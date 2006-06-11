@@ -21,7 +21,7 @@
 class Shell; // Ugly hack to appease the Windows compiler
 
 // Particularly ugly macro definition 
-#define BEGIN yy_start = 1 + 2 *
+//#define BEGIN yy_start = 1 + 2 *
 
 typedef struct _localval
   {

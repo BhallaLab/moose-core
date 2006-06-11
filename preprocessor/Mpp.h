@@ -66,6 +66,7 @@ class Mpp
 		vector<string> endstuff_;
 		vector<string> pub_;
 		vector<string> priv_;
+		vector<string> privWrapper_;
 		vector<string> fieldString_;
 		vector<string> msgsrcString_;
 		vector<string> msgdestString_;
@@ -73,6 +74,7 @@ class Mpp
 		vector<string> sharedString_;
 		vector<string> author_;
 		vector<string> description_;
+		vector<string> wrapperCpp_;
 
 		vector<string> headerText_;
 		vector<string> includes_;

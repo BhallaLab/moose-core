@@ -17648,5 +17648,680 @@ More CSPACE work. Implemented the old MOOSE bistab_construct object, works
 well in one case, fails sadly in another.
 
 Working on release number 0.06 of the new MOOSE. Minor fixes.
+Committed as revision 2.
+
+SVN Copied it over to file:///opt/SVN/moose/genesis/prerel_0.06
+Committed as revision 3.
+
+Checked out prerel, cleaned up, committed back as revision 4.
+Saved as mus_release_feb17_2006, revision 5.
 
 ============================================================================
+18 Feb 2006.
+old MOOSE: much grinding on the bistab_construct object. Getting there.
+
+From 14 Jan:
+Bigger picture:
++ Get current kinetics capabilities into this version of MOOSE, including
+	conversions, so I can shift stuff over.
++ Get complete biophysics stuff done so I can do bulb modelling stuff
+- Get some level of parallelization going so I can do bulb modelling in 
+	parallel.
+- Implement solver architecture so people can begin to play with it.
+- Bring in the GSL so I can do heavy crunching.
+
+============================================================================
+20 Feb 2006.
+Working on solvers. It is a big problem, let us break it up into bits:
+- What does the numerical method need? Can we generalize for all solvers?
+- Harvesting the solved objects. Possibly a buffer class between a set
+  	of numerical engines and the simulator.
+- setting up connections to each object.
+- Intercepting messages from outside the solved set
+	- Building a list of msgsrcs
+		- Handling triggers for updates
+	- Building a list of msgdests
+	- Handling valueRelay requests.
+- Intercepting sets
+- Intercepting gets
+- Providing fallback computation options for unknown objects
+- Solvers starting with a simple Euler solver.
+
+============================================================================
+4 April 2006
+Added fixes for genesis parser provided by Dave Beeman and Joe Svitak
+Dave's fixes: Correct problems with compiling with some recent
+versions of bison. Turns out that this was a fix already implemented 
+in GENESIS. Problem arose because of an error in the GenesisParser.ypp
+Joe's fixes: Numerous gnarly Yacc syntax changes to make it handle
+DOS type newlines.
+
+Committed these fixes as revision 6.
+Just because I don't yet reallly think in svn, here are the commands I used:
+svn commit
+(then I put in the log message)
+svn update
+(This updates my working copy to the current version)
+
+Next is to work on solvers. Consider the signaling solver first, as we have
+several working examples. Structure the harvester as a dually-inherited
+class so that it is clean to pass the y(t) and y'(t) arrays as pointers.
+
+Something about the API: 
+Old solvers have the following fields:
+mode
+path
+
+and messages:
+proc
+reinit
+solveout: Goes to zombies
+
+There seem to be two major wrapper functions: 
+internal_set_path: Assigns solver zombies, fills up solveout msgs
+set_solvefield: Handles calls to fields in zombies.
+
+In the solvers I have various build commands:
+build_mols(vector<element *>& path)
+build_sumtots(vector<element *>& path)
+build_reacs(vector<element *>& path)
+Seems like these are a bit redundant but each solver has its own data structs
+so it may be OK.
+But for example for ODE solvers which need y(t) and y'(t) we could merge.
+Something like kderiv. Should clean. Should find exactly how rksolve uses it,
+this should be nearly enough to design something even for rosenbrock and
+LSODA.
+
+============================================================================
+5 April 2006
+
+Turns out kderiv does two things. It grabs the model values, but it also
+does the calculations for rates. It is a complete representation of the model.
+Should I instead set up a stoich matrix version? I would still need to have
+the calculation of each rate term, but not too bad:
+
+y'(t) = N.f( y(t) )
+
+The kderiv form does have the merit that it is organized according to rate
+type, and is therefore fast. But it should not be hard to handle reordering.
+
+Why not start with a kderiv which talks to each thing individually asking
+for y, y'. This can later subsume some objects while retaining the basic 
+API for other objects. The objects which do not become internalized are
+called externally solved objects.
+
+This is a good exercise. Seems like we need the following:
+
+kderiv to object:
+updateOut: Sends y to the object.
+updateStep: Tells object to update its y', given t and dt.
+	Need version of this which only asks for y for objects like input tables
+object to kderiv:
+updateIn: Receives y' from object
+	Need version which takes y from objects like input tables.
+
+For an explicit solver, using Euler:
+
+y(t + 1) = y(t) + y'(t) * dt
+
+For an implicit solver, using backward Euler
+y(t + 1) = y(t) + y'(t + 1) * dt
+
+So just passing y and y' in either direction does not give enough info to
+do externally solved objects implicitly. Can we do it?
+
+Consider a compartment. To compute y[n]'(t + 1) we need
+y[n+1](t + 1) and y[n-1](t + 1) and any branches. Mutually the same info will
+be needed for these other compartments. This is hard to do because of matrix
+dependence. Runge-Kutta type solutions would not be a problem.
+
+Consider a channel. To compute y[n]'(t + 1) we need y[n+1](t + 1) for the
+associated compartment, and an estimate for y[n]'(t + 1) itself. This should
+be possible to set up on a single-channel basis.
+
+Consider a molecule. Again, the implicit solution needs matrix-dependent terms
+and is not suitable for externalizing. However, a Runge-Kutta solution would
+again be OK.
+
+Consider a reaction. This gets completely internalized because it defines the
+matrix coeffs in a reaction system. This is possible to externalize rather
+cleanly if we adopt the stoichiometry matrix design for our solver. See below.
+
+Consider a tabulated input. This is just another fixed input to either a 
+compartment or a molecule. Not a problem.
+
+Consider a horrible computed rate function. This is not easy to internalize.
+What we could do is to define the following messages and operations:
+- An init/process	: Override or co-opt the existing sched
+- All inputs		: Use existing molecules. ensure they are updated.
+- The contribution of the rate function. This is just an entry in the rate
+	vector.		: Send in the derivative term.
+
+These elements would apply just as well to reaction rate terms. So we would
+do well to put reactions in as a test case as an external input. 
+
+Basically all we need to change for solved vs regular use is to provide a
+derivative term.
+
+Summary:
+1. Implement kderiv to use stoichiometry matrix form.
+2. Provide messages for external updates to rate vector
+	- Init/Process
+	- All mol values
+		Could in principle just update the molecule and have the
+		numbers propagate through to the reac.
+	- dest for derivative.
+3. Internally manage molecule levels, update externals as needed
+
+============================================================================
+9 Apr 2006
+Fun with implementation. Some design issues for the kderiv, the part where
+it manages the calculation of rates.
+
+Option 1: 
+	- Bunch of vectors for kf, kb, MM rates.
+	- A vector for y.
+	- A vector for rates.
+	- Bunch of vectors for ptrs to doubles. This refers to locations in
+		the above two vectors.
+	Sub option 1.1
+		- vector for # of ptrs to use in each calculation
+		- Iterate through taking products of the double* s, and putting
+			into rate vector.
+	Sub option 1.2
+		- Order above list for 1, 2, 3,... n prd terms.
+		- Execute functors with suitable # of args on sub vector
+			with start ptrs to ptrs of doubles, using transform
+			so outputs go into rate vector.
+	Advantages: Separate vectors for rates, values, etc. This set just
+		ties them together
+			Speed?
+	Disadvantages: 	Computations are opaque.
+			Need multiple subvectors
+
+Option 2:
+	- Vectors for Rate objects, MM objects, Sumtotals, and Externs.
+		These are virtual objects so we can overload.
+	- vector for y, vector for rates.
+	- Each entry contains rate parms if any
+	- Each entry contains ptrs to ys.
+		Sub option 2.1
+			- Each entry contains ptr to rates
+		Sub option 2.2
+			- Each entry has function that returns value
+	- Use transform/for_each to iterate through vector of Rates, etc and
+		store outputs according to options 2.1 and 2.2.
+
+	Advantages: 	Separate entities for each reaction etc.
+			Somewhat cleaner.
+	Disadvantages:	Speed?
+			Proliferation of subtypes if we want it faster.
+			Construction and updating?
+
+============================================================================
+11 Apr.
+Looks like we're going with option 2.2
+Separate, long pending issue: How does solver handle clock ticks and eliminate
+existing ticks?
+
+Simplest approach is to replace the clocktick with the solver. Fine until
+we have multiple solvers managing overlapping sets of objects.
+
+============================================================================
+15 Apr.
+Slowly working on implementing the solver. Various aspects to it:
+- The Stoich class, handling generation of the stoichiometry matrix and its
+	calculations
+- A set of classes for doing the rate vector terms. One each for the zero,
+	first, second and higher order reactions. Additional ones for enzymes.
+	Further ones for external rate objects.
+- A class for doing sparse matrix calculations. Used for the stoichiometry
+	matrix because of speed and space.
+- A class for dealing with SumTotals.
+- The actual numerical solution engine
+- The stuff for setting up solver messages
+- Ways to insert solver into scheduling hierarchy.
+
+Setting up parts of this bit by bit. Have successfully done a skeletone
+compile of the first 4.
+============================================================================
+16 Apr 2006
+
+Too many silly issues with the preprocessor have cropped up. I have done a
+substantial upgrade of the preprocessor to resolve these. This is 
+checked in to subversion as revision 7.
+
+Added a few more mpp fixes for handling templates and function calls using
+them. Now the Stoich code compiles directly after preprocessing.
+Checked in to subversion as revision 8.
+
+Starting to take shape. Managed to compile version that handles the 
+molecule assignments. This version immediately dumps core when it is given
+a path to handle.
+
+============================================================================
+17 Apr 2006.
+Got the thing to run without crashing, but can't check anything yet.
+
+Suggestion: Further modularization of the solver system:
+
+Stoich: Extracts stoichiometry matrix info from path. Useful in many other
+	contexts too.
+Ksolve: Handles the control of the zombie objects. Takes over process.
+	Uses Stoich for value calculation.
+Assorted numerical engines:
+	EE: Exponential Euler engine talking to Ksolve. In-house.
+	AdStoch: Adaptive Stochastic method of Vasudeva and Bhalla. In-house.
+	RK5: Runge-Kutta numerical engine talking to Ksolve. GSL, In-house?
+	RK4implicit: Implicit RK4 method. GSL.
+	Gillespie: Gillespie method with optimization.
+
+All fine here, but still need to work out how to do Stoich on own and in 
+combination with Ksolve.
+
+Returning to the debugging. Still not getting a correct count of molecules
+in various states.
+
+============================================================================
+18 April 2006.
+Turns out that the messages are not being added from the stoich to the
+object. Perhaps OK for now, if the current goal is to build stoich matrix
+as an independent object.
+
+How to align stoich matrix with Ksolver? One option is to just use index
+ordering: map the # in the wildcard path. Should the Stoich then worry about
+the rate vector?
+
+============================================================================
+25 April.
+Yes, rate vector should be in Stoich. Stoich should be the one-stop object
+for getting all the kinetic info used by solvers and analysis routines.
+Does the Stoich actually do the calculations? Makes sense: it has all the
+info.
+Does the Stoich control the external rate objects? No. That is the job
+of the ksolve. The stoich needs to indicate that certain objects need to
+be updated each dt. This becomes part of the internal sched of the ksolve.
+ksolve also retrieves values and puts them into the Stoich.
+
+Still working through the Stoich.mh
+
+============================================================================
+26 April.
+Need some more stuff in the preprocessor. The field function definitions
+need an easy way to override. Currently the default is to put them into the
+MyClassWrapper.h and just lookup or assign values. Suggested syntax:
+setField( FieldType& value ) {
+	....
+}
+
+This should be placed somewhere at the end of the .mh file, after the 
+class definition.
+
+Then the job of the preprocessor is to replace the regular 
+static void setField( Conn* c, Type value ) {
+	static_cast< MyClassWrapper* >( c->parent() )->field_ = value;
+}
+
+with
+static void setField( Conn* c, Type& value ) {
+	static_cast< MyClassWrapper* >( c->parent() )->setFieldLocal( value );
+}
+
+in the MyClassWrapper.h.
+In the MyClassWrapper.cpp, the local function is filled in at the appropriate
+place:
+setFieldLocal( FieldType& value ) {
+	....
+}
+
+Similarly for getField.
+
+In the works. Now compiles and reads in the correct number of molecules etc.
+
+Working on setting up Stoich Matrix. Needs defn of matrix, as well as
+still to compile.
+
+Now able to compile, bypassing matrix stuff by just printing it out. Looks
+like it is able to find substrates and products.
+Still need to fix the FillStoich function.
+
+
+Issue of coupling between Stoich, Ksolve, and actual solvers. Ideally
+Stoich should be the hub and the other two talk only to the Stoich, not
+to each other. This minimizes the number of interfaces.
+Issue: The Gillespie algorithm needs to do dependency map traversal.
+This is not accommodated in the current Stoich architecture. Later.
+
+Now to home in on API for sparse matrix.
+
+Also need to sent MOOSE to someone.
+
+============================================================================
+3 May 2006
+Much work on the old moose, to write a calculator for total molecule count
+(for checking models). This turns out to be far harder than expected. After
+3 days or more of work on it, I have a version that works often, and reports
+when it fails by giving a return value of -1. The way it goes is :
+
+include {arg1} // Loads in the model file to test
+create stoichmat /s
+/s/path = "/kinetics/##"
+shf /s/total_mol_conc
+quit
+
+Now to put together a variant that handles the batch file outputs.
+============================================================================
+
+10 May 2006
+Working on MOOSE equivalent of the old GENESIS concchan. This is needed
+primarily for conversions of old kkit models to SBML and other forms.
+Nevertheless, it has to work to be sure it is valid.
+
+============================================================================
+15 May 2006
+OLD MOOSE:
+Working on a filter for tcas runs. It is somewhat shoehorned into the existing
+kinread command to avoid any bigger MOOSE changes. Reads in a tcas file from
+the CSPACE project, and filters out solutions which violate mass conservation.
+Also checks for -ve solutions.
+
+============================================================================
+20/21 May.
+OLD MOOSE:
+Working on on concchan. Seems to be done. Notes are there too. Turn it
+over to Arun now.
+============================================================================
+29 May
+Compiled in stuff with a more functional SparseMatrix (it isn't really sparse,
+but has the right interface). Current issue in StoichWrapper.cpp is
+where to define the size of the SparseMatrix, esp the # of reactions.
+We still have the issue of counting substrates and prds.
+
+Later: Fixed substrate counting issues. Still haven't defined SparseMatrix
+size properly. Now to get the enzymes into the StoichMatrix. In progress,
+StoichWrapper.cpp:410 ish
+============================================================================
+30 May 2006
+The stoichiometry matrix is now loading, apparently properly, from medium
+sized models. 
+* Define matrix size correctly
+- Use it and rate vector in simple Euler solver dummy.
+- Start with solver stuff.
+
+From 17 April:
+Stoich: Extracts stoichiometry matrix info from path. Useful in many other
+	contexts too.
+Ksolve: Handles the control of the zombie objects. Takes over process.
+	Uses Stoich for value calculation.
+Assorted numerical engines:
+
+At this point it looks like Stoich should be the hub:
+
+Elements <===> Ksolve <===> Stoich <===> EEsolve
+
+Connection between Stoich and solvers:
+From Stoich to solver: y'
+from solver to Stoich: y
+
+The y' will typically not change.
+The y will often but not always be a distinct part of memory. Should
+avoid copies.
+The Stoich expects to have its own stable array for y and y'.
+
+Summary:
+Stoich should expose the arrays y for writing and y' as readonly.
+Any updates in y should be done external to Stoich.
+These must be done as messages so we know what is communicated.
+We will use a shared message so that all is coordinated.
+The shared message includes a trigger from the solver, and the y and y'
+	array ptrs from Stoich back to the solver. 
+The trigger call causes Stoich to update y'
+Possibly we could return y' into an array passed in. We don't need to allocate
+it in Stoich. 
+Possibly we could use y also as a passed-in array if we converted our stoich
+calculations from pointers to offsets. Slower.
+
+
+Beginning the implementation with Stoich::updateV
+There should be an algorithm that handles assignment of successive RateTerm
+evaluations to successive v_ vector entries.
+
+============================================================================
+1 June.
+Implemented preliminary (and very inefficient) SparseMatrix
+calculations for yprime.
+
+Set up an initial ForwardEuler to talk to the Stoich. At this level of
+abstraction the ForwardEuler only needs to know its own dt and runtime.
+Should also be able to request reinit in the same message. Reinit
+can pass the rate vectors around too.
+
+Should we have it so that ForwardEuler or other solvers can talk to multiple
+equivalents of Stoich? Later
+
+Working steadily through the implementation. I have most of it in place but
+we need a little work to back-fit the Stoich class to talk to the new
+ForwardEuler class.
+- The ForwardEuler passes a yprime in to the Stoich class. This is
+	because other integrators may want to keep track of multiple yprimes.
+	yprime actually has multiplied into it a dt term, so it is delta-y.
+- The preprocessor has a new section added, private_wrapper:
+	This simply dumps its contents verbatim into the private section of the
+	Wrapper.h.
+- Working on the back-merge of Stoich.
+	- Stoich.h: OK
+	- StoichWrapper.h: OK
+	- StoichWrapper.cpp: OK
+- Compiled ForwardEuler as a preliminary integration engine.
+	Now need to couple it into the currently hook-less system and
+	display a good run, like kholodenko.g
+
+============================================================================
+2 June.
+Working on the check. 
+
+/home/bhalla/genesis/mus/test/test_ForwardEuler.g
+
+Framework is set up and a couple of bugs squashed, but the values build
+up steadily and nan soon.
+Fixed by using smaller dt. Now output does not balloon, but it certainly
+does not look intereesting.
+
+============================================================================
+5 June 2006
+Shifted laptop to Ubuntu 6.06. This breaks the compile in various ways.
+They are retrievable, but not cleanly. Anyway, I have asked for help on
+it and will now have to go on with the solver stuff.
+
+Start by trying to model a simple reaction. Runaway buildup.
+Some parts are explained by inverted sign for rates. More later.
+
+
+============================================================================
+6 June 2006
+Looks like MMenz is OK. Still trying to sort out issue with regular enz.
+Later add higher order reacs to the test list.
+============================================================================
+7 June 2006
+Got it to work for 4 test cases: reac, enz, MMenz, and kholodenko model.
+
+Now, two immediate directions: 
+- Implement another numerical engine. An RK engine would be nice. This
+	will test out the generality of the API for the solvers. Also
+	give a motivation for trying out the system in real work.
+- Implement the zombie code. This is a bigger job. In theory it should
+	be completely independent of the numerical engine.
+
+Also, for when I am really tired, 
+- Implement a good SparseMatrix.
+- Implement a RateTerm for handling general equations.
+
+The nice thing is that the system seems to be shaping up as completely modular.
+
+============================================================================
+8 June 2006
+First lets try the Ksolve. For starters, we'll set it up to zombify a
+model and make everything decay exponentially, amplitudes set by initial conc.
+Tests:
+- Eliminate messages from original Process, replace with zombie message.
+- Keep track of different output messages to plots, even with different dts
+- Initial condition to set ksolve
+- in-simulation get of any n
+- in-simulation set of any n
+- Addition of new messages after solver put in
+- Removal of messages after solver put in
+- Deleting object
+
+Working on design with just the molecule as a starting target.
+- Use ProcessConn
+- No extra space needed if we set up a new Dest for n
+- SingleMsgSrc needs 2 words (Later: could eliminate one by templating?).
+- RelayFinfo needs >= 5 words.
+- Could design a SolverFinfo template using 1 word: The conn ptr. All
+	else is handled by a templated function for looking up dests and
+	another for srcs. Actual space usage = 3+ words because of holding
+	the SolverFinfo ptr and the name of the finfo. This object needs
+	to intercept all 
+	in/out messages involving n, return msgs from the graphs, and set/get.
+	- New calls will be intercepted at the Element::field(name) stage.
+		- Sets and Gets: doable.
+		- Message arrival: only SumTotal applies. Will need to
+			construct relay and pipe extra info into solver
+		- nOut msg out: Need to scan to see if it goes anywhere
+			other than reacn. If so, need to construct relay
+			etc. Also some counterpart on solver to handle
+			updating.
+		- Add msgs: Same func, only construct the relay on the fly.
+			Need to deal with issue of user adding another part
+			of the reacn system.
+		- Drop msgs: Destroy appropriate relay along with original
+			message if applicable.
+
+Too much. Subdivide problem further
+* Fix mpp so that stuff after the class definition goes into the 
+	*Wrapper.cpp.
+* Make the first pass at the Ksolve.mh
+* Scan path and replace original Process messages
+
+============================================================================
+9 June 2006
+I am now able to replace the process message from the ClockTick to the molecule
+with a molSolve message from the Ksolver. However, this requires that
+the replacement message look exactly like the original. Two options:
+- Provide another target shared message on the molecule that uses the same
+	ProcessConn, but also handles the additional terms.
+	- Possibly cleaner. But it requires that each object know ahead
+	of time what a solver is going to do to it. That is not acceptable.
+- Do further hacks with the messaging so that a solveFinfo dynamically
+	created on the molecule knows to use the ProcessConn, and deals with
+	all remaining bits of info transfer.
+	- Use mostly existing framework, need new Finfo. 
+	- Cost of Finfo is steeper than expected: Name plus ptrs.
+
+Try putting a new field in all Finfos, or at least all relay Finfos, that
+links into the solver. Just addition of this field should redirect all
+lookups suitably. It also means that the Match command should just ask
+the original object Finfo what to return, and make a copy with the solver info
+attached.
+At first glance, this should work for most kinds of Finfo operations,
+except for already established messages. 
+- Messages sourced from zombie: Create a relay from solver to msgsrc on zombie.
+	No need to yank message provided that there is no internal trigger.
+- Messages into zombie: Issue is that the recvFunc is already deployed
+	elsewhere. Seems like we have to yank message and redeploy.
+	Possibly some messages could be left alone provided they do not
+	trigger anything in cascade. Then to tap into the contents of these
+	messages we need to connect back to the output of the originating
+	object.
+
+It boils down to altering the ValueFinfo to also hold solver info. We
+will need to put in fields for set, get and conn. There is already an
+objIndex_ field used for arrays, which we can coopt.
+Perhaps we can create novel ValueFinfos using the set and get from the
+solver.
+
+For cleanness, I should aim to design all this to use legal messaging only.
+Avoid pointers into objects if possible.
+
+============================================================================
+10 June 2006
+Now for some specifics.
+
+Setup:
+
+Get: 
+	- Look up Finfo
+	- Operation of lookup asks solver for an update of the target
+	- Finfo just returns usual field.
+
+Set:
+	- Look up Finfo
+	- Finfo returns usual field
+	- Finfo then sends update message to solver.
+
+Message in:
+	- Ignore all but slave or sumtotal.
+	- At construction time: scan for these, build a relay to the
+		update message going to the solver
+	- When input comes in, update message takes it home.
+
+Message out:
+	- Ignore any that are within ambit of solver
+	- Ignore All except concout and nout.
+	- At construction time: 
+		- Scan for these, build relay to the message going out.
+		- Register required update on solver. 
+	- Update periodically, then trigger relay out.
+
+Plot:
+	- Scan for or subvert existing relay for the ValueFinfoRelay
+		- Subversion would simply mean inserting the routine below.
+	- When input comes in, update message takes it home.
+	- Then update message goes back to object.
+	- Then return value can occur.
+
+Add: (The object is a src)
+	- Look up Finfo. Do we care? Assume yes. 
+	- Return usual Finfo. Allow message out to be made
+	- Do as we would at construction time for Message out:
+		- Build Relay to message going out.
+		- Register required update on solver
+	- Update periodically to trigger relay out.
+
+Respond to add: (Object is a dest)
+	- Look up Finfo. If we care, then...
+	- Allow message to be made.
+	- Decide if it is a regular message in or a plot
+		- Regular message in: As we would at construct time for Msg in:
+			- Build Relay to trigger update message to solver
+			- When input arrives, update message sent off.
+		- Plot: As we would normally:
+			- Subvert message
+			- When input comes in, send req to solver
+			- Solver sends back return value.
+
+So, messages to and from solver include:
+- Update message which sends values from object to solver. n, nInit, mode.
+- Update message which sends values from solver to object: n.
+- Trigger message which asks solver to send update to object.
+- Dummy Process/Reinit messages which handle the connection and provide
+	a channel for all this to happen.
+
+What does the SolverFinfo have to do?
+- When looked up, it has no way to know what the operation is going to be.
+Actually no.
+	- If it is a field, the operation will either be get or set,
+		or add a message to the field.
+	- If it is a src, operation will be add.
+	- If it is a dest, the operation will be respond to add. 
+- If we could register a post-operation callback, we could complete the
+	operation.
+	How about something at the time of destruction of the field?
+	- Field: Callback updates solver, then scans for changes and does
+		its thing.
+	- src: callback scans for changes.
+	- dest: callback scans for changes.
+
+- Must provide all the traversal calls for incoming and outgoing messages
+	between solver and object. Just another relay?
+
