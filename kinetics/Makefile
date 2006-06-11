@@ -19,6 +19,11 @@ OBJ = \
 	ReactionWrapper.o	\
 	EnzymeWrapper.o	\
 	ConcChanWrapper.o	\
+	StoichWrapper.o	\
+	Stoich.o	\
+	SparseMatrix.o	\
+	ForwardEulerWrapper.o	\
+	KsolveWrapper.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -47,6 +52,11 @@ MoleculeWrapper.o: Molecule.h MoleculeWrapper.h
 ReactionWrapper.o: Reaction.h ReactionWrapper.h
 EnzymeWrapper.o: Enzyme.h EnzymeWrapper.h
 ConcChanWrapper.o: ConcChan.h ConcChanWrapper.h
+StoichWrapper.o: Stoich.h StoichWrapper.h RateTerm.h SparseMatrix.h
+SparseMatrix.o: SparseMatrix.h
+Stoich.o: Stoich.h RateTerm.h SparseMatrix.h
+ForwardEulerWrapper.o: ForwardEuler.h ForwardEulerWrapper.h
+KsolveWrapper.o: Ksolve.h KsolveWrapper.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c

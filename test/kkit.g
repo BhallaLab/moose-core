@@ -21,6 +21,12 @@ echo kkit.g loaded
 function kparms
 end
 
+function initdump
+end
+
+function xtextload
+end
+
 function enddump
 	if ( VARIABLE_DT_FLAG )
 		setclock 0 {FASTDT} 0
@@ -39,6 +45,14 @@ function enddump
 end
 
 function complete_loading
+end
+
+// These alternate versions of the complete_loading functions are
+// so that we can either enter the command line at once (above), or
+// go on to run the simulation at once (below).
+
+/*
+function complete_loading
 	setfield /sli_shell isInteractive 1
 	reset
 	if ( VARIABLE_DT_FLAG && ( MAXTIME > TRANSIENT_TIME ) )
@@ -52,3 +66,4 @@ function complete_loading
 	end
 	call /graphs/##[TYPE=Plot],/moregraphs/##[TYPE=Plot] printIn kh.plot
 end
+*/

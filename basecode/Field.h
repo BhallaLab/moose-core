@@ -94,6 +94,10 @@ class Field {
 		bool add( Field& other );
 		// Drops a message from this Field to the target field 'other'.
 		bool drop( Field& other );
+
+		// Drops all incoming messages into this dest field.
+		bool dropAll();
+
 		// Assigns a value to this field, doing type conversions if
 		// needed. If the Finfo is a DestFinfo, it will try to 
 		// call its recvFunc with the converted value as arguments.

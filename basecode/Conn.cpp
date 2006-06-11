@@ -43,6 +43,8 @@ bool Conn::connect( Conn* target,
 // MAX if not found.
 unsigned long Conn::disconnect(Conn* target)
 {
+	if ( !target )
+		return MAX;
 	unsigned long i = this->find(target);
 	unsigned long j = target->find(this);
 	if (i != MAX && j != MAX) {

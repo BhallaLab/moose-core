@@ -23,6 +23,7 @@ class MoleculeWrapper:
 ///////////////////////////////////////////////////////
 //    Field header definitions.                      //
 ///////////////////////////////////////////////////////
+
 		static void setNInit( Conn* c, double value ) {
 			static_cast< MoleculeWrapper* >( c->parent() )->nInit_ = value;
 		}

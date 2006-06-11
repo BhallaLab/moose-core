@@ -56,6 +56,16 @@ bool Finfo::drop( Element* e, Field& srcfield ) {
 	return ( oconn->disconnect( iconn ) != Conn::MAX );
 }
 
+// Must be called from a dest Finfo. Disconnects all inputs.
+bool Finfo::dropAll( Element* e ) {
+	Conn* iconn = inConn( e );
+	if ( iconn ) {
+		iconn->disconnectAll();
+		return 1;
+	}
+	return 0;
+}
+
 bool Finfo::strGet( Element* e, string& val )
 {
 	return this->ftype()->strGet( e, this, val );

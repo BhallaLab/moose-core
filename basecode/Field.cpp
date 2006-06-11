@@ -97,6 +97,11 @@ bool Field::drop( Field& other ) {
 	return ret;
 }
 
+// Should be called only from a destination field
+bool Field::dropAll( ) {
+	return f_->dropAll( e_ );
+}
+
 void Field::src( vector< Field >& list ) {
 	f_->src( list, e_ );
 }

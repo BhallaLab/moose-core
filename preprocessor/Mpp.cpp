@@ -285,11 +285,18 @@ void Mpp::parse()
 			vec = &pub_;
 		} else if (ret == "private") {
 			vec = &priv_;
+		} else if (ret == "private_wrapper") {
+			vec = &privWrapper_;
 		} else if (ret == "author") {
 			vec = &author_;
 		} else if (ret == "description") {
 			vec = &description_;
-		} else { 
+		} else if (ret == "wrapper_cpp") {
+			// This should be unnecessary. There is a hack in the 
+			// parsing for priv_ and priv_wrapper_ that checks
+			// for the terminal brace and shifts over to wrapperCpp_
+			vec = &wrapperCpp_;
+		} else {
 			vec->push_back(*i);
 		}
 	}
@@ -363,9 +370,17 @@ void Mpp::printHeader( const string& name )
 	for ( j = 0; j < fieldVec_.size(); j++ )
 		fieldVec_[ j ]->printPrivateHeader( fout );
 
-	for(i = priv_.begin(); i != priv_.end(); i++)
-		fout << (*i) << '\n';
+	for(i = priv_.begin(); i != priv_.end(); i++) {
+		if ( *i != "};" ) {
+			fout << (*i) << '\n';
+		} else {
+			for ( i = i + 1; i != priv_.end(); i++)
+				wrapperCpp_.push_back( *i );
+			break;
+		}
+	}
 
+	fout << "};\n";
 	fout << "#endif // _" << className_ << "_h\n";
 }
 
@@ -466,6 +481,20 @@ void Mpp::printWrapperH(const string& name)
 	for ( unsigned long k = 0; k < synapseVec_.size(); k++ )
 		synapseVec_[ k ]->printPrivateWrapperH( fout );
 
+	fout << "\n";
+	fout << "///////////////////////////////////////////////////////\n";
+	fout << "// Private functions and fields for the Wrapper class//\n";
+	fout << "///////////////////////////////////////////////////////\n";
+	vector<string>::iterator j;
+	for(j = privWrapper_.begin(); j != privWrapper_.end(); j++) {
+		if ( *j != "};" ) {
+			fout << (*j) << '\n';
+		} else {
+			for (j = j + 1; j != privWrapper_.end(); j++)
+				wrapperCpp_.push_back( *j );
+			break;
+		}
+	}
 	fout << "\n";
 	fout << "///////////////////////////////////////////////////////\n";
 	fout << "// Static initializers for class and field info      //\n";
@@ -579,6 +608,14 @@ void Mpp::printWrapperCpp(const string& name)
 		fout << "///////////////////////////////////////////////////\n";
 		for ( n = 0; n < connVec_.size(); n++ )
 			connVec_[ n ]->printWrapperCppFuncs( className_, fout );
+	}
+
+	if ( wrapperCpp_.size() > 0 ) {
+		fout << "///////////////////////////////////////////////////\n";
+		fout << "// Other function definitions\n";
+		fout << "///////////////////////////////////////////////////\n";
+		for ( n = 0; n < wrapperCpp_.size(); n++ )
+			fout << wrapperCpp_[n] << "\n";
 	}
 }
 

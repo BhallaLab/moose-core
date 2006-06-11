@@ -14,7 +14,7 @@
 
 # Use the options below for compiling on GCC3. Pick your favourite
 # optimization settings.
-CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DNO_OFFSETOF
+#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DNO_OFFSETOF
 #CFLAGS  =	-O3 -Wall -pedantic -DNO_OFFSETOF
 #CFLAGS  =	-O3 -pg -Wall -pedantic -DNO_OFFSETOFF
 
@@ -22,6 +22,9 @@ CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DNO_OFFSETOF
 # ANSI C++ and hence gcc4 have some strange error messages that emanate
 # from offsetof, even when it does the right thing. The 
 # -Wno-invalid-offsetof flag suppresses these silly warnings.
+#  For Debian/Ubuntu 6.06, we need to add a few more compiler flags to
+#  help it through the genesis parser, which is littered with ifdefs.
+CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DYYMALLOC -DYYFREE -Wno-invalid-offsetof
 #CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -Wno-invalid-offsetof
 #CFLAGS  =	-O3 -Wall -pedantic -Wno-invalid-offsetof
 

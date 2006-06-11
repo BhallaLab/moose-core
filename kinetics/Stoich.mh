@@ -1,0 +1,151 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+#include "RateTerm.h"
+#include "SparseMatrix.h"
+
+class Stoich
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Upinder S. Bhalla, April 2006, NCBS
+	description:
+		Sets up stoichiometry matrix based calculations from a
+		wildcard path for the reaction system.
+		Knows how to compute derivatives for most common
+		things, also knows how to handle special cases where the
+		object will have to do its own computation. Generates a
+		stoichiometry matrix, which is useful for lots of other
+		operations as well.
+	field:
+		string path;
+		readonly int nMols = 0;
+		readonly int nVarMols = 0;
+		readonly int nSumTot = 0;
+		readonly int nBuffered = 0;
+		readonly int nReacs = 0;
+		readonly int nEnz = 0;
+		readonly int nMmEnz = 0;
+		readonly int nExternalRates = 0;
+		readonly int rateVectorSize = 0;
+
+		// Flag: When true, separates out forward and backward
+		// reactions so that things like stochasticity can be
+		// done cleanly.
+		int useOneWayReacs = 0;
+
+	shared:
+		// updates derivative values
+		// Later figure out how to couple Stoich, Ksolve, the numerical
+		// solver, and external rate objects. Stoich does not know
+		// what to do with them, but it needs to know some of the
+		// conc terms for them because internal rate calculations may
+		// depend on these conc terms.
+
+		single integrate( integrateIn, allocateOut, reinitIn );
+
+	src:
+		single allocate( vector< double >* );
+
+	dest:
+		single reinit() {
+			S_ = Sinit_;
+			allocate( &S_ );
+		}
+
+		// We want yprime to be passed in because some integrators
+		// want to use multiple intermediate results, so they need
+		// to juggle yprime vectors. e.g., Runge-Kutta.
+		single integrate( vector< double >* yprime, double dt ) {
+			updateRates( yprime, dt );
+		}
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+
+// First, we put in the data structures that hold the model
+// in the stoichiometry matrix form.
+		vector< double > S_; 	// Molecular species array.
+		vector< double > Sinit_; 	// Initial concs of molecules.
+		// Includes all of them: variables, sumtotals and buffered ones.
+		vector< double > v_;	// Reaction rates
+		vector< RateTerm* > rates_; // Entries for the rate vector,
+
+		vector< int > sumTotals_;
+		// This is just a list of indices into S_. The first entry
+		// in each set indicates how many indices to sum. The second
+		// entry is the summed entry. The remaining entries (enumerated
+		// by the first entry) are indices to sum.
+		// I could also do this using pointers. Slightly faster but
+		// dangerous. Only a few sumTotals are ever used.
+
+		SparseMatrix N_; // stoichiometry matrix.
+		// Has to be sparse because already we are dealing with
+		// systems with over 1K molecules. Also faster to compute once
+		// we get to a reasonable size.
+
+
+		// Molecules are expected to be sorted at this point 
+		// to separate out regular ones, sumtotals, slaves and 
+		// buffered cases.
+		// We first map back and forth between the MOOSE wildcard path
+		// ordering (which is also message ordering for corresponding
+		// ksolve object) and the molecule array.
+		// Note that this array will have lots of holes, about 3x
+		// for the typical network. Acceptable waste.
+		vector< int > path2mol_;
+		// Then map back to the path from the molecule array.
+		vector< int > mol2path_;
+
+		void updateRates( vector< double>* yprime, double dt  );
+		void updateV( );
+	
+	private_wrapper:
+		void setPathLocal( const string& value );
+		void setupMols(
+			vector< Element* >& varMolVec,
+			vector< Element* >& bufVec,
+			vector< Element* >& sumTotVec);
+		void addSumTot( Element* e );
+		void addReac( Element* e );
+		void addEnz( Element* e );
+		void addMmEnz( Element* e );
+		void addTab( Element* e );
+		void addRate( Element* e );
+		void setupReacSystem();
+		unsigned int findReactants( Element* e,
+			const string& msgFieldName, vector< const double* >& ret );
+		unsigned int findProducts( Element* e,
+			const string& msgFieldName, vector< const double* >& ret );
+
+		// an array to manage lookup of values.
+		map< const Element*, int > molMap_;
+		void fillStoich( const double* baseptr, 
+			vector< const double* >& sub, 
+			vector< const double* >& prd, 
+			int reacNum );
+		void fillHalfStoich( const double* baseptr, 
+			vector< const double* >& reactants, 
+			int sign, int reacNum );
+		bool checkEnz( Element* e,
+			vector< const double* >& sub, 
+			vector< const double* >& prd, 
+			vector< const double* >& enz, 
+			vector< const double* >& cplx,
+			double& k1, double& k2, double& k3,
+			bool isMM
+			);
+		static const double EPSILON;
+};
+
+////////////////////////////////////////////////////////////////////
+// Stuff below here should go verbatim into StoichWrapper.cpp
+////////////////////////////////////////////////////////////////////

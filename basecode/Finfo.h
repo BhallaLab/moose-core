@@ -160,6 +160,7 @@ class Finfo {
 		// because synapses (destinations) have to override this
 		// function.
 		virtual bool drop( Element* e, Field& srcfield );
+		virtual bool dropAll( Element* e );
 
 //////////////////////////////////////////////////////////////////////
 // Here are the Finfo miscellaneous functions
