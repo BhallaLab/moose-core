@@ -1,0 +1,56 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+
+class SpikeGen
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Upi Bhalla, NCBS, Feb 2006
+	description:
+		Spike generator object with thresholding and refractory period
+	field:
+		double threshold = 0.0;
+		double absoluteRefractoryPeriod = 0.0;
+		double amplitude = 1.0; // Defined for Backward Compatibility.
+		double state = 0.0; // Defined for Backward Compatibility.
+
+	shared:
+		// This is deliberately designed to use the same interface
+		// from the compartment as does a channel. Economizes on
+		// the compartment interface. There is no
+		// return call channelOut to the compartment, but there is no
+		// big overhead for it either.
+		single channel( channelOut, channelIn, reinitIn );
+	
+	src:
+		multi event( double time );
+		single channel( double Gk, double Ek ); // Dummy, never called.
+	
+	dest:
+		single channel( double V, ProcInfo info ) {
+			double t = info->currTime_;
+			if ( V > threshold_ && 
+				t > lastEvent_ + absoluteRefractoryPeriod_ ) {
+				event( t );
+				lastEvent_ = t;
+				state_ = amplitude_;
+			}
+			state_ = 0.0;
+		}
+		single reinit( double Vm ) {
+			lastEvent_ = 0.0;
+		}
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+		double lastEvent_ = 0.0;
+};

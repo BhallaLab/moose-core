@@ -1,0 +1,41 @@
+Joe User Docs
+
+Connections.
+Messages between objects are passed over connections. A connection is like
+a wire: It just establishes a link between two ends, and data can flow
+in either direction. The links are NOT like web links. They are completely
+symmetrical and each takes complete responsibility for the maintenance of
+the link. For example, if the object at one end has to be deleted, it will
+first notify the other end and clear up the link, so that there are no
+dangling ends.
+Connections come in many flavors:
+single: Accepts only one connection at a time.
+multi: Accepts many connections
+Evaluated: Dynamically keeps track of either end, can be useful to minimize
+	memory use.
+Relays: An interface when connections need to branch.
+
+Connections are normally associated with one or more functions that are
+called 'over the wire' to other objects. Such functions are called messages.
+See Messages.
+
+API
+abstract base class: msgconn.
+See class for methods.
+Notes: A connection cannot connect to itself.
+
+single_msgconn: Templated class for a single connection. Uses a template
+function to look back and find its parent element. This leads to minimal
+memory use of two pointers in size.
+
+multi_msgconn: Similar but for multiple connections. Efficiency not so 
+critical here.
+
+Testing: testconn/main.cpp
+- Creation
+- Deletion
+- Adding connections
+- Dropping connections
+- Attempt to connect to self
+- Attempt to drop connections where none exist
+- Attempt to add connections over the limit (for single msgs).

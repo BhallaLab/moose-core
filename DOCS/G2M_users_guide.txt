@@ -1,0 +1,167 @@
+From GENESIS to MOOSE: a user's guide.
+
+User's guide.
+
+Who should read this guide:
+- User's and developers of GENESIS who are upgrading to MOOSE
+
+Who does not need to read this guide:
+- People coming into MOOSE from scratch.
+
+------------------------------------------------------------
+1. Introduction: 
+	- Why MOOSE?
+	- Status.
+	- Differences and similiarites
+	- architectures
+	- scripting
+	- solvers
+	- synapses
+
+2. Converting old scripts
+3. Kinetic modelling
+4. Single-neuron modeling
+5. Network Modelling
+6. Using on SMP and parallel machines
+
+------------------------------------------------------------
+
+Introduction.
+	MOOSE is the rewritten core code for GENESIS. It has tried to
+remain true to what I see as the core philosophy of GENESIS model development,
+which I will expound on later. Further, it seeks to be backward compatible
+to a very large extent. The extent is partially determined by our time,
+by user needs, and by the fact that there really are better ways to do things
+in MOOSE than in GENESIS. The idea is to make it simple enough to take 
+existing big models, hopefully do rather minimal fixing up to get it to 
+work in MOOSE, and then proceed secure in the knowledge that you have a
+more modern and powerful basis for your next 20 years of modeling.
+
+Why MOOSE?
+	MOOSE is GENESIS next generation. GENESIS did many things right, which
+is why I and many other people still use it. MOOSE was written to keep those
+good things, and do the rest better too. GENESIS also accumulated cruft
+over 20 years. Many of these random hacks and inelegant tricks in its code
+were my own doing, so mea culpa. But somewhere in there are also a lot of
+good ideas and practical experience of what a comprehensive simulator needs.
+Also, many of the uglier hacks are seeds of good ideas. 
+
+Status.
+	This is a continuing process, so the best place to look is the
+STATUS file. As of Jan 2006, this is where things stand from a user's
+viewpoint:
+- Script language interface works but is verbose and lacks a few commands.
+- Backward compatibility conversion of object field names yet to be done.
+- Many models of kinetic simulations can be read in from kkit dump files
+- Moose version of squid model loads and works.
+- Few objects implemented other than kinetic and simple biophysics objects.
+- No graphics
+- Rudimentary TTY
+- No parallel stuff
+- Still struggling with Windows compilation
+- Yet to get act together and put it on SourceForge.
+
+Differences and similarities.
+	Doctor to patient: "Perhaps it would save time if I told you what
+was right with you".
+So let's start with similarities.
+- Script language
+- Concept of objects doing computations, linked up using messages
+- Object hierarchy
+Differences.
+Item		GENESIS version			MOOSE version
+Messaging	Peek into contents of 		Call functions in other objects
+		other objects.
+Message types	Flexible			Strict
+Shared messages	Didn't exist			Exist.
+Message speed	Slow				Fast.
+Message memory	Used only when needed,		Basal overhead higher, less
+		but each message costly		use per message.
+Actions		Operations onto objects,	Subsumed into messages.
+		invoked by call command.	Can be invoked by 'call'.
+Fields		Can be read by messages	but	Can be read and written by
+		not written.			messages
+Scheduling	Opaque internal code		Uses objects
+Class info	Opaque internal code		Uses 'classinfo' objects
+Graphics	Xodus				Nonexistent. Perhaps FLTK
+						someday.
+Languages	SLI (Script Language Interface)	SLI natively, many others
+		only				potentially through SWIG.
+
+
+Despite these differences, most of the same commands work and do equivalent
+things. The changes are sufficiently flexible that you can do all of what
+you used to, plus more.
+
+Architectures.
+MOOSE works on 32 and 64 bit Linux. A port to Windows is under way. As soon
+as we get Macs we'll work on that too. These are all native compilations,
+not using Cygwin.
+
+Scripting.
+SLI is implemented by simply grabbing the old GENESIS script code and
+getting it to work in C++ (not trivial!). There
+are still angularities where it interfaces with the shell and TTY, and of
+course not all the commands are implemented. But the basic functionality
+is identical, because the code is.
+
+Solvers.
+Solvers were a key part of GENESIS's ability to do things fast. The main
+GENESIS solver was the hsolve for neuronal models. Later a Gsolve was added
+for certain kinds of kinetic simulations. Solvers were ad-hoc, bolted on
+constructions. In MOOSE solvers interface much more cleanly with the 
+objects, and are designed to be completely unobtrusive. The interface
+with objects is much better defined, and is entirely the programmer's
+headache. As a user you should be able to interact with the object
+(say a cell model) just as if it were being solved in the old-fashioned
+explicit integration mode. Solvers still turn objects into zombies, but
+these are much better facsimiles of the real thing.
+
+Synapses.
+In GENESIS, synapses were done using active messages. The MOOSE concept
+of messages actually looks a lot more like active messages than the
+regular GENESIS messages. So synapses work very well, much faster, and
+more economically. It is also easier to access values of individual synapses -
+it is like a simple array lookup.
+
+/////////////////////////////////////////////////////////////////////////////
+2. Converting old scripts.
+The main limiting factor at the time of writing (Jan 2006) is that only a
+small subset of the original GENESIS objects, and none of the graphical
+objects, have been reimplemented. Further, the class naming is not what it
+was. An important near-term project is to set up a system of aliases so that
+class and field names are invisibly translated from GENESIS to MOOSE. 
+Once this is done the scripts should work if they do not invoke 
+unfamiliar objects. In other words, most scripts will not work for a while.
+
+/////////////////////////////////////////////////////////////////////////////
+3. Kinetic modelling
+The simdump schema has been reimplemented in MOOSE, along with the
+basic kinetic classes of molecule, reaction and enzyme. So kinetic modelling
+can be attempted with a fair chance of success. Unfortunately many models
+use lookup tables, channels, and other things which MOOSE does not have
+as of Jan 2006.
+
+/////////////////////////////////////////////////////////////////////////////
+4. Single-neuron modeling
+The bare minimum of the asymmetric compartment, and the HH-type channels have
+been reimplemented as of 12 Jan 2006. There is a functioning squid demo but
+it is written from scratch because the backward compatibility stuff for
+the channels and compartments is pending. I am keen to put in enough stuff
+for full models because we have a project that could benefit from MOOSE
+speedups. Solver is not yet implemented.
+
+/////////////////////////////////////////////////////////////////////////////
+5. Network Modelling
+Jan 2006:
+Synaptic channels are not yet implemented, so this is out for now. Should
+actually be fairly easy.
+
+/////////////////////////////////////////////////////////////////////////////
+6. Using on SMP and parallel machines
+Jan 2006:
+Not there yet. The plan is to implement MPI-based internode messaging first,
+and later implement Multithreading (which will benefit from SMP) as part
+of the internal calculations of the solvers.
+
+/////////////////////////////////////////////////////////////////////////////

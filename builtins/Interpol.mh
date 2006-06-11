@@ -1,0 +1,65 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class Interpol
+{
+	public:
+		double interpolateWithoutCheck( double x ) const {
+			double xv = ( x - xmin_ ) * invdx_;
+			unsigned long i = static_cast< unsigned long >( xv );
+			return table[ i ] + ( table[ i + 1 ] - table [ i ] ) *
+				( xv - i );
+		}
+
+		double indexWithoutCheck( double x ) const {
+			return table[ static_cast< int >( (x - xmin) * invdx) ];
+		}
+
+		double doLookup( double x ) const {
+			if ( x <= xmin ) 
+				return table.front();
+			if ( x >= xmax )
+				return table.back();
+			if ( mode == 0 )
+				return interpolateWithoutCheck( x );
+			else 
+				return indexWithoutCheck( x );
+		}
+
+	author: 
+		Upinder S. Bhalla, 2005, NCBS
+	description:
+		Interpolation class. Handles lookup of a y value from an
+		x value, where the x value is a double. Can either use
+		interpolation or roundoff to the nearest index.
+
+	field:
+		double xmin = 0.0;
+		double xmax = 1.0;
+		int xdivs = 0;
+		int mode = 0;
+		double dx = 1.0;
+		double table[];
+
+	shared:
+		// single gate( gateOut, gateIn, reinitIn );
+
+	src:
+		multi lookup( double y );
+	
+	dest:
+		single lookup( double x ) {
+			lookup( doLookup ( x ) );
+		}
+
+	private:
+		double invdx_;
+		static const double EPSILON = 1.0e-10;
+};

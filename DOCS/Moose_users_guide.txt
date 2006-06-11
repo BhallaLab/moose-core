@@ -1,0 +1,161 @@
+MOOSE user's guide.
+
+Who should read this guide:
+- Anyone new to MOOSE
+- Users and developers of GENESIS who are upgrading to MOOSE
+
+------------------------------------------------------------
+Introduction: 
+	- What is MOOSE?
+	- Modelling with MOOSE.
+	- What is MOOSE good for?
+	- What is MOOSE bad for?
+	- How do I get MOOSE to do something new?
+
+MOOSE Scheduling
+
+--------------------------------------------------------------------------
+
+Introduction.
+
+What is MOOSE?
+MOOSE is the Messaging Object Oriented Simulation Environment. It is a
+framework for making computer models, especially neuronal networks and
+biochemical signaling systems. 
+
+Modeling with MOOSE.
+Modeling with MOOSE is like building a circuit using wires to connect
+circuit elements. The wires are the messages (the M in MOOSE), and the
+circuit elements are the objects ( the Os ). Almost everything in MOOSE
+is an object. For example, in a neuronal network model, the neurons are
+objects and the connections between them are messages. However, the
+neurons themselves might
+be built up of compartments and ion channels, and here the messages would
+carry information about currents between compartments and channels.
+The graph displaying the output of the model is also an object, and
+the neuron might send it a message with its membrane potential.
+
+The process of modeling in MOOSE involves creating objects, setting their
+parameters, and linking them together with messages. This is accomplished
+using an interpreted input language, which can be any of several
+languages. These include the old GENESIS
+language, Python, Perl, Java, and many others. Although all the setup
+operations are done using an interpreter (slow), the internal calculations
+and information flow through messages is done using optimized C++ code (fast).
+
+What is MOOSE good for?
+MOOSE is good for many kinds of modeling. Its forte is modeling of
+realistic neuronal networks, and modeling of the biochemical reactions
+of cell biology. In other words, computational neuroscience and systems
+biology. But these specializations are only because that is what
+the developers use it for. Some of the other bizarre things it has
+been used for include acquiring and displaying experimental data,
+and controlling instruments for the training of rats. The design of MOOSE
+is suitable for building complex models involving many interactions
+between different instances of many simple subunits, organized in a
+hierarchy. In other words, almost anything complex.
+
+What is MOOSE bad for?
+Several kinds of modeling involve just enormous array calculations. If these
+calculations are all that you want to do, then you may be best off using a
+linear algebra package. Although MOOSE does support linear algebra operations,
+it does so through its object-oriented interface, which may not be a natural
+match. Nevertheless, most complex simulations need a somewhat friendlier
+front-end than a matrix. MOOSE does a good job in mapping between object-
+oriented representations of simulated objects, and matrix forms. If a
+linear-algebra operation can be mapped neatly onto objects then
+MOOSE is probably quite a good choice for the model.
+
+How do I get MOOSE to do something new?
+Write a new class (or classes) for it. See the developer's guide. If you
+have done any Java, C or C++ programming it is easy. A lot of the 
+grunge work is hidden away in an automatic code generator, so you really 
+have to learn very little new about the syntax.
+
+
+
+
+Those of you who are familiar with object-oriented programming may find the
+use of the term messages a little different. In moose, all information
+flow between objects takes place through messages. However, messages 
+in MOOSE are not one-off function calls, but persistent connections
+between objects. These connections can be set up and broken at run-time.
+MOOSE messages can be traversed at any time in order to
+figure out the structure of the 'circuit'. Furthermore, the source of a
+given message may connect to a large number of targets, and vice versa.
+The circuit and wire analogy is also a bit stretched here, because
+information flows only from source to targets. Multiple sources connecting to
+the same target do not get 'shorted' together.
+
+MOOSE inherits many parts of its design
+philosophy from GENESIS, the General Neuronal Simulation System developed
+in the 80s and 90s at Caltech. MOOSE is designed to be backward compatible
+so as to support old GENESIS models, but it has been completely rewritten in 
+C++, and works on all sorts of hardware and different operating systems.
+
+
+
+--------------------------------------------------------------------------
+MOOSE scheduling.
+
+The topic of scheduling is a little heavy for a user's guide, but it is
+important to know enough of what goes on under the hood to be able to use
+it properly. MOOSE is set up so that most of the common objects are already
+scheduled for you. Most users just need to ensure that they are using the
+correct timesteps.
+
+What does it mean to 'run' a simulation? In MOOSE, it means that a special
+function, "process", is called for each computational object, in precisely
+the correct sequence. For example, consider a chemical kinetics calculation
+involving reactions and molecules, and a graph. We need calculations to
+take place every 0.01 seconds for numerical accuracy. We only need to plot
+the results every second or so, because the values do not change very
+fast and it is very expensive to do graphics. To add to the mix, somewhere
+in the background we also want to check if the user has typed anything or
+clicked on any of the GUI controls To accomplish all this,
+these are the steps that must take place in sequence:
+
+Every 0.01 seconds four steps must occur:
+1. Molecules must send concentration information to reactions
+2. Reactions must compute rate of change for each molecule.
+3. Reactions must send rate of change information to molecules
+4. Molecules must compute their new concentration based on old concentration		and rate of change.
+Once every 100 cycles, three additional steps must occur:
+5. Each plot must request its molecule for concentration information
+6. The molecule must send the concentration information back to the plot
+7. Each plot should update its display using the new concentration values.
+
+In addition, out of sequence, we need to poll the keyboard and the mouse.
+The scheduling system orchestrates all this. It does so at three levels:
+The Scheduler coordinates jobs, which are operations that do not need a
+specific sequencing. Sometimes these can be farmed off to other threads.
+The ClockJob is a special job which coordinates sequenced operations. It
+manages a set of ClockTicks. 
+The ClockTick actually calls the operations on the computational objects.
+Each ClockTick handles one timestep, dt. In case an operation needs to
+be scheduled so that several steps occur in sequence within the same timestep,
+the ClockTick also has a 'stage' field to define this sequence.
+
+In the above example, we might have 7 ClockTicks to ensure that things
+happened in the correct order:
+
+ClockTick 1 calls operation 1 every 0.01 seconds
+ClockTick 2 calls operation 2 every 0.01 seconds
+ClockTick 3 calls operation 3 every 0.01 seconds
+and so on.
+
+The ClockJob manages all the ClockTicks and ensures that they are called 
+in the correct sequence, given their different time-steps. This can get
+quite entertaining: Consider what happens if you have 3 ClockTicks at 1.0,
+1.2 and 1.5 second time-steps respectively.
+
+What does Joe User have to do? There are two main commands:
+
+setclock clockNumber dt [stage]
+useclock path clockNumber
+
+Setclock creates ClockTicks with the specified dt. Sometimes ClockTicks
+share the same dt but need to be scheduled in a specific order. In our
+example above, we have four ClockTicks with the same timestep. For these
+occasions, we can set the stage to some value to guarantee this.
+

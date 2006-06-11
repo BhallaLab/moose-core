@@ -1,0 +1,32 @@
+MOOSE is the Messaging Object-Oriented Simulation Environment.
+It is the base and numerical core for developing simulations of biological
+systems that span the range from single molecules to subcellular networks,
+from single cells to neuronal networks, and to still larger systems.
+The domain of MOOSE includes much of computational biology, including
+but not limited to the areas of Computational Neuroscience and Systems Biology.
+
+MOOSE uses biochemical and biophysical laws to compute the outcome of 
+complex interactions in biological systems. It draws upon a wide variety
+of numerical methods to do so, including techniques that are still under
+development. One of the key architectural features of MOOSE is the ability
+to incorporate multiple numerical engines as plugins for performing 
+efficient, domain-specific computations, while retaining uniform 
+representations of biological concepts such as proteins and cells.
+
+MOOSE is designed to be the numerical core for the next-generation GENESIS 3
+project, while retaining backward compatibility with GENESIS 2. MOOSE
+focuses on the base computations while the GENESIS project 
+(also on SourceForge) includes GUI, tutorials, teaching tools, databases and 
+other community efforts. MOOSE is standalone and runs in text and batch mode 
+without necessarily requiring these other inputs.
+
+MOOSE is a complete reimplementation and major enhancement of GENESIS
+functionality in C++, with extensive use of the STL and tighter coding
+standards. The design of MOOSE is highly modular and encourages user library
+additions. MOOSE is designed for parallelization. 
+
+MOOSE models run at native C++ speeds while retaining scripting flexibility.
+This is done through a scripting language for model setup. MOOSE maintains
+backward compatibility by a reimplementation of the original GENESIS parser.
+The language interface is compatible with SWIG, so that several other
+languages may eventually be used to specify MOOSE models.

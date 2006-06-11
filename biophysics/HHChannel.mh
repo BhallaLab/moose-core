@@ -1,0 +1,145 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class HHChannel
+{
+	public:
+
+	author: 
+		Upinder S. Bhalla, 2005, NCBS
+	description:
+		Hodgkin-Huxley type voltage-gated Ion channel. Something
+		like the old tabchannel from GENESIS, but also presents
+		a similar interface as hhchan from GENESIS. 
+	field:
+		double Gbar;
+		double Ek;
+		double Xpower;	// Actually stored on the xGate
+		double Ypower;	// Actually stored on the yGate
+		double Zpower;	// Actually stored on the zGate
+		double surface;
+		int instant;
+		double Gk;
+		double Ik;
+
+	shared:
+		single channel( channelOut, channelIn, reinitIn );
+		single xGate( xGateOut, xGateIn, xGateReinitOut );
+		single yGate( yGateOut, yGateIn, yGateReinitOut );
+		single zGate( zGateOut, zGateIn, zGateReinitOut );
+
+	src:
+		// Note that src and dest can have the same name, and it
+		// may even be appropriate for communicating message pairs. All
+		// src fields have the suffix Out appended to their name.
+		// Each of these examples specifies the connection type
+		// directly: multi or single.
+		// If there are shared messages, these will eventually be
+		// defined again, and should match.
+		single channel( double Gk, double Ek ); // Updates compt values
+		single Ik( double I ); // Used for calculating Ca influx.
+		// See above for how some of these are shared.
+
+		// X, Y and Z are state variables. These messages are half of
+		// a lookup pair where the src requests the response from the
+		// gate.
+		single xGate( double Vm, double X, double dt );
+		single yGate( double Vm, double Y, double dt );
+		single zGate( double Vm, double Z, double dt );
+		single xGateReinit( double Vm );
+		single yGateReinit( double Vm );
+		single zGateReinit( double Vm );
+		// single xGatePow( double Xpower );
+		// single yGatePow( double Ypower );
+		// single zGatePow( double Zpower );
+	
+	dest:
+		single channel( double Vm, ProcInfo info ) {
+			g_ += Gbar_;
+			xGate( Vm, X_, info->dt_ );
+			yGate( Vm, Y_, info->dt_ );
+			if ( useConcentration_ )
+				zGate( conc_, Z_, info->dt_ );
+			else
+				zGate( Vm, Z_, info->dt_ );
+			Gk_ = g_;
+			channel( Gk_, Ek_ );
+			Ik_ = ( Ek_ - Vm ) * g_;
+			Ik( Ik_ );
+			g_ = 0.0;
+		}
+
+		single Ek( double Ek ) {
+			Ek_ = Ek;
+		}
+		
+		single concen( double conc ) {
+			conc_ = conc;
+		}
+
+		single addGbar( double gbar ) {
+			Gbar_ += gbar;
+		}
+
+		single reinit( double Vm ) {
+			// Go to each gate, request a steady-state lookup,
+			// restore to original lookup mode.
+			g_ = Gbar_;
+			xGateReinit( Vm, Xpower_, instant & 1 );
+			yGateReinit( Vm, Ypower_, instant & 2 );
+			useConcentration_ = concenInConn_.nTargets();
+			if ( useConcentration_ )
+				zGateReinit( conc_, Zpower_, instant_ & 4 );
+			else
+				zGateReinit( Vm, Zpower_, instant & 4 );
+			Gk_ = g_;
+			channel( Gk_, Ek_ );
+			Ik_ = ( Ek_ - Vm ) * g_;
+			g_ = 0.0;
+		}
+
+		single xGate( double X, double gScale ) {
+			X_ = X;
+			g_ *= gScale;
+		}
+
+		single yGate( double Y, double gScale ) {
+			Y_ = Y;
+			g_ *= gScale;
+		}
+
+		single zGate( double Z, double gScale ) {
+			Z_ = Z;
+			g_ *= gScale;
+		}
+
+		single tabFill( int xdivs, int mode ) {
+			// Here we need to provide a dummy conn because we do
+			// not expect a message to call this function.
+			// Later we'll use the solve message src kind of
+			// arrangement to do this economically along with the 
+			// shared messages to the gates.
+		}
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+		double X_;	// State variable for X gate
+		double Y_;	// State variable for Y gate
+		double Z_;	// State variable for Z gate
+		double g_;	// Inner variable for conductance.
+		double conc_;
+		bool useConcentration_;	
+			// Flag to tell Z gate to use conc rather than Vm.
+
+		static const double EPSILON = 1.0e-10;
+		static const int INSTANT_X = 1;
+		static const int INSTANT_Y = 2;
+		static const int INSTANT_Z = 4;
+};

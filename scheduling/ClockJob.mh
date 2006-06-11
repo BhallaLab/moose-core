@@ -1,0 +1,57 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class ClockJob: public Job
+{
+	public:
+	author:
+		Upinder S. Bhalla, Nov 2005, NCBS
+	description:
+		ClockJob class. Handles sequencing of operations in simulations
+	field:
+		double runtime; // Time for simulation to run
+		readonly double currentTime; 
+		int nSteps; // Number of steps to run
+		readonly int currentStep;
+
+	shared:
+		multi clock( processOut, reinitOut, reschedOut, dtIn );
+
+	src:
+		multi process( procInfo ); // Connect up to child operations.
+		multi resched( );
+		multi reinit( );
+		multi finished(); // Report job completion
+
+	dest:
+		single start( procInfo info, double time );
+
+		single step( procInfo info, int nsteps );
+
+		// Comes from the Job.
+		// single process( procInfo info );
+
+		single reinit( ) {
+			reinit();
+		}
+
+		single resched( ) {
+			resched();
+		}
+
+		single reset( ) {
+			resched();
+			reinit();
+		}
+
+		multi dtIn( double dt, int stage );
+
+	private:
+};

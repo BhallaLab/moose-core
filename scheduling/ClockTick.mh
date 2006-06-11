@@ -1,0 +1,55 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class ClockTick:
+{
+	public:
+	author:
+		Upinder S. Bhalla, Nov 2005, NCBS
+	description:
+		ClockTick class. Controls execution of objects on a given dt.
+	field:
+		double dt;
+		int stage;
+		double nextt;
+		double epsnextt;
+		double max_clocks;
+		string path;
+		double nclocks;
+
+	shared:
+		single clock( processIn, reinitIn, reschedIn );
+		multi tick( processOut, reinitOut );
+		multi solverStep( passStepOut, checkStepIn );
+
+	src:
+		multi process( ProcInfo ); // Connect up to child operations.
+		multi reinit( ProcInfo ); // Connect up to child operations.
+		multi passStep( double t );	// Allow solver to proceed
+
+	dest:
+		// Solver asks if anything is pending before proceeding.
+		multi checkStep( double t ) {
+			if ( t <= nextt )
+				passStep( t );
+		}
+		single process( ProcInfo info ) {
+			process( info );
+		}
+		single reinit( ) {
+			nextt = 0.0;
+			epsnextt = 0.0;
+			reinit( );
+		}
+		single resched( );
+
+	private:
+		bool terminate_;
+};

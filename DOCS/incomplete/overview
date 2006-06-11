@@ -1,0 +1,283 @@
+What is MOOSE ?
+
+What do you need to build a large, complex model with many communicating
+computational units?
+
+1 The units themselves. They can (mostly) worry about their own internal
+	computations. These are the elements.
+2 The connections between the units. They pass arguments and call functions
+	in each other. These are the messages.
+3 A way to set it all up. That is the rest of the architecture.
+
+Put these together with a lot of element classes designed for everything from
+computation to graphics, and you have MOOSE.
+
+===============================================================================
+Assembling a model in MOOSE.
+
+===============================================================================
+
+1. Elements are computational and data storage entities in MOOSE. They 
+correspond to real-world concepts such as 'cell' or 'molecule'. They have
+fields that provide handles onto everything inside the element. These fields
+include :
+	1.1: Values
+	1.2: Functions.
+
+In Moose, there is no big difference between Values and Functions. Values
+are handled in terms of functions for getting and setting the values.
+Functions just have a single 'set' like function, which may have zero
+or more arguments. 
+
+2. Messages talk to these functions. They have two parts:
+	2.1: Connections, to set up a linkage between element A and element B.
+	2.2: Function call, which uses the connection like a track to figure
+		out where to go.
+
+Unless you are writing MOOSE objects, you do not need to worry about the 
+distinction between these. From the user's point of view, any field can
+send or receive a message from any other field provided they are of
+compatible types.
+
+3. Setting it up. This is at three levels. 
+	3.1: Core stuff to keep track of element and field definitions
+	3.2: Element level stuff to look up and control element function
+	3.3: System level stuff built up of the other two, to do all else.
+
+===============================================================================
+
+A note for people converting from GENESIS.
+MOOSE is framed in terms of the core concepts from GENESIS: elements and 
+messages. It is designed to be completely backward compatible, but only
+in the sense that GENESIS models can be run on MOOSE through a special
+backward-compatible interpreter. Things that are the same for users:
+- Elements and element hierarchy
+- Messages pass information between elements
+- Many functional equivalents of the old classes
+- A script interpreter mode that runs old models.
+
+Things that are different:
+- Messages are now framed in terms of remote function calls, rather than
+	peeking into memory belonging to other elements. This is a
+	little like 'active messages' from GENESIS.
+- A unification of many of the GENESIS concepts. Field access, element
+	hierarchy, calling of methods, and messaging were distinct operations
+	in GENESIS. In MOOSE, they are all handled through messages.
+- Portability. GENESIS was written in C for Unix. Through heroic efforts
+	GENESIS was made to run under MacOSX and CycWin for Windows.
+	MOOSE is written in C++ and runs natively on all platforms.
+- Parallelization. GENESIS had a p-GENESIS version that ran using PVM.
+	MOOSE is designed to natively support threading (i.e., symmetric
+	multiprocessing especially on multiprocessor machines) and uses
+	MPI for running on clusters.
+- Cleaner and faster. This is a code word for a new and improved set of bugs.
+
+===============================================================================
+Implementation details.
+
+1. Elements.
+	Your own data structures and classes handle computation and values.
+	Elements handle your classes and provide communication (messaging).
+	- Elements are organized in a heirarchy like a filesystem heirarchy.
+	Certain kinds of elements can be parents of other elements. This is
+	similar to directories containing other directories and also files.
+		- Heirarchy: 
+			- Each Element has a parent. 
+			- Neutral elements have the capacity to have 'children'
+			- Each Element has a name
+			- Put all the names together like a directory tree
+				to obtain a unique path to each Element.
+		- Messaging:
+			- Elements maintain the connection lists.
+
+
+	The element always has three special fields:
+		- Name.
+		- Parent. This is a single message from the parent to the child.
+		- Class. This points to a special element that holds lots
+			of class information about the element.
+	Elements inherit fields from their base classes.
+	Elements can redefine fields.
+	Elements can dynamically redefine fields by the simple expedient
+		of having a child element of the specified name. need to
+		decide if type of redefined child may be altered.
+	Elements can redefine or tie together msgs using relays. These
+		are handled by a vector at the end of the element.
+1.0. Fields.
+	Fields are fully typed through templates.
+	field0: has a function with no arguments
+	field1<T>: Has a function or value with a single argument
+	field2<T1, T2>: has a function with two arguments, and so on.
+	Field1 applies to parameters and does some special things in that role.
+	Fields always provide the following methods:
+		Name()
+		ElmClass()		// Which element class is it equiv to?
+		IsA(field* arg)		// Is this an instance of arg?
+		Recv<T>(const T&)	// Receive a T as an argument.
+		Send<T>(T&)		// Send a T as an argument.
+		Recv(const string&)
+		Send(const string&)
+		bool SetTgtFunc(void (*func)(element*, T)) // Assigns
+			target func. Usually used in msgsrc.
+		or
+		bool AddTarget(destfield *dest) // uses msgdest info to
+			// assign both the destfunc and the destconn.
+			// Applies for all kinds of messages.
+		Trigger() // Equivalent to Recv(). Activate with no args.
+		Incoming(const vector&<pair(msgconn, field)>) // For traversal
+		Outgoing(const vector&<pair(msgconn, field)>) // For traversal
+		ArgTypes(const vector<const class*> t) ?
+
+1.1 Methods fields
+	Always called through the messaging interface. Often same as
+	an incoming message field. The non-message methods may be rarely
+	called methods that do not have a preassigned connection list,
+	but can set up a dynamic one if needed.
+	Always fully typed by derivation from the base field templates above,
+	to specify number of arguments.
+	Typically also emit further messaging calls to other functions.
+	Trigger may be a null func.
+	The equivalent classes here are for argument types. Still are useful,
+	for example for passing in args as strings.
+
+1.2 Message fields. Previously called message lists.
+	These are always derived from the appropriate field typing class.
+	MsgDest message fields include the method and the associated
+		connection list. Field type info specifies arguments for method.
+		Handled by Recv<T>.
+		Passes back pointer to RecvFunc<T>(element*, args).
+		Send<T> may be null, except when doing relays passing same args.
+		Trigger may be null
+		AddTarget is used to relay info.
+	MsgSrc message fields include the calling method? and the connection
+		list. Field Type info specifies arguments that will be passed
+		to the message target.
+		Send<T>(arg) specifies the call for doing the send.
+		Recv may be null.
+		Trigger may be null
+		MsgSrc is usually templated and specialized for a specific
+		msgconn. This makes it almost as fast as a direct function call.
+		MsgSrc need have no more storage than whatever is needed
+		for the ptr to the target function. To identify the
+		associated msgconn they can either use a templated lookup func,
+		or a pointer to the msgconn (which costs additional memory).
+		Not much to choose by way of speed, but the templated stuff
+		is a bit messier to code.
+		AddTarget is used for regular sending of msgs.
+
+	The important addmsg command sends a message from the MsgSrc field
+		of one element to the Incoming field of another. In doing
+		so the connections are tied together and the recvfunc is
+		passed into the msgsrc.
+	
+1.3 Parameter fields.
+	These are always derived from field1<T>
+	They are also always based on the data part of an element class.
+	Parameter fields are usually inited with the name of the class of
+		the equivalent element, so that they can provide the strvals.
+	They always provide a strval. Usually goes through the strval 
+		conversion method for the element class.
+	They do not typically have built-in connection lists.
+	Provide 3 methods:
+		Recv: derived from field1<T>, assignment to parameter.
+			(of course, may be disabled in readonly fields)
+		Send: Derived from field1<T>, reading out from parameter.
+		Trigger: Derived from field0, used to trigger any outgoing
+			messages with the parameter value.
+	AddTarget is used to set up connections from field outward.
+	
+===============================================================================
+
+2. Messages
+2.0  
+	Lots of elaborations for internode and SMP stuff to come.
+	Don't forget relays.
+2.1 Connections.
+	A connection is a completely symmetric linkage between an element
+		A and element B.
+	This linkage implies a committment by both ends to keep track of
+		the other. Unlike web pages, there cannot be any dangling
+		links. If one end is deleted, the other also must be dropped.
+	Each end of the connection can either be a singleton, or it can handle
+		multiple targets.
+	All connections must provide 7 public methods.
+		- Pa() to specify parent element.
+		- Exec to use the internal iterator.
+		= Target(index) and NTargets() to explicitly iterate over all
+			targets
+		= Add/Drop for making and destroying connections
+		- Find(target) to locate a target.
+	Any connection subtype must be able to connect to any other.
+	Connections can use either specific ptrs or run-time evaluation to
+		keep track of targets. Specific ptrs are safer, but need
+		more memory storage. Run-time evaluation of targets must
+		be unambiguous and allows no dangling.
+	Issue: Do we access connections directly or always through 
+		msgsrc/msgdests?
+
+2.2: Function call, which uses the connection like a track to figure
+		out where to go.
+	Referred to by msgsrc.
+	Usually specify recvfunc on creation. Perhaps better to specify
+	when connection is made.
+	Msgsrc handles traversal of the connection. The call is just Send(args).
+	Some messy cases have multiple classes of targets. Here the msgsrc
+	manages it.
+
+2.4 Data-full messages, like synapses.
+	Here each of the connection links has unique information that is
+	accessible from either the src or dest.
+	- Create a distinct connection for each synapse.
+	- Create a distinct field for each synapse, accessed through array
+	- Make each connection look like an indexed field, combine above.
+
+2.3 AddTarget is the critical call. Here are the cases:
+	Field->Field		: <T> must match.
+				Creates a msgconn at both ends, but the
+				function of the msg awaits a trigger.
+				Possibly default trigger if src field is changed
+				Relay use.
+	field->msgsrc		: <T> of field must fit msgsrc, or src is trig.
+				Creates a msgconn at both ends, as the msgsrc
+				conn is meant for outgoing stuff.
+				When field is triggered by assignment it calls
+				the Send() of the msgsrc.
+				Like Piggyback, but to specified target.
+	field->msgdest		: <T> of field must fit msgdest, or both trigs.
+				Creates msgconn for src from field.
+				Passes value of field to msgdest
+				Or, when field changes, triggers msgdest if trig
+	msgsrc->field		: <T> of src must match field
+				Creates msgconn on field for receiving data.
+				Assigns field value from src arg.
+	msgsrc->msgsrc		: <T> of srcs must match, or second one is trig
+				Creates msgconn on target src.
+				Fans out call to another Send() function with
+				distinct msgconn.
+				Again, specific piggyback.
+	msgsrc->msgdest		: <T> of src and dest must match
+				Everything is regular here, conns exist.
+				Regular message passing.
+	msgdest->field		: <T> of dest and field must match, or trigs.
+				Conn created on both
+				Used to relay info to field from msgdest
+	msgdest->msgsrc		: <T> must match, or src is a trig.
+				Conn created on both.
+				Generic relay/piggyback.
+	msgdest->msgdest	: <T> must match
+				Conn created on originating msgdest.
+				Used to relay
+
+In summary, all the cases make sense except the ones going into msgsrcs.
+In a sense, msgsrcs usually have virtual msgs coming in representing how
+the msgdests pass info.
+So any trigger msgsrc could be activated by a msgdest or a field.
+src->src trigger would then be the equivalent of connecting at a specific
+point of the control flow of the msgdest that controls the first src.
+With arguments, dest->src would make sense also as a relay.
+With a single argument, field->src would work as a relay.
+
+All the above cases could possibly be accessed through a specified distinct
+msgdest or msgsrc to represent a selected msgconn for piggybacking.
+
+===============================================================================

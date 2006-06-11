@@ -1,0 +1,22 @@
+This is the 0.06 release of MOOSE
+Date: 17 Feb 2006.
+
+Overview: This is a minor upgrade to handle synapses. Implements the
+synchan and spikegen objects. 
+Internally this version sees a big shift to the use
+of subversion for version control. Subversion has recently become supported
+by SourceForge and it is a much nicer system than CVS. Once the subversion
+management of MOOSE is stabilized here I will put the project on SourceForge.
+
+Compilation instructions:
+Edit Makefile to select GCC3 or GCC4 options. Some of the later GCC3 versions
+actually seem to prefer the GCC4 flags.
+Go into the mus_release_feb10_2006 directory and type
+	make moose
+
+Currently works on Fedora/Gcc4 and Gcc3. 
+Known compilation issues remain with Debian due to issues with flex++.
+Linux version 2.4.27-2-386 (gcc version 3.3.5 (Debian 1:3.3.5-13))
+	As always, suggestions are welcome.
+
+See DOCS/ReleaseNotes for details.

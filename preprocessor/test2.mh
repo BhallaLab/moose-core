@@ -1,0 +1,153 @@
+
+class MyClass: public MyBaseClass
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Uma the Programmer, today's date, Uma's Institution.
+	description:
+		// Note that this comment appears in the code, but does not
+		// become part of the description string.
+		This is a test class. If it were a real class it would 
+		have been much the same.
+	field:
+		double Vm;
+		double Cm = 1e-6;	// initial value
+		double Rm;
+		const double pi; // Here we have a constant value
+		readonly double Ra; // Here we have value that the user can
+			// only read, but it may be changed within the object.
+		double inject; // all boring stuff
+
+		// Here we define an array. Each entry can be accessed by
+		// indexing: e.g., coords[0], coords[500].
+		// Indexes are protected, the system will not accept a bad
+		// one.
+		// MOOSE arrays are all expandable: they really are vectors.
+		// By default the system also
+		// generates a 'size' field which is accessed as coords.size
+		// The entire vector can be accessed if one uses only the
+		// name of the field, coords.
+		// In this manner full vector can be assigned to another one
+		// (provided the types match).
+		double coords[];
+
+		// Here is another array, just that here we define an initial
+		// size
+		double values[ 10 ];
+
+		// Here we take a complete moose
+		// class as a field of this class. This engulfed class will
+		// not have any messaging, just the data and functions.
+		// Because MOOSE knows about the other class, we do not need
+		// to fill in details.
+		mooseclass MyOtherClass complexField;
+
+		// This silly little class is defined locally and
+		// has two fields which do not do much. In the constructed
+		// header one would presumably add functions and private
+		// fields to the class. The purpose of putting this reduced
+		// class definition here is to tell MOOSE how to access these
+		// fields within the class.
+		class pair { 
+			double foo;
+			double bar;
+		} anotherComplexField;
+
+		// This is a more typical complex field. It actually
+		// reimplements a fairly common MOOSE class, the lookup table
+		// with a specified range. In the constructed header one
+		// would elaborate on the table class.
+		class table {
+			double min;
+			double max;
+			double values[];
+		} myTableField;
+	
+	src:
+		// Note that src and dest can have the same name, and it
+		// may even be appropriate for communicating message pairs. All
+		// src fields have the suffix Out appended to their name.
+		// Each of these examples specifies the connection type
+		// directly: multi or single.
+		multi axial( double );
+		single raxial( double, double );
+		multi channel( double, ProcArg& a );
+
+		// Here we have a src that shares a connection with another one
+		// So instead of specifying the connection type directly,
+		// we give the name of the previously defined connection.
+		axialOut diffusion( double, double );
+	
+	dest:
+		// All dest fields will have the suffix In appended to the name.
+
+		// Here we have a dest that shares a connection with the 
+		// raxial message of the src. The designer knows that these
+		// messages always occur in pairs, so this little optimisation
+		// is possible. It doesn't affect run-time speed, but
+		// saves on memory.
+		// Here we again reuse a connection.
+		raxialOut axial( double V ) {
+			I += (V - Vm_) / Ra_;
+		}
+
+		// This one does not share a connection, though it would have
+		// been possible in this specific case.
+		single raxial( double V, double Ra ) {
+			I += ( V - Vm ) / Ra;
+		}
+
+		// Here we have another shared connection. It is legal
+		// only if the other object also defines its end as a
+		// shared connection, otherwise confusion will ensue.
+		channelOut channel( double Gk, double Ek ) {
+			I += (V - Ek) * Gk;
+			diffusion( Q_ );
+		}
+
+		// Note that here we explicitly indicate messages going out.
+		// If the user has a more complicated structure for their
+		// function, they can rearrange the outgoing calls.
+		single process( ProcArg& a ) {
+			channel( Vm_, a );
+			axial( Vm_ );
+			raxial( Vm_, Rm_ );
+			Vm_ += IntegFunc(I, Vm_, Rm_, Cm_);
+			// something like (I.Rm - Vm)/(1 + C.Rm);
+		}
+
+		// Here we have a shared connection but this time with another
+		// destination. The logic is that every time a process
+		// message is made, the reset message should also be done.
+		// Note that the arguments do not need to be the same.
+		processIn reset() {
+			Vm_ = Erest_;
+			I_ = 0;
+		}
+	shared:
+		// Here we indicate sets that share a connection.
+		// The lists can be as long as needed.
+		raxialIn, axialOut;
+		channelIn, channelOut;
+		processIn, resetIn;
+
+	synapse:
+		// These are also message destinations, but each connection
+		// holds additional information in the form of a class. As
+		// new connections are made this array is expanded. The
+		// array entries are visible as ordinary array fields.
+		// If there is no additional information then a regular
+		// message destination would do the job.
+		// This additional information could be as simple as an
+		// integer, or a complete class with all sorts of fields.
+		// The delay is the argument passed by the incoming message.
+		// The additional information class in this case is an int.
+		single inhib( double delay ) int;
+
+		// Here the additional info is a class called SynInfo.
+		multi excite() SynInfo;
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+};

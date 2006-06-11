@@ -1,0 +1,138 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class SynChan
+{
+	public:
+
+	author: 
+		Upinder S. Bhalla, 2006, NCBS
+	description:
+		Synaptic channel incorporating weight and delay. Does not
+		handle activity-dependent modification, see HebbSynChan for 
+		that. Very similiar to the old synchan from GENESIS.
+	field:
+		double Ek = 0.0;
+		double Gk = 0.0;
+		double Ik = 0.0;
+		double Gbar = 0.0;
+		double tau1 = 0.001;
+		double tau2 = 0.001;
+		int normalizeWeights = 0;// Flag: do we normalize synaptic wts?
+
+	shared:
+		single channel( channelOut, channelIn, reinitIn );
+
+	src:
+		// Note that src and dest can have the same name, and it
+		// may even be appropriate for communicating message pairs. All
+		// src fields have the suffix Out appended to their name.
+		// Each of these examples specifies the connection type
+		// directly: multi or single.
+		// If there are shared messages, these will eventually be
+		// defined again, and should match.
+		single channel( double Gk, double Ek ); // Updates compt values
+		single Ik( double I ); // Used for calculating Ca influx.
+	
+	dest:
+		single channel( double Vm, ProcInfo info ) {
+			while ( pendingEvents_.top().delay <= info->currTime_ ) {
+				activation_ += pendingEvents_.top().weight / info->dt_;
+				pendingEvents_.pop();
+			}
+			X_ = modulation_ * activation_ * xconst1_ + X_ * xconst2_;
+			Y_ = X_ * yconst1_ + Y_ * yconst2_;
+			Gk_ = Y_ * norm_;
+			Ik_ = ( Ek_ - Vm ) * Gk_;
+			activation_ = 0.0;
+			modulation_ = 1.0;
+			channel( Gk_, Ek_ );
+			Ik( Ik_ );
+		}
+
+		single Ek( double Ek ) {
+			Ek_ = Ek;
+		}
+
+		// Used for graded (dendro-dendritic) transmission
+		multi activation( double act ) {
+			activation_ += act;
+		}
+
+		multi modulator( double mod ) {
+			modulation_ *= mod;
+		}
+
+		// Need to get dt into here. One way would be to change
+		// the calling for reinit to also have ProcInfo.
+		// This could percolate down
+		single reinit( double Vm ) {
+			double dt = 1.0;
+			if ( channelConn_.nTargets() > 0 ) {
+				Element* compt = channelConn_->target( 0 )->parent();
+				if ( compt ) {
+					Conn* tick = compt->field( "processIn" )->inConn(0);
+					if ( tick && tick->nTargets() > 0 ) {
+						Ftype1< double >::get( 
+							tick->target( 0 )->parent(), "dt", dt );
+					}
+				}
+			}
+			activation_ = 0.0;
+			modulation_ = 1.0;
+			xconst1_ = tau1_ * ( 1.0 - exp( -dt / tau1_ ) );
+			xconst2_ = exp( -dt / tau1_ );
+			yconst1_ = tau2_ * ( 1.0 - exp( -dt / tau2_ ) );
+			yconst2_ = exp( -dt / tau2_ );
+			if ( tau1_ == tau2_ ) {
+				norm_ = Gbar_ * M_E / tau1_;
+			} else {
+				double tpeak = tau1_ * tau2_ * log( tau1_ / tau2_ ) / 
+					( tau1_ - tau2_ );
+				norm_ = Gbar_ * ( tau1_ - tau2_ ) / 
+					( tau1_ * tau2_ * ( 
+						exp( -tpeak / tau1_ ) - exp( tpeak / tau2_ )
+					) );
+			}
+			if ( normalizeWeights_ && synapsesConn_.size() > 0 )
+				norm_ /= static_cast< double >( synapsesConn_.size() );
+			while ( !pendingEvents_.empty() )
+				pendingEvents_.pop();
+			// No need to send out channel or Ik messages, because
+			// at reinit these are zero.
+			// channel( Gk_, Ek_ );
+			// Ik_ = ( Ek_ - Vm ) * Gbar_;
+		}
+
+	synapse:
+		multi synapses( double time ) SynInfo;
+		/*
+		{
+		// Insert the incoming synaptic event into the pending events
+		// queue according to the local synaptic delay and weight
+		// Compare this one line with the monstrous code in GENESIS!
+			temp->pendingEvents_.push( s->value_.event( time ) );
+		}
+		*/
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+		double xconst1_;
+		double yconst1_;
+		double xconst2_;
+		double yconst2_;
+		double norm_;
+		double activation_;
+		double modulation_;
+		double X_;	// State variable for X gate
+		double Y_;	// State variable for Y gate
+		priority_queue< SynInfo > pendingEvents_;
+};
+

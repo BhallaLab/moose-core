@@ -1,0 +1,31 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class Sched: public Neutral
+{
+	public:
+	author:
+		Upinder S. Bhalla, Nov 2005, NCBS
+	description:
+		Scheduler root class. Controls multiple jobs for I/O and 
+		processing.
+	field:
+	src:
+		multi process( ProcInfo ); // Connect up to child jobs.
+
+	dest:
+		// Should really call from job itself, using a piggyback.
+		single start( string job, string shell ); 
+		single stop( string job );
+
+	private:
+		bool terminate_;
+		bool running_;
+};

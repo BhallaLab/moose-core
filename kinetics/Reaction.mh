@@ -1,0 +1,76 @@
+class Reaction
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Upinder S. Bhalla, 2005, NCBS
+	description:
+		Reaction class, handles binding and conversion reactions
+		not involving enzymatic steps. Computes reversible reactions
+		but the rates can be set to zero to give irreversibility.
+		Order of substrates and products set by the number of 
+		messages between them.
+	field:
+		double kf = 0.1;
+		double kb = 0.1;
+
+	shared:
+		// Here we indicate sets that share a connection.
+		// The lists can be as long as needed.
+		// The group name is used in making the messages.
+		// The number and sequence of messages is just like an
+		// argument list: must match with the target.
+		// We define the actual Src and dest Finfos below.
+
+		// The process increments a timestep, the reinit initializes.
+		single process( processIn, reinitIn );
+
+		// The substrate and product messages connect to molecules
+		// acting as substrate and product respectively.
+		multi sub( subOut, subIn );
+		multi prd( prdOut, prdIn );
+
+	src:
+		// Note that src and dest can have the same name, and it
+		// may even be appropriate for communicating message pairs. All
+		// src fields have the suffix Out appended to their name.
+		// Each of these examples specifies the connection type
+		// directly: multi or single.
+		// If there are shared messages, these will eventually be
+		// defined again, and should match.
+
+		// See above for how some of these are shared.
+
+		// A is the increment, and B the decrement in the molecule.
+		// Later will set up a derivative based scheme.
+		multi sub( double A, double B ); 
+		multi prd( double A, double B ); 
+	
+	dest:
+		single reinit( ) {
+			A_ = B_ = 0;
+		}
+
+		// Note that here we explicitly indicate messages going out.
+		// If the user has a more complicated structure for their
+		// function, they can rearrange the outgoing calls.
+		single process( ProcInfo info ) {
+			sub( B_, A_ );
+			prd( A_, B_ );
+			A_ = kf_;
+			B_ = kb_;
+		}
+
+		multi sub( double n ) {
+			A_ *= n;
+		}
+
+		multi prd( double n ) {
+			B_ *= n;
+		}
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+		double A_;
+		double B_;
+};

@@ -1,0 +1,130 @@
+class Molecule
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Upinder S. Bhalla, 2005, NCBS
+	description:
+		Pool of molecules.
+	field:
+		double nInit = 0.0;
+		double concInit;
+		double volumeScale = 1.0;
+		double n = 0.0;
+		double conc;
+		int mode = 0;		// 0=normal, 1 = n sumtot, 2 = conc sumtot,
+							// > 2 is buffered
+		int slave_enable = 0; // 0=normal, 1 = n sumtot, 
+							// 2 = conc sumtot, > 2 is buffered
+		/*
+		double molWeight;
+		double D;
+		*/
+
+	shared:
+		// Here we indicate sets that share a connection.
+		// The lists can be as long as needed.
+		// The group name is used in making the messages.
+		// The number and sequence of messages is just like an
+		// argument list: must match with the target.
+		// We define the actual Src and dest Finfos below.
+
+		// The process increments a timestep, the reinit initializes.
+		single process( processIn, reinitIn );
+
+		// The reacOut and In messages are scheduled by Process.
+		// reacOut sends n. reacIn receives A and B, which are the
+		// increment and decrement of n respectively.
+		multi reac( reacOut, reacIn );
+
+		// The rateOut and In messages are for a general solver.
+		// rateOut is triggered by rateIn. rateIn passes in the 
+		// time for which rateOut is required. rateOut sends n and
+		// the slope of n.
+		// single rate( rateOut, rateIn );
+
+	src:
+		// Note that src and dest can have the same name, and it
+		// may even be appropriate for communicating message pairs. All
+		// src fields have the suffix Out appended to their name.
+		// Each of these examples specifies the connection type
+		// directly: multi or single.
+		// If there are shared messages, these will eventually be
+		// defined again, and should match.
+
+		// See above for how some of these are shared.
+
+		// also sends n out, triggered by process, shared with reacIn
+		multi reac( double );
+		multi n( double );
+	
+	dest:
+		multi reac( double A, double B ) {
+			A_ += A;
+			B_ += B;
+		}
+
+		multi prd( double A, double B ) {
+			A_ += A;
+			B_ += B;
+		}
+
+		multi sumTotal( double n ) {
+			total_ += n;
+		}
+
+		// This is meant to be called on a separate clock tick from the
+		// Process. It requires that the n of all its input molecules
+		// have arrived, so the main Process must be completed before
+		// this one is called.
+		single sumProcess( ProcInfo info ) {
+			n_ = total_;
+			total_ = 0.0;
+		}
+
+		// I'll drop this one for now. It was coded in the intermediate
+		// MOOSE, but I don't know if it was every deployed.
+		/*
+		single compartment( double vol ) {
+			static const double VOLUME_CONVERSION = 6.0e20;
+
+			volumeScale_ = vol * VOLUME_CONVERSION;
+		}
+		*/
+
+		single reinit( ) {
+			A_ = B_ = total_ = 0.0;
+			n_ = nInit_;
+			if ( mode_ == 0 && sumTotalInConn_.nTargets() > 0 )
+				mode_ = 1;
+			else if ( mode_ == 1 && sumTotalInConn_.nTargets() == 0 )
+				mode_ = 0;
+			reac( n_ );
+		}
+
+		// Note that here we explicitly indicate messages going out.
+		// If the user has a more complicated structure for their
+		// function, they can rearrange the outgoing calls.
+		single process( ProcInfo info ) {
+			if ( mode_ == 0 ) {
+				if ( n_ > EPSILON && B_ > EPSILON ) {
+					double C = exp( -B_ * info->dt_ / n_ );
+					n_ *= C + ( A_ / B_ ) * ( 1.0 - C );
+				} else {
+					n_ += ( A_ - B_ ) * info->dt_;
+				}
+				A_ = B_ = 0.0;
+			} else if ( mode_ >= 2 ) {
+				n_ = nInit_;
+			}
+
+			reac( n_ );
+		}
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+		double total_;
+		double A_;
+		double B_;
+		static const double EPSILON = 1.0e-15;
+};
