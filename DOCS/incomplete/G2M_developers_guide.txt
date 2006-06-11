@@ -1,0 +1,41 @@
+From GENESIS to MOOSE: Developer's guide
+
+Who should read this G2M developer's guide
+- Anyone who has written GENESIS code and wants to write MOOSE code
+- Anyone who wants to port old GENESIS code.
+
+Who does not need to read it
+- Someone who just wants to use MOOSE without developing stuff for it.
+- Someone who doesn't have GENESIS code writing baggage. You can jump right
+to the MOOSE developer's guide.
+
+Assumed knowledge:
+- Use and development of old GENESIS
+- similarities and differences section of G2M User's guide.
+
+Developer's guide.
+------------------------------------------------------------
+Introduction: 
+	- Design decisions
+		- 
+	- Differences and similiarites
+		- Objects
+		- Messaging
+		- Initialization
+		- Compilation
+		- Scripting
+		- Threading
+		- Solvers
+
+
+0. Codebase organization
+1. Converting old objects
+2. Converting old functions
+
+(Here we get into the main develoers guide
+3. Writing new objects from scratch
+4. Message types
+5. Compiling for Windows
+5. Writing solvers
+7. Writing parallel code.
+

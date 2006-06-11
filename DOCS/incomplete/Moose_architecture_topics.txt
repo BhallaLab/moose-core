@@ -1,0 +1,130 @@
+This file contains brief notes as reminders about obscure parts of the 
+MOOSE architecture. Later they will form the basis of esoteric parts of the
+documentation.
+
+ObjFinfo: This is a Finfo class which permits a previously defined MOOSE
+classe A to be encapsulated as a field within another MOOSE class, B.
+The ObjFinfo refers only to the data part ( the non-wrapper part) of the
+class A. In other words, it works for field access but not messages that
+were defined in A. It works by using a special version of the 'match'
+function that scans the field list of A. The match function returns a
+RelayFinfo1 with a lookup
+function and an index set using the Finfo::setObjLookup virtual function.
+The lookup function takes the data part of A within the B object, and
+returns an Element* pointer to where the wrapper of A would have been had
+A been truly defined. Using this pointer the usual field assignment and
+other functions proceed happily.
+
+
+
+Different kinds of messages
+There are seven kinds of messages:
+	Regular
+	Internal
+	Relay
+	Synaptic
+	Shared
+	Return
+	Solver
+Each is accessed through the same API, though they do very different things.
+
+- Regular messages are from a SrcFinfo to a DestFinfo. The Src sends info
+	to the Dest by calling a RecvFunc with the info as arguments. The
+	RecvFunc is a function provided by the Dest and operating on the 
+	destination element.
+
+	The Src provides a 'send( T1, T2...)' function to pass a given
+	set of arguments to all targets. The actual function executed for
+	these arguments may differ between targets: it is obtain from the
+	RecvFunc for each target. The user does not worry about this, she
+	just calls the send function.
+
+	Each message uses a Conn at either end of the message, for maintaining
+	the link.  In addition, at message creation time the RecvFunc is
+	passed to the Src.
+
+	The SrcFinfo manages a MsgSrc class, which in turn manages the
+	Conn and provides the 'send' function. The Dest returns a
+	RecvFunc to the MsgSrc.
+
+- Internal messages
+	Information flows within an object from Dest messages to Src
+	messages. This happens because many destination functions in turn
+	trigger send function calls, going out on Srcs. To traverse this
+	information flow, virtual 'messages' connect the Dest to all the
+	Srcs that it triggers. These are purely informational and allocate no
+	storage on the objects. They are set up by the Src and DestFinfo
+	constructors as a simple list of Finfo names. Leaving them out does
+	not hurt the basic functionality, but will mess up any programs that
+	need to traverse message trees.
+
+- Relay messages
+	Relays are for irregular messages. If a message needs to go
+	to a target outside the regular Src/Dest route, a Relay can be
+	set up. Not all irregular cases can be set up like this, but most
+	can. Some examples:
+	Messages to fields, to set them.
+	Messages to and from fields, to request a value
+	Messages from a Dest to a Src. Suppose you wanted the receipt of
+		a message to trigger some other event.
+	Extra messages to or from a SingleSrc or Dest target
+
+- Synaptic messages
+	Synaptic messages have to manage additional information for each
+	message target. For example, each synaptic message might hold the
+	synaptic weight and delay. This is done by having a SynapseConn< T >
+	where T is a class embedded in the SynapseConn, holding the extra
+	information. The SynapseConn itself handles a single incoming message.
+	When the message arrives, the recvfunc typecasts the Conn into the
+	SynapseConn and then performs whatever calculations are needed, using
+	T.
+	Multiple SynapseConns are managed as a vector, by the SynapseFinfo
+	class. Individual synapses can be looked up and fields manipulated.
+
+- Shared messages
+	In many if not most cases, it is necessary to send multiple
+	messages between two elements. For example, molecules connect to
+	reactions using a source message that passes n, the molecule count,
+	and a dest message where the reaction comes back with the change
+	in count. Clock ticks need to call both Process and Reinit on their
+	targets. Shared messages are a way to streamline this. There are two
+	advantages: 
+		- They share the same Conn, saving on memory. 
+		- A single 'add' call sets up all the messages.
+	As far as the individual message Src and Dest are concerned, they
+	are just the same as before. If someone _really_ wants to send a 
+	single one of the messages, relays are a possibility though this
+	is not cleanly done as yet.
+
+- Return messages
+	Sometimes we need to have a message target that performs its
+	operations and immediately sends a function call back to the
+	originating message source. This is easy using shared messages,
+	provided there is a single source and destination.
+	However, what if this target had a whole lot of incoming messages,
+	each of which asks it to do the operation independently? For example,
+	the HHGate for a K channel may be referred to by hundreds of 
+	instances of the K channel. Each of these wants the gate to perform
+	its calculation and get back with the updated state variables. The
+	usual 'send' function does not work here: The 'send' function 
+	goes through the entire list of targets, not at all what we want.
+	So we have the 'Return messages.' These use a vector of ReturnConns,
+	each of which holds the RecvFunc for the return call, and the return
+	Conn pointer. Each incoming message connects to a distinct ReturnConn
+	in the array. When a call comes to such a message, it executes
+	its destination function, then immediately calls the return RecvFunc
+	with the return Conn pointer to send required info back.
+	These messages are managed as a vector by the ReturnFinfo class.
+
+	Classes involved: ReturnFinfo, ReturnConn, MultiReturnConn.
+	The ReturnFinfo is used as the return msg source. The corresponding
+	msg dests for a shared message are just regular Destfinfos.
+	The ReturnConn is for each individual connection.
+	The MultiReturnConn holds a vector of ReturnConns and handles
+	their creation and interfacing with the ReturnFinfo.
+
+- Solver messages
+	These connect a solver to an object; they mediate the takeover of
+	object function and interconnects by the solver.
+	I won't write about these yet because I haven't implemented them.
+

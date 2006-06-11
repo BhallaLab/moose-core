@@ -1,0 +1,90 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class HHGate
+{
+	public:
+
+	author: 
+		Upinder S. Bhalla, 2005, NCBS
+	description:
+		Gate for Hodkgin-Huxley type channels, equivalent to the
+		m and h terms on the Na squid channel and the n term on K.
+		This takes the voltage and state variable from the channel,
+		computes the new value of the state variable and a scaling,
+		depending on gate power, for the conductance. These two
+		terms are sent right back in a message to the channel.
+
+	field:
+		double power;
+		double state;
+		int instant;
+
+
+	shared:
+		single gate( gateIn, gateOut, reinitIn );
+
+	src:
+		single gate( double state, double gScale );
+	
+	dest:
+		single gate( double v, double state, double dt ) {
+			if ( instant_ ) {
+				state = A_.doLookup( v ) / B_.doLookup( v );
+			} else {
+				double y = B_.doLookup( v );
+				double x = exp( -y * dt );
+				state = state * x + ( A_.doLookup( v ) / y ) * ( 1 - x);
+			}
+			// This is not actually the return. We have not yet
+			// sorted out how to do return operations in the 
+			// preprocessor.
+			gate( state, takePower_( state ) );
+		}	
+
+		single reinit( double Vm ) {
+			if ( power_ == 0.0 )
+				takePower_ = power0;
+			else if ( power_ == 1.0 )
+				takePower_ = power1;
+			else if ( power_ == 2.0 )
+				takePower_ = power2;
+			else if ( power_ == 3.0 )
+				takePower_ = power3;
+			else if ( power_ == 4.0 )
+				takePower_ = power4;
+		}
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+		Interpol A_;
+		Interpol B_;
+
+		double g_;	// Inner variable for conductance.
+		bool useConcentration_;	
+			// Flag to tell Z gate to use conc rather than Vm.
+		static double power0( double x ) {
+			return 1.0;
+		}
+		static double power1( double x ) {
+			return x;
+		}
+		static double power2( double x ) {
+			return x * x;
+		}
+		static double power3( double x ) {
+			return x * x * x;
+		}
+		static double power4( double x ) {
+			return power2( x ) * power2( x );
+		}
+
+		double ( *takePower_ )( double );
+};

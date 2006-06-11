@@ -1,0 +1,53 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class Job: public Neutral
+{
+	public:
+		Job()
+			: terminate_( 0 ), wakeUpTime_( 0.0 ) 
+		{
+			;
+		}
+
+	author:
+		Upinder S. Bhalla, Nov 2005, NCBS
+	description:
+		Job class. Handles both repetitive and event-driven operations.
+	field:
+		readonly int running;
+		int doLoop;				// Operate repeatedly.
+		int doTiming;			// Use timeInterval for periodic events
+		double realTimeInterval; // Interval between events
+		int priority;			// Like UNIX priority. +ve means lower
+	src:
+		multi process( procInfo ); // Connect up to child operations.
+		multi trigger( ); // Connect up to child operations.
+
+	dest:
+		single process( procInfo info) {
+			if ( info->currtime() > wakeUpTime_ )
+				processOut.send( info );
+		}
+
+		single stop() {
+			terminate_ = 1;
+		}
+
+		single sleep( double time ) {
+			wakeUpTime_ = time + currentRealTime();
+		}
+
+		single wake();
+
+	private:
+		bool terminate_;
+		double wakeUpTime_;
+};

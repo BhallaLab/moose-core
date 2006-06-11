@@ -1,0 +1,87 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+#ifndef _CINFO_H
+#define _CINFO_H
+
+class Cinfo {
+	friend class CinfoWrapper;
+	public:
+		Cinfo(const string& name,
+				const string& author,
+				const string& description,
+				const string& baseName,
+				Finfo** fieldArray,
+				const unsigned long nFields,
+				Element* (*createWrapper)(const string&, Element*,
+					const Element*)
+			);
+
+		~Cinfo() {
+				;
+		}
+
+		const string& name() const {
+				return name_;
+		}
+
+
+		static const Cinfo* find(const string& name);
+
+		// Element* create(const string& name) const;
+		Element* create(const string& name,
+			Element* parent, const Element* proto = 0) const;
+
+		Field field( const string& name ) const;
+		void listFields( vector< Finfo* >& ) const;
+
+		// Locates fields having matching conn and recvFunc
+		const Finfo* findMsg( const Conn* conn, RecvFunc func ) const;
+
+		// Locates fields having matching inConn
+		// const Finfo* findMsg( const Conn* conn ) const;
+
+		// Cleans out all entries pertaining to a given Conn prior to
+		// deleting it. Returns true only if the Conn actually makes
+		// contact.
+		// bool funcDrop( Element* e, const Conn* conn ) const;
+
+		// Locates fields holding matching connections and 
+		// recvFuncs for calling  remote objects.
+		Finfo* findRemoteMsg( Conn* c, RecvFunc func ) const;
+
+		// Sets up the lookup map, creates cinfo classes on /classes,
+		// assigns base names, and initializes field equivalence.
+		static void initialize();
+
+
+	private:
+		// Note that this is implemented as a function to bypass issues
+		// of sequence of static initialization.
+		static map<string, Cinfo*>& lookup() {
+			static map<string, Cinfo*> lookup_;
+			return lookup_;
+		}
+
+		const string name_;
+		string author_;
+		string description_;
+		string baseName_;
+		Finfo** fieldArray_;
+		const unsigned long nFields_;
+		Element* (*createWrapper_)(
+			const string& name, Element* parent, const Element* proto);
+
+//		static vector<Cinfo*>& Cinfotab();
+//		static vector<Cinfo*>& basetype();
+		const Cinfo* base_;
+
+};
+
+#endif // _CINFO_H

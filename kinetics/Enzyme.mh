@@ -1,0 +1,158 @@
+class Enzyme
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Upinder S. Bhalla, 2005, NCBS
+	description:
+		Irreversible enzymatic reaction that supports two forms of the 
+		Michaelis-Menten formulation for enzyme catalysis:
+		E + S <======> E.S ------> E + P
+
+		In this enzyme, the forward rate for the complex formation is
+		k1, the backward rate is k2, and the final rate for product
+		formation is k3. In terms of Michaelis-Menten parameters,
+		k3 = kcat, and
+		(k3 + k2)/k1 = Km.
+
+		In all forms, the enzyme object should be considered as an
+		enzymatic activity. It must be created in association with
+		an enzyme molecule. The same enzyme molecule may have multiple
+		activities, for example, on a range of substrates.
+
+		In the explicit form (default) the enzyme substrate complex E.S
+		is explictly created as a distinct molecular pool. This is
+		perhaps more realistic in complex models where there are likely
+		to be other substrates for this enzyme, and so enzyme 
+		saturation effects must be accounted for. However the complex
+		molecule does not participate in any other reactions, which
+		may itself be a poor assumption. If this is a serious concern
+		then it is best to do the entire enzymatic process
+		using elementary reactions.
+		In the implicit form there is no actual enzyme-complex molecule.
+		In this form the rate term is
+		computed using the Michaelis-Menten form
+		rate = kcat * [E] * [S] / ( Km + [S] )
+		Here the opposite problem from above applies: There is no
+		explicit complex, which means that the level of the free enzyme
+		molecule is unaffected even near saturation. However, other
+		reactions involving the enzyme do see the entire enzyme
+		concentration. 
+		For the record, I regard the explicit formulation as more
+		accurate for complex simulations.
+	field:
+		double k1 = 0.1;
+		double k2 = 0.4;
+		double k3 = 0.1;
+		double Km;
+		int mode; // 0 = explicit, 1 = implicit
+
+	shared:
+		// The process increments a timestep, the reinit initializes.
+		single process( processIn, reinitIn );
+
+		// This connects the enzyme activity to the enzyme molecule
+		single enz( enzIn, enzOut );
+
+		// This connects the enzyme activity to the E.S complex
+		single cplx( cplxIn, cplxOut );
+
+		// This connects the enzyme activity to the substrate(s)
+		multi sub( subIn, subOut );
+
+	src:
+		// The next four messages all send terms A and B out, where
+		// A is an increment in the molecule, and B a decrement.
+
+		// message to the enzyme molecule
+		single enz( double A, double B ); 
+
+		// message to the enzyme-substrate complex
+		single cplx( double A, double B );
+
+		// message to the substrate molecule.
+		multi sub( double A, double B ); 
+
+		// message to the product. B is always zero here.
+		multi prd( double A, double B );
+	
+	dest:
+		single reinit( ) {
+			eA_ = sA_ = pA_ = B_ = e_ = 0.0;
+			s_ = 1.0;
+		}
+
+		// This is too difficult for the automatic preprocessor to
+		// handle. For convenience, we encode the two procfuncs in
+		// explicitly
+		single process( ProcInfo info ) {
+			(this->*procfunc_)();
+			// void explicitProcFunc()
+			if ( mode == 0 ) { // explicit, the default
+				eA_ = sA_ + pA_;
+				B_ = s_ * e_;
+				sub( sA_, B_ );
+				prd( pA_, 0.0 );
+				enz( eA_, B_ );
+				cplx( B_, eA_ );
+				s = k1_ * sk1_;
+				sA_ = k2_;
+				pA_ = k3_;
+			} else {	// Implicit mode
+			// void implicitProcFunc()
+				pa_ = B_ = s_ * e_ * k3_ * sk1_ / ( s_ + km_ );
+				s_ = 1.0;
+				sub( 0.0, B_ );
+				prd( B_, 0.0 );
+			}
+		}
+
+		single enz( double n ) {
+			e = n;
+		}
+
+		single cplx( double n ) {
+			sA *= n;
+			pA *= n;
+		}
+
+		multi sub( double n ) {
+			s_ *= n;
+		}
+
+		single intramol( double n ) {
+			if ( n > 0 )
+				sk1 = 1.0 / n;
+			else
+				sk1 = 1.0;
+		}
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+		double sA_;
+		double pA_;
+		double eA_;
+		double B_;
+		double e_;
+		double s_;
+		double sk1_;
+		void ( EnzymeWrapper::*procFunc_ )( );
+		void implicitProcFunc();
+		void explicitProcFunc();
+		void innerSetKm( double Km ) {
+			Km_ = Km;
+			k1 = ( k2 + k3 ) / Km;
+		}
+		void innerSetMode( int mode ) {
+			if ( mode ) { // Implicit MM.
+				procFunc = implicitProcFunc;
+				km = ( k2 + k3 ) / k1;
+				sA = 0;
+			} else { // explicit mm
+				procFunc = explicitProcFunc;
+			}
+		}
+		int innerGetMode() {
+			return ( procFunc == implicitProcFunc );
+		}
+};

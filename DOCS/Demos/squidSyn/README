@@ -1,0 +1,7 @@
+This demo is a modified version of the GENESIS standard release Squid
+demo. The current demo is meant to test synaptic connections using the
+synchan and spikegen objects. A new compartment called 'target' is set up
+with a synaptic channel (synchan) on it. The original squid compartment
+is connected synaptically to this through a spikegen. The voltage output
+of the target and the conductance of the synaptic channel are plotted.
+Output is saved in the file squidSynGenesis.plot.

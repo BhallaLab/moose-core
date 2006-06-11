@@ -1,0 +1,60 @@
+Moose technical features
+
+1. Messaging
+2. Object-oriented
+3. Simulation (scheduler, solvers)
+4. Environment (parsers, shell, OSs)
+
+1. Message passing architecture.
+	- Looks like a function call, with type-safe arguments.
+	- Persistent. Once a message is set up, it is like a wire that
+		connects two objects until further notice.
+	- Fine grained: At the level of simple function calls
+	- Efficient: 2 pointer lookup cost in time and memory.
+		Specializations for synaptic messaging
+		Specializations for logical groups of messages
+	- Class independent: Neither source nor destination needs to
+		know about other class. Only the argument types must match.
+	- Parallelizable: Maps naturally to MPI messaging.
+	- Traversable: Messages form the 'wiring diagram' of a simulation.
+	- Universal: Every field can be source or destination of a message.
+
+2. Object-oriented.
+	- Class hierarchy including inheritance and polymorphism
+	- High-level class specification similar to C++ class definition,
+		allows very compact specification of complex class.
+		Conversion to C++ occurs using a preprocessor.
+	- Easy to derive from C++ classes, provides a wrapper class
+		for existing C++ classes.
+	- Uniform and highly modular interface from each class to the system.
+
+3. Simulation.
+	- Designed for simulations, especially time-series calculations.
+	- One-to-one mapping between objects and simulation concepts.
+	- Scheduler: System for handling complex timing dependencies:
+		- lockstep computations, 
+		- periodic updates
+		- external events.
+		- Also handles internode scheduling automatically.
+	- Solvers: Many problems are more efficiently solved using array-type
+		calculations rather than object-oriented descriptions.
+		- Support for 'solvers' that take over calculations of
+			large numbers of previously independent objects.
+		- Completely transparent. Original API to and from objects
+			is retained. It only looks like they work faster.
+		- Solvers will be basis for specialized SMP optimizations.
+
+4. Environment.
+	- Programming in ANSI C++ with extensive use of STL.
+	- MOOSE is multi-OS. 
+		- Tested and developed on UNIX / Linux
+		- Also compiled natively under Windows .net
+		- Will implement under MacOS.
+		- Graphics will also be platform independent. Possibly FLTK.
+	- Supports a range of interpreted parsers. 
+		- GENESIS parser SLI for backward compatibility
+		- JAVA, OCAML, Python, PERL, Ruby, many others through SWIG.
+	- Shell environment(s) for interactive modeling.
+		- Can have multiple shells, possibly with different parsers,
+			talking to same model simultaneously.
+

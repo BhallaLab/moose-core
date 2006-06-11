@@ -1,0 +1,228 @@
+==============================================================================
+This is the 0.06 release of MOOSE
+Date: 17 Feb 2006.
+
+Overview: This is a minor upgrade to handle synapses. Implements the
+synchan and spikegen objects. 
+Internally this version sees a big shift to the use
+of subversion for version control. Subversion has recently become supported
+by SourceForge and it is a much nicer system than CVS. Once the subversion
+management of MOOSE is stabilized here I will put the project on SourceForge.
+
+Compilation instructions:
+Edit Makefile to select GCC3 or GCC4 options. Some of the later GCC3 versions
+actually seem to prefer the GCC4 flags.
+Go into the mus_release_feb10_2006 directory and type
+	make moose
+
+Currently works on Fedora/Gcc4 and Gcc3. 
+Known compilation issues remain with Debian due to issues with flex++.
+Linux version 2.4.27-2-386 (gcc version 3.3.5 (Debian 1:3.3.5-13))
+	As always, suggestions are welcome.
+
+Changes:
+- Implemented synchan.
+- Implemented spikegen.
+New test simulations:
+	- DOCS/Demos/squidSyn.g
+	This is a standalone file that connects one squid compartment to
+	a passive compartment with a synapse.
+	- DOCS/Demos/squidSynGENESIS.g
+	This is the reference simulation. It is functionally identical to
+	the MOOSE version. It is based on the SQUID demo in GENESIS.
+
+==============================================================================
+This is the 0.05 release of MOOSE
+Date: 10 Feb 2006.
+
+Overview: This is a minor upgrade to improve readcell/channel specification,
+now it handles the Bhalla and Bower 1993 mitral cell model.
+
+Compilation instructions:
+Edit Makefile to select GCC3 or GCC4 options. Some of the later GCC3 versions
+actually seem to prefer the GCC4 flags.
+Go into the mus_release_feb10_2006 directory and type
+	make moose
+
+Currently works on Fedora/Gcc4 and Gcc3. 
+Known compilation issues remain with Debian due to issues with flex++.
+Linux version 2.4.27-2-386 (gcc version 3.3.5 (Debian 1:3.3.5-13))
+	As always, suggestions are welcome.
+
+Changes:
+- Additional backward-compatibility stuff, now it reads moosebulbchan.g
+	- setuptau command
+	- tweaktau
+	- tweakalpha
+- Readcell related fixes. It now reads and runs the mit.p model.
+	- Polar coordinates
+	- Fix issues with scaling of Ca concen B term
+	- Assignment of compartment parameters on channel lines
+
+New test simulations:
+	DOCS/Demos/mit.g
+	This should run and save Vm and Ca output for the model. Matches are
+	imperfect but good enough. For reference here is a GENESIS version
+	too: DOCS/Demos/genmit.g. You can flip the hflag if you want to use
+	the hsolver.
+	Differences: Unlike GENESIS, MOOSE uses a single-stage
+	calculation of axial current flow in compartments. The MOOSE version
+	is slightly more accurate but is asymmetrical. It would also affect
+	symmetric compartments: the asymmetry is from update order.
+	So if you order your
+	model construction differently you will get different results. It will
+	all converge at small dt, and we repeat the mantra: the hsolver will
+	fix it.
+	Note that moosebulbchan.g replaces the implementation of Kca_mit_chan.
+	Earlier version used a horribly messy vdep_channel implementation.
+	Current version uses tabchannels and is nearly identical in GENESIS.
+	Slight difference probably arises due to evaluation order in GENESIS.
+	
+
+Plans for next release:
+More cell models through readcell and prototype files.
+
+==============================================================================
+This is the 0.04 release of MOOSE
+Date: 3 Feb 2006.
+
+Compilation instructions:
+Edit Makefile to select GCC3 or GCC4 options.
+Go into the mus_release_feb03_2006 directory and type
+	make moose
+
+Currently works on Fedora/Gcc4 and Gcc3. 
+Known compilation issues remain with Debian due to issues with flex++.
+Linux version 2.4.27-2-386 (gcc version 3.3.5 (Debian 1:3.3.5-13))
+	As always, suggestions are welcome.
+
+Changes:
+- Lots of backward-compatibility additions/changes so it can read traub91proto.g
+	- setupalpha command
+	- Uses ^ for recently created element
+	- Setfield now takes multiple field/value pairs
+	- Allow -> as separator for table assignments
+	- Handle X_A syntax for table assignments
+	- Implemented TABCREATE
+	- Implemented TABFILL
+	- Implemented addfield
+- Readcell related fixes. It now reads and runs the traub91 CA3 and CA1 models
+	- Axial/Raxial messages fixed
+	- HHGate2 (which handles multiple lookups) replaces HHGate.
+	- Copy of a channel automatically sets up messages to prototype HHGate
+	- Implemented system to connect up channels/other things according to
+		the 'addmsg1' field on the channels.
+
+New test simulations:
+	DOCS/Demos/ca3.g
+	DOCS/Demos/ca1.g
+	They should run and save Vm output for the models. Matches are
+	imperfect partly because of symmetric vs asymmetric compartments.
+
+Plans for next release:
+Improved handling of cell models through readcell and prototype files.
+
+==============================================================================
+This is the 0.03 release of MOOSE
+Date: 27 Jan 2006.
+
+Compilation instructions:
+
+Go into the mus_release_jan27_2006 directory and type
+	make moose
+
+GCC4 no longer produces compiler warnings on my system, please provide
+feedback about other systems.
+Currently it fails compilation on Linux version 2.4.27-2-386 
+	(gcc version 3.3.5 (Debian 1:3.3.5-13)) due to issues with flex.
+	As always, suggestions are welcome.
+
+Changes:
+- Implemented ConcChan, CaConcen and Nernst classes. Test files:
+	DOCS/Demos/testConcChan.g: Should produce a nice sine-wave between 
+		0 and 2 at the input. The out conc should be a small ripple
+		around 1.6e-3. The in conc should be a near sine-wave between
+		0.2e-3 and 1e-3
+	DOCS/Demos/casquid.g: The squid demo enhanced. As a test we connect the
+		Na channel current into a CaConcen, and this into a Nernst.
+		The two of these are also plotted. Output file is 
+		casquid.plot.
+		NaConc (the Na current in a CaConcen) rises sharply on
+		first AP and then goes in
+		3 cycles of oscillation between 0.4e-5 and 1e-5
+		CaPotl goes between 0.05 and 0.06 mV.
+- Sundry fixes to molecule backward compatibility to get input tables
+	to work properly.
+- Fix to ReadOnlyValueFinfo so that it correctly handles messaging requests
+	for values, e.g. for plotting.
+- Minor changes in compiler flags, and in various bits of code to get things
+	to compile cleanly on GCC4.
+
+Plans for next release:
+- cellreader
+- Compilation on Gentoo
+- Compilation on Windows
+
+==============================================================================
+This is the 0.02 release of MOOSE
+Date: 20 Jan 2006.
+
+Compilation instructions:
+
+Go into the mus_release_jan20_2006 directory and type
+	make moose
+
+There are still loads of warnings, of two kinds:
+	- "invalid access to non-static data member"
+	- "warning: 'ret' is used uninitialized in this function"
+	Ignore them.
+
+Changes:
+- Gcc4 Compiler fixes. 
+- I have removed the #ifdef UNIX and #ifdef WINDOWS flags from the header.h
+	These are now passed in by the compiler. The default is the
+	behaviour for gcc4 and Windows. For GCC3 the compiler flag to use is
+	-DNO_OFFSETOF
+- Implementation of Table object, including loadtab function. This was the 
+	major missing class for kinetic models.
+- Object type name equivalence implemented for SLI backward compatibility.
+	You can now do 'create kpool' in the SLI, and get a Molecule object.
+
+Pending issues for next time:
+- ConcChan class for kinetics 
+- Ca_concen class for biophysics
+- Nernst class for biophysics
+- Compilation on Gentoo
+- Compilation on Windows
+
+==============================================================================
+This is the 0.01 release of MOOSE.
+
+It compiles on 32 and 64 bit versions of Linux, and with GCC 3 and 4.
+To get it to work on GCC4 you need to change the flag from UNIX to WINDOWS
+in the basecode/header.h file.
+
+The basic simulation infrastructure is mostly working, with the
+notable exception of solvers and parallelization.
+
+Two models are illustrated: 
+
+Kholodenko.g is a kinetikit dumpfile of
+Boris Kholodenko's oscillatory MAPK model.
+
+squid.g is an implementation of the Hodkgin-Huxley squid model.
+
+Very few of the simulation classes are implemented, mostly those needed
+to run these demos.
+
+This release is made to let developers get started with MOOSE.
+
+The next release is planned to support:
+
+- More complete set of kinetic modeling classes
+- Some more backward compatibility conversions for reading old GENESIS .g files.
+- Windows compilation.
+
+-- Upi Bhalla, Jan 13 2006.
+
+==============================================================================

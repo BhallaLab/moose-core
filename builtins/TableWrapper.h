@@ -1,0 +1,304 @@
+#ifndef _TableWrapper_h
+#define _TableWrapper_h
+class TableWrapper: 
+	public Table, public Neutral
+{
+	friend Element* returnLookupConnTableLookup( const Conn* );
+	friend Element* lookupInConnTableLookup( const Conn* );
+	friend Element* processConnTableLookup( const Conn* );
+	friend Element* inInConnTableLookup( const Conn* );
+	friend Element* tabFillInConnTableLookup( const Conn* );
+	friend Element* tabOpInConnTableLookup( const Conn* );
+	friend Element* tabOpRangeInConnTableLookup( const Conn* );
+	friend Element* sumInConnTableLookup( const Conn* );
+	friend Element* prdInConnTableLookup( const Conn* );
+	friend Element* bufferInConnTableLookup( const Conn* );
+	friend Element* assignInConnTableLookup( const Conn* );
+	friend Element* tabcreateInConnTableLookup( const Conn* );
+	friend Element* dumpInConnTableLookup( const Conn* );
+#ifdef DO_UNIT_TESTS
+	friend void testTable();
+#endif
+    public:
+		TableWrapper(const string& n)
+		:
+			Neutral( n ),
+			returnLookupSrc_( &returnLookupConn_ ),
+			outSrc_( &outOutConn_ ),
+			// lookupConn uses a templated lookup function,
+			// processConn uses a templated lookup function,
+			outOutConn_( this )
+			// inInConn uses a templated lookup function,
+			// tabFillInConn uses a templated lookup function,
+			// tabOpInConn uses a templated lookup function,
+			// tabOpRangeInConn uses a templated lookup function,
+			// sumInConn uses a templated lookup function,
+			// prdInConn uses a templated lookup function,
+			// bufferInConn uses a templated lookup function,
+			// assignInConn uses a templated lookup function,
+			// tabcreateInConn uses a templated lookup function,
+			// dumpInConn uses a templated lookup function
+		{
+			;
+		}
+///////////////////////////////////////////////////////
+//    Field header definitions.                      //
+///////////////////////////////////////////////////////
+		static void setTable( Conn* c, Interpol value ) {
+			static_cast< TableWrapper* >( c->parent() )->table_ = value;
+		}
+		static Interpol getTable( const Element* e ) {
+			return static_cast< const TableWrapper* >( e )->table_;
+		}
+		void localSetMode( int value ) {
+			mode_ = value;
+		}
+		static void setMode( Conn* c, int value ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				localSetMode( value );
+		}
+
+		int localGetMode( ) const {
+			return mode_;
+		}
+		static int getMode( const Element* e ) {
+			return static_cast< const TableWrapper* >( e )->
+				localGetMode();
+		}
+		static void setStepsize( Conn* c, double value ) {
+			static_cast< TableWrapper* >( c->parent() )->stepsize_ = value;
+		}
+		static double getStepsize( const Element* e ) {
+			return static_cast< const TableWrapper* >( e )->stepsize_;
+		}
+		static void setInput( Conn* c, double value ) {
+			static_cast< TableWrapper* >( c->parent() )->input_ = value;
+		}
+		static double getInput( const Element* e ) {
+			return static_cast< const TableWrapper* >( e )->input_;
+		}
+		static void setOutput( Conn* c, double value ) {
+			static_cast< TableWrapper* >( c->parent() )->output_ = value;
+		}
+		static double getOutput( const Element* e ) {
+			return static_cast< const TableWrapper* >( e )->output_;
+		}
+///////////////////////////////////////////////////////
+// Msgsrc header definitions .                       //
+///////////////////////////////////////////////////////
+		static SingleMsgSrc* getReturnLookupSrc( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->returnLookupSrc_ );
+		}
+
+		static NMsgSrc* getOutSrc( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->outSrc_ );
+		}
+
+///////////////////////////////////////////////////////
+// dest header definitions .                         //
+///////////////////////////////////////////////////////
+		void returnLookupFuncLocal( double x ) {
+			returnLookupSrc_.send( table_.doLookup ( x ) );
+		}
+		static void returnLookupFunc( Conn* c, double x ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				returnLookupFuncLocal( x );
+		}
+
+		void lookupFuncLocal( double x ) {
+		// This line for testing purposes
+			output_ = table_.doLookup( x ); 
+			outSrc_.send( table_.doLookup( x ) );
+		}
+		static void lookupFunc( Conn* c, double x ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				lookupFuncLocal( x );
+		}
+
+		void inFuncLocal( double value );
+		static void inFunc( Conn* c, double value ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				inFuncLocal( value );
+		}
+
+		void tabFillFuncLocal( double xdivs, int fillMode ) {
+		}
+		static void tabFillFunc( Conn* c, double xdivs, int fillMode ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				tabFillFuncLocal( xdivs, fillMode );
+		}
+
+		void tabOpFuncLocal( int op ) {
+		}
+		static void tabOpFunc( Conn* c, int op ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				tabOpFuncLocal( op );
+		}
+
+		void tabOpRangeFuncLocal( int op, double min, double max ) {
+		}
+		static void tabOpRangeFunc( Conn* c, int op, double min, double max ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				tabOpRangeFuncLocal( op, min, max );
+		}
+
+		void sumFuncLocal( double value ) {
+			sy_ += value;
+		}
+		static void sumFunc( Conn* c, double value ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				sumFuncLocal( value );
+		}
+
+		void prdFuncLocal( double value ) {
+			py_ *= value;
+		}
+		static void prdFunc( Conn* c, double value ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				prdFuncLocal( value );
+		}
+
+		void bufferFuncLocal( double value ) {
+			table_.push_back( value );
+		}
+		static void bufferFunc( Conn* c, double value ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				bufferFuncLocal( value );
+		}
+
+		void assignFuncLocal( double value, int index ) {
+			table_.setTableValue( value, index );
+		}
+		static void assignFunc( Conn* c, double value, int index ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				assignFuncLocal( value, index );
+		}
+
+		void tabcreateFuncLocal( double xmin, double xmax, int xdivs );
+		static void tabcreateFunc( Conn* c, double xmin, double xmax, int xdivs ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				tabcreateFuncLocal( xmin, xmax, xdivs );
+		}
+
+		void processFuncLocal( ProcInfo info );
+		static void processFunc( Conn* c, ProcInfo info ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				processFuncLocal( info );
+		}
+
+		void reinitFuncLocal(  );
+
+		static void reinitFunc( Conn* c ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				reinitFuncLocal(  );
+		}
+
+		void dumpFuncLocal(  ) {
+		}
+		static void dumpFunc( Conn* c ) {
+			static_cast< TableWrapper* >( c->parent() )->
+				dumpFuncLocal(  );
+		}
+
+
+///////////////////////////////////////////////////////
+// Synapse creation and info access functions.       //
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+// Conn access functions.                            //
+///////////////////////////////////////////////////////
+		static Conn* getReturnLookupConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->returnLookupConn_ );
+		}
+		static Conn* getLookupInConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->lookupInConn_ );
+		}
+		static Conn* getProcessConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->processConn_ );
+		}
+		static Conn* getOutOutConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->outOutConn_ );
+		}
+		static Conn* getInInConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->inInConn_ );
+		}
+		static Conn* getTabFillInConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->tabFillInConn_ );
+		}
+		static Conn* getTabOpInConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->tabOpInConn_ );
+		}
+		static Conn* getTabOpRangeInConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->tabOpRangeInConn_ );
+		}
+		static Conn* getSumInConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->sumInConn_ );
+		}
+		static Conn* getPrdInConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->prdInConn_ );
+		}
+		static Conn* getBufferInConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->bufferInConn_ );
+		}
+		static Conn* getAssignInConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->assignInConn_ );
+		}
+		static Conn* getTabcreateInConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->tabcreateInConn_ );
+		}
+		static Conn* getDumpInConn( Element* e ) {
+			return &( static_cast< TableWrapper* >( e )->dumpInConn_ );
+		}
+
+		static Element* lookupTable( Element* e, unsigned long index );
+
+///////////////////////////////////////////////////////
+// Class creation and info access functions.         //
+///////////////////////////////////////////////////////
+		static Element* create(
+			const string& name, Element* pa, const Element* proto ) {
+			// Put tests for parent class here
+			// Put proto initialization stuff here
+			// const Table* p = dynamic_cast<const Table *>(proto);
+			// if (p)... and so on. 
+			return new TableWrapper(name);
+		}
+
+		const Cinfo* cinfo() const {
+			return &cinfo_;
+		}
+
+
+    private:
+///////////////////////////////////////////////////////
+// MsgSrc template definitions.                      //
+///////////////////////////////////////////////////////
+		SingleMsgSrc1< double > returnLookupSrc_;
+		NMsgSrc1< double > outSrc_;
+		UniConn< returnLookupConnTableLookup > returnLookupConn_;
+		UniConn< lookupInConnTableLookup > lookupInConn_;
+		UniConn< processConnTableLookup > processConn_;
+		MultiConn outOutConn_;
+		UniConn< inInConnTableLookup > inInConn_;
+		UniConn< tabFillInConnTableLookup > tabFillInConn_;
+		UniConn< tabOpInConnTableLookup > tabOpInConn_;
+		UniConn< tabOpRangeInConnTableLookup > tabOpRangeInConn_;
+		UniConn< sumInConnTableLookup > sumInConn_;
+		UniConn< prdInConnTableLookup > prdInConn_;
+		UniConn< bufferInConnTableLookup > bufferInConn_;
+		UniConn< assignInConnTableLookup > assignInConn_;
+		UniConn< tabcreateInConnTableLookup > tabcreateInConn_;
+		UniConn< dumpInConnTableLookup > dumpInConn_;
+
+///////////////////////////////////////////////////////
+// Synapse definition.                               //
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+// Static initializers for class and field info      //
+///////////////////////////////////////////////////////
+		static Finfo* fieldArray_[];
+		static const Cinfo cinfo_;
+};
+#endif // _TableWrapper_h

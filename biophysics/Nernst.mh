@@ -1,0 +1,50 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class Nernst
+{
+	public:
+
+	author: 
+		Upinder S. Bhalla, 2006, NCBS
+	description:
+		Calculates Nernst potential for a given ion based on 
+		Cin and Cout, the inside and outside concentrations.
+		Immediately sends out the potential to all targets.
+
+	field:
+		readonly double E = 0.0;
+		double Temperature = 295;
+		int valence = 1;
+		double Cin = 1.0;
+		double Cout = 1.0 ;
+		double scale;
+
+	src:
+		multi E( double E );
+	
+	dest:
+		single Cin( double conc ) {
+			Cin_ = conc;
+			E_ = factor_ * log( Cout_ / Cin_ );
+			E( E_ );
+		}
+
+		single Cout( double conc ) {
+			Cout_ = conc;
+			E_ = factor_ * log( Cout_ / Cin_ );
+			E( E_ );
+		}
+
+	private:
+		double factor_; // private
+		static const double R_OVER_F;
+		static const double ZERO_CELSIUS;
+};

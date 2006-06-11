@@ -1,0 +1,103 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+
+class ConcChan
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Upinder S. Bhalla, 2006, NCBS
+	description:
+		Simple channel that permits molecules to cross a conc gradient.
+	field:
+		double permeability = 0.0;
+		double n; // Number of molecules
+		double Vm;
+		double ENernst = 0.0; // Calculated value for Nernst potential
+		int valence = 0; // If non-zero, will find Nernst potentials.
+		double temperature = 300.0; // 27 degrees.
+		double inVol;
+		double outVol;
+
+	shared:
+		// The process increments a timestep, the reinit initializes.
+		single process( processIn, reinitIn );
+
+		// The reacOut and In messages are scheduled by Process.
+		// reacOut sends n. reacIn receives A and B, which are the
+		// increment and decrement of n respectively.
+		single influx( influxIn, influxOut );
+		single efflux( effluxIn, effluxOut );
+
+	src:
+		single influx( double A, double B );
+		single efflux( double A, double B );
+	
+	dest:
+		single influx( double n ) {
+			A_ = n;
+		}
+
+		single efflux( double n ) {
+			B_ = n;
+		}
+
+		single n( double n ) {
+			n_ = n;
+		}
+
+		single Vm( double Vm ) {
+			Vm_ = Vm;
+		}
+
+		single reinit( ) {
+			if ( influxConn_.nTargets() > 0 )
+				Ftype1< double >::get( 
+					influxConn_.target( 0 )->parent(), "volumeScale",
+					inVolumeScale_ );
+			if ( effluxConn_.nTargets() > 0 )
+				Ftype1< double >::get( 
+					effluxConn_.target( 0 )->parent(), "volumeScale",
+					outVolumeScale_ );
+			A_ = B_ = 0.0;
+			nernstScale_ = R * temperature_ / ( F * valence_ );
+		}
+
+		single process( ProcInfo info ) {
+			if ( valence_ == 0 ) {
+				A_ *= n_ * permeability_ * inVolumeScale_;
+				B_ *= n_ * permeability_ * outVolumeScale_;
+				influx( B_, A_ );
+				efflux( A_, B_ );
+				A_ = B_ = 0.0;
+			} else {
+				ENernst_ = nernstScale_ * log( B_ * outVolumeScale_ /
+					( A_ * inVolumeScale_ ) );
+				A_ = ( ENernst_ - Vm_ ) * n_ * permeability_ * valence_;
+				B_ = 0.0;
+				influx( B_, A_ );
+				efflux( A_, B_ );
+				A_ = 1.0; // Avoid dividing by zero.
+			}
+			
+		}
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+		double A_;
+		double B_;
+		double inVolumeScale_;
+		double outVolumeScale_;
+		double nernstScale_;
+
+		static const double R = 8.3144;  // J/mol/K (Gas constt)
+		static const double F = 96485.3415; // s.A/mol (Faraday constt)
+};

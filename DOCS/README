@@ -1,0 +1,7 @@
+This directory contains MOOSE documentation and demos for models that
+run with MOOSE.
+
+The Moose_users_guide.txt and G2M_users_guide.txt are somewhat preliminary.
+The Moose_developers_guide.txt is much more complete, but still has far to go.
+
+cd into the demo directory for instructions on how to run them.

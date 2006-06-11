@@ -1,0 +1,103 @@
+class Plot
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Upinder S. Bhalla, 2005, NCBS
+	description:
+		Stores and prints xy data, typically time-series.
+		Normal mode of operation is triggered by an incoming process
+		message. The plot then triggers a request for data (trigPlot).
+		It expects the y value as an immediate response. This is
+		then pushed onto the plot value vector.
+		Backward compatibility mode accepts periodic data values at
+		whatever rate the sourcing object happens to be clocked at.
+		The Plot object ignores them unless it has just been primed
+		by a process message. If it has been primed it pushes the value
+		onto the vector.
+		The jagged flag changes how it handles incoming data. This
+		flag is meant to be set when plotting stochastic data.
+		If the flag is set, the Plot object first checks if the
+		value has changed. If so, it appends a data point using the
+		old y value but the new time. Then it appends another data
+		point using the new y and time values. This produces plots
+		with sharp transitions like the process being modeled.
+		Also saves space given the output of a typical stochastic model.
+
+	field:
+		double currTime = 0.0;
+		string plotName = "data";
+		int npts; // A dummy field, it actually looks up y.
+
+		// Flag. When set it treats plots as jagged
+		// transitions between successive points, rather than as a line
+		// joining the points. Used in stochastic simulations.
+		int jagged = 0;
+		double x[];	// Vectors holding the plot data.
+		double y[];
+
+	shared:
+		// The process increments a timestep, the reinit initializes.
+		single process( processIn, reinitIn );
+
+		// This requests a value and then handles the response
+		// It is more efficient than the legacy plot arrangement, which
+		// receives a plot message every timestep and then decides what
+		// to do with it.
+		single trigPlot( trigPlotOut, trigPlotIn );
+
+	src:
+		// This is the plot request
+		single trigPlot( ); 
+	
+	dest:
+		single reinit( ) {
+			x_.resize( 0 );
+			y_.resize( 0 );
+			currTime_ = 0.0;
+			prime_ = 0;
+		}
+
+		single process( ProcInfo info ) {
+			prime_ = 1;
+			currTime_ = info->currTime_;
+			trigPlot();
+		}
+
+		single trigPlot( double yval ) {
+			if ( jagged_ ) {
+				double lasty = ( y_.size() > 0 ) ? y_.back(): 0.0;
+				if ( yval != lasty ) {
+					x_.push_back( currTime_ );
+					y_.push_back( lasty );
+					x_.push_back( currTime_ );
+					y_.push_back( yval );
+				}
+			} else {
+				x_.push_back( currTime_ );
+				y_.push_back( yval );
+			}
+		}
+
+		// This is the old-fashioned plot. Expects input every timestep
+		// and filters out those that it doesn't want. Wasteful.
+		single plot( double yval ) {
+			if ( prime_ )
+				trigPlotFuncLocal( yval );
+			prime_ = 0;
+		}
+
+		single print( string fileName ) {
+			ofstream fout( fileName.c_str(), ios::app );
+			fout << "/newplot\n/plotname " << name() << "\n";
+			unsigned long i;
+			const unsigned int max = y_.size();
+			for ( i = 0; i < max; i++ )
+				fout << x_[ i ] << "	" << y_[ i ] << "\n";
+			fout << "\n";
+		}
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+		bool prime_;
+};

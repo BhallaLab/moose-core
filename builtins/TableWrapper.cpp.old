@@ -1,0 +1,272 @@
+#include "header.h"
+#include "Table.h"
+#include "TableWrapper.h"
+
+
+Finfo* TableWrapper::fieldArray_[] =
+{
+///////////////////////////////////////////////////////
+// Field definitions
+///////////////////////////////////////////////////////
+	new ValueFinfo< Interpol >(
+		"table", &TableWrapper::getTable, 
+		&TableWrapper::setTable, "Interpol" ),
+	new ValueFinfo< int >(
+		"mode", &TableWrapper::getMode, 
+		&TableWrapper::setMode, "int" ),
+	new ValueFinfo< double >(
+		"stepsize", &TableWrapper::getStepsize, 
+		&TableWrapper::setStepsize, "double" ),
+	new ValueFinfo< double >(
+		"input", &TableWrapper::getInput, 
+		&TableWrapper::setInput, "double" ),
+	new ValueFinfo< double >(
+		"output", &TableWrapper::getOutput, 
+		&TableWrapper::setOutput, "double" ),
+///////////////////////////////////////////////////////
+// MsgSrc definitions
+///////////////////////////////////////////////////////
+	new SingleSrc1Finfo< double >(
+		"lookupOut", &TableWrapper::getLookupSrc, 
+		"lookupIn", 1 ),
+	new NSrc1Finfo< double >(
+		"outOut", &TableWrapper::getOutSrc, 
+		"processIn, reinitIn" ),
+///////////////////////////////////////////////////////
+// MsgDest definitions
+///////////////////////////////////////////////////////
+	new Dest1Finfo< double >(
+		"lookupIn", &TableWrapper::lookupFunc,
+		&TableWrapper::getLookupConn, "lookupOut", 1 ),
+	new Dest1Finfo< double >(
+		"inIn", &TableWrapper::inFunc,
+		&TableWrapper::getInInConn, "" ),
+	new Dest2Finfo< double, int >(
+		"tabFillIn", &TableWrapper::tabFillFunc,
+		&TableWrapper::getTabFillInConn, "" ),
+	new Dest1Finfo< int >(
+		"tabOpIn", &TableWrapper::tabOpFunc,
+		&TableWrapper::getTabOpInConn, "" ),
+	new Dest3Finfo< int, double, double >(
+		"tabOpRangeIn", &TableWrapper::tabOpRangeFunc,
+		&TableWrapper::getTabOpRangeInConn, "" ),
+	new Dest1Finfo< double >(
+		"sumIn", &TableWrapper::sumFunc,
+		&TableWrapper::getSumInConn, "" ),
+	new Dest1Finfo< double >(
+		"prdIn", &TableWrapper::prdFunc,
+		&TableWrapper::getPrdInConn, "" ),
+	new Dest1Finfo< double >(
+		"bufferIn", &TableWrapper::bufferFunc,
+		&TableWrapper::getBufferInConn, "" ),
+	new Dest2Finfo< double, int >(
+		"assignIn", &TableWrapper::assignFunc,
+		&TableWrapper::getAssignInConn, "" ),
+	new Dest3Finfo< double, double, int >(
+		"tabcreateIn", &TableWrapper::tabcreateFunc,
+		&TableWrapper::getTabcreateInConn, "" ),
+	new Dest1Finfo< ProcInfo >(
+		"processIn", &TableWrapper::processFunc,
+		&TableWrapper::getProcessConn, "outOut", 1 ),
+	new Dest0Finfo(
+		"reinitIn", &TableWrapper::reinitFunc,
+		&TableWrapper::getProcessConn, "outOut", 1 ),
+	new Dest0Finfo(
+		"dumpIn", &TableWrapper::dumpFunc,
+		&TableWrapper::getDumpInConn, "" ),
+///////////////////////////////////////////////////////
+// Synapse definitions
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// Shared definitions
+///////////////////////////////////////////////////////
+	new SharedFinfo(
+		"lookup", &TableWrapper::getLookupConn,
+		"lookupOut, lookupIn" ),
+	new SharedFinfo(
+		"process", &TableWrapper::getProcessConn,
+		"processIn, reinitIn" ),
+};
+
+const Cinfo TableWrapper::cinfo_(
+	"Table",
+	"Upinder S. Bhalla, 2006, NCBS",
+	"Table: Table class. Handles lookup in several modes: \nmode 0: TAB_IO: Instantaneous lookup and return of output\nmode 1: TAB_LOOP: Looks up based on simulation time, looping.\nmode 2: TAB_ONCE: Looks up based on simulation time, nonlooping.\nmode 3: TAB_BUF: Buffers incoming data. Output holds index.\nmode 4: TAB_SPIKE: Buffers spike time. Spike thresh in stepsize\nmode 5: TAB_FIELDS: Buffers multiple input messages.\nmode 6: TAB_DELAY: Ring buffer. Delay = xdivs * dt.\nFurther refinement by stepsize:\nIn mode 1 and 2, stepsize is the increment to be applied\neach dt.\nIn mode 4, stepsize is the spike threshold.\nThe table can do internal interpolation using the function\ntabFill xdivs\nThe table can perform operations on its contents using the\ntabOp op\nwhere op can be:\na: average\nm: min\nM: max\nr: range = max - min\ns: slope\ni: intercept\nf: frequency\nS: Sqrt( sum of sqares )\nFor backward compatibility, we retain tabcreate:\ntabcreate xmin xmax xdivs",
+	"Neutral",
+	TableWrapper::fieldArray_,
+	sizeof(TableWrapper::fieldArray_)/sizeof(Finfo *),
+	&TableWrapper::create
+);
+
+///////////////////////////////////////////////////
+// Field function definitions
+///////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////
+// Dest function definitions
+///////////////////////////////////////////////////
+
+void TableWrapper::inFuncLocal( double value )
+{
+			if ( mode_ != 6 ) { 
+				input_ = value;
+			} else {
+				x_ = value; 
+			}
+}
+void TableWrapper::tabcreateFuncLocal( double xmin, double xmax, int xdivs )
+{
+			table.localSetXdivs( xdivs );
+			table.localSetXmin( xmin );
+			table.localSetXmax( xmax );
+}
+void TableWrapper::processFuncLocal( ProcInfo info )
+{
+			switch ( mode_ ) {
+				case 0: 
+					output_ = table_.doLookup( input_ ) * py_ + sy_;
+					py_ = 1.0;
+					sy_ = 0.0;
+					break;
+				case 1: 
+					if ( stepsize_ == 0.0 ) {
+						double looplen = table_.localGetXmax() - table_.localGetXmin();
+						double temp = input_ + info->currentTime_;
+						temp = temp - looplen * floor( temp / looplen );
+						output_ = table_.doLookup( temp );
+					} else {
+						input_ += stepsize_;
+						if ( input_ > table_.localGetXmax() )
+							input_ = table_.localGetXmin();
+						output_ = table_.doLookup( input_ );
+					}
+					break;
+				case 2: 
+					if ( stepsize_ == 0.0 ) {
+						output_ = table_.doLookup( input_ + info->currentTime_ );
+					} else {
+						input_ += stepsize_;
+						output_ = table_.doLookup( input_ );
+					}
+					break;
+				case 3: 
+					if ( output_ < static_cast< double >( table_.localGetXdivs() ) && round( output_ ) >= 0 ) {
+						table_.setTableValue( input_, round( output_ ));
+						output_ += 1.0;
+						table_.localSetXmax( output_ );
+					}
+					break;
+				case 4: 
+					if ( input_ > stepsize_ ) {
+						int i = static_cast< int >( output_ );
+						if ( i < table_.localGetXdivs() ) && i >= 0 ) {
+							if ( x_ < stepsize_ ) {
+								table_.setTableValue( info->currentTime_, i );
+								output_ = i + 1;
+								table_.localSetXmax( output_ );
+							}
+						}
+					}
+					x_ = input_;
+					break;
+				case 5: 
+					break;
+				case 6: 
+					int i = round( input_ );
+					if ( i < table_.localGetXdivs() && i >= 0 ) {
+						output_ = table_.getTableValue( i );
+						table_.setTableValue( x_, i++ );
+						input_ = ( i >= table.localGetXdivs() ) ? 0 : i;
+					}
+					break;
+			}
+			outSrc_.send( output_ );
+}
+///////////////////////////////////////////////////
+// Connection function definitions
+///////////////////////////////////////////////////
+Element* lookupConnTableLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( TableWrapper, lookupConn_ );
+	return reinterpret_cast< TableWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+Element* processConnTableLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( TableWrapper, processConn_ );
+	return reinterpret_cast< TableWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+Element* inInConnTableLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( TableWrapper, inInConn_ );
+	return reinterpret_cast< TableWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+Element* tabFillInConnTableLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( TableWrapper, tabFillInConn_ );
+	return reinterpret_cast< TableWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+Element* tabOpInConnTableLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( TableWrapper, tabOpInConn_ );
+	return reinterpret_cast< TableWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+Element* tabOpRangeInConnTableLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( TableWrapper, tabOpRangeInConn_ );
+	return reinterpret_cast< TableWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+Element* sumInConnTableLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( TableWrapper, sumInConn_ );
+	return reinterpret_cast< TableWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+Element* prdInConnTableLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( TableWrapper, prdInConn_ );
+	return reinterpret_cast< TableWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+Element* bufferInConnTableLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( TableWrapper, bufferInConn_ );
+	return reinterpret_cast< TableWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+Element* assignInConnTableLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( TableWrapper, assignInConn_ );
+	return reinterpret_cast< TableWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+Element* tabcreateInConnTableLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( TableWrapper, tabcreateInConn_ );
+	return reinterpret_cast< TableWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+Element* dumpInConnTableLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( TableWrapper, dumpInConn_ );
+	return reinterpret_cast< TableWrapper* >( ( unsigned long )c - OFFSET );
+}
+

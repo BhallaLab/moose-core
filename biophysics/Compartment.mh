@@ -1,0 +1,146 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class Compartment
+{
+	public:
+
+	author: 
+		Upinder S. Bhalla, 2005, NCBS
+	description:
+		Passive compartment from cable theory. Has hooks for adding
+		ion channels.
+	field:
+		double Vm = -0.06;
+		double Em = -0.06;
+		double Cm = 1.0;
+		double Rm = 1.0;
+		double Ra = 1.0;
+		double Im = 0.0;
+		double Inject = 0.0;
+		double initVm = -0.06;
+		double diameter;
+		double length;
+
+	shared:
+		// The process increments a timestep, the reinit initializes.
+		single process( processIn, reinitIn );
+		single init( initIn, dummyReinitIn ); 
+			// Handles separate phase of message passing for 
+			// cable updates.
+		multi channel( channelIn, channelOut, channelReinitOut );
+		multi axial( axialOut, raxialIn );
+		multi raxial( raxialOut, axialIn );
+
+	src:
+		// Note that src and dest can have the same name, and it
+		// may even be appropriate for communicating message pairs. All
+		// src fields have the suffix Out appended to their name.
+		// Each of these examples specifies the connection type
+		// directly: multi or single.
+		// If there are shared messages, these will eventually be
+		// defined again, and should match.
+		multi channel( double Vm, ProcInfo info );
+		multi axial( double Vm );
+		multi raxial( double Ra, double Vm );
+		multi channelReinit( double Vm, ProcInfo info );
+
+		// See above for how some of these are shared.
+	
+	dest:
+		multi channel( double Gk, double Ek ) {
+			A_ += Gk * Ek;
+			B_ += Gk;
+		}
+
+		multi raxial( double Ra, double Vm ) {
+			A_ += Vm / Ra;
+			B_ += 1.0 / Ra;
+			Im_ += ( Vm - Vm_ ) / Ra;
+		}
+
+		multi axial( double Vm ) {
+			A_ += Vm / Ra_;
+			B_ += 1.0 / Ra_;
+			Im_ += ( Vm - Vm_ ) / Ra_;
+		}
+
+		multi inject ( double I ) {
+			sumInject_ += I;
+			Im_ += I;
+		}
+
+		// Look into this. Perhaps do as a field, using relay if needed
+		single randinject( double prob, double I ) {
+			if ( mtrand() < prob * dt_ ) {
+				Im_ += I;
+				A_ += I;
+			}
+		}
+
+		// This is meant to be called on a separate clock tick from the
+		// Process, so that the channel and current updates are done
+		// later.
+		single init( ProcInfo info ) {
+			axial( Vm_ );
+			raxial( Ra_, Vm_ );
+		}
+		
+		single dummyReinit( ) {
+			; // Nothing happens here.
+		}
+
+		single reinit( ProcInfo info ) {
+			Vm_ = initVm_;
+			A_ = 0.0;
+			B_ = invRm_;
+			Im_ = 0.0;
+			// dt_ = info->dt_;
+			sumInject_ = 0.0;
+			channelReinit( Vm_ );
+			// channel( Vm_, info );
+		}
+
+		// Note that here we explicitly indicate messages going out.
+		// If the user has a more complicated structure for their
+		// function, they can rearrange the outgoing calls.
+		// Note that we do not use previousVm_ for axial and raxial
+		// messages. This would have been nice for perfect
+		// backward compatibility, but only makes a modest numerical
+		// difference. It is actually more accurate to use Vm_,
+		// but it is asymmetric and the
+		// results depend on the order of messaging, so we'll leave
+		// the accuracy issues to the solver.
+		single process( ProcInfo info ) {
+			A_ += Inject_ + sumInject_ + Em_ * invRm_;
+			if ( B_ > EPSILON ) {
+				double x = exp( -B_ * info->dt_ / Cm_ );
+				Vm_ = Vm_ * x + ( A_ / B_ )  * ( 1.0 - x );
+			} else {
+				Vm_ += ( A_ - Vm_ * B_ ) * info->dt_ / Cm_;
+			}
+			A_ = 0.0;
+			B_ = invRm_;
+			Im_ = 0.0;
+			sumInject_ = 0.0;
+			channel( Vm_, info );
+			axial( Vm_ );
+			raxial( Ra_, Vm_ );
+		}
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+		double A_;
+		double B_;
+		double invRm_;
+		double sumInject_;
+		double dt_;
+		static const double EPSILON = 1.0e-15;
+};

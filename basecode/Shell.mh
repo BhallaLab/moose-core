@@ -1,0 +1,66 @@
+class Shell
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+		bool splitFieldString( const string& field,
+		     string& e, string& f );
+		bool splitField( const string& fieldstr, Field& f );
+		Element* findElement( const string& path );
+		Element* checkWorkingElement( );
+		Element* shellRelativeFind( const string& path );
+
+	author: 
+		Upinder S. Bhalla, Oct 2005, NCBS
+	description:
+		Shell class, provides many of the basic environment functions
+		used by the parser.
+	field:
+		int isInteractive;
+		string parser;
+	src:
+
+	dest:
+		single add( string src, string dest );
+		single drop( string src, string dest );
+		single set( string field, string value );
+		single create( string type, string path );
+		single delete( string path );
+		single move( string src, string dest );
+		single copy( string src, string dest );
+		single copyShallow( string src, string dest );
+		single copyHalo( string src, string dest );
+		single ce ( string newpath );
+		single pushe ( string newpath );
+		single pope ( );
+		single alias( string origfunc, string newfunc );
+		single quit( );
+		single stop( );
+		single reset( );
+		single step( string steptime, string options );
+		single call( string args );
+
+		// Here are some funny ones that need to return a value
+		// What we'll do is set them up initially as regular msgdest,
+		// then add a wrapper to them that is of the expected type
+		// to return a value to the parser.
+		single get( string field );
+		single getmsg( string field, string options );
+		single isa( string type, string field );
+
+		// Here are some other funny ones that need to print out text.
+		// We will get call the command, then they need to send text
+		// to a tty or to the terminal if no tty message is specified.
+		single show( string field );
+		single showmsg( string field );
+		single showobject( string classname );
+		single pwe ( );
+		single le ( string start );
+		single listCommands( );
+		single listClasses( );
+		single echo( vector< string >& s, int options );
+
+	private:
+		string workingElement_;
+		vector< string > workingElementStack_;
+		vector< string > commandHistory_;
+};

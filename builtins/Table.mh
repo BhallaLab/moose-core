@@ -1,0 +1,198 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class Table
+{
+	public:
+		Table()
+			: sy_( 0.0 ), py_( 1.0 ), x_ ( 0.0 )
+		{
+			;
+		}
+
+	author: 
+		Upinder S. Bhalla, 2006, NCBS
+	description:
+		Table class. Handles lookup in several modes: 
+		mode 0: TAB_IO: Instantaneous lookup and return of output
+		mode 1: TAB_LOOP: Looks up based on simulation time, looping.
+		mode 2: TAB_ONCE: Looks up based on simulation time, nonlooping.
+		mode 3: TAB_BUF: Buffers incoming data. Output holds index.
+		mode 4: TAB_SPIKE: Buffers spike time. Spike thresh in stepsize
+		mode 5: TAB_FIELDS: Buffers multiple input messages.
+		mode 6: TAB_DELAY: Ring buffer. Delay = xdivs * dt.
+		Further refinement by stepsize:
+			In mode 1 and 2, stepsize is the increment to be applied
+			each dt.
+			In mode 4, stepsize is the spike threshold.
+		The table can do internal interpolation using the function
+			tabFill xdivs
+		The table can perform operations on its contents using the
+			tabOp op
+			where op can be:
+			a: average
+			m: min
+			M: max
+			r: range = max - min
+			s: slope
+			i: intercept
+			f: frequency
+			S: Sqrt( sum of sqares )
+		For backward compatibility, we retain tabcreate:
+			tabcreate xmin xmax xdivs
+
+	field:
+		Interpol table;
+		int mode;
+		double stepsize;
+		double input;
+		double output;
+
+	shared:
+		single returnLookup( returnLookupOut, returnLookupIn );
+		single process( processIn, reinitIn );
+
+	src:
+		single returnLookup( double y );
+		single lookup( double y );
+		multi out( double y );
+	
+	dest:
+		single returnLookup( double x ) {
+			// Immediately returns back the lookup value to sender
+			returnLookup( table_.doLookup ( x ) );
+		}
+
+		single lookup( double x ) {
+			// Immediately returns back the lookup value on a 
+			// separate message.
+			out( table_.doLookup ( x ) );
+		}
+
+		single in( double value ) {
+			if ( mode_ != 6 ) { // anything but TAB_DELAY
+				input_ = value;
+			} else {
+				x_ = value; 
+			}
+		}
+
+		single tabFill( double xdivs, int fillMode );
+
+		single tabOp( int op );
+		single tabOpRange( int op, double min, double max );
+
+		single sum( double value ) {
+			sy_ += value;
+		}
+		single prd( double value ) {
+			py_ *= value;
+		}
+
+		// Behaves a bit differently from the PROCESS mediated
+		// buffer command, which is deprecated. This simply
+		// pushes the value into the table. Xdivs is updated invisibly.
+		single buffer( double value ) {
+			table_.push_back( value );
+		}
+
+		single assign( double value, int index ) {
+			table_.setTableValue( value, index );
+		}
+
+		single tabcreate( double xmin, double xmax, int xdivs ) {
+			table_.localSetXdivs( xdivs );
+			table_.localSetXmin( xmin );
+			table_.localSetXmax( xmax );
+		}
+
+		single process( ProcInfo info ) {
+			switch ( mode_ ) {
+				case 0: // TAB_IO
+					output_ = table_.doLookup( input_ ) * py_ + sy_;
+					py_ = 1.0;
+					sy_ = 0.0;
+					break;
+				case 1: // TAB_LOOP
+					if ( stepsize_ == 0.0 ) {
+						double looplen = table_.localGetXmax() - table_.localGetXmin();
+						double temp = input_ + info->currTime_;
+						temp = temp - looplen * floor( temp / looplen );
+						output_ = table_.doLookup( temp );
+					} else {
+						input_ += stepsize_;
+						if ( input_ > table_.localGetXmax() )
+							input_ = table_.localGetXmin();
+						output_ = table_.doLookup( input_ );
+					}
+					break;
+				case 2: // TAB_ONCE
+					if ( stepsize_ == 0.0 ) {
+						output_ = table_.doLookup( input_ + info->currTime_ );
+					} else {
+						input_ += stepsize_;
+						output_ = table_.doLookup( input_ );
+					}
+					break;
+				case 3: // TAB_BUF
+					{
+						int i = static_cast< int >( output_ );
+						if ( i < table_.localGetXdivs() && i >= 0 ) {
+							table_.setTableValue( input_, i );
+							output_ += 1.0;
+							// This line below is odd, but I'll put it
+							// in for backward compatibility.
+							table_.localSetXmax( output_ );
+						}
+					}
+					break;
+				case 4: // TAB_SPIKE
+					if ( input_ > stepsize_ ) {
+						int i = static_cast< int >( output_ );
+						if ( i < table_.localGetXdivs() && i >= 0 ) {
+							if ( x_ < stepsize_ ) {
+								table_.setTableValue( info->currTime_, i );
+								output_ = i + 1;
+								table_.localSetXmax( output_ );
+							}
+						}
+					}
+					x_ = input_;
+					break;
+				case 5: // TAB_FIELDS
+					break;
+				case 6: // TAB_DELAY
+					// In GENESIS, this message misuses input_
+					// to handle the current
+					// time, and the actual input comes to x_.
+					// Here we need to do some ugly juggling to
+					// get the same to work.
+					int i = static_cast< int >( round( input_ ) );
+					if ( i < table_.localGetXdivs() && i >= 0 ) {
+						output_ = table_.getTableValue( i );
+						table_.setTableValue( x_, i++ );
+						input_ = ( i >= table_.localGetXdivs() ) ? 0 : i;
+					}
+					break;
+			}
+			out( output_ );
+		}
+		single reinit() {
+			output_ = 0.0;
+			out( output_ );
+		}
+
+		single dump();
+
+	private:
+		double sy_;
+		double py_;
+		double x_;
+};
