@@ -1,0 +1,125 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+#include "RateTerm.h"
+#include "SparseMatrix.h"
+
+class Ksolve
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Upinder S. Bhalla, June 2006, NCBS
+	description:
+		Wrapper object for zombifying reaction systems. Interfaces
+		both with the reaction system (molecules, reactions, enzymes
+		and user defined rate terms) and also with the Stoich
+		class which generates the stoichiometry matrix and 
+		handles the derivative calculations.
+	field:
+		string path;
+
+	shared:
+		// Specialized solver messages for appropriate classes.
+		multi molSolve( processOut, reinitOut, molOut, molIn );
+		// The reacs and enzymes just send info in. The shared message
+		// handles this plus the takeover of Process and reinit
+		multi reacSolve( processOut, reinitOut, reacIn );
+		multi enzSolve( processOut, reinitOut, enzIn );
+		multi mmEnzSolve( processOut, reinitOut, mmEnzIn );
+		// Likewise tables. They only need time info from processOut.
+		multi tabSolve( processOut, reinitOut, tabIn );
+
+		// A set of messages for external rates.
+		multi rateSolve( processOut, reinitOut, rateOut, rateIn );
+	src:
+		multi process( ProcInfo );	// Connect up solved processes,
+									// mostly to turn them off.
+		multi reinit();	// Connect up solved processes
+
+		multi mol( double n);	// # of molecules: updates value.
+
+		multi rate( double n );	// # of molecules, could be several
+									// substrates for a given reac.
+	dest:
+		// single solve( vector< double >* y, double t, double dt );
+
+		single process( ProcInfo info );
+			// Here we pick one of the integration methods and farm
+			// out the calculation to the actual solver.
+
+		single reinit();
+
+		// Use n for inline updates, nInit for initializing, mode
+		// for update method.
+		// Note that we do not need the volumeScale. That provides
+		// local info in the molecule if needed, for conc updates.
+		// Possibly later would want a separate geometry message for
+		// diffusion extensions.
+		multi mol( double n, double nInit, int mode ) {
+		}
+
+		multi rate( double yPrime );	// Just the derivative.
+		// We need extra information from the msg to help with the
+		// rapid lookup of the reaction. In principle we could use
+		// a map of pointers to the conns. A bit dangerous.
+		// The rateIn is called each dt, so it has to be done fast.
+
+
+		// Just the rates.
+		multi enz( double k1, double k2, double k3 );
+		
+		// Same terms but fits into calculations differently.
+		multi mmEnz( double k1, double k2, double k3 );
+
+		// Just the mol values.
+		multi tab( double n );
+
+	private:
+
+	private_wrapper:
+		void setPathLocal( const string& value );
+		void molZombify( Element* e, Field& solveSrc );
+		
+};
+
+////////////////////////////////////////////////////////////////////
+// Stuff below here goes verbatim into KsolveWrapper.cpp
+////////////////////////////////////////////////////////////////////
+
+void KsolveWrapper::molZombify( Element* e, Field& solveSrc )
+{
+	Field f( e, "process" );
+	if ( !f.dropAll() ) {
+		cerr << "Error: Failed to delete process message into " <<
+			e->path() << "\n";
+	}
+
+	if ( !solveSrc.add( f ) ) {
+		cerr << "Error: Failed to add process message from solver " <<
+			path() << " to zombie " << e->path() << "\n";
+	}
+}
+
+void KsolveWrapper::setPathLocal( const string& value )
+{
+	path_ = value;
+	vector< Element* > ret;
+	vector< Element* >::iterator i;
+	Field solveSrc( this, "process" );
+
+	Element::startFind( path_, ret );
+
+	for ( i = ret.begin(); i != ret.end(); i++ ) {
+		if ( ( *i )->cinfo()->name() == "Molecule" ) {
+			molZombify( *i, solveSrc );
+		}
+	}
+}

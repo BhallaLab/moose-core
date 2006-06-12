@@ -18325,3 +18325,143 @@ Actually no.
 - Must provide all the traversal calls for incoming and outgoing messages
 	between solver and object. Just another relay?
 
+============================================================================
+11 June 2006.
+Before I begin messing up the system with new finfo objects, time to do
+a version entry. More frequent versioning would be better. Last entry was
+version 8, on 16 Apr 2006.
+
+I just realized that in the operating system upgrade, I left out /opt,
+which is where the old svn repository was. Fortunately a lot of
+the repository state is in the local cache. Hm. What to do? Nothing 
+obvious on the SVN FAQs. I'll subscribe to their mailing list and ask.
+Here are the relevant comments:
+> On Jun 11, 2006, at 15:00, Upinder S. Bhalla wrote:
+>
+>>   I forgot to back up my SVN repository files from /opt when I
+>> upgraded my
+>> OS. The disk has been wiped and reformatted. I do have the user
+>> subdirectory with the current files and the local .svn subdirectory
+>> with
+>> the working revision. I realize most of my project history is history,
+>> but I would like to reconstruct my SVN project back to the last
+>> revision. What should I do?
+>
+> If you didn't back up the repository, then the history is gone, so
+> you only have the revision that's currently checked out in your
+> working copy. You could import that into a new repository and start
+> over from there.
+>
+> I believe Subversion (at least the current version, 1.3.2) will
+> ignore the .svn directories when importing, so you should just be
+> able to "svnadmin create" the repository, "svn import" your old
+> working copy into it, and "svn checkout" a new working copy from the
+> new repository and get back to work.
+
+On 6/11/2006 9:51 AM, Upinder S. Bhalla wrote:
+> Thanks - I see that my earlier history is gone. But is there a way to use
+> the local .svn files to populate the rebuilt repository with the most
+> recent previous revision in addition to the current state?
+
+This is probably a little tricky to get right on the first attempt, so 
+first you should back up your current working copy (including all the 
+.svn directories).
+
+Then: make another copy of it somewhere, say OLD.  Use svn revert in OLD 
+to  undo all the local changes, and do your import from OLD.
+
+Then cd over to the pristine copy of your locally modified copy, and use 
+svn status to find all the local modifications.  Copy all modified files 
+over to OLD (overwriting what is there), do all deletes and adds in OLD, 
+until OLD looks just like your locally modified version, and svn status 
+there returns the same thing.   Then commit those changes.
+
+Then back up your repository.
+
+Duncan Murdoch
+
+---------------------------------------------------------------------
+My experience with this:
+OK up to creating the OLD, reverting in it, and doing the import from OLD.
+
+Now I made one big change: I want the SVN repository to be in a different
+place so I won't forget to back it up ever again. I proceeded with the
+next step ( copying over modified files into OLD till it looks like my 
+locally modified version). This went fine. But when I tried to commit it,
+it complained:
+svn: Commit failed (details follow):
+svn: Unable to open an ra_local session to URL
+svn: Unable to open repository 'file:///opt/SVN/moose/trunk'
+
+I interpret this to mean that it is still trying to dump the files into
+the old repository, specified in the local .svn administration directories.
+Option 1: Hack into the files in the .svn directories to change the 
+path. A quick grep suggests where I should look, in a file called entries.
+If I knew enough about the system I might do this, but I don't want to mess
+things up.
+
+Option 2: Check out version 1 into a temporary location. Copy over modified
+files into this checked out version, do the adds etc, as before. Now
+commit it. This works. I still need to clean things up and commit
+a proper revision 3, but it is late and the tricky stuff should be out of
+the way now.
+
+
+Stuff for this version:
+Various improvements to the preprocessor. 
+	- Can put lines into the private portions of the *Wrapper.h
+		file (previously only .h was possible).
+	- Can put lines into the *Wrapper.cpp file.
+Compilation fixes for Ubuntu 6.06. Unfortunately some of these involve
+	hacking the output files from the parser. A make clean would not work.
+	Because these are parser output files they are not managed by SVN.
+	The fixes are listed below.
+Lots of work on the solver for biochemical kinetics.
+	Stoichiometry matrix works.
+	Grabbing the state of the model works
+	An API for connecting a numerical engine to the Stoich class works.
+	A ForwardEuler numerical engine (purely for demonstration) works. 
+	The beginnings of the Ksolve object compile, but it is not
+	functional.  Ksolve will do the actual zombification of the model
+	objects. At this stage it successfully takes over the Process
+	function of molecules, but does not go on to handle forwarding
+	of calls and
+	assignments.
+
+
+
+Compiler flags and other fixes to get compilation on
+	g++ (GCC) 4.0.3 (Ubuntu 4.0.3-1ubuntu5)
+
+- Here are the compiler flags that eliminate most errors:
+             -DYYMALLOC -DYYFREE
+
+- Here are the remaining error messages:
+
+/usr/include/FlexLexer.h:113: error: redefinition of ‘class yyFlexLexer’
+/usr/include/FlexLexer.h:113: error: previous definition of ‘class
+yyFlexLexer’
+GenesisParser.yy.cpp:1850: error: declaration of ‘int isatty(int)’ throws
+different exceptions
+/usr/include/unistd.h:717: error: than previous declaration ‘int
+isatty(int) throw ()’
+GenesisParser.tab.cpp: In member function ‘int myFlexLexer::yyparse()’:
+GenesisParser.tab.cpp:2756: error: ‘1’ cannot be used as a function
+make[1]: *** [GenesisParser.tab.o] Error 1
+
+The first error (line 113) is fixed if we comment out this line:
+
+GenesisParser.yy.cpp:20
+    #define yyFlexLexer yyFlexLexer
+
+(yes, it seems like an incredibly dumb line)
+
+The second error (1850) goes away if we comment out the declaration
+The third error (2756) goes away if 2755 and 2756 lines are commented out.
+
+============================================================================
+12 June 2006
+Put all the SVN cleanups together, and now set to check it in as revision 3.
+This revision should get us back up to speed with svn updates.
+
+============================================================================

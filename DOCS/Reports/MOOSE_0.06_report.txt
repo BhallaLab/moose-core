@@ -1,0 +1,100 @@
+
+Upi,
+
+Sorry to be so late in getting to this, but I finally got a chance to try
+compiling the Feb 17 0.06 MOOSE release.  The good news is that, with the
+GCC4 flags, it compiles and runs on my laptop with Fedora FC4.  This has
+
+Linux localhost.localdomain 2.6.11-1.1369_FC4 #1 Thu Jun 2 22:55:56 EDT 2005
+  i686 i686 i386 GNU/Linux
+gcc (GCC) 4.0.0 20050519 (Red Hat 4.0.0-8)
+flex version 2.5.4
+bison (GNU Bison) 2.0
+
+The bad news is that, for any set of flags, both my desktop (FC2) and dogstar
+(RHEL on x86_64) give an error that sounds like the Debian one you
+referred to.  I get:
+
+cd genesis_parser
+make[1]: Entering directory
+`/chuck/dbeeman/plans/genfuture/New-grant/MOOSE/mus_release_feb17_2006/genesis_parser'
+flex++ -oGenesisParser.yy.cpp GenesisParser.yy.l
+bison -d GenesisParser.ypp
+GenesisParser.ypp:928.17: syntax error, unexpected "|"
+GenesisParser.ypp:932.17: syntax error, unexpected "|"
+GenesisParser.ypp:936.17: syntax error, unexpected "|"
+make[1]: *** [GenesisParser.tab.h] Error 1
+
+Both these machines use
+flex version 2.5.4
+bison (GNU Bison) 1.875
+
+the FC2 desktop is using
+gcc (GCC) 3.3.3 20040412 (Red Hat Linux 3.3.3-7)
+
+But, there is more good news - I just found the problem.  I grepped through
+my notes on GENESIS 2.2 bugs and found:
+
+script.y:932.3: parse error, unexpected "|"
+script.y:1069.3: parse error, unexpected "|"
+
+Here is  the summary of the fix:
+
+There is some incorrect syntax in the yacc script genesis/src/ss/script.y
+that didn't bother earlier versions of bison (e.g. 1.28), but causes
+problems with bison 1.75 and later.  It arises because of some unwanted
+semicolons on the lines before the "|".  Remove the three lines that are
+tagged with a "-" below:
+
+                 | '{' expr '}'
+                   { $$ = $2; }
+-               ;
+
+                 | '{' cmd_stmnt '}'
+                   { $$ = $2; }
+-               ;
+
+                 | '{' func_call '}'
+                   { $$ = $2; }
+-               ;
+
+                 | '(' expr ')'
+                   { $$ = $2; }
+
+This appears to be exactly the problem in GenesisParser.ypp, and when I
+removed the offending semicolons, it compiled without problems.
+How old was the GENESIS 2 code that you used in the parser?  This was
+fixed in GENESIS 2.2.1.
+
+The DOCS/Demos are great!  Running these and playing on the command line
+will be a good starting point for talking about priorities of what we need
+to do next.
+
+Running them on the laptop, I got a number of error messages on starting
+moose and when giving commands to the moose> prompt.  I'm assuming these
+are because I used the flags:
+CFLAGS  =       -g -Wall -pedantic -DDO_UNIT_TESTS -Wno-invalid-offsetof
+
+and this generates debugging information.  Typical ones are:
+
+chuckito 105: ../../moose  mit.g
+ValueFinfoBase::Error: Unable to initialize class Multi
+...
+Testing table: ................................... done
+Error: PlainMultiConn::disconnectAll
+
+or
+
+OK
+doing reset
+Error: SingleMsgSrc::addRecvFunc: Error: rfunc mismatch with
+existing func on /sched/cj/ct0
+starting run for 0.1 sec.
+OK
+
+But, it nicely generated the file of plot data.  If you see anything
+disturbing in these Error messages, let me know.
+
+All in all, it looks like MOOSE has come a long way since last year.
+
+Dave
