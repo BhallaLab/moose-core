@@ -1,0 +1,68 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class ForwardEuler
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Upinder S. Bhalla, June 2006, NCBS
+	description:
+		Illustration and base class for setting up numerical solvers.
+		This is currently set up to work only with the Stoich class,
+		which represents biochemical networks.
+		The goal is to have a standard interface so different
+		solvers can work with different kinds of calculation.
+	field:
+		readonly int isInitialized = 0;
+
+	shared:
+		single integrate( integrateOut, allocateIn, reinitOut  );
+		single process( processIn, reinitIn );
+
+	src:
+		single reinit( );
+		single integrate( vector< double >* yprime, double dt );
+	dest:
+		// The stoich object uses this to pass in the pointer for
+		// its internal state vector S_. This is the main way in which
+		// solvers violate messaging isolation.
+		single allocate( vector< double >* y ) {
+			y_ = y;
+			if ( !isInitialized_ || yprime_.size() != y->size() )
+				yprime_.resize( y->size(), 0.0 );
+			isInitialized_ = 1;
+		}
+
+		single process( ProcInfo info ) {
+			vector< double >::iterator i;
+			vector< double >::const_iterator j = yprime_.begin();
+			// Tell the Stoich to calculate derivatives
+			// Here we pass our internal vector, yprime_, to 
+			// the Stoich. Another violation of messaging isolation.
+			integrate( &yprime_, info->dt_ );
+			// Do the update.
+			for ( i = y_->begin(); i != y_->end(); i++ )
+				*i += *j++;
+		}
+
+		single reinit() {
+			reinit();
+		}
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+		vector< double >* y_;
+		vector< double > yprime_;
+};
+
+////////////////////////////////////////////////////////////////////
+// Stuff below here should go verbatim into ForwardEuler.cpp
+////////////////////////////////////////////////////////////////////
