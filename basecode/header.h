@@ -13,14 +13,6 @@
 #define UNIX
 //#define WINDOWS
 
-// #ifdef WINDOWS
-#ifdef NO_OFFSETOF
-#define		FIELD_OFFSET( T, F ) \
-	( unsigned long )( &T::F )
-#else
-#define		FIELD_OFFSET( T, F ) \
-	static_cast< unsigned long >( offsetof( T, F ) )
-#endif
 
 #define MOOSE_THREADS 0
 
@@ -35,6 +27,15 @@
 // End of special headers
 
 using namespace std;
+
+// #ifdef WINDOWS
+#ifdef NO_OFFSETOF
+#define		FIELD_OFFSET( T, F ) \
+	( unsigned long )( &T::F )
+#else
+#define		FIELD_OFFSET( T, F ) \
+	static_cast< unsigned long >( offsetof( T, F ) )
+#endif
 
 class Element;
 class Finfo;

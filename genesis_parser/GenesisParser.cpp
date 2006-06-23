@@ -31,13 +31,13 @@
 // to a minimum, I'll leave it in.
 #include <setjmp.h>
 
-using namespace std;
+//using namespace std;
 #include "Shell.h"
 
 #include <FlexLexer.h>
-#include "GenesisParser.tab.h"
-#include "script.h"
 #include "GenesisParser.h"
+#include "GenesisParser.tab.hpp"
+#include "script.h"
 #include "func_externs.h"
 
 #define MOOSE_THREADS 0
@@ -318,7 +318,7 @@ void myFlexLexer::AddFunc(const char* name, slifunc func, const char* type)
 void myFlexLexer::alias(const string& alias, const string& old )
 {
 	if ( old.length() > 0 && alias.length() > 0 ) {
-		map<const string, func_entry*>::iterator i;
+		Func_map::iterator i;
 		i = func_map.find( old );
 		if ( i != func_map.end() ) {
 			func_map[ alias ] = i->second;
@@ -338,7 +338,7 @@ void myFlexLexer::alias(const string& alias, const string& old )
 
 void myFlexLexer::listCommands( )
 {
-	map<const string, func_entry*>::iterator i;
+	Func_map::iterator i;
 
 	for ( i = func_map.begin(); i != func_map.end(); i++ ) {
 		cout << i->first << "\n";
@@ -347,7 +347,7 @@ void myFlexLexer::listCommands( )
 
 int myFlexLexer::IsCommand(const char* name)
 {
-	map<const string, func_entry*>::iterator i;
+	Func_map::iterator i;
 	i = func_map.find(name);
 	// cout << "In IsCommand for '" << name << "'... ";
 	if (i != func_map.end()) {
@@ -361,7 +361,7 @@ int myFlexLexer::IsCommand(const char* name)
 
 func_entry* myFlexLexer::GetCommand(const char* name)
 {
-	map<const string, func_entry*>::iterator i;
+	Func_map::iterator i;
 	i = func_map.find(name);
 	if (i != func_map.end()) {
 		return (*i).second;

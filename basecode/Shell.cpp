@@ -955,6 +955,21 @@ Element* Shell::findElement( const string& path )
 	else
 		 return findElement( workingElement_ + "/" + path );
 }
+void Shell::ok()
+{
+	if ( isInteractive_ )
+		cout << "OK\n";
+}
+void Shell::error( const string& report )
+{
+	if ( isInteractive_ )
+		cout << "Error: " << report << "\n";
+}
+void Shell::error( const string& s1, const string& s2 )
+{
+	if ( isInteractive_ )
+		cout << "Error: " << s1 << " " << s2 << "\n";
+}
 
 #ifdef DO_UNIT_TESTS
 void testParseArgs()

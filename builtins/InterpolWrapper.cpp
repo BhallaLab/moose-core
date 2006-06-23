@@ -133,7 +133,8 @@ unsigned long InterpolOffset()
 // Here we set up string conversions
 /////////////////////////////////////////////////////////////////////
 
-template<> string val2str< Interpol >( Interpol val )
+// svi:01-05-06 - needed to be inlined for MS VC++ compiler.
+template<> inline string val2str< Interpol >( Interpol val )
 {
 	char line[200];
 	int i;
@@ -163,7 +164,8 @@ template<> string val2str< Interpol >( Interpol val )
 // - Double: Sets the entire table to a single value
 // - { v1, v2 ... }: Sets the table up using initializer type strings
 // - path: Assigns to the specified table.
-template<> Interpol str2val< Interpol >( const string& s )
+// svi:01-05-06 - needed to be inlined for MS VC++ compiler.
+template<> inline Interpol str2val< Interpol >( const string& s )
 {
 	if ( isdigit( s[0] ) ) {
 		double value = atof( s.c_str() );

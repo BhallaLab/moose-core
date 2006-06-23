@@ -1,5 +1,6 @@
 #ifndef _HHGateWrapper_h
 #define _HHGateWrapper_h
+
 class HHGateWrapper: public HHGate, public Neutral
 {
     public:

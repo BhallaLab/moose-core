@@ -52,7 +52,7 @@ extern int IsCommand(char* name);
 extern int IsInclude(char* name);
 
 extern Symtab *SymtabCreate();
-extern void *SymtabDestroy(Symtab* symtab);
+extern void SymtabDestroy(Symtab* symtab);
 extern Result* SymtabLook(Symtab* symtab, char* sym);
 extern Result* SymtabNew(Symtab* symtab, char* sym);
 extern char* SymtabKey(Symtab* symtab, Result* rp);

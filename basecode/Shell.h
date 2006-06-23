@@ -1,8 +1,13 @@
 #ifndef _Shell_h
 #define _Shell_h
 
+#include <string>
+#include <vector>
+
 class Element; 	// Forward declaration
 class Field;	// forward declaration
+
+using namespace std;
 
 unsigned int parseArgs( const string& in, vector< string >& out );
 
@@ -112,18 +117,10 @@ class Shell
 		void tabFillFunc( int argc, const char** argv );
 		void addFieldFunc( int argc, const char** argv );
 
-		void ok() {
-			if ( isInteractive_ )
-				cout << "OK\n";
-		}
-		void error( const string& report ) {
-			if ( isInteractive_ )
-				cout << "Error: " << report << "\n";
-		}
-		void error( const string& s1, const string& s2 ) {
-			if ( isInteractive_ )
-				cout << "Error: " << s1 << " " << s2 << "\n";
-		}
+		// These fnc defs were moved to Shell.cpp to mollify MSVC++.
+		void ok();
+		void error( const string& report );
+		void error( const string& s1, const string& s2 );
 
 	private:
 		string workingElement_;

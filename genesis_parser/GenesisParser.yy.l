@@ -9,11 +9,10 @@
 
 %{
 // Word recognizer with a symbol table, C++ implementation
-#include <iostream>
 #include <fstream>
 #include <setjmp.h>
-#include "GenesisParser.tab.h"
 #include "GenesisParser.h"
+#include "GenesisParser.tab.hpp"
 
 
 #    define lextoken(tok)   return(tok)
@@ -68,9 +67,9 @@ E   ((e|E){S}[0-9]+)
 			    }
 			}
 
-\r			|
 \n			|
-"//"\r		|
+\r			|
+"//"\r			|
 "//"\n			{
 			  if (!continuation)
 			      lexchar('\n');
@@ -80,12 +79,12 @@ E   ((e|E){S}[0-9]+)
 
 \\.*			continuation = 1;
 
-\"[^\n"]*	|
-\"[^\r"]*	{
+\"[^\r"]*		|
+\"[^\n"]*		{
 			  char	ch;
 
 			  ch = (char)yyinput();
-			  if (ch == '\n' || ch == '\r')
+			  if (ch == '\n')
 			    {
 			      yyerror
 			      ("Missing closing quote in string constant");

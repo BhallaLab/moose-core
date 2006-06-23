@@ -17,13 +17,13 @@
 // Here we define string conversions. In the template we do
 // only the default failure options, below we have 
 // specializations for known classes.
-template <class T> string val2str(T val)
+template <class T> inline string val2str(T val)
 {
 			cerr << "Error: val2str conversion not defined\n";
 			return "";
 }
 
-template <class T> T str2val(const string& s)
+template <class T> inline T str2val(const string& s)
 {
 			cerr << "Error: str2val conversion not defined\n";
 			return T();
@@ -34,6 +34,7 @@ template <class T> T str2val(const string& s)
 }
 
 // Some template specializations to handle common conversions.
+
 template<> string val2str<string>(string val);
 template<> string str2val<string>(const string& s);
 template<> string val2str<int>(int val) ;
@@ -244,7 +245,7 @@ template <class T1, class T2> class Ftype2: public Ftype
 
 		bool strSet( Element* e, Finfo* f, const string& val ) const {
 			// Field temp( f, e );
-			unsigned long i = val.find_first_of(" 	,");
+			size_t i = val.find_first_of(" 	,");
 			string s1;
 			if ( i != string::npos && i != 0 )
 				s1 = val.substr( 0, i );
