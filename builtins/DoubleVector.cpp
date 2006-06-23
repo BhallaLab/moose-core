@@ -8,7 +8,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "header.h"
-#include "DoubleArray.h"
+#include "DoubleVector.h"
 
 //////////////////////////////////////////////////////////////////
 // DoubleArrays are Elements that can have children. They have no 

@@ -10,9 +10,14 @@
 #ifdef DO_UNIT_TESTS
 
 #include <fstream>
+#include <string>
 #include "header.h"
 
-static const char* schedResponse[] = {
+/*
+** svitak changed from char* to string. Try to avoid using C-style
+** strings in C++.
+*/
+static const string schedResponse[] = {
 "Process: Tock t0	t = 0, dt = 1",
 "Process: Tock t1	t = 0, dt = 2",
 "Process: Tock t2	t = 0, dt = 5",
@@ -68,9 +73,9 @@ void testScheduling()
 	Field( "/sli_shell/response" ).get( response );
 	unsigned long startpos= 0;
 	unsigned long len = 0;
-	unsigned int n = sizeof( schedResponse ) / sizeof( char* );
+	unsigned int n = sizeof( schedResponse ) / sizeof( schedResponse[0] );
 	for (unsigned int i = 0; i < n; i++ ) {
-		len = strlen( schedResponse[ i ] );
+		len = schedResponse[ i ].length();
 		string ss = response.substr( startpos, len );
 		if ( startpos + len < response.length() &&
 			ss == schedResponse[ i ] ){

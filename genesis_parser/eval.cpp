@@ -21,7 +21,7 @@ using namespace std;
 #include "script.h"
 #include "Shell.h"
 #include "GenesisParser.h"
-#include "GenesisParser.tab.h"
+#include "GenesisParser.tab.hpp"
 #include "func_externs.h"
 
 extern char*	G_optopt;
@@ -37,8 +37,8 @@ extern char**	optargv;
 static char float_format[10];
 
 extern int   initopt(int argc, char* argv[], char* name);
-extern int   G_getopt(int argc, char* argv[]);
-extern int   printoptusage(int argc, char* argv[]);	
+extern int   G_getopt(int argc, char** argv);
+extern void  printoptusage(int argc, char** argv);	
 extern void  sig_msg_restore_context();
 extern void	SetAutoshell(bool);
 extern Result ExecuteCommand(int argc, char* argv[]);
@@ -64,7 +64,7 @@ char* CopyString(const char* arg)
 */
 
 // extern int errno;
-extern char* TokenStr(int);
+extern char* TokenStr(int token);
 // extern Symtab GlobalSymbols;
 // LocalVars	*CurLocals = NULL;
 

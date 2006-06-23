@@ -1,6 +1,6 @@
 %{
 // SLI parser
-#include <iostream>
+#include <iosfwd>
 #include <string>
 #include <vector>
 #include <map>
@@ -15,14 +15,14 @@
 // to a minimum, I'll leave it in.
 #include <setjmp.h>
 
-using namespace std;
-
 #include "../basecode/Shell.h"
 #include <FlexLexer.h>
-#include "GenesisParser.tab.h"
+#include "GenesisParser.h"  // need decl of YYSTYPE before next include
+#include "GenesisParser.tab.hpp"
 #include "script.h"
-#include "GenesisParser.h"
 #include "func_externs.h"
+
+using namespace std;
 
 /*
 ** Parser routines which return something other than int.

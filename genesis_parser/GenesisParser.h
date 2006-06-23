@@ -18,7 +18,10 @@
 #define BGINSTKSIZE 100
 #define MAXSCRIPTS 40
 
+#include <map>
+#include "script.h"
 class Shell; // Ugly hack to appease the Windows compiler
+class Element;
 
 // Particularly ugly macro definition 
 //#define BEGIN yy_start = 1 + 2 *
@@ -57,6 +60,7 @@ typedef union _yyvals
     char    *str;
     ParseNode   *pn;
   } YYSTYPE;
+#define YYSTYPE_IS_DECLARED 1
 
 
 typedef struct _symtabent
@@ -116,6 +120,8 @@ class func_entry
 		slifunc func;
 		string type;
 };
+
+typedef map< string, func_entry* > Func_map;
 
 class myFlexLexer: public yyFlexLexer
 {
@@ -268,7 +274,7 @@ class myFlexLexer: public yyFlexLexer
 		int continuation;
 		jmp_buf BreakBuf; 	/* Used to break out of a loop */
 		jmp_buf ReturnBuf; 	/* Used to break out of a script func */
-		map< string, func_entry* > func_map;
+		Func_map func_map;
 		map< string, string > alias_map;
 		short script_ptr;
 		Script script[MAXSCRIPTS];

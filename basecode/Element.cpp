@@ -49,7 +49,7 @@ const Cinfo Element::cinfo_(
 //////////////////////////////////////////////////////////////////
 Element* lookupChildIn(const Conn *m)
 {
-	static const unsigned long OFFSET =
+	static const size_t OFFSET =
 		FIELD_OFFSET( Element, childIn_ );
 //		(unsigned long)(&Element::childIn_);
 // Need to figure out how to do this using static casts.
