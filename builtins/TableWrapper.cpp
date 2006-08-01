@@ -184,7 +184,7 @@ void TableWrapper::processFuncLocal( ProcInfo info )
 					break;
 				case 6: 
 					// Not all architectures have a standard round().
-					int i = static_cast< int >( input_+0.5 );
+					int i = static_cast< int >( input_ + 0.5 );
 					if ( i < table_.localGetXdivs() && i >= 0 ) {
 						output_ = table_.getTableValue( i );
 						table_.setTableValue( x_, i++ );

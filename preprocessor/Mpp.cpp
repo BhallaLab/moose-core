@@ -15,6 +15,7 @@
 using namespace std;
 #include "header.h"
 #include "Field.h"
+#include "EvalField.h"
 #include "Conn.h"
 #include "Shared.h"
 #include "Src.h"
@@ -184,6 +185,39 @@ int next_token(string& ret, const string& s, int i)
 	return i + j + k;
 }
 
+// Iterates through the string vector till all braces balance out
+// Optionally test for an opening brace and complain if it isn't found
+// When it returns, the iterator i on the line with the last brace.
+bool balanceBraces( 
+	vector< string >::iterator& i,
+	vector< string >::iterator end,
+	unsigned long startpos,
+	bool lookForOpeningBrace )
+{
+	vector< string >::iterator k;
+	int nbraces = 0;
+
+	if ( i == end )
+		return 0;
+
+	if ( lookForOpeningBrace ) {
+		if ( i->substr( startpos ).find( "{" ) == string::npos )
+			return 0;
+	}
+
+	for ( ; i != end; i++ ) {
+		if ( i->find( "{" ) != string::npos )
+		 	nbraces++;
+		if ( i->find( "}" ) != string::npos ) {
+		 	nbraces--;
+			if ( nbraces <= 0 ) {
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
 // Looks for arguments of the form:
 // single solve( vector< double >* y, vector< double >* yPrime );
 // This function returns the string 
@@ -273,6 +307,8 @@ void Mpp::parse()
 			break;
 		if (ret == "field") {
 			vec = &fieldString_;
+		} else if (ret == "eval_field") {
+			vec = &evalFieldString_;
 		} else if (ret == "src") {
 			vec = &msgsrcString_;
 		} else if (ret == "dest") {
@@ -302,6 +338,7 @@ void Mpp::parse()
 	}
 
 	Field::parse( fieldVec_, fieldString_ );
+	EvalField::parse( evalFieldVec_, evalFieldString_ );
 	Shared::parse( sharedVec_, connVec_, sharedString_ );
 	Src::parse( srcVec_, connVec_, msgsrcString_ );
 	Dest::parse( destVec_, connVec_, srcVec_, msgdestString_ );
@@ -414,11 +451,21 @@ void Mpp::printWrapperH(const string& name)
 	fout << "			;\n"; 
 	fout << "		}\n"; 
 
-	fout << "///////////////////////////////////////////////////////\n";
-	fout << "//    Field header definitions.                      //\n";
-	fout << "///////////////////////////////////////////////////////\n";
-	for ( unsigned long k = 0; k < fieldVec_.size(); k++ )
-		fieldVec_[ k ]->printWrapperH( className_, fout );
+	if ( fieldVec_.size() > 0 ) {
+		fout << "///////////////////////////////////////////////////////\n";
+		fout << "//    Field header definitions.                      //\n";
+		fout << "///////////////////////////////////////////////////////\n";
+		for ( unsigned long k = 0; k < fieldVec_.size(); k++ )
+			fieldVec_[ k ]->printWrapperH( className_, fout );
+	}
+
+	if ( evalFieldVec_.size() > 0 ) {
+		fout << "///////////////////////////////////////////////////////\n";
+		fout << "//    EvalField header definitions.                  //\n";
+		fout << "///////////////////////////////////////////////////////\n";
+		for ( unsigned long k = 0; k < evalFieldVec_.size(); k++ )
+			evalFieldVec_[ k ]->printWrapperH( className_, fout );
+	}
 
 	fout << "///////////////////////////////////////////////////////\n";
 	fout << "// Msgsrc header definitions .                       //\n";
@@ -533,11 +580,21 @@ void Mpp::printWrapperCpp(const string& name)
 	string fname;
 	string ftype;
 
-	fout << "///////////////////////////////////////////////////////\n";
-	fout << "// Field definitions\n";
-	fout << "///////////////////////////////////////////////////////\n";
-	for ( n = 0; n < fieldVec_.size(); n++ )
-		fieldVec_[ n ]->printWrapperCpp( className_, fout );
+	if ( fieldVec_.size() > 0 ) {
+		fout << "///////////////////////////////////////////////////////\n";
+		fout << "// Field definitions\n";
+		fout << "///////////////////////////////////////////////////////\n";
+		for ( n = 0; n < fieldVec_.size(); n++ )
+			fieldVec_[ n ]->printWrapperCpp( className_, fout );
+	}
+
+	if ( evalFieldVec_.size() > 0 ) {
+		fout << "///////////////////////////////////////////////////////\n";
+		fout << "// EvalField definitions\n";
+		fout << "///////////////////////////////////////////////////////\n";
+		for ( n = 0; n < evalFieldVec_.size(); n++ )
+			evalFieldVec_[ n ]->printWrapperCpp( className_, fout );
+	}
 
 	fout << "///////////////////////////////////////////////////////\n";
 	fout << "// MsgSrc definitions\n";
@@ -578,13 +635,25 @@ void Mpp::printWrapperCpp(const string& name)
 	fout << "	&" << className_ << "Wrapper::create\n";
 	fout << ");\n";
 
-	fout << "\n";
-	fout << "///////////////////////////////////////////////////\n";
-	fout << "// Field function definitions\n";
-	fout << "///////////////////////////////////////////////////\n";
-	fout << "\n";
-	for ( n = 0; n < fieldVec_.size(); n++ )
-		fieldVec_[ n ]->printWrapperCppFuncs( className_, fout );
+	if ( fieldVec_.size() > 0 ) {
+		fout << "\n";
+		fout << "///////////////////////////////////////////////////\n";
+		fout << "// Field function definitions\n";
+		fout << "///////////////////////////////////////////////////\n";
+		fout << "\n";
+		for ( n = 0; n < fieldVec_.size(); n++ )
+			fieldVec_[ n ]->printWrapperCppFuncs( className_, fout );
+	}
+
+	if ( evalFieldVec_.size() > 0 ) {
+		fout << "\n";
+		fout << "///////////////////////////////////////////////////\n";
+		fout << "// EvalField function definitions\n";
+		fout << "///////////////////////////////////////////////////\n";
+		fout << "\n";
+		for ( n = 0; n < evalFieldVec_.size(); n++ )
+			evalFieldVec_[ n ]->printWrapperCppFuncs( className_, fout );
+	}
 
 	fout << "\n";
 	fout << "///////////////////////////////////////////////////\n";

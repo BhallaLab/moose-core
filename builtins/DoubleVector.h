@@ -7,8 +7,8 @@
 ** GNU Lesser Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#ifndef _DOUBLEVECTOR_H
-#define _DOUBLEVECTOR_H
+#ifndef _MU_DOUBLEVECTOR_H
+#define _MU_DOUBLEVECTOR_H
 
 #include "header.h"
 
@@ -46,4 +46,4 @@ class Double: public Element {
 		static const Cinfo cinfo_;
 };
 
-#endif	// _DOUBLEVECTOR_H
+#endif	// _MU_DOUBLEVECTOR_H

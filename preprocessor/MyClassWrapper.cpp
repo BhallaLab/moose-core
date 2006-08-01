@@ -1,6 +1,20 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+// The header stuff is now copied over verbatim, except that the
+// includes go selectively into the Wrapper.cpp
+
+
 #include "header.h"
-typedef double ProcArg;
-typedef int  SynInfo;
+#include <math.h>
+#include "myOtherInclude.h"
 #include "MyClass.h"
 #include "MyClassWrapper.h"
 
@@ -11,58 +25,80 @@ Finfo* MyClassWrapper::fieldArray_[] =
 // Field definitions
 ///////////////////////////////////////////////////////
 	new ValueFinfo< double >(
-		"Vm", &MyClassWrapper::getVm, &MyClassWrapper::setVm, "double" ),
+		"Vm", &MyClassWrapper::getVm, 
+		&MyClassWrapper::setVm, "double" ),
 	new ValueFinfo< double >(
-		"Cm", &MyClassWrapper::getCm, &MyClassWrapper::setCm, "double" ),
+		"Cm", &MyClassWrapper::getCm, 
+		&MyClassWrapper::setCm, "double" ),
 	new ValueFinfo< double >(
-		"Rm", &MyClassWrapper::getRm, &MyClassWrapper::setRm, "double" ),
+		"Rm", &MyClassWrapper::getRm, 
+		&MyClassWrapper::setRm, "double" ),
 	new ReadOnlyValueFinfo< double >(
 		"pi", &MyClassWrapper::getPi, "double" ),
 	new ReadOnlyValueFinfo< double >(
 		"Ra", &MyClassWrapper::getRa, "double" ),
 	new ValueFinfo< double >(
-		"inject", &MyClassWrapper::getInject, &MyClassWrapper::setInject, "double" ),
+		"inject", &MyClassWrapper::getInject, 
+		&MyClassWrapper::setInject, "double" ),
 	new ArrayFinfo< double >(
-		"coords", &MyClassWrapper::getCoords, &MyClassWrapper::setCoords, "double" ),
+		"coords", &MyClassWrapper::getCoords, 
+		&MyClassWrapper::setCoords, "double" ),
 	new ArrayFinfo< double >(
-		"values", &MyClassWrapper::getValues, &MyClassWrapper::setValues, "double" ),
+		"values", &MyClassWrapper::getValues, 
+		&MyClassWrapper::setValues, "double" ),
+///////////////////////////////////////////////////////
+// EvalField definitions
+///////////////////////////////////////////////////////
+	new ValueFinfo< double >(
+		"tau", &MyClassWrapper::getTau, 
+		&MyClassWrapper::setTau, "double" ),
+	new ValueFinfo< double >(
+		"im", &MyClassWrapper::getIm, 
+		&MyClassWrapper::setIm, "double" ),
+	new ReadOnlyValueFinfo< double >(
+		"area", &MyClassWrapper::getArea, "double" ),
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
 	new NSrc1Finfo< double >(
-		"axialOut", &MyClassWrapper::getAxialSrc, "processIn" ),
+		"axialOut", &MyClassWrapper::getAxialSrc, 
+		"processIn", 1 ),
 	new SingleSrc2Finfo< double, double >(
-		"raxialOut", &MyClassWrapper::getRaxialSrc, "processIn" ),
+		"raxialOut", &MyClassWrapper::getRaxialSrc, 
+		"processIn", 1 ),
 	new NSrc2Finfo< double, ProcArg >(
-		"channelOut", &MyClassWrapper::getChannelSrc, "processIn" ),
+		"channelOut", &MyClassWrapper::getChannelSrc, 
+		"processIn" ),
 	new NSrc2Finfo< double, double >(
-		"diffusion1Out", &MyClassWrapper::getDiffusion1Src, "" ),
+		"diffusion1Out", &MyClassWrapper::getDiffusion1Src, 
+		"", 1 ),
 	new SingleSrc2Finfo< double, double >(
-		"diffusion2Out", &MyClassWrapper::getDiffusion2Src, "" ),
+		"diffusion2Out", &MyClassWrapper::getDiffusion2Src, 
+		"", 1 ),
 ///////////////////////////////////////////////////////
 // MsgDest definitions
 ///////////////////////////////////////////////////////
 	new Dest1Finfo< double >(
 		"axialIn", &MyClassWrapper::axialFunc,
-		&MyClassWrapper::getDistalConn, "" ),
+		&MyClassWrapper::getDistalConn, "", 1 ),
 	new Dest2Finfo< double, double >(
 		"raxialIn", &MyClassWrapper::raxialFunc,
-		&MyClassWrapper::getProximalConn, "" ),
+		&MyClassWrapper::getProximalConn, "", 1 ),
 	new Dest2Finfo< double, double >(
 		"channelIn", &MyClassWrapper::channelFunc,
 		&MyClassWrapper::getChannelInConn, "" ),
 	new Dest2Finfo< double, double >(
 		"diffusion2In", &MyClassWrapper::diffusion2Func,
-		&MyClassWrapper::getDistalConn, "" ),
+		&MyClassWrapper::getDistalConn, "", 1 ),
 	new Dest2Finfo< double, double >(
 		"diffusion1In", &MyClassWrapper::diffusion1Func,
-		&MyClassWrapper::getProximalConn, "" ),
+		&MyClassWrapper::getProximalConn, "", 1 ),
 	new Dest1Finfo< ProcArg >(
 		"processIn", &MyClassWrapper::processFunc,
-		&MyClassWrapper::getProcessConn, "axialOut, raxialOut, channelOut" ),
+		&MyClassWrapper::getProcessConn, "axialOut, raxialOut, channelOut", 1 ),
 	new Dest0Finfo(
 		"resetIn", &MyClassWrapper::resetFunc,
-		&MyClassWrapper::getProcessConn, "" ),
+		&MyClassWrapper::getProcessConn, "", 1 ),
 ///////////////////////////////////////////////////////
 // Synapse definitions
 ///////////////////////////////////////////////////////
@@ -104,9 +140,9 @@ const Cinfo MyClassWrapper::cinfo_(
 	&MyClassWrapper::create
 );
 
-///////////////////////////////////////////////////////
+///////////////////////////////////////////////////
 // Field function definitions
-///////////////////////////////////////////////////////
+///////////////////////////////////////////////////
 
 void MyClassWrapper::setCoords(
 	Element* e , unsigned long index, double value )
@@ -142,9 +178,46 @@ double MyClassWrapper::getValues(
 	return f->values_[ 0 ];
 }
 
-///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////
+// EvalField function definitions
+///////////////////////////////////////////////////
+
+double MyClassWrapper::localGetTau() const
+{
+			return Rm_ * Cm_;
+}
+void MyClassWrapper::localSetTau( double value ) {
+			if ( value > 0 && Cm_ > 0 )
+				Rm_ = value / Cm_;	
+}
+double MyClassWrapper::localGetIm() const
+{
+			return Im_;
+}
+void MyClassWrapper::localSetIm( double value ) {
+			if ( value > 0 )
+				Im_ = value;
+}
+double MyClassWrapper::localGetArea() const
+{
+			return Cm_ / specificMembCapacitance_;
+}
+
+///////////////////////////////////////////////////
+// Dest function definitions
+///////////////////////////////////////////////////
+
+void MyClassWrapper::processFuncLocal( ProcArg a )
+{
+			channelSrc_.send( Vm_, a );
+			axialSrc_.send( Vm_ );
+			raxialSrc_.send( Vm_, Rm_ );
+			Vm_ += 0; 
+}
+///////////////////////////////////////////////////
 // Synapse function definitions
-///////////////////////////////////////////////////////
+///////////////////////////////////////////////////
 void MyClassWrapper::setInhibValue(
 	Element* e , unsigned long index, int value )
 {
@@ -205,20 +278,27 @@ unsigned long MyClassWrapper::newExciteConn( Element* e ) {
 	temp->exciteConn_.push_back( s );
 	return temp->exciteConn_.size( ) - 1;
  }
-///////////////////////////////////////////////////////
+///////////////////////////////////////////////////
 // Connection function definitions
-///////////////////////////////////////////////////////
-Element* distalConnLookup( const Conn* c )
+///////////////////////////////////////////////////
+Element* distalConnMyClassLookup( const Conn* c )
 {
 	static const unsigned long OFFSET =
-		(unsigned long) ( &MyClassWrapper::distalConn_ );
+		FIELD_OFFSET ( MyClassWrapper, distalConn_ );
 	return reinterpret_cast< MyClassWrapper* >( ( unsigned long )c - OFFSET );
 }
 
-Element* processConnLookup( const Conn* c )
+Element* processConnMyClassLookup( const Conn* c )
 {
 	static const unsigned long OFFSET =
-		(unsigned long) ( &MyClassWrapper::processConn_ );
+		FIELD_OFFSET ( MyClassWrapper, processConn_ );
 	return reinterpret_cast< MyClassWrapper* >( ( unsigned long )c - OFFSET );
 }
 
+///////////////////////////////////////////////////
+// Other function definitions
+///////////////////////////////////////////////////
+void MyClassWrapper::UtilityFunc( Element* e )
+{
+	;
+}

@@ -36,14 +36,17 @@ class KsolveWrapper:
 			;
 		}
 ///////////////////////////////////////////////////////
-//    Field header definitions.                      //
+//    EvalField header definitions.                  //
 ///////////////////////////////////////////////////////
+		string localGetPath() const;
+		static string getPath( const Element* e ) {
+			return static_cast< const KsolveWrapper* >( e )->
+			localGetPath();
+		}
+		void localSetPath( const string& value );
 		static void setPath( Conn* c, string value ) {
 			static_cast< KsolveWrapper* >( c->parent() )->
-					setPathLocal( value );
-		}
-		static string getPath( const Element* e ) {
-			return static_cast< const KsolveWrapper* >( e )->path_;
+			localSetPath( value );
 		}
 ///////////////////////////////////////////////////////
 // Msgsrc header definitions .                       //
@@ -82,7 +85,10 @@ class KsolveWrapper:
 		}
 
 		void molFuncLocal( double n, double nInit, int mode ) {
+			cout << "Got msg from mol: " << n << ", " << nInit <<
+				", " << mode << "\n";
 		}
+
 		static void molFunc( Conn* c, double n, double nInit, int mode ) {
 			static_cast< KsolveWrapper* >( c->parent() )->
 				molFuncLocal( n, nInit, mode );
@@ -93,6 +99,13 @@ class KsolveWrapper:
 		static void rateFunc( Conn* c, double yPrime ) {
 			static_cast< KsolveWrapper* >( c->parent() )->
 				rateFuncLocal( yPrime );
+		}
+
+		void reacFuncLocal( double kf, double kb ) {
+		}
+		static void reacFunc( Conn* c, double kf, double kb ) {
+			static_cast< KsolveWrapper* >( c->parent() )->
+				reacFuncLocal( kf, kb );
 		}
 
 		void enzFuncLocal( double k1, double k2, double k3 ) {

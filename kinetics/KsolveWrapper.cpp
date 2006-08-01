@@ -19,7 +19,7 @@
 Finfo* KsolveWrapper::fieldArray_[] =
 {
 ///////////////////////////////////////////////////////
-// Field definitions
+// EvalField definitions
 ///////////////////////////////////////////////////////
 	new ValueFinfo< string >(
 		"path", &KsolveWrapper::getPath, 
@@ -54,6 +54,9 @@ Finfo* KsolveWrapper::fieldArray_[] =
 	new Dest1Finfo< double >(
 		"rateIn", &KsolveWrapper::rateFunc,
 		&KsolveWrapper::getRateSolveConn, "", 1 ),
+	new Dest2Finfo< double, double >(
+		"reacIn", &KsolveWrapper::reacFunc,
+		&KsolveWrapper::getReacSolveConn, "", 1 ),
 	new Dest3Finfo< double, double, double >(
 		"enzIn", &KsolveWrapper::enzFunc,
 		&KsolveWrapper::getEnzSolveConn, "", 1 ),
@@ -71,7 +74,7 @@ Finfo* KsolveWrapper::fieldArray_[] =
 ///////////////////////////////////////////////////////
 	new SharedFinfo(
 		"molSolve", &KsolveWrapper::getMolSolveConn,
-		"processOut, reinitOut" ),
+		"processOut, reinitOut, molOut, molIn" ),
 	new SharedFinfo(
 		"reacSolve", &KsolveWrapper::getReacSolveConn,
 		"processOut, reinitOut, reacIn" ),
@@ -100,9 +103,25 @@ const Cinfo KsolveWrapper::cinfo_(
 );
 
 ///////////////////////////////////////////////////
-// Field function definitions
+// EvalField function definitions
 ///////////////////////////////////////////////////
 
+string KsolveWrapper::localGetPath() const
+{
+			return path_;
+}
+void KsolveWrapper::localSetPath( const string& value ) {
+			path_ = value;
+			vector< Element* > ret;
+			vector< Element* >::iterator i;
+			Field solveSrc( this, "molSolve" );
+			Element::startFind( path_, ret );
+			for ( i = ret.begin(); i != ret.end(); i++ ) {
+				if ( ( *i )->cinfo()->name() == "Molecule" ) {
+					molZombify( *i, solveSrc );
+				}
+			}
+}
 
 ///////////////////////////////////////////////////
 // Dest function definitions
@@ -135,21 +154,9 @@ void KsolveWrapper::molZombify( Element* e, Field& solveSrc )
 		cerr << "Error: Failed to delete process message into " <<
 			e->path() << "\n";
 	}
-	if ( !solveSrc.add( f ) ) {
-		cerr << "Error: Failed to add process message from solver " <<
+	Field ms( e, "solve" );
+	if ( !solveSrc.add( ms ) ) {
+		cerr << "Error: Failed to add molSolve message from solver " <<
 			path() << " to zombie " << e->path() << "\n";
-	}
-}
-void KsolveWrapper::setPathLocal( const string& value )
-{
-	path_ = value;
-	vector< Element* > ret;
-	vector< Element* >::iterator i;
-	Field solveSrc( this, "molSolve" );
-	Element::startFind( path_, ret );
-	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		if ( ( *i )->cinfo()->name() == "Molecule" ) {
-			molZombify( *i, solveSrc );
-		}
 	}
 }

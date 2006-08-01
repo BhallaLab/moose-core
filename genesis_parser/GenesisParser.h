@@ -18,8 +18,6 @@
 #define BGINSTKSIZE 100
 #define MAXSCRIPTS 40
 
-#include <map>
-#include "script.h"
 class Shell; // Ugly hack to appease the Windows compiler
 class Element;
 

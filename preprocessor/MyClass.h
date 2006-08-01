@@ -1,3 +1,17 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+// The header stuff is now copied over verbatim, except that the
+// includes go selectively into the Wrapper.cpp
+
+
 #ifndef _MyClass_h
 #define _MyClass_h
 class MyClass
@@ -23,5 +37,6 @@ class MyClass
 		double Ca_;
 		double volscale_;
 		double Erest_;
+		static const double specificMembraneCapacitance_ = 0.01;
 };
 #endif // _MyClass_h

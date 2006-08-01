@@ -18,6 +18,7 @@ bool is_whitespace(const string& line);
 
 void runTest();
 
+
 class Mpp
 {
 	friend void runTest();
@@ -68,6 +69,7 @@ class Mpp
 		vector<string> priv_;
 		vector<string> privWrapper_;
 		vector<string> fieldString_;
+		vector<string> evalFieldString_;
 		vector<string> msgsrcString_;
 		vector<string> msgdestString_;
 		vector<string> synapseString_;
@@ -80,6 +82,7 @@ class Mpp
 		vector<string> includes_;
 
 		vector< Field* > fieldVec_;
+		vector< EvalField* > evalFieldVec_;
 		vector< Src* > srcVec_;
 		vector< Dest* > destVec_;
 		vector< Synapse* > synapseVec_;
