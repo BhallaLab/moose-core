@@ -132,7 +132,6 @@ unsigned long InterpolOffset()
 /////////////////////////////////////////////////////////////////////
 // Here we set up string conversions
 /////////////////////////////////////////////////////////////////////
-
 // svi:01-05-06 - needed to be inlined for MS VC++ compiler.
 template<> inline string val2str< Interpol >( Interpol val )
 {

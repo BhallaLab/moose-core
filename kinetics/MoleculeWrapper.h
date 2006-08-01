@@ -1,9 +1,21 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+
 #ifndef _MoleculeWrapper_h
 #define _MoleculeWrapper_h
 class MoleculeWrapper: 
 	public Molecule, public Neutral
 {
 	friend Element* processConnMoleculeLookup( const Conn* );
+	// friend Element* solveConnMoleculeLookup( const Conn* );
 	friend Element* sumProcessInConnMoleculeLookup( const Conn* );
     public:
 		MoleculeWrapper(const string& n)
@@ -11,7 +23,10 @@ class MoleculeWrapper:
 			Neutral( n ),
 			reacSrc_( &reacConn_ ),
 			nSrc_( &nOutConn_ ),
+			// solveSrc_( &solveConn_ ),
+			solveSrc_( &processConn_ ),
 			// processConn uses a templated lookup function,
+			// solveConn uses a templated lookup function,
 			reacConn_( this ),
 			nOutConn_( this ),
 			prdInConn_( this ),
@@ -23,33 +38,11 @@ class MoleculeWrapper:
 ///////////////////////////////////////////////////////
 //    Field header definitions.                      //
 ///////////////////////////////////////////////////////
-
 		static void setNInit( Conn* c, double value ) {
 			static_cast< MoleculeWrapper* >( c->parent() )->nInit_ = value;
 		}
 		static double getNInit( const Element* e ) {
 			return static_cast< const MoleculeWrapper* >( e )->nInit_;
-		}
-		void localSetConcInit( double value ) {
-			if ( volumeScale_ > 0 )
-				nInit_ = value * volumeScale_;
-			else
-				nInit_ = value;
-		}
-		static void setConcInit( Conn* c, double value ) {
-			static_cast< MoleculeWrapper* >( c->parent() )->
-				localSetConcInit( value );
-		}
-		double localGetConcInit( ) const {
-			return nInit_ * volumeScale_;
-			if ( volumeScale_ > 0 )
-				return nInit_ / volumeScale_;
-			else
-				return nInit_;
-		}
-		static double getConcInit( const Element* e ) {
-			return static_cast< const MoleculeWrapper* >( e )->
-				localGetConcInit();
 		}
 		static void setVolumeScale( Conn* c, double value ) {
 			static_cast< MoleculeWrapper* >( c->parent() )->volumeScale_ = value;
@@ -63,38 +56,34 @@ class MoleculeWrapper:
 		static double getN( const Element* e ) {
 			return static_cast< const MoleculeWrapper* >( e )->n_;
 		}
-		void localSetConc( double value ) {
-			if ( volumeScale_ > 0 )
-				n_ = value * volumeScale_;
-			else
-				n_ = value;
-		}
-		static void setConc( Conn* c, double value ) {
-			static_cast< MoleculeWrapper* >( c->parent() )->
-				localSetConc( value );
-		}
-		double localGetConc( ) const {
-			if ( volumeScale_ > 0 )
-				return n_ / volumeScale_;
-			else
-				return n_;
-		}
-		static double getConc( const Element* e ) {
-			return static_cast< const MoleculeWrapper* >( e )->
-				localGetConc();
-		}
 		static void setMode( Conn* c, int value ) {
 			static_cast< MoleculeWrapper* >( c->parent() )->mode_ = value;
 		}
 		static int getMode( const Element* e ) {
 			return static_cast< const MoleculeWrapper* >( e )->mode_;
 		}
-		static void setSlaveEnable( Conn* c, int value ) {
-			static_cast< MoleculeWrapper* >( c->parent() )->mode_ =
-				value;
+///////////////////////////////////////////////////////
+//    EvalField header definitions.                  //
+///////////////////////////////////////////////////////
+		double localGetConc() const;
+		static double getConc( const Element* e ) {
+			return static_cast< const MoleculeWrapper* >( e )->
+			localGetConc();
 		}
-		static int getSlaveEnable( const Element* e ) {
-			return static_cast< const MoleculeWrapper* >( e )->mode_;
+		void localSetConc( double value );
+		static void setConc( Conn* c, double value ) {
+			static_cast< MoleculeWrapper* >( c->parent() )->
+			localSetConc( value );
+		}
+		double localGetConcInit() const;
+		static double getConcInit( const Element* e ) {
+			return static_cast< const MoleculeWrapper* >( e )->
+			localGetConcInit();
+		}
+		void localSetConcInit( double value );
+		static void setConcInit( Conn* c, double value ) {
+			static_cast< MoleculeWrapper* >( c->parent() )->
+			localSetConcInit( value );
 		}
 ///////////////////////////////////////////////////////
 // Msgsrc header definitions .                       //
@@ -102,23 +91,39 @@ class MoleculeWrapper:
 		static NMsgSrc* getReacSrc( Element* e ) {
 			return &( static_cast< MoleculeWrapper* >( e )->reacSrc_ );
 		}
+
 		static NMsgSrc* getNSrc( Element* e ) {
 			return &( static_cast< MoleculeWrapper* >( e )->nSrc_ );
+		}
+
+		static SingleMsgSrc* getSolveSrc( Element* e ) {
+			return &( static_cast< MoleculeWrapper* >( e )->solveSrc_ );
 		}
 
 ///////////////////////////////////////////////////////
 // dest header definitions .                         //
 ///////////////////////////////////////////////////////
+		void reacFuncLocal( double A, double B ) {
+			A_ += A;
+			B_ += B;
+		}
 		static void reacFunc( Conn* c, double A, double B ) {
 			static_cast< MoleculeWrapper* >( c->parent() )->
 				reacFuncLocal( A, B );
 		}
 
+		void prdFuncLocal( double A, double B ) {
+			A_ += A;
+			B_ += B;
+		}
 		static void prdFunc( Conn* c, double A, double B ) {
 			static_cast< MoleculeWrapper* >( c->parent() )->
-				reacFuncLocal( A, B );
+				prdFuncLocal( A, B );
 		}
 
+		void sumTotalFuncLocal( double n ) {
+			total_ += n;
+		}
 		static void sumTotalFunc( Conn* c, double n ) {
 			static_cast< MoleculeWrapper* >( c->parent() )->
 				sumTotalFuncLocal( n );
@@ -145,6 +150,14 @@ class MoleculeWrapper:
 				processFuncLocal( info );
 		}
 
+		void solveFuncLocal( double n ) {
+			n_ = n;
+		}
+		static void solveFunc( Conn* c, double n ) {
+			static_cast< MoleculeWrapper* >( c->parent() )->
+				solveFuncLocal( n );
+		}
+
 
 ///////////////////////////////////////////////////////
 // Synapse creation and info access functions.       //
@@ -156,8 +169,16 @@ class MoleculeWrapper:
 		static Conn* getProcessConn( Element* e ) {
 			return &( static_cast< MoleculeWrapper* >( e )->processConn_ );
 		}
+		/*
+		static Conn* getSolveConn( Element* e ) {
+			return &( static_cast< MoleculeWrapper* >( e )->solveConn_ );
+		}
+		*/
 		static Conn* getReacConn( Element* e ) {
 			return &( static_cast< MoleculeWrapper* >( e )->reacConn_ );
+		}
+		static Conn* getNOutConn( Element* e ) {
+			return &( static_cast< MoleculeWrapper* >( e )->nOutConn_ );
 		}
 		static Conn* getPrdInConn( Element* e ) {
 			return &( static_cast< MoleculeWrapper* >( e )->prdInConn_ );
@@ -185,6 +206,17 @@ class MoleculeWrapper:
 			return &cinfo_;
 		}
 
+		// This virtual function checks if the molecule is solved,
+		// and if name is 'n' then it triggers the solver.
+		bool triggerUpdate( const string& name ) {
+			if ( solveSrc_.targetFunc(0) && 
+				solveSrc_.targetFunc(0) != dummyFunc0 && name == "n" ) {
+				// Hack: -1 tells solver this is an update request
+				solveSrc_.send( n_, nInit_, -1 );
+				return 1;
+			}
+			return 0;
+		}
 
     private:
 ///////////////////////////////////////////////////////
@@ -192,7 +224,9 @@ class MoleculeWrapper:
 ///////////////////////////////////////////////////////
 		NMsgSrc1< double > reacSrc_;
 		NMsgSrc1< double > nSrc_;
+		SingleMsgSrc3< double, double, int > solveSrc_;
 		UniConn< processConnMoleculeLookup > processConn_;
+//		UniConn< solveConnMoleculeLookup > solveConn_;
 		MultiConn reacConn_;
 		MultiConn nOutConn_;
 		PlainMultiConn prdInConn_;
@@ -201,6 +235,10 @@ class MoleculeWrapper:
 
 ///////////////////////////////////////////////////////
 // Synapse definition.                               //
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+// Private functions and fields for the Wrapper class//
 ///////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////

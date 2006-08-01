@@ -21,7 +21,7 @@ using namespace std;
 #include "script.h"
 #include "Shell.h"
 #include "GenesisParser.h"
-#include "GenesisParser.tab.hpp"
+#include "GenesisParser.tab.h"
 #include "func_externs.h"
 
 extern char*	G_optopt;
@@ -38,7 +38,7 @@ static char float_format[10];
 
 extern int   initopt(int argc, char* argv[], char* name);
 extern int   G_getopt(int argc, char** argv);
-extern void  printoptusage(int argc, char** argv);	
+extern void   printoptusage(int argc, char** argv);	
 extern void  sig_msg_restore_context();
 extern void	SetAutoshell(bool);
 extern Result ExecuteCommand(int argc, char* argv[]);

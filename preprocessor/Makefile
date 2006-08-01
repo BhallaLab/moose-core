@@ -21,6 +21,7 @@ CXX = g++ -g
 OBJ = \
 	Mpp.o \
 	Field.o \
+	EvalField.o \
 	Src.o \
 	Dest.o \
 	Synapse.o \
@@ -30,12 +31,14 @@ OBJ = \
 TESTOBJ = \
 	Mpp.o \
 	Field.o \
+	EvalField.o \
 	MppTest.o \
 	FieldTest.o \
 
 HEADERS = \
 	Mpp.h \
 	Field.h \
+	EvalField.h \
 	Src.h \
 	Dest.h \
 	Synapse.h \

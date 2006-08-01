@@ -17,9 +17,9 @@
 
 #include "../basecode/Shell.h"
 #include <FlexLexer.h>
-#include "GenesisParser.h"  // need decl of YYSTYPE before next include
-#include "GenesisParser.tab.hpp"
 #include "script.h"
+#include "GenesisParser.h"
+#include "GenesisParser.tab.h"
 #include "func_externs.h"
 
 using namespace std;

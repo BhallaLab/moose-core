@@ -37,13 +37,13 @@ int main(int argc, const char** argv)
 	Element* sched = Cinfo::find("Sched")->
 		create( "sched", Element::root() );
 	Cinfo::find("ClockJob")->create( "cj", sched );
-	shell->field( "isInteractive" ).set( "0" );
 	
 #ifdef DO_UNIT_TESTS
 	testBasecode();
 	testScheduling();
 	testTable();
 #endif
+	shell->field( "isInteractive" ).set( "1" );
 	if ( argc > 1 ) {
 		string line = "";
 		int len = strlen( argv[ 1 ] );

@@ -101,9 +101,13 @@ void Element::AddRelay(const relay& r)
 }
 */
 
+// Ask Element for finfo for named field.
+// If given, use this as ret and wrap the other ret in it.
+// The finfo should include conn info to help track down solver?
 Field Element::field( const string& name )
 {
 	Field ret;
+	triggerUpdate( name );
 	for ( long i = relays_.size() - 1; i >= 0; i-- ) {
 		ret = relays_[ i ]->match( name );
 		if ( ret.good() ) {

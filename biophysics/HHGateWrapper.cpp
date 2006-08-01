@@ -6,7 +6,6 @@
 #include "HHGateWrapper.h"
 
 
-
 static Conn* getDummyConn( Element* e ) {
 	return Finfo::dummyConn();
 }

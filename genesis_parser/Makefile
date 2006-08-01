@@ -53,7 +53,7 @@ GenesisParser.o:			../basecode/Shell.h GenesisParser.h
 GenesisParser.yy.o:			GenesisParser.yy.l
 
 GenesisParser.yy.cpp: GenesisParser.yy.l
-	flex++ -oGenesisParser.yy.cpp GenesisParser.yy.l
+	flex++ --c++ -oGenesisParser.yy.cpp GenesisParser.yy.l
 
 
 GenesisParser.tab.o GenesisParser.yy.o GenesisParser.o: GenesisParser.yy.cpp GenesisParser.h GenesisParser.tab.h
@@ -63,7 +63,12 @@ GenesisParser.tab.h GenesisParser.tab.cpp: GenesisParser.ypp
 	sed -e "/^extern\ YYSTYPE/D" GenesisParser.tab.hpp > GenesisParser.tab.h
 #/bin/mv GenesisParser.tab.hpp GenesisParser.tab.h
 	sed -e "s/^yyparse/myFlexLexer::yyparse/" GenesisParser.tab.cpp > temp
-	sed -e "s/^YY_DECL_VARIABLES/\/\/ Shifted YY_DECL_VARIABLES to inside myFlexLexer class/" temp > GenesisParser.tab.cpp 
+	sed -e "s/YYSTACK_FREE (yyss);/    ;\/\/ Deleted YYSTACK_FREE( yyss);/" temp > temp2
+	sed -e "s/^YY_DECL_VARIABLES/\/\/ Shifted YY_DECL_VARIABLES to inside myFlexLexer class/" temp2 > GenesisParser.tab.cpp 
+
+
+	sed -e "s/^    #define yyFlexLexer yyFlexLexer/\/\/ Deleted    #define yyFlexLexer yyFlexLexer/" GenesisParser.yy.cpp > temp
+	sed -e "s/^extern \"C\" int isatty (int );/\/\/ Deleted extern C int isatty/" temp > GenesisParser.yy.cpp
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -DYYSTYPE_IS_DECLARED -I../basecode $< -c
@@ -72,4 +77,4 @@ $(TARGET):		$(OBJ) $(HEADERS)
 		$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
 
 clean:
-	-rm -f *.o $(TARGET) core core.* GenesisParser.tab.* GenesisParser.yy.o GenesisParser.yy.cpp temp
+	-rm -f *.o $(TARGET) core core.* GenesisParser.tab.* GenesisParser.yy.o GenesisParser.yy.cpp temp temp2

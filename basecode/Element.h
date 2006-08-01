@@ -99,6 +99,16 @@ class Element {
 		Field lookupSrcField( Conn*, RecvFunc func );
 		Field lookupDestField( Conn*, RecvFunc func );
 
+		// This virtual function checks if the element is solved,
+		// in which case it triggers the solver to do an update of
+		// the field value after checking that the field is one
+		// which depends on the solver.
+		// By default it does nothing.
+		// Returns True if it did the trigger.
+		virtual bool triggerUpdate( const string& name ) {
+			return 0;
+		}
+
 ///////////////////////////////////////////////////////////////////////
 // These boilerplate functions are used to access the object.
 ///////////////////////////////////////////////////////////////////////

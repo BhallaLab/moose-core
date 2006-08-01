@@ -12,7 +12,7 @@
 #include <fstream>
 #include <setjmp.h>
 #include "GenesisParser.h"
-#include "GenesisParser.tab.hpp"
+#include "GenesisParser.tab.h"
 
 
 #    define lextoken(tok)   return(tok)
@@ -69,7 +69,7 @@ E   ((e|E){S}[0-9]+)
 
 \n			|
 \r			|
-"//"\r			|
+"//"\r		|
 "//"\n			{
 			  if (!continuation)
 			      lexchar('\n');
@@ -79,12 +79,12 @@ E   ((e|E){S}[0-9]+)
 
 \\.*			continuation = 1;
 
-\"[^\r"]*		|
-\"[^\n"]*		{
+\"[^\n"]*	|
+\"[^\r"]*	{
 			  char	ch;
 
 			  ch = (char)yyinput();
-			  if (ch == '\n')
+			  if (ch == '\n' || ch == '\r')
 			    {
 			      yyerror
 			      ("Missing closing quote in string constant");

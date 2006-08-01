@@ -35,9 +35,9 @@
 #include "Shell.h"
 
 #include <FlexLexer.h>
-#include "GenesisParser.h"
-#include "GenesisParser.tab.hpp"
+#include "GenesisParser.tab.h"
 #include "script.h"
+#include "GenesisParser.h"
 #include "func_externs.h"
 
 #define MOOSE_THREADS 0

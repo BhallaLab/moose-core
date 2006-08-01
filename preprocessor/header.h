@@ -14,3 +14,12 @@ extern int next_token(string& ret, const string& s, int i);
 
 extern const string checkForVector( const string& temp, 
 	const string& line, unsigned int& j );
+
+// Iterates through the string vector till all braces balance out
+// Begins the search at startpos on the line pointed to by i.
+// Optionally test for an opening brace and complain if it isn't found
+extern bool balanceBraces( 
+	vector< string >::iterator& i,
+	vector< string >::iterator end,
+	unsigned long startpos,
+	bool lookForOpeningBrace );
