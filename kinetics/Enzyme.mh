@@ -1,3 +1,14 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+// We need to manually initialize sk1 to 1.0, till mpp is fixed.
 class Enzyme
 {
 	public:
@@ -44,12 +55,49 @@ class Enzyme
 		double k1 = 0.1;
 		double k2 = 0.4;
 		double k3 = 0.1;
-		double Km;
-		int mode; // 0 = explicit, 1 = implicit
+		// int mode; // 0 = explicit, 1 = implicit
+		// Warning: We must initialize sk1 to 1.0, by hand if mpp doesnt
+		// do it.
+	eval_field:
+		double getKm() {
+			return Km_;
+		}
+
+		// Assumption is that kcat = k3 remains the same, and so does
+		// the ratio between k2 and k3
+		void setKm( double value ) {
+			if ( value > 0.0 ) {
+				Km_ = value;
+				k1_ = ( k2_ + k3_ ) / value;
+			}
+		}
+		double getKcat() {
+			return k3_;
+		}
+
+		// Assumption is that Km remains the same, and so does
+		// the ratio between k2 and k3
+		void setKcat( double value ) {
+			if ( value > 0.0 && k3_ > 0.0 ) {
+				k2_ *= value / k3_;
+				k1_ *= value / k3_;
+				k3_ = value;
+			}
+		}
+
+		int getMode() {
+			return innerGetMode();
+		}
+		void setMode( int value ) {
+			innerSetMode( value );
+		}
 
 	shared:
 		// The process increments a timestep, the reinit initializes.
 		single process( processIn, reinitIn );
+
+		// Sets up the solver message
+		single solve( processIn, reinitIn, solveOut );
 
 		// This connects the enzyme activity to the enzyme molecule
 		single enz( enzIn, enzOut );
@@ -75,6 +123,8 @@ class Enzyme
 
 		// message to the product. B is always zero here.
 		multi prd( double A, double B );
+
+		single solve( double k1, double k2, double k3 );
 	
 	dest:
 		single reinit( ) {
@@ -82,38 +132,17 @@ class Enzyme
 			s_ = 1.0;
 		}
 
-		// This is too difficult for the automatic preprocessor to
-		// handle. For convenience, we encode the two procfuncs in
-		// explicitly
 		single process( ProcInfo info ) {
-			(this->*procfunc_)();
-			// void explicitProcFunc()
-			if ( mode == 0 ) { // explicit, the default
-				eA_ = sA_ + pA_;
-				B_ = s_ * e_;
-				sub( sA_, B_ );
-				prd( pA_, 0.0 );
-				enz( eA_, B_ );
-				cplx( B_, eA_ );
-				s = k1_ * sk1_;
-				sA_ = k2_;
-				pA_ = k3_;
-			} else {	// Implicit mode
-			// void implicitProcFunc()
-				pa_ = B_ = s_ * e_ * k3_ * sk1_ / ( s_ + km_ );
-				s_ = 1.0;
-				sub( 0.0, B_ );
-				prd( B_, 0.0 );
-			}
+			(this->*procFunc_)();
 		}
 
 		single enz( double n ) {
-			e = n;
+			e_ = n;
 		}
 
 		single cplx( double n ) {
-			sA *= n;
-			pA *= n;
+			sA_ *= n;
+			pA_ *= n;
 		}
 
 		multi sub( double n ) {
@@ -122,9 +151,9 @@ class Enzyme
 
 		single intramol( double n ) {
 			if ( n > 0 )
-				sk1 = 1.0 / n;
+				sk1_ = 1.0 / n;
 			else
-				sk1 = 1.0;
+				sk1_ = 1.0;
 		}
 
 	private:
@@ -135,24 +164,100 @@ class Enzyme
 		double B_;
 		double e_;
 		double s_;
-		double sk1_;
+		double sk1_;	// This must be initialized to 1.0
+		double Km_;
+
+	private_wrapper:
+		// Stuff here will be copied over unchanged to EnzymeWrapper.h.
 		void ( EnzymeWrapper::*procFunc_ )( );
 		void implicitProcFunc();
 		void explicitProcFunc();
-		void innerSetKm( double Km ) {
-			Km_ = Km;
-			k1 = ( k2 + k3 ) / Km;
+		int innerGetMode() const {
+			return ( procFunc_ == &EnzymeWrapper::implicitProcFunc );
 		}
-		void innerSetMode( int mode ) {
-			if ( mode ) { // Implicit MM.
-				procFunc = implicitProcFunc;
-				km = ( k2 + k3 ) / k1;
-				sA = 0;
-			} else { // explicit mm
-				procFunc = explicitProcFunc;
-			}
-		}
-		int innerGetMode() {
-			return ( procFunc == implicitProcFunc );
-		}
+		void innerSetMode( int mode );
+		void makeComplex();
+		bool isSolved() const ;
+		void solverUpdate( const Finfo* f, SolverOp s ) const;
 };
+
+//////////////////////////////////////////////////////////////////
+// Stuff here is copied over to EnzymeWrapper.cpp
+//////////////////////////////////////////////////////////////////
+
+void EnzymeWrapper::innerSetMode( int mode ) {
+	Km_ = ( k2_ + k3_ ) / k1_;
+	if ( mode == innerGetMode() )
+		return;
+
+	if ( mode ) { // Implicit MM.
+		Element* cplx = relativeFind( name() + "_cplx" );
+		if ( cplx )
+			delete cplx;
+		procFunc_ = &EnzymeWrapper::implicitProcFunc;
+		sA_ = 0;
+	} else { // explicit mm
+		procFunc_ = &EnzymeWrapper::explicitProcFunc;
+		makeComplex();
+	}
+}
+
+void EnzymeWrapper::makeComplex()
+{
+	string cplxName = name() + "_cplx";
+	if ( relativeFind( cplxName ) )
+		return;
+
+	double vol = 0.0;
+	if ( !Ftype1< double >::get( parent(), "volumeScale", vol ) ) {
+		cerr << "Error: EnzymeWrapper::makeComplex(): Cannot get volumeScale from parent()\n";
+		return;
+	}
+
+	Element* complex = 
+		Cinfo::find("Molecule")->create( cplxName, this );
+	Field f = complex->field( "reac" );
+	this->field( "cplx" ).add( f );
+	// AddMsg( e, "reac", complex, "reac" );
+	Ftype1< double >::set( complex, "volumeScale", vol );
+}
+
+void EnzymeWrapper::implicitProcFunc()
+{
+	B_ = s_ * e_ * k3_ * sk1_ / ( s_ + Km_ );
+	s_ = 1.0;
+	subSrc_.send( 0.0, B_ );
+	prdSrc_.send( B_, 0.0 );
+}
+
+void EnzymeWrapper::explicitProcFunc()
+{
+	eA_ = sA_ + pA_;
+	B_ = s_ * e_;
+	subSrc_.send( sA_, B_ );
+	prdSrc_.send( pA_, 0.0 );
+	enzSrc_.send( eA_, B_ );
+	cplxSrc_.send( B_, eA_ );
+	s_ = k1_ * sk1_;
+	sA_ = k2_;
+	pA_ = k3_;
+}
+
+bool EnzymeWrapper::isSolved() const
+{
+	return ( solveSrc_.targetFunc(0) && 
+		solveSrc_.targetFunc(0) != dummyFunc0 );
+}
+
+void EnzymeWrapper::solverUpdate( const Finfo* f, SolverOp s ) const
+{
+	if ( solveSrc_.targetFunc(0) && 
+		solveSrc_.targetFunc(0) != dummyFunc0 ) {
+		if ( s == SOLVER_SET ) {
+			if ( f->name() == "k1" || f->name() == "k2" || f->name() == "k3" || f->name() == "kcat" || f->name() == "Km" )
+				solveSrc_.send( k1_, k2_, k3_ );
+		} // Ignore the call if it was a SOLVER_GET, because we
+		// don't need to update anything in the reaction.
+		// Other stuff later for ADDMSG and DELETEMSG.
+	}
+}

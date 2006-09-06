@@ -1,3 +1,13 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
 #include "header.h"
 #include "Reaction.h"
 #include "ReactionWrapper.h"
@@ -23,6 +33,9 @@ Finfo* ReactionWrapper::fieldArray_[] =
 	new NSrc2Finfo< double, double >(
 		"prdOut", &ReactionWrapper::getPrdSrc, 
 		"processIn", 1 ),
+	new SingleSrc2Finfo< double, double >(
+		"solveOut", &ReactionWrapper::getSolveSrc, 
+		"", 1 ),
 ///////////////////////////////////////////////////////
 // MsgDest definitions
 ///////////////////////////////////////////////////////
@@ -47,6 +60,9 @@ Finfo* ReactionWrapper::fieldArray_[] =
 	new SharedFinfo(
 		"process", &ReactionWrapper::getProcessConn,
 		"processIn, reinitIn" ),
+	new SharedFinfo(
+		"solve", &ReactionWrapper::getSolveConn,
+		"processIn, reinitIn, solveOut" ),
 	new SharedFinfo(
 		"sub", &ReactionWrapper::getSubConn,
 		"subIn, subOut" ),
@@ -76,10 +92,10 @@ const Cinfo ReactionWrapper::cinfo_(
 
 void ReactionWrapper::processFuncLocal( ProcInfo info )
 {
-	subSrc_.send( B_, A_ );
-	prdSrc_.send( A_, B_ );
-	A_ = kf_;
-	B_ = kb_;
+			subSrc_.send( B_, A_ );
+			prdSrc_.send( A_, B_ );
+			A_ = kf_;
+			B_ = kb_;
 }
 ///////////////////////////////////////////////////
 // Connection function definitions
@@ -91,3 +107,28 @@ Element* processConnReactionLookup( const Conn* c )
 	return reinterpret_cast< ReactionWrapper* >( ( unsigned long )c - OFFSET );
 }
 
+Element* solveConnReactionLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( ReactionWrapper, solveConn_ );
+	return reinterpret_cast< ReactionWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+///////////////////////////////////////////////////
+// Other function definitions
+///////////////////////////////////////////////////
+bool ReactionWrapper::isSolved() const
+{
+	return ( solveSrc_.targetFunc(0) && 
+		solveSrc_.targetFunc(0) != dummyFunc0 );
+}
+void ReactionWrapper::solverUpdate( const Finfo* f, SolverOp s ) const
+{
+	if ( solveSrc_.targetFunc(0) && 
+		solveSrc_.targetFunc(0) != dummyFunc0 ) {
+		if ( s == SOLVER_SET ) {
+			if ( f->name() == "kf" || f->name() == "kb" )
+				solveSrc_.send( kf_, kb_ );
+		} 
+	}
+}

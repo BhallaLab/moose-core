@@ -37,6 +37,36 @@ Finfo* KsolveWrapper::fieldArray_[] =
 		"molOut", &KsolveWrapper::getMolSrc, 
 		"", 1 ),
 	new NSrc1Finfo< double >(
+		"bufOut", &KsolveWrapper::getBufSrc, 
+		"", 1 ),
+	new NSrc1Finfo< double >(
+		"sumTotOut", &KsolveWrapper::getSumTotSrc, 
+		"", 1 ),
+	new NSrc1Finfo< ProcInfo >(
+		"processReacOut", &KsolveWrapper::getProcessReacSrc, 
+		"", 1 ),
+	new NSrc0Finfo(
+		"reinitReacOut", &KsolveWrapper::getReinitReacSrc, 
+		"", 1 ),
+	new NSrc1Finfo< ProcInfo >(
+		"processEnzOut", &KsolveWrapper::getProcessEnzSrc, 
+		"", 1 ),
+	new NSrc0Finfo(
+		"reinitEnzOut", &KsolveWrapper::getReinitEnzSrc, 
+		"", 1 ),
+	new NSrc1Finfo< ProcInfo >(
+		"processMmEnzOut", &KsolveWrapper::getProcessMmEnzSrc, 
+		"", 1 ),
+	new NSrc0Finfo(
+		"reinitMmEnzOut", &KsolveWrapper::getReinitMmEnzSrc, 
+		"", 1 ),
+	new NSrc1Finfo< ProcInfo >(
+		"processRateOut", &KsolveWrapper::getProcessRateSrc, 
+		"", 1 ),
+	new NSrc0Finfo(
+		"reinitRateOut", &KsolveWrapper::getReinitRateSrc, 
+		"", 1 ),
+	new NSrc1Finfo< double >(
 		"rateOut", &KsolveWrapper::getRateSrc, 
 		"", 1 ),
 ///////////////////////////////////////////////////////
@@ -50,6 +80,12 @@ Finfo* KsolveWrapper::fieldArray_[] =
 		&KsolveWrapper::getReinitInConn, "" ),
 	new Dest3Finfo< double, double, int >(
 		"molIn", &KsolveWrapper::molFunc,
+		&KsolveWrapper::getMolSolveConn, "", 1 ),
+	new Dest3Finfo< double, double, int >(
+		"bufMolIn", &KsolveWrapper::bufMolFunc,
+		&KsolveWrapper::getMolSolveConn, "", 1 ),
+	new Dest3Finfo< double, double, int >(
+		"sumTotMolIn", &KsolveWrapper::sumTotMolFunc,
 		&KsolveWrapper::getMolSolveConn, "", 1 ),
 	new Dest1Finfo< double >(
 		"rateIn", &KsolveWrapper::rateFunc,
@@ -76,20 +112,26 @@ Finfo* KsolveWrapper::fieldArray_[] =
 		"molSolve", &KsolveWrapper::getMolSolveConn,
 		"processOut, reinitOut, molOut, molIn" ),
 	new SharedFinfo(
+		"bufSolve", &KsolveWrapper::getMolSolveConn,
+		"processOut, reinitOut, bufOut, bufMolIn" ),
+	new SharedFinfo(
+		"sumTotSolve", &KsolveWrapper::getMolSolveConn,
+		"processOut, reinitOut, sumTotOut, sumTotMolIn" ),
+	new SharedFinfo(
 		"reacSolve", &KsolveWrapper::getReacSolveConn,
-		"processOut, reinitOut, reacIn" ),
+		"processReacOut, reinitReacOut, reacIn" ),
 	new SharedFinfo(
 		"enzSolve", &KsolveWrapper::getEnzSolveConn,
-		"processOut, reinitOut, enzIn" ),
+		"processEnzOut, reinitEnzOut, enzIn" ),
 	new SharedFinfo(
 		"mmEnzSolve", &KsolveWrapper::getMmEnzSolveConn,
-		"processOut, reinitOut, mmEnzIn" ),
+		"processMmEnzOut, reinitMmEnzOut, mmEnzIn" ),
 	new SharedFinfo(
 		"tabSolve", &KsolveWrapper::getTabSolveConn,
-		"processOut, reinitOut, tabIn" ),
+		"processTabOut, reinitTabOut, tabIn" ),
 	new SharedFinfo(
 		"rateSolve", &KsolveWrapper::getRateSolveConn,
-		"processOut, reinitOut, rateOut, rateIn" ),
+		"processRateOut, reinitRateOut, rateOut, rateIn" ),
 };
 
 const Cinfo KsolveWrapper::cinfo_(
@@ -112,21 +154,60 @@ string KsolveWrapper::localGetPath() const
 }
 void KsolveWrapper::localSetPath( const string& value ) {
 			path_ = value;
-			vector< Element* > ret;
-			vector< Element* >::iterator i;
-			Field solveSrc( this, "molSolve" );
-			Element::startFind( path_, ret );
-			for ( i = ret.begin(); i != ret.end(); i++ ) {
-				if ( ( *i )->cinfo()->name() == "Molecule" ) {
-					molZombify( *i, solveSrc );
-				}
-			}
+			Ksolve::setPath( value, this );
 }
 
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
 
+void KsolveWrapper::molFuncLocal( double n, double nInit, int mode, long index )
+{
+			cout << "Got msg from mol: " <<
+				molSolveConn_.target( index )->parent()->name() << 
+				", " << n << ", " << nInit << 
+				", " << mode << ", index = " << index << "\n";
+			if ( mode == SOLVER_GET ) {
+				molSrc_.sendTo( index, S_[index] );
+				cout << " This was a SOLVER_GET operation\n";
+			} else if ( mode == SOLVER_SET ) {
+				cout << " This was a SOLVER_SET operation to " <<
+				molSolveConn_.target( index )->parent()->name() << "\n";
+				S_[index] = n;
+				Sinit_[index] = nInit;
+			} else if ( mode == SOLVER_REBUILD ) {
+				rebuildFlag_ = 1;
+			}
+}
+void KsolveWrapper::bufMolFuncLocal( double n, double nInit, int mode, long index )
+{
+			cout << "Got msg from buffered mol: " <<
+				molSolveConn_.target( index )->parent()->name() << 
+				", " << n << ", " << nInit << 
+				", " << mode << ", index = " << index << "\n";
+			if ( mode == SOLVER_GET ) {
+				cout << " This was a buffer SOLVER_GET operation, which does nothing.\n";
+			} else if ( mode == SOLVER_SET ) {
+				cout << " This was a SOLVER_SET operation to buffer " <<
+				molSolveConn_.target( index )->parent()->name() << "\n";
+				S_[ index + bufOffset_ ] = 
+					Sinit_[ index + bufOffset_ ] = nInit;
+			}
+}
+void KsolveWrapper::sumTotMolFuncLocal( double n, double nInit, int mode, long index )
+{
+			cout << "Got msg from sumtotalled mol: " <<
+				molSolveConn_.target( index )->parent()->name() << 
+				", " << n << ", " << nInit << 
+				", " << mode << ", index = " << index << "\n";
+			if ( mode == SOLVER_GET ) {
+				sumTotSrc_.sendTo( index, S_[index + sumTotOffset_ ] );
+				cout << " This was a sumtotal SOLVER_GET operation\n";
+			} else if ( mode == SOLVER_SET ) {
+				cout << " This was a SOLVER_SET operation to a sumtotal, which does nothing " <<
+				molSolveConn_.target( index )->parent()->name() << "\n";
+			}
+}
 ///////////////////////////////////////////////////
 // Connection function definitions
 ///////////////////////////////////////////////////
@@ -144,19 +225,3 @@ Element* reinitInConnKsolveLookup( const Conn* c )
 	return reinterpret_cast< KsolveWrapper* >( ( unsigned long )c - OFFSET );
 }
 
-///////////////////////////////////////////////////
-// Other function definitions
-///////////////////////////////////////////////////
-void KsolveWrapper::molZombify( Element* e, Field& solveSrc )
-{
-	Field f( e, "process" );
-	if ( !f.dropAll() ) {
-		cerr << "Error: Failed to delete process message into " <<
-			e->path() << "\n";
-	}
-	Field ms( e, "solve" );
-	if ( !solveSrc.add( ms ) ) {
-		cerr << "Error: Failed to add molSolve message from solver " <<
-			path() << " to zombie " << e->path() << "\n";
-	}
-}

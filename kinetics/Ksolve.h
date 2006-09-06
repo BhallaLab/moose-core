@@ -17,9 +17,19 @@ class Ksolve
 	public:
 		Ksolve()
 		{
+			rebuildFlag_ = 0;
+			bufOffset_ = 0;
+			sumTotOffset_ = 0;
 		}
 
 	private:
 		string path_;
+		vector< double >S_;
+		vector< double >Sinit_;
+		bool rebuildFlag_;
+		long bufOffset_;
+		long sumTotOffset_;
+		void setPath( const string& path, Element* wrapper );
+		void zombify( Element* e, Field& solveSrc );
 };
 #endif // _Ksolve_h

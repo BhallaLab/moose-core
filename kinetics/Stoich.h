@@ -25,12 +25,10 @@ class Stoich
 			nEnz_ = 0;
 			nMmEnz_ = 0;
 			nExternalRates_ = 0;
-			rateVectorSize_ = 0;
 			useOneWayReacs_ = 0;
 		}
 
 	private:
-		string path_;
 		int nMols_;
 		int nVarMols_;
 		int nSumTot_;
@@ -39,8 +37,8 @@ class Stoich
 		int nEnz_;
 		int nMmEnz_;
 		int nExternalRates_;
-		int rateVectorSize_;
 		int useOneWayReacs_;
+		string path_;
 		vector< double > S_; 	
 		vector< double > Sinit_; 	
 		vector< double > v_;	

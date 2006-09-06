@@ -44,14 +44,15 @@ function enddump
 	useclock /graphs/##[TYPE=Plot],/moregraphs/##[TYPE=Plot] 3
 end
 
+/*
 function complete_loading
 end
+*/
 
 // These alternate versions of the complete_loading functions are
 // so that we can either enter the command line at once (above), or
 // go on to run the simulation at once (below).
 
-/*
 function complete_loading
 	setfield /sli_shell isInteractive 1
 	reset
@@ -66,4 +67,5 @@ function complete_loading
 	end
 	call /graphs/##[TYPE=Plot],/moregraphs/##[TYPE=Plot] printIn kh.plot
 end
+/*
 */

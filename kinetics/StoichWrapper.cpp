@@ -22,9 +22,6 @@ Finfo* StoichWrapper::fieldArray_[] =
 ///////////////////////////////////////////////////////
 // Field definitions
 ///////////////////////////////////////////////////////
-	new ValueFinfo< string >(
-		"path", &StoichWrapper::getPath, 
-		&StoichWrapper::setPath, "string" ),
 	new ReadOnlyValueFinfo< int >(
 		"nMols", &StoichWrapper::getNMols, "int" ),
 	new ReadOnlyValueFinfo< int >(
@@ -41,17 +38,44 @@ Finfo* StoichWrapper::fieldArray_[] =
 		"nMmEnz", &StoichWrapper::getNMmEnz, "int" ),
 	new ReadOnlyValueFinfo< int >(
 		"nExternalRates", &StoichWrapper::getNExternalRates, "int" ),
-	new ReadOnlyValueFinfo< int >(
-		"rateVectorSize", &StoichWrapper::getRateVectorSize, "int" ),
 	new ValueFinfo< int >(
 		"useOneWayReacs", &StoichWrapper::getUseOneWayReacs, 
 		&StoichWrapper::setUseOneWayReacs, "int" ),
+///////////////////////////////////////////////////////
+// EvalField definitions
+///////////////////////////////////////////////////////
+	new ValueFinfo< string >(
+		"path", &StoichWrapper::getPath, 
+		&StoichWrapper::setPath, "string" ),
+	new ReadOnlyValueFinfo< int >(
+		"rateVectorSize", &StoichWrapper::getRateVectorSize, "int" ),
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
 	new SingleSrc1Finfo< vector< double >*  >(
 		"allocateOut", &StoichWrapper::getAllocateSrc, 
 		"reinitIn", 1 ),
+	new SingleSrc3Finfo< int, int, int >(
+		"molSizesOut", &StoichWrapper::getMolSizesSrc, 
+		"", 1 ),
+	new SingleSrc3Finfo< int, int, int >(
+		"rateSizesOut", &StoichWrapper::getRateSizesSrc, 
+		"", 1 ),
+	new SingleSrc2Finfo< vector< RateTerm* >*, int >(
+		"rateTermInfoOut", &StoichWrapper::getRateTermInfoSrc, 
+		"", 1 ),
+	new SingleSrc3Finfo< vector< double >* , vector< double >* , vector< Element *>*  >(
+		"molConnectionsOut", &StoichWrapper::getMolConnectionsSrc, 
+		"", 1 ),
+	new SingleSrc2Finfo< int, Element* >(
+		"reacConnectionOut", &StoichWrapper::getReacConnectionSrc, 
+		"", 1 ),
+	new SingleSrc2Finfo< int, Element* >(
+		"enzConnectionOut", &StoichWrapper::getEnzConnectionSrc, 
+		"", 1 ),
+	new SingleSrc2Finfo< int, Element* >(
+		"mmEnzConnectionOut", &StoichWrapper::getMmEnzConnectionSrc, 
+		"", 1 ),
 ///////////////////////////////////////////////////////
 // MsgDest definitions
 ///////////////////////////////////////////////////////
@@ -70,6 +94,9 @@ Finfo* StoichWrapper::fieldArray_[] =
 	new SharedFinfo(
 		"integrate", &StoichWrapper::getIntegrateConn,
 		"integrateIn, allocateOut, reinitIn" ),
+	new SharedFinfo(
+		"hub", &StoichWrapper::getHubConn,
+		"molSizesOut, rateSizesOut, rateTermInfoOut, molConnectionsOut, reacConnectionOut, enzConnectionOut, mmEnzConnectionOut" ),
 };
 
 const Cinfo StoichWrapper::cinfo_(
@@ -88,6 +115,22 @@ const Cinfo StoichWrapper::cinfo_(
 
 
 ///////////////////////////////////////////////////
+// EvalField function definitions
+///////////////////////////////////////////////////
+
+string StoichWrapper::localGetPath() const
+{
+			return path_;
+}
+void StoichWrapper::localSetPath( string value ) {
+			setPathLocal( value );
+}
+int StoichWrapper::localGetRateVectorSize() const
+{
+			return rates_.size();
+}
+
+///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
 
@@ -101,10 +144,16 @@ Element* integrateConnStoichLookup( const Conn* c )
 	return reinterpret_cast< StoichWrapper* >( ( unsigned long )c - OFFSET );
 }
 
+Element* hubConnStoichLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( StoichWrapper, hubConn_ );
+	return reinterpret_cast< StoichWrapper* >( ( unsigned long )c - OFFSET );
+}
+
 ///////////////////////////////////////////////////
 // Other function definitions
 ///////////////////////////////////////////////////
-
 unsigned int countRates( Element* e, bool useOneWayReacs )
 {
 	if ( e-> cinfo()->name() == "Reaction" ) {
@@ -116,24 +165,21 @@ unsigned int countRates( Element* e, bool useOneWayReacs )
 	if ( e->cinfo()->name() == "Enzyme" ) {
 		int mode = 0;
 		if ( Ftype1< int >::get( e, "mode", mode ) ) {
-			if ( mode == 0 ) { // Regular enzyme with explicit complex
+			if ( mode == 0 ) { 
 				if ( useOneWayReacs )
 					return 3;
 				else
 					return 2;
-			} else { // Classical MM enzyme, always single rate
+			} else { 
 				return 1;
 			}
 		}
 	}
 	return 0;
 }
-
-// This builds the entire reaction system and stoichiometry matrix
 void StoichWrapper::setPathLocal( const string& value )
 {
 	path_ = value;
-
 	vector< Element* > ret;
 	vector< Element* >::iterator i;
 	Element::startFind( path_, ret );
@@ -142,9 +188,9 @@ void StoichWrapper::setPathLocal( const string& value )
 	vector< Element* > sumTotVec;
 	int mode;
 	unsigned int numRates = 0;
-
+	const Cinfo* molCinfo = Cinfo::find( "Molecule" );
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		if ( ( *i )->cinfo()->name() == "Molecule" ) {
+		if ( ( *i )->cinfo() == molCinfo ) {
 			if ( Ftype1< int >::get( *i, "mode", mode ) ) {
 				if ( mode == 0 ) {
 					varMolVec.push_back( *i );
@@ -158,20 +204,33 @@ void StoichWrapper::setPathLocal( const string& value )
 			numRates += countRates( *i, useOneWayReacs_ );
 		}
 	}
-
-	// We need all the vectors set to enter things into the S_
-	// vector in the right order, and to do size calculations,
-	// and to set up the indexing for the molMap.
-	// These all have to be done before the reactions come in
-	// so that they can be indexed suitably.
 	setupMols( varMolVec, bufVec, sumTotVec );
 	N_.setSize( varMolVec.size() , numRates );
 	v_.resize( numRates, 0.0 );
-
+	rateTermInfoSrc_.send( &rates_, useOneWayReacs_ );
+	const Cinfo* reacCinfo = Cinfo::find( "Reaction" );
+	const Cinfo* enzCinfo = Cinfo::find( "Enzyme" );
+	int nReac = 0;
+	int nEnz = 0;
+	int nMmEnz = 0;
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		if ( ( *i )->cinfo()->name() == "Reaction" ) {
+		if ( ( *i )->cinfo() == reacCinfo ) {
+			nReac++;
+		} else if ( ( *i )->cinfo() == enzCinfo ) {
+			int mode = 0;
+			if ( Ftype1< int >::get( *i, "mode", mode ) ) {
+				if ( mode == 0 )
+					nEnz++;
+				else
+					nMmEnz++;
+			}
+		}
+	}
+	rateSizesSrc_.send( nReac, nEnz, nMmEnz );
+	for ( i = ret.begin(); i != ret.end(); i++ ) {
+		if ( ( *i )->cinfo() == reacCinfo ) {
 			addReac( *i );
-		} else if ( ( *i )->cinfo()->name() == "Enzyme" ) {
+		} else if ( ( *i )->cinfo() == enzCinfo ) {
 			int mode = 0;
 			if ( Ftype1< int >::get( *i, "mode", mode ) ) {
 				if ( mode == 0 )
@@ -187,19 +246,8 @@ void StoichWrapper::setPathLocal( const string& value )
 			addRate( *i );
 		}
 	}
-
-	cout << N_;
-
 	setupReacSystem();
 }
-
-
-// Fill in the molecules. Other than initial values, we will also
-// have to keep track of the element pointers for a while because
-// we need to refer back to the elements for setting up the sumtots.
-// Also we will later have to use the element pointers for doing the
-// reaction configuration.
-
 void StoichWrapper::setupMols(
 	vector< Element* >& varMolVec,
 	vector< Element* >& bufVec,
@@ -208,53 +256,48 @@ void StoichWrapper::setupMols(
 {
 	Field nInitField = Cinfo::find( "Molecule" )->field( "nInit" );
 	vector< Element* >::iterator i;
+	vector< Element* >elist;
 	int j = 0;
 	double nInit;
 	nVarMols_ = varMolVec.size();
 	nSumTot_  = sumTotVec.size();
 	nBuffered_ = bufVec.size();
 	nMols_ = nVarMols_ + nSumTot_ + nBuffered_;
-
 	S_.resize( nMols_ );
 	Sinit_.resize( nMols_ );
 	for ( i = varMolVec.begin(); i != varMolVec.end(); i++ ) {
 		Ftype1< double >::get( *i, nInitField.getFinfo(), nInit );
 		Sinit_[j] = nInit;
 		molMap_[ *i ] = j++;
+		elist.push_back( *i );
 	}
-
 	for ( i = sumTotVec.begin(); i != sumTotVec.end(); i++ ) {
 		Ftype1< double >::get( *i, nInitField.getFinfo(), nInit );
 		Sinit_[j] = nInit;
 		molMap_[ *i ] = j++;
+		elist.push_back( *i );
 	}
-
 	for ( i = bufVec.begin(); i != bufVec.end(); i++ ) {
 		Ftype1< double >::get( *i, nInitField.getFinfo(), nInit );
 		Sinit_[j] = nInit;
 		molMap_[ *i ] = j++;
+		elist.push_back( *i );
 	}
-
 	for ( i = sumTotVec.begin(); i != sumTotVec.end(); i++ ) {
 		addSumTot( *i );
 	}
+	molSizesSrc_.send( nVarMols_, nBuffered_, nSumTot_ );
+	molConnectionsSrc_.send( &S_, &Sinit_, &elist );
 }
-
 void StoichWrapper::addSumTot( Element* e )
 {
-	// Here we traverse the list of messages to find the source
-	// element, and fill up the data struct/array for the sumtot
-	// calculations
 	vector< Field > srclist;
 	vector< Field >::iterator i;
 	Field srcField = e->field( "sumTotalIn" );
 	srcField.dest( srclist );
-
 	for (i = srclist.begin() ; i != srclist.end(); i++ ) {
-		
 	}
 }
-
 unsigned int StoichWrapper::findReactants( 
 	Element* e, const string& msgFieldName, 
 	vector< const double* >& ret )
@@ -265,7 +308,6 @@ unsigned int StoichWrapper::findReactants(
 	map< const Element*, int >::iterator j;
 	Field srcField = e->field( msgFieldName );
 	srcField.src( srclist );
-
 	for (i = srclist.begin() ; i != srclist.end(); i++ ) {
 		Element* src = i->getElement();
 		j = molMap_.find( src );
@@ -279,7 +321,6 @@ unsigned int StoichWrapper::findReactants(
 	}
 	return ret.size();
 }
-
 unsigned int StoichWrapper::findProducts( 
 	Element* e, const string& msgFieldName, 
 	vector< const double* >& ret )
@@ -290,7 +331,6 @@ unsigned int StoichWrapper::findProducts(
 	map< const Element*, int >::iterator j;
 	Field prdField = e->field( msgFieldName );
 	prdField.dest( prdlist );
-
 	for (i = prdlist.begin() ; i != prdlist.end(); i++ ) {
 		Element* prd = i->getElement();
 		j = molMap_.find( prd );
@@ -304,7 +344,6 @@ unsigned int StoichWrapper::findProducts(
 	}
 	return ret.size();
 }
-
 class ZeroOrder* makeHalfReaction( double k, vector< const double*> v )
 {
 	class ZeroOrder* ret = 0;
@@ -324,16 +363,12 @@ class ZeroOrder* makeHalfReaction( double k, vector< const double*> v )
 	}
 	return ret;
 }
-
-// Assigns stoichiometry terms for half a reaction. Always have to
-// add the products separately for this reacNum.
 void StoichWrapper::fillHalfStoich( const double* baseptr, 
 	vector< const double* >& reactant, int sign, int reacNum )
 {
 	vector< const double* >::iterator i;
 	const double* lastptr = 0;
 	int n = 1;
-
 	sort( reactant.begin(), reactant.end() );
 	lastptr = reactant.front();
 	for (i = reactant.begin() + 1; i != reactant.end(); i++) {
@@ -348,7 +383,6 @@ void StoichWrapper::fillHalfStoich( const double* baseptr,
 	}
 	N_.set( lastptr - baseptr, reacNum, sign * n );
 }
-
 void StoichWrapper::fillStoich( 
 	const double* baseptr, 
 	vector< const double* >& sub, vector< const double* >& prd, 
@@ -357,12 +391,6 @@ void StoichWrapper::fillStoich(
 	fillHalfStoich( baseptr, sub, 1 , reacNum );
 	fillHalfStoich( baseptr, prd, -1 , reacNum );
 }
-
-// This sets up rate terms.
-// Also want it to set up Stoichiometry matrix. 
-// Entry for a given substrate is at i = substrate index, and 
-// j = reac #
-
 void StoichWrapper::addReac( Element* e )
 {
 	vector< const double* > sub;
@@ -380,7 +408,7 @@ void StoichWrapper::addReac( Element* e )
 		if ( findReactants( e, "prdIn", prd ) > 0 ) {
 			breac = makeHalfReaction( kb, prd );
 		}
-
+		reacConnectionSrc_.send( rates_.size(), e );
 		if ( useOneWayReacs_ ) {
 			if ( freac ) {
 				fillStoich( &S_[0], sub, prd, rates_.size() );
@@ -390,7 +418,7 @@ void StoichWrapper::addReac( Element* e )
 				fillStoich( &S_[0], prd, sub, rates_.size() );
 				rates_.push_back( breac );
 			}
-		} else { // combine into a a single rate term.
+		} else { 
 			fillStoich( &S_[0], sub, prd, rates_.size() );
 			if ( freac && breac ) {
 				rates_.push_back( 
@@ -404,7 +432,6 @@ void StoichWrapper::addReac( Element* e )
 		++nReacs_;
 	}
 }
-
 bool StoichWrapper::checkEnz( Element* e,
 		vector< const double* >& sub,
 		vector< const double* >& prd,
@@ -443,7 +470,6 @@ bool StoichWrapper::checkEnz( Element* e,
 	}
 	return 1;
 }
-
 void StoichWrapper::addEnz( Element* e )
 {
 	vector< const double* > sub;
@@ -462,6 +488,7 @@ void StoichWrapper::addEnz( Element* e )
 		freac = makeHalfReaction( k1, sub );
 		breac = makeHalfReaction( k2, cplx );
 		catreac = makeHalfReaction( k3, cplx );
+		enzConnectionSrc_.send( rates_.size(), e );
 		if ( useOneWayReacs_ ) {
 			fillStoich( &S_[0], sub, cplx, rates_.size() );
 			rates_.push_back( freac );
@@ -469,7 +496,7 @@ void StoichWrapper::addEnz( Element* e )
 			rates_.push_back( breac );
 			fillStoich( &S_[0], cplx, prd, rates_.size() );
 			rates_.push_back( catreac );
-		} else { // combine into a a single rate term.
+		} else { 
 			fillStoich( &S_[0], sub, cplx, rates_.size() );
 			rates_.push_back( 
 				new BidirectionalReaction( freac, breac ) );
@@ -479,7 +506,6 @@ void StoichWrapper::addEnz( Element* e )
 		nEnz_++;
 	}
 }
-
 void StoichWrapper::addMmEnz( Element* e )
 {
 	vector< const double* > sub;
@@ -491,8 +517,6 @@ void StoichWrapper::addMmEnz( Element* e )
 	double k2;
 	double k3;
 	if ( checkEnz( e, sub, prd, enz, cplx, k1, k2, k3, 1 ) ) {
-		// This is unidirectional, so we do not distinguish between
-		// the options on the useOneWayReacs flag.
 		double Km = 1.0;
 		if ( k1 > EPSILON ) {
 			Km = ( k2 + k3 ) / k1;
@@ -501,21 +525,18 @@ void StoichWrapper::addMmEnz( Element* e )
 			return;
 		}
 		fillStoich( &S_[0], sub, prd, rates_.size() );
-
 		sublist = makeHalfReaction( 1.0, sub );
+		mmEnzConnectionSrc_.send( rates_.size(), e );
 		rates_.push_back( new MMEnzyme( Km, k3, enz[0], sublist ) );
 		nMmEnz_++;
 	}
 }
-
 void StoichWrapper::addTab( Element* e )
 {
 }
-
 void StoichWrapper::addRate( Element* e )
 {
 }
-
 void StoichWrapper::setupReacSystem()
 {
 }

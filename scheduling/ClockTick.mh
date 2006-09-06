@@ -8,7 +8,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-class ClockTick:
+class ClockTick
 {
 	public:
 	author:
@@ -16,40 +16,94 @@ class ClockTick:
 	description:
 		ClockTick class. Controls execution of objects on a given dt.
 	field:
-		double dt;
-		int stage;
-		double nextt;
+		int stage = 0;
+		double nextt = 0.0;
 		double epsnextt;
 		double max_clocks;
-		string path;
 		double nclocks;
 
+	eval_field:
+		string getPath() {
+			return path_;
+		}
+		void setPath( string value ) {
+			innerSetPath( value );
+		}
+
+		double getDt() {
+			return dt_;
+		}
+		void setDt( double value ) {
+			dt_ = value;
+			dtSrc_.send( dt_, dtSrc_.conn() );
+		}
+		
 	shared:
-		single clock( processIn, reinitIn, reschedIn );
-		multi tick( processOut, reinitOut );
+		single clock( processIn, reinitIn, reschedIn, dtOut );
+		multi process( processOut, reinitOut );
 		multi solverStep( passStepOut, checkStepIn );
 
 	src:
 		multi process( ProcInfo ); // Connect up to child operations.
-		multi reinit( ProcInfo ); // Connect up to child operations.
+		multi reinit(); // Connect up to child operations.
 		multi passStep( double t );	// Allow solver to proceed
+		single dt( double dt, Conn* c ); // sends out dt. Not sure why.
 
 	dest:
 		// Solver asks if anything is pending before proceeding.
 		multi checkStep( double t ) {
-			if ( t <= nextt )
+			if ( t <= nextt_ )
 				passStep( t );
 		}
 		single process( ProcInfo info ) {
 			process( info );
 		}
 		single reinit( ) {
-			nextt = 0.0;
-			epsnextt = 0.0;
+			nextt_ = 0.0;
+			epsnextt_ = 0.0;
 			reinit( );
 		}
-		single resched( );
+		single resched( ) {
+			innerSetPath( path_ );
+		}
 
 	private:
+		double dt_;
 		bool terminate_;
+
+	private_wrapper:
+		string path_;
+		void innerSetPath( const string& path );
 };
+
+/////////////////////////////////////////////////////////////////
+// Wrapper cpp stuff here.
+/////////////////////////////////////////////////////////////////
+
+// Assumes the path is a wildcard field path, that is, has a
+// finfo name as the last part of the path string.
+void ClockTickWrapper::innerSetPath( const string& path )
+{
+	path_ = path;
+	size_t pos = path.find_last_of("/");
+	if ( pos == string::npos || pos == path.length()) {
+		cerr << "Error:ClockTickWrapper::innerSetPath: no finfo name in" << path << "\n"; 
+		return;
+	}
+	string finfoName = path.substr( pos + 1 );
+	string pathHead = path.substr( 0, pos );
+
+	vector< Element* > ret;
+	vector< Element* >::iterator i;
+	Element::startFind( pathHead, ret );
+	processSrc_.dropAll();
+	reinitSrc_.dropAll();
+
+	Field src = field( "process" );
+	for ( i = ret.begin(); i != ret.end(); i++ ) {
+		if ( !( *i )->isSolved() ) {
+			Field dest = ( *i )->field( finfoName );
+			src.add( dest );
+		}
+	}
+}

@@ -51,6 +51,8 @@ void NMsgSrc::addRecvFunc( RecvFunc func, unsigned long position )
 	if ( position == rfuncs_.size() ) {
 		rfuncs_.push_back( func );
 	} else {
+		rfuncs_.resize( position + 1 );
+		rfuncs_[position] = func;
 		cerr << "Error: NMsgSrc::addRecvFunc: position = " << position << " > rfuncs_.size() = " << rfuncs_.size() << " on\n";
 		cerr << c_->parent()->path() << "\n";
 	}
@@ -97,6 +99,17 @@ RecvFunc NMsgSrc::targetFunc( unsigned long msgno ) const
 		return rfuncs_[ i ];
 	cerr << "Error: NMsgSrc::targetFunc: i > size: " << i << " > " <<
 		rfuncs_.size() << ", msgno = " << msgno << "\n";
+	return 0;
+}
+
+// Returns target func corresponding to the specified msgno
+// Note that this is NOT the index into the rfuncs_array.
+RecvFunc NMsgSrc::targetFuncFromSlot( unsigned long slot ) const
+{
+	if ( rfuncs_.size() > slot )
+		return rfuncs_[ slot ];
+	cerr << "Error: NMsgSrc::targetFuncFromSlot: slot > size: " << slot << " > " <<
+		rfuncs_.size() << "\n";
 	return 0;
 }
 

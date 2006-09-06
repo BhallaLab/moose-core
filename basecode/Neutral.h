@@ -10,8 +10,6 @@
 #ifndef _P_ELEMENT_H
 #define _P_ELEMENT_H
 
-#include "header.h"
-
 class Neutral: public Element {
 	public:
 		Neutral(const string& name_arg)

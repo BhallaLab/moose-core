@@ -83,7 +83,7 @@ void Src::printWrapperH( const string& className, ofstream& fout )
 	fout << "		static ";
 	if ( type_ == "single" )
 		fout << "SingleMsgSrc";
-	else 
+	else // This includes both multi and solve.
 		fout << "NMsgSrc";
 	fout << "* get" << capsName << "Src( Element* e ) {\n";
 

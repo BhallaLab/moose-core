@@ -464,7 +464,71 @@ MOOSE currently distributes into lots of classes. So you will certainly
 need to know the details of the data structures that the solver takes over,
 and also obviously need a very good idea of the computations you wish to 
 undertake. MOOSE provides some special messaging facilities for making this
-process easier. I will fill in the rest of this section later.
+process easier.
+Solvers should be divided into three sections, and implemented as 3 classes:
+- Numerical engine(s)
+- Stepper, data representation and construction
+- Data Hub or zombie master.
+
+These are functional and implementation-level subdivisions. There should
+be separate objects for each section, and in many cases there will be
+multiple options for the first section (numerical engine) while retaining
+the same Data and Hub sections.
+
+2.1.2.1 Numerical Engine
+This should be build purely based on numerical and efficiency considerations.
+The rest of the system is in place to deal with minor issues of getting
+at the data. There are two different use cases here:
+Tightly coupled:
+Often the numerical engine is tightly coupled to a specific data
+representation and needs to be designed together.
+Examples are the hsolver, where much of the efficiency comes from 
+optimized memory ogranization.
+Generic:
+A very large class of ODE integration problems can be computed where y and y'
+arrays are the only things that the integration engine needs to know about the
+system. There are many generic solvers for such cases. The GNU Scientific
+Library provides some, and there are special variants such as LSODA. Here
+the numerical engine is easy to plug and replace. The requirement is that
+the step advancer should be provided by the developer of the solver,
+and should of course be very efficient.
+
+2.1.2.2: Stepper, data, and construction
+This object is a bit of a mix. At the numerical end, it has to efficiently
+compute the value for the next time-step. At the data end, it has to have
+a data representation to support this. At the construction end, it has to
+be able to build up the data representation by traversing the objects
+and messages in the basal MOOSE representation. Can one separate it out?
+Unfortunately, this is hard. The data structure is at the core of it all,
+and the operations of setup and step are both tightly tied to this data
+structure. As noted above, in some cases the numerical engine is also
+tied rather deeply into this.
+
+2.1.2.3: Data hub, AKA zombie master.
+This object controls the run-time interface to the rest of the simulation.
+It takes over the functions and messaging of all the objects which are being
+represented in the solver. It figures out how to map these objects back
+and forth into the solver arrays and data structures. It handles special
+messages to the zombified objects that pass this information back and forth.
+It tracks when periodic messages need to be dispatched or handled.
+
+2.1.2.4: Overall organization.
+Nominally, at run time, things look like this:
+Elements <===> Hub <===> Stepper <===> Numerical engine.
+
+where the <==> are messages going back and forth.
+
+At setup time, the stepper initiates contact with the elements, and extracts
+what it needs to know from them. It then passes configuration messages to
+the Hub, (typically pointers to vectors), so that the hub can go out and
+set up its runtime messages. Finally, it ties up to the numerical engine.
+The example implementation is in the kinetics directory.
+
+An alternative architecture may be to have the Hub initiate the model
+building process. If this is done then the hub becomes rather fat, but this
+may be reasonable if the stepper operation is complex or if there is an
+initial data representation that is further refined for the stepper.
+
 
 2.1.3 Core Moose functionality.
 Here you delve into the MOOSE architecture. This chapter is for you if you
@@ -813,7 +877,11 @@ Each is accessed through the same API, though they do very different things.
 2.5.7 Solver messages
 	These connect a solver to an object; they mediate the takeover of
 	object function and interconnects by the solver.
-	I won't write about these yet because I haven't implemented them.
+	The only difference between these and other messages is that they
+	keep track of the lookup object index. This is used both to 
+	access specific fields in the solver object, and to be able to
+	reply to the originating object. Several of these attributes are
+	also present in synapse and return messages.
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////

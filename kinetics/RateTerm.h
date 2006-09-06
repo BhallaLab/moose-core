@@ -21,15 +21,47 @@ class RateTerm
 		RateTerm() {;}
 		virtual ~RateTerm() {;}
 		virtual double operator() () const = 0;
+		virtual void setRates( double k1, double k2 ) = 0;
+};
+
+// Base class MMEnzme for the purposes of setting rates
+// Pure base class: cannot be instantiated, but useful as a handle.
+class MMEnzymeBase: public RateTerm
+{
+	public:
+		MMEnzymeBase( double Km, double kcat )
+			: Km_( Km ), kcat_( kcat )
+		{
+			;
+		}
+
+		void setKm( double Km ) {
+			if ( Km > 0.0 )
+				Km_ = Km;
+		}
+
+		void setKcat( double kcat ) {
+			if ( kcat > 0 )
+				kcat_ = kcat;
+		}
+
+		void setRates( double Km, double kcat ) {
+			setKm( Km );
+			setKcat( kcat );
+		}
+
+	protected:
+		double Km_;
+		double kcat_;
 };
 
 // Single substrate MMEnzyme: by far the most common.
-class MMEnzyme1: public RateTerm
+class MMEnzyme1: public MMEnzymeBase
 {
 	public:
 		MMEnzyme1( double Km, double kcat, 
 			const double* enz, const double* sub )
-			: Km_( Km ), kcat_( kcat ), enz_( enz ), sub_( sub )
+			: MMEnzymeBase( Km, kcat ), enz_( enz ), sub_( sub )
 		{
 			;
 		}
@@ -37,19 +69,18 @@ class MMEnzyme1: public RateTerm
 		double operator() () const {
 			return ( -kcat_ * *sub_ * *enz_ ) / ( Km_ + *sub_ );
 		}
+
 	private:
-		double Km_;
-		double kcat_;
 		const double *enz_;
 		const double *sub_;
 };
 
-class MMEnzyme: public RateTerm
+class MMEnzyme: public MMEnzymeBase
 {
 	public:
 		MMEnzyme( double Km, double kcat, 
 			const double* enz, RateTerm* sub )
-			: Km_( Km ), kcat_( kcat ), enz_( enz ), substrates_( sub )
+			: MMEnzymeBase( Km, kcat ), enz_( enz ), substrates_( sub )
 		{
 			;
 		}
@@ -62,8 +93,6 @@ class MMEnzyme: public RateTerm
 			return ( -sub * kcat_ * *enz_ ) / ( Km_ + sub );
 		}
 	private:
-		double Km_;
-		double kcat_;
 		const double *enz_;
 		RateTerm* substrates_;
 };
@@ -76,6 +105,9 @@ class ExternReac: public RateTerm
 		double operator() () const {
 			double ret = 0.0;
 			return ret;
+		}
+		void setRates( double k1, double k2 ) {
+			; // Dummy function to keep compiler happy
 		}
 	private:
 };
@@ -92,7 +124,12 @@ class ZeroOrder: public RateTerm
 		}
 
 		void setK( double k ) {
-			k_ = k;
+			if ( k >= 0.0 )
+				k_ = k;
+		}
+
+		void setRates( double k1, double k2 ) {
+			setK( k1 );
 		}
 	protected:
 		double k_;
@@ -170,6 +207,12 @@ class BidirectionalReaction: public RateTerm
 		double operator() () const {
 			return (*forward_)() - (*backward_)();
 		}
+
+		void setRates( double kf, double kb ) {
+			forward_->setK( kf );
+			backward_->setK( kb );
+		}
+
 	private:
 		ZeroOrder* forward_;
 		ZeroOrder* backward_;

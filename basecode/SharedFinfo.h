@@ -54,6 +54,11 @@ class SharedFinfo: public Finfo
 		RecvFunc targetFunc( Element* e, unsigned long i ) const {
 			return 0;
 		}
+
+		RecvFunc targetFuncFromSlot( Element* e, unsigned long i ) const {
+			cerr << "Error: SharedFinfo::targetFuncFromSlot: Can't get this\n";
+			return 0;
+		}
 		
 		// returns number of matches
 		unsigned long matchRemoteFunc( Element* e, RecvFunc rf ) const

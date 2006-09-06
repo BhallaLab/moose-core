@@ -23,7 +23,7 @@ OBJ = \
 	Stoich.o	\
 	SparseMatrix.o	\
 	ForwardEulerWrapper.o	\
-	KsolveWrapper.o	\
+	KineticHubWrapper.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -57,6 +57,8 @@ SparseMatrix.o: SparseMatrix.h
 Stoich.o: Stoich.h RateTerm.h SparseMatrix.h
 ForwardEulerWrapper.o: ForwardEuler.h ForwardEulerWrapper.h
 KsolveWrapper.o: Ksolve.h KsolveWrapper.h
+Ksolve.o: Ksolve.h
+KineticHubWrapper.o: KineticHub.h KineticHubWrapper.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c

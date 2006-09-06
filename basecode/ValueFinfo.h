@@ -36,6 +36,8 @@ extern Finfo* obtainValueRelay(
 	Finfo *( *createValueRelayFinfo )( Field& ),
 	Finfo* f, Element* e, bool useSharedConn );
 
+extern void solverUpdate( const Element* e, const Finfo* f, SolverOp mode );
+
 //////////////////////////////////////////////////////////////////////
 // Here are routines for creating various templated Finfos
 //////////////////////////////////////////////////////////////////////
@@ -77,6 +79,7 @@ template <class T> class ValueFinfo: public ValueFinfoBase<T>
 		}
 
 		T value(const Element* e) const {
+			solverUpdate( e, this, SOLVER_GET );
 			if ( lookup_ == 0 )
 				return get_( e );
 			else {
@@ -92,6 +95,7 @@ template <class T> class ValueFinfo: public ValueFinfoBase<T>
 				Element* e = lookup_( c->parent(), objIndex_ );
 				RelayConn rc( e, this );
 				localSet_( &rc, value );
+				solverUpdate( e, this, SOLVER_SET );
 			}
 		}
 

@@ -10,8 +10,6 @@
 #ifndef _MSGSRC_H
 #define _MSGSRC_H
 
-#include "header.h"
-
 template <class T> void dummyFunc( Conn* c, T v)
 {
 	;
@@ -155,6 +153,14 @@ class SingleMsgSrc
 			return rfunc_;
 		}
 
+		RecvFunc targetFuncFromSlot( unsigned long slot ) const {
+			return rfunc_;
+		}
+
+		unsigned long nFuncs() const {
+			return ( ( rfunc_ != 0 ) && ( rfunc_ != dummyFunc0) );
+		}
+
 		Conn* conn() const {
 			return c_;
 		}
@@ -236,12 +242,16 @@ template < class T1, class T2, class T3 > class SingleMsgSrc3:
 class NMsgSrc
 {
 	public:
-		NMsgSrc( MultiConn* c )
+		NMsgSrc( BaseMultiConn* c )
 			: c_( c )
 		{
 			rfuncs_.resize( 0 );
 		}
 		bool add( RecvFunc rf, Conn* target );
+		void resize( vector< unsigned long >& segments ) {
+				c_->resize( segments );
+		}
+
 		// bool drop( Conn* target );
 		bool funcDrop( const Conn* target );
 
@@ -262,6 +272,10 @@ class NMsgSrc
 		unsigned long matchRemoteFunc( RecvFunc rf ) const;
 
 		RecvFunc targetFunc( unsigned long i ) const;
+		RecvFunc targetFuncFromSlot( unsigned long slot ) const;
+		unsigned long nFuncs() const {
+			return rfuncs_.size();
+		}
 
 		Conn* conn() const {
 			return c_;
@@ -273,13 +287,13 @@ class NMsgSrc
 	
 	protected:
 		vector< RecvFunc >rfuncs_;
-		MultiConn* c_;
+		BaseMultiConn* c_;
 };
 
 class NMsgSrc0: public NMsgSrc
 {
 	public:
-		NMsgSrc0( MultiConn* c )
+		NMsgSrc0( BaseMultiConn* c )
 			: NMsgSrc( c )
 		{
 			;
@@ -296,7 +310,7 @@ class NMsgSrc0: public NMsgSrc
 template <class T> class NMsgSrc1: public NMsgSrc
 {
 	public:
-		NMsgSrc1( MultiConn* c )
+		NMsgSrc1( BaseMultiConn* c )
 			: NMsgSrc( c )
 		{
 			;
@@ -318,12 +332,40 @@ template <class T> class NMsgSrc1: public NMsgSrc
 				for_each( c_->begin( i ), c_->end( i ), op );
 			}
 		}
+
+		// This may be faster on two counts:
+		// - One less indirection per cycle to look up the conn
+		// - Contiguous addresses for the Conns.
+		/*
+		void sendSolve( T v ) const
+		{
+			vector< SolverConn >::iterator j = vec_.begin();
+			for (unsigned long i = 0; i < rfuncs_.size(); i++) {
+				void( * )( Conn*, T ) rf =
+					reinterpret_cast< void ( * )( Conn*, T ) >(
+						rfuncs_[i] );
+				vector< SolverConn >::iterator k = 
+					vec_.begin() + segments_[i];
+				for (; j < k; j++)
+					rf( j, v );
+			}
+		}
+		*/
+
+		void sendTo( unsigned long i, T v ) const
+		{
+			Conn* target = c_->target( i );
+			if ( target ) {
+				reinterpret_cast< void ( * )( Conn*, T ) >
+					( rfuncs_[ c_->index( i ) ] )( target, v);
+			}
+		}
 };
 
 template < class T1, class T2 > class NMsgSrc2: public NMsgSrc
 {
 	public:
-		NMsgSrc2( MultiConn* c )
+		NMsgSrc2( BaseMultiConn* c )
 			: NMsgSrc( c )
 		{
 			;
@@ -340,13 +382,38 @@ template < class T1, class T2 > class NMsgSrc2: public NMsgSrc
 				for_each( c_->begin( i ), c_->end( i ), op );
 			}
 		}
+
+		/*
+		void sendSolve( T1 v1, T2 v2 ) const
+		{
+			vector< SolverConn >::iterator j = vec_.begin();
+			for (unsigned long i = 0; i < rfuncs_.size(); i++) {
+				void( * )( Conn*, T1, T2 ) rf =
+					reinterpret_cast< void ( * )( Conn*, T1, T2 ) >(
+						rfuncs_[i] );
+				vector< SolverConn >::iterator k = 
+					vec_.begin() + segments_[i];
+				for (; j < k; j++)
+					rf( j, v1, v2 );
+			}
+		}
+		*/
+
+		void sendTo( unsigned long i, T1 v1, T2 v2 ) const
+		{
+			Conn* target = c_->target( i );
+			if ( target ) {
+				reinterpret_cast< void ( * )( Conn*, T1, T2 ) >
+					( rfuncs_[ c_->index( i ) ] )( target, v1, v2);
+			}
+		}
 };
 
 template < class T1, class T2, class T3 > class NMsgSrc3:
 	public NMsgSrc
 {
 	public:
-		NMsgSrc3( MultiConn* c )
+		NMsgSrc3( BaseMultiConn* c )
 			: NMsgSrc( c )
 		{
 			;
@@ -361,6 +428,31 @@ template < class T1, class T2, class T3 > class NMsgSrc3:
 						rfuncs_[i] )
 				);
 				for_each( c_->begin( i ), c_->end( i ), op );
+			}
+		}
+
+		/*
+		void sendSolve( T1 v1, T2 v2, T3 v3 ) const
+		{
+			vector< SolverConn >::iterator j = vec_.begin();
+			for (unsigned long i = 0; i < rfuncs_.size(); i++) {
+				void( * )( Conn*, T1, T2, T3 ) rf =
+					reinterpret_cast< void ( * )( Conn*, T1, T2, T3 ) >(
+						rfuncs_[i] );
+				vector< SolverConn >::iterator k = 
+					vec_.begin() + segments_[i];
+				for (; j < k; j++)
+					rf( j, v1, v2, v3 );
+			}
+		}
+		*/
+
+		void sendTo( unsigned long i, T1 v1, T2 v2, T3 v3 ) const
+		{
+			Conn* target = c_->target( i );
+			if ( target ) {
+				reinterpret_cast< void ( * )( Conn*, T1, T2, T3 ) >
+					( rfuncs_[ c_->index( i ) ] )( target, v1, v2, v3);
 			}
 		}
 };

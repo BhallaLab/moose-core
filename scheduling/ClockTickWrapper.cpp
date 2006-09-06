@@ -1,3 +1,13 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
 #include "header.h"
 #include "ClockTick.h"
 #include "ClockTickWrapper.h"
@@ -8,9 +18,6 @@ Finfo* ClockTickWrapper::fieldArray_[] =
 ///////////////////////////////////////////////////////
 // Field definitions
 ///////////////////////////////////////////////////////
-	new ValueFinfo< double >(
-		"dt", &ClockTickWrapper::getDt, 
-		&ClockTickWrapper::setDt, "double" ),
 	new ValueFinfo< int >(
 		"stage", &ClockTickWrapper::getStage, 
 		&ClockTickWrapper::setStage, "int" ),
@@ -23,12 +30,18 @@ Finfo* ClockTickWrapper::fieldArray_[] =
 	new ValueFinfo< double >(
 		"max_clocks", &ClockTickWrapper::getMax_clocks, 
 		&ClockTickWrapper::setMax_clocks, "double" ),
+	new ValueFinfo< double >(
+		"nclocks", &ClockTickWrapper::getNclocks, 
+		&ClockTickWrapper::setNclocks, "double" ),
+///////////////////////////////////////////////////////
+// EvalField definitions
+///////////////////////////////////////////////////////
 	new ValueFinfo< string >(
 		"path", &ClockTickWrapper::getPath, 
 		&ClockTickWrapper::setPath, "string" ),
 	new ValueFinfo< double >(
-		"nclocks", &ClockTickWrapper::getNclocks, 
-		&ClockTickWrapper::setNclocks, "double" ),
+		"dt", &ClockTickWrapper::getDt, 
+		&ClockTickWrapper::setDt, "double" ),
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
@@ -69,7 +82,7 @@ Finfo* ClockTickWrapper::fieldArray_[] =
 		"clock", &ClockTickWrapper::getClockConn,
 		"processIn, reinitIn, reschedIn, dtOut" ),
 	new SharedFinfo(
-		"process", &ClockTickWrapper::getTickConn,
+		"process", &ClockTickWrapper::getProcessConn,
 		"processOut, reinitOut" ),
 	new SharedFinfo(
 		"solverStep", &ClockTickWrapper::getSolverStepConn,
@@ -86,11 +99,54 @@ const Cinfo ClockTickWrapper::cinfo_(
 	&ClockTickWrapper::create
 );
 
-///////////////////////////////////////////////////////
+///////////////////////////////////////////////////
 // Field function definitions
-///////////////////////////////////////////////////////
-// Assumes the path is a wildcard field path, that is, has a
-// finfo name as the last part of the path string.
+///////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////
+// EvalField function definitions
+///////////////////////////////////////////////////
+
+string ClockTickWrapper::localGetPath() const
+{
+			return path_;
+}
+void ClockTickWrapper::localSetPath( string value ) {
+			innerSetPath( value );
+}
+double ClockTickWrapper::localGetDt() const
+{
+			return dt_;
+}
+void ClockTickWrapper::localSetDt( double value ) {
+			dt_ = value;
+			dtSrc_.send( dt_, dtSrc_.conn() );
+}
+
+///////////////////////////////////////////////////
+// Dest function definitions
+///////////////////////////////////////////////////
+
+void ClockTickWrapper::reinitFuncLocal(  )
+{
+			nextt_ = 0.0;
+			epsnextt_ = 0.0;
+			reinitSrc_.send( );
+}
+///////////////////////////////////////////////////
+// Connection function definitions
+///////////////////////////////////////////////////
+Element* clockConnClockTickLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( ClockTickWrapper, clockConn_ );
+	return reinterpret_cast< ClockTickWrapper* >( ( unsigned long )c - OFFSET );
+}
+
+///////////////////////////////////////////////////
+// Other function definitions
+///////////////////////////////////////////////////
 void ClockTickWrapper::innerSetPath( const string& path )
 {
 	path_ = path;
@@ -101,30 +157,16 @@ void ClockTickWrapper::innerSetPath( const string& path )
 	}
 	string finfoName = path.substr( pos + 1 );
 	string pathHead = path.substr( 0, pos );
-
 	vector< Element* > ret;
 	vector< Element* >::iterator i;
 	Element::startFind( pathHead, ret );
 	processSrc_.dropAll();
 	reinitSrc_.dropAll();
-
 	Field src = field( "process" );
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		Field dest = ( *i )->field( finfoName );
-		src.add( dest );
+		if ( !( *i )->isSolved() ) {
+			Field dest = ( *i )->field( finfoName );
+			src.add( dest );
+		}
 	}
 }
-
-///////////////////////////////////////////////////////
-// Synapse function definitions
-///////////////////////////////////////////////////////
-///////////////////////////////////////////////////////
-// Connection function definitions
-///////////////////////////////////////////////////////
-Element* clockConnLookup( const Conn* c )
-{
-	static const unsigned long OFFSET =
-		FIELD_OFFSET ( ClockTickWrapper, clockConn_ );
-	return reinterpret_cast< ClockTickWrapper* >( ( unsigned long )c - OFFSET );
-}
-

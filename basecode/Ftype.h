@@ -114,6 +114,9 @@ template <class T> class Ftype1: public Ftype
 				if ( func ) {
 					RelayConn c( e, f );
 					func( &c, val );
+					// Sends the new value of f to the solver,
+					// if there is a solver and it is interested in f.
+					e->solverUpdate( f, SOLVER_SET );
 					return 1;
 				}
 			}
@@ -129,6 +132,9 @@ template <class T> class Ftype1: public Ftype
 			 ValueFinfoBase< T >* v =
 			 	dynamic_cast< ValueFinfoBase< T >* >( f );
 			if ( v ) {
+				// Asks the solver to update the field value,
+				// if there is a solver and it is interested in f.
+				e->solverUpdate( f, SOLVER_GET );
 				ret = v->value( e );
 				return 1;
 			}
@@ -226,6 +232,9 @@ template <class T1, class T2> class Ftype2: public Ftype
 					RelayConn c( e, f );
 					// SynConn< int > c( e );
 					func( &c, val1, val2 );
+					// Sends the new values of f to the solver,
+					// if there is a solver and it is interested in f.
+					e->solverUpdate( f, SOLVER_SET );
 					return 1;
 				}
 			}
@@ -287,6 +296,9 @@ template <class T1, class T2, class T3 > class Ftype3: public Ftype
 					RelayConn c( e, f );
 					// SynConn< int > c( e );
 					func( &c, val1, val2, val3 );
+					// Sends the new values of f to the solver,
+					// if there is a solver and it is interested in f.
+					e->solverUpdate( f, SOLVER_SET );
 					return 1;
 				}
 			}

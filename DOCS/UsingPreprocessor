@@ -1,0 +1,336 @@
+
+3. Writing new classes from scratch
+
+3.1 Designing the classes.
+MOOSE classes are designed both in terms of what calculations they do,
+and also in terms of how they will communicate with other classes. It usually
+takes a couple of iterations to get the classes nicely aligned with each
+other and with their internal calculations. Some considerations:
+
+- Never use pointers to other elements. This ruins the modularity of
+	MOOSE, makes messages non-portable to multiprocessors, introduces
+	dependencies between classes, and other horrible things. Messages
+	are designed specifically to handle all cases of inter-object
+	communication, and if there is some case which is not covered we
+	want to know about it.
+	Places where I break these rules:
+	Enzyme.mh: Here we need to create and destroy a child object depending
+	on the mode of the enzyme. I should be able to clean this up so
+	the pointer does not get used.
+	Solvers: Here we need to handle big lists of objects.
+- Use Messages (src and dest explained below) as function
+	interfaces when speed is a primary concern, or when you know
+	that a given message will almost always be used. 
+	Multi Messages have a starting run-time overhead of about 6 words,
+	and then less than 2 words per message.
+- Use SingleMessages whenever there is only one input/output likely. They
+	are smaller and faster than the Multi messages.
+	Single Messages have a fixed run-time overhead of 3 words.
+- Use Shared Messages whenever you have a set of messages that consistently
+	are used together. For example, PROCESS and REINIT are almost always
+	used together. AXIAL and RAXIAL are always together in compartment
+	models.  Shared messages save significantly on memory use.
+	It also makes the model building process simpler and less prone to
+	error.
+- Use Value Fields when you need access to a value or function, but only
+	occasionally or only through script assignments. You can always
+	connect messages to Fields using a relay, so you do not lose
+	flexibility, but relays are relatively slow and memory expensive.
+	There is no run-time overhead for Value Fields, but don't
+	unnecessarily expose private object state information.
+
+We'll assume we have a decent first design. Now on to the implementation.
+
+The internal calculations of most classes are typically straightforward
+C/C++. I will assume you know what you are doing here, so the focus of
+this chapter is on communication using the MOOSE framework. This part is also
+what makes the code look like exceptionally ugly C++.
+
+In order to make things a little more manageable, most MOOSE classes are set
+up as 4 files: 
+
+MyClass.h
+MyClass.cpp
+MyClassWrapper.h
+MyClassWrapper.cpp
+
+The first two are the core object class, and should handle the calculations
+independently of communications (if possible). They do not know about the
+MOOSE framework and can even be imports from other projects.
+It is the job of the Wrapper files to implement the MOOSE
+framework. This is done using dual inheritance, so that moose sees a
+composite of the base classes MyClass and Element, merged into 
+MyClassWrapper.
+
+Your calculations may be so simple that the MyClass.cpp can be left out,
+and all operations done using inline functions in MyClass.h. On the other
+hand, really big classes may need a more complicated file structure than
+listed above.
+
+Defining your calculations is the easy part. Now to the communications,
+handled by the Wrapper files.
+
+Because the C++ syntax for setting up the Wrapper files is particularly
+horrible, and because it entails a very detailed knowledge of the MOOSE
+programming interface, it is best not to do it by hand. Instead, MOOSE
+provides a preprocessor to generate these files. This program is called
+mpp.
+
+The MOOSE preprocessor mpp takes a C++ like header syntax that concisely 
+specifies MOOSE classes using special constructs to do with messaging and
+fields. It expands this into a full C++ class specification. The input of
+mpp is a single file with this header-like syntax: 
+MyClass.mh
+
+The output of mpp consists of 3 files:
+MyClass.h
+MyClassWrapper.h
+MyClassWrapper.cpp
+
+Note that MyClass.cpp is conspicuously absent. The idea is that MyClass
+handles the internals of the calculations, and so the preprocessor does
+not mess with it. The wrapper class is where mpp does its stuff.
+In many cases MyClass is sufficiently simple to be merged into MyClassWrapper. 
+Later: it may provide an option to mpp to generate such simple classes 
+automatically.
+
+Mpp is a work in progress, and there are many things it does not do at all
+or does not do well. The biggest issue at present is that it does not know
+how to deal with changes that you introduce into the .h and .cpp files,
+if you want to redo mpp. Given that the MOOSE basecode may change, it is
+a good idea to use your .mh files as the primary reference for the object,
+rather than fiddling with the generated code.
+
+
+3.3 Overview of using mpp
+The procedure for using mpp is as follows:
+1. Write out your header file: MyClass.h.
+2. Plan out the following six additional sections of the header
+	- public: This is copied over unchanged, and is the public interface
+		of your .h class.
+	- author: This is you, and optionally date and place.
+	- description: This is what the class does.
+	- field: This is a list of the fields that you want visible in MOOSE.
+	- shared: These are messages that share a connection.
+	- src: These are the message sources.
+	- dest: These are the message destinations
+	- synapse: These are synapses.
+	- returns: (Still to be implemented in the preprocessor). 
+		These are return messages,
+		used on an object which receives many independent requsts
+		for a function.
+	- private: This is copied over unchanged, and holds the private
+		fields of your .h class.
+	- private_wrapper: This too is copied over unchanged. It holds
+		private fields of the wrapper.h class
+	- The tail section: functions for Wrapper.cpp. Everything after the
+		closure of the mh class definition is copied over to the
+		Wrapper.cpp file.
+3. Fill in these sections using the syntax below. You will find that this
+	is pretty concise and compact, especially compared to the code it
+	generates.
+4. Rename your header file MyClass.mh. Make sure you don't have any existing
+	MyClass.h or MyClassWrapper files lying around. The preprocessor will
+	refuse to overwrite these files. You can force it to write out
+	files using the -f option, in which case it will add the suffix
+	.old 
+	to the existing files and create a new set. It WILL overwrite .old
+	files.
+5. Run: mpp MyClass
+6. Examine the generated code. Almost everything should be done for you, but
+	there will be cases where you will want to fine-tune stuff. If possible
+	make changes in the .mh file rather than in the generated files, so
+	as to keep the code fixing process as neat as possible.
+7. Update your Makefile and compile your new class.
+8. Test it.
+
+3.4 Details of mpp file
+The syntax of mpp is like this:
+
+class MyClass: public MyBaseClass
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Uma the Programmer, today's date, Uma's Institution.
+	description:
+		// Note that this comment appears in the code, but does not
+		// become part of the description string.
+		This is a test class. If it were a real class it would 
+		have been much the same.
+	field:
+		double Vm;
+		double Cm = 1e-6;	// initial value
+		double Rm;
+		const double pi; // Here we have a constant value
+		readonly double Ra; // Here we have value that the user can
+			// only read, but it may be changed within the object.
+		double inject; // all boring stuff
+
+		// Here we define an array. Each entry can be accessed by
+		// indexing: e.g., coords[0], coords[500].
+		// Indexes are protected, the system will not accept a bad
+		// one.
+		// MOOSE arrays are all expandable: they really are vectors.
+		// By default the system also
+		// generates a 'size' field which is accessed as coords.size
+		// The entire vector can be accessed if one uses only the
+		// name of the field, coords.
+		// In this manner full vector can be assigned to another one
+		// (provided the types match).
+		double coords[];
+
+		// Here is another array, just that here we define an initial
+		// size
+		double values[ 10 ];
+
+		// Here we take a complete moose
+		// class as a field of this class. This engulfed class will
+		// not have any messaging, just the data and functions.
+		// Because MOOSE knows about the other class, we do not need
+		// to fill in details.
+		mooseclass MyOtherClass complexField;
+
+		// This silly little class is defined locally and
+		// has two fields which do not do much. In the constructed
+		// header one would presumably add functions and private
+		// fields to the class. The purpose of putting this reduced
+		// class definition here is to tell MOOSE how to access these
+		// fields within the class.
+		class pair { 
+			double foo;
+			double bar;
+		} anotherComplexField;
+
+		// This is a more typical complex field. It actually
+		// reimplements a fairly common MOOSE class, the lookup table
+		// with a specified range. In the constructed header one
+		// would elaborate on the table class.
+		class table {
+			double min;
+			double max;
+			double values[];
+		} myTableField;
+	
+	src:
+		// Note that src and dest can have the same name, and it
+		// may even be appropriate for communicating message pairs. All
+		// src fields will have the suffix Out appended.
+		multi axial( double );
+		single raxial( double, double );
+		multi channel( double, ProcArg& a );
+
+		// Here we have a src that shares a connection with another one
+		multi diffusion( double, double ) shared src axial;
+	
+	dest:
+		// All dest fields will have the suffix In appended to the name.
+
+		// Here we have a dest that shares a connection with the 
+		// raxial message of the src. The designer knows that these
+		// messages always occur in pairs, so this little optimisation
+		// is possible. It doesn't affect run-time speed, but
+		// saves on memory.
+		multi axial( double V ) shared src raxial {
+			I += (V - Vm_) / Ra_;
+		}
+
+		// This one does not share a connection, though it would have
+		// been possible in this specific case.
+		single raxial( double V, double Ra ) {
+			I += ( V - Vm ) / Ra;
+		}
+
+		// Here we have another shared connection. It is legal
+		// only if the other object also defines its end as a
+		// shared connection, otherwise confusion will ensue.
+		multi channel( double Gk, double Ek ) shared src channel {
+			I += (V - Ek) * Gk;
+		}
+
+		// Note that here we explicitly indicate messages going out.
+		// If the user has a more complicated structure for their
+		// function, they can rearrange the outgoing calls.
+		single process( ProcArg& a ) {
+			channel( Vm_, a );
+			axial( Vm_ );
+			raxial( Vm_, Rm_ );
+			Vm_ += IntegFunc(I, Vm_, Rm, Cm);
+			// something like (I.Rm - Vm)/(1 + C.Rm);
+		}
+
+		// Here we have a shared connection but this time with another
+		// destination. The logic is that every time a process
+		// message is made, the reset message should also be done.
+		// Note that the arguments do not need to be the same.
+		single reset() {
+			Vm_ = Erest_;
+			I_ = 0;
+		}
+	shared:
+		// Here we indicate sets that share a connection.
+		// The lists can be as long as needed.
+		raxialIn, axialOut;
+		channelIn, channelOut;
+		processIn, resetIn;
+
+	synapse:
+		// These are also message destinations, but each connection
+		// holds additional information in the form of a class. As
+		// new connections are made this array is expanded. The
+		// array entries are visible as ordinary array fields.
+		// If there is no additional information then a regular
+		// message destination would do the job.
+		// This additional information could be as simple as an
+		// integer, or a complete class with all sorts of fields.
+		// The delay is the argument passed by the incoming message.
+		// The additional information class in this case is an int.
+		single inhib( double delay ) int;
+
+		// Here the additional info is a class called SynInfo.
+		multi excite() SynInfo;
+
+	private:
+		// Stuff here will be copied over unchanged to .h.
+};
+
+All comments will be copied over verbatim.
+Any lines outside the field, src and dest contexts will be copied over
+verbatim. So you can define your entire class in a header using mpp.
+
+3.5 Cleaning up afterward
+Mpp in principle should give you compilable code. For really simple classes
+this is true. More complex classes will require a MyClass.cpp in addition to
+the MyClassWrapper.cpp. However, even really complex parts of solvers can
+now be done almost entirely in the .mh.
+
+- You may want to move things in and out of the inline definitions
+	in the headers. 
+- mpp does not yet know how to do the static const definitions.
+
+Issues:
+There are the following things to look out for that mpp does not yet handle:
+
+- mpp often gets confused by the placement of the last comma in the argument
+	list for the class constructor.
+- Can't handle multiline function definitions: all arguments must be together on
+	first line even if it is very long.
+- Can't define fields whose first character is capitalized: Vm, Co.
+- Need a way to tell it if a message uses a specific conn (specially
+	for solve messages, both ways). This is especially a problem when
+	two sets of messages share the same Conn, as in ProcessConn
+	being shared by Process as well as Solve.
+- Silly thing just cuts short list of functions when it
+	encounters the function field as the first thing in a line.
+- Still cant handle static const declarations.
+- Should pass most strings as const string&, rather than string.
+- Gets rid of almost all comments. Should really keep them.
+- Some of the formatting and spacing may not be to your taste.
+- Mpp puts local class functions under the MyClassWrapper definition. It might
+	be better to move these to the MyClass definition in some cases.
+- Mpp confuses Element* enz with Element *enz in argument lists for
+	destinations. The second case comes out wrong. It things that the
+	field type is Element and the name is *enz. It then uses *enz 
+	elsewhere.
+- No way to initialize variables used for eval-fields.
+- No way to put in a public function in the wrapper.h

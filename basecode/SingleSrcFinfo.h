@@ -48,6 +48,14 @@ class SingleSrcFinfo: public Finfo
 		RecvFunc targetFunc( Element* e, unsigned long i ) const {
 			return getSrc_( e )->targetFunc( i );
 		}
+
+		RecvFunc targetFuncFromSlot( Element* e, unsigned long slot ) const {
+			return getSrc_( e )->targetFuncFromSlot( slot );
+		}
+
+		unsigned long nFuncs( Element* e ) const {
+			return getSrc_( e )->nFuncs();
+		}
 		
 		// returns number of matches
 		unsigned long matchRemoteFunc( Element* e, RecvFunc rf ) const

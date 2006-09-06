@@ -48,6 +48,13 @@ class ReturnFinfo: public Finfo
 			return getConn_( e )->targetFunc( i ) ;
 		}
 
+		RecvFunc targetFuncFromSlot( Element* e, unsigned long slot )
+		const {
+			// This does not make sense
+			cerr << "Error: Should not use ReturnFinfo::targetFuncFromSlot\n";
+			return 0;
+		}
+
 		// Returns index of first match
 		unsigned long indexOfMatchingFunc( Element* e, 
 			RecvFunc rf ) const

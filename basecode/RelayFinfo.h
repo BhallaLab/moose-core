@@ -38,9 +38,18 @@ class RelayFinfo: public Finfo
 			;
 		}
 
+		// I am not terribly sure that this is right
 		RecvFunc targetFunc( Element* e, unsigned long i ) const {
 			if ( i < rfunc_.size() )
 				return rfunc_[ i ];
+			return 0;
+		}
+
+		// I am not terribly sure that this is right
+		RecvFunc targetFuncFromSlot( Element* e, unsigned long slot )
+		const {
+			if ( slot < rfunc_.size() )
+				return rfunc_[ slot ];
 			return 0;
 		}
 

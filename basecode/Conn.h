@@ -10,8 +10,6 @@
 #ifndef _CONN_H
 #define _CONN_H
 
-#include "header.h"
-
 /////////////////////////////////////////////////////////////////////
 // 
 // The Conn family of classes handle connections between objects.
@@ -40,9 +38,10 @@ class Conn
 		virtual Conn* target( unsigned long index ) const = 0;
 		virtual unsigned long nTargets() const = 0;
 		virtual void listTargets( vector< Conn* >& ) const = 0;
+		virtual unsigned long nSlots() const = 0;
 
 		virtual Element* parent() const = 0;	// Ptr to parent Element
-		bool connect( Conn* target, 
+		virtual bool connect( Conn* target, 
 			unsigned long sourceSlot, unsigned long targetSlot = 0);
 
 		// Returns index of disconnected conn, MAX = ~0 if it fails.
@@ -54,6 +53,20 @@ class Conn
 		virtual unsigned long find( const Conn* target) const = 0;
 		virtual bool innerConnect(Conn* target, unsigned long slot = 0)
 			= 0;
+
+		// Later need to make this required for all derived classes.
+		virtual void resize( vector< unsigned long >& segments ) {
+				;
+		}
+		// Perhaps we will hold off on this.
+		// Later need to make this required for all derived classes.
+		/* 
+		virtual void innerConnectVec( vector< Conn* >& list,
+			vector< unsigned long > segments )
+		{
+				;
+		}
+		*/
 		virtual void innerDisconnect(unsigned long index) = 0;
 		
 		// Brute force cleans up connections without communicating
@@ -61,9 +74,9 @@ class Conn
 		virtual void innerDisconnectAll() = 0;
 
 		static const unsigned long MAX;
+		virtual Conn* respondToConnect(Conn* target) = 0;
 	protected:
 		virtual bool canConnect(Conn* target) const = 0;
-		virtual Conn* respondToConnect(Conn* target) = 0;
 
 	private:
 };
@@ -99,6 +112,10 @@ class UniConnBase: public Conn
 			return (target_ != 0);
 		}
 
+		unsigned long nSlots() const {
+			return (target_ != 0);
+		}
+
 		void listTargets( vector< Conn* >& list ) const {
 			if ( target_ ) {
 				list.push_back( target_ );
@@ -127,15 +144,15 @@ class UniConnBase: public Conn
 		void innerDisconnectAll() {
 			target_ = 0;
 		}
-
-	protected:
-		bool canConnect(Conn* target) const {
-			return (target && (target_ == 0));
-		}
 		Conn* respondToConnect(Conn* target) {
 			if ( canConnect( target ) )
 				return this;
 			return 0;
+		}
+
+	protected:
+		bool canConnect(Conn* target) const {
+			return (target && (target_ == 0));
 		}
 
 	private:
@@ -220,6 +237,10 @@ class PlainMultiConn: public Conn
 			return static_cast< unsigned long >( target_.size() );
 		}
 
+		unsigned long nSlots() const {
+			return (target_.size() > 0);
+		}
+
 		void listTargets( vector< Conn* >& list ) const {
 			list.insert( list.end(), target_.begin(), target_.end() );
 		}
@@ -253,15 +274,15 @@ class PlainMultiConn: public Conn
 		void innerDisconnectAll() {
 			target_.resize( 0 );
 		}
-
-	protected:
-		bool canConnect(Conn* target) const {
-			return ( target != 0 );
-		}
 		Conn* respondToConnect(Conn* target) {
 			if ( canConnect( target ) )
 				return this;
 			return 0;
+		}
+
+	protected:
+		bool canConnect(Conn* target) const {
+			return ( target != 0 );
 		}
 
 	private:
@@ -269,14 +290,54 @@ class PlainMultiConn: public Conn
 		Element* parent_;
 };
 
-// The MultiConn has any number of targets. It stores its parent ptr.
+// The MultiConn has any number of targets. It is a base class
+// for a couple of variants. The base class stores its parent ptr only.
+// In one variant these
+// are PlainMultiConns, in another they are SolverConnManagers.
+class BaseMultiConn: public Conn
+{
+	public:
+		BaseMultiConn( Element* e )
+			: parent_(e)
+		{
+			;
+		}
+
+		virtual ~BaseMultiConn();
+
+		Element* parent() const {
+			return parent_;
+		}
+
+		virtual vector< Conn* >::const_iterator begin( unsigned long i ) const = 0;
+		virtual unsigned long index( unsigned long msgno ) = 0;
+
+		virtual vector< Conn* >::const_iterator end( unsigned long i ) const = 0;
+
+		Conn* respondToConnect(Conn* target) {
+			if ( canConnect( target ) )
+				return this;
+			return 0;
+		}
+	protected:
+		// Always true as long as input is good.
+		bool canConnect( Conn* target ) const {
+			return ( target != 0 );
+		}
+
+	private:
+		Element* parent_;
+};
+
+// The MultiConn has any number of targets.
 // Because the Conn may be accessed by several recvfuncs, it stores
 // the targets in a list of distinct vectors.
-class MultiConn: public Conn
+// This is the original MultiConn
+class MultiConn: public BaseMultiConn
 {
 	public:
 		MultiConn( Element* e )
-			: parent_(e)
+			: BaseMultiConn(e)
 		{
 			;
 		}
@@ -285,11 +346,11 @@ class MultiConn: public Conn
 
 		Conn* target(unsigned long index) const;
 		unsigned long nTargets() const;
-		void listTargets( vector< Conn* >& list ) const ;
 
-		Element* parent() const {
-			return parent_;
+		unsigned long nSlots() const {
+			return connVecs_.size();
 		}
+		void listTargets( vector< Conn* >& list ) const ;
 
 		vector< Conn* >::const_iterator begin( unsigned long i ) const {
 			return connVecs_[ i ]->begin();
@@ -298,8 +359,6 @@ class MultiConn: public Conn
 		vector< Conn* >::const_iterator end( unsigned long i ) const {
 			return connVecs_[ i ]->end();
 		}
-
-		// void moveLastEntry( unsigned long index );
 
 		unsigned long find( const Conn* target ) const;
 
@@ -314,21 +373,10 @@ class MultiConn: public Conn
 		void disconnectAll();
 		void innerDisconnectAll();
 
-	protected:
-		// Always true as long as input is good.
-		bool canConnect( Conn* target ) const {
-			return ( target != 0 );
-		}
-		Conn* respondToConnect(Conn* target) {
-			if ( canConnect( target ) )
-				return this;
-			return 0;
-		}
-
 	private:
 		vector< PlainMultiConn* > connVecs_;
-		Element* parent_;
 };
+
 
 // Used to send messages along connections that are not precompiled.
 class RelayConn: public PlainMultiConn
@@ -405,6 +453,10 @@ class MultiReturnConn: public Conn
 			return static_cast< unsigned long >( vec_.size() );
 		}
 
+		unsigned long nSlots() const {
+			return static_cast< unsigned long >( vec_.size() );
+		}
+
 		RecvFunc targetFunc( unsigned long index ) const {
 			if ( index < vec_.size() )
 				return vec_[ index ]->recvFunc() ;
@@ -436,12 +488,6 @@ class MultiReturnConn: public Conn
 		void innerDisconnect(unsigned long index);
 		void disconnectAll();
 		void innerDisconnectAll();
-
-	protected:
-		bool canConnect(Conn* target) const {
-		// Always true as long as input is good.
-			return ( target != 0 );
-		}
 		Conn* respondToConnect( Conn* target ) {
 			if ( canConnect( target ) ) {
 				ReturnConn* ret = new ReturnConn( parent_ );
@@ -451,9 +497,138 @@ class MultiReturnConn: public Conn
 			return 0;
 		}
 
+	protected:
+		bool canConnect(Conn* target) const {
+		// Always true as long as input is good.
+			return ( target != 0 );
+		}
+
 	private:
 		vector< ReturnConn* > vec_;
 		Element* parent_;
+};
+
+class SolverConn;
+
+// The SolveMultiConn has any number of targets. It is special
+// because the targets must be able to identify themselves to the
+// solver and be quickly accessed individually for return values.
+class SolveMultiConn: public BaseMultiConn
+{
+	public:
+		SolveMultiConn( Element* e )
+			: BaseMultiConn(e)
+		{
+			;
+		}
+
+		~SolveMultiConn();
+
+		// This is ugly and should be avoided. Ideally a different
+		// kind of iteration should be done.
+		// For now just block it.
+		vector< Conn* >::const_iterator begin( unsigned long i ) const {
+			return static_cast< vector< Conn* >::const_iterator>( 0L );
+		}
+
+		vector< Conn* >::const_iterator end( unsigned long i ) const {
+			return static_cast< vector< Conn* >::const_iterator>( 0L );
+		}
+
+		unsigned long find( const Conn* target ) const;
+
+		unsigned long nTargets() const {
+				return vec_.size();
+		}
+
+		unsigned long nSlots() const {
+			return static_cast< unsigned long >( segments_.size() );
+		}
+
+		Conn* target( unsigned long index ) const;
+
+		void listTargets( vector< Conn* >& list ) const;
+
+		// Returns the index of the segment corresponding to specified
+		// message number.
+		unsigned long index( unsigned long msgno );
+
+		bool connect( Conn* target, 
+			unsigned long sourceSlot, unsigned long targetSlot = 0 );
+
+		bool innerConnect( Conn* target, unsigned long slot = 0 );
+
+		// Allocates a vector of Conns, and fills in segment info
+		// to handle multiple types of target.
+		// Once this is done,
+		// no changes to size are allowed. Assumes that contents of
+		// vec_ are disposable and have been disconnected.
+		void resize( vector< unsigned long >& segments );
+
+		// Connects a vector of Conns, and fills in
+		// necessary allocation and size definition. Once this is done,
+		// no changes to size are allowed. Assumes that contents of
+		// vec_ are disposable and have been disconnected.
+		/*
+		void innerConnectVec( vector< Conn* >& list,
+			vector< unsigned long > segments ) {
+			segments_ = segments;
+			filled_ = segments;
+			vec_.resize( list.size() );
+			for ( unsigned long i = 0; i < list.size(); i++ )
+				vec_[ i ].innerConnect( list[i] );
+		}
+		*/
+
+		void innerDisconnect(unsigned long index);
+
+		void disconnectAll();
+
+		void innerDisconnectAll();
+
+	private:
+		// vec_ is a single big array of all the SolverConns managed
+		// by the Conn. We need great care with these because if they
+		// are messed up, e.g., due to vector reallocation, then the
+		// originating Conns will be confused. So none of the operations
+		// except resize() is permitted to touch the size of vec_.
+		vector< SolverConn > vec_;
+
+		// segments_ stores indices of the end of each segment of the
+		// vec_. Each segment handles objects of the same type, having
+		// the same RecvFunc. In most cases there will be a single
+		// segment, so this should be simple enough.
+		vector< unsigned long > segments_;
+
+		// filled_ stores index of first free vec_ entry, for each slot.
+		// When the vec_ is fully connected, filled_ == segments_.
+		vector< unsigned long > filled_;
+};
+
+// Meant to be used in vectors, but not as pointers. See 
+// SolverMultiConn above.
+class SolverConn: public UniConnBase {
+	public:
+		SolverConn( SolveMultiConn* manager = 0 )
+				: manager_( manager )
+		{
+			;
+		}
+
+		void setManager( SolveMultiConn* manager ) {
+				manager_ = manager;
+		}
+
+		Element* parent() const {
+			return manager_->parent();
+		}
+
+		unsigned long index() const {
+			return manager_->find( this );
+		}
+
+	private:
+		SolveMultiConn* manager_;
 };
 
 #endif	// _MSGCONN_H

@@ -15,25 +15,27 @@ class StoichWrapper:
 	public Stoich, public Neutral
 {
 	friend Element* integrateConnStoichLookup( const Conn* );
+	friend Element* hubConnStoichLookup( const Conn* );
     public:
 		StoichWrapper(const string& n)
 		:
 			Neutral( n ),
-			allocateSrc_( &integrateConn_ )
-			// integrateConn uses a templated lookup function
+			allocateSrc_( &integrateConn_ ),
+			molSizesSrc_( &hubConn_ ),
+			rateSizesSrc_( &hubConn_ ),
+			rateTermInfoSrc_( &hubConn_ ),
+			molConnectionsSrc_( &hubConn_ ),
+			reacConnectionSrc_( &hubConn_ ),
+			enzConnectionSrc_( &hubConn_ ),
+			mmEnzConnectionSrc_( &hubConn_ )
+			// integrateConn uses a templated lookup function,
+			// hubConn uses a templated lookup function
 		{
 			;
 		}
 ///////////////////////////////////////////////////////
 //    Field header definitions.                      //
 ///////////////////////////////////////////////////////
-		static void setPath( Conn* c, string value ) {
-			static_cast< StoichWrapper* >( c->parent() )->
-				setPathLocal( value );
-		}
-		static string getPath( const Element* e ) {
-			return static_cast< const StoichWrapper* >( e )->path_;
-		}
 		static int getNMols( const Element* e ) {
 			return static_cast< const StoichWrapper* >( e )->nMols_;
 		}
@@ -58,10 +60,6 @@ class StoichWrapper:
 		static int getNExternalRates( const Element* e ) {
 			return static_cast< const StoichWrapper* >( e )->nExternalRates_;
 		}
-		static int getRateVectorSize( const Element* e ) {
-			return static_cast< const StoichWrapper* >( e )->
-				rates_.size();
-		}
 		static void setUseOneWayReacs( Conn* c, int value ) {
 			static_cast< StoichWrapper* >( c->parent() )->useOneWayReacs_ = value;
 		}
@@ -69,10 +67,56 @@ class StoichWrapper:
 			return static_cast< const StoichWrapper* >( e )->useOneWayReacs_;
 		}
 ///////////////////////////////////////////////////////
+//    EvalField header definitions.                  //
+///////////////////////////////////////////////////////
+		string localGetPath() const;
+		static string getPath( const Element* e ) {
+			return static_cast< const StoichWrapper* >( e )->
+			localGetPath();
+		}
+		void localSetPath( string value );
+		static void setPath( Conn* c, string value ) {
+			static_cast< StoichWrapper* >( c->parent() )->
+			localSetPath( value );
+		}
+		int localGetRateVectorSize() const;
+		static int getRateVectorSize( const Element* e ) {
+			return static_cast< const StoichWrapper* >( e )->
+			localGetRateVectorSize();
+		}
+///////////////////////////////////////////////////////
 // Msgsrc header definitions .                       //
 ///////////////////////////////////////////////////////
 		static SingleMsgSrc* getAllocateSrc( Element* e ) {
 			return &( static_cast< StoichWrapper* >( e )->allocateSrc_ );
+		}
+
+		static SingleMsgSrc* getMolSizesSrc( Element* e ) {
+			return &( static_cast< StoichWrapper* >( e )->molSizesSrc_ );
+		}
+
+		static SingleMsgSrc* getRateSizesSrc( Element* e ) {
+			return &( static_cast< StoichWrapper* >( e )->rateSizesSrc_ );
+		}
+
+		static SingleMsgSrc* getRateTermInfoSrc( Element* e ) {
+			return &( static_cast< StoichWrapper* >( e )->rateTermInfoSrc_ );
+		}
+
+		static SingleMsgSrc* getMolConnectionsSrc( Element* e ) {
+			return &( static_cast< StoichWrapper* >( e )->molConnectionsSrc_ );
+		}
+
+		static SingleMsgSrc* getReacConnectionSrc( Element* e ) {
+			return &( static_cast< StoichWrapper* >( e )->reacConnectionSrc_ );
+		}
+
+		static SingleMsgSrc* getEnzConnectionSrc( Element* e ) {
+			return &( static_cast< StoichWrapper* >( e )->enzConnectionSrc_ );
+		}
+
+		static SingleMsgSrc* getMmEnzConnectionSrc( Element* e ) {
+			return &( static_cast< StoichWrapper* >( e )->mmEnzConnectionSrc_ );
 		}
 
 ///////////////////////////////////////////////////////
@@ -106,6 +150,9 @@ class StoichWrapper:
 		static Conn* getIntegrateConn( Element* e ) {
 			return &( static_cast< StoichWrapper* >( e )->integrateConn_ );
 		}
+		static Conn* getHubConn( Element* e ) {
+			return &( static_cast< StoichWrapper* >( e )->hubConn_ );
+		}
 
 ///////////////////////////////////////////////////////
 // Class creation and info access functions.         //
@@ -129,7 +176,15 @@ class StoichWrapper:
 // MsgSrc template definitions.                      //
 ///////////////////////////////////////////////////////
 		SingleMsgSrc1< vector< double >*  > allocateSrc_;
+		SingleMsgSrc3< int, int, int > molSizesSrc_;
+		SingleMsgSrc3< int, int, int > rateSizesSrc_;
+		SingleMsgSrc2< vector< RateTerm* >*, int > rateTermInfoSrc_;
+		SingleMsgSrc3< vector< double >* , vector< double >* , vector< Element *>*  > molConnectionsSrc_;
+		SingleMsgSrc2< int, Element* > reacConnectionSrc_;
+		SingleMsgSrc2< int, Element* > enzConnectionSrc_;
+		SingleMsgSrc2< int, Element* > mmEnzConnectionSrc_;
 		UniConn< integrateConnStoichLookup > integrateConn_;
+		UniConn< hubConnStoichLookup > hubConn_;
 
 ///////////////////////////////////////////////////////
 // Synapse definition.                               //

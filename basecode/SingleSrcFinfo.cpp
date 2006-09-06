@@ -12,7 +12,7 @@
 
 void finfoErrorMsg( const string& name, Field dest )
 {
-	cerr << "Error: " << name << "add() : Invalid dest field '" <<
+	cerr << "Error: " << name << " add() : Invalid dest field '" <<
 		dest->name() << "' on elm '" <<
 		dest.getElement()->name() << "'\n";
 }

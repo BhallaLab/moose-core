@@ -10,8 +10,6 @@
 #ifndef _ELEMENT_H
 #define _ELEMENT_H
 
-#include "header.h"
-
 // Used in copying
 // Defined in MsgFuncs.cpp
 extern void duplicateMessagesOnTree(
@@ -102,11 +100,15 @@ class Element {
 		// This virtual function checks if the element is solved,
 		// in which case it triggers the solver to do an update of
 		// the field value after checking that the field is one
-		// which depends on the solver.
+		// which depends on the solver. The SolverOp tells the
+		// solver what the operation was: set, get, addmsg, deletemsg..
 		// By default it does nothing.
-		// Returns True if it did the trigger.
-		virtual bool triggerUpdate( const string& name ) {
-			return 0;
+		virtual void solverUpdate( const Finfo* f, SolverOp s ) const {
+			return;
+		}
+		// Helper function
+		virtual bool isSolved() const {
+				return 0;
 		}
 
 ///////////////////////////////////////////////////////////////////////

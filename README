@@ -1,22 +1,28 @@
-This is the 0.06 release of MOOSE
-Date: 17 Feb 2006.
+This is the 0.07 release of MOOSE
+Date: 6 September 2006.
 
-Overview: This is a minor upgrade to handle synapses. Implements the
-synchan and spikegen objects. 
-Internally this version sees a big shift to the use
-of subversion for version control. Subversion has recently become supported
-by SourceForge and it is a much nicer system than CVS. Once the subversion
-management of MOOSE is stabilized here I will put the project on SourceForge.
+Overview: This is actually several releases later than the 0.06 release,
+but functionally the major change is the implementation of a solver API.
+The basic scheme is 
+Numerics <====> Data <====> Hub <====> MOOSE objects.
+This can be seen in action in the kinetics directory, where we have
+a trivial ForwardEuler solver handling a Stoich object that manages the
+data. The communication between the data and the molecules and reactions is
+handled by the KineticHub. 
+Behind the scenes, the major change is the improvement in the preprocessor.
+Most objects can be almost entirely specified using the preprocessor and
+again the kinetics directory is the examplar. Have a look at 
+DOCS/UsingPreprocessor for its features and remaining limitations.
 
 Compilation instructions:
 Edit Makefile to select GCC3 or GCC4 options. Some of the later GCC3 versions
 actually seem to prefer the GCC4 flags.
-Go into the mus_release_feb10_2006 directory and type
+Go into the moose directory and type
 	make moose
 
-Currently works on Fedora/Gcc4 and Gcc3. 
-Known compilation issues remain with Debian due to issues with flex++.
-Linux version 2.4.27-2-386 (gcc version 3.3.5 (Debian 1:3.3.5-13))
-	As always, suggestions are welcome.
+Currently works on Debian/Ubuntu/Gcc4 and Gcc3. 
+Known compilation issues remain with Fedora GCC4.
+Linux version 2.6.15-26-686 (buildd@terranova) 
+(gcc version 4.0.3 (Ubuntu 4.0.3-1ubuntu5)
 
 See DOCS/ReleaseNotes for details.

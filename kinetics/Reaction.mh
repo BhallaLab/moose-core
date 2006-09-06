@@ -1,3 +1,13 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
 class Reaction
 {
 	public:
@@ -24,11 +34,12 @@ class Reaction
 
 		// The process increments a timestep, the reinit initializes.
 		single process( processIn, reinitIn );
+		single solve( processIn, reinitIn, solveOut );
 
 		// The substrate and product messages connect to molecules
 		// acting as substrate and product respectively.
-		multi sub( subOut, subIn );
-		multi prd( prdOut, prdIn );
+		multi sub( subIn, subOut );
+		multi prd( prdIn, prdOut );
 
 	src:
 		// Note that src and dest can have the same name, and it
@@ -45,6 +56,7 @@ class Reaction
 		// Later will set up a derivative based scheme.
 		multi sub( double A, double B ); 
 		multi prd( double A, double B ); 
+		single solve( double kf, double kb);
 	
 	dest:
 		single reinit( ) {
@@ -73,4 +85,34 @@ class Reaction
 		// Stuff here will be copied over unchanged to .h.
 		double A_;
 		double B_;
+
+	private_wrapper:
+		// This virtual function checks if the reaction is solved,
+		// and if the field f has something to do with the specified
+		// operation. s is SOLVER_SET or SOLVER_GET
+		void solverUpdate( const Finfo* f, SolverOp s ) const;
+		bool isSolved( ) const;
 };
+
+
+////////////////////////////////////////////////////////////////////
+// Stuff below here goes verbatim into ReactionWrapper.cpp
+////////////////////////////////////////////////////////////////////
+bool ReactionWrapper::isSolved() const
+{
+	return ( solveSrc_.targetFunc(0) && 
+		solveSrc_.targetFunc(0) != dummyFunc0 );
+}
+
+void ReactionWrapper::solverUpdate( const Finfo* f, SolverOp s ) const
+{
+	if ( solveSrc_.targetFunc(0) && 
+		solveSrc_.targetFunc(0) != dummyFunc0 ) {
+		if ( s == SOLVER_SET ) {
+			if ( f->name() == "kf" || f->name() == "kb" )
+				solveSrc_.send( kf_, kb_ );
+		} // Ignore the call if it was a SOLVER_GET, because we
+		// don't need to update anything in the reaction.
+		// Other stuff later for ADDMSG and DELETEMSG.
+	}
+}

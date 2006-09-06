@@ -23,6 +23,21 @@ void SharedFinfo::initialize( const Cinfo* c )
 	}
 }
 
+unsigned long maxNfuncs( Element* e, vector< Finfo* >& sharedOut )
+{
+	unsigned long max = 0;
+	unsigned long j = 0;
+	unsigned long nOut = sharedOut.size();
+	for ( unsigned long i = 0; i < nOut; i++ ) {
+		j = sharedOut[ i ]->nFuncs( e );
+		if ( max < j )
+			max = j;
+	}
+	return max;
+}
+	
+
+/*
 unsigned long maxIndexOfMatchingFunc( Element* e,
 	vector< Finfo* >& sharedOut, vector< Finfo* >& sharedIn ) 
 {
@@ -37,6 +52,31 @@ unsigned long maxIndexOfMatchingFunc( Element* e,
 	}
 	return max;
 }
+*/
+
+// Returns index at which all the entries in sharedOut match
+// the recvfuncs for sharedIn.
+// If it does not find a good entry, it returns nSlots.
+// This is inefficient. For large numbers of connections it would be
+// bad. But optimize later.
+unsigned long sharedSlot( Element* e, 
+	vector< Finfo* >& sharedOut, vector< Finfo* >& sharedIn, 
+	unsigned long nSlots )
+{
+	unsigned long i;
+	unsigned long nOut = sharedOut.size();
+	for ( unsigned long j = 0; j < nSlots; j++ ) {
+		unsigned int nMatch = 0;
+		for ( i = 0; i < nOut; i++ ) {
+			RecvFunc rf = sharedOut[i]->targetFuncFromSlot( e, j );
+			if ( rf == sharedIn[i]->recvFunc() )
+				nMatch++;
+		}
+		if ( nMatch == nOut ) // Found it.
+			return j;
+	}
+	return nSlots;
+}
 
 bool SharedFinfo::add( Element* e, Field& destfield, bool useSharedConn)
 {
@@ -49,21 +89,37 @@ bool SharedFinfo::add( Element* e, Field& destfield, bool useSharedConn)
 	SharedFinfo* destSF = dynamic_cast< SharedFinfo* >( dest );
 
 	if ( destSF ) {
-		unsigned long maxout = maxIndexOfMatchingFunc(
+			/*
+		unsigned long srcSlot = maxIndexOfMatchingFunc(
 			e, sharedOut_, destSF->sharedIn_ );
-		unsigned long maxin = maxIndexOfMatchingFunc(
+		unsigned long tgtSlot = maxIndexOfMatchingFunc(
 			destfield.getElement(), destSF->sharedOut_, sharedIn_ );
+			*/
+		// unsigned long nSrcSlots = getConn_( e )->nSlots();
+		unsigned long nSrcSlots = maxNfuncs( e, sharedOut_ );
+		unsigned long srcSlot = sharedSlot(
+			e, sharedOut_, destSF->sharedIn_, nSrcSlots );
+		unsigned long nTgtSlots = 
+			maxNfuncs( destfield.getElement(), destSF->sharedOut_ );
+			// destfield->nFuncs( destfield.getElement() );
+			// destfield->inConn( destfield.getElement() )->nSlots();
+		unsigned long tgtSlot = sharedSlot(
+			destfield.getElement(), 
+			destSF->sharedOut_, sharedIn_, nTgtSlots );
 		if ( getConn_( e )->connect(
-			dest->inConn( destfield.getElement() ), maxout, maxin )
+			dest->inConn( destfield.getElement() ), srcSlot, tgtSlot )
 		) {
 			unsigned int i;
 			for ( i = 0; i < nOut; i++ ) {
-				sharedOut_[ i ]->addRecvFunc( e, destSF->sharedIn_[ i ]->recvFunc(), maxout );
+				sharedOut_[ i ]->addRecvFunc( e, destSF->sharedIn_[ i ]->recvFunc(), srcSlot );
 			}
 			for (i = 0; i < nIn; i++ ) {
-				destSF->sharedOut_[ i ]->addRecvFunc( destfield.getElement(), sharedIn_[ i ]->recvFunc(), maxin );
+				destSF->sharedOut_[ i ]->addRecvFunc( destfield.getElement(), sharedIn_[ i ]->recvFunc(), tgtSlot );
 			}
 			return 1;
+		} else {
+			cerr << "SharedFinfo::add: Unable to connect " <<
+					e->name() << " to " << destfield.name() << "\n";
 		}
 	} else { // It must be a ValueRelayFinfo. Here we expect the
 		// shared finfo to have a single trigger as a msgsrc, and a 
