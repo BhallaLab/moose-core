@@ -65,6 +65,10 @@ const string& Conn::parse(
 		}
 		connVec.push_back( c );
 		return c->name_;
+	} else if ( type == "solve" ) {
+		c = new Conn( "SolveMultiConn", name + direction + "Conn" );
+		connVec.push_back( c );
+		return c->name_;
 	}
 	/*
 	else {

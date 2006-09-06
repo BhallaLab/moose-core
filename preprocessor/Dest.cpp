@@ -153,6 +153,8 @@ void Dest::printWrapperH( const string& className, ofstream& fout )
 		if ( i < argtypes_.size() - 1 )
 			fout << ", ";
 	}
+	if ( type_ == "solve" )
+		fout << ", long index";
 	if ( destFuncLines_.size() < 3 ) {
 		fout << " ) {\n";
 		for ( i = 0; i < destFuncLines_.size(); i++ )
@@ -175,6 +177,8 @@ void Dest::printWrapperH( const string& className, ofstream& fout )
 		if ( i < argnames_.size() - 1 )
 			fout << ", ";
 	}
+	if ( type_ == "solve" )
+		fout << ",\n				static_cast< SolverConn* >( c )->index()";
 	fout << " );\n		}\n\n";
 }
 
@@ -256,6 +260,9 @@ void Dest::printWrapperCppFuncs(
 			if ( i < argtypes_.size() - 1 )
 				fout << ", ";
 		}
+		if ( type_ == "solve" )
+			fout << ", long index";
+
 		fout << " )\n{\n";
 		for ( i = 0; i < destFuncLines_.size(); i++ )
 			fout << destFuncLines_[ i ] << "\n";

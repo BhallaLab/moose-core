@@ -10,24 +10,23 @@
 
 #ifndef _ClockTick_h
 #define _ClockTick_h
-
 class ClockTick
 {
 	friend class ClockTickWrapper;
 	public:
 		ClockTick()
-			: dt_( 1.0 ), stage_( 0 ), nextt_( 0.0 )
 		{
+			stage_ = 0;
+			nextt_ = 0.0;
 		}
 
 	private:
-		double dt_;
 		int stage_;
 		double nextt_;
 		double epsnextt_;
 		double max_clocks_;
-		string path_;
 		double nclocks_;
+		double dt_;
 		bool terminate_;
 };
 #endif // _ClockTick_h

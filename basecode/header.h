@@ -16,6 +16,8 @@
 
 #define MOOSE_THREADS 0
 
+enum SolverOp { SOLVER_SET, SOLVER_GET, SOLVER_REBUILD, SOLVER_ADD, SOLVER_DROP };
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -51,6 +53,7 @@ void dummyFunc0( Conn* c );
 #include "Finfo.h"
 #include "MsgSrc.h"
 // #include "AssignFinfo.h"
+#include "Element.h"
 #include "Ftype.h"
 #include "SharedFinfo.h"
 #include "RelayFinfo.h"
@@ -60,7 +63,6 @@ void dummyFunc0( Conn* c );
 #include "NSrcFinfo.h"
 #include "ReturnFinfo.h"
 #include "ObjFinfo.h"
-#include "Element.h"
 #include "Neutral.h"
 #include "ProcInfo.h"
 

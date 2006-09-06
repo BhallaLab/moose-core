@@ -86,6 +86,13 @@ bool Finfo::isSameType( const Ftype* other ) const
 	return ( this->ftype()->isSameType( other ) );
 }
 
+void Finfo::resize( Element* e, vector< unsigned long >& segment )
+{
+	Conn* c = outConn( e );
+	c->resize( segment );
+	cout << "in Finfo::resize()\n";
+}
+
 //////////////////////////////////////////////////////////////////
 // DummyFinfo settings.
 //////////////////////////////////////////////////////////////////

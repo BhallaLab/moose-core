@@ -23,7 +23,6 @@ class MoleculeWrapper:
 			Neutral( n ),
 			reacSrc_( &reacConn_ ),
 			nSrc_( &nOutConn_ ),
-			// solveSrc_( &solveConn_ ),
 			solveSrc_( &processConn_ ),
 			// processConn uses a templated lookup function,
 			// solveConn uses a templated lookup function,
@@ -206,17 +205,6 @@ class MoleculeWrapper:
 			return &cinfo_;
 		}
 
-		// This virtual function checks if the molecule is solved,
-		// and if name is 'n' then it triggers the solver.
-		bool triggerUpdate( const string& name ) {
-			if ( solveSrc_.targetFunc(0) && 
-				solveSrc_.targetFunc(0) != dummyFunc0 && name == "n" ) {
-				// Hack: -1 tells solver this is an update request
-				solveSrc_.send( n_, nInit_, -1 );
-				return 1;
-			}
-			return 0;
-		}
 
     private:
 ///////////////////////////////////////////////////////
@@ -226,7 +214,7 @@ class MoleculeWrapper:
 		NMsgSrc1< double > nSrc_;
 		SingleMsgSrc3< double, double, int > solveSrc_;
 		UniConn< processConnMoleculeLookup > processConn_;
-//		UniConn< solveConnMoleculeLookup > solveConn_;
+		// UniConn< solveConnMoleculeLookup > solveConn_;
 		MultiConn reacConn_;
 		MultiConn nOutConn_;
 		PlainMultiConn prdInConn_;
@@ -240,6 +228,8 @@ class MoleculeWrapper:
 ///////////////////////////////////////////////////////
 // Private functions and fields for the Wrapper class//
 ///////////////////////////////////////////////////////
+		void solverUpdate( const Finfo* f, SolverOp s ) const;
+		bool isSolved( ) const;
 
 ///////////////////////////////////////////////////////
 // Static initializers for class and field info      //

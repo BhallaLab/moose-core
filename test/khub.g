@@ -4,6 +4,46 @@ include kholodenko.g
 // include kkit_reac.g
 // include kkit_enz.g
 // include kkit_MMenz.g
+reset
+
+create Stoich /s
+create KineticHub /khub
+addmsg /s/hub /khub/hub
+/*
+addmsg /s/molSizesOut /khub/molSizesIn
+addmsg /s/molConnectionsOut /khub/molConnectionsIn
+addmsg /s/reacConnectionsOut /khub/reacConnectionsIn
+*/
+
+setfield /s path "/kinetics/##"
+
+create ForwardEuler /fe
+addmsg /fe/integrate /s/integrate
+
+useclock /fe 4
+
+reset
+
+step {MAXTIME} -t
+
+setfield /sli_shell isInteractive 1
+echo {getfield /kinetics/MAPK/MAPK n}
+setfield /kinetics/MAPK/MAPK n 0.4
+echo {getfield /kinetics/MAPK/MAPK n}
+step {MAXTIME} -t
+setfield /sli_shell isInteractive 0
+setfield /kinetics/MAPK/int1/2 k3 0.6
+step {MAXTIME} -t
+call /graphs/##[TYPE=Plot],/moregraphs/##[TYPE=Plot] printIn khub.plot
+
+/*
+
+//moose
+
+include kholodenko.g
+// include kkit_reac.g
+// include kkit_enz.g
+// include kkit_MMenz.g
 
 setfield /kinetics/MAPK/int2 mode 4 // Buffer it
 setfield /kinetics/MAPK/int4 mode 4 // Buffer it
@@ -42,3 +82,4 @@ setfield /kinetics/MAPK/int1/2 k3 3.33
 
 echo Trying to setfield enz int3/6 Km to 5.55
 setfield /kinetics/MAPK/int3/6 Km 5.55
+*/

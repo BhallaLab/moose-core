@@ -1,0 +1,299 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+#include "RateTerm.h"
+
+class KineticHub
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Upinder S. Bhalla, September 2006, NCBS
+	description:
+		Object for controlling reaction systems on behalf of the
+		Stoich object. Interfaces both with the reaction system
+		(molecules, reactions, enzymes
+		and user defined rate terms) and also with the Stoich
+		class which generates the stoichiometry matrix and 
+		handles the derivative calculations.
+
+	shared:
+		// Specialized solver messages for appropriate classes.
+		solve molSolve( processMolOut, reinitMolOut, molOut, molIn );
+		// Distinct versions for buffers. Does not need to send info
+		// to molecule, but to keep the messages consistent we put it
+		// in.
+		solve bufSolve( processBufOut, reinitBufOut, bufOut, bufIn );
+		// yet another version for sumTot
+		solve sumTotSolve( processSumTotOut, reinitOut, sumTotOut, sumTotMolIn );
+		// The reacs and enzymes just send info in. The shared message
+		// handles this plus the takeover of Process and reinit
+		solve reacSolve( processReacOut, reinitReacOut, reacIn );
+		solve enzSolve( processEnzOut, reinitEnzOut, enzIn );
+		solve mmEnzSolve( processMmEnzOut, reinitMmEnzOut, mmEnzIn );
+		// Likewise tables. They only need time info from processOut.
+		solve tabSolve( processTabOut, reinitTabOut, tabIn );
+
+		// A set of messages for external rates.
+		solve rateSolve( processRateOut, reinitRateOut, rateOut, rateIn );
+		single hub( molSizesIn, rateSizesIn, rateTermInfoIn, molConnectionsIn, reacConnectionIn, enzConnectionIn, mmEnzConnectionIn );
+	src:
+		solve processMol( ProcInfo );	// Connect up solved processes,
+									// mostly to turn them off.
+		solve reinitMol();	// Connect up solved processes
+		solve mol( double n);	// # of molecules: updates value.
+
+		// Actually the buffered molecules do not need an update.
+		// But if they are to use the same 'solve' message as the
+		// rest, then we have to supply a dummy function here.
+		solve buf( double n);	// Dummy.
+		solve processBuf( ProcInfo );	// Connect up solved processes
+		solve reinitBuf( ProcInfo );	// Connect up solved processes
+
+		solve sumTot( double n);	// Sumtotalled molecules. Updates
+		solve processSumTot( ProcInfo ); // Connect up solved processes
+		solve reinitSumTot( ProcInfo );	// Connect up solved processes
+
+		// The following classes only handle parameters that update
+		// the solver, so no outgoing value message.
+		solve processReac( ProcInfo );
+		solve reinitReac();
+		solve processEnz( ProcInfo );
+		solve reinitEnz();
+		solve processMmEnz( ProcInfo );
+		solve reinitMmEnz();
+		solve processRate( ProcInfo );
+		solve reinitRate();
+		solve rate( double n );	// # of molecules, could be several
+									// substrates for a given reac.
+		single update( ); 	// Call the Stoich to update matrix.
+	dest:
+		// single solve( vector< double >* y, double t, double dt );
+
+		single process( ProcInfo info );
+			// Here we pick one of the integration methods and farm
+			// out the calculation to the actual solver.
+
+		single reinit();
+
+		// This must be called before we call controlMol, because
+		// assignments for size etc are done here.
+		single molSizes( int nMol, int nBuf, int nSumTot ) {
+			vector< unsigned long > segments( 1, 0 );
+			nMol_ = segments[0] = nMol;
+			Field molSolve( this, "molSolve" );
+			molSolve->resize( this, segments );
+
+			nBuf_ = segments[0] = nBuf;
+			Field bufSolve( this, "bufSolve" );
+			bufSolve->resize( this, segments );
+
+			nSumTot_ = segments[0] = nSumTot;
+			Field sumTotSolve( this, "sumTotSolve" );
+			sumTotSolve->resize( this, segments );
+		}
+
+		single rateSizes( int nReac, int nEnz, int nMmEnz ) {
+			vector< unsigned long > segments( 1, 0 );
+			segments[0] = nReac;
+			Field reacSolve( this, "reacSolve" );
+			reacSolve->resize( this, segments );
+
+			segments[0] = nEnz;
+			Field enzSolve( this, "enzSolve" );
+			enzSolve->resize( this, segments );
+
+			segments[0] = nMmEnz;
+			Field mmEnzSolve( this, "mmEnzSolve" );
+			mmEnzSolve->resize( this, segments );
+		}
+
+		single molConnections( vector< double >* S, vector< double >* Sinit, vector< Element *>* elist ) {
+			if ( nMol_ + nBuf_ + nSumTot_ != elist->size() ) {
+				cerr << "Error: KineticHub::molConnections: Number of molecules does not match elist size\n";
+				return;
+			}
+			Field molSolve( this, "molSolve" );
+			Field sumTotSolve( this, "sumTotSolve" );
+			Field bufSolve( this, "bufSolve" );
+			S_ = S;
+			Sinit_ = Sinit;
+			unsigned long i;
+			unsigned long max;
+			for ( i = 0; i < nMol_; i++ )
+				zombify( (*elist)[i], molSolve );
+			max = nMol_ + nSumTot_;
+			for ( ; i < max; i++ )
+				zombify( (*elist)[i], sumTotSolve );
+			max = nMol_ + nSumTot_ + nBuf_;
+			for ( ; i < max; i++ )
+				zombify( (*elist)[i], bufSolve );
+		}
+
+		single rateTermInfo( vector< RateTerm* >* rates, int useOneWayReacs ) {
+			rates_ = rates;
+			useOneWayReacs_ = useOneWayReacs;
+		}
+
+		single reacConnection( int rateTermIndex, Element* reac ) {
+			Field reacSolve( this, "reacSolve" );
+			zombify( reac, reacSolve );
+			reacIndex_.push_back( rateTermIndex );
+		}
+
+		single enzConnection( int rateTermIndex, Element* enz ) {
+			Field enzSolve( this, "enzSolve" );
+			zombify( enz, enzSolve );
+			enzIndex_.push_back( rateTermIndex );
+		}
+
+		single mmEnzConnection( int rateTermIndex, Element* enz ) {
+			Field mmEnzSolve( this, "mmEnzSolve" );
+			zombify( enz, mmEnzSolve );
+			mmEnzIndex_.push_back( rateTermIndex );
+		}
+
+		// Use n for inline updates, nInit for initializing, mode
+		// for update method.
+		// Note that we do not need the volumeScale. That provides
+		// local info in the molecule if needed, for conc updates.
+		// Possibly later would want a separate geometry message for
+		// diffusion extensions.
+		solve mol( double n, double nInit, int mode ) {
+			/*
+			cout << "Got msg from mol: " <<
+				molSolveConn_.target( index )->parent()->name() << 
+				", " << n << ", " << nInit << 
+				", " << mode << ", index = " << index << "\n";
+				*/
+			if ( mode == SOLVER_GET ) {
+				molSrc_.sendTo( index, (*S_)[index] );
+				// cout << " This was a SOLVER_GET operation\n";
+			} else if ( mode == SOLVER_SET ) {
+				/*
+				cout << " This was a SOLVER_SET operation to " <<
+				molSolveConn_.target( index )->parent()->name() << "\n";
+				*/
+				(*S_)[index] = n;
+				(*Sinit_)[index] = nInit;
+			} else if ( mode == SOLVER_REBUILD ) {
+				// Here we need to redo the whole solver because
+				// the model has changed.  This could be
+				// due to changing of buffer status, or due to
+				// alterating the model architecture due to 
+				// creating or deleting objects, or adding connections.
+				// In this situation we want to hold off any changes
+				// till the solver is asked to continue the simulation
+				// or asked for a reset. Typically such changes are
+				// done in large groups.
+				rebuildFlag_ = 1;
+			}
+		}
+
+		solve buf( double n, double nInit, int mode ) {
+			if ( mode == SOLVER_GET ) {
+				// Ignore this case. The solver does not touch buffers.
+			} else if ( mode == SOLVER_SET ) {
+				(*S_)[ index + nMol_ + nSumTot_ ] = 
+					(*Sinit_)[ index + nMol_ + nSumTot_ ] = nInit;
+			}
+		}
+
+		solve sumTot( double n, double nInit, int mode ) {
+			if ( mode == SOLVER_GET ) {
+				sumTotSrc_.sendTo( index, (*S_)[index + nMol_ ] );
+			}
+		}
+
+		solve rate( double yPrime );	// Just the derivative.
+		// The rateIn is called each dt, so it has to be done fast.
+
+		// Just the rates.
+		solve reac( double kf, double kb ) {
+			// This can only be called in SOLVER_SET mode. There
+			// is no update from the solver to the reactions.
+			unsigned long i = reacIndex_[ index ];
+			if ( i >= 0 && i < rates_->size() - useOneWayReacs_ ) {
+				if ( useOneWayReacs_ ) {
+					( *rates_ )[i]->setRates( kf, 0 );
+					( *rates_ )[i + 1]->setRates( kb, 0 );
+				} else {
+					( *rates_ )[i]->setRates( kf, kb );
+				}
+			}
+		}
+
+		// Just the rates.
+		solve enz( double k1, double k2, double k3 ) {
+			// This can only be called in SOLVER_SET mode. There
+			// is no update from the solver to the reactions.
+			unsigned int i = enzIndex_[ index ];
+			if ( i < rates_->size() - useOneWayReacs_ - 1) {
+				if ( useOneWayReacs_ ) {
+					( *rates_ )[i]->setRates( k1, 0 );
+					( *rates_ )[i + 1]->setRates( k2, 0 );
+					( *rates_ )[i + 2]->setRates( k3, 0 );
+				} else {
+					( *rates_ )[i]->setRates( k1, k2 );
+					( *rates_ )[i + 1]->setRates( k3, 0 );
+				}
+			}
+		}
+		
+		// Same terms but fits into calculations differently.
+		solve mmEnz( double k1, double k2, double k3 ) {
+			// This can only be called in SOLVER_SET mode. There
+			// is no update from the solver to the reactions.
+			double Km = ( k2 + k3 ) / k1 ;
+			unsigned int i = mmEnzIndex_[ index ];
+			if ( i >= 0 && i < rates_->size() )
+				( *rates_ )[i]->setRates( Km, k3 );
+		}
+
+		// Just the mol values.
+		solve tab( double n );
+
+	private:
+		vector< double >* S_;
+		vector< double >* Sinit_;
+		bool rebuildFlag_;
+		unsigned long nMol_;
+		unsigned long nBuf_;
+		unsigned long nSumTot_;
+
+	private_wrapper:
+		void zombify( Element* e, Field& solveSrc );
+		// The following 3 vectors are to look up index of rates_
+		// term from the index of the message
+		vector< int > reacIndex_;	
+		vector< int > enzIndex_;
+		vector< int > mmEnzIndex_;
+		vector< RateTerm* >* rates_;
+		int useOneWayReacs_;
+};
+
+////////////////////////////////////////////////////////////////////
+// Stuff below here goes verbatim into KineticHubWrapper.cpp
+////////////////////////////////////////////////////////////////////
+
+void KineticHubWrapper::zombify( Element* e, Field& solveSrc )
+{
+	Field f( e, "process" );
+	if ( !f.dropAll() ) {
+		cerr << "Error: Failed to delete process message into " <<
+			e->path() << "\n";
+	}
+	Field ms( e, "solve" );
+	if ( !solveSrc.add( ms ) ) {
+		cerr << "Error: Failed to add solve message from solver " <<
+			solveSrc.path() << " to zombie " << e->path() << "\n";
+	}
+}
+

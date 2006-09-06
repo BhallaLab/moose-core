@@ -18465,3 +18465,709 @@ Put all the SVN cleanups together, and now set to check it in as revision 3.
 This revision should get us back up to speed with svn updates.
 
 ============================================================================
+1 July 2006
+General fix up to get it to recompile from a make clean. 
+Now I need to figure out how to get the changes into SourceForge.
+
+That looks difficult. Pity. I was ready to do a checkin, and there are
+lots of interesting changes here in the offing.
+
+How to do an efficient solver takeover of an object:
+- Extend the Process shared message to include 
+	- Update message to send values from object to solver: n, nInit, mode.
+	- Update message which sends values from solver to object: n.
+	- Trigger message which asks solver to send update to object.
+- We want this to become a generic Process message. This means that all
+	the shared messages also must be generic.
+	- Update obj -> solver: Nope
+	- Update solver -> obj: Nope
+	- Trigger obj -> solver: Yes.
+- Note that through all this we still really would like a Finfo to 
+	intercept all calls. 
+	- Or we redefine finfos too.
+	- Or we intercept all Field calls.
+	- We could use the info about the presence of the solver msg src
+		func for trigger (see below) to check if we should intercept.
+- We could use a nested shared object
+- We could try right now to see if we can share the parts of a shared object.
+	This looks possible from the SharedFinfo code.
+	- We probably want to collapse the trigger into the update msg to
+	reduce overhead.
+- We could call trigger etc on the fly. This may get expensive though.
+
+============================================================================
+2 July 2006
+Prior to doing these changes, I'll check all this into the local svn
+repository on my laptop. Later will worry about merging it with the stuff
+on the SourceForge server.
+
+Working on it, but got sidetracked into fixing up evaluated fields in
+the preprocessor because molecules use them a lot. We are getting close
+to being able to define the entire class from the .mh.
+Look at EvalField.cpp:77
+
+Moving on. Compiled, now testing out MyClass.mh which as far as I know
+has all the features so far implemented in the preprocessor.
+Getting close. Stuck at balanceBraces.
+
+Looks like it works now, at least for the evaluated fields. But the
+statically consts are not yet set up.
+
+OK, seems to have mostly come together. Tested OK against the MyClass.mh
+and against Molecule.mh
+Remaining niggles:
+- comma after constructor initializers
+- Assigning static consts.
+
+Since we've already done a checkin, no harm in doing another. 
+Checked in as version 5.
+
+Now messing around with the molecule definitions. Trying to set up the
+solver messages in Molecule to use the ProcessConn. Looks like it compiles,
+at least. Now need to set the other side of it, the ksolve.
+
+============================================================================
+3 July 2006
+Looks like the ksolve thing worked, at least to set up the connections.
+Now to figure out how to use the messages to update info.
+Now to get this integrated with the solver.
+
+At this point the Stoich class goes and looks directly at element fields.
+We need to do this cleanly. The Ksolve class is already handling element
+access cleanly through its messages. The Stoich class should now be decoupled
+from the elements, and connected through Ksolve as in the original diagram of
+30 May:
+
+Elements <===> Ksolve <===> Stoich <===> EEsolve
+
+For now, lets check this in.
+
+- Get Ksolve to take over reacs and enz too
+- Get Ksolve to talk to Stoich 
+- Change Stoich so it uses Ksolve info rather than look up its own end of things
+- Fiddle with Fields so that requests for a field to assign a value to
+	a molecule get forwarded to Ksolve.
+- Fiddle with Fields so that requests for a field to obtain a value from
+	a molecule get forwarded to Ksolve, ksolve updates the molecule,
+	and then the regular field info operation occurs.
+	- This is sort of working now. But:
+		- It calls the trigger even if it is a setField call.
+			This is because the trigger is keyed to looking up
+			the field (triggerUpdate in MoleculeWrapper.cpp:211).
+			This is not good.
+		- It doesn't know how to map back onto the originating
+			element. Clearly something like returnFinfo is needed.
+
+
+============================================================================
+4 July 
+Clearly we need to do something different with returning the field, so that
+it does the correct thing depending on what is asked of it.
+- For a set, it should send info to the solver, then assign objectt.
+- For a get, it should trigger the update from the solver, then allow info 
+	to be taken from object.
+
+I'll check this in and then go back to doing the separate finfo. This was
+checked in as revision 7.
+
+============================================================================
+1 August.
+Merged in the SourceForge version 4, which was deposited by Joe Svitak after
+cleaning up for a Windows compile. Not too many changes but we still have
+some nasty stuff in the parser to do with the new flex/bison. At this point
+the local version should parallel the SourceForge version. Also sent it
+in to SourceForge as revision 5.
+
+============================================================================
+4 August.
+Getting back to solvers. As mentioned on 3/4 July, we can't use the current
+triggerUpdate hack on the Element::getField function. Proposal:
++ Extend Field data structure with a flag indicating if it is solved.
+	(Can't be in finfo, because finfos are readonly and shared)
+* Use triggerUpdate to set this flag in getField
+* in Ftype, modify the get and set to take const Field& argument (possibly later)
+* In Ftype get and set, check the solver flag on the Field to see if we
+	want to do anything about it.
+
+============================================================================
+5 August 2006
+Do we use Element::isSolved() rather than the flag in Field?
+Pros:
+	Just in time
+	No extra variable to pass or store
+Cons:
+	Multiple solvers?
+	Not all fields care.
+
+Ties into issue of updates. I want the solver to flag fields as being of
+interest, not have to hard code it in.
+Even better: solver should give the illusion of fields that do not exist?
+	Don't get into this for now.  
+@All this would be easy if we had a field array pointer for every object
+rather than the current system of it being hard coded in.
+
+Specific example: Molecule with xyz coords
+Explicit solver: Ignores spatial info, uses in.
+3d solver 1: includes xyz coords, ignores n which is always 1.
+3d solver 2: Uses xyz coords to look up n in its internal space.
+
+In general only 1 is operational at any time. However, one may have cases
+where different parts of the same object are modeled by separate solvers.
+(e.g., compt sims where xyz and Vm are modeled by a growth solver and hsolver
+respectively). Ignore for now.
+
+Single solver, somehow tells object which fields to report.
+SolveSrc_ should do this. It has to be hard coded for any part of an object
+that needs to be solved.
+Example above:
+Explicit solver: SolveSrc(n, nInit). Molecule::get needs update for n.
+	Molecule::set needs to pass info for n and nInit.
+3d solver1: SolveSrc(x, y, z). Molecule::get needs update for x, y, z.
+	Molecule::set needs to pass info for x, y, z.
+3d solver2: SolveSrc(x, y, z, n, nInit?). Molecule::get needs update for n.
+	Molecule::set needs to pass info for n and nInit. However, the
+	get call needs info for x, y, z as well and n has to come back.
+
+reaction: SolveSrc(kf, kb). reaction::get needs nothing.
+	reaction::set needs to pass kf and kb.
+
+There is indeed local info about destination operations in the solveFunc
+which accepts info from the solver in the composite message. The identity
+of this composite message can tell us which fields are affected. But this
+is very indirect, and it is simpler to write a specific function in the
+object to return the isSolved(const string& name) flag.
+
+Now into the core of it, and it is best to revert to something more like
+the original triggerUpdate function, except that it needs additional info
+to know whether it is a set or a get. Later the additional info will also
+tell the solver if we are doing an addmsg or any other operation. I think
+the only ops to worry about are set, get, addmsg, deletemsg, and delete.
+
+OK, done. I now am able to access the inside functions of the solver and
+also tell it whether to set or get. The object values get updated too.
+
+From 3 July:
+- Get Ksolve to take over reacs and enz too
+- Get Ksolve to talk to Stoich 
+- Change Stoich so it uses Ksolve info rather than look up its own end of things
++ Fiddle with Fields so that requests for a field to obtain a value from
+	a molecule get forwarded to Ksolve, ksolve updates the molecule,
+	and then the regular field info operation occurs.
+	- This is sort of working now. But:
+		- It doesn't know how to map back onto the originating
+			element. Clearly something like returnFinfo is needed.
+
+
+Looked at various options for the return call.
+- The obvious one, ReturnConn, is not a good option.
+	- Too much memory use
+	- Need index info for the solver to know who called. We would need
+		a map lookup if we used return conns.
+- The next obvious one is something like a SynConn
+	- Each SynConn stores only 1 connection, and an arbitrary type T,
+		and therefore each has to also store the parent element.
+	- The target synapse (or in this case, the solver) would have
+		a vector of SynConns to manage.
+	- The type T could store the index info for the solver. But we
+		would end up storing redundant info for the parent. Synapses
+		have this issue too.
+- The next option is something customized for solvers.
+	- If we preallocate the synConns, we can store them directly rather
+		than their pointers. Saves a word.
+	- If we use a vector of allocated UniConnBase-like things we can
+		obtain the index by pointer arithmetic on the conns. But
+		we still need a value in the allocated conn. 
+			- an index, to find the base of the vector and
+				hence everything else. 
+				Too fiddly.
+			- a pointer to the base of the SolverManagerConn
+				class which gives us the parent element
+				(the solver) as well as a way to look up
+				index of conn. That would only be a little
+				ptr arithmetic, not even a lookup. Speed
+				cost is acceptable, space is a concern here.
+				Clean enough to use.
+			- a pointer to the parent element (the solver)
+				from where we could navigate our way to the
+				connections. This is not so good as we may have
+				multiple sets of zombie classes on different
+				solver messages.
+		- So if we use the best of these, we need 2 words per slave
+			object. One is the return Conn ptr, and the other is
+			the ptr to the base of the wrapping Conn.
+			- This compares to original SynConn approach which
+			uses 4 words, or the preallocated SynConns using 3.
+
+
+OK, I have set up a skeleton of all this. I will need to implement a variant
+of an NMsgSrc to permit me to send a message to a specific target. But it
+all looks pretty good. Only small compromises on speed. No map lookups.
+Not too much memory waste. The whole thing uses only regular messaging.
+Now I only need to make it work.
+
+============================================================================
+7 Aug 2006
+As usual, harder to implement the details. Looks like the way to do the
+system is to keep NMsgSrc nearly the same but reimplement MultiConn as
+a base class that NMsgSrc uses. The original MultiConn is VecMultiConn
+and the new one for solvers is obviously SolveMultiConn.
+Possibly I can do this at the level of PlainMultiConn instead.
+Actually the best bet is to have a single big vector of all the targets.
+Then there is no messing around when sending data back to source. The
+RecvFuncs are managed separately. This works only because we do not plan to
+juggle messages, so the pointers are stable. Need great care to preserve ptrs.
+
+NMsgSrc and its chidren will need a few extra functions:
+- addVec: where we add a vector of targets all at once. The targets are
+	guaranteed to have the same RecvFunc.
+- addMixedVec: where we add a vector of targets all at once. The targets may
+	differ and may have to be filtered for the correct arguments.
+	Actually arguments are dangerous: could simply be a couple of doubles.
+	Filtering has to be done before we get here.
+- indexSend( index i , T1 v1, T2 v2 ...)
+
+============================================================================
+13 Aug 2006
+Because I need to derive another class from the NMsgSrc, I don't really need
+to use MultiConn as a base for the SolveMultiConn. But let's take it as
+far as I can and see what happens.
+
+
+============================================================================
+14 Aug 2006
+The SolveMultiConn stuff is going well, enough so that I am tempted to 
+convert the existing MultiConns to this. Would work too, if it were not for
+the issues of reallocation in a model that is being built up bit by bit.
+Perhaps could set up an internal conversion of scaffolded
+definitions for the multiconns to later be converted to this smaller and
+probably faster format. Ironically, in the solver I do not really need the
+speed.
+
+Current status: Approaching the middle from several ends:
+- NMsgSrc, which has attempts to do the various kinds of required messaging.
+	Will need to add Finfo::sendTo() to the base class, and
+	extend the various derived classes accordingly.
+	I also have a dummy NMsgSrc1::sendSolve() that illustrates how I
+	could do the old kind of Send using the SolveMultiConn.
+- NMsgSrcFinfo, which needs to support the vector add operation for connecting
+	up the array.
+- Conn, which is getting close to having the bits to do the vector add.
+
+In the meantime, the Ksolve is already prepared to use and test out this 
+functionality.
+
+============================================================================
+15 Aug 2006
+Working on connectVec and going on up through to the Field.
+Need a way for Finfo::addVec to incrementally build slots up. 
+
+============================================================================
+24 Aug 2006.
+Looking closely at the guts of the add function. It will be painful to
+propagate addVec all the way through the system. Instead better to implement
+an allocate function and then use the single connection add call 
+for the rest of the process. Need to redesign all this, but it is too big
+a job for now.
+
+For now: 
+Conn has a resize( vector< unsigned long >& segments) virtual base function
+instead of connectVec. Only SolverMultiConn uses the resize function for now.
+SolverMultiConn has been updated to support the regular Conn operations.
+NMsgSrc has a resize( vector< unsigned long >& ) operation too.
+
+Here is the sequence of calls:
+KsolveWrapper->localSetPath: Field solveSrc.resize()
+Field::operator->() is just the finfo. So,
+Finfo::resize is a virtual base, goes to NSrcFinfo::resize()
+	This function digs up the Conn. Calls conn->resize(). That is it.
+
+OK, now lets try compiling. Usual pages of error messages. 
+
+============================================================================
+25 Aug 2006
+Compilation done. Linking stuck.
+Also pending: Implement molArray in the Ksolve to hold molecule data in
+a concise form.
+============================================================================
+26 Aug 2006
+
+Ideas for better implementation of messaging:
+Connections: 
+Class Conn {
+	Element* e;	// Target element
+	unsigned int index;	// Index of target Conn
+};
+
+Class Element {
+	...
+	private:
+	...
+		vector< Conn > c_; // A single vector with all the conns
+};
+
+// Every SingleSrc needs to know its start, but it can be compiled in.
+Template < unsigned int I > Class SingleSrc {
+	unsigned int start() {
+		return I;
+	}
+	RecvFunc rf_;
+};
+
+class FuncHandler {
+	RecvFunc rf_;
+	unsigned int used_;
+	unsigned int availble_;
+
+	send ( T v ) {
+		for
+	}
+};
+
+Class NSrc {
+	unsigned int start_;
+	vector< FuncHandler > fh_;
+
+	send( T v ) {
+		// Internally there are two options here.
+		vector< FuncHandler >::iterator i;
+
+		// Here we just use the Element* argument
+		for (i = fh_.begin(); i != fh_.end(); i++ )
+			i->send( v, c_ + start );
+		
+		// Here we use both the Element* argument and also dest index
+		// The dest index is needed for messages doing:
+		// Relay: used to look up additional info (but that can be in
+		// the alternate Element*)
+		// Synapse: Used to look up syn wt and other syn local info
+		// 	Need to put this in the send loop.
+		// Return msg: Used to send info right back.
+		//	But here we could just pass in the originating elm ptr
+		// Solver msg: Used to identify caller and sometimes send
+		//	back info. Need to put in send loop.
+		for (i = fh_.begin(); i != fh_.end(); i++ )
+			i->send( v, c_ + start );
+	}
+
+	sendTo( T v, unsigned int index ) {
+		// Nasty bit here is to look up the recvFunc.
+		// Alternately, the sender could send the element*. But
+		// still need to find recvFunc.
+		// Alternately, the local handler could do the lookup for the
+		// target element* and replace the index with the element*
+		// However, we still need to look up the recvFunc, so index
+		// is probably best.
+	}
+};
+
+
+Having done this:
+All but one of the Conn classes vanish: Only Conn remains. No virtual stuff.
+MsgSrc classes are modified, but similar number needed to template arguments.
+There is a zoo of Finfos for different messages/fields etc. Some simplification.
+SingleSrcFinfos and NSrcFinfos are not much affected. They were templated for
+	arguments.
+
+
+- We need a couple of Element* wrapper elements with associated recvfuncs
+	to handle Relay messages.
+- We need an efficient way to consolidate the Conn array and FuncHandlers.
+	- For deleting
+- We need an efficient way to find and replace recvfuncs and index when we
+	create relays.
+
+.............................................................................
+
+Back to the present. Trying again to compile. Succeeded. Next steps:
+- put in tables for the molecule info, 
+- test the Ksolve messaging.
+- Check in version.
+- Interface with stoich
+- Test overall solver system
+- Put in RK solve
+- Put in one of the GSL solvers.
+
+- Consider refactoring messages.
+
+============================================================================
+27 Aug 2006
+Problem with connections using SolveMultiConn: They end up using the
+managing SolveMultiConn rather than the individual SolverConns.
+Fixed that. Various other fixes. Current issue: SolveMultiConn is not correctly
+identifying message sources. Fixed.
+Next steps:
+- put in array rather than fudging the return value
+- Look at doing for reacs too
+- Check in.
+- See above list.
+
+============================================================================
+29 Aug 2006
+
+Got array stuff to work. Also figured out how to handle the value assignment
+stuff in the reacs, but the connectivity definition stuff still needs
+thought. This was a critical part of the stoichmat object, but it looks like
+scanning the model should be done by Ksolve. So Stoichmat is reduced to
+doing the updates, and even that is mostly by the halfreac objects that
+Ksolve will be setting up.
+
+Anyway, for now we have enough working to justify a checkin.
+Done, as revision 9.
+
+Now working on getting the rest of the solver stuff in. 
+* Separated out the code into a Ksolve.cpp file.
+- Need to figure out how to handle different states of molecules:
+	regular, buffered, and variable.
+
+
+============================================================================
+30 Aug 2006
+Working on handling buffers too. 
+in basecode::Conn.cpp:291: why is sourceSlot not 1 for the buffer? The
+segments array looks OK, with 14 in 0 and 15 in 1.
+
+Seems to be an issue with the way SharedMsgs work. Best to allocate a 
+separate MultiSolveConn for each of the varMols, bufMols, and sumTotMols.
+
+Issue is now that we end up with non-contiguous arrays for the molecules,
+unless I do some creative stuff using offsets, in the functions that handle
+access.
+
+This is turning quite messy. There are several SharedFinfos that all use
+processOut and reinitOut. The Conn and SharedFinfo basecode have to be able to 
+manage multiple things on one Conn vector. 
+Another aspect of this: processSrc and reinitSrc use molSolveConn. So does
+mol. But sumtots use sumTotSolveConn. Won't work.
+
+- Need to send a message to _all_ targets. Process is the obvious target to use.
+- Need to get back to the SharedFinfo::maxIndexOfMatchingFunc to get the
+	correct slot. With this it should be possible to share the conn
+	between radically different message types.
+
+============================================================================
+31 Aug 2006
+
+Looking at the design for messaging and Conns. The current problem is that
+the MsgSrcs fail to correctly find which slot to use for the message,
+especially in the messy context of the SharedConns.
+
+In theory, any unique combo of recvFuncs for SharedConns should occupy a
+separate slot. This seems not to work. The current algorithm simply looks
+for the max entry. Need actually to look for a signature for the unique combo.
+
+Another issue: SingleMsgSrcs on a SharedConn. Even worse, when they combine
+with NMsgSrcs.
+
+Conclusion:
+Need to specify SharedConn slots by looking up the whole array of recvfuncs.
+Combinations may matter. Assume that Single recvfunc treat any index as
+the same. This is the current behaviour. The case should not really come up.
+
+Worked through the motions on this. The conclusion is that current
+SharedMessages will only handle a single message set at a time. Holes
+in the rfuncs lists otherwise appear. It works, though.
+Corrollary of this is that I need to define a whole set of Process, Reinit
+and other message sources for each of the things that the Ksolver handles,
+such as mol, buf, sumTot, reac and enz. Fifteen at least.
+
+Anyway, the molecule stuff now works. On to the others. First check it in.
+
+Did some updates to the preprocessor, it now does many of the solver-specific
+things. Cannot handle the multiple shared messages using the same Conn, though.
+Added in shared stuff for reacs, enz, mmenz, tables and rates.
+Quick checkin before I start getting the rest of the system set up.
+Now at revision 11.
+
+Next steps: 
+- handling the reacs and enzs.
+- Scan model structure to build stoich matrix and rate vector
+- Redo stoich object to talk to Ksolve via pointers
+- Put in a RKsolver
+- Put in rates
+- Document and wrap up solver stuff.
+
+============================================================================
+1 Sep 2006
+
+Developers discussion.
+
+My key points:
+
+Iterative design: I want to have all the parts working together, even as
+a kludge, to get the big picture. Then we can optimize, refactor and so on.
+
+Current status: I am working on the kinetic solver stuff. Issue is not the
+solver itself, but its API via messaging. I think that is now ready to launch.
+
+Remaining big gap(s)
+	What about parallel stuff?
+		Inter-node Messaging
+		Threads
+	What about persistence?
+	What about GUI?
+
+Will they change any user object design stuff?
+Do we know enough now to be able to standardize the .mh format?
+
+Specific ideas on refactoring messaging and connections.
+Other specific ideas.
+
+Do we want to separate parameters from variables.
+
+
+Much work done to get Ksolve talk to everybody. A remaining segv which
+looks like us running off the end of the segment_ array or perhaps the 
+Conn Vec.
+Merging in stoich code to build the data representation.
+
+============================================================================
+2 Sep 2006.
+
+The stoich code is mergeable, but perhaps it would be better to have an
+abstracted way of representing the connectivity so that instead of the
+Ksolver doing the model assembly, the specific data handler
+(stoich in this case) should. Ksolve should provide the interface to the
+model details so that the data handler does not even need to know that
+there are elements involved. I am not sure if this is a realizable goal.
+Options:
+1. Current: Ksolve builds stoich matrix, rate and S_ and Sinit_
+	vectors. We have almost merged the entire Stoich class into Ksolve.
+	- Ksolve is severely overloaded
+	- Stoich is nearly empty.
+
+2. Ksolve only handles messaging I/O. Stoich class still talks to model to
+	build its internal data structures. In fact we could have Ksolve
+	come in post-facto to set up the messaging I/O.
+	- This produces two points of contact with the model. 
+		- Ksolve is dependent: It does not get set up till Stoich is.
+		- Stoich is primary. But once built it is hands off.
+			- Sometimes we may want the stoich matrix on its own.
+
+Option 2 seems to be a cleaner separation of roles, though it is not what
+I originally envisioned. Now we need to redefine the operation of the 
+Ksolver, which may even become a generic object:
+	- Function to build each set of messages.
+		- controlMols( vector< double >* S_, vector< double >* Sinit_, 
+			vector< Element* >* mols );
+		- controlBufs( vector< double >* S_, vector< double >* Sinit_, 
+			vector< Element* >* mols );
+		- controlReacs( vector< molRate >* S_, 
+			vector< Element* >* reacs );
+		- controlEnzs( vector< molRate >* S_, 
+			vector< Element* >* reacs );
+		...
+
+Actually, looking at this it doesn't seem so easy to make it a generic.
+
+Nomenclature:
+	Old		New
+	Ksolve 		KineticHub
+	Stoich		Stoich
+	ForwardEuler	ForwardEuler
+
+Before going ahead with this change, I'll check in the sort-of-working
+version we have. There are still issues with the mol, buf and sumTot use
+of the same Conn, but the basics of the solver messaging interface
+seem to be adequate.
+Checkin done.
+Begin work on KineticHub
+
+============================================================================
+3 Sep 2006
+Almost got it to compile. Still to add stuff to stoich so it can talk to the
+hub.
+
+KineticHub compiles.
+Working on Stoich.mh so that it generates the whole thing. Almost, but the
+	usual minor preprocessor issues require a bit of hand-fixing. Compiles.
+
+Checked in at this point as revision 13.
+
+Forthcoming steps:
+* Update Stoich.mh so that it talks to KineticHub
+* Update KineticHub.mh so that it works with all fields of Stoich.mh
+- Update KineticHub::zombie so that it transfers all nout and cout messages
+	to KineticHub, and sets up Stoich so that these fields are updated
+	per clock tick or even per internal tick.
+- Implement Rate object and its linkage to KineticHub and onward to Stoich.mh
+- Figure out how to rebuild models. The current zombie approach is one-time.
+
+============================================================================
+4 Sep 2006
+Set up test script khub.g to put it all together. Immediate effect of
+connecting Stoich to KHub is a segv. Should really put it all in a 
+shared message.
+
+Fixed segv.
+Successfully set a value of an object being solved, and had the solver
+recognize the fact, and proceed with the altered simulation. This is in
+test/khub.g. Also able to get the value of the object.
+
+From now it is all details.
+
+Setting up reacConnection. It is a little tricky because we have 3 ways of
+connecting up a reac:
+forward only.
+backward only.
+both, separate
+bidirectional.
+All doable using flags and stuff, but it would be nice to be clean.
+Options:
+	- Use 4 kinds of reacConnections, one for each case
+	- Use flags and typecasting
+	- Require all reacs to be bidirectional
+		- Small speed penalty
+		- Avoids issue of restructuring if rates change.
+		Actually turns out that they are bidirectional unless
+		something really odd happens.
+
+Ended up with a clean solution: added a virtual function for assigning 2 rates,
+	sometimes only one is used.
+
+Check in before I begin the job of converting the Stoich.mh and KineticHub.mh.
+That was revision 14.
+Managed to compile Stoich.mh. Only error was the comma at end of
+initilization list, and its EPSILON.
+Managed to compile KineticHub.mh. Loads of errors at first, but in the end it
+compiles cleanly with no user intervention.
+
+Unfortunately the code does not even handle the good old assignment to a
+molecule. Debug it tomorrow.
+
+============================================================================
+5 Sep 2006.
+Yesterday's issue was simply that the khub.g script had not been updated to
+use the shared messaging.
+
+Today: the enzymes are not being connected up to the solver. It complains
+that no solve message is found on the enzyme.
+OK, issue was that the conn array was not being resized to allocate storage.
+
+Sorted that out. Now there is an effect of changing a rate: I get nans.
+Various other fixes later: now the assignment of rates also works.
+
+Check it all in.  Done as Revision 15.
+
+Prioritize: What would it take for me to begin using it?
+* Solver messaging: need for graphs: Day?
+	This was actually pretty easy: a matter of placing SolverUpdate
+	in the ValueFinfo Get and Set operations.
+	Still leaves dangling other kinds of messages from zombies.
+- Solver methods: GSL based ODE solver: 2 days. But no immediate use.
+- Solver methods: Fast Gillespie: Week? Useful on robustness.
+- HSOLVE able to handle mitral cell and bulb model: Week?
+- Parallelization: Week??? Would love to have automatic farmer.
+- Graphics, at least some stupid FLTK widgets
+- Refactoring: Month?
+
+Should clean out attempts of ClockTick to rebuild path to solved objects.
+Unfortunately the original .mh is a mess and a big pain to rebuild.
+I did the rebuild, but it seems to have broken.
+Still haven't fixed the innerSetPath function to ignore solved elements.
+============================================================================
+6 Sep 2006
+Much fixing and cleaning up. Now the innerSetPath ignores solved elements,
+and I was able to get solver messaging to work with graphs. At this point
+I can send this in as a release which mostly works as a solver example.
+
+============================================================================

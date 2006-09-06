@@ -40,6 +40,15 @@ class NSrcFinfo: public Finfo
 			return getSrc_( e )->targetFunc( i );
 		}
 
+		RecvFunc targetFuncFromSlot( Element* e, unsigned long slot )
+				const {
+			return getSrc_( e )->targetFuncFromSlot( slot );
+		}
+
+		unsigned long nFuncs( Element* e ) const {
+			return getSrc_( e )->nFuncs();
+		}
+
 		// Returns index of first match
 		unsigned long indexOfMatchingFunc( Element* e, 
 			RecvFunc rf ) const
@@ -76,6 +85,7 @@ class NSrcFinfo: public Finfo
 		}
 
 		bool add( Element* e, Field& destfield, bool useSharedConn = 0);
+		// void resize( Element* e, vector< unsigned long >& segment );
 
 		bool funcDrop( Element* e, const Conn* c ) {
 			return getSrc_( e )->funcDrop( c );

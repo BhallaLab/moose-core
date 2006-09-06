@@ -10,6 +10,11 @@
 
 #include "header.h"
 
+void solverUpdate( const Element* e, const Finfo* f, SolverOp mode )
+{
+	e->solverUpdate( f, mode );
+}
+
 // Returns an index of 0 if the name is matched without any braces.
 // Otherwise looks for index in square braces. 
 // Returns -1 if it fails.

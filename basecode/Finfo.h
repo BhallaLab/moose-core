@@ -56,6 +56,15 @@ class Finfo {
 		{
 			return 0;
 		}
+		virtual RecvFunc targetFuncFromSlot( Element* e, unsigned long slot ) const
+		{
+			return 0;
+		}
+
+		// Returns number of assigned RecvFuncs.
+		virtual unsigned long nFuncs( Element* e ) const {
+			return 0;
+		}
 
 		// Used by MsgSrcs. Returns length of function list if not found
 		virtual unsigned long indexOfMatchingFunc( 
@@ -79,7 +88,7 @@ class Finfo {
 			Element* e, RecvFunc rf, unsigned long position ) = 0;
 
 //////////////////////////////////////////////////////////////////
-//  A bunch of functions to handle RecvFuncs.
+//  A bunch of functions to handle Finfo creation/destruction
 //////////////////////////////////////////////////////////////////
 		// Default implementations for copy. If a derived class of
 		// Finfo must return a new instance in the match() command,
@@ -147,6 +156,20 @@ class Finfo {
 		// SharedFinfo.
 		virtual bool add( Element* e, Field& destfield,
 			bool useSharedConn = 0 ) = 0;
+
+		virtual void resize(
+			Element* e, vector< unsigned long >& segment );
+
+		/*
+		virtual bool addVec( Element* e, vector< Element* >& elist,
+				Field& destfield, bool useSharedConn = 0 ) {
+			vector< Element* >::iterator i;
+			for ( i = elist.begin(); i != elist.end(); i++ ) {
+				destfield.setElement( *i );
+				add( e, destfield, useSharedConn );
+			}
+		}
+		*/
 
 		// Returns a Finfo to use to build the message.
 		// Sometimes is self, but often is a Relay.

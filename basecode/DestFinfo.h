@@ -64,6 +64,12 @@ class DestFinfo: public Finfo
 		}
 
 		RecvFunc targetFunc( Element* e, unsigned long i ) const;
+		RecvFunc targetFuncFromSlot( Element* e, unsigned long i )
+				const {
+			// This does not make sense.
+			cerr << "Error: DestFinfo::targetFuncFromSlot: Call should not happen\n";
+			return 0;
+		}
 
 		void addRecvFunc( Element* e, RecvFunc rf,
 			unsigned long position );

@@ -204,3 +204,25 @@ Element* sumProcessInConnMoleculeLookup( const Conn* c )
 	return reinterpret_cast< MoleculeWrapper* >( ( unsigned long )c - OFFSET );
 }
 
+///////////////////////////////////////////////////
+// Other function definitions
+///////////////////////////////////////////////////
+bool MoleculeWrapper::isSolved() const
+{
+	return ( solveSrc_.targetFunc(0) && 
+		solveSrc_.targetFunc(0) != dummyFunc0 );
+}
+void MoleculeWrapper::solverUpdate( const Finfo* f, SolverOp s ) const
+{
+	if ( solveSrc_.targetFunc(0) && 
+		solveSrc_.targetFunc(0) != dummyFunc0 ) {
+		if ( s == SOLVER_SET ) {
+			if ( f->name() == "n" || f->name() == "nInit" ||
+				f->name() == "conc" || f->name() == "concInit" )
+				solveSrc_.send( n_, nInit_, SOLVER_SET );
+		} else if ( s == SOLVER_GET ) {
+			if ( f->name() == "n" || f->name() == "conc" )
+				solveSrc_.send( n_, nInit_, SOLVER_GET );
+		}
+	}
+}

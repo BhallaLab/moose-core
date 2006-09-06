@@ -23,30 +23,55 @@ class Ksolve
 		and user defined rate terms) and also with the Stoich
 		class which generates the stoichiometry matrix and 
 		handles the derivative calculations.
-	field:
-		string path;
+	eval_field:
+		string getPath() {
+			return path_;
+		}
+
+		void setPath( const string& value ) {
+			path_ = value;
+			Ksolve::setPath( value, this );
+		}
 
 	shared:
 		// Specialized solver messages for appropriate classes.
-		multi molSolve( processOut, reinitOut, molOut, molIn );
+		solve molSolve( processOut, reinitOut, molOut, molIn );
+		// Distinct versions for buffers. Does not need to send info
+		// to molecule, but to keep the messages consistent we put it
+		// in.
+		solve bufSolve( processOut, reinitOut, bufOut, bufMolIn );
+		// yet another version for sumTot
+		solve sumTotSolve( processOut, reinitOut, sumTotOut, sumTotMolIn );
 		// The reacs and enzymes just send info in. The shared message
 		// handles this plus the takeover of Process and reinit
-		multi reacSolve( processOut, reinitOut, reacIn );
-		multi enzSolve( processOut, reinitOut, enzIn );
-		multi mmEnzSolve( processOut, reinitOut, mmEnzIn );
+		solve reacSolve( processReacOut, reinitReacOut, reacIn );
+		solve enzSolve( processEnzOut, reinitEnzOut, enzIn );
+		solve mmEnzSolve( processMmEnzOut, reinitMmEnzOut, mmEnzIn );
 		// Likewise tables. They only need time info from processOut.
-		multi tabSolve( processOut, reinitOut, tabIn );
+		solve tabSolve( processTabOut, reinitTabOut, tabIn );
 
 		// A set of messages for external rates.
-		multi rateSolve( processOut, reinitOut, rateOut, rateIn );
+		solve rateSolve( processRateOut, reinitRateOut, rateOut, rateIn );
 	src:
-		multi process( ProcInfo );	// Connect up solved processes,
+		solve process( ProcInfo );	// Connect up solved processes,
 									// mostly to turn them off.
-		multi reinit();	// Connect up solved processes
+		solve reinit();	// Connect up solved processes
 
-		multi mol( double n);	// # of molecules: updates value.
-
-		multi rate( double n );	// # of molecules, could be several
+		solve mol( double n);	// # of molecules: updates value.
+		// Nothing for the buffered molecules. No update needed.
+		// But if they are to use the same 'solve' message as the
+		// rest, then we have to supply a dummy function here.
+		solve buf( double n);	// Dummy.
+		solve sumTot( double n);	// Sumtotalled molecules. Updates
+		solve processReac( ProcInfo );
+		solve reinitReac();
+		solve processEnz( ProcInfo );
+		solve reinitEnz();
+		solve processMmEnz( ProcInfo );
+		solve reinitMmEnz();
+		solve processRate( ProcInfo );
+		solve reinitRate();
+		solve rate( double n );	// # of molecules, could be several
 									// substrates for a given reac.
 	dest:
 		// single solve( vector< double >* y, double t, double dt );
@@ -63,63 +88,93 @@ class Ksolve
 		// local info in the molecule if needed, for conc updates.
 		// Possibly later would want a separate geometry message for
 		// diffusion extensions.
-		multi mol( double n, double nInit, int mode ) {
+		solve mol( double n, double nInit, int mode ) {
+			cout << "Got msg from mol: " <<
+				molSolveConn_.target( index )->parent()->name() << 
+				", " << n << ", " << nInit << 
+				", " << mode << ", index = " << index << "\n";
+			if ( mode == SOLVER_GET ) {
+				molSrc_.sendTo( index, S_[index] );
+				cout << " This was a SOLVER_GET operation\n";
+			} else if ( mode == SOLVER_SET ) {
+				cout << " This was a SOLVER_SET operation to " <<
+				molSolveConn_.target( index )->parent()->name() << "\n";
+				S_[index] = n;
+				Sinit_[index] = nInit;
+			} else if ( mode == SOLVER_REBUILD ) {
+				// Here we need to redo the whole solver because
+				// the model has changed.  This could be
+				// due to changing of buffer status, or due to
+				// alterating the model architecture due to 
+				// creating or deleting objects, or adding connections.
+				// In this situation we want to hold off any changes
+				// till the solver is asked to continue the simulation
+				// or asked for a reset. Typically such changes are
+				// done in large groups.
+				rebuildFlag_ = 1;
+			}
 		}
 
-		multi rate( double yPrime );	// Just the derivative.
-		// We need extra information from the msg to help with the
-		// rapid lookup of the reaction. In principle we could use
-		// a map of pointers to the conns. A bit dangerous.
+		solve bufMol( double n, double nInit, int mode ) {
+			cout << "Got msg from buffered mol: " <<
+				molSolveConn_.target( index )->parent()->name() << 
+				", " << n << ", " << nInit << 
+				", " << mode << ", index = " << index << "\n";
+			if ( mode == SOLVER_GET ) {
+				// Ignore this case. The solver does not touch buffers.
+				cout << " This was a buffer SOLVER_GET operation, which does nothing.\n";
+			} else if ( mode == SOLVER_SET ) {
+				cout << " This was a SOLVER_SET operation to buffer " <<
+				molSolveConn_.target( index )->parent()->name() << "\n";
+				S_[ index + bufOffset_ ] = 
+					Sinit_[ index + bufOffset_ ] = nInit;
+			}
+		}
+
+		solve sumTotMol( double n, double nInit, int mode ) {
+			cout << "Got msg from sumtotalled mol: " <<
+				molSolveConn_.target( index )->parent()->name() << 
+				", " << n << ", " << nInit << 
+				", " << mode << ", index = " << index << "\n";
+			if ( mode == SOLVER_GET ) {
+				sumTotSrc_.sendTo( index, S_[index + sumTotOffset_ ] );
+				cout << " This was a sumtotal SOLVER_GET operation\n";
+			} else if ( mode == SOLVER_SET ) {
+				cout << " This was a SOLVER_SET operation to a sumtotal, which does nothing " <<
+				molSolveConn_.target( index )->parent()->name() << "\n";
+			}
+		}
+
+		solve rate( double yPrime );	// Just the derivative.
 		// The rateIn is called each dt, so it has to be done fast.
 
+		// Just the rates.
+		solve reac( double kf, double kb );
 
 		// Just the rates.
-		multi enz( double k1, double k2, double k3 );
+		solve enz( double k1, double k2, double k3 );
 		
 		// Same terms but fits into calculations differently.
-		multi mmEnz( double k1, double k2, double k3 );
+		solve mmEnz( double k1, double k2, double k3 );
 
 		// Just the mol values.
-		multi tab( double n );
+		solve tab( double n );
 
 	private:
+		string path_;
+		vector< double >S_;
+		vector< double >Sinit_;
+		bool rebuildFlag_;
+		long bufOffset_;
+		long sumTotOffset_;
+		void setPath( const string& path, Element* wrapper );
+		void zombify( Element* e, Field& solveSrc );
 
 	private_wrapper:
 		void setPathLocal( const string& value );
-		void molZombify( Element* e, Field& solveSrc );
 		
 };
 
 ////////////////////////////////////////////////////////////////////
 // Stuff below here goes verbatim into KsolveWrapper.cpp
 ////////////////////////////////////////////////////////////////////
-
-void KsolveWrapper::molZombify( Element* e, Field& solveSrc )
-{
-	Field f( e, "process" );
-	if ( !f.dropAll() ) {
-		cerr << "Error: Failed to delete process message into " <<
-			e->path() << "\n";
-	}
-
-	if ( !solveSrc.add( f ) ) {
-		cerr << "Error: Failed to add process message from solver " <<
-			path() << " to zombie " << e->path() << "\n";
-	}
-}
-
-void KsolveWrapper::setPathLocal( const string& value )
-{
-	path_ = value;
-	vector< Element* > ret;
-	vector< Element* >::iterator i;
-	Field solveSrc( this, "process" );
-
-	Element::startFind( path_, ret );
-
-	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		if ( ( *i )->cinfo()->name() == "Molecule" ) {
-			molZombify( *i, solveSrc );
-		}
-	}
-}

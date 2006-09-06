@@ -94,6 +94,13 @@ void PlainMultiConn::disconnectAll()
 	target_.resize( 0 );
 }
 
+//////////////////////////////////////////////////////////////////
+// BaseMultiConn functions
+//////////////////////////////////////////////////////////////////
+BaseMultiConn::~BaseMultiConn()
+{
+		;
+}
 
 //////////////////////////////////////////////////////////////////
 // MultiConn functions
@@ -166,7 +173,7 @@ bool MultiConn::innerConnect( Conn* target, unsigned long slot )
 		connVecs_[ slot ]->innerConnect( target, slot );
 		return 1;
 	} else if ( connVecs_.size() == slot ) { // expand
-		PlainMultiConn* temp = new PlainMultiConn( parent_ );
+		PlainMultiConn* temp = new PlainMultiConn( parent() );
 		connVecs_.push_back( temp );
 		temp->innerConnect( target, 0 );
 		return 1;
@@ -216,7 +223,7 @@ void MultiConn::innerDisconnectAll()
 	connVecs_.resize( 0 );
 }
 
-// Returns the index of the connVec entry matching specified msgno
+// Returns the slot # matching specified msgno
 unsigned long MultiConn::index( unsigned long msgno )
 {
 	unsigned long count = 0;
@@ -226,6 +233,149 @@ unsigned long MultiConn::index( unsigned long msgno )
 			return i;
 	}
 	return MAX;
+}
+
+//////////////////////////////////////////////////////////////////
+// SolveMultiConn functions
+//////////////////////////////////////////////////////////////////
+
+SolveMultiConn::~SolveMultiConn()
+{
+	disconnectAll();
+}
+
+unsigned long SolveMultiConn::find( const Conn* c ) const
+{
+	const SolverConn* sc = 
+			dynamic_cast< const SolverConn* >( c );
+	if ( sc >= &vec_.front() && sc <= &vec_.back() )
+		return sc - &vec_.front();
+	return MAX;
+}
+
+Conn* SolveMultiConn::target(unsigned long index) const
+{
+	if ( index < vec_.size() )
+		return vec_[index].target( 0 );
+	return 0;
+	/*
+	if ( index < vec_.size() )
+		return const_cast< SolverConn* >( &vec_[index] )->target();
+	return 0;
+	*/
+}
+
+// Need to clean up the assumptions about these being const.
+void SolveMultiConn::listTargets( vector< Conn* >& list ) const
+{
+	vector< SolverConn >::const_iterator j;
+	for ( j = vec_.begin(); j != vec_.end(); j++ ) {
+			/*
+	SolverConn* sc = 
+			const_cast< SolverConn* >( &(*j) );
+
+		list.push_back( sc );
+			*/
+		list.push_back( j->target( 0 ) );
+	}
+}
+
+bool SolveMultiConn::connect( Conn* target, 
+	unsigned long sourceSlot, unsigned long targetSlot )
+{
+	if (target == this) {
+		cerr << "Warning: conn::connect() ignored attempt to send msg to self: " << parent()->name() << "\n";
+		return 0;
+	}
+	// Check if we have capacity to do the connect
+	if ( segments_.size() > sourceSlot && 
+					segments_[sourceSlot] > filled_[sourceSlot] ) {
+		Conn* tgt = target->respondToConnect( this );
+		Conn* src = &vec_[ filled_[sourceSlot] ];
+		if ( tgt ) {
+			tgt->innerConnect(src, targetSlot);
+			src->innerConnect(tgt, 0);
+			filled_[sourceSlot]++;
+			return 1;
+		}
+	}
+	cerr << "Warning: SolveMultiConn::connect() failed\n";
+	return 0;
+}
+
+// This is only allowed on an existing allocation.
+bool SolveMultiConn::innerConnect( Conn* target, unsigned long slot )
+{
+	if ( segments_.size() > slot && segments_[slot] > filled_[slot] ) {
+		bool ret = vec_[ filled_[slot] ].innerConnect( target, 0 );
+		if ( ret ) {
+			filled_[slot]++;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+// Likewise: We need to reallocate the whole mess. For now we
+// just leave a hole. We can't even tackle the filled_ vector
+// unless the disconnection is at the end. Ugly.
+void SolveMultiConn::innerDisconnect(unsigned long index)
+{
+	if ( index < vec_.size() )
+		vec_[index].innerDisconnect( 0 );
+}
+
+// This plays nice and tells all targets about the disconnection.
+void SolveMultiConn::disconnectAll()
+{
+	vector< SolverConn >::iterator i;
+	for ( i = vec_.begin(); i != vec_.end(); i++ ) {
+		i->innerDisconnect( 0 );
+	}
+	vec_.resize( 0 );
+	segments_.resize( 0 );
+	filled_.resize( 0 );
+}
+
+// This is ugly and just clears it all out without consulting.
+void SolveMultiConn::innerDisconnectAll()
+{
+	vec_.resize( 0 );
+	segments_.resize( 0 );
+	filled_.resize( 0 );
+}
+
+// Returns slot number matching specified msgno
+// Assumes the conn is filled.
+unsigned long SolveMultiConn::index( unsigned long msgno )
+{
+	for ( unsigned long i = 0; i < segments_.size(); i++) {
+		if ( segments_[i] > msgno )
+			return i;
+	}
+	return MAX;
+}
+
+// Allocates a vector of Conns, and fills in segment info
+// to handle multiple types of target.
+// Once this is done,
+// no changes to size are allowed. Assumes that contents of
+// vec_ are disposable and have been disconnected.
+void SolveMultiConn::resize( vector< unsigned long >& segments )
+{
+	segments_ = segments;
+	filled_.resize( segments.size(), 0 );
+	if ( segments.size() > 0 )
+		vec_.resize( segments.back() );
+	else
+		vec_.resize( 0 );
+
+	for ( unsigned long j = 1; j < segments_.size(); j++ )
+		filled_[j] = segments_[j - 1];
+
+	vector< SolverConn >::iterator i;
+	for ( i = vec_.begin(); i != vec_.end(); i++ )
+		i->setManager( this );
 }
 
 //////////////////////////////////////////////////////////////////
@@ -330,3 +480,4 @@ void MultiReturnConn::addRecvFunc( RecvFunc rf )
 	if ( vec_.size() > 0 )
 		vec_.back()->addRecvFunc( rf );
 }
+

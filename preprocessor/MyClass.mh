@@ -1,3 +1,19 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+// The header stuff is now copied over verbatim, except that the
+// includes go selectively into the Wrapper.cpp
+
+#include <math.h>
+#include "myOtherInclude.h"
+
 class MyClass
 {
 	public:
@@ -62,6 +78,34 @@ class MyClass
 			double max;
 			double values[];
 		} myTableField;
+	
+	eval_field:
+		// Here we handle evaluated fields, which do not have a simple
+		// mapping onto fields in the data structure. 
+		// If the field is purely evaluated, we need to provide
+		// a couple of access functions like this:
+		double getTau() {
+			return Rm_ * Cm_;
+		}
+		void setTau( double value ) {
+			if ( value > 0 && Cm_ > 0 )
+				Rm_ = value / Cm_;	
+		}
+		// if the field has some internal field as well, the function
+		// can be used as before but the internal field has to be
+		// declared in the private part of the header.
+		double getIm() {
+			return Im_;
+		}
+		void setIm( double value ) {
+			if ( value > 0 )
+				Im_ = value;
+		}
+
+		// We can also declare readonly evaluated fields
+		readonly double getArea() {
+			return Cm_ / specificMembCapacitance_;
+		}
 
 	shared:
 		// Here we indicate sets that share a connection.
@@ -169,4 +213,23 @@ class MyClass
 		double Ca_;
 		double volscale_;
 		double Erest_;
+
+		// We can also declare constant values. These are not
+		// copied over unchanged, but require a bit of cleaning up.
+		static const double specificMembraneCapacitance_ = 0.01;
+	
+	private_wrapper:
+		// Stuff here will be copied over unchanged to MyClassWrapper.h
+		void UtilityFunc( Element* e );
 };
+
+
+////////////////////////////////////////////////////////////////////
+// Stuff below here goes verbatim into MyClassWrapper.cpp
+////////////////////////////////////////////////////////////////////
+
+void MyClassWrapper::UtilityFunc( Element* e )
+{
+	;
+}
+

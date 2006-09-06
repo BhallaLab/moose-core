@@ -43,6 +43,8 @@ void Shared::parse( vector< Shared* >& sharedVec,
 			c = new Conn( "UniConn", name + "Conn" );
 		} else if ( type == "multi" ) {
 			c = new Conn( "MultiConn", name + "Conn" );
+		} else if ( type == "solve" ) {
+			c = new Conn( "SolveMultiConn", name + "Conn" );
 		} else {
 			cout << "syntax error: Shared::Conn::parse: " << *i << "\n";
 			continue;

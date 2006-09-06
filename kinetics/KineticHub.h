@@ -8,22 +8,23 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _Reaction_h
-#define _Reaction_h
-class Reaction
+
+#ifndef _KineticHub_h
+#define _KineticHub_h
+class KineticHub
 {
-	friend class ReactionWrapper;
+	friend class KineticHubWrapper;
 	public:
-		Reaction()
+		KineticHub()
 		{
-			kf_ = 0.1;
-			kb_ = 0.1;
 		}
 
 	private:
-		double kf_;
-		double kb_;
-		double A_;
-		double B_;
+		vector< double >* S_;
+		vector< double >* Sinit_;
+		bool rebuildFlag_;
+		unsigned long nMol_;
+		unsigned long nBuf_;
+		unsigned long nSumTot_;
 };
-#endif // _Reaction_h
+#endif // _KineticHub_h

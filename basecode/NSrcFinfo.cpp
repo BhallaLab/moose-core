@@ -48,6 +48,14 @@ bool NSrcFinfo::add( Element* e, Field& destfield, bool useSharedConn )
 	return 0;
 }
 
+/*
+void NSrcFinfo::resize( Element* e, vector< unsigned long >& segment )
+{
+	Conn* c = outConn( e );
+	c->resize( segment );
+	cout << "in NSrcFinfo::resize()\n";
+}
+*/
 
 Finfo* NSrcFinfo::respondToAdd( Element* e, const Finfo* sender )
 {
