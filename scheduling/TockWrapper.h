@@ -26,10 +26,10 @@ class TockWrapper:
 				processFuncLocal( info );
 		}
 		void processFuncLocal( ProcInfo info ) {
-			char line[200];
-			sprintf( line, "Process: Tock %s	t = %g, dt = %g",
-				label_.c_str(), info->currTime_, info->dt_ );
-			info->setResponse( line );
+			std::ostringstream buf;
+			buf << "Process: Tock " << label_ << "	t = "
+			    << info->currTime_ << ", dt = " << info->dt_;
+			info->setResponse( buf.str() );
 		}
 		static void reinitFunc( Conn* c ) {
 			static_cast< TockWrapper* >( c->parent() )->
