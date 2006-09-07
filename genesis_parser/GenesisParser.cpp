@@ -17,10 +17,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <vector>
 #include <map>
 #include <string>
-#include <stdio.h>
 
 // Upi Bhalla, 24 May 2004:
 // I did a little checking up about portability of the setjmp construct
@@ -31,7 +29,6 @@
 // to a minimum, I'll leave it in.
 #include <setjmp.h>
 
-//using namespace std;
 #include "Shell.h"
 
 #include <FlexLexer.h>
@@ -39,6 +36,12 @@
 #include "script.h"
 #include "GenesisParser.h"
 #include "func_externs.h"
+
+using std::cin;
+using std::cerr;
+using std::cout;
+using std::map;
+using std::string;
 
 #define MOOSE_THREADS 0
 
@@ -84,7 +87,7 @@ int yywrap( void )
 
 void myFlexLexer::yyerror(char* s)
 {
-	cerr << "Error: " << s << "\n";
+	cerr << "Error: " << s << std::endl;
 }
 
 struct winfo {
@@ -101,7 +104,7 @@ int myFlexLexer::add_word(int type, char* word)
 {
 	struct winfo* wp;
 	if (lookup_word(word) != LOOKUP) {
-		printf("Warning: Word %s already defined \n", word);
+		cerr << "Warning: Word " << word << "already defined " << std::endl;
 		return 0;
 	}
 
@@ -143,12 +146,12 @@ void myFlexLexer::Process() {
 #endif
 		while (currstr.length() > 0) {
 			i =  yyparse();
-		//	cerr << "in FlexLexer::Proc: yyparse() = " << i << "\n";
+		//	cerr << "in FlexLexer::Proc: yyparse() = " << i << std::endl;
 		}
 		// yyparse();
 		/*
 		while ((i = yyparse() ) )
-			cerr << "Proc: i = " << i << "\n";
+			cerr << "Proc: i = " << i << std::endl;
 			*/
 	}
 }
@@ -233,7 +236,7 @@ int myFlexLexer::LexerInput( char* buf, int max_size ) {
 				currstr = currstr.substr(ncpy - 1);
 			else
 				currstr = "";
-			// cerr << "In Lexer Input: returning " << ncpy << "\n";
+			// cerr << "In Lexer Input: returning " << ncpy << std::endl;
 			return ncpy - 1;
 		}
 		if (Compiling || InFunctionDefinition) {
@@ -328,11 +331,11 @@ void myFlexLexer::alias(const string& alias, const string& old )
 		map< string, string >::iterator i;
 		i = alias_map.find( alias );
 		if ( i != alias_map.end() )
-			cout << i->second << "\n";
+			cout << i->second << std::endl;
 	} else { // list all aliases
 		map< string, string >::iterator i;
 		for ( i = alias_map.begin(); i != alias_map.end(); i++ )
-			cout << i->first << "	" << i->second << "\n";
+			cout << i->first << "	" << i->second << std::endl;
 	}
 }
 
@@ -341,7 +344,7 @@ void myFlexLexer::listCommands( )
 	Func_map::iterator i;
 
 	for ( i = func_map.begin(); i != func_map.end(); i++ ) {
-		cout << i->first << "\n";
+		cout << i->first << std::endl;
 	}
 }
 
@@ -580,7 +583,7 @@ func_entry	*command;
 	    return(result);
 	} else
 */
-	printf("undefined function \"%s\"\n",argv[0]);
+	cerr << "undefined function " << argv[0] << std::endl;
     }
     result.r_type = IntType();
     result.r.r_int = 0;
@@ -608,7 +611,7 @@ void myFlexLexer::AddScript(
 	script[script_ptr].line = 0;
     } else {
 	// Error();
-	printf("file script stack overflow\n");
+	cerr << "file script stack overflow" << std::endl;
     }
     if(argc > 0)
 	PushLocalVars(argc,argv,NULL);

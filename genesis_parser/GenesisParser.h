@@ -18,8 +18,10 @@
 #define BGINSTKSIZE 100
 #define MAXSCRIPTS 40
 
-class Shell; // Ugly hack to appease the Windows compiler
-class Element;
+#include <map>
+#include <string>
+#include "../basecode/ElementFwd.h"
+#include "../basecode/ShellFwd.h"
 
 // Particularly ugly macro definition 
 //#define BEGIN yy_start = 1 + 2 *
@@ -116,10 +118,10 @@ class func_entry
 
 	private:
 		slifunc func;
-		string type;
+		std::string type;
 };
 
-typedef map< string, func_entry* > Func_map;
+typedef std::map< std::string, func_entry* > Func_map;
 
 class myFlexLexer: public yyFlexLexer
 {
@@ -139,11 +141,11 @@ class myFlexLexer: public yyFlexLexer
 		int yynerrs; // Number of parse errors.
 		int yylloc; // Location data for lookahead symbol
 
-		void AddInput(const string* s);
+		void AddInput(const std::string* s);
 		void Process();
-		void ParseInput(const string* s);
+		void ParseInput(const std::string* s);
 
-		const string GetOutput();
+		const std::string GetOutput();
 
 	protected:
 		int LexerInput( char* buf, int max_size );
@@ -222,7 +224,7 @@ class myFlexLexer: public yyFlexLexer
 		}
 
 		void AddFunc(const char* name, slifunc func, const char* type);
-		void alias(const string& alias, const string& old );
+		void alias(const std::string& alias, const std::string& old );
 		int IsCommand(const char* name);
 		func_entry* GetCommand(const char* name);
 		void listCommands();
@@ -245,8 +247,8 @@ class myFlexLexer: public yyFlexLexer
 		}
 
 	private:
-		string currstr;
-		string outstr;
+		std::string currstr;
+		std::string outstr;
 #if MOOSE_THREADS
 		pthread_mutex_t mutex;
 		pthread_cond_t  cond;
@@ -273,7 +275,7 @@ class myFlexLexer: public yyFlexLexer
 		jmp_buf BreakBuf; 	/* Used to break out of a loop */
 		jmp_buf ReturnBuf; 	/* Used to break out of a script func */
 		Func_map func_map;
-		map< string, string > alias_map;
+		std::map< std::string, std::string > alias_map;
 		short script_ptr;
 		Script script[MAXSCRIPTS];
 		Shell* shell_;

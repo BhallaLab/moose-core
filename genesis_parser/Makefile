@@ -53,7 +53,7 @@ GenesisParser.o:			../basecode/Shell.h GenesisParser.h
 GenesisParser.yy.o:			GenesisParser.yy.l
 
 GenesisParser.yy.cpp: GenesisParser.yy.l
-	flex++ --c++ -oGenesisParser.yy.cpp GenesisParser.yy.l
+	flex++ -+ -oGenesisParser.yy.cpp GenesisParser.yy.l
 
 
 GenesisParser.tab.o GenesisParser.yy.o GenesisParser.o: GenesisParser.yy.cpp GenesisParser.h GenesisParser.tab.h
