@@ -10,6 +10,11 @@
 
 #ifndef _FINFO_H
 #define _FINFO_H
+
+#include <iosfwd>	// cerr
+#include <string>
+#include <vector>
+
 ////////////////////////////////////////////////////////////////////
 // This file has the base Finfo classes: Finfo, Finfo0, Finfo1 and
 // some generic finfo classes
@@ -30,7 +35,7 @@
 
 class Finfo {
 	public:
-		Finfo(const string& name)
+		Finfo(const std::string& name)
 		:
 			name_(name)
 		{ ; }
@@ -40,7 +45,7 @@ class Finfo {
 
 		// This does arbitrary complexity parsing to do
 		// lookup of indirection and array subfields.
-		virtual Field match( const string& s );
+		virtual Field match( const std::string& s );
 
 //////////////////////////////////////////////////////////////////
 //  A bunch of functions to handle RecvFuncs.
@@ -135,15 +140,15 @@ class Finfo {
 
 		// Returns a list of Fields that are targets of messages
 		// emanating from this Finfo.
-		virtual void src( vector< Field >&, Element* e );
+		virtual void src( std::vector< Field >&, Element* e );
 		// Returns a list of Fields that are sources of messages
 		// received by this Finfo.
-		virtual void dest( vector< Field >&, Element* e );
+		virtual void dest( std::vector< Field >&, Element* e );
 
 		// Relay Finfos use this callback to clean up if they have
 		// no more connections left.
 		virtual void handleEmptyConn( Conn* c ) {
-			cerr << "In Finfo::handleEmptyConn at " << 
+			std::cerr << "In Finfo::handleEmptyConn at " << 
 				name() << ": should never happen.\n";
 		}
 
@@ -196,7 +201,7 @@ class Finfo {
 		virtual void initialize( const Cinfo* c ) = 0;
 
 		// Returns the name of the field.
-		const string& name() const {
+		const std::string& name() const {
 				return name_;
 		}
 
@@ -205,18 +210,18 @@ class Finfo {
 		// Does type checking by referring to internal Ftype.
 		bool isSameType( const Ftype* other ) const;
 
-		// Does conversion of field value to a string
-		virtual bool strGet( Element* e, string& val );
-		// Does assignment of field value from a string.
-		// The string can also be parsed into argument(s) for
+		// Does conversion of field value to a std::string
+		virtual bool strGet( Element* e, std::string& val );
+		// Does assignment of field value from a std::string.
+		// The std::string can also be parsed into argument(s) for
 		// a Finfo that handles functions (such as DestFinfo).
-		virtual bool strSet( Element* e, const string& val );
+		virtual bool strSet( Element* e, const std::string& val );
 
 		// Returns Ftype of this Finfo.
 		virtual const Ftype* ftype() const = 0;
 
 	private:
-		const string name_;
+		const std::string name_;
 		// Add msg with this Finfo as dest. Dest provides func?
 		// virtual Finfo* Add2(Element* e2) = 0;  
 		static Conn* dummyConn_;
@@ -224,7 +229,7 @@ class Finfo {
 
 class FinfoDummy: public Finfo {
 	public:
-		FinfoDummy(const string& name)
+		FinfoDummy(const std::string& name)
 		: Finfo(name)
 		{ ; }
 
@@ -277,7 +282,7 @@ class FinfoDummy: public Finfo {
 		}
 
 	private:
-		const string name_;
+		const std::string name_;
 		// Add msg with this Finfo as dest. Dest provides func?
 		// virtual Finfo* Add2(Element* e2) = 0;  
 		static void dummyFunc_( Conn* c ) {
@@ -308,9 +313,9 @@ template <class T> class ValueFinfoBase: public Finfo
 {
 	public:
 		ValueFinfoBase(
-			const string& name,
+			const std::string& name,
 			void (*set)(Conn*, T),
-			const string& className // Name of equivalent class.
+			const std::string& className // Name of equivalent class.
 		)
 		:	Finfo(name),
 			set_(set),
@@ -358,7 +363,7 @@ template <class T> class ValueFinfoBase: public Finfo
 			}
 		}
 
-		const string& className() const {
+		const std::string& className() const {
 			return className_;
 		}
 
@@ -369,7 +374,7 @@ template <class T> class ValueFinfoBase: public Finfo
 		private:
 			T (*get_)(const Element *);
 			void (*set_)(Conn*, T);
-			string className_;
+			std::string className_;
 			const Cinfo* cinfo_;
 			static const Ftype* myFtype_;
 };

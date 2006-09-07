@@ -348,3 +348,255 @@ Element* commandConnLookup( const Conn* c )
 		FIELD_OFFSET ( ShellWrapper, commandConn_ );
 	return reinterpret_cast< ShellWrapper* >( ( unsigned long )c - OFFSET );
 }
+
+///////////////////////////////////////////////////////
+//    Field header definitions.                      //
+///////////////////////////////////////////////////////
+void ShellWrapper::setIsInteractive( Conn* c, int value ) {
+	static_cast< ShellWrapper* >( c->parent() )->isInteractive_ = value;
+}
+int ShellWrapper::getIsInteractive( const Element* e ) {
+	return static_cast< const ShellWrapper* >( e )->isInteractive_;
+}
+void ShellWrapper::setParser( Conn* c, string value ) {
+	static_cast< ShellWrapper* >( c->parent() )->parser_ = value;
+}
+string ShellWrapper::getParser( const Element* e ) {
+	return static_cast< const ShellWrapper* >( e )->parser_;
+}
+void ShellWrapper::setResponse( Conn* c, string value ) {
+	static_cast< ShellWrapper* >( c->parent() )->response_ = value;
+}
+string ShellWrapper::getResponse( const Element* e ) {
+	return static_cast< const ShellWrapper* >( e )->response_;
+}
+///////////////////////////////////////////////////////
+// Msgsrc header definitions .                       //
+///////////////////////////////////////////////////////
+SingleMsgSrc* ShellWrapper::getCommandReturnSrc( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->commandReturnSrc_ );
+}
+///////////////////////////////////////////////////////
+// dest header definitions .                         //
+///////////////////////////////////////////////////////
+void ShellWrapper::addFunc( Conn* c, string src, string dest ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		addFuncLocal( src, dest );
+}
+void ShellWrapper::dropFunc( Conn* c, string src, string dest ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		dropFuncLocal( src, dest );
+}
+void ShellWrapper::setFunc( Conn* c, string field, string value ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		setFuncLocal( field, value );
+}
+void ShellWrapper::createFunc( Conn* c, string type, string path ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		createFuncLocal( type, path );
+}
+void ShellWrapper::deleteFunc( Conn* c, string path ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		deleteFuncLocal( path );
+}
+void ShellWrapper::moveFunc( Conn* c, string src, string dest ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		moveFuncLocal( src, dest );
+}
+void ShellWrapper::copyFunc( Conn* c, string src, string dest ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		copyFuncLocal( src, dest );
+}
+void ShellWrapper::copyShallowFunc( Conn* c, string src, string dest ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		copyShallowFuncLocal( src, dest );
+}
+void ShellWrapper::copyHaloFunc( Conn* c, string src, string dest ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		copyHaloFuncLocal( src, dest );
+}
+void ShellWrapper::ceFunc( Conn* c, string newpath ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		ceFuncLocal( newpath );
+}
+void ShellWrapper::pusheFunc( Conn* c, string newpath ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		pusheFuncLocal( newpath );
+}
+void ShellWrapper::popeFunc( Conn* c ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		popeFuncLocal(  );
+}
+void ShellWrapper::aliasFunc( Conn* c, string origfunc, string newfunc ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		aliasFuncLocal( origfunc, newfunc );
+}
+void ShellWrapper::quitFunc( Conn* c ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		quitFuncLocal(  );
+}
+void ShellWrapper::stopFunc( Conn* c ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		stopFuncLocal(  );
+}
+void ShellWrapper::resetFunc( Conn* c ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		resetFuncLocal(  );
+}
+void ShellWrapper::stepFunc( Conn* c, string steptime, string options ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		stepFuncLocal( steptime, options );
+}
+void ShellWrapper::callFunc( Conn* c, string args ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		callFuncLocal( args );
+}
+void ShellWrapper::getFunc( Conn* c, string field ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		getFuncLocal( field );
+}
+void ShellWrapper::getmsgFunc( Conn* c, string field, string options ){
+	static_cast< ShellWrapper* >( c->parent() )->
+		getmsgFuncLocal( field, options );
+}
+void ShellWrapper::isaFunc( Conn* c, string type, string field ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		isaFuncLocal( type, field );
+}
+void ShellWrapper::showFunc( Conn* c, string field ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		showFuncLocal( field );
+}
+void ShellWrapper::showmsgFunc( Conn* c, string field ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		showmsgFuncLocal( field );
+}
+void ShellWrapper::showobjectFunc( Conn* c, string classname ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		showobjectFuncLocal( classname );
+}
+void ShellWrapper::pweFunc( Conn* c ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		pweFuncLocal(  );
+}
+void ShellWrapper::leFunc( Conn* c, string start ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		leFuncLocal( start );
+}
+void ShellWrapper::listCommandsFunc( Conn* c ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		listCommandsFuncLocal(  );
+}
+void ShellWrapper::listClassesFunc( Conn* c ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		listClassesFuncLocal(  );
+}
+void ShellWrapper::echoFunc( Conn* c, vector< string >* s, int options ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		echoFuncLocal( *s, options );
+}
+
+void ShellWrapper::commandFunc( Conn* c, int argc, const char** argv ){
+	static_cast< ShellWrapper* >( c->parent() )->
+		commandFuncLocal( argc, argv );
+}
+
+///////////////////////////////////////////////////////
+// Synapse creation and info access functions.       //
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+// Conn access functions.                            //
+///////////////////////////////////////////////////////
+Conn* ShellWrapper::getAddInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->addInConn_ );
+}
+Conn* ShellWrapper::getDropInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->dropInConn_ );
+}
+Conn* ShellWrapper::getSetInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->setInConn_ );
+}
+Conn* ShellWrapper::getCreateInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->createInConn_ );
+}
+Conn* ShellWrapper::getDeleteInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->deleteInConn_ );
+}
+Conn* ShellWrapper::getMoveInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->moveInConn_ );
+}
+Conn* ShellWrapper::getCopyInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->copyInConn_ );
+}
+Conn* ShellWrapper::getCopyShallowInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->copyShallowInConn_ );
+}
+Conn* ShellWrapper::getCopyHaloInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->copyHaloInConn_ );
+}
+Conn* ShellWrapper::getCeInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->ceInConn_ );
+}
+Conn* ShellWrapper::getPusheInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->pusheInConn_ );
+}
+Conn* ShellWrapper::getPopeInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->popeInConn_ );
+}
+Conn* ShellWrapper::getAliasInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->aliasInConn_ );
+}
+Conn* ShellWrapper::getQuitInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->quitInConn_ );
+}
+Conn* ShellWrapper::getStopInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->stopInConn_ );
+}
+Conn* ShellWrapper::getResetInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->resetInConn_ );
+}
+Conn* ShellWrapper::getStepInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->stepInConn_ );
+}
+Conn* ShellWrapper::getCallInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->callInConn_ );
+}
+Conn* ShellWrapper::getGetInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->getInConn_ );
+}
+Conn* ShellWrapper::getGetmsgInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->getmsgInConn_ );
+}
+Conn* ShellWrapper::getIsaInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->isaInConn_ );
+}
+Conn* ShellWrapper::getShowInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->showInConn_ );
+}
+Conn* ShellWrapper::getShowmsgInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->showmsgInConn_ );
+}
+Conn* ShellWrapper::getShowobjectInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->showobjectInConn_ );
+}
+Conn* ShellWrapper::getPweInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->pweInConn_ );
+}
+Conn* ShellWrapper::getLeInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->leInConn_ );
+}
+Conn* ShellWrapper::getListCommandsInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->listCommandsInConn_ );
+}
+Conn* ShellWrapper::getListClassesInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->listClassesInConn_ );
+}
+Conn* ShellWrapper::getEchoInConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->echoInConn_ );
+}
+
+// Note that this is a shared conn, so no direction pertains.
+Conn* ShellWrapper::getCommandConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->commandConn_ );
+}

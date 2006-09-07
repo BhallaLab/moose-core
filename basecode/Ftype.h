@@ -11,19 +11,22 @@
 #ifndef _FTYPE_H
 #define _FTYPE_H
 
+#include <string>
+#include <vector>
+
 ////////////////////////////////////////////////////////////////////
 // Utility functions for string conversions used in assignments.
 ////////////////////////////////////////////////////////////////////
 // Here we define string conversions. In the template we do
 // only the default failure options, below we have 
 // specializations for known classes.
-template <class T> inline string val2str(T val)
+template <class T> inline std::string val2str(T val)
 {
 			cerr << "Error: val2str conversion not defined\n";
 			return "";
 }
 
-template <class T> inline T str2val(const string& s)
+template <class T> inline T str2val(const std::string& s)
 {
 			cerr << "Error: str2val conversion not defined\n";
 			return T();
@@ -35,12 +38,12 @@ template <class T> inline T str2val(const string& s)
 
 // Some template specializations to handle common conversions.
 
-template<> string val2str<string>(string val);
-template<> string str2val<string>(const string& s);
-template<> string val2str<int>(int val) ;
-template<> int str2val<int>(const string& s) ;
-template<> string val2str<double>(double val) ;
-template<> double str2val<double>(const string& s) ;
+template<> std::string val2str<std::string>(std::string val);
+template<> std::string str2val<std::string>(const std::string& s);
+template<> std::string val2str<int>(int val) ;
+template<> int str2val<int>(const std::string& s) ;
+template<> std::string val2str<double>(double val) ;
+template<> double str2val<double>(const std::string& s) ;
 
 ////////////////////////////////////////////////////////////////////
 // These are the MOOSE type info classes
@@ -55,9 +58,9 @@ class Ftype {
 
 		virtual unsigned int nValues() const = 0;
 		virtual bool isSameType( const Ftype* other ) const = 0;
-		virtual bool strGet( Element* e, Finfo* f, string& val ) 
+		virtual bool strGet( Element* e, Finfo* f, std::string& val ) 
 			const = 0;
-		virtual bool strSet( Element* e, Finfo* f, const string& val )
+		virtual bool strSet( Element* e, Finfo* f, const std::string& val )
 			const = 0;
 		// Can't do this here because RelayFinfo depends on Ftype.
 		//virtual Finfo* makeRelayFinfo( Finfo* f, Element* e ) = 0;
@@ -65,7 +68,7 @@ class Ftype {
 		// valueComparisons apply only for Ftype1, so we provide a
 		// default.
 		virtual bool valueComparison(
-			Field& f, const string& op, const string& val ) const {
+			Field& f, const std::string& op, const std::string& val ) const {
 			return 0;
 		}
 };
@@ -83,12 +86,12 @@ class Ftype0: public Ftype
 
 		static bool set( Element* e, Finfo* f );
 
-		bool strGet( Element* e, Finfo* f, string& val ) const {
+		bool strGet( Element* e, Finfo* f, std::string& val ) const {
 			val = "";
 			return 0;
 		}
 
-		bool strSet( Element* e, Finfo* f, const string& val ) const {
+		bool strSet( Element* e, Finfo* f, const std::string& val ) const {
 			return set( e, f );
 		}
 };
@@ -123,7 +126,7 @@ template <class T> class Ftype1: public Ftype
 			return 0;
 		}
 
-		static bool set( Element* e, const string& fname, T val ) {
+		static bool set( Element* e, const std::string& fname, T val ) {
 			return set( e, Field( e, fname ).getFinfo(), val );
 			// return set( e, e->field( fname ).getFinfo(), val );
 		}
@@ -150,14 +153,14 @@ template <class T> class Ftype1: public Ftype
 			return 0;
 		}
 
-		static bool get( Element* e, const string& fname, T& ret ) {
+		static bool get( Element* e, const std::string& fname, T& ret ) {
 			// Field f = e->field( fname );
 			// return get( e, f.operator->(), ret );
 			// return get( e, e->field( fname ).getFinfo(), ret );
 			return get( e, Field( e, fname ).getFinfo(), ret );
 		}
 
-		bool strGet( Element* e, Finfo* f, string& val ) const {
+		bool strGet( Element* e, Finfo* f, std::string& val ) const {
 	//		Field temp( f, e );
 			T ret;
 			if ( get( e, f, ret ) ) {
@@ -167,13 +170,13 @@ template <class T> class Ftype1: public Ftype
 			return 0;
 		}
 
-		bool strSet( Element* e, Finfo* f, const string& val ) const {
+		bool strSet( Element* e, Finfo* f, const std::string& val ) const {
 			// Field temp( f, e );
 			// return setField< T >( temp, str2val< T >( val ) );
 			return set( e, f, str2val< T >( val ) );
 		}
 		virtual bool valueComparison( 
-			Field& f, const string& op, const string& val ) const {
+			Field& f, const std::string& op, const std::string& val ) const {
 			T x;
 			T y = str2val< T >( val );
 			// We really only need to do two comparisons: == and <.
@@ -241,28 +244,28 @@ template <class T1, class T2> class Ftype2: public Ftype
 			return 0;
 		}
 
-		static bool set( Element* e, const string& fname, 
+		static bool set( Element* e, const std::string& fname, 
 			T1 val1, T2 val2 ) {
 			// return set( e, e->field( fname ).getFinfo(), val1, val2 );
 			return set( e, Field( e, fname ).getFinfo(), val1, val2 );
 		}
 
-		bool strGet( Element* e, Finfo* f, string& val ) const {
+		bool strGet( Element* e, Finfo* f, std::string& val ) const {
 			val = "";
 			return 0;
 		}
 
-		bool strSet( Element* e, Finfo* f, const string& val ) const {
+		bool strSet( Element* e, Finfo* f, const std::string& val ) const {
 			// Field temp( f, e );
 			size_t i = val.find_first_of(" 	,");
-			string s1;
-			if ( i != string::npos && i != 0 )
+			std::string s1;
+			if ( i != std::string::npos && i != 0 )
 				s1 = val.substr( 0, i );
 			else
 				s1 = "";
-			string s2 = val.substr( i );
+			std::string s2 = val.substr( i );
 			i = s2.find_first_not_of("  ,");
-			if ( i != string::npos )
+			if ( i != std::string::npos )
 				s2 = s2.substr( i );
 			else
 				s2 = "";
@@ -304,7 +307,7 @@ template <class T1, class T2, class T3 > class Ftype3: public Ftype
 			}
 			return 0;
 		}
-		static bool set( Element* e, const string& fname, 
+		static bool set( Element* e, const std::string& fname, 
 			T1 val1, T2 val2, T3 val3 ) {
 			// return set( e, e->field( fname ).getFinfo(), 
 				// val1, val2, val3 );
@@ -312,32 +315,32 @@ template <class T1, class T2, class T3 > class Ftype3: public Ftype
 				val1, val2, val3 );
 		}
 
-		bool strGet( Element* e, Finfo* f, string& val ) const {
+		bool strGet( Element* e, Finfo* f, std::string& val ) const {
 			val = "";
 			return 0;
 		}
 
-		bool strSet( Element* e, Finfo* f, const string& val ) const {
+		bool strSet( Element* e, Finfo* f, const std::string& val ) const {
 			// Field temp( f, e );
 			unsigned long i = val.find_first_of(" 	,");
-			string s1;
-			if ( i != string::npos && i != 0 )
+			std::string s1;
+			if ( i != std::string::npos && i != 0 )
 				s1 = val.substr( 0, i );
 			else
 				s1 = "";
 
-			string s2 = val.substr( i );
+			std::string s2 = val.substr( i );
 			i = s2.find_first_not_of("  ,");
-			if ( i != string::npos )
+			if ( i != std::string::npos )
 				s2 = s2.substr( i );
 			else
 				s2 = "";
 			unsigned long j = s2.find_first_of(" 	,");
-			string s3 = s2.substr( i );
+			std::string s3 = s2.substr( i );
 			s2 = s2.substr( 0, j );
 
 			i = s3.find_first_not_of("  ,");
-			if ( i != string::npos )
+			if ( i != std::string::npos )
 				s3 = s3.substr( i );
 			else
 				s3 = "";
@@ -354,7 +357,7 @@ template <class T1, class T2, class T3 > class Ftype3: public Ftype
 class MultiFtype: public Ftype
 {
 	public:
-		MultiFtype( vector< Finfo* >& finfos )
+		MultiFtype( std::vector< Finfo* >& finfos )
 			: finfos_( finfos )
 		{ ; }
 
@@ -364,16 +367,16 @@ class MultiFtype: public Ftype
 
 		bool isSameType( const Ftype* other ) const;
 
-		bool strGet( Element* e, Finfo* f, string& val ) const {
+		bool strGet( Element* e, Finfo* f, std::string& val ) const {
 			val = "";
 			return 0;
 		}
-		bool strSet( Element* e, Finfo* f, const string& val ) const {
+		bool strSet( Element* e, Finfo* f, const std::string& val ) const {
 			return 0;
 		}
 
 	private:
-		vector< Finfo* >& finfos_;
+		std::vector< Finfo* >& finfos_;
 };
 
 

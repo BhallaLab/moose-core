@@ -10,36 +10,48 @@
 #ifndef _CINFO_H
 #define _CINFO_H
 
+//TODO: mpp needs to be changed to automatically preface std:: to
+// types in std namespace.
+#include <map>
+#include <string>
+#include <vector>
+#include "RecvFunc.h"
+
+class Conn;
+class Element;
+class Field;
+class Finfo;
+
 class Cinfo {
 	friend class CinfoWrapper;
 	public:
-		Cinfo(const string& name,
-				const string& author,
-				const string& description,
-				const string& baseName,
-				Finfo** fieldArray,
-				const unsigned long nFields,
-				Element* (*createWrapper)(const string&, Element*,
-					const Element*)
+		Cinfo(const std::string& name,
+			const std::string& author,
+			const std::string& description,
+			const std::string& baseName,
+			Finfo** fieldArray,
+			const unsigned long nFields,
+			Element* (*createWrapper)(const std::string&, Element*,
+				const Element*)
 			);
 
 		~Cinfo() {
 				;
 		}
 
-		const string& name() const {
+		const std::string& name() const {
 				return name_;
 		}
 
 
-		static const Cinfo* find(const string& name);
+		static const Cinfo* find(const std::string& name);
 
-		// Element* create(const string& name) const;
-		Element* create(const string& name,
+		// Element* create(const std::string& name) const;
+		Element* create(const std::string& name,
 			Element* parent, const Element* proto = 0) const;
 
-		Field field( const string& name ) const;
-		void listFields( vector< Finfo* >& ) const;
+		Field field( const std::string& name ) const;
+		void listFields( std::vector< Finfo* >& ) const;
 
 		// Locates fields having matching conn and recvFunc
 		const Finfo* findMsg( const Conn* conn, RecvFunc func ) const;
@@ -56,7 +68,7 @@ class Cinfo {
 		// recvFuncs for calling  remote objects.
 		Finfo* findRemoteMsg( Conn* c, RecvFunc func ) const;
 
-		// Sets up the lookup map, creates cinfo classes on /classes,
+		// Sets up the lookup std::map, creates cinfo classes on /classes,
 		// assigns base names, and initializes field equivalence.
 		static void initialize();
 
@@ -64,22 +76,22 @@ class Cinfo {
 	private:
 		// Note that this is implemented as a function to bypass issues
 		// of sequence of static initialization.
-		static map<string, Cinfo*>& lookup() {
-			static map<string, Cinfo*> lookup_;
+		static std::map<std::string, Cinfo*>& lookup() {
+			static std::map<std::string, Cinfo*> lookup_;
 			return lookup_;
 		}
 
-		const string name_;
-		string author_;
-		string description_;
-		string baseName_;
+		const std::string name_;
+		std::string author_;
+		std::string description_;
+		std::string baseName_;
 		Finfo** fieldArray_;
 		const unsigned long nFields_;
 		Element* (*createWrapper_)(
-			const string& name, Element* parent, const Element* proto);
+			const std::string& name, Element* parent, const Element* proto);
 
-//		static vector<Cinfo*>& Cinfotab();
-//		static vector<Cinfo*>& basetype();
+//		static std::vector<Cinfo*>& Cinfotab();
+//		static std::vector<Cinfo*>& basetype();
 		const Cinfo* base_;
 
 };

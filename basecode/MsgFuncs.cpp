@@ -48,6 +48,7 @@ void Piggyback(const msgsrclist *csl, const string& mdest) {
 // second entries which comprise the duplicate of the original tree.
 
 // Also need to go through all generic messages.
+/* svitak -- moved to Element.cpp 
 void duplicateMessagesOnTree(map<const Element*, Element*>& tree)
 {
 	map<const Element*, Element*>::iterator ti;
@@ -75,6 +76,7 @@ void duplicateMessagesOnTree(map<const Element*, Element*>& tree)
 		}
 	}
 }
+*/
 
 /*
 // Duplicates any message going from f1 to outside. The corresponding

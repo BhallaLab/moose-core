@@ -28,25 +28,19 @@ enum SolverOp { SOLVER_SET, SOLVER_GET, SOLVER_REBUILD, SOLVER_ADD, SOLVER_DROP 
 #include <stdio.h>
 // End of special headers
 
-using namespace std;
-
 // #ifdef WINDOWS
-#ifdef NO_OFFSETOF
-#define		FIELD_OFFSET( T, F ) \
-	( unsigned long )( &T::F )
-#else
-#define		FIELD_OFFSET( T, F ) \
-	static_cast< unsigned long >( offsetof( T, F ) )
-#endif
+
+using namespace std;
 
 class Element;
 class Finfo;
 class Field;
 class Conn;
 class Ftype;
-typedef void ( *RecvFunc )( Conn* );
-void dummyFunc0( Conn* c );
 
+#include "RecvFunc.h"
+#include "dummyFunc0.h"
+#include "OffsetOf.h"
 #include "Conn.h"
 #include "Cinfo.h"
 #include "Field.h"

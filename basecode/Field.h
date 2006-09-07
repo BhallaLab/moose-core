@@ -11,6 +11,8 @@
 #ifndef _FIELD_H
 #define _FIELD_H
 
+#include <string>
+#include <vector>
 
 // Goes to the parent of the specified Conn, and looks for a Finfo
 // that either uses (Dest) or calls (Src) the specified RecvFunc.
@@ -31,9 +33,9 @@ class Field {
 
 		Field(const Field& other);
 
-		Field(const string& path);
+		Field(const std::string& path);
 
-		Field( Element* e, const string& finfoName );
+		Field( Element* e, const std::string& finfoName );
 
 		~Field();
 
@@ -66,9 +68,9 @@ class Field {
 		}
 
 		// Returns the element.field name with a period separator
-		string name() const;
+		std::string name() const;
 		// Returns the element/field path with a slash separator
-		string path() const;
+		std::string path() const;
 
 		// Update f_ and return True if the finfo has changed.
 		bool refreshFinfo();
@@ -83,12 +85,12 @@ class Field {
 		// Wrapper for Finfo::src
 		// Returns a list of Fields that are targets of messages
 		// emanating from this Finfo.
-		void src( vector< Field >& list );
+		void src( std::vector< Field >& list );
 
 		// Wrapper for Finfo::dest
 		// Returns a list of Fields that are sources of messages
 		// received by this Finfo.
-		void dest( vector< Field >& list );
+		void dest( std::vector< Field >& list );
 
 		// Adds a message from this Field to the target field 'other'.
 		bool add( Field& other );
@@ -101,13 +103,13 @@ class Field {
 		// Assigns a value to this field, doing type conversions if
 		// needed. If the Finfo is a DestFinfo, it will try to 
 		// call its recvFunc with the converted value as arguments.
-		bool set( const string& value );
+		bool set( const std::string& value );
 		// Extracts a value to this field, doing type conversions if
 		// needed
-		bool get( string& value );
+		bool get( std::string& value );
 
 		// applies operation op to compare field value with value.
-		bool valueComparison( const string& op, const string& value );
+		bool valueComparison( const std::string& op, const std::string& value );
 
 		// Adds the relay f to the element.
 		void appendRelay( Finfo* f );
