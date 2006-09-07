@@ -9,6 +9,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include <cstring>
 #include <math.h>
 #include <setjmp.h>
 #include <FlexLexer.h>
@@ -213,6 +214,17 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "tabchannel" ] = "HHChannel";
 	classnames[ "vdep_channel" ] = "HHChannel";
 	classnames[ "vdep_gate" ] = "HHGate";
+	classnames[ "xbutton" ] = "UIWidget";
+	classnames[ "xdialog" ] = "UIWidget";
+	classnames[ "xlabel" ] = "UIWidget";
+	classnames[ "xform" ] = "UIWidget";
+	classnames[ "xtoggle" ] = "UIWidget";
+	classnames[ "xshape" ] = "UIWidget";
+	classnames[ "xgraph" ] = "UIWidget";
+	classnames[ "x1dialog" ] = "UIWidget";
+	classnames[ "x1button" ] = "UIWidget";
+	classnames[ "x1shape" ] = "UIWidget";
+	classnames[ "xtext" ] = "UIWidget";
 
 	return classnames;
 }
@@ -246,7 +258,7 @@ string sliMessage( const char* elmName,
 	return "";
 }
 
-void do_add( int argc, const char** argv, Shell* s )
+void do_add( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 3 ) {
 		s->addFuncLocal( argv[1], argv[2] );
@@ -284,7 +296,7 @@ void do_add( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_drop( int argc, const char** argv, Shell* s )
+void do_drop( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 3 ) {
 		s->dropFuncLocal( argv[1], argv[2] );
@@ -293,7 +305,7 @@ void do_drop( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_set( int argc, const char** argv, Shell* s )
+void do_set( int argc, const char** const argv, Shell* s )
 {
 	string path;
 	int start = 2;
@@ -326,7 +338,7 @@ void do_set( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_call( int argc, const char** argv, Shell* s )
+void do_call( int argc, const char** const argv, Shell* s )
 {
 	if ( argc < 3 ) {
 		cout << "usage:: " << argv[0] << " path field/Action [args...]\n";
@@ -361,7 +373,7 @@ void do_call( int argc, const char** argv, Shell* s )
 	s->setFuncLocal( field, value );
 }
 
-int do_isa( int argc, const char** argv, Shell* s )
+int do_isa( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 3 ) {
 		return s->isaFuncLocal( argv[1], argv[2] );
@@ -371,7 +383,7 @@ int do_isa( int argc, const char** argv, Shell* s )
 	return 0;
 }
 
-int do_exists( int argc, const char** argv, Shell* s )
+int do_exists( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 2 ) {
 		string temp = argv[1];
@@ -387,7 +399,7 @@ int do_exists( int argc, const char** argv, Shell* s )
 	return 0;
 }
 
-char* do_get( int argc, const char** argv, Shell* s )
+char* do_get( int argc, const char** const argv, Shell* s )
 {
 	string field;
 	string value;
@@ -402,7 +414,7 @@ char* do_get( int argc, const char** argv, Shell* s )
 	return copyString( s->getFuncLocal( field ) );
 }
 
-char* do_getmsg( int argc, const char** argv, Shell* s )
+char* do_getmsg( int argc, const char** const argv, Shell* s )
 {
 	static string space = " ";
 	if ( argc < 3 ) {
@@ -417,21 +429,28 @@ char* do_getmsg( int argc, const char** argv, Shell* s )
 	return copyString( s->getmsgFuncLocal( field, options ) );
 }
 
-void do_create( int argc, const char** argv, Shell* s )
+void do_create( int argc, const char** const argv, Shell* s )
 {
-	if ( argc == 3 ) {
-		map< string, string >::iterator i = 
-			sliClassNameConvert().find( argv[1] );
-		if ( i != sliClassNameConvert().end() )
-			s->createFuncLocal( i->second, argv[2] );
+	map< string, string >::iterator i = 
+		sliClassNameConvert().find( argv[1] );
+	if ( i != sliClassNameConvert().end() ) {
+		if ( strcmp( i->second.c_str(), "UIWidget" ) == 0 ) {
+		}
+		else if ( argc > 3 ) {
+			cout << "usage:: " << argv[0] << " class name\n";
+			return;
+		}
+		s->createFuncLocal( i->second, argv[2] );
+	}
+	else {
+		if ( argc > 3 )
+			cout << "usage:: " << argv[0] << " class name\n";
 		else
 			s->createFuncLocal( argv[1], argv[2] );
-	} else {
-		cout << "usage:: " << argv[0] << " class name\n";
 	}
 }
 
-void do_delete( int argc, const char** argv, Shell* s )
+void do_delete( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 2 ) {
 		s->deleteFuncLocal( argv[1] );
@@ -440,7 +459,7 @@ void do_delete( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_move( int argc, const char** argv, Shell* s )
+void do_move( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 3 ) {
 		s->moveFuncLocal( argv[1], argv[2] );
@@ -449,7 +468,7 @@ void do_move( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_copy( int argc, const char** argv, Shell* s )
+void do_copy( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 3 ) {
 		s->copyFuncLocal( argv[1], argv[2] );
@@ -458,7 +477,7 @@ void do_copy( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_copy_shallow( int argc, const char** argv, Shell* s )
+void do_copy_shallow( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 3 ) {
 		s->copyShallowFuncLocal( argv[1], argv[2] );
@@ -467,7 +486,7 @@ void do_copy_shallow( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_copy_halo( int argc, const char** argv, Shell* s )
+void do_copy_halo( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 3 ) {
 		s->copyHaloFuncLocal( argv[1], argv[2] );
@@ -476,7 +495,7 @@ void do_copy_halo( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_ce( int argc, const char** argv, Shell* s )
+void do_ce( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 2 ) {
 		s->ceFuncLocal( argv[1] );
@@ -485,7 +504,7 @@ void do_ce( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_pushe( int argc, const char** argv, Shell* s )
+void do_pushe( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 2 ) {
 		s->pusheFuncLocal( argv[1] );
@@ -494,7 +513,7 @@ void do_pushe( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_pope( int argc, const char** argv, Shell* s )
+void do_pope( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 1 ) {
 		s->popeFuncLocal( );
@@ -503,7 +522,7 @@ void do_pope( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_alias( int argc, const char** argv, Shell* s )
+void do_alias( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 3 )
 		s->aliasFuncLocal( argv[ 1 ], argv[ 2 ] );
@@ -513,12 +532,12 @@ void do_alias( int argc, const char** argv, Shell* s )
 		s->aliasFuncLocal( "", "" );
 }
 
-void do_quit( int argc, const char** argv, Shell* s )
+void do_quit( int argc, const char** const argv, Shell* s )
 {
 	s->quitFuncLocal( );
 }
 
-void do_stop( int argc, const char** argv, Shell* s )
+void do_stop( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 1 ) {
 		s->stopFuncLocal( );
@@ -527,7 +546,7 @@ void do_stop( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_reset( int argc, const char** argv, Shell* s )
+void do_reset( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 1 ) {
 		s->resetFuncLocal( );
@@ -536,7 +555,7 @@ void do_reset( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_step( int argc, const char** argv, Shell* s )
+void do_step( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 2 ) {
 		s->stepFuncLocal( argv[1], "" );
@@ -547,7 +566,7 @@ void do_step( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_setclock( int argc, const char** argv, Shell* s )
+void do_setclock( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 3 ) {
 		s->setClockFuncLocal( argv[1], argv[2], "0" );
@@ -558,7 +577,7 @@ void do_setclock( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_showclocks( int argc, const char** argv, Shell* s )
+void do_showclocks( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 1 ) {
 		s->showClocksFuncLocal( );
@@ -567,7 +586,7 @@ void do_showclocks( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_useclock( int argc, const char** argv, Shell* s )
+void do_useclock( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 3 ) {
 		s->useClockFuncLocal( string( argv[1] ) + "/process", argv[2] );
@@ -579,7 +598,7 @@ void do_useclock( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_show( int argc, const char** argv, Shell* s )
+void do_show( int argc, const char** const argv, Shell* s )
 {
 	string temp;
 	if ( argc == 2 ) {
@@ -593,7 +612,7 @@ void do_show( int argc, const char** argv, Shell* s )
 	}
 }
 
-void do_le( int argc, const char** argv, Shell* s )
+void do_le( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 1 )
 		s->leFuncLocal( "." );
@@ -601,22 +620,22 @@ void do_le( int argc, const char** argv, Shell* s )
 		s->leFuncLocal( argv[1] );
 }
 
-void do_pwe( int argc, const char** argv, Shell* s )
+void do_pwe( int argc, const char** const argv, Shell* s )
 {
 	s->pweFuncLocal( );
 }
 
-void do_listcommands( int argc, const char** argv, Shell* s )
+void do_listcommands( int argc, const char** const argv, Shell* s )
 {
 	s->listCommandsFuncLocal( );
 }
 
-void do_listobjects( int argc, const char** argv, Shell* s )
+void do_listobjects( int argc, const char** const argv, Shell* s )
 {
 	s->listClassesFuncLocal( );
 }
 
-void do_echo( int argc, const char** argv, Shell* s )
+void do_echo( int argc, const char** const argv, Shell* s )
 {
 	vector< string > vec;
 	int options = 0;
@@ -634,34 +653,34 @@ void do_echo( int argc, const char** argv, Shell* s )
 // Old GENESIS Usage: addfield [element] field-name -indirect element field -description text
 // Here we'll have a subset of it:
 // addfield [element] field-name -type field_type
-void do_addfield( int argc, const char** argv, Shell* s )
+void do_addfield( int argc, const char** const argv, Shell* s )
 {
 	if ( argc == 2 ) {
-		const char *nargv[] = { argv[0], ".", argv[1] };
+		const char * nargv[] = { argv[0], ".", argv[1] };
 		s->commandFuncLocal( 3, nargv );
 	} else if ( argc == 3 ) {
 		s->commandFuncLocal( argc, argv );
 	} else if ( argc == 4 && strncmp( argv[2], "-f", 2 ) == 0 ) {
-		const char *nargv[] = { argv[0], ".", argv[1], argv[3] };
+		const char * nargv[] = { argv[0], ".", argv[1], argv[3] };
 		s->commandFuncLocal( 4, nargv );
 	} else if ( argc == 5 && strncmp( argv[3], "-f", 2 ) == 0 ) {
-		const char *nargv[] = { argv[0], argv[1], argv[3], argv[4] };
+		const char * nargv[] = { argv[0], argv[1], argv[3], argv[4] };
 		s->commandFuncLocal( 4, nargv );
 	} else {
 		s->error( "usage: addfield [element] field-name -type field_type" );
 	}
 }
 
-void doShellCommand ( int argc, const char** argv, Shell* s )
+void doShellCommand ( int argc, const char** const argv, Shell* s )
 {
 	s->commandFuncLocal( argc, argv );
 }
 
-void do_complete_loading( int argc, const char** argv, Shell* s )
+void do_complete_loading( int argc, const char** const argv, Shell* s )
 {
 }
 
-float do_exp( int argc, const char** argv, Shell* s )
+float do_exp( int argc, const char** const argv, Shell* s )
 {
 	if ( argc != 2 ) {
 		s->error( "exp: Too few command arguments\nusage: exp number" );
@@ -671,7 +690,7 @@ float do_exp( int argc, const char** argv, Shell* s )
 	}
 }
 
-float do_log( int argc, const char** argv, Shell* s )
+float do_log( int argc, const char** const argv, Shell* s )
 {
 	if ( argc != 2 ) {
 		s->error( "log: Too few command arguments\nusage: log number" );
@@ -681,7 +700,7 @@ float do_log( int argc, const char** argv, Shell* s )
 	}
 }
 
-float do_log10( int argc, const char** argv, Shell* s )
+float do_log10( int argc, const char** const argv, Shell* s )
 {
 	if ( argc != 2 ) {
 		s->error( "log10: Too few command arguments\nusage: log10 number" );
@@ -691,7 +710,7 @@ float do_log10( int argc, const char** argv, Shell* s )
 	}
 }
 
-float do_sin( int argc, const char** argv, Shell* s )
+float do_sin( int argc, const char** const argv, Shell* s )
 {
 	if ( argc != 2 ) {
 		s->error( "sin: Too few command arguments\nusage: sin number" );
@@ -701,7 +720,7 @@ float do_sin( int argc, const char** argv, Shell* s )
 	}
 }
 
-float do_cos( int argc, const char** argv, Shell* s )
+float do_cos( int argc, const char** const argv, Shell* s )
 {
 	if ( argc != 2 ) {
 		s->error( "cos: Too few command arguments\nusage: cos number" );
@@ -711,7 +730,7 @@ float do_cos( int argc, const char** argv, Shell* s )
 	}
 }
 
-float do_tan( int argc, const char** argv, Shell* s )
+float do_tan( int argc, const char** const argv, Shell* s )
 {
 	if ( argc != 2 ) {
 		s->error( "tan: Too few command arguments\nusage: tan number" );
@@ -721,7 +740,7 @@ float do_tan( int argc, const char** argv, Shell* s )
 	}
 }
 
-float do_sqrt( int argc, const char** argv, Shell* s )
+float do_sqrt( int argc, const char** const argv, Shell* s )
 {
 	if ( argc != 2 ) {
 		s->error( "sqrt: Too few command arguments\nusage: sqrt number" );
@@ -731,7 +750,7 @@ float do_sqrt( int argc, const char** argv, Shell* s )
 	}
 }
 
-float do_pow( int argc, const char** argv, Shell* s )
+float do_pow( int argc, const char** const argv, Shell* s )
 {
 	if ( argc != 3 ) {
 		s->error( "pow: Too few command arguments\nusage: exp base exponent" );
@@ -741,7 +760,7 @@ float do_pow( int argc, const char** argv, Shell* s )
 	}
 }
 
-float do_abs( int argc, const char** argv, Shell* s )
+float do_abs( int argc, const char** const argv, Shell* s )
 {
 	if ( argc != 2 ) {
 		s->error( "abs: Too few command arguments\nusage: abs number" );
@@ -749,6 +768,41 @@ float do_abs( int argc, const char** argv, Shell* s )
 	} else {	
 		return fabs( atof( argv[ 1 ] ) );
 	}
+}
+
+void do_xshow ( int argc, const char** const argv, Shell* s )
+{
+	s->error( "not implemented yet." );
+}
+
+void do_xhide ( int argc, const char** const argv, Shell* s )
+{
+	s->error( "not implemented yet." );
+}
+
+void do_xshowontop ( int argc, const char** const argv, Shell* s )
+{
+	s->error( "not implemented yet." );
+}
+
+void do_xupdate ( int argc, const char** const argv, Shell* s )
+{
+	s->error( "not implemented yet." );
+}
+
+void do_xcolorscale ( int argc, const char** const argv, Shell* s )
+{
+	s->error( "not implemented yet." );
+}
+
+void do_x1setuphighlight ( int argc, const char** const argv, Shell* s )
+{
+	s->error( "not implemented yet." );
+}
+
+void do_xsendevent ( int argc, const char** const argv, Shell* s )
+{
+	s->error( "not implemented yet." );
 }
 
 //////////////////////////////////////////////////////////////////
@@ -808,6 +862,13 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "sqrt", reinterpret_cast< slifunc>( do_sqrt ), "float" );
 	AddFunc( "pow", reinterpret_cast< slifunc>( do_pow ), "float" );
 	AddFunc( "abs", reinterpret_cast< slifunc>( do_abs ), "float" );
+	AddFunc( "xshow", do_xshow, "void" );
+	AddFunc( "xhide", do_xhide, "void" );
+	AddFunc( "xshowontop", do_xshowontop, "void" );
+	AddFunc( "xupdate", do_xupdate, "void" );
+	AddFunc( "xcolorscale", do_xcolorscale, "void" );
+	AddFunc( "x1setuphighlight", do_x1setuphighlight, "void" );
+	AddFunc( "xsendevent", do_xsendevent, "void" );
 }
 
 //////////////////////////////////////////////////////////////////

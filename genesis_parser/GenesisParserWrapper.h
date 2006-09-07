@@ -11,6 +11,14 @@
 #ifndef _GENESIS_PARSER_WRAPPER_H
 #define _GENESIS_PARSER_WRAPPER_H
 // class myFlexLexer: public yyFlexLexer
+
+// ISO C++ requires that these be declared in the innermost enclosing scope.
+// Most compilers inject[ed] this declaration automatically, but that's a favor.
+// These should be ok in an enclosing namespace.
+Element* lookupEchoConn( const Conn* );
+Element* lookupCommandConn( const Conn* );
+Element* lookupShellInputConn( const Conn* c );
+
 class GenesisParserWrapper: 
 	public myFlexLexer, public Element
 {
