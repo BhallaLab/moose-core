@@ -14,6 +14,7 @@
 
 # Use the options below for compiling on GCC3. Pick your favourite
 # optimization settings.
+#CFLAGS  =	-g -Wall -pedantic -DYYMALLOC -DYYFREE -DDO_UNIT_TESTS
 #CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DNO_OFFSETOF
 #CFLAGS  =	-O3 -Wall -pedantic -DNO_OFFSETOF
 #CFLAGS  =	-O3 -pg -Wall -pedantic -DNO_OFFSETOFF
@@ -24,7 +25,9 @@
 # -Wno-invalid-offsetof flag suppresses these silly warnings.
 #  For Debian/Ubuntu 6.06, we need to add a few more compiler flags to
 #  help it through the genesis parser, which is littered with ifdefs.
-CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DYYMALLOC -DYYFREE -Wno-invalid-offsetof
+CFLAGS  =	-g -Wall -DYYMALLOC -DYYFREE -pedantic -DDO_UNIT_TESTS
+# GNU C++ 4.1 and newer will need -ffriend-injection
+#CFLAGS  =	-g -Wall -ffriend-injection -Weffc++ -DYYMALLOC -DYYFREE -pedantic -DDO_UNIT_TESTS
 #CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -Wno-invalid-offsetof
 #CFLAGS  =	-O3 -Wall -pedantic -Wno-invalid-offsetof
 
@@ -38,7 +41,7 @@ LIBS = 		-lm
 CXX = g++
 LD = ld
 
-SUBDIR = basecode maindir randnum builtins genesis_parser scheduling kinetics biophysics textio
+SUBDIR = basecode maindir randnum builtins genesis_parser scheduling kinetics biophysics textio gui
 
 OBJLIBS =	\
 	basecode/basecode.o \
@@ -50,6 +53,7 @@ OBJLIBS =	\
 	textio/textio.o \
 	kinetics/kinetics.o \
 	biophysics/biophysics.o \
+	gui/gui.o \
 
 
 libs:
