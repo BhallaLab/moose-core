@@ -10,6 +10,9 @@
 #ifndef _MSGSRC_H
 #define _MSGSRC_H
 
+#include <vector>
+#include "header.h"
+
 template <class T> void dummyFunc( Conn* c, T v)
 {
 	;
@@ -165,7 +168,7 @@ class SingleMsgSrc
 			return c_;
 		}
 
-		void dest( vector< Field >& list );
+		void dest( std::vector< Field >& list );
 		void addRecvFunc( RecvFunc rf, unsigned long position );
 	
 	protected:
@@ -281,12 +284,12 @@ class NMsgSrc
 			return c_;
 		}
 
-		void dest( vector< Field >& list );
+		void dest( std::vector< Field >& list );
 
 		void addRecvFunc( RecvFunc rf, unsigned long position );
 	
 	protected:
-		vector< RecvFunc >rfuncs_;
+		std::vector< RecvFunc >rfuncs_;
 		BaseMultiConn* c_;
 };
 

@@ -10,6 +10,12 @@
 #ifndef _CONN_H
 #define _CONN_H
 
+#include <vector>
+#include "ElementFwd.h"
+#include "FinfoFwd.h"
+#include "RecvFunc.h"
+#include "dummyFunc0.h"
+
 /////////////////////////////////////////////////////////////////////
 // 
 // The Conn family of classes handle connections between objects.
@@ -37,7 +43,7 @@ class Conn
 		}
 		virtual Conn* target( unsigned long index ) const = 0;
 		virtual unsigned long nTargets() const = 0;
-		virtual void listTargets( vector< Conn* >& ) const = 0;
+		virtual void listTargets( std::vector< Conn* >& ) const = 0;
 		virtual unsigned long nSlots() const = 0;
 
 		virtual Element* parent() const = 0;	// Ptr to parent Element
@@ -116,7 +122,7 @@ class UniConnBase: public Conn
 			return (target_ != 0);
 		}
 
-		void listTargets( vector< Conn* >& list ) const {
+		void listTargets( std::vector< Conn* >& list ) const {
 			if ( target_ ) {
 				list.push_back( target_ );
 			}
@@ -241,7 +247,7 @@ class PlainMultiConn: public Conn
 			return (target_.size() > 0);
 		}
 
-		void listTargets( vector< Conn* >& list ) const {
+		void listTargets( std::vector< Conn* >& list ) const {
 			list.insert( list.end(), target_.begin(), target_.end() );
 		}
 
@@ -249,11 +255,11 @@ class PlainMultiConn: public Conn
 			return parent_;
 		}
 
-		vector< Conn* >::const_iterator begin() const {
+		std::vector< Conn* >::const_iterator begin() const {
 			return target_.begin();
 		}
 
-		vector< Conn* >::const_iterator end() const {
+		std::vector< Conn* >::const_iterator end() const {
 			return target_.end();
 		}
 
@@ -350,13 +356,13 @@ class MultiConn: public BaseMultiConn
 		unsigned long nSlots() const {
 			return connVecs_.size();
 		}
-		void listTargets( vector< Conn* >& list ) const ;
+		void listTargets( std::vector< Conn* >& list ) const ;
 
-		vector< Conn* >::const_iterator begin( unsigned long i ) const {
+		std::vector< Conn* >::const_iterator begin( unsigned long i ) const {
 			return connVecs_[ i ]->begin();
 		}
 
-		vector< Conn* >::const_iterator end( unsigned long i ) const {
+		std::vector< Conn* >::const_iterator end( unsigned long i ) const {
 			return connVecs_[ i ]->end();
 		}
 
@@ -374,7 +380,7 @@ class MultiConn: public BaseMultiConn
 		void innerDisconnectAll();
 
 	private:
-		vector< PlainMultiConn* > connVecs_;
+		std::vector< PlainMultiConn* > connVecs_;
 };
 
 
@@ -467,7 +473,7 @@ class MultiReturnConn: public Conn
 		unsigned long matchRemoteFunc( RecvFunc rf ) const;
 		void addRecvFunc( RecvFunc rf );
 
-		void listTargets( vector< Conn* >& list ) const;
+		void listTargets( std::vector< Conn* >& list ) const;
 
 		Element* parent() const {
 			return parent_;
@@ -475,12 +481,12 @@ class MultiReturnConn: public Conn
 
 		// Haven't figured out these. I think I will have to
 		// define an iterator class here that does the right thing.
-		vector< Conn* >::const_iterator begin() const {
-			return static_cast< vector< Conn* >::const_iterator >( 0 );
+		std::vector< Conn* >::const_iterator begin() const {
+			return static_cast< std::vector< Conn* >::const_iterator >( 0 );
 		}
 
-		vector< Conn* >::const_iterator end() const {
-			return static_cast< vector< Conn* >::const_iterator >( 0 );
+		std::vector< Conn* >::const_iterator end() const {
+			return static_cast< std::vector< Conn* >::const_iterator >( 0 );
 		}
 
 		unsigned long find( const Conn* other ) const;
@@ -504,7 +510,7 @@ class MultiReturnConn: public Conn
 		}
 
 	private:
-		vector< ReturnConn* > vec_;
+		std::vector< ReturnConn* > vec_;
 		Element* parent_;
 };
 
@@ -631,4 +637,4 @@ class SolverConn: public UniConnBase {
 		SolveMultiConn* manager_;
 };
 
-#endif	// _MSGCONN_H
+#endif	// _CONN_H

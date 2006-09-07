@@ -42,27 +42,6 @@ const Cinfo Element::cinfo_(
 	&Element::create
 );
 
-
-//////////////////////////////////////////////////////////////////
-// This is a friend function to look up the elm from within the 
-// parent_conn
-//////////////////////////////////////////////////////////////////
-Element* lookupChildIn(const Conn *m)
-{
-	static const size_t OFFSET =
-		FIELD_OFFSET( Element, childIn_ );
-//		(unsigned long)(&Element::childIn_);
-// Need to figure out how to do this using static casts.
-//		static_cast<const unsigned long>(&Element::parentConn_);
-		return reinterpret_cast< Element* >(
-			( unsigned long )m - OFFSET
-		);
-//		return (Element *) (
-//			(unsigned long)(m) - OFFSET);
-// This doesn't work either
-//		static_cast<unsigned long>(m) - OFFSET
-}
-
 //////////////////////////////////////////////////////////////////
 // Element functions here.
 //////////////////////////////////////////////////////////////////
@@ -284,6 +263,34 @@ bool Element::descendsFrom( const Element* pa ) const
 		if ( e == pa )
 			return 1;
 	return 0;
+}
+
+void Element::duplicateMessagesOnTree(map<const Element*, Element*>& tree) const
+{
+	map<const Element*, Element*>::iterator ti;
+
+	for (ti = tree.begin(); ti != tree.end(); ti++) {
+		// Corresponding parts of tree hould be of identical classes.
+		if ( ti->first->cinfo() != ti->second->cinfo() ) {
+			cout << "Error: duplicateMessgesOnTree(): Tree mismatch\n";
+			return;
+		}
+	}
+	for (ti = tree.begin(); ti != tree.end(); ti++) {
+		vector< Finfo* > finfos;
+		ti->first->cinfo()->listFields( finfos );
+		for (unsigned int i = 0; i < finfos.size(); i++ ) {
+			Element* temp = const_cast< Element* >( ti->first );
+			Field f1( finfos[i], temp );
+			vector< Field > dests;
+			f1.dest( dests );
+			// Scan dests for entries in tree but avoid kids and 
+			// predefined msgs.
+			// Connect up to corresponding entries in tree
+			// f1 = ti->first->GetCinfo()->GetField(++i);
+			// f2 = ti->second->GetCinfo()->GetField(i);
+		}
+	}
 }
 
 /*

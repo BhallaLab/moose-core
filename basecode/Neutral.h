@@ -7,12 +7,17 @@
 ** GNU Lesser Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#ifndef _P_ELEMENT_H
-#define _P_ELEMENT_H
+#ifndef _NEUTRAL_H
+#define _NEUTRAL_H
+
+#include <string>
+#include <vector>
+#include "Cinfo.h"
+#include "Element.h"
 
 class Neutral: public Element {
 	public:
-		Neutral(const string& name_arg)
+		Neutral(const std::string& name_arg)
 			: Element( name_arg ),
 			  childOut_( this ),
 			  childSrc_( &childOut_ )
@@ -30,7 +35,7 @@ class Neutral: public Element {
 		}
 
 		static Element* create(
-			const string& n, Element* pa, const Element* proto);
+			const std::string& n, Element* pa, const Element* proto);
 
 ///////////////////////////////////////////////////////////////////////
 // Some child-handling stuff.
@@ -56,12 +61,12 @@ class Neutral: public Element {
 		}
 
 		// Override the virtual function for Elements.
-		Element* relativeFind( const string& n );
+		Element* relativeFind( const std::string& n );
 
 		// Override the virtual function for Elements.
 		// This is defined in Wildcard.cpp
 		int wildcardRelativeFind(
-			const string& n, vector< Element* >& ret, int doublehash) ;
+			const std::string& n, std::vector< Element* >& ret, int doublehash) ;
 
 		Element* internalDeepCopy(
 			Element* pa, map<const Element*, Element* >& tree) const;
@@ -73,4 +78,4 @@ class Neutral: public Element {
 		static const Cinfo cinfo_;
 };
 
-#endif	// _P_ELEMENT_H
+#endif	// _NEUTRAL_H

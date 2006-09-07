@@ -219,7 +219,7 @@ void Shell::createFuncLocal( const string& type, const string& path )
 				}
 			} else {
 				error( "create: Failed to find parent object ", 
-					path.substr( 0, pos - 1 ) );
+					path.substr( 0, pos ) );
 			}
 		} else {
 			error( "create: Illegal object name", name );
