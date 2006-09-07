@@ -1,4 +1,4 @@
-MOOSE: Developer's guide
+MOOSE Developer's Guide
 
 Version 0.1, January 2006.
 
@@ -6,84 +6,19 @@ Upinder S. Bhalla, National Centre for Biological Sciences,
 Bangalore 560065 India
 Copyright 2005
 
-Table of contents.
 1. Introduction
-	1.1 What is MOOSE?
-	1.2 Who should read this document?
-	1.3 MOOSE licensing
-	1.4 MOOSE coding standards
-		1.4.1. Version control
-		1.4.2. Testing
-		1.4.3. Programming style
-		1.4.4. Documentation
-	1.5 MOOSE features in a nutshell.
-		1.5.1. Messaging
-		1.5.2. Object-oriented
-		1.5.3. Simulation
-		1.5.4. Environment
-	1.6 MOOSE design overview
-		1.6.1. Intro and Examples
-		1.6.2. Messaging
-		1.6.3. Class design
-		1.6.4. Simulation framework
-
-2. The MOOSE programming interface
-	2.1 Introduction
-		2.1.1 MOOSE class development.
-		2.1.2. MOOSE solver development.
-		2.1.3 Core Moose functionality.
-	2.2 Compiling
-		Linux
-		Windows
-		Flags
-	2.3 Elements, i.e., MOOSE objects
-		2.3.1 Common commands
-	2.4 Fields
-		2.4.1. Variants of Finfo
-		2.4.2. Field typing
-		2.4.3. Common commands
-		2.4.4. Field commands
-	2.5 Messages.
-		2.5.1 Regular messages
-		2.5.2 Internal messages
-		2.5.3 Relay messages
-		2.5.4 Synaptic messages
-		2.5.5 Shared messages
-		2.5.6 Return messages
-		2.5.7 Solver messages
-
-3. Writing new objects from scratch
-	3.1 Intro
-	3.2 Designing classes
-	3.3 Overview of using mpp
-	3.4 Details of mpp file
-		3.4.1 Class specification
-		3.4.2 Fields
-			3.4.2.1 Regular value fields
-			3.4.2.2 Readonly fields
-			3.4.2.3 Array fields
-			3.4.2.4 Object fields
-			3.4.2.5 Field initialization
-		3.4.3 Shared messages
-		3.4.4 Source messages
-		3.4.5 Destination messages
-	3.5 Cleaning up afterward
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-1. Introduction.
 
 1.1. What is MOOSE?
 MOOSE is the Messaging Object-oriented Simulation Environment. It is a
 general framework for making large, complex models, typically of 
 biological and neuronal networks.
 
-1.2. Who should read this MOOSE developer's guide?
-- Anyone who wants to write MOOSE code
+1.2. Intended Audience
+Who should read this MOOSE developer's guide?
+- Anyone who wants to write MOOSE code.
 - Anyone who wants to port old GENESIS code. Such poor saps should read the
-	GENESIS to MOOSE developers guide first, and there are several sections
-	you can skip.
+GENESIS to MOOSE developers guide first, and there are several sections
+you can skip.
 
 Who does not need to read it
 - Someone who just wants to use MOOSE without developing stuff for it.
@@ -95,7 +30,6 @@ Useful knowledge:
 - Mathematics and concepts of whatever you want to simulate
 - pthreads and MPI, once you get to the parallel programming sections.
 
-//////////////////////////////////////////////////////////////////////////////
 
 1.3. MOOSE licensing
 MOOSE is licensed under the terms of the Lesser GNU Public License. Details
@@ -105,15 +39,13 @@ and attribution remains. It also means you can use the code as a library
 basis for closed code. There are no warranties of any kind on the code.
 
 
-//////////////////////////////////////////////////////////////////////////////
 
-1.4. MOOSE Coding standards.
+1.4. MOOSE Coding standards
 
-1.4.1. Version control:
-MOOSE uses/will use the CVS system because sourceforge does.
-I wanted to use subversion, but CVS is fine for this scale project.
+1.4.1. Version control
+MOOSE uses/will use the subversion system.
 
-1.4.2. Testing:
+1.4.2. Testing
 MOOSE requires extensive testing. Ideally, everything written for MOOSE
 should be accompanied by a test suite, which are separate file(s) in the
 same directory as the unit under test. The compiler flag -DDO_UNIT_TESTS
@@ -129,9 +61,8 @@ A failure causes immediate termination with an error message indicated the
 failed test.
 
 In addition it would be nice to have the following:
-
-Memory test should look for obvious memory leaks.
-Speed test that should not take more than a second or so.
+- Memory test should look for obvious memory leaks.
+- Speed test that should not take more than a second or so.
 
 If possible should also compare against some reference. For example, message
 speed tests are compared against equivalent calls made directly. 
@@ -147,7 +78,7 @@ I/O, the parser. I would like to do such tests in a more automated manner,
 in due course.
 
 
-1.4.3. Programming style:
+1.4.3. Programming style
 MOOSE more or less follows the following style guide:
   C++ Programming Style Guidelines
   /Version 3.0, January 2002/
@@ -157,81 +88,73 @@ The document is available at http://geosoft.no/development/cppstyle.html
 The main idiosyncracy in MOOSE style is that I believe in the use of tabs for
 indentation, while the above style guide does not.
 
-1.4.4. Documentation:
-Minimal:
-User level: How to use the code, with example.
-	Template for use documentation of an object.
-Developer level: What the code does, design decisions.
+1.4.4. Documentation
+User level:
+How to use the code, with example.
+Template for use documentation of an object.
+Developer level:
+What the code does, design decisions.
+See this manual.
 
-Preferred: See this manual.
+1.5. What does MOOSE mean?
+MOOSE technical features in a nutshell.
 
-//////////////////////////////////////////////////////////////////////////////
-1.5. What does MOOSE mean? MOOSE technical features in a nutshell.
+1.5.1. Message passing architecture
+- A message looks like a function call, with type-safe arguments.
+- Persistent. Once a message is set up, it is like a wire that
+connects two objects until further notice.
+- Fine grained: At the level of simple function calls.
+- Efficient: 2 pointer lookup cost in time and memory.
+Specializations for synaptic messaging
+Specializations for logical groups of messages
+- Class independent: Neither source nor destination needs to
+know about other class. Only the argument types must match.
+- Parallelizable: Maps naturally to MPI messaging.
+- Traversable: Messages form the 'wiring diagram' of a simulation.
+- Universal: Every field can be source or destination of a message.
 
-1.5.1. Messaging
 1.5.2. Object-oriented
+- Class hierarchy including inheritance and polymorphism
+- High-level class specification similar to C++ class definition,
+allows very compact specification of complex class.
+Conversion to C++ occurs using a preprocessor.
+- Easy to derive from C++ classes, provides a wrapper class
+for existing C++ classes.
+- Uniform and highly modular interface from each class to the system.
+
 1.5.3. Simulation
+- Designed for simulations, especially time-series calculations.
+- One-to-one mapping between objects and simulation concepts.
+- Scheduler: System for handling complex timing dependencies:
+- lockstep computations, 
+- periodic updates
+- external events.
+- Also handles internode scheduling automatically.
+- Solvers: Many problems are more efficiently solved using array-type
+calculations rather than object-oriented descriptions.
+- Support for 'solvers' that take over calculations of
+large numbers of previously independent objects.
+- Completely transparent. Original API to and from objects
+is retained. It only looks like they work faster.
+- Solvers will be basis for specialized SMP optimizations.
+
 1.5.4. Environment
+- Programming in ANSI C++ with extensive use of STL.
+- MOOSE is multi-OS. 
+- Tested and developed on UNIX / Linux
+- Also compiled natively under Windows .net
+- Will implement under MacOS.
+- Graphics will also be platform independent. Possibly FLTK.
+- Supports a range of interpreted parsers. 
+- GENESIS parser SLI for backward compatibility
+- JAVA, OCAML, Python, PERL, Ruby, many others through SWIG.
+- Shell environment(s) for interactive modeling.
+- Can have multiple shells, possibly with different parsers,
+talking to same model simultaneously.
 
-1.5.1. Message passing architecture.
-	- A message looks like a function call, with type-safe arguments.
-	- Persistent. Once a message is set up, it is like a wire that
-		connects two objects until further notice.
-	- Fine grained: At the level of simple function calls.
-	- Efficient: 2 pointer lookup cost in time and memory.
-		Specializations for synaptic messaging
-		Specializations for logical groups of messages
-	- Class independent: Neither source nor destination needs to
-		know about other class. Only the argument types must match.
-	- Parallelizable: Maps naturally to MPI messaging.
-	- Traversable: Messages form the 'wiring diagram' of a simulation.
-	- Universal: Every field can be source or destination of a message.
-
-1.5.2. Object-oriented.
-	- Class hierarchy including inheritance and polymorphism
-	- High-level class specification similar to C++ class definition,
-		allows very compact specification of complex class.
-		Conversion to C++ occurs using a preprocessor.
-	- Easy to derive from C++ classes, provides a wrapper class
-		for existing C++ classes.
-	- Uniform and highly modular interface from each class to the system.
-
-1.5.3. Simulation.
-	- Designed for simulations, especially time-series calculations.
-	- One-to-one mapping between objects and simulation concepts.
-	- Scheduler: System for handling complex timing dependencies:
-		- lockstep computations, 
-		- periodic updates
-		- external events.
-		- Also handles internode scheduling automatically.
-	- Solvers: Many problems are more efficiently solved using array-type
-		calculations rather than object-oriented descriptions.
-		- Support for 'solvers' that take over calculations of
-			large numbers of previously independent objects.
-		- Completely transparent. Original API to and from objects
-			is retained. It only looks like they work faster.
-		- Solvers will be basis for specialized SMP optimizations.
-
-1.5.4. Environment.
-	- Programming in ANSI C++ with extensive use of STL.
-	- MOOSE is multi-OS. 
-		- Tested and developed on UNIX / Linux
-		- Also compiled natively under Windows .net
-		- Will implement under MacOS.
-		- Graphics will also be platform independent. Possibly FLTK.
-	- Supports a range of interpreted parsers. 
-		- GENESIS parser SLI for backward compatibility
-		- JAVA, OCAML, Python, PERL, Ruby, many others through SWIG.
-	- Shell environment(s) for interactive modeling.
-		- Can have multiple shells, possibly with different parsers,
-			talking to same model simultaneously.
-
-//////////////////////////////////////////////////////////////////////////////
-
-1.6. MOOSE design overview.
+1.6. MOOSE design overview
 
 1.6.1. Introduction and examples
--------------------------
 A MOOSE application is a set of functional objects that communicate via
 messages. Think of it like a circuit, or if you like, the brain. There are
 circuit elements such as neurons which are predefined building blocks coded
@@ -240,11 +163,13 @@ circuit elements carrying information. Wires, once defined, become
 persistent parts of the circuit.
 
 Example 1: Building a circuit
+<PRE>
 create Neutral /ckt		// create a placeholder called ckt
 create IntegFire /ckt/n1	// Create Integrate and Fire neuron n1
 create IntegFire /ckt/n2	// Create Integrate and Fire neuron n2
-addmsg /ckt/n1/axon /ckt/n2/dendrite	
-				// Connect the axon of n1 to the dendrite of n2
+// Connect the axon of n1 to the dendrite of n2
+addmsg /ckt/n1/axon /ckt/n2/dendrite 
+</PRE>
 
 When the MOOSE application is run, user events or an internal scheduler
 will trigger functions in objects, which in turn will make function
@@ -254,27 +179,34 @@ information begins to flow along the wires between the circuit elements,
 which trigger suitable responses in each other.
 
 Example 2: Connecting up the scheduler to the neurons.
+<PRE>
 addmsg /sched/cj/ct0/process /ckt/n1/process
 addmsg /sched/cj/ct0/process /ckt/n2/process
+</PRE>
 
 For backward compatibility, and to enable automatic rebuilding of the 
 scheduling system, the above commands could be replaced by
-useclock /##[TYPE==IntegFire] 0		
-			// use clock 0 for all objects of type IntegFire
+<PRE>
+useclock /##[TYPE==IntegFire] 0 // use clock 0 for all objects of type IntegFire
+</PRE>
 
 Example 3: Running the model
+<PRE>
 step 100
+</PRE>
 
 Once a circuit has been completed, it too can be treated as a self-contained
 circuit module. It can be duplicated in its entirety, and groups of these
 modules can be further interconnected.
 
 Example 4: Duplicating modules.
-copy /ckt /ckt2			// Duplicates the entire object tree of ckt.
-copy /ckt /ckt3			// Does it again for ckt3. Now ckt3 also has
-				// in it the IntegFires n1 and n2.
+<PRE>
+copy /ckt /ckt2	// Duplicates the entire object tree of ckt.
+copy /ckt /ckt3	// Does it again for ckt3. Now ckt3 also has
+// in it the IntegFires n1 and n2.
 addmsg /ckt/n2/axon /ckt2/n1/dendrite
 addmsg /ckt2/n2/axon /ckt3/n1/dendrite
+</PRE>
 
 Note that the internal connections on ckt were also duplicated by the copy
 function. This resulting simulation is a chain of six IntegFire neurons,
@@ -300,7 +232,6 @@ of a lot programming, so I won't try to describe it here. What this document
 does describe is how to build the objects you design.
 
 1.6.2. Messaging
----------
 C++ already supports a rather formal class interface using member functions,
 and MOOSE simply formalizes this a bit further. This formalization is the
 concept of messages. MOOSE messages are quite different from the usual
@@ -309,10 +240,10 @@ Rather than directly call the member function of another
 object, you call a message. It is the job of the basecode to then deliver this
 function request to all targets of the message. This has three critical
 implications. 
-	First, your class does not need to know anything about the target
-	class or function other than the arguments it takes. 
-	Second, the actual targets are defined at run-time by scripting. 
-	Third, it is easy to traverse the message calling sequence. 
+First, your class does not need to know anything about the target
+class or function other than the arguments it takes. 
+Second, the actual targets are defined at run-time by scripting. 
+Third, it is easy to traverse the message calling sequence. 
 The first two implications give flexibility.
 The third makes it possible for the system to analyze function flow and
 carry out parallelization. We will discuss these points later.
@@ -352,7 +283,7 @@ handled transparently in MOOSE. Virtual messages within each class tie
 incoming messages to outgoing messages that they trigger. So the above
 message sequence would look like this:
 
-	outA-->inB-->outB-->inC
+outA-->inB-->outB-->inC
 
 where the arrows represent messages. The crucial message inB-->outB is the
 virtual message. Now that we have this link in place, a program can analyze
@@ -362,7 +293,6 @@ In a later section we will consider the different kinds of MOOSE messages.
 
 
 1.6.3. MOOSE class design
-----------------------
 A MOOSE class is just an ordinary C++ class, with attention to passing
 information only through messages. In particular, your C++ class must not
 have pointers to any other object unless they are to be merged together as
@@ -409,7 +339,6 @@ code to help you build up your class.
 
 
 1.6.4. The MOOSE simulation framework
-------------------------------
 The above aspects of MOOSE design rest on the base code: the nuts and bolts
 of building classes and connecting them. There is a small infrastructure
 already in place for your MOOSE coding.
@@ -424,11 +353,9 @@ in due course MOOSE will also be able to use SWIG. This will give access
 to at least ten popular scripting languages, including Perl, Python, Ocaml,
 flavors of C, and others.
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-2. The MOOSE programming interface.
+2. The MOOSE programming interface
 
-2.1 Introduction.
+2.1. Introduction
 MOOSE is designed to be extremely modular. There are three essential code
 libraries: The basecode, the parser, and the scheduler. Even the parser library
 can be swapped for other parsers, or if you feel like it, you could hard-code
@@ -445,7 +372,7 @@ I categorize MOOSE development into three levels:
 - MOOSE solvers
 - Core moose functionality
 
-2.1.1 MOOSE class development.
+2.1.1. MOOSE class development.
 This is meant to be much simpler than the old GENESIS class development
 process, which involved various header, .g as well as source code work. MOOSE
 does not use any class files except the compiled ones, so that is simpler.
@@ -456,7 +383,7 @@ In brief, if you use this you do not need to know anything else in this
 chapter except the section below on compilation. Refer to chapter 3
 for details on MOOSE class development.
 
-2.1.2. MOOSE solver development.
+2.1.2. MOOSE solver development
 This is also meant to be much simpler than the GENESIS solvers, of which
 there were a grand total of two. However solver development by its very
 nature requires that the solver be able to represent information that
@@ -535,83 +462,86 @@ Here you delve into the MOOSE architecture. This chapter is for you if you
 want to implement a new kind of messaging, or develop a new way of accessing
 field information. 
 
-//////////////////////////////////////////////////////////////////////////////
-2.2 Compiling.
-Under Linux/Unix, the default compilation should Just Work. Type 
-	make moose
+2.2. Compiling
+There are a couple of compiler flags and #defines to set for various 
+environments. I'll put them in the Makefile eventually but right now they
+are in basecode/header.h.
+
+2.2.1. Linux/Unix
+The default compilation should Just Work. Type 
+<PRE>
+make moose
+</PRE>
 
 from the command line in the main moose directory. The compiler will visit
 each subdirectory and do its stuff.
 
 To clean out all code, type
-	make clean
+<PRE>
+make clean
+</PRE>
 
 To make the preprocessor, type
-	make mpp
+<PRE>
+make mpp
+</PRE>
 
-Compiling under Windows:
+2.2.1.1. Compiler flags
+The default Makefile is set up for Linux and uses -O3 -Wall options.
+-O3 means a high level of optimization, including loop unrolling and
+function inlining. May as well be fast!
+-Wall means complain a lot if there are problems. There should be
+no complaints at all.
+
+2.2.1.2. Compilers tested
+32-bit: gcc (GCC) 3.2.2 20030222 (Red Hat Linux 3.2.2-5)
+64-bit: gcc 4.
+
+2.2.2. Compiling under Windows
 This is much nastier. We are trying to set up NMAKE to do so from the 
 command line in essentially the same way that MOOSE compiles under Linux.
 So far it has been done laboriously by making a VisualC++ .net project.
 
-Compiler flags.
-	The default Makefile is set up for Linux and uses -O3 -Wall options.
-	-O3 means a high level of optimization, including loop unrolling and
-	function inlining. May as well be fast!
-	-Wall means complain a lot if there are problems. There should be
-	no complaints at all.
-
-Compilers tested.
-	32-bit: gcc (GCC) 3.2.2 20030222 (Red Hat Linux 3.2.2-5)
-	64-bit: gcc 4.
-	Windoze: Not much luck yet.
-
-There are a couple of compiler flags and #defines to set for various 
-environments. I'll put them in the Makefile eventually but right now they
-are in basecode/header.h.
-
-//////////////////////////////////////////////////////////////////////////////
-2.3 Elements, i.e., MOOSE objects
+2.3. Elements, i.e., MOOSE objects
 Files: 
-	basecode/Element.h
-	basecode/Neutral.h
+basecode/Element.h
+basecode/Neutral.h
 
 These are always included from header.h.
 You should always manipulate objects through the pointer Element*
 All elements are subclassed from Element and it provides the API.
 
-2.3.1 Common commands:
-	- const string& Element::name() const
-		Provides the name of the object
-	- const string& Element::path() const
-		Provides the full path of the object
-	- Element* Element::parent() const
-		Provides the full parent element of the object
-	- Element* Element::relativeFind( const string& path )
-		Finds a descendant object specified by the path
-	- static int startFind( const string& path, vector< Element* >& ret )
-		Fills a vector of Elements by searching the wildcard path.
-	- static Element* Element::root()
-		Returns the root element.
-	- static Element* Element::classes()
-		Returns the element holding the class handler elements.
-	- Element* deepCopy( Element* parent ) const
-		Copies an element tree including messages.
-	- Field field( const string& name )
-		Returns the Field identifying both element and the named
-		Finfo.
-	- const Cinfo* cinfo() const
-		Returns the Class information pointer.
-	- void listFields( vector< Finfo* >& )
-		Lists all fields of this element.
+2.3.1. Common Commands
+- const string& Element::name() const
+// Provides the name of the object
+- const string& Element::path() const
+// Provides the full path of the object
+- Element* Element::parent() const
+// Provides the full parent element of the object
+- Element* Element::relativeFind( const string& path )
+// Finds a descendant object specified by the path
+- static int startFind( const string& path, vector< Element* >& ret )
+// Fills a vector of Elements by searching the wildcard path.
+- static Element* Element::root()
+// Returns the root element.
+- static Element* Element::classes()
+// Returns the element holding the class handler elements.
+- Element* deepCopy( Element* parent ) const
+// Copies an element tree including messages.
+- Field field( const string& name )
+// Returns the Field identifying both element and the named
+Finfo.
+- const Cinfo* cinfo() const
+// Returns the Class information pointer.
+- void listFields( vector< Finfo* >& )
+// Lists all fields of this element.
 
 
 When Elements are deleted, all children are deleted and so are all messages
-	impinging on the element and children.
+impinging on the element and children.
 
-//////////////////////////////////////////////////////////////////////////////
-2.4 Fields
-	Fields in MOOSE are managed by structures called Finfo, defined in
+2.4. Fields
+Fields in MOOSE are managed by structures called Finfo, defined in
 Finfo.h. Finfos are static data in the class definition, so they do not occupy
 space in each Element.
 There is a special composite class called simply 'Field', which
@@ -623,42 +553,42 @@ static data, and the composite handler class, respectively.
 Finfo is an abstract base class for all field information. Despite the many
 variants on Finfo, they share a large number of common functions. 
 
-2.4.1 Variants of Finfo
+2.4.1. Variants of Finfo
 There are three main kinds of Finfo:
 - ValueFinfos: Subclassed from ValueFinfoBase< T >. These handle
-	set and get for regular value fields of objects.
+set and get for regular value fields of objects.
 - SrcFinfos: Message sources. These call functions in remote objects.
 - DestFinfos: Message destinations. These provide targets for SrcFinfos.
 
 In addition, there are supplementary Finfos:
 - RelayFinfo: These are created on the fly to handle messaging and calls
-	to ValueFinfos, as well as to permit various unusual permutations
-	on messaging such as a SrcFinfo being the target of a message.
+to ValueFinfos, as well as to permit various unusual permutations
+on messaging such as a SrcFinfo being the target of a message.
 - SharedFinfo: These are used to group multiple Src and Dest Finfos together
-	when they share a common target(s). This saves on space because 
-	the target information is stored only once. It also simplifies
-	message creation.
+when they share a common target(s). This saves on space because 
+the target information is stored only once. It also simplifies
+message creation.
 - ReturnFinfo: This is a variant on SrcFinfo that operates when you want
-	an immediate response to the sender of an incoming message. It 
-	operates in tandem with the SharedFinfo.
+an immediate response to the sender of an incoming message. It 
+operates in tandem with the SharedFinfo.
 - ObjFinfo: This is a Finfo class which permits a previously defined MOOSE
-	class A to be encapsulated as a field within another MOOSE class, B.
-	The ObjFinfo refers only to the data part (the non-wrapper part) of the
-	class A. In other words, it works for field access but not messages
-	that were defined in A. It works by using a special version of the
-	'match' function that scans the field list of A. The match function
-	returns a RelayFinfo1 with a lookup function and an index set using
-	the Finfo::setObjLookup virtual function.
-	The lookup function takes the data part of A within the B object, and
-	returns an Element* pointer to where the wrapper of A would have
-	been had A been truly defined. Using this pointer the usual field
-	assignment and other functions proceed happily.
-	There is a slight gotcha here: As soon as you encapsulate a class
-	in this manner, you will need to ensure that its assignment and
-	inequality operators are defined. See section 2.4.2 'Field typing'
-	below.
+class A to be encapsulated as a field within another MOOSE class, B.
+The ObjFinfo refers only to the data part (the non-wrapper part) of the
+class A. In other words, it works for field access but not messages
+that were defined in A. It works by using a special version of the
+'match' function that scans the field list of A. The match function
+returns a RelayFinfo1 with a lookup function and an index set using
+the Finfo::setObjLookup virtual function.
+The lookup function takes the data part of A within the B object, and
+returns an Element* pointer to where the wrapper of A would have
+been had A been truly defined. Using this pointer the usual field
+assignment and other functions proceed happily.
+There is a slight gotcha here: As soon as you encapsulate a class
+in this manner, you will need to ensure that its assignment and
+inequality operators are defined. See section 2.4.2 'Field typing'
+below.
 
-2.4.2	Field typing.
+2.4.2. Field typing
 Fields in MOOSE are strongly typed. Operations and messages between
 incompatible types are not permitted. These are enforced through C++
 Real Time Type Information, which is regarded as a Bad Thing as
@@ -681,63 +611,63 @@ value fields. It requires that all type T have the equality operator as
 well as the less than '<' operator. In return it means that a wide
 range of wildcard searches are possible where values are tested.
 
-2.4.3	Common commands for Finfo. 
+2.4.3. Common commands for Finfo
 
 const string& name() const
-	Returns the name of the Finfo.
+Returns the name of the Finfo.
 
 virtual Field match( const string& s );
-	Checks if this Finfo corresponds to the string. In some cases (e.g.,
-	ArrayFinfos) the match function allocates a new Finfo with specific
-	information such as index value gleaned from the string.
+Checks if this Finfo corresponds to the string. In some cases (e.g.,
+ArrayFinfos) the match function allocates a new Finfo with specific
+information such as index value gleaned from the string.
 
 virtual RecvFunc recvFunc( ) const
-	Finfos manage a 'recieve function' for their fields. This recvFunc
-	is called when the field receives a message, or when the function
-	is called from the script language, or when an assignment is done.
-	For a ValueFinfo the recvFunc would hold the 'set' function.
-	For a DestFinfo the recvFunc would hold the message execution function.
+Finfos manage a 'recieve function' for their fields. This recvFunc
+is called when the field receives a message, or when the function
+is called from the script language, or when an assignment is done.
+For a ValueFinfo the recvFunc would hold the 'set' function.
+For a DestFinfo the recvFunc would hold the message execution function.
 
-	This function is what is returned by recvFunc.
+This function is what is returned by recvFunc.
 
 virtual RecvFunc targetFunc( Element* e, unsigned long msgno )
-	Source messages store the RecvFuncs of their targets. This
-	command returns the RecvFunc of the selected message number.
+Source messages store the RecvFuncs of their targets. This
+command returns the RecvFunc of the selected message number.
 
 virtual void src( vector< Field >&, Element* e );
-	Returns a list of Fields that are targets of messages
-	emanating from this Finfo.
+Returns a list of Fields that are targets of messages
+emanating from this Finfo.
 
 virtual void dest( vector< Field >&, Element* e );
-	Returns a list of Fields that are sources of messages
-	received by this Finfo.
+Returns a list of Fields that are sources of messages
+received by this Finfo.
 
 virtual bool add( Element* e, Field& destfield, bool useSharedConn = 0 )
-	Adds a message from this Finfo to the target field destfield.
-	The flag tells it if the function is called as part of a SharedFinfo.
+Adds a message from this Finfo to the target field destfield.
+The flag tells it if the function is called as part of a SharedFinfo.
 
 virtual Finfo* respondToAdd( Element* e, const Finfo* sender )
-	Called on the destination Finfo when a message source asks to add
-	a message.  Returns a Finfo to use to build the message.
-	Sometimes is self, but often is a Relay.
-	Does type checking to ensure message compatibility
-	Returns 0 if it fails.
+Called on the destination Finfo when a message source asks to add
+a message.  Returns a Finfo to use to build the message.
+Sometimes is self, but often is a Relay.
+Does type checking to ensure message compatibility
+Returns 0 if it fails.
 
 virtual bool drop( Element* e, Field& srcfield );
-	Removes a message.
-	Usually called from the dest with the src as argument,
-	because synapses (destinations) have to override this function.
+Removes a message.
+Usually called from the dest with the src as argument,
+because synapses (destinations) have to override this function.
 
 virtual bool strGet( Element* e, string& val );
-	Does conversion of field value to a string
+Does conversion of field value to a string
 
 virtual bool strSet( Element* e, const string& val );
-	Does assignment of field value from a string.
-	The string can also be parsed into argument(s) for
-	a Finfo that handles functions (such as DestFinfo).
+Does assignment of field value from a string.
+The string can also be parsed into argument(s) for
+a Finfo that handles functions (such as DestFinfo).
 
 
-2.4.4 Field commands
+2.4.4. Field Commands
 Fields are essentially container objects. As they fully specify both the
 Element and the Finfo, they are the primary interface for development. 
 Finfo commands are frequently accessed from the field using the
@@ -757,8 +687,8 @@ bool drop( Field& other );
 
 bool set( const string& value );
 	Assigns a value to this field, doing type conversions if
-	needed. If the Finfo is a DestFinfo, it will try to 
-	call its recvFunc with the converted value as arguments.
+needed. If the Finfo is a DestFinfo, it will try to 
+call its recvFunc with the converted value as arguments.
 
 bool get( string& value );
 	Extracts a value to this field, doing type conversions if needed
@@ -767,112 +697,112 @@ bool valueComparison( const string& op, const string& value );
 	applies operation op to compare field value with value.
 
 
-//////////////////////////////////////////////////////////////////////////////
-2.5 Messages.
+2.5. Messages
 There are seven kinds of messages:
-	Regular
-	Internal
-	Relay
-	Synaptic
-	Shared
-	Return
-	Solver
+Regular
+Internal
+Relay
+Synaptic
+Shared
+Return
+Solver
 Each is accessed through the same API, though they do very different things.
 
-2.5.1 Regular messages are from a SrcFinfo to a DestFinfo. The Src sends info
-	to the Dest by calling a RecvFunc with the info as arguments. The
-	RecvFunc is a function provided by the Dest and operating on the 
-	destination element.
+2.5.1. Regular messages
+Regular messages are from a SrcFinfo to a DestFinfo. The Src sends info
+to the Dest by calling a RecvFunc with the info as arguments. The
+RecvFunc is a function provided by the Dest and operating on the 
+destination element.
 
-	The Src provides a 'send( T1, T2...)' function to pass a given
-	set of arguments to all targets. The actual function executed for
-	these arguments may differ between targets: it is obtain from the
-	RecvFunc for each target. The user does not worry about this, she
-	just calls the send function.
+The Src provides a 'send( T1, T2...)' function to pass a given
+set of arguments to all targets. The actual function executed for
+these arguments may differ between targets: it is obtain from the
+RecvFunc for each target. The user does not worry about this, she
+just calls the send function.
 
-	Each message uses a Conn at either end of the message, for maintaining
-	the link.  In addition, at message creation time the RecvFunc is
-	passed to the Src.
+Each message uses a Conn at either end of the message, for maintaining
+the link.  In addition, at message creation time the RecvFunc is
+passed to the Src.
 
-	The SrcFinfo manages a MsgSrc class, which in turn manages the
-	Conn and provides the 'send' function. The Dest returns a
-	RecvFunc to the MsgSrc.
+The SrcFinfo manages a MsgSrc class, which in turn manages the
+Conn and provides the 'send' function. The Dest returns a
+RecvFunc to the MsgSrc.
 
-2.5.2 Internal messages
-	Information flows within an object from Dest messages to Src
-	messages. This happens because many destination functions in turn
-	trigger send function calls, going out on Srcs. To traverse this
-	information flow, virtual 'messages' connect the Dest to all the
-	Srcs that it triggers. These are purely informational and allocate no
-	storage on the objects. They are set up by the Src and DestFinfo
-	constructors as a simple list of Finfo names. Leaving them out does
-	not hurt the basic functionality, but will mess up any programs that
-	need to traverse message trees.
+2.5.2. Internal messages
+Information flows within an object from Dest messages to Src
+messages. This happens because many destination functions in turn
+trigger send function calls, going out on Srcs. To traverse this
+information flow, virtual 'messages' connect the Dest to all the
+Srcs that it triggers. These are purely informational and allocate no
+storage on the objects. They are set up by the Src and DestFinfo
+constructors as a simple list of Finfo names. Leaving them out does
+not hurt the basic functionality, but will mess up any programs that
+need to traverse message trees.
 
-2.5.3 Relay messages
-	Relays are for irregular messages. If a message needs to go
-	to a target outside the regular Src/Dest route, a Relay can be
-	set up. Not all irregular cases can be set up like this, but most
-	can. Some examples:
-	Messages to fields, to set them.
-	Messages to and from fields, to request a value
-	Messages from a Dest to a Src. Suppose you wanted the receipt of
-		a message to trigger some other event.
-	Extra messages to or from a SingleSrc or Dest target
+2.5.3. Relay messages
+Relays are for irregular messages. If a message needs to go
+to a target outside the regular Src/Dest route, a Relay can be
+set up. Not all irregular cases can be set up like this, but most
+can. Some examples:
+- Messages to fields, to set them.
+- Messages to and from fields, to request a value
+- Messages from a Dest to a Src. Suppose you wanted the receipt of
+a message to trigger some other event.
+- Extra messages to or from a SingleSrc or Dest target
 
-2.5.4 Synaptic messages
-	Synaptic messages have to manage additional information for each
-	message target. For example, each synaptic message might hold the
-	synaptic weight and delay. This is done by having a SynapseConn< T >
-	where T is a class embedded in the SynapseConn, holding the extra
-	information. The SynapseConn itself handles a single incoming message.
-	When the message arrives, the recvfunc typecasts the Conn into the
-	SynapseConn and then performs whatever calculations are needed, using
-	T.
-	Multiple SynapseConns are managed as a vector, by the SynapseFinfo
-	class. Individual synapses can be looked up and fields manipulated.
+2.5.4. Synaptic messages
+Synaptic messages have to manage additional information for each
+message target. For example, each synaptic message might hold the
+synaptic weight and delay. This is done by having a SynapseConn< T >
+where T is a class embedded in the SynapseConn, holding the extra
+information. The SynapseConn itself handles a single incoming message.
+When the message arrives, the recvfunc typecasts the Conn into the
+SynapseConn and then performs whatever calculations are needed, using
+T.
+Multiple SynapseConns are managed as a vector, by the SynapseFinfo
+class. Individual synapses can be looked up and fields manipulated.
 
-2.5.5 Shared messages
-	In many if not most cases, it is necessary to send multiple
-	messages between two elements. For example, molecules connect to
-	reactions using a source message that passes n, the molecule count,
-	and a dest message where the reaction comes back with the change
-	in count. Clock ticks need to call both Process and Reinit on their
-	targets. Shared messages are a way to streamline this. There are two
-	advantages: 
-		- They share the same Conn, saving on memory. 
-		- A single 'add' call sets up all the messages.
-	As far as the individual message Src and Dest are concerned, they
-	are just the same as before. If someone _really_ wants to send a 
-	single one of the messages, relays are a possibility though this
-	is not cleanly done as yet.
+2.5.5. Shared messages
+In many if not most cases, it is necessary to send multiple
+messages between two elements. For example, molecules connect to
+reactions using a source message that passes n, the molecule count,
+and a dest message where the reaction comes back with the change
+in count. Clock ticks need to call both Process and Reinit on their
+targets. Shared messages are a way to streamline this. There are two
+advantages: 
+- They share the same Conn, saving on memory. 
+- A single 'add' call sets up all the messages.
+As far as the individual message Src and Dest are concerned, they
+are just the same as before. If someone _really_ wants to send a 
+single one of the messages, relays are a possibility though this
+is not cleanly done as yet.
 
-2.5.6 Return messages
-	Sometimes we need to have a message target that performs its
-	operations and immediately sends a function call back to the
-	originating message source. This is easy using shared messages,
-	provided there is a single source and destination.
-	However, what if this target had a whole lot of incoming messages,
-	each of which asks it to do the operation independently? For example,
-	the HHGate for a K channel may be referred to by hundreds of 
-	instances of the K channel. Each of these wants the gate to perform
-	its calculation and get back with the updated state variables. The
-	usual 'send' function does not work here: The 'send' function 
-	goes through the entire list of targets, not at all what we want.
-	So we have the 'Return messages.' These use a vector of ReturnConns,
-	each of which holds the RecvFunc for the return call, and the return
-	Conn pointer. Each incoming message connects to a distinct ReturnConn
-	in the array. When a call comes to such a message, it executes
-	its destination function, then immediately calls the return RecvFunc
-	with the return Conn pointer to send required info back.
-	These messages are managed as a vector by the ReturnFinfo class.
+2.5.6. Return messages
+Sometimes we need to have a message target that performs its
+operations and immediately sends a function call back to the
+originating message source. This is easy using shared messages,
+provided there is a single source and destination.
+However, what if this target had a whole lot of incoming messages,
+each of which asks it to do the operation independently? For example,
+the HHGate for a K channel may be referred to by hundreds of 
+instances of the K channel. Each of these wants the gate to perform
+its calculation and get back with the updated state variables. The
+usual 'send' function does not work here: The 'send' function 
+goes through the entire list of targets, not at all what we want.
+So we have the 'Return messages.' These use a vector of ReturnConns,
+each of which holds the RecvFunc for the return call, and the return
+Conn pointer. Each incoming message connects to a distinct ReturnConn
+in the array. When a call comes to such a message, it executes
+its destination function, then immediately calls the return RecvFunc
+with the return Conn pointer to send required info back.
+These messages are managed as a vector by the ReturnFinfo class.
 
-	Classes involved: ReturnFinfo, ReturnConn, MultiReturnConn.
-	The ReturnFinfo is used as the return msg source. The corresponding
-	msg dests for a shared message are just regular Destfinfos.
-	The ReturnConn is for each individual connection.
-	The MultiReturnConn holds a vector of ReturnConns and handles
-	their creation and interfacing with the ReturnFinfo.
+Classes involved: ReturnFinfo, ReturnConn, MultiReturnConn.
+The ReturnFinfo is used as the return msg source. The corresponding
+msg dests for a shared message are just regular Destfinfos.
+The ReturnConn is for each individual connection.
+The MultiReturnConn holds a vector of ReturnConns and handles
+their creation and interfacing with the ReturnFinfo.
 
 2.5.7 Solver messages
 	These connect a solver to an object; they mediate the takeover of
@@ -883,40 +813,38 @@ Each is accessed through the same API, though they do very different things.
 	reply to the originating object. Several of these attributes are
 	also present in synapse and return messages.
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 3. Writing new classes from scratch
 
-3.1 Designing the classes.
+3.1. Designing the classes
 MOOSE classes are designed both in terms of what calculations they do,
 and also in terms of how they will communicate with other classes. It usually
 takes a couple of iterations to get the classes nicely aligned with each
 other and with their internal calculations. Some considerations:
 
 - Never use pointers to other elements. This ruins the modularity of
-	MOOSE, makes messages non-portable to multiprocessors, introduces
-	dependencies between classes, and other horrible things. Messages
-	are designed specifically to handle all cases of inter-object
-	communication, and if there is some case which is not covered we
-	want to know about it.
+MOOSE, makes messages non-portable to multiprocessors, introduces
+dependencies between classes, and other horrible things. Messages
+are designed specifically to handle all cases of inter-object
+communication, and if there is some case which is not covered we
+want to know about it.
 - Use Messages (src and dest explained below) as function
-	interfaces when speed is a primary concern, or when you know
-	that a given message will almost always be used. 
-	Multi Messages have a starting run-time overhead of about 6 words,
-	and then less than 2 words per message.
+interfaces when speed is a primary concern, or when you know
+that a given message will almost always be used. 
+Multi Messages have a starting run-time overhead of about 6 words,
+and then less than 2 words per message.
 - Use SingleMessages whenever there is only one input/output likely. They
-	are smaller and faster than the Multi messages.
-	Single Messages have a fixed run-time overhead of 3 words.
+are smaller and faster than the Multi messages.
+Single Messages have a fixed run-time overhead of 3 words.
 - Use Shared Messages whenever you have a set of messages that consistently
-	pass between two objects. This saves significantly on memory use.
-	It also makes the model building process simpler and less prone to
-	error.
+pass between two objects. This saves significantly on memory use.
+It also makes the model building process simpler and less prone to
+error.
 - Use Value Fields when you need access to a value or function, but only
-	occasionally or only through script assignments. You can always
-	connect messages to Fields using a relay, so you do not lose
-	flexibility, but relays are relatively slow and memory expensive.
-	There is no run-time overhead for Value Fields, but don't
-	unnecessarily expose private object state information.
+occasionally or only through script assignments. You can always
+connect messages to Fields using a relay, so you do not lose
+flexibility, but relays are relatively slow and memory expensive.
+There is no run-time overhead for Value Fields, but don't
+unnecessarily expose private object state information.
 
 We'll assume we have a decent first design. Now on to the implementation.
 
@@ -927,11 +855,10 @@ what makes the code look like exceptionally ugly C++.
 
 In order to make things a little more manageable, most MOOSE classes are set
 up as 4 files: 
-
-MyClass.h
-MyClass.cpp
-MyClassWrapper.h
-MyClassWrapper.cpp
+	MyClass.h
+	MyClass.cpp
+	MyClassWrapper.h
+	MyClassWrapper.cpp
 
 The first two are the core object class, and should handle the calculations
 independently of communications (if possible). They do not know about the
@@ -962,9 +889,9 @@ mpp is a single file with this header-like syntax:
 MyClass.mh
 
 The output of mpp consists of 3 files:
-MyClass.h
-MyClassWrapper.h
-MyClassWrapper.cpp
+	MyClass.h
+	MyClassWrapper.h
+	MyClassWrapper.cpp
 
 Note that MyClass.cpp is conspicuously absent. The idea is that MyClass
 handles the internals of the calculations, and so the preprocessor does
@@ -981,14 +908,15 @@ clean .mh file may not be updated to keep pace with changes in the actual
 class files.
 
 
-3.3 Overview of using mpp
+3.3. Overview of using mpp
 The procedure for using mpp is as follows:
-1. Write out your header file: MyClass.h.
-2. Plan out the following six additional sections of the header
+
+#. Write out your header file: MyClass.h.
+#. Plan out the additional sections of the header
 	- public: This is copied over unchanged, and is the public interface
-		of your .h class.
+of your .h class.
 	- private: This is copied over unchanged, and holds the private
-		fields of your .h class.
+fields of your .h class.
 	- author: This is you, and optionally date and place.
 	- description: This is what the class does.
 	- field: This is a list of the fields that you want visible in MOOSE.
@@ -997,192 +925,192 @@ The procedure for using mpp is as follows:
 	- dest: These are the message destinations
 	- synapse: These are synapses.
 	- returns: (Still to be implemented in the preprocessor). 
-		These are return messages,
-		used on an object which receives many independent requsts
-		for a function.
-3. Fill in these sections using the syntax below. You will find that this
-	is pretty concise and compact, especially compared to the code it
-	generates.
-4. Rename your header file MyClass.mh. Make sure you don't have any existing
-	MyClass.h or MyClassWrapper files lying around. The preprocessor will
-	refuse to overwrite these files. You can force it to write out
-	files using the -f option, in which case it will add the suffix
-	.old 
-	to the existing files and create a new set.
-5. Run: mpp MyClass
-6. Examine the generated code. Almost everything should be done for you, but
-	there will be cases where you will want to fine-tune stuff. If possible
-	make changes in the .mh file rather than in the generated files, so
-	as to keep the code fixing process as neat as possible.
-7. Update your Makefile and compile your new class.
-8. Test it.
+These are return messages,
+used on an object which receives many independent requsts
+for a function.
+#. Fill in these sections using the syntax below. You will find that this
+is pretty concise and compact, especially compared to the code it
+generates.
+#. Rename your header file MyClass.mh. Make sure you don't have any existing
+MyClass.h or MyClassWrapper files lying around. The preprocessor will
+refuse to overwrite these files. You can force it to write out
+files using the -f option, in which case it will add the suffix
+.old 
+to the existing files and create a new set.
+#. Run: mpp MyClass
+#. Examine the generated code. Almost everything should be done for you, but
+there will be cases where you will want to fine-tune stuff. If possible
+make changes in the .mh file rather than in the generated files, so
+as to keep the code fixing process as neat as possible.
+#. Update your Makefile and compile your new class.
+#. Test it.
 
-3.4 Details of mpp file
-The syntax of mpp is like this:
-
-class MyClass: public MyBaseClass
-{
-	public:
-		// Stuff here will be copied over to .h unchanged.
-	author: 
-		Uma the Programmer, today's date, Uma's Institution.
-	description:
-		// Note that this comment appears in the code, but does not
-		// become part of the description string.
-		This is a test class. If it were a real class it would 
-		have been much the same.
-	field:
-		double Vm;
-		double Cm = 1e-6;	// initial value
-		double Rm;
-		const double pi; // Here we have a constant value
-		readonly double Ra; // Here we have value that the user can
-			// only read, but it may be changed within the object.
-		double inject; // all boring stuff
-
-		// Here we define an array. Each entry can be accessed by
-		// indexing: e.g., coords[0], coords[500].
-		// Indexes are protected, the system will not accept a bad
-		// one.
-		// MOOSE arrays are all expandable: they really are vectors.
-		// By default the system also
-		// generates a 'size' field which is accessed as coords.size
-		// The entire vector can be accessed if one uses only the
-		// name of the field, coords.
-		// In this manner full vector can be assigned to another one
-		// (provided the types match).
-		double coords[];
-
-		// Here is another array, just that here we define an initial
-		// size
-		double values[ 10 ];
-
-		// Here we take a complete moose
-		// class as a field of this class. This engulfed class will
-		// not have any messaging, just the data and functions.
-		// Because MOOSE knows about the other class, we do not need
-		// to fill in details.
-		mooseclass MyOtherClass complexField;
-
-		// This silly little class is defined locally and
-		// has two fields which do not do much. In the constructed
-		// header one would presumably add functions and private
-		// fields to the class. The purpose of putting this reduced
-		// class definition here is to tell MOOSE how to access these
-		// fields within the class.
-		class pair { 
-			double foo;
-			double bar;
-		} anotherComplexField;
-
-		// This is a more typical complex field. It actually
-		// reimplements a fairly common MOOSE class, the lookup table
-		// with a specified range. In the constructed header one
-		// would elaborate on the table class.
-		class table {
-			double min;
-			double max;
-			double values[];
-		} myTableField;
-	
-	src:
-		// Note that src and dest can have the same name, and it
-		// may even be appropriate for communicating message pairs. All
-		// src fields will have the suffix Out appended.
-		multi axial( double );
-		single raxial( double, double );
-		multi channel( double, ProcArg& a );
-
-		// Here we have a src that shares a connection with another one
-		multi diffusion( double, double ) shared src axial;
-	
-	dest:
-		// All dest fields will have the suffix In appended to the name.
-
-		// Here we have a dest that shares a connection with the 
-		// raxial message of the src. The designer knows that these
-		// messages always occur in pairs, so this little optimisation
-		// is possible. It doesn't affect run-time speed, but
-		// saves on memory.
-		multi axial( double V ) shared src raxial {
-			I += (V - Vm_) / Ra_;
-		}
-
-		// This one does not share a connection, though it would have
-		// been possible in this specific case.
-		single raxial( double V, double Ra ) {
-			I += ( V - Vm ) / Ra;
-		}
-
-		// Here we have another shared connection. It is legal
-		// only if the other object also defines its end as a
-		// shared connection, otherwise confusion will ensue.
-		multi channel( double Gk, double Ek ) shared src channel {
-			I += (V - Ek) * Gk;
-		}
-
-		// Note that here we explicitly indicate messages going out.
-		// If the user has a more complicated structure for their
-		// function, they can rearrange the outgoing calls.
-		single process( ProcArg& a ) {
-			channel( Vm_, a );
-			axial( Vm_ );
-			raxial( Vm_, Rm_ );
-			Vm_ += IntegFunc(I, Vm_, Rm, Cm);
-			// something like (I.Rm - Vm)/(1 + C.Rm);
-		}
-
-		// Here we have a shared connection but this time with another
-		// destination. The logic is that every time a process
-		// message is made, the reset message should also be done.
-		// Note that the arguments do not need to be the same.
-		single reset() {
-			Vm_ = Erest_;
-			I_ = 0;
-		}
-	shared:
-		// Here we indicate sets that share a connection.
-		// The lists can be as long as needed.
-		raxialIn, axialOut;
-		channelIn, channelOut;
-		processIn, resetIn;
-
-	synapse:
-		// These are also message destinations, but each connection
-		// holds additional information in the form of a class. As
-		// new connections are made this array is expanded. The
-		// array entries are visible as ordinary array fields.
-		// If there is no additional information then a regular
-		// message destination would do the job.
-		// This additional information could be as simple as an
-		// integer, or a complete class with all sorts of fields.
-		// The delay is the argument passed by the incoming message.
-		// The additional information class in this case is an int.
-		single inhib( double delay ) int;
-
-		// Here the additional info is a class called SynInfo.
-		multi excite() SynInfo;
-
-	private:
-		// Stuff here will be copied over unchanged to .h.
-};
-
+3.4. Details of mpp file
 All comments will be copied over verbatim.
 Any lines outside the field, src and dest contexts will be copied over
 verbatim. So you can define your entire class in a header using mpp.
+The syntax of mpp is like this:
+<PRE>
+class MyClass: public MyBaseClass
+{
+public:
+// Stuff here will be copied over to .h unchanged.
+author: 
+Uma the Programmer, today's date, Uma's Institution.
+description:
+// Note that this comment appears in the code, but does not
+// become part of the description string.
+This is a test class. If it were a real class it would 
+have been much the same.
+field:
+double Vm;
+double Cm = 1e-6;// initial value
+double Rm;
+const double pi; // Here we have a constant value
+readonly double Ra; // Here we have value that the user can
+// only read, but it may be changed within the object.
+double inject; // all boring stuff
 
-3.5 Cleaning up afterward
+// Here we define an array. Each entry can be accessed by
+// indexing: e.g., coords[0], coords[500].
+// Indexes are protected, the system will not accept a bad
+// one.
+// MOOSE arrays are all expandable: they really are vectors.
+// By default the system also
+// generates a 'size' field which is accessed as coords.size
+// The entire vector can be accessed if one uses only the
+// name of the field, coords.
+// In this manner full vector can be assigned to another one
+// (provided the types match).
+double coords[];
+
+// Here is another array, just that here we define an initial
+// size
+double values[ 10 ];
+
+// Here we take a complete moose
+// class as a field of this class. This engulfed class will
+// not have any messaging, just the data and functions.
+// Because MOOSE knows about the other class, we do not need
+// to fill in details.
+mooseclass MyOtherClass complexField;
+
+// This silly little class is defined locally and
+// has two fields which do not do much. In the constructed
+// header one would presumably add functions and private
+// fields to the class. The purpose of putting this reduced
+// class definition here is to tell MOOSE how to access these
+// fields within the class.
+class pair { 
+double foo;
+double bar;
+} anotherComplexField;
+
+// This is a more typical complex field. It actually
+// reimplements a fairly common MOOSE class, the lookup table
+// with a specified range. In the constructed header one
+// would elaborate on the table class.
+class table {
+double min;
+double max;
+double values[];
+} myTableField;
+
+src:
+// Note that src and dest can have the same name, and it
+// may even be appropriate for communicating message pairs. All
+// src fields will have the suffix Out appended.
+multi axial( double );
+single raxial( double, double );
+multi channel( double, ProcArg& a );
+
+// Here we have a src that shares a connection with another one
+multi diffusion( double, double ) shared src axial;
+
+dest:
+// All dest fields will have the suffix In appended to the name.
+
+// Here we have a dest that shares a connection with the 
+// raxial message of the src. The designer knows that these
+// messages always occur in pairs, so this little optimisation
+// is possible. It doesn't affect run-time speed, but
+// saves on memory.
+multi axial( double V ) shared src raxial {
+I += (V - Vm_) / Ra_;
+}
+
+// This one does not share a connection, though it would have
+// been possible in this specific case.
+single raxial( double V, double Ra ) {
+I += ( V - Vm ) / Ra;
+}
+
+// Here we have another shared connection. It is legal
+// only if the other object also defines its end as a
+// shared connection, otherwise confusion will ensue.
+multi channel( double Gk, double Ek ) shared src channel {
+I += (V - Ek) * Gk;
+}
+
+// Note that here we explicitly indicate messages going out.
+// If the user has a more complicated structure for their
+// function, they can rearrange the outgoing calls.
+single process( ProcArg& a ) {
+channel( Vm_, a );
+axial( Vm_ );
+raxial( Vm_, Rm_ );
+Vm_ += IntegFunc(I, Vm_, Rm, Cm);
+// something like (I.Rm - Vm)/(1 + C.Rm);
+}
+
+// Here we have a shared connection but this time with another
+// destination. The logic is that every time a process
+// message is made, the reset message should also be done.
+// Note that the arguments do not need to be the same.
+single reset() {
+Vm_ = Erest_;
+I_ = 0;
+}
+shared:
+// Here we indicate sets that share a connection.
+// The lists can be as long as needed.
+raxialIn, axialOut;
+channelIn, channelOut;
+processIn, resetIn;
+
+synapse:
+// These are also message destinations, but each connection
+// holds additional information in the form of a class. As
+// new connections are made this array is expanded. The
+// array entries are visible as ordinary array fields.
+// If there is no additional information then a regular
+// message destination would do the job.
+// This additional information could be as simple as an
+// integer, or a complete class with all sorts of fields.
+// The delay is the argument passed by the incoming message.
+// The additional information class in this case is an int.
+single inhib( double delay ) int;
+
+// Here the additional info is a class called SynInfo.
+multi excite() SynInfo;
+
+private:
+// Stuff here will be copied over unchanged to .h.
+};
+</PRE>
+
+3.5. Cleaning up afterward
 Mpp in principle should give you compilable code. For really simple classes
 this is true. More complex classes will require a MyClass.cpp in addition to
 the MyClassWrapper.cpp.
 In addition, there are the following things to look out for that mpp does
 not yet handle:
 - You will probably want to move things in and out of the inline definitions
-	in the headers. 
+in the headers. 
 - Mpp puts local class functions under the MyClassWrapper definition. It might
-	be better to move these to the MyClass definition in some cases.
+be better to move these to the MyClass definition in some cases.
 - Some of the comment formatting and spacing may not be to your taste.
 - mpp does not yet know how to do the static const definitions.
 - mpp often gets confused by the placement of the last comma in the argument
-	list for the class constructor.
+list for the class constructor.
 
