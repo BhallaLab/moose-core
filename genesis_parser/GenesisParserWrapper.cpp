@@ -62,6 +62,46 @@ const Cinfo GenesisParserWrapper::cinfo_(
 	&GenesisParserWrapper::create
 );
 
+Shell* genesisInitialize(int argc, const char** argv)
+{
+	Cinfo::initialize();
+
+	Element* shell = Cinfo::find("Shell")->
+		create( "sli_shell", Element::root() );
+	Element* sli = Cinfo::find("GenesisParser")->
+		create( "sli", shell );
+
+	sli->field( "shell" ).set( "/sli_shell" );
+	shell->field( "parser" ).set( "/sli_shell/sli" );
+	Field f = sli->field( "process" ) ;
+
+	Element* sched = Cinfo::find("Sched")->
+		create( "sched", Element::root() );
+	Cinfo::find("ClockJob")->create( "cj", sched );
+	
+
+	shell->field( "isInteractive" ).set( "1" );
+	if ( argc > 1 ) {
+		string line = "";
+		int len = strlen( argv[ 1 ] );
+		if ( len > 3 && strcmp( argv[ 1 ] + len - 2, ".g" ) == 0 )
+			line = "include";
+		if ( len > 4 && strcmp( argv[ 1 ] + len - 3, ".mu" ) == 0 )
+			line = "include";
+		// string line = "include";
+		for (int i = 1; i < argc; i++)
+			line = line + " " + argv[ i ];
+
+		sli->field( "parse" ).set( line );
+	}
+
+	// setField( sli->field( "process" ) );
+	f.set( "" );
+
+	// setField( f );
+        return dynamic_cast< ShellWrapper* >(shell);
+}
+
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper friend functions
 //////////////////////////////////////////////////////////////////
@@ -214,17 +254,17 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "tabchannel" ] = "HHChannel";
 	classnames[ "vdep_channel" ] = "HHChannel";
 	classnames[ "vdep_gate" ] = "HHGate";
-	classnames[ "xbutton" ] = "UIWidget";
-	classnames[ "xdialog" ] = "UIWidget";
-	classnames[ "xlabel" ] = "UIWidget";
-	classnames[ "xform" ] = "UIWidget";
-	classnames[ "xtoggle" ] = "UIWidget";
-	classnames[ "xshape" ] = "UIWidget";
-	classnames[ "xgraph" ] = "UIWidget";
-	classnames[ "x1dialog" ] = "UIWidget";
-	classnames[ "x1button" ] = "UIWidget";
-	classnames[ "x1shape" ] = "UIWidget";
-	classnames[ "xtext" ] = "UIWidget";
+	classnames[ "xbutton" ] = "Sli";
+	classnames[ "xdialog" ] = "Sli";
+	classnames[ "xlabel" ] = "Sli";
+	classnames[ "xform" ] = "Sli";
+	classnames[ "xtoggle" ] = "Sli";
+	classnames[ "xshape" ] = "Sli";
+	classnames[ "xgraph" ] = "Sli";
+	classnames[ "x1dialog" ] = "Sli";
+	classnames[ "x1button" ] = "Sli";
+	classnames[ "x1shape" ] = "Sli";
+	classnames[ "xtext" ] = "Sli";
 
 	return classnames;
 }
@@ -434,7 +474,7 @@ void do_create( int argc, const char** const argv, Shell* s )
 	map< string, string >::iterator i = 
 		sliClassNameConvert().find( argv[1] );
 	if ( i != sliClassNameConvert().end() ) {
-		if ( strcmp( i->second.c_str(), "UIWidget" ) == 0 ) {
+		if ( strcmp( i->second.c_str(), "Sli" ) == 0 ) {
 		}
 		else if ( argc > 3 ) {
 			cout << "usage:: " << argv[0] << " class name\n";

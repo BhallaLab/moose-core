@@ -10,6 +10,17 @@
 
 #ifndef _GENESIS_PARSER_WRAPPER_H
 #define _GENESIS_PARSER_WRAPPER_H
+
+#include <string>
+#include "Cinfo.h"
+#include "Conn.h"
+#include "Element.h"
+#include "GenesisParser.h"
+#include "MsgSrc.h"
+#include "ShellFwd.h"
+
+using std::string;
+
 // class myFlexLexer: public yyFlexLexer
 
 // ISO C++ requires that these be declared in the innermost enclosing scope.
@@ -118,6 +129,7 @@ class GenesisParserWrapper:
 			return &( static_cast< GenesisParserWrapper* >( e )->
 				shellInputConn_ );
 		}
+
 
 		/*
 		static SingleMsgSrc1< string >* getEcho( Element* e ) {

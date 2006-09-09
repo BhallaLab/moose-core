@@ -7,15 +7,12 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include <fstream>
+
 #include "header.h"
-#include "../builtins/String.h"
-#include "../builtins/Int.h"
+
+#ifdef DO_UNIT_TESTS
 #include "TestField.h"
 #include "TestMsg.h"
-// #include "../genesis_parser/GenesisParser.h"
-// #include "../genesis_parser/GenesisParserWrapper.h"
-#ifdef DO_UNIT_TESTS
 	extern void testBasecode();
 	extern void testScheduling();
 	extern void testTable();
@@ -42,7 +39,8 @@ int main(int argc, const char** argv)
 	testBasecode();
 	testScheduling();
 	testTable();
-#endif
+#endif	
+
 	shell->field( "isInteractive" ).set( "1" );
 	if ( argc > 1 ) {
 		string line = "";
