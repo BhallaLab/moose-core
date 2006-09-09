@@ -251,7 +251,7 @@ class NMsgSrc
 			rfuncs_.resize( 0 );
 		}
 		bool add( RecvFunc rf, Conn* target );
-		void resize( vector< unsigned long >& segments ) {
+		void resize( std::vector< unsigned long >& segments ) {
 				c_->resize( segments );
 		}
 

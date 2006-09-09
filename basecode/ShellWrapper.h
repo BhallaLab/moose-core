@@ -7,6 +7,7 @@
 #include "ConnFwd.h"
 #include "ElementFwd.h"
 #include "Neutral.h"
+#include "Shell.h"
 
 class ShellWrapper: 
 	public Shell, public Neutral

@@ -61,7 +61,7 @@ class Conn
 			= 0;
 
 		// Later need to make this required for all derived classes.
-		virtual void resize( vector< unsigned long >& segments ) {
+		virtual void resize( std::vector< unsigned long >& segments ) {
 				;
 		}
 		// Perhaps we will hold off on this.
@@ -292,7 +292,7 @@ class PlainMultiConn: public Conn
 		}
 
 	private:
-		vector< Conn* > target_;
+		std::vector< Conn* > target_;
 		Element* parent_;
 };
 
@@ -315,10 +315,10 @@ class BaseMultiConn: public Conn
 			return parent_;
 		}
 
-		virtual vector< Conn* >::const_iterator begin( unsigned long i ) const = 0;
+		virtual std::vector< Conn* >::const_iterator begin( unsigned long i ) const = 0;
 		virtual unsigned long index( unsigned long msgno ) = 0;
 
-		virtual vector< Conn* >::const_iterator end( unsigned long i ) const = 0;
+		virtual std::vector< Conn* >::const_iterator end( unsigned long i ) const = 0;
 
 		Conn* respondToConnect(Conn* target) {
 			if ( canConnect( target ) )
@@ -533,12 +533,12 @@ class SolveMultiConn: public BaseMultiConn
 		// This is ugly and should be avoided. Ideally a different
 		// kind of iteration should be done.
 		// For now just block it.
-		vector< Conn* >::const_iterator begin( unsigned long i ) const {
-			return static_cast< vector< Conn* >::const_iterator>( 0L );
+		std::vector< Conn* >::const_iterator begin( unsigned long i ) const {
+			return static_cast< std::vector< Conn* >::const_iterator>( 0L );
 		}
 
-		vector< Conn* >::const_iterator end( unsigned long i ) const {
-			return static_cast< vector< Conn* >::const_iterator>( 0L );
+		std::vector< Conn* >::const_iterator end( unsigned long i ) const {
+			return static_cast< std::vector< Conn* >::const_iterator>( 0L );
 		}
 
 		unsigned long find( const Conn* target ) const;
@@ -553,7 +553,7 @@ class SolveMultiConn: public BaseMultiConn
 
 		Conn* target( unsigned long index ) const;
 
-		void listTargets( vector< Conn* >& list ) const;
+		void listTargets( std::vector< Conn* >& list ) const;
 
 		// Returns the index of the segment corresponding to specified
 		// message number.
@@ -569,7 +569,7 @@ class SolveMultiConn: public BaseMultiConn
 		// Once this is done,
 		// no changes to size are allowed. Assumes that contents of
 		// vec_ are disposable and have been disconnected.
-		void resize( vector< unsigned long >& segments );
+		void resize( std::vector< unsigned long >& segments );
 
 		// Connects a vector of Conns, and fills in
 		// necessary allocation and size definition. Once this is done,
@@ -598,17 +598,17 @@ class SolveMultiConn: public BaseMultiConn
 		// are messed up, e.g., due to vector reallocation, then the
 		// originating Conns will be confused. So none of the operations
 		// except resize() is permitted to touch the size of vec_.
-		vector< SolverConn > vec_;
+		std::vector< SolverConn > vec_;
 
 		// segments_ stores indices of the end of each segment of the
 		// vec_. Each segment handles objects of the same type, having
 		// the same RecvFunc. In most cases there will be a single
 		// segment, so this should be simple enough.
-		vector< unsigned long > segments_;
+		std::vector< unsigned long > segments_;
 
 		// filled_ stores index of first free vec_ entry, for each slot.
 		// When the vec_ is fully connected, filled_ == segments_.
-		vector< unsigned long > filled_;
+		std::vector< unsigned long > filled_;
 };
 
 // Meant to be used in vectors, but not as pointers. See 
