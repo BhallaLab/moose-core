@@ -30,7 +30,7 @@ class KineticHubWrapper:
 			reinitBufSrc_( &bufSolveConn_ ),
 			sumTotSrc_( &sumTotSolveConn_ ),
 			processSumTotSrc_( &sumTotSolveConn_ ),
-			reinitSumTotSrc_( &reinitSumTotOutConn_ ),
+			reinitSumTotSrc_( &sumTotSolveConn_ ),
 			processReacSrc_( &reacSolveConn_ ),
 			reinitReacSrc_( &reacSolveConn_ ),
 			processEnzSrc_( &enzSolveConn_ ),
@@ -40,6 +40,8 @@ class KineticHubWrapper:
 			processRateSrc_( &rateSolveConn_ ),
 			reinitRateSrc_( &rateSolveConn_ ),
 			rateSrc_( &rateSolveConn_ ),
+			processTabSrc_( &tabSolveConn_ ),
+			reinitTabSrc_( &tabSolveConn_ ),
 			updateSrc_( &updateOutConn_ ),
 			molSolveConn_( this ),
 			bufSolveConn_( this ),
@@ -48,13 +50,11 @@ class KineticHubWrapper:
 			enzSolveConn_( this ),
 			mmEnzSolveConn_( this ),
 			tabSolveConn_( this ),
-			rateSolveConn_( this ),
+			rateSolveConn_( this )
 			// hubConn uses a templated lookup function,
-			reinitSumTotOutConn_( this ),
 			// updateOutConn uses a templated lookup function,
 			// processInConn uses a templated lookup function,
-			// reinitInConn uses a templated lookup function,
-			sumTotInConn_( this )
+			// reinitInConn uses a templated lookup function
 		{
 			;
 		}
@@ -131,6 +131,14 @@ class KineticHubWrapper:
 
 		static NMsgSrc* getRateSrc( Element* e ) {
 			return &( static_cast< KineticHubWrapper* >( e )->rateSrc_ );
+		}
+
+		static NMsgSrc* getProcessTabSrc( Element* e ) {
+			return &( static_cast< KineticHubWrapper* >( e )->processTabSrc_ );
+		}
+
+		static NMsgSrc* getReinitTabSrc( Element* e ) {
+			return &( static_cast< KineticHubWrapper* >( e )->reinitTabSrc_ );
 		}
 
 		static SingleMsgSrc* getUpdateSrc( Element* e ) {
@@ -292,9 +300,6 @@ class KineticHubWrapper:
 		static Conn* getHubConn( Element* e ) {
 			return &( static_cast< KineticHubWrapper* >( e )->hubConn_ );
 		}
-		static Conn* getReinitSumTotOutConn( Element* e ) {
-			return &( static_cast< KineticHubWrapper* >( e )->reinitSumTotOutConn_ );
-		}
 		static Conn* getUpdateOutConn( Element* e ) {
 			return &( static_cast< KineticHubWrapper* >( e )->updateOutConn_ );
 		}
@@ -303,9 +308,6 @@ class KineticHubWrapper:
 		}
 		static Conn* getReinitInConn( Element* e ) {
 			return &( static_cast< KineticHubWrapper* >( e )->reinitInConn_ );
-		}
-		static Conn* getSumTotInConn( Element* e ) {
-			return &( static_cast< KineticHubWrapper* >( e )->sumTotInConn_ );
 		}
 
 ///////////////////////////////////////////////////////
@@ -347,6 +349,8 @@ class KineticHubWrapper:
 		NMsgSrc1< ProcInfo > processRateSrc_;
 		NMsgSrc0 reinitRateSrc_;
 		NMsgSrc1< double > rateSrc_;
+		NMsgSrc1< ProcInfo > processTabSrc_;
+		NMsgSrc0 reinitTabSrc_;
 		SingleMsgSrc0 updateSrc_;
 		SolveMultiConn molSolveConn_;
 		SolveMultiConn bufSolveConn_;
@@ -357,11 +361,9 @@ class KineticHubWrapper:
 		SolveMultiConn tabSolveConn_;
 		SolveMultiConn rateSolveConn_;
 		UniConn< hubConnKineticHubLookup > hubConn_;
-		SolveMultiConn reinitSumTotOutConn_;
 		UniConn< updateOutConnKineticHubLookup > updateOutConn_;
 		UniConn< processInConnKineticHubLookup > processInConn_;
 		UniConn< reinitInConnKineticHubLookup > reinitInConn_;
-		SolveMultiConn sumTotInConn_;
 
 ///////////////////////////////////////////////////////
 // Synapse definition.                               //

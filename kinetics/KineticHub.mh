@@ -32,7 +32,7 @@ class KineticHub
 		// in.
 		solve bufSolve( processBufOut, reinitBufOut, bufOut, bufIn );
 		// yet another version for sumTot
-		solve sumTotSolve( processSumTotOut, reinitOut, sumTotOut, sumTotMolIn );
+		solve sumTotSolve( processSumTotOut, reinitSumTotOut, sumTotOut, sumTotIn );
 		// The reacs and enzymes just send info in. The shared message
 		// handles this plus the takeover of Process and reinit
 		solve reacSolve( processReacOut, reinitReacOut, reacIn );
@@ -73,6 +73,8 @@ class KineticHub
 		solve reinitRate();
 		solve rate( double n );	// # of molecules, could be several
 									// substrates for a given reac.
+		solve processTab( ProcInfo );
+		solve reinitTab();
 		single update( ); 	// Call the Stoich to update matrix.
 	dest:
 		// single solve( vector< double >* y, double t, double dt );

@@ -46,7 +46,7 @@ Finfo* KineticHubWrapper::fieldArray_[] =
 		"", 1 ),
 	new NSrc1Finfo< ProcInfo >(
 		"reinitSumTotOut", &KineticHubWrapper::getReinitSumTotSrc, 
-		"" ),
+		"", 1 ),
 	new NSrc1Finfo< ProcInfo >(
 		"processReacOut", &KineticHubWrapper::getProcessReacSrc, 
 		"", 1 ),
@@ -73,6 +73,12 @@ Finfo* KineticHubWrapper::fieldArray_[] =
 		"", 1 ),
 	new NSrc1Finfo< double >(
 		"rateOut", &KineticHubWrapper::getRateSrc, 
+		"", 1 ),
+	new NSrc1Finfo< ProcInfo >(
+		"processTabOut", &KineticHubWrapper::getProcessTabSrc, 
+		"", 1 ),
+	new NSrc0Finfo(
+		"reinitTabOut", &KineticHubWrapper::getReinitTabSrc, 
 		"", 1 ),
 	new SingleSrc0Finfo(
 		"updateOut", &KineticHubWrapper::getUpdateSrc, 
@@ -115,7 +121,7 @@ Finfo* KineticHubWrapper::fieldArray_[] =
 		&KineticHubWrapper::getBufSolveConn, "", 1 ),
 	new Dest3Finfo< double, double, int >(
 		"sumTotIn", &KineticHubWrapper::sumTotFunc,
-		&KineticHubWrapper::getSumTotInConn, "" ),
+		&KineticHubWrapper::getSumTotSolveConn, "", 1 ),
 	new Dest1Finfo< double >(
 		"rateIn", &KineticHubWrapper::rateFunc,
 		&KineticHubWrapper::getRateSolveConn, "", 1 ),
@@ -145,7 +151,7 @@ Finfo* KineticHubWrapper::fieldArray_[] =
 		"processBufOut, reinitBufOut, bufOut, bufIn" ),
 	new SharedFinfo(
 		"sumTotSolve", &KineticHubWrapper::getSumTotSolveConn,
-		"processSumTotOut, reinitOut, sumTotOut, sumTotMolIn" ),
+		"processSumTotOut, reinitSumTotOut, sumTotOut, sumTotIn" ),
 	new SharedFinfo(
 		"reacSolve", &KineticHubWrapper::getReacSolveConn,
 		"processReacOut, reinitReacOut, reacIn" ),
