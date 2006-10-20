@@ -1,0 +1,345 @@
+#include <stdio.h>
+#include <list>
+#include <map>
+#include <vector>
+using namespace std;
+#include "../basecode/header.h"
+#include "../basecode/Element.h"
+#include "../basecode/Ftype.h"
+#include "ChCompartment.h"
+
+class HSolve
+{
+	public:  
+		HSolve();
+		~HSolve();		
+	author:
+		
+	description:
+		This class implements the HinesSolver
+	field:
+	
+			
+	eval_field:
+	
+		string getPath() {
+			return path_;
+		}
+
+		void setPath( string value ) {
+			path_ = value;
+			configure();
+			//setDataStructure();
+		}
+
+		// set the integration time step
+//		void setDt(double value) {
+//			setTimeStep(value);
+//		}
+
+	shared:
+                single process( processIn, reinitIn );
+
+	src:	
+	dest:
+		single reinit() {
+                    // Traverse compartments to set initial conditions.
+		    //isDataStructureSet = false;
+		    //isTimeStepSet_ = false;
+                    //setDataStructure();
+                }
+		single process(ProcInfo info) {
+
+//			cout << "Setting Time Step = " << info->dt_ << endl;
+//			if(!isTimeStepSet){
+//				setTimeStep(info->dt_);			
+//				isTimeStepSet = true;
+//			}
+
+			proc(info->dt_);
+    			cout << dTime << "\t";
+    			for(int i = 0; i < compartmentCount; ++i)
+    			{
+        			cout << pdNewVoltage_list[i] << "\t";
+    			}
+    			cout << endl;
+		}
+			
+    private:
+	/* 
+	 * These cache values are used while returning Compartment voltage
+	 * i.e., Vm in function getVm. Instead of looking into complete map table
+	 * if pPrimaryCacheElement matches with element pointer then 
+	 * nPrimaryCacheValue will be used as index for compartment Voltage.
+	 */
+
+	int nPrimaryCacheValue;
+	Element* pPrimaryCacheElement;
+        
+	int compartmentCount;   // Total no of compartments.
+	double ddt;             //      Current time step for integration. 
+	double dTime;
+	
+	//    int nTotalNoOfChannel;
+        
+	//ChanSolve* pChanSolver;
+	ChCompartment* pCompartmentList;
+	ChCompartment* compartmentList;
+	SCompartment* pSCompartmentList;
+	SCompartment* SCompartmentList; // to keep info about all compartments
+	//    ChannelData* pChannelDataList;
+    
+	//      To keep Information about all compartments.     
+	int nRootCompartment;
+	//  Index of root compartment.
+	int nTotalNonZeroElmtInMatrix;	//      Used in conversion of 2D Matrix into Linear matrix.
+        
+	double* pdNewVoltage_list;	//      After solving Matrix equation new values are stored in this list.
+	double* pdOldVoltage_list;	//      Right side of Matrix equation is stored in this list.
+					//      if linear eq is AX= B, then values of B is stored in this list.
+	double** CoeffMatrix;	//      This 2D matrix is used temporarily during conversion of 
+				//      2D Matrix into linear Matrix.
+        
+	double* MatrixBackup;
+	//      Used for optimization. Except diagonal element all coefficients
+	//      remains same during each iteration so instead of calculating
+	//      same thing again in next iteration these values are stored in
+	//      this linear array.
+	double* SumGk;		//      To store sum of conductances.
+	double* RHS_Fixed;	//      Used for optimization. For details refer to Hines_Solver.pdf. 
+	double* RHS_Var_p1;	//      Used for optimization. For details refer to Hines_Solver.pdf.
+	double* LHS_Dia_p1;	//      Used for optimization. For details refer to Hines_Solver.pdf.
+	double* dtByCm;		//      Used for optimization. For details refer to Hines_Solver.pdf.
+	double *pdRaSum;
+	double* Matrix;		//      To Store Linear representation of 2D Matrix. It contains 
+				//      only nonzero values of 2D matrix.
+	int* TotElmInRow;	//      Required to convert 2D Matrix into Linear array.
+	int* StartingPos;	//      Required to convert 2D Matrix into Linear array.
+	int* DiagElmtPos;	//      Required to convert 2D Matrix into Linear array.
+                                
+	list<int> lstEliminationPriorityList;	//      Priority list as per hines numbering. Used for row elimination. 
+	map<Element*, int> mapElementIndex;	//      Map to keep one-one relation between Moose element and 
+						//      Hines_Solver's Compartments (index of the compartment).
+	Element** elementList; 
+	Element** tmpElementList;
+	// We store the mapping between moose element and compartments 
+	// in this way: pCompartmentList[i] maps to elementList[i]
+	// So we do not need the Element * pelm in ChCompartment
+	//Flags used to manage state of solver (dirty programming).
+	bool isMemoryAllocated;                          
+	bool isDataStructureSet; 
+	bool isTimeStepSet;
+	//=========Member Functions ================
+	void allocate(); // Allocates memory to the datastructures	
+
+	void assignPriority();	//      Assigns Hines numbering for row elimination.                            
+	int createSparseMatrix();
+	//      Creates Linear system of equation and stores it in linear 
+	//      Matrix representation. (Called only once)
+	void setSparseMatrix();	//      Setting up required elements of sparse matrix Before each iteration. 
+
+	int doForwardElimination(int Row1, int Row2);
+	//      Does forward elimination in Linear Matrix
+	//      here Row1 is Pivot row and Row2 is row to be eliminated.
+
+	int doBackwardElimination(int nPivotRow, int nRowToBeEliminated);
+	//      Does forward elimination in Linear Matrix
+
+	int solve();
+	//      Solves Liner Matrix and stores result into pdNewVoltage_list.
+
+	void proc(double dt); // do one integration with timestep = dt
+
+
+	void clearDataStructures();
+
+	void setDataStructure(double time_step);
+	//      Wrapper to check whether CreateSparseMatrix() or SetSparseMatrix
+	//      is to be called.
+
+	int updateRowforChangedRa(int nIndex);
+	//      Helper function to set Ra (Axial resistivity) of given compartment.
+
+	int crankNicolsonMethod();
+
+	// int printLinearMatrix();
+
+	void setParentChildRelation(ChCompartment* compartmentList, int index, Element* element);
+
+	void setTimeStep(double dTimeStep);
+	void printVoltages();
+	//      Used for debugging.
+
+    private_wrapper:
+		
+	string path_;
+
+	//      Creates and sets internal data structure. (Called only once).
+	bool assignCompartmentParameters(ChCompartment& compt,Element* e );
+	void configure();
+	
+};
+///////////////////////////////////////////////////////////
+// Stuff below here goes verbatim to wrapper cpp file
+///////////////////////////////////////////////////////////
+/**
+   Configures the datastructurs
+*/
+
+void HSolveWrapper::configure()
+{   
+    vector< Element* > elist;
+    vector< Element* >::iterator i;
+    // This gets the list of connected elements
+    Element::startFind(path_, elist);
+    compartmentCount = elist.size();
+    allocate();
+    int n = 0;
+    for( i = elist.begin(); 
+	 (i != elist.end()) && ( n < compartmentCount); ++i)
+    {
+	compartmentList[n].nPriorityNo = -1;
+	compartmentList[n].nParent = -1;
+	//       compartmentList[n].pelement = *i; // Bad. eliminate.
+	tmpElementList[n] = *i;
+	mapElementIndex[*i] = n;
+	// ### Do we need this map anymore?
+	// we are using a new array Element* tmpElementList[]
+	// so that tmpElementList[n] points to the element corresponding to 
+	// pCompartmentList[n]
+	++n;
+    }
+
+    n = 0;
+    for( i = elist.begin();
+	 (i != elist.end()) && ( n < compartmentCount); ++i)
+    { 
+	setParentChildRelation(compartmentList, n, *i); 
+	// #### Why do we do this here? To know the root element
+	++n;
+    }
+
+    // Setup root Element
+    // Logic :In tree structure root element will not have parent.
+    nTotalNonZeroElmtInMatrix = 0;
+    int nParent, nCount;
+    for(n=0; n<compartmentCount; n++)
+    {
+	nCount = compartmentList[n].nNoOfChild;
+	nParent = compartmentList[n].nParent;
+	if(nParent < 0 )
+	{
+	    nRootCompartment = n;
+	    nCount++;   //For last row diagonal term...
+	}
+	else
+	{
+	    // For parent nodes
+	    nCount++;
+	    // For all Siblings 
+	    nCount += compartmentList[nParent].nNoOfChild;
+	}
+	//pTotElmInRow[n]  = nCount; // ### I think this is not required here
+	// It is being recreated near the end of this function and never used 
+	// in between
+	nTotalNonZeroElmtInMatrix += nCount;         
+    }
+// end setup root element
+    Matrix = new double [nTotalNonZeroElmtInMatrix];
+    MatrixBackup = new double [nTotalNonZeroElmtInMatrix];    
+    for( n = 0; n < nTotalNonZeroElmtInMatrix; ++n)
+    {
+        Matrix[n] = MatrixBackup[n] = 0.0;
+    }
+    
+
+    assignPriority();
+
+    // We could avoid having two lists for compartments
+    // The code below linearly arranges compartments according to priority
+    // BUT WE SHOULD MAINTAIN THE COMPARTMENT LIST ORDERED BY PRIORITY 
+    // FOR PERFORMANCE
+    // Get the field values from the MOOSE element
+    Element* pelm = NULL;
+    list<int>::iterator lstIterator = lstEliminationPriorityList.begin();
+    n = 0;
+
+    mapElementIndex.clear();
+
+   cout << "Time\t";
+    while(lstIterator != lstEliminationPriorityList.end())
+    {
+	pelm = tmpElementList[*lstIterator++];
+	assignCompartmentParameters(pCompartmentList[n], pelm);
+	pCompartmentList[n].nParent = -1;
+	pCompartmentList[n].nPriorityNo = -1;
+	pdOldVoltage_list[n] = 
+	    pdNewVoltage_list[n] = 
+	    pCompartmentList[n].dVInitial;
+	mapElementIndex[pelm] = n;
+	elementList[n] = pelm;
+// This is for getting the output formatted with compartment names
+//### doubt here - who allocates the memory for string? or is it a reference
+	std::string name;
+	Ftype1< string >::get((Element*)pelm, (string)"name", name); 
+	cout << name << "\t";
+	n++;
+    }
+    cout << endl;
+    cout << 0 <, "\t";
+    for( n = 0; n < compartmentCount; ++n)
+    {
+	cout << pdNewVoltage_list[n] << "\t";
+    }
+    cout << endl;
+
+    lstEliminationPriorityList.clear();
+    for(n = 0; n <compartmentCount; ++n)
+    {
+	lstEliminationPriorityList.push_back(n);
+	pelm = elementList[n];
+	setParentChildRelation(pCompartmentList, n, pelm);
+    }
+    for(n = 0; n <compartmentCount; ++n)
+    {
+	nCount = pCompartmentList[n].nNoOfChild;
+	nParent = pCompartmentList[n].nParent;
+	if(nParent < 0 )
+	{
+	    nRootCompartment = n;
+	    nCount++;   //For last row diagonal term...
+	}
+	else
+	{
+	    // For parent nodes
+	    nCount++;
+	    // For all Siblings 
+	    nCount += pCompartmentList[nParent].nNoOfChild;
+	}
+	TotElmInRow[n]  = nCount;          
+    }
+// We do not need compartmentList any more
+    delete []compartmentList;
+    compartmentList = NULL;
+
+    isMemoryAllocated = true;
+    isDataStructureSet = false;
+}
+
+/**
+   Assign parameters from moose element to fields in Compartment
+*/
+bool HSolveWrapper::assignCompartmentParameters(ChCompartment& compt, Element* e)
+{
+    compt.nPriorityNo = -1;
+    Ftype1< double >::get( e, (string)"initVm", compt.dVInitial );
+    Ftype1< double >::get( e, (string)"Ra", compt.dRa );
+    Ftype1< double >::get( e, (string)"Rm", compt.dRm );
+    Ftype1< double >::get( e, (string)"Cm", compt.dCm );
+    Ftype1< double >::get( e, (string)"Inject", compt.dIinj );
+    Ftype1< double >::get( e, (string)"Em", compt.dEm );
+ //   Ftype1< double >::get( e, (string)"Vm", compt.dVm );
+    compt.nParent = -1;
+    // compt.pelement = pelm; // Deprecated
+    return true;
+}

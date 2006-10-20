@@ -19171,3 +19171,183 @@ and I was able to get solver messaging to work with graphs. At this point
 I can send this in as a release which mostly works as a solver example.
 
 ============================================================================
+9 Sep 2006
+Parallelization is the last big fundamental API thing to be done before
+we go on to functionality work and/or refactoring.
+Design points:
+	- A postmaster per node.
+	- Messages need to be sorted by type and sending schedule.
+		Want to group as many as possible together.
+	- Postmaster refuses return messages? But some (e.g., channels)
+		are invisible. Others, like plots, can afford a lag.
+	- Each node has a 'star' tree, or 'global' if you like. This
+		holds objects for which duplicates are made on all nodes.
+		Don't know if this needs to be so formal
+	- Use specially named base objects to describe partitioning of objects.
+		For example, in a diffusive kinetic model with n compartments,
+		could put the model on /all. This is deprecated. The 
+		preferred approach is to do the same kind of copies as on
+		a single node, but to somehow make them spawn onto different
+		nodes. Maybe simply pcopy /foo /#/foo. Or haveth
+		Or use the createmap with some node parsing objects.
+
+============================================================================
+10 Sep 2006
+For now, skip the high-level details. For the parallel API we first need
+to make sure that we can generate and propagate 
+- messages
+- Objects
+- Commands
+
+Stages:
+	- Write a PostMaster object that simply copies binary data from one
+instance to another, as a surrogate for internode messaging.
+	- Set up generic messaging into this PostMaster
+	- Set up generic messagion out of the PostMaster
+	- Communicate messages
+	- Communicate message setup
+	Later, move on to propagating objects and commands.
+
+Implemented first pass at postmaster, compiled it in with lots of dangling
+bits. I now need to set up a number of
+support functions in Ftype.h and then I need to fiddle with the finfo::add
+function to deal with replacing the Recvfunc with the one provided by
+the originating finfo itself.
+Also need to implement the traversal code so we can establish scheduling.
+
+============================================================================
+14 Sep 2006
+Most of the messaging to and from the postmaster have been implemented.
+Some issues with the MultiFtype in Ftype.h. What do we do about its local
+rfuncAdapter, postRecvFunc and size.
+
+============================================================================
+17 Sep 2006
+At this point the system compiles and appears to set up messages to the 
+postmaster. The PostMaster has been heavily edited by hand, will later
+need to go back to fix its .mh. 
+Current issue is that I have set the reinit and Process to use solveConns
+because we need to handle multiple incoming clock ticks for different things
+to go out. Unfortunately solveConns need to be initialized. The obvious
+place to do this is at reinit, but we cannot call reinit till the solveConns
+are initialized.
+If we manually call reinit before the regular thing, then we get other
+problems but not a segv.
+
+Much nasty debugging later, turns out that the Conn* coming to the 
+getPostPtr function is the parent SolveMultiConn, not the SolverConn.
+This probably has to do with the fact that we have only implemented solveconn
+stuff from the viewpoint of the originator of the message.
+
+Anyway, now I should check it all in because there has been a lot of change
+and we are getting close, and at least this version compiles.
+Also Joe has a version that compiles on Fedora 5, so we should merge into that.
+
+The current version is checked in as version 17.
+
+Tracked down at least some of the problems with scheduling of the postmaster
+to the fact that the SolveConn it uses does not provide valid iterators
+for begin and end. Nor should it. I need to recast the scheduling with
+something other than a solve msg, even though it is convenient for
+lookup. Possibly a synapse message? Save may also work better for our
+actual data messages.
+
+For now I'll just have a single tick0 and another tick1 dest messages from
+the scheduler. Rebuilt PostMaster.mh and did a lot of retrofixes.
+Compiled. Dumps core when I run.
+
+============================================================================
+23 Sep 2006
+Fixed up in ugly hack way. Now it runs up to handling the outgoing messages:
+outgoing from current node to remote nodes.
+Not yet working for incoming. Much cleanup remaining to handle general
+messages.
+============================================================================
+24 Sep 2006
+Quick initialization fix so it doesn't segv. So far it handles outgoing but
+not incoming. Let's check it in now before moving on. This was revision 18.
+
+Now looking at incoming. The problem is that the message source on the
+postmaster does not recognize aribitrary targets. We will need to
+- Implement a variant of the msgsrc so that the messages get sent.
+- Alter the send command so that it iterates through the incoming buffer
+	in order to send the data.
+- Perhaps set things up with a solve message so we can be sure about the
+	order of the outgoing messages.
+
+============================================================================
+25 Sep 2006
+
+Set up stuff to handle incoming msgs, that is, connecting postmaster to
+arbitrary targets.
+Nearly compiled, lots of const issues.
+Compiled. Surprisingly, it runs without errors, but it does not seem to
+be successful in making the outgoing message.
+
+============================================================================
+26 Sep 2006
+Now outgoing message works too. But it isn't being called.
+
+============================================================================
+30 Sep 2006
+Now both the incoming and outgoing messages work and I can transfer info
+from one to another, and it comes out right. That confirms that the
+messaging is fundamentally OK. Now on to scheduling this info flow.
+First, check in this version. It was version 19.
+
+Moving on. Issues:
+- Building the internode messaging data allocation.
+- Scheduling messaging across nodes
+- Managing shared messages across nodes
+- Selecting correct postmaster to handle message.
+
+One thing to keep in mind is that when we have enough of the implementation
+done to have a good list of all use scenarios, we should reimplement the 
+messaging to use the fixed conn class. Excessive grunging with the
+postmaster may not be a good thing till that conversion is complete.
+Also we need to prioritize other things like making the whole system
+useful.
+For example, we need to do
+- Joe's gcc4.1 compile fixes
+- 64 bit compile
+- Implement serious solvers (e.g. GSL)
+
+===========================================================================
+19 Oct 2006
+- Data allocation for messaging: too messy to deal with right now. Let's
+	get the more future-proof stuff in first.
+To schedule outgoing messaging: 
+	- At reset: Traverse each incoming back to source clock tick
+	- Group all messages that share a clock tick.
+	- Add a tick just after each tick, put this set of postmasters on it.
+	- Set up data so that the correct set of outgoing messages go out
+		on the correct tick.
+	- Axon msgs have a delay field. If this is big enough, just
+		piggy-back onto one of the other ticks.
+
+To schedule incoming messaging:
+	- Need a way to find when a message will be needed. Each msgdest
+		needs to specify the next msgdest that needs its contents.
+		Similar to way we specify the dest that triggers a msgsrc,
+		but note that here we specify only an information flow link,
+		not a direct execution link that msgsrcs have.
+	- Set up the incoming messages: pass extra info from postmaster of src
+		node to dest node. This could in principle be done at the
+		same time that messages were being set up, but see below.
+	- When all messages are set up: Traverse list of incoming msgs, 
+		group all that share the same 'needed' tick.
+	- Add a tick just before the 'needed' tick. Goes to all postmasters.
+		Given that we keep doing this, we should find a way to 
+		automatically ensure this is available in the scheduler.
+	- Send the output of this tick to the postmaster to trigger a
+		blocking wait for the internode message.
+
+===========================================================================
+20 Oct 2006
+Implemented massive merge with Joe Svitak's code base, which is what lives
+on SourceForge. Much of it is to do with separating out header dependencies.
+There may be a few things dangling still, but the current merge compiles and
+takes care of most of it. Will need to check later with the gcc4.1 compiler.
+Checked it in as revision 21.
+
+===========================================================================

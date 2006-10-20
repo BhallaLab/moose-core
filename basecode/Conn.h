@@ -80,7 +80,8 @@ class Conn
 		virtual void innerDisconnectAll() = 0;
 
 		static const unsigned long MAX;
-		virtual Conn* respondToConnect(Conn* target) = 0;
+		virtual Conn* respondToConnect(
+						Conn* target, unsigned long slot ) = 0;
 	protected:
 		virtual bool canConnect(Conn* target) const = 0;
 
@@ -150,7 +151,7 @@ class UniConnBase: public Conn
 		void innerDisconnectAll() {
 			target_ = 0;
 		}
-		Conn* respondToConnect(Conn* target) {
+		Conn* respondToConnect(Conn* target, unsigned long slot ) {
 			if ( canConnect( target ) )
 				return this;
 			return 0;
@@ -280,7 +281,7 @@ class PlainMultiConn: public Conn
 		void innerDisconnectAll() {
 			target_.resize( 0 );
 		}
-		Conn* respondToConnect(Conn* target) {
+		Conn* respondToConnect(Conn* target, unsigned long slot ) {
 			if ( canConnect( target ) )
 				return this;
 			return 0;
@@ -320,7 +321,7 @@ class BaseMultiConn: public Conn
 
 		virtual std::vector< Conn* >::const_iterator end( unsigned long i ) const = 0;
 
-		Conn* respondToConnect(Conn* target) {
+		Conn* respondToConnect(Conn* target, unsigned long slot ) {
 			if ( canConnect( target ) )
 				return this;
 			return 0;
@@ -494,7 +495,7 @@ class MultiReturnConn: public Conn
 		void innerDisconnect(unsigned long index);
 		void disconnectAll();
 		void innerDisconnectAll();
-		Conn* respondToConnect( Conn* target ) {
+		Conn* respondToConnect( Conn* target, unsigned long slot  ) {
 			if ( canConnect( target ) ) {
 				ReturnConn* ret = new ReturnConn( parent_ );
 				vec_.push_back( ret );
@@ -591,6 +592,8 @@ class SolveMultiConn: public BaseMultiConn
 		void disconnectAll();
 
 		void innerDisconnectAll();
+
+		Conn* respondToConnect( Conn* target, unsigned long slot );
 
 	private:
 		// vec_ is a single big array of all the SolverConns managed

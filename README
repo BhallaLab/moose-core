@@ -1,3 +1,13 @@
+Dated: 20 Oct 2006.
+This is a code update version of MOOSE, not really a new release. A lot of
+code has been merged in from Upi Bhalla's version, including the skeleton
+of an hsolver and the skeleton of parallel messaging (but not yet the
+parallel scheduling stuff). No true functionality on any of these fronts.
+This merge has also brought together rather divergent development trees,
+so there may be compilation issues on some platforms.
+
+=============================================================================
+
 This is the 0.07 release of MOOSE
 Date: 6 September 2006.
 
@@ -26,3 +36,5 @@ Linux version 2.6.15-26-686 (buildd@terranova)
 (gcc version 4.0.3 (Ubuntu 4.0.3-1ubuntu5)
 
 See DOCS/ReleaseNotes for details.
+
+=============================================================================
