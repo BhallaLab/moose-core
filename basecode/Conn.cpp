@@ -28,7 +28,7 @@ bool Conn::connect( Conn* target,
 		return 0;
 	}
 	if ( this->canConnect(target) ) {
-		Conn* tgt = target->respondToConnect( this );
+		Conn* tgt = target->respondToConnect( this, targetSlot );
 		if ( tgt ) {
 			tgt->innerConnect(this, targetSlot);
 			this->innerConnect(tgt, sourceSlot);
@@ -290,7 +290,7 @@ bool SolveMultiConn::connect( Conn* target,
 	// Check if we have capacity to do the connect
 	if ( segments_.size() > sourceSlot && 
 					segments_[sourceSlot] > filled_[sourceSlot] ) {
-		Conn* tgt = target->respondToConnect( this );
+		Conn* tgt = target->respondToConnect( this, targetSlot );
 		Conn* src = &vec_[ filled_[sourceSlot] ];
 		if ( tgt ) {
 			tgt->innerConnect(src, targetSlot);
@@ -365,17 +365,36 @@ void SolveMultiConn::resize( vector< unsigned long >& segments )
 {
 	segments_ = segments;
 	filled_.resize( segments.size(), 0 );
-	if ( segments.size() > 0 )
-		vec_.resize( segments.back() );
-	else
-		vec_.resize( 0 );
 
+	if ( segments.size() == 0 )
+		return;
+
+	vec_.resize( segments.back() );
+
+	// Note that we have initialized filled_ to be full of zeroes.
 	for ( unsigned long j = 1; j < segments_.size(); j++ )
 		filled_[j] = segments_[j - 1];
 
 	vector< SolverConn >::iterator i;
 	for ( i = vec_.begin(); i != vec_.end(); i++ )
 		i->setManager( this );
+}
+
+Conn* SolveMultiConn::respondToConnect(
+				Conn* target, unsigned long slot )
+{
+	if ( canConnect( target ) ) {
+		if ( segments_.size() > slot &&
+					segments_[slot] > filled_[slot] )
+		{
+			Conn* ret = &vec_[ filled_[slot] ];
+			filled_[slot]++;
+			return ret;
+		} else {
+			cerr << "Error: SolveMultiConn::respondToConnect: bad slot " << slot << " for " << segments_.size() << endl;
+		}
+	}
+	return 0;
 }
 
 //////////////////////////////////////////////////////////////////

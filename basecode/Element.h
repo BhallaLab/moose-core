@@ -10,18 +10,9 @@
 #ifndef _ELEMENT_H
 #define _ELEMENT_H
 
-// #include "header.h"
-#include <map>
-#include <string>
-#include <vector>
-#include "Cinfo.h"
-#include "ConnFwd.h"
-#include "OffsetOf.h"
-
 // Abstract base class for all Elements.
 class Element {
 	// friend class Neutral;
-
 	public:
 		// Core API for Element
 		Element(const std::string& name)
@@ -48,7 +39,6 @@ class Element {
 		static void setName( Conn* c, std::string name ) {
 			reinterpret_cast< Element* >( c->parent() )->name_ = name;
 		}
-
 
 		static std::string getName( const Element* e ) {
 			return e->name_;
@@ -198,7 +188,6 @@ class Element {
 		void duplicateMessagesOnTree(std::map<const Element*, Element*>& tree) const;
 
 	private:
-
 		std::string name_;
 	//	UniConn< Element, Element::childIn_ > childIn_;
 	//	UniConn< Element, childIn_ > childIn_;

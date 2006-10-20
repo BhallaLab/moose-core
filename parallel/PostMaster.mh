@@ -1,0 +1,290 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+/*
+struct PostBuffer {
+	public: 
+		unsigned int schedule;
+		unsigned long size;
+		vector< unsigned int > offset_;
+	private:
+		char* buffer;
+};
+*/
+
+#include "ParallelFinfo.h"
+
+// Dummy functions
+void isend( char* buf, int size, char* name, int dest );
+void irecv( char* buf, int size, char* name, int src );
+
+class PostMaster
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+	author: 
+		Upinder S. Bhalla, September 2006, NCBS
+	description:
+		Object for relaying messages between nodes. 
+
+	field:
+		readonly int remoteNode = 0;
+		readonly int localNode = 0;
+
+	shared:
+	// 	single rate( double n );	// # of molecules, could be several
+									// substrates for a given reac.
+		single process( processIn, reinitIn );
+	src:
+		multi src(); // The data type is generic for any size data
+		// Here we need the help of the target Ftype to 
+		// generate the correct call for the recvFunc. It looks like
+		// char* rfuncAdapter( char* data ) {
+		// 	rfunc<T>( *( static_cast< T* >(data ) );
+		//  return data + sizeof( T );
+		// }
+		// When we get the target finfo from respondToAdd we grab
+		// this function from the Ftype.
+		// Next issue is how to order the outputs. Order must match
+		// the scheduling order of the originating node. In general,
+		// the sending node knows this at the time the message is made.
+		// But it may revise it later to 
+		// We may need a special kind of msgsrc to handle this 
+		// reordering. It should allow an initial arbitrary ordering of
+		// dests, even if ther rfuncAdapters are scrambled. Then
+		// it should sort it, and send back the info to the source node.
+		// Very messy.
+
+	dest:
+		solve dest( );	// The data type again. Here we also need
+			// the index info that the solve messages give so that we
+			// can look up the location of the data in memory.
+			// The recvfunc looks like
+			// void PostRecvFunc<T>( Conn* c, T v ) {
+			//////////////////////////////////////////////////////////
+			//		long i = static_cast< SolverConn* >( c )->index(); 
+			//		T* ptr = static_cast< T* >(
+			//		static_cast< PostMasterWrapper* >( c->parent() )->
+			//       	destPtr( i ) );
+			// // This section won't work unless all Finfos know about
+			// // PostMasters. So instead we put in a global function:
+			//////////////////////////////////////////////////////////
+			//		T* ptr = static_cast< T* >( getPostPtr( c ) );
+			//		*ptr = v;
+			// And more as needed if there are more arguments.
+			// }
+			// The getPostPtr( c ) does the typecasting of c->parent
+			// to postmaster, and then calls the local getPostPtr( c )
+			// function as listed below.
+			// There is an issue here: Not all recvfuncs need to
+			// be executed each timestep. So the PostRecvFunc should
+			// also be setting a flag to indicate which to update.
+			// This flag is only needed in those rare cases where
+			// a scheduled trigger cannot be relied on.
+			// To keep it invisible, this flag is handled by the 
+			// getPostPtr( c ) call itself.
+			//
+			// Need a special respondToAdd which allocates the
+			// space needed by the dest, and preferably also
+			// figures out how to sched it. Uses the sender finfos
+			// Ftype::size() (yet to be implemented).
+
+		single process( ProcInfo info ) {
+			// Each of the scheduled Process calls first guarantees that
+			// pending messages are received, then sends out a distinct
+			// set of messages.
+			// Perhaps use the something in the info.
+			// Or this could be a solve message so we know the index?
+			// Issue here with resizing it.
+			isend( &(outgoing_.front()) + outgoingBufferOffset_[ index ],
+				outgoingBufferSize_[ index ], "char", remoteNode_);
+			irecv( &(incoming_.front()) + incomingBufferOffset_[ index ],
+				incomingBufferSize_[ index ], "char", remoteNode_);
+		}
+
+// A bit of a bootstrap problem here. The reinit sets up the
+// messaging for the process and reinit calls, but until
+// reinit is called it is not safe to use this messaging.
+		single reinit() {
+			vector< unsigned long > segments( 1, 0 );
+			unsigned long nMsgs = outgoingSize_.size();
+			unsigned int offset = 0;
+		
+			segments[0] = nMsgs;
+			outgoingOffset_.resize( nMsgs );
+			for (unsigned long i = 0; i < nMsgs; i++ ) {
+				outgoingOffset_[i] = offset;
+				offset += outgoingSize_[i];
+			}
+			outgoing_.resize( offset );
+			destInConn_.resize( segments );
+			// Temporary hack till we sort out how to do these
+			// assignments as we build the messages
+			if ( outgoingSchedule_.size() > 0 ) {
+				outgoingBufferOffset_.resize( outgoingSchedule_.size());
+				outgoingBufferSize_.resize( outgoingSchedule_.size() );
+				outgoingBufferOffset_[0] = 0;
+				outgoingBufferSize_[0] = offset;
+			}
+		
+			// This should really be sized to the number of unique clock
+			// ticks in the outgoingSchedule_.
+			// To get this we need to traverse all incoming messages
+			// and figure out which clock they belong to.
+			processInConn_.resize( segments );
+		}
+
+
+	private:
+		// Each dest message (from local to remote node)
+		// needs to be given two things: 
+		// a location to write to, and the schedule for it to go out.
+		//
+		// Index looks up the offset of the outgoing_ array to fill
+		// This is filled after all the messages have been set up,
+		// so that we can order the incoming data into the correct
+		// locations for a single big isend.
+		vector< unsigned int > outgoingOffset_;
+
+		// Each outgoing message is sent on a specific clock tick.
+		vector< unsigned int > outgoingSchedule_;
+
+		// To build the target in memory, we also need a vector of sizes
+		// In principle we could do this by having the next destOffset
+		// stored rather than the current one. But it is messy if the
+		// offsets are not sequential.
+		vector< unsigned int > outgoingSize_;
+
+		// Have a single big vector of chars so that the index
+		// goes straight to the correct place, and organize the
+		// scheduling as chunks of this single big vector. We can
+		// update the destOffset if we have to expand the big
+		// vector when stuff is added in the middle.
+		vector< char > outgoing_;
+		// Possibly we could point directly into the MPI outgoing buffer
+		// based on which messagedest it is? No, messagedests are not
+		// sorted by func call. But we could have a set of dests
+		// dynamically built? Not without major hacking of the code.
+
+		// The next two vectors are for the entire buffer for each tick
+		vector< unsigned int > outgoingBufferTime_;
+		vector< unsigned int > outgoingBufferSize_;
+		vector< unsigned int > outgoingBufferOffset_;
+
+		// Alternative:
+		// a vector of buffers: one buffer for each
+		// scheduled departure time.
+		// vector< vector< char > > outgoing_;
+		// it so that the scheduling is sorted.
+		// Issue is that we will need a double lookup for the incomings
+
+		// Each source message (arriving from remote node)
+		// gets put into a location in memory. In order to scan this
+		// for the outgoing messages, we need to associate the
+		// outgoing message sequence with locations in the memory
+		// buffer. As before, we don't use pointers lest the buffer
+		// be resized.
+		vector< unsigned int > incomingOffset_;
+		vector< unsigned int > incomingSchedule_;
+		// Similar to the vector of buffers for outgoing stuff, the
+		// data coming in from remote nodes needs to be organized
+		// as per scheduling.
+		vector< char > incoming_;
+		vector< unsigned int > incomingBufferTime_;
+		vector< unsigned int > incomingBufferSize_;
+		vector< unsigned int > incomingBufferOffset_;
+
+		// In order to work, we also need to set up outgoing messages.
+		// We get passed the name of the target and field.
+		// So we can get hold of a recvfunc.
+		
+
+	private_wrapper:
+		char* getPostPtr( unsigned long index );
+};
+
+////////////////////////////////////////////////////////////////////
+// Stuff below here goes verbatim into PostMasterWrapper.cpp
+////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////
+// Constructor. As a hack, at this time I will allocate
+// space for messages in destInConn_ and processInConn_
+// Later we need a way to do this without preallocation.
+///////////////////////////////////////////////////
+
+PostMasterWrapper::PostMasterWrapper(const string& n)
+		:
+			Neutral( n ),
+			srcSrc_( &srcOutConn_ ),
+			srcOutConn_( this ),
+			destInConn_( this ),
+			processInConn_( this )
+			// reinitInConn uses a templated lookup function
+{
+	vector< unsigned long > segments( 1, 0 );
+
+	segments[0] = 10;
+	destInConn_.resize( segments );
+	processInConn_.resize( segments );
+	outgoingOffset_.resize( 1, 0 );
+	outgoing_.resize( 40 );
+}
+
+char* PostMasterWrapper::getPostPtr( unsigned long index )
+{
+	static char dummy[1024]; 
+	if ( index < outgoingOffset_.size() )
+		return &outgoing_[ outgoingOffset_[index] ];
+	cerr << "Error: bad index " << index << 
+	" for postmaster " << name() << "\n";
+	return dummy;
+}
+
+char* getPostPtr( Conn* c )
+{
+	static char dummy[1024]; 
+	PostMasterWrapper* pm = 
+		dynamic_cast< PostMasterWrapper* >( c->parent() );
+	if ( pm ) {
+		SolveMultiConn* mc = dynamic_cast< SolveMultiConn* >( c );
+		SolverConn* sc = dynamic_cast< SolverConn* >( c );
+		if ( sc )
+			return pm->getPostPtr( sc->index() );
+	}
+	return dummy;
+}
+
+void isend( char* buf, int size, char* name, int dest )
+{
+	cout << "in isend, with " << size << " bytes\n";
+}
+void irecv( char* buf, int size, char* name, int src )
+{
+	cout << "in irecv, expecting " << size << " bytes\n";
+}
+
+///////////////////////////////////////////////////
+
+void PostMaster::addSender( const Finfo* sender )
+{
+	outgoingSize_.push_back( sender->ftype()->size() );
+
+	//	This function really needs the source element.
+	//	Will do it later, at reinit.
+//	outgoingSchedule_.push_back( getSchedule( sender ) );
+//	We would now typically use this to figure out a new value
+//	for outgoing offset. For now we'll assume all is on sched0.
+
+	outgoingSchedule_.push_back( 0 );
+	outgoingOffset_.push_back( 
+		outgoingOffset_.back() + outgoingSize_.back() );
+}
+

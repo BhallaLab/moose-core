@@ -247,7 +247,7 @@ template <class T1, class T2 > class NSrc2Finfo: public NSrcFinfo
 		}
 };
 
-// This class handles multi-target messages with two arguments.
+// This class handles multi-target messages with three arguments.
 template <class T1, class T2, class T3 >
 	class NSrc3Finfo: public NSrcFinfo
 {

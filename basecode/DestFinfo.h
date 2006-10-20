@@ -98,6 +98,10 @@ class DestFinfo: public Finfo
 			parseTriggerList( c, triggers_, internalDest_ );
 		}
 
+		bool sharesConn() const {
+			return sharesConn_;
+		}
+
 	private:
 		void ( *recvFunc_ )( Conn* );
 		Conn* ( *getConn_ )( Element * );

@@ -39,7 +39,7 @@ int main(int argc, const char** argv)
 	testBasecode();
 	testScheduling();
 	testTable();
-#endif	
+#endif
 
 	shell->field( "isInteractive" ).set( "1" );
 	if ( argc > 1 ) {

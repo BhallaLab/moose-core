@@ -1,0 +1,343 @@
+*********************************************************
+* NOTES ON HSolve - Hines Solver component for MOOSE    *
+*                                                       *
+*                                                       *
+*   Subhasis Ray / NCBS / September 2006                *
+*********************************************************
+
+1. Notes on moose header file HSolve.mh
+2. Notes on Data Structures and variables in HSolve.cpp
+3. Note on selection of row operation
+4. Note on HH-Channel part to be implemented.
+5. Note on test scripts.
+6. Note on the multiple executable files.
+
+============================================================
+1. Notes on moose header file HSolve.mh
+
+
+HSolve.mh 
+
+eval_field: 
+
+setPath(string path) - this method sets the path to the root element
+	    of the moose model for traversing compartments and calls
+	    the configure() method of the HSolveWrapper class which
+	    actually does the traversal and constructs the
+	    datastructures used by the solver.
+      
+dest: 
+
+single process(ProcInfo info) - this message is the entry point to the
+       solver. It calls the proc() method of solver which does a
+       single step in the solution process.  Each time the clock
+       associated with the solver fires, this method is called.
+      
+single reinit() - this should revert all data to their initial
+          state. Currently it does nothing.
+
+
+HSolveWrapper::configure() - This method sets up the datastructures
+          required by solver by traversing through the MOOSE elements.
+          It is called in the setPath(string) method.
+
+	  
+-------------------------------------------------------------------------------------------
+2. Notes on Data Structures and variables in HSolve.cpp
+
+The data structures -
+
+pdOldVoltage_list - SHOULD BE RENAMED TO SOMETHING LIKE RHS.
+                  It is a misnomer, during calculations, it actually
+                  stores the right hans side vector B for the equation AX=B where A is
+                  the coefficient matrix, X is the vector of unknowns and B is the
+                  constant terms matrix.
+
+                  When using Crank Nicolson method, we do not have B as a set of values,
+                  but rather as the expression C*X' where X' is the vector of the values
+                  of the unknowns as calculated in previous step.
+
+                  Thus in each step, we have to calculate the right hand side first and
+                  pdoldVoltage_list stores this.
+
+pdNewVoltage_list - this is the vector of unknowns as calculated in the latest step.
+
+RHS_Fixed / RHS_Var_p1 - no idea why this p1 suffix is there, perhaps
+          residue from some earlier version of the code which had some
+          other variable starting with RHS_Var...
+          
+          These two arrays are for optimization, they store some
+          values which can be determined independent of the
+          calculation steps, just from the initial parameters
+          (timestep and capacitance) - so these are calculated
+          beforehand and cached for reuse while actually solving the
+          equations.
+
+pCompartmentList - this stores the compartments arranged according to
+                 priority on the basis of Hines numbering.
+
+
+compartmentList - temporarily used while configuring the datastructures.
+
+SCompartmentList - this is for further optimization. The SCompartment
+                 structure maintains all the neighbours of each
+                 compartment in the order : children - siblings -
+                 parent so we do not have need all multiple loops
+                 traversing the children first, then the siblings, and
+                 then the parent. All can be traversed in a single
+                 loop using the SCompartmentList array.  This array is
+                 in the same order as pCompartmentList, i.e.,
+                 pCompartmentList[i] and SCompartmentList[i] represent
+                 the same moose element.
+
+Matrix - stores the coefficient matrix in a linear order. The
+       coefficient matrix is in general a sparse matrix. So to save
+       memory and time, we store all the coefficient matrix in a
+       single array.
+       
+       But we need to know where each row starts and ends, this
+       information is stored in the following arrays 
+
+StartingPos - stores the starting position of the row corresponding to
+       the corresponding compartment ( StartingPos[i] is the index (in
+       'Matrix' array) of the first element in the coefficient matrix
+       row for the compartment pCompartmentList[i] )
+
+TotElmInRow - stores the number of elements in the row corresponding to
+            each compartment.  Just like above, TotElmInRow[i]
+            indicates how many elements are there in the row
+            corresponding to pCompartmentList[i].
+
+DiagElmtPos - stores the position of the diagonal element of each row.
+            This is for optimization.
+
+mapElementIndex - this is a map from MOOSE element set to solver
+                compartment index in pCompartmentList. When MOOSE
+                wants to know about the results for a particular
+                element, this map will be searched for the index of
+                the corresponding ChCompartment structure in
+                pCompartmentList.
+
+                THIS SHOULD BE A PRIVATE MEMBER OF WRAPPER
+                CLASS. PROPER GETTER METHODS SHOULD BE CREATED TO
+                ACCESS THE VALUES.
+
+elementList - no importance as of now. It was intended to keep a map
+            from compartment list (as indicated by its index, the
+            compartments have no identity other than their index in
+            pCompartmentList array, so to know which compartment
+            corresponds to which MOOSE element we need a mapping from
+            compartment index to the set of moose elements. Earlier,
+            the ChCompartment data structure used to keep a pointer to
+            the actual MOOSE element, but this was deprecated as
+            introducing extra coupling between the solver and the
+            MOOSE model).  
+
+            So, elementList was conceived for maintaining a list of
+            pointers to the MOOSE elements, ordered in the same
+            sequence as their corresponding compartments in
+            pCompartmentList array, so that elementList[i] is the
+            element whose properties are represented by
+            pCompartmentList[i] inside solver.
+            
+            It performs better than ordinary map because we can
+            directly access the value by indexing with key. In map we
+            have to first find out the position of the key, and then
+            access the value at that position (which is order of n as
+            compare to order of 1).
+
+            THIS IS NOT A PROPERTY OF SOLVER. IT SHOULD BE MOVED TO
+            THE WRAPPER CLASS.  THE WRAPPER SHOULD PROVIDE METHODS FOR
+            GETTING THE NECESSARY FIELDS.
+
+tmpElementList - conceived as the counterpart of compartmentList.
+               pCompartmentList:elementList = elementList:tmpElementList.
+
+dtByCm - this is a residue from earlier version.  Current version uses
+       Cm/dt for calculations. This was used for caching the dt/Cm for
+       each compartment for faster calculations. But we are creating
+       the RHS when dt is set (where we used to calculate dtByCm
+       before) , so we do not need to cache it separately. Only other
+       use of Cm/dt is in createSparseMatrix which is called once in
+       startup.
+
+nRootCompartment - stores the index of the root compartment of the the
+                 compartment tree.
+
+nTotalNonZeroElmtInMatrix - stores the total number of nonzero
+                          elements in coefficient matrix. This is used
+                          for allocating the Matrix array (and other places, maybe).
+
+LHS_Dia_p1 - stores the diagonal elements of the coefficient matrix
+           before writing them back to the Matrix array.
+
+SumGk - used for channels, currently all code regarding channels is
+      disabled.
+
+MatrixBackup - backs up Matrix before continuing next iteration.
+
+pdRaSum - stores 1/(RAi+RAj) for each pair of neighbours. An order is
+        maintained - (i,j) < (k,l) if i R1 k and j R2 l where (i R1 k)
+        if i comes before k in priority list (pCompartmentList) and (j
+        R2 l) if j is a child and l is a sibling or parent, or j is a
+        sibling and l is parent, .. (read the code for understanding
+        how pdRaSum is populated).
+
+
+nPrimaryCacheElement -
+
+ 
+nPrimaryCacheValue - The above two are not used currently. They are
+                   supposed to cache information for some compartment
+                   ( perhaps some sort of LRU strategy ? ) so that no
+                   need for searching the map to track the compartment
+                   corresponding to an element.
+
+CoeffMatrix - leftover from earlier version - should be removed
+
+Functions:
+
+allocate() - allocates memory for various arrays and other variables
+
+assignPriority() - traverses all compartments and assigns priorities
+               (hines numbering) - this is used for ordering the
+               compartments(each of which correspond to a row in the
+               matrix) for solving. pCompartmentList is filled in this
+               order.
+
+createSparseMatrix() - creates the compact representation for the sparse
+                   matrix and sets up other related datastructures.
+
+setSparseMatrix() - after the sparse matrix is created in the first
+                iteration, this method is called to maintain the
+                sparse matrix because in each step the matrix gets
+                disturbed.
+
+doForwardElimination() - deprecated
+dobackwardelimination() - deprecated
+
+solve() - sweep through the equations and solve them.
+
+proc(dt) - set the sparse matrix (or create if necessary) and do
+         solve(). Also, if the time step has changed then do necessary
+         updates to take care of the change before solving.
+
+cleaDataStructures() - clean up allocated memory.
+
+setdataStructure() - conditionally create or set the sparse matrix 
+
+updateRowForChangedRa() - not used or defined!! remove this
+
+crankNicolsonMethod() - just for testing, can modify this to call proc
+                      multiple times to solve without intervention of
+                      the scheduler and measure performance.
+
+
+
+setParentChildRelation(ChCompartment* , int index, Element * element)-
+              Traverses through the messaging sructure of the moose 
+              elements to recreate the tree-structure in the solver's 
+              compartment list.
+
+
+setTimeStep(double dt) - sets the time step for integration to dt.
+                   Also updates the RHS_Fixed and RHS_Var_p1 arrays.
+
+printVoltages() - prints new voltages - for debugging
+
+
+There are several misnomers among the variables. Perhaps residues from
+older versions.  They should be renamed to improve the readability of
+the program.
+
+
+--------------------------------------------------------------
+3. Note on selection of row operation
+
+A note about Gaussian elimination
+
+  The non diagonal elements of the coefficient matrix are:
+      Aij = -1/(RAi + RAj)
+  The diagonal elements are:
+      Aii = CMi/dt+total conductance for compartment i + 1/2RMi
+  pdOldVoltage_list[i] = RHS_Fixed[i] + RHS_Var_p1[i]*pdNewVoltage_list[i] +SumVi_Vj           ... during sparseMatrix creation in line 369 of HSolve.cpp
+
+                       = Iinj + EMi/RMi + ( CMi/dt - 1/(2*RMi )*pdNewVoltage_list[i] +SumVi_Vj
+  pdOldVoltage_list[nRowToBeEliminated] = pdOldVoltage_list[nRowToBeEliminated]-(pdOldVoltage_list[nNode] *Matrix[nOpStartIndex])/ Matrix[nPivotIndex]; .. in line 522 of HSolve.cpp
+                       
+  Matrix[j] = Matrix[j] - ((Matrix[k] * Matrix[nOpStartIndex]) / Matrix[nPivotIndex]);       in line 528 of HSolve.cpp
+
+In the above two lines we are doing R[k] = R[k] - R[i]*R[k,j]/R[i,i]
+... where R[k] is the row to be eliminated, R[k,j] is the first
+non-zero element, R[i] is the pivot row used, and R[i,i] is the pivot
+element. Note that the matrix is diagonally dominant, so we can safely
+take the diagonal elements as pivoting element.
+
+
+
+  pdNewVoltage_list[i] = pdOldVoltage_list[i] - Aij*pdNewVoltage_list[j]/Aii           .... line 545 in HSolve.cpp ... in solve()
+
+this is the back-substitution  to get the new solution vector.
+
+    There is something else to be noted: For calculating we could also do -
+
+     Matrix[j] = ((Matrix[j] * Matrix[nPivotIndex])/Matrix[nOpStartIndex]) -  Matrix[k] ; in line 526 and modify the other expressions similarly.
+
+which in effect means multiplying the row to be eliminated by the
+pivot elelemnt and dividing by its first nonzero element.and then
+subtracting the pivoting row.  If we track how pdOldVoltage_list is
+modified in this case, we shall notice that it turns out to be
+something like
+
+      pdOldVoltage_list[k] = pdOldVoltage_list[k]*Aii/Akj - pdOldVoltage[i]
+
+The problem with this approach is that the value goes up/down very
+rapidly and causes overflow/underflow. The previous approach produces
+well behaved values. (Note that we have, C/dt in Aii as well as
+pdOldVoltage_list. So the exponent of C/dt new pdOldVoltage_list gets
+doubled in each iteration. Also, the first term in right hand side
+becomes too large compared to the second term - causing loss of
+significance of that term.
+
+----------------------------------------------------------
+4. Note on HH-Channel part to be implemented.
+
+
+The channel related computation was removed in the following places:
+....
+createSparsematrix (Line: 292 & 293) - second for loop.
+Line 368:         dTempMatrixRow[i] = LHS_Dia_p1[i];//+(pChannelDataList[i].dGk);
+Line 369:	        pdOldVoltage_list[i] = RHS_Fixed[i] + (RHS_Var_p1[i] * pdNewVoltage_list[i]) + dSumVj_Vm; //+ (pChannelDataList[i].dEk);
+setSparsematrix (Line 438) - first statement inside function body
+//    pChannelDataList = pChanSolver->SolveAllChannels(pdNewVoltage_list);
+Line 456:  after first for loop:       Matrix[nMatrixIndex++] = LHS_Dia_p1[i];// + (pChannelDataList[i].dGk);
+Line 457:         pdOldVoltage_list[i] = RHS_Fixed[i] + (RHS_Var_p1[i] * pdNewVoltage_list[i]) + dSumVj_Vm;//+ (pChannelDataList[i].dEk);                 
+Line 685: getChannelInfo - whole function commented out.
+-------------------------------------------------------------
+5. Note on tests
+
+
+The following test scripts were used to measure performance and accuracy.
+
+cable.g - single cable with 100 compartments
+cable_tX.g - single cable with 100 compartments for time step of length X
+branch.g - star structure of three compartments
+branch_tX.g - star structure of three compartments with each time step = X
+the same test files for the solver are prefixed with "hsolve_"
+
+The plots are available as <test_file_name>.plot
+
+Note that moose appends to existing plot file. So remove old ones for
+fresh tests.
+
+There is a small awk script to order the columns in top to bottom
+fashion - awk.sh. It is written for the star structure.  Redirected
+output file of HSolve should be cleaned up before applying awk script.
+
+ The file ../ moose does has the output statements commented out from the
+process() method.  - this was done for removing I/O time from the
+runtime.  The file ../moose.bak.2006.10.02 is the version with the
+output statements intact.
+
+But for runtime check of moose inbuilt solver, the graph plotting
+statements are to be removed from the corresponding script.
