@@ -90,7 +90,8 @@ bool SimDumpInfo::setFields( Element* e, int argc, const char** argv )
 
 
 Shell::Shell( Element* wrapper )
-	: workingElement_( "/" ), wrapper_( wrapper ), recentElement_( 0 )
+	: workingElement_( "/" ), isInteractive_( 0 ),
+		wrapper_( wrapper ), recentElement_( 0 )
 {
 	string className = "molecule";
 	vector< SimDumpInfo *> sid;

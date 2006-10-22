@@ -19351,3 +19351,13 @@ takes care of most of it. Will need to check later with the gcc4.1 compiler.
 Checked it in as revision 21.
 
 ===========================================================================
+21 Oct 2006
+Checked compile on 64-bit system (gj) g++ (GCC) 4.1.1. Works.
+Checked compile on 64-bit RH system (imarti). Compiles but fails unit test for
+	scheduling.
+Checked compile on 32-bit Ubuntu system (kadam). Compiles, passes unit tests.
+
+Tracked down issue with RH system. Shell::isInteractive_ was not being
+initialized. Check it in, revision 22.
+
+===========================================================================
