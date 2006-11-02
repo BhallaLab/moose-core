@@ -52,6 +52,10 @@ class Field {
 			return f_;
 		}
 
+		bool operator==( const Field& other ) {
+			return ( e_ == other.e_ ) && ( f_ == other.f_ );
+		}
+
 		// Returns the contained Finfo
 		Finfo* getFinfo() const {
 			return f_;

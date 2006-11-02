@@ -23,6 +23,8 @@ class ParallelMsgSrc: public NMsgSrc
 
 		bool add( RecvFunc rf, const Ftype* ft, Conn* target );
 		void send( char* dataPtr );
+		void send( char* dataPtr, vector< unsigned int >& sched, 
+			unsigned long tick);
 
 	private:
 		vector< const Ftype* >targetType_;

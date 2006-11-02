@@ -19317,10 +19317,10 @@ For example, we need to do
 - Data allocation for messaging: too messy to deal with right now. Let's
 	get the more future-proof stuff in first.
 To schedule outgoing messaging: 
-	- At reset: Traverse each incoming back to source clock tick
-	- Group all messages that share a clock tick.
-	- Add a tick just after each tick, put this set of postmasters on it.
-	- Set up data so that the correct set of outgoing messages go out
+	* At reset: Traverse each incoming back to source clock tick
+	* Group all messages that share a clock tick.
+	* Add a tick just after each tick, put this set of postmasters on it.
+	* Set up data so that the correct set of outgoing messages go out
 		on the correct tick.
 	- Axon msgs have a delay field. If this is big enough, just
 		piggy-back onto one of the other ticks.
@@ -19359,5 +19359,314 @@ Checked compile on 32-bit Ubuntu system (kadam). Compiles, passes unit tests.
 
 Tracked down issue with RH system. Shell::isInteractive_ was not being
 initialized. Check it in, revision 22.
+
+===========================================================================
+23 Oct 2006
+Working on traversing messages back to source. Immediate issue: 
+Element::lookupSrcField is failing from Finfo::Src() because 
+cinfo()->findRemoteMsg fails. Possibly the conn specified is the global
+one rather than the specific one 
+
+===========================================================================
+25 Oct 2006
+Sorted it out. Messy. The postmaster in the respondToAdd returns a dummy
+finfo that gives the recv func postRecvFunc, for the appropriate data type.
+The DestFinfo itself has a default destFunc.
+
+To hack around this, need to have the DestFinfo return the corrected
+destFunc according to what the querier wants to hear. But there is no
+info about the query source, so we are stuck.
+
+Put in a hack in a virtual func to handle the Finfo::src function. This
+returns DummyFunc0 as  a sign to the later routines to ignore the function
+when looking for a source. Ugly, but works.
+
+OK, various hacks later, it works and identifies the source clock tick.
+
+===========================================================================
+26 Oct 2006
+It is simple enough to sort the clock ticks now that we have found them.
+The hard part is to associate each with the end of the selected tick. Two
+issues:
+- Do we send a post-tick message from each tick to the postmaster or do
+	we create another tick?
+	Let's do another tick. Not mess with additional layers. Only issue
+	is that these proliferate, but that is what objects are for.
+	Need only one between any two ticks, even if there is both
+	sending and receiving to do.
+- How do we set up a multi process dest that uniquely identifies each
+	incoming tick so that it can be tied to a part of the scheduled outs.
+	For now we could do a hack which just sequences received inputs.
+	Later we can use the lookup facility for all messages to identify
+	the tick.
+
+Can we have a single buffer and require that all entries into
+the buffer be complete within a tick? The idea is to have
+the send go as soon as the entries finish.
+For recvs, do we post the receive at the last possible moment, or post
+a non-blocking receive early and then block at the last possible moment?
+If the latter then we cannot share the buffer
+If the former then we could even share the buffer.
+
+===========================================================================
+27 Oct 2006
+Discussed with Anmol. Looks like the blocking receive is not a good idea.
+Main problem with it is that we have to set up such receives for all the
+postmasters. If we do it sequentially it is bad news. Better to set up
+all the non-blocking receives in individual postmasters (connecting to specific
+outside nodes), and then use a waitall to harvest the whole lot.
+This means we need to maintain two buffers: one each for outgoing and incoming
+messages. However, buffers can be shared between timesteps.
+We still haven't addressed how to handle non-tick operations: spikes and
+operation calls to remote shell objects.
+
+Option 1:
+	postRecvFunc and getPostPtr modified as follows:
+	1. Originating object calls postRecvFunc which is filled in as the
+	dest function for the msg going to postmaster.
+	2. postRecvFunc calls getPostPtr with the conn and the size of the
+		fields to transfer.
+		2.1 getPostPtr returns the location in which to dump the data
+		2.2 getPostPtr increments the location for next msg.
+	3. postRecvFunc fills in the data.
+	Points:
+		- No preset locations in memory for the data. It is filled
+		in by calling order from the clocktick. Note this differs
+		from setup order of connection to postmaster.
+		- No need to lookup per-message info on any of the incoming
+		messages.  We can get rid of the solvemsgdests here.
+		- Can do resizing without worrying about anchored data.
+		- Need to figure out how to match outgoing order to order
+		on target node. 
+			Option A
+			- Get clock tick outgoing message vector
+			- Use variant of TraverseSrcToTick to find which is
+				just downstream of it.
+			Option B
+			- Get clock tick outgoing message vector
+			- variant to lookup index of trigger in this vector.
+			Both A and B have problems if more than one outgoing
+			msg originates from the same msg entry in the clock
+			tick.
+			Option C
+			- in the Reinit step, have each of the outgoings
+			call the postmaster. This sequence will be recoded.
+			Option D
+			- Get clock tick outgoing message vector
+			- March through this vector till we hit postmaster(s).
+				Record sequence # and src in postmaster.
+				(note multiple postmaster targets)
+			- Postmaster then collates sequence #s with srcs
+		- Once match has been done, this sequence has to go out to the
+		target postmaster. 
+		- It has to tie src sequence to calling sequence for dests. 
+		- There a similar sequence-based sending of outputs will work.
+Option 2:
+	Retain current architecture. Need look up of every incoming message
+	(already set up) to define where in memory the contents should go.
+	Slow. Location in memory can be dynamically assigned too, but we
+	need to set up the offsets array.
+	Later we clearly need to move to option 1. For now Option 2 needs
+	far less work.
+	1. Originating object calls postRecvFunc which obtains target ptr
+	from getPostPtr.
+		1.1 getPostPtr uses index to look up outgoingOffset array.
+	This array can be set up at reinit, just needs size info.	
+
+OK, done option 2. Implementation not too hard. Compiled.
+Preliminary test OK to show segregation of data into buffers, 
+but clock ticks not yet assigned.
+Anyway, a good time to do a check in of the revision. This is revision 24.
+Clock ticks are currently somewhat messy. The stage_ field, used to sort
+ticks with the same dt, is an integer. This means I cannot insert a tick
+between two contiguous ones, unless I redo stages all around. I need to
+do this insertion to schedule the postmaster to send stuff.
+
+
+Now need to think about the target node. 
+1. Send message building request at once, or at reinit
+	- At once: Lots of small traffic
+	- Detect setup errors early during construction.
+		- Arguably we could assume correctness by prior testing.
+	- Cannot build up connections in sequence because we don't know
+		scheduling stuff till the source node has reinited.
+	- Can keep track of definition order of messages.
+		- Would only need a vector of scheduled ticks.
+
+===========================================================================
+28 Oct
+Mostly implemented the clock ticks to drive the outgoing face of the 
+postmaster, but there is some issue now with index of incoming messages
+which were OK earlier.
+
+===========================================================================
+29 Oct 2006
+Fixed up the outgoing clock ticks. There was a scheduling issue. Now the
+scheduling organization is like this:
+
+ct0 -> postmaster::process
+postct0 -> postmaster::post
+postct1 -> postmaster::post
+postct2 -> postmaster::post
+...
+
+Checked in the whole mess before I launch on the stuff for receiving messages.
+This was revision 25.
+
+Now to refer back and update plans from Oct 19.
+To schedule outgoing messaging: 
+	* At reset: Traverse each incoming back to source clock tick
+	* Group all messages that share a clock tick.
+	* Add a tick just after each tick, put this set of postmasters on it.
+	* Set up data so that the correct set of outgoing messages go out
+		on the correct tick.
+	- Axon msgs have a delay field. If this is big enough, just
+		piggy-back onto one of the other ticks.
+
+To schedule incoming messaging:
+	- Need a way to find when a message will be needed. Each msgdest
+		needs to specify the next msgdest that needs its contents.
+		Similar to way we specify the dest that triggers a msgsrc,
+		but note that here we specify only an information flow link,
+		not a direct execution link that msgsrcs have.
+		- As an interim measure, assume it is needed by next tick.
+	- Set up the incoming messages: pass extra info from postmaster of src
+		node to dest node. This could in principle be done at the
+		same time that messages were being set up, but see below.
+	- When all messages are set up: Traverse list of incoming msgs, 
+		group all that share the same 'needed' tick.
+	- Add a tick just before the 'needed' tick. Goes to all postmasters.
+		Given that we keep doing this, we should find a way to 
+		automatically ensure this is available in the scheduler.
+	- Send the output of this tick to the postmaster to trigger a
+		blocking wait for the internode message.
+
+To pass system calls:
+	- Booting: 
+		- Each node makes assembly of postmasters, sched, classes
+		and shell.
+		- Automatic connection of shells to each other via msgs.
+	- Operation dispatch: If first arg is on remote node, then squirt op
+		over to remote node shell for execution.
+	- Building messages: Despatch request to src shell. Follow target
+		obj, if it goes through postmaster, internode build msg.
+	- setfield. If we did it cleanly through the message
+	interface, it would automagically go to the remote node. There would
+	be the need to dynamically build and then tear down a message.
+	- Hierarchy operations: Dispatch shell requests. If cross-node,
+		need to handle object squirting. Defer.
+		- Object squirting: Need to build in serialization code
+		for each object. This contains field info, including msgs.
+		The showfield command should have all the needed info.
+			- Classes can refuse to be squirted by not providing
+			serialization. Discouraged.
+
+Loads of stuff here. Let's prioritize.
+1. Be able to send messages between nodes for a running simulation
+	- Get incoming messages to work, requiring immediate completion of
+	data transfer.
+2. Additional features to bring up to level of old GENESIS.
+	- Remote funcs
+	- Check with Greg.
+3. Some scheduling fine-tuning to interleave comm with comp.
+4. Single simulation image. 
+5. Load balancing and processor spreading
+6. Grid.
+
+Somewhere around 2 and 3 we need to do the major refactoring of messaging too.
+
+Scheduling incoming messaging: First need to pass the message request on
+to the target node. Unfortunately the current framework does not include
+enough info to do this in the message creation call, it has to come from 
+a separate information call to the postmaster, following which the message
+call will be initiated.
+
+After some messing around, this is the idea:
+- At startup, set up bidirectional messaging between shells via postmaster.
+This messaging does not need info to flow, it is hard coded.
+- Shell requests to the postmaster trigger an immediate send, as well as
+	a scan for pending incoming requests. This differs from regular
+	messages which are grouped by clock ticks.
+- The send is done first, then the incoming requests are serviced.
+- When the parser gets to idle, it should service incoming requests.
+
+But first, we'll test out with hard-coded bidirectional messaging.
+- Set up 2 postmasters, same node, hard code irecv etc to send info
+
+
+===========================================================================
+31 Oct 2006
+Implemented the 2 postmasters, issues now with scheduling the recvs.
+Analyzing the scheduling. In most cases the info is needed by the next
+stage in the basic tick scheduling. This lets us avoid some complex 
+message traversal, and to work directly off the timing data provided by the
+source node.
+
+Let us divide each tick into 6:
+
+0: Post next irecv.
+1: Call all processes that have outgoing data.
+2: Post sends
+3: Call all processes that only have local data. Should take a while here.
+4: Wait for posted irecvs
+5: Distribute incoming msgs. This may merge with 4, see below.
+
+Note that this sequence applies equally to reinint and to process.
+
+Stage 4 is tricky if we do point-to-point messaging. We don't want to
+wait at any one node because we could do a lot of work while waiting.
+So we really want a loop in the schedule:
+- Repeat:
+	- Go to next postmaster
+	- Do a probe. 
+	- If data has come in:
+		- post the wait.
+		- Distribute incoming msgs (note that this eats up time)
+- Until all postmasters are cleared.
+This loop is also a good way to figure out which nodes are bottlenecks.
+This loop is terrible to implement with the current architecture.
+	Possibly we could implement a return msg from postmaster to Clock. Ugh.
+	Should subclass ClockTick to do this if we must.
+
+Problems
+	- The ParallelMsgSrc::send command sends all messages recieved
+	by this postmaster. Need instead to send only the ones scheduled
+	for current clock tick.
+		- Make a vector of MsgSrcs
+		- Make a new MsgSrc object with a vector of MsgSrcs.
+		* Alter the 'send' command so that it picks out the scheduled
+			msgs. This is slow and ugly, but good enough for
+			testing. Done.
+
+	- Lots of mutual info goes between postmasters in a manner which needs
+		blocking calls. I've implemented things with this, but the
+		current test config will fail.
+		- Bung all data into a single big data transfer.
+			This is messy, a poor prototype, and won't handle
+			near-future sequential building of messages.
+		- Use threading
+			This is a total pain.
+		- Implement a setup time scheduler for test purposes
+			This doesn't map well to eventual implementation.
+		- Put MPI on laptop and use full API.
+			Unpleasant but doable I guess.
+
+
+Status: Looks like all allocation and data transfor for the incoming msgs
+are done, but the system fails and the final irecv call has a size of
+-big number. Suspect memory tromping.
+
+===========================================================================
+1 Nov 2006.
+
+All the bits work together now, at least as far as these limited diagnostics
+can tell. Use test_Parallel.g for the test. It has two postmasters that send
+the messages back and forth. A lot of hand tweaking is needed to get all
+the values initialized in the absence of MPI.
+
+Checked in. This was revision 26.
+
+Now I have installed MPI locally on the laptop, no excuses now for fudging
+the implementation.
 
 ===========================================================================

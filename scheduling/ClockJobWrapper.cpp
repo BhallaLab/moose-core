@@ -283,7 +283,7 @@ ClockTickMsgSrc::ClockTickMsgSrc( Element* e, Element* target )
 		conn_( e ), next_( 0 ), target_( target )
 {
  	if ( Ftype1< double >::get( target, "dt", dt_ ) ) {
- 		if ( Ftype1< int >::get( target, "stage", stage_ ) ) {
+ 		if ( Ftype1< double >::get( target, "stage", stage_ ) ) {
 			// Hacks all, to set up the recvFuncs in either direction.
 			procFunc_ = target->field( "processIn" )->recvFunc();
 			reinitFunc_ = target->field( "reinitIn" )->recvFunc();

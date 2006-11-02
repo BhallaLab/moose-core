@@ -16,12 +16,12 @@ class ClockTick
 	public:
 		ClockTick()
 		{
-			stage_ = 0;
+			stage_ = 0.0;
 			nextt_ = 0.0;
 		}
 
 	private:
-		int stage_;
+		double stage_;
 		double nextt_;
 		double epsnextt_;
 		double max_clocks_;

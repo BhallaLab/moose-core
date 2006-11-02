@@ -6,7 +6,7 @@ class ClockTickMsgSrc
 {
 	public:
 		ClockTickMsgSrc( Element* e )
-			: dt_( 1.0 ), stage_( 0 ), nextTime_( 0.0 ),
+			: dt_( 1.0 ), stage_( 0.0 ), nextTime_( 0.0 ),
 				nextClockTime_( 0.0 ), conn_( e ), next_( 0 )
 		{
 			;
@@ -55,7 +55,7 @@ class ClockTickMsgSrc
 
 	private:
 		double dt_;
-		int stage_;
+		double stage_;
 		double nextTime_;
 		double nextClockTime_;
 		RecvFunc procFunc_;
