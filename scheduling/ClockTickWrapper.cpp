@@ -18,9 +18,9 @@ Finfo* ClockTickWrapper::fieldArray_[] =
 ///////////////////////////////////////////////////////
 // Field definitions
 ///////////////////////////////////////////////////////
-	new ValueFinfo< int >(
+	new ValueFinfo< double >(
 		"stage", &ClockTickWrapper::getStage, 
-		&ClockTickWrapper::setStage, "int" ),
+		&ClockTickWrapper::setStage, "double" ),
 	new ValueFinfo< double >(
 		"nextt", &ClockTickWrapper::getNextt, 
 		&ClockTickWrapper::setNextt, "double" ),

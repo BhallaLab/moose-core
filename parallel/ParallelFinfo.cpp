@@ -56,6 +56,24 @@ Finfo* ParallelDestFinfo::respondToAdd(
 	return( &df );
 }
 
+void ParallelDestFinfo::src( vector< Field >& list, Element* e )
+{
+	vector< Conn* > conns;
+	inConn( e )->listTargets( conns );
+	vector< Conn* >::iterator i;
+
+	for ( i = conns.begin() ; i != conns.end(); i++) {
+		if ( *i != 0 ) {
+			list.push_back(
+				// the dummyFunc0() is our way to tell the lookup
+				// that this is a postmaster, just take any field whose
+				// conn ptr matches.
+				( *i )->parent()->lookupSrcField( *i, dummyFunc0 )
+			);
+		}
+	}
+}
+
 //////////////////////////////////////////////////////////////////
 // ParallelSrcFinfo functions
 //////////////////////////////////////////////////////////////////

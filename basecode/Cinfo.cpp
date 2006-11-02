@@ -120,7 +120,11 @@ Finfo* Cinfo::findRemoteMsg( Conn* c, RecvFunc func ) const
 	Element* e = c->parent();
 	for (unsigned int i = 0; i < nFields_; i++) {
 		Finfo* f = fieldArray_[i];
-		if ( f->outConn( e ) == c && f->matchRemoteFunc( e, func ) )
+		// Nasty hack here: If it was a postmaster, the remote
+		// func would be one of the postRecvFunc family. Postmaster
+		// has no idea what it is. So we send in a dummyfunc0.
+		if ( f->outConn( e ) == c && 
+			(func == dummyFunc0 || f->matchRemoteFunc( e, func ) ) )
 			return f;
 	}
 

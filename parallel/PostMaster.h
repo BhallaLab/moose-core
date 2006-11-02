@@ -33,6 +33,7 @@ class PostMaster
 		{
 			remoteNode_ = 0;
 			localNode_ = 0;
+			needsReinit_ = 0;
 		}
 
 		void addSender( const Finfo* f );
@@ -40,18 +41,17 @@ class PostMaster
 	private:
 		int remoteNode_;
 		int localNode_;
+		bool needsReinit_;
+		unsigned long tickCounter_;
+		unsigned long numTicks_;
 		vector< unsigned int > outgoingOffset_;
 		vector< unsigned int > outgoingSchedule_;
 		vector< unsigned int > outgoingSize_;
+		vector< unsigned int > outgoingEntireSize_;
 		vector< char > outgoing_;
-		vector< unsigned int > outgoingBufferTime_;
-		vector< unsigned int > outgoingBufferSize_;
-		vector< unsigned int > outgoingBufferOffset_;
-		vector< unsigned int > incomingOffset_;
+
 		vector< unsigned int > incomingSchedule_;
+		vector< unsigned int > incomingEntireSize_;
 		vector< char > incoming_;
-		vector< unsigned int > incomingBufferTime_;
-		vector< unsigned int > incomingBufferSize_;
-		vector< unsigned int > incomingBufferOffset_;
 };
 #endif // _PostMaster_h

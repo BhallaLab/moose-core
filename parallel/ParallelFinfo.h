@@ -97,6 +97,7 @@ class ParallelDestFinfo: public Dest0Finfo
 		// At this level, all we do is return a dummy finfo with 
 		// the sender's PostRecvFunc.
 		Finfo* respondToAdd( Element* e, const Finfo* sender );
+		void src( vector< Field >& list, Element* e );
 };
 
 class ParallelSrcFinfo: public NSrc0Finfo

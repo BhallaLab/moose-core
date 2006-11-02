@@ -41,7 +41,7 @@ class PostMaster
 	shared:
 	// 	single rate( double n );	// # of molecules, could be several
 									// substrates for a given reac.
-		single process( processIn, reinitIn );
+		multi process( processIn, reinitIn );
 	src:
 		multi src(); // The data type is generic for any size data
 		// Here we need the help of the target Ftype to 
@@ -96,7 +96,7 @@ class PostMaster
 			// figures out how to sched it. Uses the sender finfos
 			// Ftype::size() (yet to be implemented).
 
-		single process( ProcInfo info ) {
+		multi process( ProcInfo info ) {
 			// Each of the scheduled Process calls first guarantees that
 			// pending messages are received, then sends out a distinct
 			// set of messages.
@@ -112,7 +112,7 @@ class PostMaster
 // A bit of a bootstrap problem here. The reinit sets up the
 // messaging for the process and reinit calls, but until
 // reinit is called it is not safe to use this messaging.
-		single reinit() {
+		multi reinit() {
 			vector< unsigned long > segments( 1, 0 );
 			unsigned long nMsgs = outgoingSize_.size();
 			unsigned int offset = 0;
@@ -163,20 +163,13 @@ class PostMaster
 		vector< unsigned int > outgoingSize_;
 
 		// Have a single big vector of chars so that the index
-		// goes straight to the correct place, and organize the
-		// scheduling as chunks of this single big vector. We can
-		// update the destOffset if we have to expand the big
-		// vector when stuff is added in the middle.
+		// goes straight to the correct place. Each clock tick
+		// fills in stuff starting at the beginning of this vector.
 		vector< char > outgoing_;
-		// Possibly we could point directly into the MPI outgoing buffer
-		// based on which messagedest it is? No, messagedests are not
-		// sorted by func call. But we could have a set of dests
-		// dynamically built? Not without major hacking of the code.
-
-		// The next two vectors are for the entire buffer for each tick
-		vector< unsigned int > outgoingBufferTime_;
-		vector< unsigned int > outgoingBufferSize_;
-		vector< unsigned int > outgoingBufferOffset_;
+		
+		// This final vector is so we know how much data to send on
+		// each clock tick.
+		vector< unsigned int > outgoingEntireSize_;
 
 		// Alternative:
 		// a vector of buffers: one buffer for each

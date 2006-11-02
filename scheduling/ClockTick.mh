@@ -16,7 +16,7 @@ class ClockTick
 	description:
 		ClockTick class. Controls execution of objects on a given dt.
 	field:
-		int stage = 0;
+		double stage = 0.0;
 		double nextt = 0.0;
 		double epsnextt;
 		double max_clocks;

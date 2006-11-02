@@ -35,9 +35,17 @@ class PostMasterWrapper:
 ///////////////////////////////////////////////////////
 //    Field header definitions.                      //
 ///////////////////////////////////////////////////////
+
+		void localSetRemoteNode( int node );
+		static void setRemoteNode( Conn* c, int value ) {
+			static_cast< PostMasterWrapper* >( c->parent() )->
+					localSetRemoteNode( value );
+		}
+
 		static int getRemoteNode( const Element* e ) {
 			return static_cast< const PostMasterWrapper* >( e )->remoteNode_;
 		}
+
 		static int getLocalNode( const Element* e ) {
 			return static_cast< const PostMasterWrapper* >( e )->localNode_;
 		}
@@ -71,6 +79,17 @@ class PostMasterWrapper:
 				reinitFuncLocal(  );
 		}
 
+		void postFuncLocal( ProcInfo info );
+		static void postFunc( Conn* c, ProcInfo info ) {
+			static_cast< PostMasterWrapper* >( c->parent() )->
+				postFuncLocal( info );
+		}
+
+		// Dummy func, equivalent of reinitFunc, does nothing.
+		static void postInitFunc( Conn* c ) {
+			;
+		}
+
 
 ///////////////////////////////////////////////////////
 // Synapse creation and info access functions.       //
@@ -79,6 +98,9 @@ class PostMasterWrapper:
 ///////////////////////////////////////////////////////
 // Conn access functions.                            //
 ///////////////////////////////////////////////////////
+		static Conn* getPostConn( Element* e ) {
+			return &( static_cast< PostMasterWrapper* >( e )->postConn_ );
+		}
 		static Conn* getProcessConn( Element* e ) {
 			return &( static_cast< PostMasterWrapper* >( e )->processConn_ );
 		}
@@ -106,12 +128,32 @@ class PostMasterWrapper:
 		}
 
 		char* getPostPtr( unsigned long index );
+///////////////////////////////////////////////////////
+// Schedule and setup functions.                     //
+///////////////////////////////////////////////////////
+
+		void assignSchedule();
+		void informTargetNode();
+		void connectTick( Element* tick );
+		bool callsMe( Element* tickElm );
+		bool connect( const string& target );
+		void checkPendingRequests();
+
+		void assignIncomingSizes();
+		void assignIncomingSchedule();
+
+///////////////////////////////////////////////////////
+// testing functions
+///////////////////////////////////////////////////////
+		void isend( char* buf, int size, char* name, int tag, int dest);
+		void irecv( char* buf, int size, char* name, int tag, int src );
 
     private:
 ///////////////////////////////////////////////////////
 // MsgSrc template definitions.                      //
 ///////////////////////////////////////////////////////
 		ParallelMsgSrc srcSrc_;
+		MultiConn postConn_;
 		UniConn< processConnPostMasterLookup > processConn_;
 		MultiConn srcOutConn_;
 		SolveMultiConn destInConn_;
@@ -123,6 +165,9 @@ class PostMasterWrapper:
 ///////////////////////////////////////////////////////
 // Private functions and fields for the Wrapper class//
 ///////////////////////////////////////////////////////
+// here are some for testing
+		char* remoteTransferBuffer_;
+		char localTransferBuffer_[1000];
 
 ///////////////////////////////////////////////////////
 // Static initializers for class and field info      //

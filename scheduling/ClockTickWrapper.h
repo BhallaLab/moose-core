@@ -31,10 +31,10 @@ class ClockTickWrapper:
 ///////////////////////////////////////////////////////
 //    Field header definitions.                      //
 ///////////////////////////////////////////////////////
-		static void setStage( Conn* c, int value ) {
+		static void setStage( Conn* c, double value ) {
 			static_cast< ClockTickWrapper* >( c->parent() )->stage_ = value;
 		}
-		static int getStage( const Element* e ) {
+		static double getStage( const Element* e ) {
 			return static_cast< const ClockTickWrapper* >( e )->stage_;
 		}
 		static void setNextt( Conn* c, double value ) {

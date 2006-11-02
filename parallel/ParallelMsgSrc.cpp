@@ -25,7 +25,8 @@ bool ParallelMsgSrc::add( RecvFunc rf, const Ftype* ft, Conn* target )
 	return 0;
 }
 
-void ParallelMsgSrc::send( char* dataPtr ) 
+void ParallelMsgSrc::send( char* dataPtr, vector< unsigned int >& sched, 
+			unsigned long tick) 
 {
 	if ( rfuncs_.size() != targetType_.size() ) {
 		cerr << "Warning: ParallelMsgSrc::send: size of rfuncs != targetType\n";
@@ -34,10 +35,20 @@ void ParallelMsgSrc::send( char* dataPtr )
 	vector< Conn* >::const_iterator j;
 	// char* dataPtr = &( inbuf_.front() );
 	//const Ftype* ft = &( targetType_.front() );
+	
+	size_t k = 0;
 	for (size_t i = 0; i < rfuncs_.size(); i++) {
 		const Ftype* ft = targetType_[ i ];
 		RecvFunc rf = rfuncs_[ i ];
-		for ( j = c_->begin( i ); j != c_->end( i ); j++ )
-			dataPtr = ft->rfuncAdapter( *j, rf, dataPtr );
+		for ( j = c_->begin( i ); j != c_->end( i ); j++ ) {
+			if ( sched[ k++ ] == tick ) {
+				dataPtr = ft->rfuncAdapter( *j, rf, dataPtr );
+			}
+		}
 	}
+}
+
+void ParallelMsgSrc::send( char* dataPtr )
+{
+	cout << "Error: Should not reach ParallelMsgSrc::send\n";
 }
