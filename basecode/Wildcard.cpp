@@ -296,9 +296,9 @@ void testWildcard()
 	wildcardTestFunc( el2, flist.size(), "/classes/#" );
 	wildcardTestFunc( el2, flist.size(), "/##[TYPE=Cinfo]" );
 	wildcardTestFunc( el2, flist.size(), "/##[ISA=Cinfo]" );
-	wildcardTestFunc( el2 + 1, 1, "/##[FIELD(name)=Cinfo]" );
-	wildcardTestFunc( el2 + 2, 1, "/##[FIELD(name)=ClockJob]" );
-	wildcardTestFunc( el2 + 3, 1, "/##[FIELD(name)==ClockTick]" );
+	wildcardTestFunc( el2 + 2, 1, "/##[FIELD(name)=Cinfo]" );
+	wildcardTestFunc( el2 + 3, 1, "/##[FIELD(name)=ClockJob]" );
+	wildcardTestFunc( el2 + 4, 1, "/##[FIELD(name)==ClockTick]" );
 	wildcardTestFunc( el2, flist.size() - 1, 
 		"classes/##[FIELD(name)!=Tock]" );
 	cout << " done\n";

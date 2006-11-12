@@ -1,0 +1,96 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2006 Niraj Dudani and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+#include <deque>
+#include <fstream>
+
+class AutoCorr
+{
+	public:
+	author: Niraj Dudani
+	description:
+		Auto-correlation histogram.
+		Accepts spike-amplitudes from a spike train and computes its
+		auto-correlogram. Spikes are recorded only if their amplitudes
+		cross the given threshold.
+		
+		Important fields:
+			binCount:  Number of bins, preferably odd.
+			binWidth:  Width of one bin in units of time.
+		
+		If binCount = 3, binWidth = 1.0, the bins appear as:
+		
+		        |   Bin 0   |   Bin 1   |   Bin 2   |
+		        |-----+-----|-----+-----|-----+-----|
+		      -1.5  -1.0  -0.5  -0.0   0.5   1.0   1.5
+
+	field:
+		double   threshold = 0.0;
+		int      binCount = 0;
+		double   binWidth;
+		int      spikeCount = 0;
+	
+	shared:
+		single process( processIn, reinitIn );
+	dest:
+		single spike( double amplitude, double cTime ) {
+			if( amplitude < threshold_ )
+				return;
+			
+			deque<double>::iterator i = spikeTime_.begin();
+			while ( i != spikeTime_.end() && cTime - *i >= ccWidth_ )
+				++i;
+			spikeTime_.erase( spikeTime_.begin(), i );
+			
+			for( i = spikeTime_.begin(); i != spikeTime_.end(); ++i )
+				++correlogram_ [
+					static_cast<int>
+					(( cTime - *i + ccWidth_ ) / binWidth_)
+				];
+
+			++spikeCount_;
+			spikeTime_.push_back( cTime );
+		}
+
+		single print( string fileName, int plotMode ) {
+			ofstream fout( fileName.c_str(), plotMode==1 ? ios::out : ios::app );
+			fout << "/Cross-correlogram\n/Correlogram name " << name() << endl;
+			long ic = - ( correlogram_.size() / 2 );
+			for( long ii = 0;
+			     ii < static_cast<signed long> (correlogram_.size());
+			     ++ii, ++ic )
+				fout << ic * binWidth_ << '\t' << correlogram_[ii] << endl;
+			fout << endl;
+			fout.close();
+		}
+
+		single reinit( ) {
+			correlogram_.resize( binCount_, 0 );
+			spikeTime_.clear();
+			spikeCount_ = 0;
+			ccWidth_ = binCount_ * binWidth_ / 2.0;
+		}
+		
+		single process( ProcInfo info ) { }
+
+	private:
+		// For the spike-times, a Deque is the natural choice, since many
+		// additions will take place at the back and discards at the front.
+		// Moreover, access is always going to be sequential for spike-times.
+
+		// In contrast, a vector serves well for the correlogram (random-access,
+		// fixed size).
+		
+		// ccWidth_ is 1/2 the width of the entire histogram, in seconds.
+
+		deque<double>  spikeTime_;
+		vector<int>    correlogram_;
+		double         ccWidth_;
+};

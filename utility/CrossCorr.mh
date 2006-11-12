@@ -1,0 +1,124 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2006 Niraj Dudani and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+#include <deque>
+#include <fstream>
+
+class CrossCorr
+{
+	public:
+	author: Niraj Dudani
+	description:
+		Cross-correlation histogram.
+		Accepts spike-amplitudes from spike trains A and B, and
+		computes their cross-correlogram. Spikes are recorded only
+		if their amplitudes cross the given threshold.
+		
+		Important fields:
+			binCount:  Number of bins, preferably odd.
+			binWidth:  Width of one bin in units of time.
+		
+		If binCount = 3, binWidth = 1.0, the bins appear as:
+		
+		        |   Bin 0   |   Bin 1   |   Bin 2   |
+		        |-----+-----|-----+-----|-----+-----|
+		      -1.5  -1.0  -0.5  -0.0   0.5   1.0   1.5
+
+	field:
+		double   threshold = 0.0;
+		int      binCount = 0;
+		double   binWidth;
+		int      aSpikeCount = 0;
+		int      bSpikeCount = 0;
+	
+	shared:
+		single process( processIn, reinitIn );
+	dest:
+		single aSpike( double amplitude, double cTime ) {
+			if( amplitude < threshold_ )
+				return;
+			
+			++aSpikeCount_;
+			aSpikeTime_.push_back( cTime );
+			
+			// Newest spike-time from train A is compared against all spike-
+			// -times from train B, except for the very old ones, which are
+			// purged (to conserve memory.)
+			deque<double>::iterator ib;
+			for( ib = bSpikeTime_.begin(); ib != bSpikeTime_.end(); ++ib )
+				if ( cTime - *ib > ccWidth_ )
+					bSpikeTime_.pop_front();
+				else
+					++correlogram_ [
+						static_cast<int>
+						(( *ib - cTime + ccWidth_ ) / binWidth_)
+					];
+		}
+
+		single bSpike( double amplitude, double cTime ) {
+			if( amplitude < threshold_ )
+				return;
+			
+			++bSpikeCount_;
+			bSpikeTime_.push_back( cTime );
+			
+			// Faster way to discard old spike-times..
+			if ( aSpikeTime_.empty() )
+				return;
+			deque<double>::iterator ia = aSpikeTime_.begin();
+			while ( ia != aSpikeTime_.end() && cTime - *ia >= ccWidth_ )
+				++ia;
+			aSpikeTime_.erase( aSpikeTime_.begin(), ia );
+			
+			for( ia = aSpikeTime_.begin(); ia != aSpikeTime_.end(); ++ia )
+				++correlogram_ [
+					static_cast<int>
+					(( cTime - *ia + ccWidth_ ) / binWidth_)
+				];
+		}
+
+		single print( string fileName, int plotMode ) {
+			ofstream fout( fileName.c_str(), plotMode==1 ? ios::out : ios::app );
+			fout << "/Cross-correlogram\n/Correlogram name " << name() << endl;
+			long ic = - ( correlogram_.size() / 2 );
+			for( long ii = 0;
+			     ii < static_cast<signed long> (correlogram_.size());
+			     ++ii, ++ic )
+				fout << ic * binWidth_ << '\t' << correlogram_[ii] << endl;
+			fout << endl;
+			fout.close();
+		}
+		
+		single reinit( ) {
+			correlogram_.resize( binCount_, 0 );
+			aSpikeTime_.clear();
+			bSpikeTime_.clear();
+			aSpikeCount_ = 0;
+			bSpikeCount_ = 0;
+			ccWidth_ = binCount_ * binWidth_ / 2.0;
+		}
+		
+		single process( ProcInfo info ) { }
+
+	private:
+		// For the spike-times, a Deque is the natural choice, since many
+		// additions will take place at the back and discards at the front.
+		// Moreover, access is always going to be sequential for spike-times.
+
+		// In contrast, a vector serves well for the correlogram (random-access,
+		// fixed size).
+		
+		// ccWidth_ is 1/2 the width of the entire histogram, in seconds.
+
+		deque<double>  aSpikeTime_;
+		deque<double>  bSpikeTime_;
+		vector<int>    correlogram_;
+		double         ccWidth_;
+};

@@ -1,0 +1,84 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2006 Niraj Dudani and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+
+#include <cmath>
+#include "../randnum/randnum.h"
+#define mtrandf(l,h)     (l)==(h) ? (l) : mtrand() * ((h)-(l)) + (l)
+
+class RandomSpike
+{
+	public:
+	author: Niraj Dudani
+	description:
+	field:
+		double rate;
+		double absoluteRefractoryPeriod = 0.0;
+		double state = 0.0;
+		int reset = 1;
+		double resetValue = 0.0;
+		double minAmp = 1.0;
+		double maxAmp = 1.0;
+	
+	shared:
+		single process( processIn, reinitIn );
+	src:
+		multi state( double state );
+		multi stateTime( double state, double time );
+	dest:
+		single reinit( ) {
+			mtseed( 1 );  // Seeding better done at a global level.
+			
+			state_ = resetValue_;
+			if ( rate_ <= 0.0 ) {
+				lastEvent_ = 0.0;
+				realRate_ = 0.0;
+			} else {
+				double p;
+				while((p = mtrand()) == 0.0)    // get random number larger than 0
+					;
+				lastEvent_ = log( p ) / rate_;
+			}
+		}
+
+		single rate( double rate ) {
+			rate_ = rate;
+			double p = 1.0 - rate_ * absoluteRefractoryPeriod_;
+			if ( p <= 0.0 )
+				realRate_ = rate;
+			else
+		    		realRate_ = rate / p;
+		}
+
+		single process( ProcInfo info ) {
+			double cTime = info->currTime_;
+			
+			if ( reset_ )
+				state_ = resetValue_;
+			
+			// if we're still in the refractory period then return
+			if ( absoluteRefractoryPeriod_ > cTime - lastEvent_ )
+				return;
+			
+			// send spike event at random times
+			double p = realRate_ * 1.0;  // !!! Should be clock-rate in place of 1.0
+			if ( p >= mtrand() ) {
+				lastEvent_ = cTime;
+				state_ = mtrandf( minAmp_, maxAmp_ );
+	  		}
+			
+			state( state_ );
+			stateTime( state_, cTime );
+		}
+
+	private:
+		double lastEvent_;
+		double realRate_;
+};
