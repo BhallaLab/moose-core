@@ -1,0 +1,53 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2006 Niraj Dudani and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class DummyDelay
+{
+	author: Niraj Dudani
+	description:
+		Stores a spike-amplitude and emits it after 'delay' steps
+	field:
+		double threshold = 0.0;
+		int delay = 0;
+	shared:
+		single process( processIn, reinitIn );
+	src:
+		multi spike( double amplitude );
+		multi spikeTime( double amplitude, double time );
+	dest:
+		multi spike( double amplitude ) {
+			// Ignore incoming spike if a spike is already in store, or
+			// if incoming amplitude is too small.
+			if( stepsRemaining_ != -1 || amplitude < threshold_ )
+				return;
+			
+			amplitude_ = amplitude;
+			stepsRemaining_ = delay_;
+		}
+		
+		single reinit( ) {
+			amplitude_ = 0;
+			stepsRemaining_ = -1;
+		}
+		
+		single process( ProcInfo info ) {
+			if( stepsRemaining_ == -1 )
+				return;
+			if( stepsRemaining_ == 0 ) {
+				spike( amplitude_ );
+				spikeTime( amplitude_, info->currTime_ );
+			}
+			--stepsRemaining_;
+		}
+
+	private:
+		double amplitude_;
+		int stepsRemaining_;	
+};

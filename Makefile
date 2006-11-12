@@ -47,7 +47,7 @@ LD = ld
 #
 # moved genesis_parser to beginning since it generates code
 #
-SUBDIR = genesis_parser basecode maindir randnum builtins scheduling kinetics biophysics textio parallel hsolve
+SUBDIR = genesis_parser basecode maindir randnum builtins scheduling kinetics biophysics textio parallel hsolve utility
 
 OBJLIBS =	\
 	basecode/basecode.o \
@@ -61,6 +61,7 @@ OBJLIBS =	\
 	biophysics/biophysics.o \
 	parallel/parallel.o \
 	hsolve/hsolve.o \
+	utility/utility.o \
 
 moose: libs $(OBJLIBS)
 	$(CXX) $(CFLAGS) $(OBJLIBS) $(LIBS) -o moose
