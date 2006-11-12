@@ -156,6 +156,18 @@ class Enzyme
 				sk1_ = 1.0;
 		}
 
+		multi scaleKm( double k ) {
+			if ( k > 0 )
+				s_ /= k;
+			else
+				cout << "Error: Enzyme::scaleKm msg: negative k = " <<
+					k << endl;
+		}
+
+		multi scaleKcat( double k ) {
+			pA_ *= n;
+		}
+
 	private:
 		// Stuff here will be copied over unchanged to .h.
 		double sA_;

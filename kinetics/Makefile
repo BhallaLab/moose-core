@@ -24,6 +24,7 @@ OBJ = \
 	SparseMatrix.o	\
 	ForwardEulerWrapper.o	\
 	KineticHubWrapper.o	\
+	MultiSiteWrapper.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -59,6 +60,7 @@ ForwardEulerWrapper.o: ForwardEuler.h ForwardEulerWrapper.h
 KsolveWrapper.o: Ksolve.h KsolveWrapper.h
 Ksolve.o: Ksolve.h
 KineticHubWrapper.o: KineticHub.h KineticHubWrapper.h
+MultiSiteWrapper.o: MultiSite.h MultiSiteWrapper.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c

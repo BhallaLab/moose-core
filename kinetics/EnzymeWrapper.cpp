@@ -79,6 +79,12 @@ Finfo* EnzymeWrapper::fieldArray_[] =
 	new Dest1Finfo< double >(
 		"intramolIn", &EnzymeWrapper::intramolFunc,
 		&EnzymeWrapper::getIntramolInConn, "" ),
+	new Dest1Finfo< double >(
+		"scaleKmIn", &EnzymeWrapper::scaleKmFunc,
+		&EnzymeWrapper::getScaleKmInConn, "" ),
+	new Dest1Finfo< double >(
+		"scaleKcatIn", &EnzymeWrapper::scaleKcatFunc,
+		&EnzymeWrapper::getScaleKcatInConn, "" ),
 ///////////////////////////////////////////////////////
 // Synapse definitions
 ///////////////////////////////////////////////////////
@@ -160,6 +166,14 @@ void EnzymeWrapper::intramolFuncLocal( double n )
 				sk1_ = 1.0 / n;
 			else
 				sk1_ = 1.0;
+}
+void EnzymeWrapper::scaleKmFuncLocal( double k )
+{
+			if ( k > 0 )
+				s_ /= k;
+			else
+				cout << "Error: Enzyme::scaleKm msg: negative k = " <<
+					k << endl;
 }
 ///////////////////////////////////////////////////
 // Connection function definitions

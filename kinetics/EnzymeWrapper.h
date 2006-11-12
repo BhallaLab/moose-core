@@ -33,8 +33,10 @@ class EnzymeWrapper:
 			// enzConn uses a templated lookup function,
 			// cplxConn uses a templated lookup function,
 			subConn_( this ),
-			prdOutConn_( this )
-			// intramolInConn uses a templated lookup function
+			prdOutConn_( this ),
+			// intramolInConn uses a templated lookup function,
+			scaleKmInConn_( this ),
+			scaleKcatInConn_( this )
 		{
 			;
 		}
@@ -166,6 +168,20 @@ class EnzymeWrapper:
 				intramolFuncLocal( n );
 		}
 
+		void scaleKmFuncLocal( double k );
+		static void scaleKmFunc( Conn* c, double k ) {
+			static_cast< EnzymeWrapper* >( c->parent() )->
+				scaleKmFuncLocal( k );
+		}
+
+		void scaleKcatFuncLocal( double k ) {
+			pA_ *= k;
+		}
+		static void scaleKcatFunc( Conn* c, double k ) {
+			static_cast< EnzymeWrapper* >( c->parent() )->
+				scaleKcatFuncLocal( k );
+		}
+
 
 ///////////////////////////////////////////////////////
 // Synapse creation and info access functions.       //
@@ -196,6 +212,12 @@ class EnzymeWrapper:
 		}
 		static Conn* getIntramolInConn( Element* e ) {
 			return &( static_cast< EnzymeWrapper* >( e )->intramolInConn_ );
+		}
+		static Conn* getScaleKmInConn( Element* e ) {
+			return &( static_cast< EnzymeWrapper* >( e )->scaleKmInConn_ );
+		}
+		static Conn* getScaleKcatInConn( Element* e ) {
+			return &( static_cast< EnzymeWrapper* >( e )->scaleKcatInConn_ );
 		}
 
 ///////////////////////////////////////////////////////
@@ -231,6 +253,8 @@ class EnzymeWrapper:
 		MultiConn subConn_;
 		MultiConn prdOutConn_;
 		UniConn< intramolInConnEnzymeLookup > intramolInConn_;
+		PlainMultiConn scaleKmInConn_;
+		PlainMultiConn scaleKcatInConn_;
 
 ///////////////////////////////////////////////////////
 // Synapse definition.                               //

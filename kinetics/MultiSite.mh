@@ -1,0 +1,201 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+class MultiSite
+{
+	public:
+		// Stuff here will be copied over to .h unchanged.
+		MultiSite()
+			: nTotal_( 0.0), states_(1, 0), occupancy_(1, 1.0),
+				rates_(1, 1.0), fraction_( 1, 0.0)
+		{
+		}
+	author: 
+		Upinder S. Bhalla, 2006, NCBS
+	description:
+		A multi-site molecule or complex. Manages a number of sites
+		which can be either bound or unbound (2 states only). Each
+		of these is reprepresented as a regular molecule pool.
+		Consider a MultiSite molecule MS. It has 3 sites, S1, S2 and S3.
+		Reaction rate does not depend on S1 at all.
+		We have basal rate for S2 and S3 both bound
+		We have a high rate if S2 is empty and S3 is bound
+		We have a low rate if S2 is bound and S3 is in any state.
+
+             S1  S2  S3
+              |   |   |
+              |   |   |
+              |   |   |
+              V   V   V
+              MultiSite
+              f1  f2  f3  : Compute fraction of molecules in each state.
+              -1  0   1   : State array. ----> occupancy 1
+              -1  1  -1   : State array. ----> occupancy 2.
+
+			  Note that occupancy zero is calculated as what is left
+			  over from the others.
+
+          Suppose we have total MS = 3. Let
+		[S1] = 1, [S2] = 1. [S3] = 2. Then,
+        f1_1 = 1 (no effect). f2_1 = 1/3, f3_1 = 1/2
+        Occupancy 0 = 1 * 2/3 * 1/2 = 1/3           // Default state.
+        Occupancy 1 = 1 * 2/3 * 1/2 = 1/3
+        Occupancy 2 = 1 * 1/3 * 1   = 1/3
+
+		So we end up with equal # of molecules in each state:
+		1/3, 1/3, 1/3.
+
+		Say reaction is conversion of S0 to S0*
+		So total rate should be
+
+		Occupancy0 * kf * (basal = 1) +
+		Occupancy1 * kf * rate1 +
+		Occupancy2 * kf * rate2
+
+		Or,
+		rate = substrate concs * kf * scale_factor.
+
+		To implement all these calculations, the MultiSite uses 
+		3 arrays:
+		states: Array of ints that defines each state.
+			Each set has as many ints as there are sites.
+			Each int can take one of three values:
+				0: Site must be unoccupied
+				1: Site must be occupied
+				-1: Site does not matter.
+			size is # of states * # of sites.
+			The values in states are set by user.
+		occupancy: Array of doubles holding proportion of the Multisite
+			in the specified state. Size = # of states.
+			Occupancy zero is always calculated as (1 - the rest).
+			The values in this array are calculated by object.
+		rates: Array of doubles holding the new rates for each
+			state. Assuming occupancy of state were 1, the reaction
+			rate is scaled by this new rate. 
+			The rate values are set by user.
+		After all this, a single scale factor is computed, which
+			is sigma( occupancy_i * rate_i ). This scale factor is
+			sent out to the target reaction(s).
+
+	field:
+		double nTotal;	// Total number of molecules.
+		int states[];
+		double occupancy[];
+		double rates[];
+	eval_field:
+		int getNSites() {
+			return fraction_.size();
+		}
+
+		void setNSites( int value) {
+			if ( value > 0 ) {
+				vector< unsigned long > segments( 1, value );
+				states_.resize( value * occupancy_.size() );
+				fraction_.resize( value );
+				siteInConn_.resize( segments );
+			}
+		}
+
+		int getNStates() {
+			return occupancy_.size();
+		}
+
+		void setNStates( int value) {
+			if ( value > 0 ) {
+				occupancy_.resize( value );
+				rates_.resize( value );
+				states_.resize( fraction_.size() * value );
+			}
+		}
+
+	shared:
+		single process( processIn, reinitIn );
+		single solve( processIn, reinitIn, solveIn, solveOut );
+	src:
+		multi scale( double );
+		single solve( const vector< int >* states, const vector< double >* rates, int op);
+	
+	dest:
+		// Yet again, we need to know the index of the msg source.
+		solve site( double n ) {
+			if ( index < static_cast< long >( fraction_.size() ) )
+				fraction_[index] = n / nTotal_;
+		}
+
+		single reinit( ) {
+			if ( fraction_.size() != siteInConn_.nTargets() ) {
+				cout << "Warning: MultiSite::reinit: nSites != number of site messages (" <<
+				fraction_.size() << " != " <<
+				siteInConn_.nTargets() << endl;
+			}
+		}
+
+		single process( ProcInfo info ) {
+			double totalOccupancy = 0.0;
+			int nStates = occupancy_.size();
+			int nSites = fraction_.size();
+			for (int i = 0; i < nStates; i++ ) {
+				double scale = 1.0;
+				for (int j = 0; j < nSites; j++ ) {
+					int state =  states_[j + nSites * i];
+					if ( state == 0 ) {
+						scale *= 1.0 - fraction_[j];
+					} else if ( state == 1 ) {
+						scale *= fraction_[j];
+					}
+					// if state is -1, then the scale is unchanged
+				}
+				occupancy_[i] = scale;
+				totalOccupancy += scale;
+			}
+			// We fill in the basal occupancy contribution first.
+			double temp = (1.0 - totalOccupancy);
+			for (int i = 0; i < nStates; i++ )
+				temp += occupancy_[i] * rates_[i];
+			scale( temp );
+		}
+
+		// Don't need to do anything here as the solver directly
+		// controls the molecules and sets their n.
+		single solve( ) {
+		}
+
+	private:
+		vector< double > fraction_;
+
+	private_wrapper:
+		void solverUpdate( const Finfo* f, SolverOp s ) const;
+		bool isSolved() const;
+};
+
+////////////////////////////////////////////////////////////////////
+// Stuff below here goes verbatim into MultiSiteWrapper.cpp
+////////////////////////////////////////////////////////////////////
+
+bool MultiSiteWrapper::isSolved() const
+{
+	return ( solveSrc_.targetFunc(0) && 
+		solveSrc_.targetFunc(0) != dummyFunc0 );
+}
+
+void MultiSiteWrapper::solverUpdate( const Finfo* f, SolverOp s ) const
+{
+	if ( solveSrc_.targetFunc(0) && 
+		solveSrc_.targetFunc(0) != dummyFunc0 ) {
+		if ( s == SOLVER_SET ) {
+			if ( f->name() == "states" || f->name() == "rates" ||
+				f->name() == "nSites" || f->name() == "nStates" )
+				solveSrc_.send( &states_, &rates_, SOLVER_SET );
+		} else if ( s == SOLVER_GET ) {
+			// don't need anything here.
+		}
+		// Other stuff later for ADDMSG and DELETEMSG.
+	}
+}
