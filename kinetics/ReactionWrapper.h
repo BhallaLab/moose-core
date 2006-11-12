@@ -25,7 +25,9 @@ class ReactionWrapper:
 			// processConn uses a templated lookup function,
 			// solveConn uses a templated lookup function,
 			subConn_( this ),
-			prdConn_( this )
+			prdConn_( this ),
+			scaleKfInConn_( this ),
+			scaleKbInConn_( this )
 		{
 			;
 		}
@@ -92,6 +94,22 @@ class ReactionWrapper:
 				prdFuncLocal( n );
 		}
 
+		void scaleKfFuncLocal( double k ) {
+			A_ *= k;
+		}
+		static void scaleKfFunc( Conn* c, double k ) {
+			static_cast< ReactionWrapper* >( c->parent() )->
+				scaleKfFuncLocal( k );
+		}
+
+		void scaleKbFuncLocal( double k ) {
+			B_ *= k;
+		}
+		static void scaleKbFunc( Conn* c, double k ) {
+			static_cast< ReactionWrapper* >( c->parent() )->
+				scaleKbFuncLocal( k );
+		}
+
 
 ///////////////////////////////////////////////////////
 // Synapse creation and info access functions.       //
@@ -111,6 +129,12 @@ class ReactionWrapper:
 		}
 		static Conn* getPrdConn( Element* e ) {
 			return &( static_cast< ReactionWrapper* >( e )->prdConn_ );
+		}
+		static Conn* getScaleKfInConn( Element* e ) {
+			return &( static_cast< ReactionWrapper* >( e )->scaleKfInConn_ );
+		}
+		static Conn* getScaleKbInConn( Element* e ) {
+			return &( static_cast< ReactionWrapper* >( e )->scaleKbInConn_ );
 		}
 
 ///////////////////////////////////////////////////////
@@ -141,6 +165,8 @@ class ReactionWrapper:
 		UniConn< solveConnReactionLookup > solveConn_;
 		MultiConn subConn_;
 		MultiConn prdConn_;
+		PlainMultiConn scaleKfInConn_;
+		PlainMultiConn scaleKbInConn_;
 
 ///////////////////////////////////////////////////////
 // Synapse definition.                               //

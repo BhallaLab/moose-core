@@ -81,6 +81,18 @@ class Reaction
 			B_ *= n;
 		}
 
+		// This is identical to sub, but it would confuse
+		// objects trying to scan the messaging structure.
+		multi scaleKf( double k ) {
+			A_ *= k;
+		}
+
+		// This is identical to prd, but it would confuse
+		// objects trying to scan the messaging structure.
+		multi scaleKb( double k ) {
+			B_ *= k;
+		}
+
 	private:
 		// Stuff here will be copied over unchanged to .h.
 		double A_;

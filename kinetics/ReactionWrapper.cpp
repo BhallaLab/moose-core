@@ -51,6 +51,12 @@ Finfo* ReactionWrapper::fieldArray_[] =
 	new Dest1Finfo< double >(
 		"prdIn", &ReactionWrapper::prdFunc,
 		&ReactionWrapper::getPrdConn, "", 1 ),
+	new Dest1Finfo< double >(
+		"scaleKfIn", &ReactionWrapper::scaleKfFunc,
+		&ReactionWrapper::getScaleKfInConn, "" ),
+	new Dest1Finfo< double >(
+		"scaleKbIn", &ReactionWrapper::scaleKbFunc,
+		&ReactionWrapper::getScaleKbInConn, "" ),
 ///////////////////////////////////////////////////////
 // Synapse definitions
 ///////////////////////////////////////////////////////
