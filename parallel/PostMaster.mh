@@ -8,40 +8,63 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-/*
-struct PostBuffer {
-	public: 
-		unsigned int schedule;
-		unsigned long size;
-		vector< unsigned int > offset_;
-	private:
-		char* buffer;
-};
-*/
+#define DATA_TAG 0
+#define ASYNC_TAG 1
 
+#define ASYNC_BUF_SIZE 1000
+
+#include <mpi.h>
+#include "ParallelMsgSrc.h"
 #include "ParallelFinfo.h"
-
-// Dummy functions
-void isend( char* buf, int size, char* name, int dest );
-void irecv( char* buf, int size, char* name, int src );
 
 class PostMaster
 {
 	public:
+		PostMaster()
+			: needsReinit_( 0 ), 
+			numTicks_(0),
+			comm_( MPI::COMM_WORLD )
+		{
+			remoteNode_ = 0;
+			myNode_ = MPI::COMM_WORLD.Get_rank();
+			pollFlag_ = 0;
+			asyncBuf_ = new char[ASYNC_BUF_SIZE];
+		}
 		// Stuff here will be copied over to .h unchanged.
+		void addSender( const Finfo* sender );
 	author: 
-		Upinder S. Bhalla, September 2006, NCBS
+		Upinder S. Bhalla, November 2006, NCBS
 	description:
 		Object for relaying messages between nodes. 
 
 	field:
-		readonly int remoteNode = 0;
-		readonly int localNode = 0;
+		readonly int myNode;
+
+	eval_field:
+		int getPollFlag() {
+			return pollFlag_;
+		}
+		void setPollFlag( int value ) {
+			pollFlag_ = value;
+			while ( pollFlag_ )
+				checkPendingRequests();
+		}
+
+		int getRemoteNode() {
+			return remoteNode_;
+		}
+		void setRemoteNode( int value ) {
+			remoteNode_ = value;
+			asyncRequest_ = comm_.Irecv( 
+				asyncBuf_, ASYNC_BUF_SIZE, MPI_CHAR,
+				remoteNode_, ASYNC_TAG );
+			cout << "Making initial asyncReq on node " << myNode_ << endl;
+		}
 
 	shared:
-	// 	single rate( double n );	// # of molecules, could be several
-									// substrates for a given reac.
-		multi process( processIn, reinitIn );
+		single process( processIn, reinitIn );
+		single remoteCommand( remoteCommandIn, remoteCommandOut, addOutgoingIn, addIncomingIn );
+		multi parProcess( asyncIn, postIrecvIn, postSendIn, pollRecvIn, pollRecvOut );
 	src:
 		multi src(); // The data type is generic for any size data
 		// Here we need the help of the target Ftype to 
@@ -52,16 +75,14 @@ class PostMaster
 		// }
 		// When we get the target finfo from respondToAdd we grab
 		// this function from the Ftype.
-		// Next issue is how to order the outputs. Order must match
-		// the scheduling order of the originating node. In general,
-		// the sending node knows this at the time the message is made.
-		// But it may revise it later to 
-		// We may need a special kind of msgsrc to handle this 
-		// reordering. It should allow an initial arbitrary ordering of
-		// dests, even if ther rfuncAdapters are scrambled. Then
-		// it should sort it, and send back the info to the source node.
-		// Very messy.
 
+		// This is used for asynchrnous calls between shells on 
+		// different nodes. Especially needed for message setup.
+		single remoteCommand( string );
+
+		// Notifies originating parTick that recv is complete.
+		multi pollRecv();
+		
 	dest:
 		solve dest( );	// The data type again. Here we also need
 			// the index info that the solve messages give so that we
@@ -96,58 +117,132 @@ class PostMaster
 			// figures out how to sched it. Uses the sender finfos
 			// Ftype::size() (yet to be implemented).
 
-		multi process( ProcInfo info ) {
-			// Each of the scheduled Process calls first guarantees that
-			// pending messages are received, then sends out a distinct
-			// set of messages.
-			// Perhaps use the something in the info.
-			// Or this could be a solve message so we know the index?
-			// Issue here with resizing it.
-			isend( &(outgoing_.front()) + outgoingBufferOffset_[ index ],
-				outgoingBufferSize_[ index ], "char", remoteNode_);
-			irecv( &(incoming_.front()) + incomingBufferOffset_[ index ],
-				incomingBufferSize_[ index ], "char", remoteNode_);
+		multi async( int tick ) {
+			checkPendingRequests();
 		}
 
-// A bit of a bootstrap problem here. The reinit sets up the
-// messaging for the process and reinit calls, but until
-// reinit is called it is not safe to use this messaging.
-		multi reinit() {
-			vector< unsigned long > segments( 1, 0 );
-			unsigned long nMsgs = outgoingSize_.size();
-			unsigned int offset = 0;
-		
-			segments[0] = nMsgs;
-			outgoingOffset_.resize( nMsgs );
-			for (unsigned long i = 0; i < nMsgs; i++ ) {
-				outgoingOffset_[i] = offset;
-				offset += outgoingSize_[i];
-			}
-			outgoing_.resize( offset );
-			destInConn_.resize( segments );
-			// Temporary hack till we sort out how to do these
-			// assignments as we build the messages
-			if ( outgoingSchedule_.size() > 0 ) {
-				outgoingBufferOffset_.resize( outgoingSchedule_.size());
-				outgoingBufferSize_.resize( outgoingSchedule_.size() );
-				outgoingBufferOffset_[0] = 0;
-				outgoingBufferSize_[0] = offset;
-			}
-		
-			// This should really be sized to the number of unique clock
-			// ticks in the outgoingSchedule_.
-			// To get this we need to traverse all incoming messages
-			// and figure out which clock they belong to.
-			processInConn_.resize( segments );
+			// This handles substage 0: Posting irecv. 
+		multi postIrecv( int tick ) {
+			request_ = comm_.Irecv(
+				&(incoming_.front()),
+				incomingEntireSize_[ tick ], 
+				MPI_CHAR, remoteNode_, DATA_TAG );
 		}
 
+			// This handles substage 2: Posting send.
+		multi postSend( int tick ) {
+			unsigned long i = static_cast< unsigned long >( tick );
+			if ( outgoingEntireSize_.size() > i && 
+				outgoingEntireSize_[ tick ] > 0 ) { 
+				comm_.Send(
+					&(outgoing_.front()),
+					outgoingEntireSize_[ tick ], 
+					MPI_CHAR,
+					remoteNode_,
+					DATA_TAG
+				);
+			}
+		}
+
+			// This handles substage 4: Poll for irecv return.
+			// It probes for arrival of a previously requested irecv.
+			// If it has come, completes the recv, disperses the data,
+			// and notifies the parent postmaster.
+			// Otherwise yield.
+		multi pollRecv( int tick ) {
+			// This is a non-blocking call
+			if ( request_ == 0 || incomingEntireSize_[ tick ] == 0 ) {
+				pollRecvSrc_.sendTo( tick );
+				return;
+			}
+			if ( request_.Test() ) {	// Data has arrived
+				srcSrc_.send( &( incoming_.front() ), incomingSchedule_, tick );
+				// Tell sending tick to increment # of completed recvs.
+				pollRecvSrc_.sendTo( tick );
+				request_ = 0;
+			}
+		}
+
+		single process( ProcInfo info ) {
+			// This deals with variable size messages like action 
+			// potentials and shell commands.
+			checkPendingRequests();
+		}
+
+		single reinit() {
+			checkPendingRequests();
+			if ( needsReinit_ ) {
+				vector< unsigned long > segments( 1, 0 );
+				unsigned long nMsgs = outgoingSize_.size();
+				unsigned int offset = 0;
+				segments[0] = nMsgs;
+				outgoingOffset_.resize( nMsgs );
+				for (unsigned long i = 0; i < nMsgs; i++ ) {
+					outgoingOffset_[i] = offset;
+					offset += outgoingSize_[i];
+				}
+				outgoing_.resize( offset );
+				//destInConn_.resize( segments );
+				// processInConn_.resize( segments );
+				// informTargetNode(); // Sends out schedule info.
+				// assignIncomingSchedule();
+				needsReinit_ = 0;
+			}
+		}
+
+		single remoteCommand( string data ) {
+			checkPendingRequests();
+			comm_.Send(
+				data.c_str(),
+				data.length(),
+				MPI_CHAR,
+				remoteNode_,
+				ASYNC_TAG
+			);
+		}
+
+		single addOutgoing( Field src, int tick, int size ) {
+			unsigned int currSize = outgoingEntireSize_[tick];
+			outgoingOffset_.push_back( currSize );
+			outgoingSchedule_.push_back( tick );
+			outgoingSize_.push_back( size );
+		
+			currSize += size;
+			outgoingEntireSize_[tick] = currSize;
+			if ( outgoing_.size() < currSize )
+				outgoing_.resize( currSize );
+		
+			Field me( this, "destIn" );
+			src.add( me );
+		}
+		
+		single addIncoming( Field dest, int tick, int size) {
+			unsigned int currSize = incomingEntireSize_[tick];
+			incomingSchedule_.push_back( tick );
+			incomingSize_.push_back( size );
+		
+			currSize += size;
+			incomingEntireSize_[tick] = currSize;
+			if ( incoming_.size() < currSize )
+				incoming_.resize( currSize );
+		
+			Field me( this, "srcOut" );
+			me.add( dest );
+		}
 
 	private:
-		// Each dest message (from local to remote node)
-		// needs to be given two things: 
-		// a location to write to, and the schedule for it to go out.
-		//
-		// Index looks up the offset of the outgoing_ array to fill
+
+		int remoteNode_;
+		bool needsReinit_;
+		unsigned long numTicks_;
+		int pollFlag_;
+		MPI::Comm& comm_;
+		MPI::Request request_;
+		MPI::Request asyncRequest_;
+		MPI::Status status_;
+	
+		// Looks up the offset of the outgoing_ array to fill when the
+		// local object wants to dump a value. 
 		// This is filled after all the messages have been set up,
 		// so that we can order the incoming data into the correct
 		// locations for a single big isend.
@@ -171,65 +266,39 @@ class PostMaster
 		// each clock tick.
 		vector< unsigned int > outgoingEntireSize_;
 
-		// Alternative:
-		// a vector of buffers: one buffer for each
-		// scheduled departure time.
-		// vector< vector< char > > outgoing_;
-		// it so that the scheduling is sorted.
-		// Issue is that we will need a double lookup for the incomings
-
-		// Each source message (arriving from remote node)
-		// gets put into a location in memory. In order to scan this
-		// for the outgoing messages, we need to associate the
-		// outgoing message sequence with locations in the memory
-		// buffer. As before, we don't use pointers lest the buffer
-		// be resized.
-		vector< unsigned int > incomingOffset_;
+		// When does each incoming message get called
 		vector< unsigned int > incomingSchedule_;
-		// Similar to the vector of buffers for outgoing stuff, the
-		// data coming in from remote nodes needs to be organized
-		// as per scheduling.
+		// Whater are the sizes of each message.
+		vector< unsigned int > incomingSize_;
+		// How big are the entire buffers arriving on each tick
+		vector< unsigned int > incomingEntireSize_;
+		// A buffer for the biggest of these arriving buffers.
 		vector< char > incoming_;
-		vector< unsigned int > incomingBufferTime_;
-		vector< unsigned int > incomingBufferSize_;
-		vector< unsigned int > incomingBufferOffset_;
-
-		// In order to work, we also need to set up outgoing messages.
-		// We get passed the name of the target and field.
-		// So we can get hold of a recvfunc.
-		
+		// A buffer for asynchronous incoming messages
+		char* asyncBuf_;
 
 	private_wrapper:
 		char* getPostPtr( unsigned long index );
+		// void informTargetNode();
+		void connectTick( Element* tick );
+		bool callsMe( Element* tickElm );
+		bool connect( const string& target );
+		void checkPendingRequests();
+		// void assignIncomingSizes();
+		// void assignIncomingSchedule();
 };
 
 ////////////////////////////////////////////////////////////////////
 // Stuff below here goes verbatim into PostMasterWrapper.cpp
 ////////////////////////////////////////////////////////////////////
 
+wrapper_cpp:
+
 ///////////////////////////////////////////////////
 // Constructor. As a hack, at this time I will allocate
 // space for messages in destInConn_ and processInConn_
 // Later we need a way to do this without preallocation.
 ///////////////////////////////////////////////////
-
-PostMasterWrapper::PostMasterWrapper(const string& n)
-		:
-			Neutral( n ),
-			srcSrc_( &srcOutConn_ ),
-			srcOutConn_( this ),
-			destInConn_( this ),
-			processInConn_( this )
-			// reinitInConn uses a templated lookup function
-{
-	vector< unsigned long > segments( 1, 0 );
-
-	segments[0] = 10;
-	destInConn_.resize( segments );
-	processInConn_.resize( segments );
-	outgoingOffset_.resize( 1, 0 );
-	outgoing_.resize( 40 );
-}
 
 char* PostMasterWrapper::getPostPtr( unsigned long index )
 {
@@ -247,7 +316,6 @@ char* getPostPtr( Conn* c )
 	PostMasterWrapper* pm = 
 		dynamic_cast< PostMasterWrapper* >( c->parent() );
 	if ( pm ) {
-		SolveMultiConn* mc = dynamic_cast< SolveMultiConn* >( c );
 		SolverConn* sc = dynamic_cast< SolverConn* >( c );
 		if ( sc )
 			return pm->getPostPtr( sc->index() );
@@ -255,29 +323,56 @@ char* getPostPtr( Conn* c )
 	return dummy;
 }
 
-void isend( char* buf, int size, char* name, int dest )
-{
-	cout << "in isend, with " << size << " bytes\n";
-}
-void irecv( char* buf, int size, char* name, int src )
-{
-	cout << "in irecv, expecting " << size << " bytes\n";
-}
-
 ///////////////////////////////////////////////////
 
 void PostMaster::addSender( const Finfo* sender )
 {
 	outgoingSize_.push_back( sender->ftype()->size() );
+	needsReinit_ = 1;
+}
 
-	//	This function really needs the source element.
-	//	Will do it later, at reinit.
-//	outgoingSchedule_.push_back( getSchedule( sender ) );
-//	We would now typically use this to figure out a new value
-//	for outgoing offset. For now we'll assume all is on sched0.
+bool PostMasterWrapper::callsMe( Element* tickElm )
+{
+	Field me( this, "post" );
+	Field tick( tickElm, "process" );
+	vector< Field > list;
+	me.dest( list );
+	if ( list.size() == 0 )
+		return 0;
+	return ( std::find( list.begin(), list.end(), tick ) != list.end() );
+}
 
-	outgoingSchedule_.push_back( 0 );
-	outgoingOffset_.push_back( 
-		outgoingOffset_.back() + outgoingSize_.back() );
+
+// Check if any request is pending. Service it, then issue a new irecv.
+// Idea is that we should have an irecv waiting at all times to
+// avoid deadlock.
+// Issue is that the size of an async request is not known. Have to
+// set aside a big enough buffer and to guarantee that we never send
+// anything bigger than this buffer.
+// This should ideally use a single buffer per node rather than a
+// buffer on each for each other node. Later.
+void PostMasterWrapper::checkPendingRequests()
+{
+	// cout << "in PostMasterWrapper::checkPendingRequests on node " << 
+			// myNode_ << ", for node " << remoteNode_ << endl;
+
+	if ( asyncRequest_.Test( status_ ) ) {
+		int size = status_.Get_count( MPI_CHAR );
+		cout << "irecv'ed size " << size << " on node " <<
+				myNode_ << " from node " << remoteNode_ << endl;
+		if ( size < ASYNC_BUF_SIZE )
+			asyncBuf_[size] = '\0';
+		string temp( asyncBuf_ );
+		// Post the next irecv before anything else, because we 
+		// might end up issuing a send as part of the command.
+		asyncRequest_ = comm_.Irecv( 
+			asyncBuf_, ASYNC_BUF_SIZE, MPI_CHAR, remoteNode_, ASYNC_TAG );
+
+		// Issue the command to the shell
+		remoteCommandSrc_.send( temp );
+	}
+
+	//cout << "done PostMasterWrapper::checkPendingRequests on node " <<
+	//		myNode_ << ", for node " << remoteNode_ << endl;
 }
 

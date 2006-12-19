@@ -11,12 +11,25 @@
 class ClockTick
 {
 	public:
+		int stage() const {
+			return stage_;
+		}
+		int ordinal() const {
+			return ordinal_;
+		}
+
+		void assignOrdinal() {
+			ordinal_ = ordinalCounter_;
+			++ordinalCounter_;
+		}
+
 	author:
 		Upinder S. Bhalla, Nov 2005, NCBS
 	description:
 		ClockTick class. Controls execution of objects on a given dt.
 	field:
-		double stage = 0.0;
+		int stage = 0;
+		readonly int ordinal;
 		double nextt = 0.0;
 		double epsnextt;
 		double max_clocks;
@@ -39,7 +52,7 @@ class ClockTick
 		}
 		
 	shared:
-		single clock( processIn, reinitIn, reschedIn, dtOut );
+		single clock( processIn, reinitIn, reschedIn, schedNewObjectIn, dtOut );
 		multi process( processOut, reinitOut );
 		multi solverStep( passStepOut, checkStepIn );
 
@@ -67,18 +80,44 @@ class ClockTick
 			innerSetPath( path_ );
 		}
 
+		single schedNewObject( Element* e ) {
+			unsigned int i;
+			for (i = 0; i < managedCinfo_.size(); i++ ) {
+				const Cinfo* c = managedCinfo_[i];
+				if ( c == 0 || e->cinfo()->isA( c ) ) {
+					string p = e->path();
+					const string& q = managedPath_[i];
+					if ( p.substr( 0, q.length() ) == q ) {
+						Field src = field( "process" );
+						// Note that sometimes we need to sched
+						// a different function than process.
+						Field dest = e->field( "process" );
+						src.add( dest );
+						return;
+					}
+				}
+			}
+		}
+
 	private:
 		double dt_;
 		bool terminate_;
+		static int ordinalCounter_;
 
 	private_wrapper:
-		string path_;
 		void innerSetPath( const string& path );
+		void separatePathOnCommas();
+		void fillManagementInfo( const string& s );
+		string path_;
+		vector< const Cinfo* > managedCinfo_;
+		vector< string > managedPath_;
 };
 
 /////////////////////////////////////////////////////////////////
 // Wrapper cpp stuff here.
 /////////////////////////////////////////////////////////////////
+
+int ClockTick::ordinalCounter_ = 0;
 
 // Assumes the path is a wildcard field path, that is, has a
 // finfo name as the last part of the path string.
@@ -106,4 +145,55 @@ void ClockTickWrapper::innerSetPath( const string& path )
 			src.add( dest );
 		}
 	}
+
+	// This builds up the management info for new objects.
+	separatePathOnCommas();
+}
+
+// tease apart on comma separators
+void ClockTickWrapper::separatePathOnCommas()
+{
+	string::size_type pos = 0;
+	string temp = path_;
+	pos = temp.find( "," );
+	fillManagementInfo( temp.substr( 0, pos ) );
+	while ( pos != string::npos ) {
+		temp = temp.substr( pos + 1 );
+		pos = temp.find( "," );
+		fillManagementInfo( temp.substr( 0, pos ) );
+	}
+}
+
+// Here we try to guess what the parent of the wildcard path will
+// be, and then figure out which objects apply.
+// We store the parent as a string, because we may have cases where
+// the full path of an object is specified (deprecated).
+void ClockTickWrapper::fillManagementInfo( const string& s )
+{
+	string::size_type pos = s.find_first_of( "#" );
+	managedPath_.push_back( s.substr( 0, pos ) );
+	pos = s.find( "=" ); 
+	if ( pos == string::npos ) {
+		managedCinfo_.push_back( 0 );
+	} else {
+		string tname = s.substr( pos + 1 );
+		pos = tname.find( "]" );
+		const Cinfo* c = Cinfo::find( tname.substr( 0, pos ) );
+		managedCinfo_.push_back( c );
+	}
+}
+
+// override the default.
+Element* ClockTickWrapper::create(
+	const string& name, Element* pa, const Element* proto )
+{
+	if ( pa->cinfo()->isA( Cinfo::find( "ClockJob" ) ) ) {
+		Field clock = pa->field( "clock" );
+		ClockTickWrapper* ret = new ClockTickWrapper( name );
+		ret->assignOrdinal();
+		Field tick = ret->field( "clock" );
+		clock.add( tick );
+		return ret;
+	};
+	return 0;
 }

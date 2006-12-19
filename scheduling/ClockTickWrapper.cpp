@@ -18,9 +18,11 @@ Finfo* ClockTickWrapper::fieldArray_[] =
 ///////////////////////////////////////////////////////
 // Field definitions
 ///////////////////////////////////////////////////////
-	new ValueFinfo< double >(
+	new ValueFinfo< int >(
 		"stage", &ClockTickWrapper::getStage, 
-		&ClockTickWrapper::setStage, "double" ),
+		&ClockTickWrapper::setStage, "int" ),
+	new ReadOnlyValueFinfo< int >(
+		"ordinal", &ClockTickWrapper::getOrdinal, "int" ),
 	new ValueFinfo< double >(
 		"nextt", &ClockTickWrapper::getNextt, 
 		&ClockTickWrapper::setNextt, "double" ),
@@ -72,6 +74,9 @@ Finfo* ClockTickWrapper::fieldArray_[] =
 	new Dest0Finfo(
 		"reschedIn", &ClockTickWrapper::reschedFunc,
 		&ClockTickWrapper::getClockConn, "", 1 ),
+	new Dest1Finfo< Element* >(
+		"schedNewObjectIn", &ClockTickWrapper::schedNewObjectFunc,
+		&ClockTickWrapper::getClockConn, "", 1 ),
 ///////////////////////////////////////////////////////
 // Synapse definitions
 ///////////////////////////////////////////////////////
@@ -80,7 +85,7 @@ Finfo* ClockTickWrapper::fieldArray_[] =
 ///////////////////////////////////////////////////////
 	new SharedFinfo(
 		"clock", &ClockTickWrapper::getClockConn,
-		"processIn, reinitIn, reschedIn, dtOut" ),
+		"processIn, reinitIn, reschedIn, schedNewObjectIn, dtOut" ),
 	new SharedFinfo(
 		"process", &ClockTickWrapper::getProcessConn,
 		"processOut, reinitOut" ),
@@ -134,6 +139,23 @@ void ClockTickWrapper::reinitFuncLocal(  )
 			epsnextt_ = 0.0;
 			reinitSrc_.send( );
 }
+void ClockTickWrapper::schedNewObjectFuncLocal( Element* e )
+{
+			unsigned int i;
+			for (i = 0; i < managedCinfo_.size(); i++ ) {
+				const Cinfo* c = managedCinfo_[i];
+				if ( c == 0 || e->cinfo()->isA( c ) ) {
+					string p = e->path();
+					const string& q = managedPath_[i];
+					if ( p.substr( 0, q.length() ) == q ) {
+						Field src = field( "process" );
+						Field dest = e->field( "process" );
+						src.add( dest );
+						return;
+					}
+				}
+			}
+}
 ///////////////////////////////////////////////////
 // Connection function definitions
 ///////////////////////////////////////////////////
@@ -147,12 +169,13 @@ Element* clockConnClockTickLookup( const Conn* c )
 ///////////////////////////////////////////////////
 // Other function definitions
 ///////////////////////////////////////////////////
+int ClockTick::ordinalCounter_ = 0;
 void ClockTickWrapper::innerSetPath( const string& path )
 {
 	path_ = path;
 	size_t pos = path.find_last_of("/");
 	if ( pos == string::npos || pos == path.length()) {
-		cerr << "Error:ClockTickWrapper::innerSetPath: no finfo name in" << path << "\n"; 
+		cerr << "Error:ClockTickWrapper::innerSetPath: no finfo name on tick:" << name() << " in path " << path << "\n"; 
 		return;
 	}
 	string finfoName = path.substr( pos + 1 );
@@ -169,4 +192,44 @@ void ClockTickWrapper::innerSetPath( const string& path )
 			src.add( dest );
 		}
 	}
+	separatePathOnCommas();
+}
+void ClockTickWrapper::separatePathOnCommas()
+{
+	string::size_type pos = 0;
+	string temp = path_;
+	pos = temp.find( "," );
+	fillManagementInfo( temp.substr( 0, pos ) );
+	while ( pos != string::npos ) {
+		temp = temp.substr( pos + 1 );
+		pos = temp.find( "," );
+		fillManagementInfo( temp.substr( 0, pos ) );
+	}
+}
+void ClockTickWrapper::fillManagementInfo( const string& s )
+{
+	string::size_type pos = s.find_first_of( "#" );
+	managedPath_.push_back( s.substr( 0, pos ) );
+	pos = s.find( "=" ); 
+	if ( pos == string::npos ) {
+		managedCinfo_.push_back( 0 );
+	} else {
+		string tname = s.substr( pos + 1 );
+		pos = tname.find( "]" );
+		const Cinfo* c = Cinfo::find( tname.substr( 0, pos ) );
+		managedCinfo_.push_back( c );
+	}
+}
+Element* ClockTickWrapper::create(
+	const string& name, Element* pa, const Element* proto )
+{
+	if ( pa->cinfo()->isA( Cinfo::find( "ClockJob" ) ) ) {
+		Field clock = pa->field( "clock" );
+		ClockTickWrapper* ret = new ClockTickWrapper( name );
+		ret->assignOrdinal();
+		Field tick = ret->field( "clock" );
+		clock.add( tick );
+		return ret;
+	};
+	return 0;
 }

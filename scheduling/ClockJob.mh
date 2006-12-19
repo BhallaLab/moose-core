@@ -8,50 +8,160 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include "Job.h"
+#include "JobWrapper.h"
+#include "ClockTickMsgSrc.h"
+
 class ClockJob: public Job
 {
 	public:
+		ClockJob()
+			: runTime_( 0.0 ), currentTime_( 0.0 ),
+			nSteps_( 0 ), currentStep_( 0 )
+		{
+		}
+
 	author:
 		Upinder S. Bhalla, Nov 2005, NCBS
 	description:
 		ClockJob class. Handles sequencing of operations in simulations
 	field:
-		double runtime; // Time for simulation to run
+		double runTime; // Time for simulation to run
 		readonly double currentTime; 
 		int nSteps; // Number of steps to run
 		readonly int currentStep;
 
 	shared:
-		multi clock( processOut, reinitOut, reschedOut, dtIn );
+		multi clock( processOut, reinitOut, reschedOut, schedNewObjectOut, dtIn );
 
 	src:
-		multi process( procInfo ); // Connect up to child operations.
+		multi process( ProcInfo ); // Connect up to child operations.
 		multi resched( );
 		multi reinit( );
+		multi schedNewObject( Element* object );
 		multi finished(); // Report job completion
 
 	dest:
-		single start( procInfo info, double time );
+		single start( ProcInfo info ) {
+			cout << "starting run for " << runTime_ << " sec.\n";
+			info->currTime_ = currentTime_;
+			if ( tickSrc_ )
+				tickSrc_->start( info, currentTime_ + runTime_,
+					processSrc_ );
+			currentTime_ = info->currTime_;
+		}
 
-		single step( procInfo info, int nsteps );
+		single step( ProcInfo info, int nsteps ) {
+			cout << "starting run for " << nsteps << " steps.\n";
+			info->currTime_ = currentTime_;
+			if ( tickSrc_ ) {
+				runTime_ = nsteps * tickSrc_->dt();
+				tickSrc_->start( info, currentTime_ + runTime_,
+					processSrc_ );
+			}
+			currentTime_ = info->currTime_;
+		}
 
 		// Comes from the Job.
-		// single process( procInfo info );
+		// single process( ProcInfo info );
 
 		single reinit( ) {
+			currentTime_ = 0.0;
+			currentStep_ = 0;
 			reinit();
 		}
 
 		single resched( ) {
+			// Clear out old tickSrc_
+			if ( tickSrc_ )
+				delete ( tickSrc_ );
+			tickSrc_ = 0;
+		
+			// Build list of child ClockTicks.
+			vector< Field > f;
+			Field kids = field( "processOut" );
+			kids->dest( f, this );
+		
+			// Scan list, get dts and rfuncs for proc, reinit and resched
+			vector< ClockTickMsgSrc > ticks;
+			for ( unsigned long i = 0; i < f.size(); i++ )
+	 			ticks.push_back( 
+					ClockTickMsgSrc( this, f[i].getElement() , i )
+				);
+		
+			// Build list of ClockTickMsgSrc according to dts. May need
+			// more info in case we have specific sequence for same dt.
+			// This is the stage field in ClockTick.
+			sort( ticks.begin(), ticks.end() );
+			vector< ClockTickMsgSrc >::iterator j;
+			// vector< ClockTickMsgSrc >::iterator prev = ticks.end();
+			ClockTickMsgSrc** currTick = &tickSrc_;
+			ClockTickMsgSrc* prev = tickSrc_;
+		
+			// Build connections
+			for ( j = ticks.begin(); j != ticks.end(); j++ ) {
+				*currTick = new ClockTickMsgSrc( *j );
+				prev = *currTick;
+				currTick = (*currTick)->next();
+			}
 			resched();
 		}
 
 		single reset( ) {
-			resched();
-			reinit();
+			reschedFuncLocal();
+			reinitFuncLocal();
 		}
 
-		multi dtIn( double dt, int stage );
+		// 1. Locate the affected ClockTickMsgSrc.
+		// 2. Set up altered dt
+		// 3. Sort
+		multi dt( double dt, Conn* tick ) {
+			if ( tickSrc_ == 0 )
+				return;
+
+			unsigned long index = clockConn_.find( tick ); // here 1
+
+			tickSrc_->updateDt( dt, index ); // here 2.
+
+			sortTicks(); // Here we do number 3.
+
+			// We no longer bother with merging identical ticks.
+		}
+
+		// This examines all ticks to see if any claims ownership of
+		// the new object, and if so, they should connect it up.
+		single schedNewObject( Element* object ) {
+			schedNewObject( object );
+		}
 
 	private:
+
+	private_wrapper:
+		ClockTickMsgSrc* tickSrc_;
+		void sortTicks();
 };
+
+////////////////////////////////////////////////////////////////////
+
+void ClockJobWrapper::sortTicks( )
+{
+	// Bubble sort till done. There is only one changed entry, so not
+	// too bad.
+	ClockTickMsgSrc** i;
+	ClockTickMsgSrc** j = &tickSrc_;
+	bool swapping = 1;
+	while ( swapping ) {
+		swapping = 0;
+		for ( i = (*j)->next(); *i != 0; i = (*i)->next() ) {
+			if ( **i < **j ) {
+				(*i)->swap( j );
+				i = j;
+				swapping = 1;
+				break;
+			} else {
+				j = i;
+			}
+		}
+	}
+	tickSrc_->updateNextClockTime();
+}

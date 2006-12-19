@@ -70,3 +70,15 @@ bool MultiFtype::isSameType( const Ftype* other ) const
 	}
 	return 0;
 }
+
+//////////////////////////////////////////////////////////////////
+// Dummy function defined when the parallel code is not available.
+//////////////////////////////////////////////////////////////////
+
+#ifndef USE_MPI
+char* getPostPtr( Conn* c )
+{
+	static char dummy[1024]; 
+	return dummy;
+}
+#endif // USE_MPI

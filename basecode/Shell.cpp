@@ -1,4 +1,7 @@
 #include "header.h"
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 #include "../builtins/Interpol.h"
 #include "Shell.h"
 #include "ShellWrapper.h"
@@ -7,12 +10,14 @@
 // bool splitFieldString( const string& field, string& e, string& f );
 //bool splitField( const string& fieldstr, Field& f );
 
+
+
 //////////////////////////////////////////////////////////////////
 // SimDumpInfo functions
 //////////////////////////////////////////////////////////////////
 unsigned int parseArgs( const string& in, vector< string >& out )
 {
-	static const char* separator = " ,";
+	static const char* separator = " ";
 	string back = in;
 	unsigned long pos = 0;
 
@@ -91,6 +96,7 @@ bool SimDumpInfo::setFields( Element* e, int argc, const char** argv )
 
 Shell::Shell( Element* wrapper )
 	: workingElement_( "/" ), isInteractive_( 0 ),
+		totalNodes_( 1 ), myNode_( 0 ),
 		wrapper_( wrapper ), recentElement_( 0 )
 {
 	string className = "molecule";
@@ -132,17 +138,85 @@ Shell::Shell( Element* wrapper )
 ///////////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////////
-void Shell::addFuncLocal( const string& src, const string& dest )
+void Shell::addFuncLocal( const string& srcIn, const string& destIn )
 {
 	Field s;
 	Field d;
-	if ( splitField( src, s ) && splitField ( dest, d ) ) {
-		if ( s.add ( d ) ) {
-			ok();
+	string src = srcIn;
+	string dest = destIn;
+	int srcNode = parseNode( src );
+	int destNode = parseNode( dest );
+	if ( srcNode == -2 || destNode == -2 ) {
+		error( string ("Error: Shell::addFuncLocal ") + 
+						src + " " + dest + ": illegal node #s");
+		return;
+	}
+	/*
+	cout << "addFuncLocal on " << myNode_ << 
+			" src = " << src << ", srcNode = " << srcNode << 
+			" dest = " << dest << ", destNode = " << destNode << endl;
+			*/
+	if ( srcNode == myNode_ ) {
+		if ( !splitField( src, s ) ) {
+			error( string ("Error: Shell::addFuncLocal: cannot find source: ") + src);
 			return;
 		}
+		if ( destNode == myNode_ ) {
+			if ( splitField ( dest, d ) ) {
+				if ( s.add ( d ) ) {
+					ok();
+				} else {
+					error( string ("Unable to add msg from ") +
+									src + " to " + dest);
+				}
+			} else {
+				error( string ("Error: Shell::addFuncLocal: cannot find dest: ") + dest);
+			}
+		} else {
+			// Here we need to be sure that all nodes are up to
+			// the same point, so that target objects exist.
+			barrier();
+			// This function invokes message calls, so it is the
+			// job of the wrapper.
+			ShellWrapper* sw = 
+					static_cast< ShellWrapper * >( wrapper_ );
+			if ( sw->addToRemoteNode( s, dest, destNode ) ) {
+	//			cout << "On " << myNode_ << 
+	//				" successfully sent out addToRemoteNode( " <<
+	//				s.path() << ", " << 
+	//				dest << ", " << destNode << " )\n";
+				ok(); // Actually we only know that it went out OK,
+					// we don't know that it worked at the remote node.
+			} else {
+				error( string ("Error: Shell::addFuncLocal: Failed to connect to object on remote node:\n" + src + " to " + dest) );
+			}
+		}
 	}
-	error( string ("Unable to add msg from ") + src + " to " + dest);
+	// Silently exit if the message should initiate on another node
+	// Later, if we have a single parsing node, this means that we
+	// need to send this command to the remote node to complete.
+}
+
+void Shell::addFromRemoteFunc( int argc, const char** argv )
+{
+	if ( argc != 5 ) {
+		error( string( 
+			"Usage: addfromremote srcNode destObject tick size") );
+		return;
+	}
+	int srcNode = atoi( argv[1] );
+	Field dest( argv[2] );
+	int tick = atoi( argv[3] );
+	int size = atoi( argv[4] );
+	// Some other stuff here to set up asynchronous messages
+	// cout << "addFromRemoteFunc on " << myNode_ << 
+	//	" from " << srcNode <<
+	//	" with dest=" << dest.path() <<
+	//	", tick=" << tick << ", size=" << size << "\n";
+	
+	ShellWrapper* sw = static_cast< ShellWrapper * >( wrapper_ );
+	sw->addFromRemoteNode( srcNode, dest, tick, size);
+	// sw->addIncomingSrc_.sendTo( srcNode, dest, tick, size );
 }
 
 void Shell::dropFuncLocal( const string& src, const string& dest )
@@ -184,12 +258,23 @@ string Shell::getFuncLocal( const string& field ) {
 	return "";
 }
 
-void Shell::createFuncLocal( const string& type, const string& path )
+void Shell::createFuncLocal( const string& type, const string& origPath)
 {
-//	cout << "doing create with " << type << ", " << path <<"\n";
 	Element* parent;
 	string name;
 	const Cinfo* ci = Cinfo::find( type );
+
+	string path = origPath;
+	int node = parseNode( path );
+	if ( node == -2 ) {
+		error( "create: Failed to find node to create object: ", origPath );
+		return;
+	}
+	if ( node != myNode_ ) {
+		barrier(); // guarantee synchrony of nodes here.
+		remoteCall( "create " + type + " " + path, node );
+		return;
+	}
 
 	if ( ci ) {
 		Element* cwe = checkWorkingElement( );
@@ -216,6 +301,10 @@ void Shell::createFuncLocal( const string& type, const string& path )
 					error( "create: Failed to create object", path );
 				} else {
 					recentElement_ = ret;
+					// Put the element on the schedule
+					ShellWrapper* sw = 
+						static_cast< ShellWrapper * >( wrapper_ );
+					sw->schedNewObject( ret );
 					ok();
 				}
 			} else {
@@ -423,20 +512,61 @@ void Shell::aliasFuncLocal(
 }
 
 void Shell::quitFuncLocal(  ) {
-	cout << "Quitting Moose\n";
+	if ( myNode_ == 0 ) {
+		remoteCall( "quit" ); // Tell everyone to quit.
+	}
+	barrier();
+	cout << "Quitting Moose on node " << myNode_ << "\n";
 	exit( 0 );
 }
 
 void Shell::stopFuncLocal(  ) {
 }
+
 void Shell::resetFuncLocal(  ) {
-	cout << "doing reset\n";
+	// cout << "doing reset\n";
+	// Somehow we need to have all nodes also check for incoming
+	// work here that may have initiated elsewhere. The real concern is
+	// the following sequence:
+	// Node 0 asks node 1 to do X
+	// Node 1 has to set up internode messages between 0 and 2, to do X
+	// Node 0 proceeds to reset and sends the barrier.
+	// Node 1 and 2 get the barrier
+	// Problem 1: The message request from node 1 to 0 hasn't been
+	// processed. This could be solved by a checkPendingRequests on 0.
+	// Problem 2: The barrier request could get to node 2 _before_
+	// the internode request from 1. So even if it does a checkPending,
+	// it will still be out of order.
+	// One could have even deeper levels of nesting if other nodes
+	// execute commands that trigger messaging.
+	// Options:
+	// 1. Implement a 'checkForCompletion' call that is more picky than
+	// checkPending. The checkForCompletion would ask all affected
+	// target nodes if they have done their job. Problem is that 
+	// the current internode requests are dispatch-and-forget.
+	// 2. Guarantee that all internode requests issue only from node 0.
+	// Don't see how this is possible. If a message goes from 1 to 2,
+	// then node0 will transfer the command to node 1, and then
+	// it forgets about it.
+	// 3. Ask Greg
+	// 4. Look at old GENESIS implementation.
+	// 5. Have a query for message completion. This asks each target
+	// postmaster how many msgs are complete, it should match local #.
+	// Issue is: is this enough? Probably, since all internode info
+	// is done through messages.
+	if ( myNode_ == 0 ) {
+		barrier(); // All nodes should have their pending setup stuff done
+		remoteCall( "reset" ); // Tell everyone to reset
+	}
 	Field( "/sched/cj/resetIn" ).set( "" );
 }
 
 void Shell::stepFuncLocal( const string& stepTime,
 	const string& option )
 {
+	if ( myNode_ == 0 ) {
+		remoteCall( "step " + stepTime + " " + option, -1 );
+	}
 	Field( "/sched/cj/runTime").set( stepTime );
 	ProcInfoBase b( wrapper_->path() );
 	Field f( "/sched/startIn" );
@@ -448,11 +578,17 @@ void Shell::stepFuncLocal( const string& stepTime,
 void Shell::setClockFuncLocal( 
 	const string& clockNo, const string& dt, const string& stage )
 {
+	if ( myNode_ == 0 && totalNodes_ > 1 ) {
+		remoteCall( "setclock " + clockNo + " " + dt + " " + stage, -1 );
+	}
 	string clockName = string( "/sched/cj/ct" ) + clockNo;
 
 	Field f( clockName + "/dt" );
 	if ( !f.good() ) {
-		createFuncLocal( "ClockTick", clockName );
+		if ( totalNodes_ > 0 )
+			createFuncLocal( "ParTick", clockName );
+		else
+			createFuncLocal( "ClockTick", clockName );
 		f = Field( clockName + "/dt" );
 		if ( !f.good() ) {
 			cerr << "Error: Shell::setClockFuncLocal(): Failed to create clock/dt " << clockName << "\n";
@@ -485,6 +621,9 @@ void Shell::showClocksFuncLocal()
 void Shell::useClockFuncLocal( const string& path, 
 	const string& clockNo )
 {
+	if ( myNode_ == 0 && totalNodes_ > 0 ) {
+		remoteCall( "useclock " + path + " " + clockNo, -1 );
+	}
 	Field f( string( "/sched/cj/ct" ) + clockNo + "/path" );
 	if ( f.good() ) {
 		if ( f.set( path ) ) {
@@ -557,6 +696,17 @@ int Shell::existsFuncLocal( const string& fieldstr ) {
 // Here we refer to the composite elm.finfo as the field.
 void Shell::showFuncLocal( const string& field )
 {
+	string path = field;
+	int node = parseNode( path );
+	if ( node == -2 ) {
+		error( "showfield: Failed to find node for field: ", field );
+		return;
+	}
+	if ( node != myNode_ ) {
+		remoteCall( "showfield " + path, node );
+		return;
+	}
+
 	string ename, fname;
 	splitFieldString( field, ename, fname );
 	Element* e = findElement( ename );
@@ -598,6 +748,17 @@ void Shell::showobjectFuncLocal( const string& classname ) {
 }
 
 void Shell::leFuncLocal( const string& start ) {
+	string path = start;
+	int node = parseNode( path );
+	if ( node == -2 ) {
+		error( "le: Failed to find node for le: ", start );
+		return;
+	}
+	if ( node != myNode_ ) {
+		remoteCall( "le " + path, node );
+		return;
+	}
+
 	Element* s = findElement( start );
 	/*
 	Element* s = checkWorkingElement();
@@ -629,6 +790,17 @@ void Shell::listClassesFuncLocal( ) {
 // For now, option 0 -> ordinary newline, option 1 -> no newline. 
 void Shell::echoFuncLocal( vector< string >& s, int options ) {
 	vector< string >::iterator i;
+
+	if ( totalNodes_ > 1 && myNode_ == 0 ) {
+		char line[400];
+		strcpy( line, "echo " );
+		for ( unsigned int j = 0 ; j < s.size(); j++ ) {
+			strcat( line, s[j].c_str() );
+			if ( ( j + 1 ) < s.size() )
+				strcat( line, " " );
+		}
+		remoteCall( line ); // echo it on all nodes.
+	}
 
 	if ( isInteractive_ ) {
 		for ( i = s.begin(); i != s.end(); i++ )
@@ -673,6 +845,55 @@ void Shell::commandFuncLocal( int argc, const char** argv )
 		tweakFunc( argc, argv, 1 );
 	if ( funcname == "addfield" )
 		addFieldFunc( argc, argv );
+	if ( funcname == "addfromremote" )
+		addFromRemoteFunc( argc, argv );
+	if ( funcname == "quit" )
+		quitFuncLocal( );
+	if ( funcname == "echo" ) {
+		vector< string > v;
+		for ( int j = 1; j < argc; ++j )
+			v.push_back( string( argv[j] ) );
+		echoFuncLocal( v, 0 );
+	}
+	if ( funcname == "create" && argc == 3 ) {
+		createFuncLocal( argv[1], argv[2] );
+	}
+	if ( funcname == "le" && argc == 2 ) {
+		leFuncLocal( argv[1] );
+	}
+	if ( funcname == "showfield" && argc == 2 ) {
+		showFuncLocal( argv[1] );
+	}
+	if ( funcname == "barrier" ) {
+		barrier();
+	}
+	if ( funcname == "setclock" ) {
+		setClockFuncLocal( argv[1], argv[2], argv[3] );
+	}
+	if ( funcname == "useclock" ) {
+		useClockFuncLocal( argv[1], argv[2] );
+	}
+	if ( funcname == "reset" ) {
+		resetFuncLocal( );
+	}
+	if ( funcname == "step" ) {
+		stepFuncLocal( argv[1], argv[2] );
+	}
+}
+
+void Shell::remoteCommandFuncLocal( string arglist )
+{
+	vector< string > args;
+	parseArgs( arglist, args );
+	const char** argv = new const char*[ sizeof( arglist ) ];
+	int i;
+	int argc = args.size();
+	for ( i = 0; i < argc; ++i )
+		argv[i] = args[i].c_str();
+
+	commandFuncLocal( argc, argv );
+
+	delete[] argv;
 }
 
 void Shell::simobjdumpFunc( int argc, const char** argv )
@@ -929,6 +1150,52 @@ bool Shell::splitField( const string& fieldstr, Field& f )
 	return 0;
 }
 
+// Returns the node number if it is specific node, returns
+// local node number if it is any node or a matching wildcard.
+// Returns -1 if it is an illegal node.
+// Nodes are identified as /nodexxx where xxx is a number.
+int Shell::getNode( const string& fieldstr )
+{
+	if ( fieldstr.substr( 0, 5 ) == "/node" && fieldstr.substr( 9, 1 ) == "/" ) {
+		int ret = atoi( fieldstr.substr( 6, 3 ).c_str() );
+		if ( ret >= 0 && ret < totalNodes_ )
+			return ret;
+		return -1;
+	}
+	// If the front is not a specific node, assume it is for any node.
+	return myNode_;
+	// Later parse wildcards.
+}
+
+// This variant of getNode returns >= 0 if a specific node, -1 if
+// all nodes, -2 if failure. path is changed to reflect the local
+// path as seen on the intended node(s).
+// If the path does not begin with /node, then it is assumed to be
+// only the local node.
+int Shell::parseNode( string& path )
+{
+	if ( path.substr( 0, 5 ) == "/node" ) {
+		string::size_type pos = path.substr( 1 ).find( "/" ) + 1;
+		if ( pos != string::npos && pos > 5 &&
+			( ( path[5] == '-' && isdigit(path[6] ) ||
+			isdigit( path[5] ) ) )
+		) {
+			int ret = atoi( path.substr( 5, pos - 1 ).c_str() );
+			path = path.substr( pos );
+			if ( totalNodes_ == 1 )
+				return 0; // just go to local node.
+			if ( ret >= -1 && ret < totalNodes_ ) {
+				return ret;
+			} else {
+				return -2;
+			}
+		}
+	}
+	// If the front is not a specific node, assume it is for any node.
+	return myNode_;
+	// Later parse wildcards.
+}
+
 Element* Shell::checkWorkingElement( )
 {
 	Element* cwe = findElement( workingElement_ );
@@ -971,6 +1238,90 @@ void Shell::error( const string& s1, const string& s2 )
 	if ( isInteractive_ )
 		cout << "Error: " << s1 << " " << s2 << "\n";
 }
+
+//////////////////////////////////////////////////////////////////
+// Supplementary functions for parallel messaging
+//////////////////////////////////////////////////////////////////
+//
+/*
+// This connects to the appropriate postmaster, and forwards a request
+// to the target node's shell to complete the message.
+bool Shell::addToRemoteNode( Field& s, const string& dest, int destNode )
+{
+	char destLine[200];
+	sprintf( destLine, "/postmasters/node%d/destIn", destNode );
+	Field d( destLine );
+	int tick = findTick( s );
+	int size = s->ftype()->size();
+
+	ShellWrapper* sw = static_cast< ShellWrapper * >( wrapper_ );
+	sw->addOutgoingSrc_.sendTo( destNode, s, tick, size );
+	
+	sprintf( destLine, "addfromremote %d %s %d %d",
+		myNode_, dest.c_str(), tick, size );
+	sw->remoteCommandSrc_.sendTo( destNode, destLine );
+	return 1;
+}
+*/
+
+// Needs to be an atomic operation, to make the connection from the
+// postmaster to the target object, and also to set up the size and
+// schedule of the just-connected message. The message still cannot
+// be used, till the reset is done.
+void Shell::addFromRemoteNode( int srcNode, const string& dest )
+{
+	char srcLine[200];
+
+	sprintf( srcLine, "/postmasters/node%d/srcOut", srcNode );
+	addFuncLocal( srcLine, dest ); // Hope that this works. It has no
+								// error return though it complains.
+}
+
+// Here destNode defaults to -1, which means a global call.
+void Shell::remoteCall( const string& command, int destNode )
+{
+	if ( totalNodes_ == 1 )
+		return;
+
+	if ( destNode == myNode_ )
+		remoteCommandFuncLocal( command );
+
+
+	// cout << "Sending remote call '" << command << "' to node "
+	// 		<< destNode << endl;
+	ShellWrapper* sw = static_cast< ShellWrapper * >( wrapper_ );
+	if ( destNode >= 0 ) {
+		// Problem here: sendTo misses an index at the local node.
+		// Need either to fix it or to put in a dummy.
+		if ( destNode > myNode_ )
+			--destNode;
+		sw->sendRemoteCommand( command, destNode );
+	} else {
+		// Send it to everybody but local node.
+		sw->sendRemoteCommand( command );
+	}
+}
+
+void Shell::barrier()
+{
+	if ( totalNodes_ == 1 )
+		return;
+#ifdef USE_MPI
+	// static int count = 0;
+	// cout << "barrier# " << count++ << " on " << myNode_ << endl;
+	if ( myNode_ == 0 )
+		remoteCall( "barrier", -1 ); // send to all but node zero
+
+	MPI::COMM_WORLD.Barrier();
+#endif
+}
+
+
+//////////////////////////////////////////////////////////////////
+//
+// Unit tests.
+//
+//////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
 void testParseArgs()

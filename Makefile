@@ -40,14 +40,32 @@ SUBLIBS =
 #LIBS = 		-lm -lpthread
 LIBS = 		-lm
 
+# Here we decide if we want to use MPI and the parallel library
+# Uncomment the line below if you do.
+# The -DMPICH_IGNORE_CXX_SEEK flag is because of a bug in the
+# MPI-2 standard. Hopefully it won't affect you, but if it does use
+# the version of PARALLEL_FLAGS that defines this flag.
+#PARALLEL_FLAGS = -DUSE_MPI
+#PARALLEL_FLAGS = -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK
+#PARALLEL_DIR = parallel
+#PARALLEL_LIB = parallel/parallel.o
+
+# Depending on whether we compile with MPI, you may need to change the
+# CXX compiler below
+#
+#CXX = mpicxx
+
+#
+# If you do use mpicxx, comment out the version below.
 #
 CXX = g++
+
 LD = ld
 
 #
 # moved genesis_parser to beginning since it generates code
 #
-SUBDIR = genesis_parser basecode maindir randnum builtins scheduling kinetics biophysics textio parallel hsolve utility
+SUBDIR = genesis_parser basecode maindir randnum builtins scheduling kinetics biophysics textio hsolve $(PARALLEL_DIR) utility
 
 OBJLIBS =	\
 	basecode/basecode.o \
@@ -59,12 +77,11 @@ OBJLIBS =	\
 	textio/textio.o \
 	kinetics/kinetics.o \
 	biophysics/biophysics.o \
-	parallel/parallel.o \
 	hsolve/hsolve.o \
 	utility/utility.o \
 
-moose: libs $(OBJLIBS)
-	$(CXX) $(CFLAGS) $(OBJLIBS) $(LIBS) -o moose
+moose: libs $(OBJLIBS) $(PARALLEL_LIB)
+	$(CXX) $(CFLAGS) $(PARALLEL_FLAGS) $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o moose
 	@echo "Moose compilation finished"
 
 libmoose.so: libs
@@ -72,7 +89,7 @@ libmoose.so: libs
 	@echo "Created dynamic library"
 
 libs:
-	@(for i in $(SUBDIR); do echo cd $$i; cd $$i; make CXX="$(CXX)" CFLAGS="$(CFLAGS)" LD="$(LD)" LIBS="$(SUBLIBS)"; cd ..; done)
+	@(for i in $(SUBDIR); do echo cd $$i; cd $$i; make CXX="$(CXX)" CFLAGS="$(CFLAGS) $(PARALLEL_FLAGS)" LD="$(LD)" LIBS="$(SUBLIBS)"; cd ..; done)
 	@echo "All Libs compiled"
 
 mpp: preprocessor/*.cpp preprocessor/*.h

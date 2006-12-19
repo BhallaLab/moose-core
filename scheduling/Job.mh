@@ -8,7 +8,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-class Job: public Neutral
+class Job
 {
 	public:
 		Job()

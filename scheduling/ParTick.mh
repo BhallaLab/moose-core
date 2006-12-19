@@ -1,0 +1,195 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2006 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+// This variant of ClockTick supports 5 stages involved in 
+// managing parallel messaging.
+//
+// Stage 0: post irecv for this tick.
+// Stage 1: Call all processes that have outgoing data on this tick.
+// Stage 2: Post send
+// Stage 3: Call all processes that only have local data.
+// Stage 4: Poll for posted irecvs, as they arrive, send their contents.
+//          The poll process relies on return info from each postmaster
+//
+// Stage 0, 2, 4 pass only tick stage info.
+// Stage 1 and 3 pass regular ProcInfo
+
+// Should really happen automatically when mpp sees it is derived.
+#include "ClockTick.h"
+#include "ClockTickWrapper.h"
+
+class ParTick: public ClockTick
+{
+	public:
+	author:
+		Upinder S. Bhalla, Nov 2006, NCBS
+	description:
+		ParTick class. Controls execution of objects on a given dt,
+		in the context of parallel messaging. Coordinates local and
+		off-node object execution along with special calls to the
+		postmaster.
+	
+	field:
+		int handleAsync = 0;
+
+	shared:
+		// This cannot be inherited from ClockTick because we need
+		// to override the processIn function.
+		single clock( processIn, reinitIn, reschedIn, schedNewObjectIn, dtOut );
+		// This special Process call is for objects that have an
+		// outgoing message. They are removed from the regular
+		// Process schedule and attached to this one.
+		multi outgoingProcess( outgoingProcessOut, outgoingReinitOut );
+		// The regular Process call deals with stage 3.
+		// Process call is inherited from ClockTick
+		multi parProcess( ordinalOut, asyncOut, postIrecvOut, postSendOut, pollRecvOut, pollRecvIn );
+
+	src:
+		multi outgoingProcess( ProcInfo ); // Connect up to child operations.
+		multi outgoingReinit(); // Connect up to child operations.
+		// The regular Process call is inherited.
+
+		// This is to send the ordinal number out so that postmasters
+		// know how many clock ticks they have to deal with. Allocation
+		// is done here. This is called as soon as the tick is
+		// created and connected to the postmaster.
+		multi ordinal( int );
+
+		// This is to send out of band info that is not regularly
+		// scheduled.
+		multi async( int );
+		// multi postReinit( int );
+
+		// This asks the targets to post a recv for incoming data
+		multi postIrecv( int );
+
+		// Here the postmaster sends the data
+		multi postSend( int );
+
+		// Here the post master is told to poll for arrival of
+		// messages in a non-blocking manner. It reports back success
+		// on the pollRecvIn message. The tick repeats the
+		// call till all postmasters have reported in.
+		multi pollRecv( int );
+
+	dest:
+		multi pollRecv() {
+			++numArrived_;
+		}
+		// Here we alter the original process method to sequence
+		// all the operations.
+		single process( ProcInfo info ) {
+			cout << "In ParTickWrapper::processFuncLocal\n";
+			if ( handleAsync_ )
+				async( ordinal() );
+			postIrecv( ordinal() );
+			outgoingProcess( info );
+			postSend( ordinal() );
+			ClockTickWrapper::processFuncLocal( info );
+			numArrived_ = 0;
+			while ( numArrived_ < numPostMaster_ )
+				pollRecv( ordinal() );
+		}
+
+		single reinit( ) {
+			// sequence:
+			// 1. Call reinit for postmasters. This tells them 
+			// to obtain tick info for all objects passing info to them,
+			// and to send it out to their target nodes.
+			// This has to be a multistage process too.
+			// postReinit();
+			// 2. Find any objects on the process list that are 
+			// connected to any postmaster, and put them on the
+			// outgoingProcess message list.
+			separateOutgoingTargets();
+			numPostMaster_ = parProcessConn_.nTargets();
+
+			// Here we replicate the stages of the process call.
+			// 3. Tell postmaster to post a receive for reinit data
+			postIrecv( ordinal() );
+
+			// 4. Call reinit on all objects that need to send data out.
+			// This is a little nasty: depends on all objects sending
+			// info out at reinit. If they don't, then what goes out
+			// is whatever was lying around in the send buffer.
+			outgoingReinit( );
+
+			// 5. Tell postmasters to send out reinit data
+			postSend( ordinal() );
+
+			// 6. Call reinit on locally connected objects. This uses
+			// the inherited reinit function from the ClockTick, because
+			// the locally connected objects are on the regular
+			// process/reinit conn.
+			ClockTickWrapper::reinitFuncLocal( );
+
+			// 7. Poll all postmasters till they have received all the
+			// messages that were posted in stage 3.
+			numArrived_ = 0;
+			while ( numArrived_ < numPostMaster_ )
+				pollRecv( ordinal() );
+		}
+
+		// Called from an external polling loop.
+		multi pollAsync() {
+			if ( handleAsync_ )
+				async( ordinal() );
+		}
+
+	private:
+
+	private_wrapper:
+		unsigned long numArrived_;
+		unsigned long numPostMaster_;
+		void separateOutgoingTargets();
+};
+
+/////////////////////////////////////////////////////////////////
+// Wrapper cpp stuff here.
+/////////////////////////////////////////////////////////////////
+
+// This function checks for any objects on the
+// process list that are connected to the current
+// postmaster, and puts them on the outgoingProcess
+// message list.
+void ParTickWrapper::separateOutgoingTargets( )
+{
+}
+
+
+// override the default. This is nearly the same as the 
+// ClockTickWrapper::create, pity we can't derive from it.
+Element* ParTickWrapper::create(
+	const string& name, Element* pa, const Element* proto )
+{
+	if ( pa->cinfo()->isA( Cinfo::find( "ClockJob" ) ) ) {
+		Field clock = pa->field( "clock" );
+		ParTickWrapper* ret = new ParTickWrapper( name );
+		ret->assignOrdinal();
+		Field tick = ret->field( "clock" );
+		clock.add( tick );
+		Field parProcess = ret->field( "parProcess" );
+		vector< Element* > postmasters;
+		vector< Element* >::iterator i;
+		Element::wildcardFind(
+			"/postmasters/#[TYPE=PostMaster]", postmasters );
+		cout << "ParTickWrapper::create for " << name << ": Found " <<
+		    postmasters.size() << " postmasters\n";
+		for ( i = postmasters.begin(); i != postmasters.end(); i++ ) {
+			Field f( *i, "parProcess" );
+			cout << "starting add\n";
+			if ( parProcess.add( f ) )
+				cout << "did add for " << f.name() << endl ;
+		}
+		ret->ordinalSrc_.send( ret->ordinal() );
+		return ret;
+	};
+	return 0;
+}

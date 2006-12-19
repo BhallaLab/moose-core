@@ -308,6 +308,14 @@ class NMsgSrc0: public NMsgSrc
 				for_each( c_->begin( i ), c_->end( i ), rfuncs_[ i ] );
 			}
 		}
+
+		void sendTo( unsigned long i ) const
+		{
+			Conn* target = c_->target( i );
+			if ( target ) {
+				rfuncs_[ c_->index( i ) ]( target );
+			}
+		}
 };
 
 template <class T> class NMsgSrc1: public NMsgSrc

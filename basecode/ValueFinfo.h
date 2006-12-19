@@ -95,7 +95,7 @@ template <class T> class ValueFinfo: public ValueFinfoBase<T>
 				Element* e = lookup_( c->parent(), objIndex_ );
 				RelayConn rc( e, this );
 				localSet_( &rc, value );
-				solverUpdate( e, this, SOLVER_SET );
+				solverUpdate( c->parent(), this, SOLVER_SET );
 			}
 		}
 

@@ -300,3 +300,24 @@ void element::buildMatchingTree(Element* pa, Filter *fil,
 		tree[this] = pa;
 }
 */
+
+//////////////////////////////////////////////////////////////////
+// Utility functions here
+//////////////////////////////////////////////////////////////////
+//
+Element* traverseSrcToTick( Field& f )
+{
+	static const Cinfo* tickCinfo = Cinfo::find( "ClockTick" );
+	if ( f.getElement()->cinfo()->isA( tickCinfo ) )
+		return f.getElement();
+	vector< Field > srcList;
+	vector< Field >::iterator i;
+	f.src( srcList );
+	Element* ret;
+	for ( i = srcList.begin(); i != srcList.end(); i++ ) {
+		ret = traverseSrcToTick( *i );
+		if ( ret )
+				return ret;
+	}
+	return 0;
+}

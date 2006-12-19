@@ -16,17 +16,29 @@ class ClockTick
 	public:
 		ClockTick()
 		{
-			stage_ = 0.0;
+			stage_ = 0;
 			nextt_ = 0.0;
+		}
+		int stage() const {
+			return stage_;
+		}
+		int ordinal() const {
+			return ordinal_;
+		}
+		void assignOrdinal() {
+			ordinal_ = ordinalCounter_;
+			++ordinalCounter_;
 		}
 
 	private:
-		double stage_;
+		int stage_;
+		int ordinal_;
 		double nextt_;
 		double epsnextt_;
 		double max_clocks_;
 		double nclocks_;
 		double dt_;
 		bool terminate_;
+		static int ordinalCounter_;
 };
 #endif // _ClockTick_h

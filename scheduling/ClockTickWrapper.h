@@ -31,11 +31,14 @@ class ClockTickWrapper:
 ///////////////////////////////////////////////////////
 //    Field header definitions.                      //
 ///////////////////////////////////////////////////////
-		static void setStage( Conn* c, double value ) {
+		static void setStage( Conn* c, int value ) {
 			static_cast< ClockTickWrapper* >( c->parent() )->stage_ = value;
 		}
-		static double getStage( const Element* e ) {
+		static int getStage( const Element* e ) {
 			return static_cast< const ClockTickWrapper* >( e )->stage_;
+		}
+		static int getOrdinal( const Element* e ) {
+			return static_cast< const ClockTickWrapper* >( e )->ordinal_;
 		}
 		static void setNextt( Conn* c, double value ) {
 			static_cast< ClockTickWrapper* >( c->parent() )->nextt_ = value;
@@ -116,9 +119,13 @@ class ClockTickWrapper:
 		}
 
 		void processFuncLocal( ProcInfo info ) {
+		// cout << "In ClockTickWrapper::processFuncLocal for " <<
+				// name() << "\n";
 			processSrc_.send( info );
 		}
 		static void processFunc( Conn* c, ProcInfo info ) {
+			cout << "ClockTick::processFunc on " << 
+					c->parent()->name() << endl;
 			static_cast< ClockTickWrapper* >( c->parent() )->
 				processFuncLocal( info );
 		}
@@ -135,6 +142,12 @@ class ClockTickWrapper:
 		static void reschedFunc( Conn* c ) {
 			static_cast< ClockTickWrapper* >( c->parent() )->
 				reschedFuncLocal(  );
+		}
+
+		void schedNewObjectFuncLocal( Element* e );
+		static void schedNewObjectFunc( Conn* c, Element* e ) {
+			static_cast< ClockTickWrapper* >( c->parent() )->
+				schedNewObjectFuncLocal( e );
 		}
 
 
@@ -159,13 +172,7 @@ class ClockTickWrapper:
 // Class creation and info access functions.         //
 ///////////////////////////////////////////////////////
 		static Element* create(
-			const string& name, Element* pa, const Element* proto ) {
-			// Put tests for parent class here
-			// Put proto initialization stuff here
-			// const ClockTick* p = dynamic_cast<const ClockTick *>(proto);
-			// if (p)... and so on. 
-			return new ClockTickWrapper(name);
-		}
+			const string& name, Element* pa, const Element* proto );
 
 		const Cinfo* cinfo() const {
 			return &cinfo_;
@@ -191,8 +198,12 @@ class ClockTickWrapper:
 ///////////////////////////////////////////////////////
 // Private functions and fields for the Wrapper class//
 ///////////////////////////////////////////////////////
-		string path_;
 		void innerSetPath( const string& path );
+		void separatePathOnCommas();
+		void fillManagementInfo( const string& s );
+		string path_;
+		vector< const Cinfo* > managedCinfo_;
+		vector< string > managedPath_;
 
 ///////////////////////////////////////////////////////
 // Static initializers for class and field info      //

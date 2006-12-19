@@ -10,6 +10,9 @@
 #ifndef _ELEMENT_H
 #define _ELEMENT_H
 
+// Utility function for finding how msgs are triggered.
+Element* traverseSrcToTick( Field& f );
+
 // Abstract base class for all Elements.
 class Element {
 	// friend class Neutral;

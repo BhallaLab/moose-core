@@ -42,11 +42,16 @@ class ShellWrapper:
 	friend Element* listClassesInConnLookup( const Conn* );
 	friend Element* echoInConnLookup( const Conn* );
 	friend Element* commandConnLookup( const Conn* );
+	friend Element* schedNewObjectConnLookup( const Conn* );
     public:
 		ShellWrapper(const std::string& n)
 		:
 			Shell( this), Neutral( n ),
-			commandReturnSrc_( &commandConn_ )
+			commandReturnSrc_( &commandConn_ ),
+			remoteCommandSrc_( &remoteCommandConn_ ),
+			addOutgoingSrc_( &remoteCommandConn_ ),
+			addIncomingSrc_( &remoteCommandConn_ ),
+			schedNewObjectSrc_( &schedNewObjectConn_ ),
 			// addInConn uses a templated lookup function,
 			// dropInConn uses a templated lookup function,
 			// setInConn uses a templated lookup function,
@@ -77,6 +82,7 @@ class ShellWrapper:
 			// listClassesInConn uses a templated lookup function,
 			// echoInConn uses a templated lookup function
 			// commandConn uses a templated lookup function
+			remoteCommandConn_( this )
 		{
 			;
 		}
@@ -85,6 +91,10 @@ class ShellWrapper:
 ///////////////////////////////////////////////////////
 		static void setIsInteractive( Conn* c, int value );
 		static int getIsInteractive( const Element* e );
+		static void setTotalNodes( Conn* c, int value );
+		static int getTotalNodes( const Element* e );
+		static void setMyNode( Conn* c, int value );
+		static int getMyNode( const Element* e );
 		static void setParser( Conn* c, std::string value );
 		static std::string getParser( const Element* e );
 		static void setResponse( Conn* c, std::string value );
@@ -93,6 +103,10 @@ class ShellWrapper:
 // Msgsrc header definitions .                       //
 ///////////////////////////////////////////////////////
 		static SingleMsgSrc* getCommandReturnSrc( Element* e );
+		static NMsgSrc* getRemoteCommandSrc( Element* e );
+		static SingleMsgSrc* getSchedNewObjectSrc( Element* e );
+		static NMsgSrc* getAddOutgoingSrc( Element* e );
+		static NMsgSrc* getAddIncomingSrc( Element* e );
 ///////////////////////////////////////////////////////
 // dest header definitions .                         //
 ///////////////////////////////////////////////////////
@@ -127,6 +141,7 @@ class ShellWrapper:
 		static void echoFunc( Conn* c, std::vector< std::string >* s, int options );
 
 		static void commandFunc( Conn* c, int argc, const char** argv );
+		static void remoteCommandFunc( Conn* c, std::string command );
 
 ///////////////////////////////////////////////////////
 // Synapse creation and info access functions.       //
@@ -164,9 +179,11 @@ class ShellWrapper:
 		static Conn* getListCommandsInConn( Element* e );
 		static Conn* getListClassesInConn( Element* e );
 		static Conn* getEchoInConn( Element* e );
+		static Conn* getSchedNewObjectConn( Element* e );
 
-		// Note that this is a shared conn, so no direction pertains.
+		// Note that both are shared conns, so no direction pertains.
 		static Conn* getCommandConn( Element* e );
+		static Conn* getRemoteCommandConn( Element* e );
 
 ///////////////////////////////////////////////////////
 // Class creation and info access functions.         //
@@ -184,12 +201,28 @@ class ShellWrapper:
 			return &cinfo_;
 		}
 
+//////////////////////////////////////////////////////////////////
+// Parallel Access utility fuctions.
+//////////////////////////////////////////////////////////////////
 
+		bool addToRemoteNode( 
+						Field& s, const string& dest, int destNode );
+		void addFromRemoteNode(
+						int srcNode, Field& dest, int tick, int size);
+
+		void sendRemoteCommand( 
+						const string& command, int destNode = -1 );
+
+		void schedNewObject( Element* e );
     private:
 ///////////////////////////////////////////////////////
 // MsgSrc template definitions.                      //
 ///////////////////////////////////////////////////////
 		SingleMsgSrc1< std::string > commandReturnSrc_;
+		NMsgSrc1< std::string > remoteCommandSrc_;
+		NMsgSrc3< Field&, int, int > addOutgoingSrc_;
+		NMsgSrc3< Field&, int, int > addIncomingSrc_;
+		SingleMsgSrc1< Element* > schedNewObjectSrc_;
 		UniConn< addInConnLookup > addInConn_;
 		UniConn< dropInConnLookup > dropInConn_;
 		UniConn< setInConnLookup > setInConn_;
@@ -220,6 +253,8 @@ class ShellWrapper:
 		UniConn< listClassesInConnLookup > listClassesInConn_;
 		UniConn< echoInConnLookup > echoInConn_;
 		UniConn< commandConnLookup > commandConn_;
+		MultiConn remoteCommandConn_;
+		UniConn< schedNewObjectConnLookup > schedNewObjectConn_;
 
 ///////////////////////////////////////////////////////
 // Static initializers for class and field info      //

@@ -50,5 +50,5 @@ function complete_loading
 		step {MAXTIME} -t
 	end
 	call /graphs/##[TYPE=Plot],/moregraphs/##[TYPE=Plot] printIn kh.plot
-	quit
+	//quit
 end

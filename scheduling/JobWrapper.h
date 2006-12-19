@@ -72,10 +72,7 @@ class JobWrapper:
 		}
 
 		// Overridden by the ClockJob
-		virtual void processFuncLocal( ProcInfo info ) {
-			if ( info->currTime_ > wakeUpTime_ )
-				processSrc_.send( info );
-		}
+		virtual void processFuncLocal( ProcInfo info );
 
 		static void stopFunc( Conn* c ) {
 			static_cast< JobWrapper* >( c->parent() )->

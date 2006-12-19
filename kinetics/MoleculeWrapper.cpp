@@ -33,6 +33,9 @@ Finfo* MoleculeWrapper::fieldArray_[] =
 	new ValueFinfo< int >(
 		"mode", &MoleculeWrapper::getMode, 
 		&MoleculeWrapper::setMode, "int" ),
+	new ValueFinfo< int >(
+		"slaveEnable", &MoleculeWrapper::getMode, 
+		&MoleculeWrapper::setMode, "int" ),
 ///////////////////////////////////////////////////////
 // EvalField definitions
 ///////////////////////////////////////////////////////
