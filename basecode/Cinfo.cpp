@@ -185,3 +185,16 @@ Element* Cinfo::create(const string& name) const
 	return createWrapper_( name, Element::root(), 0);
 }
 */
+
+bool Cinfo::isA( const Cinfo* other ) const
+{
+	if ( other == this )
+			return 1;
+	const Cinfo* b = base_;
+	while ( b && b != b->base_ ) {
+		if ( b == other )
+			return 1;
+		b = b->base_;
+	}
+	return 0;
+}

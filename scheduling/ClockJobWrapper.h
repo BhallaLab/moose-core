@@ -1,80 +1,25 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+
 #ifndef _ClockJobWrapper_h
 #define _ClockJobWrapper_h
-
-// We maintain a list of these. Each goes out to a number of ClockTicks.
-class ClockTickMsgSrc
-{
-	public:
-		ClockTickMsgSrc( Element* e )
-			: dt_( 1.0 ), stage_( 0.0 ), nextTime_( 0.0 ),
-				nextClockTime_( 0.0 ), conn_( e ), next_( 0 )
-		{
-			;
-		}
-		~ClockTickMsgSrc( );
-
-		ClockTickMsgSrc( Element* e, Element* target );
-		void setProcInfo( ProcInfo info );
-		void start( ProcInfo info, double maxTime );
-		double incrementClock( ProcInfo info, double prevClockTime );
-		void reinit();
-		void resched();
-		void connect( ClockTickMsgSrc& dest );
-		ClockTickMsgSrc** next() {
-			return &next_;
-		}
-
-		bool operator<( const ClockTickMsgSrc& other ) const {
-			if ( dt_ < other.dt_ ) return 1;
-			if ( dt_ == other.dt_ && stage_ < other.stage_ ) return 1;
-			return 0;
-		}
-
-		bool operator==( const ClockTickMsgSrc& other ) const {
-			return ( dt_ == other.dt_ && 
-				stage_ == other.stage_ &&
-				procFunc_ == other.procFunc_ && 
-				reinitFunc_ == other.reinitFunc_ &&
-				reschedFunc_ == other.reschedFunc_ );
-		}
-		double dt() {
-			return dt_;
-		}
-
-		void updateDt( double newdt, Conn* tick );
-
-		ClockTickMsgSrc* findSrcOf( const Conn* tick );
-		// Swaps the order of the ClockTickMsgSrc in their linked list
-		void swap( ClockTickMsgSrc** other );
-
-		// Current ClockTickMsgSrc absorbs other. 
-		// Require that other->next_ == this.
-		void merge( ClockTickMsgSrc* other );
-
-		void updateNextClockTime( );
-
-	private:
-		double dt_;
-		double stage_;
-		double nextTime_;
-		double nextClockTime_;
-		RecvFunc procFunc_;
-		RecvFunc reinitFunc_;
-		RecvFunc reschedFunc_;
-		PlainMultiConn conn_;
-		ClockTickMsgSrc* next_;
-		Op1< ProcInfo > op_;
-		Element* target_;
-};
-
 class ClockJobWrapper: 
 	public ClockJob, public JobWrapper
 {
-	friend Element* startCJInConnLookup( const Conn* );
-	friend Element* stepCJInConnLookup( const Conn* );
-	friend Element* reinitCJInConnLookup( const Conn* );
-	friend Element* reschedCJInConnLookup( const Conn* );
-	friend Element* resetCJInConnLookup( const Conn* );
+	friend Element* startInConnClockJobLookup( const Conn* );
+	friend Element* stepInConnClockJobLookup( const Conn* );
+	friend Element* reinitInConnClockJobLookup( const Conn* );
+	friend Element* reschedInConnClockJobLookup( const Conn* );
+	friend Element* resetInConnClockJobLookup( const Conn* );
+	friend Element* schedNewObjectInConnClockJobLookup( const Conn* );
     public:
 		ClockJobWrapper(const string& n)
 		:
@@ -82,38 +27,37 @@ class ClockJobWrapper:
 			processSrc_( &clockConn_ ),
 			reschedSrc_( &clockConn_ ),
 			reinitSrc_( &clockConn_ ),
+			schedNewObjectSrc_( &clockConn_ ),
 			finishedSrc_( &finishedOutConn_ ),
 			clockConn_( this ),
-			finishedOutConn_( this ), 
+			finishedOutConn_( this ),
 			tickSrc_( 0 )
 			// startInConn uses a templated lookup function,
 			// stepInConn uses a templated lookup function,
 			// reinitInConn uses a templated lookup function,
 			// reschedInConn uses a templated lookup function,
-			// resetInConn uses a templated lookup function
+			// resetInConn uses a templated lookup function,
+			// schedNewObjectInConn uses a templated lookup function
 		{
 			;
 		}
 ///////////////////////////////////////////////////////
 //    Field header definitions.                      //
 ///////////////////////////////////////////////////////
-		static double getRuntime( const Element* e ) {
-			return static_cast< const ClockJobWrapper* >( e )->runTime_;
+		static void setRunTime( Conn* c, double value ) {
+			static_cast< ClockJobWrapper* >( c->parent() )->runTime_ = value;
 		}
-		// This should also refer to the shortest dt to scale nSteps
-		static void setRuntime( Conn* c, double value ) {
-			static_cast< ClockJobWrapper* >( c->parent() )->
-				runTime_ = value;
+		static double getRunTime( const Element* e ) {
+			return static_cast< const ClockJobWrapper* >( e )->runTime_;
 		}
 		static double getCurrentTime( const Element* e ) {
 			return static_cast< const ClockJobWrapper* >( e )->currentTime_;
 		}
+		static void setNSteps( Conn* c, int value ) {
+			static_cast< ClockJobWrapper* >( c->parent() )->nSteps_ = value;
+		}
 		static int getNSteps( const Element* e ) {
 			return static_cast< const ClockJobWrapper* >( e )->nSteps_;
-		}
-		static void setNSteps( Conn* c, int value ) {
-			static_cast< ClockJobWrapper* >( c->parent() )->
-			nSteps_ = value;
 		}
 		static int getCurrentStep( const Element* e ) {
 			return static_cast< const ClockJobWrapper* >( e )->currentStep_;
@@ -131,6 +75,10 @@ class ClockJobWrapper:
 
 		static NMsgSrc* getReinitSrc( Element* e ) {
 			return &( static_cast< ClockJobWrapper* >( e )->reinitSrc_ );
+		}
+
+		static NMsgSrc* getSchedNewObjectSrc( Element* e ) {
+			return &( static_cast< ClockJobWrapper* >( e )->schedNewObjectSrc_ );
 		}
 
 		static NMsgSrc* getFinishedSrc( Element* e ) {
@@ -152,22 +100,13 @@ class ClockJobWrapper:
 				stepFuncLocal( info, nsteps );
 		}
 
-		// Used to update the dt and stages of clockticks,
-		// without changing their list of targets. Applied when the
-		// setclock function is called from the script.
-		void dtFuncLocal( double dt, Conn* src );
-		static void dtFunc( Conn* c, double dt, Conn* src ) {
-			static_cast< ClockJobWrapper* >( c->parent() )->
-				dtFuncLocal( dt, src );
-		}
-
-		void reinitFuncLocal( );
+		void reinitFuncLocal(  );
 		static void reinitFunc( Conn* c ) {
 			static_cast< ClockJobWrapper* >( c->parent() )->
 				reinitFuncLocal(  );
 		}
 
-		void reschedFuncLocal( );
+		void reschedFuncLocal(  );
 		static void reschedFunc( Conn* c ) {
 			static_cast< ClockJobWrapper* >( c->parent() )->
 				reschedFuncLocal(  );
@@ -181,6 +120,21 @@ class ClockJobWrapper:
 			static_cast< ClockJobWrapper* >( c->parent() )->
 				resetFuncLocal(  );
 		}
+
+		void dtFuncLocal( double dt, Conn* tick );
+		static void dtFunc( Conn* c, double dt, Conn* tick ) {
+			static_cast< ClockJobWrapper* >( c->parent() )->
+				dtFuncLocal( dt, tick );
+		}
+
+		void schedNewObjectFuncLocal( Element* object ) {
+			schedNewObjectSrc_.send( object );
+		}
+		static void schedNewObjectFunc( Conn* c, Element* object ) {
+			static_cast< ClockJobWrapper* >( c->parent() )->
+				schedNewObjectFuncLocal( object );
+		}
+
 
 ///////////////////////////////////////////////////////
 // Synapse creation and info access functions.       //
@@ -210,6 +164,9 @@ class ClockJobWrapper:
 		static Conn* getResetInConn( Element* e ) {
 			return &( static_cast< ClockJobWrapper* >( e )->resetInConn_ );
 		}
+		static Conn* getSchedNewObjectInConn( Element* e ) {
+			return &( static_cast< ClockJobWrapper* >( e )->schedNewObjectInConn_ );
+		}
 
 ///////////////////////////////////////////////////////
 // Class creation and info access functions.         //
@@ -227,8 +184,6 @@ class ClockJobWrapper:
 			return &cinfo_;
 		}
 
-		// Sort the ClockTickMsgSrcs in order of dt and stage.
-		void sortTicks( );
 
     private:
 ///////////////////////////////////////////////////////
@@ -237,22 +192,26 @@ class ClockJobWrapper:
 		NMsgSrc1< ProcInfo > processSrc_;
 		NMsgSrc0 reschedSrc_;
 		NMsgSrc0 reinitSrc_;
+		NMsgSrc1< Element* > schedNewObjectSrc_;
 		NMsgSrc0 finishedSrc_;
-		// We need to redefine the clockConn_ into a special
-		// MultiConn that refers to the tickSrc_ for component conns.
 		MultiConn clockConn_;
 		MultiConn finishedOutConn_;
-		UniConn< startCJInConnLookup > startInConn_;
-		UniConn< stepCJInConnLookup > stepInConn_;
-		UniConn< reinitCJInConnLookup > reinitInConn_;
-		UniConn< reschedCJInConnLookup > reschedInConn_;
-		UniConn< resetCJInConnLookup > resetInConn_;
-
+		UniConn< startInConnClockJobLookup > startInConn_;
+		UniConn< stepInConnClockJobLookup > stepInConn_;
+		UniConn< reinitInConnClockJobLookup > reinitInConn_;
+		UniConn< reschedInConnClockJobLookup > reschedInConn_;
+		UniConn< resetInConnClockJobLookup > resetInConn_;
+		UniConn< schedNewObjectInConnClockJobLookup > schedNewObjectInConn_;
 
 ///////////////////////////////////////////////////////
-// Other local fields                                //
+// Synapse definition.                               //
+///////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+// Private functions and fields for the Wrapper class//
 ///////////////////////////////////////////////////////
 		ClockTickMsgSrc* tickSrc_;
+		void sortTicks();
 
 ///////////////////////////////////////////////////////
 // Static initializers for class and field info      //

@@ -72,6 +72,9 @@ class Cinfo {
 		// assigns base names, and initializes field equivalence.
 		static void initialize();
 
+		// True if current class is derived from other.
+		// Always true if 'other' is an Element.
+		bool isA( const Cinfo* other ) const;
 
 	private:
 		// Note that this is implemented as a function to bypass issues

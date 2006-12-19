@@ -13,7 +13,6 @@
 #define UNIX
 //#define WINDOWS
 
-
 #define MOOSE_THREADS 0
 
 enum SolverOp { SOLVER_SET, SOLVER_GET, SOLVER_REBUILD, SOLVER_ADD, SOLVER_DROP };

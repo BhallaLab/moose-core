@@ -13,6 +13,12 @@ Finfo* ShellWrapper::fieldArray_[] =
 	new ValueFinfo< int >(
 		"isInteractive", &ShellWrapper::getIsInteractive,
 			&ShellWrapper::setIsInteractive, "int" ),
+	new ValueFinfo< int >(
+		"totalnodes", &ShellWrapper::getTotalNodes,
+			&ShellWrapper::setTotalNodes, "int" ),
+	new ValueFinfo< int >(
+		"mynode", &ShellWrapper::getMyNode,
+			&ShellWrapper::setMyNode, "int" ),
 	new ValueFinfo< string >(
 		"parser", &ShellWrapper::getParser,
 		&ShellWrapper::setParser, "string" ),
@@ -25,6 +31,14 @@ Finfo* ShellWrapper::fieldArray_[] =
 	new SingleSrc1Finfo< string > (
 		"commandReturn", &ShellWrapper::getCommandReturnSrc,
 		"commandIn" ),
+	new NSrc1Finfo< string > (
+		"remoteCommandOut", &ShellWrapper::getRemoteCommandSrc, "" ),
+	new SingleSrc1Finfo< Element* > (
+		"schedNewObjectOut", &ShellWrapper::getSchedNewObjectSrc, "" ),
+	new NSrc3Finfo< Field, int, int > (
+		"addOutgoingOut", &ShellWrapper::getAddOutgoingSrc, "" ),
+	new NSrc3Finfo< Field, int, int > (
+		"addIncomingOut", &ShellWrapper::getAddIncomingSrc, "" ),
 ///////////////////////////////////////////////////////
 // MsgDest definitions
 ///////////////////////////////////////////////////////
@@ -118,12 +132,18 @@ Finfo* ShellWrapper::fieldArray_[] =
 	new Dest2Finfo< int, const char** >(
 		"commandIn", &ShellWrapper::commandFunc,
 		&ShellWrapper::getCommandConn, "commandReturn" ),
+	new Dest1Finfo< string >(
+		"remoteCommandIn", &ShellWrapper::remoteCommandFunc,
+		&ShellWrapper::getRemoteCommandConn, "" ),
 ///////////////////////////////////////////////////////
 // Shared definitions
 ///////////////////////////////////////////////////////
 	new SharedFinfo(
 		"command", &ShellWrapper::getCommandConn,
 		"commandIn, commandReturn" ),
+	new SharedFinfo(
+		"remoteCommand", &ShellWrapper::getRemoteCommandConn,
+		"remoteCommandOut, remoteCommandIn, addOutgoingOut, addIncomingOut" ),
 };
 
 const Cinfo ShellWrapper::cinfo_(
@@ -349,6 +369,13 @@ Element* commandConnLookup( const Conn* c )
 	return reinterpret_cast< ShellWrapper* >( ( unsigned long )c - OFFSET );
 }
 
+Element* schedNewObjectConnLookup( const Conn* c )
+{
+	static const unsigned long OFFSET =
+		FIELD_OFFSET ( ShellWrapper, schedNewObjectConn_ );
+	return reinterpret_cast< ShellWrapper* >( ( unsigned long )c - OFFSET );
+}
+
 ///////////////////////////////////////////////////////
 //    Field header definitions.                      //
 ///////////////////////////////////////////////////////
@@ -357,6 +384,18 @@ void ShellWrapper::setIsInteractive( Conn* c, int value ) {
 }
 int ShellWrapper::getIsInteractive( const Element* e ) {
 	return static_cast< const ShellWrapper* >( e )->isInteractive_;
+}
+void ShellWrapper::setTotalNodes( Conn* c, int value ) {
+	static_cast< ShellWrapper* >( c->parent() )->totalNodes_ = value;
+}
+int ShellWrapper::getTotalNodes( const Element* e ) {
+	return static_cast< const ShellWrapper* >( e )->totalNodes_;
+}
+void ShellWrapper::setMyNode( Conn* c, int value ) {
+	static_cast< ShellWrapper* >( c->parent() )->myNode_ = value;
+}
+int ShellWrapper::getMyNode( const Element* e ) {
+	return static_cast< const ShellWrapper* >( e )->myNode_;
 }
 void ShellWrapper::setParser( Conn* c, string value ) {
 	static_cast< ShellWrapper* >( c->parent() )->parser_ = value;
@@ -376,6 +415,23 @@ string ShellWrapper::getResponse( const Element* e ) {
 SingleMsgSrc* ShellWrapper::getCommandReturnSrc( Element* e ) {
 	return &( static_cast< ShellWrapper* >( e )->commandReturnSrc_ );
 }
+
+NMsgSrc* ShellWrapper::getRemoteCommandSrc( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->remoteCommandSrc_ );
+}
+
+SingleMsgSrc* ShellWrapper::getSchedNewObjectSrc( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->schedNewObjectSrc_ );
+}
+
+NMsgSrc* ShellWrapper::getAddOutgoingSrc( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->addOutgoingSrc_ );
+}
+
+NMsgSrc* ShellWrapper::getAddIncomingSrc( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->addIncomingSrc_ );
+}
+
 ///////////////////////////////////////////////////////
 // dest header definitions .                         //
 ///////////////////////////////////////////////////////
@@ -501,6 +557,11 @@ void ShellWrapper::commandFunc( Conn* c, int argc, const char** argv ){
 		commandFuncLocal( argc, argv );
 }
 
+void ShellWrapper::remoteCommandFunc( Conn* c, string arglist ) {
+	static_cast< ShellWrapper* >( c->parent() )->
+		remoteCommandFuncLocal( arglist );
+}
+
 ///////////////////////////////////////////////////////
 // Synapse creation and info access functions.       //
 ///////////////////////////////////////////////////////
@@ -599,4 +660,63 @@ Conn* ShellWrapper::getEchoInConn( Element* e ) {
 // Note that this is a shared conn, so no direction pertains.
 Conn* ShellWrapper::getCommandConn( Element* e ) {
 	return &( static_cast< ShellWrapper* >( e )->commandConn_ );
+}
+Conn* ShellWrapper::getRemoteCommandConn( Element* e ) {
+	return &( static_cast< ShellWrapper* >( e )->remoteCommandConn_ );
+}
+
+//////////////////////////////////////////////////////////////////
+// Parallel Access utility fuctions.
+//////////////////////////////////////////////////////////////////
+
+// This connects to the appropriate postmaster, and forwards a request
+// to the target node's shell to complete the message.
+bool ShellWrapper::addToRemoteNode( Field& s, const string& dest, int destNode )
+{
+	char destLine[200];
+	sprintf( destLine, "/postmasters/node%d/destIn", destNode );
+	Field d( destLine );
+
+	Element* t = traverseSrcToTick( s );
+	int tick = -1; // Default indicates it is an async call.
+	if ( t ) {
+		Ftype1< int >::get( t, "ordinal", tick );
+	}
+	int size = s->ftype()->size();
+	sprintf( destLine, "addfromremote %d %s %d %d",
+		myNode_, dest.c_str(), tick, size );
+	int tgtNode = destNode;
+	if ( tgtNode > myNode_ )
+		tgtNode--; // to skip the entry of the current node.
+	addOutgoingSrc_.sendTo( tgtNode, s, tick, size );
+	remoteCommandSrc_.sendTo( tgtNode, destLine );
+	// cout << "remoteCommandSrc_.sendTo( destNode = " << destNode <<
+			// ", destLine = " << destLine << " );\n";
+	return 1;
+}
+
+// Needs to be an atomic operation, to make the connection from the
+// postmaster to the target object, and also to set up the size and
+// schedule of the just-connected message. The message still cannot
+// be used, till the reset is done.
+void ShellWrapper::addFromRemoteNode( int srcNode, Field& dest,
+				int tick, int size)
+{
+	addIncomingSrc_.sendTo( srcNode, dest, tick, size );
+}
+
+void ShellWrapper::sendRemoteCommand( 
+				const string& command, int destNode )
+{
+	if ( destNode < 0 ) {
+		remoteCommandSrc_.send( command );
+	} else if ( destNode >= 0 && destNode < totalNodes_ ) {
+		remoteCommandSrc_.sendTo( destNode, command );
+	}
+}
+
+// Utility function so that the Shell can access the message.
+void ShellWrapper::schedNewObject( Element* e )
+{
+	schedNewObjectSrc_.send( e );
 }

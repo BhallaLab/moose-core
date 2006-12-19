@@ -62,6 +62,16 @@ const Cinfo JobWrapper::cinfo_(
 // Field function definitions
 ///////////////////////////////////////////////////////
 
+// Overridden by the ClockJob
+void JobWrapper::processFuncLocal( ProcInfo info )
+{
+	while ( doLoop_ && !terminate_ )
+	processSrc_.send( info );
+
+	if ( info->currTime_ > wakeUpTime_ )
+	processSrc_.send( info );
+}
+
 ///////////////////////////////////////////////////////
 // Synapse function definitions
 ///////////////////////////////////////////////////////

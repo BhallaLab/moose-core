@@ -1,0 +1,201 @@
+17 Dec 2006
+Here is a brief outline of current messaging across nodes.
+
+1. User calls
+2. Message set up
+3. Message data handling
+4. Message scheduling
+
+#############################################################################
+#############################################################################
+
+1. User calls.
+This is identical to the usual addmsg call. For now we use a hack to identify
+node number for each object as the start of the object path:
+
+//////////////////////////////////////////////////////////////////////////////
+//                               Start example                              //
+//////////////////////////////////////////////////////////////////////////////
+// Creating stuff on master node (node 0)
+create Neutral /kinetics
+create Molecule /kinetics/m
+
+// creating stuff on node 1
+create Neutral /node1/kinetics
+create ConcChan /node1/kinetics/cc
+create Reaction /node1/kinetics/r
+
+// Here we use a message which only passes a single-value between nodes
+addmsg /kinetics/m/nOut /node1/kinetics/cc/nIn
+
+// Here we use a shared message which passes data bidirectionally between nodes
+addmsg /kinetics/m/reac /node1/kinetics/r/sub
+//////////////////////////////////////////////////////////////////////////////
+//                                End example                               //
+//////////////////////////////////////////////////////////////////////////////
+
+#############################################################################
+#############################################################################
+
+2. Message set up.
+Overview:
+	This works through some straightforward but tedious assigning of
+	info to the respective postmasters, and then some tricky, even ugly
+	handling of message sources and dests pertaining to postmasters.
+	At this point shared messages are not dealt with proplerly.
+
+Stages:
+- The addmsg call invokes Shell::addFuncLocal( src, dest)
+- This checks if target is local. If so, does Field::add( dest)
+- If target is off-node:
+	- does barrier
+	- calls ShellWrappper::addToRemoteNode. This:
+	- Composes addfromremote command string with tick and size info
+	- calls addOutgoingSrc_ message on local postmaster
+		- This does housekeeping things for tick and size.
+		- It then calls add from the src to self.
+		This goes through various inherited methods to 
+		ParallelDestFinfo::respondToAdd, which returns a dummy finfo
+		with the _senders_ postRecvFunc. This is used for setting
+		up the message. The postRecvFuncs are defined in Ftype.h
+
+	- Sends addfromremote command string to remote node.
+		- This goes to remote Shell::addFromRemoteFunc which
+		parses it and hands to ShellWrapper::addFromRemoteNode
+		- This calls addIncomingSrc_ on appropriate postmaster
+			- This does various housekeeping things to
+			keep track of tick and size for msg.
+			- Then it calls add from self to dest.
+			- This goes through inherited methods to 
+			ParallelSrcFinfo::add, where we ask the destfield to
+			respondToAdd with its own finfo as argument. This
+			lets us get hold of the recvfunc of the target without
+			knowing ahead of time what type the target is. It
+			puts the rfunc and also the Ftype of the target finfo
+			into matching vectors.
+			- Then it calls ParallelMsgSrc::add which connects up
+			using the recvfunc of the dest.
+
+
+
+Problems:
+- There is no single tick and size for shared messages. Some parts of the
+	message may even be asynchronous.
+- The whole thing is very baroque. It would be nice to clean up.
+
+#############################################################################
+#############################################################################
+
+3. Message data handling
+Overview:
+	This is a relatively quick (has to be!) excercise in pointer
+	juggling to get data into the right place in the outgoing buffer,
+	and then to read it out again. The clever stuff is all done either
+	at set up time above, where the correct functions are placed to 
+	wrap around the data, or in the scheduling below, where it is all
+	sequenced.
+
+Stages for this are:
+- Object on source node sends out a message.
+- This invokes the postRecvFunc of the source object with the argument.
+- This uses the global function char* getPostPtr( Conn* ) to extract a 
+	pointer lying in the outgoing data buffer in the source postmaster.
+	The function is defined in PostMasterWrapper.cpp.
+	This operation needs to know which source called it to position the
+	pointer within the outgoing_ buffer, so we use the SolverConn.
+- The postRecvFunc simply copies outgoing data into this pointer location.
+- In due course (described in section 4) all the entries in the outgoing_
+	buffer will get filled, and the data is transferred to target node.
+
+- In due course (also described in section 4) this entire buffer lands up at
+	the target node, and the send operation is triggered.
+- The target node calls ParallelMsgSrc::send using the incoming_ data buffer
+	that has just been filled.
+	- This goes through the matching targetType and rfuncs vectors 
+	- Each entry is called with char* Ftype::rfuncAdapter(,rfunc, dataPtr)
+		which marches through the incoming_ data buffer.
+		- rfuncAdapater() calls the rfunc with the typecast data ptr,
+		and returns the dataptr incremented by data size.
+	
+
+Problems:
+- We don't yet have a good way to deal with non-data or async messages.
+- The use of SolverConn is messy, as we still have dangling issues with setup
+	and allocation of the SolverConn.
+
+#############################################################################
+#############################################################################
+
+4. Message scheduling
+
+Overview:
+	Process data is sorted to interleave computation and communication.
+	First calculations are done for any objects that need to send out data,
+	then it is sent out. Then the remaining calculations are done while
+	comms happen in the background. At the end of each tick, we poll all
+	message sources till the data comes in. There is an assumption that
+	data must reach target by the end of the current clock tick. Possibly
+	we could relax this in some cases, but it is infrequent and messy.
+	We don't yet have a clear scheme for event data like action potentials.
+	Also return messages are a problem here if they are time-bound like
+	for some channel calculations. Do we want to forbid them?
+
+Stages:
+- At MOOSE initialization we decide if to use ClockTick or ParTick.
+- At MOOSE initialization we build a bunch of postmasters (/postmaster/node#),
+	provided it is a multinode simulation.
+- At the script initialization phase of MOOSE, scheduling is done. Here
+	the clocks and ticks planned for the simulation are set up.
+	- Note that this happens _after_ the postmasters are made.
+	- Note that we MUST have the same schedule on all nodes.
+	- Each ParTick is assigned an ordinal number. Needed for parallel
+		scheduling to match up corresponding ticks between nodes.
+- ParTicks are derived from ClockTicks, but when created they look for all
+	extant postmasters and connect using parProcess.
+
+- At Reinit:
+	- Set up all ParTicks in relationship to parent Clock through the
+	use of ClockTickMsgSrc.
+	- Separate all scheduled objects into local and remote connected sets.
+		- This builds a separate outgoingProcess conn for the remot
+		connected objects, and removes them from the local process
+		conn list.
+	- Post the irecv for reinit data
+	- Call the Reinit function for remote connected objects. This
+		fills up the outgoing_ buffer as described above. Some
+		objects don't necessarily send out data at reinit, so
+		their contents will be undefined.
+	- Send the data to the remote node
+	- Call reinit for locally connected objects
+	- Poll for receipt of remote reinint data, and dispatch this
+		data to local objects. 
+		- This happens through the pollRecv message, which calls
+		PostMasterWrapper::pollRecvFuncLocal. It tests for arrival
+		of data (non blocking), and if it has come, it sends out
+		the data to targets. Then it informs the parent Tick that the
+		data has come.
+		- The parent Tick counts how many nodes have acknowledged the
+		receipt of data, and when all are done it finishes up.
+
+- At Process:
+	- Handle async messages if flat is on. This is yet to be fully tested.
+	- Post irecv for process data
+	- Call Process for remote connected objects.
+	- Send the outgoing data
+	- Call Process for locally connected objects.
+	- Poll for receipt of remote process data, and dispatch to local
+		objects. This is essentially the same as for Reinit, above.
+
+
+Problems:
+- No way to handle dynamically growing simulations (more nodes). But possibly
+	postmasters can look for scheduled clocks at creation, much like other
+	objects do.
+- ClockTick/ParTick management by ClockJob is done through an ugly intermediate
+	called ClockTickMsgSrc. This can be gotten rid of if we have better
+	ways of handling connection lists and sorting them.
+- No arrangement yet worked out for async messages like setup calls and
+	action potential like rare events.
+- No good arrangement yet for return messages.
+#############################################################################
+#############################################################################

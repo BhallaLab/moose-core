@@ -16,10 +16,15 @@ class Shell
 		used by the parser.
 	field:
 		int isInteractive;
+		int totalnodes;
+		int mynode;
 		string parser;
 	src:
+		single commandReturn( string value );
+		solve remoteCommand( string command );
 
 	dest:
+		multi command( string command );
 		single add( string src, string dest );
 		single drop( string src, string dest );
 		single set( string field, string value );

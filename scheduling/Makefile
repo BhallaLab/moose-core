@@ -18,7 +18,9 @@ OBJ = \
 	SchedWrapper.o	\
 	JobWrapper.o	\
 	ClockJobWrapper.o	\
+	ClockTickMsgSrc.o	\
 	ClockTickWrapper.o	\
+	ParTickWrapper.o	\
 	TockWrapper.o	\
 	TestScheduling.o \
 
@@ -48,9 +50,11 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 SchedWrapper.o: Sched.h SchedWrapper.h
 JobWrapper.o: Job.h JobWrapper.h
-ClockJobWrapper.o: Job.h ClockJob.h ClockJobWrapper.h
+ClockJobWrapper.o: Job.h ClockJob.h ClockJobWrapper.h ClockTickMsgSrc.h
+ClockTickMsgSrc.o: ClockTickMsgSrc.h
 ClockTickWrapper.o: ClockTick.h ClockTickWrapper.h
 TockWrapper.o: Tock.h TockWrapper.h
+ParTickWrapper.o: ClockTick.h ClockTickWrapper.h ParTick.h ParTickWrapper.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c

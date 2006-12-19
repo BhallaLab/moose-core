@@ -47,7 +47,10 @@ This is the squid demo enhanced. As a test we connect the Na channel current
 into a CaConcen, and this into a Nernst.  The two of these are also plotted.
 Output file is casquid.plot.  NaConc (the Na current in a CaConcen) rises
 sharply on first AP and then goes in 3 cycles of oscillation between
-0.4e-5 and 1e-5 CaPotl goes between 0.05 and 0.06 mV.
+0.4e-5 and 1e-5.
+CaPotl starts up at a bit over 0.1 V and then goes between 0.05 and 0.06 V.
+Vm behaves much the same as for the regular squid demo, with three action
+potentials from -0.075 V to +0.025 V.
 .............................................................................
 
 

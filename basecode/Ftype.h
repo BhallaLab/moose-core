@@ -101,6 +101,10 @@ class Ftype0: public Ftype
 
 		static bool set( Element* e, Finfo* f );
 
+		static bool set( Element* e, const string& fname ) {
+			return set( e, Field( e, fname ).getFinfo() );
+		}
+
 		bool strGet( Element* e, Finfo* f, string& val ) const {
 			val = "";
 			return 0;

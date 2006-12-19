@@ -8,6 +8,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <mpi.h>
 #include "header.h"
 #include "ParallelFinfo.h"
 #include "ParallelMsgSrc.h"
@@ -29,6 +30,8 @@ const Ftype* ParallelDummyFinfo::ftype() const
 //////////////////////////////////////////////////////////////////
 
 
+// Note that e is the target element, whereas sender is the field of
+// the src.
 Finfo* ParallelDestFinfo::respondToAdd( 
 				Element* e, const Finfo* sender )
 {
@@ -45,8 +48,8 @@ Finfo* ParallelDestFinfo::respondToAdd(
 	}
 	PostMasterWrapper* pm = dynamic_cast< PostMasterWrapper* >( e );
 	if ( !pm ) {
-			cerr << "Error: ParallelDestFinfo on non-postmaster element\n";
-			return 0;
+		cerr << "Error: ParallelDestFinfo on non-postmaster element\n";
+		return 0;
 	}
 	pm->addSender( sender );
 	// pm->outgoingSize_.pushBack( sender.size() );

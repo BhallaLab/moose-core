@@ -93,6 +93,7 @@ class Shell
 		void listClassesFuncLocal( );
 		void echoFuncLocal( vector< string >& s, int options );
 		void commandFuncLocal( int argc, const char** argv );
+		void remoteCommandFuncLocal( string arglist );
 
 ////////////////////////////////////////////////////////////////////
 // Utility functions
@@ -102,11 +103,21 @@ class Shell
 			string& e, string& f );
 		bool splitField( const string& fieldstr, Field& f );
 		int wildcardField( const string& fieldstr, vector< Field >& f );
+
+// Returns the node number if it is specific node, returns
+// local node number if it is any node or a matching wildcard.
+// Returns -1 if it is an illegal node.
+// Nodes are identified as /nodexxx where xxx is a number.
+		int getNode( const string& fieldstr );
+		int parseNode( string& fieldstr );
 		Element* findElement( const string& path );
 		Element* checkWorkingElement( );
 		Element* shellRelativeFind( const string& path );
 		Element* findDest( const string& dest, string& destChildName );
 
+//////////////////////////////////////////////////////////////////
+// Set of functions handled by commandFunc
+//////////////////////////////////////////////////////////////////
 		void simobjdumpFunc( int argc, const char** argv );
 		void simundumpFunc( int argc, const char** argv );
 		void loadtabFunc( int argc, const char** argv );
@@ -116,11 +127,20 @@ class Shell
 		void tabCreateFunc( int argc, const char** argv );
 		void tabFillFunc( int argc, const char** argv );
 		void addFieldFunc( int argc, const char** argv );
+		void addFromRemoteFunc( int argc, const char** argv );
 
 		// These fnc defs were moved to Shell.cpp to mollify MSVC++.
 		void ok();
 		void error( const string& report );
 		void error( const string& s1, const string& s2 );
+
+//////////////////////////////////////////////////////////////////
+// Supplementary functions for parallel messaging
+//////////////////////////////////////////////////////////////////
+		// bool addToRemoteNode( Field& s, const string& dest, int destNode );
+		void addFromRemoteNode( int srcNode, const string& dest );
+		void remoteCall( const string& command, int destNode = -1 );
+		void barrier();
 
 	private:
 		string workingElement_;
@@ -128,6 +148,8 @@ class Shell
 		vector< string > workingElementStack_;
 		// True if prompts etc are to be printed.
 		int isInteractive_;
+		int totalNodes_;
+		int myNode_;
 		// Temporary for holding text that is sent to the shell for
 		// output. Eventually to be directed to tty or graphics.
 		string response_;
