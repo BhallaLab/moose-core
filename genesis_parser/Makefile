@@ -14,10 +14,10 @@
 
 TARGET = SLI.o
 
+
 OBJ = \
 	GenesisParser.o \
 	GenesisParser.tab.o \
-	GenesisParserWrapper.o \
 	symtab.o \
 	eval.o \
 	parse.o \
@@ -27,29 +27,13 @@ OBJ = \
 HEADERS = \
 	../basecode/header.h \
 	../basecode/Conn.h \
-	../basecode/Cinfo.h \
-	../basecode/Ftype.h \
-	../basecode/Field.h \
-	../basecode/Finfo.h \
-	../basecode/MsgSrc.h \
-	../basecode/RelayFinfo.h \
-	../basecode/ValueFinfo.h \
-	../basecode/DestFinfo.h \
-	../basecode/SingleSrcFinfo.h \
-	../basecode/NSrcFinfo.h \
-	../basecode/ReturnFinfo.h \
-	../basecode/SharedFinfo.h \
-	../basecode/ObjFinfo.h \
 	../basecode/Element.h \
-	../basecode/Neutral.h \
-	../basecode/ProcInfo.h \
 
 default: $(TARGET)
 
 
 $(OBJ)	: GenesisParser.yy.cpp $(HEADERS)
-GenesisParserWrapper.o:		../basecode/Shell.h ../basecode/ShellWrapper.h GenesisParser.h GenesisParserWrapper.h
-GenesisParser.o:			../basecode/Shell.h GenesisParser.h
+GenesisParser.o:			GenesisParser.h
 GenesisParser.yy.o:			GenesisParser.yy.l
 
 GenesisParser.yy.cpp: GenesisParser.yy.l

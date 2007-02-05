@@ -19,20 +19,17 @@
 #CFLAGS  =	-O3 -pg -Wall -pedantic -DNO_OFFSETOFF
 
 # Use the options below for compiling on GCC4.0
-# ANSI C++ and hence gcc4 have some strange error messages that emanate
-# from offsetof, even when it does the right thing. The 
-# -Wno-invalid-offsetof flag suppresses these silly warnings.
 #  For Debian/Ubuntu 6.06, we need to add a few more compiler flags to
 #  help it through the genesis parser, which is littered with ifdefs.
-CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DYYMALLOC -DYYFREE -Wno-invalid-offsetof
-#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -Wno-invalid-offsetof
-#CFLAGS  =	-O3 -Wall -pedantic -Wno-invalid-offsetof
+CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DYYMALLOC -DYYFREE
+#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS
+#CFLAGS  =	-O3 -Wall -pedantic
 
 # Use the options below for compiling on GCC4.1
 # GNU C++ 4.1 and newer will need -ffriend-injection
 #
-#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DYYMALLOC -DYYFREE -Wno-invalid-offsetof -ffriend-injection
-#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -Wno-invalid-offsetof -ffriend-injection
+#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DYYMALLOC -DYYFREE -ffriend-injection
+#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -ffriend-injection
 
 
 # Libraries are defined below. For now we do not use threads.
@@ -65,20 +62,16 @@ LD = ld
 #
 # moved genesis_parser to beginning since it generates code
 #
-SUBDIR = genesis_parser basecode maindir randnum builtins scheduling kinetics biophysics textio hsolve $(PARALLEL_DIR) utility
+SUBDIR = genesis_parser basecode shell element maindir
+
+#randnum builtins scheduling kinetics biophysics textio hsolve $(PARALLEL_DIR) utility
 
 OBJLIBS =	\
 	basecode/basecode.o \
-	scheduling/scheduling.o \
-	randnum/randnum.o \
 	maindir/maindir.o \
 	genesis_parser/SLI.o \
-	builtins/builtins.o \
-	textio/textio.o \
-	kinetics/kinetics.o \
-	biophysics/biophysics.o \
-	hsolve/hsolve.o \
-	utility/utility.o \
+	element/element.o \
+	shell/shell.o \
 
 moose: libs $(OBJLIBS) $(PARALLEL_LIB)
 	$(CXX) $(CFLAGS) $(PARALLEL_FLAGS) $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o moose
@@ -87,6 +80,9 @@ moose: libs $(OBJLIBS) $(PARALLEL_LIB)
 libmoose.so: libs
 	$(CXX) -G $(LIBS) -o libmoose.so
 	@echo "Created dynamic library"
+
+shell: libs $(OBJLIBS) $(PARALLEL_LIB)
+	g++ -shared shell/Swig_wrap.o $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o _shell.so
 
 libs:
 	@(for i in $(SUBDIR); do echo cd $$i; cd $$i; make CXX="$(CXX)" CFLAGS="$(CFLAGS) $(PARALLEL_FLAGS)" LD="$(LD)" LIBS="$(SUBLIBS)"; cd ..; done)
@@ -99,4 +95,4 @@ default: moose mpp
 
 clean:
 	@(for i in $(SUBDIR) ; do echo cd $$i; cd $$i; make clean; cd ..; done)
-	-rm -rf moose mpp core.* 
+	-rm -rf moose mpp core.* DOCS/html *.so *.py *.pyc

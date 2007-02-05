@@ -15,7 +15,7 @@
 // to a minimum, I'll leave it in.
 #include <setjmp.h>
 
-#include "../basecode/Shell.h"
+// #include "../basecode/Shell.h"
 #include <FlexLexer.h>
 #include "script.h"
 #include "GenesisParser.h"

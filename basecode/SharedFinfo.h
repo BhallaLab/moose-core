@@ -2,214 +2,102 @@
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**           copyright (C) 2005 Upinder S. Bhalla. and NCBS
+**           copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
-** GNU Lesser Public License version 2.1
+** GNU General Public License version 2
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-
 #ifndef _SHARED_FINFO_H
 #define _SHARED_FINFO_H
 
-///////////////////////////////////////////////////////////////////////
-// Here we define a set of classes derived from Finfo0 and Finfo1
-// that handle group messaging using shared conns.
-// There is only one class, handling both ends of the
-// group message.
-///////////////////////////////////////////////////////////////////////
-
-extern bool parseShareList( 
-	const Cinfo* c, const string&,
-	vector< Finfo* >&, vector< Finfo* >&
-);
-
-// This finfo handles messages that share a common Conn. A single
-// 'add' call to a SharedFinfo sets up all these messages. There can
-// be both incoming and outgoing messages. In order to connect to a
-// SharedFinfo there must be a perfect, ordered match between the
-// incoming and outgoing messages of the two SharedFinfos.
-// The name is just the name of the msgsrc
-// The getSrc returns a ptr to the msgsrc, given the element ptr.
-// The triggers are a list of msgdests that trigger this msgsrc.
-// Here we just put in their finfo names.
+/**
+ * Finfo for handling shared messages with arbitrary numbers of
+ * srcs and dests.
+ * The array of pair< Ftype*, RecvFunc > can indicate MsgSrc or MsgDest
+ * in any order, and that order will be preserved in the created
+ * Finfo. In this array, MsgSrcs are indicated by the presence of
+ * a dummyFunc, and Dests by other funcs.
+ * This order is enforced when messages are set up. This means that
+ * you cannot send a shared message between the same Finfo on
+ * identical objects. Other than that case, the convention is to
+ * use the same name for the source and destination Finfo of a shared
+ * message, because they are usually a bit of both. Furthermore,
+ * it is fine to send the message in either direction.
+ */
 class SharedFinfo: public Finfo
 {
-	public:
-		SharedFinfo( const string& name, 
-			Conn* ( *getConn )( Element* ),
-			const string& connSharers
-		)
-		:	Finfo(name), 
-			getConn_( getConn ),
-			connSharers_( connSharers ),
-			myFtype_( finfos_ )
-		{
-			;
-		}
+		public:
 
-		RecvFunc recvFunc() const {
-			return 0;
-		}
+			/**
+			 * In the constructor, we need to build up a composite
+			 * Ftype that manages the local vector of Ftypes. We
+			 * also make a vector of RecvFuncs that will be used
+			 * when adding messages.
+			 */
+			SharedFinfo( const string& name,
+				pair< const Ftype*, RecvFunc >* types, 
+				unsigned int nTypes );
 
-		RecvFunc targetFunc( Element* e, unsigned long i ) const {
-			return 0;
-		}
+			~SharedFinfo()
+			{;}
 
-		RecvFunc targetFuncFromSlot( Element* e, unsigned long i ) const {
-			cerr << "Error: SharedFinfo::targetFuncFromSlot: Can't get this\n";
-			return 0;
-		}
-		
-		// returns number of matches
-		unsigned long matchRemoteFunc( Element* e, RecvFunc rf ) const
-		{
-			return 0;
-		}
+			bool add(
+					Element* e, Element* destElm, const Finfo* destFinfo
+			) const;
 
-		void addRecvFunc( Element* e, RecvFunc rf, unsigned long position ) {
-			;
-		}
+			bool respondToAdd(
+					Element* e, Element* src, const Ftype *srcType,
+					FuncList& srcfl, FuncList& returnFl,
+					unsigned int& destIndex, unsigned int& numDest
+			) const;
+			
 
-		bool add( Element* e, Field& destfield, bool useSharedConn = 0);
+			unsigned int srcList(
+					const Element* e, vector< Conn >& list ) const;
+			unsigned int destList(
+					const Element* e, vector< Conn >& list ) const;
 
-		Conn* inConn( Element* e ) const {
-			return getConn_( e );
-		}
+			/**
+			 * Send a message with the arguments in the string.
+			 */
+			bool strSet( Element* e, const std::string &s )
+					const;
+			
+			/// strGet doesn't work for SharedFinfo
+			bool strGet( const Element* e, std::string &s ) const {
+				return 0;
+			}
 
-		Conn* outConn( Element* e ) const {
-			return getConn_( e );
-		}
+			/// This Finfo does not support recvFuncs.
+			RecvFunc recvFunc() const {
+					return 0;
+			}
+			
+			/**
+			 * In the case of the SharedFinfo, we need to assign
+			 * MsgSrcs for every src entry in the types list. 
+			 * These are identified by the entries where the RecvFunc
+			 * is zero. These src entries are mostly redundant,
+			 * because they all specify the same conn range. The
+			 * only distinguishing feature is that each manages a
+			 * different RecvFunc from the target.
+			 * When the SharedFinfo has no MsgSrcs, then we set up
+			 * a single MsgDest to deal with it all.
+			 */
+			void countMessages( 
+					unsigned int& srcNum, unsigned int& destNum );
 
-		void src( vector< Field >& list, Element* e ) {
-			;
-		}
+			const Finfo* match( 
+				const Element* e, unsigned int connIndex ) const;
 
-		bool funcDrop( Element* e, const Conn* c ) {
-			return 0;
-		}
+			bool isTransient() const {
+					return 0;
+			}
 
-		void initialize( const Cinfo* c );
-
-		Finfo* respondToAdd( Element* e, const Finfo* sender );
-		
-		const Ftype* ftype() const {
-			return &myFtype_;
-		}
-
-		Finfo* makeRelayFinfo( Element* e ) {
-			return 0;
-		}
-
-	protected:
-
-		void setInFinfos( Finfo* f ) {
-			finfos_.push_back( f );
-			sharedIn_.push_back( f );
-		}
-
-		void setOutFinfos( Finfo* f ) {
-			finfos_.push_back( f );
-			sharedOut_.push_back( f );
-		}
-
-	private:
-		Conn* ( *getConn_ )( Element * );
-		string connSharers_;
-		vector< Finfo* > finfos_;
-		vector< Finfo* > sharedOut_;
-		vector< Finfo* > sharedIn_;
-		MultiFtype myFtype_;
+		private:
+			unsigned int numSrc_;
+			FuncList rfuncs_;
+			unsigned int msgIndex_;
 };
-
-/*
-// This Finfo is for messages sharing a common Conn, but in a somewhat
-// specialized context. This is a destination Finfo from a Shared
-// Finfo. It expects that the incoming message wants an immediate
-// response by a return function. Further it expects that each incoming
-// message wants an independent response from all the other messages.
-// For example, if there are 100 instances of an HHChannel, all using
-// the same HHGate, each will independently send a message to the 
-// HHGate asking it to calculate their state variables and return 
-// updated state values. None of the HHChannels is interested in
-// what the other channels are doing.
-// In principle this kind of Finfo can handle multiple output messages,
-// but for now the idea is it just returns to sender.
-// There are some similarities to Synapse1Finfo
-
-class ReturnFinfo: public SharedFinfo
-{
-	public:
-		ReturnFinfo:( const string& name,
-			vector< Conn* >& ( *getConnVec )( Element* ),
-			unsigned long( *newConn )( Element* ) ,
-			const string& connSharers )
-		:	SharedFinfo( name, 0, connSharers ),
-			getConnVec_( getConnVec ),
-			newConn_( newConn )
-		{
-			;
-		}
-
-		Field match( const string& s )
-		{
-			if ( s == name() ) {
-				return this;
-			}
-			int i = findIndex( s, name() );
-			if ( i >= 0 ) {
-				ReturnFinfo* ret = new ReturnFinfo( *this );
-				ret->isIndex_ = 1;
-				ret->index_ = i;
-				return ret;
-			} else {
-				return Field();
-			}
-		}
-	
-		Finfo* copy() {
-			if ( isIndex_ )
-				return ( new ReturnFinfo( *this ) );
-			else
-				return this;
-		}
-
-		void destroy() const {
-			if ( isIndex_ )
-				delete this;
-		}
-
-		Conn* inConn( Element* e ) const {
-			if ( isIndex_ ) {
-				if ( getConnVec_( e ).size() > index_ )
-					return getConnVec_( e )[ index_ ];
-			} else {
-				Conn* ret = new ReturnConn( e );
-				getConnVec_( e ).push_back( ret );
-				return ret;
-			}
-		}
-
-		Conn* outConn( Element* e ) const {
-			if ( isIndex_ ) {
-				if ( getConnVec_( e ).size() > index_ )
-					return getConnVec_( e )[ index_ ]->target( 0 );
-			}
-			return dummyConn();
-		}
-	
-		void src( vector< Field >& list, Element* e );
-
-		// This should only be used as a destination.
-		bool add( Element* e, Field& destfield, bool useSharedConn = 0)
-		{
-			return 0;
-		}
-		Finfo* respondToAdd( Element* e, const Finfo* sender );
-
-	private:
-		vector< Conn* >& ( *getConnVec_ )( Element* );
-		unsigned long( *newConn_ )( Element* );
-};
-*/
 
 #endif // _SHARED_FINFO_H

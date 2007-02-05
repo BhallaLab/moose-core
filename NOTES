@@ -1,0 +1,1057 @@
+26 Dec 2006
+
+Revision 50: Implemented connects and disconnects at the conn level. This
+is non-trivial as it involves updating ranges and target Conns affected by
+the index changes.
+
+- Handle Element deletion. Do it intelligently: first mark all elements
+	scheduled for deletion, then efficiently update only the surviving
+	connections.
+	This is a bit premature as we also need to delete the MsgSrc/MsgDest
+	entries along with this.
+
+- Build up MsgSrc and MsgDest handling
+
+- Test regular messages
+
+=============================================================================
+29 Dec 2006
+
+Revision 51: checked in the preliminary element deletion stuff prior to
+going on with the MsgSrc stuff.
+
+=============================================================================
+30 Dec 2006
+
+Message creation starting to take shape. For shared messages we have
+to go to the first src _on both sides_, and ask this src to insert a new
+Conn which is then used to make a connection. If the shared message only
+has dests then the dest takes care of the Conn insertion. For regular
+messages it is straightforward: insert Conn on src and dest respectively.
+
+Also have a flow chart for how to set up the messages from the view point of
+the Field/finfo:
+
+typedef FuncList vector< RecvFunc >
+
+addFrom:
+- Check respondToAdd. This returns a conn index if it works
+- Trigger a local event for message formation.
+- Insert new Conn on src as above
+- Tie up Conns.
+
+bool respondToAdd( Field src, FuncList& srcRf, vector< Ftype* >& srcType,
+	FuncList& destRF, unsigned int& destConn )
+- Check the types
+- Trigger a local event for message formation.
+- inert the new Conn, using a src if there are any funcs coming in.
+- Return with the new Conn and recvfuncs.
+
+delete
+- Most of the effort goes into identifying the conns to go for.
+- Delete the conn
+- Do local event.
+
+set/call
+- Check arg type(s)
+- Make dummy conn
+- execute all RFs in FuncList.
+
+get
+- For values:
+	- Copy values into pointer
+- For MsgSrc:
+	- Copy target list
+- msgDest
+	- Copy target list.
+
+strSet
+- Convert arg type(s)
+- Do above set/call
+
+strGet
+- Do above get
+- Convert arg types into string.
+
+Finally got initial pass at messaging to compile, though it croaks when run.
+=============================================================================
+31 Dec 2006
+
+Setting up to make messages using MsgSrc and MsgDest.
+Got initial message creation to work. 
+Looks like we could simplify MsgDests to be independent of ranges, and 
+refer directly to ranges in the Conn vector.
+
+Checked in as revision 53.
+
+Trying now to do send.
+OK, got it to work. But the send is a horribly messy function, way too many
+indirections. Need to rethink the structure of MsgSrc and MsgDest, try to 
+do away with the Range altogether.
+Anyway, check this version in as revision 54.
+
+Working on update. Looks like it will be good. But currently the updates
+are a bit messy. Not wrapped up.
+Could even consider putting in pointers to the Conn entries in the Src
+vector. Would need to do a bit of extra work on some updates, but the
+Sends would be slightly faster as they would not have to lookup values.
+=============================================================================
+1 Jan 2007
+After much grinding, finally reimplemented the messaging starting from the
+definition of MsgSrc to get rid of the Range. Compiles. Fails.
+
+Various fixes later. Compiles, runs.
+
+Checked in as revision 55.
+
+Now to do more thorough checking
++ Conn insertion and updates in later sections.
++ src link list
++ Managing both dests and srcs as if in a shared message.
++ Conn deleting
+
+
+=============================================================================
+2 Jan 2007
+Working on the checks listed above. Minor fixes.
+Lots more tests added, all clear. Time to check it in.
+
+=============================================================================
+3 Jan 2007
+Design the infos now. Operations to support:
+
+Admin:
+match ( to find info from string, and possibly subfields or array entries )
+isA (type identity, going through Ftype)
+
+Messaging:
+add ( as source )
+respondToAdd (as dest )
+drop (as any half of connection )
+respondToDrop ( as other half )
+srcList
+destList
+
+Data:
+set/call ( using usual recvfunc )
+get
+strset
+strget
+
+The Element itself has to manage an array of finfos, which are set up
+using a static initializer. Each finfo must have
+RecvFunc ( This provides the set operation )
+getFunc ( for messages this is an indexed list of targets. But doesn't match
+	RecvFunc )
+Ftype ( handles str conversions either way, does type checking )
+base class info (needed to handle nested fields)
+Would like to also finfos to contain cinfos. finfo_[0] has class info of
+	data ptr as a whole.
+	Field finfos are derived from cinfos for other classes, so that 
+	every field has full class mappings.
+	Perhaps Ftype === cinfo? But we have multi-arg recvfuncs.
+
+
+I had a proliferation of ~20 Finfos, all listed:
+
+What is a finfo?
+- Something you send messages to or from.
+- Something to manage and access data fields
+
+The first is more restrictive. More stuff is needed for data fields.
+
+
+=============================================================================
+4 Jan 2007
+
+Relay stuff for finfos:
+
+All srcs can be dests: Provide a RecvFunc that is templated to pass arguments
+from the triggering function directly to the src. Can use send and sendTo, 
+but sendBack is tricky.
+	- This means that we can configure fields to do this cleanly, except
+	that here the RecvFunc is munged so it instead uses the field value.
+
+All dests can be srcs passing the same arguments:
+Here we just need to go back to the real src and have it send another message.
+No additional stuff in the finfo.
+
+In the earlier version we had some 20 Finfo types. Here we need:
+- ObjFinfo: Uses a lookup func, permits nesting, 
+	permits full object assignment, passes a pointer except at postmaster.
+- ValueFinfo: No nesting. provides recvFunc for set. Use another recvFunc to
+	trigger return message, which is also used for get. Perhaps split it?
+	Actually respondToAdd is a good way to provide different recvFuncs.
+- MsgSrcFinfo: No nesting. provides recvFunc for passing arguments right into
+	src.  Handles specific MsgSrc entries.
+- MsgDestFinfo: No nesting. Provides recvFunc for operations.
+- SharedFinfo: No nesting. Provides a whole set of recvFuncs. Or sometimes
+	no recvfuncs if it is only srcs.
+
+Options for getting values from fields:
+- Use a getfunc
+	- Simple.
+	- Still need to implement something for message access.
+- Using a shared message with a trigger and a return msgsrc 
+	- Complex. For regular object assignment would need something like
+	a temporary message to be set up. If this could be simplified it would
+	be OK.
+		- Get the trigger recvfunc with a respondToAdd. Perhaps at
+		this point the target can decide which recvfunc to return,
+		one for gets, or one for proper messages.
+		- Calling a trigger recvfunc is easy.
+		- Need to provide a return conn in any case, because that is
+		how recvfuncs work. In addition would need to have a recvFunc
+		to accept the return value. 
+			- Pass the rf in the triggering recvFunc? 
+			Not good, specially across nodes.
+			- Assume a generic recvfunc that just typecasts the
+			e->data and assigns it? Works, except how do we give
+			it other recvfuncs when we set up proper messages.
+			- Actually, simple: Just pass in the required return
+			recvfunc in the respondToAdd itself. But oops, where
+			does it store it? The proper message stores it in 
+			the MsgSrc array.
+			- Make a distinction in the respondToAdd about which
+			recvfunc to return to the caller. If there is no
+			passed in recvfunc, return the recvfunc that typecasts
+			e->data.
+	- Works for message access
+	- Would it be simpler for cross-node field access?
+- Build a full message and then delete it.
+	- Major complex to execute, but simplest to program.
+	- Residual allocations all over the place.
+	- Completely general across nodes
+		- Issue with deadlocks and timings across nodes. These are
+		there in the other methods too unless we do the serializing.
+- Return a recvfunc void(*)(Conn*, value& ret) where we return the value
+	in a naughty way.
+- Pass in a recvfunc to be used for the return operation. Also naughty,
+	but keeps the typecast function interface to a minimum.
+- Provide Set/Get functions but typecast to some uniform shape so that we 
+	can put them in the main Finfo class without juggling through a 
+	valuefinfo class. Do type protection via the finfo's ftype... can we?
+	Yes, the set< T >  function can build a temporary ftype for the
+	comparison.
+
+=============================================================================
+5 Jan 2007
+
+After messing around a fair bit with finfos, I think the best bet is to go
+ahead and reimplement essentially the same functional set as before, but with
+an eye to cleanness and moving all type-specificity to Ftype. Later we can
+look at further merging of concepts.
+
+Implemented the basic message passing SrcFinfo and DestFinfo, compiled.
+Time to check it in. Revision 57
+
+Did a preliminary unit test to show that the Src and Dest Finfos can 
+manage the setting up of messages.
+Now to try sending information.
+
+Did so, after lots of additional fixes. Revision 58.
+
+Accessing finfos:
+- Ptr to vector off Element*
+	- Tricky to extend
+- vector off Element* where first entry is always self, and points to cinfo,
+	which points to array of finfos for default fields.
+	- Each data Finfo points to a cinfo which gives a further set of
+	finfos obtained by indirection. Their use is fine for get/set,
+	but for real messages we need to copy the nested finfo, put it into
+	a new finfo to live on the finfo vector. The new finfo will also
+	handle indirection.
+
+=============================================================================
+6 Jan 2007
+
+Looking at handling nested fields. OK as above up to the generation of a 
+new finfo to deal with it, but not good for messaging. Functors are an obvious
+way to pass in the extra indirection info, but this would add a minimum 2
+indirections to every func call. We would need a wrapper functor with
+a pointer to the polymorphic class that executes the func, because functors
+are pass-by-value. Then the virtual func would cost at least another 
+indirection. Original plan was to provide a wrapper Element* to do this.
+It would do the lookup of the nested part of the data, and the assigning 
+func only needs to know the final data type. Issue is how to manage this
+wrapper Element. We would need to pass it back in the respondToAdd, and
+the incipient Conn would need to know about it to replace the primary
+Element.
+Alternatively: Can we design a recvfunc that is precompiled but looks up
+some extra info to find the other parts of it?
+Two possibilities: 
+- Template off about 3 recvfuncs with indices, and send out
+whichever is needed. Rarely will we need more, complain if it happens. These
+just look up the appropriate entry when needed. Messiness here with scaling
+and with predefining a load of recvfuncs.
+- Use the conn index to look for a matching entry. Slightly slow for looking
+up, but saved because we will rarely have many. No issue with scaling.
+I like this. The RecvFunc simply says, look for the entry in the extended
+Finfo table which matches this, and do your operation with its help.
+
+void extRecFunc( Conn& c, T v )
+{
+	ExtFinfo* f = findExtFinfo( c ); // Match it using the Conn index.
+	assert( f != 0 );
+
+// Here the lookup func is wrapped into the indirection element
+	TempConn tc( c, f->data() ); // Here we set up an indirection Element
+				// to replace the one from c. 
+				// Or perhaps TempConn tc = c.tempConn( e, f->data() );
+
+// Here the nested recv func is applied to the looked up data part as held in
+// the indirection Element.
+	reinterpret_cast< void ( *ofunc )( Conn&, T ) >( f->origFunc() ) ( tc, v );
+}
+
+Slow building up of many things here. Began with implementation of Cinfo.
+Begun implementing ThisFinfo, which handles the object itself.
+
+Checked it in as version 59.
+
+Other pieces:
+ValueFinfo: Need it to understand the API we will need for fields.
+IndirectFinfo: Manage the above function and recvfuncs
+ObjFinfo: A finfo that refers to a nested object.
+IndirectElement: Manage lookup of data() internally.
+DynamicFinfo: Finfo to be made on the fly for handling non-compiled operations.
+	Looked up using the cinfo index.
+=============================================================================
+7 Jan 2007
+
+Putting preliminary implementations together for various things, just to
+clarify implementation possibilities. Lots of things coming together here,
+and now I should steadily work through implementing each.
+* Class definition through array of Finfos.
+* Finfo lookup
++ Value fields
+- Nested fields
+- Array fields
+- Shared messages
++ Dynamic messaging: To value fields
+- Dynamic messaging: To nested fields
+
+Getting close to sending messages using the class definition. Bug somewhere
+in how the numbering of msgsrcs is done.
+Also SimpleElement::add is not defined, but doesn't seem to bother it.
+Possible issue is  SimpleElement::insertConnOnSrc
+
+=============================================================================
+8 Jan 2007
+
+Finally got a simple network with messaging to work, various bugs ironed out.
+Time to check it in. This is revision 60.
+
+=============================================================================
+9 Jan 2007.
+
+Got first level of finfo lookup to work, no bells and whistles yet. Checked in.
+This was revision 61.
+
+=============================================================================
+10 Jan 2007.
+Beginning to set up ValueFinfo, which in large part also involves defining
+DynamicFinfo.
+
+Trying to compile.
+=============================================================================
+11 Jan 2007
+
+Horrible mess compiling, obscure error messages about vtables that did not
+identify the source of the problem. Turns out it helps to have an object
+file rather than just inlines, because then the compiler deigns to explain
+what the problem was. The problem was that in the base Element class I had
+not put the =0; when defining a pure virtual.
+
+Anyway, checked this whole mess in prior to doing the next stage of getting
+data field assignment to work, and then the messaging to value fields.
+This was version 62.
+
+Now got simple set and get to work. This entailed development of the listFinfos
+function that ramifies through many classes, just to test that the
+finfo was a valid one. The function has other uses too, which is why I 
+bothered. Checked in as version 63.
+
+=============================================================================
+12 Jan 2007
+Now working on messages to and from Values.
+Setting up a rather big seris of tests for this. First stage was just
+doing the controls: ensuring that the regular messaging works. Works.
+
+Got set message into a ValueFinfo to work. Checked in as version 64.
+
+Currently a little stuck on line 983 in the unit tests. dval of e0 has
+changed, and I don't know why.
+=============================================================================
+13 Jan 2007
+Need to use the MsgDest ranging to monitor if a DynamicFinfo is invoked by an
+incoming message. Actually reduces work when we are changing conns.
+
+Architecture issues pending:
+- Parallel messages
+- SWIG
+- Class init and MPP
+- Solver messaging
+- Scheduling and clock juggling
+- Field objects
+- Object/field ids across nodes
+- Serialization and persistence: data
+- Serialization and persistence: messages
+- Multithreading options.
+
+
+=============================================================================
+14 Jan 2007
+
+After much messing around, figured out why there was a problem in unit
+tests when I tried --proc--> e1/procout --> e0/dval --> e4/dsum
+Turned out not to be an issue with the messaging, which worked, but with
+the field gets, which failed when confronted with a DynamicFinfo. This led
+me to do some general reorganization of the set/get functions so that they
+are now part of the main Finfo base class with delayed typing.
+So we now have messages going into and out of fields. Still more variants
+to test, but first to check it all in. This was revision 65.
+
+Now testing  --proc--> e1/procout --> e5/dval --> e6/dsum";
+where we first add the message from d5 to e6, then the trigger. Currently
+it fails.
+
+Yet more fixes to how the DynamicFinfo handles messaging, and how it is
+set up by the ValueFinfo. Now it works.
+
+Then I went through adding further tests:
+trig then dval: --proc--> e1/procout --> e7/dval --> e8/dval";
+dval then trig: --proc--> e1/procout --> e9/dval --> e10/dval";
+
+All OK. Still remain to handle shared messages, but otherwise things look
+pretty good here, and a very general solution so far. Time to check it in.
+This was revision 66.
+
+Running into problems with the PtrFinfo. The issue is the usual one of 
+providing a static function for set/get, while having the available func
+as a different function ptr. functors would be easy, but I don't think
+the code will allow it.
+
+=============================================================================
+15 Jan 2007
+For now, defer the problem of ptr use for set/get. Require that if one
+wants to access the entire data field, one should define it also as a
+ValueFinfo for itself.
+Back to the PtrFinfo. I'm able to generate a nested set of DynamicFinfos
+using the recursive match operation. But where and when does the returned
+Finfo get used? If used for set/get, then it is used once and should then
+be deleted. if used for messaging, we need to anchor the DynamicFinfo on
+the elm. Perhaps the add operation can trigger a call within the
+DynamicFinfo to check if it has been moored onto the elm.
+
+=============================================================================
+17 Jan 2007
+Let's start by splitting up the problem.
+- Separate DynamicFinfos for each class. Later merge if good.
+- ArrayFinfo, DynArrayFinfo: ValueFinfo for arrays.
+- NestFinfo (to replace PtrFinfo): ONLY for nesting, refers to a known Cinfo.
+	NOT for assigning values, at least not at first.
+- Figure out if DynamicFinfo handles Dest->other and other->Src cases.
+
+ArrayFinfo: A variant on ValueFinfo and deals with specific, known classes. 
+- No further nesting. 
+- User provides 
+	void set( const Conn&, T, unsigned int index )
+	T get ( const void*, index )
+
+
+NestFinfo( const string& name, const Cinfo*, void* (*)( void*, unsigned int index ) )
+- Matching: identifies traversal, index and nested field. Looks up
+	Finfo for nested field. Generates a DyNestFinfo.
+- Only does nesting, no sets or gets at this point for field as a whole.
+- set, RecvFunc: Nested Finfo->ftype()->nestFunc()
+	which uses DyNestFinfo.
+- get: NestedFinfo->Ftype()->getFunc but needs to be invoked from DyNestFinfo.
+- add: Wrapper function to look up actual target, fake the conn?
+- respondToAdd: ?
+- DestFinfo: Same as Set
+- SrcFinfo: DyNest provides dummy Element to fudge MsgSrc indices
+- ArrayFinfo: 
+- NestFinfo:
+All in all, the NestFinfo has a pretty formidable set of things to do.
+
+Another approach:
+- Use DynamicFinfo for all funny messages, but look up supplementary info
+efficiently in the same way that Synapse info is looked up.
+- Use different kinds of DynamicFinfos, but look them up using efficient
+indexing a la synapses.
+
+
+OK, current approach:
+- We'll work out how to index the DynamicFinfo as needed.
+- We'll create a new DynamicFinfo as soon as the 'match' function is called.
+	We immediately place it on the finfo_ vector.
+	By definition, future calls would hit the DynamicFinfo first,
+	so match should only be called once on any object.
+	(May need to refer between DynamicFinfo and original Finfo in case
+	we have more messiness here.)
+- If the subsequent function is set or get, it checks if the DynamicFinfo
+	is unmessages. If so, delete it as soon as op is done.
+- If the subsequent function is messaging, add/drop messaging and delete
+	DynamicFinfo if now empty.
+- Add, respondToAdd, and drop now operate on the new dynamic finfo, NOT on the 
+	original finfo. So these operations need to be handled only by
+	the DynamicFinfo.
+- Whatever recvFunc or other op is needed, is handled by the original
+	Finfo, which typically refers these to the Ftype. In all cases
+	the DynamicFinfo, or a subclass, provides additional data.
+- set/get remain a problem. They really need to refer somehow to the
+	parent Finfo. I suppose that only Value and DynamicFinfos should
+	support set/get, in which case we could organize it. Even better,
+	we never actually expose anything except the DynamicFinfo...
+	oops, we wanted also to do DestFinfos.
+
+=============================================================================
+18 Jan
+Running into all sorts of problems with set/get for funny finfos.
+Perhaps I should stick to implementing messaging operations alone, and
+do set/get through messages. Question is whether overhead will be too much.
+
+Try:
+- DynamicFinfo that can handle indirection to forward operations for
+	doing add or respondToAdd.
+	- Need common mechanism for doing this forwarding.
+- Value, Src and Dest Finfos that provide add and respond.
+- Array and Nesting Finfos to provide info for DynamicFinfo to do indirection.
+- Ftype to deal with all function typing. Clean up ValueFinfo so it doesn't
+
+- ValueFinfo with setFunc and either a getFunc or a trigFunc given by the user.
+- ArrayFinfo with setFunc and either getFunc or trigFunc, indexed by Dynamic.
+- 
+
+=============================================================================
+19 Jan 2007
+Should I modify the Send so that there is a sendWithIndex that passes
+an extra arg, of the conn index, to each target. Used for synapses etc.
+This would have the implication that the RecvFunc need not know anything
+at all about the Element. It would be an entirely local operation.
+No, won't work. The outgoing Send commands in a recvFunc will need the
+Element info.
+
+Now into concrete compilation. 
+- Compile and test. Currently stuck with the usual template header
+	dependency headaches.
+	Now compiled, but get immediate segve
+- Eliminate ValueFinfo<T> and just have the generic operations, rest by 
+	Ftype. Compile and test.
+- Make an ArrayFinfo
+- Make a NestFinfo
+=============================================================================
+20 Jan 2007
+Conversion under way. Somewhat to my surprise I have a working 
+(clears all unit tests) intermediate version where DynamicFinfo
+is handling all the adds and respondToAdds, and various mutations
+have happened to Ftype1.
+
+Checked it in. It is version 67.
+
+Now lots of changes going on to get the ValueFinfo to become non-templated
+and shift stuff over to Ftype. Ftype1 has been subclassed into variants
+for handling Value, Array and Nest.
+
+Again, surprisingly, it worked and cleared unit tests with relatively little
+effort after many rather deep changes. Checked in as version 68.
+
+Now let's set up the ArrayFinfos.
+
+Point here: The DynamicFinfo needs two sets of setFuncs and getFuncs.
+The inner set is the set that the original object passes it. These are
+used by the Ftype to generate the static setFunc and trigFuncs that
+are seen by the outside world, such as messages.
+Point is that the DynamicFinfo needs to have the whole lot accessible to it.
+But possibly we could have the Ftypes accessing the funcs in a
+setFunc( Finfo ) type operation, which either passes back the statically
+defined Ftype variant of the function, or the variant that the parent Finfo
+generated. A bit too convoluted. Let's just have the Finfo pass the 
+correct functions in to the DynamicFinfo, which now has rather a lot
+of args.
+
+Cleaned up use of set/get funcs in Finfo. Separated the role of different
+types of Ftype. Redid the set<T> and get<T> operations, they are more
+general now and should work with arrays and nested fields in due course.
+Yet again surprised at the whole thing clearing the unit tests.
+Checked in as version 69.
+
+Next to set up unit tests for Arrays, then for nested objects. Begun.
+Barfs.
+
+=============================================================================
+21 Jan 2007
+
+Fixed up minor bugs, fixed issue with naming in the DynamicFinfo. We really 
+need to have the fully specified name given to the DynamicFinfo so that
+a regular name match is sufficient to identify it. Updated the UnitTests
+so that they test Set and Get on the Array.
+
+Some issues with looking it up because conn index is zero but so is conn size
+on the dummy element.
+This is a more fundamental problem. It happens because we assume each
+DynamicFinfo is associated with at least one incoming Conn. But if we
+are doing a set/get, we have unassociated DynamicFinfos sitting around.
+Worse, we could have multiple of them unless we can guarantee that the others
+will be deleted at once. Multithreading of shell is an issue here.
+
+OK, one issue dealt with. For set and get we do not rely on the lookup of
+DynamicFinfos, we use the one provided. However, we still have 'droppings'
+of old DynamicFinfos left sitting on the SimpleElement finfo_ list. These
+can be identified by having no incoming Conns, and can be deleted at
+some garbage collection stage. Perhaps addFinfo would be a good stage for
+this.
+
+Implemented the fix, ran a few unit tests, looks like ArrayFinfo set and
+get now works. Hooray. Checked it in as version 70.
+
+Now to check messaging to and from array entries.
+Great. This worked right off. I have done most of the variants on
+message to and from regular, Value and Array Finfos. 
+Checked it in as version 71.
+
+Looking at NestFinfo. This will need a functioning cinfo infrastructure.
+It has a problem because Finfos are const. So we really want the nested
+class to be passed in as a cinfo, which constrains us to having the class
+already defined. This rules out an initialization step. Given the
+usual static initialization approach, we need something clever to ensure
+that the nested class is defined first so its cinfo can be looked up.
+
+Anyway, started implementing NestFinfo.h using this idea. Should march
+on through. Need also to back up all this work.
+
+=============================================================================
+22 Jan 2006
+Did complete disk backup.
+Muddling along with Nest implementation.
+=============================================================================
+23 Jan 2006
+Heard from Dave Beeman that Jim has decided to cut MOOSE out of the loop with
+his incarnation of GENESIS, and to go with Hugo's Neurospaces instead.
+Various decisions follow.
+- Takeover and Makeover of the MOOSE site. 
+- Whether to do our own graphics. If so, how.
+- Tie ups. Erik, Sharon and Padriag, Sys Bio people.
+- Renaming and release plans
+- Announcements and writing
+- Prioritization
+
+Anyway, for now let's get the Nest implementation to work. Main obstacle now
+is defining its scope.
+- Consider a channel. It has nested in it several interpols.
+Actually we would normally do this using messages, so that the interpols
+could be shared.
+- Consider an nreac. It has nested in it an array of reactions and molecules,
+all computed efficiently in one step. Same rate for the lot, but an array
+of state variables. But this could be set up using the regular array. Do I
+really want it to look like many steps inside?
+- Consider diffusion. Idea is to have a single Element managing an array of
+identical molecules, and superimpose a diffusive calculator on it.
+But I would like to refer to each molecule as if it were the real thing.
+- Consider an array of 1e6 neurons. They all share the same heirarchy. We
+build one neuron, and then say that each compartment actually represents
+the 1e6 corresponding ones.
+
+Two key points:
+1. Often we want to have generic access plus a black-box solver on top.
+2. Other times we want to have generic access but preserve a certain messaging
+	structure for all the pieces. Often this would be taken over by
+	a solver.
+
+Both these cases seem to require an ArrayElement rather than a SimpleElement.
+Here we can acheive the message replication effect by having a local variable
+in the ArrayElement to indicate which index we are on. All the old messaging
+Just Works using the Element::data() function. Only issue is how to get the
+whole lot of elements to coordinate this indexing. Perhaps a special message
+to the whole lot of them? 
+createmap /neuron /map 100 100
+le /map
+	neuron[0..9999]
+showfield /map/neuron[2703]/compt/Vm
+
+So here the index on the neuron[2703] would tell neuron/compt which index
+to use.
+
+Any attempts to modify message structure on an individual basis would be messy.
+But necessary, for example, for synaptic connectivity. The ArrayElement would
+need an extra internal table to direct the conn_ entries correctly.
+
+Would like to have vector messaging here.
+Would like to have vector Process operations, provided the thing isn't
+solved. Or even if it is.
+Would like to have solver messaging set up in a similar invisible way for
+zillions of children.
+
+For now: Move on. Let's get something that works and that we can use
+for computing. Here is a list of things to work on with current priority set.
+
+- SWIG
+- GENESIS parser
+- Windows compilation				Assign Niraj
+- MOOSE web site.				Assign Harsha to look at it.
+- Scheduling and clock juggling			Me, also get an idea of obj
+- Implementation of some basic classes		Me, also test somethings
+- Class init and MPP
+- Parallel messages
+- Solver messaging
+- Field objects
+- Object/field ids across nodes
+- Serialization and persistence: data
+- Serialization and persistence: messages
+- Multithreading options.
+- Array Elements.
+
+...........................................................................
+
+Working on SWIG.
+- varargs in commands: Avoid them. Let the Genesis parser wrapper
+	code deploy the correct one.
+- Commands: Many of them use the shell object as a global. But
+	there is a strong assumption of string based object identification.
+	That is why . and .. make sense. 
+- Should we deal with Field objects rather than strings? it would be nice
+	to be able to use the scripting languages to do assignments
+	etc on these rather than just replicate the GENESIS setfield/getfield
+	commands. In other words, we should be able to do
+	/foo/bar = /zod/caprice.
+For now:
+- Use shell commands with string args
+	(exception is setfield and getfield, which have typedefed args.)
+- Do not use varargs.
+- Do using namespace shell::, but from the viewpoint of a single instance of it
+	as if it were a global. Looks like I need to provide a lot
+	of little wrapper functions. Alternative is to make them static
+	functions of the shell class.
+
+Begun on a test program
+
+=============================================================================
+
+24 Jan 2007
+Got the little test program to work with SWIG and python, after much
+muddling around. Now to use it to set up a useful system.
+
+I'm sure if I knew more SWIG I could figure out how to represent objects
+from MOOSE within Python directly and access fields as though they were
+local entities. That can wait, but the only issue is if I get started
+with the current approach, will it need to be rolled back? If so, will
+it be hard to? I think it should be fine either way. Let's do it.
+
+OK, got the whole of MOOSE to compile with Swig.  Easy after the earlier
+prototyping. Currently I have named it 'shell', obviously should be
+pymoose or some similar name. Also the funcs in it are still dummy ones.
+There are still issues with having the .py files in the right place. This
+is a bit odd, as it means we have to have multiple files available to
+run python. I guess there is some standard way around this.
+
+Anyway, this is a good time to check it in.
+
+=============================================================================
+25 Jan 2007
+Now to implement the basic parser commands. Will fill out as I go along.
+The other bit is to tie it into the GENESIS parser too, in parallel.
+Part of the latter process will also help with internode commands, since
+I need to serialize shell function calls using a single function that 
+speaks argc, argv.
+
+I've asked Eric Mueller who I think was the PyNest person, about how it is done.
+Also wrote to our buddy Joe Svitak.
+
+Now some nomenclature. We need specifically to decide how to name fields.
+The confusion arises because Finfo names for MsgSrc, MsgDest, and SharedMsg
+may look similar. Let's do this:
+
+- All MsgDests are just given a regular lower case name, such as 'child'
+- All SharedMsgs likewise.
+- All MsgSrcs names should be suffixed with a Src: 'childSrc'
+
+The reasoning is that MsgDests are often treated like functions, so we
+don't want confusing names. SharedMessages are always composites, so
+src and dest do not make sense and the same name is useful for either end.
+
+Implemented Neutral. Python sees it and can create and delete it.
+Checked in. This should be version 73.
+
+Started on Neutral unit tests. Segv.
+
+Progress on the cleaning up of messages upon deletion.
+Struck by an issue with conn indexing in SimpleElement. Cleaner approach is
+to provide connBegin( unsigned int src ), connEnd( unsigned int src )
+as iterator ranges.
+But first lets fix the current problem and check it in before
+redoing the interface.
+
+Now working on doig the interface. There is a small expansion in number of
+functions but it does keep MsgSrc out of the public interface for 
+SimpleElement. Still pegging away at it.
+
+=============================================================================
+26 Jan 2007
+
+Did makeover of eliminating MsgSrc and MsgDest return functions from
+SimpleElement. Also other cleanups.
+
+A bit stuck on the Neutral test, but I suspect that what is happening is that
+I am cleaning up the children which alters the conn_ vector even while I
+use an iterator for it.
+
+Perhaps need to do Delete in 3 stages:
+1. Mark elements for deletion.
+2. Clean out messages to non-marked elements
+3. Delete.
+
+We can't merge 1 and 2 because inter-object messaging may not occur in
+the same sequence as marking. 
+We can't merge 2 and 3, because then there would be already deleted child
+elements being queried about whether they were marked.
+
+This would also remove the responsibility of cleanup from ~SimpleElement,
+which is not up to the job.
+
+Much messing around later, we have something that works.  Deleting turns
+out to be surprisingly complicated. There are also other pending things to 
+delete on the SimpleElement, later. For now check in. 
+This was version 75.
+
+Implemented Finfo::isTransient as a test when deleting SimpleElements,
+need to work out unit tests. Perhaps create a dummy Finfo or so and
+have it do assertions when it is deleted. OK, done, works.
+Checked in as version 76.
+
+Some interesting ideas from implementing Neutral:
+- Fields for parent, child (array type)
+- Don't want Element::delete to be a message called from parent. Actually
+	it should be called from self. And at this point the child operations
+	involve 3 calls. Delete should be a single call.
+- Messages visible as Element/Field combos, using node-independent
+	representations of each.
+- Global Element identifier? This comes up in context of parent/child fields
+	Also makes sense for Python linkage
+	Also makes sense for parallel implementation.
+	Two possibilities:
+		- Each node has vector indexed by id, for all Elements.
+			Off-node Elements point to appropriate postmaster
+			for resolution.
+			- Fast to access # to Element
+			- Need help to go the other way, or each Element stores
+				its own index.
+			- One ptr per Element. If we use lots of arrays,
+				this isn't too bad. Otherwise, we may
+				end up handling 1e9 Elements.
+			- Not clear how to deal with distributed arrays.
+				Possibly local ArrayElement would have to
+				keep track of node partitioning.
+		- Each node has one vector indicating message ranges and
+			their node ids. Other vector handles local Elements.
+			- Terribly slow to access, possibly need map for first.
+			- Gets worse with greater node decomposition.
+- Global Finfo identifier.
+	Easy to implement for fixed Finfos. 
+		Relative: Each class has its own, starting from 0.
+			Needs first to look up object, then Finfo.
+		Absolute: All defined fixed Finfos get their own id.
+	Hard to do for transient Finfos.
+		Has to be some form of relative indexing for each Element.
+
+
+Immediate stuff:
+- SWIG and parser working
+	- Need Element heirarchy
+		+ Need Create operation. Let's put it on Neutral
+		+ Need Delete operation, discussed above. On Neutral
+		+ Need getfield for parent, also discussed above.
+			- This led to discussion of what is returned.
+		- Need getfield for named child in order to get paths.
+			- Assoc mem array Finfo?
+			- Block messaging to and from it so no dynamic form?
+
+
+Implemented several of the ops in Neutral. Created an Element::id().
+Compiled. Yet to use and do unit tests.
+Checked in as version 77.
+
+=============================================================================
+27 Jan 2007
+The Neutral::create operation turns out to be pretty useless for in-code
+use. As it is a RecvFunc call, it does not provide a way to return the new
+Element. This may be OK if we have the 'el ^' equivalent command from
+the script, but for in-code purposes it is a pain.
+
+Need to work through use patterns for an Element id integer.
+
+=============================================================================
+28 Jan 2007
+
+Analyzed the use patterns for eids. The bottom line is that they add little
+to the internal computation of MOOSE, but they would be a useful
+interface and scripting construct, especially as we go parallel. Here is the
+analysis.
+
+Uses: 	1. Unique parallel element id
+	2. Persistence and changing data holders
+	3. Interface: RecvFuncs and Elists
+
+Alternatives:
+	U1:	String path: Lengthy. Needs traversal.
+		Elm ptr + node#: Ptrs are a bad thing to refer to across nodes.
+		Not constant when object is moved between nodes.
+	U2:	Fine for string path.
+		Elm ptr approach would involve changing all references. Ugh.
+	U3:	String path is fine.
+		Elm ptr is ugly.
+
+Use cases:
+	1. Elists across nodes:
+			- Value assignment
+			- Message setup
+			- Loops
+		This is an issue somewhere between scripting and the shell.
+		The shell would benefit from compact elists across nodes,
+		if it could parse the job out between nodes.
+		Arguably, the original wildcard is still more compact and
+		can also be parsed between nodes.
+	2. Handle for script languages
+		Still need to get a feel for how SWIG would use it. Want to
+		have elements appear with all their fields when referred to.
+	3. Array elements: Do we have a unique id for each or treat them
+		as a single one?
+		This is an interface as well as costs issue.
+	4. Messages sending element ids around
+		No experience with this, but conceivably higher-order and
+		algorithm objects might like this. Certainly cleaner than
+		passing element pointers around.
+		For example, the shell object might want to use eids instead
+		of name strings a lot of the time. Of course, this complicates
+		the internode shell commands which were hitherto using strings.
+
+Level of exposure/API:
+	- Don't bother for anything at the data flow level.
+	- Use partially at shell level
+	- Use extensively at script level, but no use for old GENESIS parser.
+
+Problems and solutions.
+	- Cost.
+		Array form:
+			1 big vector of element ptrs, indexed by eid. Off-node
+			elements refer to other postmasters.
+			Each element has its own eid.
+			- Exorbitant memory use 
+			- Especially bad if we have unique indexing for arrays.
+			- Access is very fast.
+			- Very simple.
+		Range-bound tree:
+			Each tree leaf has low and upper bound, and location
+			for start, which could be an array index or node #.
+			SimpleElements on a big vector, can use leaf
+			info to compute their eids.
+			- Very low memory use until objects start to get
+			seriously shuffled between nodes. Unlikely to happen.
+			- Would handle unique indexing of arrays very nicely.
+			- Access log N, but tolerable if mostly contiguous.
+			- Complex.
+
+...........................................................................
+
+With this in hand, move on to define the Shell object that the parsers
+have to talk to.
+
+One constraining requirement: Shells on different nodes must talk to each
+other. Earlier we just passed strings so a single RecvFunc could handle all.
+This is a bad idea because it puts a lot of parsing back onto the Shell.
+Options:
+	Massively shared message.
+	Block form of regular message with distinct segments for data.
+
+I think the massively shared message will work. Let the postmaster figure
+it out.
+
+...........................................................................
+Another frequent issue: Finfos. 
+- Could be global. Element independent fids. This would fail for
+	local finfos such as dynamic ones or extended fields. Also,
+	how would you deal with array finfo indices?
+	- Dynamic finfos with same name could be picked up using 
+	global fids.
+	- Array finfo indices could be an optional arg.
+	- In any case the script has to refer to the element at some point
+	to get back the ids. But perhaps if it reuses them... Or does
+	it use them at all times?
+- Relative finfos. This means that all finfos with the same name have the
+	same number (fid).
+	
+	Or I could stick with strings for finfos. They are short too.
+
+For now stick with strings.
+...........................................................................
+
+Finally begun a bit of coding with Shell.cpp, to start to implement some
+of these. The first step is path2eid and eid2path. Partly done.
+
+=============================================================================
+Jan 29 2007
+
+Now need a function to return a vector of uints for message dest elements.
+Will later need one to additionally return info about the finfos that
+they target.
+Since I'm doing all this in the Neutral, I want a systematic way to
+pass in an argument (say a finfo name) and get back information. Something
+like a value, but a looked up value. Or think of it as a get with additional
+argument(s) to specify what to get. This is easy to composite as two
+messages, one with the arguments and one with the return value. In other
+words, a shared message.
+
+How to implement. Shared Finfo needs a list of ftypes and where it is a dest,
+of RecvFuncs. Perhaps use pairs, and src funcs could be dummys.
+Need a composite Ftype for typing comparisons.
+
+=============================================================================
+Jan 30 2007
+
+Many intermediate steps on the way to getting a functioning shell.
+
+- Implemented SharedFinfo and SharedFtype
+- Implemented Neutral::lookupChild
+- Implemented set( Element* e, const string& finfoName, T val )
+- Implemented set for zero-arg finfos.
+
+Now it compiles and passes unit tests, but I haven't begun the many tests
+that will be needed for checking all the above. Anyway, time to check it in.
+
+That was revision 78. 
+On other fronts: Niraj has successfully compiled and tested a somewhat earlier
+revision on Windows. The main issue was that the RecvFuncs being passed in
+were referenced directly, rather than using &funcname. A few other minor
+fixes also done. Unit tests still work. Checked in.
+This should be revision 79.
+=============================================================================
+Jan 31
+
+Added in revision 80 with a little documentation.
+
+Worked on unit tests for SharedFtype. Passed painlessly. Checked in as
+revision 81.
+
+Worked on unit tests for SharedFinfo. Very painful. Compiled, does not pass.
+Lots of work to be done here. Checked in as 
+revision 82.
+
+=============================================================================
+Feb 01 2007.
+
+Begun unit tests. Initial error turned out to be in SharedFtypes. Fixed. Now
+messages are formed correctly. Later error turned out to be bug in 
+DynamicFinfo::match(connIndex). Fixed, clears unit tests. This means
+that shared finfos seem to work. Checked in as
+revision 83.
+
+Two separate issues with handling all heirarchy and shell ops through
+RecvFuncs:
+- Looking at the Neutral, it seems like we need a way to move many of the
+DestFinfos and even SrcFinfos off the default list, and only make them when
+they are needed. Save us a lot of space.
+- Many of these calls are multi-arg and require a return value. So
+some kind of message is needed, the set/get commands don't work. So lots
+of quick message creates and deletes.
+
+=============================================================================
