@@ -18,10 +18,10 @@
 #define BGINSTKSIZE 100
 #define MAXSCRIPTS 40
 
+typedef char NElement;
+
 #include <map>
 #include <string>
-#include "../basecode/ElementFwd.h"
-#include "../basecode/ShellFwd.h"
 
 // Particularly ugly macro definition 
 //#define BEGIN yy_start = 1 + 2 *
@@ -96,11 +96,11 @@ typedef struct _localvars
 
 extern Result* SymtabLook(Symtab* symtab, char* sym);
 extern "C" int yywrap( void );
-typedef void (*slifunc)(int argc, const char** argv, Shell* s );
-typedef int (*PFI)(int argc, const char** argv, Shell* s );
-typedef char* (*PFC)(int argc, const char** argv, Shell* s );
-typedef float (*PFF)(int argc, const char** argv, Shell* s );
-typedef double (*PFD)(int argc, const char** argv, Shell* s );
+typedef void (*slifunc)(int argc, const char** argv, NElement* s );
+typedef int (*PFI)(int argc, const char** argv, NElement* s );
+typedef char* (*PFC)(int argc, const char** argv, NElement* s );
+typedef float (*PFF)(int argc, const char** argv, NElement* s );
+typedef double (*PFD)(int argc, const char** argv, NElement* s );
 
 class func_entry 
 {
@@ -111,7 +111,7 @@ class func_entry
 			;
 		}
 
-		Result Execute(int argc, const char** argv, Shell* s );
+		Result Execute(int argc, const char** argv, NElement* s );
 		bool HasFunc() {
 			return (func != 0);
 		}
@@ -126,7 +126,7 @@ typedef std::map< std::string, func_entry* > Func_map;
 class myFlexLexer: public yyFlexLexer
 {
 	public:
-		myFlexLexer( Element* parent );
+		myFlexLexer( NElement* parent );
 		
 		int yylex();
 
@@ -238,11 +238,11 @@ class myFlexLexer: public yyFlexLexer
 		}
 		int IncludeScript(int argc, char** argv);
 
-		void innerSetShell( Shell* s ) {
+		void innerSetShell( NElement* s ) {
 			shell_ = s;
 		}
 
-		Shell* innerGetShell() const {
+		NElement* innerGetShell() const {
 			return shell_;
 		}
 
@@ -278,8 +278,8 @@ class myFlexLexer: public yyFlexLexer
 		std::map< std::string, std::string > alias_map;
 		short script_ptr;
 		Script script[MAXSCRIPTS];
-		Shell* shell_;
-		Element* parent_;
+		NElement* shell_;
+		NElement* parent_;
 };
 
 #endif // _GENESIS_PARSER_H

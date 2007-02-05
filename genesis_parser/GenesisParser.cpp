@@ -29,7 +29,7 @@
 // to a minimum, I'll leave it in.
 #include <setjmp.h>
 
-#include "Shell.h"
+// #include "Shell.h"
 
 #include <FlexLexer.h>
 #include "GenesisParser.tab.h"
@@ -52,7 +52,7 @@ using std::string;
 ///////////////////////////////////////////////////////////////////////
 
 
-myFlexLexer::myFlexLexer( Element* parent )
+myFlexLexer::myFlexLexer( NElement* parent )
 			: yyFlexLexer(), state(LOOKUP), parent_( parent )
 {
 	currstr = "";
@@ -390,7 +390,7 @@ int SetCommandTraceLevel(int iLevel)
 }
 */
 
-Result func_entry::Execute(int argc, const char** argv, Shell* s)
+Result func_entry::Execute(int argc, const char** argv, NElement* s)
 {
 	Result		result;
 	if ( s == 0 ) {

@@ -15,64 +15,51 @@
 TARGET = basecode.o
 
 OBJ = \
-	Conn.o	\
-	Cinfo.o	\
-	CinfoWrapper.o	\
-	Ftype.o \
-	Field.o	\
-	Finfo.o	\
-	RelayFinfo.o	\
-	ValueFinfo.o	\
-	DestFinfo.o	\
-	SingleSrcFinfo.o	\
-	NSrcFinfo.o	\
-	SharedFinfo.o \
-	ReturnFinfo.o \
-	ObjFinfo.o \
-	MsgSrc.o	\
-	MsgFuncs.o	\
 	Element.o	\
-	Neutral.o	\
-	Shell.o	\
-	ShellWrapper.o	\
-	ReadCell.o	\
-	Wildcard.o	\
+	Conn.o	\
+	RecvFunc.o \
+	SimpleElement.o	\
+	send.o \
+	SrcFinfo.o \
+	DestFinfo.o \
+	ValueFinfo.o \
+	ArrayFinfo.o \
+	ThisFinfo.o \
+	DeletionMarkerFinfo.o \
+	Cinfo.o \
+	DynamicFinfo.o \
+	UnitTests.o \
 	TestBasecode.o \
-
-#	AssignFinfo.o
-
+	SharedFtype.o \
+	SharedFinfo.o \
+	setget.o \
 
 HEADERS = \
 	header.h \
 	Conn.h \
-	Cinfo.h \
-	Ftype.h \
-	Field.h \
-	Finfo.h \
-	MsgSrc.h \
-	RelayFinfo.h \
-	ValueFinfo.h \
-	DestFinfo.h \
-	SingleSrcFinfo.h \
-	NSrcFinfo.h \
-	ReturnFinfo.h \
-	SharedFinfo.h \
-	ObjFinfo.h \
 	Element.h \
-	Neutral.h \
-	ProcInfo.h \
+	Ftype.h \
 
 #	AssignFinfo.h
 
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Cinfo.o: CinfoWrapper.h
-CinfoWrapper.o: CinfoWrapper.h
-Shell.o:  Shell.h
-ShellWrapper.o:	Shell.h ShellWrapper.h
-ReadCell.o:	Shell.h ShellWrapper.h ../builtins/Interpol.h
-TestBasecode.o:	Shell.h ShellWrapper.h
+#TestBasecode.o:	Shell.h ShellWrapper.h
+
+SrcFinfo.o:		SrcFinfo.h
+DestFinfo.o: 	DestFinfo.h
+ThisFinfo.o: 	ThisFinfo.h
+DynamicFinfo.o:	DynamicFinfo.h
+ValueFinfo.o:	ValueFinfo.h DynamicFinfo.h send.h
+SharedFtype.o:	SharedFtype.h
+SharedFinfo.o:	SharedFinfo.h SharedFtype.h
+Cinfo.o:		Cinfo.h
+UnitTests.o:	MsgSrc.h MsgDest.h SimpleElement.h DerivedFtype.h SrcFinfo.h DestFinfo.h Cinfo.h DynamicFinfo.h ValueFinfo.h send.h ArrayFtype.h ValueFtype.h NestFtype.h
+ArrayFinfo.o:	ArrayFinfo.h DynamicFinfo.h ArrayFtype.h
+DeletionMarkerFinfo.o: DeletionMarkerFinfo.h
+SimpleElement.o:	SimpleElement.h MsgSrc.h MsgDest.h DeletionMarkerFinfo.h
+setget.o:		setget.h DerivedFtype.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) $< -c
