@@ -1,0 +1,125 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU General Public License version 2
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+#ifndef _DERIVED_FTYPE_H
+#define _DERIVED_FTYPE_H
+
+class Ftype0: public Ftype
+{
+		public:
+			unsigned int nValues() const {
+				return 0;
+			}
+			
+			bool isSameType( const Ftype* other ) const {
+				return ( dynamic_cast< const Ftype0* >( other ) != 0 );
+			}
+
+			static bool isA ( const Ftype* other ) {
+				return ( dynamic_cast< const Ftype0* >( other ) != 0 );
+			}
+
+			size_t size() const
+			{
+				return 0;
+			}
+
+			static const Ftype* global() {
+				static Ftype* ret = new Ftype0();
+				return ret;
+			}
+
+			RecvFunc recvFunc() const {
+				return 0;
+			}
+
+			RecvFunc trigFunc() const {
+				return 0;
+			}
+};
+
+/**
+ * The Ftype1 is the most used Ftype as it handles values.
+ * This is still a virtual base class as it lacks the
+ * functions for recvFunc and trigFunc. Those are specialized for
+ * Value, Array, and Nest derived Ftypes.
+ * It also introduces the get function that needs to be specialized
+ * depending on the Finfo type.
+ */
+template < class T > class Ftype1: public Ftype
+{
+		public:
+			unsigned int nValues() const {
+				return 1;
+			}
+			
+			bool isSameType( const Ftype* other ) const {
+				return ( dynamic_cast< const Ftype1< T >* >( other ) != 0 );
+			}
+			
+			static bool isA( const Ftype* other ) {
+				return ( dynamic_cast< const Ftype1< T >* >( other ) != 0 );
+			}
+
+			size_t size() const
+			{
+				return sizeof( T );
+			}
+
+			void* create( const unsigned int num ) const
+			{
+				if ( num > 1 )
+						return new T[ num ];
+				else
+						return new T;
+			}
+
+			virtual bool get( const Element* e, const Finfo* f, T& v )
+			const 
+			{
+					return 0;
+			}
+
+			/**
+			 * This variant works for most kinds of Finfo,
+			 * so we make a default version.
+			 * In a few cases we need to specialize it because
+			 * we need extra info from the Finfo.
+			 * This function makes the strong assumption that
+			 * we will NOT look up any dynamic finfo, and will
+			 * NOT use the conn index in any way. This would
+			 * fail because the conn index given is a dummy one.
+			 * We do a few assert tests in downstream functions
+			 * for any such attempts
+			 * to search for a Finfo based on the index.
+			 */
+			virtual bool set( Element* e, const Finfo* f, T v ) const {
+				void (*set)( const Conn&, T v ) =
+					reinterpret_cast< void (*)( const Conn&, T ) >(
+									f->recvFunc() );
+				Conn c( e, MAXUINT );
+				set( c, v );
+				return 1;
+			}
+
+			static const Ftype* global() {
+				static Ftype* ret = new Ftype1< T >();
+				return ret;
+			}
+
+			RecvFunc recvFunc() const {
+				return 0;
+			}
+
+			RecvFunc trigFunc() const {
+				return 0;
+			}
+};
+
+#endif // _DERIVED_FTYPE_H
