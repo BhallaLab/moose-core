@@ -161,14 +161,13 @@ class Element
 			return id_;
 		}
 
-		static Element* element( unsigned int id ) {
-			if ( id < elementList.size() )
-				return elementList[ id ];
-			return 0;
-		}
+		static Element* element( unsigned int id );
+
+		static unsigned int numElements();
 
 	private:
-		static vector< Element* > elementList;
+		static vector< Element* >& elementList();
+		// static vector< Element* > elementList;
 		unsigned int id_;
 };
 

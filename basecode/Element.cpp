@@ -10,15 +10,32 @@
 
 #include "header.h"
 
-vector< Element* > Element::elementList;
-
 Element::Element()
 {
-	id_ = elementList.size();
-	elementList.push_back( this );
+	id_ = elementList().size();
+	elementList().push_back( this );
 }
 
 Element::~Element()
 {
-	elementList[ id_ ] = 0;
+	elementList()[ id_ ] = 0;
+}
+
+Element* Element::element( unsigned int id )
+{
+	if ( id < elementList().size() )
+		return elementList()[ id ];
+	return 0;
+}
+
+vector< Element* >& Element::elementList()
+{
+	static vector< Element* > elementList;
+
+	return elementList;
+}
+
+unsigned int Element::numElements()
+{
+	return elementList().size();
 }

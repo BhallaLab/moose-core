@@ -12,6 +12,7 @@
 
 #include "header.h"
 #include <iostream>
+#include <algorithm>
 #include <map>
 #include "Cinfo.h"
 #include "MsgSrc.h"

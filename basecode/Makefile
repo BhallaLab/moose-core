@@ -24,6 +24,7 @@ OBJ = \
 	DestFinfo.o \
 	ValueFinfo.o \
 	ArrayFinfo.o \
+	LookupFinfo.o \
 	ThisFinfo.o \
 	DeletionMarkerFinfo.o \
 	Cinfo.o \
@@ -57,6 +58,7 @@ SharedFinfo.o:	SharedFinfo.h SharedFtype.h
 Cinfo.o:		Cinfo.h
 UnitTests.o:	MsgSrc.h MsgDest.h SimpleElement.h DerivedFtype.h SrcFinfo.h DestFinfo.h Cinfo.h DynamicFinfo.h ValueFinfo.h send.h ArrayFtype.h ValueFtype.h NestFtype.h
 ArrayFinfo.o:	ArrayFinfo.h DynamicFinfo.h ArrayFtype.h
+LookupFinfo.o:	LookupFinfo.h DynamicFinfo.h LookupFtype.h
 DeletionMarkerFinfo.o: DeletionMarkerFinfo.h
 SimpleElement.o:	SimpleElement.h MsgSrc.h MsgDest.h DeletionMarkerFinfo.h
 setget.o:		setget.h DerivedFtype.h

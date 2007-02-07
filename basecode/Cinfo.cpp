@@ -44,6 +44,9 @@ Cinfo::Cinfo(const std::string& name,
 	}
 	thisFinfo_ = new ThisFinfo( this );
 	lookup()[name] = this;
+	// This funny call is used to ensure that the root element is
+	// created at static initialization time.
+	Element::root();
 }
 
 const Cinfo* Cinfo::find( const string& name )
