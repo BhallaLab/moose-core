@@ -1138,5 +1138,8 @@ Now shifting over to SourceForge based subversion so that development
 can be spread out more. The revision number there was version 27.
 Checked in the past week of work, future updates should be smaller and
 more frequent.
+This was version 28.
+Error in the Makefile for the genesis-parser subdirectory, didn't update
+it with the rest in version 28. Checked in new version.
 
 =============================================================================
