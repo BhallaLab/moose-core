@@ -1,0 +1,230 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU General Public License version 2
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+#ifndef _LOOKUP_FTYPE_H
+#define _LOOKUP_FTYPE_H
+
+/**
+ * This class manages the type-specific aspects of lookup fields.
+ * A lookup field may be an array
+ * or a map, or anything else in which the desired value is referred
+ * to by an index which could be any type. The most common cases are
+ * lookup by an integral index, and lookup by a string name.
+ *
+ * The first type T1 refers to the type of the object being looked up.
+ * The second type T2 refers to the type of the index.
+ *
+ * There are several use cases:
+ *  Sending messages to or from a specific entry:
+ *  	Here it first creates a DynamicFinfo that refers to the
+ *  	specific entry, and this DynamicFinfo manages the messages.
+ *  	The Dynamic Finfo has to store the index T2 as an allocated
+ *  	pointer, in a void*. The job of our Ftype here is to do the
+ *  	correct typecasting back.
+ *  	The message for 'set' is a simple Ftype1<T1> message and 
+ *  	assigns the value at the specified index.
+ *  	The messages for 'get' are an incoming trigger message with 
+ *  	no arguments. This tells the DynamicFinfo to send out a 
+ *  	regular Ftype1<T1> message holding the field value at the
+ *  	specific entry.
+ *  Set and get onto a specific entry:
+ *  	Again, we first make a DynamicFinfo with the indexing info
+ *  	and use it as a handle for the set/get calls
+ *  Messages including indexing information:
+ *  	Here the DynamicFinfo is needed purely to manage the MsgSrc
+ *  	and MsgDest, as it uses the index info in the message call.
+ *  	The message for 'set' is Ftype2< T1, T2 > where T1 is the
+ *  	value and T2 is the index.
+ *  	The messages for 'get' are an incoming trigger of Ftype1<T2>
+ *  	for the index, and an outgoing Ftype1<T1> with the field value.
+ *  	Here we do not need to create a DynamicFinfo, and if one
+ *  	exists, it just refers to the Finfo's lookup functions.
+ *  	As these lookup functions work with indexing, the base
+ *  lookupSet and lookupGet which provide their own index:
+ *  	This time, we don't need a DynamicFinfo. These lookup functions
+ *  	provide the index along with the value.
+ *
+ */
+template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
+{
+		public:
+
+			/**
+			 * The LookupRecvFunc here uses the DynamicFinfo
+			 * to keep track of the original setFunc of the ArrayFinfo,
+			 * and to hold the lookup data. Has to be in a void*.
+			 */
+			static void lookupRecvFunc( const Conn& c, T1 v )
+			{
+				const DynamicFinfo* f = getDF( c );
+				assert ( f != 0 );
+				const T2* index = static_cast< const T2* >(
+								f->generalIndex() );
+
+				void (*rf)( const Conn& c, T1 v, const T2& index ) =
+					reinterpret_cast<
+					void (*)( const Conn&, T1, const T2& ) > (
+									f->innerSetFunc() );
+				rf( c, v, *index );
+			}
+
+			/**
+			 * This is the recvFunc for triggering outgoing messages
+			 * with the looked-up value.
+			 * You probably want to also consider using the alternate
+			 * SharedMessage provided by the LookupFtype, where it
+			 * takes the index in an incoming trigger message, and
+			 * sends out the value in a return message.
+			 * This function refers to one of the dynamicFinfos
+			 * on the target object to figure out what has to be
+			 * done for the return message.
+			 * The DynamicFinfo provides four things:
+			 * - Lookup from Conn.
+			 * - The index of the lookup entry.
+			 * - The GetFunc for the array type.
+			 * - The message response handling for later adds.
+			 */
+			static void lookupTrigFunc( const Conn& c )
+			{
+				const DynamicFinfo* f = getDF( c );
+				T1 (*getLookup)( const Element*, const T2& index ) =
+					reinterpret_cast< 
+					T1 (*)( const Element*, const T2& ) >
+					( f->innerGetFunc() );
+
+				Element* e = c.targetElement();
+				const T2* index = static_cast< const T2* >(
+								f->generalIndex() );
+				send1< T1 >( e, f->srcIndex(), getLookup( e, *index ) );
+			}
+
+			RecvFunc recvFunc() const {
+				return reinterpret_cast< RecvFunc >(
+						&lookupRecvFunc );
+			}
+
+			RecvFunc trigFunc() const {
+				return &lookupTrigFunc;
+			}
+
+			static const Ftype* global() {
+				static Ftype* ret = new LookupFtype< T1, T2 >();
+				return ret;
+			}
+
+			/**
+			 * This may only be called from a DynamicFinfo
+			 */
+			bool get( const Element* e, const Finfo* f, T1& v ) const {
+				const DynamicFinfo* df =
+						dynamic_cast< const DynamicFinfo* >( f );
+				assert( df != 0 );
+				T1 ( *g )( const Element*, const T2& ) =
+					reinterpret_cast<
+					T1 (*)( const Element*, const T2& ) >(
+							df->innerGetFunc()
+					);
+				const T2* index = static_cast< const T2* >(
+								df->generalIndex() );
+				v = g( e, *index );
+				return 1;
+			}
+
+			/**
+			 * This may only be called from a DynamicFinfo.
+			 * It specializes the generic version in the parent Ftype1
+			 */
+			bool set( Element* e, const Finfo* f, T1 v ) const {
+				const DynamicFinfo* df =
+						dynamic_cast< const DynamicFinfo* >( f );
+				assert( df != 0 );
+
+				void (*set)( const Conn&, T1 v, const T2& ) =
+					reinterpret_cast<
+					void (*)( const Conn&, T1, const T2& ) >(
+						df->innerSetFunc()
+					);
+				Conn c( e, 0 );
+				const T2* index = static_cast< const T2* >(
+								df->generalIndex() );
+				set( c, v, *index );
+				return 1;
+			}
+
+			/**
+			 * Here we can directly get the value without any
+			 * intermediates like the DynamicFinfo.
+			 * This may only be called from lookupGet< T1, T2 >
+			 * It is happy with the Finfo either as a DynamicFinfo
+			 * or as a LookupFinfo
+			 */
+			bool lookupGet( const Element* e, const Finfo* f,
+							T1& v, const T2& index ) const {
+				const LookupFinfo* lf = 
+					dynamic_cast< const LookupFinfo* >( f );
+				if ( lf ) {
+					T1 ( *g )( const Element*, const T2& ) =
+						reinterpret_cast<
+						T1 (*)( const Element*, const T2& ) >(
+								lf->innerGetFunc()
+						);
+					v = g( e, index );
+					return 1;
+				}
+				const DynamicFinfo* df = 
+					dynamic_cast< const DynamicFinfo* >( f );
+				if ( df ) {
+					T1 ( *g )( const Element*, const T2& ) =
+						reinterpret_cast<
+						T1 (*)( const Element*, const T2& ) >(
+								df->innerGetFunc()
+						);
+					v = g( e, index );
+					return 1;
+				}
+				return 0;
+			}
+
+			/**
+			 * Here we can directly set the value without any
+			 * intermediates like the DynamicFinfo.
+			 * This may only be called from lookupSet< T1, T2 >
+			 * It is happy with the Finfo either as a DynamicFinfo
+			 * or as a LookupFinfo
+			 */
+			bool lookupSet( Element* e, const Finfo* f,
+							T1 v, const T2& index ) const {
+				const LookupFinfo* lf = 
+					dynamic_cast< const LookupFinfo* >( f );
+				void (*set)( const Conn&, T1 v, const T2& ) = 0;
+				if ( lf ) {
+					set = reinterpret_cast<
+						void (*)( const Conn&, T1 v, const T2& ) >(
+								lf->recvFunc()
+						);
+				} else {
+					const DynamicFinfo* df = 
+						dynamic_cast< const DynamicFinfo* >( f );
+					if ( df ) {
+						set = reinterpret_cast<
+							void (*)( const Conn&, T1 v, const T2& ) >(
+									df->innerSetFunc()
+							);
+					}
+				}
+				if ( set != 0 ) {
+					Conn c( e, 0 );
+					set( c , v, index );
+					return 1;
+				}
+				return 0;
+			}
+};
+
+#endif // _LOOKUP_FTYPE_H

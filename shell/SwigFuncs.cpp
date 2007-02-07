@@ -18,6 +18,8 @@ using namespace std;
 #include "Cinfo.h"
 #include "Shell.h"
 
+static string separator = "/";
+
 /////////////////////////////////////////////////////////////////////
 
 static Shell* sh()
@@ -31,34 +33,40 @@ static Shell* sh()
 
 void pwe()
 {
-		return sh()->pwe();
+		sh()->pwe();
 }
 
 void ce( const string& dest )
 {
-		sh()->ce( sh()->path2eid( dest ) );
+	sh()->ce( sh()->path2eid( dest, separator ) );
 }
 
 void create( const string& type, const string& path )
 {
-	string::size_type pos = path.rfind( "/" );
+	string::size_type pos = path.rfind( separator );
 	string name;
 	if ( pos == string::npos ) {
 		sh()->create( type, path, sh()->cwe() );
+	} else if ( pos == 0 ) {
+		sh()->create( type, path.substr( separator.length() ), 0 );
 	} else {
-		sh()->create( type, path.substr( pos ), 
-						sh()->path2eid( path.substr( 0, pos - 1 ) ) );
+		string head = path.substr( 0, pos );
+		string tail = path.substr( pos + separator.length() );
+		sh()->create( type, tail, sh()->path2eid( head, separator ) );
+		cout << "creating " << type << " on " << 
+			head << "(" << sh()->path2eid( head, separator ) <<
+			") named " << tail << endl;
 	}
 }
 
 void destroy( const string& path )
 {
-		sh()->destroy( sh()->path2eid( path ) );
+		sh()->destroy( sh()->path2eid( path, separator ) );
 }
 
 void le ( const string& path ) 
 {
-	sh()->le( sh()->path2eid( path ) );
+	sh()->le( sh()->path2eid( path, separator ) );
 }
 
 void le ( )

@@ -23,15 +23,10 @@
 #include "DestFinfo.h"
 #include "SharedFtype.h"
 #include "SharedFinfo.h"
+#include "LookupFinfo.h"
+#include "LookupFtype.h"
 
 #include "Neutral.h"
-
-static TypeFuncPair lookupChildTypes[] =
-{
-	TypeFuncPair( Ftype1< string >::global(), 
-	  	reinterpret_cast< RecvFunc >( &Neutral::lookupChild ) ),
-	TypeFuncPair( Ftype1< unsigned int >::global(), 0 )
-};
 
 static Finfo* neutralFinfos[] = 
 {
@@ -41,10 +36,20 @@ static Finfo* neutralFinfos[] =
 		),
 		new ValueFinfo( "parent", ValueFtype1< unsigned int >::global(),
 					reinterpret_cast< GetFunc >( &Neutral::getParent ),
-					dummyFunc
+					&dummyFunc
+		),
+		new ValueFinfo( "childList",
+				ValueFtype1< vector< unsigned int > >::global(), 
+				reinterpret_cast< GetFunc>( &Neutral::getChildList ),
+				&dummyFunc
+		),
+		new LookupFinfo(
+				"lookupChild",
+				LookupFtype< int, string >::global(), 
+				reinterpret_cast< GetFunc >( &Neutral::getChildByName ),
+				0
 		),
 		new SrcFinfo( "childSrc", Ftype1< int >::global() ),
-		new SharedFinfo( "lookupChild", lookupChildTypes, 2 ),
 		new DestFinfo( "child", Ftype1< int >::global(),
 			reinterpret_cast< RecvFunc >( &Neutral::childFunc ) ),
 		new DestFinfo( "create", Ftype2< string, string >::global(),
@@ -72,8 +77,7 @@ static Cinfo neutralCinfo(
  */
 Element* Element::root()
 {
-	elementList.resize( 0 );
-	elementList.reserve( 128 );
+	// elementList.reserve( 128 );
 	static Element* ret = neutralCinfo.create( "root" );
 	
 	return ret;
@@ -169,6 +173,29 @@ unsigned int Neutral::getParent( const Element* e )
 }
 
 /**
+ * Looks up the child with the specified name, and returns the eid.
+ */
+int Neutral::getChildByName( const Element* elm, const string s )
+{
+	const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
+	assert( e != 0 );
+	// assert that the element is a neutral.
+
+	// Here we should put in one of the STL algorithms.
+	vector< Conn >::const_iterator i;
+	// For neutral, src # 0 is the childSrc.
+	vector< Conn >::const_iterator begin = e->connSrcBegin( 0 );
+	vector< Conn >::const_iterator end = e->connSrcEnd( 0 );
+	for ( i = begin; i != end; i++ ) {
+		if ( i->targetElement()->name() == s ) {
+			return i->targetElement()->id();
+		}
+	}
+	// Failure option: return root id.
+	return 0;
+}
+
+/**
  * Looks up the child with the specified name, and sends its eid
  * in a message back to sender.
  */
@@ -198,10 +225,29 @@ void Neutral::lookupChild( const Conn& c, const string s )
 	sendTo1< unsigned int >( e, 1, c.sourceIndex( e ), MAXUINT );
 }
 
+vector< unsigned int > Neutral::getChildList( const Element* elm )
+{
+	const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
+	assert( e != 0 );
+
+	vector< Conn >::const_iterator i;
+	// For neutral, src # 0 is the childSrc.
+	vector< Conn >::const_iterator begin = e->connSrcBegin( 0 );
+	vector< Conn >::const_iterator end = e->connSrcEnd( 0 );
+
+	vector< unsigned int > ret;
+	if ( end == begin ) // zero children
+			return ret;
+	ret.reserve( end - begin );
+	for ( i = begin; i != end; i++ )
+		ret.push_back( i->targetElement()->id() );
+
+	return ret;
+}
+
 /////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
-#include <algorithm>
 #include "Ftype2.h"
 #include "setget.h"
 

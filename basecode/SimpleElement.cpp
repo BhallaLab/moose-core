@@ -37,7 +37,7 @@ SimpleElement::SimpleElement(
 {
 #ifdef DO_UNIT_TESTS
 		numInstances++;
-#endif
+#endif	
 		;
 }
 

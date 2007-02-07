@@ -162,6 +162,7 @@ const Finfo* SharedFinfo::match(
 
 #ifdef DO_UNIT_TESTS
 #include <map>
+#include <algorithm>
 #include "DynamicFinfo.h"
 #include "ValueFinfo.h"
 #include "DestFinfo.h"

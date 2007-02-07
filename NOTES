@@ -1055,3 +1055,88 @@ some kind of message is needed, the set/get commands don't work. So lots
 of quick message creates and deletes.
 
 =============================================================================
+Feb 02 2007
+One possibility is to use something like the get() function but with 
+extra args. We will also have to ensure that the operations get passed to
+the required node by shell-to-shell communication so that the get() is a
+local function.
+
+This enhanced get() would also help for array finfos. How would we 
+set it up? Using 
+bool getByLookup( const Element* e, const Finfo* f, T1& v, const T2& lookup )
+
+OK, now how would we use it? 
+- Could automatically set up as a SharedFinfo, much like triggers and 
+data parts were in ValueFinfos.
+- Avoid using DynamicFinfos for arrays. Actually arrays would be a good
+test case.
+
+=============================================================================
+Feb 03 2007
+
+Working on a LookupFinfo, done a version for LookupFtype.
+Problem in the match() function. All is similar to the ArrayFtype but how
+do we deal with the index in the match operation? We may have to refer it to
+the Ftype to convert. 
+- Or, we could permit exactly two types for lookup:
+int and string. But we may want a continuous lookup: eg., lookup table.
+- Or, just block the indexed match operation. This would eliminate all direct
+accesses to fields, and insist that we access by lookupGet/Set or by
+messages with an extra arg.
+- Or limit it to types where conversions to and from strings have been defined.
+
+=============================================================================
+Feb 04 2007
+Slowly working in the LookupFinfo and associated classes. Initial compile
+worked and didn't foul up any existing unit tests. Now added LookupFinfo
+unit tests and there are plenty of compile errors.
+
+=============================================================================
+Feb 05 2007
+Marched through huge set of compile errors arising out of definitions of
+LookupFinfo and LookupFtype and setgetLookup. Compiled. Cleaned up unit tests.
+Works both for assignment and for ArrayFinfo style messaging to specific
+index entry. But haven't tested yet for shared messages. Anyway, time now
+for checking lots of stuff in.
+This was version 84.
+
+Now to go on to the shell and SWIG stuff, which is what set all this off.
+
+Begin on unit tests for the shell. Usual croaks.
+=============================================================================
+Feb 06 2007
+Really baffling bug in Shell.cpp::eid2path. Name being build up for path
+is not getting set properly.
+Turned out to be most likely due to some strange properties of the 
+ASSERT macro set up using #define. Possibly the function was being called
+multiple times in the macro without my realizing it.
+
+Various other headaches, most fairly ugly. Anyway, now completed this small
+set of Shell unit tests for create, eid2path and path2eid. Time to check
+it in.
+This was version 85.
+
+=============================================================================
+Feb 07 2007
+Added le command to shell. This necessitated making a suitable function in 
+Neutral to give an elist of children. Still not sure how best to tie this
+into the parser. Anyway, checked it in.
+This was version 86.
+
+Now to tie in the two main parsers, SLI and Python.
+
+Initial part of tying in Python went fine. But when I try to run it there are
+issues with initialization of the root element. Trying to do it through
+sttic initialization, but the ordering is not good.
+
+Sorted out some aspects of initialization, and did Python test too. After
+various fixes, seems to handle create and le within Python. Checked it in.
+This was version 87
+
+
+Now shifting over to SourceForge based subversion so that development
+can be spread out more. The revision number there was version 27.
+Checked in the past week of work, future updates should be smaller and
+more frequent.
+
+=============================================================================

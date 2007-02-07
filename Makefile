@@ -14,21 +14,19 @@
 
 # Use the options below for compiling on GCC3. Pick your favourite
 # optimization settings.
-#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DNO_OFFSETOF
-#CFLAGS  =	-O3 -Wall -pedantic -DNO_OFFSETOF
-#CFLAGS  =	-O3 -pg -Wall -pedantic -DNO_OFFSETOFF
+#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS
+#CFLAGS  =	-O3 -Wall -pedantic
+#CFLAGS  =	-O3 -pg -Wall -pedantic
 
 # Use the options below for compiling on GCC4.0
 #  For Debian/Ubuntu 6.06, we need to add a few more compiler flags to
 #  help it through the genesis parser, which is littered with ifdefs.
-CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DYYMALLOC -DYYFREE
-#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS
+CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS
 #CFLAGS  =	-O3 -Wall -pedantic
 
 # Use the options below for compiling on GCC4.1
 # GNU C++ 4.1 and newer will need -ffriend-injection
 #
-#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DYYMALLOC -DYYFREE -ffriend-injection
 #CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -ffriend-injection
 
 
@@ -81,8 +79,8 @@ libmoose.so: libs
 	$(CXX) -G $(LIBS) -o libmoose.so
 	@echo "Created dynamic library"
 
-shell: libs $(OBJLIBS) $(PARALLEL_LIB)
-	g++ -shared shell/Swig_wrap.o $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o _shell.so
+pymoose: libs $(OBJLIBS) $(PARALLEL_LIB)
+	g++ -shared shell/Swig_wrap.o $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o _pymoose.so
 
 libs:
 	@(for i in $(SUBDIR); do echo cd $$i; cd $$i; make CXX="$(CXX)" CFLAGS="$(CFLAGS) $(PARALLEL_FLAGS)" LD="$(LD)" LIBS="$(SUBLIBS)"; cd ..; done)

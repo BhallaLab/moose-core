@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include <algorithm>
 #include "DerivedFtype.h"
 #include "Ftype2.h"
 #include "setget.h"

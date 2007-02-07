@@ -188,6 +188,14 @@ class DynamicFinfo: public Finfo
 			 */
 			void* traverseIndirection( void* data ) const;
 
+			void setGeneralIndex( const void* index ) {
+					generalIndex_ = index;
+			}
+
+			const void* generalIndex( ) const {
+					return generalIndex_;
+			}
+
 		private:
 			const Finfo* origFinfo_;
 
@@ -203,14 +211,19 @@ class DynamicFinfo: public Finfo
 			/// Public RecvFunc for receiving requests to send value.
 			RecvFunc trigFunc_;
 
+			/// This is used by ArrayFinfo. 
 			unsigned int arrayIndex_;
+
+			/// This is used by LookupFinfo.
+			const void* generalIndex_;
+
 			unsigned int srcIndex_;
 			unsigned int destIndex_;
 			vector< IndirectType > indirect_;
 };
 
 /**
- * This function looks up the DynamicFonfo matching the incoming Conn
+ * This function looks up the DynamicFinfo matching the incoming Conn
  */
 extern const DynamicFinfo* getDF( const Conn& );
 
