@@ -13,16 +13,24 @@
 class Shell
 {
 	public:
-			Shell();
-			string expandPath( const std::string& path ) const;
-			string eid2path( unsigned int eid ) const;
-			unsigned int path2eid( const string& path ) const;
-			unsigned int parent( unsigned int eid ) const;
-			unsigned int traversePath( 
-						unsigned int start, const string& s ) const;
+		Shell();
+		string expandPath( const std::string& path ) const;
+		string eid2path( unsigned int eid ) const;
+		unsigned int path2eid( const string& path,
+						const string& separator ) const;
+		unsigned int parent( unsigned int eid ) const;
+		unsigned int traversePath( 
+				unsigned int start, vector< string >& ) const;
 ////////////////////////////////////////////////////////////////////
 // Local functions for implementing basic GENESIS/MOOSE command set.
 ////////////////////////////////////////////////////////////////////
+		unsigned int create( const string& type, const string& name,
+						unsigned int parent );
+		void destroy( unsigned int victim );
+		void ce( unsigned int eid );
+		unsigned int cwe() const {
+			return cwe_;
+		}
 
 			/*
 		void add( const string& src, const string& dest );
@@ -34,13 +42,6 @@ class Shell
 			const string& src, const string& dest );
 		void copyHalo( const string& src, const string& dest );
 		*/
-		void create( const string& type, const string& name,
-						unsigned int parent );
-		void destroy( unsigned int victim );
-		void ce( unsigned int eid );
-		unsigned int cwe() const {
-			return cwe_;
-		}
 		/*
 		void pushe( const string& newpath );
 		void pope(  );

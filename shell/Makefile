@@ -28,7 +28,9 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 
-Swig_wrap.o: Swig.h Swig_wrap.cxx
+Swig_wrap.o: Swig.h Shell.h Swig_wrap.cxx
+Shell.o: Shell.h
+SwigFuncs.o: Swig.h Shell.h
 
 Swig_wrap.cxx:
 	swig -c++ -python Swig.i
@@ -43,7 +45,8 @@ Swig_wrap.o:
 
 $(TARGET):		$(OBJ) $(HEADERS) Swig_wrap.o
 	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
+	cp pymoose.py ..
 
 clean:
-	-rm -f *.o $(TARGET) core core.* Swig_wrap.cxx
+	-rm -f *.o $(TARGET) core core.* Swig_wrap.cxx pymoose.py
 

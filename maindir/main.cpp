@@ -14,6 +14,7 @@
 #ifdef DO_UNIT_TESTS
 	extern void testBasecode();
 	extern void testNeutral();
+	extern void testShell();
 #endif
 
 
@@ -22,6 +23,7 @@ int main(int argc, char** argv)
 #ifdef DO_UNIT_TESTS
 	testBasecode();
 	testNeutral();
+	testShell();
 #endif
 	
 	cout << "done" << endl;
