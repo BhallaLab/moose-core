@@ -55,7 +55,7 @@ GenesisParser.tab.h GenesisParser.tab.cpp: GenesisParser.ypp
 	sed -e "s/^extern \"C\" int isatty (int );/\/\/ Deleted extern C int isatty/" temp > GenesisParser.yy.cpp
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -DYYSTYPE_IS_DECLARED -I../basecode $< -c
+	$(CXX) $(CFLAGS) -DYYMALLOC -DYYFREE -DYYSTYPE_IS_DECLARED -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 		$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
