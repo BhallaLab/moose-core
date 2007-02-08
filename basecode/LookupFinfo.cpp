@@ -86,6 +86,7 @@ bool LookupFinfo::respondToAdd(
 
 #ifdef DO_UNIT_TESTS
 #include <map>
+#include <algorithm>
 #include "Cinfo.h"
 #include "MsgSrc.h"
 #include "MsgDest.h"

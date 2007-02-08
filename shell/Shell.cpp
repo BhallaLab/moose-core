@@ -9,6 +9,7 @@
 **********************************************************************/
 
 #include <map>
+#include <algorithm>
 #include "header.h"
 #include "Cinfo.h"
 

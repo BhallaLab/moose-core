@@ -118,6 +118,9 @@
 					RelativePath="basecode\Element.cpp">
 				</File>
 				<File
+					RelativePath="basecode\LookupFinfo.cpp">
+				</File>
+				<File
 					RelativePath="basecode\RecvFunc.cpp">
 				</File>
 				<File
@@ -218,6 +221,12 @@
 					RelativePath="basecode\IndirectFinfo.h">
 				</File>
 				<File
+					RelativePath="basecode\LookupFinfo.h">
+				</File>
+				<File
+					RelativePath="basecode\LookupFtype.h">
+				</File>
+				<File
 					RelativePath="basecode\MsgDest.h">
 				</File>
 				<File
@@ -258,6 +267,9 @@
 				</File>
 				<File
 					RelativePath="basecode\setget.h">
+				</File>
+				<File
+					RelativePath="basecode\setgetLookup.h">
 				</File>
 			</Filter>
 			<Filter
