@@ -175,7 +175,7 @@ unsigned int Neutral::getParent( const Element* e )
 /**
  * Looks up the child with the specified name, and returns the eid.
  */
-int Neutral::getChildByName( const Element* elm, const string s )
+int Neutral::getChildByName( const Element* elm, const string& s )
 {
 	const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
 	assert( e != 0 );
@@ -248,6 +248,7 @@ vector< unsigned int > Neutral::getChildList( const Element* elm )
 /////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
+#include <algorithm>
 #include "Ftype2.h"
 #include "setget.h"
 
