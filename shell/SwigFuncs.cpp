@@ -31,14 +31,20 @@ static Shell* sh()
 
 /////////////////////////////////////////////////////////////////////
 
+/*
+ * This has to change to use the shell as a MOOSE object, not a
+ * direct pointer.
+ */
+
 void pwe()
 {
-		sh()->pwe();
+		return;
 }
 
 void ce( const string& dest )
 {
-	sh()->ce( sh()->path2eid( dest, separator ) );
+	// sh()->ce( sh()->path2eid( dest, separator ) );
+	return;
 }
 
 void create( const string& type, const string& path )
@@ -46,7 +52,7 @@ void create( const string& type, const string& path )
 	string::size_type pos = path.rfind( separator );
 	string name;
 	if ( pos == string::npos ) {
-		sh()->create( type, path, sh()->cwe() );
+		// sh()->create( type, path, sh()->cwe() );
 	} else if ( pos == 0 ) {
 		sh()->create( type, path.substr( separator.length() ), 0 );
 	} else {
@@ -66,10 +72,12 @@ void destroy( const string& path )
 
 void le ( const string& path ) 
 {
-	sh()->le( sh()->path2eid( path, separator ) );
+	// sh()->le( sh()->path2eid( path, separator ) );
+	return;
 }
 
 void le ( )
 {
-	sh()->le( sh()->cwe() );
+	// sh()->le( sh()->cwe() );
+	return;
 }

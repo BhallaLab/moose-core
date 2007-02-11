@@ -24,13 +24,34 @@ class Shell
 ////////////////////////////////////////////////////////////////////
 // Local functions for implementing basic GENESIS/MOOSE command set.
 ////////////////////////////////////////////////////////////////////
+//
+		static void setCwe( const Conn&, unsigned int id );
+		static unsigned int getCwe( const Element* );
+
 		unsigned int create( const string& type, const string& name,
 						unsigned int parent );
 		void destroy( unsigned int victim );
+
+		static void staticCreate( const Conn&, string type,
+						string name, unsigned int parent );
+		static void staticDestroy( const Conn&, unsigned int victim );
+
+		/*
+		 * These functions also vanish. They are already on Neutral.
+		 *
+
+		void le( unsigned int eid );
+		*
+		*/
+
+		/* 
+		 * These functions are moved over to a set and get cwe.
 		void ce( unsigned int eid );
 		unsigned int cwe() const {
 			return cwe_;
 		}
+		void pwe( ) const;
+		*/
 
 			/*
 		void add( const string& src, const string& dest );
@@ -66,8 +87,6 @@ class Shell
 		void showmsg( const string& field );
 		void showobject( const string& classname );
 		*/
-		void pwe( ) const;
-		void le( unsigned int eid );
 		/*
 		void listCommands( );
 		void listClasses( );

@@ -1145,4 +1145,51 @@ This was version 29.
 Niraj tells me there were a few bad files sitting around in the DOCS
 directory. I've cleaned them out. Checked in.
 
+Now to tackle integrating the old genesis parser. The interface code for
+the old MOOSE is in GenesisParserWrapper.cpp.
+Key question: How should the shell communicate with 
+	- other shells, e.g, on other nodes.
+		Make regular messages, assemble in a big shared message.
+		This will entail replacing the current functions in Shell.h
+		with field-compatible functions. They will be used both
+		in direct set()/get calls, and also in a big shared message.
+	- Swig
+		Currently we use a set of interface functions that
+		accept string arguments. Could readily convert to integer
+		arguments too. But it would be best to get inside the
+		wrappers so that MOOSE objects look like regular objects.
+		It would also be nice to have a SwigWrapper object that
+		could talk politely to the shell via messages, the same
+		ones that go between shells.
+		Should be possible. See this page:
+		http://www.swig.org/Doc1.1/HTML/Python.html#n6
+	- GenesisParser
+		This needs func( argc, argv ) format for all funcs. 
+		But it often does ugly optargv stuff, so we will really
+		want to have a separate set of functions here to call the
+		reference ones for the Shell.
+		We have an existing GenesisParserWrapper object from the old
+		MOOSE. This could readily be adapted to be an object in 
+		MOOSE07, and communicate cleanly with the shell using messages.
+
+A related point: Should data output be handled by the shell directly
+(to cout) or should it just be returned to the calling function? If so, how?
+
+Discussed with Subhasis. It seems that the Shell should never handle output
+itself, instead pass the data to the calling parser.
+
+Also, many of the object hierarchy functions belong not in Shell, but in
+Neutral. Shifting them there.
+
 =============================================================================
+Feb 10 2007
+Interesting problem with static initilizers as I try to make the Shell into
+a proper MOOSE object: The Neutral Cinfo is needed to make Element::root.
+It is failing because it hasn't been initialized.
+
+=============================================================================
+Feb 11 2007
+Nasty recursion issues with the static initializers. After much messing around
+I have a system where each Cinfo is initialized using a static initializer
+function, which is called both by the MOOSE object for that Cinfo,
+and also by the static initializers for any derived classes.

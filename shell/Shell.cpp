@@ -8,6 +8,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include "moose.h"
+
+/*
 #include <map>
 #include <algorithm>
 #include "header.h"
@@ -15,18 +18,63 @@
 
 using namespace std;
 
-#include "DerivedFtype.h"
-#include "Ftype2.h"
-#include "setget.h"
-#include "Shell.h"
-#include "DynamicFinfo.h"
 #include "MsgSrc.h" 
 #include "MsgDest.h" 
 #include "SimpleElement.h" 
 #include "send.h"
+#include "DerivedFtype.h"
+#include "Ftype2.h"
+#include "setget.h"
+#include "DestFinfo.h"
+#include "DynamicFinfo.h"
+#include "ValueFinfo.h"
+#include "DerivedFtype.h"
+#include "Ftype3.h"
+#include "ValueFtype.h"
 #include "LookupFinfo.h"
 #include "LookupFtype.h"
 #include "setgetLookup.h"
+*/
+
+#include "Shell.h"
+
+//////////////////////////////////////////////////////////////////////
+// Shell MOOSE object creation stuff
+//////////////////////////////////////////////////////////////////////
+
+const Cinfo* initShellCinfo()
+{
+	static Finfo* shellFinfos[] =
+	{
+		new ValueFinfo( "cwe", ValueFtype1< unsigned int >::global(),
+				reinterpret_cast< GetFunc >( &Shell::getCwe ),
+				RFCAST( &Shell::setCwe ) ),
+		new DestFinfo( "create",
+				Ftype3< string, string, unsigned int >::global(),
+				RFCAST( &Shell::staticCreate ) ),
+		new DestFinfo( "destroy",
+				Ftype1< unsigned int >::global(), 
+				RFCAST( &Shell::staticDestroy ) ),
+	};
+
+	static Cinfo shellCinfo(
+		"Shell",
+		"Upi Bhalla, NCBS",
+		"Shell object. Manages general simulator commands.",
+		initNeutralCinfo(),
+		shellFinfos,
+		sizeof( shellFinfos ) / sizeof( Finfo* ),
+		ValueFtype1< Shell >::global()
+	);
+
+	return &shellCinfo;
+}
+
+static const Cinfo* shellCinfo = initShellCinfo();
+
+//////////////////////////////////////////////////////////////////////
+// Initializer
+//////////////////////////////////////////////////////////////////////
 
 Shell::Shell()
 	: cwe_( 0 )
@@ -157,17 +205,48 @@ string Shell::eid2path( unsigned int eid ) const
 	return n;
 }
 
-void Shell::pwe() const
+//////////////////////////////////////////////////////////////////////
+// Moose fields for Shell
+//////////////////////////////////////////////////////////////////////
+
+void Shell::setCwe( const Conn& c, unsigned int id )
 {
-	cout << cwe_ << endl;
+	if ( id < Element::numElements() && Element::element( id ) != 0 ) {
+		Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+		s->cwe_ = id;
+	}
 }
 
-void Shell::ce( unsigned int dest )
+unsigned int Shell::getCwe( const Element* e )
 {
-	if ( Element::element( dest ) )
-		cwe_ = dest;
+	assert( e != 0 );
+	const Shell* s = static_cast< const Shell* >( e->data() );
+	return s->cwe_;
 }
 
+//////////////////////////////////////////////////////////////////////
+// Create and destroy are possibly soon to be deleted. These may have
+// to go over to the Neutral, but till we've sorted out the SWIG
+// interface we'll keep it in case it gets used there.
+//////////////////////////////////////////////////////////////////////
+
+// Static function
+void Shell::staticCreate( const Conn& c, string type,
+						string name, unsigned int parent )
+{
+	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	s->create( type, name, parent );
+}
+
+// Static function
+void Shell::staticDestroy( const Conn& c, unsigned int victim )
+{
+	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	s->destroy( victim );
+}
+
+
+// Regular function
 unsigned int Shell::create( const string& type, const string& name, unsigned int parent )
 {
 	const Cinfo* c = Cinfo::find( type );
@@ -195,6 +274,7 @@ unsigned int Shell::create( const string& type, const string& name, unsigned int
 	return 0;
 }
 
+// Regular function
 void Shell::destroy( unsigned int victim )
 {
 	// cout << "in Shell::destroy\n";
@@ -205,6 +285,21 @@ void Shell::destroy( unsigned int victim )
 	}
 
 	set( e, "destroy" );
+}
+//////////////////////////////////////////////////////////////////////
+// Deleted stuff.
+//////////////////////////////////////////////////////////////////////
+
+#ifdef OLD_SHELL_FUNCS
+void Shell::pwe() const
+{
+	cout << cwe_ << endl;
+}
+
+void Shell::ce( unsigned int dest )
+{
+	if ( Element::element( dest ) )
+		cwe_ = dest;
 }
 
 void Shell::le ( unsigned int eid )
@@ -220,6 +315,7 @@ void Shell::le ( unsigned int eid )
 		}
 	}
 }
+#endif
 
 #ifdef DO_UNIT_TESTS
 
@@ -260,6 +356,10 @@ void testShell()
 
 	/////////////////////////////////////////
 	// Test element creation in trees
+	// This used to be a set of unit tests for Shell, but now
+	// the operations have been shifted over to Neutral.
+	// I still set up the creation operations because they are
+	// used later for path lookup
 	/////////////////////////////////////////
 
 	unsigned int n = Element::numElements() - 1;
@@ -304,7 +404,6 @@ void testShell()
 	ASSERT( Element::element( a ) == 0, "destroy a" );
 	ASSERT( Element::element( a1 ) == 0, "destroy a1" );
 	ASSERT( Element::element( a2 ) == 0, "destroy a2" );
-	
 }
 
 #endif // DO_UNIT_TESTS

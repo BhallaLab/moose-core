@@ -17,10 +17,21 @@
 class Cinfo
 {
 		public:
+			/**
+			 * The Cinfo intializer is used for static initialization
+			 * of all the MOOSE Cinfos. Each MOOSE class must set up
+			 * a function to build its Cinfo. This function must be
+			 * called statically in the MOOSE class .cpp file. 
+			 * Note how it takes the base *Cinfo as an argument. This
+			 * lets us call the base Cinfo initializer when making
+			 * each Cinfo class, thus ensuring the correct static
+			 * initialization sequence, despite the somewhat loose
+			 * semantics for this sequence in most C++ compilers.
+			 */
 			Cinfo( const std::string& name,
 					const std::string& author,
 					const std::string& description,
-					const std::string& baseName,
+					const Cinfo* baseCinfo,
 					Finfo** finfoArray,
 					unsigned int nFinfos,
 					const Ftype* ftype
@@ -58,7 +69,7 @@ class Cinfo
 			const std::string name_;
 			const std::string author_;
 			const std::string description_;
-			const std::string baseName_;
+			const Cinfo* baseCinfo_;
 			vector< Finfo* > finfos_;
 			const Cinfo* base_;
 			const Ftype* ftype_;
