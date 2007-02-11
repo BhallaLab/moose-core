@@ -85,6 +85,8 @@ bool LookupFinfo::respondToAdd(
 
 
 #ifdef DO_UNIT_TESTS
+#include "moose.h"
+/*
 #include <map>
 #include <algorithm>
 #include "Cinfo.h"
@@ -101,6 +103,7 @@ bool LookupFinfo::respondToAdd(
 #include "LookupFtype.h"
 #include "setget.h"
 #include "setgetLookup.h"
+*/
 
 /**
  * This test class contains a vector of doubles, a regular double,
@@ -207,7 +210,8 @@ void lookupFinfoTest()
 	};
 
 	Cinfo lookuptestclass( "lookuptestclass", "Upi",
-					"Lookup Test class", "",
+					"Lookup Test class",
+					initNeutralCinfo(),
 					testFinfos, 
 					sizeof( testFinfos ) / sizeof( Finfo*),
 					ValueFtype1< LookupTestClass >::global() );

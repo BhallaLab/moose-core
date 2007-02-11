@@ -161,6 +161,8 @@ const Finfo* SharedFinfo::match(
 ////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
+#include "moose.h"
+/*
 #include <map>
 #include <algorithm>
 #include "DynamicFinfo.h"
@@ -175,6 +177,7 @@ const Finfo* SharedFinfo::match(
 #include "Cinfo.h"
 #include "Ftype2.h"
 #include "setget.h"
+*/
 
 // Set up two SharedFinfos to test things.
 // One of them is designed to talk to a ValueFinfo to trigger a
@@ -274,7 +277,8 @@ void sharedFinfoTest()
 	};
 
 	Cinfo sfc( "sharedFinfoTestClass", "Upi", "Tests shared Finfos",
-					"", testFinfos, 
+					initNeutralCinfo(),
+					testFinfos, 
 					sizeof( testFinfos ) / sizeof( Finfo*),
 					ValueFtype1< SharedTest >::global() );
 

@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+/*
 #include "header.h"
 #include <map>
 #include "Cinfo.h"
@@ -25,11 +26,41 @@
 #include "SharedFinfo.h"
 #include "LookupFinfo.h"
 #include "LookupFtype.h"
+*/
+
+#include "moose.h"
 
 #include "Neutral.h"
 
-static Finfo* neutralFinfos[] = 
+
+/**
+ * Declaration of the Element::root() function is here because
+ * we want to be able to set it up as a Neutral. This function
+ * uses the common trick of having an internal static value which
+ * is created the first time the function is called.
+ * This is an unusual Element because it is created on every node.
+ */
+Element* Element::root()
 {
+	// elementList.reserve( 128 );
+	static Element* ret = initNeutralCinfo()->create( "root" );
+	return ret;
+}
+
+/**
+ * Declaration of the neutralCinfo() function is here because
+ * we ensure the correct sequence of static initialization by having
+ * each Cinfo use this call to find its base class. Most Cinfos
+ * inherit from neutralCinfo. This function
+ * uses the common trick of having an internal static value which
+ * is created the first time the function is called.
+ * The function for neutralCinfo has an additional line to statically
+ * initialize the root element.
+ */
+const Cinfo* initNeutralCinfo()
+{
+	static Finfo* neutralFinfos[] = 
+	{
 		new ValueFinfo( "name", ValueFtype1< string >::global(),
 					reinterpret_cast< GetFunc >( &Neutral::getName ),
 					reinterpret_cast< RecvFunc >( &Neutral::setName )
@@ -56,32 +87,23 @@ static Finfo* neutralFinfos[] =
 			reinterpret_cast< RecvFunc >( &Neutral::create ) ),
 		new DestFinfo( "destroy", Ftype0::global(),
 			&Neutral::destroy ),
-};
+	};
 
-static Cinfo neutralCinfo(
+	static Cinfo neutralCinfo(
 				"Neutral",
 				"Upi Bhalla",
 				"Neutral object. Manages Element heirarchy.",
-				"",
+				0,
 				neutralFinfos,
 				sizeof( neutralFinfos ) / sizeof( Finfo* ),
 				ValueFtype1< Neutral >::global()
-);
+	);
 
-/**
- * Declaration of the Element::root() function is here because
- * we want to be able to set it up as a Neutral. This function
- * uses the common trick of having an internal static value which
- * is created the first time the function is called.
- * This is an unusual Element because it is created on every node.
- */
-Element* Element::root()
-{
-	// elementList.reserve( 128 );
-	static Element* ret = neutralCinfo.create( "root" );
-	
-	return ret;
+	return &neutralCinfo;
 }
+
+static const Cinfo* neutralCinfo = initNeutralCinfo();
+static const Element* root = Element::root();
 
 //////////////////////////////////////////////////////////////////
 // Here we put the Neutral class functions.
@@ -256,7 +278,7 @@ void testNeutral()
 {
 		cout << "\nTesting Neutral";
 
-		Element* n1 = neutralCinfo.create( "n1" );
+		Element* n1 = neutralCinfo->create( "n1" );
 		string s;
 		get< string >( n1, n1->findFinfo( "name" ), s );
 		ASSERT( s == "n1", "Neutral name get" );
@@ -265,28 +287,28 @@ void testNeutral()
 		get< string >( n1, n1->findFinfo( "name" ), s );
 		ASSERT( s == "N1", "Neutral name set" );
 
-		Element* n2 = neutralCinfo.create( "n2" );
+		Element* n2 = neutralCinfo->create( "n2" );
 		
 		ASSERT( n1->findFinfo( "childSrc" )->add(
 								n1, n2, n2->findFinfo( "child" ) ),
 						"adding child"
 			  );
 
-		Element* n3 = neutralCinfo.create( "n3" );
+		Element* n3 = neutralCinfo->create( "n3" );
 		
 		ASSERT( n1->findFinfo( "childSrc" )->add(
 								n1, n3, n3->findFinfo( "child" ) ),
 						"adding child"
 			  );
 
-		Element* n21 = neutralCinfo.create( "n21" );
+		Element* n21 = neutralCinfo->create( "n21" );
 		
 		ASSERT( n2->findFinfo( "childSrc" )->add(
 								n2, n21, n21->findFinfo( "child" ) ),
 						"adding child"
 			  );
 
-		Element* n22 = neutralCinfo.create( "n22" );
+		Element* n22 = neutralCinfo->create( "n22" );
 		
 		ASSERT( n2->findFinfo( "childSrc" )->add(
 								n2, n22, n22->findFinfo( "child" ) ),
