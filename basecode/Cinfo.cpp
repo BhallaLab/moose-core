@@ -28,13 +28,13 @@
 Cinfo::Cinfo(const std::string& name,
 				const std::string& author,
 				const std::string& description,
-				const std::string& baseName,
+				const Cinfo* baseCinfo,
 				Finfo** finfoArray,
 				unsigned int nFinfos,
 				const Ftype* ftype
 )
 		: name_(name), author_(author), 
-		description_(description), baseName_(baseName),
+		description_(description), baseCinfo_(baseCinfo),
 		base_( 0 ), ftype_( ftype ), nSrc_( 0 ), nDest_( 0 )
 {
 	unsigned int i;
@@ -43,10 +43,11 @@ Cinfo::Cinfo(const std::string& name,
 		finfos_.push_back( finfoArray[i] );
 	}
 	thisFinfo_ = new ThisFinfo( this );
+	///\todo: here need to put in additional initialization stuff from base class
 	lookup()[name] = this;
 	// This funny call is used to ensure that the root element is
 	// created at static initialization time.
-	Element::root();
+	// Element::root();
 }
 
 const Cinfo* Cinfo::find( const string& name )

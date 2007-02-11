@@ -10,6 +10,9 @@
 
 #ifdef DO_UNIT_TESTS
 
+#include "moose.h"
+
+/*
 #include "header.h"
 #include <iostream>
 #include <algorithm>
@@ -25,6 +28,7 @@
 #include "ValueFtype.h"
 #include "Ftype2.h"
 #include "setget.h"
+*/
 
 
 /**
@@ -442,7 +446,8 @@ void cinfoTest()
 	ASSERT (sizeof( testFinfos ) / sizeof( Finfo* ) == 8, 
 					"Finfo array creation" );
 
-	Cinfo testclass( "testclass", "Upi", "Test class", "", testFinfos, 
+	Cinfo testclass( "testclass", "Upi", "Test class", 
+					initNeutralCinfo(), testFinfos, 
 					sizeof( testFinfos ) / sizeof( Finfo*),
 					f1d );
 
@@ -627,7 +632,9 @@ void finfoLookupTest()
 	ASSERT (sizeof( testFinfos ) / sizeof( Finfo* ) == 8, 
 					"Finfo array creation" );
 
-	Cinfo testclass( "testclass", "Upi", "Test class", "", testFinfos, 
+	Cinfo testclass( "testclass", "Upi", "Test class",
+					initNeutralCinfo(),
+					testFinfos, 
 					sizeof( testFinfos ) / sizeof( Finfo*),
 					ValueFtype1< double >::global() );
 
@@ -865,7 +872,8 @@ void valueFinfoTest()
 		new DestFinfo( "proc", f0, &TestClass::proc ),
 	};
 
-	Cinfo testclass( "testclass2", "Upi", "Test class 2", "",
+	Cinfo testclass( "testclass2", "Upi", "Test class 2",
+					initNeutralCinfo(),
 					testFinfos, 
 					sizeof( testFinfos ) / sizeof( Finfo*),
 					ValueFtype1< TestClass >::global() );
@@ -1284,7 +1292,8 @@ void arrayFinfoTest()
 	};
 
 	Cinfo arraytestclass( "arraytestclass", "Upi",
-					"Array Test class", "",
+					"Array Test class",
+					initNeutralCinfo(),
 					testFinfos, 
 					sizeof( testFinfos ) / sizeof( Finfo*),
 					ValueFtype1< ArrayTestClass >::global() );
