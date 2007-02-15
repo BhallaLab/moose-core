@@ -10,21 +10,30 @@
 #ifndef _SHELL_H
 #define _SHELL_H
 
+extern void separateString( const string& s, vector< string>& v, 
+				const string& separator );
+
 class Shell
 {
 	public:
 		Shell();
+	
+////////////////////////////////////////////////////////////////////
+// Some utility functions
+////////////////////////////////////////////////////////////////////
 		string expandPath( const std::string& path ) const;
-		string eid2path( unsigned int eid ) const;
+		static string eid2path( unsigned int eid );
 		unsigned int path2eid( const string& path,
 						const string& separator ) const;
-		unsigned int parent( unsigned int eid ) const;
-		unsigned int traversePath( 
-				unsigned int start, vector< string >& ) const;
+		static unsigned int parent( unsigned int eid );
+		static unsigned int traversePath( 
+				unsigned int start, vector< string >& );
+		static string head( const string& path, const string& separator );
+		static string tail( const string& path, const string& separator );
 ////////////////////////////////////////////////////////////////////
 // Local functions for implementing basic GENESIS/MOOSE command set.
 ////////////////////////////////////////////////////////////////////
-//
+
 		static void setCwe( const Conn&, unsigned int id );
 		static unsigned int getCwe( const Element* );
 

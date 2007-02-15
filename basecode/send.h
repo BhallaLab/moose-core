@@ -76,4 +76,26 @@ template < class T1, class T2 > void send2(
 	} while ( src != 0 );
 }
 
+/**
+ * This templated function sends three-argument messages.
+ */
+template < class T1, class T2, class T3 > void send3(
+			const Element* eIn, unsigned int src,
+			T1 val1, T2 val2, T3 val3 )
+{
+	const SimpleElement* e = static_cast< const SimpleElement* >( eIn );
+
+	do {
+		void( *rf )( const Conn&, T1, T2, T3 ) = 
+			reinterpret_cast< void ( * )( const Conn&, T1, T2, T3 ) >(
+				e->srcRecvFunc( src ) ); 
+		/// \todo Are there STL binders for 2 values?
+		vector< Conn >::const_iterator j;
+		for ( j = e->connSrcBegin( src );
+						j != e->connSrcEnd( src ); j++ )
+				rf( *j, val1, val2, val3 );
+		src = e->nextSrc( src );
+	} while ( src != 0 );
+}
+
 #endif // _SEND_H
