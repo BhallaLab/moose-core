@@ -46,6 +46,7 @@
 
 #include "setget.h"
 #include "setgetLookup.h"
+#include "ProcInfo.h"
 
 /// This is here because most classes derive from NeutralCinfo
 extern const Cinfo* initNeutralCinfo();
