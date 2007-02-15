@@ -1232,7 +1232,12 @@ better, for having them enumed by the name of the field.
 =============================================================================
 Feb 15 2007.
 
-Managed to get compilation to work, yet to test. Old unit tests are fine.
+Managed to get compilation to work, still to test. Old unit tests are fine.
 Will need a lot of cleaning up of src/dest indices.
+
+Implemented biophysics/Compartment. This is really for Subhasis to go ahead
+with an example class for the Python implementation. Should be functional,
+except that it needs proper scheduling to work. Compiles, old unit tests
+work, new ones still to implement.
 
 =============================================================================
