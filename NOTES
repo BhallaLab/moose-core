@@ -1193,3 +1193,46 @@ Nasty recursion issues with the static initializers. After much messing around
 I have a system where each Cinfo is initialized using a static initializer
 function, which is called both by the MOOSE object for that Cinfo,
 and also by the static initializers for any derived classes.
+
+There are a fair number of development lines now pending for the scripting:
+- Getting integration with the GENESIS SLI.
+- Getting shells to talk to each other
+- Filling in more shell functions
+- Implementing the id wrapper class for SWIG
+	- Implementing Finfo parsing to generate SWIG/python class wrappers.
+
+
+Working on GENESIS SLI. First issue:
+Most of the funcs that get added to the parser vocabulary need to talk to
+MOOSE objects. In the old code I had the parser include a field for the 
+Shell and GenesisParserWrapper. Here I want to do it all using messages
+from the GenesisParserWrapper. I have a bunch of void( * )(argc, argv, Shell* )
+functions that get into the vocabulary. Can I eliminate the Shell*? Should I?
+Each of the funcs needs ultimately to send messages and call setfuncs.
+Note that for Python I just use the eids.
+=============================================================================
+Feb 13 2007.
+
+Building the GenesisParserWrapper around the idea that it will be connected
+to its shell by messages, and that the GenesisParser object knows the id
+of the Element it is on. It needs this to pass to the various functions that
+have to send messages around, especially to the Shell.
+
+Now major cleanup to do on the GenesisParserWrapper to use the id and
+messaging rather than the Shell pointer it had previously.
+
+=============================================================================
+Feb 14 2007.
+About halfway through a very messy recompile of GenesisParserWrapper.
+
+Getting close
+Need a systematic way of finding the appropriate src/dest index, or even
+better, for having them enumed by the name of the field.
+
+=============================================================================
+Feb 15 2007.
+
+Managed to get compilation to work, yet to test. Old unit tests are fine.
+Will need a lot of cleaning up of src/dest indices.
+
+=============================================================================

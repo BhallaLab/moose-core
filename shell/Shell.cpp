@@ -88,7 +88,7 @@ Shell::Shell()
  * This needs to be on the Shell for future use, because we may
  * need to look up remote nodes
  */
-unsigned int Shell::parent( unsigned int eid ) const 
+unsigned int Shell::parent( unsigned int eid )
 {
 	Element* e = Element::element( eid );
 	unsigned int ret;
@@ -100,15 +100,14 @@ unsigned int Shell::parent( unsigned int eid ) const
 }
 
 /**
- * Returns the element at the end of the specified path
- * This function should be rethought because it puts parsing in the
- * shell rather than the parser, where it belongs.
+ * Returns the element at the end of the specified path.
+ * It is a static func as a utility for parsers.
  * We ignore any leading /
  * We ignore any isolated ./
  */
 unsigned int Shell::traversePath(
 				unsigned int start,
-				vector< string >& names ) const
+				vector< string >& names )
 {
 	vector< string >::iterator i;
 	for ( i = names.begin(); i != names.end(); i++ ) {
@@ -184,7 +183,7 @@ unsigned int Shell::path2eid(
 	return traversePath( start, names );
 }
 
-string Shell::eid2path( unsigned int eid ) const
+string Shell::eid2path( unsigned int eid ) 
 {
 	static const string slash = "/";
 	string n( "" );
@@ -203,6 +202,24 @@ string Shell::eid2path( unsigned int eid ) const
 	}
 	*/
 	return n;
+}
+
+string Shell::head( const string& path, const string& separator )
+{
+	string::size_type pos = path.rfind( separator );
+	if ( pos == string::npos )
+			return path;
+
+	return path.substr( 0, pos );
+}
+
+string Shell::tail( const string& path, const string& separator )
+{
+	string::size_type pos = path.rfind( separator );
+	if ( pos == string::npos )
+			return "";
+
+	return path.substr( pos + separator.length() );
 }
 
 //////////////////////////////////////////////////////////////////////

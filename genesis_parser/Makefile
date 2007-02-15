@@ -17,6 +17,7 @@ TARGET = SLI.o
 
 OBJ = \
 	GenesisParser.o \
+	GenesisParserWrapper.o \
 	GenesisParser.tab.o \
 	symtab.o \
 	eval.o \
@@ -34,6 +35,7 @@ default: $(TARGET)
 
 $(OBJ)	: GenesisParser.yy.cpp $(HEADERS)
 GenesisParser.o:			GenesisParser.h
+GenesisParserWrapper.o:		GenesisParser.h GenesisParserWrapper.h ../shell/Shell.h
 GenesisParser.yy.o:			GenesisParser.yy.l
 
 GenesisParser.yy.cpp: GenesisParser.yy.l

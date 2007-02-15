@@ -18,7 +18,7 @@
 #define BGINSTKSIZE 100
 #define MAXSCRIPTS 40
 
-typedef char NElement;
+typedef unsigned int Id;
 
 #include <map>
 #include <string>
@@ -96,11 +96,11 @@ typedef struct _localvars
 
 extern Result* SymtabLook(Symtab* symtab, char* sym);
 extern "C" int yywrap( void );
-typedef void (*slifunc)(int argc, const char** argv, NElement* s );
-typedef int (*PFI)(int argc, const char** argv, NElement* s );
-typedef char* (*PFC)(int argc, const char** argv, NElement* s );
-typedef float (*PFF)(int argc, const char** argv, NElement* s );
-typedef double (*PFD)(int argc, const char** argv, NElement* s );
+typedef void (*slifunc)(int argc, const char** argv, Id s );
+typedef int (*PFI)(int argc, const char** argv, Id s );
+typedef char* (*PFC)(int argc, const char** argv, Id s );
+typedef float (*PFF)(int argc, const char** argv, Id s );
+typedef double (*PFD)(int argc, const char** argv, Id s );
 
 class func_entry 
 {
@@ -111,7 +111,7 @@ class func_entry
 			;
 		}
 
-		Result Execute(int argc, const char** argv, NElement* s );
+		Result Execute(int argc, const char** argv, Id s );
 		bool HasFunc() {
 			return (func != 0);
 		}
@@ -126,7 +126,7 @@ typedef std::map< std::string, func_entry* > Func_map;
 class myFlexLexer: public yyFlexLexer
 {
 	public:
-		myFlexLexer( NElement* parent );
+		myFlexLexer( Id element );
 		
 		int yylex();
 
@@ -238,14 +238,6 @@ class myFlexLexer: public yyFlexLexer
 		}
 		int IncludeScript(int argc, char** argv);
 
-		void innerSetShell( NElement* s ) {
-			shell_ = s;
-		}
-
-		NElement* innerGetShell() const {
-			return shell_;
-		}
-
 	private:
 		std::string currstr;
 		std::string outstr;
@@ -278,8 +270,7 @@ class myFlexLexer: public yyFlexLexer
 		std::map< std::string, std::string > alias_map;
 		short script_ptr;
 		Script script[MAXSCRIPTS];
-		NElement* shell_;
-		NElement* parent_;
+		Id element_;
 };
 
 #endif // _GENESIS_PARSER_H

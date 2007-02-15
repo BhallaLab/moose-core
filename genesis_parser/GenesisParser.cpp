@@ -52,8 +52,8 @@ using std::string;
 ///////////////////////////////////////////////////////////////////////
 
 
-myFlexLexer::myFlexLexer( NElement* parent )
-			: yyFlexLexer(), state(LOOKUP), parent_( parent )
+myFlexLexer::myFlexLexer( Id id )
+			: yyFlexLexer(), state(LOOKUP), element_( id )
 {
 	currstr = "";
 	BreakAllowed = 0;
@@ -65,7 +65,6 @@ myFlexLexer::myFlexLexer( NElement* parent )
 	continuation = 0;
 	CurLocals = 0;
 	script_ptr = -1;
-	shell_ = 0;
 
 	// AddFunc("quit", do_quit, "void");
 	// AddFunc("echo", do_echo, "void");
@@ -390,13 +389,12 @@ int SetCommandTraceLevel(int iLevel)
 }
 */
 
-Result func_entry::Execute(int argc, const char** argv, NElement* s)
+Result func_entry::Execute(int argc, const char** argv, Id s)
 {
 	Result		result;
-	if ( s == 0 ) {
-		cout << "GenesisParser::func_entry::Execute: Error: shell not defined\n";
-	}
-	if(type == "int") {
+
+	assert( s != 0 );
+	if ( type == "int") {
 	    result.r_type = IntType();
 	    result.r.r_int = ((PFI)func)( argc, argv, s );
 	} else
@@ -553,7 +551,7 @@ func_entry	*command;
 	/*
 	** call the function
 	*/
-	return command->Execute( argc, (const char**)argv, shell_ );
+	return command->Execute( argc, (const char**)argv, element_ );
 
     } else 
     /*
