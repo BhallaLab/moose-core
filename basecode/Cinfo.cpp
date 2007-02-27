@@ -38,6 +38,14 @@ Cinfo::Cinfo(const std::string& name,
 		base_( 0 ), ftype_( ftype ), nSrc_( 0 ), nDest_( 0 )
 {
 	unsigned int i;
+	if ( baseCinfo ) {
+		nSrc_ = baseCinfo->nSrc_;
+		nDest_ = baseCinfo->nDest_;
+		for ( i = 0; i < baseCinfo->finfos_.size(); i++ ) {
+			finfos_.push_back( baseCinfo->finfos_[i] );
+		}
+	}
+
 	for ( i = 0 ; i < nFinfos; i++ ) {
 		finfoArray[i]->countMessages( nSrc_, nDest_ );
 		finfos_.push_back( finfoArray[i] );
@@ -166,4 +174,20 @@ Element* Cinfo::create( const std::string& name ) const
 void Cinfo::listFinfos( vector< const Finfo* >& flist ) const
 {
 	flist.insert( flist.end(), finfos_.begin(), finfos_.end() );
+}
+
+/**
+ * Looks up the slotIndex for the finfo specified by name.
+ * This is either the destIndex_ or srcIndex_, depending on the
+ * Finfo class. Used to set up named static indices for various
+ * finfos, for use in the send() functions
+ */
+unsigned int Cinfo::getSlotIndex( const string& name ) const
+{
+	vector< Finfo* >::const_iterator i;
+	for ( i = finfos_.begin() ; i < finfos_.end(); i++ ) {
+		if ( (*i)->name() == name )
+			return (*i)->getSlotIndex();
+	}
+	return 0;
 }

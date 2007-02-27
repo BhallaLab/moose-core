@@ -162,22 +162,6 @@ const Finfo* SharedFinfo::match(
 
 #ifdef DO_UNIT_TESTS
 #include "moose.h"
-/*
-#include <map>
-#include <algorithm>
-#include "DynamicFinfo.h"
-#include "ValueFinfo.h"
-#include "DestFinfo.h"
-#include "MsgSrc.h"
-#include "MsgDest.h"
-#include "SimpleElement.h"
-#include "DerivedFtype.h"
-#include "send.h"
-#include "ValueFtype.h"
-#include "Cinfo.h"
-#include "Ftype2.h"
-#include "setget.h"
-*/
 
 // Set up two SharedFinfos to test things.
 // One of them is designed to talk to a ValueFinfo to trigger a
@@ -219,22 +203,25 @@ class SharedTest
 
 		static void trigRead( const Conn& c ) {
 			Element* e = c.targetElement();
-			// 0 is the readVal trig MsgSrc.
-			send0( e, 0 );
+			// 0 is the readVal trig MsgSrc., but we have to
+			// increment it to 1 because of base class.
+			send0( e, 1 );
 		}
 
 		static void pingPong( const Conn& c ) {
 			Element* e = c.targetElement();
 			SharedTest* st = 
 				static_cast< SharedTest* >( e->data() );
-			// 1 is the pingPong dval MsgSrc.
-			send1< double >( e, 1, st->dval_ );
+			// 1 is the pingPong dval MsgSrc. We have to increment it to
+			// 2 because of the base class
+			send1< double >( e, 2, st->dval_ );
 		}
 
 		static void trigPing( const Conn& c ) {
 			Element* e = c.targetElement();
-			// 2 is the pingPong trig MsgSrc.
-			send0( e, 2 );
+			// 2 is the pingPong trig MsgSrc. We have to increment it
+			// to 3 because of the base class.
+			send0( e, 3 );
 		}
 
 		private:

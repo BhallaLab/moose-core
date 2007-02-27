@@ -65,6 +65,8 @@ class Cinfo
 
 			void listFinfos( vector< const Finfo* >& flist ) const;
 
+			unsigned int getSlotIndex( const string& name ) const;
+
 		private:
 			const std::string name_;
 			const std::string author_;

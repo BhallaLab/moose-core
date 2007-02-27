@@ -205,3 +205,10 @@ const DynamicFinfo* getDF( const Conn& c )
 	assert( f != 0 );
 	return f;
 }
+
+unsigned int DynamicFinfo::getSlotIndex() const
+{
+	if ( destIndex_ != 0 )
+			return destIndex_;
+	return srcIndex_;
+}

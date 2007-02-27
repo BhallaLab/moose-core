@@ -82,6 +82,10 @@ class DestFinfo: public Finfo
 				destIndex_ = destNum++;
 			}
 
+			unsigned int getSlotIndex() const {
+				return destIndex_;
+			}
+
 			const Finfo* match( 
 				const Element* e, unsigned int connIndex ) const;
 
