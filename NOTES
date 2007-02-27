@@ -1239,5 +1239,34 @@ Implemented biophysics/Compartment. This is really for Subhasis to go ahead
 with an example class for the Python implementation. Should be functional,
 except that it needs proper scheduling to work. Compiles, old unit tests
 work, new ones still to implement.
+Checked in to the SourceForge site. Now at revision 34.
+
+=============================================================================
+Feb 27 2007
+
+Put in code to inherit finfos. Things fall apart here in several ways.
+- The indexing of local fields is shifted. This messes up UnitTests.cpp:458
+	and onward. Trivial.
+- The numbering of messages just got even worse. I need to initialize
+	some static fields with the message names so that I can send things
+	easily. Either that or define wrapper funcs.
+- There will be a proliferation of message slot requests. Most of these
+	will sit unused but occupy space. Various measures:
+	- Allocate slots only as needed. Always parent, not always child.
+		Expand slot vector as message creation requests occur.
+		- Ordering of slot vector needs to be so that common ones
+		are sooner.
+	- Many finfos, even src and dest ones, need not have default slots
+		given. The finfos are used rarely so we can put in a finfo
+		reference in the finfo array if needed. This is like messages
+		to fields.
+
+I have addressed the first two problems above. Unit tests were far from
+trivial because indexing issues were everywhere. At the end of this we have
+implemented two things:
+- class inheritance and managing message slot access issues that result
+- Generating a slot index from the finfo name so that the send() command
+does not need to use hard-coded indices.
+
 
 =============================================================================

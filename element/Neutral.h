@@ -33,4 +33,7 @@ class Neutral
 			static void setName( const Conn&, const string s );
 			static void lookupChild( const Conn&, const string s );
 			static int getChildByName( const Element* e, const string& s );
+
+			static const unsigned int childSrcIndex;
+			static const unsigned int childIndex;
 };

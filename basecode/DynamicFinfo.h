@@ -158,6 +158,8 @@ class DynamicFinfo: public Finfo
 					return 1;
 			}
 
+			unsigned int getSlotIndex() const;
+
 			/////////////////////////////////////////////////////////
 			// Here we define the functions that are unique to this
 			// class.

@@ -151,6 +151,16 @@ class Finfo
 				unsigned int& srcIndex, unsigned int& destIndex ) = 0;
 
 			/**
+			 * This function returns the srcIndex or destIndex of
+			 * the Finfo, as appropriate, provided the Finfo has a
+			 * predefined Index of one of these kinds. Many Finfos do
+			 * not have such a number, so it returns 0 by default.
+			 */
+			virtual unsigned int getSlotIndex() const {
+				return 0;
+			}
+
+			/**
 			 * This returns true if the Finfo is meant to be 
 			 * created and destroyed during the lifetime of an
 			 * Element. Otherwise all Finfos are permanent, 

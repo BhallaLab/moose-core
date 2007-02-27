@@ -77,6 +77,10 @@ class SrcFinfo: public Finfo
 					return 0;
 			}
 
+			unsigned int getSlotIndex() const {
+				return srcIndex_;
+			}
+
 		private:
 			unsigned int srcIndex_;
 };

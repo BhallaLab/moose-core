@@ -410,8 +410,13 @@ void proc( const Conn& c )
 {
 	double ret = 
 			*static_cast< double* >( c.targetElement()->data() );
-	send1< double >( c.targetElement(), 0, ret );
+	// It is a bad idea to use absolute indices here, because
+	// these depend on what Finfos in a base class might do.
+	// For now I'll set them to the correct value, but you should
+	// suspect these if there are any further problems with the
+	// unit tests.
 	send1< double >( c.targetElement(), 1, ret );
+	send1< double >( c.targetElement(), 2, ret );
 }
 
 #include <map>
@@ -427,7 +432,7 @@ void cinfoTest()
 	 * The sumout and subout are triggered by the proc message.
 	 */
 
-	cout << "Testing class formation and messagint";
+	cout << "Testing class formation and messaging";
 
 	const Ftype* f1d = ValueFtype1<double>::global();
 	const Ftype* f0 = Ftype0::global();
@@ -447,7 +452,8 @@ void cinfoTest()
 					"Finfo array creation" );
 
 	Cinfo testclass( "testclass", "Upi", "Test class", 
-					initNeutralCinfo(), testFinfos, 
+					initNeutralCinfo(),
+					testFinfos, 
 					sizeof( testFinfos ) / sizeof( Finfo*),
 					f1d );
 
@@ -455,23 +461,42 @@ void cinfoTest()
 	// but the fields are private. So I've made this function their
 	// friend.
 	
+	unsigned int startIndex = testFinfos[0]->getSlotIndex();
+
+	unsigned int sumSlotIndex = testclass.getSlotIndex( "sum" );
+
+	ASSERT( startIndex == sumSlotIndex, 
+					"getFinfoIndex during cinfo initialization" );
 	ASSERT( dynamic_cast< DestFinfo* >( testFinfos[0] )->
-					destIndex_ == 0 ,
+					destIndex_ == 0 + startIndex ,
 					"msg counting during cinfo inititialization" );
 	ASSERT( dynamic_cast< DestFinfo* >( testFinfos[1] )->
-					destIndex_ == 1 ,
+					destIndex_ == 1 + startIndex ,
 					"msg counting during cinfo inititialization" );
 	ASSERT( dynamic_cast< DestFinfo* >( testFinfos[2] )->
-					destIndex_ == 2 ,
+					destIndex_ == 2 + startIndex ,
 					"msg counting during cinfo inititialization" );
+	ASSERT( dynamic_cast< DestFinfo* >( testFinfos[3] )->
+					destIndex_ == 3 + startIndex ,
+					"msg counting during cinfo inititialization" );
+
+	startIndex = testFinfos[4]->getSlotIndex();
+	unsigned int sumOutSlotIndex = testclass.getSlotIndex( "sumout" );
+
+	ASSERT( startIndex == sumOutSlotIndex, 
+					"sumOutIndex during cinfo initialization" );
+
 	ASSERT( dynamic_cast< SrcFinfo* >( testFinfos[4] )->
-					srcIndex_ == 0 ,
+					srcIndex_ == 0 + startIndex ,
 					"msg counting during cinfo inititialization" );
 	ASSERT( dynamic_cast< SrcFinfo* >( testFinfos[5] )->
-					srcIndex_ == 1 ,
+					srcIndex_ == 1 + startIndex ,
 					"msg counting during cinfo inititialization" );
 	ASSERT( dynamic_cast< SrcFinfo* >( testFinfos[6] )->
-					srcIndex_ == 2 ,
+					srcIndex_ == 2 + startIndex ,
+					"msg counting during cinfo inititialization" );
+	ASSERT( dynamic_cast< SrcFinfo* >( testFinfos[7] )->
+					srcIndex_ == 3 + startIndex ,
 					"msg counting during cinfo inititialization" );
 
 	Element* clock = testclass.create( "clock" );
@@ -500,22 +525,21 @@ void cinfoTest()
 	//	-3	2	4
 	//	-3	-1	0
 	//	4	-4	-7
-	
 
 	SimpleElement* se1 = static_cast< SimpleElement* >( e1 );
 
 	testFinfos[4]->add( e1, e2, testFinfos[0] );
-	ASSERT( se1->src_.size() == 4, "" );
-	ASSERT( se1->src_[0].begin() == 0 , "" );
-	ASSERT( se1->src_[0].end() == 1 , "" );
+	ASSERT( se1->src_.size() == 4 + startIndex, "" );
+	ASSERT( se1->src_[sumOutSlotIndex].begin() == 0 , "" );
+	ASSERT( se1->src_[sumOutSlotIndex].end() == 1 , "" );
 	ASSERT( se1->conn_.size() == 1, "" );
 	ASSERT( se1->conn_[0].targetElement()->name() == "e2", "" );
 	ASSERT( se1->conn_[0].targetIndex() == 0, "" );
 
 	testFinfos[4]->add( e1, e3, testFinfos[0] );
-	ASSERT( se1->src_.size() == 4, "" );
-	ASSERT( se1->src_[0].begin() == 0 , "" );
-	ASSERT( se1->src_[0].end() == 2 , "" );
+	ASSERT( se1->src_.size() == 4 + startIndex, "" );
+	ASSERT( se1->src_[sumOutSlotIndex].begin() == 0 , "" );
+	ASSERT( se1->src_[sumOutSlotIndex].end() == 2 , "" );
 	ASSERT( se1->conn_.size() == 2, "" );
 	ASSERT( se1->conn_[1].targetElement()->name() == "e3", "" );
 	ASSERT( se1->conn_[1].targetIndex() == 0, "" );
@@ -529,26 +553,35 @@ void cinfoTest()
 	testFinfos[7]->add( clock, e1, testFinfos[3] );
 	testFinfos[7]->add( clock, e2, testFinfos[3] );
 	testFinfos[7]->add( clock, e3, testFinfos[3] );
-	ASSERT( se1->src_.size() == 4, "" );
-	ASSERT( se1->conn_.size() == 5, "" );
-	ASSERT( se1->src_[0].begin() == 0 , "" );
-	ASSERT( se1->src_[0].end() == 2 , "" );
-	ASSERT( se1->src_[1].begin() == 2 , "" );
-	ASSERT( se1->src_[1].end() == 2 , "" );
-	ASSERT( se1->src_[2].begin() == 2 , "" );
-	ASSERT( se1->src_[2].end() == 2 , "" );
-	ASSERT( se1->src_[3].begin() == 2 , "" );
-	ASSERT( se1->src_[3].end() == 2 , "" );
 
-	ASSERT( se1->dest_.size() == 4, "" );
-	ASSERT( se1->dest_[0].begin() == 2 , "" );
-	ASSERT( se1->dest_[0].end() == 2 , "" );
-	ASSERT( se1->dest_[1].begin() == 2 , "" );
-	ASSERT( se1->dest_[1].end() == 3 , "" );
-	ASSERT( se1->dest_[2].begin() == 3 , "" );
-	ASSERT( se1->dest_[2].end() == 4 , "" );
-	ASSERT( se1->dest_[3].begin() == 4 , "" );
-	ASSERT( se1->dest_[3].end() == 5 , "" );
+	unsigned int subOutSlotIndex = testclass.getSlotIndex( "subout" );
+	unsigned int printOutSlotIndex = testclass.getSlotIndex( "printout" );
+	unsigned int procOutSlotIndex = testclass.getSlotIndex( "procout" );
+
+	ASSERT( se1->src_.size() == 4 + startIndex, "" );
+	ASSERT( se1->conn_.size() == 5, "" );
+	ASSERT( se1->src_[sumOutSlotIndex].begin() == 0 , "" );
+	ASSERT( se1->src_[sumOutSlotIndex].end() == 2 , "" );
+	ASSERT( se1->src_[subOutSlotIndex].begin() == 2 , "" );
+	ASSERT( se1->src_[subOutSlotIndex].end() == 2 , "" );
+	ASSERT( se1->src_[printOutSlotIndex].begin() == 2 , "" );
+	ASSERT( se1->src_[printOutSlotIndex].end() == 2 , "" );
+	ASSERT( se1->src_[procOutSlotIndex].begin() == 2 , "" );
+	ASSERT( se1->src_[procOutSlotIndex].end() == 2 , "" );
+
+	
+	unsigned int subSlotIndex = testclass.getSlotIndex( "sub" );
+	unsigned int printSlotIndex = testclass.getSlotIndex( "print" );
+	unsigned int procSlotIndex = testclass.getSlotIndex( "proc" );
+	ASSERT( se1->dest_.size() == 4 + sumSlotIndex, "" );
+	ASSERT( se1->dest_[sumSlotIndex].begin() == 2 , "" );
+	ASSERT( se1->dest_[sumSlotIndex].end() == 2 , "" );
+	ASSERT( se1->dest_[subSlotIndex].begin() == 2 , "" );
+	ASSERT( se1->dest_[subSlotIndex].end() == 3 , "" );
+	ASSERT( se1->dest_[printSlotIndex].begin() == 3 , "" );
+	ASSERT( se1->dest_[printSlotIndex].end() == 4 , "" );
+	ASSERT( se1->dest_[procSlotIndex].begin() == 4 , "" );
+	ASSERT( se1->dest_[procSlotIndex].end() == 5 , "" );
 	ASSERT( se1->conn_.size() == 5, "" );
 
 	// e2->conn[0] goes to e3 as it is a msgsrc
@@ -572,25 +605,25 @@ void cinfoTest()
 	*DATA( e2 ) = 1;
 	*DATA( e3 ) = 1;
 
-	send0( clock, 2 ); // print
+	send0( clock, printOutSlotIndex ); // print
 	ASSERT( *reinterpret_cast< double* >( e1->data() ) == 1, "msg1" );
 	ASSERT( *reinterpret_cast< double* >( e2->data() ) == 1, "msg2" );
 	ASSERT( *reinterpret_cast< double* >( e3->data() ) == 1, "msg3" );
 
-	send0( clock, 3 ); // process
-	send0( clock, 2 ); // print
+	send0( clock, procOutSlotIndex ); // process
+	send0( clock, printOutSlotIndex ); // print
 	ASSERT( *reinterpret_cast< double* >( e1->data() ) == -3, "msg1" );
 	ASSERT( *reinterpret_cast< double* >( e2->data() ) == 2, "msg2" );
 	ASSERT( *reinterpret_cast< double* >( e3->data() ) == 4, "msg3" );
 
-	send0( clock, 3 ); // process
-	send0( clock, 2 ); // print
+	send0( clock, procOutSlotIndex ); // process
+	send0( clock, printOutSlotIndex ); // print
 	ASSERT( *reinterpret_cast< double* >( e1->data() ) == -3, "msg1" );
 	ASSERT( *reinterpret_cast< double* >( e2->data() ) == -1, "msg2" );
 	ASSERT( *reinterpret_cast< double* >( e3->data() ) == 0, "msg3" );
 
-	send0( clock, 3 ); // process
-	send0( clock, 2 ); // print
+	send0( clock, procOutSlotIndex ); // process
+	send0( clock, printOutSlotIndex ); // print
 	ASSERT( *reinterpret_cast< double* >( e1->data() ) == 4, "msg1" );
 	ASSERT( *reinterpret_cast< double* >( e2->data() ) == -4, "msg2" );
 	ASSERT( *reinterpret_cast< double* >( e3->data() ) == -7, "msg3" );
@@ -678,18 +711,21 @@ void finfoLookupTest()
 
 	e1->findFinfo( "sumout" )->add( e1, e2, e2->findFinfo( "sum" ) );
 	// testFinfos[4]->add( e1, e2, testFinfos[0] );
-	ASSERT( se1->src_.size() == 4, "" );
-	ASSERT( se1->src_[0].begin() == 0 , "" );
-	ASSERT( se1->src_[0].end() == 1 , "" );
+	
+	unsigned int sumOutSlotIndex = testclass.getSlotIndex( "sumout" );
+
+	ASSERT( se1->src_.size() == 4 + sumOutSlotIndex, "" );
+	ASSERT( se1->src_[sumOutSlotIndex].begin() == 0 , "" );
+	ASSERT( se1->src_[sumOutSlotIndex].end() == 1 , "" );
 	ASSERT( se1->conn_.size() == 1, "" );
 	ASSERT( se1->conn_[0].targetElement()->name() == "e2", "" );
 	ASSERT( se1->conn_[0].targetIndex() == 0, "" );
 
 	e1->findFinfo( "sumout" )->add( e1, e3, e3->findFinfo( "sum" ) );
 	// testFinfos[4]->add( e1, e3, testFinfos[0] );
-	ASSERT( se1->src_.size() == 4, "" );
-	ASSERT( se1->src_[0].begin() == 0 , "" );
-	ASSERT( se1->src_[0].end() == 2 , "" );
+	ASSERT( se1->src_.size() == 4 + sumOutSlotIndex, "" );
+	ASSERT( se1->src_[sumOutSlotIndex].begin() == 0 , "" );
+	ASSERT( se1->src_[sumOutSlotIndex].end() == 2 , "" );
 	ASSERT( se1->conn_.size() == 2, "" );
 	ASSERT( se1->conn_[1].targetElement()->name() == "e3", "" );
 	ASSERT( se1->conn_[1].targetIndex() == 0, "" );
@@ -711,26 +747,36 @@ void finfoLookupTest()
 	// testFinfos[7]->add( clock, e1, testFinfos[3] );
 	// testFinfos[7]->add( clock, e2, testFinfos[3] );
 	// testFinfos[7]->add( clock, e3, testFinfos[3] );
-	ASSERT( se1->src_.size() == 4, "" );
-	ASSERT( se1->conn_.size() == 5, "" );
-	ASSERT( se1->src_[0].begin() == 0 , "" );
-	ASSERT( se1->src_[0].end() == 2 , "" );
-	ASSERT( se1->src_[1].begin() == 2 , "" );
-	ASSERT( se1->src_[1].end() == 2 , "" );
-	ASSERT( se1->src_[2].begin() == 2 , "" );
-	ASSERT( se1->src_[2].end() == 2 , "" );
-	ASSERT( se1->src_[3].begin() == 2 , "" );
-	ASSERT( se1->src_[3].end() == 2 , "" );
+	//
+	unsigned int subOutSlotIndex = testclass.getSlotIndex( "subout" );
+	unsigned int printOutSlotIndex = testclass.getSlotIndex( "printout" );
+	unsigned int procOutSlotIndex = testclass.getSlotIndex( "procout" );
 
-	ASSERT( se1->dest_.size() == 4, "" );
-	ASSERT( se1->dest_[0].begin() == 2 , "" );
-	ASSERT( se1->dest_[0].end() == 2 , "" );
-	ASSERT( se1->dest_[1].begin() == 2 , "" );
-	ASSERT( se1->dest_[1].end() == 3 , "" );
-	ASSERT( se1->dest_[2].begin() == 3 , "" );
-	ASSERT( se1->dest_[2].end() == 4 , "" );
-	ASSERT( se1->dest_[3].begin() == 4 , "" );
-	ASSERT( se1->dest_[3].end() == 5 , "" );
+	ASSERT( se1->src_.size() == 4 + sumOutSlotIndex, "" );
+	ASSERT( se1->conn_.size() == 5, "" );
+	ASSERT( se1->src_[sumOutSlotIndex].begin() == 0 , "" );
+	ASSERT( se1->src_[sumOutSlotIndex].end() == 2 , "" );
+	ASSERT( se1->src_[subOutSlotIndex].begin() == 2 , "" );
+	ASSERT( se1->src_[subOutSlotIndex].end() == 2 , "" );
+	ASSERT( se1->src_[printOutSlotIndex].begin() == 2 , "" );
+	ASSERT( se1->src_[printOutSlotIndex].end() == 2 , "" );
+	ASSERT( se1->src_[procOutSlotIndex].begin() == 2 , "" );
+	ASSERT( se1->src_[procOutSlotIndex].end() == 2 , "" );
+
+	unsigned int sumSlotIndex = testclass.getSlotIndex( "sum" );
+	unsigned int subSlotIndex = testclass.getSlotIndex( "sub" );
+	unsigned int printSlotIndex = testclass.getSlotIndex( "print" );
+	unsigned int procSlotIndex = testclass.getSlotIndex( "proc" );
+
+	ASSERT( se1->dest_.size() == 4 + sumSlotIndex, "" );
+	ASSERT( se1->dest_[sumSlotIndex].begin() == 2 , "" );
+	ASSERT( se1->dest_[sumSlotIndex].end() == 2 , "" );
+	ASSERT( se1->dest_[subSlotIndex].begin() == 2 , "" );
+	ASSERT( se1->dest_[subSlotIndex].end() == 3 , "" );
+	ASSERT( se1->dest_[printSlotIndex].begin() == 3 , "" );
+	ASSERT( se1->dest_[printSlotIndex].end() == 4 , "" );
+	ASSERT( se1->dest_[procSlotIndex].begin() == 4 , "" );
+	ASSERT( se1->dest_[procSlotIndex].end() == 5 , "" );
 	ASSERT( se1->conn_.size() == 5, "" );
 
 	// e2->conn[0] goes to e3 as it is a msgsrc
@@ -754,25 +800,25 @@ void finfoLookupTest()
 	*DATA( e2 ) = 1;
 	*DATA( e3 ) = 1;
 
-	send0( clock, 2 ); // print
+	send0( clock, printOutSlotIndex ); // print
 	ASSERT( *reinterpret_cast< double* >( e1->data() ) == 1, "msg1" );
 	ASSERT( *reinterpret_cast< double* >( e2->data() ) == 1, "msg2" );
 	ASSERT( *reinterpret_cast< double* >( e3->data() ) == 1, "msg3" );
 
-	send0( clock, 3 ); // process
-	send0( clock, 2 ); // print
+	send0( clock, procOutSlotIndex ); // process
+	send0( clock, printOutSlotIndex ); // print
 	ASSERT( *reinterpret_cast< double* >( e1->data() ) == -3, "msg1" );
 	ASSERT( *reinterpret_cast< double* >( e2->data() ) == 2, "msg2" );
 	ASSERT( *reinterpret_cast< double* >( e3->data() ) == 4, "msg3" );
 
-	send0( clock, 3 ); // process
-	send0( clock, 2 ); // print
+	send0( clock, procOutSlotIndex ); // process
+	send0( clock, printOutSlotIndex ); // print
 	ASSERT( *reinterpret_cast< double* >( e1->data() ) == -3, "msg1" );
 	ASSERT( *reinterpret_cast< double* >( e2->data() ) == -1, "msg2" );
 	ASSERT( *reinterpret_cast< double* >( e3->data() ) == 0, "msg3" );
 
-	send0( clock, 3 ); // process
-	send0( clock, 2 ); // print
+	send0( clock, procOutSlotIndex ); // process
+	send0( clock, printOutSlotIndex ); // print
 	ASSERT( *reinterpret_cast< double* >( e1->data() ) == 4, "msg1" );
 	ASSERT( *reinterpret_cast< double* >( e2->data() ) == -4, "msg2" );
 	ASSERT( *reinterpret_cast< double* >( e3->data() ) == -7, "msg3" );
@@ -826,18 +872,22 @@ class TestClass
 					tc->dval *= tc->ival;
 
 					// This sends the double value out to a target
-					// dsumout == 0
-					send1< double >( e, 0, tc->dval );
+					// dsumout == 0, but base class changes it
+					send1< double >( e, 1, tc->dval );
 
 					// This sends the int value out to a target
-					// isetout == 1
-					send1< int >( e, 1, tc->ival );
+					// isetout == 1, but base class changes it
+					send1< int >( e, 2, tc->ival );
 
 					// This just sends a trigger to the remote object.
-					// procout == 2
+					// procout == 2, but base class changes it.
 					// Either it will trigger dproc itself, or it
 					// could trigger a getfunc.
-					send0( e, 2 );
+					// 
+					// Again, it is a bad idea to use a literal index
+					// here because the actual index depends on
+					// base classes.
+					send0( e, 3 );
 			}
 
 		private:
@@ -930,6 +980,8 @@ void valueFinfoTest()
 	// 				trigger-> Value field -> Value field
 	// 				Here we set up dval first, then the trigger msg.
 	/////////////////////////////////////////////////////////////
+	
+	unsigned int procOutSlotIndex = testclass.getSlotIndex( "procout" );
 
 	Element* e1 = testclass.create( "e1" );
 	Element* e2 = testclass.create( "e2" );
@@ -942,7 +994,7 @@ void valueFinfoTest()
 	set< int >( e2, e2->findFinfo( "ival" ), -2 );
 	clock->findFinfo( "procout" )->add( clock, e1, e1->findFinfo( "proc" ) );
 	e1->findFinfo( "dsumout" )->add( e1, e2, e2->findFinfo( "dsum" ) );
-	send0( clock, 2 ); // procout
+	send0( clock, procOutSlotIndex ); // procout
 	get< double >( e1, e1->findFinfo( "dval" ), dret );
 	ASSERT( dret == -1.0, "proc--> e1/dsumout --> e2/dsum" );
 	get< int >( e1, e1->findFinfo( "ival" ), iret );
@@ -965,7 +1017,7 @@ void valueFinfoTest()
 	ASSERT( iret == -3, "proc--> e1/isetout --> e3/ival" );
 
 	e1->findFinfo( "isetout" )->add( e1, e3, e3->findFinfo( "ival" ) );
-	send0( clock, 2 ); // procout
+	send0( clock, procOutSlotIndex ); // procout
 
 	get< double >( e1, e1->findFinfo( "dval" ), dret );
 	ASSERT( dret == 1.0, "proc--> e1/isetout --> e3/ival" );
@@ -1008,7 +1060,7 @@ void valueFinfoTest()
 	get< double >( e0, e0->findFinfo( "dval" ), dret );
 	ASSERT( dret == 2.0,"--proc--> e1/procout --> e0/dval --> e4/dsum");
 
-	send0( clock, 2 ); // procout
+	send0( clock, procOutSlotIndex ); // procout
 
 
 	get< double >( e1, e1->findFinfo( "dval" ), dret );
@@ -1058,7 +1110,7 @@ void valueFinfoTest()
 	get< double >( e5, e5->findFinfo( "dval" ), dret );
 	ASSERT( dret == 5.0,"--proc--> e1/procout --> e5/dval --> e6/dsum");
 
-	send0( clock, 2 ); // procout
+	send0( clock, procOutSlotIndex ); // procout
 
 
 	get< double >( e1, e1->findFinfo( "dval" ), dret );
@@ -1108,7 +1160,7 @@ void valueFinfoTest()
 	get< double >( e7, e7->findFinfo( "dval" ), dret );
 	ASSERT( dret == 7.0,"--proc--> e1/procout --> e7/dval --> e8/dsum");
 
-	send0( clock, 2 ); // procout
+	send0( clock, procOutSlotIndex ); // procout
 
 
 	get< double >( e1, e1->findFinfo( "dval" ), dret );
@@ -1158,7 +1210,7 @@ void valueFinfoTest()
 	get< double >( e9, e9->findFinfo( "dval" ), dret );
 	ASSERT( dret == 9.0,"--proc--> e1/procout --> e9/dval --> e10/dsum");
 
-	send0( clock, 2 ); // procout
+	send0( clock, procOutSlotIndex ); // procout
 
 
 	get< double >( e1, e1->findFinfo( "dval" ), dret );
@@ -1247,14 +1299,14 @@ class ArrayTestClass
 						tc->dval += tc->dvec[i];
 
 					// This sends the double value out to a target
-					// dsumout == 0
-					send1< double >( e, 0, tc->dval );
+					// dsumout == 0, but base class shifts it.
+					send1< double >( e, 1, tc->dval );
 
 					// This just sends a trigger to the remote object.
-					// procout == 1
+					// procout == 1, but base class shifts it.
 					// Either it will trigger dproc itself, or it
 					// could trigger a getfunc.
-					send0( e, 1 );
+					send0( e, 2 );
 			}
 
 		private:
@@ -1451,8 +1503,9 @@ void arrayFinfoTest()
 	a1->listFinfos( flist );
 	ASSERT ( flist.size() - s == 6, "New DynamicFinfo for dvec[3]" );
 
+	unsigned int procOutSlotIndex = arraytestclass.getSlotIndex( "procout" );
 
-	send0( a1, 1 ); // procout
+	send0( a1, procOutSlotIndex ); // procout
 	// Here a2->dval should simply become the sum of its array entries.
 	// As this has just been initialized, the sum should be 1.0.
 	// Bad Upi: should never test for equality of doubles.

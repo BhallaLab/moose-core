@@ -94,6 +94,10 @@ class SharedFinfo: public Finfo
 					return 0;
 			}
 
+			unsigned int getSlotIndex() const {
+					return msgIndex_;
+			}
+
 		private:
 			unsigned int numSrc_;
 			FuncList rfuncs_;

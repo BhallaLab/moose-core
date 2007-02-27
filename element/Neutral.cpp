@@ -104,6 +104,11 @@ const Cinfo* initNeutralCinfo()
 
 static const Cinfo* neutralCinfo = initNeutralCinfo();
 static const Element* root = Element::root();
+const unsigned int Neutral::childSrcIndex = initNeutralCinfo()->
+	getSlotIndex( "childSrc" );
+const unsigned int Neutral::childIndex = initNeutralCinfo()->
+	getSlotIndex( "child" );
+
 
 //////////////////////////////////////////////////////////////////
 // Here we put the Neutral class functions.
