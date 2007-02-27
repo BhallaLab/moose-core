@@ -171,14 +171,15 @@ class LookupTestClass
 					tc->dval += i->second;
 
 				// This sends the double value out to a target
-				// dsumout == 0
-				send1< double >( e, 0, tc->dval );
+				// dsumout == 0, but we make it one because of
+				// base neutral class adding fields.
+				send1< double >( e, 1, tc->dval );
 
 				// This just sends a trigger to the remote object.
-				// procout == 1
+				// procout == 1, but set to 2 because of base class
 				// Either it will trigger dproc itself, or it
 				// could trigger a getfunc.
-				send0( e, 1 );
+				send0( e, 2 );
 			}
 
 		private:
@@ -378,8 +379,9 @@ void lookupFinfoTest()
 	a1->listFinfos( flist );
 	ASSERT ( flist.size() - s == 5, "Old DynamicFinfo for dmap[3]" );
 
+	unsigned int procOutSlot = lookuptestclass.getSlotIndex( "procout");
 
-	send0( a1, 1 ); // procout
+	send0( a1, procOutSlot ); // procout
 	// Here a2->dval should simply become the sum of its lookup entries.
 	// As this has just been initialized, the sum should be 1.0.
 	// Bad Upi: should never test for equality of doubles.
