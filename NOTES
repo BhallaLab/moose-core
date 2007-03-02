@@ -1270,3 +1270,22 @@ does not need to use hard-coded indices.
 
 
 =============================================================================
+Mar 01 2007
+
+Resuming work on the genesis parser interface. Plan:
+- Set up a shared message on Shell and on the GenesisParserWrapper.
+	All the little funcs go back and forth through this
+- Start with ce, pwe, le, create, delete.
+
+Done first pass of implementation on the Shell. All these still remain to be
+done on the GenesisParserWrapper.
+
+=============================================================================
+Mar 02 2007
+
+Got Shell stuff to compile. Reveals an issue with the getSlotIndex: the
+shared messages don't record names of individual parts of the finfo. Should do.
+Checked current version in before going on to deal with the 
+GenesisParserWrapper sending input to the Shell.
+
+=============================================================================

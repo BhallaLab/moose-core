@@ -9,33 +9,6 @@
 **********************************************************************/
 
 #include "moose.h"
-
-/*
-#include <map>
-#include <algorithm>
-#include "header.h"
-#include "Cinfo.h"
-
-using namespace std;
-
-#include "MsgSrc.h" 
-#include "MsgDest.h" 
-#include "SimpleElement.h" 
-#include "send.h"
-#include "DerivedFtype.h"
-#include "Ftype2.h"
-#include "setget.h"
-#include "DestFinfo.h"
-#include "DynamicFinfo.h"
-#include "ValueFinfo.h"
-#include "DerivedFtype.h"
-#include "Ftype3.h"
-#include "ValueFtype.h"
-#include "LookupFinfo.h"
-#include "LookupFtype.h"
-#include "setgetLookup.h"
-*/
-
 #include "Shell.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -44,11 +17,47 @@ using namespace std;
 
 const Cinfo* initShellCinfo()
 {
+	/**
+	 * This is a shared message to talk to the GenesisParser and
+	 * perhaps to other parsers like the one for SWIG and Python
+	 */
+
+	static TypeFuncPair parserTypes[] =
+	{
+		// Setting cwe
+		TypeFuncPair( Ftype1< unsigned int >::global(),
+						RFCAST( &Shell::setCwe ) ),
+		// Getting cwe back: First handle a request
+		TypeFuncPair( Ftype0::global(), 
+						RFCAST( &Shell::trigCwe ) ),
+		// Then send out the cwe info
+		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
+
+		// Getting a list of child ids: First handle a request with
+		// the requested parent elm id.
+		TypeFuncPair( Ftype1< unsigned int >::global(), 
+						RFCAST( &Shell::trigLe ) ),
+		// Then send out the vector of child ids.
+		TypeFuncPair( Ftype1< vector< unsigned int > >::global(), 0 ),
+		
+		// Creating an object
+		TypeFuncPair( 
+				Ftype3< string, string, unsigned int >::global(),
+				RFCAST( &Shell::staticCreate ) ),
+		// Deleting an object
+		TypeFuncPair( 
+				Ftype1< unsigned int >::global(), 
+				RFCAST( &Shell::staticDestroy ) ),
+	};
+
+
 	static Finfo* shellFinfos[] =
 	{
 		new ValueFinfo( "cwe", ValueFtype1< unsigned int >::global(),
 				reinterpret_cast< GetFunc >( &Shell::getCwe ),
 				RFCAST( &Shell::setCwe ) ),
+		new SharedFinfo( "parser", parserTypes, 
+				sizeof( parserTypes ) / sizeof( TypeFuncPair ) ), 
 		new DestFinfo( "create",
 				Ftype3< string, string, unsigned int >::global(),
 				RFCAST( &Shell::staticCreate ) ),
@@ -71,6 +80,15 @@ const Cinfo* initShellCinfo()
 }
 
 static const Cinfo* shellCinfo = initShellCinfo();
+static const unsigned int cweSlot =
+	initShellCinfo()->getSlotIndex( "parser" ) + 2;
+static const unsigned int leSlot =
+	initShellCinfo()->getSlotIndex( "parser" ) + 4;
+static const unsigned int createSlot =
+	initShellCinfo()->getSlotIndex( "parser" ) + 5;
+static const unsigned int deleteSlot =
+	initShellCinfo()->getSlotIndex( "parser" ) + 6;
+
 
 //////////////////////////////////////////////////////////////////////
 // Initializer
@@ -241,11 +259,34 @@ unsigned int Shell::getCwe( const Element* e )
 	return s->cwe_;
 }
 
+void Shell::trigCwe( const Conn& c )
+						
+{
+	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	sendTo1< unsigned int >( c.targetElement(), cweSlot,
+					c.targetIndex(), s->cwe_ );
+}
+
 //////////////////////////////////////////////////////////////////////
 // Create and destroy are possibly soon to be deleted. These may have
 // to go over to the Neutral, but till we've sorted out the SWIG
 // interface we'll keep it in case it gets used there.
 //////////////////////////////////////////////////////////////////////
+
+
+void Shell::trigLe( const Conn& c, unsigned int parent )
+						
+{
+	Element* pa = Element::element( parent );
+	// Here we do something intelligent for off-node le.
+	if ( pa ) {
+		vector< unsigned int > ret;
+		if ( get< vector< unsigned int > >( pa, "childList", ret ) ) {
+			sendTo1< vector< unsigned int > >( c.targetElement(),
+				leSlot, c.targetIndex(), ret );
+		}
+	}
+}
 
 // Static function
 void Shell::staticCreate( const Conn& c, string type,
