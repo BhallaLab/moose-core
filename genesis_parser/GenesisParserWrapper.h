@@ -24,6 +24,16 @@ class GenesisParserWrapper: public myFlexLexer
 
 		static void setReturnId( const Conn& c, unsigned int i );
 
+		static void recvCwe( const Conn& c, unsigned int i );
+		static void recvLe( const Conn& c, vector< Id > elist );
+		static void recvCreate( const Conn& c, unsigned int i );
+
+//////////////////////////////////////////////////////////////////
+// Helper functions
+//////////////////////////////////////////////////////////////////
+		void doLe( int argc, const char** argv, Id s );
+		void doPwe( int argc, const char** argv, Id s );
+
 // Surely this should be a local parser function
 /*
 		static void aliasFunc( const Conn& c, string alias, string old); {
@@ -50,11 +60,15 @@ class GenesisParserWrapper: public myFlexLexer
 		// shell, if necessary to get cwe, and gets the id
 		// for the specified path.
 		static unsigned int path2eid( const string& path, unsigned int i );
+		static string eid2path( unsigned int i );
 		static Element* getShell( Id g );
 
     private:
 		void loadBuiltinCommands();
 		string returnCommandValue_;
 		unsigned int returnId_;
+		Id cwe_;
+		Id createdElm_;
+		vector< Id > elist_;
 };
 #endif // _GENESIS_PARSER_WRAPPER_H

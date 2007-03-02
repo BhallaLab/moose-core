@@ -21,8 +21,40 @@
 
 const Cinfo* initGenesisParserCinfo()
 {
+	/**
+	 * This is a shared message to talk to the Shell.
+	 */
+	static TypeFuncPair parserTypes[] =
+	{
+		// Setting cwe
+		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
+		// Getting cwe back: First trigger a request
+		TypeFuncPair( Ftype0::global(), 0 ),
+		// Then receive the cwe info
+		TypeFuncPair( Ftype1< unsigned int >::global(),
+						RFCAST( &GenesisParserWrapper::recvCwe ) ),
+
+		// Getting a list of child ids: First send a request with
+		// the requested parent elm id.
+		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
+		// Then recv the vector of child ids.
+		TypeFuncPair( Ftype1< vector< unsigned int > >::global(), 
+						RFCAST( &GenesisParserWrapper::recvLe ) ),
+		
+		// Creating an object: Send out the request.
+		TypeFuncPair( 
+				Ftype3< string, string, unsigned int >::global(), 0 ),
+		// Creating an object: Recv the returned object id.
+		TypeFuncPair( Ftype1< unsigned int >::global(),
+						RFCAST( &GenesisParserWrapper::recvCreate ) ),
+		// Deleting an object: Send out the request.
+		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
+	};
+	
 	static Finfo* genesisParserFinfos[] =
 	{
+		new SharedFinfo( "parser", parserTypes,
+				sizeof( parserTypes ) / sizeof( TypeFuncPair ) ),
 		new DestFinfo( "readline",
 			Ftype1< string >::global(),
 			RFCAST( &GenesisParserWrapper::readlineFunc ) ),
@@ -69,6 +101,16 @@ const Cinfo* initGenesisParserCinfo()
 }
 
 static const Cinfo* genesisParserCinfo = initGenesisParserCinfo();
+static const unsigned int setCweSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 0;
+static const unsigned int requestCweSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 1;
+static const unsigned int requestLeSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 3;
+static const unsigned int createSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 5;
+static const unsigned int deleteSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 7;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -173,6 +215,31 @@ char* copyString( const string& s )
 	return ret;
 }
 
+
+//////////////////////////////////////////////////////////////////
+// GenesisParserWrapper Message recv functions
+//////////////////////////////////////////////////////////////////
+
+void GenesisParserWrapper::recvCwe( const Conn& c, Id cwe )
+{
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( c.targetElement()->data() );
+	gpw->cwe_ = cwe;
+}
+
+void GenesisParserWrapper::recvLe( const Conn& c, vector< Id > elist )
+{
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( c.targetElement()->data() );
+	gpw->elist_ = elist;
+}
+
+void GenesisParserWrapper::recvCreate( const Conn& c, Id e )
+{
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( c.targetElement()->data() );
+	gpw->createdElm_ = e;
+}
 
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper Builtin commands
@@ -517,8 +584,12 @@ void do_create( int argc, const char** const argv, Id s )
 		string parent = Shell::head( argv[2], "/" );
 
 		send3< string, string, unsigned int >( Element::element( s ),
-			1, i->second, name,
+			createSlot, i->second, name,
 			GenesisParserWrapper::path2eid( argv[2], s ) );
+
+		// The return function recvCreate gets the id of the
+		// returned elm, but
+		// the GenesisParser does not care.
 		
 		// s->createFuncLocal( i->second, argv[2] );
 	}
@@ -527,10 +598,9 @@ void do_create( int argc, const char** const argv, Id s )
 void do_delete( int argc, const char** const argv, Id s )
 {
 	if ( argc == 2 ) {
-		// s->deleteFuncLocal( argv[1] );
-		Element* e = Element::element( 
-					GenesisParserWrapper::path2eid( argv[1] , s ) );
-		set( e, "delete" );
+		Id victim = GenesisParserWrapper::path2eid( argv[1], s );
+		if ( victim != 0 )
+			send1< Id >( Element::element( s ), deleteSlot, victim );
 	} else {
 		cout << "usage:: " << argv[0] << " Element/path\n";
 	}
@@ -575,7 +645,8 @@ void do_copy_halo( int argc, const char** const argv, Id s )
 void do_ce( int argc, const char** const argv, Id s )
 {
 	if ( argc == 2 ) {
-		// s->ceFuncLocal( argv[1] );
+		Id e = GenesisParserWrapper::path2eid( argv[1], s );
+		send1< Id >( Element::element( s ), setCweSlot, e );
 	} else {
 		cout << "usage:: " << argv[0] << " Element\n";
 	}
@@ -698,15 +769,42 @@ void do_show( int argc, const char** const argv, Id s )
 
 void do_le( int argc, const char** const argv, Id s )
 {
-	if ( argc == 1 )
-	;	// s->leFuncLocal( "." );
-	else if ( argc >= 2 )
-	;	// s->leFuncLocal( argv[1] );
+	Element* e = Element::element( s );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( e->data() );
+	gpw->doLe( argc, argv, s );
+}
+
+void GenesisParserWrapper::doLe( int argc, const char** argv, Id s )
+{
+	if ( argc == 1 ) { // Look in the cwe first.
+		send0( Element::element( s ), requestCweSlot );
+		send1< Id >( Element::element( s ), requestLeSlot, cwe_ );
+	} else if ( argc >= 2 ) {
+		Id e = path2eid( argv[1], s );
+		send1< Id >( Element::element( s ), requestLeSlot, e );
+	}
+	vector< Id >::iterator i = elist_.begin();
+	// This operation should really do it in a parallel-clean way.
+	for ( i = elist_.begin(); i != elist_.end(); i++ )
+		cout << Element::element( *i )->name() << endl;
+	elist_.resize( 0 );
 }
 
 void do_pwe( int argc, const char** const argv, Id s )
 {
-	;// s->pweFuncLocal( );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( Element::element( s )->data() );
+	gpw->doPwe( argc, argv, s );
+}
+
+void GenesisParserWrapper::doPwe( int argc, const char** argv, Id s )
+{
+	send0( Element::element( s ), requestCweSlot );
+	// Here we need to wait for the shell to service this message
+	// request and put the requested value in the local cwe_.
+	
+	cout << GenesisParserWrapper::eid2path( cwe_ ) << endl;
 }
 
 void do_listcommands( int argc, const char** const argv, Id s )
@@ -740,15 +838,15 @@ void do_echo( int argc, const char** const argv, Id s )
 void do_addfield( int argc, const char** const argv, Id s )
 {
 	if ( argc == 2 ) {
-		const char * nargv[] = { argv[0], ".", argv[1] };
+		// const char * nargv[] = { argv[0], ".", argv[1] };
 //		s->commandFuncLocal( 3, nargv );
 	} else if ( argc == 3 ) {
 		// s->commandFuncLocal( argc, argv );
 	} else if ( argc == 4 && strncmp( argv[2], "-f", 2 ) == 0 ) {
-		const char * nargv[] = { argv[0], ".", argv[1], argv[3] };
+		// const char * nargv[] = { argv[0], ".", argv[1], argv[3] };
 //		s->commandFuncLocal( 4, nargv );
 	} else if ( argc == 5 && strncmp( argv[3], "-f", 2 ) == 0 ) {
-		const char * nargv[] = { argv[0], argv[1], argv[3], argv[4] };
+		// const char * nargv[] = { argv[0], argv[1], argv[3], argv[4] };
 //		s->commandFuncLocal( 4, nargv );
 //	} else {
 		; // s->error( "usage: addfield [element] field-name -type field_type" );
@@ -999,6 +1097,32 @@ Id GenesisParserWrapper::path2eid( const string& path, Id g )
 		separateString( path, names, separator );
 	}
 	return Shell::traversePath( start, names );
+}
+
+/*
+ * Should really refer to the shell for this in case we need to do
+ * node traversal.
+ */
+static Id parent( Id e )
+{
+	Element* elm = Element::element( e );
+	unsigned int ret;
+	
+	// Check if eid is on local node, otherwise go to remote node
+	if ( get< unsigned int >( elm, "parent", ret ) )
+		return ret;
+	return 0;
+}
+
+string GenesisParserWrapper::eid2path( unsigned int eid ) 
+{
+	static const string slash = "/";
+	string n( "" );
+	while ( eid != 0 ) {
+		n = slash + Element::element( eid )->name() + n;
+		eid = parent( eid );
+	}
+	return n;
 }
 
 /**
