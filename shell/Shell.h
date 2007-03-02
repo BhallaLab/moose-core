@@ -36,6 +36,9 @@ class Shell
 
 		static void setCwe( const Conn&, unsigned int id );
 		static unsigned int getCwe( const Element* );
+		static void trigCwe( const Conn& );
+
+		static void trigLe( const Conn&, unsigned int parent );
 
 		unsigned int create( const string& type, const string& name,
 						unsigned int parent );

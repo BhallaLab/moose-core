@@ -173,21 +173,6 @@ char* copyString( const string& s )
 	return ret;
 }
 
-/*
- * We are not using these as the interface any more.
- * Don't know if we ever did.
-void GenesisParserWrapper::plainCommand( int argc, const char** argv )
-{
-	commandSrc_.send( argc, argv );
-}
-
-char* GenesisParserWrapper::returnCommand( int argc, const char** argv )
-{
-	commandSrc_.send( argc, argv );
-	// The Shell immediately sends back the return value as a string.
-	return copyString( returnCommandValue_.c_str() );
-}
-*/
 
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper Builtin commands
@@ -973,34 +958,6 @@ void GenesisParserWrapper::loadBuiltinCommands()
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper Field commands
 //////////////////////////////////////////////////////////////////
-
-/*
-void GenesisParserWrapper::setShell( const Conn& c, string s )
-{
-	Element* temp = Element::root()->relativeFind( s );
-	ShellWrapper* shell = dynamic_cast< ShellWrapper* >( temp );
-	if ( !shell ) {
-		cout << "Error:GenesisParserWrapper::setShell: Element " << 
-			s << " not found\n";
-		return;
-	}
-	static_cast<GenesisParserWrapper *>( c->parent() )->
-		innerSetShell( shell );
-}
-
-string GenesisParserWrapper::getShell( const Element* e )
-{
-	Id temp = 
-		static_cast< const GenesisParserWrapper *>( e )->
-			innerGetShell( );
-	ShellWrapper* shell = dynamic_cast< ShellWrapper* >( temp );
-			if ( !shell ) {
-		cout << "Error:GenesisParserWrapper::getShell: shell not defined\n";
-		return "";
-	}
-	return shell->name();
-}
-*/
 
 /**
  * Looks up the Id of the object specified by the string s.
