@@ -1287,5 +1287,11 @@ Got Shell stuff to compile. Reveals an issue with the getSlotIndex: the
 shared messages don't record names of individual parts of the finfo. Should do.
 Checked current version in before going on to deal with the 
 GenesisParserWrapper sending input to the Shell.
+Checked in as revision 36.
+
+Now dealing with GenesisParserWrappr.
+
+Implemented GenesisParserWrapper side of parser message.
+Compiled, unit tests OK, but not tested for specifics.
 
 =============================================================================

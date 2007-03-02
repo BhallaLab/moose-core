@@ -44,6 +44,8 @@ const Cinfo* initShellCinfo()
 		TypeFuncPair( 
 				Ftype3< string, string, unsigned int >::global(),
 				RFCAST( &Shell::staticCreate ) ),
+		// The create func returns the id of the created object.
+		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
 		// Deleting an object
 		TypeFuncPair( 
 				Ftype1< unsigned int >::global(), 
@@ -84,10 +86,17 @@ static const unsigned int cweSlot =
 	initShellCinfo()->getSlotIndex( "parser" ) + 2;
 static const unsigned int leSlot =
 	initShellCinfo()->getSlotIndex( "parser" ) + 4;
+
+// Returns the id of the created object
 static const unsigned int createSlot =
-	initShellCinfo()->getSlotIndex( "parser" ) + 5;
-static const unsigned int deleteSlot =
 	initShellCinfo()->getSlotIndex( "parser" ) + 6;
+
+	/* 
+	 * As far as I can see, we never need the deleteSlot because
+	 * we don't send out values on it.
+static const unsigned int deleteSlot =
+	initShellCinfo()->getSlotIndex( "parser" ) + 7;
+	*/
 
 
 //////////////////////////////////////////////////////////////////////
@@ -293,7 +302,11 @@ void Shell::staticCreate( const Conn& c, string type,
 						string name, unsigned int parent )
 {
 	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
-	s->create( type, name, parent );
+	unsigned int ret = s->create( type, name, parent );
+	if ( ret ) {
+		sendTo1< unsigned int >( c.targetElement(),
+			createSlot, c.targetIndex(), ret );
+	}
 }
 
 // Static function
