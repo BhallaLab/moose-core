@@ -438,6 +438,6 @@ void testCompartment()
 {
 		cout << "\nTesting Compartment";
 
-		Element* c1 = compartmentCinfo->create( "n1" );
+//		Element* c1 = compartmentCinfo->create( "n1" );
 }
 #endif

@@ -83,19 +83,19 @@ const Cinfo* initShellCinfo()
 
 static const Cinfo* shellCinfo = initShellCinfo();
 static const unsigned int cweSlot =
-	initShellCinfo()->getSlotIndex( "parser" ) + 2;
+	initShellCinfo()->getSlotIndex( "parser" ) + 0;
 static const unsigned int leSlot =
-	initShellCinfo()->getSlotIndex( "parser" ) + 4;
+	initShellCinfo()->getSlotIndex( "parser" ) + 1;
 
 // Returns the id of the created object
 static const unsigned int createSlot =
-	initShellCinfo()->getSlotIndex( "parser" ) + 6;
+	initShellCinfo()->getSlotIndex( "parser" ) + 2;
 
 	/* 
 	 * As far as I can see, we never need the deleteSlot because
 	 * we don't send out values on it.
 static const unsigned int deleteSlot =
-	initShellCinfo()->getSlotIndex( "parser" ) + 7;
+	initShellCinfo()->getSlotIndex( "parser" ) + 3;
 	*/
 
 
@@ -231,20 +231,28 @@ string Shell::eid2path( unsigned int eid )
 	return n;
 }
 
+/**
+ * Returns that component of path that precedes the last separator.
+ * If there is nothing there, or no separator, returns an empty string.
+ */
 string Shell::head( const string& path, const string& separator )
 {
 	string::size_type pos = path.rfind( separator );
 	if ( pos == string::npos )
-			return path;
+			return "";
 
 	return path.substr( 0, pos );
 }
 
+/**
+ * Returns that component of path that follows the last separator.
+ * If there is nothing there, or no separator, returns the entire path.
+ */
 string Shell::tail( const string& path, const string& separator )
 {
 	string::size_type pos = path.rfind( separator );
 	if ( pos == string::npos )
-			return "";
+			return path;
 
 	return path.substr( pos + separator.length() );
 }
@@ -291,7 +299,8 @@ void Shell::trigLe( const Conn& c, unsigned int parent )
 	if ( pa ) {
 		vector< unsigned int > ret;
 		if ( get< vector< unsigned int > >( pa, "childList", ret ) ) {
-			sendTo1< vector< unsigned int > >( c.targetElement(),
+			Element* e = c.targetElement();
+			sendTo1< vector< unsigned int > >( e,
 				leSlot, c.targetIndex(), ret );
 		}
 	}
@@ -305,7 +314,7 @@ void Shell::staticCreate( const Conn& c, string type,
 	unsigned int ret = s->create( type, name, parent );
 	if ( ret ) {
 		sendTo1< unsigned int >( c.targetElement(),
-			createSlot, c.targetIndex(), ret );
+					createSlot, c.targetIndex(), ret );
 	}
 }
 

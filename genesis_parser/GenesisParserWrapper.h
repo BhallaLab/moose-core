@@ -59,7 +59,8 @@ class GenesisParserWrapper: public myFlexLexer
 		// This utility function follows the message to the 
 		// shell, if necessary to get cwe, and gets the id
 		// for the specified path.
-		static unsigned int path2eid( const string& path, unsigned int i );
+		static Id path2eid( const string& path, Id i );
+		Id innerPath2eid( const string& path, Id g );
 		static string eid2path( unsigned int i );
 		static Element* getShell( Id g );
 
