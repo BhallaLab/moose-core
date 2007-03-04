@@ -17,6 +17,9 @@
 	extern void testShell();
 #endif
 
+#ifdef USE_GENESIS_PARSER
+	extern void makeGenesisParser( const string& s );
+#endif
 
 int main(int argc, char** argv)
 {
@@ -25,6 +28,19 @@ int main(int argc, char** argv)
 	testNeutral();
 	testShell();
 #endif
-	
+
+#ifdef USE_GENESIS_PARSER
+	string line = "";
+	if ( argc > 1 ) {
+		int len = strlen( argv[1] );
+		if ( len > 3 && strcmp( argv[1] + len - 2, ".g" ) == 0 )
+			line = "include";
+		else if ( len > 4 && strcmp( argv[1] + len - 3, ".mu" ) == 0 )
+			line = "include";
+		for ( int i = 1; i < argc; i++ )
+			line = line + " " + argv[ i ];
+	}
+	makeGenesisParser( line );
+#endif
 	cout << "done" << endl;
 }

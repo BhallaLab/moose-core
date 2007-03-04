@@ -163,6 +163,10 @@ class Element
 
 		static Element* element( unsigned int id );
 
+		static Element* lastElement() {
+				return elementList().back();
+		}
+
 		static unsigned int numElements();
 
 	private:
