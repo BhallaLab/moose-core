@@ -126,5 +126,18 @@ template < class T1, class T2 > bool set(
 	return 0;
 }
 
-
+/**
+ * Utility function for doing the set using a string lookup for Finfo
+ */
+template < class T1, class T2 > bool set( 
+			Element* e, const string& f, T1 v1, T2 v2 )
+{
+	const Finfo* finfo = e->findFinfo( f );
+	if ( finfo == 0 ) {
+		cout << "Error: set( " << e->name() << ", " << f <<
+				"T1, T2 ): Finfo not found\n";
+		return 0;
+	}
+	return set( e, finfo, v1, v2 );
+}
 #endif // _SETGET_H

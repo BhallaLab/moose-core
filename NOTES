@@ -1295,3 +1295,11 @@ Implemented GenesisParserWrapper side of parser message.
 Compiled, unit tests OK, but not tested for specifics.
 
 =============================================================================
+Mar 04 2007
+Working on getting SLI to be created, to talk to shell, and to run.
+
+Did all of the above. Compiles and SLI is invoked. Currently the only thing
+it does properly is to quit. le causes a core dump. Anyway, good time to
+check it all in. Possibly some issues will crop up with the python interface.
+
+=============================================================================

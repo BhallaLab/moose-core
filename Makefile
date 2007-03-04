@@ -21,13 +21,13 @@
 # Use the options below for compiling on GCC4.0
 #  For Debian/Ubuntu 6.06, we need to add a few more compiler flags to
 #  help it through the genesis parser, which is littered with ifdefs.
-CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS
+CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 #CFLAGS  =	-O3 -Wall -pedantic
 
 # Use the options below for compiling on GCC4.1
 # GNU C++ 4.1 and newer will need -ffriend-injection
 #
-#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -ffriend-injection
+#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -ffriend-injection -DUSE_GENESIS_PARSER
 
 
 # Libraries are defined below. For now we do not use threads.
