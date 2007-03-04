@@ -1139,3 +1139,30 @@ Element* GenesisParserWrapper::getShell( Id g )
 	Element* ret = i->targetElement();
 	return ret;
 }
+
+//////////////////////////////////////////////////////////////////
+// Utility function for creating a GenesisParserWrapper, shell and
+// connecting them all up.
+//////////////////////////////////////////////////////////////////
+
+/**
+ * This function is called from main() if there is a genesis parser.
+ * It passes in the initial string issued to the program, which
+ * the Genesis parser treats as a file argument for loading.
+ * Then the parser goes to its infinite loop using the Process call.
+ */
+void makeGenesisParser( const string& s )
+{
+	set< string, string >( Element::root(), "create", "Shell", "shell");
+	Element* shell = Element::lastElement();
+	set< string, string >( shell, "create", "GenesisParser", "sli");
+	Element* sli = Element::lastElement();
+
+	assert( shell->findFinfo( "parser" )->add( shell, sli, 
+		sli->findFinfo( "parser" ) ) != 0 );
+
+	if ( s.length() > 1 ) {
+		set< string >( sli, "parse", s );		
+	}
+	set( sli, "process" );
+}
