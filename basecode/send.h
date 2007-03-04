@@ -18,8 +18,8 @@ extern void send0( const Element* eIn, unsigned int src );
 
 /**
  * This function sends zero-argument messages to a specific target.
- * The target index is given by the absolute index in the conn_
- * array as a whole.
+ * The target index is given by the absolute index in the local conn_
+ * vector.
  */
 extern void sendTo0( const Element* eIn, unsigned int src, 
 				unsigned int index);
@@ -45,6 +45,11 @@ template < class T > void send1(
 	} while ( src != 0 );
 }
 
+/**
+ * This templated function sends a single-argument message to the
+ * target specified by the conn argument. Note that this refers
+ * to the index in the local conn_ vector.
+ */
 template< class T > void sendTo1(
 		const Element* eIn, unsigned int src, unsigned int conn, T val )
 {

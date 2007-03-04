@@ -37,14 +37,13 @@
 void connTest()
 {
 	// SimpleElement( name, srcSize, destSize );
+	cout << "Testing conn basic stuff";
 	SimpleElement e1("e1", 2, 2);
 	SimpleElement e2("e2", 2, 2);
 	Conn c1( &e1, 1234 );
 	Conn c2( &e2, 3241 );
 	ASSERT( c1.targetElement() == &e1, "targetElement access" );
 	ASSERT( c1.targetIndex() == 1234, "targetIndex access" );
-	// ASSERT( c1.sourceElement() = &e2, "sourceElement()" );
-	// ASSERT( c1.sourceIndex = 0, "sourceIndex()" );
 	
 	unsigned int ic1 = e1.insertConn( 0, 1, 0, 0 );
 	unsigned int ic2 = e2.insertConn( 0, 0, 0, 1 );
@@ -70,6 +69,16 @@ void connTest()
 	ASSERT( e2.lookupConn( ic2 )->targetIndex() == 1,
 					"Testing conn indices following insert: 4" );
 
+	ASSERT( e1.lookupConn( ic1 )->sourceElement() == &e1,
+					"sourceElement()" );
+	ASSERT( e1.lookupConn( ic1 )->sourceIndex( &e1 ) == ic1,
+					"sourceIndex()" );
+
+	ASSERT( e2.lookupConn( ic2 )->sourceElement() == &e2,
+					"sourceElement()" );
+	ASSERT( e2.lookupConn( ic2 )->sourceIndex( &e2 ) == ic2,
+					"sourceIndex()" );
+
 	SimpleElement e3( "e3", 2, 2 );
 	unsigned int ic3 = e3.insertConn( 0, 1, 0, 0 );
 	ic2 = e2.insertConn( 0, 0, 0, 1 );
@@ -81,6 +90,22 @@ void connTest()
 
 	ASSERT( e1.lookupConn( ic1 )->targetIndex() == 2,
 		"Testing conn indices following insert: This is the key one" );
+
+
+	ASSERT( e1.lookupConn( ic1 )->sourceElement() == &e1,
+					"sourceElement()" );
+	ASSERT( e1.lookupConn( ic1 )->sourceIndex( &e1 ) == ic1,
+					"sourceIndex()" );
+
+	ASSERT( e2.lookupConn( ic2 )->sourceElement() == &e2,
+					"sourceElement()" );
+	ASSERT( e2.lookupConn( ic2 )->sourceIndex( &e2 ) == ic2,
+					"sourceIndex()" );
+
+	ASSERT( e3.lookupConn( ic3 )->sourceElement() == &e3,
+					"sourceElement()" );
+	ASSERT( e3.lookupConn( ic3 )->sourceIndex( &e3 ) == ic3,
+					"sourceIndex()" );
 
 	/*
 	 * The current connections are:
@@ -106,6 +131,10 @@ void connTest()
 	 * e3_r0_c0 -> e2_r0_c0
 	 * e1_r1_c0 -> e2_r1_c1
 	 */
+	ASSERT( e1.connSize() == 1, "Check conn size after delete" );
+	ASSERT( e2.connSize() == 2, "Check conn size after delete" );
+	ASSERT( e3.connSize() == 1, "Check conn size after delete" );
+
 	ASSERT( e1.lookupConn( 0 )->targetIndex() == 1, "Check e1 target" );
 	ASSERT( e1.lookupConn( 0 )->targetElement() == &e2, "Check e1 target" );
 	ASSERT( e2.lookupConn( 0 )->targetIndex() == 0, "Check e2 target" );
@@ -115,8 +144,25 @@ void connTest()
 	ASSERT( e3.lookupConn( 0 )->targetIndex() == 0, "Check e3 target" );
 	ASSERT( e3.lookupConn( 0 )->targetElement() == &e2, "Check e3 target" );
 
-	
-	cout << "Completed connTest()\n";
+
+	ASSERT( e1.lookupConn( 0 )->sourceElement() == &e1,
+					"sourceElement()" );
+	ASSERT( e1.lookupConn( 0 )->sourceIndex( &e1 ) == 0,
+					"sourceIndex()" );
+
+	ASSERT( e2.lookupConn( 0 )->sourceElement() == &e2,
+					"sourceElement()" );
+	ASSERT( e2.lookupConn( 0 )->sourceIndex( &e2 ) == 0,
+					"sourceIndex()" );
+	ASSERT( e2.lookupConn( 1 )->sourceElement() == &e2,
+					"sourceElement()" );
+	ASSERT( e2.lookupConn( 1 )->sourceIndex( &e2 ) == 1,
+					"sourceIndex()" );
+
+	ASSERT( e3.lookupConn( 0 )->sourceElement() == &e3,
+					"sourceElement()" );
+	ASSERT( e3.lookupConn( 0 )->sourceIndex( &e3 ) == 0,
+					"sourceIndex()" );
 }
 
 /**

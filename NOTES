@@ -1302,4 +1302,23 @@ Did all of the above. Compiles and SLI is invoked. Currently the only thing
 it does properly is to quit. le causes a core dump. Anyway, good time to
 check it all in. Possibly some issues will crop up with the python interface.
 
+Moving on to getting the functions to work, starting with le.
+Ran into a morass of problems when trying to use sendTo. The issue seems to
+be with the conn indexing. Introduced a whole bunch of unit tests for
+the Conn::sourceElement and Conn::sourceIndex() functions.
+
+Tracked down the problem: I was including both the Source and Dest vectors
+in the counting for indexing of msgSlots in the shared message. Should have
+used Source separately.
+Many things now work: pwe, le, ce.
+create sometimes works but:
+- doesn't do Neutral (but does neutral!)
+- doesn't do create neutral foo (but does create neutral /foo)
+	- when we create foo, it puts a blank-name object in, it seems.
+- doesn't create any object on anything but /
+Most of these are now fixed.
+
+Time to check in. 
+This will be version 39
+
 =============================================================================

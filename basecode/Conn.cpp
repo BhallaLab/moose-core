@@ -28,6 +28,11 @@ unsigned int Conn::sourceIndex( const Element* e ) const
 	return e->connIndex( this );
 }
 
+unsigned int Conn::sourceIndex( ) const
+{
+	return sourceElement()->connIndex( this );
+}
+
 /**
  * Strictly speaking we need not pass in the index j, as we can get
  * it correctly as in the assert statement below. But it is much
