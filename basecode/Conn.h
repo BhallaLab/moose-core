@@ -50,14 +50,42 @@ class Conn
 					: e_( e ), index_( targetConnIndex )
 			{;}
 
+			
+			/**
+			 * Returns the originating Element for this Conn
+			 * Used infrequently, involves multiple lookups.
+			 */
 			Element* sourceElement() const;
 
+			/**
+			 * Returns the target Element for this Conn. Fast.
+			 * Used in every message call, just returns local field.
+			 */
 			Element* targetElement() const {
 					return e_;
 			}
 
+			/**
+			 * Returns the index of this Conn on the originating
+			 * Element.
+			 * Used infrequently, involves multiple lookups.
+			 * Use this call only if you have already got a handle
+			 * on the originating Element.
+			 */
 			unsigned int sourceIndex( const Element* e ) const;
+			
+			/**
+			 * Returns the index of this Conn on the originating
+			 * Element, using internal information only.
+			 * Used infrequently, involves multiple lookups.
+			 * Use this call for preference as it is safer.
+			 */
+			unsigned int sourceIndex( ) const;
 
+			/**
+			 * Returns the index of the target Conn. Fast.
+			 * Used in every message call, just returns local field
+			 */
 			unsigned int targetIndex() const {
 					return index_;
 			}

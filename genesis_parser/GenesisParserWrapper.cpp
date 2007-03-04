@@ -106,11 +106,11 @@ static const unsigned int setCweSlot =
 static const unsigned int requestCweSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 1;
 static const unsigned int requestLeSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 3;
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 2;
 static const unsigned int createSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 5;
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 3;
 static const unsigned int deleteSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 7;
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 4;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -568,30 +568,36 @@ char* do_getmsg( int argc, const char** const argv, Id s )
 
 void do_create( int argc, const char** const argv, Id s )
 {
+	if ( argc != 3 ) {
+		cout << "usage:: " << argv[0] << " class name\n";
+		return;
+	}
 	map< string, string >::iterator i = 
 		sliClassNameConvert().find( argv[1] );
 	if ( i != sliClassNameConvert().end() ) {
-		if ( strcmp( i->second.c_str(), "Sli" ) == 0 ) {
+		string className = i->second;
+		if ( className == "Sli" ) {
 				// We bail out of these classes as MOOSE does not
 				// yet handle them.
-		}
-		else if ( argc > 3 ) {
-			cout << "usage:: " << argv[0] << " class name\n";
-			return;
+				cout << "Do not know how to handle class: " << 
+						className << endl;
+				return;
 		}
 
 		string name = Shell::tail( argv[2], "/" );
+		if ( name.length() < 1 ) {
+			cout << "Error: invalid object name : " << name << endl;
+			return;
+		}
 		string parent = Shell::head( argv[2], "/" );
+		Id pa = GenesisParserWrapper::path2eid( parent, s );
 
 		send3< string, string, unsigned int >( Element::element( s ),
-			createSlot, i->second, name,
-			GenesisParserWrapper::path2eid( argv[2], s ) );
+			createSlot, className, name, pa );
 
 		// The return function recvCreate gets the id of the
 		// returned elm, but
 		// the GenesisParser does not care.
-		
-		// s->createFuncLocal( i->second, argv[2] );
 	}
 }
 
@@ -786,6 +792,7 @@ void GenesisParserWrapper::doLe( int argc, const char** argv, Id s )
 	}
 	vector< Id >::iterator i = elist_.begin();
 	// This operation should really do it in a parallel-clean way.
+	/// \todo If any children, we should suffix the name with a '/'
 	for ( i = elist_.begin(); i != elist_.end(); i++ )
 		cout << Element::element( *i )->name() << endl;
 	elist_.resize( 0 );
@@ -1065,22 +1072,29 @@ void GenesisParserWrapper::loadBuiltinCommands()
  */
 Id GenesisParserWrapper::path2eid( const string& path, Id g )
 {
+	Element* e = Element::element( g );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+		( e->data() );
+	return gpw->innerPath2eid( path, g );
+}
+
+Id GenesisParserWrapper::innerPath2eid( const string& path, Id g )
+{
 	static string separator = "/";
 
-	if ( path == separator || path == "/root" )
+	if ( path == separator || path == separator + "root" )
 			return 0;
 
-	Element* s = getShell( g );
-	Id cwe;
-	get< Id >( s, "cwe", cwe );
-
-	if ( path == "" || path == "." )
-			return cwe;
+	if ( path == "" || path == "." ) {
+		send0( Element::element( g ), requestCweSlot );
+		return cwe_;
+	}
 
 	if ( path == ".." ) {
-			if ( cwe == 0 )
-				return 0;
-			return Shell::parent( cwe );
+		send0( Element::element( g ), requestCweSlot );
+		if ( cwe_ == 0 )
+			return 0;
+		return Shell::parent( cwe_ );
 	}
 
 	vector< string > names;
@@ -1093,7 +1107,8 @@ Id GenesisParserWrapper::path2eid( const string& path, Id g )
 		start = 0;
 		separateString( path.substr( 5 ), names, separator );
 	} else {
-		start = cwe;
+		send0( Element::element( g ), requestCweSlot );
+		start = cwe_;
 		separateString( path, names, separator );
 	}
 	return Shell::traversePath( start, names );
@@ -1118,6 +1133,10 @@ string GenesisParserWrapper::eid2path( unsigned int eid )
 {
 	static const string slash = "/";
 	string n( "" );
+
+	if ( eid == 0 )
+		return "/";
+
 	while ( eid != 0 ) {
 		n = slash + Element::element( eid )->name() + n;
 		eid = parent( eid );
