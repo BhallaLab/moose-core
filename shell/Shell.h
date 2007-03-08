@@ -106,6 +106,7 @@ class Shell
 		void remoteCommand( string arglist );
 		void command( int argc, const char** argv );
 		*/
+		static const unsigned int BAD_ID;
 
 	private:
 		/// Current working element
