@@ -164,29 +164,6 @@ unsigned int Shell::traversePath(
 	return start;
 }
 
-/**
- * Chops up a string s into bits at separator, stuffs the bits
- * into the vector v.
- */
-void separateString( const string& s, vector< string>& v, 
-				const string& separator )
-{
-	string temp = s;
-	unsigned int separatorLength = separator.length();
-	string::size_type pos = s.find( separator );
-	v.resize( 0 );
-
-	while ( pos != string::npos ) {
-		string t = temp.substr( 0, pos );
-		if ( t.length() > 0 )
-			v.push_back( t );
-		temp = temp.substr( pos + separatorLength );
-		pos = temp.find( separator );
-	}
-	if ( temp.length() > 0 )
-		v.push_back( temp );
-}
-
 // Requires a path argument without a starting space
 // Perhaps this should be in the interpreter?
 unsigned int Shell::path2eid( 
@@ -352,6 +329,13 @@ void Shell::getField( const Conn& c, unsigned int id, string field )
 	// Appropriate off-node stuff here.
 
 	const Finfo* f = e->findFinfo( field );
+	// Error messages are the job of the parser. So we just return
+	// the value when it is good and leave the rest to the parser.
+	if ( f )
+		if ( f->strGet( e, ret ) )
+			sendTo1< string >( c.targetElement(),
+				getFieldSlot, c.targetIndex(), ret );
+	/*
 	if ( f ) {
 		if ( f->strGet( e, ret ) )
 			sendTo1< string >( c.targetElement(),
@@ -363,6 +347,7 @@ void Shell::getField( const Conn& c, unsigned int id, string field )
 		cout << "Error: field does not exist: " << e->name() <<
 				"." << field << endl;
 	}
+	*/
 }
 
 // Static function

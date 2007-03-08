@@ -566,8 +566,11 @@ char* GenesisParserWrapper::doGet( int argc, const char** argv, Id s )
 		cout << "usage:: " << argv[0] << " [element] field\n";
 		return copyString( "" );
 	}
+	fieldValue_ = "";
 	send2< Id, string >( Element::element( s ),
 		requestFieldSlot, e, field );
+	if ( fieldValue_.length() == 0 ) // Nothing came back
+		return 0;
 	return copyString( fieldValue_.c_str() );
 }
 
@@ -786,16 +789,28 @@ void do_show( int argc, const char** const argv, Id s )
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
 			( e->data() );
 	gpw->doShow( argc, argv, s );
+}
 
-	string temp;
-	if ( argc == 2 ) {
-		temp = string( "./" ) + argv[1];
-		// s->showFuncLocal( temp );
-	} else if ( argc == 3 ) {
-		temp = string( argv[ 1 ] ) + "/" + argv[ 2 ];
-		// s->showFuncLocal( temp );
-	} else {
-		cout << "usage:: " << argv[0] << " [element] field\n";
+void GenesisParserWrapper::showAllFields( Id e, Id s )
+{
+	char temp[80];
+	
+	// Ask for the list of fields as one big string
+	send2< Id, string >( Element::element( s ),
+		requestFieldSlot, e, "fieldList" );
+	vector< string > list;
+	vector< string >::iterator i;
+	separateString( fieldValue_, list, ", " );
+	for ( i = list.begin(); i != list.end(); i++ ) {
+		if ( *i == "fieldList" )
+			continue;
+		fieldValue_ = "";
+		send2< Id, string >( Element::element( s ),
+			requestFieldSlot, e, *i );
+		if ( fieldValue_.length() > 0 ) {
+			sprintf( temp, "%-25s%s", i->c_str(), "= " );
+			print( temp + fieldValue_ );
+		}
 	}
 }
 
@@ -810,11 +825,13 @@ void GenesisParserWrapper::doShow( int argc, const char** argv, Id s )
 {
 	Id e;
 	int firstField = 2;
+	char temp[80];
 
 	if ( argc < 2 ) {
 		print( "Usage: showfield [object/wildcard] [fields] -all" );
 		return;
 	}
+
 
 	if ( argc == 2 ) { // show fields of cwe.
 		send0( Element::element( s ), requestCweSlot );
@@ -830,13 +847,20 @@ void GenesisParserWrapper::doShow( int argc, const char** argv, Id s )
 		}
 	}
 
+	print( "[ " + eid2path( e ) + " ]" );
+
 	for ( int i = firstField; i < argc; i++ ) {
-		if ( strcmp( argv[i], "*") == 0 )
-				// Print all fields here
-				;
-		else 
-				// get specific field here.
-				;
+		if ( strcmp( argv[i], "*") == 0 ) {
+			showAllFields( e, s );
+		} else { // get specific field here.
+			fieldValue_ = "";
+			send2< Id, string >( Element::element( s ),
+				requestFieldSlot, e, argv[i] );
+			if ( fieldValue_.length() > 0 ) {
+				sprintf( temp, "%-25s%s", argv[i], "= " );
+				print( temp + fieldValue_ );
+			}
+		}
 	}
 }
 
@@ -1327,7 +1351,10 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "setfield Rm 0.1", "" );
 	gpAssert( "echo {getfield Rm}", "0.1 " );
 	gpAssert( "ce /", "" );
-
-	cout << "done\n";
+	gpAssert( "showfield /compt Vm",
+					"[ /compt ] Vm                       = 1.234 " );
+	gpAssert( "showfield compt Em Cm Rm",
+					"[ /compt ] Em                       = -0.06 Cm                       = 3.1415 Rm                       = 0.1 " );
+	cout << "\n";
 }
 #endif
