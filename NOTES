@@ -1330,8 +1330,24 @@ More generally, I need to implement unit testing for these functions.
 Fixed le.
 Implemented unit tests for GenesisParser. Set up tests for le, pwe, ce, create,
 delete. This would be a good time to check it in, but I don't have net access.
-For now, just copying the whole source tree into a temporary subdir.
+For now, just copying the whole source tree into a temporary subdir:
+mg3_rev40 because this would have been rev 40.
 
+Continuing with the main branch.
+Immediate goal is to get system to point where we can run the rallpacks,
+preferaby a bit further so we can also run the Purkinje demo sans graphics.
+This will also fit in with the solver code from Niraj.
 
+Sub-goals:
+- Parser upgrades: *echo, showfield, getfield, setfield, addmsg, alias,
+	reset, step
+- New objects : channels, ca_concens
+- Scheduling.
+
+Working on getfield. This involves the implementation of string conversions.
+strget is now working, but getfield is not.
 
 =============================================================================
+Mar 07 2007
+getfield now works. Time to do another pseudo-checkin, which would be rev41.
+

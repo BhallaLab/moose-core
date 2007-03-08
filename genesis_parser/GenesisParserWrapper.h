@@ -27,12 +27,15 @@ class GenesisParserWrapper: public myFlexLexer
 		static void recvCwe( const Conn& c, unsigned int i );
 		static void recvLe( const Conn& c, vector< Id > elist );
 		static void recvCreate( const Conn& c, unsigned int i );
+		static void recvField( const Conn& c, string value );
 
 //////////////////////////////////////////////////////////////////
 // Helper functions
 //////////////////////////////////////////////////////////////////
 		void doLe( int argc, const char** argv, Id s );
 		void doPwe( int argc, const char** argv, Id s );
+		char* doGet( int argc, const char** argv, Id s );
+		void doShow( int argc, const char** argv, Id s );
 
 // Surely this should be a local parser function
 /*
@@ -68,7 +71,7 @@ class GenesisParserWrapper: public myFlexLexer
 		 * This utility function directs output either to cout, or
 		 * to a local buffer which can be inspected for unit tests.
 		 */
-		void print( const string& s );
+		void print( const string& s, bool noNewLine = 0 );
 
 #ifdef DO_UNIT_TESTS
 		/**
@@ -100,5 +103,6 @@ class GenesisParserWrapper: public myFlexLexer
 		 * This string holds parser output during unit tests
 		 */
 		string printbuf_;
+		string fieldValue_;
 };
 #endif // _GENESIS_PARSER_WRAPPER_H

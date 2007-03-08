@@ -32,23 +32,30 @@ const Cinfo* initGenesisParserCinfo()
 		TypeFuncPair( Ftype0::global(), 0 ),
 		// Then receive the cwe info
 		TypeFuncPair( Ftype1< unsigned int >::global(),
-						RFCAST( &GenesisParserWrapper::recvCwe ) ),
+					RFCAST( &GenesisParserWrapper::recvCwe ) ),
 
 		// Getting a list of child ids: First send a request with
 		// the requested parent elm id.
 		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
 		// Then recv the vector of child ids.
 		TypeFuncPair( Ftype1< vector< unsigned int > >::global(), 
-						RFCAST( &GenesisParserWrapper::recvLe ) ),
+					RFCAST( &GenesisParserWrapper::recvLe ) ),
 		
 		// Creating an object: Send out the request.
 		TypeFuncPair( 
 				Ftype3< string, string, unsigned int >::global(), 0 ),
 		// Creating an object: Recv the returned object id.
 		TypeFuncPair( Ftype1< unsigned int >::global(),
-						RFCAST( &GenesisParserWrapper::recvCreate ) ),
+					RFCAST( &GenesisParserWrapper::recvCreate ) ),
 		// Deleting an object: Send out the request.
 		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
+
+		// Getting a field value as a string: send out request:
+		TypeFuncPair( 
+				Ftype2< unsigned int, string >::global(), 0 ),
+		// Getting a field value as a string: Recv the value.
+		TypeFuncPair( Ftype1< string >::global(),
+					RFCAST( &GenesisParserWrapper::recvField ) ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -117,6 +124,8 @@ static const unsigned int createSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 3;
 static const unsigned int deleteSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 4;
+static const unsigned int requestFieldSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 5;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -179,12 +188,15 @@ char* copyString( const string& s )
 	return ret;
 }
 
-void GenesisParserWrapper::print( const string& s )
+void GenesisParserWrapper::print( const string& s, bool noNewLine )
 {
-	if ( testFlag_ )
+	if ( testFlag_ ) {
 		printbuf_ = printbuf_ + s + " ";
-	else
-		cout << s << endl;
+	} else {
+		cout << s;
+		if ( !noNewLine )
+				cout << endl;
+	}
 }
 
 //////////////////////////////////////////////////////////////////
@@ -210,6 +222,13 @@ void GenesisParserWrapper::recvCreate( const Conn& c, Id e )
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
 			( c.targetElement()->data() );
 	gpw->createdElm_ = e;
+}
+
+void GenesisParserWrapper::recvField( const Conn& c, string value )
+{
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( c.targetElement()->data() );
+	gpw->fieldValue_ = value;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -504,21 +523,38 @@ int do_exists( int argc, const char** const argv, Id s )
 	return 0;
 }
 
+/**
+ * getfield [obj] field
+ */
 char* do_get( int argc, const char** const argv, Id s )
+{
+	Element* e = Element::element( s );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( e->data() );
+	return gpw->doGet( argc, argv, s );
+}
+
+char* GenesisParserWrapper::doGet( int argc, const char** argv, Id s )
 {
 	string field;
 	string value;
+	Id e;
 	if ( argc == 3 ) {
-		field = string( argv[ 1 ] ) + "/" + argv[ 2 ];
+		e = GenesisParserWrapper::path2eid( argv[1], s );
+		if ( e == Shell::BAD_ID )
+			return copyString( "" );
+		field = argv[2];
 	} else if ( argc == 2 ) {
+		send0( Element::element( s ), requestCweSlot );
+		e = cwe_;
 		field = argv[ 1 ];
 	} else {
 		cout << "usage:: " << argv[0] << " [element] field\n";
-		return "";
+		return copyString( "" );
 	}
-	// return copyString( s->getFuncLocal( field ) );
-	cout << "in do_get " << field << endl;
-	return copyString( "" );
+	send2< Id, string >( Element::element( s ),
+		requestFieldSlot, e, field );
+	return copyString( fieldValue_.c_str() );
 }
 
 char* do_getmsg( int argc, const char** const argv, Id s )
@@ -732,6 +768,11 @@ void do_useclock( int argc, const char** const argv, Id s )
 
 void do_show( int argc, const char** const argv, Id s )
 {
+	Element* e = Element::element( s );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( e->data() );
+	gpw->doShow( argc, argv, s );
+
 	string temp;
 	if ( argc == 2 ) {
 		temp = string( "./" ) + argv[1];
@@ -741,6 +782,47 @@ void do_show( int argc, const char** const argv, Id s )
 		// s->showFuncLocal( temp );
 	} else {
 		cout << "usage:: " << argv[0] << " [element] field\n";
+	}
+}
+
+/**
+ * Decide if it is a specific field, or all.
+ * If specific, get the value for that specific field and print it.
+ * If all, first get the list of all fields (which is a field too),
+ * then get the value for each specific field in turn.
+ * The first arg could be a field, or it could be the object.
+ */
+void GenesisParserWrapper::doShow( int argc, const char** argv, Id s )
+{
+	Id e;
+	int firstField = 2;
+
+	if ( argc < 2 ) {
+		print( "Usage: showfield [object/wildcard] [fields] -all" );
+		return;
+	}
+
+	if ( argc == 2 ) { // show fields of cwe.
+		send0( Element::element( s ), requestCweSlot );
+		e = cwe_;
+		firstField = 1;
+	} else {
+		e = path2eid( argv[1], s );
+		if ( e == Shell::BAD_ID ) {
+			e = cwe_;
+			firstField = 1;
+		} else {
+			firstField = 2;
+		}
+	}
+
+	for ( int i = firstField; i < argc; i++ ) {
+		if ( strcmp( argv[i], "*") == 0 )
+				// Print all fields here
+				;
+		else 
+				// get specific field here.
+				;
 	}
 }
 
@@ -800,15 +882,25 @@ void do_listobjects( int argc, const char** const argv, Id s )
 
 void do_echo( int argc, const char** const argv, Id s )
 {
-	vector< string > vec;
+	// vector< string > vec;
 	int options = 0;
 	if ( argc > 1 && strncmp( argv[ argc - 1 ], "-n", 2 ) == 0 ) {
 		options = 1; // no newline
 		argc--;
 	}
 
+	string temp = "";
+	for (int i = 1; i < argc; i++ )
+		temp = temp + argv[i];
+
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( Element::element( s )->data() );
+	gpw->print( temp, options );
+
+	/*
 	for (int i = 1; i < argc; i++ )
 		vec.push_back( argv[i] );
+		*/
 
 	// s->echoFuncLocal( vec, options );
 }
@@ -1203,6 +1295,15 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "delete /foo", "" );
 	gpAssert( "le", "b c shell " );
 	gpAssert( "le /foo", "cannot find object '/foo' " );
+	gpAssert( "echo foo", "foo " );
+	gpAssert( "echo bar -n", "bar " );
+	gpAssert( "echo {2 + 3}", "5 " );
+	gpAssert( "echo {sqrt { 13 - 4 }}", "3 " );
+	gpAssert( "echo {sin 1.5 }", "0.997495 " );
+	gpAssert( "echo {log 3 }", "1.09861 " );
+	gpAssert( "create compartment /compt", "" );
+	gpAssert( "echo {getfield /compt Vm}", "-0.06 " );
+
 	cout << "done\n";
 }
 #endif
