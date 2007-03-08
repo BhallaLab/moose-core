@@ -56,6 +56,9 @@ const Cinfo* initGenesisParserCinfo()
 		// Getting a field value as a string: Recv the value.
 		TypeFuncPair( Ftype1< string >::global(),
 					RFCAST( &GenesisParserWrapper::recvField ) ),
+		// Setting a field value as a string: send out request:
+		TypeFuncPair( // object, field, value 
+				Ftype3< unsigned int, string, string >::global(), 0 ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -126,6 +129,8 @@ static const unsigned int deleteSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 4;
 static const unsigned int requestFieldSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 5;
+static const unsigned int setFieldSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 6;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -419,9 +424,20 @@ void do_drop( int argc, const char** const argv, Id s )
 	}
 }
 
+/**
+ * setfield [obj] field value [field value] ...
+ */
 void do_set( int argc, const char** const argv, Id s )
 {
-	string path;
+	Element* e = Element::element( s );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( e->data() );
+	return gpw->doSet( argc, argv, s );
+}
+
+void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
+{
+	Id e;
 	int start = 2;
 	if ( argc < 3 ) {
 		cout << argv[0] << ": Too few command arguments\n";
@@ -429,10 +445,13 @@ void do_set( int argc, const char** const argv, Id s )
 		return;
 	}
 	if ( argc % 2 == 1 ) { // 'path' is left out, use current object.
-		path = ".";
+		send0( Element::element( s ), requestCweSlot );
+		e = cwe_;
 		start = 1;
 	} else  {
-		path = argv[ 1 ];
+		e = GenesisParserWrapper::path2eid( argv[1], s );
+		if ( e == Shell::BAD_ID )
+			return;
 		start = 2;
 	}
 
@@ -441,18 +460,13 @@ void do_set( int argc, const char** const argv, Id s )
 	// 		setfield Ca Y_A->table[{i}] {y}
 	// so here we need to do setfield Ca/Y/A->table[{i}] {y}
 	for ( int i = start; i < argc; i += 2 ) {
-		if ( strncmp (argv[ i ] + 1, "_A->", 4) == 0  ||
-			strncmp (argv[ i ] + 1, "_B->", 4) == 0 ) {
-			string fieldname = argv[ i ];
-			fieldname[1] = '/';
-			cout << "in do_set " << path + "/" + fieldname << ", " <<
-					argv[ i + 1 ] << endl;
-			// s->setFuncLocal( path + "/" + fieldname, argv[ i + 1 ] );
-		} else {
-			// s->setFuncLocal( path + "/" + argv[ i ], argv[ i + 1 ] );
-			cout << "in do_set " << path + "/" + argv[ i ] << ", " <<
-					argv[ i + 1 ] << endl;
-		}
+		// s->setFuncLocal( path + "/" + argv[ i ], argv[ i + 1 ] );
+		string field = argv[i];
+		string value = argv[ i+1 ];
+		// cout << "in do_set " << path << "." << field << " " <<
+				// value << endl;
+		send3< Id, string, string >( Element::element( s ),
+			setFieldSlot, e, field, value );
 	}
 }
 
@@ -1303,6 +1317,16 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "echo {log 3 }", "1.09861 " );
 	gpAssert( "create compartment /compt", "" );
 	gpAssert( "echo {getfield /compt Vm}", "-0.06 " );
+	gpAssert( "setfield /compt Vm 1.234", "" );
+	gpAssert( "echo {getfield /compt Vm}", "1.234 " );
+	gpAssert( "setfield /compt Cm 3.1415", "" );
+	gpAssert( "echo {getfield /compt Cm}", "3.1415 " );
+	gpAssert( "ce /compt", "" );
+	gpAssert( "echo {getfield Cm}", "3.1415 " );
+	gpAssert( "echo {getfield Vm}", "1.234 " );
+	gpAssert( "setfield Rm 0.1", "" );
+	gpAssert( "echo {getfield Rm}", "0.1 " );
+	gpAssert( "ce /", "" );
 
 	cout << "done\n";
 }

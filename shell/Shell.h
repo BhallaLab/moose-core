@@ -50,6 +50,8 @@ class Shell
 
 		static void getField( const Conn& c, unsigned int id,
 						string field );
+		static void setField( const Conn& c, 
+						unsigned int id, string field, string value );
 
 		/*
 		 * These functions also vanish. They are already on Neutral.

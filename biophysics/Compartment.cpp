@@ -219,7 +219,7 @@ double Compartment::getVm( const Element* e )
 
 void Compartment::setEm( const Conn& c, double Em )
 {
-	static_cast< Compartment* >( c.targetElement()->data() )->Vm_ = Em;
+	static_cast< Compartment* >( c.targetElement()->data() )->Em_ = Em;
 }
 
 double Compartment::getEm( const Element* e )
@@ -230,7 +230,7 @@ double Compartment::getEm( const Element* e )
 void Compartment::setCm( const Conn& c, double Cm )
 {
 	if ( rangeWarning( c, "Cm", Cm ) ) return;
-	static_cast< Compartment* >( c.targetElement()->data() )->Vm_ = Cm;
+	static_cast< Compartment* >( c.targetElement()->data() )->Cm_ = Cm;
 }
 
 double Compartment::getCm( const Element* e )

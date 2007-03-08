@@ -35,6 +35,7 @@ class GenesisParserWrapper: public myFlexLexer
 		void doLe( int argc, const char** argv, Id s );
 		void doPwe( int argc, const char** argv, Id s );
 		char* doGet( int argc, const char** argv, Id s );
+		void doSet( int argc, const char** argv, Id s );
 		void doShow( int argc, const char** argv, Id s );
 
 // Surely this should be a local parser function

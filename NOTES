@@ -1339,7 +1339,7 @@ preferaby a bit further so we can also run the Purkinje demo sans graphics.
 This will also fit in with the solver code from Niraj.
 
 Sub-goals:
-- Parser upgrades: *echo, showfield, getfield, setfield, addmsg, alias,
+- Parser upgrades: *echo, showfield, *getfield, *setfield, addmsg, alias,
 	reset, step
 - New objects : channels, ca_concens
 - Scheduling.
@@ -1351,3 +1351,9 @@ strget is now working, but getfield is not.
 Mar 07 2007
 getfield now works. Time to do another pseudo-checkin, which would be rev41.
 
+On now to strset and setfield.
+
+These now work and have been put into unit tests. Another psuedo-checkin, rev42.
+
+
+=============================================================================
