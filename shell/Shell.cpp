@@ -52,6 +52,13 @@ const Cinfo* initShellCinfo()
 		TypeFuncPair( 
 				Ftype1< unsigned int >::global(), 
 				RFCAST( &Shell::staticDestroy ) ),
+
+		// Getting a field value as a string: handling request
+		TypeFuncPair( 
+				Ftype2< unsigned int, string >::global(),
+				RFCAST( &Shell::getField ) ),
+		// Getting a field value as a string: Sending value back.
+		TypeFuncPair( Ftype1< string >::global(), 0 ),
 	};
 
 
@@ -92,13 +99,8 @@ static const unsigned int leSlot =
 // Returns the id of the created object
 static const unsigned int createSlot =
 	initShellCinfo()->getSlotIndex( "parser" ) + 2;
-
-	/* 
-	 * As far as I can see, we never need the deleteSlot because
-	 * we don't send out values on it.
-static const unsigned int deleteSlot =
+static const unsigned int getFieldSlot =
 	initShellCinfo()->getSlotIndex( "parser" ) + 3;
-	*/
 
 
 //////////////////////////////////////////////////////////////////////
@@ -287,6 +289,7 @@ void Shell::trigCwe( const Conn& c )
 					c.targetIndex(), s->cwe_ );
 }
 
+
 //////////////////////////////////////////////////////////////////////
 // Create and destroy are possibly soon to be deleted. These may have
 // to go over to the Neutral, but till we've sorted out the SWIG
@@ -326,6 +329,35 @@ void Shell::staticDestroy( const Conn& c, unsigned int victim )
 {
 	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 	s->destroy( victim );
+}
+
+// Static function
+/**
+ * This function handles request to get a field value. It triggers
+ * a return function to the calling object, as a string.
+ * The reason why we take this function to the Shell at all is because
+ * we will eventually need to be able to handle this for off-node
+ * object requests.
+ */
+void Shell::getField( const Conn& c, unsigned int id, string field )
+{
+	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	string ret;
+	Element* e = Element::element( id );
+	// Appropriate off-node stuff here.
+
+	const Finfo* f = e->findFinfo( field );
+	if ( f ) {
+		if ( f->strGet( e, ret ) )
+			sendTo1< string >( c.targetElement(),
+				getFieldSlot, c.targetIndex(), ret );
+		else
+			cout << "Error: Unable to get field " << e->name() <<
+					"." << field << endl;
+	} else {
+		cout << "Error: field does not exist: " << e->name() <<
+				"." << field << endl;
+	}
 }
 
 
@@ -369,6 +401,7 @@ void Shell::destroy( unsigned int victim )
 
 	set( e, "destroy" );
 }
+
 //////////////////////////////////////////////////////////////////////
 // Deleted stuff.
 //////////////////////////////////////////////////////////////////////

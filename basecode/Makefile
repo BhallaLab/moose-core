@@ -34,6 +34,7 @@ OBJ = \
 	SharedFtype.o \
 	SharedFinfo.o \
 	setget.o \
+	strconv.o \
 
 HEADERS = \
 	header.h \
@@ -62,6 +63,7 @@ LookupFinfo.o:	LookupFinfo.h DynamicFinfo.h LookupFtype.h
 DeletionMarkerFinfo.o: DeletionMarkerFinfo.h
 SimpleElement.o:	SimpleElement.h MsgSrc.h MsgDest.h DeletionMarkerFinfo.h
 setget.o:		setget.h DerivedFtype.h
+strconv.o:		DerivedFtype.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) $< -c

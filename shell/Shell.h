@@ -48,6 +48,9 @@ class Shell
 						string name, unsigned int parent );
 		static void staticDestroy( const Conn&, unsigned int victim );
 
+		static void getField( const Conn& c, unsigned int id,
+						string field );
+
 		/*
 		 * These functions also vanish. They are already on Neutral.
 		 *

@@ -34,6 +34,7 @@ using namespace std;
 
 class Element;
 class Conn;
+class Finfo;
 
 #include "RecvFunc.h"
 #include "Conn.h"

@@ -80,6 +80,11 @@ const Cinfo* initNeutralCinfo()
 				reinterpret_cast< GetFunc >( &Neutral::getChildByName ),
 				0
 		),
+		new ValueFinfo( "fieldList",
+				ValueFtype1< vector< string > >::global(), 
+				reinterpret_cast< GetFunc>( &Neutral::getFieldList ),
+				&dummyFunc
+		),
 		new SrcFinfo( "childSrc", Ftype1< int >::global() ),
 		new DestFinfo( "child", Ftype1< int >::global(),
 			reinterpret_cast< RecvFunc >( &Neutral::childFunc ) ),
@@ -268,6 +273,22 @@ vector< unsigned int > Neutral::getChildList( const Element* elm )
 	ret.reserve( end - begin );
 	for ( i = begin; i != end; i++ )
 		ret.push_back( i->targetElement()->id() );
+
+	return ret;
+}
+
+vector< string > Neutral::getFieldList( const Element* elm )
+{
+	const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
+	assert( e != 0 );
+
+	vector< string > ret;
+	vector< const Finfo* > flist;
+	vector< const Finfo* >::const_iterator i;
+	e->listFinfos( flist );
+
+	for ( i = flist.begin(); i != flist.end(); i++ )
+		ret.push_back( (*i)->name() );
 
 	return ret;
 }

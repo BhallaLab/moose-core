@@ -44,6 +44,27 @@ class Ftype0: public Ftype
 			}
 };
 
+
+			/**
+			 * This function has to be specialized for each Ftype
+			 * that we wish to be able to convert. Otherwise it
+			 * reports failure.
+			 */
+			template< class T >bool val2str( T v, string& s ) {
+				s = "";
+				return 0;
+			}
+
+			/**
+			 * This function has to be specialized for each Ftype
+			 * that we wish to be able to convert. Otherwise it
+			 * reports failure.
+			 */
+			template< class T > bool str2val( const string& s, T& v ) {
+					cerr << "This is the default str2val.\n";
+				return 0;
+			}
+
 /**
  * The Ftype1 is the most used Ftype as it handles values.
  * This is still a virtual base class as it lacks the
@@ -118,6 +139,35 @@ template < class T > class Ftype1: public Ftype
 			}
 
 			RecvFunc trigFunc() const {
+				return 0;
+			}
+
+			/**
+			 * This is a virtual function that gets the value,
+			 * converts it to a string, and puts this into the
+			 * string location specified.
+			 * Returns true on success.
+			 */
+			bool strGet( const Element* e, const Finfo* f, string& s )
+				const
+			{
+				T val;
+				if ( this->get( e, f, val ) )
+						return val2str( val, s );
+				return 0;
+			}
+
+			/**
+			 * This is a virtual function that takes a string,
+			 * converts it to a value, and assigns it to a field.
+			 * Returns true on success.
+			 */
+			bool strSet( Element* e, const Finfo* f, const string& s )
+					const
+			{
+				T val;
+				if ( str2val( s, val ) )
+					return this->set( e, f, val );
 				return 0;
 			}
 };

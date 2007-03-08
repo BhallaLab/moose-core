@@ -36,4 +36,5 @@ class Neutral
 
 			static const unsigned int childSrcIndex;
 			static const unsigned int childIndex;
+			static vector< string > getFieldList( const Element* elm );
 };

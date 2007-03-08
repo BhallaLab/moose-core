@@ -977,20 +977,40 @@ void valueFinfoTest()
 
 
 	Element* clock = testclass.create( "clock" );
+	string sret = "";
 	double dret = 0;
 	int iret;
 
 	get< double >( clock, clock->findFinfo( "dval" ), dret );
 	ASSERT( dret == 1234.5, "test get1");
+
+	ASSERT( clock->findFinfo( "dval" )->strGet( clock, sret ), 
+					"testing strGet" );
+	ASSERT( sret == "1234.5", "testing strGet" );
+
 	set< double >( clock, clock->findFinfo( "dval" ), 54321 );
 	dret = 0;
 	get< double >( clock, clock->findFinfo( "dval" ), dret );
 	ASSERT( dret == 54321, "test set1");
 
+	ASSERT( clock->findFinfo( "dval" )->strGet( clock, sret ), 
+					"testing strGet" );
+	ASSERT( sret == "54321", "testing strGet" );
+
 	get< int >( clock, clock->findFinfo( "ival" ), iret );
 	ASSERT( iret == 56789, "test iget");
+
+	ASSERT( clock->findFinfo( "ival" )->strGet( clock, sret ), 
+					"testing strGet" );
+	ASSERT( sret == "56789", "testing strGet" );
+
 	set< int >( clock, clock->findFinfo( "ival" ), 77777 );
 	iret = 0;
+
+	ASSERT( clock->findFinfo( "ival" )->strGet( clock, sret ), 
+					"testing strGet" );
+	ASSERT( sret == "77777", "testing strGet" );
+
 	get< int >( clock, clock->findFinfo( "ival" ), iret );
 	ASSERT( iret == 77777, "test iset");
 
