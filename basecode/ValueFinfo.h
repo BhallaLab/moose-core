@@ -63,7 +63,7 @@ class ValueFinfo: public Finfo
 			// The Ftype handles this conversion.
 			bool strGet( const Element* e, std::string &s ) const
 			{
-					return 0;
+					return ftype()->strGet( e, this, s );
 			}
 
 			unsigned int srcList(
