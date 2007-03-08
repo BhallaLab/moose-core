@@ -64,6 +64,26 @@ class GenesisParserWrapper: public myFlexLexer
 		static string eid2path( unsigned int i );
 		static Element* getShell( Id g );
 
+		/**
+		 * This utility function directs output either to cout, or
+		 * to a local buffer which can be inspected for unit tests.
+		 */
+		void print( const string& s );
+
+#ifdef DO_UNIT_TESTS
+		/**
+		 * This function performs unit tests for the GenesisParser
+		 */
+		void unitTest();
+
+		/**
+		 * This is used in the unit tests and asserts that the
+		 * specified command string gives rise to the specified
+		 * return string.
+		 */
+		void gpAssert( const string& command, const string& ret );
+#endif
+
     private:
 		void loadBuiltinCommands();
 		string returnCommandValue_;
@@ -71,5 +91,14 @@ class GenesisParserWrapper: public myFlexLexer
 		Id cwe_;
 		Id createdElm_;
 		vector< Id > elist_;
+
+		/**
+		 * This flag is true if unit tests are being done.
+		 */
+		bool testFlag_;
+		/**
+		 * This string holds parser output during unit tests
+		 */
+		string printbuf_;
 };
 #endif // _GENESIS_PARSER_WRAPPER_H

@@ -1322,3 +1322,16 @@ Time to check in.
 This will be version 39
 
 =============================================================================
+Mar 06 2007
+Delete works.
+le looks at root element list if the specified path is not found
+More generally, I need to implement unit testing for these functions.
+
+Fixed le.
+Implemented unit tests for GenesisParser. Set up tests for le, pwe, ce, create,
+delete. This would be a good time to check it in, but I don't have net access.
+For now, just copying the whole source tree into a temporary subdir.
+
+
+
+=============================================================================

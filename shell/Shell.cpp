@@ -11,6 +11,8 @@
 #include "moose.h"
 #include "Shell.h"
 
+const unsigned int Shell::BAD_ID = ~0;
+
 //////////////////////////////////////////////////////////////////////
 // Shell MOOSE object creation stuff
 //////////////////////////////////////////////////////////////////////
@@ -127,10 +129,11 @@ unsigned int Shell::parent( unsigned int eid )
 }
 
 /**
- * Returns the element at the end of the specified path.
+ * Returns the id of the element at the end of the specified path.
+ * On failure, returns Shell::BAD_ID
  * It is a static func as a utility for parsers.
- * We ignore any leading /
- * We ignore any isolated ./
+ * It takes a pre-separated vector of names.
+ * It ignores names that are just . or /
  */
 unsigned int Shell::traversePath(
 				unsigned int start,
@@ -147,7 +150,7 @@ unsigned int Shell::traversePath(
 			Element* e = Element::element( start );
 			lookupGet< int, string >( e, "lookupChild", ret, *i );
 			if ( ret == 0 )
-					return ret;
+					return BAD_ID;
 			start = ret;
 		}
 	}
