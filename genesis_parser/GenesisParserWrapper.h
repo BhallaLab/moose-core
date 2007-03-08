@@ -38,22 +38,9 @@ class GenesisParserWrapper: public myFlexLexer
 		void doSet( int argc, const char** argv, Id s );
 		void doShow( int argc, const char** argv, Id s );
 		void showAllFields( Id e, Id s );
-
-// Surely this should be a local parser function
-/*
-		static void aliasFunc( const Conn& c, string alias, string old); {
-			static_cast<GenesisParserWrapper *>( c->parent() )->
-				alias( alias, old );
-		}
-*/
-
-// This should also be a local parser function
-/*
-		static void listCommandsFunc( Conn* c ) {
-			static_cast<GenesisParserWrapper *>( c->parent() )->
-				listCommands( );
-		}
-*/
+		void doAdd( int argc, const char** const argv, Id s );
+		void innerAdd( Id src, const string& srcF, Id dest,
+						const string& destF );
 
 		////////////////////////////////////////////////
 		//  Utility functions

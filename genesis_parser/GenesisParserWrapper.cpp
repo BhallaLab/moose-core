@@ -74,14 +74,6 @@ const Cinfo* initGenesisParserCinfo()
 		new DestFinfo( "readline",
 			Ftype1< string >::global(),
 			RFCAST( &GenesisParserWrapper::readlineFunc ) ),
-	/*
-		new DestFinfo( "listcommands",
-			Ftype0::global(),
-			RFCAST( &GenesisParserWrapper::listCommandsFunc ) ), 
-		new DestFinfo( "alias",
-			Ftype2< string, string >::global(),
-			RFCAST( &GenesisParserWrapper::aliasFunc ) ), 
-	*/
 		new DestFinfo( "process",
 			Ftype0::global(),
 			RFCAST( &GenesisParserWrapper::processFunc ) ), 
@@ -357,7 +349,7 @@ map< string, string >& sliFieldNameConvert()
 */
 
 
-string sliMessage( const char* elmName, 
+string sliMessage(
 	const string& msgType, map< string, string >& converter )
 {
 	map< string, string >::iterator i;
@@ -366,18 +358,49 @@ string sliMessage( const char* elmName,
 		if ( i->second.length() == 0 ) // A redundant message 
 			return "";
 		else 
-			return string( elmName ) + "/" + i->second; // good message.
+			return i->second; // good message.
 	} else 
 		cout << "Error:sliMessage: Unknown message " <<
-			elmName << " " << msgType << "\n";
+			msgType << "\n";
 	return "";
 }
 
 void do_add( int argc, const char** const argv, Id s )
 {
+	Element* e = Element::element( s );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( e->data() );
+	return gpw->doAdd( argc, argv, s );
+}
+
+void GenesisParserWrapper::innerAdd(
+	Id src, const string& srcF, Id dest, const string& destF )
+{
+	if ( src != Shell::BAD_ID && dest != Shell::BAD_ID ) {
+		Element* se = Element::element( src );
+		Element* de = Element::element( dest );
+
+		if ( 
+			!se->findFinfo( srcF )->add( se, de, de->findFinfo( destF ) )
+		   )
+				cout << "Error:innerAdd: Failed to add Message\n";
+	}
+}
+
+void GenesisParserWrapper::doAdd(
+				int argc, const char** const argv, Id s )
+{
 	if ( argc == 3 ) {
+		string srcE = Shell::head( argv[1], "/" );
+		string srcF = Shell::tail( argv[1], "/" );
+		string destE = Shell::head( argv[2], "/" );
+		string destF = Shell::tail( argv[2], "/" );
+		Id src = path2eid( srcE, s );
+		Id dest = path2eid( destE, s );
+
+		// Should ideally send this off to the shell.
+		innerAdd( src, srcF, dest, destF );
 	 	cout << "in do_add " << argv[1] << ", " << argv[2] << endl;
-		// s->addFuncLocal( argv[1], argv[2] );
 	} else if ( argc > 3 ) { 
 	// Old-fashioned addmsg. Backward Compatibility conversions here.
 	// usage: addmsg source-element dest-delement msg-type [msg-fields]
@@ -385,28 +408,19 @@ void do_add( int argc, const char** const argv, Id s )
 	// msg fields. Often there are redundant messages which are now
 	// handled by shared messages. The redundant one is ignored.
 		string msgType = argv[3];
-	// A particularly ugly special case. PLOT messages are turned
-	// around in MOOSE because we now use trigPlots where the
-	// plot is the message source and the field the dest.
-	// In principle we may need to do a separate lookup for the plotted
-	// field, here we just plug in argv[4].
-		if ( msgType == "PLOT" ) {
-			string plotfield = argv[4];
-			if (plotfield == "Co")
-				plotfield = "conc";
-	 	cout << "in do_add " << argv[2] << ", " << argv[1] << endl;
-		//	s->addFuncLocal( string( argv[2] ) + "/trigPlot", 
-	//			string( argv[ 1 ] ) + "/" + plotfield );
-			return;
-		}
-	
 
 		for ( int i = 4; i < argc; i++ )
 			msgType = msgType + " " + argv[ i ];
-		string src = sliMessage( argv[1], msgType, sliSrcLookup() );
-		string dest = sliMessage( argv[2], msgType, sliDestLookup() );
-		if ( src.length() > 0 && dest.length() > 0 )
-	 	cout << "in do_add " << src << ", " << dest << endl;
+
+		string srcF = sliMessage( msgType, sliSrcLookup() );
+		string destF = sliMessage( msgType, sliDestLookup() );
+
+		if ( srcF.length() > 0 && destF.length() > 0 ) {
+			Id src = path2eid( argv[1], s );
+			Id dest = path2eid( argv[2], s );
+	 		cout << "in do_add " << src << ", " << dest << endl;
+			innerAdd( src, srcF, dest, destF );
+		}
 		//	s->addFuncLocal( src, dest );
 	} else {
 		cout << "usage:: " << argv[0] << " src dest\n";
@@ -702,15 +716,18 @@ void do_pope( int argc, const char** const argv, Id s )
 
 void do_alias( int argc, const char** const argv, Id s )
 {
-	if ( argc == 3 )
-		// s->aliasFuncLocal( argv[ 1 ], argv[ 2 ] );
-			;
-	else if ( argc == 2 )
-		// s->aliasFuncLocal( argv[ 1 ], "" );
-			;
-	else if ( argc == 1 )
-		// s->aliasFuncLocal( "", "" );
-			;
+	string alias = "";
+	string old = "";
+	if ( argc == 3 ) {
+		alias = argv[1];
+		old = argv[2];
+	} else if ( argc == 2 ) {
+		alias = argv[1];
+	}
+	Element* e = Element::element( s );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( e->data() );
+	gpw->alias( alias, old );
 }
 
 void do_quit( int argc, const char** const argv, Id s )
@@ -910,7 +927,9 @@ void GenesisParserWrapper::doPwe( int argc, const char** argv, Id s )
 
 void do_listcommands( int argc, const char** const argv, Id s )
 {
-	;// s->listCommandsFuncLocal( );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( Element::element( s )->data() );
+	gpw->listCommands( );
 }
 
 void do_listobjects( int argc, const char** const argv, Id s )
@@ -1355,6 +1374,12 @@ void GenesisParserWrapper::unitTest()
 					"[ /compt ] Vm                       = 1.234 " );
 	gpAssert( "showfield compt Em Cm Rm",
 					"[ /compt ] Em                       = -0.06 Cm                       = 3.1415 Rm                       = 0.1 " );
+	gpAssert( "alias shf showfield", "" );
+	gpAssert( "shf /compt Em",
+					"[ /compt ] Em                       = -0.06 " );
+	gpAssert( "alias gf getfield", "" );
+	gpAssert( "alias", "gf\tgetfield shf\tshowfield " );
+	gpAssert( "alias gf", "getfield " );
 	cout << "\n";
 }
 #endif
