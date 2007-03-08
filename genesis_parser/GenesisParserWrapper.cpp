@@ -53,6 +53,12 @@ const Cinfo* initGenesisParserCinfo()
 	
 	static Finfo* genesisParserFinfos[] =
 	{
+			/*
+		new ValueFinfo( "unitTest", ValueFtype1< bool >::global(),
+			reinterpret_cast< GetFunc >( &Compartment::doUnitTest ),
+			RFCAST( dummyFunc )
+		),
+		*/
 		new SharedFinfo( "parser", parserTypes,
 				sizeof( parserTypes ) / sizeof( TypeFuncPair ) ),
 		new DestFinfo( "readline",
@@ -129,48 +135,6 @@ GenesisParserWrapper::GenesisParserWrapper()
 		loadBuiltinCommands();
 }
 
-		/*
-Shell* genesisInitialize(int argc, const char** argv)
-{
-	Cinfo::initialize();
-
-	Element* shell = Cinfo::find("Shell")->
-		create( "sli_shell", Element::root() );
-	Element* sli = Cinfo::find("GenesisParser")->
-		create( "sli", shell );
-
-	sli->field( "shell" ).set( "/sli_shell" );
-	shell->field( "parser" ).set( "/sli_shell/sli" );
-	Field f = sli->field( "process" ) ;
-
-	Element* sched = Cinfo::find("Sched")->
-		create( "sched", Element::root() );
-	Cinfo::find("ClockJob")->create( "cj", sched );
-	
-
-	shell->field( "isInteractive" ).set( "1" );
-	if ( argc > 1 ) {
-		string line = "";
-		int len = strlen( argv[ 1 ] );
-		if ( len > 3 && strcmp( argv[ 1 ] + len - 2, ".g" ) == 0 )
-			line = "include";
-		if ( len > 4 && strcmp( argv[ 1 ] + len - 3, ".mu" ) == 0 )
-			line = "include";
-		// string line = "include";
-		for (int i = 1; i < argc; i++)
-			line = line + " " + argv[ i ];
-
-		sli->field( "parse" ).set( line );
-	}
-
-	// setField( sli->field( "process" ) );
-	f.set( "" );
-
-	// setField( f );
-        return dynamic_cast< ShellWrapper* >(shell);
-}
-		*/
-
 void GenesisParserWrapper::readlineFunc( const Conn& c, string s )
 {
 	GenesisParserWrapper* data =
@@ -215,6 +179,13 @@ char* copyString( const string& s )
 	return ret;
 }
 
+void GenesisParserWrapper::print( const string& s )
+{
+	if ( testFlag_ )
+		printbuf_ = printbuf_ + s + " ";
+	else
+		cout << s << endl;
+}
 
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper Message recv functions
@@ -788,13 +759,16 @@ void GenesisParserWrapper::doLe( int argc, const char** argv, Id s )
 		send1< Id >( Element::element( s ), requestLeSlot, cwe_ );
 	} else if ( argc >= 2 ) {
 		Id e = path2eid( argv[1], s );
+		/// \todo: Use better test for a bad path than this.
+		if ( e == Shell::BAD_ID )
+			return;
 		send1< Id >( Element::element( s ), requestLeSlot, e );
 	}
 	vector< Id >::iterator i = elist_.begin();
 	// This operation should really do it in a parallel-clean way.
 	/// \todo If any children, we should suffix the name with a '/'
 	for ( i = elist_.begin(); i != elist_.end(); i++ )
-		cout << Element::element( *i )->name() << endl;
+		print( Element::element( *i )->name() );
 	elist_.resize( 0 );
 }
 
@@ -811,7 +785,7 @@ void GenesisParserWrapper::doPwe( int argc, const char** argv, Id s )
 	// Here we need to wait for the shell to service this message
 	// request and put the requested value in the local cwe_.
 	
-	cout << GenesisParserWrapper::eid2path( cwe_ ) << endl;
+	print( GenesisParserWrapper::eid2path( cwe_ ) );
 }
 
 void do_listcommands( int argc, const char** const argv, Id s )
@@ -1111,7 +1085,10 @@ Id GenesisParserWrapper::innerPath2eid( const string& path, Id g )
 		start = cwe_;
 		separateString( path, names, separator );
 	}
-	return Shell::traversePath( start, names );
+	Id ret = Shell::traversePath( start, names );
+	if ( ret == Shell::BAD_ID )
+			print( string( "cannot find object '" ) + path + "'" );
+	return ret;
 }
 
 /*
@@ -1180,8 +1157,52 @@ void makeGenesisParser( const string& s )
 	assert( shell->findFinfo( "parser" )->add( shell, sli, 
 		sli->findFinfo( "parser" ) ) != 0 );
 
+#ifdef DO_UNIT_TESTS
+	static_cast< GenesisParserWrapper* >( sli->data() )->unitTest();
+#endif
+
 	if ( s.length() > 1 ) {
 		set< string >( sli, "parse", s );		
 	}
 	set( sli, "process" );
 }
+
+//////////////////////////////////////////////////////////////////
+// GenesisParserWrapper unit tests
+//////////////////////////////////////////////////////////////////
+
+#ifdef DO_UNIT_TESTS
+void GenesisParserWrapper::gpAssert(
+		const string& command, const string& ret )
+{
+	testFlag_ = 1;
+	printbuf_ = "";
+	ParseInput( &command );
+	assert( printbuf_ == ret );
+	testFlag_ = 0;
+	cout << ".";
+}
+
+void GenesisParserWrapper::unitTest()
+{
+	cout << "\nDoing GenesisParserWrapper tests";
+	gpAssert( "le", "b c shell " );
+	gpAssert( "create neutral /foo", "" );
+	gpAssert( "le", "b c shell foo " );
+	gpAssert( "ce /foo", "" );
+	gpAssert( "le", "" );
+	gpAssert( "pwe", "/foo " );
+	gpAssert( "create neutral ./bar", "" );
+	gpAssert( "le", "bar " );
+	gpAssert( "le /foo", "bar " );
+	gpAssert( "le ..", "b c shell foo " );
+	gpAssert( "ce bar", "" );
+	gpAssert( "pwe", "/foo/bar " );
+	gpAssert( "ce ../..", "" );
+	gpAssert( "le", "b c shell foo " );
+	gpAssert( "delete /foo", "" );
+	gpAssert( "le", "b c shell " );
+	gpAssert( "le /foo", "cannot find object '/foo' " );
+	cout << "done\n";
+}
+#endif
