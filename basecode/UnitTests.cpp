@@ -1014,6 +1014,27 @@ void valueFinfoTest()
 	get< int >( clock, clock->findFinfo( "ival" ), iret );
 	ASSERT( iret == 77777, "test iset");
 
+	/////////////////////////////////////////////////////////////
+	//  Testing strSet
+	/////////////////////////////////////////////////////////////
+	cout << "\nTesting valueFinfo strSet/Get";
+	
+	ASSERT( clock->findFinfo( "ival" )->strSet( clock, "121314" ), 
+					"testing strSet" );
+	get< int >( clock, clock->findFinfo( "ival" ), iret );
+	ASSERT( iret == 121314, "test strset");
+	ASSERT( clock->findFinfo( "ival" )->strGet( clock, sret ), 
+					"testing strSet" );
+	ASSERT( sret == "121314", "testing strGet" );
+	
+	ASSERT( clock->findFinfo( "dval" )->strSet( clock, "6.25" ), 
+					"testing strSet" );
+	get< double >( clock, clock->findFinfo( "dval" ), dret );
+	ASSERT( dret == 6.25, "test strset");
+	ASSERT( clock->findFinfo( "dval" )->strGet( clock, sret ), 
+					"testing strSet" );
+	ASSERT( sret == "6.25", "testing strGet" );
+	
 
 	/////////////////////////////////////////////////////////////
 	// Now let's try sending messages to and from values

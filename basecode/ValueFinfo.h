@@ -57,7 +57,7 @@ class ValueFinfo: public Finfo
 			 */
 			bool strSet( Element* e, const std::string &s ) const
 			{ 
-					return 0;
+					return ftype()->strSet( e, this, s );
 			}
 			
 			// The Ftype handles this conversion.

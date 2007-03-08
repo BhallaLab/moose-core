@@ -59,6 +59,11 @@ const Cinfo* initShellCinfo()
 				RFCAST( &Shell::getField ) ),
 		// Getting a field value as a string: Sending value back.
 		TypeFuncPair( Ftype1< string >::global(), 0 ),
+
+		// Setting a field value as a string: handling request
+		TypeFuncPair( 
+				Ftype3< unsigned int, string, string >::global(),
+				RFCAST( &Shell::setField ) ),
 	};
 
 
@@ -356,6 +361,30 @@ void Shell::getField( const Conn& c, unsigned int id, string field )
 					"." << field << endl;
 	} else {
 		cout << "Error: field does not exist: " << e->name() <<
+				"." << field << endl;
+	}
+}
+
+// Static function
+/**
+ * This function handles request to set a field value.
+ * The reason why we take this function to the Shell is because
+ * we will eventually need to be able to handle this for off-node
+ * object requests.
+ */
+void Shell::setField( const Conn& c, 
+				unsigned int id, string field, string value )
+{
+	Element* e = Element::element( id );
+	// Appropriate off-node stuff here.
+
+	const Finfo* f = e->findFinfo( field );
+	if ( f ) {
+		if ( !f->strSet( e, value ) )
+			cout << "Error: cannot set field " << e->name() <<
+					"." << field << " to " << value << endl;
+	} else {
+		cout << "Error: cannot find field: " << e->name() <<
 				"." << field << endl;
 	}
 }
