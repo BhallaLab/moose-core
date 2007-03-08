@@ -146,6 +146,8 @@ class myFlexLexer: public yyFlexLexer
 		void ParseInput(const std::string* s);
 
 		const std::string GetOutput();
+		void alias(const std::string& alias, const std::string& old );
+		void listCommands();
 
 	protected:
 		int LexerInput( char* buf, int max_size );
@@ -224,10 +226,8 @@ class myFlexLexer: public yyFlexLexer
 		}
 
 		void AddFunc(const char* name, slifunc func, const char* type);
-		void alias(const std::string& alias, const std::string& old );
 		int IsCommand(const char* name);
 		func_entry* GetCommand(const char* name);
-		void listCommands();
 		Result ExecuteCommand(int argc, char** argv);
 		void AddScript(char* ptr, FILE* fp,
 			int argc, char** argv, short type);
@@ -237,6 +237,7 @@ class myFlexLexer: public yyFlexLexer
     		NextScript();
 		}
 		int IncludeScript(int argc, char** argv);
+		void print( const std::string& s );
 
 	private:
 		std::string currstr;
