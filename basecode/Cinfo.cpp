@@ -77,7 +77,7 @@ const Finfo* Cinfo::findFinfo( Element* e, const string& name ) const
 	}
 
 	// Fallthrough. No matches were found, so ask the base class.
-	if (base_ != this)
+	if (base_ != 0 && base_ != this)
 		return base_->findFinfo( e, name );
 
 	return 0;

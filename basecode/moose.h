@@ -50,3 +50,8 @@
 
 /// This is here because most classes derive from NeutralCinfo
 extern const Cinfo* initNeutralCinfo();
+
+// This is here because it is a common utility function.
+// It is defined in strconv.cpp
+extern void separateString( const string& s, vector< string>& v, 
+				const string& separator );

@@ -1339,7 +1339,7 @@ preferaby a bit further so we can also run the Purkinje demo sans graphics.
 This will also fit in with the solver code from Niraj.
 
 Sub-goals:
-- Parser upgrades: *echo, showfield, *getfield, *setfield, addmsg, alias,
+- Parser upgrades: *echo, *showfield, *getfield, *setfield, addmsg, alias,
 	reset, step
 - New objects : channels, ca_concens
 - Scheduling.
@@ -1355,5 +1355,13 @@ On now to strset and setfield.
 
 These now work and have been put into unit tests. Another psuedo-checkin, rev42.
 
+Tried to echo the fieldList. Barfs. Fixed. It was a little problem with the
+recursion in getting fields.
+
+Also fixed problem of what to return when fields don't exist. Now it barfs
+the same way GENESIS does.
+
+Got showfield to work. Set up unit tests too. Time for another psuedo checkin:
+rev43
 
 =============================================================================
