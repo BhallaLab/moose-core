@@ -88,3 +88,50 @@ template<> bool str2val< double >( const string& s, double& ret )
 	ret = strtod( s.c_str(), 0 );
 	return 1;
 }
+
+
+template<> bool val2str< vector< string > >(
+				vector< string > v, string& ret)
+{
+	ret = "";
+	unsigned int i;
+	for ( i = 0 ; i < v.size(); i++ ) {
+		if ( i + 1 < v.size() )
+			ret = ret + v[i] + ", ";
+		else
+			ret = ret + v[i];
+	}
+	return 1;
+}
+
+/**
+ * Chops up a string s into bits at separator, stuffs the bits
+ * into the vector v.
+ */
+void separateString( const string& s, vector< string>& v, 
+				const string& separator )
+{
+	string temp = s;
+	unsigned int separatorLength = separator.length();
+	string::size_type pos = s.find( separator );
+	v.resize( 0 );
+
+	while ( pos != string::npos ) {
+		string t = temp.substr( 0, pos );
+		if ( t.length() > 0 )
+			v.push_back( t );
+		temp = temp.substr( pos + separatorLength );
+		pos = temp.find( separator );
+	}
+	if ( temp.length() > 0 )
+		v.push_back( temp );
+}
+
+template<> bool str2val< vector< string > >( 
+				const string& s, vector< string >& ret )
+{
+	// cerr << "in str2val< double >\n";
+	
+	separateString( s, ret, "," );
+	return 1;
+}
