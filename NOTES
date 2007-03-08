@@ -1361,7 +1361,19 @@ recursion in getting fields.
 Also fixed problem of what to return when fields don't exist. Now it barfs
 the same way GENESIS does.
 
-Got showfield to work. Set up unit tests too. Time for another psuedo checkin:
+Got showfield to work. Set up unit tests too. Time for another pseudo checkin:
 rev43
+
+=============================================================================
+Mar 08 2007
+Got the addmsg to work, but it does not go through the Shell. May need to
+revisit later.
+
+Got the alias to work. This is just an internal parser command.
+Got listcommands to work too. This is also an internal parser command, easy.
+
+Pseudo-checkin rev44. Now to put these incrementally onto the SourceForge
+server. Incremental is best both for the historical sequence and to figure out
+what happened if things break.
 
 =============================================================================

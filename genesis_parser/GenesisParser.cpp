@@ -43,6 +43,9 @@ using std::cout;
 using std::map;
 using std::string;
 
+#include "header.h"
+#include "GenesisParserWrapper.h"
+
 #define MOOSE_THREADS 0
 
 ///////////////////////////////////////////////////////////////////////
@@ -299,7 +302,17 @@ loop:
 	}
 }
 
+///////////////////////////////////////////////////////////////////
+// Here we tap into the GenesisParserWrapper::print command
+///////////////////////////////////////////////////////////////////
 
+void myFlexLexer::print( const string& s )
+{
+	Element* e = Element::element( element_ );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( e->data() );
+	gpw->print( s );
+}
 
 ///////////////////////////////////////////////////////////////////
 // 
@@ -330,11 +343,11 @@ void myFlexLexer::alias(const string& alias, const string& old )
 		map< string, string >::iterator i;
 		i = alias_map.find( alias );
 		if ( i != alias_map.end() )
-			cout << i->second << std::endl;
+			print( i->second );
 	} else { // list all aliases
 		map< string, string >::iterator i;
 		for ( i = alias_map.begin(); i != alias_map.end(); i++ )
-			cout << i->first << "	" << i->second << std::endl;
+			print( i->first + "	" + i->second );
 	}
 }
 
@@ -343,7 +356,7 @@ void myFlexLexer::listCommands( )
 	Func_map::iterator i;
 
 	for ( i = func_map.begin(); i != func_map.end(); i++ ) {
-		cout << i->first << std::endl;
+		print( i->first );
 	}
 }
 
