@@ -35,6 +35,7 @@ bool DestFinfo::respondToAdd(
 	return 0;
 }
 			
+/// \Todo: implement the lookup of the list.
 unsigned int DestFinfo::srcList(
 					const Element* e, vector< Conn >& list ) const
 {

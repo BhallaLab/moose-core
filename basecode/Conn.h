@@ -98,6 +98,12 @@ class Conn
 			
 			void set( Element* e, unsigned int index );
 
+			/**
+			 * This utility function gets the data pointer from the
+			 * targetElement. It is used very frequently in recvFuncs.
+			 */
+			void* data() const;
+
 		private:
 			
 			/// e_ points to the target element.

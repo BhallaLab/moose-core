@@ -12,6 +12,7 @@ TARGET = biophysics.o
 
 OBJ = \
 	Compartment.o	\
+	HHChannel.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -22,6 +23,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Compartment.o:	Compartment.h ../basecode/Ftype2.h
+HHChannel.o:	HHChannel.h ../basecode/Ftype2.h ../basecode/Ftype3.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c

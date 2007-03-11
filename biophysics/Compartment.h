@@ -8,6 +8,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifndef _COMPARTMENT_H
+#define _COMPARTMENT_H
+
 /**
  * The Compartment class sets up an asymmetric compartment for
  * branched nerve calculations. Handles electronic structure and
@@ -91,3 +94,5 @@ class Compartment
 			double sumInject_;
 			static const double EPSILON;
 };
+
+#endif // _COMPARTMENT_H

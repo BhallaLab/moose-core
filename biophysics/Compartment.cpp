@@ -69,15 +69,13 @@ const Cinfo* initCompartmentCinfo()
 	 * This is a shared message from a compartment to channels.
 	 * The first entry is a MsgDest for the info coming from the channel
 	 * It expects Gk and Ek from the channel as args.
-	 * The second entry is a MsgSrc sending Vm and ProcInfo.
-	 * The third is a MsgSrc resetting the channel, same args.
+	 * The second entry is a MsgSrc sending Vm
 	 */
 	static TypeFuncPair channelTypes[] =
 	{
 		TypeFuncPair( Ftype2< double, double >::global(),
 				RFCAST( &Compartment::channelFunc ) ),
-		TypeFuncPair( Ftype2< double, ProcInfo >::global(), 0),
-		TypeFuncPair( Ftype2< double, ProcInfo >::global(), 0)
+		TypeFuncPair( Ftype1< double >::global(), 0),
 	};
 
 	/**
@@ -189,6 +187,13 @@ const Cinfo* initCompartmentCinfo()
 }
 
 static const Cinfo* compartmentCinfo = initCompartmentCinfo();
+
+static const unsigned int channelSlot =
+	initCompartmentCinfo()->getSlotIndex( "channel" );
+static const unsigned int axialSlot =
+	initCompartmentCinfo()->getSlotIndex( "axial" );
+static const unsigned int raxialSlot =
+	initCompartmentCinfo()->getSlotIndex( "raxial" );
 
 //////////////////////////////////////////////////////////////////
 // Here we put the Compartment class functions.
@@ -330,11 +335,11 @@ void Compartment::innerProcessFunc( Element* e, ProcInfo p )
 	Im_ = 0.0;
 	sumInject_ = 0.0;
 	// Send out the channel messages
-	send2< double, ProcInfo >( e, 1, Vm_, p );
+	send2< double, ProcInfo >( e, channelSlot, Vm_, p );
 	// Send out the axial messages
-	send1< double >( e, 2, Vm_ );
+	send1< double >( e, axialSlot, Vm_ );
 	// Send out the raxial messages
-	send2< double >( e, 3, Ra_, Vm_ );
+	send2< double >( e, raxialSlot, Ra_, Vm_ );
 }
 
 void Compartment::processFunc( const Conn& c, ProcInfo p )
@@ -350,8 +355,8 @@ void Compartment::innerReinitFunc( Element* e, ProcInfo p )
 	B_ = invRm_;
 	Im_ = 0.0;
 	sumInject_ = 0.0;
-	// ChannelReinit here.
-	send1< double >( e, 4, Vm_ );
+	// ChannelReinit no longer done from compartments. 
+	// send1< double >( e, 4, Vm_ );
 }
 
 void Compartment::reinitFunc( const Conn& c, ProcInfo p )
@@ -365,9 +370,9 @@ void Compartment::initFunc( const Conn& c, ProcInfo p )
 	Element* e = c.targetElement();
 	Compartment* compt = static_cast< Compartment* >( e->data() );
 	// Send out the axial messages
-	send1< double >( e, 2, compt->Vm_ );
+	send1< double >( e, axialSlot, compt->Vm_ );
 	// Send out the raxial messages
-	send2< double >( e, 3, compt->Ra_, compt->Vm_ );
+	send2< double >( e, raxialSlot, compt->Ra_, compt->Vm_ );
 }
 
 void Compartment::dummyInitFunc( const Conn& c, ProcInfo p )
