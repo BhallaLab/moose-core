@@ -49,3 +49,8 @@ void Conn::set( Element* e, unsigned int index )
 	e_ = e;
 	index_ = index;
 }
+
+void* Conn::data() const
+{
+	return e_->data();
+}
