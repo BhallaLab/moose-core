@@ -1339,7 +1339,7 @@ preferaby a bit further so we can also run the Purkinje demo sans graphics.
 This will also fit in with the solver code from Niraj.
 
 Sub-goals:
-- Parser upgrades: *echo, *showfield, *getfield, *setfield, addmsg, alias,
+- Parser upgrades: *echo, *showfield, *getfield, *setfield, *addmsg, *alias,
 	reset, step
 - New objects : channels, ca_concens
 - Scheduling.
@@ -1375,5 +1375,21 @@ Got listcommands to work too. This is also an internal parser command, easy.
 Pseudo-checkin rev44. Now to put these incrementally onto the SourceForge
 server. Incremental is best both for the historical sequence and to figure out
 what happened if things break.
+
+=============================================================================
+
+Mar 10 2007
+Begun work on HHChannel. So far only set up the .h and the Cinfo initializaton
+stuff for the HHChannel. Some changes to the old mus variant of the HHChannel.
+In the current version the channel has to handle its own process, rather than
+be driven by the compartment. Compartment can jolly well wait for a new clock
+tick to see what the channel had to say.
+
+=============================================================================
+Mar 11 2007.
+
+First pass on implementing HHChannel. Compiled, all funcs in, but the unit
+tests aren't done yet and nor is the HHGate, needed for HHChannel function.
+Anyway, it goes through the regular unit tests and time to check it in.
 
 =============================================================================
