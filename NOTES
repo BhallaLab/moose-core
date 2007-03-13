@@ -1393,3 +1393,29 @@ tests aren't done yet and nor is the HHGate, needed for HHChannel function.
 Anyway, it goes through the regular unit tests and time to check it in.
 
 =============================================================================
+Mar 12 2007.
+
+Working on HHGate. Two issues:
+- Need to manage a couple of encapsulated Interpol classes. Would like to
+use the automated inheritance of assignment operations, but the basecode
+features for this do not yet exist.
+- Need to work out how to manage initialization of the HHGate.
+	- Have another bunch of messages from each Channel. This gets expensive.
+	- Every time Channel fields are set, a new HHGate is created.
+		- The HHGate is reused if the Channel is copied.
+	- Do simple assignment on creation of HHGate. 
+
+Dealt with idea for second issue. Now need to implement Interpol, test it,
+and then come up with basecode features to let me put Interpols as nested
+fields within the HHGate.
+
+Implementation in progress...
+
+=============================================================================
+Mar 13 2007.
+Implemented Interpol.
+Done unit tests for Interpol. Somewhat painful, caught some unpleasant
+and unexpected bugs. Time to check it in. Then we go on to incorporating
+it as a component of HHGate.
+
+=============================================================================
