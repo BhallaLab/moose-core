@@ -17,6 +17,8 @@ typedef void ( *RecvFunc )( const Conn& );
 
 typedef double ( *GetFunc )( const Element* );
 
+#define GFCAST(x) reinterpret_cast< GetFunc >( x )
+
 typedef vector< RecvFunc > FuncList;
 
 void dummyFunc( const Conn& c );

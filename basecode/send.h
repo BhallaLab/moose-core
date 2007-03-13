@@ -82,6 +82,22 @@ template < class T1, class T2 > void send2(
 }
 
 /**
+ * This templated function sends a two-argument message to the
+ * target specified by the conn argument. Note that this refers
+ * to the index in the local conn_ vector.
+ */
+template< class T1, class T2 > void sendTo2(
+		const Element* eIn, unsigned int src, unsigned int conn,
+		T1 val1, T2 val2 )
+{
+	const SimpleElement* e = static_cast< const SimpleElement* >( eIn );
+	void( *rf )( const Conn&, T1, T2 ) = 
+			reinterpret_cast< void ( * )( const Conn&, T1, T2 ) >(
+			e->lookupRecvFunc( src, conn ) );
+		rf( *( e->lookupConn( conn ) ),  val1, val2 );
+}
+
+/**
  * This templated function sends three-argument messages.
  */
 template < class T1, class T2, class T3 > void send3(
