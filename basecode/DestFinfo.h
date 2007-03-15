@@ -93,6 +93,8 @@ class DestFinfo: public Finfo
 					return 0;
 			}
 
+			bool inherit( const Finfo* baseFinfo );
+
 		private:
 			RecvFunc rfunc_;
 			unsigned int destIndex_;

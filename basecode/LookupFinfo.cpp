@@ -86,24 +86,6 @@ bool LookupFinfo::respondToAdd(
 
 #ifdef DO_UNIT_TESTS
 #include "moose.h"
-/*
-#include <map>
-#include <algorithm>
-#include "Cinfo.h"
-#include "MsgSrc.h"
-#include "MsgDest.h"
-#include "SimpleElement.h"
-#include "send.h"
-#include "DerivedFtype.h"
-#include "Ftype2.h"
-#include "SrcFinfo.h"
-#include "DestFinfo.h"
-#include "ValueFinfo.h"
-#include "ValueFtype.h"
-#include "LookupFtype.h"
-#include "setget.h"
-#include "setgetLookup.h"
-*/
 
 /**
  * This test class contains a vector of doubles, a regular double,

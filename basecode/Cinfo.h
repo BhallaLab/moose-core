@@ -43,11 +43,25 @@ class Cinfo
 
 			static const Cinfo* find( const std::string& name );
 
+			/**
+			 * Finds Finfo on an element based on the name of the Finfo.
+			 * Checks the match with 
+			 * the element first, in case there is something overridden
+			 */
 			const Finfo* findFinfo( Element* e, const string& name )
 					const;
 
+			/**
+			 * Finds Finfo on an element based on the connIndex.
+			 */
 			const Finfo* findFinfo( 
 					const Element* e, unsigned int connIndex) const;
+
+			/**
+			 * Finds Finfo by name in the list for this class, 
+			 * ignoring any element-specific fields.
+			 */
+			const Finfo* findFinfo( const string& name) const;
 
 			static void initialize();
 
@@ -55,7 +69,8 @@ class Cinfo
 				return ftype_->isSameType( other->ftype_ );
 			}
 
-			Element* create( const std::string& name ) const ;
+			Element* create( const string& name ) const ;
+			Element* create( const string& name, void* data ) const;
 
 			void destroy( void* ) const ;
 

@@ -19,6 +19,20 @@ class HHGate
 			instant_ = 0;
 		}
 
+		static void gateFunc(
+				const Conn& c, double v, double state, double dt );
+		static void postCreate( const Conn& c );
+
+		static void setPower( const Conn& c, double power );
+		void innerSetPower( double power );
+		static double getPower( const Element* e );
+
+		static void setState( const Conn& c, double state );
+		static double getState( const Element* e );
+
+		static void setInstant( const Conn& c, int instant );
+		static int getInstant( const Element* e );
+
 	private:
 		double power_;
 		double state_;
@@ -42,6 +56,16 @@ class HHGate
 		static double power4( double x ) {
 			return power2( x * x );
 		}
+		static double powerN( double x ) {
+				cout << "Error: Cannot handle powerN\n";
+			return 0.0;
+		}
 		double ( *takePower_ )( double );
+
+
+
+		void innerGateFunc(
+				const Conn& c, double v, double state, double dt );
+
 };
 #endif // _HHGate_h

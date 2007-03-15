@@ -88,6 +88,13 @@ class ThisFinfo: public Finfo
 					;
 			}
 
+			/**
+			 * This cannot be inherited. Returns 0 always.
+			 */
+			bool inherit( const Finfo* baseFinfo ) {
+				return 0;
+			}
+
 			bool isTransient() const {
 					return 0;
 			}

@@ -169,6 +169,14 @@ class Finfo
 			 * Used by the SimpleElement destructor function.
 			 */
 			virtual bool isTransient() const = 0;
+
+			/** This returns true if the Finfo is correctly derived
+			 * from the base. It primarily checks that the Ftype 
+			 * matches, but also does other inheritance operations
+			 * such as transferring over message slot indices.
+			 */
+			virtual bool inherit( const Finfo* baseFinfo ) = 0;
+
 		private:
 			string name_;
 			const Ftype* ftype_;

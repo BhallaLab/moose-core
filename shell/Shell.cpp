@@ -74,12 +74,14 @@ const Cinfo* initShellCinfo()
 				RFCAST( &Shell::setCwe ) ),
 		new SharedFinfo( "parser", parserTypes, 
 				sizeof( parserTypes ) / sizeof( TypeFuncPair ) ), 
+		/*
 		new DestFinfo( "create",
 				Ftype3< string, string, unsigned int >::global(),
 				RFCAST( &Shell::staticCreate ) ),
 		new DestFinfo( "destroy",
 				Ftype1< unsigned int >::global(), 
 				RFCAST( &Shell::staticDestroy ) ),
+				*/
 	};
 
 	static Cinfo shellCinfo(

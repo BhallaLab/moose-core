@@ -49,6 +49,20 @@ class DynamicFinfo: public Finfo
 					destIndex_( 0 )
 			{;}
 
+			DynamicFinfo( const string& name, const Finfo* origFinfo,
+							vector< IndirectType >& indirection )
+					: Finfo( name, origFinfo->ftype() ),
+					origFinfo_( origFinfo ), 
+					setFunc_( &dummyFunc ),
+					getFunc_( 0 ),
+					recvFunc_( &dummyFunc ) ,
+					trigFunc_( &dummyFunc ) ,
+					arrayIndex_( 0 ),
+					srcIndex_( 0 ),
+					destIndex_( 0 ),
+					indirect_( indirection )
+			{;}
+
 			// Assert that the affected conns have been cleaned up
 			// before deleteing this.
 			~DynamicFinfo()
@@ -160,6 +174,13 @@ class DynamicFinfo: public Finfo
 
 			unsigned int getSlotIndex() const;
 
+			/**
+			 * This operation makes no sense for the DynamicFinfo
+			 */
+			bool inherit( const Finfo* baseFinfo ) {
+				return 0;
+			}
+
 			/////////////////////////////////////////////////////////
 			// Here we define the functions that are unique to this
 			// class.
@@ -197,6 +218,7 @@ class DynamicFinfo: public Finfo
 			const void* generalIndex( ) const {
 					return generalIndex_;
 			}
+
 
 		private:
 			const Finfo* origFinfo_;

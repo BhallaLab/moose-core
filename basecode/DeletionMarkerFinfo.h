@@ -85,6 +85,10 @@ class DeletionMarkerFinfo: public Finfo
 					return 0;
 			}
 
+			bool inherit( const Finfo* baseFinfo ) {
+				return ftype()->isSameType( baseFinfo->ftype() );
+			}
+
 			///////////////////////////////////////////////////////
 			// Class-specific functions below
 			///////////////////////////////////////////////////////
