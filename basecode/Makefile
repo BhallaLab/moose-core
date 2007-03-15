@@ -57,7 +57,7 @@ ValueFinfo.o:	ValueFinfo.h DynamicFinfo.h send.h
 SharedFtype.o:	SharedFtype.h
 SharedFinfo.o:	SharedFinfo.h SharedFtype.h
 Cinfo.o:		Cinfo.h
-UnitTests.o:	MsgSrc.h MsgDest.h SimpleElement.h DerivedFtype.h SrcFinfo.h DestFinfo.h Cinfo.h DynamicFinfo.h ValueFinfo.h send.h ArrayFtype.h ValueFtype.h NestFtype.h
+UnitTests.o:	MsgSrc.h MsgDest.h SimpleElement.h DerivedFtype.h SrcFinfo.h DestFinfo.h Cinfo.h DynamicFinfo.h ValueFinfo.h send.h ArrayFtype.h ValueFtype.h
 ArrayFinfo.o:	ArrayFinfo.h DynamicFinfo.h ArrayFtype.h
 LookupFinfo.o:	LookupFinfo.h DynamicFinfo.h LookupFtype.h
 DeletionMarkerFinfo.o: DeletionMarkerFinfo.h

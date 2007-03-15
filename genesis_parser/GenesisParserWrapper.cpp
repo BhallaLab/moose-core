@@ -610,33 +610,40 @@ void do_create( int argc, const char** const argv, Id s )
 		cout << "usage:: " << argv[0] << " class name\n";
 		return;
 	}
-	map< string, string >::iterator i = 
-		sliClassNameConvert().find( argv[1] );
-	if ( i != sliClassNameConvert().end() ) {
-		string className = i->second;
-		if ( className == "Sli" ) {
+	string className = argv[1];
+	if ( !Cinfo::find( className ) )  {
+		// Possibly it is aliased for backward compatibility.
+		map< string, string >::iterator i = 
+			sliClassNameConvert().find( argv[1] );
+		if ( i != sliClassNameConvert().end() ) {
+			className = i->second;
+			if ( className == "Sli" ) {
 				// We bail out of these classes as MOOSE does not
 				// yet handle them.
 				cout << "Do not know how to handle class: " << 
 						className << endl;
 				return;
-		}
-
-		string name = Shell::tail( argv[2], "/" );
-		if ( name.length() < 1 ) {
-			cout << "Error: invalid object name : " << name << endl;
+			}
+		} else {
+			cout << "GenesisParserWrapper::do_create: Do not know class: " << className << endl;
 			return;
 		}
-		string parent = Shell::head( argv[2], "/" );
-		Id pa = GenesisParserWrapper::path2eid( parent, s );
+	}
 
-		send3< string, string, unsigned int >( Element::element( s ),
-			createSlot, className, name, pa );
+	string name = Shell::tail( argv[2], "/" );
+	if ( name.length() < 1 ) {
+		cout << "Error: invalid object name : " << name << endl;
+		return;
+	}
+	string parent = Shell::head( argv[2], "/" );
+	Id pa = GenesisParserWrapper::path2eid( parent, s );
+
+	send3< string, string, unsigned int >( Element::element( s ),
+		createSlot, className, name, pa );
 
 		// The return function recvCreate gets the id of the
 		// returned elm, but
 		// the GenesisParser does not care.
-	}
 }
 
 void do_delete( int argc, const char** const argv, Id s )

@@ -94,6 +94,14 @@ class SharedFinfo: public Finfo
 					return 0;
 			}
 
+			/**
+			 * Returns true only if the other finfo is the same type
+			 * For the SharedFinfo this means that every function
+			 * argument matches. Then on top of this, the function
+			 * copies over the slot indices.
+			 */
+			bool inherit( const Finfo* baseFinfo );
+
 			unsigned int getSlotIndex() const {
 					return msgIndex_;
 			}

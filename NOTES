@@ -1418,4 +1418,36 @@ Done unit tests for Interpol. Somewhat painful, caught some unpleasant
 and unexpected bugs. Time to check it in. Then we go on to incorporating
 it as a component of HHGate.
 
+Now working on NestFinfo, which was partially implemented a while back
+and then dropped. We need it to implement the HHGate which contains 
+two Interpols. Got the basics implemented, and it compiles. Set up unit
+tests for NestFinfo, and those fail.
+
+=============================================================================
+Mar 15 2007
+After much messing around with NestFinfo and related files, seems like the
+best solution is to bypass the problem. Instead require that any nested field
+look like a child element. The child element is almost the same as 
+Neutral except that it may not be deleted directly, and it takes its
+data value from the nested field.
+Details:
+- We create the HHGate. It has two Interpol objects nested in it.
+- As soon as it is created, the postCreate function is called. For most objects
+	this does nothing, but in this case it creates two child SimpleElements
+	using the addresses of the Interpols as data.
+
+We need now to have a callback when an object is created.
+
+This is going OK, but it raises a problem in Cinfo::Cinfo because it requires
+for the first time that we handle overriding parent fields with fields from
+derived classes. Among other things, we need to match up slot numbers and this
+turns out to be an absolute can of worms. Perhaps I should also guarantee that
+overridden fields are type compatible.
+
+Done this the hard way, added to all Finfos as a required function. For
+several of them I need to shift to the .cpp.
+
+Finally, all done, and we get the nested Interpols created with the HHGate.
+Many changes done, time to check stuff in.
+
 =============================================================================

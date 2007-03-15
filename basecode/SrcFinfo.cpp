@@ -81,3 +81,14 @@ const Finfo* SrcFinfo::match(
 {
 	return ( e->isConnOnSrc( srcIndex_, connIndex ) ? this : 0 );
 }
+
+bool SrcFinfo::inherit( const Finfo* baseFinfo )
+{
+	const SrcFinfo* other =
+			dynamic_cast< const SrcFinfo* >( baseFinfo );
+	if ( other && ftype()->isSameType( baseFinfo->ftype() ) ) {
+			srcIndex_ = other->srcIndex_;
+			return 1;
+	} 
+	return 0;
+}

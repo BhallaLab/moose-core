@@ -121,6 +121,10 @@ class ArrayFinfo: public Finfo
 					return 0;
 			}
 
+			bool inherit( const Finfo* baseFinfo ) {
+				return ftype()->isSameType( baseFinfo->ftype() );
+			}
+
 		private:
 			GetFunc get_;
 			RecvFunc set_;

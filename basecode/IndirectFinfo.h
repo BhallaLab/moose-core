@@ -83,6 +83,13 @@ class IndirectFinfo: public Finfo
 					return 0;
 			}
 
+			/**
+			 * This operation makes no sense for the IndirectFinfo
+			 */
+			bool inherit( const Finfo* baseFinfo ) {
+				return 0;
+			}
+
 		private:
 			Cinfo* cinfo_;
 };

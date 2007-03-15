@@ -11,7 +11,7 @@
 #define _NEST_FTYPE_H
 
 
-template < class T > class NestFtype1: public Ftype1<T>
+template < class T > class NestFtype: public Ftype1<T>
 {
 		public:
 
@@ -84,7 +84,7 @@ template < class T > class NestFtype1: public Ftype1<T>
 			}
 
 			static const Ftype* global() {
-				static Ftype* ret = new NestFtype1< T >();
+				static Ftype* ret = new NestFtype< T >();
 				return ret;
 			}
 
@@ -116,7 +116,7 @@ template < class T > class NestFtype1: public Ftype1<T>
 
 				void (*set)( const Conn&, T v ) =
 					reinterpret_cast< void (*)( const Conn&, T ) >(
-						f->innerSetFunc()
+						df->innerSetFunc()
 					);
 				SimpleElement se( "temp",
 					df->traverseIndirection( e->data() ) );
