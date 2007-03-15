@@ -92,6 +92,15 @@ const Cinfo* initNeutralCinfo()
 			reinterpret_cast< RecvFunc >( &Neutral::create ) ),
 		new DestFinfo( "destroy", Ftype0::global(),
 			&Neutral::destroy ),
+
+		/**
+		 * This function allows objects to do additional initialization
+		 * at the MOOSE level after they are created. For example, we
+		 * may want to nest some fields in the object, which requires
+		 * the creation of child objects to hold the nested fields.
+		 * This would be done by overriding the postCreate function.
+		 */
+		new DestFinfo( "postCreate", Ftype0::global(), &dummyFunc ),
 	};
 
 	static Cinfo neutralCinfo(
@@ -146,6 +155,7 @@ void Neutral::childFunc( const Conn& c , int stage )
 				break;
 				case COMPLETE_DELETION:
 					send1< int >( e, 0, COMPLETE_DELETION );
+					///\todo: Need to cleanly delete the data part too.
 					delete e;
 				break;
 				default:

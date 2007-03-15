@@ -158,6 +158,18 @@ const Finfo* SharedFinfo::match(
 		return ( e->isConnOnDest( msgIndex_, connIndex ) ? this : 0 );
 }
 
+bool SharedFinfo::inherit( const Finfo* baseFinfo )
+{
+	const SharedFinfo* other =
+			dynamic_cast< const SharedFinfo* >( baseFinfo );
+	if ( other && ftype()->isSameType( baseFinfo->ftype() ) ) {
+			msgIndex_ = other->msgIndex_;
+			numSrc_ = other->numSrc_;
+			return 1;
+	} 
+	return 0;
+}
+
 ////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS

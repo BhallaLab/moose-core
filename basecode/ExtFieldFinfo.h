@@ -163,6 +163,13 @@ class ExtFieldFinfo: public Finfo
 			 */
 			void* traverseIndirection( void* data ) const;
 
+			/**
+			 * This operation makes no sense for the ExtFieldFinfo
+			 */
+			bool inherit( const Finfo* baseFinfo ) {
+				return 0;
+			}
+
 		private:
 			const Finfo* origFinfo_;
 

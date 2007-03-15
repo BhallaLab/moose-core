@@ -7,7 +7,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <math.h>
 #include "moose.h"
+#include "../builtins/Interpol.h"
 #include "HHGate.h"
 
 const Cinfo* initHHGateCinfo()
@@ -42,12 +44,14 @@ const Cinfo* initHHGateCinfo()
 			RFCAST( &HHGate::setInstant )
 		), 
 		//// Stuff needed here.
+		/*
 		new ObjFinfo< Interpol >(
 			"A", &HHGateWrapper::getA,
 			&HHGateWrapper::setA, &HHGateWrapper::lookupA, "Interpol"),
 		new ObjFinfo< Interpol >(
 			"B", &HHGateWrapper::getB,
 			&HHGateWrapper::setB, &HHGateWrapper::lookupB, "Interpol"),
+			*/
 		
 	///////////////////////////////////////////////////////
 	// Shared definitions
@@ -57,6 +61,8 @@ const Cinfo* initHHGateCinfo()
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
+		new DestFinfo( "postCreate", Ftype0::global(),
+			&HHGate::postCreate ),
 	};
 	
 	static Cinfo HHGateCinfo(
@@ -73,6 +79,8 @@ const Cinfo* initHHGateCinfo()
 }
 
 static const Cinfo* hhGateCinfo = initHHGateCinfo();
+static const unsigned int gateSlot =
+	initHHGateCinfo()->getSlotIndex( "gate" );
 
 
 ///////////////////////////////////////////////////
@@ -129,7 +137,7 @@ int HHGate::getInstant( const Element* e )
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void HHGateWrapper::gateFunc(
+void HHGate::gateFunc(
 				const Conn& c, double v, double state, double dt )
 {
 	static_cast< HHGate *>( c.data() )->innerGateFunc( c, v, state, dt);
@@ -139,11 +147,11 @@ void HHGate::innerGateFunc(
 				const Conn& c, double v, double state, double dt )
 {
 	if ( instant_ ) {
-		state = A_.doLookup( v ) / B_.doLookup( v );
+		state = A_.innerLookup( v ) / B_.innerLookup( v );
 	} else {
-		double y = B_.doLookup( v );
+		double y = B_.innerLookup( v );
 		double x = exp( -y * dt );
-		state = state * x + ( A_.doLookup( v ) / y ) * ( 1 - x );
+		state = state * x + ( A_.innerLookup( v ) / y ) * ( 1 - x );
 	}
 
 	// This ugly construction returns the info back to sender.
@@ -151,8 +159,31 @@ void HHGate::innerGateFunc(
 		c.targetIndex(), state, takePower_( state ) );
 }
 
-void HHGateWrapper::reinitFunc( const Conn& c, double power, double dt, int instant)
+/*
+void HHGate::reinitFunc( const Conn& c, double power, double dt, int instant)
 {
 	static_cast< HHGate *>( c.data() )->
 			innerReinitFunc( power, dt, instant );
+}
+*/
+
+/**
+ * This creates two nested child objects on the HHGate, to hold the
+ * Interpols.
+ * \todo: We need to figure out how to handle the deletion correctly,
+ * without zapping the data fields of these child objects.
+ */
+
+void HHGate::postCreate( const Conn& c )
+{
+	HHGate* h = static_cast< HHGate *>( c.data() );
+	Element* e = c.targetElement();
+
+	cout << "HHGate::postCreate called\n";
+	const Cinfo* ic = initInterpolCinfo();
+	Element* A = ic->create( "A", static_cast< void* >( &h->A_ ) );
+	e->findFinfo( "childSrc" )->add( e, A, A->findFinfo( "child" ) );
+
+	Element* B = ic->create( "B", static_cast< void* >( &h->B_) );
+	e->findFinfo( "childSrc" )->add( e, B, B->findFinfo( "child" ) );
 }

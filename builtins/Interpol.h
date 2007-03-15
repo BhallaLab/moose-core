@@ -94,4 +94,6 @@ class Interpol
 		static const int MAX_DIVS;
 };
 
+extern const Cinfo* initInterpolCinfo();
+
 #endif // _Interpol_h

@@ -99,6 +99,13 @@ class ValueFinfo: public Finfo
 					return 0;
 			}
 
+			/**
+			 * Not sure why one would override this.
+			 */
+			bool inherit( const Finfo* baseFinfo ) {
+				return 0;
+			}
+
 			RecvFunc recvFunc() const {
 					return set_;
 			}

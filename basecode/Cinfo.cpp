@@ -21,9 +21,24 @@
 #include "MsgDest.h"
 #include "SimpleElement.h"
 
+// These includes are needed to call set
+#include <algorithm>
+#include "DerivedFtype.h"
+#include "Ftype2.h"
+#include "setget.h"
+
 //////////////////////////////////////////////////////////////////
 // Cinfo is the class info for the MOOSE classes.
 //////////////////////////////////////////////////////////////////
+
+Finfo* findMatchingFinfo( const string& name,
+				Finfo** finfoArray, unsigned int nFinfos )
+{
+	for ( unsigned int i = 0; i < nFinfos; i++ )
+		if ( name == finfoArray[i]->name() )
+				return finfoArray[i];
+	return 0;
+}
 
 Cinfo::Cinfo(const std::string& name,
 				const std::string& author,
@@ -42,7 +57,15 @@ Cinfo::Cinfo(const std::string& name,
 		nSrc_ = baseCinfo->nSrc_;
 		nDest_ = baseCinfo->nDest_;
 		for ( i = 0; i < baseCinfo->finfos_.size(); i++ ) {
-			finfos_.push_back( baseCinfo->finfos_[i] );
+			Finfo* f = findMatchingFinfo(
+				baseCinfo->finfos_[i]->name(), finfoArray, nFinfos );
+			if ( f ) {
+				// The inherit operation is true only if the types
+				// match.
+				assert( f->inherit( baseCinfo->finfos_[i] ) );
+				finfos_.push_back( f );
+			} else
+				finfos_.push_back( baseCinfo->finfos_[i] );
 		}
 	}
 
@@ -103,6 +126,21 @@ const Finfo* Cinfo::findFinfo(
 	return 0;
 }
 
+const Finfo* Cinfo::findFinfo( const string& name ) const
+{
+	vector< Finfo* >::const_iterator i;
+	for ( i = finfos_.begin(); i != finfos_.end(); i++ ) {
+		if ( (*i)->name() == name )
+				return (*i);
+	}
+
+	// Fallthrough. No matches were found, so ask the base class.
+	if (base_ != 0 && base_ != this)
+		return base_->findFinfo( name );
+
+	return 0;
+}
+
 /*
 void Cinfo::listFinfos( vector< Finfo* >& ret ) const
 {
@@ -155,15 +193,25 @@ std::map<std::string, Cinfo*>& Cinfo::lookup()
 }
 
 /**
+ * Create a new element with provided data, a set of Finfos and
+ * the MsgSrc and MsgDest allocated.
+ */
+Element* Cinfo::create( const std::string& name, void* data ) const
+{
+	SimpleElement* ret = 
+		new SimpleElement( name, nSrc_, nDest_, data );
+	ret->addFinfo( thisFinfo_ );
+	set( ret, "postCreate" );
+	return ret;
+}
+
+/**
  * Create a new element, complete with data, a set of Finfos and
  * the MsgSrc and MsgDest allocated.
  */
 Element* Cinfo::create( const std::string& name ) const
 {
-	SimpleElement* ret = 
-		new SimpleElement( name, nSrc_, nDest_, ftype_->create(1) );
-	ret->addFinfo( thisFinfo_ );
-	return ret;
+	return create( name, ftype_->create( 1 ) );
 }
 
 /**

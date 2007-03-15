@@ -147,6 +147,14 @@ class LookupFinfo: public Finfo
 					return 0;
 			}
 
+			/**
+			 * Returns true only if the other object is also a 
+			 * LookupFinfo. This will be true if LookupFtype matches.
+			 */
+			bool inherit( const Finfo* baseFinfo ) {
+				return ( ftype()->isSameType( baseFinfo->ftype() ) );
+			}
+
 		private:
 			GetFunc get_;
 			RecvFunc set_;

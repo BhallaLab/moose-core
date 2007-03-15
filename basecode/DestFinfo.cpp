@@ -66,3 +66,14 @@ const Finfo* DestFinfo::match(
 {
 	return ( e->isConnOnDest( destIndex_, connIndex ) ? this : 0 );
 }
+
+bool DestFinfo::inherit( const Finfo* baseFinfo )
+{
+	const DestFinfo* other =
+			dynamic_cast< const DestFinfo* >( baseFinfo );
+	if ( other && ftype()->isSameType( baseFinfo->ftype() ) ) {
+			destIndex_ = other->destIndex_;
+			return 1;
+	} 
+	return 0;
+}

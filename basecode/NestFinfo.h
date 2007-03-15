@@ -21,9 +21,10 @@ class NestFinfo: public Finfo
 						const Cinfo* nestClass,
 						void* (*ptrFunc)( void*, unsigned int )
 					 )
-					: Finfo( name, nestClass->Ftype() ),
+					: Finfo( name, nestClass->ftype() ),
 					nestClass_( nestClass ),
-					ptrFunc_( ptrFunc )
+					ptrFunc_( ptrFunc ),
+					maxIndex_( 0 )
 			{;}
 
 			~NestFinfo()
@@ -106,16 +107,25 @@ class NestFinfo: public Finfo
 			}
 
 			RecvFunc recvFunc() const {
-					return set_;
+					return 0;
 			}
 
 			bool isTransient() const {
 					return 0;
 			}
 
+			/**
+			 * Returns true only if the other finfo is the same type
+			 */
+			bool inherit( const Finfo* baseFinfo );
+
+			const Finfo* parseName( 
+				vector< IndirectType >& v, const string& path ) const;
+
 		private:
-			GetFunc get_;
-			RecvFunc set_;
+			const Cinfo* nestClass_;
+			void* (*ptrFunc_)( void*, unsigned int );
+			unsigned int maxIndex_;
 };
 
 #endif // _NEST_FINFO_H

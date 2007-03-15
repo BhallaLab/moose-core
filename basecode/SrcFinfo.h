@@ -77,6 +77,12 @@ class SrcFinfo: public Finfo
 					return 0;
 			}
 
+			/**
+			 * Returns true only if the other finfo is the same type
+			 * In addition it copies over the slot indexing.
+			 */
+			bool inherit( const Finfo* baseFinfo );
+
 			unsigned int getSlotIndex() const {
 				return srcIndex_;
 			}
