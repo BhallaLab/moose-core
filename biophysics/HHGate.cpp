@@ -43,15 +43,6 @@ const Cinfo* initHHGateCinfo()
 			reinterpret_cast< GetFunc >( &HHGate::getInstant ),
 			RFCAST( &HHGate::setInstant )
 		), 
-		//// Stuff needed here.
-		/*
-		new ObjFinfo< Interpol >(
-			"A", &HHGateWrapper::getA,
-			&HHGateWrapper::setA, &HHGateWrapper::lookupA, "Interpol"),
-		new ObjFinfo< Interpol >(
-			"B", &HHGateWrapper::getB,
-			&HHGateWrapper::setB, &HHGateWrapper::lookupB, "Interpol"),
-			*/
 		
 	///////////////////////////////////////////////////////
 	// Shared definitions

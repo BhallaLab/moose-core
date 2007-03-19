@@ -325,10 +325,10 @@ void Compartment::innerProcessFunc( Element* e, ProcInfo p )
 {
 	A_ += Inject_ + sumInject_ + Em_ * invRm_; 
 	if ( B_ > EPSILON ) {
-		double x = exp( -B_ * p.dt / Cm_ );
+		double x = exp( -B_ * p->dt_ / Cm_ );
 		Vm_ = Vm_ * x + ( A_ / B_ )  * ( 1.0 - x );
 	} else {
-		Vm_ += ( A_ - Vm_ * B_ ) * p.dt / Cm_;
+		Vm_ += ( A_ - Vm_ * B_ ) * p->dt_ / Cm_;
 	}
 	A_ = 0.0;
 	B_ = invRm_; 
