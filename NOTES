@@ -1448,6 +1448,40 @@ Done this the hard way, added to all Finfos as a required function. For
 several of them I need to shift to the .cpp.
 
 Finally, all done, and we get the nested Interpols created with the HHGate.
-Many changes done, time to check stuff in.
+Many changes done, time to check stuff in. That was revision 47. Now
+we can actually go ahead with the channel stuff.
+
+Starting on setting up the scheduling. On close examination, it seems 
+like we don't really need the sched object. All operations should be doable
+through calls to the jobs.
+Slowly working out what happens with the ClockJob.
+=============================================================================
+Mar 16.
+Very preliminary work on ClockJob. I am changing the ClockTickMsgSrc class
+of previous versions into a much simpler TickSequencer class, which will
+just send out appropriate messages to the child ClockTics rather than 
+manage them directly. Lots of changes need to be set up together.
+
+=============================================================================
+Mar 17.
+The earlier version used a separate class to juggle the sequence. I think
+this can be done using regular messages and the clock ticks themselves.
+
+Slow grind through implementation, long way yet to go. Should be able to do
+a dummy compile soon enough.
+
+=============================================================================
+March 18, 2007
+Implemented first pass at ClockJob and Tick objects. Compiles. They are each
+about 80% complete. I have restructured the earlier rather complex and 
+specialized scheduling code to use distinct objects and clean messaging.
+It is still a bit commplex, but no more than the algorithm demands.
+At this time I don't need the Sched object at all, a Neutral will do.
+Next stages:
+- complete the sorting and message set up in the Clock Job
+- complete unit tests for the scheduler
+- Implement the SLI drivers for the scheduler: setclock, useclock and so on.
+- Unit test for biophysics objects.
+- Connect scheduler up to biophysics objects, unit tests for action potl
 
 =============================================================================

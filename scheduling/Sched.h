@@ -7,26 +7,16 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-/**
- * This class manages the context of simulations and is passed around
- * by the various scheduling objects.
- * Later it may probably also handle other aspects of the context.
- */
-class ProcInfoBase
+#ifndef _SCHED_H
+#define _SCHED_H
+
+class Sched
 {
 	public:
-		ProcInfoBase( unsigned int shell = 0,
-			double dt = 1.0, double currTime = 0.0 )
-			: dt_( dt ), currTime_( currTime ), shell_( shell )
+		Sched()
 		{
-			;
 		}
 
-		double dt_;
-		double currTime_;
-
 	private:
-		unsigned int shell_;
 };
-
-typedef ProcInfoBase* ProcInfo;
+#endif // _SCHED_H
