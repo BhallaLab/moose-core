@@ -99,7 +99,9 @@ const Cinfo* initClockJobCinfo()
 	/**
 	 * This sets up the Process shared message. First entry is for
 	 * Process, second for Reinit.
+	 * For now disabled.
 	 */
+		/*
 	static TypeFuncPair processTypes[] = {
 		TypeFuncPair( Ftype1< ProcInfo >::global(), 0 ),	// Process
 		TypeFuncPair( Ftype1< ProcInfo >::global(), 0 ),	// Reinit
@@ -107,6 +109,33 @@ const Cinfo* initClockJobCinfo()
 		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ), // NewObj
 		TypeFuncPair( Ftype1< double >::global(), 
 						RFCAST( &ClockJob::dtFunc ) ),	// dtIn
+	};
+	*/
+
+	/**
+	 * This is a shared message that connects up to the 'prev'
+	 * message of the first 
+	 * Tick in the sequence. It is equivalent to the Tick::next
+	 * shared message. It invokes its incrementTick
+	 * function and also manages various functions for reset
+	 * and return values. It is meant to handle only a
+	 * single target.
+	 */
+	static TypeFuncPair tickTypes[] = 
+	{
+		// This first entry is for the incrementTick function
+		TypeFuncPair( Ftype2< ProcInfo, double >::global(), 0 ),
+		// The second entry is a request to send nextTime_ from the next
+		// tick to the current one. 
+		TypeFuncPair( Ftype0::global(), 0 ),
+		// The third entry is for receiving the nextTime_ value
+		// from the following tick.
+		TypeFuncPair( Ftype1< double >::global(), 
+			RFCAST( &ClockJob::receiveNextTime ) ),
+		// The third one is for propagating resched forward.
+		TypeFuncPair( Ftype0::global(), 0 ),
+		// The fourth one is for propagating reinit forward.
+		TypeFuncPair( Ftype0::global(), 0 ),
 	};
 
 	static Finfo* clockFinfos[] =
@@ -133,13 +162,17 @@ const Cinfo* initClockJobCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "process", processTypes, 5 ),
-		// "processSrc, reinitSrc, reschedSrc, schedNewObjectSrc, dtIn"
+		// Connects up to the 'prev' shared message of the first
+		// Tick in the sequence.
+		new SharedFinfo( "tick", tickTypes, 5 ),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
+		// A trigger when the simulation ends
 		new SrcFinfo( "finishedSrc", Ftype0::global() ),
-		new SrcFinfo( "start", Ftype2< ProcInfo, double >::global() ),
+
+		// Sends ProcInfo and the runtime to the first Tick
+		new SrcFinfo( "startSrc", Ftype2< ProcInfo, double >::global()),
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
@@ -179,13 +212,15 @@ const Cinfo* initClockJobCinfo()
 static const Cinfo* clockJobCinfo = initClockJobCinfo();
 
 static const unsigned int startSlot = 
-	initClockJobCinfo()->getSlotIndex( "start" );
-static const unsigned int processSlot = 
-	initClockJobCinfo()->getSlotIndex( "process" ) + 0;
-static const unsigned int reinitSlot = 
-	initClockJobCinfo()->getSlotIndex( "reinit" ) + 1;
+	initClockJobCinfo()->getSlotIndex( "startSrc" );
+static const unsigned int incrementSlot = 
+	initClockJobCinfo()->getSlotIndex( "tick" ) + 0;
+static const unsigned int requestNextTimeSlot = 
+	initClockJobCinfo()->getSlotIndex( "tick" ) + 1;
 static const unsigned int reschedSlot = 
-	initClockJobCinfo()->getSlotIndex( "resched" ) + 2;
+	initClockJobCinfo()->getSlotIndex( "tick" ) + 2;
+static const unsigned int reinitSlot = 
+	initClockJobCinfo()->getSlotIndex( "tick" ) + 3;
 
 ///////////////////////////////////////////////////
 // Field function definitions
@@ -234,6 +269,10 @@ int ClockJob::getCurrentStep( const Element* e )
 // Dest function definitions
 ///////////////////////////////////////////////////
 
+void ClockJob::receiveNextTime( const Conn& c, double nextTime )
+{
+	static_cast< ClockJob* >( c.data() )->nextTime_ = nextTime;
+}
 
 void ClockJob::startFunc( const Conn& c, double runtime)
 {
@@ -243,14 +282,14 @@ void ClockJob::startFunc( const Conn& c, double runtime)
 
 void ClockJob::startFuncLocal( Element* e, double runTime )
 {
-	cout << "starting run for " << runTime << " sec.\n";
-	send2< ProcInfo, double >( e, startSlot, info_, runTime );
+	// cout << "starting run for " << runTime << " sec.\n";
+	send2< ProcInfo, double >( e, startSlot, &info_, runTime );
 	/*
-	info_->currTime_ = currentTime_;
+	info_.currTime_ = currentTime_;
 	if ( tick_ )
-		tick_->start( info_, currentTime_ + runTime,
+		tick_->start( &info_, currentTime_ + runTime,
 			processSrc_ );
-	currentTime_ = info_->currTime_;
+	currentTime_ = info_.currTime_;
 	*/
 }
 
@@ -265,7 +304,7 @@ void ClockJob::stepFunc( const Conn& c, int nsteps )
  * reorder any of the clock ticks, it assumes that they are scheduled
  * correctly
  */
-void ClockJob::reinitFunc( const Conn& c, double runtime)
+void ClockJob::reinitFunc( const Conn& c )
 {
 	static_cast< ClockJob* >( c.data() )->reinitFuncLocal(
 					c.targetElement() );
@@ -273,8 +312,9 @@ void ClockJob::reinitFunc( const Conn& c, double runtime)
 void ClockJob::reinitFuncLocal( Element* e )
 {
 	currentTime_ = 0.0;
+	nextTime_ = 0.0;
 	currentStep_ = 0;
-	send1< ProcInfo >( e, reinitSlot, info_ );
+	send1< ProcInfo >( e, reinitSlot, &info_ );
 }
 
 /**
@@ -319,6 +359,7 @@ void ClockJob::reschedFunc( const Conn& c )
 				double dt_;
 				int stage_;
 	};
+
 void ClockJob::reschedFuncLocal( Element* e )
 {
 
@@ -336,11 +377,17 @@ void ClockJob::reschedFuncLocal( Element* e )
 	sort( tickList.begin(), tickList.end() );
 
 	Element* last = tickList.front().element();
-	e->findFinfo( "start" )->add( last, e, e->findFinfo( "prev" ) );
+	assert ( e->findFinfo( "tick" )->
+					add( e, last, last->findFinfo( "prev" ) )
+	);
+	assert ( e->findFinfo( "startSrc" )->
+					add( e, last, last->findFinfo( "start" ) )
+	);
 	for ( j = tickList.begin() + 1; j != tickList.end(); j++ ) {
 			buildMessages( last, j->element() );
 			last = j->element();
 	}
+	send0( e, reschedSlot );
 }
 
 /**
@@ -358,7 +405,9 @@ void ClockJob::clearMessages( Element* e )
  */
 void ClockJob::buildMessages( Element* last, Element* e )
 {
-	last->findFinfo( "next" )->add( last, e, e->findFinfo( "prev" ) );
+	assert(
+		last->findFinfo( "next" )->add( last, e, e->findFinfo( "prev" ))
+	);
 }
 
 

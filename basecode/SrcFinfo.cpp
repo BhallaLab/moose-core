@@ -60,8 +60,8 @@ void SrcFinfo::dropAll( Element* e ) const
 	if ( srcIndex_ > 0 ) {
 		begin = e->connSrcBegin( srcIndex_ )->sourceIndex( e );
 		end = e->connSrcEnd( srcIndex_ )->sourceIndex( e );
-		for ( unsigned int j = end - 1; j >= begin; j-- )
-			e->disconnect( j );
+		for ( unsigned int j = end; j > begin; j-- )
+			e->disconnect( j - 1 );
 	}
 }
 
