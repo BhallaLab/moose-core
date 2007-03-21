@@ -133,14 +133,14 @@ void DynamicFinfo::dropAll( Element* e ) const
 	if ( destIndex_ > 0 ) {
 		begin = e->connDestBegin( destIndex_ )->sourceIndex( e );
 		end = e->connDestEnd( destIndex_ )->sourceIndex( e );
-		for ( unsigned int j = end - 1; j >= begin; j-- )
-			e->disconnect( j );
+		for ( unsigned int j = end; j > begin; j-- )
+			e->disconnect( j - 1 );
 	}
 	if ( srcIndex_ > 0 ) {
 		begin = e->connSrcBegin( srcIndex_ )->sourceIndex( e );
 		end = e->connSrcEnd( srcIndex_ )->sourceIndex( e );
-		for ( unsigned int j = end - 1; j >= begin; j-- )
-			e->disconnect( j );
+		for ( unsigned int j = end; j > begin; j-- )
+			e->disconnect( j - 1 );
 	}
 }
 

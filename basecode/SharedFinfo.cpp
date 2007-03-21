@@ -141,13 +141,13 @@ void SharedFinfo::dropAll( Element* e ) const
 	if ( numSrc_ == 0 ) { // Messages are on the MsgDest vector.
 		begin = e->connDestBegin( msgIndex_ )->sourceIndex( e );
 		end = e->connDestEnd( msgIndex_ )->sourceIndex( e );
-		for ( unsigned int j = end - 1; j >= begin; j-- )
-			e->disconnect( j );
+		for ( unsigned int j = end; j > begin; j-- )
+			e->disconnect( j - 1 );
 	} else { // Otherwise put on msgSrc Vector
 		begin = e->connSrcBegin( msgIndex_ )->sourceIndex( e );
 		end = e->connSrcEnd( msgIndex_ )->sourceIndex( e );
-		for ( unsigned int j = end - 1; j >= begin; j-- )
-			e->disconnect( j );
+		for ( unsigned int j = end; j > begin; j-- )
+			e->disconnect( j - 1 );
 	}
 }
 

@@ -14,7 +14,7 @@ class ClockJob
 {
 	public:
 		ClockJob()
-			: runTime_( 0.0 ), currentTime_( 0.0 ),
+			: runTime_( 0.0 ), currentTime_( 0.0 ), nextTime_( 0.0 ),
 			nSteps_( 0 ), currentStep_( 0 )
 		{
 		}
@@ -32,10 +32,11 @@ class ClockJob
 		//////////////////////////////////////////////////////////
 		//  Dest functions
 		//////////////////////////////////////////////////////////
+		static void receiveNextTime( const Conn&, double nextTime );
 		static void startFunc( const Conn& c, double runTime );
 		void startFuncLocal( Element* e, double runTime );
 		static void stepFunc( const Conn& c, int nsteps );
-		static void reinitFunc( const Conn& c, double runtime );
+		static void reinitFunc( const Conn& c );
 		void reinitFuncLocal( Element* e );
 		static void reschedFunc( const Conn& c );
 		void reschedFuncLocal( Element* e );
@@ -51,10 +52,11 @@ class ClockJob
 	private:
 		double runTime_;
 		double currentTime_;
+		double nextTime_;
 		int nSteps_;
 		int currentStep_;
 		double dt_;
-		ProcInfo info_;
+		ProcInfoBase info_;
 };
 
 #endif // _CLOCKJOB_H
