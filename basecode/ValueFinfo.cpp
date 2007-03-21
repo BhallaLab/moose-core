@@ -92,3 +92,16 @@ bool ValueFinfo::respondToAdd(
 	return df->respondToAdd( e, src, srcType, srcFl, returnFl,
 					destIndex, numDest );
 }
+
+/// Dummy function: DynamicFinfo should handle
+void ValueFinfo::dropAll( Element* e ) const
+{
+		assert( 0 );
+}
+
+/// Dummy function: DynamicFinfo should handle
+bool ValueFinfo::drop( Element* e, unsigned int i ) const
+{
+		assert( 0 );
+		return 0;
+}

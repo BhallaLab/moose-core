@@ -31,6 +31,19 @@ bool ThisFinfo::respondToAdd(
 		*/
 		return 0;
 }
+
+/// Dummy function: Do not handle as yet.
+void ThisFinfo::dropAll( Element* e ) const
+{
+		assert( 0 );
+}
+
+/// Dummy function: Do not handle as yet.
+bool ThisFinfo::drop( Element* e, unsigned int i ) const
+{
+		assert( 0 );
+		return 0;
+}
 			
 unsigned int ThisFinfo::srcList(
 					const Element* e, vector< Conn >& list ) const

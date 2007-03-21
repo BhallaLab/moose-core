@@ -34,6 +34,55 @@ bool DestFinfo::respondToAdd(
 	}
 	return 0;
 }
+
+/**
+ * Deletes all connections for this DestFinfo by iterating through the
+ * list of connections. This is non-trivial, because the connection
+ * indices change as we delete them.
+ * We use two attributes of the connections: 
+ * First, they are sequential.
+ * Second, deleting higher connections does not affect lower connection
+ * indices.
+ * So we just find the range and delete them in reverse order.
+ * Note that we do not notify the target Finfo or Element that these
+ * connections are being deleted. This operation must be guaranteed to 
+ * have no other side effects.
+ */
+void DestFinfo::dropAll( Element* e ) const
+{
+	vector< Conn >::const_iterator i;
+
+	i = e->connDestBegin( destIndex_ );
+	unsigned int begin = i->sourceIndex( e );
+	i = e->connDestEnd( destIndex_ );
+	unsigned int end = i->sourceIndex( e );
+
+	for ( unsigned int j = end - 1; j >= begin; j-- )
+		e->disconnect( j );
+}
+
+/**
+ * Deletes a specific connection into this DestFinfo. The index is 
+ * numbered within this Finfo because the most common use case is to
+ * pick a specific index from a vector of Conns coming into this
+ * Finfo.
+ */
+bool DestFinfo::drop( Element* e, unsigned int i ) const
+{
+	vector< Conn >::const_iterator k;
+
+	k = e->connDestBegin( destIndex_ );
+	unsigned int begin = k->sourceIndex( e );
+	k = e->connDestEnd( destIndex_ );
+	unsigned int end = k->sourceIndex( e );
+
+	i += begin;
+	if ( i < end ) {
+		e->disconnect( i );
+		return 1;
+	}
+	return 0;
+}
 			
 /// \Todo: implement the lookup of the list.
 unsigned int DestFinfo::srcList(

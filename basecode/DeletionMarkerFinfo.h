@@ -38,6 +38,9 @@ class DeletionMarkerFinfo: public Finfo
 					return 0;
 			}
 
+			void dropAll( Element* e ) const { ; }
+			bool drop( Element* e, unsigned int i ) const { return 0; }
+
 			unsigned int srcList(
 					const Element* e, vector< Conn >& list ) const
 			{

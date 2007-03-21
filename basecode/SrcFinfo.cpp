@@ -48,6 +48,38 @@ bool SrcFinfo::respondToAdd(
 {
 	return 0; // for now we cannot handle this.
 }
+
+/**
+ * Disconnects all messages out of this SrcFinfo.
+ */
+void SrcFinfo::dropAll( Element* e ) const
+{
+	vector< Conn >::const_iterator i;
+	unsigned int begin;
+	unsigned int end;
+	if ( srcIndex_ > 0 ) {
+		begin = e->connSrcBegin( srcIndex_ )->sourceIndex( e );
+		end = e->connSrcEnd( srcIndex_ )->sourceIndex( e );
+		for ( unsigned int j = end - 1; j >= begin; j-- )
+			e->disconnect( j );
+	}
+}
+
+/**
+ * Delete a specific message emerging from this SrcFinfo. Returns True
+ * if the index is valid and the operation succeeds.
+ */
+bool SrcFinfo::drop( Element* e, unsigned int i ) const
+{
+	unsigned int begin = e->connSrcBegin( srcIndex_ )->sourceIndex( e );
+	unsigned int end = e->connSrcEnd( srcIndex_ )->sourceIndex( e );
+	i += begin;
+	if ( i < end ) {
+		e->disconnect( i );
+		return 1;
+	}
+	return 0;
+}
 			
 /**
  * Here we look up all the inputs to this MsgSrc, especially the 

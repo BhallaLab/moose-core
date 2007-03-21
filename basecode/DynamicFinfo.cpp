@@ -120,6 +120,71 @@ bool DynamicFinfo::respondToAdd(
 	}
 	return 0;
 }
+
+/**
+ * Disconnects all messages into and out of this DynamicFinfo.
+ * This includes incoming as well as outgoing messages.
+ */
+void DynamicFinfo::dropAll( Element* e ) const
+{
+	vector< Conn >::const_iterator i;
+	unsigned int begin;
+	unsigned int end;
+	if ( destIndex_ > 0 ) {
+		begin = e->connDestBegin( destIndex_ )->sourceIndex( e );
+		end = e->connDestEnd( destIndex_ )->sourceIndex( e );
+		for ( unsigned int j = end - 1; j >= begin; j-- )
+			e->disconnect( j );
+	}
+	if ( srcIndex_ > 0 ) {
+		begin = e->connSrcBegin( srcIndex_ )->sourceIndex( e );
+		end = e->connSrcEnd( srcIndex_ )->sourceIndex( e );
+		for ( unsigned int j = end - 1; j >= begin; j-- )
+			e->disconnect( j );
+	}
+}
+
+/**
+ * drop has somewhat tricky semantics for the DynamicFinfo, because
+ * we do not know ahead of time whether it has incoming, outgoing or
+ * both kinds of messages. From the principle of least surprise, we
+ * will assume that it eliminates the specified indexed message, whether
+ * incoming or outgoing. If there are both kinds of messages and there
+ * exists one on each with the same index then we complain.
+ */
+bool DynamicFinfo::drop( Element* e, unsigned int i ) const
+{
+	if ( destIndex_ == 0 && srcIndex_ == 0 ) {
+		cout << "DynamicFinfo::drop: No messages found\n";
+		return 0;
+	}
+	if ( destIndex_ > 0 && srcIndex_ > 0 ) {
+		cout << "DynamicFinfo::drop: Ambiguous because both source and dest messages present\n";
+		return 0;
+	}
+
+	unsigned int begin;
+	unsigned int end;
+	if ( destIndex_ > 0 ) {
+		begin = e->connDestBegin( destIndex_ )->sourceIndex( e );
+		end = e->connDestEnd( destIndex_ )->sourceIndex( e );
+		i += begin;
+		if ( i < end ) {
+			e->disconnect( i );
+			return 1;
+		}
+	}
+	if ( srcIndex_ > 0 ) {
+		begin = e->connSrcBegin( srcIndex_ )->sourceIndex( e );
+		end = e->connSrcEnd( srcIndex_ )->sourceIndex( e );
+		i += begin;
+		if ( i < end ) {
+			e->disconnect( i );
+			return 1;
+		}
+	}
+	return 0;
+}
 			
 unsigned int DynamicFinfo::srcList(
 	const Element* e, vector< Conn >& list ) const

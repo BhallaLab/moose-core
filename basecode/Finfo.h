@@ -23,30 +23,83 @@ class Finfo
 			virtual ~Finfo()
 			{;}
 
+			/**
+			 * This function creates a connection between to Finfos.
+			 */
 			virtual bool add( 
 					Element* e, Element* destElm, const Finfo* destFinfo
 			) const = 0;
+
+			/**
+			 * This function is executed at the destination Finfo and
+			 * does all the critical type-checking to decide if the
+			 * message creation is legal. It also handles passing the
+			 * message function pointers back and forth between source
+			 * and destination objects.
+			 */
 			virtual bool respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
 					FuncList& srcfl, FuncList& returnFl,
 					unsigned int& destIndex, unsigned int& numDest
 			) const = 0;
 			
-			/*
+			/**
+			 * This function removes all messages into/out of this
+			 * Finfo. It does not have an error status.
+			 */
+			virtual void dropAll( Element* e ) const = 0;
+
+			/**
+			 * This function removes the specified connection into/out
+			 * of this Finfo. The index refers to the index within
+			 * this Finfo, not the global connection index for the 
+			 * Element. Returns True if the int was in the right
+			 * range for this Finfo, False otherwise.
+			 */
 			virtual bool drop( Element* e, unsigned int i ) const = 0;
 
-			virtual bool respondToDrop( Element* e, unsigned int i )
-					const = 0;
-					*/
+			/**
+			 * We were going to have respondToDrop functions, but
+			 * this adds a lot of overhead and complexity. Instead
+			 * we guarantee that there are no side-effects from
+			 * deleting connections.
+			 * virtual bool respondToDrop( Element* e) const = 0;
+			 * virtual bool respondToDrop( Element* e, unsigned int i )
+			 *	const = 0;
+			 *
+			 */
 
+			/**
+			 * This function returns a vector all of connections 
+			 * arriving at this Finfo.
+			 * \todo should rename as incomingConns
+			 */
 			virtual unsigned int srcList( 
 					const Element* e, vector< Conn >& list ) const = 0;
+			/**
+			 * This function returns a vector all of connections 
+			 * arriving at this Finfo.
+			 * \todo should rename as outgoingConns
+			 */
 			virtual unsigned int destList( 
 					const Element* e, vector< Conn >& list ) const = 0;
 
+			/**
+			 * This function utilizes the hard-coded string conversions
+			 * for the type of this Finfo, if present, for doing Set.
+			 * Multiple argument fields also can be handled this way.
+			 * Returns true if the
+			 * conversion and assignment succeeded.
+			 */
 			virtual bool strSet(
 							Element* e, const std::string &s
 				) const = 0;
+
+			/**
+			 * This function utilizes the hard-coded string conversions
+			 * if present, for getting the field value. Returns true
+			 * if the conversion and assignment succeeded.
+			 */
 			virtual bool strGet( 
 							const Element* e, std::string &s
 				) const = 0;

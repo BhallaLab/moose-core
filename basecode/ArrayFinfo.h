@@ -37,7 +37,6 @@ class ArrayFinfo: public Finfo
 			 * This operation requires the formation of a dynamic
 			 * Finfo to handle the messaging, as Array fields are
 			 * not assigned a message src or dest.
-			 * \todo: Still to implement.
 			 */
 			bool add( 
 					Element* e, Element* destElm, const Finfo* destFinfo
@@ -48,6 +47,13 @@ class ArrayFinfo: public Finfo
 					FuncList& srcFl, FuncList& returnFl,
 					unsigned int& destIndex, unsigned int& numDest
 			) const;
+
+			/**
+			 * Both of these Drop functions are dummy functions.
+			 * The Dynamic Finfo has to handle these operations.
+			 */
+			void dropAll( Element* e ) const;
+			bool drop( Element* e, unsigned int i ) const;
 
 			/**
 			 * The Ftype knows how to do this conversion.

@@ -90,6 +90,7 @@
  */
 
 #include "moose.h"
+#include "../element/Neutral.h"
 #include "ClockJob.h"
 
 const Cinfo* initClockJobCinfo()
@@ -289,32 +290,77 @@ void ClockJob::reschedFunc( const Conn& c )
 	static_cast< ClockJob* >( c.data() )->reschedFuncLocal(
 					c.targetElement() );
 }
+
+	class TickSeq {
+		public:
+				TickSeq()
+				{;}
+
+				TickSeq( unsigned int id)
+						: e_( Element::element( id ) )
+				{
+						get< double >( e_, "dt", dt_ );
+						get< int >( e_, "stage", stage_ );
+				}
+
+				bool operator<( const TickSeq& other ) const {
+					if ( dt_ < other.dt_ ) return 1;
+					if ( dt_ == other.dt_ && stage_ < other.stage_ )
+							return 1;
+					return 0;
+				}
+
+				Element* element() {
+						return e_;
+				}
+
+		private:
+				Element* e_;
+				double dt_;
+				int stage_;
+	};
 void ClockJob::reschedFuncLocal( Element* e )
 {
-		/*
-			if ( tick_ )
-				delete ( tick_ );
-			tick_ = 0;
-			vector< Field > f;
-			Field kids = field( "processOut" );
-			kids->dest( f, this );
-			vector< ClockTickMsgSrc > ticks;
-			for ( unsigned long i = 0; i < f.size(); i++ )
-	 			ticks.push_back( 
-					ClockTickMsgSrc( this, f[i].getElement() , i )
-				);
-			sort( ticks.begin(), ticks.end() );
-			vector< ClockTickMsgSrc >::iterator j;
-			ClockTickMsgSrc** currTick = &tick_;
-			ClockTickMsgSrc* prev = tick_;
-			for ( j = ticks.begin(); j != ticks.end(); j++ ) {
-				*currTick = new ClockTickMsgSrc( *j );
-				prev = *currTick;
-				currTick = (*currTick)->next();
-			}
-			reschedSrc_.send();
-			*/
+
+	vector< unsigned int > childList = Neutral::getChildList( e );
+	if ( childList.size() == 0 )
+			return;
+	vector< TickSeq > tickList;
+	vector< unsigned int >::iterator i;
+	for ( i = childList.begin(); i != childList.end(); i++ )
+		tickList.push_back( TickSeq( *i ) );
+
+	vector< TickSeq >::iterator j;
+	for ( j = tickList.begin(); j != tickList.end(); j++ )
+			clearMessages( j->element() );
+	sort( tickList.begin(), tickList.end() );
+
+	Element* last = tickList.front().element();
+	e->findFinfo( "start" )->add( last, e, e->findFinfo( "prev" ) );
+	for ( j = tickList.begin() + 1; j != tickList.end(); j++ ) {
+			buildMessages( last, j->element() );
+			last = j->element();
+	}
 }
+
+/**
+ * ClearMessages removes the next/prev messages from each Tick.
+ * It does not touch the process messages from the Tick to the 
+ * objects it controls.
+ */
+void ClockJob::clearMessages( Element* e )
+{
+	e->findFinfo( "prev" )->dropAll( e );
+}
+
+/**
+ * BuildMessages sets up the next/prev messages for each Tick.
+ */
+void ClockJob::buildMessages( Element* last, Element* e )
+{
+	last->findFinfo( "next" )->add( last, e, e->findFinfo( "prev" ) );
+}
+
 
 /**
  * This function handles any changes to dt in the ticks. This means
