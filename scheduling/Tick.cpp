@@ -60,7 +60,7 @@ const Cinfo* initTickCinfo()
 			RFCAST( &Tick::incrementTick ) ),
 		// The second entry handles requests to send nextTime_ back
 		// to the previous tick.
-		TypeFuncPair( Ftype1< double >::global(), 
+		TypeFuncPair( Ftype0::global(), 
 			RFCAST( &Tick::handleNextTimeRequest ) ),
 		// The third entry sends nextTime_ value
 		// to the previous tick.
@@ -295,7 +295,7 @@ void Tick::innerIncrementTick(
 		Element* e, ProcInfo info, double prevTickTime )
 {
 	if ( next_ ) {
-		if ( nextTime_ < nextTickTime_ ) {
+		if ( nextTime_ <= nextTickTime_ ) {
 			info->currTime_ = nextTime_;
 			info->dt_ = dt_;
 			send1< ProcInfo >( e, processSlot, info );
@@ -309,11 +309,10 @@ void Tick::innerIncrementTick(
 			send2< ProcInfo, double >(
 							e, nextSlot, info, nextTime_ );
 		}
-		if ( nextTickTime_ < nextTime_ )
-			// return; 
-			// Not sure if I should just fall through or not
-			// return anything
-			;
+		if ( nextTickTime_ < nextTime_ ) {
+			send1< double >( e, returnNextTimeSlot, nextTickTime_ );
+			return;
+		}
 	} else {
 		info->currTime_ = nextTime_;
 		info->dt_ = dt_;
@@ -344,10 +343,10 @@ void Tick::updateNextTickTime( Element* e )
 	// As with all of these, we cannot do any of this in parallel
 	// Here we are simply setting the local value of nextTickTime_
 	// to the nextTime_ value of the next tick.
-	SimpleElement* se = static_cast< SimpleElement* >( e );
+	// SimpleElement* se = static_cast< SimpleElement* >( e );
 	
 	next_ = ( 
-		se->connSrcBegin( nextSlot ) == se->connSrcEnd( nextSlot )
+		e->connSrcBegin( nextSlot ) < e->connSrcEnd( nextSlot )
 	);
 	if ( next_ ) {
 		// This asks for the nextTime_ of the next tick
@@ -355,6 +354,9 @@ void Tick::updateNextTickTime( Element* e )
 
 		// This sends local nextTime_ to previous tick.
 		send1< double >( e, returnNextTimeSlot, nextTime_ );
+
+		// This asks the next Tick to resched itself.
+		send0( e, reschedSlot );
 	} else {
 		nextTickTime_ = 0;
 	}
@@ -362,7 +364,7 @@ void Tick::updateNextTickTime( Element* e )
 
 /**
  * Reinit is used to set the simulation time back to zero for itself,
- * and to trigger reinit in all targets.
+ * and to trigger reinit in all targets, and to go on to the next tick
  */
 void Tick::reinit( const Conn& c, ProcInfo info )
 {
@@ -372,6 +374,8 @@ void Tick::reinit( const Conn& c, ProcInfo info )
 	info->currTime_ = 0.0;
 	info->dt_ = t->dt_;
 	send1< ProcInfo >( c.targetElement(), reinitSlot, info );
+	if ( t->next_ )
+		send1< ProcInfo >( c.targetElement(), reinitNextSlot, info );
 }
 
 /**

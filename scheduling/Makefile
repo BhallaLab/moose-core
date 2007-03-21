@@ -13,6 +13,7 @@ TARGET = scheduling.o
 OBJ = \
 	ClockJob.o	\
 	Tick.o	\
+	SchedTests.o	\
 
 HEADERS = \
 	../basecode/header.h \

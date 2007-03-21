@@ -1478,7 +1478,7 @@ specialized scheduling code to use distinct objects and clean messaging.
 It is still a bit commplex, but no more than the algorithm demands.
 At this time I don't need the Sched object at all, a Neutral will do.
 Next stages:
-- complete the sorting and message set up in the Clock Job
++ complete the sorting and message set up in the Clock Job
 - complete unit tests for the scheduler
 - Implement the SLI drivers for the scheduler: setclock, useclock and so on.
 - Unit test for biophysics objects.
@@ -1493,3 +1493,12 @@ been implemented yet for Finfos. So I went to all the Finfos and did
 the implementation. This required that Elements handle the four Conn 
 access functions: connSrcBegin/End and connDestBegin/End.
 Compiled, no unit tests yet.
+This was checked in as revision 49.
+
+Put in a utility function Neutral::create for creating objects.
+Fixed some bugs in the recent implementation of the dropAll in several
+of the Finfo.cpps.
+Further work on implementation of the scheduling.
+Implemented and passed unit tests for scheduling.
+
+=============================================================================

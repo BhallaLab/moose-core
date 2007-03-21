@@ -27,8 +27,14 @@ class Neutral
 			static unsigned int getParent( const Element* e );
 			static vector< unsigned int > getChildList(
 							const Element* e );
-			static void create( const Conn&,
+
+			// The m in the name is to avoid confusion with the utility
+			// function create below.
+			static void mcreate( const Conn&,
 							const string cinfo, const string name );
+			static Element* create(
+				const string& cinfo, const string& name, 
+				Element* parent );
 			static void destroy( const Conn& c );
 			static void setName( const Conn&, const string s );
 			static void lookupChild( const Conn&, const string s );

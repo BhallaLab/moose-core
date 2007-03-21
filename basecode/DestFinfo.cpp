@@ -57,8 +57,8 @@ void DestFinfo::dropAll( Element* e ) const
 	i = e->connDestEnd( destIndex_ );
 	unsigned int end = i->sourceIndex( e );
 
-	for ( unsigned int j = end - 1; j >= begin; j-- )
-		e->disconnect( j );
+	for ( unsigned int j = end; j > begin; j-- )
+		e->disconnect( j - 1 );
 }
 
 /**

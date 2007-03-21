@@ -7,29 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-/*
-#include "header.h"
-#include <map>
-#include "Cinfo.h"
-#include "MsgSrc.h"
-#include "MsgDest.h"
-#include "SimpleElement.h"
-#include "send.h"
-#include "DynamicFinfo.h"
-#include "ValueFinfo.h"
-#include "DerivedFtype.h"
-#include "Ftype2.h"
-#include "ValueFtype.h"
-#include "SrcFinfo.h"
-#include "DestFinfo.h"
-#include "SharedFtype.h"
-#include "SharedFinfo.h"
-#include "LookupFinfo.h"
-#include "LookupFtype.h"
-*/
-
 #include "moose.h"
-
 #include "Neutral.h"
 
 
@@ -89,7 +67,7 @@ const Cinfo* initNeutralCinfo()
 		new DestFinfo( "child", Ftype1< int >::global(),
 			reinterpret_cast< RecvFunc >( &Neutral::childFunc ) ),
 		new DestFinfo( "create", Ftype2< string, string >::global(),
-			reinterpret_cast< RecvFunc >( &Neutral::create ) ),
+			reinterpret_cast< RecvFunc >( &Neutral::mcreate ) ),
 		new DestFinfo( "destroy", Ftype0::global(),
 			&Neutral::destroy ),
 
@@ -177,9 +155,11 @@ void Neutral::setName( const Conn& c, const string s )
 // Perhaps this should take a Cinfo* for the first arg, except that
 // I don't want to add yet another class into the header.
 // An alternative would be to use an indexed lookup for all Cinfos
-void Neutral::create( const Conn& conn,
+void Neutral::mcreate( const Conn& conn,
 				const string cinfo, const string name )
 {
+		create( cinfo, name, conn.targetElement() );
+/*
 		Element* e = conn.targetElement();
 
 		// Need to check here if the name is an existing one.
@@ -194,6 +174,29 @@ void Neutral::create( const Conn& conn,
 			cout << "Error: Neutral::create: class " << cinfo << 
 					" not found\n";
 		}
+*/
+}
+
+/**
+ * Underlying utility function for creating objects.
+ */
+Element* Neutral::create(
+		const string& cinfo, const string& name, Element* parent )
+{
+	// Need to check here if the name is an existing one.
+	const Cinfo* c = Cinfo::find( cinfo );
+	if ( c ) {
+		Element* kid = c->create( name );
+		// Here a global absolute or a relative finfo lookup for
+		// the childSrc field would be useful.
+		parent->findFinfo( "childSrc" )->
+				add( parent, kid, kid->findFinfo( "child" ) ); 
+		return kid;
+	} else {
+		cout << "Error: Neutral::create: class " << cinfo << 
+				" not found\n";
+	}
+	return 0;
 }
 
 void Neutral::destroy( const Conn& c )
