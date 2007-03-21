@@ -1485,3 +1485,11 @@ Next stages:
 - Connect scheduler up to biophysics objects, unit tests for action potl
 
 =============================================================================
+March 21, 2007
+
+Next stage implementation of ClockJob. This time I put in the sorting of
+ticks. This involves deletion of messages, which turned out not to have
+been implemented yet for Finfos. So I went to all the Finfos and did
+the implementation. This required that Elements handle the four Conn 
+access functions: connSrcBegin/End and connDestBegin/End.
+Compiled, no unit tests yet.

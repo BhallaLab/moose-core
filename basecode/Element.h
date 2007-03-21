@@ -47,6 +47,40 @@ class Element
 		/// Returns the size of the conn vector.
 		virtual unsigned int connSize() const = 0;
 
+		/**
+		 * This function returns the iterator to conn_ at the beginning
+		 * of the Src range specified by i. Note that we don't need
+		 * to know how the Element handles MsgSrcs here.
+		 */
+		virtual vector< Conn >::const_iterator
+				connSrcBegin( unsigned int src ) const = 0;
+
+		/**
+		 * This function returns the iterator to conn_ at the end
+		 * of the Src range specified by i. End here is in the same
+		 * sense as the end() operator on vectors: one past the last
+		 * entry. Note that we don't need
+		 * to know how the Element handles MsgSrcs here.
+		 */
+		virtual vector< Conn >::const_iterator
+				connSrcEnd( unsigned int src ) const = 0;
+
+		/**
+		 * This function returns the iterator to conn_ at the beginning
+		 * of the Dest range specified by i.
+		 */
+		virtual vector< Conn >::const_iterator
+				connDestBegin( unsigned int dest ) const = 0;
+
+		/**
+		 * This function returns the iterator to conn_ at the end
+		 * of the Dest range specified by i. End here is in the same
+		 * sense as the end() operator on vectors: one past the last
+		 * entry.
+		 */
+		virtual vector< Conn >::const_iterator
+				connDestEnd( unsigned int dest ) const = 0;
+
 		/// Sets up a connection between previously created Conn entries
 		virtual void connect( unsigned int myConn,
 			Element* targetElement, unsigned int targetConn) = 0;

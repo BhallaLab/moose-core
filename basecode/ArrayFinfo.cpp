@@ -58,10 +58,7 @@ const Finfo* ArrayFinfo::match( Element* e, const string& s ) const
 	return 0;
 }
 
-/**
-* This operation should never be called: The Dynamic Finfo should
-* handle it.
-*/
+/// Dummy function: DynamicFinfo should handle
 bool ArrayFinfo::add( 
 	Element* e, Element* destElm, const Finfo* destFinfo
 	) const 
@@ -70,15 +67,25 @@ bool ArrayFinfo::add(
 		return 0;
 }
 			
-/**
-* This operation should never be called: The Dynamic Finfo should
-* handle it.
-*/
+/// Dummy function: DynamicFinfo should handle
 bool ArrayFinfo::respondToAdd(
 		Element* e, Element* src, const Ftype *srcType,
 		FuncList& srcFl, FuncList& returnFl,
 		unsigned int& destIndex, unsigned int& numDest
 ) const
+{
+		assert( 0 );
+		return 0;
+}
+
+/// Dummy function: DynamicFinfo should handle
+void ArrayFinfo::dropAll( Element* e ) const
+{
+		assert( 0 );
+}
+
+/// Dummy function: DynamicFinfo should handle
+bool ArrayFinfo::drop( Element* e, unsigned int i ) const
 {
 		assert( 0 );
 		return 0;

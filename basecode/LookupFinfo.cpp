@@ -83,6 +83,19 @@ bool LookupFinfo::respondToAdd(
 }
 
 
+/// Dummy function: DynamicFinfo should handle
+void LookupFinfo::dropAll( Element* e ) const
+{
+		assert( 0 );
+}
+
+/// Dummy function: DynamicFinfo should handle
+bool LookupFinfo::drop( Element* e, unsigned int i ) const
+{
+		assert( 0 );
+		return 0;
+}
+
 
 #ifdef DO_UNIT_TESTS
 #include "moose.h"

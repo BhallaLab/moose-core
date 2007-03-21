@@ -85,6 +85,12 @@ class LookupFinfo: public Finfo
 					unsigned int& destIndex, unsigned int& numDest
 			) const;
 
+			/// This is a dummy function. The Dynamic Finfo handles it.
+			void dropAll( Element* e ) const;
+
+			/// This is a dummy function. The Dynamic Finfo handles it.
+			bool drop( Element* e, unsigned int i ) const;
+
 			/**
 			 * The Ftype knows how to do this conversion.
 			 */
