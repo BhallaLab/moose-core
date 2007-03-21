@@ -44,12 +44,8 @@ class ThisFinfo: public Finfo
 					unsigned int& destIndex, unsigned int& numDest
 			) const;
 			
-			/*
-			virtual bool drop( Element* e, unsigned int i ) const = 0;
-
-			virtual bool respondToDrop( Element* e, unsigned int i )
-					const = 0;
-					*/
+			void dropAll( Element* e ) const;
+			bool drop( Element* e, unsigned int i ) const;
 
 			unsigned int srcList(
 					const Element* e, vector< Conn >& list ) const;

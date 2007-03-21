@@ -42,6 +42,12 @@ class ClockJob
 		static void dtFunc( const Conn& c, double dt );
 		void dtFuncLocal( Element* e, double dt );
 
+		//////////////////////////////////////////////////////////
+		//  Utility functions
+		//////////////////////////////////////////////////////////
+		void clearMessages( Element* e );
+		void buildMessages( Element* last, Element* e );
+
 	private:
 		double runTime_;
 		double currentTime_;

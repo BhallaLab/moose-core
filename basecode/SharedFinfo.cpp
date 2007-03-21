@@ -112,6 +112,78 @@ bool SharedFinfo::respondToAdd(
 	}
 	return 0;
 }
+
+/**
+ * Deletes all connections for this SharedFinfo by iterating through the
+ * list of connections. This is non-trivial, because the connection
+ * indices change as we delete them.
+ * We use two attributes of the connections: 
+ * First, they are sequential.
+ * Second, deleting higher connections does not affect lower connection
+ * indices.
+ * So we just find the range and delete them in reverse order.
+ * Note that we do not notify the target Finfo or Element that these
+ * connections are being deleted. This operation must be guaranteed to 
+ * have no other side effects.
+ * For the SharedFinfo we have the extra issue that we do not know
+ * ahead of time whether the messages are going to be on the MsgSrc
+ * vector or the MsgDest vector. 
+ */
+void SharedFinfo::dropAll( Element* e ) const
+{
+	vector< Conn >::const_iterator i;
+	unsigned int begin;
+	unsigned int end;
+	// This assumes that the child message is not a shared message.
+	if ( msgIndex_ == 0 )
+			return;
+
+	if ( numSrc_ == 0 ) { // Messages are on the MsgDest vector.
+		begin = e->connDestBegin( msgIndex_ )->sourceIndex( e );
+		end = e->connDestEnd( msgIndex_ )->sourceIndex( e );
+		for ( unsigned int j = end - 1; j >= begin; j-- )
+			e->disconnect( j );
+	} else { // Otherwise put on msgSrc Vector
+		begin = e->connSrcBegin( msgIndex_ )->sourceIndex( e );
+		end = e->connSrcEnd( msgIndex_ )->sourceIndex( e );
+		for ( unsigned int j = end - 1; j >= begin; j-- )
+			e->disconnect( j );
+	}
+}
+
+/**
+ * Deletes a specific connection into this SharedFinfo. The index is 
+ * numbered within this Finfo because the most common use case is to
+ * pick a specific index from a vector of Conns coming into this
+ * Finfo.
+ * For the SharedFinfo we have the extra issue that we do not know
+ * ahead of time whether the messages are going to be on the MsgSrc
+ * vector or the MsgDest vector. 
+ */
+bool SharedFinfo::drop( Element* e, unsigned int i ) const
+{
+	if ( msgIndex_ == 0 ) {
+		cout << "SharedFinfo::drop: No messages found\n";
+		return 0;
+	}
+
+	unsigned int begin;
+	unsigned int end;
+	if ( numSrc_ == 0 ) { // Messages are on the MsgDest vector
+		begin = e->connDestBegin( msgIndex_ )->sourceIndex( e );
+		end = e->connDestEnd( msgIndex_ )->sourceIndex( e );
+	} else {
+		begin = e->connSrcBegin( msgIndex_ )->sourceIndex( e );
+		end = e->connSrcEnd( msgIndex_ )->sourceIndex( e );
+	}
+
+	i += begin;
+	if ( i < end ) {
+		e->disconnect( i );
+		return 1;
+	}
+	return 0;
+}
 			
 unsigned int SharedFinfo::srcList(
 					const Element* e, vector< Conn >& list ) const

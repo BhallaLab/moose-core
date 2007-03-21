@@ -51,6 +51,8 @@ class SharedFinfo: public Finfo
 					unsigned int& destIndex, unsigned int& numDest
 			) const;
 			
+			void dropAll( Element* e ) const;
+			bool drop( Element* e, unsigned int i ) const;
 
 			unsigned int srcList(
 					const Element* e, vector< Conn >& list ) const;
