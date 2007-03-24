@@ -52,12 +52,12 @@ class ExtFieldFinfo: public Finfo
 			void dropAll( Element* e ) const;
 			bool drop( Element* e, unsigned int i ) const;
 			
-			unsigned int srcList(
+			unsigned int numIncoming( const Element* e ) const;
+			unsigned int numOutgoing( const Element* e ) const;
+			unsigned int incomingConns(
 					const Element* e, vector< Conn >& list ) const;
-
-			unsigned int destList(
+			unsigned int outgoingConns(
 					const Element* e, vector< Conn >& list ) const;
-
 
 			/**
 			 * The Ftype knows how to do this conversion.

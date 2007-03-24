@@ -1479,7 +1479,7 @@ It is still a bit commplex, but no more than the algorithm demands.
 At this time I don't need the Sched object at all, a Neutral will do.
 Next stages:
 + complete the sorting and message set up in the Clock Job
-- complete unit tests for the scheduler
++ complete unit tests for the scheduler
 - Implement the SLI drivers for the scheduler: setclock, useclock and so on.
 - Unit test for biophysics objects.
 - Connect scheduler up to biophysics objects, unit tests for action potl
@@ -1501,4 +1501,15 @@ of the Finfo.cpps.
 Further work on implementation of the scheduling.
 Implemented and passed unit tests for scheduling.
 
+Checked in as revision 50.
+
+=============================================================================
+March 23, 2007
+Implementing the SLI drivers for scheduling. The useclock function requires
+the use of Finfo::numIncoming and Finfo::numOutgoing. So another round
+through all Finfos to implement these functions.
+Then another pass through the GenesisParser and Shell to set up the 
+function calls. Still a few loose ends, but the existing unit tests pass.
+
+Checked in.
 =============================================================================

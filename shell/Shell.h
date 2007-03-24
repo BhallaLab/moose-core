@@ -53,6 +53,12 @@ class Shell
 		static void setField( const Conn& c, 
 						unsigned int id, string field, string value );
 
+		static void setClock( const Conn& c, int clockNo, double dt,
+				int stage );
+		static void useClock( const Conn& c,
+			unsigned int tickId,
+			vector< unsigned int > path, string function );
+
 		/*
 		 * These functions also vanish. They are already on Neutral.
 		 *

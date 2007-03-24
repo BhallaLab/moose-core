@@ -83,15 +83,35 @@ bool DestFinfo::drop( Element* e, unsigned int i ) const
 	}
 	return 0;
 }
+
+unsigned int DestFinfo::numIncoming( const Element* e ) const
+{
+	return ( e->connDestEnd( destIndex_ ) - e->connDestBegin( destIndex_ ) );
+}
+
+// Doesn't handle outgoing messages yet, probably a DynamicFinfo task.
+unsigned int DestFinfo::numOutgoing( const Element* e ) const
+{
+	return 0;
+}
 			
-/// \Todo: implement the lookup of the list.
-unsigned int DestFinfo::srcList(
+/**
+ * incomingConns does a simple insertion of the dest Conn list for this
+ * Finfo into the vector. It does NOT check for duplications as
+ * that would turn it into an n^2 operation.
+ */
+unsigned int DestFinfo::incomingConns(
 					const Element* e, vector< Conn >& list ) const
 {
+	list.insert( list.end(), e->connDestBegin( destIndex_ ),
+					e->connDestEnd( destIndex_ ) );
 	return list.size();
 }
 
-unsigned int DestFinfo::destList(
+/**
+ * does not do anything: this is a job for DynamicFinfo.
+ */
+unsigned int DestFinfo::outgoingConns(
 					const Element* e, vector< Conn >& list ) const
 {
 	return list.size();
