@@ -70,18 +70,32 @@ class Finfo
 			 */
 
 			/**
+			 * This function counts the number of incoming connections
+			 * on this Finfo.
+			 */
+			virtual unsigned int numIncoming( const Element* e )
+					const = 0;
+
+			/**
+			 * This function counts the number of outgoing connections
+			 * on this Finfo.
+			 */
+			virtual unsigned int numOutgoing( const Element* e )
+					const = 0;
+
+			/**
 			 * This function returns a vector all of connections 
 			 * arriving at this Finfo.
 			 * \todo should rename as incomingConns
 			 */
-			virtual unsigned int srcList( 
+			virtual unsigned int incomingConns(
 					const Element* e, vector< Conn >& list ) const = 0;
 			/**
 			 * This function returns a vector all of connections 
 			 * arriving at this Finfo.
 			 * \todo should rename as outgoingConns
 			 */
-			virtual unsigned int destList( 
+			virtual unsigned int outgoingConns(
 					const Element* e, vector< Conn >& list ) const = 0;
 
 			/**

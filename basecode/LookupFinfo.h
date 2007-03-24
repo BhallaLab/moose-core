@@ -105,11 +105,21 @@ class LookupFinfo: public Finfo
 					return 0;
 			}
 
-			unsigned int srcList(
+			// The following 4 functions are dummies because the
+			// DynamicFinfo deals with them.
+			unsigned int numIncoming( const Element* e ) const {
+					return 0;
+			}
+
+			unsigned int numOutgoing( const Element* e ) const {
+					return 0;
+			}
+
+			unsigned int incomingConns(
 					const Element* e, vector< Conn >& list ) const {
 					return 0;
 			}
-			unsigned int destList(
+			unsigned int outgoingConns(
 					const Element* e, vector< Conn >& list ) const {
 					return 0;
 			}

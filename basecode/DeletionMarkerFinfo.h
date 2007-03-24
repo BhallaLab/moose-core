@@ -41,18 +41,22 @@ class DeletionMarkerFinfo: public Finfo
 			void dropAll( Element* e ) const { ; }
 			bool drop( Element* e, unsigned int i ) const { return 0; }
 
-			unsigned int srcList(
-					const Element* e, vector< Conn >& list ) const
-			{
+			unsigned int numIncoming( const Element* e ) const {
 					return 0;
 			}
 
-			unsigned int destList(
-					const Element* e, vector< Conn >& list ) const
-			{
+			unsigned int numOutgoing( const Element* e ) const {
 					return 0;
 			}
 
+			unsigned int incomingConns(
+					const Element* e, vector< Conn >& list ) const {
+					return 0;
+			}
+			unsigned int outgoingConns(
+					const Element* e, vector< Conn >& list ) const {
+					return 0;
+			}
 
 			/**
 			 * Call the RecvFunc with the arguments in the string.

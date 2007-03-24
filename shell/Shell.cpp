@@ -9,6 +9,7 @@
 **********************************************************************/
 
 #include "moose.h"
+#include "../element/Neutral.h"
 #include "Shell.h"
 
 const unsigned int Shell::BAD_ID = ~0;
@@ -23,7 +24,6 @@ const Cinfo* initShellCinfo()
 	 * This is a shared message to talk to the GenesisParser and
 	 * perhaps to other parsers like the one for SWIG and Python
 	 */
-
 	static TypeFuncPair parserTypes[] =
 	{
 		// Setting cwe
@@ -64,6 +64,17 @@ const Cinfo* initShellCinfo()
 		TypeFuncPair( 
 				Ftype3< unsigned int, string, string >::global(),
 				RFCAST( &Shell::setField ) ),
+
+		// Handle requests for setting values for a clock tick.
+		// args are clockNo, dt, stage
+		TypeFuncPair( Ftype3< int, double, int >::global(),
+				RFCAST( &Shell::setClock ) ),
+
+		// Handle requests to assign a path to a given clock tick.
+		// args are tick id, path, function
+		TypeFuncPair( 
+				Ftype3< unsigned int, vector< unsigned int >, string >::global(),
+				RFCAST( &Shell::useClock ) ),
 	};
 
 
@@ -377,6 +388,93 @@ void Shell::setField( const Conn& c,
 }
 
 
+// Static function
+/**
+ * Assigns dt and optionally stage to a clock tick. If the Tick does
+ * not exist, create it. The ClockJob and Tick0 are created by default.
+ * I keep this function in the Shell because we'll want something
+ * similar in Python. Otherwise it can readily go into the
+ * GenesisParserWrapper.
+ */
+void Shell::setClock( const Conn& c, int clockNo, double dt,
+				int stage )
+{
+	Shell* sh = static_cast< Shell* >( c.data() );
+	char line[20];
+	sprintf( line, "tick%d", clockNo );
+	string TickName = line;
+	string clockPath = string( "/sched/cj/" + TickName );
+	unsigned int id = sh->path2eid( clockPath, "/" );
+	unsigned int cj = sh->path2eid( "/sched/cj", "/" );
+	Element* tick = 0;
+	if ( id == 0 ) {
+		tick = Neutral::create( 
+						"Tick", TickName, Element::element( cj ) );
+	} else {
+		tick = Element::element( id );
+	}
+	assert ( tick != 0 && tick != Element::root() );
+	set< double >( tick, "dt", dt );
+	set< int >( tick, "stage", stage );
+	set( Element::element( cj ), "resched" );
+	// Call the function
+}
+
+// static function
+/**
+ * Sets up the path controlled by a given clock tick. The final 
+ * argument sets up the target finfo for the message. Usually this
+ * is 'process' but some objects need multi-phase clocking so we
+ * add the 'function' argument to specify what the target finfo is.
+ * The function does a unique merge of the path
+ * with the existing targets of the clock tick by checking if the
+ * elements on the path are already tied to this tick. (This avoids
+ * the N^2 problem of matching them against the list). If they are
+ * on some other tick that message is dropped and this new one added.
+ * The function does not reinit the clocks or reschedule them: the
+ * simulation can resume right away.
+ * It is the job of the parser to provide defaults
+ * and to decode the path list from wildcards.
+ */
+void Shell::useClock( const Conn& c,
+	unsigned int tickId, vector< unsigned int > path, string function )
+{
+	assert( tickId != 0 );
+	Element* tick = Element::element( tickId );
+	assert ( tick != 0 );
+	const Finfo* tickProc = tick->findFinfo( "process" );
+
+	vector< Conn > list;
+
+	// Scan through path and check for existing process connections.
+	// If they are to the same tick, skip the object
+	// If they are to a different tick, delete the connection.
+	vector< unsigned int >::iterator i;
+	for (i = path.begin(); i != path.end(); i++ ) {
+		assert ( *i != 0 );
+		Element* e = Element::element( *i );
+		assert ( e && e != Element::root() );
+		const Finfo* func = e->findFinfo( function );
+		if ( func ) {
+			if ( func->numIncoming( e ) == 0 ) {
+				tickProc->add( tick, e, func );
+			} else {
+				vector< Conn > list;
+				assert ( func->incomingConns( e, list ) > 0 );
+				if ( list[0].sourceElement() != tick ) {
+					func->dropAll( e );
+					tickProc->add( tick, e, func );
+				}
+			}
+		} else {
+			// This cannot be an 'assertion' error because the 
+			// user might do a typo.
+			cout << "Error: Shell::useClock: unknown function " <<
+					function << endl;
+		}
+	}
+}
+
 // Regular function
 unsigned int Shell::create( const string& type, const string& name, unsigned int parent )
 {
@@ -417,6 +515,7 @@ void Shell::destroy( unsigned int victim )
 
 	set( e, "destroy" );
 }
+
 
 //////////////////////////////////////////////////////////////////////
 // Deleted stuff.

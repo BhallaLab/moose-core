@@ -59,6 +59,13 @@ const Cinfo* initGenesisParserCinfo()
 		// Setting a field value as a string: send out request:
 		TypeFuncPair( // object, field, value 
 				Ftype3< unsigned int, string, string >::global(), 0 ),
+
+		// Setting values for a clock tick: setClock
+		TypeFuncPair( // clockNo, dt, stage
+				Ftype3< int, double, int >::global(), 0 ),
+		// Assigning path and function to a clock tick: useClock
+		TypeFuncPair( // tick id, path, function
+				Ftype3< unsigned int, vector< unsigned int >, string >::global(), 0 ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -123,6 +130,10 @@ static const unsigned int requestFieldSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 5;
 static const unsigned int setFieldSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 6;
+static const unsigned int setClockSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 7;
+static const unsigned int useClockSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 8;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -779,9 +790,13 @@ void do_step( int argc, const char** const argv, Id s )
 void do_setclock( int argc, const char** const argv, Id s )
 {
 	if ( argc == 3 ) {
-	;	// s->setClockFuncLocal( argv[1], argv[2], "0" );
+			send3< int, double, int >( Element::element( s ),
+				setClockSlot, 
+				atoi( argv[1] ), atof( argv[2] ), 0 );
 	} else if ( argc == 4 ) {
-	;	// s->setClockFuncLocal( argv[1], argv[2], argv[3] );
+			send3< int, double, int >( Element::element( s ),
+				setClockSlot, 
+				atoi( argv[1] ), atof( argv[2] ), atoi( argv[3] ) );
 	} else {
 		cout << "usage:: " << argv[0] << " clockNum dt [stage]\n";
 	}
@@ -798,13 +813,23 @@ void do_showclocks( int argc, const char** const argv, Id s )
 
 void do_useclock( int argc, const char** const argv, Id s )
 {
+	char tickName[40];
+	string func = "process";
 	if ( argc == 3 ) {
+		sprintf( tickName, "/sched/cj/t%s", argv[2] );
 	;	// s->useClockFuncLocal( string( argv[1] ) + "/process", argv[2] );
 	} else if ( argc == 4 ) {
-	;	// s->useClockFuncLocal( string( argv[1] ) + "/" + argv[2], argv[3] );
+		sprintf( tickName, "/sched/cj/t%s", argv[3] );
+		func = argv[2];
 	} else {
 		cout << "usage:: " << argv[0] << " path [funcname] clockNum\n";
 	}
+	Id tickId = GenesisParserWrapper::path2eid( tickName, s );
+	vector< unsigned int > path; /// \todo. this has yet to be done.
+	send3< unsigned int, vector< unsigned int >, string >(
+		Element::element( s ),
+		useClockSlot, 
+		tickId, path, func );
 }
 
 void do_show( int argc, const char** const argv, Id s )

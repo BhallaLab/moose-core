@@ -8,6 +8,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifndef _NEUTRAL_H
+#define _NEUTRAL_H
+
 /**
  * This class just supports the most basic object hierarchy stuff.
  * It can be both a parent and a child of objects.
@@ -44,3 +47,5 @@ class Neutral
 			static const unsigned int childIndex;
 			static vector< string > getFieldList( const Element* elm );
 };
+
+#endif // _NEUTRAL_H

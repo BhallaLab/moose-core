@@ -185,17 +185,43 @@ bool DynamicFinfo::drop( Element* e, unsigned int i ) const
 	}
 	return 0;
 }
-			
-unsigned int DynamicFinfo::srcList(
-	const Element* e, vector< Conn >& list ) const
+
+unsigned int DynamicFinfo::numIncoming( const Element* e ) const
 {
+	if ( destIndex_ != 0 ) {
+		return ( e->connDestEnd( destIndex_ ) -
+						e->connDestBegin( destIndex_ ) );
+	}
 	return 0;
 }
 
-unsigned int DynamicFinfo::destList(
+unsigned int DynamicFinfo::numOutgoing( const Element* e ) const
+{
+	if ( srcIndex_ != 0 ) {
+		return ( e->connSrcEnd( srcIndex_ ) -
+						e->connSrcBegin( srcIndex_ ) );
+	}
+	return 0;
+}
+			
+unsigned int DynamicFinfo::incomingConns(
 	const Element* e, vector< Conn >& list ) const
 {
-	return 0;
+	if ( destIndex_ != 0 ) {
+		list.insert( list.end(), e->connDestBegin( destIndex_ ),
+					e->connDestEnd( destIndex_ ) );
+	}
+	return list.size();
+}
+
+unsigned int DynamicFinfo::outgoingConns(
+	const Element* e, vector< Conn >& list ) const
+{
+	if ( srcIndex_ != 0 ) {
+		list.insert( list.end(), e->connSrcBegin( srcIndex_ ),
+					e->connSrcEnd( srcIndex_ ) );
+	}
+	return list.size();
 }
 
 

@@ -80,13 +80,28 @@ bool SrcFinfo::drop( Element* e, unsigned int i ) const
 	}
 	return 0;
 }
+
+/**
+ * for now numIncoming does not look at possible future internal
+ * messages or relayed messages.
+ */
+unsigned int SrcFinfo::numIncoming( const Element* e ) const
+{
+		return 0;
+}
+
+unsigned int SrcFinfo::numOutgoing( const Element* e ) const
+{
+	return ( e->connSrcEnd( srcIndex_ ) - e->connSrcBegin( srcIndex_ ));
+}
 			
 /**
  * Here we look up all the inputs to this MsgSrc, especially the 
  * internal messages that deal with traversal.
+ * \todo: We don't yet have internal messages handled.
  * Return the list size.
  */
-unsigned int SrcFinfo::srcList(
+unsigned int SrcFinfo::incomingConns(
 				const Element* e, vector< Conn >& list ) const
 {
 	return list.size();
@@ -96,9 +111,11 @@ unsigned int SrcFinfo::srcList(
  * Here we look up all the targets on this MsgSrc, and fill up the 
  * list. Return the list size.
  */
-unsigned int SrcFinfo::destList(
+unsigned int SrcFinfo::outgoingConns(
 				const Element* e, vector< Conn >& list ) const
 {
+	list.insert( list.end(), e->connSrcBegin( srcIndex_ ),
+					e->connSrcEnd( srcIndex_ ) );
 	return list.size();
 }
 
