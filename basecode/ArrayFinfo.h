@@ -69,11 +69,19 @@ class ArrayFinfo: public Finfo
 					return 0;
 			}
 
-			unsigned int srcList(
+			unsigned int numIncoming( const Element* e ) const {
+					return 0;
+			}
+
+			unsigned int numOutgoing( const Element* e ) const {
+					return 0;
+			}
+
+			unsigned int incomingConns(
 					const Element* e, vector< Conn >& list ) const {
 					return 0;
 			}
-			unsigned int destList(
+			unsigned int outgoingConns(
 					const Element* e, vector< Conn >& list ) const {
 					return 0;
 			}

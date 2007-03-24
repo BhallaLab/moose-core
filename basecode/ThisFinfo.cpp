@@ -44,14 +44,24 @@ bool ThisFinfo::drop( Element* e, unsigned int i ) const
 		assert( 0 );
 		return 0;
 }
+
+unsigned int ThisFinfo::numIncoming( const Element* e ) const
+{
+		return 0;
+}
+
+unsigned int ThisFinfo::numOutgoing( const Element* e ) const
+{
+		return 0;
+}
 			
-unsigned int ThisFinfo::srcList(
+unsigned int ThisFinfo::incomingConns(
 					const Element* e, vector< Conn >& list ) const
 {
 	return list.size();
 }
 
-unsigned int ThisFinfo::destList(
+unsigned int ThisFinfo::outgoingConns(
 					const Element* e, vector< Conn >& list ) const
 {
 	return list.size();

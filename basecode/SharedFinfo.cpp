@@ -185,16 +185,66 @@ bool SharedFinfo::drop( Element* e, unsigned int i ) const
 	return 0;
 }
 			
-unsigned int SharedFinfo::srcList(
-					const Element* e, vector< Conn >& list ) const
+/**
+ * The semantics of this are a bit tricky. Shared messages
+ * are usually both incoming and outgoing. So usually we will
+ * want to report the messages as both. What to do about the
+ * rare unidirectional cases (all incoming or all outgoing) ?
+ * The principle of least surprise suggests that we try to keep
+ * the behaviour the same in all cases. Furthermore, a user would
+ * normally query the appropriate direction case, where the
+ * answer would be right anyway. So, the numIncoming does the
+ * same as the numOutgoing function and reports the number of
+ * connections on the SharedFinfo without worrying about direction.
+ */
+unsigned int SharedFinfo::numIncoming( const Element* e ) const
 {
+	if ( msgIndex_ == 0 )
+			return 0;
+
+	if ( numSrc_ == 0 ) {
+		return ( 
+			e->connDestEnd( msgIndex_ ) - e->connDestBegin( msgIndex_ )
+		);
+	}
+
+	return (
+			e->connSrcEnd( msgIndex_ ) - e->connSrcBegin( msgIndex_ )
+		);
+}
+
+/**
+ * Does the same as numIncoming.
+ */
+unsigned int SharedFinfo::numOutgoing( const Element* e ) const
+{
+	return numIncoming( e );
+}
+
+/**
+ * Same issue of semantics. Here we report all connections regardless
+ * of direction.
+ */
+unsigned int SharedFinfo::incomingConns(
+				const Element* e, vector< Conn >& list ) const
+{
+	if ( msgIndex_ != 0 ) {
+		if ( numSrc_ == 0 ) {
+			list.insert( list.end(), e->connDestBegin( msgIndex_ ),
+					e->connDestEnd( msgIndex_ ) );
+		} else {
+			list.insert( list.end(), e->connSrcBegin( msgIndex_ ),
+					e->connSrcEnd( msgIndex_ ) );
+		}
+	}
+
 	return list.size();
 }
 
-unsigned int SharedFinfo::destList(
-					const Element* e, vector< Conn >& list ) const
+unsigned int SharedFinfo::outgoingConns(
+				const Element* e, vector< Conn >& list ) const
 {
-	return list.size();
+	return incomingConns( e, list );
 }
 
 /**

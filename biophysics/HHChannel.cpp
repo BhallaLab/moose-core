@@ -326,7 +326,7 @@ void HHChannel::innerReinitFunc( Element* e, ProcInfo info )
 	
 	vector< Conn > list;
 	useConcentration_ =
-			e->findFinfo( "concen" )->srcList( e, list ) > 0;
+			e->findFinfo( "concen" )->numIncoming( e ) > 0;
 
 	if ( useConcentration_ )
 		send2< double, double >( e, zGateSlot, conc_, Z_ );
