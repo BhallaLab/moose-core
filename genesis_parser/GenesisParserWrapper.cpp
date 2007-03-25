@@ -66,6 +66,13 @@ const Cinfo* initGenesisParserCinfo()
 		// Assigning path and function to a clock tick: useClock
 		TypeFuncPair( // tick id, path, function
 				Ftype3< unsigned int, vector< unsigned int >, string >::global(), 0 ),
+
+		// Getting a wildcard path of elements: send out request
+		// args are path, flag true for breadth-first list.
+		TypeFuncPair( Ftype2< string, bool >::global(), 0 ),
+		// Getting a wildcard path of elements: Recv the list.
+		TypeFuncPair( Ftype1< vector< unsigned int > >::global(),
+					RFCAST( &GenesisParserWrapper::recvWildcardList ) ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -134,6 +141,8 @@ static const unsigned int setClockSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 7;
 static const unsigned int useClockSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 8;
+static const unsigned int requestWildcardListSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 9;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -237,6 +246,14 @@ void GenesisParserWrapper::recvField( const Conn& c, string value )
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
 			( c.targetElement()->data() );
 	gpw->fieldValue_ = value;
+}
+
+void GenesisParserWrapper::recvWildcardList(
+	const Conn& c, vector< unsigned int > value )
+{
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( c.targetElement()->data() );
+	gpw->elist_ = value;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -817,19 +834,44 @@ void do_useclock( int argc, const char** const argv, Id s )
 	string func = "process";
 	if ( argc == 3 ) {
 		sprintf( tickName, "/sched/cj/t%s", argv[2] );
-	;	// s->useClockFuncLocal( string( argv[1] ) + "/process", argv[2] );
 	} else if ( argc == 4 ) {
 		sprintf( tickName, "/sched/cj/t%s", argv[3] );
 		func = argv[2];
 	} else {
 		cout << "usage:: " << argv[0] << " path [funcname] clockNum\n";
+		return;
 	}
+
 	Id tickId = GenesisParserWrapper::path2eid( tickName, s );
-	vector< unsigned int > path; /// \todo. this has yet to be done.
+	if ( tickId == Shell::BAD_ID ) {
+		cout << "Error:" << argv[0] << ": Invalid clockNumber " <<
+				tickName << "\n";
+		return;
+	}
+
+	string path = argv[1];
+	Element* e = Element::element( s );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( e->data() );
+	gpw->useClock( tickId, path, func, s );
+}
+
+void GenesisParserWrapper::useClock(
+	Id tickId, const string& path, const string& func, Id s )
+{
+	Element* e = Element::element( s );
+
+	// Here we use the default form which takes comma-separated lists
+	// but may scramble the order.
+	// This request elicits a return message to put the list in the
+	// elist_ field.
+
+	send2< string, bool >( e, requestWildcardListSlot, path, 0 );
+
 	send3< unsigned int, vector< unsigned int >, string >(
 		Element::element( s ),
 		useClockSlot, 
-		tickId, path, func );
+		tickId, elist_, func );
 }
 
 void do_show( int argc, const char** const argv, Id s )
@@ -1367,22 +1409,22 @@ void GenesisParserWrapper::gpAssert(
 void GenesisParserWrapper::unitTest()
 {
 	cout << "\nDoing GenesisParserWrapper tests";
-	gpAssert( "le", "b c shell " );
+	gpAssert( "le", "sched b c shell " );
 	gpAssert( "create neutral /foo", "" );
-	gpAssert( "le", "b c shell foo " );
+	gpAssert( "le", "sched b c shell foo " );
 	gpAssert( "ce /foo", "" );
 	gpAssert( "le", "" );
 	gpAssert( "pwe", "/foo " );
 	gpAssert( "create neutral ./bar", "" );
 	gpAssert( "le", "bar " );
 	gpAssert( "le /foo", "bar " );
-	gpAssert( "le ..", "b c shell foo " );
+	gpAssert( "le ..", "sched b c shell foo " );
 	gpAssert( "ce bar", "" );
 	gpAssert( "pwe", "/foo/bar " );
 	gpAssert( "ce ../..", "" );
-	gpAssert( "le", "b c shell foo " );
+	gpAssert( "le", "sched b c shell foo " );
 	gpAssert( "delete /foo", "" );
-	gpAssert( "le", "b c shell " );
+	gpAssert( "le", "sched b c shell " );
 	gpAssert( "le /foo", "cannot find object '/foo' " );
 	gpAssert( "echo foo", "foo " );
 	gpAssert( "echo bar -n", "bar " );
@@ -1412,6 +1454,12 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "alias gf getfield", "" );
 	gpAssert( "alias", "gf\tgetfield shf\tshowfield " );
 	gpAssert( "alias gf", "getfield " );
+	gpAssert( "le /sched/cj", "t0 " );
+	gpAssert( "setclock 1 0.1", "" );
+	gpAssert( "le /sched/cj", "t0 t1 " );
+	gpAssert( "echo {getfield /sched/cj/t0 dt}", "1 " );
+	gpAssert( "echo {getfield /sched/cj/t1 dt}", "0.1 " );
+	gpAssert( "useclock /##[TYPE=Compartment] 1", "" );
 	cout << "\n";
 }
 #endif
