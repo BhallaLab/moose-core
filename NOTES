@@ -1480,7 +1480,7 @@ At this time I don't need the Sched object at all, a Neutral will do.
 Next stages:
 + complete the sorting and message set up in the Clock Job
 + complete unit tests for the scheduler
-- Implement the SLI drivers for the scheduler: setclock, useclock and so on.
++ Implement the SLI drivers for the scheduler: setclock, useclock and so on.
 - Unit test for biophysics objects.
 - Connect scheduler up to biophysics objects, unit tests for action potl
 
@@ -1543,3 +1543,11 @@ comparisons in a general way given the object and a string value. Later.
 
 Another thing pending is to clean up the deallocation of the data part of 
 objects. Later.
+
+Checked in stuff as revision 52.
+
+Connected wildcarding between SLI and shell.
+Got the SLI drivers to work, some prelimiary unit tests on this. Can't complete
+the tests till I have operations working to show messages.
+
+=============================================================================

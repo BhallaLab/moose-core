@@ -59,22 +59,9 @@ class Shell
 			unsigned int tickId,
 			vector< unsigned int > path, string function );
 
-		/*
-		 * These functions also vanish. They are already on Neutral.
-		 *
+		static void getWildcardList( const Conn& c,
+						string path, bool ordered );
 
-		void le( unsigned int eid );
-		*
-		*/
-
-		/* 
-		 * These functions are moved over to a set and get cwe.
-		void ce( unsigned int eid );
-		unsigned int cwe() const {
-			return cwe_;
-		}
-		void pwe( ) const;
-		*/
 
 			/*
 		void add( const string& src, const string& dest );

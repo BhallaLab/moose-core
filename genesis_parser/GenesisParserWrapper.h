@@ -28,6 +28,8 @@ class GenesisParserWrapper: public myFlexLexer
 		static void recvLe( const Conn& c, vector< Id > elist );
 		static void recvCreate( const Conn& c, unsigned int i );
 		static void recvField( const Conn& c, string value );
+		static void recvWildcardList( const Conn& c,
+						vector< unsigned int > value );
 
 //////////////////////////////////////////////////////////////////
 // Helper functions
@@ -41,6 +43,8 @@ class GenesisParserWrapper: public myFlexLexer
 		void doAdd( int argc, const char** const argv, Id s );
 		void innerAdd( Id src, const string& srcF, Id dest,
 						const string& destF );
+		void useClock( Id tickId, const string& path,
+						const string& func, Id s );
 
 		////////////////////////////////////////////////
 		//  Utility functions
