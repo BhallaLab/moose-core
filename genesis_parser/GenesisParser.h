@@ -141,9 +141,9 @@ class myFlexLexer: public yyFlexLexer
 		int yynerrs; // Number of parse errors.
 		int yylloc; // Location data for lookahead symbol
 
-		void AddInput(const std::string* s);
+		void AddInput(const std::string& s);
 		void Process();
-		void ParseInput(const std::string* s);
+		void ParseInput(const std::string& s);
 
 		const std::string GetOutput();
 		void alias(const std::string& alias, const std::string& old );

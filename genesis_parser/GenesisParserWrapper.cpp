@@ -157,7 +157,7 @@ void GenesisParserWrapper::readlineFunc( const Conn& c, string s )
 	GenesisParserWrapper* data =
 	static_cast< GenesisParserWrapper* >( c.targetElement()->data() );
 
-	data->AddInput( &s );
+	data->AddInput( s );
 }
 
 void GenesisParserWrapper::processFunc( const Conn& c )
@@ -173,7 +173,7 @@ void GenesisParserWrapper::parseFunc( const Conn& c, string s )
 	GenesisParserWrapper* data =
 	static_cast< GenesisParserWrapper* >( c.targetElement()->data() );
 
-	data->ParseInput( &s );
+	data->ParseInput( s );
 }
 
 void GenesisParserWrapper::setReturnId( const Conn& c, unsigned int id )
@@ -1358,7 +1358,7 @@ void GenesisParserWrapper::gpAssert(
 {
 	testFlag_ = 1;
 	printbuf_ = "";
-	ParseInput( &command );
+	ParseInput( command );
 	assert( printbuf_ == ret );
 	testFlag_ = 0;
 	cout << ".";

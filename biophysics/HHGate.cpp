@@ -170,7 +170,7 @@ void HHGate::postCreate( const Conn& c )
 	HHGate* h = static_cast< HHGate *>( c.data() );
 	Element* e = c.targetElement();
 
-	cout << "HHGate::postCreate called\n";
+	// cout << "HHGate::postCreate called\n";
 	const Cinfo* ic = initInterpolCinfo();
 	Element* A = ic->create( "A", static_cast< void* >( &h->A_ ) );
 	e->findFinfo( "childSrc" )->add( e, A, A->findFinfo( "child" ) );
