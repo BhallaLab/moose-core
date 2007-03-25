@@ -94,30 +94,32 @@ const Cinfo* initCompartmentCinfo()
 	 * soma.
 	 *
 	 * The first entry is a MsgDest for the info coming from the other
-	 * compt. It expects Vm from the other compt as an arg.
-	 * The second is a MsgSrc sending Ra and Vm to the raxialFunc
+	 * compt. It expects Ra and Vm from the other compt as args.
+	 * The second is a MsgSrc sending Vm to the axialFunc
 	 * of the target compartment.
+	 *
+	 * Note that the message is named after the source type.
 	 */
 	static TypeFuncPair axialTypes[] =
 	{
-		TypeFuncPair( Ftype1< double >::global(),
-				RFCAST( &Compartment::axialFunc ) ),
-		TypeFuncPair( Ftype2< double, double >::global(), 0)
+		TypeFuncPair( Ftype2< double, double >::global(),
+				RFCAST( &Compartment::raxialFunc ) ),
+		TypeFuncPair( Ftype1< double >::global(), 0)
 	};
 
 	/**
 	 * This is a raxial shared message between asymmetric compartments.
 	 *
 	 * The first entry is a MsgDest for the info coming from the other
-	 * compt. It expects Ra and Vm from the other compt as args.
-	 * The second is a MsgSrc sending Vm to the axialFunc
+	 * compt. It expects Vm from the other compt as an arg.
+	 * The second is a MsgSrc sending Ra and Vm to the raxialFunc
 	 * of the target compartment.
 	 */
 	static TypeFuncPair raxialTypes[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(),
-				RFCAST( &Compartment::raxialFunc ) ),
-		TypeFuncPair( Ftype1< double >::global(), 0)
+		TypeFuncPair( Ftype1< double >::global(),
+				RFCAST( &Compartment::axialFunc ) ),
+		TypeFuncPair( Ftype2< double, double >::global(), 0)
 	};
 	
 	static Finfo* compartmentFinfos[] = 
@@ -337,9 +339,9 @@ void Compartment::innerProcessFunc( Element* e, ProcInfo p )
 	// Send out the channel messages
 	send2< double, ProcInfo >( e, channelSlot, Vm_, p );
 	// Send out the axial messages
-	send1< double >( e, axialSlot, Vm_ );
+	// send1< double >( e, axialSlot, Vm_ );
 	// Send out the raxial messages
-	send2< double >( e, raxialSlot, Ra_, Vm_ );
+	// send2< double >( e, raxialSlot, Ra_, Vm_ );
 }
 
 void Compartment::processFunc( const Conn& c, ProcInfo p )
@@ -438,11 +440,95 @@ void Compartment::randInjectFunc( const Conn& c, double prob, double I)
 /////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
+#include "../element/Neutral.h"
 
 void testCompartment()
 {
-		cout << "\nTesting Compartment";
+	cout << "\nTesting Compartment";
 
-//		Element* c1 = compartmentCinfo->create( "n1" );
+	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	Element* c0 = Neutral::create( "Compartment", "c0", n );
+	ASSERT( c0 != 0, "creating compartment" );
+	ProcInfoBase p;
+	Conn c( c0, 0 );
+	p.dt_ = 0.002;
+	Compartment::setInject( c, 1.0 );
+	Compartment::setRm( c, 1.0 );
+	Compartment::setRa( c, 0.0025 );
+	Compartment::setCm( c, 1.0 );
+	Compartment::setEm( c, 0.0 );
+	Compartment::setVm( c, 0.0 );
+
+	// First, test charging curve for a single compartment
+	// We want our charging curve to be a nice simple exponential
+	// Vm = 1.0 - 1.0 * exp( - t / 1.0 );
+	double delta = 0.0;
+	double Vm = 0.0;
+	double x = 0.0;
+	double tau = 1.0;
+	double Vmax = 1.0;
+	for ( p.currTime_ = 0.0; p.currTime_ < 2.0; p.currTime_ += p.dt_ ) 
+	{
+		Vm = Compartment::getVm( c0 );
+		x = Vmax - Vmax * exp( -p.currTime_ / tau );
+		delta += ( Vm - x ) * ( Vm - x );
+		Compartment::processFunc( c, &p );
+	}
+	ASSERT( delta < 1.0e-6, "Testing compartment time" );
+
+	// Second, test the spatial spread of charge.
+	// We make the cable long enough to get another nice exponential.
+	// Vm = Vm0 * exp( -x/lambda)
+	// lambda = sqrt( Rm/Ra ) where these are the actual values, not
+	// the values per unit length.
+	// So here lambda = 20, so that each compt is lambda/20
+	double Rm = 1.0;
+	double Ra = 0.0025;
+	double lambda = sqrt( Rm / Ra );
+	unsigned int i;
+	Element* compts[100];
+	compts[0] = c0;
+	const Finfo* axial = c0->findFinfo( "axial" );
+	const Finfo* raxial = c0->findFinfo( "raxial" );
+	Compartment::setVm( c, 0.0 );
+	Compartment::setInject( c, 20.5 );
+	for (i = 1; i < 100; i++ ) {
+		char name[20];
+		sprintf( name, "c%d", i );
+		compts[i] = Neutral::create( "Compartment", "c0", n );
+		Conn temp( compts[i], 0 );
+		Compartment::setInject( temp, 0.0 );
+		Compartment::setRm( temp, Rm );
+		Compartment::setRa( temp, Ra );
+		Compartment::setCm( temp, 1.0 );
+		Compartment::setEm( temp, 0.0 );
+		Compartment::setVm( temp, 0.0 );
+
+		assert( raxial->add( compts[i - 1], compts[i], axial ) ); 
+	}
+	ASSERT( 1, "messaging in compartments" );
+
+	for ( p.currTime_ = 0.0; p.currTime_ < 10.0; p.currTime_ += p.dt_ ) 
+	{
+		for (i = 0; i < 100; i++ ) {
+			Conn temp( compts[i], 0 );
+			Compartment::processFunc( temp, &p );
+			Compartment::initFunc( temp, &p );
+		}
+	}
+
+	delta = 0.0;
+	// We measure only the first 50 compartments as later we 
+	// run into end effects because it is not an infinite cable
+	for (i = 0; i < 50; i++ ) {
+		Vm = Compartment::getVm( compts[i] );
+		x = Vmax * exp( - static_cast< double >( i ) / lambda );
+		delta += ( Vm - x ) * ( Vm - x );
+	}
+	// Error here is larger because it isn't an infinite cable.
+	ASSERT( delta < 1.0e-5, "Testing compartment space" );
+
+	// Get rid of all the compartments.
+	set( n, "destroy" );
 }
 #endif

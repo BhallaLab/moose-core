@@ -1549,5 +1549,9 @@ Checked in stuff as revision 52.
 Connected wildcarding between SLI and shell.
 Got the SLI drivers to work, some prelimiary unit tests on this. Can't complete
 the tests till I have operations working to show messages.
+Checked in stuff as revision 53.
+
+Now begun unit tests for biophysics. Did tests for compartments, fixed
+bug in compartment messaging in the process.
 
 =============================================================================
