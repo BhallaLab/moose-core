@@ -96,6 +96,11 @@ class ThisFinfo: public Finfo
 					return 0;
 			}
 
+			/// Utility function: returns cinfo.
+			const Cinfo* cinfo() const {
+					return cinfo_;
+			}
+
 		private:
 			const Cinfo* cinfo_;
 };

@@ -270,10 +270,10 @@ void Neutral::lookupChild( const Conn& c, const string s )
 	sendTo1< unsigned int >( e, 1, c.sourceIndex( e ), MAXUINT );
 }
 
-vector< unsigned int > Neutral::getChildList( const Element* elm )
+vector< unsigned int > Neutral::getChildList( const Element* e )
 {
-	const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
-	assert( e != 0 );
+	// const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
+	// assert( e != 0 );
 
 	vector< Conn >::const_iterator i;
 	// For neutral, src # 0 is the childSrc.
@@ -398,6 +398,11 @@ void testNeutral()
 		ASSERT( initialNumInstances - SimpleElement::numInstances == 2,
 						"Check that N2 is made" );
 
+		Element* foo = Neutral::create( "Neutral", "foo", n1 );
+		ASSERT( foo != 0, "Neutral::create" );
+		ASSERT( initialNumInstances - SimpleElement::numInstances == 1,
+						"Check that foo is made" );
+		ASSERT( foo->name() == "foo", "Neutral::create" );
 
 		//
 		// It would be nice to have a findChild function. But

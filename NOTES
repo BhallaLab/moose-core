@@ -1511,5 +1511,35 @@ through all Finfos to implement these functions.
 Then another pass through the GenesisParser and Shell to set up the 
 function calls. Still a few loose ends, but the existing unit tests pass.
 
-Checked in.
 =============================================================================
+March 24, 2007.
+Checked in. This was version 51.
+
+Need now to implement wildcarding so that the useClock function can be
+implemented. Where does it go?
+GenesisParserWrapper: 
+	- Syntax is not really consistent for other parsers.
+	- But it may be useful for other parsers, though syntax may change.
+Shell:
+	- Accessible to all parsers
+Neutral:
+	- Accessible to all developers as a generic function. Will we need it
+	in other, non shell/parser code?
+
+Put it for now with the Neutral.
+Did cleaning up, remarkably little, of the old mus version of wildcard.cpp.
+I am currently at the wildcardRelativeFind function which is just before the
+unit tests.
+=============================================================================
+March 25, 2007.
+Now on to unit tests for wildcards. A particularly ugly bug appeared,
+manifesting not in wildcards but in the genesis parser. Used valgrind, that
+showed up an unitialized value in the GenesisParser structure. Miraculously
+the problem went away when I initilized it. Valgrind rules!
+
+Now I have a decent set of wildcard tests. One critical set that is missing
+still is for field value comparisons. This needs a way for Ftype to do the
+comparisons in a general way given the object and a string value. Later.
+
+Another thing pending is to clean up the deallocation of the data part of 
+objects. Later.

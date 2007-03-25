@@ -17,6 +17,7 @@
 	extern void testShell();
 	extern void testInterpol();
 	extern void testSched();
+	extern void testWildcard();
 #endif
 
 #ifdef USE_GENESIS_PARSER
@@ -31,6 +32,7 @@ int main(int argc, char** argv)
 	testShell();
 	testInterpol();
 	testSched();
+	testWildcard();
 #endif
 
 #ifdef USE_GENESIS_PARSER

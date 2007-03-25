@@ -64,6 +64,7 @@ myFlexLexer::myFlexLexer( Id id )
 	Compiling = 0;
 	InFunctionDefinition = 0;
 	LocalSymbols = 0;
+	GlobalSymbols.sym_entlist = 0;
 	yybginidx = 0;
 	continuation = 0;
 	CurLocals = 0;
@@ -158,21 +159,21 @@ void myFlexLexer::Process() {
 	}
 }
 
-void myFlexLexer::ParseInput(const string* s) {
-	currstr += *s + "\n";
+void myFlexLexer::ParseInput(const string& s) {
+	currstr += s + "\n";
 	while (currstr.length() > 0) {
 		 yyparse();
 	}
 }
 
-void myFlexLexer::AddInput(const string* s) {
+void myFlexLexer::AddInput(const string& s) {
 #if MOOSE_THREADS
 	int status = pthread_mutex_lock(&mutex);
-	currstr += *s + "\n";
+	currstr += s + "\n";
 	status = pthread_cond_signal(&cond);
 	status = pthread_mutex_unlock(&mutex);
 #else
-	currstr += *s + "\n";
+	currstr += s + "\n";
 #endif
 }
 

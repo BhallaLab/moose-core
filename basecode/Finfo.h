@@ -86,14 +86,12 @@ class Finfo
 			/**
 			 * This function returns a vector all of connections 
 			 * arriving at this Finfo.
-			 * \todo should rename as incomingConns
 			 */
 			virtual unsigned int incomingConns(
 					const Element* e, vector< Conn >& list ) const = 0;
 			/**
 			 * This function returns a vector all of connections 
-			 * arriving at this Finfo.
-			 * \todo should rename as outgoingConns
+			 * originating from this Finfo.
 			 */
 			virtual unsigned int outgoingConns(
 					const Element* e, vector< Conn >& list ) const = 0;
