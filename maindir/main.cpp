@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include "header.h"
+#include "../element/Neutral.h"
 
 #ifdef DO_UNIT_TESTS
 	extern void testBasecode();
@@ -26,6 +27,13 @@
 
 int main(int argc, char** argv)
 {
+	Element* sched =
+			Neutral::create( "Neutral", "sched", Element::root() );
+	Element* cj =
+			Neutral::create( "ClockJob", "cj", sched );
+	// Element* t0 =
+			Neutral::create( "Tick", "t0", cj );
+
 #ifdef DO_UNIT_TESTS
 	testBasecode();
 	testNeutral();
@@ -34,6 +42,7 @@ int main(int argc, char** argv)
 	testSched();
 	testWildcard();
 #endif
+
 
 #ifdef USE_GENESIS_PARSER
 	string line = "";

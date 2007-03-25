@@ -10,6 +10,7 @@
 
 #include "moose.h"
 #include "../element/Neutral.h"
+#include "../element/Wildcard.h"
 #include "Shell.h"
 
 const unsigned int Shell::BAD_ID = ~0;
@@ -75,8 +76,14 @@ const Cinfo* initShellCinfo()
 		TypeFuncPair( 
 				Ftype3< unsigned int, vector< unsigned int >, string >::global(),
 				RFCAST( &Shell::useClock ) ),
+		
+		// Getting a wildcard path of elements: handling request
+		TypeFuncPair( // args are path, flag true for breadth-first list
+				Ftype2< string, bool >::global(),
+				RFCAST( &Shell::getWildcardList ) ),
+		// Getting a wildcard path of elements: Sending list back.
+		TypeFuncPair( Ftype1< vector< unsigned int > >::global(), 0 ),
 	};
-
 
 	static Finfo* shellFinfos[] =
 	{
@@ -119,6 +126,8 @@ static const unsigned int createSlot =
 	initShellCinfo()->getSlotIndex( "parser" ) + 2;
 static const unsigned int getFieldSlot =
 	initShellCinfo()->getSlotIndex( "parser" ) + 3;
+static const unsigned int returnWildcardListSlot =
+	initShellCinfo()->getSlotIndex( "parser" ) + 4;
 
 
 //////////////////////////////////////////////////////////////////////
@@ -401,13 +410,13 @@ void Shell::setClock( const Conn& c, int clockNo, double dt,
 {
 	Shell* sh = static_cast< Shell* >( c.data() );
 	char line[20];
-	sprintf( line, "tick%d", clockNo );
+	sprintf( line, "t%d", clockNo );
 	string TickName = line;
 	string clockPath = string( "/sched/cj/" + TickName );
 	unsigned int id = sh->path2eid( clockPath, "/" );
 	unsigned int cj = sh->path2eid( "/sched/cj", "/" );
 	Element* tick = 0;
-	if ( id == 0 ) {
+	if ( id == 0 || id == BAD_ID ) {
 		tick = Neutral::create( 
 						"Tick", TickName, Element::element( cj ) );
 	} else {
@@ -475,6 +484,38 @@ void Shell::useClock( const Conn& c,
 	}
 }
 
+// static function
+/** 
+ * getWildcardList obtains a wildcard list specified by the path.
+ * Normally the list is tested for uniqueness and sorted by pointer -
+ * it becomes effectively random.
+ * The flag specifies if we want a list in breadth-first order,
+ * in which case commas are not permitted.
+ */
+void Shell::getWildcardList( const Conn& c, string path, bool ordered )
+{
+	vector< Element* > list;
+	if ( ordered )
+		simpleWildcardFind( path, list );
+	else
+		wildcardFind( path, list );
+
+	vector< unsigned int > ret;
+	ret.resize( list.size() );
+	vector< unsigned int >::iterator i;
+	vector< Element* >::iterator j;
+
+	for (i = ret.begin(), j = list.begin(); j != list.end(); i++, j++ )
+		*i = ( *j )->id();
+	
+	send1< vector< unsigned int > >( c.targetElement(), 
+				returnWildcardListSlot, ret );
+}
+
+//////////////////////////////////////////////////////////////////
+// Helper functions.
+//////////////////////////////////////////////////////////////////
+
 // Regular function
 unsigned int Shell::create( const string& type, const string& name, unsigned int parent )
 {
@@ -515,6 +556,7 @@ void Shell::destroy( unsigned int victim )
 
 	set( e, "destroy" );
 }
+
 
 
 //////////////////////////////////////////////////////////////////////
