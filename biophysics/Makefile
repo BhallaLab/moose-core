@@ -14,6 +14,7 @@ OBJ = \
 	Compartment.o	\
 	HHChannel.o	\
 	HHGate.o	\
+	TestBiophysics.o	\
 
 HEADERS = \
 	../basecode/header.h \
