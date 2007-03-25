@@ -19,6 +19,7 @@
 	extern void testInterpol();
 	extern void testSched();
 	extern void testWildcard();
+	extern void testBiophysics();
 #endif
 
 #ifdef USE_GENESIS_PARSER
@@ -41,6 +42,7 @@ int main(int argc, char** argv)
 	testInterpol();
 	testSched();
 	testWildcard();
+	testBiophysics();
 #endif
 
 
