@@ -12,6 +12,7 @@ TARGET = element.o
 
 OBJ = \
 	Neutral.o	\
+	Wildcard.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -22,6 +23,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Neutral.o:	Neutral.h ../basecode/Ftype2.h
+Wildcard.o:	Neutral.h Wildcard.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c

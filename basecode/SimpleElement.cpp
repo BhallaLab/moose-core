@@ -8,11 +8,18 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+/*
 #include "header.h"
 #include "MsgSrc.h"
 #include "MsgDest.h"
 #include "DeletionMarkerFinfo.h"
 #include "SimpleElement.h"
+#include "ThisFinfo.h"
+*/
+
+#include "moose.h"
+#include "DeletionMarkerFinfo.h"
+#include "ThisFinfo.h"
 
 #ifdef DO_UNIT_TESTS
 int SimpleElement::numInstances = 0;
@@ -63,6 +70,13 @@ SimpleElement::~SimpleElement()
 	for ( i = finfo_.begin(); i != finfo_.end(); i++ )
 		if ( (*i)->isTransient() )
 			delete *i;
+}
+
+const std::string& SimpleElement::className( ) const
+{
+	const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( finfo_[0] );
+	assert( tf != 0 );
+	return tf->cinfo()->name();
 }
 
 /**

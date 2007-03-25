@@ -32,6 +32,9 @@ class Element
 		/// Sets the name of the element.
 		virtual void setName( const std::string& name ) = 0;
 
+		/// Returns the name of the element class
+		virtual const std::string& className( ) const = 0;
+
 		/// Looks up the specific indexed conn
 		virtual vector< Conn >::const_iterator 
 				lookupConn( unsigned int i ) const = 0;

@@ -46,10 +46,7 @@ class SimpleElement: public Element
 				name_ = name;
 		}
 
-		/*
-		bool add( unsigned int src, vector< RecvFunc >& rf,
-			Element* destElm, unsigned int destIndex );
-			*/
+		const std::string& className( ) const;
 
 		/**
 		 * Looks up a Conn entry.
