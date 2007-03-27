@@ -175,9 +175,10 @@ unsigned int Shell::traversePath(
 		} else if ( *i == ".." ) {
 			start = parent( start );
 		} else {
-			int ret;
+			unsigned int ret;
 			Element* e = Element::element( start );
-			lookupGet< int, string >( e, "lookupChild", ret, *i );
+			lookupGet< unsigned int, string >( 
+							e, "lookupChild", ret, *i );
 			if ( ret == 0 )
 					return BAD_ID;
 			start = ret;

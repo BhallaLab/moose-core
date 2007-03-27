@@ -10,6 +10,8 @@
 
 #include "header.h"
 
+const unsigned int BAD_ID = ~0;
+
 Element::Element()
 {
 	id_ = elementList().size();

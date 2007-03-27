@@ -1554,4 +1554,11 @@ Checked in stuff as revision 53.
 Now begun unit tests for biophysics. Did tests for compartments, fixed
 bug in compartment messaging in the process.
 
+Checked in as revision 54. Some strange hiccups with SourceForge.
+
 =============================================================================
+March 27 2007.
+Begun unit tests on HHChannel. Uncovered bug in basic message handling,
+that manifested when all children were deleted and then a new one made.
+Got to automatic construction and removal of HHGates depending on HHChannel
+gating powers. Time to check it in.

@@ -30,6 +30,8 @@
 #include <iostream>
 #include <cassert>
 
+extern const unsigned int BAD_ID;
+
 using namespace std;
 
 class Element;

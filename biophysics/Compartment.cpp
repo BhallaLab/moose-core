@@ -163,7 +163,7 @@ const Cinfo* initCompartmentCinfo()
 
 		new SharedFinfo( "process", processTypes, 2 ),
 		new SharedFinfo( "init", initTypes, 2 ),
-		new SharedFinfo( "channel", channelTypes, 3 ),
+		new SharedFinfo( "channel", channelTypes, 2 ),
 		new SharedFinfo( "axial", axialTypes, 2 ),
 		new SharedFinfo( "raxial", raxialTypes, 2 ),
 
@@ -444,7 +444,7 @@ void Compartment::randInjectFunc( const Conn& c, double prob, double I)
 
 void testCompartment()
 {
-	cout << "\nTesting Compartment";
+	cout << "\nTesting Compartment" << flush;
 
 	Element* n = Neutral::create( "Neutral", "n", Element::root() );
 	Element* c0 = Neutral::create( "Compartment", "c0", n );

@@ -54,7 +54,7 @@ const Cinfo* initNeutralCinfo()
 		),
 		new LookupFinfo(
 				"lookupChild",
-				LookupFtype< int, string >::global(), 
+				LookupFtype< unsigned int, string >::global(), 
 				reinterpret_cast< GetFunc >( &Neutral::getChildByName ),
 				0
 		),
@@ -220,7 +220,7 @@ unsigned int Neutral::getParent( const Element* e )
 /**
  * Looks up the child with the specified name, and returns the eid.
  */
-int Neutral::getChildByName( const Element* elm, const string& s )
+unsigned int Neutral::getChildByName( const Element* elm, const string& s )
 {
 	const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
 	assert( e != 0 );
