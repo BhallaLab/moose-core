@@ -57,12 +57,21 @@ class MsgSrc
 				++end_;
 			}
 
+			/**
+			 * dropConn removes the specified Conn, by rearranging the
+			 * indices that bracket the used Conn range.
+			 * If there are no Conns left then the function must
+			 * be cleared out so that future use of this slot has a
+			 * clear slate.
+			 */
 			void dropConn( unsigned int i ) {
 				if ( i < end_ ) {
 					--end_;
 					if ( i < begin_ )
 						--begin_;
 				}
+				if ( end_ == begin_ )
+					recvFunc_ = &dummyFunc;
 			}
 
 			void setFunc( RecvFunc rf ) {

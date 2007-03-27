@@ -41,7 +41,8 @@ class Neutral
 			static void destroy( const Conn& c );
 			static void setName( const Conn&, const string s );
 			static void lookupChild( const Conn&, const string s );
-			static int getChildByName( const Element* e, const string& s );
+			static unsigned int getChildByName( 
+							const Element* e, const string& s );
 
 			static const unsigned int childSrcIndex;
 			static const unsigned int childIndex;
