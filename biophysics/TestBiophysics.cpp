@@ -13,10 +13,12 @@
 #include "header.h"
 
 extern void testCompartment(); // Defined in Compartment.cpp
+extern void testHHChannel(); // Defined in HHChannel.cpp
 
 void testBiophysics()
 {
 	testCompartment();
+	testHHChannel();
 }
 
 #endif

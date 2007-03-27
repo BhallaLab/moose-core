@@ -144,6 +144,9 @@ class HHChannel
 		static void zGateFunc( const Conn& c, double Z, double g );
 
 	private:
+		// Utility function for making gates.
+		static void makeGate( Element *e, const Finfo* f, double power);
+
 		/// Channel maximal conductance
 		double Gbar_;
 		/// Reversal potential of channel

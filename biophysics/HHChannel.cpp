@@ -1,5 +1,6 @@
 #include "moose.h"
 #include "HHChannel.h"
+#include "../element/Neutral.h"
 
 const double HHChannel::EPSILON = 1.0e-10;
 const int HHChannel::INSTANT_X = 1;
@@ -184,9 +185,84 @@ double HHChannel::getEk( const Element* e )
 	return static_cast< HHChannel* >( e->data() )->Ek_;
 }
 
+/**
+ * Assigns the power for a specific gate, identified by the Finfo.
+ * Assumes that this is a different power from the old one.
+ * 
+ * If the gate exists and has only this element for input, then change
+ * the gate power.
+ * If the gate exists and has multiple parents, then make a new gate,
+ * 	set its power.
+ * If the gate does not exist, make a new gate, set its power.
+ *
+ * Note that if the power is zero, then the gate has to be removed.
+ *
+ * The function is designed with the idea that if copies of this
+ * channel are made, then they all point back to the original HHGate.
+ * (Unless they are cross-node copies).
+ * It is only if we subsequently alter the HHGate of this channel that
+ * we need to make our own variant of the HHGate, or disconnect from
+ * an existing one.
+ */
+
+void HHChannel::makeGate( Element *e, const Finfo* f, double power )
+{
+	Element* gate = 0;	
+	vector< Conn > list;
+	unsigned int numGates = f->outgoingConns( e, list );
+	assert( numGates <= 1 );
+	if ( power <= 0 ) {
+		// If gate exists, remove it.
+		if ( numGates == 1 ) {
+			gate = list[0].targetElement();
+			unsigned int numChans =
+					gate->findFinfo( "gate" )->numOutgoing( gate );
+			assert( numChans > 0 );
+			if ( numChans > 1 ) {
+				// Here we have multiple channels using this gate. So
+				// we don't mess with the original.
+				// Get rid of local connection to gate, but don't delete
+				f->dropAll( e );
+			} else { // Delete the single gate.
+				assert( set( gate, "destroy" ) );
+			}
+		}
+		return;
+	}
+
+	if ( numGates == 1 ) {
+		gate = list[0].targetElement();
+		unsigned int numChans =
+				gate->findFinfo( "gate" )->numOutgoing( gate );
+		assert( numChans > 0 );
+		if ( numChans > 1 ) {
+			// Here we have multiple channels using this gate. So
+			// we don't mess with the original.
+			// make a new gate which we can change.
+			gate = Neutral::create( "HHGate", "xGate", e );
+			assert( f->add( e, gate, gate->findFinfo( "gate" ) ) );
+		}
+	} else { // No gate, make a new one.
+		gate = Neutral::create( "HHGate", f->name(), e );
+		assert( f->add( e, gate, gate->findFinfo( "gate" ) ) );
+	}
+	set< double >( gate, "power", power );
+}
+
+/**
+ * Assigns the Xpower for this gate. If the gate exists and has
+ * only this element for input, then change the gate value.
+ * If the gate exists and has multiple parents, then make a new gate.
+ * If the gate does not exist, make a new gate
+ */
 void HHChannel::setXpower( const Conn& c, double Xpower )
 {
-	static_cast< HHChannel* >( c.data() )->Xpower_ = Xpower;
+	Element* e = c.targetElement();
+	HHChannel* chan = static_cast< HHChannel* >( c.data() );
+
+	if ( Xpower == chan->Xpower_ ) return;
+	makeGate( e, e->findFinfo( "xGate" ), Xpower );
+	chan->Xpower_ = Xpower;
 }
 double HHChannel::getXpower( const Element* e )
 {
@@ -195,7 +271,12 @@ double HHChannel::getXpower( const Element* e )
 
 void HHChannel::setYpower( const Conn& c, double Ypower )
 {
-	static_cast< HHChannel* >( c.data() )->Ypower_ = Ypower;
+	Element* e = c.targetElement();
+	HHChannel* chan = static_cast< HHChannel* >( c.data() );
+
+	if ( Ypower == chan->Ypower_ ) return;
+	makeGate( e, e->findFinfo( "yGate" ), Ypower );
+	chan->Ypower_ = Ypower;
 }
 double HHChannel::getYpower( const Element* e )
 {
@@ -204,7 +285,12 @@ double HHChannel::getYpower( const Element* e )
 
 void HHChannel::setZpower( const Conn& c, double Zpower )
 {
-	static_cast< HHChannel* >( c.data() )->Zpower_ = Zpower;
+	Element* e = c.targetElement();
+	HHChannel* chan = static_cast< HHChannel* >( c.data() );
+
+	if ( Zpower == chan->Zpower_ ) return;
+	makeGate( e, e->findFinfo( "zGate" ), Zpower );
+	chan->Zpower_ = Zpower;
 }
 double HHChannel::getZpower( const Element* e )
 {
@@ -379,21 +465,60 @@ void HHChannel::zGateFunc( const Conn& c, double Z, double g )
 }
 
 ///////////////////////////////////////////////////
-// Gate handling functions
+// Unit tests
 ///////////////////////////////////////////////////
 
-// Note that we are not creating the gates, just adding more messages
-// to them.
-/*
-void addGate( Element* chan, Conn* tgt, const string& name )
+#ifdef DO_UNIT_TESTS
+void testHHChannel()
 {
-	if (tgt ) {
-		Element* gate = tgt->parent();
-		if ( gate ) {
-			Field temp( gate, "gate" );
-			chan->field( name ).add( temp );
-		}
-	}
-}
+	cout << "\nTesting HHChannel";
+	// Check message construction with compartment
+	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	Element* compt = Neutral::create( "Compartment", "compt", n );
+	Element* chan = Neutral::create( "HHChannel", "Na", compt );
 
-*/
+	ASSERT( compt->findFinfo( "channel" )->add( compt, chan,
+					chan->findFinfo( "channel" ) ),
+					"Setting up channel" );
+
+	// Check gate construction and removal when powers are assigned
+	
+	ASSERT( chan->findFinfo( "childSrc" )->numOutgoing( chan ) == 0,
+					"Creating xGate");
+	set< double >( chan, "Xpower", 2.0 );
+	ASSERT( chan->findFinfo( "xGate" )->numIncoming( chan ) == 1,
+					"Creating xGate");
+	ASSERT( chan->findFinfo( "childSrc" )->numOutgoing( chan ) == 1,
+					"Creating xGate");
+
+	set< double >( chan, "Xpower", 0.0 );
+	ASSERT( chan->findFinfo( "childSrc" )->numOutgoing( chan ) == 0,
+					"Removing xGate");
+	ASSERT( chan->findFinfo( "xGate" )->numIncoming( chan ) == 0,
+					"Removing xGate");
+	set< double >( chan, "Xpower", 3.0 );
+	ASSERT( chan->findFinfo( "xGate" )->numIncoming( chan ) == 1,
+					"Creating xGate again");
+
+	unsigned int xGateId;
+	bool ret = lookupGet< unsigned int, string >(
+		chan, "lookupChild", xGateId, "xGate" );
+	ASSERT( ret, "Look up xGate");
+	ASSERT( xGateId != 0 && xGateId != BAD_ID, "Lookup xGate" );
+
+
+	Element* xGate = Element::element( xGateId );
+	double power = 0.0;
+	ret = get< double >( xGate, "power", power );
+	ASSERT( ret, "Check gate power" );
+	ASSERT( power == 3.0, "Check gate power" );
+
+	set< double >( chan, "Ypower", 1.0 );
+	ASSERT( chan->findFinfo( "yGate" )->numIncoming( chan ) == 1, "Creating yGate");
+	
+	// Check steady-state calculation for channel cond on reinit
+	// Check construction and result of HH squid simulation
+	// Clear it up
+	set( n, "destroy" );
+}
+#endif 
