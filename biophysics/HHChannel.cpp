@@ -1,3 +1,13 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+#include <math.h>
 #include "moose.h"
 #include "HHChannel.h"
 #include "../element/Neutral.h"
@@ -40,13 +50,14 @@ const Cinfo* initHHChannelCinfo()
 
 	/**
 	 * This is a shared message to communicate with the X gate.
-	 * Sends out Vm and X_, the gate state. 
-	 * Receives updated X state, and conductance scale term from
-	 * the gate.
+	 * Sends out Vm.
+	 * Receives lookedup up values A and B for the Vm.
+	 * The A term is the alpha term from HH equations.
+	 * The B term is actually alpha + beta, precalculated.
 	 */
 	static TypeFuncPair xGateTypes[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(), 0 ),
+		TypeFuncPair( Ftype1< double >::global(), 0 ),
 		TypeFuncPair( Ftype2< double, double >::global(),
 				RFCAST( &HHChannel::xGateFunc ) ),
 	};
@@ -56,7 +67,7 @@ const Cinfo* initHHChannelCinfo()
 	 */
 	static TypeFuncPair yGateTypes[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(), 0 ),
+		TypeFuncPair( Ftype1< double >::global(), 0 ),
 		TypeFuncPair( Ftype2< double, double >::global(),
 				RFCAST( &HHChannel::yGateFunc ) ),
 	};
@@ -66,7 +77,7 @@ const Cinfo* initHHChannelCinfo()
 	 */
 	static TypeFuncPair zGateTypes[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(), 0 ),
+		TypeFuncPair( Ftype1< double >::global(), 0 ),
 		TypeFuncPair( Ftype2< double, double >::global(),
 				RFCAST( &HHChannel::zGateFunc ) ),
 	};
@@ -246,7 +257,6 @@ void HHChannel::makeGate( Element *e, const Finfo* f, double power )
 		gate = Neutral::create( "HHGate", f->name(), e );
 		assert( f->add( e, gate, gate->findFinfo( "gate" ) ) );
 	}
-	set< double >( gate, "power", power );
 }
 
 /**
@@ -263,6 +273,7 @@ void HHChannel::setXpower( const Conn& c, double Xpower )
 	if ( Xpower == chan->Xpower_ ) return;
 	makeGate( e, e->findFinfo( "xGate" ), Xpower );
 	chan->Xpower_ = Xpower;
+	chan->takeXpower_ = selectPower( Xpower );
 }
 double HHChannel::getXpower( const Element* e )
 {
@@ -277,6 +288,7 @@ void HHChannel::setYpower( const Conn& c, double Ypower )
 	if ( Ypower == chan->Ypower_ ) return;
 	makeGate( e, e->findFinfo( "yGate" ), Ypower );
 	chan->Ypower_ = Ypower;
+	chan->takeYpower_ = selectPower( Ypower );
 }
 double HHChannel::getYpower( const Element* e )
 {
@@ -291,6 +303,7 @@ void HHChannel::setZpower( const Conn& c, double Zpower )
 	if ( Zpower == chan->Zpower_ ) return;
 	makeGate( e, e->findFinfo( "zGate" ), Zpower );
 	chan->Zpower_ = Zpower;
+	chan->takeZpower_ = selectPower( Zpower );
 }
 double HHChannel::getZpower( const Element* e )
 {
@@ -361,6 +374,19 @@ int HHChannel::getUseConcentration( const Element* e )
 // Dest function definitions
 ///////////////////////////////////////////////////
 
+/**
+ * Returns the state variable for the new timestep based on
+ * the internal variables A_ and B_ which were passed in from the gate.
+ */
+double HHChannel::integrate( double state, double dt )
+{
+	if ( B_ > EPSILON ) {
+		double x = exp( -B_ * dt );
+		return state * x + ( A_ / B_ ) * ( 1 - x );
+	}
+	return state + A_ * dt ;
+}
+
 void HHChannel::processFunc( const Conn& c, ProcInfo p )
 {
 	Element* e = c.targetElement();
@@ -370,27 +396,49 @@ void HHChannel::processFunc( const Conn& c, ProcInfo p )
 void HHChannel::innerProcessFunc( Element* e, ProcInfo info )
 {
 	g_ += Gbar_;
-	send2< double, double >( e, xGateSlot, Vm_, X_ );
-	send2< double, double >( e, yGateSlot, Vm_, Y_ );
-	// xGateSrc_.send( Vm_, X_, info->dt_ );
-	// yGateSrc_.send( Vm_, Y_, info->dt_ );
-	if ( useConcentration_ )
-		send2< double, double >( e, zGateSlot, conc_, Z_ );
-		// zGateSrc_.send( conc_, Z_, info->dt_ );
-	else
-		send2< double, double >( e, zGateSlot, Vm_, Z_ );
-		// zGateSrc_.send( Vm_, Z_, info->dt_ );
-	// the state variables and conductance terms come back
-	// from each gate during the above 'send' calls.
+	if ( Xpower_ > 0 ) {
+		// The looked up table values A_ and B_ come back from the gate
+		// right away after these 'send' calls.
+		send1< double >( e, xGateSlot, Vm_ );
+		if ( instant_ & INSTANT_X )
+			X_ = A_/B_;
+		else 
+			X_ = integrate( X_, info->dt_ );
+
+		g_ *= takeXpower_( X_, Xpower_ );
+	}
+
+	if ( Ypower_ > 0 ) {
+		send1< double >( e, yGateSlot, Vm_ );
+		if ( instant_ & INSTANT_Y )
+			Y_ = A_/B_;
+		else 
+			Y_ = integrate( Y_, info->dt_ );
+
+		g_ *= takeYpower_( Y_, Ypower_ );
+	}
+
+	if ( Zpower_ > 0 ) {
+		if ( useConcentration_ )
+			send1< double >( e, zGateSlot, conc_ );
+		else
+			send1< double >( e, zGateSlot, Vm_ );
+
+		if ( instant_ & INSTANT_Z )
+			Z_ = A_/B_;
+		else 
+			Z_ = integrate( Z_, info->dt_ );
+
+		g_ *= takeZpower_( Z_, Zpower_ );
+	}
+
 	Gk_ = g_;
 	send2< double, double >( e, channelSlot, Gk_, Ek_ );
-	// channelSrc_.send( Gk_, Ek_ );
 	Ik_ = ( Ek_ - Vm_ ) * g_;
 
 	// This is used if the channel connects up to a conc pool and
 	// handles influx of ions giving rise to a concentration change.
 	send1< double >( e, ikSlot, Ik_ );
-	// IkSrc_.send( Ik_ );
 	g_ = 0.0;
 }
 
@@ -400,26 +448,37 @@ void HHChannel::reinitFunc( const Conn& c, ProcInfo p )
 	static_cast< HHChannel* >( e->data() )->innerReinitFunc( e, p );
 }
 
+/**
+ * Here we get the steady-state values for the gate (the 'instant'
+ * calculation) as A_/B_.
+ */
 void HHChannel::innerReinitFunc( Element* e, ProcInfo info )
 {
 	g_ = Gbar_;
-		
-	send2< double, double >( e, xGateSlot, Vm_, X_ );
-	send2< double, double >( e, yGateSlot, Vm_, Y_ );
 
-	// xGateReinitSrc_.send( Vm, Xpower_, ( instant_ & 1 ) );
-	// yGateReinitSrc_.send( Vm, Ypower_, ( instant_ & 2 ) );
-	
-	vector< Conn > list;
-	useConcentration_ =
-			e->findFinfo( "concen" )->numIncoming( e ) > 0;
+	if ( Xpower_ > 0 ) {
+		// The looked up table values A_ and B_ come back from the gate
+		// right away after these 'send' calls.
+		send1< double >( e, xGateSlot, Vm_ );
+		X_ = A_/B_;
+		g_ *= takeXpower_( X_, Xpower_ );
+	}
 
-	if ( useConcentration_ )
-		send2< double, double >( e, zGateSlot, conc_, Z_ );
-		// zGateReinitSrc_.send( conc_, Zpower_, (instant_ & 4 ) );
-	else
-		send2< double, double >( e, zGateSlot, Vm_, Z_ );
-		// zGateReinitSrc_.send( Vm, Zpower_, (instant_ & 4 ) );
+	if ( Ypower_ > 0 ) {
+		send1< double >( e, yGateSlot, Vm_ );
+		Y_ = A_/B_;
+		g_ *= takeYpower_( Y_, Ypower_ );
+	}
+
+	if ( Zpower_ > 0 ) {
+		if ( useConcentration_ )
+			send1< double >( e, zGateSlot, conc_ );
+		else
+			send1< double >( e, zGateSlot, Vm_ );
+		Z_ = A_/B_;
+		g_ *= takeZpower_( Z_, Zpower_ );
+	}
+
 	Gk_ = g_;
 
 	send2< double, double >( e, channelSlot, Gk_, Ek_ );
@@ -440,28 +499,54 @@ void HHChannel::concFunc( const Conn& c, double conc )
 	static_cast< HHChannel* >( e->data() )->conc_ = conc;
 }
 
-void HHChannel::xGateFunc( const Conn& c, double X, double g )
+void HHChannel::xGateFunc( const Conn& c, double A, double B )
 {
 	HHChannel* h =
 			static_cast< HHChannel* >( c.targetElement()->data() );
-	h->X_ = X;
-	h->g_ *= g;
+	h->A_ = A;
+	h->B_ = B;
 }
 
-void HHChannel::yGateFunc( const Conn& c, double Y, double g )
+void HHChannel::yGateFunc( const Conn& c, double A, double B )
 {
 	HHChannel* h =
 			static_cast< HHChannel* >( c.targetElement()->data() );
-	h->Y_ = Y;
-	h->g_ *= g;
+	h->A_ = A;
+	h->B_ = B;
 }
 
-void HHChannel::zGateFunc( const Conn& c, double Z, double g )
+void HHChannel::zGateFunc( const Conn& c, double A, double B )
 {
 	HHChannel* h =
 			static_cast< HHChannel* >( c.targetElement()->data() );
-	h->Z_ = Z;
-	h->g_ *= g;
+	h->A_ = A;
+	h->B_ = B;
+}
+
+///////////////////////////////////////////////////
+// Utility function
+///////////////////////////////////////////////////
+double HHChannel::powerN( double x, double p )
+{
+	if ( x > 0.0 )
+		return exp( p * log( x ) );
+	return 0.0;
+}
+
+PFDD HHChannel::selectPower( double power )
+{
+	if ( power == 0.0 )
+		return powerN;
+	else if ( power == 1.0 )
+		return power1;
+	else if ( power == 2.0 )
+		return power2;
+	else if ( power == 3.0 )
+		return power3;
+	else if ( power == 4.0 )
+		return power4;
+	else
+		return powerN;
 }
 
 ///////////////////////////////////////////////////
@@ -506,17 +591,92 @@ void testHHChannel()
 	ASSERT( ret, "Look up xGate");
 	ASSERT( xGateId != 0 && xGateId != BAD_ID, "Lookup xGate" );
 
-
 	Element* xGate = Element::element( xGateId );
-	double power = 0.0;
-	ret = get< double >( xGate, "power", power );
-	ASSERT( ret, "Check gate power" );
-	ASSERT( power == 3.0, "Check gate power" );
 
 	set< double >( chan, "Ypower", 1.0 );
 	ASSERT( chan->findFinfo( "yGate" )->numIncoming( chan ) == 1, "Creating yGate");
 	
 	// Check steady-state calculation for channel cond on reinit
+	// Here we start with Gbar = 1, Vm set ahead of time to 0,
+	// xGate giving an X_ state of 2 and yGate of 10 for Vm == 0.
+	unsigned int temp;
+
+	////////////////////////////////////////////////////////////////
+	// Set up X gates
+	////////////////////////////////////////////////////////////////
+	// Set up X gate A
+	ret = lookupGet< unsigned int, string >(
+		xGate, "lookupChild", temp, "A" );
+	ASSERT( ret, "Check gate table" );
+	ASSERT( temp != 0 && temp != BAD_ID, "xGate_A" );
+	Element* xGate_A = Element::element( temp );
+	set< double >( xGate_A, "xmin", -2.0 );
+	set< double >( xGate_A, "xmax", 2.0 );
+	set< int >( xGate_A, "xdivs", 1 );
+	lookupSet< double, unsigned int >( xGate_A, "table", 0.0, 0 );
+	lookupSet< double, unsigned int >( xGate_A, "table", 4.0, 1 );
+
+	// Set up X gate B
+	ret = lookupGet< unsigned int, string >(
+		xGate, "lookupChild", temp, "B" );
+	ASSERT( ret, "Check gate table" );
+	ASSERT( temp != 0 && temp != BAD_ID, "xGate_B" );
+	Element* xGate_B = Element::element( temp );
+	set< double >( xGate_B, "xmin", -1.0 );
+	set< double >( xGate_B, "xmax", 1.0 );
+	set< int >( xGate_B, "xdivs", 1 );
+	lookupSet< double, unsigned int >( xGate_B, "table", 0.0, 0 );
+	lookupSet< double, unsigned int >( xGate_B, "table", 2.0, 1 );
+
+	////////////////////////////////////////////////////////////////
+	// Set up Y gates
+	////////////////////////////////////////////////////////////////
+	unsigned int yGateId;
+	ret = lookupGet< unsigned int, string >(
+		chan, "lookupChild", yGateId, "yGate" );
+	ASSERT( ret, "Look up yGate");
+	ASSERT( yGateId != 0 && yGateId != BAD_ID, "Lookup yGate" );
+
+	Element* yGate = Element::element( yGateId );
+	ret = lookupGet< unsigned int, string >(
+		yGate, "lookupChild", temp, "A" );
+	ASSERT( ret, "Check gate table" );
+	ASSERT( temp != 0 && temp != BAD_ID, "yGate_A" );
+	Element* yGate_A = Element::element( temp );
+	set< double >( yGate_A, "xmin", -2.0 );
+	set< double >( yGate_A, "xmax", 2.0 );
+	set< int >( yGate_A, "xdivs", 1 );
+	lookupSet< double, unsigned int >( yGate_A, "table", 20.0, 0 );
+	lookupSet< double, unsigned int >( yGate_A, "table", 0.0, 1 );
+
+	ret = lookupGet< unsigned int, string >(
+		yGate, "lookupChild", temp, "B" );
+	ASSERT( ret, "Check gate table" );
+	ASSERT( temp != 0 && temp != BAD_ID, "yGate_B" );
+	Element* yGate_B = Element::element( temp );
+	set< double >( yGate_B, "xmin", -1.0 );
+	set< double >( yGate_B, "xmax", 1.0 );
+	set< int >( yGate_B, "xdivs", 1 );
+	lookupSet< double, unsigned int >( yGate_B, "table", 0.0, 0 );
+	lookupSet< double, unsigned int >( yGate_B, "table", 2.0, 1 );
+
+	////////////////////////////////////////////////////////////////
+	// Do the Reinit.
+	////////////////////////////////////////////////////////////////
+	set< double >( chan, "Gbar", 1.0 );
+	set< double >( chan, "Ek", 0.0 );
+	ProcInfoBase pb;
+	pb.dt_ = 0.001;
+	Conn c( chan, 0 );
+	HHChannel* Na = static_cast< HHChannel* >( c.data() );
+	Na->Vm_ = 0.0;
+
+	// This function should do all the reinit steps.
+	HHChannel::reinitFunc( c, &pb );
+	ASSERT( Na->Gk_ == 80, "Gk_" );
+	ASSERT( Na->X_ == 2, "X_" );
+	ASSERT( Na->Y_ == 10, "Y_" );
+
 	// Check construction and result of HH squid simulation
 	// Clear it up
 	set( n, "destroy" );

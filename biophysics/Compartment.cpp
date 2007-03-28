@@ -440,6 +440,9 @@ void Compartment::randInjectFunc( const Conn& c, double prob, double I)
 /////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
+// Comment out this define if it takes too long (about 5 seconds on
+// a modest machine, but could be much longer with valgrind)
+// #define DO_SPATIAL_TESTS
 #include "../element/Neutral.h"
 
 void testCompartment()
@@ -508,6 +511,8 @@ void testCompartment()
 	}
 	ASSERT( 1, "messaging in compartments" );
 
+#ifdef DO_SPATIAL_TESTS
+
 	for ( p.currTime_ = 0.0; p.currTime_ < 10.0; p.currTime_ += p.dt_ ) 
 	{
 		for (i = 0; i < 100; i++ ) {
@@ -527,7 +532,7 @@ void testCompartment()
 	}
 	// Error here is larger because it isn't an infinite cable.
 	ASSERT( delta < 1.0e-5, "Testing compartment space" );
-
+#endif
 	// Get rid of all the compartments.
 	set( n, "destroy" );
 }
