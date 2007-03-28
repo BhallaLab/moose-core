@@ -1578,4 +1578,11 @@ Got HHChannel and HHGates to talk nicely again, got unit tests for reinit
 to work.
 
 Checked in as revision 56.
+
+Implemented the action potentials unit test. There is a small nagging
+difference between the waveform on MOOSE and the original GENESIS waveforms,
+but for now it is pretty clear that the basics work fine.
+
+Checked in as revision 57.
+
 =============================================================================
