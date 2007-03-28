@@ -16,12 +16,12 @@ const Cinfo* initHHGateCinfo()
 {
 	/**
 	 * This is a shared message to communicate with the channel.
-	 * Receives Vm and gate state.
-	 * Sends updated gate state and conductance scale term for gate.
+	 * Receives Vm
+	 * Sends A and B from the respective table lookups based on Vm.
 	 */
 	static TypeFuncPair gateTypes[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(),
+		TypeFuncPair( Ftype1< double >::global(),
 						RFCAST( &HHGate::gateFunc ) ),
 		TypeFuncPair( Ftype2< double, double >::global(), 0),
 	};
@@ -29,20 +29,8 @@ const Cinfo* initHHGateCinfo()
 	static Finfo* HHGateFinfos[] =
 	{
 	///////////////////////////////////////////////////////
-	// Field definitions
+	// Field definitions. Non needed
 	///////////////////////////////////////////////////////
-		new ValueFinfo( "power", ValueFtype1< double >::global(),
-			reinterpret_cast< GetFunc >( &HHGate::getPower ),
-			RFCAST( &HHGate::setPower )
-		), 
-		new ValueFinfo( "state", ValueFtype1< double >::global(),
-			reinterpret_cast< GetFunc >( &HHGate::getState ),
-			RFCAST( &HHGate::setState )
-		), 
-		new ValueFinfo( "instant", ValueFtype1< int >::global(),
-			reinterpret_cast< GetFunc >( &HHGate::getInstant ),
-			RFCAST( &HHGate::setInstant )
-		), 
 		
 	///////////////////////////////////////////////////////
 	// Shared definitions
@@ -78,85 +66,20 @@ static const unsigned int gateSlot =
 // Field function definitions
 ///////////////////////////////////////////////////
 
-///\todo: Need to use a functor to handle arbitrary powers
-void HHGate::innerSetPower( double power )
-{
-	power_ = power;
-	if ( power_ == 0.0 )
-		takePower_ = power0;
-	else if ( power_ == 1.0 )
-		takePower_ = power1;
-	else if ( power_ == 2.0 )
-		takePower_ = power2;
-	else if ( power_ == 3.0 )
-		takePower_ = power3;
-	else if ( power_ == 4.0 )
-		takePower_ = power4;
-	else
-		takePower_ = powerN;
-}
-
-void HHGate::setPower( const Conn& c, double power )
-{
-	static_cast< HHGate* >( c.data() )->innerSetPower( power );
-}
-double HHGate::getPower( const Element* e )
-{
-	return static_cast< HHGate* >( e->data() )->power_;
-}
-
-void HHGate::setState( const Conn& c, double state )
-{
-	static_cast< HHGate* >( c.data() )->state_ = state;
-}
-double HHGate::getState( const Element* e )
-{
-	return static_cast< HHGate* >( e->data() )->state_;
-}
-
-void HHGate::setInstant( const Conn& c, int instant )
-{
-	static_cast< HHGate* >( c.data() )->instant_ = instant;
-}
-int HHGate::getInstant( const Element* e )
-{
-	return static_cast< HHGate* >( e->data() )->instant_;
-}
-
-
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
 
 void HHGate::gateFunc(
-				const Conn& c, double v, double state, double dt )
+				const Conn& c, double v )
 {
-	static_cast< HHGate *>( c.data() )->innerGateFunc( c, v, state, dt);
-}
+	// static_cast< HHGate *>( c.data() )->innerGateFunc( c, v );
+	HHGate *h = static_cast< HHGate *>( c.data() );
 
-void HHGate::innerGateFunc(
-				const Conn& c, double v, double state, double dt )
-{
-	if ( instant_ ) {
-		state = A_.innerLookup( v ) / B_.innerLookup( v );
-	} else {
-		double y = B_.innerLookup( v );
-		double x = exp( -y * dt );
-		state = state * x + ( A_.innerLookup( v ) / y ) * ( 1 - x );
-	}
-
-	// This ugly construction returns the info back to sender.
 	sendTo2< double, double >( c.targetElement(), gateSlot,
-		c.targetIndex(), state, takePower_( state ) );
+		c.targetIndex(),
+		h->A_.innerLookup( v ) , h->B_.innerLookup( v ) );
 }
-
-/*
-void HHGate::reinitFunc( const Conn& c, double power, double dt, int instant)
-{
-	static_cast< HHGate *>( c.data() )->
-			innerReinitFunc( power, dt, instant );
-}
-*/
 
 /**
  * This creates two nested child objects on the HHGate, to hold the

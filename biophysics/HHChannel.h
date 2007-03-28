@@ -47,8 +47,13 @@
  *
  */
 
+typedef double ( *PFDD )( double, double );
+
 class HHChannel
 {
+#ifdef DO_UNIT_TESTS
+	friend void testHHChannel();
+#endif // DO_UNIT_TESTS
 	public:
 		HHChannel()
 			: Gbar_( 0.0 ), Ek_( 0.0 ),
@@ -180,9 +185,37 @@ class HHChannel
 		double conc_;
 		/// Flag for use of conc for input to Z gate calculations.
 		bool useConcentration_;	
+
+
+		// Internal variables for return values
+		double A_;
+		double B_;
+
+		double integrate( double state, double dt );
+
+		double ( *takeXpower_ )( double, double );
+		double ( *takeYpower_ )( double, double );
+		double ( *takeZpower_ )( double, double );
+
+		static PFDD selectPower( double power);
+
 		static const double EPSILON;
 		static const int INSTANT_X;
 		static const int INSTANT_Y;
 		static const int INSTANT_Z;
+
+		static double power1( double x, double p ) {
+			return x;
+		}
+		static double power2( double x, double p ) {
+			return x * x;
+		}
+		static double power3( double x, double p ) {
+			return x * x * x;
+		}
+		static double power4( double x, double p ) {
+			return power2( x * x, p );
+		}
+		static double powerN( double x, double p );
 };
 #endif // _HHChannel_h
