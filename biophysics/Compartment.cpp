@@ -140,6 +140,10 @@ const Cinfo* initCompartmentCinfo()
 			reinterpret_cast< GetFunc >( &Compartment::getIm ),
 			&dummyFunc
 		),
+		new ValueFinfo( "Inject", ValueFtype1< double >::global(),
+			reinterpret_cast< GetFunc >( &Compartment::getInject ),
+			reinterpret_cast< RecvFunc >( &Compartment::setInject )
+		),
 		new ValueFinfo( "initVm", ValueFtype1< double >::global(),
 			reinterpret_cast< GetFunc >( &Compartment::getInitVm ),
 			reinterpret_cast< RecvFunc >( &Compartment::setInitVm )
@@ -357,8 +361,8 @@ void Compartment::innerReinitFunc( Element* e, ProcInfo p )
 	B_ = invRm_;
 	Im_ = 0.0;
 	sumInject_ = 0.0;
-	// ChannelReinit no longer done from compartments. 
-	// send1< double >( e, 4, Vm_ );
+	// Send the Vm over to the compartment at reset.
+	send1< double >( e, channelSlot, Vm_ );
 }
 
 void Compartment::reinitFunc( const Conn& c, ProcInfo p )
@@ -487,7 +491,6 @@ void testCompartment()
 	// So here lambda = 20, so that each compt is lambda/20
 	double Rm = 1.0;
 	double Ra = 0.0025;
-	double lambda = sqrt( Rm / Ra );
 	unsigned int i;
 	Element* compts[100];
 	compts[0] = c0;
@@ -512,6 +515,7 @@ void testCompartment()
 	ASSERT( 1, "messaging in compartments" );
 
 #ifdef DO_SPATIAL_TESTS
+	double lambda = sqrt( Rm / Ra );
 
 	for ( p.currTime_ = 0.0; p.currTime_ < 10.0; p.currTime_ += p.dt_ ) 
 	{
