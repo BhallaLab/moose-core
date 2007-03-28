@@ -1535,7 +1535,7 @@ March 25, 2007.
 Now on to unit tests for wildcards. A particularly ugly bug appeared,
 manifesting not in wildcards but in the genesis parser. Used valgrind, that
 showed up an unitialized value in the GenesisParser structure. Miraculously
-the problem went away when I initilized it. Valgrind rules!
+the problem went away when I initialized it. Valgrind rules!
 
 Now I have a decent set of wildcard tests. One critical set that is missing
 still is for field value comparisons. This needs a way for Ftype to do the
@@ -1562,3 +1562,20 @@ Begun unit tests on HHChannel. Uncovered bug in basic message handling,
 that manifested when all children were deleted and then a new one made.
 Got to automatic construction and removal of HHGates depending on HHChannel
 gating powers. Time to check it in.
+Checked in as revision 55.
+
+Valgrind again helped track down a problem, this time with argument usage
+between HHChannel and HHGate. I am perhaps asking too much of the gate
+function, and it should not be dealing with all this info. I will switch
+the numerical integration from the gate back into the HHChannel. This
+reduced the number of values being passed around too.
+
+Did major overhaul to accomplish all this. Compiled, back into unit tests.
+=============================================================================
+March 28 2007
+
+Got HHChannel and HHGates to talk nicely again, got unit tests for reinit
+to work.
+
+Checked in as revision 56.
+=============================================================================
