@@ -1481,7 +1481,7 @@ Next stages:
 + complete the sorting and message set up in the Clock Job
 + complete unit tests for the scheduler
 + Implement the SLI drivers for the scheduler: setclock, useclock and so on.
-- Unit test for biophysics objects.
++ Unit test for biophysics objects.
 - Connect scheduler up to biophysics objects, unit tests for action potl
 
 =============================================================================
@@ -1584,5 +1584,34 @@ difference between the waveform on MOOSE and the original GENESIS waveforms,
 but for now it is pretty clear that the basics work fine.
 
 Checked in as revision 57.
+
+Next: Build the plot object and then it should be possible to run something
+close to the squid demo from the earlier version of mus.
+
+Stages, rough order
+- Table object to handle output from sim runs.
+- Complete biophysics library: Ca concen, Nernst, SynChan, SpikeGen
+- HSolver
+- Parallel stuff
+- Python pass 1
+- Kinetics library
+- Dumpfile/kkit read
+- Stimfile read capability
+- Cell reader
+- OB sim capability
+- SBML read/write
+- kinsolvers: ODE, RK5, LSODA, G1, mixed, smoldyn
+- Stoichiometry matrix ops: Stoich test
+- FLTK graphics.
+
+
+Compled table, it requires inheritance from interpol, and this is not
+working.
+
+=============================================================================
+March 29 2007
+Table compiles. On to unit tests.
+Much effort later, unit tests cleared. Especially ugly because of the zillions
+of options in the table class.
 
 =============================================================================

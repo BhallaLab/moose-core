@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <fstream>
 #include <math.h>
 #include "moose.h"
 #include "../basecode/ArrayFtype.h"
@@ -14,7 +15,8 @@
 #include "Interpol.h"
 
 const double Interpol::EPSILON = 1.0e-10;
-const int Interpol::MAX_DIVS = 10000000; //Ten million points should do.
+const unsigned int Interpol::MAX_DIVS = 10000000;
+	//Ten million points should do.
 
 const Cinfo* initInterpolCinfo()
 {
@@ -88,6 +90,10 @@ const Cinfo* initInterpolCinfo()
 		/// Expand table. First arg is xdivs, second is mode.
 		new DestFinfo( "tabFill", Ftype2< int, int >::global(), 
 			RFCAST( &Interpol::tabFill )
+		),
+		/// Print contents to file.
+		new DestFinfo( "print", Ftype1< string >::global(), 
+			RFCAST( &Interpol::print )
 		),
 	};
 
@@ -213,6 +219,11 @@ void Interpol::tabFill( const Conn& c, int xdivs, int mode )
 	static_cast< Interpol* >( c.data() )->innerTabFill( xdivs, mode );
 }
 
+void Interpol::print( const Conn& c, string fname )
+{
+	static_cast< Interpol* >( c.data() )->innerPrint( fname );
+}
+
 ////////////////////////////////////////////////////////////////////
 // Here we set up private Interpol class functions.
 ////////////////////////////////////////////////////////////////////
@@ -248,6 +259,8 @@ double Interpol::interpolateWithoutCheck( double x ) const
 
 double Interpol::innerLookup( double x ) const
 {
+	if ( table_.size() == 0 )
+		return 0.0;
 	if ( x <= xmin_ ) 
 		return table_.front();
 	if ( x >= xmax_ )
@@ -290,7 +303,7 @@ void Interpol::localSetXmin( double value ) {
 		invDx_ = static_cast< double >( table_.size() - 1 ) / 
 			( xmax_ - xmin_ );
 	} else {
-		cerr << "Warning: InterpolWrapper: Xmin ~= Xmax : Assignment failed\n";
+		cerr << "Warning: Interpol: Xmin ~= Xmax : Assignment failed\n";
 	}
 }
 void Interpol::localSetXmax( double value ) {
@@ -299,7 +312,7 @@ void Interpol::localSetXmax( double value ) {
 		invDx_ = static_cast< double >( table_.size() - 1 ) / 
 			( xmax_ - xmin_ );
 	} else {
-		cerr << "Warning: InterpolWrapper: Xmin ~= Xmax : Assignment failed\n";
+		cerr << "Warning: Interpol: Xmin ~= Xmax : Assignment failed\n";
 	}
 }
 void Interpol::localSetXdivs( int value ) {
@@ -312,10 +325,10 @@ void Interpol::localSetXdivs( int value ) {
 // Later also check that it is OK for xmax_ < xmin_
 void Interpol::localSetDx( double value ) {
 	if ( fabs( value ) - EPSILON > 0 ) {
-		int xdivs = static_cast< int >( 
+		unsigned int xdivs = static_cast< unsigned int >( 
 			0.5 + fabs( xmax_ - xmin_ ) / value );
 		if ( xdivs < 1 || xdivs > MAX_DIVS ) {
-			cerr << "Warning: InterpolWrapper: Out of range:" <<
+			cerr << "Warning: Interpol: Out of range:" <<
 				xdivs << " entries in table.\n";
 				return;
 		}
@@ -336,7 +349,7 @@ void Interpol::localSetSy( double value ) {
 			*i *= ratio;
 		sy_ = value;
 	} else {
-		cerr << "Warning: InterpolWrapper: localSetSy: sy too small:" <<
+		cerr << "Warning: Interpol: localSetSy: sy too small:" <<
 			value << "\n";
 	}
 }
@@ -364,6 +377,14 @@ void Interpol::innerTabFill( int xdivs, int mode )
 	table_ = newtab;
 	mode_ = mode;
 	invDx_ = 1.0/dx;
+}
+
+void Interpol::innerPrint( const string& fname )
+{
+	vector< double >::iterator i;
+	std::ofstream fout( fname.c_str() );
+	for ( i = table_.begin(); i != table_.end(); i++ )
+		fout << *i << endl;
 }
 
 #ifdef DO_UNIT_TESTS

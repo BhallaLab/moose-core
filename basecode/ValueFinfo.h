@@ -110,11 +110,9 @@ class ValueFinfo: public Finfo
 			}
 
 			/**
-			 * Not sure why one would override this.
+			 * Permit override for a field with the same name and type
 			 */
-			bool inherit( const Finfo* baseFinfo ) {
-				return 0;
-			}
+			bool inherit( const Finfo* baseFinfo );
 
 			RecvFunc recvFunc() const {
 					return set_;

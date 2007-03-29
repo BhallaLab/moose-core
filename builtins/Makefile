@@ -12,6 +12,7 @@ TARGET = builtins.o
 
 OBJ = \
 	Interpol.o	\
+	Table.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -22,6 +23,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Interpol.o:	Interpol.h ../basecode/Ftype2.h
+Table.o:	Table.h Interpol.h ../basecode/Ftype2.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c

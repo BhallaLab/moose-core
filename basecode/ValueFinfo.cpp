@@ -105,3 +105,10 @@ bool ValueFinfo::drop( Element* e, unsigned int i ) const
 		assert( 0 );
 		return 0;
 }
+
+/**
+* Permit override for a field with the same name and type
+*/
+bool ValueFinfo::inherit( const Finfo* baseFinfo ) {
+	return ftype()->isSameType( baseFinfo->ftype() );
+}
