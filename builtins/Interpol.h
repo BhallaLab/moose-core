@@ -51,6 +51,7 @@ class Interpol
 		static void lookupReturn( const Conn& c, double val );
 		static void lookup( const Conn& c, double val );
 		static void tabFill( const Conn& c, int xdivs, int mode );
+		static void print( const Conn& c, string fname );
 
 		////////////////////////////////////////////////////////////
 		// Here are the internal functions
@@ -82,16 +83,18 @@ class Interpol
 		 * Mode 1 : Splines (Not yet implemented. )
 		 */
 		void innerTabFill( int xdivs, int mode );
+		void innerPrint( const string& fname );
 
-	private:
+	protected:
 		double xmin_;
 		double xmax_;
 		int mode_;
-		double invDx_;
-		double sy_;
 		vector < double > table_;
 		static const double EPSILON;
-		static const int MAX_DIVS;
+		static const unsigned int MAX_DIVS;
+		double sy_;
+	private:
+		double invDx_;
 };
 
 extern const Cinfo* initInterpolCinfo();
