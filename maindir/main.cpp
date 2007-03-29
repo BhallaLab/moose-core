@@ -17,6 +17,7 @@
 	extern void testNeutral();
 	extern void testShell();
 	extern void testInterpol();
+	extern void testTable();
 	extern void testSched();
 	extern void testWildcard();
 	extern void testBiophysics();
@@ -40,6 +41,7 @@ int main(int argc, char** argv)
 	testNeutral();
 	testShell();
 	testInterpol();
+	testTable();
 	testSched();
 	testWildcard();
 	testBiophysics();
