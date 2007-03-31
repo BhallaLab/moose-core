@@ -127,7 +127,7 @@ bool DestFinfo::strSet( Element* e, const std::string &s ) const
 	 * \todo Here we will ask the Ftype to do the string conversion
 	 * and call the properly typecast rfunc.
 	 */
-	return 0;
+	return ftype()->strSet( e, this, s );
 }
 
 const Finfo* DestFinfo::match( 

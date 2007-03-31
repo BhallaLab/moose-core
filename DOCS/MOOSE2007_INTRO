@@ -1,6 +1,6 @@
 MOOSE architecture introduction.
 
-31 Jan 2007
+29 March 2007
 
 Upi Bhalla
 
@@ -28,7 +28,7 @@ class definition involving 3 files.
 MOOSE2007 implements the same functionality with much less.
 - The messaging is completely revamped, and it doesn't
 make much sense to talk about message variants now. 
-- There are currently 12 Finfo classes, but we still cannot do everything
+- There are currently 11 Finfo classes, which can do almost everything
 that MOOSE06 did. 
 - There is only one Connection class, and that is not going to expand.
 - The user-class definition is now completely separate from the Element
@@ -43,7 +43,35 @@ early stage:
 - Extensive use of assertions
 - Extensive and rigorous unit tests for the base code
 - Compilation with Windows as well as Linux.
-- Integration with SWIG as an alternative to the GENESIS parser. Currently
-	only the Python module is set up to compile.
+- Integration with SWIG as an alternative to the GENESIS parser.
+	Currently the GENESIS parser is set up by default, but a substantial
+	body of code with the Python module is awaiting merging.
 
 This document will evolve to lay out the architecture and API of MOOSE.
+
+Shell API calls:
+These are calls that connect the parser to the system. They are independent
+of the number of nodes and of the location of objects. They do not use pointers.
+These calls are all encapsulated in a large SharedMessage between the 
+parser and the shell. Currently the GenesisParserWrapper talks to the
+Shell by default.
+
+C++ API calls:
+These are calls meant to be used _on a single node_. They handle Element
+pointers. 
+
+Object creation: Neutral::create( const string& type, const string& name,
+	Element* parent );
+Object destruction: set( Element*, "destroy" );
+Message creation: Finfo::add( Element* source, Element* dest, const Finfo* destField );
+Message destruction: Finfo::drop( Element* e, unsigned int msgIndex )
+Message destruction: Finfo::dropAll( Element* e )
+Sending messages: send0( Element*, unsigned int slot );
+Sending messages: send1< T >( Element*, unsigned int slot, T value );
+Sending messages: send2< T1, T2 >( Element*, unsigned int slot, T1 v1, T2 v2 );
+Sending messages: send3< T1, T2, T3 >( Element*, unsigned int slot, T1 v1, T2 v2, T3 v3 );
+Field assignment: set< T >( Element*, const Finfo*, T value );
+Field assignment: set< T >( Element*, const string& fieldName, T value );
+Field readout: get< T >( const Element*, const Finfo*, T& value );
+Field readout: get< T >( Element*, const string& fieldName, T& value );
+

@@ -62,6 +62,18 @@ class Shell
 		static void getWildcardList( const Conn& c,
 						string path, bool ordered );
 
+		static void listMessages( const Conn& c,
+				unsigned int id, string field, bool isIncoming );
+
+		//////////////////////////////////////////////////////////
+		// Some stuff for managing scheduling and simulation runs
+		//////////////////////////////////////////////////////////
+		static void resched( const Conn& c );
+		static void reinit( const Conn& c );
+		static void stop( const Conn& c );
+		static void step( const Conn& c, double time );
+		static void requestClocks( const Conn& c );
+
 
 			/*
 		void add( const string& src, const string& dest );
