@@ -37,9 +37,11 @@ const Cinfo* initGenesisParserCinfo()
 		// Getting a list of child ids: First send a request with
 		// the requested parent elm id.
 		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
-		// Then recv the vector of child ids.
+		// Then recv the vector of child ids. This function is
+		// shared by several other messages as all it does is dump
+		// the elist into a temporary local buffer.
 		TypeFuncPair( Ftype1< vector< unsigned int > >::global(), 
-					RFCAST( &GenesisParserWrapper::recvLe ) ),
+					RFCAST( &GenesisParserWrapper::recvElist ) ),
 		
 		// Creating an object: Send out the request.
 		TypeFuncPair( 
@@ -70,9 +72,26 @@ const Cinfo* initGenesisParserCinfo()
 		// Getting a wildcard path of elements: send out request
 		// args are path, flag true for breadth-first list.
 		TypeFuncPair( Ftype2< string, bool >::global(), 0 ),
-		// Getting a wildcard path of elements: Recv the list.
-		TypeFuncPair( Ftype1< vector< unsigned int > >::global(),
-					RFCAST( &GenesisParserWrapper::recvWildcardList ) ),
+		// The return function for the wildcard past is the shared
+		// function recvElist
+
+		TypeFuncPair( Ftype0::global(), 0 ), // resched
+		TypeFuncPair( Ftype0::global(), 0 ), // reinit
+		TypeFuncPair( Ftype0::global(), 0 ), // stop
+		TypeFuncPair( Ftype1< double >::global(), 0 ),
+				// step, arg is time
+		TypeFuncPair( Ftype0::global(), 0 ), // request clocks
+		TypeFuncPair( Ftype1< vector< double > >::global(), 
+					RFCAST( &GenesisParserWrapper::recvClocks ) ),
+		
+		///////////////////////////////////////////////////////////////
+		// Message info functions
+		///////////////////////////////////////////////////////////////
+		// Request message list: id elm, string field, bool isIncoming
+		TypeFuncPair( Ftype3< Id, string, bool >::global(), 0 ),
+		// Receive message list and string with remote fields for msgs
+		TypeFuncPair( Ftype2< vector < Id >, string >::global(), 
+					RFCAST( &GenesisParserWrapper::recvMessageList ) ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -143,6 +162,18 @@ static const unsigned int useClockSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 8;
 static const unsigned int requestWildcardListSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 9;
+static const unsigned int reschedSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 10;
+static const unsigned int reinitSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 11;
+static const unsigned int stopSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 12;
+static const unsigned int stepSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 13;
+static const unsigned int requestClocksSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 14;
+static const unsigned int listMessagesSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 15;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -227,7 +258,9 @@ void GenesisParserWrapper::recvCwe( const Conn& c, Id cwe )
 	gpw->cwe_ = cwe;
 }
 
-void GenesisParserWrapper::recvLe( const Conn& c, vector< Id > elist )
+//
+//This is used for Le, for WildcardList, and others
+void GenesisParserWrapper::recvElist( const Conn& c, vector< Id > elist)
 {
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
 			( c.targetElement()->data() );
@@ -248,12 +281,21 @@ void GenesisParserWrapper::recvField( const Conn& c, string value )
 	gpw->fieldValue_ = value;
 }
 
-void GenesisParserWrapper::recvWildcardList(
-	const Conn& c, vector< unsigned int > value )
+void GenesisParserWrapper::recvClocks( 
+				const Conn& c, vector< double > dbls)
 {
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
 			( c.targetElement()->data() );
-	gpw->elist_ = value;
+	gpw->dbls_ = dbls;
+}
+
+void GenesisParserWrapper::recvMessageList( 
+				const Conn& c, vector< Id > elist, string s)
+{
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( c.targetElement()->data() );
+	gpw->elist_ = elist;
+	gpw->fieldValue_ = s;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -632,6 +674,108 @@ char* do_getmsg( int argc, const char** const argv, Id s )
 	return copyString( "" );
 }
 
+void do_showmsg( int argc, const char** const argv, Id s )
+{
+	Element* e = Element::element( s );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( e->data() );
+	gpw->doShowMsg( argc, argv, s );
+}
+
+/**
+ * Displays information about incoming/outgoing messages.
+ * Unlike GENESIS, we can put in additional info about the message
+ * type, but we cannot put in all the current arguments without
+ * special effort.
+ * Form of output is
+ * INCOMING MESSAGES onto <mypath>
+ * MSG[0]:	into <destField> from [<path1>, <path2>, ...].<srcField>
+ * ...
+ *
+ * OUTGOING MESSAGES
+ * MSG[0]:	from <srcField> into [<path1>, <path2>, ...].<destField>
+ * ...
+ *
+ * Algorithm: ask Shell for list of all fields on object.
+ * Increment through each requesting incoming/outgoing messages.
+ * This uses the Shell::listMessages function.
+ */
+
+void printMessageList( const string& f1, const string& f2,
+		vector< Id >& elist, unsigned int& msgNum, bool isIncoming )
+{
+	vector< string > list;
+	separateString( f2, list, ", " );
+	if ( elist.size() > 0 ) {
+		assert( elist.size() == list.size() );
+		unsigned int i;
+		if ( isIncoming )
+			cout << "MSG[" << msgNum << "]:	into " << f1 << " from: ";
+		else
+			cout << "MSG[" << msgNum << "]:	from " << f1 << " into: ";
+		string lastField = "";
+		for ( i = 0; i < elist.size(); i++ ) {
+			if ( lastField != list[i] ) {
+				if ( lastField != "" )
+					cout << " ]." << lastField << "\n	[ ";
+				else
+					cout << "[ ";
+			} else {
+					cout << ", ";
+			}
+			cout << GenesisParserWrapper::eid2path( elist[i] );
+			lastField = list[i];
+		}
+		cout << " ]." << lastField << "\n";
+		msgNum++;
+	}
+}
+
+void GenesisParserWrapper::doShowMsg( int argc, const char** argv, Id s)
+{
+	Id e;
+	if ( argc == 1 ) {
+		send0( Element::element( s ), requestCweSlot );
+		e = cwe_;
+	} else {
+		e = path2eid( argv[1], s );
+		if ( e == Shell::BAD_ID ) {
+			cout << "Error: " << argv[0] << ": unknown element " <<
+					argv[1] << endl;
+			return;
+		}
+	}
+	send2< Id, string >( Element::element( s ),
+		requestFieldSlot, e, "fieldList" );
+	vector< string > list;
+	vector< string >::iterator i;
+	separateString( fieldValue_, list, ", " );
+
+	cout << "INCOMING MESSAGES onto " << eid2path( e ) << endl;
+	unsigned int msgNum = 0;
+	for ( i = list.begin(); i != list.end(); i++ ) {
+		if ( *i == "fieldList" )
+			continue;
+		send3< Id, string, bool >( Element::element( s ),
+			listMessagesSlot, e, *i, 1 );
+		// The return message puts the elements in elist_ and the 
+		// target field names in fieldValue_
+		printMessageList( *i, fieldValue_, elist_, msgNum, 1 );
+	}
+
+	cout << "OUTGOING MESSAGES from " << eid2path( e ) << endl;
+	msgNum = 0;
+	for ( i = list.begin(); i != list.end(); i++ ) {
+		if ( *i == "fieldList" )
+			continue;
+		send3< Id, string, bool >( Element::element( s ),
+			listMessagesSlot, e, *i, 0 );
+		// The return message puts the elements in elist_ and the 
+		// target field name in fieldValue_
+		printMessageList( *i, fieldValue_, elist_, msgNum, 0);
+	}
+}
+
 void do_create( int argc, const char** const argv, Id s )
 {
 	if ( argc != 3 ) {
@@ -774,8 +918,7 @@ void do_quit( int argc, const char** const argv, Id s )
 void do_stop( int argc, const char** const argv, Id s )
 {
 	if ( argc == 1 ) {
-		// s->stopFuncLocal( );
-		;
+		send0( Element::element( s ), stopSlot );
 	} else {
 		cout << "usage:: " << argv[0] << "\n";
 	}
@@ -784,8 +927,9 @@ void do_stop( int argc, const char** const argv, Id s )
 void do_reset( int argc, const char** const argv, Id s )
 {
 	if ( argc == 1 ) {
+		send0( Element::element( s ), reschedSlot );
+		send0( Element::element( s ), reinitSlot );
 		;
-		// s->resetFuncLocal( );
 	} else {
 		cout << "usage:: " << argv[0] << "\n";
 	}
@@ -793,15 +937,45 @@ void do_reset( int argc, const char** const argv, Id s )
 
 void do_step( int argc, const char** const argv, Id s )
 {
-	if ( argc == 2 ) {
-			;
-		// s->stepFuncLocal( argv[1], "" );
-	} else if ( argc == 3 ) {
-			;
-		// s->stepFuncLocal( argv[1], argv[2] );
+	Element* e = Element::element( s );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( e->data() );
+	gpw->step( argc, argv );
+}
+
+void GenesisParserWrapper::step( int argc, const char** const argv )
+{
+	double runtime;
+	Element* e = Element::element( element() );
+	if ( argc == 3 ) {
+		if ( strcmp( argv[ 2 ], "-t" ) == 0 ) {
+			runtime = strtod( argv[ 1 ], 0 );
+		} else {
+			cout << "usage:: " << argv[0] << 
+					" time/nsteps [-t -s(default ]\n";
+			return;
+		}
 	} else {
-		cout << "usage:: " << argv[0] << " time/nsteps [-t -s(default ]\n";
+		send0( e, requestClocksSlot ); 
+		assert( dbls_.size() > 0 );
+		// This fills up a vector of doubles with the clock duration.
+		// Find the shortest dt.
+		double min = 1.0e10;
+		vector< double >::iterator i;
+		for ( i = dbls_.begin(); i != dbls_.end(); i++ )
+			if ( min > *i )
+					min = *i ;
+		if ( argc == 1 )
+			runtime = min;
+		else 
+			runtime = min * strtol( argv[1], 0, 10 );
 	}
+	if ( runtime < 0 ) {
+		cout << "Error: " << argv[0] << ": negative time is illegal\n";
+		return;
+	}
+
+	send1< double >( e, stepSlot, runtime );
 }
 
 void do_setclock( int argc, const char** const argv, Id s )
@@ -819,10 +993,24 @@ void do_setclock( int argc, const char** const argv, Id s )
 	}
 }
 
+void GenesisParserWrapper::showClocks( Element* e )
+{
+	send0( e, requestClocksSlot ); 
+	// This fills up a vector of doubles with the clock duration.
+	cout << "ACTIVE CLOCKS\n";
+	cout << "-------------\n";
+	for ( unsigned int i = 0; i < dbls_.size(); i++ )
+		cout << "[" << i << "]	: " << dbls_[i] << endl;
+}
+
 void do_showclocks( int argc, const char** const argv, Id s )
 {
 	if ( argc == 1 ) {
-	;	// s->showClocksFuncLocal( );
+		Element* e = Element::element( s );
+		GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+				( e->data() );
+		gpw->showClocks( e );
+
 	} else {
 		cout << "usage:: " << argv[0] << "\n";
 	}
@@ -835,8 +1023,8 @@ void do_useclock( int argc, const char** const argv, Id s )
 	if ( argc == 3 ) {
 		sprintf( tickName, "/sched/cj/t%s", argv[2] );
 	} else if ( argc == 4 ) {
-		sprintf( tickName, "/sched/cj/t%s", argv[3] );
-		func = argv[2];
+		sprintf( tickName, "/sched/cj/t%s", argv[2] );
+		func = argv[3];
 	} else {
 		cout << "usage:: " << argv[0] << " path [funcname] clockNum\n";
 		return;
@@ -882,6 +1070,12 @@ void do_show( int argc, const char** const argv, Id s )
 	gpw->doShow( argc, argv, s );
 }
 
+/**
+ * This function shows values for all fields of an element. It
+ * sends out a request for the FieldList, which comes back as one big
+ * string. It parses out the string and requests values for each field
+ * in turn to print out.
+ */
 void GenesisParserWrapper::showAllFields( Id e, Id s )
 {
 	char temp[80];
@@ -1021,8 +1215,11 @@ void do_echo( int argc, const char** const argv, Id s )
 	}
 
 	string temp = "";
-	for (int i = 1; i < argc; i++ )
+	for (int i = 1; i < argc; i++ ) {
 		temp = temp + argv[i];
+		if ( i < argc - 1 )
+			temp = temp + " ";
+	}
 
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
 			( Element::element( s )->data() );
@@ -1202,6 +1399,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "setfield", do_set, "void" );
 	AddFunc( "getfield", reinterpret_cast< slifunc >( do_get ), "char*" );
 	AddFunc( "getmsg", reinterpret_cast< slifunc >( do_getmsg ), "char*" );
+	AddFunc( "showmsg", do_showmsg, "void" );
 	AddFunc( "call", do_call, "void" );
 	AddFunc( "isa", reinterpret_cast< slifunc >( do_isa ), "int" );
 	AddFunc( "exists", reinterpret_cast< slifunc >( do_exists ), "int");

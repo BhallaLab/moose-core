@@ -178,7 +178,7 @@ const Cinfo* initClockJobCinfo()
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
 		/**
-		 * This function sets off the simulation for the specificed
+		 * This function sets off the simulation for the specified
 		 * duration
 		 */
 		new DestFinfo( "start", Ftype1< double >::global(),

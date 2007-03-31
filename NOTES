@@ -1614,4 +1614,34 @@ Table compiles. On to unit tests.
 Much effort later, unit tests cleared. Especially ugly because of the zillions
 of options in the table class.
 
+Checked in as revision 58.
+
+Working on porting over the old moose squid demo. Numerous problems.
+Fixed strSet/strGet for LookupFinfo.
+Remaining:
+- reset, step need to be activated in GenesisParser
+- I need a plot object. The table is nice but does not have a way (yet) to
+get values by requesting them.
++ I need to set up a return message from the table that would be used when
+	INPUT was the message name. Goes and asks for values from fields.
+
+=============================================================================
+March 30 2007
+
+Many updates to Shell and GenesisParser to handle reset, reinit, step, 
+showclocks etc. Still does not work with squid demo. For some reason Vm
+is not getting scheduled.
+
+A bit of a diversion: Implemented showmsg, with the idea that it would help
+me debug the problem with Vm. Fairly involved. Completes old unit tests
+but the function itself barfs.
+Now fixed. It is a big help. Shows that the Table Vm was indeed connected
+up to t0. So why is it not saving data?
+Also shows up some oddness in sched: Multiple messages going from
+sched/cj to t0.start
+Various oddnesses are present. If I repeat a useclock command it croaks.
+
+Well, this is unsatisfactory, but I have made a whole lot of changes and
+the old unit tests still pass, so I should check this mess in.
+
 =============================================================================
