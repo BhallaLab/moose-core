@@ -226,16 +226,16 @@ unsigned int DynamicFinfo::outgoingConns(
 
 
 /**
-* The OrigFinfo knows how to do this conversion.
+* The Ftype of the OrigFinfo knows how to do this conversion.
 */
 bool DynamicFinfo::strSet( Element* e, const std::string &s ) const
 {
-	return 0;
+	return ftype()->strSet( e, this, s );
 }
 			
 // The Ftype handles this conversion.
 bool DynamicFinfo::strGet( const Element* e, std::string &s ) const {
-	return 0;
+	return ftype()->strGet( e, this, s );
 }
 
 

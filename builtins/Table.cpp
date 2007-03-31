@@ -34,6 +34,19 @@ const Cinfo* initTableCinfo()
 				RFCAST( &Table::reinit ) ),
 	};
 
+	/** 
+	 * This is a shared message to request and handle value
+	 * messages from fields.
+	 */
+	static TypeFuncPair inputRequestTypes[] =
+	{
+			// Sends out the request. Issued from the process call.
+		TypeFuncPair( Ftype0::global(), 0 ),
+			// Handle the returned value.
+	    TypeFuncPair( Ftype1< double >::global(),
+				RFCAST( &Table::setInput ) ),
+	};
+
 	static Finfo* tableFinfos[] =
 	{
 	///////////////////////////////////////////////////////
@@ -73,6 +86,7 @@ const Cinfo* initTableCinfo()
 	// Shared message definitions
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "process", processTypes, 2 ),
+		new SharedFinfo( "inputRequest", inputRequestTypes, 2 ),
 		
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -132,6 +146,8 @@ static const Cinfo* tableCinfo = initTableCinfo();
 
 static const unsigned int outputSlot = 
 	initTableCinfo()->getSlotIndex( "outputSrc" );
+static const unsigned int inputRequestSlot = 
+	initTableCinfo()->getSlotIndex( "inputRequest" );
 
 ////////////////////////////////////////////////////////////////////
 // Here we set up Table value fields
@@ -217,6 +233,7 @@ void Table::innerProcess( Element* e, ProcInfo p )
 {
 	double temp;
 	unsigned long index;
+	send0( e, inputRequestSlot );
 	switch( stepMode_ ) {
 		case TAB_IO :
 			output_ = innerLookup( input_ ) * py_ + sy_ ;
@@ -510,9 +527,27 @@ void testTable()
 					"TAB_SPIKE" );
 	}
 
+	// Testing inputRequest message and its ability to grab the
+	// field of another object.
+	Element* t3 = Neutral::create( "Table", "t3", Element::root() );
+	ASSERT( 
+		t3->findFinfo( "inputRequest" )->
+			add( t3, t, t->findFinfo( "output" ) ),
+			"making inputRequest msg"
+	);
+	ASSERT( set< double >( t, "output", 42.345 ) , "inputRequest" );
+	Conn c3( t3, 0 );
+	Table::process( c3, &pb );
+	get< double >( t3, "input", v );
+	ASSERT( v == 42.345, "inputRequest" );
+
+	// Testing file print command
+	ASSERT( set< string >( t, "print", "/tmp/test.txt" ), "print" );
+	
 
 	set( t, "destroy" );
 	set( t2, "destroy" );
+	set( t3, "destroy" );
 }
 
 double calcWaveform( int i )

@@ -239,6 +239,10 @@ class myFlexLexer: public yyFlexLexer
 		int IncludeScript(int argc, char** argv);
 		void print( const std::string& s );
 
+		Id element() const {
+			return element_;
+		}
+
 	private:
 		std::string currstr;
 		std::string outstr;

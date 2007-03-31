@@ -82,7 +82,7 @@ bool ThisFinfo::strSet( Element* e, const std::string &s ) const
 
 const Finfo* ThisFinfo::match( Element* e, const string& name ) const
 {
-	if ( name == "" )
+	if ( name == "" || name == "this" )
 		return this;
 
 	return cinfo_->findFinfo( e, name );

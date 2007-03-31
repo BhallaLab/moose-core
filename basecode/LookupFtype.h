@@ -119,7 +119,9 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 			}
 
 			/**
-			 * This may only be called from a DynamicFinfo
+			 * 'get' gets a value. It requires that the indexing info
+			 * be available through the Finfo, which must be a 
+			 * DynamicFinfo. Returns true on success.
 			 */
 			bool get( const Element* e, const Finfo* f, T1& v ) const {
 				const DynamicFinfo* df =
@@ -137,7 +139,9 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 			}
 
 			/**
-			 * This may only be called from a DynamicFinfo.
+			 * 'set' assigns a value. It requires that the indexing
+			 * info be available through the Finfo, which must
+			 * be a DynamicFinfo. Returns true on success.
 			 * It specializes the generic version in the parent Ftype1
 			 */
 			bool set( Element* e, const Finfo* f, T1 v ) const {
@@ -155,6 +159,34 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 								df->generalIndex() );
 				set( c, v, *index );
 				return 1;
+			}
+
+			/**
+			 * This gets the value and converts it to a string,
+			 * returning true if everything worked.
+			 * This may only be called from a DynamicFinfo
+			 */
+			bool strGet( const Element* e, const Finfo* f, string& s )
+					const
+			{
+				T1 val;
+				if ( get( e, f, val ) )
+						return val2str( val, s );
+				return 0;
+			}
+
+			/**
+			 * This sets the value from a string,
+			 * returning true if everything worked.
+			 * This may only be called from a DynamicFinfo
+			 */
+			bool strSet( Element* e, const Finfo* f, const string& s )
+					const
+			{
+				T1 val;
+				if ( str2val( s, val ) )
+						return set( e, f, val );
+				return 0;
 			}
 
 			/**

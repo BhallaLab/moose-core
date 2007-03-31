@@ -82,7 +82,31 @@ const Cinfo* initShellCinfo()
 				Ftype2< string, bool >::global(),
 				RFCAST( &Shell::getWildcardList ) ),
 		// Getting a wildcard path of elements: Sending list back.
-		TypeFuncPair( Ftype1< vector< unsigned int > >::global(), 0 ),
+		// This goes through the exiting list for elists set up in le.
+		//TypeFuncPair( Ftype1< vector< unsigned int > >::global(), 0 ),
+
+		////////////////////////////////////////////////////////////
+		// Running simulation set
+		////////////////////////////////////////////////////////////
+		TypeFuncPair( Ftype0::global(), RFCAST( &Shell::resched ) ),
+		TypeFuncPair( Ftype0::global(), RFCAST( &Shell::reinit ) ),
+		TypeFuncPair( Ftype0::global(), RFCAST( &Shell::stop ) ),
+		TypeFuncPair( Ftype1< double >::global(), // Arg is runtime
+						RFCAST( &Shell::step ) ),
+		TypeFuncPair( Ftype0::global(), &Shell::requestClocks ),
+		// Sending back the list of clocks times
+		TypeFuncPair( Ftype1< vector< double > >::global(), 0 ),
+
+		////////////////////////////////////////////////////////////
+		// Message info functions
+		////////////////////////////////////////////////////////////
+		// Handle request for message list:
+		// id elm, string field, bool isIncoming
+		TypeFuncPair( Ftype3< unsigned int, string, bool >::global(),
+						RFCAST( &Shell::listMessages ) ),
+		// Return message list and string with remote fields for msgs
+		TypeFuncPair( 
+			Ftype2< vector < unsigned int >, string >::global(), 0 ),
 	};
 
 	static Finfo* shellFinfos[] =
@@ -118,7 +142,7 @@ const Cinfo* initShellCinfo()
 static const Cinfo* shellCinfo = initShellCinfo();
 static const unsigned int cweSlot =
 	initShellCinfo()->getSlotIndex( "parser" ) + 0;
-static const unsigned int leSlot =
+static const unsigned int elistSlot =
 	initShellCinfo()->getSlotIndex( "parser" ) + 1;
 
 // Returns the id of the created object
@@ -126,8 +150,10 @@ static const unsigned int createSlot =
 	initShellCinfo()->getSlotIndex( "parser" ) + 2;
 static const unsigned int getFieldSlot =
 	initShellCinfo()->getSlotIndex( "parser" ) + 3;
-static const unsigned int returnWildcardListSlot =
+static const unsigned int clockSlot =
 	initShellCinfo()->getSlotIndex( "parser" ) + 4;
+static const unsigned int listMessageSlot =
+	initShellCinfo()->getSlotIndex( "parser" ) + 5;
 
 
 //////////////////////////////////////////////////////////////////////
@@ -312,7 +338,7 @@ void Shell::trigLe( const Conn& c, unsigned int parent )
 		if ( get< vector< unsigned int > >( pa, "childList", ret ) ) {
 			Element* e = c.targetElement();
 			sendTo1< vector< unsigned int > >( e,
-				leSlot, c.targetIndex(), ret );
+				elistSlot, c.targetIndex(), ret );
 		}
 	}
 }
@@ -510,7 +536,113 @@ void Shell::getWildcardList( const Conn& c, string path, bool ordered )
 		*i = ( *j )->id();
 	
 	send1< vector< unsigned int > >( c.targetElement(), 
-				returnWildcardListSlot, ret );
+				elistSlot, ret );
+}
+
+/**
+ * Utility function to find the ClockJob pointer
+ */
+Element* findCj()
+{
+	unsigned int schedId;
+	lookupGet< unsigned int, string >( 
+		Element::root(), "lookupChild", schedId, "sched" );
+	assert( schedId != BAD_ID );
+	unsigned int cjId;
+	lookupGet< unsigned int, string >( 
+		Element::element( schedId ), "lookupChild", cjId, "cj" );
+	assert( cjId != BAD_ID );
+	return Element::element( cjId );
+}
+
+void Shell::resched( const Conn& c )
+{
+	Element* cj = findCj();
+	set( cj, "resched" );
+}
+
+void Shell::reinit( const Conn& c )
+{
+	Element* cj = findCj();
+	set( cj, "reinit" );
+}
+
+void Shell::stop( const Conn& c )
+{
+	// Element* cj = findCj();
+	// set( cj, "stop" ); // Not yet implemented
+}
+
+void Shell::step( const Conn& c, double time )
+{
+	Element* cj = findCj();
+	set< double >( cj, "start", time );
+}
+
+/**
+ * requestClocks builds a list of all clock times in order of clock
+ * number. Puts these into a vector of doubles to send back to the
+ * calling parser.
+ * \todo: Need to fix requestClocks as it will give the wrong index
+ * if we have non-contiguous clock ticks.
+ */
+void Shell::requestClocks( const Conn& c )
+{
+	// Here we fill up the clock timings.
+	Element* cj = findCj();
+	vector< Conn > kids;
+	vector< Conn >::iterator i;
+	vector< double > times;
+	cj->findFinfo( "childSrc" )->outgoingConns( cj, kids );
+	double dt;
+	for ( i = kids.begin(); i != kids.end(); i++ ) {
+		if ( get< double >( i->targetElement(), "dt", dt ) )
+			times.push_back( dt );
+	}
+
+	send1< vector< double > >( c.targetElement(), clockSlot, times );
+}
+
+/**
+ * listMessages builds a list of messages associated with the 
+ * specified element on the named field, and sends it back to
+ * the calling parser. It extracts the
+ * target element from the connections, and puts this into a
+ * vector of unsigned ints.
+ */
+void Shell::listMessages( const Conn& c,
+				unsigned int id, string field, bool isIncoming )
+{
+	assert( id != BAD_ID );
+	Element* e = Element::element( id );
+	const Finfo* f = e->findFinfo( field );
+	assert( f != 0 );
+	vector< Conn > list;
+	vector< unsigned int > ret;
+	string remoteFields = "";
+	
+	if ( isIncoming )
+		f->incomingConns( e, list );
+	else
+		f->outgoingConns( e, list );
+
+	if ( list.size() > 0 ) {
+		vector< Conn >::iterator i;
+		for ( i = list.begin(); i != list.end(); i++ ) {
+			Element* temp = i->targetElement();
+			ret.push_back( temp->id() );
+			const Finfo* targetFinfo = 
+					temp->findFinfo( i->targetIndex() );
+			assert( targetFinfo != 0 );
+			if ( i == list.begin() )
+				remoteFields = remoteFields + targetFinfo->name();
+			else
+				remoteFields = remoteFields + ", " +
+						targetFinfo->name();
+		}
+	}
+	send2< vector< unsigned int >, string >(
+		c.targetElement(), listMessageSlot, ret, remoteFields );
 }
 
 //////////////////////////////////////////////////////////////////

@@ -284,6 +284,20 @@ void lookupFinfoTest()
 	ASSERT ( flist.size() - s == 3, "Checking formation of DynamicFinfos" );
 
 	////////////////////////////////////////////////////////////////
+	// Check string set and get.
+	////////////////////////////////////////////////////////////////
+	
+	string sret = "";
+	bool bret = 0;
+	bret = a1->findFinfo( "dmap[3]" )->strSet( a1, "-2.3" );
+	ASSERT( bret, "strSet" );
+	get< double >( a1, a1->findFinfo( "dmap[3]" ), dret );
+	ASSERT( dret == -2.3, "test strSet");
+	bret = a1->findFinfo( "dmap[3]" )->strGet( a1, sret );
+	ASSERT( bret, "strSet" );
+	ASSERT( sret == "-2.3", "test strSet");
+
+	////////////////////////////////////////////////////////////////
 	// Now we start testing messages between LookupFinfo fields.
 	////////////////////////////////////////////////////////////////
 	

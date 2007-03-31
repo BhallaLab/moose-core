@@ -25,11 +25,14 @@ class GenesisParserWrapper: public myFlexLexer
 		static void setReturnId( const Conn& c, unsigned int i );
 
 		static void recvCwe( const Conn& c, unsigned int i );
-		static void recvLe( const Conn& c, vector< Id > elist );
+		static void recvElist( const Conn& c, vector< Id > elist);
 		static void recvCreate( const Conn& c, unsigned int i );
 		static void recvField( const Conn& c, string value );
 		static void recvWildcardList( const Conn& c,
 						vector< unsigned int > value );
+		static void recvClocks( const Conn& c, vector< double > dbls);
+		static void recvMessageList( 
+				const Conn& c, vector< Id > elist, string s);
 
 //////////////////////////////////////////////////////////////////
 // Helper functions
@@ -39,12 +42,15 @@ class GenesisParserWrapper: public myFlexLexer
 		char* doGet( int argc, const char** argv, Id s );
 		void doSet( int argc, const char** argv, Id s );
 		void doShow( int argc, const char** argv, Id s );
+		void doShowMsg( int argc, const char** argv, Id s );
 		void showAllFields( Id e, Id s );
 		void doAdd( int argc, const char** const argv, Id s );
 		void innerAdd( Id src, const string& srcF, Id dest,
 						const string& destF );
 		void useClock( Id tickId, const string& path,
 						const string& func, Id s );
+		void step( int argc, const char** const argv );
+		void showClocks( Element* e );
 
 		////////////////////////////////////////////////
 		//  Utility functions
@@ -87,6 +93,7 @@ class GenesisParserWrapper: public myFlexLexer
 		Id cwe_;
 		Id createdElm_;
 		vector< Id > elist_;
+		vector< double > dbls_;
 
 		/**
 		 * This flag is true if unit tests are being done.
