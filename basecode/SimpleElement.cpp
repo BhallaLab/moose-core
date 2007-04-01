@@ -111,7 +111,6 @@ unsigned int SimpleElement::insertConnOnSrc(
 	}
 
 	if ( begin == end ) { // Need to initialize current MsgSrc
-		assert( next == 0 );
 		unsigned int i;
 		for ( i = 0; i < rf.size(); i++ ) {
 			assert( src_[ src + i ].recvFunc() == dummyFunc );
@@ -204,6 +203,19 @@ vector< Conn >::const_iterator
 {
 	assert (  src  < src_.size() );
 	assert ( conn_.size() >= src_[ src ].end() );
+	return conn_.begin() + src_[ src ].end();
+}
+
+
+vector< Conn >::const_iterator
+	SimpleElement::connSrcVeryEnd( unsigned int src ) const
+{
+	assert (  src  < src_.size() );
+	assert ( conn_.size() >= src_[ src ].end() );
+	unsigned int n = nextSrc( src );
+	if ( n != 0 )
+		return connSrcVeryEnd( n );
+
 	return conn_.begin() + src_[ src ].end();
 }
 

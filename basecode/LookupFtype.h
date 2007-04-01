@@ -190,6 +190,24 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 			}
 
 			/**
+			 * This virtual function returns a void* to an allocated
+			 * T2 instance of the converted string. If the conversion
+			 * fails it returns 0.
+			 * Note that in LookupFtype it has a special meaning,
+			 * because it converts to the T2 class which is used
+			 * for indexing, rather than to the data class.
+			 * I'm not sure if the function is even needed for
+			 * any other ftype.
+			 */
+			void* strToIndexPtr( const string& s ) const {
+				T2 ret;
+				if ( str2val( s, ret ) ) {
+					return new T2( ret );
+				}
+				return 0;
+			}
+
+			/**
 			 * Here we can directly get the value without any
 			 * intermediates like the DynamicFinfo.
 			 * This may only be called from lookupGet< T1, T2 >

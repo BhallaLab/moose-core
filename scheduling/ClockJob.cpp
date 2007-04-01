@@ -283,7 +283,8 @@ void ClockJob::startFunc( const Conn& c, double runtime)
 void ClockJob::startFuncLocal( Element* e, double runTime )
 {
 	// cout << "starting run for " << runTime << " sec.\n";
-	send2< ProcInfo, double >( e, startSlot, &info_, runTime );
+	send2< ProcInfo, double >( e, startSlot, &info_, 
+					info_.currTime_ + runTime );
 	/*
 	info_.currTime_ = currentTime_;
 	if ( tick_ )

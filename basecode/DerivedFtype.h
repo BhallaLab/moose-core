@@ -170,6 +170,19 @@ template < class T > class Ftype1: public Ftype
 					return this->set( e, f, val );
 				return 0;
 			}
+
+			/**
+			 * This virtual function returns a void* to an allocated
+			 * T instance of the converted string. If the conversion
+			 * fails it returns 0.
+			 */
+			void* strToIndexPtr( const string& s ) const {
+				T ret;
+				if ( str2val( s, ret ) ) {
+					return new T( ret );
+				}
+				return 0;
+			}
 };
 
 #endif // _DERIVED_FTYPE_H

@@ -40,8 +40,8 @@ const Finfo* LookupFinfo::match( Element* e, const string& s ) const
 			s.substr( openpos + 1, closepos - openpos - 1 );
 
 		///\todo: need to define the strToIndex function
-		// void* index = ftype()->strToIndex( indexStr );
-		string* index = new string( indexStr );
+		void* index = ftype()->strToIndexPtr( indexStr );
+		// string* index = new string( indexStr );
 		string n = name() + "[" + indexStr + "]";
 		DynamicFinfo* ret = 
 				new DynamicFinfo(
@@ -50,7 +50,7 @@ const Finfo* LookupFinfo::match( Element* e, const string& s ) const
 					set_, get_,
 					ftype()->recvFunc(), ftype()->trigFunc()
 				);
-		ret->setGeneralIndex( static_cast< void* >( index ) );
+		ret->setGeneralIndex( index );
 		e->addFinfo( ret );
 		return ret;
 	}
@@ -297,6 +297,12 @@ void lookupFinfoTest()
 	ASSERT( bret, "strSet" );
 	ASSERT( sret == "-2.3", "test strSet");
 
+	bret = a1->findFinfo( "dmap[2]" )->strSet( a1, "-0.03" );
+	ASSERT( bret, "strSet" );
+	bret = get< double >( a1, a1->findFinfo( "dmap[2]" ), dret );
+	ASSERT( bret, "strGet" );
+	ASSERT( dret == -0.03, "test strGet");
+
 	////////////////////////////////////////////////////////////////
 	// Now we start testing messages between LookupFinfo fields.
 	////////////////////////////////////////////////////////////////
@@ -333,7 +339,7 @@ void lookupFinfoTest()
 	// is the one that is used for the messaging.
 	flist.resize( 0 );
 	a1->listFinfos( flist );
-	ASSERT ( flist.size() - s == 3, "reuse of DynamicFinfos" );
+	ASSERT ( flist.size() - s == 4, "reuse of DynamicFinfos" );
 
 	// 3. a1 trigger message will call send on a2->dmap[1]. This goes
 	//   to a1->dval.
@@ -350,7 +356,7 @@ void lookupFinfoTest()
 	// Here we made a new DynamicFinfo for the regular ValueFinfo.
 	flist.resize( 0 );
 	a1->listFinfos( flist );
-	ASSERT ( flist.size() - s == 4, "No new DynamicFinfos." );
+	ASSERT ( flist.size() - s == 5, "No new DynamicFinfos." );
 
 	// 4. a1 trigger message will call send on a2->dmap[2]. This goes
 	//   to a1->dmap[2]. The trigger is created first. Check it.

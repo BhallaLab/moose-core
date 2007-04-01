@@ -59,7 +59,7 @@ void SrcFinfo::dropAll( Element* e ) const
 	unsigned int end;
 	if ( srcIndex_ > 0 ) {
 		begin = e->connSrcBegin( srcIndex_ )->sourceIndex( e );
-		end = e->connSrcEnd( srcIndex_ )->sourceIndex( e );
+		end = e->connSrcVeryEnd( srcIndex_ )->sourceIndex( e );
 		for ( unsigned int j = end; j > begin; j-- )
 			e->disconnect( j - 1 );
 	}
@@ -72,7 +72,7 @@ void SrcFinfo::dropAll( Element* e ) const
 bool SrcFinfo::drop( Element* e, unsigned int i ) const
 {
 	unsigned int begin = e->connSrcBegin( srcIndex_ )->sourceIndex( e );
-	unsigned int end = e->connSrcEnd( srcIndex_ )->sourceIndex( e );
+	unsigned int end = e->connSrcVeryEnd( srcIndex_ )->sourceIndex( e );
 	i += begin;
 	if ( i < end ) {
 		e->disconnect( i );
@@ -92,7 +92,7 @@ unsigned int SrcFinfo::numIncoming( const Element* e ) const
 
 unsigned int SrcFinfo::numOutgoing( const Element* e ) const
 {
-	return ( e->connSrcEnd( srcIndex_ ) - e->connSrcBegin( srcIndex_ ));
+	return ( e->connSrcVeryEnd( srcIndex_ ) - e->connSrcBegin( srcIndex_ ));
 }
 			
 /**
@@ -115,7 +115,7 @@ unsigned int SrcFinfo::outgoingConns(
 				const Element* e, vector< Conn >& list ) const
 {
 	list.insert( list.end(), e->connSrcBegin( srcIndex_ ),
-					e->connSrcEnd( srcIndex_ ) );
+					e->connSrcVeryEnd( srcIndex_ ) );
 	return list.size();
 }
 
