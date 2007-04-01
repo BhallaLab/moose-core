@@ -1643,5 +1643,13 @@ Various oddnesses are present. If I repeat a useclock command it croaks.
 
 Well, this is unsatisfactory, but I have made a whole lot of changes and
 the old unit tests still pass, so I should check this mess in.
+Checked in as revision 59.
+
+=============================================================================
+April 1 2007
+Jokes aside, still struggling with the test script. I have now added 
+further unit tests on the scheduling of different kinds of objects, and
+there is no sign of the problematic behaviour I see with the actual script.
+Anyway, check in these unit tests.
 
 =============================================================================

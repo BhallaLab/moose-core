@@ -10,6 +10,7 @@
 
 #include "moose.h"
 #include "../element/Neutral.h"
+#include "../shell/Shell.h"
 
 /**
  * Unit tests for the scheduling system.
@@ -155,6 +156,212 @@ void testSched()
 	ASSERT( TickTest::count_ == 31, "# of individual tick counts" );
 	ASSERT( set( sched, "destroy" ), "cleanup" );
 	ASSERT( set( tt, "destroy" ), "cleanup" );
+}
+
+//////////////////////////////////////////////////////////////////////
+// Here we check how the system handles process calls to multiple
+// target types.
+//////////////////////////////////////////////////////////////////////
+
+static string procSeq1[] = {
+	"Process0: s0_0 at 0",
+	"Process0: s0_1 at 0",
+	"Process1: s1 at 0",
+	"Process2: s2 at 0",
+	"Process0: s0_0 at 1",
+	"Process0: s0_1 at 1",
+	"Process1: s1 at 1",
+	"Process2: s2 at 1",
+	"Process0: s0_0 at 2",
+	"Process0: s0_1 at 2",
+	"Process1: s1 at 2",
+	"Process2: s2 at 2",
+	"Process0: s0_0 at 3",
+	"Process0: s0_1 at 3",
+	"Process1: s1 at 3",
+	"Process2: s2 at 3",
+};
+
+static string reinitSeq[] = {
+	"Reinit: s0_0",
+	"Reinit: s0_1",
+	"Reinit: s1",
+	"Reinit: s2",
+};
+
+static string* seqStr;
+static unsigned int seqCount;
+
+void processCall0( const Conn& c, ProcInfo p )
+{
+	char line[40];
+	sprintf( line, "Process0: %s at %g",
+			c.targetElement()->name().c_str(), p->currTime_ );
+	ASSERT( seqStr[ seqCount++ ] == line , "process0" );
+}
+
+void processCall1( const Conn& c, ProcInfo p )
+{
+	char line[40];
+	sprintf( line, "Process1: %s at %g",
+			c.targetElement()->name().c_str(), p->currTime_ );
+	ASSERT( seqStr[ seqCount++ ] == line , "process1" );
+}
+
+void processCall2( const Conn& c, ProcInfo p )
+{
+	char line[40];
+	sprintf( line, "Process2: %s at %g",
+			c.targetElement()->name().c_str(), p->currTime_ );
+	ASSERT( seqStr[ seqCount++ ] == line , "process2" );
+}
+
+void reinitCall( const Conn& c, ProcInfo p )
+{
+	char line[40];
+	sprintf( line, "Reinit: %s", c.targetElement()->name().c_str() );
+	ASSERT( seqStr[ seqCount++ ] == line , "reinit" );
+}
+
+void testSchedProcess()
+{
+	static TypeFuncPair processTypes0[] =
+	{
+			// The process func call
+		TypeFuncPair( Ftype1< ProcInfo >::global(), 
+				RFCAST( processCall0 ) ),
+		TypeFuncPair( Ftype1< ProcInfo >::global(), 
+				RFCAST( reinitCall ) ),
+	};
+
+	static Finfo* sched0Finfos[] =
+	{
+		new SharedFinfo( "process", processTypes0, 2 ),
+	};
+
+	static Cinfo sched0Cinfo(
+		"Sched0",
+		"Upinder S. Bhalla, Mar 2007, NCBS",
+		"Sched0: Checks scheduling of multiple target types",
+		initNeutralCinfo(),
+		sched0Finfos,
+		sizeof(sched0Finfos)/sizeof(Finfo *),
+		ValueFtype1< double >::global()
+	);
+
+
+	static TypeFuncPair processTypes1[] =
+	{
+			// The process func call
+		TypeFuncPair( Ftype1< ProcInfo >::global(), 
+				RFCAST( processCall1 ) ),
+		TypeFuncPair( Ftype1< ProcInfo >::global(), 
+				RFCAST( reinitCall ) ),
+	};
+
+	static Finfo* sched1Finfos[] =
+	{
+		new SharedFinfo( "process", processTypes1, 2 ),
+	};
+
+	static Cinfo sched1Cinfo(
+		"Sched1",
+		"Upinder S. Bhalla, Mar 2007, NCBS",
+		"Sched1: Checks scheduling of multiple target types",
+		initNeutralCinfo(),
+		sched1Finfos,
+		sizeof(sched1Finfos)/sizeof(Finfo *),
+		ValueFtype1< double >::global()
+	);
+	static TypeFuncPair processTypes2[] =
+	{
+			// The process func call
+		TypeFuncPair( Ftype1< ProcInfo >::global(), 
+				RFCAST( processCall2 ) ),
+		TypeFuncPair( Ftype1< ProcInfo >::global(), 
+				RFCAST( reinitCall ) ),
+	};
+
+	static Finfo* sched2Finfos[] =
+	{
+		new SharedFinfo( "process", processTypes2, 2 ),
+	};
+
+	static Cinfo sched2Cinfo(
+		"Sched2",
+		"Upinder S. Bhalla, Mar 2007, NCBS",
+		"Sched2: Checks scheduling of multiple target types",
+		initNeutralCinfo(),
+		sched2Finfos,
+		sizeof(sched2Finfos)/sizeof(Finfo *),
+		ValueFtype1< double >::global()
+	);
+
+	cout << "\nTesting sched process sequencing";
+	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	Element* cj = Neutral::create( "ClockJob", "cj", n );
+	Element* t0 = Neutral::create( "Tick", "t0", cj );
+	Element* s0_0 = Neutral::create( "Sched0", "s0_0", n );
+	Element* s0_1 = Neutral::create( "Sched0", "s0_1", n );
+	Element* s1 = Neutral::create( "Sched1", "s1", n );
+	Element* s2 = Neutral::create( "Sched2", "s2", n );
+
+	const Finfo* proc = t0->findFinfo( "process" );
+	proc->add( t0, s0_0, s0_0->findFinfo( "process" ) );
+	proc->add( t0, s0_1, s0_1->findFinfo( "process" ) );
+	proc->add( t0, s1, s1->findFinfo( "process" ) );
+	proc->add( t0, s2, s2->findFinfo( "process" ) );
+
+	seqStr = procSeq1;
+	seqCount = 0;
+	set( cj, "resched" );
+	set< double >( cj, "start", 3.0 );
+	ASSERT( seqCount == 16, "sequencing" );
+
+	ASSERT( set( n, "destroy" ), "cleanup" );
+
+	cout << "\nTesting Shell-based scheduling commands";
+
+	n = Neutral::create( "Neutral", "n", Element::root() );
+	s0_0 = Neutral::create( "Sched0", "s0_0", n );
+	s0_1 = Neutral::create( "Sched0", "s0_1", n );
+	s1 = Neutral::create( "Sched1", "s1", n );
+	s2 = Neutral::create( "Sched2", "s2", n );
+
+	Element* shell = Neutral::create( "Shell", "shell",
+					Element::root() );
+	ASSERT( shell != 0 , "shell creation");
+	Conn c( shell, 0 );
+	vector< unsigned int > path;
+	path.push_back( s0_0->id() );
+	path.push_back( s0_1->id() );
+	path.push_back( s1->id() );
+	path.push_back( s2->id() );
+			
+	unsigned int schedId = Neutral::getChildByName( 
+					Element::root(), "sched" );
+	ASSERT( schedId != 0 && schedId != BAD_ID, "find sched" );
+	unsigned int cjId = Neutral::getChildByName( 
+					Element::element( schedId ), "cj" );
+	ASSERT( cjId != 0 && cjId != BAD_ID, "find cjId" );
+	unsigned int t0Id = Neutral::getChildByName( 
+					Element::element( cjId ), "t0" );
+	ASSERT( t0Id != 0 && t0Id != BAD_ID, "find t0Id" );
+
+	Shell::useClock( c, t0Id, path, string( "process" ) );
+	Shell::resched( c );
+	seqStr = reinitSeq;
+	seqCount = 0;
+	Shell::reinit( c );
+	ASSERT( seqCount == 4, "sequencing" );
+
+	seqStr = procSeq1;
+	seqCount = 0;
+	Shell::step( c, 3.0 );
+
+	ASSERT( seqCount == 16, "sequencing" );
+	ASSERT( set( n, "destroy" ), "cleanup" );
+	ASSERT( set( shell, "destroy" ), "cleanup" );
 }
 
 #endif
