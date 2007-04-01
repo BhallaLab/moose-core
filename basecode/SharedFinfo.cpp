@@ -145,7 +145,7 @@ void SharedFinfo::dropAll( Element* e ) const
 			e->disconnect( j - 1 );
 	} else { // Otherwise put on msgSrc Vector
 		begin = e->connSrcBegin( msgIndex_ )->sourceIndex( e );
-		end = e->connSrcEnd( msgIndex_ )->sourceIndex( e );
+		end = e->connSrcVeryEnd( msgIndex_ )->sourceIndex( e );
 		for ( unsigned int j = end; j > begin; j-- )
 			e->disconnect( j - 1 );
 	}
@@ -174,7 +174,7 @@ bool SharedFinfo::drop( Element* e, unsigned int i ) const
 		end = e->connDestEnd( msgIndex_ )->sourceIndex( e );
 	} else {
 		begin = e->connSrcBegin( msgIndex_ )->sourceIndex( e );
-		end = e->connSrcEnd( msgIndex_ )->sourceIndex( e );
+		end = e->connSrcVeryEnd( msgIndex_ )->sourceIndex( e );
 	}
 
 	i += begin;
@@ -209,7 +209,7 @@ unsigned int SharedFinfo::numIncoming( const Element* e ) const
 	}
 
 	return (
-			e->connSrcEnd( msgIndex_ ) - e->connSrcBegin( msgIndex_ )
+			e->connSrcVeryEnd( msgIndex_ ) - e->connSrcBegin( msgIndex_ )
 		);
 }
 
@@ -234,7 +234,7 @@ unsigned int SharedFinfo::incomingConns(
 					e->connDestEnd( msgIndex_ ) );
 		} else {
 			list.insert( list.end(), e->connSrcBegin( msgIndex_ ),
-					e->connSrcEnd( msgIndex_ ) );
+					e->connSrcVeryEnd( msgIndex_ ) );
 		}
 	}
 

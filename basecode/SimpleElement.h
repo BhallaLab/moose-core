@@ -108,9 +108,22 @@ class SimpleElement: public Element
 		 * sense as the end() operator on vectors: one past the last
 		 * entry. Note that we don't need
 		 * to know how the Element handles MsgSrcs here.
+		 * Note: this call does NOT follow the linked list of src_ to
+		 * the very end. It applies only to the set of Conns that are
+		 * attached to a given recvFunc and are therefore on a single
+		 * src_ entry.
+		 * If you want to follow the linked list, use the nextSrc
+		 * function.
 		 */
 		vector< Conn >::const_iterator
 				connSrcEnd( unsigned int src ) const;
+
+		/**
+		 * This function does follow the linked list of src_ to the
+		 * very end.
+		 */
+		vector< Conn >::const_iterator
+				connSrcVeryEnd( unsigned int src ) const;
 
 		/**
 		 * Returns the index of the next src entry on this list of srcs.

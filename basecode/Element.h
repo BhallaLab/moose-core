@@ -60,13 +60,37 @@ class Element
 
 		/**
 		 * This function returns the iterator to conn_ at the end
-		 * of the Src range specified by i. End here is in the same
+		 * of the Src range specified by the src arg.
+		 * End here is in the same
 		 * sense as the end() operator on vectors: one past the last
 		 * entry. Note that we don't need
 		 * to know how the Element handles MsgSrcs here.
+		 * Note also that this call does NOT follow the linked list of
+		 * Srcs to the very end. It applies only to the Conns that are
+		 * on the src_ entry given by the src argument.
+		 * If you want to follow the linked list, use the nextSrc
+		 * function.
+		 * If you want to go to the very end of the linked list, use
+		 * connSrcVeryEnd
 		 */
 		virtual vector< Conn >::const_iterator
 				connSrcEnd( unsigned int src ) const = 0;
+
+		/**
+		 * This function returns to the iterator to conn_ at the end
+		 * of the linked list of srcs starting with the src arg.
+		 * End here is in the same
+		 * sense as the end() operator on vectors: one past the last.
+		 */
+		virtual vector< Conn >::const_iterator
+				connSrcVeryEnd( unsigned int src ) const = 0;
+
+		/**
+		 * Returns the index of the next src entry on this
+		 * linked list of srcs.
+		 * Returns zero at the end of the list.
+		 */
+		virtual unsigned int nextSrc( unsigned int src ) const = 0;
 
 		/**
 		 * This function returns the iterator to conn_ at the beginning

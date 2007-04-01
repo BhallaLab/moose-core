@@ -138,7 +138,7 @@ void DynamicFinfo::dropAll( Element* e ) const
 	}
 	if ( srcIndex_ > 0 ) {
 		begin = e->connSrcBegin( srcIndex_ )->sourceIndex( e );
-		end = e->connSrcEnd( srcIndex_ )->sourceIndex( e );
+		end = e->connSrcVeryEnd( srcIndex_ )->sourceIndex( e );
 		for ( unsigned int j = end; j > begin; j-- )
 			e->disconnect( j - 1 );
 	}
@@ -176,7 +176,7 @@ bool DynamicFinfo::drop( Element* e, unsigned int i ) const
 	}
 	if ( srcIndex_ > 0 ) {
 		begin = e->connSrcBegin( srcIndex_ )->sourceIndex( e );
-		end = e->connSrcEnd( srcIndex_ )->sourceIndex( e );
+		end = e->connSrcVeryEnd( srcIndex_ )->sourceIndex( e );
 		i += begin;
 		if ( i < end ) {
 			e->disconnect( i );
@@ -198,7 +198,7 @@ unsigned int DynamicFinfo::numIncoming( const Element* e ) const
 unsigned int DynamicFinfo::numOutgoing( const Element* e ) const
 {
 	if ( srcIndex_ != 0 ) {
-		return ( e->connSrcEnd( srcIndex_ ) -
+		return ( e->connSrcVeryEnd( srcIndex_ ) -
 						e->connSrcBegin( srcIndex_ ) );
 	}
 	return 0;
@@ -219,7 +219,7 @@ unsigned int DynamicFinfo::outgoingConns(
 {
 	if ( srcIndex_ != 0 ) {
 		list.insert( list.end(), e->connSrcBegin( srcIndex_ ),
-					e->connSrcEnd( srcIndex_ ) );
+					e->connSrcVeryEnd( srcIndex_ ) );
 	}
 	return list.size();
 }
