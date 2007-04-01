@@ -19,6 +19,7 @@
 	extern void testInterpol();
 	extern void testTable();
 	extern void testSched();
+	extern void testSchedProcess();
 	extern void testWildcard();
 	extern void testBiophysics();
 #endif
@@ -43,6 +44,7 @@ int main(int argc, char** argv)
 	testInterpol();
 	testTable();
 	testSched();
+	testSchedProcess();
 	testWildcard();
 	testBiophysics();
 #endif

@@ -493,7 +493,7 @@ void Shell::useClock( const Conn& c,
 		const Finfo* func = e->findFinfo( function );
 		if ( func ) {
 			if ( func->numIncoming( e ) == 0 ) {
-				tickProc->add( tick, e, func );
+				assert( tickProc->add( tick, e, func ) );
 			} else {
 				vector< Conn > list;
 				assert ( func->incomingConns( e, list ) > 0 );
