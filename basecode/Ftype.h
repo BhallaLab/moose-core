@@ -63,6 +63,17 @@ class Ftype
 			}
 
 			/**
+			 * Returns a void* to allocated instance of converted
+			 * string. Returns 0 on failure.
+			 * This must be supported by Ftype1, and possibly other
+			 * ftypes. In general the conversion doesn't work so we
+			 * return 0 by default.
+			 */
+			virtual void* strToIndexPtr( const string& s ) const {
+					return 0;
+			}
+
+			/**
 			 * create an object of the specified type. Applies of
 			 * course only to objects with a single type, ie, Ftype1.
 			 */

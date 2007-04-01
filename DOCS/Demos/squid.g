@@ -120,8 +120,6 @@ setfield /squid/Na/yGate/B xdivs {NDIVS}
 setfield /squid/K/xGate/A xdivs {NDIVS}
 setfield /squid/K/xGate/B xdivs {NDIVS}
 
-end
-
 v = VMIN
 for ( i = 0 ; i <= NDIVS; i = i + 1 )
 	setfield /squid/Na/xGate/A table[{i}] { calc_Na_m_A { v } }
@@ -136,12 +134,10 @@ for ( i = 0 ; i <= NDIVS; i = i + 1 )
 end
 
 setclock 0 {SIMDT} 0
-setclock 1 {SIMDT} 1
-setclock 2 {PLOTDT} 0
+setclock 1 {PLOTDT} 0
 
 useclock /Vm,/squid,/squid/# 0
-useclock /squid 1 init
-// useclock /##[TYPE=Table] 1
+useclock /##[TYPE=Table] 1
 // useclock /Vm 0
 
 // Crazy hack, but the squid demo does it and we need to match.

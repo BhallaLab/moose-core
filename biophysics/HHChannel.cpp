@@ -404,7 +404,6 @@ void HHChannel::innerProcessFunc( Element* e, ProcInfo info )
 			X_ = A_/B_;
 		else 
 			X_ = integrate( X_, info->dt_ );
-
 		g_ *= takeXpower_( X_, Xpower_ );
 	}
 
@@ -460,12 +459,22 @@ void HHChannel::innerReinitFunc( Element* e, ProcInfo info )
 		// The looked up table values A_ and B_ come back from the gate
 		// right away after these 'send' calls.
 		send1< double >( e, xGateSlot, Vm_ );
+		if ( B_ < EPSILON ) {
+			cout << "Warning: B_ value for " << e->name() <<
+					" is ~0. Check X table\n";
+			return;
+		}
 		X_ = A_/B_;
 		g_ *= takeXpower_( X_, Xpower_ );
 	}
 
 	if ( Ypower_ > 0 ) {
 		send1< double >( e, yGateSlot, Vm_ );
+		if ( B_ < EPSILON ) {
+			cout << "Warning: B_ value for " << e->name() <<
+					" is ~0. Check Y table\n";
+			return;
+		}
 		Y_ = A_/B_;
 		g_ *= takeYpower_( Y_, Ypower_ );
 	}
@@ -475,6 +484,11 @@ void HHChannel::innerReinitFunc( Element* e, ProcInfo info )
 			send1< double >( e, zGateSlot, conc_ );
 		else
 			send1< double >( e, zGateSlot, Vm_ );
+		if ( B_ < EPSILON ) {
+			cout << "Warning: B_ value for " << e->name() <<
+					" is ~0. Check Z table\n";
+			return;
+		}
 		Z_ = A_/B_;
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}

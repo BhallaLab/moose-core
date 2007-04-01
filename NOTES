@@ -1651,5 +1651,38 @@ Jokes aside, still struggling with the test script. I have now added
 further unit tests on the scheduling of different kinds of objects, and
 there is no sign of the problematic behaviour I see with the actual script.
 Anyway, check in these unit tests.
+Checked in as revision 60.
+
+Fixed one of the problem cases in the script.
+Now it looks like there is a problem in the SimpleElement::connSrcEnd
+function. It was not taking next_ into account but when I try to do this I get
+another crash.
+Valgrind reports other problems too.
+
+Sorted out problem. The send function uses connSrcEnd to mean only the current
+src, not taking into account the next src_ entry if any. I need a separate
+function to get the entire list of conns.
+
+Now to implement this alternate way of getting conns. Implemented
+connSrcVeryEnd function that many commands should use instead of connSrcEnd.
+This seems to have fixed problems with the showmsg command and also with
+redoing resets after a simulation is run, and also with repeating the
+useclock command. Valgrind is also happier.
+The nan problems with the squid demo remain.
+Turns out that the table filling was a failure. All entries were zero.
+Just got confirmation that the DynamicFinfos for each table assignment are
+not cleaned up: all 150 entries for the table were there, but all were zero.
+Even when I reassigned them they stayed at zero.
+Added another check in LookupFinfo.cpp unit tests, that is cleared. So it
+is something in Shell or in GenesisParser.
+Fixed: The generalIndex (a void* in DynamicFinfo) was not being set to the
+appropriate type for LookupFinfo.
+I need now to put in a check that the tables for beta do not get
+too close to zero. If they do, then checks will have to be inserted to
+avoid divide by zero errors.
+
+For now a small check on the reinit.
+And it runs! There is a minor hiccup with the step function using the time
+argument as total time, not incremental time. Fixed.
 
 =============================================================================
