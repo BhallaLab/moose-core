@@ -1401,6 +1401,7 @@ class ArrayTestClass
 			double dval;
 };
 
+/*
 #include "ArrayFinfo.h"
 #include "ArrayFtype.h"
 
@@ -1628,6 +1629,7 @@ void arrayFinfoTest()
 	a1->listFinfos( flist );
 	ASSERT ( flist.size() - s == 6, "Same DynamicFinfo for dvec[3]" );
 }
+*/
 
 class TestTransientFinfo: public DynamicFinfo
 {

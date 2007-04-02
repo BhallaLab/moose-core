@@ -409,6 +409,15 @@ unsigned int SimpleElement::listFinfos(
 	return flist.size();
 }
 
+unsigned int SimpleElement::listLocalFinfos( vector< Finfo* >& flist )
+{
+	flist.resize( 0 );
+	if ( finfo_.size() <= 1 )
+		return 0;
+	flist.insert( flist.end(), finfo_.begin() + 1, finfo_.end() );
+	return flist.size();
+}
+
 /**
  * Here we need to put in the new Finfo, and also check if it
  * requires allocation of any MsgSrc or MsgDest slots.

@@ -20,6 +20,40 @@
 #include "DerivedFtype.h"
 #include "SharedFtype.h"
 
+DynamicFinfo* DynamicFinfo::setupDynamicFinfo(
+	Element* e, const string& name, const Finfo* origFinfo,
+	RecvFunc setFunc, GetFunc getFunc,
+	RecvFunc recvFunc, RecvFunc trigFunc, void* index )
+{
+	assert( e != 0 );
+
+	DynamicFinfo* ret = new DynamicFinfo(
+		name, origFinfo, setFunc, getFunc, recvFunc, trigFunc, index
+	);
+
+	// Here we check if there is a vacant Dynamic Finfo to use
+	vector< Finfo* > flist;
+	vector< Finfo* >::iterator i;
+	e->listLocalFinfos( flist );
+	for ( i = flist.begin(); i != flist.end(); i++ ) {
+		DynamicFinfo* df = dynamic_cast< DynamicFinfo* >( *i );
+		if ( df ) {
+			if ( df->numIncoming( e ) == 0 &&
+							df->numOutgoing( e ) == 0 ) {
+				ret->srcIndex_ = df->srcIndex_;
+				ret->destIndex_ = df->destIndex_;
+				*df = *ret;
+				delete ret;
+				return df;
+			}
+		}
+	}
+
+	// Nope, we have to use the new DynamicFinfo.
+	e->addFinfo( ret );
+	return ret;
+}
+
 /**
  * Here the DynamicFinfo intercepts add requests that would have
  * initiated from the original ValueFinfo or whatever it is 
@@ -275,6 +309,7 @@ const Finfo* DynamicFinfo::match(
 }	
 	
 
+/*
 void* DynamicFinfo::traverseIndirection( void* data ) const
 {
 	if ( indirect_.size() == 0 )
@@ -284,6 +319,7 @@ void* DynamicFinfo::traverseIndirection( void* data ) const
 			data =  i->first( data, i->second );
 	return data;
 }
+*/
 
 const DynamicFinfo* getDF( const Conn& c )
 {

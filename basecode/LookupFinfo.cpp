@@ -44,14 +44,14 @@ const Finfo* LookupFinfo::match( Element* e, const string& s ) const
 		// string* index = new string( indexStr );
 		string n = name() + "[" + indexStr + "]";
 		DynamicFinfo* ret = 
-				new DynamicFinfo(
-					n,
-					this, 
+				DynamicFinfo::setupDynamicFinfo(
+					e, n, this, 
 					set_, get_,
-					ftype()->recvFunc(), ftype()->trigFunc()
+					ftype()->recvFunc(), ftype()->trigFunc(),
+					index
 				);
-		ret->setGeneralIndex( index );
-		e->addFinfo( ret );
+		// ret->setGeneralIndex( index );
+		// e->addFinfo( ret );
 		return ret;
 	}
 	return 0;
@@ -222,9 +222,9 @@ void lookupFinfoTest()
 	get< double >( a1, "dval", dret );
 	ASSERT( dret == 555.5, "test set1");
 
-	vector< const Finfo* > flist;
-	a1->listFinfos( flist );
-	size_t s = flist.size();
+	vector< Finfo* > flist;
+	unsigned int ndyn = a1->listLocalFinfos( flist );
+	ASSERT( ndyn == 0, "Counting DynFinfos" );
 
 	// Here we have the crucial functions for the LookupFinfo:
 	// the ability to lookup the data using the lookupGet/Set functions
@@ -252,10 +252,7 @@ void lookupFinfoTest()
 
 	// Check that there is only one DynamicFinfo set up when looking at
 	// the same lookup index.
-	flist.resize( 0 );
-	a1->listFinfos( flist );
-	ASSERT ( flist.size() - s == 1, "Checking formation of DynamicFinfos" );
-
+	ASSERT( a1->listLocalFinfos( flist ) == 1, "Counting DynFinfos" );
 
 	get< double >( a1, a1->findFinfo( "dmap[1]" ), dret );
 	ASSERT( dret == 0.2, "test get1");
@@ -266,9 +263,7 @@ void lookupFinfoTest()
 
 	// Check that there is only one DynamicFinfo set up when looking at
 	// the same lookup index.
-	flist.resize( 0 );
-	a1->listFinfos( flist );
-	ASSERT ( flist.size() - s == 2, "Checking formation of DynamicFinfos" );
+	ASSERT( a1->listLocalFinfos( flist ) == 1, "Counting DynFinfos" );
 
 	get< double >( a1, a1->findFinfo( "dmap[3]" ), dret );
 	ASSERT( dret == 0.4, "test get3");
@@ -277,11 +272,8 @@ void lookupFinfoTest()
 	get< double >( a1, a1->findFinfo( "dmap[3]" ), dret );
 	ASSERT( dret == 3.3, "test set3");
 
-	// Check that there is only one DynamicFinfo set up when looking at
-	// the same lookup index.
-	flist.resize( 0 );
-	a1->listFinfos( flist );
-	ASSERT ( flist.size() - s == 3, "Checking formation of DynamicFinfos" );
+	// Check that the system reuses the DynamicFinfo.
+	ASSERT( a1->listLocalFinfos( flist ) == 1, "Counting DynFinfos" );
 
 	////////////////////////////////////////////////////////////////
 	// Check string set and get.
@@ -337,9 +329,7 @@ void lookupFinfoTest()
 		);
 	// We have already made a finfo for a1->dmap[0]. Check that this
 	// is the one that is used for the messaging.
-	flist.resize( 0 );
-	a1->listFinfos( flist );
-	ASSERT ( flist.size() - s == 4, "reuse of DynamicFinfos" );
+	ASSERT( a1->listLocalFinfos( flist ) == 1, "Counting DynFinfos" );
 
 	// 3. a1 trigger message will call send on a2->dmap[1]. This goes
 	//   to a1->dval.
@@ -354,9 +344,7 @@ void lookupFinfoTest()
 			"Adding dmap[1] to dval"
 		);
 	// Here we made a new DynamicFinfo for the regular ValueFinfo.
-	flist.resize( 0 );
-	a1->listFinfos( flist );
-	ASSERT ( flist.size() - s == 5, "No new DynamicFinfos." );
+	ASSERT( a1->listLocalFinfos( flist ) == 2, "Counting DynFinfos" );
 
 	// 4. a1 trigger message will call send on a2->dmap[2]. This goes
 	//   to a1->dmap[2]. The trigger is created first. Check it.
@@ -372,9 +360,7 @@ void lookupFinfoTest()
 		);
 	// We have not made a finfo for a1->dmap[2]. Check that this
 	// new one is used for the messaging.
-	flist.resize( 0 );
-	a1->listFinfos( flist );
-	ASSERT ( flist.size() - s == 5, "New DynamicFinfo for dmap[2]" );
+	ASSERT( a1->listLocalFinfos( flist ) == 3, "Counting DynFinfos" );
 
 	// 5. a1 trigger message will call send on a2->dmap[3]. This goes
 	//   to a1->dmap[3]. The send is created first. Check it.
@@ -390,9 +376,7 @@ void lookupFinfoTest()
 		);
 	// We have not made a finfo for a1->dmap[3]. Check that this
 	// new one is used for the messaging.
-	flist.resize( 0 );
-	a1->listFinfos( flist );
-	ASSERT ( flist.size() - s == 5, "Old DynamicFinfo for dmap[3]" );
+	ASSERT( a1->listLocalFinfos( flist ) == 4, "Counting DynFinfos" );
 
 	unsigned int procOutSlot = lookuptestclass.getSlotIndex( "procout");
 
@@ -428,9 +412,7 @@ void lookupFinfoTest()
 
 	// Check that there are no strange things happening with the
 	// Finfos when the messaging is actually used.
-	flist.resize( 0 );
-	a1->listFinfos( flist );
-	ASSERT ( flist.size() - s == 5, "Same DynamicFinfo for dmap[3]" );
+	ASSERT( a1->listLocalFinfos( flist ) == 4, "Counting DynFinfos" );
 }
 
 #endif // DO_UNIT_TESTS

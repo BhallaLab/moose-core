@@ -18,12 +18,11 @@ extern void msgFinfoTest(); // Defined in UnitTests.cpp
 extern void cinfoTest(); // Defined in UnitTests.cpp
 extern void finfoLookupTest(); // Defined in UnitTests.cpp
 extern void valueFinfoTest(); // Defined in UnitTests.cpp
-extern void arrayFinfoTest(); // Defined in UnitTests.cpp
+// extern void arrayFinfoTest(); // Defined in UnitTests.cpp
 extern void transientFinfoDeletionTest(); // in UnitTests.cpp
 extern void sharedFtypeTest(); // in SharedFtype.cpp
 extern void sharedFinfoTest(); // in SharedFinfo.cpp
 extern void lookupFinfoTest(); // in LookupFinfo.cpp
-// extern void nestFinfoTest(); // in NestFinfo.cpp
 
 void testBasecode()
 {
@@ -33,12 +32,11 @@ void testBasecode()
 	cinfoTest();
 	finfoLookupTest();
 	valueFinfoTest();
-	arrayFinfoTest();
+//	arrayFinfoTest();
 	transientFinfoDeletionTest();
 	sharedFtypeTest();
 	sharedFinfoTest();
 	lookupFinfoTest();
-//	nestFinfoTest();
 }
 
 #endif

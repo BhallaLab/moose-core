@@ -26,10 +26,17 @@ bool ValueFinfo::add(
 	// If this is going to be a message source, then we will
 	// be sending the local value through getFunc, and triggering
 	// the response through trigfunc.
+	DynamicFinfo *df = DynamicFinfo::setupDynamicFinfo(
+					e,
+					name(), this,
+					set_, get_,
+					set_, ftype()->trigFunc() );
+	/*
 	DynamicFinfo *df = new DynamicFinfo( name(), this,
 					set_, get_,
 					set_, ftype()->trigFunc() );
 	e->addFinfo( df );
+	*/
 	return df->add( e, destElm, destFinfo );
 }
 			
@@ -85,10 +92,17 @@ bool ValueFinfo::respondToAdd(
 	assert( srcType != 0 );
 	assert( src != 0 && e != 0 );
 	assert( returnFl.size() == 0 );
+	DynamicFinfo *df = DynamicFinfo::setupDynamicFinfo(
+					e,
+					name(), this,
+					set_, get_,
+					set_, ftype()->trigFunc() );
+	/*
 	DynamicFinfo *df = new DynamicFinfo( name(), this,
 					set_, get_,
 					set_, ftype()->trigFunc() );
 	e->addFinfo( df );
+	*/
 	return df->respondToAdd( e, src, srcType, srcFl, returnFl,
 					destIndex, numDest );
 }

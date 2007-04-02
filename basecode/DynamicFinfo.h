@@ -13,7 +13,7 @@
 /**
  * IndirectType is used to manage nested indirection and array lookups.
  */
-typedef pair< void* (*)( void*, unsigned int ), unsigned int > IndirectType;
+// typedef pair< void* (*)( void*, unsigned int ), unsigned int > IndirectType;
 
 /**
  * Finfo that is built up dynamically on the Element, used for
@@ -37,36 +37,38 @@ class DynamicFinfo: public Finfo
 			DynamicFinfo( const string& name, const Finfo* origFinfo,
 							RecvFunc setFunc, GetFunc getFunc,
 							RecvFunc recvFunc, RecvFunc trigFunc,
-							unsigned int index = 0 )
+							const void* index = 0 )
 					: Finfo( name, origFinfo->ftype() ),
 					origFinfo_( origFinfo ), 
 					setFunc_( setFunc ),
 					getFunc_( getFunc ),
 					recvFunc_( recvFunc ) ,
 					trigFunc_( trigFunc ) ,
-					arrayIndex_( index ),
+					generalIndex_( index ),
 					srcIndex_( 0 ),
 					destIndex_( 0 )
-			{;}
-
-			DynamicFinfo( const string& name, const Finfo* origFinfo,
-							vector< IndirectType >& indirection )
-					: Finfo( name, origFinfo->ftype() ),
-					origFinfo_( origFinfo ), 
-					setFunc_( &dummyFunc ),
-					getFunc_( 0 ),
-					recvFunc_( &dummyFunc ) ,
-					trigFunc_( &dummyFunc ) ,
-					arrayIndex_( 0 ),
-					srcIndex_( 0 ),
-					destIndex_( 0 ),
-					indirect_( indirection )
 			{;}
 
 			// Assert that the affected conns have been cleaned up
 			// before deleteing this.
 			~DynamicFinfo()
 			{;}
+
+			/**
+			 * This sets up a DynamicFinfo on a given Element. If
+			 * there is one sitting around unused it uses that, 
+			 * otherwise it makes a new one.
+			 */
+			static DynamicFinfo* setupDynamicFinfo(
+				Element* e, const string& name, const Finfo* origFinfo,
+				RecvFunc setFunc, GetFunc getFunc,
+				RecvFunc recvFunc, RecvFunc trigFunc,
+				void* index = 0 );
+
+			/**
+			 * This checks if a DynamicFinfo is sitting around
+			 * unused.
+			 */
 
 			/**
 			 * This should be almost the regular SrcFinfo::add
@@ -111,13 +113,6 @@ class DynamicFinfo: public Finfo
 			RecvFunc recvFunc() const {
 				return recvFunc_;
 			}
-			
-			/*
-			/// Public RecvFunc for receiving requests to send value.
-			RecvFunc trigFunc() const {
-				return trigFunc_;
-			}
-			*/
 			
 			/**
 			 * Internal RecvFunc for passing to Ftype to construct
@@ -202,22 +197,15 @@ class DynamicFinfo: public Finfo
 				return srcIndex_;
 			}
 
+			/*
 			unsigned int arrayIndex() const {
 				return arrayIndex_;
 			}
 
-			/**
-			 * This returns a pointer to a field specified by the
-			 * indirect_ array, as looked up from the data pointer.
-			 * Because we deal with void* pointers, this function
-			 * must only be called within properly type-protected
-			 * functions.
-			 */
-			void* traverseIndirection( void* data ) const;
-
 			void setGeneralIndex( const void* index ) {
 					generalIndex_ = index;
 			}
+			*/
 
 			const void* generalIndex( ) const {
 					return generalIndex_;
@@ -239,15 +227,11 @@ class DynamicFinfo: public Finfo
 			/// Public RecvFunc for receiving requests to send value.
 			RecvFunc trigFunc_;
 
-			/// This is used by ArrayFinfo. 
-			unsigned int arrayIndex_;
-
 			/// This is used by LookupFinfo.
 			const void* generalIndex_;
 
 			unsigned int srcIndex_;
 			unsigned int destIndex_;
-			vector< IndirectType > indirect_;
 };
 
 /**
