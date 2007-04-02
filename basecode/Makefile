@@ -23,7 +23,6 @@ OBJ = \
 	SrcFinfo.o \
 	DestFinfo.o \
 	ValueFinfo.o \
-	ArrayFinfo.o \
 	LookupFinfo.o \
 	ThisFinfo.o \
 	DeletionMarkerFinfo.o \
@@ -43,6 +42,7 @@ HEADERS = \
 	Ftype.h \
 
 #	AssignFinfo.h
+#	ArrayFinfo.o \
 
 default: $(TARGET)
 
@@ -57,8 +57,8 @@ ValueFinfo.o:	ValueFinfo.h DynamicFinfo.h send.h
 SharedFtype.o:	SharedFtype.h
 SharedFinfo.o:	SharedFinfo.h SharedFtype.h
 Cinfo.o:		Cinfo.h
-UnitTests.o:	MsgSrc.h MsgDest.h SimpleElement.h DerivedFtype.h SrcFinfo.h DestFinfo.h Cinfo.h DynamicFinfo.h ValueFinfo.h send.h ArrayFtype.h ValueFtype.h
-ArrayFinfo.o:	ArrayFinfo.h DynamicFinfo.h ArrayFtype.h
+UnitTests.o:	MsgSrc.h MsgDest.h SimpleElement.h DerivedFtype.h SrcFinfo.h DestFinfo.h Cinfo.h DynamicFinfo.h ValueFinfo.h send.h ValueFtype.h
+#ArrayFinfo.o:	ArrayFinfo.h DynamicFinfo.h ArrayFtype.h
 LookupFinfo.o:	LookupFinfo.h DynamicFinfo.h LookupFtype.h
 DeletionMarkerFinfo.o: DeletionMarkerFinfo.h
 SimpleElement.o:	SimpleElement.h MsgSrc.h MsgDest.h DeletionMarkerFinfo.h

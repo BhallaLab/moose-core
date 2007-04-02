@@ -10,8 +10,6 @@
 #include <fstream>
 #include <math.h>
 #include "moose.h"
-#include "../basecode/ArrayFtype.h"
-#include "../basecode/ArrayFinfo.h"
 #include "Interpol.h"
 
 const double Interpol::EPSILON = 1.0e-10;

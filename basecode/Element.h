@@ -188,6 +188,15 @@ class Element
 			vector<	const Finfo* >& flist ) const = 0;
 
 		/**
+		 * Finds the local Finfos associated with this Element.
+		 * Note that these are variable. Typically they are Dynamic
+		 * Finfos.
+		 * Returns number of Finfos found.
+		 */
+		virtual unsigned int listLocalFinfos( vector< Finfo* >& flist )
+				= 0;
+
+		/**
 		 * Appends a new Finfo onto the Element. Typically this new
 		 * Finfo is a Dynamic Finfo used to store messages that are
 		 * not precompiled, and therefore need to be allocated on the

@@ -1684,5 +1684,16 @@ avoid divide by zero errors.
 For now a small check on the reinit.
 And it runs! There is a minor hiccup with the step function using the time
 argument as total time, not incremental time. Fixed.
+Checked in as revision 61.
+Next:
++ enable reuse of DynamicFinfo slots if they don't have messages.
++ Clean up DynamicFinfo: many functions are not used.
++ Get rid of ArrayFinfo.
+- Have freeing of index in DynamicFinfo on destruction.
+- Fix up deallocation of data in elements on destruction.
+- Implement GenesisParser conversion of old message types and table lookups
+	so that squid demo can be identically run on genesis and moose.
+	Keep this as a target for future sims.
+- Then, move on to Ca concen and stuff.
 
 =============================================================================
