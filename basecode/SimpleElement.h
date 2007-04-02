@@ -228,7 +228,21 @@ class SimpleElement: public Element
 		 */
 		const Finfo* findFinfo( unsigned int connIndex ) const;
 
+		/**
+		 * Finds all the Finfos associated with this Element,
+		 * starting from the local ones and then going to the 
+		 * core class ones.
+		 * Returns number of Finfos found.
+		 */
 		unsigned int listFinfos( vector< const Finfo* >& flist ) const;
+
+		/**
+		 * Finds the local Finfos associated with this Element.
+		 * Note that these are variable. Typically they are Dynamic
+		 * Finfos.
+		 * Returns number of Finfos found.
+		 */
+		unsigned int listLocalFinfos( vector< Finfo* >& flist );
 
 		void addFinfo( Finfo* f );
 
