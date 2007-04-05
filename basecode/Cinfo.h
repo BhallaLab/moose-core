@@ -37,6 +37,8 @@ class Cinfo
 					const Ftype* ftype
 			);
 
+			~Cinfo();
+
 			const std::string& name() const {
 					return name_;
 			}
@@ -70,9 +72,10 @@ class Cinfo
 			}
 
 			Element* create( const string& name ) const ;
-			Element* create( const string& name, void* data ) const;
+			Element* create( const string& name, void* data,
+							bool noDelFlag = 0 ) const;
 
-			void destroy( void* ) const ;
+			// void destroy( void* ) const ;
 
 			const Ftype* ftype() const {
 					return ftype_;
@@ -90,7 +93,15 @@ class Cinfo
 			vector< Finfo* > finfos_;
 			const Cinfo* base_;
 			const Ftype* ftype_;
+			/**
+			 * These two fields hold the Finfo that refers back to
+			 * this Cinfo for class information. The noDelFinfo_
+			 * is used where the data field of the Element must
+			 * not be freed at delete time. The only difference it
+			 * has is the state of the noDeleteFlag.
+			 */
 			Finfo* thisFinfo_;
+			Finfo* noDelFinfo_;
 			unsigned int nSrc_;
 			unsigned int nDest_;
 

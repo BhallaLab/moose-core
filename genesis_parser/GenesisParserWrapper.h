@@ -45,12 +45,14 @@ class GenesisParserWrapper: public myFlexLexer
 		void doShowMsg( int argc, const char** argv, Id s );
 		void showAllFields( Id e, Id s );
 		void doAdd( int argc, const char** const argv, Id s );
-		void innerAdd( Id src, const string& srcF, Id dest,
+		bool innerAdd( Id src, const string& srcF, Id dest,
 						const string& destF );
 		void useClock( Id tickId, const string& path,
 						const string& func, Id s );
 		void step( int argc, const char** const argv );
 		void showClocks( Element* e );
+
+		bool tabCreate( int argc, const char** argv, Id s );
 
 		////////////////////////////////////////////////
 		//  Utility functions

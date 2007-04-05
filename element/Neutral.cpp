@@ -47,6 +47,10 @@ const Cinfo* initNeutralCinfo()
 					reinterpret_cast< GetFunc >( &Neutral::getParent ),
 					&dummyFunc
 		),
+		new ValueFinfo( "class", ValueFtype1< string >::global(),
+					reinterpret_cast< GetFunc >( &Neutral::getClass ),
+					&dummyFunc
+		),
 		new ValueFinfo( "childList",
 				ValueFtype1< vector< unsigned int > >::global(), 
 				reinterpret_cast< GetFunc>( &Neutral::getChildList ),
@@ -151,6 +155,12 @@ void Neutral::setName( const Conn& c, const string s )
 {
 	c.targetElement()->setName( s );
 }
+
+const string Neutral::getClass( const Element* e )
+{
+		return e->className();
+}
+
 
 // Perhaps this should take a Cinfo* for the first arg, except that
 // I don't want to add yet another class into the header.

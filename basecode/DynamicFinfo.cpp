@@ -19,6 +19,17 @@
 #include "DynamicFinfo.h"
 #include "DerivedFtype.h"
 #include "SharedFtype.h"
+#include "LookupFinfo.h"
+// #include "LookupFtype.h"
+
+
+DynamicFinfo::~DynamicFinfo()
+{
+	if ( generalIndex_ != 0 ) {
+		// Assume that the ftype knows what to do here.
+		ftype()->destroyIndex( generalIndex_ );
+	}
+}
 
 DynamicFinfo* DynamicFinfo::setupDynamicFinfo(
 	Element* e, const string& name, const Finfo* origFinfo,
@@ -27,8 +38,11 @@ DynamicFinfo* DynamicFinfo::setupDynamicFinfo(
 {
 	assert( e != 0 );
 
+	// Note that we create this with a null index. This is because
+	// the DynamicFinfo is a temporary and we don't want to lose
+	// the index when we destroy it.
 	DynamicFinfo* ret = new DynamicFinfo(
-		name, origFinfo, setFunc, getFunc, recvFunc, trigFunc, index
+		name, origFinfo, setFunc, getFunc, recvFunc, trigFunc, 0
 	);
 
 	// Here we check if there is a vacant Dynamic Finfo to use
@@ -42,7 +56,12 @@ DynamicFinfo* DynamicFinfo::setupDynamicFinfo(
 							df->numOutgoing( e ) == 0 ) {
 				ret->srcIndex_ = df->srcIndex_;
 				ret->destIndex_ = df->destIndex_;
+				if ( df->generalIndex_ != 0 ) {
+					df->ftype()->destroyIndex( df->generalIndex_ );
+				}
+
 				*df = *ret;
+				df->generalIndex_ = index;
 				delete ret;
 				return df;
 			}
@@ -50,6 +69,7 @@ DynamicFinfo* DynamicFinfo::setupDynamicFinfo(
 	}
 
 	// Nope, we have to use the new DynamicFinfo.
+	ret->generalIndex_ = index;
 	e->addFinfo( ret );
 	return ret;
 }
