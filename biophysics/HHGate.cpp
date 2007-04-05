@@ -95,9 +95,11 @@ void HHGate::postCreate( const Conn& c )
 
 	// cout << "HHGate::postCreate called\n";
 	const Cinfo* ic = initInterpolCinfo();
-	Element* A = ic->create( "A", static_cast< void* >( &h->A_ ) );
+	// Here we must set the noDelFlag to 1 because these data
+	// parts belong to the parent HHGate structure.
+	Element* A = ic->create( "A", static_cast< void* >( &h->A_ ), 1 );
 	e->findFinfo( "childSrc" )->add( e, A, A->findFinfo( "child" ) );
 
-	Element* B = ic->create( "B", static_cast< void* >( &h->B_) );
+	Element* B = ic->create( "B", static_cast< void* >( &h->B_), 1 );
 	e->findFinfo( "childSrc" )->add( e, B, B->findFinfo( "child" ) );
 }

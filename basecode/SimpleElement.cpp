@@ -26,7 +26,7 @@ int SimpleElement::numInstances = 0;
 #endif
 
 SimpleElement::SimpleElement( const std::string& name )
-	: Element(), name_( name )
+	: Element(), name_( name ), data_( 0 )
 {
 #ifdef DO_UNIT_TESTS
 		numInstances++;
@@ -64,6 +64,14 @@ SimpleElement::~SimpleElement()
 	ThisFinfo* tf = dynamic_cast< ThisFinfo* >( finfo_[0] );
 	tf->destroy( data() );
 	*/	
+	if ( data_ ) {
+		if ( finfo_.size() > 0 && finfo_[0] != 0 ) {
+			ThisFinfo* tf = dynamic_cast< ThisFinfo* >( finfo_[0] );
+			if ( tf && tf->noDeleteFlag() == 0 )
+				finfo_[0]->ftype()->destroy( data_, 0 );
+		}
+	}
+
 
 	// Check if Finfo is one of the transient set, if so, clean it up.
 	vector< Finfo* >::iterator i;

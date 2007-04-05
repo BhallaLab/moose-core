@@ -275,6 +275,14 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 				}
 				return 0;
 			}
+
+			/**
+			 * Free index data. Used only for LookupFinfo
+			 */
+			void destroyIndex( void* index ) const
+			{
+				delete static_cast< T2* >( index );
+			}
 };
 
 #endif // _LOOKUP_FTYPE_H

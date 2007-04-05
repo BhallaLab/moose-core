@@ -27,6 +27,7 @@ class Neutral
 
 			static void childFunc( const Conn& c, int stage );
 			static const string getName( const Element* e );
+			static const string getClass( const Element* e );
 			static unsigned int getParent( const Element* e );
 			static vector< unsigned int > getChildList(
 							const Element* e );
