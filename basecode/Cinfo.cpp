@@ -74,11 +74,29 @@ Cinfo::Cinfo(const std::string& name,
 		finfos_.push_back( finfoArray[i] );
 	}
 	thisFinfo_ = new ThisFinfo( this );
+	noDelFinfo_ = new ThisFinfo( this, 1 );
 	///\todo: here need to put in additional initialization stuff from base class
 	lookup()[name] = this;
 	// This funny call is used to ensure that the root element is
 	// created at static initialization time.
 	// Element::root();
+}
+
+Cinfo::~Cinfo()
+{
+	unsigned int i;
+	unsigned int start = 0;
+	if ( baseCinfo_ )
+		start = baseCinfo_->finfos_.size();
+	for ( i = start; i < finfos_.size(); i++ )
+		delete finfos_[i];
+	/*
+	vector< Finfo* >::iterator i;
+	for ( i = finfos_.begin(); i != finfos_.end(); i++ )
+		delete *i;
+		*/
+	delete thisFinfo_;
+	delete noDelFinfo_;
 }
 
 const Cinfo* Cinfo::find( const string& name )
@@ -196,11 +214,15 @@ std::map<std::string, Cinfo*>& Cinfo::lookup()
  * Create a new element with provided data, a set of Finfos and
  * the MsgSrc and MsgDest allocated.
  */
-Element* Cinfo::create( const std::string& name, void* data ) const
+Element* Cinfo::create( const std::string& name, void* data,
+				bool noDeleteFlag ) const
 {
 	SimpleElement* ret = 
 		new SimpleElement( name, nSrc_, nDest_, data );
-	ret->addFinfo( thisFinfo_ );
+	if ( noDeleteFlag )
+		ret->addFinfo( noDelFinfo_ );
+	else
+		ret->addFinfo( thisFinfo_ );
 	set( ret, "postCreate" );
 	return ret;
 }

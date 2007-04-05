@@ -1689,11 +1689,57 @@ Next:
 + enable reuse of DynamicFinfo slots if they don't have messages.
 + Clean up DynamicFinfo: many functions are not used.
 + Get rid of ArrayFinfo.
-- Have freeing of index in DynamicFinfo on destruction.
-- Fix up deallocation of data in elements on destruction.
++ Have freeing of index in DynamicFinfo on destruction.
++ Fix up deallocation of data in elements on destruction.
 - Implement GenesisParser conversion of old message types and table lookups
 	so that squid demo can be identically run on genesis and moose.
 	Keep this as a target for future sims.
 - Then, move on to Ca concen and stuff.
 
 =============================================================================
+April 2 2007.
+Lots of cleanup work on DynamicFinfo, got rid of ArrayFinfo.
+Checked in as revision 62.
+
+=============================================================================
+April 3.
+Implemented two freeings: 
+- Index of dynamicFinfo on destruction/replacement of the DynamicFinfo
+- data_ fields of SimpleElement.
+
+Unfortunately the latter does not seem to work. Clears unit tests but 
+valgrind shows no difference in unfreed memory.
+
+Now the destroy is being called, and we run into the double-free problem with
+HHGate.
+I will need to have two variants of thisFinfo on the Cinfo, one of them
+having a flag to prohibit deletion.
+I will also have to check for the thisFinfo flag in SimpleElement::delete.
+
+OK, seems to work. Now valgrind finds 1089 /16797 non-freed blocks.
+A closer look at the freeing of indices by DynamicFinfo. That too fails
+and barfs.
+Now that is fixed. But valgrind does not find any fewer non-freed.
+Just for the heck of it, I went through and freed Finfos in the vectors
+on the Cinfos when destroying the Cinfos. This made it 711 / 16797 blocks.
+Some leak is still quite substantial, should track it down. Later.
+Should check in but no internet.
+
+Trying now to set up the squid test to run with GENESIS. Mostly there, but
+getting nans. Once it works I'll work on parser till it can handle this
+script.
+
+=============================================================================
+
+April 5.
+
+Implemented a script for doing the squid demo in GENESIS. It is called
+squid_gen.g
+
+Working through the genesis parser backward compatibility to get it to read
+this script in. First implemented the message and class conversion.
+Currently it handles the table assignments and TABCREATEs for HHChannel.
+
+An issue with the messaging from fields to shared messages such as the
+inputRequest of a table or the plot of a graph object. The ValueFinfo
+does not seem to recognize it.

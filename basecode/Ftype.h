@@ -81,6 +81,20 @@ class Ftype
 			{
 				return 0;
 			}
+
+			/**
+			 * Free data of the specified type. If isArray, then
+			 * the array delete[] is used.
+			 * Applies only to objects with a single type.
+			 */
+			virtual void destroy( void* data, bool isArray ) const
+			{;}
+
+			/**
+			 * Free index data. Currently used only for LookupFtype.
+			 */
+			virtual void destroyIndex( void* index ) const
+			{;}
 };
 
 #endif // _FTYPE_H

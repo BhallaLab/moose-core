@@ -37,7 +37,7 @@ class DynamicFinfo: public Finfo
 			DynamicFinfo( const string& name, const Finfo* origFinfo,
 							RecvFunc setFunc, GetFunc getFunc,
 							RecvFunc recvFunc, RecvFunc trigFunc,
-							const void* index = 0 )
+							void* index = 0 )
 					: Finfo( name, origFinfo->ftype() ),
 					origFinfo_( origFinfo ), 
 					setFunc_( setFunc ),
@@ -51,8 +51,7 @@ class DynamicFinfo: public Finfo
 
 			// Assert that the affected conns have been cleaned up
 			// before deleteing this.
-			~DynamicFinfo()
-			{;}
+			~DynamicFinfo();
 
 			/**
 			 * This sets up a DynamicFinfo on a given Element. If
@@ -197,16 +196,6 @@ class DynamicFinfo: public Finfo
 				return srcIndex_;
 			}
 
-			/*
-			unsigned int arrayIndex() const {
-				return arrayIndex_;
-			}
-
-			void setGeneralIndex( const void* index ) {
-					generalIndex_ = index;
-			}
-			*/
-
 			const void* generalIndex( ) const {
 					return generalIndex_;
 			}
@@ -228,7 +217,7 @@ class DynamicFinfo: public Finfo
 			RecvFunc trigFunc_;
 
 			/// This is used by LookupFinfo.
-			const void* generalIndex_;
+			void* generalIndex_;
 
 			unsigned int srcIndex_;
 			unsigned int destIndex_;

@@ -101,6 +101,14 @@ template < class T > class Ftype1: public Ftype
 						return new T;
 			}
 
+			void destroy( void* data, bool isArray ) const
+			{
+				if ( isArray )
+					delete[] static_cast< T* >( data );
+				else
+					delete static_cast< T* >( data );
+			}
+
 			virtual bool get( const Element* e, const Finfo* f, T& v )
 			const 
 			{

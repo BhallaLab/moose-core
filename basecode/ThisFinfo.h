@@ -18,8 +18,9 @@
 class ThisFinfo: public Finfo
 {
 		public:
-			ThisFinfo( const Cinfo* c )
-					: Finfo( "this", c->ftype() ), cinfo_( c )
+			ThisFinfo( const Cinfo* c, bool noDeleteFlag = 0 )
+					: Finfo( "this", c->ftype() ), cinfo_( c ),
+						noDeleteFlag_( noDeleteFlag )
 			{;}
 
 			~ThisFinfo()
@@ -101,8 +102,13 @@ class ThisFinfo: public Finfo
 					return cinfo_;
 			}
 
+			bool noDeleteFlag() const {
+				return noDeleteFlag_;
+			}
+
 		private:
 			const Cinfo* cinfo_;
+			bool noDeleteFlag_;
 };
 
 #endif // _THIS_FINFO_H

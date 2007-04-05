@@ -332,6 +332,18 @@ map< string, string >& sliSrcLookup()
 	src[ "CONSERVE n nInit" ] = ""; 	// Deprecated
 	src[ "CONSERVE nComplex nComplexInit" ] = ""; 	// Deprecated
 
+	// Some messages for compartments.
+	src[ "AXIAL Vm" ] = "axial";
+	src[ "AXIAL previous_state" ] = "axial";
+	src[ "RAXIAL Ra Vm" ] = "";
+	src[ "RAXIAL Ra previous_state" ] = "";
+
+	// Some messages for channels.
+	src[ "VOLTAGE Vm" ] = "";
+	src[ "CHANNEL Gk Ek" ] = "channel";
+
+	// Some messages for tables
+	src[ "INPUT Vm" ] = "Vm";
 	return src;
 }
 
@@ -366,6 +378,18 @@ map< string, string >& sliDestLookup()
 	dest[ "CONSERVE n nInit" ] = ""; 	// Deprecated
 	dest[ "CONSERVE nComplex nComplexInit" ] = ""; 	// Deprecated
 
+	dest[ "AXIAL Vm" ] = "raxial";
+	dest[ "AXIAL previous_state" ] = "raxial";
+	dest[ "RAXIAL Ra Vm" ] = "";
+	dest[ "RAXIAL Ra previous_state" ] = "";
+
+	// Some messages for channels.
+	dest[ "VOLTAGE Vm" ] = "";
+	dest[ "CHANNEL Gk Ek" ] = "channel";
+
+	// Some messages for tables
+	dest[ "INPUT Vm" ] = "inputRequest";
+
 	return dest;
 }
 
@@ -391,6 +415,7 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "tabchannel" ] = "HHChannel";
 	classnames[ "vdep_channel" ] = "HHChannel";
 	classnames[ "vdep_gate" ] = "HHGate";
+	classnames[ "table" ] = "Table";
 	classnames[ "xbutton" ] = "Sli";
 	classnames[ "xdialog" ] = "Sli";
 	classnames[ "xlabel" ] = "Sli";
@@ -443,18 +468,16 @@ void do_add( int argc, const char** const argv, Id s )
 	return gpw->doAdd( argc, argv, s );
 }
 
-void GenesisParserWrapper::innerAdd(
+bool GenesisParserWrapper::innerAdd(
 	Id src, const string& srcF, Id dest, const string& destF )
 {
 	if ( src != Shell::BAD_ID && dest != Shell::BAD_ID ) {
 		Element* se = Element::element( src );
 		Element* de = Element::element( dest );
 
-		if ( 
-			!se->findFinfo( srcF )->add( se, de, de->findFinfo( destF ) )
-		   )
-				cout << "Error:innerAdd: Failed to add Message\n";
+		return se->findFinfo( srcF )->add( se, de, de->findFinfo( destF )) ;
 	}
+	return 0;
 }
 
 void GenesisParserWrapper::doAdd(
@@ -469,9 +492,9 @@ void GenesisParserWrapper::doAdd(
 		Id dest = path2eid( destE, s );
 
 		// Should ideally send this off to the shell.
-		innerAdd( src, srcF, dest, destF );
-	 	cout << "in do_add " << argv[1] << ", " << argv[2] << endl;
-	} else if ( argc > 3 ) { 
+		if ( !innerAdd( src, srcF, dest, destF ) )
+	 		cout << "Error in doAdd " << argv[1] << " " << argv[2] << endl;
+	} else if ( argc > 3 ) {
 	// Old-fashioned addmsg. Backward Compatibility conversions here.
 	// usage: addmsg source-element dest-delement msg-type [msg-fields]
 	// Most of these are handled using the info in the msg-type and
@@ -488,8 +511,9 @@ void GenesisParserWrapper::doAdd(
 		if ( srcF.length() > 0 && destF.length() > 0 ) {
 			Id src = path2eid( argv[1], s );
 			Id dest = path2eid( argv[2], s );
-	 		cout << "in do_add " << src << ", " << dest << endl;
-			innerAdd( src, srcF, dest, destF );
+	// 		cout << "in do_add " << src << ", " << dest << endl;
+			if ( !innerAdd( src, srcF, dest, destF ) )
+	 			cout << "Error in do_add " << argv[1] << " " << argv[2] << " " << msgType << endl;
 		}
 		//	s->addFuncLocal( src, dest );
 	} else {
@@ -521,6 +545,13 @@ void do_set( int argc, const char** const argv, Id s )
 
 void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 {
+	static map< string, string > tabmap;
+	tabmap[ "X_A" ] = "xGate/A";
+	tabmap[ "X_B" ] = "xGate/B";
+	tabmap[ "Y_A" ] = "yGate/A";
+	tabmap[ "Y_B" ] = "yGate/B";
+	tabmap[ "Z_A" ] = "zGate/A";
+	tabmap[ "Z_B" ] = "zGate/B";
 	Id e;
 	int start = 2;
 	if ( argc < 3 ) {
@@ -542,10 +573,26 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 	// Hack here to deal with the special case of filling tables
 	// in tabchannels. Example command looks like:
 	// 		setfield Ca Y_A->table[{i}] {y}
-	// so here we need to do setfield Ca/Y/A->table[{i}] {y}
+	// so here we need to do setfield Ca/yGate/A table[{i}] {y}
+	
 	for ( int i = start; i < argc; i += 2 ) {
 		// s->setFuncLocal( path + "/" + argv[ i ], argv[ i + 1 ] );
 		string field = argv[i];
+		string::size_type pos = field.find( "->table" );
+		if ( pos != string::npos ) { // Fill table
+			map< string, string >::iterator i = 
+					tabmap.find( field.substr( 0, 3 ) );
+			if ( i != tabmap.end() ) {
+				string path;
+				if ( start == 1 )
+					path = "./" + i->second;
+				else
+					path = string( argv[1] ) + "/" + i->second;
+				e = GenesisParserWrapper::path2eid( path, s );
+				field = field.substr( pos + 2 );
+			}
+		}
+	
 		string value = argv[ i+1 ];
 		// cout << "in do_set " << path << "." << field << " " <<
 				// value << endl;
@@ -554,22 +601,98 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 	}
 }
 
+/** 
+ * tabCreate handles the allocation of tables.
+ * Returns true on success
+ * For channels the GENESIS command is something like 
+ * call /squid/Na TABCREATE X {NDIVS} {VMIN} {VMAX}
+ *
+ * For tables this is 
+ * call /Vm TABCREATE {NDIVS} {XMIN} {XMAX}
+ */
+bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s)
+{
+	string path = argv[1];
+	Id id = path2eid( path, s );
+	if ( id != 0 && id != BAD_ID ) {
+		send2< Id, string >( Element::element( s ),
+			requestFieldSlot, id, "class" );
+		if ( fieldValue_.length() == 0 ) // Nothing came back
+			return 0;
+		if ( fieldValue_ == "HHChannel" && argc == 7 ) {
+			// TABCREATE on HHChannel requires the assignment of
+			// something like
+			// setfield /squid/Na/xGate/A xmin {XMIN}
+			// setfield /squid/Na/xGate/A xmax {XMAX}
+			// setfield /squid/Na/xGate/A xdivs {XDIVS}
+			if ( strlen( argv[3] ) != 1 ) {
+				cout << "usage: call element TABCREATE gate xdivs xmin xmax\n";
+				cout << "Error: Gate should be X, Y or Z\n";
+				return 0;
+			}
+			string tempA;
+			string tempB;
+			if ( string( argv[3] ) == "X" ) {
+				tempA = path + "/xGate/A";
+				tempB = path + "/xGate/B";
+			} else if ( string( argv[3] ) == "Y" ) {
+				tempA = path + "/yGate/A";
+				tempB = path + "/yGate/B";
+			} else if ( string( argv[3] ) == "Z" ) {
+				tempA = path + "/zGate/A";
+				tempB = path + "/zGate/B";
+			}
+			id = path2eid( tempA, s );
+			if ( id == 0 || id == BAD_ID ) return 0; // Error msg here
+			send3< Id, string, string >( Element::element( s ),
+				setFieldSlot, id, "xdivs", argv[4] );
+			send3< Id, string, string >( Element::element( s ),
+				setFieldSlot, id, "xmin", argv[5] );
+			send3< Id, string, string >( Element::element( s ),
+				setFieldSlot, id, "xmax", argv[6] );
+			id = path2eid( tempB, s );
+			if ( id == 0 || id == BAD_ID ) return 0; // Error msg here
+			send3< Id, string, string >( Element::element( s ),
+				setFieldSlot, id, "xdivs", argv[4] );
+			send3< Id, string, string >( Element::element( s ),
+				setFieldSlot, id, "xmin", argv[5] );
+			send3< Id, string, string >( Element::element( s ),
+				setFieldSlot, id, "xmax", argv[6] );
+			return 1;
+		}
+		if ( fieldValue_ == "Table" && argc == 6 ) {
+			send3< Id, string, string >( Element::element( s ),
+				setFieldSlot, id, "xdivs", argv[3] );
+			send3< Id, string, string >( Element::element( s ),
+				setFieldSlot, id, "xmin", argv[4] );
+			send3< Id, string, string >( Element::element( s ),
+				setFieldSlot, id, "xmax", argv[5] );
+			return 1;
+		}
+	}
+	return 0;
+}
+
 void do_call( int argc, const char** const argv, Id s )
 {
 	if ( argc < 3 ) {
 		cout << "usage:: " << argv[0] << " path field/Action [args...]\n";
 		return;
 	}
+	Element* e = Element::element( s );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( e->data() );
 	// Ugly hack to avoid LOAD call for notes on kkit dumpfiles
-	if ( strcmp ( argv[2], "LOAD" ) == 0 )
+	if ( strcmp ( argv[2], "LOAD" ) == 0 ) {
+		cout << "in do_call LOAD " << endl;
 		return;
+	}
 	
-	// Ugly hack to handle the TABCREATE calls, which do not go through
-	// the normal message destination route.
+	// Ugly hack to handle the TABCREATE calls, which get converted
+	// to three setfields, or six if it is a tabchannel. 
 	if ( strcmp ( argv[2], "TABCREATE" ) == 0 ) {
-		// s->tabCreateFunc( argc, argv );
-		cout << "in do_call TABCREATE\n";
-		return;
+		if ( !gpw->tabCreate( argc, argv, s ) )
+				cout << "Error: TABCREATE failed\n";
 	}
 
 	// Ugly hack to handle the TABFILL call, which need to be redirected
@@ -589,7 +712,6 @@ void do_call( int argc, const char** const argv, Id s )
 		value = value + argv[ i ];
 	}
 	// s->setFuncLocal( field, value );
-	cout << "in do_call " << field << ", " << value << endl;
 }
 
 int do_isa( int argc, const char** const argv, Id s )
