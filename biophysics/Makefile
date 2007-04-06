@@ -15,6 +15,7 @@ OBJ = \
 	HHChannel.o	\
 	HHGate.o	\
 	CaConc.o	\
+	Nernst.o	\
 	TestBiophysics.o	\
 
 HEADERS = \
@@ -29,6 +30,7 @@ Compartment.o:	Compartment.h ../basecode/Ftype2.h
 HHChannel.o:	HHChannel.h ../basecode/Ftype2.h ../basecode/Ftype3.h
 HHGate.o:	HHGate.h ../builtins/Interpol.h
 CaConc.o:	CaConc.h
+Nernst.o:	Nernst.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c
