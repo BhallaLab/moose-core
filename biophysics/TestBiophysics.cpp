@@ -16,6 +16,7 @@ extern void testCompartment(); // Defined in Compartment.cpp
 extern void testHHChannel(); // Defined in HHChannel.cpp
 extern void testCaConc(); // Defined in CaConc.cpp
 extern void testNernst(); // Defined in Nernst.cpp
+extern void testSpikeGen(); // Defined in SpikeGen.cpp
 
 void testBiophysics()
 {
@@ -23,6 +24,7 @@ void testBiophysics()
 	testHHChannel();
 	testCaConc();
 	testNernst();
+	testSpikeGen();
 }
 
 #endif
