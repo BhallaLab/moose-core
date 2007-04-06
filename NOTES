@@ -1691,7 +1691,7 @@ Next:
 + Get rid of ArrayFinfo.
 + Have freeing of index in DynamicFinfo on destruction.
 + Fix up deallocation of data in elements on destruction.
-_ Implement GenesisParser conversion of old message types and table lookups
++ Implement GenesisParser conversion of old message types and table lookups
 	so that squid demo can be identically run on genesis and moose.
 	Keep this as a target for future sims.
 - Then, move on to Ca concen and stuff.
@@ -1750,7 +1750,7 @@ Checked in as revision 63.
 =============================================================================
 April 6.
 Got the Shared msg from DynamicFinfo to work.
-Checked in as revision 63.
+Checked in as revision 64.
 
 Now the only obvious thing remaining for the squid_gen.g to work in MOOSE is
 the tab2file.
@@ -1758,6 +1758,8 @@ the tab2file.
 Did a quick and dirty hack for the tab2file. But there was another issue,
 because MOOSE had confusing naming for the inject field and INJECT message.
 Sorted that out. Now MOOSE runs the squid_gen.g script too.
+Checked in as revision 65.
 
+Implemented CaConc. Unit tests in progress. Done.
 
 =============================================================================
