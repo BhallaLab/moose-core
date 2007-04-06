@@ -141,11 +141,11 @@ useclock /##[TYPE=Table] 1
 // Crazy hack, but the squid demo does it and we need to match.
 setfield /squid initVm {EREST}
 reset
-setfield /squid Inject 0
+setfield /squid inject 0
 step 0.005 -t
-setfield /squid Inject {INJECT}
+setfield /squid inject {INJECT}
 step 0.040 -t
-setfield /squid Inject 0
+setfield /squid inject 0
 step 0.005 -t
 setfield /Vm print "squid.plot"
 // call /##[TYPE=Plot] printIn squid.plot

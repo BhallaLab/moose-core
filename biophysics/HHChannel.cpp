@@ -772,7 +772,7 @@ void testHHChannel()
 	set< double >( compt, "Ra", 7639.44e3 ); // does it matter?
 	set< double >( compt, "Rm", 424.4e3 );
 	set< double >( compt, "Em", EREST + 0.010613 );
-	set< double >( compt, "Inject", 0.1e-6 );
+	set< double >( compt, "inject", 0.1e-6 );
 	set< double >( chan, "Gbar", 0.94248e-3 );
 	set< double >( chan, "Ek", EREST + 0.115 );
 	set< double >( kchan, "Gbar", 0.282743e-3 );
