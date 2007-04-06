@@ -1589,7 +1589,7 @@ Next: Build the plot object and then it should be possible to run something
 close to the squid demo from the earlier version of mus.
 
 Stages, rough order
-- Table object to handle output from sim runs.
+* Table object to handle output from sim runs.
 - Complete biophysics library: Ca concen, Nernst, SynChan, SpikeGen
 - HSolver
 - Parallel stuff
@@ -1742,4 +1742,12 @@ Currently it handles the table assignments and TABCREATEs for HHChannel.
 
 An issue with the messaging from fields to shared messages such as the
 inputRequest of a table or the plot of a graph object. The ValueFinfo
-does not seem to recognize it.
+does not seem to recognize it. Turns out it is because the dynamicFinfo
+does not know how to handle shared messages as a source. Need to implement.
+
+Checked in as revision 63.
+
+=============================================================================
+April 6.
+Got the Shared msg from DynamicFinfo to work.
+=============================================================================

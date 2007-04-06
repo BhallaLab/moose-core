@@ -78,7 +78,11 @@ DynamicFinfo* DynamicFinfo::setupDynamicFinfo(
  * Here the DynamicFinfo intercepts add requests that would have
  * initiated from the original ValueFinfo or whatever it is 
  * substituting for.
- * This function is identical to that from SrcFinfo.
+ * Returns true on success.
+ * It handles two cases:
+ * - Just sending out a value to a target
+ * - A shared message where it receives a trigger and also sends a
+ *   value out to the target.
  */
 bool DynamicFinfo::add( 
 		Element* e, Element* destElm, const Finfo* destFinfo) const
@@ -88,6 +92,9 @@ bool DynamicFinfo::add(
 		unsigned int destIndex;
 		unsigned int numDest;
 
+		// How do we know what the target expects: a simple message
+		// or a shared one? Here we use the respondToAdd to query it.
+		
 		if ( destFinfo->respondToAdd( destElm, e, ftype(),
 								srcFl, destFl,
 								destIndex, numDest ) )
@@ -95,13 +102,42 @@ bool DynamicFinfo::add(
 			assert( srcFl.size() == 0 );
 			assert( destFl.size() == 1 );
 			assert( numDest == 1 );
-
+			// First we handle the case where this just sends out its
+			// value to the target.
 			unsigned int srcConn =
-					e->insertConnOnSrc( srcIndex_, destFl, 0, 0);
+				e->insertConnOnSrc( srcIndex_, destFl, 0, 0);
 			unsigned int destConn =
 				destElm->insertConnOnDest( destIndex, 1 );
 			e->connect( srcConn, destElm, destConn );
 			return 1;
+		} else {
+			// Here we make a SharedFtype on the fly for passing in the
+			// respondToAdd.
+			pair< const Ftype*, RecvFunc >
+					p1( Ftype0::global(), trigFunc_ );
+			pair< const Ftype*, RecvFunc >
+					p2( ftype(), 0 );
+			TypeFuncPair tfp[2] = {
+					p1, p2
+			};
+			SharedFtype sf( tfp, 2 );
+			assert ( srcFl.size() == 0 );
+			srcFl.push_back( trigFunc_ );
+			if ( destFinfo->respondToAdd( destElm, e, &sf,
+								srcFl, destFl,
+								destIndex, numDest ) ) {
+				// This is the SharedFinfo case where the incoming
+				// message should be a Trigger to request the return.
+				unsigned int originatingConn =
+					e->insertConnOnSrc( srcIndex_, destFl, 0, 0);
+				// Here we know that the target is source to the
+				// trigger message. So its Conn must be on
+				// its MsgSrc vector.
+				unsigned int targetConn =
+					destElm->insertConnOnSrc( destIndex, srcFl, 0, 0 );
+				e->connect( originatingConn, destElm, targetConn );
+				return 1;
+			}
 		}
 		return 0;
 }
@@ -111,10 +147,11 @@ bool DynamicFinfo::add(
  * The DynamicFinfo, if it exists, must intercept operations directed
  * toward the original ValueFinfo. In this case it is able to
  * deal with message requests.
- * \todo: Later must also handle shared message requests. This
- * could get quite messy, because it would lead to possible 
- * interference between requests. Still haven't worked out what is
- * the least surprising outcome.
+ * This Finfo must handle three kinds of requests:
+ * - To assign a value: a set
+ * - A request to extract a value: a trigger to send back values to
+ *   the destinations from this DynamicFinfo.
+ * - A sharedFinfo request: Set up both the trigger and the return.
  */
 bool DynamicFinfo::respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
