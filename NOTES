@@ -1761,5 +1761,8 @@ Sorted that out. Now MOOSE runs the squid_gen.g script too.
 Checked in as revision 65.
 
 Implemented CaConc. Unit tests in progress. Done.
+Checked in as revision 66.
+
+Implemented Nernst. Unit tests in progress. Done.
 
 =============================================================================
