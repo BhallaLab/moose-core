@@ -249,7 +249,7 @@ void testCaConc()
 		delta += ( y - conc ) * ( y - conc );
 	}
 	ASSERT( delta < 1e-6, "CaConc unit test" );
-	// Get rid of all the compartments.
+	// Get rid of the test stuff
 	set( n, "destroy" );
 }
 #endif 
