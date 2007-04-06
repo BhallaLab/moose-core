@@ -302,6 +302,10 @@ void GenesisParserWrapper::recvMessageList(
 // GenesisParserWrapper Builtin commands
 //////////////////////////////////////////////////////////////////
 
+/**
+ * This map converts the old GENESIS message syntax into the MOOSE
+ * syntax for the source side of a message.
+ */
 map< string, string >& sliSrcLookup()
 {
 	static map< string, string > src;
@@ -337,6 +341,7 @@ map< string, string >& sliSrcLookup()
 	src[ "AXIAL previous_state" ] = "axial";
 	src[ "RAXIAL Ra Vm" ] = "";
 	src[ "RAXIAL Ra previous_state" ] = "";
+	src[ "INJECT output" ] = "output";
 
 	// Some messages for channels.
 	src[ "VOLTAGE Vm" ] = "";
@@ -347,6 +352,10 @@ map< string, string >& sliSrcLookup()
 	return src;
 }
 
+/**
+ * This map converts the old GENESIS message syntax into the MOOSE
+ * syntax for the destination side of a message.
+ */
 map< string, string >& sliDestLookup()
 {
 	static map< string, string > dest;
@@ -378,10 +387,12 @@ map< string, string >& sliDestLookup()
 	dest[ "CONSERVE n nInit" ] = ""; 	// Deprecated
 	dest[ "CONSERVE nComplex nComplexInit" ] = ""; 	// Deprecated
 
+	// Some messages for compartments.
 	dest[ "AXIAL Vm" ] = "raxial";
 	dest[ "AXIAL previous_state" ] = "raxial";
 	dest[ "RAXIAL Ra Vm" ] = "";
 	dest[ "RAXIAL Ra previous_state" ] = "";
+	dest[ "INJECT output" ] = "injectMsg";
 
 	// Some messages for channels.
 	dest[ "VOLTAGE Vm" ] = "";
@@ -1355,6 +1366,30 @@ void do_echo( int argc, const char** const argv, Id s )
 	// s->echoFuncLocal( vec, options );
 }
 
+void do_tab2file( int argc, const char** const argv, Id s )
+{
+	if ( argc < 4 ) {
+		cout << argv[0] << ": Too few command arguments\n";
+		cout << "usage: " << argv[0] << " file-name element table -table2 table -table3 table -mode mode -nentries n -overwrite\n\n";
+		cout << "mode can be y, xy, alpha, beta, tau, minf index. 'y' is default\n";
+		return;
+	}
+	string fname = argv[1];
+	string elmname = argv[2];
+	string tabname = argv[3];
+
+	// Here we will later have to put in checks for tables on channels.
+	// Also lots of options remain.
+	// For now we just call the print command on the interpol
+	Id e = GenesisParserWrapper::path2eid( elmname, s );
+	if ( e != 0 && e != BAD_ID )
+		send3< Id, string, string >( Element::element( s ),
+			setFieldSlot, e, "print", fname );
+	else
+		cout << "Error: " << argv[0] << ": element not found: " <<
+				elmname << endl;
+}
+
 // Old GENESIS Usage: addfield [element] field-name -indirect element field -description text
 // Here we'll have a subset of it:
 // addfield [element] field-name -type field_type
@@ -1548,6 +1583,8 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "listcommands", do_listcommands, "void" );
 	AddFunc( "listobjects", do_listobjects, "void" );
 	AddFunc( "echo", do_echo, "void" );
+	AddFunc( "tab2file", do_tab2file, "void" );
+
 	AddFunc( "simdump", doShellCommand, "void" );
 	AddFunc( "simundump", doShellCommand, "void" );
 	AddFunc( "simobjdump", doShellCommand, "void" );

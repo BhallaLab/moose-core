@@ -66,7 +66,7 @@ class Compartment
 			static void channelFunc( const Conn& c, double Gk, double Ek);
 			static void raxialFunc(const Conn& c, double Ra, double Vm);
 			static void axialFunc(const Conn& c, double Vm);
-			static void injectFunc(const Conn& c, double I);
+			static void injectMsgFunc(const Conn& c, double I);
 			static void randInjectFunc(const Conn& c, double prob, double I);
 			// A utility function
 			static bool rangeWarning( 
