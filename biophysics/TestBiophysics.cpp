@@ -14,11 +14,13 @@
 
 extern void testCompartment(); // Defined in Compartment.cpp
 extern void testHHChannel(); // Defined in HHChannel.cpp
+extern void testCaConc(); // Defined in CaConc.cpp
 
 void testBiophysics()
 {
 	testCompartment();
 	testHHChannel();
+	testCaConc();
 }
 
 #endif

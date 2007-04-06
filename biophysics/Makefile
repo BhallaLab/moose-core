@@ -14,6 +14,7 @@ OBJ = \
 	Compartment.o	\
 	HHChannel.o	\
 	HHGate.o	\
+	CaConc.o	\
 	TestBiophysics.o	\
 
 HEADERS = \
@@ -27,6 +28,7 @@ $(OBJ)	: $(HEADERS)
 Compartment.o:	Compartment.h ../basecode/Ftype2.h
 HHChannel.o:	HHChannel.h ../basecode/Ftype2.h ../basecode/Ftype3.h
 HHGate.o:	HHGate.h ../builtins/Interpol.h
+CaConc.o:	CaConc.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c
