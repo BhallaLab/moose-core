@@ -165,12 +165,24 @@ const Cinfo* initCompartmentCinfo()
 			reinterpret_cast< RecvFunc >( &Compartment::setLength )
 		),
 
+	//////////////////////////////////////////////////////////////////
+	// SharedFinfo definitions
+	//////////////////////////////////////////////////////////////////
 		new SharedFinfo( "process", processTypes, 2 ),
 		new SharedFinfo( "init", initTypes, 2 ),
 		new SharedFinfo( "channel", channelTypes, 2 ),
 		new SharedFinfo( "axial", axialTypes, 2 ),
 		new SharedFinfo( "raxial", raxialTypes, 2 ),
 
+	///////////////////////////////////////////////////////
+	// MsgSrc definitions
+	///////////////////////////////////////////////////////
+		// Sends out the membrane potential. Used for SpikeGen.
+		new SrcFinfo( "VmSrc", Ftype1< double >::global() ),
+
+	//////////////////////////////////////////////////////////////////
+	// DestFinfo definitions
+	//////////////////////////////////////////////////////////////////
 		// The injectMsg corresponds to the INJECT message in the
 		// GENESIS compartment. It does different things from the
 		// inject field, and perhaps should just be merged in.
@@ -205,6 +217,8 @@ static const unsigned int axialSlot =
 	initCompartmentCinfo()->getSlotIndex( "axial" );
 static const unsigned int raxialSlot =
 	initCompartmentCinfo()->getSlotIndex( "raxial" );
+static const unsigned int VmSlot =
+	initCompartmentCinfo()->getSlotIndex( "VmSrc" );
 
 //////////////////////////////////////////////////////////////////
 // Here we put the Compartment class functions.
@@ -346,7 +360,9 @@ void Compartment::innerProcessFunc( Element* e, ProcInfo p )
 	Im_ = 0.0;
 	sumInject_ = 0.0;
 	// Send out the channel messages
-	send2< double, ProcInfo >( e, channelSlot, Vm_, p );
+	send1< double >( e, channelSlot, Vm_ );
+	// Send out the message to any SpikeGens.
+	send1< double >( e, VmSlot, Vm_ );
 	// Send out the axial messages
 	// send1< double >( e, axialSlot, Vm_ );
 	// Send out the raxial messages
@@ -366,8 +382,10 @@ void Compartment::innerReinitFunc( Element* e, ProcInfo p )
 	B_ = invRm_;
 	Im_ = 0.0;
 	sumInject_ = 0.0;
-	// Send the Vm over to the compartment at reset.
+	// Send the Vm over to the channels at reset.
 	send1< double >( e, channelSlot, Vm_ );
+	// Send the Vm over to the SpikeGen
+	send1< double >( e, VmSlot, Vm_ );
 }
 
 void Compartment::reinitFunc( const Conn& c, ProcInfo p )
