@@ -140,7 +140,7 @@ const Cinfo* initCompartmentCinfo()
 			reinterpret_cast< GetFunc >( &Compartment::getIm ),
 			&dummyFunc
 		),
-		new ValueFinfo( "Inject", ValueFtype1< double >::global(),
+		new ValueFinfo( "inject", ValueFtype1< double >::global(),
 			reinterpret_cast< GetFunc >( &Compartment::getInject ),
 			reinterpret_cast< RecvFunc >( &Compartment::setInject )
 		),
@@ -171,8 +171,13 @@ const Cinfo* initCompartmentCinfo()
 		new SharedFinfo( "axial", axialTypes, 2 ),
 		new SharedFinfo( "raxial", raxialTypes, 2 ),
 
-		new DestFinfo( "inject", Ftype1< double >::global(),
-			RFCAST( &Compartment::injectFunc ) ),
+		// The injectMsg corresponds to the INJECT message in the
+		// GENESIS compartment. It does different things from the
+		// inject field, and perhaps should just be merged in.
+		// In particular, it needs to be updated every dt to have
+		// an effect.
+		new DestFinfo( "injectMsg", Ftype1< double >::global(),
+			RFCAST( &Compartment::injectMsgFunc ) ),
 		
 		/// Arguments to randInject are probability and current.
 		new DestFinfo( "randInject", Ftype2< double, double >::global(),
@@ -421,7 +426,7 @@ void Compartment::axialFunc( const Conn& c, double Vm)
 			innerAxialFunc( Vm );
 }
 
-void Compartment::injectFunc( const Conn& c, double I)
+void Compartment::injectMsgFunc( const Conn& c, double I)
 {
 	Compartment* compt = static_cast< Compartment* >(
 					c.targetElement()->data() );
