@@ -1764,5 +1764,8 @@ Implemented CaConc. Unit tests in progress. Done.
 Checked in as revision 66.
 
 Implemented Nernst. Unit tests in progress. Done.
+Checked in as revision 67.
+
+Implemented SpikeGen. Unit tests done.
 
 =============================================================================
