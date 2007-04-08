@@ -64,7 +64,7 @@ const Cinfo* initSpikeGenCinfo()
 	///////////////////////////////////////////////////////
 		// Sends out a trigger for an event. The time is not 
 		// sent - everyone knows the time.
-		new SrcFinfo( "event", Ftype0::global() ),
+		new SrcFinfo( "event", Ftype1< double >::global() ),
 
 	//////////////////////////////////////////////////////////////////
 	// Dest Finfos.
@@ -139,8 +139,8 @@ double SpikeGen::getState( const Element* e )
 void SpikeGen::innerProcessFunc( const Conn& c, ProcInfo p )
 {
 	double t = p->currTime_;
-	if ( V_> threshold_ && t > lastEvent_ + refractT_ ) {
-		send0( c.targetElement(), eventSlot );
+	if ( V_> threshold_ && t >= lastEvent_ + refractT_ ) {
+		send1< double >( c.targetElement(), eventSlot, t );
 		lastEvent_ = t;
 		state_ = amplitude_;
 	} else {

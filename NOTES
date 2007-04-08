@@ -1767,5 +1767,42 @@ Implemented Nernst. Unit tests in progress. Done.
 Checked in as revision 67.
 
 Implemented SpikeGen. Unit tests done.
+Checked in as revision 68.
+
+Working on SynChan. Implemented field part.
+
+=============================================================================
+April 7
+Implemented most of the rest of SynChan, but its interface requires a rethink
+of the channel interface.
+
+Channels in GENESIS and in the current MOOSE design use a separate channel
+message and process message. The merit here is that the flow of info is staged;
+there are no return messages.
+
+Channels in the earlier MOOSE had no process message. The channel message
+triggered their calculations, which went back immediately in a return message.
+The merit of this is that it eliminates a lot of extra messaging: speed and
+space both. In principle this would also be good for a solver based 
+calculation. 
+An issue is the handling of CaConc. It may have multiple Ca channel inputs,
+so it has to have a Process message to schedule its updates and assignments
+of channel values.
+
+For now: stick with the GENESIS compatible design. Fancy stuff is for the
+solvers. Later if the return messages from channels look useful we can
+change.
+
+Made fixes, but now that I'm into unit tests I find that there is an issue
+with the managing of the synapses_ vector. This really needs to be updated
+as soon as a message is added _or_ dropped. The clean way to do this is
+to equip the DestFinfo (or a derived SynFinfo) with a callback to manage
+SynFinfo on the add and drop functions.
+For a first pass, trying to set up unit tests for SynChan. Still stuck.
+
+=============================================================================
+April 8
+For now we'll implement the non-deleteable SynChan. That has passed its unit
+tests.
 
 =============================================================================

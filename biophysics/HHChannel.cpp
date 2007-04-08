@@ -503,8 +503,7 @@ void HHChannel::innerReinitFunc( Element* e, ProcInfo info )
 
 void HHChannel::channelFunc( const Conn& c, double Vm )
 {
-	Element* e = c.targetElement();
-	static_cast< HHChannel* >( e->data() )->Vm_ = Vm;
+	static_cast< HHChannel* >( c.data() )->Vm_ = Vm;
 }
 
 void HHChannel::concFunc( const Conn& c, double conc )

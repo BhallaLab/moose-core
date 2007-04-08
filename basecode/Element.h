@@ -47,6 +47,15 @@ class Element
 		virtual unsigned int 
 				connIndex( const Conn* ) const = 0;
 
+		/**
+		 * Finds the relative index of a conn arriving at this element.
+		 * Relative index means it is based on the specified
+		 * msgDest slot, so that the first conn in this slot would
+		 * have an index of 0.
+		 */
+		virtual unsigned int connDestRelativeIndex(
+				const Conn& c, unsigned int slot ) const = 0;
+		
 		/// Returns the size of the conn vector.
 		virtual unsigned int connSize() const = 0;
 

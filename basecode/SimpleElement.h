@@ -85,6 +85,10 @@ class SimpleElement: public Element
 		 */
 		unsigned int connIndex( const Conn* ) const;
 
+		/// Finds the relative index of a conn arriving at this element.
+		unsigned int connDestRelativeIndex(
+				const Conn& c, unsigned int slot ) const;
+
 		// Returns size of the conn vector.
 		unsigned int connSize( ) const {
 				return conn_.size();
