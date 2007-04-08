@@ -48,9 +48,11 @@ static bool wildcardName( Element* e, const string& n)
 	unsigned int end = 0;
 	if (mid.substr(0, 7) == "[TYPE==") end = 7;
 	else if (mid.substr(0, 6) == "[TYPE=") end = 6;
+	else if (mid.substr(0, 7) == "[CLASS=") end = 7;
 	else if (mid.substr(0, 5) == "[ISA=") end = 5;
 	else if (mid.substr(0, 6) == "[ISA==") end = 5;
 	else if (mid.substr(0, 7) == "[TYPE!=") end = 7;
+	else if (mid.substr(0, 8) == "[CLASS!=") end = 8;
 	else if (mid.substr(0, 6) == "[ISA!=") end = 6;
 
 	if ( end > 0 ) {
@@ -60,6 +62,10 @@ static bool wildcardName( Element* e, const string& n)
 			return 0;
 		}
 		head = mid.substr(end, pos - end);
+		// Hack here to handle GENESIS Parser stuff.
+		if ( head == "membrane" )
+			head = "Compartment";
+
 		if ( mid[5] == '!' || mid[6] == '!' ) {
 			if ( head == e->className() )
 				return 0;
