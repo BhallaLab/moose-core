@@ -1590,7 +1590,7 @@ close to the squid demo from the earlier version of mus.
 
 Stages, rough order
 * Table object to handle output from sim runs.
-- Complete biophysics library: Ca concen, Nernst, SynChan, SpikeGen
+* Complete biophysics library: Ca concen, Nernst, SynChan, SpikeGen
 - HSolver
 - Parallel stuff
 - Python pass 1
@@ -1694,7 +1694,7 @@ Next:
 + Implement GenesisParser conversion of old message types and table lookups
 	so that squid demo can be identically run on genesis and moose.
 	Keep this as a target for future sims.
-- Then, move on to Ca concen and stuff.
++ Then, move on to Ca concen and stuff.
 
 =============================================================================
 April 2 2007.
@@ -1804,5 +1804,21 @@ For a first pass, trying to set up unit tests for SynChan. Still stuck.
 April 8
 For now we'll implement the non-deleteable SynChan. That has passed its unit
 tests.
+Checked in as revision 69.
+That is it for the basic biophysics. Now to get some compatibility fixes in,
+leading into readcell capability and the hsolver.
+
+Trying out the original GENESIS squid demo. Of course tons of barfing, but
+let's incrementally fix things up.
+
+- Implemented element_list (aka el) command in the parser.
+- Tried to implement addtask command as a feed-in to useclock, but this
+	cause an assertion error. Tracked it down to the use of the
+	form 'CLASS=' in wildcards. There is still some fragility there,
+	but fixed for now.
+- Cleaned out assorted objects left lying around in the object tree after
+	unit tests.
+
+Currently there are 190 errors.
 
 =============================================================================

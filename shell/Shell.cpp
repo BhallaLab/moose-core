@@ -807,6 +807,8 @@ void testShell()
 	// Test destroy operation
 	/////////////////////////////////////////
 	sh.destroy( a );
+	sh.destroy( b );
+	sh.destroy( c );
 	ASSERT( Element::element( a ) == 0, "destroy a" );
 	ASSERT( Element::element( a1 ) == 0, "destroy a1" );
 	ASSERT( Element::element( a2 ) == 0, "destroy a2" );

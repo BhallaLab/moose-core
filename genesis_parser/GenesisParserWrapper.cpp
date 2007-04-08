@@ -347,6 +347,11 @@ map< string, string >& sliSrcLookup()
 	src[ "VOLTAGE Vm" ] = "";
 	src[ "CHANNEL Gk Ek" ] = "channel";
 
+	// Some messages for gates, used in the squid demo. This 
+	// is used to set the reset value of Vm in the gates, which is 
+	// done already through the existing messaging.
+	src[ "EREST Vm" ] = "";
+
 	// Some messages for tables
 	src[ "INPUT Vm" ] = "Vm";
 	return src;
@@ -397,6 +402,11 @@ map< string, string >& sliDestLookup()
 	// Some messages for channels.
 	dest[ "VOLTAGE Vm" ] = "";
 	dest[ "CHANNEL Gk Ek" ] = "channel";
+
+	// Some messages for gates, used in the squid demo. This 
+	// is used to set the reset value of Vm in the gates, which is 
+	// done already through the existing messaging.
+	dest[ "EREST Vm" ] = "";
 
 	// Some messages for tables
 	dest[ "INPUT Vm" ] = "inputRequest";
@@ -1159,7 +1169,7 @@ void do_useclock( int argc, const char** const argv, Id s )
 		sprintf( tickName, "/sched/cj/t%s", argv[2] );
 		func = argv[3];
 	} else {
-		cout << "usage:: " << argv[0] << " path [funcname] clockNum\n";
+		cout << "usage:: " << argv[0] << " path clockNum [funcname]\n";
 		return;
 	}
 
@@ -1390,6 +1400,80 @@ void do_tab2file( int argc, const char** const argv, Id s )
 				elmname << endl;
 }
 
+/**
+ * This returns a space-separated list of individual element paths
+ * generated from the wildcard list of the 'path' argument.
+ * The path argument can be a comma-separated series of individual
+ * element paths, or wildcard paths.
+ * There is no guarantee about ordering of the result.
+ * There is a guarantee about there being no repeats.
+ *
+ * The original GENESIS version has additional arguments
+ * 	-listname listname'
+ * which I have no clue about and have not implemented.
+ */
+char* do_element_list( int argc, const char** const argv, Id s )
+{
+	static string space = " ";
+	if ( argc != 2 ) {
+		cout << "usage:: " << argv[0] << " path\n";
+		return "";
+	}
+	string path = argv[1];
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( Element::element( s )->data() );
+	string ret;
+	gpw->elementList( ret, path, s );
+
+	// return copyString( s->getmsgFuncLocal( field, options ) );
+	return copyString( ret.c_str() );
+}
+
+void GenesisParserWrapper::elementList(
+		string& ret, const string& path, Id s)
+{
+ 	send2< string, bool >( Element::element( s ), 
+		requestWildcardListSlot, path, 0 );
+	bool first = 1;
+	vector< Id >::iterator i;
+	for ( i = elist_.begin(); i != elist_.end(); i++ ) {
+		if ( first )
+			ret = eid2path( *i );
+		else
+			ret = ret + " " + eid2path( *i );
+		first = 0;
+	}
+}
+
+/**
+ * This really sets up the scheduler to keep track of all specified
+ * objects in the wildcard, including those created after this command
+ * was issued. Here we fudge it using the same functionality of
+ * useclock.
+ */
+void do_addtask( int argc, const char** const argv, Id s )
+{
+	if (argc != 5 ) {
+		cout << "usage:: " << argv[0] << " Task path -action action\n";
+		return;
+	}
+	string action;
+	if ( strcmp( argv[4], "INIT" ) == 0 )
+		action = "init";
+	else if ( strcmp( argv[4], "PROCESS" ) == 0 )
+		action = "process";
+	else {
+		cout << "Error:: " << argv[0] << ": action " << argv[4] <<
+				" not known\n";
+		return;
+	}
+
+	const char* nargv[] = { argv[0], argv[2], "0", action.c_str() };
+	do_useclock( 4, nargv, s );
+	// for useclock the args are:
+	// cout << "usage:: " << argv[0] << " path clockNum [funcname]\n";
+}
+
 // Old GENESIS Usage: addfield [element] field-name -indirect element field -description text
 // Here we'll have a subset of it:
 // addfield [element] field-name -type field_type
@@ -1584,6 +1668,11 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "listobjects", do_listobjects, "void" );
 	AddFunc( "echo", do_echo, "void" );
 	AddFunc( "tab2file", do_tab2file, "void" );
+	AddFunc( "el",
+			reinterpret_cast< slifunc >( do_element_list ), "char*" );
+	AddFunc( "element_list",
+			reinterpret_cast< slifunc >( do_element_list ), "char*" );
+	AddFunc( "addtask", do_addtask, "void" );
 
 	AddFunc( "simdump", doShellCommand, "void" );
 	AddFunc( "simundump", doShellCommand, "void" );
@@ -1766,22 +1855,22 @@ void GenesisParserWrapper::gpAssert(
 void GenesisParserWrapper::unitTest()
 {
 	cout << "\nDoing GenesisParserWrapper tests";
-	gpAssert( "le", "sched b c shell " );
+	gpAssert( "le", "sched shell " );
 	gpAssert( "create neutral /foo", "" );
-	gpAssert( "le", "sched b c shell foo " );
+	gpAssert( "le", "sched shell foo " );
 	gpAssert( "ce /foo", "" );
 	gpAssert( "le", "" );
 	gpAssert( "pwe", "/foo " );
 	gpAssert( "create neutral ./bar", "" );
 	gpAssert( "le", "bar " );
 	gpAssert( "le /foo", "bar " );
-	gpAssert( "le ..", "sched b c shell foo " );
+	gpAssert( "le ..", "sched shell foo " );
 	gpAssert( "ce bar", "" );
 	gpAssert( "pwe", "/foo/bar " );
 	gpAssert( "ce ../..", "" );
-	gpAssert( "le", "sched b c shell foo " );
+	gpAssert( "le", "sched shell foo " );
 	gpAssert( "delete /foo", "" );
-	gpAssert( "le", "sched b c shell " );
+	gpAssert( "le", "sched shell " );
 	gpAssert( "le /foo", "cannot find object '/foo' " );
 	gpAssert( "echo foo", "foo " );
 	gpAssert( "echo bar -n", "bar " );
@@ -1817,6 +1906,9 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "echo {getfield /sched/cj/t0 dt}", "1 " );
 	gpAssert( "echo {getfield /sched/cj/t1 dt}", "0.1 " );
 	gpAssert( "useclock /##[TYPE=Compartment] 1", "" );
+	gpAssert( "delete /compt", "" );
+	gpAssert( "le", "sched shell " );
+
 	cout << "\n";
 }
 #endif
