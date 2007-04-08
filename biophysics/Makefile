@@ -17,6 +17,7 @@ OBJ = \
 	CaConc.o	\
 	Nernst.o	\
 	SpikeGen.o	\
+	SynChan.o	\
 	TestBiophysics.o	\
 
 HEADERS = \
@@ -33,6 +34,7 @@ HHGate.o:	HHGate.h ../builtins/Interpol.h
 CaConc.o:	CaConc.h
 Nernst.o:	Nernst.h
 SpikeGen.o:	SpikeGen.h
+SynChan.o:	SynChan.h SynInfo.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c

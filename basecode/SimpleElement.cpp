@@ -194,6 +194,18 @@ unsigned int SimpleElement::connIndex( const Conn* c ) const
 	return static_cast< unsigned int >( c - &conn_.front() );
 }
 
+/**
+ * This finds the relative index of a conn arriving at this element.
+ */
+unsigned int SimpleElement::connDestRelativeIndex(
+				const Conn& c, unsigned int slot ) const
+{
+	assert ( slot < dest_.size() );
+	assert ( conn_.size() >= dest_[ slot ].begin() );
+	assert ( c.targetIndex() >= dest_[ slot ].begin() );
+	return c.targetIndex() - dest_[ slot ].begin();
+}
+
 //////////////////////////////////////////////////////////////////
 // Src functions
 //////////////////////////////////////////////////////////////////

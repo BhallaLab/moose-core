@@ -43,6 +43,9 @@ class Cinfo
 					return name_;
 			}
 
+			/**
+			 * Finds the Cinfo with the specified name.
+			 */
 			static const Cinfo* find( const std::string& name );
 
 			/**

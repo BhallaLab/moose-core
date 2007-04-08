@@ -17,6 +17,7 @@ extern void testHHChannel(); // Defined in HHChannel.cpp
 extern void testCaConc(); // Defined in CaConc.cpp
 extern void testNernst(); // Defined in Nernst.cpp
 extern void testSpikeGen(); // Defined in SpikeGen.cpp
+extern void testSynChan(); // Defined in SynChan.cpp
 
 void testBiophysics()
 {
@@ -25,6 +26,7 @@ void testBiophysics()
 	testCaConc();
 	testNernst();
 	testSpikeGen();
+	testSynChan();
 }
 
 #endif
