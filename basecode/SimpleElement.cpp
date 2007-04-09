@@ -48,6 +48,21 @@ SimpleElement::SimpleElement(
 		;
 }
 
+SimpleElement::SimpleElement( const SimpleElement* orig )
+		: Element(),
+		name_( orig->name_ ), 
+		conn_( orig->conn_ ), 
+		src_( orig->src_ ),
+		dest_( orig->dest_ ),
+		finfo_( orig->finfo_ ),
+		data_( 0 )
+{
+#ifdef DO_UNIT_TESTS
+		numInstances++;
+#endif	
+		;
+}
+
 SimpleElement::~SimpleElement()
 {
 #ifndef DO_UNIT_TESTS

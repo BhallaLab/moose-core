@@ -35,6 +35,8 @@ class SimpleElement: public Element
 				void* data = 0
 		);
 
+		SimpleElement( const SimpleElement* orig );
+
 		/// This cleans up the data_ and finfo_ if needed.
 		~SimpleElement();
 
@@ -259,7 +261,7 @@ class SimpleElement: public Element
 		///////////////////////////////////////////////////////////////
 		// Functions for the copy operation. All 5 are virtual
 		///////////////////////////////////////////////////////////////
-		Element* copy( Element* parent ) const;
+		Element* copy( Element* parent, const string& newName ) const;
 		bool isDescendant( const Element* ancestor ) const;
 
 		Element* innerDeepCopy( 

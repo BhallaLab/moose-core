@@ -101,9 +101,9 @@ const Cinfo* initGenesisParserCinfo()
 		///////////////////////////////////////////////////////////////
 		// This function is for copying an element tree, complete with
 		// messages, onto another.
-		TypeFuncPair( Ftype2< Id, Id >::global(),  0 ),
+		TypeFuncPair( Ftype3< Id, Id, string >::global(),  0 ),
 		// This function is for moving element trees.
-		TypeFuncPair( Ftype2< Id, Id >::global(),  0 ),
+		TypeFuncPair( Ftype3< Id, Id, string >::global(),  0 ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -988,19 +988,33 @@ void do_delete( int argc, const char** const argv, Id s )
 	}
 }
 
-void do_move( int argc, const char** const argv, Id s )
+bool parseCopyMove( int argc, const char** const argv, Id s,
+		Id& e, Id& pa, string& childname )
 {
 	if ( argc == 3 ) {
-		Id e = GenesisParserWrapper::path2eid( argv[1], s );
+		e = GenesisParserWrapper::path2eid( argv[1], s );
 		if ( e != 0 && e != BAD_ID ) {
-			Id pa = GenesisParserWrapper::path2eid( argv[2], s );
-			if ( pa != BAD_ID ) {
-				send2< Id, Id >(
-					Element::element( s ), moveSlot, e, pa );
-			} else {
-				cout << "Error: " << argv[0] << ": Parent element " <<
-						argv[2] << " not found\n";
+			childname = "";
+			pa = GenesisParserWrapper::path2eid( argv[2], s );
+			if ( pa == BAD_ID ) { // Possibly we are renaming it too.
+				string pastr = argv[2];
+				if ( pastr.find( "/" ) == 0 ) {
+					pastr = "/";
+				} else {
+					pastr = Shell::head( argv[2], "/" );
+				}
+				if ( pastr == "" )
+						pastr = ".";
+				pa = GenesisParserWrapper::path2eid( pastr, s );
+				if ( pa == BAD_ID ) { // Nope, even that doesn't work.
+					cout << "Error: " << argv[0] << 
+							": Parent element " << argv[2] << 
+							" not found\n";
+					return 0;
+				}
+				childname = Shell::tail( argv[2], "/" );
 			}
+			return 1;
 		} else {
 			cout << "Error: " << argv[0] << ": source element " <<
 					argv[1] << " not found\n";
@@ -1008,27 +1022,28 @@ void do_move( int argc, const char** const argv, Id s )
 	} else {
 		cout << "usage:: " << argv[0] << " src dest\n";
 	}
+	return 0;
+}
+
+void do_move( int argc, const char** const argv, Id s )
+{
+	Id e;
+	Id pa;
+	string name;
+	if ( parseCopyMove( argc, argv, s, e, pa, name ) ) {
+		send3< Id, Id, string >(
+				Element::element( s ), moveSlot, e, pa, name );
+	}
 }
 
 void do_copy( int argc, const char** const argv, Id s )
 {
-	if ( argc == 3 ) {
-		Id e = GenesisParserWrapper::path2eid( argv[1], s );
-		if ( e != 0 && e != BAD_ID ) {
-			Id pa = GenesisParserWrapper::path2eid( argv[2], s );
-			if ( pa != BAD_ID ) {
-				send2< Id, Id >(
-					Element::element( s ), copySlot, e, pa );
-			} else {
-				cout << "Error: " << argv[0] << ": Parent element " <<
-						argv[2] << " not found\n";
-			}
-		} else {
-			cout << "Error: " << argv[0] << ": source element " <<
-					argv[1] << " not found\n";
-		}
-	} else {
-		cout << "usage:: " << argv[0] << " src dest\n";
+	Id e;
+	Id pa;
+	string name;
+	if ( parseCopyMove( argc, argv, s, e, pa, name ) ) {
+		send3< Id, Id, string >(
+				Element::element( s ), copySlot, e, pa, name );
 	}
 }
 
@@ -1350,8 +1365,10 @@ void GenesisParserWrapper::doLe( int argc, const char** argv, Id s )
 	} else if ( argc >= 2 ) {
 		Id e = path2eid( argv[1], s );
 		/// \todo: Use better test for a bad path than this.
-		if ( e == Shell::BAD_ID )
+		if ( e == Shell::BAD_ID ) {
+			print( string( "cannot find object '" ) + argv[1] + "'" );
 			return;
+		}
 		send1< Id >( Element::element( s ), requestLeSlot, e );
 	}
 	vector< Id >::iterator i = elist_.begin();
@@ -1797,8 +1814,10 @@ Id GenesisParserWrapper::innerPath2eid( const string& path, Id g )
 		separateString( path, names, separator );
 	}
 	Id ret = Shell::traversePath( start, names );
+	/*
 	if ( ret == Shell::BAD_ID )
 			print( string( "cannot find object '" ) + path + "'" );
+			*/
 	return ret;
 }
 

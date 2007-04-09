@@ -1591,13 +1591,13 @@ close to the squid demo from the earlier version of mus.
 Stages, rough order
 * Table object to handle output from sim runs.
 * Complete biophysics library: Ca concen, Nernst, SynChan, SpikeGen
+- Cell reader
 - HSolver
 - Parallel stuff
 - Python pass 1
 - Kinetics library
 - Dumpfile/kkit read
 - Stimfile read capability
-- Cell reader
 - OB sim capability
 - SBML read/write
 - kinsolvers: ODE, RK5, LSODA, G1, mixed, smoldyn
@@ -1844,5 +1844,13 @@ All this copy stuff implemented and compiles, not yet tested.
 Also implemented the GenesisParser and Shell interface to do it.
 Confirmed that it does not yet work. But the old unit tests do work, and enough
 changes have been made to require a checkin.
+Checked in as revision 71.
+
+Some progress. Various unit tests set up, but the proper copy syntax is not
+complete yet.
+Much struggling later, turned out that the problem was a really subtle one
+where when I used the default constructor T( T ) it bypassed the necessary
+Element::Element constructor that set up the ids. Fixed. Added into 
+unit tests. Unit tests passed.
 
 =============================================================================

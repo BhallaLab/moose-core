@@ -246,8 +246,8 @@ unsigned int Neutral::getChildByName( const Element* elm, const string& s )
 			return i->targetElement()->id();
 		}
 	}
-	// Failure option: return root id.
-	return 0;
+	// Failure option: return BAD_ID.
+	return BAD_ID;
 }
 
 /**

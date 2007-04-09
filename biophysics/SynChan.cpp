@@ -448,6 +448,7 @@ void testSynChan()
 	ASSERT( dret == 0.01, "setup SynChan" );
 
 	ret = set< double >( sg1, "Vm", 2.0 );
+	ret = set< double >( sg2, "Vm", 2.0 );
 	ASSERT( ret, "setup SynChan" );
 	ret = get< double >( syn, "Gk", dret );
 	ASSERT( ret, "setup SynChan" );
