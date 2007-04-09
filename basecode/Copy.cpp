@@ -42,7 +42,7 @@ bool SimpleElement::isDescendant( const Element* ancestor ) const
 
 Element* SimpleElement::innerCopy() const
 {
-	SimpleElement* ret = new SimpleElement( *this );
+	SimpleElement* ret = new SimpleElement( this );
 	
 	assert( finfo_.size() > 0 );
 	assert( dynamic_cast< ThisFinfo* >( finfo_[0] ) != 0 );
@@ -87,37 +87,46 @@ Element* SimpleElement::innerDeepCopy(
  * This function does a deep copy of the current element
  * including all messages. Returns the base of the copied tree.
  * It attaches the copied element tree to the parent.
+ * It renames the copied tree base if the newName is not empty.
+ * It first checks that the parent does not already have a child
+ * of the target name.
  * It is non-recursive but calls lots recursive functions.
  */
 
-Element* SimpleElement::copy( Element* parent ) const
+Element* SimpleElement::copy( Element* parent, const string& newName )
+		const
 {
 	if ( parent->isDescendant( this ) ) {
 		cout << "Warning: SimpleElement::copy: Attempt to copy within descendant tree" << parent->name() << endl;
 		return 0;
 	}
+	string nm = newName;
+
+	if ( newName == "" )
+		nm = name();
+	unsigned int oldChild;
+	bool ret = lookupGet< unsigned int, string >(
+					parent, "lookupChild", oldChild, nm );
+	assert( ret );
+	if ( oldChild != BAD_ID ) {
+		cout << "Warning: SimpleElement::copy: pre-existing child with target name: " << parent->name() << "/" << nm << endl;
+		return 0;
+	}
+
 	map< const Element*, Element* > tree;
 	map< const Element*, Element* >::iterator i;
 
 	Element* child = innerDeepCopy( tree );
+	child->setName( nm );
 
 	for ( i = tree.begin(); i != tree.end(); i++ ) {
 		i->second->replaceCopyPointers( tree );
 	}
 	
 	// Finally, stick the copied tree onto the parent Element.
-	// Here we use rather base-level calls to insert a new Conn on
-	// the parent, but reuse the 'parent' Conn from the new child
-	// which is the base of the copied tree.
-	vector< RecvFunc >rf;
-	rf.push_back( RFCAST( &Neutral::childFunc ) );
-	unsigned int parentConn = parent->insertConnOnSrc( 0, rf, 0, 0 );
-
-	// Note we are a little naughty here: using the dest_ of the
-	// original element. Should be fine because the copy is, well,
-	// a copy.
-	unsigned int childConn = dest_[ 0 ].begin();
-	parent->connect( parentConn, child, childConn );
+	ret = parent->findFinfo( "childSrc" )->add(
+					parent, child, child->findFinfo( "child" ) );
+	assert( ret );
 
 	return child;
 }
@@ -139,9 +148,11 @@ void SimpleElement::replaceCopyPointers(
 	if ( conn_.size() == 0 ) return;
 	map< const Element*, Element* >::iterator j;
 
-	// Here we do a reverse iteration because we will want to delete
+	// Here we do a reverse iteration because we want to delete
 	// conns that are outside the tree. The delete operation munges
 	// all later Conn indices, so a forward iteration would not work.
+	// Note that this loop also deletes the dangling child message
+	// on the root of the copied tree.
 	
 	for ( unsigned int i = conn_.size(); i > 0; i-- ) {
 		j = tree.find( conn_[ i - 1 ].targetElement() );
@@ -154,3 +165,93 @@ void SimpleElement::replaceCopyPointers(
 		}
 	}
 }
+
+
+#ifdef DO_UNIT_TESTS
+
+void copyTest()
+{
+	cout << "\nTesting copy";
+
+	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	Element* c0 = Neutral::create( "Compartment", "c0", n );
+	ASSERT( c0 != 0, "creating compartment" );
+
+	Element* ch = Neutral::create( "HHChannel", "ch", c0 );
+	ASSERT( ch != 0, "creating channel" );
+	
+	ASSERT(
+		c0->findFinfo( "channel" )->
+		add( c0, ch, ch->findFinfo( "channel" ) ), "set up copy" );
+	set< double >( ch, "Xpower", 3.0 );
+	set< double >( ch, "Ypower", 1.0 );
+
+
+	ProcInfoBase p;
+	Conn c( c0, 0 );
+	p.dt_ = 0.002;
+	set< double >( c0, "inject", 1.0 );
+	set< double >( c0, "Rm", 2.0 );
+	set< double >( c0, "Ra", 3.0 );
+	set< double >( c0, "Cm", 4.0 );
+	set< double >( c0, "Em", 5.0 );
+	set< double >( c0, "Vm", 6.0 );
+
+	Element* c1 = c0->copy( n, "c1" );
+	ASSERT( c1 != c0, "copying" );
+	ASSERT( c1 != 0, "copying" );
+
+	ASSERT( c1->name() == "c1", "copying" );
+
+	// Check copied values
+	double dret;
+	get< double >( c1, "inject", dret );
+	ASSERT( dret == 1.0, "copying" );
+	get< double >( c1, "Rm", dret );
+	ASSERT( dret == 2.0, "copying" );
+	get< double >( c1, "Ra", dret );
+	ASSERT( dret == 3.0, "copying" );
+	get< double >( c1, "Cm", dret );
+	ASSERT( dret == 4.0, "copying" );
+	get< double >( c1, "Em", dret );
+	ASSERT( dret == 5.0, "copying" );
+	get< double >( c1, "Vm", dret );
+	ASSERT( dret == 6.0, "copying" );
+
+	// Check that copy is a unique object
+	bool ret;
+	ret = set< double >( c1, "inject", 0.1 );
+	ASSERT( ret, "copy uniqueness" );
+	get< double >( c0, "inject", dret );
+	ASSERT( dret == 1.0, "copying" );
+	get< double >( c1, "inject", dret );
+	ASSERT( dret == 0.1, "copying" );
+
+	// Check copied tree
+	Element* e = Element::element( Neutral::getChildByName( c1, "ch" ));
+	ASSERT( e != 0, "copied child" );
+	get< double >( e, "Xpower", dret );
+	ASSERT( dret == 3.0, "copying" );
+	Element* temp = Element::element(
+					Neutral::getChildByName( e, "xGate" ) );
+	ASSERT( temp != 0, "copied child" );
+	temp = Element::element( Neutral::getChildByName( temp, "A" ) );
+	ASSERT( temp != 0, "copied child" );
+	temp = Element::element( Neutral::getChildByName( e, "yGate" ) );
+	ASSERT( temp != 0, "copied child" );
+	temp = Element::element( Neutral::getChildByName( temp, "B" ) );
+	ASSERT( temp != 0, "copied child" );
+
+	// Check copy preserving old name. Copy c0 onto c1.
+	Element* c10 = c0->copy( c1, "" );
+	ASSERT( c10 != c0, "copying" );
+	ASSERT( c10 != 0, "copying" );
+	ASSERT( c10->name() == "c0", "copying" );
+
+	// Check that the copy has a unique id (this was an actual bug!)
+	ASSERT( c10->id() != c0->id(), "unique copy id" );
+
+	set( n, "destroy" );
+}
+
+#endif // DO_UNIT_TESTS

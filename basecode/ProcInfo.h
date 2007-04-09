@@ -7,6 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifndef PROCINFO_H
+#define PROCINFO_H
 /**
  * This class manages the context of simulations and is passed around
  * by the various scheduling objects.
@@ -30,3 +32,5 @@ class ProcInfoBase
 };
 
 typedef ProcInfoBase* ProcInfo;
+
+#endif // PROCINFO_H

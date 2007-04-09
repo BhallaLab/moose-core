@@ -256,7 +256,8 @@ class Element
 		 * including all messages. Returns the base of the copied tree.
 		 * It attaches the copied element tree to the parent.
 		 */
-		virtual Element* copy( Element* parent ) const = 0;
+		virtual Element* copy( Element* parent, const string& newName )
+				const = 0;
 		/**
 		 * True if current element descends from the specified ancestor.
 		 */

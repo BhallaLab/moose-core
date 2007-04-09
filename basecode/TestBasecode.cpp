@@ -23,6 +23,7 @@ extern void transientFinfoDeletionTest(); // in UnitTests.cpp
 extern void sharedFtypeTest(); // in SharedFtype.cpp
 extern void sharedFinfoTest(); // in SharedFinfo.cpp
 extern void lookupFinfoTest(); // in LookupFinfo.cpp
+extern void copyTest(); // in Copy.cpp
 
 void testBasecode()
 {
@@ -37,6 +38,7 @@ void testBasecode()
 	sharedFtypeTest();
 	sharedFinfoTest();
 	lookupFinfoTest();
+	copyTest();
 }
 
 #endif
