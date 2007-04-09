@@ -104,6 +104,13 @@ class Conn
 			 */
 			void* data() const;
 
+			/**
+			 * Utility function used only by Copy.cpp as far as I know
+			 */
+			void replaceElement( Element* e ) {
+				e_ = e;
+			}
+
 		private:
 			
 			/// e_ points to the target element.

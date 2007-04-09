@@ -1819,6 +1819,30 @@ let's incrementally fix things up.
 - Cleaned out assorted objects left lying around in the object tree after
 	unit tests.
 
-Currently there are 190 errors.
+Currently there are 190 errors when I run the original squid demo.
+Many of these are simply missing object classes.
+
+Checked in as revision 70.
+
+We now need to implement the copy function. It should be easier and faster
+than the old variants, because we use very few pointers. I think the following
+should work:
+- Copy all SimpleElements without assigning parents etc.
+- Duplicate all the DynamicFinfos.
+- Recreate their data and copy the values
+- Build a map of all the new vs old element ptrs.
+- Do a simple copy of the Conns, MsgSrc, MsgDest vectors.
+- Go through all new Conns replacing old with new ptrs.
+- For all off-tree messages, add a connection to the appropriate src
+	and tie up (if in halo mode) to the new tree. Otherwise drop these
+	connections (current behaviour.)
+
+=============================================================================
+April 9.
+
+All this copy stuff implemented and compiles, not yet tested.
+Also implemented the GenesisParser and Shell interface to do it.
+Confirmed that it does not yet work. But the old unit tests do work, and enough
+changes have been made to require a checkin.
 
 =============================================================================

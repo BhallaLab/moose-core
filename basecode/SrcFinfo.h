@@ -85,6 +85,10 @@ class SrcFinfo: public Finfo
 				return srcIndex_;
 			}
 
+			Finfo* copy() const {
+				return new SrcFinfo( *this );
+			}
+
 		private:
 			unsigned int srcIndex_;
 };

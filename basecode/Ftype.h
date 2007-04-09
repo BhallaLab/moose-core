@@ -83,6 +83,17 @@ class Ftype
 			}
 
 			/**
+			 * Copy an object of the specified type, possibly an
+			 * entire array of it if num > 1. Applies only to Ftype1.
+			 * Returns the copy.
+			 */
+			virtual void* copy( 
+					const void* orig, const unsigned int num ) const
+			{
+				return 0;
+			}
+
+			/**
 			 * Free data of the specified type. If isArray, then
 			 * the array delete[] is used.
 			 * Applies only to objects with a single type.
@@ -95,6 +106,15 @@ class Ftype
 			 */
 			virtual void destroyIndex( void* index ) const
 			{;}
+
+			/**
+			 * Copy index data. Currently used only for LookupFtype
+			 * in the context of DynamicFinfo.
+			 */
+			virtual void* copyIndex( void* index ) const
+			{
+				return 0;
+			}
 };
 
 #endif // _FTYPE_H

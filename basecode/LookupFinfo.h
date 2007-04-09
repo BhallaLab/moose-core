@@ -171,6 +171,10 @@ class LookupFinfo: public Finfo
 				return ( ftype()->isSameType( baseFinfo->ftype() ) );
 			}
 
+			Finfo* copy() const {
+				return new LookupFinfo( *this );
+			}
+
 		private:
 			GetFunc get_;
 			RecvFunc set_;

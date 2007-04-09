@@ -277,6 +277,17 @@ bool DynamicFinfo::drop( Element* e, unsigned int i ) const
 	return 0;
 }
 
+Finfo* DynamicFinfo::copy() const
+{
+	void* ge = 0;
+	if ( generalIndex_ != 0 ) {
+		ge = ftype()->copyIndex( generalIndex_ );
+	}
+	DynamicFinfo* ret = new DynamicFinfo( *this );
+	ret->generalIndex_ = ge;
+	return ret;
+}
+
 unsigned int DynamicFinfo::numIncoming( const Element* e ) const
 {
 	if ( destIndex_ != 0 ) {

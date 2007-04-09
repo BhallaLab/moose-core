@@ -256,6 +256,19 @@ class SimpleElement: public Element
 		bool isConnOnDest(
 			unsigned int dest, unsigned int conn ) const;
 
+		///////////////////////////////////////////////////////////////
+		// Functions for the copy operation. All 5 are virtual
+		///////////////////////////////////////////////////////////////
+		Element* copy( Element* parent ) const;
+		bool isDescendant( const Element* ancestor ) const;
+
+		Element* innerDeepCopy( 
+						map< const Element*, Element* >& tree ) const;
+		void replaceCopyPointers(
+						map< const Element*, Element* >& tree );
+	protected:
+		Element* innerCopy() const;
+
 	private:
 		string name_;
 
@@ -288,10 +301,8 @@ class SimpleElement: public Element
 		vector< MsgDest > dest_;
 
 		vector< Finfo* > finfo_;
-		// Cinfo* cinfo_;
-		void* data_;
 
-		// bool isMarkedForDeletion_;
+		void* data_;
 
 		/**
 		 * Scans through all MsgSrcs to find the highest Conn index
