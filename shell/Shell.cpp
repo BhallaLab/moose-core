@@ -111,9 +111,11 @@ const Cinfo* initShellCinfo()
 		////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions
 		////////////////////////////////////////////////////////////
-		TypeFuncPair( Ftype2< unsigned int, unsigned int >::global(), 
+		TypeFuncPair(
+			Ftype3< unsigned int, unsigned int, string >::global(), 
 					RFCAST( &Shell::copy ) ),
-		TypeFuncPair( Ftype2< unsigned int, unsigned int >::global(), 
+		TypeFuncPair(
+			Ftype3< unsigned int, unsigned int, string >::global(), 
 					RFCAST( &Shell::move ) ),
 	};
 
@@ -408,11 +410,19 @@ void Shell::getField( const Conn& c, unsigned int id, string field )
 }
 
 // Static function
-void Shell::copy( const Conn& c, unsigned int src, unsigned int parent )
+/**
+ * This copies the element tree from src to parent. If name arg is 
+ * not empty, it renames the resultant object. It first verifies
+ * that the planned new object has a different name from any of
+ * the existing children of the prospective parent.
+ */
+void Shell::copy( const Conn& c, 
+				unsigned int src, unsigned int parent, string name )
 {
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 	Element* e =
-		Element::element( src )->copy( Element::element( parent ) );
+		Element::element( src )->copy(
+			Element::element( parent ), name );
 	if ( e ) { // Send back the id of the new element base
 		sendTo1< unsigned int >( c.targetElement(),
 					createSlot, c.targetIndex(), e->id() );
@@ -420,7 +430,14 @@ void Shell::copy( const Conn& c, unsigned int src, unsigned int parent )
 }
 
 // Static placeholder.
-void Shell::move( const Conn& c, unsigned int src, unsigned int parent )
+/**
+ * This moves the element tree from src to parent. If name arg is 
+ * not empty, it renames the resultant object. It first verifies
+ * that the planned new object has a different name from any of
+ * the existing children of the prospective parent.
+ */
+void Shell::move( const Conn& c,
+				unsigned int src, unsigned int parent, string name )
 {
 }
 

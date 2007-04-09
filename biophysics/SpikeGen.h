@@ -20,6 +20,7 @@ class SpikeGen
 			amplitude_ = 1.0;
 			state_ = 0.0;
 			lastEvent_ = 0.0;
+			V_ = 0.0;
 		}
 	//////////////////////////////////////////////////////////////////
 	// Field functions.
