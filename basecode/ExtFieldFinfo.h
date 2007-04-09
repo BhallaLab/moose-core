@@ -173,6 +173,10 @@ class ExtFieldFinfo: public Finfo
 				return 0;
 			}
 
+			Finfo* copy() const {
+				return new ExtFieldFinfo( *this );
+			}
+
 		private:
 			const Finfo* origFinfo_;
 
@@ -191,7 +195,7 @@ class ExtFieldFinfo: public Finfo
 			unsigned int arrayIndex_;
 			unsigned int srcIndex_;
 			unsigned int destIndex_;
-			vector< IndirectType > indirect_;
+			// vector< IndirectType > indirect_;
 };
 
 /**

@@ -242,6 +242,16 @@ class Finfo
 			 */
 			virtual bool inherit( const Finfo* baseFinfo ) = 0;
 
+			/**
+			 * Makes a duplicate of the current Finfo. Is useful
+			 * mainly for the DynamicFinfos, the ExtFieldFinfos and
+			 * other ones that have an element-specific existence
+			 * in the nether regions of the finfo_ array.
+			 * Nevertheless, I want the other Finfos to come up with
+			 * a reasonable copy operation too.
+			 */
+			virtual Finfo* copy() const = 0;
+
 		private:
 			string name_;
 			const Ftype* ftype_;

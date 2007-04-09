@@ -106,6 +106,10 @@ class ThisFinfo: public Finfo
 				return noDeleteFlag_;
 			}
 
+			Finfo* copy() const {
+				return new ThisFinfo( *this );
+			}
+
 		private:
 			const Cinfo* cinfo_;
 			bool noDeleteFlag_;

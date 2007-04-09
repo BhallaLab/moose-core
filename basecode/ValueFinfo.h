@@ -122,6 +122,10 @@ class ValueFinfo: public Finfo
 					return get_;
 			}
 
+			Finfo* copy() const {
+				return new ValueFinfo( *this );
+			}
+
 		private:
 			GetFunc get_;
 			RecvFunc set_;

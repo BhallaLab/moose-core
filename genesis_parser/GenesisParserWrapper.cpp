@@ -42,7 +42,10 @@ const Cinfo* initGenesisParserCinfo()
 		// the elist into a temporary local buffer.
 		TypeFuncPair( Ftype1< vector< unsigned int > >::global(), 
 					RFCAST( &GenesisParserWrapper::recvElist ) ),
-		
+
+		///////////////////////////////////////////////////////////////
+		// Object heirarchy manipulation functions.
+		///////////////////////////////////////////////////////////////
 		// Creating an object: Send out the request.
 		TypeFuncPair( 
 				Ftype3< string, string, unsigned int >::global(), 0 ),
@@ -92,6 +95,15 @@ const Cinfo* initGenesisParserCinfo()
 		// Receive message list and string with remote fields for msgs
 		TypeFuncPair( Ftype2< vector < Id >, string >::global(), 
 					RFCAST( &GenesisParserWrapper::recvMessageList ) ),
+
+		///////////////////////////////////////////////////////////////
+		// Object heirarchy manipulation functions.
+		///////////////////////////////////////////////////////////////
+		// This function is for copying an element tree, complete with
+		// messages, onto another.
+		TypeFuncPair( Ftype2< Id, Id >::global(),  0 ),
+		// This function is for moving element trees.
+		TypeFuncPair( Ftype2< Id, Id >::global(),  0 ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -174,6 +186,10 @@ static const unsigned int requestClocksSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 14;
 static const unsigned int listMessagesSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 15;
+static const unsigned int copySlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 16;
+static const unsigned int moveSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 17;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -975,7 +991,20 @@ void do_delete( int argc, const char** const argv, Id s )
 void do_move( int argc, const char** const argv, Id s )
 {
 	if ( argc == 3 ) {
-		; // s->moveFuncLocal( argv[1], argv[2] );
+		Id e = GenesisParserWrapper::path2eid( argv[1], s );
+		if ( e != 0 && e != BAD_ID ) {
+			Id pa = GenesisParserWrapper::path2eid( argv[2], s );
+			if ( pa != BAD_ID ) {
+				send2< Id, Id >(
+					Element::element( s ), moveSlot, e, pa );
+			} else {
+				cout << "Error: " << argv[0] << ": Parent element " <<
+						argv[2] << " not found\n";
+			}
+		} else {
+			cout << "Error: " << argv[0] << ": source element " <<
+					argv[1] << " not found\n";
+		}
 	} else {
 		cout << "usage:: " << argv[0] << " src dest\n";
 	}
@@ -984,7 +1013,20 @@ void do_move( int argc, const char** const argv, Id s )
 void do_copy( int argc, const char** const argv, Id s )
 {
 	if ( argc == 3 ) {
-		// s->copyFuncLocal( argv[1], argv[2] );
+		Id e = GenesisParserWrapper::path2eid( argv[1], s );
+		if ( e != 0 && e != BAD_ID ) {
+			Id pa = GenesisParserWrapper::path2eid( argv[2], s );
+			if ( pa != BAD_ID ) {
+				send2< Id, Id >(
+					Element::element( s ), copySlot, e, pa );
+			} else {
+				cout << "Error: " << argv[0] << ": Parent element " <<
+						argv[2] << " not found\n";
+			}
+		} else {
+			cout << "Error: " << argv[0] << ": source element " <<
+					argv[1] << " not found\n";
+		}
 	} else {
 		cout << "usage:: " << argv[0] << " src dest\n";
 	}

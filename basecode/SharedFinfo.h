@@ -110,6 +110,10 @@ class SharedFinfo: public Finfo
 					return msgIndex_;
 			}
 
+			Finfo* copy() const {
+				return new SharedFinfo( *this );
+			}
+
 		private:
 			unsigned int numSrc_;
 			FuncList rfuncs_;

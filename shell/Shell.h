@@ -65,6 +65,11 @@ class Shell
 		static void listMessages( const Conn& c,
 				unsigned int id, string field, bool isIncoming );
 
+		static void copy(
+				const Conn& c, unsigned int src, unsigned int parent );
+		static void move( 
+				const Conn& c, unsigned int src, unsigned int parent );
+
 		//////////////////////////////////////////////////////////
 		// Some stuff for managing scheduling and simulation runs
 		//////////////////////////////////////////////////////////

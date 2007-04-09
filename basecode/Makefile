@@ -19,6 +19,7 @@ OBJ = \
 	Conn.o	\
 	RecvFunc.o \
 	SimpleElement.o	\
+	Copy.o \
 	send.o \
 	SrcFinfo.o \
 	DestFinfo.o \

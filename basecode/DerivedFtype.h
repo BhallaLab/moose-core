@@ -101,6 +101,29 @@ template < class T > class Ftype1: public Ftype
 						return new T;
 			}
 
+			/**
+			 * Copies the data pointed to by orig into a new pointer.
+			 * the size 'num' must be the size of orig, and will be
+			 * the size of the return data.
+			 * I wonder if there is a better way to do the array
+			 * copy. Usually array ops can use economies of scale,
+			 * but here the constructor followed by assignment is
+			 * actually slower than the single constructor with
+			 * initializer.
+			 */
+			void* copy( const void* orig, const unsigned int num ) const
+			{
+				if ( num > 1 ) {
+					T* ret = new T[ num ];
+					const T* optr = static_cast< const T* >( orig );
+					for ( unsigned int i = 0; i < num; i++ )
+						ret[ i ] = optr[ i ];
+					return ret;
+				} else {
+					return new T( *static_cast< const T* >( orig ) );
+				}
+			}
+
 			void destroy( void* data, bool isArray ) const
 			{
 				if ( isArray )

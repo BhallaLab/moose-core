@@ -93,6 +93,10 @@ class DestFinfo: public Finfo
 
 			bool inherit( const Finfo* baseFinfo );
 
+			Finfo* copy() const {
+				return new DestFinfo( *this );
+			}
+
 		private:
 			RecvFunc rfunc_;
 			unsigned int destIndex_;
