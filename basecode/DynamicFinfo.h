@@ -179,6 +179,15 @@ class DynamicFinfo: public Finfo
 				return 0;
 			}
 
+			/**
+			 * The copy operation for DynamicFinfos is the most
+			 * impartant among Finfos.
+			 * Most of the fields are OK, but the generalIndex
+			 * is not and needs a private copy, because it gets
+			 * deleted when the DynamicFinfo is deleted.
+			 */
+			Finfo* copy() const;
+
 			/////////////////////////////////////////////////////////
 			// Here we define the functions that are unique to this
 			// class.

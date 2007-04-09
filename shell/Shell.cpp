@@ -107,6 +107,14 @@ const Cinfo* initShellCinfo()
 		// Return message list and string with remote fields for msgs
 		TypeFuncPair( 
 			Ftype2< vector < unsigned int >, string >::global(), 0 ),
+
+		////////////////////////////////////////////////////////////
+		// Object heirarchy manipulation functions
+		////////////////////////////////////////////////////////////
+		TypeFuncPair( Ftype2< unsigned int, unsigned int >::global(), 
+					RFCAST( &Shell::copy ) ),
+		TypeFuncPair( Ftype2< unsigned int, unsigned int >::global(), 
+					RFCAST( &Shell::move ) ),
 	};
 
 	static Finfo* shellFinfos[] =
@@ -397,6 +405,23 @@ void Shell::getField( const Conn& c, unsigned int id, string field )
 				"." << field << endl;
 	}
 	*/
+}
+
+// Static function
+void Shell::copy( const Conn& c, unsigned int src, unsigned int parent )
+{
+	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	Element* e =
+		Element::element( src )->copy( Element::element( parent ) );
+	if ( e ) { // Send back the id of the new element base
+		sendTo1< unsigned int >( c.targetElement(),
+					createSlot, c.targetIndex(), e->id() );
+	}
+}
+
+// Static placeholder.
+void Shell::move( const Conn& c, unsigned int src, unsigned int parent )
+{
 }
 
 // Static function

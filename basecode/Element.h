@@ -248,6 +248,51 @@ class Element
 
 		static unsigned int numElements();
 
+		///////////////////////////////////////////////////////////////
+		// Functions for the copy operation
+		///////////////////////////////////////////////////////////////
+		/**
+		 * This function does a deep copy of the current element 
+		 * including all messages. Returns the base of the copied tree.
+		 * It attaches the copied element tree to the parent.
+		 */
+		virtual Element* copy( Element* parent ) const = 0;
+		/**
+		 * True if current element descends from the specified ancestor.
+		 */
+		virtual bool isDescendant( const Element* ancestor ) const = 0;
+
+		/**
+		 * This function fills up the map with current element and
+		 * all its descendants. Returns the root element of the
+		 * copied tree. The first entry in the map is the original
+		 * The second entry in the map is the copy.
+		 * The function does NOT fix up the messages.
+		 */
+		virtual Element* innerDeepCopy( 
+				map< const Element*, Element* >& tree )
+				const = 0;
+
+		/**
+		 * This function replaces Element* pointers in the conn_ vector
+		 * with corresponding ones from the copied tree.
+		 */
+		virtual void replaceCopyPointers(
+						map< const Element*, Element* >& tree ) = 0;
+	protected:
+		/**
+		 * This function copies the element, its data and its
+		 * dynamic Finfos. What it does not do is to replace
+		 * any pointers to other elements in the Conn array.
+		 * It does not do anything about the element hierarchy
+		 * either, because that is also handled through messages,
+		 * ie., the Conn array.
+		 * The returned Element is dangling in memory: No parent
+		 * or child.
+		 */
+		virtual Element* innerCopy() const = 0;
+
+
 	private:
 		static vector< Element* >& elementList();
 		// static vector< Element* > elementList;
