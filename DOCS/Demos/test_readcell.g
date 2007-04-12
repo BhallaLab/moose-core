@@ -1,3 +1,3 @@
 //moose
 
-readcell cell.p /cell
+readcell mit.p /mit
