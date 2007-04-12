@@ -15,13 +15,13 @@
 #include "../element/Neutral.h"
 
 ReadCell::ReadCell()
-		: RM( 0.0 ), CM( 0.0 ), RA( 0.0 ), EREST_ACT( 0.0 ),
+		: RM_( 0.0 ), CM_( 0.0 ), RA_( 0.0 ), EREST_ACT_( 0.0 ),
 		dendrDiam( 0.0 ), aveLength( 0.0 ),
 		spineSurf( 0.0 ), spineDens( 0.0 ),
 		spineFreq( 0.0 ), membFactor( 0.0 ),
 		numCompartments_( 0 ), numChannels_( 0 ), numOthers_( 0 ),
 		cell_( 0 ), lastCompt_( 0 ),
-		polarFlag_( 0 )
+		polarFlag_( 0 ), relativeCoordsFlag_( 0 )
 {
 		;
 }
@@ -84,11 +84,11 @@ void ReadCell::read( const string& filename, const string& cellpath )
 				continue;
 		else
 			line = line.substr( pos );
-		if ( line == "//" )
+		if ( line.substr( 0, 2 ) == "//" )
 				continue;
-		if ( line == "/*" ) {
+		if ( line.substr( 0, 2 ) == "/*" ) {
 				parseMode = COMMENT;
-		} else if ( line == "*/" ) {
+		} else if ( line.find( "*/" ) != string::npos ) {
 				parseMode = DATA;
 				continue;
 		} else if ( line[0] == '*' ) {
@@ -156,6 +156,28 @@ void ReadCell::buildCompartment(
 			Cinfo::find( "Compartment" )->findFinfo( "axial" );
 	static const Finfo* raxial = 
 			Cinfo::find( "Compartment" )->findFinfo( "raxial" );
+	static const Finfo* xFinfo = 
+			Cinfo::find( "Compartment" )->findFinfo( "x" );
+	static const Finfo* yFinfo = 
+			Cinfo::find( "Compartment" )->findFinfo( "y" );
+	static const Finfo* zFinfo = 
+			Cinfo::find( "Compartment" )->findFinfo( "z" );
+	static const Finfo* dFinfo = 
+			Cinfo::find( "Compartment" )->findFinfo( "diameter" );
+	static const Finfo* lengthFinfo = 
+			Cinfo::find( "Compartment" )->findFinfo( "length" );
+	static const Finfo* RmFinfo = 
+			Cinfo::find( "Compartment" )->findFinfo( "Rm" );
+	static const Finfo* CmFinfo = 
+			Cinfo::find( "Compartment" )->findFinfo( "Cm" );
+	static const Finfo* RaFinfo = 
+			Cinfo::find( "Compartment" )->findFinfo( "Ra" );
+	static const Finfo* initVmFinfo = 
+			Cinfo::find( "Compartment" )->findFinfo( "initVm" );
+	static const Finfo* VmFinfo = 
+			Cinfo::find( "Compartment" )->findFinfo( "Vm" );
+
+
 	Element* pa;
 	if ( parent == "." ) { // Shorthand: use the previous compartment.
 			pa = lastCompt_;
@@ -189,10 +211,80 @@ void ReadCell::buildCompartment(
 	++numCompartments_;
 	lastCompt_ = compt;
 
-	if ( pa != Element::root() )
+	double length;
+	if ( pa != Element::root() ) {
+		double dx, dy, dz;
+		get< double >( pa, xFinfo, dx );
+		get< double >( pa, yFinfo, dy );
+		get< double >( pa, zFinfo, dz );
+		if ( relativeCoordsFlag_ == 1 ) {
+			x += dx;
+			y += dy;
+			z += dz;
+		}
+		dx = x - dx;
+		dy = y - dy;
+		dz = z - dz;
+
+		length = sqrt( dx * dx + dy * dy + dz * dz );
 		axial->add( pa, compt, raxial );
+	} else {
+		length = sqrt( x * x + y * y + z * z ); 
+		// or it coult be a sphere.
+	}
+
+	set< double >( compt, xFinfo, x );
+	set< double >( compt, yFinfo, y );
+	set< double >( compt, zFinfo, z );
+	set< double >( compt, dFinfo, d );
+
+
+
+	set< double >( compt, lengthFinfo, length );
+	double Rm = RM_ / ( d * length * PI );
+	set< double >( compt, RmFinfo, Rm );
+	double Ra = RA_ * length * 4.0 / ( d * d * PI );
+	set< double >( compt, RaFinfo, Ra );
+	double Cm = CM_ * ( d * length * PI );
+	set< double >( compt, CmFinfo, Cm );
+	set< double >( compt, initVmFinfo, EREST_ACT_ );
+	set< double >( compt, VmFinfo, EREST_ACT_ );
 }
 
 void ReadCell::readScript( const string& line, unsigned int lineNum )
 {
+	vector< string > argv;
+	parseString( line, argv, "\t " ); 
+
+	if ( argv[0] == "*cartesian" ) {
+		polarFlag_ = 0;
+		return;
+	}
+	if ( argv[0] == "*polar" ) {
+		polarFlag_ = 1;
+		return;
+	}
+	if ( argv[0] == "*relative" ) {
+		relativeCoordsFlag_ = 1;
+		return;
+	}
+	if ( argv[0] == "*absolute" ) {
+		relativeCoordsFlag_ = 0;
+		return;
+	}
+
+	if ( argv[0] == "*set_global" ) {
+		if ( argv.size() != 3 ) {
+			cout << "Error: readCell: Bad line: " << lineNum <<
+					": " << line << endl;
+		}
+		if ( argv[1] == "RM" )
+				RM_ = atof( argv[2].c_str() );
+		if ( argv[1] == "RA" )
+				RA_ = atof( argv[2].c_str() );
+		if ( argv[1] == "CM" )
+				CM_ = atof( argv[2].c_str() );
+		if ( argv[1] == "EREST_ACT" )
+				EREST_ACT_ = atof( argv[2].c_str() );
+	}
 }

@@ -57,6 +57,12 @@ class Compartment
 			static double getDiameter( const Element* );
 			static void setLength( const Conn& c, double length );
 			static double getLength( const Element* );
+			static void setX( const Conn& c, double value );
+			static double getX( const Element* );
+			static void setY( const Conn& c, double value );
+			static double getY( const Element* );
+			static void setZ( const Conn& c, double value );
+			static double getZ( const Element* );
 
 			// Dest function definitions.
 			static void processFunc( const Conn& c, ProcInfo p );
@@ -92,6 +98,9 @@ class Compartment
 			double B_;
 			double invRm_;
 			double sumInject_;
+			double x_;
+			double y_;
+			double z_;
 			static const double EPSILON;
 };
 

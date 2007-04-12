@@ -22,10 +22,10 @@ class ReadCell
 				double x, double y, double z, double d,
 				vector< string >& argv );
 	private:
-		double RM;
-		double CM;
-		double RA;
-		double EREST_ACT;
+		double RM_;
+		double CM_;
+		double RA_;
+		double EREST_ACT_;
 		double dendrDiam;
 		double aveLength;
 		double spineSurf;
@@ -41,5 +41,6 @@ class ReadCell
 
 		Element* lastCompt_;
 		bool polarFlag_;
+		bool relativeCoordsFlag_;
 };
 
