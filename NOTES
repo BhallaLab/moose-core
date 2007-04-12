@@ -1852,5 +1852,16 @@ Much struggling later, turned out that the problem was a really subtle one
 where when I used the default constructor T( T ) it bypassed the necessary
 Element::Element constructor that set up the ids. Fixed. Added into 
 unit tests. Unit tests passed.
+Checked in as revision 72.
+
+=============================================================================
+11 April 2007
+Begun work on cellreader. Trying to compile.
+
+=============================================================================
+12 April 2007
+OK, compiled in this very skeletal form.
+Preliminary variant of readcell works and sets up compartments and their
+messages.
 
 =============================================================================

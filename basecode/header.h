@@ -12,6 +12,10 @@
 #define _HEADER_H
 #define UNIX
 
+#ifndef PI
+#define PI 3.141592653589793
+#endif
+
 /// Here we set up an enhanced variant of assert, used in unit tests.
 #ifndef NDEBUG
 # define ASSERT( isOK, message ) \

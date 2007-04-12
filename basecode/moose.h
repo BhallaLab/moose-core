@@ -55,3 +55,6 @@ extern const Cinfo* initNeutralCinfo();
 // It is defined in strconv.cpp
 extern void separateString( const string& s, vector< string>& v, 
 				const string& separator );
+// Another variant on it, same place.
+extern void parseString( const string& s, vector< string>& v, 
+				const char* separators );
