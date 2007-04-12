@@ -104,6 +104,11 @@ const Cinfo* initGenesisParserCinfo()
 		TypeFuncPair( Ftype3< Id, Id, string >::global(),  0 ),
 		// This function is for moving element trees.
 		TypeFuncPair( Ftype3< Id, Id, string >::global(),  0 ),
+
+		///////////////////////////////////////////////////////////////
+		// Cell reader: filename cellpath
+		///////////////////////////////////////////////////////////////
+		TypeFuncPair( Ftype2< string, string >::global(),  0 ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -190,6 +195,8 @@ static const unsigned int copySlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 16;
 static const unsigned int moveSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 17;
+static const unsigned int readCellSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 18;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -508,7 +515,7 @@ void do_add( int argc, const char** const argv, Id s )
 bool GenesisParserWrapper::innerAdd(
 	Id src, const string& srcF, Id dest, const string& destF )
 {
-	if ( src != Shell::BAD_ID && dest != Shell::BAD_ID ) {
+	if ( src != BAD_ID && dest != BAD_ID ) {
 		Element* se = Element::element( src );
 		Element* de = Element::element( dest );
 
@@ -602,7 +609,7 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 		start = 1;
 	} else  {
 		e = GenesisParserWrapper::path2eid( argv[1], s );
-		if ( e == Shell::BAD_ID )
+		if ( e == BAD_ID )
 			return;
 		start = 2;
 	}
@@ -798,7 +805,7 @@ char* GenesisParserWrapper::doGet( int argc, const char** argv, Id s )
 	Id e;
 	if ( argc == 3 ) {
 		e = GenesisParserWrapper::path2eid( argv[1], s );
-		if ( e == Shell::BAD_ID )
+		if ( e == BAD_ID )
 			return copyString( "" );
 		field = argv[2];
 	} else if ( argc == 2 ) {
@@ -898,7 +905,7 @@ void GenesisParserWrapper::doShowMsg( int argc, const char** argv, Id s)
 		e = cwe_;
 	} else {
 		e = path2eid( argv[1], s );
-		if ( e == Shell::BAD_ID ) {
+		if ( e == BAD_ID ) {
 			cout << "Error: " << argv[0] << ": unknown element " <<
 					argv[1] << endl;
 			return;
@@ -1231,7 +1238,7 @@ void do_useclock( int argc, const char** const argv, Id s )
 	}
 
 	Id tickId = GenesisParserWrapper::path2eid( tickName, s );
-	if ( tickId == Shell::BAD_ID ) {
+	if ( tickId == BAD_ID ) {
 		cout << "Error:" << argv[0] << ": Invalid clockNumber " <<
 				tickName << "\n";
 		return;
@@ -1324,7 +1331,7 @@ void GenesisParserWrapper::doShow( int argc, const char** argv, Id s )
 		firstField = 1;
 	} else {
 		e = path2eid( argv[1], s );
-		if ( e == Shell::BAD_ID ) {
+		if ( e == BAD_ID ) {
 			e = cwe_;
 			firstField = 1;
 		} else {
@@ -1365,7 +1372,7 @@ void GenesisParserWrapper::doLe( int argc, const char** argv, Id s )
 	} else if ( argc >= 2 ) {
 		Id e = path2eid( argv[1], s );
 		/// \todo: Use better test for a bad path than this.
-		if ( e == Shell::BAD_ID ) {
+		if ( e == BAD_ID ) {
 			print( string( "cannot find object '" ) + argv[1] + "'" );
 			return;
 		}
@@ -1532,6 +1539,39 @@ void do_addtask( int argc, const char** const argv, Id s )
 	// for useclock the args are:
 	// cout << "usage:: " << argv[0] << " path clockNum [funcname]\n";
 }
+
+void do_readcell( int argc, const char** const argv, Id s )
+{
+	if (argc != 3 ) {
+		cout << "usage:: " << argv[0] << " filename cellpath\n";
+		return;
+	}
+
+	string filename = argv[1];
+	string cellpath = argv[2];
+
+ 	send2< string, string >( Element::element( s ), 
+		readCellSlot, filename, cellpath );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Old GENESIS Usage: addfield [element] field-name -indirect element field -description text
 // Here we'll have a subset of it:
@@ -1733,11 +1773,12 @@ void GenesisParserWrapper::loadBuiltinCommands()
 			reinterpret_cast< slifunc >( do_element_list ), "char*" );
 	AddFunc( "addtask", do_addtask, "void" );
 
+	AddFunc( "readcell", do_readcell, "void" );
+
 	AddFunc( "simdump", doShellCommand, "void" );
 	AddFunc( "simundump", doShellCommand, "void" );
 	AddFunc( "simobjdump", doShellCommand, "void" );
 	AddFunc( "loadtab", doShellCommand, "void" );
-	AddFunc( "readcell", doShellCommand, "void" );
 	AddFunc( "setupalpha", doShellCommand, "void" );
 	AddFunc( "setuptau", doShellCommand, "void" );
 	AddFunc( "tweakalpha", doShellCommand, "void" );
@@ -1815,7 +1856,7 @@ Id GenesisParserWrapper::innerPath2eid( const string& path, Id g )
 	}
 	Id ret = Shell::traversePath( start, names );
 	/*
-	if ( ret == Shell::BAD_ID )
+	if ( ret == BAD_ID )
 			print( string( "cannot find object '" ) + path + "'" );
 			*/
 	return ret;

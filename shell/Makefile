@@ -18,6 +18,7 @@ TARGET = shell.o
 OBJ = \
 	Shell.o	\
 	SwigFuncs.o	\
+	ReadCell.o \
 
 HEADERS = \
 	../basecode/header.h \
@@ -31,6 +32,7 @@ $(OBJ)	: $(HEADERS)
 Swig_wrap.o: Swig.h Shell.h Swig_wrap.cxx
 Shell.o: Shell.h
 SwigFuncs.o: Swig.h Shell.h
+ReadCell.o: ReadCell.h Shell.h
 
 Swig_wrap.cxx:
 	swig -c++ -python Swig.i

@@ -23,7 +23,9 @@ class Shell
 ////////////////////////////////////////////////////////////////////
 		string expandPath( const std::string& path ) const;
 		static string eid2path( unsigned int eid );
-		unsigned int path2eid( const string& path,
+		static unsigned int path2eid( const string& path,
+						const string& separator );
+		unsigned int innerPath2eid( const string& path,
 						const string& separator ) const;
 		static unsigned int parent( unsigned int eid );
 		static unsigned int traversePath( 
@@ -79,6 +81,11 @@ class Shell
 		static void step( const Conn& c, double time );
 		static void requestClocks( const Conn& c );
 
+		//////////////////////////////////////////////////////////
+		// Major input functions.
+		//////////////////////////////////////////////////////////
+		static void readCell( 
+					const Conn& c, string filename, string cellpath);
 
 			/*
 		void add( const string& src, const string& dest );
@@ -91,37 +98,12 @@ class Shell
 		void copyHalo( const string& src, const string& dest );
 		*/
 		/*
-		void pushe( const string& newpath );
-		void pope(  );
-		void quit(  );
-		void stop(  );
-		void reset(  );
-		void step( 
-			const string& steptime, const string& option );
-		void setClock( const string& clockNo,
-			const string& dt, const string& stage );
-		void showClocks();
-		void useClock(
-			const string& path, const string& clockNo );
-
-		void call( const string& args );
-		string get( const string& field );
-		string getmsg( 
-			const string& field, const string& options );
-		int isa( const string& type, const string& field );
-		int exists( const string& fieldstr );
-		void show( const string& field );
-		void showmsg( const string& field );
-		void showobject( const string& classname );
-		*/
-		/*
 		void listCommands( );
 		void listClasses( );
 		void echo( vector< string >& s, int options );
 		void remoteCommand( string arglist );
 		void command( int argc, const char** argv );
 		*/
-		static const unsigned int BAD_ID;
 
 	private:
 		/// Current working element

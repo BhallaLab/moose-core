@@ -1,0 +1,21 @@
+soma		none	0	0	5	5
+apical0		.	0	0	20	2
+apical1		.	0	0	20	2
+apical2		.	0	0	20	2
+apical3		.	0	0	20	2
+apical4		.	0	0	20	2
+apical5		.	0	0	20	2
+apical6		.	0	0	20	2
+branch10	.	0	0	10	1
+branch11	.	0	0	10	1
+branch12	.	0	0	10	1
+branch13	.	0	0	10	1
+branch14	.	0	0	10	1
+branch15	.	0	0	10	1
+
+branch20	apical6	0	0	10	1
+branch21	.	0	0	10	1
+branch22	.	0	0	10	1
+branch23	.	0	0	10	1
+branch24	.	0	0	10	1
+branch25	.	0	0	10	1

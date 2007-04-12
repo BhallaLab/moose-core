@@ -12,8 +12,7 @@
 #include "../element/Neutral.h"
 #include "../element/Wildcard.h"
 #include "Shell.h"
-
-const unsigned int Shell::BAD_ID = ~0;
+#include "ReadCell.h"
 
 //////////////////////////////////////////////////////////////////////
 // Shell MOOSE object creation stuff
@@ -117,6 +116,12 @@ const Cinfo* initShellCinfo()
 		TypeFuncPair(
 			Ftype3< unsigned int, unsigned int, string >::global(), 
 					RFCAST( &Shell::move ) ),
+		////////////////////////////////////////////////////////////
+		// Cell reader
+		////////////////////////////////////////////////////////////
+		TypeFuncPair(
+			Ftype2< string, string >::global(), 
+					RFCAST( &Shell::readCell ) ),
 	};
 
 	static Finfo* shellFinfos[] =
@@ -225,7 +230,7 @@ unsigned int Shell::traversePath(
 
 // Requires a path argument without a starting space
 // Perhaps this should be in the interpreter?
-unsigned int Shell::path2eid( 
+unsigned int Shell::innerPath2eid( 
 		const string& path, const string& separator ) const
 {
 	if ( path == separator || path == "/root" )
@@ -254,6 +259,20 @@ unsigned int Shell::path2eid(
 		separateString( path, names, separator );
 	}
 	return traversePath( start, names );
+}
+
+// This is the static version of the function.
+unsigned int Shell::path2eid(
+		const string& path, const string& separator )
+{
+	unsigned int shellId;
+	bool ret = lookupGet< unsigned int, string >(
+				Element::root(), "lookupChild", shellId, "shell" );
+	assert( ret );
+	assert( shellId != BAD_ID );
+	Shell* s = static_cast< Shell* >(
+					Element::element( shellId )->data() );
+	return s->innerPath2eid( path, separator );
 }
 
 string Shell::eid2path( unsigned int eid ) 
@@ -482,8 +501,8 @@ void Shell::setClock( const Conn& c, int clockNo, double dt,
 	sprintf( line, "t%d", clockNo );
 	string TickName = line;
 	string clockPath = string( "/sched/cj/" + TickName );
-	unsigned int id = sh->path2eid( clockPath, "/" );
-	unsigned int cj = sh->path2eid( "/sched/cj", "/" );
+	unsigned int id = sh->innerPath2eid( clockPath, "/" );
+	unsigned int cj = sh->innerPath2eid( "/sched/cj", "/" );
 	Element* tick = 0;
 	if ( id == 0 || id == BAD_ID ) {
 		tick = Neutral::create( 
@@ -687,6 +706,13 @@ void Shell::listMessages( const Conn& c,
 		c.targetElement(), listMessageSlot, ret, remoteFields );
 }
 
+void Shell::readCell( const Conn& c, string filename, string cellpath )
+{
+	ReadCell rc;
+	
+	rc.read( filename, cellpath );
+}
+
 //////////////////////////////////////////////////////////////////
 // Helper functions.
 //////////////////////////////////////////////////////////////////
@@ -840,9 +866,9 @@ void testShell()
 	path = sh.eid2path( a2 );
 	ASSERT( path == "/a/a2", "a2 eid2path" );
 
-	unsigned int eid = sh.path2eid( "/a/a1", "/" );
+	unsigned int eid = sh.innerPath2eid( "/a/a1", "/" );
 	ASSERT( eid == a1, "a1 path2eid" );
-	eid = sh.path2eid( "/a/a2", "/" );
+	eid = sh.innerPath2eid( "/a/a2", "/" );
 	ASSERT( eid == a2, "a2 path2eid" );
 
 	/////////////////////////////////////////
