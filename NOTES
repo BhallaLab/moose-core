@@ -1864,4 +1864,17 @@ OK, compiled in this very skeletal form.
 Preliminary variant of readcell works and sets up compartments and their
 messages.
 
+Bleargh. Another hour of fighting with subversion/SourceForge. Again SF had
+messed up the commit. It is quite a pain to fix things up later. The best
+solution seems to be make a backup copy, do an svn revert -R, do an
+svn update, and then fix anything still pending.
+
+Now to tackle the compartment parameters.
+1. Dimensions. Simple option is to provide xyz coords for compartments. 
+This is assumed by a huge range of functions, too.
+
+Did this. The test cell is now the venerable mit.p from my thesis: 286
+compartments. Reads in the coords correctly and assigns passive properties
+correctly, in at least a couple of the compartments at either end of the cell.
+
 =============================================================================

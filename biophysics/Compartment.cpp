@@ -164,6 +164,18 @@ const Cinfo* initCompartmentCinfo()
 			reinterpret_cast< GetFunc >( &Compartment::getLength ),
 			reinterpret_cast< RecvFunc >( &Compartment::setLength )
 		),
+		new ValueFinfo( "x", ValueFtype1< double >::global(),
+			reinterpret_cast< GetFunc >( &Compartment::getX ),
+			reinterpret_cast< RecvFunc >( &Compartment::setX )
+		),
+		new ValueFinfo( "y", ValueFtype1< double >::global(),
+			reinterpret_cast< GetFunc >( &Compartment::getY ),
+			reinterpret_cast< RecvFunc >( &Compartment::setY )
+		),
+		new ValueFinfo( "z", ValueFtype1< double >::global(),
+			reinterpret_cast< GetFunc >( &Compartment::getZ ),
+			reinterpret_cast< RecvFunc >( &Compartment::setZ )
+		),
 
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfo definitions
@@ -324,22 +336,59 @@ double Compartment::getInitVm( const Element* e )
 	return static_cast< Compartment* >( e->data() )->initVm_;
 }
 
-void Compartment::setDiameter( const Conn& c, double diameter )
+void Compartment::setDiameter( const Conn& c, double value )
 {
+	static_cast< Compartment* >( c.targetElement()->data() )->
+			diameter_ = value;
 }
 
 double Compartment::getDiameter( const Element* e )
 {
-		return 0.0;
+	return static_cast< Compartment* >( e->data() )->diameter_;
 }
 
-void Compartment::setLength( const Conn& c, double length )
+void Compartment::setLength( const Conn& c, double value )
 {
+	static_cast< Compartment* >( c.targetElement()->data() )->length_ =
+			value;
 }
 
 double Compartment::getLength( const Element* e )
 {
-		return 0.0;
+	return static_cast< Compartment* >( e->data() )->length_;
+}
+
+void Compartment::setX( const Conn& c, double value )
+{
+	static_cast< Compartment* >( c.targetElement()->data() )->x_ =
+			value;
+		
+}
+double Compartment::getX( const Element* e )
+{
+	return static_cast< Compartment* >( e->data() )->x_;
+}
+
+void Compartment::setY( const Conn& c, double value )
+{
+	static_cast< Compartment* >( c.targetElement()->data() )->y_ =
+			value;
+		
+}
+double Compartment::getY( const Element* e )
+{
+	return static_cast< Compartment* >( e->data() )->y_;
+}
+
+void Compartment::setZ( const Conn& c, double value )
+{
+	static_cast< Compartment* >( c.targetElement()->data() )->z_ =
+			value;
+		
+}
+double Compartment::getZ( const Element* e )
+{
+	return static_cast< Compartment* >( e->data() )->z_;
 }
 
 //////////////////////////////////////////////////////////////////
