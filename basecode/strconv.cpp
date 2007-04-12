@@ -105,8 +105,9 @@ template<> bool val2str< vector< string > >(
 }
 
 /**
- * Chops up a string s into bits at separator, stuffs the bits
- * into the vector v.
+ * Chops up a string s into pieces at separator, stuffs the pieces
+ * into the vector v. Here the separator is precisely the provided
+ * string.
  */
 void separateString( const string& s, vector< string>& v, 
 				const string& separator )
@@ -122,6 +123,31 @@ void separateString( const string& s, vector< string>& v,
 			v.push_back( t );
 		temp = temp.substr( pos + separatorLength );
 		pos = temp.find( separator );
+	}
+	if ( temp.length() > 0 )
+		v.push_back( temp );
+}
+
+/**
+ * Chops up a string s into pieces at separator, stuffs the pieces
+ * into the vector v. Here the separator can be any one or more
+ * of the values in the char*.
+ */
+void parseString( const string& s, vector< string>& v, 
+				const char* separators )
+{
+	string temp = s;
+	string::size_type pos = s.find_first_of( separators );
+	v.resize( 0 );
+
+	while ( pos != string::npos ) {
+		string t = temp.substr( 0, pos );
+		if ( t.length() > 0 )
+			v.push_back( t );
+		temp = temp.substr( pos );
+		pos = temp.find_first_not_of( separators );
+		temp = temp.substr( pos );
+		pos = temp.find_first_of( separators );
 	}
 	if ( temp.length() > 0 )
 		v.push_back( temp );
