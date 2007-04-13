@@ -87,6 +87,13 @@ class Shell
 		static void readCell( 
 					const Conn& c, string filename, string cellpath);
 
+		//////////////////////////////////////////////////////////
+		// Channel setup functions.
+		//////////////////////////////////////////////////////////
+		static void setupAlpha( const Conn& c, unsigned int gate,
+				vector< double > parms );
+		static void setupTau( const Conn& c, unsigned int gate,
+				vector< double > parms );
 			/*
 		void add( const string& src, const string& dest );
 		void drop( const string& src, const string& dest );

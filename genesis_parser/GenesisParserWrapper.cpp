@@ -55,6 +55,9 @@ const Cinfo* initGenesisParserCinfo()
 		// Deleting an object: Send out the request.
 		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
 
+		///////////////////////////////////////////////////////////////
+		// Value assignment: set and get.
+		///////////////////////////////////////////////////////////////
 		// Getting a field value as a string: send out request:
 		TypeFuncPair( 
 				Ftype2< unsigned int, string >::global(), 0 ),
@@ -65,6 +68,10 @@ const Cinfo* initGenesisParserCinfo()
 		TypeFuncPair( // object, field, value 
 				Ftype3< unsigned int, string, string >::global(), 0 ),
 
+
+		///////////////////////////////////////////////////////////////
+		// Clock control and scheduling
+		///////////////////////////////////////////////////////////////
 		// Setting values for a clock tick: setClock
 		TypeFuncPair( // clockNo, dt, stage
 				Ftype3< int, double, int >::global(), 0 ),
@@ -109,6 +116,14 @@ const Cinfo* initGenesisParserCinfo()
 		// Cell reader: filename cellpath
 		///////////////////////////////////////////////////////////////
 		TypeFuncPair( Ftype2< string, string >::global(),  0 ),
+
+		///////////////////////////////////////////////////////////////
+		// Channel setup functions
+		///////////////////////////////////////////////////////////////
+		// setupalpha
+		TypeFuncPair( Ftype2< Id, vector< double > >::global(),  0 ),
+		// setuptau
+		TypeFuncPair( Ftype2< Id, vector< double > >::global(),  0 ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -197,6 +212,11 @@ static const unsigned int moveSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 17;
 static const unsigned int readCellSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 18;
+
+static const unsigned int setupAlphaSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 19;
+static const unsigned int setupTauSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 20;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -518,6 +538,10 @@ bool GenesisParserWrapper::innerAdd(
 	if ( src != BAD_ID && dest != BAD_ID ) {
 		Element* se = Element::element( src );
 		Element* de = Element::element( dest );
+		const Finfo* sf = se->findFinfo( srcF );
+		if ( !sf ) return 0;
+		const Finfo* df = de->findFinfo( destF );
+		if ( !df ) return 0;
 
 		return se->findFinfo( srcF )->add( se, de, de->findFinfo( destF )) ;
 	}
@@ -1554,54 +1578,102 @@ void do_readcell( int argc, const char** const argv, Id s )
 		readCellSlot, filename, cellpath );
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Old GENESIS Usage: addfield [element] field-name -indirect element field -description text
-// Here we'll have a subset of it:
-// addfield [element] field-name -type field_type
-void do_addfield( int argc, const char** const argv, Id s )
+void setupChanFunc( int argc, const char** const argv, Id s, 
+				unsigned int slot )
 {
-	if ( argc == 2 ) {
-		// const char * nargv[] = { argv[0], ".", argv[1] };
-//		s->commandFuncLocal( 3, nargv );
-	} else if ( argc == 3 ) {
-		// s->commandFuncLocal( argc, argv );
-	} else if ( argc == 4 && strncmp( argv[2], "-f", 2 ) == 0 ) {
-		// const char * nargv[] = { argv[0], ".", argv[1], argv[3] };
-//		s->commandFuncLocal( 4, nargv );
-	} else if ( argc == 5 && strncmp( argv[3], "-f", 2 ) == 0 ) {
-		// const char * nargv[] = { argv[0], argv[1], argv[3], argv[4] };
-//		s->commandFuncLocal( 4, nargv );
-//	} else {
-		; // s->error( "usage: addfield [element] field-name -type field_type" );
+	if (argc < 13 ) {
+		cout << "usage:: " << argv[0] << " channel-element gate AA AB AC AD AF BA BB BC BD BF -size n -range min max\n";
+		return;
 	}
+	// In MOOSE we only have tabchannels with gates, more like the
+	// good old tabgates and vdep_channels. Functionally equivalent,
+	// and here we merge the two cases.
+	
+	string gate = argv[1];
+	if ( argv[2][0] == 'X' )
+			gate = gate + "/xGate";
+	else if ( argv[2][0] == 'Y' )
+			gate = gate + "/yGate";
+	else if ( argv[2][0] == 'Z' )
+			gate = gate + "/zGate";
+	Id chanId = GenesisParserWrapper::path2eid( gate, s );
+	if ( chanId == BAD_ID ) // Don't give up, it might be a tabgate
+		chanId = GenesisParserWrapper::path2eid( argv[1], s );
+	if ( chanId == BAD_ID ) { // Now give up
+			cout << "Error: setupalpha: unable to find channel/gate '" << argv[1] << "/" << argv[2] << endl;
+			return;
+	}
+
+	vector< double > parms;
+	parms.push_back( atof( argv[3] ) ); // AA
+	parms.push_back( atof( argv[4] ) ); // AB
+	parms.push_back( atof( argv[5] ) ); // AC
+	parms.push_back( atof( argv[6] ) ); // AD
+	parms.push_back( atof( argv[7] ) ); // AF
+	parms.push_back( atof( argv[8] ) ); // BA
+	parms.push_back( atof( argv[9] ) ); // BB
+	parms.push_back( atof( argv[10] ) ); // BC
+	parms.push_back( atof( argv[11] ) ); // BD
+	parms.push_back( atof( argv[12] ) ); // BF
+
+	double size = 3000.0;
+	double min = -0.100;
+	double max = 0.050;
+	int nextArg;
+	if ( argc >=15 ) {
+		if ( strncmp( argv[13], "-s", 2 ) == 0 ) {
+			size = atof( argv[14] );
+			nextArg = 15;
+		} else {
+			nextArg = 13;
+		}
+
+		if ( strncmp( argv[nextArg], "-r", 2 ) == 0 ) {
+			if ( argc == nextArg + 3 ) {
+				min = atof( argv[nextArg + 1] );
+				max = atof( argv[nextArg + 2] );
+			}
+		}
+	}
+	parms.push_back( size );
+	parms.push_back( min );
+	parms.push_back( max );
+
+ 	send2< Id, vector< double > >( Element::element( s ), 
+		slot, chanId, parms );
 }
 
-void doShellCommand ( int argc, const char** const argv, Id s )
+void do_setupalpha( int argc, const char** const argv, Id s )
 {
-; //	s->commandFuncLocal( argc, argv );
+	setupChanFunc( argc, argv, s, setupAlphaSlot );
 }
 
-void do_complete_loading( int argc, const char** const argv, Id s )
+void do_setuptau( int argc, const char** const argv, Id s )
 {
+	setupChanFunc( argc, argv, s, setupTauSlot );
 }
+
+void do_tweakalpha( int argc, const char** const argv, Id s )
+{
+	// foo
+}
+
+void do_tweaktau( int argc, const char** const argv, Id s )
+{
+	// bar
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 float do_exp( int argc, const char** const argv, Id s )
 {
@@ -1693,6 +1765,41 @@ float do_abs( int argc, const char** const argv, Id s )
 	}
 }
 
+
+
+
+
+
+// Old GENESIS Usage: addfield [element] field-name -indirect element field -description text
+// Here we'll have a subset of it:
+// addfield [element] field-name -type field_type
+void do_addfield( int argc, const char** const argv, Id s )
+{
+	if ( argc == 2 ) {
+		// const char * nargv[] = { argv[0], ".", argv[1] };
+//		s->commandFuncLocal( 3, nargv );
+	} else if ( argc == 3 ) {
+		// s->commandFuncLocal( argc, argv );
+	} else if ( argc == 4 && strncmp( argv[2], "-f", 2 ) == 0 ) {
+		// const char * nargv[] = { argv[0], ".", argv[1], argv[3] };
+//		s->commandFuncLocal( 4, nargv );
+	} else if ( argc == 5 && strncmp( argv[3], "-f", 2 ) == 0 ) {
+		// const char * nargv[] = { argv[0], argv[1], argv[3], argv[4] };
+//		s->commandFuncLocal( 4, nargv );
+//	} else {
+		; // s->error( "usage: addfield [element] field-name -type field_type" );
+	}
+}
+
+void doShellCommand ( int argc, const char** const argv, Id s )
+{
+; //	s->commandFuncLocal( argc, argv );
+}
+
+void do_complete_loading( int argc, const char** const argv, Id s )
+{
+}
+
 void do_xshow ( int argc, const char** const argv, Id s )
 {
 	// s->error( "not implemented yet." );
@@ -1775,14 +1882,16 @@ void GenesisParserWrapper::loadBuiltinCommands()
 
 	AddFunc( "readcell", do_readcell, "void" );
 
+	AddFunc( "setupalpha", do_setupalpha, "void" );
+	AddFunc( "setup_tabchan", do_setupalpha, "void" );
+	AddFunc( "setuptau", do_setuptau, "void" );
+	AddFunc( "tweakalpha", do_tweakalpha, "void" );
+	AddFunc( "tweaktau", do_tweaktau, "void" );
+
 	AddFunc( "simdump", doShellCommand, "void" );
 	AddFunc( "simundump", doShellCommand, "void" );
 	AddFunc( "simobjdump", doShellCommand, "void" );
 	AddFunc( "loadtab", doShellCommand, "void" );
-	AddFunc( "setupalpha", doShellCommand, "void" );
-	AddFunc( "setuptau", doShellCommand, "void" );
-	AddFunc( "tweakalpha", doShellCommand, "void" );
-	AddFunc( "tweaktau", doShellCommand, "void" );
 	AddFunc( "addfield", do_addfield, "void" );
 	AddFunc( "complete_loading", do_complete_loading, "void" );
 	AddFunc( "exp", reinterpret_cast< slifunc>( do_exp ), "float" );

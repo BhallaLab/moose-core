@@ -122,6 +122,15 @@ const Cinfo* initShellCinfo()
 		TypeFuncPair(
 			Ftype2< string, string >::global(), 
 					RFCAST( &Shell::readCell ) ),
+		////////////////////////////////////////////////////////////
+		// Channel setup functions
+		////////////////////////////////////////////////////////////
+		TypeFuncPair(
+			Ftype2< unsigned int, vector< double > >::global(), 
+					RFCAST( &Shell::setupAlpha ) ),
+		TypeFuncPair(
+			Ftype2< unsigned int, vector< double > >::global(), 
+					RFCAST( &Shell::setupTau ) ),
 	};
 
 	static Finfo* shellFinfos[] =
@@ -209,6 +218,7 @@ unsigned int Shell::traversePath(
 				unsigned int start,
 				vector< string >& names )
 {
+	assert( start != BAD_ID );
 	vector< string >::iterator i;
 	for ( i = names.begin(); i != names.end(); i++ ) {
 		if ( *i == "." || *i == "/" ) {
@@ -220,7 +230,7 @@ unsigned int Shell::traversePath(
 			Element* e = Element::element( start );
 			lookupGet< unsigned int, string >( 
 							e, "lookupChild", ret, *i );
-			if ( ret == 0 )
+			if ( ret == 0 || ret == BAD_ID )
 					return BAD_ID;
 			start = ret;
 		}
@@ -711,6 +721,18 @@ void Shell::readCell( const Conn& c, string filename, string cellpath )
 	ReadCell rc;
 	
 	rc.read( filename, cellpath );
+}
+
+void Shell::setupAlpha( const Conn& c, unsigned int gate,
+				vector< double > parms )
+{
+		cout << "In setupAlpha\n";
+}
+
+void Shell::setupTau( const Conn& c, unsigned int gate,
+				vector< double > parms )
+{
+		cout << "In setupTau\n";
 }
 
 //////////////////////////////////////////////////////////////////

@@ -17,10 +17,26 @@ class ReadCell
 		void read( const string& filename, const string& cellpath );
 		void readData( const string& line, unsigned int lineNum );
 		void readScript( const string& line, unsigned int lineNum );
-		void buildCompartment( 
+		Element*  buildCompartment( 
 				const string& name, const string& parent,
-				double x, double y, double z, double d,
+				double x, double y, double z, double d, double& length,
 				vector< string >& argv );
+		bool buildChannels( 
+				Element* compt, vector< string >& argv,
+				double diameter, double length);
+		Element* findChannel( const string& name );
+		bool addChannel( Element* compt, Element* chan, 
+				double value, double dia, double length );
+		bool addHHChannel( Element* compt, Element* chan, 
+				double value, double dia, double length );
+		bool addSynChan( Element* compt, Element* chan, 
+				double value, double dia, double length );
+		bool addSpikeGen( Element* compt, Element* chan, 
+				double value, double dia, double length );
+		bool addCaConc( Element* compt, Element* chan, 
+				double value, double dia, double length );
+		bool addNernst( Element* compt, Element* chan, double value );
+
 	private:
 		double RM_;
 		double CM_;
@@ -42,5 +58,5 @@ class ReadCell
 		Element* lastCompt_;
 		bool polarFlag_;
 		bool relativeCoordsFlag_;
+		vector< Element* >chanProtos_;
 };
-

@@ -1877,4 +1877,16 @@ Did this. The test cell is now the venerable mit.p from my thesis: 286
 compartments. Reads in the coords correctly and assigns passive properties
 correctly, in at least a couple of the compartments at either end of the cell.
 
+Checked in as revision 74.
+
+=============================================================================
+13 April 2007.
+Let's try to get the channels in.
+
+Channels are connected in but not set up properly. At least part of the
+problem is that MOOSE is not correctly handling all the exotic functions
+used to set up channels in standard GENESIS simulations.
+Began to implement some of these: setupalpha, setuptau.
+Also fixed sundry bugs that crop up as we use the system in new ways.
+
 =============================================================================
