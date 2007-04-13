@@ -1888,5 +1888,9 @@ problem is that MOOSE is not correctly handling all the exotic functions
 used to set up channels in standard GENESIS simulations.
 Began to implement some of these: setupalpha, setuptau.
 Also fixed sundry bugs that crop up as we use the system in new ways.
+Checked in as revision 75.
+
+Implemented setupalpha and setuptau. Some table values are now getting
+filled.
 
 =============================================================================

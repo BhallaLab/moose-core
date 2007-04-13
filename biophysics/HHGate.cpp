@@ -12,6 +12,8 @@
 #include "../builtins/Interpol.h"
 #include "HHGate.h"
 
+static const double SINGULARITY = 1.0e-6;
+
 const Cinfo* initHHGateCinfo()
 {
 	/**
@@ -29,7 +31,7 @@ const Cinfo* initHHGateCinfo()
 	static Finfo* HHGateFinfos[] =
 	{
 	///////////////////////////////////////////////////////
-	// Field definitions. Non needed
+	// Field definitions.  Currently empty
 	///////////////////////////////////////////////////////
 		
 	///////////////////////////////////////////////////////
@@ -42,6 +44,12 @@ const Cinfo* initHHGateCinfo()
 	///////////////////////////////////////////////////////
 		new DestFinfo( "postCreate", Ftype0::global(),
 			&HHGate::postCreate ),
+		new DestFinfo( "setupAlpha",
+			Ftype1< vector< double > >::global(),
+			RFCAST( &HHGate::setupAlpha ) ),
+		new DestFinfo( "setupTau",
+			Ftype1< vector< double > >::global(),
+			RFCAST( &HHGate::setupTau ) ),
 	};
 	
 	static Cinfo HHGateCinfo(
@@ -102,4 +110,91 @@ void HHGate::postCreate( const Conn& c )
 
 	Element* B = ic->create( "B", static_cast< void* >( &h->B_), 1 );
 	e->findFinfo( "childSrc" )->add( e, B, B->findFinfo( "child" ) );
+}
+
+// static func
+void HHGate::setupAlpha( const Conn& c, vector< double > parms )
+{
+	if ( parms.size() != 13 ) {
+			cout << "HHGate::setupAlpha: Error: parms.size() != 13\n";
+			return;
+	}
+	// static_cast< HHGate *>( c.data() )->innerGateFunc( c, v );
+	static_cast< HHGate *>( c.data() )->setupTables( parms, 0 );
+}
+
+// static func
+void HHGate::setupTau( const Conn& c, vector< double > parms )
+{
+	if ( parms.size() != 13 ) {
+			cout << "HHGate::setupTau: Error: parms.size() != 13\n";
+			return;
+	}
+	// static_cast< HHGate *>( c.data() )->innerGateFunc( c, v );
+	static_cast< HHGate *>( c.data() )->setupTables( parms, 1 );
+}
+
+/**
+ * Sets up the tables. See code in GENESIS/src/olf/new_interp.c,
+ * function setup_tab_values,
+ * fine tuned by Erik De Schutter.
+ */
+void HHGate::setupTables( const vector< double >& parms, bool doTau )
+{
+	static const int XDIVS = 10;
+	static const int XMIN = 11;
+	static const int XMAX = 12;
+	if ( parms[XDIVS] < 1 ) return;
+	unsigned int xdivs = static_cast< unsigned int >( parms[XDIVS] );
+
+	A_.table_.resize( xdivs );
+	B_.table_.resize( xdivs );
+
+	double x = parms[XMIN];
+	double dx = ( parms[XMAX] - x ) / xdivs;
+	double prevAentry = 0.0;
+	double prevBentry = 0.0;
+	double temp, temp2;
+	unsigned int i;
+
+	for( i = 0; i <= xdivs; i++ ) {
+		if ( fabs( parms[4] < SINGULARITY ) ) {
+			temp = A_.table_[i] = 0.0;
+		} else {
+			temp2 = parms[2] + exp( ( x + parms[3] ) / parms[4] );
+			if ( fabs( temp2 ) < SINGULARITY )
+				temp = A_.table_[i] = prevAentry;
+			else
+				temp = A_.table_[i] = ( parms[0] + parms[1] * x) / temp2;
+		}
+		if ( fabs( parms[9] ) < SINGULARITY ) {
+			B_.table_[i] = 0.0;
+		} else {
+			temp2 = parms[7] + exp( ( x + parms[8] ) / parms[9] );
+			if ( fabs( temp2 ) < SINGULARITY )
+				B_.table_[i] = prevBentry;
+			else
+				B_.table_[i] = ( parms[5] + parms[6] * x ) / temp2;
+		}
+		if ( doTau == 0 )
+			B_.table_[i] += temp;
+
+		prevAentry = A_.table_[i];
+		prevBentry = B_.table_[i];
+		x += dx;
+	}
+
+	if ( doTau ) {
+		for( i = 0; i <= xdivs; i++ ) {
+			temp = A_.table_[i];
+			temp2 = B_.table_[i];
+			if ( fabs( temp ) < SINGULARITY ) {
+				A_.table_[i] = 0.0;
+				B_.table_[i] = 0.0;
+			} else {
+				A_.table_[i] = temp2 / temp;
+				B_.table_[i] = temp - temp2;
+			}
+		}
+	}
 }
