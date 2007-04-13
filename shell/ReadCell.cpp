@@ -23,7 +23,23 @@ ReadCell::ReadCell()
 		cell_( 0 ), lastCompt_( 0 ),
 		polarFlag_( 0 ), relativeCoordsFlag_( 0 )
 {
-		;
+		unsigned int libId;
+		bool ret = lookupGet< unsigned int, string >(
+					Element::root(), "lookupChild", libId, "library" );
+
+		if ( !ret || libId == BAD_ID ) {
+			cout << "Warning: ReadCell: No library for channels\n";
+			return;
+		}
+
+		Element* lib = Element::element( libId );
+
+		vector< unsigned int > chanIds;
+		vector< unsigned int >::iterator i;
+		ret = get< vector< unsigned int > >( lib, "childList", chanIds);
+		assert( ret );
+		for ( i = chanIds.begin(); i != chanIds.end(); i++ )
+			chanProtos_.push_back( Element::element( *i ) );
 }
 
 /**
@@ -45,12 +61,16 @@ Element* ReadCell::start( const string& cellpath )
 		return 0;
 	}
 
+	string cellname = "cell";
+
 	string::size_type pos = cellpath.find_last_of( "/" );
 	Element* cellpa;
 	if ( pos == string::npos ) {
 		cellpa = Element::root(); // actually should be cwe
+		cellname = cellpath;
 	} else if ( pos == 0 ) {
 		cellpa = Element::root();
+		cellname = cellpath.substr( 1 );
 	} else {
 		cellId = Shell::path2eid( cellpath.substr( 0, pos - 1 ), "/" );
 		if ( cellId == BAD_ID ) {
@@ -59,9 +79,10 @@ Element* ReadCell::start( const string& cellpath )
 			return 0;
 		}
 		cellpa = Element::element( cellId );
+		cellname = cellpath.substr( pos + 1 );
 	}
 	
-	return Neutral::create( "Neutral", "cell", cellpa );
+	return Neutral::create( "Neutral", cellname, cellpa );
 }
 
 void ReadCell::read( const string& filename, const string& cellpath )
@@ -144,12 +165,15 @@ void ReadCell::readData( const string& line, unsigned int lineNum )
 		z *= 1.0e-6;
 	}
 
-	buildCompartment( name, parent, x, y, z, d, argv );
+	double length;
+	Element* compt =
+		buildCompartment( name, parent, x, y, z, d, length, argv );
+	buildChannels( compt, argv, d, length );
 }
 
-void ReadCell::buildCompartment( 
+Element* ReadCell::buildCompartment( 
 				const string& name, const string& parent,
-				double x, double y, double z, double d,
+				double x, double y, double z, double d, double& length,
 				vector< string >& argv )
 {
 	static const Finfo* axial = 
@@ -191,12 +215,12 @@ void ReadCell::buildCompartment(
 		if ( paId == BAD_ID ) {
 			cout << "Error: ReadCell: could not find parent compt '" <<
 					parent << "' for child '" << name << "'\n";
-			return;
+			return 0;
 		}
 		pa = Element::element( paId );
 	}
 	if ( pa == 0 )
-		return;
+		return 0;
 	unsigned int childId;
 	bool ret = lookupGet< unsigned int, string >(
 				cell_, "lookupChild", childId, name );
@@ -204,14 +228,13 @@ void ReadCell::buildCompartment(
 	if ( childId != BAD_ID ) {
 		cout << "Error: ReadCell: duplicate child on parent compt '" <<
 				parent << "' for child '" << name << "'\n";
-		return;
+		return 0;
 	}
 
 	Element* compt = Neutral::create( "Compartment", name, cell_ );
 	++numCompartments_;
 	lastCompt_ = compt;
 
-	double length;
 	if ( pa != Element::root() ) {
 		double dx, dy, dz;
 		get< double >( pa, xFinfo, dx );
@@ -238,8 +261,6 @@ void ReadCell::buildCompartment(
 	set< double >( compt, zFinfo, z );
 	set< double >( compt, dFinfo, d );
 
-
-
 	set< double >( compt, lengthFinfo, length );
 	double Rm = RM_ / ( d * length * PI );
 	set< double >( compt, RmFinfo, Rm );
@@ -249,6 +270,8 @@ void ReadCell::buildCompartment(
 	set< double >( compt, CmFinfo, Cm );
 	set< double >( compt, initVmFinfo, EREST_ACT_ );
 	set< double >( compt, VmFinfo, EREST_ACT_ );
+
+	return compt;
 }
 
 void ReadCell::readScript( const string& line, unsigned int lineNum )
@@ -287,4 +310,160 @@ void ReadCell::readScript( const string& line, unsigned int lineNum )
 		if ( argv[1] == "EREST_ACT" )
 				EREST_ACT_ = atof( argv[2].c_str() );
 	}
+}
+
+Element* ReadCell::findChannel( const string& name )
+{
+	vector< Element* >::iterator i;
+	for ( i = chanProtos_.begin(); i != chanProtos_.end(); i++ )
+		if ( (*i)->name() == name )
+			return (*i);
+	return 0;
+}
+
+bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
+				double diameter, double length)
+{
+	if ( ( argv.size() % 2 ) == 1 ) {
+		cout << "Error: readCell: Bad number of arguments in channel list\n";
+		return 0;
+	}
+	for ( unsigned int j = 6; j < argv.size(); j++ ) {
+		// Here we explicitly set compt fields
+		// But I can't quite figure out what GENESIS did here.
+		if ( argv[j] == "RA" ) {
+		} else if ( argv[j] == "RA" ) {
+		} else if ( argv[j] == "CM" ) {
+		} else {
+			Element* chan = findChannel( argv[j] );
+			if ( chan == 0 ) {
+				cout << "Error: readCell: Channel '" << argv[j] <<
+						"' not found\n";
+				return 0;
+			}
+
+			j++;
+			double value = atof( argv[j].c_str() );
+			if ( !addChannel( compt, chan, value, diameter, length ) )
+					return 0;
+		}
+	}
+	return 1;
+}
+
+
+bool ReadCell::addChannel( 
+			Element* compt, Element* proto, double value, 
+			double dia, double length )
+{
+
+	Element* chan = proto->copy( compt, "" );
+	assert( chan != 0 );
+
+	if ( addHHChannel( compt, chan, value, dia, length ) ) return 1;
+	if ( addSynChan( compt, chan, value, dia, length ) ) return 1;
+	if ( addSpikeGen( compt, chan, value, dia, length ) ) return 1;
+	if ( addCaConc( compt, chan, value, dia, length ) ) return 1;
+	if ( addNernst( compt, chan, value ) ) return 1;
+	return 0;
+}
+
+bool ReadCell::addHHChannel( 
+		Element* compt, Element* chan, 
+		double value, double dia, double length )
+{
+	static const Finfo* chanSrcFinfo =
+			Cinfo::find( "Compartment" )->findFinfo( "channel" );
+	static const Finfo* hhChanDestFinfo = 
+		Cinfo::find( "HHChannel" )->findFinfo( "channel" );
+	static const Finfo* gbarFinfo =
+		Cinfo::find( "HHChannel" )->findFinfo( "Gbar" );
+
+	if ( chan->className() == "HHChannel" ) {
+		assert( chanSrcFinfo->add( compt, chan, hhChanDestFinfo ) );
+		if ( value > 0 ) {
+			value *= dia * length * PI;
+		} else {
+			value = - value;
+		}
+
+		++numChannels_;
+		return set< double >( chan, gbarFinfo, value );
+	}
+	return 0;
+}
+
+bool ReadCell::addSynChan( 
+		Element* compt, Element* chan, 
+		double value, double dia, double length )
+{
+	static const Finfo* chanSrcFinfo =
+			Cinfo::find( "Compartment" )->findFinfo( "channel" );
+	static const Finfo* synChanDestFinfo = 
+		Cinfo::find( "SynChan" )->findFinfo( "channel" );
+	static const Finfo* synGbarFinfo = 
+		Cinfo::find( "SynChan" )->findFinfo( "gbar" );
+
+	if ( chan->className() == "SynChan" ) {
+
+		assert( chanSrcFinfo->add( compt, chan, synChanDestFinfo ) );
+		if ( value > 0 ) {
+			value *= dia * length * PI;
+		} else {
+			value = - value;
+		}
+
+		++numChannels_;
+		return set< double >( chan, synGbarFinfo, value );
+	}
+	return 0;
+}
+
+bool ReadCell::addSpikeGen( 
+		Element* compt, Element* chan, 
+		double value, double dia, double length )
+{
+	static const Finfo* vmSrcFinfo = 
+		Cinfo::find( "Compartment" )->findFinfo( "VmSrc" );
+	static const Finfo* vmDestFinfo = 
+		Cinfo::find( "SpikeGen" )->findFinfo( "Vm" );
+	static const Finfo* threshFinfo = 
+		Cinfo::find( "SpikeGen" )->findFinfo( "threshold" );
+	if ( chan->className() == "SpikeGen" ) {
+
+		assert( vmSrcFinfo->add( compt, chan, vmDestFinfo  ) );
+		++numOthers_;
+		return set< double >( chan, threshFinfo, value );
+	}
+	return 0;
+}
+
+
+// This has tricky messaging, need to complete later.
+bool ReadCell::addCaConc( 
+		Element* compt, Element* chan, 
+		double value, double dia, double length )
+{
+		/*
+	static const Finfo* concSrcFinfo = 
+		Cinfo::find( "CaConc" )->findFinfo( "concSrc" );
+	static const Finfo* currentFinfo = 
+		Cinfo::find( "CaConc" )->findFinfo( "current" );
+		*/
+	static const Finfo* bFinfo = 
+		Cinfo::find( "CaConc" )->findFinfo( "B" );
+	if ( chan->className() == "CaConc" ) {
+		// assert( vmSrcFinfo->add( compt, chan, vmDestFinfo  ) );
+		++numOthers_;
+		return set< double >( chan, bFinfo, value );
+	}
+	return 0;
+}
+
+// This has tricky messaging, need to complete later.
+bool ReadCell::addNernst( 
+		Element* compt, Element* chan, double value )
+{
+	++numOthers_;
+	return 0;
 }
