@@ -793,18 +793,29 @@ int do_isa( int argc, const char** const argv, Id s )
 	return 0;
 }
 
+bool GenesisParserWrapper::fieldExists(
+			Id eid, const string& field, Id s )
+{
+	send2< Id, string >( Element::element( s ),
+		requestFieldSlot, eid, "fieldList" );
+	if ( fieldValue_.length() == 0 ) // Nothing came back
+		return 0;
+	return ( fieldValue_.find( field ) != string::npos );
+}
+
 int do_exists( int argc, const char** const argv, Id s )
 {
-	if ( argc == 2 ) {
-		string temp = argv[1];
-		temp = temp + "/name";
-		// return s->existsFuncLocal( temp );
-		cout << "in do_exists " << temp << endl;
-	} else if ( argc == 3 ) {
-		string temp = argv[1];
-		temp = temp + "/" + argv[2];
-		// return s->existsFuncLocal( temp );
-		cout << "in do_exists " << temp << endl;
+	if ( argc == 2 ) { // Checking for element
+		Id eid = GenesisParserWrapper::path2eid( argv[1], s );
+		return ( eid != BAD_ID );
+	} else if ( argc == 3 ) { // checking for element and field.
+		Id eid = GenesisParserWrapper::path2eid( argv[1], s );
+		if ( eid != BAD_ID ) {
+			GenesisParserWrapper* gpw =
+				static_cast< GenesisParserWrapper* >( 
+								Element::element( s )->data() );
+			return gpw->fieldExists( eid, argv[2], s );
+		}
 	} else {
 		cout << "usage:: " << argv[0] << " element [field]\n";
 	}

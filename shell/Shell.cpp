@@ -723,16 +723,34 @@ void Shell::readCell( const Conn& c, string filename, string cellpath )
 	rc.read( filename, cellpath );
 }
 
-void Shell::setupAlpha( const Conn& c, unsigned int gate,
+void Shell::setupAlpha( const Conn& c, unsigned int gateId,
 				vector< double > parms )
 {
-		cout << "In setupAlpha\n";
+	static const Finfo* setupAlphaFinfo = 
+			Cinfo::find( "HHGate")->findFinfo( "setupAlpha" );
+	assert( gateId != BAD_ID );
+	Element* gate = Element::element( gateId );
+	if ( gate->className() != "HHGate" ) {
+		cout << "Error: Shell::setupAlpha: element is not an HHGate: "
+				<< gate->name() << endl;
+		return;
+	}
+	set< vector< double > >( gate, setupAlphaFinfo, parms );
 }
 
-void Shell::setupTau( const Conn& c, unsigned int gate,
+void Shell::setupTau( const Conn& c, unsigned int gateId,
 				vector< double > parms )
 {
-		cout << "In setupTau\n";
+	static const Finfo* setupTauFinfo = 
+			Cinfo::find( "HHGate")->findFinfo( "setupTau" );
+	assert( gateId != BAD_ID );
+	Element* gate = Element::element( gateId );
+	if ( gate->className() != "HHGate" ) {
+		cout << "Error: Shell::setupTau: element is not an HHGate: "
+				<< gate->name() << endl;
+		return;
+	}
+	set< vector< double > >( gate, setupTauFinfo, parms );
 }
 
 //////////////////////////////////////////////////////////////////

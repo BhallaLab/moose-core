@@ -85,11 +85,11 @@ class Interpol
 		void innerTabFill( int xdivs, int mode );
 		void innerPrint( const string& fname );
 
+		vector < double > table_;
 	protected:
 		double xmin_;
 		double xmax_;
 		int mode_;
-		vector < double > table_;
 		static const double EPSILON;
 		static const unsigned int MAX_DIVS;
 		double sy_;
