@@ -115,6 +115,8 @@ class Shell
 	private:
 		/// Current working element
 		unsigned int cwe_;
+		/// Most recently created element
+		unsigned int recentElement_;
 		vector< unsigned int > workingElementStack_;
 		// True if prompts etc are to be printed.
 		int isInteractive_;

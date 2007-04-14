@@ -73,6 +73,9 @@ class Interpol
 
 		void setTableValue( double value, unsigned int index );
 		double getTableValue( unsigned int index ) const;
+		void resize( unsigned int size ) {
+			table_.resize( size );
+		}
 		void push_back( double value ) {
 			table_.push_back( value );
 		}
@@ -85,7 +88,6 @@ class Interpol
 		void innerTabFill( int xdivs, int mode );
 		void innerPrint( const string& fname );
 
-		vector < double > table_;
 	protected:
 		double xmin_;
 		double xmax_;
@@ -93,6 +95,7 @@ class Interpol
 		static const double EPSILON;
 		static const unsigned int MAX_DIVS;
 		double sy_;
+		vector < double > table_;
 	private:
 		double invDx_;
 };
