@@ -1892,5 +1892,25 @@ Checked in as revision 75.
 
 Implemented setupalpha and setuptau. Some table values are now getting
 filled.
+Checked in as revision 76.
+
+Evidently the shared table code is not working either. The messages that
+should tie all the HHGates to the prototype do not form. Instead, at least
+for K_mit_usb, the HHGates are duplicated on each channel.
+
+
+=============================================================================
+14 April 2007
+
+first priority: Get the axon to work. Incrementally working through error list.
+- TABFILL call now works for channels.
+- many aliases are now defined in the .g
+- The addalias command is implemented
+- The ^ shorthand for recently created elements is implemented.
+- Bug in setupAlpha fixed.
+- various bugs in the test_axon.g file fixed.
+
+At this point the axon simulation gets set up (using vast amounts of memory,
+because all tables are duplicated) but it does not work.
 
 =============================================================================

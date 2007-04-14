@@ -147,10 +147,16 @@ void HHGate::setupTables( const vector< double >& parms, bool doTau )
 	if ( parms[XDIVS] < 1 ) return;
 	unsigned int xdivs = static_cast< unsigned int >( parms[XDIVS] );
 
-	A_.table_.resize( xdivs );
-	B_.table_.resize( xdivs );
+	A_.resize( xdivs + 1 );
+	B_.resize( xdivs + 1 );
+	double xmin = parms[XMIN];
+	double xmax = parms[XMAX];
+	A_.localSetXmin( xmin );
+	B_.localSetXmin( xmin );
+	A_.localSetXmax( xmax );
+	B_.localSetXmax( xmax );
 
-	double x = parms[XMIN];
+	double x = xmin;
 	double dx = ( parms[XMAX] - x ) / xdivs;
 	double prevAentry = 0.0;
 	double prevBentry = 0.0;
@@ -158,42 +164,48 @@ void HHGate::setupTables( const vector< double >& parms, bool doTau )
 	unsigned int i;
 
 	for( i = 0; i <= xdivs; i++ ) {
-		if ( fabs( parms[4] < SINGULARITY ) ) {
-			temp = A_.table_[i] = 0.0;
+		if ( fabs( parms[4] ) < SINGULARITY ) {
+			temp = 0.0;
+			A_.setTableValue( temp, i );
 		} else {
 			temp2 = parms[2] + exp( ( x + parms[3] ) / parms[4] );
-			if ( fabs( temp2 ) < SINGULARITY )
-				temp = A_.table_[i] = prevAentry;
-			else
-				temp = A_.table_[i] = ( parms[0] + parms[1] * x) / temp2;
+			if ( fabs( temp2 ) < SINGULARITY ) {
+				temp = prevAentry;
+				A_.setTableValue( temp, i );
+			} else {
+				temp = ( parms[0] + parms[1] * x) / temp2;
+				A_.setTableValue( temp, i );
+			}
 		}
 		if ( fabs( parms[9] ) < SINGULARITY ) {
-			B_.table_[i] = 0.0;
+			B_.setTableValue( 0.0, i );
 		} else {
 			temp2 = parms[7] + exp( ( x + parms[8] ) / parms[9] );
 			if ( fabs( temp2 ) < SINGULARITY )
-				B_.table_[i] = prevBentry;
+				B_.setTableValue( prevBentry, i );
 			else
-				B_.table_[i] = ( parms[5] + parms[6] * x ) / temp2;
+				B_.setTableValue( 
+						(parms[5] + parms[6] * x ) / temp2, i );
+				// B_.table_[i] = ( parms[5] + parms[6] * x ) / temp2;
 		}
 		if ( doTau == 0 )
-			B_.table_[i] += temp;
+			B_.setTableValue( B_.getTableValue( i ) + temp, i );
 
-		prevAentry = A_.table_[i];
-		prevBentry = B_.table_[i];
+		prevAentry = A_.getTableValue( i );
+		prevBentry = B_.getTableValue( i );
 		x += dx;
 	}
 
 	if ( doTau ) {
 		for( i = 0; i <= xdivs; i++ ) {
-			temp = A_.table_[i];
-			temp2 = B_.table_[i];
+			temp = A_.getTableValue( i );
+			temp2 = B_.getTableValue( i );
 			if ( fabs( temp ) < SINGULARITY ) {
-				A_.table_[i] = 0.0;
-				B_.table_[i] = 0.0;
+				A_.setTableValue( 0.0, i );
+				B_.setTableValue( 0.0, i );
 			} else {
-				A_.table_[i] = temp2 / temp;
-				B_.table_[i] = temp - temp2;
+				A_.setTableValue( temp2 / temp, i );
+				B_.setTableValue( temp - temp2, i );
 			}
 		}
 	}
