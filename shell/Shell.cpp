@@ -185,7 +185,7 @@ static const unsigned int listMessageSlot =
 //////////////////////////////////////////////////////////////////////
 
 Shell::Shell()
-	: cwe_( 0 )
+	: cwe_( 0 ), recentElement_( 0 )
 {;}
 
 //////////////////////////////////////////////////////////////////////
@@ -248,6 +248,9 @@ unsigned int Shell::innerPath2eid(
 
 	if ( path == "" || path == "." )
 			return cwe_;
+
+	if ( path == "^" )
+			return recentElement_;
 
 	if ( path == ".." ) {
 			if ( cwe_ == 0 )
@@ -777,7 +780,8 @@ unsigned int Shell::create( const string& type, const string& name, unsigned int
 		Element* e = c->create( name );
 		assert( childSrc->add( p, e, e->findFinfo( "child" ) ) );
 		// cout << "OK\n";
-		return e->id();
+		recentElement_ = e->id();
+		return recentElement_;
 	} else  {
 		cout << "Error: Shell::create: Unable to find type " <<
 			type << endl;

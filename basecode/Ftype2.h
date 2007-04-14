@@ -60,6 +60,36 @@ template < class T1, class T2 > class Ftype2: public Ftype
 				return 1;
 			}
 
+			/**
+			 * This is a virtual function that takes a string,
+			 * converts it to two values, and assigns it to a field.
+			 * Returns true on success.
+			 * It will run into trouble if the contents are strings
+			 * with spaces or commas.
+			 */
+			bool strSet( Element* e, const Finfo* f, const string& s )
+					const
+			{
+				string::size_type pos = s.find_first_of( ", 	" );
+				if ( pos == string::npos )
+						return 0;
+				if ( pos < 1 )
+						return 0;
+				string s1 = s.substr( 0, pos );
+				pos = s.find_last_of( ", 	" );
+				if ( pos >=  s.length() - 1 )
+						return 0;
+				string s2 = s.substr( pos );
+				T1 val1;
+				if ( str2val( s1, val1 ) ) {
+					T2 val2;
+					if ( str2val( s2, val2 ) )
+						return this->set( e, f, val1, val2 );
+				}
+
+				return 0;
+			}
+
 			static const Ftype* global() {
 				static Ftype* ret = new Ftype2< T1, T2 >();
 				return ret;

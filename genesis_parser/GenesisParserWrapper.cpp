@@ -230,7 +230,9 @@ static const unsigned int setupTauSlot =
  * threading happens here.
  */
 GenesisParserWrapper::GenesisParserWrapper()
-		: myFlexLexer( Element::numElements() )
+		: myFlexLexer( Element::numElements() ), 
+		returnCommandValue_( "" ), returnId_( 0 ),
+		cwe_( 0 ), createdElm_( 0 )
 {
 		loadBuiltinCommands();
 }
@@ -766,20 +768,54 @@ void do_call( int argc, const char** const argv, Id s )
 	// Ugly hack to handle the TABFILL call, which need to be redirected
 	// to the two interpols of the HHGates.
 	// Deprecated.
+	// The call looks like:
+	// call KM_bsg_yka TABFILL X 3000 0
+	//
 	if ( strcmp ( argv[2], "TABFILL" ) == 0 ) {
-		// s->tabFillFunc( argc, argv );
-		cout << "in do_call TABFILL\n";
+		if ( argc != 6 ) {
+			cout << "usage: " << argv[0] << 
+					" element TABFILL gate divs mode\n";
+			return;
+		}
+		string elmpath = argv[1];
+		string argstr = argv[4];
+		argstr = argstr + "," + argv[5];
+		int ndivs = atoi( argv[4] );
+		if ( ndivs < 1 )
+				return;
+		if ( argv[3][0] == 'X' )
+				elmpath = elmpath + "/xGate";
+		else if ( argv[3][0] == 'Y' )
+				elmpath = elmpath + "/yGate";
+		else if ( argv[3][0] == 'Z' )
+				elmpath = elmpath + "/zGate";
+		else {
+			cout << "Error: " << argv[0] << 
+					" unknown gate '" << argv[3] << "'\n";
+			return;
+		}
+		string temp = elmpath + "/A";
+		Id gate = GenesisParserWrapper::path2eid( temp, s );
+		if ( gate == BAD_ID ) {
+			cout << "Error: " << argv[0] << 
+					" could not find object '" << temp << "'\n";
+			return;
+		}
+		send3< Id, string, string >( Element::element( s ),
+			setFieldSlot, gate, "tabFill", argstr );
+
+		temp = elmpath + "/B";
+		gate = GenesisParserWrapper::path2eid( temp, s );
+		if ( gate == BAD_ID ) {
+			cout << "Error: " << argv[0] << 
+					" could not find object '" << temp << "'\n";
+			return;
+		}
+		send3< Id, string, string >( Element::element( s ),
+			setFieldSlot, gate, "tabFill", argstr );
+
 		return;
 	}
-	string field;
-	string value = "";
-	field = string( argv[ 1 ] ) + "/" + argv[ 2 ];
-	for ( int i = 3; i < argc; i++ ) {
-		if ( i > 3 )
-			value = value + ",";
-		value = value + argv[ i ];
-	}
-	// s->setFuncLocal( field, value );
 }
 
 int do_isa( int argc, const char** const argv, Id s )
@@ -1518,7 +1554,7 @@ char* do_element_list( int argc, const char** const argv, Id s )
 	static string space = " ";
 	if ( argc != 2 ) {
 		cout << "usage:: " << argv[0] << " path\n";
-		return "";
+		return copyString( "" );
 	}
 	string path = argv[1];
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
@@ -1871,6 +1907,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "ce", do_ce, "void" );
 	AddFunc( "pushe", do_pushe, "void" );
 	AddFunc( "pope", do_pope, "void" );
+	AddFunc( "addalias", do_alias, "void" );
 	AddFunc( "alias", do_alias, "void" );
 	AddFunc( "quit", do_quit, "void" );
 	AddFunc( "stop", do_stop, "void" );
@@ -1952,6 +1989,9 @@ Id GenesisParserWrapper::innerPath2eid( const string& path, Id g )
 		send0( Element::element( g ), requestCweSlot );
 		return cwe_;
 	}
+
+	if ( path == "^" )
+		return createdElm_;
 
 	if ( path == ".." ) {
 		send0( Element::element( g ), requestCweSlot );
