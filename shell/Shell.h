@@ -94,6 +94,8 @@ class Shell
 				vector< double > parms );
 		static void setupTau( const Conn& c, unsigned int gate,
 				vector< double > parms );
+		static void tweakAlpha( const Conn& c, unsigned int gateId );
+		static void tweakTau( const Conn& c, unsigned int gateId );
 			/*
 		void add( const string& src, const string& dest );
 		void drop( const string& src, const string& dest );

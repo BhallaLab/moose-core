@@ -50,6 +50,10 @@ const Cinfo* initHHGateCinfo()
 		new DestFinfo( "setupTau",
 			Ftype1< vector< double > >::global(),
 			RFCAST( &HHGate::setupTau ) ),
+		new DestFinfo( "tweakAlpha", Ftype0::global(),
+			&HHGate::tweakAlpha ),
+		new DestFinfo( "tweakTau", Ftype0::global(),
+			&HHGate::tweakTau ),
 	};
 	
 	static Cinfo HHGateCinfo(
@@ -134,6 +138,18 @@ void HHGate::setupTau( const Conn& c, vector< double > parms )
 	static_cast< HHGate *>( c.data() )->setupTables( parms, 1 );
 }
 
+// static func
+void HHGate::tweakAlpha( const Conn& c )
+{
+	static_cast< HHGate *>( c.data() )->tweakTables( 0 );
+}
+
+// static func
+void HHGate::tweakTau( const Conn& c )
+{
+	static_cast< HHGate *>( c.data() )->tweakTables( 1 );
+}
+
 /**
  * Sets up the tables. See code in GENESIS/src/olf/new_interp.c,
  * function setup_tab_values,
@@ -157,7 +173,7 @@ void HHGate::setupTables( const vector< double >& parms, bool doTau )
 	B_.localSetXmax( xmax );
 
 	double x = xmin;
-	double dx = ( parms[XMAX] - x ) / xdivs;
+	double dx = ( xmax - xmin ) / xdivs;
 	double prevAentry = 0.0;
 	double prevBentry = 0.0;
 	double temp, temp2;
@@ -188,7 +204,11 @@ void HHGate::setupTables( const vector< double >& parms, bool doTau )
 						(parms[5] + parms[6] * x ) / temp2, i );
 				// B_.table_[i] = ( parms[5] + parms[6] * x ) / temp2;
 		}
-		if ( doTau == 0 )
+		// There are cleaner ways to do this, but this keeps
+		// the relation to the GENESIS version clearer.
+		// Note the additional SINGULARITY check, to fix a bug
+		// in the earlier code.
+		if ( doTau == 0 && fabs( temp2 ) > SINGULARITY )
 			B_.setTableValue( B_.getTableValue( i ) + temp, i );
 
 		prevAentry = A_.getTableValue( i );
@@ -196,17 +216,52 @@ void HHGate::setupTables( const vector< double >& parms, bool doTau )
 		x += dx;
 	}
 
+	prevAentry = 0.0;
+	prevBentry = 0.0;
 	if ( doTau ) {
 		for( i = 0; i <= xdivs; i++ ) {
 			temp = A_.getTableValue( i );
 			temp2 = B_.getTableValue( i );
 			if ( fabs( temp ) < SINGULARITY ) {
-				A_.setTableValue( 0.0, i );
-				B_.setTableValue( 0.0, i );
+				A_.setTableValue( prevAentry, i );
+				B_.setTableValue( prevBentry, i );
 			} else {
 				A_.setTableValue( temp2 / temp, i );
-				B_.setTableValue( temp - temp2, i );
+				B_.setTableValue( 1.0 / temp, i );
+				// B_.setTableValue( temp - temp2, i );
 			}
+			prevAentry = A_.getTableValue( i );
+			prevBentry = B_.getTableValue( i );
 		}
+	}
+}
+
+/**
+ * Tweaks the A and B entries in the tables from the original
+ * alpha/beta or minf/tau values. See code in 
+ * GENESIS/src/olf/new_interp.c, function tweak_tab_values
+ */
+void HHGate::tweakTables( bool doTau )
+{
+	unsigned int i;
+	unsigned int size = A_.size();
+	assert( size == B_.size() );
+	if ( doTau ) {
+		for ( i = 0; i < size; i++ ) {
+			double temp = A_.getTableValue( i );
+			double temp2 = B_.getTableValue( i );
+			if ( fabs( temp ) < SINGULARITY )  {
+				if ( temp < 0.0 )
+					temp = -SINGULARITY;
+				else
+					temp = SINGULARITY;
+			}
+			A_.setTableValue( temp2 / temp, i );
+			B_.setTableValue( 1.0 / temp, i );
+		}
+	} else {
+		for ( i = 0; i < size; i++ )
+			B_.setTableValue( 
+				A_.getTableValue( i ) + B_.getTableValue( i ), i );
 	}
 }
