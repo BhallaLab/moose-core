@@ -1078,6 +1078,15 @@ void do_delete( int argc, const char** const argv, Id s )
 	}
 }
 
+/**
+ * This function figures out destination and name for moves
+ * and copies. The rules are:
+ * 1. Target can be existing element, in which case name is retained.
+ *  In this case the childname is set to the empty string "".
+ * 2. Target might not exist. In this case the parent of the target
+ * 	must exist, and the object e is going to be renamed. This new
+ * 	name is returned in the childname.
+ */
 bool parseCopyMove( int argc, const char** const argv, Id s,
 		Id& e, Id& pa, string& childname )
 {

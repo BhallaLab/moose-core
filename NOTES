@@ -1932,6 +1932,68 @@ test_single_compt.g simulation. Hooray!
 Also get action potential propagation with the test_axon.g simulation.
 Another Hooray!.
 
+Checked in as revision 78.
+Looking back at the roadmap from March 28. We now have 3 items under
+control. I should add another one, to streamline the use of global objects
+like the HHGate. Also a better way of doing function lists would be nice,
+to avoid the huge overhead we currently have.
 
+Stages, rough order
+* Table object to handle output from sim runs.
+* Complete biophysics library: Ca concen, Nernst, SynChan, SpikeGen
+* Cell reader
+- HSolver
+- Parallel stuff
+- Python pass 1
+- Kinetics library
+- Dumpfile/kkit read
+- Stimfile read capability
+- OB sim capability
+- SBML read/write
+- kinsolvers: ODE, RK5, LSODA, G1, mixed, smoldyn
+- Stoichiometry matrix ops: Stoich test
+- FLTK graphics.
+
+First, a list of fixes that are pending to the messaging system as we
+may have to tackle them for the solver and parallel messaging:
+- Wasteful implementation for multiple functions in a message using
+'next' in the MsgSrc. Problem is that different messages need different ranges.
+But the distinct functions of shared messages do not, so they should not be
+in different ranges.
+- Wasteful pre-allocation of MsgSrc and MsgDest arrays. Can we have them
+set up just in time? Can we even set the rare ones on DynamicFinfos?
+- Cinfo has a thisFinfo and a noDelFinfo to represent objects where the
+	data part should not be deleted. Perhaps this should be a different
+	Element class. Option in Create?
+- Copying of prototypes should be aware of cases where the prototype is global.
+	Perhaps this concept also applies to parallel prototypes.
+	Again, perhaps a distinct Element class.
+- Have all SimpleElement operations been put into Element as virtual functions?
+- Traversal of messages back to source and through intermediate functions.
+	Requires additional info in Finfos and some tricks in the traversal
+	functions.
+- Naming of functions in the SharedMessages so we can use a named lookup.
+- Mapping of SynFinfo to synapse msg# index breaks down on deletion.
+Also, some additions that will come up when we handle solvers and parallelism:
+- Intercepting set/get calls when an object is solved.
+	- Could use a replacement Element* 
+	- Could use an entire set of replacement Finfos that forward the
+	request to the solver.
+	- Could just replace the ThisFinfo to intercept the solved fields
+	in a generic way. It could actually handle the whole solver stuff,
+	thus avoiding having to tread on any object-local code at all.
+- Intercepting 
+- Providing a dest function based on the calling Ftype in the RespondToAdd
+	of the solver.
+- Intercepting all return messages when we attempt to go off-node.
+- Intercepting cases where multiple messages go to same node, and having
+	the divergence occur on the postmaster of the dest node.
+- Handling sporadic messages like action potls, commands, object shifts.
+	Need a table like a synapse, that keeps track
+	of target node index for the sporadic message, and this plus any
+	data is all that goes out. Target node index may have high fan-out.
+
+
+In the meantime, a small step: Implemented move command.
 
 =============================================================================

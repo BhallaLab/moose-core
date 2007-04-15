@@ -473,10 +473,62 @@ void Shell::copy( const Conn& c,
  * not empty, it renames the resultant object. It first verifies
  * that the planned new object has a different name from any of
  * the existing children of the prospective parent.
+ * Unlike the 'copy', this function is handled by the shell and may
+ * involve interesting node relocation issues.
  */
 void Shell::move( const Conn& c,
 				unsigned int src, unsigned int parent, string name )
 {
+	assert( src != BAD_ID );
+	assert( parent != BAD_ID );
+	// Cannot move object onto its own descendant
+	Element* e = Element::element( src );
+	Element* pa = Element::element( parent );
+	if ( pa->isDescendant( e ) ) {
+		cout << "Error: move '" << e->name() << "' to '" << 
+				pa->name() << 
+				"': cannot move object onto itself or descendant\n";
+		return;
+	}
+	unsigned int srcPaId = Neutral::getParent( e );
+	assert ( srcPaId != BAD_ID );
+	if ( srcPaId == parent ) { // Just rename it.
+		assert ( name != "" ); // New name must exist.
+		if ( Neutral::getChildByName( pa, name ) == BAD_ID ) {
+			// Good, we do not have name duplication.
+			e->setName( name );
+			// OK();
+			return;
+		} else {
+			// Bad, we do have name duplication. This should not happen
+			// because this ought to mean that we are moving the 
+			// object as a child of the named object. 
+			assert( 0 );
+		}
+	} else { // Move the object onto a new parent.
+		string temp = name;
+		if ( name == "" )
+			temp = e->name();
+		if ( Neutral::getChildByName( pa, temp ) == BAD_ID ) {
+			// Good, we do not have name duplication.
+			if ( name != "" )
+				e->setName( name );
+			/// \todo: Here we don't take into acount multiple parents.
+			bool ret = e->findFinfo( "child" )->drop( e, 0 );
+			assert ( ret );
+			ret = pa->findFinfo( "childSrc" )->add(
+				pa, e, e->findFinfo( "child" ) );
+			assert ( ret );
+			// OK();
+			return;
+		} else {
+			// Bad, we do have name duplication. GENESIS
+			// allows this but we will not.
+			cout << "Error: move '" << e->name() << "' to '" << 
+				pa->name() << "': same name child already exists.\n";
+			return;
+		}
+	}
 }
 
 // Static function
