@@ -2,9 +2,9 @@
 // This simulation tests readcell formation of a compartmental model
 // of an axon.
 
-float SIMDT = 2e-5
+float SIMDT = 1e-5
 float PLOTDT = 1e-4
-float RUNTIME = 0.1
+float RUNTIME = 0.5
 float INJECT = 1e-9
 
 // settab2const sets a range of entries in a tabgate table to a constant
@@ -33,27 +33,11 @@ make_K_mit_usb
 make_Na_mit_usb
 ce /
 
-readcell axon.p /axon
+readcell soma.p /axon
 
 create Table /Vm0
 setfield /Vm0 stepmode 3
 addmsg /Vm0/inputRequest /axon/soma/Vm
-
-create Table /Vm100
-setfield /Vm100 stepmode 3
-addmsg /Vm100/inputRequest /axon/c100/Vm
-
-create Table /Vm200
-setfield /Vm200 stepmode 3
-addmsg /Vm200/inputRequest /axon/c200/Vm
-
-create Table /Vm300
-setfield /Vm300 stepmode 3
-addmsg /Vm300/inputRequest /axon/c300/Vm
-
-create Table /Vm400
-setfield /Vm400 stepmode 3
-addmsg /Vm400/inputRequest /axon/c400/Vm
 
 setclock 0 {SIMDT} 0
 setclock 1 {SIMDT} 1
@@ -65,9 +49,15 @@ useclock /##[TYPE=Table] 2
 
 reset
 setfield /axon/soma inject {INJECT}
-step {RUNTIME} -t
+step 0.050 -t
 setfield /Vm0 print "axon0.plot"
-setfield /Vm100 print "axon1.plot"
-setfield /Vm200 print "axon2.plot"
-setfield /Vm300 print "axon3.plot"
-setfield /Vm400 print "axon4.plot"
+
+setfield /axon/soma/Na_mit_usb/xGate/A print "Na_xa.plot"
+setfield /axon/soma/Na_mit_usb/xGate/B print "Na_xb.plot"
+setfield /axon/soma/Na_mit_usb/yGate/A print "Na_ya.plot"
+setfield /axon/soma/Na_mit_usb/yGate/B print "Na_yb.plot"
+
+setfield /axon/soma/K_mit_usb/xGate/A print "K_xa.plot"
+setfield /axon/soma/K_mit_usb/xGate/B print "K_xb.plot"
+setfield /axon/soma/K_mit_usb/yGate/A print "K_ya.plot"
+setfield /axon/soma/K_mit_usb/yGate/B print "K_yb.plot"

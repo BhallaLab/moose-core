@@ -131,6 +131,12 @@ const Cinfo* initShellCinfo()
 		TypeFuncPair(
 			Ftype2< unsigned int, vector< double > >::global(), 
 					RFCAST( &Shell::setupTau ) ),
+		TypeFuncPair(
+			Ftype1< unsigned int >::global(), 
+					RFCAST( &Shell::tweakAlpha ) ),
+		TypeFuncPair(
+			Ftype1< unsigned int >::global(), 
+					RFCAST( &Shell::tweakTau ) ),
 	};
 
 	static Finfo* shellFinfos[] =
@@ -754,6 +760,34 @@ void Shell::setupTau( const Conn& c, unsigned int gateId,
 		return;
 	}
 	set< vector< double > >( gate, setupTauFinfo, parms );
+}
+
+void Shell::tweakAlpha( const Conn& c, unsigned int gateId )
+{
+	static const Finfo* tweakAlphaFinfo = 
+			Cinfo::find( "HHGate")->findFinfo( "tweakAlpha" );
+	assert( gateId != BAD_ID );
+	Element* gate = Element::element( gateId );
+	if ( gate->className() != "HHGate" ) {
+		cout << "Error: Shell::tweakAlpha: element is not an HHGate: "
+				<< gate->name() << endl;
+		return;
+	}
+	set( gate, tweakAlphaFinfo );
+}
+
+void Shell::tweakTau( const Conn& c, unsigned int gateId )
+{
+	static const Finfo* tweakTauFinfo = 
+			Cinfo::find( "HHGate")->findFinfo( "tweakTau" );
+	assert( gateId != BAD_ID );
+	Element* gate = Element::element( gateId );
+	if ( gate->className() != "HHGate" ) {
+		cout << "Error: Shell::tweakTau: element is not an HHGate: "
+				<< gate->name() << endl;
+		return;
+	}
+	set( gate, tweakTauFinfo );
 }
 
 //////////////////////////////////////////////////////////////////

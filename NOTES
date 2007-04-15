@@ -1912,5 +1912,26 @@ first priority: Get the axon to work. Incrementally working through error list.
 
 At this point the axon simulation gets set up (using vast amounts of memory,
 because all tables are duplicated) but it does not work.
+Checked in as revision 77.
+
+Looked at graph curves. Clearly the graphs are not displying correct ss
+value.
+
+=============================================================================
+15 April 2007
+I had not implemented the tweakalpha and tweaktau functions, except as 
+dummies. Now I have tested the curves for the channels in GENESIS and
+MOOSE, and they match except that GENESIS does use spline smoothing to
+set up the curves. There is a glitch in Na_xb.plot in both as well, and I
+am tracking it down. It is at -15 mV. The glitch adds exactly the value of the
+A curve to the already summed B curve.
+The channel set up uses only the setup_tabchan (setupalpha) function.
+Fixed the bug.
+Fixed the current injection. Now I get action potentials with the 
+test_single_compt.g simulation. Hooray!
+Also get action potential propagation with the test_axon.g simulation.
+Another Hooray!.
+
+
 
 =============================================================================
