@@ -124,6 +124,10 @@ const Cinfo* initGenesisParserCinfo()
 		TypeFuncPair( Ftype2< Id, vector< double > >::global(),  0 ),
 		// setuptau
 		TypeFuncPair( Ftype2< Id, vector< double > >::global(),  0 ),
+		// tweakalpha
+		TypeFuncPair( Ftype1< Id >::global(),  0 ),
+		// tweaktau
+		TypeFuncPair( Ftype1< Id >::global(),  0 ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -217,6 +221,10 @@ static const unsigned int setupAlphaSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 19;
 static const unsigned int setupTauSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 20;
+static const unsigned int tweakAlphaSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 21;
+static const unsigned int tweakTauSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 22;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -649,6 +657,10 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 		// s->setFuncLocal( path + "/" + argv[ i ], argv[ i + 1 ] );
 		string field = argv[i];
 		string::size_type pos = field.find( "->table" );
+		if ( pos == string::npos )
+				pos = field.find( "->calc_mode" );
+		if ( pos == string::npos )
+				pos = field.find( "->sy" );
 		if ( pos != string::npos ) { // Fill table
 			map< string, string >::iterator i = 
 					tabmap.find( field.substr( 0, 3 ) );
@@ -1625,13 +1637,9 @@ void do_readcell( int argc, const char** const argv, Id s )
 		readCellSlot, filename, cellpath );
 }
 
-void setupChanFunc( int argc, const char** const argv, Id s, 
-				unsigned int slot )
+Id findChanGateId( int argc, const char** const argv, Id s ) 
 {
-	if (argc < 13 ) {
-		cout << "usage:: " << argv[0] << " channel-element gate AA AB AC AD AF BA BB BC BD BF -size n -range min max\n";
-		return;
-	}
+	assert( argc >= 3 );
 	// In MOOSE we only have tabchannels with gates, more like the
 	// good old tabgates and vdep_channels. Functionally equivalent,
 	// and here we merge the two cases.
@@ -1643,13 +1651,27 @@ void setupChanFunc( int argc, const char** const argv, Id s,
 			gate = gate + "/yGate";
 	else if ( argv[2][0] == 'Z' )
 			gate = gate + "/zGate";
-	Id chanId = GenesisParserWrapper::path2eid( gate, s );
-	if ( chanId == BAD_ID ) // Don't give up, it might be a tabgate
-		chanId = GenesisParserWrapper::path2eid( argv[1], s );
-	if ( chanId == BAD_ID ) { // Now give up
-			cout << "Error: setupalpha: unable to find channel/gate '" << argv[1] << "/" << argv[2] << endl;
-			return;
+	Id gateId = GenesisParserWrapper::path2eid( gate, s );
+	if ( gateId == BAD_ID ) // Don't give up, it might be a tabgate
+		gateId = GenesisParserWrapper::path2eid( argv[1], s );
+	if ( gateId == BAD_ID ) { // Now give up
+			cout << "Error: findChanGateId: unable to find channel/gate '" << argv[1] << "/" << argv[2] << endl;
+			return BAD_ID;
 	}
+	return gateId;
+}
+
+void setupChanFunc( int argc, const char** const argv, Id s, 
+				unsigned int slot )
+{
+	if (argc < 13 ) {
+		cout << "usage:: " << argv[0] << " channel-element gate AA AB AC AD AF BA BB BC BD BF -size n -range min max\n";
+		return;
+	}
+
+	Id gateId = findChanGateId( argc, argv, s );
+	if ( gateId == BAD_ID )
+			return;
 
 	vector< double > parms;
 	parms.push_back( atof( argv[3] ) ); // AA
@@ -1687,7 +1709,7 @@ void setupChanFunc( int argc, const char** const argv, Id s,
 	parms.push_back( max );
 
  	send2< Id, vector< double > >( Element::element( s ), 
-		slot, chanId, parms );
+		slot, gateId, parms );
 }
 
 void do_setupalpha( int argc, const char** const argv, Id s )
@@ -1700,14 +1722,29 @@ void do_setuptau( int argc, const char** const argv, Id s )
 	setupChanFunc( argc, argv, s, setupTauSlot );
 }
 
+void tweakChanFunc( int argc, const char** const argv, Id s, 
+				unsigned int slot )
+{
+	if (argc < 3 ) {
+		cout << "usage:: " << argv[0] << " channel-element gate\n";
+		return;
+	}
+
+	Id gateId = findChanGateId( argc, argv, s );
+	if ( gateId == BAD_ID )
+			return;
+
+ 	send1< Id >( Element::element( s ), slot, gateId );
+}
+
 void do_tweakalpha( int argc, const char** const argv, Id s )
 {
-	// foo
+	tweakChanFunc( argc, argv, s, tweakAlphaSlot );
 }
 
 void do_tweaktau( int argc, const char** const argv, Id s )
 {
-	// bar
+	tweakChanFunc( argc, argv, s, tweakTauSlot );
 }
 
 

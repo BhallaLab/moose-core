@@ -73,6 +73,9 @@ class Interpol
 
 		void setTableValue( double value, unsigned int index );
 		double getTableValue( unsigned int index ) const;
+		unsigned long size( ) {
+			return table_.size();
+		}
 		void resize( unsigned int size ) {
 			table_.resize( size );
 		}
