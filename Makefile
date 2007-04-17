@@ -82,8 +82,10 @@ libmoose.so: libs
 	$(CXX) -G $(LIBS) -o libmoose.so
 	@echo "Created dynamic library"
 
+pymoose: CFLAGS += -fPIC
+pymoose: SUBDIR += pymoose
 pymoose: libs $(OBJLIBS) $(PARALLEL_LIB)
-	g++ -shared shell/Swig_wrap.o $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o _pymoose.so
+	$(MAKE) -C $@
 
 libs:
 	@(for i in $(SUBDIR); do echo cd $$i; cd $$i; make CXX="$(CXX)" CFLAGS="$(CFLAGS) $(PARALLEL_FLAGS)" LD="$(LD)" LIBS="$(SUBLIBS)"; cd ..; done)
