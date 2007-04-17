@@ -1,0 +1,18 @@
+
+	This directory contains code for python interface for
+moose. There are C++ wrappers for relevant moose classes. These
+classes are visible to python through a swig wrapper. The file moose.i
+contains the swig interface definition. All moose classes that can be
+used through python extend one base class - PyMooseBase.
+
+	Some of the moose functionalities are available through this
+base class. And the classes named after the moose classes act as a
+very thin wrapper over the latter.
+
+	The module is named 'moose'. To compile it, the make program
+should be invoked as:
+
+	make pymoose
+
+	This creates moose.py, moose_wrap.cxx, _moose.so.
+
