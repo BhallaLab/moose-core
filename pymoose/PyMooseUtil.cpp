@@ -1,8 +1,7 @@
 /*******************************************************************
  * File:            PyMooseUtil.cpp
  * Description:      
- * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * Author:          Subhasis Ray / NCBS
  * Created:         2007-03-23 16:03:01
  ********************************************************************/
 #ifndef _PYMOOSE_UTIL_CPP

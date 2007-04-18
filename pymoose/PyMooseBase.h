@@ -1,8 +1,7 @@
 /*******************************************************************
  * File:            Base.h
  * Description:      
- * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * Author:          Subhasis Ray / NCBS
  * Created:         2007-03-10 18:24:02
  ********************************************************************/
 

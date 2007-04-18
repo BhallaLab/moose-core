@@ -89,7 +89,7 @@ const Cinfo* initPyMooseContextCinfo()
             // Message info functions
             ///////////////////////////////////////////////////////////////
             // Request message list: id elm, string field, bool isIncoming
-            TypeFuncPair( Ftype3< unsigned int, string, bool >::global(), 0 ),
+            TypeFuncPair( Ftype3< Id, string, bool >::global(), 0 ),
             // Receive message list and string with remote fields for msgs
             TypeFuncPair( Ftype2< vector < unsigned int >, string >::global(), 
                           RFCAST( &PyMooseContext::recvMessageList ) ),
@@ -662,9 +662,8 @@ void PyMooseContext::stop()
 
 void PyMooseContext::addTask(std::string arg)
 {
-    // todo: to be implemented
+    //Do nothing
 }
-
 /**
    This just does the copying without returning anything.
    Corresponds to the procedural technique used in Genesis shell
@@ -689,6 +688,7 @@ void PyMooseContext::do_move( Id object, std::string new_name, Id dest)
     send3< Id, Id, string >(
         Element::element( myId_), moveSlot, object, dest, new_name );
 }
+
 #ifdef DO_UNIT_TESTS
 /**
    These are the unit tests

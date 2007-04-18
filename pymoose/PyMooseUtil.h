@@ -1,8 +1,8 @@
 /*******************************************************************
  * File:            PyMooseUtil.h
- * Description:      
- * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * Description:     This contains some utility functions for use in
+ *                  python interface of MOOSE.
+ * Author:          Subhasis Ray / NCBS
  * Created:         2007-03-23 16:06:11
  ********************************************************************/
 #ifndef _PYMOOSE_UTIL_H
