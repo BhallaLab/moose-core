@@ -1,7 +1,7 @@
 TARGET = pymoose
-OBJFILES = ../basecode/basecode.o ../element/element.o ../shell/shell.o ../builtins/builtins.o ../biophysics/biophysics.o PyMooseBase.o PyMooseContext.o Compartment.o Neutral.o PyMooseUtil.o 
+OBJFILES = ../basecode/basecode.o ../element/element.o ../shell/shell.o ../builtins/builtins.o ../biophysics/biophysics.o PyMooseBase.o PyMooseContext.o Compartment.o Neutral.o PyMooseUtil.o HHChannel.o HHGate.o Interpol.o ClockJob.o CaConc.o SpikeGen.o SynChan.o Table.o Tick.o TickTest.o Sched0.o Sched1.o Sched2.o Nernst.o
 CFLAGS = -ggdb -O0 -Wall -fPIC -DDO_UNIT_TESTS
-HEADERS = PyMooseUtil.h PyMooseContext.h PyMooseBase.h  Compartment.h Neutral.h 
+HEADERS = PyMooseUtil.h PyMooseContext.h PyMooseBase.h  Compartment.h Neutral.h HHChannel.h HHGate.h Interpol.h ClockJob.h CaConc.h SpikeGen.h SynChan.h Table.h Tick.h TickTest.h Sched0.h Sched1.h Sched2.h Nernst.h
 default: $(TARGET)
 
 test_swig: $(OBJFILES) $(HEADERS) SwigTest.cpp 
@@ -16,7 +16,6 @@ moose_wrap.o: moose_wrap.cxx
 
 moose.py moose_wrap.cxx: moose.i $(HEADERS)
 	swig -modern -c++ -python moose.i
-
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode -I../shell $< -c
 clean:

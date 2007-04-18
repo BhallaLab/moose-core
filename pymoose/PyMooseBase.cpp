@@ -1,8 +1,7 @@
 /*******************************************************************
  * File:            PyMooseBase.cpp
  * Description:      
- * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * Author:          Subhasis Ray / NCBS
  * Created:         2007-03-10 18:42:50
  ********************************************************************/
 #ifndef _PYMOOSE_BASE_CPP

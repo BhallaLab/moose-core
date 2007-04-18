@@ -44,10 +44,10 @@ int main(int argc, char **argv)
     cerr << "TEST:: PyMooseContext::testPyMooseContext - " <<  (context->testPyMooseContext(loopCount, true)?"SUCCESS":"FAILED") << endl;        
     end = clock();
     cerr << "Time spent to test " << loopCount << " times = " << (double)(end-start)/CLOCKS_PER_SEC << " with overhead = " << clock_overhead() << endl;
-    start = clock();
-    cerr << "TEST:: Compartment::testCompartment() - " << (Compartment::testCompartment(10000,true)?"SUCCESS":"FAILED") << endl;
-    end = clock();
-    cerr << "Time spent to test " << loopCount << " times = " << (double)(end-start)/CLOCKS_PER_SEC << " with overhead = " << clock_overhead() << endl;
+//     start = clock();
+//     cerr << "TEST:: Compartment::testCompartment() - " << (Compartment::testCompartment(10000,true)?"SUCCESS":"FAILED") << endl;
+//     end = clock();
+//     cerr << "Time spent to test " << loopCount << " times = " << (double)(end-start)/CLOCKS_PER_SEC << " with overhead = " << clock_overhead() << endl;
     
     return 0;   
 }

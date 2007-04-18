@@ -10,6 +10,8 @@
 #ifndef _SHELL_H
 #define _SHELL_H
 
+#include "header.h"
+
 extern void separateString( const string& s, vector< string>& v, 
 				const string& separator );
 

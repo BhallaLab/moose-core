@@ -9,10 +9,15 @@ used through python extend one base class - PyMooseBase.
 base class. And the classes named after the moose classes act as a
 very thin wrapper over the latter.
 
-	The module is named 'moose'. To compile it, the make program
-should be invoked as:
+	The module is named 'moose'. To compile it, you need to have
+swig and python installed. The make program should be invoked in the
+top level source directory as :
 
 	make pymoose
 
-	This creates moose.py, moose_wrap.cxx, _moose.so.
+	This creates moose.py, moose_wrap.cxx, _moose.so in the
+pymoose directory. Note that if you ran make for moose earlier, you
+need to run "make clean" first. This is because swig uses dynamic
+linking/loading (.so) while the default moose binary uses static
+linking.
 
