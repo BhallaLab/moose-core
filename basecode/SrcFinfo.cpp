@@ -114,6 +114,7 @@ unsigned int SrcFinfo::incomingConns(
 unsigned int SrcFinfo::outgoingConns(
 				const Element* e, vector< Conn >& list ) const
 {
+	list.resize( 0 );
 	list.insert( list.end(), e->connSrcBegin( srcIndex_ ),
 					e->connSrcVeryEnd( srcIndex_ ) );
 	return list.size();

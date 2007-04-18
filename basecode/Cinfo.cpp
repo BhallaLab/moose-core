@@ -13,7 +13,11 @@
 #include "header.h"
 #include "Cinfo.h"
 #include "ThisFinfo.h"
-#include "filecheck.h"
+
+// The include below is commented out because the header file is not
+// present in the svn repository. -- Upi
+// #include "filecheck.h"
+
 // The three includes below are needed because of the create function
 // requiring an instantiable Element class. Could get worse if we
 // permit multiple variants of Element, say an array form.
