@@ -7,12 +7,13 @@
 ** GNU General Public License version 2
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#include <iostream>
 #include <fstream>
 #include <map>
 #include "header.h"
 #include "Cinfo.h"
 #include "ThisFinfo.h"
-
+#include "filecheck.h"
 // The three includes below are needed because of the create function
 // requiring an instantiable Element class. Could get worse if we
 // permit multiple variants of Element, say an array form.
@@ -68,11 +69,114 @@ Cinfo::Cinfo(const std::string& name,
 				finfos_.push_back( baseCinfo->finfos_[i] );
 		}
 	}
+#ifdef GENERATE_WRAPPERS        
+        std::string out_dir_name ="generated/";
+        std::string swig_name = out_dir_name+"pymoose.i";    
+        std::string header_name = out_dir_name+name+".h";
+        std::string cpp_name = out_dir_name+name+".cpp";
+                    
+        ofstream header, cpp, swig;
+        bool created = false;
+        
+        created = open_outfile(header_name, header);
+
+        if (created){
+            created = open_outfile(cpp_name, cpp);
+            if (!created)
+            {
+                header.close();
+            }else 
+            {
+                created = open_appendfile(swig_name, swig);
+                if (!created)
+                {
+                    header.close();
+                    cpp.close();
+                }            
+            }        
+        }
+        if (!created)
+        {
+            cerr << "Could not create files for " << name << endl;        
+        }
+    
+        if (created)
+        {
+            /*
+              Insert the common class members,
+              constructors and the common method getType()
+              and the common field className.
+            */
+            header << "#ifndef _pymoose_" << name << "_h\n"
+                   << "#define _pymoose_"<< name << "_h\n"
+                   << "#include \"PyMooseBase.h\"\n"
+                   << "class " << name << " : public PyMooseBase\n"
+                   << "{"
+                   << "    public:\n"
+                   << "        static const std::string className;\n"
+                   << "        " << name << "(Id id);\n"
+                   << "        " << name << "(std::string path);\n"
+                   << "        " << name << "(std::string name, Id parentId);\n"
+                   << "        " << name << "(std::string name, PyMooseBase* parent);\n"
+                   << "        ~" << name <<"();\n"
+                   << "        const std::string& getType();\n";
+        
+            cpp << "#ifndef _pymoose_" << name << "_cpp\n"
+                << "#define _pymoose_"<< name << "_cpp\n"
+                << "#include \"" << name << ".h\"\n"
+                << "const std::string "<< name <<"::className = \"" << name <<"\";\n"
+                << name << "::" << name << "(Id id):PyMooseBase(id){}\n"
+                << name << "::" << name <<"(std::string path):PyMooseBase(className, path){}\n"
+                << name << "::" << name << "(std::string name, Id parentId):PyMooseBase(className, name, parentId){}\n"
+                << name << "::" << name << "(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}\n"
+                << name << "::~" << name <<"(){}\n"
+                << "const std::string& "<< name <<"::getType(){ return className; }\n";
+            swig << "%include \"" << name << ".h\"\n";        
+        }
+#endif
 
 	for ( i = 0 ; i < nFinfos; i++ ) {
-		finfoArray[i]->countMessages( nSrc_, nDest_ );
-		finfos_.push_back( finfoArray[i] );
-	}
+            finfoArray[i]->countMessages( nSrc_, nDest_ );
+            finfos_.push_back( finfoArray[i] );
+#ifdef GENERATE_WRAPPERS                
+            if ( created )
+            {                    
+                std::string fieldName = finfoArray[i]->name();
+                std::string fieldType = finfoArray[i]->ftype()->getTemplateParameters();
+                                
+                if (fieldType != "void")
+                {
+                    /* Insert the getters and setters */                  
+                    header << "        " << fieldType << " __get_" << fieldName << "() const;\n";
+                    header << "        void" << " __set_" << fieldName << "(" << fieldType << " " << fieldName << ");\n";
+                
+                    cpp << fieldType <<" " <<  name << "::__get_" <<  fieldName << "() const\n"
+                        << "{\n"
+                        << "    " <<  fieldType << " " << fieldName << ";\n"
+                        << "    get < " << fieldType << " > (Element::element(id_), \""<< fieldName << "\"," << fieldName << ");\n"
+                        << "    return " << fieldName << ";\n"
+                        << "}" << endl;
+                    cpp << "void " << name << "::__set_" << fieldName <<"( " << fieldType << " " << fieldName << " )\n"
+                        << "{\n"
+                        << "    set < " << fieldType << " > (Element::element(id_), \"" << fieldName << "\", "<< fieldName << ");\n"
+                        << "}" << endl;
+                    swig << "%attribute(" << name << ", " << fieldType << ", " << fieldName << ", __get_" << fieldName << ", __set_" << fieldName << ")\n";                
+                }
+            }
+#endif
+        }
+#ifdef GENERATE_WRAPPERS
+        if (created)
+        {
+            header << "};\n"
+                   << "#endif" << endl;
+            cpp << "#endif" << endl;
+            header.close();
+            cpp.close();
+            swig.close();        
+        }
+#endif
+        
 	thisFinfo_ = new ThisFinfo( this );
 	noDelFinfo_ = new ThisFinfo( this, 1 );
 	///\todo: here need to put in additional initialization stuff from base class

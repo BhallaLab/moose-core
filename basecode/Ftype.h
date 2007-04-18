@@ -9,7 +9,7 @@
 **********************************************************************/
 #ifndef _FTYPE_H
 #define _FTYPE_H
-
+#include <map>
 /*
 enum FinfoIdentifier { VALUE_SET, VALUE_TRIG, 
 		ARRAY_SET, ARRAY_TRIG, 
@@ -115,6 +115,37 @@ class Ftype
 			{
 				return 0;
 			}
+			    static std::string full_type(std::string type)
+    {
+        static map < std::string, std::string > type_map;
+        if (type_map.find("j") == type_map.end())
+        {
+            type_map["j"] = "unsigned int";
+            type_map["i"] = "int";        
+            type_map["f"] = "float";        
+            type_map["d"] = "double";        
+            type_map["Ss"] = "string";        
+            type_map["s"] = "short";
+            type_map["b"] = "bool";            
+        }
+        const map< std::string, std::string >::iterator i = type_map.find(type);
+        if (i == type_map.end())
+        {
+            cout << "Not found - " << type << endl;
+            
+            return type;
+        }
+        else 
+        {
+            return i->second;
+        }
+    }
+
+virtual std::string getTemplateParameters() const
+    {
+        return "void";        
+    }
+
 };
 
 #endif // _FTYPE_H

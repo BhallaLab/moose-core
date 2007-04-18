@@ -42,6 +42,11 @@ class Ftype0: public Ftype
 			RecvFunc trigFunc() const {
 				return 0;
 			}
+    std::string getTemplateParameters()
+    {
+        return "none";
+    }
+    
 };
 
 
@@ -214,6 +219,11 @@ template < class T > class Ftype1: public Ftype
 				}
 				return 0;
 			}
+    std::string getTemplateParameters() const
+    {
+        return Ftype::full_type(std::string(typeid(T).name()));        
+    }
+
 };
 
 #endif // _DERIVED_FTYPE_H

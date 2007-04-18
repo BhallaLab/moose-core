@@ -1,293 +1,162 @@
-/*******************************************************************
- * File:            Compartment.cpp
- * Description:      
- * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
- * Created:         2007-03-10 18:46:07
- ********************************************************************/
-
-#ifndef _PYMOOSE_COMPARTMENT_CPP
-#define _PYMOOSE_COMPARTMENT_CPP
-
-#include "../basecode/header.h"
-#include "../basecode/moose.h"
-#include "../shell/Shell.h"
-#include "PyMooseUtil.h"
-#include "PyMooseBase.h"
+#ifndef _pymoose_Compartment_cpp
+#define _pymoose_Compartment_cpp
 #include "Compartment.h"
 
 const std::string Compartment::className = "Compartment";
-Compartment::Compartment(Id id):PyMooseBase(id)
-{
-}
-Compartment::Compartment(std::string path):PyMooseBase(className, path)
-{
-}
-
-Compartment::Compartment(std::string name, unsigned int parentId):PyMooseBase(className, name, parentId)
-{
-}
-Compartment::Compartment(std::string name, PyMooseBase * parent):PyMooseBase(className, name, parent)
-{
-}
-
-Compartment::~Compartment()
-{    
-}
-
-const std::string& Compartment::getType()
-{
-    return className;
-}
-
+Compartment::Compartment(Id id):PyMooseBase(id){}
+Compartment::Compartment(std::string path):PyMooseBase(className, path){}
+Compartment::Compartment(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
+Compartment::Compartment(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+Compartment::~Compartment(){}
+const std::string& Compartment::getType(){ return className; }
 double Compartment::__get_Vm() const
 {
-    double vm;
-    get<double>(Element::element(id_), "Vm", vm);
-    return vm;
+    double Vm;
+    get < double > (Element::element(id_), "Vm",Vm);
+    return Vm;
 }
-
-void Compartment::__set_Vm(double vm)
+void Compartment::__set_Vm( double Vm )
 {
-    set <double> (Element::element(id_), "Vm", vm);
+    set < double > (Element::element(id_), "Vm", Vm);
 }
-
-
-double Compartment::__get_Rm() const
+double Compartment::__get_Cm() const
 {
-    double rm;
-    get<double>(Element::element(id_), "Rm", rm);
-    return rm;
+    double Cm;
+    get < double > (Element::element(id_), "Cm",Cm);
+    return Cm;
 }
-
-void Compartment::__set_Rm(double rm)
+void Compartment::__set_Cm( double Cm )
 {
-    set <double> (Element::element(id_), "Rm", rm);
+    set < double > (Element::element(id_), "Cm", Cm);
 }
-
-double Compartment::__get_Ra() const
-{
-    double ra;
-    get<double>(Element::element(id_), "Ra", ra);
-    return ra;
-}
-
-void Compartment::__set_Ra(double ra)
-{
-    set <double> (Element::element(id_), "Ra", ra);
-}
-
-void Compartment::__set_Em(double Em )
-{
-    set <double> (Element::element(id_),"Em", Em);    
-}
-
 double Compartment::__get_Em() const
 {
     double Em;
-    get<double>(Element::element(id_), "Em", Em);
+    get < double > (Element::element(id_), "Em",Em);
     return Em;
 }
-
-void Compartment::__set_Cm(double Cm )
+void Compartment::__set_Em( double Em )
 {
-    set <double> (Element::element(id_),"Cm", Cm);
+    set < double > (Element::element(id_), "Em", Em);
 }
-
-double Compartment::__get_Cm() const
-{
-    double cm;
-    get<double>(Element::element(id_), "Cm", cm);
-    return cm;
-}
-
-void Compartment::__set_Im(double Im )
-{
-    set <double> (Element::element(id_),"Im", Im);
-}
-
 double Compartment::__get_Im() const
 {
-    double im;
-    get<double>(Element::element(id_), "Im", im);
-    return im;
+    double Im;
+    get < double > (Element::element(id_), "Im",Im);
+    return Im;
 }
-
-void Compartment::__set_inject(double Inject )
+void Compartment::__set_Im( double Im )
 {
-    set <double> (Element::element(id_),"inject", Inject);
+    set < double > (Element::element(id_), "Im", Im);
 }
-
 double Compartment::__get_inject() const
 {
     double inject;
-    get<double>(Element::element(id_), "inject", inject);
+    get < double > (Element::element(id_), "inject",inject);
     return inject;
 }
-
-void Compartment::__set_initVm(double initVm )
+void Compartment::__set_inject( double inject )
 {
-    set <double> (Element::element(id_),"initVm", initVm);
+    set < double > (Element::element(id_), "inject", inject);
 }
-
 double Compartment::__get_initVm() const
 {
-    double initvm;
-    get<double>(Element::element(id_), "initVm", initvm);
-    return initvm;
+    double initVm;
+    get < double > (Element::element(id_), "initVm",initVm);
+    return initVm;
 }
-
-void Compartment::__set_diameter(double diameter )
+void Compartment::__set_initVm( double initVm )
 {
-    set <double> (Element::element(id_),"diameter",diameter);
+    set < double > (Element::element(id_), "initVm", initVm);
 }
-
+double Compartment::__get_Rm() const
+{
+    double Rm;
+    get < double > (Element::element(id_), "Rm",Rm);
+    return Rm;
+}
+void Compartment::__set_Rm( double Rm )
+{
+    set < double > (Element::element(id_), "Rm", Rm);
+}
+double Compartment::__get_Ra() const
+{
+    double Ra;
+    get < double > (Element::element(id_), "Ra",Ra);
+    return Ra;
+}
+void Compartment::__set_Ra( double Ra )
+{
+    set < double > (Element::element(id_), "Ra", Ra);
+}
 double Compartment::__get_diameter() const
 {
     double diameter;
-    get<double>(Element::element(id_), "diameter", diameter);
+    get < double > (Element::element(id_), "diameter",diameter);
     return diameter;
 }
-
-void Compartment::__set_length(double length )
+void Compartment::__set_diameter( double diameter )
 {
-    set <double> (Element::element(id_),"length", length);
+    set < double > (Element::element(id_), "diameter", diameter);
 }
-
 double Compartment::__get_length() const
 {
     double length;
-    get<double>(Element::element(id_), "length", length);
+    get < double > (Element::element(id_), "length",length);
     return length;
 }
-#ifdef DO_UNIT_TESTS
-bool Compartment::testCompartment(int count, bool doPrint)
+void Compartment::__set_length( double length )
 {
-    bool testResult = true;
-    bool localResult = true;
-    
-
-    double diameter, length, initVm, injCurrent, Rm, Cm, Ra, Vm, Im;
-    double retrieved;
-    double epsilon = 1e-5;
-    
-    diameter = 1.2e-6;
-    length = 2.3e-5;
-    initVm = 3.4e-3;
-    injCurrent = 4.5e-9;
-    Cm =  5.6e-12;
-    Vm = 6.7e-3;
-    Im = 7.8e-9;
-    Rm = 8.9e9;
-    Ra = 9.1e6;
-    if (doPrint)
-    {
-        cerr << "TEST:: Compartment::testCompartment ... STARTING" << endl;
-    }
-    
-    for ( int i = 0; i < count; ++i)
-    {
-        
-        Compartment testComp("test");
-// !!Commented out because set and get for diameter and length remains unimplemented
-        // testComp.__set_diameter(diameter);
-//         retrieved = testComp.__get_diameter();        
-//         localResult = isEqual(diameter, retrieved, epsilon);
-        
-//         testResult = testResult && localResult;
-//        if (!localResult)
-//         {
-//             cerr << "TEST:: Compartment::testCompartment() - tried to set diameter to " << diameter << " but found the value to be " << retrieved << endl;
-//         }
-        
-//         testComp.__set_length(length);
-//         retrieved = testComp.__get_length();
-        
-//         localResult = isEqual(length, retrieved, epsilon);
-        
-
-//         testResult = testResult && localResult;
-//            if (!localResult)
-//         {
-//             cerr << "TEST:: Compartment::testCompartment() - tried to set length to " << length << " but found the value to be " << retrieved << endl;
-//         }
-
-        testComp.__set_initVm(initVm);
-        retrieved = testComp.__get_initVm();
-        localResult = isEqual(initVm, retrieved, epsilon);        
-        localResult = localResult;
-        testResult = testResult && localResult;
-        if (!localResult)
-        {
-            cerr << "TEST:: Compartment::testCompartment() - tried to set initVm to " << initVm << " but found the value to be " << retrieved << endl;
-        }
-
-        // !!There is something wrong with this - injection current retrieved is way away from that set.
-        //   testComp.__set_inject(injCurrent);
-//         retrieved = testComp.__get_inject();        
-//         localResult = isEqual(injCurrent, retrieved, epsilon);
-//         testResult = testResult && localResult;
-//        if (!localResult)
-//         {
-//             cerr << "TEST:: Compartment::testCompartment() - tried to set injection current to " << injCurrent << " but found the value to be " << retrieved << endl;
-//         }
-
-        testComp.__set_Vm(Vm);
-        retrieved = testComp.__get_Vm();        
-        localResult = isEqual(Vm, retrieved, epsilon);
-        testResult = testResult && localResult;
-        if (!localResult)
-        {
-            cerr << "TEST:: Compartment::testCompartment() - tried to set Vm to " << Vm << " but found the value to be " << retrieved << endl;
-        }
-
-        
-        testComp.__set_Cm(Cm);
-        retrieved = testComp.__get_Cm();        
-        localResult = isEqual(Cm, retrieved, epsilon);
-        testResult = testResult && localResult;
-        if (!localResult)
-        {
-            cerr << "TEST:: Compartment::testCompartment() - tried to set Cm to " << Cm << " but found the value to be " << retrieved << endl;
-        }
-
-        testComp.__set_Ra(Ra);
-        retrieved = testComp.__get_Ra();        
-        localResult = isEqual(Ra, retrieved, epsilon);
-        testResult = testResult && localResult;
-        if (!localResult)
-        {
-            cerr << "TEST:: Compartment::testCompartment() - tried to set Ra to " << Ra << " but found the value to be " << retrieved << endl;
-        }
-
-        testComp.__set_Rm(Rm);
-        retrieved = testComp.__get_Rm();        
-        localResult = isEqual(Rm, retrieved, epsilon);
-        testResult = testResult && localResult;
-        if (!localResult)
-        {
-            cerr << "TEST:: Compartment::testCompartment() - tried to set Rm to " << Rm << " but found the value to be " << retrieved << endl;
-        }
-
-        // !! Im setting is also not working - may be it is dynamically calculated. Then why do we have setter method for Im?
-    //     testComp.__set_Im(Im);
-//         retrieved = testComp.__get_Im();
-//         localResult = isEqual(Im, retrieved, epsilon);
-//         testResult = testResult && localResult;
-//         if (!localResult)
-//         {
-//             cerr << "TEST:: Compartment::testCompartment() - tried to set Im to " << Im << " but found the value to be " << retrieved << endl;
-//         }
-
-
-    } // end for
-    if (doPrint)
-    {
-        cerr << "TEST::  Compartment::testCompartment() ... " << (testResult? "SUCCESS": "FAILURE") << endl;
-    }
-    return testResult;    
+    set < double > (Element::element(id_), "length", length);
 }
-
-#endif // DO_UNIT_TESTS
-
-#endif // _PYMOOSE_COMPARTMENT_CPP
+double Compartment::__get_x() const
+{
+    double x;
+    get < double > (Element::element(id_), "x",x);
+    return x;
+}
+void Compartment::__set_x( double x )
+{
+    set < double > (Element::element(id_), "x", x);
+}
+double Compartment::__get_y() const
+{
+    double y;
+    get < double > (Element::element(id_), "y",y);
+    return y;
+}
+void Compartment::__set_y( double y )
+{
+    set < double > (Element::element(id_), "y", y);
+}
+double Compartment::__get_z() const
+{
+    double z;
+    get < double > (Element::element(id_), "z",z);
+    return z;
+}
+void Compartment::__set_z( double z )
+{
+    set < double > (Element::element(id_), "z", z);
+}
+double Compartment::__get_VmSrc() const
+{
+    double VmSrc;
+    get < double > (Element::element(id_), "VmSrc",VmSrc);
+    return VmSrc;
+}
+void Compartment::__set_VmSrc( double VmSrc )
+{
+    set < double > (Element::element(id_), "VmSrc", VmSrc);
+}
+double Compartment::__get_injectMsg() const
+{
+    double injectMsg;
+    get < double > (Element::element(id_), "injectMsg",injectMsg);
+    return injectMsg;
+}
+void Compartment::__set_injectMsg( double injectMsg )
+{
+    set < double > (Element::element(id_), "injectMsg", injectMsg);
+}
+#endif

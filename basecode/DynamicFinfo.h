@@ -229,7 +229,7 @@ class DynamicFinfo: public Finfo
 			void* generalIndex_;
 
 			unsigned int srcIndex_;
-			unsigned int destIndex_;
+			unsigned int destIndex_;		
 };
 
 /**

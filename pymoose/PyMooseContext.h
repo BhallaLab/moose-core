@@ -11,8 +11,7 @@
  *      to the Moose classes. It should not be dirtied by the details
  *      of interaction with Shell class.
  *
- * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * Author:          Subhasis Ray / NCBS
  * Created:         2007-03-12 03:15:09
  ********************************************************************/
 #ifndef _PYMOOSE_CONTEXT_H
