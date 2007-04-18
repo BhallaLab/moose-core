@@ -27,6 +27,7 @@ OBJ = \
 	LookupFinfo.o \
 	ThisFinfo.o \
 	DeletionMarkerFinfo.o \
+	GlobalMarkerFinfo.o \
 	Cinfo.o \
 	DynamicFinfo.o \
 	UnitTests.o \
@@ -62,6 +63,7 @@ UnitTests.o:	MsgSrc.h MsgDest.h SimpleElement.h DerivedFtype.h SrcFinfo.h DestFi
 #ArrayFinfo.o:	ArrayFinfo.h DynamicFinfo.h ArrayFtype.h
 LookupFinfo.o:	LookupFinfo.h DynamicFinfo.h LookupFtype.h
 DeletionMarkerFinfo.o: DeletionMarkerFinfo.h
+GlobalMarkerFinfo.o: DeletionMarkerFinfo.h GlobalMarkerFinfo.h
 SimpleElement.o:	SimpleElement.h MsgSrc.h MsgDest.h DeletionMarkerFinfo.h
 setget.o:		setget.h DerivedFtype.h
 strconv.o:		DerivedFtype.h

@@ -19,6 +19,7 @@
 
 #include "moose.h"
 #include "DeletionMarkerFinfo.h"
+#include "GlobalMarkerFinfo.h"
 #include "ThisFinfo.h"
 
 #ifdef DO_UNIT_TESTS
@@ -386,8 +387,8 @@ void SimpleElement::deleteHalfConn( unsigned int connIndex )
 		j->dropConn( connIndex );
 
 	conn_.erase( conn_.begin() + connIndex );
-	for ( unsigned int j = connIndex; j < conn_.size(); j++ )
-		conn_[j].updateIndex( j );
+	for ( unsigned int k = connIndex; k < conn_.size(); k++ )
+		conn_[k].updateIndex( k );
 }
 
 const Finfo* SimpleElement::findFinfo( const string& name )
@@ -532,6 +533,14 @@ bool SimpleElement::isMarkedForDeletion() const
 {
 	if ( finfo_.size() > 0 )
 		return finfo_.back() == DeletionMarkerFinfo::global();
+	// This fallback case should only occur during unit testing.
+	return 0;
+}
+
+bool SimpleElement::isGlobal() const
+{
+	if ( finfo_.size() > 0 )
+		return finfo_.back() == GlobalMarkerFinfo::global();
 	// This fallback case should only occur during unit testing.
 	return 0;
 }

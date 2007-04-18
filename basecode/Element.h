@@ -130,6 +130,9 @@ class Element
 		/// True if element is marked for deletion.
 		virtual bool isMarkedForDeletion() const = 0;
 
+		/// True if element is global, that is, should not be copied.
+		virtual bool isGlobal() const = 0;
+
 		/// Before actual delete, mark all victims for message cleanup.
 		virtual void prepareForDeletion( bool stage ) = 0;
 
@@ -280,6 +283,16 @@ class Element
 		 */
 		virtual void replaceCopyPointers(
 						map< const Element*, Element* >& tree ) = 0;
+
+		/**
+		 * This function takes all the messages between this
+		 * element and the key (original) portion of the tree,
+		 * and makes duplicates of the messages to go between the 
+		 * current element and the data (copied) portion of the tree.
+		 * Excludes child messages.
+		 */
+		virtual void copyMsg( map< const Element*, Element* >& tree )
+				= 0;
 	protected:
 		/**
 		 * This function copies the element, its data and its
@@ -292,6 +305,8 @@ class Element
 		 * or child.
 		 */
 		virtual Element* innerCopy() const = 0;
+		virtual bool innerCopyMsg(
+				Conn& c, const Element* orig, Element* dup ) = 0;
 
 
 	private:

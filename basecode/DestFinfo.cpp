@@ -103,6 +103,7 @@ unsigned int DestFinfo::numOutgoing( const Element* e ) const
 unsigned int DestFinfo::incomingConns(
 					const Element* e, vector< Conn >& list ) const
 {
+	list.resize( 0 );
 	list.insert( list.end(), e->connDestBegin( destIndex_ ),
 					e->connDestEnd( destIndex_ ) );
 	return list.size();
