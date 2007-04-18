@@ -1995,5 +1995,31 @@ Also, some additions that will come up when we handle solvers and parallelism:
 
 
 In the meantime, a small step: Implemented move command.
+Checked in as revision 79.
+
+=============================================================================
+16 Apr 2007
+Small beginning to handling global elements (no copies, only dup of msgs)
+Using flag GlobalMarkerFinfo;
+
+=============================================================================
+17 Apr 2007
+More small progress, implemented most of the functions for global elements
+but still need to put them all together in Copy.cpp and to do unit tests
+=============================================================================
+18 Apr 2007.
+The copyGlobal stuff turns out to be quite messy. Now I've set up unit tests
+in Copy.cpp, and they are not clearing.
+
+Finally tracked it down. I was appending Conns to the list when doing 
+Finfo::incomingConn and outgoingConn functions. Should have instead cleared
+out the list. 
+Now: unit tests work. test_single_compt.g works. test_axon.g works, and using
+showmsg I verified that all the messages point to the library channel gates.
+Furthermore the memory use is quite respectable.
+
+I realize that I should do away with the GlobalMarker, DeletionMarker and other
+individual Finfos for setting flags. Instead the ExtFieldFinfo is just the
+thing to provide flags and anything else. Later.
 
 =============================================================================

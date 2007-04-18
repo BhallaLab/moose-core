@@ -11,6 +11,8 @@
 #include "moose.h"
 #include "HHChannel.h"
 #include "../element/Neutral.h"
+#include "DeletionMarkerFinfo.h"
+#include "GlobalMarkerFinfo.h"
 
 const double HHChannel::EPSILON = 1.0e-10;
 const int HHChannel::INSTANT_X = 1;
@@ -251,10 +253,14 @@ void HHChannel::makeGate( Element *e, const Finfo* f, double power )
 			// we don't mess with the original.
 			// make a new gate which we can change.
 			gate = Neutral::create( "HHGate", "xGate", e );
+			gate->addFinfo( GlobalMarkerFinfo::global() );
 			assert( f->add( e, gate, gate->findFinfo( "gate" ) ) );
 		}
 	} else { // No gate, make a new one.
 		gate = Neutral::create( "HHGate", f->name(), e );
+		// Make it a global so that duplicates do not happen unless
+		// the table values change.
+		gate->addFinfo( GlobalMarkerFinfo::global() );
 		assert( f->add( e, gate, gate->findFinfo( "gate" ) ) );
 	}
 }

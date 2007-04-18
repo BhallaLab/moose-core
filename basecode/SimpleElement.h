@@ -201,6 +201,11 @@ class SimpleElement: public Element
 		bool isMarkedForDeletion() const;
 
 		/**
+		 * Reports if this element is Global, i.e., should not be copied
+		 */
+		bool isGlobal() const;
+
+		/**
 		 * Puts the death mark on this element.
 		 */
 		void prepareForDeletion( bool stage );
@@ -268,8 +273,11 @@ class SimpleElement: public Element
 						map< const Element*, Element* >& tree ) const;
 		void replaceCopyPointers(
 						map< const Element*, Element* >& tree );
+		void copyMsg( map< const Element*, Element* >& tree );
 	protected:
 		Element* innerCopy() const;
+
+		bool innerCopyMsg( Conn& c, const Element* orig, Element* dup );
 
 	private:
 		string name_;

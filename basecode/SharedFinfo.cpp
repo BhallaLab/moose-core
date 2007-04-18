@@ -228,6 +228,7 @@ unsigned int SharedFinfo::numOutgoing( const Element* e ) const
 unsigned int SharedFinfo::incomingConns(
 				const Element* e, vector< Conn >& list ) const
 {
+	list.resize( 0 );
 	if ( msgIndex_ != 0 ) {
 		if ( numSrc_ == 0 ) {
 			list.insert( list.end(), e->connDestBegin( msgIndex_ ),
