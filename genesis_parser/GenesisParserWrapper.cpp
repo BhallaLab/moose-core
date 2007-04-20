@@ -2162,23 +2162,29 @@ void GenesisParserWrapper::gpAssert(
 
 void GenesisParserWrapper::unitTest()
 {
+#ifdef USE_MPI
+	string lestr = "postmasters sched shell ";
+#else
+	string lestr = "sched shell ";
+#endif
 	cout << "\nDoing GenesisParserWrapper tests";
-	gpAssert( "le", "sched shell " );
+	gpAssert( "le", lestr );
 	gpAssert( "create neutral /foo", "" );
-	gpAssert( "le", "sched shell foo " );
+	gpAssert( "le", lestr + "foo " );
 	gpAssert( "ce /foo", "" );
 	gpAssert( "le", "" );
 	gpAssert( "pwe", "/foo " );
 	gpAssert( "create neutral ./bar", "" );
 	gpAssert( "le", "bar " );
 	gpAssert( "le /foo", "bar " );
-	gpAssert( "le ..", "sched shell foo " );
+	gpAssert( "le ..", lestr + "foo " );
 	gpAssert( "ce bar", "" );
 	gpAssert( "pwe", "/foo/bar " );
 	gpAssert( "ce ../..", "" );
-	gpAssert( "le", "sched shell foo " );
+	// gpAssert( "le", "sched shell foo " );
+	gpAssert( "le", lestr + "foo " );
 	gpAssert( "delete /foo", "" );
-	gpAssert( "le", "sched shell " );
+	gpAssert( "le", lestr );
 	gpAssert( "le /foo", "cannot find object '/foo' " );
 	gpAssert( "echo foo", "foo " );
 	gpAssert( "echo bar -n", "bar " );
@@ -2215,7 +2221,7 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "echo {getfield /sched/cj/t1 dt}", "0.1 " );
 	gpAssert( "useclock /##[TYPE=Compartment] 1", "" );
 	gpAssert( "delete /compt", "" );
-	gpAssert( "le", "sched shell " );
+	gpAssert( "le", lestr );
 
 	cout << "\n";
 }

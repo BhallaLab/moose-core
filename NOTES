@@ -1964,8 +1964,8 @@ in different ranges.
 set up just in time? Can we even set the rare ones on DynamicFinfos?
 - Cinfo has a thisFinfo and a noDelFinfo to represent objects where the
 	data part should not be deleted. Perhaps this should be a different
-	Element class. Option in Create?
-- Copying of prototypes should be aware of cases where the prototype is global.
+	Element class. Option in Create? Better an extField.
++ Copying of prototypes should be aware of cases where the prototype is global.
 	Perhaps this concept also applies to parallel prototypes.
 	Again, perhaps a distinct Element class.
 - Have all SimpleElement operations been put into Element as virtual functions?
@@ -1982,9 +1982,9 @@ Also, some additions that will come up when we handle solvers and parallelism:
 	- Could just replace the ThisFinfo to intercept the solved fields
 	in a generic way. It could actually handle the whole solver stuff,
 	thus avoiding having to tread on any object-local code at all.
-- Intercepting 
+- Intercepting messages when an object is solved.
 - Providing a dest function based on the calling Ftype in the RespondToAdd
-	of the solver.
+	of the postmaster
 - Intercepting all return messages when we attempt to go off-node.
 - Intercepting cases where multiple messages go to same node, and having
 	the divergence occur on the postmaster of the dest node.
@@ -2022,4 +2022,112 @@ I realize that I should do away with the GlobalMarker, DeletionMarker and other
 individual Finfos for setting flags. Instead the ExtFieldFinfo is just the
 thing to provide flags and anything else. Later.
 
+Some updates from Subhasis, but a lost #include was the only issue with it.
+
+Checked in as revision 83.
+
 =============================================================================
+19 Apr 2007
+Traversal for messaging. Time to set up virtual messages that represent
+logical flow of information within an object. For example, process triggers
+VmSrc.
+
+Finfo has incomingConns and outgoingConns functions... fills up provided
+vectors. Conn src and dest are current element. Conn index has to help us
+use Element::findFinfo( unsigned int connIndex ) to lookup Finfo.
+
+Sporadic messages: typically the commands from one shell to another.
+Also action potls.
+
+Note that each postmaster handles a specific remote node.
+Here is the partick call sequence.
+	0 Post irecv
+	1 Tick calls process for outgoing objects.
+	2 Post send out id and data together.
+	3 Tick calls process for local objects.
+	4 Poll for posted irecvs. As they arrive send out contents locally.
+
+Here are the events on the postmaster.
+0 Post irecv. Minor problem here because we don't know how much data is to
+	come. Typically the main messaging will use lots of space so we can
+	be reasonably comfortable with that size buffer. Otherwise we have
+	to plan multiple cycles of sending till the whole thing comes.
+1 Func arrives because of clock ticks reaching outgoing objects.
+	Recvfunc and other type info provided by Ftype of source itself.
+	For the sporadic messages:
+	- Id of message is found from conn->targetIndex.
+	- Id goes into one buffer, data into another. Increment position of
+		second buffer by data size. The second buffer is dynamically
+		allocated.
+
+2. Post send. This happens frequently if no computation is being run,
+	otherwise interleaved with lots of processing.
+	- First 2 datums: # of messages and total size.
+	- Then the two buffers are appended and sent off.
+	- All nodes likewise.
+	Repeat till done. This is tricky though.
+
+3. Local process stuff: this does not affect the postmaster other than give the
+	data time to flow.
+
+4 Poll for posted irecv. When data arrives, Look up id. Call func. with args.
+	For sporadic messages:
+	- Check identifier. It points to a msgslot and an ftype to do data
+		extraction.
+	- Use function provided by ftype to extract correct # of bytes,
+		advance pointer, and call correctly typed function on the slot.
+	
+
+At initialization time:
+Here we need bootstrap the message addition process so that the inter-shell
+messages get set up. Master node sends these messages to all other nodes.
+Additionally, we may also need to set up fully connected messages between
+all shells for handling independent message formation and data transfer
+requests.
+
+At message addition time:
+	- Identify src and dest nodes
+	- Now we are on src node.
+		- query message to check clock tick and if they are sporadic.
+		If sporadic:
+		- From src node, the respondToAdd function on the postmaster
+		must convert ftype into a string to send over. Assemble
+		this string, target id, target finfo, and clock tick/sporadic
+		flag. Assemble into a message and send this data over as 
+		above.
+		THIS IS NOW ASYNCHRONOUS. WE DO NOT WAIT FOR AN IMMEDIATE
+		RETURN. SEE ABOVE FOR CALL SEQUENCE
+		- The recvFunc for this message creation message does checking
+		- If all is OK, it builds the message on the far side.
+		- It sends back a message with status and any shared message
+		requirements.
+		THIS COMES BACK WHENEVER THE NEXT TICK OCCURS. PERHAPS MANY
+		ARRIVE.
+		- The recvFunc for this completes the checking and does the
+		setup on the originating side
+		- recvFunc may also trigger a flag to tell the scheduler?
+		parser? Shell? that the message addition is done, and certain
+		operations that were held up can resume.
+		This is important if there is a script dependency on completing
+		the message. We'll need to establish which functions are 
+		permitted in the script. There was a polling function in 
+		the earlier version which served this role.
+
+Handling return requests:
+	- Identify any messages that are return messages; check if they
+		are permitted variants.
+		- Ones attached to globals. Here the global should be 
+		duplicated on the remote node
+		- Non-globals where the message must be instant.
+		Here we should flag an error.
+		- Non-time-critical returns, e.g., plots. Here we assign
+		the return message the same tick as the request by following
+		through the dependencies. It will be a timestep off in the
+		display, not critical. Could even be corrected post-facto.
+
+
+.............................................................................
+
+Working on setting up the skeleton of the compilation and the postmasters.
+
+Compiles.
