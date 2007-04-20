@@ -2131,3 +2131,12 @@ Handling return requests:
 Working on setting up the skeleton of the compilation and the postmasters.
 
 Compiles.
+=============================================================================
+20 Apr 2007.
+
+Got the initial skeleton code for PostMasters to work, verified using MPI.
+Checked in as revision 84.
+
+Set Makefile flags back to non-MPI version to make life easier for other 
+developers.
+
