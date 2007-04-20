@@ -10,7 +10,11 @@
 
 #include <iostream>
 #include "header.h"
+#include "moose.h"
 #include "../element/Neutral.h"
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 
 #ifdef DO_UNIT_TESTS
 	extern void testBasecode();
@@ -30,6 +34,28 @@
 
 int main(int argc, char** argv)
 {
+	unsigned int mynode = 0;
+#ifdef USE_MPI
+	MPI::Init( argc, argv );
+	unsigned int totalnodes = MPI::COMM_WORLD.Get_size();
+	mynode = MPI::COMM_WORLD.Get_rank();
+
+	Element* postmasters =
+			Neutral::create( "Neutral", "postmasters", Element::root());
+	for ( unsigned int i = 0; i < totalnodes; i++ ) {
+		char name[10];
+		if ( i != mynode ) {
+			sprintf( name, "node%d", i );
+			Element* p = Neutral::create(
+					"PostMaster", name, postmasters );
+			assert( p != 0 );
+			set< unsigned int >( p, "remoteNode", i );
+		}
+	}
+	// Perhaps we will soon want to also connect up the clock ticks.
+	// How do we handle different timesteps?
+#endif
+	
 	Element* sched =
 			Neutral::create( "Neutral", "sched", Element::root() );
 	Element* cj =
@@ -51,17 +77,23 @@ int main(int argc, char** argv)
 
 
 #ifdef USE_GENESIS_PARSER
-	string line = "";
-	if ( argc > 1 ) {
-		int len = strlen( argv[1] );
-		if ( len > 3 && strcmp( argv[1] + len - 2, ".g" ) == 0 )
-			line = "include";
-		else if ( len > 4 && strcmp( argv[1] + len - 3, ".mu" ) == 0 )
-			line = "include";
-		for ( int i = 1; i < argc; i++ )
-			line = line + " " + argv[ i ];
+	if ( mynode == 0 ) {
+		string line = "";
+		if ( argc > 1 ) {
+			int len = strlen( argv[1] );
+			if ( len > 3 && strcmp( argv[1] + len - 2, ".g" ) == 0 )
+				line = "include";
+			else if ( len > 4 && 
+							strcmp( argv[1] + len - 3, ".mu" ) == 0 )
+				line = "include";
+			for ( int i = 1; i < argc; i++ )
+				line = line + " " + argv[ i ];
+		}
+		makeGenesisParser( line );
 	}
-	makeGenesisParser( line );
+#endif
+#ifdef USE_MPI
+	MPI::Finalize();
 #endif
 	cout << "done" << endl;
 }
