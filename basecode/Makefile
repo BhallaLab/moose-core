@@ -32,6 +32,7 @@ OBJ = \
 	DynamicFinfo.o \
 	UnitTests.o \
 	TestBasecode.o \
+	DerivedFtype.o \
 	SharedFtype.o \
 	SharedFinfo.o \
 	setget.o \
@@ -56,11 +57,11 @@ DestFinfo.o: 	DestFinfo.h
 ThisFinfo.o: 	ThisFinfo.h
 DynamicFinfo.o:	DynamicFinfo.h
 ValueFinfo.o:	ValueFinfo.h DynamicFinfo.h send.h
+DerivedFtype.o:	DerivedFtype.h
 SharedFtype.o:	SharedFtype.h
 SharedFinfo.o:	SharedFinfo.h SharedFtype.h
 Cinfo.o:		Cinfo.h
 UnitTests.o:	MsgSrc.h MsgDest.h SimpleElement.h DerivedFtype.h SrcFinfo.h DestFinfo.h Cinfo.h DynamicFinfo.h ValueFinfo.h send.h ValueFtype.h
-#ArrayFinfo.o:	ArrayFinfo.h DynamicFinfo.h ArrayFtype.h
 LookupFinfo.o:	LookupFinfo.h DynamicFinfo.h LookupFtype.h
 DeletionMarkerFinfo.o: DeletionMarkerFinfo.h
 GlobalMarkerFinfo.o: DeletionMarkerFinfo.h GlobalMarkerFinfo.h

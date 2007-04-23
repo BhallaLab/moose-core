@@ -42,33 +42,97 @@ class Ftype0: public Ftype
 			RecvFunc trigFunc() const {
 				return 0;
 			}
-    std::string getTemplateParameters()
-    {
-        return "none";
-    }
-    
+
+			std::string getTemplateParameters()
+			{
+				return "none";
+			}
+			
+			///////////////////////////////////////////////////////
+			// Here we define the functions for serializing data
+			// for parallel messaging.
+			///////////////////////////////////////////////////////
+			static const void* incomingFunc(
+				const Element* e, const void* data, unsigned int index )
+			{
+				send0( e, index );
+				return data;
+			}
+			
+			virtual IncomingFunc parIncomingFunc() const {
+				return &incomingFunc;
+			}
+
+			static void outgoingFunc( const Conn& c ) {
+				// here the getParBuf just sticks in the id of the 
+				// message. No data is sent.
+				getParBuf( c, 0 ); 
+			}
+
+			virtual RecvFunc parOutgoingFunc() const {
+				return &outgoingFunc;
+			}
 };
 
 
-			/**
-			 * This function has to be specialized for each Ftype
-			 * that we wish to be able to convert. Otherwise it
-			 * reports failure.
-			 */
-			template< class T >bool val2str( T v, string& s ) {
-				s = "";
-				return 0;
-			}
+/**
+ * This function has to be specialized for each Ftype
+ * that we wish to be able to convert. Otherwise it
+ * reports failure.
+ */
+template< class T >bool val2str( T v, string& s ) {
+	s = "";
+	return 0;
+}
 
-			/**
-			 * This function has to be specialized for each Ftype
-			 * that we wish to be able to convert. Otherwise it
-			 * reports failure.
-			 */
-			template< class T > bool str2val( const string& s, T& v ) {
-					cerr << "This is the default str2val.\n";
-				return 0;
-			}
+/**
+ * This function has to be specialized for each Ftype
+ * that we wish to be able to convert. Otherwise it
+ * reports failure.
+ */
+template< class T > bool str2val( const string& s, T& v ) {
+	cerr << "This is the default str2val.\n";
+	return 0;
+}
+
+/**
+ * Converts serialized data into defined types.
+ * This function has to be specialised for many Ftypes like
+ * vectors and strings. This default works only for simple
+ * types.
+ * Returns the data pointer incremented to the next field.
+ */
+template< class T > const void* unserialize( T& value, const void* data )
+{
+	const T* temp = static_cast< const T* >( data );
+	value = *temp;
+	return static_cast< const void* >( temp + 1 );
+}
+
+/**
+ * Converts defined types into serialized data.
+ * Puts the value into the data.
+ * This function has to be specialised for many Ftypes like
+ * vectors and strings. This default works only for simple
+ * types.
+ * Returns data pointer incremented to end of this field.
+ */
+template< class T > void* serialize( void* data, const T& value )
+{
+	T* temp = static_cast< T* >( data );
+	*temp = value;
+	return temp + 1;
+}
+
+/**
+ * Gets the serialized size of the data type. Usually a simple sizeof,
+ * but when handling complex types it will need to be specialized.
+ */
+template< class T > size_t serialSize( const T& value )
+{
+	return sizeof( T );
+}
+
 
 /**
  * The Ftype1 is the most used Ftype as it handles values.
@@ -219,10 +283,45 @@ template < class T > class Ftype1: public Ftype
 				}
 				return 0;
 			}
-    std::string getTemplateParameters() const
-    {
-        return Ftype::full_type(std::string(typeid(T).name()));        
-    }
+
+			std::string getTemplateParameters() const
+			{
+				return Ftype::full_type(std::string(typeid(T).name()));
+			}
+			
+			///////////////////////////////////////////////////////
+			// Here we define the functions for serializing data
+			// for parallel messaging.
+			// There are some specializations needed when T is a
+			// vector or a string.
+			///////////////////////////////////////////////////////
+
+			/**
+			 * This function extracts the value for this field from
+			 * the data, and returns the data pointer set to the
+			 * next field.
+			 */
+			static const void* incomingFunc(
+				const Element* e, const void* data, unsigned int index )
+			{
+				T ret;
+				data = unserialize< T >( ret, data );
+				send1< T >( e, index, ret );
+				return data;
+			}
+			
+			virtual IncomingFunc parIncomingFunc() const {
+				return &incomingFunc;
+			}
+
+			static void outgoingFunc( const Conn& c, T value ) {
+				void* data = getParBuf( c, serialSize< T >( value ) ); 
+				serialize< T >( data, value );
+			}
+
+			virtual RecvFunc parOutgoingFunc() const {
+				return RFCAST( &outgoingFunc );
+			}
 
 };
 

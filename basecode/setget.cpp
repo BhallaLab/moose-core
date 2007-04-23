@@ -9,6 +9,10 @@
 
 #include "header.h"
 #include <algorithm>
+#include "MsgSrc.h"
+#include "MsgDest.h"
+#include "SimpleElement.h"
+#include "send.h"
 #include "DerivedFtype.h"
 #include "Ftype2.h"
 #include "setget.h"

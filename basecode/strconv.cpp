@@ -9,6 +9,10 @@
 **********************************************************************/
 
 #include "header.h"
+#include "MsgSrc.h"
+#include "MsgDest.h"
+#include "SimpleElement.h"
+#include "send.h"
 #include "DerivedFtype.h"
 
 // Some template specializations to handle common conversions.

@@ -102,16 +102,49 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			RecvFunc trigFunc() const {
 				return 0;
 			}
-    std::string getTemplateParameters()
-    {
-        std::string s = "";
-        std::string type1(typeid(T1).name());
-        std::string type2(typeid(T2).name());
-        s = Ftype::full_type(type1)+" "+Ftype::full_type(type2);                     
-        return s;
-    }
-    
-    
+    		std::string getTemplateParameters()
+    		{
+        		std::string s = "";
+        		std::string type1(typeid(T1).name());
+        		std::string type2(typeid(T2).name());
+        		s = Ftype::full_type(type1)+" "+Ftype::full_type(type2);                     
+        		return s;
+    		}
+			
+			///////////////////////////////////////////////////////
+			// Here we define the functions for handling 
+			// messages of this type for parallel messaging.
+			///////////////////////////////////////////////////////
+			static const void* incomingFunc(
+				const Element* e, const void* data, unsigned int index )
+			{
+				T1 v1;
+				T2 v2;
+				data = unserialize< T1 >( v1, data );
+				// data += serialSize< T1 >( v1 );
+				data = unserialize< T2 >( v2, data );
+				// data += serialSize< T2 >( v2 );
+				send2< T1, T2 >( e, index, v1, v2 );
+				return data;
+			}
+			
+			virtual IncomingFunc parIncomingFunc() const {
+				return &incomingFunc;
+			}
+
+			static void outgoingFunc( const Conn& c, T1 v1, T2 v2 ) {
+				// here the getParBuf just sticks in the id of the 
+				// message. No data is sent.
+				unsigned int size1 = serialSize< T1 >( v1 );
+				unsigned int size2 = serialSize< T2 >( v2 );
+				void* data = getParBuf( c, size1 + size2 ); 
+				data = serialize< T1 >( data, v1 );
+				serialize< T2 >( data, v2 );
+			}
+
+			virtual RecvFunc parOutgoingFunc() const {
+				return RFCAST( &outgoingFunc );
+			}
 };
 
 #endif // _FTYPE2_H
