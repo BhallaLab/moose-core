@@ -58,6 +58,14 @@ class SharedFtype: public Ftype
 					return 0;
 			}
 
+			IncomingFunc parIncomingFunc() const {
+					return 0;
+			}
+
+			RecvFunc parOutgoingFunc() const {
+					return 0;
+			}
+
 		private:
 			vector< const Ftype* > destTypes_;
 			vector< const Ftype* > srcTypes_;

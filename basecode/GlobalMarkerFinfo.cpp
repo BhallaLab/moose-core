@@ -8,7 +8,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "moose.h"
 #include "DerivedFtype.h"
 #include "DeletionMarkerFinfo.h"
 #include "GlobalMarkerFinfo.h"

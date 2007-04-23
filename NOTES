@@ -2087,6 +2087,7 @@ requests.
 
 At message addition time:
 	- Identify src and dest nodes
+	- Check if same field is a msgsrc to this node.
 	- Now we are on src node.
 		- query message to check clock tick and if they are sporadic.
 		If sporadic:
@@ -2139,4 +2140,147 @@ Checked in as revision 84.
 
 Set Makefile flags back to non-MPI version to make life easier for other 
 developers.
+Checked in as revision 85.
 
+Starting on impementation of ParFinfo, though perhaps this should be 
+ParFinfoDest. Another set of classes for ParFinfoSrc and ParFinfoShared.
+
+=============================================================================
+21 Apr 2007.
+Worked out roughly how to handle the actual parallel data transfers.
+The approach does not care if the messages are sporadic or scheduled.
+It makes one key tradeoff: Puts the target index in each message. This would
+be needed anyway for all sporadic messages. At the dest end all it needs is
+an array to lookup the target index and return the Ftype* of the attached
+message. I could go one indirection less by returning the parIncomingFunc
+of the attached message.
+
+The other option is to use a more rigid addressing scheme to get each
+datum into its place for scheduled messages. This would require additional
+storage for addressing at the sending end, but would use less data for
+transfer. Sporadic messages would not benefit. Time about the same.
+
+From benchmarks, bandwidth rises (but sub linearly) with message size. That
+means that doubling message size does not quite double message time. There
+is also a latency cost, which again does not quite double with message size.
+Up to about 256 bytes it is almost flat.
+We are talking about 10 usec for 1 K, and 41 usec for 16K. 100 usec for 65K.
+For 100 molecules, we go about 10-100x real speed, say 1 msec dt. So we do
+a calculation cycle in about 10 to 100 usec. If all of the molecules
+diffuse, we need to send 100x12 bytes each way. Here we are about balanced
+comm:comput in the worst case, and very comfortable otherwise.
+For 5000 molecules we would have a linear scale in comput time, say 500 to 
+5000 usec. Communicaton is now 60K bytes, taking ~100 usec.
+So the communication is comfortable to interleave, even if we use a faster
+solver.
+
+=============================================================================
+22 Apr 2007.
+An issue here: our sendTo index may not agree with the index given to the
+message from postmaster to dest on the target node. The reason is that the
+outgoing index is set up so that the recvFuncs are ordered.
+Options:
+	- Another lookup table for the sendTo index
+	- Munge the outgoing function so that all the targets are on the
+	same MsgSrc slot and with the same sendTo index as at the originating
+	postMaster, but they each have to store their own recvfuncs.
+
+Here is how it works (assuming all messages set up, not worried about sched
+at this stage)
+
+- Regular object Send invokes the Ftype1<T>::parOutgoingFunc (or equiv)
+	which comes from its own Ftype.
+- This calls getParBuf which steps through the parallel outgoing
+	buffer and returns the location for value assignment.
+	The parOutgoingFunc does typecasting and assignment.
+- Outgoing buffer has Nitems, id0, data0, id1, data1...
+- All the data gets shifted over to the remote node.
+- Postmaster loops through arrived data buffer. id<n> looks up dest Conn
+	as well as a templated Ftype::parIncomingFunc.
+	VARIANT 1: Regular msging.
+	- parIncomingFunc calls the appropriate sendTo<T> function and typecasts
+		the data.
+		- Advantage: Regular messaging calls for setup.
+		- Disadvantage: 
+			- Message ordering does not match. Another lookup 
+			needed between id and targetIndex. Need to maintain.
+			- Terribly slow if we use regular func/msgIndex
+			lookup for SendTo.
+			- Extra cost of all the MsgSrc entries for different
+			dest recvFuncs. We are not using the extra info.
+			Unless we do something clever with it for the 
+			scatter msgs.
+		- Scatter msgs: Extra info in lookup, but it would be a 
+		messy iterative call of multiple SendTo.
+		- Each message needs:
+			Conn: from regular array
+			MsgSrc data structures: 3 uints, one RF*, one Ftype*
+			Conversion table for lookup of targetIndex from id.
+			Further field in conversion to handle scatter.
+			Every scattered target needs all but the MsgSrc.
+	VARIANT 2: Special msgs. all conns in one big MsgSrc slot, separate 
+		recvFunc array for dests.
+	- parIncomingFunc is passed the recvFunc, typecasts it, and
+		calls it with the Conn.
+		- Advantage: Cleaner call sequence. Less indirection.
+		- Disadvantage: Unusual messaging. Will need special 
+			handling for add/drop
+		- Scatter msgs: Flag pointing to range of targets. 
+			Rather simple handling of multiple target types.
+		- Each message needs:
+			Conn index, RF*, Ftype*, scatter::next
+
+	As an alternative, we could just do scatter messages by many 
+		explicit connections through the postmaster.
+		would be very costly in highly connected networks.
+	Or put a fan-out object after the postmaster. Hard to manage.
+
+	VARIANT 3: Use the MsgSrc array as the lookup, with the Slot being 
+		given directly from the id (possibly with offset so regular
+		messages can live safely below.).
+	- parIncomingFunc calls send<T> and typecasts the data
+		- Advantage: Almost regular messaging for setup. But some
+			redundancy in use of MsgSrc as indices now match ids,
+			not unique functions. 
+			- Fast.
+		- Disadvantage:
+			- Memory cost of MsgSrc builds up if lots of unique
+			targets.
+		- Scatter msgs: Handled cleanly in MsgSrc using existing code.
+			Very economical and fast if high scatter.
+		- Each message needs:
+			Conn: from regular array
+			parIncomingFunc array
+			MsgSrc for each unique id. Good for high scatter.
+			Some cleverness in doing this variant of MsgSrc
+			management. Actually the insertConnOnSrc seems to
+			do this absolutely painlessly. Only issue is
+			MsgSrc size management.
+
+Variant 3 seems neatest, provided I can cleanly deal with the MsgSrc 
+management.
+
+.........................................................................
+Finally, after much planning, now down to the implementation.
+
+- Implementation
+	- Set up the Ftype code
+	- Set up ParFinfo
+	- Set up add/drop code.
+	- Set up ParTick
+	- Set up message transfer ops
+	- Set up bootstrap
+
+Ftype coding done. This has involved setting up the appropriate functions
+for the base Ftype0, Ftype1, Ftype2 and Ftype3. Also several serialization
+functions that give us quite a bit of generality including for transferring
+vectors and strings.
+Stuck on compiling SharedFtype, but it is mostly grinding through the
+steps now.
+
+=============================================================================
+23 Apr 2007.
+Compiled. No new functionality, but the hooks are there for parallel
+messaging to be set up.
+
+=============================================================================

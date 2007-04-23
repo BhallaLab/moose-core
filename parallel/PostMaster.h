@@ -21,10 +21,17 @@ class PostMaster
 		static unsigned int getMyNode( const Element* e );
 		static unsigned int getRemoteNode( const Element* e );
 		static void setRemoteNode( const Conn& c, unsigned int node );
+		void* innerGetParBuf( unsigned int targetIndex,
+						unsigned int size );
 
 	private:
 		unsigned int localNode_;
 		unsigned int remoteNode_;
+		char* inBuf_;
+		unsigned int inBufSize_;
+		char* outBuf_;
+		unsigned int outBufPos_;
+		unsigned int outBufSize_;
 };
 
 #endif // _POST_MASTER_H

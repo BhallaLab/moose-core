@@ -43,6 +43,11 @@ class Element;
 class Conn;
 class Finfo;
 
+// This is here because parallel messaging needs a way to
+// access PostMaster buffer from within all the templated
+// Ftypes. Ugly.
+extern void* getParBuf( const Conn& c, unsigned int size );
+
 #include "RecvFunc.h"
 #include "Conn.h"
 #include "Ftype.h"
