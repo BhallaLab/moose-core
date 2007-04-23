@@ -79,6 +79,46 @@ template < class T1, class T2, class T3 > class Ftype3: public Ftype
         s = Ftype::full_type(std::string(typeid(T1).name())) +" "+Ftype::full_type(std::string(typeid(T2).name()))+" "+Ftype::full_type(std::string (typeid(T3).name()));
         return s;
     }
+			///////////////////////////////////////////////////////
+			// Here we define the functions for handling 
+			// messages of this type for parallel messaging.
+			///////////////////////////////////////////////////////
+			static const void* incomingFunc(
+				const Element* e, const void* data, unsigned int index )
+			{
+				T1 v1;
+				T2 v2;
+				T3 v3;
+				data = unserialize< T1 >( v1, data );
+				// data += serialSize< T1 >( v1 );
+				data = unserialize< T2 >( v2, data );
+				// data += serialSize< T2 >( v2 );
+				data = unserialize< T3 >( v3, data );
+				// data += serialSize< T3 >( v3 );
+				send3< T1, T2, T3 >( e, index, v1, v2, v3 );
+				return data;
+			}
+			
+			virtual IncomingFunc parIncomingFunc() const {
+				return &incomingFunc;
+			}
+
+			static void outgoingFunc( const Conn& c, 
+							T1 v1, T2 v2, T3 v3 ) {
+				// here the getParBuf just sticks in the id of the 
+				// message. No data is sent.
+				unsigned int size1 = serialSize< T1 >( v1 );
+				unsigned int size2 = serialSize< T2 >( v2 );
+				unsigned int size3 = serialSize< T3 >( v3 );
+				void* data = getParBuf( c, size1 + size2 +size3 ); 
+				data = serialize< T1 >( data, v1 );
+				data = serialize< T2 >( data, v2 );
+				serialize< T3 >( data, v3 );
+			}
+
+			virtual RecvFunc parOutgoingFunc() const {
+				return RFCAST( &outgoingFunc );
+			}
     
 };
 

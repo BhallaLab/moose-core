@@ -17,6 +17,18 @@ enum FinfoIdentifier { VALUE_SET, VALUE_TRIG,
 		*/
 
 /**
+ * This typedef is used for functions converting serial data
+ * into calls to messages on the target end of a parallel message.
+ * The IncomingFunc munches through serial data stream to send data to
+ * destination objects. This function is called from 
+ * PostMaster on target node. Returns the data pointer
+ * incremented with the size of the fields in the Ftype.
+ * Index looks up the message slot (MsgSrc) to send from.
+ */
+typedef const void* ( *IncomingFunc )( 
+			const Element* e, const void* data, unsigned int index );
+
+/**
  * Virtual base class for typing information. 
  */
 class Ftype
@@ -115,37 +127,62 @@ class Ftype
 			{
 				return 0;
 			}
-			    static std::string full_type(std::string type)
-    {
-        static map < std::string, std::string > type_map;
-        if (type_map.find("j") == type_map.end())
-        {
-            type_map["j"] = "unsigned int";
-            type_map["i"] = "int";        
-            type_map["f"] = "float";        
-            type_map["d"] = "double";        
-            type_map["Ss"] = "string";        
-            type_map["s"] = "short";
-            type_map["b"] = "bool";            
-        }
-        const map< std::string, std::string >::iterator i = type_map.find(type);
-        if (i == type_map.end())
-        {
-            cout << "Not found - " << type << endl;
-            
-            return type;
-        }
-        else 
-        {
-            return i->second;
-        }
-    }
 
-virtual std::string getTemplateParameters() const
-    {
-        return "void";        
-    }
+			static std::string full_type(std::string type)
+    		{
+        		static map < std::string, std::string > type_map;
+				if (type_map.find("j") == type_map.end())
+        		{
+            		type_map["j"] = "unsigned int";
+            		type_map["i"] = "int";        
+            		type_map["f"] = "float";        
+            		type_map["d"] = "double";        
+            		type_map["Ss"] = "string";        
+            		type_map["s"] = "short";
+            		type_map["b"] = "bool";            
+        		}
+        		const map< std::string, std::string >::iterator i = type_map.find(type);
+        		if (i == type_map.end())
+        		{
+            		cout << "Not found - " << type << endl;
+            		
+            		return type;
+        		}
+        		else 
+        		{
+            		return i->second;
+        		}
+    		}
 
+			virtual std::string getTemplateParameters() const
+    		{
+        		return "void";        
+    		}
+
+			////////////////////////////////////////////////////////
+			// Here are some serialization functions used for
+			// parallel message transfer
+			////////////////////////////////////////////////////////
+
+			/**
+			 * This returns the IncomingFunc from the specific
+			 * Ftype. The job of the IncomingFunc is to
+			 * Munch through serial data stream to send data to
+			 * destination objects. This function is called from 
+			 * PostMaster on target node.
+			 */
+			virtual IncomingFunc parIncomingFunc() const = 0;
+
+			/**
+			 * This returns a suitably typecast RecvFunc for handling
+			 * messages going into the PostMaster. Each Ftype has
+			 * to provide a static function to return here.
+			 * The job of the RecvFunc is to call a global function
+			 * 'getParbuf' that returns the current location in
+			 * the postmaster outBuf, and then to copy
+			 * the arguments of the recvFunc into this buffer.
+			 */
+			virtual RecvFunc parOutgoingFunc() const = 0;
 };
 
 #endif // _FTYPE_H

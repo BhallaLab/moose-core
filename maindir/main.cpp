@@ -26,6 +26,9 @@
 	extern void testSchedProcess();
 	extern void testWildcard();
 	extern void testBiophysics();
+#ifdef USE_MPI
+	extern void testPostMaster();
+#endif
 #endif
 
 #ifdef USE_GENESIS_PARSER
@@ -73,6 +76,9 @@ int main(int argc, char** argv)
 	testSchedProcess();
 	testWildcard();
 	testBiophysics();
+#ifdef USE_MPI
+	testPostMaster();
+#endif
 #endif
 
 
