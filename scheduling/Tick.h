@@ -19,7 +19,7 @@ class Tick
 			;
 		}
 
-		~Tick( )
+		virtual ~Tick( )
 		{ ; }
 
 		bool operator<( const Tick& other ) const {
@@ -64,6 +64,18 @@ class Tick
 		void innerStart( Element* e, ProcInfo p, double maxTime );
 		static void schedNewObject( const Conn& c, unsigned int id,
 						string s );
+		///////////////////////////////////////////////////////
+		// Utility function
+		///////////////////////////////////////////////////////
+		int ordinal() const {
+				return ordinal_;
+		}
+		///////////////////////////////////////////////////////
+		// Virtual functions for handling scheduling. The
+		// derived ParTick class puts in its own versions.
+		///////////////////////////////////////////////////////
+		virtual void innerProcessFunc( Element* e, ProcInfo info );
+		virtual void innerReinitFunc( Element* e, ProcInfo info );
 
 	private:
 		double dt_;
@@ -76,5 +88,7 @@ class Tick
 		string path_;/// \todo Perhaps we delete this field
 		static int ordinalCounter_;
 };
+
+extern const Cinfo* initTickCinfo();
 
 #endif // _Tick_h

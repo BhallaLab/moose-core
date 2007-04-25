@@ -13,6 +13,7 @@ TARGET = scheduling.o
 OBJ = \
 	ClockJob.o	\
 	Tick.o	\
+	ParTick.o	\
 	SchedTests.o	\
 
 HEADERS = \
@@ -25,6 +26,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 ClockJob.o:	ClockJob.h ../basecode/Ftype2.h ../basecode/Ftype3.h
 Tick.o:	Tick.h
+ParTick.o:	Tick.h ParTick.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c

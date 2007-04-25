@@ -298,7 +298,8 @@ void Tick::innerIncrementTick(
 		if ( nextTime_ <= nextTickTime_ ) {
 			info->currTime_ = nextTime_;
 			info->dt_ = dt_;
-			send1< ProcInfo >( e, processSlot, info );
+			// send1< ProcInfo >( e, processSlot, info );
+			this->innerProcessFunc( e, info );
 			nextTime_ += dt_;
 		}
 		if ( nextTime_ > nextTickTime_ &&
@@ -316,7 +317,8 @@ void Tick::innerIncrementTick(
 	} else {
 		info->currTime_ = nextTime_;
 		info->dt_ = dt_;
-		send1< ProcInfo >( e, processSlot, info );
+		// send1< ProcInfo >( e, processSlot, info );
+		this->innerProcessFunc( e, info );
 		nextTime_ += dt_;
 	}
 	send1< double >( e, returnNextTimeSlot, nextTime_ );
@@ -373,7 +375,8 @@ void Tick::reinit( const Conn& c, ProcInfo info )
 	t->nextTickTime_ = 0.0;
 	info->currTime_ = 0.0;
 	info->dt_ = t->dt_;
-	send1< ProcInfo >( c.targetElement(), reinitSlot, info );
+	// send1< ProcInfo >( c.targetElement(), reinitSlot, info );
+	t->innerReinitFunc( c.targetElement(), info );
 	if ( t->next_ )
 		send1< ProcInfo >( c.targetElement(), reinitNextSlot, info );
 }
@@ -417,7 +420,8 @@ void Tick::innerStart( Element* e, ProcInfo info, double maxTime )
 		while ( nextTime_ <= endTime ) {
 			info->currTime_ = nextTime_;
 			// Send out the process message to all and sundry
-			send1< ProcInfo >( e, processSlot, info );
+			// send1< ProcInfo >( e, processSlot, info );
+			this->innerProcessFunc( e, info );
 			nextTime_ += dt_;
 		}
 
@@ -459,6 +463,32 @@ void Tick::schedNewObjectFuncLocal( Element* e )
 	}
 }
 */
+
+
+///////////////////////////////////////////////////
+// Virtual function definitions for actually sending out the 
+// process and reinit calls.
+///////////////////////////////////////////////////
+/**
+ * This sends out the process call. It is virtualized
+ * because derived classes (ParTick) need to do much more complicated
+ * things to send out data and interleave communication and 
+ * computation.
+ */
+void Tick::innerProcessFunc( Element* e, ProcInfo info )
+{
+	send1< ProcInfo >( e, processSlot, info );
+}
+
+/**
+ * This sends out the call to reinit objects. It is virtualized
+ * because derived classes (ParTick) need to do much more complicated
+ * things to coordinate the reinit.
+ */
+void Tick::innerReinitFunc( Element* e, ProcInfo info )
+{
+	send1< ProcInfo >( e, reinitSlot, info );
+}
 
 ///////////////////////////////////////////////////
 // Other function definitions
