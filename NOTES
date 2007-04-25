@@ -2283,4 +2283,20 @@ steps now.
 Compiled. No new functionality, but the hooks are there for parallel
 messaging to be set up.
 
+Checked in as revision 86.
+
+
 =============================================================================
+24 Apr 2007.
+
+Almost all the pieces in place now. Remaining:
++ ParTick
+- Clean up postmaster funcs.
+- Set up Shell-postmaster messages.
+
+=============================================================================
+25 Apr 2007.
+
+Further work on PostMaster.
+Implemented ParTick. 
+Compilation time.

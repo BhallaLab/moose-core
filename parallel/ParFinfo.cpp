@@ -24,17 +24,29 @@ ParFinfo::ParFinfo( const string& name )
 /**
  * This adds a message from a postmaster to a destination object.
  * It is only called when a message is sent between nodes.
+ * It fills up the MsgSrc slot and incomingFunc_ array starting
+ * at msgIndex.
  */
 bool ParFinfo::add(
 	Element* e, Element* destElm, const Finfo* destFinfo
+	unsigned int msgIndex
+	// This extra argument is the slot in which the msg goes.
 ) const
 {
-	FuncList srcFl = rfuncs_;
+	FuncList srcFl;
 	FuncList destFl;
 	unsigned int destIndex;
 	unsigned int numDest;
 
-	if ( destFinfo->respondToAdd( destElm, e, ftype(),
+	// destFinfo->ftype()->appendIncomingFuncs( returnFl );
+	
+	Ftype dftype = destFinfo->ftype()->makeMatchingType();
+	// Here we put the srcFl entries into the srcFl list
+	// in case it is a SharedFinfo.
+	// These are recvFuncs generated from the destFinfo Ftype
+	// to handle return function calls.
+
+	if ( destFinfo->respondToAdd( destElm, e, dftype,
 							srcFl, destFl,
 							destIndex, numDest ) )
 	{
@@ -44,11 +56,12 @@ bool ParFinfo::add(
 		unsigned int targetConn;
 
 		// First we decide where to put the originating Conn.
-		if ( numSrc_ == 0 )  // Put it on MsgDest.
+		if ( numSrc_ == 0 ) {  // Put it on MsgDest.
 			originatingConn = e->insertConnOnDest( msgIndex_, 1);
-		else // The usual case: put it on MsgSrc.
+		} else { // The usual case: put it on MsgSrc.
 			originatingConn = 
-					e->insertConnOnSrc( msgIndex_, destFl, 0, 0 );
+					e->insertConnOnSrc( msgIndex, destFl, 0, 0 );
+		}
 
 		// Now the target Conn
 		if ( srcFl.size() == 0 ) { // Target has only dests.
@@ -60,6 +73,15 @@ bool ParFinfo::add(
 
 		// Finally, we're ready to do the connection.
 		e->connect( originatingConn, destElm, targetConn );
+
+		// Now we put in the incomingFuncs to
+		// invoke the recvFuncs of the destination elements.
+
+		PostMaster* post = static_cast< PostMaster* >( e->data() );
+		vector< IncomingFunc > inFl;
+		destFinfo->ftype()->appendIncomingFuncs( inFl );
+		post->placeIncomingFuncs( inFl, msgIndex );
+
 		return 1;
 	}
 	return 0;
@@ -76,7 +98,9 @@ bool ParFinfo::add(
  * message and issues an error call.
  *
  * The Element* e is a dummy Element with extra info
- * to indicate the id of the true target.
+ * to indicate the id of the true target. It is made on the fly by
+ * the Element::element() function when it finds an id with magic #
+ * content of 123.
  * Here we basically package the entire argument list into a string
  * for sending abroad.
  * - It is a comma separated list.
@@ -92,45 +116,39 @@ bool ParFinfo::add(
  *   postmaster messaging info, and are not transmitted.
  */
 bool ParFinfo::respondToAdd(
-					Element* e, Element* src, const Finfo *srcFinfo,
+					Element* e, Element* src, const Ftype *srcType,
 					FuncList& srcFl, FuncList& returnFl,
 					unsigned int& destIndex, unsigned int& numDest
 ) const
 {
+	PostMaster* post = static_cast< PostMaster* >( e->data() );
+	
 	const Ftype* srcType = srcFinfo->ftype();
-	// This function traverses up to find if the message is sporadic
-	// or scheduled.
-	bool isSporadic = checkSporadic( src, srcFinfo );
 
 	string respondString;
 	sstream ss( respondString );
-	// Probably also want to put in an identifier for the msg
-	// depending on whether it is sporadic or scheduled.
-	ss << e->id() << "," << src->id() << "," << isSporadic << "," <<
-		ftype2str( srcType );
+	ss << src->id() << " " << e->id() << " " << destFinfo->name() <<
+			" " << ftype2str( srcType );
+	// We also need to put in the name of the dest finfo.
 
 	// Post irecv for return status of this message request.
 	// Send out this message request.
 	// Create local node message.
 	
-		// First, fill up the returnFl with functions provided by the
-		// srcType.
-		// SharedFtype: Here the Ftype entries requiring return 
-		// functions will have 0 in their rfunc fields.
-		// Others: If the srcFl is empty, then the Ftype requires a
-		// return function.
-
+	// First, fill up the returnFl with functions provided by the
+	// srcType.
+	returnFl.resize( 0 );
+	srcType->appendOutgoingFuncs( returnFl );
 	
-	// This function returns true if the connection should be made
-	if ( srcType->fillReturnFl( isSporadic, srcFl, returnFl ) ) {
-		offset += srcType.size();
-		msgInfo mi( offset )
-		msgInfo[msgno].
+	destIndex = post->outgoingSlotNum_;
+	numDest = returnFl.size();
+	post->outgoingSlotNum_ += numDest;
 
-		destIndex = msgIndex_;
-		numDest = 1;
-		return 1;
-	}
+
+	// Still need to figure out how to deal with stuff in the srcFl.
+	return 1;
 }
+
+
 
 ////////////////////////////////////////////////////////////////////
