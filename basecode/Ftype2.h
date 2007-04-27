@@ -128,8 +128,9 @@ template < class T1, class T2 > class Ftype2: public Ftype
 				return data;
 			}
 			
-			virtual IncomingFunc parIncomingFunc() const {
-				return &incomingFunc;
+			void appendIncomingFunc( vector< IncomingFunc >& vec )
+					const {
+				vec.push_back( &incomingFunc );
 			}
 
 			static void outgoingFunc( const Conn& c, T1 v1, T2 v2 ) {
@@ -142,8 +143,8 @@ template < class T1, class T2 > class Ftype2: public Ftype
 				serialize< T2 >( data, v2 );
 			}
 
-			virtual RecvFunc parOutgoingFunc() const {
-				return RFCAST( &outgoingFunc );
+			void appendOutgoingFunc( vector< RecvFunc >& vec ) const {
+				vec.push_back( RFCAST( &outgoingFunc ) );
 			}
 };
 

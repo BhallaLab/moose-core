@@ -27,6 +27,15 @@ SharedFtype::SharedFtype(
 			else
 				destTypes_.push_back( types[i].first );
 		}
+		match_ = new SharedFtype;
+		match_->nValues_ = nValues_;
+		match_->size_ = size_;
+		match_->match_ = this;
+		vector< const Ftype* >::iterator i;
+		for ( i = destTypes_.begin(); i != destTypes_.end(); i++ )
+			match_->srcTypes_.push_back( ( *i )->makeMatchingType() );
+		for ( i = srcTypes_.begin(); i != srcTypes_.end(); i++ )
+			match_->destTypes_.push_back( ( *i )->makeMatchingType() );
 }
 
 /*
