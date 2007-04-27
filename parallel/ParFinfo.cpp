@@ -8,10 +8,13 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "moose.h"
+#include "OffNodeElement.h"
 #include "MsgDest.h"
-#include "ParFtype.h"
 #include "ParFinfo.h"
+#include <mpi.h>
+#include "PostMaster.h"
+#include <sstream>
 
 
 ParFinfo::ParFinfo( const string& name ) 
@@ -28,7 +31,7 @@ ParFinfo::ParFinfo( const string& name )
  * at msgIndex.
  */
 bool ParFinfo::add(
-	Element* e, Element* destElm, const Finfo* destFinfo
+	Element* e, Element* destElm, const Finfo* destFinfo,
 	unsigned int msgIndex
 	// This extra argument is the slot in which the msg goes.
 ) const
@@ -38,9 +41,9 @@ bool ParFinfo::add(
 	unsigned int destIndex;
 	unsigned int numDest;
 
-	// destFinfo->ftype()->appendIncomingFuncs( returnFl );
+	// destFinfo->ftype()->appendIncomingFunc( returnFl );
 	
-	Ftype dftype = destFinfo->ftype()->makeMatchingType();
+	const Ftype* dftype = destFinfo->ftype()->makeMatchingType();
 	// Here we put the srcFl entries into the srcFl list
 	// in case it is a SharedFinfo.
 	// These are recvFuncs generated from the destFinfo Ftype
@@ -50,13 +53,11 @@ bool ParFinfo::add(
 							srcFl, destFl,
 							destIndex, numDest ) )
 	{
-		assert ( destFl.size() == numSrc_ );
-		assert ( numSrc_ + srcFl.size() > 0 );
 		unsigned int originatingConn;
 		unsigned int targetConn;
 
 		// First we decide where to put the originating Conn.
-		if ( numSrc_ == 0 ) {  // Put it on MsgDest.
+		if ( destFl.size() == 0 ) {  // The msg'src' has only dests
 			originatingConn = e->insertConnOnDest( msgIndex_, 1);
 		} else { // The usual case: put it on MsgSrc.
 			originatingConn = 
@@ -77,9 +78,10 @@ bool ParFinfo::add(
 		// Now we put in the incomingFuncs to
 		// invoke the recvFuncs of the destination elements.
 
+		assert( e->className() == "PostMaster" );
 		PostMaster* post = static_cast< PostMaster* >( e->data() );
 		vector< IncomingFunc > inFl;
-		destFinfo->ftype()->appendIncomingFuncs( inFl );
+		destFinfo->ftype()->appendIncomingFunc( inFl );
 		post->placeIncomingFuncs( inFl, msgIndex );
 
 		return 1;
@@ -98,9 +100,10 @@ bool ParFinfo::add(
  * message and issues an error call.
  *
  * The Element* e is a dummy Element with extra info
- * to indicate the id of the true target. It is made on the fly by
- * the Element::element() function when it finds an id with magic #
- * content of 123.
+ * to indicate the id of the true target, and provision to store the
+ * target field name. It is made on the fly by
+ * the Element::element() function when the lookup returns a
+ * node index rather than the element.
  * Here we basically package the entire argument list into a string
  * for sending abroad.
  * - It is a comma separated list.
@@ -121,15 +124,19 @@ bool ParFinfo::respondToAdd(
 					unsigned int& destIndex, unsigned int& numDest
 ) const
 {
-	PostMaster* post = static_cast< PostMaster* >( e->data() );
+	OffNodeElement* off = dynamic_cast< OffNodeElement* >( e );
+	assert( off != 0 );
+	assert( off->post() != 0 );
+	assert( off->post()->className() == "PostMaster" );
+	PostMaster* post = static_cast< PostMaster* >( off->post()->data());
 	
-	const Ftype* srcType = srcFinfo->ftype();
+	// const Ftype* srcType = srcFinfo->ftype();
 
 	string respondString;
-	sstream ss( respondString );
-	ss << src->id() << " " << e->id() << " " << destFinfo->name() <<
-			" " << ftype2str( srcType );
-	// We also need to put in the name of the dest finfo.
+	ostringstream oss;
+	oss.str( respondString );
+	oss << src->id() << " " << off->destId() << " " << 
+			off->fieldName() << " " << ftype2str( srcType );
 
 	// Post irecv for return status of this message request.
 	// Send out this message request.
@@ -138,11 +145,17 @@ bool ParFinfo::respondToAdd(
 	// First, fill up the returnFl with functions provided by the
 	// srcType.
 	returnFl.resize( 0 );
-	srcType->appendOutgoingFuncs( returnFl );
-	
-	destIndex = post->outgoingSlotNum_;
+	srcType->appendOutgoingFunc( returnFl );
 	numDest = returnFl.size();
-	post->outgoingSlotNum_ += numDest;
+
+	// Second, refer this to the postmaster which does the following:
+	// - post irecv for return status of this message
+	// - send out message request
+	// - create local message
+	destIndex = post->respondToAdd( respondString, numDest );
+	
+	// destIndex = post->outgoingSlotNum_;
+	// post->outgoingSlotNum_ += numDest;
 
 
 	// Still need to figure out how to deal with stuff in the srcFl.
@@ -152,3 +165,47 @@ bool ParFinfo::respondToAdd(
 
 
 ////////////////////////////////////////////////////////////////////
+
+void ParFinfo::dropAll( Element* e ) const
+{
+	;
+}
+
+bool ParFinfo::drop( Element* e, unsigned int i ) const
+{
+		return 0;
+}
+
+unsigned int ParFinfo::numIncoming( const Element* e ) const
+{
+		return 0;
+}
+
+unsigned int ParFinfo::numOutgoing( const Element* e ) const
+{
+		return 0;
+}
+
+unsigned int ParFinfo::incomingConns(
+					const Element* e, vector< Conn >& list ) const
+{
+		return 0;
+}
+
+unsigned int ParFinfo::outgoingConns(
+					const Element* e, vector< Conn >& list ) const
+{
+		return 0;
+}
+
+/// This Finfo does not support recvFuncs.
+RecvFunc ParFinfo::recvFunc() const
+{
+		return &dummyFunc;
+}
+
+void ParFinfo::countMessages( 
+					unsigned int& srcNum, unsigned int& destNum )
+{
+		return;
+}
