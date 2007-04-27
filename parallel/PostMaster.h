@@ -36,6 +36,8 @@ class PostMaster
 		void innerPoll( Element* e);
 		static void postSend( const Conn& c, int ordinal );
 		void innerPostSend( );
+		unsigned int respondToAdd( const string& respondString,
+						unsigned int numDest );
 	private:
 		unsigned int localNode_;
 		unsigned int remoteNode_;
@@ -52,6 +54,9 @@ class PostMaster
 		MPI::Status status_;
 		MPI::Comm* comm_;
 };
+
+extern const char* ftype2str( const Ftype *f );
+
 #endif
 
 #endif // _POST_MASTER_H

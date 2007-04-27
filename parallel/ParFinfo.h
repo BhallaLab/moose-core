@@ -31,6 +31,14 @@ class ParFinfo: public Finfo
 
 			bool add(
 					Element* e, Element* destElm, const Finfo* destFinfo
+			) const
+			{
+					return 0;
+			}
+
+			bool add(
+					Element* e, Element* destElm, 
+					const Finfo* destFinfo, unsigned int msgIndex 
 			) const;
 
 			bool respondToAdd(
@@ -51,9 +59,11 @@ class ParFinfo: public Finfo
 
 			/**
 			 * Send a message with the arguments in the string.
+			 * Doesn't work for this Finfo.
 			 */
-			bool strSet( Element* e, const std::string &s )
-					const;
+			bool strSet( Element* e, const std::string &s ) const {
+				return 0;
+			}
 			
 			/// strGet doesn't work for ParFinfo
 			bool strGet( const Element* e, std::string &s ) const {
@@ -78,7 +88,9 @@ class ParFinfo: public Finfo
 					unsigned int& srcNum, unsigned int& destNum );
 
 			const Finfo* match( 
-				const Element* e, unsigned int connIndex ) const;
+				const Element* e, unsigned int connIndex ) const {
+					return 0;
+			}
 
 			bool isTransient() const {
 					return 0;
@@ -90,7 +102,9 @@ class ParFinfo: public Finfo
 			 * argument matches. Then on top of this, the function
 			 * copies over the slot indices.
 			 */
-			bool inherit( const Finfo* baseFinfo );
+			bool inherit( const Finfo* baseFinfo ) {
+					return 0;
+			}
 
 			unsigned int getSlotIndex() const {
 					return msgIndex_;

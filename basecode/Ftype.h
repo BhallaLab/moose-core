@@ -171,7 +171,8 @@ class Ftype
 			 * destination objects. This function is called from 
 			 * PostMaster on target node.
 			 */
-			virtual IncomingFunc parIncomingFunc() const = 0;
+			virtual void 
+				appendIncomingFunc( vector <IncomingFunc >& ) const = 0;
 
 			/**
 			 * This returns a suitably typecast RecvFunc for handling
@@ -182,7 +183,20 @@ class Ftype
 			 * the postmaster outBuf, and then to copy
 			 * the arguments of the recvFunc into this buffer.
 			 */
-			virtual RecvFunc parOutgoingFunc() const = 0;
+			virtual void 
+				appendOutgoingFunc( vector < RecvFunc >& ) const = 0;
+
+			/**
+			 * This is used for making messages from postmasters to
+			 * their dests. The PostMaster needs to be able to
+			 * send to arbitrary targets, so the targets have to
+			 * be able to supply the Ftype that they want.
+			 * In most cases self will do,
+			 * but for SharedFtypes it gets more interesting.
+			 */
+			virtual const Ftype* makeMatchingType() const {
+				return this;
+			}
 };
 
 #endif // _FTYPE_H

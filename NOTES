@@ -2300,3 +2300,54 @@ Almost all the pieces in place now. Remaining:
 Further work on PostMaster.
 Implemented ParTick. 
 Compilation time.
+
+Checked in as revision 87.
+
+=============================================================================
+26 Apr 2007.
+
+Incorporating ParFinfo into the compilation.
+
+Working out how to handle the issues of insufficient information in the
+current add and respondToAdd argument lists.
+
+	add( Element* e, Element* destElm, const Finfo* destFinfo )
+	respondToAdd( Element* e, Element* src, const Ftype *srcType,
+		FuncList& srcFl, FuncList& returnFl,
+		unsigned int& destIndex, unsigned int& numDest )
+
+Additional info needed: 
+	- id of the target element.
+	- Name of the target Finfo.
+
+These are available at the point where the script call happens.
+They are lost when we call 'add', because it has to go to the postmaster
+(not the dest) and to the 'data' message (not the dest Finfo).
+The 'add' function is ubiquitous and we don't want to mess with it.
+
+Solution 1:
+	Implement a variant on add for all Finfo classes. Ugh.
+Solution 2:
+	Provide a wrapper element e, generated on the fly, that
+	stores the id and destFinfo name, but provides a handle for
+	the originating element to use its regular 'add'.
+Solution 3:
+	Likewise, but with destFinfo.
+Solution 4:
+	Generate a regular element on the fly, put some data in it with
+	this info. Don't bother clever stuff with OffNodeElement type,
+	as all we need here is a handle and SimpleElement will do.
+
+
+Set up something like solution 2. Still excruciatingly messy. 
+Compilation nearly there. Implemented OffNodeElement to handle the extra
+info that goes into the off-node messaging. Must remember to delete the
+OffNodeElement when done.
+Still need to fill in stuff which puts the additional info in the 
+OffNodeElement.
+
+=============================================================================
+27 Apr 2007.
+Successfully compiled. Incorporated OffNodeElement and some updates to
+Ftype classes to handle function generation for messaging.
+

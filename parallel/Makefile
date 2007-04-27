@@ -12,6 +12,7 @@ TARGET = parallel.o
 
 OBJ = \
 	PostMaster.o	\
+	ParFinfo.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -21,7 +22,8 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-PostMaster.o:	PostMaster.h ../basecode/Ftype2.h
+PostMaster.o:	PostMaster.h ParFinfo.h ../basecode/Ftype2.h
+ParFinfo.o:		ParFinfo.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c

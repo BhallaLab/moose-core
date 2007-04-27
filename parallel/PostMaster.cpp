@@ -62,7 +62,7 @@ const Cinfo* initPostMasterCinfo()
 					GFCAST( &PostMaster::getRemoteNode ),
 					RFCAST( &PostMaster::setRemoteNode )
 		),
-	//	new ParFinfo( "data" ),
+		new ParFinfo( "data" ),
 		new SharedFinfo( "parallel", parTypes, 4 ),
 	};
 
@@ -277,6 +277,31 @@ void PostMaster::postSend( const Conn& c, int ordinal )
 	static_cast< PostMaster* >( c.data() )->innerPostSend();
 }
 
+/////////////////////////////////////////////////////////////////////
+/**
+ * This function handles requests to set up a message. It does the
+ * following:
+ * - posts irecv for return status of the message
+ * - Sends out the message request itself
+ * - Creates the local message stuff
+ * - Returns index for forming local message.
+ */
+unsigned int PostMaster::respondToAdd(
+				const string& respondString, unsigned int numDest )
+{
+	return 0;
+}
+
+/**
+ * This function handles addition of message from postmaster to
+ * targets. Usually called from within the PostMaster following a
+ * cross-node message
+ */
+void PostMaster::placeIncomingFuncs( 
+		vector< IncomingFunc >& inFl, unsigned int msgIndex )
+{
+	;
+}
 /////////////////////////////////////////////////////////////////////
 
 void* getParBuf( const Conn& c, unsigned int size )

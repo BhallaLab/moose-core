@@ -99,8 +99,9 @@ template < class T1, class T2, class T3 > class Ftype3: public Ftype
 				return data;
 			}
 			
-			virtual IncomingFunc parIncomingFunc() const {
-				return &incomingFunc;
+			void appendIncomingFunc( vector< IncomingFunc >& vec )
+					const {
+				vec.push_back( &incomingFunc );
 			}
 
 			static void outgoingFunc( const Conn& c, 
@@ -116,10 +117,9 @@ template < class T1, class T2, class T3 > class Ftype3: public Ftype
 				serialize< T3 >( data, v3 );
 			}
 
-			virtual RecvFunc parOutgoingFunc() const {
-				return RFCAST( &outgoingFunc );
+			void appendOutgoingFunc( vector< RecvFunc >& vec ) const {
+				vec.push_back( RFCAST( &outgoingFunc ) );
 			}
-    
 };
 
 #endif // _FTYPE3_H

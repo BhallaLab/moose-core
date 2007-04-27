@@ -39,6 +39,8 @@ typedef pair< const Ftype*, RecvFunc > TypeFuncPair;
 class SharedFtype: public Ftype
 {
 		public:
+			SharedFtype() {;}
+
 			SharedFtype( pair< const Ftype*, RecvFunc >*, unsigned int);
 
 			unsigned int nValues() const {
@@ -57,18 +59,31 @@ class SharedFtype: public Ftype
 			RecvFunc trigFunc() const {
 					return 0;
 			}
+			
+			void appendIncomingFunc( vector< IncomingFunc >& vec ) const
+				{ ; }
 
-			IncomingFunc parIncomingFunc() const {
-					return 0;
-			}
+			void appendOutgoingFunc( vector< RecvFunc >& vec ) const
+				{ ; }
 
-			RecvFunc parOutgoingFunc() const {
-					return 0;
+
+			/**
+			 * This is used for making messages from postmasters to
+			 * their dests. The PostMaster needs to be able to
+			 * send to arbitrary targets, so the targets have to
+			 * be able to supply the Ftype that they want.
+			 * Here we match each individual Ftype in the src
+			 * and dest lists, and swap the lists.
+			 */
+			const Ftype* makeMatchingType() const {
+				return match_;
 			}
 
 		private:
 			vector< const Ftype* > destTypes_;
 			vector< const Ftype* > srcTypes_;
+			// This is the matching ftype.
+			SharedFtype* match_;
 			unsigned int nValues_;
 			unsigned int size_;
 };
