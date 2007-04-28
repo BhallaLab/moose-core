@@ -2351,3 +2351,30 @@ OffNodeElement.
 Successfully compiled. Incorporated OffNodeElement and some updates to
 Ftype classes to handle function generation for messaging.
 
+Checked in as revision 88.
+
+Still much to be done, but we should have enough infrastructure to
+send information between two nodes if the message setup is hard-coded.
+Time to test.
+- Confirmed creation of all postmasters.
+- Failed trying to connect from object to postmaster.
+	Two issues: 
+	- Do we use MsgSrc vector for all postmaster messages?
+	Yes, because we need unique indexing. If we used that and the 
+	MsgDest we'd have two sets of indices.
+	- How do we handle its allocation?
+	Should be safe just to do a resize or push_back when messages are added.
+
+=============================================================================
+28 April 2007.
+Still need another fix to the messaging logic. We need a separate Conn from
+each MsgSrc in a shared message to the PostMaster. This lets us assign the Conn
+id to the destination MsgSrc id, otherwise there is ambiguity.
+Then the MsgDest array becomes a mirror of the MsgSrc array on the recieving
+PostMaster.
+
+Tryign to compile. Looks like our 'off' element is being retained as a ptr
+after it is deleted. I can really add a couple of fields to the postmaster
+and accomplish much the same. Let's try that. Check it in first for reference.
+
+=============================================================================

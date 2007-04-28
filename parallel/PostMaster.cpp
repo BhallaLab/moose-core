@@ -290,6 +290,8 @@ unsigned int PostMaster::respondToAdd(
 				const string& respondString, unsigned int numDest )
 {
 	return 0;
+
+	// Here we assign space on the MsgSrc/Dest for the messages.
 }
 
 /**
@@ -314,6 +316,8 @@ void* getParBuf( const Conn& c, unsigned int size )
 /////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
+#include "../element/Neutral.h"
+#include "../basecode/OffNodeElement.h"
 #include "Ftype2.h"
 #include "setget.h"
 #include "../builtins/Interpol.h"
@@ -321,7 +325,84 @@ void* getParBuf( const Conn& c, unsigned int size )
 
 void testPostMaster()
 {
-		cout << "\nTesting PostMaster";
+	// First, ensure that all nodes are synced.
+	MPI::COMM_WORLD.Barrier();
+	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
+	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
+	unsigned int* postId = new unsigned int[numNodes];
+	if ( myNode == 0 )
+		cout << "\nTesting PostMaster: " << numNodes << " nodes";
+	MPI::COMM_WORLD.Barrier();
+	///////////////////////////////////////////////////////////////
+	// check that we have postmasters for each of the other nodes
+	// Print out a dot for each node.
+	///////////////////////////////////////////////////////////////
+	unsigned int postMastersId =
+			Neutral::getChildByName( Element::root(), "postmasters" );
+	ASSERT( postMastersId != BAD_ID, "postmasters element creation" );
+	Element* pms = Element::element( postMastersId );
+	for ( unsigned int i = 0; i < numNodes; i++ ) {
+		char name[10];
+		sprintf( name, "node%d", i );
+		unsigned int id = Neutral::getChildByName( pms, name );
+		if ( myNode == i ) { // Should not exist locally.
+			ASSERT( id == BAD_ID, "Checking local postmasters" )
+		} else {
+			ASSERT( id != BAD_ID, "Checking local postmasters" )
+		}
+		postId[i] = id;
+	}
+	MPI::COMM_WORLD.Barrier();
+	
+	///////////////////////////////////////////////////////////////
+	// This next test works on a single node too, for debugging.
+	// In the single node case it fudges things to look like 2 nodes.
+	// It tries to create a message from a table to a postmaster.
+	///////////////////////////////////////////////////////////////
+	// On all nodes, create a table and fill it up.
+	Element* table = Neutral::create( "Table", "tab", Element::root() );
+	ASSERT( table != 0, "Checking data flow" );
+	set< int >( table, "xdivs", 10 );
+	if ( myNode == 0 ) {
+		set< int >( table, "stepmode", 2 ); // TAB_ONCE
+		for ( unsigned int i = 0; i <= 10; i++ )
+			lookupSet< double, unsigned int >( 
+							table, "table", i * i, i );
+	} else {
+		set< int >( table, "stepmode", 3 ); // TAB_BUF
+		for ( unsigned int i = 0; i <= 10; i++ )
+			lookupSet< double, unsigned int >( 
+							table, "table", 0.0, i );
+	}
+
+	Element* post;
+	if ( numNodes == 1 ) { // Create a dummy postmaster
+		post = Neutral::create( "PostMaster", "node1", pms );
+		numNodes = 2;
+		delete[] postId;
+		postId = new unsigned int[numNodes];
+		postId[0] = BAD_ID;
+		postId[1] = post->id();
+	}
+	if ( myNode == 0 ) {
+		// Here we are being sneaky because we have the same id on all 
+		// nodes.
+		for ( unsigned int i = 1; i < numNodes; i++ ) {
+			OffNodeElement off( table->id(), i );
+			Element* post = Element::element( postId[i] );
+			off.setPost( post );
+			off.setFieldName( "input" );
+			const Finfo* outFinfo = table->findFinfo( "outputSrc" );
+			const Finfo* dataFinfo = post->findFinfo( "data" );
+			bool ret = outFinfo->add( table, &off, dataFinfo );
+			ASSERT( ret, "Node 0 Making input message to postmaster" );
+		}
+	}
+
+
+	// This first test sends data from node 0 to all the other
+	// nodes using hard-coded messaging. We use a 
+	// table at each end for the source and dest of the data.
 		/*
 		cout << "\n ftype2str( Ftype1< double > ) = " <<
 				ftype2str( Ftype1< double >::global() );
@@ -330,6 +411,7 @@ void testPostMaster()
 		cout << "\n ftype2str( ValueFtype1< Table >::global() ) = " <<
 				ftype2str( ValueFtype1< Table >::global() );
 				*/
+	set( table, "destroy" );
 }
 #endif
 
