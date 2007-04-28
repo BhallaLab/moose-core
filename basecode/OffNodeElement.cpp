@@ -36,106 +36,117 @@ const std::string& OffNodeElement::name( ) const
 		return ret;
 }
 
-		/// Sets the name of the element.
+		/// Sets the name of the element. Not permitted.
 void OffNodeElement::setName( const std::string& name )
 { ; }
 
 		/// Returns the name of the element class
 const std::string& OffNodeElement::className( ) const
 {
-	static string ret = "";
-	return ret;
+	return post_->className();
+	// static string ret = "";
+	// return ret;
 }
 
 /// Looks up the specific indexed conn
 vector< Conn >::const_iterator OffNodeElement::lookupConn( unsigned int i ) const
 {
-		return static_cast< vector< Conn >::const_iterator >( 0 );
+		return post_->lookupConn( i );
+		// return static_cast< vector< Conn >::const_iterator >( 0 );
 		// return post_->lookupConn( i );
 }
 
 /// Looks up the specific indexed conn, allows modification.
 vector< Conn >::iterator OffNodeElement::lookupVariableConn( unsigned int i )
 {
-		return static_cast< vector< Conn >::iterator >( 0 );
+		return post_->lookupVariableConn( i );
+		// return static_cast< vector< Conn >::iterator >( 0 );
 		// return post_->lookupVariableConn( i );
 }
 
 		/// Finds the index of the specified conn
-unsigned int OffNodeElement::connIndex( const Conn* ) const
+unsigned int OffNodeElement::connIndex( const Conn* c ) const
 {
-		return 0;
+		return post_->connIndex( c );
+		// return 0;
 }
 
 unsigned int OffNodeElement::connDestRelativeIndex(
 				const Conn& c, unsigned int slot ) const
 {
-		return 0;
+		return post_->connDestRelativeIndex( c, slot );
 }
 		
 		/// Returns the size of the conn vector.
 unsigned int OffNodeElement::connSize() const 
 {
-		return 0;
+		return post_->connSize();
 }
 
 vector< Conn >::const_iterator OffNodeElement::connSrcBegin( unsigned int src ) const
 {
-		return static_cast< vector< Conn >::const_iterator >( 0 );
+		return post_->connSrcBegin( src );
+		// return static_cast< vector< Conn >::const_iterator >( 0 );
 }
 
 vector< Conn >::const_iterator OffNodeElement::connSrcEnd( unsigned int src ) const
 {
-		return static_cast< vector< Conn >::const_iterator >( 0 );
+		return post_->connSrcEnd( src );
+		// return static_cast< vector< Conn >::const_iterator >( 0 );
 }
 
 vector< Conn >::const_iterator OffNodeElement::connSrcVeryEnd( unsigned int src ) const
 {
-		return static_cast< vector< Conn >::const_iterator >( 0 );
+		return post_->connSrcVeryEnd( src );
+		// return static_cast< vector< Conn >::const_iterator >( 0 );
 }
 
 unsigned int OffNodeElement::nextSrc( unsigned int src ) const
 {
-		return 0;
+		return post_->nextSrc( src );
+		// return 0;
 }
 
 vector< Conn >::const_iterator OffNodeElement::connDestBegin( unsigned int dest ) const
 {
-		return static_cast< vector< Conn >::const_iterator >( 0 );
+		return post_->connDestBegin( dest );
+		// return static_cast< vector< Conn >::const_iterator >( 0 );
 }
 
 vector< Conn >::const_iterator OffNodeElement::connDestEnd( unsigned int dest ) const
 {
-		return static_cast< vector< Conn >::const_iterator >( 0 );
+		return post_->connDestEnd( dest );
+		// return static_cast< vector< Conn >::const_iterator >( 0 );
 }
 
 void OffNodeElement::connect( unsigned int myConn,
 			Element* targetElement, unsigned int targetConn)
 {
-		;
+		post_->connect( myConn, targetElement, targetConn );
 }
 
 void OffNodeElement::disconnect( unsigned int connIndex )
 {
-		;
+		post_->disconnect( connIndex );
 }
 
 void OffNodeElement::deleteHalfConn( unsigned int connIndex ) 
 {
-		;
+		post_->deleteHalfConn( connIndex );
 }
 
 
 bool OffNodeElement::isMarkedForDeletion() const
 {
-		return 0;
+		return post_->isMarkedForDeletion();
 }
 
 bool OffNodeElement::isGlobal() const
 {
-		return 0;
+		return post_->isGlobal();
 }
 
+// Here we do NOT want to delete the postmaster.
 void OffNodeElement::prepareForDeletion( bool stage )
 {
 		;
@@ -145,56 +156,61 @@ unsigned int OffNodeElement::insertConnOnSrc(
 				unsigned int src, FuncList& rf,
 				unsigned int dest, unsigned int nDest)
 {
-		return 0;
+		return post_->insertConnOnSrc( src, rf, dest, nDest );
+		// return 0;
 }
 
 unsigned int OffNodeElement::insertConnOnDest( unsigned int dest, unsigned int nDest)
 {
-		return 0;
+		return post_->insertConnOnDest( dest, nDest );
+		// return 0;
 }
 
 void* OffNodeElement::data() const
 {
-		return 0;
+		return post_->data();
+		// return 0;
 }
 
 const Finfo* OffNodeElement::findFinfo( const string& name )
 {
-		return 0;
+		return post_->findFinfo( name );
+		// return 0;
 }
 
 const Finfo* OffNodeElement::findFinfo( unsigned int connIndex ) const
 {
+		return post_->findFinfo( connIndex );
 		return 0;
 }
 
 unsigned int OffNodeElement::listFinfos(
 			vector<	const Finfo* >& flist ) const
 {
-		return 0;
+		return post_->listFinfos( flist );
 }
 
 unsigned int OffNodeElement::listLocalFinfos( vector< Finfo* >& flist )
 {
-		return 0;
+		return post_->listLocalFinfos( flist );
 }
 
 
 void OffNodeElement::addFinfo( Finfo* f )
 {
-		;
+		return post_->addFinfo( f );
 }
 
 bool OffNodeElement::isConnOnSrc(
 			unsigned int src, unsigned int conn ) const
 {
-		return 0;
+		return post_->isConnOnSrc( src, conn );
 }
 
 bool OffNodeElement::isConnOnDest(
 			unsigned int dest, unsigned int conn ) const
 {
-		return 0;
+		return post_->isConnOnDest( dest, conn );
 }
 
 
@@ -206,7 +222,7 @@ Element* OffNodeElement::copy( Element* parent, const string& newName )
 
 bool OffNodeElement::isDescendant( const Element* ancestor ) const
 {
-		return 0;
+		return post_->isDescendant( ancestor );
 }
 
 
