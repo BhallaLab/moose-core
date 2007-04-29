@@ -62,6 +62,16 @@ const Cinfo* initPostMasterCinfo()
 					GFCAST( &PostMaster::getRemoteNode ),
 					RFCAST( &PostMaster::setRemoteNode )
 		),
+		new ValueFinfo( "targetId", 
+					ValueFtype1< unsigned int >::global(),
+					GFCAST( &PostMaster::getTargetId ),
+					RFCAST( &PostMaster::setTargetId )
+		),
+		new ValueFinfo( "targetField", 
+					ValueFtype1< string >::global(),
+					GFCAST( &PostMaster::getTargetField ),
+					RFCAST( &PostMaster::setTargetField )
+		),
 		new ParFinfo( "data" ),
 		new SharedFinfo( "parallel", parTypes, 4 ),
 	};
@@ -110,6 +120,28 @@ unsigned int PostMaster::getRemoteNode( const Element* e )
 void PostMaster::setRemoteNode( const Conn& c, unsigned int node )
 {
 		static_cast< PostMaster* >( c.data() )->remoteNode_ = node;
+}
+
+
+unsigned int PostMaster::getTargetId( const Element* e )
+{
+		return static_cast< PostMaster* >( e->data() )->targetId_;
+}
+
+void PostMaster::setTargetId( const Conn& c, unsigned int value )
+{
+		static_cast< PostMaster* >( c.data() )->targetId_ = value;
+}
+
+
+string PostMaster::getTargetField( const Element* e )
+{
+		return static_cast< PostMaster* >( e->data() )->targetField_;
+}
+
+void PostMaster::setTargetField( const Conn& c, string value )
+{
+		static_cast< PostMaster* >( c.data() )->targetField_ = value;
 }
 
 
@@ -286,12 +318,16 @@ void PostMaster::postSend( const Conn& c, int ordinal )
  * - Creates the local message stuff
  * - Returns index for forming local message.
  */
-unsigned int PostMaster::respondToAdd(
-				const string& respondString, unsigned int numDest )
-{
-	return 0;
 
-	// Here we assign space on the MsgSrc/Dest for the messages.
+unsigned int PostMaster::respondToAdd(
+		Element* e, const string& respondString, unsigned int numDest )
+{
+		cout << "\nresponding to add from node " <<
+			PostMaster::getMyNode( e ) <<
+		 	" to node " << 
+			PostMaster::getRemoteNode( e ) <<
+			" with " << respondString << endl;
+	return 0;
 }
 
 /**
@@ -317,7 +353,6 @@ void* getParBuf( const Conn& c, unsigned int size )
 
 #ifdef DO_UNIT_TESTS
 #include "../element/Neutral.h"
-#include "../basecode/OffNodeElement.h"
 #include "Ftype2.h"
 #include "setget.h"
 #include "../builtins/Interpol.h"
@@ -349,6 +384,11 @@ void testPostMaster()
 			ASSERT( id == BAD_ID, "Checking local postmasters" )
 		} else {
 			ASSERT( id != BAD_ID, "Checking local postmasters" )
+			Element* p = Element::element( id );
+			ASSERT( p->className() == "PostMaster", "Check PostMaster");
+			unsigned int remoteNode;
+			get< unsigned int >( p, "remoteNode", remoteNode );
+			ASSERT( remoteNode == i, "CheckPostMaster" );
 		}
 		postId[i] = id;
 	}
@@ -388,13 +428,12 @@ void testPostMaster()
 		// Here we are being sneaky because we have the same id on all 
 		// nodes.
 		for ( unsigned int i = 1; i < numNodes; i++ ) {
-			OffNodeElement off( table->id(), i );
 			Element* post = Element::element( postId[i] );
-			off.setPost( post );
-			off.setFieldName( "input" );
+			set< unsigned int >( post, "targetId", table->id() );
+			set< string >( post, "targetField", "input" );
 			const Finfo* outFinfo = table->findFinfo( "outputSrc" );
 			const Finfo* dataFinfo = post->findFinfo( "data" );
-			bool ret = outFinfo->add( table, &off, dataFinfo );
+			bool ret = outFinfo->add( table, post, dataFinfo );
 			ASSERT( ret, "Node 0 Making input message to postmaster" );
 		}
 	}
