@@ -2377,4 +2377,17 @@ Tryign to compile. Looks like our 'off' element is being retained as a ptr
 after it is deleted. I can really add a couple of fields to the postmaster
 and accomplish much the same. Let's try that. Check it in first for reference.
 
+Checked in as revision 89 
+
+=============================================================================
+29 April 2007.
+Now using the PostMaster itself as the holder for the extra info when 
+creating off-node messages. Just add a few fields. This lets us eliminate
+the ugliness with a Union for Element* and node#, and also the OffNodeElement.
+
+That works, or at least, it passes the limited initial unit tests.
+Added a few more tests and it looks like the initial phase of parallel 
+messaging is beginning to take shape.
+
+
 =============================================================================

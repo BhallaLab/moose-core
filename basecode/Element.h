@@ -12,17 +12,6 @@
 #define _ELEMENT_H
 
 /**
- * This union is used to manage conversion between id and element
- * including cases where the element is off-node.
- * \todo Later we have to make it a more sophisticated class and move
- * the lookup stuff off the Element.
- */
-union IdLookup {
-		Element* element;
-		unsigned int node;
-};
-
-/**
  * The Element class handles all the MOOSE infrastructure: messages,
  * field information and class information. It manages the actual
  * data class through a generic char* pointer.
@@ -320,7 +309,7 @@ class Element
 
 
 	private:
-		static vector< IdLookup >& elementList();
+		static vector< Element* >& elementList();
 		// static vector< Element* > elementList;
 		unsigned int id_;
 };

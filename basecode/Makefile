@@ -16,7 +16,6 @@ TARGET = basecode.o
 
 OBJ = \
 	Element.o	\
-	OffNodeElement.o	\
 	Conn.o	\
 	RecvFunc.o \
 	SimpleElement.o	\
