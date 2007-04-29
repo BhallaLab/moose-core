@@ -57,12 +57,7 @@ CXX = g++
 
 LD = ld
 
-#
-# moved genesis_parser to beginning since it generates code
-#
-SUBDIR = genesis_parser basecode shell element maindir biophysics builtins scheduling $(PARALLEL_DIR)
-
-#randnum builtins scheduling kinetics biophysics textio hsolve $(PARALLEL_DIR) utility
+SUBDIR = genesis_parser basecode shell element maindir biophysics kinetics builtins scheduling $(PARALLEL_DIR)
 
 OBJLIBS =	\
 	basecode/basecode.o \
@@ -71,6 +66,7 @@ OBJLIBS =	\
 	element/element.o \
 	shell/shell.o \
 	biophysics/biophysics.o \
+	kinetics/kinetics.o \
 	builtins/builtins.o \
 	scheduling/scheduling.o \
 
