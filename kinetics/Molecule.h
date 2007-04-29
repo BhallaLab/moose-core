@@ -13,13 +13,41 @@
 class Molecule
 {
 	public:
-		Molecule()
-		{
-			nInit_ = 0.0;
-			volumeScale_ = 1.0;
-			n_ = 0.0;
-			mode_ = 0;
-		}
+		Molecule();
+		
+		///////////////////////////////////////////////////
+		// Field assignment functions
+		///////////////////////////////////////////////////
+		
+		static void setNinit( const Conn& c, double value );
+		static double getNinit( const Element* e );
+		static void setVolumeScale( const Conn& c, double value );
+		static double getVolumeScale( const Element* e );
+		static void setN( const Conn& c, double value );
+		static double getN( const Element* e );
+		static void setMode( const Conn& c, int value );
+		static double getMode( const Element* e );
+		double localGetConc() const;
+		static double getConc( const Element* e );
+		void localSetConc( double value );
+		static void setConc( const Conn& c, double value );
+		double localGetConcInit() const;
+		static double getConcInit( const Element* e );
+		void localSetConcInit( double value );
+		static void setConcInit( const Conn& c, double value );
+		
+		///////////////////////////////////////////////////
+		// Dest function definitions
+		///////////////////////////////////////////////////
+		
+		static void reacFunc( const Conn& c, double A, double B );
+		static void sumTotalFunc( const Conn& c, double n );
+		void sumProcessFuncLocal( );
+		static void sumProcessFunc( const Conn& c, ProcInfo info );
+		static void reinitFunc( const Conn& c, ProcInfo info );
+		void reinitFuncLocal( Element* e );
+		static void processFunc( const Conn& c, ProcInfo info );
+		void processFuncLocal( Element* e, ProcInfo info );
 
 	private:
 		double nInit_;

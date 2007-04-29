@@ -2389,5 +2389,9 @@ That works, or at least, it passes the limited initial unit tests.
 Added a few more tests and it looks like the initial phase of parallel 
 messaging is beginning to take shape.
 
+Checked in as revision 90 
+
+As a little side-project, finished implementation of Molecule, implemented
+Reaction, compiled, yet to do tests.
 
 =============================================================================
