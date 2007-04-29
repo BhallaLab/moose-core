@@ -19,9 +19,16 @@ class PostMaster
 {
 	public:
 		PostMaster();
+		//////////////////////////////////////////////////////////////
+		// Field access functions
+		//////////////////////////////////////////////////////////////
 		static unsigned int getMyNode( const Element* e );
 		static unsigned int getRemoteNode( const Element* e );
 		static void setRemoteNode( const Conn& c, unsigned int node );
+		static unsigned int getTargetId( const Element* e );
+		static void setTargetId( const Conn& c, unsigned int value );
+		static string getTargetField( const Element* e );
+		static void setTargetField( const Conn& c, string value );
 		void* innerGetParBuf( unsigned int targetIndex,
 						unsigned int size );
 		void placeIncomingFuncs( 
@@ -36,8 +43,12 @@ class PostMaster
 		void innerPoll( Element* e);
 		static void postSend( const Conn& c, int ordinal );
 		void innerPostSend( );
-		unsigned int respondToAdd( const string& respondString,
-						unsigned int numDest );
+
+		// This static function handles response to an addmsg request,
+		// including operations on the element portion of the postmaster
+		// and tranmitting info to the remote node.
+		static unsigned int respondToAdd(
+		Element* e, const string& respondString, unsigned int numDest );
 	private:
 		unsigned int localNode_;
 		unsigned int remoteNode_;
@@ -50,6 +61,12 @@ class PostMaster
 		unsigned int outBufSize_;
 		unsigned int outgoingSlotNum_;
 		bool donePoll_;
+
+		// Here are some fields used to ferry data into off-node
+		// messaging code in ParFinfo.
+		unsigned int targetId_;
+		string targetField_;
+		
 		MPI::Request request_;
 		MPI::Status status_;
 		MPI::Comm* comm_;

@@ -9,7 +9,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "OffNodeElement.h"
 
 const unsigned int BAD_ID = ~0;
 const unsigned int MIN_NODE = 1;
@@ -22,9 +21,7 @@ const unsigned int MAX_NODE = 65536; // Dream on.
 Element::Element()
 {
 	id_ = elementList().size();
-	IdLookup id;
-	id.element = this;
-	elementList().push_back( id );
+	elementList().push_back( this );
 }
 
 /**
@@ -46,7 +43,7 @@ Element::Element( bool ignoreId )
 Element::~Element()
 {
 	if ( id_ != 0 )
-		elementList()[ id_ ].element = 0;
+		elementList()[ id_ ] = 0;
 }
 
 /**
@@ -57,12 +54,7 @@ Element::~Element()
 Element* Element::element( unsigned int id )
 {
 	if ( id < elementList().size() ) {
-		unsigned int node = elementList()[ id ].node;
-		// Check if it is a good node
-		if ( node >= MIN_NODE && node <= MAX_NODE )
-			return new OffNodeElement( id, node - 1 );
-		else 
-			return elementList()[ id ].element;
+		return elementList()[ id ];
 	}
 	return 0;
 }
@@ -76,9 +68,9 @@ Element* Element::lastElement() {
 	return Element::element( elementList().size() - 1 );
 }
 
-vector< IdLookup >& Element::elementList()
+vector< Element* >& Element::elementList()
 {
-	static vector< IdLookup > elementList;
+	static vector< Element* > elementList;
 
 	return elementList;
 }

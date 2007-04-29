@@ -9,7 +9,6 @@
 **********************************************************************/
 
 #include "moose.h"
-#include "OffNodeElement.h"
 #include "MsgDest.h"
 #include "ParFinfo.h"
 #include <mpi.h>
@@ -124,19 +123,21 @@ bool ParFinfo::respondToAdd(
 					unsigned int& destIndex, unsigned int& numDest
 ) const
 {
-	OffNodeElement* off = dynamic_cast< OffNodeElement* >( e );
-	assert( off != 0 );
-	assert( off->post() != 0 );
-	assert( off->post()->className() == "PostMaster" );
-	PostMaster* post = static_cast< PostMaster* >( off->post()->data());
+	assert( e != 0 );
+	assert( e->className() == "PostMaster" );
+	// PostMaster* post = static_cast< PostMaster* >( e->data());
 	
 	// const Ftype* srcType = srcFinfo->ftype();
 
-	string respondString;
+	unsigned int targetId;
+	get< unsigned int >( e, "targetId", targetId );
+	string targetField;
+	get< string >( e, "targetField", targetField );
+//	string respondString;
 	ostringstream oss;
-	oss.str( respondString );
-	oss << src->id() << " " << off->destId() << " " << 
-			off->fieldName() << " " << ftype2str( srcType );
+// 	oss.str( respondString );
+	oss << src->id() << " " << targetId << " " << 
+			targetField << " " << ftype2str( srcType );
 
 	// Post irecv for return status of this message request.
 	// Send out this message request.
@@ -152,11 +153,10 @@ bool ParFinfo::respondToAdd(
 	// - post irecv for return status of this message
 	// - send out message request
 	// - create local message
-	destIndex = post->respondToAdd( respondString, numDest );
+	destIndex = PostMaster::respondToAdd( e, oss.str(), numDest );
 	
 	// destIndex = post->outgoingSlotNum_;
 	// post->outgoingSlotNum_ += numDest;
-
 
 	// Still need to figure out how to deal with stuff in the srcFl.
 	return 1;
