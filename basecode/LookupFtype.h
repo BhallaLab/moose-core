@@ -118,6 +118,13 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 				return ret;
 			}
 
+    virtual std::string getTemplateParameters() const
+    {
+        static std::string s = Ftype::full_type(typeid(T1).name())+","+Ftype::full_type(typeid(T2).name());
+        cout << "In LookupFtype::getTemplateParameters - " << s << endl;
+        
+        return s;
+    }
 			/**
 			 * 'get' gets a value. It requires that the indexing info
 			 * be available through the Finfo, which must be a 
