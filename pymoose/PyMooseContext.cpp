@@ -7,10 +7,21 @@
  ********************************************************************/
 #ifndef _PYMOOSE_CONTEXT_CPP
 #define _PYMOOSE_CONTEXT_CPP
+
 #include "PyMooseContext.h"
+
+#include "../scheduling/Tick.h"
+#include "../scheduling/ClockJob.h"
+#include "../builtins/Interpol.h"
+#include "../builtins/Table.h"
+
 using namespace std;
 
 extern const Cinfo* initShellCinfo();
+extern const Cinfo* initTickCinfo();
+extern const Cinfo* initClockJobCinfo();
+extern const Cinfo* initTableCinfo();
+
 extern const unsigned int BAD_ID;
 
 //extern vector <string> separateString(string s, vector <string> v, string separator);
@@ -143,6 +154,9 @@ const Cinfo* initPyMooseContextCinfo()
 
 static const Cinfo* pyMooseContextCinfo = initPyMooseContextCinfo();
 static const Cinfo* shellCinfo = initShellCinfo();
+static const Cinfo* tickCinfo = initTickCinfo();
+static const Cinfo* clockJobCinfo = initClockJobCinfo();
+static const Cinfo* tableCinfo = initTableCinfo();
 
 static const unsigned int setCweSlot = 
 initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 0;
@@ -383,7 +397,17 @@ PyMooseContext* PyMooseContext::createPyMooseContext(std::string shellName, std:
     assert( shellFinfo->add( shellElement, contextElement, contextFinfo) != 0 );
     PyMooseContext* context = static_cast<PyMooseContext*> (contextElement->data());
     context->shell_ = shellElement->id();
-    context->myId_ = contextElement->id();        
+    context->myId_ = contextElement->id();
+    set<std::string, std::string>( Element::root(), "create", "Neutral", "sched");
+    context->scheduler_ = Element::lastElement()->id();
+    cout << "PyMooseContext::createPyMooseContext() - scheduler id: " << context->scheduler_ << endl;
+    
+    set<std::string, std::string>( Element::element(context->scheduler_), "create", "ClockJob", "cj");
+    context->clockJob_ =  Element::lastElement()->id();
+    cout << "PyMooseContext::createPyMooseContext() - clockjob id: " << context->clockJob_ << endl;
+//    set<std::string, std::string>( Element::element(context->clockJob_), "create", "Tick", "t0");
+//    context->tick0_ =   Element::lastElement()->id();
+//    cout << "PyMooseContext::createPyMooseContext() - tick id: " << context->tick0_ << endl;
 
     context->setCwe(0); // make initial element = root        
 
@@ -514,10 +538,17 @@ std::string PyMooseContext::getPath(Id id) const
     }
     while (id!=0)
     {
-        path = separator + Element::element( id )->name() + path;
+        Element* e = Element::element( id );
+        if ( e == NULL)
+        {
+            cerr << "Error: PyMooseContext::getPath(Id id) - Invalid id specified" << endl;
+            return "";        
+        }
+        
+        path = separator + e->name() + path;
         id = getParent(id);
-    }
-    return path ;
+    }    
+    return path;
 }
 
 Id PyMooseContext::pathToId(std::string path)
@@ -595,6 +626,9 @@ vector <Id>& PyMooseContext::getChildren(std::string path)
  */
 /**
    The most basic versions: step by the amount specified as rutime.
+   corresponds to :
+        step 0.005 -t
+   in genesis parser
  */
 void PyMooseContext::step(double runtime )
 {
@@ -608,6 +642,9 @@ void PyMooseContext::step(double runtime )
 }
 /**
    step by mult multiple of the smallest clock duration.
+   corresponds to:
+        step 5
+   in genesis parser
  */
 void PyMooseContext::step(long mult)
 {
@@ -627,11 +664,19 @@ void PyMooseContext::step(long mult)
 }
 /**
    step by the smallest clock duration only
+   corresponds to genesis parser command:
+        step 
  */
 void PyMooseContext::step(void)
 {
     step((long)1);    
 }
+
+void PyMooseContext::setClock(int clockNo, double dt, int stage = 0)
+{
+    send3< int, double, int >(Element::element(myId_), setClockSlot, clockNo, dt, stage);
+}
+
 
 vector <double> & PyMooseContext::getClocks()
 {
@@ -639,14 +684,14 @@ vector <double> & PyMooseContext::getClocks()
         return dbls_;        
 }
 
-void PyMooseContext::useClock(Id tickId, std::string path)
+void PyMooseContext::useClock(Id tickId, std::string path, std::string func)
 {
     Element * e = Element::element(myId_);
     send2< string, bool >( e, requestWildcardListSlot, path, 0 );
     send3< unsigned int, vector< unsigned int >, string >(
         Element::element( myId_ ),
         useClockSlot, 
-        tickId, elist_, "process" );
+        tickId, elist_,  func );
 }
 
 void PyMooseContext::reset()
@@ -680,13 +725,27 @@ Id PyMooseContext::deepCopy( Id object, std::string new_name, Id dest)
     do_deep_copy( object,  new_name, dest);
     
     std::string path = getPath(dest) + PyMooseContext::separator+new_name;
-    return pathToId(path);    
+    return pathToId(path);
 }
 
 void PyMooseContext::do_move( Id object, std::string new_name, Id dest)
 {
     send3< Id, Id, string >(
         Element::element( myId_), moveSlot, object, dest, new_name );
+}
+
+bool PyMooseContext::connect(Id src, std::string srcField, Id dest, std::string destField)
+{
+    	if ( src != BAD_ID && dest != BAD_ID ) {
+            Element* se = Element::element( src );
+            Element* de = Element::element( dest );
+            const Finfo* sf = se->findFinfo( srcField );
+            if ( !sf ) return false;
+            const Finfo* df = de->findFinfo( destField );
+            if ( !df ) return false;
+            return (bool)(se->findFinfo( srcField )->add( se, de, de->findFinfo( destField )));
+	}
+    return false;    
 }
 
 #ifdef DO_UNIT_TESTS

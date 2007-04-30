@@ -21,7 +21,17 @@
 # Use the options below for compiling on GCC4.0
 #  For Debian/Ubuntu 6.06, we need to add a few more compiler flags to
 #  help it through the genesis parser, which is littered with ifdefs.
-CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+
+# !! Avoid the following unless you are a moose python-interface developer. !!
+# If you want the python interface wrapper classes to be generated 
+# use the following CFLAGS specification.
+# Do remember that you have to create a directory named "generated" 
+# in the working directory of moose. Also you have to do some editing to get the 
+# generated code to work. 
+# It is completely harmless except for a few file existence checks at startup.
+CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DGENERATE_WRAPPERS
+
 #CFLAGS  =	-O3 -Wall -pedantic
 
 # Use the options below for compiling on GCC4.1
