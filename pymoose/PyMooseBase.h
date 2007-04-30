@@ -20,17 +20,24 @@ class PyMooseBase
     virtual ~PyMooseBase();
     static bool destroy(Id id);    
     static void endSimulation();    
-    std::string __get_path() const;   
-    Id __get_id() const;
-    
     virtual const std::string& getType() = 0;
     const string& getSeparator() const;
-//    static const PyMooseContext* getContext();
+    static const PyMooseContext* getContext();
+
     vector< Id >& __get_children() const;
     Id __get_parent() const;
+    std::string path() const;   
+    Id __get_id() const;
+    
+
+    bool connect(std::string field, PyMooseBase* dest, std::string destField);
+    bool connect(std::string field, Id dest, std::string destField);
     static vector <Id>& le();
     static Id pwe();
     static Id ce(Id newElement);
+    static Id ce(std::string path);
+    static Id pathToId(std::string path);
+    static string idToPath(Id id);    
     static Id getParent(Id id);
     static vector <Id>& getChildren(Id id);    
     static void initSimulation();
@@ -47,7 +54,7 @@ class PyMooseBase
   private:
     static PyMooseBase* root_;    
     static string  separator_;
-    static PyMooseContext* context_;    
+    static PyMooseContext* context_;
 };
 #endif // _PYMOOSE_BASE_H
 

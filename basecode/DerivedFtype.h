@@ -43,7 +43,7 @@ class Ftype0: public Ftype
 				return 0;
 			}
 
-			std::string getTemplateParameters()
+			virtual std::string getTemplateParameters() const
 			{
 				return "none";
 			}
@@ -285,7 +285,7 @@ template < class T > class Ftype1: public Ftype
 				return 0;
 			}
 
-			std::string getTemplateParameters() const
+			virtual std::string getTemplateParameters() const
 			{
 				return Ftype::full_type(std::string(typeid(T).name()));
 			}

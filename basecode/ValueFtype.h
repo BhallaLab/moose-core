@@ -131,10 +131,6 @@ template < class T > class ValueFtype1: public Ftype1<T>
 					return set( e, f, val );
 				return 0;
 			}
-    std::string getTemplateParameters() const
-    {
-        return std::string(typeid(T).name);
-    }
     
 #endif
 };

@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cassert>
 #include "PyMooseUtil.h"
 bool isEqual(double val1, double val2, double epsilon)
 {

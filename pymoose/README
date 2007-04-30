@@ -21,3 +21,11 @@ need to run "make clean" first. This is because swig uses dynamic
 linking/loading (.so) while the default moose binary uses static
 linking.
 
+
+	After successful compilation and linking, you can try out the
+python interface by cd-ing to the pymoose directory, which should
+contain the moose.py and _moose.so now. See the squid.py file and
+comment out the parts requiring third party libraries unless you have
+them installed. Now run: python ./squid.py - you should get the out
+file squid.plot (and a nice looking graph will pop up if you have the
+third party library installed).

@@ -426,7 +426,7 @@ void testInterpol()
 	ASSERT(
 			i1->findFinfo( "lookupSrc" )->add(
 			i1, i2, i2->findFinfo( "xmin" ) ),
-			"connecting interpols
+			"connecting interpols"
 	);
 
 	set< double >( i1, "lookup", -10.0 );

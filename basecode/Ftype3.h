@@ -73,10 +73,10 @@ template < class T1, class T2, class T3 > class Ftype3: public Ftype
 			RecvFunc trigFunc() const {
 				return 0;
 			}
-    std::string getTemplateParameters()
+virtual std::string getTemplateParameters() const
     {
-        std::string s = "";
-        s = Ftype::full_type(std::string(typeid(T1).name())) +" "+Ftype::full_type(std::string(typeid(T2).name()))+" "+Ftype::full_type(std::string (typeid(T3).name()));
+        static std::string s = Ftype::full_type(std::string(typeid(T1).name())) +","+Ftype::full_type(std::string(typeid(T2).name()))+","+Ftype::full_type(std::string (typeid(T3).name()));
+        cout << "Ftype3::getTemplateParameters() - " << s << endl;        
         return s;
     }
 			///////////////////////////////////////////////////////
