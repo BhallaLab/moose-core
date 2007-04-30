@@ -37,6 +37,7 @@ OBJ = \
 	SharedFinfo.o \
 	setget.o \
 	strconv.o \
+	filecheck.o \
 
 HEADERS = \
 	header.h \
@@ -68,7 +69,7 @@ GlobalMarkerFinfo.o: DeletionMarkerFinfo.h GlobalMarkerFinfo.h
 SimpleElement.o:	SimpleElement.h MsgSrc.h MsgDest.h DeletionMarkerFinfo.h
 setget.o:		setget.h DerivedFtype.h
 strconv.o:		DerivedFtype.h
-
+filecheck.o: filecheck.h
 .cpp.o:
 	$(CXX) $(CFLAGS) $< -c
 

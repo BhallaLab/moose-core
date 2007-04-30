@@ -21,6 +21,7 @@ typedef unsigned int Id;
 #include "../basecode/header.h"
 #include "../basecode/moose.h"
 #include "../shell/Shell.h"
+
 #include "PyMooseUtil.h"
 
 class PyMooseContext
@@ -84,13 +85,14 @@ class PyMooseContext
     void step();
     void reset();
     void stop();
-    
+    void setClock(int clockNo, double dt, int stage);    
     vector <double>& getClocks();
-    void useClock(Id tickId, std::string path);
+    void useClock(Id tickId, std::string path, std::string func = "process");
     void addTask(std::string arg);
     void do_deep_copy( Id object, std::string new_name, Id dest);
     Id deepCopy( Id object, std::string new_name, Id dest);    
     void do_move( Id object, std::string new_name, Id dest);        
+    bool connect(Id src, std::string srcField, Id dest, std::string destField);
     
 #ifdef DO_UNIT_TESTS    
     static bool testPyMooseContext(int count, bool print);
@@ -115,5 +117,7 @@ class PyMooseContext
     vector< double > dbls_;
     // We may need the shell
     Id shell_;
+    Id scheduler_;
+    Id clockJob_;
 };
 #endif

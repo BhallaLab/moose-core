@@ -9,9 +9,10 @@
 	#include "PyMooseBase.h"
 	#include "Neutral.h"
 	#include "Compartment.h"
-	#include "Tick.h"
-	#include "ClockJob.h"
+	#include "Tick.h" 
+	#include "ClockJob.h" 
 	#include "Interpol.h"
+	#include "TableIterator.h"
 	#include "Table.h"
 	#include "SynChan.h"
 	#include "SpikeGen.h"
@@ -20,11 +21,13 @@
 	#include "HHGate.h"
 	#include "HHChannel.h"
 	#include "Compartment.h"
-	#include "TickTest.h"
+/*	#include "TickTest.h"
 	#include "Sched0.h"
 	#include "Sched1.h"
 	#include "Sched2.h"
+*/
 %}
+%feature("autodoc", "1");
 %template(uint_vector) std::vector<unsigned int>;
 %template(int_vector) std::vector<int>;
 %template(double_vector) std::vector<double>;
@@ -36,16 +39,19 @@
 %attribute(PyMooseBase, unsigned int, id, __get_id)
 %attribute(PyMooseBase, unsigned int, parent, __get_parent)
 %attribute(PyMooseBase, vector <unsigned int>&, children, __get_children)
+//%attribute(PyMooseBase, string& , path, __get_path)
 %include "Neutral.h"
 %attribute(Neutral, int, childSrc, __get_childSrc, __set_childSrc)
 %attribute(Neutral, int, child, __get_child, __set_child)
+
 %include "Tick.h"
 %attribute(Tick, double, dt, __get_dt, __set_dt)
 %attribute(Tick, int, stage, __get_stage, __set_stage)
 %attribute(Tick, int, ordinal, __get_ordinal, __set_ordinal)
 %attribute(Tick, double, nextTime, __get_nextTime, __set_nextTime)
-#%attribute(Tick, string&, path, __get_path, __set_path)
+//%attribute(Tick, string&, path, __get_path, __set_path) 
 %attribute(Tick, double, updateDtSrc, __get_updateDtSrc, __set_updateDtSrc)
+
 %include "ClockJob.h"
 %attribute(ClockJob, double, runTime, __get_runTime, __set_runTime)
 %attribute(ClockJob, double, currentTime, __get_currentTime, __set_currentTime)
@@ -53,18 +59,35 @@
 %attribute(ClockJob, int, currentStep, __get_currentStep, __set_currentStep)
 %attribute(ClockJob, double, start, __get_start, __set_start)
 %attribute(ClockJob, int, step, __get_step, __set_step)
+
 %include "Interpol.h"
-%attribute(Interpol, double, xmin, __get_xmin, __set_xmin)
-%attribute(Interpol, double, xmax, __get_xmax, __set_xmax)
-%attribute(Interpol, int, xdivs, __get_xdivs, __set_xdivs)
-%attribute(Interpol, int, mode, __get_mode, __set_mode)
-%attribute(Interpol, int, calc_mode, __get_calc_mode, __set_calc_mode)
-%attribute(Interpol, double, dx, __get_dx, __set_dx)
-%attribute(Interpol, double, sy, __get_sy, __set_sy)
-%attribute(Interpol, double, table, __get_table, __set_table)
-%attribute(Interpol, double, lookupSrc, __get_lookupSrc, __set_lookupSrc)
-%attribute(Interpol, double, lookup, __get_lookup, __set_lookup)
-#%attribute(Interpol, string&, print, __get_print, __set_print)
+%attribute(InterpolationTable, double, xmin, __get_xmin, __set_xmin)
+%attribute(InterpolationTable, double, xmax, __get_xmax, __set_xmax)
+%attribute(InterpolationTable, int, xdivs, __get_xdivs, __set_xdivs)
+%attribute(InterpolationTable, int, mode, __get_mode, __set_mode)
+%attribute(InterpolationTable, int, calc_mode, __get_calc_mode, __set_calc_mode)
+%attribute(InterpolationTable, double, dx, __get_dx, __set_dx)
+%attribute(InterpolationTable, double, sy, __get_sy, __set_sy)
+%attribute(InterpolationTable, double, lookup, __get_lookup, __set_lookup)
+%include "TableIterator.h"
+%extend TableIterator
+{	%insert("python")%{
+		def _generator_(self):
+			if self.__hasNext__():
+				yield self.__next__()
+		
+		def next(self):
+			return self._generator_().next()
+			
+	%}
+}
+/* The following does not work
+%pythoncode %{
+	InterpolationTable.__setitem__ = InterpolationTable.__set_table
+	InterpolationTable.__getitem__ = InterpolationTable.__get_table
+%}
+*/
+//%attribute(InterpolationTable, string&, dumpFile, __get_print, __set_print) 
 %include "Table.h"
 %attribute(Table, double, input, __get_input, __set_input)
 %attribute(Table, double, output, __get_output, __set_output)
@@ -72,7 +95,7 @@
 %attribute(Table, int, stepmode, __get_stepmode, __set_stepmode)
 %attribute(Table, double, stepsize, __get_stepsize, __set_stepsize)
 %attribute(Table, double, threshold, __get_threshold, __set_threshold)
-%attribute(Table, double, tableLookup, __get_tableLookup, __set_tableLookup)
+//%attribute(Table, double, tableLookup, __get_tableLookup, __set_tableLookup)
 %attribute(Table, double, outputSrc, __get_outputSrc, __set_outputSrc)
 %attribute(Table, double, msgInput, __get_msgInput, __set_msgInput)
 %attribute(Table, double, sum, __get_sum, __set_sum)
@@ -150,7 +173,9 @@
 %attribute(Compartment, double, z, __get_z, __set_z)
 %attribute(Compartment, double, VmSrc, __get_VmSrc, __set_VmSrc)
 %attribute(Compartment, double, injectMsg, __get_injectMsg, __set_injectMsg)
+/*
 %include "TickTest.h"
 %include "Sched0.h"
 %include "Sched1.h"
 %include "Sched2.h"
+*/

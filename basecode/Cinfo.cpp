@@ -13,11 +13,9 @@
 #include "moose.h"
 #include "Cinfo.h"
 #include "ThisFinfo.h"
-
-// The include below is commented out because the header file is not
-// present in the svn repository. -- Upi
-// #include "filecheck.h"
-
+#ifdef GENERATE_WRAPPERS
+#include "filecheck.h"
+#endif
 // The three includes below are needed because of the create function
 // requiring an instantiable Element class. Could get worse if we
 // permit multiple variants of Element, say an array form.
