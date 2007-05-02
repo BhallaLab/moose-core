@@ -12,6 +12,7 @@ TARGET = kinetics.o
 OBJ = \
 	Molecule.o	\
 	Reaction.o	\
+	Enzyme.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -23,6 +24,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 Molecule.o:	Molecule.h ../basecode/Ftype2.h
 Reaction.o:	Reaction.h ../basecode/Ftype2.h
+Enzyme.o:	Enzyme.h ../basecode/Ftype2.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c
