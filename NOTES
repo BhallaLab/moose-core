@@ -2395,3 +2395,33 @@ As a little side-project, finished implementation of Molecule, implemented
 Reaction, compiled, yet to do tests.
 
 =============================================================================
+1 May 2007
+Flurry of activity: I had checked in the kinetics changes, then Subhasis
+checked in lots of stuff for PyMOOSE, and Niraj checked in his solver code
+as a branch. Also my regular work laptop died so I will hold on for a while
+about doing parallel stuff.
+Some design thoughts about parallel stuff, lost with the laptop:
+- Give all RecvFuncs an id. There are only about 10-20 per class.
+- Pass MsgId, FuncId, data in internode messages.
+- Note that if there are distinct target funcs for a given message,
+  the FuncIds will differ. No need for further management of 'next' MsgSrcs.
+- Don't use MsgSrc on dest node. Use a MsgDest-like structure, indexed
+	by MsgId, and holding only the dest Conn ranges. Function is looked
+	up by FuncId.
+- When making a message, the originating node gets back 
+- As before, a dummy RecvFunc is needed by the MsgSrc on the src node.
+	We get this by querying the target Finfo for the funcId, and using
+	it to find the appropriate dummyFunc (indexed by the same funcId).
+	This dummy RecvFunc has the funcId hardcoded in (but I don't know
+	how just yet) along with the type conversion stuff.
+- In most cases this local query is fine, but we may have messages that
+	use DynamicFinfos. Those have to go to the target node to get
+	the funcId, and when the report comes back they are redone.
+
+
+
+Anyway, I have just work on the enzyme class today. Almost there.
+
+=============================================================================
+2 May 2007
+Enzyme class completed, compiled, not yet tested.
