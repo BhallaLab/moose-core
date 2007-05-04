@@ -299,3 +299,75 @@ void Molecule::processFuncLocal( Element* e, ProcInfo info )
 			send1< double >( e, reacSlot, n_ );
 			send1< double >( e, nSlot, n_ );
 }
+
+
+
+#ifdef DO_UNIT_TESTS
+#include "../element/Neutral.h"
+#include "Reaction.h"
+
+void testMolecule()
+{
+	cout << "\nTesting Molecule" << flush;
+
+	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	Element* m0 = Neutral::create( "Molecule", "m0", n );
+	ASSERT( m0 != 0, "creating molecule" );
+	Element* m1 = Neutral::create( "Molecule", "m1", n );
+	ASSERT( m1 != 0, "creating molecule" );
+	Element* r0 = Neutral::create( "Reaction", "r0", n );
+	ASSERT( r0 != 0, "creating reaction" );
+
+	bool ret;
+
+	ProcInfoBase p;
+	Conn cm0( m0, 0 );
+	Conn cm1( m1, 0 );
+	Conn cr0( r0, 0 );
+	p.dt_ = 0.001;
+	set< double >( m0, "concInit", 1.0 );
+	set< int >( m0, "mode", 0 );
+	set< double >( m1, "concInit", 0.0 );
+	set< int >( m1, "mode", 0 );
+	set< double >( r0, "kf", 0.1 );
+	set< double >( r0, "kb", 0.1 );
+	ret = m0->findFinfo( "reac" )->add( m0, r0, r0->findFinfo( "sub" ) );
+	ASSERT( ret, "adding msg 0" );
+	ret = m1->findFinfo( "reac" )->add( m1, r0, r0->findFinfo( "prd" ) );
+	ASSERT( ret, "adding msg 1" );
+
+	// First, test charging curve for a single compartment
+	// We want our charging curve to be a nice simple exponential
+	// n = 0.5 + 0.5 * exp( - t * 0.2 );
+	double delta = 0.0;
+	double n0 = 1.0;
+	double n1 = 0.0;
+	double y = 0.0;
+	double y0 = 0.0;
+	double y1 = 0.0;
+	double tau = 5.0;
+	double nMax = 0.5;
+	Reaction::reinitFunc( cr0, &p );
+	Molecule::reinitFunc( cm0, &p );
+	Molecule::reinitFunc( cm1, &p );
+	for ( p.currTime_ = 0.0; p.currTime_ < 20.0; p.currTime_ += p.dt_ ) 
+	{
+		n0 = Molecule::getN( m0 );
+		n1 = Molecule::getN( m1 );
+//		cout << p.currTime_ << "	" << n1 << endl;
+
+		y = nMax * exp( -p.currTime_ / tau );
+		y0 = 0.5 + y;
+		y1 = 0.5 - y;
+		delta += ( n0 - y0 ) * ( n0 - y0 );
+		delta += ( n1 - y1 ) * ( n1 - y1 );
+		Reaction::processFunc( cr0, &p );
+		Molecule::processFunc( cm0, &p );
+		Molecule::processFunc( cm1, &p );
+	}
+	ASSERT( delta < 5.0e-6, "Testing molecule and reacn" );
+
+	// Get rid of all the compartments.
+	set( n, "destroy" );
+}
+#endif
