@@ -116,7 +116,7 @@ double Reaction::getKb( const Element* e )
 void Reaction::innerProcessFunc( Element* e, ProcInfo info )
 {
 		send2< double, double >( e, substrateSlot, B_, A_ );
-		send2< double, double >( e, productSlot, B_, A_ );
+		send2< double, double >( e, productSlot, A_, B_ );
 			A_ = kf_;
 			B_ = kb_;
 }
@@ -129,7 +129,8 @@ void Reaction::processFunc( const Conn& c, ProcInfo p )
 
 void Reaction::innerReinitFunc( )
 {
-		A_ = B_ = 0;
+		A_ = kf_;
+	   	B_ = kb_;
 }
 		
 void Reaction::reinitFunc( const Conn& c, ProcInfo p )
