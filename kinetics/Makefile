@@ -13,6 +13,7 @@ OBJ = \
 	Molecule.o	\
 	Reaction.o	\
 	Enzyme.o	\
+	TestKinetics.o	\
 
 HEADERS = \
 	../basecode/header.h \

@@ -1942,10 +1942,10 @@ Stages, rough order
 * Table object to handle output from sim runs.
 * Complete biophysics library: Ca concen, Nernst, SynChan, SpikeGen
 * Cell reader
-- HSolver
-- Parallel stuff
-- Python pass 1
-- Kinetics library
++ HSolver
++ Parallel stuff
++ Python pass 1
++ Kinetics library
 - Dumpfile/kkit read
 - Stimfile read capability
 - OB sim capability
@@ -2425,3 +2425,95 @@ Anyway, I have just work on the enzyme class today. Almost there.
 =============================================================================
 2 May 2007
 Enzyme class completed, compiled, not yet tested.
+
+Checked in as revision 94
+
+=============================================================================
+4 May 2007
+Set up solver messaging now that Niraj has implemented the Hsolver.
+
+- We'll intercept all calls to Finfos by having a replacement ThisFinfo.
+	The ThisFinfo sports a set of alternate Finfos that are generated
+	by the solver. These alternate Finfos are checked first and work like
+	this:
+	- get: first query the solver for the field value and bung it into
+	the field. Finally the 'get' command extracts data from field.
+	- set: do the local assignment then put the modified field into the
+	solver.
+	In both these, the solver provides replacement set/get functions
+	- DynamicFinfos: same as set/get.
+	An existing DynamicFinfo has its set/get replaced.
+	- MsgDest. Here a function is called on the target object. Unless
+	I mess with the Conns, there is not much I can do. Instead the 
+	solver could extract relevant info from the object using separate
+	calls. Issue is that this would require cooperation from the
+	object, which violates the idea that solvers should be invisible to
+	the object builder.
+	Counter point is the synapse. Here the efficiency of the operation
+	is pretty critical so we cannot afford extra calls to transfer data
+	from object to solver. Somehow the original message should be 
+	cleanly redirected to the solver.
+	So the only solution, as considered below, is to go through and
+	replace all the messages and their funcs.
+	- MsgSrc. These can mostly be left alone. They will typically be
+	silent, because the Process message is not called. Solver can
+	forcibly trigger the remainder. A special case is return messages,
+	but those mostly work through the dynamicFinfos.
+	
+func( const Conn& c, T value ) {
+	static_cast< Obj* >( c.data() )->field_ = value;
+or
+	static_cast< Obj* >( c.data() )->func( value );
+	
+}
+
+The func is stored on the src. We need to replace it and the target
+of the Conn. 
+
+// Note that this only changes the Conn part of the messaging. The
+// functions have to be handled separately.
+Conn::redirect( Element* newTgt)
+
+
+// this is called for a field on the object oldE that is going to
+// be replaced by newE and newF. srcFl is filled with functions that
+// the newE provides to replace those from oldE. destFl comes back with
+// functions that the original target wants us to call. Of course, 
+// destFl could have been extracted from the original element.
+// 
+Finfo::redirect( Element* oldE, Element* newE, const Finfo* newF,
+			FuncList& srcFl, FuncList& destFl );
+
+// Here is is how we would replace a destination func. Suppose we had an
+// external ion channel to replace.
+// Original:
+void Compartment::channelFunc( const Conn& c, double Gk, double Ek)
+{
+        Element* e = c.targetElement();
+        Compartment* compt = static_cast< Compartment* >( e->data() );
+        compt->A_ += Gk * Ek;
+        compt->B_ += Gk;
+}
+// Replacement.
+void HSolver::comptChannelFunc( const Conn& c, double Gk, double Ek)
+{
+        Element* e = c.targetElement();
+	Hsolver* hs = static_cast< PostMaster* >( e->data() );
+	SolveCompt* sc = hs->lookupCompt( c.targetIndex() );
+	sc->handleExtChannel( Gk, Ek );
+}
+
+- Intercepting set/get calls when an object is solved.
+	- Could use a replacement Element* 
+	- Could use an entire set of replacement Finfos that forward the
+	request to the solver.
+	- Could just replace the ThisFinfo to intercept the solved fields
+	in a generic way. It could actually handle the whole solver stuff,
+	thus avoiding having to tread on any object-local code at all.
+- Intercepting messages when an object is solved.
+
+
+
+
+
+
