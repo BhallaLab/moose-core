@@ -67,7 +67,7 @@ class MMEnzyme1: public MMEnzymeBase
 		}
 
 		double operator() () const {
-			return ( -kcat_ * *sub_ * *enz_ ) / ( Km_ + *sub_ );
+			return ( kcat_ * *sub_ * *enz_ ) / ( Km_ + *sub_ );
 		}
 
 	private:
@@ -89,8 +89,8 @@ class MMEnzyme: public MMEnzymeBase
 			double sub = -(*substrates_)();
 			// the subtrates_() operator returns the negative of 
 			// the conc product.
-			// Here we return negative of the overall rate.
-			return ( -sub * kcat_ * *enz_ ) / ( Km_ + sub );
+			// Here we the overall rate.
+			return ( sub * kcat_ * *enz_ ) / ( Km_ + sub );
 		}
 	private:
 		const double *enz_;
@@ -120,7 +120,7 @@ class ZeroOrder: public RateTerm
 		{;}
 
 		double operator() () const {
-			return k_;
+			return -k_;
 		}
 
 		void setK( double k ) {
@@ -143,7 +143,7 @@ class FirstOrder: public ZeroOrder
 		{;}
 
 		double operator() () const {
-			return k_ * *y_;
+			return -k_ * *y_;
 		}
 
 	private:
@@ -158,7 +158,7 @@ class SecondOrder: public ZeroOrder
 		{;}
 
 		double operator() () const {
-			return k_ * *y1_ * *y2_;
+			return -k_ * *y1_ * *y2_;
 		}
 
 	private:
@@ -174,7 +174,7 @@ class NOrder: public ZeroOrder
 		{;}
 
 		double operator() () const {
-			double ret = k_;
+			double ret = -k_;
 			vector< const double* >::const_iterator i;
 			for ( i = v_.begin(); i != v_.end(); i++)
 				ret *= *( *i );

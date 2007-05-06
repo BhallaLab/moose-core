@@ -2558,7 +2558,7 @@ To test it: I'll set up a diffusion chain of reactions and load it into
 the solver. Check: 
 	+ loading, 
 	+ creation of Stoich matrix
-	- Updates
+	+ Computing derivatives.
 	- Add enzymes into system.
 Then: 
 	- Check variable extraction from the diffusion chain.
@@ -2568,5 +2568,9 @@ Then:
 
 Implemented unit tests for loading model into the Stoich class, and 
 creation of stoichiometry matrix. Loads of bugs cleaned.
+
+Checked in as revision 97
+
+Implemented unit tests for computing derivatives. Sign fix put in RateTerms.
 
 =============================================================================
