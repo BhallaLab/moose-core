@@ -175,7 +175,7 @@ void Molecule::setMode( const Conn& c, int value )
 	static_cast< Molecule* >( c.data() )->mode_ = value;
 }
 
-double Molecule::getMode( const Element* e )
+int Molecule::getMode( const Element* e )
 {
 	return static_cast< Molecule* >( e->data() )->mode_;
 }
