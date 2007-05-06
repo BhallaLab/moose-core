@@ -9,6 +9,7 @@
 #ifdef DO_UNIT_TESTS
 
 #include <fstream>
+#include <math.h>
 #include "header.h"
 #include "moose.h"
 #include "../element/Neutral.h"
@@ -54,6 +55,9 @@ void testStoich()
 	assert( sFinfo != 0 );
 	const Finfo* pFinfo = reacCinfo->findFinfo( "prd" );
 	assert( pFinfo != 0 );
+	///////////////////////////////////////////////////////////
+	// Create a linear sequence of molecules with reactions between.
+	///////////////////////////////////////////////////////////
 	for ( unsigned int i = 0; i < NUM_COMPT; i++ ) {
 		sprintf( name, "m%d", i );
 		Element* mtemp = Neutral::create( "Molecule", name, n );
@@ -78,6 +82,10 @@ void testStoich()
 		}
 	}
 
+	///////////////////////////////////////////////////////////
+	// Assign reaction system to a Stoich object
+	///////////////////////////////////////////////////////////
+
 	Element* stoich = Neutral::create( "Stoich", "s", Element::root() );
 
 	ret = set< string >( stoich, "path", "/n/##" );
@@ -97,6 +105,9 @@ void testStoich()
 	
 	// cout << s->N_;
 
+	///////////////////////////////////////////////////////////
+	// Check that stoich matrix is correct.
+	///////////////////////////////////////////////////////////
 	unsigned int molNum;
 	int entry;
 	map< const Element*, unsigned int >::iterator k;
@@ -125,6 +136,27 @@ void testStoich()
 		}
 	}
 
+	///////////////////////////////////////////////////////////
+	// Run an update step on this reaction system
+	///////////////////////////////////////////////////////////
+	for ( unsigned int i = 0; i < NUM_COMPT; i++ )
+		s->S_[i] = s->Sinit_[i];
+
+	const double EPSILON = 1e-10;
+
+	vector< double > yprime( NUM_COMPT, 0.0 );
+	s->updateRates( &yprime, 1.0 );
+	for ( unsigned int i = 0; i < NUM_COMPT; i++ ) {
+		k = s->molMap_.find( m[i] );
+		molNum = k->second;
+		if ( molNum == 0 ) {
+			ASSERT( fabs( yprime[i] - 0.1 ) < EPSILON, "update");
+		} else if ( molNum == 9 ) {
+			ASSERT( fabs( yprime[i] + 0.1 ) < EPSILON, "update");
+		} else {
+			ASSERT( fabs( yprime[i] ) < EPSILON, "update" );
+		}
+	}
 
 	// Get rid of all the compartments.
 	set( stoich, "destroy" );

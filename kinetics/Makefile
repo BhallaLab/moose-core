@@ -32,6 +32,7 @@ Enzyme.o:	Enzyme.h ../basecode/Ftype2.h
 SparseMatrix.o:	SparseMatrix.h
 KineticHub.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h
 Stoich.o:	RateTerm.h Stoich.h SparseMatrix.h
+TestKinetics.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h Stoich.h SparseMatrix.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c
