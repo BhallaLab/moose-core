@@ -13,7 +13,9 @@
 #define _Stoich_h
 class Stoich
 {
-	friend class StoichWrapper;
+#ifdef DO_UNIT_TESTS
+	friend void testStoich();
+#endif
 	public:
 		Stoich()
 		{
@@ -102,15 +104,15 @@ class Stoich
 		///////////////////////////////////////////////////
 		// Internal fields.
 		///////////////////////////////////////////////////
-		int nMols_;
-		int nVarMols_;
-		int nSumTot_;
-		int nBuffered_;
-		int nReacs_;
-		int nEnz_;
-		int nMmEnz_;
-		int nExternalRates_;
-		int useOneWayReacs_;
+		unsigned int nMols_;
+		unsigned int nVarMols_;
+		unsigned int nSumTot_;
+		unsigned int nBuffered_;
+		unsigned int nReacs_;
+		unsigned int nEnz_;
+		unsigned int nMmEnz_;
+		unsigned int nExternalRates_;
+		bool useOneWayReacs_;
 		string path_;
 		vector< double > S_; 	
 		vector< double > Sinit_; 	
@@ -120,7 +122,10 @@ class Stoich
 		SparseMatrix N_; 
 		vector< int > path2mol_;
 		vector< int > mol2path_;
-		map< const Element*, int > molMap_;
+		map< const Element*, unsigned int > molMap_;
+#ifdef DO_UNIT_TESTS
+		map< const Element*, unsigned int > reacMap_;
+#endif
 		static const double EPSILON;
 };
 #endif // _Stoich_h
