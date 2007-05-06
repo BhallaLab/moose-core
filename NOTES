@@ -2552,4 +2552,21 @@ Setting up infrastructure for kinetic solvers. Ported over most of the stuff
 from earlier MOOSE, still need to complete the implementation of KineticHub.
 It all compiles but no tests yet.
 
+Checked in as revision 96
+
+To test it: I'll set up a diffusion chain of reactions and load it into
+the solver. Check: 
+	+ loading, 
+	+ creation of Stoich matrix
+	- Updates
+	- Add enzymes into system.
+Then: 
+	- Check variable extraction from the diffusion chain.
+	- Check parameter assignment in the diffusion chain.
+	- Check incorporation of existing messaging in the diffusion chain.
+	- Check incorporation of new messages (readouts) in the chain.
+
+Implemented unit tests for loading model into the Stoich class, and 
+creation of stoichiometry matrix. Loads of bugs cleaned.
+
 =============================================================================

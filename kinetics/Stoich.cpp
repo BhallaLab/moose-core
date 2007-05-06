@@ -340,7 +340,7 @@ void Stoich::localSetPath( Element* stoich, const string& value )
 				addMmEnz( stoich, *i );
 		} else if ( ( *i )->className() == "Table" ) {
 			addTab( stoich, *i );
-		} else {
+		} else if ( ( *i )->className() != "Molecule" ) {
 			addRate( stoich, *i );
 		}
 	}
@@ -360,7 +360,7 @@ void Stoich::setupMols(
 	// Field nInitField = Cinfo::find( "Molecule" )->field( "nInit" );
 	vector< Element* >::iterator i;
 	vector< Element* >elist;
-	int j = 0;
+	unsigned int j = 0;
 	double nInit;
 	nVarMols_ = varMolVec.size();
 	nSumTot_  = sumTotVec.size();
@@ -421,7 +421,7 @@ unsigned int Stoich::findReactants(
 	vector< Conn > srcList;
 	vector< Conn >::iterator i;
 	ret.resize( 0 );
-	map< const Element*, int >::iterator j;
+	map< const Element*, unsigned int >::iterator j;
 	// Fill in the list of incoming messages.
 	srcFinfo->outgoingConns( e, srcList );
 	for (i = srcList.begin() ; i != srcList.end(); i++ ) {
@@ -448,7 +448,7 @@ unsigned int Stoich::findProducts(
 	vector< Conn > prdList;
 	vector< Conn >::iterator i;
 	ret.resize( 0 );
-	map< const Element*, int >::iterator j;
+	map< const Element*, unsigned int >::iterator j;
 	// Fill in the list of incoming messages.
 	prdFinfo->incomingConns( e, prdList );
 	for (i = prdList.begin() ; i != prdList.end(); i++ ) {
@@ -511,8 +511,8 @@ void Stoich::fillStoich(
 	vector< const double* >& sub, vector< const double* >& prd, 
 	int reacNum )
 {
-	fillHalfStoich( baseptr, sub, 1 , reacNum );
-	fillHalfStoich( baseptr, prd, -1 , reacNum );
+	fillHalfStoich( baseptr, sub, -1 , reacNum );
+	fillHalfStoich( baseptr, prd, 1 , reacNum );
 }
 
 /**
@@ -531,13 +531,16 @@ void Stoich::addReac( Element* stoich, Element* e )
 	isOK = get< double >( e, "kb", kb );
 	assert ( isOK );
 
-	if ( findReactants( e, "subIn", sub ) > 0 ) {
+	if ( findReactants( e, "sub", sub ) > 0 ) {
 		freac = makeHalfReaction( kf, sub );
 	}
-	if ( findReactants( e, "prdIn", prd ) > 0 ) {
+	if ( findReactants( e, "prd", prd ) > 0 ) {
 		breac = makeHalfReaction( kb, prd );
 	}
 
+#ifdef DO_UNIT_TESTS
+	reacMap_[e] = rates_.size();
+#endif
 	send2< unsigned int, Element* >( stoich, 
 			reacConnectionSlot, rates_.size(), e );
 	if ( useOneWayReacs_ ) {
@@ -581,16 +584,16 @@ bool Stoich::checkEnz( Element* e,
 	ret = get< double >( e, "k3", k3 );
 	assert( ret );
 
-	if ( findReactants( e, "subIn", sub ) < 1 ) {
+	if ( findReactants( e, "sub", sub ) < 1 ) {
 		cerr << "Error: Stoich::addEnz: Failed to find subs\n";
 		return 0;
 	}
-	if ( findReactants( e, "enzIn", enz ) != 1 ) {
+	if ( findReactants( e, "enz", enz ) != 1 ) {
 		cerr << "Error: Stoich::addEnz: Failed to find enzyme\n";
 		return 0;
 	}
 	if ( !isMM ) {
-		if ( findReactants( e, "cplxIn", cplx ) != 1 ) {  
+		if ( findReactants( e, "cplx", cplx ) != 1 ) {  
 			cerr << "Error: Stoich::addEnz: Failed to find cplx\n";
 			return 0;
 		}
@@ -671,12 +674,12 @@ void Stoich::addMmEnz( Element* stoich, Element* e )
 
 void Stoich::addTab( Element* stoich, Element* e )
 {
-	cout << "Don't yet know how to addTab\n";
+	cout << "Don't yet know how to addTab for " << e->name() << "\n";
 }
 
 void Stoich::addRate( Element* stoich, Element* e )
 {
-	cout << "Don't yet know how to addRate\n";
+	cout << "Don't yet know how to addRate for " << e->name() << "\n";
 }
 
 void Stoich::setupReacSystem()

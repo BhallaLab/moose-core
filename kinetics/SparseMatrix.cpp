@@ -98,3 +98,37 @@ double SparseMatrix::computeRowRate(
 
 	return ret;
 }
+
+
+#ifdef DO_UNIT_TESTS
+#include "header.h"
+
+void testSparseMatrix()
+{
+	cout << "\nTesting SparseMatrix" << flush;
+	const unsigned int NR = 4;
+	const unsigned int NC = 5;
+
+	SparseMatrix sm( NR, NC);
+
+	for ( unsigned int i = 0; i < NR; i++ ) {
+		for ( unsigned int j = 0; j < NC; j++ ) {
+			sm.set( i, j, 10 * i + j );
+			unsigned int ret = sm.get( i, j );
+			ASSERT( ret == 10 * i + j, "set/get" );
+		}
+	}
+	// cout << sm;
+
+	vector< double > v( 5, 1.0 );
+	double dret = sm.computeRowRate( 0, v );
+	ASSERT( dret == 10.0, "computeRowRate" );
+	dret = sm.computeRowRate( 1, v );
+	ASSERT( dret == 60.0, "computeRowRate" );
+	dret = sm.computeRowRate( 2, v );
+	ASSERT( dret == 110.0, "computeRowRate" );
+	dret = sm.computeRowRate( 3, v );
+	ASSERT( dret == 160.0, "computeRowRate" );
+}
+
+#endif
