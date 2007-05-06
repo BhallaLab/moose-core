@@ -13,6 +13,9 @@ OBJ = \
 	Molecule.o	\
 	Reaction.o	\
 	Enzyme.o	\
+	SparseMatrix.o	\
+	KineticHub.o	\
+	Stoich.o	\
 	TestKinetics.o	\
 
 HEADERS = \
@@ -26,6 +29,9 @@ $(OBJ)	: $(HEADERS)
 Molecule.o:	Molecule.h ../basecode/Ftype2.h
 Reaction.o:	Reaction.h ../basecode/Ftype2.h
 Enzyme.o:	Enzyme.h ../basecode/Ftype2.h
+SparseMatrix.o:	SparseMatrix.h
+KineticHub.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h
+Stoich.o:	RateTerm.h Stoich.h SparseMatrix.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c
