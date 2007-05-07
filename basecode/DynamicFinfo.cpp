@@ -401,9 +401,13 @@ const DynamicFinfo* getDF( const Conn& c )
 	return f;
 }
 
-unsigned int DynamicFinfo::getSlotIndex() const
+bool DynamicFinfo::getSlotIndex( const string& name, 
+					unsigned int& ret ) const
 {
+	if ( name != this->name() ) return 0;
 	if ( destIndex_ != 0 )
-			return destIndex_;
-	return srcIndex_;
+		ret = destIndex_;
+	else 
+		ret = srcIndex_;
+	return 1;
 }

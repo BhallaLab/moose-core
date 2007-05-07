@@ -12,8 +12,15 @@
 #include "MsgDest.h"
 #include "SharedFtype.h"
 #include "SharedFinfo.h"
+#include "DestFinfo.h"
+#include "SrcFinfo.h"
 
 
+/**
+ * This variant of the constructor is deprecated. It only knows the 
+ * ftype and the RecvFunc, which is insufficient for many purposes.
+ * See below.
+ */
 SharedFinfo::SharedFinfo( const string& name, 
 				 pair< const Ftype*, RecvFunc >* types,
 				 unsigned int nTypes )
@@ -25,6 +32,32 @@ SharedFinfo::SharedFinfo( const string& name,
 				numSrc_++;
 		} else {
 				rfuncs_.push_back( types[i].second );
+		}
+	}
+}
+
+/**
+ * This variant of the constructor uses an array of Finfos instead
+ * of the pair version above. For simplicity we just use Finfos to set
+ * up the required info for each part of the message. We assume the Finfos
+ * are either SrcFinfo or DestFinfo: other clever variants are not allowed
+ * at this time.
+ */
+SharedFinfo::SharedFinfo( const string& name, Finfo** finfos,
+				 unsigned int nFinfos )
+	: Finfo( name, new SharedFtype( finfos, nFinfos ) )
+{
+	numSrc_ = 0;
+	for ( unsigned int i = 0; i < nFinfos; i++ ) {
+		DestFinfo *df = dynamic_cast< DestFinfo* >( finfos[i] );
+
+		if ( df == 0 ) {
+			// It is a MsgSrc: paranoia check.
+			assert( dynamic_cast< SrcFinfo* >( finfos[i] ) != 0);
+			numSrc_++;
+			names_.push_back( finfos[i]->name() );
+		} else {
+			rfuncs_.push_back( df->recvFunc() );
 		}
 	}
 }
@@ -291,6 +324,23 @@ bool SharedFinfo::inherit( const Finfo* baseFinfo )
 			return 1;
 	} 
 	return 0;
+}
+
+bool SharedFinfo::getSlotIndex( const string& name, 
+					unsigned int& ret ) const
+{
+	if ( name == this->name() ) {
+		ret = msgIndex_;
+		return 1;
+	}
+
+	vector< string >::const_iterator i = 
+		find( names_.begin(), names_.end(), name );
+	if ( i == names_.end() )
+		return 0;
+	
+	ret = msgIndex_ + ( i - names_.begin() );
+	return 1;
 }
 
 ////////////////////////////////////////////////////////////////////
