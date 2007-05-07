@@ -2573,4 +2573,14 @@ Checked in as revision 97
 
 Implemented unit tests for computing derivatives. Sign fix put in RateTerms.
 
+Checked in as revision 98
+
 =============================================================================
+7 May 2007
+
+A little side-tracked as I prepare to set up messages to the KineticHub
+preparatory to building the SolveFinfos. 
+Worked on SharedFinfos so that they take regular Src and Dest Finfos as 
+entries, rather than the TypeFuncPair which had insufficient info.
+Fixed many Finfo files as a result.
+

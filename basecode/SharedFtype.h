@@ -42,6 +42,7 @@ class SharedFtype: public Ftype
 			SharedFtype() {;}
 
 			SharedFtype( pair< const Ftype*, RecvFunc >*, unsigned int);
+			SharedFtype( Finfo**, unsigned int);
 
 			unsigned int nValues() const {
 				return nValues_;
