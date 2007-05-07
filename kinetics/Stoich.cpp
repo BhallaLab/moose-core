@@ -30,6 +30,36 @@ const Cinfo* initStoichCinfo()
 	};
 	*/
 
+	static Finfo* hubShared[] =
+	{
+		new SrcFinfo( "rateTermInfoSrc", 
+			Ftype2< vector< RateTerm* >*, bool >::global()
+		),
+		new SrcFinfo( "rateSizeSrc", 
+			Ftype3< unsigned int, unsigned int, unsigned int >::
+			global()
+		),
+		new SrcFinfo( "molSizeSrc", 
+			Ftype3< unsigned int, unsigned int, unsigned int >::
+			global()
+		),
+		new SrcFinfo( "molConnectionSrc",
+			Ftype3< vector< double >* , 
+				vector< double >* , 
+				vector< Element *>*  
+				>::global() 
+		),
+		new SrcFinfo( "reacConnectionSrc",
+			Ftype2< unsigned int, Element* >::global()
+		),
+		new SrcFinfo( "enzConnectionSrc",
+			Ftype2< unsigned int, Element* >::global()
+		),
+		new SrcFinfo( "mmEnzConnectionSrc",
+			Ftype2< unsigned int, Element* >::global()
+		),
+	};
+
 	static Finfo* stoichFinfos[] =
 	{
 		///////////////////////////////////////////////////////
@@ -93,6 +123,8 @@ const Cinfo* initStoichCinfo()
 		///////////////////////////////////////////////////////
 		// MsgSrc definitions
 		///////////////////////////////////////////////////////
+		
+		/* Moved over to hubShared
 		new SrcFinfo( "rateTermInfoSrc", 
 			Ftype2< vector< RateTerm* >*, bool >::global()
 		),
@@ -119,6 +151,7 @@ const Cinfo* initStoichCinfo()
 		new SrcFinfo( "mmEnzConnectionSrc",
 			Ftype2< unsigned int, Element* >::global()
 		),
+		*/
 		/*
 	new SingleSrc1Finfo< vector< double >*  >(
 		"allocateOut", &StoichWrapper::getAllocateSrc, 
@@ -148,6 +181,9 @@ const Cinfo* initStoichCinfo()
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
+		new SharedFinfo( "hub", hubShared, 
+				sizeof( hubShared )/ sizeof( Finfo* ) ),
+
 		/*
 		new SharedFinfo(
 			"integrate", &StoichWrapper::getIntegrateConn,

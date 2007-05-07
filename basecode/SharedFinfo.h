@@ -29,6 +29,7 @@ class SharedFinfo: public Finfo
 		public:
 
 			/**
+			 * This variant is deprecated
 			 * In the constructor, we need to build up a composite
 			 * Ftype that manages the local vector of Ftypes. We
 			 * also make a vector of RecvFuncs that will be used
@@ -37,6 +38,13 @@ class SharedFinfo: public Finfo
 			SharedFinfo( const string& name,
 				pair< const Ftype*, RecvFunc >* types, 
 				unsigned int nTypes );
+			/**
+			 * Here we construct the list of RecvFuncs for the
+			 * SharedFinfo based on a list of either Src or
+			 * DestFinfos.
+			 */
+			SharedFinfo( const string& name, Finfo** finfos,
+				 unsigned int nFinfos );
 
 			~SharedFinfo()
 			{;}
@@ -106,9 +114,19 @@ class SharedFinfo: public Finfo
 			 */
 			bool inherit( const Finfo* baseFinfo );
 
+			/**
+			 * Returns true if the named MsgSrc is present
+			 * on the SharedFinfo, or if the name is the name
+			 * of the SharedFinfo itself. Passes back the
+			 * index in the 'ret' field if true.
+			 */
+			bool getSlotIndex( const string& name, 
+					unsigned int& ret ) const;
+			/*
 			unsigned int getSlotIndex() const {
 					return msgIndex_;
 			}
+			*/
 
 			Finfo* copy() const {
 				return new SharedFinfo( *this );
@@ -118,6 +136,7 @@ class SharedFinfo: public Finfo
 			unsigned int numSrc_;
 			FuncList rfuncs_;
 			unsigned int msgIndex_;
+			vector < string > names_;
 };
 
 #endif // _SHARED_FINFO_H
