@@ -13,9 +13,13 @@
 #include "SimpleElement.h"
 #include "send.h"
 #include "SharedFtype.h"
+#include "DestFinfo.h"
 
-SharedFtype::SharedFtype( 
-				TypeFuncPair* types, unsigned int n )
+/**
+ * This variang of the constructor is deprecated. We will no longer
+ * be using TypeFuncPairs.
+ */
+SharedFtype::SharedFtype( TypeFuncPair* types, unsigned int n )
 {
 		nValues_ = 0;
 		size_ = 0;
@@ -36,6 +40,36 @@ SharedFtype::SharedFtype(
 			match_->srcTypes_.push_back( ( *i )->makeMatchingType() );
 		for ( i = srcTypes_.begin(); i != srcTypes_.end(); i++ )
 			match_->destTypes_.push_back( ( *i )->makeMatchingType() );
+}
+
+
+/**
+ * Here we construct the SharedFtype using Finfos. The array has either
+ * Src or Dest Finfos and we extract their Ftypes from them.
+ */
+SharedFtype::SharedFtype( Finfo** finfos, unsigned int n )
+{
+	nValues_ = 0;
+	size_ = 0;
+	for (unsigned int i = 0; i < n; i++ ) {
+		const Ftype *f = finfos[i]->ftype();
+		DestFinfo* df = dynamic_cast< DestFinfo* >( finfos[i] );
+		nValues_ += f->nValues();
+		size_ += f->size();
+		if ( df == 0 )
+			srcTypes_.push_back( f );
+		else
+			destTypes_.push_back( f );
+	}
+	match_ = new SharedFtype;
+	match_->nValues_ = nValues_;
+	match_->size_ = size_;
+	match_->match_ = this;
+	vector< const Ftype* >::iterator i;
+	for ( i = destTypes_.begin(); i != destTypes_.end(); i++ )
+		match_->srcTypes_.push_back( ( *i )->makeMatchingType() );
+	for ( i = srcTypes_.begin(); i != srcTypes_.end(); i++ )
+		match_->destTypes_.push_back( ( *i )->makeMatchingType() );
 }
 
 /*

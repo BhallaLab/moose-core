@@ -216,14 +216,21 @@ class Finfo
 				unsigned int& srcIndex, unsigned int& destIndex ) = 0;
 
 			/**
-			 * This function returns the srcIndex or destIndex of
-			 * the Finfo, as appropriate, provided the Finfo has a
-			 * predefined Index of one of these kinds. Many Finfos do
-			 * not have such a number, so it returns 0 by default.
+			 * Returns true if the name matches and if the
+			 * Finfo has a suitable srcIndex or destIndex
+			 * to pass back in the 'ret' argument.
+			 * Many Finfos do not have such a number, 
+			 * so it returns 0 by default.
 			 */
+			virtual bool getSlotIndex( const string& name, 
+					unsigned int& ret ) const {
+				return 0;
+			}
+			/*
 			virtual unsigned int getSlotIndex() const {
 				return 0;
 			}
+			*/
 
 			/**
 			 * This returns true if the Finfo is meant to be 

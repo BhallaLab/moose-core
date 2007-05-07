@@ -507,7 +507,11 @@ void cinfoTest()
 	// but the fields are private. So I've made this function their
 	// friend.
 	
-	unsigned int startIndex = testFinfos[0]->getSlotIndex();
+	unsigned int startIndex;
+	ASSERT( testFinfos[0]->getSlotIndex( "sum", startIndex ),
+	     "test getSlotIndex" );
+
+	// unsigned int startIndex = testFinfos[0]->getSlotIndex();
 
 	unsigned int sumSlotIndex = testclass.getSlotIndex( "sum" );
 
@@ -526,7 +530,11 @@ void cinfoTest()
 					destIndex_ == 3 + startIndex ,
 					"msg counting during cinfo inititialization" );
 
-	startIndex = testFinfos[4]->getSlotIndex();
+	// startIndex = testFinfos[4]->getSlotIndex();
+
+	ASSERT( testFinfos[4]->getSlotIndex( "sumout", startIndex ),
+	     "test getSlotIndex" );
+
 	unsigned int sumOutSlotIndex = testclass.getSlotIndex( "sumout" );
 
 	ASSERT( startIndex == sumOutSlotIndex, 

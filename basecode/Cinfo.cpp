@@ -361,9 +361,12 @@ void Cinfo::listFinfos( vector< const Finfo* >& flist ) const
 unsigned int Cinfo::getSlotIndex( const string& name ) const
 {
 	vector< Finfo* >::const_iterator i;
+	unsigned int ret = 0;
 	for ( i = finfos_.begin() ; i < finfos_.end(); i++ ) {
-		if ( (*i)->name() == name )
-			return (*i)->getSlotIndex();
+		if ( (*i)->getSlotIndex( name, ret ) )
+			return ret;
+//		if ( (*i)->name() == name )
+//			return (*i)->getSlotIndex();
 	}
 	return 0;
 }

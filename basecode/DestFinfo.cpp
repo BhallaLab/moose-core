@@ -147,3 +147,10 @@ bool DestFinfo::inherit( const Finfo* baseFinfo )
 	} 
 	return 0;
 }
+
+bool DestFinfo::getSlotIndex( const string& name, unsigned int& ret ) const
+{
+	if ( name != this->name() ) return 0;
+	ret = destIndex_;
+	return 1;
+}
