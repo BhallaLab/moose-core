@@ -34,7 +34,7 @@ class KineticHub
 		static void rateSizeFunc( const Conn& c,
 			unsigned int nReac, unsigned int nEnz, 
 			unsigned int nMmEnz);
-		void rateSizeFuncLocal( 
+		void rateSizeFuncLocal( Element* hub,
 			unsigned int nReac, unsigned int nEnz, 
 			unsigned int nMmEnz );
 		static void molSizeFunc( const Conn& c,
@@ -55,6 +55,10 @@ class KineticHub
 		);
 		static void reacConnectionFunc( const Conn& c,
 				unsigned int index, Element* reac );
+		void reacConnectionFuncLocal( 
+				Element* hub, 
+				int rateTermIndex, 
+				Element* reac );
 		static void enzConnectionFunc( const Conn& c,
 				unsigned int index, Element* enz );
 		static void mmEnzConnectionFunc( const Conn& c,
@@ -67,11 +71,13 @@ class KineticHub
 		static double getMolN( const Element* e );
 		static void setMolNinit( const Conn& c, double value );
 		static double getMolNinit( const Element* e );
-
+		static void setReacKf( const Conn& c, double value );
+		static double getReacKf( const Element* e );
+		static void setReacKb( const Conn& c, double value );
+		static double getReacKb( const Element* e );
 		static void zombify( 
-			Element* hub, Element* e, 
-			const Finfo* hubFinfo, Finfo* solveFinfo
-		);
+			Element* hub, Element* e, const Finfo* hubFinfo,
+	       		Finfo* solveFinfo );
 	private:
 		vector< double >* S_;
 		vector< double >* Sinit_;
@@ -81,5 +87,8 @@ class KineticHub
 		unsigned long nMol_;
 		unsigned long nBuf_;
 		unsigned long nSumTot_;
+		vector< unsigned int > reacMap_;
+		vector< unsigned int > enzMap_;
+		vector< unsigned int > mmEnzMap_;
 };
 #endif // _KineticHub_h

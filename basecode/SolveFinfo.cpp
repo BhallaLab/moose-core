@@ -45,23 +45,12 @@ void SolveFinfo::listFinfos( vector< const Finfo* >& flist ) const
 }
 
 /**
-* Returns the index of the solved object e on the solver
+* Returns the Conn going from solved object e to the solver
 */
-unsigned int SolveFinfo::getIndex( const Element* e ) const
+const Conn& SolveFinfo::getSolvedConn( const Element* e ) const
 {
 	vector< Conn >::const_iterator i = 
 		e->connDestBegin( procSlot_ );
 	assert( e->connDestEnd( procSlot_ ) != i );
-	return i->targetIndex();
-}
-
-/**
-* Returns the solver data part.
-*/
-void* SolveFinfo::getSolver( const Element* e ) const
-{
-	vector< Conn >::const_iterator i = 
-		e->connDestBegin( procSlot_ );
-	assert( e->connDestEnd( procSlot_ ) != i );
-	return i->targetElement()->data();
+	return *i;
 }
