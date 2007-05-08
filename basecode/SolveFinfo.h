@@ -18,55 +18,50 @@
  */
 class SolveFinfo: public ThisFinfo
 {
-		public:
-			/**
-			 * This creates a SolveFinfo to replace the
-			 * existing ThisFinfo.
-			 */
-			SolveFinfo( Finfo** finfos, unsigned int nFinfos,
-			       	const ThisFinfo* tf );
+	public:
+		/**
+		 * This creates a SolveFinfo to replace the
+		 * existing ThisFinfo.
+		 */
+		SolveFinfo( Finfo** finfos, unsigned int nFinfos,
+		       	const ThisFinfo* tf );
 
-			~SolveFinfo()
-			{;}
+		~SolveFinfo()
+		{;}
 
-			/**
-			 * This is the key function that is overridden
-			 * so that alternate Finfos can be returned for
-			 * operations that need to talk to the solver.
-			 */
-			const Finfo* match( Element* e, const string& name ) const;
+		/**
+		 * This is the key function that is overridden
+		 * so that alternate Finfos can be returned for
+		 * operations that need to talk to the solver.
+		 */
+		const Finfo* match( Element* e, const string& name ) const;
 
-			// ThisFinfo must go to the cinfo to build up the list.
-			void listFinfos( vector< const Finfo* >& flist ) const;
+		// ThisFinfo must go to the cinfo to build up the list.
+		void listFinfos( vector< const Finfo* >& flist ) const;
 
-			/**
-			 * This is an interesting case. What happens when
-			 * one copies a solved object? Unexpected stuff
-			 * if the solver is not included in the copy.
-			 * Anyway, for completeness, let's do it right.
-			 */
-			Finfo* copy() const {
-				return new SolveFinfo( *this );
-			}
+		/**
+		 * This is an interesting case. What happens when
+		 * one copies a solved object? Unexpected stuff
+		 * if the solver is not included in the copy.
+		 * Anyway, for completeness, let's do it right.
+		 */
+		Finfo* copy() const {
+			return new SolveFinfo( *this );
+		}
 
-			////////////////////////////////////////////////////
-			// Special functions for SolveFinfo
-			////////////////////////////////////////////////////
+		////////////////////////////////////////////////////
+		// Special functions for SolveFinfo
+		////////////////////////////////////////////////////
 
-			/**
-			 * Returns the index of the solved object on
-			 * the solver
-			 */
-			unsigned int getIndex( const Element* e ) const;
+		/**
+		* Returns the Conn going from solved 
+		* object e to the solver
+		*/
+		const Conn& getSolvedConn( const Element* e ) const;
 
-			/**
-			 * Returns the solver data part.
-			 */
-			void* getSolver( const Element* e ) const;
-
-		private:
-			unsigned int procSlot_;
-			vector< Finfo* > finfos_;
+	private:
+		unsigned int procSlot_;
+		vector< Finfo* > finfos_;
 
 };
 

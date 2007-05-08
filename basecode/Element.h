@@ -49,12 +49,23 @@ class Element
 				connIndex( const Conn* ) const = 0;
 
 		/**
-		 * Finds the relative index of a conn arriving at this element.
+		 * Finds the relative index of a conn arriving at this
+		 * element onto a MsgDest entry identified by slot.
 		 * Relative index means it is based on the specified
-		 * msgDest slot, so that the first conn in this slot would
+		 * MsgDest slot, so that the first conn in this slot would
 		 * have an index of 0.
 		 */
 		virtual unsigned int connDestRelativeIndex(
+				const Conn& c, unsigned int slot ) const = 0;
+
+		/**
+		 * Finds the relative index of a conn arriving at this
+		 * element onto a MsgSrc entry identified by the slot.
+		 * Relative index means it is based on the specified
+		 * MsgSrc slot, so that the first conn in this slot would
+		 * have an index of 0.
+		 */
+		virtual unsigned int connSrcRelativeIndex(
 				const Conn& c, unsigned int slot ) const = 0;
 		
 		/// Returns the size of the conn vector.
