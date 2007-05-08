@@ -139,6 +139,7 @@ void testStoich()
 	///////////////////////////////////////////////////////////
 	// Run an update step on this reaction system
 	///////////////////////////////////////////////////////////
+	cout << "\nTesting Stoich deriv calculation" << flush;
 	for ( unsigned int i = 0; i < NUM_COMPT; i++ )
 		s->S_[i] = s->Sinit_[i];
 
@@ -158,7 +159,41 @@ void testStoich()
 		}
 	}
 
+	///////////////////////////////////////////////////////////
+	// Connect up stoich to KineticHub
+	///////////////////////////////////////////////////////////
+	
+	cout << "\nTesting Stoich zombie data access" << flush;
+	// Clean out the old stoich
+	set( stoich, "destroy" );
+	stoich = Neutral::create( "Stoich", "s", Element::root() );
+
+	Element* hub = Neutral::create( "KineticHub", "hub", Element::root() );
+	ret = stoich->findFinfo( "hub" )->
+		add( stoich, hub, hub->findFinfo( "hub" ) );
+	ASSERT( ret, "connecting stoich to hub" );
+
+	// Rebuild the path now that the hub is connected.
+	ret = set< string >( stoich, "path", "/n/##" );
+	ASSERT( ret, "Setting path" );
+
+	ret = set< double >( m[7], "n", 1234.5 );
+	ASSERT( ret, "Setting value" );
+	s = static_cast< Stoich* >( stoich->data() );
+	k = s->molMap_.find( m[7] );
+	molNum = k->second;
+	ASSERT( s->S_[molNum] == 1234.5, "Setting value" );
+
+	k = s->molMap_.find( m[3] );
+	molNum = k->second;
+	s->Sinit_[molNum] = 543210.0;
+	double dret;
+	ret = get< double >( m[3], "nInit", dret );
+	ASSERT( ret, "Getting value" );
+	ASSERT( dret = 543210.0, "Getting value" );
+
 	// Get rid of all the compartments.
+	set( hub, "destroy" );
 	set( stoich, "destroy" );
 	set( n, "destroy" );
 }
