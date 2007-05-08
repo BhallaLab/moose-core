@@ -22,6 +22,12 @@ class RateTerm
 		virtual ~RateTerm() {;}
 		virtual double operator() () const = 0;
 		virtual void setRates( double k1, double k2 ) = 0;
+		// These next 4 terms are used for talking back to the
+		// original rate objects in MOOSE
+		virtual void setR1( double k1 ) = 0;
+		virtual void setR2( double k2 ) = 0;
+		virtual double getR1() const = 0;
+		virtual double getR2() const = 0;
 };
 
 // Base class MMEnzme for the purposes of setting rates
@@ -48,6 +54,22 @@ class MMEnzymeBase: public RateTerm
 		void setRates( double Km, double kcat ) {
 			setKm( Km );
 			setKcat( kcat );
+		}
+
+		void setR1( double Km ) {
+			setKm( Km );
+		}
+
+		void setR2( double kcat ) {
+			setKcat( kcat );
+		}
+
+		double getR1() const {
+			return Km_;
+		}
+
+		double getR2() const {
+			return kcat_;
 		}
 
 	protected:
@@ -116,11 +138,11 @@ class ZeroOrder: public RateTerm
 {
 	public:
 		ZeroOrder( double k )
-			: k_( -k )
+			: k_( k )
 		{;}
 
 		double operator() () const {
-			return -k_;
+			return k_;
 		}
 
 		void setK( double k ) {
@@ -130,6 +152,22 @@ class ZeroOrder: public RateTerm
 
 		void setRates( double k1, double k2 ) {
 			setK( k1 );
+		}
+
+		void setR1( double k1 ) {
+			setK( k1 );
+		}
+
+		void setR2( double k2 ) {
+			;
+		}
+
+		double getR1() const {
+			return k_;
+		}
+
+		double getR2() const {
+			return 0.0;
 		}
 	protected:
 		double k_;
@@ -143,7 +181,7 @@ class FirstOrder: public ZeroOrder
 		{;}
 
 		double operator() () const {
-			return -k_ * *y_;
+			return k_ * *y_;
 		}
 
 	private:
@@ -158,7 +196,7 @@ class SecondOrder: public ZeroOrder
 		{;}
 
 		double operator() () const {
-			return -k_ * *y1_ * *y2_;
+			return k_ * *y1_ * *y2_;
 		}
 
 	private:
@@ -174,7 +212,7 @@ class NOrder: public ZeroOrder
 		{;}
 
 		double operator() () const {
-			double ret = -k_;
+			double ret = k_;
 			vector< const double* >::const_iterator i;
 			for ( i = v_.begin(); i != v_.end(); i++)
 				ret *= *( *i );
@@ -211,6 +249,22 @@ class BidirectionalReaction: public RateTerm
 		void setRates( double kf, double kb ) {
 			forward_->setK( kf );
 			backward_->setK( kb );
+		}
+
+		void setR1( double kf ) {
+			forward_->setK( kf );
+		}
+
+		void setR2( double kb ) {
+			backward_->setK( kb );
+		}
+
+		double getR1() const {
+			return forward_->getR1();
+		}
+
+		double getR2() const {
+			return backward_->getR1();
 		}
 
 	private:

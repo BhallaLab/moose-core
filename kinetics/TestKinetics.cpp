@@ -192,6 +192,29 @@ void testStoich()
 	ASSERT( ret, "Getting value" );
 	ASSERT( dret = 543210.0, "Getting value" );
 
+	/////////////////////////////////////////////////////////
+	// Here we try reaction acces.
+	/////////////////////////////////////////////////////////
+	unsigned int index;
+	ret = set< double >( r[5], "kf", 111.222 );
+	ASSERT( ret, "Setting reac value" );
+	k = s->reacMap_.find( r[5] );
+	ASSERT( k != s->reacMap_.end(), "reac values" );
+	index = k->second;
+	ASSERT( s->rates_[index]->getR1() == 111.222, "Setting reac value" );
+	ASSERT( s->rates_[index]->getR2() == 0.1, "Setting reac value" );
+
+	k = s->reacMap_.find( r[2] );
+	ASSERT( k != s->reacMap_.end(), "reac values" );
+	index = k->second;
+	s->rates_[index]->setR2( 999.888 );
+	ret = get< double >( r[2], "kb", dret );
+	ASSERT( ret, "Getting reac value" );
+	ASSERT( dret == 999.888, "Getting reac value" );
+	ret = get< double >( r[2], "kf", dret );
+	ASSERT( ret, "Getting reac value" );
+	ASSERT( dret == 0.1, "Getting reac value" );
+
 	// Get rid of all the compartments.
 	set( hub, "destroy" );
 	set( stoich, "destroy" );

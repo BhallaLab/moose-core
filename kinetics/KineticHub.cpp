@@ -139,6 +139,10 @@ const Cinfo* initKineticHubCinfo()
 }
 
 static const Cinfo* kineticHubCinfo = initKineticHubCinfo();
+static const Finfo* molSolveFinfo = 
+	initKineticHubCinfo()->findFinfo( "molSolve" );
+static const Finfo* reacSolveFinfo = 
+	initKineticHubCinfo()->findFinfo( "reacSolve" );
 
 /*
 static const unsigned int reacSlot =
@@ -235,8 +239,6 @@ void KineticHub::molConnectionFuncLocal( Element* hub,
 	       	vector< double >*  S, vector< double >*  Sinit, 
 		vector< Element *>*  elist )
 {
-	static const Finfo* molSolveFinfo = 
-		initKineticHubCinfo()->findFinfo( "molSolve" );
 	// These fields will replace the original molecule fields so that
 	// the lookups refer to the solver rather than the molecule.
 	static Finfo* molFields[] =
@@ -252,7 +254,7 @@ void KineticHub::molConnectionFuncLocal( Element* hub,
 			RFCAST( &KineticHub::setMolNinit )
 		),
 	};
-	const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
+	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
 		initMoleculeCinfo()->getThisFinfo( ) );
 	assert( tf != 0 );
 	static SolveFinfo molZombieFinfo( 
@@ -281,11 +283,16 @@ void KineticHub::rateSizeFunc(  const Conn& c,
 	unsigned int nReac, unsigned int nEnz, unsigned int nMmEnz )
 {
 	static_cast< KineticHub* >( c.data() )->rateSizeFuncLocal(
-		nReac, nEnz, nMmEnz );
+		c.targetElement(), nReac, nEnz, nMmEnz );
 }
-void KineticHub::rateSizeFuncLocal( 
+void KineticHub::rateSizeFuncLocal( Element* hub, 
 	unsigned int nReac, unsigned int nEnz, unsigned int nMmEnz )
 {
+	// Ensure we have enough space allocated in each of the maps
+	reacMap_.resize( nReac );
+	enzMap_.resize( nEnz );
+	mmEnzMap_.resize( nMmEnz );
+
 	// Not sure what to do here.
 	// cout << "in rateSizeFuncLocal\n";
 }
@@ -293,7 +300,43 @@ void KineticHub::rateSizeFuncLocal(
 void KineticHub::reacConnectionFunc( const Conn& c,
 	unsigned int index, Element* reac )
 {
-	// cout << "in reacConnectionFunc for " << reac->name() << endl;
+	Element* e = c.targetElement();
+	static_cast< KineticHub* >( e->data() )->
+		reacConnectionFuncLocal( e, index, reac );
+}
+
+void KineticHub::reacConnectionFuncLocal( 
+		Element* hub, int rateTermIndex, Element* reac )
+{
+	// These fields will replace the original reaction fields so that
+	// the lookups refer to the solver rather than the molecule.
+	static Finfo* reacFields[] =
+	{
+		new ValueFinfo( "kf",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getReacKf ),
+			RFCAST( &KineticHub::setReacKf )
+		),
+		new ValueFinfo( "kb",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getReacKb ),
+			RFCAST( &KineticHub::setReacKb )
+		),
+	};
+	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
+		initReactionCinfo()->getThisFinfo( ) );
+	assert( tf != 0 );
+	static SolveFinfo reacZombieFinfo( 
+		reacFields, 
+		sizeof( reacFields ) / sizeof( Finfo* ),
+		tf
+	);
+
+	zombify( hub, reac, reacSolveFinfo, &reacZombieFinfo );
+	unsigned int connIndex = reacSolveFinfo->numOutgoing( hub );
+	assert( connIndex > 0 ); // Should have just created a message on it
+
+	reacMap_[connIndex - 1] = rateTermIndex;
 }
 
 void KineticHub::enzConnectionFunc( const Conn& c,
@@ -309,28 +352,43 @@ void KineticHub::mmEnzConnectionFunc( const Conn& c,
 }
 
 ///////////////////////////////////////////////////
-// Zombie object set/get function replacements
+// Zombie object set/get function replacements for molecules
 ///////////////////////////////////////////////////
 
 /**
  * Looks up the solver from the zombie element e. Returns the solver
- * element, or null on failure. Also passes back the index of the
- * zombie element, obtained by a simple lookup of the Conn index
- * connecting solver to zombie.
+ * element, or null on failure. 
+ * It needs the originating Finfo on the solver that connects to the zombie,
+ * as the srcFinfo.
+ * Also passes back the index of the zombie element on this set of
+ * messages. This is NOT the absolute Conn index.
  */
-KineticHub* getHubFromZombie( const Element* e, unsigned int& index )
+KineticHub* getHubFromZombie( const Element* e, const Finfo* srcFinfo,
+		unsigned int& index )
 {
 	const SolveFinfo* f = dynamic_cast< const SolveFinfo* > (
 			       	e->getThisFinfo() );
 	if ( !f ) return 0;
-	index = f->getIndex( e );
-	return static_cast< KineticHub* >( f->getSolver( e ) );
+	const Conn& c = f->getSolvedConn( e );
+	unsigned int slot;
+       	srcFinfo->getSlotIndex( srcFinfo->name(), slot );
+	Element* hub = c.targetElement();
+	index = hub->connSrcRelativeIndex( c, slot );
+	return static_cast< KineticHub* >( hub->data() );
 }
 
+/**
+ * Here we provide the zombie function to set the 'n' field of the 
+ * molecule. It first sets the solver location handling this
+ * field, then the molecule itself.
+ * For the molecule set/get operations, the lookup order is identical
+ * to the message order. So we don't need an intermediate table.
+ */
 void KineticHub::setMolN( const Conn& c, double value )
 {
 	unsigned int molIndex;
-	KineticHub* kh = getHubFromZombie( c.targetElement(), molIndex );
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), molSolveFinfo, molIndex );
 	if ( kh && kh->S_ ) {
 		assert ( molIndex < kh->S_->size() );
 		( *kh->S_ )[molIndex] = value;
@@ -341,7 +399,7 @@ void KineticHub::setMolN( const Conn& c, double value )
 double KineticHub::getMolN( const Element* e )
 {
 	unsigned int molIndex;
-	KineticHub* kh = getHubFromZombie( e, molIndex );
+	KineticHub* kh = getHubFromZombie( e, molSolveFinfo, molIndex );
 	if ( kh && kh->S_ ) {
 		assert ( molIndex < kh->S_->size() );
 		return ( *kh->S_ )[molIndex];
@@ -352,7 +410,8 @@ double KineticHub::getMolN( const Element* e )
 void KineticHub::setMolNinit( const Conn& c, double value )
 {
 	unsigned int molIndex;
-	KineticHub* kh = getHubFromZombie( c.targetElement(), molIndex );
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), molSolveFinfo, molIndex );
 	if ( kh && kh->Sinit_ ) {
 		assert ( molIndex < kh->Sinit_->size() );
 		( *kh->Sinit_ )[molIndex] = value;
@@ -363,10 +422,80 @@ void KineticHub::setMolNinit( const Conn& c, double value )
 double KineticHub::getMolNinit( const Element* e )
 {
 	unsigned int molIndex;
-	KineticHub* kh = getHubFromZombie( e, molIndex );
+	KineticHub* kh = getHubFromZombie( e, molSolveFinfo, molIndex );
 	if ( kh && kh->Sinit_ ) {
 		assert ( molIndex < kh->Sinit_->size() );
 		return ( *kh->Sinit_ )[molIndex];
+	}
+	return 0.0;
+}
+
+///////////////////////////////////////////////////
+// Zombie object set/get function replacements for reactions
+///////////////////////////////////////////////////
+
+/**
+ * Here we provide the zombie function to set the 'kf' field of the 
+ * Reaction. It first sets the solver location handling this
+ * field, then the reaction itself.
+ * For the reaction set/get operations, the lookup order is
+ * different from the message order. So we need an intermediate
+ * table, the reacMap_, to map from one to the other.
+ */
+void KineticHub::setReacKf( const Conn& c, double value )
+{
+	unsigned int index;
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), reacSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->reacMap_.size() );
+		index = kh->reacMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		( *kh->rates_ )[index]->setR1( value );
+	}
+	Reaction::setKf( c, value );
+}
+
+// getReacKf does not really need to go to the solver to get the value,
+// because it should always remain in sync locally. But we do have
+// to define the function to go with the set func in the replacement
+// ValueFinfo.
+double KineticHub::getReacKf( const Element* e )
+{
+	unsigned int index;
+	KineticHub* kh = getHubFromZombie( e, reacSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->reacMap_.size() );
+		index = kh->reacMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		return ( *kh->rates_ )[index]->getR1();
+	}
+	return 0.0;
+}
+
+void KineticHub::setReacKb( const Conn& c, double value )
+{
+	unsigned int index;
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), reacSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->reacMap_.size() );
+		index = kh->reacMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		( *kh->rates_ )[index]->setR2( value );
+	}
+	Reaction::setKb( c, value );
+}
+
+double KineticHub::getReacKb( const Element* e )
+{
+	unsigned int index;
+	KineticHub* kh = getHubFromZombie( e, reacSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->reacMap_.size() );
+		index = kh->reacMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		return ( *kh->rates_ )[index]->getR2();
 	}
 	return 0.0;
 }
@@ -453,6 +582,11 @@ void KineticHubWrapper::mmEnzFuncLocal( double k1, double k2, double k3, long in
 ///////////////////////////////////////////////////
 // Other function definitions
 ///////////////////////////////////////////////////
+/**
+ * This operation turns the target element e into a zombie controlled
+ * by the hub/solver. It gets rid of any process message coming into 
+ * the zombie and replaces it with one from the solver.
+ */
 void KineticHub::zombify( 
 		Element* hub, Element* e, const Finfo* hubFinfo,
 	       	Finfo* solveFinfo )
