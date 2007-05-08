@@ -220,6 +220,22 @@ class Element
 		virtual void addFinfo( Finfo* f ) = 0;
 
 		/**
+		 * Assigns the zeroth finfo, which is the one that 
+		 * holds all the common info for the object. Normally this
+		 * is assigned at object creation time, but when an object
+		 * is taken over (zombified) by a solver, its functions
+		 * have to be overridden. At that time the 'ThisFinfo' is
+		 * reassigned by this function.
+		 */
+		virtual void setThisFinfo( Finfo* f ) = 0;
+
+		/**
+		 * Accesses the zeroth finfo.
+		 */
+		virtual const Finfo* getThisFinfo() const = 0;
+
+
+		/**
 		 * Returns true if the specified connection is on the specified
 		 * MsgSrc
 		 */

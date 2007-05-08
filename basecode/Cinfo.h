@@ -87,6 +87,9 @@ class Cinfo
 			void listFinfos( vector< const Finfo* >& flist ) const;
 
 			unsigned int getSlotIndex( const string& name ) const;
+			const Finfo* getThisFinfo() const {
+				return thisFinfo_;
+			}
 
 		private:
 			const std::string name_;
