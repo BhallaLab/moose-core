@@ -52,4 +52,8 @@ class Reaction
 		double A_;
 		double B_;
 };
+
+// Used by the solver
+extern const Cinfo* initReactionCinfo();
+
 #endif // _Reaction_h
