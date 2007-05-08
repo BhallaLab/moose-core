@@ -226,11 +226,6 @@ class Finfo
 					unsigned int& ret ) const {
 				return 0;
 			}
-			/*
-			virtual unsigned int getSlotIndex() const {
-				return 0;
-			}
-			*/
 
 			/**
 			 * This returns true if the Finfo is meant to be 

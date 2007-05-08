@@ -59,4 +59,8 @@ class Molecule
 		double B_;
 		static const double EPSILON;
 };
+
+// Used by the solver
+extern const Cinfo* initMoleculeCinfo();
+
 #endif // _Molecule_h

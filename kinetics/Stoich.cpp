@@ -344,7 +344,6 @@ void Stoich::localSetPath( Element* stoich, const string& value )
 	v_.resize( numRates, 0.0 );
 	send2< vector< RateTerm* >*, bool >( 
 		stoich, rateTermInfoSlot, &rates_, useOneWayReacs_ );
-	// rateTermInfoSrc_.send( &rates_, useOneWayReacs_ );
 	int nReac = 0;
 	int nEnz = 0;
 	int nMmEnz = 0;
@@ -720,7 +719,7 @@ void Stoich::addRate( Element* stoich, Element* e )
 
 void Stoich::setupReacSystem()
 {
-	cout << "Don't yet know how to setupReacSystem\n";
+	// cout << "Don't yet know how to setupReacSystem\n";
 }
 
 // Update the v_ vector for individual reac velocities.

@@ -256,6 +256,8 @@ class SimpleElement: public Element
 		unsigned int listLocalFinfos( vector< Finfo* >& flist );
 
 		void addFinfo( Finfo* f );
+		void setThisFinfo( Finfo* f );
+		const Finfo* getThisFinfo( ) const;
 
 		bool isConnOnSrc(
 			unsigned int src, unsigned int conn ) const;
