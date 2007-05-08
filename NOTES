@@ -2584,3 +2584,27 @@ Worked on SharedFinfos so that they take regular Src and Dest Finfos as
 entries, rather than the TypeFuncPair which had insufficient info.
 Fixed many Finfo files as a result.
 
+Checked in as revision 99
+
+Connected up KineticHub, messages succeeded. Now to do the zombie messages.
+Hub has: 
+For reactions: index for RateTerm, Element* for reacn.
+For molecules: Vector of S and Sinit, elist of mols.
+
+
+First pass at SolveFinfo meant to replace ThisFinfo on the solved elements.
+All the required ops are handled skeletally. No compile yet. The
+msgSlot stuff is untidy.
+
+Still need to define a counterpart Finfo to the SolveFinfo.
+
+=============================================================================
+8 May 2007
+
+Field access now working for zombies. Some initial unit tests done, but
+more work required to make it general. The basic approach as discussed,
+was to replace the 'ThisFinfo' with a SolveFinfo, and that intercepts
+set/get calls for each object. Yet to handle messages or object
+creation/destruction.
+
+=============================================================================

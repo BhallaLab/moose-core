@@ -477,6 +477,20 @@ void SimpleElement::addFinfo( Finfo* f )
 	finfo_.push_back( f );
 }
 
+void SimpleElement::setThisFinfo( Finfo* f )
+{
+	if ( finfo_.size() == 0 )
+		finfo_.resize( 1 );
+	finfo_[0] = f;
+}
+
+const Finfo* SimpleElement::getThisFinfo( ) const
+{
+	if ( finfo_.size() == 0 )
+		return 0;
+	return finfo_[0];
+}
+
 bool SimpleElement::isConnOnSrc(
 			unsigned int srcIndex, unsigned int connIndex ) const
 {
