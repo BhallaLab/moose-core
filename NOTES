@@ -2609,4 +2609,40 @@ creation/destruction.
 
 Checked in as revision 100
 
+Generalized the field access stuff. Now working both for molecule values
+and for reaction rates. 
+
+Checked in as revision 101
+
+Remaining:
+- Document it.
+- Deal with enzymes
+- Deal with existing messages.
+- Deal with new message requests
+- Deal with existing DynamicFinfos.
+- Deal with changing mode of molecule
+- Deal with changing mode of enzyme
+
+But the core concepts are in place and working, and the rest is turning
+the handle.
+=============================================================================
+9 May 2007
+Cleaned up hub deletion: needed to get rid of SolveFinfos and put back
+zombies. Also think about messaging.
+
+=============================================================================
+10 May
+Slow wok on handling messaging. Most works but message doesn't.
+=============================================================================
+11 May
+still struggling to find timeto work on message redirection. gdb reports
+a problem on KineticHub.cpp:698
+srcFinfos[ i ]= c.targetElement()->findFinfo( c.targetIndex() );
+Something funny happens when the finfo is returned from findFinfo.
+Valgrind it. No obvious mem issue found.
+
+=============================================================================
+13 May 2007
+Finally got the message redirection stuff to work. 
+
 =============================================================================
