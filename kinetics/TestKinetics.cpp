@@ -13,6 +13,8 @@
 #include "header.h"
 #include "moose.h"
 #include "../element/Neutral.h"
+#include "../builtins/Interpol.h"
+#include "../builtins/Table.h"
 #include "RateTerm.h"
 #include "SparseMatrix.h"
 #include "Stoich.h"
@@ -215,7 +217,56 @@ void testStoich()
 	ASSERT( ret, "Getting reac value" );
 	ASSERT( dret == 0.1, "Getting reac value" );
 
+	/////////////////////////////////////////////////////////
+	// Now move on to handling pre-existing messages.
+	/////////////////////////////////////////////////////////
+
+	cout << "\nTesting Stoich external message redirection" << flush;
+	// Clean out the old stuff
+	set( hub, "destroy" );
+	set( stoich, "destroy" );
+
+	Element* table = Neutral::create( "Table", "table", Element::root() );
+	ret = table->findFinfo( "outputSrc" )->add( table, m[5], 
+			m[5]->findFinfo( "sumTotal" ) );
+	ASSERT( ret, "Making test message" );
+
+	stoich = Neutral::create( "Stoich", "s", Element::root() );
+
+	hub = Neutral::create( "KineticHub", "hub", Element::root() );
+	ret = stoich->findFinfo( "hub" )->
+		add( stoich, hub, hub->findFinfo( "hub" ) );
+	ASSERT( ret, "connecting stoich to hub" );
+
+	// Rebuild the path now that the hub is connected.
+	ret = set< string >( stoich, "path", "/n/##" );
+	ASSERT( ret, "Setting path" );
+
+	set< int >( table, "stepmode", 0 );
+	set< int >( table, "xdivs", 1 );
+	set< double >( table, "xmin", 0.0 );
+	set< double >( table, "xmax", 10.0 );
+	lookupSet< double, unsigned int >( table, "table", 33.0, 0 );
+	lookupSet< double, unsigned int >( table, "table", 33.0, 1 );
+	set< int >( table, "stepmode", 0 );
+	Conn c( table, 0 );
+	ProcInfoBase p;
+	p.dt_ = 0.001;
+	p.currTime_ = 0.0;
+	Table::process( c, &p );
+	// Check that the value has been added to the correct molecule
+	ret = get< double >( m[5], "n", dret );
+	ASSERT( ret, "Getting value" );
+	ASSERT( dret = 33.0, "Message redirection" );
+	k = s->molMap_.find( m[5] );
+	molNum = k->second;
+	ASSERT( s->S_[molNum] == 33.0, "Message redirection" );
+
+
+	/////////////////////////////////////////////////////////
 	// Get rid of all the compartments.
+	/////////////////////////////////////////////////////////
+	set( table, "destroy" );
 	set( hub, "destroy" );
 	set( stoich, "destroy" );
 	set( n, "destroy" );

@@ -10,6 +10,7 @@
 
 
 #include "moose.h"
+#include "../element/Neutral.h"
 #include "RateTerm.h"
 #include "KineticHub.h"
 #include "Molecule.h"
@@ -107,6 +108,10 @@ const Cinfo* initKineticHubCinfo()
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
+		new DestFinfo( "destroy", Ftype0::global(),
+			&KineticHub::destroy ),
+		new DestFinfo( "molSum", Ftype1< double >::global(),
+			RFCAST( &KineticHub::molSum ) ),
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
@@ -143,13 +148,21 @@ static const Finfo* molSolveFinfo =
 	initKineticHubCinfo()->findFinfo( "molSolve" );
 static const Finfo* reacSolveFinfo = 
 	initKineticHubCinfo()->findFinfo( "reacSolve" );
+static const Finfo* molSumFinfo = 
+	initKineticHubCinfo()->findFinfo( "molSum" );
 
+static const unsigned int molSumSlot =
+	initKineticHubCinfo()->getSlotIndex( "molSum" );
 /*
 static const unsigned int reacSlot =
 	initMoleculeCinfo()->getSlotIndex( "reac" );
 static const unsigned int nSlot =
 	initMoleculeCinfo()->getSlotIndex( "nSrc" );
 */
+
+void redirectDestMessages(
+	Element* hub, Element* e, const Finfo* hubFinfo, const Finfo* eFinfo,
+	unsigned int eIndex, vector< unsigned int >& map );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -161,6 +174,51 @@ KineticHub::KineticHub()
 	nMol_( 0 ), nBuf_( 0 ), nSumTot_( 0 )
 {
 	;
+}
+
+/**
+ * In this destructor we need to put messages back to process,
+ * and we need to replace the SolveFinfos on zombies with the
+ * original ThisFinfo.
+ */
+void KineticHub::destroy( const Conn& c)
+{
+	static Finfo* origMolFinfo =
+		const_cast< Finfo* >(
+		initMoleculeCinfo()->getThisFinfo( ) );
+	static Finfo* origReacFinfo =
+		const_cast< Finfo* >(
+		initReactionCinfo()->getThisFinfo( ) );
+	Element* hub = c.targetElement();
+	vector< Conn > targets;
+	vector< Conn >::iterator i;
+
+	// First (todo) put the messages back onto the scheduler.
+	// Second, replace the SolveFinfos
+	molSolveFinfo->outgoingConns( hub, targets );
+	for ( i = targets.begin(); i != targets.end(); i++ )
+		i->targetElement()->setThisFinfo( origMolFinfo );
+
+	reacSolveFinfo->outgoingConns( hub, targets );
+	for ( i = targets.begin(); i != targets.end(); i++ )
+		i->targetElement()->setThisFinfo( origReacFinfo );
+
+	Neutral::destroy( c );
+}
+
+/**
+ * Here we add external inputs to a molecule. This message replaces
+ * the SumTot input to a molecule when it is used for controlling its
+ * number. It is not meant as a substitute for SumTot between molecules.
+ */
+void KineticHub::molSum( const Conn& c, double val )
+{
+	Element* hub = c.targetElement();
+	unsigned int index = hub->connDestRelativeIndex( c, molSumSlot );
+	KineticHub* kh = static_cast< KineticHub* >( hub->data() );
+
+	assert( index < kh->molSumMap_.size() );
+	( *kh->S_ )[ kh->molSumMap_[ index ] ] = val;
 }
 
 ///////////////////////////////////////////////////
@@ -274,8 +332,13 @@ void KineticHub::molConnectionFuncLocal( Element* hub,
 	// order of the S_ and Sinit_ vectors and the elist vector.
 	// This is used implicitly in the ordering of the process messages
 	// that get set up between the Hub and the objects.
+	const Finfo* sumTotFinfo = 
+		Cinfo::find( "Molecule" )->findFinfo( "sumTotal" );
 	for ( i = elist->begin(); i != elist->end(); i++ ) {
 		zombify( hub, *i, molSolveFinfo, &molZombieFinfo );
+		// Here we replace the sumTotMessages from outside the tree.
+		redirectDestMessages( hub, *i, molSumFinfo, sumTotFinfo, 
+		i - elist->begin(), molSumMap_ );
 	}
 }
 
@@ -604,3 +667,39 @@ void KineticHub::zombify(
 	// Replace the 'ThisFinfo' on the solved element
 	e->setThisFinfo( solveFinfo );
 }
+
+/**
+ * This function redirects messages arriving at zombie elements onto
+ * the hub. 
+ * e is the zombie element whose messages are being redirected to the hub.
+ * eFinfo is the Finfo holding those messages.
+ * hubFinfo is the Finfo on the hub which will now handle the messages.
+ * eIndex is the index to look up the element.
+*/
+void redirectDestMessages(
+	Element* hub, Element* e, const Finfo* hubFinfo, const Finfo* eFinfo,
+	unsigned int eIndex, vector< unsigned int >& map )
+{
+	vector< Conn > clist;
+	if ( eFinfo->incomingConns( e, clist ) == 0 )
+		return;
+
+	unsigned int i;
+	unsigned int max = clist.size();
+	vector< Element* > srcElements( max );
+	vector< const Finfo* > srcFinfos( max );
+	
+	map.push_back( eIndex );
+	
+	// An issue here: Do I check if the src is on the solved tree?
+	for ( i = 0; i != max; i++ ) {
+		Conn& c = clist[ i ];
+		srcElements[ i ] = c.targetElement();
+		srcFinfos[ i ]= c.targetElement()->findFinfo( c.targetIndex() );
+	}
+	eFinfo->dropAll( e );
+	for ( i = 0; i != max; i++ ) {
+		srcFinfos[ i ]->add( srcElements[ i ], hub, hubFinfo );
+	}
+}
+
