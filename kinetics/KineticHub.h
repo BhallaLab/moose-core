@@ -13,7 +13,6 @@
 #define _KineticHub_h
 class KineticHub
 {
-	friend class KineticHubWrapper;
 	public:
 		KineticHub();
 
@@ -65,6 +64,16 @@ class KineticHub
 				unsigned int index, Element* mmEnz );
 		
 		///////////////////////////////////////////////////
+		// Overrides Neutral::destroy to clean up zombies.
+		///////////////////////////////////////////////////
+		static void destroy( const Conn& c);
+
+		///////////////////////////////////////////////////
+		// Functions to override zombie messages
+		///////////////////////////////////////////////////
+		static void molSum( const Conn& c, double val );
+
+		///////////////////////////////////////////////////
 		// Functions to override zombie field access funcs.
 		///////////////////////////////////////////////////
 		static void setMolN( const Conn& c, double value );
@@ -90,5 +99,6 @@ class KineticHub
 		vector< unsigned int > reacMap_;
 		vector< unsigned int > enzMap_;
 		vector< unsigned int > mmEnzMap_;
+		vector< unsigned int > molSumMap_;
 };
 #endif // _KineticHub_h

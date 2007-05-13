@@ -38,7 +38,7 @@ Swig_wrap.cxx:
 	swig -c++ -python Swig.i
 
 Swig_wrap.o:
-	g++ -fpic -c Swig_wrap.cxx -I/usr/include/python2.4
+	g++ -fpic -c Swig_wrap.cxx -I/usr/include/python2.5
 
 #MyClassWrapper.o: MyClassWrapper.h
 
