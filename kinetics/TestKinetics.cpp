@@ -296,6 +296,9 @@ void testStoich()
 	set< double >( table, "xmin", 0.0 );
 	set< double >( table, "xmax", 10.0 );
 	set< double >( table, "output", 0.0 );
+	Conn c1( table, 0 );
+	p.dt_ = 0.001;
+	p.currTime_ = 0.0;
 
 	ret = table->findFinfo( "inputRequest" )->add( table, m[4], 
 			m[4]->findFinfo( "n" ) );
@@ -335,13 +338,48 @@ void testStoich()
 	// Here we finally check that the return message to the
 	// DynamicFinfo can look up the solver.
 	s->S_[molNum] = 192939.5;
-	Table::process( c, &p );
+	Table::process( c1, &p );
 	ret = get< double >( table, "input", dret );
 	ASSERT( ret, "DynamicFinfo message redirect" );
 	ASSERT( dret == 192939.5, "DynamicFinfo message redirect" );
 	ret = lookupGet< double, unsigned int >( table, "table", dret, 0 );
 	ASSERT( ret, "DynamicFinfo message redirect" );
 	ASSERT( dret == 192939.5, "DynamicFinfo message redirect" );
+
+	// Here we check if a brand new DynamicFinfo automagically finds the
+	// solver.
+	Element* table2 = Neutral::create( "Table", "table2", table );
+	set< int >( table2, "stepmode", 3 );
+	set< int >( table2, "xdivs", 1 );
+	set< double >( table2, "xmin", 0.0 );
+	set< double >( table2, "xmax", 10.0 );
+	set< double >( table2, "output", 0.0 );
+
+	ret = table2->findFinfo( "inputRequest" )->add( table2, m[8], 
+			m[8]->findFinfo( "n" ) );
+	ASSERT( ret, "Making test message" );
+
+	Conn c2( table2, 0 );
+
+	k = s->molMap_.find( m[8] );
+	molNum = k->second;
+	s->S_[molNum] = 12.5;
+
+	ret = get< double >( table2, "input", dret );
+	ASSERT( ret, "new DynamicFinfo message redirect" );
+	ASSERT( dret == 0, "New DynamicFinfo message redirect" );
+	ret = lookupGet< double, unsigned int >( table2, "table", dret, 0 );
+	ASSERT( ret, "New DynamicFinfo message redirect" );
+	ASSERT( dret == 0, New "DynamicFinfo message redirect" );
+
+	Table::process( c2, &p );
+
+	ret = get< double >( table2, "input", dret );
+	ASSERT( ret, "new DynamicFinfo message redirect" );
+	ASSERT( dret == 12.5, "New DynamicFinfo message redirect" );
+	ret = lookupGet< double, unsigned int >( table2, "table", dret, 0 );
+	ASSERT( ret, "New DynamicFinfo message redirect" );
+	ASSERT( dret == 12.5, New "DynamicFinfo message redirect" );
 
 	/////////////////////////////////////////////////////////
 	// Get rid of all the compartments.
