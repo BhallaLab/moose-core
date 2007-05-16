@@ -203,6 +203,13 @@ class Element
 				const = 0;
 
 		/**
+		 * Returns finfo ptr on local vector of Finfos. 0 if we are out
+		 * of range. Most of these Finfos should be DynamicFinfos.
+		 */
+		virtual const Finfo* localFinfo( unsigned int index )
+				const = 0;
+
+		/**
 		 * Checks that specified finfo does in fact come from this
 		 * Element. Used for paranoia checks in some functions,
 		 * though perhaps this can later be phased out by using
@@ -229,6 +236,14 @@ class Element
 		 * the class information.
 		 */
 		virtual void addFinfo( Finfo* f ) = 0;
+
+		/**
+ 		* This function cleans up the finfo f. It removes its messages,
+ 		* deletes it, and removes its entry from the finfo list. Returns
+ 		* true if the finfo was found and removed. It does NOT
+ 		* permit deleting the ThisFinfo at index 0.
+ 		*/
+		virtual bool dropFinfo( const Finfo* f ) = 0;
 
 		/**
 		 * Assigns the zeroth finfo, which is the one that 

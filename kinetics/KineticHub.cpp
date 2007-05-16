@@ -164,6 +164,8 @@ void redirectDestMessages(
 	Element* hub, Element* e, const Finfo* hubFinfo, const Finfo* eFinfo,
 	unsigned int eIndex, vector< unsigned int >& map );
 
+void redirectDynamicMessages( Element* e );
+
 ///////////////////////////////////////////////////
 // Class function definitions
 ///////////////////////////////////////////////////
@@ -339,6 +341,7 @@ void KineticHub::molConnectionFuncLocal( Element* hub,
 		// Here we replace the sumTotMessages from outside the tree.
 		redirectDestMessages( hub, *i, molSumFinfo, sumTotFinfo, 
 		i - elist->begin(), molSumMap_ );
+		redirectDynamicMessages( *i );
 	}
 }
 
@@ -703,3 +706,55 @@ void redirectDestMessages(
 	}
 }
 
+/**
+ * Here we replace the existing DynamicFinfos and their messages with
+ * new ones for the updated access functions
+ */
+void redirectDynamicMessages( Element* e )
+{
+	const Finfo* f;
+	unsigned int finfoNum = 1;
+	unsigned int i;
+
+	vector< Conn > clist;
+
+	while ( ( f = e->localFinfo( finfoNum ) ) ) {
+		const DynamicFinfo *df = dynamic_cast< const DynamicFinfo* >( f );
+		assert( df != 0 );
+		f->incomingConns( e, clist );
+		unsigned int max = clist.size();
+		vector< Element* > srcElements( max );
+		vector< const Finfo* > srcFinfos( max );
+		// An issue here: Do I check if the src is on the solved tree?
+		for ( i = 0; i != max; i++ ) {
+			Conn& c = clist[ i ];
+			srcElements[ i ] = c.targetElement();
+			srcFinfos[ i ]= c.targetElement()->findFinfo( c.targetIndex() );
+		}
+
+		f->outgoingConns( e, clist );
+		max = clist.size();
+		vector< Element* > destElements( max );
+		vector< const Finfo* > destFinfos( max );
+		for ( i = 0; i != max; i++ ) {
+			Conn& c = clist[ i ];
+			destElements[ i ] = c.targetElement();
+			destFinfos[ i ] = c.targetElement()->findFinfo( c.targetIndex() );
+		}
+		string name = df->name();
+		assert( e->dropFinfo( df ) );
+
+		const Finfo* origFinfo = e->findFinfo( name );
+
+		max = srcFinfos.size();
+		for ( i =  0; i < max; i++ ) {
+			srcFinfos[ i ]->add( srcElements[ i ], e, origFinfo );
+		}
+		max = destFinfos.size();
+		for ( i =  0; i < max; i++ ) {
+			origFinfo->add( e, destElements[ i ], destFinfos[ i ] );
+		}
+
+		finfoNum++;
+	}
+}

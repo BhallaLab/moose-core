@@ -441,6 +441,13 @@ const Finfo* SimpleElement::findFinfo( unsigned int connIndex ) const
 	return 0;
 }
 
+const Finfo* SimpleElement::localFinfo( unsigned int index ) const
+{
+	if ( index >= finfo_.size() ) 
+		return 0;
+	return finfo_[ index ];
+}
+
 unsigned int SimpleElement::listFinfos( 
 				vector< const Finfo* >& flist ) const
 {
@@ -487,6 +494,29 @@ void SimpleElement::addFinfo( Finfo* f )
 		dest_.push_back( temp );
 	}
 	finfo_.push_back( f );
+}
+
+/**
+ * This function cleans up the finfo f. It removes its messages,
+ * deletes it, and removes its entry from the finfo list. Returns
+ * true if the finfo was found and removed. At this stage it does NOT
+ * permit deleting the ThisFinfo at index 0.
+ */
+bool SimpleElement::dropFinfo( const Finfo* f )
+{
+	if ( finfo_.size() < 2 )
+		return 0;
+
+	vector< Finfo* >::iterator i;
+	for ( i = finfo_.begin() + 1; i != finfo_.end(); i++ ) {
+		if ( *i == f ) {
+			f->dropAll( this );
+			delete *i;
+			finfo_.erase( i );
+			return 1;
+		}
+	}
+	return 0;
 }
 
 void SimpleElement::setThisFinfo( Finfo* f )

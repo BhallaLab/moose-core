@@ -38,6 +38,7 @@ DynamicFinfo* DynamicFinfo::setupDynamicFinfo(
 {
 	assert( e != 0 );
 
+
 	// Note that we create this with a null index. This is because
 	// the DynamicFinfo is a temporary and we don't want to lose
 	// the index when we destroy it.
@@ -52,6 +53,13 @@ DynamicFinfo* DynamicFinfo::setupDynamicFinfo(
 	for ( i = flist.begin(); i != flist.end(); i++ ) {
 		DynamicFinfo* df = dynamic_cast< DynamicFinfo* >( *i );
 		if ( df ) {
+			// If this DynamicFinfo is already handling the origFinfo, 
+			// just reuse it, but check that the index is the same too.
+			if ( df->origFinfo_ == origFinfo && 
+				df->generalIndex_ == index ) {
+				delete ret;
+				return df;
+			}
 			if ( df->numIncoming( e ) == 0 &&
 							df->numOutgoing( e ) == 0 ) {
 				ret->srcIndex_ = df->srcIndex_;
@@ -355,6 +363,13 @@ void DynamicFinfo::countMessages(
 {
 	srcIndex_ = srcIndex++;
 	destIndex_ = destIndex++;
+}
+
+const Finfo* DynamicFinfo:: match( Element* e, const string& n ) const 
+{
+	if ( n == name() )
+		return this;
+	return 0;
 }
 
 /**
