@@ -2615,11 +2615,11 @@ and for reaction rates.
 Checked in as revision 101
 
 Remaining:
-- Document it.
++ Document it.
 - Deal with enzymes
-- Deal with existing messages.
+* Deal with existing messages.
 - Deal with new message requests
-- Deal with existing DynamicFinfos.
++ Deal with existing DynamicFinfos.
 - Deal with changing mode of molecule
 - Deal with changing mode of enzyme
 
@@ -2644,5 +2644,53 @@ Valgrind it. No obvious mem issue found.
 =============================================================================
 13 May 2007
 Finally got the message redirection stuff to work. 
+
+Checked in as revision 102
+
+=============================================================================
+14 May 2007
+Looks like for the DynamicFinfo all we need is to replace the set and get
+funcs from the altered Finfos.
+=============================================================================
+15 May 2007
+A closer look shows that it is not so simple.
+
+DynamicFinfo --> dest: Here the DynamicFinfo must call a dest function
+with a value it looks up using an access func. Here in principle we could
+replace the 'get' access func.
+
+DynamicFinfo <--> dest : Here we have the DynamicFinfo receive a trigger
+from the dest, do a lookup, and call the dest recvFunc with its looked up 
+value. Here again we could replace the 'get' accessFunc. The trigFunc is 
+independent of access funcs and could stay.
+
+DynamicFinfo <-- dest: Here we have to give the dest the accessFunc for the
+origFinfo encapsulated by the DynamicFinfo. Have to redo the message.
+
+A clean and comprehensive way to do all this is just to rebuild the dynamic
+finfo by replacing all its messages. We already have a powerful func for 
+doing this in the form of redirectDestMessages.
+
+We might save a little setup time in the first two cases if we replace
+the access funcs. But we would still need to do the redirect, so it would
+be a messier coding solution.
+
+OK, implemented the solution where we rebuild the DynamicFinfo completely.
+Now to test it.
+
+A bit stuck. The message claims to be formed but the value it gets is 
+the unzombified value from the object. Redirection does not seem to be
+happening, but the redirection function is called. It uses a very odd looking
+Conn in the redirection.
+More fundamental issue with getting values from zombie. Works at first,
+but not later.
+Ooops, lots of errors. I was doing an assert on dret=<num>
+Should be ==.
+
+Now that it is fixed, I'm still stuck at the same place. The second time I
+try to do zombie field access I fail.
+
+OK, I see it. In the second attempt at field acces, we are going through the 
+DynamicFinfo because a message has been set up. This DynamicFinfo is confused.
 
 =============================================================================

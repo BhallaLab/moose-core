@@ -65,11 +65,6 @@ class DynamicFinfo: public Finfo
 				void* index = 0 );
 
 			/**
-			 * This checks if a DynamicFinfo is sitting around
-			 * unused.
-			 */
-
-			/**
 			 * This should be almost the regular SrcFinfo::add
 			 * operation, since at this point we have acquired
 			 * a MsgSrc slot.
@@ -91,6 +86,14 @@ class DynamicFinfo: public Finfo
 
 			void dropAll( Element* e ) const;
 			bool drop( Element* e, unsigned int i ) const;
+
+			/**
+			 * This function erases contents of a DynamicFinfo, including
+			 * getting rid of messages, its name, and functions. This
+			 * is needed because we may otherwise get spurious matches to
+			 * an old DynamicFinfo, in the Element::findFinfo( name )
+			 */
+			void clear( Element* e );
 			
 			unsigned int numIncoming( const Element* e ) const;
 			unsigned int numOutgoing( const Element* e ) const;
@@ -149,12 +152,7 @@ class DynamicFinfo: public Finfo
 			 * variations in the string, such as spaces in index
 			 * braces.
 			 */
-			const Finfo* match( Element* e, const string& n )
-			const {
-					if ( n == name() )
-							return this;
-					return 0;
-			}
+			const Finfo* match( Element* e, const string& n ) const;
 
 			const Finfo* match( 
 				const Element* e, unsigned int connIndex ) const;

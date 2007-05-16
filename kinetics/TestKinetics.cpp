@@ -192,7 +192,23 @@ void testStoich()
 	double dret;
 	ret = get< double >( m[3], "nInit", dret );
 	ASSERT( ret, "Getting value" );
-	ASSERT( dret = 543210.0, "Getting value" );
+	ASSERT( dret == 543210.0, "Getting value" );
+
+	k = s->molMap_.find( m[7] );
+	molNum = k->second;
+	s->S_[molNum] = 343434.0;
+	ret = get< double >( m[7], "n", dret );
+	ASSERT( ret, "Getting value" );
+	ASSERT( dret == 343434.0, "Getting value" );
+
+	// This extra check is in case there was something strange that
+	// failed on a second access to the set of zombies.
+	k = s->molMap_.find( m[4] );
+	molNum = k->second;
+	s->S_[molNum] = 10203.5;
+	ret = get< double >( m[4], "n", dret );
+	ASSERT( ret, "Getting another value" );
+	ASSERT( dret == 10203.5, "Getting another value" );
 
 	/////////////////////////////////////////////////////////
 	// Here we try reaction acces.
@@ -232,6 +248,7 @@ void testStoich()
 	ASSERT( ret, "Making test message" );
 
 	stoich = Neutral::create( "Stoich", "s", Element::root() );
+	s = static_cast< Stoich* >( stoich->data() );
 
 	hub = Neutral::create( "KineticHub", "hub", Element::root() );
 	ret = stoich->findFinfo( "hub" )->
@@ -257,11 +274,74 @@ void testStoich()
 	// Check that the value has been added to the correct molecule
 	ret = get< double >( m[5], "n", dret );
 	ASSERT( ret, "Getting value" );
-	ASSERT( dret = 33.0, "Message redirection" );
+	ASSERT( dret == 33.0, "Message redirection" );
 	k = s->molMap_.find( m[5] );
 	molNum = k->second;
 	ASSERT( s->S_[molNum] == 33.0, "Message redirection" );
 
+
+	/////////////////////////////////////////////////////////
+	// Now test handling of stuff on DynamicFinfos.
+	/////////////////////////////////////////////////////////
+
+	cout << "\nTesting Stoich DynamicFinfo msg redirection" << flush;
+	// Clean out the old stuff
+	set( hub, "destroy" );
+	set( stoich, "destroy" );
+	set( table, "destroy" );
+
+	table = Neutral::create( "Table", "table", Element::root() );
+	set< int >( table, "stepmode", 3 );
+	set< int >( table, "xdivs", 1 );
+	set< double >( table, "xmin", 0.0 );
+	set< double >( table, "xmax", 10.0 );
+	set< double >( table, "output", 0.0 );
+
+	ret = table->findFinfo( "inputRequest" )->add( table, m[4], 
+			m[4]->findFinfo( "n" ) );
+	ASSERT( ret, "Making test message" );
+
+	stoich = Neutral::create( "Stoich", "s", Element::root() );
+	s = static_cast< Stoich* >( stoich->data() );
+
+	hub = Neutral::create( "KineticHub", "hub", Element::root() );
+	ret = stoich->findFinfo( "hub" )->
+		add( stoich, hub, hub->findFinfo( "hub" ) );
+	ASSERT( ret, "connecting stoich to hub" );
+
+	// Rebuild the path now that the hub is connected.
+	ret = set< string >( stoich, "path", "/n/##" );
+	ASSERT( ret, "Setting path" );
+
+
+	// Confirm that the field access still works
+	k = s->molMap_.find( m[6] );
+	molNum = k->second;
+	s->S_[molNum] = 346434.0;
+	ret = get< double >( m[6], "n", dret );
+	ASSERT( ret, "Getting value" );
+	ASSERT( dret == 346434.0, "Getting value" );
+
+	// This check turns out to be quite important. Confirm that
+	// field access works even through a dynamic Finfo.
+	k = s->molMap_.find( m[4] );
+	molNum = k->second;
+	s->S_[molNum] = 102030.5;
+
+	ret = get< double >( m[4], "n", dret );
+	ASSERT( ret, "DynamicFinfo message redirect" );
+	ASSERT( dret == 102030.5, "DynamicFinfo message redirect" );
+
+	// Here we finally check that the return message to the
+	// DynamicFinfo can look up the solver.
+	s->S_[molNum] = 192939.5;
+	Table::process( c, &p );
+	ret = get< double >( table, "input", dret );
+	ASSERT( ret, "DynamicFinfo message redirect" );
+	ASSERT( dret == 192939.5, "DynamicFinfo message redirect" );
+	ret = lookupGet< double, unsigned int >( table, "table", dret, 0 );
+	ASSERT( ret, "DynamicFinfo message redirect" );
+	ASSERT( dret == 192939.5, "DynamicFinfo message redirect" );
 
 	/////////////////////////////////////////////////////////
 	// Get rid of all the compartments.
