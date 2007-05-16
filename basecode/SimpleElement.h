@@ -245,6 +245,11 @@ class SimpleElement: public Element
 		const Finfo* findFinfo( unsigned int connIndex ) const;
 
 		/**
+		 * Local finfo_ lookup.
+		 */
+		const Finfo* localFinfo( unsigned int index ) const;
+
+		/**
 		 * Finds all the Finfos associated with this Element,
 		 * starting from the local ones and then going to the 
 		 * core class ones.
@@ -261,6 +266,7 @@ class SimpleElement: public Element
 		unsigned int listLocalFinfos( vector< Finfo* >& flist );
 
 		void addFinfo( Finfo* f );
+		bool dropFinfo( const Finfo* f );
 		void setThisFinfo( Finfo* f );
 		const Finfo* getThisFinfo( ) const;
 
