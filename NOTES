@@ -2561,9 +2561,9 @@ the solver. Check:
 	+ Computing derivatives.
 	- Add enzymes into system.
 Then: 
-	- Check variable extraction from the diffusion chain.
-	- Check parameter assignment in the diffusion chain.
-	- Check incorporation of existing messaging in the diffusion chain.
+	* Check variable extraction from the diffusion chain.
+	* Check parameter assignment in the diffusion chain.
+	* Check incorporation of existing messaging in the diffusion chain.
 	- Check incorporation of new messages (readouts) in the chain.
 
 Implemented unit tests for loading model into the Stoich class, and 
@@ -2619,7 +2619,7 @@ Remaining:
 - Deal with enzymes
 * Deal with existing messages.
 - Deal with new message requests
-+ Deal with existing DynamicFinfos.
+* Deal with existing DynamicFinfos.
 - Deal with changing mode of molecule
 - Deal with changing mode of enzyme
 
@@ -2692,5 +2692,19 @@ try to do zombie field access I fail.
 
 OK, I see it. In the second attempt at field acces, we are going through the 
 DynamicFinfo because a message has been set up. This DynamicFinfo is confused.
+
+
+=============================================================================
+16 May 2007
+
+Fixed up the implementation via DynamicFinfo. It had been looking up itself
+instead of the Finfo provided by the solver. Now it works, passes unit tests.
+
+Did a bit more work on the solver documentation.
+
+Checked in as revision 103
+
+Also added unit test to show that new DynamicFinfos, added after solver is
+in place, correctly forward requests to the solver.
 
 =============================================================================
