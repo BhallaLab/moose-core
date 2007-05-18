@@ -93,7 +93,7 @@ const Cinfo* initPyMooseContextCinfo()
             TypeFuncPair( Ftype0::global(), 0), // reinit
             TypeFuncPair( Ftype0::global(), 0), // stop
             TypeFuncPair( Ftype1<double>::global(), 0),
-                            // step, arg is time
+            // step, arg is time
             TypeFuncPair( Ftype0::global(), 0),
             TypeFuncPair( Ftype1< vector < double > >::global(), RFCAST(&PyMooseContext::recvClocks )),
             ///////////////////////////////////////////////////////////////
@@ -134,7 +134,7 @@ const Cinfo* initPyMooseContextCinfo()
 	{
             new SharedFinfo( "parser", contextTypes,
                              sizeof( contextTypes ) / sizeof( TypeFuncPair ) ),
-   //          new DestFinfo( "process",
+            //          new DestFinfo( "process",
 //                            Ftype0::global(),
 //                            RFCAST( &PyMooseContext::processFunc ) ), 
 	};
@@ -174,38 +174,38 @@ static const unsigned int setFieldSlot =
 initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 6;
 
 static const unsigned int setClockSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 7;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 7;
 static const unsigned int useClockSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 8;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 8;
 static const unsigned int requestWildcardListSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 9;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 9;
 static const unsigned int reschedSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 10;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 10;
 static const unsigned int reinitSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 11;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 11;
 static const unsigned int stopSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 12;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 12;
 static const unsigned int stepSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 13;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 13;
 static const unsigned int requestClocksSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 14;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 14;
 static const unsigned int listMessagesSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 15;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 15;
 static const unsigned int copySlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 16;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 16;
 static const unsigned int moveSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 17;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 17;
 static const unsigned int readCellSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 18;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 18;
 
 static const unsigned int setupAlphaSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 19;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 19;
 static const unsigned int setupTauSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 20;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 20;
 static const unsigned int tweakAlphaSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 21;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 21;
 static const unsigned int tweakTauSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 22;
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 22;
 
 //////////////////////////
 // Static constants
@@ -265,20 +265,20 @@ void PyMooseContext::recvWildcardList(
 
 
 void PyMooseContext::recvClocks( 
-				const Conn& c, vector< double > dbls)
+    const Conn& c, vector< double > dbls)
 {
-	PyMooseContext* gpw = static_cast< PyMooseContext* >
-			( c.targetElement()->data() );
-	gpw->dbls_ = dbls;
+    PyMooseContext* gpw = static_cast< PyMooseContext* >
+        ( c.targetElement()->data() );
+    gpw->dbls_ = dbls;
 }
 
 void PyMooseContext::recvMessageList( 
-				const Conn& c, vector< Id > elist, string s)
+    const Conn& c, vector< Id > elist, string s)
 {
-	PyMooseContext* gpw = static_cast< PyMooseContext* >
-			( c.targetElement()->data() );
-	gpw->elist_ = elist;
-	gpw->fieldValue_ = s;
+    PyMooseContext* gpw = static_cast< PyMooseContext* >
+        ( c.targetElement()->data() );
+    gpw->elist_ = elist;
+    gpw->fieldValue_ = s;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -322,14 +322,21 @@ void PyMooseContext::setCwe(Id elementId)
     }
     
     send1< Id > (Element::element(myId_), setCweSlot, elementId);
-    // \todo: if success
+    // Todo: if success
     cwe_ = elementId;    
 }
 
 void PyMooseContext::setCwe(std::string path)
 {
     Id newElementId = pathToId(path);
-    cwe_ = newElementId;    
+    if (newElementId != BAD_ID)
+    {
+        cwe_ = newElementId;
+    }
+    else 
+    {
+        cerr << "Error: Invalid path specified" << endl;
+    }    
 }
 
 /**
@@ -551,7 +558,7 @@ std::string PyMooseContext::getPath(Id id) const
     return path;
 }
 
-Id PyMooseContext::pathToId(std::string path)
+Id PyMooseContext::pathToId(std::string path, bool echo)
 {
     Id returnValue = 0;
     if ( path == separator || path == separator + "root")
@@ -583,11 +590,22 @@ Id PyMooseContext::pathToId(std::string path)
         separateString(path, nodes, separator);
     }
     returnValue = Shell::traversePath(start, nodes);
-    if ( returnValue == BAD_ID)
+    if (( returnValue == BAD_ID) && echo)
     {
         cerr << "ERROR: PyMooseContext::pathToId(std::string path) - Could not find the object '" << path << "'"<< endl;
     }
     return returnValue;    
+}
+
+bool PyMooseContext::exists(Id id)
+{
+    Element* e = Element::element(id);
+    return e != NULL;    
+}
+
+bool PyMooseContext::exists(std::string path)
+{
+    return pathToId(path, false) != BAD_ID;    
 }
 
 vector <Id>& PyMooseContext::getChildren(Id id)
@@ -620,16 +638,16 @@ vector <Id>& PyMooseContext::getChildren(std::string path)
     return elist_;
 }
 /*
-   A set of overloaded functions to step the clocks.
-   The three versions are required to account for
-   genesis parsers multiple decisions depending on argument list.
- */
+  A set of overloaded functions to step the clocks.
+  The three versions are required to account for
+  genesis parsers multiple decisions depending on argument list.
+*/
 /**
    The most basic versions: step by the amount specified as rutime.
    corresponds to :
-        step 0.005 -t
+   step 0.005 -t
    in genesis parser
- */
+*/
 void PyMooseContext::step(double runtime )
 {
     Element* e = Element::element( myId_ );
@@ -643,30 +661,30 @@ void PyMooseContext::step(double runtime )
 /**
    step by mult multiple of the smallest clock duration.
    corresponds to:
-        step 5
+   step 5
    in genesis parser
- */
+*/
 void PyMooseContext::step(long mult)
 {
-     double runtime;
+    double runtime;
     
-     send0( Element::element(myId_), requestClocksSlot ); 
-     assert( dbls_.size() > 0 );
-     // This fills up a vector of doubles with the clock duration.
-     // Find the shortest dt.
-     double min = 1.0e10;
-     vector< double >::iterator i;
-     for ( i = dbls_.begin(); i != dbls_.end(); i++ )
-         if ( min > *i )
-             min = *i ;
-     runtime = min * mult;
-     step(runtime);     
+    send0( Element::element(myId_), requestClocksSlot ); 
+    assert( dbls_.size() > 0 );
+    // This fills up a vector of doubles with the clock duration.
+    // Find the shortest dt.
+    double min = 1.0e10;
+    vector< double >::iterator i;
+    for ( i = dbls_.begin(); i != dbls_.end(); i++ )
+        if ( min > *i )
+            min = *i ;
+    runtime = min * mult;
+    step(runtime);     
 }
 /**
    step by the smallest clock duration only
    corresponds to genesis parser command:
-        step 
- */
+   step 
+*/
 void PyMooseContext::step(void)
 {
     step((long)1);    
@@ -680,8 +698,8 @@ void PyMooseContext::setClock(int clockNo, double dt, int stage = 0)
 
 vector <double> & PyMooseContext::getClocks()
 {
-	send0( Element::element(myId_), requestClocksSlot );
-        return dbls_;        
+    send0( Element::element(myId_), requestClocksSlot );
+    return dbls_;        
 }
 
 void PyMooseContext::useClock(Id tickId, std::string path, std::string func)
@@ -728,7 +746,7 @@ Id PyMooseContext::deepCopy( Id object, std::string new_name, Id dest)
     return pathToId(path);
 }
 
-void PyMooseContext::do_move( Id object, std::string new_name, Id dest)
+void PyMooseContext::move( Id object, std::string new_name, Id dest)
 {
     send3< Id, Id, string >(
         Element::element( myId_), moveSlot, object, dest, new_name );
@@ -736,16 +754,174 @@ void PyMooseContext::do_move( Id object, std::string new_name, Id dest)
 
 bool PyMooseContext::connect(Id src, std::string srcField, Id dest, std::string destField)
 {
-    	if ( src != BAD_ID && dest != BAD_ID ) {
-            Element* se = Element::element( src );
-            Element* de = Element::element( dest );
-            const Finfo* sf = se->findFinfo( srcField );
-            if ( !sf ) return false;
-            const Finfo* df = de->findFinfo( destField );
-            if ( !df ) return false;
-            return (bool)(se->findFinfo( srcField )->add( se, de, de->findFinfo( destField )));
-	}
+    if ( src != BAD_ID && dest != BAD_ID ) {
+        Element* se = Element::element( src );
+        Element* de = Element::element( dest );
+        const Finfo* sf = se->findFinfo( srcField );
+        if ( !sf ) return false;
+        const Finfo* df = de->findFinfo( destField );
+        if ( !df ) return false;
+        return (bool)(se->findFinfo( srcField )->add( se, de, de->findFinfo( destField )));
+    }
     return false;    
+}
+/*
+  The following functions are for manipulating HHChannels.  They
+  should ideally be part of HHChannel/HHGate class only.  But I had to
+  put them here as there is no better way to access the slots of the
+  shell.
+
+  So HHChannel / HHGate should have functions that wrap these fnctions.
+
+  The functions are findChanGateId
+  
+*/
+
+Id PyMooseContext::findChanGateId( std::string channel, std::string gate)
+{
+    std::string path = "";
+    if ( gate.at(0) == 'X' )
+        path = channel + "/xGate";
+    else if ( gate.at(0) == 'Y' )
+        path = channel + "/yGate";
+    else if ( gate.at(0)   == 'Z' )
+        path = channel + "/zGate";
+    Id gateId = pathToId( path);
+    if ( gateId == BAD_ID ) // Don't give up, it might be a tabgate
+        gateId = pathToId( channel);
+    if ( gateId == BAD_ID ) { // Now give up
+        cout << "Error: findChanGateId: unable to find channel/gate '" << channel << "/" << gate << endl;
+        return BAD_ID;
+    }
+    return gateId;
+}
+
+void PyMooseContext::setupChanFunc(std::string channel, std::string gate, vector <double>& parms, const unsigned int& slot)
+{
+    
+    if (parms.size() < 10 ) {
+        cerr << "Error: PyMooseContext::setupChanFunc() -  We need a vector for these items: AA AB AC AD AF BA BB BC BD BF size min max (length should be at least 10)" << endl;
+        return;
+    }
+
+    Id gateId = findChanGateId(channel, gate );
+    if (gateId == BAD_ID )
+        return;
+
+    
+    double size = 3000.0;
+    double min = -0.100;
+    double max = 0.050;
+    if (parms.size() < 11)
+    {
+        parms.push_back(size);
+    }
+    if (parms.size() < 12 )
+    {
+        parms.push_back(min);
+    }
+    if ( parms.size() < 13 )
+    {
+        parms.push_back(max);        
+    }    
+    
+    send2< Id, vector< double > >( Element::element( myId_ ), slot, gateId, parms );
+}
+
+void PyMooseContext::setupAlpha( std::string channel, std::string gate, vector <double> parms ) 
+{
+    setupChanFunc( channel, gate, parms, setupAlphaSlot );
+}
+
+void PyMooseContext::setupTau( std::string channel, std::string gate, vector <double> parms ) 
+{
+    setupChanFunc( channel, gate, parms, setupTauSlot );
+}
+
+void PyMooseContext::tweakChanFunc( std::string  channel, std::string gate, unsigned int slot )
+{
+    Id gateId = findChanGateId( channel, gate );
+    if ( gateId == BAD_ID )
+        return;
+    send1< Id >( Element::element( myId_ ), slot, gateId );
+}
+
+void PyMooseContext::tweakAlpha( std::string channel, std::string gate ) 
+{
+    tweakChanFunc( channel, gate, tweakAlphaSlot );
+}
+void PyMooseContext::tweakTau( std::string channel, std::string gate)
+{
+    tweakChanFunc( channel, gate, tweakTauSlot );
+}
+
+//=================================================================
+// These are a set of overloaded versions of the above
+// - where we take advantage of the fact that python users
+// have more control over the moose objects ;-) and they can
+// do better programming than the genesis parser allows
+//=================================================================
+
+void PyMooseContext::setupChanFunc(Id gateId, vector <double> parms, unsigned int slot)
+{
+    
+    if (parms.size() < 10 ) {
+        cerr << "Error: PyMooseContext::setupChanFunc() -  We need a vector for these items: AA AB AC AD AF BA BB BC BD BF size min max (length should be at least 10)" << endl;
+        return;
+    }
+    if (gateId == BAD_ID )
+        return;
+    
+    double size = 3000.0;
+    double min = -0.100;
+    double max = 0.050;
+    if (parms.size() < 11)
+    {
+        parms.push_back(size);
+    }
+    if (parms.size() < 12 )
+    {
+        parms.push_back(min);
+    }
+    if ( parms.size() < 13 )
+    {
+        parms.push_back(max);        
+    }    
+    
+    send2< Id, vector< double > >( Element::element( myId_ ), slot, gateId, parms );
+}
+
+void PyMooseContext::setupAlpha( Id gateId, vector <double> parms )
+{
+    setupChanFunc( gateId, parms, setupAlphaSlot );
+}
+
+void PyMooseContext::setupTau( Id gateId, vector <double> parms )
+{
+    setupChanFunc( gateId, parms, setupTauSlot );
+}
+
+void PyMooseContext::tweakChanFunc( Id gateId, unsigned int slot )
+{
+    if ( gateId == BAD_ID )
+        return;
+    send1< Id >( Element::element( myId_ ), slot, gateId );
+}
+
+void PyMooseContext::tweakAlpha( Id gateId )
+{
+    tweakChanFunc( gateId, tweakAlphaSlot );
+}
+void PyMooseContext::tweakTau( Id gateId)
+{
+    tweakChanFunc( gateId, tweakTauSlot );
+}
+//========================
+
+void PyMooseContext::tabFill(Id table, int xdivs, int mode)
+{
+    std::string argstr = xdivs + "," + mode;
+    send3< Id, string, string >( Element::element( myId_ ), setFieldSlot, table, "tabFill", argstr );
 }
 
 #ifdef DO_UNIT_TESTS
