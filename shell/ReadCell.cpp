@@ -7,7 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include <math.h>
+#include <cmath>
 #include <fstream>
 #include "moose.h"
 #include "Shell.h"

@@ -17,7 +17,6 @@ TARGET = shell.o
 
 OBJ = \
 	Shell.o	\
-	SwigFuncs.o	\
 	ReadCell.o \
 
 HEADERS = \
@@ -29,26 +28,17 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 
-Swig_wrap.o: Swig.h Shell.h Swig_wrap.cxx
 Shell.o: Shell.h
-SwigFuncs.o: Swig.h Shell.h
 ReadCell.o: ReadCell.h Shell.h
 
-Swig_wrap.cxx:
-	swig -c++ -python Swig.i
-
-Swig_wrap.o:
-	g++ -fpic -c Swig_wrap.cxx -I/usr/include/python2.5
-
-#MyClassWrapper.o: MyClassWrapper.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c
 
-$(TARGET):		$(OBJ) $(HEADERS) Swig_wrap.o
+$(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
-	cp pymoose.py ..
+
 
 clean:
-	-rm -f *.o $(TARGET) core core.* Swig_wrap.cxx pymoose.py
+	-rm -f *.o $(TARGET) core core.* 
 
