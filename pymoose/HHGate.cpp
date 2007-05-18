@@ -10,13 +10,19 @@ HHGate::~HHGate(){}
 const std::string& HHGate::getType(){ return className; }
 
 // Manually edited part
-Id HHGate::getA() const
+Table* HHGate::getA() const
 {
-    return PyMooseBase::pathToId(this->path()+"/A");    
+    return new Table(PyMooseBase::pathToId(this->path()+"/A"));    
 }
-Id HHGate::getB() const
+Table* HHGate::getB() const
 {
-    return PyMooseBase::pathToId(this->path()+"/B");
+    return new Table(PyMooseBase::pathToId(this->path()+"/B"));
+}
+
+void HHGate::tabFill(int xdivs, int mode)
+{
+    this->getA()->tabFill(xdivs, mode);
+    this->getB()->tabFill(xdivs, mode);
 }
 
 #endif

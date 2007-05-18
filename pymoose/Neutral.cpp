@@ -6,6 +6,8 @@ Neutral::Neutral(Id id):PyMooseBase(id){}
 Neutral::Neutral(std::string path):PyMooseBase(className, path){}
 Neutral::Neutral(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 Neutral::Neutral(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+Neutral::Neutral(std::string path, std::string fileName):PyMooseBase(className, path, fileName){}
+
 Neutral::~Neutral(){}
 const std::string& Neutral::getType(){ return className; }
 int Neutral::__get_childSrc() const

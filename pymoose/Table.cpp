@@ -119,4 +119,11 @@ void Table::__set_prd( double prd )
 {
     set < double > (Element::element(id_), "prd", prd);
 }
+void Table::createTable( int xdivs, double xmin, double xmax)
+{
+    __set_xmin(xmin);
+    __set_xmax(xmax);
+    __set_xdivs(xdivs);    
+}
+
 #endif
