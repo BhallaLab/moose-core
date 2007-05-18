@@ -32,6 +32,7 @@ class InterpolationTable : public PyMooseBase
     void __setitem__( unsigned int index, double value );
     TableIterator* __iter__();
     int __len__();
+    void tabFill(int xdivs, int mode);
     
         double __get_lookupSrc() const;
         void __set_lookupSrc(double lookupSrc);
@@ -39,6 +40,8 @@ class InterpolationTable : public PyMooseBase
         void __set_lookup(double lookup);
         string dumpFile() const;
         void dumpFile(string fileName);
+    
+    
   protected:
     // This constructor is for allowing derived type (Table) to
     // have constructors exactly as if it was directly derived from PyMooseBase.

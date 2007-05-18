@@ -34,5 +34,8 @@ class Table : public InterpolationTable
         void __set_sum(double sum);
         double __get_prd() const;
         void __set_prd(double prd);
+
+    void createTable(int xdiv, double xmin, double xmax );
+    
 };
 #endif

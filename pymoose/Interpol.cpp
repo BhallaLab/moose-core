@@ -150,4 +150,10 @@ void InterpolationTable::dumpFile( string fileName )
 {
     set < string > (Element::element(id_), "print", fileName);
 }
+
+void InterpolationTable::tabFill( int xdivs, int mode )
+{
+    this->getContext()->tabFill(id_, xdivs, mode);    
+}
+
 #endif

@@ -8,6 +8,7 @@
 #define _PYMOOSE_BASE_CPP
 
 #include "PyMooseBase.h"
+#include "../shell/ReadCell.h"
 #include <iostream>
 #include <sstream>
 using namespace std;
@@ -56,6 +57,13 @@ PyMooseBase::PyMooseBase(Id id)
  */
 PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id parentId )
 {
+    if ( objectName.find(getSeparator()) == std::string::npos)
+    {
+        cerr << "Error: PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id parentId ) - object name should not have " << getSeparator() << endl;
+        id_ = BAD_ID;
+        return;        
+    }
+    
     id_ = context_->create(className, objectName, parentId);    
 }
 
@@ -74,6 +82,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id paren
  */
 PyMooseBase::PyMooseBase(std::string className, std::string path)
 {
+     
     if ( path == getSeparator() || path == (getSeparator()+"root"))
     {
         cerr << "ERROR: PyMooseBase::PyMooseBase(std::string className, std::string path) -  Attempt to create predefined root element." << endl;
@@ -87,17 +96,26 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
     id_ = PyMooseBase::pathToId(path);
     if (id_ != BAD_ID)
     {
+        cerr << "Info: Object already exists." << endl;
         return;
-    }    
-        
-    std::string::size_type name_start = path.rfind(getSeparator());
+    }
+
+    // Extract the object name from the path
+    std::string::size_type name_start = path.rfind(getSeparator(),path.length()-1);
+    std::string myName;    
+    std::string parentPath;
+
     if (name_start == std::string::npos)
     {
         name_start = 0;
+        myName = path;
+        parentPath = "/";        
     }
-    
-    std::string myName = path.substr(name_start);
-    std::string parentPath = path.substr(0, name_start);
+    else 
+    {
+        myName = path.substr(name_start+1);
+        parentPath = path.substr(0,name_start);
+    }
     id_ = context_->create(className, myName, context_->pathToId(parentPath));
 }
 
@@ -116,6 +134,18 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseB
 {
     id_ = context_->create(className, objectName, parent->id_);
 }
+
+/**
+   This constructor wraps read-cell -- reading the object from an ascii text file   
+ */
+PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fileName)
+{
+    ReadCell reader;
+    reader.read(fileName, path);
+    id_ = context_->pathToId(path);
+}
+
+
 /**
    I still have a big dilemma with the destructor. Should an object be
    _actually_ deleted in moose environment when the pymoose destructor
@@ -141,7 +171,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseB
 */
 PyMooseBase::~PyMooseBase()
 {
-    context_->destroy(id_);
+//    context_->destroy(id_);
 //    cerr << "Destructor called for " << id_ << endl;    
     id_ = PyMooseContext::BAD_ID;    
 }
@@ -180,7 +210,7 @@ bool PyMooseBase::connect(std::string srcField, Id dest, std::string destField)
     return context_->connect(this->id_, srcField, dest, destField);    
 }
 
-const PyMooseContext* PyMooseBase::getContext()
+PyMooseContext* PyMooseBase::getContext()
 {
     return context_;
 }
@@ -224,6 +254,16 @@ vector <Id>& PyMooseBase::getChildren(Id id)
     return context_->getChildren(id);
 }
 
+bool PyMooseBase::exists(Id id)
+{
+    return context_->exists(id);    
+}
+
+bool PyMooseBase::exists(std::string path)
+{
+    return context_->exists(path);    
+}
+
 vector <Id>& PyMooseBase::le()
 {
     return context_->getChildren(context_->getCwe());
@@ -245,9 +285,9 @@ Id PyMooseBase::ce(std::string path)
     context_->setCwe(id);
     return id;    
 }
-Id PyMooseBase::pathToId(std::string path)
+Id PyMooseBase::pathToId(std::string path, bool echo)
 {
-    Id id = context_->pathToId(path);
+    Id id = context_->pathToId(path, echo);
     return id;    
 }
 std::string PyMooseBase::idToPath(Id id)

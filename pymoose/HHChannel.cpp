@@ -1,6 +1,6 @@
 #ifndef _pymoose_HHChannel_cpp
 #define _pymoose_HHChannel_cpp
-#include "HHChannel.h"
+#include "pymoose.h"
 const std::string HHChannel::className = "HHChannel";
 HHChannel::HHChannel(Id id):PyMooseBase(id){}
 HHChannel::HHChannel(std::string path):PyMooseBase(className, path){}
@@ -118,4 +118,76 @@ void HHChannel::__set_concen( double concen )
 {
     set < double > (Element::element(id_), "concen", concen);
 }
+
+
+void HHChannel::tweakAlpha(std::string gate)
+{
+    this->getContext()->tweakAlpha(this->path(),gate);    
+}
+
+void HHChannel::tweakTau(std::string gate)
+{
+    this->getContext()->tweakTau(this->path(),gate);    
+}
+
+void HHChannel::setupAlpha(std::string gate, vector <double> params)
+{
+    this->getContext()->setupAlpha(this->path(),gate, params);    
+}
+
+void HHChannel::setupTau(std::string gate, vector <double> params)
+{
+    this->getContext()->setupTau(this->path(),gate, params);    
+}
+
+void HHChannel::createTable(std::string gate, unsigned int divs, double min, double max)
+{
+    if (gate.empty())
+    {
+        cerr << "Error: Gate cannot be empty std::string." << endl;
+        return;        
+    }
+    
+    if (gate.at(0)== 'X' || gate.at(0)== 'x')
+    {
+        gate = "xGate";        
+    }
+    else if (gate.at(0) == 'Y' || gate.at(0)== 'y' )
+    {
+        gate = "yGate";        
+    }
+    else if (gate.at(0) == 'Y' || gate.at(0)== 'y' )
+    {
+        gate = "zGate";        
+    }
+    else 
+    {
+        cerr << "Error: Gate must be one of X, Y or Z" << endl;
+        return;        
+    }
+    std::string path = this->path()+"/"+gate + "/" +"A";
+
+    Id id = PyMooseBase::pathToId(path);
+    if ( id == 0 || id == BAD_ID )
+    {
+        cerr << "Error: " << " HHChannel::createTable(...) - Object does not exist: " << path << endl;
+        return;        
+    }
+    InterpolationTable tableA(id);
+    tableA.__set_xmin(min);
+    tableA.__set_xmax(max);
+    tableA.__set_xdivs(divs);
+    path = this->path()+"/"+gate + "/" +"B";
+    id = PyMooseBase::pathToId(path);
+    if ( id == 0 || id == BAD_ID )
+    {
+        cerr << "Error: " << " HHChannel::createTable(...) - Object does not exist: " << path << endl;
+        return;        
+    }
+    InterpolationTable tableB(id);    
+    tableB.__set_xmin(min);
+    tableB.__set_xmax(max);
+    tableB.__set_xdivs(divs);
+}
+
 #endif

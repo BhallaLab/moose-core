@@ -22,7 +22,7 @@ class PyMooseBase
     static void endSimulation();    
     virtual const std::string& getType() = 0;
     const string& getSeparator() const;
-    static const PyMooseContext* getContext();
+    static PyMooseContext* getContext();
 
     vector< Id >& __get_children() const;
     Id __get_parent() const;
@@ -32,12 +32,15 @@ class PyMooseBase
 
     bool connect(std::string field, PyMooseBase* dest, std::string destField);
     bool connect(std::string field, Id dest, std::string destField);
+
+    static bool exists(Id id);
+    static bool exists(string path);
     static vector <Id>& le();
     static Id pwe();
     static Id ce(Id newElement);
     static Id ce(std::string path);
-    static Id pathToId(std::string path);
-    static string idToPath(Id id);    
+    static Id pathToId(std::string path, bool echo = true);
+    static string idToPath(Id id);
     static Id getParent(Id id);
     static vector <Id>& getChildren(Id id);    
     static void initSimulation();
@@ -50,7 +53,9 @@ class PyMooseBase
     
   protected:
     Id id_;
-    PyMooseBase(Id id);    // This is for wrapping an existing ID inside an object
+    PyMooseBase(Id id);    /// This is for wrapping an existing ID inside an object
+    PyMooseBase(std::string className, std::string path, std::string fileName); /// this will use readcell - since we do not know how exactly all future classes will be loaded from file, we make it protected and those classes should provide the actual implementation
+    
   private:
     static PyMooseBase* root_;    
     static string  separator_;

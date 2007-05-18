@@ -1,7 +1,7 @@
 #ifndef _pymoose_HHGate_h
 #define _pymoose_HHGate_h
 #include "PyMooseBase.h"
-#include "Interpol.h"
+#include "Table.h"
 
 class HHGate : public PyMooseBase
 {
@@ -14,7 +14,8 @@ class HHGate : public PyMooseBase
     ~HHGate();
     const std::string& getType();
     // These are manually inserted
-    Id getA() const;
-    Id getB() const;
+    Table* getA() const;
+    Table* getB() const;
+    void tabFill(int xdivs, int mode);
 };
 #endif
