@@ -200,6 +200,15 @@ The advantage of separating out (d), if you can, is that it allows you
 to plug in multiple distinct solver engines into the same set of interface
 classes.
 
+When we separate out the solver into multiple classes, there is the problem
+that these classes need to be tightly coupled. For example, in the kinetics 
+solver, the KineticHub needs to know about the vector created by the Stoich
+object in which all the molecule concentrations are stored. We do this by
+passing messages back and forth between the solver objects which contain
+pointers to these data structures. This admittedly violates a key rule of
+MOOSE messaging: no pointers should be passed. It is OK in this one case
+because the solvers are really meant to function as an integral whole and
+are not going to be separated between nodes.
 
 4. Field access. 
 ----------------
@@ -270,3 +279,27 @@ Similar operations work for the get function.
 
 5. Regular Messages
 -------------------
+Regular messages go between a SrcFinfo and a DestFinfo, or between two
+SharedFinfos which are composed of matching sets of Src and Dest Finfos.
+In each case the message works because the message source (src) gets hold
+of an access function of the message destination (dest), and calls this
+function to pass information and commands to the destination object.
+
+When an object is solved, it may have messages that go outside the domain
+of the solver. We assume that such messages will pass data on each time-step,
+so they must be managed efficiently. This rules out the kind of forwarding
+scheme that is implemented for value fields above. Instead we simply replace
+the original object message with a message to (or from) the solver. To make
+this work, two things must happen:
+
+a) The solver must have a suitable Finfo to replace the 
+SrcFinfo/DestFinfo/SharedFinfo on the zombie. This Finfo must be able to
+identify the target object (by the information on the Conn structure of the
+message) and to map it to the correct part of the solver data structures.
+
+b) The original message from the zombie must be deleted, and in its place
+the solver must set up a message to the original target.
+
+
+
+

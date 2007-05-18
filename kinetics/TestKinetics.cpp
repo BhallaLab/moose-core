@@ -20,12 +20,14 @@
 #include "Stoich.h"
 
 extern void testMolecule(); // Defined in Molecule.cpp
+extern void testEnzyme(); // Defined in Enzyme.cpp
 extern void testSparseMatrix(); // Defined in SparseMatrix.cpp
 void testStoich();
 
 void testKinetics()
 {
 	testMolecule();
+	testEnzyme();
 	testSparseMatrix();
 	testStoich();
 }
@@ -152,12 +154,12 @@ void testStoich()
 	for ( unsigned int i = 0; i < NUM_COMPT; i++ ) {
 		k = s->molMap_.find( m[i] );
 		molNum = k->second;
-		if ( molNum == 0 ) {
-			ASSERT( fabs( yprime[i] - 0.1 ) < EPSILON, "update");
-		} else if ( molNum == 9 ) {
-			ASSERT( fabs( yprime[i] + 0.1 ) < EPSILON, "update");
+		if ( i == 0 ) {
+			ASSERT( fabs( yprime[molNum] - 0.1 ) < EPSILON, "update");
+		} else if ( i == 9 ) {
+			ASSERT( fabs( yprime[molNum] + 0.1 ) < EPSILON, "update");
 		} else {
-			ASSERT( fabs( yprime[i] ) < EPSILON, "update" );
+			ASSERT( fabs( yprime[molNum] ) < EPSILON, "update" );
 		}
 	}
 
