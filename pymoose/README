@@ -1,4 +1,13 @@
 
+	NOTES ON COMPILING PYTHON INTERFACE FOR MOOSE
+-------------------------------------------------------------------
+
+	Author : Subhasis Ray
+	Version: 
+		2007-05-01 	0.0 - Initial draft 
+		2007-05-18	0.1 - Updated info on Python2.5
+___________________________________________________________________
+
 	This directory contains code for python interface for
 moose. There are C++ wrappers for relevant moose classes. These
 classes are visible to python through a swig wrapper. The file moose.i
@@ -20,6 +29,10 @@ pymoose directory. Note that if you ran make for moose earlier, you
 need to run "make clean" first. This is because swig uses dynamic
 linking/loading (.so) while the default moose binary uses static
 linking.
+
+	It is recommended that you use python2.4. Using Python 2.5
+produces this error: ... undefined symbol: Py_InitModule4
+	At the current stage may not even compile with Python 2.5.
 
 
 	After successful compilation and linking, you can try out the
