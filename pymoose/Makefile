@@ -19,4 +19,4 @@ moose.py moose_wrap.cxx: moose.i $(HEADERS)
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode -I../shell $< -c
 clean:
-	-rm -f *.o moose_wrap.cxx *.so moose.py test_swig
+	-rm -f *.o moose_wrap.cxx *.so moose.py test_swig *.pyc
