@@ -32,5 +32,12 @@ class HHChannel : public PyMooseBase
         void __set_IkSrc(double IkSrc);
         double __get_concen() const;
         void __set_concen(double concen);
+    
+    void createTable(std::string gate, unsigned int divs, double min, double max);    
+    void tweakAlpha(std::string gate);
+    void tweakTau(std::string gate);
+    void setupAlpha(std::string gate, vector <double> params);
+    void setupTau(std::string gate, vector <double> params);
+    
 };
 #endif

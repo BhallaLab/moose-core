@@ -79,7 +79,7 @@ class PyMooseContext
     std::string getPath(Id id) const;
     vector <Id>& getChildren(Id id);
     vector <Id>& getChildren(std::string path);    
-    Id pathToId(std::string path);
+    Id pathToId(std::string path, bool echo = true);
     void step(double runTime);
     void step(long multiple);
     void step();
@@ -91,9 +91,22 @@ class PyMooseContext
     void addTask(std::string arg);
     void do_deep_copy( Id object, std::string new_name, Id dest);
     Id deepCopy( Id object, std::string new_name, Id dest);    
-    void do_move( Id object, std::string new_name, Id dest);        
+    void move( Id object, std::string new_name, Id dest);
     bool connect(Id src, std::string srcField, Id dest, std::string destField);
+    void setupAlpha( std::string channel, std::string gate, vector <double> parms );
+    void setupTau( std::string channel, std::string gate, vector <double> parms );
+    void tweakAlpha( std::string channel, std::string gate );
+    void tweakTau( std::string channel, std::string gate);
+    void tabFill(Id table, int xdivs, int mode);    
+        
+    void setupAlpha( Id gateId, vector <double> parms );
+    void setupTau( Id gateId, vector <double> parms );
+    void tweakAlpha( Id gateId );
+    void tweakTau( Id gateId);
+    bool exists(Id id);
+    bool exists(std::string path);
     
+
 #ifdef DO_UNIT_TESTS    
     static bool testPyMooseContext(int count, bool print);
     bool testCreateDestroy(std::string className, int count, bool print);
@@ -103,6 +116,12 @@ class PyMooseContext
     static const std::string separator;
     
   private:
+    Id findChanGateId( std::string channel, std::string gate);
+    void setupChanFunc( std::string channel, std::string gate, vector <double>& parms, const unsigned int& slot);
+    void tweakChanFunc( std::string channel, std::string gate, unsigned int slot );
+    void setupChanFunc( Id gateId, vector <double> parms, unsigned int slot);
+    void tweakChanFunc( Id gateId, unsigned int slot );
+    
     Id myId_;    
     // Present working element
     Id cwe_;

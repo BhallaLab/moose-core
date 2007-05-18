@@ -8,6 +8,8 @@ class Neutral : public PyMooseBase
         Neutral(std::string path);
         Neutral(std::string name, Id parentId);
         Neutral(std::string name, PyMooseBase* parent);
+        Neutral(std::string path, std::string fileName);
+    
         ~Neutral();
         const std::string& getType();
         int __get_childSrc() const;
