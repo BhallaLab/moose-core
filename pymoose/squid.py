@@ -149,7 +149,7 @@ context = moose.PyMooseBase.getContext()
 context.setClock(0, SIMDT, 0)
 context.setClock(1, PLOTDT, 0)
 context.useClock(moose.PyMooseBase.pathToId('/sched/cj/t0'), '/Vm,/squid,/squid/#')
-# Ask Upi about this comma separated wildcard path list - why does it not work when I put separate useClock statements.
+
 # context.useClock(moose.PyMooseBase.pathToId('/sched/cj/t0'), '/Vm')
 # context.useClock(moose.PyMooseBase.pathToId('/sched/cj/t0'), '/squid')
 # context.useClock(moose.PyMooseBase.pathToId('/sched/cj/t0'), '/squid/#')
