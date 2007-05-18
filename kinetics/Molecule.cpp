@@ -128,10 +128,14 @@ static const unsigned int nSlot =
 ///////////////////////////////////////////////////
 
 Molecule::Molecule()
-	: nInit_( 0.0 ), 
+	:
+	nInit_( 0.0 ), 
 	volumeScale_( 1.0 ),
 	n_( 0.0 ),
-	mode_( 0 )
+	mode_( 0 ),
+	total_( 0.0 ),
+	A_( 0.0 ),
+	B_( 0.0 )
 {
 		;
 }

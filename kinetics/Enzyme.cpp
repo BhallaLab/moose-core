@@ -78,7 +78,7 @@ const Cinfo* initEnzymeCinfo()
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-		new SrcFinfo( "prdSrc", Ftype2< double, double >::global() ),
+		new SrcFinfo( "prd", Ftype2< double, double >::global() ),
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
@@ -122,14 +122,15 @@ static const unsigned int enzSlot =
 static const unsigned int cplxSlot =
 	initEnzymeCinfo()->getSlotIndex( "cplx" );
 static const unsigned int prdSlot =
-	initEnzymeCinfo()->getSlotIndex( "prdSrc" );
+	initEnzymeCinfo()->getSlotIndex( "prd" );
 
 ///////////////////////////////////////////////////
 // Enzyme class function definitions
 ///////////////////////////////////////////////////
 
 Enzyme::Enzyme()
-	: k1_(0.1), k2_(0.4), k3_(0.1),sk1_(1.0)
+	: k1_(0.1), k2_(0.4), k3_(0.1),sk1_(1.0), 
+		procFunc_( &Enzyme::implicitProcFunc )
 {
 	;
 }
@@ -224,7 +225,7 @@ void Enzyme::innerSetMode( Element* e, bool mode )
 		if ( id != BAD_ID ) {
 			Element* cplx = Element::element( id );
 			if ( cplx )
-				delete cplx;
+				set( cplx, "destroy" );
 		}
 		procFunc_ = &Enzyme::implicitProcFunc;
 		sA_ = 0;
@@ -352,3 +353,161 @@ void Enzyme::makeComplex( Element* e )
 	assert( ret );
 }
 
+
+#ifdef DO_UNIT_TESTS
+#include "../element/Neutral.h"
+#include "Molecule.h"
+
+void testEnzyme()
+{
+	static double explicitSub[] = {
+		0.9999, 0.92394, 0.879014, 0.849819, 0.828738,
+		0.811911, 0.797361, 0.784069, 0.771509, 0.759406
+	};
+	static double explicitPrd[] = {
+		0, 0.00401767, 0.013213, 0.0249653, 0.0379434,
+		0.0514658, 0.0651816, 0.0789104, 0.0925594, 0.106081,
+	};
+	static double explicitEnz[] = {
+		0.9999, 0.927958, 0.892226, 0.874783, 0.86668,
+		0.863375, 0.86254, 0.862976, 0.864064, 0.865483,
+	};
+
+	static double implicitSub[] = {
+		0.999983, 0.983432, 0.967111, 0.951017, 0.935149,
+		0.919504, 0.904081, 0.888878, 0.873892, 0.859122,
+	};
+	static double implicitPrd[] = {
+		0, 0.0165678, 0.0328894, 0.0489834, 0.0648518,
+		0.0804965, 0.0959196, 0.111123, 0.126109, 0.140879,
+	};
+	static double implicitEnz[] = {
+		1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1,
+	};
+
+
+	cout << "\nTesting Enzyme" << flush;
+
+	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	Element* sub = Neutral::create( "Molecule", "sub", n );
+	ASSERT( sub != 0, "creating molecule" );
+	Element* prd = Neutral::create( "Molecule", "prd", n );
+	ASSERT( prd != 0, "creating molecule" );
+	Element* enzMol = Neutral::create( "Molecule", "enzMol", n );
+	ASSERT( enzMol != 0, "creating molecule" );
+	Element* enz = Neutral::create( "Enzyme", "enz", enzMol );
+	ASSERT( enz != 0, "creating enzyme" );
+
+	bool ret;
+
+	ProcInfoBase p;
+	Conn csub( sub, 0 );
+	Conn cprd( prd, 0 );
+	Conn cenzMol( enzMol, 0 );
+	Conn cenz( enz, 0 );
+	p.dt_ = 0.001;
+	set< double >( sub, "concInit", 1.0 );
+	set< int >( sub, "mode", 0 );
+	set< double >( prd, "concInit", 0.0 );
+	set< int >( prd, "mode", 0 );
+	set< double >( enzMol, "concInit", 1.0 );
+	set< int >( enzMol, "mode", 0 );
+	set< double >( enz, "k1", 0.1 );
+	set< double >( enz, "k2", 0.4 );
+	set< double >( enz, "k3", 0.1 );
+	ret = set< bool >( enz, "mode", 0 );
+	ASSERT( ret, "setting enz mode" );
+	unsigned int cplxId = Neutral::getChildByName( enz, "enz_cplx" );
+	ASSERT( cplxId != BAD_ID , "making Enzyme cplx" );
+	Element* cplx = Element::element( cplxId );
+	Conn ccplx( cplx, 0 );
+
+	ret = sub->findFinfo( "reac" )->add( sub, enz, enz->findFinfo( "sub" ));
+	ASSERT( ret, "adding substrate msg" );
+	ret = enz->findFinfo( "prd" )->add( enz, prd, prd->findFinfo( "prd" ) );
+	ASSERT( ret, "adding product msg" );
+	ret = enzMol->findFinfo( "reac" )->add( enzMol, enz, enz->findFinfo( "enz" ) );
+	ASSERT( ret, "adding enzMol msg" );
+
+	// First, test charging curve for a single compartment
+	// We want our charging curve to be a nice simple exponential
+	// n = 0.5 + 0.5 * exp( - t * 0.2 );
+	double delta = 0.0;
+	Enzyme::reinitFunc( cenz, &p );
+	Molecule::reinitFunc( csub, &p );
+	Molecule::reinitFunc( cprd, &p );
+	Molecule::reinitFunc( cenzMol, &p );
+	unsigned int i = 0;
+	unsigned int j = 0;
+	cout << "\n";
+	for ( p.currTime_ = 0.0; p.currTime_ < 9.5; p.currTime_ += p.dt_ ) 
+	{
+		double nprd = Molecule::getN( prd );
+		double nsub = Molecule::getN( sub );
+		double nenz = Molecule::getN( enzMol );
+		double temp = 0;
+		if ( i++ % 1000 == 0 ) {
+			temp = nprd - explicitPrd[ j ]; delta += temp * temp;
+			temp = nsub - explicitSub[ j ]; delta += temp * temp;
+			temp = nenz - explicitEnz[ j++ ]; delta += temp * temp;
+		}
+		//	cout << p.currTime_ << "	" << nprd << endl;
+
+		Enzyme::processFunc( cenz, &p );
+		Molecule::processFunc( ccplx, &p );
+		Molecule::processFunc( csub, &p );
+		Molecule::processFunc( cprd, &p );
+		Molecule::processFunc( cenzMol, &p );
+	}
+	ASSERT( delta < 5.0e-6, "Testing molecule and enzyme" );
+
+	////////////////////////////////////////////////////////////////////
+	// Testing implicit mode.
+	////////////////////////////////////////////////////////////////////
+	ret = set< bool >( enz, "mode", 1 );
+	ASSERT( ret, "setting enz mode" );
+	cplxId = Neutral::getChildByName( enz, "enz_cplx" );
+	ASSERT( cplxId == BAD_ID , "removing Enzyme cplx" );
+
+	ret = set< bool >( enz, "mode", 0 );
+	ASSERT( ret, "setting enz mode" );
+	cplxId = Neutral::getChildByName( enz, "enz_cplx" );
+	ASSERT( cplxId != BAD_ID , "adding Enzyme cplx" );
+
+	ret = set< bool >( enz, "mode", 1 );
+	ASSERT( ret, "setting enz mode" );
+	cplxId = Neutral::getChildByName( enz, "enz_cplx" );
+	ASSERT( cplxId == BAD_ID , "removing Enzyme cplx" );
+
+	Enzyme::reinitFunc( cenz, &p );
+	Molecule::reinitFunc( csub, &p );
+	Molecule::reinitFunc( cprd, &p );
+	Molecule::reinitFunc( cenzMol, &p );
+	i = 0;
+	j = 0;
+	delta = 0.0;
+	for ( p.currTime_ = 0.0; p.currTime_ < 9.5; p.currTime_ += p.dt_ ) 
+	{
+		double nprd = Molecule::getN( prd );
+		double nsub = Molecule::getN( sub );
+		double nenz = Molecule::getN( enzMol );
+		double temp = 0;
+		if ( i++ % 1000 == 0 ) {
+			temp = nprd - implicitPrd[ j ]; delta += temp * temp;
+			temp = nsub - implicitSub[ j ]; delta += temp * temp;
+			temp = nenz - implicitEnz[ j++ ]; delta += temp * temp;
+		}
+		//	cout << p.currTime_ << "	" << nprd << endl;
+
+		Enzyme::processFunc( cenz, &p );
+		Molecule::processFunc( csub, &p );
+		Molecule::processFunc( cprd, &p );
+		Molecule::processFunc( cenzMol, &p );
+	}
+	ASSERT( delta < 5.0e-6, "Testing molecule and enzyme" );
+
+	// Get rid of all the compartments.
+	set( n, "destroy" );
+}
+#endif

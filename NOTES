@@ -2706,5 +2706,21 @@ Checked in as revision 103
 
 Also added unit test to show that new DynamicFinfos, added after solver is
 in place, correctly forward requests to the solver.
+Checked in as revision 104
+
+=============================================================================
+17 May 2007
+A little work setting up Enzyme unit tests preparatory to tying it to
+the solver.
+=============================================================================
+18 May 2007
+Partial implementation of Enzyme unit tests: Explicit enz. Barfs at the stoich
+unit tests in TestKinetics.cpp.
+
+Completed Enzyme unit tests for Implicit enz also, as well as switching
+between explicit and implicit. Fixed but in Stoich unit tests.
+
+In the meantime several updates seem to have been checked in by Subhasis to
+deal with the python wrappers.
 
 =============================================================================
