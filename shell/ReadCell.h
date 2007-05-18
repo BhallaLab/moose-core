@@ -6,7 +6,8 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-
+#ifndef READCELL_H
+#define READCELL_H
 enum ParseStage { COMMENT, DATA, SCRIPT };
 
 class ReadCell
@@ -60,3 +61,4 @@ class ReadCell
 		bool relativeCoordsFlag_;
 		vector< Element* >chanProtos_;
 };
+#endif
