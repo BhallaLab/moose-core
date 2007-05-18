@@ -1,0 +1,60 @@
+/*******************************************************************
+ * File:            GtoPy.txt
+ * Description:      
+ * Author:          Subhasis Ray
+ * E-mail:          ray.subhasis@gmail.com
+ * Created:         2007-05-07 17:46:02
+ ********************************************************************/
+
+This documents how to convert a .g file ( genesis commands) into
+pymoose commands - which are just python classes and function calls.
+
+----------------------------
+tabchannel
+----------------------------
+tabchannel - it is HHChannel actually.
+// create tabchannel LCa3_mit_usb
+LCa3_mit_usb = create moose.HHChannel('LCa3_mit_usb')
+
+setup_tabchan is equivalent to setupAlpha for the same HHChannel.
+setup_tabchan LCa3_mit_usb X 7500.0 0.0 1.0 -0.013 -0.007 1650.0 0.0 1.0 -0.014 0.004
+LCa3_mit_usb.setupAlpha('X', params)    
+
+-----------------------------
+ TABCREATE
+-----------------------------
+
+TABCREATE is used for two types - HHChaneel and Table.  This is
+essentially a utility function in moose. In python, one can directly
+create the required objects.
+
+In moose shell - 
+For Tables:
+call /Vm TABCREATE {NDIVS} {XMIN} {XMAX} 
+
+TABCREATE on HHChannel requires the assignment of something like
+setfield /squid/Na/xGate/A xmin {XMIN} 
+setfield /squid/Na/xGate/A xmax {XMAX} 
+setfield /squid/Na/xGate/A xdivs {XDIVS}
+
+
+Which is equivalent to:
+
+squid_Na_xGate_A.xmin = XMIN
+squid_Na_xGate_A.xmax = XMAX
+squid_Na_xGate_A.xdivs = XDIVS
+
+
+Where squid_Na_xGate_A corresponds to the element with path
+/squid/Na/xGate/A.
+
+
+Still, these two utility functions were provided to reduce the task:
+
+HHChannel.createTable(gatename, xmin, xmax, xdivs)
+and Table.createTable(xmin, xmax, xdivs)
+
+----------------------------------------------
+	setfield mychannel X_A->tab[N] valueN
+----------------------------------------------
+// WORK IN PROGRESS
