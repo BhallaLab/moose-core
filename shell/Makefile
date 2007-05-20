@@ -18,6 +18,7 @@ TARGET = shell.o
 OBJ = \
 	Shell.o	\
 	ReadCell.o \
+	SimDump.o \
 
 HEADERS = \
 	../basecode/header.h \

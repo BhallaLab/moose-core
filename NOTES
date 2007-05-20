@@ -2718,9 +2718,18 @@ Partial implementation of Enzyme unit tests: Explicit enz. Barfs at the stoich
 unit tests in TestKinetics.cpp.
 
 Completed Enzyme unit tests for Implicit enz also, as well as switching
-between explicit and implicit. Fixed but in Stoich unit tests.
+between explicit and implicit. Fixed bug in Stoich unit tests.
 
 In the meantime several updates seem to have been checked in by Subhasis to
 deal with the python wrappers.
+Checked in as revision 108
+
+=============================================================================
+19 May 2007
+Made logo.
+=============================================================================
+20 May 2007
+Implementing SimDump feature. Compiles, not yet folded into operations of
+Shell.
 
 =============================================================================
