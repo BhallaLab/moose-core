@@ -13,6 +13,7 @@
 #include "../element/Wildcard.h"
 #include "Shell.h"
 #include "ReadCell.h"
+#include "SimDump.h"
 
 //////////////////////////////////////////////////////////////////////
 // Shell MOOSE object creation stuff
@@ -122,6 +123,20 @@ const Cinfo* initShellCinfo()
 		TypeFuncPair(
 			Ftype2< string, string >::global(), 
 					RFCAST( &Shell::readCell ) ),
+		////////////////////////////////////////////////////////////
+		// SimDump facility
+		////////////////////////////////////////////////////////////
+		/*
+		TypeFuncPair(	// arg is filename
+			Ftype1< string >::global(), 
+					RFCAST( &Shell::readDumpFile ) ),
+		TypeFuncPair(	// args are filename, path to dump
+			Ftype2< string, string >::global(), 
+					RFCAST( &Shell::writeDumpFile ) ),
+		TypeFuncPair(	// arg is a set of fields for the desired class
+			Ftype2< vector< string > >::global(), 
+					RFCAST( &Shell::simObjDump ) ),
+			*/
 		////////////////////////////////////////////////////////////
 		// Channel setup functions
 		////////////////////////////////////////////////////////////
