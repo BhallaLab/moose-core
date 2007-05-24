@@ -128,6 +128,18 @@ const Cinfo* initGenesisParserCinfo()
 		TypeFuncPair( Ftype1< Id >::global(),  0 ),
 		// tweaktau
 		TypeFuncPair( Ftype1< Id >::global(),  0 ),
+
+		///////////////////////////////////////////////////////////////
+		// SimDump facilities
+		///////////////////////////////////////////////////////////////
+		// readDumpFile
+		TypeFuncPair( Ftype1< string >::global(),  0 ),
+		// writeDumpFile
+		TypeFuncPair( Ftype2< string, string >::global(),  0 ),
+		// simObjDump
+		TypeFuncPair( Ftype1< string >::global(),  0 ),
+		// simundump
+		TypeFuncPair( Ftype1< string >::global(),  0 ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -225,6 +237,15 @@ static const unsigned int tweakAlphaSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 21;
 static const unsigned int tweakTauSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 22;
+
+static const unsigned int readDumpFileSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 23;
+static const unsigned int writeDumpFileSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 24;
+static const unsigned int simObjDumpSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 25;
+static const unsigned int simUndumpSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 26;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -1443,6 +1464,9 @@ void GenesisParserWrapper::doShow( int argc, const char** argv, Id s )
 			if ( fieldValue_.length() > 0 ) {
 				sprintf( temp, "%-25s%s", argv[i], "= " );
 				print( temp + fieldValue_ );
+			} else {
+				cout << "'" << argv[i] << "' is not an element or the field of the working element\n";
+				return;
 			}
 		}
 	}
@@ -1760,6 +1784,107 @@ void do_tweaktau( int argc, const char** const argv, Id s )
 
 
 
+/**
+ * Equivalent to simdump
+ */
+void doWriteDump( int argc, const char** const argv, Id s )
+{
+	if (argc < 3 ) {
+		cout << "usage:: " << argv[0] << " file -path path -all\n";
+		return;
+	}
+
+	bool doAll = 0;
+	string filename = argv[1];
+	string path = "";
+	for ( int i = 2; i < argc; i++ ) {
+		if ( strncmp( argv[i], "-p", 2 ) == 0 ) {
+			if ( argc > i + 1 ) {
+				i++;
+				if ( path.length() == 0 )
+					path = argv[ i ];
+				else
+					path = path + "," + argv[ i ];
+			}
+		}
+		if ( strncmp( argv[i], "-a", 2 ) == 0 ) {
+			doAll = 1;
+		}
+	}
+	if ( doAll )
+	path = "/##";
+	send2< string, string >( Element::element( s ), writeDumpFileSlot,
+		filename, path );
+}
+
+/**
+ * The simdump command. Here we just munge all args into one big
+ * string to send to the shell
+ */
+void doSimUndump( int argc, const char** const argv, Id s )
+{
+	if (argc < 4 ) {
+		cout << "usage:: " << argv[0] << " object element ... x y z";
+		return;
+	}
+
+	string args = "";
+	for ( int i = 0; i < argc; i++ ) {
+		if ( args.length() == 0 )
+			args = argv[ i ];
+		else
+			args = args + " " + argv[ i ];
+	}
+	send1< string >( Element::element( s ), simUndumpSlot, args );
+}
+
+void doSimObjDump( int argc, const char** const argv, Id s )
+{
+	if (argc < 3 ) {
+		cout << "usage:: " << argv[0] << " object  -coords -default -noDUMP";
+		return;
+	}
+	bool coordsFlag = 0;
+	bool defaultFlag = 0;
+	bool noDumpFlag = 0;
+
+	string args = argv[0];
+	for ( int i = 1; i < argc; i++ ) {
+		if ( argv[i][0] == '-' ) {
+			if ( argv[i][1] == 'c' )
+				coordsFlag = 1;
+			if ( argv[i][1] == 'd' )
+				defaultFlag = 1;
+			if ( argv[i][1] == 'n' )
+				noDumpFlag = 1;
+			continue;
+		}
+		args = args + " " + argv[ i ];
+	}
+	if ( coordsFlag ) {
+		args = args + " x y z";
+	}
+	// At this point we don't handle default and noDump
+	send1< string >( Element::element( s ), simObjDumpSlot, args );
+}
+
+/**
+ * New function, not present in GENESIS. Used when we want to treat
+ * the dumpfile as an isolated entity rather than as just another
+ * script file. Think of it as a counterpart of readcell.
+ */
+void doReadDump( int argc, const char** const argv, Id s )
+{
+	if (argc != 2 ) {
+		cout << "usage:: " << argv[0] << " file\n";
+		return;
+	}
+
+	string filename = argv[1];
+
+	send1< string >( Element::element( s ), readDumpFileSlot, filename );
+}
+
 
 
 
@@ -1856,6 +1981,16 @@ float do_abs( int argc, const char** const argv, Id s )
 	} else {	
 		return fabs( atof( argv[ 1 ] ) );
 	}
+}
+
+char** doArgv( int argc, const char** const argv, Id s )
+{
+	return 0;
+}
+
+int doArgc( int argc, const char** const argv, Id s )
+{
+	return 0;
 }
 
 
@@ -1982,9 +2117,16 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "tweakalpha", do_tweakalpha, "void" );
 	AddFunc( "tweaktau", do_tweaktau, "void" );
 
-	AddFunc( "simdump", doShellCommand, "void" );
-	AddFunc( "simundump", doShellCommand, "void" );
-	AddFunc( "simobjdump", doShellCommand, "void" );
+	AddFunc( "simdump", doWriteDump, "void" );
+	AddFunc( "simundump", doSimUndump, "void" );
+	AddFunc( "simobjdump", doSimObjDump, "void" );
+	AddFunc( "readdump", doReadDump, "void" ); // New command: not in GENESIS
+
+	AddFunc( "argv", 
+		reinterpret_cast< slifunc >( doArgv ), "char**" );
+	AddFunc( "argc", 
+		reinterpret_cast< slifunc >( doArgc ), "int" );
+
 	AddFunc( "loadtab", doShellCommand, "void" );
 	AddFunc( "addfield", do_addfield, "void" );
 	AddFunc( "complete_loading", do_complete_loading, "void" );

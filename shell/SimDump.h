@@ -25,10 +25,11 @@ class SimDumpInfo {
 			const string& oldFields, const string& newFields);
 
 		// Takes info from simobjdump
-		void setFieldSequence( int argc, const char** argv );
+		void setFieldSequence( vector< string >& argv );
 
 		// Sets the fields from the simundump arg list.
-		bool setFields( Element* e, int argc, const char** argv);
+		bool setFields( Element* e, vector< string >::iterator begin,
+			vector< string >::iterator end );
 
 		string oldObject() {
 			return oldObject_;
@@ -52,8 +53,29 @@ class SimDump
 {
 	public:
 		SimDump();
-		void simObjDump( int argc, const char** argv );
-		void simUndump( int argc, const char** argv );
+		/**
+		 * Defines the sequence of fields used in a dumpfile.
+		 */
+		// void simObjDump( int argc, const char** argv );
+		void simObjDump( const string& fields );
+
+		/**
+		 * Reads a single line from the dumpfile.
+		 */
+		void simUndump( const string& args );
+
+		/**
+		 * Reads in the specified dump file. Returns true if the
+		 * reading worked.
+		 */
+		bool read( const string& filename );
+
+		/**
+		 * Writes out a dump file using elements on the specified element
+		 * path.
+		 */
+		bool write( const string& filename, const string& path );
+
 	private:
 		map< string, SimDumpInfo* > dumpConverter_;
 };

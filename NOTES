@@ -2731,5 +2731,21 @@ Made logo.
 20 May 2007
 Implementing SimDump feature. Compiles, not yet folded into operations of
 Shell.
+Checked in as revision 109
+
+=============================================================================
+21 May 2007
+Cleaning up incorporation of SimDump into GenesisParser and Shell.
+=============================================================================
+24 May 2007
+SimDump compiled.
+Cleaned up really nasty parser bug for non-existent include files. Turned
+out to be a double free.
+Headache getting simObjDump count to match with the actual simUndump call.
+Turned out to be a problem handling blank strings. Need a different separator.
+
+OK, an intermediate fix: Earlier I was not including blank strings as valid
+arguments. Now I am. Now it loads in and assigns values for molecules and enz,
+and also looks like it sets up messages correctly. Time to check it in.
 
 =============================================================================

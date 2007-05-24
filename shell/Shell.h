@@ -10,10 +10,11 @@
 #ifndef _SHELL_H
 #define _SHELL_H
 
-#include "header.h"
-
 extern void separateString( const string& s, vector< string>& v, 
 				const string& separator );
+
+// forward declaration
+class SimDump;
 
 class Shell
 {
@@ -98,6 +99,15 @@ class Shell
 				vector< double > parms );
 		static void tweakAlpha( const Conn& c, unsigned int gateId );
 		static void tweakTau( const Conn& c, unsigned int gateId );
+
+		//////////////////////////////////////////////////////////
+		// SimDump functions
+		//////////////////////////////////////////////////////////
+		static void readDumpFile( const Conn& c, string filename );
+		static void writeDumpFile( const Conn& c, 
+			string filename, string path );
+		static void simObjDump( const Conn& c, string fields );
+		static void simUndump( const Conn& c, string args );
 			/*
 		void add( const string& src, const string& dest );
 		void drop( const string& src, const string& dest );
@@ -125,6 +135,7 @@ class Shell
 		// True if prompts etc are to be printed.
 		int isInteractive_;
 		string parser_;
+		SimDump* simDump_;
 };
 
 #endif // _SHELL_H
