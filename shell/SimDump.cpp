@@ -36,13 +36,15 @@ SimDumpInfo::SimDumpInfo(
 }
 
 // Takes info from simobjdump
-void SimDumpInfo::setFieldSequence( int argc, const char** argv )
+void SimDumpInfo::setFieldSequence( vector< string >& argv )
 {
 	string blank = "";
 	fieldSequence_.resize( 0 );
-	for ( int i = 0; i < argc; i++ ) {
-		string temp( argv[ i ] );
-		map< string, string >::iterator j = fields_.find( temp );
+	assert( argv.size() > 2 );
+	vector< string >::iterator i;
+	for ( i = argv.begin() + 2; i != argv.end(); i++ )
+	{
+		map< string, string >::iterator j = fields_.find( *i );
 		if ( j != fields_.end() )
 			fieldSequence_.push_back( j->second );
 		else 
@@ -50,13 +52,19 @@ void SimDumpInfo::setFieldSequence( int argc, const char** argv )
 	}
 }
 
-bool SimDumpInfo::setFields( Element* e, int argc, const char** argv )
+bool SimDumpInfo::setFields( Element* e, vector< string >::iterator begin,
+	vector< string >::iterator end)
 {
-	if ( static_cast< unsigned int >(argc) != fieldSequence_.size() ) {
-		cout << "Error: SimDumpInfo::setFields:: Number of argument mismatch\n";
+	assert( end >= begin );
+	unsigned long size = static_cast< unsigned long >( end - begin );
+	if ( size != fieldSequence_.size() ) {
+		cout << "Error: SimDumpInfo::setFields('" << e->name() << 
+			"'):: Number of argument mismatch\n";
 		return 0;
 	}
-	for ( int i = 0; i < argc; i++ ) {
+	vector< string >::iterator j;
+	unsigned int i = 0;
+	for ( j = begin; j != end; j++ ) {
 		if ( fieldSequence_[ i ].length() > 0 )
 		{
 			const Finfo* f = e->findFinfo( fieldSequence_[ i ] );
@@ -65,15 +73,16 @@ bool SimDumpInfo::setFields( Element* e, int argc, const char** argv )
 				return 0;
 			}
 			
-			bool ret = f->strSet( e, argv[ i ] );
+			bool ret = f->strSet( e, *j );
 			if ( ret == 0 )
 			{
 				cout << "Error: SimDumpInfo::setFields:: Failed to set '";
 				cout << e->name() << "/" << 
-					fieldSequence_[ i ] << " to " << argv[ i ] << "'\n";
+					fieldSequence_[ i ] << " to " << *j << "'\n";
 				return 0;
 			}
 		}
+		i++;
 	}
 	return 1;
 }
@@ -92,7 +101,7 @@ SimDump::SimDump()
 	sid.push_back( new SimDumpInfo(
 		"kpool", "Molecule", 
 		"n nInit vol slave_enable", 
-		"n nInit volumeScale slaveEnable") );
+		"n nInit volumeScale slave_enable") );
 	sid.push_back( new SimDumpInfo(
 		"kreac", "Reaction", "kf kb", "kf kb") );
 	sid.push_back( new SimDumpInfo( "kenz", "Enzyme",
@@ -120,23 +129,35 @@ SimDump::SimDump()
 	}
 }
 
-void SimDump::simObjDump( int argc, const char** argv )
+/**
+ * Stores a list of fields to be used when dumping or undumping an object.
+ * First argument is the function call.
+ */
+void SimDump::simObjDump( const string& args )
 {
-	if ( argc < 3 )
+	vector< string > argv;
+	separateString( args, argv, " " );
+
+	if ( argv.size() < 3 )
 		return;
 	string name = argv[ 1 ];
-	map< string, SimDumpInfo* >::iterator i = 
+	map< string, SimDumpInfo* >::iterator i =
 		dumpConverter_.find( name );
 	if ( i != dumpConverter_.end() ) {
-		i->second->setFieldSequence( argc - 2, argv + 2 );
+		i->second->setFieldSequence( argv );
 	}
 }
 
-void SimDump::simUndump( int argc, const char** argv )
+void SimDump::simUndump( const string& args )
 {
+	vector< string > argv;
+	separateString( args, argv, " " );
+	
+
+
 	// use a map to associate class with sequence of fields, 
 	// as set up in default and also with simobjdump
-	if (argc < 4 ) {
+	if (argv.size() < 4 ) {
 		cout << string("usage: ") + argv[ 0 ] +
 			" class path clock [fields...]\n";
 		return;
@@ -158,15 +179,16 @@ void SimDump::simUndump( int argc, const char** argv )
 	if ( id != BAD_ID ) {
 		e = Element::element( id );
 		assert( e != 0 );
-		i->second->setFields( e, argc - 4, argv + 4 );
+		i->second->setFields( e, argv.begin() + 4, argv.end() );
 		return;
 	}
 
 	// Case 2: Element does not exist but parent element does.
-	string epath = Shell::head( path, "/" );
-	id = Shell::path2eid( path, "/" );
+	string ppath = Shell::head( path, "/" );
+	string epath = Shell::tail( path, "/" );
+	id = Shell::path2eid( ppath, "/" );
 	if ( id == BAD_ID ) {
-		cout << "simundumpFunc: bad parent path" << endl;
+		cout << "simundumpFunc: bad parent path: " << epath << endl;
 		return;
 	}
 	Element* parent = Element::element( id );
@@ -180,5 +202,27 @@ void SimDump::simUndump( int argc, const char** argv )
 			" " << epath << endl;
 			return;
 	}
-	i->second->setFields( e, argc - 4, argv + 4 );
+	i->second->setFields( e, argv.begin() + 4, argv.end() );
 }
+
+/**
+ * This should give a standalone, parser-independent function for
+ * reading in kkit simdump files
+ */
+bool SimDump::read( const string& filename )
+{
+	cout << " in SimDump::read( const string& filename )\n";
+	return 0;
+}
+
+/**
+ * This should give a standalone, parser-independent function for
+ * writing out kkit simdump files
+ */
+bool SimDump::write( const string& filename, const string& path )
+{
+	cout << "in SimDump::write( const string& filename, const string& path )\n";
+	return 0;
+}
+
+

@@ -1174,10 +1174,10 @@ char* myFlexLexer::do_cmd_args(ParseNode* arg, int* argc, char* argv[])
 
 	      case ARGLIST:
 		cargv = (char **) r.r.r_str;
-		if (cargv == NULL)
+		if (cargv == NULL) {
 		    myFlexLexer::yyerror("do_cmd_args: NULL Arglist");
-		    /* no return */
-
+			return( NULL );
+		}
 		while (*cargv != NULL)
 		  {
 		    if (argv == NULL)
