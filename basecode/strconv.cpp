@@ -112,6 +112,7 @@ template<> bool val2str< vector< string > >(
  * Chops up a string s into pieces at separator, stuffs the pieces
  * into the vector v. Here the separator is precisely the provided
  * string.
+ * Consecutive separators are assumed to be around a blank string.
  */
 void separateString( const string& s, vector< string>& v, 
 				const string& separator )
@@ -123,8 +124,11 @@ void separateString( const string& s, vector< string>& v,
 
 	while ( pos != string::npos ) {
 		string t = temp.substr( 0, pos );
+		/*
 		if ( t.length() > 0 )
 			v.push_back( t );
+			*/
+		v.push_back( t );
 		temp = temp.substr( pos + separatorLength );
 		pos = temp.find( separator );
 	}

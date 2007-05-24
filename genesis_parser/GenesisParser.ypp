@@ -295,6 +295,7 @@ include_stmnt	: include_hdr LITERAL WHITESPACE arg_list ws
 		    int		argc;
 		    char	*argv[100];
 		    char	argbuf[1000];
+			bool	doneFree = 0;
 		    // jmp_buf	save;
 		    // Result	r;
 
@@ -311,6 +312,7 @@ include_stmnt	: include_hdr LITERAL WHITESPACE arg_list ws
 			FreePTValues($4);
 			PTFree($4);
 			free($2);
+			doneFree = 1;
 			yyerror(argbuf);
 		      }
 
@@ -321,9 +323,11 @@ include_stmnt	: include_hdr LITERAL WHITESPACE arg_list ws
 		      }
 		    else
 		      {
-			FreePTValues($4);
-			PTFree($4);
-			free($2);
+			  if ( doneFree == 0 ) {
+				FreePTValues($4);
+				PTFree($4);
+				free($2);
+				}
 			$$ = NULL;
 		      }
 		  }

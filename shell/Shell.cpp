@@ -124,20 +124,6 @@ const Cinfo* initShellCinfo()
 			Ftype2< string, string >::global(), 
 					RFCAST( &Shell::readCell ) ),
 		////////////////////////////////////////////////////////////
-		// SimDump facility
-		////////////////////////////////////////////////////////////
-		/*
-		TypeFuncPair(	// arg is filename
-			Ftype1< string >::global(), 
-					RFCAST( &Shell::readDumpFile ) ),
-		TypeFuncPair(	// args are filename, path to dump
-			Ftype2< string, string >::global(), 
-					RFCAST( &Shell::writeDumpFile ) ),
-		TypeFuncPair(	// arg is a set of fields for the desired class
-			Ftype2< vector< string > >::global(), 
-					RFCAST( &Shell::simObjDump ) ),
-			*/
-		////////////////////////////////////////////////////////////
 		// Channel setup functions
 		////////////////////////////////////////////////////////////
 		TypeFuncPair(
@@ -152,6 +138,22 @@ const Cinfo* initShellCinfo()
 		TypeFuncPair(
 			Ftype1< unsigned int >::global(), 
 					RFCAST( &Shell::tweakTau ) ),
+		////////////////////////////////////////////////////////////
+		// SimDump facility
+		////////////////////////////////////////////////////////////
+		TypeFuncPair(	// arg is filename
+			Ftype1< string >::global(), 
+					RFCAST( &Shell::readDumpFile ) ),
+		TypeFuncPair(	// args are filename, path to dump
+			Ftype2< string, string >::global(), 
+					RFCAST( &Shell::writeDumpFile ) ),
+		TypeFuncPair(	// arg is a set of fields for the desired class
+			// The list of fields is a space-delimited list and 
+			// can be extracted using separateString.
+			Ftype1< string >::global(), RFCAST( &Shell::simObjDump ) ),
+		TypeFuncPair(	
+					// args is sequence of args for simundump command.
+			Ftype1< string >::global(), RFCAST( &Shell::simUndump ) ),
 	};
 
 	static Finfo* shellFinfos[] =
@@ -207,7 +209,9 @@ static const unsigned int listMessageSlot =
 
 Shell::Shell()
 	: cwe_( 0 ), recentElement_( 0 )
-{;}
+{
+	simDump_ = new SimDump;
+}
 
 //////////////////////////////////////////////////////////////////////
 // General path to eid conversion utilities
@@ -435,7 +439,8 @@ void Shell::staticDestroy( const Conn& c, unsigned int victim )
  */
 void Shell::getField( const Conn& c, unsigned int id, string field )
 {
-	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	if ( id == BAD_ID )
+		return;
 	string ret;
 	Element* e = Element::element( id );
 	// Appropriate off-node stuff here.
@@ -855,6 +860,66 @@ void Shell::tweakTau( const Conn& c, unsigned int gateId )
 		return;
 	}
 	set( gate, tweakTauFinfo );
+}
+
+//////////////////////////////////////////////////////////////////
+// SimDump functions
+//////////////////////////////////////////////////////////////////
+/**
+ * readDumpFile loads in a simulation from a GENESIS simdump file.
+ * Works specially for reading in Kinetikit dump files.
+ * In many old simulations the dump files are loaded in as regular script 
+ * files. Here it is the job of the GENESIS parser to detect that these
+ * are simDump files and treat them accordingly.
+ * In a few cases the simulation commands and the simdump file have been
+ * mixed up in a single file. MOOSE does not handle such cases.
+ * This uses a local instance of SimDump, and does not interfere
+ * with the private version in the Shell.
+ */
+void Shell::readDumpFile( const Conn& c, string filename )
+{
+	SimDump localSid;
+	
+	localSid.read( filename );
+}
+
+/**
+ * writeDumpFile takes the specified comma-separated path and generates
+ * an old-style GENESIS simdump file. Used mostly for dumping kinetic
+ * models to kkit format.
+ * This is equivalent to the simdump command from the GENESIS parser.
+ * This uses the private SimDump object on the Shell because the
+ * simObjDump function may need to set its state.
+ */
+void Shell::writeDumpFile( const Conn& c, string filename, string path )
+{
+	Shell* sh = static_cast< Shell* >( c.data() );
+	sh->simDump_->write( filename, path );
+}
+
+/**
+ * This function sets up the sequence of fields used in a dumpfile
+ * This uses the private SimDump object on the Shell because the
+ * writeDumpFile and simObjDump functions may need to use this state
+ * information.
+ * First argument is the function call, second is the name of the class.
+ */
+void Shell::simObjDump( const Conn& c, string fields )
+{
+	Shell* sh = static_cast< Shell* >( c.data() );
+	sh->simDump_->simObjDump( fields );
+}
+/**
+ * This function reads in a single dumpfile line.
+ * It is only for the special case where the GenesisParser is reading
+ * a dumpfile as if it were a script file.
+ * This uses the private SimDump object on the Shell because the
+ * simObjDump function may need to set its state.
+ */
+void Shell::simUndump( const Conn& c, string args )
+{
+	Shell* sh = static_cast< Shell* >( c.data() );
+	sh->simDump_->simUndump( args );
 }
 
 //////////////////////////////////////////////////////////////////
