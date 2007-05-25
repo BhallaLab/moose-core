@@ -154,6 +154,13 @@ const Cinfo* initShellCinfo()
 		TypeFuncPair(	
 					// args is sequence of args for simundump command.
 			Ftype1< string >::global(), RFCAST( &Shell::simUndump ) ),
+		////////////////////////////////////////////////////////////
+		// field assignment for a vector of objects
+		////////////////////////////////////////////////////////////
+		// Setting a field value as a string: handling request
+		TypeFuncPair( 
+				Ftype3< vector< unsigned int >, string, string >::global(),
+				RFCAST( &Shell::setVecField ) ),
 	};
 
 	static Finfo* shellFinfos[] =
@@ -572,6 +579,31 @@ void Shell::setField( const Conn& c,
 	} else {
 		cout << "Error: cannot find field: " << e->name() <<
 				"." << field << endl;
+	}
+}
+
+// Static function
+/**
+ * This function handles request to set identical field value for a 
+ * vector of objects. Used for the GENESIS SET function.
+ */
+void Shell::setVecField( const Conn& c, 
+				vector< unsigned int > elist, string field, string value )
+{
+	vector< unsigned int >::iterator i;
+	for ( i = elist.begin(); i != elist.end(); i++ ) {
+		Element* e = Element::element( *i );
+		// Appropriate off-node stuff here.
+	
+		const Finfo* f = e->findFinfo( field );
+		if ( f ) {
+			if ( !f->strSet( e, value ) )
+				cout << "Error: cannot set field " << e->name() <<
+						"." << field << " to " << value << endl;
+		} else {
+			cout << "Error: cannot find field: " << e->name() <<
+					"." << field << endl;
+		}
 	}
 }
 

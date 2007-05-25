@@ -113,7 +113,7 @@ SimDump::SimDump()
 
 	sid.push_back( new SimDumpInfo( "group", "Neutral", "", "" ) );
 	sid.push_back( new SimDumpInfo( "xgraph", "Neutral", "", "" ) );
-	sid.push_back( new SimDumpInfo( "xplot", "Plot", "", "" ) );
+	sid.push_back( new SimDumpInfo( "xplot", "Table", "", "" ) );
 
 	sid.push_back( new SimDumpInfo( "geometry", "Neutral", "", "" ) );
 	sid.push_back( new SimDumpInfo( "xcoredraw", "Neutral", "", "" ) );
