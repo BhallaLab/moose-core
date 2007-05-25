@@ -2747,5 +2747,23 @@ Turned out to be a problem handling blank strings. Need a different separator.
 OK, an intermediate fix: Earlier I was not including blank strings as valid
 arguments. Now I am. Now it loads in and assigns values for molecules and enz,
 and also looks like it sets up messages correctly. Time to check it in.
+Checked in as revision 110
+
+Working on separator. Now it handles arguments in quotes even if they
+have separators in them.
+
+Next issue: Handling the plot messages.
+That done.
+Next issue: foreach is not handled properly.
+Also: Graphs do not save values. All values are nan.
+
+=============================================================================
+25 May 2007
+Finally got a kkit model to load and run. Now to fix up the foreach and so
+on for setting up the plots automatically so I can run any kkit model.
+
+Fixed up the set command to set fields on multiple objects.
+Successfully loaded up and ran all the simple models and the Kholodenko 
+oscillatory MAPK model.  Plotting is still ugly.  Foreach remains to fix.
 
 =============================================================================

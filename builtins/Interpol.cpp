@@ -380,7 +380,7 @@ void Interpol::innerTabFill( int xdivs, int mode )
 void Interpol::innerPrint( const string& fname )
 {
 	vector< double >::iterator i;
-	std::ofstream fout( fname.c_str() );
+	std::ofstream fout( fname.c_str(), std::ios::app );
 	for ( i = table_.begin(); i != table_.end(); i++ )
 		fout << *i << endl;
 }
