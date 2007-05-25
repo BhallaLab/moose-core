@@ -140,6 +140,13 @@ const Cinfo* initGenesisParserCinfo()
 		TypeFuncPair( Ftype1< string >::global(),  0 ),
 		// simundump
 		TypeFuncPair( Ftype1< string >::global(),  0 ),
+
+		///////////////////////////////////////////////////////////////
+		// Setting field values for a vector of objects
+		///////////////////////////////////////////////////////////////
+		// Setting a field value as a string: send out request:
+		TypeFuncPair( // object, field, value 
+				Ftype3< vector< unsigned int >, string, string >::global(), 0 ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -246,6 +253,9 @@ static const unsigned int simObjDumpSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 25;
 static const unsigned int simUndumpSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 26;
+
+static const unsigned int setVecFieldSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 27;
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -401,7 +411,7 @@ map< string, string >& sliSrcLookup()
 								// only applies to explicit enz.
 	src[ "ENZYME n" ] = "reac"; // target is an enzyme. Use it.
 	src[ "PRODUCT n" ] = "";
-	src[ "MM_PRD pA" ] = "prdOut";
+	src[ "MM_PRD pA" ] = "prd";
 
 	src[ "SUMTOTAL n nInit" ] = "nOut";	// for molecules
 	src[ "SUMTOTAL output output" ] = "out";	// for tables
@@ -428,6 +438,10 @@ map< string, string >& sliSrcLookup()
 
 	// Some messages for tables
 	src[ "INPUT Vm" ] = "Vm";
+
+	// Messages for having tables pretend to be an xplot
+	src[ "PLOT Co" ] = "conc";
+	src[ "PLOT n" ] = "n";
 	return src;
 }
 
@@ -457,7 +471,7 @@ map< string, string >& sliDestLookup()
 									// for explicit enzymes. Ignore.
 	dest[ "ENZYME n" ] = "enz"; 	// Used both for explicit and MM.
 	dest[ "PRODUCT n" ] = "";
-	dest[ "MM_PRD pA" ] = "prdIn";
+	dest[ "MM_PRD pA" ] = "prd";
 
 	dest[ "SUMTOTAL n nInit" ] = "sumTotalIn";	// for molecules
 	dest[ "SUMTOTAL output output" ] = "sumTotalIn";	// for molecules
@@ -484,6 +498,10 @@ map< string, string >& sliDestLookup()
 
 	// Some messages for tables
 	dest[ "INPUT Vm" ] = "inputRequest";
+
+	// Messages for having tables pretend to be an xplot
+	dest[ "PLOT Co" ] = "inputRequest";
+	dest[ "PLOT n" ] = "inputRequest";
 
 	return dest;
 }
@@ -549,9 +567,27 @@ string sliMessage(
 			return "";
 		else 
 			return i->second; // good message.
-	} else 
-		cout << "Error:sliMessage: Unknown message " <<
-			msgType << "\n";
+	} else {
+		// Trim off bits of the message, see if it recognizes it.
+		// Require that at least one string be known.
+		// Always go with more specific first, then more general.
+		vector< string > args;
+		separateString( msgType, args, " " );
+		if ( args.size() == 1 ) {
+			cout << "Error:sliMessage: Unknown message " <<
+				msgType << "\n";
+		} else {
+			vector< string >::iterator j;
+			string subType = "";
+			for ( j = args.begin(); j != args.end() - 1; j++ ) {
+				if ( j == args.begin() )
+					subType = *j;
+				else
+					subType = subType + " " + *j;
+			}
+			return sliMessage( subType, converter );
+		}
+	}
 	return "";
 }
 
@@ -651,7 +687,8 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 	tabmap[ "Y_B" ] = "yGate/B";
 	tabmap[ "Z_A" ] = "zGate/A";
 	tabmap[ "Z_B" ] = "zGate/B";
-	Id e;
+
+	Element* sh = Element::element( s );
 	int start = 2;
 	if ( argc < 3 ) {
 		cout << argv[0] << ": Too few command arguments\n";
@@ -659,13 +696,21 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 		return;
 	}
 	if ( argc % 2 == 1 ) { // 'path' is left out, use current object.
-		send0( Element::element( s ), requestCweSlot );
-		e = cwe_;
+		send0( sh, requestCweSlot );
+		elist_.resize( 0 );
+		elist_.push_back( cwe_ );
+		// e = cwe_;
 		start = 1;
 	} else  {
-		e = GenesisParserWrapper::path2eid( argv[1], s );
-		if ( e == BAD_ID )
+		string path = argv[1];
+		send2< string, bool >( sh, requestWildcardListSlot, path, 0 );
+		if ( elist_.size() == 0 ) {
 			return;
+		}
+		// e = GenesisParserWrapper::path2eid( argv[1], s );
+		// Try wildcards
+		// if ( e == BAD_ID )
+			// return;
 		start = 2;
 	}
 
@@ -677,6 +722,7 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 	for ( int i = start; i < argc; i += 2 ) {
 		// s->setFuncLocal( path + "/" + argv[ i ], argv[ i + 1 ] );
 		string field = argv[i];
+		string value = argv[ i+1 ];
 		string::size_type pos = field.find( "->table" );
 		if ( pos == string::npos )
 				pos = field.find( "->calc_mode" );
@@ -691,16 +737,17 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 					path = "./" + i->second;
 				else
 					path = string( argv[1] ) + "/" + i->second;
-				e = GenesisParserWrapper::path2eid( path, s );
+				Id e = GenesisParserWrapper::path2eid( path, s );
 				field = field.substr( pos + 2 );
+				send3< Id, string, string >( Element::element( s ),
+					setVecFieldSlot, e, field, value );
+				continue;
 			}
 		}
-	
-		string value = argv[ i+1 ];
 		// cout << "in do_set " << path << "." << field << " " <<
 				// value << endl;
-		send3< Id, string, string >( Element::element( s ),
-			setFieldSlot, e, field, value );
+		send3< vector< Id >, string, string >( Element::element( s ),
+			setVecFieldSlot, elist_, field, value );
 	}
 }
 
@@ -1830,10 +1877,15 @@ void doSimUndump( int argc, const char** const argv, Id s )
 
 	string args = "";
 	for ( int i = 0; i < argc; i++ ) {
-		if ( args.length() == 0 )
+		if ( args.length() == 0 ) {
 			args = argv[ i ];
-		else
-			args = args + " " + argv[ i ];
+		} else {
+			string temp = argv[i];
+			if ( temp.find( " " ) == string::npos )
+				args = args + " " + temp;
+			else 
+				args = args + " \"" + temp + "\"";
+		}
 	}
 	send1< string >( Element::element( s ), simUndumpSlot, args );
 }

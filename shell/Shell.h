@@ -57,6 +57,8 @@ class Shell
 						string field );
 		static void setField( const Conn& c, 
 						unsigned int id, string field, string value );
+		static void setVecField( const Conn& c, 
+				vector< unsigned int > elist, string field, string value );
 
 		static void setClock( const Conn& c, int clockNo, double dt,
 				int stage );
