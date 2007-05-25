@@ -109,11 +109,100 @@ template<> bool val2str< vector< string > >(
 }
 
 /**
+ * Locates the next separator on the string, analogous to the string::find
+ * function. The difference is that here it also checks if the string
+ * is protected with quotes anywhere. If so, it skips the quoted portion
+ * and looks for the separator after that.
+ */
+string::size_type nextSeparator( const string& s, const string& separator )
+{
+	string::size_type spos = s.find( separator );
+	if ( spos == string::npos )
+		return spos;
+
+	string::size_type qpos = s.find( '"' );
+	if ( qpos == string::npos )
+		return spos;
+
+	if ( qpos > spos )
+		return spos;
+	
+	string::size_type nextqpos = s.substr( qpos + 1 ).find( '"' );
+	if ( nextqpos == string::npos ) {
+		// Ugh. Unterminated quote
+		cout << "Error: separateString: Unterminated quote in '" <<
+			s << "'\n";
+		return string::npos;
+	}
+
+	nextqpos += qpos;
+	spos = s.substr( nextqpos ).find( separator );
+	if ( spos == string::npos )
+		return spos;
+	return spos + nextqpos;
+}
+
+/**
  * Chops up a string s into pieces at separator, stuffs the pieces
  * into the vector v. Here the separator is precisely the provided
  * string.
  * Consecutive separators are assumed to be around a blank string.
+ * If a quote " is found, the routine ignores separators till the
+ * matching end of the quote.
  */
+
+void separateString( const string& s, vector< string>& v, 
+				const string& separator )
+{
+	string temp = s;
+	unsigned int separatorLength = separator.length();
+	string::size_type pos = nextSeparator( s, separator );
+	v.resize( 0 );
+
+	while ( pos != string::npos ) {
+		string t = temp.substr( 0, pos );
+		v.push_back( t );
+		temp = temp.substr( pos + separatorLength );
+		pos = nextSeparator( temp, separator );
+	}
+	if ( temp.length() > 0 )
+		v.push_back( temp );
+}
+/*
+void separateString( const string& s, vector< string>& v, 
+				const string& separator )
+{
+	string temp = s;
+	unsigned int separatorLength = separator.length();
+	string::size_type pos;
+	v.resize( 0 );
+	if ( s[0] == '"' ) {
+		pos = s.substr( 1 ).find( '"' );
+		if ( pos == string::npos ) {
+			v.push_back( s );
+			return;
+		}
+		pos = s.substr( pos + 1 ).find( separator );
+		if ( pos == string::npos ) {
+			v.push_back( s );
+			return;
+		}
+	}
+	pos = s.find( separator );
+
+	while ( pos != string::npos ) {
+		string t = temp.substr( 0, pos );
+		v.push_back( t );
+		temp = temp.substr( pos + separatorLength );
+		pos = temp.find( separator );
+	}
+	if ( temp.length() > 0 )
+		v.push_back( temp );
+}
+*/
+
+
+/*
 void separateString( const string& s, vector< string>& v, 
 				const string& separator )
 {
@@ -124,10 +213,6 @@ void separateString( const string& s, vector< string>& v,
 
 	while ( pos != string::npos ) {
 		string t = temp.substr( 0, pos );
-		/*
-		if ( t.length() > 0 )
-			v.push_back( t );
-			*/
 		v.push_back( t );
 		temp = temp.substr( pos + separatorLength );
 		pos = temp.find( separator );
@@ -135,6 +220,7 @@ void separateString( const string& s, vector< string>& v,
 	if ( temp.length() > 0 )
 		v.push_back( temp );
 }
+*/
 
 /**
  * Chops up a string s into pieces at separator, stuffs the pieces
