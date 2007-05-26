@@ -15,8 +15,8 @@ using namespace std;
 
 #include "SparseMatrix.h"
 
-const unsigned int SparseMatrix::MAX_ROWS = 100;
-const unsigned int SparseMatrix::MAX_COLUMNS = 100;
+const unsigned int SparseMatrix::MAX_ROWS = 200;
+const unsigned int SparseMatrix::MAX_COLUMNS = 200;
 
 ostream& operator <<( ostream& s, SparseMatrix& m )
 {
