@@ -47,6 +47,13 @@ class Stoich
 		static void setPath( const Conn& c, string value );
 		static unsigned int getRateVectorSize( const Element* e );
 
+		///////////////////////////////////////////////////
+		// Msg Dest function definitions
+		///////////////////////////////////////////////////
+		static void reinitFunc( const Conn& c );
+		static void integrateFunc( 
+			const Conn& c, vector< double >* v, double dt );
+
 	private:
 		///////////////////////////////////////////////////
 		// Setup function definitions

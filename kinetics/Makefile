@@ -16,6 +16,7 @@ OBJ = \
 	SparseMatrix.o	\
 	KineticHub.o	\
 	Stoich.o	\
+	Kintegrator.o	\
 	TestKinetics.o	\
 
 HEADERS = \
@@ -32,6 +33,7 @@ Enzyme.o:	Enzyme.h ../basecode/Ftype2.h
 SparseMatrix.o:	SparseMatrix.h
 KineticHub.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h
 Stoich.o:	RateTerm.h Stoich.h SparseMatrix.h
+Kintegrator.o:	Kintegrator.h
 TestKinetics.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h Stoich.h SparseMatrix.h
 
 .cpp.o:

@@ -2766,4 +2766,14 @@ Fixed up the set command to set fields on multiple objects.
 Successfully loaded up and ran all the simple models and the Kholodenko 
 oscillatory MAPK model.  Plotting is still ugly.  Foreach remains to fix.
 
+Checked in as revision 111
+
+First pass on the Kintegrator. Trying to compile a framework.
+
+Well, surprisingly the unit tests suggest it works first off, at least
+with the Forward Euler default integration scheme. I need a testable
+model to run here. Maybe something diffusive.
+Tried out a 100-compt model with slightly faster diffusion. Still need
+to test the decay curve against an exponential.
+
 =============================================================================

@@ -60,6 +60,17 @@ const Cinfo* initStoichCinfo()
 		),
 	};
 
+	static Finfo* integrateShared[] =
+	{
+		new DestFinfo( "reinit", Ftype0::global(),
+			&Stoich::reinitFunc ),
+		new DestFinfo( "integrate",
+			Ftype2< vector< double >* , double >::global(),
+			RFCAST( &Stoich::integrateFunc ) ),
+		new SrcFinfo( "allocate",
+			Ftype1< vector< double >* >::global() ),
+	};
+
 	static Finfo* stoichFinfos[] =
 	{
 		///////////////////////////////////////////////////////
@@ -154,42 +165,36 @@ const Cinfo* initStoichCinfo()
 		*/
 		/*
 	new SingleSrc1Finfo< vector< double >*  >(
-		"allocateOut", &StoichWrapper::getAllocateSrc, 
+		"allocateOut", &Stoich::getAllocateSrc, 
 		"reinitIn", 1 ),
 	new SingleSrc3Finfo< int, int, int >(
-		"molSizesOut", &StoichWrapper::getMolSizesSrc, 
+		"molSizesOut", &Stoich::getMolSizesSrc, 
 		"", 1 ),
 	new SingleSrc3Finfo< int, int, int >(
-		"rateSizesOut", &StoichWrapper::getRateSizesSrc, 
+		"rateSizesOut", &Stoich::getRateSizesSrc, 
 		"", 1 ),
 	new SingleSrc2Finfo< vector< RateTerm* >*, int >(
-		"rateTermInfoOut", &StoichWrapper::getRateTermInfoSrc, 
+		"rateTermInfoOut", &Stoich::getRateTermInfoSrc, 
 		"", 1 ),
 		*/
 		///////////////////////////////////////////////////////
 		// MsgDest definitions
 		///////////////////////////////////////////////////////
-		/*
-		new Dest0Finfo(
-			"reinitIn", &StoichWrapper::reinitFunc,
-			&StoichWrapper::getIntegrateConn, "allocateOut", 1 ),
-		new Dest2Finfo< vector< double >* , double >(
-			"integrateIn", &StoichWrapper::integrateFunc,
-			&StoichWrapper::getIntegrateConn, "", 1 ),
-		
-		*/
+		//
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
 		new SharedFinfo( "hub", hubShared, 
 				sizeof( hubShared )/ sizeof( Finfo* ) ),
+		new SharedFinfo( "integrate", integrateShared, 
+				sizeof( integrateShared )/ sizeof( Finfo* ) ),
 
 		/*
 		new SharedFinfo(
-			"integrate", &StoichWrapper::getIntegrateConn,
+			"integrate", &Stoich::getIntegrateConn,
 			"integrateIn, allocateOut, reinitIn" ),
 		new SharedFinfo(
-			"hub", &StoichWrapper::getHubConn,
+			"hub", &Stoich::getHubConn,
 			"molSizesOut, rateSizesOut, rateTermInfoOut, molConnectionsOut, reacConnectionOut, enzConnectionOut, mmEnzConnectionOut" ),
 		*/
 	};
@@ -223,6 +228,8 @@ static const unsigned int enzConnectionSlot =
 	initStoichCinfo()->getSlotIndex( "enzConnectionSrc" );
 static const unsigned int mmEnzConnectionSlot =
 	initStoichCinfo()->getSlotIndex( "mmEnzConnectionSrc" );
+static const unsigned int allocateSlot =
+	initStoichCinfo()->getSlotIndex( "allocate" );
 
 ///////////////////////////////////////////////////
 // Field function definitions
@@ -284,6 +291,21 @@ unsigned int Stoich::getRateVectorSize( const Element* e ) {
 // Dest function definitions
 ///////////////////////////////////////////////////
 
+// Static func
+void Stoich::reinitFunc( const Conn& c )
+{
+	Element* e = c.targetElement();
+	Stoich* s = static_cast< Stoich* >( e->data() );
+	s->S_ = s->Sinit_;
+	send1< vector< double >* >( e, allocateSlot, &s->S_ );
+}
+
+// static func
+void Stoich::integrateFunc( const Conn& c, vector< double >* v, double dt )
+{
+	Stoich* s = static_cast< Stoich* >( c.data() );
+	s->updateRates( v, dt );
+}
 
 ///////////////////////////////////////////////////
 // Other function definitions
@@ -694,7 +716,7 @@ void Stoich::addMmEnz( Element* stoich, Element* e )
 		if ( k1 > EPSILON ) {
 			Km = ( k2 + k3 ) / k1;
 		} else {
-			cerr << "Error: StoichWrapper::addMMEnz: zero k1\n";
+			cerr << "Error: Stoich::addMMEnz: zero k1\n";
 			return;
 		}
 		fillStoich( &S_[0], sub, prd, rates_.size() );
