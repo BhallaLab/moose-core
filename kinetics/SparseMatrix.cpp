@@ -66,7 +66,7 @@ int SparseMatrix::get( unsigned int row, unsigned int column )
 		int i = row * ncolumns_ + column;
 		return N_[ i ];
 	} else {
-		cout << "Error: SparseMatrix::set( " << 
+		cout << "Error: SparseMatrix::get( " << 
 			row << ", " << column << ") is out of range: ( " <<
 			nrows_ << ", " << ncolumns_ << ")\n";
 	}
