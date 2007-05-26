@@ -2777,3 +2777,18 @@ Tried out a 100-compt model with slightly faster diffusion. Still need
 to test the decay curve against an exponential.
 
 =============================================================================
+26 May 2007
+Checked in as revision 112
+
+Trying now to examine entire set. This involved converting the free-floating
+end molecule to a buffered one. This reveals all sorts of problems with
+the Stoich and other parts of the solver.
+
+Need to write out the solution scheme and redo.
+
+Done. It turns out to be a simple matter of excluding the rows for 
+buffered molecules. At some later stage this would be a good way to toggle
+buffering. I have two buffered molecules now in the model, and it all
+works. Also implemented a nice simple unit test for diffusion.
+
+=============================================================================
