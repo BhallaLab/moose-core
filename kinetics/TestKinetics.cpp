@@ -23,6 +23,7 @@ extern void testMolecule(); // Defined in Molecule.cpp
 extern void testEnzyme(); // Defined in Enzyme.cpp
 extern void testSparseMatrix(); // Defined in SparseMatrix.cpp
 void testStoich();
+void testKintegrator();
 
 void testKinetics()
 {
@@ -30,6 +31,7 @@ void testKinetics()
 	testEnzyme();
 	testSparseMatrix();
 	testStoich();
+	testKintegrator();
 }
 
 
@@ -59,9 +61,9 @@ void testStoich()
 	assert( sFinfo != 0 );
 	const Finfo* pFinfo = reacCinfo->findFinfo( "prd" );
 	assert( pFinfo != 0 );
-	///////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////
 	// Create a linear sequence of molecules with reactions between.
-	///////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////
 	for ( unsigned int i = 0; i < NUM_COMPT; i++ ) {
 		sprintf( name, "m%d", i );
 		Element* mtemp = Neutral::create( "Molecule", name, n );
@@ -387,6 +389,128 @@ void testStoich()
 	// Get rid of all the compartments.
 	/////////////////////////////////////////////////////////
 	set( table, "destroy" );
+	set( hub, "destroy" );
+	set( stoich, "destroy" );
+	set( n, "destroy" );
+}
+
+
+//////////////////////////////////////////////////////////////////
+// Here we set up a small reaction system for testing with the
+// solver.
+//////////////////////////////////////////////////////////////////
+
+#include "Kintegrator.h"
+void testKintegrator()
+{
+	static const double EPSILON = 1.0e-6;
+	cout << "\nTesting Kintegrator" << flush;
+	const unsigned int NUM_COMPT = 100;
+
+	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	vector< Element* >m;
+	vector< Element* >r;
+	char name[10];
+	bool ret;
+	const Cinfo* molCinfo = Cinfo::find( "Molecule" );
+	assert( molCinfo != 0 );
+	const Finfo* rFinfo = molCinfo->findFinfo( "reac" );
+	assert( rFinfo != 0 );
+
+	const Cinfo* reacCinfo = Cinfo::find( "Reaction" );
+	assert( reacCinfo != 0 );
+	const Finfo* sFinfo = reacCinfo->findFinfo( "sub" );
+	assert( sFinfo != 0 );
+	const Finfo* pFinfo = reacCinfo->findFinfo( "prd" );
+	assert( pFinfo != 0 );
+	//////////////////////////////////////////////////////////////////
+	// Create a linear sequence of molecules with reactions between.
+	//////////////////////////////////////////////////////////////////
+	for ( unsigned int i = 0; i < NUM_COMPT; i++ ) {
+		sprintf( name, "m%d", i );
+		Element* mtemp = Neutral::create( "Molecule", name, n );
+		assert( mtemp != 0 );
+		set< double >( mtemp, "nInit", 0.0 );
+		set< double >( mtemp, "n", 0.0 );
+		set< int >( mtemp, "mode", 0 );
+		m.push_back( mtemp );
+
+		if ( i > 0 ) {
+			sprintf( name, "r%d", i );
+			Element* rtemp = 
+				Neutral::create( "Reaction", name, n );
+			assert( rtemp != 0 );
+			set< double >( rtemp, "kf", 1 );
+			set< double >( rtemp, "kb", 1 );
+			r.push_back( rtemp );
+			ret = rFinfo->add( m[i - 1], rtemp, sFinfo );
+			ASSERT( ret, "adding msg 0" );
+			ret = rFinfo->add( mtemp, rtemp, pFinfo );
+			ASSERT( ret, "adding msg 1" );
+		}
+	}
+
+	///////////////////////////////////////////////////////////
+	// Assign reaction system to a Stoich object
+	///////////////////////////////////////////////////////////
+
+	Element* stoich = Neutral::create( "Stoich", "s", Element::root() );
+	Element* hub = Neutral::create( "KineticHub", "hub", Element::root() );
+	Element* integ = Neutral::create( "Kintegrator", "integ", Element::root() );
+	Conn ci( integ, 0 );
+
+	ret = stoich->findFinfo( "hub" )->
+		add( stoich, hub, hub->findFinfo( "hub" ) );
+	ASSERT( ret, "connecting stoich to hub" );
+	ret = stoich->findFinfo( "integrate" )->
+		add( stoich, integ, integ->findFinfo( "integrate" ) );
+	ASSERT( ret, "connecting stoich to integ" );
+
+	ret = set< string >( stoich, "path", "/n/##" );
+	ASSERT( ret, "Setting path" );
+
+
+	Element* table = Neutral::create( "Table", "table", Element::root() );
+	ret = table->findFinfo( "inputRequest" )->add( table, m[4], 
+			m[4]->findFinfo( "n" ) );
+	ASSERT( ret, "Making test message" );
+
+	set< int >( table, "stepmode", 3 );
+	set< int >( table, "xdivs", 1 );
+	set< double >( table, "xmin", 0.0 );
+	set< double >( table, "xmax", 10.0 );
+	set< double >( table, "output", 0.0 );
+	Conn ct( table, 0 );
+	ProcInfoBase p;
+	p.dt_ = 0.001;
+	p.currTime_ = 0.0;
+
+	static const double totalMols = 100.0;
+	set< double >( m[0], "nInit", totalMols );
+	Kintegrator::reinitFunc( ci, &p );
+
+	for ( p.currTime_ = 0.0; p.currTime_ < 1.0; p.currTime_ += p.dt_ ) {
+		Kintegrator::processFunc( ci, &p );
+		Table::process( ct, &p );
+	}
+	double tot = 0.0;
+	for ( unsigned int i = 0; i < NUM_COMPT; i++ ) {
+		double val;
+		get< double >( m[i], "n", val );
+		tot += val;
+	}
+	ASSERT( fabs( tot - totalMols ) < EPSILON, "Mass consv by Kintegrator");
+	set< string >( table, "print", "kinteg.plot" );
+
+	// Note that the order of the species in the matrix is 
+	// ill-defined because of the properties of the STL sort operation.
+	// So here we need to look up the order based on the mol_map
+	// Reac order has also been scrambled.
+	
+	// cout << s->N_;
+	
+	set( table, "destroy" );
+	set( integ, "destroy" );
 	set( hub, "destroy" );
 	set( stoich, "destroy" );
 	set( n, "destroy" );
