@@ -403,9 +403,10 @@ void testStoich()
 #include "Kintegrator.h"
 void testKintegrator()
 {
-	static const double EPSILON = 1.0e-6;
+	static const double EPSILON = 1.0e-4;
 	cout << "\nTesting Kintegrator" << flush;
-	const unsigned int NUM_COMPT = 100;
+	const unsigned int NUM_COMPT = 21;
+	const double RUNTIME = 500.0;
 
 	Element* n = Neutral::create( "Neutral", "n", Element::root() );
 	vector< Element* >m;
@@ -449,6 +450,12 @@ void testKintegrator()
 			ASSERT( ret, "adding msg 1" );
 		}
 	}
+	// Buffer the end compartments to fixed values.
+	set < int >( m[0], "mode", 4 );
+	set < int >( m[ NUM_COMPT - 1 ], "mode", 4 );
+	static const double totalMols = 1.0;
+	set< double >( m[0], "nInit", totalMols );
+	set< double >( m[NUM_COMPT - 1], "nInit", 0.0 );
 
 	///////////////////////////////////////////////////////////
 	// Assign reaction system to a Stoich object
@@ -482,25 +489,25 @@ void testKintegrator()
 	set< double >( table, "output", 0.0 );
 	Conn ct( table, 0 );
 	ProcInfoBase p;
-	p.dt_ = 0.001;
+	p.dt_ = 0.05;
 	p.currTime_ = 0.0;
 
-	static const double totalMols = 100.0;
-	set< double >( m[0], "nInit", totalMols );
 	Kintegrator::reinitFunc( ci, &p );
 
-	for ( p.currTime_ = 0.0; p.currTime_ < 1.0; p.currTime_ += p.dt_ ) {
+	for ( p.currTime_ = 0.0; p.currTime_ < RUNTIME; p.currTime_ += p.dt_ ) {
 		Kintegrator::processFunc( ci, &p );
 		Table::process( ct, &p );
 	}
 	double tot = 0.0;
+	double dx = totalMols / (NUM_COMPT - 1);
 	for ( unsigned int i = 0; i < NUM_COMPT; i++ ) {
 		double val;
 		get< double >( m[i], "n", val );
-		tot += val;
+		tot += fabs( totalMols - ( val + dx * i ) );
+		// cout << val << "\n";
 	}
-	ASSERT( fabs( tot - totalMols ) < EPSILON, "Mass consv by Kintegrator");
-	set< string >( table, "print", "kinteg.plot" );
+	// set< string >( table, "print", "kinteg.plot" );
+	ASSERT ( tot < EPSILON, "Diffusion between source and sink by Kintegrator");
 
 	// Note that the order of the species in the matrix is 
 	// ill-defined because of the properties of the STL sort operation.
