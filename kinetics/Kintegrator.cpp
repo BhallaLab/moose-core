@@ -139,11 +139,15 @@ void Kintegrator::innerProcessFunc( Element* e, ProcInfo info )
 		vector< double >::const_iterator j = yprime_.begin();
 		send2< vector< double >*, double >( e, integrateSlot, 
 			&yprime_, info->dt_ );
+
+		// Here we do the simple Euler method.
 		for ( i = y_->begin(); i != y_->end(); i++ )
 			*i += *j++;
+		/*
 		long currT = static_cast< long >( info->currTime_ );
 		if ( info->currTime_ - currT < info->dt_ )
 			cout << info->currTime_ << "    " << y_->front() << "\n";
+			*/
 }
 
 void Kintegrator::reinitFunc( const Conn& c, ProcInfo info )

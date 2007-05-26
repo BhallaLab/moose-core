@@ -361,8 +361,15 @@ void Stoich::localSetPath( Element* stoich, const string& value )
 			numRates += countRates( *i, useOneWayReacs_ );
 		}
 	}
+	/*
+	 * We set up the stoichiometry matrix with _all_ the molecules
+	 * here. Later we only update those rows (molecules) that are 
+	 * variable, but for other kinds of matrix-based analyses
+	 * it is a good thing to have the
+	 * whole lot accessible.
+	 */
 	setupMols( stoich, varMolVec, bufVec, sumTotVec );
-	N_.setSize( varMolVec.size() , numRates );
+	N_.setSize( nMols_, numRates );
 	v_.resize( numRates, 0.0 );
 	send2< vector< RateTerm* >*, bool >( 
 		stoich, rateTermInfoSlot, &rates_, useOneWayReacs_ );
@@ -548,6 +555,8 @@ void Stoich::fillHalfStoich( const double* baseptr,
 	vector< const double* >::iterator i;
 	const double* lastptr = 0;
 	int n = 1;
+	unsigned int molNum = 0;
+
 	sort( reactant.begin(), reactant.end() );
 	lastptr = reactant.front();
 	for (i = reactant.begin() + 1; i != reactant.end(); i++) {
@@ -555,12 +564,18 @@ void Stoich::fillHalfStoich( const double* baseptr,
 			n++;
 		}
 		if ( *i != lastptr ) {
-			N_.set( lastptr - baseptr, reacNum, sign * n );
-			n = 1;
+			molNum = static_cast< unsigned int >(lastptr - baseptr);
+			if ( molNum < nVarMols_ ) {
+				N_.set( molNum, reacNum, sign * n );
+				n = 1;
+			}
 		}
 		lastptr = *i;
 	}
-	N_.set( lastptr - baseptr, reacNum, sign * n );
+	molNum = static_cast< unsigned int >(lastptr - baseptr);
+	if ( molNum < nVarMols_ ) {
+		N_.set( molNum, reacNum, sign * n );
+	}
 }
 
 void Stoich::fillStoich( 
@@ -766,7 +781,7 @@ void Stoich::updateRates( vector< double>* yprime, double dt  )
 
 	// Much scope for optimization here.
 	vector< double >::iterator j = yprime->begin();
-	for (unsigned int i = 0; i < N_.nRows(); i++) {
+	for (unsigned int i = 0; i < nVarMols_; i++) {
 		*j++ = dt * N_.computeRowRate( i , v_ );
 	}
 }
