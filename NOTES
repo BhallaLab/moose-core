@@ -2791,4 +2791,22 @@ buffered molecules. At some later stage this would be a good way to toggle
 buffering. I have two buffered molecules now in the model, and it all
 works. Also implemented a nice simple unit test for diffusion.
 
+Now starting out on the GSL implementation.
+
+=============================================================================
+28 May 2007
+Finally getting close to the GSL stuff. Some retrofitting needed on
+Stoich.cpp, compiled it without the GSL stuff to make sure the old code still
+works. Yes. Passes unit tests. Now on to GSL portion.
+
+Also looked at CVODE. Fortunately it has the same functional form as GSL
+for its core stepper function, which Stoich provides. CVODE also seems to have
+parallel solver capabilities, something to keep in mind.
+
+OK, GSL integrator works. Haven't really stretched it yet nor analyzed its
+stepping patterns, but it passes the basic unit tests for 21-compartment
+diffusion using rk5.
+For the purposes of the checkin, I have compiled it without the GSL flags,
+so as to preserve the plain vanilla version with minimal library dependencies.
+
 =============================================================================
