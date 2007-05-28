@@ -35,7 +35,7 @@ CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DGENERATE_WRAP
 #CFLAGS  =	-O3 -Wall -pedantic
 
 # Use the options below for compiling on GCC4.1
-# GNU C++ 4.1 and newer will need -ffriend-injection
+# GNU C++ 4.1 and newer might need -ffriend-injection
 #
 #CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -ffriend-injection -DUSE_GENESIS_PARSER
 

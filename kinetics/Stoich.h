@@ -17,18 +17,7 @@ class Stoich
 	friend void testStoich();
 #endif
 	public:
-		Stoich()
-		{
-			nMols_ = 0;
-			nVarMols_ = 0;
-			nSumTot_ = 0;
-			nBuffered_ = 0;
-			nReacs_ = 0;
-			nEnz_ = 0;
-			nMmEnz_ = 0;
-			nExternalRates_ = 0;
-			useOneWayReacs_ = 0;
-		}
+		Stoich();
 		
 		///////////////////////////////////////////////////
 		// Field function definitions
@@ -54,6 +43,25 @@ class Stoich
 		static void integrateFunc( 
 			const Conn& c, vector< double >* v, double dt );
 
+		unsigned int nVarMols() const {
+			return nVarMols_;
+		}
+
+		///////////////////////////////////////////////////
+		// Functions used by the GslIntegrator
+		///////////////////////////////////////////////////
+#ifdef USE_GSL
+		static int gslFunc( double t, const double* y, 
+			double* yprime, void* params);
+
+		int innerGslFunc( double t, const double* y, double* yprime );
+
+		// Dangerous func, meant only for the GslIntegrator which is
+		// permitted to look at the insides of the Stoich class.
+		double* S() {
+			return &S_[0];
+		}
+#endif // USE_GSL
 	private:
 		///////////////////////////////////////////////////
 		// Setup function definitions
@@ -134,5 +142,11 @@ class Stoich
 		map< const Element*, unsigned int > reacMap_;
 #endif
 		static const double EPSILON;
+		///////////////////////////////////////////////////
+		// Fields used by the GslIntegrator
+		///////////////////////////////////////////////////
+		const double* lasty_;
+		unsigned int nVarMolsBytes_;
+		unsigned int nCopy_;
 };
 #endif // _Stoich_h

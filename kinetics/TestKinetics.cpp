@@ -24,6 +24,9 @@ extern void testEnzyme(); // Defined in Enzyme.cpp
 extern void testSparseMatrix(); // Defined in SparseMatrix.cpp
 void testStoich();
 void testKintegrator();
+#ifdef USE_GSL
+void testGslIntegrator();
+#endif // USE_GSL
 
 void testKinetics()
 {
@@ -32,6 +35,9 @@ void testKinetics()
 	testSparseMatrix();
 	testStoich();
 	testKintegrator();
+#ifdef USE_GSL
+	testGslIntegrator();
+#endif // USE_GSL
 }
 
 
@@ -522,5 +528,134 @@ void testKintegrator()
 	set( stoich, "destroy" );
 	set( n, "destroy" );
 }
+
+#ifdef USE_GSL
+
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_odeiv.h>
+#include "GslIntegrator.h"
+void testGslIntegrator()
+{
+	static const double EPSILON = 1.0e-4;
+	cout << "\nTesting GslIintegrator" << flush;
+	const unsigned int NUM_COMPT = 21;
+	const double RUNTIME = 500.0;
+
+	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	vector< Element* >m;
+	vector< Element* >r;
+	char name[10];
+	bool ret;
+	const Cinfo* molCinfo = Cinfo::find( "Molecule" );
+	assert( molCinfo != 0 );
+	const Finfo* rFinfo = molCinfo->findFinfo( "reac" );
+	assert( rFinfo != 0 );
+
+	const Cinfo* reacCinfo = Cinfo::find( "Reaction" );
+	assert( reacCinfo != 0 );
+	const Finfo* sFinfo = reacCinfo->findFinfo( "sub" );
+	assert( sFinfo != 0 );
+	const Finfo* pFinfo = reacCinfo->findFinfo( "prd" );
+	assert( pFinfo != 0 );
+	//////////////////////////////////////////////////////////////////
+	// Create a linear sequence of molecules with reactions between.
+	//////////////////////////////////////////////////////////////////
+	for ( unsigned int i = 0; i < NUM_COMPT; i++ ) {
+		sprintf( name, "m%d", i );
+		Element* mtemp = Neutral::create( "Molecule", name, n );
+		assert( mtemp != 0 );
+		set< double >( mtemp, "nInit", 0.0 );
+		set< double >( mtemp, "n", 0.0 );
+		set< int >( mtemp, "mode", 0 );
+		m.push_back( mtemp );
+
+		if ( i > 0 ) {
+			sprintf( name, "r%d", i );
+			Element* rtemp = 
+				Neutral::create( "Reaction", name, n );
+			assert( rtemp != 0 );
+			set< double >( rtemp, "kf", 1 );
+			set< double >( rtemp, "kb", 1 );
+			r.push_back( rtemp );
+			ret = rFinfo->add( m[i - 1], rtemp, sFinfo );
+			ASSERT( ret, "adding msg 0" );
+			ret = rFinfo->add( mtemp, rtemp, pFinfo );
+			ASSERT( ret, "adding msg 1" );
+		}
+	}
+	// Buffer the end compartments to fixed values.
+	set < int >( m[0], "mode", 4 );
+	set < int >( m[ NUM_COMPT - 1 ], "mode", 4 );
+	static const double totalMols = 1.0;
+	set< double >( m[0], "nInit", totalMols );
+	set< double >( m[NUM_COMPT - 1], "nInit", 0.0 );
+
+	///////////////////////////////////////////////////////////
+	// Assign reaction system to a Stoich object
+	///////////////////////////////////////////////////////////
+
+	Element* stoich = Neutral::create( "Stoich", "s", Element::root() );
+	Element* hub = Neutral::create( "KineticHub", "hub", Element::root() );
+	Element* integ = Neutral::create( "GslIntegrator", "integ", Element::root() );
+	Conn ci( integ, 0 );
+
+	ret = stoich->findFinfo( "hub" )->
+		add( stoich, hub, hub->findFinfo( "hub" ) );
+	ASSERT( ret, "connecting stoich to hub" );
+	ret = stoich->findFinfo( "gsl" )->
+		add( stoich, integ, integ->findFinfo( "gsl" ) );
+	ASSERT( ret, "connecting stoich to gsl integ" );
+
+	ret = set< string >( stoich, "path", "/n/##" );
+	ASSERT( ret, "Setting path" );
+
+
+	Element* table = Neutral::create( "Table", "table", Element::root() );
+	ret = table->findFinfo( "inputRequest" )->add( table, m[4], 
+			m[4]->findFinfo( "n" ) );
+	ASSERT( ret, "Making test message" );
+
+	set< int >( table, "stepmode", 3 );
+	set< int >( table, "xdivs", 1 );
+	set< double >( table, "xmin", 0.0 );
+	set< double >( table, "xmax", 10.0 );
+	set< double >( table, "output", 0.0 );
+	Conn ct( table, 0 );
+	ProcInfoBase p;
+	p.dt_ = 100.0; // Oddly, it isn't accurate given 500 sec to work with.
+	p.currTime_ = 0.0;
+
+	GslIntegrator::reinitFunc( ci, &p );
+
+	for ( p.currTime_ = 0.0; p.currTime_ < RUNTIME; p.currTime_ += p.dt_ ) {
+		GslIntegrator::processFunc( ci, &p );
+		Table::process( ct, &p );
+	}
+	double tot = 0.0;
+	double dx = totalMols / (NUM_COMPT - 1);
+	for ( unsigned int i = 0; i < NUM_COMPT; i++ ) {
+		double val;
+		get< double >( m[i], "n", val );
+		tot += fabs( totalMols - ( val + dx * i ) );
+		// cout << val << "\n";
+	}
+	// set< string >( table, "print", "kinteg.plot" );
+	ASSERT ( tot < EPSILON, "Diffusion between source and sink by GslIntegrator");
+
+	// Note that the order of the species in the matrix is 
+	// ill-defined because of the properties of the STL sort operation.
+	// So here we need to look up the order based on the mol_map
+	// Reac order has also been scrambled.
+	
+	// cout << s->N_;
+	
+	set( table, "destroy" );
+	set( integ, "destroy" );
+	set( hub, "destroy" );
+	set( stoich, "destroy" );
+	set( n, "destroy" );
+}
+#endif // USE_GSL
 
 #endif
