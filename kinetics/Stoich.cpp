@@ -16,6 +16,10 @@
 #include "SparseMatrix.h"
 #include "Stoich.h"
 
+#ifdef USE_GSL
+#include <gsl/gsl_errno.h>
+#endif
+
 const double Stoich::EPSILON = 1.0e-6;
 
 const Cinfo* initStoichCinfo()
@@ -69,6 +73,14 @@ const Cinfo* initStoichCinfo()
 			RFCAST( &Stoich::integrateFunc ) ),
 		new SrcFinfo( "allocate",
 			Ftype1< vector< double >* >::global() ),
+	};
+
+	static Finfo* gslShared[] =
+	{
+		new DestFinfo( "reinit", Ftype0::global(),
+			&Stoich::reinitFunc ),
+		new SrcFinfo( "assignStoich",
+			Ftype1< void* >::global() ),
 	};
 
 	static Finfo* stoichFinfos[] =
@@ -188,6 +200,8 @@ const Cinfo* initStoichCinfo()
 				sizeof( hubShared )/ sizeof( Finfo* ) ),
 		new SharedFinfo( "integrate", integrateShared, 
 				sizeof( integrateShared )/ sizeof( Finfo* ) ),
+		new SharedFinfo( "gsl", gslShared, 
+				sizeof( gslShared )/ sizeof( Finfo* ) ),
 
 		/*
 		new SharedFinfo(
@@ -230,7 +244,28 @@ static const unsigned int mmEnzConnectionSlot =
 	initStoichCinfo()->getSlotIndex( "mmEnzConnectionSrc" );
 static const unsigned int allocateSlot =
 	initStoichCinfo()->getSlotIndex( "allocate" );
+static const unsigned int assignStoichSlot =
+	initStoichCinfo()->getSlotIndex( "assignStoich" );
 
+///////////////////////////////////////////////////
+// Class function definitions
+///////////////////////////////////////////////////
+
+Stoich::Stoich()
+{
+	nMols_ = 0;
+	nVarMols_ = 0;
+	nVarMolsBytes_ = 0;
+	nSumTot_ = 0;
+	nBuffered_ = 0;
+	nReacs_ = 0;
+	nEnz_ = 0;
+	nMmEnz_ = 0;
+	nExternalRates_ = 0;
+	useOneWayReacs_ = 0;
+	lasty_ = 0;
+}
+		
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
@@ -298,6 +333,9 @@ void Stoich::reinitFunc( const Conn& c )
 	Stoich* s = static_cast< Stoich* >( e->data() );
 	s->S_ = s->Sinit_;
 	send1< vector< double >* >( e, allocateSlot, &s->S_ );
+	send1< void* >( e, assignStoichSlot, e->data() );
+	s->lasty_ = 0;
+	s->nCopy_ = 0;
 }
 
 // static func
@@ -427,6 +465,7 @@ void Stoich::setupMols(
 	unsigned int j = 0;
 	double nInit;
 	nVarMols_ = varMolVec.size();
+	nVarMolsBytes_ = nVarMols_ * sizeof( double );
 	nSumTot_  = sumTotVec.size();
 	nBuffered_ = bufVec.size();
 	nMols_ = nVarMols_ + nSumTot_ + nBuffered_;
@@ -786,3 +825,47 @@ void Stoich::updateRates( vector< double>* yprime, double dt  )
 	}
 }
 
+#ifdef USE_GSL
+///////////////////////////////////////////////////
+// GSL interface stuff
+///////////////////////////////////////////////////
+
+/**
+ * This is the function used by GSL to advance the simulation one step.
+ * We have a design decision here: to perform the calculations 'in place'
+ * on the passed in y and f arrays, or to copy the data over and use
+ * the native calculations in the Stoich object. We chose the latter,
+ * because memcpy is fast, and the alternative would be to do a huge
+ * number of array lookups (currently it is direct pointer references).
+ * Someday should benchmark to see how well it works.
+ * The derivative array f is used directly by the stoich function
+ * updateRates that computes these derivatives, so we do not need to
+ * do any memcopies there.
+ *
+ * Perhaps not by accident, this same functional form is used by CVODE.
+ * Should make it easier to eventually use CVODE as a solver too.
+ */
+
+// Static function passed in as the stepper for GSL
+int Stoich::gslFunc( double t, const double* y, double* yprime, void* s )
+{
+	return static_cast< Stoich* >( s )->innerGslFunc( t, y, yprime );
+}
+
+int Stoich::innerGslFunc( double t, const double* y, double* yprime )
+{
+	if ( lasty_ != y ) { // should count to see how often this copy happens
+		// Copy the y array into the y_ vector.
+		memcpy( &S_[0], y, nVarMolsBytes_ );
+		lasty_ = y;
+		nCopy_++;
+	}
+	updateV();
+
+	// Much scope for optimization here.
+	for (unsigned int i = 0; i < nVarMols_; i++) {
+		*yprime++ = N_.computeRowRate( i , v_ );
+	}
+	return GSL_SUCCESS;
+}
+#endif // USE_GSL

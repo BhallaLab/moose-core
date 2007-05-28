@@ -24,6 +24,18 @@ HEADERS = \
 	../basecode/Conn.h \
 	../basecode/Element.h \
 
+
+# The GSL library (GNU Scientific Library) provides a range of
+# numerical functions, which allow us to use various advanced integration
+# methods. The GslIntegrator accesses these. This library is licenced
+# under the GPL, so only GPL-compliant uses of MOOSE will be able to
+# use it. Should be fine for academic use.
+# Optional: Comment out the following three items if not using GSL
+#GSL_OBJ = GslIntegrator.o
+#GSL_LIBS = -lgsl -lgslcblas
+#GSL_FLAGS = -DUSE_GSL
+
+
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
@@ -36,11 +48,15 @@ Stoich.o:	RateTerm.h Stoich.h SparseMatrix.h
 Kintegrator.o:	Kintegrator.h
 TestKinetics.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h Stoich.h SparseMatrix.h
 
-.cpp.o:
-	$(CXX) $(CFLAGS) -I../basecode $< -c
+#Optional: Comment out the following two items if not using GSL.
+# $(GSL_OBJ) : $(HEADERS)
+# GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h SparseMatrix.h
 
-$(TARGET):		$(OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
+.cpp.o:
+	$(CXX) $(CFLAGS) $(GSL_FLAGS) -I../basecode $< -c
+
+$(TARGET):		$(OBJ) $(GSL_OBJ) $(HEADERS)
+	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(LIBS) $(GSL_LIBS)
 
 clean:
 	-rm -f *.o $(TARGET) core core.*
