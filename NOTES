@@ -2859,5 +2859,6 @@ Recompiled with the O3, and ran it... Hooray, nearly 2x speedup:
 0.88 sec (ave of N=3).
 
 Some more cleaning up of SparseMatrix pending, but good to check it in now.
+Checked in as revision 117.
 
 =============================================================================
