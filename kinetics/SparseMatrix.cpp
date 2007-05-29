@@ -10,24 +10,47 @@
 
 #include <vector>
 #include <iostream>
+#include <cassert>
 
 using namespace std;
 
 #include "SparseMatrix.h"
 
-const unsigned int SparseMatrix::MAX_ROWS = 200;
-const unsigned int SparseMatrix::MAX_COLUMNS = 200;
+// Substantially bigger than possible using a full matrix.
+const unsigned int SparseMatrix::MAX_ROWS = 10000;
+const unsigned int SparseMatrix::MAX_COLUMNS = 10000;
+
+SparseMatrix::SparseMatrix()
+	: nrows_( 0 ), ncolumns_( 0 )
+{
+	N_.resize( 0 );
+	N_.reserve( 16 );
+	colIndex_.resize( 0 );
+	colIndex_.reserve( 16 );
+}
+
 
 ostream& operator <<( ostream& s, SparseMatrix& m )
 {
 	for ( unsigned int i = 0; i < m.nrows_; i++) {
+		unsigned int start = m.rowStart_[i];
+		unsigned int end = m.rowStart_[i + 1];
 		s << i << ":	";
-		for ( unsigned int j = 0; j < m.ncolumns_; j++) {
+
+		unsigned int k = start;
+		int value = 0;
+		for ( unsigned int j = 0; j < m.ncolumns_; j++ ) {
+			if ( k == end ) 
+				value = 0;
+			else if ( j == m.colIndex_[ k ] )
+				value = m.N_[ k++ ];
+			else
+				value = 0;
+
 			s.width( 4 );
-			s << m.N_[ i * m.ncolumns_ + j ];
-			if ( j == m.ncolumns_ - 1 )
-				s << "\n";
+			s << value ;
 		}
+		s << "\n";
 	}
 	s << "\n";
 
@@ -37,9 +60,13 @@ ostream& operator <<( ostream& s, SparseMatrix& m )
 void SparseMatrix::setSize( unsigned int nrows, unsigned int ncolumns )
 {
 	if ( nrows < MAX_ROWS && ncolumns < MAX_COLUMNS ) {
-		N_.resize( nrows * ncolumns );
+		N_.resize( 0 );
+		N_.reserve( 2 * nrows );
 		nrows_ = nrows;
 		ncolumns_ = ncolumns;
+		rowStart_.resize( nrows + 1, 0 );
+		colIndex_.resize( 0 );
+		colIndex_.reserve( 2 * nrows );
 	} else {
 		cout << "Error: SparseMatrix::setSize( " << 
 			nrows << ", " << ncolumns << ") out of range: ( " <<
@@ -47,54 +74,98 @@ void SparseMatrix::setSize( unsigned int nrows, unsigned int ncolumns )
 	}
 }
 
+/**
+ * This function assumes that we rarely set any entry to zero: most
+ * cases are when we add a new non-zero entry. If we were to use it to
+ * exhaustively fill up all coords in the matrix it would be quite slow.
+ */
 void SparseMatrix::set( 
 	unsigned int row, unsigned int column, int value )
 {
-	if ( row < nrows_ && column < ncolumns_ ) {
-		int i = row * ncolumns_ + column;
-		N_[ i ] = value;
-	} else {
-		cout << "Error: SparseMatrix::set( " << 
-			row << ", " << column << ") is out of range: ( " <<
-			nrows_ << ", " << ncolumns_ << ")\n";
+	vector< unsigned int >::iterator i;
+	vector< unsigned int >::iterator begin = 
+		colIndex_.begin() + rowStart_[ row ];
+	vector< unsigned int >::iterator end = 
+		colIndex_.begin() + rowStart_[ row + 1 ];
+
+	if ( begin == end ) { // Entire row was empty.
+		if ( value == 0 ) // Don't need to change an already zero entry
+			return;
+		unsigned long offset = begin - colIndex_.begin();
+		colIndex_.insert( colIndex_.begin() + offset, column );
+		N_.insert( N_.begin() + offset, value );
+		for ( unsigned int j = row + 1; j <= nrows_; j++ )
+			rowStart_[ j ]++;
+		return;
+	}
+
+	if ( column > *( end - 1 ) ) { // add entry at end of row.
+		if ( value == 0 )
+			return;
+		unsigned long offset = end - colIndex_.begin();
+		colIndex_.insert( colIndex_.begin() + offset, column );
+		N_.insert( N_.begin() + offset, value );
+		for ( unsigned int j = row + 1; j <= nrows_; j++ )
+			rowStart_[ j ]++;
+		return;
+	}
+	for ( i = begin; i != end; i++ ) {
+		if ( *i == column ) { // Found desired entry. By defn it is nonzero.
+			if ( value != 0 ) // Assign value
+				N_[ i - colIndex_.begin()] = value;
+			else { // Clear out value and entry.
+				unsigned long offset = i - colIndex_.begin();
+				colIndex_.erase( i );
+				N_.erase( N_.begin() + offset );
+				for ( unsigned int j = row + 1; j <= nrows_; j++ )
+					rowStart_[ j ]--;
+			}
+			return;
+		} else if ( *i > column ) { // Desired entry is blank.
+			if ( value == 0 ) // Don't need to change an already zero entry
+				return;
+			unsigned long offset = i - colIndex_.begin();
+			colIndex_.insert( colIndex_.begin() + offset, column );
+			N_.insert( N_.begin() + offset, value );
+			for ( unsigned int j = row + 1; j <= nrows_; j++ )
+				rowStart_[ j ]++;
+			return;
+		}
 	}
 }
 
 int SparseMatrix::get( unsigned int row, unsigned int column )
 {
-	if ( row < nrows_ && column < ncolumns_ ) {
-		int i = row * ncolumns_ + column;
-		return N_[ i ];
+	assert( row < nrows_ && column < ncolumns_ );
+	vector< unsigned int >::iterator i;
+	vector< unsigned int >::iterator begin = 
+		colIndex_.begin() + rowStart_[ row ];
+	vector< unsigned int >::iterator end = 
+		colIndex_.begin() + rowStart_[ row + 1 ];
+
+	i = find( begin, end, column );
+	if ( i == end ) { // most common situation for a sparse Stoich matrix.
+		return 0;
 	} else {
-		cout << "Error: SparseMatrix::get( " << 
-			row << ", " << column << ") is out of range: ( " <<
-			nrows_ << ", " << ncolumns_ << ")\n";
+		return N_[ rowStart_[row] + i - begin ];
 	}
-	return 0;
 }
 
 double SparseMatrix::computeRowRate( 
 	unsigned int row, const vector< double >& v
 ) const
 {
-	if ( row >= nrows_ ) {
-		cout << "Error: SparseMatrix::computeRowRate: row out of bounds: " << 
-			row << " >= " << nrows_ << "\n";
-		return 0.0;
-	}
+	assert( row < nrows_ );
+	assert( v.size() == ncolumns_ );
+
+	vector< int >::const_iterator i;
+	vector< int >::const_iterator end = N_.begin() + rowStart_[ row + 1 ];
+	vector< unsigned int >::const_iterator j = 
+		colIndex_.begin() + rowStart_[ row ];
 	
-	if ( v.size() != ncolumns_ ) {
-		cout << "Error: SparseMatrix::computeRowRate: v.size() != ncolumns:" << 
-			v.size() << " != " << ncolumns_ << "\n";
-		return 0.0;
-	}
-
-	vector< int >::const_iterator i = N_.begin() + ncolumns_ * row;
-	vector< double >::const_iterator j;
 	double ret = 0.0;
-
-	for ( j = v.begin(); j != v.end(); j++ )
-		ret += *j * *i++;
+	for ( i = N_.begin() + rowStart_[ row ]; i != end; i++ )
+		ret += *i * v[ *j++ ];
 
 	return ret;
 }
@@ -114,11 +185,12 @@ void testSparseMatrix()
 	for ( unsigned int i = 0; i < NR; i++ ) {
 		for ( unsigned int j = 0; j < NC; j++ ) {
 			sm.set( i, j, 10 * i + j );
-			unsigned int ret = sm.get( i, j );
-			ASSERT( ret == 10 * i + j, "set/get" );
+			// cout << i << ", " << j << ", " << sm.nColumns() << endl;
+			int ret = sm.get( i, j );
+			ASSERT( ret == static_cast< int >( 10 * i + j ), "set/get" );
 		}
 	}
-	// cout << sm;
+	cout << sm;
 
 	vector< double > v( 5, 1.0 );
 	double dret = sm.computeRowRate( 0, v );
