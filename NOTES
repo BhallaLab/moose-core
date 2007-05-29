@@ -2839,4 +2839,8 @@ memory a lot and possibly speed too.
 Anyway, let's check this in before fooling around with SparseMatrix 
 optimizations.
 
+Checked in as revision 115.
+
+Now saved again, with compile flags set not to use GSL.
+
 =============================================================================
