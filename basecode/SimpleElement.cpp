@@ -315,10 +315,11 @@ unsigned int SimpleElement::insertConn(
 	assert( src + nSrc <= src_.size() );
 	assert( dest + nDest <= dest_.size() );
 	assert( nSrc + nDest > 0 );
+
 	unsigned int location;
 	if ( nSrc > 0 )
 			location = src_[ src ].end();
-	else if ( nDest > 0 )
+	else // if ( nDest > 0 ) is always true, given the above assertion.
 			location = dest_[ dest ].end();
 
 	conn_.insert( conn_.begin() + location, Conn() );

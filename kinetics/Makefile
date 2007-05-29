@@ -31,9 +31,9 @@ HEADERS = \
 # under the GPL, so only GPL-compliant uses of MOOSE will be able to
 # use it. Should be fine for academic use.
 # Optional: Comment out the following three items if not using GSL
-#GSL_OBJ = GslIntegrator.o
-#GSL_LIBS = -lgsl -lgslcblas
-#GSL_FLAGS = -DUSE_GSL
+GSL_OBJ = GslIntegrator.o
+GSL_LIBS = -lgsl -lgslcblas
+GSL_FLAGS = -DUSE_GSL
 
 
 default: $(TARGET)
@@ -44,13 +44,13 @@ Reaction.o:	Reaction.h ../basecode/Ftype2.h
 Enzyme.o:	Enzyme.h ../basecode/Ftype2.h
 SparseMatrix.o:	SparseMatrix.h
 KineticHub.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h
-Stoich.o:	RateTerm.h Stoich.h SparseMatrix.h
+Stoich.o:	RateTerm.h Stoich.h SparseMatrix.h Makefile
 Kintegrator.o:	Kintegrator.h
-TestKinetics.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h Stoich.h SparseMatrix.h
+TestKinetics.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h Stoich.h SparseMatrix.h Makefile
 
 #Optional: Comment out the following two items if not using GSL.
-# $(GSL_OBJ) : $(HEADERS)
-# GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h SparseMatrix.h
+$(GSL_OBJ) : $(HEADERS)
+GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h SparseMatrix.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) $(GSL_FLAGS) -I../basecode $< -c

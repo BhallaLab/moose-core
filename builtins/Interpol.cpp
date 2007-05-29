@@ -443,7 +443,8 @@ void testInterpol()
 
 	set< double >( i1, "lookup", 2.1 );
 	get< double >( i2, "xmin", ret );
-	ASSERT( ret == 5.0, "Lookup interpolation" );
+	ASSERT( fabs( ret - 5.0 ) < 1.0e-10, "Lookup interpolation" );
+	// ASSERT( ret == 5.0, "Lookup interpolation" );
 
 	set< double >( i1, "lookup", 10.0 );
 	get< double >( i2, "xmin", ret );

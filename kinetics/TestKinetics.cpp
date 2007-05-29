@@ -535,6 +535,8 @@ void testKintegrator()
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv.h>
 #include "GslIntegrator.h"
+#include <sys/time.h>
+#include <time.h>
 
 static const unsigned int NUM_COMPT = 21;
 void doGslRun( const string& method, Element* integ, Element* stoich,
@@ -624,6 +626,9 @@ void testGslIntegrator()
 	Conn ct( table, 0 );
 
 	cout << "\n";
+	struct timeval tv1;
+	struct timeval tv2;
+	gettimeofday( &tv1, 0 );
 	doGslRun( "rk2", integ, stoich, ct, m, 1.0e-6 );
 	doGslRun( "rk4", integ, stoich, ct, m, 1.0e-4 );
 	doGslRun( "rk5", integ, stoich, ct, m, 1.0e-6 );
@@ -633,6 +638,12 @@ void testGslIntegrator()
 	doGslRun( "rk4imp", integ, stoich, ct, m, 1.0e-4 );
 	doGslRun( "gear1", integ, stoich, ct, m, 1.0e-6 );
 	doGslRun( "gear2", integ, stoich, ct, m, 2.0e-4 );
+	gettimeofday( &tv2, 0 );
+	unsigned long time = tv2.tv_sec - tv1.tv_sec;
+	time *= 1000000;
+	time += tv2.tv_usec;
+	time -= tv1.tv_usec;
+	cout << "runtime (usec)= " << time << endl;
 	
 	set( table, "destroy" );
 	set( integ, "destroy" );
