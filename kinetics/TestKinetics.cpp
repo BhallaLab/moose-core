@@ -406,6 +406,7 @@ void testStoich()
 // solver.
 //////////////////////////////////////////////////////////////////
 
+static const double totalMols = 1.0;
 #include "Kintegrator.h"
 void testKintegrator()
 {
@@ -459,7 +460,6 @@ void testKintegrator()
 	// Buffer the end compartments to fixed values.
 	set < int >( m[0], "mode", 4 );
 	set < int >( m[ NUM_COMPT - 1 ], "mode", 4 );
-	static const double totalMols = 1.0;
 	set< double >( m[0], "nInit", totalMols );
 	set< double >( m[NUM_COMPT - 1], "nInit", 0.0 );
 
@@ -535,12 +535,14 @@ void testKintegrator()
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv.h>
 #include "GslIntegrator.h"
+
+static const unsigned int NUM_COMPT = 21;
+void doGslRun( const string& method, Element* integ, Element* stoich,
+	const Conn& ct, vector< Element* >& m, double accuracy );
+
 void testGslIntegrator()
 {
-	static const double EPSILON = 1.0e-4;
 	cout << "\nTesting GslIintegrator" << flush;
-	const unsigned int NUM_COMPT = 21;
-	const double RUNTIME = 500.0;
 
 	Element* n = Neutral::create( "Neutral", "n", Element::root() );
 	vector< Element* >m;
@@ -587,7 +589,6 @@ void testGslIntegrator()
 	// Buffer the end compartments to fixed values.
 	set < int >( m[0], "mode", 4 );
 	set < int >( m[ NUM_COMPT - 1 ], "mode", 4 );
-	static const double totalMols = 1.0;
 	set< double >( m[0], "nInit", totalMols );
 	set< double >( m[NUM_COMPT - 1], "nInit", 0.0 );
 
@@ -598,7 +599,6 @@ void testGslIntegrator()
 	Element* stoich = Neutral::create( "Stoich", "s", Element::root() );
 	Element* hub = Neutral::create( "KineticHub", "hub", Element::root() );
 	Element* integ = Neutral::create( "GslIntegrator", "integ", Element::root() );
-	Conn ci( integ, 0 );
 
 	ret = stoich->findFinfo( "hub" )->
 		add( stoich, hub, hub->findFinfo( "hub" ) );
@@ -622,10 +622,48 @@ void testGslIntegrator()
 	set< double >( table, "xmax", 10.0 );
 	set< double >( table, "output", 0.0 );
 	Conn ct( table, 0 );
+
+	cout << "\n";
+	doGslRun( "rk2", integ, stoich, ct, m, 1.0e-6 );
+	doGslRun( "rk4", integ, stoich, ct, m, 1.0e-4 );
+	doGslRun( "rk5", integ, stoich, ct, m, 1.0e-6 );
+	doGslRun( "rkck", integ, stoich, ct, m, 1.0e-8 );
+	doGslRun( "rk8pd", integ, stoich, ct, m, 1.0e-7 );
+	doGslRun( "rk2imp", integ, stoich, ct, m, 1.0e-6 );
+	doGslRun( "rk4imp", integ, stoich, ct, m, 1.0e-4 );
+	doGslRun( "gear1", integ, stoich, ct, m, 1.0e-6 );
+	doGslRun( "gear2", integ, stoich, ct, m, 2.0e-4 );
+	
+	set( table, "destroy" );
+	set( integ, "destroy" );
+	set( hub, "destroy" );
+	set( stoich, "destroy" );
+	set( n, "destroy" );
+}
+
+void doGslRun( const string& method, Element* integ, Element* stoich,
+	const Conn& ct, vector< Element* >& m, double accuracy )
+{
+	double EPSILON = accuracy * 50.0;
+	const double RUNTIME = 500.0;
+	Conn ci( integ, 0 );
 	ProcInfoBase p;
 	p.dt_ = 100.0; // Oddly, it isn't accurate given 500 sec to work with.
 	p.currTime_ = 0.0;
 
+	if ( method == "gear2") // This is for the dreadful Gear2.
+		EPSILON = 0.01;
+	if ( method == "rkck") // This is for the strange rkck, which does not
+		EPSILON = 1.0e-5;	// take long but doesn't meet its accuracy
+							// specs.
+	if ( method == "rk8pd") // Another case of accuracy not up to spec.
+		EPSILON = 1.0e-4;
+	
+
+	set< string >( integ, "method", method );
+	set< double >( integ, "relativeAccuracy", accuracy );
+	set< double >( integ, "absoluteAccuracy", accuracy );
+	cout << method << "." << flush;
 	GslIntegrator::reinitFunc( ci, &p );
 
 	for ( p.currTime_ = 0.0; p.currTime_ < RUNTIME; p.currTime_ += p.dt_ ) {
@@ -640,22 +678,13 @@ void testGslIntegrator()
 		tot += fabs( totalMols - ( val + dx * i ) );
 		// cout << val << "\n";
 	}
+	cout << "Err= " << tot << ",	accRequest= " << accuracy << ", ";
+	static_cast< Stoich* >( stoich->data() )->runStats();
 	// set< string >( table, "print", "kinteg.plot" );
 	ASSERT ( tot < EPSILON, "Diffusion between source and sink by GslIntegrator");
 
-	// Note that the order of the species in the matrix is 
-	// ill-defined because of the properties of the STL sort operation.
-	// So here we need to look up the order based on the mol_map
-	// Reac order has also been scrambled.
-	
-	// cout << s->N_;
-	
-	set( table, "destroy" );
-	set( integ, "destroy" );
-	set( hub, "destroy" );
-	set( stoich, "destroy" );
-	set( n, "destroy" );
 }
+
 #endif // USE_GSL
 
 #endif

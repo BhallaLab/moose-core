@@ -2809,4 +2809,34 @@ diffusion using rk5.
 For the purposes of the checkin, I have compiled it without the GSL flags,
 so as to preserve the plain vanilla version with minimal library dependencies.
 
+Checked in as revision 114
+
+=============================================================================
+29 May 2007
+Running through the various routines. Quite disappointing. Turns out that 
+rk4 is often a problem due to excessively small dt. It seems to be invoked
+within gear2 as well. Then, rk8pd gives too big an error. Surprisingly,
+rk5 is nice and quick. Perhaps I need to relax the relative accuracy
+criterion for the GSL...
+
+Gone through the whole set:
+
+rk2.Err=	3.24919e-07,	accRequest= 1e-06,	Copy:Call=   2455:4799
+rk4.Err=	7.16957e-09,	accRequest= 0.0001,	Copy:Call=  10621:31790
+rk5.Err=	5.49466e-06,	accRequest= 1e-06,	Copy:Call=   1131:3808
+rkck.Err=	3.4423e-06,	accRequest= 1e-08,	Copy:Call=   2757:9605
+rk8pd.Err=	7.513e-05,	accRequest= 1e-07,	Copy:Call=   2337:16310
+rk2imp.Err=	3.71797e-05,	accRequest= 1e-06,	Copy:Call=   8513:25481
+rk4imp.Err=	0.000347163,	accRequest= 0.0001,	Copy:Call= 105781:110877
+gear1.Err=	3.78904e-05,	accRequest= 1e-06,	Copy:Call=  14638:73190
+gear2.Err=	0.00025797,	accRequest= 0.0002,	Copy:Call=  75823:83406
+
+Clearly, RK5 handles this kind of problem the best. RK2 is surprisingly good
+too. RK2imp takes honours among the implicit methods. RK4 is surprisingly
+bad throughout. A bit of optimization in the SparseMatrix will help
+memory a lot and possibly speed too.
+
+Anyway, let's check this in before fooling around with SparseMatrix 
+optimizations.
+
 =============================================================================
