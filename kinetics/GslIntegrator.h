@@ -14,10 +14,18 @@ class GslIntegrator
 	public:
 		GslIntegrator();
 
+
+///////////////////////////////////////////////////
+// Field function definitions
+///////////////////////////////////////////////////
 		static bool getIsInitialized( const Element* e );
 		static string getMethod( const Element* e );
 		static void setMethod( const Conn& c, string method );
 		void innerSetMethod( const string& method );
+		static double getRelativeAccuracy( const Element* e );
+		static void setRelativeAccuracy( const Conn& c, double value );
+		static double getAbsoluteAccuracy( const Element* e );
+		static void setAbsoluteAccuracy( const Conn& c, double value );
 
 ///////////////////////////////////////////////////
 // Dest function definitions
