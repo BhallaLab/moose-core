@@ -13,11 +13,7 @@ class SparseMatrix
 	friend ostream& operator <<( ostream& s, SparseMatrix& sm );
 
 	public:
-		SparseMatrix()
-			: nrows_( 0 ), ncolumns_( 0 )
-		{
-			N_.resize( 16, 0 );
-		}
+		SparseMatrix();
 
 		SparseMatrix( unsigned int nrows, unsigned int ncolumns )
 		{
@@ -45,7 +41,16 @@ class SparseMatrix
 	private:
 		unsigned int nrows_;
 		unsigned int ncolumns_;
-		vector< int > N_;
+		vector< int > N_;	/// Non-zero entries in the SparseMatrix.
+
+		/* 
+		 * Column index of each non-zero entry. 
+		 * This matches up entry-by entry with the N_ vector.
+		 */
+		vector< unsigned int > colIndex_;	
+
+		/// Start index in the N_ and colIndex_ vectors, of each row.
+		vector< unsigned int > rowStart_;
 		static const unsigned int MAX_ROWS;
 		static const unsigned int MAX_COLUMNS;
 };
