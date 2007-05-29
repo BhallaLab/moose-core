@@ -61,6 +61,7 @@ class Stoich
 		double* S() {
 			return &S_[0];
 		}
+		void runStats();
 #endif // USE_GSL
 	private:
 		///////////////////////////////////////////////////
@@ -148,5 +149,6 @@ class Stoich
 		const double* lasty_;
 		unsigned int nVarMolsBytes_;
 		unsigned int nCopy_;
+		unsigned int nCall_;
 };
 #endif // _Stoich_h

@@ -52,6 +52,16 @@ const Cinfo* initGslIntegratorCinfo()
 			GFCAST( &GslIntegrator::getMethod ), 
 			RFCAST( &GslIntegrator::setMethod )
 		),
+		new ValueFinfo( "relativeAccuracy", 
+			ValueFtype1< double >::global(),
+			GFCAST( &GslIntegrator::getRelativeAccuracy ), 
+			RFCAST( &GslIntegrator::setRelativeAccuracy )
+		),
+		new ValueFinfo( "absoluteAccuracy", 
+			ValueFtype1< double >::global(),
+			GFCAST( &GslIntegrator::getAbsoluteAccuracy ), 
+			RFCAST( &GslIntegrator::setAbsoluteAccuracy )
+		),
 
 		///////////////////////////////////////////////////////
 		// DestFinfo definitions
@@ -99,9 +109,10 @@ GslIntegrator::GslIntegrator()
 	isInitialized_ = 0;
 	method_ = "rk5";
 	gslStepType_ = gsl_odeiv_step_rkf45;
+	gslStep_ = 0;
 	nVarMols_ = 0;
-	absAccuracy_ = 1e-6;
-	relAccuracy_ = 0.0;
+	absAccuracy_ = 1.0e-6;
+	relAccuracy_ = 1.0e-6;
 	internalStepSize_ = 1.0e-2;
 	y_ = 0;
 }
@@ -127,33 +138,54 @@ void GslIntegrator::setMethod( const Conn& c, string method )
 void GslIntegrator::innerSetMethod( const string& method )
 {
 	method_ = method;
-	cout << "in void GslIntegrator::innerSetMethod( string method ) \n";
-	if ( method == "rk2" )
+	gslStepType_ = 0;
+	// cout << "in void GslIntegrator::innerSetMethod( string method ) \n";
+	if ( method == "rk2" ) {
 		gslStepType_ = gsl_odeiv_step_rk2;
-	if ( method == "rk4" )
+	} else if ( method == "rk4" ) {
 		gslStepType_ = gsl_odeiv_step_rk4;
-	if ( method == "rk5" )
+	} else if ( method == "rk5" ) {
 		gslStepType_ = gsl_odeiv_step_rkf45;
-	if ( method == "rkck" )
+	} else if ( method == "rkck" ) {
 		gslStepType_ = gsl_odeiv_step_rkck;
-	if ( method == "rk8pd" )
+	} else if ( method == "rk8pd" ) {
 		gslStepType_ = gsl_odeiv_step_rk8pd;
-	if ( method == "rk2imp" )
+	} else if ( method == "rk2imp" ) {
 		gslStepType_ = gsl_odeiv_step_rk2imp;
-	if ( method == "rk4imp" )
+	} else if ( method == "rk4imp" ) {
 		gslStepType_ = gsl_odeiv_step_rk4imp;
-	if ( method == "bsimp" ) {
+	} else if ( method == "bsimp" ) {
 		gslStepType_ = gsl_odeiv_step_rk4imp;
 		cout << "Warning: implicit Bulirsch-Stoer method not yet implemented: needs Jacobian\n";
-	}
-	if ( method == "gear1" )
+	} else if ( method == "gear1" ) {
 		gslStepType_ = gsl_odeiv_step_gear1;
-	if ( method == "gear2" )
+	} else if ( method == "gear2" ) {
 		gslStepType_ = gsl_odeiv_step_gear2;
-
-	gsl_odeiv_step_alloc( gslStepType_, nVarMols_ );
+	} else {
+		cout << "Warning: GslIntegrator::innerSetMethod: method '" <<
+			method << "' not known, using rk5\n";
+		gslStepType_ = gsl_odeiv_step_rkf45;
+	}
 }
 
+
+double GslIntegrator::getRelativeAccuracy( const Element* e )
+{
+	return static_cast< const GslIntegrator* >( e->data() )->relAccuracy_;
+}
+void GslIntegrator::setRelativeAccuracy( const Conn& c, double value )
+{
+	static_cast< GslIntegrator* >( c.data() )->relAccuracy_ = value;
+}
+
+double GslIntegrator::getAbsoluteAccuracy( const Element* e )
+{
+	return static_cast< const GslIntegrator* >( e->data() )->absAccuracy_;
+}
+void GslIntegrator::setAbsoluteAccuracy( const Conn& c, double value )
+{
+	static_cast< GslIntegrator* >( c.data() )->absAccuracy_ = value;
+}
 
 ///////////////////////////////////////////////////
 // Dest function definitions
@@ -176,7 +208,11 @@ void GslIntegrator::assignStoichFuncLocal( void* stoich )
 	isInitialized_ = 1;
 
 	nVarMols_ = s->nVarMols();
+	if ( gslStep_ )
+		gsl_odeiv_step_free( gslStep_ );
+	assert( gslStepType_ != 0 );
 	gslStep_ = gsl_odeiv_step_alloc( gslStepType_, nVarMols_ );
+	assert( gslStep_ != 0 );
 	gslControl_ = gsl_odeiv_control_y_new( absAccuracy_, relAccuracy_ );
 	gslEvolve_ = gsl_odeiv_evolve_alloc( nVarMols_ );
 	gslSys_.function = &Stoich::gslFunc;
@@ -214,6 +250,9 @@ void GslIntegrator::innerProcessFunc( Element* e, ProcInfo info )
 
 void GslIntegrator::reinitFunc( const Conn& c, ProcInfo info )
 {
+	GslIntegrator* gi = static_cast< GslIntegrator* >( c.data() );
+	if ( gi->gslStep_ )
+		gsl_odeiv_step_reset( gi->gslStep_ );
 	send0( c.targetElement(), reinitSlot );
 	// y_[] = yprime_[]
 }
