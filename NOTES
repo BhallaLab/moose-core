@@ -2842,5 +2842,22 @@ optimizations.
 Checked in as revision 115.
 
 Now saved again, with compile flags set not to use GSL.
+Checked in as revision 116.
+
+Tried compiling with O3. Unit tests fail in a strGet call. When I patch around
+that with a -g compile for the basecode, it compiles. After a few fixes 
+in the unit tests it clears everything. I had intended to time the above
+numerical integration calculations to compare with a proposed rewrite of
+SparseMatrix, but the thing is too fast now for hand timing. Put in a
+gettimeofday call and it comes to about 1.62 sec (ave of N=3).
+
+Note that there are loads of spurious warnings with O3 about uninitialized
+variables, even though they are actually OK.
+
+Much messing around with SparseMatrix reimplementation. Now it works.
+Recompiled with the O3, and ran it... Hooray, nearly 2x speedup:
+0.88 sec (ave of N=3).
+
+Some more cleaning up of SparseMatrix pending, but good to check it in now.
 
 =============================================================================
