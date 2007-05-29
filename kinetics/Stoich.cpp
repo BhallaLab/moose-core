@@ -336,6 +336,7 @@ void Stoich::reinitFunc( const Conn& c )
 	send1< void* >( e, assignStoichSlot, e->data() );
 	s->lasty_ = 0;
 	s->nCopy_ = 0;
+	s->nCall_ = 0;
 }
 
 // static func
@@ -854,6 +855,7 @@ int Stoich::gslFunc( double t, const double* y, double* yprime, void* s )
 
 int Stoich::innerGslFunc( double t, const double* y, double* yprime )
 {
+	nCall_++;
 	if ( lasty_ != y ) { // should count to see how often this copy happens
 		// Copy the y array into the y_ vector.
 		memcpy( &S_[0], y, nVarMolsBytes_ );
@@ -867,5 +869,10 @@ int Stoich::innerGslFunc( double t, const double* y, double* yprime )
 		*yprime++ = N_.computeRowRate( i , v_ );
 	}
 	return GSL_SUCCESS;
+}
+
+void Stoich::runStats()
+{
+	cout << "Copy:Call=	" << nCopy_ << ":" << nCall_ << endl;
 }
 #endif // USE_GSL
