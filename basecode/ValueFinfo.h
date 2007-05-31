@@ -28,9 +28,7 @@ class ValueFinfo: public Finfo
 				const string& name,
 				const Ftype* f,
 				GetFunc get, RecvFunc set
-			)
-				: Finfo( name, f ), get_( get ), set_( set )
-			{;}
+			);
 
 			~ValueFinfo()
 			{;}
