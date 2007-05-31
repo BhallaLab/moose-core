@@ -12,6 +12,17 @@
 #include "ValueFinfo.h"
 #include "DynamicFinfo.h"
 
+ValueFinfo::ValueFinfo(
+				const string& name,
+				const Ftype* f,
+				GetFunc get, RecvFunc set
+)
+	: Finfo( name, f ), get_( get ), set_( set )
+{
+	// Save the function data.
+	getFunctionDataManager()->add( set, f );
+}
+
 /**
 * This operation requires the formation of a dynamic
 * Finfo to handle the messaging, as Value fields are

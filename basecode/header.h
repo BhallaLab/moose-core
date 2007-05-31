@@ -51,6 +51,7 @@ extern void* getParBuf( const Conn& c, unsigned int size );
 #include "RecvFunc.h"
 #include "Conn.h"
 #include "Ftype.h"
+#include "FunctionData.h"
 #include "Finfo.h"
 #include "Element.h"
 

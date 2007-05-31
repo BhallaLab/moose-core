@@ -12,6 +12,16 @@
 #include "MsgDest.h"
 #include "DestFinfo.h"
 
+DestFinfo::DestFinfo( const string& name, const Ftype *f, 
+							RecvFunc rfunc, unsigned int destIndex )
+	: Finfo( name, f ), 
+	rfunc_( rfunc ), 
+	destIndex_( destIndex )
+{
+	// Save the function data.
+	getFunctionDataManager()->add( rfunc, f );
+}
+
 /**
  * Check the request to form a message, and return true with 
  * the necessary information if all is well.

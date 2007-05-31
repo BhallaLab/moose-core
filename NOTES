@@ -2861,4 +2861,55 @@ Recompiled with the O3, and ran it... Hooray, nearly 2x speedup:
 Some more cleaning up of SparseMatrix pending, but good to check it in now.
 Checked in as revision 117.
 
+Rearranged Makefiles to keep it easy for other users to compile without
+GSL or optimization.
+Checked in as revision 118.
+
+Various levels of cleanup needed:
+	- Simundump should work for bigger and harder models
+	- Handle tables in kinetic sims
+	- Automatic solver creation for simdump files.
+	- Benchmark against old moose, esp for rk5.
+
+Next major steps:
+	- Parallelization
+
+
+=============================================================================
+31 May 2007.
+
+Looking at overall structure for parallelization.
+We have two kinds of data transfer:
+Synchronous: Every time step, exactly same data, same sequence.
+	Examples: Diffusion messages. Dendro-dendritic info.
+	Requires: 
+		- Call sequence matches conn sequence on remote node
+		- MsgDest vector entry for each func.
+		- Func/MsgDestIndex vector entry for each func
+			( We can't merge them because of bidirectional msgs)
+		- Some identification from ParTicks to the set of msgs to call.
+		- Individual msg entries for multiple targets: single fan-out.
+	Features: 
+		- Minimal data transfer
+		- Fast at the node level because func calls all grouped
+Asynchronous: Random times, random orders.
+	Examples: Synaptic info. Cross-node Shell commands.
+	Requires:
+		- MsgDest vector (also needed for bidirectionality)
+		- Global Func management
+		- Func id + msg index to be tranferred for each hunk of data.
+	Features:
+		- Arbitrary ordering, easy setup
+		- Multiple fan-out on remote node.
+
+Plan: Start with asynch. See how it works and design synch as needed.
+
+
+Started. Implemented FunctionData class, got it set up to record creation
+of functions used in ValueFinfo and DestFinfo.
+We will have problems for the old-style (deprecated) sharedFinfo usage of
+functions as those do not get initialized into the FunctionData.
+Turns out that there are currently about 150 functions used.
+I'll incrementally clean up.
+
 =============================================================================
