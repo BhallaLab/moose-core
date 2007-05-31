@@ -39,12 +39,14 @@ OBJ = \
 	setget.o \
 	strconv.o \
 	filecheck.o \
+	FunctionData.o \
 
 HEADERS = \
 	header.h \
 	Conn.h \
 	Element.h \
 	Ftype.h \
+	FunctionData.h \
 
 #	AssignFinfo.h
 #	ArrayFinfo.o \
@@ -72,6 +74,8 @@ SimpleElement.o:	SimpleElement.h MsgSrc.h MsgDest.h DeletionMarkerFinfo.h
 setget.o:		setget.h DerivedFtype.h
 strconv.o:		DerivedFtype.h
 filecheck.o: filecheck.h
+FunctionData.o:	FunctionData.h
+
 .cpp.o:
 	$(CXX) $(CFLAGS) $< -c
 
