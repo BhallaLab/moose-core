@@ -190,7 +190,7 @@ void testSparseMatrix()
 			ASSERT( ret == static_cast< int >( 10 * i + j ), "set/get" );
 		}
 	}
-	cout << sm;
+	// cout << sm;
 
 	vector< double > v( 5, 1.0 );
 	double dret = sm.computeRowRate( 0, v );
