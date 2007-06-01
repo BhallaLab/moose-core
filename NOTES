@@ -2912,4 +2912,26 @@ functions as those do not get initialized into the FunctionData.
 Turns out that there are currently about 150 functions used.
 I'll incrementally clean up.
 
+Checked in as revision 119.
+
+Started implementation with a simple extension of Element::element().
+If the looked up element is off-node, it returns a postmaster and 
+assigns the Id to a field in the postmaster for further processing.
+
+=============================================================================
+1 June 2007.
+
+Stage 1 of parallel message testing: Get one postmaster to send info
+to another. I have set up a dummy rawAddFunc in Shell, which will be 
+triggered by a message from the postmaster. For starters, just see
+if I can do this cross-node triggering step.
+Along the way I converted Shell to use the new form of Shared Messages.
+Seems OK.
+Set up automatic creation of message between Shell and PostMaster at 
+startup. This involved shuffling
+initialization code so that a Shell is created by default on all nodes.
+Earlier it was tied to creation of a GenesisParser. There will be implications
+for Subhasis to handle, because the Python parser also creates a shell.
+For general use I have compiled this without the parallel flags for checkin.
+
 =============================================================================

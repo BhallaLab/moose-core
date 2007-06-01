@@ -35,6 +35,13 @@ class Shell
 				unsigned int start, vector< string >& );
 		static string head( const string& path, const string& separator );
 		static string tail( const string& path, const string& separator );
+
+//////////////////////////////////////////////////////////////////////
+// Special low-level operations that Shell handles using raw
+// serialized strings from PostMaster.
+//////////////////////////////////////////////////////////////////////
+		static void rawAddFunc( const Conn& c, string s );
+		static void rawCopyFunc( const Conn& c, string s );
 ////////////////////////////////////////////////////////////////////
 // Local functions for implementing basic GENESIS/MOOSE command set.
 ////////////////////////////////////////////////////////////////////
