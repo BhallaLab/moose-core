@@ -8,7 +8,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "moose.h"
 
 const unsigned int BAD_ID = ~0;
 const unsigned int MIN_NODE = 1;
@@ -47,13 +47,20 @@ Element::~Element()
 }
 
 /**
- * Here we do nasty stuff to identify off-node elements and set up
- * the appropriate OffNodeElement data structure for it to use.
- * It is a static function.
+ * Here we work with a single big array of all ids. Off-node elements
+ * are represented by their postmasters. When we hit a postmaster we
+ * put the id into a special field on it. Note that this is horrendously
+ * thread-unsafe.
  */
 Element* Element::element( unsigned int id )
 {
 	if ( id < elementList().size() ) {
+		Element* ret = elementList()[ id ];
+		if ( ret == 0 )
+			return 0;
+		if ( ret->className() == "PostMaster" ) {
+			set< unsigned int >( ret, "targetId", id );
+		}
 		return elementList()[ id ];
 	}
 	return 0;

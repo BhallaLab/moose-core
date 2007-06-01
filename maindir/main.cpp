@@ -46,6 +46,8 @@ int main(int argc, char** argv)
 
 	Element* postmasters =
 			Neutral::create( "Neutral", "postmasters", Element::root());
+	vector< Element* > post;
+	post.reserve( totalnodes );
 	for ( unsigned int i = 0; i < totalnodes; i++ ) {
 		char name[10];
 		if ( i != mynode ) {
@@ -54,6 +56,7 @@ int main(int argc, char** argv)
 					"PostMaster", name, postmasters );
 			assert( p != 0 );
 			set< unsigned int >( p, "remoteNode", i );
+			post.push_back( p );
 		}
 	}
 	// Perhaps we will soon want to also connect up the clock ticks.
@@ -66,6 +69,19 @@ int main(int argc, char** argv)
 			Neutral::create( "ClockJob", "cj", sched );
 	// Element* t0 =
 			Neutral::create( "Tick", "t0", cj );
+	Element* shell =
+			Neutral::create( "Shell", "shell", Element::root() );
+
+#ifdef USE_MPI
+	const Finfo* serialFinfo = shell->findFinfo( "serial" );
+	assert( serialFinfo != 0 );
+	for ( vector< Element* >::iterator j = post.begin();
+		j != post.end(); j++ ) {
+		bool ret = serialFinfo->
+			add( shell, *j, (*j)->findFinfo( "serial" ) );
+		assert( ret );
+	}
+#endif
 
 #ifdef DO_UNIT_TESTS
 	testBasecode();

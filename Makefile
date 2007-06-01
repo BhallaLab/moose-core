@@ -63,7 +63,7 @@ LIBS = 		-lm
 #
 # If you do use mpicxx, comment out the version below.
 #
-CXX = g++
+#CXX = g++
 
 LD = ld
 
