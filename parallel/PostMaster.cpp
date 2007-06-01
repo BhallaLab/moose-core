@@ -30,7 +30,8 @@
 const Cinfo* initPostMasterCinfo()
 {
 	/**
-	 * This shared message communicates with the postmaster
+	 * This shared message communicates between the ParTick and 
+	 * the PostMaster
 	 */
 	static TypeFuncPair parTypes[] = 
 	{
@@ -49,6 +50,14 @@ const Cinfo* initPostMasterCinfo()
 		// The argument is the node number handled by the postmaster.
 		// It comes back when the polling on that postmaster is done.
 		TypeFuncPair( Ftype1< unsigned int >::global(), 0 )
+	};
+
+	static Finfo* serialShared[] =
+	{
+		new SrcFinfo( "rawAdd", // addmsg using serialized data.
+			Ftype1< string >::global() ),
+		new SrcFinfo( "rawCopy", // copy using serialized data.
+			Ftype1< string >::global() ),
 	};
 
 	static Finfo* postMasterFinfos[] = 
@@ -74,6 +83,8 @@ const Cinfo* initPostMasterCinfo()
 		),
 		new ParFinfo( "data" ),
 		new SharedFinfo( "parallel", parTypes, 4 ),
+		new SharedFinfo( "serial", serialShared, 
+			sizeof( serialShared ) / sizeof( Finfo* )),
 	};
 
 	static Cinfo postMasterCinfo(

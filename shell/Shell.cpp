@@ -25,60 +25,62 @@ const Cinfo* initShellCinfo()
 	 * This is a shared message to talk to the GenesisParser and
 	 * perhaps to other parsers like the one for SWIG and Python
 	 */
-	static TypeFuncPair parserTypes[] =
+	static Finfo* parserShared[] =
 	{
 		// Setting cwe
-		TypeFuncPair( Ftype1< unsigned int >::global(),
+		new DestFinfo( "cwe", Ftype1< unsigned int >::global(),
 						RFCAST( &Shell::setCwe ) ),
 		// Getting cwe back: First handle a request
-		TypeFuncPair( Ftype0::global(), 
+		new DestFinfo( "trigCwe", Ftype0::global(), 
 						RFCAST( &Shell::trigCwe ) ),
 		// Then send out the cwe info
-		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
+		new SrcFinfo( "cweSrc", Ftype1< unsigned int >::global() ),
 
 		// Getting a list of child ids: First handle a request with
 		// the requested parent elm id.
-		TypeFuncPair( Ftype1< unsigned int >::global(), 
+		new DestFinfo( "trigLe", Ftype1< unsigned int >::global(), 
 						RFCAST( &Shell::trigLe ) ),
 		// Then send out the vector of child ids.
-		TypeFuncPair( Ftype1< vector< unsigned int > >::global(), 0 ),
+		new SrcFinfo( "leSrc", Ftype1< vector< unsigned int > >::global() ),
 		
 		// Creating an object
-		TypeFuncPair( 
+		new DestFinfo( "create",
 				Ftype3< string, string, unsigned int >::global(),
 				RFCAST( &Shell::staticCreate ) ),
 		// The create func returns the id of the created object.
-		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
+		new SrcFinfo( "createSrc", Ftype1< unsigned int >::global() ),
 		// Deleting an object
-		TypeFuncPair( 
+		new DestFinfo( "delete",
 				Ftype1< unsigned int >::global(), 
 				RFCAST( &Shell::staticDestroy ) ),
 
 		// Getting a field value as a string: handling request
-		TypeFuncPair( 
+		new DestFinfo( "get",
 				Ftype2< unsigned int, string >::global(),
 				RFCAST( &Shell::getField ) ),
 		// Getting a field value as a string: Sending value back.
-		TypeFuncPair( Ftype1< string >::global(), 0 ),
+		new SrcFinfo( "getSrc", Ftype1< string >::global(), 0 ),
 
 		// Setting a field value as a string: handling request
-		TypeFuncPair( 
+		new DestFinfo( "set",
 				Ftype3< unsigned int, string, string >::global(),
 				RFCAST( &Shell::setField ) ),
 
 		// Handle requests for setting values for a clock tick.
 		// args are clockNo, dt, stage
-		TypeFuncPair( Ftype3< int, double, int >::global(),
+		new DestFinfo( "setClock",
+				Ftype3< int, double, int >::global(),
 				RFCAST( &Shell::setClock ) ),
 
 		// Handle requests to assign a path to a given clock tick.
 		// args are tick id, path, function
-		TypeFuncPair( 
+		new DestFinfo( "useClock",
 				Ftype3< unsigned int, vector< unsigned int >, string >::global(),
 				RFCAST( &Shell::useClock ) ),
 		
 		// Getting a wildcard path of elements: handling request
-		TypeFuncPair( // args are path, flag true for breadth-first list
+		new DestFinfo( // args are path, flag true for breadth-first list
+				"el",
 				Ftype2< string, bool >::global(),
 				RFCAST( &Shell::getWildcardList ) ),
 		// Getting a wildcard path of elements: Sending list back.
@@ -88,79 +90,106 @@ const Cinfo* initShellCinfo()
 		////////////////////////////////////////////////////////////
 		// Running simulation set
 		////////////////////////////////////////////////////////////
-		TypeFuncPair( Ftype0::global(), RFCAST( &Shell::resched ) ),
-		TypeFuncPair( Ftype0::global(), RFCAST( &Shell::reinit ) ),
-		TypeFuncPair( Ftype0::global(), RFCAST( &Shell::stop ) ),
-		TypeFuncPair( Ftype1< double >::global(), // Arg is runtime
-						RFCAST( &Shell::step ) ),
-		TypeFuncPair( Ftype0::global(), &Shell::requestClocks ),
+		new DestFinfo( "resched",
+				Ftype0::global(), RFCAST( &Shell::resched ) ),
+		new DestFinfo( "reinit",
+				Ftype0::global(), RFCAST( &Shell::reinit ) ),
+		new DestFinfo( "stop",
+				Ftype0::global(), RFCAST( &Shell::stop ) ),
+		new DestFinfo( "step",
+				Ftype1< double >::global(), // Arg is runtime
+				RFCAST( &Shell::step ) ),
+		new DestFinfo( "requestClocks",
+				Ftype0::global(), &Shell::requestClocks ),
 		// Sending back the list of clocks times
-		TypeFuncPair( Ftype1< vector< double > >::global(), 0 ),
+		new SrcFinfo( "returnClocksSrc",
+			Ftype1< vector< double > >::global() ),
 
 		////////////////////////////////////////////////////////////
 		// Message info functions
 		////////////////////////////////////////////////////////////
 		// Handle request for message list:
 		// id elm, string field, bool isIncoming
-		TypeFuncPair( Ftype3< unsigned int, string, bool >::global(),
-						RFCAST( &Shell::listMessages ) ),
+		new DestFinfo( "listMessages",
+				Ftype3< unsigned int, string, bool >::global(),
+				RFCAST( &Shell::listMessages ) ),
 		// Return message list and string with remote fields for msgs
-		TypeFuncPair( 
-			Ftype2< vector < unsigned int >, string >::global(), 0 ),
+		new SrcFinfo( "listMessagesSrc",
+			Ftype2< vector < unsigned int >, string >::global() ),
 
 		////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions
 		////////////////////////////////////////////////////////////
-		TypeFuncPair(
+		new DestFinfo( "copy",
 			Ftype3< unsigned int, unsigned int, string >::global(), 
 					RFCAST( &Shell::copy ) ),
-		TypeFuncPair(
+		new DestFinfo( "move",
 			Ftype3< unsigned int, unsigned int, string >::global(), 
 					RFCAST( &Shell::move ) ),
 		////////////////////////////////////////////////////////////
 		// Cell reader
 		////////////////////////////////////////////////////////////
-		TypeFuncPair(
+		new DestFinfo( "readcell",
 			Ftype2< string, string >::global(), 
 					RFCAST( &Shell::readCell ) ),
 		////////////////////////////////////////////////////////////
 		// Channel setup functions
 		////////////////////////////////////////////////////////////
-		TypeFuncPair(
+		new DestFinfo( "setupAlpha",
 			Ftype2< unsigned int, vector< double > >::global(), 
 					RFCAST( &Shell::setupAlpha ) ),
-		TypeFuncPair(
+		new DestFinfo( "setupTau",
 			Ftype2< unsigned int, vector< double > >::global(), 
 					RFCAST( &Shell::setupTau ) ),
-		TypeFuncPair(
+		new DestFinfo( "tweakAlpha",
 			Ftype1< unsigned int >::global(), 
 					RFCAST( &Shell::tweakAlpha ) ),
-		TypeFuncPair(
+		new DestFinfo( "tweakTau",
 			Ftype1< unsigned int >::global(), 
 					RFCAST( &Shell::tweakTau ) ),
 		////////////////////////////////////////////////////////////
 		// SimDump facility
 		////////////////////////////////////////////////////////////
-		TypeFuncPair(	// arg is filename
-			Ftype1< string >::global(), 
+		new DestFinfo(	"readDumpFile",
+			Ftype1< string >::global(), // arg is filename
 					RFCAST( &Shell::readDumpFile ) ),
-		TypeFuncPair(	// args are filename, path to dump
+		new DestFinfo(	"writeDumpFile",
+			// args are filename, path to dump
 			Ftype2< string, string >::global(), 
 					RFCAST( &Shell::writeDumpFile ) ),
-		TypeFuncPair(	// arg is a set of fields for the desired class
+		new DestFinfo(	"simObjDump",
+			// arg is a set of fields for the desired class
 			// The list of fields is a space-delimited list and 
 			// can be extracted using separateString.
 			Ftype1< string >::global(), RFCAST( &Shell::simObjDump ) ),
-		TypeFuncPair(	
+		new DestFinfo(	"simUndump",
 					// args is sequence of args for simundump command.
 			Ftype1< string >::global(), RFCAST( &Shell::simUndump ) ),
 		////////////////////////////////////////////////////////////
 		// field assignment for a vector of objects
 		////////////////////////////////////////////////////////////
 		// Setting a field value as a string: handling request
-		TypeFuncPair( 
+		new DestFinfo( "setVecField",
 				Ftype3< vector< unsigned int >, string, string >::global(),
 				RFCAST( &Shell::setVecField ) ),
+	};
+
+	/**
+	 * This handles serialized data, typically between nodes. The
+	 * arguments are a single long string. Takes care of low-level
+	 * operations such as message set up or the gory details of copies
+	 * across nodes.
+	 */
+	static Finfo* serialShared[] =
+	{
+		new DestFinfo( "rawAdd", // Addmsg as a raw string.
+			Ftype1< string >::global(),
+			RFCAST( &Shell::rawAddFunc )
+		),
+		new DestFinfo( "rawCopy", // Copy an entire object sent as a string
+			Ftype1< string >::global(),
+			RFCAST( &Shell::rawCopyFunc )
+		),
 	};
 
 	static Finfo* shellFinfos[] =
@@ -168,16 +197,10 @@ const Cinfo* initShellCinfo()
 		new ValueFinfo( "cwe", ValueFtype1< unsigned int >::global(),
 				reinterpret_cast< GetFunc >( &Shell::getCwe ),
 				RFCAST( &Shell::setCwe ) ),
-		new SharedFinfo( "parser", parserTypes, 
-				sizeof( parserTypes ) / sizeof( TypeFuncPair ) ), 
-		/*
-		new DestFinfo( "create",
-				Ftype3< string, string, unsigned int >::global(),
-				RFCAST( &Shell::staticCreate ) ),
-		new DestFinfo( "destroy",
-				Ftype1< unsigned int >::global(), 
-				RFCAST( &Shell::staticDestroy ) ),
-				*/
+		new SharedFinfo( "parser", parserShared, 
+				sizeof( parserShared ) / sizeof( Finfo* ) ), 
+		new SharedFinfo( "serial", serialShared,
+				sizeof( serialShared ) / sizeof( Finfo* ) ), 
 	};
 
 	static Cinfo shellCinfo(
@@ -194,20 +217,22 @@ const Cinfo* initShellCinfo()
 }
 
 static const Cinfo* shellCinfo = initShellCinfo();
+
+
 static const unsigned int cweSlot =
-	initShellCinfo()->getSlotIndex( "parser" ) + 0;
+	initShellCinfo()->getSlotIndex( "cweSrc" );
 static const unsigned int elistSlot =
-	initShellCinfo()->getSlotIndex( "parser" ) + 1;
+	initShellCinfo()->getSlotIndex( "leSrc" );
 
 // Returns the id of the created object
 static const unsigned int createSlot =
-	initShellCinfo()->getSlotIndex( "parser" ) + 2;
+	initShellCinfo()->getSlotIndex( "createSrc" );
 static const unsigned int getFieldSlot =
-	initShellCinfo()->getSlotIndex( "parser" ) + 3;
+	initShellCinfo()->getSlotIndex( "getSrc" );
 static const unsigned int clockSlot =
-	initShellCinfo()->getSlotIndex( "parser" ) + 4;
+	initShellCinfo()->getSlotIndex( "returnClocksSrc" );
 static const unsigned int listMessageSlot =
-	initShellCinfo()->getSlotIndex( "parser" ) + 5;
+	initShellCinfo()->getSlotIndex( "listMessagesSrc" );
 
 
 //////////////////////////////////////////////////////////////////////
@@ -365,6 +390,27 @@ string Shell::tail( const string& path, const string& separator )
 			return path;
 
 	return path.substr( pos + separator.length() );
+}
+
+//////////////////////////////////////////////////////////////////////
+// Special low-level operations that Shell handles using raw
+// serialized strings from PostMaster.
+//////////////////////////////////////////////////////////////////////
+
+void Shell::rawAddFunc( const Conn& c, string s )
+{
+	Element* post = c.sourceElement();
+	unsigned int mynode;
+	unsigned int remotenode;
+	get< unsigned int >( post, "localNode", mynode );
+	get< unsigned int >( post, "remoteNode", remotenode );
+	cout << "Shell::rawAddFunc( " << s << " ), on " << mynode <<
+		", from " << remotenode << "\n";
+}
+
+void Shell::rawCopyFunc( const Conn& c, string s )
+{
+	cout << "Shell::rawCopyFunc( " << s << " )\n";
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -2308,8 +2308,8 @@ Element* GenesisParserWrapper::getShell( Id g )
 }
 
 //////////////////////////////////////////////////////////////////
-// Utility function for creating a GenesisParserWrapper, shell and
-// connecting them all up.
+// Utility function for creating a GenesisParserWrapper, and 
+// connecting it up to the shell.
 //////////////////////////////////////////////////////////////////
 
 /**
@@ -2320,8 +2320,13 @@ Element* GenesisParserWrapper::getShell( Id g )
  */
 void makeGenesisParser( const string& s )
 {
-	set< string, string >( Element::root(), "create", "Shell", "shell");
-	Element* shell = Element::lastElement();
+	// set< string, string >( Element::root(), "create", "Shell", "shell");
+	// Element* shell = Element::lastElement();
+	unsigned int shellId;
+	lookupGet< unsigned int, string >( Element::root(), "lookupChild",
+		shellId, "shell" );
+	assert( shellId != BAD_ID );
+	Element* shell = Element::element( shellId );
 	set< string, string >( shell, "create", "GenesisParser", "sli");
 	Element* sli = Element::lastElement();
 
