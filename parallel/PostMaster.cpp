@@ -153,7 +153,7 @@ PostMaster::PostMaster()
 	inBuf_ = new char[ inBufSize_ ];
 	if ( incomingFunc_.size() == 0 ) {
 		incomingFunc_.push_back( lookupFunctionData( RFCAST( Neutral::childFunc ) )->index() );
-		incomingFunc_.push_back( lookupFunctionData( RFCAST( Shell::rawAddFunc ) )->index() );
+//		incomingFunc_.push_back( lookupFunctionData( RFCAST( Shell::rawAddFunc ) )->index() );
 		cout << "incoming func[0] = " << incomingFunc_[0] << endl;
 	}
 }
@@ -300,6 +300,10 @@ void PostMaster::parseMsgRequest( const char* req, Element* self )
 	// send back success report.
 }
 
+void PostMaster::addIncomingFunc( unsigned int index )
+{
+	incomingFunc_.push_back( index );
+}
 /////////////////////////////////////////////////////////////////////
 // This function does the main work of sending incoming messages
 // to dests.
@@ -358,25 +362,24 @@ void PostMaster::innerPoll( Element* e)
 		// async msgs.
 		const char* data = inBuf_;
 		while ( data < inBuf_ + dataSize ) {
-			cout << "1:"<<localNode_ << "," << remoteNode_ << endl << flush;
+			cout << "1:"<<localNode_ << "," << remoteNode_ << ", datapos = " << data - inBuf_ << endl << flush;
 			unsigned int msgId =  *static_cast< const unsigned int *>(
 				static_cast< const void* >( data ) );
 				// the funcVec_ has msgId entries matching each Conn
 			data += sizeof( unsigned int );
-			cout << "1.5:"<<localNode_ << "," << remoteNode_ <<
-				"msgid = " << msgId << endl << flush;
+			cout << "1.5:"<<localNode_ << "," << remoteNode_ << "msgid = " << msgId << endl << flush;
 			// Hack for testing: sometimes msgId comes in out of range.
-			if ( msgId > incomingFunc_.size() )
+			if ( msgId > incomingFunc_.size() ) {
+				cout << "PostMaster::innerPoll: Warning: incoming msgId too big: " << msgId << " > " << incomingFunc_.size() << endl;
 				break;
+			}
 			unsigned int funcId = incomingFunc_[ msgId ]; 
 			RecvFunc rf = lookupFunctionData( funcId )->func();
-			cout << "2:"<<localNode_ << "," << remoteNode_ << endl << flush;
 			IncomingFunc pf = 
 				lookupFunctionData( funcId )->funcType()->inFunc();
-			cout << "3:"<<localNode_ << "," << remoteNode_ << endl << flush;
 			data = static_cast< const char* >(
 				pf( *( e->lookupConn( msgId ) ), data, rf ) );
-			cout << "4:"<<localNode_ << "," << remoteNode_ << endl << flush;
+			cout << "4:"<<localNode_ << "," << remoteNode_ << ", datapos = " << data - inBuf_ << endl << flush;
 			assert (data != 0 );
 		}
 

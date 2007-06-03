@@ -28,7 +28,7 @@ template<> const void* unserialize< string >( string& s, const void* data )
 {
 	const char* temp = static_cast< const char* >( data );
 	s = temp;
-	return temp + 1;
+	return temp + s.length() + 1;
 }
 
 
