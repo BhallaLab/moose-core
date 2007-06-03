@@ -3072,6 +3072,19 @@ Now began trying to transfer some string data. Compiles but crashes on
 transfer.
 
 Now got data transfer to work. Moderately fiddly, much work yet to do to 
-generalize and clean up. Tested for 1, 2, 3 and 4 nodes.
+generalize and clean up. Tested for 1, 2, 3 and 4 nodes. A small step here
+but it finally sees us over a major hurdle.
+
+Checked in as revision 122.
+
+Solved problem with msgId overruns: The unserialize for strings was not
+advancing the pointer by the correct size of the string.
+
+Now onto the problem of setting up messages. I have simplified the test
+case so that we send a simple message from data to the shell for the rawAdd.
+Later I'll look into shared message targets.
+After various changes and updates to the ParFinfo, it works. I create
+a message from PostMaster::data to Shell::rawAdd, and I am able to send data
+to the shell from a remote node. Works for 2, 3 and 4 nodes.
 
 =============================================================================
