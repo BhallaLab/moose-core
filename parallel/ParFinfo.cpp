@@ -26,13 +26,9 @@ ParFinfo::ParFinfo( const string& name )
 /**
  * This adds a message from a postmaster to a destination object.
  * It is only called when a message is sent between nodes.
- * It fills up the MsgSrc slot and incomingFunc_ array starting
- * at msgIndex.
  */
 bool ParFinfo::add(
-	Element* e, Element* destElm, const Finfo* destFinfo,
-	unsigned int msgIndex
-	// This extra argument is the slot in which the msg goes.
+	Element* e, Element* destElm, const Finfo* destFinfo
 ) const
 {
 	FuncList srcFl;
@@ -55,13 +51,11 @@ bool ParFinfo::add(
 		unsigned int originatingConn;
 		unsigned int targetConn;
 
-		// First we decide where to put the originating Conn.
-		if ( destFl.size() == 0 ) {  // The msg'src' has only dests
-			originatingConn = e->insertConnOnDest( msgIndex_, 1);
-		} else { // The usual case: put it on MsgSrc.
-			originatingConn = 
-					e->insertConnOnSrc( msgIndex, destFl, 0, 0 );
-		}
+		// At this point we would normally check whether to put the 
+		// originating Conn on src_ or dest_. For ParFinfo we always
+		// put the originator on the same dest_ slot so as to match up
+		// with the incoming message sequence.
+		originatingConn = e->insertConnOnDest( msgIndex_, 1);
 
 		// Now the target Conn
 		if ( srcFl.size() == 0 ) { // Target has only dests.
@@ -76,12 +70,16 @@ bool ParFinfo::add(
 
 		// Now we put in the incomingFuncs to
 		// invoke the recvFuncs of the destination elements.
+		assert( destFl.size() > 0 );
+		const FunctionData* fd = lookupFunctionData( destFl[0] );
+		assert ( fd != 0 );
 
 		assert( e->className() == "PostMaster" );
 		PostMaster* post = static_cast< PostMaster* >( e->data() );
+		//equivalent to: incomingFunc_.push_back( fd->index() );
+		post->addIncomingFunc( fd->index() );
 		// vector< IncomingFunc > inFl;
 		// destFinfo->ftype()->appendIncomingFunc( inFl );
-		// post->placeIncomingFuncs( inFl, msgIndex );
 
 		return 1;
 	}
@@ -208,5 +206,6 @@ RecvFunc ParFinfo::recvFunc() const
 void ParFinfo::countMessages( 
 					unsigned int& srcNum, unsigned int& destNum )
 {
+		msgIndex_ = destNum++;
 		return;
 }

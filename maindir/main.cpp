@@ -96,15 +96,15 @@ int main(int argc, char** argv)
 	///////////////////////////////////////////////////////////////////
 	//	Here we connect up the postmasters to the shell and the ParTick.
 	///////////////////////////////////////////////////////////////////
-	const Finfo* serialFinfo = shell->findFinfo( "serial" );
+	const Finfo* serialFinfo = shell->findFinfo( "rawAdd" );
 	assert( serialFinfo != 0 );
 
 	const Finfo* tickFinfo = t0->findFinfo( "parTick" );
 	assert( tickFinfo != 0 );
 	for ( vector< Element* >::iterator j = post.begin();
 		j != post.end(); j++ ) {
-		bool ret = serialFinfo->
-			add( shell, *j, (*j)->findFinfo( "serial" ) );
+		// bool ret = serialFinfo->add( shell, *j, (*j)->findFinfo( "serial" ) );
+		bool ret = (*j)->findFinfo( "data" )->add( *j, shell, serialFinfo );
 		assert( ret );
 		ret = tickFinfo->add( t0, *j, (*j)->findFinfo( "parTick" ) );
 		assert( ret );
