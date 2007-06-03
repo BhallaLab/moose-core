@@ -26,7 +26,7 @@ enum FinfoIdentifier { VALUE_SET, VALUE_TRIG,
  * Index looks up the message slot (MsgSrc) to send from.
  */
 typedef const void* ( *IncomingFunc )( 
-			const Element* e, const void* data, unsigned int index );
+			const Conn& c, const void* data, RecvFunc rf );
 
 /**
  * Virtual base class for typing information. 
@@ -167,12 +167,11 @@ class Ftype
 			/**
 			 * This returns the IncomingFunc from the specific
 			 * Ftype. The job of the IncomingFunc is to
-			 * Munch through serial data stream to send data to
+			 * munch through serial data stream to send data to
 			 * destination objects. This function is called from 
 			 * PostMaster on target node.
 			 */
-			virtual void 
-				appendIncomingFunc( vector <IncomingFunc >& ) const = 0;
+			virtual IncomingFunc inFunc() const = 0;
 
 			/**
 			 * This returns a suitably typecast RecvFunc for handling
@@ -182,9 +181,19 @@ class Ftype
 			 * 'getParbuf' that returns the current location in
 			 * the postmaster outBuf, and then to copy
 			 * the arguments of the recvFunc into this buffer.
+			 * The syncFunc stores only value data in the buffer, and
+			 * requires that the data sequence is identical every timestep.
 			 */
-			virtual void 
-				appendOutgoingFunc( vector < RecvFunc >& ) const = 0;
+			virtual RecvFunc syncFunc() const = 0;
+			/**
+			 * The asyncFunc is similar to the syncFunc, but it is for
+			 * data that is transmitted sporadically such as action
+			 * potentials and cross-node shell calls. It stores
+			 * both the value data and the conn index in the buffer.
+			 * The target node figures out which target object to call
+			 * using the conn index.
+			 */
+			virtual RecvFunc asyncFunc() const = 0;
 
 			/**
 			 * This is used for making messages from postmasters to

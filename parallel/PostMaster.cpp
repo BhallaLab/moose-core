@@ -33,6 +33,26 @@ const Cinfo* initPostMasterCinfo()
 	 * This shared message communicates between the ParTick and 
 	 * the PostMaster
 	 */
+	static Finfo* parShared[] = 
+	{
+		// This first entry is to tell the PostMaster to post iRecvs
+		// The argument is the ordinal number of the clock tick
+		new DestFinfo( "postIrecv",
+			Ftype1< int >::global(), RFCAST( &PostMaster::postIrecv ) ),
+		// The second entry is to tell the PostMaster to post 'send'
+		new DestFinfo( "postSend",
+			Ftype1< int >::global(), RFCAST( &PostMaster::postSend ) ),
+		// The third entry is for polling the receipt of incoming data.
+		// Each PostMaster does an MPI_Test on the earlier posted iRecv.
+		new DestFinfo( "poll",
+			Ftype1< int >::global(), RFCAST( &PostMaster::poll ) ),
+		// The fourth entry is for harvesting the poll request.
+		// The argument is the node number handled by the postmaster.
+		// It comes back when the polling on that postmaster is done.
+		new SrcFinfo( "harvestPoll", Ftype1< unsigned int >::global() )
+	};
+
+	/*
 	static TypeFuncPair parTypes[] = 
 	{
 		// This first entry is to tell the PostMaster to post iRecvs
@@ -51,6 +71,7 @@ const Cinfo* initPostMasterCinfo()
 		// It comes back when the polling on that postmaster is done.
 		TypeFuncPair( Ftype1< unsigned int >::global(), 0 )
 	};
+	*/
 
 	static Finfo* serialShared[] =
 	{
@@ -81,10 +102,18 @@ const Cinfo* initPostMasterCinfo()
 					GFCAST( &PostMaster::getTargetField ),
 					RFCAST( &PostMaster::setTargetField )
 		),
+		////////////////////////////////////////////////////////////////
+		//	Special Finfo for the postmaster for handling serialization.
+		////////////////////////////////////////////////////////////////
 		new ParFinfo( "data" ),
-		new SharedFinfo( "parallel", parTypes, 4 ),
+
+		////////////////////////////////////////////////////////////////
+		//	Shared messages.
+		////////////////////////////////////////////////////////////////
+		new SharedFinfo( "parTick", parShared, 
+			sizeof( parShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "serial", serialShared, 
-			sizeof( serialShared ) / sizeof( Finfo* )),
+			sizeof( serialShared ) / sizeof( Finfo* ) ),
 	};
 
 	static Cinfo postMasterCinfo(
@@ -103,7 +132,7 @@ const Cinfo* initPostMasterCinfo()
 static const Cinfo* postMasterCinfo = initPostMasterCinfo();
 
 static const unsigned int pollSlot = 
-	initPostMasterCinfo()->getSlotIndex( "parallel" ) + 0;
+	initPostMasterCinfo()->getSlotIndex( "harvestPoll" );
 
 //////////////////////////////////////////////////////////////////
 // Here we put the PostMaster class functions.
@@ -173,13 +202,32 @@ const char* ftype2str( const Ftype *f )
 // Utility function for accessing postmaster data buffer.
 /////////////////////////////////////////////////////////////////////
 /**
+ * This function just passes the next free location over to the calling 
+ * function. It does not store the targetIndex.
+ * It internally increments the current location of the buffer.
+ * If we don't use MPI, then this whole file is unlikely to be compiled.
+ * So we define the dummy version of the function in DerivedFtype.cpp.
+ */
+void* PostMaster::innerGetParBuf( 
+				unsigned int targetIndex, unsigned int size )
+{
+	if ( size + outBufPos_ > outBufSize_ ) {
+		cout << "in getParBuf: Out of space in outBuf.\n";
+		// Do something clever here to send another installment
+		return 0;
+	}
+	outBufPos_ += size;
+	return static_cast< void* >( outBuf_ + outBufPos_ - size );
+}
+
+/**
  * This function puts in the id of the message into the data buffer
  * and passes the next free location over to the calling function.
  * It internally increments the current location of the buffer.
  * If we don't use MPI, then this whole file is unlikely to be compiled.
  * So we define the dummy version of the function in DerivedFtype.cpp.
  */
-void* PostMaster::innerGetParBuf( 
+void* PostMaster::innerGetAsyncParBuf( 
 				unsigned int targetIndex, unsigned int size )
 {
 	if ( size + outBufPos_ > outBufSize_ ) {
@@ -247,6 +295,7 @@ void PostMaster::parseMsgRequest( const char* req, Element* self )
  */
 void PostMaster::innerPostIrecv()
 {
+	cout << "!" << flush;
 	request_ = comm_->Irecv(
 			inBuf_, inBufSize_, MPI_CHAR, remoteNode_, DATA_TAG );
 	donePoll_ = 0;
@@ -266,6 +315,7 @@ void PostMaster::postIrecv( const Conn& c, int ordinal )
 void PostMaster::innerPoll( Element* e)
 {
 	// Look up the irecv'ed data here
+	// cout << "inner Poll\n" << flush;
 	if ( donePoll_ )
 			return;
 	if ( !request_ ) {
@@ -278,18 +328,25 @@ void PostMaster::innerPoll( Element* e)
 		unsigned int dataSize = status_.Get_count( MPI_CHAR );
 		request_ = 0;
 		if ( dataSize < sizeof( unsigned int ) ) return;
+
+		// Handle async data in the buffer
 		unsigned int nMsgs = *static_cast< unsigned int *>(
 						static_cast< void* >( inBuf_ ) );
 		const char* data = inBuf_ + sizeof( unsigned int );
+
 		for ( unsigned int i = 0; i < nMsgs; i++ ) {
-			unsigned int msgId = *static_cast< const unsigned int *>(
-						static_cast< const void* >( data ) );
-			data = static_cast< const char* >( 
-							incomingFunc_[ msgId ]( 
-							e, data + sizeof( unsigned int ), msgId )
-						);
+			unsigned int msgId =  *static_cast< const unsigned int *>(
+				static_cast< const void* >( data ) );
+				// the funcVec_ has msgId entries matching each Conn
+			unsigned int funcId = incomingFunc_[msgId]; 
+			RecvFunc rf = lookupFunctionData( funcId )->func();
+			IncomingFunc pf = 
+				lookupFunctionData( funcId )->funcType()->inFunc();
+			data = static_cast< const char* >(
+				pf( *( e->lookupConn( msgId ) ), data, rf ) );
 			assert (data != 0 );
 		}
+
 		send1< unsigned int >( e, pollSlot, remoteNode_ );
 		donePoll_ = 1;
 	}
@@ -309,6 +366,7 @@ void PostMaster::poll( const Conn& c, int ordinal )
 void PostMaster::innerPostSend( )
 {
 	// send out the filled buffer here to the other nodes..
+	cout << "*" << flush;
 	comm_->Send(
 			outBuf_, outBufPos_, MPI_CHAR, remoteNode_, DATA_TAG
 	);
@@ -360,6 +418,13 @@ void* getParBuf( const Conn& c, unsigned int size )
 	return pm->innerGetParBuf( c.targetIndex(), size );
 }
 
+void* getAsyncParBuf( const Conn& c, unsigned int size )
+{
+	PostMaster* pm = static_cast< PostMaster* >( c.data() );
+	assert( pm != 0 );
+	return pm->innerGetAsyncParBuf( c.targetIndex(), size );
+}
+
 /////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
@@ -368,6 +433,7 @@ void* getParBuf( const Conn& c, unsigned int size )
 #include "setget.h"
 #include "../builtins/Interpol.h"
 #include "../builtins/Table.h"
+#include "../shell/Shell.h"
 
 void testPostMaster()
 {
@@ -462,6 +528,15 @@ void testPostMaster()
 				ftype2str( ValueFtype1< Table >::global() );
 				*/
 	set( table, "destroy" );
+
+	////////////////////////////////////////////////////////////////
+	// Now we fire up the scheduler on all nodes to keep info flowing.
+	////////////////////////////////////////////////////////////////
+	MPI::COMM_WORLD.Barrier();
+	unsigned int cjId = Shell::path2eid( "/sched/cj", "/" );
+	assert( cjId != BAD_ID );
+	Element* cj = Element::element( cjId );
+	set< double >( cj, "start", 1.0 );
 }
 #endif
 
