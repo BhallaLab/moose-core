@@ -14,6 +14,8 @@
 #include "ParFinfo.h"
 #include <sstream>
 #include <typeinfo>
+#include "../element/Neutral.h" // Possibly only need this for testing.
+#include "../shell/Shell.h" // Possibly only need this for testing.
 
 #define DATA_TAG 0
 
@@ -133,6 +135,10 @@ static const Cinfo* postMasterCinfo = initPostMasterCinfo();
 
 static const unsigned int pollSlot = 
 	initPostMasterCinfo()->getSlotIndex( "harvestPoll" );
+static const unsigned int addSlot = 
+	initPostMasterCinfo()->getSlotIndex( "rawAdd" );
+static const unsigned int copySlot = 
+	initPostMasterCinfo()->getSlotIndex( "rawCopy" );
 
 //////////////////////////////////////////////////////////////////
 // Here we put the PostMaster class functions.
@@ -141,6 +147,15 @@ PostMaster::PostMaster()
 	: remoteNode_( 0 ), donePoll_( 0 ), comm_( &MPI::COMM_WORLD )
 {
 	localNode_ = MPI::COMM_WORLD.Get_rank();
+	outBufSize_ = 10000;
+	outBuf_ = new char[ outBufSize_ ];
+	inBufSize_ = 10000;
+	inBuf_ = new char[ inBufSize_ ];
+	if ( incomingFunc_.size() == 0 ) {
+		incomingFunc_.push_back( lookupFunctionData( RFCAST( Neutral::childFunc ) )->index() );
+		incomingFunc_.push_back( lookupFunctionData( RFCAST( Shell::rawAddFunc ) )->index() );
+		cout << "incoming func[0] = " << incomingFunc_[0] << endl;
+	}
 }
 
 //////////////////////////////////////////////////////////////////
@@ -326,24 +341,42 @@ void PostMaster::innerPoll( Element* e)
 	if ( request_.Test( status_ ) ) {
 		// Data has arrived. How big was it?
 		unsigned int dataSize = status_.Get_count( MPI_CHAR );
+		cout << dataSize << " bytes of data arrived on " << 
+			localNode_ << " from " << remoteNode_ << endl << flush;
 		request_ = 0;
 		if ( dataSize < sizeof( unsigned int ) ) return;
 
 		// Handle async data in the buffer
+		/*
 		unsigned int nMsgs = *static_cast< unsigned int *>(
 						static_cast< void* >( inBuf_ ) );
 		const char* data = inBuf_ + sizeof( unsigned int );
-
 		for ( unsigned int i = 0; i < nMsgs; i++ ) {
+		}
+		*/
+		// Here we skip the location for the msgId, so this is only for
+		// async msgs.
+		const char* data = inBuf_;
+		while ( data < inBuf_ + dataSize ) {
+			cout << "1:"<<localNode_ << "," << remoteNode_ << endl << flush;
 			unsigned int msgId =  *static_cast< const unsigned int *>(
 				static_cast< const void* >( data ) );
 				// the funcVec_ has msgId entries matching each Conn
-			unsigned int funcId = incomingFunc_[msgId]; 
+			data += sizeof( unsigned int );
+			cout << "1.5:"<<localNode_ << "," << remoteNode_ <<
+				"msgid = " << msgId << endl << flush;
+			// Hack for testing: sometimes msgId comes in out of range.
+			if ( msgId > incomingFunc_.size() )
+				break;
+			unsigned int funcId = incomingFunc_[ msgId ]; 
 			RecvFunc rf = lookupFunctionData( funcId )->func();
+			cout << "2:"<<localNode_ << "," << remoteNode_ << endl << flush;
 			IncomingFunc pf = 
 				lookupFunctionData( funcId )->funcType()->inFunc();
+			cout << "3:"<<localNode_ << "," << remoteNode_ << endl << flush;
 			data = static_cast< const char* >(
 				pf( *( e->lookupConn( msgId ) ), data, rf ) );
+			cout << "4:"<<localNode_ << "," << remoteNode_ << endl << flush;
 			assert (data != 0 );
 		}
 
@@ -367,6 +400,8 @@ void PostMaster::innerPostSend( )
 {
 	// send out the filled buffer here to the other nodes..
 	cout << "*" << flush;
+	cout << "sending " << outBufPos_ << " bytes: " << 
+		outBuf_ << endl << flush;
 	comm_->Send(
 			outBuf_, outBufPos_, MPI_CHAR, remoteNode_, DATA_TAG
 	);
@@ -493,6 +528,7 @@ void testPostMaster()
 	}
 
 	Element* post;
+	unsigned int i;
 	if ( numNodes == 1 ) { // Create a dummy postmaster
 		post = Neutral::create( "PostMaster", "node1", pms );
 		numNodes = 2;
@@ -504,8 +540,8 @@ void testPostMaster()
 	if ( myNode == 0 ) {
 		// Here we are being sneaky because we have the same id on all 
 		// nodes.
-		for ( unsigned int i = 1; i < numNodes; i++ ) {
-			Element* post = Element::element( postId[i] );
+		for ( i = 1; i < numNodes; i++ ) {
+			post = Element::element( postId[i] );
 			set< unsigned int >( post, "targetId", table->id() );
 			set< string >( post, "targetField", "input" );
 			const Finfo* outFinfo = table->findFinfo( "outputSrc" );
@@ -536,6 +572,25 @@ void testPostMaster()
 	unsigned int cjId = Shell::path2eid( "/sched/cj", "/" );
 	assert( cjId != BAD_ID );
 	Element* cj = Element::element( cjId );
+	set< double >( cj, "start", 1.0 );
+	char sendstr[50];
+	for ( i = 0; i < numNodes; i++ ) {
+		if ( i == myNode )
+			continue;
+		post = Element::element( postId[i] );
+		PostMaster* pdata = static_cast< PostMaster* >( post->data() );
+		sprintf( sendstr, "My name is Michael Caine %d,%d", myNode, i );
+
+		// Find the Conn# of the message to the shell. Assume same
+		// index is used on all nodes.
+		unsigned int shellIndex = post->connSrcBegin( addSlot ) - 
+			post->lookupConn( 0 );
+		cout << "shellIndex = " << shellIndex << ", sendstr = " << sendstr << endl << flush;
+		char* buf = static_cast< char* >(
+			pdata->innerGetAsyncParBuf( shellIndex, strlen( sendstr ) + 1 )
+		);
+		strcpy( buf, sendstr );
+	}
 	set< double >( cj, "start", 1.0 );
 }
 #endif
