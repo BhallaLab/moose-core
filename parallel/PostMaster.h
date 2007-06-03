@@ -29,6 +29,10 @@ class PostMaster
 		static void setTargetId( const Conn& c, unsigned int value );
 		static string getTargetField( const Element* e );
 		static void setTargetField( const Conn& c, string value );
+
+		//////////////////////////////////////////////////////////////
+		// Transmit/receive Data buffer handling functions.
+		//////////////////////////////////////////////////////////////
 		void* innerGetParBuf( unsigned int targetIndex,
 						unsigned int size );
 		void* innerGetAsyncParBuf(
