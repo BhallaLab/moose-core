@@ -31,14 +31,6 @@ class ParFinfo: public Finfo
 
 			bool add(
 					Element* e, Element* destElm, const Finfo* destFinfo
-			) const
-			{
-					return 0;
-			}
-
-			bool add(
-					Element* e, Element* destElm, 
-					const Finfo* destFinfo, unsigned int msgIndex 
 			) const;
 
 			bool respondToAdd(

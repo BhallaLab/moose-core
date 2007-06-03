@@ -50,6 +50,7 @@ class PostMaster
 		static void postSend( const Conn& c, int ordinal );
 		void innerPostSend( );
 
+		void addIncomingFunc( unsigned int );
 		// This static function handles response to an addmsg request,
 		// including operations on the element portion of the postmaster
 		// and tranmitting info to the remote node.
