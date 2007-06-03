@@ -3066,5 +3066,12 @@ of space used by MsgSrc.
 
 Implemented all this. Many changes to Ftypes. Compiles. Now to start on tests.
 Passes old unit tests. Yet to start testing data transfer.
+Checked in as revision 121.
+
+Now began trying to transfer some string data. Compiles but crashes on 
+transfer.
+
+Now got data transfer to work. Moderately fiddly, much work yet to do to 
+generalize and clean up. Tested for 1, 2, 3 and 4 nodes.
 
 =============================================================================
