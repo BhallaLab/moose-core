@@ -83,42 +83,71 @@ virtual std::string getTemplateParameters() const
 			// Here we define the functions for handling 
 			// messages of this type for parallel messaging.
 			///////////////////////////////////////////////////////
+			/**
+			 * This function extracts the value for this field from
+			 * the data, and executes the function call for its
+			 * target Conn. It returns the data pointer set to the
+			 * next field.
+			 */
 			static const void* incomingFunc(
-				const Element* e, const void* data, unsigned int index )
+				const Conn& c, const void* data, RecvFunc rf )
 			{
 				T1 v1;
 				T2 v2;
 				T3 v3;
 				data = unserialize< T1 >( v1, data );
-				// data += serialSize< T1 >( v1 );
 				data = unserialize< T2 >( v2, data );
-				// data += serialSize< T2 >( v2 );
 				data = unserialize< T3 >( v3, data );
-				// data += serialSize< T3 >( v3 );
-				send3< T1, T2, T3 >( e, index, v1, v2, v3 );
+				( reinterpret_cast< 
+					void (*)( const Conn& c, T1, T2, T3 ) 
+				> ( rf ) )( c, v1, v2, v3 );
 				return data;
 			}
-			
-			void appendIncomingFunc( vector< IncomingFunc >& vec )
-					const {
-				vec.push_back( &incomingFunc );
-			}
 
-			static void outgoingFunc( const Conn& c, 
-							T1 v1, T2 v2, T3 v3 ) {
-				// here the getParBuf just sticks in the id of the 
-				// message. No data is sent.
+			/**
+			 * This function inserts data into the outgoing buffer.
+			 * This variant is used when the data is synchronous: sent
+			 * every clock step, so that the sequence is fixed.
+			 */
+			static void outgoingSync( const Conn& c, T1 v1, T2 v2, T3 v3 ) {
 				unsigned int size1 = serialSize< T1 >( v1 );
 				unsigned int size2 = serialSize< T2 >( v2 );
 				unsigned int size3 = serialSize< T3 >( v3 );
-				void* data = getParBuf( c, size1 + size2 +size3 ); 
+				void* data = getParBuf( c, size1 + size2 + size3 ); 
 				data = serialize< T1 >( data, v1 );
 				data = serialize< T2 >( data, v2 );
 				serialize< T3 >( data, v3 );
 			}
 
-			void appendOutgoingFunc( vector< RecvFunc >& vec ) const {
-				vec.push_back( RFCAST( &outgoingFunc ) );
+			/**
+			 * This variant is used for asynchronous data, where data
+			 * is sent in at unpredictable stages of the simulation. It
+			 * therefore adds additional data to identify the message
+			 * source
+			 */
+			static void outgoingAsync( const Conn& c, T1 v1, T2 v2, T3 v3 ){
+				unsigned int size1 = serialSize< T1 >( v1 );
+				unsigned int size2 = serialSize< T2 >( v2 );
+				unsigned int size3 = serialSize< T3 >( v3 );
+				void* data = getAsyncParBuf( c, size1 + size2 + size3 ); 
+				data = serialize< T1 >( data, v1 );
+				data = serialize< T2 >( data, v2 );
+				serialize< T3 >( data, v3 );
+			}
+
+			/// Returns the statically defined incoming func
+			IncomingFunc inFunc() const {
+				return this->incomingFunc;
+			}
+
+			/// Returns the statically defined outgoingSync function
+			RecvFunc syncFunc() const {
+				return RFCAST( this->outgoingSync );
+			}
+
+			/// Returns the statically defined outgoingAsync function
+			RecvFunc asyncFunc() const {
+				return RFCAST( this->outgoingAsync );
 			}
 };
 

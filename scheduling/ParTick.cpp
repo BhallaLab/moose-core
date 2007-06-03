@@ -115,7 +115,8 @@ const Cinfo* initParTickCinfo()
 	// Shared message definitions
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "outgoingProcess", processTypes, 2 ),
-		new SharedFinfo( "parallel", parTypes, 4 ),
+		new SharedFinfo( "parTick", parTypes, 
+			sizeof( parTypes ) / sizeof( TypeFuncPair ) ),
 	
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -153,21 +154,21 @@ const Cinfo* initParTickCinfo()
 static const Cinfo* parTickCinfo = initParTickCinfo();
 
 static const unsigned int processSlot = 
-	initTickCinfo()->getSlotIndex( "process" ) + 0;
+	initParTickCinfo()->getSlotIndex( "process" ) + 0;
 static const unsigned int reinitSlot = 
-	initTickCinfo()->getSlotIndex( "process" ) + 1;
+	initParTickCinfo()->getSlotIndex( "process" ) + 1;
 
 static const unsigned int outgoingProcessSlot = 
-	initTickCinfo()->getSlotIndex( "outgoingProcess" ) + 0;
+	initParTickCinfo()->getSlotIndex( "outgoingProcess" ) + 0;
 static const unsigned int outgoingReinitSlot = 
-	initTickCinfo()->getSlotIndex( "outgoingProcess" ) + 1;
+	initParTickCinfo()->getSlotIndex( "outgoingProcess" ) + 1;
 
 static const unsigned int iRecvSlot = 
-	initTickCinfo()->getSlotIndex( "parallel" ) + 0;
+	initParTickCinfo()->getSlotIndex( "parTick" ) + 0;
 static const unsigned int sendSlot = 
-	initTickCinfo()->getSlotIndex( "parallel" ) + 1;
+	initParTickCinfo()->getSlotIndex( "parTick" ) + 1;
 static const unsigned int pollSlot = 
-	initTickCinfo()->getSlotIndex( "parallel" ) + 2;
+	initParTickCinfo()->getSlotIndex( "parTick" ) + 2;
 
 ///////////////////////////////////////////////////
 // Field function definitions
@@ -193,7 +194,7 @@ void ParTick::innerPollFunc( unsigned int node )
 
 bool ParTick::pendingData() const
 {
-	return ( pendingCount_ == 0 );
+	return ( pendingCount_ != 0 );
 }
 
 /**
@@ -223,16 +224,19 @@ void ParTick::innerProcessFunc( Element* e, ProcInfo info )
 	send1< ProcInfo >( e, processSlot, info );
 	// Phase 4: Poll for arrival of all data
 	initPending( e );
-	while( pendingData() )
+	while( pendingData() ) {
+		// cout << "." << flush;
 		send1< int >( e, pollSlot, ordinal() );
+	}
 }
 
 void ParTick::initPending( Element* e )
 {
-	static const Finfo* parFinfo = e->findFinfo( "parallel" );
-	pendingCount_ = parFinfo->numIncoming( e );
-	pendingNodes_.resize( pendingCount_ );
-	pendingNodes_.assign( pendingCount_, 1);
+	static const Finfo* parFinfo = e->findFinfo( "parTick" );
+	pendingCount_ = parFinfo->numOutgoing( e );
+	cout << "pendingCount = " << pendingCount_ << endl;
+	pendingNodes_.resize( pendingCount_ + 1 );
+	pendingNodes_.assign( pendingCount_ + 1, 1);
 }
 
 /**

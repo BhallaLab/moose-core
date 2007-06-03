@@ -2934,4 +2934,137 @@ Earlier it was tied to creation of a GenesisParser. There will be implications
 for Subhasis to handle, because the Python parser also creates a shell.
 For general use I have compiled this without the parallel flags for checkin.
 
+Checked in as revision 120.
+
+Starting to run with ParTick talking to the PostMaster. Turns out that
+I do need pretty continuous polling if the nodes are to keep up with each
+other, even when no work is going on. Will need to work out a way to
+throttle this on idle.
+
+Currently the message to ask for polling doesn't seem to work.
+
+Why are there 19 MsgSrcs on the ParTick? The pollSlot, which is the one we 
+want, should have a slot of 14. Most of these are blank - much work to do
+there.
+
+Aaargh, got it. The slot lookup was referring to Tick, not to ParTick. Now
+polling is OK.
+
+Next:
+- Implement a function on originating postmaster to take and post
+	the command string.
+- Implement a function on receiving postmaster to unserialize
+	slot and function as well as command string. Send this to the shell.
+- Implement originating function to take string from an 'add' operation.
+- Perhaps do for other, more complex types than strings.
+- Implement receiving function on shell to intepret add string and do it.
+- Implement originating function to do the whole 'add' operationn.
+
+=============================================================================
+2 June 2007
+
+Working on setting up the async call. Two issues.
+1. The Ftype call has no way to internally specify identity of target func.
+	Here again it would be nice to have functors.
+2. We don't know identity of target func till we contact target node.
+	2.1 We cannot even associate a Conn with a target func because same
+	conn may handle many calls.
+	2.2 In principle at 'add' time we have some idea, but it is compromised
+	if there are dynamicFinfos overriding functions.
+	2.3 We could initiate the 'add' on the target node, where the func is
+	known. But doesn't work for shared messages, so we may as well do it
+	all the same way and pass back the Func number.
+
+
+Solution:
+- All shared messages use a variant of the 'add' operation that unshares them,
+	that is, assigns a separate Conn to each MsgSrc. 
+	(?)We still permit sharing of conns between Src and Dest.
+	Net result: Unique function identity for each Conn.
+- There is a matching vector of RecvFuncs to the Conn vector.
+- Sync messages use a variant of the serializer that just puts the values
+	in the array.
+	- Receiver marches through the Conn vector and matching funcs and
+	refers to the sync data.
+- Async messages use a variant of the serializer func that also sends the 
+	conn index.
+	- Receiver looks up Conn index from recvBuffer and uses it to
+	find Conn entry and RecvFunc to apply. Marches through recvBuffer.
+
+Some notes:
+- I thought of a nice solution where buffer ordering allowed economical use
+of a minimal Func array. Also good for speed. But buffer ordering is not
+simple to set up due to scheduling complexity. Also interleaving of
+funcs is likely.
+
+
+OB: 256 nodes. 50K mit 5M gran. Say 20K per mit = 1e9 connections. Assume
+	almost all are off-node. Then total usage = 
+	outbuf space 	= NConn * 8 bytes.
+	inbuf space 	= NConn * 8 bytes.
+	Func ptr space	= NConn * 8 bytes.
+	Conn space 	= NConn * 4 * 12 bytes
+	MPI space	= NConn * 24 bytes.
+	Synapse obj 	= NMit * nCompt * 48 bytes (negligible).
+
+	= NConn * 96 bytes = 96 Gb.
+	Total cluster capacity is 256 Gb. Somewhat alarming. However, if
+	half of these are node-local then it is much better. Even more so
+	if we do intelligent messaging on-node using shared memory.
+
+Net result: The contribution of the func ptr usage is small enough not to worry.
+Another important point: We _really_ want to use threading. It will be 
+faster and save a lot of memory.
+
+We can handle the postmaster func calls much more efficently like so:
+
+template< class T, RecvFunc F > char* destFunc( const Conn& c, char* data )
+{
+	T arg;
+	data = unserialize( data, arg );
+	F( c, arg );
+}
+
+This template will need to be set up when we do the Finfo. Ugh.
+
+=============================================================================
+3 June
+
+Alternatively have the Ftype provide the function using the stored Recv
+Func:
+
+char* ( *PostFunc )( const Conn& c, char* data, RecvFunc rf )
+{
+	T ret;
+	data = unserialize< T >( ret, data );
+	rf( c, ret );
+	return data;
+}
+
+Trouble is, we now need to store both this func and the original RecvFunc
+at the destination PostMaster. We could trade a bit of speed in and do:
+
+pollFunc{
+...
+	for ( unsigned int i = 0; i < nMsgs; i++ ) {
+		msgId =  *static_cast< const unsigned int *>(
+			static_cast< const void* >( data ) );
+			// the funcVec_ has msgId entries matching each Conn
+		funcId = funcVec_[msgId]; 
+		rf = funcData_[ funcId ].recvFunc();
+		pf = funcData_[ funcId ].postFunc();
+		data = pf( conn_[ msgId ], data, rf );
+	}
+...
+}
+
+where we instead store everything in the func lookup table and index it.
+
+All of these have the issue that they bypass regular messaging stuff,
+especially the MsgSrc vector. That is necessary because of the huge amount
+of space used by MsgSrc.
+
+Implemented all this. Many changes to Ftypes. Compiles. Now to start on tests.
+Passes old unit tests. Yet to start testing data transfer.
+
 =============================================================================

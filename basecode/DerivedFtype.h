@@ -52,6 +52,7 @@ class Ftype0: public Ftype
 			// Here we define the functions for serializing data
 			// for parallel messaging.
 			///////////////////////////////////////////////////////
+			/*
 			static const void* incomingFunc(
 				const Element* e, const void* data, unsigned int index )
 			{
@@ -72,6 +73,59 @@ class Ftype0: public Ftype
 
 			void appendOutgoingFunc( vector< RecvFunc >& vec ) const {
 				vec.push_back( &outgoingFunc );
+			}
+			*/
+
+			/**
+			 * This function extracts the value for this field from
+			 * the data, and executes the function call for its
+			 * target Conn. It returns the data pointer set to the
+			 * next field. Here we don't have any arguments so the function
+			 * just executes the target function.
+			 */
+			static const void* incomingFunc(
+				const Conn& c, const void* data, RecvFunc rf )
+			{
+				rf( c );
+				return data;
+			}
+
+			/**
+			 * This function inserts data into the outgoing buffer.
+			 * This variant is used when the data is synchronous: sent
+			 * every clock step, so that the sequence is fixed.
+			 * For the Ftype0, this function is pretty useless: it 
+			 * amounts to a function executed without args every dt.
+			 * We define it here for compiler satisfaction.
+			 */
+			static void outgoingSync( const Conn& c ) {
+				;
+			}
+
+			/**
+			 * This variant is used for asynchronous data, where data
+			 * is sent in at unpredictable stages of the simulation. 
+			 * As there is no additonal data, it just inserts the
+			 * index of the conn into the data buffer by the getAsyncParBuf
+			 * function. 
+			 */
+			static void outgoingAsync( const Conn& c ) {
+				getAsyncParBuf( c, 0 ); 
+			}
+
+			/// Returns the statically defined incoming func
+			IncomingFunc inFunc() const {
+				return this->incomingFunc;
+			}
+
+			/// Returns the statically defined outgoingSync function
+			RecvFunc syncFunc() const {
+				return RFCAST( this->outgoingSync );
+			}
+
+			/// Returns the statically defined outgoingAsync function
+			RecvFunc asyncFunc() const {
+				return RFCAST( this->outgoingAsync );
 			}
 };
 
@@ -299,32 +353,55 @@ template < class T > class Ftype1: public Ftype
 
 			/**
 			 * This function extracts the value for this field from
-			 * the data, and returns the data pointer set to the
+			 * the data, and executes the function call for its
+			 * target Conn. It returns the data pointer set to the
 			 * next field.
 			 */
 			static const void* incomingFunc(
-				const Element* e, const void* data, unsigned int index )
+				const Conn& c, const void* data, RecvFunc rf )
 			{
 				T ret;
 				data = unserialize< T >( ret, data );
-				send1< T >( e, index, ret );
+				( reinterpret_cast< void (*)( const Conn&, T ) >( rf ) )(
+					c, ret );
 				return data;
 			}
-			
-			void appendIncomingFunc( vector< IncomingFunc >& vec )
-					const {
-				vec.push_back( &incomingFunc );
-			}
 
-			static void outgoingFunc( const Conn& c, T value ) {
+			/**
+			 * This function inserts data into the outgoing buffer.
+			 * This variant is used when the data is synchronous: sent
+			 * every clock step, so that the sequence is fixed.
+			 */
+			static void outgoingSync( const Conn& c, T value ) {
 				void* data = getParBuf( c, serialSize< T >( value ) ); 
 				serialize< T >( data, value );
 			}
 
-			void appendOutgoingFunc( vector< RecvFunc >& vec ) const {
-				vec.push_back( RFCAST( &outgoingFunc ) );
+			/**
+			 * This variant is used for asynchronous data, where data
+			 * is sent in at unpredictable stages of the simulation. It
+			 * therefore adds additional data to identify the message
+			 * source
+			 */
+			static void outgoingAsync( const Conn& c, T value ) {
+				void* data = getAsyncParBuf( c, serialSize< T >( value ) ); 
+				serialize< T >( data, value );
 			}
 
+			/// Returns the statically defined incoming func
+			IncomingFunc inFunc() const {
+				return this->incomingFunc;
+			}
+
+			/// Returns the statically defined outgoingSync function
+			RecvFunc syncFunc() const {
+				return RFCAST( this->outgoingSync );
+			}
+
+			/// Returns the statically defined outgoingAsync function
+			RecvFunc asyncFunc() const {
+				return RFCAST( this->outgoingAsync );
+			}
 };
 
 #endif // _DERIVED_FTYPE_H
