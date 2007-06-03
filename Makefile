@@ -51,14 +51,14 @@ LIBS = 		-lm
 # MPI-2 standard. Hopefully it won't affect you, but if it does use
 # the version of PARALLEL_FLAGS that defines this flag.
 #PARALLEL_FLAGS = -DUSE_MPI
-#PARALLEL_FLAGS = -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK
-#PARALLEL_DIR = parallel
-#PARALLEL_LIB = parallel/parallel.o
+PARALLEL_FLAGS = -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK
+PARALLEL_DIR = parallel
+PARALLEL_LIB = parallel/parallel.o
 
 # Depending on whether we compile with MPI, you may need to change the
 # CXX compiler below
 #
-#CXX = mpicxx
+CXX = mpicxx
 
 #
 # If you do use mpicxx, comment out the version below.

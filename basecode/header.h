@@ -47,6 +47,7 @@ class Finfo;
 // access PostMaster buffer from within all the templated
 // Ftypes. Ugly.
 extern void* getParBuf( const Conn& c, unsigned int size );
+extern void* getAsyncParBuf( const Conn& c, unsigned int size );
 
 #include "RecvFunc.h"
 #include "Conn.h"

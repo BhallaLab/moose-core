@@ -31,6 +31,8 @@ class PostMaster
 		static void setTargetField( const Conn& c, string value );
 		void* innerGetParBuf( unsigned int targetIndex,
 						unsigned int size );
+		void* innerGetAsyncParBuf(
+						unsigned int targetIndex, unsigned int size );
 		void placeIncomingFuncs( 
 					vector< IncomingFunc >&, unsigned int msgIndex );
 
@@ -54,12 +56,12 @@ class PostMaster
 		unsigned int remoteNode_;
 		char* inBuf_;
 		unsigned int inBufSize_;
-		vector< IncomingFunc > incomingFunc_;
+		vector< unsigned int > incomingFunc_;
 
 		char* outBuf_;
 		unsigned int outBufPos_;
 		unsigned int outBufSize_;
-		unsigned int outgoingSlotNum_;
+//		unsigned int outgoingSlotNum_;
 		bool donePoll_;
 
 		// Here are some fields used to ferry data into off-node

@@ -67,21 +67,16 @@ int main(int argc, char** argv)
 			Neutral::create( "Neutral", "sched", Element::root() );
 	Element* cj =
 			Neutral::create( "ClockJob", "cj", sched );
-	// Element* t0 =
-			Neutral::create( "Tick", "t0", cj );
 	Element* shell =
 			Neutral::create( "Shell", "shell", Element::root() );
 
 #ifdef USE_MPI
-	const Finfo* serialFinfo = shell->findFinfo( "serial" );
-	assert( serialFinfo != 0 );
-	for ( vector< Element* >::iterator j = post.begin();
-		j != post.end(); j++ ) {
-		bool ret = serialFinfo->
-			add( shell, *j, (*j)->findFinfo( "serial" ) );
-		assert( ret );
-	}
+	Element* t0 =
+			Neutral::create( "ParTick", "t0", cj );
+#else
+	Neutral::create( "Tick", "t0", cj );
 #endif
+
 
 #ifdef DO_UNIT_TESTS
 	testBasecode();
@@ -94,7 +89,27 @@ int main(int argc, char** argv)
 	testWildcard();
 	testBiophysics();
 	testKinetics();
+#endif
+
+
 #ifdef USE_MPI
+	///////////////////////////////////////////////////////////////////
+	//	Here we connect up the postmasters to the shell and the ParTick.
+	///////////////////////////////////////////////////////////////////
+	const Finfo* serialFinfo = shell->findFinfo( "serial" );
+	assert( serialFinfo != 0 );
+
+	const Finfo* tickFinfo = t0->findFinfo( "parTick" );
+	assert( tickFinfo != 0 );
+	for ( vector< Element* >::iterator j = post.begin();
+		j != post.end(); j++ ) {
+		bool ret = serialFinfo->
+			add( shell, *j, (*j)->findFinfo( "serial" ) );
+		assert( ret );
+		ret = tickFinfo->add( t0, *j, (*j)->findFinfo( "parTick" ) );
+		assert( ret );
+	}
+#ifdef DO_UNIT_TESTS
 	testPostMaster();
 #endif
 #endif
