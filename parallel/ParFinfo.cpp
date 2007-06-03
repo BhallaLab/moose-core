@@ -79,9 +79,9 @@ bool ParFinfo::add(
 
 		assert( e->className() == "PostMaster" );
 		PostMaster* post = static_cast< PostMaster* >( e->data() );
-		vector< IncomingFunc > inFl;
-		destFinfo->ftype()->appendIncomingFunc( inFl );
-		post->placeIncomingFuncs( inFl, msgIndex );
+		// vector< IncomingFunc > inFl;
+		// destFinfo->ftype()->appendIncomingFunc( inFl );
+		// post->placeIncomingFuncs( inFl, msgIndex );
 
 		return 1;
 	}
@@ -146,7 +146,8 @@ bool ParFinfo::respondToAdd(
 	// First, fill up the returnFl with functions provided by the
 	// srcType.
 	returnFl.resize( 0 );
-	srcType->appendOutgoingFunc( returnFl );
+	/// \todo: work out how to decide if a message should be sync/async.
+	returnFl.push_back( srcType->asyncFunc() );
 	numDest = returnFl.size();
 
 	// Second, refer this to the postmaster which does the following:

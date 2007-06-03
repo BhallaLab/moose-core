@@ -60,13 +60,6 @@ class SharedFtype: public Ftype
 			RecvFunc trigFunc() const {
 					return 0;
 			}
-			
-			void appendIncomingFunc( vector< IncomingFunc >& vec ) const
-				{ ; }
-
-			void appendOutgoingFunc( vector< RecvFunc >& vec ) const
-				{ ; }
-
 
 			/**
 			 * This is used for making messages from postmasters to
@@ -78,6 +71,29 @@ class SharedFtype: public Ftype
 			 */
 			const Ftype* makeMatchingType() const {
 				return match_;
+			}
+
+			//////////////////////////////////////////////////////////////
+			// The stuff for serialization and parallel messages does not
+			// apply here, so we just put in dummy functions and
+			// throw an error.
+			//////////////////////////////////////////////////////////////
+			/// Returns the statically defined incoming func
+			IncomingFunc inFunc() const {
+				assert( 0 );
+				return 0;
+			}
+
+			/// Returns the statically defined outgoingSync function
+			RecvFunc syncFunc() const {
+				assert( 0 );
+				return 0;
+			}
+
+			/// Returns the statically defined outgoingAsync function
+			RecvFunc asyncFunc() const {
+				assert( 0 );
+				return 0;
 			}
 
 		private:
