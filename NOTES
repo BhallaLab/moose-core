@@ -3109,4 +3109,9 @@ clean unit test form.
 
 Much messing around later, it is mostly set up with unit test form.
 
+Checked in as revision 124.
+
+A bit of minor cleanup and compiler flag changes to get it to work without
+the parallel stuff.
+
 =============================================================================

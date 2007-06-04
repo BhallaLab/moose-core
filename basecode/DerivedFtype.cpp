@@ -242,5 +242,9 @@ void* getParBuf( const Conn& c, unsigned int size )
 {
 	return 0;
 }
+void* getAsyncParBuf( const Conn& c, unsigned int size )
+{
+	return 0;
+}
 #endif
 
