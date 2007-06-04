@@ -77,9 +77,8 @@ bool ParFinfo::add(
 		assert( e->className() == "PostMaster" );
 		PostMaster* post = static_cast< PostMaster* >( e->data() );
 		//equivalent to: incomingFunc_.push_back( fd->index() );
-		post->addIncomingFunc( fd->index() );
-		// vector< IncomingFunc > inFl;
-		// destFinfo->ftype()->appendIncomingFunc( inFl );
+		post->addIncomingFunc( originatingConn, fd->index() );
+		// cout << "ParFinfo::add::origConn = " << originatingConn << ", IncomingFunc = " << fd->index() << endl;
 
 		return 1;
 	}
@@ -153,6 +152,11 @@ bool ParFinfo::respondToAdd(
 	// - send out message request
 	// - create local message
 	destIndex = PostMaster::respondToAdd( e, oss.str(), numDest );
+	/*
+	cout << "ParFinfo::respondToadd::conn = " << 
+		e->connDestEnd( destIndex ) - e->lookupConn( 0 )  <<
+		", destIndex = " << destIndex << endl;
+		*/
 	
 	// destIndex = post->outgoingSlotNum_;
 	// post->outgoingSlotNum_ += numDest;
@@ -208,4 +212,12 @@ void ParFinfo::countMessages(
 {
 		msgIndex_ = destNum++;
 		return;
+}
+
+bool ParFinfo::getSlotIndex( const string& name, unsigned int& ret ) const
+{
+	if ( name != this->name() ) 
+		return 0;
+	ret = msgIndex_;
+	return 1;
 }
