@@ -234,7 +234,7 @@ void ParTick::initPending( Element* e )
 {
 	static const Finfo* parFinfo = e->findFinfo( "parTick" );
 	pendingCount_ = parFinfo->numOutgoing( e );
-	cout << "pendingCount = " << pendingCount_ << endl;
+	// cout << "pendingCount = " << pendingCount_ << endl;
 	pendingNodes_.resize( pendingCount_ + 1 );
 	pendingNodes_.assign( pendingCount_ + 1, 1);
 }

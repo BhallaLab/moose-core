@@ -98,9 +98,13 @@ class ParFinfo: public Finfo
 					return 0;
 			}
 
+			/*
 			unsigned int getSlotIndex() const {
 					return msgIndex_;
 			}
+			*/
+			bool getSlotIndex( const string& name, unsigned int& ret ) 
+				const;
 
 			Finfo* copy() const {
 				return new ParFinfo( *this );
