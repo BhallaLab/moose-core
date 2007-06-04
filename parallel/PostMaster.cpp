@@ -139,6 +139,8 @@ static const unsigned int addSlot =
 	initPostMasterCinfo()->getSlotIndex( "rawAdd" );
 static const unsigned int copySlot = 
 	initPostMasterCinfo()->getSlotIndex( "rawCopy" );
+static const unsigned int dataSlot = 
+	initPostMasterCinfo()->getSlotIndex( "data" );
 
 //////////////////////////////////////////////////////////////////
 // Here we put the PostMaster class functions.
@@ -151,11 +153,9 @@ PostMaster::PostMaster()
 	outBuf_ = new char[ outBufSize_ ];
 	inBufSize_ = 10000;
 	inBuf_ = new char[ inBufSize_ ];
-	if ( incomingFunc_.size() == 0 ) {
-		incomingFunc_.push_back( lookupFunctionData( RFCAST( Neutral::childFunc ) )->index() );
+	incomingFunc_.push_back( lookupFunctionData( RFCAST( Neutral::childFunc ) )->index() );
 //		incomingFunc_.push_back( lookupFunctionData( RFCAST( Shell::rawAddFunc ) )->index() );
-		cout << "incoming func[0] = " << incomingFunc_[0] << endl;
-	}
+		// cout << "incoming func[0] = " << incomingFunc_[0] << endl;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -300,9 +300,13 @@ void PostMaster::parseMsgRequest( const char* req, Element* self )
 	// send back success report.
 }
 
-void PostMaster::addIncomingFunc( unsigned int index )
+void PostMaster::addIncomingFunc( unsigned int connId, unsigned int index )
 {
-	incomingFunc_.push_back( index );
+	if ( incomingFunc_.size() <= connId )
+		incomingFunc_.resize( connId + 1 );
+	incomingFunc_[ connId ] = index;
+	// incomingFunc_.push_back( index );
+	// cout << "incomingFunc_.size() = " << incomingFunc_.size() << endl;
 }
 /////////////////////////////////////////////////////////////////////
 // This function does the main work of sending incoming messages
@@ -314,7 +318,7 @@ void PostMaster::addIncomingFunc( unsigned int index )
  */
 void PostMaster::innerPostIrecv()
 {
-	cout << "!" << flush;
+	// cout << "!" << flush;
 	request_ = comm_->Irecv(
 			inBuf_, inBufSize_, MPI_CHAR, remoteNode_, DATA_TAG );
 	donePoll_ = 0;
@@ -345,8 +349,7 @@ void PostMaster::innerPoll( Element* e)
 	if ( request_.Test( status_ ) ) {
 		// Data has arrived. How big was it?
 		unsigned int dataSize = status_.Get_count( MPI_CHAR );
-		cout << dataSize << " bytes of data arrived on " << 
-			localNode_ << " from " << remoteNode_ << endl << flush;
+		// cout << dataSize << " bytes of data arrived on " << localNode_ << " from " << remoteNode_ << endl << flush;
 		request_ = 0;
 		if ( dataSize < sizeof( unsigned int ) ) return;
 
@@ -362,15 +365,15 @@ void PostMaster::innerPoll( Element* e)
 		// async msgs.
 		const char* data = inBuf_;
 		while ( data < inBuf_ + dataSize ) {
-			cout << "1:"<<localNode_ << "," << remoteNode_ << ", datapos = " << data - inBuf_ << endl << flush;
+			// cout << "1:"<<localNode_ << "," << remoteNode_ << ", datapos = " << data - inBuf_ << endl << flush;
 			unsigned int msgId =  *static_cast< const unsigned int *>(
 				static_cast< const void* >( data ) );
 				// the funcVec_ has msgId entries matching each Conn
 			data += sizeof( unsigned int );
-			cout << "1.5:"<<localNode_ << "," << remoteNode_ << "msgid = " << msgId << endl << flush;
+			// cout << "1.5:"<<localNode_ << "," << remoteNode_ << "msgid = " << msgId << endl << flush;
 			// Hack for testing: sometimes msgId comes in out of range.
-			if ( msgId > incomingFunc_.size() ) {
-				cout << "PostMaster::innerPoll: Warning: incoming msgId too big: " << msgId << " > " << incomingFunc_.size() << endl;
+			if ( msgId >= incomingFunc_.size() ) {
+				cout << "PostMaster::innerPoll: Warning: incoming msgId too big: " << msgId << " >= " << incomingFunc_.size() << endl;
 				break;
 			}
 			unsigned int funcId = incomingFunc_[ msgId ]; 
@@ -379,7 +382,7 @@ void PostMaster::innerPoll( Element* e)
 				lookupFunctionData( funcId )->funcType()->inFunc();
 			data = static_cast< const char* >(
 				pf( *( e->lookupConn( msgId ) ), data, rf ) );
-			cout << "4:"<<localNode_ << "," << remoteNode_ << ", datapos = " << data - inBuf_ << endl << flush;
+			// cout << "4:"<<localNode_ << "," << remoteNode_ << ", datapos = " << data - inBuf_ << endl << flush;
 			assert (data != 0 );
 		}
 
@@ -402,9 +405,8 @@ void PostMaster::poll( const Conn& c, int ordinal )
 void PostMaster::innerPostSend( )
 {
 	// send out the filled buffer here to the other nodes..
-	cout << "*" << flush;
-	cout << "sending " << outBufPos_ << " bytes: " << 
-		outBuf_ << endl << flush;
+	// cout << "*" << flush;
+	// cout << "sending " << outBufPos_ << " bytes: " << outBuf_ << endl << flush;
 	comm_->Send(
 			outBuf_, outBufPos_, MPI_CHAR, remoteNode_, DATA_TAG
 	);
@@ -429,12 +431,14 @@ void PostMaster::postSend( const Conn& c, int ordinal )
 unsigned int PostMaster::respondToAdd(
 		Element* e, const string& respondString, unsigned int numDest )
 {
+		/*
 		cout << "\nresponding to add from node " <<
 			PostMaster::getMyNode( e ) <<
 		 	" to node " << 
 			PostMaster::getRemoteNode( e ) <<
 			" with " << respondString << endl;
-	return 0;
+			*/
+	return dataSlot;
 }
 
 /**
@@ -480,6 +484,7 @@ void testPostMaster()
 	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
 	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
 	unsigned int* postId = new unsigned int[numNodes];
+	unsigned int i;
 	if ( myNode == 0 )
 		cout << "\nTesting PostMaster: " << numNodes << " nodes";
 	MPI::COMM_WORLD.Barrier();
@@ -491,7 +496,7 @@ void testPostMaster()
 			Neutral::getChildByName( Element::root(), "postmasters" );
 	ASSERT( postMastersId != BAD_ID, "postmasters element creation" );
 	Element* pms = Element::element( postMastersId );
-	for ( unsigned int i = 0; i < numNodes; i++ ) {
+	for ( i = 0; i < numNodes; i++ ) {
 		char name[10];
 		sprintf( name, "node%d", i );
 		unsigned int id = Neutral::getChildByName( pms, name );
@@ -531,7 +536,7 @@ void testPostMaster()
 	}
 
 	Element* post;
-	unsigned int i;
+	/*
 	if ( numNodes == 1 ) { // Create a dummy postmaster
 		post = Neutral::create( "PostMaster", "node1", pms );
 		numNodes = 2;
@@ -540,6 +545,7 @@ void testPostMaster()
 		postId[0] = BAD_ID;
 		postId[1] = post->id();
 	}
+	*/
 	if ( myNode == 0 ) {
 		// Here we are being sneaky because we have the same id on all 
 		// nodes.
@@ -586,15 +592,109 @@ void testPostMaster()
 
 		// Find the Conn# of the message to the shell. Assume same
 		// index is used on all nodes.
-		unsigned int shellIndex = post->connSrcBegin( addSlot ) - 
-			post->lookupConn( 0 );
-		cout << "shellIndex = " << shellIndex << ", sendstr = " << sendstr << endl << flush;
+		unsigned int shellIndex = post->connDestEnd( dataSlot ) - 
+			post->lookupConn( 0 ) - 2;
+		// cout << "dataslot = " << dataSlot << ", shellIndex = " << shellIndex << ", sendstr = " << sendstr << endl << flush;
 		char* buf = static_cast< char* >(
 			pdata->innerGetAsyncParBuf( shellIndex, strlen( sendstr ) + 1 )
 		);
 		strcpy( buf, sendstr );
 	}
+	// cout << " starting string send\n" << flush;
 	set< double >( cj, "start", 1.0 );
+	// cout << " Done string send\n" << flush;
+	MPI::COMM_WORLD.Barrier();
+
+	////////////////////////////////////////////////////////////////
+	// Now we set up a fully connected network of tables. Each 
+	// node has numNodes tables. The one with index myNode is a source
+	// the others are destinations. On each node the myNode table 
+	// sends messages to tables with the same index on other nodes, 
+	// to transfer its data to them. 
+	//
+	// We manually set up the msgs from
+	// tables to postmaster and from postmaster to tables
+	// This tests the full message flow process.
+	// It also tests that info goes to multiple targets correctly.
+	// It also tests multiple time-step transfer.
+	//
+	// We have to be careful that ordering of messages matches on
+	// src and dest nodes. This works if we first create messages
+	// with the lower table index, regardless of whether the
+	// message is to or from the table.
+	////////////////////////////////////////////////////////////////
+	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	vector< Element* > tables( numNodes, 0 );
+	unsigned int tickId;
+	lookupGet< unsigned int, string >( cj, "lookupChild", tickId, "t0" );
+	Element* tick = Element::element( tickId );
+	const Finfo* tickProcFinfo = tick->findFinfo( "outgoingProcess" );
+	assert( tickProcFinfo != 0 );
+	for ( i = 0; i < numNodes; i++ ) {
+		char tabname[20];
+		sprintf( tabname, "tab%d", i );
+		tables[ i ] = Neutral::create( "Table", tabname, n );
+		ASSERT( tables[i] != 0, "Checking data flow" );
+		const Finfo* outFinfo = tables[i]->findFinfo( "outputSrc" );
+		const Finfo* inFinfo = tables[i]->findFinfo( "input" );
+		set< int >( tables[i], "xdivs", 10 );
+		set< double >( tables[i], "xmin", 0.0 );
+		set< double >( tables[i], "xmax", 10.0 );
+		set< double >( tables[i], "input", 0.0 );
+		bool ret = tickProcFinfo->add( 
+			tick, tables[i], tables[i]->findFinfo( "process" ) );
+		ASSERT( ret, "scheduling tables" );
+
+		if ( i == myNode ) { // This is source table
+			set< int >( tables[i], "stepmode", 2 ); // TAB_ONCE
+			set< double >( tables[i], "stepsize", 1.0 ); // TAB_ONCE
+			for ( unsigned int k = 0; k <= 10; k++ )
+				lookupSet< double, unsigned int >( 
+								tables[i], "table", i * 10 + k, k );
+
+			for ( unsigned int j = 0; j < numNodes; j++ ) {
+				if ( j == myNode ) continue;
+				Element* p = Element::element( postId[j] );
+				const Finfo* dataFinfo = p->findFinfo( "data" );
+				set< unsigned int >( p, "targetId", tables[i]->id() );
+				set< string >( p, "targetField", "input" );
+				bool ret = outFinfo->add( tables[i], p, dataFinfo );
+				ASSERT( ret, "Making input message to postmaster" );
+			}
+		} else {
+			post = Element::element( postId[i] );
+			const Finfo* dataFinfo = post->findFinfo( "data" );
+			set< int >( tables[i], "stepmode", 3 ); // TAB_BUF
+			set< double >( tables[i], "output", 0.0 ); // TAB_BUF
+			for ( unsigned int k = 0; k <= 10; k++ )
+				lookupSet< double, unsigned int >( 
+								tables[i], "table", 0.0, k );
+
+			bool ret = dataFinfo->add( post, tables[i], inFinfo );
+			ASSERT( ret, "Making output message from postmaster" );
+		}
+	}
+	set< double >( cj, "start", 11.0 );
+	MPI::COMM_WORLD.Barrier();
+	// At this point the contents of the tables should be changed by the
+	// arrival of data.
+	double value;
+	for ( i = 0; i < numNodes; i++ ) {
+		for ( unsigned int k = 0; k <= 10; k++ ) {
+			lookupGet< double, unsigned int >( 
+							tables[i], "table", value, k );
+			// cout << "value = " << value << ", i = " << i << ", j = " << k << endl;
+			if ( i == myNode ) {
+				ASSERT( value == i * 10 + k , "Testing data transfer\n" );
+			} else if ( k == 0 ) { // The value is delayed by one, and the first is zero
+				ASSERT( value == 0 , "Testing data transfer\n" );
+			} else {
+				ASSERT( value == i * 10 + k - 1, "Testing data transfer\n");
+			}
+		}
+	}
+	set( n, "destroy" );
+	MPI::COMM_WORLD.Barrier();
 }
 #endif
 

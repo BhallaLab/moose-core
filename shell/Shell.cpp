@@ -410,8 +410,8 @@ void Shell::rawAddFunc( const Conn& c, string s )
 	unsigned int remotenode;
 	get< unsigned int >( post, "localNode", mynode );
 	get< unsigned int >( post, "remoteNode", remotenode );
-	cout << "Shell::rawAddFunc( " << s << " ), on " << mynode <<
-		", from " << remotenode << "\n";
+	cout << ".";
+	//cout << "Shell::rawAddFunc( " << s << " ), on " << mynode << ", from " << remotenode << "\n";
 }
 
 void Shell::rawCopyFunc( const Conn& c, string s )
