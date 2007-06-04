@@ -3087,4 +3087,26 @@ After various changes and updates to the ParFinfo, it works. I create
 a message from PostMaster::data to Shell::rawAdd, and I am able to send data
 to the shell from a remote node. Works for 2, 3 and 4 nodes.
 
+Checked in as revision 123.
+
+=============================================================================
+4 June 2007
+Let's now see if we can send data all the way through via messages. I'll
+make a table for each node. The local node table will source data to the
+same numbered table on remote nodes. 
+
+Set up this test. Seems like data is being transferred but it is
+not arriving correctly. 
+
+OK, problem seems to be mismatch between conn indices. If we use the same 
+Conn vector for incoming and outgoing
+msgs, we need to create both ends of the message at the same time.
+
+Had to fix up mapping between Conns and FuncIndex.
+
+Starting to work!!! Tested with 2, 3, 4 nodes. Now to put it into 
+clean unit test form.
+
+Much messing around later, it is mostly set up with unit test form.
+
 =============================================================================
