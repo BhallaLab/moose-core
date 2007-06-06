@@ -9,7 +9,7 @@
 #define _PYMOOSE_CONTEXT_CPP
 
 #include "PyMooseContext.h"
-
+#include "../element/Neutral.h"
 #include "../scheduling/Tick.h"
 #include "../scheduling/ClockJob.h"
 #include "../builtins/Interpol.h"
@@ -128,6 +128,25 @@ const Cinfo* initPyMooseContextCinfo()
             TypeFuncPair( Ftype1< unsigned int >::global(),  0 ),
             // tweaktau
             TypeFuncPair( Ftype1< unsigned int >::global(),  0 ),
+            ///////////////////////////////////////////////////////////////
+            // SimDump facilities - MAY NOT BE REQUIRED SO MUCH FOR PYMOOSE
+            ///////////////////////////////////////////////////////////////
+            // readDumpFile
+            TypeFuncPair( Ftype1< string >::global(),  0 ),
+            // writeDumpFile
+            TypeFuncPair( Ftype2< string, string >::global(),  0 ),
+            // simObjDump
+            TypeFuncPair( Ftype1< string >::global(),  0 ),
+            // simundump
+            TypeFuncPair( Ftype1< string >::global(),  0 ),
+
+            ///////////////////////////////////////////////////////////////
+            // Setting field values for a vector of objects
+            ///////////////////////////////////////////////////////////////
+            // Setting a field value as a string: send out request:
+            TypeFuncPair( // object, field, value 
+                Ftype3< vector< unsigned int >, string, string >::global(), 0 ),
+
 	};
 
     static Finfo* pyMooseContextFinfos[] =
@@ -206,12 +225,25 @@ static const unsigned int tweakAlphaSlot =
 initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 21;
 static const unsigned int tweakTauSlot = 
 initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 22;
+static const unsigned int readDumpFileSlot = 
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 23;
+static const unsigned int writeDumpFileSlot = 
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 24;
+static const unsigned int simObjDumpSlot = 
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 25;
+static const unsigned int simUndumpSlot = 
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 26;
+
+static const unsigned int setVecFieldSlot = 
+initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 27;
+
 
 //////////////////////////
 // Static constants
 //////////////////////////
 const std::string PyMooseContext::separator = "/";
-const Id PyMooseContext::BAD_ID = BAD_ID;
+//const Id PyMooseContext::BAD_ID = BAD_ID;
+const Id PyMooseContext::BAD_ID = ~0;
 
 
 // void PyMooseContext::processFunc( const Conn& c )
@@ -390,8 +422,15 @@ Id PyMooseContext::getShell()
 */
 PyMooseContext* PyMooseContext::createPyMooseContext(std::string shellName, std::string contextName)
 {    
-    set< string, string >( Element::root(), "create", "Shell", shellName);
-    Element * shellElement = Element::lastElement();
+//    set< string, string >( Element::root(), "create", "Shell", shellName);    
+//    Element * shellElement = Element::lastElement();
+    Element* shellElement = Neutral::create( "Shell", "shell", Element::root() );
+
+//     unsigned int shellId;
+//     cerr << "lookupGet returned: " << lookupGet< unsigned int, string >( Element::root(), "lookupChild", shellId, "shell" ) << endl;
+//     assert( shellId != BAD_ID );
+//     Element* shellElement = Element::element( shellId );
+
     set< string, string >( shellElement, "create", "PyMooseContext", contextName);
     Element* contextElement = Element::lastElement();
     const Finfo* shellFinfo, *contextFinfo;
