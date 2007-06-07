@@ -21,6 +21,13 @@
 	#include "HHGate.h"
 	#include "HHChannel.h"
 	#include "Compartment.h"
+	#include "Enzyme.h"
+	#include "KineticHub.h"		
+	#include "Kintegrator.h"
+	#include "Molecule.h"
+	#include "Reaction.h"
+	#include "Stoich.h"
+	#include "../kinetics/SparseMatrix.h"
 /*	#include "TickTest.h"
 	#include "Sched0.h"
 	#include "Sched1.h"
@@ -173,6 +180,64 @@
 %attribute(Compartment, double, z, __get_z, __set_z)
 %attribute(Compartment, double, VmSrc, __get_VmSrc, __set_VmSrc)
 %attribute(Compartment, double, injectMsg, __get_injectMsg, __set_injectMsg)
+
+%include "Kintegrator.h"
+%attribute(Kintegrator, bool, isInitiatilized, __get_isInitiatilized, __set_isInitiatilized)
+//%attribute(Kintegrator, string, integrate_method, __get_method, __set_method)
+//%attribute_ref(Kintegrator, string, method)
+%include "Stoich.h"
+%attribute(Stoich, unsigned int, nMols, __get_nMols, __set_nMols)
+%attribute(Stoich, unsigned int, nVarMols, __get_nVarMols, __set_nVarMols)
+%attribute(Stoich, unsigned int, nSumTot, __get_nSumTot, __set_nSumTot)
+%attribute(Stoich, unsigned int, nBuffered, __get_nBuffered, __set_nBuffered)
+%attribute(Stoich, unsigned int, nReacs, __get_nReacs, __set_nReacs)
+%attribute(Stoich, unsigned int, nEnz, __get_nEnz, __set_nEnz)
+%attribute(Stoich, unsigned int, nMMenz, __get_nMMenz, __set_nMMenz)
+%attribute(Stoich, unsigned int, nExternalRates, __get_nExternalRates, __set_nExternalRates)
+%attribute(Stoich, bool, useOneWayReacs, __get_useOneWayReacs, __set_useOneWayReacs)
+//%attribute(Stoich, string, path, __get_path, __set_path)
+%attribute(Stoich, unsigned int, rateVectorSize, __get_rateVectorSize, __set_rateVectorSize)
+%include "KineticHub.h"
+%attribute(KineticHub, unsigned int, nMol, __get_nMol, __set_nMol)
+%attribute(KineticHub, unsigned int, nReac, __get_nReac, __set_nReac)
+%attribute(KineticHub, unsigned int, nEnz, __get_nEnz, __set_nEnz)
+%attribute(KineticHub, double, molSum, __get_molSum, __set_molSum)
+%include "Enzyme.h"
+%attribute(Enzyme, double, k1, __get_k1, __set_k1)
+%attribute(Enzyme, double, k2, __get_k2, __set_k2)
+%attribute(Enzyme, double, k3, __get_k3, __set_k3)
+%attribute(Enzyme, double, Km, __get_Km, __set_Km)
+%attribute(Enzyme, double, kcat, __get_kcat, __set_kcat)
+%attribute(Enzyme, bool, mode, __get_mode, __set_mode)
+//%attribute(Enzyme, double,double, prd, __get_prd, __set_prd)
+%attribute(Enzyme, double, scaleKm, __get_scaleKm, __set_scaleKm)
+%attribute(Enzyme, double, scaleKcat, __get_scaleKcat, __set_scaleKcat)
+%attribute(Enzyme, double, intramol, __get_intramol, __set_intramol)
+%include "Reaction.h"
+%attribute(Reaction, double, kf, __get_kf, __set_kf)
+%attribute(Reaction, double, kb, __get_kb, __set_kb)
+%attribute(Reaction, double, scaleKf, __get_scaleKf, __set_scaleKf)
+%attribute(Reaction, double, scaleKb, __get_scaleKb, __set_scaleKb)
+%include "Molecule.h"
+%attribute(Molecule, double, nInit, __get_nInit, __set_nInit)
+%attribute(Molecule, double, volumeScale, __get_volumeScale, __set_volumeScale)
+%attribute(Molecule, double, n, __get_n, __set_n)
+%attribute(Molecule, int, mode, __get_mode, __set_mode)
+%attribute(Molecule, int, slave_enable, __get_slave_enable, __set_slave_enable)
+%attribute(Molecule, double, conc, __get_conc, __set_conc)
+%attribute(Molecule, double, concInit, __get_concInit, __set_concInit)
+%attribute(Molecule, double, nSrc, __get_nSrc, __set_nSrc)
+//%attribute(Molecule, double,double, prd, __get_prd, __set_prd)
+%attribute(Molecule, double, sumTotal, __get_sumTotal, __set_sumTotal)
+
+/* %include "Enzyme.h"
+	#include "KineticHub.h"		
+	#include "Kintegrator.h"
+	#include "Molecule.h"
+	#include "Reaction.h"
+	#include "Stoich.h"
+	#include "../kinetics/SparseMatrix.h"
+*/
 /*
 %include "TickTest.h"
 %include "Sched0.h"
