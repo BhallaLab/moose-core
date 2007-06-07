@@ -93,7 +93,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
     // But I personally tend to make the mistake of trying to wrap an existing path inside a new python object
     // table_A = moose.InterpolationTable(channel.path()+'/xGate/A') - which fails otherwise
     // Try to wrap preexisting object
-    id_ = PyMooseBase::pathToId(path);
+    id_ = PyMooseBase::pathToId(path,false);
     if (id_ != BAD_ID)
     {
         cerr << "Info: Object already exists." << endl;
@@ -116,7 +116,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
         myName = path.substr(name_start+1);
         parentPath = path.substr(0,name_start);
     }
-    id_ = context_->create(className, myName, context_->pathToId(parentPath));
+    id_ = context_->create(className, myName, context_->pathToId(parentPath, false));
 }
 
 /**
@@ -142,7 +142,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
 {
     ReadCell reader;
     reader.read(fileName, path);
-    id_ = context_->pathToId(path);
+    id_ = context_->pathToId(path, false);
 }
 
 
