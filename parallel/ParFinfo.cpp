@@ -126,13 +126,19 @@ bool ParFinfo::respondToAdd(
 	
 	// const Ftype* srcType = srcFinfo->ftype();
 
-	unsigned int targetId;
-	get< unsigned int >( e, "targetId", targetId );
-	string targetField;
-	get< string >( e, "targetField", targetField );
+	unsigned int targetId = 0;
+	bool ret = get< unsigned int >( e, "targetId", targetId );
+	assert( ret );
+	string targetField = "nil";
+	ret = get< string >( e, "targetField", targetField );
+	assert( ret );
 //	string respondString;
 	ostringstream oss;
 // 	oss.str( respondString );
+	cout << "src=" << src->name() << ", dest=" << e->name() << 
+		", srcid=" << src->id() << ", destid=" << e->id() <<
+		", targetid=" << targetId << endl;
+
 	oss << src->id() << " " << targetId << " " << 
 			targetField << " " << ftype2str( srcType );
 
