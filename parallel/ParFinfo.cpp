@@ -130,6 +130,9 @@ bool ParFinfo::respondToAdd(
 	bool ret = get< unsigned int >( e, "targetId", targetId );
 	assert( ret );
 	string targetField = "nil";
+	string targetType;
+	ret = val2str< const Ftype* >( srcType->baseFtype(), targetType );
+	assert( ret );
 	ret = get< string >( e, "targetField", targetField );
 	assert( ret );
 //	string respondString;
@@ -140,7 +143,7 @@ bool ParFinfo::respondToAdd(
 		", targetid=" << targetId << endl;
 
 	oss << src->id() << " " << targetId << " " << 
-			targetField << " " << ftype2str( srcType );
+			targetField << " " << targetType;
 
 	// Post irecv for return status of this message request.
 	// Send out this message request.
