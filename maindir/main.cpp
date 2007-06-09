@@ -67,14 +67,15 @@ int main(int argc, char** argv)
 			Neutral::create( "Neutral", "sched", Element::root() );
 	Element* cj =
 			Neutral::create( "ClockJob", "cj", sched );
-	Element* shell =
-			Neutral::create( "Shell", "shell", Element::root() );
 
 #ifdef USE_MPI
+	Element* shell =
+			Neutral::create( "Shell", "shell", Element::root() );
 	Element* t0 =
 			Neutral::create( "ParTick", "t0", cj );
 #else
 	Neutral::create( "Tick", "t0", cj );
+	Neutral::create( "Shell", "shell", Element::root() );
 #endif
 
 
