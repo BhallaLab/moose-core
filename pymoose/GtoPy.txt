@@ -1,0 +1,15 @@
+/*******************************************************************
+ * File:            GtoPy.txt
+ * Description:      
+ * Author:          Subhasis Ray
+ * E-mail:          ray.subhasis@gmail.com
+ * Created:         2007-05-07 17:46:02
+ ********************************************************************/
+
+This documents how to convert a .g file ( genesis commands) into
+pymoose commands - which are just python classes and function calls.
+
+tabchannel - it is HHChannel actually.
+// create tabchannel LCa3_mit_usb
+LCa3_mit_usb = create moose.HHChannel('LCa3_mit_usb')
+
