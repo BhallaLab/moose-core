@@ -3158,5 +3158,8 @@ Checked in as revision 129.
 Fixed up the type specification passing by implementing baseFtype().
 Also cleaned up things a bit with the implementation of 
 basecode::ParallelDummy to avoid having dummy definitions in an obscure place.
+Checked in as revision 130.
+
+Modified makefile to generate non-parallel version for more general developers.
 
 =============================================================================
