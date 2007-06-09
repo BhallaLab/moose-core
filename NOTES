@@ -3148,3 +3148,15 @@ through the string className::fieldName.
 
 Some fairly major steps to do:
 - Replace the naming of sub-finfos within a shared message to shared:sub
+* When passing type specification use baseFtype() func so as to have
+	compatible field matches on remote node.
+
+For starters, check current stuff in (including merge with Python stuff
+from Subhasis). 
+Checked in as revision 129.
+
+Fixed up the type specification passing by implementing baseFtype().
+Also cleaned up things a bit with the implementation of 
+basecode::ParallelDummy to avoid having dummy definitions in an obscure place.
+
+=============================================================================
