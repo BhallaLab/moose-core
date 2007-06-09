@@ -128,6 +128,11 @@ class Ftype
 				return 0;
 			}
 
+			////////////////////////////////////////////////////////
+			// Here are some ftype to string conversion functions.
+			////////////////////////////////////////////////////////
+			// I believe these are used by the Python code.
+			
 			static std::string full_type(std::string type)
     		{
         		static map < std::string, std::string > type_map;

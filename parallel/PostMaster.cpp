@@ -420,7 +420,7 @@ void PostMaster::postSend( const Conn& c, int ordinal )
 
 /////////////////////////////////////////////////////////////////////
 /**
- * This function handles requests to set up a message. It does the
+ * This static function handles requests to set up a message. It does the
  * following:
  * - posts irecv for return status of the message
  * - Sends out the message request itself
@@ -438,6 +438,16 @@ unsigned int PostMaster::respondToAdd(
 			PostMaster::getRemoteNode( e ) <<
 			" with " << respondString << endl;
 			*/
+	// A little risky: We assume that the second message formed on the
+	// postmaster is the connection to the Shell, and that nothing
+	// is inserted below this.
+	unsigned int shellIndex = 1;
+	PostMaster* p = static_cast< PostMaster* >( e->data() );
+	char* buf = static_cast< char* >(
+		p->innerGetAsyncParBuf( shellIndex, respondString.length() + 1 )
+	);
+	strcpy( buf, respondString.c_str() );
+
 	return dataSlot;
 }
 
@@ -552,7 +562,7 @@ void testPostMaster()
 		for ( i = 1; i < numNodes; i++ ) {
 			post = Element::element( postId[i] );
 			set< unsigned int >( post, "targetId", table->id() );
-			set< string >( post, "targetField", "input" );
+			set< string >( post, "targetField", "msgInput" );
 			const Finfo* outFinfo = table->findFinfo( "outputSrc" );
 			const Finfo* dataFinfo = post->findFinfo( "data" );
 			bool ret = outFinfo->add( table, post, dataFinfo );
@@ -578,6 +588,8 @@ void testPostMaster()
 	// Now we fire up the scheduler on all nodes to keep info flowing.
 	////////////////////////////////////////////////////////////////
 	MPI::COMM_WORLD.Barrier();
+	// sleep( 5 );
+	MPI::COMM_WORLD.Barrier();
 	unsigned int cjId = Shell::path2eid( "/sched/cj", "/" );
 	assert( cjId != BAD_ID );
 	Element* cj = Element::element( cjId );
@@ -594,7 +606,7 @@ void testPostMaster()
 		// index is used on all nodes.
 		unsigned int shellIndex = post->connDestEnd( dataSlot ) - 
 			post->lookupConn( 0 ) - 2;
-		// cout << "dataslot = " << dataSlot << ", shellIndex = " << shellIndex << ", sendstr = " << sendstr << endl << flush;
+		cout << "dataslot = " << dataSlot << ", shellIndex = " << shellIndex << ", sendstr = " << sendstr << endl << flush;
 		char* buf = static_cast< char* >(
 			pdata->innerGetAsyncParBuf( shellIndex, strlen( sendstr ) + 1 )
 		);
@@ -657,9 +669,10 @@ void testPostMaster()
 				Element* p = Element::element( postId[j] );
 				const Finfo* dataFinfo = p->findFinfo( "data" );
 				set< unsigned int >( p, "targetId", tables[i]->id() );
-				set< string >( p, "targetField", "input" );
+				set< string >( p, "targetField", "msgInput" );
 				bool ret = outFinfo->add( tables[i], p, dataFinfo );
 				ASSERT( ret, "Making input message to postmaster" );
+	MPI::COMM_WORLD.Barrier();
 			}
 		} else {
 			post = Element::element( postId[i] );

@@ -108,6 +108,19 @@ template<> bool val2str< vector< string > >(
 	return 1;
 }
 
+template<> bool str2val< const Ftype* >( const string& s, const Ftype* &ret)
+{
+	ret = 0;
+	return 0;
+}
+
+template<> bool val2str< const Ftype* >(
+				const Ftype* f, string& ret )
+{
+	ret = typeid( *f ).name();
+	return 1;
+}
+
 /**
  * Locates the next separator on the string, analogous to the string::find
  * function. The difference is that here it also checks if the string
