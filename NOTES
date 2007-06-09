@@ -3114,4 +3114,37 @@ Checked in as revision 124.
 A bit of minor cleanup and compiler flag changes to get it to work without
 the parallel stuff.
 
+Checked in as revision 125.
+
+Next step: Do the entire messaging from a single command that sends the
+request to the remote postmaster to handle the remote message setup.
+
 =============================================================================
+5 June 2007
+Issue with ids being passed in the rawAdd string. Something funny about the
+targetId assigned to the postmaster.
+
+=============================================================================
+6 June 2007
+Incremental progress. Shell.cpp is dumping core for some reason around
+line 428.
+
+=============================================================================
+7 June 2007.
+More incremental progress. Now I have some of the message requests coming 
+through with all fields correct, and which could be used to set up the rest
+of the message. The earlier unit tests are now problematic as they don't
+work with the whole system. 
+
+Another, perhaps bigger problem is that the system is too picky about 
+message type matching. Once we've converted to string type info, I do not
+know how to test for type equivalence when one is a derived class of the
+other. One option is to globally register not the functions, but the finfos.
+These have the advantage that they can be easily and globally specified
+through the string className::fieldName.
+
+=============================================================================
+9 June 2007
+
+Some fairly major steps to do:
+- Replace the naming of sub-finfos within a shared message to shared:sub
