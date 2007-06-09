@@ -233,18 +233,3 @@ template<> size_t serialSize< vector< string > >(
 	return ret;
 }
 
-//////////////////////////////////////////////////////////////////
-//  This is here as a fallback in case we do not have the 
-//  parallel code to use.
-//////////////////////////////////////////////////////////////////
-#ifndef USE_MPI
-void* getParBuf( const Conn& c, unsigned int size )
-{
-	return 0;
-}
-void* getAsyncParBuf( const Conn& c, unsigned int size )
-{
-	return 0;
-}
-#endif
-

@@ -40,6 +40,7 @@ OBJ = \
 	strconv.o \
 	filecheck.o \
 	FunctionData.o \
+	ParallelDummy.o \
 
 HEADERS = \
 	header.h \
