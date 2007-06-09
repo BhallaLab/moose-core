@@ -409,24 +409,17 @@ void Shell::rawAddFunc( const Conn& c, string s )
 	assert( post->className() == "PostMaster" );
 	unsigned int mynode;
 	unsigned int remotenode;
-	unsigned int j = 0; // This is for breakpointing for parallel debug
-	// istringsream istr;
-	// istr.str( s );
-	// istr >> srcId >> destId >> typeSig >> targetFname;
+	// unsigned int j = 0; // This is for breakpointing for parallel debug
 	get< unsigned int >( post, "localNode", mynode );
 	get< unsigned int >( post, "remoteNode", remotenode );
 	cout << ".";
 	cout << "Shell::rawAddFunc( " << s << " ), on " << mynode << ", from " << remotenode << "\n";
 	vector< string > svec;
 	separateString( s, svec, " " );
-	cout << "svec = ";
-	for ( unsigned int i = 0 ; i < svec.size(); i++ )
-		cout << i << ": " << svec[i] << "	\n";
-	
-	cout << "on node " << mynode << ", numElements = " << 
-		Element::numElements() << endl;
-	while ( j > 0 )
+	/*
+	while ( j > 0 ) // for breakpointing in parallel debug.
 		;
+		*/
 	// svec seq is : srcid, targetId, targetField, srcType
 	unsigned int destId = atoi( svec[1].c_str() );
 	if ( destId == BAD_ID ) {
@@ -449,7 +442,7 @@ void Shell::rawAddFunc( const Conn& c, string s )
 	}
 
 	string typeSig = "";
-	val2str< const Ftype* >( destField->ftype(), typeSig );
+	val2str< const Ftype* >( destField->ftype()->baseFtype(), typeSig );
 	if ( typeSig != svec[3] ) {
 		cout << "Error: Shell::rawAddFunc: field type mismatch: '" <<
 			typeSig << "' != '" << svec[3] << "'\n";

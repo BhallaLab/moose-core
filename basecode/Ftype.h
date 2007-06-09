@@ -50,6 +50,17 @@ class Ftype
 			 * which is a static function.
 			 */
 			virtual bool isSameType( const Ftype* other ) const = 0;
+
+			/**
+			 * This virtual function returns the base type of the Ftype,
+			 * that is, the elementary template specification T1 T2 etc.
+			 * For most Ftypes 'this' will do, but in some cases
+			 * (ValueFtype) we need to return the simpler variant.
+			 */
+			virtual const Ftype* baseFtype() const {
+				return this;
+			}
+			
 			virtual size_t size() const = 0;
 
 			virtual RecvFunc recvFunc() const = 0;

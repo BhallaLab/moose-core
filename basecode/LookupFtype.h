@@ -299,6 +299,10 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 				assert( index != 0 );
 				return new T2( *static_cast< T2* >( index ) );
 			}
+
+			const Ftype* baseFtype() const {
+				return Ftype1< T1 >::global();
+			}
 };
 
 #endif // _LOOKUP_FTYPE_H

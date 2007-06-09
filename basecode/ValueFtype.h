@@ -83,56 +83,9 @@ template < class T > class ValueFtype1: public Ftype1<T>
 				return 1;
 			}
 
-#if 0
-			/**
-			 * This function has to be specialized for each Ftype
-			 * that we wish to be able to convert. Otherwise it
-			 * reports failure.
-			 */
-			static bool val2str( T v, string& s ) {
-				s = "";
-				return 0;
+			const Ftype* baseFtype() const {
+				return Ftype1< T >::global();
 			}
-
-			/**
-			 * This function has to be specialized for each Ftype
-			 * that we wish to be able to convert. Otherwise it
-			 * reports failure.
-			 */
-			static bool str2val( const string& s, T& v ) {
-				return 0;
-			}
-
-			/**
-			 * This is a virtual function that gets the value,
-			 * converts it to a string, and puts this into the
-			 * string location specified.
-			 * Returns true on success.
-			 */
-			bool strGet( const Element* e, const Finfo* f, string& s )
-				const
-			{
-				T val;
-				if ( get( e, f, val ) )
-						return val2str( val, s );
-				return 0;
-			}
-
-			/**
-			 * This is a virtual function that takes a string,
-			 * converts it to a value, and assigns it to a field.
-			 * Returns true on success.
-			 */
-			bool strSet( Element* e, const Finfo* f, const string& s )
-				const
-			{
-				T val;
-				if ( str2val( s, val ) )
-					return set( e, f, val );
-				return 0;
-			}
-    
-#endif
 };
 
 #endif // _VALUE_FTYPE_H
