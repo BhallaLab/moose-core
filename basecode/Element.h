@@ -334,6 +334,12 @@ class Element
 		 */
 		virtual void copyMsg( map< const Element*, Element* >& tree )
 				= 0;
+		
+		/**
+		 * Returns the memory use of the Element and its messages, 
+		 * excluding the data part.
+		 */
+		virtual unsigned int getMsgMem() const = 0;
 	protected:
 		/**
 		 * This function copies the element, its data and its

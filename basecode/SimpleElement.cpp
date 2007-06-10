@@ -280,6 +280,16 @@ RecvFunc SimpleElement::srcRecvFunc( unsigned int src ) const
 	return src_[ src ].recvFunc();
 }
 
+unsigned int SimpleElement::getMsgMem() const
+{
+	return sizeof( SimpleElement ) + 
+		sizeof( name_ ) + name_.length() + 
+		sizeof( conn_ ) + conn_.size() * sizeof( Conn ) + 
+		sizeof( src_ ) +  src_.size() * sizeof( MsgSrc ) + 
+		sizeof( dest_ ) +  dest_.size() * sizeof( MsgDest ) + 
+		sizeof( finfo_ ) + finfo_.size() * sizeof( Finfo* );
+}
+
 //////////////////////////////////////////////////////////////////
 // Dest functions
 //////////////////////////////////////////////////////////////////

@@ -163,6 +163,8 @@ class SimpleElement: public Element
 				return src_.size();
 		}
 
+		/// Computes the memory use by the Element and its messages.
+		unsigned int getMsgMem() const;
 		/////////////////////////////////////////////////////////////
 		// Dest handling functions
 		/////////////////////////////////////////////////////////////
