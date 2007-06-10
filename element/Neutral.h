@@ -31,6 +31,11 @@ class Neutral
 			static unsigned int getParent( const Element* e );
 			static vector< unsigned int > getChildList(
 							const Element* e );
+			static double getCpu( const Element* e );
+			static unsigned int getDataMem( const Element* e );
+			static unsigned int getMsgMem( const Element* e );
+			// static unsigned int getNode( const Element* e );
+			// static void setNode( const Conn& c, unsigned int node );
 
 			// The m in the name is to avoid confusion with the utility
 			// function create below.
