@@ -3161,5 +3161,22 @@ basecode::ParallelDummy to avoid having dummy definitions in an obscure place.
 Checked in as revision 130.
 
 Modified makefile to generate non-parallel version for more general developers.
+Checked in as revision 131.
+
+Various organizational things to get into parallel:
+- Fix up Cinfos to automatically do scheduling.
+* Return size of objects: data and msg parts.
++ Add a load estimation field to Neutral so all classes inherit it.
+	Either that or put it in Cinfos. If it is public we can do more things.
+- Fix up Finfos to provide internal msg info.
+- Fix up Shared messages between nodes
+- Connect up the main Shell messages.
+- Fix up ParTick scheduling for resting and running times.
+- Decide how to access each node.
+	- Field on each obj.
+		- Does it cascade downward?
+	- /node1, /node2 etc: Ugly. Alternatively send into postmasters.
+	- Enhancement of move command. But it doesn't tell about current obj.
+	- Use a special shell command.
 
 =============================================================================

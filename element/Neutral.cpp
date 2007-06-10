@@ -56,6 +56,32 @@ const Cinfo* initNeutralCinfo()
 				reinterpret_cast< GetFunc>( &Neutral::getChildList ),
 				&dummyFunc
 		),
+		/// Reports the cost of one clock tick, very roughly # of FLOPs.
+		new ValueFinfo( "cpu",
+				ValueFtype1< double >::global(), 
+				reinterpret_cast< GetFunc>( &Neutral::getCpu ),
+				&dummyFunc
+		),
+		/// Returns memory used by data part of object
+		new ValueFinfo( "dataMem",
+				ValueFtype1< unsigned int >::global(), 
+				reinterpret_cast< GetFunc>( &Neutral::getDataMem ),
+				&dummyFunc
+		),
+		/// Returns memory used by messaging (Element) part of object.
+		new ValueFinfo( "msgMem",
+				ValueFtype1< unsigned int >::global(), 
+				reinterpret_cast< GetFunc>( &Neutral::getMsgMem ),
+				&dummyFunc
+		),
+		/*
+		/// Get and set the node on which this object sits. Low level op.
+		new ValueFinfo( "node",
+				ValueFtype1< unsigned int >::global(), 
+				GFCAST( &Neutral::getNode ),
+				RFCAST( &Neutral::setNode )
+		),
+		*/
 		new LookupFinfo(
 				"lookupChild",
 				LookupFtype< unsigned int, string >::global(), 
@@ -161,6 +187,9 @@ const string Neutral::getClass( const Element* e )
 		return e->className();
 }
 
+/////////////////////////////////////////////////////////////////////
+// Field functions.
+/////////////////////////////////////////////////////////////////////
 
 // Perhaps this should take a Cinfo* for the first arg, except that
 // I don't want to add yet another class into the header.
@@ -302,13 +331,13 @@ vector< unsigned int > Neutral::getChildList( const Element* e )
 
 vector< string > Neutral::getFieldList( const Element* elm )
 {
-	const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
-	assert( e != 0 );
+	// const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
+	// assert( e != 0 );
 
 	vector< string > ret;
 	vector< const Finfo* > flist;
 	vector< const Finfo* >::const_iterator i;
-	e->listFinfos( flist );
+	elm->listFinfos( flist );
 
 	for ( i = flist.begin(); i != flist.end(); i++ )
 		ret.push_back( (*i)->name() );
@@ -316,6 +345,36 @@ vector< string > Neutral::getFieldList( const Element* elm )
 	return ret;
 }
 
+double Neutral::getCpu( const Element* e )
+{
+	return 0.0;
+}
+
+unsigned int Neutral::getDataMem( const Element* e )
+{
+	const Finfo *f = e->getThisFinfo();
+	return f->ftype()->size();
+}
+
+unsigned int Neutral::getMsgMem( const Element* e )
+{
+	return e->getMsgMem();
+}
+
+/*
+unsigned int Neutral::getNode( const Element* e )
+{
+	return e->getNode();
+}
+
+void Neutral::setNode( const Conn& c, unsigned int node )
+{
+	e->setNode( node );
+}
+*/
+
+/////////////////////////////////////////////////////////////////////
+// Unit tests.
 /////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
