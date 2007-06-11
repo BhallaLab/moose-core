@@ -3169,6 +3169,8 @@ Various organizational things to get into parallel:
 + Add a load estimation field to Neutral so all classes inherit it.
 	Either that or put it in Cinfos. If it is public we can do more things.
 - Fix up Finfos to provide internal msg info.
+	- Add flag for whether MsgFinfo should allocate permanently or
+	on the fly. If anyone uses the Slot then it may have to be permanent.
 - Fix up Shared messages between nodes
 - Connect up the main Shell messages.
 - Fix up ParTick scheduling for resting and running times.
@@ -3178,5 +3180,27 @@ Various organizational things to get into parallel:
 	- /node1, /node2 etc: Ugly. Alternatively send into postmasters.
 	- Enhancement of move command. But it doesn't tell about current obj.
 	- Use a special shell command.
+
+=============================================================================
+10 June 2007
+Minor checkin for fields for memory and CPU usage.
+Checked in as revision 132.
+
+More or less implemented SharedFinfo::addSeparateConns. Now need to implement
+the converse, respondToSeparateConns. Alternatively I keep it one-way
+because SharedFinfos can be handled either way.
+
+Now successfully compiled, passes basic unit tests but not parallel tests.
+
+=============================================================================
+11 June 2007
+
+Stepped through message creation process. The conns, and MsgDest arrays
+at either end are being correctly handled. 
+Problem in ParFinfo::respondToAdd. Doesn't talk nicely to SharedMessages.
+
+Getting close. Some of the data is going across nodes OK, but there are still
+errors. I'll check it in now because there are perhaps too many accumulated
+changes.
 
 =============================================================================

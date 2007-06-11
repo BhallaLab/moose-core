@@ -222,6 +222,10 @@ class SimpleElement: public Element
 				unsigned int dest, unsigned int nDest
 		);
 
+		unsigned int insertSeparateConnOnSrc(
+			unsigned int src, FuncList& rf,
+			unsigned int dest, unsigned int nDest );
+
 		unsigned int insertConnOnDest(
 						unsigned int dest, unsigned int nDest );
 

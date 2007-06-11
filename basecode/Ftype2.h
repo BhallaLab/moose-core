@@ -162,15 +162,20 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			IncomingFunc inFunc() const {
 				return this->incomingFunc;
 			}
+			/*
+			void inFunc( vector< IncomingFunc >& ret ) const {
+				ret.push_back( this->incomingFunc );
+			}
+			*/
 
 			/// Returns the statically defined outgoingSync function
-			RecvFunc syncFunc() const {
-				return RFCAST( this->outgoingSync );
+			void syncFunc( vector< RecvFunc >& ret ) const {
+				ret.push_back( RFCAST( this->outgoingSync ) );
 			}
 
 			/// Returns the statically defined outgoingAsync function
-			RecvFunc asyncFunc() const {
-				return RFCAST( this->outgoingAsync );
+			void asyncFunc( vector< RecvFunc >& ret ) const {
+				ret.push_back( RFCAST( this->outgoingAsync ) );
 			}
 };
 

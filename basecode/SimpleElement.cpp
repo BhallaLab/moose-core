@@ -161,6 +161,90 @@ unsigned int SimpleElement::insertConnOnSrc(
 }
 
 /**
+ * This variant inserts a connection on the MsgSrc, putting it on
+ * the separate index. It is used to expand out shared messages into
+ * individual ones for connecting to the PostMaster.
+ * Returns the index of the first matching MsgSrc of the shared set,
+ * or if it doesn't exist, it makes a new set of MsgSrcs and returns
+ * the starting index of this set.
+ * Assumes that the Finfo that called this function has done the
+ * necessary type matching to the src.
+ * Ensures that all Conns belonging to the linked list of MsgSrcs are
+ * contiguous.
+ * Assumes that the FuncList rf has been expanded out in case there are
+ * extra Conn entries needed for incoming messages.
+ */
+unsigned int SimpleElement::insertSeparateConnOnSrc(
+		unsigned int src, FuncList& rf,
+		unsigned int dest, unsigned int nDest )
+{
+	assert ( rf.size() > 0 );
+	assert ( src_.size() > 0 );
+	assert ( src_.size() >= src + rf.size() );
+
+	vector< RecvFunc > oldFuncs;
+	MsgSrc& s( src_[ src ] );
+	unsigned int begin = s.begin();
+	unsigned int end = s.end();
+	unsigned int next = s.next();
+
+	if ( begin == end ) { // Need to initialize current MsgSrc
+		unsigned int i;
+		unsigned int ret;
+		for ( i = 0; i < rf.size(); i++ ) {
+			assert( src_[ src + i ].recvFunc() == dummyFunc );
+			src_[ src + i ].setFunc( rf[i] );
+			if ( i == 0 )
+				ret = insertConn( src, 1, dest, nDest );
+			else 
+				insertConn( src + i, 1, dest, nDest );
+		}
+		return ret;
+	}
+
+	for (unsigned int i = 0; i < rf.size(); i++ ) {
+		oldFuncs.push_back( src_[ src + i ].recvFunc() );
+	}
+
+	if ( oldFuncs == rf ) { // This src matches, insertion in this src
+		unsigned int i;
+		unsigned int ret;
+		for ( i = 0; i < rf.size(); i++ ) {
+			assert( src_[ src + i ].recvFunc() == rf[i] );
+			if ( i == 0 )
+				ret = insertConn( src, 1, dest, nDest );
+			else 
+				insertConn( src + i, 1, dest, nDest );
+		}
+		return ret;
+	}
+
+	if ( next != 0 ) // Look in next range for insertion
+		return insertSeparateConnOnSrc( src + next, rf, dest, nDest );
+
+	// Nothing matches. So we create a new range at the end of the src_.
+	unsigned int offset = src_.size() - src;
+	for (unsigned int i = 0; i < rf.size(); i++ ) {
+		src_[ src + i ].setNext( offset );
+		// Note that the new src uses the 'end' from the previous one.
+		// This ensures that all Conns within a MsgSrc are contiguous.
+		src_.push_back( MsgSrc( end, end, rf[i] ) );
+	}
+	src = src_.size() - rf.size();
+		unsigned int i;
+		unsigned int ret;
+		for ( i = 0; i < rf.size(); i++ ) {
+			assert( src_[ src + i ].recvFunc() == rf[i] );
+			if ( i == 0 )
+				ret = insertConn( src, 1, dest, nDest );
+			else 
+				insertConn( src + i, 1, dest, nDest );
+		}
+		return ret;
+	//return insertConn( src_.size() - rf.size(), rf.size(), dest, nDest);
+}
+
+/**
  * Inserts a Conn for the desired dest. Returns the index of the
  * new Conn. Assumes that there are no shared Srcs to be dealt with.
  * The nDest is in case this is a shared dest, and we may have to

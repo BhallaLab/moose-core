@@ -53,6 +53,10 @@ class SharedFinfo: public Finfo
 					Element* e, Element* destElm, const Finfo* destFinfo
 			) const;
 
+			bool addSeparateConns(
+					Element* e, Element* destElm, const Finfo* destFinfo
+			) const;
+
 			bool respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
 					FuncList& srcfl, FuncList& returnFl,

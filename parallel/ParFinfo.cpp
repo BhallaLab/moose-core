@@ -153,7 +153,8 @@ bool ParFinfo::respondToAdd(
 	// srcType.
 	returnFl.resize( 0 );
 	/// \todo: work out how to decide if a message should be sync/async.
-	returnFl.push_back( srcType->asyncFunc() );
+	srcType->asyncFunc( returnFl );
+	// returnFl.push_back( srcType->asyncFunc() );
 	numDest = returnFl.size();
 
 	// Second, refer this to the postmaster which does the following:
@@ -161,16 +162,17 @@ bool ParFinfo::respondToAdd(
 	// - send out message request
 	// - create local message
 	destIndex = PostMaster::respondToAdd( e, oss.str(), numDest );
-	/*
-	cout << "ParFinfo::respondToadd::conn = " << 
-		e->connDestEnd( destIndex ) - e->lookupConn( 0 )  <<
-		", destIndex = " << destIndex << endl;
-		*/
-	
-	// destIndex = post->outgoingSlotNum_;
-	// post->outgoingSlotNum_ += numDest;
 
-	// Still need to figure out how to deal with stuff in the srcFl.
+
+	PostMaster* post = static_cast< PostMaster* >( e->data() );
+	vector< Conn >::const_iterator conn = e->connDestEnd( msgIndex_ );
+	unsigned int connIndex = 
+		e->connDestBegin( msgIndex_ ) - e->lookupConn( 0 );
+	for ( unsigned int i = 0; i < srcFl.size(); i++ ) {
+		const FunctionData* fd = lookupFunctionData( srcFl[i] );
+		assert ( fd != 0 );
+		post->addIncomingFunc( connIndex + i, fd->index() );
+	}
 	return 1;
 }
 
