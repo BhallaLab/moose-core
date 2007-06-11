@@ -182,7 +182,7 @@ const Cinfo* initShellCinfo()
 	 */
 	static Finfo* serialShared[] =
 	{
-		new DestFinfo( "xrawAdd", // Addmsg as a raw string.
+		new DestFinfo( "rawAdd", // Addmsg as a raw string.
 			Ftype1< string >::global(),
 			RFCAST( &Shell::rawAddFunc )
 		),
@@ -198,7 +198,7 @@ const Cinfo* initShellCinfo()
 				reinterpret_cast< GetFunc >( &Shell::getCwe ),
 				RFCAST( &Shell::setCwe ) ),
 
-		new DestFinfo( "rawAdd", // Addmsg as a raw string.
+		new DestFinfo( "xrawAdd", // Addmsg as a raw string.
 			Ftype1< string >::global(),
 			RFCAST( &Shell::rawAddFunc )
 		),
