@@ -165,6 +165,11 @@ class Element
 				unsigned int dest, unsigned int nDest
 		) = 0;
 
+		virtual unsigned int insertSeparateConnOnSrc(
+				unsigned int src, FuncList& rf,
+				unsigned int dest, unsigned int nDest
+		) = 0;
+
 		/** Makes a dest conn and returns the index of the new conn.
 		 * Here we only have to worry about placing it on one or more
 		 * dests. If it were a shared message with any srcs then the

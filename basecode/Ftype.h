@@ -182,16 +182,21 @@ class Ftype
 
 			/**
 			 * This returns the IncomingFunc from the specific
-			 * Ftype. The job of the IncomingFunc is to
+			 * Ftype in the vector ret. The vector is needed because
+			 * SharedFtype may return many funcs. 
+			 * The job of the IncomingFunc is to
 			 * munch through serial data stream to send data to
 			 * destination objects. This function is called from 
 			 * PostMaster on target node.
 			 */
 			virtual IncomingFunc inFunc() const = 0;
+			// virtual void inFunc( vector< IncomingFunc >& ret ) const = 0;
 
 			/**
-			 * This returns a suitably typecast RecvFunc for handling
-			 * messages going into the PostMaster. Each Ftype has
+			 * This puts into the return vector ret, one or more suitably 
+			 * typecast RecvFuncs for handling messages going into the 
+			 * PostMaster. Many may be entered by a SharedFtype. 
+			 * Each Ftype has
 			 * to provide a static function to return here.
 			 * The job of the RecvFunc is to call a global function
 			 * 'getParbuf' that returns the current location in
@@ -200,7 +205,7 @@ class Ftype
 			 * The syncFunc stores only value data in the buffer, and
 			 * requires that the data sequence is identical every timestep.
 			 */
-			virtual RecvFunc syncFunc() const = 0;
+			virtual void syncFunc( vector< RecvFunc >& ret ) const = 0;
 			/**
 			 * The asyncFunc is similar to the syncFunc, but it is for
 			 * data that is transmitted sporadically such as action
@@ -209,7 +214,7 @@ class Ftype
 			 * The target node figures out which target object to call
 			 * using the conn index.
 			 */
-			virtual RecvFunc asyncFunc() const = 0;
+			virtual void asyncFunc( vector< RecvFunc >& ret ) const = 0;
 
 			/**
 			 * This is used for making messages from postmasters to

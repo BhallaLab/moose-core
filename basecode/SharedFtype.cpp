@@ -107,6 +107,29 @@ bool SharedFtype::isSameType( const Ftype* other ) const
 	return 0;
 }
 
+/*
+void inFunc( vector< IncomingFunc >& ret ) const
+{
+	vector< const Ftype* >::iterator i;
+	for ( i = destTypes.begin(); i != destTypes.end(); i++ )
+		( *i )->inFunc( ret );
+}
+*/
+
+void SharedFtype::syncFunc( vector< RecvFunc >& ret ) const
+{
+	vector< const Ftype* >::const_iterator i;
+	for ( i = srcTypes_.begin(); i != srcTypes_.end(); i++ )
+		( *i )->syncFunc( ret );
+}
+
+void SharedFtype::asyncFunc( vector< RecvFunc >& ret ) const
+{
+	vector< const Ftype* >::const_iterator i;
+	for ( i = srcTypes_.begin(); i != srcTypes_.end(); i++ )
+		( *i )->asyncFunc( ret );
+}
+
 #ifdef DO_UNIT_TESTS
 #include "DerivedFtype.h"
 void tempFunc( const Conn& c )
