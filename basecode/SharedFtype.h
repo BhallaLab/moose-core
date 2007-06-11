@@ -83,18 +83,17 @@ class SharedFtype: public Ftype
 				assert( 0 );
 				return 0;
 			}
+			/*
+			void inFunc( vector< IncomingFunc >& ret ) const {
+				assert( 0 );
+			}
+			*/
 
 			/// Returns the statically defined outgoingSync function
-			RecvFunc syncFunc() const {
-				assert( 0 );
-				return 0;
-			}
+			void syncFunc( vector< RecvFunc >& ret ) const;
 
 			/// Returns the statically defined outgoingAsync function
-			RecvFunc asyncFunc() const {
-				assert( 0 );
-				return 0;
-			}
+			void asyncFunc( vector< RecvFunc >& ret ) const;
 
 		private:
 			vector< const Ftype* > destTypes_;

@@ -79,6 +79,13 @@ bool SharedFinfo::add(
 	Element* e, Element* destElm, const Finfo* destFinfo
 ) const
 {
+	// This test is ugly and needs to be fixed. 
+	if ( destElm->className() == "PostMaster" && 
+		!( destFinfo->name() == "parTick" || 
+		destFinfo->name() == "serial" )
+	)
+		return addSeparateConns( e, destElm, destFinfo );
+
 	FuncList srcFl = rfuncs_;
 	FuncList destFl;
 	unsigned int destIndex;
@@ -90,6 +97,7 @@ bool SharedFinfo::add(
 	{
 		assert ( destFl.size() == numSrc_ );
 		assert ( numSrc_ + srcFl.size() > 0 );
+
 		unsigned int originatingConn;
 		unsigned int targetConn;
 
@@ -115,6 +123,67 @@ bool SharedFinfo::add(
 	return 0;
 }
 
+/**
+ * For the PostMaster and possibly other cases, we have to provide a
+ * distinct Conn for each sub-message. This function does so. It
+ * assumes that the target SharedFinfo also knows how to do so, and
+ * we must set a flag to confirm that separate conns are being used.
+ *
+ * To be more precise: each unique 
+ * MsgSrc must have a separate Conn, and likewise each unique MsgDest. 
+ * However, the src and dests conns can overap. So if we only had 
+ * 1 MsgSrc and 1 MsgDest, we would use 1 conn. If we had 2 MsgSrc
+ * and 1 MsgDest, we would use 2 conns and the first one would be
+ * shared by a Src and a Dest.
+ */
+bool SharedFinfo::addSeparateConns(
+	Element* e, Element* destElm, const Finfo* destFinfo
+) const
+{
+	FuncList srcFl = rfuncs_;
+	FuncList destFl;
+	unsigned int destIndex;
+	unsigned int numDest;
+
+	if ( destFinfo->respondToAdd( destElm, e, ftype(),
+							srcFl, destFl,
+							destIndex, numDest ) )
+	{
+		assert ( destFl.size() == numSrc_ );
+		assert ( numSrc_ + srcFl.size() > 0 );
+
+		unsigned int originatingConn;
+		unsigned int targetConn;
+		unsigned int i;
+
+		// First we decide where to put the originating Conn.
+		// Note that all target conns (on the PostMaster) get put on the 
+		// msgDest vector.
+		if ( numSrc_ == 0 ) {  // Put it on MsgDest.
+			for ( i = 0; i < srcFl.size(); i++ ) {
+				originatingConn = e->insertConnOnDest( msgIndex_, 1);
+				targetConn = destElm->insertConnOnDest( destIndex, 1 );
+				e->connect( originatingConn, destElm, targetConn );
+			}
+		} else { // The usual case: mixed srcs and dests.
+			unsigned int numConns = srcFl.size();
+			if ( numConns < numSrc_ )
+				numConns = numSrc_;
+			for ( i = numSrc_; i != numConns; i++ )
+				destFl.push_back( &dummyFunc );
+
+			originatingConn = 
+				e->insertSeparateConnOnSrc( msgIndex_, destFl, 0, 0 );
+
+			for ( i = 0; i < numConns; i++ ) {
+				targetConn = destElm->insertConnOnDest( destIndex, 1 );
+				e->connect( originatingConn + i, destElm, targetConn );
+			}
+		}
+		return 1;
+	}
+	return 0;
+}
 
 /**
  * This responds to a message request from a shared message src.
