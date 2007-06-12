@@ -15,6 +15,8 @@
 #include "PostMaster.h"
 #include <sstream>
 
+static const unsigned int dataSlot = 
+	initPostMasterCinfo()->getSlotIndex( "data" );
 
 ParFinfo::ParFinfo( const string& name ) 
 	: Finfo( name, Ftype0::global() )
@@ -77,7 +79,9 @@ bool ParFinfo::add(
 		assert( e->className() == "PostMaster" );
 		PostMaster* post = static_cast< PostMaster* >( e->data() );
 		//equivalent to: incomingFunc_.push_back( fd->index() );
-		post->addIncomingFunc( originatingConn, fd->index() );
+		unsigned int destOffset = e->connDestBegin( dataSlot ) -
+				e->lookupConn( 0 );
+		post->addIncomingFunc( originatingConn - destOffset, fd->index() );
 		// cout << "ParFinfo::add::origConn = " << originatingConn << ", IncomingFunc = " << fd->index() << endl;
 
 		return 1;
@@ -140,6 +144,7 @@ bool ParFinfo::respondToAdd(
 // 	oss.str( respondString );
 	cout << "src=" << src->name() << ", dest=" << e->name() << 
 		", srcid=" << src->id() << ", destid=" << e->id() <<
+		", targetField=" << targetField <<
 		", targetid=" << targetId << endl;
 
 	oss << src->id() << " " << targetId << " " << 
@@ -161,17 +166,24 @@ bool ParFinfo::respondToAdd(
 	// - post irecv for return status of this message
 	// - send out message request
 	// - create local message
-	destIndex = PostMaster::respondToAdd( e, oss.str(), numDest );
+
+	if ( targetId != 0 ) // Check that message isn't to postmaster itself.
+		destIndex = PostMaster::respondToAdd( e, oss.str(), numDest );
 
 
 	PostMaster* post = static_cast< PostMaster* >( e->data() );
 	vector< Conn >::const_iterator conn = e->connDestEnd( msgIndex_ );
 	unsigned int connIndex = 
 		e->connDestBegin( msgIndex_ ) - e->lookupConn( 0 );
+
+	cout << "destIndex=" << destIndex << ", connIndex=" << connIndex <<endl;
+
+	unsigned int destOffset = e->connDestBegin( dataSlot ) -
+			e->lookupConn( 0 );
 	for ( unsigned int i = 0; i < srcFl.size(); i++ ) {
 		const FunctionData* fd = lookupFunctionData( srcFl[i] );
 		assert ( fd != 0 );
-		post->addIncomingFunc( connIndex + i, fd->index() );
+		post->addIncomingFunc( connIndex + i - destOffset, fd->index() );
 	}
 	return 1;
 }

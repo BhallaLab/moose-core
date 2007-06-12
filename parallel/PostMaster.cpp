@@ -204,6 +204,7 @@ void PostMaster::setTargetField( const Conn& c, string value )
 // Here we handle passing messages to off-nodes
 /////////////////////////////////////////////////////////////////////
 
+/*
 // Just to help me remember how to use the typeid from RTTI.
 // This will work only between identical compilers, I think.
 // Something more exciting happens with shared finfos.
@@ -211,6 +212,7 @@ const char* ftype2str( const Ftype *f )
 {
 	return typeid( *f ).name();
 }
+*/
 
 
 /////////////////////////////////////////////////////////////////////
@@ -283,7 +285,7 @@ void PostMaster::parseMsgRequest( const char* req, Element* self )
 		return;
 	}
 
-	if ( ftype2str( targetFinfo->ftype() ) != typeSig ) {
+	if ( targetFinfo->ftype()->typeStr() != typeSig ) {
 		// Send back failure report
 		return;
 	}
@@ -381,7 +383,7 @@ void PostMaster::innerPoll( Element* e)
 			IncomingFunc pf = 
 				lookupFunctionData( funcId )->funcType()->inFunc();
 			data = static_cast< const char* >(
-				pf( *( e->lookupConn( msgId ) ), data, rf ) );
+				pf( *( e->connDestBegin( dataSlot ) + msgId ), data, rf ) );
 			// cout << "4:"<<localNode_ << "," << remoteNode_ << ", datapos = " << data - inBuf_ << endl << flush;
 			assert (data != 0 );
 		}
@@ -472,9 +474,12 @@ void* getParBuf( const Conn& c, unsigned int size )
 
 void* getAsyncParBuf( const Conn& c, unsigned int size )
 {
-	PostMaster* pm = static_cast< PostMaster* >( c.data() );
+	Element* post = c.targetElement();
+	PostMaster* pm = static_cast< PostMaster* >( post->data() );
 	assert( pm != 0 );
-	return pm->innerGetAsyncParBuf( c.targetIndex(), size );
+	unsigned int msgId = c.targetIndex() - 
+		 ( post->connDestBegin( dataSlot ) - post->lookupConn( 0 ) );
+	return pm->innerGetAsyncParBuf( msgId, size );
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -494,6 +499,7 @@ void testPostMaster()
 	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
 	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
 	unsigned int* postId = new unsigned int[numNodes];
+	Element* post;
 	unsigned int i;
 	if ( myNode == 0 )
 		cout << "\nTesting PostMaster: " << numNodes << " nodes";
@@ -530,7 +536,9 @@ void testPostMaster()
 	// It tries to create a message from a table to a postmaster.
 	///////////////////////////////////////////////////////////////
 	// On all nodes, create a table and fill it up.
+	
 	Element* table = Neutral::create( "Table", "tab", Element::root() );
+	// cout << myNode << ": tabId = " << table->id() << endl;
 	ASSERT( table != 0, "Checking data flow" );
 	set< int >( table, "xdivs", 10 );
 	if ( myNode == 0 ) {
@@ -545,17 +553,8 @@ void testPostMaster()
 							table, "table", 0.0, i );
 	}
 
-	Element* post;
-	/*
-	if ( numNodes == 1 ) { // Create a dummy postmaster
-		post = Neutral::create( "PostMaster", "node1", pms );
-		numNodes = 2;
-		delete[] postId;
-		postId = new unsigned int[numNodes];
-		postId[0] = BAD_ID;
-		postId[1] = post->id();
-	}
-	*/
+	MPI::COMM_WORLD.Barrier();
+
 	if ( myNode == 0 ) {
 		// Here we are being sneaky because we have the same id on all 
 		// nodes.
@@ -570,18 +569,13 @@ void testPostMaster()
 		}
 	}
 
+	// This section sends the data over to the remote node.
+	unsigned int cjId = Shell::path2eid( "/sched/cj", "/" );
+	assert( cjId != BAD_ID );
+	Element* cj = Element::element( cjId );
+	set< double >( cj, "start", 1.0 );
 
-	// This first test sends data from node 0 to all the other
-	// nodes using hard-coded messaging. We use a 
-	// table at each end for the source and dest of the data.
-		/*
-		cout << "\n ftype2str( Ftype1< double > ) = " <<
-				ftype2str( Ftype1< double >::global() );
-		cout << "\n ftype2str( Ftype2< string, vector< unsigned int > > ) = " <<
-				ftype2str( Ftype2< string, vector< unsigned int > >::global() );
-		cout << "\n ftype2str( ValueFtype1< Table >::global() ) = " <<
-				ftype2str( ValueFtype1< Table >::global() );
-				*/
+	MPI::COMM_WORLD.Barrier();
 	set( table, "destroy" );
 
 	////////////////////////////////////////////////////////////////
@@ -590,11 +584,10 @@ void testPostMaster()
 	MPI::COMM_WORLD.Barrier();
 	// sleep( 5 );
 	MPI::COMM_WORLD.Barrier();
-	unsigned int cjId = Shell::path2eid( "/sched/cj", "/" );
-	assert( cjId != BAD_ID );
-	Element* cj = Element::element( cjId );
-	set< double >( cj, "start", 1.0 );
 	char sendstr[50];
+
+	bool glug = 0; // Breakpoint for parallel debugging
+	while ( glug ) ;
 	for ( i = 0; i < numNodes; i++ ) {
 		if ( i == myNode )
 			continue;
@@ -604,14 +597,14 @@ void testPostMaster()
 
 		// Find the Conn# of the message to the shell. Assume same
 		// index is used on all nodes.
-		unsigned int shellIndex = post->connDestEnd( dataSlot ) - 
-			post->lookupConn( 0 ) - 2;
+		unsigned int shellIndex = 2;
 		cout << "dataslot = " << dataSlot << ", shellIndex = " << shellIndex << ", sendstr = " << sendstr << endl << flush;
 		char* buf = static_cast< char* >(
 			pdata->innerGetAsyncParBuf( shellIndex, strlen( sendstr ) + 1 )
 		);
 		strcpy( buf, sendstr );
 	}
+	MPI::COMM_WORLD.Barrier();
 	// cout << " starting string send\n" << flush;
 	set< double >( cj, "start", 1.0 );
 	// cout << " Done string send\n" << flush;

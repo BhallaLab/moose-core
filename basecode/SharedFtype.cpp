@@ -130,6 +130,28 @@ void SharedFtype::asyncFunc( vector< RecvFunc >& ret ) const
 		( *i )->asyncFunc( ret );
 }
 
+/**
+ * This returns a precomputed Ftype with its baseType
+ */
+const Ftype* SharedFtype::baseFtype() const {
+	return this;
+}
+
+/**
+ * This generates the type string for the SharedFtype by going through
+ * each of the sub-types and catenating their typeStr.
+ */
+string SharedFtype::typeStr() const
+{
+	vector< const Ftype* >::const_iterator i;
+	string ret = "";
+	for ( i = destTypes_.begin(); i != destTypes_.end(); i++ )
+		ret = ret + (*i)->typeStr();
+	for ( i = srcTypes_.begin(); i != srcTypes_.end(); i++ )
+		ret = ret + (*i)->typeStr();
+	return ret;
+}
+
 #ifdef DO_UNIT_TESTS
 #include "DerivedFtype.h"
 void tempFunc( const Conn& c )
