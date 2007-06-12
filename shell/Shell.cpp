@@ -415,8 +415,8 @@ void Shell::rawAddFunc( const Conn& c, string s )
 	unsigned int remotenode;
 	get< unsigned int >( post, "localNode", mynode );
 	get< unsigned int >( post, "remoteNode", remotenode );
-	cout << ".";
-	cout << "Shell::rawAddFunc( " << s << " ), on " << mynode << ", from " << remotenode << "\n";
+	// cout << ".";
+	// cout << "Shell::rawAddFunc( " << s << " ), on " << mynode << ", from " << remotenode << "\n";
 	vector< string > svec;
 	separateString( s, svec, " " );
 	unsigned int j = 0; // This is for breakpointing for parallel debug
@@ -452,7 +452,7 @@ void Shell::rawAddFunc( const Conn& c, string s )
 	}
 	
 	// post->findFinfo( "data" )->add( post, dest, destField );
-	cout << "Shell::rawAddFunc: Successfully added msg on remote node\n";
+	// cout << "Shell::rawAddFunc: Successfully added msg on remote node\n";
 }
 
 void Shell::rawCopyFunc( const Conn& c, string s )
@@ -462,7 +462,20 @@ void Shell::rawCopyFunc( const Conn& c, string s )
 
 void Shell::rawTestFunc( const Conn& c, string s )
 {
-	cout << "Shell::rawTestFunc( " << s << " )\n";
+	Element* post = c.sourceElement();
+	ASSERT( post->className() == "PostMaster", "rawTestFunc" );
+	unsigned int mynode;
+	unsigned int remotenode;
+	get< unsigned int >( post, "localNode", mynode );
+	get< unsigned int >( post, "remoteNode", remotenode );
+	char teststr[30];
+	sprintf( teststr, "My name is Michael Caine %d,%d", 
+		remotenode, mynode );
+
+	// cout << "Shell::rawTestFunc( " << s << " )," << teststr << "\n";
+	
+	ASSERT( s == teststr, "Shell::rawTestFunc" );
+	// cout << "Shell::rawTestFunc( " << s << " )\n";
 }
 
 //////////////////////////////////////////////////////////////////////
