@@ -3220,6 +3220,8 @@ The place where the ConnIndex is assigned is:
 	PostMaster::test ~595 where we send out strings directly.
 	PostMaster::getAsyncParBuf where we pass the targetIndex into 
 		innerGetAsyncParBuf.
+	PostMaster::respondToAdd ~446 where we send out data for the
+		rawAdd function on the remote node.
 The place where the ConnIndex is read out is:
 	PostMaster::innerPoll ~370 where we extract it from the string.
 The place where the FuncIds are set is:
@@ -3230,8 +3232,12 @@ The place where the FuncIds are set is:
 Let's use relative indexing.
 This helps a lot. Also implemented a test function to confirm that the
 connId system can handle multiple target funcs.
-Checked in as revision 133.
+Checked in as revision 134.
 
 Set up with non-parallel compilation settings for other developers.
+Checked in as revision 135.
+
+Fixed up some remaining bugs, cleaned up unit tests, cleaned up a lot of
+cout debugging.
 
 =============================================================================
