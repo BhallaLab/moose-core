@@ -3230,5 +3230,8 @@ The place where the FuncIds are set is:
 Let's use relative indexing.
 This helps a lot. Also implemented a test function to confirm that the
 connId system can handle multiple target funcs.
+Checked in as revision 133.
+
+Set up with non-parallel compilation settings for other developers.
 
 =============================================================================
