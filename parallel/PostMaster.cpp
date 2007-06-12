@@ -440,10 +440,10 @@ unsigned int PostMaster::respondToAdd(
 			PostMaster::getRemoteNode( e ) <<
 			" with " << respondString << endl;
 			*/
-	// A little risky: We assume that the second message formed on the
-	// postmaster is the connection to the Shell, and that nothing
-	// is inserted below this.
-	unsigned int shellIndex = 1;
+	// A little risky: We assume that the second message on the
+	// dataSlot of the postmaster is the connection to the Shell,
+	// and that nothing is inserted below this.
+	unsigned int shellIndex = 0;
 	PostMaster* p = static_cast< PostMaster* >( e->data() );
 	char* buf = static_cast< char* >(
 		p->innerGetAsyncParBuf( shellIndex, respondString.length() + 1 )
@@ -598,7 +598,7 @@ void testPostMaster()
 		// Find the Conn# of the message to the shell. Assume same
 		// index is used on all nodes.
 		unsigned int shellIndex = 2;
-		cout << "dataslot = " << dataSlot << ", shellIndex = " << shellIndex << ", sendstr = " << sendstr << endl << flush;
+//		cout << "dataslot = " << dataSlot << ", shellIndex = " << shellIndex << ", sendstr = " << sendstr << endl << flush;
 		char* buf = static_cast< char* >(
 			pdata->innerGetAsyncParBuf( shellIndex, strlen( sendstr ) + 1 )
 		);
