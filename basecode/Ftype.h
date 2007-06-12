@@ -175,6 +175,18 @@ class Ftype
         		return "void";        
     		}
 
+			/**
+			 * This is a helper function for val2str and returns a 
+			 * string for the Ftype. The function is specialized
+			 * when the derived class is 
+			 * a SharedFtype where we need to append lots of Ftypes.
+			 * The function is used by val2str<Ftype*>
+			 */
+			virtual std::string typeStr() const
+			{
+				return typeid( this ).name();
+			}
+
 			////////////////////////////////////////////////////////
 			// Here are some serialization functions used for
 			// parallel message transfer
