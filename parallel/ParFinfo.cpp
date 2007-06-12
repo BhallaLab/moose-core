@@ -142,10 +142,12 @@ bool ParFinfo::respondToAdd(
 //	string respondString;
 	ostringstream oss;
 // 	oss.str( respondString );
+	/*
 	cout << "src=" << src->name() << ", dest=" << e->name() << 
 		", srcid=" << src->id() << ", destid=" << e->id() <<
 		", targetField=" << targetField <<
 		", targetid=" << targetId << endl;
+		*/
 
 	oss << src->id() << " " << targetId << " " << 
 			targetField << " " << targetType;
@@ -176,7 +178,7 @@ bool ParFinfo::respondToAdd(
 	unsigned int connIndex = 
 		e->connDestBegin( msgIndex_ ) - e->lookupConn( 0 );
 
-	cout << "destIndex=" << destIndex << ", connIndex=" << connIndex <<endl;
+	// cout << "destIndex=" << destIndex << ", connIndex=" << connIndex <<endl;
 
 	unsigned int destOffset = e->connDestBegin( dataSlot ) -
 			e->lookupConn( 0 );
