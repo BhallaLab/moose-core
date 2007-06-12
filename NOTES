@@ -3202,5 +3202,33 @@ Problem in ParFinfo::respondToAdd. Doesn't talk nicely to SharedMessages.
 Getting close. Some of the data is going across nodes OK, but there are still
 errors. I'll check it in now because there are perhaps too many accumulated
 changes.
+Checked in as revision 133.
+
+=============================================================================
+12 June 2007
+Need to clean up the alignment of conns in parallel messaging. Three
+vectors need to be aligned:
+FuncId
+Conn on src
+Conn on dest.
+
+The problem is that message addition/deletion can renumber Conns.
+One option is not to use absolute Conn indexes, but only those within this
+DestFinfo. Then deletions of conns must be reported.
+
+The place where the ConnIndex is assigned is:
+	PostMaster::test ~595 where we send out strings directly.
+	PostMaster::getAsyncParBuf where we pass the targetIndex into 
+		innerGetAsyncParBuf.
+The place where the ConnIndex is read out is:
+	PostMaster::innerPoll ~370 where we extract it from the string.
+The place where the FuncIds are set is:
+	PostMaster::addIncomingFunc which is called by 
+	ParFinfo::add and 
+	ParFinfo::respondToAdd
+
+Let's use relative indexing.
+This helps a lot. Also implemented a test function to confirm that the
+connId system can handle multiple target funcs.
 
 =============================================================================

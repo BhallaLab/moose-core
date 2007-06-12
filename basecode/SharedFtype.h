@@ -50,6 +50,8 @@ class SharedFtype: public Ftype
 
 			bool isSameType( const Ftype* other ) const;
 
+			const Ftype* baseFtype() const;
+
 			size_t size() const {
 				return size_;
 			}
@@ -72,6 +74,8 @@ class SharedFtype: public Ftype
 			const Ftype* makeMatchingType() const {
 				return match_;
 			}
+
+			string typeStr() const;
 
 			//////////////////////////////////////////////////////////////
 			// The stuff for serialization and parallel messages does not

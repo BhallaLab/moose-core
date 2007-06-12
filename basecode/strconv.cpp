@@ -114,11 +114,24 @@ template<> bool str2val< const Ftype* >( const string& s, const Ftype* &ret)
 	return 0;
 }
 
+/*
 template<> bool val2str< const Ftype* >(
 				const Ftype* f, string& ret )
 {
 	if ( f ) {
 		ret = typeid( *f ).name();
+		return 1;
+	}
+	ret = "";
+	return 0;
+}
+*/
+
+template<> bool val2str< const Ftype* >(
+				const Ftype* f, string& ret )
+{
+	if ( f ) {
+		ret = f->typeStr();
 		return 1;
 	}
 	ret = "";

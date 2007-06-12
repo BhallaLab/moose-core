@@ -79,7 +79,8 @@ class PostMaster
 		MPI::Comm* comm_;
 };
 
-extern const char* ftype2str( const Ftype *f );
+// extern const char* ftype2str( const Ftype *f );
+extern const Cinfo* initPostMasterCinfo();
 
 #endif
 

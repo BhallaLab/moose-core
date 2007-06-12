@@ -112,6 +112,10 @@ int main(int argc, char** argv)
 		ret = tickFinfo->add( t0, *j, (*j)->findFinfo( "parTick" ) );
 		assert( ret );
 	}
+	MPI::COMM_WORLD.Barrier();
+	if ( mynode == 0 )
+		cout << "Initialized all nodes\n";
+	MPI::COMM_WORLD.Barrier();
 #ifdef DO_UNIT_TESTS
 	testPostMaster();
 #endif
