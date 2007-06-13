@@ -94,10 +94,12 @@ const Cinfo* initGslIntegratorCinfo()
 
 static const Cinfo* gslIntegratorCinfo = initGslIntegratorCinfo();
 
+/*
 static const unsigned int integrateSlot =
 	initGslIntegratorCinfo()->getSlotIndex( "integrateSrc" );
+	*/
 static const unsigned int reinitSlot =
-	initGslIntegratorCinfo()->getSlotIndex( "reinitSrc" );
+	initGslIntegratorCinfo()->getSlotIndex( "gsl.reinitSrc" );
 
 
 ///////////////////////////////////////////////////

@@ -3239,5 +3239,63 @@ Checked in as revision 135.
 
 Fixed up some remaining bugs, cleaned up unit tests, cleaned up a lot of
 cout debugging.
+Checked in as revision 136.
+
+Next steps:
+- Adding the cross-shell messages. Or is it multiple msgs from parser?
+- Managing Ids across nodes: 
+	- After any create op (single or multiple) circulate a packet with info
+	- Create stuff locally, assign temporary ids, then update.
+	- Dish out id slots to nodes, and require new obj formed within them.
+		Circulate update packet again.
+		Or JustInTime: only if target unknown, get it from where?
+		Or all nodes send info to master and update when needed.
+		No creates allowed till new set of ids provided.
+	- Do a preliminary scan of the request on the master node and decide
+		how it is to be partitioned. Attach the id(s) to the request
+		and update them locally. Only send the request to the specific
+		target node. This gives a single point of reference for
+		model creation decisions.
+	- Have a single master id list on node 0. All nodes update it.
+	- Create everything on node 0 and ship it out. Obviously silly.
+	
+- Complete inter-node messaging with duplicate of table test.
+- Node-specific creation. Make some proto objects located on specific nodes.
+- Inter-node copies
+- inter-node move
+- Test shared messaging with a reaction on 3 nodes
+- two-level scheduling: setup vs runtime
+
+=============================================================================
+13 June 2007
+
+Designing id arrays. The current plan for management is:
+	- Do a preliminary scan of the request on the master node and decide
+		how it is to be partitioned. Attach the id(s) to the request
+		and update them locally. Only send the request to the specific
+		target node. This gives a single point of reference for
+		model creation decisions.
+
+This means that master node can set up ids as it likes.
+Slave nodes need to fill in the ids for their local objects as they make them.
+The master node must provide the id to the slave node when it passes the
+create request.
+Whenever the master node issues a cross-node command to a slave (messaging
+or object transfer), it must first provide info on node assignment for the
+target, then the slave node gets the actual command.
+
+1. All nodes have a vector of Element* for the ids. 
+2. The master node vector is authoritative.
+3. All unknown slave node ids point to the postmaster for the master node.
+4. Node-id updates are sent as a vector of uints with a uint to identify 
+	start of block. Such vectors are interpreted to put the correct
+	postmaster* into the local id vector.
+5. Global object creation requests are sent to all nodes. The resultant
+	objects are locally present on all nodes but have the same id.
+
+
+To start off on this process, I had to fix up the getSlotIndex so that it
+uses sharedFieldName.subFieldName syntax. 
+Various fixes done following this.
 
 =============================================================================
