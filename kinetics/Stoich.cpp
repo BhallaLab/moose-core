@@ -229,23 +229,23 @@ const Cinfo* initStoichCinfo()
 static const Cinfo* stoichCinfo = initStoichCinfo();
 
 static const unsigned int rateTermInfoSlot =
-	initStoichCinfo()->getSlotIndex( "rateTermInfoSrc" );
+	initStoichCinfo()->getSlotIndex( "hub.rateTermInfoSrc" );
 static const unsigned int rateSizeSlot =
-	initStoichCinfo()->getSlotIndex( "rateSizeSrc" );
+	initStoichCinfo()->getSlotIndex( "hub.rateSizeSrc" );
 static const unsigned int molSizeSlot =
-	initStoichCinfo()->getSlotIndex( "molSizeSrc" );
+	initStoichCinfo()->getSlotIndex( "hub.molSizeSrc" );
 static const unsigned int molConnectionSlot =
-	initStoichCinfo()->getSlotIndex( "molConnectionSrc" );
+	initStoichCinfo()->getSlotIndex( "hub.molConnectionSrc" );
 static const unsigned int reacConnectionSlot =
-	initStoichCinfo()->getSlotIndex( "reacConnectionSrc" );
+	initStoichCinfo()->getSlotIndex( "hub.reacConnectionSrc" );
 static const unsigned int enzConnectionSlot =
-	initStoichCinfo()->getSlotIndex( "enzConnectionSrc" );
+	initStoichCinfo()->getSlotIndex( "hub.enzConnectionSrc" );
 static const unsigned int mmEnzConnectionSlot =
-	initStoichCinfo()->getSlotIndex( "mmEnzConnectionSrc" );
+	initStoichCinfo()->getSlotIndex( "hub.mmEnzConnectionSrc" );
 static const unsigned int allocateSlot =
-	initStoichCinfo()->getSlotIndex( "allocate" );
+	initStoichCinfo()->getSlotIndex( "integrate.allocate" );
 static const unsigned int assignStoichSlot =
-	initStoichCinfo()->getSlotIndex( "assignStoich" );
+	initStoichCinfo()->getSlotIndex( "gsl.assignStoich" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
