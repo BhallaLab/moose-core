@@ -395,21 +395,42 @@ bool SharedFinfo::inherit( const Finfo* baseFinfo )
 	return 0;
 }
 
-bool SharedFinfo::getSlotIndex( const string& name, 
+/**
+ * In this class, the field name could refer to the SharedFinfo as a 
+ * whole, in which case it is just the name.
+ * Or it could refer to one of the subfields. In this case it uses the
+ * format:         sharedname.subname
+ * where the two names are separated by a dot.
+ * Note that this refers only to Src fields.
+ */
+bool SharedFinfo::getSlotIndex( const string& field, 
 					unsigned int& ret ) const
 {
-	if ( name == this->name() ) {
-		ret = msgIndex_;
-		return 1;
-	}
-
-	vector< string >::const_iterator i = 
-		find( names_.begin(), names_.end(), name );
-	if ( i == names_.end() )
+	string::size_type len = this->name().length();
+	if ( field.length() < len )
 		return 0;
-	
-	ret = msgIndex_ + ( i - names_.begin() );
-	return 1;
+
+	if ( field.substr( 0, len ) == this->name() ) { 
+		if ( field.length() == len ) { // this is the whole SharedFinfo
+			ret = msgIndex_;
+			return 1;
+		} else { // Look for a string within the original, skipping a dot.
+			if ( field[len] != '.' )
+				return 0;
+			string temp = field.substr( len + 1 );
+
+			vector< string >::const_iterator i = 
+				find( names_.begin(), names_.end(), temp );
+			if ( i == names_.end() ) {
+				return 0;
+			} else {
+				ret = msgIndex_ + ( i - names_.begin() );
+				return 1;
+			}
+		}
+	} else {
+		return 0;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////
