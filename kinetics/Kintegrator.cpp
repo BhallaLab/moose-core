@@ -73,9 +73,9 @@ const Cinfo* initKintegratorCinfo()
 static const Cinfo* kintegratorCinfo = initKintegratorCinfo();
 
 static const unsigned int integrateSlot =
-	initKintegratorCinfo()->getSlotIndex( "integrateSrc" );
+	initKintegratorCinfo()->getSlotIndex( "integrate.integrateSrc" );
 static const unsigned int reinitSlot =
-	initKintegratorCinfo()->getSlotIndex( "reinitSrc" );
+	initKintegratorCinfo()->getSlotIndex( "integrate.reinitSrc" );
 
 
 ///////////////////////////////////////////////////

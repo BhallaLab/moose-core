@@ -230,19 +230,19 @@ static const Cinfo* shellCinfo = initShellCinfo();
 
 
 static const unsigned int cweSlot =
-	initShellCinfo()->getSlotIndex( "cweSrc" );
+	initShellCinfo()->getSlotIndex( "parser.cweSrc" );
 static const unsigned int elistSlot =
-	initShellCinfo()->getSlotIndex( "leSrc" );
+	initShellCinfo()->getSlotIndex( "parser.leSrc" );
 
 // Returns the id of the created object
 static const unsigned int createSlot =
-	initShellCinfo()->getSlotIndex( "createSrc" );
+	initShellCinfo()->getSlotIndex( "parser.createSrc" );
 static const unsigned int getFieldSlot =
-	initShellCinfo()->getSlotIndex( "getSrc" );
+	initShellCinfo()->getSlotIndex( "parser.getSrc" );
 static const unsigned int clockSlot =
-	initShellCinfo()->getSlotIndex( "returnClocksSrc" );
+	initShellCinfo()->getSlotIndex( "parser.returnClocksSrc" );
 static const unsigned int listMessageSlot =
-	initShellCinfo()->getSlotIndex( "listMessagesSrc" );
+	initShellCinfo()->getSlotIndex( "parser.listMessagesSrc" );
 
 
 //////////////////////////////////////////////////////////////////////
