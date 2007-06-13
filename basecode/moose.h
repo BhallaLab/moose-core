@@ -36,6 +36,7 @@
 #include "DerivedFtype.h"
 #include "Ftype2.h"
 #include "Ftype3.h"
+#include "Ftype4.h"
 #include "ValueFtype.h"
 #include "SharedFtype.h"
 #include "LookupFtype.h"
