@@ -196,6 +196,55 @@ const Cinfo* initShellCinfo()
 		),
 	};
 
+	static Finfo* masterShared[] = 
+	{
+		new SrcFinfo( "create", 
+			// type, name, parentId, newObjId.
+			Ftype4< string, string, unsigned int, unsigned int >::global()
+		),
+		new SrcFinfo( "get",
+			// objId, field
+			Ftype2< unsigned int, string >::global() ),
+		new DestFinfo( "recvGet",
+			Ftype1< string >::global(),
+			RFCAST( &Shell::recvGetFunc )
+		),
+		new SrcFinfo( "set",
+			// objId, field, value
+			Ftype3< unsigned int, string, string >::global() ),
+		new SrcFinfo( "add",
+				// srcObjId, srcFiekd, destObjId, destField
+			Ftype4< unsigned int, string, unsigned int, string >::global()
+		),
+	};
+
+	static Finfo* slaveShared[] = 
+	{
+		new DestFinfo( "create", 
+			// type, name, parentId, newObjId.
+			Ftype4< string, string, unsigned int, unsigned int >::global(),
+			RFCAST( &Shell::slaveCreateFunc )
+		),
+		new DestFinfo( "get",
+			// objId, field
+			Ftype2< unsigned int, string >::global(),
+			RFCAST( &Shell::getField )
+			),
+		new SrcFinfo( "recvGet",
+			Ftype1< string >::global()
+		),
+		new DestFinfo( "set",
+			// objId, field, value
+			Ftype3< unsigned int, string, string >::global(),
+			RFCAST( &Shell::setField )
+		),
+		new DestFinfo( "add",
+				// srcObjId, srcFiekd, destObjId, destField
+			Ftype4< unsigned int, string, unsigned int, string >::global(),
+			RFCAST( &Shell::addFunc )
+		),
+	};
+
 	static Finfo* shellFinfos[] =
 	{
 		new ValueFinfo( "cwe", ValueFtype1< unsigned int >::global(),
@@ -211,6 +260,10 @@ const Cinfo* initShellCinfo()
 				sizeof( parserShared ) / sizeof( Finfo* ) ), 
 		new SharedFinfo( "serial", serialShared,
 				sizeof( serialShared ) / sizeof( Finfo* ) ), 
+		new SharedFinfo( "master", masterShared,
+				sizeof( masterShared ) / sizeof( Finfo* ) ), 
+		new SharedFinfo( "slave", slaveShared,
+				sizeof( slaveShared ) / sizeof( Finfo* ) ), 
 	};
 
 	static Cinfo shellCinfo(
@@ -585,6 +638,28 @@ void Shell::getField( const Conn& c, unsigned int id, string field )
 	*/
 }
 
+////////////////////////////////////////////////////////////////////////
+// Functions for implementing Master/Slave set
+////////////////////////////////////////////////////////////////////////
+void Shell::recvGetFunc( const Conn& c, string field )
+{
+	// send off to parser maybe.
+	;
+}
+
+void Shell::slaveCreateFunc ( const Conn& c, 
+				string objtype, string objname, 
+				unsigned int parent, unsigned int newobj )
+{
+	;
+}
+
+void Shell::addFunc ( const Conn& c, 
+				unsigned int src, string srcField,
+				unsigned int dest, string destField )
+{
+	;
+}
 // Static function
 /**
  * This copies the element tree from src to parent. If name arg is 
