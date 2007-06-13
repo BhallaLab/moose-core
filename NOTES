@@ -3297,5 +3297,35 @@ target, then the slave node gets the actual command.
 To start off on this process, I had to fix up the getSlotIndex so that it
 uses sharedFieldName.subFieldName syntax. 
 Various fixes done following this.
+Checked in as revision 137.
+
+Funcs needed from master to slave shell:
+create( type, name, parentId, childId )
+
+get( id, string field ) // getfield with string return.
+getSrc( string )
+set( id, string field, string value )
+
+
+/These possibly could be done using several elementary steps. On the
+other hand, the funcs already exist.
+setClock( int clockNo, double dt, int stage )
+useClock( id tick, vector< id > path, string func )
+resched()
+reinit()
+stop()
+step( double time )
+
+listMessages
+listMessagesSrc
+
+copy( id, id, string )
+move( id, id, string )
+
+add( id, string, id, string)
+
+Lets start with the first 4 funcs.
+
+Need to make a Ftype4. Did so. Compiles. Passes unit tests.
 
 =============================================================================
