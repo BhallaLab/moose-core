@@ -85,6 +85,18 @@ class Shell
 		static void move( const Conn& c,
 				unsigned int src, unsigned int parent, string name );
 
+////////////////////////////////////////////////////////////////////
+// Local functions for implementing Master/Slave set
+////////////////////////////////////////////////////////////////////
+		static void recvGetFunc( const Conn& c, string value );
+		static void slaveCreateFunc( const Conn& c,
+			string objtype, string objname, 
+			unsigned int parentId, unsigned int newObjId );
+		static void addFunc( const Conn& c,
+			unsigned int src, string srcField,
+			unsigned int dest, string destField );
+		
+
 		//////////////////////////////////////////////////////////
 		// Some stuff for managing scheduling and simulation runs
 		//////////////////////////////////////////////////////////
