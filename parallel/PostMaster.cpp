@@ -81,6 +81,8 @@ const Cinfo* initPostMasterCinfo()
 			Ftype1< string >::global() ),
 		new SrcFinfo( "rawCopy", // copy using serialized data.
 			Ftype1< string >::global() ),
+		new SrcFinfo( "rawTest", // copy using serialized data.
+			Ftype1< string >::global() ),
 	};
 
 	static Finfo* postMasterFinfos[] = 
@@ -134,11 +136,13 @@ const Cinfo* initPostMasterCinfo()
 static const Cinfo* postMasterCinfo = initPostMasterCinfo();
 
 static const unsigned int pollSlot = 
-	initPostMasterCinfo()->getSlotIndex( "harvestPoll" );
+	initPostMasterCinfo()->getSlotIndex( "parTick.harvestPoll" );
 static const unsigned int addSlot = 
-	initPostMasterCinfo()->getSlotIndex( "rawAdd" );
+	initPostMasterCinfo()->getSlotIndex( "serial.rawAdd" );
 static const unsigned int copySlot = 
-	initPostMasterCinfo()->getSlotIndex( "rawCopy" );
+	initPostMasterCinfo()->getSlotIndex( "serial.rawCopy" );
+static const unsigned int testSlot = 
+	initPostMasterCinfo()->getSlotIndex( "serial.rawTest" );
 static const unsigned int dataSlot = 
 	initPostMasterCinfo()->getSlotIndex( "data" );
 
@@ -154,6 +158,7 @@ PostMaster::PostMaster()
 	inBufSize_ = 10000;
 	inBuf_ = new char[ inBufSize_ ];
 	incomingFunc_.push_back( lookupFunctionData( RFCAST( Neutral::childFunc ) )->index() );
+	request_ = 0;
 //		incomingFunc_.push_back( lookupFunctionData( RFCAST( Shell::rawAddFunc ) )->index() );
 		// cout << "incoming func[0] = " << incomingFunc_[0] << endl;
 }
@@ -323,6 +328,7 @@ void PostMaster::innerPostIrecv()
 	// cout << "!" << flush;
 	request_ = comm_->Irecv(
 			inBuf_, inBufSize_, MPI_CHAR, remoteNode_, DATA_TAG );
+	// cout << inBufSize_ << " innerPostIrecv: request_ empty?" << ( request_ == static_cast< MPI::Request >( 0 ) ) << "\n";
 	donePoll_ = 0;
 }
 
@@ -577,6 +583,9 @@ void testPostMaster()
 
 	MPI::COMM_WORLD.Barrier();
 	set( table, "destroy" );
+	// unsigned int cjId = Shell::path2eid( "/sched/cj", "/" );
+	// assert( cjId != BAD_ID );
+	// Element* cj = Element::element( cjId );
 
 	////////////////////////////////////////////////////////////////
 	// Now we fire up the scheduler on all nodes to keep info flowing.
@@ -586,8 +595,6 @@ void testPostMaster()
 	MPI::COMM_WORLD.Barrier();
 	char sendstr[50];
 
-	bool glug = 0; // Breakpoint for parallel debugging
-	while ( glug ) ;
 	for ( i = 0; i < numNodes; i++ ) {
 		if ( i == myNode )
 			continue;
@@ -605,6 +612,8 @@ void testPostMaster()
 		strcpy( buf, sendstr );
 	}
 	MPI::COMM_WORLD.Barrier();
+	bool glug = 0; // Breakpoint for parallel debugging
+	while ( glug ) ;
 	// cout << " starting string send\n" << flush;
 	set< double >( cj, "start", 1.0 );
 	// cout << " Done string send\n" << flush;

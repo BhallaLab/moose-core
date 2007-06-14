@@ -78,18 +78,21 @@ int main(int argc, char** argv)
 	Neutral::create( "Shell", "shell", Element::root() );
 #endif
 
-
 #ifdef DO_UNIT_TESTS
-	testBasecode();
-	testNeutral();
-	testShell();
-	testInterpol();
-	testTable();
-	testSched();
-	testSchedProcess();
-	testWildcard();
-	testBiophysics();
-	testKinetics();
+	// if ( mynode == 0 )
+	if ( 1 )
+	{
+		testBasecode();
+		testNeutral();
+		testShell();
+		testInterpol();
+		testTable();
+		testSched();
+		testSchedProcess();
+		testWildcard();
+		testBiophysics();
+		testKinetics();
+	}
 #endif
 
 
@@ -98,12 +101,14 @@ int main(int argc, char** argv)
 	//	Here we connect up the postmasters to the shell and the ParTick.
 	///////////////////////////////////////////////////////////////////
 	const Finfo* serialFinfo = shell->findFinfo( "serial" );
+	const Finfo* masterFinfo = shell->findFinfo( "master" );
+	const Finfo* slaveFinfo = shell->findFinfo( "slave" );
 	assert( serialFinfo != 0 );
 
 	const Finfo* tickFinfo = t0->findFinfo( "parTick" );
 	assert( tickFinfo != 0 );
-	bool aval = 0;
-	while ( aval );
+	bool glug = 0; // Breakpoint for parallel debugging
+	while ( glug );
 	for ( vector< Element* >::iterator j = post.begin();
 		j != post.end(); j++ ) {
 		bool ret = serialFinfo->add( shell, *j, (*j)->findFinfo( "data" ) );
@@ -111,7 +116,18 @@ int main(int argc, char** argv)
 		assert( ret );
 		ret = tickFinfo->add( t0, *j, (*j)->findFinfo( "parTick" ) );
 		assert( ret );
+		/*
+		if ( mynode == 0 ) {
+			ret = masterFinfo->add( shell, *j, (*j)->findFinfo( "data" ) );
+		} else {
+			ret = slaveFinfo->add( shell, *j, (*j)->findFinfo( "data" ) );
+		}
+		assert( ret );
+		*/
 	}
+
+	set( cj, "resched" );
+	set( cj, "reinit" );
 #ifdef DO_UNIT_TESTS
 	MPI::COMM_WORLD.Barrier();
 	if ( mynode == 0 )
