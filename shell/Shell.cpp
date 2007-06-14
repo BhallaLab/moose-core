@@ -478,21 +478,21 @@ void Shell::rawAddFunc( const Conn& c, string s )
 	// svec seq is : srcid, targetId, targetField, srcType
 	unsigned int destId = atoi( svec[1].c_str() );
 	if ( destId == BAD_ID ) {
-		cout << "Error: Shell::rawAddFunc: msgdest is a bad elm\n";
+		cout << "Error: Shell::rawAddFunc: msgdest is a bad elm on " << mynode << " from " << remotenode << " with str " << s << "\n";
 		return;
 	} 
 	Element* dest = Element::element( destId );
 	if ( dest == 0 ) {
-		cout << "Error: Shell::rawAddFunc: msgdest ptr is empty\n";
+		cout << "Error: Shell::rawAddFunc: msgdest ptr is empty on " << mynode << " from " << remotenode << " with str " << s << "\n";
 		return;
 	} 
 	if ( dest->className() == "PostMaster" ) { //oops, off node.
-		cout << "Error: Shell::rawAddFunc: msgdest is off node\n";
+		cout << "Error: Shell::rawAddFunc: msgdest is off node on " << mynode << " from " << remotenode << " with str " << s << "\n";
 		return;
 	}
 	const Finfo *destField = dest->findFinfo( svec[2] );
 	if ( destField == 0 ) {
-		cout << "Error: Shell::rawAddFunc: targetField does not exist on dest\n";
+		cout << "Error: Shell::rawAddFunc: targetField does not exist on dest on " << mynode << " from " << remotenode << " with str " << s << "\n";
 		return;
 	}
 
@@ -500,7 +500,7 @@ void Shell::rawAddFunc( const Conn& c, string s )
 	val2str< const Ftype* >( destField->ftype()->baseFtype(), typeSig );
 	if ( typeSig != svec[3] ) {
 		cout << "Error: Shell::rawAddFunc: field type mismatch: '" <<
-			typeSig << "' != '" << svec[3] << "'\n";
+			typeSig << "' != '" << svec[3] << "' on " << mynode << " from " << remotenode << "\n";
 		return;
 	}
 	

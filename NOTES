@@ -3328,4 +3328,43 @@ Lets start with the first 4 funcs.
 
 Need to make a Ftype4. Did so. Compiles. Passes unit tests.
 
+Checked in as revision 138.
+
+Now need to try out the master-slave messages and create special objects
+exclusive to the nodes for starters.
+
+=============================================================================
+14 June 2007
+A little stuck trying to make master/slave messages between shells across
+nodes.
+OK, got it. Here there are more dest messages than src, and the calculation
+for # of slots for the shared message assumes otherwise. Problem is that
+this works fine for regular messages, and it is only when we attempt
+parallel messages that we lack the space.
+
+Yup, confirmed that that is the problem. Did an ugly hack to allot more
+space by a name comparison. Now it is stuck in the polling.
+
+Thought the poll stuckness was due to the addition of the master-slave
+messages. I was wrong. The poll is stuck even if they are absent.
+
+OK, tracked it down. Something in the running of the previous unit tests
+matters. I had eliminated the unit tests from all except node 0.
+
+Doing resched and reinit of cj at the right place fixes things to where they
+were, but the new master-slave messages still cause problems. This time
+it is a core dump, something that can be managed.
+
+Now things seem seriously adrift. I am not able to get the Michael Caine
+message to go out. The kind of crash is dependent on # nodes. 
+
+Tracked down one major issue: Because I am not doing unit tests on other
+nodes, the id numbers (of lots of created objects) are out of sync 
+between node 0 and others.
+
+Now I've pinpointed all changes: Backtracked so we do all the unit tests
+on all nodes. Backtracked the master-slave messaging. This version works
+for 2, 3 and 4 nodes. Check it in as a reference point.
+
+
 =============================================================================
