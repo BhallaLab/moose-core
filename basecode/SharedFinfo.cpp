@@ -368,7 +368,11 @@ void SharedFinfo::countMessages(
 {
 	if ( numSrc_ > 0 ) {
 		msgIndex_ = srcNum;
-		srcNum += numSrc_;
+		// Hack for testing
+		if ( name() == "slave" )
+			srcNum += 4;
+		else 
+			srcNum += numSrc_;
 	} else {
 		msgIndex_ = destNum++;
 	}
