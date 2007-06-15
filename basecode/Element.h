@@ -345,6 +345,12 @@ class Element
 		 * excluding the data part.
 		 */
 		virtual unsigned int getMsgMem() const = 0;
+
+		/**
+		 * Debugging function: prints out all the messaging info
+		 * for this element.
+		 */
+		virtual void dumpMsgInfo() const = 0;
 	protected:
 		/**
 		 * This function copies the element, its data and its

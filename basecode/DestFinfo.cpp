@@ -19,7 +19,7 @@ DestFinfo::DestFinfo( const string& name, const Ftype *f,
 	destIndex_( destIndex )
 {
 	// Save the function data.
-	getFunctionDataManager()->add( rfunc, f );
+	getFunctionDataManager()->add( rfunc, this );
 }
 
 /**
