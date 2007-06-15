@@ -71,31 +71,31 @@ const Cinfo* initParTickCinfo()
 	 * Although it is identical to the one in Tick.cpp, we redo it
 	 * because of scope issues.
 	 */
-	static TypeFuncPair processTypes[] = 
+	static Finfo* processShared[] =
 	{
 		// The process function call
-		TypeFuncPair( Ftype1< ProcInfo >::global(), 0 ),
+		new SrcFinfo( "process", Ftype1< ProcInfo >::global() ),
 		// The reinit function call
-		TypeFuncPair( Ftype1< ProcInfo >::global(), 0 ),
+		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
 	};
 
 	/**
 	 * This shared message communicates with the postmaster
 	 */
-	static TypeFuncPair parTypes[] = 
+	static Finfo* parShared[] =
 	{
 		// This first entry is to tell the PostMaster to post iRecvs
 		// The argument is the ordinal number of the clock tick
-		TypeFuncPair( Ftype1< int >::global(), 0 ),
+		new SrcFinfo( "postIrecv", Ftype1< int >::global() ),
 		// The second entry is to tell the PostMaster to post 'send'
-		TypeFuncPair( Ftype1< int >::global(), 0 ),
+		new SrcFinfo( "postSend",  Ftype1< int >::global() ),
 		// The third entry is for polling the receipt of incoming data.
 		// Each PostMaster does an MPI_Test on the earlier posted iRecv.
-		TypeFuncPair( Ftype1< int >::global(), 0 ),
+		new SrcFinfo( "poll", Ftype1< int >::global() ),
 		// The fourth entry is for harvesting the poll request.
 		// The argument is the node number handled by the postmaster.
 		// It comes back when the polling on that postmaster is done.
-		TypeFuncPair( Ftype1< unsigned int >::global(),
+		new DestFinfo( "harvestPoll", Ftype1< unsigned int >::global(),
 						RFCAST( &ParTick::pollFunc ) )
 	};
 
@@ -114,9 +114,10 @@ const Cinfo* initParTickCinfo()
 	///////////////////////////////////////////////////////
 	// Shared message definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "outgoingProcess", processTypes, 2 ),
-		new SharedFinfo( "parTick", parTypes, 
-			sizeof( parTypes ) / sizeof( TypeFuncPair ) ),
+		new SharedFinfo( "outgoingProcess", processShared,
+			sizeof( processShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "parTick", parShared, 
+			sizeof( parShared ) / sizeof( Finfo* ) ),
 	
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -159,16 +160,16 @@ static const unsigned int reinitSlot =
 	initParTickCinfo()->getSlotIndex( "process" ) + 1;
 
 static const unsigned int outgoingProcessSlot = 
-	initParTickCinfo()->getSlotIndex( "outgoingProcess" ) + 0;
+	initParTickCinfo()->getSlotIndex( "outgoingProcess.process" );
 static const unsigned int outgoingReinitSlot = 
-	initParTickCinfo()->getSlotIndex( "outgoingProcess" ) + 1;
+	initParTickCinfo()->getSlotIndex( "outgoingProcess.reinit" );
 
 static const unsigned int iRecvSlot = 
-	initParTickCinfo()->getSlotIndex( "parTick" ) + 0;
+	initParTickCinfo()->getSlotIndex( "parTick.postIrecv" );
 static const unsigned int sendSlot = 
-	initParTickCinfo()->getSlotIndex( "parTick" ) + 1;
+	initParTickCinfo()->getSlotIndex( "parTick.postSend" );
 static const unsigned int pollSlot = 
-	initParTickCinfo()->getSlotIndex( "parTick" ) + 2;
+	initParTickCinfo()->getSlotIndex( "parTick.poll" );
 
 ///////////////////////////////////////////////////
 // Field function definitions

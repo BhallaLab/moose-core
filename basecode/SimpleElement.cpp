@@ -708,3 +708,28 @@ void SimpleElement::prepareForDeletion( bool stage )
 		}
 	}
 }
+
+void SimpleElement::dumpMsgInfo() const
+{
+	unsigned int i;
+	cout << "Element " << name_ << ":\n";
+	cout << "dest_:	begin, end\n";
+	for ( i = 0; i < dest_.size(); i++ )
+		cout << i << ":	" << dest_[i].begin() << ", " << dest_[i].end() << endl;
+	cout << "src_:	begin, end, next, func\n";
+	for ( i = 0; i < src_.size(); i++ ) {
+		string temp = "dummyFunc";
+		if ( src_[i].recvFunc() != &dummyFunc ) {
+			const FunctionData* fd =
+				lookupFunctionData( src_[i].recvFunc() );
+			temp = ( fd ) ? fd->funcFinfo()->name() : "unknown func";
+		}
+		cout << i << ":	" << src_[i].begin() << ", " << src_[i].end() << 
+			", " << src_[i].next() << ", " << temp << endl;
+
+	}
+	cout << "conn:	target index, target Element:\n";
+	for ( i = 0; i < conn_.size(); i++ )
+		cout << i << ":	" << conn_[i].targetIndex() << ", " << 
+			conn_[i].targetElement()->name() << endl;
+}

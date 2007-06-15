@@ -116,13 +116,15 @@ int main(int argc, char** argv)
 		assert( ret );
 		ret = tickFinfo->add( t0, *j, (*j)->findFinfo( "parTick" ) );
 		assert( ret );
-		/*
 		if ( mynode == 0 ) {
 			ret = masterFinfo->add( shell, *j, (*j)->findFinfo( "data" ) );
 		} else {
 			ret = slaveFinfo->add( shell, *j, (*j)->findFinfo( "data" ) );
 		}
+		// cout << "On " << mynode << ", post: " << (*j)->name() << endl;
+		// (*j)->dumpMsgInfo();
 		assert( ret );
+		/*
 		*/
 	}
 

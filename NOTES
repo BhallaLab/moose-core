@@ -3366,5 +3366,28 @@ Now I've pinpointed all changes: Backtracked so we do all the unit tests
 on all nodes. Backtracked the master-slave messaging. This version works
 for 2, 3 and 4 nodes. Check it in as a reference point.
 
+Checked in as revision 139.
+
+
+=============================================================================
+15 June 2007
+
+Debugging in progress. Checking if message structure and functions are
+OK. Seem OK so far. The FunctionDatas match.
+
+Fixed the problem: I was not setting up the incomingFunc_ vector on the 
+postmaster correctly due to bad calculation of conn indices.
+
+Along the way I had to change the FunctionData so that it stores the Finfo
+associated with the Func. This provides a lot of additional info.
+
+Also had to update various objects to phase out the deprecated TypeFuncPair
+for SharedFinfo, because the FunctionData only gets filled with the
+new form.
+
+At this point it passes tests up to 2 nodes. New problem: dies when creating 
+the parser, but only if # nodes > 2.
+
+Anyway, many files updated so it is time to check it in.
 
 =============================================================================
