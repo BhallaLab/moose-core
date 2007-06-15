@@ -176,16 +176,15 @@ bool ParFinfo::respondToAdd(
 	PostMaster* post = static_cast< PostMaster* >( e->data() );
 	vector< Conn >::const_iterator conn = e->connDestEnd( msgIndex_ );
 	unsigned int connIndex = 
-		e->connDestBegin( msgIndex_ ) - e->lookupConn( 0 );
+		e->connDestEnd( msgIndex_ ) - e->connDestBegin( msgIndex_ );
 
 	// cout << "destIndex=" << destIndex << ", connIndex=" << connIndex <<endl;
 
-	unsigned int destOffset = e->connDestBegin( dataSlot ) -
-			e->lookupConn( 0 );
+	// unsigned int destOffset = e->connDestBegin( dataSlot ) - e->lookupConn( 0 );
 	for ( unsigned int i = 0; i < srcFl.size(); i++ ) {
 		const FunctionData* fd = lookupFunctionData( srcFl[i] );
 		assert ( fd != 0 );
-		post->addIncomingFunc( connIndex + i - destOffset, fd->index() );
+		post->addIncomingFunc( connIndex + i, fd->index() );
 	}
 	return 1;
 }

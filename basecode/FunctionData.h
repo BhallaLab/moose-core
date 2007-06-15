@@ -10,10 +10,12 @@
 #ifndef _FUNCTION_DATA_H
 #define _FUNCTION_DATA_H
 
+class Finfo;
+
 class FunctionData
 {
 	public:
-		FunctionData( RecvFunc func, const Ftype* type, unsigned int index);
+		FunctionData( RecvFunc func, const Finfo* info, unsigned int index);
 
 		RecvFunc func() const {
 			return func_;
@@ -23,22 +25,23 @@ class FunctionData
 			return index_;
 		}
 
-		const Ftype* funcType() const {
-			return type_;
+		const Ftype* funcType() const;
+
+		const Finfo* funcFinfo() const {
+			return info_;
 		}
 
 	private:
 		RecvFunc func_;
-		const Ftype* type_;
+		const Finfo* info_;
 		unsigned int index_;
-
 };
 
 class FunctionDataManager
 {
 	public:
 		/// creates a new FunctionData and inserts into the map and vector.
-		const FunctionData* add( RecvFunc func, const Ftype* type );
+		const FunctionData* add( RecvFunc func, const Finfo* info );
 		const FunctionData* find( RecvFunc rf );
 		const FunctionData* find( unsigned int index );
 		

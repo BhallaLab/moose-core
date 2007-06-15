@@ -20,7 +20,7 @@ ValueFinfo::ValueFinfo(
 	: Finfo( name, f ), get_( get ), set_( set )
 {
 	// Save the function data.
-	getFunctionDataManager()->add( set, f );
+	getFunctionDataManager()->add( set, this );
 }
 
 /**
