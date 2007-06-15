@@ -29,13 +29,19 @@ const FunctionData* lookupFunctionData( unsigned int index )
 	return getFunctionDataManager()->find( index );
 }
 
+
 //////////////////////////////////////////////////////////////////
 // FunctionData functions
 //////////////////////////////////////////////////////////////////
 
+const Ftype* FunctionData::funcType() const
+{
+	return info_->ftype();
+}
+
 FunctionData::FunctionData( 
-	RecvFunc func, const Ftype* ftype, unsigned int index )
-	: func_( func ), type_( ftype ), index_( index )
+	RecvFunc func, const Finfo* info, unsigned int index )
+	: func_( func ), info_( info ), index_( index )
 {;}
 
 //////////////////////////////////////////////////////////////////
@@ -46,14 +52,14 @@ FunctionData::FunctionData(
  * creates a new FunctionData and inserts into the map and vector.
  * Returns the new FunctionData.
  */
-const FunctionData* FunctionDataManager::add( RecvFunc func, const Ftype* type )
+const FunctionData* FunctionDataManager::add( RecvFunc func, const Finfo* info )
 {
 	vector< const FunctionData* >::const_iterator i;
 	for ( i = funcVec_.begin(); i != funcVec_.end(); i++ )
 		if ( (*i)->func() == func )
 			break; 
 	if ( i == funcVec_.end() ) { // make a new one.
-		FunctionData* fd = new FunctionData( func, type, funcVec_.size() );
+		FunctionData* fd = new FunctionData( func, info, funcVec_.size() );
 		funcVec_.push_back( fd );
 		funcMap_[func] = fd;
 		// cout << "# FunctionData = " << funcVec_.size() << endl;

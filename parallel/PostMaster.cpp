@@ -54,27 +54,6 @@ const Cinfo* initPostMasterCinfo()
 		new SrcFinfo( "harvestPoll", Ftype1< unsigned int >::global() )
 	};
 
-	/*
-	static TypeFuncPair parTypes[] = 
-	{
-		// This first entry is to tell the PostMaster to post iRecvs
-		// The argument is the ordinal number of the clock tick
-		TypeFuncPair( Ftype1< int >::global(), 
-						RFCAST( &PostMaster::postIrecv ) ),
-		// The second entry is to tell the PostMaster to post 'send'
-		TypeFuncPair( Ftype1< int >::global(),
-						RFCAST( &PostMaster::postSend ) ),
-		// The third entry is for polling the receipt of incoming data.
-		// Each PostMaster does an MPI_Test on the earlier posted iRecv.
-		TypeFuncPair( Ftype1< int >::global(),
-						RFCAST( &PostMaster::poll ) ),
-		// The fourth entry is for harvesting the poll request.
-		// The argument is the node number handled by the postmaster.
-		// It comes back when the polling on that postmaster is done.
-		TypeFuncPair( Ftype1< unsigned int >::global(), 0 )
-	};
-	*/
-
 	static Finfo* serialShared[] =
 	{
 		new SrcFinfo( "rawAdd", // addmsg using serialized data.

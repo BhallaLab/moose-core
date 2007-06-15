@@ -293,6 +293,12 @@ class SimpleElement: public Element
 		void replaceCopyPointers(
 						map< const Element*, Element* >& tree );
 		void copyMsg( map< const Element*, Element* >& tree );
+
+		///////////////////////////////////////////////////////////////
+		// Debugging function
+		///////////////////////////////////////////////////////////////
+		void dumpMsgInfo() const;
+
 	protected:
 		Element* innerCopy() const;
 
