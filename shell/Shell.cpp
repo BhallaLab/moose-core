@@ -198,10 +198,6 @@ const Cinfo* initShellCinfo()
 
 	static Finfo* masterShared[] = 
 	{
-		new SrcFinfo( "create", 
-			// type, name, parentId, newObjId.
-			Ftype4< string, string, unsigned int, unsigned int >::global()
-		),
 		new SrcFinfo( "get",
 			// objId, field
 			Ftype2< unsigned int, string >::global() ),
@@ -216,15 +212,14 @@ const Cinfo* initShellCinfo()
 				// srcObjId, srcFiekd, destObjId, destField
 			Ftype4< unsigned int, string, unsigned int, string >::global()
 		),
+		new SrcFinfo( "create", 
+			// type, name, parentId, newObjId.
+			Ftype4< string, string, unsigned int, unsigned int >::global()
+		),
 	};
 
 	static Finfo* slaveShared[] = 
 	{
-		new DestFinfo( "create", 
-			// type, name, parentId, newObjId.
-			Ftype4< string, string, unsigned int, unsigned int >::global(),
-			RFCAST( &Shell::slaveCreateFunc )
-		),
 		new DestFinfo( "get",
 			// objId, field
 			Ftype2< unsigned int, string >::global(),
@@ -242,6 +237,11 @@ const Cinfo* initShellCinfo()
 				// srcObjId, srcFiekd, destObjId, destField
 			Ftype4< unsigned int, string, unsigned int, string >::global(),
 			RFCAST( &Shell::addFunc )
+		),
+		new DestFinfo( "create", 
+			// type, name, parentId, newObjId.
+			Ftype4< string, string, unsigned int, unsigned int >::global(),
+			RFCAST( &Shell::slaveCreateFunc )
 		),
 	};
 
@@ -698,7 +698,7 @@ void Shell::slaveGetField( const Conn& c, unsigned int id, string field )
 	if ( f )
 		if ( f->strGet( e, ret ) )
 			sendTo1< string >( c.targetElement(),
-				recvGetSlot, c.targetIndex() - 1, ret );
+				recvGetSlot, c.targetIndex(), ret );
 }
 
 void Shell::recvGetFunc( const Conn& c, string value )

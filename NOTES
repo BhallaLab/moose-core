@@ -3446,5 +3446,31 @@ identify which Conns to use for successive funcs.
 This works! One oddity is that all the nodes seem to be sending each other
 slaveCreate messages, though the testMess function should only be
 called for node 0. Anyway, this is a major step forward and needs recording.
+Checked in as revision 142.
+
+Figured out the problem. The response to the Get call, recvGet, has 
+to be sent back to a message with a certain offset from the incoming
+conn, because of misalignment of the matching src and dest fields. This offset
+depends on the number of nodes. Horribly messy. Even if we sort out the
+offset for return messages, other forms of sendTo will have a problem.
+
+Offset was fixed by the simple expedient of advancing the 'get' call in
+the Shell::master/slave to the first subField. The sendTo problem remains.
+
+At this point we're ready to fill in the hooks for the Master/Slave
+messages. Then we can begin on the list below.
+
+- Set up node-specific Id handling
+- Complete inter-node messaging with duplicate of table test.
+- Node-specific creation. Make some proto objects located on specific nodes.
+- Inter-node copies
+- inter-node move
+- Test shared messaging with a reaction on 3 nodes
+- two-level scheduling: setup vs runtime
+
+
+Did a reference checkin at this point with flags set for non-parallel 
+compilation.
+
 
 =============================================================================
