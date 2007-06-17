@@ -88,6 +88,8 @@ class Shell
 ////////////////////////////////////////////////////////////////////
 // Local functions for implementing Master/Slave set
 ////////////////////////////////////////////////////////////////////
+		static void slaveGetField( 
+			const Conn& c, unsigned int id, string field );
 		static void recvGetFunc( const Conn& c, string value );
 		static void slaveCreateFunc( const Conn& c,
 			string objtype, string objname, 
@@ -96,7 +98,6 @@ class Shell
 			unsigned int src, string srcField,
 			unsigned int dest, string destField );
 		
-
 		//////////////////////////////////////////////////////////
 		// Some stuff for managing scheduling and simulation runs
 		//////////////////////////////////////////////////////////

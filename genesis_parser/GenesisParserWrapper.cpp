@@ -24,83 +24,90 @@ const Cinfo* initGenesisParserCinfo()
 	/**
 	 * This is a shared message to talk to the Shell.
 	 */
-	static TypeFuncPair parserTypes[] =
+	static Finfo* parserShared[] =
 	{
 		// Setting cwe
-		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
+		new SrcFinfo( "cwe", Ftype1< unsigned int >::global() ),
 		// Getting cwe back: First trigger a request
-		TypeFuncPair( Ftype0::global(), 0 ),
+		new SrcFinfo( "trigCwe", Ftype0::global() ),
 		// Then receive the cwe info
-		TypeFuncPair( Ftype1< unsigned int >::global(),
+		new DestFinfo( "recvCwe", Ftype1< unsigned int >::global(),
 					RFCAST( &GenesisParserWrapper::recvCwe ) ),
 
 		// Getting a list of child ids: First send a request with
 		// the requested parent elm id.
-		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
+		new SrcFinfo( "trigLe", Ftype1< unsigned int >::global() ),
 		// Then recv the vector of child ids. This function is
 		// shared by several other messages as all it does is dump
 		// the elist into a temporary local buffer.
-		TypeFuncPair( Ftype1< vector< unsigned int > >::global(), 
+		new DestFinfo( "recvElist", 
+					Ftype1< vector< unsigned int > >::global(), 
 					RFCAST( &GenesisParserWrapper::recvElist ) ),
 
 		///////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions.
 		///////////////////////////////////////////////////////////////
 		// Creating an object: Send out the request.
-		TypeFuncPair( 
-				Ftype3< string, string, unsigned int >::global(), 0 ),
+		new SrcFinfo( "create",
+				Ftype3< string, string, unsigned int >::global() ),
 		// Creating an object: Recv the returned object id.
-		TypeFuncPair( Ftype1< unsigned int >::global(),
+		new DestFinfo( "recvCreate",
+					Ftype1< unsigned int >::global(),
 					RFCAST( &GenesisParserWrapper::recvCreate ) ),
 		// Deleting an object: Send out the request.
-		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
+		new SrcFinfo( "delete", Ftype1< unsigned int >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// Value assignment: set and get.
 		///////////////////////////////////////////////////////////////
 		// Getting a field value as a string: send out request:
-		TypeFuncPair( 
-				Ftype2< unsigned int, string >::global(), 0 ),
+		new SrcFinfo( "get",
+				Ftype2< unsigned int, string >::global() ),
 		// Getting a field value as a string: Recv the value.
-		TypeFuncPair( Ftype1< string >::global(),
+		new DestFinfo( "recvField",
+					Ftype1< string >::global(),
 					RFCAST( &GenesisParserWrapper::recvField ) ),
 		// Setting a field value as a string: send out request:
-		TypeFuncPair( // object, field, value 
-				Ftype3< unsigned int, string, string >::global(), 0 ),
+		new SrcFinfo( "set", // object, field, value 
+				Ftype3< unsigned int, string, string >::global() ),
 
 
 		///////////////////////////////////////////////////////////////
 		// Clock control and scheduling
 		///////////////////////////////////////////////////////////////
 		// Setting values for a clock tick: setClock
-		TypeFuncPair( // clockNo, dt, stage
-				Ftype3< int, double, int >::global(), 0 ),
+		new SrcFinfo( "setClock", // clockNo, dt, stage
+				Ftype3< int, double, int >::global() ),
 		// Assigning path and function to a clock tick: useClock
-		TypeFuncPair( // tick id, path, function
-				Ftype3< unsigned int, vector< unsigned int >, string >::global(), 0 ),
+		new SrcFinfo( "useClock", // tick id, path, function
+				Ftype3< unsigned int, vector< unsigned int >, string >::global() ),
 
 		// Getting a wildcard path of elements: send out request
 		// args are path, flag true for breadth-first list.
-		TypeFuncPair( Ftype2< string, bool >::global(), 0 ),
+		new SrcFinfo( "el", Ftype2< string, bool >::global() ),
 		// The return function for the wildcard past is the shared
 		// function recvElist
 
-		TypeFuncPair( Ftype0::global(), 0 ), // resched
-		TypeFuncPair( Ftype0::global(), 0 ), // reinit
-		TypeFuncPair( Ftype0::global(), 0 ), // stop
-		TypeFuncPair( Ftype1< double >::global(), 0 ),
+		new SrcFinfo( "resched", Ftype0::global() ), // resched
+		new SrcFinfo( "reinit", Ftype0::global() ), // reinit
+		new SrcFinfo( "stop", Ftype0::global() ), // stop
+		new SrcFinfo( "step", Ftype1< double >::global() ),
 				// step, arg is time
-		TypeFuncPair( Ftype0::global(), 0 ), // request clocks
-		TypeFuncPair( Ftype1< vector< double > >::global(), 
+		new SrcFinfo( "requestClocks", 
+					Ftype0::global() ), //request clocks
+		new DestFinfo( "recvClocks", 
+					Ftype1< vector< double > >::global(), 
 					RFCAST( &GenesisParserWrapper::recvClocks ) ),
 		
 		///////////////////////////////////////////////////////////////
 		// Message info functions
 		///////////////////////////////////////////////////////////////
 		// Request message list: id elm, string field, bool isIncoming
-		TypeFuncPair( Ftype3< Id, string, bool >::global(), 0 ),
+		new SrcFinfo( "listMessages", 
+					Ftype3< Id, string, bool >::global() ),
 		// Receive message list and string with remote fields for msgs
-		TypeFuncPair( Ftype2< vector < Id >, string >::global(), 
+		new DestFinfo( "recvMessageList",
+					Ftype2< vector < Id >, string >::global(), 
 					RFCAST( &GenesisParserWrapper::recvMessageList ) ),
 
 		///////////////////////////////////////////////////////////////
@@ -108,57 +115,57 @@ const Cinfo* initGenesisParserCinfo()
 		///////////////////////////////////////////////////////////////
 		// This function is for copying an element tree, complete with
 		// messages, onto another.
-		TypeFuncPair( Ftype3< Id, Id, string >::global(),  0 ),
+		new SrcFinfo( "copy", Ftype3< Id, Id, string >::global() ),
 		// This function is for moving element trees.
-		TypeFuncPair( Ftype3< Id, Id, string >::global(),  0 ),
+		new SrcFinfo( "move", Ftype3< Id, Id, string >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// Cell reader: filename cellpath
 		///////////////////////////////////////////////////////////////
-		TypeFuncPair( Ftype2< string, string >::global(),  0 ),
+		new SrcFinfo( "readcell", Ftype2< string, string >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// Channel setup functions
 		///////////////////////////////////////////////////////////////
 		// setupalpha
-		TypeFuncPair( Ftype2< Id, vector< double > >::global(),  0 ),
+		new SrcFinfo( "setupAlpha", 
+					Ftype2< Id, vector< double > >::global() ),
 		// setuptau
-		TypeFuncPair( Ftype2< Id, vector< double > >::global(),  0 ),
+		new SrcFinfo( "setupTau", 
+					Ftype2< Id, vector< double > >::global() ),
 		// tweakalpha
-		TypeFuncPair( Ftype1< Id >::global(),  0 ),
+		new SrcFinfo( "tweakAlpha", Ftype1< Id >::global() ),
 		// tweaktau
-		TypeFuncPair( Ftype1< Id >::global(),  0 ),
+		new SrcFinfo( "tweakTau", Ftype1< Id >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// SimDump facilities
 		///////////////////////////////////////////////////////////////
 		// readDumpFile
-		TypeFuncPair( Ftype1< string >::global(),  0 ),
+		new SrcFinfo( "readDumpFile", 
+					Ftype1< string >::global() ),
 		// writeDumpFile
-		TypeFuncPair( Ftype2< string, string >::global(),  0 ),
+		new SrcFinfo( "writeDumpFile", 
+					Ftype2< string, string >::global() ),
 		// simObjDump
-		TypeFuncPair( Ftype1< string >::global(),  0 ),
+		new SrcFinfo( "simObjDump",
+					Ftype1< string >::global() ),
 		// simundump
-		TypeFuncPair( Ftype1< string >::global(),  0 ),
+		new SrcFinfo( "simUndump",
+					Ftype1< string >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// Setting field values for a vector of objects
 		///////////////////////////////////////////////////////////////
-		// Setting a field value as a string: send out request:
-		TypeFuncPair( // object, field, value 
-				Ftype3< vector< unsigned int >, string, string >::global(), 0 ),
+		// Setting a vec of field values as a string: send out request:
+		new SrcFinfo( "setVecField", // object, field, value 
+			Ftype3< vector< unsigned int >, string, string >::global() ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
 	{
-			/*
-		new ValueFinfo( "unitTest", ValueFtype1< bool >::global(),
-			reinterpret_cast< GetFunc >( &Compartment::doUnitTest ),
-			RFCAST( dummyFunc )
-		),
-		*/
-		new SharedFinfo( "parser", parserTypes,
-				sizeof( parserTypes ) / sizeof( TypeFuncPair ) ),
+		new SharedFinfo( "parser", parserShared,
+				sizeof( parserShared ) / sizeof( Finfo* ) ),
 		new DestFinfo( "readline",
 			Ftype1< string >::global(),
 			RFCAST( &GenesisParserWrapper::readlineFunc ) ),
@@ -170,17 +177,6 @@ const Cinfo* initGenesisParserCinfo()
 			RFCAST( &GenesisParserWrapper::parseFunc ) ), 
 		new SrcFinfo( "echo", Ftype1< string>::global() ),
 
-		// This one is to exchange info with the shell.
-		// We'll fill it in later
-		/*
-		new SharedFinfo( "shell", shellTypes,
-				sizeof( shellTypes ) / sizeof( TypeFuncPair ) ),
-				*/
-		
-		/*
-		new SingleSrc2Finfo< int, const char** >( "commandOut",
-			&GenesisParserWrapper::getCommandSrc, ""),
-			*/
 	};
 
 	static Cinfo genesisParserCinfo(
@@ -198,64 +194,64 @@ const Cinfo* initGenesisParserCinfo()
 
 static const Cinfo* genesisParserCinfo = initGenesisParserCinfo();
 static const unsigned int setCweSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 0;
+	initGenesisParserCinfo()->getSlotIndex( "parser.cwe" );
 static const unsigned int requestCweSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 1;
+	initGenesisParserCinfo()->getSlotIndex( "parser.trigCwe" );
 static const unsigned int requestLeSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 2;
+	initGenesisParserCinfo()->getSlotIndex( "parser.trigLe" );
 static const unsigned int createSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 3;
+	initGenesisParserCinfo()->getSlotIndex( "parser.create" );
 static const unsigned int deleteSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 4;
+	initGenesisParserCinfo()->getSlotIndex( "parser.delete" );
 static const unsigned int requestFieldSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 5;
+	initGenesisParserCinfo()->getSlotIndex( "parser.get" );
 static const unsigned int setFieldSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 6;
+	initGenesisParserCinfo()->getSlotIndex( "parser.set" );
 static const unsigned int setClockSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 7;
+	initGenesisParserCinfo()->getSlotIndex( "parser.setClock" );
 static const unsigned int useClockSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 8;
+	initGenesisParserCinfo()->getSlotIndex( "parser.useClock" );
 static const unsigned int requestWildcardListSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 9;
+	initGenesisParserCinfo()->getSlotIndex( "parser.el" );
 static const unsigned int reschedSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 10;
+	initGenesisParserCinfo()->getSlotIndex( "parser.resched" );
 static const unsigned int reinitSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 11;
+	initGenesisParserCinfo()->getSlotIndex( "parser.reinit" );
 static const unsigned int stopSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 12;
+	initGenesisParserCinfo()->getSlotIndex( "parser.stop" );
 static const unsigned int stepSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 13;
+	initGenesisParserCinfo()->getSlotIndex( "parser.step" );
 static const unsigned int requestClocksSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 14;
+	initGenesisParserCinfo()->getSlotIndex( "parser.requestClocks" );
 static const unsigned int listMessagesSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 15;
+	initGenesisParserCinfo()->getSlotIndex( "parser.listMessages" );
 static const unsigned int copySlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 16;
+	initGenesisParserCinfo()->getSlotIndex( "parser.copy" );
 static const unsigned int moveSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 17;
+	initGenesisParserCinfo()->getSlotIndex( "parser.move" );
 static const unsigned int readCellSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 18;
+	initGenesisParserCinfo()->getSlotIndex( "parser.readcell" );
 
 static const unsigned int setupAlphaSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 19;
+	initGenesisParserCinfo()->getSlotIndex( "parser.setupAlpha" );
 static const unsigned int setupTauSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 20;
+	initGenesisParserCinfo()->getSlotIndex( "parser.setupTau" );
 static const unsigned int tweakAlphaSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 21;
+	initGenesisParserCinfo()->getSlotIndex( "parser.tweakAlpha" );
 static const unsigned int tweakTauSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 22;
+	initGenesisParserCinfo()->getSlotIndex( "parser.tweakTau" );
 
 static const unsigned int readDumpFileSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 23;
+	initGenesisParserCinfo()->getSlotIndex( "parser.readDumpFile" );
 static const unsigned int writeDumpFileSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 24;
+	initGenesisParserCinfo()->getSlotIndex( "parser.writeDumpFile" );
 static const unsigned int simObjDumpSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 25;
+	initGenesisParserCinfo()->getSlotIndex( "parser.simObjDump" );
 static const unsigned int simUndumpSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 26;
+	initGenesisParserCinfo()->getSlotIndex( "parser.simUndump" );
 
 static const unsigned int setVecFieldSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser" ) + 27;
+	initGenesisParserCinfo()->getSlotIndex( "parser.setVecField" );
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions

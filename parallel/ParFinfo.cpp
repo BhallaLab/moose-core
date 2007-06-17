@@ -169,8 +169,12 @@ bool ParFinfo::respondToAdd(
 	// - send out message request
 	// - create local message
 
-	if ( targetId != 0 ) // Check that message isn't to postmaster itself.
-		destIndex = PostMaster::respondToAdd( e, oss.str(), numDest );
+	if ( targetId != 0 ) // If the message is to a remote node object,
+						// post the request for a remote message.
+		PostMaster::respondToAdd( e, oss.str(), numDest );
+	
+	// Either way, the target of the message is the current message slot
+	destIndex = msgIndex_;
 
 
 	PostMaster* post = static_cast< PostMaster* >( e->data() );

@@ -3389,5 +3389,26 @@ At this point it passes tests up to 2 nodes. New problem: dies when creating
 the parser, but only if # nodes > 2.
 
 Anyway, many files updated so it is time to check it in.
+Checked in as revision 140.
+
+Got the Master-Slave data transfer to work, but there is an issue with the
+field recv func: there might be asynchrony. May need more identification info
+to go back.
+Still barfs for 3 nodes.
+
+Turns out there is an unassigned conn coming up. When execution reaches this
+the null Element pointer in it causes problems.
+Next is to track this down.
 
 =============================================================================
+17 June 2007
+Cleaning up stuff trying to track it:
+- Fixed an unassigned field problem with the DestIndex in SharedFinfo::add.
+For some reason it did not crop up earlier.
+- Put in assorted assertions to test for empty Conn::targetElement().
+- Replaced the deprecated SharedFinfo initialization of GenesisParserWrapper
+	with the new version.
+
+None of these helps. We still pass the 2-node, and barf at the 3-node
+tests. The empty Conn remains. Anyway, check it in.
+
