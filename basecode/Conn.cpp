@@ -47,6 +47,7 @@ void Conn::updateIndex( unsigned int j )
 void Conn::set( Element* e, unsigned int index )
 {
 	e_ = e;
+	assert( e_ != 0 );
 	index_ = index;
 }
 

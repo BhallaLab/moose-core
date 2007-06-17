@@ -228,7 +228,7 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "get",
 			// objId, field
 			Ftype2< unsigned int, string >::global(),
-			RFCAST( &Shell::getField )
+			RFCAST( &Shell::slaveGetField )
 			),
 		new SrcFinfo( "recvGet",
 			Ftype1< string >::global()
@@ -297,6 +297,17 @@ static const unsigned int clockSlot =
 static const unsigned int listMessageSlot =
 	initShellCinfo()->getSlotIndex( "parser.listMessagesSrc" );
 
+
+static const unsigned int rCreateSlot =
+	initShellCinfo()->getSlotIndex( "master.create" );
+static const unsigned int rGetSlot =
+	initShellCinfo()->getSlotIndex( "master.get" );
+static const unsigned int rSetSlot =
+	initShellCinfo()->getSlotIndex( "master.set" );
+static const unsigned int rAddSlot =
+	initShellCinfo()->getSlotIndex( "master.add" );
+static const unsigned int recvGetSlot =
+	initShellCinfo()->getSlotIndex( "slave.recvGet" );
 
 //////////////////////////////////////////////////////////////////////
 // Initializer
@@ -641,24 +652,62 @@ void Shell::getField( const Conn& c, unsigned int id, string field )
 ////////////////////////////////////////////////////////////////////////
 // Functions for implementing Master/Slave set
 ////////////////////////////////////////////////////////////////////////
-void Shell::recvGetFunc( const Conn& c, string field )
+
+// To be called from the node on which the Master shell resides.
+void testMess( Element* e )
 {
+	send4< string , string, unsigned int, unsigned int>( 
+		e, rCreateSlot, "objtype", "objname", 1234, 5678 );
+
+	send2< unsigned int, string >( e, rGetSlot, 5, "name" );
+
+	// send1< string >( e, recvGetSlot, "fieldvalue" );
+
+	send3< unsigned int, string, string >( e, rSetSlot, 
+		0, "fieldname", "value" );
+
+	send4< unsigned int, string, unsigned int, string >( e, rAddSlot, 
+		5432, "srcfield", 9876, "destfield" );
+}
+
+void Shell::slaveGetField( const Conn& c, unsigned int id, string field )
+{
+	cout << "in slaveGetFunc on " << id << " with field :" << 
+		field << "\n";
+	if ( id == BAD_ID )
+		return;
+	string ret;
+	Element* e = Element::element( id );
+	if ( e == 0 )
+		return;
+
+	const Finfo* f = e->findFinfo( field );
+	if ( f )
+		if ( f->strGet( e, ret ) )
+			sendTo1< string >( c.targetElement(),
+				recvGetSlot, c.targetIndex() - 1, ret );
+}
+
+void Shell::recvGetFunc( const Conn& c, string value )
+{
+	cout << "in recvGetFunc with field value :'" << value << "'\n";
 	// send off to parser maybe.
-	;
 }
 
 void Shell::slaveCreateFunc ( const Conn& c, 
 				string objtype, string objname, 
 				unsigned int parent, unsigned int newobj )
 {
-	;
+	cout << "in slaveCreateFunc :" << objtype << " " << objname << 
+		" " << parent << " " << newobj << "\n";
 }
 
 void Shell::addFunc ( const Conn& c, 
 				unsigned int src, string srcField,
 				unsigned int dest, string destField )
 {
-	;
+	cout << "in slaveAddFunc :" << src << " " << srcField << 
+		" " << dest << " " << destField << "\n";
 }
 // Static function
 /**
@@ -755,6 +804,11 @@ void Shell::setField( const Conn& c,
 				unsigned int id, string field, string value )
 {
 	Element* e = Element::element( id );
+	if ( !e ) {
+		cout << "Shell::setField:Error: Element not found: " 
+			<< id << endl;
+		return;
+	}
 	// Appropriate off-node stuff here.
 
 	const Finfo* f = e->findFinfo( field );
