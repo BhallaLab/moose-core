@@ -119,4 +119,58 @@ template < class T1, class T2, class T3 > void send3(
 	} while ( src != 0 );
 }
 
+/**
+ * This templated function sends a three-argument message to the
+ * target specified by the conn argument. Note that this refers
+ * to the index in the local conn_ vector.
+ */
+template< class T1, class T2, class T3 > void sendTo2(
+		const Element* eIn, unsigned int src, unsigned int conn,
+		T1 val1, T2 val2, T3 val3 )
+{
+	const SimpleElement* e = static_cast< const SimpleElement* >( eIn );
+	void( *rf )( const Conn&, T1, T2, T3 ) = 
+			reinterpret_cast< void ( * )( const Conn&, T1, T2, T3 ) >(
+			e->lookupRecvFunc( src, conn ) );
+		rf( *( e->lookupConn( conn ) ),  val1, val2, val3 );
+}
+
+/**
+ * This templated function sends four-argument messages.
+ */
+template < class T1, class T2, class T3, class T4 > void send4(
+			const Element* eIn, unsigned int src,
+			T1 val1, T2 val2, T3 val3, T4 val4 )
+{
+	const SimpleElement* e = static_cast< const SimpleElement* >( eIn );
+
+	do {
+		void( *rf )( const Conn&, T1, T2, T3, T4 ) = 
+			reinterpret_cast< void ( * )( const Conn&, T1, T2, T3, T4 ) >(
+				e->srcRecvFunc( src ) ); 
+		/// \todo Are there STL binders for 2 values?
+		vector< Conn >::const_iterator j;
+		for ( j = e->connSrcBegin( src );
+						j != e->connSrcEnd( src ); j++ )
+				rf( *j, val1, val2, val3, val4 );
+		src = e->nextSrc( src );
+	} while ( src != 0 );
+}
+
+/**
+ * This templated function sends a four-argument message to the
+ * target specified by the conn argument. Note that this refers
+ * to the index in the local conn_ vector.
+ */
+template< class T1, class T2, class T3, class T4 > void sendTo2(
+		const Element* eIn, unsigned int src, unsigned int conn,
+		T1 val1, T2 val2, T3 val3, T4 val4 )
+{
+	const SimpleElement* e = static_cast< const SimpleElement* >( eIn );
+	void( *rf )( const Conn&, T1, T2, T3, T4 ) = 
+			reinterpret_cast< void ( * )( const Conn&, T1, T2, T3, T4 ) >(
+			e->lookupRecvFunc( src, conn ) );
+		rf( *( e->lookupConn( conn ) ),  val1, val2, val3, val4 );
+}
+
 #endif // _SEND_H

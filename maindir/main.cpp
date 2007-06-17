@@ -121,13 +121,15 @@ int main(int argc, char** argv)
 		} else {
 			ret = slaveFinfo->add( shell, *j, (*j)->findFinfo( "data" ) );
 		}
-		// cout << "On " << mynode << ", post: " << (*j)->name() << endl;
-		// (*j)->dumpMsgInfo();
-		assert( ret );
 		/*
+		cout << "On " << mynode << ", post: " << (*j)->name() << endl;
+		(*j)->dumpMsgInfo();
+		assert( ret );
 		*/
 	}
 
+	cout << "On " << mynode << ", shell: " << shell->name() << endl;
+	shell->dumpMsgInfo();
 	set( cj, "resched" );
 	set( cj, "reinit" );
 #ifdef DO_UNIT_TESTS
