@@ -164,7 +164,7 @@ unsigned int SimpleElement::insertConnOnSrc(
  * This variant inserts a connection on the MsgSrc, putting it on
  * the separate index. It is used to expand out shared messages into
  * individual ones for connecting to the PostMaster.
- * Returns the index of the first matching MsgSrc of the shared set,
+ * Returns the index of the first matching Conn of the shared set,
  * or if it doesn't exist, it makes a new set of MsgSrcs and returns
  * the starting index of this set.
  * Assumes that the Finfo that called this function has done the
