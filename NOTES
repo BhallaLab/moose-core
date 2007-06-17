@@ -3411,4 +3411,40 @@ For some reason it did not crop up earlier.
 
 None of these helps. We still pass the 2-node, and barf at the 3-node
 tests. The empty Conn remains. Anyway, check it in.
+Checked in as revision 141. This checkin is to the new 'moose' site, 
+switching over from moose-g3.
 
+OK, tracked it down. The MsgSrc indexing of begin and end increments by one,
+but there is a block of conns for the parallel dest that need to be skipped.
+This also explains why it fails only for >= 3 nodes, when we have multiple
+originating messages. 
+For the 2 node case we have:
+src_:   begin, end, next, func
+11:     0, 1, 0, unknown func
+12:     1, 2, 0, dummyFunc
+13:     2, 3, 0, dummyFunc
+14:     3, 4, 0, dummyFunc
+
+For the 3 node case we have:
+src_:   begin, end, next, func
+11:     0, 2, 0, unknown func
+12:     2, 4, 0, dummyFunc
+13:     4, 6, 0, dummyFunc
+14:     6, 8, 0, dummyFunc
+
+and so on.
+Other possibilities: 
+- If we know the number of targets ahead of time (unlikely) we could
+	simply assign blocks for each func.
+- We could put each new target onto another slab of the Src, using the next ptr.
+
+In the end, fixed it without messing with the MsgSrc. I realized I have to
+keep the Conns sequential for each Func, that is, for each entry in the
+MsgSrc. So the solution is instead to be a little smarter with how I
+identify which Conns to use for successive funcs.
+
+This works! One oddity is that all the nodes seem to be sending each other
+slaveCreate messages, though the testMess function should only be
+called for node 0. Anyway, this is a major step forward and needs recording.
+
+=============================================================================
