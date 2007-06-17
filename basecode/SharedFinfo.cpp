@@ -142,15 +142,18 @@ bool SharedFinfo::addSeparateConns(
 {
 	FuncList srcFl = rfuncs_;
 	FuncList destFl;
-	unsigned int destIndex;
+	unsigned int destIndex = 0;
 	unsigned int numDest;
 
 	if ( destFinfo->respondToAdd( destElm, e, ftype(),
 							srcFl, destFl,
 							destIndex, numDest ) )
 	{
-		assert ( destFl.size() == numSrc_ );
-		assert ( numSrc_ + srcFl.size() > 0 );
+		assert( destFl.size() == numSrc_ );
+		assert( numSrc_ + srcFl.size() > 0 );
+		assert( destElm != 0 );
+		assert( e != 0 );
+		assert( destIndex != 0 );
 
 		unsigned int originatingConn;
 		unsigned int targetConn;
@@ -164,6 +167,9 @@ bool SharedFinfo::addSeparateConns(
 				originatingConn = e->insertConnOnDest( msgIndex_, 1);
 				targetConn = destElm->insertConnOnDest( destIndex, 1 );
 				e->connect( originatingConn, destElm, targetConn );
+				assert( e->lookupConn( originatingConn )->
+					targetElement() == destElm );
+				assert( destElm->lookupConn( targetConn )->targetElement() == e );
 			}
 		} else { // The usual case: mixed srcs and dests.
 			unsigned int numConns = srcFl.size();
@@ -178,6 +184,10 @@ bool SharedFinfo::addSeparateConns(
 			for ( i = 0; i < numConns; i++ ) {
 				targetConn = destElm->insertConnOnDest( destIndex, 1 );
 				e->connect( originatingConn + i, destElm, targetConn );
+				assert( e->lookupConn( originatingConn + i )->
+					targetElement() == destElm );
+				assert( destElm->lookupConn( targetConn )->
+					targetElement() == e );
 			}
 		}
 		return 1;

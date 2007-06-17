@@ -582,11 +582,13 @@ void SimpleElement::addFinfo( Finfo* f )
 		unsigned int end = lastSrcConnIndex();
 		MsgSrc temp( end, end, dummyFunc );
 		src_.push_back( temp );
+		assert( src_.size() == nSrc );
 	}
 	if ( nDest > dest_.size() ) {
 		unsigned int end = lastDestConnIndex();
 		MsgDest temp( end, end );
 		dest_.push_back( temp );
+		assert( dest_.size() == nDest );
 	}
 	finfo_.push_back( f );
 }
@@ -729,7 +731,9 @@ void SimpleElement::dumpMsgInfo() const
 
 	}
 	cout << "conn:	target index, target Element:\n";
-	for ( i = 0; i < conn_.size(); i++ )
-		cout << i << ":	" << conn_[i].targetIndex() << ", " << 
-			conn_[i].targetElement()->name() << endl;
+	for ( i = 0; i < conn_.size(); i++ ) {
+		Element* e = conn_[i].targetElement();
+		string name = ( e ) ? e->name() : "EMPTY CONN";
+		cout << i << ":	" << conn_[i].targetIndex() << ", " << name << endl;
+	}
 }

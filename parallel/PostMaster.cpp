@@ -477,6 +477,8 @@ void* getAsyncParBuf( const Conn& c, unsigned int size )
 #include "../builtins/Table.h"
 #include "../shell/Shell.h"
 
+extern void testMess( Element* e );
+
 void testPostMaster()
 {
 	// First, ensure that all nodes are synced.
@@ -688,6 +690,13 @@ void testPostMaster()
 		}
 	}
 	set( n, "destroy" );
+	MPI::COMM_WORLD.Barrier();
+
+	unsigned int shellId = Shell::path2eid( "/shell", "/" );
+	Element* shell = Element::element( shellId );
+	if ( myNode == 0 )
+		testMess( shell );
+	set< double >( cj, "start", 2.0 );
 	MPI::COMM_WORLD.Barrier();
 }
 #endif
