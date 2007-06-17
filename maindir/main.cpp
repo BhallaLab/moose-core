@@ -128,8 +128,8 @@ int main(int argc, char** argv)
 		*/
 	}
 
-	cout << "On " << mynode << ", shell: " << shell->name() << endl;
-	shell->dumpMsgInfo();
+	// cout << "On " << mynode << ", shell: " << shell->name() << endl;
+	// shell->dumpMsgInfo();
 	set( cj, "resched" );
 	set( cj, "reinit" );
 #ifdef DO_UNIT_TESTS
