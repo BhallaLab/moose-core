@@ -670,8 +670,21 @@ void testMess( Element* e )
 		5432, "srcfield", 9876, "destfield" );
 }
 
+void printNodeInfo( const Conn& c )
+{
+	Element* post = c.sourceElement();
+	assert( post->className() == "PostMaster" );
+	unsigned int mynode;
+	unsigned int remotenode;
+	get< unsigned int >( post, "localNode", mynode );
+	get< unsigned int >( post, "remoteNode", remotenode );
+
+	cout << "on " << mynode << " from " << remotenode << ":";
+}
+
 void Shell::slaveGetField( const Conn& c, unsigned int id, string field )
 {
+	printNodeInfo( c );
 	cout << "in slaveGetFunc on " << id << " with field :" << 
 		field << "\n";
 	if ( id == BAD_ID )
@@ -690,6 +703,7 @@ void Shell::slaveGetField( const Conn& c, unsigned int id, string field )
 
 void Shell::recvGetFunc( const Conn& c, string value )
 {
+	printNodeInfo( c );
 	cout << "in recvGetFunc with field value :'" << value << "'\n";
 	// send off to parser maybe.
 }
@@ -698,6 +712,7 @@ void Shell::slaveCreateFunc ( const Conn& c,
 				string objtype, string objname, 
 				unsigned int parent, unsigned int newobj )
 {
+	printNodeInfo( c );
 	cout << "in slaveCreateFunc :" << objtype << " " << objname << 
 		" " << parent << " " << newobj << "\n";
 }
@@ -706,6 +721,7 @@ void Shell::addFunc ( const Conn& c,
 				unsigned int src, string srcField,
 				unsigned int dest, string destField )
 {
+	printNodeInfo( c );
 	cout << "in slaveAddFunc :" << src << " " << srcField << 
 		" " << dest << " " << destField << "\n";
 }
