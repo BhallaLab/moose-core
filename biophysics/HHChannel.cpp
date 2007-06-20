@@ -237,7 +237,8 @@ void HHChannel::makeGate( Element *e, const Finfo* f, double power )
 				// Get rid of local connection to gate, but don't delete
 				f->dropAll( e );
 			} else { // Delete the single gate.
-				assert( set( gate, "destroy" ) );
+				bool ret = set( gate, "destroy" );
+				assert( ret );
 			}
 		}
 		return;
@@ -254,14 +255,16 @@ void HHChannel::makeGate( Element *e, const Finfo* f, double power )
 			// make a new gate which we can change.
 			gate = Neutral::create( "HHGate", "xGate", e );
 			gate->addFinfo( GlobalMarkerFinfo::global() );
-			assert( f->add( e, gate, gate->findFinfo( "gate" ) ) );
+			bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
+			assert( ret );
 		}
 	} else { // No gate, make a new one.
 		gate = Neutral::create( "HHGate", f->name(), e );
 		// Make it a global so that duplicates do not happen unless
 		// the table values change.
 		gate->addFinfo( GlobalMarkerFinfo::global() );
-		assert( f->add( e, gate, gate->findFinfo( "gate" ) ) );
+		bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
+		assert( ret );
 	}
 }
 
