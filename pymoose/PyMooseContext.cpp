@@ -785,6 +785,9 @@ Id PyMooseContext::deepCopy( Id object, std::string new_name, Id dest)
     return pathToId(path);
 }
 
+/**
+   move object into the element specified by dest and rename the object to new_name
+*/
 void PyMooseContext::move( Id object, std::string new_name, Id dest)
 {
     send3< Id, Id, string >(
@@ -819,11 +822,11 @@ bool PyMooseContext::connect(Id src, std::string srcField, Id dest, std::string 
 Id PyMooseContext::findChanGateId( std::string channel, std::string gate)
 {
     std::string path = "";
-    if ( gate.at(0) == 'X' )
+    if (( gate.at(0) == 'X' )||( gate.at(0) == 'x' ))
         path = channel + "/xGate";
-    else if ( gate.at(0) == 'Y' )
+    else if (( gate.at(0) == 'Y' ) || ( gate.at(0) == 'y' ))
         path = channel + "/yGate";
-    else if ( gate.at(0)   == 'Z' )
+    else if (( gate.at(0)   == 'Z' )||( gate.at(0)   == 'z' ))
         path = channel + "/zGate";
     Id gateId = pathToId( path);
     if ( gateId == BAD_ID ) // Don't give up, it might be a tabgate
@@ -835,9 +838,16 @@ Id PyMooseContext::findChanGateId( std::string channel, std::string gate)
     return gateId;
 }
 
+/**
+   this is a common interface for setting up channel function - used
+   by setupAlpha, setupTau.
+   
+   parameter channel is the path to the channel containing the gate.
+   The actual gate used is xGate or yGate or xGate when the gate
+   parameter starts with 'x', 'y' or 'z' respectively.
+ */
 void PyMooseContext::setupChanFunc(std::string channel, std::string gate, vector <double>& parms, const unsigned int& slot)
-{
-    
+{    
     if (parms.size() < 10 ) {
         cerr << "Error: PyMooseContext::setupChanFunc() -  We need a vector for these items: AA AB AC AD AF BA BB BC BD BF size min max (length should be at least 10)" << endl;
         return;
@@ -867,16 +877,54 @@ void PyMooseContext::setupChanFunc(std::string channel, std::string gate, vector
     send2< Id, vector< double > >( Element::element( myId_ ), slot, gateId, parms );
 }
 
+/**
+   this is a common interface for setting up channel function - used
+   by setupAlpha, setupTau.
+   
+   parameter channel is the path to the channel containing the gate.
+   The actual gate used is xGate or yGate or xGate when the gate
+   parameter starts with 'x', 'y' or 'z' respectively.
+ */
+void PyMooseContext::setupChanFunc(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max, const unsigned int& slot)
+{
+    Id gateId = findChanGateId(channel, gate );
+    if (gateId == BAD_ID )
+        return;
+    vector<double> params;
+    params.push_back(AA);
+    params.push_back(AB);
+    params.push_back(AC);
+    params.push_back(AD);
+    params.push_back(AF);
+    params.push_back(BA);
+    params.push_back(BB);
+    params.push_back(BC);
+    params.push_back(BD);
+    params.push_back(BF);
+    params.push_back(size);
+    params.push_back(min);
+    params.push_back(max);
+    send2< Id, vector< double > >( Element::element( myId_ ), slot, gateId, params );
+}
+
 void PyMooseContext::setupAlpha( std::string channel, std::string gate, vector <double> parms ) 
 {
     setupChanFunc( channel, gate, parms, setupAlphaSlot );
+}
+
+void PyMooseContext::setupAlpha(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max)
+{
+    setupChanFunc(channel, gate, AA, AB, AC, AD, AF, BA, BB, BC, BD, BF, size, min, max, setupAlphaSlot);    
 }
 
 void PyMooseContext::setupTau( std::string channel, std::string gate, vector <double> parms ) 
 {
     setupChanFunc( channel, gate, parms, setupTauSlot );
 }
-
+void PyMooseContext::setupTau(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max)
+{
+    setupChanFunc(channel, gate, AA, AB, AC, AD, AF, BA, BB, BC, BD, BF, size, min, max, setupTauSlot);    
+}
 void PyMooseContext::tweakChanFunc( std::string  channel, std::string gate, unsigned int slot )
 {
     Id gateId = findChanGateId( channel, gate );
@@ -889,6 +937,7 @@ void PyMooseContext::tweakAlpha( std::string channel, std::string gate )
 {
     tweakChanFunc( channel, gate, tweakAlphaSlot );
 }
+
 void PyMooseContext::tweakTau( std::string channel, std::string gate)
 {
     tweakChanFunc( channel, gate, tweakTauSlot );
@@ -963,6 +1012,11 @@ void PyMooseContext::tabFill(Id table, int xdivs, int mode)
     send3< Id, string, string >( Element::element( myId_ ), setFieldSlot, table, "tabFill", argstr );
 }
 
+void PyMooseContext::readCell( std::string filename, std::string cellpath )
+{
+    send2< string, string >( Element::element( myId_ ), 
+                             readCellSlot, filename, cellpath );
+}
 #ifdef DO_UNIT_TESTS
 /**
    These are the unit tests
