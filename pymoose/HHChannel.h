@@ -37,7 +37,9 @@ class HHChannel : public PyMooseBase
     void tweakAlpha(std::string gate);
     void tweakTau(std::string gate);
     void setupAlpha(std::string gate, vector <double> params);
+    void setupAlpha(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size = 3000, double min = -0.1, double max = 0.05);
     void setupTau(std::string gate, vector <double> params);
+    void setupTau(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size = 3000, double min = -0.1, double max=0.05);
     
 };
 #endif
