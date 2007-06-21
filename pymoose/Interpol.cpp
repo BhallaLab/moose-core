@@ -150,7 +150,9 @@ void InterpolationTable::dumpFile( string fileName )
 {
     set < string > (Element::element(id_), "print", fileName);
 }
-
+/**
+   What are the possible values for mode?
+ */
 void InterpolationTable::tabFill( int xdivs, int mode )
 {
     this->getContext()->tabFill(id_, xdivs, mode);    
