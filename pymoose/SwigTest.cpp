@@ -24,7 +24,7 @@ double clock_overhead()
     return (double)(time - start)/count;
 }
 
-    
+
 int main(int argc, char **argv)
 {
     atexit(__libc_freeres);
@@ -47,8 +47,18 @@ int main(int argc, char **argv)
 //     cerr << "Time spent to test " << loopCount << " times = " << (double)(end-start)/CLOCKS_PER_SEC << " with overhead = " << clock_overhead() << endl;
 
     Neutral lib("/library");
+    cerr << "Created Neutral: /library" << endl;
+    
     HHChannel LCa3_mit_usb = HHChannel("/library/LCa3_mit_usb");
-    Neutral lib2("lib");
+    cerr << "Created HHChannel: /library/LCa3_mit_usb" << endl;
+
+    Compartment soma("/soma");
+    cerr << "Created compartment: /soma" << endl;
+
+    PyMooseContext* ctx = soma.getContext();
+    ctx->readCell("/home/subha/src/moose/moose/DOCS/Demos/soma.p", "/soma_test");
+    cerr << "Successfully read cell file 'soma'" << endl;
+    
     
     
     return 0;   

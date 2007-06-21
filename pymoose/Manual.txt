@@ -13,12 +13,18 @@ pymoose commands - which are just python classes and function calls.
 tabchannel
 ----------------------------
 tabchannel - it is HHChannel actually.
-// create tabchannel LCa3_mit_usb
-LCa3_mit_usb = create moose.HHChannel('LCa3_mit_usb')
+create tabchannel LCa3_mit_usb 
+is equivalent to
+LCa3_mit_usb = moose.HHChannel('LCa3_mit_usb')
 
 setup_tabchan is equivalent to setupAlpha for the same HHChannel.
 setup_tabchan LCa3_mit_usb X 7500.0 0.0 1.0 -0.013 -0.007 1650.0 0.0 1.0 -0.014 0.004
 LCa3_mit_usb.setupAlpha('X', params)    
+
+setup_tabchan_tau
+setupTau()
+
+tweak_tabchan channelname gatename
 
 -----------------------------
  TABCREATE

@@ -135,9 +135,19 @@ void HHChannel::setupAlpha(std::string gate, vector <double> params)
     this->getContext()->setupAlpha(this->path(),gate, params);    
 }
 
+void HHChannel::setupAlpha(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max )
+{
+    // TODO:
+}
+
+
 void HHChannel::setupTau(std::string gate, vector <double> params)
 {
     this->getContext()->setupTau(this->path(),gate, params);    
+}
+void HHChannel::setupTau(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max)
+{
+    // TODO:
 }
 
 void HHChannel::createTable(std::string gate, unsigned int divs, double min, double max)

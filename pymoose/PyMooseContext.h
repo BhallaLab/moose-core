@@ -94,7 +94,9 @@ class PyMooseContext
     void move( Id object, std::string new_name, Id dest);
     bool connect(Id src, std::string srcField, Id dest, std::string destField);
     void setupAlpha( std::string channel, std::string gate, vector <double> parms );
+    void setupAlpha(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max);
     void setupTau( std::string channel, std::string gate, vector <double> parms );
+    void setupTau(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max);
     void tweakAlpha( std::string channel, std::string gate );
     void tweakTau( std::string channel, std::string gate);
     void tabFill(Id table, int xdivs, int mode);    
@@ -103,6 +105,7 @@ class PyMooseContext
     void setupTau( Id gateId, vector <double> parms );
     void tweakAlpha( Id gateId );
     void tweakTau( Id gateId);
+    void readCell(std::string fileName, std::string cellPath);    
     bool exists(Id id);
     bool exists(std::string path);
     
@@ -118,7 +121,12 @@ class PyMooseContext
   private:
     Id findChanGateId( std::string channel, std::string gate);
     void setupChanFunc( std::string channel, std::string gate, vector <double>& parms, const unsigned int& slot);
+    
+    void setupChanFunc(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max, const unsigned int& slot);
+
+    
     void tweakChanFunc( std::string channel, std::string gate, unsigned int slot );
+    
     void setupChanFunc( Id gateId, vector <double> parms, unsigned int slot);
     void tweakChanFunc( Id gateId, unsigned int slot );
     
