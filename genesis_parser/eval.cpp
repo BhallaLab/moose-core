@@ -18,8 +18,8 @@ using namespace std;
 // #include <string.h>
 #include <setjmp.h>
 #include <FlexLexer.h>
+#include "header.h"
 #include "script.h"
-// #include "Shell.h"
 #include "GenesisParser.h"
 #include "GenesisParser.tab.h"
 #include "func_externs.h"

@@ -19,10 +19,12 @@
  * be specialized as needed for arrays and other things.
  */
 
+class Cinfo;
+
 class Element
 {
 	public:
-		Element();
+		Element( Id id );
 		Element( bool ignoreId );
 
 		virtual ~Element();
@@ -35,6 +37,9 @@ class Element
 
 		/// Returns the name of the element class
 		virtual const std::string& className( ) const = 0;
+
+		/// Returns the class infor of the element class.
+		virtual const Cinfo* cinfo( ) const = 0;
 
 		/// Looks up the specific indexed conn
 		virtual vector< Conn >::const_iterator 
@@ -287,15 +292,23 @@ class Element
 		 */
 		static Element* root();
 
-		unsigned int id() const {
+		Id id() const {
 			return id_;
 		}
 
-		static Element* element( unsigned int id );
+		///////////////////////////////////////////////////////////////
+		// Element Id management functions
+		///////////////////////////////////////////////////////////////
 
-		static Element* lastElement();
+		// static Element* element( unsigned int id );
 
-		static unsigned int numElements();
+		// Deprecated
+		// static Element* lastElement();
+
+		// static unsigned int numElements();
+
+		// static unsigned int nextId();
+		// static unsigned int lastId();
 
 		///////////////////////////////////////////////////////////////
 		// Functions for the copy operation
@@ -368,9 +381,9 @@ class Element
 
 
 	private:
-		static vector< Element* >& elementList();
+		// static vector< Element* >& elementList();
 		// static vector< Element* > elementList;
-		unsigned int id_;
+		Id id_;
 };
 
 #endif // _ELEMENT_H

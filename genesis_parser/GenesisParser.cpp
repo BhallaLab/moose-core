@@ -34,6 +34,7 @@
 #include <FlexLexer.h>
 #include "GenesisParser.tab.h"
 #include "script.h"
+#include "header.h"
 #include "GenesisParser.h"
 #include "func_externs.h"
 
@@ -43,7 +44,6 @@ using std::cout;
 using std::map;
 using std::string;
 
-#include "header.h"
 #include "GenesisParserWrapper.h"
 
 #define MOOSE_THREADS 0
@@ -55,8 +55,8 @@ using std::string;
 ///////////////////////////////////////////////////////////////////////
 
 
-myFlexLexer::myFlexLexer( Id id )
-			: yyFlexLexer(), state(LOOKUP), element_( id )
+myFlexLexer::myFlexLexer( )
+			: yyFlexLexer(), state(LOOKUP)
 {
 	currstr = "";
 	BreakAllowed = 0;
@@ -73,6 +73,11 @@ myFlexLexer::myFlexLexer( Id id )
 	// AddFunc("quit", do_quit, "void");
 	// AddFunc("echo", do_echo, "void");
 	set_float_format("%g");
+}
+
+void myFlexLexer::setElement( Id id )
+{
+	element_ = id;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -309,7 +314,8 @@ loop:
 
 void myFlexLexer::print( const string& s )
 {
-	Element* e = Element::element( element_ );
+	// Element* e = Element::element( element_ );
+	Element* e = element_();
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
 			( e->data() );
 	gpw->print( s );
@@ -407,7 +413,7 @@ Result func_entry::Execute(int argc, const char** argv, Id s)
 {
 	Result		result;
 
-	assert( s != 0 );
+	assert( s != Id() );
 	if ( type == "int") {
 	    result.r_type = IntType();
 	    result.r.r_int = ((PFI)func)( argc, argv, s );

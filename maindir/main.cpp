@@ -12,6 +12,7 @@
 #include "header.h"
 #include "moose.h"
 #include "../element/Neutral.h"
+#include "IdManager.h"
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
@@ -39,10 +40,24 @@
 int main(int argc, char** argv)
 {
 	unsigned int mynode = 0;
+	// Create the shell on id 1.
+	const Cinfo* c = Cinfo::find( "Shell" );
+	assert ( c != 0 );
+	const Finfo* childSrc = Element::root()->findFinfo( "childSrc" );
+	assert ( childSrc != 0 );
+	Element* shell = c->create( Id( 1 ), "shell" );
+	assert( shell != 0 );
+	bool ret = childSrc->add( Element::root(), shell, 
+		shell->findFinfo( "child" ) );
+	assert( ret );
+
 #ifdef USE_MPI
+// 	Element* shell =
+// 			Neutral::create( "Shell", "shell", Element::root() );
 	MPI::Init( argc, argv );
 	unsigned int totalnodes = MPI::COMM_WORLD.Get_size();
 	mynode = MPI::COMM_WORLD.Get_rank();
+	Id::manager().setNodes( mynode, totalnodes );
 
 	Element* postmasters =
 			Neutral::create( "Neutral", "postmasters", Element::root());
@@ -61,6 +76,8 @@ int main(int argc, char** argv)
 	}
 	// Perhaps we will soon want to also connect up the clock ticks.
 	// How do we handle different timesteps?
+#else	
+//	Neutral::create( "Shell", "shell", Element::root() );
 #endif
 	
 	Element* sched =
@@ -69,13 +86,10 @@ int main(int argc, char** argv)
 			Neutral::create( "ClockJob", "cj", sched );
 
 #ifdef USE_MPI
-	Element* shell =
-			Neutral::create( "Shell", "shell", Element::root() );
 	Element* t0 =
 			Neutral::create( "ParTick", "t0", cj );
 #else
 	Neutral::create( "Tick", "t0", cj );
-	Neutral::create( "Shell", "shell", Element::root() );
 #endif
 
 #ifdef DO_UNIT_TESTS
@@ -163,3 +177,4 @@ int main(int argc, char** argv)
 #endif
 	cout << "done" << endl;
 }
+
