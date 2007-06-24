@@ -49,14 +49,13 @@ void IdManager::setNodes( unsigned int myNode, unsigned int numNodes )
  */
 unsigned int IdManager::scratchId()
 {
-	if ( numNodes_ <= 1 || myNode_ == 0 ) {
+	if ( numNodes_ <= 1 ) {
 		lastId_ = mainIndex_;
 		mainIndex_++;
 		if ( mainIndex_ >= elementList_.size() )
 			elementList_.resize( mainIndex_ * 2 );
 		return lastId_;
-	}
-	if ( myNode_ > 0 ) {
+	} else {
 		if ( scratchIndex_ < numScratch ) {
 			lastId_ = scratchIndex_;
 			++scratchIndex_;
@@ -118,7 +117,7 @@ Element* IdManager::getElement( unsigned int index ) const
 		} else {
 			// later:
 			// Element* wrap = new WrapperElement( ret, id_ );
-			Element* wrap = 0;
+			Element* wrap = ret;
 			return wrap;
 		}
 #else
