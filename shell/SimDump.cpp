@@ -174,10 +174,10 @@ void SimDump::simUndump( const string& args )
 	}
 
 	// Case 1: The element already exists.
-	unsigned int id = Shell::path2eid( path, "/" );
+	Id id( path, "/" );
 	Element* e = 0;
-	if ( id != BAD_ID ) {
-		e = Element::element( id );
+	if ( !id.bad() ) {
+		e = id();
 		assert( e != 0 );
 		i->second->setFields( e, argv.begin() + 4, argv.end() );
 		return;
@@ -186,12 +186,12 @@ void SimDump::simUndump( const string& args )
 	// Case 2: Element does not exist but parent element does.
 	string ppath = Shell::head( path, "/" );
 	string epath = Shell::tail( path, "/" );
-	id = Shell::path2eid( ppath, "/" );
-	if ( id == BAD_ID ) {
+	id = Id( ppath, "/" );
+	if ( id.bad() ) {
 		cout << "simundumpFunc: bad parent path: " << epath << endl;
 		return;
 	}
-	Element* parent = Element::element( id );
+	Element* parent = id();
 	assert( parent != 0 );
 
 	string newClassName = i->second->newObject();

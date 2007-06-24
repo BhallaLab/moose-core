@@ -56,6 +56,43 @@ template<> bool str2val< unsigned int >( const string& s, unsigned int& ret )
 	return 1;
 }
 
+template<> bool val2str< double >( double v, string& ret)
+{
+	char temp[40];
+	// cerr << "in val2str< double >\n";
+	sprintf(temp, "%g", v);
+	ret = temp;
+	return 1;
+}
+
+template<> bool str2val< double >( const string& s, double& ret )
+{
+	// cerr << "in str2val< double >\n";
+	ret = strtod( s.c_str(), 0 );
+	return 1;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Id conversions
+/////////////////////////////////////////////////////////////////////////
+
+template<> bool val2str< Id >( Id v, string& ret)
+{
+	ret = Id::id2str( v );
+	return 1;
+}
+
+template<> bool str2val< Id >( const string& s, Id& ret )
+{
+	// cerr << "in str2val< double >\n";
+	ret = Id::str2Id( s );
+	return 1;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// String conversions
+/////////////////////////////////////////////////////////////////////////
+
 template<> bool val2str< bool >( bool v, string& ret)
 {
 	char temp[40];
@@ -77,23 +114,6 @@ template<> bool str2val< bool >( const string& s, bool& ret )
 	return 1;
 }
 
-template<> bool val2str< double >( double v, string& ret)
-{
-	char temp[40];
-	// cerr << "in val2str< double >\n";
-	sprintf(temp, "%g", v);
-	ret = temp;
-	return 1;
-}
-
-template<> bool str2val< double >( const string& s, double& ret )
-{
-	// cerr << "in str2val< double >\n";
-	ret = strtod( s.c_str(), 0 );
-	return 1;
-}
-
-
 template<> bool val2str< vector< string > >(
 				vector< string > v, string& ret)
 {
@@ -108,24 +128,28 @@ template<> bool val2str< vector< string > >(
 	return 1;
 }
 
+// Function forward declaration.
+void separateString( const string& s, vector< string>& v, 
+				const string& separator );
+
+template<> bool str2val< vector< string > >( 
+				const string& s, vector< string >& ret )
+{
+	// cerr << "in str2val< double >\n";
+	
+	separateString( s, ret, "," );
+	return 1;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Ftype conversions
+/////////////////////////////////////////////////////////////////////////
+
 template<> bool str2val< const Ftype* >( const string& s, const Ftype* &ret)
 {
 	ret = 0;
 	return 0;
 }
-
-/*
-template<> bool val2str< const Ftype* >(
-				const Ftype* f, string& ret )
-{
-	if ( f ) {
-		ret = typeid( *f ).name();
-		return 1;
-	}
-	ret = "";
-	return 0;
-}
-*/
 
 template<> bool val2str< const Ftype* >(
 				const Ftype* f, string& ret )
@@ -137,6 +161,10 @@ template<> bool val2str< const Ftype* >(
 	ret = "";
 	return 0;
 }
+
+/////////////////////////////////////////////////////////////////////////
+// Utility functions
+/////////////////////////////////////////////////////////////////////////
 
 /**
  * Locates the next separator on the string, analogous to the string::find
@@ -198,59 +226,7 @@ void separateString( const string& s, vector< string>& v,
 	if ( temp.length() > 0 )
 		v.push_back( temp );
 }
-/*
-void separateString( const string& s, vector< string>& v, 
-				const string& separator )
-{
-	string temp = s;
-	unsigned int separatorLength = separator.length();
-	string::size_type pos;
-	v.resize( 0 );
-	if ( s[0] == '"' ) {
-		pos = s.substr( 1 ).find( '"' );
-		if ( pos == string::npos ) {
-			v.push_back( s );
-			return;
-		}
-		pos = s.substr( pos + 1 ).find( separator );
-		if ( pos == string::npos ) {
-			v.push_back( s );
-			return;
-		}
-	}
-	pos = s.find( separator );
 
-	while ( pos != string::npos ) {
-		string t = temp.substr( 0, pos );
-		v.push_back( t );
-		temp = temp.substr( pos + separatorLength );
-		pos = temp.find( separator );
-	}
-	if ( temp.length() > 0 )
-		v.push_back( temp );
-}
-*/
-
-
-/*
-void separateString( const string& s, vector< string>& v, 
-				const string& separator )
-{
-	string temp = s;
-	unsigned int separatorLength = separator.length();
-	string::size_type pos = s.find( separator );
-	v.resize( 0 );
-
-	while ( pos != string::npos ) {
-		string t = temp.substr( 0, pos );
-		v.push_back( t );
-		temp = temp.substr( pos + separatorLength );
-		pos = temp.find( separator );
-	}
-	if ( temp.length() > 0 )
-		v.push_back( temp );
-}
-*/
 
 /**
  * Chops up a string s into pieces at separator, stuffs the pieces
@@ -275,13 +251,4 @@ void parseString( const string& s, vector< string>& v,
 	}
 	if ( temp.length() > 0 )
 		v.push_back( temp );
-}
-
-template<> bool str2val< vector< string > >( 
-				const string& s, vector< string >& ret )
-{
-	// cerr << "in str2val< double >\n";
-	
-	separateString( s, ret, "," );
-	return 1;
 }

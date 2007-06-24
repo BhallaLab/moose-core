@@ -22,17 +22,17 @@ class Shell
 		Shell();
 	
 ////////////////////////////////////////////////////////////////////
-// Some utility functions
+// Some utility functions for path management.
+// These need to be here in Shell for two reasons. First, the shell
+// holds the current working element, cwe. Second, many functions are
+// multinode and the Shell has to handle queries across nodes.
 ////////////////////////////////////////////////////////////////////
 		string expandPath( const std::string& path ) const;
-		static string eid2path( unsigned int eid );
-		static unsigned int path2eid( const string& path,
-						const string& separator );
-		unsigned int innerPath2eid( const string& path,
-						const string& separator ) const;
-		static unsigned int parent( unsigned int eid );
-		static unsigned int traversePath( 
-				unsigned int start, vector< string >& );
+		static string eid2path( Id eid );
+		static Id path2eid( const string& path, const string& separator );
+		Id innerPath2eid( const string& path, const string& separator ) const;
+		static Id parent( Id eid );
+		static Id traversePath( Id start, vector< string >& );
 		static string head( const string& path, const string& separator );
 		static string tail( const string& path, const string& separator );
 
@@ -47,56 +47,57 @@ class Shell
 // Local functions for implementing basic GENESIS/MOOSE command set.
 ////////////////////////////////////////////////////////////////////
 
-		static void setCwe( const Conn&, unsigned int id );
-		static unsigned int getCwe( const Element* );
+		static void setCwe( const Conn&, Id id );
+		static Id getCwe( const Element* );
 		static void trigCwe( const Conn& );
 
-		static void trigLe( const Conn&, unsigned int parent );
+		static void trigLe( const Conn&, Id parent );
 
-		unsigned int create( const string& type, const string& name,
-						unsigned int parent );
-		void destroy( unsigned int victim );
+		bool create( const string& type, const string& name,
+						Id parent, Id id );
+		void destroy( Id victim );
 
+		/**
+		 * This function creates an object, generating its
+		 * own Id. It may decide it should create the object on a
+		 * remote node.
+		 */
 		static void staticCreate( const Conn&, string type,
-						string name, unsigned int parent );
-		static void staticDestroy( const Conn&, unsigned int victim );
+						string name, Id parent );
+		static void staticDestroy( const Conn&, Id victim );
 
-		static void getField( const Conn& c, unsigned int id,
-						string field );
+		static void getField( const Conn& c, Id id, string field );
 		static void setField( const Conn& c, 
-						unsigned int id, string field, string value );
+						Id id, string field, string value );
 		static void setVecField( const Conn& c, 
-				vector< unsigned int > elist, string field, string value );
+				vector< Id > elist, string field, string value );
 
 		static void setClock( const Conn& c, int clockNo, double dt,
 				int stage );
 		static void useClock( const Conn& c,
-			unsigned int tickId,
-			vector< unsigned int > path, string function );
+			Id tickId, vector< Id > path, string function );
 
 		static void getWildcardList( const Conn& c,
 						string path, bool ordered );
 
 		static void listMessages( const Conn& c,
-				unsigned int id, string field, bool isIncoming );
+				Id id, string field, bool isIncoming );
 
-		static void copy( const Conn& c,
-				unsigned int src, unsigned int parent, string name );
-		static void move( const Conn& c,
-				unsigned int src, unsigned int parent, string name );
+		static void copy( const Conn& c, Id src, Id parent, string name );
+		static void move( const Conn& c, Id src, Id parent, string name );
 
 ////////////////////////////////////////////////////////////////////
 // Local functions for implementing Master/Slave set
 ////////////////////////////////////////////////////////////////////
 		static void slaveGetField( 
-			const Conn& c, unsigned int id, string field );
+			const Conn& c, Id id, string field );
 		static void recvGetFunc( const Conn& c, string value );
 		static void slaveCreateFunc( const Conn& c,
 			string objtype, string objname, 
-			unsigned int parentId, unsigned int newObjId );
+			Id parentId, Id newObjId );
 		static void addFunc( const Conn& c,
-			unsigned int src, string srcField,
-			unsigned int dest, string destField );
+			Id src, string srcField,
+			Id dest, string destField );
 		
 		//////////////////////////////////////////////////////////
 		// Some stuff for managing scheduling and simulation runs
@@ -116,12 +117,12 @@ class Shell
 		//////////////////////////////////////////////////////////
 		// Channel setup functions.
 		//////////////////////////////////////////////////////////
-		static void setupAlpha( const Conn& c, unsigned int gate,
+		static void setupAlpha( const Conn& c, Id gate,
 				vector< double > parms );
-		static void setupTau( const Conn& c, unsigned int gate,
+		static void setupTau( const Conn& c, Id gate,
 				vector< double > parms );
-		static void tweakAlpha( const Conn& c, unsigned int gateId );
-		static void tweakTau( const Conn& c, unsigned int gateId );
+		static void tweakAlpha( const Conn& c, Id gateId );
+		static void tweakTau( const Conn& c, Id gateId );
 
 		//////////////////////////////////////////////////////////
 		// SimDump functions
@@ -151,10 +152,10 @@ class Shell
 
 	private:
 		/// Current working element
-		unsigned int cwe_;
+		Id cwe_;
 		/// Most recently created element
-		unsigned int recentElement_;
-		vector< unsigned int > workingElementStack_;
+		Id recentElement_;
+		vector< Id > workingElementStack_;
 		// True if prompts etc are to be printed.
 		int isInteractive_;
 		string parser_;

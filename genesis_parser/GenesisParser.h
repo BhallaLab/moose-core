@@ -18,7 +18,7 @@
 #define BGINSTKSIZE 100
 #define MAXSCRIPTS 40
 
-typedef unsigned int Id;
+// typedef unsigned int Id;
 
 #include <map>
 #include <string>
@@ -126,7 +126,7 @@ typedef std::map< std::string, func_entry* > Func_map;
 class myFlexLexer: public yyFlexLexer
 {
 	public:
-		myFlexLexer( Id element );
+		myFlexLexer();
 		
 		int yylex();
 
@@ -148,6 +148,8 @@ class myFlexLexer: public yyFlexLexer
 		const std::string GetOutput();
 		void alias(const std::string& alias, const std::string& old );
 		void listCommands();
+
+		void setElement( Id id );
 
 	protected:
 		int LexerInput( char* buf, int max_size );

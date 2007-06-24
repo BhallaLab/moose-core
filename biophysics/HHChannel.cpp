@@ -672,13 +672,13 @@ void testHHChannel()
 	ASSERT( chan->findFinfo( "xGate" )->numIncoming( chan ) == 1,
 					"Creating xGate again");
 
-	unsigned int xGateId;
-	bool ret = lookupGet< unsigned int, string >(
+	Id xGateId;
+	bool ret = lookupGet< Id, string >(
 		chan, "lookupChild", xGateId, "xGate" );
 	ASSERT( ret, "Look up xGate");
-	ASSERT( xGateId != 0 && xGateId != BAD_ID, "Lookup xGate" );
+	ASSERT( !xGateId.zero() && !xGateId.bad(), "Lookup xGate" );
 
-	Element* xGate = Element::element( xGateId );
+	Element* xGate = xGateId();
 
 	set< double >( chan, "Ypower", 1.0 );
 	ASSERT( chan->findFinfo( "yGate" )->numIncoming( chan ) == 1, "Creating yGate");
@@ -686,17 +686,16 @@ void testHHChannel()
 	// Check steady-state calculation for channel cond on reinit
 	// Here we start with Gbar = 1, Vm set ahead of time to 0,
 	// xGate giving an X_ state of 2 and yGate of 10 for Vm == 0.
-	unsigned int temp;
+	Id temp;
 
 	////////////////////////////////////////////////////////////////
 	// Set up X gates
 	////////////////////////////////////////////////////////////////
 	// Set up X gate A
-	ret = lookupGet< unsigned int, string >(
-		xGate, "lookupChild", temp, "A" );
+	ret = lookupGet< Id, string >( xGate, "lookupChild", temp, "A" );
 	ASSERT( ret, "Check gate table" );
-	ASSERT( temp != 0 && temp != BAD_ID, "xGate_A" );
-	Element* xGate_A = Element::element( temp );
+	ASSERT( !temp.zero() && !temp.bad(), "xGate_A" );
+	Element* xGate_A = temp();
 	set< double >( xGate_A, "xmin", -2.0 );
 	set< double >( xGate_A, "xmax", 2.0 );
 	set< int >( xGate_A, "xdivs", 1 );
@@ -704,11 +703,10 @@ void testHHChannel()
 	lookupSet< double, unsigned int >( xGate_A, "table", 4.0, 1 );
 
 	// Set up X gate B
-	ret = lookupGet< unsigned int, string >(
-		xGate, "lookupChild", temp, "B" );
+	ret = lookupGet< Id, string >( xGate, "lookupChild", temp, "B" );
 	ASSERT( ret, "Check gate table" );
-	ASSERT( temp != 0 && temp != BAD_ID, "xGate_B" );
-	Element* xGate_B = Element::element( temp );
+	ASSERT( !temp.zero() && !temp.bad(), "xGate_B" );
+	Element* xGate_B = temp();
 	set< double >( xGate_B, "xmin", -1.0 );
 	set< double >( xGate_B, "xmax", 1.0 );
 	set< int >( xGate_B, "xdivs", 1 );
@@ -718,29 +716,26 @@ void testHHChannel()
 	////////////////////////////////////////////////////////////////
 	// Set up Y gates
 	////////////////////////////////////////////////////////////////
-	unsigned int yGateId;
-	ret = lookupGet< unsigned int, string >(
-		chan, "lookupChild", yGateId, "yGate" );
+	Id yGateId;
+	ret = lookupGet< Id, string >( chan, "lookupChild", yGateId, "yGate" );
 	ASSERT( ret, "Look up yGate");
-	ASSERT( yGateId != 0 && yGateId != BAD_ID, "Lookup yGate" );
+	ASSERT( !yGateId.zero() && !yGateId.bad(), "Lookup yGate" );
 
-	Element* yGate = Element::element( yGateId );
-	ret = lookupGet< unsigned int, string >(
-		yGate, "lookupChild", temp, "A" );
+	Element* yGate = yGateId();
+	ret = lookupGet< Id, string >( yGate, "lookupChild", temp, "A" );
 	ASSERT( ret, "Check gate table" );
-	ASSERT( temp != 0 && temp != BAD_ID, "yGate_A" );
-	Element* yGate_A = Element::element( temp );
+	ASSERT( !temp.zero() && !temp.bad(), "yGate_A" );
+	Element* yGate_A = temp();
 	set< double >( yGate_A, "xmin", -2.0 );
 	set< double >( yGate_A, "xmax", 2.0 );
 	set< int >( yGate_A, "xdivs", 1 );
 	lookupSet< double, unsigned int >( yGate_A, "table", 20.0, 0 );
 	lookupSet< double, unsigned int >( yGate_A, "table", 0.0, 1 );
 
-	ret = lookupGet< unsigned int, string >(
-		yGate, "lookupChild", temp, "B" );
+	ret = lookupGet< Id, string >( yGate, "lookupChild", temp, "B" );
 	ASSERT( ret, "Check gate table" );
-	ASSERT( temp != 0 && temp != BAD_ID, "yGate_B" );
-	Element* yGate_B = Element::element( temp );
+	ASSERT( !temp.zero() && !temp.bad(), "yGate_B" );
+	Element* yGate_B = temp();
 	set< double >( yGate_B, "xmin", -1.0 );
 	set< double >( yGate_B, "xmax", 1.0 );
 	set< int >( yGate_B, "xdivs", 1 );
@@ -787,23 +782,20 @@ void testHHChannel()
 	set< double >( kchan, "Ek", EREST - 0.012 );
 	set< double >( kchan, "Xpower", 4.0 );
 
-	unsigned int kGateId;
-	ret = lookupGet< unsigned int, string >(
-		kchan, "lookupChild", kGateId, "xGate" );
+	Id kGateId;
+	ret = lookupGet< Id, string >( kchan, "lookupChild", kGateId, "xGate" );
 	ASSERT( ret, "Look up kGate");
-	ASSERT( kGateId != 0 && kGateId != BAD_ID, "Lookup kGate" );
+	ASSERT( !kGateId.zero() && !kGateId.bad(), "Lookup kGate" );
 
-	Element* kGate = Element::element( kGateId );
-	ret = lookupGet< unsigned int, string >( 
-					kGate, "lookupChild", temp, "A" );
+	Element* kGate = kGateId();
+	ret = lookupGet< Id, string >( kGate, "lookupChild", temp, "A" );
 	ASSERT( ret, "Check gate table" );
-	ASSERT( temp != 0 && temp != BAD_ID, "kGate_A" );
-	Element* kGate_A = Element::element( temp );
-	ret = lookupGet< unsigned int, string >(
-		kGate, "lookupChild", temp, "B" );
+	ASSERT( !temp.zero() && !temp.bad(), "kGate_A" );
+	Element* kGate_A = temp();
+	ret = lookupGet< Id, string >( kGate, "lookupChild", temp, "B" );
 	ASSERT( ret, "Check gate table" );
-	ASSERT( temp != 0 && temp != BAD_ID, "kGate_B" );
-	Element* kGate_B = Element::element( temp );
+	ASSERT( !temp.zero() && !temp.bad(), "kGate_B" );
+	Element* kGate_B = temp();
 
 	assert( set< double >( xGate_A, "xmin", VMIN ) );
 	assert( set< double >( xGate_B, "xmin", VMIN ) );

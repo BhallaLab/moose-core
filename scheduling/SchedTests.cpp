@@ -332,21 +332,18 @@ void testSchedProcess()
 					Element::root() );
 	ASSERT( shell != 0 , "shell creation");
 	Conn c( shell, 0 );
-	vector< unsigned int > path;
+	vector< Id > path;
 	path.push_back( s0_0->id() );
 	path.push_back( s0_1->id() );
 	path.push_back( s1->id() );
 	path.push_back( s2->id() );
 			
-	unsigned int schedId = Neutral::getChildByName( 
-					Element::root(), "sched" );
-	ASSERT( schedId != 0 && schedId != BAD_ID, "find sched" );
-	unsigned int cjId = Neutral::getChildByName( 
-					Element::element( schedId ), "cj" );
-	ASSERT( cjId != 0 && cjId != BAD_ID, "find cjId" );
-	unsigned int t0Id = Neutral::getChildByName( 
-					Element::element( cjId ), "t0" );
-	ASSERT( t0Id != 0 && t0Id != BAD_ID, "find t0Id" );
+	Id schedId = Neutral::getChildByName( Element::root(), "sched" );
+	ASSERT( !schedId.zero() && !schedId.bad(), "find sched" );
+	Id cjId = Neutral::getChildByName( schedId(), "cj" );
+	ASSERT( !cjId.zero() != 0 && !cjId.bad(), "find cjId" );
+	Id t0Id = Neutral::getChildByName( cjId(), "t0" );
+	ASSERT( !t0Id.zero() && !t0Id.bad(), "find t0Id" );
 
 	Shell::useClock( c, t0Id, path, string( "process" ) );
 	Shell::resched( c );

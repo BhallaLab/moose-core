@@ -248,20 +248,21 @@ void PostMaster::parseMsgRequest( const char* req, Element* self )
 	// sscanf( req, "%d %d %s", srcId, destId, typeSig );
 	// string sreq( req );
 
-	unsigned int srcId;
-	unsigned int destId;
+	Id srcId;
+	Id destId;
 	string typeSig;
 	string targetFname;
 	unsigned int msgIndex;
 
 	istringstream istr;
 	istr.str( req );
-	assert ( (istr >> srcId >> destId >> typeSig >> targetFname 
-						>> msgIndex >> ws ) && istr.eof());
-	assert ( srcId != BAD_ID );
-	assert ( destId != BAD_ID );
+	istr >> srcId >> destId >> typeSig >> targetFname 
+						>> msgIndex >> ws;
+	assert ( istr.eof() );
+	assert ( !srcId.bad() );
+	assert ( !destId.bad() );
 
-	Element* dest = Element::element( destId );
+	Element* dest = destId();
 	assert( dest != 0 );
 	const Finfo* targetFinfo = dest->findFinfo( targetFname );
 	if ( targetFinfo == 0 ) {
@@ -485,7 +486,7 @@ void testPostMaster()
 	MPI::COMM_WORLD.Barrier();
 	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
 	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
-	unsigned int* postId = new unsigned int[numNodes];
+	Id* postId = new Id[numNodes];
 	Element* post;
 	unsigned int i;
 	if ( myNode == 0 )
@@ -495,19 +496,19 @@ void testPostMaster()
 	// check that we have postmasters for each of the other nodes
 	// Print out a dot for each node.
 	///////////////////////////////////////////////////////////////
-	unsigned int postMastersId =
+	Id postMastersId =
 			Neutral::getChildByName( Element::root(), "postmasters" );
-	ASSERT( postMastersId != BAD_ID, "postmasters element creation" );
-	Element* pms = Element::element( postMastersId );
+	ASSERT( !postMastersId.bad(), "postmasters element creation" );
+	Element* pms = postMastersId();
 	for ( i = 0; i < numNodes; i++ ) {
 		char name[10];
 		sprintf( name, "node%d", i );
-		unsigned int id = Neutral::getChildByName( pms, name );
+		Id id = Neutral::getChildByName( pms, name );
 		if ( myNode == i ) { // Should not exist locally.
-			ASSERT( id == BAD_ID, "Checking local postmasters" )
+			ASSERT( id.bad(), "Checking local postmasters" )
 		} else {
-			ASSERT( id != BAD_ID, "Checking local postmasters" )
-			Element* p = Element::element( id );
+			ASSERT( !id.bad(), "Checking local postmasters" )
+			Element* p = id();
 			ASSERT( p->className() == "PostMaster", "Check PostMaster");
 			unsigned int remoteNode;
 			get< unsigned int >( p, "remoteNode", remoteNode );
@@ -546,8 +547,8 @@ void testPostMaster()
 		// Here we are being sneaky because we have the same id on all 
 		// nodes.
 		for ( i = 1; i < numNodes; i++ ) {
-			post = Element::element( postId[i] );
-			set< unsigned int >( post, "targetId", table->id() );
+			post = postId[i]();
+			set< Id >( post, "targetId", table->id() );
 			set< string >( post, "targetField", "msgInput" );
 			const Finfo* outFinfo = table->findFinfo( "outputSrc" );
 			const Finfo* dataFinfo = post->findFinfo( "data" );
@@ -557,16 +558,14 @@ void testPostMaster()
 	}
 
 	// This section sends the data over to the remote node.
-	unsigned int cjId = Shell::path2eid( "/sched/cj", "/" );
-	assert( cjId != BAD_ID );
-	Element* cj = Element::element( cjId );
+	Id cjId( "/sched/cj", "/" );
+	assert( !cjId.bad() );
+	Element* cj = cjId();
 	set< double >( cj, "start", 1.0 );
 
 	MPI::COMM_WORLD.Barrier();
 	set( table, "destroy" );
 	// unsigned int cjId = Shell::path2eid( "/sched/cj", "/" );
-	// assert( cjId != BAD_ID );
-	// Element* cj = Element::element( cjId );
 
 	////////////////////////////////////////////////////////////////
 	// Now we fire up the scheduler on all nodes to keep info flowing.
@@ -579,7 +578,7 @@ void testPostMaster()
 	for ( i = 0; i < numNodes; i++ ) {
 		if ( i == myNode )
 			continue;
-		post = Element::element( postId[i] );
+		post = postId[i]();
 		PostMaster* pdata = static_cast< PostMaster* >( post->data() );
 		sprintf( sendstr, "My name is Michael Caine %d,%d", myNode, i );
 
@@ -620,9 +619,9 @@ void testPostMaster()
 	////////////////////////////////////////////////////////////////
 	Element* n = Neutral::create( "Neutral", "n", Element::root() );
 	vector< Element* > tables( numNodes, 0 );
-	unsigned int tickId;
-	lookupGet< unsigned int, string >( cj, "lookupChild", tickId, "t0" );
-	Element* tick = Element::element( tickId );
+	Id tickId;
+	lookupGet< Id, string >( cj, "lookupChild", tickId, "t0" );
+	Element* tick = tickId();
 	const Finfo* tickProcFinfo = tick->findFinfo( "outgoingProcess" );
 	assert( tickProcFinfo != 0 );
 	for ( i = 0; i < numNodes; i++ ) {
@@ -649,16 +648,16 @@ void testPostMaster()
 
 			for ( unsigned int j = 0; j < numNodes; j++ ) {
 				if ( j == myNode ) continue;
-				Element* p = Element::element( postId[j] );
+				Element* p = postId[j]();
 				const Finfo* dataFinfo = p->findFinfo( "data" );
-				set< unsigned int >( p, "targetId", tables[i]->id() );
+				set< Id >( p, "targetId", tables[i]->id() );
 				set< string >( p, "targetField", "msgInput" );
 				bool ret = outFinfo->add( tables[i], p, dataFinfo );
 				ASSERT( ret, "Making input message to postmaster" );
 	MPI::COMM_WORLD.Barrier();
 			}
 		} else {
-			post = Element::element( postId[i] );
+			post = postId[i]();
 			const Finfo* dataFinfo = post->findFinfo( "data" );
 			set< int >( tables[i], "stepmode", 3 ); // TAB_BUF
 			set< double >( tables[i], "output", 0.0 ); // TAB_BUF
@@ -692,8 +691,8 @@ void testPostMaster()
 	set( n, "destroy" );
 	MPI::COMM_WORLD.Barrier();
 
-	unsigned int shellId = Shell::path2eid( "/shell", "/" );
-	Element* shell = Element::element( shellId );
+	Id shellId( "/shell", "/" );
+	Element* shell = shellId();
 	if ( myNode == 0 )
 		testMess( shell );
 	set< double >( cj, "start", 2.0 );

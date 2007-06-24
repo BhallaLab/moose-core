@@ -16,6 +16,8 @@ TARGET = basecode.o
 
 OBJ = \
 	Element.o	\
+	Id.o	\
+	IdManager.o	\
 	Conn.o	\
 	RecvFunc.o \
 	SimpleElement.o	\
@@ -44,10 +46,13 @@ OBJ = \
 
 HEADERS = \
 	header.h \
+	RecvFunc.h \
 	Conn.h \
-	Element.h \
 	Ftype.h \
 	FunctionData.h \
+	Finfo.h \
+	Element.h \
+	Id.h \
 
 #	AssignFinfo.h
 #	ArrayFinfo.o \
@@ -76,6 +81,7 @@ setget.o:		setget.h DerivedFtype.h
 strconv.o:		DerivedFtype.h
 filecheck.o: filecheck.h
 FunctionData.o:	FunctionData.h
+IdManager.o:	Id.h IdManager.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) $< -c

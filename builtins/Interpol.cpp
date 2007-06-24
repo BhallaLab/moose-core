@@ -391,8 +391,8 @@ void testInterpol()
 	static const unsigned int XDIVS = 100;
 	cout << "\nDoing Interpol tests";
 
-	Element* i1 = interpolCinfo->create( "i1" );
-	Element* i2 = interpolCinfo->create( "i2" );
+	Element* i1 = interpolCinfo->create( Id::scratchId(), "i1" );
+	Element* i2 = interpolCinfo->create( Id::scratchId(), "i2" );
 	unsigned int i;
 	double ret = 0;
 

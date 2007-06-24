@@ -22,14 +22,14 @@ class GenesisParserWrapper: public myFlexLexer
 
 		static void parseFunc( const Conn& c, string s );
 
-		static void setReturnId( const Conn& c, unsigned int i );
+		static void setReturnId( const Conn& c, Id i );
 
-		static void recvCwe( const Conn& c, unsigned int i );
+		static void recvCwe( const Conn& c, Id i );
 		static void recvElist( const Conn& c, vector< Id > elist);
-		static void recvCreate( const Conn& c, unsigned int i );
+		static void recvCreate( const Conn& c, Id i );
 		static void recvField( const Conn& c, string value );
 		static void recvWildcardList( const Conn& c,
-						vector< unsigned int > value );
+						vector< Id > value );
 		static void recvClocks( const Conn& c, vector< double > dbls);
 		static void recvMessageList( 
 				const Conn& c, vector< Id > elist, string s);
@@ -65,9 +65,9 @@ class GenesisParserWrapper: public myFlexLexer
 		// This utility function follows the message to the 
 		// shell, if necessary to get cwe, and gets the id
 		// for the specified path.
-		static Id path2eid( const string& path, Id i );
-		Id innerPath2eid( const string& path, Id g );
-		static string eid2path( unsigned int i );
+//		static Id path2eid( const string& path, Id i );
+//		Id innerPath2eid( const string& path, Id g );
+//		static string eid2path( Id i );
 		static Element* getShell( Id g );
 
 		/**
@@ -93,7 +93,7 @@ class GenesisParserWrapper: public myFlexLexer
     private:
 		void loadBuiltinCommands();
 		string returnCommandValue_;
-		unsigned int returnId_;
+		Id returnId_;
 		Id cwe_;
 		Id createdElm_;
 		vector< Id > elist_;
