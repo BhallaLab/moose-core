@@ -34,6 +34,15 @@ const Cinfo* initCompartmentCinfo()
 	 * The second entry is a MsgDest for the Reinit operation. It
 	 * also uses ProcInfo.
 	 */
+	static Finfo* processShared[] =
+	{
+		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
+				RFCAST( &Compartment::processFunc ) ),
+		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
+				RFCAST( &Compartment::reinitFunc ) ),
+	};
+
+	/*
 	static TypeFuncPair processTypes[] =
 	{
 		TypeFuncPair( Ftype1< ProcInfo >::global(),
@@ -41,6 +50,7 @@ const Cinfo* initCompartmentCinfo()
 		TypeFuncPair( Ftype1< ProcInfo >::global(),
 				RFCAST( &Compartment::reinitFunc ) ),
 	};
+	*/
 	
 	/**
 	 * This is a shared message to receive Init messages from
@@ -57,6 +67,15 @@ const Cinfo* initCompartmentCinfo()
 	 * The second entry is a dummy MsgDest for the Reinit operation. It
 	 * also uses ProcInfo.
 	 */
+	static Finfo* initShared[] =
+	{
+		new DestFinfo( "init", Ftype1< ProcInfo >::global(),
+				RFCAST( &Compartment::initFunc ) ),
+		new DestFinfo( "dummy", Ftype1< ProcInfo >::global(),
+				RFCAST( &dummyFunc ) ),
+	};
+
+	/*
 	static TypeFuncPair initTypes[] =
 	{
 		TypeFuncPair( Ftype1< ProcInfo >::global(),
@@ -64,6 +83,7 @@ const Cinfo* initCompartmentCinfo()
 		TypeFuncPair( Ftype1< ProcInfo >::global(),
 				RFCAST( &dummyFunc ) ),
 	};
+	*/
 
 	/**
 	 * This is a shared message from a compartment to channels.
@@ -71,12 +91,21 @@ const Cinfo* initCompartmentCinfo()
 	 * It expects Gk and Ek from the channel as args.
 	 * The second entry is a MsgSrc sending Vm
 	 */
+	static Finfo* channelShared[] =
+	{
+		new DestFinfo( "channel", Ftype2< double, double >::global(),
+				RFCAST( &Compartment::channelFunc ) ),
+		new SrcFinfo( "Vm", Ftype1< double >::global() ),
+	};
+
+	/*
 	static TypeFuncPair channelTypes[] =
 	{
 		TypeFuncPair( Ftype2< double, double >::global(),
 				RFCAST( &Compartment::channelFunc ) ),
 		TypeFuncPair( Ftype1< double >::global(), 0),
 	};
+	*/
 
 	/**
 	 * This is a shared message between asymmetric compartments.
@@ -100,12 +129,21 @@ const Cinfo* initCompartmentCinfo()
 	 *
 	 * Note that the message is named after the source type.
 	 */
+	static Finfo* axialShared[] =
+	{
+		new DestFinfo( "handleRaxial", Ftype2< double, double >::global(),
+				RFCAST( &Compartment::raxialFunc ) ),
+		new SrcFinfo( "axialSrc", Ftype1< double >::global() )
+	};
+
+	/*
 	static TypeFuncPair axialTypes[] =
 	{
 		TypeFuncPair( Ftype2< double, double >::global(),
 				RFCAST( &Compartment::raxialFunc ) ),
 		TypeFuncPair( Ftype1< double >::global(), 0)
 	};
+	*/
 
 	/**
 	 * This is a raxial shared message between asymmetric compartments.
@@ -115,12 +153,21 @@ const Cinfo* initCompartmentCinfo()
 	 * The second is a MsgSrc sending Ra and Vm to the raxialFunc
 	 * of the target compartment.
 	 */
+	static Finfo* raxialShared[] =
+	{
+		new DestFinfo( "handleAxial", Ftype1< double >::global(),
+				RFCAST( &Compartment::axialFunc ) ),
+		new SrcFinfo( "raxialSrc", Ftype2< double, double >::global() )
+	};
+
+	/*
 	static TypeFuncPair raxialTypes[] =
 	{
 		TypeFuncPair( Ftype1< double >::global(),
 				RFCAST( &Compartment::axialFunc ) ),
 		TypeFuncPair( Ftype2< double, double >::global(), 0)
 	};
+	*/
 	
 	static Finfo* compartmentFinfos[] = 
 	{
@@ -180,11 +227,23 @@ const Cinfo* initCompartmentCinfo()
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfo definitions
 	//////////////////////////////////////////////////////////////////
+		new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "init", initShared,
+			sizeof( initShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "channel", channelShared,
+			sizeof( channelShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "axial", axialShared,
+			sizeof( axialShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "raxial", raxialShared,
+			sizeof( raxialShared ) / sizeof( Finfo* ) ),
+		/*
 		new SharedFinfo( "process", processTypes, 2 ),
 		new SharedFinfo( "init", initTypes, 2 ),
 		new SharedFinfo( "channel", channelTypes, 2 ),
 		new SharedFinfo( "axial", axialTypes, 2 ),
 		new SharedFinfo( "raxial", raxialTypes, 2 ),
+		*/
 
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
