@@ -320,11 +320,11 @@ std::map<std::string, Cinfo*>& Cinfo::lookup()
  * Create a new element with provided data, a set of Finfos and
  * the MsgSrc and MsgDest allocated.
  */
-Element* Cinfo::create( const std::string& name, void* data,
-				bool noDeleteFlag ) const
+Element* Cinfo::create( Id id, const std::string& name, 
+			void* data, bool noDeleteFlag ) const
 {
 	SimpleElement* ret = 
-		new SimpleElement( name, nSrc_, nDest_, data );
+		new SimpleElement( id, name, nSrc_, nDest_, data );
 	if ( noDeleteFlag )
 		ret->addFinfo( noDelFinfo_ );
 	else
@@ -337,9 +337,9 @@ Element* Cinfo::create( const std::string& name, void* data,
  * Create a new element, complete with data, a set of Finfos and
  * the MsgSrc and MsgDest allocated.
  */
-Element* Cinfo::create( const std::string& name ) const
+Element* Cinfo::create( Id id, const std::string& name ) const
 {
-	return create( name, ftype_->create( 1 ) );
+	return create( id, name, ftype_->create( 1 ) );
 }
 
 /**

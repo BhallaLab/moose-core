@@ -28,42 +28,41 @@ const Cinfo* initShellCinfo()
 	static Finfo* parserShared[] =
 	{
 		// Setting cwe
-		new DestFinfo( "cwe", Ftype1< unsigned int >::global(),
+		new DestFinfo( "cwe", Ftype1< Id >::global(),
 						RFCAST( &Shell::setCwe ) ),
 		// Getting cwe back: First handle a request
 		new DestFinfo( "trigCwe", Ftype0::global(), 
 						RFCAST( &Shell::trigCwe ) ),
 		// Then send out the cwe info
-		new SrcFinfo( "cweSrc", Ftype1< unsigned int >::global() ),
+		new SrcFinfo( "cweSrc", Ftype1< Id >::global() ),
 
 		// Getting a list of child ids: First handle a request with
 		// the requested parent elm id.
-		new DestFinfo( "trigLe", Ftype1< unsigned int >::global(), 
+		new DestFinfo( "trigLe", Ftype1< Id >::global(), 
 						RFCAST( &Shell::trigLe ) ),
 		// Then send out the vector of child ids.
-		new SrcFinfo( "leSrc", Ftype1< vector< unsigned int > >::global() ),
+		new SrcFinfo( "leSrc", Ftype1< vector< Id > >::global() ),
 		
 		// Creating an object
 		new DestFinfo( "create",
-				Ftype3< string, string, unsigned int >::global(),
+				Ftype3< string, string, Id >::global(),
 				RFCAST( &Shell::staticCreate ) ),
 		// The create func returns the id of the created object.
-		new SrcFinfo( "createSrc", Ftype1< unsigned int >::global() ),
+		new SrcFinfo( "createSrc", Ftype1< Id >::global() ),
 		// Deleting an object
-		new DestFinfo( "delete",
-				Ftype1< unsigned int >::global(), 
+		new DestFinfo( "delete", Ftype1< Id >::global(), 
 				RFCAST( &Shell::staticDestroy ) ),
 
 		// Getting a field value as a string: handling request
 		new DestFinfo( "get",
-				Ftype2< unsigned int, string >::global(),
+				Ftype2< Id, string >::global(),
 				RFCAST( &Shell::getField ) ),
 		// Getting a field value as a string: Sending value back.
 		new SrcFinfo( "getSrc", Ftype1< string >::global(), 0 ),
 
 		// Setting a field value as a string: handling request
 		new DestFinfo( "set",
-				Ftype3< unsigned int, string, string >::global(),
+				Ftype3< Id, string, string >::global(),
 				RFCAST( &Shell::setField ) ),
 
 		// Handle requests for setting values for a clock tick.
@@ -75,7 +74,7 @@ const Cinfo* initShellCinfo()
 		// Handle requests to assign a path to a given clock tick.
 		// args are tick id, path, function
 		new DestFinfo( "useClock",
-				Ftype3< unsigned int, vector< unsigned int >, string >::global(),
+				Ftype3< Id, vector< Id >, string >::global(),
 				RFCAST( &Shell::useClock ) ),
 		
 		// Getting a wildcard path of elements: handling request
@@ -85,7 +84,7 @@ const Cinfo* initShellCinfo()
 				RFCAST( &Shell::getWildcardList ) ),
 		// Getting a wildcard path of elements: Sending list back.
 		// This goes through the exiting list for elists set up in le.
-		//TypeFuncPair( Ftype1< vector< unsigned int > >::global(), 0 ),
+		//TypeFuncPair( Ftype1< vector< Id > >::global(), 0 ),
 
 		////////////////////////////////////////////////////////////
 		// Running simulation set
@@ -111,21 +110,19 @@ const Cinfo* initShellCinfo()
 		// Handle request for message list:
 		// id elm, string field, bool isIncoming
 		new DestFinfo( "listMessages",
-				Ftype3< unsigned int, string, bool >::global(),
+				Ftype3< Id, string, bool >::global(),
 				RFCAST( &Shell::listMessages ) ),
 		// Return message list and string with remote fields for msgs
 		new SrcFinfo( "listMessagesSrc",
-			Ftype2< vector < unsigned int >, string >::global() ),
+			Ftype2< vector < Id >, string >::global() ),
 
 		////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions
 		////////////////////////////////////////////////////////////
 		new DestFinfo( "copy",
-			Ftype3< unsigned int, unsigned int, string >::global(), 
-					RFCAST( &Shell::copy ) ),
+			Ftype3< Id, Id, string >::global(), RFCAST( &Shell::copy ) ),
 		new DestFinfo( "move",
-			Ftype3< unsigned int, unsigned int, string >::global(), 
-					RFCAST( &Shell::move ) ),
+			Ftype3< Id, Id, string >::global(), RFCAST( &Shell::move ) ),
 		////////////////////////////////////////////////////////////
 		// Cell reader
 		////////////////////////////////////////////////////////////
@@ -136,17 +133,15 @@ const Cinfo* initShellCinfo()
 		// Channel setup functions
 		////////////////////////////////////////////////////////////
 		new DestFinfo( "setupAlpha",
-			Ftype2< unsigned int, vector< double > >::global(), 
+			Ftype2< Id, vector< double > >::global(), 
 					RFCAST( &Shell::setupAlpha ) ),
 		new DestFinfo( "setupTau",
-			Ftype2< unsigned int, vector< double > >::global(), 
+			Ftype2< Id, vector< double > >::global(), 
 					RFCAST( &Shell::setupTau ) ),
 		new DestFinfo( "tweakAlpha",
-			Ftype1< unsigned int >::global(), 
-					RFCAST( &Shell::tweakAlpha ) ),
+			Ftype1< Id >::global(), RFCAST( &Shell::tweakAlpha ) ),
 		new DestFinfo( "tweakTau",
-			Ftype1< unsigned int >::global(), 
-					RFCAST( &Shell::tweakTau ) ),
+			Ftype1< Id >::global(), RFCAST( &Shell::tweakTau ) ),
 		////////////////////////////////////////////////////////////
 		// SimDump facility
 		////////////////////////////////////////////////////////////
@@ -170,7 +165,7 @@ const Cinfo* initShellCinfo()
 		////////////////////////////////////////////////////////////
 		// Setting a field value as a string: handling request
 		new DestFinfo( "setVecField",
-				Ftype3< vector< unsigned int >, string, string >::global(),
+				Ftype3< vector< Id >, string, string >::global(),
 				RFCAST( &Shell::setVecField ) ),
 	};
 
@@ -200,21 +195,21 @@ const Cinfo* initShellCinfo()
 	{
 		new SrcFinfo( "get",
 			// objId, field
-			Ftype2< unsigned int, string >::global() ),
+			Ftype2< Id, string >::global() ),
 		new DestFinfo( "recvGet",
 			Ftype1< string >::global(),
 			RFCAST( &Shell::recvGetFunc )
 		),
 		new SrcFinfo( "set",
 			// objId, field, value
-			Ftype3< unsigned int, string, string >::global() ),
+			Ftype3< Id, string, string >::global() ),
 		new SrcFinfo( "add",
 				// srcObjId, srcFiekd, destObjId, destField
-			Ftype4< unsigned int, string, unsigned int, string >::global()
+			Ftype4< Id, string, Id, string >::global()
 		),
 		new SrcFinfo( "create", 
 			// type, name, parentId, newObjId.
-			Ftype4< string, string, unsigned int, unsigned int >::global()
+			Ftype4< string, string, Id, Id >::global()
 		),
 	};
 
@@ -222,7 +217,7 @@ const Cinfo* initShellCinfo()
 	{
 		new DestFinfo( "get",
 			// objId, field
-			Ftype2< unsigned int, string >::global(),
+			Ftype2< Id, string >::global(),
 			RFCAST( &Shell::slaveGetField )
 			),
 		new SrcFinfo( "recvGet",
@@ -230,24 +225,24 @@ const Cinfo* initShellCinfo()
 		),
 		new DestFinfo( "set",
 			// objId, field, value
-			Ftype3< unsigned int, string, string >::global(),
+			Ftype3< Id, string, string >::global(),
 			RFCAST( &Shell::setField )
 		),
 		new DestFinfo( "add",
 				// srcObjId, srcFiekd, destObjId, destField
-			Ftype4< unsigned int, string, unsigned int, string >::global(),
+			Ftype4< Id, string, Id, string >::global(),
 			RFCAST( &Shell::addFunc )
 		),
 		new DestFinfo( "create", 
 			// type, name, parentId, newObjId.
-			Ftype4< string, string, unsigned int, unsigned int >::global(),
+			Ftype4< string, string, Id, Id >::global(),
 			RFCAST( &Shell::slaveCreateFunc )
 		),
 	};
 
 	static Finfo* shellFinfos[] =
 	{
-		new ValueFinfo( "cwe", ValueFtype1< unsigned int >::global(),
+		new ValueFinfo( "cwe", ValueFtype1< Id >::global(),
 				reinterpret_cast< GetFunc >( &Shell::getCwe ),
 				RFCAST( &Shell::setCwe ) ),
 
@@ -314,7 +309,7 @@ static const unsigned int recvGetSlot =
 //////////////////////////////////////////////////////////////////////
 
 Shell::Shell()
-	: cwe_( 0 ), recentElement_( 0 )
+	: cwe_( Id() ), recentElement_( Id() )
 {
 	simDump_ = new SimDump;
 }
@@ -327,29 +322,27 @@ Shell::Shell()
  * This needs to be on the Shell for future use, because we may
  * need to look up remote nodes
  */
-unsigned int Shell::parent( unsigned int eid )
+Id Shell::parent( Id eid )
 {
-	Element* e = Element::element( eid );
-	unsigned int ret;
+	Element* e = eid();
+	Id ret;
 	// Check if eid is on local node, otherwise go to remote node
 	
-	if ( get< unsigned int >( e, "parent", ret ) )
+	if ( get< Id >( e, "parent", ret ) )
 		return ret;
-	return 0;
+	return Id::badId();
 }
 
 /**
  * Returns the id of the element at the end of the specified path.
- * On failure, returns Shell::BAD_ID
+ * On failure, returns badId()
  * It is a static func as a utility for parsers.
  * It takes a pre-separated vector of names.
  * It ignores names that are just . or /
  */
-unsigned int Shell::traversePath(
-				unsigned int start,
-				vector< string >& names )
+Id Shell::traversePath( Id start, vector< string >& names )
 {
-	assert( start != BAD_ID );
+	assert( !start.bad() );
 	vector< string >::iterator i;
 	for ( i = names.begin(); i != names.end(); i++ ) {
 		if ( *i == "." || *i == "/" ) {
@@ -357,12 +350,11 @@ unsigned int Shell::traversePath(
 		} else if ( *i == ".." ) {
 			start = parent( start );
 		} else {
-			unsigned int ret;
-			Element* e = Element::element( start );
-			lookupGet< unsigned int, string >( 
-							e, "lookupChild", ret, *i );
-			if ( ret == 0 || ret == BAD_ID )
-					return BAD_ID;
+			Id ret;
+			Element* e = start();
+			lookupGet< Id, string >( e, "lookupChild", ret, *i );
+			if ( ret.zero() || ret.bad() )
+					return Id::badId();
 			start = ret;
 		}
 	}
@@ -371,11 +363,11 @@ unsigned int Shell::traversePath(
 
 // Requires a path argument without a starting space
 // Perhaps this should be in the interpreter?
-unsigned int Shell::innerPath2eid( 
+Id Shell::innerPath2eid( 
 		const string& path, const string& separator ) const
 {
 	if ( path == separator || path == "/root" )
-			return 0;
+			return Id();
 
 	if ( path == "" || path == "." )
 			return cwe_;
@@ -384,19 +376,17 @@ unsigned int Shell::innerPath2eid(
 			return recentElement_;
 
 	if ( path == ".." ) {
-			if ( cwe_ == 0 )
-				return 0;
+			if ( cwe_.zero() )
+				return cwe_;
 			return parent( cwe_ );
 	}
 
 	vector< string > names;
 
-	unsigned int start;
+	Id start; // Initializes to zero
 	if ( path.substr( 0, separator.length() ) == separator ) {
-		start = 0;
 		separateString( path.substr( separator.length() ), names, separator );
 	} else if ( path.substr( 0, 5 ) == "/root" ) {
-		start = 0;
 		separateString( path.substr( 5 ), names, separator );
 	} else {
 		start = cwe_;
@@ -406,37 +396,28 @@ unsigned int Shell::innerPath2eid(
 }
 
 // This is the static version of the function.
-unsigned int Shell::path2eid(
-		const string& path, const string& separator )
+Id Shell::path2eid( const string& path, const string& separator )
 {
-	unsigned int shellId;
-	bool ret = lookupGet< unsigned int, string >(
+	/*
+	Id shellId;
+	bool ret = lookupGet< Id, string >(
 				Element::root(), "lookupChild", shellId, "shell" );
 	assert( ret );
-	assert( shellId != BAD_ID );
-	Shell* s = static_cast< Shell* >(
-					Element::element( shellId )->data() );
+	assert( !shellId.bad() );
+	Shell* s = static_cast< Shell* >( shellId()->data() );
+	*/
+	Shell* s = static_cast< Shell* >( ( Id::shellId() )()->data() );
 	return s->innerPath2eid( path, separator );
 }
 
-string Shell::eid2path( unsigned int eid ) 
+string Shell::eid2path( Id eid ) 
 {
 	static const string slash = "/";
 	string n( "" );
-	while ( eid != 0 ) {
-		n = slash + Element::element( eid )->name() + n;
+	while ( !eid.zero() ) {
+		n = slash + eid()->name() + n;
 		eid = parent( eid );
 	}
-
-	/*
-	Element* e = Element::element( eid );
-	string name = "";
-
-	while ( e != Element::root() ) {
-		name = slash + e->name() + name;
-		e = Element::element( parent( e->id() ) );
-	}
-	*/
 	return n;
 }
 
@@ -487,12 +468,12 @@ void Shell::rawAddFunc( const Conn& c, string s )
 	while ( j > 0 ) // for breakpointing in parallel debug.
 		;
 	// svec seq is : srcid, targetId, targetField, srcType
-	unsigned int destId = atoi( svec[1].c_str() );
-	if ( destId == BAD_ID ) {
+	Id destId = Id::str2Id( svec[1] );
+	if ( destId.bad() ) {
 		cout << "Error: Shell::rawAddFunc: msgdest is a bad elm on " << mynode << " from " << remotenode << " with str " << s << "\n";
 		return;
 	} 
-	Element* dest = Element::element( destId );
+	Element* dest = destId();
 	if ( dest == 0 ) {
 		cout << "Error: Shell::rawAddFunc: msgdest ptr is empty on " << mynode << " from " << remotenode << " with str " << s << "\n";
 		return;
@@ -546,15 +527,17 @@ void Shell::rawTestFunc( const Conn& c, string s )
 // Moose fields for Shell
 //////////////////////////////////////////////////////////////////////
 
-void Shell::setCwe( const Conn& c, unsigned int id )
+void Shell::setCwe( const Conn& c, Id id )
 {
-	if ( id < Element::numElements() && Element::element( id ) != 0 ) {
+	/// \todo: Need some work here to fix up with new id scheme.
+	// This should only be called on master node.
+	if ( id() != 0 ) {
 		Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 		s->cwe_ = id;
 	}
 }
 
-unsigned int Shell::getCwe( const Element* e )
+Id Shell::getCwe( const Element* e )
 {
 	assert( e != 0 );
 	const Shell* s = static_cast< const Shell* >( e->data() );
@@ -565,7 +548,7 @@ void Shell::trigCwe( const Conn& c )
 						
 {
 	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
-	sendTo1< unsigned int >( c.targetElement(), cweSlot,
+	sendTo1< Id >( c.targetElement(), cweSlot,
 					c.targetIndex(), s->cwe_ );
 }
 
@@ -577,35 +560,35 @@ void Shell::trigCwe( const Conn& c )
 //////////////////////////////////////////////////////////////////////
 
 
-void Shell::trigLe( const Conn& c, unsigned int parent )
+void Shell::trigLe( const Conn& c, Id parent )
 						
 {
-	Element* pa = Element::element( parent );
+	Element* pa = parent();
 	// Here we do something intelligent for off-node le.
 	if ( pa ) {
-		vector< unsigned int > ret;
-		if ( get< vector< unsigned int > >( pa, "childList", ret ) ) {
+		vector< Id > ret;
+		if ( get< vector< Id > >( pa, "childList", ret ) ) {
 			Element* e = c.targetElement();
-			sendTo1< vector< unsigned int > >( e,
-				elistSlot, c.targetIndex(), ret );
+			sendTo1< vector< Id > >( e, elistSlot, c.targetIndex(), ret );
 		}
 	}
 }
 
 // Static function
 void Shell::staticCreate( const Conn& c, string type,
-						string name, unsigned int parent )
+					string name, Id parent )
 {
 	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
-	unsigned int ret = s->create( type, name, parent );
+	Id id = Id::childId( parent );
+	bool ret = s->create( type, name, parent, id );
 	if ( ret ) {
-		sendTo1< unsigned int >( c.targetElement(),
-					createSlot, c.targetIndex(), ret );
+		sendTo1< Id >( c.targetElement(),
+					createSlot, c.targetIndex(), id );
 	}
 }
 
 // Static function
-void Shell::staticDestroy( const Conn& c, unsigned int victim )
+void Shell::staticDestroy( const Conn& c, Id victim )
 {
 	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 	s->destroy( victim );
@@ -619,12 +602,12 @@ void Shell::staticDestroy( const Conn& c, unsigned int victim )
  * we will eventually need to be able to handle this for off-node
  * object requests.
  */
-void Shell::getField( const Conn& c, unsigned int id, string field )
+void Shell::getField( const Conn& c, Id id, string field )
 {
-	if ( id == BAD_ID )
+	if ( id.bad() )
 		return;
 	string ret;
-	Element* e = Element::element( id );
+	Element* e = id();
 	// Appropriate off-node stuff here.
 
 	const Finfo* f = e->findFinfo( field );
@@ -634,19 +617,6 @@ void Shell::getField( const Conn& c, unsigned int id, string field )
 		if ( f->strGet( e, ret ) )
 			sendTo1< string >( c.targetElement(),
 				getFieldSlot, c.targetIndex(), ret );
-	/*
-	if ( f ) {
-		if ( f->strGet( e, ret ) )
-			sendTo1< string >( c.targetElement(),
-				getFieldSlot, c.targetIndex(), ret );
-		else
-			cout << "Error: Unable to get field " << e->name() <<
-					"." << field << endl;
-	} else {
-		cout << "Error: field does not exist: " << e->name() <<
-				"." << field << endl;
-	}
-	*/
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -656,18 +626,20 @@ void Shell::getField( const Conn& c, unsigned int id, string field )
 // To be called from the node on which the Master shell resides.
 void testMess( Element* e )
 {
-	send4< string , string, unsigned int, unsigned int>( 
-		e, rCreateSlot, "objtype", "objname", 1234, 5678 );
+	send4< string , string, Id, Id>( 
+		e, rCreateSlot, "objtype", "objname", 
+		Id::str2Id( "1234" ), Id::str2Id( "5678" ) );
 
-	send2< unsigned int, string >( e, rGetSlot, 5, "name" );
+	send2< Id, string >( e, rGetSlot, Id::str2Id( "5" ), "name" );
 
 	// send1< string >( e, recvGetSlot, "fieldvalue" );
 
-	send3< unsigned int, string, string >( e, rSetSlot, 
-		0, "fieldname", "value" );
+	send3< Id, string, string >( e, rSetSlot, 
+		Id(), "fieldname", "value" );
 
-	send4< unsigned int, string, unsigned int, string >( e, rAddSlot, 
-		5432, "srcfield", 9876, "destfield" );
+	send4< Id, string, Id, string >( e, rAddSlot, 
+		Id::str2Id( "5432" ), "srcfield", Id::str2Id( "9876" ),
+		"destfield" );
 }
 
 void printNodeInfo( const Conn& c )
@@ -682,15 +654,15 @@ void printNodeInfo( const Conn& c )
 	cout << "on " << mynode << " from " << remotenode << ":";
 }
 
-void Shell::slaveGetField( const Conn& c, unsigned int id, string field )
+void Shell::slaveGetField( const Conn& c, Id id, string field )
 {
 	printNodeInfo( c );
 	cout << "in slaveGetFunc on " << id << " with field :" << 
 		field << "\n";
-	if ( id == BAD_ID )
+	if ( id.bad() )
 		return;
 	string ret;
-	Element* e = Element::element( id );
+	Element* e = id();
 	if ( e == 0 )
 		return;
 
@@ -706,20 +678,38 @@ void Shell::recvGetFunc( const Conn& c, string value )
 	printNodeInfo( c );
 	cout << "in recvGetFunc with field value :'" << value << "'\n";
 	// send off to parser maybe.
+	// Problem if multiple parsers.
+	// Bigger problem that this is asynchronous now.
+	// Maybe it is OK if only one parser.
+	sendTo1< string >( c.targetElement(), getFieldSlot, 0, value );
 }
 
 void Shell::slaveCreateFunc ( const Conn& c, 
 				string objtype, string objname, 
-				unsigned int parent, unsigned int newobj )
+				Id parent, Id newobj )
 {
 	printNodeInfo( c );
 	cout << "in slaveCreateFunc :" << objtype << " " << objname << 
 		" " << parent << " " << newobj << "\n";
+
+
+	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	bool ret = s->create( objtype, objname, parent, newobj );
+	assert( ret );
+	// Need to send return back to master node, and again we have
+	// asynchrony. Actually return not needed because master assigns
+	// id. All we need is to verify that it was created OK.
+	/*
+	if ( ret ) {
+		sendTo1< Id >( c.targetElement(),
+					createSlot, c.targetIndex(), ret );
+	}
+	*/
 }
 
 void Shell::addFunc ( const Conn& c, 
-				unsigned int src, string srcField,
-				unsigned int dest, string destField )
+				Id src, string srcField,
+				Id dest, string destField )
 {
 	printNodeInfo( c );
 	cout << "in slaveAddFunc :" << src << " " << srcField << 
@@ -733,14 +723,12 @@ void Shell::addFunc ( const Conn& c,
  * the existing children of the prospective parent.
  */
 void Shell::copy( const Conn& c, 
-				unsigned int src, unsigned int parent, string name )
+				Id src, Id parent, string name )
 {
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
-	Element* e =
-		Element::element( src )->copy(
-			Element::element( parent ), name );
+	Element* e = src()->copy( parent(), name );
 	if ( e ) { // Send back the id of the new element base
-		sendTo1< unsigned int >( c.targetElement(),
+		sendTo1< Id >( c.targetElement(),
 					createSlot, c.targetIndex(), e->id() );
 	}
 }
@@ -755,24 +743,24 @@ void Shell::copy( const Conn& c,
  * involve interesting node relocation issues.
  */
 void Shell::move( const Conn& c,
-				unsigned int src, unsigned int parent, string name )
+				Id src, Id parent, string name )
 {
-	assert( src != BAD_ID );
-	assert( parent != BAD_ID );
+	assert( !src.bad() );
+	assert( !parent.bad() );
 	// Cannot move object onto its own descendant
-	Element* e = Element::element( src );
-	Element* pa = Element::element( parent );
+	Element* e = src();
+	Element* pa = parent();
 	if ( pa->isDescendant( e ) ) {
 		cout << "Error: move '" << e->name() << "' to '" << 
 				pa->name() << 
 				"': cannot move object onto itself or descendant\n";
 		return;
 	}
-	unsigned int srcPaId = Neutral::getParent( e );
-	assert ( srcPaId != BAD_ID );
+	Id srcPaId = Neutral::getParent( e );
+	assert ( !srcPaId.bad() );
 	if ( srcPaId == parent ) { // Just rename it.
 		assert ( name != "" ); // New name must exist.
-		if ( Neutral::getChildByName( pa, name ) == BAD_ID ) {
+		if ( Neutral::getChildByName( pa, name ).bad() ) {
 			// Good, we do not have name duplication.
 			e->setName( name );
 			// OK();
@@ -787,7 +775,7 @@ void Shell::move( const Conn& c,
 		string temp = name;
 		if ( name == "" )
 			temp = e->name();
-		if ( Neutral::getChildByName( pa, temp ) == BAD_ID ) {
+		if ( Neutral::getChildByName( pa, temp ).bad() ) {
 			// Good, we do not have name duplication.
 			if ( name != "" )
 				e->setName( name );
@@ -817,9 +805,9 @@ void Shell::move( const Conn& c,
  * object requests.
  */
 void Shell::setField( const Conn& c, 
-				unsigned int id, string field, string value )
+				Id id, string field, string value )
 {
-	Element* e = Element::element( id );
+	Element* e = id();
 	if ( !e ) {
 		cout << "Shell::setField:Error: Element not found: " 
 			<< id << endl;
@@ -844,11 +832,11 @@ void Shell::setField( const Conn& c,
  * vector of objects. Used for the GENESIS SET function.
  */
 void Shell::setVecField( const Conn& c, 
-				vector< unsigned int > elist, string field, string value )
+				vector< Id > elist, string field, string value )
 {
-	vector< unsigned int >::iterator i;
+	vector< Id >::iterator i;
 	for ( i = elist.begin(); i != elist.end(); i++ ) {
-		Element* e = Element::element( *i );
+		Element* e = ( *i )();
 		// Appropriate off-node stuff here.
 	
 		const Finfo* f = e->findFinfo( field );
@@ -880,19 +868,19 @@ void Shell::setClock( const Conn& c, int clockNo, double dt,
 	sprintf( line, "t%d", clockNo );
 	string TickName = line;
 	string clockPath = string( "/sched/cj/" + TickName );
-	unsigned int id = sh->innerPath2eid( clockPath, "/" );
-	unsigned int cj = sh->innerPath2eid( "/sched/cj", "/" );
+	Id id = sh->innerPath2eid( clockPath, "/" );
+	Id cj = sh->innerPath2eid( "/sched/cj", "/" );
 	Element* tick = 0;
-	if ( id == 0 || id == BAD_ID ) {
+	if ( id.zero() || id.bad() ) {
 		tick = Neutral::create( 
-						"Tick", TickName, Element::element( cj ) );
+						"Tick", TickName, cj() );
 	} else {
-		tick = Element::element( id );
+		tick = id();
 	}
 	assert ( tick != 0 && tick != Element::root() );
 	set< double >( tick, "dt", dt );
 	set< int >( tick, "stage", stage );
-	set( Element::element( cj ), "resched" );
+	set( cj(), "resched" );
 	// Call the function
 }
 
@@ -913,10 +901,10 @@ void Shell::setClock( const Conn& c, int clockNo, double dt,
  * and to decode the path list from wildcards.
  */
 void Shell::useClock( const Conn& c,
-	unsigned int tickId, vector< unsigned int > path, string function )
+	Id tickId, vector< Id > path, string function )
 {
-	assert( tickId != 0 );
-	Element* tick = Element::element( tickId );
+	assert( !tickId.zero() );
+	Element* tick = tickId();
 	assert ( tick != 0 );
 	const Finfo* tickProc = tick->findFinfo( "process" );
 
@@ -925,10 +913,10 @@ void Shell::useClock( const Conn& c,
 	// Scan through path and check for existing process connections.
 	// If they are to the same tick, skip the object
 	// If they are to a different tick, delete the connection.
-	vector< unsigned int >::iterator i;
+	vector< Id >::iterator i;
 	for (i = path.begin(); i != path.end(); i++ ) {
-		assert ( *i != 0 );
-		Element* e = Element::element( *i );
+		assert ( !i->zero() );
+		Element* e = ( *i )( );
 		assert ( e && e != Element::root() );
 		const Finfo* func = e->findFinfo( function );
 		if ( func ) {
@@ -967,16 +955,15 @@ void Shell::getWildcardList( const Conn& c, string path, bool ordered )
 	else
 		wildcardFind( path, list );
 
-	vector< unsigned int > ret;
+	vector< Id > ret;
 	ret.resize( list.size() );
-	vector< unsigned int >::iterator i;
+	vector< Id >::iterator i;
 	vector< Element* >::iterator j;
 
 	for (i = ret.begin(), j = list.begin(); j != list.end(); i++, j++ )
 		*i = ( *j )->id();
 	
-	send1< vector< unsigned int > >( c.targetElement(), 
-				elistSlot, ret );
+	send1< vector< Id > >( c.targetElement(), elistSlot, ret );
 }
 
 /**
@@ -984,15 +971,15 @@ void Shell::getWildcardList( const Conn& c, string path, bool ordered )
  */
 Element* findCj()
 {
-	unsigned int schedId;
-	lookupGet< unsigned int, string >( 
+	Id schedId;
+	lookupGet< Id, string >( 
 		Element::root(), "lookupChild", schedId, "sched" );
-	assert( schedId != BAD_ID );
-	unsigned int cjId;
-	lookupGet< unsigned int, string >( 
-		Element::element( schedId ), "lookupChild", cjId, "cj" );
-	assert( cjId != BAD_ID );
-	return Element::element( cjId );
+	assert( !schedId.bad() );
+	Id cjId;
+	lookupGet< Id, string >( 
+		schedId(), "lookupChild", cjId, "cj" );
+	assert( !cjId.bad() );
+	return cjId();
 }
 
 void Shell::resched( const Conn& c )
@@ -1051,14 +1038,14 @@ void Shell::requestClocks( const Conn& c )
  * vector of unsigned ints.
  */
 void Shell::listMessages( const Conn& c,
-				unsigned int id, string field, bool isIncoming )
+				Id id, string field, bool isIncoming )
 {
-	assert( id != BAD_ID );
-	Element* e = Element::element( id );
+	assert( !id.bad() );
+	Element* e = id();
 	const Finfo* f = e->findFinfo( field );
 	assert( f != 0 );
 	vector< Conn > list;
-	vector< unsigned int > ret;
+	vector< Id > ret;
 	string remoteFields = "";
 	
 	if ( isIncoming )
@@ -1081,7 +1068,7 @@ void Shell::listMessages( const Conn& c,
 						targetFinfo->name();
 		}
 	}
-	send2< vector< unsigned int >, string >(
+	send2< vector< Id >, string >(
 		c.targetElement(), listMessageSlot, ret, remoteFields );
 }
 
@@ -1092,13 +1079,13 @@ void Shell::readCell( const Conn& c, string filename, string cellpath )
 	rc.read( filename, cellpath );
 }
 
-void Shell::setupAlpha( const Conn& c, unsigned int gateId,
+void Shell::setupAlpha( const Conn& c, Id gateId,
 				vector< double > parms )
 {
 	static const Finfo* setupAlphaFinfo = 
 			Cinfo::find( "HHGate")->findFinfo( "setupAlpha" );
-	assert( gateId != BAD_ID );
-	Element* gate = Element::element( gateId );
+	assert( !gateId.bad() );
+	Element* gate = gateId();
 	if ( gate->className() != "HHGate" ) {
 		cout << "Error: Shell::setupAlpha: element is not an HHGate: "
 				<< gate->name() << endl;
@@ -1107,13 +1094,13 @@ void Shell::setupAlpha( const Conn& c, unsigned int gateId,
 	set< vector< double > >( gate, setupAlphaFinfo, parms );
 }
 
-void Shell::setupTau( const Conn& c, unsigned int gateId,
+void Shell::setupTau( const Conn& c, Id gateId,
 				vector< double > parms )
 {
 	static const Finfo* setupTauFinfo = 
 			Cinfo::find( "HHGate")->findFinfo( "setupTau" );
-	assert( gateId != BAD_ID );
-	Element* gate = Element::element( gateId );
+	assert( gateId.bad() );
+	Element* gate = gateId();
 	if ( gate->className() != "HHGate" ) {
 		cout << "Error: Shell::setupTau: element is not an HHGate: "
 				<< gate->name() << endl;
@@ -1122,12 +1109,12 @@ void Shell::setupTau( const Conn& c, unsigned int gateId,
 	set< vector< double > >( gate, setupTauFinfo, parms );
 }
 
-void Shell::tweakAlpha( const Conn& c, unsigned int gateId )
+void Shell::tweakAlpha( const Conn& c, Id gateId )
 {
 	static const Finfo* tweakAlphaFinfo = 
 			Cinfo::find( "HHGate")->findFinfo( "tweakAlpha" );
-	assert( gateId != BAD_ID );
-	Element* gate = Element::element( gateId );
+	assert( !gateId.bad() );
+	Element* gate = gateId();
 	if ( gate->className() != "HHGate" ) {
 		cout << "Error: Shell::tweakAlpha: element is not an HHGate: "
 				<< gate->name() << endl;
@@ -1136,12 +1123,12 @@ void Shell::tweakAlpha( const Conn& c, unsigned int gateId )
 	set( gate, tweakAlphaFinfo );
 }
 
-void Shell::tweakTau( const Conn& c, unsigned int gateId )
+void Shell::tweakTau( const Conn& c, Id gateId )
 {
 	static const Finfo* tweakTauFinfo = 
 			Cinfo::find( "HHGate")->findFinfo( "tweakTau" );
-	assert( gateId != BAD_ID );
-	Element* gate = Element::element( gateId );
+	assert( !gateId.bad() );
+	Element* gate = gateId();
 	if ( gate->className() != "HHGate" ) {
 		cout << "Error: Shell::tweakTau: element is not an HHGate: "
 				<< gate->name() << endl;
@@ -1215,10 +1202,11 @@ void Shell::simUndump( const Conn& c, string args )
 //////////////////////////////////////////////////////////////////
 
 // Regular function
-unsigned int Shell::create( const string& type, const string& name, unsigned int parent )
+bool Shell::create( const string& type, const string& name, 
+		Id parent, Id id )
 {
 	const Cinfo* c = Cinfo::find( type );
-	Element* p = Element::element( parent );
+	Element* p = parent();
 	if ( !p ) {
 		cout << "Error: Shell::create: No parent " << p << endl;
 		return 0;
@@ -1231,11 +1219,12 @@ unsigned int Shell::create( const string& type, const string& name, unsigned int
 		return 0;
 	}
 	if ( c != 0 && p != 0 ) {
-		Element* e = c->create( name );
-		assert( childSrc->add( p, e, e->findFinfo( "child" ) ) );
+		Element* e = c->create( id, name );
+		bool ret = childSrc->add( p, e, e->findFinfo( "child" ) );
+		assert( ret );
 		// cout << "OK\n";
-		recentElement_ = e->id();
-		return recentElement_;
+		recentElement_ = id;
+		return 1;
 	} else  {
 		cout << "Error: Shell::create: Unable to find type " <<
 			type << endl;
@@ -1244,10 +1233,10 @@ unsigned int Shell::create( const string& type, const string& name, unsigned int
 }
 
 // Regular function
-void Shell::destroy( unsigned int victim )
+void Shell::destroy( Id victim )
 {
 	// cout << "in Shell::destroy\n";
-	Element* e = Element::element( victim );
+	Element* e = victim();
 	if ( !e ) {
 		cout << "Error: Shell::destroy: No element " << victim << endl;
 		return;
@@ -1268,22 +1257,22 @@ void Shell::pwe() const
 	cout << cwe_ << endl;
 }
 
-void Shell::ce( unsigned int dest )
+void Shell::ce( Id dest )
 {
-	if ( Element::element( dest ) )
+	if ( dest() )
 		cwe_ = dest;
 }
 
-void Shell::le ( unsigned int eid )
+void Shell::le ( Id eid )
 {
-	Element* e = Element::element( eid );
+	Element* e = eid( );
 	if ( e ) {
-		vector< unsigned int > elist;
-		vector< unsigned int >::iterator i;
+		vector< Id > elist;
+		vector< Id >::iterator i;
 		get( e, "childList", elist );
 		for ( i = elist.begin(); i != elist.end(); i++ ) {
-			if ( Element::element( *i ) != 0 )
-				cout << Element::element( *i )->name() << endl;
+			if ( ( *i )() != 0 )
+				cout << ( *i )()->name() << endl;
 		}
 	}
 }
@@ -1298,7 +1287,7 @@ void testShell()
 	cout << "\nTesting Shell";
 
 	Element* root = Element::root();
-	ASSERT( root->id() == 0 , "creating /root" );
+	ASSERT( root->id().zero() , "creating /root" );
 
 	vector< string > vs;
 	separateString( "a/b/c/d/e/f/ghij/k", vs, "/" );
@@ -1334,26 +1323,35 @@ void testShell()
 	// used later for path lookup
 	/////////////////////////////////////////
 
-	unsigned int n = Element::numElements() - 1;
+	Id n = Id::lastId();
+	Id a = Id::scratchId();
+	bool ret = 0;
 
-	unsigned int a = sh.create( "Neutral", "a", 0 );
-	ASSERT( a == n + 1 , "creating a" );
-
+	ret = sh.create( "Neutral", "a", Id(), a );
+	ASSERT( ret, "creating a" );
+	ASSERT( a.id_ == n.id_ + 1 , "creating a" );
 	ASSERT( ( sh.parent( a ) == 0 ), "finding parent" );
 
-	unsigned int b = sh.create( "Neutral", "b", 0 );
-	ASSERT( b == n + 2 , "creating b" );
+	Id b = Id::scratchId();
+	ret = sh.create( "Neutral", "b", Id(), b );
+	ASSERT( ret, "creating b" );
+	ASSERT( b.id_ == n.id_ + 2 , "creating b" );
 
-	unsigned int c = sh.create( "Neutral", "c", 0 );
-	ASSERT( c == n + 3 , "creating c" );
+	Id c = Id::scratchId();
+	ret = sh.create( "Neutral", "c", Id(), c );
+	ASSERT( ret, "creating c" );
+	ASSERT( c.id_ == n.id_ + 3 , "creating c" );
 
-	unsigned int a1 = sh.create( "Neutral", "a1", a );
-	ASSERT( a1 == n + 4 , "creating a1" );
-
+	Id a1 = Id::scratchId();
+	ret = sh.create( "Neutral", "a1", a, a1 );
+	ASSERT( ret, "creating a1" );
+	ASSERT( a1.id_ == n.id_ + 4 , "creating a1" );
 	ASSERT( ( sh.parent( a1 ) == a ), "finding parent" );
 
-	unsigned int a2 = sh.create( "Neutral", "a2", a );
-	ASSERT( a2 == n + 5 , "creating a2" );
+	Id a2 = Id::scratchId();
+	ret = sh.create( "Neutral", "a2", a, a2 );
+	ASSERT( ret, "creating a2" );
+	ASSERT( a2.id_ == n.id_ + 5 , "creating a2" );
 
 	/////////////////////////////////////////
 	// Test path lookup operations
@@ -1364,7 +1362,7 @@ void testShell()
 	path = sh.eid2path( a2 );
 	ASSERT( path == "/a/a2", "a2 eid2path" );
 
-	unsigned int eid = sh.innerPath2eid( "/a/a1", "/" );
+	Id eid = sh.innerPath2eid( "/a/a1", "/" );
 	ASSERT( eid == a1, "a1 path2eid" );
 	eid = sh.innerPath2eid( "/a/a2", "/" );
 	ASSERT( eid == a2, "a2 path2eid" );
@@ -1375,9 +1373,9 @@ void testShell()
 	sh.destroy( a );
 	sh.destroy( b );
 	sh.destroy( c );
-	ASSERT( Element::element( a ) == 0, "destroy a" );
-	ASSERT( Element::element( a1 ) == 0, "destroy a1" );
-	ASSERT( Element::element( a2 ) == 0, "destroy a2" );
+	ASSERT( a() == 0, "destroy a" );
+	ASSERT( a1() == 0, "destroy a1" );
+	ASSERT( a2() == 0, "destroy a2" );
 }
 
 #endif // DO_UNIT_TESTS

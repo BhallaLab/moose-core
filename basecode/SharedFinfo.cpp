@@ -571,8 +571,8 @@ void sharedFinfoTest()
 					sizeof( testFinfos ) / sizeof( Finfo*),
 					ValueFtype1< SharedTest >::global() );
 
-	Element* e1 = sfc.create( "e1" );
-	Element* e2 = sfc.create( "e2" );
+	Element* e1 = sfc.create( Id::scratchId(), "e1" );
+	Element* e2 = sfc.create( Id::scratchId(), "e2" );
 
 	cout << "\nTesting SharedFinfo";
 

@@ -26,15 +26,17 @@ class SimpleElement: public Element
 			friend void finfoLookupTest(); // to do these tests
 			static int numInstances;
 #endif
-		SimpleElement( const string& name );
+		SimpleElement( Id id, const string& name );
 
 		SimpleElement(
+				Id id,
 				const std::string& name, 
 				unsigned int srcSize,
 				unsigned int destSize,
 				void* data = 0
 		);
 
+		// Used in copies.
 		SimpleElement( const SimpleElement* orig );
 
 		/// This cleans up the data_ and finfo_ if needed.
@@ -49,6 +51,8 @@ class SimpleElement: public Element
 		}
 
 		const std::string& className( ) const;
+
+		const Cinfo* cinfo() const;
 
 		/**
 		 * Looks up a Conn entry.

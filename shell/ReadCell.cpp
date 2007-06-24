@@ -23,23 +23,23 @@ ReadCell::ReadCell()
 		cell_( 0 ), lastCompt_( 0 ),
 		polarFlag_( 0 ), relativeCoordsFlag_( 0 )
 {
-		unsigned int libId;
-		bool ret = lookupGet< unsigned int, string >(
+		Id libId;
+		bool ret = lookupGet< Id, string >(
 					Element::root(), "lookupChild", libId, "library" );
 
-		if ( !ret || libId == BAD_ID ) {
+		if ( !ret || libId.bad() ) {
 			cout << "Warning: ReadCell: No library for channels\n";
 			return;
 		}
 
-		Element* lib = Element::element( libId );
+		Element* lib = libId();
 
-		vector< unsigned int > chanIds;
-		vector< unsigned int >::iterator i;
-		ret = get< vector< unsigned int > >( lib, "childList", chanIds);
+		vector< Id > chanIds;
+		vector< Id >::iterator i;
+		ret = get< vector< Id > >( lib, "childList", chanIds);
 		assert( ret );
 		for ( i = chanIds.begin(); i != chanIds.end(); i++ )
-			chanProtos_.push_back( Element::element( *i ) );
+			chanProtos_.push_back( ( *i )() );
 }
 
 /**
@@ -51,12 +51,12 @@ ReadCell::ReadCell()
 
 Element* ReadCell::start( const string& cellpath )
 {
-	// Warning: here is a parser dependence.
-	unsigned int cellId = Shell::path2eid( cellpath, "/" );
+	// Warning: here is a parser dependence in the separator.
+	Id cellId( cellpath, "/" );
 	// There should not be an existing object of this name.
 	// In the old GENESIS it deleted it. Here we will complain
 	
-	if ( cellId != BAD_ID ) {
+	if ( !cellId.bad() ) {
 		cout << "Warning: cell '" << cellpath << "' already exists.\n";
 		return 0;
 	}
@@ -72,13 +72,13 @@ Element* ReadCell::start( const string& cellpath )
 		cellpa = Element::root();
 		cellname = cellpath.substr( 1 );
 	} else {
-		cellId = Shell::path2eid( cellpath.substr( 0, pos - 1 ), "/" );
-		if ( cellId == BAD_ID ) {
+		cellId = Id( cellpath.substr( 0, pos - 1 ), "/" );
+		if ( cellId.bad() ) {
 			cout << "Warning: cell path '" << cellpath <<
 					"' not found.\n";
 			return 0;
 		}
-		cellpa = Element::element( cellId );
+		cellpa = cellId();
 		cellname = cellpath.substr( pos + 1 );
 	}
 	
@@ -208,24 +208,24 @@ Element* ReadCell::buildCompartment(
 	} else if ( parent == "none" || parent == "nil" ) {
 			pa = Element::root();
 	} else {
-		unsigned int paId;
-		bool ret = lookupGet< unsigned int, string >(
+		Id paId;
+		bool ret = lookupGet< Id , string >(
 					cell_, "lookupChild", paId, parent );
 		assert( ret );
-		if ( paId == BAD_ID ) {
+		if ( paId.bad() ) {
 			cout << "Error: ReadCell: could not find parent compt '" <<
 					parent << "' for child '" << name << "'\n";
 			return 0;
 		}
-		pa = Element::element( paId );
+		pa = paId();
 	}
 	if ( pa == 0 )
 		return 0;
-	unsigned int childId;
-	bool ret = lookupGet< unsigned int, string >(
+	Id childId;
+	bool ret = lookupGet< Id, string >(
 				cell_, "lookupChild", childId, name );
 	assert( ret );
-	if ( childId != BAD_ID ) {
+	if ( !childId.bad() ) {
 		cout << "Error: ReadCell: duplicate child on parent compt '" <<
 				parent << "' for child '" << name << "'\n";
 		return 0;

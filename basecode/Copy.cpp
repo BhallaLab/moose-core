@@ -115,6 +115,10 @@ Element* SimpleElement::innerDeepCopy(
  * if they are the root of the copy tree. In this case we assume that
  * the user really does want to copy the global element as they have
  * specifically requested the copy.
+ *
+ * \todo: This will need a lot of work to handle cross-node copies,
+ * or even worse, copies of element trees that span nodes. For now
+ * it is single-node stuff.
  */
 
 Element* SimpleElement::copy( Element* parent, const string& newName )
@@ -128,11 +132,11 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 
 	if ( newName == "" )
 		nm = name();
-	unsigned int oldChild;
-	bool ret = lookupGet< unsigned int, string >(
+	Id oldChild;
+	bool ret = lookupGet< Id, string >(
 					parent, "lookupChild", oldChild, nm );
 	assert( ret );
-	if ( oldChild != BAD_ID ) {
+	if ( !oldChild.bad() ) {
 		cout << "Warning: SimpleElement::copy: pre-existing child with target name: " << parent->name() << "/" << nm << endl;
 		return 0;
 	}
@@ -321,7 +325,7 @@ void copyTest()
 	ASSERT( dret == 0.1, "copying" );
 
 	// Check copied tree
-	Element* e = Element::element( Neutral::getChildByName( c1, "ch" ));
+	Element* e = Neutral::getChildByName( c1, "ch" )();
 	ASSERT( e != 0, "copied child" );
 	get< double >( e, "Xpower", dret );
 	ASSERT( dret == 3.0, "copying" );
@@ -331,10 +335,9 @@ void copyTest()
 	// Test out copies when there is a global element in the tree.
 	// The copy should have messages to the original global element.
 	//////////////////////////////////////////////////////////////////
-	Element* temp = Element::element(
-					Neutral::getChildByName( e, "xGate" ) );
+	Element* temp = Neutral::getChildByName( e, "xGate" )( );
 	ASSERT( temp == 0, "copied global child: should not exist" );
-	temp = Element::element( Neutral::getChildByName( e, "yGate" ) );
+	temp = Neutral::getChildByName( e, "yGate" )( );
 	ASSERT( temp == 0, "copied global child: should not exist" );
 
 	// See if the messages go to the original Gates.
@@ -343,8 +346,7 @@ void copyTest()
 	unsigned int numConns = xGateFinfo->incomingConns( ch, clist );
 	ASSERT( numConns == 1, "Original connections on x gate" );
 
-	temp = Element::element(
-					Neutral::getChildByName( ch, "xGate" ) );
+	temp = Neutral::getChildByName( ch, "xGate" )( );
 	ASSERT( temp != 0, "original xgate" );
 	ASSERT( temp == clist[0].targetElement(), "Testing orig gate" );
 
@@ -353,8 +355,7 @@ void copyTest()
 	ASSERT( numConns == 1, "Shifted connections on x gate" );
 	ASSERT( temp == clist[0].targetElement(), "Testing that gate msg is to same place as orig gate" );
 
-	temp = Element::element(
-					Neutral::getChildByName( ch, "yGate" ) );
+	temp = Neutral::getChildByName( ch, "yGate" )( );
 	ASSERT( temp != 0, "original ygate" );
 	const Finfo* yGateFinfo = ch->findFinfo( "yGate" );
 	numConns = yGateFinfo->incomingConns( ch, clist );

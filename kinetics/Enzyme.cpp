@@ -220,10 +220,9 @@ void Enzyme::innerSetMode( Element* e, bool mode )
 	if ( mode == innerGetMode() )
 		return;
 	if ( mode ) { 
-		unsigned int id = 
-			Neutral::getChildByName( e, e->name() + "_cplx" );
-		if ( id != BAD_ID ) {
-			Element* cplx = Element::element( id );
+		Id id = Neutral::getChildByName( e, e->name() + "_cplx" );
+		if ( !id.bad() ) {
+			Element* cplx = id();
 			if ( cplx )
 				set( cplx, "destroy" );
 		}
@@ -336,15 +335,15 @@ void Enzyme::makeComplex( Element* e )
 {
 	static const Finfo* cplxSrcFinfo = enzymeCinfo->findFinfo( "cplx" );
 	string cplxName = e->name() + "_cplx";
-	unsigned int id = Neutral::getChildByName( e, cplxName );
-	if ( id != BAD_ID )
+	Id id = Neutral::getChildByName( e, cplxName );
+	if ( !id.bad() )
 		return;
 
 	double vol = 0.0;
 
-	unsigned int parentId = Neutral::getParent( e );
-	assert( parentId != BAD_ID );
-	Element* parent = Element::element( parentId );
+	Id parentId = Neutral::getParent( e );
+	assert( !parentId.bad() );
+	Element* parent = parentId();
 
 	bool ret = get< double >( parent, "volumeScale", vol );
 	assert( ret );
@@ -418,9 +417,9 @@ void testEnzyme()
 	set< double >( enz, "k3", 0.1 );
 	ret = set< bool >( enz, "mode", 0 );
 	ASSERT( ret, "setting enz mode" );
-	unsigned int cplxId = Neutral::getChildByName( enz, "enz_cplx" );
-	ASSERT( cplxId != BAD_ID , "making Enzyme cplx" );
-	Element* cplx = Element::element( cplxId );
+	Id cplxId = Neutral::getChildByName( enz, "enz_cplx" );
+	ASSERT( !cplxId.bad(), "making Enzyme cplx" );
+	Element* cplx = cplxId();
 	Conn ccplx( cplx, 0 );
 
 	ret = sub->findFinfo( "reac" )->add( sub, enz, enz->findFinfo( "sub" ));
@@ -468,17 +467,17 @@ void testEnzyme()
 	ret = set< bool >( enz, "mode", 1 );
 	ASSERT( ret, "setting enz mode" );
 	cplxId = Neutral::getChildByName( enz, "enz_cplx" );
-	ASSERT( cplxId == BAD_ID , "removing Enzyme cplx" );
+	ASSERT( cplxId.bad() , "removing Enzyme cplx" );
 
 	ret = set< bool >( enz, "mode", 0 );
 	ASSERT( ret, "setting enz mode" );
 	cplxId = Neutral::getChildByName( enz, "enz_cplx" );
-	ASSERT( cplxId != BAD_ID , "adding Enzyme cplx" );
+	ASSERT( !cplxId.bad(), "adding Enzyme cplx" );
 
 	ret = set< bool >( enz, "mode", 1 );
 	ASSERT( ret, "setting enz mode" );
 	cplxId = Neutral::getChildByName( enz, "enz_cplx" );
-	ASSERT( cplxId == BAD_ID , "removing Enzyme cplx" );
+	ASSERT( cplxId.bad(), "removing Enzyme cplx" );
 
 	Enzyme::reinitFunc( cenz, &p );
 	Molecule::reinitFunc( csub, &p );

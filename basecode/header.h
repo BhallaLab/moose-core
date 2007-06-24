@@ -35,8 +35,6 @@
 #include <iostream>
 #include <cassert>
 
-extern const unsigned int BAD_ID;
-
 using namespace std;
 
 class Element;
@@ -49,11 +47,16 @@ class Finfo;
 extern void* getParBuf( const Conn& c, unsigned int size );
 extern void* getAsyncParBuf( const Conn& c, unsigned int size );
 
+// Another ugly global, this one for accessing the ids.
+class IdManager;
+// extern IdManager* idManager();
+
 #include "RecvFunc.h"
 #include "Conn.h"
 #include "Ftype.h"
 #include "FunctionData.h"
 #include "Finfo.h"
+#include "Id.h"
 #include "Element.h"
 
 #endif // _HEADER_H

@@ -38,8 +38,8 @@ void connTest()
 {
 	// SimpleElement( name, srcSize, destSize );
 	cout << "Testing conn basic stuff";
-	SimpleElement e1("e1", 2, 2);
-	SimpleElement e2("e2", 2, 2);
+	SimpleElement e1( Id::scratchId(), "e1", 2, 2);
+	SimpleElement e2( Id::scratchId(), "e2", 2, 2);
 	Conn c1( &e1, 1234 );
 	Conn c2( &e2, 3241 );
 	ASSERT( c1.targetElement() == &e1, "targetElement access" );
@@ -79,7 +79,7 @@ void connTest()
 	ASSERT( e2.lookupConn( ic2 )->sourceIndex( &e2 ) == ic2,
 					"sourceIndex()" );
 
-	SimpleElement e3( "e3", 2, 2 );
+	SimpleElement e3(  Id::scratchId(), "e3", 2, 2 );
 	unsigned int ic3 = e3.insertConn( 0, 1, 0, 0 );
 	ic2 = e2.insertConn( 0, 0, 0, 1 );
 	e3.connect( ic3, &e2, ic2 );
@@ -220,8 +220,8 @@ void msgSrcTest()
 
 	// SimpleElement( name, srcSize, destSize );
 
-	SimpleElement e1("e1", 4, 2 );
-	SimpleElement e2("e2", 4, 2 );
+	SimpleElement e1(  Id::scratchId(), "e1", 4, 2 );
+	SimpleElement e2(  Id::scratchId(), "e2", 4, 2 );
 
 	// unsigned int insertConnOnSrc( src, FuncList& rf, dest, nDest );
 	unsigned int ic1 = e1.insertConnOnSrc( 1, fl, 0, 1 );
@@ -256,7 +256,7 @@ void msgSrcTest()
 
 	// Something funny here about msgdest ordering wrt msgsrc
 	cout << "\nTesting insertion of conns and increment of later srcs";
-	SimpleElement e3("e3", 4, 2 );
+	SimpleElement e3(  Id::scratchId(), "e3", 4, 2 );
 	FuncList fl2;
 	fl2.push_back( &msgSrcTestFunc2 );
 	unsigned int ic1a = e1.insertConnOnSrc( 0, fl2, 0, 0 );
@@ -390,8 +390,8 @@ void msgFinfoTest()
 	
 	double e2data = 1.5;
 
-	SimpleElement e1("e1", 4, 2 );
-	SimpleElement e2("e2", 4, 2, &e2data );
+	SimpleElement e1(  Id::scratchId(), "e1", 4, 2 );
+	SimpleElement e2(  Id::scratchId(), "e2", 4, 2, &e2data );
 	Ftype0 zft;
 	ValueFtype1< double > dft;
 
@@ -553,10 +553,10 @@ void cinfoTest()
 					srcIndex_ == 3 + startIndex ,
 					"msg counting during cinfo inititialization" );
 
-	Element* clock = testclass.create( "clock" );
-	Element* e1 = testclass.create( "e1" );
-	Element* e2 = testclass.create( "e2" );
-	Element* e3 = testclass.create( "e3" );
+	Element* clock = testclass.create(  Id::scratchId(), "clock" );
+	Element* e1 = testclass.create( Id::scratchId(), "e1" );
+	Element* e2 = testclass.create( Id::scratchId(), "e2" );
+	Element* e3 = testclass.create( Id::scratchId(), "e3" );
 
 	cout << "\nUsing above class to make and connect objects";
 
@@ -727,10 +727,10 @@ void finfoLookupTest()
 
 
 
-	Element* clock = testclass.create( "clock" );
-	Element* e1 = testclass.create( "e1" );
-	Element* e2 = testclass.create( "e2" );
-	Element* e3 = testclass.create( "e3" );
+	Element* clock = testclass.create(  Id::scratchId(), "clock" );
+	Element* e1 = testclass.create( Id::scratchId(), "e1" );
+	Element* e2 = testclass.create( Id::scratchId(), "e2" );
+	Element* e3 = testclass.create( Id::scratchId(), "e3" );
 
 	ASSERT( clock->findFinfo( "sum" ) == testFinfos[0], "finfoLookup");
 	ASSERT( clock->findFinfo( "sub" ) == testFinfos[1], "finfoLookup");
@@ -984,7 +984,7 @@ void valueFinfoTest()
 
 
 
-	Element* clock = testclass.create( "clock" );
+	Element* clock = testclass.create( Id::scratchId(), "clock" );
 	string sret = "";
 	double dret = 0;
 	int iret;
@@ -1078,8 +1078,8 @@ void valueFinfoTest()
 	
 	unsigned int procOutSlotIndex = testclass.getSlotIndex( "procout" );
 
-	Element* e1 = testclass.create( "e1" );
-	Element* e2 = testclass.create( "e2" );
+	Element* e1 = testclass.create( Id::scratchId(), "e1" );
+	Element* e2 = testclass.create( Id::scratchId(), "e2" );
 	set< double >( e1, e1->findFinfo( "dval" ), 1 );
 	set< int >( e1, e1->findFinfo( "ival" ), -1 );
 
@@ -1102,7 +1102,7 @@ void valueFinfoTest()
 	/////////////////////////////////////////////////////////////////// 
 	cout << "\nTesting --proc--> e1/isetout --> e3/ival";
 	// --proc--> e1/isetout --> e3/ival
-	Element* e3 = testclass.create( "e3" );
+	Element* e3 = testclass.create( Id::scratchId(), "e3" );
 	set< double >( e3, e3->findFinfo( "dval" ), 3 );
 	set< int >( e3, e3->findFinfo( "ival" ), -3 );
 
@@ -1127,8 +1127,8 @@ void valueFinfoTest()
 	/////////////////////////////////////////////////////////////////// 
 	cout << "\nTesting trig then dval: --proc--> e1/procout --> e0/dval --> e4/dsum";
 	// --proc--> e1/procout --> e0/dval --> e4/dsum
-	Element* e0 = testclass.create( "e0" );
-	Element* e4 = testclass.create( "e4" );
+	Element* e0 = testclass.create( Id::scratchId(), "e0" );
+	Element* e4 = testclass.create( Id::scratchId(), "e4" );
 	set< double >( e0, e0->findFinfo( "dval" ), 2 );
 	set< int >( e0, e0->findFinfo( "ival" ), -2 );
 	set< double >( e4, e4->findFinfo( "dval" ), 4 );
@@ -1176,8 +1176,8 @@ void valueFinfoTest()
 	/////////////////////////////////////////////////////////////////// 
 	cout << "\nTesting dval then trig: --proc--> e1/procout --> e5/dval --> e6/dsum";
 	// Here we first add the message from d5 to e6, then the trigger.
-	Element* e5 = testclass.create( "e5" );
-	Element* e6 = testclass.create( "e6" );
+	Element* e5 = testclass.create( Id::scratchId(), "e5" );
+	Element* e6 = testclass.create( Id::scratchId(), "e6" );
 	set< double >( e5, e5->findFinfo( "dval" ), 5 );
 	set< int >( e5, e5->findFinfo( "ival" ), -5 );
 	set< double >( e6, e6->findFinfo( "dval" ), 6 );
@@ -1226,8 +1226,8 @@ void valueFinfoTest()
 	/////////////////////////////////////////////////////////////////// 
 	cout << "\nTesting trig then dval: --proc--> e1/procout --> e7/dval --> e8/dval";
 	// First set up trigger,  then we send message from value to value.
-	Element* e7 = testclass.create( "e7" );
-	Element* e8 = testclass.create( "e8" );
+	Element* e7 = testclass.create( Id::scratchId(), "e7" );
+	Element* e8 = testclass.create( Id::scratchId(), "e8" );
 	set< double >( e7, e7->findFinfo( "dval" ), 7 );
 	set< int >( e7, e7->findFinfo( "ival" ), -7 );
 	set< double >( e8, e8->findFinfo( "dval" ), 8 );
@@ -1276,8 +1276,8 @@ void valueFinfoTest()
 	/////////////////////////////////////////////////////////////////// 
 	cout << "\nTesting dval then trig: --proc--> e1/procout --> e9/dval --> e10/dval";
 	// First set up message from value to value, then trigger.
-	Element* e9 = testclass.create( "e9" );
-	Element* e10 = testclass.create( "e10" );
+	Element* e9 = testclass.create( Id::scratchId(), "e9" );
+	Element* e10 = testclass.create( Id::scratchId(), "e10" );
 	set< double >( e9, e9->findFinfo( "dval" ), 9 );
 	set< int >( e9, e9->findFinfo( "ival" ), -9 );
 	set< double >( e10, e10->findFinfo( "dval" ), 10 );
@@ -1446,7 +1446,7 @@ void arrayFinfoTest()
 					sizeof( testFinfos ) / sizeof( Finfo*),
 					ValueFtype1< ArrayTestClass >::global() );
 
-	Element* a1 = arraytestclass.create( "a1" );
+	Element* a1 = arraytestclass.create( 0, "a1" );
 	double dret = 0;
 	int iret;
 
@@ -1513,7 +1513,7 @@ void arrayFinfoTest()
 	////////////////////////////////////////////////////////////////
 	
 	cout << "\nTesting arrayFinfo messaging";
-	Element* a2 = arraytestclass.create( "a2" );
+	Element* a2 = arraytestclass.create( 0, "a2" );
 
 	// We will follow a1 messages to call proc on a2. Check a2->dval.
 	//
@@ -1659,7 +1659,7 @@ int TestTransientFinfo::numInstances = 0;
 
 void transientFinfoDeletionTest()
 {
-	SimpleElement *e1 = new SimpleElement( "e1" );
+	SimpleElement *e1 = new SimpleElement(  Id::scratchId(), "e1" );
 	Finfo* temp = new DestFinfo( "temp", Ftype1< double >::global(), 
 					0, 0 );
 

@@ -26,8 +26,8 @@
 int SimpleElement::numInstances = 0;
 #endif
 
-SimpleElement::SimpleElement( const std::string& name )
-	: Element(), name_( name ), data_( 0 )
+SimpleElement::SimpleElement( Id id, const std::string& name )
+	: Element( id ), name_( name ), data_( 0 )
 {
 #ifdef DO_UNIT_TESTS
 		numInstances++;
@@ -36,12 +36,15 @@ SimpleElement::SimpleElement( const std::string& name )
 }
 
 SimpleElement::SimpleElement(
+				Id id,
 				const std::string& name, 
 				unsigned int srcSize,
 				unsigned int destSize,
 				void* data
 	)
-	: Element(), name_( name ), src_( srcSize ), dest_( destSize ), data_( data )
+	: Element( id ), name_( name ), 
+		src_( srcSize ), dest_( destSize ), 
+		data_( data )
 {
 #ifdef DO_UNIT_TESTS
 		numInstances++;
@@ -50,7 +53,7 @@ SimpleElement::SimpleElement(
 }
 
 SimpleElement::SimpleElement( const SimpleElement* orig )
-		: Element(),
+		: Element( Id::scratchId() ),
 		name_( orig->name_ ), 
 		conn_( orig->conn_ ), 
 		src_( orig->src_ ),
@@ -98,9 +101,14 @@ SimpleElement::~SimpleElement()
 
 const std::string& SimpleElement::className( ) const
 {
+	return cinfo()->name();
+}
+
+const Cinfo* SimpleElement::cinfo( ) const
+{
 	const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( finfo_[0] );
 	assert( tf != 0 );
-	return tf->cinfo()->name();
+	return tf->cinfo();
 }
 
 /**
