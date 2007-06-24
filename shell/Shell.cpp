@@ -475,7 +475,7 @@ void Shell::rawAddFunc( const Conn& c, string s )
 	} 
 	Element* dest = destId();
 	if ( dest == 0 ) {
-		cout << "Error: Shell::rawAddFunc: msgdest ptr is empty on " << mynode << " from " << remotenode << " with str " << s << "\n";
+		cout << "Error: Shell::rawAddFunc: msgdest ptr for id " << destId << " is empty on " << mynode << " from " << remotenode << " with str " << s << "\n";
 		return;
 	} 
 	if ( dest->className() == "PostMaster" ) { //oops, off node.
@@ -579,7 +579,8 @@ void Shell::staticCreate( const Conn& c, string type,
 					string name, Id parent )
 {
 	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
-	Id id = Id::childId( parent );
+	// Id id = Id::childId( parent );
+	Id id = Id::scratchId();
 	bool ret = s->create( type, name, parent, id );
 	if ( ret ) {
 		sendTo1< Id >( c.targetElement(),
@@ -630,7 +631,8 @@ void testMess( Element* e )
 		e, rCreateSlot, "objtype", "objname", 
 		Id::str2Id( "1234" ), Id::str2Id( "5678" ) );
 
-	send2< Id, string >( e, rGetSlot, Id::str2Id( "5" ), "name" );
+	// This should return 'shell'
+	send2< Id, string >( e, rGetSlot, Id::str2Id( "1" ), "name" );
 
 	// send1< string >( e, recvGetSlot, "fieldvalue" );
 
@@ -694,8 +696,8 @@ void Shell::slaveCreateFunc ( const Conn& c,
 
 
 	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
-	bool ret = s->create( objtype, objname, parent, newobj );
-	assert( ret );
+	// bool ret = s->create( objtype, objname, parent, newobj );
+	// assert( ret );
 	// Need to send return back to master node, and again we have
 	// asynchrony. Actually return not needed because master assigns
 	// id. All we need is to verify that it was created OK.
