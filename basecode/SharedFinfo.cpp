@@ -537,13 +537,32 @@ class SharedTest
 
 void sharedFinfoTest()
 {
+	static Finfo* readValShared[] =
+	{
+			new DestFinfo( "tenXdval", Ftype1< double >::global(), 
+							RFCAST( &SharedTest::tenXdval ) ),
+			new SrcFinfo( "tenXdvalSrc", Ftype0::global() )
+	};
+	/*
 	static TypeFuncPair readValTypes[] = 
 	{ 	// Receive the double, and trigger its sending.
 			TypeFuncPair( Ftype1< double >::global(), 
 							RFCAST( &SharedTest::tenXdval ) ),
 			TypeFuncPair( Ftype0::global(), 0 )
 	};
+	*/
 
+	static Finfo* pingPongShared[] = 
+	{ 	// Send and receive the double, send and receive the trigger.
+			new DestFinfo( "recv", Ftype1< double >::global(), 
+							RFCAST( &SharedTest::twoXdval ) ),
+			new SrcFinfo( "send", Ftype1< double >::global() ),
+			new DestFinfo( "trig", 
+							Ftype0::global(), &SharedTest::pingPong ),
+			new SrcFinfo( "trigSrc", Ftype0::global() ),
+	};
+
+	/*
 	static TypeFuncPair pingPongTypes[] = 
 	{ 	// Send and receive the double, send and receive the trigger.
 			TypeFuncPair( Ftype1< double >::global(), 
@@ -552,13 +571,18 @@ void sharedFinfoTest()
 			TypeFuncPair( Ftype0::global(), &SharedTest::pingPong ),
 			TypeFuncPair( Ftype0::global(), 0 ),
 	};
+	*/
 
 	static Finfo* testFinfos[] = 
 	{
 		new ValueFinfo( "dval", ValueFtype1< double >::global(), 
 			SharedTest::getDval, RFCAST( &SharedTest::setDval ) ),
-		new SharedFinfo( "readVal", readValTypes, 2 ),
-		new SharedFinfo( "pingPong", pingPongTypes, 4 ),
+		new SharedFinfo( "readVal", readValShared, 
+			sizeof( readValShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "pingPong", pingPongShared,
+			sizeof( pingPongShared ) / sizeof( Finfo* ) ),
+		// new SharedFinfo( "readVal", readValTypes, 2 ),
+		// new SharedFinfo( "pingPong", pingPongTypes, 4 ),
 		new DestFinfo( "trigRead", Ftype0::global(), 
 						&SharedTest::trigRead ),
 		new DestFinfo( "trigPing", Ftype0::global(), 
