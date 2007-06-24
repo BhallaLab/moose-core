@@ -3471,6 +3471,89 @@ messages. Then we can begin on the list below.
 
 Did a reference checkin at this point with flags set for non-parallel 
 compilation.
+Checked in as revision 143.
 
 
+=============================================================================
+18 June 2007.
+
+Need to manage ids. It will be a major pain to decouple all of the 
+Element based code to do so.
+
+Element creation: Here we need id assignment
+Element::Element( unsigned int id )
+( checks size of table and assigns it. What about the ones skipped? Refer
+to node 0 for all slave nodes. )
+
+~Element: Set id to zero, but the info also has to get to node 0.
+
+Element::element( id ): Lookup element on id, no problems except that the 
+number may be too high. Return 0 if so. Rename to Element::find.
+If it is off node it assigns the target id into the postmaster and returns
+the postmaster. Need a direct hook into the postmaster to do this faster.
+
+nextId(): returns next id and expands id vector.
+lastId(): returns most recent id. Only should work on master node.
+
+All this could be low-level. The issue is where we decide which node
+to use. Need NodeManager.
+
+Begun work on it.
+=============================================================================
+19 June 2007.
+
+Need to provide a user-level create function which insulates them from the id
+business.
+Need to provide low-level functions where id is specified. These are
+dangerous as id may be occupied. Will need asserts.
+
+Here is an instance where a create should happen on a remote node without
+the master node supervising ids:
+When setting/unsetting the explicit vs. MMEnz field on the enzyme object,
+we create and delete an enzComplex object. What happens?
+
+=============================================================================
+20 June 2007
+Need to backtrack a bit for the ids.
+We need a scheme which combines per-node allocation of ids with master-node
+assigned ids.
+Furthermore, we need a flexible way to handle arrays so that the minimum
+number of ids are used up. 
+
+Refer to the DOCS/IDS section to see how I plan to implement this.
+
+Done a first pass at the implementation. Now I need to go back, clean up
+the Element::Element functions, prepare a checkin, and incrementally 
+incorporate the Id and IdManager into the system.
+
+Some second thoughts on setting aside ids for globals. It is really the 
+job of the shell to work out what to do when an object is a global. 
+For now let's try to get our first pass implementation working.
+
+Need to bring in the ids, slowly working through compiles.
+=============================================================================
+21 June.
+Slow plodding through files to put in the ids.
+=============================================================================
+22 June.
+
+Some more thoughts on the ids. Rather than put all unassigned ids in separate
+pre-allocated places, I can simply put aside a scratch area of ids for
+local node use. This scratch area would be the same segment of ids,
+say 1 to 1000. Whenever an id is needed externally the whole scratch set is
+promoted to the filled set. Whenever the scratch set is filled, the whole lot
+are promoted.
+
+Moving ahead with implementation, compiling halfway through basecode now.
+=============================================================================
+23 June
+Done basecode. Working on shell.
+
+Finally the whole thing compiles, and fails to run even the first test.
+Something bout Element::root in the static constructors.
+
+=============================================================================
+24 June.
+Finally have a working compile and passing the (non-parallel) unit tests.
+Way way overdue for a checkin.
 =============================================================================

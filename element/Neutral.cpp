@@ -21,7 +21,7 @@
 Element* Element::root()
 {
 	// elementList.reserve( 128 );
-	static Element* ret = initNeutralCinfo()->create( "root" );
+	static Element* ret = initNeutralCinfo()->create( Id(), "root" );
 	return ret;
 }
 
@@ -43,7 +43,7 @@ const Cinfo* initNeutralCinfo()
 					reinterpret_cast< GetFunc >( &Neutral::getName ),
 					reinterpret_cast< RecvFunc >( &Neutral::setName )
 		),
-		new ValueFinfo( "parent", ValueFtype1< unsigned int >::global(),
+		new ValueFinfo( "parent", ValueFtype1< Id >::global(),
 					reinterpret_cast< GetFunc >( &Neutral::getParent ),
 					&dummyFunc
 		),
@@ -52,7 +52,7 @@ const Cinfo* initNeutralCinfo()
 					&dummyFunc
 		),
 		new ValueFinfo( "childList",
-				ValueFtype1< vector< unsigned int > >::global(), 
+				ValueFtype1< vector< Id > >::global(), 
 				reinterpret_cast< GetFunc>( &Neutral::getChildList ),
 				&dummyFunc
 		),
@@ -74,17 +74,9 @@ const Cinfo* initNeutralCinfo()
 				reinterpret_cast< GetFunc>( &Neutral::getMsgMem ),
 				&dummyFunc
 		),
-		/*
-		/// Get and set the node on which this object sits. Low level op.
-		new ValueFinfo( "node",
-				ValueFtype1< unsigned int >::global(), 
-				GFCAST( &Neutral::getNode ),
-				RFCAST( &Neutral::setNode )
-		),
-		*/
 		new LookupFinfo(
 				"lookupChild",
-				LookupFtype< unsigned int, string >::global(), 
+				LookupFtype< Id, string >::global(), 
 				reinterpret_cast< GetFunc >( &Neutral::getChildByName ),
 				0
 		),
@@ -217,7 +209,10 @@ void Neutral::mcreate( const Conn& conn,
 }
 
 /**
- * Underlying utility function for creating objects.
+ * Underlying utility function for creating objects in scratch space.
+ * Not to be used when creating objects explicitly on commands from
+ * the master node, because in those cases the Id of the new object
+ * is defined.
  */
 Element* Neutral::create(
 		const string& cinfo, const string& name, Element* parent )
@@ -225,11 +220,12 @@ Element* Neutral::create(
 	// Need to check here if the name is an existing one.
 	const Cinfo* c = Cinfo::find( cinfo );
 	if ( c ) {
-		Element* kid = c->create( name );
+		Element* kid = c->create( Id::scratchId(), name );
 		// Here a global absolute or a relative finfo lookup for
 		// the childSrc field would be useful.
-		parent->findFinfo( "childSrc" )->
+		bool ret = parent->findFinfo( "childSrc" )->
 				add( parent, kid, kid->findFinfo( "child" ) ); 
+		assert( ret );
 		return kid;
 	} else {
 		cout << "Error: Neutral::create: class " << cinfo << 
@@ -245,21 +241,21 @@ void Neutral::destroy( const Conn& c )
 	childFunc( c, COMPLETE_DELETION );
 }
 
-unsigned int Neutral::getParent( const Element* e )
+Id Neutral::getParent( const Element* e )
 {
 	const SimpleElement* se = dynamic_cast< const SimpleElement* >( e );
 	assert( se != 0 );
 	assert( se->destSize() > 0 );
 	// The zero dest is the child dest.
 	assert( se->connDestEnd( 0 ) > se->connDestBegin( 0 ) );
-	// return reverseElementLookup( se->connDestBegin()->targetElement() );
+
 	return se->connDestBegin( 0 )->targetElement()->id();
 }
 
 /**
  * Looks up the child with the specified name, and returns the eid.
  */
-unsigned int Neutral::getChildByName( const Element* elm, const string& s )
+Id Neutral::getChildByName( const Element* elm, const string& s )
 {
 	const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
 	assert( e != 0 );
@@ -276,7 +272,7 @@ unsigned int Neutral::getChildByName( const Element* elm, const string& s )
 		}
 	}
 	// Failure option: return BAD_ID.
-	return BAD_ID;
+	return Id::badId();
 }
 
 /**
@@ -298,7 +294,7 @@ void Neutral::lookupChild( const Conn& c, const string s )
 	for ( i = begin; i != end; i++ ) {
 		if ( i->targetElement()->name() == s ) {
 			// For neutral, src # 1 is the shared message.
-			sendTo1< unsigned int >( e, 1, c.sourceIndex( e ), 
+			sendTo1< Id >( e, 1, c.sourceIndex( e ), 
 				i->targetElement()->id() );
 			return;
 		}
@@ -306,10 +302,10 @@ void Neutral::lookupChild( const Conn& c, const string s )
 	// Hm. What is the best thing to do if it fails? Return an
 	// error value, or not return anything at all?
 	// Perhaps best to be consistent about returning something.
-	sendTo1< unsigned int >( e, 1, c.sourceIndex( e ), MAXUINT );
+	sendTo1< Id >( e, 1, c.sourceIndex( e ), Id::badId() );
 }
 
-vector< unsigned int > Neutral::getChildList( const Element* e )
+vector< Id > Neutral::getChildList( const Element* e )
 {
 	// const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
 	// assert( e != 0 );
@@ -319,7 +315,7 @@ vector< unsigned int > Neutral::getChildList( const Element* e )
 	vector< Conn >::const_iterator begin = e->connSrcBegin( 0 );
 	vector< Conn >::const_iterator end = e->connSrcEnd( 0 );
 
-	vector< unsigned int > ret;
+	vector< Id > ret;
 	if ( end == begin ) // zero children
 			return ret;
 	ret.reserve( end - begin );
@@ -361,18 +357,6 @@ unsigned int Neutral::getMsgMem( const Element* e )
 	return e->getMsgMem();
 }
 
-/*
-unsigned int Neutral::getNode( const Element* e )
-{
-	return e->getNode();
-}
-
-void Neutral::setNode( const Conn& c, unsigned int node )
-{
-	e->setNode( node );
-}
-*/
-
 /////////////////////////////////////////////////////////////////////
 // Unit tests.
 /////////////////////////////////////////////////////////////////////
@@ -386,7 +370,7 @@ void testNeutral()
 {
 		cout << "\nTesting Neutral";
 
-		Element* n1 = neutralCinfo->create( "n1" );
+		Element* n1 = neutralCinfo->create( Id::scratchId(), "n1" );
 		string s;
 		get< string >( n1, n1->findFinfo( "name" ), s );
 		ASSERT( s == "n1", "Neutral name get" );
@@ -395,28 +379,28 @@ void testNeutral()
 		get< string >( n1, n1->findFinfo( "name" ), s );
 		ASSERT( s == "N1", "Neutral name set" );
 
-		Element* n2 = neutralCinfo->create( "n2" );
+		Element* n2 = neutralCinfo->create( Id::scratchId(), "n2" );
 		
 		ASSERT( n1->findFinfo( "childSrc" )->add(
 								n1, n2, n2->findFinfo( "child" ) ),
 						"adding child"
 			  );
 
-		Element* n3 = neutralCinfo->create( "n3" );
+		Element* n3 = neutralCinfo->create( Id::scratchId(), "n3" );
 		
 		ASSERT( n1->findFinfo( "childSrc" )->add(
 								n1, n3, n3->findFinfo( "child" ) ),
 						"adding child"
 			  );
 
-		Element* n21 = neutralCinfo->create( "n21" );
+		Element* n21 = neutralCinfo->create( Id::scratchId(), "n21" );
 		
 		ASSERT( n2->findFinfo( "childSrc" )->add(
 								n2, n21, n21->findFinfo( "child" ) ),
 						"adding child"
 			  );
 
-		Element* n22 = neutralCinfo->create( "n22" );
+		Element* n22 = neutralCinfo->create( Id::scratchId(), "n22" );
 		
 		ASSERT( n2->findFinfo( "childSrc" )->add(
 								n2, n22, n22->findFinfo( "child" ) ),

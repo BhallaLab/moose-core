@@ -125,13 +125,14 @@ bool ParFinfo::respondToAdd(
 ) const
 {
 	assert( e != 0 );
+	assert( src != 0 );
 	assert( e->className() == "PostMaster" );
 	// PostMaster* post = static_cast< PostMaster* >( e->data());
 	
 	// const Ftype* srcType = srcFinfo->ftype();
 
-	unsigned int targetId = 0;
-	bool ret = get< unsigned int >( e, "targetId", targetId );
+	Id targetId;
+	bool ret = get< Id >( e, "targetId", targetId );
 	assert( ret );
 	string targetField = "nil";
 	string targetType;
@@ -169,7 +170,7 @@ bool ParFinfo::respondToAdd(
 	// - send out message request
 	// - create local message
 
-	if ( targetId != 0 ) // If the message is to a remote node object,
+	if ( !targetId.zero() ) // If the message is to a remote node object,
 						// post the request for a remote message.
 		PostMaster::respondToAdd( e, oss.str(), numDest );
 	

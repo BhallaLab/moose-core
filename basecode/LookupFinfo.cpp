@@ -212,7 +212,7 @@ void lookupFinfoTest()
 					sizeof( testFinfos ) / sizeof( Finfo*),
 					ValueFtype1< LookupTestClass >::global() );
 
-	Element* a1 = lookuptestclass.create( "a1" );
+	Element* a1 = lookuptestclass.create( Id::scratchId(), "a1" );
 	double dret = 0;
 
 	get< double >( a1, "dval", dret );
@@ -300,7 +300,7 @@ void lookupFinfoTest()
 	////////////////////////////////////////////////////////////////
 	
 	cout << "\nTesting lookupFinfo messaging";
-	Element* a2 = lookuptestclass.create( "a2" );
+	Element* a2 = lookuptestclass.create( Id::scratchId(), "a2" );
 
 	// We will follow a1 messages to call proc on a2. Check a2->dval.
 	//

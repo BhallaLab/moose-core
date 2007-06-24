@@ -74,9 +74,9 @@ class Cinfo
 				return ftype_->isSameType( other->ftype_ );
 			}
 
-			Element* create( const string& name ) const ;
-			Element* create( const string& name, void* data,
-							bool noDelFlag = 0 ) const;
+			Element* create( Id id, const string& name ) const ;
+			Element* create( Id id, const string& name, 
+							void* data, bool noDelFlag = 0 ) const;
 
 			// void destroy( void* ) const ;
 

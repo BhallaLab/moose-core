@@ -337,8 +337,8 @@ void ClockJob::reschedFunc( const Conn& c )
 				TickSeq()
 				{;}
 
-				TickSeq( unsigned int id)
-						: e_( Element::element( id ) )
+				TickSeq( Id id)
+						: e_( id() )
 				{
 						get< double >( e_, "dt", dt_ );
 						get< int >( e_, "stage", stage_ );
@@ -364,11 +364,11 @@ void ClockJob::reschedFunc( const Conn& c )
 void ClockJob::reschedFuncLocal( Element* e )
 {
 
-	vector< unsigned int > childList = Neutral::getChildList( e );
+	vector< Id > childList = Neutral::getChildList( e );
 	if ( childList.size() == 0 )
 			return;
 	vector< TickSeq > tickList;
-	vector< unsigned int >::iterator i;
+	vector< Id >::iterator i;
 	for ( i = childList.begin(); i != childList.end(); i++ )
 		tickList.push_back( TickSeq( *i ) );
 
