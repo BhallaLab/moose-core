@@ -3556,4 +3556,10 @@ Something bout Element::root in the static constructors.
 24 June.
 Finally have a working compile and passing the (non-parallel) unit tests.
 Way way overdue for a checkin.
+Checked in as revision 146. Along the way Subhasis has done some 
+	Pymoose checkins.
+
+Got parallel version also to work. Finally we're back to where we were a
+week ago. 
+
 =============================================================================

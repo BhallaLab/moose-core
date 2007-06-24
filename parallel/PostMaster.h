@@ -25,8 +25,8 @@ class PostMaster
 		static unsigned int getMyNode( const Element* e );
 		static unsigned int getRemoteNode( const Element* e );
 		static void setRemoteNode( const Conn& c, unsigned int node );
-		static unsigned int getTargetId( const Element* e );
-		static void setTargetId( const Conn& c, unsigned int value );
+		static Id getTargetId( const Element* e );
+		static void setTargetId( const Conn& c, Id value );
 		static string getTargetField( const Element* e );
 		static void setTargetField( const Conn& c, string value );
 
@@ -71,7 +71,7 @@ class PostMaster
 
 		// Here are some fields used to ferry data into off-node
 		// messaging code in ParFinfo.
-		unsigned int targetId_;
+		Id targetId_;
 		string targetField_;
 		
 		MPI::Request request_;

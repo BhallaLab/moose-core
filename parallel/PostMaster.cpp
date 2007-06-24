@@ -75,8 +75,8 @@ const Cinfo* initPostMasterCinfo()
 					GFCAST( &PostMaster::getRemoteNode ),
 					RFCAST( &PostMaster::setRemoteNode )
 		),
-		new ValueFinfo( "targetId", 
-					ValueFtype1< unsigned int >::global(),
+		new ValueFinfo( "targetId",  // deprecated
+					ValueFtype1< Id >::global(),
 					GFCAST( &PostMaster::getTargetId ),
 					RFCAST( &PostMaster::setTargetId )
 		),
@@ -162,12 +162,12 @@ void PostMaster::setRemoteNode( const Conn& c, unsigned int node )
 }
 
 
-unsigned int PostMaster::getTargetId( const Element* e )
+Id PostMaster::getTargetId( const Element* e )
 {
 		return static_cast< PostMaster* >( e->data() )->targetId_;
 }
 
-void PostMaster::setTargetId( const Conn& c, unsigned int value )
+void PostMaster::setTargetId( const Conn& c, Id value )
 {
 		static_cast< PostMaster* >( c.data() )->targetId_ = value;
 }
