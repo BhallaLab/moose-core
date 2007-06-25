@@ -17,18 +17,18 @@ const double Molecule::EPSILON = 1.0e-15;
 
 const Cinfo* initMoleculeCinfo()
 {
-	static TypeFuncPair processTypes[] =
+	static Finfo* processShared[] =
 	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
 			RFCAST( &Molecule::processFunc ) ),
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			RFCAST( &Molecule::reinitFunc ) ),
 	};
-	static TypeFuncPair reacTypes[] =
+	static Finfo* reacShared[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(),
+		new DestFinfo( "reac", Ftype2< double, double >::global(),
 			RFCAST( &Molecule::reacFunc ) ),
-		TypeFuncPair( Ftype1< double >::global(), 0 )
+		new SrcFinfo( "n", Ftype1< double >::global() )
 	};
 
 	static Finfo* moleculeFinfos[] =
@@ -99,8 +99,10 @@ const Cinfo* initMoleculeCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "process", processTypes, 2 ),
-		new SharedFinfo( "reac", reacTypes, 2 ),
+		new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "reac", reacShared,
+			sizeof( reacShared ) / sizeof( Finfo* ) ),
 	};
 
 	static Cinfo moleculeCinfo(
@@ -119,7 +121,7 @@ const Cinfo* initMoleculeCinfo()
 static const Cinfo* moleculeCinfo = initMoleculeCinfo();
 
 static const unsigned int reacSlot =
-	initMoleculeCinfo()->getSlotIndex( "reac" );
+	initMoleculeCinfo()->getSlotIndex( "reac.n" );
 static const unsigned int nSlot =
 	initMoleculeCinfo()->getSlotIndex( "nSrc" );
 
