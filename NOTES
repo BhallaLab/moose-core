@@ -3569,3 +3569,10 @@ Finfo* based form.
 Checked in as revision 148, in non-parallel compile form.
 
 =============================================================================
+25 June.
+Further cleanup of TypeFuncPairs. The biophysics directory is now clean.
+Checked in as revision 150, in non-parallel compile form.
+
+Further cleanup. The kinetics directory is now clean.
+
+=============================================================================
