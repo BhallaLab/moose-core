@@ -24,16 +24,6 @@ const double Stoich::EPSILON = 1.0e-6;
 
 const Cinfo* initStoichCinfo()
 {
-	/*
-	static TypeFuncPair processTypes[] =
-	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
-			RFCAST( &Stoich::processFunc ) ),
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
-			RFCAST( &Stoich::reinitFunc ) ),
-	};
-	*/
-
 	static Finfo* hubShared[] =
 	{
 		new SrcFinfo( "rateTermInfoSrc", 
@@ -147,52 +137,10 @@ const Cinfo* initStoichCinfo()
 		// MsgSrc definitions
 		///////////////////////////////////////////////////////
 		
-		/* Moved over to hubShared
-		new SrcFinfo( "rateTermInfoSrc", 
-			Ftype2< vector< RateTerm* >*, bool >::global()
-		),
-		new SrcFinfo( "rateSizeSrc", 
-			Ftype3< unsigned int, unsigned int, unsigned int >::
-			global()
-		),
-		new SrcFinfo( "molSizeSrc", 
-			Ftype3< unsigned int, unsigned int, unsigned int >::
-			global()
-		),
-		new SrcFinfo( "molConnectionSrc",
-			Ftype3< vector< double >* , 
-				vector< double >* , 
-				vector< Element *>*  
-				>::global() 
-		),
-		new SrcFinfo( "reacConnectionSrc",
-			Ftype2< unsigned int, Element* >::global()
-		),
-		new SrcFinfo( "enzConnectionSrc",
-			Ftype2< unsigned int, Element* >::global()
-		),
-		new SrcFinfo( "mmEnzConnectionSrc",
-			Ftype2< unsigned int, Element* >::global()
-		),
-		*/
-		/*
-	new SingleSrc1Finfo< vector< double >*  >(
-		"allocateOut", &Stoich::getAllocateSrc, 
-		"reinitIn", 1 ),
-	new SingleSrc3Finfo< int, int, int >(
-		"molSizesOut", &Stoich::getMolSizesSrc, 
-		"", 1 ),
-	new SingleSrc3Finfo< int, int, int >(
-		"rateSizesOut", &Stoich::getRateSizesSrc, 
-		"", 1 ),
-	new SingleSrc2Finfo< vector< RateTerm* >*, int >(
-		"rateTermInfoOut", &Stoich::getRateTermInfoSrc, 
-		"", 1 ),
-		*/
 		///////////////////////////////////////////////////////
 		// MsgDest definitions
 		///////////////////////////////////////////////////////
-		//
+		
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
@@ -203,14 +151,6 @@ const Cinfo* initStoichCinfo()
 		new SharedFinfo( "gsl", gslShared, 
 				sizeof( gslShared )/ sizeof( Finfo* ) ),
 
-		/*
-		new SharedFinfo(
-			"integrate", &Stoich::getIntegrateConn,
-			"integrateIn, allocateOut, reinitIn" ),
-		new SharedFinfo(
-			"hub", &Stoich::getHubConn,
-			"molSizesOut, rateSizesOut, rateTermInfoOut, molConnectionsOut, reacConnectionOut, enzConnectionOut, mmEnzConnectionOut" ),
-		*/
 	};
 
 	static Cinfo stoichCinfo(
