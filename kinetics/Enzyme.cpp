@@ -14,29 +14,29 @@
 
 const Cinfo* initEnzymeCinfo()
 {
-	static TypeFuncPair processTypes[] =
+	static Finfo* processShared[] =
 	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
 			RFCAST( &Enzyme::processFunc ) ),
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			RFCAST( &Enzyme::reinitFunc ) ),
 	};
-	static TypeFuncPair substrateTypes[] =
+	static Finfo* substrateShared[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(), 0 ),
-		TypeFuncPair( Ftype1< double >::global(),
+		new SrcFinfo( "reac", Ftype2< double, double >::global() ),
+		new DestFinfo( "sub", Ftype1< double >::global(),
 			RFCAST( &Enzyme::substrateFunc ) ),
 	};
-	static TypeFuncPair enzTypes[] =
+	static Finfo* enzShared[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(), 0 ),
-		TypeFuncPair( Ftype1< double >::global(),
+		new SrcFinfo( "reac", Ftype2< double, double >::global() ),
+		new DestFinfo( "enz", Ftype1< double >::global(),
 			RFCAST( &Enzyme::enzymeFunc ) ),
 	};
-	static TypeFuncPair cplxTypes[] =
+	static Finfo* cplxShared[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(), 0 ),
-		TypeFuncPair( Ftype1< double >::global(),
+		new SrcFinfo( "reac", Ftype2< double, double >::global() ),
+		new DestFinfo( "cplx", Ftype1< double >::global(),
 			RFCAST( &Enzyme::complexFunc ) ),
 	};
 
@@ -94,10 +94,14 @@ const Cinfo* initEnzymeCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "process", processTypes, 2 ),
-		new SharedFinfo( "sub", substrateTypes, 2 ),
-		new SharedFinfo( "enz", enzTypes, 2 ),
-		new SharedFinfo( "cplx", cplxTypes, 2 ),
+		new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "sub", substrateShared,
+			sizeof( processShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "enz", enzShared,
+			sizeof( processShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "cplx", cplxShared,
+			sizeof( processShared ) / sizeof( Finfo* ) ),
 	};
 
 	static  Cinfo enzymeCinfo(
@@ -116,11 +120,11 @@ const Cinfo* initEnzymeCinfo()
 static const Cinfo* enzymeCinfo = initEnzymeCinfo();
 
 static const unsigned int subSlot =
-	initEnzymeCinfo()->getSlotIndex( "sub" );
+	initEnzymeCinfo()->getSlotIndex( "sub.reac" );
 static const unsigned int enzSlot =
-	initEnzymeCinfo()->getSlotIndex( "enz" );
+	initEnzymeCinfo()->getSlotIndex( "enz.reac" );
 static const unsigned int cplxSlot =
-	initEnzymeCinfo()->getSlotIndex( "cplx" );
+	initEnzymeCinfo()->getSlotIndex( "cplx.reac" );
 static const unsigned int prdSlot =
 	initEnzymeCinfo()->getSlotIndex( "prd" );
 

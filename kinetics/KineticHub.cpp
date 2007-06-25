@@ -21,11 +21,11 @@
 
 const Cinfo* initKineticHubCinfo()
 {
-	static TypeFuncPair processTypes[] =
+	static Finfo* processShared[] =
 	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
 			RFCAST( &KineticHub::processFunc ) ),
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			RFCAST( &KineticHub::reinitFunc ) ),
 	};
 
@@ -115,7 +115,8 @@ const Cinfo* initKineticHubCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "process", processTypes, 2 ),
+		new SharedFinfo( "process", processShared,
+			      sizeof( processShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "hub", hubShared, 
 			      sizeof( hubShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "molSolve", zombieShared, 

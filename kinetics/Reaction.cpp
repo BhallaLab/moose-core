@@ -13,23 +13,23 @@
 
 const Cinfo* initReactionCinfo()
 {
-	static TypeFuncPair processTypes[] =
+	static Finfo* processShared[] =
 	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
 			RFCAST( &Reaction::processFunc ) ),
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			RFCAST( &Reaction::reinitFunc ) ),
 	};
-	static TypeFuncPair substrateTypes[] =
+	static Finfo* substrateShared[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(), 0 ),
-		TypeFuncPair( Ftype1< double >::global(),
+		new SrcFinfo( "reac", Ftype2< double, double >::global() ),
+		new DestFinfo( "sub", Ftype1< double >::global(),
 			RFCAST( &Reaction::substrateFunc ) ),
 	};
-	static TypeFuncPair productTypes[] =
+	static Finfo* productShared[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(), 0 ),
-		TypeFuncPair( Ftype1< double >::global(),
+		new SrcFinfo( "reac", Ftype2< double, double >::global() ),
+		new DestFinfo( "prd", Ftype1< double >::global(),
 			RFCAST( &Reaction::productFunc ) ),
 	};
 
@@ -60,9 +60,12 @@ const Cinfo* initReactionCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "process", processTypes, 2 ),
-		new SharedFinfo( "sub", substrateTypes, 2 ),
-		new SharedFinfo( "prd", productTypes, 2 ),
+		new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "sub", substrateShared,
+			sizeof( substrateShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "prd", productShared,
+			sizeof( productShared ) / sizeof( Finfo* ) ),
 	};
 
 	static  Cinfo reactionCinfo(
@@ -81,9 +84,9 @@ const Cinfo* initReactionCinfo()
 static const Cinfo* reactionCinfo = initReactionCinfo();
 
 static const unsigned int substrateSlot =
-	initReactionCinfo()->getSlotIndex( "sub" );
+	initReactionCinfo()->getSlotIndex( "sub.reac" );
 static const unsigned int productSlot =
-	initReactionCinfo()->getSlotIndex( "prd" );
+	initReactionCinfo()->getSlotIndex( "prd.reac" );
 
 ///////////////////////////////////////////////////
 // Field function definitions
