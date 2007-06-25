@@ -20,7 +20,7 @@ const double Compartment::EPSILON = 1.0e-15;
  * This function uses the common trick of having an internal
  * static value which is created the first time the function is called.
  * There are several static arrays set up here. The ones which
- * use TypeFuncPairs are for shared messages where multiple kinds
+ * use SharedFinfos are for shared messages where multiple kinds
  * of information go along the same connection.
  */
 const Cinfo* initCompartmentCinfo()
@@ -41,16 +41,6 @@ const Cinfo* initCompartmentCinfo()
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 				RFCAST( &Compartment::reinitFunc ) ),
 	};
-
-	/*
-	static TypeFuncPair processTypes[] =
-	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
-				RFCAST( &Compartment::processFunc ) ),
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
-				RFCAST( &Compartment::reinitFunc ) ),
-	};
-	*/
 	
 	/**
 	 * This is a shared message to receive Init messages from
@@ -75,16 +65,6 @@ const Cinfo* initCompartmentCinfo()
 				RFCAST( &dummyFunc ) ),
 	};
 
-	/*
-	static TypeFuncPair initTypes[] =
-	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
-				RFCAST( &Compartment::initFunc ) ),
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
-				RFCAST( &dummyFunc ) ),
-	};
-	*/
-
 	/**
 	 * This is a shared message from a compartment to channels.
 	 * The first entry is a MsgDest for the info coming from the channel
@@ -97,15 +77,6 @@ const Cinfo* initCompartmentCinfo()
 				RFCAST( &Compartment::channelFunc ) ),
 		new SrcFinfo( "Vm", Ftype1< double >::global() ),
 	};
-
-	/*
-	static TypeFuncPair channelTypes[] =
-	{
-		TypeFuncPair( Ftype2< double, double >::global(),
-				RFCAST( &Compartment::channelFunc ) ),
-		TypeFuncPair( Ftype1< double >::global(), 0),
-	};
-	*/
 
 	/**
 	 * This is a shared message between asymmetric compartments.
@@ -136,15 +107,6 @@ const Cinfo* initCompartmentCinfo()
 		new SrcFinfo( "axialSrc", Ftype1< double >::global() )
 	};
 
-	/*
-	static TypeFuncPair axialTypes[] =
-	{
-		TypeFuncPair( Ftype2< double, double >::global(),
-				RFCAST( &Compartment::raxialFunc ) ),
-		TypeFuncPair( Ftype1< double >::global(), 0)
-	};
-	*/
-
 	/**
 	 * This is a raxial shared message between asymmetric compartments.
 	 *
@@ -159,15 +121,6 @@ const Cinfo* initCompartmentCinfo()
 				RFCAST( &Compartment::axialFunc ) ),
 		new SrcFinfo( "raxialSrc", Ftype2< double, double >::global() )
 	};
-
-	/*
-	static TypeFuncPair raxialTypes[] =
-	{
-		TypeFuncPair( Ftype1< double >::global(),
-				RFCAST( &Compartment::axialFunc ) ),
-		TypeFuncPair( Ftype2< double, double >::global(), 0)
-	};
-	*/
 	
 	static Finfo* compartmentFinfos[] = 
 	{
@@ -283,11 +236,11 @@ const Cinfo* initCompartmentCinfo()
 static const Cinfo* compartmentCinfo = initCompartmentCinfo();
 
 static const unsigned int channelSlot =
-	initCompartmentCinfo()->getSlotIndex( "channel" );
+	initCompartmentCinfo()->getSlotIndex( "channel.Vm" );
 static const unsigned int axialSlot =
-	initCompartmentCinfo()->getSlotIndex( "axial" );
+	initCompartmentCinfo()->getSlotIndex( "axial.axialSrc" );
 static const unsigned int raxialSlot =
-	initCompartmentCinfo()->getSlotIndex( "raxial" );
+	initCompartmentCinfo()->getSlotIndex( "raxial.raxialSrc" );
 static const unsigned int VmSlot =
 	initCompartmentCinfo()->getSlotIndex( "VmSrc" );
 

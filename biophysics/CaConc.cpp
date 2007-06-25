@@ -23,11 +23,11 @@ const Cinfo* initCaConcCinfo()
 	 * The second entry is a MsgDest for the Reinit operation. It
 	 * also uses ProcInfo.
 	 */
-	static TypeFuncPair processTypes[] =
+	static Finfo* processShared[] =
 	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
 				RFCAST( &CaConc::processFunc ) ),
-	    TypeFuncPair( Ftype1< ProcInfo >::global(),
+	    new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 				RFCAST( &CaConc::reinitFunc ) ),
 	};
 
@@ -60,7 +60,8 @@ const Cinfo* initCaConcCinfo()
 ///////////////////////////////////////////////////////
 // Shared message definitions
 ///////////////////////////////////////////////////////
-		new SharedFinfo( "process", processTypes, 2 ),
+		new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo * ) ),
 
 ///////////////////////////////////////////////////////
 // MsgSrc definitions

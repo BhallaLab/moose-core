@@ -23,11 +23,11 @@ const Cinfo* initSynChanCinfo()
 	 * This is a shared message to receive Process message from
 	 * the scheduler.
 	 */
-	static TypeFuncPair processTypes[] =
+	static Finfo* processShared[] =
 	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
 				RFCAST( &SynChan::processFunc ) ),
-	    TypeFuncPair( Ftype1< ProcInfo >::global(),
+	    new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 				RFCAST( &SynChan::reinitFunc ) ),
 	};
 	/**
@@ -35,10 +35,10 @@ const Cinfo* initSynChanCinfo()
 	 * The first entry is a MsgSrc to send Gk and Ek to the compartment
 	 * The second entry is a MsgDest for Vm from the compartment.
 	 */
-	static TypeFuncPair channelTypes[] =
+	static Finfo* channelShared[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(), 0 ),
-		TypeFuncPair( Ftype2< ProcInfo, double >::global(), 
+		new SrcFinfo( "channel", Ftype2< double, double >::global() ),
+		new DestFinfo( "Vm", Ftype1< double >::global(), 
 				RFCAST( &SynChan::channelFunc ) ),
 	};
 
@@ -98,8 +98,10 @@ const Cinfo* initSynChanCinfo()
 ///////////////////////////////////////////////////////
 // Shared message definitions
 ///////////////////////////////////////////////////////
-		new SharedFinfo( "process", processTypes, 2 ),
-		new SharedFinfo( "channel", channelTypes, 2 ),
+		new SharedFinfo( "process", processShared,
+			sizeof( processShared ) / sizeof( Finfo* ) ), 
+		new SharedFinfo( "channel", channelShared,
+			sizeof( channelShared ) / sizeof( Finfo* ) ),
 
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
