@@ -21,11 +21,11 @@ const Cinfo* initHHGateCinfo()
 	 * Receives Vm
 	 * Sends A and B from the respective table lookups based on Vm.
 	 */
-	static TypeFuncPair gateTypes[] =
+	static Finfo* gateShared[] =
 	{
-		TypeFuncPair( Ftype1< double >::global(),
+		new DestFinfo( "Vm", Ftype1< double >::global(),
 						RFCAST( &HHGate::gateFunc ) ),
-		TypeFuncPair( Ftype2< double, double >::global(), 0),
+		new SrcFinfo( "gate", Ftype2< double, double >::global() ),
 	};
 	
 	static Finfo* HHGateFinfos[] =
@@ -37,7 +37,8 @@ const Cinfo* initHHGateCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "gate", gateTypes, 2 ),
+		new SharedFinfo( "gate", gateShared, 
+			sizeof( gateShared ) / sizeof( Finfo* ) ),
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions

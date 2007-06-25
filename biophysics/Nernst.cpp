@@ -16,19 +16,6 @@ const double Nernst::ZERO_CELSIUS = 273.15;
 
 const Cinfo* initNernstCinfo()
 {
-		/*
-		 * Seems like we do not need Process here as all that
-		 * the Nernst does can be handled by cascading calculations
-		 * with immediate calling of the target, in this case
-		 * the channel reversal potl.
-	static TypeFuncPair processTypes[] =
-	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
-				RFCAST( &CaConc::processFunc ) ),
-	    TypeFuncPair( Ftype1< ProcInfo >::global(),
-				RFCAST( &CaConc::reinitFunc ) ),
-	};
-	*/
 
 	///////////////////////////////////////////////////////
 	// Field definitions
@@ -62,7 +49,6 @@ const Cinfo* initNernstCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-		// new SharedFinfo( "process", processTypes, 2 ),
 
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
