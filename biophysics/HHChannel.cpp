@@ -30,11 +30,11 @@ const Cinfo* initHHChannelCinfo()
 	 * The second entry is a MsgDest for the Reinit operation. It
 	 * also uses ProcInfo.
 	 */
-	static TypeFuncPair processTypes[] =
+	static Finfo* processShared[] =
 	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
 				RFCAST( &HHChannel::processFunc ) ),
-	    TypeFuncPair( Ftype1< ProcInfo >::global(),
+	    new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 				RFCAST( &HHChannel::reinitFunc ) ),
 	};
 
@@ -43,10 +43,10 @@ const Cinfo* initHHChannelCinfo()
 	 * The first entry is a MsgSrc to send Gk and Ek to the compartment
 	 * The second entry is a MsgDest for Vm from the compartment.
 	 */
-	static TypeFuncPair channelTypes[] =
+	static Finfo* channelShared[] =
 	{
-		TypeFuncPair( Ftype2< double, double >::global(), 0 ),
-		TypeFuncPair( Ftype1< double >::global(), 
+		new SrcFinfo( "channel", Ftype2< double, double >::global() ),
+		new DestFinfo( "Vm", Ftype1< double >::global(), 
 				RFCAST( &HHChannel::channelFunc ) ),
 	};
 
@@ -57,30 +57,30 @@ const Cinfo* initHHChannelCinfo()
 	 * The A term is the alpha term from HH equations.
 	 * The B term is actually alpha + beta, precalculated.
 	 */
-	static TypeFuncPair xGateTypes[] =
+	static Finfo* xGateShared[] =
 	{
-		TypeFuncPair( Ftype1< double >::global(), 0 ),
-		TypeFuncPair( Ftype2< double, double >::global(),
+		new SrcFinfo( "Vm", Ftype1< double >::global() ),
+		new DestFinfo( "gate", Ftype2< double, double >::global(),
 				RFCAST( &HHChannel::xGateFunc ) ),
 	};
 
 	/**
 	 * Shared message for Y gate. Fields as in X gate.
 	 */
-	static TypeFuncPair yGateTypes[] =
+	static Finfo* yGateShared[] =
 	{
-		TypeFuncPair( Ftype1< double >::global(), 0 ),
-		TypeFuncPair( Ftype2< double, double >::global(),
+		new SrcFinfo( "Vm", Ftype1< double >::global() ),
+		new DestFinfo( "gate", Ftype2< double, double >::global(),
 				RFCAST( &HHChannel::yGateFunc ) ),
 	};
 
 	/**
 	 * Shared message for Z gate. Fields as in X gate.
 	 */
-	static TypeFuncPair zGateTypes[] =
+	static Finfo* zGateShared[] =
 	{
-		TypeFuncPair( Ftype1< double >::global(), 0 ),
-		TypeFuncPair( Ftype2< double, double >::global(),
+		new SrcFinfo( "Vm", Ftype1< double >::global() ),
+		new DestFinfo( "gate", Ftype2< double, double >::global(),
 				RFCAST( &HHChannel::zGateFunc ) ),
 	};
 
@@ -131,11 +131,16 @@ const Cinfo* initHHChannelCinfo()
 ///////////////////////////////////////////////////////
 // Shared message definitions
 ///////////////////////////////////////////////////////
-		new SharedFinfo( "process", processTypes, 2 ),
-		new SharedFinfo( "channel", channelTypes, 2 ),
-		new SharedFinfo( "xGate", xGateTypes, 2 ),
-		new SharedFinfo( "yGate", yGateTypes, 2 ),
-		new SharedFinfo( "zGate", zGateTypes, 2 ),
+		new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "channel", channelShared,
+			sizeof( channelShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "xGate", xGateShared,
+			sizeof( xGateShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "yGate", yGateShared,
+			sizeof( yGateShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "zGate", zGateShared,
+			sizeof( zGateShared ) / sizeof( Finfo* ) ),
 
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
@@ -165,13 +170,13 @@ const Cinfo* initHHChannelCinfo()
 static const Cinfo* hhChannelCinfo = initHHChannelCinfo();
 
 static const unsigned int channelSlot =
-	initHHChannelCinfo()->getSlotIndex( "channel" );
+	initHHChannelCinfo()->getSlotIndex( "channel.channel" );
 static const unsigned int xGateSlot =
-	initHHChannelCinfo()->getSlotIndex( "xGate" );
+	initHHChannelCinfo()->getSlotIndex( "xGate.Vm" );
 static const unsigned int yGateSlot =
-	initHHChannelCinfo()->getSlotIndex( "yGate" );
+	initHHChannelCinfo()->getSlotIndex( "yGate.Vm" );
 static const unsigned int zGateSlot =
-	initHHChannelCinfo()->getSlotIndex( "zGate" );
+	initHHChannelCinfo()->getSlotIndex( "zGate.Vm" );
 static const unsigned int ikSlot =
 	initHHChannelCinfo()->getSlotIndex( "IkSrc" );
 

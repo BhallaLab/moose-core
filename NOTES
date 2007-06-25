@@ -3566,5 +3566,6 @@ Checked in as revision 147, in parallel compile form.
 Converted back to non-parallel compile form. Also converted a couple
 of moose class specs from the deprecated TypeFuncPair form to the newer
 Finfo* based form.
+Checked in as revision 148, in non-parallel compile form.
 
 =============================================================================

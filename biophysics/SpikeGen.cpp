@@ -18,11 +18,11 @@ const Cinfo* initSpikeGenCinfo()
 	 * This is a shared message to receive Process messages from
 	 * the scheduler objects.
 	 */
-	static TypeFuncPair processTypes[] =
+	static Finfo* processShared[] =
 	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
 				RFCAST( &SpikeGen::processFunc ) ),
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
+		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 				RFCAST( &SpikeGen::reinitFunc ) ),
 	};
 	
@@ -57,7 +57,8 @@ const Cinfo* initSpikeGenCinfo()
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfos
 	//////////////////////////////////////////////////////////////////
-		new SharedFinfo( "process", processTypes, 2 ),
+		new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo* ) ),
 
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
