@@ -34,7 +34,7 @@ const Cinfo* initHHChannelCinfo()
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
 				RFCAST( &HHChannel::processFunc ) ),
-	    new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
+		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 				RFCAST( &HHChannel::reinitFunc ) ),
 	};
 
@@ -81,7 +81,7 @@ const Cinfo* initHHChannelCinfo()
 	{
 		new SrcFinfo( "Vm", Ftype1< double >::global() ),
 		new DestFinfo( "gate", Ftype2< double, double >::global(),
-				RFCAST( &HHChannel::zGateFunc ) ),
+			RFCAST( &HHChannel::zGateFunc ) ),
 	};
 
 ///////////////////////////////////////////////////////
@@ -91,41 +91,52 @@ const Cinfo* initHHChannelCinfo()
 	static Finfo* HHChannelFinfos[] =
 	{
 		new ValueFinfo( "Gbar", ValueFtype1< double >::global(),
-			reinterpret_cast< GetFunc >( &HHChannel::getGbar ), 
+			GFCAST( &HHChannel::getGbar ), 
 			RFCAST( &HHChannel::setGbar )
 		),
 		new ValueFinfo( "Ek", ValueFtype1< double >::global(),
-			reinterpret_cast< GetFunc >( &HHChannel::getEk ), 
+			GFCAST( &HHChannel::getEk ), 
 			RFCAST( &HHChannel::setEk )
 		),
 		new ValueFinfo( "Xpower", ValueFtype1< double >::global(),
-			reinterpret_cast< GetFunc >( &HHChannel::getXpower ), 
+			GFCAST( &HHChannel::getXpower ), 
 			RFCAST( &HHChannel::setXpower )
 		),
 		new ValueFinfo( "Ypower", ValueFtype1< double >::global(),
-			reinterpret_cast< GetFunc >( &HHChannel::getYpower ), 
+			GFCAST( &HHChannel::getYpower ), 
 			RFCAST( &HHChannel::setYpower )
 		),
 		new ValueFinfo( "Zpower", ValueFtype1< double >::global(),
-			reinterpret_cast< GetFunc >( &HHChannel::getZpower ), 
+			GFCAST( &HHChannel::getZpower ), 
 			RFCAST( &HHChannel::setZpower )
 		),
 		new ValueFinfo( "instant", ValueFtype1< int >::global(),
-			reinterpret_cast< GetFunc >( &HHChannel::getInstant ), 
+			GFCAST( &HHChannel::getInstant ), 
 			RFCAST( &HHChannel::setInstant )
 		),
 		new ValueFinfo( "Gk", ValueFtype1< double >::global(),
-			reinterpret_cast< GetFunc >( &HHChannel::getGk ), 
+			GFCAST( &HHChannel::getGk ), 
 			RFCAST( &HHChannel::setGk )
 		),
 		new ValueFinfo( "Ik", ValueFtype1< double >::global(),
-			reinterpret_cast< GetFunc >( &HHChannel::getIk ), 
+			GFCAST( &HHChannel::getIk ), 
 			RFCAST( &HHChannel::setIk )
 		),
+		new ValueFinfo( "X", ValueFtype1< double >::global(),
+			GFCAST( &HHChannel::getX ), 
+			RFCAST( &HHChannel::setX )
+		),
+		new ValueFinfo( "Y", ValueFtype1< double >::global(),
+			GFCAST( &HHChannel::getY ), 
+			RFCAST( &HHChannel::setY )
+		),
+		new ValueFinfo( "Z", ValueFtype1< double >::global(),
+			GFCAST( &HHChannel::getZ ), 
+			RFCAST( &HHChannel::setZ )
+		),
 		new ValueFinfo( "useConcentration",
-						ValueFtype1< int >::global(),
-			reinterpret_cast< GetFunc >(
-					&HHChannel::getUseConcentration ), 
+			ValueFtype1< int >::global(),
+			GFCAST( &HHChannel::getUseConcentration ), 
 			&dummyFunc
 		),
 ///////////////////////////////////////////////////////
