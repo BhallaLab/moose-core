@@ -84,6 +84,7 @@ int main(int argc, char** argv)
 			post.push_back( p );
 		}
 	}
+	Id::manager().setPostMasters( post );
 	// Perhaps we will soon want to also connect up the clock ticks.
 	// How do we handle different timesteps?
 #else	
