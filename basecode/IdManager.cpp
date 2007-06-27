@@ -10,6 +10,7 @@
 
 #include "moose.h"
 #include "IdManager.h"
+#include "ThisFinfo.h"
 #ifdef USE_MPI
 const Cinfo* initPostMasterCinfo();
 #endif
@@ -39,6 +40,18 @@ void IdManager::setNodes( unsigned int myNode, unsigned int numNodes )
 			nodeLoad.resize( numNodes );
 		elementList_.resize( numScratch + blockSize );
 		mainIndex_ = numScratch;
+		post_.resize( numNodes );
+	}
+}
+
+void IdManager::setPostMasters( vector< Element* >& post )
+{
+	unsigned int j = 0;
+	for ( unsigned int i = 0; i < numNodes_; i++ ) {
+		if ( i == myNode_ )
+			post_[ i ] = 0;
+		else
+			post_[ i ] = post[ j++ ];
 	}
 }
 
@@ -83,6 +96,9 @@ unsigned int IdManager::childId( unsigned int parent )
 			mainIndex_++;
 		} else { // parent is on master node.
 			// Do some fancy load balancing calculation here
+			unsigned int targetNode = 
+				( mainIndex_ / loadThresh_ ) % numNodes_;
+			ElementList_[ lastId_ ] = post_[ targetNode ];
 			lastId_ = mainIndex_;
 			mainIndex_++;
 		}
@@ -102,6 +118,7 @@ unsigned int IdManager::childId( unsigned int parent )
 
 Element* IdManager::getElement( unsigned int index ) const
 {
+	static ThisFinfo dummyFinfo( initNeutralCinfo(), 1 );
 	if ( index < mainIndex_ ) {
 #ifdef USE_MPI
 		Element* ret = elementList_[ index ];
@@ -115,9 +132,10 @@ Element* IdManager::getElement( unsigned int index ) const
 		if ( ret->cinfo() != initPostMasterCinfo() ) {
 			return ret;
 		} else {
-			// later:
-			// Element* wrap = new WrapperElement( ret, id_ );
-			Element* wrap = ret;
+			OffNodeInfo* oni = new OffNodeInfo( ret, Id( index ) );
+
+			Element* wrap = new SimpleElement( Id(), "wrapper", 0, 0, oni );
+			wrap->addFinfo( &dummyFinfo );
 			return wrap;
 		}
 #else

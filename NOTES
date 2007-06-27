@@ -3574,5 +3574,31 @@ Further cleanup of TypeFuncPairs. The biophysics directory is now clean.
 Checked in as revision 150, in non-parallel compile form.
 
 Further cleanup. The kinetics directory is now clean.
+Checked in as revision 151, in non-parallel compile form.
+
+Next I need to resume parallel coding. 
+- Implement the ElementWrapper for off-node objects
+- Implement an IdManager class so we can set node control thresholds.
+- Devise a test case where after a certain number of objects are formed
+	on one node, the next set get exported. Pass messages between them.
+	This would first be the same table example I currently do in other
+	ways.
+- Do a serious test case involving shared messages, such as between 
+	diffusing compartments.
+
+=============================================================================
+26 June
+The wrapper turns out to be easy to do as a SimpleElement. Did so.
+
+This is taking shape, but there are a couple of minor problems:
+- ~Element zeros out the id if it is non-zero. We can't store our temp id there.
+- ~SimpleElement expects a non-zero Finfo* in the vector. Need to put one in.
+
+Set it up. Seems like we don't actually need postmaster pointer: the id
+has it already. Compiles but dumps core.
+
+=============================================================================
+27 June.
+Got the unit tests to work with the completed ElementWrapper.
 
 =============================================================================
