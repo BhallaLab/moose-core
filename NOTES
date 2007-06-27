@@ -3600,5 +3600,9 @@ has it already. Compiles but dumps core.
 =============================================================================
 27 June.
 Got the unit tests to work with the completed ElementWrapper.
+Checked in as revision 153, in non-parallel compile form.
+
+Tests failed in parallel compile. Tracked down to error in IdManager::childId.
+Single node tests now work. Multinode tests fail.
 
 =============================================================================
