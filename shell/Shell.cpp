@@ -9,6 +9,7 @@
 **********************************************************************/
 
 #include "moose.h"
+#include "IdManager.h"
 #include "../element/Neutral.h"
 #include "../element/Wildcard.h"
 #include "Shell.h"
@@ -579,12 +580,33 @@ void Shell::staticCreate( const Conn& c, string type,
 					string name, Id parent )
 {
 	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
-	// Id id = Id::childId( parent );
-	Id id = Id::scratchId();
-	bool ret = s->create( type, name, parent, id );
-	if ( ret ) {
-		sendTo1< Id >( c.targetElement(),
-					createSlot, c.targetIndex(), id );
+
+	// This is where the IdManager does clever load balancing etc
+	// to assign child node.
+	Id id = Id::childId( parent );
+	// Id id = Id::scratchId();
+	Element* child = id();
+	if ( child == 0 ) { // local node
+		bool ret = s->create( type, name, parent, id );
+		if ( ret ) {
+			sendTo1< Id >( c.targetElement(),
+						createSlot, c.targetIndex(), id );
+		}
+	} else {
+		// Shell-to-shell messaging here with the request to
+		// create a child.
+		// This must only happen on node 0.
+		assert( c.targetElement()->id().node() == 0 );
+		assert( id.node() > 0 );
+		OffNodeInfo* oni = static_cast< OffNodeInfo* >( child->data() );
+		// Element* post = oni->post;
+		unsigned int target = id.node() - 1;
+		sendTo4< string , string, Id, Id>( 
+			c.targetElement(), rCreateSlot, target,
+			type, name, 
+			parent, oni->id );
+		delete oni;
+		delete child;
 	}
 }
 
