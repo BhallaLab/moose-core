@@ -143,6 +143,12 @@ class IdManager
 		 */
 		unsigned int myNode_;
 		unsigned int numNodes_;
+
+		/**
+		 * This specifies the load at which the system looks for another
+		 * node to run on.
+		 */
+		double loadThresh_;
 		
 		/**
 		 * Keep track of assigned load on each node

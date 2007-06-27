@@ -2337,9 +2337,11 @@ void makeGenesisParser( const string& s )
 {
 	// set< string, string >( Element::root(), "create", "Shell", "shell");
 	// Element* shell = Element::lastElement();
-	Id shellId;
+	Id shellId = Id::shellId();
+	/*
 	lookupGet< Id, string >( Element::root(), "lookupChild",
 		shellId, "shell" );
+		*/
 	assert( !shellId.bad() );
 	Element* shell = shellId();
 	Element* sli = Neutral::create( "GenesisParser", "sli", shell );
