@@ -25,6 +25,21 @@ class NodeLoad
 };
 
 /**
+ * Handy structure to sit in the data field of the wrapper element
+ * used to convey info about off node objects.
+ */
+class OffNodeInfo
+{
+	public:
+		OffNodeInfo( Element* p, Id i )
+			: post( p ), id( i )
+		{;}
+
+		Element* post;
+		Id id;
+};
+
+/**
  * This class coordinates closely with the PostMaster to set up 
  * policies for distributing ids across nodes. On the master node this
  * actually assigns ids to requested objects. On the slave nodes, if
@@ -36,6 +51,8 @@ class IdManager
 		IdManager();
 
 		void setNodes( unsigned int myNode, unsigned int numNodes );
+
+		void setPostMasters( vector< Element* >& post );
 
 		//////////////////////////////////////////////////////////////////
 		// Id creation
@@ -133,6 +150,7 @@ class IdManager
 		 */
 		vector< NodeLoad > nodeLoad;
 		vector< Element* > elementList_;
+		vector< Element* > post_;
 
 		/**
 		 * This keeps track of the # of scratch ids. Only on slave nodes.
