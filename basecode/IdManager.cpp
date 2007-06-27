@@ -24,7 +24,8 @@ const unsigned int BAD_NODE = ~0;
 
 IdManager::IdManager()
 	: myNode_( 0 ), numNodes_( 1 ), 
-	scratchIndex_( 2 ), mainIndex_( 2 ) 
+	loadThresh_( 1.0 ),
+	scratchIndex_( 2 ), mainIndex_( 2 )
 	// Start at 2 because root is 0 and shell is 1.
 {
 	elementList_.resize( blockSize );
@@ -42,6 +43,7 @@ void IdManager::setNodes( unsigned int myNode, unsigned int numNodes )
 		mainIndex_ = numScratch;
 		post_.resize( numNodes );
 	}
+	post_.resize( 1 );
 }
 
 void IdManager::setPostMasters( vector< Element* >& post )
@@ -97,9 +99,10 @@ unsigned int IdManager::childId( unsigned int parent )
 		} else { // parent is on master node.
 			// Do some fancy load balancing calculation here
 			unsigned int targetNode = 
-				( mainIndex_ / loadThresh_ ) % numNodes_;
-			ElementList_[ lastId_ ] = post_[ targetNode ];
+				static_cast< unsigned int >( mainIndex_ / loadThresh_ ) %
+				numNodes_;
 			lastId_ = mainIndex_;
+			elementList_[ lastId_ ] = post_[ targetNode ];
 			mainIndex_++;
 		}
 		if ( mainIndex_ >= elementList_.size() )
