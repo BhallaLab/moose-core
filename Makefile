@@ -30,9 +30,9 @@
 # in the working directory of moose. Also you have to do some editing to get the 
 # generated code to work. 
 # It is completely harmless except for a few file existence checks at startup.
-CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DGENERATE_WRAPPERS
+#CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DGENERATE_WRAPPERS
 
-#CFLAGS = -O3 -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DGENERATE_WRAPPERS
+CFLAGS = -O3 -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DGENERATE_WRAPPERS
 
 # Use the options below for compiling on GCC4.1
 # GNU C++ 4.1 and newer might need -ffriend-injection
@@ -51,19 +51,19 @@ LIBS = 		-lm
 # MPI-2 standard. Hopefully it won't affect you, but if it does use
 # the version of PARALLEL_FLAGS that defines this flag.
 #PARALLEL_FLAGS = -DUSE_MPI
-PARALLEL_FLAGS = -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK
-PARALLEL_DIR = parallel
-PARALLEL_LIB = parallel/parallel.o
+#PARALLEL_FLAGS = -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK
+#PARALLEL_DIR = parallel
+#PARALLEL_LIB = parallel/parallel.o
 
 # Depending on whether we compile with MPI, you may need to change the
 # CXX compiler below
 #
-CXX = mpicxx
+#CXX = mpicxx
 
 #
 # If you do use mpicxx, comment out the version below.
 #
-#CXX = g++
+CXX = g++
 
 LD = ld
 

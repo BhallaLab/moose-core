@@ -14,6 +14,7 @@
 #include "MsgDest.h"
 #include "SimpleElement.h"
 #include "send.h"
+#include "ProcInfo.h"
 #include "DerivedFtype.h"
 #include "Ftype2.h"
 #include "setget.h"

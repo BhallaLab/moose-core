@@ -198,7 +198,7 @@ unsigned int SimpleElement::insertSeparateConnOnSrc(
 
 	if ( begin == end ) { // Need to initialize current MsgSrc
 		unsigned int i;
-		unsigned int ret;
+		unsigned int ret = 0;
 		for ( i = 0; i < rf.size(); i++ ) {
 			assert( src_[ src + i ].recvFunc() == dummyFunc );
 			src_[ src + i ].setFunc( rf[i] );
@@ -216,7 +216,7 @@ unsigned int SimpleElement::insertSeparateConnOnSrc(
 
 	if ( oldFuncs == rf ) { // This src matches, insertion in this src
 		unsigned int i;
-		unsigned int ret;
+		unsigned int ret = 0;
 		for ( i = 0; i < rf.size(); i++ ) {
 			assert( src_[ src + i ].recvFunc() == rf[i] );
 			if ( i == 0 )
@@ -240,7 +240,7 @@ unsigned int SimpleElement::insertSeparateConnOnSrc(
 	}
 	src = src_.size() - rf.size();
 		unsigned int i;
-		unsigned int ret;
+		unsigned int ret = 0;
 		for ( i = 0; i < rf.size(); i++ ) {
 			assert( src_[ src + i ].recvFunc() == rf[i] );
 			if ( i == 0 )
