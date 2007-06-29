@@ -3604,5 +3604,29 @@ Checked in as revision 153, in non-parallel compile form.
 
 Tests failed in parallel compile. Tracked down to error in IdManager::childId.
 Single node tests now work. Multinode tests fail.
+Checked in as revision 154, in parallel compile form.
+
+=============================================================================
+28 June.
+Various attempts to get the system to compile with O3 and to run. The 
+compilation works with lots of error messages. The run fails because
+of problems with template specialization. I find that the str2val and
+val2str funcs fail to go to the specialized form.
+
+Tried making a BaseFtype1< T > class in DerivedFtype.h. The idea was to
+have this function set up a pure virtual reference to the get< T > function,
+so the system would know for sure that it has to look for a specialized form.
+Failed.
+
+=============================================================================
+29 June.
+Trying to define the specialized functions in the original header,
+DerivedFtype.h. Seems to progress, but it complains now about lots of
+uninitialized variables (perhaps a different set from before).
+ProcInfoBase* is the most common. Vector< double >* is another.
+The good news is that it now compiles and runs with -O3, real fast.
+It runs the kholodenko.g test too. We're in business.
+
+Fixed ProcInfoBase* strconvs.
 
 =============================================================================

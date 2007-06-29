@@ -32,6 +32,7 @@
 #include "ValueFinfo.h"
 #include "LookupFinfo.h"
 
+#include "ProcInfo.h"
 #include "send.h"
 #include "DerivedFtype.h"
 #include "Ftype2.h"
@@ -47,7 +48,6 @@
 
 #include "setget.h"
 #include "setgetLookup.h"
-#include "ProcInfo.h"
 
 /// This is here because most classes derive from NeutralCinfo
 extern const Cinfo* initNeutralCinfo();

@@ -34,12 +34,12 @@ OBJ = \
 	DynamicFinfo.o \
 	UnitTests.o \
 	TestBasecode.o \
+	strconv.o \
 	DerivedFtype.o \
 	SharedFtype.o \
 	SharedFinfo.o \
 	SolveFinfo.o \
 	setget.o \
-	strconv.o \
 	filecheck.o \
 	FunctionData.o \
 	ParallelDummy.o \

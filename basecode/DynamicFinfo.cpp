@@ -17,6 +17,7 @@
 #include "SimpleElement.h"
 #include "send.h"
 #include "DynamicFinfo.h"
+#include "ProcInfo.h"
 #include "DerivedFtype.h"
 #include "SharedFtype.h"
 #include "LookupFinfo.h"
