@@ -179,7 +179,8 @@ void HHGate::setupTables( const vector< double >& parms, bool doTau )
 	double dx = ( xmax - xmin ) / xdivs;
 	double prevAentry = 0.0;
 	double prevBentry = 0.0;
-	double temp, temp2;
+	double temp; 
+	double temp2 = 0.0;
 	unsigned int i;
 
 	for( i = 0; i <= xdivs; i++ ) {

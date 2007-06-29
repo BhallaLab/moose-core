@@ -13,6 +13,7 @@
 #include "MsgDest.h"
 #include "SimpleElement.h"
 #include "send.h"
+#include "ProcInfo.h"
 #include "DerivedFtype.h"
 
 // Some template specializations to handle common conversions.
@@ -160,6 +161,39 @@ template<> bool val2str< const Ftype* >(
 	}
 	ret = "";
 	return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// ProcInfo conversions
+/////////////////////////////////////////////////////////////////////////
+template<> bool str2val< ProcInfo >( const string& s, ProcInfo &ret)
+{
+	static ProcInfoBase pb; 
+	// thread-unsafe hack, but it should never be used anyway.
+	vector< string > svec;
+	separateString( s, svec, " " );
+	if ( svec.size() == 2 ) {
+		pb.dt_ = atof( svec[0].c_str() );
+		pb.currTime_ = atof( svec[1].c_str() );
+	} else {
+		pb.dt_ = 1.0;
+		pb.currTime_ = 0.0;
+	}
+
+	ret = &pb;
+	return 1;
+}
+
+template<> bool val2str< ProcInfo >( ProcInfo v, string& ret)
+{
+	if ( v != 0 ) {
+		char line[40];
+		sprintf( line, "%g %g", v->dt_, v->currTime_ );
+		ret = line;
+	} else {
+		ret = "0 0";
+	}
+	return 1;
 }
 
 /////////////////////////////////////////////////////////////////////////
