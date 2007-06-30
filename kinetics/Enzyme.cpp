@@ -205,6 +205,12 @@ void Enzyme::innerSetKcat( double value )
 		k3_ = value;
 	}
 }
+
+/**
+ * Enzyme mode is TRUE if it is an MM enzyme: implicit form.
+ * By default we have an explicit enzyme with enz-sub complex: this is
+ * mode FALSE.
+ */
 bool Enzyme::getMode( const Element* e )
 {
 	return static_cast< Enzyme* >( e->data() )->innerGetMode();
