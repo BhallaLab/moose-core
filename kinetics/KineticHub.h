@@ -60,6 +60,10 @@ class KineticHub
 				Element* reac );
 		static void enzConnectionFunc( const Conn& c,
 				unsigned int index, Element* enz );
+		void enzConnectionFuncLocal(
+				Element* hub, 
+				int enzTermIndex, 
+				Element* enz );
 		static void mmEnzConnectionFunc( const Conn& c,
 				unsigned int index, Element* mmEnz );
 		
@@ -84,6 +88,13 @@ class KineticHub
 		static double getReacKf( const Element* e );
 		static void setReacKb( const Conn& c, double value );
 		static double getReacKb( const Element* e );
+
+		static void setEnzK1( const Conn& c, double value );
+		static double getEnzK1( const Element* e );
+		static void setEnzK2( const Conn& c, double value );
+		static double getEnzK2( const Element* e );
+		static void setEnzK3( const Conn& c, double value );
+		static double getEnzK3( const Element* e );
 		static void zombify( 
 			Element* hub, Element* e, const Finfo* hubFinfo,
 	       		Finfo* solveFinfo );
