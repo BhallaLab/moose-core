@@ -377,12 +377,14 @@ void Stoich::localSetPath( Element* stoich, const string& value )
 			bool enzmode = 0;
 			isOK = get< bool >( *i, "mode", enzmode );
 			assert( isOK );
-			if ( mode == 0 )
+			if ( enzmode == 0 )
 				addEnz( stoich, *i );
 			else
 				addMmEnz( stoich, *i );
 		} else if ( ( *i )->className() == "Table" ) {
 			addTab( stoich, *i );
+		} else if ( ( *i )->className() == "Neutral" ) {
+			cout << (*i)->name() << " is a Neutral\n";
 		} else if ( ( *i )->className() != "Molecule" ) {
 			addRate( stoich, *i );
 		}
@@ -494,7 +496,7 @@ unsigned int Stoich::findProducts(
 	ret.resize( 0 );
 	map< const Element*, unsigned int >::iterator j;
 	// Fill in the list of incoming messages.
-	prdFinfo->incomingConns( e, prdList );
+	prdFinfo->outgoingConns( e, prdList );
 	for (i = prdList.begin() ; i != prdList.end(); i++ ) {
 		Element* prd = i->targetElement();
 		j = molMap_.find( prd );
@@ -650,7 +652,7 @@ bool Stoich::checkEnz( Element* e,
 			return 0;
 		}
 	}
-	if ( findProducts( e, "prdOut", prd ) < 1 ) {
+	if ( findProducts( e, "prd", prd ) < 1 ) {
 		cerr << "Error: Stoich::addEnz: Failed to find prds\n";
 		return 0;
 	}
@@ -715,11 +717,17 @@ void Stoich::addMmEnz( Element* stoich, Element* e )
 			return;
 		}
 		fillStoich( &S_[0], sub, prd, rates_.size() );
-		sublist = makeHalfReaction( 1.0, sub );
 		send2< unsigned int, Element* >(
 			stoich, mmEnzConnectionSlot,
 			rates_.size(), e );
-		rates_.push_back( new MMEnzyme( Km, k3, enz[0], sublist ) );
+		if ( sub.size() == 1 ) {
+			// cout << "Making MMEnzyme1\n" << flush;
+			rates_.push_back( new MMEnzyme1( Km, k3, enz[0], sub[0] ) );
+		} else {
+			// cout << "Making general MMEnzyme\n" << flush;
+			sublist = makeHalfReaction( 1.0, sub );
+			rates_.push_back( new MMEnzyme( Km, k3, enz[0], sublist ) );
+		}
 		nMmEnz_++;
 	}
 }

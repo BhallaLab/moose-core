@@ -3628,5 +3628,36 @@ The good news is that it now compiles and runs with -O3, real fast.
 It runs the kholodenko.g test too. We're in business.
 
 Fixed ProcInfoBase* strconvs.
+Checked in as revision 156, with -O3 compile flags.
+
+Trying now to run the kholodenko simulation with the kinetic solver. It
+is a long and ugly script to set things up for now. Setup happens but the
+thing dumps core when we try to run it.
+
+That was because I tried to call /integ reset. Now it works with a general
+reset. But it gives flat lines for all molecules. Fast, though.
+
+=============================================================================
+30 June 2007
+Working on the kinetic solver. The fast calculations were because there were
+no calculations. The enzymes were not being set up. Now I have some progress
+there but the output is not working. Also it is incredibly slow.
+May need to redo the way I set up plotting.
+
+Seems to go into the enzyme calculations, in RateTerm.h, but for some
+reason it is doing the general rather than 1-substrate form, which is slower.
+Was doing a -ve value.
+
+OK, now it is much faster but still not seeing the waveform.
+Checked that the numbers do seem to be changing with time.
+Hacked in an alias for the conc field to look at n. Clearly it oscillates,
+but the freq is wrong.
+
+Ran it anyway, runs in about the same time as the old MOOSE: actually
+about 10% slower. Perhaps fixing the MMenz calculation will help.
+That also is almost the same time.
+
+Need still to sort out why we have a mismatch in the exact solutions.
+Anyway, we can compile and run all this, so time to check in all the changes.
 
 =============================================================================

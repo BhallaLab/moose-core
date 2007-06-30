@@ -108,7 +108,7 @@ class MMEnzyme: public MMEnzymeBase
 		}
 
 		double operator() () const {
-			double sub = -(*substrates_)();
+			double sub = (*substrates_)();
 			// the subtrates_() operator returns the negative of 
 			// the conc product.
 			// Here we the overall rate.
