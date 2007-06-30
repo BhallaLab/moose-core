@@ -76,4 +76,8 @@ class Enzyme
 		double Km_;
 		void (Enzyme::*procFunc_ )( Element* e );
 };
+
+// Used by the solver
+extern const Cinfo* initEnzymeCinfo();
+
 #endif // _Enzyme_h

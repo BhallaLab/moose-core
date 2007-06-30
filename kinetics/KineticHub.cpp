@@ -149,6 +149,8 @@ static const Finfo* molSolveFinfo =
 	initKineticHubCinfo()->findFinfo( "molSolve" );
 static const Finfo* reacSolveFinfo = 
 	initKineticHubCinfo()->findFinfo( "reacSolve" );
+static const Finfo* enzSolveFinfo = 
+	initKineticHubCinfo()->findFinfo( "enzSolve" );
 static const Finfo* molSumFinfo = 
 	initKineticHubCinfo()->findFinfo( "molSum" );
 
@@ -314,6 +316,16 @@ void KineticHub::molConnectionFuncLocal( Element* hub,
 			GFCAST( &KineticHub::getMolNinit ),
 			RFCAST( &KineticHub::setMolNinit )
 		),
+		new ValueFinfo( "conc",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getMolN ),
+			RFCAST( &KineticHub::setMolN )
+		),
+		new ValueFinfo( "concInit",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getMolNinit ),
+			RFCAST( &KineticHub::setMolNinit )
+		),
 	};
 	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
 		initMoleculeCinfo()->getThisFinfo( ) );
@@ -416,6 +428,44 @@ void KineticHub::mmEnzConnectionFunc( const Conn& c,
 	unsigned int index, Element* mmEnz )
 {
 	cout << "in mmEnzConnectionFunc for " << mmEnz->name() << endl;
+}
+
+void KineticHub::enzConnectionFuncLocal(
+	Element* hub, int rateTermIndex, Element* enz )
+{
+	static Finfo* enzFields[] =
+	{
+		new ValueFinfo( "k1",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getEnzK1 ),
+			RFCAST( &KineticHub::setEnzK1 )
+		),
+		new ValueFinfo( "k2",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getEnzK2 ),
+			RFCAST( &KineticHub::setEnzK2 )
+		),
+		new ValueFinfo( "k3",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getEnzK3 ),
+			RFCAST( &KineticHub::setEnzK3 )
+		),
+	};
+
+	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
+		initEnzymeCinfo()->getThisFinfo( ) );
+	assert( tf != 0 );
+	static SolveFinfo enzZombieFinfo( 
+		enzFields, 
+		sizeof( enzFields ) / sizeof( Finfo* ),
+		tf
+	);
+
+	zombify( hub, enz, enzSolveFinfo, &enzZombieFinfo );
+	unsigned int connIndex = enzSolveFinfo->numOutgoing( hub );
+	assert( connIndex > 0 ); // Should have just created a message on it
+
+	enzMap_[connIndex - 1] = rateTermIndex;
 }
 
 ///////////////////////////////////////////////////
@@ -564,6 +614,91 @@ double KineticHub::getReacKb( const Element* e )
 		assert ( index < kh->rates_->size() );
 		return ( *kh->rates_ )[index]->getR2();
 	}
+	return 0.0;
+}
+
+///////////////////////////////////////////////////
+// Zombie object set/get function replacements for Enzymes
+///////////////////////////////////////////////////
+
+/**
+ * Here we provide the zombie function to set the 'k1' field of the 
+ * Enzyme. It first sets the solver location handling this
+ * field, then the reaction itself.
+ * For the reaction set/get operations, the lookup order is
+ * different from the message order. So we need an intermediate
+ * table, the enzMap_, to map from one to the other.
+ */
+void KineticHub::setEnzK1( const Conn& c, double value )
+{
+	unsigned int index;
+	cout << "in setEnzK1\n";
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		( *kh->rates_ )[index]->setR1( value );
+	}
+	Enzyme::setK1( c, value );
+}
+
+// getEnzK1 does not really need to go to the solver to get the value,
+// because it should always remain in sync locally. But we do have
+// to define the function to go with the set func in the replacement
+// ValueFinfo.
+double KineticHub::getEnzK1( const Element* e )
+{
+	unsigned int index;
+	cout << "in getEnzK1\n";
+	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		return ( *kh->rates_ )[index]->getR1();
+	}
+	return 0.0;
+}
+
+void KineticHub::setEnzK2( const Conn& c, double value )
+{
+	unsigned int index;
+	cout << "in setEnzK2\n";
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		( *kh->rates_ )[index]->setR2( value );
+	}
+	Enzyme::setK2( c, value );
+}
+
+double KineticHub::getEnzK2( const Element* e )
+{
+	unsigned int index;
+	cout << "in getEnzK2\n";
+	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		return ( *kh->rates_ )[index]->getR2();
+	}
+	return 0.0;
+}
+
+void KineticHub::setEnzK3( const Conn& c, double value )
+{
+	cout << "in setEnzK3\n";
+}
+
+double KineticHub::getEnzK3( const Element* e )
+{
+	cout << "in getEnzK3\n";
 	return 0.0;
 }
 
