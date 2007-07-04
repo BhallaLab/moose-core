@@ -11,101 +11,101 @@ const std::string& CaConc::getType(){ return className; }
 double CaConc::__get_Ca() const
 {
     double Ca;
-    get < double > (Element::element(id_), "Ca",Ca);
+    get < double > (id_(), "Ca",Ca);
     return Ca;
 }
 void CaConc::__set_Ca( double Ca )
 {
-    set < double > (Element::element(id_), "Ca", Ca);
+    set < double > (id_(), "Ca", Ca);
 }
 double CaConc::__get_CaBasal() const
 {
     double CaBasal;
-    get < double > (Element::element(id_), "CaBasal",CaBasal);
+    get < double > (id_(), "CaBasal",CaBasal);
     return CaBasal;
 }
 void CaConc::__set_CaBasal( double CaBasal )
 {
-    set < double > (Element::element(id_), "CaBasal", CaBasal);
+    set < double > (id_(), "CaBasal", CaBasal);
 }
 double CaConc::__get_Ca_base() const
 {
     double Ca_base;
-    get < double > (Element::element(id_), "Ca_base",Ca_base);
+    get < double > (id_(), "Ca_base",Ca_base);
     return Ca_base;
 }
 void CaConc::__set_Ca_base( double Ca_base )
 {
-    set < double > (Element::element(id_), "Ca_base", Ca_base);
+    set < double > (id_(), "Ca_base", Ca_base);
 }
 double CaConc::__get_tau() const
 {
     double tau;
-    get < double > (Element::element(id_), "tau",tau);
+    get < double > (id_(), "tau",tau);
     return tau;
 }
 void CaConc::__set_tau( double tau )
 {
-    set < double > (Element::element(id_), "tau", tau);
+    set < double > (id_(), "tau", tau);
 }
 double CaConc::__get_B() const
 {
     double B;
-    get < double > (Element::element(id_), "B",B);
+    get < double > (id_(), "B",B);
     return B;
 }
 void CaConc::__set_B( double B )
 {
-    set < double > (Element::element(id_), "B", B);
+    set < double > (id_(), "B", B);
 }
 double CaConc::__get_concSrc() const
 {
     double concSrc;
-    get < double > (Element::element(id_), "concSrc",concSrc);
+    get < double > (id_(), "concSrc",concSrc);
     return concSrc;
 }
 void CaConc::__set_concSrc( double concSrc )
 {
-    set < double > (Element::element(id_), "concSrc", concSrc);
+    set < double > (id_(), "concSrc", concSrc);
 }
 double CaConc::__get_current() const
 {
     double current;
-    get < double > (Element::element(id_), "current",current);
+    get < double > (id_(), "current",current);
     return current;
 }
 void CaConc::__set_current( double current )
 {
-    set < double > (Element::element(id_), "current", current);
+    set < double > (id_(), "current", current);
 }
 double CaConc::__get_increase() const
 {
     double increase;
-    get < double > (Element::element(id_), "increase",increase);
+    get < double > (id_(), "increase",increase);
     return increase;
 }
 void CaConc::__set_increase( double increase )
 {
-    set < double > (Element::element(id_), "increase", increase);
+    set < double > (id_(), "increase", increase);
 }
 double CaConc::__get_decrease() const
 {
     double decrease;
-    get < double > (Element::element(id_), "decrease",decrease);
+    get < double > (id_(), "decrease",decrease);
     return decrease;
 }
 void CaConc::__set_decrease( double decrease )
 {
-    set < double > (Element::element(id_), "decrease", decrease);
+    set < double > (id_(), "decrease", decrease);
 }
 double CaConc::__get_basalMsg() const
 {
     double basalMsg;
-    get < double > (Element::element(id_), "basalMsg",basalMsg);
+    get < double > (id_(), "basalMsg",basalMsg);
     return basalMsg;
 }
 void CaConc::__set_basalMsg( double basalMsg )
 {
-    set < double > (Element::element(id_), "basalMsg", basalMsg);
+    set < double > (id_(), "basalMsg", basalMsg);
 }
 #endif
