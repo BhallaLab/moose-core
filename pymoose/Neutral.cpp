@@ -13,21 +13,21 @@ const std::string& Neutral::getType(){ return className; }
 int Neutral::__get_childSrc() const
 {
     int childSrc;
-    get < int > (Element::element(id_), "childSrc",childSrc);
+    get < int > (id_(), "childSrc",childSrc);
     return childSrc;
 }
 void Neutral::__set_childSrc( int childSrc )
 {
-    set < int > (Element::element(id_), "childSrc", childSrc);
+    set < int > (id_(), "childSrc", childSrc);
 }
 int Neutral::__get_child() const
 {
     int child;
-    get < int > (Element::element(id_), "child",child);
+    get < int > (id_(), "child",child);
     return child;
 }
 void Neutral::__set_child( int child )
 {
-    set < int > (Element::element(id_), "child", child);
+    set < int > (id_(), "child", child);
 }
 #endif

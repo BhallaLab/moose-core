@@ -9,6 +9,7 @@
 #define _PYMOOSE_CONTEXT_CPP
 
 #include "PyMooseContext.h"
+#include "../basecode/Id.h"
 #include "../element/Neutral.h"
 #include "../scheduling/Tick.h"
 #include "../scheduling/ClockJob.h"
@@ -21,141 +22,171 @@ extern const Cinfo* initShellCinfo();
 extern const Cinfo* initTickCinfo();
 extern const Cinfo* initClockJobCinfo();
 extern const Cinfo* initTableCinfo();
-
-extern const unsigned int BAD_ID;
-
-//extern vector <string> separateString(string s, vector <string> v, string separator);
+extern const Cinfo* initSchedulerCinfo();
 
 const Cinfo* initPyMooseContextCinfo()
 {
-    /**
-     * This is a shared message to talk to the Shell.
-     */
-    static TypeFuncPair contextTypes[] =
+    static Finfo* contextShared[] =
 	{
-            // Setting cwe
-            TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
-            // Getting cwe back: First trigger a request
-            TypeFuncPair( Ftype0::global(), 0 ),
-            // Then receive the cwe info
-            TypeFuncPair( Ftype1< unsigned int >::global(),
-                          RFCAST( &PyMooseContext::recvCwe ) ),
+            // Current working element
+            
+            // 1. Setting cwe
+            new SrcFinfo( "cwe", Ftype1< Id >::global() ),
+            // 2. Getting cwe back: First trigger a request
+            new SrcFinfo( "trigCwe", Ftype0::global() ),
+            // 3. Then receive the cwe info
+            new DestFinfo( "recvCwe",
+                           Ftype1< Id >::global(),
+                           RFCAST( &PyMooseContext::recvCwe ) ),
 
-            // Getting a list of child ids: First send a request with
-            // the requested parent elm id.
-            TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
-            // Then recv the vector of child ids.
-            TypeFuncPair( Ftype1< vector< unsigned int > >::global(), 
-                          RFCAST( &PyMooseContext::recvElist ) ),
+            // Getting a list of child ids:
+
+            // 4. first send a request with the requested parent elm
+            // id.
+            new SrcFinfo( "trigLe", Ftype1< Id >::global() ),
+            // 5. Then receive the vector of child ids. This function
+            // is shared by several other messages as all it does is
+            // dump the elist into a temporary local buffer.
+            new DestFinfo( "recvElist", 
+                           Ftype1< vector< Id > >::global(), 
+                           RFCAST( &PyMooseContext::recvElist ) ),
+
             ///////////////////////////////////////////////////////////////
-            // Object heirarchy manipulation functions.
-            ///////////////////////////////////////////////////////////////		
-            // Creating an object: Send out the request.
-            TypeFuncPair( 
-                Ftype3< string, string, unsigned int >::global(), 0 ),
-            // Creating an object: Recv the returned object id.
-            TypeFuncPair( Ftype1< unsigned int >::global(),
-                          RFCAST( &PyMooseContext::recvCreate ) ),
-            // Deleting an object: Send out the request.
-            TypeFuncPair( Ftype1< unsigned int >::global(), 0 ),
+            // Object hierarchy manipulation functions
+            ///////////////////////////////////////////////////////////////
+            // Creating an object
+            // 6. send out the request.
+            new SrcFinfo( "create",
+                          Ftype3< string, string, Id >::global() ),
+            // 7. receive the returned object id.
+            new DestFinfo( "recvCreate",
+                           Ftype1< Id >::global(),
+                           RFCAST( &PyMooseContext::recvCreate ) ),
+            // Deleting an object
+            // 8. send out the request.
+            new SrcFinfo( "delete", Ftype1< Id >::global() ),
+
             ///////////////////////////////////////////////////////////////
             // Value assignment: set and get.
             ///////////////////////////////////////////////////////////////
-	
-            // Getting a field value as a string: send out request:
-            TypeFuncPair( 
-                Ftype2< unsigned int, string >::global(), 0 ),
-            // Getting a field value as a string: Recv the value.
-            TypeFuncPair( Ftype1< string >::global(),
-                          RFCAST( &PyMooseContext::recvField ) ),
-            // Setting a field value as a string: send out request:
-            TypeFuncPair( // object, field, value 
-                Ftype3< unsigned int, string, string >::global(), 0 ),
-            
+            // Getting a field value as a std::string
+            // 9. send out request:
+            new SrcFinfo( "get", Ftype2< Id, string >::global() ),
+            // 10.receive the value.
+            new DestFinfo( "recvField",
+                           Ftype1< string >::global(),
+                           RFCAST( &PyMooseContext::recvField ) ),
+            // Setting a field value as a std::string
+            // 11. send out request:
+            new SrcFinfo( "set", // object, field, value 
+                          Ftype3< Id, string, string >::global() ),
+
+
             ///////////////////////////////////////////////////////////////
             // Clock control and scheduling
             ///////////////////////////////////////////////////////////////
-	
-            // Setting values for a clock tick: setClock
-            TypeFuncPair( // clockNo, dt, stage
-                Ftype3< int, double, int >::global(), 0 ),
-            // Assigning path and function to a clock tick: useClock
-            TypeFuncPair( // tick id, path, function
-                Ftype3< unsigned int, vector< unsigned int >, string >::global(), 0 ),
+            // 12. Setting values for a clock tick: setClock
+            new SrcFinfo( "setClock", // clockNo, dt, stage
+                          Ftype3< int, double, int >::global() ),
+            // 13. Assigning path and function to a clock tick: useClock
+            new SrcFinfo( "useClock", // tick id, path, function
+                          Ftype3< Id, vector< Id >, string >::global() ),
 
-            // Getting a wildcard path of elements: send out request
+            // 14. Getting a wildcard path of elements: send out request
             // args are path, flag true for breadth-first list.
-            TypeFuncPair( Ftype2< string, bool >::global(), 0 ),
+            new SrcFinfo( "el", Ftype2< string, bool >::global() ),
             // The return function for the wildcard past is the shared
             // function recvElist
-   
-            TypeFuncPair( Ftype0::global(), 0), // resched
-            TypeFuncPair( Ftype0::global(), 0), // reinit
-            TypeFuncPair( Ftype0::global(), 0), // stop
-            TypeFuncPair( Ftype1<double>::global(), 0),
-            // step, arg is time
-            TypeFuncPair( Ftype0::global(), 0),
-            TypeFuncPair( Ftype1< vector < double > >::global(), RFCAST(&PyMooseContext::recvClocks )),
+
+            new SrcFinfo( "resched", Ftype0::global() ), // 15.resched
+            new SrcFinfo( "reinit", Ftype0::global() ), // 16. reinit
+            new SrcFinfo( "stop", Ftype0::global() ), // 17. stop
+            new SrcFinfo( "step", Ftype1< double >::global() ),
+            // 18. step, arg is time
+            new SrcFinfo( "requestClocks", 
+                          Ftype0::global() ), // 19. request clocks
+            new DestFinfo( "recvClocks", 
+                           Ftype1< vector< double > >::global(), 
+                           RFCAST( &PyMooseContext::recvClocks ) ), // 20. receive the response
+		
             ///////////////////////////////////////////////////////////////
             // Message info functions
             ///////////////////////////////////////////////////////////////
-            // Request message list: id elm, string field, bool isIncoming
-            TypeFuncPair( Ftype3< Id, string, bool >::global(), 0 ),
-            // Receive message list and string with remote fields for msgs
-            TypeFuncPair( Ftype2< vector < unsigned int >, string >::global(), 
-                          RFCAST( &PyMooseContext::recvMessageList ) ),
+            // 21. Request message list: id elm, string field, bool isIncoming
+            new SrcFinfo( "listMessages", 
+                          Ftype3< Id, string, bool >::global() ),
+            // 22. Receive message list and string with remote fields for msgs
+            new DestFinfo( "recvMessageList",
+                           Ftype2< vector < Id >, string >::global(), 
+                           RFCAST( &PyMooseContext::recvMessageList ) ),
+
             ///////////////////////////////////////////////////////////////
             // Object heirarchy manipulation functions.
             ///////////////////////////////////////////////////////////////
-            // This function is for copying an element tree, complete with
+            // 23. This function is for copying an element tree, complete with
             // messages, onto another.
-            TypeFuncPair( Ftype3< unsigned int, unsigned int, string >::global(),  0 ),
-            // This function is for moving element trees.
-            TypeFuncPair( Ftype3< unsigned int, unsigned int, string >::global(),  0 ),
-            
+            new SrcFinfo( "copy", Ftype3< Id, Id, string >::global() ),
+            // 24. This function is for moving element trees.
+            new SrcFinfo( "move", Ftype3< Id, Id, string >::global() ),
+
             ///////////////////////////////////////////////////////////////
-            // Cell reader: filename cellpath
+            // 25. Cell reader: filename cellpath
             ///////////////////////////////////////////////////////////////
-            TypeFuncPair( Ftype2< string, string >::global(),  0 ),
+            new SrcFinfo( "readcell", Ftype2< string, string >::global() ),
+
             ///////////////////////////////////////////////////////////////
             // Channel setup functions
             ///////////////////////////////////////////////////////////////
-            // setupalpha
-            TypeFuncPair( Ftype2< unsigned int, vector< double > >::global(),  0 ),
-            // setuptau
-            TypeFuncPair( Ftype2< unsigned int, vector< double > >::global(),  0 ),
-            // tweakalpha
-            TypeFuncPair( Ftype1< unsigned int >::global(),  0 ),
-            // tweaktau
-            TypeFuncPair( Ftype1< unsigned int >::global(),  0 ),
+            // 26. setupalpha
+            new SrcFinfo( "setupAlpha", 
+                          Ftype2< Id, vector< double > >::global() ),
+            // 27. setuptau
+            new SrcFinfo( "setupTau", 
+                          Ftype2< Id, vector< double > >::global() ),
+            // 28. tweakalpha
+            new SrcFinfo( "tweakAlpha", Ftype1< Id >::global() ),
+            // 29. tweaktau
+            new SrcFinfo( "tweakTau", Ftype1< Id >::global() ),
+
             ///////////////////////////////////////////////////////////////
-            // SimDump facilities - MAY NOT BE REQUIRED SO MUCH FOR PYMOOSE
+            // SimDump facilities
             ///////////////////////////////////////////////////////////////
-            // readDumpFile
-            TypeFuncPair( Ftype1< string >::global(),  0 ),
-            // writeDumpFile
-            TypeFuncPair( Ftype2< string, string >::global(),  0 ),
-            // simObjDump
-            TypeFuncPair( Ftype1< string >::global(),  0 ),
-            // simundump
-            TypeFuncPair( Ftype1< string >::global(),  0 ),
+            // 30. readDumpFile
+            new SrcFinfo( "readDumpFile", 
+                          Ftype1< string >::global() ),
+            // 31. writeDumpFile
+            new SrcFinfo( "writeDumpFile", 
+                          Ftype2< string, string >::global() ),
+            // 32. simObjDump
+            new SrcFinfo( "simObjDump",
+                          Ftype1< string >::global() ),
+            // 33. simundump
+            new SrcFinfo( "simUndump",
+                          Ftype1< string >::global() ),
 
             ///////////////////////////////////////////////////////////////
             // Setting field values for a vector of objects
             ///////////////////////////////////////////////////////////////
-            // Setting a field value as a string: send out request:
-            TypeFuncPair( // object, field, value 
-                Ftype3< vector< unsigned int >, string, string >::global(), 0 ),
-
+            // 34. Setting a vec of field values as a string: send out request:
+            new SrcFinfo( "setVecField", // object, field, value 
+                          Ftype3< vector< Id >, string, string >::global() ),
 	};
-
+	
     static Finfo* pyMooseContextFinfos[] =
 	{
-            new SharedFinfo( "parser", contextTypes,
-                             sizeof( contextTypes ) / sizeof( TypeFuncPair ) ),
-            //          new DestFinfo( "process",
-//                            Ftype0::global(),
-//                            RFCAST( &PyMooseContext::processFunc ) ), 
+            new SharedFinfo( "parser", contextShared,
+                             sizeof( contextShared ) / sizeof( Finfo* ) ),
+// 		new DestFinfo( "readline",
+// 			Ftype1< string >::global(),
+// 			RFCAST( &PyMooseContext::readlineFunc ) ),
+// 		new DestFinfo( "process",
+// 			Ftype0::global(),
+// 			RFCAST( &PyMooseContext::processFunc ) ), 
+// 		new DestFinfo( "parse",
+// 			Ftype1< string >::global(),
+// 			RFCAST( &PyMooseContext::parseFunc ) ), 
+// 		new SrcFinfo( "echo", Ftype1< string>::global() ),
+
 	};
 
     static Cinfo pyMooseContextCinfo(
@@ -167,93 +198,102 @@ const Cinfo* initPyMooseContextCinfo()
         sizeof(pyMooseContextFinfos) / sizeof( Finfo* ),
         ValueFtype1< PyMooseContext >::global()
 	);
-
     return &pyMooseContextCinfo;
 }
 
-static const Cinfo* pyMooseContextCinfo = initPyMooseContextCinfo();
+// These static initializations are required to ensure proper sequence
+// of static object creation
 static const Cinfo* shellCinfo = initShellCinfo();
 static const Cinfo* tickCinfo = initTickCinfo();
 static const Cinfo* clockJobCinfo = initClockJobCinfo();
 static const Cinfo* tableCinfo = initTableCinfo();
 
+static const Cinfo* pyMooseContextCinfo = initPyMooseContextCinfo();
+
 static const unsigned int setCweSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 0;
+initPyMooseContextCinfo()->getSlotIndex( "parser.cwe" );
+
 static const unsigned int requestCweSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 1;
+initPyMooseContextCinfo()->getSlotIndex( "parser.trigCwe" );
+
 static const unsigned int requestLeSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 2;
+initPyMooseContextCinfo()->getSlotIndex( "parser.trigLe" );
+
 static const unsigned int createSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 3;
+initPyMooseContextCinfo()->getSlotIndex( "parser.create" );
 static const unsigned int deleteSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 4;
+initPyMooseContextCinfo()->getSlotIndex( "parser.delete" );
 static const unsigned int requestFieldSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 5;
+initPyMooseContextCinfo()->getSlotIndex( "parser.get" );
 static const unsigned int setFieldSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 6;
+initPyMooseContextCinfo()->getSlotIndex( "parser.set" );
 
 static const unsigned int setClockSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 7;
+initPyMooseContextCinfo()->getSlotIndex( "parser.setClock" );
 static const unsigned int useClockSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 8;
+initPyMooseContextCinfo()->getSlotIndex( "parser.useClock" );
 static const unsigned int requestWildcardListSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 9;
+initPyMooseContextCinfo()->getSlotIndex( "parser.el" );
 static const unsigned int reschedSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 10;
+initPyMooseContextCinfo()->getSlotIndex( "parser.resched" );
 static const unsigned int reinitSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 11;
+initPyMooseContextCinfo()->getSlotIndex( "parser.reinit" );
 static const unsigned int stopSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 12;
+initPyMooseContextCinfo()->getSlotIndex( "parser.stop" );
 static const unsigned int stepSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 13;
+initPyMooseContextCinfo()->getSlotIndex( "parser.step" );
 static const unsigned int requestClocksSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 14;
+initPyMooseContextCinfo()->getSlotIndex( "parser.requestClocks" );
 static const unsigned int listMessagesSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 15;
+initPyMooseContextCinfo()->getSlotIndex( "parser.listMessages" );
 static const unsigned int copySlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 16;
+initPyMooseContextCinfo()->getSlotIndex( "parser.copy" );
 static const unsigned int moveSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 17;
+initPyMooseContextCinfo()->getSlotIndex( "parser.move" );
 static const unsigned int readCellSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 18;
+initPyMooseContextCinfo()->getSlotIndex( "parser.readCell" );
 
 static const unsigned int setupAlphaSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 19;
+initPyMooseContextCinfo()->getSlotIndex( "parser.setupAlpha" );
 static const unsigned int setupTauSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 20;
+initPyMooseContextCinfo()->getSlotIndex( "parser.setuptau" );
 static const unsigned int tweakAlphaSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 21;
+initPyMooseContextCinfo()->getSlotIndex( "parser.tweakAlpha" );
 static const unsigned int tweakTauSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 22;
+initPyMooseContextCinfo()->getSlotIndex( "parser.tweakTau" );
 static const unsigned int readDumpFileSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 23;
+initPyMooseContextCinfo()->getSlotIndex( "parser.readDumpFile" );
 static const unsigned int writeDumpFileSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 24;
+initPyMooseContextCinfo()->getSlotIndex( "parser.writeDumpFile" );
 static const unsigned int simObjDumpSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 25;
+initPyMooseContextCinfo()->getSlotIndex( "parser.simObjDump" );
 static const unsigned int simUndumpSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 26;
+initPyMooseContextCinfo()->getSlotIndex( "parser.simUndump" );
 
 static const unsigned int setVecFieldSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser" ) + 27;
+initPyMooseContextCinfo()->getSlotIndex( "parser.setVecField" );
 
 
 //////////////////////////
 // Static constants
 //////////////////////////
-const std::string PyMooseContext::separator = "/";
-//const Id PyMooseContext::BAD_ID = BAD_ID;
-const Id PyMooseContext::BAD_ID = ~0;
+const string PyMooseContext::separator = "/";
 
 
 // void PyMooseContext::processFunc( const Conn& c )
 // {
-// 	PyMooseContext* data =
+//     PyMooseContext* data =
 // 	static_cast< PyMooseContext* >( c.targetElement()->data() );
 
-// 	data->Process();
+//     data->Process();
 // }
 
+char* copyString( const string& s )
+{
+    char* ret = ( char* ) calloc ( s.length() + 1, sizeof( char ) );
+    strcpy( ret, s.c_str() );
+    return ret;
+}
 //////////////////////////////////////////////////////////////////
 // PyMooseContext Message recv functions
 //////////////////////////////////////////////////////////////////
@@ -288,7 +328,7 @@ void PyMooseContext::recvField( const Conn& c, string value )
 
 
 void PyMooseContext::recvWildcardList(
-    const Conn& c, vector< unsigned int > value )
+    const Conn& c, vector< Id > value )
 {
     PyMooseContext* gpw = static_cast< PyMooseContext* >
         ( c.targetElement()->data() );
@@ -347,21 +387,21 @@ Id PyMooseContext::getCwe()
 // TODO: complete
 void PyMooseContext::setCwe(Id elementId)
 {
-    if ( Element::element(elementId) == NULL)
+    if ( elementId() == NULL)
     {
         cerr << "ERROR:  PyMooseContext::setCwe(Id elementId) - Element with id " << elementId << " does not exist" << endl;
         return;        
     }
     
-    send1< Id > (Element::element(myId_), setCweSlot, elementId);
+    send1< Id > (myId_(), setCweSlot, elementId);
     // Todo: if success
     cwe_ = elementId;    
 }
 
-void PyMooseContext::setCwe(std::string path)
+void PyMooseContext::setCwe(string path)
 {
-    Id newElementId = pathToId(path);
-    if (newElementId != BAD_ID)
+    Id newElementId(path);
+    if (!newElementId.bad() )
     {
         cwe_ = newElementId;
     }
@@ -381,20 +421,23 @@ void PyMooseContext::setCwe(std::string path)
    
    @param objectId - Id of the owner object
    @param fieldName - name of the field to be retrieved
-   @returns the std::string representation of the field value
+   @returns the string representation of the field value
 */
-std::string PyMooseContext::getField(Id objectId, std::string fieldName)
+string PyMooseContext::getField(Id objectId, string fieldName)
 {
-    send2<Id, std::string >(Element::element(myId_), requestFieldSlot, objectId, fieldName);
-    return fieldValue_;
+    send2<Id, string >(myId_(), requestFieldSlot, objectId, fieldName);
+    
+    if ( fieldValue_.length() == 0 ) // Nothing came back
+        return 0;
+    return copyString( fieldValue_.c_str() );
 }
 
 /**
    set a field value. Same comment here as for getField
 */
-void PyMooseContext::setField(Id object, std::string fieldName, std::string fieldValue)
+void PyMooseContext::setField(Id object, string fieldName, string fieldValue)
 {
-    send3< Id, std::string, std::string >(Element::element(myId_), setFieldSlot, object, fieldName, fieldValue);
+    send3< Id, string, string >(myId_(), setFieldSlot, object, fieldName, fieldValue);
 }
 
    
@@ -411,7 +454,7 @@ Id PyMooseContext::id()
 */
 Id PyMooseContext::getShell()
 {
-    return shell_;    
+    return shell_;
 }
 /**
    This method should be used instead of a constructor. The constructor is kept public
@@ -420,43 +463,62 @@ Id PyMooseContext::getShell()
    @param string contextElement - name of this context
    @returns PyMooseContext* pointer to the newly created PyMooseContext object.
 */
-PyMooseContext* PyMooseContext::createPyMooseContext(std::string shellName, std::string contextName)
-{    
-//    set< string, string >( Element::root(), "create", "Shell", shellName);    
-//    Element * shellElement = Element::lastElement();
-    Element* shellElement = Neutral::create( "Shell", "shell", Element::root() );
-
-//     unsigned int shellId;
-//     cerr << "lookupGet returned: " << lookupGet< unsigned int, string >( Element::root(), "lookupChild", shellId, "shell" ) << endl;
-//     assert( shellId != BAD_ID );
-//     Element* shellElement = Element::element( shellId );
-
-    set< string, string >( shellElement, "create", "PyMooseContext", contextName);
-    Element* contextElement = Element::lastElement();
+PyMooseContext* PyMooseContext::createPyMooseContext(string shellName, string contextName)
+{
+    Id shellId;
+    Element* shell;
+    bool ret;
+    
+    lookupGet<Id, string > (Element::root(), "lookupChild", shellId, shellName );
+    if (shellId.bad() )
+    {
+        cerr << "Warning: shell does not exist, trying to create a new one!" << endl;
+        const Cinfo* c = Cinfo::find("Shell");
+        assert(c!=0);
+        const Finfo* childSrc = Element::root()->findFinfo("childSrc" );
+        assert( childSrc != 0 );
+        shell = c->create( Id(1), shellName);
+        assert(shell != 0 );
+        ret = childSrc->add( Element::root(), shell, 
+		shell->findFinfo( "child" ) );
+        assert(ret);
+        shellId = shell->id();
+    
+    }
+    else
+    {
+        shell = shellId();
+    }
+    
+    
+    Element* contextElement = Neutral::create( "PyMooseContext",contextName, shell);
+    
     const Finfo* shellFinfo, *contextFinfo;
-    shellFinfo = shellElement->findFinfo( "parser" );
+    shellFinfo = shell->findFinfo( "parser" );
     assert(shellFinfo!=NULL);
     
     contextFinfo = contextElement->findFinfo( "parser" );
     assert(contextFinfo!=NULL);
-                    
-    assert( shellFinfo->add( shellElement, contextElement, contextFinfo) != 0 );
-    PyMooseContext* context = static_cast<PyMooseContext*> (contextElement->data());
-    context->shell_ = shellElement->id();
-    context->myId_ = contextElement->id();
-    set<std::string, std::string>( Element::root(), "create", "Neutral", "sched");
-    context->scheduler_ = Element::lastElement()->id();
-    cout << "PyMooseContext::createPyMooseContext() - scheduler id: " << context->scheduler_ << endl;
+    ret = shellFinfo->add( shell, contextElement, contextFinfo);
+
+    assert(ret);
     
-    set<std::string, std::string>( Element::element(context->scheduler_), "create", "ClockJob", "cj");
-    context->clockJob_ =  Element::lastElement()->id();
-    cout << "PyMooseContext::createPyMooseContext() - clockjob id: " << context->clockJob_ << endl;
-//    set<std::string, std::string>( Element::element(context->clockJob_), "create", "Tick", "t0");
-//    context->tick0_ =   Element::lastElement()->id();
-//    cout << "PyMooseContext::createPyMooseContext() - tick id: " << context->tick0_ << endl;
-
-    context->setCwe(0); // make initial element = root        
-
+    PyMooseContext* context = static_cast<PyMooseContext*> (contextElement->data() );
+    context->shell_ = shellId;    
+    context->myId_ = contextElement->id();
+    context->setCwe(Element::root()->id() ); // set initial element = root
+    // Create the scheduler explicitly, how does it happen in parser?
+    //     set<std::string, std::string>( Element::root(), "create", "Neutral", "sched");
+    context->scheduler_ = Neutral::create( "Neutral", "sched", Element::root() )->id();
+//     cout << "PyMooseContext::createPyMooseContext() - scheduler id: " << context->scheduler_ << endl;
+    
+//     set<std::string, std::string>( Element::element(context->scheduler_), "create", "ClockJob", "cj");
+    context->clockJob_ = Neutral::create( "ClockJob", "cj", context->scheduler_() )->id();
+//     cout << "PyMooseContext::createPyMooseContext() - clockjob id: " << context->clockJob_ << endl;
+//     set<std::string, std::string>( Element::element(context->clockJob_), "create", "Tick", "t0");
+    Neutral::create( "Tick", "t0", context->clockJob_() )->id();
+//     cout << "PyMooseContext::createPyMooseContext() - tick id: " << context->tick0_ << endl;
+    
     return context;        
 }
 
@@ -471,7 +533,7 @@ void PyMooseContext::destroyPyMooseContext(PyMooseContext* context)
     
     context->end();
     
-    Element* ctxt = Element::element(context->myId_);
+    Element* ctxt = context->myId_();
     
     if ( ctxt == NULL)
     {
@@ -480,14 +542,14 @@ void PyMooseContext::destroyPyMooseContext(PyMooseContext* context)
     }
     
     
-    unsigned int shellId = context->shell_;
-    if (shellId == BAD_ID)
+    Id shellId = context->shell_;
+    if (shellId.bad() )
     {
         cerr << "ERROR:  PyMooseContext::destroyPyMooseContext(PyMooseContext* context) - Shell id turns out to be invalid." << endl;
         
     }    
-    set(  ctxt, "destroy");
-    Element* shell = Element::element(shellId);
+    set(  ctxt, "destroy" );
+    Element* shell = shellId();
     if (shell == NULL)
     {
         cerr <<  "ERROR:  PyMooseContext::destroyPyMooseContext(PyMooseContext* context) - Shell id turns out to be invalid." << endl;
@@ -495,7 +557,7 @@ void PyMooseContext::destroyPyMooseContext(PyMooseContext* context)
     }
     else 
     {
-        set ( shell, "destroy");   
+        set ( shell, "destroy" );   
     }
 }
 
@@ -506,31 +568,30 @@ void PyMooseContext::destroyPyMooseContext(PyMooseContext* context)
    @returns id of the newly generated object.
 */
 
-Id PyMooseContext::create(std::string className, std::string name, Id parent)
+Id PyMooseContext::create(string className, string name, Id parent)
 {
     if ( name.length() < 1 ) {
         cerr << "Error: invalid object name : " << name << endl;
-        return 0;
+        return Id();
     }
     if ( !Cinfo::find( className ) )
     {
         cerr << "Error: could not find any class of name " << className << endl;
-        return 0;
+        return Id();
     }    
         
-    send3 < string, string, unsigned int > (
-        Element::element(myId_), createSlot, className, name, parent );
+    send3 < string, string, Id > (
+        myId_(), createSlot, className, name, parent );
+//    cerr << "PyMooseContext::create - Created Id = " << createdElm_ << " " << className << "::" << name << endl;
     
     return createdElm_;
 }
 
 bool PyMooseContext::destroy( Id victim)
 {
-    Element* e = Element::element(victim);
-    
-    if (( victim > myId_ ) && (e != NULL))
+    if ( victim != Id() )
     {
-        send1< Id >( Element::element(myId_), deleteSlot, victim );
+        send1< Id >(myId_(), deleteSlot, victim );
         return true;
     }
     else 
@@ -543,83 +604,88 @@ bool PyMooseContext::destroy( Id victim)
 */
 void PyMooseContext::end()
 {
-    while (createdElm_ > myId_)
-    {
-        if (Element::element(createdElm_) != NULL)
-            destroy(createdElm_);
-        cerr << "Destroyed " << createdElm_ << endl;
+    // TODO: this has become obsolete - update with the new implementation of Id system
+//     while (createdElm_ > myId_)
+//     {
+//         if (Element::element(createdElm_) != NULL)
+//             destroy(createdElm_);
+//         cerr << "Destroyed " << createdElm_ << endl;
         
-        --createdElm_;        
-    }
-    
+//         --createdElm_;        
+//     }    
 }
 
 Id PyMooseContext::getParent( Id e ) const
 {
-    unsigned int ret = BAD_ID;
-    Element* elm = Element::element( e );
+    Id ret = Id::badId();
+    Element* elm = e();
     if (elm == NULL)
     {
         cerr << "ERROR: PyMooseContext::getParent( Id e ) - Element with id " << e << " does not exist." << endl;        
     }    
-    else if (e != 0)
+    else if (e != Element::root()->id() )
     {
-        get< unsigned int >( elm, "parent", ret );
+        get< Id >( elm, "parent", ret );
     }
     else 
     {
         cerr << "WARNING: PyMooseContext::getParent( Id e ) - 'root' object does not have any parent" << endl;
+        ret = e;        
     }
     
     return ret;
 }
 
-std::string PyMooseContext::getPath(Id id) const
+string PyMooseContext::getPath(Id id) const
 {
-    std::string path = "";
+    return id.path();
+    
+    // string path = "";
        
-    if ( id == 0 )
-    {
-        return separator;
-    }
-    while (id!=0)
-    {
-        Element* e = Element::element( id );
-        if ( e == NULL)
-        {
-            cerr << "Error: PyMooseContext::getPath(Id id) - Invalid id specified" << endl;
-            return "";        
-        }
+//     if ( id == Element::root()->id() )
+//     {
+//         return separator;
+//     }
+//     while (1)
+//     {
+//         Element* e = id();
+//         if ( e == NULL)
+//         {
+//             cerr << "Error: PyMooseContext::getPath(Id id) - Invalid id specified" << endl;
+//             return "";        
+//         }
         
-        path = separator + e->name() + path;
-        id = getParent(id);
-    }    
-    return path;
+//         path = separator + e->name() + path;
+//         id = getParent(id);
+//     }    
+//     return path;
 }
 
-Id PyMooseContext::pathToId(std::string path, bool echo)
+Id PyMooseContext::pathToId(string path, bool echo)
 {
-    Id returnValue = 0;
-    if ( path == separator || path == separator + "root")
+    Id returnValue(path);
+    
+/*    Id returnValue = Element::root()->id();
+    if ( path == separator || path == separator + "root" )
     {
-        return 0;
+        return returnValue;
     }
-    if( path == "" || path == ".")
+    if( path == "" || path == "." )
     {
         return cwe_;
     }
-    if (path == "..")
+    if (path == ".." )
     {
-        return (cwe_ == 0)? 0 : Shell::parent(cwe_);
+        return (cwe_ == Element::root()->id() )? cwe_ : Shell::parent(cwe_);
     }
-    vector <std::string > nodes;
-    unsigned int start;
-    if (path.substr(0,separator.length()) == separator)
+    vector <string > nodes;
+    Id start;
+    if (path.substr(0,separator.length() ) == separator)
     {
-        start = 0;
-        separateString(path.substr(separator.length()), nodes, separator);
+        start = Element::root()->id();
+        separateString(path.substr(separator.length() ), nodes, separator);
     }
-    else if (path.substr(separator.length(),4) == "root")
+    else if (path.substr(separator.length(),4) == "root" )
     {
         separateString(path.substr(separator.length()+4), nodes, separator);
     }
@@ -629,30 +695,33 @@ Id PyMooseContext::pathToId(std::string path, bool echo)
         separateString(path, nodes, separator);
     }
     returnValue = Shell::traversePath(start, nodes);
-    if (( returnValue == BAD_ID) && echo)
+*/
+    if (( returnValue.bad() ) && echo)
     {
-        cerr << "ERROR: PyMooseContext::pathToId(std::string path) - Could not find the object '" << path << "'"<< endl;
+        cerr << "ERROR: PyMooseContext::pathToId(string path) - Could not find the object '" << path << "'"<< endl;
     }
+
     return returnValue;    
 }
 
 bool PyMooseContext::exists(Id id)
 {
-    Element* e = Element::element(id);
+    Element* e = id();
     return e != NULL;    
 }
 
-bool PyMooseContext::exists(std::string path)
+bool PyMooseContext::exists(string path)
 {
-    return pathToId(path, false) != BAD_ID;    
+    Id id(path);    
+    return id.bad();    
 }
 
-vector <Id>& PyMooseContext::getChildren(Id id)
+vector < Id >& PyMooseContext::getChildren(Id id)
 {
     elist_.resize(0);
-    if ( Element::element(id) != NULL )
+    if ( id() != NULL )
     {
-        send1< Id >( Element::element( myId_ ), requestLeSlot, id );
+        send1< Id >( myId_(), requestLeSlot, id );
     }
     else 
     {
@@ -662,18 +731,18 @@ vector <Id>& PyMooseContext::getChildren(Id id)
     return elist_;
 }
 
-vector <Id>& PyMooseContext::getChildren(std::string path)
+vector < Id >& PyMooseContext::getChildren(string path)
 {
     elist_.resize(0);    
-    Id id = pathToId(path);
+    Id id(path);
     
     /// \todo: Use better test for a bad path than this.
-    if ( id == BAD_ID )
+    if ( id.bad() )
     {
-        cerr << "ERROR:  PyMooseContext::getChildren(std::string path) - This path seems to be invalid" << endl;
+        cerr << "ERROR:  PyMooseContext::getChildren(string path) - This path seems to be invalid" << endl;
         return elist_;
     }
-    send1< Id >( Element::element( myId_ ), requestLeSlot, id );
+    send1< Id >( myId_(), requestLeSlot, id );
     return elist_;
 }
 /*
@@ -689,7 +758,7 @@ vector <Id>& PyMooseContext::getChildren(std::string path)
 */
 void PyMooseContext::step(double runtime )
 {
-    Element* e = Element::element( myId_ );
+    Element* e = myId_();
 
     if ( runtime < 0 ) {
         cout << "Error: " << runtime << " : negative time is illegal\n";
@@ -707,7 +776,7 @@ void PyMooseContext::step(long mult)
 {
     double runtime;
     
-    send0( Element::element(myId_), requestClocksSlot ); 
+    send0( myId_(), requestClocksSlot ); 
     assert( dbls_.size() > 0 );
     // This fills up a vector of doubles with the clock duration.
     // Find the shortest dt.
@@ -731,38 +800,38 @@ void PyMooseContext::step(void)
 
 void PyMooseContext::setClock(int clockNo, double dt, int stage = 0)
 {
-    send3< int, double, int >(Element::element(myId_), setClockSlot, clockNo, dt, stage);
+    send3< int, double, int >(myId_(), setClockSlot, clockNo, dt, stage);
 }
 
 
 vector <double> & PyMooseContext::getClocks()
 {
-    send0( Element::element(myId_), requestClocksSlot );
+    send0( myId_(), requestClocksSlot );
     return dbls_;        
 }
 
-void PyMooseContext::useClock(Id tickId, std::string path, std::string func)
+void PyMooseContext::useClock(Id tickId, string path, string func)
 {
-    Element * e = Element::element(myId_);
+    Element * e = myId_();
     send2< string, bool >( e, requestWildcardListSlot, path, 0 );
-    send3< unsigned int, vector< unsigned int >, string >(
-        Element::element( myId_ ),
+    send3< Id, vector< Id >, string >(
+        myId_(),
         useClockSlot, 
         tickId, elist_,  func );
 }
 
 void PyMooseContext::reset()
 {
-    send0(Element::element(myId_), reschedSlot);
-    send0(Element::element(myId_), reinitSlot);    
+    send0(myId_(), reschedSlot);
+    send0(myId_(), reinitSlot);    
 }
 
 void PyMooseContext::stop()
 {
-    send0( Element::element( myId_ ), stopSlot );
+    send0( myId_(), stopSlot );
 }
 
-void PyMooseContext::addTask(std::string arg)
+void PyMooseContext::addTask(string arg)
 {
     //Do nothing
 }
@@ -770,40 +839,41 @@ void PyMooseContext::addTask(std::string arg)
    This just does the copying without returning anything.
    Corresponds to the procedural technique used in Genesis shell
 */
-void PyMooseContext::do_deep_copy( Id object, std::string new_name, Id dest)
+void PyMooseContext::do_deep_copy( Id object, string new_name, Id dest)
 {
-    send3< Id, Id, std::string >  ( Element::element(myId_), copySlot, object, dest, new_name);
+    send3< Id, Id, string >  ( myId_(), copySlot, object, dest, new_name);
 }
 /**
    This is the object oriented version. It returns Id of new copy.
 */
-Id PyMooseContext::deepCopy( Id object, std::string new_name, Id dest)
+Id PyMooseContext::deepCopy( Id object, string new_name, Id dest)
 {
     do_deep_copy( object,  new_name, dest);
     
-    std::string path = getPath(dest) + PyMooseContext::separator+new_name;
-    return pathToId(path);
+    string path = getPath(dest) + PyMooseContext::separator+new_name;
+    Id id(path);
+    return id;
 }
 
 /**
    move object into the element specified by dest and rename the object to new_name
 */
-void PyMooseContext::move( Id object, std::string new_name, Id dest)
+void PyMooseContext::move( Id object, string new_name, Id dest)
 {
     send3< Id, Id, string >(
-        Element::element( myId_), moveSlot, object, dest, new_name );
+        myId_(), moveSlot, object, dest, new_name );
 }
 
-bool PyMooseContext::connect(Id src, std::string srcField, Id dest, std::string destField)
+bool PyMooseContext::connect(Id src, string srcField, Id dest, string destField)
 {
-    if ( src != BAD_ID && dest != BAD_ID ) {
-        Element* se = Element::element( src );
-        Element* de = Element::element( dest );
+    if ( !src.bad() && !dest.bad() ) {
+        Element* se = src( );
+        Element* de = dest( );
         const Finfo* sf = se->findFinfo( srcField );
         if ( !sf ) return false;
         const Finfo* df = de->findFinfo( destField );
         if ( !df ) return false;
-        return (bool)(se->findFinfo( srcField )->add( se, de, de->findFinfo( destField )));
+        return (bool)(se->findFinfo( srcField )->add( se, de, de->findFinfo( destField ) ));
     }
     return false;    
 }
@@ -819,21 +889,20 @@ bool PyMooseContext::connect(Id src, std::string srcField, Id dest, std::string 
   
 */
 
-Id PyMooseContext::findChanGateId( std::string channel, std::string gate)
+Id PyMooseContext::findChanGateId( string channel, string gate)
 {
-    std::string path = "";
-    if (( gate.at(0) == 'X' )||( gate.at(0) == 'x' ))
+    string path = "";
+    if (( gate.at(0) == 'X' )||( gate.at(0) == 'x' ) )
         path = channel + "/xGate";
-    else if (( gate.at(0) == 'Y' ) || ( gate.at(0) == 'y' ))
+    else if (( gate.at(0) == 'Y' ) || ( gate.at(0) == 'y' ) )
         path = channel + "/yGate";
-    else if (( gate.at(0)   == 'Z' )||( gate.at(0)   == 'z' ))
+    else if (( gate.at(0)   == 'Z' )||( gate.at(0)   == 'z' ) )
         path = channel + "/zGate";
-    Id gateId = pathToId( path);
-    if ( gateId == BAD_ID ) // Don't give up, it might be a tabgate
-        gateId = pathToId( channel);
-    if ( gateId == BAD_ID ) { // Now give up
-        cout << "Error: findChanGateId: unable to find channel/gate '" << channel << "/" << gate << endl;
-        return BAD_ID;
+    Id gateId(path);
+    if ( gateId.bad() ) // Don't give up, it might be a tabgate
+        gateId = Id( channel);
+    if ( gateId.bad() ) { // Now give up
+        cout << "Error: findChanGateId: unable to find channel/gate '" << channel << "/" << gate << endl;        
     }
     return gateId;
 }
@@ -845,8 +914,8 @@ Id PyMooseContext::findChanGateId( std::string channel, std::string gate)
    parameter channel is the path to the channel containing the gate.
    The actual gate used is xGate or yGate or xGate when the gate
    parameter starts with 'x', 'y' or 'z' respectively.
- */
-void PyMooseContext::setupChanFunc(std::string channel, std::string gate, vector <double>& parms, const unsigned int& slot)
+*/
+void PyMooseContext::setupChanFunc(string channel, string gate, vector <double>& parms, const unsigned int& slot)
 {    
     if (parms.size() < 10 ) {
         cerr << "Error: PyMooseContext::setupChanFunc() -  We need a vector for these items: AA AB AC AD AF BA BB BC BD BF size min max (length should be at least 10)" << endl;
@@ -854,7 +923,7 @@ void PyMooseContext::setupChanFunc(std::string channel, std::string gate, vector
     }
 
     Id gateId = findChanGateId(channel, gate );
-    if (gateId == BAD_ID )
+    if (gateId.bad() )
         return;
 
     
@@ -874,7 +943,7 @@ void PyMooseContext::setupChanFunc(std::string channel, std::string gate, vector
         parms.push_back(max);        
     }    
     
-    send2< Id, vector< double > >( Element::element( myId_ ), slot, gateId, parms );
+    send2< Id, vector< double > >( myId_(), slot, gateId, parms );
 }
 
 /**
@@ -884,11 +953,11 @@ void PyMooseContext::setupChanFunc(std::string channel, std::string gate, vector
    parameter channel is the path to the channel containing the gate.
    The actual gate used is xGate or yGate or xGate when the gate
    parameter starts with 'x', 'y' or 'z' respectively.
- */
-void PyMooseContext::setupChanFunc(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max, const unsigned int& slot)
+*/
+void PyMooseContext::setupChanFunc(string channel, string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max, const unsigned int& slot)
 {
     Id gateId = findChanGateId(channel, gate );
-    if (gateId == BAD_ID )
+    if (gateId.bad() )
         return;
     vector<double> params;
     params.push_back(AA);
@@ -904,41 +973,41 @@ void PyMooseContext::setupChanFunc(std::string channel, std::string gate, double
     params.push_back(size);
     params.push_back(min);
     params.push_back(max);
-    send2< Id, vector< double > >( Element::element( myId_ ), slot, gateId, params );
+    send2< Id, vector< double > >( myId_(), slot, gateId, params );
 }
 
-void PyMooseContext::setupAlpha( std::string channel, std::string gate, vector <double> parms ) 
+void PyMooseContext::setupAlpha( string channel, string gate, vector <double> parms ) 
 {
     setupChanFunc( channel, gate, parms, setupAlphaSlot );
 }
 
-void PyMooseContext::setupAlpha(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max)
+void PyMooseContext::setupAlpha(string channel, string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max)
 {
     setupChanFunc(channel, gate, AA, AB, AC, AD, AF, BA, BB, BC, BD, BF, size, min, max, setupAlphaSlot);    
 }
 
-void PyMooseContext::setupTau( std::string channel, std::string gate, vector <double> parms ) 
+void PyMooseContext::setupTau( string channel, string gate, vector <double> parms ) 
 {
     setupChanFunc( channel, gate, parms, setupTauSlot );
 }
-void PyMooseContext::setupTau(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max)
+void PyMooseContext::setupTau(string channel, string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max)
 {
     setupChanFunc(channel, gate, AA, AB, AC, AD, AF, BA, BB, BC, BD, BF, size, min, max, setupTauSlot);    
 }
-void PyMooseContext::tweakChanFunc( std::string  channel, std::string gate, unsigned int slot )
+void PyMooseContext::tweakChanFunc( string  channel, string gate, unsigned int slot )
 {
     Id gateId = findChanGateId( channel, gate );
-    if ( gateId == BAD_ID )
+    if ( gateId.bad() )
         return;
-    send1< Id >( Element::element( myId_ ), slot, gateId );
+    send1< Id >( myId_(), slot, gateId );
 }
 
-void PyMooseContext::tweakAlpha( std::string channel, std::string gate ) 
+void PyMooseContext::tweakAlpha( string channel, string gate ) 
 {
     tweakChanFunc( channel, gate, tweakAlphaSlot );
 }
 
-void PyMooseContext::tweakTau( std::string channel, std::string gate)
+void PyMooseContext::tweakTau( string channel, string gate)
 {
     tweakChanFunc( channel, gate, tweakTauSlot );
 }
@@ -957,7 +1026,7 @@ void PyMooseContext::setupChanFunc(Id gateId, vector <double> parms, unsigned in
         cerr << "Error: PyMooseContext::setupChanFunc() -  We need a vector for these items: AA AB AC AD AF BA BB BC BD BF size min max (length should be at least 10)" << endl;
         return;
     }
-    if (gateId == BAD_ID )
+    if (gateId.bad() )
         return;
     
     double size = 3000.0;
@@ -976,7 +1045,7 @@ void PyMooseContext::setupChanFunc(Id gateId, vector <double> parms, unsigned in
         parms.push_back(max);        
     }    
     
-    send2< Id, vector< double > >( Element::element( myId_ ), slot, gateId, parms );
+    send2< Id, vector< double > >( myId_(), slot, gateId, parms );
 }
 
 void PyMooseContext::setupAlpha( Id gateId, vector <double> parms )
@@ -991,9 +1060,9 @@ void PyMooseContext::setupTau( Id gateId, vector <double> parms )
 
 void PyMooseContext::tweakChanFunc( Id gateId, unsigned int slot )
 {
-    if ( gateId == BAD_ID )
+    if ( gateId.bad() )
         return;
-    send1< Id >( Element::element( myId_ ), slot, gateId );
+    send1< Id >( myId_(), slot, gateId );
 }
 
 void PyMooseContext::tweakAlpha( Id gateId )
@@ -1008,13 +1077,13 @@ void PyMooseContext::tweakTau( Id gateId)
 
 void PyMooseContext::tabFill(Id table, int xdivs, int mode)
 {
-    std::string argstr = xdivs + "," + mode;
-    send3< Id, string, string >( Element::element( myId_ ), setFieldSlot, table, "tabFill", argstr );
+    string argstr = xdivs + "," + mode;
+    send3< Id, string, string >( myId_(), setFieldSlot, table, "tabFill", argstr );
 }
 
-void PyMooseContext::readCell( std::string filename, std::string cellpath )
+void PyMooseContext::readCell( string filename, string cellpath )
 {
-    send2< string, string >( Element::element( myId_ ), 
+    send2< string, string >( myId_(), 
                              readCellSlot, filename, cellpath );
 }
 #ifdef DO_UNIT_TESTS
@@ -1029,11 +1098,11 @@ bool PyMooseContext::testSetGetField(int count, bool doPrint)
     bool testResult = true;
     
     int i = 0;
-    std::string setValue;    
-    std::string getValue;
-    double eps = 1e-5; // usual error (for std::string conversion) on PC is 1e-6
+    string setValue;    
+    string getValue;
+    double eps = 1e-5; // usual error (for string conversion) on PC is 1e-6
     
-    Id obj = create("Compartment", "TestSetGetCompartment", 0);
+    Id obj = create( "Compartment", "TestSetGetCompartment", Element::root()->id() );
     
     for ( i = 0; i < count; ++i )
     {
@@ -1043,10 +1112,10 @@ bool PyMooseContext::testSetGetField(int count, bool doPrint)
         setValue = toString < double > (d);
         
         setField(obj, "Rm", setValue);
-        getValue = getField(obj, "Rm");
+        getValue = getField(obj, "Rm" );
 
         
-        val = atof(getValue.c_str());        
+        val = atof(getValue.c_str() );        
         testResult = testResult && ((d > val)? (1-val/d) < eps : (1 - d/val) < eps);
         if (testResult == false)
         {
@@ -1057,12 +1126,12 @@ bool PyMooseContext::testSetGetField(int count, bool doPrint)
     return testResult;
 }
 
-bool PyMooseContext::testSetGetField(std::string className, std::string fieldName, std::string fieldValue, int count, bool doPrint)
+bool PyMooseContext::testSetGetField(string className, string fieldName, string fieldValue, int count, bool doPrint)
 {
 
-    std::string retrievedVal;
+    string retrievedVal;
     bool testResult = true;
-    Id obj = create(className,"TestSetGetField", getCwe());    
+    Id obj = create(className,"TestSetGetField", getCwe() );    
     for ( int i = 0; i < count; ++i)
     {
         setField(obj, fieldName, fieldValue);
@@ -1080,28 +1149,28 @@ bool PyMooseContext::testSetGetField(std::string className, std::string fieldNam
     return testResult;    
 }
 
-bool PyMooseContext::testCreateDestroy(std::string className, int count, bool doPrint)
+bool PyMooseContext::testCreateDestroy(string className, int count, bool doPrint)
 {
-    vector <Id> idList;
+    vector < Id > idList;
     int i;
     Id instanceId;
     
     for (i = 0; i < count; ++i)
     {
-        instanceId = create(className, "test"+toString < int > (i), 0);
+        instanceId = create(className, "test"+toString < int > (i), Element::root()->id() );
         idList.push_back(instanceId);
     }
        
     while (idList.size() > 0)
     {
-        instanceId = (Id)(idList.back());
+        instanceId = (Id)(idList.back() );
         idList.pop_back();
         destroy(instanceId);
         --i;        
     }
     if (doPrint)
     {
-        cerr << "TEST::  PyMooseContext::testCreateDestroy(std::string className, int count, bool doPrint) - create and destroy " << count << " " << className << " instances ... " << ((i == 0)? "SUCCESS":"FAILED") << endl;
+        cerr << "TEST::  PyMooseContext::testCreateDestroy(string className, int count, bool doPrint) - create and destroy " << count << " " << className << " instances ... " << ((i == 0)? "SUCCESS":"FAILED" ) << endl;
     }
     
     return ( i == 0 );     
@@ -1111,19 +1180,19 @@ bool PyMooseContext::testPyMooseContext(int testCount, bool doPrint)
 {
     bool overallResult = true;    
     bool testResult;
-    PyMooseContext *context = createPyMooseContext("TestContext", "TestShell");
+    PyMooseContext *context = createPyMooseContext( "TestContext", "TestShell" );
     
-    testResult = context->testCreateDestroy("Compartment", testCount, doPrint);
+    testResult = context->testCreateDestroy( "Compartment", testCount, doPrint);
     overallResult = overallResult && testResult;
     
     if(doPrint){
-        cerr << "TEST::  PyMooseContext::testPyMooseContext(int testCount, bool doPrint) - testing create and destroy ... " << (testResult?"SUCCESS":"FAILED") << endl;
+        cerr << "TEST::  PyMooseContext::testPyMooseContext(int testCount, bool doPrint) - testing create and destroy ... " << (testResult?"SUCCESS":"FAILED" ) << endl;
     }
     testResult = context->testSetGetField(testCount, doPrint);
     overallResult = overallResult && testResult;
     
     if(doPrint){
-        cerr << "TEST:: PyMooseContext::testPyMooseContext(int testCount, bool doPrint) - testing set and get ... " << (testResult?"SUCCESS":"FAILED") << endl;
+        cerr << "TEST:: PyMooseContext::testPyMooseContext(int testCount, bool doPrint) - testing set and get ... " << (testResult?"SUCCESS":"FAILED" ) << endl;
     }
     
     delete context;

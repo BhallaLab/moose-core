@@ -15,7 +15,7 @@ using namespace std;
 
 string PyMooseBase::separator_ = "/"; /// this is default separator is the unix path separator
 
-PyMooseContext* PyMooseBase::context_ = PyMooseContext::createPyMooseContext("BaseContext", "RootShell");
+PyMooseContext* PyMooseBase::context_ = PyMooseContext::createPyMooseContext("BaseContext", "shell");
 
 /**
    This constructor is protected and is intended for use by the
@@ -31,14 +31,14 @@ PyMooseContext* PyMooseBase::context_ = PyMooseContext::createPyMooseContext("Ba
 */
 PyMooseBase::PyMooseBase(Id id)
 {
-  Element* e = Element::element(id);
-  if ( e == NULL)
-  {
-    cerr << "ERROR: PyMooseBase::PyMooseBase(Id id) - this Id does not exist." << endl;
-    id_ = PyMooseContext::BAD_ID;    
-    return;
-  }
-  id_ = id;
+    Element* e = id();
+    if ( e == NULL)
+    {
+        cerr << "ERROR: PyMooseBase::PyMooseBase(Id id) - this Id does not exist." << endl;
+        id_ = Id();    
+        return;
+    }
+    id_ = id;
 }
 /**
    This is the most commonly used constructor. It will create an
@@ -54,13 +54,13 @@ PyMooseBase::PyMooseBase(Id id)
    @param parentId - Id of the parent of this object. In the object
    tree, the newly instantiated object will be placed under the object
    with id parentId.
- */
+*/
 PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id parentId )
 {
     if ( objectName.find(getSeparator()) == std::string::npos)
     {
         cerr << "Error: PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id parentId ) - object name should not have " << getSeparator() << endl;
-        id_ = BAD_ID;
+        id_ = Id::badId();
         return;        
     }
     
@@ -79,7 +79,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id paren
    @param path - full path of the object. If the path to the parent is
    ${PATH_TO_PARENT} and you want the new object to be called child,
    then the path to be specified is: ${PATH_TO_PARENT}/child.
- */
+*/
 PyMooseBase::PyMooseBase(std::string className, std::string path)
 {
      
@@ -94,7 +94,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
     // table_A = moose.InterpolationTable(channel.path()+'/xGate/A') - which fails otherwise
     // Try to wrap preexisting object
     id_ = PyMooseBase::pathToId(path,false);
-    if (id_ != BAD_ID)
+    if (!id_.bad())
     {
         cerr << "Info: Object already exists." << endl;
         return;
@@ -129,7 +129,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
 
    @param parent - the object under which the newly instantiated
    object will be placed.
- */
+*/
 PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseBase* parent)
 {
     id_ = context_->create(className, objectName, parent->id_);
@@ -137,7 +137,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseB
 
 /**
    This constructor wraps read-cell -- reading the object from an ascii text file   
- */
+*/
 PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fileName)
 {
     ReadCell reader;
@@ -160,7 +160,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
    
    c = moose.Compartment("test")
    for i in range(10):
-        d = moose.Compartment("test_"+str(i), c)
+   d = moose.Compartment("test_"+str(i), c)
 
    This results in the destructor being called in each iteration of
    loop and only the 10-th child survives. Hence we move the actual
@@ -173,7 +173,7 @@ PyMooseBase::~PyMooseBase()
 {
 //    context_->destroy(id_);
 //    cerr << "Destructor called for " << id_ << endl;    
-    id_ = PyMooseContext::BAD_ID;    
+    id_ = Id();    
 }
 
 const std::string& PyMooseBase::getSeparator() const
@@ -217,16 +217,16 @@ PyMooseContext* PyMooseBase::getContext()
 
 
 /**
-  This method is for reinitializing simulation once
-  PyMooseBase::endSimulation() method has been called and
-  PyMooseBase::context_ has become invalid. Otherwise it does not do
-  anything.
- */
+   This method is for reinitializing simulation once
+   PyMooseBase::endSimulation() method has been called and
+   PyMooseBase::context_ has become invalid. Otherwise it does not do
+   anything.
+*/
 void PyMooseBase::initSimulation()
 {
     if (context_== NULL)
     {
-        context_ = PyMooseContext::createPyMooseContext("BaseContext", "RootShell");
+        context_ = PyMooseContext::createPyMooseContext("BaseContext", "shell");
     }    
 }
 /**

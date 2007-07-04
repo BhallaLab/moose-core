@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 //         loopCount = atol(argv[1]);
 //     }
 //     start = clock();
-//     PyMooseContext* context = PyMooseContext::createPyMooseContext("context", "shell");    
+//    PyMooseContext* context = PyMooseContext::createPyMooseContext("context", "shell");    
 //     cerr << "TEST:: PyMooseContext::testPyMooseContext - " <<  (context->testPyMooseContext(loopCount, true)?"SUCCESS":"FAILED") << endl;        
 //     end = clock();
 //     cerr << "Time spent to test " << loopCount << " times = " << (double)(end-start)/CLOCKS_PER_SEC << " with overhead = " << clock_overhead() << endl;
@@ -58,6 +58,9 @@ int main(int argc, char **argv)
     PyMooseContext* ctx = soma.getContext();
     ctx->readCell("/home/subha/src/moose/moose/DOCS/Demos/soma.p", "/soma_test");
     cerr << "Successfully read cell file 'soma'" << endl;
+    
+    double Vm = soma.__get_Vm();
+    cerr << "Default Vm for soma = " << Vm << endl;
     
     
     
