@@ -4,10 +4,12 @@ OBJFILES = ../basecode/basecode.o ../element/element.o ../shell/shell.o ../built
 CFLAGS = -ggdb -O0 -Wall -fPIC -DDO_UNIT_TESTS
 HEADERS = PyMooseUtil.h PyMooseContext.h PyMooseBase.h  Compartment.h Neutral.h HHChannel.h HHGate.h Interpol.h CaConc.h SpikeGen.h SynChan.h Table.h Nernst.h Tick.h ClockJob.h TableIterator.h Enzyme.h KineticHub.h Kintegrator.h Molecule.h Reaction.h Stoich.h 
 #../kinetics/SparseMatrix.h
+TEST_MAIN = SquidTest.cpp
+# TEST_MAIN = SwigTest.cpp
 default: $(TARGET)
 
-test_swig: $(OBJFILES) $(HEADERS) SwigTest.cpp 
-	$(CXX) $(CFLAGS) -o test_swig SwigTest.cpp $(OBJFILES)  -I../basecode -I../shell
+test_swig: $(OBJFILES) $(HEADERS) $(TEST_MAIN)
+	$(CXX) $(CFLAGS) -o test_swig $(TEST_MAIN) $(OBJFILES)  -I../basecode -I../shell
 
 pymoose: test_swig _moose.so moose.py
 _moose.so: moose_wrap.o $(HEADERS) $(OBJFILES)

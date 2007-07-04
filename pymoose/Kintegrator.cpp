@@ -11,32 +11,32 @@ const std::string& Kintegrator::getType(){ return className; }
 bool Kintegrator::__get_isInitiatilized() const
 {
     bool isInitiatilized;
-    get < bool > (Element::element(id_), "isInitiatilized",isInitiatilized);
+    get < bool > (id_(), "isInitiatilized",isInitiatilized);
     return isInitiatilized;
 }
 void Kintegrator::__set_isInitiatilized( bool isInitiatilized )
 {
-    set < bool > (Element::element(id_), "isInitiatilized", isInitiatilized);
+    set < bool > (id_(), "isInitiatilized", isInitiatilized);
 }
 // string Kintegrator::__get_method() const
 // {
 //     string method;
-//     get < string > (Element::element(id_), "method",method);
+//     get < string > (id_(), "method",method);
 //     return method;
 // }
 // void Kintegrator::__set_method( string method )
 // {
-//     set < string > (Element::element(id_), "method", method);
+//     set < string > (id_(), "method", method);
 // }
 string Kintegrator::imethod() const
 {
     string method;
-    get < string > (Element::element(id_), "method",method);
+    get < string > (id_(), "method",method);
     return method;
 }
 string Kintegrator::imethod( string method )
 {
-    set < string > (Element::element(id_), "method", method);
+    set < string > (id_(), "method", method);
     return method;    
 }
 #endif

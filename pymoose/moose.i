@@ -5,6 +5,7 @@
 %{
 	#include "../basecode/header.h"
 	#include "../basecode/moose.h"
+	#include "../basecode/Id.h"
 	#include "PyMooseContext.h"
 	#include "PyMooseBase.h"
 	#include "Neutral.h"
@@ -41,11 +42,12 @@
 %template(string_vector) std::vector<std::string>;
 %include "../basecode/header.h"
 %include "../basecode/moose.h"
+
 %include "PyMooseContext.h"
 %include "PyMooseBase.h"
-%attribute(PyMooseBase, unsigned int, id, __get_id)
-%attribute(PyMooseBase, unsigned int, parent, __get_parent)
-%attribute(PyMooseBase, vector <unsigned int>&, children, __get_children)
+%attribute(PyMooseBase, Id, id, __get_id)
+%attribute(PyMooseBase, Id, parent, __get_parent)
+%attribute(PyMooseBase, vector <Id>&, children, __get_children)
 //%attribute(PyMooseBase, string& , path, __get_path)
 %include "Neutral.h"
 %attribute(Neutral, int, childSrc, __get_childSrc, __set_childSrc)
