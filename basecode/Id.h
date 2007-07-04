@@ -22,7 +22,8 @@ class Id
 	// the manager.
 	friend int main( int argc, char** argv );
 	friend class IdManager;
-
+        friend class PyMooseContext;
+    
 #ifdef DO_UNIT_TESTS
 	friend void testShell();
 #endif

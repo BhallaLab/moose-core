@@ -17,7 +17,6 @@
 #ifndef _PYMOOSE_CONTEXT_H
 #define _PYMOOSE_CONTEXT_H
 
-typedef unsigned int Id;
 #include "../basecode/header.h"
 #include "../basecode/moose.h"
 #include "../shell/Shell.h"
@@ -27,9 +26,6 @@ typedef unsigned int Id;
 class PyMooseContext
 {
   public:
-
-    static const Id BAD_ID;
-    
     PyMooseContext();
     ~PyMooseContext();
     /**
@@ -60,12 +56,12 @@ class PyMooseContext
     bool destroy(Id victim);
     void end();    
     // Receive functions
-    static void recvCwe( const Conn& c, unsigned int i );
+    static void recvCwe( const Conn& c, Id i );
     static void recvElist( const Conn& c, vector< Id > elist );
-    static void recvCreate( const Conn& c, unsigned int i );
+    static void recvCreate( const Conn& c, Id i );
     static void recvField( const Conn& c, string value );
     static void recvWildcardList( const Conn& c,
-                                  vector< unsigned int > value );
+                                  vector< Id > value );
     
     static void recvClocks( const Conn& c, vector< double > dbls);
     static void recvMessageList( 
@@ -108,8 +104,9 @@ class PyMooseContext
     void readCell(std::string fileName, std::string cellPath);    
     bool exists(Id id);
     bool exists(std::string path);
+//    static Element* getShell( Id g );
+//    void processFunc( const Conn& c );
     
-
 #ifdef DO_UNIT_TESTS    
     static bool testPyMooseContext(int count, bool print);
     bool testCreateDestroy(std::string className, int count, bool print);

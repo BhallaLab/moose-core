@@ -11,71 +11,71 @@ const std::string& SpikeGen::getType(){ return className; }
 double SpikeGen::__get_threshold() const
 {
     double threshold;
-    get < double > (Element::element(id_), "threshold",threshold);
+    get < double > (id_(), "threshold",threshold);
     return threshold;
 }
 void SpikeGen::__set_threshold( double threshold )
 {
-    set < double > (Element::element(id_), "threshold", threshold);
+    set < double > (id_(), "threshold", threshold);
 }
 double SpikeGen::__get_refractT() const
 {
     double refractT;
-    get < double > (Element::element(id_), "refractT",refractT);
+    get < double > (id_(), "refractT",refractT);
     return refractT;
 }
 void SpikeGen::__set_refractT( double refractT )
 {
-    set < double > (Element::element(id_), "refractT", refractT);
+    set < double > (id_(), "refractT", refractT);
 }
 double SpikeGen::__get_abs_refract() const
 {
     double abs_refract;
-    get < double > (Element::element(id_), "abs_refract",abs_refract);
+    get < double > (id_(), "abs_refract",abs_refract);
     return abs_refract;
 }
 void SpikeGen::__set_abs_refract( double abs_refract )
 {
-    set < double > (Element::element(id_), "abs_refract", abs_refract);
+    set < double > (id_(), "abs_refract", abs_refract);
 }
 double SpikeGen::__get_amplitude() const
 {
     double amplitude;
-    get < double > (Element::element(id_), "amplitude",amplitude);
+    get < double > (id_(), "amplitude",amplitude);
     return amplitude;
 }
 void SpikeGen::__set_amplitude( double amplitude )
 {
-    set < double > (Element::element(id_), "amplitude", amplitude);
+    set < double > (id_(), "amplitude", amplitude);
 }
 double SpikeGen::__get_state() const
 {
     double state;
-    get < double > (Element::element(id_), "state",state);
+    get < double > (id_(), "state",state);
     return state;
 }
 void SpikeGen::__set_state( double state )
 {
-    set < double > (Element::element(id_), "state", state);
+    set < double > (id_(), "state", state);
 }
 double SpikeGen::__get_event() const
 {
     double event;
-    get < double > (Element::element(id_), "event",event);
+    get < double > (id_(), "event",event);
     return event;
 }
 void SpikeGen::__set_event( double event )
 {
-    set < double > (Element::element(id_), "event", event);
+    set < double > (id_(), "event", event);
 }
 double SpikeGen::__get_Vm() const
 {
     double Vm;
-    get < double > (Element::element(id_), "Vm",Vm);
+    get < double > (id_(), "Vm",Vm);
     return Vm;
 }
 void SpikeGen::__set_Vm( double Vm )
 {
-    set < double > (Element::element(id_), "Vm", Vm);
+    set < double > (id_(), "Vm", Vm);
 }
 #endif
