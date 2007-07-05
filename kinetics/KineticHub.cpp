@@ -165,7 +165,8 @@ static const unsigned int nSlot =
 
 void redirectDestMessages(
 	Element* hub, Element* e, const Finfo* hubFinfo, const Finfo* eFinfo,
-	unsigned int eIndex, vector< unsigned int >& map );
+	unsigned int eIndex, vector< unsigned int >& map,
+	vector< Element* >* elist );
 
 void redirectDynamicMessages( Element* e );
 
@@ -347,14 +348,18 @@ void KineticHub::molConnectionFuncLocal( Element* hub,
 	// order of the S_ and Sinit_ vectors and the elist vector.
 	// This is used implicitly in the ordering of the process messages
 	// that get set up between the Hub and the objects.
-	const Finfo* sumTotFinfo = 
-		Cinfo::find( "Molecule" )->findFinfo( "sumTotal" );
+	const Finfo* sumTotFinfo = initMoleculeCinfo()->findFinfo( "sumTotal" );
 	for ( i = elist->begin(); i != elist->end(); i++ ) {
 		zombify( hub, *i, molSolveFinfo, &molZombieFinfo );
+		redirectDynamicMessages( *i );
+	}
+	// Here we should really set up a 'set' of mols to check if the
+	// sumTotMessage is coming from in or outside the tree.
+	// Since I'm hazy about the syntax, here I'm just using the elist.
+	for ( i = elist->begin(); i != elist->end(); i++ ) {
 		// Here we replace the sumTotMessages from outside the tree.
 		redirectDestMessages( hub, *i, molSumFinfo, sumTotFinfo, 
-		i - elist->begin(), molSumMap_ );
-		redirectDynamicMessages( *i );
+		i - elist->begin(), molSumMap_, elist );
 	}
 }
 
@@ -817,7 +822,8 @@ void KineticHub::zombify(
 */
 void redirectDestMessages(
 	Element* hub, Element* e, const Finfo* hubFinfo, const Finfo* eFinfo,
-	unsigned int eIndex, vector< unsigned int >& map )
+	unsigned int eIndex, vector< unsigned int >& map, 
+		vector< Element *>*  elist )
 {
 	vector< Conn > clist;
 	if ( eFinfo->incomingConns( e, clist ) == 0 )
@@ -825,19 +831,21 @@ void redirectDestMessages(
 
 	unsigned int i;
 	unsigned int max = clist.size();
-	vector< Element* > srcElements( max );
-	vector< const Finfo* > srcFinfos( max );
+	vector< Element* > srcElements;
+	vector< const Finfo* > srcFinfos;
 	
 	map.push_back( eIndex );
 	
 	// An issue here: Do I check if the src is on the solved tree?
 	for ( i = 0; i != max; i++ ) {
 		Conn& c = clist[ i ];
-		srcElements[ i ] = c.targetElement();
-		srcFinfos[ i ]= c.targetElement()->findFinfo( c.targetIndex() );
+		if ( find( elist->begin(), elist->end(), c.targetElement() ) == elist->end() )  {
+			srcElements.push_back( c.targetElement() );
+			srcFinfos.push_back( c.targetElement()->findFinfo( c.targetIndex() ) );
+		}
 	}
 	eFinfo->dropAll( e );
-	for ( i = 0; i != max; i++ ) {
+	for ( i = 0; i != srcElements.size(); i++ ) {
 		srcFinfos[ i ]->add( srcElements[ i ], hub, hubFinfo );
 	}
 }
@@ -878,17 +886,21 @@ void redirectDynamicMessages( Element* e )
 			destFinfos[ i ] = c.targetElement()->findFinfo( c.targetIndex() );
 		}
 		string name = df->name();
-		assert( e->dropFinfo( df ) );
+		bool ret = e->dropFinfo( df );
+		assert( ret );
 
 		const Finfo* origFinfo = e->findFinfo( name );
+		assert( origFinfo );
 
 		max = srcFinfos.size();
 		for ( i =  0; i < max; i++ ) {
-			srcFinfos[ i ]->add( srcElements[ i ], e, origFinfo );
+			ret = srcFinfos[ i ]->add( srcElements[ i ], e, origFinfo );
+			assert( ret );
 		}
 		max = destFinfos.size();
 		for ( i =  0; i < max; i++ ) {
-			origFinfo->add( e, destElements[ i ], destFinfos[ i ] );
+			ret = origFinfo->add( e, destElements[ i ], destFinfos[ i ] );
+			assert( ret );
 		}
 
 		finfoNum++;

@@ -206,10 +206,14 @@ void GslIntegrator::assignStoichFunc( const Conn& c, void* stoich )
 void GslIntegrator::assignStoichFuncLocal( void* stoich ) 
 {
 	Stoich* s = static_cast< Stoich* >( stoich );
-	y_ = s->S();
+		// memcpy( &S_[0], y, nVarMolsBytes_ );
+	// y_ = s->S();
+	
+	nVarMols_ = s->nVarMols();
+	y_ = new double[ nVarMols_ ];
+	memcpy( y_, s->S(), nVarMols_ * sizeof( double ) );
 	isInitialized_ = 1;
 
-	nVarMols_ = s->nVarMols();
 	if ( gslStep_ )
 		gsl_odeiv_step_free( gslStep_ );
 	assert( gslStepType_ != 0 );
@@ -247,6 +251,12 @@ void GslIntegrator::innerProcessFunc( Element* e, ProcInfo info )
 			&internalStepSize_, y_);
 		if ( status != GSL_SUCCESS )
 			break;
+		// Heuristic: We often get stuck in stupid cycles where the
+		// internal step size oscillates between above and below dt.
+		// This situation doubles the number of steps we need to take.
+		// This tries to fix it.
+//		if ( internalStepSize_ > info->dt_ * 0.6 )
+//			internalStepSize_ = info->dt_;
 	}
 }
 

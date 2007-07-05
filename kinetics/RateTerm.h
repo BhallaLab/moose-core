@@ -276,8 +276,59 @@ class BidirectionalReaction: public RateTerm
 class SumTotal
 {
 	public:
-		SumTotal()
-		{
-			;
+		SumTotal( double* target, const vector< const double* >& mol )
+			: target_( target ), mol_( mol )
+		{;}
+
+		void sum() const {
+			double ret = 0.0;
+			for( vector< const double* >::const_iterator i = mol_.begin(); 
+				i != mol_.end(); i++ )
+				ret += **i;
+			*target_ = ret;
 		}
+	private:
+		double* target_;
+		vector< const double* > mol_;
 };
+
+/*
+class SumTotal: public RateTerm
+{
+	public:
+		SumTotal( const vector< const double* >& mol )
+			: mol_( mol )
+		{;}
+
+		// Should be able to do an algorithm operation here.
+		double operator() () const {
+			double ret = 0.0;
+			for( vector< const double* >::const_iterator i = mol_.begin(); 
+				i != mol_.end(); i++ )
+				ret += **i;
+			return ret;
+		}
+
+		void setRates( double k1, double k2 )
+		{;}
+		// These next 4 terms are used for talking back to the
+		// original rate objects in MOOSE
+		virtual void setR1( double k1 )
+		{;}
+
+		virtual void setR2( double k2 )
+		{;}
+
+		double getR1() const
+		{
+			return 0.0;
+		}
+		
+		double getR2() const
+		{
+			return 0.0;
+		}
+	private:
+		vector< const double* > mol_;
+};
+*/

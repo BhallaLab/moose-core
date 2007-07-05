@@ -445,14 +445,41 @@ void Stoich::setupMols(
 
 void Stoich::addSumTot( Element* e )
 {
-	/*
-	static const Finfo* sumTotFinfo = Cinfo::find( "Molecule" )->
-		findFinfo( "sumTotal" );
-	vector< Element* >::iterator i;
-	srcField.dest( srclist );
-	for (i = srclist.begin() ; i != srclist.end(); i++ ) {
+	vector< const double* > mol;
+	if ( findIncoming( e, "sumTotal", mol ) > 0 ) {
+		map< const Element*, unsigned int >::iterator j = molMap_.find( e );
+		assert( j != molMap_.end() );
+		SumTotal st( &S_[ j->second ], mol );
+		sumTotals_.push_back( st );
 	}
-	*/
+}
+
+unsigned int Stoich::findIncoming(
+	Element* e, const string& msgFieldName, 
+	vector< const double* >& ret )
+{
+	const Finfo* srcFinfo = e->findFinfo( msgFieldName );
+	assert( srcFinfo != 0 );
+	vector< Conn > srcList;
+	vector< Conn >::iterator i;
+	map< const Element*, unsigned int >::iterator j;
+	srcFinfo->incomingConns( e, srcList );
+
+	// vector< Element* >::iterator i;
+	// srcField.dest( srclist );
+	for (i = srcList.begin() ; i != srcList.end(); i++ ) {
+		Element* src = i->targetElement();
+		j = molMap_.find( src );
+		if ( j != molMap_.end() ) {
+			ret.push_back( & S_[ j->second ] );
+		} else {
+			cerr << "Error: Unable to locate " << 
+				src->name() <<
+				" as reactant for " << e->name();
+			return 0;
+		}
+	}
+	return ret.size();
 }
 
 /**
@@ -485,6 +512,7 @@ unsigned int Stoich::findReactants(
 	return ret.size();
 }
 
+/*
 unsigned int Stoich::findProducts( 
 	Element* e, const string& msgFieldName, 
 	vector< const double* >& ret )
@@ -510,6 +538,7 @@ unsigned int Stoich::findProducts(
 	}
 	return ret.size();
 }
+*/
 
 class ZeroOrder* makeHalfReaction( double k, vector< const double*> v )
 {
@@ -652,7 +681,7 @@ bool Stoich::checkEnz( Element* e,
 			return 0;
 		}
 	}
-	if ( findProducts( e, "prd", prd ) < 1 ) {
+	if ( findReactants( e, "prd", prd ) < 1 ) {
 		cerr << "Error: Stoich::addEnz: Failed to find prds\n";
 		return 0;
 	}
@@ -761,6 +790,11 @@ void Stoich::updateV( )
 	{
 		*j++ = (**i)();
 	}
+
+	// I should use foreach here.
+	vector< SumTotal >::const_iterator k;
+	for ( k = sumTotals_.begin(); k != sumTotals_.end(); k++ )
+		k->sum();
 }
 
 void Stoich::updateRates( vector< double>* yprime, double dt  )
@@ -804,12 +838,12 @@ int Stoich::gslFunc( double t, const double* y, double* yprime, void* s )
 int Stoich::innerGslFunc( double t, const double* y, double* yprime )
 {
 	nCall_++;
-	if ( lasty_ != y ) { // should count to see how often this copy happens
+//	if ( lasty_ != y ) { // should count to see how often this copy happens
 		// Copy the y array into the y_ vector.
 		memcpy( &S_[0], y, nVarMolsBytes_ );
 		lasty_ = y;
 		nCopy_++;
-	}
+//	}
 	updateV();
 
 	// Much scope for optimization here.
