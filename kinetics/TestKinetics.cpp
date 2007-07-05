@@ -665,7 +665,7 @@ void doGslRun( const string& method, Element* integ, Element* stoich,
 	if ( method == "gear2") // This is for the dreadful Gear2.
 		EPSILON = 0.01;
 	if ( method == "rkck") // This is for the strange rkck, which does not
-		EPSILON = 1.0e-5;	// take long but doesn't meet its accuracy
+		EPSILON = 1.0e-4;	// take long but doesn't meet its accuracy
 							// specs.
 	if ( method == "rk8pd") // Another case of accuracy not up to spec.
 		EPSILON = 1.0e-4;

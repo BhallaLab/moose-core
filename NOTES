@@ -3659,5 +3659,83 @@ That also is almost the same time.
 
 Need still to sort out why we have a mismatch in the exact solutions.
 Anyway, we can compile and run all this, so time to check in all the changes.
+Checked in as revision 157, with -O3 compile flags, and including the GSL libs.
+
+Analyzing the discrepancy in output. It persists for all cases: mmenz,
+enz. There are two aspects.
+1. The first timepoint is already nonzero: some time elapsed before data 
+	comes out. 
+2. The reactions go too fast.
+
+Point 1 improves, of course, if the dt is forced to be much smaller. Point 2
+remains a problem.
+
+rk4 is even worse.
+
+Gear2 is spectacularly dreadful. In all cases, though, the time-course is
+affected, not so much the steady states. Looks to me like I am misusing
+the GSL integrator.
+
+Yup. I was changing values in S_ used to calculate yprime. But S_ was also
+used for the current value y_. Cost for fixing this is a whole lot of
+memcpys. I think they are fast though.
+
+This fixes the numerical values. Major step. I still have a memory leak
+in the allocation of y_.
+
+Now let's see how this affects the speed.
+Marginally slower, maybe another half second - about 5%. The little check
+I had put in for timestep doesn't seem to matter here.
+
+So far so good. Let's try now to get our regular benchmark suite of models
+to work.
+
+acc4_1.6e-21.g loads. Runs 2x slower under new moose than old. I suspect
+SUMTOTAL isn't working either.
+
+Fixed SUMTOTAL loading into system.
+Checked that it works OK at least so far as the default ee method goes.
+Confirmed that rk5 doesn't handle sumtotals.
+Looks like the default ee method does handle them. Also it is way faster:
+takes 11 sec as compared to 23 for rk5. The ee method in Genesis is,
+if anything, a bit faster at 10 sec. rk5 takes 12 sec in the old moose.
+
+=============================================================================
+2 July 2007
+Working on completing functionality for kinetic simulations. Implemented 
+a sumtot RateTerm for the solver, implemented a test script in demos.
+The plain MOOSE reads it in correctly and gives the correct output. The
+solver does not. Nothing obvious in the genesis_parser conversions.
+Will need to gdb it.
+
+The data assignment and processing within the Stoich seems to be going OK.
+This looks like a problem with zombification.
+
+Yup. The system is not finding the finfo associated with the specified conn.
+Furthermore, the two allocated finfos don't have a name. finfo_[1] has
+recvFunc of KineticHub::setMolN, which is good. This should be the one
+to respond to the lookup for the conn.
+
+Story goes on: numIncoming on the finfo is zero, numOutgoing is 1. Why? We
+have plenty of examples where the conversion works.
+
+OK. Valgrind picked it up. I had put the sumtotal in the rates vector,
+but that vector is very precisely tied to the velocity vector which only 
+has size equal to the variable molecules. I need to put sumtotals separately
+or extend the velocity vector to manage sumtots.
+
+Did that. Still didn't work. Finally tracked down issue to 
+KineticHub.cpp:redirectDestMessages which was munging sumtotals even if
+they were within the simulated tree. Fixed that and finally the sumtots
+work. Phew. Should now be able to handle many of the models in DOQCS.
+Tried out the acc4 model. Takes a long time to run, possibly the initial
+conditions. The match with the GENESIS version is poor: obviously same sim,
+but curves are all a bit off. Need to try GENESIS version with greater acc
+
+=============================================================================
+5 July 2007
+Merged in code changes from Subhasis, which incorporate the Id system into
+the PyMoose code.
+Confirmed that the sumtotal stuff still works.
 
 =============================================================================
