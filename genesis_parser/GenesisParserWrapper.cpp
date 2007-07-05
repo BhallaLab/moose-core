@@ -408,8 +408,8 @@ map< string, string >& sliSrcLookup()
 	src[ "PRODUCT n" ] = "";
 	src[ "MM_PRD pA" ] = "prd";
 
-	src[ "SUMTOTAL n nInit" ] = "nOut";	// for molecules
-	src[ "SUMTOTAL output output" ] = "out";	// for tables
+	src[ "SUMTOTAL n nInit" ] = "nSrc";	// for molecules
+	src[ "SUMTOTAL output output" ] = "outputSrc";	// for tables
 	src[ "SLAVE output" ] = "out";	// for tables
 	src[ "INTRAMOL n" ] = "nOut"; 	// target is an enzyme.
 	src[ "CONSERVE n nInit" ] = ""; 	// Deprecated
@@ -468,8 +468,8 @@ map< string, string >& sliDestLookup()
 	dest[ "PRODUCT n" ] = "";
 	dest[ "MM_PRD pA" ] = "prd";
 
-	dest[ "SUMTOTAL n nInit" ] = "sumTotalIn";	// for molecules
-	dest[ "SUMTOTAL output output" ] = "sumTotalIn";	// for molecules
+	dest[ "SUMTOTAL n nInit" ] = "sumTotal";	// for molecules
+	dest[ "SUMTOTAL output output" ] = "sumTotal";	// for molecules
 	dest[ "SLAVE output" ] = "sumTotalIn";	// for molecules
 	dest[ "INTRAMOL n" ] = "intramolIn"; 	// target is an enzyme.
 	dest[ "CONSERVE n nInit" ] = ""; 	// Deprecated
@@ -837,7 +837,7 @@ void do_call( int argc, const char** const argv, Id s )
 			( e->data() );
 	// Ugly hack to avoid LOAD call for notes on kkit dumpfiles
 	if ( strcmp ( argv[2], "LOAD" ) == 0 ) {
-		cout << "in do_call LOAD " << endl;
+		// cout << "in do_call LOAD " << endl;
 		return;
 	}
 	

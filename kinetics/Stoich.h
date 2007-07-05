@@ -82,7 +82,7 @@ class Stoich
 			Element* e, const string& msgFieldName, 
 			vector< const double* >& ret );
 
-		unsigned int findProducts( 
+		unsigned int findIncoming( 
 			Element* e, const string& msgFieldName, 
 			vector< const double* >& ret );
 
@@ -134,7 +134,7 @@ class Stoich
 		vector< double > Sinit_; 	
 		vector< double > v_;	
 		vector< RateTerm* > rates_; 
-		vector< int > sumTotals_;
+		vector< SumTotal > sumTotals_;
 		SparseMatrix N_; 
 		vector< int > path2mol_;
 		vector< int > mol2path_;
