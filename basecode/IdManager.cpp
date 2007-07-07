@@ -24,11 +24,12 @@ const unsigned int BAD_NODE = ~0;
 
 IdManager::IdManager()
 	: myNode_( 0 ), numNodes_( 1 ), 
-	loadThresh_( 1.0 ),
+	loadThresh_( 2000.0 ),
 	scratchIndex_( 2 ), mainIndex_( 2 )
 	// Start at 2 because root is 0 and shell is 1.
 {
 	elementList_.resize( blockSize );
+	post_.resize( 1 );
 }
 
 void IdManager::setNodes( unsigned int myNode, unsigned int numNodes )
@@ -42,8 +43,10 @@ void IdManager::setNodes( unsigned int myNode, unsigned int numNodes )
 		elementList_.resize( numScratch + blockSize );
 		mainIndex_ = numScratch;
 		post_.resize( numNodes );
+	} else {
+		post_.resize( 1 );
+		post_[0] = 0;
 	}
-	post_.resize( 1 );
 }
 
 void IdManager::setPostMasters( vector< Element* >& post )
@@ -134,6 +137,9 @@ Element* IdManager::getElement( unsigned int index ) const
 			assert( 0 );
 		if ( ret->cinfo() != initPostMasterCinfo() ) {
 			return ret;
+		} else if ( ret->id().id_ == index ) {
+			// This is the postmaster itself
+			return ret;
 		} else {
 			OffNodeInfo* oni = new OffNodeInfo( ret, Id( index ) );
 
@@ -159,6 +165,9 @@ bool IdManager::setElement( unsigned int index, Element* e )
 			// Here we are presumably clearing out an element. Permit it.
 			elementList_[ index ] = 0;
 			/// \todo: We could add this element to a list for reuse here.
+			return 1;
+		} else if ( index == 0 ) {
+			// Here it is the wrapper for off-node objects. Ignore it.
 			return 1;
 		} else { // attempt to overwrite element. Should I assert?
 			assert( 0 );
