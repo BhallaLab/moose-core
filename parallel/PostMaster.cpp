@@ -509,6 +509,7 @@ void testPostMaster()
 		} else {
 			ASSERT( !id.bad(), "Checking local postmasters" )
 			Element* p = id();
+			cout << "name of what should be a postmaster: " << p->name() << endl << flush;
 			ASSERT( p->className() == "PostMaster", "Check PostMaster");
 			unsigned int remoteNode;
 			get< unsigned int >( p, "remoteNode", remoteNode );
