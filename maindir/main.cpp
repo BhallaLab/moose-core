@@ -132,7 +132,10 @@ int main(int argc, char** argv)
 
 	const Finfo* tickFinfo = t0->findFinfo( "parTick" );
 	assert( tickFinfo != 0 );
-	bool glug = 0; // Breakpoint for parallel debugging
+
+	bool glug = (argc == 2 && 
+		strcmp( argv[1], "-debug" ) == 0 );
+	// Breakpoint for parallel debugging
 	while ( glug );
 	for ( vector< Element* >::iterator j = post.begin();
 		j != post.end(); j++ ) {

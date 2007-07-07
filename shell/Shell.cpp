@@ -580,6 +580,7 @@ void Shell::staticCreate( const Conn& c, string type,
 					string name, Id parent )
 {
 	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	Element* e = c.targetElement();
 
 	// This is where the IdManager does clever load balancing etc
 	// to assign child node.
@@ -589,22 +590,24 @@ void Shell::staticCreate( const Conn& c, string type,
 	if ( child == 0 ) { // local node
 		bool ret = s->create( type, name, parent, id );
 		if ( ret ) {
-			sendTo1< Id >( c.targetElement(),
-						createSlot, c.targetIndex(), id );
+			sendTo1< Id >( e, createSlot, c.targetIndex(), id );
 		}
 	} else {
 		// Shell-to-shell messaging here with the request to
 		// create a child.
 		// This must only happen on node 0.
-		assert( c.targetElement()->id().node() == 0 );
+		assert( e->id().node() == 0 );
 		assert( id.node() > 0 );
 		OffNodeInfo* oni = static_cast< OffNodeInfo* >( child->data() );
 		// Element* post = oni->post;
-		unsigned int target = id.node() - 1;
+		unsigned int target = 
+		e->connSrcBegin( rCreateSlot ) - e->lookupConn( 0 ) +
+			id.node() - 1;
 		sendTo4< string , string, Id, Id>( 
-			c.targetElement(), rCreateSlot, target,
+			e, rCreateSlot, target,
 			type, name, 
 			parent, oni->id );
+		// Here it needs to fork till the object creation is complete.
 		delete oni;
 		delete child;
 	}

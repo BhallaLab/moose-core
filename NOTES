@@ -3734,8 +3734,40 @@ but curves are all a bit off. Need to try GENESIS version with greater acc
 
 =============================================================================
 5 July 2007
-Merged in code changes from Subhasis, which incorporate the Id system into
+Merged in code changes from Subhasis, which incorporates the Id system into
 the PyMoose code.
 Confirmed that the sumtotal stuff still works.
+
+=============================================================================
+6 July 2007
+Next I need to resume parallel coding. 
+- Implement the ElementWrapper for off-node objects
+- Implement an IdManager class so we can set node control thresholds.
+- Devise a test case where after a certain number of objects are formed
+	on one node, the next set get exported. Pass messages between them.
+	This would first be the same table example I currently do in other
+	ways.
+- Do a serious test case involving shared messages, such as between 
+	diffusing compartments.
+
+Working through more Id-related headaches. Current issue is that the tests
+for creation of postmasters in PostMaster.cpp:513 use the id() call which
+returns a wrapper. Would like to have a way to return the postmaster when
+it is legal.
+
+Fixed this. Now problem in the genesis parser test commands, line 2401.
+Check if element is created on expected node.
+=============================================================================
+7 July 2007
+Turns out element should be created on expected node, but the system doesn't
+wait for the create to complete and issues an le request right away. 
+Furthermore, even when we fix up the creation, we have a problem because 
+there is no message to go from parent to child element.
+See Shell.cpp:610 in staticCreate.
+
+Anyway, to get the current tests over with, I bypassed this problem and tried
+again. Seems OK except that it turned up another bug. I think that the 
+SolveFinfo doesn't work well with the Finfo::match( Element*, connIndex)
+function. Yup, it just returns zero. Fixed.
 
 =============================================================================

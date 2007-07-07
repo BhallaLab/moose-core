@@ -80,9 +80,7 @@ class ParFinfo: public Finfo
 					unsigned int& srcNum, unsigned int& destNum );
 
 			const Finfo* match( 
-				const Element* e, unsigned int connIndex ) const {
-					return 0;
-			}
+				const Element* e, unsigned int connIndex ) const;
 
 			bool isTransient() const {
 					return 0;
