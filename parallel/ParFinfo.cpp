@@ -243,6 +243,12 @@ void ParFinfo::countMessages(
 		return;
 }
 
+const Finfo* ParFinfo::match( 
+				const Element* e, unsigned int connIndex ) const
+{
+	return( e->isConnOnDest( msgIndex_, connIndex ) ? this: 0 );
+}
+
 bool ParFinfo::getSlotIndex( const string& name, unsigned int& ret ) const
 {
 	if ( name != this->name() ) 

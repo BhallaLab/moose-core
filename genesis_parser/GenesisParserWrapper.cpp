@@ -2375,6 +2375,9 @@ void GenesisParserWrapper::gpAssert(
 	testFlag_ = 1;
 	printbuf_ = "";
 	ParseInput( command );
+	if ( ! (printbuf_ == ret) )
+		cout << "printbuf_ = '" << printbuf_ << "', ret = '" << ret <<
+			"'\n" << flush;
 	assert( printbuf_ == ret );
 	testFlag_ = 0;
 	cout << ".";
