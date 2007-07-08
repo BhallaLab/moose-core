@@ -323,14 +323,16 @@ void PostMaster::postIrecv( const Conn& c, int ordinal )
  * to local dest objects.
  * This is called by the poll function
  */
-void PostMaster::innerPoll( Element* e)
+void PostMaster::innerPoll( const Conn& c )
 {
+	Element* e = c.targetElement();
+	unsigned int pollMsgIndex = c.targetIndex();
 	// Look up the irecv'ed data here
 	// cout << "inner Poll\n" << flush;
 	if ( donePoll_ )
 			return;
 	if ( !request_ ) {
-		send1< unsigned int >( e, pollSlot, remoteNode_ );
+		sendTo1< unsigned int >( e, pollSlot, pollMsgIndex, remoteNode_ );
 		donePoll_ = 1;
 		return;
 	}
@@ -374,15 +376,14 @@ void PostMaster::innerPoll( Element* e)
 			assert (data != 0 );
 		}
 
-		send1< unsigned int >( e, pollSlot, remoteNode_ );
+		sendTo1< unsigned int >( e, pollSlot, pollMsgIndex, remoteNode_ );
 		donePoll_ = 1;
 	}
 }
 
 void PostMaster::poll( const Conn& c, int ordinal )
 {
-	static_cast< PostMaster* >( c.data() )->
-			innerPoll( c.targetElement() );
+	static_cast< PostMaster* >( c.data() )->innerPoll( c );
 }
 
 /**
@@ -478,7 +479,7 @@ void* getAsyncParBuf( const Conn& c, unsigned int size )
 #include "../builtins/Table.h"
 #include "../shell/Shell.h"
 
-extern void testMess( Element* e );
+extern void testMess( Element* e, unsigned int numNodes );
 
 void testPostMaster()
 {
@@ -509,7 +510,7 @@ void testPostMaster()
 		} else {
 			ASSERT( !id.bad(), "Checking local postmasters" )
 			Element* p = id();
-			cout << "name of what should be a postmaster: " << p->name() << endl << flush;
+			// cout << "name of what should be a postmaster: " << p->name() << endl << flush;
 			ASSERT( p->className() == "PostMaster", "Check PostMaster");
 			unsigned int remoteNode;
 			get< unsigned int >( p, "remoteNode", remoteNode );
@@ -695,7 +696,7 @@ void testPostMaster()
 	Id shellId( "/shell", "/" );
 	Element* shell = shellId();
 	if ( myNode == 0 )
-		testMess( shell );
+		testMess( shell, numNodes );
 	set< double >( cj, "start", 2.0 );
 	MPI::COMM_WORLD.Barrier();
 }

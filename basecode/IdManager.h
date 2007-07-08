@@ -75,6 +75,16 @@ class IdManager
 		 *   a new group, such as kinetics.
 		 */
 		unsigned int childId( unsigned int parent );
+
+		/**
+ 		* This variant of childId forces creation of object on specified 
+		* node, provided that we are in parallel mode. Otherwise it 
+		* ignores the node specification.  
+ 		* Should only be called on master node, and parent should have
+		* been checked. In single-node mode it is equivalent to the 
+		* scratchId and childId ops.
+ 		*/
+		unsigned int makeIdOnNode( unsigned int childNode );
 		
 		//////////////////////////////////////////////////////////////////
 		// Id info

@@ -46,7 +46,7 @@ class PostMaster
 		static void postIrecv( const Conn& c, int ordinal );
 		void innerPostIrecv();
 		static void poll( const Conn& c, int ordinal );
-		void innerPoll( Element* e);
+		void innerPoll( const Conn& c );
 		static void postSend( const Conn& c, int ordinal );
 		void innerPostSend( );
 
