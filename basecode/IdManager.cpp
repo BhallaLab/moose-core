@@ -15,7 +15,7 @@
 const Cinfo* initPostMasterCinfo();
 #endif
 
-static const Element* UNKNOWN_NODE = reinterpret_cast< const Element* >( 1L );
+static Element* UNKNOWN_NODE = reinterpret_cast< Element* >( 1L );
 // const unsigned int MIN_NODE = 1;
 // const unsigned int MAX_NODE = 65536; // Dream on.
 const unsigned int IdManager::numScratch = 1000;
@@ -197,8 +197,19 @@ bool IdManager::setElement( unsigned int index, Element* e )
 			return 0;
 		}
 	} else {
-		assert( 0 );
-		return 0;
+		if ( myNode_ > 0 ) {
+			// Here we have been told by the master node to make a child 
+			// at a specific index before the elementList has been
+			// expanded to that index. Just expand it to fit.
+			elementList_.resize( ( 1 + index / blockSize ) * blockSize, 
+				UNKNOWN_NODE );
+			elementList_[ index ] = e;
+			mainIndex_ = index + 1;
+			return 1;
+		} else {
+			assert( 0 );
+			return 0;
+		}
 	}
 }
 

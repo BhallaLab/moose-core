@@ -653,23 +653,47 @@ void Shell::getField( const Conn& c, Id id, string field )
 void testMess( Element* e, unsigned int numNodes )
 {
 	/*
+	 * Here we create a set of neutrals on all the slave nodes.
+	*/
 	unsigned int startConn = e->connSrcBegin( rCreateSlot ) - 
 		e->lookupConn( 0 );
+	vector< Id > offNodeObjs( numNodes );
 	for ( unsigned int i = 1; i < numNodes; i++ ) {
-	sendTo4< string , string, Id, Id>( 
-		e, rCreateSlot, startConn + i - 1, 
-		"Neutral", "OffNodeCreateTest", 
-		Id::str2Id( "1" ), Id::makeIdOnNode( i ) );
+		offNodeObjs[ i ] = Id::makeIdOnNode( i );
+		sendTo4< string , string, Id, Id>( 
+			e, rCreateSlot, startConn + i - 1, 
+			"Neutral", "OffNodeCreateTest", 
+			Id::str2Id( "1" ), offNodeObjs[ i ] );
 	}
-	*/
 
 	// This should return 'shell'
 	send2< Id, string >( e, rGetSlot, Id::str2Id( "1" ), "name" );
 
 	// send1< string >( e, recvGetSlot, "fieldvalue" );
 
-	send3< Id, string, string >( e, rSetSlot, 
-		Id(), "fieldname", "value" );
+	/*
+	 * Here we assign new names to each of these neutrals
+	*/
+	startConn = e->connSrcBegin( rSetSlot ) - e->lookupConn( 0 );
+	for ( unsigned int i = 1; i < numNodes; i++ ) {
+		char name[20];
+		sprintf( name, "OffNodeCreateTest_%d", i );
+		sendTo3< Id, string, string >( e, rSetSlot,
+			startConn + i - 1,
+			offNodeObjs[ i ], "name", name );
+	}
+
+	/*
+	 * Here we check the names of the neutrals.
+	*/
+	startConn = e->connSrcBegin( rGetSlot ) - e->lookupConn( 0 );
+	for ( unsigned int i = 1; i < numNodes; i++ ) {
+		char name[20];
+		sprintf( name, "OffNodeCreateTest_%d", i );
+		sendTo2< Id, string >( e, rGetSlot,
+			startConn + i - 1,
+			offNodeObjs[ i ], "name" );
+	}
 
 	send4< Id, string, Id, string >( e, rAddSlot, 
 		Id::str2Id( "5432" ), "srcfield", Id::str2Id( "9876" ),
@@ -709,7 +733,7 @@ void Shell::slaveGetField( const Conn& c, Id id, string field )
 void Shell::recvGetFunc( const Conn& c, string value )
 {
 	printNodeInfo( c );
-	// cout << "in recvGetFunc with field value :'" << value << "'\n";
+	cout << "in recvGetFunc with field value :'" << value << "'\n";
 	// send off to parser maybe.
 	// Problem if multiple parsers.
 	// Bigger problem that this is asynchronous now.
@@ -721,8 +745,8 @@ void Shell::slaveCreateFunc ( const Conn& c,
 				string objtype, string objname, 
 				Id parent, Id newobj )
 {
-	// printNodeInfo( c );
-	// cout << "in slaveCreateFunc :" << objtype << " " << objname << " " << parent << " " << newobj << "\n";
+	printNodeInfo( c );
+	cout << "in slaveCreateFunc :" << objtype << " " << objname << " " << parent << " " << newobj << "\n";
 
 	Element* e = c.targetElement();
 	Shell* s = static_cast< Shell* >( e->data() );
