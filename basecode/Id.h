@@ -61,6 +61,14 @@ class Id
 		static Id scratchId();
 
 		/**
+ 		* This variant of childId forces creation of object on specified 
+		* node, provided that we are in parallel mode. Otherwise it 
+		* ignores the node specification and behavies like scratchId.
+ 		* Should only be called on master node.
+ 		*/
+		static Id makeIdOnNode( unsigned int childNode );
+
+		/**
 		 * This returns Id( 1 ), which is the shell.
 		 */
 		static Id shellId();

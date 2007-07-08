@@ -3769,5 +3769,228 @@ Anyway, to get the current tests over with, I bypassed this problem and tried
 again. Seems OK except that it turned up another bug. I think that the 
 SolveFinfo doesn't work well with the Finfo::match( Element*, connIndex)
 function. Yup, it just returns zero. Fixed.
+Checked in as revision 160, with -g and parallization compile flags.
+
+Trying now to run the kholodenko simulation with the kinetic solver. It
+is a long and ugly script to set things up for now. Setup happens but the
+thing dumps core when we try to run it.
+
+That was because I tried to call /integ reset. Now it works with a general
+reset. But it gives flat lines for all molecules. Fast, though.
+
+=============================================================================
+30 June 2007
+Working on the kinetic solver. The fast calculations were because there were
+no calculations. The enzymes were not being set up. Now I have some progress
+there but the output is not working. Also it is incredibly slow.
+May need to redo the way I set up plotting.
+
+Seems to go into the enzyme calculations, in RateTerm.h, but for some
+reason it is doing the general rather than 1-substrate form, which is slower.
+Was doing a -ve value.
+
+OK, now it is much faster but still not seeing the waveform.
+Checked that the numbers do seem to be changing with time.
+Hacked in an alias for the conc field to look at n. Clearly it oscillates,
+but the freq is wrong.
+
+Ran it anyway, runs in about the same time as the old MOOSE: actually
+about 10% slower. Perhaps fixing the MMenz calculation will help.
+That also is almost the same time.
+
+Need still to sort out why we have a mismatch in the exact solutions.
+Anyway, we can compile and run all this, so time to check in all the changes.
+Checked in as revision 157, with -O3 compile flags, and including the GSL libs.
+
+Analyzing the discrepancy in output. It persists for all cases: mmenz,
+enz. There are two aspects.
+1. The first timepoint is already nonzero: some time elapsed before data 
+	comes out. 
+2. The reactions go too fast.
+
+Point 1 improves, of course, if the dt is forced to be much smaller. Point 2
+remains a problem.
+
+rk4 is even worse.
+
+Gear2 is spectacularly dreadful. In all cases, though, the time-course is
+affected, not so much the steady states. Looks to me like I am misusing
+the GSL integrator.
+
+Yup. I was changing values in S_ used to calculate yprime. But S_ was also
+used for the current value y_. Cost for fixing this is a whole lot of
+memcpys. I think they are fast though.
+
+This fixes the numerical values. Major step. I still have a memory leak
+in the allocation of y_.
+
+Now let's see how this affects the speed.
+Marginally slower, maybe another half second - about 5%. The little check
+I had put in for timestep doesn't seem to matter here.
+
+So far so good. Let's try now to get our regular benchmark suite of models
+to work.
+
+acc4_1.6e-21.g loads. Runs 2x slower under new moose than old. I suspect
+SUMTOTAL isn't working either.
+
+Fixed SUMTOTAL loading into system.
+Checked that it works OK at least so far as the default ee method goes.
+Confirmed that rk5 doesn't handle sumtotals.
+Looks like the default ee method does handle them. Also it is way faster:
+takes 11 sec as compared to 23 for rk5. The ee method in Genesis is,
+if anything, a bit faster at 10 sec. rk5 takes 12 sec in the old moose.
+
+=============================================================================
+2 July 2007
+Working on completing functionality for kinetic simulations. Implemented 
+a sumtot RateTerm for the solver, implemented a test script in demos.
+The plain MOOSE reads it in correctly and gives the correct output. The
+solver does not. Nothing obvious in the genesis_parser conversions.
+Will need to gdb it.
+
+The data assignment and processing within the Stoich seems to be going OK.
+This looks like a problem with zombification.
+
+Yup. The system is not finding the finfo associated with the specified conn.
+Furthermore, the two allocated finfos don't have a name. finfo_[1] has
+recvFunc of KineticHub::setMolN, which is good. This should be the one
+to respond to the lookup for the conn.
+
+Story goes on: numIncoming on the finfo is zero, numOutgoing is 1. Why? We
+have plenty of examples where the conversion works.
+
+OK. Valgrind picked it up. I had put the sumtotal in the rates vector,
+but that vector is very precisely tied to the velocity vector which only 
+has size equal to the variable molecules. I need to put sumtotals separately
+or extend the velocity vector to manage sumtots.
+
+Did that. Still didn't work. Finally tracked down issue to 
+KineticHub.cpp:redirectDestMessages which was munging sumtotals even if
+they were within the simulated tree. Fixed that and finally the sumtots
+work. Phew. Should now be able to handle many of the models in DOQCS.
+Tried out the acc4 model. Takes a long time to run, possibly the initial
+conditions. The match with the GENESIS version is poor: obviously same sim,
+but curves are all a bit off. Need to try GENESIS version with greater acc
+
+=============================================================================
+5 July 2007
+Merged in code changes from Subhasis, which incorporates the Id system into
+the PyMoose code.
+Confirmed that the sumtotal stuff still works.
+
+=============================================================================
+6 July 2007
+Next I need to resume parallel coding. 
+- Implement the ElementWrapper for off-node objects
+- Implement an IdManager class so we can set node control thresholds.
+- Devise a test case where after a certain number of objects are formed
+	on one node, the next set get exported. Pass messages between them.
+	This would first be the same table example I currently do in other
+	ways.
+- Do a serious test case involving shared messages, such as between 
+	diffusing compartments.
+
+Working through more Id-related headaches. Current issue is that the tests
+for creation of postmasters in PostMaster.cpp:513 use the id() call which
+returns a wrapper. Would like to have a way to return the postmaster when
+it is legal.
+
+Fixed this. Now problem in the genesis parser test commands, line 2401.
+Check if element is created on expected node.
+=============================================================================
+7 July 2007
+Turns out element should be created on expected node, but the system doesn't
+wait for the create to complete and issues an le request right away. 
+Furthermore, even when we fix up the creation, we have a problem because 
+there is no message to go from parent to child element.
+See Shell.cpp:610 in staticCreate.
+
+Anyway, to get the current tests over with, I bypassed this problem and tried
+again. Seems OK except that it turned up another bug. I think that the 
+SolveFinfo doesn't work well with the Finfo::match( Element*, connIndex)
+function. Yup, it just returns zero. Fixed.
+
+Analyzing requirements for scheduling internode message during simulation 
+setup.
+
+Most commands can go on asynchronously, provided there is a rollback or 
+error reporting mechanism that identifies where in the earlier commands things
+went wrong:
+
+create
+delete
+move
+copy
+pwe
+ce
+addmsg
+setfield
+
+Some commands can only return if the info is updated:
+le
+getfield
+showmsg
+el
+
+Options:
+- Insert a 'poll' in every shell operation. 
+	- For commands that need updated info, repeat this poll till some 
+	completion flag comes in.
+	- When waiting for user input, poll every second or 100 msec.
+- Run poll on separate thread: Can't do because of BlueGene arch,
+	not to mention issues with multithreading.
+
+
+Runtime organization:
+- We need a call to the postmaster every Tick.
+	- If we have threading, then we will need to subdivide the Tick
+	but there is only one cycle of postmaster calls at the end of
+	all of these.
+- Scripting calls are added as async requests any tick, and get sent out on
+	the same tick. I don't need to deal with other forms of update as
+	this is pretty immediate.
+
+Setup time organization:
+- Set up a ParTick on a separate job, which is run on all slave nodes and
+	on the master node whenever the system is waiting for input. It
+	polls to clear input, and then sleeps for a little bit before
+	the next cycle.
+- On all nodes, have the shell do a poll before most commands.
+- This would actually be a nice way to handle keyboard input too:
+	It would allow control-p for previous command
+- There is an infinte loop in GenesisParser::myFlexLexer::Process. 
+	This does the tty and calls the yyparse() command.
+- We have another infinite loop in myFlexLexer::LexerInput. But I don't see
+	it called.
+
+=============================================================================
+8 July 2007.
+
+So, overall:
+- do NOT set up the cj/t0 at startup. Set up instead pj and cj,
+	and pj/pt
+	- All ticks must be connected to postmasters.
+		- Later when we do operation scanning we can selectively
+		connect up only those ticks which need parallel messaging.
+		This is a rather weak optimization.
+- In due course do auto scheduling of the objects under t0, t1 etc. Till then
+	apply useclock and setclock to build these.
+- pj and pt are immediately hooked up to the postmasters.
+- pj is invoked by shell for once-off polling with 1 step (runtime 1, dt 1).
+- On master node, pj is called in an infinite loop by the input-polling 
+	loop of the parser
+- On slave nodes, pj is called in an infinite loop by the main function.
+- In both infinite loops, there is a small wait after the poll is complete.
+	This is to lessen the idle load.
+This balance between once-of and infinite polling is tricky. A script must
+switch between them
+
+
+Setting up to generate objects on specified nodes as a test.
+
+Mostly set up. I have had to implement a new function for creating objects
+on specified nodes. The actual creation test is on hold till I check in the
+assorted changes and fixes so far. This set works with 2, 3 and 4 nodes.
 
 =============================================================================
