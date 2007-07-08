@@ -579,8 +579,8 @@ void Shell::trigLe( const Conn& c, Id parent )
 void Shell::staticCreate( const Conn& c, string type,
 					string name, Id parent )
 {
-	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 	Element* e = c.targetElement();
+	Shell* s = static_cast< Shell* >( e->data() );
 
 	// This is where the IdManager does clever load balancing etc
 	// to assign child node.
@@ -589,7 +589,7 @@ void Shell::staticCreate( const Conn& c, string type,
 	Element* child = id();
 	if ( child == 0 ) { // local node
 		bool ret = s->create( type, name, parent, id );
-		if ( ret ) {
+		if ( ret ) { // Tell the parser it was created happily.
 			sendTo1< Id >( e, createSlot, c.targetIndex(), id );
 		}
 	} else {
@@ -650,11 +650,18 @@ void Shell::getField( const Conn& c, Id id, string field )
 ////////////////////////////////////////////////////////////////////////
 
 // To be called from the node on which the Master shell resides.
-void testMess( Element* e )
+void testMess( Element* e, unsigned int numNodes )
 {
-	send4< string , string, Id, Id>( 
-		e, rCreateSlot, "objtype", "objname", 
-		Id::str2Id( "1234" ), Id::str2Id( "5678" ) );
+	/*
+	unsigned int startConn = e->connSrcBegin( rCreateSlot ) - 
+		e->lookupConn( 0 );
+	for ( unsigned int i = 1; i < numNodes; i++ ) {
+	sendTo4< string , string, Id, Id>( 
+		e, rCreateSlot, startConn + i - 1, 
+		"Neutral", "OffNodeCreateTest", 
+		Id::str2Id( "1" ), Id::makeIdOnNode( i ) );
+	}
+	*/
 
 	// This should return 'shell'
 	send2< Id, string >( e, rGetSlot, Id::str2Id( "1" ), "name" );
@@ -684,8 +691,7 @@ void printNodeInfo( const Conn& c )
 void Shell::slaveGetField( const Conn& c, Id id, string field )
 {
 	printNodeInfo( c );
-	cout << "in slaveGetFunc on " << id << " with field :" << 
-		field << "\n";
+	// cout << "in slaveGetFunc on " << id << " with field :" << field << "\n";
 	if ( id.bad() )
 		return;
 	string ret;
@@ -703,7 +709,7 @@ void Shell::slaveGetField( const Conn& c, Id id, string field )
 void Shell::recvGetFunc( const Conn& c, string value )
 {
 	printNodeInfo( c );
-	cout << "in recvGetFunc with field value :'" << value << "'\n";
+	// cout << "in recvGetFunc with field value :'" << value << "'\n";
 	// send off to parser maybe.
 	// Problem if multiple parsers.
 	// Bigger problem that this is asynchronous now.
@@ -715,12 +721,18 @@ void Shell::slaveCreateFunc ( const Conn& c,
 				string objtype, string objname, 
 				Id parent, Id newobj )
 {
-	printNodeInfo( c );
-	cout << "in slaveCreateFunc :" << objtype << " " << objname << 
-		" " << parent << " " << newobj << "\n";
+	// printNodeInfo( c );
+	// cout << "in slaveCreateFunc :" << objtype << " " << objname << " " << parent << " " << newobj << "\n";
 
+	Element* e = c.targetElement();
+	Shell* s = static_cast< Shell* >( e->data() );
 
-	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	bool ret = s->create( objtype, objname, parent, newobj );
+	if ( ret ) { // Tell the master node it was created happily.
+		// sendTo2< Id, bool >( e, createCheckSlot, c.targetIndex(), newobj, 1 );
+	} else { // Tell master node that the create failed.
+		// sendTo2< Id, bool >( e, createCheckSlot, c.targetIndex(), newobj, 0 );
+	}
 	// bool ret = s->create( objtype, objname, parent, newobj );
 	// assert( ret );
 	// Need to send return back to master node, and again we have

@@ -163,7 +163,7 @@ bool SharedFinfo::addSeparateConns(
 		// Note that all target conns (on the PostMaster) get put on the 
 		// msgDest vector.
 		if ( numSrc_ == 0 ) {  // Put it on MsgDest.
-			cout << "\nSharedFinfo:" << name() << " to " << destElm->name() << " :addSeparateConns:numSrc_==0:Conns =\n";
+			// cout << "\nSharedFinfo:" << name() << " to " << destElm->name() << " :addSeparateConns:numSrc_==0:Conns =\n";
 			for ( i = 0; i < srcFl.size(); i++ ) {
 				originatingConn = e->insertConnOnDest( msgIndex_, 1);
 				targetConn = destElm->insertConnOnDest( destIndex, 1 );
@@ -171,7 +171,7 @@ bool SharedFinfo::addSeparateConns(
 				assert( e->lookupConn( originatingConn )->
 					targetElement() == destElm );
 				assert( destElm->lookupConn( targetConn )->targetElement() == e );
-				cout << originatingConn << ", " << targetConn << "\n";
+				// cout << originatingConn << ", " << targetConn << "\n";
 			}
 		} else { // The usual case: mixed srcs and dests.
 			unsigned int numConns = srcFl.size();
@@ -191,7 +191,7 @@ bool SharedFinfo::addSeparateConns(
 			unsigned int stride = e->connSrcEnd( msgIndex_ ) -
 				e->connSrcBegin( msgIndex_ );
 
-			cout << "\nSharedFinfo:" << name() << " to " << destElm->name() << " :addSeparateConns:numSrc_!=0:Conns =\n";
+			// cout << "\nSharedFinfo:" << name() << " to " << destElm->name() << " :addSeparateConns:numSrc_!=0:Conns =\n";
 			for ( i = 0; i < numConns; i++ ) {
 				targetConn = destElm->insertConnOnDest( destIndex, 1 );
 				e->connect( originatingConn + i * stride,
@@ -200,7 +200,7 @@ bool SharedFinfo::addSeparateConns(
 					targetElement() == destElm );
 				assert( destElm->lookupConn( targetConn )->
 					targetElement() == e );
-				cout << originatingConn + i * stride << ", " << targetConn << "\n";
+			// 	cout << originatingConn + i * stride << ", " << targetConn << "\n";
 			}
 		}
 		return 1;

@@ -93,12 +93,18 @@ int main(int argc, char** argv)
 	
 	Element* sched =
 			Neutral::create( "Neutral", "sched", Element::root() );
+	// This one handles the simulation clocks
 	Element* cj =
 			Neutral::create( "ClockJob", "cj", sched );
+	// This one handles parser and postmaster scheduling.
+	Element* pj =
+			Neutral::create( "ClockJob", "pj", sched );
 
 #ifdef USE_MPI
 	Element* t0 =
 			Neutral::create( "ParTick", "t0", cj );
+	Element* pt0 =
+			Neutral::create( "ParTick", "t0", pj );
 #else
 	Neutral::create( "Tick", "t0", cj );
 #endif
@@ -144,6 +150,8 @@ int main(int argc, char** argv)
 		assert( ret );
 		ret = tickFinfo->add( t0, *j, (*j)->findFinfo( "parTick" ) );
 		assert( ret );
+		ret = tickFinfo->add( pt0, *j, (*j)->findFinfo( "parTick" ) );
+		assert( ret );
 		if ( mynode == 0 ) {
 			ret = masterFinfo->add( shell, *j, (*j)->findFinfo( "data" ) );
 		} else {
@@ -159,7 +167,9 @@ int main(int argc, char** argv)
 	// cout << "On " << mynode << ", shell: " << shell->name() << endl;
 	// shell->dumpMsgInfo();
 	set( cj, "resched" );
+	set( pj, "resched" );
 	set( cj, "reinit" );
+	set( pj, "reinit" );
 #ifdef DO_UNIT_TESTS
 	MPI::COMM_WORLD.Barrier();
 	if ( mynode == 0 )
