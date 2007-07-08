@@ -124,7 +124,7 @@ template < class T1, class T2, class T3 > void send3(
  * target specified by the conn argument. Note that this refers
  * to the index in the local conn_ vector.
  */
-template< class T1, class T2, class T3 > void sendTo2(
+template< class T1, class T2, class T3 > void sendTo3(
 		const Element* eIn, unsigned int src, unsigned int conn,
 		T1 val1, T2 val2, T3 val3 )
 {

@@ -3992,5 +3992,9 @@ Setting up to generate objects on specified nodes as a test.
 Mostly set up. I have had to implement a new function for creating objects
 on specified nodes. The actual creation test is on hold till I check in the
 assorted changes and fixes so far. This set works with 2, 3 and 4 nodes.
+Checked in as revision 161, in parallel compile form with debugging.
+
+The Shell::testMess is coming along nicely now, with node-specific creation
+of objects and assignment of values. Tested on 1 - 4 nodes.
 
 =============================================================================
