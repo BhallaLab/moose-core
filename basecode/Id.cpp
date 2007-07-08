@@ -47,6 +47,12 @@ Id Id::scratchId()
 }
 
 // static func
+Id Id::makeIdOnNode( unsigned int node )
+{
+	return manager().makeIdOnNode( node );
+}
+
+// static func
 Id Id::shellId()
 {
 	return Id( 1 );

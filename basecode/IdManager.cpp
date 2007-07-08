@@ -109,7 +109,7 @@ unsigned int IdManager::childId( unsigned int parent )
 			mainIndex_++;
 		}
 		if ( mainIndex_ >= elementList_.size() )
-			elementList_.resize( mainIndex_ * 2 );
+			elementList_.resize( mainIndex_ * 2, 0 );
 		return lastId_;
 	}
 	assert( 0 );
@@ -117,9 +117,32 @@ unsigned int IdManager::childId( unsigned int parent )
 	lastId_ = mainIndex_;
 	mainIndex_++;
 	if ( mainIndex_ >= elementList_.size() )
-		elementList_.resize( mainIndex_ * 2 );
+		elementList_.resize( mainIndex_ * 2, 0 );
 	return lastId_;
 #endif
+}
+
+/**
+ * This variant of childId forces creation of object on specified node,
+ * provided that we are in parallel mode. Otherwise it ignores the node
+ * specification.  
+ * Should only be called on master node, and parent should have been checked
+ * In single-node mode it is equivalent to the scratchId and childId ops.
+ */
+unsigned int IdManager::makeIdOnNode( unsigned int childNode )
+{
+	lastId_ = mainIndex_;
+	mainIndex_++;
+#ifdef USE_MPI
+	assert( myNode_ == 0 );
+	assert( childNode < numNodes_ );
+	if ( childNode > 0 ) { // Off-node element
+		elementList_[ lastId_ ] = post_[ childNode ];
+	}
+#endif
+	if ( mainIndex_ >= elementList_.size() )
+		elementList_.resize( mainIndex_ * 2, 0 );
+	return lastId_;
 }
 
 Element* IdManager::getElement( unsigned int index ) const
