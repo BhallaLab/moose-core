@@ -44,7 +44,9 @@
 #endif
 
 #ifdef USE_GENESIS_PARSER
-	extern void makeGenesisParser( const string& s );
+	extern Element* makeGenesisParser( );
+	extern void nonblock( int state );
+	extern bool nonBlockingGetLine( string& s );
 #endif
 
 int main(int argc, char** argv)
@@ -199,10 +201,42 @@ int main(int argc, char** argv)
 			else if ( len > 4 && 
 							strcmp( argv[1] + len - 3, ".mu" ) == 0 )
 				line = "include";
-			for ( int i = 1; i < argc; i++ )
-				line = line + " " + argv[ i ];
+
+			if ( line == "include" ) {
+				for ( int i = 1; i < argc; i++ )
+					line = line + " " + argv[ i ];
+				line.push_back( '\n' );
+			}
 		}
-		makeGenesisParser( line );
+		Element* sli = makeGenesisParser();
+		assert( sli != 0 );
+		const Finfo* parseFinfo = sli->findFinfo( "parse" );
+		assert ( parseFinfo != 0 );
+
+		set< string >( sli, parseFinfo, line );
+		set< string >( sli, parseFinfo, "\n" );
+		/**
+		 * Here is the key infinite loop for getting terminal input,
+		 * parsing it, polling postmaster, managing GUI and other 
+		 * good things.
+		 */
+		string s = "";
+//		nonblock( 1 );
+		unsigned int lineNum = 0;
+		cout << "moose #" << lineNum << " > " << flush;
+		while( 1 ) {
+			if ( nonBlockingGetLine( s ) ) {
+				set< string >( sli, parseFinfo, s );
+				if ( s.find_first_not_of( " \t\n" ) != s.npos )
+					lineNum++;
+				s = "";
+				cout << "moose #" << lineNum << " > " << flush;
+			}
+			// Here we poll the postmaster
+			// set( shell, stepFinfo );
+			// gui stuff here maybe.
+		}
+//		nonblock( 0 );
 	}
 #endif
 #ifdef USE_MPI
