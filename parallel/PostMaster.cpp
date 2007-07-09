@@ -306,6 +306,7 @@ void PostMaster::addIncomingFunc( unsigned int connId, unsigned int index )
 void PostMaster::innerPostIrecv()
 {
 	// cout << "!" << flush;
+	// cout << "inner PostIrecv on node " << localNode_ << " from " << remoteNode_ << endl << flush;
 	request_ = comm_->Irecv(
 			inBuf_, inBufSize_, MPI_CHAR, remoteNode_, DATA_TAG );
 	// cout << inBufSize_ << " innerPostIrecv: request_ empty?" << ( request_ == static_cast< MPI::Request >( 0 ) ) << "\n";
@@ -328,7 +329,7 @@ void PostMaster::innerPoll( const Conn& c )
 	Element* e = c.targetElement();
 	unsigned int pollMsgIndex = c.targetIndex();
 	// Look up the irecv'ed data here
-	// cout << "inner Poll\n" << flush;
+	// cout << "inner Poll on node " << localNode_ << " from " << remoteNode_ << endl << flush;
 	if ( donePoll_ )
 			return;
 	if ( !request_ ) {
@@ -695,10 +696,17 @@ void testPostMaster()
 
 	Id shellId( "/shell", "/" );
 	Element* shell = shellId();
-	if ( myNode == 0 )
+	if ( myNode == 0 ) {
 		testMess( shell, numNodes );
-	set< double >( cj, "start", 2.0 );
+		Id pjId( "/sched/pj", "/" );
+		assert( !pjId.bad() );
+		Element* pj = pjId();
+		set< double >( pj, "start", 4.0 );
+	}
+	/*
+	set( shell, "poll" );
 	MPI::COMM_WORLD.Barrier();
+	*/
 }
 #endif
 
