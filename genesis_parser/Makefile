@@ -23,7 +23,7 @@ OBJ = \
 	eval.o \
 	parse.o \
 	getopt.o \
-	script.o
+	script.o \
 
 HEADERS = \
 	../basecode/header.h \

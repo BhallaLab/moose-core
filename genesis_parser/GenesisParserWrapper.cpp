@@ -2333,7 +2333,7 @@ Element* GenesisParserWrapper::getShell( Id g )
  * the Genesis parser treats as a file argument for loading.
  * Then the parser goes to its infinite loop using the Process call.
  */
-void makeGenesisParser( const string& s )
+Element* makeGenesisParser()
 {
 	// set< string, string >( Element::root(), "create", "Shell", "shell");
 	// Element* shell = Element::lastElement();
@@ -2358,10 +2358,10 @@ void makeGenesisParser( const string& s )
 	static_cast< GenesisParserWrapper* >( sli->data() )->unitTest();
 #endif
 
-	if ( s.length() > 1 ) {
-		set< string >( sli, "parse", s );		
-	}
-	set( sli, "process" );
+	return sli;
+
+	// The original infinite event loop. Now shifted out to the 'main'
+	// set( sli, "process" );
 }
 
 //////////////////////////////////////////////////////////////////
