@@ -16,6 +16,7 @@ TARGET = maindir.o
 
 OBJ = \
 	main.o	\
+	nonblock.o \
 
 HEADERS = \
 	../basecode/header.h \
