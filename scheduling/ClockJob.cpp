@@ -97,22 +97,6 @@ const Cinfo* initClockJobCinfo()
 {
 
 	/**
-	 * This sets up the Process shared message. First entry is for
-	 * Process, second for Reinit.
-	 * For now disabled.
-	 */
-		/*
-	static TypeFuncPair processTypes[] = {
-		TypeFuncPair( Ftype1< ProcInfo >::global(), 0 ),	// Process
-		TypeFuncPair( Ftype1< ProcInfo >::global(), 0 ),	// Reinit
-		TypeFuncPair( Ftype0::global(), 0 ),				// Resched
-		TypeFuncPair( Ftype1< unsigned int >::global(), 0 ), // NewObj
-		TypeFuncPair( Ftype1< double >::global(), 
-						RFCAST( &ClockJob::dtFunc ) ),	// dtIn
-	};
-	*/
-
-	/**
 	 * This is a shared message that connects up to the 'prev'
 	 * message of the first 
 	 * Tick in the sequence. It is equivalent to the Tick::next
@@ -121,21 +105,22 @@ const Cinfo* initClockJobCinfo()
 	 * and return values. It is meant to handle only a
 	 * single target.
 	 */
-	static TypeFuncPair tickTypes[] = 
+	static Finfo* tickShared[] = 
 	{
 		// This first entry is for the incrementTick function
-		TypeFuncPair( Ftype2< ProcInfo, double >::global(), 0 ),
+		new SrcFinfo( "incrementTick", 
+			Ftype2< ProcInfo, double >::global() ),
 		// The second entry is a request to send nextTime_ from the next
 		// tick to the current one. 
-		TypeFuncPair( Ftype0::global(), 0 ),
+		new SrcFinfo( "nextTime", Ftype0::global() ),
 		// The third entry is for receiving the nextTime_ value
 		// from the following tick.
-		TypeFuncPair( Ftype1< double >::global(), 
+		new DestFinfo( "recvNextTime", Ftype1< double >::global(), 
 			RFCAST( &ClockJob::receiveNextTime ) ),
 		// The third one is for propagating resched forward.
-		TypeFuncPair( Ftype0::global(), 0 ),
+		new SrcFinfo( "resched", Ftype0::global() ),
 		// The fourth one is for propagating reinit forward.
-		TypeFuncPair( Ftype0::global(), 0 ),
+		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
 	};
 
 	static Finfo* clockFinfos[] =
@@ -164,7 +149,8 @@ const Cinfo* initClockJobCinfo()
 	///////////////////////////////////////////////////////
 		// Connects up to the 'prev' shared message of the first
 		// Tick in the sequence.
-		new SharedFinfo( "tick", tickTypes, 5 ),
+		new SharedFinfo( "tick", tickShared, 
+			sizeof( tickShared ) / sizeof( Finfo* ) ),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -214,13 +200,13 @@ static const Cinfo* clockJobCinfo = initClockJobCinfo();
 static const unsigned int startSlot = 
 	initClockJobCinfo()->getSlotIndex( "startSrc" );
 static const unsigned int incrementSlot = 
-	initClockJobCinfo()->getSlotIndex( "tick" ) + 0;
+	initClockJobCinfo()->getSlotIndex( "tick.incrementTick" );
 static const unsigned int requestNextTimeSlot = 
-	initClockJobCinfo()->getSlotIndex( "tick" ) + 1;
+	initClockJobCinfo()->getSlotIndex( "tick.nextTime" );
 static const unsigned int reschedSlot = 
-	initClockJobCinfo()->getSlotIndex( "tick" ) + 2;
+	initClockJobCinfo()->getSlotIndex( "tick.resched" );
 static const unsigned int reinitSlot = 
-	initClockJobCinfo()->getSlotIndex( "tick" ) + 3;
+	initClockJobCinfo()->getSlotIndex( "tick.reinit" );
 
 ///////////////////////////////////////////////////
 // Field function definitions

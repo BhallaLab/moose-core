@@ -132,9 +132,13 @@ int main(int argc, char** argv)
 	//	Here we connect up the postmasters to the shell and the ParTick.
 	///////////////////////////////////////////////////////////////////
 	const Finfo* serialFinfo = shell->findFinfo( "serial" );
-	const Finfo* masterFinfo = shell->findFinfo( "master" );
-	const Finfo* slaveFinfo = shell->findFinfo( "slave" );
 	assert( serialFinfo != 0 );
+	const Finfo* masterFinfo = shell->findFinfo( "master" );
+	assert( masterFinfo != 0 );
+	const Finfo* slaveFinfo = shell->findFinfo( "slave" );
+	assert( slaveFinfo != 0 );
+	const Finfo* pollFinfo = shell->findFinfo( "pollSrc" );
+	assert( pollFinfo != 0 );
 
 	const Finfo* tickFinfo = t0->findFinfo( "parTick" );
 	assert( tickFinfo != 0 );
@@ -152,10 +156,13 @@ int main(int argc, char** argv)
 		assert( ret );
 		ret = tickFinfo->add( pt0, *j, (*j)->findFinfo( "parTick" ) );
 		assert( ret );
+
 		if ( mynode == 0 ) {
 			ret = masterFinfo->add( shell, *j, (*j)->findFinfo( "data" ) );
+			assert( ret );
 		} else {
 			ret = slaveFinfo->add( shell, *j, (*j)->findFinfo( "data" ) );
+			assert( ret );
 		}
 		/*
 		cout << "On " << mynode << ", post: " << (*j)->name() << endl;
@@ -163,6 +170,8 @@ int main(int argc, char** argv)
 		assert( ret );
 		*/
 	}
+	ret = pollFinfo->add( shell, pj, pj->findFinfo( "step" ) );
+	assert( ret );
 
 	// cout << "On " << mynode << ", shell: " << shell->name() << endl;
 	// shell->dumpMsgInfo();
@@ -197,6 +206,10 @@ int main(int argc, char** argv)
 	}
 #endif
 #ifdef USE_MPI
+	if ( mynode != 0 ) {
+		ret = set( shell, "poll" );
+		assert( ret );
+	}
 	MPI::Finalize();
 #endif
 	cout << "done" << endl;
