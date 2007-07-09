@@ -141,9 +141,10 @@ int main(int argc, char** argv)
 	assert( slaveFinfo != 0 );
 	const Finfo* pollFinfo = shell->findFinfo( "pollSrc" );
 	assert( pollFinfo != 0 );
-
 	const Finfo* tickFinfo = t0->findFinfo( "parTick" );
 	assert( tickFinfo != 0 );
+	const Finfo* stepFinfo = pj->findFinfo( "step" );
+	assert( stepFinfo != 0 );
 
 	bool glug = (argc == 2 && 
 		strcmp( argv[1], "-debug" ) == 0 );
@@ -215,13 +216,13 @@ int main(int argc, char** argv)
 
 		set< string >( sli, parseFinfo, line );
 		set< string >( sli, parseFinfo, "\n" );
+
 		/**
 		 * Here is the key infinite loop for getting terminal input,
 		 * parsing it, polling postmaster, managing GUI and other 
 		 * good things.
 		 */
 		string s = "";
-//		nonblock( 1 );
 		unsigned int lineNum = 0;
 		cout << "moose #" << lineNum << " > " << flush;
 		while( 1 ) {
@@ -233,10 +234,9 @@ int main(int argc, char** argv)
 				cout << "moose #" << lineNum << " > " << flush;
 			}
 			// Here we poll the postmaster
-			// set( shell, stepFinfo );
+			ret = set< int >( pj, stepFinfo, 1 );
 			// gui stuff here maybe.
 		}
-//		nonblock( 0 );
 	}
 #endif
 #ifdef USE_MPI
@@ -248,4 +248,3 @@ int main(int argc, char** argv)
 #endif
 	cout << "done" << endl;
 }
-
