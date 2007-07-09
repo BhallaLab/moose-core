@@ -698,15 +698,7 @@ void testPostMaster()
 	Element* shell = shellId();
 	if ( myNode == 0 ) {
 		testMess( shell, numNodes );
-		Id pjId( "/sched/pj", "/" );
-		assert( !pjId.bad() );
-		Element* pj = pjId();
-		set< double >( pj, "start", 4.0 );
 	}
-	/*
-	set( shell, "poll" );
-	MPI::COMM_WORLD.Barrier();
-	*/
 }
 #endif
 
