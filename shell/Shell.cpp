@@ -251,6 +251,15 @@ const Cinfo* initShellCinfo()
 			Ftype1< string >::global(),
 			RFCAST( &Shell::rawAddFunc )
 		),
+		new DestFinfo( "poll", // Infinite loop, meant for slave nodes
+			Ftype0::global(),
+			RFCAST( &Shell::pollFunc )
+		),
+		new SrcFinfo( "pollSrc", 
+			// # of steps. 
+			// This talks to /sched/pj:step to poll the postmasters
+			Ftype1< int >::global()
+		),
 
 		new SharedFinfo( "parser", parserShared, 
 				sizeof( parserShared ) / sizeof( Finfo* ) ), 
@@ -304,6 +313,12 @@ static const unsigned int rAddSlot =
 	initShellCinfo()->getSlotIndex( "master.add" );
 static const unsigned int recvGetSlot =
 	initShellCinfo()->getSlotIndex( "slave.recvGet" );
+
+static const unsigned int pollSlot =
+	initShellCinfo()->getSlotIndex( "pollSrc" );
+
+
+void printNodeInfo( const Conn& c );
 
 //////////////////////////////////////////////////////////////////////
 // Initializer
@@ -524,6 +539,14 @@ void Shell::rawTestFunc( const Conn& c, string s )
 	// cout << "Shell::rawTestFunc( " << s << " )\n";
 }
 
+void Shell::pollFunc( const Conn& c )
+{
+	while( 1 ) {
+		// cout << "." << flush;
+		send1< int >( c.targetElement(), pollSlot, 1 );
+	}
+}
+
 //////////////////////////////////////////////////////////////////////
 // Moose fields for Shell
 //////////////////////////////////////////////////////////////////////
@@ -663,7 +686,7 @@ void testMess( Element* e, unsigned int numNodes )
 		sendTo4< string , string, Id, Id>( 
 			e, rCreateSlot, startConn + i - 1, 
 			"Neutral", "OffNodeCreateTest", 
-			Id::str2Id( "1" ), offNodeObjs[ i ] );
+			Id::str2Id( "0" ), offNodeObjs[ i ] );
 	}
 
 	// This should return 'shell'
@@ -671,6 +694,8 @@ void testMess( Element* e, unsigned int numNodes )
 
 	// send1< string >( e, recvGetSlot, "fieldvalue" );
 
+	// Poll the postmasters.
+	send1< int >( e, pollSlot, 1 );
 	/*
 	 * Here we assign new names to each of these neutrals
 	*/
@@ -682,6 +707,7 @@ void testMess( Element* e, unsigned int numNodes )
 			startConn + i - 1,
 			offNodeObjs[ i ], "name", name );
 	}
+	send1< int >( e, pollSlot, 1 );
 
 	/*
 	 * Here we check the names of the neutrals.
@@ -694,10 +720,13 @@ void testMess( Element* e, unsigned int numNodes )
 			startConn + i - 1,
 			offNodeObjs[ i ], "name" );
 	}
+	send1< int >( e, pollSlot, 1 );
 
 	send4< Id, string, Id, string >( e, rAddSlot, 
 		Id::str2Id( "5432" ), "srcfield", Id::str2Id( "9876" ),
 		"destfield" );
+
+	send1< int >( e, pollSlot, 1 );
 }
 
 void printNodeInfo( const Conn& c )
@@ -738,7 +767,8 @@ void Shell::recvGetFunc( const Conn& c, string value )
 	// Problem if multiple parsers.
 	// Bigger problem that this is asynchronous now.
 	// Maybe it is OK if only one parser.
-	sendTo1< string >( c.targetElement(), getFieldSlot, 0, value );
+	// sendTo1< string >( c.targetElement(), getFieldSlot, 0, value );
+	send1< string >( c.targetElement(), getFieldSlot, value );
 }
 
 void Shell::slaveCreateFunc ( const Conn& c, 

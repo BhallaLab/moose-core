@@ -3996,5 +3996,57 @@ Checked in as revision 161, in parallel compile form with debugging.
 
 The Shell::testMess is coming along nicely now, with node-specific creation
 of objects and assignment of values. Tested on 1 - 4 nodes.
+Checked in as revision 162, in parallel compile form with debugging.
+
+Next to put in a function for handling the polling using pj within 
+shell commands.
+
+OK, I have polling going on between testMess calls on the master node. How
+to set up on slaves? Best approach may be to provide a shell function that
+does polling till the quit command.
+
+Seems like I get a near-race condition if I set off the polling. I tried
+to do the equivalent by setting it off for 200 steps, and it took a long
+time to unwind the calls. Need to trace to see the execution order of the
+polls on different nodes.
+
+Order seems OK. Tracked down a problem with an uninitialized dt in ClockJob.
+Now another issue comes up with 3 nodes where it looks like a pointer problem.
+Valgrind can't deal with it.
+Overall, we are getting close to being able to set the system to work with
+polling on the slave nodes.
+
+=============================================================================
+9 July 2007
+Working on yesterday's problem. 
+- Dies only on slave nodes, 3 nodes not 2.
+- Identical trace
+- Initiated from ClockJob::startFuncLocal, line 287
+- SimpleElement::srcRecvFunc: line 371 is actual assertion.
+- in ClockJob::startFuncLocal, info_ data is garbage. Info should be 
+	properly initialized at this point. 
+	- Info garbage is identical between the two slaves.
+- Aha: The element actually is named node0 in both cases, presumably the
+	postmaster that should be handling this. Looks like we sent a message
+	to the wrong target.
+	Something funny with the c.e_
+
+Checked if it was the use of TypeFuncPairs in ClockJob. Nope.
+
+OK: there are serious issues with the args in ClockJob and Tick::reinit.
+Fixed lots of stuff there, still same problem with 3 nodes.
+One possibility is that the Conn vector on the shell is being rearranged 
+while the polling is in process.
+Yes. That is it. The operation requested by testMess creates a child on the
+shell, thus rearranging the Conn vector. Nasty.
+Options:
+	Shell becomes readonly for messaging
+	Preallocate space on the Conn vector (limited hack)
+	Objects in general keep a block on modifications till messaging is done.
+
+Confirmed diagnosis by shifting test objects to be children of root.
+I've set it up to work through all tests, preparatory to tackling the issue
+of non-blocking terminal I/O so that the master process can also keep polling
+the postmasters.
 
 =============================================================================

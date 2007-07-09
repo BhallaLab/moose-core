@@ -15,9 +15,8 @@ class ClockJob
 	public:
 		ClockJob()
 			: runTime_( 0.0 ), currentTime_( 0.0 ), nextTime_( 0.0 ),
-			nSteps_( 0 ), currentStep_( 0 )
-		{
-		}
+			nSteps_( 0 ), currentStep_( 0 ), dt_( 1.0 ), info_()
+		{;}
 
 		//////////////////////////////////////////////////////////
 		//  Field assignment functions
