@@ -4056,6 +4056,9 @@ on the command line, but I hacked another carriage return in and it now
 does that too. Then there was an issue with the loss of the control characters.
 I finally have something that does most of what I need: nonblocking, but
 uses the canonical control character handling so the tty is nice. 
+Checked in as revision 164, in parallel compile form with debugging.
 
+Implemented the postmaster polling from all nodes now, including master.
+Tested from 1 to 4 nodes.
 
 =============================================================================
