@@ -31,21 +31,21 @@ const Cinfo* initTickCinfo()
 	 * and return values. It is meant to handle only a
 	 * single target.
 	 */
-	static TypeFuncPair nextTypes[] = 
+	static Finfo* nextShared[] = 
 	{
 		// This first entry is for the incrementTick function
-		TypeFuncPair( Ftype2< ProcInfo, double >::global(), 0 ),
+		new SrcFinfo( "increment", Ftype2< ProcInfo, double >::global() ),
 		// The second entry is a request to send nextTime_ from the next
 		// tick to the current one. 
-		TypeFuncPair( Ftype0::global(), 0 ),
+		new SrcFinfo( "nextTimeSrc", Ftype0::global() ),
 		// The third entry is for receiving the nextTime_ value
 		// from the following tick.
-		TypeFuncPair( Ftype1< double >::global(), 
+		new DestFinfo( "nextTime", Ftype1< double >::global(), 
 			RFCAST( &Tick::receiveNextTime ) ),
 		// The third one is for propagating resched forward.
-		TypeFuncPair( Ftype0::global(), 0 ),
+		new SrcFinfo( "resched", Ftype0::global() ),
 		// The fourth one is for propagating reinit forward.
-		TypeFuncPair( Ftype0::global(), 0 ),
+		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
 	};
 
 	/**
@@ -53,33 +53,35 @@ const Cinfo* initTickCinfo()
 	 * this message from the preceding tick. Again, should only have
 	 * a singe target.
 	 */
-	static TypeFuncPair prevTypes[] = 
+	static Finfo* prevShared[] = 
 	{
 		// This first entry is for the incrementTick function
-		TypeFuncPair( Ftype2< ProcInfo, double >::global(), 
+		new DestFinfo( "increment", Ftype2< ProcInfo, double >::global(), 
 			RFCAST( &Tick::incrementTick ) ),
 		// The second entry handles requests to send nextTime_ back
 		// to the previous tick.
-		TypeFuncPair( Ftype0::global(), 
+		new DestFinfo( "nextTime", Ftype0::global(), 
 			RFCAST( &Tick::handleNextTimeRequest ) ),
 		// The third entry sends nextTime_ value
 		// to the previous tick.
-		TypeFuncPair( Ftype1< double >::global(), 0 ),
+		new SrcFinfo( "nextTimeSrc", Ftype1< double >::global() ),
 		// The fourth entry is for receiving the resched call
-		TypeFuncPair( Ftype0::global(), RFCAST( &Tick::resched ) ),
+		new DestFinfo( "resched", Ftype0::global(), 
+			RFCAST( &Tick::resched ) ),
 		// The fifth one is for receiving the reinit call.
-		TypeFuncPair( Ftype0::global(), RFCAST( &Tick::reinit ) ),
+		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(), 
+			RFCAST( &Tick::reinit ) ),
 	};
 
 	/**
 	 * This goes to all scheduled objects to call their process events.
 	 */
-	static TypeFuncPair processTypes[] = 
+	static Finfo* processShared[] = 
 	{
 		// The process function call
-		TypeFuncPair( Ftype1< ProcInfo >::global(), 0 ),
+		new SrcFinfo( "process", Ftype1< ProcInfo >::global() ),
 		// The reinit function call
-		TypeFuncPair( Ftype1< ProcInfo >::global(), 0 ),
+		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
 	};
 
 	static Finfo* tickFinfos[] =
@@ -110,9 +112,12 @@ const Cinfo* initTickCinfo()
 	///////////////////////////////////////////////////////
 	// Shared message definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "next", nextTypes, 5 ),
-		new SharedFinfo( "prev", prevTypes, 5 ),
-		new SharedFinfo( "process", processTypes, 2 ),
+		new SharedFinfo( "next", nextShared, 
+			sizeof( nextShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "prev", prevShared, 
+			sizeof( prevShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo* ) ),
 	
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -166,24 +171,24 @@ const Cinfo* initTickCinfo()
 static const Cinfo* tickCinfo = initTickCinfo();
 
 static const unsigned int nextSlot = 
-	initTickCinfo()->getSlotIndex( "next" ) + 0;
+	initTickCinfo()->getSlotIndex( "next.increment" );
 static const unsigned int requestNextTimeSlot = 
-	initTickCinfo()->getSlotIndex( "next" ) + 1;
+	initTickCinfo()->getSlotIndex( "next.nextTimeSrc" );
 static const unsigned int reschedSlot = 
-	initTickCinfo()->getSlotIndex( "next" ) + 2;
+	initTickCinfo()->getSlotIndex( "next.resched" );
 static const unsigned int reinitNextSlot = 
-	initTickCinfo()->getSlotIndex( "next" ) + 3;
+	initTickCinfo()->getSlotIndex( "next.reinit" );
 
 static const unsigned int returnNextTimeSlot = 
-	initTickCinfo()->getSlotIndex( "prev" ) + 0;
+	initTickCinfo()->getSlotIndex( "prev.nextTimeSrc" );
 	
 static const unsigned int updateDtSlot = 
 	initTickCinfo()->getSlotIndex( "updateDt" );
 
 static const unsigned int processSlot = 
-	initTickCinfo()->getSlotIndex( "process" ) + 0;
+	initTickCinfo()->getSlotIndex( "process.process" );
 static const unsigned int reinitSlot = 
-	initTickCinfo()->getSlotIndex( "process" ) + 1;
+	initTickCinfo()->getSlotIndex( "process.reinit" );
 
 ///////////////////////////////////////////////////
 // Field function definitions

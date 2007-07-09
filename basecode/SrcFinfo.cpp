@@ -16,6 +16,10 @@ bool SrcFinfo::add(
 	Element* e, Element* destElm, const Finfo* destFinfo
 ) const
 {
+	assert( destFinfo != 0 );
+	assert( e != 0 );
+	assert( destElm != 0 );
+
 	FuncList srcFl;
 	FuncList destFl;
 	unsigned int destIndex;
