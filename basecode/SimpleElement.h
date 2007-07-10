@@ -294,8 +294,10 @@ class SimpleElement: public Element
 
 		Element* innerDeepCopy( 
 						map< const Element*, Element* >& tree ) const;
+
 		void replaceCopyPointers(
-						map< const Element*, Element* >& tree );
+					map< const Element*, Element* >& tree,
+					vector< pair< Element*, unsigned int > >& delConns );
 		void copyMsg( map< const Element*, Element* >& tree );
 
 		///////////////////////////////////////////////////////////////
