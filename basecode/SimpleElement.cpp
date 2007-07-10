@@ -290,7 +290,7 @@ RecvFunc SimpleElement::lookupRecvFunc(
 	assert ( conn < conn_.size() );
 	assert ( src_[src].begin() <= conn );
 	vector< MsgSrc >::const_iterator i = src_.begin() + src;
-	while ( i->end() < conn ) {
+	while ( i->end() <= conn ) {
 		assert ( i->next() != 0 );
 		i += i->next();
 	}
