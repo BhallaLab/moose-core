@@ -143,6 +143,7 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 
 	map< const Element*, Element* > tree;
 	map< const Element*, Element* >::iterator i;
+	vector< pair< Element*, unsigned int > > delConns;
 
 	Element* child = innerDeepCopy( tree );
 	child->setName( nm );
@@ -150,10 +151,16 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 	// First pass: Replace copy pointers so that the dup is set up right
 	for ( i = tree.begin(); i != tree.end(); i++ ) {
 		if ( i->first != i->second ) {
-			i->second->replaceCopyPointers( tree );
+			i->second->replaceCopyPointers( tree, delConns );
 		}
 	}
-	// Second pass: Copy over messages to any global elements.
+
+	// Second pass: Delete any outgoing messages or messages to globals
+	vector< pair< Element*, unsigned int > >::iterator j;
+	for ( j = delConns.begin(); j != delConns.end(); j++ )
+		j->first->deleteHalfConn( j->second );
+	
+	// Third pass: Copy over messages to any global elements.
 	for ( i = tree.begin(); i != tree.end(); i++ ) {
 		if ( i->first == i->second ) { // a global
 			i->second->copyMsg( tree );
@@ -222,29 +229,28 @@ bool SimpleElement::innerCopyMsg(
 	return 0;
 }
 
-
 /**
  * This function replaces Element* pointers in the conn_ vector
  * with corresponding ones from the copied tree.
- * 
- * If there are any Conns going outside the tree, they have to be 
- * removed here.
+ *
+ * While doing so it also fills out a vector to keep track of conns
+ * that need to be deleted. This vector has to be filled out now,
+ * because the information on targetElement can only be found from the
+ * tree before the targets are replaced here. However, the deletion of
+ * the conns cannot be done till the entire tree has had its targets
+ * replaces. So the vector is filled here and executed later.
  *
  * In the case of the HaloCopy (yet to be implemented ) we would
  * instead create new exterior conns to duplicate the linkages
  * of the old ones.
  */
+
 void SimpleElement::replaceCopyPointers(
-	map< const Element*, Element* >& tree )
+	map< const Element*, Element* >& tree,
+	vector< pair< Element*, unsigned int > >& delConns )
 {
 	if ( conn_.size() == 0 ) return;
 	map< const Element*, Element* >::iterator j;
-
-	// Here we do a reverse iteration because we want to delete
-	// conns that are outside the tree. The delete operation munges
-	// all later Conn indices, so a forward iteration would not work.
-	// Note that this loop also deletes the dangling child message
-	// on the root of the copied tree.
 	
 	unsigned int i = conn_.size();
 	while ( i > 0 ) {
@@ -253,16 +259,15 @@ void SimpleElement::replaceCopyPointers(
 		if ( j != tree.end() ) { // Inside the tree. Just replace ptrs.
 			if ( j->first != j->second ) // Don't mess with globals.
 				conn_[ i ].replaceElement( j->second );
-			else // Delete the conn as it goes to the global.
-				deleteHalfConn( i );
-		} else {
-			// Outside the tree. Delete the conn and update
-			// all sorts of stuff in MsgSrc and MsgDest.
-			deleteHalfConn( i );
+			else // Globals must have their conns deleted
+				delConns.push_back( 
+					pair< Element*, unsigned int >( this, i ) );
+		} else { // Objects outside the tree must have their conns deleted
+			delConns.push_back( 
+				pair< Element*, unsigned int >( this, i ) );
 		}
 	}
 }
-
 
 #ifdef DO_UNIT_TESTS
 
