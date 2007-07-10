@@ -339,9 +339,14 @@ class Element
 		/**
 		 * This function replaces Element* pointers in the conn_ vector
 		 * with corresponding ones from the copied tree.
+		 * It fills the delConns vector with entries where the conns
+		 * have to be deleted. These include conns
+		 * to global objects; they will later be reconstructed using
+		 * the CopyMsg function.
 		 */
 		virtual void replaceCopyPointers(
-						map< const Element*, Element* >& tree ) = 0;
+				map< const Element*, Element* >& tree,
+				vector< pair < Element*, unsigned int > >& delConns ) = 0;
 
 		/**
 		 * This function takes all the messages between this
@@ -350,8 +355,7 @@ class Element
 		 * current element and the data (copied) portion of the tree.
 		 * Excludes child messages.
 		 */
-		virtual void copyMsg( map< const Element*, Element* >& tree )
-				= 0;
+		virtual void copyMsg( map< const Element*, Element* >& tree ) = 0;
 		
 		/**
 		 * Returns the memory use of the Element and its messages, 
