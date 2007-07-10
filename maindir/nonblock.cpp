@@ -55,47 +55,16 @@ void nonblock(int state)
 
 bool nonBlockingGetLine( string& s )
 {
-	static vector< string > history;
-	static unsigned int historyIndex = 0;
+	// static vector< string > history;
+	// static unsigned int historyIndex = 0;
 	static char line[400];
 
 	usleep( 1 );
 	if ( kbhit() ) {
 		fgets( line, 399, stdin );
 		s = line;
-		history.push_back( s );
+		// history.push_back( s );
 		return 1;
-
-		/*
-		cout << "." << flush;
-		char c = fgetc( stdin );
-		switch ( c ) {
-			case 0x10: // control-p
-				break;
-			case 0x0e: // control-n
-				break;
-			case '\b': // backspace
-			case 0x7f: // delete
-				// do something!
-//				fputc( c, stdout );
-				break;
-			case 0x15: // clear line, hopefully control-u
-				break;
-			case '\n':
-			case '\r':
-				if ( s.find_first_not_of( " \t" ) != s.npos ) {
-					history.push_back( s );
-				}
-				s.push_back( c );
-//				fputc( c, stdout );
-				return 1;
-				break;
-			default:
-//				fputc( c, stdout );
-				s.push_back( c );
-				break;
-		}
-		*/
 	}
 	return 0;
 }
