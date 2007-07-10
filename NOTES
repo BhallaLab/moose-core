@@ -4060,5 +4060,11 @@ Checked in as revision 164, in parallel compile form with debugging.
 
 Implemented the postmaster polling from all nodes now, including master.
 Tested from 1 to 4 nodes.
+Checked in as revision 165, in parallel compile form with debugging.
+
+=============================================================================
+10 July 2007
+Fixed subtle bug in copy, reported by Niraj: Issue with sequencing the 
+removal of conns going outside tree and to global objects.
 
 =============================================================================
