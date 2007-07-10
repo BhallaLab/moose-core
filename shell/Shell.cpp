@@ -544,6 +544,8 @@ void Shell::pollFunc( const Conn& c )
 	while( 1 ) {
 		// cout << "." << flush;
 		send1< int >( c.targetElement(), pollSlot, 1 );
+		// Surprisingly, the usleep seems to worsen the responsiveness.
+		// usleep( 10 );
 	}
 }
 

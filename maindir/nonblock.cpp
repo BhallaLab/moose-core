@@ -59,7 +59,7 @@ bool nonBlockingGetLine( string& s )
 	static unsigned int historyIndex = 0;
 	static char line[400];
 
-	usleep( 10 );
+	usleep( 1 );
 	if ( kbhit() ) {
 		fgets( line, 399, stdin );
 		s = line;
