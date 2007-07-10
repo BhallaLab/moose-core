@@ -98,11 +98,11 @@ int main(int argc, char** argv)
 	// This one handles the simulation clocks
 	Element* cj =
 			Neutral::create( "ClockJob", "cj", sched );
+
+#ifdef USE_MPI
 	// This one handles parser and postmaster scheduling.
 	Element* pj =
 			Neutral::create( "ClockJob", "pj", sched );
-
-#ifdef USE_MPI
 	Element* t0 =
 			Neutral::create( "ParTick", "t0", cj );
 	Element* pt0 =
@@ -233,8 +233,10 @@ int main(int argc, char** argv)
 				s = "";
 				cout << "moose #" << lineNum << " > " << flush;
 			}
+#ifdef USE_MPI
 			// Here we poll the postmaster
 			ret = set< int >( pj, stepFinfo, 1 );
+#endif
 			// gui stuff here maybe.
 		}
 	}

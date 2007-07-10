@@ -4070,7 +4070,9 @@ Checked in as revision 166, in parallel compile form with debugging.
 
 Niraj found and fixed another bug, this one in SimpleElement::lookupRecvFunc.
 A bit of fine-tuning the polling of the postmasters.
+Checked in as revision 167, in parallel compile form with debugging.
 
-
+Niraj pointed out yet another problem: I had not been testing in the
+serial form. Fixed.
 
 =============================================================================
