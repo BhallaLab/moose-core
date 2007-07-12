@@ -104,4 +104,7 @@ class Compartment
 			static const double EPSILON;
 };
 
+// Used by the solver
+extern const Cinfo* initCompartmentCinfo();
+
 #endif // _COMPARTMENT_H
