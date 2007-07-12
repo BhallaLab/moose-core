@@ -30,4 +30,8 @@ class HHGate
 		Interpol A_;
 		Interpol B_;
 };
+
+// Used by the solver
+extern const Cinfo* initHHGateCinfo();
+
 #endif // _HHGate_h
