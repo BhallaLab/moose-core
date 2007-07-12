@@ -218,4 +218,8 @@ class HHChannel
 		}
 		static double powerN( double x, double p );
 };
+
+// Used by the solver
+extern const Cinfo* initHHChannelCinfo();
+
 #endif // _HHChannel_h

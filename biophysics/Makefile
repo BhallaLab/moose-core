@@ -18,6 +18,11 @@ OBJ = \
 	Nernst.o	\
 	SpikeGen.o	\
 	SynChan.o	\
+	HSolveBase.o	\
+	HSolve.o \
+	NeuroScanBase.o \
+	NeuroScan.o \
+	NeuroHub.o \
 	TestBiophysics.o	\
 
 HEADERS = \
@@ -35,6 +40,11 @@ CaConc.o:	CaConc.h
 Nernst.o:	Nernst.h
 SpikeGen.o:	SpikeGen.h
 SynChan.o:	SynChan.h SynInfo.h
+HSolveBase.o:	HSolveBase.h HSolveStructure.h
+HSolve.o:	HSolve.h HSolveBase.h HSolveStructure.h
+NeuroScanBase.o:	NeuroScanBase.h HSolveStructure.h
+NeuroScan.o:	NeuroScan.h NeuroScanBase.h HSolveStructure.h
+NeuroHub.o:	NeuroHub.h HSolveStructure.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c
