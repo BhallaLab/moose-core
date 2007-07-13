@@ -19,6 +19,10 @@
 #CFLAGS  =	-O3 -pg -Wall -pedantic
 
 # Use the options below for compiling on GCC4.0
+
+#  On Mac OS X, -Wno-deprecated helps silence some warnings (from GCC 4.0.1)
+#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -Wno-deprecated
+
 #  For Debian/Ubuntu 6.06, we need to add a few more compiler flags to
 #  help it through the genesis parser, which is littered with ifdefs.
 #CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
