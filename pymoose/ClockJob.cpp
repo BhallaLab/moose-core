@@ -69,4 +69,25 @@ void ClockJob::__set_step( int step )
 {
     set < int > (id_(), "step", step);
 }
+
+void ClockJob::resched()
+{
+    set (id_(), "resched");    
+}
+
+void ClockJob::reinit()
+{
+        set (id_(), "reinit");
+}
+
+void ClockJob::stop()
+{
+        set (id_(), "stop");
+}
+
+vector <double> & ClockJob::getClocks()
+{
+    return PyMooseBase::getContext()->getClocks();
+}
+
 #endif

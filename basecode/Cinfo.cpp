@@ -155,12 +155,12 @@ Cinfo::Cinfo(const std::string& name,
                     cpp << fieldType <<" " <<  name << "::__get_" <<  fieldName << "() const\n"
                         << "{\n"
                         << "    " <<  fieldType << " " << fieldName << ";\n"
-                        << "    get < " << fieldType << " > (Element::element(id_), \""<< fieldName << "\"," << fieldName << ");\n"
+                        << "    get < " << fieldType << " > (id_(), \""<< fieldName << "\"," << fieldName << ");\n"
                         << "    return " << fieldName << ";\n"
                         << "}" << endl;
                     cpp << "void " << name << "::__set_" << fieldName <<"( " << fieldType << " " << fieldName << " )\n"
                         << "{\n"
-                        << "    set < " << fieldType << " > (Element::element(id_), \"" << fieldName << "\", "<< fieldName << ");\n"
+                        << "    set < " << fieldType << " > (id_(), \"" << fieldName << "\", "<< fieldName << ");\n"
                         << "}" << endl;
                     swig << "%attribute(" << name << ", " << fieldType << ", " << fieldName << ", __get_" << fieldName << ", __set_" << fieldName << ")\n";                
                 }
