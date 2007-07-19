@@ -1,7 +1,6 @@
 #ifndef _pymoose_Compartment_cpp
 #define _pymoose_Compartment_cpp
 #include "Compartment.h"
-
 const std::string Compartment::className = "Compartment";
 Compartment::Compartment(Id id):PyMooseBase(id){}
 Compartment::Compartment(std::string path):PyMooseBase(className, path){}
