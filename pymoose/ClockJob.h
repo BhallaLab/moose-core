@@ -22,5 +22,13 @@ class ClockJob : public PyMooseBase
         void __set_start(double start);
         int __get_step() const;
         void __set_step(int step);
+    void resched();
+    void reinit();
+    void stop();
+    static vector <double> & getClocks(); // check with Upi - if this
+                                        // clock is the set of
+                                        // individual clocks or
+                                        // different ticks only
+    
 };
 #endif

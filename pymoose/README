@@ -6,6 +6,7 @@
 	Version: 
 		2007-05-01 	0.0 - Initial draft 
 		2007-05-18	0.1 - Updated info on Python2.5
+		2007-07-19	0.2 - Added examples
 ___________________________________________________________________
 
 	This directory contains code for python interface for
@@ -30,10 +31,10 @@ need to run "make clean" first. This is because swig uses dynamic
 linking/loading (.so) while the default moose binary uses static
 linking.
 
-	It is recommended that you use python2.4. Using Python 2.5
-produces this error: ... undefined symbol: Py_InitModule4
-	At the current stage may not even compile with Python 2.5.
-
+	Using Python 2.5 produces this error in some cases:
+... undefined symbol: Py_InitModule4
+	To compile for other versions of python, you have to change 
+the entry -I/usr/include/python2.5 to -I${YOUR_PYTHON_INCLUDE_DIR}
 
 	After successful compilation and linking, you can try out the
 python interface by cd-ing to the pymoose directory, which should
@@ -42,3 +43,12 @@ comment out the parts requiring third party libraries unless you have
 them installed. Now run: python ./squid.py - you should get the out
 file squid.plot (and a nice looking graph will pop up if you have the
 third party library installed).
+
+Examples:
+	The directory examples contains a few python scripts
+demonstrating the use of the python version. These are translations of
+corresponding GENESIS scripts. To run these from any location, you
+should have the directory containing moose.py and _moose.so (the same
+directory where _this_ file is located ) in your PYTHONPATH
+environment variable.
+

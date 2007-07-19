@@ -180,9 +180,9 @@ Vm.dumpFile("squid.plot")
 # Forget it (i.e. comment out) if you don't have matplotlib installed
 # and be happy with plotting the 'squid.plot' output file with some
 # other plotting software like xplot or gnuplot.
-from pylab import plot
-from pylab import array
-from pylab import show
-vm = array(Vm)
-plot(vm)
-show()
+#from pylab import plot
+#from pylab import array
+#from pylab import show
+#vm = array(Vm)
+#plot(vm)
+#show()
