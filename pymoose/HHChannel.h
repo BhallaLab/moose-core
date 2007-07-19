@@ -26,6 +26,12 @@ class HHChannel : public PyMooseBase
         void __set_Gk(double Gk);
         double __get_Ik() const;
         void __set_Ik(double Ik);
+        double __get_X() const;
+        void __set_X(double X);
+        double __get_Y() const;
+        void __set_Y(double Y);
+        double __get_Z() const;
+        void __set_Z(double Z);
         int __get_useConcentration() const;
         void __set_useConcentration(int useConcentration);
         double __get_IkSrc() const;

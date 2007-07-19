@@ -22,6 +22,7 @@
 	#include "HHGate.h"
 	#include "HHChannel.h"
 	#include "Compartment.h"
+	#include "HSolve.h"
 	#include "Enzyme.h"
 	#include "KineticHub.h"		
 	#include "Kintegrator.h"
@@ -42,7 +43,6 @@
 %template(string_vector) std::vector<std::string>;
 %include "../basecode/header.h"
 %include "../basecode/moose.h"
-
 %include "PyMooseContext.h"
 %include "PyMooseBase.h"
 %attribute(PyMooseBase, Id, id, __get_id)
@@ -182,6 +182,13 @@
 %attribute(Compartment, double, z, __get_z, __set_z)
 %attribute(Compartment, double, VmSrc, __get_VmSrc, __set_VmSrc)
 %attribute(Compartment, double, injectMsg, __get_injectMsg, __set_injectMsg)
+
+
+%include "HSolve.h"
+%attribute(HSolve, string, seedPath, __get_seed_path, __set_seed_path)
+%attribute(HSolve, int, NDiv, __get_NDiv, __set_NDiv)
+%attribute(HSolve, double, VLo, __get_VLo, __set_VLo)
+%attribute(HSolve, double, VHi, __get_VHi, __set_VHi)
 
 %include "Kintegrator.h"
 %attribute(Kintegrator, bool, isInitiatilized, __get_isInitiatilized, __set_isInitiatilized)
