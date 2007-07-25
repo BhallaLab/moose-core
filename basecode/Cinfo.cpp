@@ -49,11 +49,13 @@ Cinfo::Cinfo(const std::string& name,
 				const Cinfo* baseCinfo,
 				Finfo** finfoArray,
 				unsigned int nFinfos,
-				const Ftype* ftype
+				const Ftype* ftype,
+				struct SchedInfo* schedInfo,
+				unsigned int nSched
 )
 		: name_(name), author_(author), 
 		description_(description), baseCinfo_(baseCinfo),
-		base_( 0 ), ftype_( ftype ), nSrc_( 0 ), nDest_( 0 )
+		ftype_( ftype ), nSrc_( 0 ), nDest_( 0 )
 {
 	unsigned int i;
 	if ( baseCinfo ) {
@@ -71,6 +73,12 @@ Cinfo::Cinfo(const std::string& name,
 				finfos_.push_back( baseCinfo->finfos_[i] );
 		}
 	}
+
+	// Here we set up the scheduling.
+	///\ todo: Set up inheritance for scheduling.
+	for ( i = 0; i < nSched; i++ )
+		scheduling_.push_back( schedInfo[i] );
+
 #ifdef GENERATE_WRAPPERS        
         std::string out_dir_name ="generated/";
         std::string swig_name = out_dir_name+"pymoose.i";    
@@ -223,9 +231,11 @@ const Finfo* Cinfo::findFinfo( Element* e, const string& name ) const
 			return ret;
 	}
 
+	/*
 	// Fallthrough. No matches were found, so ask the base class.
 	if (base_ != 0 && base_ != this)
 		return base_->findFinfo( e, name );
+		*/
 
 	return 0;
 }
@@ -240,12 +250,14 @@ const Finfo* Cinfo::findFinfo(
 			return ret;
 	}
 
+	/*
 	// Fallthrough. No matches were found, so ask the base class.
 	// This could be problematic, if the base class indices disagree
 	// with the child class.
 	///\todo: Figure out how to manage base class index alignment here
 	if ( base_ && base_ != this)
 		return base_->findFinfo( e, connIndex );
+		*/
 
 	return 0;
 }
@@ -258,9 +270,11 @@ const Finfo* Cinfo::findFinfo( const string& name ) const
 				return (*i);
 	}
 
+	/*
 	// Fallthrough. No matches were found, so ask the base class.
 	if (base_ != 0 && base_ != this)
 		return base_->findFinfo( name );
+		*/
 
 	return 0;
 }
@@ -330,6 +344,7 @@ Element* Cinfo::create( Id id, const std::string& name,
 	else
 		ret->addFinfo( thisFinfo_ );
 	set( ret, "postCreate" );
+	
 	return ret;
 }
 
@@ -340,6 +355,30 @@ Element* Cinfo::create( Id id, const std::string& name,
 Element* Cinfo::create( Id id, const std::string& name ) const
 {
 	return create( id, name, ftype_->create( 1 ) );
+}
+
+/**
+ * Connect up new element to the clock ticks that will control its
+ * runtime operations.
+ */
+bool Cinfo::schedule( Element* e ) const
+{
+	static const Cinfo* tickCinfo = find( "Tick" );
+	assert( tickCinfo != 0 ); // Not sure about execution order here.
+	static const Finfo* procFinfo = tickCinfo->findFinfo( "process" );
+	assert( procFinfo != 0 );
+
+	vector< SchedInfo >::const_iterator i;
+	for ( i = scheduling_.begin(); i != scheduling_.end(); i++ ) {
+		char line[20];
+		sprintf( line, "/sched/cj/t%d", i->tick * 2 + i->stage );
+		Id tick( line );
+		assert( !tick.bad() );
+		procFinfo->add( tick(), e, i->finfo );
+	}
+	
+	// cout << "scheduling new object " << e->name() << endl;
+	return 1;
 }
 
 /**

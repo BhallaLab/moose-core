@@ -11,6 +11,13 @@
 #ifndef _CINFO_H
 #define _CINFO_H
 
+struct SchedInfo
+{
+	const Finfo* finfo;
+	unsigned int tick;
+	unsigned int stage;
+};
+
 /**
  * Class to manage class information for all the other classes.
  */
@@ -34,7 +41,9 @@ class Cinfo
 					const Cinfo* baseCinfo,
 					Finfo** finfoArray,
 					unsigned int nFinfos,
-					const Ftype* ftype
+					const Ftype* ftype,
+					struct SchedInfo* schedInfo = 0,
+					unsigned int nSched = 0
 			);
 
 			~Cinfo();
@@ -78,6 +87,7 @@ class Cinfo
 			Element* create( Id id, const string& name, 
 							void* data, bool noDelFlag = 0 ) const;
 
+			bool schedule( Element* e ) const;
 			// void destroy( void* ) const ;
 
 			const Ftype* ftype() const {
@@ -97,8 +107,9 @@ class Cinfo
 			const std::string description_;
 			const Cinfo* baseCinfo_;
 			vector< Finfo* > finfos_;
-			const Cinfo* base_;
 			const Ftype* ftype_;
+			vector < SchedInfo > scheduling_;
+			// const Cinfo* base_;
 			/**
 			 * These two fields hold the Finfo that refers back to
 			 * this Cinfo for class information. The noDelFinfo_

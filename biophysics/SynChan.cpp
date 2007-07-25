@@ -30,6 +30,8 @@ const Cinfo* initSynChanCinfo()
 	    new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 				RFCAST( &SynChan::reinitFunc ) ),
 	};
+	static Finfo* process =	new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo* ) );
 	/**
 	 * This is a shared message to couple channel to compartment.
 	 * The first entry is a MsgSrc to send Gk and Ek to the compartment
@@ -98,8 +100,12 @@ const Cinfo* initSynChanCinfo()
 ///////////////////////////////////////////////////////
 // Shared message definitions
 ///////////////////////////////////////////////////////
+		process,
+
+		/*
 		new SharedFinfo( "process", processShared,
 			sizeof( processShared ) / sizeof( Finfo* ) ), 
+			*/
 		new SharedFinfo( "channel", channelShared,
 			sizeof( channelShared ) / sizeof( Finfo* ) ),
 
@@ -124,6 +130,9 @@ const Cinfo* initSynChanCinfo()
 				RFCAST( &SynChan::modulatorFunc ) ),
 	};
 
+	// SynChan is scheduled after the compartment calculations.
+	static SchedInfo schedInfo[] = { { process, 0, 1 } };
+
 	static Cinfo SynChanCinfo(
 		"SynChan",
 		"Upinder S. Bhalla, 2007, NCBS",
@@ -131,7 +140,8 @@ const Cinfo* initSynChanCinfo()
 		initNeutralCinfo(),
 		SynChanFinfos,
 		sizeof( SynChanFinfos )/sizeof(Finfo *),
-		ValueFtype1< SynChan >::global()
+		ValueFtype1< SynChan >::global(),
+		schedInfo, 1
 	);
 
 	return &SynChanCinfo;
