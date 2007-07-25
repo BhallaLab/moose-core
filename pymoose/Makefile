@@ -1,29 +1,121 @@
+############################################################################
+# To avoid portability issues, we are avoiding setting the
+# include directories of the third party libraries in the 
+# makefile. 
+# To build the project using make, you should set the proper 
+# environment variables according to the location of the third 
+# party softwares.
+# These environment variables are:
+# CPLUS_INCLUDE_PATH
+# This should have python include directory in it, for linux 
+# it may be: /usr/include/python{VERSION} 
+#	/usr/local/include/python{VERSION}
+# For Apple's Darwin ( Mac), it might be:
+# /Library/Frameworks/Python.framework/Versions/2.5/include/python{VERSION}
+#
+# Also, you should pass the non-essential flags for compilation in the 
+# command line or as environment variables.
+# A sample build session could be:
+# export CPLUS_INCLUDE_PATH=/usr/local/include/python2.5
+# export CXXFLAGS=-g -Wall
+# export LDFLAGS=-lm -lpython
+# make pymoose
+#
+############################################################################
+
 TARGET = pymoose
+CXXFLAGS +=-DDO_UNIT_TESTS -fPIC
+DYNAMIC_FLAGS=-shared 
+# The library location and flags for creating dll in Mac is different from Linux
+SYSTEM=$(shell (uname))
+ifeq ($(SYSTEM),Darwin)
+	DYNAMIC_FLAGS=-bundle -flat_namespace -undefined suppress 
+endif
 
-CFLAGS = -ggdb -O0 -Wall -fPIC -DDO_UNIT_TESTS
-INCLUDES = -I../basecode -I../shell -I/usr/include/python2.5
+INCLUDES=-I../basecode -I../shell
 
-OBJFILES = ../basecode/basecode.o ../element/element.o ../shell/shell.o ../builtins/builtins.o ../biophysics/biophysics.o ../scheduling/scheduling.o PyMooseBase.o PyMooseContext.o Compartment.o Neutral.o PyMooseUtil.o HHChannel.o HHGate.o Interpol.o CaConc.o SpikeGen.o SynChan.o Table.o Nernst.o Tick.o ClockJob.o Enzyme.o  KineticHub.o Kintegrator.o Molecule.o  Reaction.o Stoich.o HSolve.o
-#  ../kinetics/SparseMatrix.o
-HEADERS = PyMooseUtil.h PyMooseContext.h PyMooseBase.h  Compartment.h Neutral.h HHChannel.h HHGate.h Interpol.h CaConc.h SpikeGen.h SynChan.h Table.h Nernst.h Tick.h ClockJob.h TableIterator.h Enzyme.h KineticHub.h Kintegrator.h Molecule.h Reaction.h Stoich.h HSolve.h
-#../kinetics/SparseMatrix.h
-TEST_MAIN = SquidTest.cpp
+OBJFILES = ../basecode/basecode.o \
+	../element/element.o \
+	../shell/shell.o \
+	../builtins/builtins.o \
+	../biophysics/biophysics.o \
+	../scheduling/scheduling.o 
+
+OBJ = PyMooseBase.o \
+	PyMooseContext.o \
+	Compartment.o \
+	Neutral.o \
+	PyMooseUtil.o \
+	HHChannel.o \
+	HHGate.o \
+	Interpol.o \
+	CaConc.o \
+	SpikeGen.o \
+	SynChan.o \
+	Table.o \
+	Nernst.o \
+	Tick.o \
+	ClockJob.o \
+	Enzyme.o \
+	KineticHub.o \
+	Kintegrator.o \
+	Molecule.o \
+	Reaction.o \
+	Stoich.o \
+	HSolve.o
+
+HEADERS = PyMooseUtil.h \
+	PyMooseContext.h \
+	PyMooseBase.h \
+	Compartment.h \
+	Neutral.h \
+	HHChannel.h \
+	HHGate.h \
+	Interpol.h \
+	CaConc.h \
+	SpikeGen.h \
+	SynChan.h \
+	Table.h \
+	Nernst.h \
+	Tick.h \
+	ClockJob.h \
+	TableIterator.h \
+	Enzyme.h \
+	KineticHub.h \
+	Kintegrator.h \
+	Molecule.h \
+	Reaction.h \
+	Stoich.h  \
+	HSolve.h
+
+# TEST_MAIN = SquidTest.cpp
 # TEST_MAIN = SwigTest.cpp
+
+#test_swig: $(OBJFILES) $(HEADERS) $(TEST_MAIN)
+#	$(CXX) $(CXXFLAGS) -o test_swig $(TEST_MAIN) $(OBJFILES)  
+
+
 default: $(TARGET)
 
-test_swig: $(OBJFILES) $(HEADERS) $(TEST_MAIN)
-	$(CXX) $(CFLAGS) -o test_swig $(TEST_MAIN) $(OBJFILES)  -I../basecode -I../shell
+.PHONY: pymoose
+.PHONY: clean
 
-pymoose: test_swig _moose.so moose.py
-_moose.so: moose_wrap.o $(HEADERS) $(OBJFILES)
-	g++ -g -shared -o _moose.so moose_wrap.o $(OBJFILES)
+pymoose: _moose.so moose.py 
+
+_moose.so: moose_wrap.o $(OBJ) $(OBJFILES)
+	$(CXX) $(CXXFLAGS) $(DYNAMIC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 moose_wrap.o: moose_wrap.cxx
-	g++ -g -c -fPIC moose_wrap.cxx -o moose_wrap.o $(INCLUDES)
+	$(CXX) $(CXXFLAGS) -c $^ -o $@ $(INCLUDES)
 
 moose.py moose_wrap.cxx: moose.i $(HEADERS)
 	swig -modern -c++ -python moose.i
-.cpp.o:
-	$(CXX) $(CFLAGS) -I../basecode -I../shell $< -c
+
+# This is not required - gnumake does it by implicit rule
+# .cpp.o:
+# 	$(CXX) $(CXXFLAGS) $(INCLUDES) $< -c
+
 clean:
 	-rm -f *.o moose_wrap.cxx *.so moose.py test_swig *.pyc
+
+

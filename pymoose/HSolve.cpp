@@ -9,13 +9,13 @@ HSolve::HSolve(std::string name, PyMooseBase* parent):PyMooseBase(className, nam
 HSolve::~HSolve(){}
 const std::string& HSolve::getType(){ return className; }
 
-string HSolve::__get_seed_path() const
+const string HSolve::__get_seed_path() const
 {
     string path;
     get < string > (id_(), "path",path);
     return path;
 }
-void HSolve::__set_seed_path( string path )
+void HSolve::__set_seed_path( const string path ) const
 {
     set < string > (id_(), "path", path);
 }

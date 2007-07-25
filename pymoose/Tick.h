@@ -1,14 +1,14 @@
 #ifndef _pymoose_Tick_h
 #define _pymoose_Tick_h
 #include "PyMooseBase.h"
-class Tick : public PyMooseBase
+class ClockTick : public PyMooseBase
 {    public:
         static const std::string className;
-        Tick(Id id);
-        Tick(std::string path);
-        Tick(std::string name, Id parentId);
-        Tick(std::string name, PyMooseBase* parent);
-        ~Tick();
+        ClockTick(Id id);
+        ClockTick(std::string path);
+        ClockTick(std::string name, Id parentId);
+        ClockTick(std::string name, PyMooseBase* parent);
+        ~ClockTick();
         const std::string& getType();
         double __get_dt() const;
         void __set_dt(double dt);

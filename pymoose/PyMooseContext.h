@@ -84,6 +84,7 @@ class PyMooseContext
     void setClock(int clockNo, double dt, int stage);    
     vector <double>& getClocks();
     void useClock(Id tickId, std::string path, std::string func = "process");
+    void useClock(int tickNo, std::string path, std::string func = "process");
     void addTask(std::string arg);
     void do_deep_copy( Id object, std::string new_name, Id dest);
     Id deepCopy( Id object, std::string new_name, Id dest);    
