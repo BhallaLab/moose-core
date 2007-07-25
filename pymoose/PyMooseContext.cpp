@@ -294,6 +294,24 @@ char* copyString( const string& s )
     strcpy( ret, s.c_str() );
     return ret;
 }
+void setupDefaultSchedule( 
+	Element* t0, Element* t1, 
+	Element* t2, Element* t3, 
+	Element* t4, Element* t5,
+	Element* cj)
+{
+	set< double >( t0, "dt", 1e-5 );
+	set< double >( t1, "dt", 1e-5 );
+	set< int >( t1, "stage", 1 );
+	set< double >( t2, "dt", 5e-3 );
+	set< double >( t3, "dt", 5e-3 );
+	set< int >( t3, "stage", 1 );
+	set< double >( t4, "dt", 5e-3 );
+	set< double >( t5, "dt", 1.0 );
+	set( cj, "resched" );
+	set( cj, "reinit" );
+}
+
 //////////////////////////////////////////////////////////////////
 // PyMooseContext Message recv functions
 //////////////////////////////////////////////////////////////////
@@ -465,6 +483,12 @@ Id PyMooseContext::getShell()
 */
 PyMooseContext* PyMooseContext::createPyMooseContext(string shellName, string contextName)
 {
+	static const Cinfo* shellCinfo = initShellCinfo();
+	static const Cinfo* tickCinfo = initTickCinfo();
+	static const Cinfo* clockJobCinfo = initClockJobCinfo();
+	static const Cinfo* tableCinfo = initTableCinfo();
+	static const Cinfo* pyMooseContextCinfo = initPyMooseContextCinfo();
+
     Id shellId;
     Element* shell;
     bool ret;
@@ -516,8 +540,17 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string shellName, string co
     context->clockJob_ = Neutral::create( "ClockJob", "cj", context->scheduler_() )->id();
 //     cout << "PyMooseContext::createPyMooseContext() - clockjob id: " << context->clockJob_ << endl;
 //     set<std::string, std::string>( Element::element(context->clockJob_), "create", "Tick", "t0");
-    Neutral::create( "Tick", "t0", context->clockJob_() )->id();
+//     Neutral::create( "Tick", "t0", context->clockJob_() )->id();
 //     cout << "PyMooseContext::createPyMooseContext() - tick id: " << context->tick0_ << endl;
+
+    Element* cj =  context->clockJob_();
+    Element* t0 = Neutral::create( "Tick", "t0", cj );
+    Element* t1 = Neutral::create( "Tick", "t1", cj );
+    Element* t2 = Neutral::create( "Tick", "t2", cj );
+    Element* t3 = Neutral::create( "Tick", "t3", cj );
+    Element* t4 = Neutral::create( "Tick", "t4", cj );
+    Element* t5 = Neutral::create( "Tick", "t5", cj );
+
     
     return context;        
 }
@@ -818,6 +851,19 @@ void PyMooseContext::useClock(Id tickId, string path, string func)
         myId_(),
         useClockSlot, 
         tickId, elist_,  func );
+}
+
+void PyMooseContext::useClock(int tickNo, std::string path, std::string func)
+{
+    char tickName[40];
+    snprintf(tickName, (size_t)(39), "/sched/cj/t%d",tickNo);
+    Id tickId(tickName);
+    if (tickId.bad())
+    {
+        cerr << "useClock: Invalid clock number " << tickNo << endl;
+        return;        
+    }
+    this->useClock( tickId, path, func);    
 }
 
 void PyMooseContext::reset()
