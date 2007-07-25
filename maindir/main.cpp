@@ -49,6 +49,24 @@
 	extern bool nonBlockingGetLine( string& s );
 #endif
 
+void setupDefaultSchedule( 
+	Element* t0, Element* t1, 
+	Element* t2, Element* t3, 
+	Element* t4, Element* t5,
+	Element* cj)
+{
+	set< double >( t0, "dt", 1e-5 );
+	set< double >( t1, "dt", 1e-5 );
+	set< int >( t1, "stage", 1 );
+	set< double >( t2, "dt", 5e-3 );
+	set< double >( t3, "dt", 5e-3 );
+	set< int >( t3, "stage", 1 );
+	set< double >( t4, "dt", 5e-3 );
+	set< double >( t5, "dt", 1.0 );
+	set( cj, "resched" );
+	set( cj, "reinit" );
+}
+
 int main(int argc, char** argv)
 {
 	unsigned int mynode = 0;
@@ -108,7 +126,12 @@ int main(int argc, char** argv)
 	Element* pt0 =
 			Neutral::create( "ParTick", "t0", pj );
 #else
-	Neutral::create( "Tick", "t0", cj );
+	Element* t0 = Neutral::create( "Tick", "t0", cj );
+	Element* t1 = Neutral::create( "Tick", "t1", cj );
+	Element* t2 = Neutral::create( "Tick", "t2", cj );
+	Element* t3 = Neutral::create( "Tick", "t3", cj );
+	Element* t4 = Neutral::create( "Tick", "t4", cj );
+	Element* t5 = Neutral::create( "Tick", "t5", cj );
 #endif
 
 #ifdef DO_UNIT_TESTS
@@ -211,6 +234,11 @@ int main(int argc, char** argv)
 		}
 		Element* sli = makeGenesisParser();
 		assert( sli != 0 );
+
+		// Need to do this before the first script is loaded, but
+		// after the unit test for the parser.
+		setupDefaultSchedule( t0, t1, t2, t3, t4, t5, cj );
+
 		const Finfo* parseFinfo = sli->findFinfo( "parse" );
 		assert ( parseFinfo != 0 );
 

@@ -37,6 +37,8 @@ const Cinfo* initHHChannelCinfo()
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 				RFCAST( &HHChannel::reinitFunc ) ),
 	};
+	static Finfo* process =	new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo* ) );
 
 	/**
 	 * This is a shared message to couple channel to compartment.
@@ -142,8 +144,11 @@ const Cinfo* initHHChannelCinfo()
 ///////////////////////////////////////////////////////
 // Shared message definitions
 ///////////////////////////////////////////////////////
+		process,
+		/*
 		new SharedFinfo( "process", processShared, 
 			sizeof( processShared ) / sizeof( Finfo* ) ),
+		*/
 		new SharedFinfo( "channel", channelShared,
 			sizeof( channelShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "xGate", xGateShared,
@@ -165,6 +170,9 @@ const Cinfo* initHHChannelCinfo()
 				RFCAST( &HHChannel::concFunc ) ),
 	};
 
+	// We want the channel updates after the compartments are done.
+	static SchedInfo schedInfo[] = { { process, 0, 1 } };
+
 	static Cinfo HHChannelCinfo(
 		"HHChannel",
 		"Upinder S. Bhalla, 2007, NCBS",
@@ -172,7 +180,8 @@ const Cinfo* initHHChannelCinfo()
 		initNeutralCinfo(),
 		HHChannelFinfos,
 		sizeof( HHChannelFinfos )/sizeof(Finfo *),
-		ValueFtype1< HHChannel >::global()
+		ValueFtype1< HHChannel >::global(),
+		schedInfo, 1
 	);
 
 	return &HHChannelCinfo;

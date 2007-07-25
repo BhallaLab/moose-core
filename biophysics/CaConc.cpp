@@ -30,6 +30,8 @@ const Cinfo* initCaConcCinfo()
 	    new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 				RFCAST( &CaConc::reinitFunc ) ),
 	};
+	static Finfo* process =	new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo* ) );
 
 ///////////////////////////////////////////////////////
 // Field definitions
@@ -60,8 +62,11 @@ const Cinfo* initCaConcCinfo()
 ///////////////////////////////////////////////////////
 // Shared message definitions
 ///////////////////////////////////////////////////////
+		process,
+		/*
 		new SharedFinfo( "process", processShared, 
 			sizeof( processShared ) / sizeof( Finfo * ) ),
+			*/
 
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
@@ -84,6 +89,9 @@ const Cinfo* initCaConcCinfo()
 				RFCAST( &CaConc::basalMsgFunc ) ),
 	};
 
+	// We want the Ca updates before channel updates, so along with compts.
+	static SchedInfo schedInfo[] = { { process, 0, 0 } };
+
 	static Cinfo CaConcCinfo(
 		"CaConc",
 		"Upinder S. Bhalla, 2007, NCBS",
@@ -91,7 +99,8 @@ const Cinfo* initCaConcCinfo()
 		initNeutralCinfo(),
 		CaConcFinfos,
 		sizeof( CaConcFinfos )/sizeof(Finfo *),
-		ValueFtype1< CaConc >::global()
+		ValueFtype1< CaConc >::global(),
+		schedInfo, 1
 	);
 
 	return &CaConcCinfo;

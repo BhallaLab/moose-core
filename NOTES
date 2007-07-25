@@ -4074,5 +4074,61 @@ Checked in as revision 167, in parallel compile form with debugging.
 
 Niraj pointed out yet another problem: I had not been testing in the
 serial form. Fixed.
+Checked in as revision 168, in serial compile form with debugging.
+
+=============================================================================
+18 July 2007
+Seriously bogged down in other stuff. Worked out plan to update the 
+Cinfo to handle scheduling info, and also worked out how to manage solvers
+for automatic scheduling of objects:
+
+=============================================================================
+24 July 2007
+Other stuff continues. I need to set up some major changes in Cinfo and 
+scheduling soon though.
+
+Updated to the most recent revision, 172.
+
+The scheduling ideas were:
+1. Each object connects up to the scheduler upon creation. 
+	- Exception for objects on /proto and /library
+	- Need to unschedule objects when they move to /proto and /library,
+	 and vice versa. This means that we need callbacks when operations are
+	 done on messages. The Cinfo needs a callback function for
+	 message operations.
+2. Each class knows where to connect its instances.
+	- This is defined in Cinfo
+	- Biophys stuff goes to t0 and t1
+	- Biochem stuff goes to t2 and t3
+	- Graphics stuff goes to t4, t5 and t6.
+	- These clocks will need to be predefined.
+3. Solvers do Just in Time (JIT) scheduling of their zombies
+	- They scan the new entries on the clock ticks
+	- Solvers live on /solvers/biophys, /solvers/biochem etc.
+	- Eventually we will implement a SolverManager class to handle
+		issues of model partitioning among solvers.
+		This solver manager will replace the neutrals for 
+		/solvers/biophys etc.
+	- For now the shell handles this. It puts all connected compartments
+		on a single solver. 
+	- We need a variant on hsolver for lots of identical single compt
+		spiking models. Useful for stimuli.
+4. All this scheduling can be overridden by the user. This is mostly for
+	BC, and we need a flag which tells us whether the user wants to
+	ignore explicit scheduling from old simulations, or pay attention to 
+	them.
+
+Set up scheduling operation in cinfo. Now to set up ticks and then the
+elements to use them.
+
+Ticks set up and compartments can use them. Now to set up good initial timings.
+
+Partly done, in main.cpp. 
+Need to do a reset etc so that the thing is ready to use.
+
+=============================================================================
+25 July 2007
+Implemented auto-scheduling of biophysics objects, but not for hsolver.
+That still needs quite a bit of organization.
 
 =============================================================================

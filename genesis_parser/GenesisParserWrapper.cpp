@@ -2437,9 +2437,9 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "alias gf getfield", "" );
 	gpAssert( "alias", "gf\tgetfield shf\tshowfield " );
 	gpAssert( "alias gf", "getfield " );
-	gpAssert( "le /sched/cj", "t0 " );
+	gpAssert( "le /sched/cj", "t0 t1 t2 t3 t4 t5 " );
 	gpAssert( "setclock 1 0.1", "" );
-	gpAssert( "le /sched/cj", "t0 t1 " );
+	gpAssert( "le /sched/cj", "t0 t1 t2 t3 t4 t5 " );
 	gpAssert( "echo {getfield /sched/cj/t0 dt}", "1 " );
 	gpAssert( "echo {getfield /sched/cj/t1 dt}", "0.1 " );
 	gpAssert( "useclock /##[TYPE=Compartment] 1", "" );
