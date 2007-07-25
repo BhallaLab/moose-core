@@ -1,6 +1,18 @@
 #!/usr/bin/python
-# python version of bulbchan.g
-# Subhasis Ray / 2007-06-11
+#!/usr/bin/env python
+##################################################################
+#  This program is part of 'MOOSE', the
+#  Messaging Object Oriented Simulation Environment.
+#            Copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+#  It is made available under the terms of the
+#  GNU Lesser General Public License version 2.1
+#  See the file COPYING.LIB for the full notice.
+##################################################################
+# This is the python version of bulbchan.g for MOOSE.
+# Author: Subhasis Ray
+# Created: 2007-06-11
+#################################################################
+
 import math
 import moose
 

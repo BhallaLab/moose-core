@@ -12,8 +12,8 @@ class HSolve : public PyMooseBase
     ~HSolve();
     const std::string& getType();
     
-    string __get_seed_path() const;
-    void __set_seed_path(string path);
+    const string __get_seed_path() const;
+    void __set_seed_path(string path) const;
     int __get_NDiv() const;
     void __set_NDiv(int NDiv);
     double __get_VLo() const;
