@@ -54,12 +54,12 @@
 %attribute(Neutral, int, child, __get_child, __set_child)
 
 %include "Tick.h"
-%attribute(Tick, double, dt, __get_dt, __set_dt)
-%attribute(Tick, int, stage, __get_stage, __set_stage)
-%attribute(Tick, int, ordinal, __get_ordinal, __set_ordinal)
-%attribute(Tick, double, nextTime, __get_nextTime, __set_nextTime)
-//%attribute(Tick, string&, path, __get_path, __set_path) 
-%attribute(Tick, double, updateDtSrc, __get_updateDtSrc, __set_updateDtSrc)
+%attribute(ClockTick, double, dt, __get_dt, __set_dt)
+%attribute(ClockTick, int, stage, __get_stage, __set_stage)
+%attribute(ClockTick, int, ordinal, __get_ordinal, __set_ordinal)
+%attribute(ClockTick, double, nextTime, __get_nextTime, __set_nextTime)
+//%attribute(ClockTick, string&, path, __get_path, __set_path) 
+%attribute(ClockTick, double, updateDtSrc, __get_updateDtSrc, __set_updateDtSrc)
 
 %include "ClockJob.h"
 %attribute(ClockJob, double, runTime, __get_runTime, __set_runTime)
