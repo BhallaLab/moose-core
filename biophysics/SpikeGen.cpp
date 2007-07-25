@@ -25,6 +25,8 @@ const Cinfo* initSpikeGenCinfo()
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 				RFCAST( &SpikeGen::reinitFunc ) ),
 	};
+	static Finfo* process =	new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo* ) );
 	
 	static Finfo* spikeGenFinfos[] = 
 	{
@@ -57,8 +59,11 @@ const Cinfo* initSpikeGenCinfo()
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfos
 	//////////////////////////////////////////////////////////////////
+		process,
+		/*
 		new SharedFinfo( "process", processShared, 
 			sizeof( processShared ) / sizeof( Finfo* ) ),
+			*/
 
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -74,6 +79,9 @@ const Cinfo* initSpikeGenCinfo()
 			RFCAST( &SpikeGen::VmFunc ) ),
 	};
 
+	// We want the spikeGen to update after the compartments have done so
+	static SchedInfo schedInfo[] = { { process, 0, 1 } };
+
 	static Cinfo spikeGenCinfo(
 				"SpikeGen",
 				"Upi Bhalla",
@@ -81,7 +89,8 @@ const Cinfo* initSpikeGenCinfo()
 				initNeutralCinfo(),
 				spikeGenFinfos,
 				sizeof( spikeGenFinfos ) / sizeof( Finfo* ),
-				ValueFtype1< SpikeGen >::global()
+				ValueFtype1< SpikeGen >::global(),
+				schedInfo, 1
 	);
 
 	return &spikeGenCinfo;

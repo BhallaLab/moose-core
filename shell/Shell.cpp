@@ -1319,6 +1319,8 @@ bool Shell::create( const string& type, const string& name,
 		assert( ret );
 		// cout << "OK\n";
 		recentElement_ = id;
+		ret = c->schedule( e );
+		assert( ret );
 		return 1;
 	} else  {
 		cout << "Error: Shell::create: Unable to find type " <<
