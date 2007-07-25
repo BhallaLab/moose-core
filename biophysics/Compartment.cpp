@@ -41,6 +41,8 @@ const Cinfo* initCompartmentCinfo()
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 				RFCAST( &Compartment::reinitFunc ) ),
 	};
+	static Finfo* process =	new SharedFinfo( "process", processShared, 
+			sizeof( processShared ) / sizeof( Finfo* ) );
 	
 	/**
 	 * This is a shared message to receive Init messages from
@@ -64,6 +66,8 @@ const Cinfo* initCompartmentCinfo()
 		new DestFinfo( "dummy", Ftype1< ProcInfo >::global(),
 				RFCAST( &dummyFunc ) ),
 	};
+	static Finfo* init = new SharedFinfo( "init", initShared,
+			sizeof( initShared ) / sizeof( Finfo* ) );
 
 	/**
 	 * This is a shared message from a compartment to channels.
@@ -180,10 +184,14 @@ const Cinfo* initCompartmentCinfo()
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfo definitions
 	//////////////////////////////////////////////////////////////////
+		process,
+		init,
+		/*
 		new SharedFinfo( "process", processShared, 
 			sizeof( processShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "init", initShared,
 			sizeof( initShared ) / sizeof( Finfo* ) ),
+		*/
 		new SharedFinfo( "channel", channelShared,
 			sizeof( channelShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "axial", axialShared,
@@ -220,6 +228,8 @@ const Cinfo* initCompartmentCinfo()
 			RFCAST( &Compartment::randInjectFunc ) ),
 	};
 
+	static SchedInfo schedInfo[] = { { process, 0, 0 }, { init, 0, 1 } };
+
 	static Cinfo compartmentCinfo(
 				"Compartment",
 				"Upi Bhalla",
@@ -227,7 +237,8 @@ const Cinfo* initCompartmentCinfo()
 				initNeutralCinfo(),
 				compartmentFinfos,
 				sizeof( compartmentFinfos ) / sizeof( Finfo* ),
-				ValueFtype1< Compartment >::global()
+				ValueFtype1< Compartment >::global(),
+				schedInfo, 2
 	);
 
 	return &compartmentCinfo;
