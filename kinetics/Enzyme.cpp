@@ -21,6 +21,9 @@ const Cinfo* initEnzymeCinfo()
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			RFCAST( &Enzyme::reinitFunc ) ),
 	};
+	static Finfo* process = new SharedFinfo( "process", processShared,
+		sizeof( processShared ) / sizeof( Finfo* ) );
+
 	static Finfo* substrateShared[] =
 	{
 		new SrcFinfo( "reac", Ftype2< double, double >::global() ),
@@ -94,8 +97,7 @@ const Cinfo* initEnzymeCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "process", processShared, 
-			sizeof( processShared ) / sizeof( Finfo* ) ),
+		process,
 		new SharedFinfo( "sub", substrateShared,
 			sizeof( processShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "enz", enzShared,
@@ -104,6 +106,9 @@ const Cinfo* initEnzymeCinfo()
 			sizeof( processShared ) / sizeof( Finfo* ) ),
 	};
 
+	// Schedule enzymes for slower clock, stage 1.
+	static SchedInfo schedInfo[] = { { process, 1, 1 } };
+
 	static  Cinfo enzymeCinfo(
 		"Enzyme",
 		"Upinder S. Bhalla, 2007, NCBS",
@@ -111,7 +116,8 @@ const Cinfo* initEnzymeCinfo()
 		initNeutralCinfo(),
 		enzymeFinfos,
 		sizeof(enzymeFinfos)/sizeof(Finfo *),
-		ValueFtype1< Enzyme >::global()
+		ValueFtype1< Enzyme >::global(),
+		schedInfo, 1
 	);
 
 	return &enzymeCinfo;

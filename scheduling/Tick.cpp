@@ -142,10 +142,10 @@ const Cinfo* initTickCinfo()
 		 * newObject handles addition of new objects to the list on
 		 * this tick. I don't know if it is needed. Arguments are
 		 * object id and process field name
-		 */
 		new DestFinfo( "newObject",
 			Ftype2< unsigned int, string >::global(),
 			RFCAST( &Tick::schedNewObject ) ),
+		 */
 		/**
 		 * The start function sets of a simulation to run for 
 		 * the specified runtime.
@@ -191,9 +191,26 @@ static const unsigned int reinitSlot =
 	initTickCinfo()->getSlotIndex( "process.reinit" );
 
 ///////////////////////////////////////////////////
-// Field function definitions
+// Tick class definition functions
 ///////////////////////////////////////////////////
 
+bool Tick::operator<( const Tick& other ) const
+{
+	if ( dt_ < other.dt_ ) return 1;
+		if ( dt_ == other.dt_ && stage_ < other.stage_ )
+			return 1;
+	return 0;
+}
+
+
+bool Tick::operator==( const Tick& other ) const
+{
+	return ( dt_ == other.dt_ && stage_ == other.stage_ );
+}
+
+///////////////////////////////////////////////////
+// Field function definitions
+///////////////////////////////////////////////////
 
 /**
  * This is called when dt is set on the local Tick.
@@ -441,34 +458,6 @@ void Tick::innerStart( Element* e, ProcInfo info, double maxTime )
 	}
 }
 
-/**
- * This function adds a new object to the tick. Not sure it has
- * much utility: surely this is just an addmsg?
- */
-void Tick::schedNewObject( const Conn& c, unsigned int id, string s )
-{
-}
-
-/*
-void Tick::schedNewObjectFuncLocal( Element* e )
-{
-	unsigned int i;
-	for (i = 0; i < managedCinfo_.size(); i++ ) {
-		const Cinfo* c = managedCinfo_[i];
-		if ( c == 0 || e->cinfo()->isA( c ) ) {
-			string p = e->path();
-			const string& q = managedPath_[i];
-			if ( p.substr( 0, q.length() ) == q ) {
-				Field src = field( "process" );
-				Field dest = e->field( "process" );
-				src.add( dest );
-				return;
-			}
-		}
-	}
-}
-*/
-
 
 ///////////////////////////////////////////////////
 // Virtual function definitions for actually sending out the 
@@ -500,56 +489,3 @@ void Tick::innerReinitFunc( Element* e, ProcInfo info )
 ///////////////////////////////////////////////////
 int Tick::ordinalCounter_ = 0;
 
-#if 0
-void Tick::innerSetPath( const string& path )
-{
-	path_ = path;
-	size_t pos = path.find_last_of("/");
-	if ( pos == string::npos || pos == path.length()) {
-		cerr << "Error:Tick::innerSetPath: no finfo name on tick:" << name() << " in path " << path << "\n"; 
-		return;
-	}
-	string finfoName = path.substr( pos + 1 );
-	string pathHead = path.substr( 0, pos );
-	vector< Element* > ret;
-	vector< Element* >::iterator i;
-	Element::startFind( pathHead, ret );
-	processSrc_.dropAll();
-	reinitSrc_.dropAll();
-	Field src = field( "process" );
-	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		if ( !( *i )->isSolved() ) {
-			Field dest = ( *i )->field( finfoName );
-			src.add( dest );
-		}
-	}
-	separatePathOnCommas();
-}
-
-void Tick::separatePathOnCommas()
-{
-	string::size_type pos = 0;
-	string temp = path_;
-	pos = temp.find( "," );
-	fillManagementInfo( temp.substr( 0, pos ) );
-	while ( pos != string::npos ) {
-		temp = temp.substr( pos + 1 );
-		pos = temp.find( "," );
-		fillManagementInfo( temp.substr( 0, pos ) );
-	}
-}
-void Tick::fillManagementInfo( const string& s )
-{
-	string::size_type pos = s.find_first_of( "#" );
-	managedPath_.push_back( s.substr( 0, pos ) );
-	pos = s.find( "=" ); 
-	if ( pos == string::npos ) {
-		managedCinfo_.push_back( 0 );
-	} else {
-		string tname = s.substr( pos + 1 );
-		pos = tname.find( "]" );
-		const Cinfo* c = Cinfo::find( tname.substr( 0, pos ) );
-		managedCinfo_.push_back( c );
-	}
-}
-#endif
