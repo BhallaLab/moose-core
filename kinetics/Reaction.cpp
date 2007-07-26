@@ -20,6 +20,9 @@ const Cinfo* initReactionCinfo()
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			RFCAST( &Reaction::reinitFunc ) ),
 	};
+	static Finfo* process = new SharedFinfo( "process", processShared,
+		sizeof( processShared ) / sizeof( Finfo* ) );
+
 	static Finfo* substrateShared[] =
 	{
 		new SrcFinfo( "reac", Ftype2< double, double >::global() ),
@@ -60,13 +63,15 @@ const Cinfo* initReactionCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "process", processShared, 
-			sizeof( processShared ) / sizeof( Finfo* ) ),
+		process,
 		new SharedFinfo( "sub", substrateShared,
 			sizeof( substrateShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "prd", productShared,
 			sizeof( productShared ) / sizeof( Finfo* ) ),
 	};
+
+	// Schedule reactions for slower clock, stage 1.
+	static SchedInfo schedInfo[] = { { process, 1, 1 } };
 
 	static  Cinfo reactionCinfo(
 		"Reaction",
@@ -75,7 +80,8 @@ const Cinfo* initReactionCinfo()
 		initNeutralCinfo(),
 		reactionFinfos,
 		sizeof(reactionFinfos)/sizeof(Finfo *),
-		ValueFtype1< Reaction >::global()
+		ValueFtype1< Reaction >::global(),
+		schedInfo, 1
 	);
 
 	return &reactionCinfo;

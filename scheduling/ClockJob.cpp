@@ -318,34 +318,34 @@ void ClockJob::reschedFunc( const Conn& c )
 					c.targetElement() );
 }
 
-	class TickSeq {
-		public:
-				TickSeq()
-				{;}
+class TickSeq {
+	public:
+			TickSeq()
+			{;}
 
-				TickSeq( Id id)
-						: e_( id() )
-				{
-						get< double >( e_, "dt", dt_ );
-						get< int >( e_, "stage", stage_ );
-				}
+			TickSeq( Id id)
+					: e_( id() )
+			{
+					get< double >( e_, "dt", dt_ );
+					get< int >( e_, "stage", stage_ );
+			}
 
-				bool operator<( const TickSeq& other ) const {
-					if ( dt_ < other.dt_ ) return 1;
-					if ( dt_ == other.dt_ && stage_ < other.stage_ )
-							return 1;
-					return 0;
-				}
+			bool operator<( const TickSeq& other ) const {
+				if ( dt_ < other.dt_ ) return 1;
+				if ( dt_ == other.dt_ && stage_ < other.stage_ )
+						return 1;
+				return 0;
+			}
 
-				Element* element() {
-						return e_;
-				}
+			Element* element() {
+					return e_;
+			}
 
-		private:
-				Element* e_;
-				double dt_;
-				int stage_;
-	};
+	private:
+			Element* e_;
+			double dt_;
+			int stage_;
+};
 
 void ClockJob::reschedFuncLocal( Element* e )
 {
@@ -354,13 +354,29 @@ void ClockJob::reschedFuncLocal( Element* e )
 	if ( childList.size() == 0 )
 			return;
 	vector< TickSeq > tickList;
-	vector< Id >::iterator i;
-	for ( i = childList.begin(); i != childList.end(); i++ )
-		tickList.push_back( TickSeq( *i ) );
 
 	vector< TickSeq >::iterator j;
-	for ( j = tickList.begin(); j != tickList.end(); j++ )
+	vector< Id >::iterator i;
+
+	// Clear out old tick list
+	for ( i = childList.begin(); i != childList.end(); i++ ) {
+		tickList.push_back( TickSeq( *i ) );
+		for ( j = tickList.begin(); j != tickList.end(); j++ )
 			clearMessages( j->element() );
+	}
+	tickList.resize( 0 );
+
+	for ( i = childList.begin(); i != childList.end(); i++ ) {
+		const Finfo* procFinfo = (*i)()->findFinfo( "process" );
+		assert ( procFinfo != 0 );
+		unsigned int numTargets = procFinfo->numOutgoing( (*i)() );
+		if ( numTargets > 0 )
+			tickList.push_back( TickSeq( *i ) );
+	}
+
+	if ( tickList.size() == 0 )
+		return;
+
 	sort( tickList.begin(), tickList.end() );
 
 	Element* last = tickList.front().element();
@@ -385,6 +401,7 @@ void ClockJob::reschedFuncLocal( Element* e )
 void ClockJob::clearMessages( Element* e )
 {
 	e->findFinfo( "prev" )->dropAll( e );
+	e->findFinfo( "start" )->dropAll( e );
 }
 
 /**
