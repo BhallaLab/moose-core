@@ -124,6 +124,9 @@ Element* SimpleElement::innerDeepCopy(
 Element* SimpleElement::copy( Element* parent, const string& newName )
 		const
 {
+	static const Element* library = Id( "/library" )();
+	static const Element* proto = Id( "/proto" )();
+
 	if ( parent->isDescendant( this ) ) {
 		cout << "Warning: SimpleElement::copy: Attempt to copy within descendant tree" << parent->name() << endl;
 		return 0;
@@ -141,6 +144,7 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 		return 0;
 	}
 
+	// First is original, second is copy
 	map< const Element*, Element* > tree;
 	map< const Element*, Element* >::iterator i;
 	vector< pair< Element*, unsigned int > > delConns;
@@ -167,10 +171,20 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 		}
 	}
 	
-	// Finally, stick the copied tree onto the parent Element.
+	// Fourth pass: stick the copied tree onto the parent Element.
 	ret = parent->findFinfo( "childSrc" )->add(
 					parent, child, child->findFinfo( "child" ) );
 	assert( ret );
+
+	// Fifth pass: Schedule all the objects
+	if ( !( 
+		parent->isDescendant( library ) || parent->isDescendant( proto )
+		) ) {
+		for ( i = tree.begin(); i != tree.end(); i++ ) {
+			if ( i->first != i->second ) // a global
+				i->second->cinfo()->schedule( i->second );
+		}
+	}
 
 	return child;
 }

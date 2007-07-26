@@ -226,6 +226,8 @@ Element* Neutral::create(
 		bool ret = parent->findFinfo( "childSrc" )->
 				add( parent, kid, kid->findFinfo( "child" ) ); 
 		assert( ret );
+		ret = c->schedule( kid );
+		assert( ret );
 		return kid;
 	} else {
 		cout << "Error: Neutral::create: class " << cinfo << 
@@ -369,8 +371,18 @@ unsigned int Neutral::getMsgMem( const Element* e )
 void testNeutral()
 {
 		cout << "\nTesting Neutral";
+		const Finfo* childSrcFinfo = 
+			Element::root()->findFinfo( "childSrc" );
+		assert( childSrcFinfo != 0 );
+
 
 		Element* n1 = neutralCinfo->create( Id::scratchId(), "n1" );
+
+		ASSERT( childSrcFinfo->add( 
+			Element::root(), n1, n1->findFinfo( "child" ) ), 
+				"adding n1"
+			);
+
 		string s;
 		get< string >( n1, n1->findFinfo( "name" ), s );
 		ASSERT( s == "n1", "Neutral name get" );
@@ -381,33 +393,30 @@ void testNeutral()
 
 		Element* n2 = neutralCinfo->create( Id::scratchId(), "n2" );
 		
-		ASSERT( n1->findFinfo( "childSrc" )->add(
-								n1, n2, n2->findFinfo( "child" ) ),
+		ASSERT( childSrcFinfo->add( n1, n2, n2->findFinfo( "child" ) ),
 						"adding child"
 			  );
 
 		Element* n3 = neutralCinfo->create( Id::scratchId(), "n3" );
 		
-		ASSERT( n1->findFinfo( "childSrc" )->add(
-								n1, n3, n3->findFinfo( "child" ) ),
+		ASSERT( childSrcFinfo->add( n1, n3, n3->findFinfo( "child" ) ),
 						"adding child"
 			  );
 
 		Element* n21 = neutralCinfo->create( Id::scratchId(), "n21" );
 		
-		ASSERT( n2->findFinfo( "childSrc" )->add(
-								n2, n21, n21->findFinfo( "child" ) ),
+		ASSERT( childSrcFinfo->add( n2, n21, n21->findFinfo( "child" ) ),
 						"adding child"
 			  );
 
 		Element* n22 = neutralCinfo->create( Id::scratchId(), "n22" );
 		
-		ASSERT( n2->findFinfo( "childSrc" )->add(
+		ASSERT( childSrcFinfo->add(
 								n2, n22, n22->findFinfo( "child" ) ),
 						"adding child"
 			  );
 
-		ASSERT( n1->connSize() == 2, "count children" );
+		ASSERT( n1->connSize() == 3, "count children and parent" );
 
 		// n2 has n1 as parent, and n21 and n22 as children
 		ASSERT( n2->connSize() == 3, "count children" );
@@ -417,14 +426,14 @@ void testNeutral()
 		sendTo1< int >( n1, 0, 0, 0 );
 
 		// At this point n1 still has both n2 and n3 as children
-		ASSERT( n1->connSize() == 2, "Should still have 2 children" );
+		ASSERT( n1->connSize() == 3, "Should still have 2 children and parent" );
 		// and n2 still has n1 as parent, and n21 and n22 as children
 		ASSERT( n2->connSize() == 3, "2 kids and a parent" );
 
 		// Send the command to clean up messages. This still does
 		// not delete anything.
 		sendTo1< int >( n1, 0, 0, 1 );
-		ASSERT( n1->connSize() == 1, "As far as n1 is concerned, n2 is removed" );
+		ASSERT( n1->connSize() == 2, "As far as n1 is concerned, n2 is removed" );
 		// n2 still has n1 as parent, and n21 and n22 as children
 		ASSERT( n2->connSize() == 3, "2 kids and a parent" );
 
@@ -434,7 +443,7 @@ void testNeutral()
 		// any more because the handle has gone off n1.
 		set< int >( n2, n2->findFinfo( "child" ), 2 );
 		// Now we've gotten rid of n2.
-		ASSERT( n1->connSize() == 1, "Now only 1 child." );
+		ASSERT( n1->connSize() == 2, "Now only 1 child." );
 
 		// Now check that n2, n21, and n22 are really gwan.
 
@@ -456,6 +465,8 @@ void testNeutral()
 		ASSERT( initialNumInstances - SimpleElement::numInstances == 1,
 						"Check that foo is made" );
 		ASSERT( foo->name() == "foo", "Neutral::create" );
+		bool ret = set( n1, "destroy" );
+		ASSERT( ret, "cleaning up n1" );
 
 		//
 		// It would be nice to have a findChild function. But

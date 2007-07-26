@@ -20,22 +20,8 @@
 class Compartment
 {
 	public:
-			Compartment( )
-			{
-					Vm_ = -0.06;
-					Em_ = -0.06;
-					Cm_ = 1.0;
-					Rm_ = 1.0;
-					invRm_ = 1.0;
-					Ra_ = 1.0;
-					Im_ = 0.0;
-					Inject_ = 0.0;
-					sumInject_ = 0.0;
-					initVm_ = -0.06;
-					A_ = 0.0;
-					B_ = 0.0;
-			}
-			
+			Compartment();
+
 			// Value Field access function definitions.
 			static void setVm( const Conn& c, double Vm );
 			static double getVm( const Element* );

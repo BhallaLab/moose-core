@@ -117,6 +117,11 @@ int main(int argc, char** argv)
 	Element* cj =
 			Neutral::create( "ClockJob", "cj", sched );
 
+	Element* library = 
+			Neutral::create( "Neutral", "library", Element::root() );
+	Element* proto = 
+			Neutral::create( "Neutral", "proto", Element::root() );
+
 #ifdef USE_MPI
 	// This one handles parser and postmaster scheduling.
 	Element* pj =
