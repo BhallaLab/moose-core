@@ -24,6 +24,9 @@ const Cinfo* initMoleculeCinfo()
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			RFCAST( &Molecule::reinitFunc ) ),
 	};
+	static Finfo* process = new SharedFinfo( "process", processShared,
+		sizeof( processShared ) / sizeof( Finfo* ) );
+
 	static Finfo* reacShared[] =
 	{
 		new DestFinfo( "reac", Ftype2< double, double >::global(),
@@ -99,12 +102,14 @@ const Cinfo* initMoleculeCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "process", processShared, 
-			sizeof( processShared ) / sizeof( Finfo* ) ),
+		process,
 		new SharedFinfo( "reac", reacShared,
 			sizeof( reacShared ) / sizeof( Finfo* ) ),
 	};
 
+	// Schedule molecules for the slower clock, stage 0.
+	static SchedInfo schedInfo[] = { { process, 1, 0 } };
+	
 	static Cinfo moleculeCinfo(
 		"Molecule",
 		"Upinder S. Bhalla, 2007, NCBS",
@@ -112,7 +117,8 @@ const Cinfo* initMoleculeCinfo()
 		initNeutralCinfo(),
 		moleculeFinfos,
 		sizeof( moleculeFinfos )/sizeof(Finfo *),
-		ValueFtype1< Molecule >::global()
+		ValueFtype1< Molecule >::global(),
+			schedInfo, 1
 	);
 
 	return &moleculeCinfo;

@@ -4130,5 +4130,27 @@ Need to do a reset etc so that the thing is ready to use.
 25 July 2007
 Implemented auto-scheduling of biophysics objects, but not for hsolver.
 That still needs quite a bit of organization.
+Checked in as revision 173, in serial compile form with debugging.
+
+Now I put in the kinetics objects. But we get problems because of the unused
+t0 and t1 taking up a long time. Tried to eliminate the unused ticks. Now
+I get core dumps around line 152 in SchedTests.cpp on the unit tests.
+
+Fixed it, still core dumps, now in the main::scheduling function.
+Nasty one. The Tick::reinit is calling the RecvFunc for a compartment,
+no idea why.
+
+=============================================================================
+26 July 2007.
+Finally tracked down problem, it was in ClockJob::reschedFuncLocal.
+
+Now chugging through all sorts of fixes for the autoscheduling, using
+automatic scheduling of the kholodenko model as a target point. Currently
+stuck on earlier unit tests.
+Fixed that, also solved yet more issues with the scheduling. Now the
+kholodenko model loads and runs using (mostly) the builtin scheduling. I
+need to implement a subclass of the table to pretend to be a plot, and more
+to the point, to have the appropriate default scheduled tick. Currently there
+is no easy way to determine how to schedule the tables.
 
 =============================================================================

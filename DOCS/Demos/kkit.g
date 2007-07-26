@@ -24,12 +24,16 @@ create neutral /moregraphs
 function enddump
 	setclock 0 {SIMDT} 0
 	setclock 1 {SIMDT} 1
-	setclock 2 {PLOTDT}
-	setclock 3 {CONTROLDT}
+	setclock 2 {SIMDT} 0
+	setclock 3 {SIMDT} 1
+	setclock 4 {PLOTDT}
+	setclock 5 {CONTROLDT}
 
+	/*
 	useclock /kinetics/##[TYPE=Molecule] 0
 	useclock /kinetics/##[TYPE=Enzyme],/kinetics/##[TYPE=Reaction] 1
-	useclock /graphs/##[TYPE=Table] 2
+	*/
+	useclock /graphs/##[TYPE=Table] 4
 
 	setfield /graphs/##[TYPE=Table] step_mode 3
 

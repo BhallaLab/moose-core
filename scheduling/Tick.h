@@ -22,17 +22,9 @@ class Tick
 		virtual ~Tick( )
 		{ ; }
 
-		bool operator<( const Tick& other ) const {
-			if ( dt_ < other.dt_ ) return 1;
-			if ( dt_ == other.dt_ && stage_ < other.stage_ )
-				return 1;
-			return 0;
-		}
+		bool operator<( const Tick& other ) const;
 
-		bool operator==( const Tick& other ) const {
-			return ( dt_ == other.dt_ && 
-				stage_ == other.stage_ );
-		}
+		bool operator==( const Tick& other ) const;
 
 		///////////////////////////////////////////////////////
 		// Functions for handling field assignments.
@@ -62,8 +54,6 @@ class Tick
 
 		static void start( const Conn& c, ProcInfo p, double maxTime );
 		void innerStart( Element* e, ProcInfo p, double maxTime );
-		static void schedNewObject( const Conn& c, unsigned int id,
-						string s );
 		///////////////////////////////////////////////////////
 		// Utility function
 		///////////////////////////////////////////////////////
