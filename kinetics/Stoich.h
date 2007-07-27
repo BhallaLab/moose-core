@@ -39,6 +39,7 @@ class Stoich
 		///////////////////////////////////////////////////
 		// Msg Dest function definitions
 		///////////////////////////////////////////////////
+		static void scanTicks( const Conn& c );
 		static void reinitFunc( const Conn& c );
 		static void integrateFunc( 
 			const Conn& c, vector< double >* v, double dt );
@@ -63,6 +64,8 @@ class Stoich
 		}
 		void runStats();
 #endif // USE_GSL
+		void rebuildMatrix( Element* stoich, vector< Element* >& ret );
+		void localScanTicks( Element* stoich );
 	private:
 		///////////////////////////////////////////////////
 		// Setup function definitions

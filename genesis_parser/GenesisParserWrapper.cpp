@@ -2386,9 +2386,9 @@ void GenesisParserWrapper::gpAssert(
 void GenesisParserWrapper::unitTest()
 {
 #ifdef USE_MPI
-	string lestr = "shell postmasters sched library proto ";
+	string lestr = "shell postmasters sched library proto solvers ";
 #else
-	string lestr = "shell sched library proto ";
+	string lestr = "shell sched library proto solvers ";
 #endif
 	cout << "\nDoing GenesisParserWrapper tests";
 	gpAssert( "le", lestr );

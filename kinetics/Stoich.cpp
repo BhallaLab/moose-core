@@ -140,6 +140,10 @@ const Cinfo* initStoichCinfo()
 		///////////////////////////////////////////////////////
 		// MsgDest definitions
 		///////////////////////////////////////////////////////
+		new DestFinfo( "scanTicks", 
+			Ftype0::global(),
+			RFCAST( &Stoich::scanTicks )
+		),
 		
 		///////////////////////////////////////////////////////
 		// Shared definitions
@@ -266,6 +270,11 @@ unsigned int Stoich::getRateVectorSize( const Element* e ) {
 // Dest function definitions
 ///////////////////////////////////////////////////
 
+void Stoich::scanTicks( const Conn& c ) {
+	Element* e = c.targetElement();
+	static_cast< Stoich* >( e->data() )->localScanTicks( e );
+}
+
 // Static func
 void Stoich::reinitFunc( const Conn& c )
 {
@@ -313,12 +322,44 @@ unsigned int countRates( Element* e, bool useOneWayReacs )
 	}
 	return 0;
 }
+
+void Stoich::localScanTicks( Element* stoich )
+{
+	static Id t2( "/sched/cj/t2" );
+	static Id t3( "/sched/cj/t3" );
+	static const Finfo* processFinfo = t2()->findFinfo( "process" );
+	assert( !t2.bad() );
+	assert( !t3.bad() );
+	assert( processFinfo != 0 );
+	
+	vector< Element* > ret;
+	vector< Conn > list;
+	vector< Conn >::iterator i;
+	
+	processFinfo->outgoingConns( t2(), list );
+	for ( i = list.begin(); i != list.end(); i++ )
+		ret.push_back( i->targetElement() );
+
+	processFinfo->outgoingConns( t3(), list );
+	for ( i = list.begin(); i != list.end(); i++ )
+		ret.push_back( i->targetElement() );
+
+	rebuildMatrix( stoich, ret );
+}
+
 void Stoich::localSetPath( Element* stoich, const string& value )
 {
 	path_ = value;
 	vector< Element* > ret;
-	vector< Element* >::iterator i;
 	wildcardFind( path_, ret );
+
+	rebuildMatrix( stoich, ret );
+}
+
+// Need to clean out existing stuff first.
+void Stoich::rebuildMatrix( Element* stoich, vector< Element* >& ret )
+{
+	vector< Element* >::iterator i;
 	vector< Element* > varMolVec;
 	vector< Element* > bufVec;
 	vector< Element* > sumTotVec;

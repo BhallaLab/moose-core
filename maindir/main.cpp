@@ -111,16 +111,29 @@ int main(int argc, char** argv)
 //	Neutral::create( "Shell", "shell", Element::root() );
 #endif
 	
+	/**
+	 * Here we set up a bunch of predefined objects, that
+	 * exist simultaneously on each node.
+	 */
 	Element* sched =
 			Neutral::create( "Neutral", "sched", Element::root() );
 	// This one handles the simulation clocks
 	Element* cj =
 			Neutral::create( "ClockJob", "cj", sched );
 
-	Element* library = 
+	// Element* library = 
 			Neutral::create( "Neutral", "library", Element::root() );
-	Element* proto = 
+	// Element* proto = 
 			Neutral::create( "Neutral", "proto", Element::root() );
+	Element* solvers = 
+			Neutral::create( "Neutral", "solvers", Element::root() );
+	// These two should really be solver managers because there are
+	// a lot of decisions to be made about how the simulation is best
+	// solved. For now let the Shell deal with it.
+	// Element* chem = 
+			Neutral::create( "Neutral", "chem", solvers );
+	// Element* neuronal = 
+			Neutral::create( "Neutral", "neuronal", solvers );
 
 #ifdef USE_MPI
 	// This one handles parser and postmaster scheduling.
