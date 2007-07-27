@@ -426,13 +426,18 @@ void KineticHub::reacConnectionFuncLocal(
 void KineticHub::enzConnectionFunc( const Conn& c,
 	unsigned int index, Element* enz )
 {
-	cout << "in enzConnectionFunc for " << enz->name() << endl;
+	Element* e = c.targetElement();
+	static_cast< KineticHub* >( e->data() )->
+		enzConnectionFuncLocal( e, index, enz );
 }
 
 void KineticHub::mmEnzConnectionFunc( const Conn& c,
 	unsigned int index, Element* mmEnz )
 {
-	cout << "in mmEnzConnectionFunc for " << mmEnz->name() << endl;
+	// cout << "in mmEnzConnectionFunc for " << mmEnz->name() << endl;
+	Element* e = c.targetElement();
+	static_cast< KineticHub* >( e->data() )->
+		mmEnzConnectionFuncLocal( e, index, mmEnz );
 }
 
 void KineticHub::enzConnectionFuncLocal(
@@ -455,6 +460,16 @@ void KineticHub::enzConnectionFuncLocal(
 			GFCAST( &KineticHub::getEnzK3 ),
 			RFCAST( &KineticHub::setEnzK3 )
 		),
+		new ValueFinfo( "Km",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getEnzKm ),
+			RFCAST( &KineticHub::setEnzKm )
+		),
+		new ValueFinfo( "kcat",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getEnzK3 ), // Same as k3
+			RFCAST( &KineticHub::setEnzKcat ) // this is different.
+		),
 	};
 
 	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
@@ -471,6 +486,54 @@ void KineticHub::enzConnectionFuncLocal(
 	assert( connIndex > 0 ); // Should have just created a message on it
 
 	enzMap_[connIndex - 1] = rateTermIndex;
+}
+
+void KineticHub::mmEnzConnectionFuncLocal(
+	Element* hub, int rateTermIndex, Element* mmEnz )
+{
+	static Finfo* enzFields[] =
+	{
+		new ValueFinfo( "k1",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getMmEnzK1 ),
+			RFCAST( &KineticHub::setMmEnzK1 )
+		),
+		new ValueFinfo( "k2",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getMmEnzK2 ),
+			RFCAST( &KineticHub::setMmEnzK2 )
+		),
+		new ValueFinfo( "k3",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getMmEnzKcat ),
+			RFCAST( &KineticHub::setMmEnzK3 )
+		),
+		new ValueFinfo( "Km",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getMmEnzKm ),
+			RFCAST( &KineticHub::setMmEnzKm )
+		),
+		new ValueFinfo( "kcat",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getMmEnzKcat ),
+			RFCAST( &KineticHub::setMmEnzKcat )
+		),
+	};
+
+	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
+		initEnzymeCinfo()->getThisFinfo( ) );
+	assert( tf != 0 );
+	static SolveFinfo enzZombieFinfo( 
+		enzFields, 
+		sizeof( enzFields ) / sizeof( Finfo* ),
+		tf
+	);
+
+	zombify( hub, mmEnz, enzSolveFinfo, &enzZombieFinfo );
+	unsigned int connIndex = enzSolveFinfo->numOutgoing( hub );
+	assert( connIndex > 0 ); // Should have just created a message on it
+
+	mmEnzMap_[connIndex - 1] = rateTermIndex;
 }
 
 ///////////////////////////////////////////////////
@@ -698,15 +761,244 @@ double KineticHub::getEnzK2( const Element* e )
 
 void KineticHub::setEnzK3( const Conn& c, double value )
 {
+	unsigned int index;
 	cout << "in setEnzK3\n";
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index + 1 < kh->rates_->size() );
+		( *kh->rates_ )[ index + 1 ]->setR1( value );
+	}
+	Enzyme::setK3( c, value );
 }
 
 double KineticHub::getEnzK3( const Element* e )
 {
+	unsigned int index;
 	cout << "in getEnzK3\n";
+	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index + 1 < kh->rates_->size() );
+		return ( *kh->rates_ )[ index + 1 ]->getR1();
+	}
 	return 0.0;
 }
 
+// This function does rather nasty scaling of all rates so as to
+// end up with the same overall Km when k3 is changed.
+void KineticHub::setEnzKcat( const Conn& c, double value )
+{
+	unsigned int index;
+	cout << "in setEnzKcat\n";
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index + 1 < kh->rates_->size() );
+		double k1 = ( *kh->rates_ )[ index ]->getR1();
+		double k2 = ( *kh->rates_ )[ index ]->getR2();
+		double k3 = ( *kh->rates_ )[ index + 1 ]->getR1();
+		if ( value > 0.0 && k3 > 0.0 ) {
+			k2 *= value / k3;
+			k1 *= value / k3;
+			k3 = value;
+			( *kh->rates_ )[index]->setR1( k1 );
+			( *kh->rates_ )[index]->setR2( k2 );
+			( *kh->rates_ )[ index + 1 ]->setR1( k3 );
+		}
+	}
+	Enzyme::setKcat( c, value );
+}
+
+
+// This function does rather nasty scaling of all rates so as to
+// end up with the same overall Km when k3 is changed.
+void KineticHub::setEnzKm( const Conn& c, double value )
+{
+	unsigned int index;
+	cout << "in setEnzKm\n";
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index + 1 < kh->rates_->size() );
+		double k1 = ( *kh->rates_ )[ index ]->getR1();
+		double k2 = ( *kh->rates_ )[ index ]->getR2();
+		double k3 = ( *kh->rates_ )[ index + 1 ]->getR1();
+		if ( value > 0.0 ) {
+			k1 = ( k2 + k3 ) / value;
+			( *kh->rates_ )[index]->setR1( k1 );
+		}
+	}
+	Enzyme::setKm( c, value );
+}
+
+double KineticHub::getEnzKm( const Element* e )
+{
+	unsigned int index;
+	cout << "in getEnzKm\n";
+	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index + 1 < kh->rates_->size() );
+		double k1 = ( *kh->rates_ )[ index ]->getR1();
+		double k2 = ( *kh->rates_ )[ index ]->getR2();
+		double k3 = ( *kh->rates_ )[ index + 1 ]->getR1();
+		if ( k1 > 0.0 )
+			return ( k2 + k3 ) / k1;
+	}
+	return 0.0;
+}
+
+
+//////////////////////////////////////////////////////////////////
+// Here we set up stuff for mmEnzymes. It is similar, but not identical,
+// to what we did for ordinary enzymes.
+//////////////////////////////////////////////////////////////////
+void KineticHub::setMmEnzK1( const Conn& c, double value )
+{
+	unsigned int index;
+	cout << "in setEnzK1\n";
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		if ( value > 0.0 ) {
+			double oldK1 = Enzyme::getKm( c.targetElement() );
+			double oldKm = ( *kh->rates_ )[ index ]->getR1();
+			double Km = oldKm * oldK1 / value;
+			( *kh->rates_ )[index]->setR1( Km );
+		}
+	}
+	Enzyme::setK1( c, value );
+}
+
+// The Kinetic solver has no record of mmEnz::K1, so we simply go back to
+// the object here. Should have a way to bypass this.
+double KineticHub::getMmEnzK1( const Element* e )
+{
+	return Enzyme::getK1( e );
+}
+
+// Ugh. Should perhaps ignore this mess.
+void KineticHub::setMmEnzK2( const Conn& c, double value )
+{
+	unsigned int index;
+	cout << "in setEnzK2\n";
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		Element* e = c.targetElement();
+		double k1 = Enzyme::getK1( e );
+		double k3 = Enzyme::getK3( e );
+		double Km = ( value + k3 ) / k1;
+		( *kh->rates_ )[index]->setR1( Km );
+	}
+	Enzyme::setK2( c, value );
+}
+
+double KineticHub::getMmEnzK2( const Element* e )
+{
+	return Enzyme::getK2( e );
+}
+
+// Note that this differs from assigning kcat. k3 leads to changes
+// in Km and kcat, whereas kcat only affects kcat.
+void KineticHub::setMmEnzK3( const Conn& c, double value )
+{
+	unsigned int index;
+	cout << "in setEnzK3\n";
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		Element* e = c.targetElement();
+		double k1 = Enzyme::getK1( e );
+		double k2 = Enzyme::getK2( e );
+		double Km = ( k2 + value ) / k1;
+		double kcat = value;
+		( *kh->rates_ )[index]->setR1( Km );
+		( *kh->rates_ )[index]->setR2( kcat );
+	}
+	Enzyme::setK3( c, value );
+}
+
+double KineticHub::getMmEnzKcat( const Element* e )
+{
+	unsigned int index;
+	cout << "in getEnzK3\n";
+	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		return ( *kh->rates_ )[ index ]->getR2();
+	}
+	return 0.0;
+}
+
+void KineticHub::setMmEnzKcat( const Conn& c, double value )
+{
+	unsigned int index;
+	cout << "in setEnzKcat\n";
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		if ( value > 0.0 )
+			( *kh->rates_ )[index]->setR2( value );
+	}
+	Enzyme::setKcat( c, value );
+}
+
+
+// This function does rather nasty scaling of all rates so as to
+// end up with the same overall Km when k3 is changed.
+void KineticHub::setMmEnzKm( const Conn& c, double value )
+{
+	unsigned int index;
+	cout << "in setEnzKm\n";
+	KineticHub* kh = getHubFromZombie( 
+		c.targetElement(), enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		if ( value > 0.0 )
+			( *kh->rates_ )[index]->setR1( value );
+	}
+	Enzyme::setKm( c, value );
+}
+
+double KineticHub::getMmEnzKm( const Element* e )
+{
+	unsigned int index;
+	cout << "in getEnzKm\n";
+	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
+	if ( kh && kh->rates_ ) {
+		assert ( index < kh->enzMap_.size() );
+		index = kh->enzMap_[ index ];
+		assert ( index < kh->rates_->size() );
+		return ( *kh->rates_ )[index]->getR1();
+	}
+	return 0.0;
+}
 /*
 void KineticHubWrapper::reacConnectionFuncLocal( int rateTermIndex, Element* reac )
 {

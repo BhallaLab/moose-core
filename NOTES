@@ -4152,5 +4152,25 @@ kholodenko model loads and runs using (mostly) the builtin scheduling. I
 need to implement a subclass of the table to pretend to be a plot, and more
 to the point, to have the appropriate default scheduled tick. Currently there
 is no easy way to determine how to schedule the tables.
+Checked in as revision 176, in serial compile form with debugging.
+
+Designing a biochem solver manager.
+- Needs a general mode indicator: EE, ODE, stochastic, spatial, stochmesh,
+particle.
+- Needs a scale range for adaptive behaviour: over what range is it adaptive?
+	Needs rules for adaptive behaviour.
+- Needs options for specifying a specific method if many are available.
+- Needs rules for deciding between aternate methods, eg, alternate ODE
+	methods.
+- Needs guidelines on parallel behaviour too.
+
+Starting out with a first pass implementation using ClockJob.cpp.
+=============================================================================
+
+27 July 2007
+Got the automatic kinetic solver stuff set up. Loads and runs kholodenko
+model. Got sidetracked into wrapping up a whole lot of the minor
+unfinished field assignment stuff in the kinetic solver.
+
 
 =============================================================================
