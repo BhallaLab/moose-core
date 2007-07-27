@@ -1079,12 +1079,14 @@ Element* findCj()
 
 void Shell::resched( const Conn& c )
 {
+	// Should be a msg
 	Element* cj = findCj();
 	set( cj, "resched" );
 }
 
 void Shell::reinit( const Conn& c )
 {
+	// Should be a msg
 	Element* cj = findCj();
 	set( cj, "reinit" );
 }
@@ -1097,6 +1099,7 @@ void Shell::stop( const Conn& c )
 
 void Shell::step( const Conn& c, double time )
 {
+	// Should be a msg
 	Element* cj = findCj();
 	set< double >( cj, "start", time );
 }

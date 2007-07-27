@@ -66,6 +66,10 @@ class KineticHub
 				Element* enz );
 		static void mmEnzConnectionFunc( const Conn& c,
 				unsigned int index, Element* mmEnz );
+		void mmEnzConnectionFuncLocal(
+				Element* hub, 
+				int enzTermIndex, 
+				Element* enz );
 		
 		///////////////////////////////////////////////////
 		// Overrides Neutral::destroy to clean up zombies.
@@ -95,6 +99,22 @@ class KineticHub
 		static double getEnzK2( const Element* e );
 		static void setEnzK3( const Conn& c, double value );
 		static double getEnzK3( const Element* e );
+		static void setEnzKm( const Conn& c, double value );
+		static double getEnzKm( const Element* e );
+		static void setEnzKcat( const Conn& c, double value );
+		static double getEnzKcat( const Element* e );
+
+		static void setMmEnzK1( const Conn& c, double value );
+		static double getMmEnzK1( const Element* e );
+		static void setMmEnzK2( const Conn& c, double value );
+		static double getMmEnzK2( const Element* e );
+		static void setMmEnzK3( const Conn& c, double value );
+		static void setMmEnzKm( const Conn& c, double value );
+		static double getMmEnzKm( const Element* e );
+		static void setMmEnzKcat( const Conn& c, double value );
+		static double getMmEnzKcat( const Element* e );
+
+
 		static void zombify( 
 			Element* hub, Element* e, const Finfo* hubFinfo,
 	       		Finfo* solveFinfo );
