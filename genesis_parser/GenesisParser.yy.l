@@ -73,14 +73,13 @@ E   ((e|E){S}[0-9]+)
 "//"\n			{
 			  if (!continuation)
 			      lexchar('\n');
-
 			  continuation = 0;
 			}
 
 \\.*			continuation = 1;
 
-\"[^\n"]*	|
-\"[^\r"]*	{
+\"(\\.|[^\n"])*	|
+\"(\\.|[^\r"])*	{
 			  char	ch;
 
 			  ch = (char)yyinput();
@@ -88,9 +87,8 @@ E   ((e|E){S}[0-9]+)
 			    {
 			      yyerror
 			      ("Missing closing quote in string constant");
-			      /* No Return */
+			      // No Return 
 			    }
-
 			  if (yytext[yyleng-1] == '\\')
 			    {
 			      yytext[yyleng-1] = '"';
@@ -99,10 +97,43 @@ E   ((e|E){S}[0-9]+)
 			    }
 			  else
 			    {
-			      yylval.str = (char *) strdup(yytext+1);
+			      /* Changes made by Raamesh Deshpande, NCBS
+			       * Change made in lex rule \"[^\n"]*|\"[^\n"]* --> \"(\\.|[^\n"])*|\"(\\.|[^\r"])*
+			       * This allows escape characters which are in form of text, for example, \n, \t, etc
+			       * I have dealt only with \n, \", \t. Rest will remain as text. If you want to deal with an 
+			       * escape character say \x then add another else if and it would be dealt.
+			       */
+			      char *str = (char *) strdup(yytext+1);
+ 			      int index = 0;
+			      //char *str1 = new char[strlen(str)];
+			      for (size_t i = 0; i < strlen(str); i++){
+			        if (str[i] == '\\' && str[i+1] == '"') {
+			          str[index] = '"';
+			          index++;
+			          i++;
+			        }
+			        else if (str[i] == '\\' && str[i+1] == 'n') {
+			          str[index] = '\n';
+			          index++;
+			          i++;
+			        }
+			        else if (str[i] == '\\' && str[i+1] == 't') {
+			          str[index] = '\t';
+			          index++;
+			          i++;
+			        }
+			        else {
+			          str[index] = str[i];
+			          index++;
+			        }
+			      }
+			      str[index] = '\0';
+			      //Change end
+			      yylval.str = str;
 			      lextoken(STRCONST);
 			    }
-			};
+		}
+
 
 "$"[0-9]+		{
 			  sscanf(yytext+1, " %d ", &yylval.iconst);
