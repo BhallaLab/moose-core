@@ -22,6 +22,7 @@
 extern void testMolecule(); // Defined in Molecule.cpp
 extern void testEnzyme(); // Defined in Enzyme.cpp
 extern void testSparseMatrix(); // Defined in SparseMatrix.cpp
+extern void testMathFunc(); //Defined in MathFunc.cpp
 void testStoich();
 void testKintegrator();
 #ifdef USE_GSL
@@ -34,6 +35,7 @@ void testKinetics()
 	testEnzyme();
 	testSparseMatrix();
 	testStoich();
+	testMathFunc();
 	testKintegrator();
 #ifdef USE_GSL
 	testGslIntegrator();
