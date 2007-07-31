@@ -363,8 +363,8 @@ Element* Cinfo::create( Id id, const std::string& name ) const
  */
 bool Cinfo::schedule( Element* e ) const
 {
-	static const Element* library = Id( "/library" )();
-	static const Element* proto = Id( "/proto" )();
+	const Element* library = Id( "/library" )();
+	const Element* proto = Id( "/proto" )();
 	static const Cinfo* tickCinfo = find( "Tick" );
 	assert( tickCinfo != 0 ); // Not sure about execution order here.
 	static const Finfo* procFinfo = tickCinfo->findFinfo( "process" );
@@ -372,7 +372,7 @@ bool Cinfo::schedule( Element* e ) const
 
 	// Don't bother to schedule objects sitting on /library or /proto
 	if ( e->isDescendant( library ) || e->isDescendant( proto ) )
-		return 0;
+		return 1;
 
 	vector< SchedInfo >::const_iterator i;
 	for ( i = scheduling_.begin(); i != scheduling_.end(); i++ ) {
