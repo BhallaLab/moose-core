@@ -28,7 +28,11 @@ bool SimpleElement::isDescendant( const Element* ancestor ) const
 	if ( this == Element::root() )
 			return 0;
 	assert( connDestBegin( 0 ) != connDestEnd( 0 ) );
-	return connDestBegin( 0 )->targetElement()->isDescendant( ancestor);
+	const Element* parent = connDestBegin( 0 )->targetElement();
+	if ( parent == ancestor )
+		return 1;
+	else
+		return parent->isDescendant( ancestor);
 }
 
 /**
