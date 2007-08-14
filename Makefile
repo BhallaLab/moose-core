@@ -71,7 +71,7 @@ CXX = g++
 
 LD = ld
 
-SUBDIR = genesis_parser basecode shell element maindir biophysics kinetics builtins scheduling $(PARALLEL_DIR)
+SUBDIR = genesis_parser basecode shell element maindir biophysics kinetics builtins scheduling example $(PARALLEL_DIR)
 
 OBJLIBS =	\
 	basecode/basecode.o \
@@ -83,6 +83,7 @@ OBJLIBS =	\
 	kinetics/kinetics.o \
 	builtins/builtins.o \
 	scheduling/scheduling.o \
+	example/example.o \
 
 moose: libs $(OBJLIBS) $(PARALLEL_LIB)
 	$(CXX) $(CFLAGS) $(PARALLEL_FLAGS) $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o moose
