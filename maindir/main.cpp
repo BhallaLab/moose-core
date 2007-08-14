@@ -38,6 +38,7 @@
 	extern void testWildcard();
 	extern void testBiophysics();
 	extern void testKinetics();
+	extern void testAverage();
 #ifdef USE_MPI
 	extern void testPostMaster();
 #endif
@@ -166,6 +167,7 @@ int main(int argc, char** argv)
 		testWildcard();
 		testBiophysics();
 		testKinetics();
+		testAverage();
 	}
 #endif
 

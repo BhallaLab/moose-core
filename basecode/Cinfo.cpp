@@ -358,6 +358,37 @@ Element* Cinfo::create( Id id, const std::string& name ) const
 }
 
 /**
+ * Create a new element with provided data, a set of Finfos and
+ * the MsgSrc and MsgDest allocated.
+ */
+Element* Cinfo::createArray( Id id, const std::string& name, 
+			void* data, unsigned int numEntries, size_t objectSize,
+			bool noDeleteFlag ) const
+{
+	ArrayElement* ret = 
+		new ArrayElement( id, name, nSrc_, nDest_, data, 
+			numEntries, objectSize );
+	if ( noDeleteFlag )
+		ret->addFinfo( noDelFinfo_ );
+	else
+		ret->addFinfo( thisFinfo_ );
+	set( ret, "postCreate" );
+	
+	return ret;
+}
+
+/**
+ * Create a new arrayElement, complete with data, a set of Finfos and
+ * the MsgSrc and MsgDest allocated.
+ */
+Element* Cinfo::createArray( Id id, const std::string& name,
+	unsigned int numEntries, size_t objectSize )	const
+{
+	return createArray( id, name, ftype_->create( numEntries ), 
+		numEntries, objectSize );
+}
+
+/**
  * Connect up new element to the clock ticks that will control its
  * runtime operations.
  */
