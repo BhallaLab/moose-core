@@ -191,6 +191,13 @@ class Element
 		 */
 		virtual void* data() const = 0;
 
+		/**
+		 * Returns number of entries in the data. 1 for SimpleElement,
+		 * any value for ArrayElement
+		 */
+		virtual unsigned int numEntries() const = 0;
+
+
 		/** Returns a Finfo that matches the path given by 'name'.
 		 * This can be a general path including field indirection
 		 * and indices. If necessary the function will generate
