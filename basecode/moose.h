@@ -27,6 +27,7 @@
 #include "MsgSrc.h"
 #include "MsgDest.h"
 #include "SimpleElement.h"
+#include "ArrayElement.h"
 
 #include "DynamicFinfo.h"
 #include "ValueFinfo.h"

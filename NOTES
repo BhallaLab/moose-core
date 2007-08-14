@@ -4171,6 +4171,45 @@ Starting out with a first pass implementation using ClockJob.cpp.
 Got the automatic kinetic solver stuff set up. Loads and runs kholodenko
 model. Got sidetracked into wrapping up a whole lot of the minor
 unfinished field assignment stuff in the kinetic solver.
+Checked in as revision 177, in serial compile form with debugging.
 
+=============================================================================
+13 August 2007
+Begun work on ArrayElement with Raamesh. 
+Design decisions:
+	- use a separate creation function from Cinfo.
+	- Store data values in an array (not a vector)
+
+Issue: size field currently refers to # of entries, not size of object. Should
+	we store size directly or continue to use cinfo access procedure.
+
+
+Stages to implementing ArrayElement:
+1. Creating with array of objects.
+2. Accessing fields in array (using wrapper element)
+3. Ensuring that generic messages apply to all objects in array.
+4. How to get specific messages to go to individual objects in array.
+
+
+Implemented the basic class and did a simple unit test for creation. 
+
+=============================================================================
+14 August 2007
+
+Implemented example directory with a simple averaging class. Unit tests
+connect 3 together and run for 19 steps. An identical calculation is done
+in a .g file.
+
+
+Working on wrapper element for ArrayElement lookups. The one for PostMasters
+is just a SimpleElement, but here we need to do some clever stuff with the
+data lookup, so we will need to implement a separate class. May as well
+derive from SimpleElement: Lots of code to be bypassed.
+
+Setting up, compiles, but doesn't work because our test Element does not
+have a ThisFinfo or Cinfo. perhaps the Cinfo should be an Element field?
+
+Instead set it up using an array of Interpols. Lots of potential tests,
+but only bare bones one done so far.
 
 =============================================================================

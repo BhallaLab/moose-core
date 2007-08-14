@@ -8,15 +8,15 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _SIMPLE_ELEMENT_H
-#define _SIMPLE_ELEMENT_H
+#ifndef _ARRAY_ELEMENT_H
+#define _ARRAY_ELEMENT_H
 
 /**
- * The SimpleElement class implements Element functionality in the
+ * The ArrayElement class implements Element functionality in the
  * most common vanilla way. It manages a set of vectors and pointers
  * that keep track of messaging and field information.
  */
-class SimpleElement: public Element
+class ArrayElement: public Element
 {
 	public:
 #ifdef DO_UNIT_TESTS
@@ -26,21 +26,23 @@ class SimpleElement: public Element
 			friend void finfoLookupTest(); // to do these tests
 			static int numInstances;
 #endif
-		SimpleElement( Id id, const string& name );
+		ArrayElement( Id id, const string& name );
 
-		SimpleElement(
+		ArrayElement(
 				Id id,
 				const std::string& name, 
 				unsigned int srcSize,
 				unsigned int destSize,
-				void* data = 0
+				void* data = 0,
+				unsigned int numEntries = 0,
+				size_t objectSize = 0
 		);
 
 		// Used in copies.
-		SimpleElement( const SimpleElement* orig );
+		ArrayElement( const ArrayElement* orig );
 
 		/// This cleans up the data_ and finfo_ if needed.
-		~SimpleElement();
+		~ArrayElement();
 
 		const std::string& name( ) const {
 				return name_;
@@ -238,7 +240,7 @@ class SimpleElement: public Element
 		}
 
 		unsigned int numEntries() const {
-			return 1;
+			return numEntries_;
 		}
 
 		/**
@@ -347,7 +349,22 @@ class SimpleElement: public Element
 
 		vector< Finfo* > finfo_;
 
+		/**
+		 * This void* points to the start of an array of the object
+		 * data. Note that it is NOT an array of object data pointers,
+		 * but the actual allocated data.
+		 */
 		void* data_;
+
+		/**
+		 * This is the number of allocated entries in the data array.
+		 */
+		unsigned int numEntries_;
+
+		/**
+		 * This is the size of each object in the array.
+		 */
+		size_t objectSize_;
 
 		/**
 		 * Scans through all MsgSrcs to find the highest Conn index
@@ -363,4 +380,4 @@ class SimpleElement: public Element
 
 };
 
-#endif // _SIMPLE_ELEMENT_H
+#endif // _ARRAY_ELEMENT_H

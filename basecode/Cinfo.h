@@ -87,6 +87,12 @@ class Cinfo
 			Element* create( Id id, const string& name, 
 							void* data, bool noDelFlag = 0 ) const;
 
+			Element* createArray( Id id, const string& name,
+				unsigned int numEntries, size_t objectSize ) const ;
+			Element* createArray( Id id, const string& name, 
+					void* data, unsigned numEntries, size_t objectSize,
+					bool noDelFlag = 0 ) const;
+
 			bool schedule( Element* e ) const;
 			// void destroy( void* ) const ;
 
