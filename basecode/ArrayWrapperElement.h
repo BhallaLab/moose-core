@@ -24,6 +24,7 @@ class ArrayWrapperElement: public SimpleElement
 		/// This cleans up the data_ and finfo_ if needed.
 		~ArrayWrapperElement();
 
+		const Finfo* findFinfo( const string& name );
 
 		void* data() const;
 
