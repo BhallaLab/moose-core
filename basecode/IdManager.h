@@ -99,7 +99,7 @@ class IdManager
 		 * belongs.
 		 * Returns 0 on failure.
 		 */
-		Element* getElement( unsigned int index ) const;
+		Element* getElement( const Id& id ) const;
 
 		/**
 		 * Assigns element to specified index. On master node, the

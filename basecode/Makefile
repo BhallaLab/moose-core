@@ -83,7 +83,7 @@ setget.o:		setget.h DerivedFtype.h
 strconv.o:		DerivedFtype.h
 filecheck.o: filecheck.h
 FunctionData.o:	FunctionData.h
-IdManager.o:	Id.h IdManager.h
+IdManager.o:	Id.h IdManager.h ArrayWrapperElement.h
 ArrayElement.o:	ArrayElement.h SimpleElement.h MsgSrc.h MsgDest.h DeletionMarkerFinfo.h
 ArrayWrapperElement.o:	ArrayWrapperElement.h SimpleElement.h MsgSrc.h MsgDest.h DeletionMarkerFinfo.h
 

@@ -259,18 +259,65 @@ Id Neutral::getParent( const Element* e )
  */
 Id Neutral::getChildByName( const Element* elm, const string& s )
 {
-	const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
-	assert( e != 0 );
+	// const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
+	// assert( e != 0 );
 	// assert that the element is a neutral.
 
 	// Here we should put in one of the STL algorithms.
 	vector< Conn >::const_iterator i;
 	// For neutral, src # 0 is the childSrc.
-	vector< Conn >::const_iterator begin = e->connSrcBegin( 0 );
-	vector< Conn >::const_iterator end = e->connSrcEnd( 0 );
+	vector< Conn >::const_iterator begin = elm->connSrcBegin( 0 );
+	vector< Conn >::const_iterator end = elm->connSrcEnd( 0 );
+
+	string name;
+	assert( s.length() > 0 );
+	unsigned int index = 0;
+	if ( s[s.length() - 1] == ']' ) {
+		string::size_type pos = s.rfind( '[' );
+		if ( pos == string::npos )
+			return Id::badId();
+		if ( pos == s.length() - 2 ) {
+			// return the whole array
+			name = s.substr( 0, pos );
+			index = 0;
+		} else {
+			name = s.substr( 0, pos );
+			index = atoi( s.substr( pos + 1, s.length() - pos ).c_str() );
+		}
+	} else {
+		name = s;
+		index = 0;
+	}
 	for ( i = begin; i != end; i++ ) {
-		if ( i->targetElement()->name() == s ) {
-			return i->targetElement()->id();
+		Element* kid = i->targetElement();
+		const string& n = kid->name();
+		assert( n.length() > 0 );
+		if ( n[ n.length() - 1 ] == ']' ) { // name-indexing
+			if ( n == s )
+		// But note this forestalls the use of foo[ i ][ j ] type indexing.
+		// Note also multiple use cases.
+				return kid->id();
+		} else if ( i->targetElement()->name() == name ) {
+			// Four cases here:
+			// index == 0, elm->index == 0: simple element return
+			// index == 0, elm->index > 0
+			// index > 0, elm->index == 0
+			// index > 0, elm->index > 0
+			if ( elm->numEntries() == 0 ) {
+				// index == 0, elm->index == 0: simple element return
+				if ( index == 0 )
+					return kid->id();
+				else // index > 0, elm->index == 0: Child should be an array
+					if ( kid->numEntries() < index )
+						return Id::badId();
+					else
+						return kid->id().assignIndex( index );
+			} else {
+				if ( index == 0 ) // Here the child id inherits the parent indx
+					return kid->id().assignIndex( elm->id().index() );
+				else // Nasty: indices for parent as well as child. Work out later.
+					return Id::badId();
+			}
 		}
 	}
 	// Failure option: return BAD_ID.

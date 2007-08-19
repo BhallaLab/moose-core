@@ -4211,5 +4211,58 @@ have a ThisFinfo or Cinfo. perhaps the Cinfo should be an Element field?
 
 Instead set it up using an array of Interpols. Lots of potential tests,
 but only bare bones one done so far.
+Checked in as revision 181, in serial compile form with debugging.
 
 =============================================================================
+17 August 2007.
+The basic checks for the ArrayWrapperElement are fine, but now we come to 
+a design issue: How to handle lookup of Elements?
+- Add an index field to ids
+- Add a generic extension field to ids.
+- Add other extension to Id so it acts like the ArrayWrapperElement.
+
+Let's just do the first. Simple and obvious. Doubles Id size.
+Can add a special index, MAX_INT, to indicate entire ArrayElement.
+Leads to various changes on the IdManager.
+Higher-dimension arrays, or arrays that contain arrays, will need something
+better. Later.
+
+A related problem: Suppose I make: 
+cell
+cell/soma
+cell/dend
+
+Now I turn this into array elements: cell[1..10]
+In GENESIS, I would see
+	/cell[5]/soma
+Here, I would see 
+	/cell[5]/soma
+	and also
+	/cell/soma[5]
+How to resolve?
+	Basically comes down to how we traverse array element children.
+	What we actually see is a single tree. At each level we can do
+	indexing. The key is to set up the parsing so it does it right.
+
+Implemented an index field within the Id. Need now to modify the getElement
+function to take the returned ArrayElement and put a wrapper around it if
+there is an index. But it still doesn't clear unit tests.
+=============================================================================
+18 Aug 2007
+OK, it was just a matter of doing a clean recompile. Now to move on to
+accessing arrays.
+Going on OK in Neutral::getChildByName, but there is a GENESIS syntax issue
+here which
+unfortunately trickles down to the base code. GENESIS takes an un-indexed
+element as element 0. If we do the same, it comes up here. Problem arises
+because C syntax takes the un-indexed array name as referring to the whole
+array. Best I can do here is to add the syntax that foo[] means the whole
+array. This extends GENESIS syntax but does not break it.
+
+Working on handling lookup. Next to handle creation of arrays.
+
+=============================================================================
+
+
+=============================================================================
+

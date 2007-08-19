@@ -30,6 +30,11 @@ void* ArrayWrapperElement::data() const
 		+ index_ * arrayElement_->cinfo()->ftype()->size() );
 }
 
+const Finfo* ArrayWrapperElement::findFinfo( const string& name )
+{
+	return arrayElement_->findFinfo( name );
+}
+
 unsigned int ArrayWrapperElement::numEntries( ) const
 {
 	return arrayElement_->numEntries();
