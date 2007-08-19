@@ -21,35 +21,35 @@ const unsigned int MAX_ID = 1000000;
 //////////////////////////////////////////////////////////////
 
 Id::Id()
-	: id_( 0 )
+	: id_( 0 ), index_( 0 )
 {;}
 
 Id::Id( unsigned int i )
-	: id_( i )
+	: id_( i ), index_( 0 )
 {;}
 
 ///\todo Lots of stuff to do here, mostly to refer to Shell's operations.
 Id::Id( const string& path, const string& separator )
 {
-	id_ = Shell::path2eid( path, separator ).id_;
+	*this = Shell::path2eid( path, separator );
 }
 
 // static func
 Id Id::childId( Id parent )
 {
-	return manager().childId( parent.id_ );
+	return Id( manager().childId( parent.id_ ) );
 }
 
 // static func
 Id Id::scratchId()
 {
-	return manager().scratchId();
+	return Id( manager().scratchId() );
 }
 
 // static func
 Id Id::makeIdOnNode( unsigned int node )
 {
-	return manager().makeIdOnNode( node );
+	return Id( manager().makeIdOnNode( node ) );
 }
 
 // static func
@@ -67,6 +67,13 @@ Id Id::str2Id( const std::string& s )
 {
 	unsigned int val = atoi( s.c_str() );
 	return Id( val );
+}
+
+Id Id::assignIndex( unsigned int index )
+{
+	Id i( id_ );
+	i.index_ = index;
+	return i;
 }
 
 //////////////////////////////////////////////////////////////
@@ -87,7 +94,10 @@ IdManager& Id::manager()
 string Id::id2str( Id id )
 {
 	char temp[40];
-	sprintf( temp, "%d", id.id_ );
+	if ( id.index_ == 0 )
+		sprintf( temp, "%d", id.id_ );
+	else
+		sprintf( temp, "%d[%d]", id.id_, id.index_ );
 	return temp;
 }
 
@@ -110,7 +120,7 @@ string Id::path( const string& separator) const
  */
 Element* Id::operator()() const
 {
-	return manager().getElement( id_ );
+	return manager().getElement( *this );
 }
 
 unsigned int Id::node() const 
@@ -160,7 +170,10 @@ bool Id::isScratch() const
 
 ostream& operator <<( ostream& s, const Id& i )
 {
-	s << i.id_;
+	if ( i.index_ == 0 )
+		s << i.id_;
+	else 
+		s << i.id_ << "[" << i.index_ << "]";
 	return s;
 }
 
