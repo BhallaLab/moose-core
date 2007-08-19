@@ -73,6 +73,8 @@ class Id
 		 */
 		static Id shellId();
 
+		Id assignIndex( unsigned int index );
+
 		//////////////////////////////////////////////////////////////
 		//	Id info
 		//////////////////////////////////////////////////////////////
@@ -93,6 +95,10 @@ class Id
 		 * Returns 0 on failure.
 		 */
 		Element* operator()() const;
+
+		unsigned int index() const {
+			return index_;
+		}
 
 		/**
 		 * Returns node on which id is located.
@@ -148,15 +154,16 @@ class Id
 		//	Comparisons between ids
 		//////////////////////////////////////////////////////////////
 		bool operator==( const Id& other ) const {
-			return id_ == other.id_;
+			return id_ == other.id_ && index_ == other.index_;
 		}
 
 		bool operator!=( const Id& other ) const {
-			return id_ != other.id_;
+			return id_ != other.id_ || index_ != other.index_;
 		}
 
 		bool operator<( const Id& other ) const {
-			return id_ < other.id_;
+			return ( id_ < other.id_ ) ||
+				( id_ == other.id_ && index_ < other.index_ );
 		}
 
 		friend ostream& operator <<( ostream& s, const Id& i );
@@ -178,6 +185,7 @@ class Id
 		 */
 		Id( unsigned int id );
 		unsigned int id_;
+		unsigned int index_;
 		static IdManager& manager();
 };
 

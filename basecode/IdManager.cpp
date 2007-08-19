@@ -11,6 +11,7 @@
 #include "moose.h"
 #include "IdManager.h"
 #include "ThisFinfo.h"
+#include "ArrayWrapperElement.h"
 #ifdef USE_MPI
 const Cinfo* initPostMasterCinfo();
 #endif
@@ -145,14 +146,14 @@ unsigned int IdManager::makeIdOnNode( unsigned int childNode )
 	return lastId_;
 }
 
-Element* IdManager::getElement( unsigned int index ) const
+Element* IdManager::getElement( const Id& id ) const
 {
 	static ThisFinfo dummyFinfo( initNeutralCinfo(), 1 );
-	if ( index < mainIndex_ ) {
+	if ( id.id_ < mainIndex_ ) {
+	Element* ret = elementList_[ id.id_ ];
+	if ( ret == 0 )
+		return 0;
 #ifdef USE_MPI
-		Element* ret = elementList_[ index ];
-		if ( ret == 0 )
-			return 0;
 		if ( ret == UNKNOWN_NODE )
 			// don't know how to handle this yet. It should trigger
 			// a request to the master node to update the elist.
@@ -160,7 +161,7 @@ Element* IdManager::getElement( unsigned int index ) const
 			assert( 0 );
 		if ( ret->cinfo() != initPostMasterCinfo() ) {
 			return ret;
-		} else if ( ret->id().id_ == index ) {
+		} else if ( ret->id().id_ == id.id_ ) {
 			// This is the postmaster itself
 			return ret;
 		} else {
@@ -171,7 +172,14 @@ Element* IdManager::getElement( unsigned int index ) const
 			return wrap;
 		}
 #else
-		return elementList_[ index ];
+	if ( id.index_ > 0 ) {
+		if ( ret->numEntries() > id.index_ )
+			return new ArrayWrapperElement( ret , id.index_ );
+		else
+			return 0;
+	} else {
+		return ret;
+	}
 #endif
 	}
 	return 0;

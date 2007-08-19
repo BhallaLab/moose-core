@@ -793,9 +793,12 @@ void ArrayElementTest()
 	Interpol* foo = new Interpol[ArraySize];
 	for ( unsigned int i = 0 ; i < ArraySize; i++ ) {
 		foo[i].localSetXmax( static_cast< double >( i + 1 ) );
-		foo[i].localSetXdivs( i );
+		foo[i].localSetXdivs( 2 * (i + 1) );
 	}
 
+	///////////////////////////////////////////////////////////////////
+	// Low level access to ArrayElement
+	///////////////////////////////////////////////////////////////////
 	Element* e = new ArrayElement( Id::scratchId(), "array", 0, 0, 
 		static_cast< void* >( foo ), 
 		ArraySize, sizeof( double ) );
@@ -808,7 +811,23 @@ void ArrayElementTest()
 	Element* awe = new ArrayWrapperElement( e, 27 );
 	// Interpol x = *( static_cast< Interpol* >( awe->data() ) );
 	ASSERT( Interpol::getXmax( awe ) == 28, "ArrayWrapperElement test" );
+	ASSERT( Interpol::getXdivs( awe ) == 56, "ArrayWrapperElement test" );
 	// Lots more to do here: Check set/get now.
+	
+	double d;
+	int i;
+	bool ret;
+	ret = get< double >( awe, awe->findFinfo( "xmax" ), d );
+	ASSERT( ret, "ArrayWrapperElement test" );
+	ASSERT( d == 28, "ArrayWrapperElement test" );
+
+	ret = get< int >( awe, awe->findFinfo( "xdivs" ), i );
+	ASSERT( ret, "ArrayWrapperElement test" );
+	ASSERT( i == 56, "ArrayWrapperElement test" );
+
+	///////////////////////////////////////////////////////////////////
+	// Now we look at higher level access to array elements.
+	///////////////////////////////////////////////////////////////////
 
 	delete[] foo;
 	delete awe;
