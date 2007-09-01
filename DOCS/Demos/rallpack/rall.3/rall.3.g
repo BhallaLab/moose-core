@@ -14,15 +14,15 @@ float  INJECT          = 1e-10
 float  DIAMETER        = 1e-6
 float  LENGTH          = {CABLE_LENGTH} / {N_COMPARTMENT}
 
-make_compartment /proto {RA} {RM} {CM} {EM} 0.0 {DIAMETER} {LENGTH}
+make_compartment /proto/cc {RA} {RM} {CM} {EM} 0.0 {DIAMETER} {LENGTH}
 
 create Neutral /axon
-copy proto axon/c1
+copy /proto/cc axon/c1
 setfield axon/c1 inject {INJECT}
 
 int i
 for ( i = 2; i <= {N_COMPARTMENT}; i = i + 1 )
-	copy proto axon/c{i}
+	copy /proto/cc axon/c{i}
 	link_compartment /axon/c{i - 1} /axon/c{i}
 end
 
@@ -42,7 +42,7 @@ create Table /plot/v1
 create Table /plot/vn
 setfield /plot/v1,/plot/vn stepmode 3
 addmsg /plot/v1/inputRequest /axon/c1/Vm
-addmsg /plot/vn/inputRequest /axon/c1000/Vm
+addmsg /plot/vn/inputRequest /axon/c{N_COMPARTMENT}/Vm
 
 setclock 0 {SIMDT} 0
 setclock 1 {SIMDT} 1
