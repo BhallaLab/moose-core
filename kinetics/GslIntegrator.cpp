@@ -117,6 +117,10 @@ GslIntegrator::GslIntegrator()
 	relAccuracy_ = 1.0e-6;
 	internalStepSize_ = 1.0e-2;
 	y_ = 0;
+        gslEvolve_ = NULL;
+        gslControl_ = NULL;
+        
+        
 }
 
 ///////////////////////////////////////////////////
@@ -212,15 +216,40 @@ void GslIntegrator::assignStoichFuncLocal( void* stoich )
 	nVarMols_ = s->nVarMols();
 	y_ = new double[ nVarMols_ ];
 	memcpy( y_, s->S(), nVarMols_ * sizeof( double ) );
-	isInitialized_ = 1;
 
-	if ( gslStep_ )
-		gsl_odeiv_step_free( gslStep_ );
-	assert( gslStepType_ != 0 );
-	gslStep_ = gsl_odeiv_step_alloc( gslStepType_, nVarMols_ );
-	assert( gslStep_ != 0 );
-	gslControl_ = gsl_odeiv_control_y_new( absAccuracy_, relAccuracy_ );
-	gslEvolve_ = gsl_odeiv_evolve_alloc( nVarMols_ );
+	isInitialized_ = 1;
+        // Allocate GSL functions if not already allocated,
+        // otherwise reset the reusable ones
+        assert( gslStepType_ != 0 );
+        if ( gslStep_ )
+        {
+            gsl_odeiv_step_free(gslStep_);
+        }
+        
+        gslStep_ = gsl_odeiv_step_alloc( gslStepType_, nVarMols_ );
+        
+   	assert( gslStep_ != 0 );
+        if ( !gslEvolve_ )
+        {
+            gslEvolve_ = gsl_odeiv_evolve_alloc(nVarMols_);
+        }
+        else
+        {
+            gsl_odeiv_evolve_reset(gslEvolve_);
+        }
+        assert(gslEvolve_ != 0);
+        
+        if ( !gslControl_ )
+        {
+            gslControl_ = gsl_odeiv_control_y_new( absAccuracy_, relAccuracy_ );
+        }
+        else 
+        {
+            gsl_odeiv_control_init(gslControl_,absAccuracy_, relAccuracy_, 1, 0);
+        }
+        assert(gslControl_!= 0);
+        
+        
 	gslSys_.function = &Stoich::gslFunc;
 	gslSys_.jacobian = 0;
 	gslSys_.dimension = nVarMols_;
@@ -257,14 +286,12 @@ void GslIntegrator::innerProcessFunc( Element* e, ProcInfo info )
 		// This tries to fix it.
 //		if ( internalStepSize_ > info->dt_ * 0.6 )
 //			internalStepSize_ = info->dt_;
-	}
+	}        
 }
 
 void GslIntegrator::reinitFunc( const Conn& c, ProcInfo info )
 {
-	GslIntegrator* gi = static_cast< GslIntegrator* >( c.data() );
-	if ( gi->gslStep_ )
-		gsl_odeiv_step_reset( gi->gslStep_ );
+    // Everything is done in assignStoichFuncLocal
 	send0( c.targetElement(), reinitSlot );
 	// y_[] = yprime_[]
 }
