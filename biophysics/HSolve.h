@@ -31,11 +31,14 @@ public:
 	static void processFunc( const Conn& c, ProcInfo p );
 	static void reinitFunc( const Conn& c, ProcInfo p );
 	static void postCreateFunc( const Conn& c );
+	static void scanTicksFunc( const Conn& c );
 	
 private:
 	void innerSetPath( Element* e, const string& path );
 	void innerReinitFunc( Element* e, const ProcInfo& p );
+	void innerProcessFunc( );
 	void innerPostCreateFunc( Element* e );
+	void innerScanTicksFunc( );
 	
 	NeuroScan scanData_;
 	Element* scanElm_;

@@ -25,25 +25,20 @@ end
 
 echo "Rallpack 1 model set up."
 
-create HSolve solve
-/* Unlike GENESIS, where the solver is informed of all compartments,
- * here any single "seed" compartment from the tree suffices.
- */
-setfield /solve path /cable/c1
-
 create Neutral /plot
 create Table /plot/v1
 create Table /plot/vn
 setfield /plot/v1,/plot/vn stepmode 3
 addmsg /plot/v1/inputRequest /cable/c1/Vm
-addmsg /plot/vn/inputRequest /cable/c1000/Vm
+addmsg /plot/vn/inputRequest /cable/c{N_COMPARTMENT}/Vm
 
-setclock 0 {SIMDT} 0
-setclock 1 {SIMDT} 1
-setclock 2 {PLOTDT} 0
-useclock /cable/##[TYPE=Compartment] 0
-useclock /solve 1
-useclock /plot/##[TYPE=Table] 2
+/*
+ * Solver will get attached to clock 4 automatically. Setting dt explicitly.
+ * Tables are not yet autoscheduled.
+ */
+setclock 4 {SIMDT} 0
+setclock 5 {PLOTDT} 0
+useclock /plot/##[TYPE=Table] 5
 reset
 
 step {SIMLENGTH} -t

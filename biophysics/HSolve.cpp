@@ -81,6 +81,8 @@ const Cinfo* initHSolveCinfo()
 	//////////////////////////////////////////////////////////////////
 		new DestFinfo( "postCreate", Ftype0::global(),
 			&HSolve::postCreateFunc ),
+		new DestFinfo( "scanTicks", Ftype0::global(),
+			&HSolve::scanTicksFunc ),
 	};
 
 	static Cinfo hsolveCinfo(
@@ -207,7 +209,15 @@ double HSolve::getVHi( const Element* e )
 
 void HSolve::processFunc( const Conn&c, ProcInfo p )
 {
-	static_cast< HSolve* >( c.data() )->step();
+	static_cast< HSolve* >( c.data() )->
+		innerProcessFunc();
+}
+
+void HSolve::innerProcessFunc( )
+{
+	if ( seed_ == 0 )
+		return;
+	step();
 }
 
 void HSolve::reinitFunc( const Conn& c, ProcInfo p )
@@ -218,8 +228,12 @@ void HSolve::reinitFunc( const Conn& c, ProcInfo p )
 
 void HSolve::innerReinitFunc( Element* e, const ProcInfo& p )
 {
-	// sendTo not used since there is only one scan element
-	send2< Element*, double >( e, readModelSlot,
+	if ( seed_ == 0 )
+		return;
+	unsigned int scanConn =
+		e->connSrcBegin( readModelSlot ) -
+		e->lookupConn( 0 );
+	sendTo2< Element*, double >( e, readModelSlot, scanConn,
 		seed_, p->dt_ );
 }
 
@@ -250,4 +264,29 @@ void HSolve::innerPostCreateFunc( Element* e )
 		e->connSrcBegin( scanSlot ) -
 		e->lookupConn( 0 );
 	sendTo1< Element* >( e, hubCreateSlot, scanConn, e );
+}
+
+void HSolve::scanTicksFunc( const Conn& c )
+{
+	static_cast< HSolve* >( c.data() )->innerScanTicksFunc( );
+}
+
+void HSolve::innerScanTicksFunc( )
+{
+	static Id t0( "/sched/cj/t0" );
+	static const Finfo* processFinfo = t0()->findFinfo( "process" );
+	assert( !t0.bad() );
+	assert( processFinfo != 0 );
+	
+	vector< Conn > list;
+	vector< Conn >::iterator i;
+	
+	processFinfo->outgoingConns( t0(), list );
+	for ( i = list.begin(); i != list.end(); i++ ) {
+		Element* el = i->targetElement();
+		if( el->cinfo()->isA( Cinfo::find( "Compartment" ) ) ) {
+			seed_ = el;
+			break;
+		}
+	}
 }
