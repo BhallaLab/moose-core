@@ -32,7 +32,7 @@ ifeq ($(SYSTEM),Darwin)
 	DYNAMIC_FLAGS=-bundle -flat_namespace -undefined suppress 
 endif
 
-INCLUDES=-I../basecode -I../shell
+INCLUDES=-I../basecode -I../shell -I/usr/include/python2.4
 
 OBJFILES = ../basecode/basecode.o \
 	../element/element.o \

@@ -41,6 +41,9 @@ class Id
 		 */
 		Id( const std::string& path, const std::string& separator = "/" );
 
+                ~Id(){}
+    
+
 		/**
 		 * Creates a new childId based on location of parent node and
 		 * whatever other heuristics the IdManager applies. Must be

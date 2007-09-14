@@ -223,8 +223,8 @@ void HHChannel::createTable(std::string gate, unsigned int divs, double min, dou
     if ( id.bad() )
     {
         cerr << "Error: " << " HHChannel::createTable(...) - Object does not exist: " << path << endl;
-        return;        
-    }
+        return;
+    }    
     InterpolationTable tableB(id);    
     tableB.__set_xmin(min);
     tableB.__set_xmax(max);

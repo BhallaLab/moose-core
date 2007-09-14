@@ -21,10 +21,10 @@ PyMooseContext* PyMooseBase::context_ = PyMooseContext::createPyMooseContext("Ba
    This constructor is protected and is intended for use by the
    subclasses only.  When a you need access to existing moose object
    in the pymoose way, wrap the object inside an instance of any class
-   extending PyMooseBase (although it is advisable that she should
+   extending PyMooseBase (although it is advisable that you
    wrap it inside only a class that is the same class as the moose
    object itself, pymoose does not complain. But be ready for surprise
-   if you wrap a Table inside a Compartment clas. Most likely you will
+   if you wrap a Table inside a Compartment class. Most likely you will
    get a segmentation violation error. Don't say I did not tell you!)
 
    @param id - Id of the object to be wrapped.
@@ -83,20 +83,25 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id paren
 PyMooseBase::PyMooseBase(std::string className, std::string path)
 {
      
-    if ( path == getSeparator() || path == (getSeparator()+"root"))
-    {
-        cerr << "ERROR: PyMooseBase::PyMooseBase(std::string className, std::string path) -  Attempt to create predefined root element." << endl;
-        return;        
-    }
     assert(path.length() > 0);
     // Consider the pros and cons - do we want to check pre existence for each new create call?
     // But I personally tend to make the mistake of trying to wrap an existing path inside a new python object
-    // table_A = moose.InterpolationTable(channel.path()+'/xGate/A') - which fails otherwise
+    // table_A = moose.InterpolationTable(channel.getPath+'/xGate/A') - which fails otherwise
+    
+    // 2007-07-30: returning pre-existing objects with an info message seems to be the best thing
     // Try to wrap preexisting object
     id_ = PyMooseBase::pathToId(path,false);
     if (!id_.bad())
     {
-        cerr << "Info: Object already exists." << endl;
+        cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
+        
+        if ( path == getSeparator() || path == (getSeparator()+"root"))
+        {
+            cerr << "Returning the predefined root element." << endl;
+        } else 
+        {
+            cerr << "Returning already existing object." << endl;
+        }
         return;
     }
 
@@ -104,19 +109,22 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
     std::string::size_type name_start = path.rfind(getSeparator(),path.length()-1);
     std::string myName;    
     std::string parentPath;
-
+    Id parentId;
+    
     if (name_start == std::string::npos)
     {
         name_start = 0;
         myName = path;
-        parentPath = "/";        
+        parentId = context_->getCwe();        
     }
     else 
     {
         myName = path.substr(name_start+1);
         parentPath = path.substr(0,name_start);
+        parentId = context_->pathToId(parentPath, false);        
     }
-    id_ = context_->create(className, myName, context_->pathToId(parentPath, false));
+    
+    id_ = context_->create(className, myName, parentId );
 }
 
 /**
@@ -171,8 +179,6 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
 */
 PyMooseBase::~PyMooseBase()
 {
-//    context_->destroy(id_);
-//    cerr << "Destructor called for " << id_ << endl;    
     id_ = Id();    
 }
 
@@ -180,19 +186,19 @@ const std::string& PyMooseBase::getSeparator() const
 {
     return context_->separator;    
 }
-std::string  PyMooseBase::path() const 
+const std::string  PyMooseBase::path() const 
 {
     return context_->getPath(id_);    
 }
 
-Id PyMooseBase::__get_id() const
+const Id* PyMooseBase::__get_id() const
 {
-    return id_;
+    return &id_;
 }
 
-Id PyMooseBase::__get_parent() const 
+const Id* PyMooseBase::__get_parent() const 
 {
-    return context_->getParent(id_);
+    return &(context_->getParent(id_));
 }
 
 vector <Id>& PyMooseBase::__get_children() const
@@ -290,7 +296,7 @@ Id PyMooseBase::pathToId(std::string path, bool echo)
     Id id = context_->pathToId(path, echo);
     return id;    
 }
-std::string PyMooseBase::idToPath(Id id)
+const std::string PyMooseBase::idToPath(Id id)
 {
     return context_->getPath(id);
 }
