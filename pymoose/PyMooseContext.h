@@ -52,7 +52,7 @@ class PyMooseContext
        @param name : Name of the instance to be generated.
        @returns id of the newly generated object.
     */
-    Id create(std::string type, std::string name, Id parent);
+    Id create(std::string type, std::string name, Id parent=Id::badId());
     bool destroy(Id victim);
     void end();    
     // Receive functions
@@ -71,8 +71,8 @@ class PyMooseContext
     static void destroyPyMooseContext(PyMooseContext* context);
     std::string getField(Id, std::string);
     void setField(Id, std::string, std::string);
-    Id getParent(Id id) const;
-    std::string getPath(Id id) const;
+    const Id getParent(Id id) const;
+    const std::string getPath(Id id) const;
     vector <Id>& getChildren(Id id);
     vector <Id>& getChildren(std::string path);    
     Id pathToId(std::string path, bool echo = true);

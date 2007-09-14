@@ -14,7 +14,7 @@ class PyMooseBase
 {
   public:  
     PyMooseBase(std::string className, std::string objectName, Id parentId);
-    PyMooseBase(std::string className, std::string path);    
+    PyMooseBase(std::string className, std::string path);
     PyMooseBase(std::string className, std::string objectName, PyMooseBase* parent);
     
     virtual ~PyMooseBase();
@@ -25,10 +25,9 @@ class PyMooseBase
     static PyMooseContext* getContext();
 
     vector< Id >& __get_children() const;
-    Id __get_parent() const;
-    std::string path() const;   
-    Id __get_id() const;
-    
+    const Id* __get_parent() const;
+    const std::string path() const;   
+    const Id* __get_id() const;
 
     bool connect(std::string field, PyMooseBase* dest, std::string destField);
     bool connect(std::string field, Id dest, std::string destField);
@@ -40,7 +39,7 @@ class PyMooseBase
     static Id ce(Id newElement);
     static Id ce(std::string path);
     static Id pathToId(std::string path, bool echo = true);
-    static string idToPath(Id id);
+    static const string idToPath(Id id);
     static Id getParent(Id id);
     static vector <Id>& getChildren(Id id);    
     static void initSimulation();

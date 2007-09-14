@@ -176,17 +176,6 @@ const Cinfo* initPyMooseContextCinfo()
 	{
             new SharedFinfo( "parser", contextShared,
                              sizeof( contextShared ) / sizeof( Finfo* ) ),
-// 		new DestFinfo( "readline",
-// 			Ftype1< string >::global(),
-// 			RFCAST( &PyMooseContext::readlineFunc ) ),
-// 		new DestFinfo( "process",
-// 			Ftype0::global(),
-// 			RFCAST( &PyMooseContext::processFunc ) ), 
-// 		new DestFinfo( "parse",
-// 			Ftype1< string >::global(),
-// 			RFCAST( &PyMooseContext::parseFunc ) ), 
-// 		new SrcFinfo( "echo", Ftype1< string>::global() ),
-
 	};
 
     static Cinfo pyMooseContextCinfo(
@@ -405,7 +394,7 @@ Id PyMooseContext::getCwe()
 // TODO: complete
 void PyMooseContext::setCwe(Id elementId)
 {
-    if ( elementId() == NULL)
+    if ((elementId.bad()) || (elementId() == NULL))
     {
         cerr << "ERROR:  PyMooseContext::setCwe(Id elementId) - Element with id " << elementId << " does not exist" << endl;
         return;        
@@ -421,7 +410,7 @@ void PyMooseContext::setCwe(string path)
     Id newElementId(path);
     if (!newElementId.bad() )
     {
-        cwe_ = newElementId;
+        setCwe(newElementId);        
     }
     else 
     {
@@ -603,6 +592,11 @@ void PyMooseContext::destroyPyMooseContext(PyMooseContext* context)
 
 Id PyMooseContext::create(string className, string name, Id parent)
 {
+    if ( parent == Id::badId() )
+    {
+        parent = cwe_;
+    }
+    
     if ( name.length() < 1 ) {
         cerr << "Error: invalid object name : " << name << endl;
         return Id();
@@ -648,7 +642,7 @@ void PyMooseContext::end()
 //     }    
 }
 
-Id PyMooseContext::getParent( Id e ) const
+const Id PyMooseContext::getParent( Id e ) const
 {
     Id ret = Id::badId();
     Element* elm = e();
@@ -669,66 +663,15 @@ Id PyMooseContext::getParent( Id e ) const
     return ret;
 }
 
-string PyMooseContext::getPath(Id id) const
+const string PyMooseContext::getPath(Id id) const
 {
     return id.path();
-    
-    // string path = "";
-       
-//     if ( id == Element::root()->id() )
-//     {
-//         return separator;
-//     }
-//     while (1)
-//     {
-//         Element* e = id();
-//         if ( e == NULL)
-//         {
-//             cerr << "Error: PyMooseContext::getPath(Id id) - Invalid id specified" << endl;
-//             return "";        
-//         }
-        
-//         path = separator + e->name() + path;
-//         id = getParent(id);
-//     }    
-//     return path;
 }
 
 Id PyMooseContext::pathToId(string path, bool echo)
 {
     Id returnValue(path);
     
-/*    Id returnValue = Element::root()->id();
-    if ( path == separator || path == separator + "root" )
-    {
-        return returnValue;
-    }
-    if( path == "" || path == "." )
-    {
-        return cwe_;
-    }
-    if (path == ".." )
-    {
-        return (cwe_ == Element::root()->id() )? cwe_ : Shell::parent(cwe_);
-    }
-    vector <string > nodes;
-    Id start;
-    if (path.substr(0,separator.length() ) == separator)
-    {
-        start = Element::root()->id();
-        separateString(path.substr(separator.length() ), nodes, separator);
-    }
-    else if (path.substr(separator.length(),4) == "root" )
-    {
-        separateString(path.substr(separator.length()+4), nodes, separator);
-    }
-    else
-    {
-        start = cwe_;
-        separateString(path, nodes, separator);
-    }
-    returnValue = Shell::traversePath(start, nodes);
-*/
     if (( returnValue.bad() ) && echo)
     {
         cerr << "ERROR: PyMooseContext::pathToId(string path) - Could not find the object '" << path << "'"<< endl;
@@ -746,7 +689,7 @@ bool PyMooseContext::exists(Id id)
 bool PyMooseContext::exists(string path)
 {
     Id id(path);    
-    return id.bad();    
+    return !id.bad();    
 }
 
 vector < Id >& PyMooseContext::getChildren(Id id)
