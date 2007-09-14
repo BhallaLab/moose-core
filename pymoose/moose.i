@@ -5,7 +5,7 @@
 %{
 	#include "../basecode/header.h"
 	#include "../basecode/moose.h"
-	#include "../basecode/Id.h"
+//	#include "../basecode/Id.h"
 	#include "PyMooseContext.h"
 	#include "PyMooseBase.h"
 	#include "Neutral.h"
@@ -41,14 +41,27 @@
 %template(int_vector) std::vector<int>;
 %template(double_vector) std::vector<double>;
 %template(string_vector) std::vector<std::string>;
+%template(Id_vector) std::vector<Id>;
 %include "../basecode/header.h"
 %include "../basecode/moose.h"
+
+%ignore main; // this does not work, friend main() seems to interfere inspite of otherwise being stated in documentation
+%ignore Id::operator();
+%ignore operator<<;
+%ignore operator>>;
+%include "../basecode/Id.h"
+
 %include "PyMooseContext.h"
 %include "PyMooseBase.h"
-%attribute(PyMooseBase, Id, id, __get_id)
-%attribute(PyMooseBase, Id, parent, __get_parent)
+%attribute(PyMooseBase, Id*, id, __get_id)
+%attribute(PyMooseBase, Id*, parent, __get_parent)
 %attribute(PyMooseBase, vector <Id>&, children, __get_children)
-//%attribute(PyMooseBase, string& , path, __get_path)
+//%attribute(PyMooseBase, string& , path, _path)
+// The above gives segmentation fault, path is dynamically generated,
+// so when using pointers, the memory may already have been deallocated
+// better try writing to a string stream and returb stream.str()
+//%ignore PyMooseBase::getPath;
+//%attribute(PyMooseBase, string, path, getPath)
 %include "Neutral.h"
 %attribute(Neutral, int, childSrc, __get_childSrc, __set_childSrc)
 %attribute(Neutral, int, child, __get_child, __set_child)
@@ -253,3 +266,4 @@
 %include "Sched1.h"
 %include "Sched2.h"
 */
+
