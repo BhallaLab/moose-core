@@ -297,9 +297,9 @@ void ClockJob::checkSolvers( vector< Id >& childList )
 			Element* kh = Neutral::create( "KineticHub", "hub", ksolvers());
 			ks->findFinfo( "hub" )->add( ks, kh, kh->findFinfo( "hub" ) );
 			ks->findFinfo( "gsl" )->add( ks, ki, ki->findFinfo( "gsl" ) );
-			set< string >( ks, "method", "rk5" );
-			set< double >( ks, "relativeAccuracy", 1.0e-5 );
-			set< double >( ks, "absoluteAccuracy", 1.0e-5 );
+			set< string >( ki, "method", "rk5" );
+			set< double >( ki, "relativeAccuracy", 1.0e-5 );
+			set< double >( ki, "absoluteAccuracy", 1.0e-5 );
 			set( ks, "scanTicks" );
 			childList[4]()->findFinfo( "process" )->add( 
 				childList[4](), ki, ki->findFinfo( "process" ) );

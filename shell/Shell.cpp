@@ -1016,7 +1016,8 @@ void Shell::useClock( const Conn& c,
 		const Finfo* func = e->findFinfo( function );
 		if ( func ) {
 			if ( func->numIncoming( e ) == 0 ) {
-				assert( tickProc->add( tick, e, func ) );
+				bool ret = tickProc->add( tick, e, func );
+				assert( ret );
 			} else {
 				vector< Conn > list;
 				assert ( func->incomingConns( e, list ) > 0 );
