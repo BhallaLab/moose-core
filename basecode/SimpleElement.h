@@ -238,7 +238,12 @@ class SimpleElement: public Element
 		}
 
 		unsigned int numEntries() const {
-			return 1;
+			return 0;
+		}
+		
+		//till Sept 5, 2007 no function was using this.
+		unsigned int index() const {
+			return UINT_MAX;
 		}
 
 		/**
@@ -294,11 +299,14 @@ class SimpleElement: public Element
 		// Functions for the copy operation. All 5 are virtual
 		///////////////////////////////////////////////////////////////
 		Element* copy( Element* parent, const string& newName ) const;
+		Element* copyIntoArray( Element* parent, const string& newName, int n ) const;
 		bool isDescendant( const Element* ancestor ) const;
 
-		Element* innerDeepCopy( 
+		Element* innerDeepCopy(
 						map< const Element*, Element* >& tree ) const;
-
+		Element* innerDeepCopy(
+						map< const Element*, Element* >& tree, int n ) const;
+		
 		void replaceCopyPointers(
 					map< const Element*, Element* >& tree,
 					vector< pair< Element*, unsigned int > >& delConns );
@@ -311,6 +319,7 @@ class SimpleElement: public Element
 
 	protected:
 		Element* innerCopy() const;
+		Element* innerCopy(int n) const;
 
 		bool innerCopyMsg( Conn& c, const Element* orig, Element* dup );
 
