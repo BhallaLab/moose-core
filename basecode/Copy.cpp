@@ -60,6 +60,29 @@ Element* SimpleElement::innerCopy() const
 	return ret;
 }
 
+Element* SimpleElement::innerCopy(int n) const
+{	
+	assert( finfo_.size() > 0 );
+	assert( dynamic_cast< ThisFinfo* >( finfo_[0] ) != 0 );
+	void *data = finfo_[0]->ftype()->copyIntoArray( data_, 1, n );
+	ArrayElement* ret = new ArrayElement( name_, src_, dest_, conn_, finfo_, data, n, 0 );
+	//cout <<  "IDS "<< ret->id() << " " << id() << endl;
+	//cout << (ret->id())()->id() << endl;
+	//ret->CopyFinfosSimpleToArray(this);
+	return ret;
+}
+
+//obsolete::delete it 
+void ArrayElement::CopyFinfosSimpleToArray(const SimpleElement *se){
+	vector< const Finfo* > flist;
+	se->listFinfos(flist);
+	for (size_t i = 0; i < flist.size(); i++ ){
+		//cout << i << " " << flist.size() << endl;
+		this->finfo_.push_back(flist[i]->copy());
+	}
+}
+
+
 /**
  * This function fills up the map with current element and
  * all its descendants. Returns the root element of the copied tree.
@@ -78,6 +101,7 @@ Element* SimpleElement::innerDeepCopy(
 {
 	if ( isGlobal() && tree.size() >= 0 ) {
 		Element* cme = const_cast< SimpleElement* >( this );
+		// RDWORRY: What about the ArrayElement*?
 		tree[ this ] = cme;
 		return cme;
 	}
@@ -95,6 +119,33 @@ Element* SimpleElement::innerDeepCopy(
 			cout << "Warning: SimpleElement::innerDeepCopy: Loop in element tree at " << i->targetElement()->name() << endl;
 		else 
 			i->targetElement()->innerDeepCopy( tree );
+	}
+	return duplicate;
+}
+
+Element* SimpleElement::innerDeepCopy(
+	map< const Element*, Element* >& tree, int n ) const
+{
+	if ( isGlobal() && tree.size() >= 0 ) {
+		Element* cme = const_cast< SimpleElement* >( this );
+		// RDWORRY: What about the ArrayElement*?
+		tree[ this ] = cme;
+		return cme;
+	}
+
+	Element* duplicate = innerCopy(n);
+	tree[ this ] = duplicate;
+	
+	// The 0 slot in the MsgSrc array is for child elements.
+	vector< Conn >::const_iterator i;
+	vector< Conn >::const_iterator begin = connSrcBegin( 0 );
+	vector< Conn >::const_iterator end = connSrcEnd( 0 );
+	for ( i = begin; i != end; i++ ) {
+		// Watch out for loops.
+		if ( tree.find( i->targetElement() ) != tree.end() )
+			cout << "Warning: SimpleElement::innerDeepCopy: Loop in element tree at " << i->targetElement()->name() << endl;
+		else 
+			i->targetElement()->innerDeepCopy( tree, n );
 	}
 	return duplicate;
 }
@@ -193,6 +244,73 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 	return child;
 }
 
+Element* SimpleElement::copyIntoArray( Element* parent, const string& newName, int n )
+		const
+{
+	static const Element* library = Id( "/library" )();
+	static const Element* proto = Id( "/proto" )();
+
+	if ( parent->isDescendant( this ) ) {
+		cout << "Warning: SimpleElement::copy: Attempt to copy within descendant tree" << parent->name() << endl;
+		return 0;
+	}
+	string nm = newName;
+
+	if ( newName == "" )
+		nm = name();
+	Id oldChild;
+	//oldChild = Neutral::getChildByName( parent, nm)
+	bool ret = lookupGet< Id, string >(
+					parent, "lookupChild", oldChild, nm );
+	assert( ret );
+	if ( !oldChild.bad() ) {
+		cout << "Warning: SimpleElement::copy: pre-existing child with target name: " << parent->name() << "/" << nm << endl;
+		return 0;
+	}
+
+	// First is original, second is copy
+	map< const Element*, Element* > tree;
+	map< const Element*, Element* >::iterator i;
+	vector< pair< Element*, unsigned int > > delConns;
+
+	Element* child = innerDeepCopy( tree, n );
+	child->setName( nm );
+
+	// First pass: Replace copy pointers so that the dup is set up right
+	for ( i = tree.begin(); i != tree.end(); i++ ) {
+		if ( i->first != i->second ) {
+			i->second->replaceCopyPointers( tree, delConns );
+		}
+	}
+
+	// Second pass: Delete any outgoing messages or messages to globals
+	vector< pair< Element*, unsigned int > >::iterator j;
+	for ( j = delConns.begin(); j != delConns.end(); j++ )
+		j->first->deleteHalfConn( j->second );
+	
+	// Third pass: Copy over messages to any global elements.
+	for ( i = tree.begin(); i != tree.end(); i++ ) {
+		if ( i->first == i->second ) { // a global
+			i->second->copyMsg( tree );
+		}
+	}
+	
+	// Fourth pass: stick the copied tree onto the parent Element.
+	ret = parent->findFinfo( "childSrc" )->add(parent, child, child->findFinfo( "child" ) );
+	assert( ret );
+
+	// Fifth pass: Schedule all the objects
+	if ( !( 
+		parent->isDescendant( library ) || parent->isDescendant( proto )
+		) ) {
+		for ( i = tree.begin(); i != tree.end(); i++ ) {
+			if ( i->first != i->second ) // a global
+				i->second->cinfo()->schedule( i->second );
+		}
+	}
+	return child;
+}
+
 /**
  * Takes all the messages between this element and the
  * key (original) portion of the tree, and duplicate them to go
@@ -264,6 +382,30 @@ bool SimpleElement::innerCopyMsg(
  */
 
 void SimpleElement::replaceCopyPointers(
+	map< const Element*, Element* >& tree,
+	vector< pair< Element*, unsigned int > >& delConns )
+{
+	if ( conn_.size() == 0 ) return;
+	map< const Element*, Element* >::iterator j;
+	
+	unsigned int i = conn_.size();
+	while ( i > 0 ) {
+		--i;
+		j = tree.find( conn_[ i ].targetElement() );
+		if ( j != tree.end() ) { // Inside the tree. Just replace ptrs.
+			if ( j->first != j->second ) // Don't mess with globals.
+				conn_[ i ].replaceElement( j->second );
+			else // Globals must have their conns deleted
+				delConns.push_back( 
+					pair< Element*, unsigned int >( this, i ) );
+		} else { // Objects outside the tree must have their conns deleted
+			delConns.push_back( 
+				pair< Element*, unsigned int >( this, i ) );
+		}
+	}
+}
+
+void ArrayElement::replaceCopyPointers(
 	map< const Element*, Element* >& tree,
 	vector< pair< Element*, unsigned int > >& delConns )
 {

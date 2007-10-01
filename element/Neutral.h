@@ -40,9 +40,14 @@ class Neutral
 			// function create below.
 			static void mcreate( const Conn&,
 							const string cinfo, const string name );
+			static void mcreateArray( const Conn&,
+							const string cinfo, const string name, int n );
 			static Element* create(
 				const string& cinfo, const string& name, 
 				Element* parent );
+			static Element* createArray(
+				const string& cinfo, const string& name, 
+				Element* parent, int n );
 			static void destroy( const Conn& c );
 			static void setName( const Conn&, const string s );
 			static void lookupChild( const Conn&, const string s );

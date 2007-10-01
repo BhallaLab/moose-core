@@ -202,7 +202,7 @@ bool IdManager::setElement( unsigned int index, Element* e )
 			return 1;
 		} else { // attempt to overwrite element. Should I assert?
 			assert( 0 );
-			return 0;
+			return 1;
 		}
 	} else {
 		if ( myNode_ > 0 ) {
