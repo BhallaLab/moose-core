@@ -19,7 +19,7 @@ static bool wildcardFieldComparison( Element* e, const string& mid );
  * The name must be nonzero.
  * It returns a pointer to the found element or 0 on failure
  */
-static bool wildcardName( Element* e, const string& n)
+static bool wildcardName( Element* &e, const string& n)
 {
 	size_t pos;
 
@@ -31,9 +31,56 @@ static bool wildcardName( Element* e, const string& n)
 	if (n == "#" || n == e->name() || n == "##") {
 		return 1;
 	}
-
+	
+	//handling arrays
+	if (e->name().size() < n.size()){
+		string base = n.substr(0, e->name().size());
+		string index = n.substr(e->name().size());
+		if (index[0] == '['){
+			size_t pos = index.find("]");
+			index = index.substr(1, pos-1);
+			// check whether index is an integer
+			size_t i;
+			if (index.find_first_not_of("01234567879") == string::npos){
+				i = atoi(index.c_str());
+				if (i < e->numEntries()){
+					e = new ArrayWrapperElement(e, i);
+					return 1;
+				}
+			}
+			else{
+				// think what to do!! Error??
+			}
+		}
+	}
+	
 	// Need to put in code to handle partial string matches
-
+	size_t last;
+	string mid;
+	pos=n.find("##");
+	if (pos == string::npos){
+		pos = n.find("#");
+		last = pos;
+	}
+	else 
+		last = pos +1;
+	
+	
+	if (pos != string::npos){
+		if (n.substr(0, pos) != e->name().substr(0, pos) && pos != 0){ 
+			return 0;
+		}
+		else if (last == n.size() - 1 ){ // there is nothing to follow the hashes
+			return 1;
+		}
+		else{
+			mid = n.substr(last+1);
+		}
+	}
+	else 
+		return 0;
+	
+	/*
 	string mid;
 	if (n.substr(0, 2) == "##")
 		mid = n.substr(2);
@@ -41,6 +88,7 @@ static bool wildcardName( Element* e, const string& n)
 		mid = n.substr(1);
 	else 
 		return 0;
+	*/
 
 	string head;
 
@@ -178,7 +226,6 @@ int simpleWildcardFind( const string& path, vector<Element *>& ret)
 {
 	if ( path.length() == 0 )
 		return 0;
-
 	int n = 0;
 	string temp = path;
 	unsigned long pos = 0;
@@ -303,6 +350,9 @@ void testWildcard()
 
 	Element* el1[] = { Element::root(), a1, c1 };
 	wildcardTestFunc( el1, 3, "/,/a1,/a1/c1" );
+	Element* el3[] = { c1, c2, c3 };
+	wildcardTestFunc( el3, 3, "a1/c#" );
+	wildcardTestFunc( el3, 3, "a1/c#[TYPE=Compartment]" );
 
 	int initialNumInstances = SimpleElement::numInstances;
 

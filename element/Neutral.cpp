@@ -90,6 +90,8 @@ const Cinfo* initNeutralCinfo()
 			reinterpret_cast< RecvFunc >( &Neutral::childFunc ) ),
 		new DestFinfo( "create", Ftype2< string, string >::global(),
 			reinterpret_cast< RecvFunc >( &Neutral::mcreate ) ),
+		new DestFinfo( "createArray", Ftype3< string, string, int >::global(),
+			reinterpret_cast< RecvFunc >( &Neutral::mcreateArray ) ),
 		new DestFinfo( "destroy", Ftype0::global(),
 			&Neutral::destroy ),
 
@@ -208,6 +210,13 @@ void Neutral::mcreate( const Conn& conn,
 */
 }
 
+void Neutral::mcreateArray( const Conn& conn,
+				const string cinfo, const string name, int n )
+{
+		createArray( cinfo, name, conn.targetElement(), n );
+}
+
+
 /**
  * Underlying utility function for creating objects in scratch space.
  * Not to be used when creating objects explicitly on commands from
@@ -236,6 +245,29 @@ Element* Neutral::create(
 	return 0;
 }
 
+Element* Neutral::createArray(
+		const string& cinfo, const string& name, Element* parent, int n )
+{
+	// Need to check here if the name is an existing one.
+	const Cinfo* c = Cinfo::find( cinfo );
+	if ( c ) {
+		Element* kid = c->createArray( Id::scratchId(), name, n, 0 );
+		// Here a global absolute or a relative finfo lookup for
+		// the childSrc field would be useful.
+		bool ret = parent->findFinfo( "childSrc" )->
+				add( parent, kid, kid->findFinfo( "child" ) ); 
+		assert( ret );
+		ret = c->schedule( kid );
+		assert( ret );
+		return kid;
+	} else {
+		cout << "Error: Neutral::create: class " << cinfo << 
+				" not found\n";
+	}
+	return 0;
+}
+
+
 void Neutral::destroy( const Conn& c )
 {
 	childFunc( c, MARK_FOR_DELETION );
@@ -245,7 +277,21 @@ void Neutral::destroy( const Conn& c )
 
 Id Neutral::getParent( const Element* e )
 {
-	const SimpleElement* se = dynamic_cast< const SimpleElement* >( e );
+	if ( e->id().index() > 0 ){
+		Id i = e->id().assignIndex(0);
+		e = i();
+	}
+	const Element *se = e;
+	//const SimpleElement* se = dynamic_cast< const SimpleElement* >( e );
+	/*if (se == 0){//to allow array elements
+		const ArrayElement* ae = dynamic_cast< const ArrayElement* >( e );
+		assert(ae != 0);
+		assert( ae->destSize() > 0 );//Why do we need it?
+		// The zero dest is the child dest.
+		assert( ae->connDestEnd( 0 ) > ae->connDestBegin( 0 ) );
+		return ae->connDestBegin( 0 )->targetElement()->id();
+	}*/
+	
 	assert( se != 0 );
 	assert( se->destSize() > 0 );
 	// The zero dest is the child dest.
@@ -307,16 +353,18 @@ Id Neutral::getChildByName( const Element* elm, const string& s )
 				// index == 0, elm->index == 0: simple element return
 				if ( index == 0 )
 					return kid->id();
-				else // index > 0, elm->index == 0: Child should be an array
+				else{ // index > 0, elm->index == 0: Child should be an array
 					if ( kid->numEntries() < index )
 						return Id::badId();
 					else
 						return kid->id().assignIndex( index );
+				}
 			} else {
 				if ( index == 0 ) // Here the child id inherits the parent indx
 					return kid->id().assignIndex( elm->id().index() );
-				else // Nasty: indices for parent as well as child. Work out later.
+				else{ // Nasty: indices for parent as well as child. Work out later.
 					return Id::badId();
+				}
 			}
 		}
 	}

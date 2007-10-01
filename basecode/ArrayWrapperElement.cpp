@@ -9,11 +9,21 @@
 
 #include "moose.h"
 #include "ArrayWrapperElement.h"
+#include<sstream>
+
+string itos(int i)	// convert int to string
+{
+	stringstream s;
+	s << i;
+	return s.str();
+}
 
 ArrayWrapperElement::ArrayWrapperElement( Element* arrayElement, unsigned int index )
-	: SimpleElement( Id(), "wrapper", 0, 0, 0 ),
+	: SimpleElement( Id(), arrayElement->name() + "[" + itos(index) + "]" , 0, 0, 0 ),
 	arrayElement_( arrayElement ), index_( index )
 {
+	//arrayElement->id().assignIndex(index);
+	//id().setIndex(index);
 	assert( index < arrayElement->numEntries() );
 }
 
@@ -35,7 +45,71 @@ const Finfo* ArrayWrapperElement::findFinfo( const string& name )
 	return arrayElement_->findFinfo( name );
 }
 
+unsigned int ArrayWrapperElement::listFinfos( 
+				vector< const Finfo* >& flist ) const
+{
+	return arrayElement_->listFinfos( flist );
+}
+
+
 unsigned int ArrayWrapperElement::numEntries( ) const
 {
-	return arrayElement_->numEntries();
+	return 0;
+	//return arrayElement_->numEntries();
 }
+
+unsigned int ArrayWrapperElement::index( ) const
+{
+	return index_;
+}
+
+Id ArrayWrapperElement::id( ) const
+{
+	return arrayElement_->id().assignIndex(index_);
+}
+
+const std::string& ArrayWrapperElement::className( ) const
+{
+	return arrayElement_->className();
+}
+
+vector< Conn >::const_iterator
+	ArrayWrapperElement::connSrcBegin( unsigned int src ) const
+{
+	return arrayElement_->connSrcBegin(src);
+}
+
+vector< Conn >::const_iterator
+	ArrayWrapperElement::connSrcEnd( unsigned int src ) const
+{
+	return arrayElement_->connSrcEnd(src);
+}
+
+const Finfo* ArrayWrapperElement::getThisFinfo( ) const
+{
+	return arrayElement_->getThisFinfo( );
+}
+
+vector< Conn >::const_iterator
+	ArrayWrapperElement::connSrcVeryEnd( unsigned int src ) const
+{
+	return arrayElement_->connSrcVeryEnd(src);
+}
+
+void ArrayWrapperElement::getElementPosition(int& nx, int& ny){
+	(static_cast<ArrayElement *> (arrayElement_))->getElementPosition(nx, ny, index_);
+}
+
+void ArrayWrapperElement::getElementCoordinates(double& xcoord, double& ycoord){
+	(static_cast<ArrayElement *> (arrayElement_))->getElementCoordinates(xcoord, ycoord, index_);
+}
+		
+
+
+
+
+
+
+
+
+

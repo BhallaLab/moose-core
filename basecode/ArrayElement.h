@@ -10,6 +10,7 @@
 
 #ifndef _ARRAY_ELEMENT_H
 #define _ARRAY_ELEMENT_H
+#include <limits.h>
 
 /**
  * The ArrayElement class implements Element functionality in the
@@ -40,6 +41,18 @@ class ArrayElement: public Element
 
 		// Used in copies.
 		ArrayElement( const ArrayElement* orig );
+		
+		//used in copies
+		ArrayElement(
+				const std::string& name, 
+				const vector< MsgSrc >& src,
+				const vector< MsgDest >& dest,
+				const vector< Conn >& conn,
+				const vector< Finfo* >& finfo,
+				void* data,
+				unsigned int numEntries,
+				size_t objectSize
+		);
 
 		/// This cleans up the data_ and finfo_ if needed.
 		~ArrayElement();
@@ -243,6 +256,10 @@ class ArrayElement: public Element
 			return numEntries_;
 		}
 
+		unsigned int index() const {
+			return UINT_MAX;
+		}
+		
 		/**
 		 * Regular lookup for Finfo from its name.
 		 */
@@ -280,6 +297,12 @@ class ArrayElement: public Element
 		 * Returns number of Finfos found.
 		 */
 		unsigned int listLocalFinfos( vector< Finfo* >& flist );
+		
+		/**
+		 * Copies Finfos from the SimpleElement to the current Array
+		 * Element
+		*/
+		void CopyFinfosSimpleToArray(const SimpleElement *se);
 
 		void addFinfo( Finfo* f );
 		bool dropFinfo( const Finfo* f );
@@ -296,10 +319,13 @@ class ArrayElement: public Element
 		// Functions for the copy operation. All 5 are virtual
 		///////////////////////////////////////////////////////////////
 		Element* copy( Element* parent, const string& newName ) const;
+		Element* copyIntoArray( Element* parent, const string& newName, int n ) const;
 		bool isDescendant( const Element* ancestor ) const;
 
 		Element* innerDeepCopy( 
 						map< const Element*, Element* >& tree ) const;
+		Element* innerDeepCopy(
+						map< const Element*, Element* >& tree, int n ) const;
 
 		void replaceCopyPointers(
 					map< const Element*, Element* >& tree,
@@ -310,9 +336,35 @@ class ArrayElement: public Element
 		// Debugging function
 		///////////////////////////////////////////////////////////////
 		void dumpMsgInfo() const;
+		
+		void setNoOfElements(int Nx, int Ny){
+			Nx_ = Nx;
+			Ny_ = Ny;
+		}
+		
+		void setDistances(double dx, double dy){
+			dx_ = dx;
+			dy_ = dy;
+		}
+		
+		void setOrigin(double xorigin, double yorigin){
+			xorigin_ = xorigin;
+			yorigin_ = yorigin;
+		}
+		
+		void getElementPosition(int& nx, int& ny, const unsigned int index){
+			nx = index%Nx_;
+			ny = index/Ny_;
+		}
+		
+		void getElementCoordinates(double& xcoord, double& ycoord, const unsigned int index ){
+			xcoord = xorigin_ + (index%Nx_)*dx_;
+			ycoord = yorigin_ + (index%Ny_)*dy_;
+		}
 
 	protected:
 		Element* innerCopy() const;
+		Element* innerCopy(int n) const;
 
 		bool innerCopyMsg( Conn& c, const Element* orig, Element* dup );
 
@@ -377,6 +429,11 @@ class ArrayElement: public Element
 		 * used for MsgDests.
 		 */
 		unsigned int lastDestConnIndex() const;
+		
+		//createmap specific variables
+		int Nx_, Ny_;
+		double dx_, dy_;
+		double xorigin_, yorigin_;
 
 };
 

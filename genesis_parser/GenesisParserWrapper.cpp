@@ -52,6 +52,11 @@ const Cinfo* initGenesisParserCinfo()
 		new SrcFinfo( "create",
 				Ftype3< string, string, Id >::global() ),
 		// Creating an object: Recv the returned object id.
+		new SrcFinfo( "createArray",
+				Ftype4< string, string, Id, vector <double> >::global() ),
+		new SrcFinfo( "planarconnect", Ftype3< string, string, double >::global() ),
+		new SrcFinfo( "planardelay", Ftype2< string, double >::global() ),
+		new SrcFinfo( "planarweight", Ftype2< string, double >::global() ),
 		new DestFinfo( "recvCreate",
 					Ftype1< Id >::global(),
 					RFCAST( &GenesisParserWrapper::recvCreate ) ),
@@ -116,6 +121,7 @@ const Cinfo* initGenesisParserCinfo()
 		// This function is for copying an element tree, complete with
 		// messages, onto another.
 		new SrcFinfo( "copy", Ftype3< Id, Id, string >::global() ),
+		new SrcFinfo( "copyIntoArray", Ftype4< Id, Id, string, vector <double> >::global() ),
 		// This function is for moving element trees.
 		new SrcFinfo( "move", Ftype3< Id, Id, string >::global() ),
 
@@ -201,6 +207,14 @@ static const unsigned int requestLeSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser.trigLe" );
 static const unsigned int createSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.create" );
+static const unsigned int createArraySlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.createArray" );
+static const unsigned int planarconnectSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.planarconnect" );
+static const unsigned int planardelaySlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.planardelay" );
+static const unsigned int planarweightSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.planarweight" );
 static const unsigned int deleteSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.delete" );
 static const unsigned int requestFieldSlot = 
@@ -227,6 +241,8 @@ static const unsigned int listMessagesSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser.listMessages" );
 static const unsigned int copySlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.copy" );
+static const unsigned int copyIntoArraySlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.copyIntoArray" );
 static const unsigned int moveSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.move" );
 static const unsigned int readCellSlot = 
@@ -702,6 +718,7 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 		start = 1;
 	} else  {
 		string path = argv[1];
+		//Shell::getWildCardList(conn, path, 0);
 		send2< string, bool >( sh, requestWildcardListSlot, path, 0 );
 		if ( elist_.size() == 0 ) {
 			return;
@@ -746,6 +763,8 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 		}
 		// cout << "in do_set " << path << "." << field << " " <<
 				// value << endl;
+		
+		//Shell::setVecField(conn, elist_, field, value)
 		send3< vector< Id >, string, string >( s(),
 			setVecFieldSlot, elist_, field, value );
 	}
@@ -962,6 +981,7 @@ char* GenesisParserWrapper::doGet( int argc, const char** argv, Id s )
 	if ( argc == 3 ) {
 		// e = GenesisParserWrapper::path2eid( argv[1], s );
 		e = Id( argv[1] );
+		if ( e.bad() ) cout << "bad!!" << endl;
 		if ( e.bad() )
 			return copyString( "" );
 		field = argv[2];
@@ -1220,6 +1240,7 @@ void do_copy( int argc, const char** const argv, Id s )
 	Id pa;
 	string name;
 	if ( parseCopyMove( argc, argv, s, e, pa, name ) ) {
+		//Shell::copy(conn, e, pa, name);
 		send3< Id, Id, string >( s(), copySlot, e, pa, name );
 	}
 }
@@ -1466,6 +1487,7 @@ void GenesisParserWrapper::showAllFields( Id e, Id s )
 		if ( *i == "fieldList" )
 			continue;
 		fieldValue_ = "";
+		//Shell::getField(conn, e->id(), *i)
 		send2< Id, string >( s(), requestFieldSlot, e, *i );
 		if ( fieldValue_.length() > 0 ) {
 			sprintf( temp, "%-25s%s", i->c_str(), "= " );
@@ -1507,15 +1529,14 @@ void GenesisParserWrapper::doShow( int argc, const char** argv, Id s )
 			firstField = 2;
 		}
 	}
-
 	// print( "[ " + eid2path( e ) + " ]" );
 	print( "[ " + e.path() + " ]" );
-
 	for ( int i = firstField; i < argc; i++ ) {
 		if ( strcmp( argv[i], "*") == 0 ) {
 			showAllFields( e, s );
 		} else { // get specific field here.
 			fieldValue_ = "";
+			//Shell::getField(conn, e, argv[i])
 			send2< Id, string >( s(), requestFieldSlot, e, argv[i] );
 			if ( fieldValue_.length() > 0 ) {
 				sprintf( temp, "%-25s%s", argv[i], "= " );
@@ -1673,6 +1694,7 @@ char* do_element_list( int argc, const char** const argv, Id s )
 void GenesisParserWrapper::elementList(
 		string& ret, const string& path, Id s)
 {
+ 	//Shell::getWildCardList(conn, path, 0(ordered))
  	send2< string, bool >( s(), requestWildcardListSlot, path, 0 );
 	bool first = 1;
 	vector< Id >::iterator i;
@@ -2126,6 +2148,209 @@ void do_xsendevent ( int argc, const char** const argv, Id s )
 	//s->error( "not implemented yet." );
 }
 
+void do_createmap(int argc, const char** const argv, Id s){
+//#define DEBUG
+	//createmap source dest 
+	//	Nx Ny 
+	//	-delta dx dy 
+	//	-origin x y
+	//	-object
+	
+	const char* source, *dest;
+	int Nx, Ny;
+	double dx, dy;
+	double xorigin, yorigin;
+	bool object = false;
+	vector <double> parameter;
+	
+	//if (argc != 11 && argc != 12) {/*error*/;}
+	
+	source = argv[1];
+	dest = argv[2];
+	Nx = atoi(argv[3]);
+	Ny = atoi(argv[4]);
+	
+	for(int i = 0; i < argc; i++){
+		if (strcmp(argv[i], "-delta") == 0){
+		if (i+2 >= argc) {/*error*/}
+		dx = atof(argv[i+1]);
+		dy = atof(argv[i+2]);
+		}	
+		else if (strcmp(argv[i], "-origin") == 0){
+			if (i+2 >= argc) {/*error*/}
+			xorigin = atof(argv[i+1]);
+			yorigin = atof(argv[i+2]);
+		}
+		else if (strcmp(argv[i], "-object") == 0){
+			object = true;
+		}
+	}
+	
+#ifdef DEBUG
+	cout << source << endl;
+	cout << dest << endl;
+	cout << Nx << " " << Ny << endl;
+	cout << dx << " " << dy << endl;
+	cout << xorigin << " " << yorigin << endl;
+	cout << object << endl;
+#endif //DEBUG
+	parameter.push_back(Nx);
+	parameter.push_back(Ny);
+	parameter.push_back(dx);
+	parameter.push_back(dy);
+	parameter.push_back(xorigin);
+	parameter.push_back(yorigin);
+	
+	
+	if (object){
+		string className = source;
+		if ( !Cinfo::find( className ) )  {
+			cout << "Not handled yet!!" << endl;
+			/*WORK*/
+		}
+		string name = Shell::tail(dest, "/");
+		if ( name.length() < 1 ) {
+			cout << "Error: invalid object name : " << name << endl;
+			return;
+		}
+		string parent = Shell::head( argv[2], "/" );
+		Id pa(parent);
+		//Shell::staticCreateArray( conn, className, name, pa, n )
+		send4< string, string, Id, vector <double> >( s(),
+		createArraySlot, className, name, pa, parameter );
+	}
+	else{
+		string name;
+		Id e;
+		Id pa;
+		if ( parseCopyMove( 3, argv, s, e, pa, name ) ) {
+			//Shell::copy(conn, e, pa, name);
+			send4< Id, Id, string, vector <double> >( s(), copyIntoArraySlot, e, pa, name, parameter );
+		}
+	}
+	//src = src_list[0];
+	//dst = dst_list[0];
+	
+	
+}
+
+void do_planarconnect( int argc, const char** const argv, Id s )
+{
+/*
+source-path dest-path -relative -sourcemask {box,ellipse} x1 y1 x2 y2 -sourcehole {box,ellipse} x1 y1 x2 y2 -destmask {box,ellipse} x1 y1 x2 y2 -desthole {box,ellipse} x1 y1 x2 y2 -probability p
+planarconnect / dest-path -relative -sourcemask box -1 -1 1 1 -destmask box 1 1 2 2 -probability 0.5
+*/
+	string source, dest;
+	source = argv[1];
+	dest = argv[2];
+	//Shell::planarconnect(conn, source, dest, probability)
+	send3<string, string, double>(s(), planarconnectSlot, source, dest, 0.5);
+	//GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >( e->data() );
+	//return gpw->doPlanarConnect( argc, argv, s );
+	
+}
+
+void do_planardelay( int argc, const char** const argv, Id s )
+{
+	string source;
+	source = argv[1];
+	send2<string, double>(s(), planardelaySlot, source, 0.5);
+}
+
+void do_planarweight( int argc, const char** const argv, Id s )
+{
+	string source;
+	source = argv[1];
+	send2<string, double>(s(), planarweightSlot, source, 0.5);
+}
+
+int do_getsyncount( int argc, const char** const argv, Id s )
+{
+	vector <Conn> conn;
+	if (argc == 3){
+		Element* src = Id(argv[1])();
+		Element* dst = Id(argv[2])();
+		src->findFinfo("event")->outgoingConns(src, conn);
+		unsigned int count = 0;
+		for(size_t i = 0; i < conn.size(); i++){
+			if(conn[i].targetElement() == dst)
+				count++;
+		}
+		return count;
+	}
+	else if (argc == 2){
+		Element* src = Id(argv[1])();
+		src->findFinfo("event")->outgoingConns(src, conn);
+		return conn.size();
+	}
+	return 0;
+	//send2<string, string>(s(), planarweightSlot, source, dest);
+}
+
+char* do_getsynsrc( int argc, const char** const argv, Id s ){
+//getsynsrc <postsynaptic-element> <index>
+	if (argc != 3) {
+		cout << "usage:: getsynsrc <postsynaptic-element> <index>" << endl;
+		string s = "";
+		return copyString(s.c_str()); 
+	}
+	vector <Conn> conn;
+	string ret = "";
+	Element *dst = Id(argv[1])();
+	dst->findFinfo("synapse")->incomingConns(dst, conn);
+	unsigned int index = atoi(argv[2]);
+	if (index >= conn.size()){/*error*/}
+	Element *src = conn[index].targetElement();
+	ret = src->id().path();
+	return copyString(ret.c_str());
+}
+
+
+char* do_getsyndest( int argc, const char** const argv, Id s ){
+//getsynsrc <presynaptic-element> <index>
+	if (argc != 3) {
+		cout << "usage:: getsynsrc <presynaptic-element> <index>" << endl;
+		string s = "";
+		return copyString(s.c_str()); 
+	}
+	vector <Conn> conn;
+	string ret = "";
+	Element *src = Id(argv[1])();
+	src->findFinfo("event")->outgoingConns(src, conn);
+	unsigned int index = atoi(argv[2]);
+	if (index >= conn.size()){/*error*/}
+	Element *dst = conn[index].targetElement();
+	ret = dst->id().path();
+	return copyString(ret.c_str());
+}
+
+int do_getsynindex( int argc, const char** const argv, Id s ){
+//getsynsrc <presynaptic-element> <postsynaptic-element> [-number n]
+	if (argc != 3) {
+		cout << "usage:: getsynsrc <presynaptic-element> <postsynaptic-element> [-number n]" << endl;
+		return -1; 
+	}
+	vector <Conn> conn;
+	Element *src = Id(argv[1])();
+	Element *dst = Id(argv[2])();
+	if (src == 0 || dst == 0){
+		cout << "Wrong paths!!" << endl;
+		return -1;
+	}
+	src->findFinfo("event")->outgoingConns(src, conn);
+	for(size_t i = 0; i < conn.size(); i++){
+		if (conn[i].targetElement() == dst){
+			return i;
+		}
+	}
+	return -1;
+}
+
+int do_strcmp(int argc, const char** const argv, Id s ){
+	return strcmp(argv[1], argv[2]);
+}
+
+
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper load command
 //////////////////////////////////////////////////////////////////
@@ -2209,6 +2434,15 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "xcolorscale", do_xcolorscale, "void" );
 	AddFunc( "x1setuphighlight", do_x1setuphighlight, "void" );
 	AddFunc( "xsendevent", do_xsendevent, "void" );
+	AddFunc( "createmap", do_createmap, "void" );
+	AddFunc( "planarconnect", do_planarconnect, "void" );
+	AddFunc( "planardelay", do_planardelay, "void" );
+	AddFunc( "planarweight", do_planarweight, "void" );
+	AddFunc( "getsyncount", reinterpret_cast< slifunc >(do_getsyncount), "int" );
+	AddFunc( "getsynsrc", reinterpret_cast< slifunc >(do_getsynsrc), "char*" );
+	AddFunc( "getsyndest", reinterpret_cast< slifunc >(do_getsyndest), "char*" );
+	AddFunc( "getsynindex", reinterpret_cast< slifunc >(do_getsynindex), "int" );
+	AddFunc( "strcmp", reinterpret_cast< slifunc >(do_strcmp), "int" );
 }
 
 //////////////////////////////////////////////////////////////////
