@@ -115,6 +115,13 @@ class Ftype
 			{
 				return 0;
 			}
+			
+			virtual void* copyIntoArray( 
+					const void* orig, const unsigned int num, 
+					const unsigned int numCopies ) const
+			{
+				return 0;
+			}
 
 			/**
 			 * Free data of the specified type. If isArray, then

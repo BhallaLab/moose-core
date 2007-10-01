@@ -41,9 +41,6 @@ class Id
 		 */
 		Id( const std::string& path, const std::string& separator = "/" );
 
-                ~Id(){}
-    
-
 		/**
 		 * Creates a new childId based on location of parent node and
 		 * whatever other heuristics the IdManager applies. Must be
@@ -77,6 +74,8 @@ class Id
 		static Id shellId();
 
 		Id assignIndex( unsigned int index );
+		
+		void setIndex( unsigned int index );
 
 		//////////////////////////////////////////////////////////////
 		//	Id info

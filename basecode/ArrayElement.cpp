@@ -21,6 +21,7 @@
 #include "DeletionMarkerFinfo.h"
 #include "GlobalMarkerFinfo.h"
 #include "ThisFinfo.h"
+#include<sstream>
 
 #ifdef DO_UNIT_TESTS
 int ArrayElement::numInstances = 0;
@@ -56,6 +57,30 @@ ArrayElement::ArrayElement(
 		;
 }
 
+
+ArrayElement::ArrayElement(
+				const std::string& name, 
+				const vector< MsgSrc >& src,
+				const vector< MsgDest >& dest,
+				const vector< Conn >& conn,
+				const vector< Finfo* >& finfo,
+				void* data,
+				unsigned int numEntries,
+				size_t objectSize
+	)
+	: Element( Id::scratchId() ), name_( name ), 
+		conn_(conn), src_( src ), dest_( dest ), 
+		finfo_( finfo ), data_( data ), 
+		numEntries_( numEntries ), objectSize_( objectSize )
+{
+	for (size_t i = 1; i < finfo.size(); i++)
+		finfo_[i] = finfo[i]->copy();
+#ifdef DO_UNIT_TESTS
+		numInstances++;
+#endif	
+		;
+}
+
 ArrayElement::ArrayElement( const ArrayElement* orig )
 		: Element( Id::scratchId() ),
 		name_( orig->name_ ), 
@@ -63,7 +88,9 @@ ArrayElement::ArrayElement( const ArrayElement* orig )
 		src_( orig->src_ ),
 		dest_( orig->dest_ ),
 		finfo_( orig->finfo_ ),
-		data_( 0 )
+		data_( 0 ), 
+		numEntries_( orig->numEntries_ ), 
+		objectSize_( orig->objectSize_ )
 {
 #ifdef DO_UNIT_TESTS
 		numInstances++;
@@ -448,6 +475,8 @@ unsigned int ArrayElement::insertConn(
 		k->insertBefore( );
 
 	// Update the Conns. This is the hard part.
+	//for ( unsigned int j = location + 1; j < conn_.size(); j++ )
+		//cout << "hi* " << conn_[j].sourceIndex(this)<< endl;
 	for ( unsigned int j = location + 1; j < conn_.size(); j++ )
 		conn_[j].updateIndex( j );
 
@@ -754,6 +783,10 @@ void ArrayElement::dumpMsgInfo() const
 Element* ArrayElement::copy( Element* parent, const string& newName ) const
 { return 0;}
 
+Element* ArrayElement::copyIntoArray( Element* parent, const string& newName, int n )
+		const
+{ return 0; }
+
 bool ArrayElement::isDescendant( const Element* ancestor ) const
 { return 0;}
 
@@ -761,15 +794,24 @@ Element* ArrayElement::innerDeepCopy(
 						map< const Element*, Element* >& tree ) const
 { return 0;}
 
-void ArrayElement::replaceCopyPointers(
+Element* ArrayElement::innerDeepCopy(
+	map< const Element*, Element* >& tree, int n ) const
+{ return 0; }
+
+/*void ArrayElement::replaceCopyPointers(
 					map< const Element*, Element* >& tree,
 					vector< pair< Element*, unsigned int > >& delConns )
-{;}
+{;}*/
 
 void ArrayElement::copyMsg( map< const Element*, Element* >& tree )
 {;}
 
 Element* ArrayElement::innerCopy() const 
+{
+	return 0;
+}
+
+Element* ArrayElement::innerCopy(int n) const 
 {
 	return 0;
 }

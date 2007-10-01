@@ -25,10 +25,31 @@ class ArrayWrapperElement: public SimpleElement
 		~ArrayWrapperElement();
 
 		const Finfo* findFinfo( const string& name );
+		
+		unsigned int listFinfos( vector< const Finfo* >& flist ) const;
 
 		void* data() const;
-
+		
 		unsigned int numEntries() const;
+		
+		unsigned int index() const;
+		
+		Id id() const;
+		
+		const std::string& className( ) const;
+		
+		vector< Conn >::const_iterator connSrcBegin( unsigned int src ) const;
+		
+		vector< Conn >::const_iterator connSrcEnd( unsigned int src ) const;
+		
+		const Finfo* getThisFinfo( ) const;
+		
+		vector< Conn >::const_iterator connSrcVeryEnd( unsigned int src ) const;
+		
+		void getElementPosition(int& nx, int& ny);
+		
+		void getElementCoordinates(double& xcoord, double& ycoord);
+		
 
 	private:
 		Element* arrayElement_;
