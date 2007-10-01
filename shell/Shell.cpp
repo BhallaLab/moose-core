@@ -15,6 +15,8 @@
 #include "Shell.h"
 #include "ReadCell.h"
 #include "SimDump.h"
+//#include <stdlib.h>
+//#include <time.h>
 
 //////////////////////////////////////////////////////////////////////
 // Shell MOOSE object creation stuff
@@ -48,6 +50,19 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "create",
 				Ftype3< string, string, Id >::global(),
 				RFCAST( &Shell::staticCreate ) ),
+		// Creating an array of objects
+		new DestFinfo( "createArray",
+				Ftype4< string, string, Id, vector<double> >::global(),
+				RFCAST( &Shell::staticCreateArray ) ),
+		new DestFinfo( "planarconnect",
+				Ftype3< string, string, double >::global(),
+				RFCAST( &Shell::planarconnect ) ),
+		new DestFinfo( "planardelay",
+				Ftype2< string, double >::global(),
+				RFCAST( &Shell::planardelay ) ),
+		new DestFinfo( "planarweight",
+				Ftype2< string, double >::global(),
+				RFCAST( &Shell::planarweight ) ),
 		// The create func returns the id of the created object.
 		new SrcFinfo( "createSrc", Ftype1< Id >::global() ),
 		// Deleting an object
@@ -122,6 +137,8 @@ const Cinfo* initShellCinfo()
 		////////////////////////////////////////////////////////////
 		new DestFinfo( "copy",
 			Ftype3< Id, Id, string >::global(), RFCAST( &Shell::copy ) ),
+		new DestFinfo( "copyIntoArray",
+			Ftype4< Id, Id, string, vector <double> >::global(), RFCAST( &Shell::copyIntoArray ) ),
 		new DestFinfo( "move",
 			Ftype3< Id, Id, string >::global(), RFCAST( &Shell::move ) ),
 		////////////////////////////////////////////////////////////
@@ -301,8 +318,6 @@ static const unsigned int clockSlot =
 	initShellCinfo()->getSlotIndex( "parser.returnClocksSrc" );
 static const unsigned int listMessageSlot =
 	initShellCinfo()->getSlotIndex( "parser.listMessagesSrc" );
-
-
 static const unsigned int rCreateSlot =
 	initShellCinfo()->getSlotIndex( "master.create" );
 static const unsigned int rGetSlot =
@@ -343,7 +358,7 @@ Id Shell::parent( Id eid )
 	Element* e = eid();
 	Id ret;
 	// Check if eid is on local node, otherwise go to remote node
-	
+	// ret = Neutral::getParent(e)
 	if ( get< Id >( e, "parent", ret ) )
 		return ret;
 	return Id::badId();
@@ -368,7 +383,9 @@ Id Shell::traversePath( Id start, vector< string >& names )
 		} else {
 			Id ret;
 			Element* e = start();
+			//Neutral::getChildByName(e, *i);
 			lookupGet< Id, string >( e, "lookupChild", ret, *i );
+			//if ( ret.zero() || ret.bad() ) cout << "Shell:traversePath: The id is bad" << endl;
 			if ( ret.zero() || ret.bad() )
 					return Id::badId();
 			start = ret;
@@ -639,6 +656,120 @@ void Shell::staticCreate( const Conn& c, string type,
 }
 
 // Static function
+// parameter has following clumped in the order mentioned, Nx, Ny, dx, dy, xorigin, yorigin
+void Shell::staticCreateArray( const Conn& c, string type,
+					string name, Id parent, vector <double> parameter )
+{
+	Element* e = c.targetElement();
+	Shell* s = static_cast< Shell* >( e->data() );
+
+	// This is where the IdManager does clever load balancing etc
+	// to assign child node.
+	Id id = Id::childId( parent );
+	// Id id = Id::scratchId();
+	Element* child = id();
+	if ( child == 0 ) { // local node
+		int n = (int) (parameter[0]*parameter[1]);
+		bool ret = s->createArray( type, name, parent, id, n );
+		assert(parameter.size() == 6);
+		ArrayElement* f = static_cast <ArrayElement *> (e);
+		f->setNoOfElements((int)(parameter[0]), (int)(parameter[1]));
+		f->setDistances(parameter[2], parameter[3]);
+		f->setOrigin(parameter[4], parameter[5]);
+		if ( ret ) { // Tell the parser it was created happily.
+			//GenesisParserWrapper::recvCreate(conn, id)
+			sendTo1< Id >( e, createSlot, c.targetIndex(), id);
+		}
+	} else {
+		// Shell-to-shell messaging here with the request to
+		// create a child.
+		// This must only happen on node 0.
+		assert( e->id().node() == 0 );
+		assert( id.node() > 0 );
+		OffNodeInfo* oni = static_cast< OffNodeInfo* >( child->data() );
+		// Element* post = oni->post;
+		unsigned int target = 
+		e->connSrcBegin( rCreateSlot ) - e->lookupConn( 0 ) +
+			id.node() - 1;
+		sendTo4< string , string, Id, Id>( 
+			e, rCreateSlot, target,
+			type, name, 
+			parent, oni->id );
+		// Here it needs to fork till the object creation is complete.
+		delete oni;
+		delete child;
+	}
+}
+
+void Shell::planarconnect(const Conn& c, string source, string dest, double probability){
+	vector <Element* > src_list, dst_list;
+	simpleWildcardFind( source, src_list );
+	simpleWildcardFind( dest, dst_list );
+	for(size_t i = 0; i < src_list.size(); i++) {
+		if (src_list[i]->className() != "SpikeGen" ){
+			/*error! The source element must be SpikeGen*/
+		}
+		for(size_t j = 0; j < dst_list.size(); j++) {
+			if (dst_list[j]->className() != "SynChan"){
+				/*error! Thes dest element must be SynChan*/
+			}
+			if ((rand()%100)/100.0 <= probability){
+				cout << i+1 << " " << j+1 << endl;
+				src_list[i]->findFinfo("event")->add(src_list[i], dst_list[j], dst_list[j]->findFinfo("synapse"));
+			}
+		}
+	}
+}
+
+void Shell::planardelay(const Conn& c, string source, double delay){
+	vector <Element* > src_list;
+	simpleWildcardFind( source, src_list );
+	for (size_t i = 0 ; i < src_list.size(); i++){
+		if (src_list[i]->className() != "SynChan"){/*error!!*/}
+		unsigned int numSynapses;
+		bool ret;
+		ret = get< unsigned int >( src_list[i], "numSynapses", numSynapses );
+		if (!ret) {cout << "error" <<endl;}
+		cout<< numSynapses << endl;
+		for (size_t j = 0 ; j < numSynapses; j++){
+			lookupSet< double, unsigned int >( src_list[i], "delay", delay, j );
+		}
+	}
+}
+
+void Shell::planarweight(const Conn& c, string source, double weight){
+	vector <Element* > src_list;
+	simpleWildcardFind( source, src_list );
+	for (size_t i = 0 ; i < src_list.size(); i++){
+		if (src_list[i]->className() != "SynChan"){/*error!!*/}
+		unsigned int numSynapses;
+		bool ret;
+		ret = get< unsigned int >( src_list[i], "numSynapses", numSynapses );
+		if (!ret) {/*error!*/}
+		for (size_t j = 0 ; j < numSynapses; j++){
+			lookupSet< double, unsigned int >( src_list[i], "weight", weight, j );
+		}
+	}
+}
+
+/*void Shell::getSynCount(const Conn& c, string source, string dest){
+	Element* src = Id(source)();
+	Element* dst = Id(dest)();
+	vector <Conn> conn;
+	
+	src->findFinfo("event")->outgoingConns(src, conn);
+	unsigned int count = 0;
+	for(size_t i = 0; i < conn.size(); i++){
+		if(conn[i].targetElement() == dst)
+			count++;
+	}
+	
+}*/
+
+
+
+
+// Static function
 void Shell::staticDestroy( const Conn& c, Id victim )
 {
 	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
@@ -659,15 +790,19 @@ void Shell::getField( const Conn& c, Id id, string field )
 		return;
 	string ret;
 	Element* e = id();
+	//cout << e->name() << endl;
+	
 	// Appropriate off-node stuff here.
 
 	const Finfo* f = e->findFinfo( field );
 	// Error messages are the job of the parser. So we just return
 	// the value when it is good and leave the rest to the parser.
 	if ( f )
-		if ( f->strGet( e, ret ) )
+		if ( f->strGet( e, ret ) ){
+			//GenesisParserWrapper::recvField (conn, ret);
 			sendTo1< string >( c.targetElement(),
 				getFieldSlot, c.targetIndex(), ret );
+		}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -826,6 +961,29 @@ void Shell::copy( const Conn& c,
 		sendTo1< Id >( c.targetElement(),
 					createSlot, c.targetIndex(), e->id() );
 	}
+}
+
+/**
+ * This function copies the prototype element in form of an array.
+ * It is similar to copy() only that it creates an array of copies 
+ * elements
+*/
+
+void Shell::copyIntoArray( const Conn& c, 
+				Id src, Id parent, string name, vector <double> parameter )
+{
+	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	int n = (int) (parameter[0]*parameter[1]);
+	Element* e = src()->copyIntoArray( parent(), name, n );
+	//assign the other parameters to the arrayelement
+	assert(parameter.size() == 6);
+	ArrayElement* f = static_cast <ArrayElement *> (e);
+	f->setNoOfElements((int)(parameter[0]), (int)(parameter[1]));
+	f->setDistances(parameter[2], parameter[3]);
+	f->setOrigin(parameter[4], parameter[5]);
+	if ( e )  // Send back the id of the new element base
+		sendTo1< Id >( c.targetElement(),
+					createSlot, c.targetIndex(), e->id() );
 }
 
 // Static placeholder.
@@ -1016,8 +1174,7 @@ void Shell::useClock( const Conn& c,
 		const Finfo* func = e->findFinfo( function );
 		if ( func ) {
 			if ( func->numIncoming( e ) == 0 ) {
-				bool ret = tickProc->add( tick, e, func );
-				assert( ret );
+				assert( tickProc->add( tick, e, func ) );
 			} else {
 				vector< Conn > list;
 				assert ( func->incomingConns( e, list ) > 0 );
@@ -1057,8 +1214,9 @@ void Shell::getWildcardList( const Conn& c, string path, bool ordered )
 	vector< Element* >::iterator j;
 
 	for (i = ret.begin(), j = list.begin(); j != list.end(); i++, j++ )
-		*i = ( *j )->id();
+			*i = ( *j )->id();
 	
+	//GenesisParserWrapper::recvElist(conn, elist)
 	send1< vector< Id > >( c.targetElement(), elistSlot, ret );
 }
 
@@ -1322,6 +1480,40 @@ bool Shell::create( const string& type, const string& name,
 		bool ret = childSrc->add( p, e, e->findFinfo( "child" ) );
 		assert( ret );
 		// cout << "OK\n";
+		recentElement_ = id;
+		ret = c->schedule( e );
+		assert( ret );
+		return 1;
+	} else  {
+		cout << "Error: Shell::create: Unable to find type " <<
+			type << endl;
+	}
+	return 0;
+}
+
+// Regular function
+bool Shell::createArray( const string& type, const string& name, 
+		Id parent, Id id, int n )
+{	
+	const Cinfo* c = Cinfo::find( type );
+	Element* p = parent();
+	if ( !p ) {
+		cout << "Error: Shell::create: No parent " << p << endl;
+		return 0;
+	}
+
+	const Finfo* childSrc = p->findFinfo( "childSrc" );
+	if ( !childSrc ) {
+		// Sorry, couldn't resist it.
+		cout << "Error: Shell::create: parent cannot handle child\n";
+		return 0;
+	}
+	if ( c != 0 && p != 0 ) {
+		Element* e = c->createArray( id, name, n, 0 );
+		//cout << e->name() << endl;
+		bool ret = childSrc->add( p, e, e->findFinfo( "child" ) );
+		assert( ret );
+		//cout << "OK\n";
 		recentElement_ = id;
 		ret = c->schedule( e );
 		assert( ret );

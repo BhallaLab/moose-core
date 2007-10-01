@@ -59,6 +59,8 @@ class Shell
 
 		bool create( const string& type, const string& name,
 						Id parent, Id id );
+		bool createArray( const string& type, const string& name,
+						Id parent, Id id, int n );
 		void destroy( Id victim );
 
 		/**
@@ -68,6 +70,12 @@ class Shell
 		 */
 		static void staticCreate( const Conn&, string type,
 						string name, Id parent );
+		static void staticCreateArray( const Conn&, string type,
+						string name, Id parent, vector <double> parameter );
+		static void planarconnect( const Conn& c, string source, string dest, double probability);
+		static void planardelay(const Conn& c, string source, double delay);
+		static void planarweight(const Conn& c, string source, double weight);
+		
 		static void staticDestroy( const Conn&, Id victim );
 
 		static void getField( const Conn& c, Id id, string field );
@@ -88,6 +96,7 @@ class Shell
 				Id id, string field, bool isIncoming );
 
 		static void copy( const Conn& c, Id src, Id parent, string name );
+		static void copyIntoArray( const Conn& c, Id src, Id parent, string name, vector <double> parameter );
 		static void move( const Conn& c, Id src, Id parent, string name );
 
 ////////////////////////////////////////////////////////////////////

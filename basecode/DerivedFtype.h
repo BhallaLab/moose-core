@@ -281,6 +281,23 @@ template < class T > class Ftype1: public Ftype
 					return new T( *static_cast< const T* >( orig ) );
 				}
 			}
+			
+			void* copyIntoArray( const void* orig, const unsigned int num, unsigned int numCopies ) const
+			{
+				if ( num > 1 ) {
+					//not done
+					T* ret = new T[ num ];
+					const T* optr = static_cast< const T* >( orig );
+					for ( unsigned int i = 0; i < num; i++ )
+						ret[ i ] = optr[ i ];
+					return ret;
+				} else {
+					T* ret = new T[ numCopies ];
+					for ( unsigned int i = 0; i < numCopies; i++ )
+						ret[ i ] = *( new T( *static_cast< const T* >( orig ) ) );
+					return ret;
+				}
+			}
 
 			void destroy( void* data, bool isArray ) const
 			{
