@@ -539,6 +539,8 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "tabchannel" ] = "HHChannel";
 	classnames[ "vdep_channel" ] = "HHChannel";
 	classnames[ "vdep_gate" ] = "HHGate";
+	classnames[ "spikegen" ] = "SpikeGen";
+	classnames[ "synchan" ] = "SynChan";
 	classnames[ "table" ] = "Table";
 	classnames[ "xbutton" ] = "Sli";
 	classnames[ "xdialog" ] = "Sli";
@@ -2148,6 +2150,10 @@ void do_xsendevent ( int argc, const char** const argv, Id s )
 	//s->error( "not implemented yet." );
 }
 
+void do_xps ( int argc, const char** const argv, Id s ){
+
+}
+
 void do_createmap(int argc, const char** const argv, Id s){
 //#define DEBUG
 	//createmap source dest 
@@ -2252,16 +2258,28 @@ planarconnect / dest-path -relative -sourcemask box -1 -1 1 1 -destmask box 1 1 
 
 void do_planardelay( int argc, const char** const argv, Id s )
 {
+	if (argc < 3){
+		cout << "usage:: planardelay <srcelements> <delay>" << endl;
+		return;
+	}	
 	string source;
 	source = argv[1];
-	send2<string, double>(s(), planardelaySlot, source, 0.5);
+	//check whether argv[2] is proper float
+	double delay = atof(argv[2]);
+	send2<string, double>(s(), planardelaySlot, source, delay);
 }
 
 void do_planarweight( int argc, const char** const argv, Id s )
 {
+	if (argc < 3){
+		cout << "usage:: planarweight <srcelements> <weight>" << endl;
+		return;
+	}
 	string source;
 	source = argv[1];
-	send2<string, double>(s(), planarweightSlot, source, 0.5);
+	//check whether argv[2] is proper float
+	double weight = atof(argv[2]);
+	send2<string, double>(s(), planarweightSlot, source, weight);
 }
 
 int do_getsyncount( int argc, const char** const argv, Id s )
@@ -2347,9 +2365,102 @@ int do_getsynindex( int argc, const char** const argv, Id s ){
 }
 
 int do_strcmp(int argc, const char** const argv, Id s ){
+	if (argc != 3){
+		cout << "usage:: strcmp <str1> <str2>" << endl;
+		return 0;
+	}
 	return strcmp(argv[1], argv[2]);
 }
 
+/*
+Function: opens file
+Question: Where will the file handle go?
+*/
+
+void do_openfile(int argc, const char** const argv, Id s){
+	if ( argc != 3 ){
+		cout << "usage:: openfile <filename> <mode>" << endl;
+	}
+	
+	
+}
+
+void do_writefile(int argc, const char** const argv, Id s){
+	//writefile <filename> text
+	
+}
+
+
+void do_closefile(int argc, const char** const argv, Id s){
+	if ( argc != 2 ){
+		cout << "usage:: openfile <filename>" << endl;
+	}
+	
+}
+
+void do_listfiles(int argc, const char** const argv, Id s){
+	if ( argc != 1 ){
+		cout << "usage:: openfile <filename> <mode>" << endl;
+	}
+	
+}
+
+char* do_readfile(int argc, const char** const argv, Id s){
+	if ( argc != 2 ){
+		cout << "usage:: readfile <filename>" << endl;
+	}
+	return 0;
+}
+
+char* do_getarg( int argc, const char** const argv, Id s ){
+	if ( !( argc >= 2  && strcmp(argv[argc-1], "-count") == 0) &&
+		!( argc >= 3  && strcmp(argv[argc-2], "-arg") == 0 ) ){
+		cout << "usage:: getarg <list of argument> <-count OR -arg #>" << endl;
+		return 0;
+	}
+	if ( strcmp(argv[argc-1], "-count") == 0 ){
+		char e[5];
+		sprintf(e, "%d", argc-2);
+		return strdup(e);
+	}
+	if ( strcmp(argv[argc-2], "-arg") == 0 ){
+		// check whether argv[argc -1] is a number
+		int index = atoi(argv[argc-1]);
+		if (index > argc-2){
+			cout << "getarg:: Improper index" << endl;
+			return 0;
+		}
+		return strdup(argv[index]);
+	}
+	return 0;
+}
+
+int do_randseed( int argc, const char** const argv, Id s ){
+	if (argc == 1){
+		return rand();
+	}
+	if (argc == 2){
+		//check whether argv[1] is an int in string!!
+		int seed = atoi(argv[1]);
+		//copied the error message from genesis
+		cout << "WARNING from init_rng: changing global seed value! Independence of streams is not guaranteed" << endl;
+		srand(seed);
+		return 0;
+	}
+	cout << "usage:: randseed [seed]" << endl;
+	return 0;
+}
+
+float do_rand( int argc, const char** const argv, Id s ){
+	if (argc != 3){
+		cout << "usage:: rand <lo> <hi>" << endl;
+		return 0;
+	}
+	//check whether argv[1] and argv[2] are in proper formats
+	double lo = atof(argv[1]);
+	double hi = atof(argv[2]);
+	return lo + rand()*(hi - lo)/RAND_MAX;
+}
 
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper load command
@@ -2443,6 +2554,16 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "getsyndest", reinterpret_cast< slifunc >(do_getsyndest), "char*" );
 	AddFunc( "getsynindex", reinterpret_cast< slifunc >(do_getsynindex), "int" );
 	AddFunc( "strcmp", reinterpret_cast< slifunc >(do_strcmp), "int" );
+	AddFunc( "getelementlist", reinterpret_cast< slifunc >(do_element_list ), "char*");
+	AddFunc( "openfile", do_openfile, "void" );
+	AddFunc( "writefile", do_writefile, "void" );
+	AddFunc( "readfile", reinterpret_cast< slifunc >( do_readfile ), "char*");
+	AddFunc( "listfiles", do_listfiles, "void" );
+	AddFunc( "closefile", do_closefile, "void" );
+	AddFunc( "getarg", reinterpret_cast< slifunc >( do_getarg ), "char*" );
+	AddFunc( "randseed", reinterpret_cast< slifunc >( do_randseed ), "int" );
+	AddFunc( "rand", reinterpret_cast< slifunc >( do_rand ), "float" );
+	AddFunc( "xps", do_xps, "void" );
 }
 
 //////////////////////////////////////////////////////////////////
@@ -2681,7 +2802,9 @@ void GenesisParserWrapper::unitTest()
 //	gpAssert( "useclock /##[TYPE=Compartment] 1", "" );
 	gpAssert( "delete /compt", "" );
 	gpAssert( "le", lestr );
-
+	gpAssert( "echo {strcmp \"hello\" \"hello\"} ", "0 " );
+	gpAssert( "echo {strcmp \"hello\" \"hell\"} ", "1 " );
+	gpAssert( "echo {strcmp \"hell\" \"hello\"} ", "-1 " );
 	cout << "\n";
 }
 #endif
