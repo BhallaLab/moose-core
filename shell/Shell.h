@@ -145,6 +145,11 @@ class Shell
 			string filename, string path );
 		static void simObjDump( const Conn& c, string fields );
 		static void simUndump( const Conn& c, string args );
+		static void openFile( const Conn& c, string filename, string mode );
+		static void closeFile( const Conn& c, string filename );
+		static void writeFile( const Conn& c, string filename, string text );
+		static void readFile( const Conn& c, string filename, bool linemode );
+		static void listFiles( const Conn& c );
 			/*
 		void add( const string& src, const string& dest );
 		void drop( const string& src, const string& dest );
@@ -162,7 +167,8 @@ class Shell
 		void remoteCommand( string arglist );
 		void command( int argc, const char** argv );
 		*/
-
+		
+	
 	private:
 		/// Current working element
 		Id cwe_;
@@ -170,6 +176,13 @@ class Shell
 		Id recentElement_;
 		vector< Id > workingElementStack_;
 		// True if prompts etc are to be printed.
+		///stores all the filehandles create by genesis style format.
+		static map <string, FILE*> filehandler;
+		// variable for file handling
+		static vector <string> filenames;
+		static vector <string> modes;
+		static vector <FILE*> filehandles;
+		
 		int isInteractive_;
 		string parser_;
 		SimDump* simDump_;
