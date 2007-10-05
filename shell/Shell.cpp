@@ -178,6 +178,21 @@ const Cinfo* initShellCinfo()
 		new DestFinfo(	"simUndump",
 					// args is sequence of args for simundump command.
 			Ftype1< string >::global(), RFCAST( &Shell::simUndump ) ),
+		new DestFinfo( "openfile",
+				Ftype2< string, string >::global(),
+				RFCAST( &Shell::openFile ) ),
+		new DestFinfo( "writefile",
+				Ftype2< string, string >::global(),
+				RFCAST( &Shell::writeFile ) ),
+		new DestFinfo( "listfiles",
+				Ftype0::global(),
+				RFCAST( &Shell::listFiles ) ),
+		new DestFinfo( "closefile",
+				Ftype1< string >::global(),
+				RFCAST( &Shell::closeFile ) ),	
+		new DestFinfo( "readfile",
+				Ftype2< string, bool >::global(),
+				RFCAST( &Shell::readFile) ),	
 		////////////////////////////////////////////////////////////
 		// field assignment for a vector of objects
 		////////////////////////////////////////////////////////////
@@ -1454,6 +1469,98 @@ void Shell::simUndump( const Conn& c, string args )
 	sh->simDump_->simUndump( args );
 }
 
+map <string, FILE*> Shell::filehandler;
+vector <string> Shell::filenames;
+vector <string> Shell::modes;
+vector <FILE*> Shell::filehandles;
+
+void Shell::openFile( const Conn& c, string filename, string mode ){
+	FILE* o = fopen( filename.c_str(), mode.c_str() );
+	if (o == NULL){
+		cout << "Error: Shell::openFile Cannot openfile " << filename << endl;
+		return;
+	}
+	map<string, FILE*>::iterator iter = filehandler.find(filename);
+	if (iter != filehandler.end() ){
+		cout << "File " << filename << " already being used." << endl;
+		return;
+	}
+	//filehandler[filename] = o;
+	filenames.push_back(filename);
+	modes.push_back(mode);
+	filehandles.push_back(o);
+}
+
+
+
+void Shell::writeFile( const Conn& c, string filename, string text ){
+	size_t i = 0;
+	while (filenames[i] != filename && ++i);
+	if ( i < filenames.size() ){
+		if (modes[i] != "w"){
+			cout << "Error:: The file has not been opened in write mode" << endl;
+			return;
+		}
+		fprintf(filehandles[i], "%s", text.c_str());
+	}
+	else {
+		cout << "Error:: File "<< filename << " not opened!!" << endl;
+		return;
+	}
+}
+
+void Shell::closeFile( const Conn& c, string filename ){
+	size_t i = 0;
+	while (filenames[i] != filename && ++i);
+	if ( i < filenames.size() ){
+		if ( fclose(filehandles[i]) != 0 ) {
+			cout << "Error:: Could not close the file." << endl;
+			return;
+		}
+		filenames.erase( filenames.begin() + i );
+		modes.erase( modes.begin() + i );
+		filehandles.erase( filehandles.begin() + i );
+	}
+	else {
+		cout << "Error:: File "<< filename << " not opened!!" << endl;
+		return;
+	}
+}
+
+void Shell::listFiles( const Conn& c ){
+	string ret = "";
+	for ( size_t i = 0; i < filenames.size(); i++ ) 
+		ret = ret + filenames[i] + "\n";
+	sendTo1< string >( c.targetElement(), getFieldSlot, c.targetIndex(), ret );	
+}
+
+
+/*
+Limitation: lines should be shorter than 1000 chars
+*/
+void Shell::readFile( const Conn& c, string filename, bool linemode ){
+	size_t i = 0;
+	while (filenames[i] != filename && ++i);
+	if ( i < filenames.size() ){
+		char str[1000];
+		if (linemode){
+			fgets( str, 1000, filehandles[i] );
+		}
+		else 
+			fscanf( filehandles[i], "%s", str);
+		string ret = str;
+		if (ret[ ret.size() -1 ] == '\n' && !linemode)
+			ret.erase( ret.end() - 1 );
+		sendTo1< string >( c.targetElement(), getFieldSlot, c.targetIndex(), ret );
+	}
+	else {
+		cout << "Error:: File "<< filename << " not opened!!" << endl;
+		return;
+	}
+}
+
+
+
 //////////////////////////////////////////////////////////////////
 // Helper functions.
 //////////////////////////////////////////////////////////////////
@@ -1524,6 +1631,8 @@ bool Shell::createArray( const string& type, const string& name,
 	}
 	return 0;
 }
+
+
 
 // Regular function
 void Shell::destroy( Id victim )
