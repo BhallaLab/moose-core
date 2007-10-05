@@ -159,7 +159,16 @@ const Cinfo* initGenesisParserCinfo()
 		// simundump
 		new SrcFinfo( "simUndump",
 					Ftype1< string >::global() ),
-
+		new SrcFinfo( "openfile", 
+			Ftype2< string, string >::global() ),
+		new SrcFinfo( "writefile", 
+			Ftype2< string, string >::global() ),
+		new SrcFinfo( "listfiles", 
+			Ftype0::global() ),
+		new SrcFinfo( "closefile", 
+			Ftype1< string >::global() ),
+		new SrcFinfo( "readfile", 
+			Ftype2< string, bool >::global() ),
 		///////////////////////////////////////////////////////////////
 		// Setting field values for a vector of objects
 		///////////////////////////////////////////////////////////////
@@ -266,8 +275,19 @@ static const unsigned int simObjDumpSlot =
 static const unsigned int simUndumpSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.simUndump" );
 
+static const unsigned int openFileSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.openfile" );
+static const unsigned int writeFileSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.writefile" );
+static const unsigned int listFilesSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.listfiles" );
+static const unsigned int closeFileSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.closefile" );
+static const unsigned int readFileSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.readfile" );
 static const unsigned int setVecFieldSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.setVecField" );
+
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -2372,6 +2392,61 @@ int do_strcmp(int argc, const char** const argv, Id s ){
 	return strcmp(argv[1], argv[2]);
 }
 
+int do_strlen(int argc, const char** const argv, Id s ){
+	if (argc != 2){
+		cout << "usage:: strlen <str>" << endl;
+		return 0;
+	}
+	return strlen(argv[1]);
+}
+
+char* do_strcat(int argc, const char** const argv, Id s ){
+	if (argc != 3){
+		cout << "usage:: strcat <str1> <str2>" << endl;
+		return 0;
+	}
+	string str1 = argv[1];
+	string str2 = argv[2];
+	string concat = str1 + str2;
+	return copyString(concat.c_str());
+}
+
+
+char* do_substring(int argc, const char** const argv, Id s ){
+	if (argc < 3 || argc > 4){
+		cout << "usage:: substring <str1> <start> <end>" << endl;
+		return 0;
+	}
+	string str = argv[1];
+	//check whether argv[2] and argv[3] are in correct format
+	size_t start = atoi(argv[2]);
+	size_t end = str.size();
+	if (argc == 4) 
+		end = atoi(argv[3]);
+	if (start > end){
+		cout << "You cannot start after end" << endl;
+		return 0;
+	}
+	if (start > str.size() || end > str.size()){
+		cout << "You string has only " << str.size() << " chars"  << endl;
+	}
+	string substr = str.substr(start, end);	
+	return copyString(substr.c_str());
+}
+
+ 
+int do_findchar(int argc, const char** const argv, Id s ){
+	if (argc != 3){
+		cout << "usage:: strcmp <str> <char>" << endl;
+		return 0;
+	}
+	string str1 = argv[1];
+	string str2 = argv[2];
+	size_t pos = str1.find(str2, 0); 	
+	if (pos == string::npos)
+		pos = -1;
+	return pos;
+}
 /*
 Function: opens file
 Question: Where will the file handle go?
@@ -2380,14 +2455,56 @@ Question: Where will the file handle go?
 void do_openfile(int argc, const char** const argv, Id s){
 	if ( argc != 3 ){
 		cout << "usage:: openfile <filename> <mode>" << endl;
+		return;
 	}
-	
-	
+	string filename = argv[1];
+	string mode = argv[2];
+	send2<string, string>(s(), openFileSlot, filename, mode);
 }
 
 void do_writefile(int argc, const char** const argv, Id s){
 	//writefile <filename> text
+	if ( argc < 2 ) {
+		cout << "Too less arguments" << endl;
+		return;
+	}
+	bool newline = true;
+	bool userformat = false;
+	string format = "%s";
+	int max = argc;
+	for (int i = 2; i < argc; i++){
+		if (strcmp(argv[i], "-nonewline") == 0){
+			newline = false;
+			if (max > i) 
+				max = i;
+		}
+		if (strcmp(argv[i], "-format") == 0){
+			if (i+1 >= argc){
+				cout << "writefile::format not mentioned." << endl;
+				continue;
+			}
+			userformat = true;
+			format = argv[i+1];
+			if (max > i)
+				max = i;
+			i++;
+		}
+	}
 	
+	
+	string filename = argv[1];
+	string text = "";
+	for ( int i = 2; i < max; i++ ){ 
+		char e[100];
+		sprintf(e, format.c_str(), argv[i]);
+		text = text + e;
+		if (!userformat && i < max - 1)
+			text = text + " ";
+	}
+	if (newline)
+		text = text + "\n";
+	cout << "!" << text << "!" << endl;
+	send2 < string, string > ( s(), writeFileSlot, filename, text );
 }
 
 
@@ -2395,21 +2512,39 @@ void do_closefile(int argc, const char** const argv, Id s){
 	if ( argc != 2 ){
 		cout << "usage:: openfile <filename>" << endl;
 	}
-	
+	string filename = argv[1];
+	send1< string > ( s(), closeFileSlot, filename );
 }
 
 void do_listfiles(int argc, const char** const argv, Id s){
 	if ( argc != 1 ){
 		cout << "usage:: openfile <filename> <mode>" << endl;
 	}
-	
+	send0( s(), listFilesSlot );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( s()->data() );
+	cout << gpw->getFieldValue();	
+}
+
+string GenesisParserWrapper::getFieldValue(){
+	return fieldValue_;
 }
 
 char* do_readfile(int argc, const char** const argv, Id s){
-	if ( argc != 2 ){
-		cout << "usage:: readfile <filename>" << endl;
+	if ( argc < 2 ){
+		cout << "usage:: readfile <filename> -linemode" << endl;
+		return 0;
 	}
-	return 0;
+	string filename = argv[1];
+	bool linemode = false;
+	if (argc == 3)
+		if (strcmp(argv[2], "-linemode") == 0) 
+			linemode = true;
+	send2< string , bool > ( s(), readFileSlot, filename, linemode );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( s()->data() );
+	string text = "" + gpw->getFieldValue();
+	return copyString(text.c_str());
 }
 
 char* do_getarg( int argc, const char** const argv, Id s ){
@@ -2461,6 +2596,13 @@ float do_rand( int argc, const char** const argv, Id s ){
 	double hi = atof(argv[2]);
 	return lo + rand()*(hi - lo)/RAND_MAX;
 }
+
+void do_disable( int argc, const char** const argv, Id s ){
+}
+
+void do_setup_table2( int argc, const char** const argv, Id s ){
+}
+
 
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper load command
@@ -2554,6 +2696,10 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "getsyndest", reinterpret_cast< slifunc >(do_getsyndest), "char*" );
 	AddFunc( "getsynindex", reinterpret_cast< slifunc >(do_getsynindex), "int" );
 	AddFunc( "strcmp", reinterpret_cast< slifunc >(do_strcmp), "int" );
+	AddFunc( "strlen", reinterpret_cast< slifunc >(do_strlen), "int" );
+	AddFunc( "strcat", reinterpret_cast< slifunc >(do_strcat), "char*" );
+	AddFunc( "substring", reinterpret_cast< slifunc >(do_substring), "char*" );
+	AddFunc( "findchar", reinterpret_cast< slifunc >(do_findchar), "int" );
 	AddFunc( "getelementlist", reinterpret_cast< slifunc >(do_element_list ), "char*");
 	AddFunc( "openfile", do_openfile, "void" );
 	AddFunc( "writefile", do_writefile, "void" );
@@ -2564,6 +2710,8 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "randseed", reinterpret_cast< slifunc >( do_randseed ), "int" );
 	AddFunc( "rand", reinterpret_cast< slifunc >( do_rand ), "float" );
 	AddFunc( "xps", do_xps, "void" );
+	AddFunc( "disable", do_disable, "void" );
+	AddFunc( "setup_table2", do_setup_table2, "void" );
 }
 
 //////////////////////////////////////////////////////////////////

@@ -55,6 +55,7 @@ class GenesisParserWrapper: public myFlexLexer
 		bool tabCreate( int argc, const char** argv, Id s );
 		void elementList( string& ret, const string& path, Id s );
 		bool fieldExists( Id eid, const string& field, Id s );
+		string getFieldValue();
 
 		////////////////////////////////////////////////
 		//  Utility functions
