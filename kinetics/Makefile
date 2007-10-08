@@ -57,7 +57,8 @@ GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h SparseMatrix.h
 	$(CXX) $(CFLAGS) $(GSL_FLAGS) -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(GSL_OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(LIBS) $(GSL_LIBS)
+	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(GSL_LIBS)
+#	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(LIBS) $(GSL_LIBS)
 
 clean:
 	-rm -f *.o $(TARGET) core core.*

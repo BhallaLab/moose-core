@@ -9,6 +9,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "moose.h"
 #include "stdlib.h"
 #include "DynamicFinfo.h"
 #include "LookupFinfo.h"
@@ -98,7 +99,7 @@ bool LookupFinfo::drop( Element* e, unsigned int i ) const
 
 
 #ifdef DO_UNIT_TESTS
-#include "moose.h"
+
 
 /**
  * This test class contains a vector of doubles, a regular double,
