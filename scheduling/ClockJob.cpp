@@ -273,7 +273,6 @@ void ClockJob::checkSolvers( vector< Id >& childList )
 	static const Finfo* procFinfo = tickCinfo->findFinfo( "process" );
 	assert ( procFinfo != 0 );
 	static Id ksolvers( "/solvers/chem" );
-	static Id nsolvers( "/solvers/neuronal" );
 	// This is a really dumb first pass on solver assignment,
 	// puts all chem stuff onto a single solver
 	
@@ -308,20 +307,6 @@ void ClockJob::checkSolvers( vector< Id >& childList )
 	}
 
 	// Similar stuff here for hsolver.
-	if ( procFinfo->numOutgoing( childList[0]() ) > 0 ) {
-		// Set up neuronal solver
-		Id nsolve( "/solvers/neuronal/integ" );
-		if ( !nsolve.bad() ) { // alter existing nsolve
-			set( nsolve(), "scanTicks" );
-		} else { // make a whole new set.
-			Element* ni = Neutral::create( "HSolve", "integ",
-				nsolvers() );
-			set( ni, "scanTicks" );
-
-			childList[4]()->findFinfo( "process" )->add( 
-				childList[4](), ni, ni->findFinfo( "process" ) );
-		}
-	}
 }
 
 void ClockJob::startFuncLocal( Element* e, double runTime )
@@ -411,8 +396,10 @@ void ClockJob::reschedFuncLocal( Element* e )
 	vector< Id > childList = Neutral::getChildList( e );
 	if ( childList.size() == 0 )
 			return;
-
-	checkSolvers( childList );
+        // Commented this to avoid remapping of solvers to clock ticks
+        // need to check how it affects the simulator
+        // check the discussion on autoscheduling design
+//	checkSolvers( childList ); 
 
 	vector< TickSeq > tickList;
 

@@ -6,6 +6,8 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#ifndef _MOOSE_H
+#define _MOOSE_H
 
 /**
  * The moose.h header is used when one makes MOOSE classes. It is not
@@ -61,3 +63,4 @@ extern void separateString( const string& s, vector< string>& v,
 // Another variant on it, same place.
 extern void parseString( const string& s, vector< string>& v, 
 				const char* separators );
+#endif
