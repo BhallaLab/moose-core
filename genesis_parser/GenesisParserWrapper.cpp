@@ -555,6 +555,7 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "conc_chan" ] = "ConcChan";
 	classnames[ "Ca_concen" ] = "CaConc";
 	classnames[ "compartment" ] = "Compartment";
+	classnames[ "symcompartment" ] = "Compartment";//needs to be changed
 	classnames[ "hh_channel" ] = "HHChannel";
 	classnames[ "tabchannel" ] = "HHChannel";
 	classnames[ "vdep_channel" ] = "HHChannel";
@@ -1780,17 +1781,29 @@ Id findChanGateId( int argc, const char** const argv, Id s )
 	// and here we merge the two cases.
 	
 	string gate = argv[1];
+	string type = "";
 	if ( argv[2][0] == 'X' )
-			gate = gate + "/xGate";
+			type =  "xGate";
 	else if ( argv[2][0] == 'Y' )
-			gate = gate + "/yGate";
+			type = "yGate";
 	else if ( argv[2][0] == 'Z' )
-			gate = gate + "/zGate";
+			type = "zGate";
 	// Id gateId = GenesisParserWrapper::path2eid( gate, s );
+	
+	gate = gate + "/" + type;
 	Id gateId( gate );
-	if ( gateId.bad() ) // Don't give up, it might be a tabgate
+	if ( gateId.bad() ) // Don't give up, it might be a tabgate or might not have been created
 		gateId = Id( argv[1] );
 		// gateId = GenesisParserWrapper::path2eid( argv[1], s );
+	Id channelId( argv[1] );
+	Element *channel = channelId();
+	if ( channel->className()=="HHChannel" ){
+		if (type == "") /*error*/;
+		send3< string, string, Id >( s(),
+		createSlot, "HHGate", type, channelId );
+		gateId = Id(gate);
+	}
+	
 	if ( gateId.bad() ) { // Now give up
 			cout << "Error: findChanGateId: unable to find channel/gate '" << argv[1] << "/" << argv[2] << endl;
 			return gateId;
@@ -2171,7 +2184,7 @@ void do_xsendevent ( int argc, const char** const argv, Id s )
 }
 
 void do_xps ( int argc, const char** const argv, Id s ){
-
+	cout << "Not yet implemented!!" << endl;
 }
 
 void do_createmap(int argc, const char** const argv, Id s){
@@ -2503,7 +2516,6 @@ void do_writefile(int argc, const char** const argv, Id s){
 	}
 	if (newline)
 		text = text + "\n";
-	cout << "!" << text << "!" << endl;
 	send2 < string, string > ( s(), writeFileSlot, filename, text );
 }
 
@@ -2598,9 +2610,11 @@ float do_rand( int argc, const char** const argv, Id s ){
 }
 
 void do_disable( int argc, const char** const argv, Id s ){
+	cout << "Not yet implemented!!" << endl;
 }
 
 void do_setup_table2( int argc, const char** const argv, Id s ){
+	cout << "Not yet implemented!!" << endl;
 }
 
 
