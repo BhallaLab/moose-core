@@ -37,7 +37,7 @@ ReadCell.o: ReadCell.h Shell.h
 	$(CXX) $(CFLAGS) -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
+	$(LD) -r -o $(TARGET) $(OBJ)
 
 
 clean:

@@ -13,7 +13,7 @@
 #
 
 TARGET = basecode.o
-
+CFLAGS += -I..
 OBJ = \
 	Element.o	\
 	Id.o	\
@@ -91,7 +91,7 @@ ArrayWrapperElement.o:	ArrayWrapperElement.h SimpleElement.h MsgSrc.h MsgDest.h 
 	$(CXX) $(CFLAGS) $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
+	$(LD) -r -o $(TARGET) $(OBJ)
 
 clean:
 	-rm -f *.o $(TARGET) core core.*
