@@ -71,10 +71,11 @@ CXX = g++
 
 LD = ld
 
-SUBDIR = genesis_parser basecode shell element maindir biophysics kinetics builtins scheduling example $(PARALLEL_DIR)
+SUBDIR = genesis_parser basecode shell element maindir biophysics kinetics builtins scheduling example utility $(PARALLEL_DIR)
 
 OBJLIBS =	\
 	basecode/basecode.o \
+	utility/utility.o \
 	maindir/maindir.o \
 	genesis_parser/SLI.o \
 	element/element.o \
@@ -84,6 +85,10 @@ OBJLIBS =	\
 	builtins/builtins.o \
 	scheduling/scheduling.o \
 	example/example.o \
+
+export CFLAGS
+export LD
+export LIBS
 
 moose: libs $(OBJLIBS) $(PARALLEL_LIB)
 	$(CXX) $(CFLAGS) $(PARALLEL_FLAGS) $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o moose
@@ -99,7 +104,7 @@ pymoose: libs $(OBJLIBS) $(PARALLEL_LIB)
 	$(MAKE) -C $@
 
 libs:
-	@(for i in $(SUBDIR); do echo cd $$i; cd $$i; make CXX="$(CXX)" CFLAGS="$(CFLAGS) $(PARALLEL_FLAGS)" LD="$(LD)" LIBS="$(SUBLIBS)"; cd ..; done)
+	@(for i in $(SUBDIR); do echo cd $$i; cd $$i && $(MAKE) $(PARALLEL_FLAGS) ; cd ..; done)
 	@echo "All Libs compiled"
 
 mpp: preprocessor/*.cpp preprocessor/*.h
@@ -108,5 +113,5 @@ mpp: preprocessor/*.cpp preprocessor/*.h
 default: moose mpp
 
 clean:
-	@(for i in $(SUBDIR) ; do echo cd $$i; cd $$i; make clean; cd ..; done)
+	@(for i in $(SUBDIR) ; do echo cd $$i; cd $$i; $(MAKE) clean; cd ..; done)
 	-rm -rf moose mpp core.* DOCS/html *.so *.py *.pyc

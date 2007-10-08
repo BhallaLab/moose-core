@@ -61,7 +61,8 @@ GenesisParser.tab.o GenesisParser.yy.o GenesisParser.o: GenesisParser.yy.cpp Gen
 	$(CXX) $(CFLAGS) -DYYMALLOC -DYYFREE -DYYSTYPE_IS_DECLARED -I../basecode -I../external/include $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
-		$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
+		$(LD) -r -o $(TARGET) $(OBJ) 
+#		$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
 
 clean:
 	-rm -f *.o $(TARGET) core core.* GenesisParser.tab.o GenesisParser.yy.o

@@ -8,7 +8,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+//#include "header.h"
+#include "moose.h"
 #include "MsgDest.h"
 #include "SharedFtype.h"
 #include "SharedFinfo.h"
@@ -463,7 +464,7 @@ bool SharedFinfo::getSlotIndex( const string& field,
 ////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
-#include "moose.h"
+//#include "moose.h" - causes compilation failure, known bug in gcc - http://gcc.gnu.org/ml/gcc-bugs/2003-10/msg01703.html
 
 // Set up two SharedFinfos to test things.
 // One of them is designed to talk to a ValueFinfo to trigger a

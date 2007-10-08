@@ -14,7 +14,7 @@ float  INJECT          = 1e-10
 float  DIAMETER        = 1e-6
 float  LENGTH          = {CABLE_LENGTH} / {N_COMPARTMENT}
 
-create Neutral /cable
+create Cell /cable
 make_compartment /cable/c1 {RA} {RM} {CM} {EM} {INJECT} {DIAMETER} {LENGTH}
 
 int i
@@ -40,7 +40,7 @@ setclock 4 {SIMDT} 0
 setclock 5 {PLOTDT} 0
 useclock /plot/##[TYPE=Table] 5
 reset
-
+reset
 step {SIMLENGTH} -t
 setfield /plot/v1 print "sim_cable.0"
 setfield /plot/vn print "sim_cable.x"
