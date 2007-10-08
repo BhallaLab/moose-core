@@ -23,6 +23,7 @@ OBJ = \
 	NeuroScanBase.o \
 	NeuroScan.o \
 	NeuroHub.o \
+	Cell.o	\
 	TestBiophysics.o	\
 
 HEADERS = \
@@ -45,12 +46,13 @@ HSolve.o:	HSolve.h HSolveBase.h HSolveStructure.h
 NeuroScanBase.o:	NeuroScanBase.h HSolveStructure.h
 NeuroScan.o:	NeuroScan.h NeuroScanBase.h HSolveStructure.h
 NeuroHub.o:	NeuroHub.h HSolveStructure.h
-
+Cell.o:		Cell.h 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
+	$(LD) -r -o $(TARGET) $(OBJ)
+#	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
 
 clean:
 	-rm -f *.o $(TARGET) core core.*
