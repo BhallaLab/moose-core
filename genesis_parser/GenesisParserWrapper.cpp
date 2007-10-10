@@ -578,17 +578,21 @@ map< string, string >& sliClassNameConvert()
 	return classnames;
 }
 
-/*
+
 map< string, string >& sliFieldNameConvert()
 {
 	static map< string, string > fieldnames;
 
 	if ( fieldnames.size() > 0 )
 		return fieldnames;
-
+	
+	fieldnames["Molecule.Co"] = "conc";
+	fieldnames["Molecule.CoInit"] = "concInit";
+	fieldnames["SpikeGen.thresh"] = "threshold";
+	fieldnames["SpikeGen.output_amp"] = "amplitude";
 	return fieldnames;
 }
-*/
+
 
 
 string sliMessage(
@@ -761,6 +765,10 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 	for ( int i = start; i < argc; i += 2 ) {
 		// s->setFuncLocal( path + "/" + argv[ i ], argv[ i + 1 ] );
 		string field = argv[i];
+		map< string, string >::iterator iter = 
+			sliFieldNameConvert().find( elist_[0]()->className() + "." + field );
+		if ( iter != sliFieldNameConvert().end() ) 
+			field = iter->second;
 		string value = argv[ i+1 ];
 		string::size_type pos = field.find( "->table" );
 		if ( pos == string::npos )
@@ -837,6 +845,19 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s)
 			}
 			// id = path2eid( tempA, s );
 			id = Id( tempA );
+			if ( id.zero() || id.bad() ) { //creating the gates
+				string name;
+				if ( string( argv[3] ) == "X" ) {
+					name = "xGate";
+				} else if ( string( argv[3] ) == "Y" ) {
+					name = "yGate";
+				} else if ( string( argv[3] ) == "Z" ) {
+					name = "zGate";
+				}
+				send3< string, string, Id >( s(),
+				createSlot, "HHGate", name, Id(path) );
+				id = Id( tempA );
+			}
 			if ( id.zero() || id.bad() ) return 0; //Error msg here
 			send3< Id, string, string >( s(),
 				setFieldSlot, id, "xdivs", argv[4] );
@@ -959,10 +980,18 @@ int do_isa( int argc, const char** const argv, Id s )
 bool GenesisParserWrapper::fieldExists(
 			Id eid, const string& field, Id s )
 {
+	//conversion of field
+	map< string, string >::iterator i = 
+			sliFieldNameConvert().find( eid()->className() + "." + field );
+	string newfield;
+	if ( i != sliFieldNameConvert().end() ) 
+		newfield = i->second;
+	//conversion of field, if needed, complete
+		
 	send2< Id, string >( s(), requestFieldSlot, eid, "fieldList" );
 	if ( fieldValue_.length() == 0 ) // Nothing came back
 		return 0;
-	return ( fieldValue_.find( field ) != string::npos );
+	return ( fieldValue_.find( newfield ) != string::npos );
 }
 
 int do_exists( int argc, const char** const argv, Id s )
@@ -1016,6 +1045,10 @@ char* GenesisParserWrapper::doGet( int argc, const char** argv, Id s )
 		cout << "usage:: " << argv[0] << " [element] field\n";
 		return copyString( "" );
 	}
+	map< string, string >::iterator i = 
+			sliFieldNameConvert().find( e()->className() + "." + field );
+	if ( i != sliFieldNameConvert().end() ) 
+		field = i->second;
 	fieldValue_ = "";
 	send2< Id, string >( s(),
 		requestFieldSlot, e, field );
@@ -1560,12 +1593,18 @@ void GenesisParserWrapper::doShow( int argc, const char** argv, Id s )
 		} else { // get specific field here.
 			fieldValue_ = "";
 			//Shell::getField(conn, e, argv[i])
-			send2< Id, string >( s(), requestFieldSlot, e, argv[i] );
+			string field = argv[i];
+			map< string, string >::iterator iter = 
+				sliFieldNameConvert().find( e()->className() + "." + field );
+			if ( iter != sliFieldNameConvert().end() ) 
+				field = iter->second;
+				
+			send2< Id, string >( s(), requestFieldSlot, e, field );
 			if ( fieldValue_.length() > 0 ) {
-				sprintf( temp, "%-25s%s", argv[i], "= " );
+				sprintf( temp, "%-25s%s", field.c_str(), "= " );//printing the new field name 
 				print( temp + fieldValue_ );
 			} else {
-				cout << "'" << argv[i] << "' is not an element or the field of the working element\n";
+				cout << "'" << field << "' is not an element or the field of the working element\n";
 				return;
 			}
 		}
@@ -2617,6 +2656,29 @@ void do_setup_table2( int argc, const char** const argv, Id s ){
 	cout << "Not yet implemented!!" << endl;
 }
 
+int do_INSTANTX(int argc, const char** const argv, Id s ){
+	if (argc != 1){
+		cout << "Error:: INSTANTX is a constant" << endl;
+	}
+	return 1;
+}
+
+int do_INSTANTY(int argc, const char** const argv, Id s ){
+	if (argc != 1){
+		cout << "Error:: INSTANTY is a constant" << endl;
+	}
+	return 2;
+}
+
+
+int do_INSTANTZ(int argc, const char** const argv, Id s ){
+	if (argc != 1){
+		cout << "Error:: INSTANTZ is a constant" << endl;
+	}
+	return 4;
+}
+
+
 
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper load command
@@ -2726,6 +2788,9 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "xps", do_xps, "void" );
 	AddFunc( "disable", do_disable, "void" );
 	AddFunc( "setup_table2", do_setup_table2, "void" );
+	AddFunc( "INSTANTX", reinterpret_cast< slifunc > ( do_INSTANTX ), "int" );
+	AddFunc( "INSTANTY", reinterpret_cast< slifunc > ( do_INSTANTY ), "int" );
+	AddFunc( "INSTANTZ", reinterpret_cast< slifunc > ( do_INSTANTZ ), "int" );
 }
 
 //////////////////////////////////////////////////////////////////
