@@ -4262,7 +4262,31 @@ array. This extends GENESIS syntax but does not break it.
 Working on handling lookup. Next to handle creation of arrays.
 
 =============================================================================
-
+19 Aug 2007
+Checked in as revision 182, in serial compile form with debugging.
 
 =============================================================================
+10 Oct 2007.
+Updated to version 203.
+=============================================================================
+11 Oct 2007.
 
+Redesign plans for solver autoscheduling: Develop new manager classes.
+Subha has already set up a 'cell' manager class. This is meant to be created
+under a cell tree, and then it manages set up of a solver that manages
+all the child compartments and channels.
+I will create a similar 'kinetics' manager class that does a similar thing.
+
+The rule is that objects do NOT get solved by default, only when these managers
+are set up. Cellreader and kreader will set up managers.
+
+Also we revert to a single clock created by default. Later we'll figure out
+how to get solvers to negotiate timesteps with each other.
+
+=============================================================================
+12 Oct 2007.
+
+implemented shell of KineticManager class to act as controller for solving
+kinetic models. Lots yet to be done.
+
+=============================================================================
