@@ -19,6 +19,7 @@ OBJ = \
 	Kintegrator.o	\
 	MathFunc.o	\
 	TestKinetics.o	\
+	KineticManager.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -47,6 +48,7 @@ SparseMatrix.o:	SparseMatrix.h
 KineticHub.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h
 Stoich.o:	RateTerm.h Stoich.h SparseMatrix.h Makefile
 Kintegrator.o:	Kintegrator.h
+KineticManager.o:	KineticManager.h
 TestKinetics.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h Stoich.h SparseMatrix.h Makefile
 
 #Optional: Comment out the following two items if not using GSL.
