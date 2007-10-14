@@ -108,7 +108,7 @@ const Cinfo* initMoleculeCinfo()
 	};
 
 	// Schedule molecules for the slower clock, stage 0.
-	static SchedInfo schedInfo[] = { { process, 1, 0 } };
+	static SchedInfo schedInfo[] = { { process, 0, 0 } };
 	
 	static Cinfo moleculeCinfo(
 		"Molecule",

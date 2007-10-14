@@ -27,6 +27,8 @@ const Cinfo* initGslIntegratorCinfo()
 			Ftype1< ProcInfo >::global(),
 			RFCAST( &GslIntegrator::reinitFunc )),
 	};
+	static Finfo* process = new SharedFinfo( "process", processShared,
+		sizeof( processShared ) / sizeof( Finfo* ) );
 
 	static Finfo* gslShared[] =
 	{
@@ -75,9 +77,10 @@ const Cinfo* initGslIntegratorCinfo()
 		///////////////////////////////////////////////////////
 		new SharedFinfo( "gsl", gslShared, 
 				sizeof( gslShared )/ sizeof( Finfo* ) ),
-		new SharedFinfo( "process", processShared, 
-				sizeof( processShared )/ sizeof( Finfo* ) ),
+		process,
 	};
+
+	static SchedInfo schedInfo[] = { { process, 0, 0 } };
 
 	static  Cinfo gslIntegratorCinfo(
 		"GslIntegrator",
@@ -86,7 +89,8 @@ const Cinfo* initGslIntegratorCinfo()
 		initNeutralCinfo(),
 		gslIntegratorFinfos,
 		sizeof(gslIntegratorFinfos)/sizeof(Finfo *),
-		ValueFtype1< GslIntegrator >::global()
+		ValueFtype1< GslIntegrator >::global(),
+			schedInfo, 1
 	);
 
 	return &gslIntegratorCinfo;
