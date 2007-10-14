@@ -52,6 +52,7 @@ extern int mooseInit(std::string confFile);
 	extern bool nonBlockingGetLine( string& s );
 #endif
 
+/*
 void setupDefaultSchedule( 
 	Element* t0, Element* t1, 
 	Element* t2, Element* t3, 
@@ -66,6 +67,16 @@ void setupDefaultSchedule(
 	set< int >( t3, "stage", 1 );
 	set< double >( t4, "dt", 5e-3 );
 	set< double >( t5, "dt", 1.0 );
+	set( cj, "resched" );
+	set( cj, "reinit" );
+}
+*/
+void setupDefaultSchedule( 
+	Element* t0, Element* t1, Element* cj)
+{
+	set< double >( t0, "dt", 1e-2 );
+	set< double >( t1, "dt", 1e-2 );
+	set< int >( t1, "stage", 1 );
 	set( cj, "resched" );
 	set( cj, "reinit" );
 }
@@ -180,11 +191,14 @@ int main(int argc, char** argv)
                 Id cj("/sched/cj");
                 Id t0("/sched/cj/t0");
                 Id t1("/sched/cj/t1");
+				/*
                 Id t2("/sched/cj/t2");
                 Id t3("/sched/cj/t3");
                 Id t4("/sched/cj/t4");
                 Id t5("/sched/cj/t5");
 		setupDefaultSchedule( t0(), t1(), t2(), t3(), t4(), t5(), cj() );
+				*/
+		setupDefaultSchedule( t0(), t1(), cj() );
 
 		const Finfo* parseFinfo = sli->findFinfo( "parse" );
 		assert ( parseFinfo != 0 );

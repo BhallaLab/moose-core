@@ -32,7 +32,7 @@ template < class T > bool set( Element* e, const Finfo* f, T v )
 		return f1->set( e, f, v );
 	}
 	cout << "Error: set( " << e->name() << ", " << f->name() <<
-			"T ): Finfo type mismatch\n";
+			" T ): Finfo type mismatch\n";
 	return 0;
 }
 
@@ -44,7 +44,7 @@ template < class T > bool set( Element* e, const string& f, T v )
 	const Finfo* finfo = e->findFinfo( f );
 	if ( finfo == 0 ) {
 		cout << "Error: set( " << e->name() << ", " << f <<
-				"T ): Finfo not found\n";
+				" T ): Finfo not found\n";
 		return 0;
 	}
 	return set( e, finfo, v );
@@ -76,7 +76,7 @@ template < class T > bool get( const Element* e, const Finfo* f, T& v )
 		return f1->get( e, f, v );
 	}
 	cout << "Error: get( " << e->name() << ", " << f->name() <<
-			"T ): Finfo Type mismatch\n";
+			" T ): Finfo Type mismatch\n";
 	return 0;
 }
 
@@ -92,7 +92,7 @@ template < class T > bool get( Element* e, const string& f, T& v )
 	const Finfo* finfo = e->findFinfo( f );
 	if ( finfo == 0 ) {
 		cout << "Error: get( " << e->name() << ", " << f <<
-				"T ): Finfo not found\n";
+				" T ): Finfo not found\n";
 		return 0;
 	}
 	return get( e, finfo, v );
@@ -112,7 +112,7 @@ template < class T1, class T2 > bool set(
 	e->listFinfos( flist );
 	if ( find( flist.begin(), flist.end(), f ) == flist.end() ) {
 		cout << "Error: set( " << e->name() << ", " << f->name() <<
-				"T ): Finfo not found\n";
+				" T ): Finfo not found\n";
 		return 0;
 	}
 
@@ -122,7 +122,7 @@ template < class T1, class T2 > bool set(
 		return f2->set( e, f, v1, v2 );
 	}
 	cout << "Error: set2( " << e->name() << ", " << f->name() <<
-			"T1, T2 ): Finfo type mismatch\n";
+			" T1, T2 ): Finfo type mismatch\n";
 	return 0;
 }
 
@@ -135,7 +135,7 @@ template < class T1, class T2 > bool set(
 	const Finfo* finfo = e->findFinfo( f );
 	if ( finfo == 0 ) {
 		cout << "Error: set( " << e->name() << ", " << f <<
-				"T1, T2 ): Finfo not found\n";
+				" T1, T2 ): Finfo not found\n";
 		return 0;
 	}
 	return set( e, finfo, v1, v2 );

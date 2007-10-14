@@ -16,7 +16,7 @@ end
 function initdump
 end
 
-create neutral /kinetics
+create KineticManager /kinetics
 
 create neutral /graphs
 create neutral /moregraphs
