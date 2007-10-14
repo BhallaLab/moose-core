@@ -10,6 +10,19 @@
 
 #ifndef _KINETIC_MANAGER_H
 #define _KINETIC_MANAGER_H
+
+struct MethodInfo
+{
+	string description;
+	bool isStochastic;
+	bool isSpatial;
+	bool isVariableDt;
+	bool isImplicit;
+	bool isSingleParticle;
+	bool isMultiscale;
+	// May need other info here as well
+};
+
 class KineticManager
 {
 	public:
@@ -27,17 +40,38 @@ class KineticManager
 		static bool getSpatial( const Element* e );
 		static void setMethod( const Conn& c, string value );
 		static string getMethod( const Element* e );
+
+		// Some readonly fields with more info about the methods.
+		static bool getVariableDt( const Element* e );
+		static bool getSingleParticle( const Element* e );
+		static bool getMultiscale( const Element* e );
+		static bool getImplicit( const Element* e );
+		static string getDescription( const Element* e );
+		// static string getMethodList( const Element* e );
+		//
+		void innerSetMethod( Element* e, string value );
+		void setupSolver( Element* e );
 		
 		///////////////////////////////////////////////////
 		// Dest function definitions
 		///////////////////////////////////////////////////
 		
-		/*
 		static void reinitFunc( const Conn& c, ProcInfo info );
 		void reinitFuncLocal( Element* e );
 		static void processFunc( const Conn& c, ProcInfo info );
+		/*
 		void processFuncLocal( Element* e, ProcInfo info );
 		*/
+
+ // static void addMethod( name, description,
+ // 					isStochastic,isSpatial, 
+ // 					isVariableDt, isImplicit,
+ //						isSingleParticle, isMultiscale );
+		static void addMethod( const string& name, 
+			const string& description,
+			bool isStochastic, bool isSpatial, 
+			bool isVariableDt, bool isImplicit,
+			bool isSingleParticle, bool isMultiscale );
 
 	private:
 		bool auto_;	// Default true. Pick method automatically
@@ -48,6 +82,11 @@ class KineticManager
 						// RK5 for determ
 						// Fast Gillespie 1 for stoch
 						// yet to decide for spatial set.
+		bool implicit_;	// default False
+		bool variableDt_; // Default False
+		bool multiscale_; // Default False
+		bool singleParticle_; // Default False
+		static map< string, MethodInfo > methodMap_;
 };
 
 #endif // _KINETIC_MANAGER_H

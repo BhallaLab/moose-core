@@ -153,6 +153,11 @@ bool Id::bad() const
 	return id_ == BAD_ID;
 }
 
+bool Id::good() const
+{
+	return ( !( bad() || outOfRange() || zero() ) );
+}
+
 bool Id::zero() const
 {
 	return id_ == 0;
