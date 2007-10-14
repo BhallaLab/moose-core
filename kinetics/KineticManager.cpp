@@ -10,29 +10,24 @@
 
 
 #include "moose.h"
+#include "setgetLookup.h"
+#include "../element/Neutral.h"
 #include <math.h>
 #include "KineticManager.h"
 
+map< string, MethodInfo > KineticManager::methodMap_;
+
 const Cinfo* initKineticManagerCinfo()
 {
-	/*
 	static Finfo* processShared[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-			RFCAST( &Molecule::processFunc ) ),
+			RFCAST( &KineticManager::processFunc ) ),
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
-			RFCAST( &Molecule::reinitFunc ) ),
+			RFCAST( &KineticManager::reinitFunc ) ),
 	};
 	static Finfo* process = new SharedFinfo( "process", processShared,
 		sizeof( processShared ) / sizeof( Finfo* ) );
-
-	static Finfo* reacShared[] =
-	{
-		new DestFinfo( "reac", Ftype2< double, double >::global(),
-			RFCAST( &Molecule::reacFunc ) ),
-		new SrcFinfo( "n", Ftype1< double >::global() )
-	};
-	*/
 
 	static Finfo* kineticManagerFinfos[] =
 	{
@@ -72,25 +67,85 @@ const Cinfo* initKineticManagerCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-		/*
 		process,
-		new SharedFinfo( "reac", reacShared,
-			sizeof( reacShared ) / sizeof( Finfo* ) ),
-		*/
 	};
 
-	// Schedule molecules stage 0.
-	// static SchedInfo schedInfo[] = { { process, 1, 0 } };
+	// Schedule it to tick 0 stage 0
+	static SchedInfo schedInfo[] = { { process, 0, 0 } };
 	
 	static Cinfo kineticManagerCinfo(
 		"KineticManager",
 		"Upinder S. Bhalla, 2007, NCBS",
-		"Kinetic Manager: Handles integration methods for kinetic simulations.",
+		"Kinetic Manager: Handles integration methods for kinetic simulations. If in 'auto' mode then it picks a method depending on the stochastic and spatial flags. If you set a method, then the 'auto' flag goes off and all the other options are set directly by your choice.",
 		initNeutralCinfo(),
 		kineticManagerFinfos,
 		sizeof( kineticManagerFinfos )/sizeof(Finfo *),
-		ValueFtype1< KineticManager >::global()
+		ValueFtype1< KineticManager >::global(),
+			schedInfo, 1
 	);
+
+ // static void addMethod( name, description,
+ // 					isStochastic,isSpatial, 
+ // 					isVariableDt, isImplicit,
+ //						isSingleParticle, isMultiscale );
+
+	KineticManager::addMethod( "ee", 
+		"GENESIS Exponential Euler method.",
+		0, 0, 0, 0, 0, 0 );
+	KineticManager::addMethod( "rk2", 
+		"Runge Kutta 2, 3 from GSL",
+		0, 0, 0, 0, 0, 0 );
+	KineticManager::addMethod( "rk4", 
+		"Runge Kutta 4th order (classical) from GSL",
+		0, 0, 0, 0, 0, 0 );
+	KineticManager::addMethod( "rk5", 
+		"Embedded Runge-Kutta-Fehlberg (4, 5) method, variable timestep. Default kinetic method from GSL",
+		0, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "rkck", 
+		"Embedded Runge-Kutta Cash-Karp (4, 5) from GSL",
+		0, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "rk8pd", 
+		"Embedded Runge-Kutta Prince-Dormand (8,9) from GSL",
+		0, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "rk2imp", 
+		"Implicit 2nd order Runge-Kutta at Gaussian points from GSL",
+		0, 0, 1, 1, 0, 0 );
+	KineticManager::addMethod( "rk4imp", 
+		"Implicit 4nd order Runge-Kutta at Gaussian points from GSL",
+		0, 0, 1, 1, 0, 0 );
+	KineticManager::addMethod( "bsimp", 
+		"Implicit Bulirsch-Stoer method of Bader and Deuflhard: Not yet implemented as it needs the Jacobian. From GSL",
+		0, 0, 1, 1, 0, 0 );
+	KineticManager::addMethod( "gear1", 
+		"Implicit M = 1 Gear method. From GSL",
+		0, 0, 1, 1, 0, 0 );
+	KineticManager::addMethod( "gear2", 
+		"Implicit M = 2 Gear method. From GSL",
+		0, 0, 1, 1, 0, 0 );
+	KineticManager::addMethod( "Gillespie1", 
+		"Optimized Direct Reaction Method of Gillespie",
+		1, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "Gillespie2", 
+		"Optimized Next Reaction Method of Gillespie",
+		1, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "Gibson-Bruck", 
+		"Gibson-Bruck optimzed version of Gillespie's next reaction method",
+		1, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "tau_leap", 
+		"Gillespie's tau-leap method",
+		1, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "adstoch", 
+		"Explicit adaptive stochastic method of Vasudeva and Bhalla",
+		1, 0, 1, 0, 0, 1 );
+	KineticManager::addMethod( "Smoldyn", 
+		"Smoldyn numerical engine for single particle stochastic calculations using Smoluchowski dynamics, from Andrews and Bray",
+		1, 1, 0, 0, 1, 0 );
+	KineticManager::addMethod( "Elf3d", 
+		"Elf-Ehrenberg spatial Gillespie (square grid) method",
+		1, 1, 0, 0, 0, 0 );
+	KineticManager::addMethod( "Wils", 
+		"Wils spatial Gillespie (finite element grid) method",
+		1, 1, 0, 0, 0, 0 );
 
 	return &kineticManagerCinfo;
 }
@@ -111,10 +166,28 @@ KineticManager::KineticManager()
 	auto_( 1 ), 
 	stochastic_( 0 ),
 	spatial_( 0 ),
-	method_( "RK5" )
+	method_( "rk5" )
 {
 		;
 }
+
+void KineticManager::addMethod( const string& name,
+	const string& description,
+	bool isStochastic,
+	bool isSpatial, bool isVariableDt, bool isImplicit,
+	bool isSingleParticle, bool isMultiscale )
+{
+	MethodInfo mi;
+	mi.description = description;
+	mi.isStochastic = isStochastic;
+	mi.isSpatial = isSpatial;
+	mi.isVariableDt = isVariableDt;
+	mi.isImplicit = isImplicit;
+	mi.isSingleParticle = isSingleParticle;
+	mi.isMultiscale = isMultiscale;
+	methodMap_[name] = mi;
+}
+
 
 ///////////////////////////////////////////////////
 // Field function definitions
@@ -152,7 +225,9 @@ bool KineticManager::getSpatial( const Element* e )
 
 void KineticManager::setMethod( const Conn& c, string value )
 {
-	static_cast< KineticManager* >( c.data() )->method_ = value;
+	Element* e = c.targetElement();
+
+	static_cast< KineticManager* >( e->data() )->innerSetMethod( e, value );
 }
 
 string KineticManager::getMethod( const Element* e )
@@ -160,73 +235,133 @@ string KineticManager::getMethod( const Element* e )
 	return static_cast< KineticManager* >( e->data() )->method_;
 }
 
+void KineticManager::innerSetMethod( Element* e, string value )
+{
+	map< string, MethodInfo >::iterator i = methodMap_.find( value );
+	if ( i != methodMap_.end() ) {
+		method_ = value;
+		stochastic_ = i->second.isStochastic;
+		spatial_ = i->second.isSpatial;
+		variableDt_ = i->second.isVariableDt;
+		multiscale_ = i->second.isMultiscale;
+		singleParticle_ = i->second.isSingleParticle;
+		implicit_ = i->second.isImplicit;
+		auto_ = 0;
+		setupSolver( e );
+	} else {
+		if ( stochastic_ )
+			method_ = "Gillespie1";
+		else
+			method_ = "rk5";
+		cout << "Warning: method '" << value << "' not known. Using '" <<
+			method_ << "'\n";
+		innerSetMethod( e, method_ );
+		auto_ = 1;
+	}
+}
+
+// Returns the solver set up for GSL integration, on the element e
+Id gslSetup( Element* e, const string& method )
+{
+	Id solveId;
+	if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" ) ) {
+		if ( solveId.good() ) {
+			Id gslId;
+			if ( lookupGet< Id, string >( 
+				solveId(), "lookupChild", gslId, "GslIntegrator" ) ) {
+				if ( gslId.good() )
+					return solveId;
+				else
+					set( solveId(), "destroy" );
+			} else {
+				// have to clear out the old solver and make a new one.
+				set( solveId(), "destroy" );
+			}
+		}
+	}
+	Element* solve = Neutral::create( "Neutral", "solve", e );
+	solveId = e->id();
+	assert( solveId.good() );
+
+	Element*  ki = Neutral::create( "GslIntegrator", "integ", solve );
+	assert ( ki != 0 );
+	Element* ks = Neutral::create( "Stoich", "stoich", solve );
+	assert( ks != 0 );
+	Element* kh = Neutral::create( "KineticHub", "hub", solve );
+	assert( kh != 0 );
+	ks->findFinfo( "hub" )->add( ks, kh, kh->findFinfo( "hub" ) );
+	ks->findFinfo( "gsl" )->add( ks, ki, ki->findFinfo( "gsl" ) );
+	set< string >( ki, "method", method );
+	string simpath = e->id().path() + "/##";
+	set< string >( ks, "path", simpath );
+	set< double >( ki, "relativeAccuracy", 1.0e-5 );
+	set< double >( ki, "absoluteAccuracy", 1.0e-5 );
+	return solveId;
+}
+
+void eeSetup( Element* e )
+{
+	cout << "doing ee setup\n";
+}
+
+Id gillespieSetup( Element* e, const string& method )
+{
+	cout << "doing Gillespie setup\n";
+	return Id();
+}
+
+double estimateDt( Element* e ) 
+{
+	return 0.01;	
+}
+
+void KineticManager::setupSolver( Element* e )
+{
+	if ( method_ == "ee" ) {
+		Id solveId;
+		if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" ) )
+			set( solveId(), "destroy" );
+		//double dt = estimateDt( e );
+	} else if ( stochastic_ == 0 && multiscale_ == 0 ) {
+		// Use a GSL deterministic method.
+		Id solveId = gslSetup( e, method_ );
+	} else if ( stochastic_ == 1 && multiscale_ == 0 && singleParticle_ == 0 ) {
+		Id solveId = gillespieSetup( e, method_ );
+	}
+}
+
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
 
 
-/*
-
-void KineticManager::sumProcessFuncLocal( )
-{
-		n_ = total_;
-		total_ = 0.0;
-}
-void KineticManager::sumProcessFunc( const Conn& c, ProcInfo info )
-{
-	static_cast< KineticManager* >( c.data() )->sumProcessFuncLocal();
-}
+ 
+/**
+ * Reinit Function makes sure that all child elements are scheduled,
+ * either directly from the clock ticks, or through a solver.
+ */
 
 void KineticManager::reinitFunc( const Conn& c, ProcInfo info )
 {
 	static_cast< KineticManager* >( c.data() )->reinitFuncLocal( 
 					c.targetElement() );
 }
+
 void KineticManager::reinitFuncLocal( Element* e )
 {
-	static const Finfo* sumTotFinfo = 
-			Cinfo::find( "KineticManager" )->findFinfo( "sumTotal" );
-
-	A_ = B_ = total_ = 0.0;
-	n_ = nInit_;
-	if ( mode_ == 0 && sumTotFinfo->numIncoming( e ) > 0 )
-		mode_ = 1;
-	else if ( mode_ == 1 && sumTotFinfo->numIncoming( e ) == 0 )
-		mode_ = 0;
-	send1< double >( e, reacSlot, n_ );
-	send1< double >( e, nSlot, n_ );
+	setupSolver( e );
 }
 
+/**
+ * processFunc doesn't do anything.
+ */
 void KineticManager::processFunc( const Conn& c, ProcInfo info )
 {
-	Element* e = c.targetElement();
-	static_cast< KineticManager* >( e->data() )->processFuncLocal( e, info );
-}
-void KineticManager::processFuncLocal( Element* e, ProcInfo info )
-{
-			if ( mode_ == 0 ) {
-				if ( n_ > EPSILON && B_ > EPSILON ) {
-					double C = exp( -B_ * info->dt_ / n_ );
-					n_ *= C + ( A_ / B_ ) * ( 1.0 - C );
-				} else {
-					n_ += ( A_ - B_ ) * info->dt_;
-				}
-				A_ = B_ = 0.0;
-			} else if ( mode_ == 1 ) {
-				n_ = total_;
-				total_ = 0.0;
-			} else if ( mode_ == 2 ) {
-				n_ = total_ * volumeScale_;
-				total_ = 0.0;
-			} else { 
-				n_ = nInit_;
-			}
-			send1< double >( e, reacSlot, n_ );
-			send1< double >( e, nSlot, n_ );
-}
-*/
+	;
+//	Element* e = c.targetElement();
+//static_cast< KineticManager* >( e->data() )->processFuncLocal( e, info );
 
-
+}
 
 #ifdef DO_UNIT_TESTS
 /*

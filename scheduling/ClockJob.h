@@ -47,7 +47,6 @@ class ClockJob
 		//////////////////////////////////////////////////////////
 		void clearMessages( Element* e );
 		void buildMessages( Element* last, Element* e );
-		void checkSolvers( vector< Id >& childList );
 
 	private:
 		double runTime_;
