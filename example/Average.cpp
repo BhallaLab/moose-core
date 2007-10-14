@@ -9,6 +9,7 @@
 **********************************************************************/
 
 
+#include <math.h>
 #include "moose.h"
 #include "Average.h"
 
@@ -192,6 +193,10 @@ void Average::processFuncLocal( Element* e, ProcInfo info )
 
 void testAverage()
 {
+	static const double EPSILON = 0.001;
+	static double check[] = { 0.1, 6.1, 8.3875, 9.5736, 10.3754, 10.9807,
+		11.4666, 11.8724, 12.2207,12.5257, 12.797};
+
 	cout << "\nTesting Average" << flush;
 
 	Element* n = Neutral::create( "Neutral", "n", Element::root() );
@@ -227,15 +232,18 @@ void testAverage()
 	Average::reinitFunc( cm1, &p );
 	Average::reinitFunc( cm2, &p );
 
-	for ( p.currTime_ = 0.0; p.currTime_ < 20.0; p.currTime_ += p.dt_ ) 
+	unsigned int i = 0;
+	for ( p.currTime_ = 0.0; p.currTime_ < 10.0; p.currTime_ += p.dt_ ) 
 	{
-		double n0 = Average::getMean( m0 );
-		double n1 = Average::getMean( m1 );
+//		double n0 = Average::getMean( m0 );
+//		double n1 = Average::getMean( m1 );
 		double n2 = Average::getMean( m2 );
 		Average::processFunc( cm0, &p );
 		Average::processFunc( cm1, &p );
 		Average::processFunc( cm2, &p );
-		cout << p.currTime_ << "	" << n0 << "	" << n1 << "	" << n2 << endl;
+//		cout << p.currTime_ << "	" << n0 << "	" << n1 << "	" << n2 << "	" << check[i] << endl;
+		ASSERT( fabs ( n2 - check[ i ] ) < EPSILON, "testing example/average values" );
+		i++;
 	}
 	// Get rid of all the compartments.
 	set( n, "destroy" );

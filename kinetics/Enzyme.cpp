@@ -107,7 +107,7 @@ const Cinfo* initEnzymeCinfo()
 	};
 
 	// Schedule enzymes for slower clock, stage 1.
-	static SchedInfo schedInfo[] = { { process, 1, 1 } };
+	static SchedInfo schedInfo[] = { { process, 0, 1 } };
 
 	static  Cinfo enzymeCinfo(
 		"Enzyme",

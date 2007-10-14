@@ -4290,3 +4290,21 @@ implemented shell of KineticManager class to act as controller for solving
 kinetic models. Lots yet to be done.
 
 =============================================================================
+13 Oct 2007
+Continuing work on it. The Manager class now knows about the GSL integrators
+as well as having hooks for a lot of others. Croaks when I try to 
+set the method.
+=============================================================================
+14 Oct 2007
+Now getting to set up the solver scheduling. There are serious issues,
+reported earlier by Raamesh, of the thing crashing when reset.
+
+I have also cleaned up the clock ticks. Now only t0 and t1 are created 
+by default. 
+I have also cleaned up the printouts during unit tests. Now much less junk
+is printed.
+
+Time to check this mess in before going on to next stage of fixing kinetics
+solver.
+
+=============================================================================

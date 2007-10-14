@@ -696,8 +696,8 @@ void doGslRun( const string& method, Element* integ, Element* stoich,
 		tot += fabs( totalMols - ( val + dx * i ) );
                 // cout << val << "\t" << tot << "\n";
 	}
-	cout << "Err= " << tot << ",	accRequest= " << accuracy  << ",     ";
-	static_cast< Stoich* >( stoich->data() )->runStats();
+	// cout << "Err= " << tot << ",	accRequest= " << accuracy  << ",     ";
+	// static_cast< Stoich* >( stoich->data() )->runStats();
 	// set< string >( table, "print", "kinteg.plot" );
 	ASSERT ( tot < EPSILON, "Diffusion between source and sink by GslIntegrator");
 

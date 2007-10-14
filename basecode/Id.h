@@ -145,6 +145,12 @@ class Id
 		bool bad() const;
 
 		/**
+		 * Returns true only if id is not bad, not zero and not out of range
+		 * Note that this more restrictive than !Id::bad().
+		 */
+		bool good() const;
+
+		/**
 		 * True if id points to zero object
 		 */
 		bool zero() const;

@@ -23,7 +23,7 @@ template < class T1, class T2 > bool lookupSet( Element* e, const Finfo* f, T1 v
 		return lf->lookupSet( e, f, v, index );
 	}
 	cout << "Error: set( " << e->name() << ", " << f->name() <<
-			"T ): Finfo type mismatch\n";
+			" T ): Finfo type mismatch\n";
 	return 0;
 }
 
@@ -35,7 +35,7 @@ template < class T1, class T2 > bool lookupSet( Element* e, const string& f, T1 
 	const Finfo* finfo = e->findFinfo( f );
 	if ( finfo == 0 ) {
 		cout << "Error: set( " << e->name() << ", " << f <<
-				"T1, T2 ): Finfo not found\n";
+				" T1, T2 ): Finfo not found\n";
 		return 0;
 	}
 	return lookupSet<T1, T2>( e, finfo, v, index );
@@ -57,7 +57,7 @@ template < class T1, class T2 > bool lookupGet(
 		return lf->lookupGet( e, f, v, index );
 	}
 	cout << "Error: lookupget( " << e->name() << ", " << f->name() <<
-			"T1, T2 ): Finfo Type mismatch\n";
+			" T1, T2 ): Finfo Type mismatch\n";
 	return 0;
 }
 
@@ -74,7 +74,7 @@ template < class T1, class T2 > bool lookupGet(
 	const Finfo* finfo = e->findFinfo( f );
 	if ( finfo == 0 ) {
 		cout << "Error: lookupGet( " << e->name() << ", " << f <<
-				"T1, T2 ): Finfo not found\n";
+				" T1, T2 ): Finfo not found\n";
 		return 0;
 	}
 	return lookupGet< T1, T2 >( e, finfo, v, index );
