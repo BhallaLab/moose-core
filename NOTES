@@ -4343,5 +4343,19 @@ with a new one and the current ugly system then uses a new index.
 
 Fixed. Now unit tests pass. The solvers now run without crashing but do not
 give any results. Time to check in this mess.
+Checked in as revision 206, in serial compile form with debugging.
+
+Seems like the KineticHub is not created. On closer inspection it seems
+like it interferes with the listing and access to child objects including
+itself. This is what happens if we start out with new children on an object:
+If we create any object before the hub, the hub becomes invisible.
+If we create any object after the hub, the object becomes invisible.
+
+Fixed. Turned out to be related to the earlier problem. I was using a new
+target function for handling child messages to the hub class, so the MsgSrc
+should have been going to the connSrcVeryEnd rather than connSrcEnd. 
+Fixed in several places. The kholodenko demo still does not work, though.
+Also when I change the method to ee and reset it dumps core.
+
 
 =============================================================================

@@ -334,10 +334,10 @@ unsigned int countRates( Element* e, bool useOneWayReacs )
 
 void Stoich::clear( Element* stoich )
 {
-	cout << "Sending clear signal for " << stoich->name() << "\n" << flush;
+	// cout << "Sending clear signal for " << stoich->name() << "\n" << flush;
 	send0( stoich, clearSlot ); // Sends command to KineticHub to clear
 			// out the old messages to solved objects, and unzombify them
-	cout << "Clear signal sent\n" << flush;
+	// cout << "Clear signal sent\n" << flush;
 
 	nMols_ = 0;
 	nVarMols_ = 0;
