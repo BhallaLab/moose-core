@@ -47,6 +47,9 @@ class Stoich
 		unsigned int nVarMols() const {
 			return nVarMols_;
 		}
+		void clear( Element* stoich );
+		// static void rebuild( const Conn& c );
+		// void localRebuild( Element* stoich );
 
 		///////////////////////////////////////////////////
 		// Functions used by the GslIntegrator
