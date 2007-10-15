@@ -568,7 +568,7 @@ void unzombify( Conn c )
  */
 void KineticHub::clearFunc( const Conn& c )
 {
-	cout << "Starting clearFunc for " << c.targetElement()->name() << endl;
+	// cout << "Starting clearFunc for " << c.targetElement()->name() << endl;
 	static const Finfo* molFinfo = initKineticHubCinfo()->findFinfo( "molSolve" );
 	static const Finfo* reacFinfo = initKineticHubCinfo()->findFinfo( "reacSolve" );
 	static const Finfo* enzFinfo = initKineticHubCinfo()->findFinfo( "enzSolve" );
@@ -579,17 +579,17 @@ void KineticHub::clearFunc( const Conn& c )
 	vector< Conn >::iterator i;
 
 	molFinfo->outgoingConns( e, list );
-	cout << "clearFunc: molFinfo unzombified " << list.size() << " elements\n";
+	// cout << "clearFunc: molFinfo unzombified " << list.size() << " elements\n";
 	molFinfo->dropAll( e );
 	for_each ( list.begin(), list.end(), unzombify );
 
 	reacFinfo->outgoingConns( e, list );
-	cout << "clearFunc: reacFinfo unzombified " << list.size() << " elements\n";
+	// cout << "clearFunc: reacFinfo unzombified " << list.size() << " elements\n";
 	reacFinfo->dropAll( e );
 	for_each ( list.begin(), list.end(), unzombify );
 
 	enzFinfo->outgoingConns( e, list );
-	cout << "clearFunc: enzFinfo unzombified " << list.size() << " elements\n";
+	// cout << "clearFunc: enzFinfo unzombified " << list.size() << " elements\n";
 	enzFinfo->dropAll( e );
 	for_each ( list.begin(), list.end(), unzombify );
 }
