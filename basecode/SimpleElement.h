@@ -252,6 +252,13 @@ class SimpleElement: public Element
 		const Finfo* findFinfo( const string& name );
 
 		/**
+		 * Special const lookup for Finfo from its name, where the returned
+		 * Finfo is limited to the ones already defined in the class
+		 * and cannot be an array or other dynamic finfo
+		 */
+		const Finfo* constFindFinfo( const string& name ) const;
+
+		/**
 		 * Returns finfo ptr associated with specified conn index.
 		 * For ordinary finfos, this is a messy matter of comparing
 		 * the conn index with the ranges of MsgSrc or MsgDest

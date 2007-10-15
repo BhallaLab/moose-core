@@ -63,7 +63,7 @@ function save
 end
 
 function complete_loading
-	reset
-	step {MAXTIME} -t
-	save
+//	reset
+//	step {MAXTIME} -t
+//	save
 end

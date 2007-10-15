@@ -558,6 +558,22 @@ const Finfo* ArrayElement::findFinfo( const string& name )
 	return 0;
 }
 
+const Finfo* ArrayElement::constFindFinfo( const string& name ) const
+{
+	vector< Finfo* >::const_reverse_iterator i;
+	// We should always have a base finfo.
+	assert( finfo_.size() > 0 );
+
+	// Reverse iterate because the zeroth finfo is the base,
+	// and we want more recent finfos to override old ones.
+	for ( i = finfo_.rbegin(); i != finfo_.rend(); i++ )
+	{
+			if ( (*i)->name() == name )
+				return *i;
+	}
+	return 0;
+}
+
 const Finfo* ArrayElement::findFinfo( unsigned int connIndex ) const
 {
 	vector< Finfo* >::const_reverse_iterator i;

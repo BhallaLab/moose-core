@@ -394,6 +394,8 @@ Element* Cinfo::createArray( Id id, const std::string& name,
  */
 bool Cinfo::schedule( Element* e ) const
 {
+	if ( scheduling_.size() == 0 ) 
+		return 1;
 	const Element* library = Id( "/library" )();
 	const Element* proto = Id( "/proto" )();
 	static const Cinfo* tickCinfo = find( "Tick" );
