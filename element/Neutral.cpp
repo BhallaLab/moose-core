@@ -324,7 +324,7 @@ Id Neutral::getChildByName( const Element* elm, const string& s )
 	vector< Conn >::const_iterator i;
 	// For neutral, src # 0 is the childSrc.
 	vector< Conn >::const_iterator begin = elm->connSrcBegin( 0 );
-	vector< Conn >::const_iterator end = elm->connSrcEnd( 0 );
+	vector< Conn >::const_iterator end = elm->connSrcVeryEnd( 0 );
 
 	string name;
 	assert( s.length() > 0 );
@@ -398,7 +398,7 @@ void Neutral::lookupChild( const Conn& c, const string s )
 	vector< Conn >::const_iterator i;
 	// For neutral, src # 0 is the childSrc.
 	vector< Conn >::const_iterator begin = e->connSrcBegin( 0 );
-	vector< Conn >::const_iterator end = e->connSrcEnd( 0 );
+	vector< Conn >::const_iterator end = e->connSrcVeryEnd( 0 );
 	for ( i = begin; i != end; i++ ) {
 		if ( i->targetElement()->name() == s ) {
 			// For neutral, src # 1 is the shared message.
@@ -421,7 +421,7 @@ vector< Id > Neutral::getChildList( const Element* e )
 	vector< Conn >::const_iterator i;
 	// For neutral, src # 0 is the childSrc.
 	vector< Conn >::const_iterator begin = e->connSrcBegin( 0 );
-	vector< Conn >::const_iterator end = e->connSrcEnd( 0 );
+	vector< Conn >::const_iterator end = e->connSrcVeryEnd( 0 );
 
 	vector< Id > ret;
 	if ( end == begin ) // zero children

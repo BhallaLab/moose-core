@@ -121,7 +121,7 @@ Element* SimpleElement::innerDeepCopy(
 	// The 0 slot in the MsgSrc array is for child elements.
 	vector< Conn >::const_iterator i;
 	vector< Conn >::const_iterator begin = connSrcBegin( 0 );
-	vector< Conn >::const_iterator end = connSrcEnd( 0 );
+	vector< Conn >::const_iterator end = connSrcVeryEnd( 0 );
 	for ( i = begin; i != end; i++ ) {
 		// Watch out for loops.
 		if ( tree.find( i->targetElement() ) != tree.end() )
@@ -148,7 +148,7 @@ Element* SimpleElement::innerDeepCopy(
 	// The 0 slot in the MsgSrc array is for child elements.
 	vector< Conn >::const_iterator i;
 	vector< Conn >::const_iterator begin = connSrcBegin( 0 );
-	vector< Conn >::const_iterator end = connSrcEnd( 0 );
+	vector< Conn >::const_iterator end = connSrcVeryEnd( 0 );
 	for ( i = begin; i != end; i++ ) {
 		// Watch out for loops.
 		if ( tree.find( i->targetElement() ) != tree.end() )
