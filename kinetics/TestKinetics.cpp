@@ -180,8 +180,8 @@ void testStoich()
 	cout << "\nTesting Stoich zombie data access" << flush;
 	// Clean out the old stoich
 	set( stoich, "destroy" );
-	stoich = Neutral::create( "Stoich", "s", Element::root() );
 
+	stoich = Neutral::create( "Stoich", "s", Element::root() );
 	Element* hub = Neutral::create( "KineticHub", "hub", Element::root() );
 	ret = stoich->findFinfo( "hub" )->
 		add( stoich, hub, hub->findFinfo( "hub" ) );

@@ -166,7 +166,11 @@ KineticManager::KineticManager()
 	auto_( 1 ), 
 	stochastic_( 0 ),
 	spatial_( 0 ),
-	method_( "rk5" )
+	method_( "rk5" ),
+	implicit_( 0 ),
+	variableDt_( 1 ),
+	multiscale_( 0 ),
+	singleParticle_( 0 )
 {
 		;
 }

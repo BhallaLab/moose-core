@@ -506,6 +506,13 @@ void SimpleElement::deleteHalfConn( unsigned int connIndex )
 		conn_[k].updateIndex( k );
 }
 
+/**
+ * Returns a finfo matching the target name.
+ * Note that this is not a const function because the 'match'
+ * function may generate dynamic finfos on the fly. If you need
+ * a simpler, const string comparison then use constFindFinfo below,
+ * which has limitations for special fields and arrays.
+ */
 const Finfo* SimpleElement::findFinfo( const string& name )
 {
 	vector< Finfo* >::reverse_iterator i;
@@ -522,6 +529,32 @@ const Finfo* SimpleElement::findFinfo( const string& name )
 			if ( ret )
 					return ret;
 	}
+	return 0;
+}
+
+/**
+ * This is a const version of findFinfo. Instead of match it does a
+ * simple strcmp against the field name. Cannot handle complex fields
+ * like ones with indices.
+ */
+const Finfo* SimpleElement::constFindFinfo( const string& name ) const
+{
+	vector< Finfo* >::const_reverse_iterator i;
+	// We should always have a base finfo.
+	assert( finfo_.size() > 0 );
+
+	// Reverse iterate because the zeroth finfo is the base,
+	// and we want more recent finfos to override old ones.
+	for ( i = finfo_.rbegin(); i != finfo_.rend(); i++ )
+	{
+			if ( (*i)->name() == name )
+				return *i;
+	}
+
+	// If it is not on the dynamically created finfos, maybe it is on
+	// the static set.
+	return cinfo()->findFinfo( name );
+	
 	return 0;
 }
 

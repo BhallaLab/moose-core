@@ -265,6 +265,8 @@ class ArrayElement: public Element
 		 */
 		const Finfo* findFinfo( const string& name );
 
+		const Finfo* constFindFinfo( const string& name ) const;
+
 		/**
 		 * Returns finfo ptr associated with specified conn index.
 		 * For ordinary finfos, this is a messy matter of comparing
