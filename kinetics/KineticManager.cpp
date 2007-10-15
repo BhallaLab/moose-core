@@ -323,8 +323,11 @@ void KineticManager::setupSolver( Element* e )
 {
 	if ( method_ == "ee" ) {
 		Id solveId;
-		if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" ) )
-			set( solveId(), "destroy" );
+		if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" )){
+			if ( solveId.good() ) {
+				set( solveId(), "destroy" );
+			}
+		}
 		//double dt = estimateDt( e );
 	} else if ( stochastic_ == 0 && multiscale_ == 0 ) {
 		// Use a GSL deterministic method.

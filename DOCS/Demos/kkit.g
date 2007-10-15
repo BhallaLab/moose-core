@@ -54,6 +54,16 @@ function enddump
 end
 
 function save
+	str name
+	/*
+	foreach name ( {el /graphs/##[TYPE=Table] } )
+		openfile kkit.plot a
+		writefile kkit.plot "/newplot"
+		writefile kkit.plot "/plotname "{name}
+		closefile kkit.plot
+		setfield name print kkit.plot
+	end
+	*/
 	setfield /graphs/##[TYPE=Table] print kkit.plot
 	/*
 	setfield /graphs/conc1/E.Co print "E.plot"
@@ -64,6 +74,6 @@ end
 
 function complete_loading
 	reset
-	step {MAXTIME} -t
-	save
+//	step {MAXTIME} -t
+//	save
 end
