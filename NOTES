@@ -4307,4 +4307,41 @@ is printed.
 Time to check this mess in before going on to next stage of fixing kinetics
 solver.
 
+Checked it in. Now at revision 205.
+
+Now to tackle reset problems with solver. 
+Resched should do the following:
+	- Check if the object list has changed
+	- If so, clear out old ones and reload matrix. When clearing out
+	old ones, must put the latest state values back into the old objects.
+	- Currently don't try to do this incrementally. Too complex.
+
+Reinit should do the following:
+	- Restore all initial conditions. This is a purely internal operation.
+
+Reset does resched + reinit.
+
+Step should do the following:
+	- Check for change of object list. If so, do a resched.
+
+Now all the steps are in order. Kkit automatically sets up a KineticManager
+so that instead of waiting to change the method, we get a core dump right away.
+The dump is because the ThisFinfo has been replaced on some elements with
+a SolveFinfo, but the message from the solver is no longer there.
+I have put in a lot of stuff that ought to clean out old simulations so that
+they are ready to be re-solved, but it isn't doing the job.
+
+Last thing: tried to get it so that upon deletion the KineticHub cleans up
+all the solved objects. Crashes now during unit tests.
+
+=============================================================================
+15 Oct 2007
+After much messing around, figured out why the crash occurs. It has nothing
+to do with the stoich stuff. Simply that we used the hard-coded index
+0 for the childDest message, but in the KineticHub we override the childFinfo
+with a new one and the current ugly system then uses a new index.
+
+Fixed. Now unit tests pass. The solvers now run without crashing but do not
+give any results. Time to check in this mess.
+
 =============================================================================

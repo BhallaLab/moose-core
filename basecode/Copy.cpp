@@ -27,8 +27,17 @@ bool SimpleElement::isDescendant( const Element* ancestor ) const
 {
 	if ( this == Element::root() )
 			return 0;
+	const Finfo* f = constFindFinfo( "child" );
+	assert( f != 0 );
+	vector< Conn > list;
+	f->incomingConns( this, list );
+	assert( list.size() > 0 );
+	const Element* parent = list[0].targetElement();
+
+	/*
 	assert( connDestBegin( 0 ) != connDestEnd( 0 ) );
 	const Element* parent = connDestBegin( 0 )->targetElement();
+	*/
 	if ( parent == ancestor )
 		return 1;
 	else
