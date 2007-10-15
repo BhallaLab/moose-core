@@ -294,10 +294,21 @@ Id Neutral::getParent( const Element* e )
 	
 	assert( se != 0 );
 	assert( se->destSize() > 0 );
+
+	const Finfo* f = se->constFindFinfo( "child" );
+	assert( f != 0 );
+	vector< Conn > list;
+
+	f->incomingConns( se, list );
+	assert( list.size() > 0 );
+	return list[0].targetElement()->id();
+
+	/*
 	// The zero dest is the child dest.
 	assert( se->connDestEnd( 0 ) > se->connDestBegin( 0 ) );
 
 	return se->connDestBegin( 0 )->targetElement()->id();
+	*/
 }
 
 /**

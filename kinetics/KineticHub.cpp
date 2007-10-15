@@ -80,6 +80,10 @@ const Cinfo* initKineticHubCinfo()
 			Ftype2< unsigned int, Element* >::global(),
 			RFCAST( &KineticHub::mmEnzConnectionFunc )
 		),
+		new DestFinfo( "clear",
+			Ftype0::global(),
+			RFCAST( &KineticHub::clearFunc )
+		),
 	};
 
 	static Finfo* kineticHubFinfos[] =
@@ -112,6 +116,9 @@ const Cinfo* initKineticHubCinfo()
 			&KineticHub::destroy ),
 		new DestFinfo( "molSum", Ftype1< double >::global(),
 			RFCAST( &KineticHub::molSum ) ),
+		// override the Neutral::childFunc here.
+		new DestFinfo( "child", Ftype1< int >::global(),
+			RFCAST( &KineticHub::childFunc ) ),
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
@@ -211,6 +218,16 @@ void KineticHub::destroy( const Conn& c)
 
 	Neutral::destroy( c );
 }
+
+void KineticHub::childFunc( const Conn& c, int stage )
+{
+	if ( stage == 1 ) // clear messages: first clean out zombies before
+		// the messages are all deleted.
+		clearFunc( c );
+	// Then fall back into what the Neutral version does
+	Neutral::childFunc( c, stage );
+}
+
 
 /**
  * Here we add external inputs to a molecule. This message replaces
@@ -534,6 +551,47 @@ void KineticHub::mmEnzConnectionFuncLocal(
 	assert( connIndex > 0 ); // Should have just created a message on it
 
 	mmEnzMap_[connIndex - 1] = rateTermIndex;
+}
+
+void unzombify( Conn c )
+{
+	Element* e = c.targetElement();
+	const Cinfo* ci = e->cinfo();
+	bool ret = ci->schedule( e );
+	assert( ret );
+	e->setThisFinfo( const_cast< Finfo* >( ci->getThisFinfo() ) );
+}
+
+
+/**
+ * Clears out all the messages to zombie objects
+ */
+void KineticHub::clearFunc( const Conn& c )
+{
+	cout << "Starting clearFunc for " << c.targetElement()->name() << endl;
+	static const Finfo* molFinfo = initKineticHubCinfo()->findFinfo( "molSolve" );
+	static const Finfo* reacFinfo = initKineticHubCinfo()->findFinfo( "reacSolve" );
+	static const Finfo* enzFinfo = initKineticHubCinfo()->findFinfo( "enzSolve" );
+	Element* e = c.targetElement();
+
+	// First unzombify all targets
+	vector< Conn > list;
+	vector< Conn >::iterator i;
+
+	molFinfo->outgoingConns( e, list );
+	cout << "clearFunc: molFinfo unzombified " << list.size() << " elements\n";
+	molFinfo->dropAll( e );
+	for_each ( list.begin(), list.end(), unzombify );
+
+	reacFinfo->outgoingConns( e, list );
+	cout << "clearFunc: reacFinfo unzombified " << list.size() << " elements\n";
+	reacFinfo->dropAll( e );
+	for_each ( list.begin(), list.end(), unzombify );
+
+	enzFinfo->outgoingConns( e, list );
+	cout << "clearFunc: enzFinfo unzombified " << list.size() << " elements\n";
+	enzFinfo->dropAll( e );
+	for_each ( list.begin(), list.end(), unzombify );
 }
 
 ///////////////////////////////////////////////////

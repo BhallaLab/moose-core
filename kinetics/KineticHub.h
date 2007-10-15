@@ -70,6 +70,11 @@ class KineticHub
 				Element* hub, 
 				int enzTermIndex, 
 				Element* enz );
+		static void childFunc( const Conn& c, int stage );
+
+		
+		/// Clears out all messages to solved objects.
+		static void clearFunc( const Conn& c );
 		
 		///////////////////////////////////////////////////
 		// Overrides Neutral::destroy to clean up zombies.
