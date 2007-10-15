@@ -65,6 +65,9 @@ class Stoich
 		double* S() {
 			return &S_[0];
 		}
+		double* Sinit() {
+			return &Sinit_[0];
+		}
 		void runStats();
 #endif // USE_GSL
 		void rebuildMatrix( Element* stoich, vector< Element* >& ret );

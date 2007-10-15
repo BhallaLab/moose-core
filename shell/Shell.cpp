@@ -1474,7 +1474,8 @@ vector <string> Shell::filenames;
 vector <string> Shell::modes;
 vector <FILE*> Shell::filehandles;
 
-void Shell::openFile( const Conn& c, string filename, string mode ){
+void Shell::openFile( const Conn& c, string filename, string mode )
+{
 	FILE* o = fopen( filename.c_str(), mode.c_str() );
 	if (o == NULL){
 		cout << "Error: Shell::openFile Cannot openfile " << filename << endl;
@@ -1493,11 +1494,12 @@ void Shell::openFile( const Conn& c, string filename, string mode ){
 
 
 
-void Shell::writeFile( const Conn& c, string filename, string text ){
+void Shell::writeFile( const Conn& c, string filename, string text )
+{
 	size_t i = 0;
 	while (filenames[i] != filename && ++i);
 	if ( i < filenames.size() ){
-		if (modes[i] != "w"){
+		if ( !( modes[i] == "w" || modes[i] == "a" ) ) {
 			cout << "Error:: The file has not been opened in write mode" << endl;
 			return;
 		}
