@@ -4356,6 +4356,20 @@ target function for handling child messages to the hub class, so the MsgSrc
 should have been going to the connSrcVeryEnd rather than connSrcEnd. 
 Fixed in several places. The kholodenko demo still does not work, though.
 Also when I change the method to ee and reset it dumps core.
+Checked in as revision 207, in serial compile form with debugging.
 
+Now to tackle the issues with the demo.
+
+Seems like the main issue was just that it wasn't initialized properly.
+Unfortunately the bog-standard reset command is pretty ugly as it rebuilds 
+the whole mess.
+Did a test of rerunning the model multiple times. Seems promising. But it
+still dies when I change the method to ee.
+
+Fixed the crash when the method changes. But now EE does not give any output
+at all. Other things look fine.
+The clock ticks are connected up OK. I think it is the input to the table for
+the output graphs that gets messed up. Anyway, this is a good intermediate
+point to check it in.
 
 =============================================================================

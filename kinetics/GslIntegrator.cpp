@@ -219,7 +219,7 @@ void GslIntegrator::assignStoichFuncLocal( void* stoich )
 	
 	nVarMols_ = s->nVarMols();
 	y_ = new double[ nVarMols_ ];
-	memcpy( y_, s->S(), nVarMols_ * sizeof( double ) );
+	memcpy( y_, s->Sinit(), nVarMols_ * sizeof( double ) );
 
 	isInitialized_ = 1;
         // Allocate GSL functions if not already allocated,
@@ -296,6 +296,7 @@ void GslIntegrator::innerProcessFunc( Element* e, ProcInfo info )
 void GslIntegrator::reinitFunc( const Conn& c, ProcInfo info )
 {
     // Everything is done in assignStoichFuncLocal
+	// But the init function should somehow move here.
 	send0( c.targetElement(), reinitSlot );
 	// y_[] = yprime_[]
 }
