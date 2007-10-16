@@ -27,6 +27,7 @@ class Molecule
 		static double getN( const Element* e );
 		static void setMode( const Conn& c, int value );
 		static int getMode( const Element* e );
+		int localGetMode( const Element* e );
 		double localGetConc() const;
 		static double getConc( const Element* e );
 		void localSetConc( double value );
