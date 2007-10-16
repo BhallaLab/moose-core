@@ -53,6 +53,8 @@
 #include "setget.h"
 #include "setgetLookup.h"
 
+#include "../utility/utility.h"
+
 /// This is here because most classes derive from NeutralCinfo
 extern const Cinfo* initNeutralCinfo();
 
