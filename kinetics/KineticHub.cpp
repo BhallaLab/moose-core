@@ -1199,9 +1199,10 @@ void redirectDestMessages(
 		if ( find( elist->begin(), elist->end(), c.targetElement() ) == elist->end() )  {
 			srcElements.push_back( c.targetElement() );
 			srcFinfos.push_back( c.targetElement()->findFinfo( c.targetIndex() ) );
+			eFinfo->drop( e, i );
 		}
 	}
-	eFinfo->dropAll( e );
+	// eFinfo->dropAll( e );
 	for ( i = 0; i != srcElements.size(); i++ ) {
 		srcFinfos[ i ]->add( srcElements[ i ], hub, hubFinfo );
 	}
