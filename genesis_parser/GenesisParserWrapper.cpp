@@ -461,6 +461,7 @@ map< string, string >& sliSrcLookup()
 	// Some messages for channels.
 	src[ "VOLTAGE Vm" ] = "";
 	src[ "CHANNEL Gk Ek" ] = "channel";
+	src[ "SynChan.Mg_block.CHANNEL Gk Ek" ] = "origChannel";
 
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
@@ -521,6 +522,7 @@ map< string, string >& sliDestLookup()
 	// Some messages for channels.
 	dest[ "VOLTAGE Vm" ] = "";
 	dest[ "CHANNEL Gk Ek" ] = "channel";
+	dest[ "SynChan.Mg_block.CHANNEL Gk Ek" ] = "origChannel";
 
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
@@ -680,12 +682,18 @@ void GenesisParserWrapper::doAdd(
 		for ( int i = 4; i < argc; i++ )
 			msgType = msgType + " " + argv[ i ];
 
+		Id src( argv[1] );
+		Id dest( argv[2] );
+		
+		if ( msgType == "CHANNEL Gk Ek" && src()->className() == "SynChan" && dest()->className() == "Mg_block" )
+			msgType = src()->className() + "." + dest()->className() + "." + msgType;
+		
 		string srcF = sliMessage( msgType, sliSrcLookup() );
 		string destF = sliMessage( msgType, sliDestLookup() );
 
 		if ( srcF.length() > 0 && destF.length() > 0 ) {
-			Id src( argv[1] );
-			Id dest( argv[2] );
+			//Id src( argv[1] );
+			//Id dest( argv[2] );
 			// Id src = path2eid( argv[1], s );
 			// Id dest = path2eid( argv[2], s );
 	// 		cout << "in do_add " << src << ", " << dest << endl;
@@ -2623,7 +2631,7 @@ char* do_getarg( int argc, const char** const argv, Id s ){
 
 int do_randseed( int argc, const char** const argv, Id s ){
 	if (argc == 1){
-		return mtrand()*294967296;
+		return static_cast <int> (mtrand()*294967296);
 	}
 	if (argc == 2){
 		//check whether argv[1] is an int in string!!

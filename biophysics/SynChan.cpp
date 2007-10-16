@@ -101,11 +101,8 @@ const Cinfo* initSynChanCinfo()
 // Shared message definitions
 ///////////////////////////////////////////////////////
 		process,
-
-		/*
 		new SharedFinfo( "process", processShared,
 			sizeof( processShared ) / sizeof( Finfo* ) ), 
-			*/
 		new SharedFinfo( "channel", channelShared,
 			sizeof( channelShared ) / sizeof( Finfo* ) ),
 
@@ -113,6 +110,8 @@ const Cinfo* initSynChanCinfo()
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
 		new SrcFinfo( "IkSrc", Ftype1< double >::global() ),
+		new SrcFinfo( "origChannel", Ftype2< double, double >::
+			global() ),
 
 ///////////////////////////////////////////////////////
 // MsgDest definitions
@@ -151,6 +150,8 @@ static const Cinfo* synChanCinfo = initSynChanCinfo();
 
 static const unsigned int channelSlot =
 	initSynChanCinfo()->getSlotIndex( "channel" );
+static const unsigned int origChannelSlot =
+	initSynChanCinfo()->getSlotIndex( "origChannel" );
 static const unsigned int ikSlot =
 	initSynChanCinfo()->getSlotIndex( "IkSrc" );
 static const unsigned int synapseSlot =
@@ -301,6 +302,7 @@ void SynChan::innerProcessFunc( Element* e, ProcInfo info )
 	activation_ = 0.0;
 	modulation_ = 1.0;
 	send2< double, double >( e, channelSlot, Gk_, Ek_ );
+	send2< double, double >( e, origChannelSlot, Gk_, Ek_ );
 	send1< double >( e, ikSlot, Ik_ );
 }
 void SynChan::processFunc( const Conn& c, ProcInfo p )
