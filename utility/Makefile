@@ -7,7 +7,8 @@ TARGET = utility.o
 OBJ = \
 	Configuration.o \
 	StringUtil.o	\
-	PropertyReader.o
+	PropertyReader.o \
+	mt19937ar.o
 
 default: $(TARGET)
 
@@ -16,7 +17,7 @@ default: $(TARGET)
 #	$(CXX) $(CFLAGS) $(shell pkg-config libxml++-2.6 --cflags) $< -c
 
 $(TARGET): $(OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) 
+	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
 
 clean:
 	-rm -f *.o $(TARGET) core core.*
