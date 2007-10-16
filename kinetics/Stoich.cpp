@@ -479,9 +479,10 @@ void Stoich::rebuildMatrix( Element* stoich, vector< Element* >& ret )
 	send3< unsigned int, unsigned int, unsigned int >(
 			stoich, rateSizeSlot, nReac, nEnz, nMmEnz );
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		if ( ( *i )->className() == "Reaction" ) {
+		const string& cn = ( *i )->className();
+		if ( cn == "Reaction" ) {
 			addReac( stoich, *i );
-		} else if ( ( *i )->className() == "Enzyme" ) {
+		} else if ( cn == "Enzyme" ) {
 			bool enzmode = 0;
 			isOK = get< bool >( *i, "mode", enzmode );
 			assert( isOK );
@@ -489,10 +490,16 @@ void Stoich::rebuildMatrix( Element* stoich, vector< Element* >& ret )
 				addEnz( stoich, *i );
 			else
 				addMmEnz( stoich, *i );
-		} else if ( ( *i )->className() == "Table" ) {
+		} else if ( cn == "Table" ) {
 			addTab( stoich, *i );
-		} else if ( ( *i )->className() == "Neutral" ) {
-			cout << (*i)->name() << " is a Neutral\n";
+		} else if ( cn == "Neutral" ) {
+			// cout << (*i)->name() << " is a Neutral\n";
+		} else if ( cn == "GslIntegrator" ||
+			cn == "Kintegrator" ||
+			cn == "KineticHub" ||
+			cn == "Stoich" )
+		{
+			// Ignore this too.
 		} else if ( ( *i )->className() != "Molecule" ) {
 			addRate( stoich, *i );
 		}
@@ -580,10 +587,10 @@ unsigned int Stoich::findIncoming(
 		j = molMap_.find( src );
 		if ( j != molMap_.end() ) {
 			ret.push_back( & S_[ j->second ] );
-		} else {
+		} else { // Should be a table or other object.
 			cerr << "Error: Unable to locate " << 
 				src->name() <<
-				" as reactant for " << e->name();
+				" as incoming for " << e->name();
 			return 0;
 		}
 	}

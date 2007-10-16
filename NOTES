@@ -4383,5 +4383,28 @@ Found that the existing function redirectDynamicMessages works fine in
 either direction. Used it, works right off. So we can now switch between
 solved and unsolved simulations. Test program is DOCS/Demos/test_kinsolver.g
 
+Checked in as revision 209, in serial compile form with debugging.
+
+Now to see if sumtotal works with the solvers.
+
+No, it doesn't. And the reason is that the solver SumTotal class works through
+molecules only. What I need is an extRateHandler that forces various 
+external calculation entities to do their stuff for the specified time and dt.
+Due to variable timestep algorithms, the time may be non-monotonic.
+The outcome of these calculations goes into the mol array as a dummy, and then
+the SumTotal will finally be able to use it.
+
+Rather than this, note that the only likely external input is a table. This
+needs to be managed by the solver to handle variable dt methods. So we really
+need to work on incorporating tables that live in the kinetic object tree.
+
+Turns out I had anticipated almost all of this. I had a silly error in the
+KineticHub code that deleted the internal sumTot messages. Now fixed, and
+the internal sumTots work. On now to external sumTots. The problem here
+is managing timing, which may differ for internal steps of the solver, and the
+external clock tick of tables and other inputs to the sumTot. 
+In the current version I just assume that the dt is small
+enough that a little bit of jumping around by the solver won't mess up the
+output.
 
 =============================================================================
