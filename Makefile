@@ -14,9 +14,12 @@
 
 # Use the options below for compiling on GCC3. Pick your favourite
 # optimization settings.
+# Higher optimization levels should use -DNDEBUG to eliminate the
+# assertions sprinkled throughout the code
+#
 #CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS
-#CFLAGS  =	-O3 -Wall -pedantic
-#CFLAGS  =	-O3 -pg -Wall -pedantic
+#CFLAGS  =	-O3 -Wall -pedantic -DNDEBUG
+#CFLAGS  =	-O3 -pg -Wall -pedantic -DNDEBUG
 
 # Use the options below for compiling on GCC4.0
 
@@ -36,7 +39,7 @@
 # It is completely harmless except for a few file existence checks at startup.
 CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER 
 
-#CFLAGS = -O3 -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DGENERATE_WRAPPERS
+#CFLAGS = -O3 -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DGENERATE_WRAPPERS -DNDEBUG
 
 # Use the options below for compiling on GCC4.1
 # GNU C++ 4.1 and newer might need -ffriend-injection
