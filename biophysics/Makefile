@@ -13,6 +13,7 @@ TARGET = biophysics.o
 OBJ = \
 	Compartment.o	\
 	HHChannel.o	\
+	Mg_block.o	\
 	HHGate.o	\
 	CaConc.o	\
 	Nernst.o	\
@@ -36,6 +37,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 Compartment.o:	Compartment.h ../basecode/Ftype2.h
 HHChannel.o:	HHChannel.h ../basecode/Ftype2.h ../basecode/Ftype3.h
+Mg_block.o:	Mg_block.h ../basecode/Ftype2.h ../basecode/Ftype3.h
 HHGate.o:	HHGate.h ../builtins/Interpol.h
 CaConc.o:	CaConc.h
 Nernst.o:	Nernst.h
