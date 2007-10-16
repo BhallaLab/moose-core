@@ -4371,5 +4371,17 @@ at all. Other things look fine.
 The clock ticks are connected up OK. I think it is the input to the table for
 the output graphs that gets messed up. Anyway, this is a good intermediate
 point to check it in.
+Checked in as revision 208, in serial compile form with debugging.
+
+=============================================================================
+16 Oct 2007
+Ascertained that the plot messages remain intact when going from GSL to ee
+solvers. So the issue is, how is the plot message set up and cleared during
+rebuilding the stoichiometric system.
+
+Found that the existing function redirectDynamicMessages works fine in
+either direction. Used it, works right off. So we can now switch between
+solved and unsolved simulations. Test program is DOCS/Demos/test_kinsolver.g
+
 
 =============================================================================
