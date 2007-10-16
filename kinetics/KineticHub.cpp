@@ -560,6 +560,7 @@ void unzombify( Conn c )
 	bool ret = ci->schedule( e );
 	assert( ret );
 	e->setThisFinfo( const_cast< Finfo* >( ci->getThisFinfo() ) );
+	redirectDynamicMessages( e );
 }
 
 
@@ -582,6 +583,12 @@ void KineticHub::clearFunc( const Conn& c )
 	// cout << "clearFunc: molFinfo unzombified " << list.size() << " elements\n";
 	molFinfo->dropAll( e );
 	for_each ( list.begin(), list.end(), unzombify );
+	/*
+	for ( i = elist->begin(); i != elist->end(); i++ ) {
+		zombify( hub, *i, molSolveFinfo, &molZombieFinfo );
+		redirectDynamicMessages( *i );
+	}
+	*/
 
 	reacFinfo->outgoingConns( e, list );
 	// cout << "clearFunc: reacFinfo unzombified " << list.size() << " elements\n";
