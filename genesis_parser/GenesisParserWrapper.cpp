@@ -2623,14 +2623,14 @@ char* do_getarg( int argc, const char** const argv, Id s ){
 
 int do_randseed( int argc, const char** const argv, Id s ){
 	if (argc == 1){
-		return rand();
+		return mtrand()*294967296;
 	}
 	if (argc == 2){
 		//check whether argv[1] is an int in string!!
 		int seed = atoi(argv[1]);
 		//copied the error message from genesis
 		cout << "WARNING from init_rng: changing global seed value! Independence of streams is not guaranteed" << endl;
-		srand(seed);
+		mtseed(seed);
 		return 0;
 	}
 	cout << "usage:: randseed [seed]" << endl;
@@ -2645,7 +2645,8 @@ float do_rand( int argc, const char** const argv, Id s ){
 	//check whether argv[1] and argv[2] are in proper formats
 	double lo = atof(argv[1]);
 	double hi = atof(argv[2]);
-	return lo + rand()*(hi - lo)/RAND_MAX;
+	//return lo + rand()*(hi - lo)/RAND_MAX;
+	return lo + mtrand()*(hi - lo);
 }
 
 void do_disable( int argc, const char** const argv, Id s ){
