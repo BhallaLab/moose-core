@@ -109,7 +109,7 @@ SimDump::SimDump()
 		"k1 k2 k3 mode") );
 	sid.push_back( new SimDumpInfo( "xtab", "Table",
 	"input output step_mode stepsize",
-	"input output mode stepsize" ) );
+	"input output stepmode stepsize" ) );
 
 	sid.push_back( new SimDumpInfo( "group", "Neutral", "", "" ) );
 	sid.push_back( new SimDumpInfo( "xgraph", "Neutral", "", "" ) );

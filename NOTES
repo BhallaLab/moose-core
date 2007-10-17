@@ -4407,4 +4407,16 @@ In the current version I just assume that the dt is small
 enough that a little bit of jumping around by the solver won't mess up the
 output.
 
+Checked in as revision 212, in serial compile form with debugging.
+
+Implemented a test case for sumtots with tables. In GENESIS/kkit such
+beasts are handled using the SLAVE message, here I want to stick to sumtots.
+
+=============================================================================
+17 Oct 2007
+
+Got table input into the regular EE method to work, and also set up loadtab
+from kkit dump files. The solver still does not handle it, and still does
+not work to restore EE function if the mode is switched back.
+
 =============================================================================
