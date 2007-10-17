@@ -150,6 +150,8 @@ class Shell
 		static void writeFile( const Conn& c, string filename, string text );
 		static void readFile( const Conn& c, string filename, bool linemode );
 		static void listFiles( const Conn& c );
+		static void loadtab( const Conn& c, string data );
+		void innerLoadTab( const string& data );
 			/*
 		void add( const string& src, const string& dest );
 		void drop( const string& src, const string& dest );

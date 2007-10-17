@@ -175,6 +175,8 @@ const Cinfo* initGenesisParserCinfo()
 		// Setting a vec of field values as a string: send out request:
 		new SrcFinfo( "setVecField", // object, field, value 
 			Ftype3< vector< Id >, string, string >::global() ),
+		new SrcFinfo( "loadtab", 
+			Ftype1< string >::global() ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -287,6 +289,8 @@ static const unsigned int readFileSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser.readfile" );
 static const unsigned int setVecFieldSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.setVecField" );
+static const unsigned int loadtabSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.loadtab" );
 
 
 //////////////////////////////////////////////////////////////////
@@ -446,7 +450,7 @@ map< string, string >& sliSrcLookup()
 
 	src[ "SUMTOTAL n nInit" ] = "nSrc";	// for molecules
 	src[ "SUMTOTAL output output" ] = "outputSrc";	// for tables
-	src[ "SLAVE output" ] = "out";	// for tables
+	src[ "SLAVE output" ] = "outputSrc";	// for tables
 	src[ "INTRAMOL n" ] = "nOut"; 	// target is an enzyme.
 	src[ "CONSERVE n nInit" ] = ""; 	// Deprecated
 	src[ "CONSERVE nComplex nComplexInit" ] = ""; 	// Deprecated
@@ -507,7 +511,7 @@ map< string, string >& sliDestLookup()
 
 	dest[ "SUMTOTAL n nInit" ] = "sumTotal";	// for molecules
 	dest[ "SUMTOTAL output output" ] = "sumTotal";	// for molecules
-	dest[ "SLAVE output" ] = "sumTotalIn";	// for molecules
+	dest[ "SLAVE output" ] = "sumTotal";	// for molecules
 	dest[ "INTRAMOL n" ] = "intramolIn"; 	// target is an enzyme.
 	dest[ "CONSERVE n nInit" ] = ""; 	// Deprecated
 	dest[ "CONSERVE nComplex nComplexInit" ] = ""; 	// Deprecated
@@ -592,6 +596,8 @@ map< string, string >& sliFieldNameConvert()
 	fieldnames["Molecule.CoInit"] = "concInit";
 	fieldnames["SpikeGen.thresh"] = "threshold";
 	fieldnames["SpikeGen.output_amp"] = "amplitude";
+	fieldnames["Table.table->dx"] = "dx";
+	fieldnames["Table.table->invdx"] = "";
 	return fieldnames;
 }
 
@@ -2186,9 +2192,16 @@ void do_addfield( int argc, const char** const argv, Id s )
 	}
 }
 
-void doShellCommand ( int argc, const char** const argv, Id s )
+void do_loadtab ( int argc, const char** const argv, Id s )
 {
-; //	s->commandFuncLocal( argc, argv );
+	cout << "in do_loadtab: argc = " << argc << endl;
+	string line = "";
+	for ( int i = 1 ; i < argc; i++ ) {
+		line.append( argv[i] );
+		line.append( " " );
+	}
+
+	send1< string >( s(), loadtabSlot, line );
 }
 
 void do_complete_loading( int argc, const char** const argv, Id s )
@@ -2753,7 +2766,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "argc", 
 		reinterpret_cast< slifunc >( doArgc ), "int" );
 
-	AddFunc( "loadtab", doShellCommand, "void" );
+	AddFunc( "loadtab", do_loadtab, "void" );
 	AddFunc( "addfield", do_addfield, "void" );
 	AddFunc( "complete_loading", do_complete_loading, "void" );
 	AddFunc( "exp", reinterpret_cast< slifunc>( do_exp ), "float" );
