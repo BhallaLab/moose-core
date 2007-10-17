@@ -67,6 +67,10 @@ const Cinfo* initInterpolCinfo()
 			GFCAST( &Interpol::getTable ),
 			RFCAST( &Interpol::setTable )
 		),
+		new ValueFinfo( "tableVector", ValueFtype1< vector< double > >::global(),
+			GFCAST( &Interpol::getTableVector ),
+			RFCAST( &Interpol::setTableVector )
+		),
 	///////////////////////////////////////////////////////
 	// Shared message definitions
 	///////////////////////////////////////////////////////
@@ -181,6 +185,16 @@ void Interpol::setTable(
 double Interpol::getTable( const Element* e, const unsigned int& i )
 {
 	return static_cast< Interpol* >( e->data() )->getTableValue( i );
+}
+
+void Interpol::setTableVector( const Conn& c, vector< double > value ) 
+{
+	static_cast< Interpol* >( c.data() )->localSetTableVector( value );
+}
+
+vector< double > Interpol::getTableVector( const Element* e )
+{
+	return static_cast< Interpol* >( e->data() )->table_;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -361,6 +375,20 @@ double Interpol::getTableValue( unsigned int index ) const {
 	if ( index < table_.size() )
 		return table_[ index ];
 	return 0.0;
+}
+
+// This sets the whole thing up: values, xdivs, dx and so on. Only xmin
+// and xmax are unknown to the input vector.
+void Interpol::localSetTableVector( const vector< double >& value ) 
+{
+	unsigned int xdivs = value.size();
+	if ( xdivs == 0 ) {
+		table_.resize( 0 );
+		invDx_ = 1.0;
+	} else {
+		invDx_ = static_cast< double >( xdivs ) / ( xmax_ - xmin_ );
+		table_ = value;
+	}
 }
 
 void Interpol::innerTabFill( int xdivs, int mode )

@@ -200,6 +200,9 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "setVecField",
 				Ftype3< vector< Id >, string, string >::global(),
 				RFCAST( &Shell::setVecField ) ),
+		new DestFinfo( "loadtab",
+				Ftype1< string >::global(),
+				RFCAST( &Shell::loadtab ) ),	
 	};
 
 	/**
@@ -1469,6 +1472,17 @@ void Shell::simUndump( const Conn& c, string args )
 	sh->simDump_->simUndump( args );
 }
 
+void Shell::loadtab( const Conn& c, string data )
+{
+	Shell* sh = static_cast< Shell* >( c.data() );
+	sh->innerLoadTab( data );
+}
+
+//////////////////////////////////////////////////////////////////
+// File handling functions
+//////////////////////////////////////////////////////////////////
+
+///\todo These things should NOT be globals.
 map <string, FILE*> Shell::filehandler;
 vector <string> Shell::filenames;
 vector <string> Shell::modes;
@@ -1684,6 +1698,7 @@ void Shell::le ( Id eid )
 
 #ifdef DO_UNIT_TESTS
 
+#include <math.h>
 #include "../element/Neutral.h"
 
 void testShell()
@@ -1780,6 +1795,27 @@ void testShell()
 	ASSERT( a() == 0, "destroy a" );
 	ASSERT( a1() == 0, "destroy a1" );
 	ASSERT( a2() == 0, "destroy a2" );
+
+	/////////////////////////////////////////
+	// Test the loadTab operation
+	/////////////////////////////////////////
+	Element* tab = Neutral::create( "Table", "t1", Element::root() );
+	static const double EPSILON = 1.0e-9;
+	static double values[] = 
+		{ 1, 1.0628, 1.1253, 1.1874, 1.2487, 1.309,
+			1.3681, 1.4258, 1.4817, 1.5358, 1.5878 };
+	sh.innerLoadTab( "/t1 table 1 10 0 10		1 1.0628 1.1253 1.1874 1.2487 1.309 1.3681 1.4258 1.4817 1.5358 1.5878" );
+	int ival;
+	ret = get< int >( tab, "xdivs", ival );
+	ASSERT( ret, "LoadTab" );
+	ASSERT( ival == 10 , "LoadTab" );
+	for ( unsigned int i = 0; i < 11; i++ ) {
+		double y = 0.0;
+		ret = lookupGet< double, unsigned int >( tab, "table", y, i );
+		ASSERT( ret, "LoadTab" );
+		ASSERT( fabs( y - values[i] ) < EPSILON , "LoadTab" );
+	}
+	set( tab, "destroy" );
 }
 
 #endif // DO_UNIT_TESTS
