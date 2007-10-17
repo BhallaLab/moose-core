@@ -44,6 +44,9 @@ class Interpol
 					const Conn& c, double val, const unsigned int& i );
 		static double getTable(
 					const Element* e,const unsigned int& i );
+		static void setTableVector( const Conn& c, vector< double > value );
+
+		static vector< double > getTableVector( const Element* e );
 
 		////////////////////////////////////////////////////////////
 		// Here are the Interpol Destination functions
@@ -73,6 +76,7 @@ class Interpol
 
 		void setTableValue( double value, unsigned int index );
 		double getTableValue( unsigned int index ) const;
+		void localSetTableVector( const vector< double >& value );
 		unsigned long size( ) {
 			return table_.size();
 		}

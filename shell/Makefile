@@ -19,6 +19,7 @@ OBJ = \
 	Shell.o	\
 	ReadCell.o \
 	SimDump.o \
+	LoadTab.o \
 
 HEADERS = \
 	../basecode/header.h \
