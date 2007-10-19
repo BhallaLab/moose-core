@@ -54,23 +54,21 @@ function enddump
 	reset
 end
 
+function do_save_all_plots( filename )
+	str filename
+	str name
+	foreach name ( {el /graphs/##[TYPE=Table] } )
+		openfile {filename} a
+		writefile {filename} "/newplot"
+		writefile {filename} "/plotname "{name}
+		closefile {filename}
+		setfield {name} print {filename}
+	end
+end
+
 function save
 	str name
-	/*
-	foreach name ( {el /graphs/##[TYPE=Table] } )
-		openfile kkit.plot a
-		writefile kkit.plot "/newplot"
-		writefile kkit.plot "/plotname "{name}
-		closefile kkit.plot
-		setfield name print kkit.plot
-	end
-	*/
 	setfield /graphs/##[TYPE=Table] print kkit.plot
-	/*
-	setfield /graphs/conc1/E.Co print "E.plot"
-	setfield /graphs/conc1/S.Co print "S.plot"
-	setfield /graphs/conc1/P.Co print "P.plot"
-	*/
 end
 
 function complete_loading

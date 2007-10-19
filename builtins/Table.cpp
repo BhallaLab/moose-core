@@ -400,6 +400,9 @@ void Table::innerReinit( const Conn& c, ProcInfo p )
 		for ( i = table_.begin(); i != table_.end(); i++ )
 			*i = 0.0;
 	}
+	if ( stepMode_ == TAB_BUF ) {
+		xmax_ = output_ = 0.0;
+	}
 }
 
 
