@@ -16,8 +16,8 @@ end
 function initdump
 end
 
-// create KineticManager /kinetics
-create neutral /kinetics
+create KineticManager /kinetics
+// create neutral /kinetics
 
 create neutral /graphs
 create neutral /moregraphs
@@ -75,6 +75,6 @@ end
 
 function complete_loading
 	reset
-//	step {MAXTIME} -t
-//	save
+	step {MAXTIME} -t
+	save
 end

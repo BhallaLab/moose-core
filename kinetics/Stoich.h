@@ -91,7 +91,7 @@ class Stoich
 			Element* e, const string& msgFieldName, 
 			vector< const double* >& ret );
 
-		unsigned int findIncoming( 
+		bool findIncoming( 
 			Element* e, const string& msgFieldName, 
 			vector< const double* >& ret );
 
