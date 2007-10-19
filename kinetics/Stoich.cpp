@@ -561,7 +561,8 @@ void Stoich::setupMols(
 void Stoich::addSumTot( Element* e )
 {
 	vector< const double* > mol;
-	if ( findIncoming( e, "sumTotal", mol ) > 0 ) {
+	// vector< const Element* > tab;
+	if ( findIncoming( e, "sumTotal", mol ) ) {
 		map< const Element*, unsigned int >::iterator j = molMap_.find( e );
 		assert( j != molMap_.end() );
 		SumTotal st( &S_[ j->second ], mol );
@@ -569,9 +570,8 @@ void Stoich::addSumTot( Element* e )
 	}
 }
 
-unsigned int Stoich::findIncoming(
-	Element* e, const string& msgFieldName, 
-	vector< const double* >& ret )
+bool Stoich::findIncoming(
+	Element* e, const string& msgFieldName, vector< const double* >& ret )
 {
 	const Finfo* srcFinfo = e->findFinfo( msgFieldName );
 	assert( srcFinfo != 0 );
@@ -588,13 +588,17 @@ unsigned int Stoich::findIncoming(
 		if ( j != molMap_.end() ) {
 			ret.push_back( & S_[ j->second ] );
 		} else { // Should be a table or other object.
+			// tab.push_back( src );
+			/*
 			cerr << "Error: Unable to locate " << 
 				src->name() <<
 				" as incoming for " << e->name();
 			return 0;
+			*/
 		}
 	}
-	return ret.size();
+	// return ( ( ret.size() + tab.size() ) > 0 );
+	return ( ret.size() > 0 );
 }
 
 /**

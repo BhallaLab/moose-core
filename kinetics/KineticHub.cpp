@@ -173,7 +173,7 @@ static const unsigned int nSlot =
 void redirectDestMessages(
 	Element* hub, Element* e, const Finfo* hubFinfo, const Finfo* eFinfo,
 	unsigned int eIndex, vector< unsigned int >& map,
-	vector< Element* >* elist );
+	vector< Element* >* elist, bool retain = 0 );
 
 void redirectDynamicMessages( Element* e );
 
@@ -376,7 +376,7 @@ void KineticHub::molConnectionFuncLocal( Element* hub,
 	for ( i = elist->begin(); i != elist->end(); i++ ) {
 		// Here we replace the sumTotMessages from outside the tree.
 		redirectDestMessages( hub, *i, molSumFinfo, sumTotFinfo, 
-		i - elist->begin(), molSumMap_, elist );
+		i - elist->begin(), molSumMap_, elist, 1 );
 	}
 }
 
@@ -599,6 +599,14 @@ void KineticHub::clearFunc( const Conn& c )
 	// cout << "clearFunc: enzFinfo unzombified " << list.size() << " elements\n";
 	enzFinfo->dropAll( e );
 	for_each ( list.begin(), list.end(), unzombify );
+
+
+	// Need the original molecule info. Where is that?
+	// The molSumMap indexes from the sum index to the mol elist index.
+	// But how do I access the mol elist? I need it to find the original
+	// molecule element that was conneced from the table.
+	molSumFinfo->incomingConns( e, list );
+	molSumFinfo->dropAll( e );
 }
 
 ///////////////////////////////////////////////////
@@ -1180,7 +1188,7 @@ void KineticHub::zombify(
 void redirectDestMessages(
 	Element* hub, Element* e, const Finfo* hubFinfo, const Finfo* eFinfo,
 	unsigned int eIndex, vector< unsigned int >& map, 
-		vector< Element *>*  elist )
+		vector< Element *>*  elist, bool retain )
 {
 	vector< Conn > clist;
 	if ( eFinfo->incomingConns( e, clist ) == 0 )
@@ -1194,17 +1202,21 @@ void redirectDestMessages(
 	map.push_back( eIndex );
 	
 	// An issue here: Do I check if the src is on the solved tree?
+	// This is a bad iteration: dropping connections is going to affect
+	// the list size and position of i in the list.
 	for ( i = 0; i != max; i++ ) {
 		Conn& c = clist[ i ];
 		if ( find( elist->begin(), elist->end(), c.targetElement() ) == elist->end() )  {
 			srcElements.push_back( c.targetElement() );
 			srcFinfos.push_back( c.targetElement()->findFinfo( c.targetIndex() ) );
-			eFinfo->drop( e, i );
+			if ( !retain )
+				eFinfo->drop( e, i );
 		}
 	}
 	// eFinfo->dropAll( e );
 	for ( i = 0; i != srcElements.size(); i++ ) {
-		srcFinfos[ i ]->add( srcElements[ i ], hub, hubFinfo );
+		bool ret = srcFinfos[ i ]->add( srcElements[ i ], hub, hubFinfo );
+		assert( ret );
 	}
 }
 
