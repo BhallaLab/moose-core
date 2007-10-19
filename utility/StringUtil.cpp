@@ -64,7 +64,7 @@ int testTrim()
     
     bool success = true;
     
-    for ( int i = 0; i < sizeof(testStrings)/sizeof(*testStrings); ++i )
+    for (unsigned int i = 0; i < sizeof(testStrings)/sizeof(*testStrings); ++i )
     {
         std::string trimmed = trim(testStrings[i]);
         success = (results[i].compare(trimmed)==0);

@@ -45,6 +45,7 @@ OBJ = \
 	filecheck.o \
 	FunctionData.o \
 	ParallelDummy.o \
+	Class.o	\
 
 HEADERS = \
 	header.h \
@@ -55,6 +56,7 @@ HEADERS = \
 	Finfo.h \
 	Element.h \
 	Id.h \
+	Class.h \
 
 #	AssignFinfo.h
 #	ArrayFinfo.o \
@@ -86,7 +88,7 @@ FunctionData.o:	FunctionData.h
 IdManager.o:	Id.h IdManager.h ArrayWrapperElement.h
 ArrayElement.o:	ArrayElement.h SimpleElement.h MsgSrc.h MsgDest.h DeletionMarkerFinfo.h
 ArrayWrapperElement.o:	ArrayWrapperElement.h SimpleElement.h MsgSrc.h MsgDest.h DeletionMarkerFinfo.h
-
+Class.o: Class.h Cinfo.h Cinfo.cpp
 .cpp.o:
 	$(CXX) $(CFLAGS) $< -c
 

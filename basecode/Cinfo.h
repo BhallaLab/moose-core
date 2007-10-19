@@ -23,6 +23,8 @@ struct SchedInfo
  */
 class Cinfo
 {
+    friend class Class;
+    
 		public:
 			/**
 			 * The Cinfo intializer is used for static initialization
