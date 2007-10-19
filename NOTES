@@ -4422,7 +4422,7 @@ not work to restore EE function if the mode is switched back.
 Checked in as revision 213, in serial compile form with debugging.
 
 Five things before I can use this in production mode:
-- Get the solver to handle the tables.
+* Get the solver to handle the tables.
 - Get the SolverManager to do intelligent things with timesteps
 - Get the loadtab to handle the -continue statement
 - Fix up the plots.
@@ -4441,5 +4441,10 @@ It is hard to put the message back. See line 604 in KineticHub.cpp
 19 Oct 2007
 Instead of struggling with putting back the sumtot message, I left it there
 and made an extra one for the solver. This seems to work.
+
+Checked in as revision 217, in serial compile form with debugging.
+
+Fixed up plots. This involved some fixes in the genesis parser for the
+el (getelementlist) command, as well as some to the table object.
 
 =============================================================================
