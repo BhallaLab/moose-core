@@ -103,10 +103,10 @@ int mooseInit(std::string configFile)
     // not allowing user to change the clock settings
     Neutral::create( "Tick", "t0", cj );
     Neutral::create( "Tick", "t1", cj );
-    Neutral::create( "Tick", "t2", cj );
-    Neutral::create( "Tick", "t3", cj );
-    Neutral::create( "Tick", "t4", cj );
-    Neutral::create( "Tick", "t5", cj );
+//     Neutral::create( "Tick", "t2", cj );
+//     Neutral::create( "Tick", "t3", cj );
+//     Neutral::create( "Tick", "t4", cj );
+//     Neutral::create( "Tick", "t5", cj );
 //    setupDefaultSchedule(t0,t1,t2,t3,t4,t5,cj); // cannot put here - dt causes failure in SchedTest
 #endif
     return 0;    
