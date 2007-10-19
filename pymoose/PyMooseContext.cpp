@@ -535,10 +535,10 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string shellName, string co
     Element* cj =  context->clockJob_();
     Element* t0 = Neutral::create( "Tick", "t0", cj );
     Element* t1 = Neutral::create( "Tick", "t1", cj );
-    Element* t2 = Neutral::create( "Tick", "t2", cj );
-    Element* t3 = Neutral::create( "Tick", "t3", cj );
-    Element* t4 = Neutral::create( "Tick", "t4", cj );
-    Element* t5 = Neutral::create( "Tick", "t5", cj );
+//     Element* t2 = Neutral::create( "Tick", "t2", cj );
+//     Element* t3 = Neutral::create( "Tick", "t3", cj );
+//     Element* t4 = Neutral::create( "Tick", "t4", cj );
+//     Element* t5 = Neutral::create( "Tick", "t5", cj );
 
     
     return context;        
