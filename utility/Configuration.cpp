@@ -77,7 +77,7 @@ int Configuration::readConfiguration(std::string confFile)
 #endif // HAS_LIBXML
     properties[AUTOSCHEDULE] = PropertyReader::getProperty(confFile, AUTOSCHEDULE);
     properties[CREATESOLVER] = PropertyReader::getProperty(confFile, CREATESOLVER);;
-	return 0;
+	return 1;
 }
 
 
