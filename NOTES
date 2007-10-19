@@ -4419,4 +4419,27 @@ Got table input into the regular EE method to work, and also set up loadtab
 from kkit dump files. The solver still does not handle it, and still does
 not work to restore EE function if the mode is switched back.
 
+Checked in as revision 213, in serial compile form with debugging.
+
+Five things before I can use this in production mode:
+- Get the solver to handle the tables.
+- Get the SolverManager to do intelligent things with timesteps
+- Get the loadtab to handle the -continue statement
+- Fix up the plots.
+- Profiling and benchmarking.
+
+Working on the first. seems like we have problems around line 378 of
+KineticHub.cpp: although all looks like we successfully redirect the
+message, it does not appear when I look for it from the command line.
+
+I think that the first round of redirecting is fine, but when the solver
+is deleted the 'clear' command does not properly put the message back, so
+subsequent rounds all fail.
+It is hard to put the message back. See line 604 in KineticHub.cpp
+
+=============================================================================
+19 Oct 2007
+Instead of struggling with putting back the sumtot message, I left it there
+and made an extra one for the solver. This seems to work.
+
 =============================================================================
