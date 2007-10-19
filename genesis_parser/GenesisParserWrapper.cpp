@@ -1739,6 +1739,16 @@ void do_tab2file( int argc, const char** const argv, Id s )
 }
 
 /**
+ * Utility function for returning an empty argv list
+ */
+char** NULLArgv()
+{
+	char** argv = (char** )malloc( sizeof( char* ) );
+	argv[0] = 0;
+	return argv;
+}
+
+/**
  * This returns a space-separated list of individual element paths
  * generated from the wildcard list of the 'path' argument.
  * The path argument can be a comma-separated series of individual
@@ -1750,38 +1760,51 @@ void do_tab2file( int argc, const char** const argv, Id s )
  * 	-listname listname'
  * which I have no clue about and have not implemented.
  */
-char* do_element_list( int argc, const char** const argv, Id s )
+char** do_element_list( int argc, const char** const argv, Id s )
 {
 	static string space = " ";
 	if ( argc != 2 ) {
 		cout << "usage:: " << argv[0] << " path\n";
-		return copyString( "" );
+		return NULLArgv();
 	}
 	string path = argv[1];
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
 			( s()->data() );
-	string ret;
-	gpw->elementList( ret, path, s );
+	return gpw->elementList( path, s );
 
 	// return copyString( s->getmsgFuncLocal( field, options ) );
-	return copyString( ret.c_str() );
+//	return copyString( ret.c_str() );
 }
-
-void GenesisParserWrapper::elementList(
-		string& ret, const string& path, Id s)
+/**
+ * Allocates and returns an array of char* for the element list
+ * entries, just like the old GENESIS sim_list.c::do_construct_list
+ * function. There too I did not know how the list was supposed to be
+ * freed.
+ */
+char** GenesisParserWrapper::elementList( const string& path, Id s)
 {
  	//Shell::getWildCardList(conn, path, 0(ordered))
  	send2< string, bool >( s(), requestWildcardListSlot, path, 0 );
-	bool first = 1;
+	// bool first = 1;
 	vector< Id >::iterator i;
+	// Need to use old-style allocation because the genesis parser 
+	// just might free it in the old style.
+	if ( elist_.size() == 0 )
+		return( NULLArgv() );
+	char** ret = ( char** )calloc( elist_.size() + 1, sizeof( char * ) );
+	char** j = ret;
 	for ( i = elist_.begin(); i != elist_.end(); i++ ) {
+		*j++ = copyString( i->path().c_str() );
+		/*
 		if ( first )
 			ret = i->path(); // ret = eid2path( *i );
 		else
 			ret = ret + " " + i->path();
 			// ret = ret + " " + eid2path( *i );
 		first = 0;
+		*/
 	}
+	return ret;
 }
 
 /**
@@ -2743,7 +2766,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "echo", do_echo, "void" );
 	AddFunc( "tab2file", do_tab2file, "void" );
 	AddFunc( "el",
-			reinterpret_cast< slifunc >( do_element_list ), "char*" );
+			reinterpret_cast< slifunc >( do_element_list ), "char**" );
 	AddFunc( "element_list",
 			reinterpret_cast< slifunc >( do_element_list ), "char*" );
 	AddFunc( "addtask", do_addtask, "void" );
