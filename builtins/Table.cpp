@@ -402,6 +402,7 @@ void Table::innerReinit( const Conn& c, ProcInfo p )
 	}
 	if ( stepMode_ == TAB_BUF ) {
 		xmax_ = output_ = 0.0;
+		table_.resize( 0 );
 	}
 }
 

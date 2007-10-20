@@ -55,6 +55,8 @@ class Interpol
 		static void lookup( const Conn& c, double val );
 		static void tabFill( const Conn& c, int xdivs, int mode );
 		static void print( const Conn& c, string fname );
+		static void appendTableVector( const Conn& c, 
+			vector< double > value );
 
 		////////////////////////////////////////////////////////////
 		// Here are the internal functions
@@ -77,6 +79,7 @@ class Interpol
 		void setTableValue( double value, unsigned int index );
 		double getTableValue( unsigned int index ) const;
 		void localSetTableVector( const vector< double >& value );
+		void localAppendTableVector( const vector< double >& value );
 		unsigned long size( ) {
 			return table_.size();
 		}

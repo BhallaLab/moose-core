@@ -97,6 +97,11 @@ const Cinfo* initInterpolCinfo()
 		new DestFinfo( "print", Ftype1< string >::global(), 
 			RFCAST( &Interpol::print )
 		),
+		/// Append to existing table. Used in loadtab -continue.
+		new DestFinfo( "appendTableVector", 
+			Ftype1< vector< double > >::global(), 
+			RFCAST( &Interpol::appendTableVector )
+		),
 	};
 
 	static Cinfo interpolCinfo(
@@ -234,6 +239,11 @@ void Interpol::tabFill( const Conn& c, int xdivs, int mode )
 void Interpol::print( const Conn& c, string fname )
 {
 	static_cast< Interpol* >( c.data() )->innerPrint( fname );
+}
+
+void Interpol::appendTableVector( const Conn& c, vector< double > value ) 
+{
+	static_cast< Interpol* >( c.data() )->localAppendTableVector( value );
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -388,6 +398,20 @@ void Interpol::localSetTableVector( const vector< double >& value )
 	} else {
 		invDx_ = static_cast< double >( xdivs ) / ( xmax_ - xmin_ );
 		table_ = value;
+	}
+}
+
+// This sets the whole thing up: values, xdivs, dx and so on. Only xmin
+// and xmax are unknown to the input vector.
+void Interpol::localAppendTableVector( const vector< double >& value ) 
+{
+	unsigned int xdivs = value.size();
+	if ( xdivs == 0 ) {
+		return;
+	} else {
+		xdivs += table_.size();
+		invDx_ = static_cast< double >( xdivs ) / ( xmax_ - xmin_ );
+		table_.insert( table_.end(), value.begin(), value.end() );
 	}
 }
 

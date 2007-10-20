@@ -23,13 +23,27 @@ void Shell::innerLoadTab(const string& line)
 
 	istr >> name;
 	if ( name == "-continue" ) {
+		if ( !lastTab_.good() ) {
+			cout << "Error: loadtab -continue: No previous table loaded\n";
+			return;
+		}
+		Element* tab = lastTab_();
+		// int xdivs;
+		// get< int >( tab, "xdivs", xdivs );
 		double y;
 		while (istr >> y) {
 			values.push_back(y);
 		}
+		/*
+		if (values.size() > xdivs + 1)
+			cerr << "Error: loadTab: Overfill\n";
+		else
+		*/
+		set< vector< double > >( tab, "appendTableVector", values );
 	} else {
 		Id tabId( name );
 		if ( tabId.good() ) {
+			lastTab_ = tabId;
 			Element* tab = tabId();
 			// Create an interpol for the data, as a child of the
 			// table. Later we'll do this right with a special kind of
@@ -58,9 +72,8 @@ void Shell::innerLoadTab(const string& line)
 			}
 			if (values.size() > xdivs + 1)
 				cerr << "Error: loadTab: Overfill\n";
-			if (values.size() < xdivs + 1)
-				cerr << "Error: loadTab: Underfill\n";
-			if ( values.size() == xdivs + 1)
+			// underfull is not an issue, we assume a -continue.
+			else
 				set< vector< double > >( tab, "tableVector", values );
 		} else {
 			cout << "Error: table '" << name << "' not found\n";
