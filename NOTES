@@ -4425,7 +4425,7 @@ Five things before I can use this in production mode:
 * Get the solver to handle the tables.
 - Get the SolverManager to do intelligent things with timesteps
 - Get the loadtab to handle the -continue statement
-- Fix up the plots.
+* Fix up the plots.
 - Profiling and benchmarking.
 
 Working on the first. seems like we have problems around line 378 of
@@ -4446,5 +4446,26 @@ Checked in as revision 217, in serial compile form with debugging.
 
 Fixed up plots. This involved some fixes in the genesis parser for the
 el (getelementlist) command, as well as some to the table object.
+Checked in as revision 218, in serial compile form with debugging.
 
+=============================================================================
+20 Oct 2007
+Trying to implement loadtab -continue. Seems OK but weird things now happening
+with plot saves:
+If I do 'save' alone it works
+If I do 'do_save_all_plots' alone it fails
+If I do 'do_save_all_plots' after the run is done, I get plots on both
+If I do both 'save' and 'do_save_all_plots' internally, in either order,
+	both fail.
+The failure doesn't seem related to plotting, but to the data values.
+
+There is some scripting issue here. I can toggle the problem by 
+commenting out a single line, where I define an unused string variable.
+Anyway, after all this the thing clears tests for bigtabsumtot.g, which 
+loads tables in using the -continue command. Unfortunately, it does not
+clear a test for doing the simulation repeatedly with different solvers.
+Problem now is that we don't trust the scripting.
+
+Still have this problem, but fixed another issue with the reset of tables
+acting as buffers for incoming data in lieu of xplots.
 =============================================================================

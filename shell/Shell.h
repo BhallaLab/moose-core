@@ -188,6 +188,8 @@ class Shell
 		int isInteractive_;
 		string parser_;
 		SimDump* simDump_;
+		Id lastTab_; // Used for the loadtab -continue option, which 
+			// contines loading numbers into the previously selected table.
 };
 
 #endif // _SHELL_H

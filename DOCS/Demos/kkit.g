@@ -38,18 +38,6 @@ function enddump
 
 	setfield /graphs/##[TYPE=Table] step_mode 3
 
-/*
-	str name
-	foreach name ( { el /graphs/#/#[TYPE=Table] } )
-		echo {name}
-		echo setfield {name} step_mode 3
-		setfield {name} step_mode 3
-	end
-	setfield /graphs/conc1/E.Co step_mode 3
-	setfield /graphs/conc1/P.Co step_mode 3
-	setfield /graphs/conc1/S.Co step_mode 3
-	*/
-
 	echo done reading dump
 	reset
 end
@@ -67,12 +55,18 @@ function do_save_all_plots( filename )
 end
 
 function save
-	str name
 	setfield /graphs/##[TYPE=Table] print kkit.plot
+end
+
+function save2
+	// str name
+	setfield /graphs/##[TYPE=Table] print kkit.plot2
 end
 
 function complete_loading
 	reset
 	step {MAXTIME} -t
-	save
+//	save
+//	save2
+	do_save_all_plots glug.plot
 end
