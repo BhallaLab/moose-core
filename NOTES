@@ -4424,7 +4424,7 @@ Checked in as revision 213, in serial compile form with debugging.
 Five things before I can use this in production mode:
 * Get the solver to handle the tables.
 - Get the SolverManager to do intelligent things with timesteps
-- Get the loadtab to handle the -continue statement
++ Get the loadtab to handle the -continue statement
 * Fix up the plots.
 - Profiling and benchmarking.
 
@@ -4468,4 +4468,27 @@ Problem now is that we don't trust the scripting.
 
 Still have this problem, but fixed another issue with the reset of tables
 acting as buffers for incoming data in lieu of xplots.
+
+Checked in as revision 219, in serial compile form with debugging.
+
+Attempting to compile with optimization. By turning off NDEBUG a whole lot
+of nasty holes turn up because I was doing operations in the assertions, and
+the subsequent code depended on some of these. Struggling now with the
+kinetics library where there are some solver issues with the optimization,
+even when NDEBUG is on again for the kinetics dir only.
+
+=============================================================================
+21 Oct 2007
+Finally managed to compile with optimization, but all the unit tests are still
+in place. More to the point, both the optimized and debug versions dumped core
+with the first serious benchmark model, acc4_1.6e-21.g.
+After some work it turned out that I had not allowed for cases where 
+the model has both classical MM and also explicit complex enzymes. Fixed.
+Works, but for a 4x difference between two plots at the 1e-8 uM level. That
+is probably a matter of numerical resolution.
+But the other two benchmark tests still fail.
+
+Set up the benchmark directory with tests, a preliminary RESULTS file,
+and outputs computed by the old moose.
+
 =============================================================================

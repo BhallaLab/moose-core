@@ -132,6 +132,8 @@ const Cinfo* initKineticHubCinfo()
 			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "enzSolve", zombieShared, 
 			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "mmEnzSolve", zombieShared, 
+			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
 		/*
 		new SolveFinfo( "molSolve", molFields, 
 			sizeof( molFields ) / sizeof( const Finfo* ) );
@@ -158,6 +160,8 @@ static const Finfo* reacSolveFinfo =
 	initKineticHubCinfo()->findFinfo( "reacSolve" );
 static const Finfo* enzSolveFinfo = 
 	initKineticHubCinfo()->findFinfo( "enzSolve" );
+static const Finfo* mmEnzSolveFinfo = 
+	initKineticHubCinfo()->findFinfo( "mmEnzSolve" );
 static const Finfo* molSumFinfo = 
 	initKineticHubCinfo()->findFinfo( "molSum" );
 
@@ -436,6 +440,7 @@ void KineticHub::reacConnectionFuncLocal(
 	zombify( hub, reac, reacSolveFinfo, &reacZombieFinfo );
 	unsigned int connIndex = reacSolveFinfo->numOutgoing( hub );
 	assert( connIndex > 0 ); // Should have just created a message on it
+	assert( reacMap_.size() >= connIndex );
 
 	reacMap_[connIndex - 1] = rateTermIndex;
 }
@@ -501,6 +506,7 @@ void KineticHub::enzConnectionFuncLocal(
 	zombify( hub, enz, enzSolveFinfo, &enzZombieFinfo );
 	unsigned int connIndex = enzSolveFinfo->numOutgoing( hub );
 	assert( connIndex > 0 ); // Should have just created a message on it
+	assert( enzMap_.size() >= connIndex );
 
 	enzMap_[connIndex - 1] = rateTermIndex;
 }
@@ -546,9 +552,10 @@ void KineticHub::mmEnzConnectionFuncLocal(
 		tf
 	);
 
-	zombify( hub, mmEnz, enzSolveFinfo, &enzZombieFinfo );
-	unsigned int connIndex = enzSolveFinfo->numOutgoing( hub );
+	zombify( hub, mmEnz, mmEnzSolveFinfo, &enzZombieFinfo );
+	unsigned int connIndex = mmEnzSolveFinfo->numOutgoing( hub );
 	assert( connIndex > 0 ); // Should have just created a message on it
+	assert( mmEnzMap_.size() >= connIndex );
 
 	mmEnzMap_[connIndex - 1] = rateTermIndex;
 }
@@ -570,34 +577,30 @@ void unzombify( Conn c )
 void KineticHub::clearFunc( const Conn& c )
 {
 	// cout << "Starting clearFunc for " << c.targetElement()->name() << endl;
-	static const Finfo* molFinfo = initKineticHubCinfo()->findFinfo( "molSolve" );
-	static const Finfo* reacFinfo = initKineticHubCinfo()->findFinfo( "reacSolve" );
-	static const Finfo* enzFinfo = initKineticHubCinfo()->findFinfo( "enzSolve" );
 	Element* e = c.targetElement();
 
 	// First unzombify all targets
 	vector< Conn > list;
 	vector< Conn >::iterator i;
 
-	molFinfo->outgoingConns( e, list );
-	// cout << "clearFunc: molFinfo unzombified " << list.size() << " elements\n";
-	molFinfo->dropAll( e );
+	molSolveFinfo->outgoingConns( e, list );
+	// cout << "clearFunc: molSolveFinfo unzombified " << list.size() << " elements\n";
+	molSolveFinfo->dropAll( e );
 	for_each ( list.begin(), list.end(), unzombify );
-	/*
-	for ( i = elist->begin(); i != elist->end(); i++ ) {
-		zombify( hub, *i, molSolveFinfo, &molZombieFinfo );
-		redirectDynamicMessages( *i );
-	}
-	*/
 
-	reacFinfo->outgoingConns( e, list );
+	reacSolveFinfo->outgoingConns( e, list );
 	// cout << "clearFunc: reacFinfo unzombified " << list.size() << " elements\n";
-	reacFinfo->dropAll( e );
+	reacSolveFinfo->dropAll( e );
 	for_each ( list.begin(), list.end(), unzombify );
 
-	enzFinfo->outgoingConns( e, list );
+	enzSolveFinfo->outgoingConns( e, list );
 	// cout << "clearFunc: enzFinfo unzombified " << list.size() << " elements\n";
-	enzFinfo->dropAll( e );
+	enzSolveFinfo->dropAll( e );
+	for_each ( list.begin(), list.end(), unzombify );
+
+	mmEnzSolveFinfo->outgoingConns( e, list );
+	// cout << "clearFunc: mmEnzFinfo unzombified " << list.size() << " elements\n";
+	mmEnzSolveFinfo->dropAll( e );
 	for_each ( list.begin(), list.end(), unzombify );
 
 

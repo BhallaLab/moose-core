@@ -1,0 +1,23 @@
+Oct 21 2007
+
+Times in seconds.
+
+Benchmark script: kholodenko.g
+Simulator	Machine	Method	Simtime	Runtime	Flags
+MOOSE		kadam	rk5	1e7	43	Unit tests on, Assertions on.
+oldMOOSE	kadam	rk5	1e7	49
+
+Script: acc4_1.6e-21.g
+MOOSE		kadam	rk5	1000	
+oldMOOSE	kadam	rk5	1000	24
+
+
+Script: nonscaf6_1.6e-21b.g
+MOOSE		kadam	rk5	500	
+oldMOOSE	kadam	rk5	500	106
+
+
+Script: mega_1.6e-21.g
+MOOSE		kadam	rk5	20	
+oldMOOSE	kadam	rk5	20	74
+

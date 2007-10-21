@@ -51,6 +51,8 @@ class KineticManager
 		//
 		void innerSetMethod( Element* e, string value );
 		void setupSolver( Element* e );
+		void setupDt( Element* e );
+		double estimateDt( Element* e );
 		
 		///////////////////////////////////////////////////
 		// Dest function definitions
