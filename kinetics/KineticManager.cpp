@@ -12,6 +12,7 @@
 #include "moose.h"
 #include "setgetLookup.h"
 #include "../element/Neutral.h"
+#include "../element/Wildcard.h"
 #include <math.h>
 #include "KineticManager.h"
 
@@ -53,6 +54,36 @@ const Cinfo* initKineticManagerCinfo()
 			ValueFtype1< string >::global(),
 			GFCAST( &KineticManager::getMethod ), 
 			RFCAST( &KineticManager::setMethod )
+		),
+		new ValueFinfo( "variableDt", 
+			ValueFtype1< bool >::global(),
+			GFCAST( &KineticManager::getVariableDt ), 
+			dummyFunc
+		),
+		new ValueFinfo( "singleParticle", 
+			ValueFtype1< bool >::global(),
+			GFCAST( &KineticManager::getSingleParticle ), 
+			dummyFunc
+		),
+		new ValueFinfo( "multiscale", 
+			ValueFtype1< bool >::global(),
+			GFCAST( &KineticManager::getMultiscale ), 
+			dummyFunc
+		),
+		new ValueFinfo( "implicit", 
+			ValueFtype1< bool >::global(),
+			GFCAST( &KineticManager::getImplicit ), 
+			dummyFunc
+		),
+		new ValueFinfo( "description", 
+			ValueFtype1< string >::global(),
+			GFCAST( &KineticManager::getDescription ), 
+			dummyFunc
+		),
+		new ValueFinfo( "recommendedDt", 
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticManager::getRecommendedDt ), 
+			dummyFunc
 		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -239,6 +270,41 @@ string KineticManager::getMethod( const Element* e )
 	return static_cast< KineticManager* >( e->data() )->method_;
 }
 
+bool KineticManager::getVariableDt( const Element* e )
+{
+	return static_cast< KineticManager* >( e->data() )->variableDt_;
+}
+
+bool KineticManager::getSingleParticle( const Element* e )
+{
+	return static_cast< KineticManager* >( e->data() )->singleParticle_;
+}
+
+bool KineticManager::getMultiscale( const Element* e )
+{
+	return static_cast< KineticManager* >( e->data() )->multiscale_;
+}
+
+bool KineticManager::getImplicit( const Element* e )
+{
+	return static_cast< KineticManager* >( e->data() )->implicit_;
+}
+
+string KineticManager::getDescription( const Element* e )
+{
+	return static_cast< KineticManager* >( e->data() )->description_;
+}
+
+double KineticManager::getRecommendedDt( const Element* e )
+{
+	return static_cast< KineticManager* >( e->data() )->recommendedDt_;
+}
+
+
+//////////////////////////////////////////////////////////////////
+// Here we set up some of the messier inner functions.
+//////////////////////////////////////////////////////////////////
+
 void KineticManager::innerSetMethod( Element* e, string value )
 {
 	map< string, MethodInfo >::iterator i = methodMap_.find( value );
@@ -250,6 +316,7 @@ void KineticManager::innerSetMethod( Element* e, string value )
 		multiscale_ = i->second.isMultiscale;
 		singleParticle_ = i->second.isSingleParticle;
 		implicit_ = i->second.isImplicit;
+		description_ = i->second.description;
 		auto_ = 0;
 		setupSolver( e );
 	} else {
@@ -314,16 +381,6 @@ Id gillespieSetup( Element* e, const string& method )
 	return Id();
 }
 
-/**
- * This function figures out an appropriate dt for a fixed timestep 
- * method. It does so by estimating the permissible ( default 1%) error 
- * assuming a forward Euler advance.
- * \todo Currently just a dummy function.
- */
-double KineticManager::estimateDt( Element* e ) 
-{
-	return 0.01;	
-}
 
 void KineticManager::setupSolver( Element* e )
 {
@@ -356,6 +413,8 @@ void KineticManager::setupDt( Element* e )
 	};
 	static unsigned int numFixedDtMethods = 
 		sizeof( fixedDtMethods ) / sizeof( char* );
+	static const double EULER_ACCURACY = 0.01; 
+		// Actually this is pretty tight for exponential Euler
 
 	Id cj( "/sched/cj" );
 	Id t0( "/sched/cj/t0" );
@@ -365,21 +424,28 @@ void KineticManager::setupDt( Element* e )
 	assert( t0.good() );
 	assert( t1.good() );
 
+	Element* elm;
+	string field;
+	double dt = estimateDt( e, &elm, field, EULER_ACCURACY );
+
 	for ( unsigned int i = 0; i < numFixedDtMethods; i++ ) {
 		if ( method_ == fixedDtMethods[i] ) {
-			double dt = estimateDt( e );
 			set< double >( t0(), "dt", dt );
 			set< double >( t1(), "dt", dt );
 			return;
 		}
 	}
 
-	double dt = 1.0;
+	Id integ( e->id().path() + "/solve/integ" );
+	assert( integ.good() );
+	set< double >( integ(), "internalDt", dt );
+
+	double plotDt = 1.0;
 	if ( t2.good() ) {
-		get< double >( t2(), "dt", dt );
+		get< double >( t2(), "dt", plotDt );
 	}
-	set< double >( t0(), "dt", dt );
-	set< double >( t1(), "dt", dt );
+	set< double >( t0(), "dt", plotDt );
+	set< double >( t1(), "dt", plotDt );
 	set( cj(), "resched" );
 }
 
@@ -417,74 +483,191 @@ void KineticManager::processFunc( const Conn& c, ProcInfo info )
 
 }
 
-#ifdef DO_UNIT_TESTS
-/*
-#include "../element/Neutral.h"
-#include "Reaction.h"
+//////////////////////////////////////////////////////////////////
+//
+// Here we have a set of utility functions to estimate a suitable
+// dt for the simulation. Needed for fixed-timestep methods, but
+// also useful to set a starting timestep for variable timestep methods.
+//
+//////////////////////////////////////////////////////////////////
 
-void testKineticManager()
+/**
+ * Returns largest propensity for a reaction Element e. Direction of
+ * reaction calculation is set by the isPrd flag.
+ */
+double KineticManager::findReacPropensity( Element* e, bool isPrd ) const
 {
-	cout << "\nTesting KineticManager" << flush;
+	static const Cinfo* rCinfo = Cinfo::find( "Reaction" );
+	static const Cinfo* mCinfo = Cinfo::find( "Molecule" );
+	static const Finfo* substrateFinfo = rCinfo->findFinfo( "sub" );
+	static const Finfo* productFinfo = rCinfo->findFinfo( "prd" );
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root() );
-	Element* m0 = Neutral::create( "KineticManager", "m0", n );
-	ASSERT( m0 != 0, "creating kineticManager" );
-	Element* m1 = Neutral::create( "KineticManager", "m1", n );
-	ASSERT( m1 != 0, "creating kineticManager" );
-	Element* r0 = Neutral::create( "Reaction", "r0", n );
-	ASSERT( r0 != 0, "creating reaction" );
+	assert( e->cinfo()->isA( rCinfo ) );
 
 	bool ret;
+	double prop;
+	if ( isPrd )
+		ret = get< double >( e, "kb", prop );
+	else 
+		ret = get< double >( e, "kf", prop );
+	assert( ret );
+	double min = 1.0e10;
+	double mval;
 
-	ProcInfoBase p;
-	Conn cm0( m0, 0 );
-	Conn cm1( m1, 0 );
-	Conn cr0( r0, 0 );
-	p.dt_ = 0.001;
-	set< double >( m0, "concInit", 1.0 );
-	set< int >( m0, "mode", 0 );
-	set< double >( m1, "concInit", 0.0 );
-	set< int >( m1, "mode", 0 );
-	set< double >( r0, "kf", 0.1 );
-	set< double >( r0, "kb", 0.1 );
-	ret = m0->findFinfo( "reac" )->add( m0, r0, r0->findFinfo( "sub" ) );
-	ASSERT( ret, "adding msg 0" );
-	ret = m1->findFinfo( "reac" )->add( m1, r0, r0->findFinfo( "prd" ) );
-	ASSERT( ret, "adding msg 1" );
+	vector< Conn > list;
+	vector< Conn >::iterator i;
+	if ( isPrd )
+		productFinfo->incomingConns( e, list );
+	else
+		substrateFinfo->incomingConns( e, list );
 
-	// First, test charging curve for a single compartment
-	// We want our charging curve to be a nice simple exponential
-	// n = 0.5 + 0.5 * exp( - t * 0.2 );
-	double delta = 0.0;
-	double n0 = 1.0;
-	double n1 = 0.0;
-	double y = 0.0;
-	double y0 = 0.0;
-	double y1 = 0.0;
-	double tau = 5.0;
-	double nMax = 0.5;
-	Reaction::reinitFunc( cr0, &p );
-	KineticManager::reinitFunc( cm0, &p );
-	KineticManager::reinitFunc( cm1, &p );
-	for ( p.currTime_ = 0.0; p.currTime_ < 20.0; p.currTime_ += p.dt_ ) 
-	{
-		n0 = KineticManager::getN( m0 );
-		n1 = KineticManager::getN( m1 );
-//		cout << p.currTime_ << "	" << n1 << endl;
-
-		y = nMax * exp( -p.currTime_ / tau );
-		y0 = 0.5 + y;
-		y1 = 0.5 - y;
-		delta += ( n0 - y0 ) * ( n0 - y0 );
-		delta += ( n1 - y1 ) * ( n1 - y1 );
-		Reaction::processFunc( cr0, &p );
-		KineticManager::processFunc( cm0, &p );
-		KineticManager::processFunc( cm1, &p );
+	for( i = list.begin(); i != list.end(); i++ ) {
+		Element* m = i->targetElement();
+		assert( m->cinfo()->isA( mCinfo ) );
+		ret = get< double >( m, "nInit", mval );
+		// should really be 'n' but there is a problem with initialization
+		// of the S_ array if we want to be able to do on-the-fly solver
+		// rebuilding.
+		assert( ret );
+		prop *= mval;
+		if ( min > mval )
+			min = mval;
 	}
-	ASSERT( delta < 5.0e-6, "Testing kineticManager and reacn" );
-
-	// Get rid of all the compartments.
-	set( n, "destroy" );
+	if ( min > 0.0 )
+		return prop / min;
+	else
+		return 0.0;
 }
-*/
-#endif
+
+/**
+ * Returns largest propensity for a reaction Element e. Direction of
+ * reaction calculation is set by the isPrd flag.
+ */
+double KineticManager::findEnzSubPropensity( Element* e ) const
+{
+	static const Cinfo* eCinfo = Cinfo::find( "Enzyme" );
+	static const Cinfo* mCinfo = Cinfo::find( "Molecule" );
+	static const Finfo* substrateFinfo = eCinfo->findFinfo( "sub" );
+	static const Finfo* enzymeFinfo = eCinfo->findFinfo( "enz" );
+	static const Finfo* intramolFinfo = eCinfo->findFinfo( "intramol" );
+
+	assert( e->cinfo()->isA( eCinfo ) );
+
+	bool ret;
+	double prop;
+	ret = get< double >( e, "k1", prop );
+	assert( ret );
+	double min = 1.0e10;
+	double mval;
+
+	vector< Conn > list;
+	vector< Conn > list2;
+	vector< Conn >::iterator i;
+	substrateFinfo->incomingConns( e, list );
+	if ( list.size() == 0 ) // It is possible to have a dangling enzyme
+		return 0.0;
+	enzymeFinfo->incomingConns( e, list2 );
+	assert( list2.size() == 1 );
+	list.insert( list.end(), list2.begin(), list2.end() );
+
+	for( i = list.begin(); i != list.end(); i++ ) {
+		Element* m = i->targetElement();
+		assert( m->cinfo()->isA( mCinfo ) );
+		ret = get< double >( m, "nInit", mval );
+		assert( ret );
+		prop *= mval;
+		if ( min > mval )
+			min = mval;
+	}
+
+	intramolFinfo->incomingConns( e, list );
+	for( i = list.begin(); i != list.end(); i++ ) {
+		Element* m = i->targetElement();
+		assert( m->cinfo()->isA( mCinfo ) );
+		ret = get< double >( m, "nInit", mval );
+		assert( ret );
+		if ( mval > 0.0 )
+			prop /= mval;
+	}
+	if ( min > 0.0 )
+		return prop / min;
+	else
+		return 0.0;
+}
+
+double KineticManager::findEnzPrdPropensity( Element* e ) const
+{
+	static const Cinfo* eCinfo = Cinfo::find( "Enzyme" );
+	assert( e->cinfo()->isA( eCinfo ) );
+
+	bool ret;
+	double k2;
+	double k3;
+	ret = get< double >( e, "k2", k2 );
+	assert( ret );
+	ret = get< double >( e, "k3", k3 );
+	assert( ret );
+	return k2 + k3;
+}
+
+/**
+ * This function figures out an appropriate dt for a fixed timestep 
+ * method. It does so by estimating the permissible ( default 1%) error 
+ * assuming a forward Euler advance.
+ * Also returns the element and field that have the highest propensity,
+ * that is, the shortest dt.
+ */
+double KineticManager::estimateDt( Element* mgr, 
+	Element** elm, string& field, double error ) 
+{
+	static const Cinfo* eCinfo = Cinfo::find( "Enzyme" );
+	static const Cinfo* rCinfo = Cinfo::find( "Reaction" );
+
+	assert( error > 0.0 );
+	vector< Element* > elist;
+	vector< Element* >::iterator i;
+
+	if ( wildcardRelativeFind( mgr, "##", elist, 1 ) == 0 ) {
+		*elm = 0;
+		field = "";
+		return 1.0;
+	}
+
+	double prop = 0.0;
+	double maxProp = 0.0;
+
+	for ( i = elist.begin(); i != elist.end(); i++ )
+	{
+		if ( ( *i )->cinfo()->isA( rCinfo ) ) {
+			prop = findReacPropensity( *i, 0 );
+			if ( maxProp < prop ) {
+				maxProp = prop;
+				*elm = *i;
+				field = "kf";
+			}
+			prop = findReacPropensity( *i, 1 );
+			if ( maxProp < prop ) {
+				maxProp = prop;
+				*elm = *i;
+				field = "kb";
+			}
+		} else if ( ( *i )->cinfo()->isA( eCinfo ) ) {
+			prop = findEnzSubPropensity( *i );
+			if ( maxProp < prop ) {
+				maxProp = prop;
+				*elm = *i;
+				field = "k1";
+			}
+			prop = findEnzPrdPropensity( *i );
+			if ( maxProp < prop ) {
+				maxProp = prop;
+				*elm = *i;
+				field = "k3";
+			}
+		}
+	}
+
+	recommendedDt_ = sqrt( error ) / maxProp;
+
+	return recommendedDt_;
+}

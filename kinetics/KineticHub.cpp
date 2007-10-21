@@ -776,7 +776,7 @@ double KineticHub::getReacKb( const Element* e )
 void KineticHub::setEnzK1( const Conn& c, double value )
 {
 	unsigned int index;
-	cout << "in setEnzK1\n";
+	// cout << "in setEnzK1\n";
 	KineticHub* kh = getHubFromZombie( 
 		c.targetElement(), enzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
@@ -795,7 +795,7 @@ void KineticHub::setEnzK1( const Conn& c, double value )
 double KineticHub::getEnzK1( const Element* e )
 {
 	unsigned int index;
-	cout << "in getEnzK1\n";
+	// cout << "in getEnzK1\n";
 	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
@@ -809,7 +809,7 @@ double KineticHub::getEnzK1( const Element* e )
 void KineticHub::setEnzK2( const Conn& c, double value )
 {
 	unsigned int index;
-	cout << "in setEnzK2\n";
+	// cout << "in setEnzK2\n";
 	KineticHub* kh = getHubFromZombie( 
 		c.targetElement(), enzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
@@ -824,7 +824,7 @@ void KineticHub::setEnzK2( const Conn& c, double value )
 double KineticHub::getEnzK2( const Element* e )
 {
 	unsigned int index;
-	cout << "in getEnzK2\n";
+	// cout << "in getEnzK2\n";
 	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
@@ -838,7 +838,7 @@ double KineticHub::getEnzK2( const Element* e )
 void KineticHub::setEnzK3( const Conn& c, double value )
 {
 	unsigned int index;
-	cout << "in setEnzK3\n";
+	// cout << "in setEnzK3\n";
 	KineticHub* kh = getHubFromZombie( 
 		c.targetElement(), enzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
@@ -853,7 +853,7 @@ void KineticHub::setEnzK3( const Conn& c, double value )
 double KineticHub::getEnzK3( const Element* e )
 {
 	unsigned int index;
-	cout << "in getEnzK3\n";
+	// cout << "in getEnzK3\n";
 	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
@@ -869,7 +869,7 @@ double KineticHub::getEnzK3( const Element* e )
 void KineticHub::setEnzKcat( const Conn& c, double value )
 {
 	unsigned int index;
-	cout << "in setEnzKcat\n";
+	// cout << "in setEnzKcat\n";
 	KineticHub* kh = getHubFromZombie( 
 		c.targetElement(), enzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
@@ -897,7 +897,7 @@ void KineticHub::setEnzKcat( const Conn& c, double value )
 void KineticHub::setEnzKm( const Conn& c, double value )
 {
 	unsigned int index;
-	cout << "in setEnzKm\n";
+	// cout << "in setEnzKm\n";
 	KineticHub* kh = getHubFromZombie( 
 		c.targetElement(), enzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
@@ -918,7 +918,7 @@ void KineticHub::setEnzKm( const Conn& c, double value )
 double KineticHub::getEnzKm( const Element* e )
 {
 	unsigned int index;
-	cout << "in getEnzKm\n";
+	// cout << "in getEnzKm\n";
 	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
@@ -941,12 +941,12 @@ double KineticHub::getEnzKm( const Element* e )
 void KineticHub::setMmEnzK1( const Conn& c, double value )
 {
 	unsigned int index;
-	cout << "in setEnzK1\n";
+	// cout << "in setEnzK1\n";
 	KineticHub* kh = getHubFromZombie( 
 		c.targetElement(), enzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
-		assert ( index < kh->enzMap_.size() );
-		index = kh->enzMap_[ index ];
+		assert ( index < kh->mmEnzMap_.size() );
+		index = kh->mmEnzMap_[ index ];
 		assert ( index < kh->rates_->size() );
 		if ( value > 0.0 ) {
 			double oldK1 = Enzyme::getKm( c.targetElement() );
@@ -969,12 +969,12 @@ double KineticHub::getMmEnzK1( const Element* e )
 void KineticHub::setMmEnzK2( const Conn& c, double value )
 {
 	unsigned int index;
-	cout << "in setEnzK2\n";
+	// cout << "in setEnzK2\n";
 	KineticHub* kh = getHubFromZombie( 
 		c.targetElement(), enzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
-		assert ( index < kh->enzMap_.size() );
-		index = kh->enzMap_[ index ];
+		assert ( index < kh->mmEnzMap_.size() );
+		index = kh->mmEnzMap_[ index ];
 		assert ( index < kh->rates_->size() );
 		Element* e = c.targetElement();
 		double k1 = Enzyme::getK1( e );
@@ -995,12 +995,12 @@ double KineticHub::getMmEnzK2( const Element* e )
 void KineticHub::setMmEnzK3( const Conn& c, double value )
 {
 	unsigned int index;
-	cout << "in setEnzK3\n";
+	// cout << "in setEnzK3\n";
 	KineticHub* kh = getHubFromZombie( 
 		c.targetElement(), enzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
-		assert ( index < kh->enzMap_.size() );
-		index = kh->enzMap_[ index ];
+		assert ( index < kh->mmEnzMap_.size() );
+		index = kh->mmEnzMap_[ index ];
 		assert ( index < kh->rates_->size() );
 		Element* e = c.targetElement();
 		double k1 = Enzyme::getK1( e );
@@ -1016,11 +1016,11 @@ void KineticHub::setMmEnzK3( const Conn& c, double value )
 double KineticHub::getMmEnzKcat( const Element* e )
 {
 	unsigned int index;
-	cout << "in getEnzK3\n";
-	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
+	// cout << "in getMmEnzKcat\n";
+	KineticHub* kh = getHubFromZombie( e, mmEnzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
-		assert ( index < kh->enzMap_.size() );
-		index = kh->enzMap_[ index ];
+		assert ( index < kh->mmEnzMap_.size() );
+		index = kh->mmEnzMap_[ index ];
 		assert ( index < kh->rates_->size() );
 		return ( *kh->rates_ )[ index ]->getR2();
 	}
@@ -1030,12 +1030,12 @@ double KineticHub::getMmEnzKcat( const Element* e )
 void KineticHub::setMmEnzKcat( const Conn& c, double value )
 {
 	unsigned int index;
-	cout << "in setEnzKcat\n";
+	// cout << "in setEnzKcat\n";
 	KineticHub* kh = getHubFromZombie( 
-		c.targetElement(), enzSolveFinfo, index );
+		c.targetElement(), mmEnzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
-		assert ( index < kh->enzMap_.size() );
-		index = kh->enzMap_[ index ];
+		assert ( index < kh->mmEnzMap_.size() );
+		index = kh->mmEnzMap_[ index ];
 		assert ( index < kh->rates_->size() );
 		if ( value > 0.0 )
 			( *kh->rates_ )[index]->setR2( value );
@@ -1049,12 +1049,12 @@ void KineticHub::setMmEnzKcat( const Conn& c, double value )
 void KineticHub::setMmEnzKm( const Conn& c, double value )
 {
 	unsigned int index;
-	cout << "in setEnzKm\n";
+	// cout << "in setEnzKm\n";
 	KineticHub* kh = getHubFromZombie( 
-		c.targetElement(), enzSolveFinfo, index );
+		c.targetElement(), mmEnzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
-		assert ( index < kh->enzMap_.size() );
-		index = kh->enzMap_[ index ];
+		assert ( index < kh->mmEnzMap_.size() );
+		index = kh->mmEnzMap_[ index ];
 		assert ( index < kh->rates_->size() );
 		if ( value > 0.0 )
 			( *kh->rates_ )[index]->setR1( value );
@@ -1065,11 +1065,11 @@ void KineticHub::setMmEnzKm( const Conn& c, double value )
 double KineticHub::getMmEnzKm( const Element* e )
 {
 	unsigned int index;
-	cout << "in getEnzKm\n";
-	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
+	// cout << "in getEnzKm\n";
+	KineticHub* kh = getHubFromZombie( e, mmEnzSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
-		assert ( index < kh->enzMap_.size() );
-		index = kh->enzMap_[ index ];
+		assert ( index < kh->mmEnzMap_.size() );
+		index = kh->mmEnzMap_[ index ];
 		assert ( index < kh->rates_->size() );
 		return ( *kh->rates_ )[index]->getR1();
 	}
