@@ -483,11 +483,9 @@ void testNeutral()
 
 
 		Element* n1 = neutralCinfo->create( Id::scratchId(), "n1" );
-
-		ASSERT( childSrcFinfo->add( 
-			Element::root(), n1, n1->findFinfo( "child" ) ), 
-				"adding n1"
-			);
+		bool ret = childSrcFinfo->add( 
+			Element::root(), n1, n1->findFinfo( "child" ) );
+		ASSERT( ret, "adding n1");
 
 		string s;
 		get< string >( n1, n1->findFinfo( "name" ), s );
@@ -499,28 +497,23 @@ void testNeutral()
 
 		Element* n2 = neutralCinfo->create( Id::scratchId(), "n2" );
 		
-		ASSERT( childSrcFinfo->add( n1, n2, n2->findFinfo( "child" ) ),
-						"adding child"
-			  );
+		ret = childSrcFinfo->add( n1, n2, n2->findFinfo( "child" ) );
+		ASSERT( ret , "adding child");
 
 		Element* n3 = neutralCinfo->create( Id::scratchId(), "n3" );
 		
-		ASSERT( childSrcFinfo->add( n1, n3, n3->findFinfo( "child" ) ),
-						"adding child"
-			  );
+		ret = childSrcFinfo->add( n1, n3, n3->findFinfo( "child" ) );
+		ASSERT( ret, "adding child");
 
 		Element* n21 = neutralCinfo->create( Id::scratchId(), "n21" );
 		
-		ASSERT( childSrcFinfo->add( n2, n21, n21->findFinfo( "child" ) ),
-						"adding child"
-			  );
+		ret = childSrcFinfo->add( n2, n21, n21->findFinfo( "child" ) );
+		ASSERT( ret, "adding child");
 
 		Element* n22 = neutralCinfo->create( Id::scratchId(), "n22" );
 		
-		ASSERT( childSrcFinfo->add(
-								n2, n22, n22->findFinfo( "child" ) ),
-						"adding child"
-			  );
+		ret = childSrcFinfo->add( n2, n22, n22->findFinfo( "child" ) );
+		ASSERT( ret, "adding child");
 
 		ASSERT( n1->connSize() == 3, "count children and parent" );
 
@@ -571,7 +564,7 @@ void testNeutral()
 		ASSERT( initialNumInstances - SimpleElement::numInstances == 1,
 						"Check that foo is made" );
 		ASSERT( foo->name() == "foo", "Neutral::create" );
-		bool ret = set( n1, "destroy" );
+		ret = set( n1, "destroy" );
 		ASSERT( ret, "cleaning up n1" );
 
 		//
