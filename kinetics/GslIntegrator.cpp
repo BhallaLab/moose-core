@@ -64,6 +64,11 @@ const Cinfo* initGslIntegratorCinfo()
 			GFCAST( &GslIntegrator::getAbsoluteAccuracy ), 
 			RFCAST( &GslIntegrator::setAbsoluteAccuracy )
 		),
+		new ValueFinfo( "internalDt", 
+			ValueFtype1< double >::global(),
+			GFCAST( &GslIntegrator::getInternalDt ), 
+			RFCAST( &GslIntegrator::setInternalDt )
+		),
 
 		///////////////////////////////////////////////////////
 		// DestFinfo definitions
@@ -119,7 +124,7 @@ GslIntegrator::GslIntegrator()
 	nVarMols_ = 0;
 	absAccuracy_ = 1.0e-6;
 	relAccuracy_ = 1.0e-6;
-	internalStepSize_ = 1.0e-2;
+	internalStepSize_ = 1.0e-4;
 	y_ = 0;
         gslEvolve_ = NULL;
         gslControl_ = NULL;
@@ -195,6 +200,15 @@ double GslIntegrator::getAbsoluteAccuracy( const Element* e )
 void GslIntegrator::setAbsoluteAccuracy( const Conn& c, double value )
 {
 	static_cast< GslIntegrator* >( c.data() )->absAccuracy_ = value;
+}
+
+double GslIntegrator::getInternalDt( const Element* e )
+{
+	return static_cast< const GslIntegrator* >( e->data() )->internalStepSize_;
+}
+void GslIntegrator::setInternalDt( const Conn& c, double value )
+{
+	static_cast< GslIntegrator* >( c.data() )->internalStepSize_ = value;
 }
 
 ///////////////////////////////////////////////////

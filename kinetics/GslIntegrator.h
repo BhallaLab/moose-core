@@ -26,6 +26,8 @@ class GslIntegrator
 		static void setRelativeAccuracy( const Conn& c, double value );
 		static double getAbsoluteAccuracy( const Element* e );
 		static void setAbsoluteAccuracy( const Conn& c, double value );
+		static double getInternalDt( const Element* e );
+		static void setInternalDt( const Conn& c, double value );
 
 ///////////////////////////////////////////////////
 // Dest function definitions
