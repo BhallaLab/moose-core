@@ -314,7 +314,13 @@ Id gillespieSetup( Element* e, const string& method )
 	return Id();
 }
 
-double estimateDt( Element* e ) 
+/**
+ * This function figures out an appropriate dt for a fixed timestep 
+ * method. It does so by estimating the permissible ( default 1%) error 
+ * assuming a forward Euler advance.
+ * \todo Currently just a dummy function.
+ */
+double KineticManager::estimateDt( Element* e ) 
 {
 	return 0.01;	
 }
@@ -328,13 +334,53 @@ void KineticManager::setupSolver( Element* e )
 				set( solveId(), "destroy" );
 			}
 		}
-		//double dt = estimateDt( e );
 	} else if ( stochastic_ == 0 && multiscale_ == 0 ) {
 		// Use a GSL deterministic method.
 		Id solveId = gslSetup( e, method_ );
 	} else if ( stochastic_ == 1 && multiscale_ == 0 && singleParticle_ == 0 ) {
 		Id solveId = gillespieSetup( e, method_ );
 	}
+}
+
+/**
+ * This function sets up dts to use depending on method. Where possible
+ * (i.e., variable timestep methods) we would like to use the longest
+ * possible dt, which is the rate of
+ * graphing. But there are complications yet to be sorted out, for the
+ * case of external tables.
+ */
+void KineticManager::setupDt( Element* e )
+{
+	static char* fixedDtMethods[] = {
+		"ee", 
+	};
+	static unsigned int numFixedDtMethods = 
+		sizeof( fixedDtMethods ) / sizeof( char* );
+
+	Id cj( "/sched/cj" );
+	Id t0( "/sched/cj/t0" );
+	Id t1( "/sched/cj/t1" );
+	Id t2( "/sched/cj/t2" );
+	assert( cj.good() );
+	assert( t0.good() );
+	assert( t1.good() );
+
+	for ( unsigned int i = 0; i < numFixedDtMethods; i++ ) {
+		if ( method_ == fixedDtMethods[i] ) {
+			double dt = estimateDt( e );
+			set< double >( t0(), "dt", dt );
+			set< double >( t1(), "dt", dt );
+			return;
+		}
+	}
+
+	double dt = 1.0;
+	if ( t2.good() ) {
+		get< double >( t2(), "dt", dt );
+	}
+	set< double >( t0(), "dt", dt );
+	set< double >( t1(), "dt", dt );
+	set( cj(), "resched" );
 }
 
 ///////////////////////////////////////////////////
@@ -357,6 +403,7 @@ void KineticManager::reinitFunc( const Conn& c, ProcInfo info )
 void KineticManager::reinitFuncLocal( Element* e )
 {
 	setupSolver( e );
+	setupDt( e );
 }
 
 /**
