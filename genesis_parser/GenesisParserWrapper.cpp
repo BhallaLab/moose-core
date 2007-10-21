@@ -2217,7 +2217,7 @@ void do_addfield( int argc, const char** const argv, Id s )
 
 void do_loadtab ( int argc, const char** const argv, Id s )
 {
-	cout << "in do_loadtab: argc = " << argc << endl;
+	// cout << "in do_loadtab: argc = " << argc << endl;
 	string line = "";
 	for ( int i = 1 ; i < argc; i++ ) {
 		line.append( argv[i] );
