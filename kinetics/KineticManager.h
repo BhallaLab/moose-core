@@ -47,12 +47,17 @@ class KineticManager
 		static bool getMultiscale( const Element* e );
 		static bool getImplicit( const Element* e );
 		static string getDescription( const Element* e );
+		static double getRecommendedDt( const Element* e );
 		// static string getMethodList( const Element* e );
 		//
 		void innerSetMethod( Element* e, string value );
 		void setupSolver( Element* e );
 		void setupDt( Element* e );
-		double estimateDt( Element* e );
+		double estimateDt( Element* e, Element** elm, string& field, 
+			double error );
+		double findEnzSubPropensity( Element* e ) const;
+		double findEnzPrdPropensity( Element* e ) const;
+		double findReacPropensity( Element* e, bool isPrd ) const;
 		
 		///////////////////////////////////////////////////
 		// Dest function definitions
@@ -89,6 +94,8 @@ class KineticManager
 		bool multiscale_; // Default False
 		bool singleParticle_; // Default False
 		static map< string, MethodInfo > methodMap_;
+		string description_;
+		double recommendedDt_;
 };
 
 #endif // _KINETIC_MANAGER_H
