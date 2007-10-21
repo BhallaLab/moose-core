@@ -4490,5 +4490,25 @@ But the other two benchmark tests still fail.
 
 Set up the benchmark directory with tests, a preliminary RESULTS file,
 and outputs computed by the old moose.
+Checked in as revision 220, in serial compile form with debugging.
+
+I put in a check for the nan in the sparse matrix.
+I think the error is simply because the initial dt is too big.
+
+Yup. Confirmed. For the nonscaf6 benchmark simulation the internal dt 
+settles down to about 0.6 msec. Ugh. The actual location of the internal
+dt is in the GslIntegrator class.
+
+Put in a fair amount of work to implement the estimation of required dt.
+Mostly works, but there is a problem with molecule values which are redirected
+back to the solver S_ array, which is not initialized. However, if I 
+explicitly initialize it at this point the solver setup becomes impossible
+to use on the fly during runtime.
+I should set up new S_ values from the objects themselves, but the same
+initialization issue applies.
+For now I'll set up the dts based on initial conditions. Poor compromise.
+
+Anyway, it now handles the nonscaf6 case with an intelligent guess for
+a starting dt. Still barfs at the mega.g simulation, but time to check it in.
 
 =============================================================================
