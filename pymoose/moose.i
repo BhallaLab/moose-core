@@ -5,10 +5,11 @@
 %{
 	#include "../basecode/header.h"
 	#include "../basecode/moose.h"
-//	#include "../basecode/Id.h"
 	#include "PyMooseContext.h"
 	#include "PyMooseBase.h"
 	#include "Neutral.h"
+	#include "Class.h"
+	#include "Cell.h"
 	#include "Compartment.h"
 	#include "Tick.h" 
 	#include "ClockJob.h" 
@@ -30,11 +31,7 @@
 	#include "Reaction.h"
 	#include "Stoich.h"
 	#include "../kinetics/SparseMatrix.h"
-/*	#include "TickTest.h"
-	#include "Sched0.h"
-	#include "Sched1.h"
-	#include "Sched2.h"
-*/
+	#include "../utility/utility.h"
 %}
 %feature("autodoc", "1");
 %template(uint_vector) std::vector<unsigned int>;
@@ -44,7 +41,8 @@
 %template(Id_vector) std::vector<Id>;
 %include "../basecode/header.h"
 %include "../basecode/moose.h"
-
+%ignore mooseInit;
+%include "../utility/utility.h"
 %ignore main; // this does not work, friend main() seems to interfere inspite of otherwise being stated in documentation
 %ignore Id::operator();
 %ignore operator<<;
@@ -66,6 +64,14 @@
 %attribute(Neutral, int, childSrc, __get_childSrc, __set_childSrc)
 %attribute(Neutral, int, child, __get_child, __set_child)
 
+%include "Class.h"
+%attribute(Class, std::string, name, __get_name, __set_name)
+%attribute(Class, std::string, author, __get_author)
+%attribute(Class, std::string, description, __get_description)
+%attribute(Class, unsigned int, tick, __get_tick, __set_tick)
+%attribute(Class, unsigned int, stage, __get_stage, __set_stage)
+
+%include "Cell.h"
 %include "Tick.h"
 %attribute(ClockTick, double, dt, __get_dt, __set_dt)
 %attribute(ClockTick, int, stage, __get_stage, __set_stage)
