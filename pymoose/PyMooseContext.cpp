@@ -34,6 +34,8 @@ const Cinfo* initPyMooseContextCinfo()
             new SrcFinfo( "cwe", Ftype1< Id >::global() ),
             // 2. Getting cwe back: First trigger a request
             new SrcFinfo( "trigCwe", Ftype0::global() ),
+            // Send out cwe info
+//            new DestFinfo(
             // 3. Then receive the cwe info
             new DestFinfo( "recvCwe",
                            Ftype1< Id >::global(),
@@ -58,6 +60,12 @@ const Cinfo* initPyMooseContextCinfo()
             // 6. send out the request.
             new SrcFinfo( "create",
                           Ftype3< string, string, Id >::global() ),
+            new SrcFinfo( "createArray",
+                          Ftype4< string, string, Id, vector <double> >::global() ),
+            new SrcFinfo( "planarconnect", Ftype3< string, string, double >::global() ),
+            new SrcFinfo( "planardelay", Ftype2< string, double >::global() ),
+            new SrcFinfo( "planarweight", Ftype2< string, double >::global() ),
+	
             // 7. receive the returned object id.
             new DestFinfo( "recvCreate",
                            Ftype1< Id >::global(),
@@ -126,6 +134,8 @@ const Cinfo* initPyMooseContextCinfo()
             // 23. This function is for copying an element tree, complete with
             // messages, onto another.
             new SrcFinfo( "copy", Ftype3< Id, Id, string >::global() ),
+            new SrcFinfo( "copyIntoArray", Ftype4< Id, Id, string, vector <double> >::global() ),
+	
             // 24. This function is for moving element trees.
             new SrcFinfo( "move", Ftype3< Id, Id, string >::global() ),
 
@@ -163,13 +173,26 @@ const Cinfo* initPyMooseContextCinfo()
             // 33. simundump
             new SrcFinfo( "simUndump",
                           Ftype1< string >::global() ),
-
+            new SrcFinfo( "openfile", 
+                          Ftype2< string, string >::global() ),
+            new SrcFinfo( "writefile", 
+                          Ftype2< string, string >::global() ),
+            new SrcFinfo( "listfiles", 
+                          Ftype0::global() ),
+            new SrcFinfo( "closefile", 
+                          Ftype1< string >::global() ),
+            new SrcFinfo( "readfile", 
+                          Ftype2< string, bool >::global() ),
+	
             ///////////////////////////////////////////////////////////////
             // Setting field values for a vector of objects
             ///////////////////////////////////////////////////////////////
             // 34. Setting a vec of field values as a string: send out request:
             new SrcFinfo( "setVecField", // object, field, value 
                           Ftype3< vector< Id >, string, string >::global() ),
+            new SrcFinfo( "loadtab", 
+                          Ftype1< string >::global() ),
+
 	};
 	
     static Finfo* pyMooseContextFinfos[] =
@@ -210,6 +233,15 @@ initPyMooseContextCinfo()->getSlotIndex( "parser.trigLe" );
 
 static const unsigned int createSlot = 
 initPyMooseContextCinfo()->getSlotIndex( "parser.create" );
+static const unsigned int createArraySlot = 
+	initPyMooseContextCinfo()->getSlotIndex( "parser.createArray" );
+static const unsigned int planarconnectSlot = 
+	initPyMooseContextCinfo()->getSlotIndex( "parser.planarconnect" );
+static const unsigned int planardelaySlot = 
+	initPyMooseContextCinfo()->getSlotIndex( "parser.planardelay" );
+static const unsigned int planarweightSlot = 
+    initPyMooseContextCinfo()->getSlotIndex( "parser.planarweight" );
+
 static const unsigned int deleteSlot = 
 initPyMooseContextCinfo()->getSlotIndex( "parser.delete" );
 static const unsigned int requestFieldSlot = 
@@ -237,6 +269,8 @@ static const unsigned int listMessagesSlot =
 initPyMooseContextCinfo()->getSlotIndex( "parser.listMessages" );
 static const unsigned int copySlot = 
 initPyMooseContextCinfo()->getSlotIndex( "parser.copy" );
+static const unsigned int copyIntoArraySlot = 
+	initPyMooseContextCinfo()->getSlotIndex( "parser.copyIntoArray" );
 static const unsigned int moveSlot = 
 initPyMooseContextCinfo()->getSlotIndex( "parser.move" );
 static const unsigned int readCellSlot = 
@@ -259,10 +293,23 @@ initPyMooseContextCinfo()->getSlotIndex( "parser.simObjDump" );
 static const unsigned int simUndumpSlot = 
 initPyMooseContextCinfo()->getSlotIndex( "parser.simUndump" );
 
+
+static const unsigned int openFileSlot = 
+	initPyMooseContextCinfo()->getSlotIndex( "parser.openfile" );
+static const unsigned int writeFileSlot = 
+	initPyMooseContextCinfo()->getSlotIndex( "parser.writefile" );
+static const unsigned int listFilesSlot = 
+	initPyMooseContextCinfo()->getSlotIndex( "parser.listfiles" );
+static const unsigned int closeFileSlot = 
+	initPyMooseContextCinfo()->getSlotIndex( "parser.closefile" );
+static const unsigned int readFileSlot = 
+	initPyMooseContextCinfo()->getSlotIndex( "parser.readfile" );
 static const unsigned int setVecFieldSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser.setVecField" );
+    initPyMooseContextCinfo()->getSlotIndex( "parser.setVecField" );
 
 
+static const unsigned int loadtabSlot = 
+    initPyMooseContextCinfo()->getSlotIndex( "parser.loadtab" );
 //////////////////////////
 // Static constants
 //////////////////////////
