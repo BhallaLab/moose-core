@@ -2404,6 +2404,10 @@ int do_getsyncount( int argc, const char** const argv, Id s )
 	if (argc == 3){
 		Element* src = Id(argv[1])();
 		Element* dst = Id(argv[2])();
+		if (!(src->className () == "SpikeGen" && dst->className() == "SynChan")){
+			cout << "getsyncount:: The elements' class types are not matching" << endl;
+			return 0;
+		}
 		src->findFinfo("event")->outgoingConns(src, conn);
 		unsigned int count = 0;
 		for(size_t i = 0; i < conn.size(); i++){
@@ -2414,6 +2418,10 @@ int do_getsyncount( int argc, const char** const argv, Id s )
 	}
 	else if (argc == 2){
 		Element* src = Id(argv[1])();
+		if (src->className() != "SynChan"){
+			cout << "getsyncount:: The src element is not of type SynChan." << endl;
+			return 0;
+		}
 		src->findFinfo("event")->outgoingConns(src, conn);
 		return conn.size();
 	}
@@ -2431,6 +2439,11 @@ char* do_getsynsrc( int argc, const char** const argv, Id s ){
 	vector <Conn> conn;
 	string ret = "";
 	Element *dst = Id(argv[1])();
+	if (dst->className() != "SynChan"){
+		cout << "getsynsrc:: The element's type is not matching"<< endl;
+		string s = "";
+		return copyString(s.c_str()); 
+	}
 	dst->findFinfo("synapse")->incomingConns(dst, conn);
 	unsigned int index = atoi(argv[2]);
 	if (index >= conn.size()){/*error*/}
@@ -2450,6 +2463,11 @@ char* do_getsyndest( int argc, const char** const argv, Id s ){
 	vector <Conn> conn;
 	string ret = "";
 	Element *src = Id(argv[1])();
+	if (src->className() != "SpikeGen"){
+		cout << "getsyndest:: The element's type is not matching"<< endl;
+		string s = "";
+		return copyString(s.c_str()); 
+	}
 	src->findFinfo("event")->outgoingConns(src, conn);
 	unsigned int index = atoi(argv[2]);
 	if (index >= conn.size()){/*error*/}
@@ -2470,6 +2488,10 @@ int do_getsynindex( int argc, const char** const argv, Id s ){
 	if (src == 0 || dst == 0){
 		cout << "Wrong paths!!" << endl;
 		return -1;
+	}
+	if (!(src->className() == "SpikeGen" && dst->className() == "SynChan")){
+		cout << "getsynindex:: The elements' type is not matching"<< endl;
+		return 0;
 	}
 	src->findFinfo("event")->outgoingConns(src, conn);
 	for(size_t i = 0; i < conn.size(); i++){
@@ -2723,7 +2745,14 @@ int do_INSTANTZ(int argc, const char** const argv, Id s ){
 	return 4;
 }
 
+void do_floatformat(int argc, const char** const argv, Id s ){
+	cout << "floatformat::Not yet implemented" << endl;
+}
 
+float do_getstat(int argc, const char** const argv, Id s ){
+	cout << "getstat::Not yet implemented" << endl;
+	return 0;
+}
 
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper load command
@@ -2836,6 +2865,8 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "INSTANTX", reinterpret_cast< slifunc > ( do_INSTANTX ), "int" );
 	AddFunc( "INSTANTY", reinterpret_cast< slifunc > ( do_INSTANTY ), "int" );
 	AddFunc( "INSTANTZ", reinterpret_cast< slifunc > ( do_INSTANTZ ), "int" );
+	AddFunc( "floatformat", do_floatformat, "void" );
+	AddFunc( "getstat", reinterpret_cast< slifunc > ( do_getstat ), "float" );
 }
 
 //////////////////////////////////////////////////////////////////

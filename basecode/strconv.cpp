@@ -280,6 +280,10 @@ void parseString( const string& s, vector< string>& v,
 			v.push_back( t );
 		temp = temp.substr( pos );
 		pos = temp.find_first_not_of( separators );
+		if ( pos == string::npos) {
+			temp = "";
+			break;
+		}
 		temp = temp.substr( pos );
 		pos = temp.find_first_of( separators );
 	}
