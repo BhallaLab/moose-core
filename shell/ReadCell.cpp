@@ -72,7 +72,7 @@ Element* ReadCell::start( const string& cellpath )
 		cellpa = Element::root();
 		cellname = cellpath.substr( 1 );
 	} else {
-		cout << cellpath.substr( 0, pos ) << endl;
+		//cout << cellpath.substr( 0, pos ) << endl;
 		cellId = Id( cellpath.substr( 0, pos  ), "/" );
 		if ( cellId.bad() ) {
 			cout << "Warning: cell path '" << cellpath <<
@@ -89,7 +89,6 @@ Element* ReadCell::start( const string& cellpath )
 void ReadCell::read( const string& filename, const string& cellpath )
 {
 	ifstream fin( filename.c_str() );
-	
 	cell_ = start( cellpath );
 	if ( !cell_ ) return;
 
@@ -134,6 +133,7 @@ void ReadCell::read( const string& filename, const string& cellpath )
 				parseMode = DATA;
 		}
 	}
+	
 	cout << filename << " read: " <<
 			numCompartments_ << " compartments, " << 
 			numChannels_ << " channels, " << 
@@ -405,7 +405,7 @@ bool ReadCell::addSynChan(
 	static const Finfo* synChanDestFinfo = 
 		Cinfo::find( "SynChan" )->findFinfo( "channel" );
 	static const Finfo* synGbarFinfo = 
-		Cinfo::find( "SynChan" )->findFinfo( "gbar" );
+		Cinfo::find( "SynChan" )->findFinfo( "Gbar" );
 
 	if ( chan->className() == "SynChan" ) {
 
