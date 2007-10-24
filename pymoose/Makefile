@@ -32,17 +32,20 @@ ifeq ($(SYSTEM),Darwin)
 	DYNAMIC_FLAGS=-bundle -flat_namespace -undefined suppress 
 endif
 
-INCLUDES=-I../basecode -I../shell -I/usr/include/python2.4
+INCLUDES=-I/usr/include/python2.4
 
 OBJFILES = ../basecode/basecode.o \
 	../element/element.o \
 	../shell/shell.o \
 	../builtins/builtins.o \
 	../biophysics/biophysics.o \
-	../scheduling/scheduling.o 
+	../scheduling/scheduling.o \
+	../utility/utility.o	\
 
 OBJ = PyMooseBase.o \
 	PyMooseContext.o \
+	Class.o	\
+	Cell.o	\
 	Compartment.o \
 	Neutral.o \
 	PyMooseUtil.o \
@@ -69,6 +72,8 @@ HEADERS = PyMooseUtil.h \
 	PyMooseBase.h \
 	Compartment.h \
 	Neutral.h \
+	Class.h	\
+	Cell.h	\
 	HHChannel.h \
 	HHGate.h \
 	Interpol.h \
