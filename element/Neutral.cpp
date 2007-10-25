@@ -365,8 +365,10 @@ Id Neutral::getChildByName( const Element* elm, const string& s )
 				if ( index == 0 )
 					return kid->id();
 				else{ // index > 0, elm->index == 0: Child should be an array
+					// Here we might have explicit name indexing, so go
+					// around again.
 					if ( kid->numEntries() < index )
-						return Id::badId();
+						continue;
 					else
 						return kid->id().assignIndex( index );
 				}

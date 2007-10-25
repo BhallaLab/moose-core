@@ -1259,6 +1259,9 @@ void Shell::resched( const Conn& c )
 	// Should be a msg
 	Element* cj = findCj();
 	set( cj, "resched" );
+	Id kinetics( "/kinetics" );
+	if ( kinetics.good() )
+		set( kinetics(), "resched" );
 }
 
 void Shell::reinit( const Conn& c )
