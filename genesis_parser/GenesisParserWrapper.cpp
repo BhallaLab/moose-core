@@ -810,9 +810,10 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 		// cout << "in do_set " << path << "." << field << " " <<
 				// value << endl;
 		
+		if ( field.length() > 0 )
 		//Shell::setVecField(conn, elist_, field, value)
-		send3< vector< Id >, string, string >( s(),
-			setVecFieldSlot, elist_, field, value );
+			send3< vector< Id >, string, string >( s(),
+				setVecFieldSlot, elist_, field, value );
 	}
 }
 
