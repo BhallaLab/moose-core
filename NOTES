@@ -4510,5 +4510,64 @@ For now I'll set up the dts based on initial conditions. Poor compromise.
 
 Anyway, it now handles the nonscaf6 case with an intelligent guess for
 a starting dt. Still barfs at the mega.g simulation, but time to check it in.
+Checked in as revision 221, in serial compile form with debugging.
+
+Confirmed that the issue is the use of array braces for parent objects,
+specifically groups.
+I now have the odd situation that my tiny test model, test_undump.g,
+successfully crashes MOOSE but the big model, mega.g, loads properly
+and at least it begins to run. But there is some problem with the timestep,
+keeps going smaller, down below 400 nsec. Tried implicit solution. This has 
+an internal dt of 10 usec, but falling, and does not look any better.
+EE gave a -ve time! Need to sort all these out.
+
+=============================================================================
+23 Oct 2007
+Figured out why we have a crash in test_undump.g. The ksolver reinit
+creates and deletes lots of elements that are also scheduled to be reinited,
+thus invalidating the iterator for reinit.
+
+This raises the question of why reinit has not messed up other objects.
+Probably just luck of allocation of the vector out of t0.
+- queue reinit operations. I need some kind of queueing operations anyway
+	for other kinds of runtime creation of objects.
+- Make a safe iterator for reinit. This won't help for other runtime operations.
+- Reorder the iterator to put the kinetic object at the end
+- Have an exclusive tick/stage for the KineticHandler.
+- Don't even call the setup function from the scheduler. Call it from the shell.
+	For example, at the start of the 'step' function. Problem is that
+	there may be many handlers of different kinds. Even so, this is
+	useful.
+- Provide a special message on cj to do things at 'start'.
+
+Tried the quick and dirty. I put KH on a separate tick. Dirty yes, quick no.
+Stuck somewhere else now, in the Tick::reinit function where it looks like
+again we have a rebuilding of a iterarator.
+
+
+=============================================================================
+25 Oct 2007
+
+Trying to handle queueing this way:
+- Add a 'inQ' flag to ProcInfo. This indicates if the command is coming
+	through the usual messages or through a queueue.
+- Any operation (process or reinit) that needs orderly rescheduling, must
+	trap this flag and push itself onto the queue. 
+	Ideally through a return msg, 
+		(but there are issues of hardcoding funcs to lessen memory use.)
+- The queue is operated after all ticks are done (otherwise too many checks).
+	Just a matter of rerunning the function with a different flag.
+
+Before I jump into this, let's confirm the iterator issue.
+Yup. Confirmed. But also realized that I should not do this stuff on reinit,
+only on reset. Shifted it over. Now I have an ugly direct call from shell to
+/kinetics to do a resched.
+At this point the nonscaf benchmark seems to be OK, and I have resolved the
+issue with the undump of mega as well as the test undump file. However,
+mega does not run properly and goes into dt < 1e-6.
+
+Ran in kkit. This confirms that we get recommended dt ~1e-9 for the mega model.
+Perhaps the problem is not a bug after all. Then how does the old MOOSE handle
+it?
 
 =============================================================================

@@ -882,7 +882,9 @@ void Stoich::addMmEnz( Element* stoich, Element* e )
 
 void Stoich::addTab( Element* stoich, Element* e )
 {
-	cout << "Don't yet know how to addTab for " << e->name() << "\n";
+	// nothing to do here. It is handled by keeping the tab as an external,
+	// unmanaged object.
+	// cout << "Don't yet know how to addTab for " << e->name() << "\n";
 }
 
 void Stoich::addRate( Element* stoich, Element* e )
