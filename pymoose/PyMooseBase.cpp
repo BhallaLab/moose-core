@@ -221,6 +221,86 @@ PyMooseContext* PyMooseBase::getContext()
     return context_;
 }
 
+/**
+ * listMessages builds a list of messages associated with the 
+ * specified element on the named field, and sends it back to
+ * the calling parser. It extracts the
+ * target element from the connections, and puts this into a
+ * vector of unsigned ints.
+ */
+vector <std::string> PyMooseBase::getMessageList(string field, bool isIncoming )
+{
+	assert( !id_.bad() );
+	Element* e = id_();
+	const Finfo* f = e->findFinfo( field );
+	assert( f != 0 );
+	vector< Conn > list;
+	vector< Id > ret;
+	vector <std::string> remoteFields;
+	
+	if ( isIncoming )
+        {
+            f->incomingConns( e, list );
+        }        
+	else
+        {
+            f->outgoingConns( e, list );
+        }
+        
+	if ( list.size() > 0 ) {
+		vector< Conn >::iterator i;
+		for ( i = list.begin(); i != list.end(); i++ ) {
+			Element* temp = i->targetElement();
+                        const Finfo* targetFinfo = 
+					temp->findFinfo( i->targetIndex() );
+			assert( targetFinfo != 0 );
+                        remoteFields.push_back( targetFinfo->name());
+		}
+	}
+        return remoteFields;
+}
+/**
+   Wraps getMessageList and presents incoming messages as a field to python.
+ */
+vector <std::string>& PyMooseBase::__get_incoming_messages()
+{
+
+    vector <std::string> fieldList;
+    string fields = context_->getField(id_,"fieldList" );
+    separateString( fields, fieldList, ", " );
+    incomingMessages_.clear();
+    
+    for ( unsigned int i = 0; i < fieldList.size(); ++i )
+    {
+        vector <std::string> tmpList = getMessageList(fieldList[i], true);
+        for ( unsigned int j = 0; j < tmpList.size(); ++j )
+        {
+            incomingMessages_.push_back(tmpList[j]);
+        }
+    }
+    return incomingMessages_;    
+}
+/*
+  Wraps getMessageList and presents outgoing messages as a field to python.
+ */
+vector <std::string>& PyMooseBase::__get_outgoing_messages()
+{
+    
+    vector <std::string> fieldList;
+    string fields = context_->getField(id_,"fieldList" );
+    separateString( fields, fieldList, ", " );
+    outgoingMessages_.clear();
+    
+    for ( unsigned int i = 0; i < fieldList.size(); ++i )
+    {
+        vector <std::string> tmpList = getMessageList(fieldList[i], false);
+        for ( unsigned int j = 0; j < tmpList.size(); ++j )
+        {
+            outgoingMessages_.push_back(tmpList[j]);
+        }
+    }
+    return outgoingMessages_;
+}
 
 /**
    This method is for reinitializing simulation once

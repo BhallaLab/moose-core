@@ -31,7 +31,10 @@ class PyMooseBase
 
     bool connect(std::string field, PyMooseBase* dest, std::string destField);
     bool connect(std::string field, Id dest, std::string destField);
-
+    vector <std::string> getMessageList(string field, bool isIncoming );
+    vector <std::string>& __get_incoming_messages();
+    vector <std::string>& __get_outgoing_messages();
+    
     static bool exists(Id id);
     static bool exists(string path);
     static vector <Id>& le();
@@ -59,6 +62,8 @@ class PyMooseBase
     static PyMooseBase* root_;    
     static string  separator_;
     static PyMooseContext* context_;
+    vector <std::string> incomingMessages_;
+    vector <std::string> outgoingMessages_;
 };
 #endif // _PYMOOSE_BASE_H
 
