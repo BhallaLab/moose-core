@@ -230,38 +230,41 @@ PyMooseContext* PyMooseBase::getContext()
  */
 vector <std::string> PyMooseBase::getMessageList(string field, bool isIncoming )
 {
-	assert( !id_.bad() );
-	Element* e = id_();
-	const Finfo* f = e->findFinfo( field );
-	assert( f != 0 );
-	vector< Conn > list;
-	vector< Id > ret;
-	vector <std::string> remoteFields;
-	
-	if ( isIncoming )
-        {
-            f->incomingConns( e, list );
-        }        
-	else
-        {
-            f->outgoingConns( e, list );
-        }
+    assert( !id_.bad() );
+    Element* e = id_();
+    const Finfo* f = e->findFinfo( field );
+    assert( f != 0 );
+    vector< Conn > list;
+    vector< Id > ret;
+    vector <std::string> remoteFields;
+    std::string arrow = "";
+    if ( isIncoming )
+    {
+        f->incomingConns( e, list );
+        arrow = " <- ";        
+    }        
+    else
+    {
+        f->outgoingConns( e, list );
+        arrow = " -> ";        
+    }
         
-	if ( list.size() > 0 ) {
-		vector< Conn >::iterator i;
-		for ( i = list.begin(); i != list.end(); i++ ) {
-			Element* temp = i->targetElement();
-                        const Finfo* targetFinfo = 
-					temp->findFinfo( i->targetIndex() );
-			assert( targetFinfo != 0 );
-                        remoteFields.push_back( targetFinfo->name());
-		}
-	}
-        return remoteFields;
+    if ( list.size() > 0 ) {
+        vector< Conn >::iterator i;
+        for ( i = list.begin(); i != list.end(); i++ ) {
+            Element* temp = i->targetElement();
+            const Finfo* targetFinfo = 
+                temp->findFinfo( i->targetIndex() );
+            assert( targetFinfo != 0 );
+            string line = field + arrow + "[ "+ (temp->id()).path()+" ]."+targetFinfo->name();            
+            remoteFields.push_back( line);
+        }
+    }
+    return remoteFields;
 }
 /**
    Wraps getMessageList and presents incoming messages as a field to python.
- */
+*/
 vector <std::string>& PyMooseBase::__get_incoming_messages()
 {
 
@@ -272,17 +275,19 @@ vector <std::string>& PyMooseBase::__get_incoming_messages()
     
     for ( unsigned int i = 0; i < fieldList.size(); ++i )
     {
-        vector <std::string> tmpList = getMessageList(fieldList[i], true);
-        for ( unsigned int j = 0; j < tmpList.size(); ++j )
-        {
-            incomingMessages_.push_back(tmpList[j]);
+        if ( fieldList[i] != "fieldList" ){
+            vector <std::string> tmpList = getMessageList(fieldList[i], true);
+            for ( unsigned int j = 0; j < tmpList.size(); ++j )
+            {
+                incomingMessages_.push_back(tmpList[j]);
+            }
         }
     }
     return incomingMessages_;    
 }
 /*
   Wraps getMessageList and presents outgoing messages as a field to python.
- */
+*/
 vector <std::string>& PyMooseBase::__get_outgoing_messages()
 {
     
@@ -293,10 +298,12 @@ vector <std::string>& PyMooseBase::__get_outgoing_messages()
     
     for ( unsigned int i = 0; i < fieldList.size(); ++i )
     {
-        vector <std::string> tmpList = getMessageList(fieldList[i], false);
-        for ( unsigned int j = 0; j < tmpList.size(); ++j )
-        {
-            outgoingMessages_.push_back(tmpList[j]);
+        if ( fieldList[i] != "fieldList" ){
+            vector <std::string> tmpList = getMessageList(fieldList[i], false);
+            for ( unsigned int j = 0; j < tmpList.size(); ++j )
+            {
+                outgoingMessages_.push_back(tmpList[j]);
+            }
         }
     }
     return outgoingMessages_;
@@ -323,8 +330,8 @@ void PyMooseBase::endSimulation()
 {
     context_->end();
     // \NOTE: not sure whether we should handle the destruction of context object inside python
-//    PyMooseContext::destroyPyMooseContext(context_);    
-//    context_ = NULL;    
+    //    PyMooseContext::destroyPyMooseContext(context_);    
+    //    context_ = NULL;    
 }
 
 // These functions break the Object-oriented design.
