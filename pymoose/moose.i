@@ -54,6 +54,8 @@
 %attribute(PyMooseBase, Id*, id, __get_id)
 %attribute(PyMooseBase, Id*, parent, __get_parent)
 %attribute(PyMooseBase, vector <Id>&, children, __get_children)
+%attribute(PyMooseBase, vector <std::string>&, inMessages, __get_incoming_messages)
+%attribute(PyMooseBase, vector <std::string>&, outMessages, __get_outgoing_messages)
 //%attribute(PyMooseBase, string& , path, _path)
 // The above gives segmentation fault, path is dynamically generated,
 // so when using pointers, the memory may already have been deallocated

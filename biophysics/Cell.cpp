@@ -37,7 +37,7 @@ const Cinfo * initCellCinfo()
         {            
             process,
         };
-    static SchedInfo schedInfo[] = { { process, 2, 1 } }; // tick 2,stage 0 gives SIGSEGV
+    static SchedInfo schedInfo[] = { { process, 0, 0 } };
     static Cinfo cellCinfo("Cell",
                            "Subhasis Ray",
                            "Cell object. Container for applying solvers.",
