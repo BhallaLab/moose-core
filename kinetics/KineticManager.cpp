@@ -91,6 +91,9 @@ const Cinfo* initKineticManagerCinfo()
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
+		new DestFinfo( "resched", Ftype0::global(),
+			RFCAST( &KineticManager::reschedFunc )
+		),
 	
 	///////////////////////////////////////////////////////
 	// Synapse definitions
@@ -101,7 +104,7 @@ const Cinfo* initKineticManagerCinfo()
 		process,
 	};
 
-	// Schedule it to tick 0 stage 0
+	// Schedule it to tick 1 stage 0
 	static SchedInfo schedInfo[] = { { process, 0, 0 } };
 	
 	static Cinfo kineticManagerCinfo(
@@ -456,8 +459,7 @@ void KineticManager::setupDt( Element* e )
 
  
 /**
- * Reinit Function makes sure that all child elements are scheduled,
- * either directly from the clock ticks, or through a solver.
+ * Reinit Function restarts the simulation from time 0.
  */
 
 void KineticManager::reinitFunc( const Conn& c, ProcInfo info )
@@ -467,6 +469,21 @@ void KineticManager::reinitFunc( const Conn& c, ProcInfo info )
 }
 
 void KineticManager::reinitFuncLocal( Element* e )
+{
+	;
+}
+ 
+/**
+ * Resched Function makes sure that all child elements are scheduled,
+ * either directly from the clock ticks, or through a solver.
+ */
+void KineticManager::reschedFunc( const Conn& c )
+{
+	static_cast< KineticManager* >( c.data() )->reschedFuncLocal( 
+					c.targetElement() );
+}
+
+void KineticManager::reschedFuncLocal( Element* e )
 {
 	setupSolver( e );
 	setupDt( e );

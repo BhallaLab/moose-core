@@ -69,6 +69,8 @@ class KineticManager
 		/*
 		void processFuncLocal( Element* e, ProcInfo info );
 		*/
+		static void reschedFunc( const Conn& c );
+		void reschedFuncLocal( Element* e );
 
  // static void addMethod( name, description,
  // 					isStochastic,isSpatial, 
