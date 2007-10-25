@@ -23,6 +23,7 @@
 #include "MsgSrc.h"
 #include "MsgDest.h"
 #include "SimpleElement.h"
+#include "../element/Neutral.h"
 
 // These includes are needed to call set
 #include <algorithm>
@@ -412,7 +413,15 @@ bool Cinfo::schedule( Element* e ) const
 		char line[20];
 		sprintf( line, "/sched/cj/t%d", i->tick * 2 + i->stage );
 		Id tick( line );
-		assert( !tick.bad() );
+		if ( !tick.good() ) { // Make the clock tick
+			Id cjId( "/sched/cj" );
+			assert( cjId.good() );
+			sprintf( line, "t%d", i->tick * 2 + i->stage );
+			Element* t = Neutral::create( "Tick", line, cjId() );
+			assert( t != 0 );
+			tick = t->id();
+		}
+		assert( tick.good() );
 		procFinfo->add( tick(), e, i->finfo );
 	}
 	
