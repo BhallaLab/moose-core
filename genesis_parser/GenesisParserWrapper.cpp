@@ -19,6 +19,7 @@
 #include "GenesisParser.h"
 #include "GenesisParserWrapper.h"
 #include "../element/Neutral.h"
+#include "func_externs.h"
 
 const Cinfo* initGenesisParserCinfo()
 {
@@ -2746,7 +2747,25 @@ int do_INSTANTZ(int argc, const char** const argv, Id s ){
 }
 
 void do_floatformat(int argc, const char** const argv, Id s ){
-	cout << "floatformat::Not yet implemented" << endl;
+	char *format;
+	char formtype;
+	
+	if (argc != 2){
+		cout << "usage::floatformat format-string"<< endl;
+		return;
+	}
+	
+	format = strdup(argv[1]);
+	formtype = format[strlen(format)-1];
+
+	if (format[0] != '%' || strrchr(format, '%') != format ||
+	    (formtype != 'f' && formtype != 'g')) {
+		cout << "\texample : floatformat %%0.5g" << endl;
+		printf("\tonly f and g formats are allowed\n");
+		return;
+	}
+
+	set_float_format(format);
 }
 
 float do_getstat(int argc, const char** const argv, Id s ){
