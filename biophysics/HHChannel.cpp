@@ -822,33 +822,33 @@ void testHHChannel()
 	ASSERT( !temp.zero() && !temp.bad(), "kGate_B" );
 	Element* kGate_B = temp();
 
-	assert( set< double >( xGate_A, "xmin", VMIN ) );
-	assert( set< double >( xGate_B, "xmin", VMIN ) );
-	assert( set< double >( yGate_A, "xmin", VMIN ) );
-	assert( set< double >( yGate_B, "xmin", VMIN ) );
-	assert( set< double >( kGate_A, "xmin", VMIN ) );
-	assert( set< double >( kGate_B, "xmin", VMIN ) );
+	ret = set< double >( xGate_A, "xmin", VMIN ) ; assert( ret );
+	ret = set< double >( xGate_B, "xmin", VMIN ) ; assert( ret );
+	ret = set< double >( yGate_A, "xmin", VMIN ) ; assert( ret );
+	ret = set< double >( yGate_B, "xmin", VMIN ) ; assert( ret );
+	ret = set< double >( kGate_A, "xmin", VMIN ) ; assert( ret );
+	ret = set< double >( kGate_B, "xmin", VMIN ) ; assert( ret );
 
-	assert( set< double >( xGate_A, "xmax", VMAX ) );
-	assert( set< double >( xGate_B, "xmax", VMAX ) );
-	assert( set< double >( yGate_A, "xmax", VMAX ) );
-	assert( set< double >( yGate_B, "xmax", VMAX ) );
-	assert( set< double >( kGate_A, "xmax", VMAX ) );
-	assert( set< double >( kGate_B, "xmax", VMAX ) );
+	ret = set< double >( xGate_A, "xmax", VMAX ) ; assert( ret );
+	ret = set< double >( xGate_B, "xmax", VMAX ) ; assert( ret );
+	ret = set< double >( yGate_A, "xmax", VMAX ) ; assert( ret );
+	ret = set< double >( yGate_B, "xmax", VMAX ) ; assert( ret );
+	ret = set< double >( kGate_A, "xmax", VMAX ) ; assert( ret );
+	ret = set< double >( kGate_B, "xmax", VMAX ) ; assert( ret );
 
-	assert( set< int >( xGate_A, "xdivs", XDIVS ) );
-	assert( set< int >( xGate_B, "xdivs", XDIVS ) );
-	assert( set< int >( yGate_A, "xdivs", XDIVS ) );
-	assert( set< int >( yGate_B, "xdivs", XDIVS ) );
-	assert( set< int >( kGate_A, "xdivs", XDIVS ) );
-	assert( set< int >( kGate_B, "xdivs", XDIVS ) );
+	ret = set< int >( xGate_A, "xdivs", XDIVS ) ; assert( ret );
+	ret = set< int >( xGate_B, "xdivs", XDIVS ) ; assert( ret );
+	ret = set< int >( yGate_A, "xdivs", XDIVS ) ; assert( ret );
+	ret = set< int >( yGate_B, "xdivs", XDIVS ) ; assert( ret );
+	ret = set< int >( kGate_A, "xdivs", XDIVS ) ; assert( ret );
+	ret = set< int >( kGate_B, "xdivs", XDIVS ) ; assert( ret );
 
-	assert( set< int >( xGate_A, "mode", 1 ) );
-	assert( set< int >( xGate_B, "mode", 1 ) );
-	assert( set< int >( yGate_A, "mode", 1 ) );
-	assert( set< int >( yGate_B, "mode", 1 ) );
-	assert( set< int >( kGate_A, "mode", 1 ) );
-	assert( set< int >( kGate_B, "mode", 1 ) );
+	ret = set< int >( xGate_A, "mode", 1 ) ; assert( ret );
+	ret = set< int >( xGate_B, "mode", 1 ) ; assert( ret );
+	ret = set< int >( yGate_A, "mode", 1 ) ; assert( ret );
+	ret = set< int >( yGate_B, "mode", 1 ) ; assert( ret );
+	ret = set< int >( kGate_A, "mode", 1 ) ; assert( ret );
+	ret = set< int >( kGate_B, "mode", 1 ) ; assert( ret );
 
 	double v = VMIN;
 	double dv = ( VMAX - VMIN ) / XDIVS;
@@ -863,7 +863,7 @@ void testHHChannel()
 		v = v + dv;
 	}
 
-	assert( set< double >( compt, "initVm", EREST ) );
+	ret = set< double >( compt, "initVm", EREST ); assert( ret );
 
 	pb.dt_ = 1.0e-5;
 	pb.currTime_ = 0.0;
