@@ -37,6 +37,14 @@ GSL_OBJ = GslIntegrator.o
 GSL_LIBS = -lgsl -lgslcblas
 GSL_FLAGS = -DUSE_GSL
 
+# Smoldyn, written by Steven Andrews, provides a numerical engine for
+# 3-D single-particle simulations using Smoluchowsky dynamics. It is
+# licenced on a non-commercial license. Should be fine for academic use.
+# Optional: Comment out the following two items if not using Smoldyn
+SMOLDYN_OBJ = \
+	Particle.o \
+	SmoldynHub.o
+SMOLDYN_FLAGS = -DUSE_SMOLDYN
 
 default: $(TARGET)
 
@@ -55,12 +63,16 @@ TestKinetics.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h Stoich.h 
 $(GSL_OBJ) : $(HEADERS)
 GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h SparseMatrix.h 
 
-.cpp.o:
-	$(CXX) $(CFLAGS) $(GSL_FLAGS) -I../basecode $< -c
+#Optional: Comment out the following three items if not using SMOLDYN.
+$(SMOLDYN_OBJ) : $(HEADERS)
+Particle.o:		SmoldynHub.h Particle.h Molecule.h
+SmoldynHub.o:	SmoldynHub.h Smoldyn/source/smollib.h
 
-$(TARGET):		$(OBJ) $(GSL_OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(GSL_LIBS)
-#	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(LIBS) $(GSL_LIBS)
+.cpp.o:
+	$(CXX) $(CFLAGS) $(GSL_FLAGS) $(SMOLDYN_FLAGS) -I../basecode $< -c
+
+$(TARGET):		$(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(HEADERS)
+	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(GSL_LIBS)
 
 clean:
 	-rm -f *.o $(TARGET) core core.*
