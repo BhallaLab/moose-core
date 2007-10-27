@@ -384,12 +384,12 @@ void ClockJob::reschedFuncLocal( Element* e )
 	sort( tickList.begin(), tickList.end() );
 
 	Element* last = tickList.front().element();
-	assert ( e->findFinfo( "tick" )->
-					add( e, last, last->findFinfo( "prev" ) )
-	);
-	assert ( e->findFinfo( "startSrc" )->
-					add( e, last, last->findFinfo( "start" ) )
-	);
+	bool ret = e->findFinfo( "tick" )->
+					add( e, last, last->findFinfo( "prev" ) );
+	assert( ret );
+	ret = e->findFinfo( "startSrc" )->
+					add( e, last, last->findFinfo( "start" ) );
+	assert( ret );
 	for ( j = tickList.begin() + 1; j != tickList.end(); j++ ) {
 			buildMessages( last, j->element() );
 			last = j->element();
@@ -413,9 +413,9 @@ void ClockJob::clearMessages( Element* e )
  */
 void ClockJob::buildMessages( Element* last, Element* e )
 {
-	assert(
-		last->findFinfo( "next" )->add( last, e, e->findFinfo( "prev" ))
-	);
+	bool ret = 
+		last->findFinfo( "next" )->add( last, e, e->findFinfo( "prev" ) );
+	assert( ret );
 }
 
 

@@ -383,7 +383,8 @@ bool ReadCell::addHHChannel(
 		Cinfo::find( "HHChannel" )->findFinfo( "Gbar" );
 
 	if ( chan->className() == "HHChannel" ) {
-		assert( chanSrcFinfo->add( compt, chan, hhChanDestFinfo ) );
+		bool ret = chanSrcFinfo->add( compt, chan, hhChanDestFinfo );
+		assert( ret );
 		if ( value > 0 ) {
 			value *= dia * length * PI;
 		} else {
@@ -408,8 +409,8 @@ bool ReadCell::addSynChan(
 		Cinfo::find( "SynChan" )->findFinfo( "Gbar" );
 
 	if ( chan->className() == "SynChan" ) {
-
-		assert( chanSrcFinfo->add( compt, chan, synChanDestFinfo ) );
+		bool ret = chanSrcFinfo->add( compt, chan, synChanDestFinfo );
+		assert( ret );
 		if ( value > 0 ) {
 			value *= dia * length * PI;
 		} else {
@@ -433,8 +434,8 @@ bool ReadCell::addSpikeGen(
 	static const Finfo* threshFinfo = 
 		Cinfo::find( "SpikeGen" )->findFinfo( "threshold" );
 	if ( chan->className() == "SpikeGen" ) {
-
-		assert( vmSrcFinfo->add( compt, chan, vmDestFinfo  ) );
+		bool ret = vmSrcFinfo->add( compt, chan, vmDestFinfo  );
+		assert( ret );
 		++numOthers_;
 		return set< double >( chan, threshFinfo, value );
 	}

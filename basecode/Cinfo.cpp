@@ -68,7 +68,8 @@ Cinfo::Cinfo(const std::string& name,
 			if ( f ) {
 				// The inherit operation is true only if the types
 				// match.
-				assert( f->inherit( baseCinfo->finfos_[i] ) );
+				bool ret = f->inherit( baseCinfo->finfos_[i] );
+				assert( ret );
 				finfos_.push_back( f );
 			} else
 				finfos_.push_back( baseCinfo->finfos_[i] );

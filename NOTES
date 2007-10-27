@@ -4570,4 +4570,70 @@ Ran in kkit. This confirms that we get recommended dt ~1e-9 for the mega model.
 Perhaps the problem is not a bug after all. Then how does the old MOOSE handle
 it?
 
+Anyway, did a checkin of the current version.
+Checked in as revision 228, in serial compile form with debugging.
+
+Now let's see if we can get the thing to run without the assertions and
+unit tests.
+No, crashes right off.
+
+Went through many files cleaning up asserts. It works now for kholodenko.g
+but fails to handle Demos/test_solvertabsumtot.g
+
+=============================================================================
+26 Oct 2007
+Slowly working through the possibilities.
+- when the asserts and unit tests are turned on, the tabsumtot.g file works
+- when asserts are on but unit tests are off, tabsumtot.g fails.
+
+Now to individually remove unit test operations from likely places.
+
+A stroke of luck: first thing I tried (in Table.cpp) showed misbehaviour.
+Tracked it down to creating and destroying 1 vs 2 table instances, without
+any other stuff. 2 instances works, 1 fails.
+Most things are identical: xtab and field values.
+Here is the version that works:
+
+showmsg solve/hub
+INCOMING MESSAGES onto /kinetics/solve/hub
+MSG[0]: into child from: [ /kinetics/solve ].childSrc
+MSG[1]: into molSum from: [ /kinetics/xtab ].outputSrc
+MSG[2]: into child from: [ /kinetics/solve ].childSrc
+MSG[3]: into hub from: [ /kinetics/solve/stoich ].hub
+MSG[4]: into molSolve from: [ /kinetics/B, /kinetics/A, /kinetics/C, /kinetics/D, /kinetics/tot1, /kinetics/tot2 ].process
+MSG[5]: into reacSolve from: [ /kinetics/kreac, /kinetics/forward ].process
+OUTGOING MESSAGES from /kinetics/solve/hub
+MSG[0]: from hub into: [ /kinetics/solve/stoich ].hub
+MSG[1]: from molSolve into: [ /kinetics/B, /kinetics/A, /kinetics/C, /kinetics/D, /kinetics/tot1, /kinetics/tot2 ].process
+MSG[2]: from reacSolve into: [ /kinetics/kreac, /kinetics/forward ].process
+moose #11 > 
+
+
+Here is the version that fails:
+showmsg solve/hub
+INCOMING MESSAGES onto /kinetics/solve/hub
+MSG[0]: into child from: [ /kinetics/solve ].childSrc
+MSG[1]: into molSum from: [ /kinetics/xtab ].outputSrc
+MSG[2]: into child from: [ /kinetics/solve ].childSrc
+MSG[3]: into hub from: [ /kinetics/solve/stoich ].hub
+MSG[4]: into molSolve from: [ /kinetics/B, /kinetics/A, /kinetics/C, /kinetics/tot1, /kinetics/tot2, /kinetics/D ].process
+MSG[5]: into reacSolve from: [ /kinetics/kreac, /kinetics/forward ].process
+OUTGOING MESSAGES from /kinetics/solve/hub
+MSG[0]: from hub into: [ /kinetics/solve/stoich ].hub
+MSG[1]: from molSolve into: [ /kinetics/B, /kinetics/A, /kinetics/C, /kinetics/tot1, /kinetics/tot2, /kinetics/D ].process
+MSG[2]: from reacSolve into: [ /kinetics/kreac, /kinetics/forward ].process
+
+Note the small difference in molecule sequencing involving D. Shouldn't
+matter, but...
+
+Additional headache: the timestep calculator is returning inf, even when
+the simulation works.
+Fixed this, but there are still problesm with the tabsumtot.g test.
+
+=============================================================================
+27 Oct 2007
+I've been stuck on this bug too long, and need to move on to the Smoldyn
+interface. Note it as a major outstanding issue, but continue with the new
+stuff.
+
 =============================================================================

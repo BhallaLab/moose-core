@@ -38,6 +38,7 @@
 # generated code to work. 
 # It is completely harmless except for a few file existence checks at startup.
 CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER 
+#CFLAGS = -g -Wall -pedantic -DNDEBUG -DUSE_GENESIS_PARSER 
 
 #CFLAGS = -O3 -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DGENERATE_WRAPPERS -DNDEBUG
 #CFLAGS = -O3 -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
