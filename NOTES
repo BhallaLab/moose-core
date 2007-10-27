@@ -4635,5 +4635,33 @@ Fixed this, but there are still problesm with the tabsumtot.g test.
 I've been stuck on this bug too long, and need to move on to the Smoldyn
 interface. Note it as a major outstanding issue, but continue with the new
 stuff.
+Checked in as revision 230, in serial compile form with debugging.
+
+Now on to implementing the Smoldyn interface. Design is that the KineticHandler
+sets up a geom object as well as the solve object. The geom object is the
+same as the surface object used in Smoldyn, and is home to a number of panels
+which can be rectangles, triangles, spheres, cylinders, hemispheres and disks.
+
+The molecule class has to be derived to have an extra Diffusion field, and
+a set of xyz vectors that aren't located on the object, but only in the
+Smoldyn equivalent.
+
+I've downloaded the Smoldyn source but it is still an older version (1.73).
+
+OK, the source is current (1.74). 
+
+Some questions for Steven:
+1. How do you assign the number of molecules in a pool? 
+2. Where (in space) are they put, or taken away from?
+3. What is 'identity' of a molecule.
+4. Is there a concept of nInit, that is, an initial number of molecules to
+	act like a boundary condition every time the simulation is rerun?
+5. Can one get total volume/area from a surface?
+6. Is there an economy of calculation to partition a single large Smoldyn
+	simulation into two smaller ones that communicate with each other
+	through teleporters?
+
+First steps: Implemented Particle object, derived from Molecule, and
+implemented skeleton of SmoldynHub.
 
 =============================================================================
