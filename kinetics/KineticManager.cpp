@@ -204,7 +204,8 @@ KineticManager::KineticManager()
 	implicit_( 0 ),
 	variableDt_( 1 ),
 	multiscale_( 0 ),
-	singleParticle_( 0 )
+	singleParticle_( 0 ),
+	recommendedDt_( 0.001 )
 {
 		;
 }
@@ -634,6 +635,10 @@ double KineticManager::findEnzPrdPropensity( Element* e ) const
  * Also returns the element and field that have the highest propensity,
  * that is, the shortest dt.
  */
+#ifndef NDEBUG
+#include <limits>
+#endif
+
 double KineticManager::estimateDt( Element* mgr, 
 	Element** elm, string& field, double error ) 
 {
@@ -683,8 +688,12 @@ double KineticManager::estimateDt( Element* mgr,
 			}
 		}
 	}
+	assert ( error < 1.0 );
+	if ( maxProp <= 0 ) 
+		maxProp = 10.0;
 
 	recommendedDt_ = sqrt( error ) / maxProp;
+	assert ( !isinf( recommendedDt_ ) );
 
 	return recommendedDt_;
 }
