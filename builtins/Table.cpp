@@ -439,8 +439,9 @@ void testTable()
 				static_cast< double >( i * i ), i );
 				
 	// Testing simple table lookup
-	assert( set< int >( t, "step_mode", TAB_IO ) );
-	assert( set< double >( t, "input", 2.5 ) );
+	bool ret;
+	ret = set< int >( t, "step_mode", TAB_IO ); assert( ret );
+	ret = set< double >( t, "input", 2.5 ); assert( ret );
 	Table::process( c, &pb );
 	double v = 0.0;
 	get< double >( t, "input", v );
@@ -451,8 +452,8 @@ void testTable()
 	ASSERT( fabs( v - 6.5 ) < 1e-8 , "TAB_IO" );
 
 	// Testing table lookup with addition of output
-	assert( set< double >( t, "input", 3.5 ) ); // (9 + 16) / 2 = 12.5
-	assert( set< double >( t, "sum", 2.5 ) ); // 12.5 + 2.5 = 15.0
+	ret = set< double >( t, "input", 3.5 ); assert( ret ); // (9 + 16) / 2 = 12.5
+	ret = set< double >( t, "sum", 2.5 ); assert( ret ); // 12.5 + 2.5 = 15.0
 	Table::process( c, &pb );
 	v = 0.0;
 	get< double >( t, "output", v );
@@ -461,8 +462,8 @@ void testTable()
 	ASSERT( fabs( v - 15.0 ) < 1e-8 , "sum" );
 
 	// Testing table lookup with scaling of output
-	assert( set< double >( t, "input", 4.5 ) ); // (16 + 25) / 2 = 20.5
-	assert( set< double >( t, "prd", 2.0 ) ); // 20.5 * 2.0 = 41.0
+	ret = set< double >( t, "input", 4.5 ); assert( ret ); // (16 + 25) / 2 = 20.5
+	ret = set< double >( t, "prd", 2.0 ); assert( ret ); // 20.5 * 2.0 = 41.0
 	Table::process( c, &pb );
 	v = 0.0;
 	get< double >( t, "output", v );
@@ -472,15 +473,15 @@ void testTable()
 	
 	// Testing two things: func generator, periodic (TAB_LOOP) and
 	// buffering input like a shift-register ( TAB_BUF ) 
-	assert( set< int >( t, "stepmode", TAB_LOOP ) );
+	ret = set< int >( t, "stepmode", TAB_LOOP ); assert( ret );
 	// with stepsize = 0, we use simulation time to look up the value
-	assert( set< double >( t, "input", 0.0 ) );
-	assert( set< double >( t, "stepsize", 0.0 ) );
-	assert( set< int >( t2, "stepmode", TAB_BUF ) );
-	assert( set< double >( t2, "output", 0.0 ) );
-	assert( set< double >( t2, "xmax", 1.0 ) );
-	assert( set< double >( t2, "xmin", 0.0 ) );
-	assert( set< int >( t2, "xdivs", 1 ) );
+	ret = set< double >( t, "input", 0.0 ); assert( ret );
+	ret = set< double >( t, "stepsize", 0.0 ); assert( ret );
+	ret = set< int >( t2, "stepmode", TAB_BUF ); assert( ret );
+	ret = set< double >( t2, "output", 0.0 ); assert( ret );
+	ret = set< double >( t2, "xmax", 1.0 ); assert( ret );
+	ret = set< double >( t2, "xmin", 0.0 ); assert( ret );
+	ret = set< int >( t2, "xdivs", 1 ); assert( ret );
 	unsigned int k;
 	for ( i = 0; i < 20; i++ ) {
 		pb.currTime_ = pb.dt_ * i;
@@ -494,7 +495,6 @@ void testTable()
 	ASSERT( fabs( v - 20.0 ) < 1e-8 , "TAB_BUF" );
 	get< double >( t2, "xmax", v );
 	ASSERT( fabs( v - 20.0 ) < 1e-8 , "TAB_BUF" );
-	bool ret;
 	for ( i = 0; i < 20; i++ ) {
 		ret = lookupGet< double, unsigned int >( t2, "table", v, i );
 		assert( ret );
@@ -512,15 +512,15 @@ void testTable()
 	// So the output should look like 0 for t < 14, 
 	// ( (t - 12)/2 )^2 for later up to t < 34, but mind the 
 	// interpolation.
-	assert( set< int >( t, "stepmode", TAB_ONCE ) );
-	assert( set< double >( t, "input", -2.0 ) );
-	assert( set< double >( t, "stepsize", 0.5 ) );
-	assert( set< int >( t2, "stepmode", TAB_DELAY ) );
-	assert( set< double >( t2, "output", 0.0 ) );
-	assert( set< double >( t2, "input", 0.0 ) );
-	assert( set< double >( t2, "xmax", 1.0 ) );
-	assert( set< double >( t2, "xmin", 0.0 ) );
-	assert( set< int >( t2, "xdivs", 10 ) );
+	ret = set< int >( t, "stepmode", TAB_ONCE ); assert( ret );
+	ret = set< double >( t, "input", -2.0 ); assert( ret );
+	ret = set< double >( t, "stepsize", 0.5 ); assert( ret );
+	ret = set< int >( t2, "stepmode", TAB_DELAY ); assert( ret );
+	ret = set< double >( t2, "output", 0.0 ); assert( ret );
+	ret = set< double >( t2, "input", 0.0 ); assert( ret );
+	ret = set< double >( t2, "xmax", 1.0 ); assert( ret );
+	ret = set< double >( t2, "xmin", 0.0 ); assert( ret );
+	ret = set< int >( t2, "xdivs", 10 ); assert( ret );
 	Table::reinit( c2, &pb );
 
 	double temp;
@@ -539,17 +539,17 @@ void testTable()
 	}
 
 	// Testing spike detector.
-	assert( set< int >( t, "stepmode", TAB_SPIKE ) );
-	assert( set< double >( t, "threshold", 8.5 ) );
-	assert( set< double >( t, "output", 0.0 ) );
+	ret = set< int >( t, "stepmode", TAB_SPIKE ); assert( ret );
+	ret = set< double >( t, "threshold", 8.5 ); assert( ret );
+	ret = set< double >( t, "output", 0.0 ); assert( ret );
 	Table::reinit( c, &pb );
 	for ( i = 0; i < 100; i++ ) {
 		pb.currTime_ = pb.dt_ * i;
 
 		// This is a spike on times 3, 8, 13...
-		assert( set< double >( t, "input", 
-				static_cast< double >( ( i % 5 ) * ( i % 5 ) ) )
-		);
+		ret = set< double >( t, "input", 
+				static_cast< double >( ( i % 5 ) * ( i % 5 ) ) );
+		assert( ret );
 		Table::process( c, &pb );
 	}
 

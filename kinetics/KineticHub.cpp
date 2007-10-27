@@ -1207,7 +1207,10 @@ void redirectDestMessages(
 	// An issue here: Do I check if the src is on the solved tree?
 	// This is a bad iteration: dropping connections is going to affect
 	// the list size and position of i in the list.
-	for ( i = 0; i != max; i++ ) {
+	// for ( i = 0; i != max; i++ ) {
+	i = max;
+	while ( i > 0 ) {
+		i--;
 		Conn& c = clist[ i ];
 		if ( find( elist->begin(), elist->end(), c.targetElement() ) == elist->end() )  {
 			srcElements.push_back( c.targetElement() );
