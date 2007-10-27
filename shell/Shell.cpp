@@ -1186,16 +1186,19 @@ void Shell::useClock( const Conn& c,
 	// If they are to a different tick, delete the connection.
 	vector< Id >::iterator i;
 	for (i = path.begin(); i != path.end(); i++ ) {
+		bool ret;
 		assert ( !i->zero() );
 		Element* e = ( *i )( );
 		assert ( e && e != Element::root() );
 		const Finfo* func = e->findFinfo( function );
 		if ( func ) {
 			if ( func->numIncoming( e ) == 0 ) {
-				assert( tickProc->add( tick, e, func ) );
+				ret = tickProc->add( tick, e, func );
+				assert( ret );
 			} else {
 				vector< Conn > list;
-				assert ( func->incomingConns( e, list ) > 0 );
+				ret = func->incomingConns( e, list ) > 0;
+				assert ( ret );
 				if ( list[0].sourceElement() != tick ) {
 					func->dropAll( e );
 					tickProc->add( tick, e, func );
