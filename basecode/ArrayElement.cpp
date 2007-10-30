@@ -571,6 +571,7 @@ const Finfo* ArrayElement::constFindFinfo( const string& name ) const
 			if ( (*i)->name() == name )
 				return *i;
 	}
+	return cinfo()->findFinfo( name );
 	return 0;
 }
 
