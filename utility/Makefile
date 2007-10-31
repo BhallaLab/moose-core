@@ -8,7 +8,19 @@ OBJ = \
 	Configuration.o \
 	StringUtil.o	\
 	PropertyReader.o \
-	mt19937ar.o
+	mt19937ar.o	\
+	Binomial.o	\
+	Normal.o
+
+HEADERS = \
+	Probability.h	\
+	Binomial.h	\
+	Normal.h	\
+	randnum.h	\
+	PropertyReader.h	\
+	StringUtil.h	\
+	Configuration.h	\
+	utility.h
 
 default: $(TARGET)
 
