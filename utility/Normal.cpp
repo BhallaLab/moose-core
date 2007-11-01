@@ -24,16 +24,16 @@
 using namespace std;
 
 extern unsigned long genrand_int32(void);
-Normal::Normal():mean_(0.0),variance_(1.0)
+Normal::Normal():mean_(0.0),variance_(1.0), isStandard_(true)
 {
     generator_ = &(Normal::aliasMethod);    
 }
 
-Normal::Normal(NormalGenerator method):mean_(0.0), variance_(1.0)
+Normal::Normal(NormalGenerator method):mean_(0.0), variance_(1.0), isStandard_(true)
 {
     switch(method)
     {
-        case BOXMUELLER:
+        case BOX_MUELLER:
             generator_ = &(Normal::BoxMueller);
             break;            
         case ALIAS:
@@ -51,23 +51,47 @@ double dummy()
 }
 
 
-Normal::Normal(double mean, double variance):mean_(mean), variance_(variance)
+Normal::Normal(double mean, double variance):mean_(mean), variance_(variance), isStandard_(false)
 {
-    cerr << "Normal(double mean, double variance):mean_(mean), variance_(variance) - yet to be implemented." << endl;
-    generator_ = &(dummy);    
+    generator_ = &(Normal::aliasMethod);
 }
 
-double Normal::getNextSample()
+Normal::Normal(NormalGenerator method, double mean, double variance):mean_(mean), variance_(variance), isStandard_(false)
 {
-    return generator_();    
+     switch(method)
+    {
+        case BOX_MUELLER:
+            generator_ = &(Normal::BoxMueller);
+            break;            
+        case ALIAS:
+            generator_ = &(Normal::aliasMethod);
+            break;
+        default:
+            cerr << "ERROR: Normal() - generator method# " << method << ". Don't know how to do this. Using alias method."<<endl;
+            generator_ = &(Normal::aliasMethod);
+    }
 }
 
-double Normal::getMean()
+double Normal::getNextSample() const
+{
+    static double sd = sqrt(variance_);
+    
+    double sample = generator_();
+    
+    if (!isStandard_)
+    {
+        sample = mean_ + sd*sample;
+    }
+
+    return sample;    
+}
+
+double Normal::getMean() const
 {
     return mean_;
 }
 
-double Normal::getVariance()
+double Normal::getVariance() const
 {
     return variance_;
 }
@@ -78,7 +102,6 @@ double Normal::getVariance()
 */
 double Normal::BoxMueller()
 {
-    
     static double result;    
     double a, b, r = 0;
     
@@ -254,7 +277,10 @@ double Normal::aliasMethod()
     return result;
     
 }
-
+/**
+   Method to check if v > exp(-t) without doing the exponentiation
+   TODO: try to do everything in integer arithmetic
+*/
 bool Normal::testAcceptance(unsigned long t_num, unsigned long v_num)
 {
     bool accept = false;
@@ -403,7 +429,7 @@ int main(void)
     double sd = 0.0;
     double sum = 0.0;
     int freq [200];
-    Normal n(BOXMUELLER);
+    Normal n(BOX_MUELLER);
     
     for ( int i = 0; i < 200; ++i )
     {
@@ -415,6 +441,10 @@ int main(void)
         double p = n.getNextSample();//aliasMethod();
         int index = (int)(p*100)+99;
         cout << index << " ] " << p << endl;
+        if ( index < 0 )
+            index = 0;
+        else if ( index > 199 )
+            index = 199;
         
         freq[index]++;
         

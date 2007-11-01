@@ -18,6 +18,11 @@
 
 #ifndef _PROBABILITY_H
 #define _PROBABILITY_H
+
+const int WORD_LENGTH = 32; // number of bits in a word
+const double LN2 = 0.69314718055994528622676;
+const unsigned long LN2BYTES = 0xB1721814;
+
 /**
    Base class for implementing various probability distributions.
  */
@@ -26,9 +31,9 @@ class Probability
   public:
     virtual ~Probability(){};
     
-    virtual double getMean()=0;
-    virtual double getVariance()=0;
-    virtual double getNextSample()=0;
+    virtual double getMean() const =0;
+    virtual double getVariance()const =0;
+    virtual double getNextSample()const =0;
     
   private:
 //     long double mean_; // TODO : do we really need this?
