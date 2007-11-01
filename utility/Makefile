@@ -10,12 +10,14 @@ OBJ = \
 	PropertyReader.o \
 	mt19937ar.o	\
 	Binomial.o	\
-	Normal.o
+	Normal.o	\
+	Exponential.o
 
 HEADERS = \
 	Probability.h	\
 	Binomial.h	\
 	Normal.h	\
+	Exponential.h	\
 	randnum.h	\
 	PropertyReader.h	\
 	StringUtil.h	\

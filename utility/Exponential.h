@@ -1,9 +1,9 @@
 /*******************************************************************
- * File:            Binomial.h
- * Description:      Implements binomial distribution
+ * File:            Exponential.h
+ * Description:      
  * Author:          Subhasis Ray
  * E-mail:          ray.subhasis@gmail.com
- * Created:         2007-10-28 13:42:24
+ * Created:         2007-11-01 08:59:47
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
@@ -15,26 +15,34 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _BINOMIAL_H
-#define _BINOMIAL_H
+#ifndef _EXPONENTIAL_H
+#define _EXPONENTIAL_H
 #include "Probability.h"
+enum ExponentialGenerator
+{
+    LOGARITHMIC,
+    RANDOM_MINIMIZATION
+};
 
-class Binomial:Probability
+    
+class Exponential: public Probability
 {
   public:
-    Binomial(){};
-    Binomial( unsigned long n, double p);
-    unsigned long getN() const;
-    double getP() const;        
+    Exponential(double mean);
+    Exponential( ExponentialGenerator generator, double mean);
+    
     double getMean() const;
     double getVariance() const;
     double getNextSample() const;
-    
   private:
-    unsigned long n_;
-    double p_;
+    double mean_;
+    double (*generator_)(double);
+    static double logarithmic(double mean);
+    static double randomMinimization(double mean);
+    
     
 };
 
     
+
 #endif
