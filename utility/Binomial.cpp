@@ -21,26 +21,26 @@
 #include "randnum.h"
 #include "Binomial.h"
 
-Binomial::Binomial(unsigned long n, double p, long seed):n_(n),p_(p)
+Binomial::Binomial(unsigned long n, double p):n_(n),p_(p)
 {    
 }
 
-unsigned long Binomial::getN()
+unsigned long Binomial::getN() const
 {
     return n_;    
 }
 
-double Binomial::getP()
+double Binomial::getP() const
 {
     return p_;
 }
 
-double Binomial::getMean()
+double Binomial::getMean() const
 {
     return n_*p_;    
 }
 
-double Binomial::getVariance()
+double Binomial::getVariance() const
 {
     return sqrt(n_*p_*(1.0-p_));
 }
@@ -48,7 +48,7 @@ double Binomial::getVariance()
    returns the next random number in this distribution as the ratio of
    the number of positive outcomes and the total number of trials.
 */
-double Binomial::getNextSample()
+double Binomial::getNextSample() const
 {
     long double sample = 0;
     

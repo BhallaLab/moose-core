@@ -19,12 +19,10 @@
 #ifndef _NORMAL_H
 #define _NORMAL_H
 #include "Probability.h"
-#define WORD_LENGTH 32 // number of bits in a word
-#define LN2 0.69314718055994528622676
 enum NormalGenerator
 {
     ALIAS,
-    BOXMUELLER
+    BOX_MUELLER
 };
 
 class Normal : public Probability
@@ -32,16 +30,17 @@ class Normal : public Probability
     
   public:
     Normal();
-    Normal(NormalGenerator);
+    Normal(NormalGenerator algorithm);
     Normal(double mean, double variance);
-    
-    double getMean();
-    double getVariance();
-    double getNextSample();
+    Normal(NormalGenerator algorithm, double mean, double variance);
+    double getMean()  const;
+    double getVariance() const;
+    double getNextSample() const;
   private:
     double mean_;
     double variance_;
     double (*generator_)();
+    bool isStandard_;
     
     static double BoxMueller();
     static double aliasMethod();
