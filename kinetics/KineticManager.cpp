@@ -385,6 +385,35 @@ Id gillespieSetup( Element* e, const string& method )
 	return Id();
 }
 
+// Returns the solver set up for GSL integration, on the element e
+Id smoldynSetup( Element* e, const string& method )
+{
+	Id solveId;
+	if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" ) ) {
+		if ( solveId.good() ) {
+			Id smoldynId;
+			if ( lookupGet< Id, string >( 
+				solveId(), "lookupChild", smoldynId, "SmoldynHub" ) ) {
+				if ( smoldynId.good() )
+					return solveId;
+				else
+					set( solveId(), "destroy" );
+			} else {
+				// have to clear out the old solver and make a new one.
+				set( solveId(), "destroy" );
+			}
+		}
+	}
+	Element* solve = Neutral::create( "Neutral", "solve", e );
+	solveId = e->id();
+	assert( solveId.good() );
+
+	Element*  sh = Neutral::create( "SmoldynHub", "SmoldynHub", solve );
+	assert ( sh != 0 );
+	string simpath = e->id().path() + "/##";
+	set< string >( sh, "path", simpath );
+	return solveId;
+}
 
 void KineticManager::setupSolver( Element* e )
 {
@@ -400,6 +429,8 @@ void KineticManager::setupSolver( Element* e )
 		Id solveId = gslSetup( e, method_ );
 	} else if ( stochastic_ == 1 && multiscale_ == 0 && singleParticle_ == 0 ) {
 		Id solveId = gillespieSetup( e, method_ );
+	} else if ( stochastic_ == 1 && multiscale_ == 0 && singleParticle_ == 1 ) {
+		Id solveId = smoldynSetup( e, method_ );
 	}
 }
 
