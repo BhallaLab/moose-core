@@ -19,6 +19,7 @@
 #define _EXPONENTIAL_CPP
 #include "Exponential.h"
 #include "randnum.h"
+#include "NumUtil.h"
 #include <iostream>
 #include <cmath>
 
