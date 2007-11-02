@@ -1,10 +1,9 @@
 /*******************************************************************
- * File:            Probability.h
- * Description:      This is base class for various probability
- *                   distribution generator classes.
+ * File:            NumUtil.h
+ * Description:      
  * Author:          Subhasis Ray
  * E-mail:          ray.subhasis@gmail.com
- * Created:         2007-10-28 13:30:41
+ * Created:         2007-11-02 11:47:21
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
@@ -16,26 +15,14 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _PROBABILITY_H
-#define _PROBABILITY_H
+#ifndef _NUMUTIL_H
+#define _NUMUTIL_H
 
+const int WORD_LENGTH = 32; // number of bits in a word - check for portability
+const double LN2 = 0.69314718055994528622676;
+const unsigned long LN2BYTES = 0xB1721814;
+const double NATURAL_E = 2.718281828459045;
 
-/**
-   Base class for implementing various probability distributions.
- */
-class Probability
-{
-  public:
-    virtual ~Probability(){};
-    
-    virtual double getMean() const =0;
-    virtual double getVariance()const =0;
-    virtual double getNextSample()const =0;
-    
-  private:
-//     long double mean_; // TODO : do we really need this?
-//     long double variance_;// TODO : do we really need this?    
-};
+extern const double getMachineEpsilon();
 
-    
 #endif
