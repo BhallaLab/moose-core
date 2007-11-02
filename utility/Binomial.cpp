@@ -19,6 +19,7 @@
 #define _BINOMIAL_CPP
 #include <cmath>
 #include "randnum.h"
+#include "NumUtil.h"
 #include "Binomial.h"
 
 Binomial::Binomial(unsigned long n, double p):n_(n),p_(p)

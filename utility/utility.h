@@ -15,4 +15,5 @@
 #include "StringUtil.h"
 #include "PropertyReader.h"
 #include "Configuration.h"
+#include "NumUtil.h"
 #endif
