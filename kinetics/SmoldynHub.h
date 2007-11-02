@@ -59,6 +59,10 @@ class SmoldynHub
 		unsigned int numSpecies() const;
 		static unsigned int getNspecies( const Element* e );
 		
+		static string getPath( const Element* e );
+		static void setPath( const Conn& c, string value );
+		void localSetPath( Element* stoich, const string& value );
+		
 		///////////////////////////////////////////////////
 		// Dest function definitions
 		///////////////////////////////////////////////////
@@ -73,6 +77,7 @@ class SmoldynHub
 	private:
 		// A pointer to the entire Smoldyn data structure
 		struct simstruct* simptr_;	
+		string path_;
 };
 
 // Used by the solver

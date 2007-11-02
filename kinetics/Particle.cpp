@@ -78,11 +78,6 @@ const Cinfo* initParticleCinfo()
 			GFCAST( &Particle::getN ), 
 			RFCAST( &Particle::setN )
 		),
-		new ValueFinfo( "nInit", 
-			ValueFtype1< double >::global(),
-			GFCAST( &Particle::getNinit ), 
-			RFCAST( &Particle::setNinit )
-		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -129,16 +124,6 @@ Particle::Particle()
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
-
-void Particle::setNinit( const Conn& c, double value )
-{
-	;
-}
-
-double Particle::getNinit( const Element* e )
-{
-	return 0.0;
-}
 
 /*
 void Particle::setVolumeScale( const Conn& c, double value )

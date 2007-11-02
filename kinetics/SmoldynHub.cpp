@@ -14,6 +14,7 @@
 #include "SmoldynHub.h"
 #include "ThisFinfo.h"
 #include "SolveFinfo.h"
+#include "../element/Wildcard.h"
 
 
 const Cinfo* initSmoldynHubCinfo()
@@ -38,6 +39,11 @@ const Cinfo* initSmoldynHubCinfo()
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &SmoldynHub::getNspecies ), 
 			&dummyFunc
+		),
+		new ValueFinfo( "path", 
+			ValueFtype1< string >::global(),
+			GFCAST( &SmoldynHub::getPath ),
+			RFCAST( &SmoldynHub::setPath )
 		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -89,6 +95,7 @@ static const unsigned int nSlot =
 ///////////////////////////////////////////////////
 
 SmoldynHub::SmoldynHub()
+	: simptr_( 0 ), path_( "" )
 {
 		;
 }
@@ -183,6 +190,16 @@ unsigned int SmoldynHub::numSpecies() const
 	return 0;
 }
 
+string SmoldynHub::getPath( const Element* e )
+{
+	return static_cast< const SmoldynHub* >( e->data() )->path_;
+}
+
+void SmoldynHub::setPath( const Conn& c, string value )
+{
+	Element* e = c.targetElement();
+	static_cast< SmoldynHub* >( e->data() )->localSetPath( e, value );
+}
 
 ///////////////////////////////////////////////////
 // Dest function definitions
@@ -204,7 +221,23 @@ void SmoldynHub::processFunc( const Conn& c, ProcInfo info )
 	Element* e = c.targetElement();
 	static_cast< SmoldynHub* >( e->data() )->processFuncLocal( e, info );
 }
+
 void SmoldynHub::processFuncLocal( Element* e, ProcInfo info )
 {
 	// do stuff here
+}
+
+///////////////////////////////////////////////////
+// This is where the business happens
+///////////////////////////////////////////////////
+
+void SmoldynHub::localSetPath( Element* stoich, const string& value )
+{
+	path_ = value;
+	vector< Element* > ret;
+	wildcardFind( path_, ret );
+	if ( ret.size() > 0 ) {
+		;
+	}
+	cout << "found " << ret.size() << " elements\n";
 }
