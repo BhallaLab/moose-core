@@ -1,10 +1,9 @@
 /*******************************************************************
- * File:            Probability.h
- * Description:      This is base class for various probability
- *                   distribution generator classes.
+ * File:            Poisson.h
+ * Description:      
  * Author:          Subhasis Ray
  * E-mail:          ray.subhasis@gmail.com
- * Created:         2007-10-28 13:30:41
+ * Created:         2007-11-02 09:43:47
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
@@ -16,25 +15,22 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _PROBABILITY_H
-#define _PROBABILITY_H
-
-
-/**
-   Base class for implementing various probability distributions.
- */
-class Probability
+#ifndef _POISSON_H
+#define _POISSON_H
+#include "Probability.h"
+class Poisson:public Probability
 {
   public:
-    virtual ~Probability(){};
+    Poisson(double mean);
     
-    virtual double getMean() const =0;
-    virtual double getVariance()const =0;
-    virtual double getNextSample()const =0;
-    
+    double getMean() const;
+    double getVariance() const;
+    double getNextSample() const;
   private:
-//     long double mean_; // TODO : do we really need this?
-//     long double variance_;// TODO : do we really need this?    
+    double mean_;
+    double poissonLow() const;
+    double poissonInverse() const;
+    double ratioOfUniforms() const;    
 };
 
     
