@@ -4663,5 +4663,10 @@ Some questions for Steven:
 
 First steps: Implemented Particle object, derived from Molecule, and
 implemented skeleton of SmoldynHub.
+Checked in as revision 231, in serial compile form with debugging.
+
+=============================================================================
+2 Nov 2007
+Put in hooks for SmoldynHub into KineticManager. Doesn't do anything yet.
 
 =============================================================================
