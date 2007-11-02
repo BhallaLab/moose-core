@@ -11,17 +11,21 @@ OBJ = \
 	mt19937ar.o	\
 	Binomial.o	\
 	Normal.o	\
-	Exponential.o
+	Exponential.o	\
+	Poisson.o	\
+	NumUtil.o
 
 HEADERS = \
 	Probability.h	\
 	Binomial.h	\
 	Normal.h	\
 	Exponential.h	\
+	Poisson.h	\
 	randnum.h	\
 	PropertyReader.h	\
 	StringUtil.h	\
 	Configuration.h	\
+	NumUtil.h	\
 	utility.h
 
 default: $(TARGET)
