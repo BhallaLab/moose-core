@@ -71,7 +71,6 @@ class Particle: public Molecule
 		*/
 
 	private:
-		double D_;
 };
 
 // Used by the solver
