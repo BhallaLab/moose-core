@@ -62,6 +62,45 @@ class SmoldynHub
 		static string getPath( const Element* e );
 		static void setPath( const Conn& c, string value );
 		void localSetPath( Element* stoich, const string& value );
+
+		static unsigned int getNreac( const Element* e );
+		unsigned int numReac() const;
+
+		static unsigned int getNenz( const Element* e );
+		unsigned int numEnz() const;
+
+		///////////////////////////////////////////////////
+		// Functions to override zombie field access funcs.
+		///////////////////////////////////////////////////
+		static void setMolN( const Conn& c, double value );
+		static double getMolN( const Element* e );
+		static void setMolNinit( const Conn& c, double value );
+		static double getMolNinit( const Element* e );
+		static void setReacKf( const Conn& c, double value );
+		static double getReacKf( const Element* e );
+		static void setReacKb( const Conn& c, double value );
+		static double getReacKb( const Element* e );
+
+		static void setEnzK1( const Conn& c, double value );
+		static double getEnzK1( const Element* e );
+		static void setEnzK2( const Conn& c, double value );
+		static double getEnzK2( const Element* e );
+		static void setEnzK3( const Conn& c, double value );
+		static double getEnzK3( const Element* e );
+		static void setEnzKm( const Conn& c, double value );
+		static double getEnzKm( const Element* e );
+		static void setEnzKcat( const Conn& c, double value );
+		static double getEnzKcat( const Element* e );
+
+		static void setMmEnzK1( const Conn& c, double value );
+		static double getMmEnzK1( const Element* e );
+		static void setMmEnzK2( const Conn& c, double value );
+		static double getMmEnzK2( const Element* e );
+		static void setMmEnzK3( const Conn& c, double value );
+		static void setMmEnzKm( const Conn& c, double value );
+		static double getMmEnzKm( const Element* e );
+		static void setMmEnzKcat( const Conn& c, double value );
+		static double getMmEnzKcat( const Element* e );
 		
 		///////////////////////////////////////////////////
 		// Dest function definitions
@@ -74,10 +113,79 @@ class SmoldynHub
 
 		static const Finfo* particleFinfo;
 
+		static void molSum( const Conn& c, double val );
+
+		///////////////////////////////////////////////////
+		// Zombie setup functions
+		///////////////////////////////////////////////////
+
+		static void rateTermFunc( const Conn& c,
+			vector< RateTerm* >* rates, bool useHalfReacs );
+		static void rateSizeFunc( const Conn& c,
+			unsigned int nReac, unsigned int nEnz, 
+			unsigned int nMmEnz);
+		void rateSizeFuncLocal( Element* hub,
+			unsigned int nReac, unsigned int nEnz, 
+			unsigned int nMmEnz );
+		static void molSizeFunc( const Conn& c,
+			unsigned int nMol, unsigned int nBuf,
+			unsigned int nSumTot );
+		void molSizeFuncLocal(
+			unsigned int nMol, unsigned int nBuf,
+			unsigned int nSumTot );
+		static void molConnectionFunc( const Conn& c,
+				vector< double >* S,
+				vector< double >* Sinit,
+				vector< Element* >* elist
+		);
+		void molConnectionFuncLocal( Element* e,
+				vector< double >* S,
+				vector< double >* Sinit,
+				vector< Element* >* elist
+		);
+		static void reacConnectionFunc( const Conn& c,
+				unsigned int index, Element* reac );
+		void reacConnectionFuncLocal( 
+				Element* hub, 
+				int rateTermIndex, 
+				Element* reac );
+		static void enzConnectionFunc( const Conn& c,
+				unsigned int index, Element* enz );
+		void enzConnectionFuncLocal(
+				Element* hub, 
+				int enzTermIndex, 
+				Element* enz );
+		static void mmEnzConnectionFunc( const Conn& c,
+				unsigned int index, Element* mmEnz );
+		void mmEnzConnectionFuncLocal(
+				Element* hub, 
+				int enzTermIndex, 
+				Element* enz );
+
+		static void clearFunc( const Conn& c );
+		static void childFunc( const Conn& c, int stage );
+		static void destroy( const Conn& c );
+		static void zombify( Element* hub, Element* e, 
+			const Finfo* hubFinfo, Finfo* solveFinfo );
+
+		static const Finfo* molSolveFinfo;
+
+
 	private:
 		// A pointer to the entire Smoldyn data structure
+		unsigned int nMol_;
+		unsigned int nBuf_;
+		unsigned int nSumTot_;
 		struct simstruct* simptr_;	
-		string path_;
+		// string path_;
+		map< Element*, unsigned int > molMap_;
+		vector< unsigned int > molSumMap_;
+		vector< unsigned int > reacMap_;
+		vector< unsigned int > enzMap_;
+		vector< unsigned int > mmEnzMap_;
+		vector< RateTerm* >* rates_;
+		vector< double >* S_;
+		vector< double >* Sinit_;
 };
 
 // Used by the solver

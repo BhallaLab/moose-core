@@ -4668,5 +4668,39 @@ Checked in as revision 231, in serial compile form with debugging.
 =============================================================================
 2 Nov 2007
 Put in hooks for SmoldynHub into KineticManager. Doesn't do anything yet.
+Checked in as revision 236, in serial compile form with debugging.
 
 =============================================================================
+3 Nov 2007
+Working on scanning model path to set up reactions.
+
+Qs for Steve:
+1. Why are there 3 rxnptrs in the list of reactions in the simstruct ? Is it
+	one for each order of reactions?
+2. in the rxnstruct, where are the substrates for the reactions set up? 
+	Are they in the prod array? Or does the rxnptr array map one-to-one
+	with each entry in the mols array?
+
+Asked Steve. In the meantime,, next step is to decide whether to use the
+Stoich calculations to set up vectors for reacs, enz, mols
+=============================================================================
+4 Nov 2007.
+
+Pros and cons of using Stoich:
+Pro: 
+	- Deal with the whole of the MOOSE structure in one place. Don't
+		have to do messy scanning again.
+	- Return reaction structure in an indexed form, in terms of pointers
+		off S_, more similar to the organization of the Smoldyn code.
+Cons:
+	- Need to handle extra mol info for Smoldyn
+	- Unnecessary construction of Stoich matrix. 
+		- But overhead here is tiny compared to Smoldyn sim.
+
+I think that the Stoich should deal with talking to the MOOSE model, and we
+take info from there.
+
+Setting it up thusly. I have redone the SmoldynHub much like the KineticHub
+to achieve this, and it is beginning to look like a common base class is
+called for. For now, check it in.
+
