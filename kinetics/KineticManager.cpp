@@ -171,6 +171,9 @@ const Cinfo* initKineticManagerCinfo()
 	KineticManager::addMethod( "adstoch", 
 		"Explicit adaptive stochastic method of Vasudeva and Bhalla",
 		1, 0, 1, 0, 0, 1 );
+	KineticManager::addMethod( "smoldyn", 
+		"Smoldyn numerical engine for single particle stochastic calculations using Smoluchowski dynamics, from Andrews and Bray",
+		1, 1, 0, 0, 1, 0 );
 	KineticManager::addMethod( "Smoldyn", 
 		"Smoldyn numerical engine for single particle stochastic calculations using Smoluchowski dynamics, from Andrews and Bray",
 		1, 1, 0, 0, 1, 0 );
@@ -445,6 +448,7 @@ void KineticManager::setupDt( Element* e )
 {
 	static char* fixedDtMethods[] = {
 		"ee", 
+		"Smoldyn", 
 	};
 	static unsigned int numFixedDtMethods = 
 		sizeof( fixedDtMethods ) / sizeof( char* );
