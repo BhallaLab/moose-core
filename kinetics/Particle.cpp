@@ -12,6 +12,7 @@
 #include "moose.h"
 #include <math.h>
 #include "Molecule.h"
+#include "RateTerm.h"
 #include "SmoldynHub.h"
 #include "Particle.h"
 
@@ -142,7 +143,7 @@ void Particle::setPos( const Conn& c, double value,
 {
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie(
-		c.targetElement(), SmoldynHub::particleFinfo, molIndex );
+		c.targetElement(), SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
 		sh->setPos( molIndex, value, i, dim );
@@ -168,7 +169,7 @@ double Particle::getPos( const Element* e, unsigned int i, unsigned int dim)
 {
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie( 
-		e, SmoldynHub::particleFinfo, molIndex );
+		e, SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
 		return sh->getPos( molIndex, i, dim );
@@ -195,7 +196,7 @@ void Particle::setN( const Conn& c, double value )
 {
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie( 
-		c.targetElement(), SmoldynHub::particleFinfo, molIndex );
+		c.targetElement(), SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
 		sh->setNmol( molIndex, static_cast< unsigned int >( value ) );
@@ -206,7 +207,7 @@ double Particle::getN( const Element* e )
 {
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie( 
-		e, SmoldynHub::particleFinfo, molIndex );
+		e, SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
 		return static_cast< double >( sh->getNmol( molIndex ) );
@@ -219,7 +220,7 @@ void Particle::setPosVector( const Conn& c, const vector< double >& value,
 {
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie( 
-		c.targetElement(), SmoldynHub::particleFinfo, molIndex );
+		c.targetElement(), SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
 		sh->setPosVector( molIndex, value, dim );
@@ -246,7 +247,7 @@ vector< double > Particle::getPosVector( const Element* e, unsigned int dim)
 	vector< double > ret;
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie( 
-		e, SmoldynHub::particleFinfo, molIndex );
+		e, SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
 		sh->getPosVector( molIndex, ret, dim );
@@ -273,7 +274,7 @@ void Particle::setD( const Conn& c, double value )
 {
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie( 
-		c.targetElement(), SmoldynHub::particleFinfo, molIndex );
+		c.targetElement(), SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
 		sh->setD( molIndex, value );
@@ -284,7 +285,7 @@ double Particle::getD( const Element* e )
 {
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie( 
-		e, SmoldynHub::particleFinfo, molIndex );
+		e, SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
 		return sh->getD( molIndex );
