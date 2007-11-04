@@ -116,7 +116,8 @@ const Cinfo* initKineticHubCinfo()
 			&KineticHub::destroy ),
 		new DestFinfo( "molSum", Ftype1< double >::global(),
 			RFCAST( &KineticHub::molSum ) ),
-		// override the Neutral::childFunc here.
+		// override the Neutral::childFunc here, so that when this
+		// is deleted all the zombies are reanimated.
 		new DestFinfo( "child", Ftype1< int >::global(),
 			RFCAST( &KineticHub::childFunc ) ),
 	///////////////////////////////////////////////////////
@@ -197,6 +198,8 @@ KineticHub::KineticHub()
  * In this destructor we need to put messages back to process,
  * and we need to replace the SolveFinfos on zombies with the
  * original ThisFinfo.
+ * This should really just use the clearFunc. Try it once the
+ * Smoldyn stuff is done.
  */
 void KineticHub::destroy( const Conn& c)
 {
@@ -259,12 +262,12 @@ unsigned int KineticHub::getNmol( const Element* e )
 
 unsigned int KineticHub::getNreac( const Element* e )
 {
-	return static_cast< KineticHub* >( e->data() )->nMol_;
+	return static_cast< KineticHub* >( e->data() )->reacMap_.size();
 }
 
 unsigned int KineticHub::getNenz( const Element* e )
 {
-	return static_cast< KineticHub* >( e->data() )->nMol_;
+	return static_cast< KineticHub* >( e->data() )->enzMap_.size();
 }
 
 ///////////////////////////////////////////////////
@@ -560,7 +563,7 @@ void KineticHub::mmEnzConnectionFuncLocal(
 	mmEnzMap_[connIndex - 1] = rateTermIndex;
 }
 
-void unzombify( Conn c )
+void unzombify( const Conn& c )
 {
 	Element* e = c.targetElement();
 	const Cinfo* ci = e->cinfo();
