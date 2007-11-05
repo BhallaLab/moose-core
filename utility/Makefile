@@ -8,31 +8,17 @@ OBJ = \
 	Configuration.o \
 	StringUtil.o	\
 	PropertyReader.o \
-	mt19937ar.o	\
-	Binomial.o	\
-	Normal.o	\
-	Exponential.o	\
-	Poisson.o	\
-	NumUtil.o
 
 HEADERS = \
-	Probability.h	\
-	Binomial.h	\
-	Normal.h	\
-	Exponential.h	\
-	Poisson.h	\
-	randnum.h	\
 	PropertyReader.h	\
 	StringUtil.h	\
 	Configuration.h	\
-	NumUtil.h	\
 	utility.h
 
 default: $(TARGET)
 
 .cpp.o:
 	$(CXX) $(CFLAGS)  $< -c
-#	$(CXX) $(CFLAGS) $(shell pkg-config libxml++-2.6 --cflags) $< -c
 
 $(TARGET): $(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
