@@ -9,11 +9,5 @@
 ** Biophase Simulations Inc, http://www.bpsims.com
 ** See the file BIOPHASE.INFO for details.
 **********************************************************************/
-#ifndef _UTILITY_H
-#define _UTILITY_H
-#include "randnum/randnum.h"
-#include "StringUtil.h"
-#include "PropertyReader.h"
-#include "Configuration.h"
-#include "randnum/NumUtil.h"
-#endif
+extern double mtrand(void);
+extern void mtseed(long seed);

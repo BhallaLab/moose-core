@@ -76,11 +76,12 @@ CXX = g++
 
 LD = ld
 
-SUBDIR = genesis_parser basecode shell element maindir biophysics kinetics builtins scheduling example utility $(PARALLEL_DIR)
+SUBDIR = genesis_parser basecode shell element maindir biophysics kinetics builtins scheduling example utility utility/randnum $(PARALLEL_DIR)
 
 OBJLIBS =	\
 	basecode/basecode.o \
 	utility/utility.o \
+	utility/randnum/randnum.o	\
 	maindir/maindir.o \
 	genesis_parser/SLI.o \
 	element/element.o \
