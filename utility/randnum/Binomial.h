@@ -31,9 +31,24 @@ class Binomial:Probability
     double getNextSample() const;
     
   private:
+    double generateTrd() const;
+    bool isInverted_;
+    
     unsigned long n_;
     double p_;
+    double mean_;
     
+    double paramC_;
+    double paramB_;
+    double paramA_;
+    double paramAlpha_;
+    double paramUr_; 
+    double paramVr_; 
+    double paramUrVr_;
+    double paramM_; 
+    double paramR_; 
+    double paramNr_;
+    double paramNpq_;
 };
 
     
