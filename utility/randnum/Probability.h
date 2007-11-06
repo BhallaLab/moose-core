@@ -36,6 +36,5 @@ class Probability
 //     long double mean_; // TODO : do we really need this?
 //     long double variance_;// TODO : do we really need this?    
 };
-
     
 #endif
