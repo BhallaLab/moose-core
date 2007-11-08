@@ -19,7 +19,7 @@
 #define _BINOMIAL_H
 #include "Probability.h"
 
-class Binomial:Probability
+class Binomial:public Probability
 {
   public:
     Binomial(){};

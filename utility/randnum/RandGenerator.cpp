@@ -23,7 +23,7 @@
 const Cinfo * initRandGeneratorCinfo()
 {
     static Finfo* processShared[] = 
-        {
+        {            
             new DestFinfo("process", Ftype1< ProcInfo >::global(),
                           RFCAST( &RandGenerator::processFunc )),
             new DestFinfo("reinit", Ftype1<ProcInfo >::global(),
@@ -33,18 +33,20 @@ const Cinfo * initRandGeneratorCinfo()
                                             sizeof(processShared)/sizeof(Finfo*));
     static Finfo* randGeneratorFinfos[] =
         {
+            new ValueFinfo("sample", ValueFtype1<double>::global(),
+                           GFCAST( &RandGenerator::getSample),
+                           &dummyFunc),
+            new ValueFinfo("mean", ValueFtype1<double>::global(),
+                           GFCAST( &RandGenerator::getMean),
+                           &dummyFunc),
+            new ValueFinfo("variance", ValueFtype1<double>::global(),
+                           GFCAST( &RandGenerator::getVariance),
+                           &dummyFunc),
+
             process,
             new SrcFinfo("output", Ftype1<double>::global()),
         };
-    
-/*    
-    static SchedInfo schedInfo[] = 
-        {
-            {
-                process, 0, 0
-            },
-        };
-*/    
+      
     static Cinfo randGeneratorCinfo("RandGenerator",
                                     "Subhasis Ray",
                                     "Base class for random number generator.",
@@ -72,17 +74,47 @@ RandGenerator::~RandGenerator()
 
 double RandGenerator::getMean(const Element* e)
 {
-    return static_cast<RandGenerator*>(e->data())->rng_->getMean();
+    Probability* gen = static_cast<RandGenerator*>(e->data())->rng_;
+    
+    if (gen)
+    {
+        return gen->getMean();
+    }
+    else
+    {
+        cerr << "WARNING: RandGenerator::getMean - parameters not set for object " << e->name() << endl;
+        return 0;
+    }            
 }
 
 double RandGenerator::getVariance(const Element* e)
 {
-    return static_cast<RandGenerator*>(e->data())->rng_->getVariance();    
+    Probability* gen = static_cast<RandGenerator*>(e->data())->rng_;
+    if (gen)
+    {
+        return gen->getVariance();    
+    }
+    else
+    {
+        cerr << "WARNING: RandGenerator::getVariance - parameters not set for object " << e->name() << endl;
+        return 0;
+    }
+    
+        
 }
 
 double RandGenerator::getSample(const Element* e)
 {
-    return static_cast<RandGenerator*>( e->data())->rng_->getNextSample();
+    Probability* gen = static_cast<RandGenerator*>(e->data())->rng_;
+    if (gen)
+    {
+        return gen->getNextSample();
+    }
+    else
+    {
+        cerr << "WARNING: RandGenerator::getSample  - parameters not set for object " << e->name() << endl;
+        return 0;
+    }    
 }
 
 void RandGenerator::processFunc( const Conn& c, ProcInfo info )
@@ -92,7 +124,7 @@ void RandGenerator::processFunc( const Conn& c, ProcInfo info )
 
 void RandGenerator::reinitFunc(const Conn& c, ProcInfo info)
 {
-    cerr << "ERROR: RandGenerator::reinitFunc - this function should never be reached." << endl;
+    cerr << "ERROR: RandGenerator::reinitFunc - this function should never be reached. Guilty party: " << c.targetElement()->name() << endl;
 }
 
 

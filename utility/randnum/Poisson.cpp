@@ -67,7 +67,6 @@ double Poisson::poissonSmall() const
 {
     static double  limit = exp(-mean_);
     
-    double result;
     double product = 1.0;
     
     int i = 0;

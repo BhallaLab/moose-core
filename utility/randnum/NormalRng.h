@@ -20,9 +20,9 @@
 #include "randnum.h"
 #include "basecode/header.h"
 #include "basecode/moose.h"
-
-#include "Normal.h"
 #include "RandGenerator.h"
+#include "Normal.h"
+
 /**
    This is MOOSE wrapper for normally distributed random number generator class, Normal.
    The default
@@ -31,21 +31,17 @@ class NormalRng: public RandGenerator
 {
   public:
     NormalRng();
-    ~NormalRng();
     static double getMean(const Element* e);    
     static void setMean(const Conn& c, double mean);
     static double getVariance(const Element* e);
     static void setVariance(const Conn& c, double variance);
-    static double getSample(const Element* e);
     static void setMethod(const Conn& c, int method);
     static int getMethod(const Element* e);
-    static void processFunc( const Conn& c, ProcInfo info);
     static void reinitFunc( const Conn& c, ProcInfo info);
 
   private:
     double mean_;
     double variance_;
-    Normal* normalRng_;
     NormalGenerator method_;    
     bool isMeanSet_;
     bool isVarianceSet_;
