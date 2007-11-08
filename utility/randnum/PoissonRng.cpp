@@ -26,9 +26,6 @@ const Cinfo* initPoissonRngCinfo()
 {
     static Finfo* poissonRngFinfos[] =
         {
-            new ValueFinfo("sample", ValueFtype1<double>::global(),
-                           GFCAST( &PoissonRng::getSample),
-                           RFCAST(&dummyFunc)),
             new ValueFinfo("mean", ValueFtype1<double>::global(),
                            GFCAST( &PoissonRng::getMean),
                            RFCAST( &PoissonRng::setMean)),
@@ -36,7 +33,7 @@ const Cinfo* initPoissonRngCinfo()
     
     static Cinfo poissonRngCinfo("PoissonRng",
                                 "Subhasis Ray",
-                                "Poissonly distributed random number generator.",
+                                "Poisson distributed random number generator.",
                                 initRandGeneratorCinfo(),
                                 poissonRngFinfos,
                                 sizeof(poissonRngFinfos)/sizeof(Finfo*),
@@ -48,23 +45,35 @@ const Cinfo* initPoissonRngCinfo()
     
 static const Cinfo* poissonRngCinfo = initPoissonRngCinfo();
 
-    
+/**
+   Sets the mean. Since poisson distribution is defined in terms of
+   the rate parameter or the mean, it is mandatory to set this before
+   using the generator. This is stored as member variable even if the
+   actual generator object has not been instantiated. If the generator
+   object exists, this function call has no effect.
+*/
 void PoissonRng::setMean(const Conn& c, double mean)
 {
     PoissonRng* generator = static_cast<PoissonRng*>(c.data());
-    if ( generator->rng_ )
+    if ( !generator->rng_ )
     {
-        delete generator->rng_;        
+        generator->rng_ = new Poisson(mean);
     }
-    generator->rng_ = new Poisson(mean);
+    else 
+    {
+        generator->mean_ = generator->rng_->getMean();
+    }
 }
+/**
+   reports error in case the parameter mean has not been set.
+*/
 void PoissonRng::reinitFunc(const Conn& c, ProcInfo info)
 {
     PoissonRng* generator = static_cast < PoissonRng* >(c.data());
     if (! generator->rng_ )
     {
         cerr << "ERROR: PoissonRng::reinitFunc - mean must be set before using the Poisson distribution generator." << endl;                
-    } 
+    }
 }
 
     

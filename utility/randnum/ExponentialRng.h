@@ -1,9 +1,9 @@
 /*******************************************************************
- * File:            PoissonRng.h
+ * File:            ExponentialRng.h
  * Description:      
  * Author:          Subhasis Ray
  * E-mail:          ray.subhasis@gmail.com
- * Created:         2007-11-07 16:22:35
+ * Created:         2007-11-08 11:27:50
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
@@ -15,17 +15,33 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _POISSONRNG_H
-#define _POISSONRNG_H
-#include "Poisson.h"
+#ifndef _EXPONENTIALRNG_H
+#define _EXPONENTIALRNG_H
+#include "randnum.h"
+#include "basecode/header.h"
+#include "basecode/moose.h"
 #include "RandGenerator.h"
-class PoissonRng:public RandGenerator
+#include "Exponential.h"
+
+/**
+   This is MOOSE wrapper for Exponentially distributed random number generator class, Exponential.
+   The default
+ */
+class ExponentialRng: public RandGenerator
 {
   public:
+    ExponentialRng();
+    static double getMean(const Element* e);    
     static void setMean(const Conn& c, double mean);
-    static void reinitFunc(const Conn& c, ProcInfo p);
+    static int getMethod(const Element* e);    
+    static void setMethod(const Conn& c, int method);    
+    static void reinitFunc( const Conn& c, ProcInfo info);
+
   private:
     double mean_;    
+    bool isMeanSet_;
+    int method_;
+    
 };
 
 
