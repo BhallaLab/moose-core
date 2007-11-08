@@ -22,18 +22,19 @@
 #include "NormalRng.h"
 #include "Normal.h"
 #include "basecode/moose.h"
+extern const Cinfo* initRandGeneratorCinfo();
 
 const Cinfo* initNormalRngCinfo()
 {
-    static Finfo* processShared[] = 
-        {
-            new DestFinfo("process", Ftype1<ProcInfo>::global(),
-                          RFCAST( &NormalRng::processFunc)),
-            new DestFinfo("reinit", Ftype1<ProcInfo>::global(),
-                          RFCAST( &NormalRng::reinitFunc)),
-        };
-    static Finfo* process = new SharedFinfo( "process", processShared,
-                                             sizeof(processShared)/sizeof(Finfo*));
+//     static Finfo* processShared[] = 
+//         {
+//             new DestFinfo("process", Ftype1<ProcInfo>::global(),
+//                           RFCAST( &NormalRng::processFunc)),
+//             new DestFinfo("reinit", Ftype1<ProcInfo>::global(),
+//                           RFCAST( &NormalRng::reinitFunc)),
+//         };
+//     static Finfo* process = new SharedFinfo( "process", processShared,
+//                                              sizeof(processShared)/sizeof(Finfo*));
     static Finfo* normalRngFinfos[] =
         {
             new ValueFinfo("sample", ValueFtype1<double>::global(),
@@ -48,33 +49,23 @@ const Cinfo* initNormalRngCinfo()
             new ValueFinfo("method", ValueFtype1<int>::global(),
                            GFCAST( &NormalRng::getMethod),
                            RFCAST( &NormalRng::setMethod)),
-            process,
-
-            new SrcFinfo("output", Ftype1<double>::global()),
-            
             
         };
-    static SchedInfo schedInfo[] = 
-            {
-                {
-                    process, 0, 0
-                },
-            };
     
     static Cinfo normalRngCinfo("NormalRng",
                                 "Subhasis Ray",
                                 "Normally distributed random number generator.",
-                                initNeutralCinfo(),
+                                initRandGeneratorCinfo(),
                                 normalRngFinfos,
                                 sizeof(normalRngFinfos)/sizeof(Finfo*),
-                                ValueFtype1<NormalRng>::global(),
-                                schedInfo, 1);
+                                ValueFtype1<NormalRng>::global()
+                                );
     return &normalRngCinfo;
 }
 
     
 static const Cinfo* normalRngCinfo = initNormalRngCinfo();
-static const unsigned int outputSlot = initNormalRngCinfo()->getSlotIndex("output");
+
 
 double NormalRng::getSample( const Element* e)
 {
@@ -95,11 +86,11 @@ void NormalRng::setMean(const Conn& c, double mean)
     if ( generator->isVarianceSet_&& (!generator->normalRng_))
     {
         generator->normalRng_ = new Normal(generator->method_, generator->mean_, generator->variance_);
-    }else if ( generator->normalRng_)
+    }
+    else if ( generator->normalRng_)
     {
         generator->mean_ = generator->normalRng_->getMean();        
-    }
-    
+    }    
 }
 
 double NormalRng::getVariance(const Element* e)
@@ -150,10 +141,10 @@ void NormalRng::setMethod(const Conn& c, int method)
     }
 }
 
-void NormalRng::processFunc( const Conn& c, ProcInfo info )
-{
-    send1<double>(c.targetElement(), outputSlot, getSample(c.targetElement()));    
-}
+// void NormalRng::processFunc( const Conn& c, ProcInfo info )
+// {
+//     send1<double>(c.targetElement(), outputSlot, getSample(c.targetElement()));    
+// }
 
 void NormalRng::reinitFunc(const Conn& c, ProcInfo info)
 {
