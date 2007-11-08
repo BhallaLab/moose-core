@@ -31,6 +31,15 @@ Gamma::Gamma(double alpha, double theta):alpha_(alpha), theta_(theta)
         theta_ = 1;        
     }
 }
+double Gamma::getAlpha()
+{
+    return alpha_;
+}
+
+double Gamma::getTheta()
+{
+    return theta_;
+}
 
 double Gamma::getMean() const
 {
@@ -46,7 +55,7 @@ double Gamma::getNextSample() const
 {
     double result;
     
-    if ( alpha_ < 1 )
+    if ( alpha_ <= 1 )
     {
         result = gammaSmall();
     }
@@ -63,7 +72,7 @@ double Gamma::getNextSample() const
 }
 
 // See Algorithm A in TAOCP by Knuth, Vol 2 ,Section 3.4.1
-double Gamma::gammaLarge() const// alpha >= 1
+double Gamma::gammaLarge() const// alpha > 1
 {
     double result = 0.0;
     // a1. generate candidate
@@ -75,6 +84,7 @@ double Gamma::gammaLarge() const// alpha >= 1
     
     while (true)
     {
+        uniformU = mtrand();        
         yValue = tan(M_PI*uniformU);
         tmp = sqrt(2*alpha_ - 1)*yValue;
         

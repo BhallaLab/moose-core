@@ -1,9 +1,9 @@
 /*******************************************************************
- * File:            PoissonRng.h
+ * File:            BinomialRng.h
  * Description:      
  * Author:          Subhasis Ray
  * E-mail:          ray.subhasis@gmail.com
- * Created:         2007-11-07 16:22:35
+ * Created:         2007-11-08 10:48:59
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
@@ -15,18 +15,31 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _POISSONRNG_H
-#define _POISSONRNG_H
-#include "Poisson.h"
+#ifndef _BINOMIALRNG_H
+#define _BINOMIALRNG_H
+
+#include "randnum.h"
+#include "basecode/header.h"
+#include "basecode/moose.h"
 #include "RandGenerator.h"
-class PoissonRng:public RandGenerator
+#include "Binomial.h"
+
+class BinomialRng: public RandGenerator
 {
   public:
-    static void setMean(const Conn& c, double mean);
-    static void reinitFunc(const Conn& c, ProcInfo p);
-  private:
-    double mean_;    
-};
+    BinomialRng();
+    
+    static void setN(const Conn& c, int n);
+    static int getN(const Element* e);
+    static void setP(const Conn& c, double p);
+    static double getP(const Element* e);    
+    static void reinitFunc( const Conn& c, ProcInfo info);
 
+  private:
+    bool isNSet_;
+    unsigned long n_;
+    bool isPSet_;
+    double p_;    
+};
 
 #endif
