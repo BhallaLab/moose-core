@@ -25,7 +25,8 @@ class Gamma: public Probability
 {
   public:
     Gamma(double alpha, double theta);
-    
+    double getAlpha();
+    double getTheta();    
     double getMean()  const;
     double getVariance() const;
     double getNextSample() const;

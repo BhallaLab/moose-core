@@ -1,9 +1,9 @@
 /*******************************************************************
- * File:            PoissonRng.h
+ * File:            GammaRng.h
  * Description:      
  * Author:          Subhasis Ray
  * E-mail:          ray.subhasis@gmail.com
- * Created:         2007-11-07 16:22:35
+ * Created:         2007-11-08 11:53:29
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
@@ -15,17 +15,35 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _POISSONRNG_H
-#define _POISSONRNG_H
-#include "Poisson.h"
+#ifndef _GAMMARNG_H
+#define _GAMMARNG_H
+#include "randnum.h"
+#include "basecode/header.h"
+#include "basecode/moose.h"
 #include "RandGenerator.h"
-class PoissonRng:public RandGenerator
+#include "Gamma.h"
+
+/**
+   This is MOOSE wrapper for Gammaly distributed random number generator class, Gamma.
+   The default
+ */
+class GammaRng: public RandGenerator
 {
   public:
-    static void setMean(const Conn& c, double mean);
-    static void reinitFunc(const Conn& c, ProcInfo p);
+    GammaRng();
+    static double getAlpha(const Element* e);
+    static double getTheta(const Element* e);
+    static void setAlpha(const Conn & c, double alpha);
+    static void setTheta(const Conn & c, double theta);
+    
+    static void reinitFunc( const Conn& c, ProcInfo info);
+
   private:
-    double mean_;    
+    double alpha_;
+    double theta_;
+    
+    bool isAlphaSet_;
+    bool isThetaSet_;    
 };
 
 

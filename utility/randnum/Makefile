@@ -15,6 +15,9 @@ OBJ = \
 	NumUtil.o	\
 	NormalRng.o	\
 	PoissonRng.o	\
+	BinomialRng.o	\
+	ExponentialRng.o	\
+	GammaRng.o	\
 
 HEADERS = \
 	Probability.h	\
@@ -28,6 +31,9 @@ HEADERS = \
 	RandGenerator.h	\
 	NormalRng.h	\
 	PoissonRng.h	\
+	BinomialRng.h	\
+	ExponentialRng.h	\
+	GammaRng.h	\
 	../../basecode/header.h	\
 	../../basecode/Element.h	\
 	../../basecode/Conn.h	\
