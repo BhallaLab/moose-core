@@ -1,9 +1,9 @@
 /*******************************************************************
- * File:            NormalRng.h
+ * File:            RandGenerator.h
  * Description:      
  * Author:          Subhasis Ray
  * E-mail:          ray.subhasis@gmail.com
- * Created:         2007-11-05 10:19:18
+ * Created:         2007-11-07 16:25:08
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
@@ -15,42 +15,28 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _NORMALRNG_H
-#define _NORMALRNG_H
+#ifndef _RANDGENERATOR_H
+#define _RANDGENERATOR_H
+
 #include "randnum.h"
 #include "basecode/header.h"
 #include "basecode/moose.h"
+#include "Probability.h"
 
-#include "Normal.h"
-#include "RandGenerator.h"
-/**
-   This is MOOSE wrapper for normally distributed random number generator class, Normal.
-   The default
- */
-class NormalRng: public RandGenerator
+class RandGenerator
 {
+    
   public:
-    NormalRng();
-    ~NormalRng();
+    RandGenerator();
+    ~RandGenerator();
     static double getMean(const Element* e);    
-    static void setMean(const Conn& c, double mean);
     static double getVariance(const Element* e);
-    static void setVariance(const Conn& c, double variance);
     static double getSample(const Element* e);
-    static void setMethod(const Conn& c, int method);
-    static int getMethod(const Element* e);
     static void processFunc( const Conn& c, ProcInfo info);
     static void reinitFunc( const Conn& c, ProcInfo info);
 
-  private:
-    double mean_;
-    double variance_;
-    Normal* normalRng_;
-    NormalGenerator method_;    
-    bool isMeanSet_;
-    bool isVarianceSet_;
-    
-    
+  protected:
+    Probability* rng_;    
 };
 
     
