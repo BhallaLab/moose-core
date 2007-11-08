@@ -1870,16 +1870,21 @@ Id findChanGateId( int argc, const char** const argv, Id s )
 	
 	gate = gate + "/" + type;
 	Id gateId( gate );
-	if ( gateId.bad() ) // Don't give up, it might be a tabgate or might not have been created
-		gateId = Id( argv[1] );
-		// gateId = GenesisParserWrapper::path2eid( argv[1], s );
-	Id channelId( argv[1] );
-	Element *channel = channelId();
-	if ( channel->className()=="HHChannel" ){
-		if (type == "") /*error*/;
-		send3< string, string, Id >( s(),
-		createSlot, "HHGate", type, channelId );
-		gateId = Id(gate);
+	if ( gateId.bad() ) {// Don't give up, it might be a tabgate or might not have been created
+		Id id = Id( argv[1] );
+		Element *el = id();
+		
+		if ( el->className() == "HHGate" )
+			gateId = id;
+		else if ( el->className() == "HHChannel" ) {
+			if (type != "") {
+				send3< string, string, Id >( s(),
+					createSlot, "HHGate", type, id );
+				gateId = Id(gate);
+			}
+			else
+				; // error
+		}
 	}
 	
 	if ( gateId.bad() ) { // Now give up
