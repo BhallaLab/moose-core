@@ -32,7 +32,7 @@ ifeq ($(SYSTEM),Darwin)
 	DYNAMIC_FLAGS=-bundle -flat_namespace -undefined suppress 
 endif
 
-INCLUDES=-I/usr/include/python2.4
+INCLUDES=-I/usr/include/python2.4 -I..
 
 OBJFILES = ../basecode/basecode.o \
 	../element/element.o \
@@ -41,6 +41,8 @@ OBJFILES = ../basecode/basecode.o \
 	../biophysics/biophysics.o \
 	../scheduling/scheduling.o \
 	../utility/utility.o	\
+	../utility/randnum/randnum.o	\
+
 
 OBJ = PyMooseBase.o \
 	PyMooseContext.o \
@@ -65,7 +67,14 @@ OBJ = PyMooseBase.o \
 	Molecule.o \
 	Reaction.o \
 	Stoich.o \
-	HSolve.o
+	HSolve.o	\
+	RandGenerator.o	\
+	BinomialRng.o	\
+	ExponentialRng.o	\
+	GammaRng.o	\
+	NormalRng.o	\
+	PoissonRng.o	\
+
 
 HEADERS = PyMooseUtil.h \
 	PyMooseContext.h \
@@ -91,7 +100,21 @@ HEADERS = PyMooseUtil.h \
 	Molecule.h \
 	Reaction.h \
 	Stoich.h  \
-	HSolve.h
+	HSolve.h	\
+	RandGenerator.h	\
+	BinomialRng.h	\
+	ExponentialRng.h	\
+	GammaRng.h	\
+	NormalRng.h	\
+	PoissonRng.h	\
+	../utility/randnum/randnum.h	\
+	../utility/randnum/Probability.h	\
+	../utility/randnum/Binomial.h	\
+	../utility/randnum/Exponential.h	\
+	../utility/randnum/Gamma.h	\
+	../utility/randnum/Normal.h	\
+	../utility/randnum/Poisson.h	\
+
 
 # TEST_MAIN = SquidTest.cpp
 # TEST_MAIN = SwigTest.cpp

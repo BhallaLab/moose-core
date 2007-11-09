@@ -32,6 +32,22 @@
 	#include "Stoich.h"
 	#include "../kinetics/SparseMatrix.h"
 	#include "../utility/utility.h"
+	/* Random number related utilities */
+	#include "../utility/randnum/randnum.h"
+	/* These are the raw generic C++ classes - without any dependency on MOOSE */
+	#include "../utility/randnum/Probability.h"
+	#include "../utility/randnum/Binomial.h"
+	#include "../utility/randnum/Gamma.h"
+	#include "../utility/randnum/Normal.h"
+	#include "../utility/randnum/Poisson.h"
+	#include "../utility/randnum/Exponential.h"
+	/* The following are moose classes */
+	#include "RandGenerator.h"
+	#include "BinomialRng.h"
+	#include "GammaRng.h"
+	#include "NormalRng.h"
+	#include "PoissonRng.h"
+	#include "ExponentialRng.h"
 %}
 %feature("autodoc", "1");
 %template(uint_vector) std::vector<unsigned int>;
@@ -275,3 +291,35 @@
 %include "Sched2.h"
 */
 
+//**********************************
+// Random number related utilities *	
+//**********************************
+%include "../utility/randnum/randnum.h"
+/* These are the raw generic C++ classes - without any dependency on MOOSE */
+%include "../utility/randnum/Binomial.h"
+%include "../utility/randnum/Gamma.h"
+%include "../utility/randnum/Normal.h"
+%include "../utility/randnum/Poisson.h"
+%include "../utility/randnum/Exponential.h"
+/* The following are moose classes */
+
+%include "RandGenerator.h"
+%attribute(RandGenerator, double, sample, __get_sample, __set_sample)
+%attribute(RandGenerator, double, mean, __get_mean, __set_mean)
+%attribute(RandGenerator, double, variance, __get_variance, __set_variance)
+%attribute(RandGenerator, double, output, __get_output, __set_output)
+%include "GammaRng.h"
+%attribute(GammaRng, double, alpha, __get_alpha, __set_alpha)
+%attribute(GammaRng, double, theta, __get_theta, __set_theta)
+%include "ExponentialRng.h"
+%attribute(ExponentialRng, double, mean, __get_mean, __set_mean)
+%attribute(ExponentialRng, int, method, __get_method, __set_method)
+%include "BinomialRng.h"
+%attribute(BinomialRng, int, n, __get_n, __set_n)
+%attribute(BinomialRng, double, p, __get_p, __set_p)
+%include "PoissonRng.h"
+%attribute(PoissonRng, double, mean, __get_mean, __set_mean)
+%include "NormalRng.h"
+%attribute(NormalRng, double, mean, __get_mean, __set_mean)
+%attribute(NormalRng, double, variance, __get_variance, __set_variance)
+%attribute(NormalRng, int, method, __get_method, __set_method)
