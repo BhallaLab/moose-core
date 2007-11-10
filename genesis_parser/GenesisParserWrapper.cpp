@@ -801,9 +801,11 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 					path = string( argv[1] ) + "/" + i->second;
 				// Id e = GenesisParserWrapper::path2eid( path, s );
 				Id e( path );
+				elist_.resize( 0 );
+				elist_.push_back( e );
 				field = field.substr( pos + 2 );
-				send3< Id, string, string >( s(),
-					setVecFieldSlot, e, field, value );
+				send3< vector< Id >, string, string >( s(),
+					setVecFieldSlot, elist_, field, value );
 				continue;
 			}
 		}
