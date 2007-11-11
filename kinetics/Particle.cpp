@@ -79,6 +79,12 @@ const Cinfo* initParticleCinfo()
 			GFCAST( &Particle::getN ), 
 			RFCAST( &Particle::setN )
 		),
+
+		new ValueFinfo( "D", 
+			ValueFtype1< double >::global(),
+			GFCAST( &Molecule::getD ), 
+			RFCAST( &Particle::setD )
+		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -272,6 +278,7 @@ vector< double > Particle::getZvector( const Element* e )
 
 void Particle::setD( const Conn& c, double value )
 {
+	Molecule::setD( c, value );
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie( 
 		c.targetElement(), SmoldynHub::molSolveFinfo, molIndex );
@@ -279,18 +286,6 @@ void Particle::setD( const Conn& c, double value )
 		assert( molIndex < sh->numSpecies() );
 		sh->setD( molIndex, value );
 	}
-}
-
-double Particle::getD( const Element* e )
-{
-	unsigned int molIndex;
-	SmoldynHub* sh = SmoldynHub::getHubFromZombie( 
-		e, SmoldynHub::molSolveFinfo, molIndex );
-	if ( sh ) {
-		assert( molIndex < sh->numSpecies() );
-		return sh->getD( molIndex );
-	}
-	return 0.0;
 }
 
 ///////////////////////////////////////////////////

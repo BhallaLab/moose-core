@@ -4870,4 +4870,22 @@ for a while. Now the MOOSE stuff is checked in, as revision 250.
 In the interests of developers working without Smoldyn, I've also checked
 in a version which comments out the Smoldyn dependencies from the Makefile.
 
+Checked in as revision 251, in serial compile form with debugging, and with
+Smoldyn flags turned off.
+
+Now back to the Smoldyn development. Some fixes later, the test program
+(just an enzyme reaction) no longer dumps core and has begun to call the 
+necessary functions.
+Decision: To put D into the Molecule or keep it in particle?
+Pros: 
+	- kkit already has D
+	- Useful in stoch as well as PDE systems
+Cons:
+	- Currently few simulations use it.
+
+The Ayes have it.
+
+Set it up. Working on communication between solved stuff and Smoldyn.
+Enzymes look OK, molecules/particles not so.
+
 ==============================================================================
