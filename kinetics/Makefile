@@ -40,17 +40,19 @@ GSL_FLAGS = -DUSE_GSL
 # Smoldyn, written by Steven Andrews, provides a numerical engine for
 # 3-D single-particle simulations using Smoluchowsky dynamics. It is
 # licenced on a non-commercial license. Should be fine for academic use.
-# Optional: Comment out the following two items if not using Smoldyn
-SMOLDYN_OBJ = \
+# Optional: Comment out the following three items if not using Smoldyn
+#SMOLDYN_OBJ = \
 	Particle.o \
 	SmoldynHub.o \
 
-#	Smoldyn/source/smoldynengine.o
 
-SMOLDYN_FLAGS = -DUSE_SMOLDYN
-#SMOLDYN_LIBS = libsmoldyn.so
-SMOLDYN_LIBS = /home/bhalla/genesis/SFmus/moose-g3/kinetics/Smoldyn/source/libsmoldyn.a
+#SMOLDYN_FLAGS = -DUSE_SMOLDYN
+# This is a static lib version, does not need the lib_path
+#SMOLDYN_LIBS = /home/bhalla/genesis/SFmus/moose-g3/kinetics/Smoldyn/source/libsmoldyn.a
+
+# This version uses dynamic libs. Not yet confirmed to work.
 #SMOLDYN_LIB_PATH = -L/home/bhalla/genesis/SFmus/moose-g3/kinetics/Smoldyn/source
+#SMOLDYN_LIBS = libsmoldyn.so
 
 default: $(TARGET)
 
