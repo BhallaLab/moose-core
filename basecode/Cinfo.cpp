@@ -458,3 +458,12 @@ unsigned int Cinfo::getSlotIndex( const string& name ) const
 	}
 	return 0;
 }
+
+bool Cinfo::isA( const Cinfo* other ) const {
+	if ( ftype_->isSameType( other->ftype_ ) )
+		return 1;
+	if ( baseCinfo_ )
+		return baseCinfo_->isA( other );
+	else
+		return 0;
+}
