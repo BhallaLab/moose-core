@@ -121,6 +121,7 @@ class SmoldynHub
 
 		static void rateTermFunc( const Conn& c,
 			vector< RateTerm* >* rates, bool useHalfReacs );
+		void localRateTermFunc( vector< RateTerm* >* rates );
 		static void rateSizeFunc( const Conn& c,
 			unsigned int nReac, unsigned int nEnz, 
 			unsigned int nMmEnz);
