@@ -28,6 +28,16 @@ class RateTerm
 		virtual void setR2( double k2 ) = 0;
 		virtual double getR1() const = 0;
 		virtual double getR2() const = 0;
+		/**
+		 * This function finds the reactant indices in the vector
+		 * S. It returns the number of substrates found, which are the
+		 * first entries in molIndex. The products are the remaining ones.
+		 * Note that it does NOT find products for unidirectional
+		 * reactions, which is a bit of a problem.
+		 */
+		virtual unsigned int  getReactants( 
+			vector< unsigned int >& molIndex,
+			const vector< double >& S ) const = 0;
 };
 
 // Base class MMEnzme for the purposes of setting rates
@@ -72,6 +82,7 @@ class MMEnzymeBase: public RateTerm
 			return kcat_;
 		}
 
+
 	protected:
 		double Km_;
 		double kcat_;
@@ -90,6 +101,14 @@ class MMEnzyme1: public MMEnzymeBase
 
 		double operator() () const {
 			return ( kcat_ * *sub_ * *enz_ ) / ( Km_ + *sub_ );
+		}
+
+		unsigned int getReactants( vector< unsigned int >& molIndex,
+			const vector< double >& S ) const {
+			molIndex.resize( 2 );
+			molIndex[0] = enz_ - &S[0];
+			molIndex[1] = sub_ - &S[0];
+			return 2;
 		}
 
 	private:
@@ -114,6 +133,13 @@ class MMEnzyme: public MMEnzymeBase
 			// Here we the overall rate.
 			return ( sub * kcat_ * *enz_ ) / ( Km_ + sub );
 		}
+
+		unsigned int getReactants( vector< unsigned int >& molIndex,
+			const vector< double >& S ) const {
+			substrates_->getReactants( molIndex, S );
+			molIndex.insert( molIndex.begin(), enz_ - &S[0] );
+			return molIndex.size();
+		}
 	private:
 		const double *enz_;
 		RateTerm* substrates_;
@@ -130,6 +156,12 @@ class ExternReac: public RateTerm
 		}
 		void setRates( double k1, double k2 ) {
 			; // Dummy function to keep compiler happy
+		}
+
+		unsigned int getReactants( vector< unsigned int >& molIndex,
+			const vector< double >& S ) const {
+			molIndex.resize( 0 );
+			return 0;
 		}
 	private:
 };
@@ -169,6 +201,12 @@ class ZeroOrder: public RateTerm
 		double getR2() const {
 			return 0.0;
 		}
+		
+		unsigned int getReactants( vector< unsigned int >& molIndex,
+			const vector< double >& S ) const {
+			molIndex.resize( 0 );
+			return 0;
+		}
 	protected:
 		double k_;
 };
@@ -184,6 +222,13 @@ class FirstOrder: public ZeroOrder
 			return k_ * *y_;
 		}
 
+		unsigned int getReactants( vector< unsigned int >& molIndex,
+			const vector< double >& S ) const {
+			molIndex.resize( 1 );
+			molIndex[0] = y_ - &S[0];
+			return 1;
+		}
+
 	private:
 		const double *y_;
 };
@@ -197,6 +242,14 @@ class SecondOrder: public ZeroOrder
 
 		double operator() () const {
 			return k_ * *y1_ * *y2_;
+		}
+
+		unsigned int getReactants( vector< unsigned int >& molIndex,
+			const vector< double >& S ) const {
+			molIndex.resize( 2 );
+			molIndex[0] = y1_ - &S[0];
+			molIndex[1] = y2_ - &S[0];
+			return 2;
 		}
 
 	private:
@@ -217,6 +270,14 @@ class NOrder: public ZeroOrder
 			for ( i = v_.begin(); i != v_.end(); i++)
 				ret *= *( *i );
 			return ret;
+		}
+
+		unsigned int getReactants( vector< unsigned int >& molIndex,
+			const vector< double >& S ) const {
+			molIndex.resize( sizeof( v_ ) );
+			for ( unsigned int i = 0; i < sizeof( v_ ); i++ )
+				molIndex[i] = v_[i] - &S[0];
+			return sizeof( v_ );
 		}
 
 	private:
@@ -265,6 +326,16 @@ class BidirectionalReaction: public RateTerm
 
 		double getR2() const {
 			return backward_->getR1();
+		}
+
+		unsigned int getReactants( vector< unsigned int >& molIndex,
+			const vector< double >& S ) const {
+			forward_->getReactants( molIndex, S );
+			unsigned int ret = molIndex.size();
+			vector< unsigned int > temp;
+			backward_->getReactants( temp, S );
+			molIndex.insert( molIndex.end(), temp.begin(), temp.end() );
+			return ret;
 		}
 
 	private:

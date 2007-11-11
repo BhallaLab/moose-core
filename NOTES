@@ -4704,3 +4704,159 @@ Setting it up thusly. I have redone the SmoldynHub much like the KineticHub
 to achieve this, and it is beginning to look like a common base class is
 called for. For now, check it in.
 
+Checked in as revision 237, in serial compile form with debugging.
+
+A bit of cleanup work on it, and it now zombifies the model, but of course
+doesn't run yet.
+
+
+Some more Qs for Steve:
+1. What is 'root' in simalloc?
+2. Does simalloc take care of allocating molsptr?  How about particles?
+3. Is molsptr an array, one for each species,
+	or a single entry having a lot of particles in it?
+4. Do we have a single giant moleculestruct vector for all particles?
+5. When setting 'max' for molssalloc, should I put in just the total number
+	of particles in the system, or some intelligent scaling factor 
+	over this for subsequent evolution?
+6. I assume that the simstruct::name entry is an array of names for
+	each identity, that is, molecule species.
+7. Is there default initialization of some of the parameters such as 
+	simstruct::tiffit?
+8. What are the three reactions in rxn: zero, one and two molecule?
+9. What is 'total' in rxnalloc?
+10. What does setproducts do?
+11. If I have molecule species A, B, C in reaction A -> B + C, how do
+	I set it up?
+
+
+=============================================================================
+5 Nov 2007.
+Here are Steve's answers:
+>
+> 1. What is 'root' in simalloc?
+
+It is the configuration file path.  It is recorded in sim (the simulation
+structure) so output files will be saved in the proper directory.
+
+> 2. Does simalloc take care of allocating molsptr?  How about particles?
+
+No.  Both the molecule superstructure and all of the empty molecules are
+allocated by the loadsimul function, when it reads the max_mol statement
+in the configuration file.
+
+
+> 3. Is molsptr an array, one for each species,
+>         or a single entry having a lot of particles in it?
+
+I'm assuming you mean the simulation stucture element mols, which is a
+molssptr, which is a pointer to a molecule superstructure (there is no
+molsptr in the code).  It is a single entry, pointing to a single
+superstructure.  The superstructure lists some of information about every
+molecule, including diffusion coefficients and drawing information.  It
+also contains the lists of molecules.
+
+
+> 4. Do we have a single giant moleculestruct vector for all particles?
+
+There are actually 3 vectors of moleculestructs (or, more accurately,
+moleculeptrs, which are pointers to moleculestructs).  These vectors are
+all owned by the molecule superstructure.  They are the vector live[0],
+which are active molecules that can diffuse; live[1], which are active
+molecules that do not diffuse; and dead, which is just storage space for
+molecule structures that are not currently in use but that are available
+for reuse if needed.
+
+> 5. When setting 'max' for molssalloc, should I put in just the total
+> number
+>         of particles in the system, or some intelligent scaling factor
+>         over this for subsequent evolution?
+
+It should be the maximum number of particles that might be needed during
+the simulation.  Currently, if more particles become required than were
+allocated initially with molssalloc, Smoldyn just stops and tells the user
+that not enough molecules were allocated.  It would be more elegant if
+Smoldyn fixed the problem dynamically rather than just stopping, but
+that's not what's done currently.
+
+> 6. I assume that the simstruct::name entry is an array of names for
+>         each identity, that is, molecule species.
+
+Correct.  Logically, this entry would be more appropriate as an element of
+the molecule superstucture, but it's actually in sim instead.
+
+> 7. Is there default initialization of some of the parameters such as
+>         simstruct::tiffit?
+
+Yes.  Most parameters have defaults.  For example, the default for tiffit
+is 0, which means that tiff saving is turned off.  Most defaults are
+listed in part 1 of the documentation, in the description of the statement
+that is used to modify them.
+
+> 8. What are the three reactions in rxn: zero, one and two molecule?
+
+Correct.
+
+
+> 9. What is 'total' in rxnalloc?
+
+I chose horrendous names when I designed reactions.  total is the total
+number of reactions that are defined in that reaction structure.
+
+> 10. What does setproducts do?
+
+A reaction such as C->A+B is simple if it is irreversible.  When it
+occurs, the location of the reaction is defined to be the location of C. 
+C is removed from the system and A and B are both placed on top of each
+other at the reaction location.  However, if it is reversible such that
+there is also a reaction A+B->C, then this product placement method won't
+work because, at the very next time step, the A and B products are certain
+to be within a collision distance of each other and will react.  The
+solution is to initially separate the A and B products by a small
+distance, if there is a reversible reaction.  setproducts determines what
+this small distance should be and then saves the result in the product
+template, which is the prod element of the reaction structure.
+
+
+.........................................................................
+
+Slowly setting up data allocations. Simple but tedious. yet to tackle reactions
+and come up with a usable test.
+==============================================================================
+6 Nov.
+More Qs.
+1. Should the size of the vectors live[0] and live[1] be independently
+	determined depending on # of diffusible and non-diffusible
+	entries? Will the molsort function do this?
+
+2. What does moleculesstruct->serno do? Do I need to allocate it?
+
+3. What does the difsort argument in molsort do?
+
+4. simptr->topd: should this be the first free entry, or the size of the
+	dead vector?
+5. I gather than a zero ident molecule has to be just below the last of the
+	entries in the dead list. Do I need to do anything special here or
+	will calloc deal with it?
+
+6. How many zero order reactions to define? As I understand we have to 
+	define nident + 1 for 1st order, and (nident + 1)^2 for 2nd order.
+
+7. Don't understand args for AddRxn2Struct.
+
+Begun process of extracting info from reactions. Using rates::getReactants
+to do so.
+
+==============================================================================
+7 Nov
+Compiled MOOSE with the Smoldyn set up stuff, but still need to link
+the Smoldyn code for an overall executable. Getting there... Steven will
+generate separated sets of C files to help to do the engine as a standalone
+library.
+
+I should also get the spatial stuff set up.
+
+And if I have too much time, I need to get the original GSL solver into
+production mode.
+
+==============================================================================
