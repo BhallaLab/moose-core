@@ -36,6 +36,8 @@ class Molecule
 		static double getConcInit( const Element* e );
 		void localSetConcInit( double value );
 		static void setConcInit( const Conn& c, double value );
+		static double getD( const Element* e );
+		static void setD( const Conn& c, double value );
 		
 		///////////////////////////////////////////////////
 		// Dest function definitions
@@ -51,14 +53,17 @@ class Molecule
 		void processFuncLocal( Element* e, ProcInfo info );
 
 	private:
-		double nInit_;
-		double volumeScale_;
-		double n_;
-		int mode_;
-		double total_;
-		double A_;
-		double B_;
-		static const double EPSILON;
+		/// Initial number of molecules: t=0 boundary condition.
+		double nInit_;	
+		/// Scale factor to go from n to conc. Deprecated. Should refer to geometry
+		double volumeScale_; 
+		double n_; /// Current number of molecules.
+		int mode_; /// 0: Normal. 1: nSumTot. 2: concSumTot. 4: Buffered.
+		double total_; /// State variable used for sumtotal calculations
+		double A_;	/// Internal state variable
+		double B_;	/// Internal state variable
+		static const double EPSILON; /// Used for Exp Euler calculations
+		double D_;	/// Diffusion constant
 };
 
 // Used by the solver
