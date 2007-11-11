@@ -167,6 +167,7 @@ class SmoldynHub
 		static void destroy( const Conn& c );
 		static void zombify( Element* hub, Element* e, 
 			const Finfo* hubFinfo, Finfo* solveFinfo );
+		void findProducts( vector< unsigned int >& molIndex, RateTerm* r );
 
 		static const Finfo* molSolveFinfo;
 
