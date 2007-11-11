@@ -426,6 +426,7 @@ void Stoich::localSetPath( Element* stoich, const string& value )
 // Need to clean out existing stuff first.
 void Stoich::rebuildMatrix( Element* stoich, vector< Element* >& ret )
 {
+	static const Cinfo* molCinfo = Cinfo::find( "Molecule" );
 	vector< Element* >::iterator i;
 	vector< Element* > varMolVec;
 	vector< Element* > bufVec;
@@ -434,7 +435,7 @@ void Stoich::rebuildMatrix( Element* stoich, vector< Element* >& ret )
 	bool isOK;
 	unsigned int numRates = 0;
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		if ( ( *i )->className() == "Molecule" ) {
+		if ( ( *i )->cinfo()->isA( molCinfo ) ) {
 			isOK = get< int >( *i, "mode", mode );
 			assert( isOK );
 			if ( mode == 0 ) {
@@ -500,7 +501,7 @@ void Stoich::rebuildMatrix( Element* stoich, vector< Element* >& ret )
 			cn == "Stoich" )
 		{
 			// Ignore this too.
-		} else if ( ( *i )->className() != "Molecule" ) {
+		} else if ( !( *i )->cinfo()->isA( molCinfo ) ) {
 			addRate( stoich, *i );
 		}
 	}
