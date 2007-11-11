@@ -74,6 +74,11 @@ const Cinfo* initMoleculeCinfo()
 			GFCAST( &Molecule::getConcInit ), 
 			RFCAST( &Molecule::setConcInit )
 		),
+		new ValueFinfo( "D", 
+			ValueFtype1< double >::global(),
+			GFCAST( &Molecule::getD ), 
+			RFCAST( &Molecule::setD )
+		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -143,7 +148,8 @@ Molecule::Molecule()
 	mode_( 0 ),
 	total_( 0.0 ),
 	A_( 0.0 ),
-	B_( 0.0 )
+	B_( 0.0 ),
+	D_( 0.0 )
 {
 		;
 }
@@ -154,7 +160,8 @@ Molecule::Molecule()
 
 void Molecule::setNinit( const Conn& c, double value )
 {
-	static_cast< Molecule* >( c.data() )->nInit_ = value;
+	if ( value >= 0.0 )
+		static_cast< Molecule* >( c.data() )->nInit_ = value;
 }
 
 double Molecule::getNinit( const Element* e )
@@ -164,7 +171,8 @@ double Molecule::getNinit( const Element* e )
 
 void Molecule::setVolumeScale( const Conn& c, double value )
 {
-	static_cast< Molecule* >( c.data() )->volumeScale_ = value;
+	if ( value >= 0.0 )
+		static_cast< Molecule* >( c.data() )->volumeScale_ = value;
 }
 
 double Molecule::getVolumeScale( const Element* e )
@@ -174,7 +182,8 @@ double Molecule::getVolumeScale( const Element* e )
 
 void Molecule::setN( const Conn& c, double value )
 {
-	static_cast< Molecule* >( c.data() )->n_ = value;
+	if ( value >= 0.0 )
+		static_cast< Molecule* >( c.data() )->n_ = value;
 }
 
 double Molecule::getN( const Element* e )
@@ -224,7 +233,8 @@ void Molecule::localSetConc( double value ) {
 }
 void Molecule::setConc( const Conn& c, double value )
 {
-	static_cast< Molecule* >( c.data() )->localSetConc( value );
+	if ( value >= 0.0 )
+		static_cast< Molecule* >( c.data() )->localSetConc( value );
 }
 
 double Molecule::localGetConcInit() const
@@ -248,6 +258,17 @@ void Molecule::localSetConcInit( double value ) {
 void Molecule::setConcInit( const Conn& c, double value )
 {
 	static_cast< Molecule* >( c.data() )->localSetConcInit( value );
+}
+
+void Molecule::setD( const Conn& c, double value )
+{
+	if ( value >= 0.0 )
+		static_cast< Molecule* >( c.data() )->D_ = value;
+}
+
+double Molecule::getD( const Element* e )
+{
+	return static_cast< Molecule* >( e->data() )->D_;
 }
 
 ///////////////////////////////////////////////////

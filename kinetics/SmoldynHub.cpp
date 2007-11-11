@@ -298,6 +298,8 @@ void SmoldynHub::getPosVector( unsigned int molIndex,
 
 void SmoldynHub::setNinit( unsigned int molIndex, unsigned int value )
 {
+	cout << "void SmoldynHub::setNinit( unsigned int molIndex = " <<
+		molIndex << ", unsigned int value = " << value << " )\n";
 }
 
 unsigned int SmoldynHub::getNinit( unsigned int molIndex )
@@ -307,12 +309,15 @@ unsigned int SmoldynHub::getNinit( unsigned int molIndex )
 
 void SmoldynHub::setNmol( unsigned int molIndex, unsigned int value )
 {
-	;
+	cout << "void SmoldynHub::setNmol( unsigned int molIndex = " <<
+		molIndex << ", unsigned int value = " << value << " )\n";
 }
 
 unsigned int SmoldynHub::getNmol( unsigned int molIndex )
 {
-	return 0;
+	cout << "unsigned int SmoldynHub::getNmol( unsigned int molIndex = " <<
+		molIndex << ")\n";
+	return 43210;
 }
 
 void SmoldynHub::setD( unsigned int molIndex, double value )
@@ -321,7 +326,7 @@ void SmoldynHub::setD( unsigned int molIndex, double value )
 
 double SmoldynHub::getD( unsigned int molIndex )
 {
-	return 0.0;
+	return 0.0314;
 }
 
 
@@ -429,8 +434,89 @@ void SmoldynHub::rateTermFunc( const Conn& c,
 {
 	// the useHalfReacs flag is irrelevant here, since Smoldyn always 
 	// considers irreversible reactions
-	SmoldynHub* sh = static_cast< SmoldynHub* >( c.data() );
-	sh->rates_ = rates;
+	
+	static_cast< SmoldynHub* >( c.data() )->localRateTermFunc( rates );
+}
+
+void SmoldynHub::localRateTermFunc( vector< RateTerm* >* rates )
+{
+	rates_ = rates;
+	////////////////////////////////////////////////////////////////
+	//  On now to reactions.
+	////////////////////////////////////////////////////////////////
+
+	// First, fill in the arrays.
+	unsigned int maxident = nMol_ + 1;
+	
+	// Now define reaction entries.
+	vector< unsigned int > molIndex; 
+	vector< RateTerm* >::iterator ri;
+	int num0Order = 0;
+	int num1Order = 0;
+	int num2Order = 0;
+	int reacIndex = 0;
+	unsigned int numForward = 0;
+
+	for ( ri = rates_->begin(); ri != rates_->end(); ++ri ) {
+		numForward = (*ri)->getReactants( molIndex, *S_ );
+		if ( numForward == 0 ) {
+			++num0Order;
+		} else if ( numForward == 1 ) {
+			++num1Order;
+		} else if ( numForward == 2 ) {
+			++num2Order;
+		}
+	}
+	simptr_->rxn[0] = rxnalloc( 0, maxident, num0Order );
+	simptr_->rxn[1] = rxnalloc( 1, maxident, num1Order );
+	simptr_->rxn[2] = rxnalloc( 2, maxident, num2Order );
+	num0Order = 0;
+	num1Order = 0;
+	num2Order = 0;
+	reacIndex = 0;
+
+	for ( ri = rates_->begin(); ri != rates_->end(); ++ri ) {
+		numForward = ( *ri )->getReactants( molIndex, *S_ );
+		if ( numForward == molIndex.size() ) { // need to fill in products
+			findProducts( molIndex, *ri );
+		}
+		unsigned int numProds = molIndex.size() - numForward;
+		if ( numForward == 0 ) {
+			reacIndex = ++num0Order;
+			// AddRxn2Struct( ? ) Don't know what to do with zero-order
+			// I need to add a the reaction products and rates etc.
+			AddRxnProds2Struct( simptr_->rxn[0], reacIndex, numProds, 3 );
+			simptr_->rxn[0]->rate[reacIndex] = ( *ri )->getR1();
+		} else if ( numForward == 1 ) {
+			reacIndex = ++num1Order;
+			AddRxns2Struct( simptr_->rxn[1], molIndex[0], 1 , maxident );
+			AddRxnProds2Struct( simptr_->rxn[1], reacIndex, numProds, 3 );
+			simptr_->rxn[1]->rate[reacIndex] = ( *ri )->getR1();
+			// 3 is the system dimensionality
+		} else if ( numForward == 2 ) {
+			reacIndex = ++num2Order;
+			AddRxns2Struct( simptr_->rxn[2], 
+				molIndex[0] * maxident + molIndex[1], 
+				1, maxident );
+			AddRxnProds2Struct( simptr_->rxn[2], reacIndex, numProds, 3 );
+			simptr_->rxn[2]->rate[reacIndex] = ( *ri )->getR1();
+		}
+	}
+	
+
+	// For reactions, use the function:
+	// AddRxns2struct
+	// and
+	// AddRxnPrds2Struct
+	//
+	// I still need to fill in the following fields:
+	// - Rates
+	// - Names
+	// - Reversible stuff: set rtype to x
+	// - Permit: for surface bound molecules. (for later)
+	// 	 ( if A is on surface, and B in bulk, then turn off certain reacs.)
+	// 	 Would be possible to handle if I insist that such molecules are
+	// 	 different species.
 }
 
 /**
@@ -517,6 +603,10 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 	// Steven cautions that this may need to be bigger. I should
 	// check it out for various systems.
 	int max = static_cast< int >( dmax * 1.1 );
+	if ( max <= 0 ) { // can't assert this error, may happen legally.
+		cerr << "Error: SmoldynHub::molConnectionFuncLocal: zero molecules in simulation\n";
+		return;
+	}
 	simptr_->mols = molssalloc( 3, max, nMol_ );
 	// dont need simptr_->name = calloc( nMol_, sizeof( char* ) );
 	vector< Element* > fixedMols;
@@ -569,12 +659,11 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 	j = 0;
 	int k = max - 1;
 	for ( i = elist->begin(); i != elist->end(); i++ ) {
-		// do we need to allocate it, or does simalloc do so ?
-		/*
-		 * All defined to 256 chars.
-		simptr_->name[ j ] = calloc( 
-			( *i )->name().length() + 1, sizeof( char* ) );
-			*/
+		// Here we need to pick out only the variable molecules.
+		// Buffered ones have to be handled otherwise.
+
+		
+		// All names defined to 256 chars, so we don't have to allocate.
 		strncpy( simptr_->name[j], ( *i )->name().c_str(), 255 );
 		double D;
 		get< double >( *i, "D", D );
@@ -593,82 +682,6 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 // 	molsort( simptr_->mols, 0 );
 // 	This will be done now with a setup function.
 	
-	////////////////////////////////////////////////////////////////
-	//  On now to reactions.
-	////////////////////////////////////////////////////////////////
-
-	// First, fill in the arrays.
-	unsigned int maxident = elist->size() + 1;
-	
-	// Now define reaction entries.
-	vector< unsigned int > molIndex; 
-	vector< RateTerm* >::iterator ri;
-	int num0Order = 0;
-	int num1Order = 0;
-	int num2Order = 0;
-	int reacIndex = 0;
-	unsigned int numForward = 0;
-
-	for ( ri = rates_->begin(); ri != rates_->end(); ++ri ) {
-		numForward = (*ri)->getReactants( molIndex, *S_ );
-		if ( numForward == 0 ) {
-			++num0Order;
-		} else if ( numForward == 1 ) {
-			++num1Order;
-		} else if ( numForward == 2 ) {
-			++num2Order;
-		}
-	}
-	simptr_->rxn[0] = rxnalloc( 0, maxident, num0Order );
-	simptr_->rxn[1] = rxnalloc( 1, maxident, num1Order );
-	simptr_->rxn[2] = rxnalloc( 2, maxident, num2Order );
-	num0Order = 0;
-	num1Order = 0;
-	num2Order = 0;
-	reacIndex = 0;
-
-	for ( ri = rates_->begin(); ri != rates_->end(); ++ri ) {
-		numForward = ( *ri )->getReactants( molIndex, *S );
-		if ( numForward == molIndex.size() ) { // need to fill in products
-			findProducts( molIndex, *ri );
-		}
-		unsigned int numProds = molIndex.size() - numForward;
-		if ( numForward == 0 ) {
-			reacIndex = ++num0Order;
-			// AddRxn2Struct( ? ) Don't know what to do with zero-order
-			// I need to add a the reaction products and rates etc.
-			AddRxnProds2Struct( simptr_->rxn[0], reacIndex, numProds, 3 );
-			simptr_->rxn[0]->rate[reacIndex] = ( *ri )->getR1();
-		} else if ( numForward == 1 ) {
-			reacIndex = ++num1Order;
-			AddRxns2Struct( simptr_->rxn[1], molIndex[0], 1 , maxident );
-			AddRxnProds2Struct( simptr_->rxn[1], reacIndex, numProds, 3 );
-			simptr_->rxn[1]->rate[reacIndex] = ( *ri )->getR1();
-			// 3 is the system dimensionality
-		} else if ( numForward == 2 ) {
-			reacIndex = ++num2Order;
-			AddRxns2Struct( simptr_->rxn[2], 
-				molIndex[0] * maxident + molIndex[1], 
-				1, maxident );
-			AddRxnProds2Struct( simptr_->rxn[2], reacIndex, numProds, 3 );
-			simptr_->rxn[2]->rate[reacIndex] = ( *ri )->getR1();
-		}
-	}
-	
-
-	// For reactions, use the function:
-	// AddRxns2struct
-	// and
-	// AddRxnPrds2Struct
-	//
-	// I still need to fill in the following fields:
-	// - Rates
-	// - Names
-	// - Reversible stuff: set rtype to x
-	// - Permit: for surface bound molecules. (for later)
-	// 	 ( if A is on surface, and B in bulk, then turn off certain reacs.)
-	// 	 Would be possible to handle if I insist that such molecules are
-	// 	 different species.
 }
 
 void SmoldynHub::rateSizeFunc(  const Conn& c,
@@ -949,19 +962,25 @@ void SmoldynHub::clearFunc( const Conn& c )
  */
 void SmoldynHub::setMolN( const Conn& c, double value )
 {
+	cout << "void SmoldynHub::setMolN( const Conn& c, double value= " <<
+		value << ")\n";
 }
 
 double SmoldynHub::getMolN( const Element* e )
 {
+	cout << "double SmoldynHub::getMolN( const Element* e )\n";
 	return 0.0;
 }
 
 void SmoldynHub::setMolNinit( const Conn& c, double value )
 {
+	cout << "void SmoldynHub::setMolNinit( const Conn& c, double value= "
+		<< value << ")\n";
 }
 
 double SmoldynHub::getMolNinit( const Element* e )
 {
+	cout << "double SmoldynHub::getMolNinit( const Element* e )\n";
 	return 0.0;
 }
 
@@ -979,6 +998,8 @@ double SmoldynHub::getMolNinit( const Element* e )
  */
 void SmoldynHub::setReacKf( const Conn& c, double value )
 {
+	cout << "void SmoldynHub::setReacKf( const Conn& c, double value= "
+		<< value << ")\n";
 }
 
 // getReacKf does not really need to go to the solver to get the value,
@@ -987,6 +1008,7 @@ void SmoldynHub::setReacKf( const Conn& c, double value )
 // ValueFinfo.
 double SmoldynHub::getReacKf( const Element* e )
 {
+	cout << "double SmoldynHub::getReacKf( const Element* e )\n";
 	return 0.0;
 }
 
@@ -1013,6 +1035,8 @@ double SmoldynHub::getReacKb( const Element* e )
  */
 void SmoldynHub::setEnzK1( const Conn& c, double value )
 {
+	cout << "void SmoldynHub::setEnzK1( const Conn& c, double value= "
+		<< value << ")\n";
 }
 
 // getEnzK1 does not really need to go to the solver to get the value,
@@ -1021,7 +1045,8 @@ void SmoldynHub::setEnzK1( const Conn& c, double value )
 // ValueFinfo.
 double SmoldynHub::getEnzK1( const Element* e )
 {
-	return 0.0;
+	cout << "double SmoldynHub::getEnzK1( const Element* e )\n";
+	return 0.0123;
 }
 
 void SmoldynHub::setEnzK2( const Conn& c, double value )
