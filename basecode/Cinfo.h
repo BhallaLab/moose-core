@@ -81,9 +81,11 @@ class Cinfo
 
 			static void initialize();
 
-			bool isA( const Cinfo* other ) const {
-				return ftype_->isSameType( other->ftype_ );
-			}
+			/**
+			 * Returns true if 'other' is the same class or a base
+			 * class of the calling Cinfo.
+			 */
+			bool isA( const Cinfo* other ) const;
 
 			Element* create( Id id, const string& name ) const ;
 			Element* create( Id id, const string& name, 

@@ -411,10 +411,13 @@ Id smoldynSetup( Element* e, const string& method )
 	solveId = e->id();
 	assert( solveId.good() );
 
+	Element* ks = Neutral::create( "Stoich", "stoich", solve );
+	assert( ks != 0 );
 	Element*  sh = Neutral::create( "SmoldynHub", "SmoldynHub", solve );
 	assert ( sh != 0 );
+	ks->findFinfo( "hub" )->add( ks, sh, sh->findFinfo( "hub" ) );
 	string simpath = e->id().path() + "/##";
-	set< string >( sh, "path", simpath );
+	set< string >( ks, "path", simpath );
 	return solveId;
 }
 
