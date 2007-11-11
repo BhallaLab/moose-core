@@ -4888,4 +4888,7 @@ The Ayes have it.
 Set it up. Working on communication between solved stuff and Smoldyn.
 Enzymes look OK, molecules/particles not so.
 
+Checked it in.
+Then update the Makefile to get rid of Smoldyn dependencies.
+
 ==============================================================================
