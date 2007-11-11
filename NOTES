@@ -4860,3 +4860,14 @@ And if I have too much time, I need to get the original GSL solver into
 production mode.
 
 ==============================================================================
+11 Nov.
+
+Finally got compilation to work with the Smoldyn libraries. Many challenges,
+not least simply getting the Smoldyn makefile to generate libraries. Then
+I ran into problems with linking in the C libraries, which had me stuck
+for a while. Now the MOOSE stuff is checked in, as revision 250.
+
+In the interests of developers working without Smoldyn, I've also checked
+in a version which comments out the Smoldyn dependencies from the Makefile.
+
+==============================================================================
