@@ -43,8 +43,14 @@ GSL_FLAGS = -DUSE_GSL
 # Optional: Comment out the following two items if not using Smoldyn
 SMOLDYN_OBJ = \
 	Particle.o \
-	SmoldynHub.o
+	SmoldynHub.o \
+
+#	Smoldyn/source/smoldynengine.o
+
 SMOLDYN_FLAGS = -DUSE_SMOLDYN
+#SMOLDYN_LIBS = libsmoldyn.so
+SMOLDYN_LIBS = /home/bhalla/genesis/SFmus/moose-g3/kinetics/Smoldyn/source/libsmoldyn.a
+#SMOLDYN_LIB_PATH = -L/home/bhalla/genesis/SFmus/moose-g3/kinetics/Smoldyn/source
 
 default: $(TARGET)
 
@@ -66,13 +72,13 @@ GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h SparseMatrix.h
 #Optional: Comment out the following three items if not using SMOLDYN.
 $(SMOLDYN_OBJ) : $(HEADERS)
 Particle.o:		SmoldynHub.h Particle.h Molecule.h
-SmoldynHub.o:	SmoldynHub.h Smoldyn/source/smollib.h
+SmoldynHub.o:	SmoldynHub.h Smoldyn/source/smolrun.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) $(GSL_FLAGS) $(SMOLDYN_FLAGS) -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(GSL_LIBS)
+	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(GSL_LIBS) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS)
 
 clean:
 	-rm -f *.o $(TARGET) core core.*
