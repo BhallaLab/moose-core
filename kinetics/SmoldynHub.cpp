@@ -20,9 +20,10 @@
 #include "ThisFinfo.h"
 #include "SolveFinfo.h"
 
-#include "Smoldyn/source/smollib.h"
-// #include "../element/Wildcard.h"
-
+extern "C"{
+#include "Smoldyn/source/smolrun.h"
+#include "Smoldyn/source/smolload.h"
+}
 
 const Cinfo* initSmoldynHubCinfo()
 {
@@ -464,6 +465,12 @@ void SmoldynHub::molConnectionFunc( const Conn& c,
 		molConnectionFuncLocal( e, S, Sinit, elist );
 }
 
+void SmoldynHub::findProducts( vector< unsigned int >& molIndex, 
+	RateTerm* r )
+{
+	;
+}
+
 void SmoldynHub::molConnectionFuncLocal( Element* hub,
 	       	vector< double >*  S, vector< double >*  Sinit, 
 		vector< Element *>*  elist )
@@ -495,6 +502,173 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 		redirectDestMessages( hub, *i, molSumFinfo, sumTotFinfo, 
 			i - elist->begin(), molSumMap_, elist, 1 );
 	}
+
+	// Steven says: root is the configuration file path. 
+	// It is recorded in sim (the simulation
+	// structure) so output files will be saved in the proper directory.
+	//
+	simptr_ = simalloc( 3, nMol_, "root" );
+	double dmax = 0.0;
+	for ( vector< double >::iterator i = Sinit->begin(); 
+			i != Sinit->end(); ++i )
+		dmax += *i;
+
+	// Presumably we won't have much more than dmax molecules
+	// Steven cautions that this may need to be bigger. I should
+	// check it out for various systems.
+	int max = static_cast< int >( dmax * 1.1 );
+	simptr_->mols = molssalloc( 3, max, nMol_ );
+	// dont need simptr_->name = calloc( nMol_, sizeof( char* ) );
+	vector< Element* > fixedMols;
+	vector< Element* > diffusibleMols;
+	vector< int > dim;
+	vector< unsigned int > ident;
+	unsigned int j = 0;
+
+
+	// Steven says: I can eliminate this loop if I put all the molecules
+	// into the 'dead' list and then call molsort
+	//
+	// I should fill them in from top (high index) down, and update
+	// nd and topd correctly.
+#if 0	
+	for ( i = elist.begin(); i != elist.end(); i++ ) {
+		// do we need to allocate it, or does simalloc do so ?
+		simptr_->name[ j++ ] = calloc( 
+			( *i )->name().length() + 1, sizeof( char* ) );
+		strcpy( simptr_->name[j], ( *i )->name().c_str() );
+		double D;
+		get< double >( *i, "D", D );
+		if ( D > 0.0 ) {
+			diffusibleMols.push_back( *i );
+		} else {
+			fixedMols.push_back( *i );
+		}
+		dim.push_back( getGeomDim( *i ) );
+	}
+	simptr_->mols->live[0] = calloc( diffusibleMols.size(), 
+		sizeof( moleculeptr ) );
+	simptr_->mols->live[1] = calloc( fixedMols.size(), 
+		sizeof( moleculeptr ) );
+	simptr_->mols->nl[0] = diffusibleMols.size();
+	simptr_->mols->nl[1] = fixedMols.size();
+
+	for ( j = 0; j < diffusibleMols.size(); ++j ) {
+		moleculeptr mp = molalloc( dim[j] );
+		mp->serno = j;
+		mp->ident = 
+		simptr_->mols->live[ 0 ][ j ] = mp;
+	}
+
+	for ( j = 0; j < fixedMols.size(); ++j )
+		simptr_->mols->live[ 1 ][ j ] = molalloc( dim[j] );
+#endif
+
+
+	// Here is the alternative suggested by Steven:
+	j = 0;
+	int k = max - 1;
+	for ( i = elist->begin(); i != elist->end(); i++ ) {
+		// do we need to allocate it, or does simalloc do so ?
+		/*
+		 * All defined to 256 chars.
+		simptr_->name[ j ] = calloc( 
+			( *i )->name().length() + 1, sizeof( char* ) );
+			*/
+		strncpy( simptr_->name[j], ( *i )->name().c_str(), 255 );
+		double D;
+		get< double >( *i, "D", D );
+		// don't need to do: moleculeptr mp = molalloc( getGeomDim( *i ) );
+		// don't need to do: mp->serno = j;
+		// Need to assign same identity to each instance of that species.
+		moleculeptr* d = simptr_->mols->dead;
+		unsigned int maxq = static_cast< unsigned int >( ( *Sinit )[j] );
+		j++;
+		for ( unsigned int q = 0; q < maxq; q++ )
+			d[ k-- ]->ident = j;
+	}
+	simptr_->mols->nd = max - k;
+	simptr_->mols->topd = max; // Check with Steven : right, should be # alloced.
+	// Here is the magic function. Difsort arg should be 0
+// 	molsort( simptr_->mols, 0 );
+// 	This will be done now with a setup function.
+	
+	////////////////////////////////////////////////////////////////
+	//  On now to reactions.
+	////////////////////////////////////////////////////////////////
+
+	// First, fill in the arrays.
+	unsigned int maxident = elist->size() + 1;
+	
+	// Now define reaction entries.
+	vector< unsigned int > molIndex; 
+	vector< RateTerm* >::iterator ri;
+	int num0Order = 0;
+	int num1Order = 0;
+	int num2Order = 0;
+	int reacIndex = 0;
+	unsigned int numForward = 0;
+
+	for ( ri = rates_->begin(); ri != rates_->end(); ++ri ) {
+		numForward = (*ri)->getReactants( molIndex, *S_ );
+		if ( numForward == 0 ) {
+			++num0Order;
+		} else if ( numForward == 1 ) {
+			++num1Order;
+		} else if ( numForward == 2 ) {
+			++num2Order;
+		}
+	}
+	simptr_->rxn[0] = rxnalloc( 0, maxident, num0Order );
+	simptr_->rxn[1] = rxnalloc( 1, maxident, num1Order );
+	simptr_->rxn[2] = rxnalloc( 2, maxident, num2Order );
+	num0Order = 0;
+	num1Order = 0;
+	num2Order = 0;
+	reacIndex = 0;
+
+	for ( ri = rates_->begin(); ri != rates_->end(); ++ri ) {
+		numForward = ( *ri )->getReactants( molIndex, *S );
+		if ( numForward == molIndex.size() ) { // need to fill in products
+			findProducts( molIndex, *ri );
+		}
+		unsigned int numProds = molIndex.size() - numForward;
+		if ( numForward == 0 ) {
+			reacIndex = ++num0Order;
+			// AddRxn2Struct( ? ) Don't know what to do with zero-order
+			// I need to add a the reaction products and rates etc.
+			AddRxnProds2Struct( simptr_->rxn[0], reacIndex, numProds, 3 );
+			simptr_->rxn[0]->rate[reacIndex] = ( *ri )->getR1();
+		} else if ( numForward == 1 ) {
+			reacIndex = ++num1Order;
+			AddRxns2Struct( simptr_->rxn[1], molIndex[0], 1 , maxident );
+			AddRxnProds2Struct( simptr_->rxn[1], reacIndex, numProds, 3 );
+			simptr_->rxn[1]->rate[reacIndex] = ( *ri )->getR1();
+			// 3 is the system dimensionality
+		} else if ( numForward == 2 ) {
+			reacIndex = ++num2Order;
+			AddRxns2Struct( simptr_->rxn[2], 
+				molIndex[0] * maxident + molIndex[1], 
+				1, maxident );
+			AddRxnProds2Struct( simptr_->rxn[2], reacIndex, numProds, 3 );
+			simptr_->rxn[2]->rate[reacIndex] = ( *ri )->getR1();
+		}
+	}
+	
+
+	// For reactions, use the function:
+	// AddRxns2struct
+	// and
+	// AddRxnPrds2Struct
+	//
+	// I still need to fill in the following fields:
+	// - Rates
+	// - Names
+	// - Reversible stuff: set rtype to x
+	// - Permit: for surface bound molecules. (for later)
+	// 	 ( if A is on surface, and B in bulk, then turn off certain reacs.)
+	// 	 Would be possible to handle if I insist that such molecules are
+	// 	 different species.
 }
 
 void SmoldynHub::rateSizeFunc(  const Conn& c,
