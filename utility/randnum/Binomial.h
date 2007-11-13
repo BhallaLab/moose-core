@@ -23,8 +23,8 @@ class Binomial:public Probability
 {
   public:
     Binomial(){};
-    Binomial( unsigned long n, double p);
-    unsigned long getN() const;
+    Binomial( long n, double p);
+    long getN() const;
     double getP() const;        
     double getMean() const;
     double getVariance() const;
