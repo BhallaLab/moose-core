@@ -19,19 +19,23 @@
 #define _BINOMIALRNG_CPP
 #include "BinomialRng.h"
 #include "Binomial.h"
-
+#include <cmath>
 extern const Cinfo* initRandGeneratorCinfo();
 
 const Cinfo* initBinomialRngCinfo()
 {
     static Finfo* binomialRngFinfos[] =
         {
-            new ValueFinfo("n", ValueFtype1<int>::global(),
+            new ValueFinfo("n", ValueFtype1< double >::global(),
                            GFCAST( &BinomialRng::getN),
                            RFCAST(&BinomialRng::setN)),
-            new ValueFinfo("p", ValueFtype1<double>::global(),
+            new ValueFinfo("p", ValueFtype1< double >::global(),
                            GFCAST( &BinomialRng::getP),
                            RFCAST(&BinomialRng::setP)),
+            new DestFinfo("nDest", Ftype1 < double >::global(),
+                          RFCAST(&BinomialRng::setN)),
+            new DestFinfo("pDest", Ftype1 < double >::global(),
+                          RFCAST(&BinomialRng::setP)),
         };
     
     static Cinfo binomialRngCinfo("BinomialRng",
@@ -52,6 +56,8 @@ BinomialRng::BinomialRng()
 {
     isNSet_ = false;
     isPSet_ = false;
+    isModified_ = true;
+    
     n_ = 0;
     p_ = 0;    
 }
@@ -60,7 +66,7 @@ BinomialRng::BinomialRng()
    Set parameter n ( number of trials for a two-outcome experiment).
    This must be set before the actual generator is instantiated.
  */
-void BinomialRng::setN(const Conn& c, int n)
+void BinomialRng::setN(const Conn& c, double n)
 {    
     if ( n <= 0 )
     {
@@ -68,25 +74,35 @@ void BinomialRng::setN(const Conn& c, int n)
         return;
     }
     BinomialRng* gen = static_cast<BinomialRng*>(c.data());
-    gen->isNSet_ = true;
-    gen->n_ = n;
-    if ( gen->isNSet_ && gen->isPSet_)
+    if(!gen->isNSet_)
     {
-        if ( !gen->rng_ )
+        gen->isNSet_ = true;
+        gen->n_ = (int)n;
+    }
+    else 
+    {
+        if (fabs(gen->n_- n) > EPSILON )
         {
+            gen->n_ = (int)n;
+            gen->isModified_ = true;            
+        }
+    }
+    
+    if ( gen->isNSet_ && gen->isPSet_ && gen->isModified_)
+    {   {
+            if ( gen->rng_ )
+            {
+                delete gen->rng_;
+            }           
             gen->rng_ = new Binomial((unsigned long)gen->n_,gen->p_);
-        }
-        else
-        {
-            cerr << "WARNING: cannot modify parameter after initialization." << endl;
-            gen->n_ = static_cast<Binomial*>(gen->rng_)->getN();            
-        }
-    }    
+            gen->isModified_ = false;            
+        }     
+    }
 }
 /**
    Returns parameter n.
  */
-int BinomialRng::getN(const Element* e)
+double BinomialRng::getN(const Element* e)
 {
     return (int)(static_cast <BinomialRng*>(e->data())->n_);
 }
@@ -103,20 +119,28 @@ void BinomialRng::setP(const Conn& c, double p)
         return;
     }
     BinomialRng* gen = static_cast<BinomialRng*>(c.data());
-    gen->isPSet_ = true;
-    gen->p_ = p;
-    
-    if ( gen->isNSet_ && gen->isPSet_)
+    if ( !gen->isPSet_)
     {
-        if ( !gen->rng_ )
+        gen->p_ = p;
+        gen->isPSet_ = true;
+    }
+    else
+    {
+        if (fabs(gen->p_ - p ) > EPSILON )
         {
-            gen->rng_ = new Binomial((unsigned long)(gen->n_),gen->p_);
+            gen->p_ = p;
+            gen->isModified_ = true;            
         }
-        else
+    }        
+    
+    if ( gen->isNSet_ && gen->isPSet_ && gen->isModified_)
+    {
+        if ( gen->rng_ )
         {
-            cerr << "WARNING: BinomialRng::setP - cannot modify parameter after initialization." << endl;
-            gen->p_ = static_cast<Binomial*>(gen->rng_)->getP();            
-        }        
+            delete gen->rng_;            
+        }
+        gen->rng_ = new Binomial((long)(gen->n_),gen->p_);
+        gen->isModified_ = false;        
     }
 }
 
