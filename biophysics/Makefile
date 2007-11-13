@@ -26,6 +26,9 @@ OBJ = \
 	NeuroHub.o \
 	Cell.o	\
 	TestBiophysics.o	\
+	StochBouton.o	\
+	SynReceptor.o	\
+
 
 HEADERS = \
 	../basecode/header.h \
@@ -49,6 +52,8 @@ NeuroScanBase.o:	NeuroScanBase.h HSolveStructure.h
 NeuroScan.o:	NeuroScan.h NeuroScanBase.h HSolveStructure.h
 NeuroHub.o:	NeuroHub.h HSolveStructure.h
 Cell.o:		Cell.h 
+StochBouton.o:	StochBouton.h
+SynReceptor.o:	SynReceptor.h
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c
 
