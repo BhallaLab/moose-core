@@ -29,8 +29,8 @@ class BinomialRng: public RandGenerator
   public:
     BinomialRng();
     
-    static void setN(const Conn& c, int n);
-    static int getN(const Element* e);
+    static void setN(const Conn& c, double n);
+    static double getN(const Element* e);
     static void setP(const Conn& c, double p);
     static double getP(const Element* e);    
     static void reinitFunc( const Conn& c, ProcInfo info);
@@ -39,7 +39,8 @@ class BinomialRng: public RandGenerator
     bool isNSet_;
     unsigned long n_;
     bool isPSet_;
-    double p_;    
+    double p_;
+    bool isModified_;    
 };
 
 #endif
