@@ -84,7 +84,7 @@ inline double getFc(unsigned int k)
    Binomial distribution generator with parameters n and p.  p is the
    probability of the favoured outcome, n is the number of trials.
  */
-Binomial::Binomial(unsigned long n, double p):n_(n), p_(p)
+Binomial::Binomial( long n, double p):n_(n), p_(p)
 {
     
     if (( p < 0 ) || ( p > 1 ))
@@ -134,7 +134,7 @@ Binomial::Binomial(unsigned long n, double p):n_(n), p_(p)
     mean_ = n_*p_;
 }
 
-unsigned long Binomial::getN() const
+long Binomial::getN() const
 {
     return n_;    
 }

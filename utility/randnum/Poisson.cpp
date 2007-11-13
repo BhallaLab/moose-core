@@ -87,7 +87,7 @@ double Poisson::poissonLarge() const
 
     // generate X with the gamma distribution of order floor(alpha*mu)
     // where alpha is a suitable constant
-    static int m_value = (int)floor(0.875*mean_); // alpha = 7/8 = 0.875 is a good value according to Ahrens and Dieter
+    static double m_value = floor(0.875*mean_); // alpha = 7/8 = 0.875 is a good value according to Ahrens and Dieter
     static Gamma gammaGen(m_value, 1.0);
     double n_value;
     
@@ -96,11 +96,11 @@ double Poisson::poissonLarge() const
     if ( x_value < mean_ )
     {
         Poisson poissonGen(mean_ - x_value);        
-        n_value = m_value+ poissonGen.getNextSample();
+        n_value = m_value + poissonGen.getNextSample();
     }
     else
     {
-        Binomial binomialGen(m_value-1,mean_/x_value);
+        Binomial binomialGen((long)m_value-1,mean_/x_value);
         n_value = binomialGen.getNextSample();        
     }
     
