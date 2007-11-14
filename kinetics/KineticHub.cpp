@@ -12,6 +12,7 @@
 #include "moose.h"
 #include "../element/Neutral.h"
 #include "RateTerm.h"
+#include "SparseMatrix.h"
 #include "KineticHub.h"
 #include "Molecule.h"
 #include "Reaction.h"
@@ -48,7 +49,7 @@ const Cinfo* initKineticHubCinfo()
 	static Finfo* hubShared[] =
 	{
 		new DestFinfo( "rateTermInfo", 
-			Ftype2< vector< RateTerm* >*, bool >::global(),
+			Ftype3< vector< RateTerm* >*, SparseMatrix*, bool >::global(),
 			RFCAST( &KineticHub::rateTermFunc )
 		),
 		new DestFinfo( "rateSize", 
@@ -287,7 +288,7 @@ void KineticHub::processFunc( const Conn& c, ProcInfo info )
 }
 
 void KineticHub::rateTermFunc( const Conn& c,
-	vector< RateTerm* >* rates, bool useHalfReacs )
+	vector< RateTerm* >* rates, SparseMatrix* N,  bool useHalfReacs )
 {
 	KineticHub* kh = static_cast< KineticHub* >( c.data() );
 	kh->rates_ = rates;

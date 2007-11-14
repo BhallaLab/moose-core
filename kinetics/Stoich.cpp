@@ -27,7 +27,7 @@ const Cinfo* initStoichCinfo()
 	static Finfo* hubShared[] =
 	{
 		new SrcFinfo( "rateTermInfoSrc", 
-			Ftype2< vector< RateTerm* >*, bool >::global()
+			Ftype3< vector< RateTerm* >*, SparseMatrix*, bool >::global()
 		),
 		new SrcFinfo( "rateSizeSrc", 
 			Ftype3< unsigned int, unsigned int, unsigned int >::
@@ -459,8 +459,8 @@ void Stoich::rebuildMatrix( Element* stoich, vector< Element* >& ret )
 	setupMols( stoich, varMolVec, bufVec, sumTotVec );
 	N_.setSize( nMols_, numRates );
 	v_.resize( numRates, 0.0 );
-	send2< vector< RateTerm* >*, bool >( 
-		stoich, rateTermInfoSlot, &rates_, useOneWayReacs_ );
+	send3< vector< RateTerm* >*, SparseMatrix*, bool >( 
+		stoich, rateTermInfoSlot, &rates_, &N_, useOneWayReacs_ );
 	int nReac = 0;
 	int nEnz = 0;
 	int nMmEnz = 0;
