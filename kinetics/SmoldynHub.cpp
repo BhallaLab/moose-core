@@ -12,6 +12,7 @@
 #include "moose.h"
 #include "../element/Neutral.h"
 #include "RateTerm.h"
+#include "SparseMatrix.h"
 #include "SmoldynHub.h"
 #include "Molecule.h"
 #include "Particle.h"
@@ -54,7 +55,7 @@ const Cinfo* initSmoldynHubCinfo()
 	static Finfo* hubShared[] =
 	{
 		new DestFinfo( "rateTermInfo",
-			Ftype2< vector< RateTerm* >*, bool >::global(),
+			Ftype3< vector< RateTerm* >*, SparseMatrix*, bool >::global(),
 			RFCAST( &SmoldynHub::rateTermFunc )
 		),
 		new DestFinfo( "rateSize", 
@@ -382,65 +383,19 @@ void SmoldynHub::setPath( const Conn& c, string value )
 void SmoldynHub::reinitFunc( const Conn& c, ProcInfo info )
 {
 	static_cast< SmoldynHub* >( c.data() )->reinitFuncLocal( 
-					c.targetElement() );
+					c.targetElement(), info );
 }
 
-void SmoldynHub::reinitFuncLocal( Element* e )
+void SmoldynHub::reinitFuncLocal( Element* e, ProcInfo info )
 {
-	// do stuff here.
-}
+	simptr_->boxs->mpbox = 5.0;
+	simptr_->wlist[0]->pos = -1.0e-6;
+	simptr_->wlist[1]->pos = 1.0e-6;
+	simptr_->wlist[2]->pos = -1.0e-6;
+	simptr_->wlist[3]->pos = 1.0e-6;
+	simptr_->wlist[4]->pos = -1.0e-6;
+	simptr_->wlist[5]->pos = 1.0e-6;
 
-void SmoldynHub::processFunc( const Conn& c, ProcInfo info )
-{
-	Element* e = c.targetElement();
-	static_cast< SmoldynHub* >( e->data() )->processFuncLocal( e, info );
-}
-
-void SmoldynHub::processFuncLocal( Element* e, ProcInfo info )
-{
-	// do stuff here
-}
-
-///////////////////////////////////////////////////
-// This may go soon
-///////////////////////////////////////////////////
-
-void SmoldynHub::localSetPath( Element* stoich, const string& value )
-{
-	/*
-	path_ = value;
-	vector< Element* > ret;
-	wildcardFind( path_, ret );
-	if ( ret.size() > 0 ) {
-		;
-	}
-	cout << "found " << ret.size() << " elements\n";
-	*/
-}
-
-
-
-///////////////////////////////////////////////////
-// This is where the reaction system from MOOSE is zombified and 
-// incorporated into the solution engine.
-///////////////////////////////////////////////////
-
-/**
- * This sets up the local version of the rate term array, used to 
- * figure out reaction structures.
- */
-void SmoldynHub::rateTermFunc( const Conn& c,
-	vector< RateTerm* >* rates, bool useHalfReacs )
-{
-	// the useHalfReacs flag is irrelevant here, since Smoldyn always 
-	// considers irreversible reactions
-	
-	static_cast< SmoldynHub* >( c.data() )->localRateTermFunc( rates );
-}
-
-void SmoldynHub::localRateTermFunc( vector< RateTerm* >* rates )
-{
-	rates_ = rates;
 	////////////////////////////////////////////////////////////////
 	//  On now to reactions.
 	////////////////////////////////////////////////////////////////
@@ -475,31 +430,60 @@ void SmoldynHub::localRateTermFunc( vector< RateTerm* >* rates )
 	num2Order = 0;
 	reacIndex = 0;
 
+	/// \todo: Figure out how to associate reaction names with rates_ so I can add those in as well.
 	for ( ri = rates_->begin(); ri != rates_->end(); ++ri ) {
 		numForward = ( *ri )->getReactants( molIndex, *S_ );
 		if ( numForward == molIndex.size() ) { // need to fill in products
-			findProducts( molIndex, *ri );
+			findProducts( molIndex, ri - rates_->begin() );
 		}
 		unsigned int numProds = molIndex.size() - numForward;
 		if ( numForward == 0 ) {
-			reacIndex = ++num0Order;
+			reacIndex = num0Order++;
 			// AddRxn2Struct( ? ) Don't know what to do with zero-order
 			// I need to add a the reaction products and rates etc.
+			// last arg here is dimensionality.
 			AddRxnProds2Struct( simptr_->rxn[0], reacIndex, numProds, 3 );
+			for ( unsigned int j = 0; j < numProds; j++ ) {
+				simptr_->rxn[0]->prod[reacIndex][j]->ident = 1 + molIndex[ numForward + j ];
+				simptr_->rxn[0]->prod[reacIndex][j]->mstate = MSsoln;
+			}
+
 			simptr_->rxn[0]->rate[reacIndex] = ( *ri )->getR1();
+			sprintf( simptr_->rxn[0]->rname[ reacIndex ],
+				"r0_%d", reacIndex );
 		} else if ( numForward == 1 ) {
-			reacIndex = ++num1Order;
-			AddRxns2Struct( simptr_->rxn[1], molIndex[0], 1 , maxident );
+			reacIndex = num1Order++;
+			AddRxns2Struct( simptr_->rxn[1], 1 + molIndex[0], 1 , maxident );
 			AddRxnProds2Struct( simptr_->rxn[1], reacIndex, numProds, 3 );
+			for ( unsigned int j = 0; j < numProds; j++ ) {
+				simptr_->rxn[1]->prod[reacIndex][j]->ident = 1 + molIndex[ numForward + j ];
+				simptr_->rxn[1]->prod[reacIndex][j]->mstate = MSsoln;
+			}
 			simptr_->rxn[1]->rate[reacIndex] = ( *ri )->getR1();
+			int j = simptr_->rxn[1]->nrxn[ 1 + molIndex[0] ] - 1;
+			simptr_->rxn[1]->table[ 1 + molIndex[0] ][ j ] = reacIndex;
 			// 3 is the system dimensionality
+			sprintf( simptr_->rxn[1]->rname[ reacIndex ],
+				"r1_%d", reacIndex );
 		} else if ( numForward == 2 ) {
-			reacIndex = ++num2Order;
-			AddRxns2Struct( simptr_->rxn[2], 
-				molIndex[0] * maxident + molIndex[1], 
-				1, maxident );
+			reacIndex = num2Order++;
+			int i = ( 1 + molIndex[0] ) * maxident + molIndex[1] + 1;
+			AddRxns2Struct( simptr_->rxn[2], i, 1, maxident );
 			AddRxnProds2Struct( simptr_->rxn[2], reacIndex, numProds, 3 );
-			simptr_->rxn[2]->rate[reacIndex] = ( *ri )->getR1();
+			for ( unsigned int j = 0; j < numProds; j++ ) {
+				simptr_->rxn[2]->prod[reacIndex][j]->ident = 1 + molIndex[ numForward + j ];
+				simptr_->rxn[2]->prod[reacIndex][j]->mstate = MSsoln;
+			}
+
+	// These rates are in #*Vol/time.
+	// I need to extract volume at some point to scale this.
+	// For now, hack in a volume term.
+
+			simptr_->rxn[2]->rate[reacIndex] = ( *ri )->getR1() * 8.0e-18;
+			int j = simptr_->rxn[2]->nrxn[ i ] - 1;
+			simptr_->rxn[2]->table[ i ][ j ] = reacIndex;
+			sprintf( simptr_->rxn[2]->rname[ reacIndex ],
+				"r2_%d", reacIndex );
 		}
 	}
 	
@@ -517,6 +501,76 @@ void SmoldynHub::localRateTermFunc( vector< RateTerm* >* rates )
 	// 	 ( if A is on surface, and B in bulk, then turn off certain reacs.)
 	// 	 Would be possible to handle if I insist that such molecules are
 	// 	 different species.
+	//
+	simptr_->time = 0.0;
+	simptr_->tmin = 0.0;
+	simptr_->tmax = 100.0;
+	simptr_->dt = info->dt_;
+	scmdsetfnames( simptr_->cmds, "smoldyn.out" );
+	scmdstr2cmd( simptr_->cmds, "e molcount smoldyn.out", simptr_->tmin, simptr_->tmax, simptr_->dt );
+	if ( setupsim( NULL, NULL, &simptr_, NULL ) ) {
+		cout << "Warning: SmoldynHub::reinitFuncLocal: Setupsim failed\n";
+	}
+	scmdopenfiles( simptr_->cmds, 0 );
+}
+
+void SmoldynHub::processFunc( const Conn& c, ProcInfo info )
+{
+	Element* e = c.targetElement();
+	static_cast< SmoldynHub* >( e->data() )->processFuncLocal( e, info );
+}
+
+void SmoldynHub::processFuncLocal( Element* e, ProcInfo info )
+{
+	// do stuff here
+	int ret = simulatetimestep( simptr_ );
+	if ( ret > 1 ) { // 0 is OK, 1 is out of time. 2 and up are other errors
+		cout << "Bad things happened to Smoldyn\n";
+	} 
+}
+
+///////////////////////////////////////////////////
+// This may go soon
+///////////////////////////////////////////////////
+
+void SmoldynHub::localSetPath( Element* stoich, const string& value )
+{
+	/*
+	path_ = value;
+	vector< Element* > ret;
+	wildcardFind( path_, ret );
+	if ( ret.size() > 0 ) {
+		;
+	}
+	cout << "found " << ret.size() << " elements\n";
+	*/
+}
+
+
+
+///////////////////////////////////////////////////
+// This is where the reaction system from MOOSE is zombified and 
+// incorporated into the solution engine.
+///////////////////////////////////////////////////
+
+/**
+ * This sets up the local version of the rate term array, used to 
+ * figure out reaction structures.
+ */
+void SmoldynHub::rateTermFunc( const Conn& c,
+	vector< RateTerm* >* rates, SparseMatrix* N, bool useHalfReacs )
+{
+	// the useHalfReacs flag is irrelevant here, since Smoldyn always 
+	// considers irreversible reactions
+	
+	static_cast< SmoldynHub* >( c.data() )->localRateTermFunc( rates, N );
+}
+
+void SmoldynHub::localRateTermFunc( vector< RateTerm* >* rates,
+	SparseMatrix* N )
+{
+	rates_ = rates;
+	N_ = N;
 }
 
 /**
@@ -552,9 +606,15 @@ void SmoldynHub::molConnectionFunc( const Conn& c,
 }
 
 void SmoldynHub::findProducts( vector< unsigned int >& molIndex, 
-	RateTerm* r )
+	size_t reacIndex )
 {
-	;
+	unsigned int j = static_cast< unsigned int >( reacIndex );
+	for ( unsigned int i = 0; i < N_->nRows(); i++ ) {
+		// Handle stoichiometry by pushing back same molecule as often
+		// as needed to build up full count.
+		for ( int entry = N_->get( i, j ) - 1 ; entry >= 0; entry-- )
+			molIndex.push_back( i );
+	}
 }
 
 void SmoldynHub::molConnectionFuncLocal( Element* hub,
@@ -593,7 +653,9 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 	// It is recorded in sim (the simulation
 	// structure) so output files will be saved in the proper directory.
 	//
-	simptr_ = simalloc( 3, nMol_, "root" );
+	// Put in an extra molecule for the empty one at index 0.
+	//
+	simptr_ = simalloc( 3, nMol_ + 1, "tmp" );
 	double dmax = 0.0;
 	for ( vector< double >::iterator i = Sinit->begin(); 
 			i != Sinit->end(); ++i )
@@ -602,12 +664,13 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 	// Presumably we won't have much more than dmax molecules
 	// Steven cautions that this may need to be bigger. I should
 	// check it out for various systems.
-	int max = static_cast< int >( dmax * 1.1 );
+	int max = static_cast< int >( dmax * 2.1 );
 	if ( max <= 0 ) { // can't assert this error, may happen legally.
 		cerr << "Error: SmoldynHub::molConnectionFuncLocal: zero molecules in simulation\n";
 		return;
 	}
-	simptr_->mols = molssalloc( 3, max, nMol_ );
+	// The extra molecule species here is for the ident of zero.
+	simptr_->mols = molssalloc( 3, max, 1 + nMol_ );
 	// dont need simptr_->name = calloc( nMol_, sizeof( char* ) );
 	vector< Element* > fixedMols;
 	vector< Element* > diffusibleMols;
@@ -656,7 +719,7 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 
 
 	// Here is the alternative suggested by Steven:
-	j = 0;
+	j = 1; // Note indexing starting with 1, to skip empty molecule.
 	int k = max - 1;
 	for ( i = elist->begin(); i != elist->end(); i++ ) {
 		// Here we need to pick out only the variable molecules.
@@ -667,17 +730,26 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 		strncpy( simptr_->name[j], ( *i )->name().c_str(), 255 );
 		double D;
 		get< double >( *i, "D", D );
+		D = 1.0e-13; // a reasonable number.
+		simptr_->mols->difc[j][ MSsoln ] = D;
 		// don't need to do: moleculeptr mp = molalloc( getGeomDim( *i ) );
 		// don't need to do: mp->serno = j;
 		// Need to assign same identity to each instance of that species.
 		moleculeptr* d = simptr_->mols->dead;
-		unsigned int maxq = static_cast< unsigned int >( ( *Sinit )[j] );
-		j++;
-		for ( unsigned int q = 0; q < maxq; q++ )
+		unsigned int maxq = static_cast< unsigned int >( ( *Sinit )[j - 1] );
+		for ( unsigned int q = 0; q < maxq; q++ ) {
+			// Here we want to scatter the molecules in space. Not
+			// so easy if we have a funny geometry.
+			d[ k ]->pos[0] = mtrand() * 2.0e-6 - 1.0e-6;
+			d[ k ]->pos[1] = mtrand() * 2.0e-6 - 1.0e-6;
+			d[ k ]->pos[2] = mtrand() * 2.0e-6 - 1.0e-6;
 			d[ k-- ]->ident = j;
+		}
+		j++;
 	}
-	simptr_->mols->nd = max - k;
-	simptr_->mols->topd = max; // Check with Steven : right, should be # alloced.
+	// simptr_->mols->nd = max - k;
+	simptr_->mols->topd = k + 1; // Check with Steven : right, should be # alloced.
+	simptr_->nident = nMol_ + 1;
 	// Here is the magic function. Difsort arg should be 0
 // 	molsort( simptr_->mols, 0 );
 // 	This will be done now with a setup function.
