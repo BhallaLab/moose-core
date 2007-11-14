@@ -415,6 +415,7 @@ Id smoldynSetup( Element* e, const string& method )
 	assert( ks != 0 );
 	Element*  sh = Neutral::create( "SmoldynHub", "SmoldynHub", solve );
 	assert ( sh != 0 );
+	set< bool >( ks, "useOneWayReacs", 1 );
 	ks->findFinfo( "hub" )->add( ks, sh, sh->findFinfo( "hub" ) );
 	string simpath = e->id().path() + "/##";
 	set< string >( ks, "path", simpath );
