@@ -107,7 +107,7 @@ class SmoldynHub
 		///////////////////////////////////////////////////
 		
 		static void reinitFunc( const Conn& c, ProcInfo info );
-		void reinitFuncLocal( Element* e );
+		void reinitFuncLocal( Element* e, ProcInfo info );
 		static void processFunc( const Conn& c, ProcInfo info );
 		void processFuncLocal( Element* e, ProcInfo info );
 
@@ -120,8 +120,11 @@ class SmoldynHub
 		///////////////////////////////////////////////////
 
 		static void rateTermFunc( const Conn& c,
-			vector< RateTerm* >* rates, bool useHalfReacs );
-		void localRateTermFunc( vector< RateTerm* >* rates );
+			vector< RateTerm* >* rates, 
+			SparseMatrix* N,
+			bool useHalfReacs );
+		void localRateTermFunc( vector< RateTerm* >* rates,
+			SparseMatrix* N );
 		static void rateSizeFunc( const Conn& c,
 			unsigned int nReac, unsigned int nEnz, 
 			unsigned int nMmEnz);
@@ -168,7 +171,8 @@ class SmoldynHub
 		static void destroy( const Conn& c );
 		static void zombify( Element* hub, Element* e, 
 			const Finfo* hubFinfo, Finfo* solveFinfo );
-		void findProducts( vector< unsigned int >& molIndex, RateTerm* r );
+		void findProducts( vector< unsigned int >& molIndex, 
+				size_t reacIndex );
 
 		static const Finfo* molSolveFinfo;
 
@@ -188,6 +192,7 @@ class SmoldynHub
 		vector< RateTerm* >* rates_;
 		vector< double >* S_;
 		vector< double >* Sinit_;
+		SparseMatrix* N_;
 };
 
 // Used by the solver

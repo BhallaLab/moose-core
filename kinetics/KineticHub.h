@@ -29,7 +29,9 @@ class KineticHub
 		static void processFunc( const Conn& c, ProcInfo info );
 		static void reinitFunc( const Conn& c, ProcInfo info );
 		static void rateTermFunc( const Conn& c,
-			vector< RateTerm* >* rates, bool useHalfReacs );
+			vector< RateTerm* >* rates, 
+			SparseMatrix* N,
+			bool useHalfReacs );
 		static void rateSizeFunc( const Conn& c,
 			unsigned int nReac, unsigned int nEnz, 
 			unsigned int nMmEnz);

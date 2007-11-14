@@ -4891,4 +4891,14 @@ Enzymes look OK, molecules/particles not so.
 Checked it in.
 Then update the Makefile to get rid of Smoldyn dependencies.
 
+Checked in as revision 253, in serial compile form with debugging, and with
+Smoldyn flags turned off.
+
+==============================================================================
+13 Nov.
+After much joint coding with Steven, got Smoldyn to correctly run an
+enzyme reaction. Major step forward. A huge number of loose ends remain to
+be cleaned up, and then I need also to get the spatial stuff in place.
+
+
 ==============================================================================
