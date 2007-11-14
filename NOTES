@@ -4900,5 +4900,9 @@ After much joint coding with Steven, got Smoldyn to correctly run an
 enzyme reaction. Major step forward. A huge number of loose ends remain to
 be cleaned up, and then I need also to get the spatial stuff in place.
 
+Checked in as revision 260, in serial compile form with debugging, and with
+Smoldyn flags turned on.
+
+Then removed the Smoldyn compile flags and checked it in again.
 
 ==============================================================================
