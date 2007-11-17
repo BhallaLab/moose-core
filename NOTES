@@ -4906,3 +4906,31 @@ Smoldyn flags turned on.
 Then removed the Smoldyn compile flags and checked it in again.
 
 ==============================================================================
+17 Nov
+
+Some days of meetings with the visiting CRL team.
+
+Beta release: 7 Jan 2008
+
+Goals:
+Production kinetic simulations
+Production neuronal simulations
+Action-potl communications in parallel
+Smoldyn first pass incorporation into MOOSE
+
+
+Today's work: Working on interface
+
+Got lookup of 'n' to work. I may have also eliminated the need for the
+special SolveFinfo.
+
+Need to fix the conc field in particle so it looks up the N, which is working.
+This is going to be complicated because it has to refer to the surface,
+unlike the old compartmental molecule, which had its own internal calculation.
+
+Got around it for now by referring to the Molecule:: base class operations
+to look up conc. Now the simulation can plot out molecule concs as it
+goes along. Assignment is yet to be sorted and I'll need to work with Steven
+to get that set up.
+
+==============================================================================

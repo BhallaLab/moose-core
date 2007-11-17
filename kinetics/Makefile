@@ -41,14 +41,14 @@ GSL_FLAGS = -DUSE_GSL
 # 3-D single-particle simulations using Smoluchowsky dynamics. It is
 # licenced on a non-commercial license. Should be fine for academic use.
 # Optional: Comment out the following three items if not using Smoldyn
-#SMOLDYN_OBJ = \
+SMOLDYN_OBJ = \
 	Particle.o \
 	SmoldynHub.o \
 
 
-#SMOLDYN_FLAGS = -DUSE_SMOLDYN
+SMOLDYN_FLAGS = -DUSE_SMOLDYN
 # This is a static lib version, does not need the lib_path
-#SMOLDYN_LIBS = /home/bhalla/genesis/SFmus/moose-g3/kinetics/Smoldyn/source/libsmoldyn.a
+SMOLDYN_LIBS = /home/bhalla/genesis/SFmus/moose-g3/kinetics/Smoldyn/source/libsmoldyn.a
 
 # This version uses dynamic libs. Not yet confirmed to work.
 #SMOLDYN_LIB_PATH = -L/home/bhalla/genesis/SFmus/moose-g3/kinetics/Smoldyn/source
@@ -71,7 +71,6 @@ TestKinetics.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h Stoich.h 
 $(GSL_OBJ) : $(HEADERS)
 GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h SparseMatrix.h 
 
-#Optional: Comment out the following three items if not using SMOLDYN.
 $(SMOLDYN_OBJ) : $(HEADERS)
 Particle.o:		SmoldynHub.h Particle.h Molecule.h
 SmoldynHub.o:	SparseMatrix.h SmoldynHub.h Smoldyn/source/smolrun.h
