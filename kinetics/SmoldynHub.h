@@ -50,8 +50,10 @@ class SmoldynHub
 		void setNinit( unsigned int molIndex, unsigned int value );
 		unsigned int getNinit( unsigned int molIndex );
 
-		void setNmol( unsigned int molIndex, unsigned int value );
-		unsigned int getNmol( unsigned int molIndex );
+// Sets the number of particles of the mol species specified by molIndex
+		void setNparticles( unsigned int molIndex, unsigned int value );
+// Returns the number of particles of the mol species specified by molIndex
+		unsigned int getNparticles( unsigned int molIndex );
 
 		void setD( unsigned int molIndex, double value );
 		double getD( unsigned int molIndex );
