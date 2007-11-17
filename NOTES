@@ -4933,4 +4933,9 @@ to look up conc. Now the simulation can plot out molecule concs as it
 goes along. Assignment is yet to be sorted and I'll need to work with Steven
 to get that set up.
 
+Checked in as revision 262, in serial compile form with debugging, and with
+Smoldyn flags turned on.
+
+Then removed the Smoldyn compile flags and checked it in again.
+
 ==============================================================================
