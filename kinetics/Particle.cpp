@@ -80,6 +80,11 @@ const Cinfo* initParticleCinfo()
 			GFCAST( &Particle::getN ), 
 			RFCAST( &Particle::setN )
 		),
+		new ValueFinfo( "conc", 
+			ValueFtype1< double >::global(),
+			GFCAST( &Particle::getConc ), 
+			RFCAST( &Particle::setConc )
+		),
 
 		new ValueFinfo( "D", 
 			ValueFtype1< double >::global(),
@@ -206,8 +211,9 @@ void Particle::setN( const Conn& c, double value )
 		c.targetElement(), SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
-		sh->setNmol( molIndex, static_cast< unsigned int >( value ) );
+		sh->setNparticles( molIndex, static_cast< unsigned int >( value ) );
 	}
+	Molecule::setN( c, value );
 }
 
 double Particle::getN( const Element* e )
@@ -217,9 +223,32 @@ double Particle::getN( const Element* e )
 		e, SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
-		return static_cast< double >( sh->getNmol( molIndex ) );
+		double n = sh->getNparticles( molIndex );
+		return n;
 	}
 	return 0.0;
+}
+
+/**
+ * set and getConc really need to deal with the volume defined by the
+ * surface and geometry of the local region, and may not be well defined
+ * if there is a spatial gradient. For now, I simply use compartmental
+ * estimates of volume by drawing on the base Molecule class for the
+ * conversion.
+ */
+void Particle::setConc( const Conn& c, double value )
+{
+	Molecule::setConc( c, value );
+	double n = Molecule::getN( c.targetElement() );
+	setN( c, n );
+}
+
+double Particle::getConc( const Element* e )
+{
+	double n = getN( e );
+	// Doing this so the internal fields of the Molecule are updated.
+	static_cast< Particle* >( e->data() )->localSetConc( n );
+	return Molecule::getConc( e );
 }
 
 void Particle::setPosVector( const Conn& c, const vector< double >& value, 
