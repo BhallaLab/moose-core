@@ -45,6 +45,8 @@ class Particle: public Molecule
 		//  For compatibility I use doubles, but here it is always integral
 		static void setN( const Conn& c, double value );
 		static double getN( const Element* e );
+		static void setConc( const Conn& c, double value );
+		static double getConc( const Element* e );
 		static void setNinit( const Conn& c, double value );
 		static double getNinit( const Element* e );
 
