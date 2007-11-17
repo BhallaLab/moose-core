@@ -265,12 +265,12 @@ void SmoldynHub::molSum( const Conn& c, double val )
 SmoldynHub* SmoldynHub::getHubFromZombie( 
 	const Element* e, const Finfo* srcFinfo, unsigned int& index )
 {
-	const SolveFinfo* f = dynamic_cast< const SolveFinfo* > (
-			       	e->getThisFinfo() );
-	if ( !f ) return 0;
-	const Conn& c = f->getSolvedConn( e );
+	unsigned int procSlot = e->cinfo()->getSlotIndex( "process" );
+	assert( procSlot != 0 );
+	const Conn& c = *e->connDestBegin( procSlot );
 	unsigned int slot;
-       	srcFinfo->getSlotIndex( srcFinfo->name(), slot );
+	bool ret = srcFinfo->getSlotIndex( srcFinfo->name(), slot );
+	assert( ret );
 	Element* hub = c.targetElement();
 	index = hub->connSrcRelativeIndex( c, slot );
 	return static_cast< SmoldynHub* >( hub->data() );
@@ -308,17 +308,31 @@ unsigned int SmoldynHub::getNinit( unsigned int molIndex )
 	return 0;
 }
 
-void SmoldynHub::setNmol( unsigned int molIndex, unsigned int value )
+// Sets the number of particles of the mol species specified by molIndex
+void SmoldynHub::setNparticles( unsigned int molIndex, unsigned int value )
 {
-	cout << "void SmoldynHub::setNmol( unsigned int molIndex = " <<
+	cout << "void SmoldynHub::setNparticles( unsigned int molIndex = " <<
 		molIndex << ", unsigned int value = " << value << " )\n";
 }
 
-unsigned int SmoldynHub::getNmol( unsigned int molIndex )
+// Returns the number of particles of the mol species specified by molIndex
+unsigned int SmoldynHub::getNparticles( unsigned int molIndex )
 {
-	cout << "unsigned int SmoldynHub::getNmol( unsigned int molIndex = " <<
-		molIndex << ")\n";
-	return 43210;
+	// Ideally I would use a Smoldyn routine here, but the closest approx
+	// is cmdmolcount which dumps the data to a file. So here I'll just
+	// reimplement it.
+	
+	unsigned int count = 0;
+	int smolIndex = molIndex + 1; // Add in the extra null molecule index
+
+	// i = 0 is fixed molecules, i = 1 is mobile.
+	for ( unsigned int i = 0; i < 2; i++ ) {
+		moleculestruct** live = simptr_->mols->live[ i ];
+		moleculestruct** live_end = live + simptr_->mols->nl[ i ];
+		while ( live < live_end )
+			count += ( *(live++) )->ident == smolIndex;
+	}
+	return count;
 }
 
 void SmoldynHub::setD( unsigned int molIndex, double value )
@@ -341,7 +355,7 @@ unsigned int SmoldynHub::getNspecies( const Element* e )
 
 unsigned int SmoldynHub::numSpecies() const
 {
-	return 0;
+	return nMol_;
 }
 
 unsigned int SmoldynHub::getNreac( const Element* e )
@@ -351,7 +365,7 @@ unsigned int SmoldynHub::getNreac( const Element* e )
 
 unsigned int SmoldynHub::numReac() const
 {
-	return 0;
+	return reacMap_.size();
 }
 
 unsigned int SmoldynHub::getNenz( const Element* e )
@@ -361,7 +375,7 @@ unsigned int SmoldynHub::getNenz( const Element* e )
 
 unsigned int SmoldynHub::numEnz() const
 {
-	return 0;
+	return enzMap_.size();
 }
 
 string SmoldynHub::getPath( const Element* e )
