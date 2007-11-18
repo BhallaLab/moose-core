@@ -4939,3 +4939,54 @@ Smoldyn flags turned on.
 Then removed the Smoldyn compile flags and checked it in again.
 
 ==============================================================================
+18 Nov.
+
+Things to do with Smoldyn:
+- Get the individual molecule positions: Should be linear.
+- Set the molecule concs: Need to get instant diffusion func from Steven.
+	Instead how about a reseeding algorithm.
+- Control molecule rates on line.
+- Implement surfaces: Lots to do here. Design:
+	- /KineticManager|
+			 L/solve----------------|
+			 |			L/hub
+			 |			L/stoich
+			 |			L/solver
+			 |
+			 L/geometry-------------|
+			 |			L/surface-------|
+			 |			|		L/panels
+			 |			|		L/panels
+			 |			|
+			 |			L/surface-------|
+			 |			|		L/panels
+			 |			|		L/panels
+			 |			...
+			 |
+			 L/Other kinetic managers
+			 |
+			 L/model reacs.
+
+The idea is to have a complete specification of all surfaces on the manager.
+The norm will be one, but other things may happen.
+Additional managers come in when we want to merge multiple methods.
+To make it flatter we could have a single manager but multiple solve 
+directories, and multiple geometry (surface) directories?
+
+Issue with that is that each solve needs to be associated with a specific
+geometry. Could do by indexing. At some point we will need to formalize
+how the solvers and geometries communicate.
+
+At this point, if I have a Surface/Geometry definition, I should be able to
+have the molecules get rid of their local volume info and refer instead to
+their geometry. Will need to work out in detail. For now let's get the panels
+in place.
+
+
+To check with Steven:
+- What do shapes mean in less than 3 dimensions? Are they used?
+- What are slices and stacks in sphere?
+
+Implemented first pass for Geometry, Surface, and Panel.
+
+==============================================================================
