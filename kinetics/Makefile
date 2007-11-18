@@ -18,6 +18,9 @@ OBJ = \
 	Stoich.o	\
 	Kintegrator.o	\
 	MathFunc.o	\
+	Geometry.o	\
+	Surface.o	\
+	Panel.o	\
 	TestKinetics.o	\
 	KineticManager.o	\
 
@@ -60,6 +63,9 @@ $(OBJ)	: $(HEADERS)
 Molecule.o:	Molecule.h ../basecode/Ftype2.h
 Reaction.o:	Reaction.h ../basecode/Ftype2.h
 Enzyme.o:	Enzyme.h ../basecode/Ftype2.h
+Geometry.o:	Geometry.h
+Surface.o:	Surface.h
+Panel.o:	Panel.h
 SparseMatrix.o:	SparseMatrix.h
 KineticHub.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h
 Stoich.o:	RateTerm.h Stoich.h SparseMatrix.h Makefile
