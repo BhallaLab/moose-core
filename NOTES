@@ -4988,5 +4988,12 @@ To check with Steven:
 - What are slices and stacks in sphere?
 
 Implemented first pass for Geometry, Surface, and Panel.
+Checked in as revision 264, in serial compile form with debugging, and with
+Smoldyn flags turned off.
+
+==============================================================================
+19 Nov.
+Added skeleton classes for all basic shapes in Smoldyn: 
+Disk, Hemisphere, Cylinder, Sphere, Triangle, Rectangle.
 
 ==============================================================================
