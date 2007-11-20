@@ -69,6 +69,8 @@ class Panel
 		*/
 		static vector< double > getFiniteElementVertices(
 			const Element* e, double area );
+		virtual void localFiniteElementVertices( 
+			vector< double >& ret,  double area ) const;
 
 	private:
 
@@ -89,5 +91,10 @@ class Panel
 
 // Used by the Smoldyn solver
 extern const Cinfo* initPanelCinfo();
+
+// Protect it here from the Smoldyn enum with the same args.
+namespace Moose {
+	enum PanelShape {PSrect,PStri,PSsph,PScyl,PShemi,PSdisk,PSall,PSnone};
+}
 
 #endif // _Panel_h
