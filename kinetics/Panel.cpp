@@ -90,8 +90,6 @@ static const Cinfo* panelCinfo = initPanelCinfo();
 static const Finfo* neighborSrcFinfo = initPanelCinfo()->findFinfo( "neighborSrc" );
 static const Finfo* neighborDestFinfo = initPanelCinfo()->findFinfo( "neighbor" );
 
-static const unsigned int panelSphere = 2;
-
 ///////////////////////////////////////////////////
 // Class function definitions
 ///////////////////////////////////////////////////
@@ -128,7 +126,7 @@ unsigned int Panel::getShapeId( const Element* e )
 
 // Default version
 unsigned int Panel::localShapeId() const {
-	return panelSphere; 
+	return Moose::PSsph; 
 }
 
 unsigned int Panel::getNneighbors( const Element* e )
@@ -197,5 +195,26 @@ double Panel::getZ( const Element* e, const unsigned int& i )
 }
 
 ///////////////////////////////////////////////////
-// Dest function definitions
+// Finite element mesh generator for surface
 ///////////////////////////////////////////////////
+/**
+ * For future use: Convert the current shape into a set of 
+ * triangular
+ * finite element vertices (assuming 3 d). The fineness of the
+ * grid is set by the 'area' argument.
+ */
+vector< double > Panel::getFiniteElementVertices(
+		const Element* e, double area )
+{
+	vector< double > ret;
+	static_cast< Panel* >( e->data() )->
+		localFiniteElementVertices( ret, area );
+	return ret;
+}
+
+void Panel::localFiniteElementVertices( 
+	vector< double >& ret, double area ) const
+{
+	// Fill up 'ret' here.
+	;
+}
