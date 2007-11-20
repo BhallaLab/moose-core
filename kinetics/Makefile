@@ -21,6 +21,12 @@ OBJ = \
 	Geometry.o	\
 	Surface.o	\
 	Panel.o	\
+	RectPanel.o	\
+	TriPanel.o	\
+	SpherePanel.o	\
+	HemispherePanel.o	\
+	CylPanel.o	\
+	DiskPanel.o	\
 	TestKinetics.o	\
 	KineticManager.o	\
 
@@ -66,6 +72,12 @@ Enzyme.o:	Enzyme.h ../basecode/Ftype2.h
 Geometry.o:	Geometry.h
 Surface.o:	Surface.h
 Panel.o:	Panel.h
+RectPanel.o:	Panel.h RectPanel.h
+TriPanel.o:	Panel.h TriPanel.h
+SpherePanel.o:	Panel.h SpherePanel.h
+HemispherePanel.o:	Panel.h HemispherePanel.h
+CylPanel.o:	Panel.h CylPanel.h
+DiskPanel.o:	Panel.h DiskPanel.h
 SparseMatrix.o:	SparseMatrix.h
 KineticHub.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h
 Stoich.o:	RateTerm.h Stoich.h SparseMatrix.h Makefile
