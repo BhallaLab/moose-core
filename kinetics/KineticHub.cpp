@@ -81,6 +81,9 @@ const Cinfo* initKineticHubCinfo()
 			Ftype2< unsigned int, Element* >::global(),
 			RFCAST( &KineticHub::mmEnzConnectionFunc )
 		),
+		new DestFinfo( "completeSetup",
+			Ftype0::global(),
+			&dummyFunc ), // The Kinetic hub doesn't need this call.
 		new DestFinfo( "clear",
 			Ftype0::global(),
 			RFCAST( &KineticHub::clearFunc )
