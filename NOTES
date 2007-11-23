@@ -5067,3 +5067,9 @@ Compartment messaging:
 Message contents: outside/inside: nothing.
 - from surfaces: vol, area, perimeter.
 
+==============================================================================
+23 Nov.
+
+Checked in as revision 266, in serial compile form with debugging, and with
+Smoldyn flags turned off.
+

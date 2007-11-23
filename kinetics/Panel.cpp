@@ -59,6 +59,12 @@ const Cinfo* initPanelCinfo()
 			GFCAST( &Panel::getNneighbors ), 
 			&dummyFunc
 		),
+
+		new ValueFinfo( "shapeId", 
+			ValueFtype1< unsigned int >::global(),
+			GFCAST( &Panel::getShapeId ), 
+			&dummyFunc
+		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
