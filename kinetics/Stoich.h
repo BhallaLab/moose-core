@@ -117,7 +117,7 @@ class Stoich
 		void addMmEnz( Element* stoich, Element* e );
 		void addTab( Element* stoich, Element* e );
 		void addRate( Element* stoich, Element* e );
-		void setupReacSystem( );
+		void setupReacSystem( Element* stoich );
 
 		///////////////////////////////////////////////////
 		// These functions control the updates of state

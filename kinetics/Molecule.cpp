@@ -17,6 +17,9 @@ const double Molecule::EPSILON = 1.0e-15;
 
 const Cinfo* initMoleculeCinfo()
 {
+	/**
+	 * Manages scheduling control
+	 */
 	static Finfo* processShared[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
@@ -27,11 +30,25 @@ const Cinfo* initMoleculeCinfo()
 	static Finfo* process = new SharedFinfo( "process", processShared,
 		sizeof( processShared ) / sizeof( Finfo* ) );
 
+	/**
+	 * Manages interactions with reactions
+	 */
 	static Finfo* reacShared[] =
 	{
 		new DestFinfo( "reac", Ftype2< double, double >::global(),
 			RFCAST( &Molecule::reacFunc ) ),
 		new SrcFinfo( "n", Ftype1< double >::global() )
+	};
+
+	/**
+	 * Manages volume control through interacting with KinCompt: the
+	 * kinetic compartment object, which in turn interfaces with surfaces
+	 */
+	static Finfo* extentShared[] =
+	{
+		new DestFinfo( "returnExtent", Ftype2< double, unsigned int >::global(),
+			RFCAST( &Molecule::extentFunc ) ),
+		new SrcFinfo( "requestExtent", Ftype0::global() )
 	};
 
 	static Finfo* moleculeFinfos[] =
@@ -110,6 +127,8 @@ const Cinfo* initMoleculeCinfo()
 		process,
 		new SharedFinfo( "reac", reacShared,
 			sizeof( reacShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "extent", extentShared,
+			sizeof( extentShared ) / sizeof( Finfo* ) ),
 	};
 
 	// Schedule molecules for the slower clock, stage 0.
@@ -135,6 +154,8 @@ static const unsigned int reacSlot =
 	initMoleculeCinfo()->getSlotIndex( "reac.n" );
 static const unsigned int nSlot =
 	initMoleculeCinfo()->getSlotIndex( "nSrc" );
+static const unsigned int extentSlot =
+	initMoleculeCinfo()->getSlotIndex( "extent.requestExtent" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -315,6 +336,9 @@ void Molecule::reinitFuncLocal( Element* e )
 		mode_ = 0;
 	send1< double >( e, reacSlot, n_ );
 	send1< double >( e, nSlot, n_ );
+	send0( e, extentSlot ); // Request volume from the compartment.
+							// The compartment will also push the
+							// latest volume in at appropriate times.
 }
 
 void Molecule::processFunc( const Conn& c, ProcInfo info )
@@ -343,6 +367,25 @@ void Molecule::processFuncLocal( Element* e, ProcInfo info )
 			}
 			send1< double >( e, reacSlot, n_ );
 			send1< double >( e, nSlot, n_ );
+}
+
+void Molecule::extentFunc( const Conn& c, double size, unsigned int dim )
+{
+	Element* e = c.targetElement();
+	static_cast< Molecule* >( e->data() )->extentFuncLocal( e, size, dim );
+}
+
+void Molecule::extentFuncLocal( Element* e, double size, unsigned int dim)
+{
+	// Assume that the units of conc are uM.
+	if ( size > 0.0 ) {
+		if ( dim == 3 ) // Regular 3-d scaling.
+			volumeScale_ = size / 6.023e20;
+		else // Here a quandary: Do we use areal density for readout?
+			volumeScale_ = 1.0;
+	} else {
+		volumeScale_ = 1.0;
+	}
 }
 
 

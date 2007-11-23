@@ -52,6 +52,9 @@ const Cinfo* initStoichCinfo()
 		new SrcFinfo( "mmEnzConnectionSrc",
 			Ftype2< unsigned int, Element* >::global()
 		),
+		new SrcFinfo( "completeSetupSrc",
+			Ftype0::global()
+		),
 		new SrcFinfo( "clearSrc",
 			Ftype0::global()
 		),
@@ -191,6 +194,8 @@ static const unsigned int enzConnectionSlot =
 	initStoichCinfo()->getSlotIndex( "hub.enzConnectionSrc" );
 static const unsigned int mmEnzConnectionSlot =
 	initStoichCinfo()->getSlotIndex( "hub.mmEnzConnectionSrc" );
+static const unsigned int completeSetupSlot =
+	initStoichCinfo()->getSlotIndex( "hub.completeSetupSrc" );
 static const unsigned int clearSlot =
 	initStoichCinfo()->getSlotIndex( "hub.clearSrc" );
 static const unsigned int allocateSlot =
@@ -505,7 +510,7 @@ void Stoich::rebuildMatrix( Element* stoich, vector< Element* >& ret )
 			addRate( stoich, *i );
 		}
 	}
-	setupReacSystem();
+	setupReacSystem( stoich );
 }
 
 
@@ -893,9 +898,12 @@ void Stoich::addRate( Element* stoich, Element* e )
 	cout << "Don't yet know how to addRate for " << e->name() << "\n";
 }
 
-void Stoich::setupReacSystem()
+void Stoich::setupReacSystem( Element* stoich )
 {
+	// At this point the Stoich has sent out all info to the target
+	// objects and the Hubs. It now requests them to do something with it.
 	// cout << "Don't yet know how to setupReacSystem\n";
+	send0( stoich, completeSetupSlot );
 }
 
 // Update the v_ vector for individual reac velocities.
