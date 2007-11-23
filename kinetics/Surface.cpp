@@ -35,6 +35,11 @@ const Cinfo* initSurfaceCinfo()
 		// As a molecule may interact with multiple surfaces, it isn't
 		// enough to confer a property on the molecule itself. We
 		// have to use messages.
+		//
+		// Perhaps we don't need these, but instead put entities on the
+		// surface which the molecule interacts with if it doesn't do the
+		// basic reflect operation.
+		//
 		new SrcFinfo( "absorb", Ftype0::global() ),
 		new SrcFinfo( "transmit", Ftype0::global() ),
 		new SrcFinfo( "jump", Ftype0::global() ),

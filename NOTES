@@ -4997,3 +4997,73 @@ Added skeleton classes for all basic shapes in Smoldyn:
 Disk, Hemisphere, Cylinder, Sphere, Triangle, Rectangle.
 
 ==============================================================================
+20 Nov
+Checked in basic shape classes. 
+In revision 265, in serial compile form with debugging, without Smoldyn flags.
+
+To get this to take over volume terms in MOOSE, I need to replace the
+Molecule::volumeScale_ parameter with a message that queries the geometry.
+This would cost a bit in terms of memory, but is a clean single-point
+solution for all molecules and can eventually give dynamic volumes.
+
+I need a new concept, a compartment. This gets volume info from a bunch of 
+surfaces in an additive or subtractive manner. The compartment is what 
+a given molecule species is associated with. This is needed because the
+same surface may be inner or outer bound of different sets of molecules,
+or some molecules may be on the surface itself.
+
+Compartments are located below geometry and communicate with shapes on
+the same level using messages.
+
+To get this backward compat:
+	- Need to set up geometry neutral object automatically
+	- Need to set up surface object automatically under geometry
+	- Need to set up sphere object automatically on the surface.
+	- Need a default compartment on the geometry, tie this to first surface
+	- Connect up all molecules to default compartment on creation,
+		unless there is a separate named compartment to attach to.
+	-- Will need to set up kkit dump of geometry/compartment to dump
+		before the molecules are done.
+	- Cannot use name Compartment: that is taken by neuronal models.
+		How about MolCompt or MolVol or Space or KinCompartment.
+
+Setting it up.
+==============================================================================
+21 Nov.
+The SBML specification of compartments uses the single 'outside' field to
+specify relationships between them. If A->outside == B, then B is outside of A.
+
+Here I was going to use exterior and interior messages to surfaces. Can I 
+include an equivalent to the 'outside' field? 
+Some criteria:
+- I must be able to set these up by default or by reading an SBML file.
+- I must be able to handle cell membranes: 2-d surfaces in 3D.
+- I must be able to talk easily to molecules to replace the existing
+	volumeScale field.
+
+Approaches:
+- Use surface relationships. If S1 is exterior to A and interior to B, then
+	B is outside A.
+	- Indirect. Would it be tricky to set up? I will need a shape even
+	for a generic compartment.
+	- How do we handle exocytosis/membrane fusion?
+	- How do we handle membranes?
+- Use separate special messages between compartments.
+	- Messy. May end up with dual specifications of same info.
+	- Membranes can be handled. A is inside memb is inside B
+	- SBML uses an 'outside' field.
+
+==============================================================================
+22 Nov.
+
+Compartment messaging:
+- outside (src): Goes to the compartment outside the current one. No args.
+- inside (dest): Comes from the compt(s) inside current. No args.
+- exterior (dest): volume, area, perimeter.
+- Interior (dest): volume, area, perimeter.
+- Return message to molecules: extent: This is an alias for size, but also
+	includes dimensionality.
+
+Message contents: outside/inside: nothing.
+- from surfaces: vol, area, perimeter.
+
