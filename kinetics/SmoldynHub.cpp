@@ -11,6 +11,7 @@
 
 #include "moose.h"
 #include "../element/Neutral.h"
+#include "../element/Wildcard.h"
 #include "RateTerm.h"
 #include "SparseMatrix.h"
 #include "SmoldynHub.h"
@@ -87,6 +88,10 @@ const Cinfo* initSmoldynHubCinfo()
 			Ftype2< unsigned int, Element* >::global(),
 			RFCAST( &SmoldynHub::mmEnzConnectionFunc )
 		),
+		new DestFinfo( "completeSetup",
+			Ftype0::global(),
+			RFCAST( &SmoldynHub::completeReacSetupFunc )
+		),
 		new DestFinfo( "clear",
 			Ftype0::global(),
 			RFCAST( &SmoldynHub::clearFunc )
@@ -113,13 +118,11 @@ const Cinfo* initSmoldynHubCinfo()
 			GFCAST( &SmoldynHub::getNenz ), 
 			&dummyFunc
 		),
-		/*
 		new ValueFinfo( "path", 
 			ValueFtype1< string >::global(),
 			GFCAST( &SmoldynHub::getPath ),
 			RFCAST( &SmoldynHub::setPath )
 		),
-		*/
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -380,7 +383,7 @@ unsigned int SmoldynHub::numEnz() const
 
 string SmoldynHub::getPath( const Element* e )
 {
-	//return static_cast< const SmoldynHub* >( e->data() )->path_;
+	return static_cast< const SmoldynHub* >( e->data() )->path_;
 	return "";
 }
 
@@ -401,6 +404,11 @@ void SmoldynHub::reinitFunc( const Conn& c, ProcInfo info )
 }
 
 void SmoldynHub::reinitFuncLocal( Element* e, ProcInfo info )
+{
+	simptr_->dt = info->dt_;
+}
+
+void SmoldynHub::completeReacSetupLocal()
 {
 	simptr_->boxs->mpbox = 5.0;
 	simptr_->wlist[0]->pos = -1.0e-6;
@@ -519,7 +527,11 @@ void SmoldynHub::reinitFuncLocal( Element* e, ProcInfo info )
 	simptr_->time = 0.0;
 	simptr_->tmin = 0.0;
 	simptr_->tmax = 100.0;
-	simptr_->dt = info->dt_;
+	// Ooops. Smoldyn currently needs dt to be set _before_ calling 
+	// setupsim. So I need to bung it in somehow.
+	// Steve tells me that he'll put in this flexibility some time soon,
+	// so for now I'm going to kludge it.
+	simptr_->dt = 0.01;
 	scmdsetfnames( simptr_->cmds, "smoldyn.out" );
 	scmdstr2cmd( simptr_->cmds, "e molcount smoldyn.out", simptr_->tmin, simptr_->tmax, simptr_->dt );
 	if ( setupsim( NULL, NULL, &simptr_, NULL ) ) {
@@ -544,20 +556,30 @@ void SmoldynHub::processFuncLocal( Element* e, ProcInfo info )
 }
 
 ///////////////////////////////////////////////////
-// This may go soon
+// This goes through the path and finds all the geometry info.
+// The surface and panel instances hold this info.
 ///////////////////////////////////////////////////
 
 void SmoldynHub::localSetPath( Element* stoich, const string& value )
 {
-	/*
+	static const Cinfo* panelCinfo = Cinfo::find( "Panel" );
+	static const Cinfo* surfaceCinfo = Cinfo::find( "Surface" );
+
 	path_ = value;
 	vector< Element* > ret;
+	vector< Element* > panels;
+	vector< Element* > surfaces;
+	vector< Element* >::iterator i;
 	wildcardFind( path_, ret );
-	if ( ret.size() > 0 ) {
-		;
+	for ( i = ret.begin(); i != ret.end(); i++ ) {
+		if ( (*i)->cinfo()->isA( panelCinfo ) )
+			panels.push_back( *i );
+		if ( (*i)->cinfo()->isA( surfaceCinfo ) )
+			surfaces.push_back( *i );
 	}
-	cout << "found " << ret.size() << " elements\n";
-	*/
+
+	cout << "found " << panels.size() << " panels; ";
+	cout << surfaces.size() << " surfaces, \n";
 }
 
 
@@ -992,6 +1014,15 @@ void SmoldynHub::zombify(
 	e->setThisFinfo( solveFinfo );
 }
 
+/**
+ * Completes all the setup operations. At this point the Stoich object
+ * has called all the individual reaction operations and now is telling
+ * the SmoldynHub to wrap it up.
+ */
+void SmoldynHub::completeReacSetupFunc( const Conn& c )
+{
+	static_cast< SmoldynHub* >( c.data() )->completeReacSetupLocal();
+}
 
 /**
  * Clears out all the messages to zombie objects

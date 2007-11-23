@@ -419,6 +419,9 @@ Id smoldynSetup( Element* e, const string& method )
 	ks->findFinfo( "hub" )->add( ks, sh, sh->findFinfo( "hub" ) );
 	string simpath = e->id().path() + "/##";
 	set< string >( ks, "path", simpath );
+
+	// This sets up additional things like the geometry information.
+	set< string >( sh, "path", simpath );
 	return solveId;
 }
 
