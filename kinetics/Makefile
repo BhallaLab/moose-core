@@ -27,6 +27,7 @@ OBJ = \
 	HemispherePanel.o	\
 	CylPanel.o	\
 	DiskPanel.o	\
+	KinCompt.o	\
 	TestKinetics.o	\
 	KineticManager.o	\
 
@@ -78,6 +79,7 @@ SpherePanel.o:	Panel.h SpherePanel.h
 HemispherePanel.o:	Panel.h HemispherePanel.h
 CylPanel.o:	Panel.h CylPanel.h
 DiskPanel.o:	Panel.h DiskPanel.h
+KinCompt.o:	KinCompt.h
 SparseMatrix.o:	SparseMatrix.h
 KineticHub.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h
 Stoich.o:	RateTerm.h Stoich.h SparseMatrix.h Makefile
