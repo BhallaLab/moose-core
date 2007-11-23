@@ -169,6 +169,10 @@ class SmoldynHub
 				Element* enz );
 
 		static void clearFunc( const Conn& c );
+
+		static void completeReacSetupFunc( const Conn& c );
+		void completeReacSetupLocal();
+
 		static void childFunc( const Conn& c, int stage );
 		static void destroy( const Conn& c );
 		static void zombify( Element* hub, Element* e, 
@@ -185,7 +189,7 @@ class SmoldynHub
 		unsigned int nBuf_;
 		unsigned int nSumTot_;
 		struct simstruct* simptr_;	
-		// string path_;
+		string path_;
 		map< Element*, unsigned int > molMap_;
 		vector< unsigned int > molSumMap_;
 		vector< unsigned int > reacMap_;

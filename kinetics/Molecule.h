@@ -51,6 +51,9 @@ class Molecule
 		void reinitFuncLocal( Element* e );
 		static void processFunc( const Conn& c, ProcInfo info );
 		void processFuncLocal( Element* e, ProcInfo info );
+		static void extentFunc( const Conn& c, 
+			double size, unsigned int dim );
+		void extentFuncLocal( Element* e, double size, unsigned int dim);
 
 	private:
 		/// Initial number of molecules: t=0 boundary condition.
