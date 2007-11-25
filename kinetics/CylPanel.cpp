@@ -38,8 +38,11 @@ static const Cinfo* cylPanelCinfo = initCylPanelCinfo();
 // Class function definitions
 ///////////////////////////////////////////////////
 
+/**
+ * Cylinder is defined by 2 points for axis plus another for radius at dim0
+ */
 CylPanel::CylPanel( unsigned int nDims )
-	: Panel( nDims )
+	: Panel( nDims, 3 ) // 3 points to define it.
 {
 		;
 }
