@@ -38,8 +38,12 @@ static const Cinfo* rectPanelCinfo = initRectPanelCinfo();
 // Class function definitions
 ///////////////////////////////////////////////////
 
+/**
+ * RectPanel is defined by 4 corners with CCW winding, followed by a
+ * further 'front' vector whose meaning I need to check with Steven.
+ */
 RectPanel::RectPanel( unsigned int nDims )
-	: Panel( nDims )
+	: Panel( nDims, 4 )
 {
 		;
 }

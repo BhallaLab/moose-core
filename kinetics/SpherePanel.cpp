@@ -38,8 +38,11 @@ static const Cinfo* spherePanelCinfo = initSpherePanelCinfo();
 // Class function definitions
 ///////////////////////////////////////////////////
 
+/**
+ * Sphere is defined by 2 points: a centre point, and a radius at dim0.
+ */
 SpherePanel::SpherePanel( unsigned int nDims )
-	: Panel( nDims )
+	: Panel( nDims, 2 )
 {
 		;
 }

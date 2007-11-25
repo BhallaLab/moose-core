@@ -38,8 +38,12 @@ static const Cinfo* hemispherePanelCinfo = initHemispherePanelCinfo();
 // Class function definitions
 ///////////////////////////////////////////////////
 
+/**
+ * The Hemisphere is defined by 3 pts: 
+ * centre, radius[dim0], outward vec[dim0+ve]
+ */
 HemispherePanel::HemispherePanel( unsigned int nDims )
-	: Panel( nDims )
+	: Panel( nDims, 3 )
 {
 		;
 }

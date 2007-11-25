@@ -38,8 +38,11 @@ static const Cinfo* triPanelCinfo = initTriPanelCinfo();
 // Class function definitions
 ///////////////////////////////////////////////////
 
+/**
+ * Triangle is defined by 3 points with CCW winding.
+ */
 TriPanel::TriPanel( unsigned int nDims )
-	: Panel( nDims )
+	: Panel( nDims, 3 )
 {
 		;
 }
