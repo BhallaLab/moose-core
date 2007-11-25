@@ -21,7 +21,7 @@
 class Panel
 {
 	public:
-		Panel( unsigned int nDims = 3 );
+		Panel( unsigned int nDims = 3, unsigned int nPts = 3 );
 		virtual ~Panel() {
 			;
 		}
@@ -59,6 +59,7 @@ class Panel
 		static double getY( const Element* e, const unsigned int& i );
 		static void setZ( const Conn& c, double val, const unsigned int& i);
 		static double getZ( const Element* e, const unsigned int& i );
+		static vector< double > getCoords( const Element* e );
 
 
 		/**
@@ -82,11 +83,16 @@ class Panel
 		bool front_;	
 
 		/**
+		 * nDims is the number of dimensions of the panel. Usually 3,
+		 * in fact at this point isn't likely to work for other dims.
+		 */
+		unsigned int nDims_;
+
+		/**
 		 * Vector of coords. coords_[number][dimension]
 		 */
 		vector< double > coords_;
 
-		unsigned int nDims_;
 };
 
 // Used by the Smoldyn solver
