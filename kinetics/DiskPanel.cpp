@@ -38,8 +38,11 @@ static const Cinfo* diskPanelCinfo = initDiskPanelCinfo();
 // Class function definitions
 ///////////////////////////////////////////////////
 
+/**
+ * The three points that define a disk are: centre, radius[dim0], normal.
+ */
 DiskPanel::DiskPanel( unsigned int nDims )
-	: Panel( nDims )
+	: Panel( nDims, 3 )
 {
 		;
 }

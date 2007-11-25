@@ -556,6 +556,57 @@ void SmoldynHub::processFuncLocal( Element* e, ProcInfo info )
 }
 
 ///////////////////////////////////////////////////
+// Geometry assignment utility functions.
+///////////////////////////////////////////////////
+void assignPoints( Element* e, panelptr pptr )
+{
+	const unsigned int nDim = 3; // should really refer to simptr.
+	// The points array has been allocated by panelsalloc, so we 
+	// just need to fill it in.
+	// Ask Steven : The dimension is not specified in any of the 
+	// panel, surface, or surfacesuper struct. Only the simptr has it.
+	vector< double > coords;
+	bool ret = get< vector< double > >( e, "coords", coords );
+	assert( ret );
+	assert ( pptr->npts * nDim + nDim == coords.size() );
+	for ( int i = 0; i < pptr->npts; i++ )
+		for ( unsigned int j = 0; j < nDim; j++ )
+			pptr->point[i][j] = coords[ i * nDim + j ];
+	for ( unsigned int j = 0; j < nDim; j++ )
+		pptr->front[j] = coords[ pptr->npts * nDim + j ];
+}
+
+void assignNeighbors( Element* e, panelptr pptr,
+	map< Element*, panelptr >& panelMap )
+{
+	static const Cinfo* panelCinfo = Cinfo::find( "Panel" );
+	static const Finfo* nSrcFinfo = panelCinfo->findFinfo( "neighborSrc" );
+	static const Finfo* nDestFinfo = panelCinfo->findFinfo( "neighbor" );
+
+	// the neigh array has NOT been allocated. need to do so.
+	vector< Conn > neighborsIn;
+	vector< Conn > neighborsOut;
+	unsigned int numIncoming = nDestFinfo->incomingConns( e, neighborsIn );
+	unsigned int numOutgoing = nSrcFinfo->outgoingConns( e, neighborsOut );
+	pptr->nneigh = numIncoming + numOutgoing;
+	pptr->neigh = ( panelptr* ) calloc( pptr->nneigh, sizeof( panelptr* ));
+	panelptr* temp = pptr->neigh;
+	vector< Conn >::iterator c;
+	map< Element*, panelptr >::iterator i;
+	for ( c = neighborsIn.begin(); c != neighborsIn.end(); c++ ) {
+		i = panelMap.find( c->targetElement() );
+		assert( i != panelMap.end() );
+		*temp++ = i->second;
+	}
+
+	for ( c = neighborsOut.begin(); c != neighborsOut.end(); c++ ) {
+		i = panelMap.find( c->targetElement() );
+		assert( i != panelMap.end() );
+		*temp++ = i->second;
+	}
+}
+
+///////////////////////////////////////////////////
 // This goes through the path and finds all the geometry info.
 // The surface and panel instances hold this info.
 ///////////////////////////////////////////////////
@@ -564,21 +615,79 @@ void SmoldynHub::localSetPath( Element* stoich, const string& value )
 {
 	static const Cinfo* panelCinfo = Cinfo::find( "Panel" );
 	static const Cinfo* surfaceCinfo = Cinfo::find( "Surface" );
+	static const int dim = 3;
 
 	path_ = value;
 	vector< Element* > ret;
-	vector< Element* > panels;
+	// vector< Element* > panels;
 	vector< Element* > surfaces;
+	vector< vector< Id > > panels;
 	vector< Element* >::iterator i;
+	vector< Id > children;
 	wildcardFind( path_, ret );
+	unsigned int numPanels = 0;
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		if ( (*i)->cinfo()->isA( panelCinfo ) )
-			panels.push_back( *i );
-		if ( (*i)->cinfo()->isA( surfaceCinfo ) )
+	//	if ( (*i)->cinfo()->isA( panelCinfo ) )
+	//		panels.push_back( *i );
+		if ( (*i)->cinfo()->isA( surfaceCinfo ) ) {
 			surfaces.push_back( *i );
+			panels.push_back( Neutral::getChildList( *i ) );
+			numPanels += panels.back().size();
+		}
 	}
 
-	cout << "found " << panels.size() << " panels; ";
+	// Check with Steven about nMol_ + 1.
+	// Assume 3D.
+	simptr_->srfss = surfacessalloc( surfaces.size(), nMol_ + 1, 3 );
+	for ( unsigned int j = 0; j < surfaces.size(); j++ ) {
+		map< Element*, panelptr > panelMap;
+
+		strncpy( simptr_->srfss->snames[j], 
+			surfaces[j]->name().c_str(), 199 );
+		vector< vector< Id > > typedPanels( PSMAX );
+		vector< Id >& pan = panels[j];
+
+		// Here we organize panels into a vector indexed by the shapeId.
+		for ( unsigned int k = 0; k < pan.size(); k++ ) {
+			unsigned int shapeId;
+			if ( pan[k]()->cinfo()->isA( panelCinfo ) ) {
+				bool temp = get< unsigned int >( pan[k](), "shapeId", shapeId );
+				assert( temp );
+				assert ( shapeId < PSMAX );
+				typedPanels[ shapeId ].push_back( pan[k] );
+			}
+		}
+
+		// Now we set up the panels, in order of ShapeId.
+		for ( unsigned int k = 0; k < typedPanels.size(); k++ ) {
+			if ( typedPanels[k].size() > 0 ) {
+				panelsalloc( simptr_->srfss->srflist[j], dim, 
+					typedPanels[k].size(), 
+					static_cast< PanelShape >( k ) );
+			}
+			for ( unsigned int q = 0; q < typedPanels[k].size(); q++ ) {
+				Element* pe = typedPanels[k][q]();
+				panelptr pptr = simptr_->srfss->srflist[j]->panels[k][q];
+				panelMap[ pe ] = pptr;
+			}
+		}
+		
+		for ( unsigned int k = 0; k < typedPanels.size(); k++ ) {
+			for ( unsigned int q = 0; q < typedPanels[k].size(); q++ ) {
+				Element* pe = typedPanels[k][q]();
+				panelptr pptr = simptr_->srfss->srflist[j]->panels[k][q];
+				strncpy( pptr->pname, pe->name().c_str(), 199 );
+				// Todo. This extracts the points from pe and puts into
+				// pptr.
+				assignPoints( pe, pptr );
+
+				// Traverse neighbours and set them up.
+				assignNeighbors( pe, pptr, panelMap );
+			}
+		}
+	}
+
+	cout << "found " << numPanels << " panels; ";
 	cout << surfaces.size() << " surfaces, \n";
 }
 
