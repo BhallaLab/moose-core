@@ -5073,3 +5073,7 @@ Message contents: outside/inside: nothing.
 Checked in as revision 266, in serial compile form with debugging, and with
 Smoldyn flags turned off.
 
+==============================================================================
+24 Nov.
+Added in most of the interface stuff for shapes going to Smoldyn. Still need
+a complete test version.

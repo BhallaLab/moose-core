@@ -65,6 +65,18 @@ const Cinfo* initPanelCinfo()
 			GFCAST( &Panel::getShapeId ), 
 			&dummyFunc
 		),
+
+		/**
+		 * Coords is used for getting all the shape position info in one
+		 * vector. The # and meaning of each coord 
+		 * depends on the shape subtype. The coord vector is accessed as
+		 * coord[index * nDim + dim]
+		 */
+		new ValueFinfo( "coords", 
+			ValueFtype1< vector< double > >::global(),
+			GFCAST( &Panel::getCoords ), 
+			&dummyFunc
+		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -100,8 +112,13 @@ static const Finfo* neighborDestFinfo = initPanelCinfo()->findFinfo( "neighbor" 
 // Class function definitions
 ///////////////////////////////////////////////////
 
-Panel::Panel( unsigned int nDims )
-	: nDims_( nDims )
+/**
+ * Panel is defined by dimensions, currently always 3, and nPts.
+ * The points sets up the coordinates of the panel as well as the 'outward'
+ * direction.
+ */
+Panel::Panel( unsigned int nDims, unsigned int nPts )
+	: nDims_( nDims ), coords_( ( nPts + 1 ) * nDims, 0.0 )
 {
 		;
 }
@@ -139,6 +156,11 @@ unsigned int Panel::getNneighbors( const Element* e )
 {
 	return neighborSrcFinfo->numIncoming( e ) + 
 		neighborDestFinfo->numIncoming( e );
+}
+
+vector< double > Panel::getCoords( const Element* e )
+{
+	return static_cast< Panel* >( e->data() )->coords_;
 }
 
 //////////////////////////////////////////////////////////
