@@ -5077,3 +5077,12 @@ Smoldyn flags turned off.
 24 Nov.
 Added in most of the interface stuff for shapes going to Smoldyn. Still need
 a complete test version.
+
+==============================================================================
+25 Nov.
+Completed first pass at surface loading into Smoldyn. Shapes are now loaded,
+but the molecules are not yet associated with the surfaces.
+Checked in as revision 269, in serial compile form with debugging, and with
+Smoldyn flags on
+
+Changed compile flgas again to remove Smoldyn dependencies, checked in again.
