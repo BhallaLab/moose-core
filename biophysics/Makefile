@@ -18,7 +18,9 @@ OBJ = \
 	CaConc.o	\
 	Nernst.o	\
 	SpikeGen.o	\
+	ParSpikeGen.o	\
 	SynChan.o	\
+	ParSynChan.o	\
 	HSolveBase.o	\
 	HSolve.o \
 	NeuroScanBase.o \
@@ -45,7 +47,9 @@ HHGate.o:	HHGate.h ../builtins/Interpol.h
 CaConc.o:	CaConc.h
 Nernst.o:	Nernst.h
 SpikeGen.o:	SpikeGen.h
+ParSpikeGen.o:	SpikeGen.h ParSpikeGen.h
 SynChan.o:	SynChan.h SynInfo.h
+ParSynChan.o:	SynChan.h SynInfo.h ParSynChan.h
 HSolveBase.o:	HSolveBase.h HSolveStructure.h
 HSolve.o:	HSolve.h HSolveBase.h HSolveStructure.h
 NeuroScanBase.o:	NeuroScanBase.h HSolveStructure.h
