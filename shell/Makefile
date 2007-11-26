@@ -17,6 +17,7 @@ TARGET = shell.o
 
 OBJ = \
 	Shell.o	\
+	ParShell.o	\
 	ReadCell.o \
 	SimDump.o \
 	LoadTab.o \
@@ -31,6 +32,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 
 Shell.o: Shell.h
+ParShell.o: Shell.h ParShell.h
 ReadCell.o: ReadCell.h Shell.h
 
 
