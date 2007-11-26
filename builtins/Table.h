@@ -15,12 +15,7 @@ enum TableModes { TAB_IO, TAB_LOOP, TAB_ONCE, TAB_BUF, TAB_SPIKE, TAB_FIELDS, TA
 class Table: public Interpol
 {
 	public:
-		Table()
-				: input_( 0.0 ), output_( 0.0 ),
-				stepSize_( 0.0 ), stepMode_( TAB_IO ),
-				sy_( 0.0 ), py_( 1.0 ), lastSpike_( 0.0 ),
-				counter_( 0 )
-		{ ; }
+		Table();
 
 		////////////////////////////////////////////////////////////
 		// Here are the interface functions for the MOOSE class

@@ -179,6 +179,17 @@ static const unsigned int inputRequestSlot =
 	initTableCinfo()->getSlotIndex( "inputRequest.requestInput" );
 
 ////////////////////////////////////////////////////////////////////
+// Here we set up Table class functions
+////////////////////////////////////////////////////////////////////
+Table::Table()
+	: input_( 0.0 ), output_( 0.0 ),
+	stepSize_( 0.0 ), stepMode_( TAB_IO ),
+	sy_( 0.0 ), py_( 1.0 ), lastSpike_( 0.0 ),
+	counter_( 0 )
+{ 
+	;
+}
+////////////////////////////////////////////////////////////////////
 // Here we set up Table value fields
 ////////////////////////////////////////////////////////////////////
 
@@ -271,7 +282,7 @@ void Table::innerProcess( Element* e, ProcInfo p )
 		case TAB_LOOP:
 			// Looks up values based on input and time. Loops around
 			// when done.
-			if ( stepSize_ == 0 ) {
+			if ( fabs( stepSize_ ) < EPSILON ) {
 				double looplen = xmax_ - xmin_;
 				temp = input_ + p->currTime_;
 				if ( fabs( looplen ) > EPSILON )
@@ -291,7 +302,7 @@ void Table::innerProcess( Element* e, ProcInfo p )
 		case TAB_ONCE:
 			// Looks up values based on input and time. Does not
 			// loop around.
-			if ( stepSize_ == 0 ) {
+			if ( fabs( stepSize_ ) < EPSILON ) {
 				temp = input_ + p->currTime_;
 			} else {
 				temp = input_;
@@ -363,6 +374,7 @@ void Table::innerProcess( Element* e, ProcInfo p )
 			 */
 			break;
 		default:
+			assert( 0 );
 			break;
 	};
 	sy_ = 0.0;
