@@ -15,7 +15,12 @@ using namespace std;
 int mooseInit(std::string configFile)
 {
     static Configuration conf(configFile);    
-    const Cinfo* c = Cinfo::find( "Shell" );
+#ifdef CRL_MPI
+	    const Cinfo* c = Cinfo::find( "ParShell" );
+#else
+	    const Cinfo* c = Cinfo::find( "Shell" );
+#endif
+
     assert ( c != 0 );
     const Finfo* childSrc = Element::root()->findFinfo( "childSrc" );
     assert ( childSrc != 0 );
