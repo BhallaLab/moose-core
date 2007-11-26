@@ -45,8 +45,8 @@ class Molecule
 		
 		static void reacFunc( const Conn& c, double A, double B );
 		static void sumTotalFunc( const Conn& c, double n );
-		void sumProcessFuncLocal( );
-		static void sumProcessFunc( const Conn& c, ProcInfo info );
+		// void sumProcessFuncLocal( );
+		// static void sumProcessFunc( const Conn& c, ProcInfo info );
 		static void reinitFunc( const Conn& c, ProcInfo info );
 		void reinitFuncLocal( Element* e );
 		static void processFunc( const Conn& c, ProcInfo info );

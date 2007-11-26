@@ -308,6 +308,7 @@ void Molecule::sumTotalFunc( const Conn& c, double n )
 	static_cast< Molecule* >( c.data() )->total_ += n;
 }
 
+/*
 void Molecule::sumProcessFuncLocal( )
 {
 		n_ = total_;
@@ -317,6 +318,7 @@ void Molecule::sumProcessFunc( const Conn& c, ProcInfo info )
 {
 	static_cast< Molecule* >( c.data() )->sumProcessFuncLocal();
 }
+*/
 
 void Molecule::reinitFunc( const Conn& c, ProcInfo info )
 {
