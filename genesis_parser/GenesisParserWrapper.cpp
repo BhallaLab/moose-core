@@ -3029,7 +3029,13 @@ Element* makeGenesisParser()
 		*/
 	assert( !shellId.bad() );
 	Element* shell = shellId();
+
+#ifdef CRL_MPI
+	Element* sli = Neutral::create( "ParGenesisParser", "sli", shell );
+#else
 	Element* sli = Neutral::create( "GenesisParser", "sli", shell );
+#endif
+
 	// set< string, string >( shell, "create", "GenesisParser", "sli");
 	// Element* sli = Element::lastElement();
 	static_cast< GenesisParserWrapper* >( sli->data() )->
