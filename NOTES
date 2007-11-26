@@ -5086,3 +5086,36 @@ Checked in as revision 269, in serial compile form with debugging, and with
 Smoldyn flags on
 
 Changed compile flgas again to remove Smoldyn dependencies, checked in again.
+Now at revision 270.
+
+To get this reasonably complete, I still need to do the following:
+- Expand the test. Put in coordinates and neighbour relationships, and also
+	associate molecules with surfaces.
+- Implement the association of molecules with compartments.
+- Check out a few simple geometries
+- Set up kkit to define geometries.
+
+==============================================================================
+26 Nov.
+Working on the earlier bug with eliminating the unit tests and assertions:
+There was a problem running tabsumtot.g. The output was flatlined.
+Turns out that the error is present only in the (automatically setup) solver
+mode. EE mode handles the tabsumtot fine. The data is actually going from the
+table to the molecule, but the solver is not doing anything with it.
+
+For a while it looked like the SumTotal::sum operation was overwriting
+the target sumtot value, but now even that does not happen.
+
+Should verify the assignment of the value in the Stoich/Hub from the
+external table.
+
+26 Nov contd 
+
+Finally tracked it down. The molSumMap is the list of all molecules that
+take sumTotals. However, it is being indexed in KineticHub::molSum
+by the # of external objects that connect into sumTotals.
+
+Fixed. The molSumMap should only refer to external objects, and now it does.
+It now clears the test for tabsumtot.
+
+==============================================================================
