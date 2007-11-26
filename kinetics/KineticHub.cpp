@@ -386,6 +386,8 @@ void KineticHub::molConnectionFuncLocal( Element* hub,
 	// Since I'm hazy about the syntax, here I'm just using the elist.
 	for ( i = elist->begin(); i != elist->end(); i++ ) {
 		// Here we replace the sumTotMessages from outside the tree.
+		// The 'retain' flag at the end is 1: we do not want to delete
+		// the original message to the molecule.
 		redirectDestMessages( hub, *i, molSumFinfo, sumTotFinfo, 
 		i - elist->begin(), molSumMap_, elist, 1 );
 	}
@@ -1209,12 +1211,19 @@ void redirectDestMessages(
 	vector< Element* > srcElements;
 	vector< const Finfo* > srcFinfos;
 	
-	map.push_back( eIndex );
 	
+	for ( i = 0; i != max; i++ ) {
+		Element* tgt = clist[i].targetElement();
+		if ( find( elist->begin(), elist->end(), tgt ) == elist->end() )
+		// Only add the molSum message if the src is outside the mol tree
+		// Add as many references to this molecule as there are
+		// messages coming in.
+			map.push_back( eIndex );
+	}
+
 	// An issue here: Do I check if the src is on the solved tree?
 	// This is a bad iteration: dropping connections is going to affect
 	// the list size and position of i in the list.
-	// for ( i = 0; i != max; i++ ) {
 	i = max;
 	while ( i > 0 ) {
 		i--;
@@ -1222,6 +1231,7 @@ void redirectDestMessages(
 		if ( find( elist->begin(), elist->end(), c.targetElement() ) == elist->end() )  {
 			srcElements.push_back( c.targetElement() );
 			srcFinfos.push_back( c.targetElement()->findFinfo( c.targetIndex() ) );
+				
 			if ( !retain )
 				eFinfo->drop( e, i );
 		}
