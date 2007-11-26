@@ -334,7 +334,7 @@ void SynChan::innerReinitFunc( Element* e, ProcInfo info )
 			( tau1_ - tau2_ );
 		norm_ = Gbar_ * ( tau1_ - tau2_ ) / 
 			( tau1_ * tau2_ * ( 
-				exp( -tpeak / tau1_ ) - exp( tpeak / tau2_ )
+				exp( -tpeak / tau1_ ) - exp( -tpeak / tau2_ )
 			) );
 	}
 	updateNumSynapse( e );
