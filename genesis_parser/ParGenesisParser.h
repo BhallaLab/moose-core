@@ -14,6 +14,27 @@
 #ifndef _PARGENESIS_PARSER_H
 #define _PARGENESIS_PARSER_H
 
+static const int MAX_COMMAND_ARGS = 25;
+static const int MAX_COMMAND_SIZE = 1024;
+
+struct stCommand
+{
+	int iSize;
+	char arrCommand[MAX_COMMAND_ARGS][MAX_COMMAND_SIZE];
+
+	stCommand()
+	{
+		clear();
+	};
+
+	void clear()
+	{
+		iSize = 0;
+		memset(arrCommand, 0, MAX_COMMAND_ARGS*MAX_COMMAND_SIZE*sizeof(char));
+	};
+
+};
+
 
 class ParGenesisParserWrapper:public GenesisParserWrapper
 {
@@ -21,6 +42,15 @@ public:
 	ParGenesisParserWrapper();
 	void MyFunc();
 	void loadBuiltinCommands();
+
+	static void parseFunc( const Conn& c, string s );
+	virtual Result ExecuteCommand(int argc, char** argv);
+	int SendCommand(int argc);
+	struct stCommand objCommand_; 
+
+private:
+	int	processrank_;
+	int	processcount_;
 };
 
 #endif	//_PARGENESIS_PARSER_H

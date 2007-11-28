@@ -14,6 +14,8 @@
 
 #include "ParGenesisParser.h"
 
+#include <mpi.h>
+
 using namespace std;
 
 const Cinfo* initParGenesisParserCinfo()
@@ -187,7 +189,7 @@ const Cinfo* initParGenesisParserCinfo()
 			RFCAST( &GenesisParserWrapper::processFunc ) ), 
 		new DestFinfo( "parse",
 			Ftype1< string >::global(),
-			RFCAST( &GenesisParserWrapper::parseFunc ) ), 
+			RFCAST( &ParGenesisParserWrapper::parseFunc ) ), 
 		new SrcFinfo( "echo", Ftype1< string>::global() ),
 
 	};
@@ -226,6 +228,12 @@ void do_setrank( int argc, const char** const argv, Id s )
 	cout<<endl<<"In do_setrank";
 }
 
+void do_parquit( int argc, const char** const argv, Id s )
+{
+		MPI_Finalize();
+		exit( 0 );
+}
+
 void do_parplanarconnect( int argc, const char** const argv, Id s )
 {
 	cout<<endl<<"In do_planarconnect";
@@ -241,5 +249,251 @@ void ParGenesisParserWrapper::loadBuiltinCommands()
 {
 	AddFunc( "setrank", do_setrank, "void" );
 	AddFunc( "planarconnect", do_parplanarconnect, "void");
+	AddFunc( "quit", do_parquit, "void");
+}
+
+void ParGenesisParserWrapper::parseFunc( const Conn& c, string s )
+{
+	//ParGenesisParserWrapper* data = static_cast< ParGenesisParserWrapper* >( c.targetElement()->data() );
+	ParGenesisParserWrapper &objParParser = *(static_cast< ParGenesisParserWrapper* >( c.targetElement()->data() ));
+	int i;
+	char **pArgs;
+
+        MPI_Comm_rank(MPI_COMM_WORLD, &objParParser.processrank_);
+        MPI_Comm_size(MPI_COMM_WORLD, &objParParser.processcount_);
+
+	if(objParParser.processrank_ == 0)
+	{
+		objParParser.ParseInput( s );
+	}
+	else
+	{
+		stCommand &objCommand = static_cast< ParGenesisParserWrapper* >( c.targetElement()->data() )->objCommand_;
+		
+		while(1)
+		{
+			MPI_Bcast(&objCommand, sizeof(int) + MAX_COMMAND_SIZE * MAX_COMMAND_ARGS * sizeof(char), MPI_CHAR, 0, MPI_COMM_WORLD);
+	
+			pArgs = new char* [objCommand.iSize];
+
+			for(i=0; i<objCommand.iSize; i++)
+			{
+                                pArgs[i] = new char [strlen(objCommand.arrCommand[i])+1];
+                                strcpy(pArgs[i], objCommand.arrCommand[i]);
+
+			}
+
+			objParParser.ExecuteCommand(objCommand.iSize, pArgs);
+
+                        for(i=0; i<objCommand.iSize; i++)
+                        {
+                                delete pArgs[i];
+                        }
+
+                        delete[] pArgs;
+
+			if(!strcmp(objCommand.arrCommand[0], "quit"))
+				break;
+		}
+	}
+}
+
+Result ParGenesisParserWrapper::ExecuteCommand(int argc, char** argv)
+{
+	FILE            *pfile;
+	// int          code;
+	short           redirect_mode = 0;
+	int             start = 0;
+	int             i;
+	char            *mode = "a";
+	Result          result;
+	// int          ival;
+	func_entry      *command;
+
+	result.r_type = IntType();
+	result.r.r_int = 0;
+ 
+	if(argc < 1)
+	{
+		cout<<endl<<"Error: number of arguments less than 1"<<endl;
+		return(result);
+	}
+
+	if(processrank_ == 0)
+	{
+		if(argc > MAX_COMMAND_ARGS)
+		{
+			cout<<endl<<"Error: Max command arguments exceed "<<MAX_COMMAND_ARGS<<endl;
+			return result;
+		}
+
+		objCommand_.clear();	
+		objCommand_.iSize = argc;
+		for(int i=0; i<argc; i++)
+		{
+			strcpy(objCommand_.arrCommand[i], argv[i]);
+		}
+
+		SendCommand(argc);
+		if(!strcmp(argv[0], "quit"))
+		{
+			MPI_Finalize();
+			exit(0);
+		}
+	}
+	else
+	{
+		command = GetCommand(argv[0]);
+
+
+		if (command && command->HasFunc() ) {
+		/*
+		** check through the arg list for stdout
+		** redirection
+		*/
+		for(i=0;i<argc;i++){
+		    /*
+		    ** check for stdout redirection
+		    */
+		    if(i+1 < argc && ((strcmp(argv[i],"|") == 0) ||
+		   (strcmp(argv[i],">") == 0) ||
+		   (strcmp(argv[i],">>") == 0))){
+			start = i+1;
+			if(strcmp(argv[i],"|") == 0){
+			    /*
+			    ** pipe
+			    */
+			    redirect_mode = 1;
+			    mode = "w";
+			}
+			if(strcmp(argv[i],">") == 0){
+			    /*
+			    ** redirect stdout to a file
+			    */
+			    redirect_mode = 2;
+			    mode = "w";
+			}
+			if(strcmp(argv[i],">>") == 0){
+			    /*
+			    ** append stdout to a file
+			    */
+			    redirect_mode = 2;
+			    mode = "a";
+			}
+			break;
+		    }
+		}
+		if(redirect_mode){
+			cerr << "Error: Redirection not yet working in MOOSE\n";
+		// Here we have a lot of OS-specific stuff. Will deal with later.
+	#if 0
+		    FILE *fp = NULL;
+		    FILE *output;
+		    int   savefd;
+		    int   stdoutfd = fileno(stdout);
+
+		    normal_tty();
+		    /*
+		    ** save the stdout FILE structure
+		    */
+		    switch(redirect_mode){
+		    case 1:
+			/*
+			** open up the pipe
+			*/
+			fp = G_popen(ArgListToString(argc-start,argv+start),mode);
+			break;
+		    case 2:
+			/*
+			** open up the file
+			*/
+			fp = fopen(argv[start],mode);
+			break;
+		    }
+		    if (fp == NULL){ /* G_popen or fopen failed!!! */
+			genesis_tty();
+			perror(argv[start]);
+			return(result);
+		    }
+		    /*
+		    ** flush the existing data in stdout
+		    */
+		    fflush(stdout);
+		    savefd = dup(stdoutfd);
+		    close(stdoutfd);
+		    dup(fileno(fp));
+		    /*
+		    ** call the function
+		    */
+			command->Execute(start - 1, argv);
+		    // func(start-1,argv);
+		    /*
+		    ** flush the output and close it
+		    */
+		    fflush(stdout);
+		    close(stdoutfd);
+		    switch(redirect_mode){
+		    case 1:
+			G_pclose(fp);
+			break;
+		    case 2:
+			fclose(fp);
+			break;
+		    }
+		    /*
+		    ** restore the stdout file structure
+		    */
+		    dup(savefd);
+		    close(savefd);
+		    genesis_tty();
+	#endif
+		} else
+		/*
+		** call the function
+		*/
+		return command->Execute( argc, (const char**)argv, element_ );
+
+	    } else 
+	    /*
+	    ** is it a simulator shell script?
+	    */
+	    if(ValidScript(pfile = SearchForScript(argv[0],"r"))){
+		AddScript(NULL, pfile, argc, argv, FILE_TYPE);
+	    } else {
+		/*
+		** if the function is not locally defined then
+		** check to see if system functions should be
+		** tried
+		*/
+		// May 2004. USB.
+		// For MOOSE, we cannot permit system calls because they are not
+		// cross-platform
+	/*
+		if(Autoshell()){
+		    normal_tty();
+		    if((code = ExecFork(argc,argv)) != 0){
+			Error();
+			printf("code %d\n",code);
+		    };
+		    genesis_tty();
+		    result.r_type = IntType();
+		    result.r.r_int = code;
+		    return(result);
+		} else
+	*/
+		cerr << "undefined function " << argv[0] << std::endl;
+	    }
+	    result.r_type = IntType();
+	    result.r.r_int = 0;
+	    return(result);	
+	}
+	
+	return result;
+}
+
+int ParGenesisParserWrapper::SendCommand(int argc)
+{
+	MPI_Bcast(&objCommand_, sizeof(int) + MAX_COMMAND_SIZE * MAX_COMMAND_ARGS * sizeof(char), MPI_CHAR, 0, MPI_COMM_WORLD);
+	return 0;
 }
 
