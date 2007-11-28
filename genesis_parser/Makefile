@@ -14,7 +14,7 @@
 
 TARGET = SLI.o
 
-
+ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 OBJ = \
 	GenesisParser.o \
 	GenesisParserWrapper.o \
@@ -24,7 +24,18 @@ OBJ = \
 	eval.o \
 	parse.o \
 	getopt.o \
-	script.o \
+	script.o 
+else
+OBJ = \
+	GenesisParser.o \
+	GenesisParserWrapper.o \
+	GenesisParser.tab.o \
+	symtab.o \
+	eval.o \
+	parse.o \
+	getopt.o \
+	script.o 
+endif
 
 HEADERS = \
 	../basecode/header.h \
@@ -37,7 +48,9 @@ default: $(TARGET)
 $(OBJ)	: GenesisParser.yy.cpp $(HEADERS)
 GenesisParser.o:			GenesisParser.h
 GenesisParserWrapper.o:		GenesisParser.h GenesisParserWrapper.h ../shell/Shell.h
+ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 ParGenesisParser.o:		GenesisParserWrapper.h ParGenesisParser.h ../shell/Shell.h
+endif
 GenesisParser.yy.o:			GenesisParser.yy.cpp
 #GenesisParser.yy.o:			GenesisParser.yy.l
 

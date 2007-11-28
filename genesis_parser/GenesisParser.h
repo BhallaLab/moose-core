@@ -230,7 +230,7 @@ class myFlexLexer: public yyFlexLexer
 		void AddFunc(const char* name, slifunc func, const char* type);
 		int IsCommand(const char* name);
 		func_entry* GetCommand(const char* name);
-		Result ExecuteCommand(int argc, char** argv);
+		virtual Result ExecuteCommand(int argc, char** argv);
 		void AddScript(char* ptr, FILE* fp,
 			int argc, char** argv, short type);
 		Script *NextScript();
@@ -245,6 +245,7 @@ class myFlexLexer: public yyFlexLexer
 			return element_;
 		}
 
+		Id element_;
 	private:
 		std::string currstr;
 		std::string outstr;
@@ -277,7 +278,6 @@ class myFlexLexer: public yyFlexLexer
 		std::map< std::string, std::string > alias_map;
 		short script_ptr;
 		Script script[MAXSCRIPTS];
-		Id element_;
 };
 
 #endif // _GENESIS_PARSER_H
