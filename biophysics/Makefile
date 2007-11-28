@@ -10,6 +10,7 @@
 
 TARGET = biophysics.o
 
+ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 OBJ = \
 	Compartment.o	\
 	HHChannel.o	\
@@ -29,8 +30,27 @@ OBJ = \
 	Cell.o	\
 	TestBiophysics.o	\
 	StochBouton.o	\
-	SynReceptor.o	\
-
+	SynReceptor.o	
+else
+OBJ = \
+	Compartment.o	\
+	HHChannel.o	\
+	Mg_block.o	\
+	HHGate.o	\
+	CaConc.o	\
+	Nernst.o	\
+	SpikeGen.o	\
+	SynChan.o	\
+	HSolveBase.o	\
+	HSolve.o \
+	NeuroScanBase.o \
+	NeuroScan.o \
+	NeuroHub.o \
+	Cell.o	\
+	TestBiophysics.o	\
+	StochBouton.o	\
+	SynReceptor.o	
+endif
 
 HEADERS = \
 	../basecode/header.h \
@@ -47,9 +67,17 @@ HHGate.o:	HHGate.h ../builtins/Interpol.h
 CaConc.o:	CaConc.h
 Nernst.o:	Nernst.h
 SpikeGen.o:	SpikeGen.h
+
+ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 ParSpikeGen.o:	SpikeGen.h ParSpikeGen.h
+endif
+
 SynChan.o:	SynChan.h SynInfo.h
+
+ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 ParSynChan.o:	SynChan.h SynInfo.h ParSynChan.h
+endif
+
 HSolveBase.o:	HSolveBase.h HSolveStructure.h
 HSolve.o:	HSolve.h HSolveBase.h HSolveStructure.h
 NeuroScanBase.o:	NeuroScanBase.h HSolveStructure.h
