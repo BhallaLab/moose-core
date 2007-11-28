@@ -40,6 +40,9 @@
 #CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER 
 CFLAGS = -g -Wall -pedantic -DNDEBUG -DUSE_GENESIS_PARSER 
 
+# CFLAGS to be used for parallel moose
+#CFLAGS = -g -Wall -pedantic -DUSE_GENESIS_PARSER -DCRL_MPI
+
 #CFLAGS = -O3 -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DGENERATE_WRAPPERS -DNDEBUG
 #CFLAGS = -O3 -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 
@@ -73,6 +76,11 @@ LIBS = 		-lm -lgsl -lgslcblas
 # If you do use mpicxx, comment out the version below.
 #
 CXX = g++
+ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
+       CXX = mpicxx
+else
+       CXX = g++
+endif
 
 LD = ld
 
