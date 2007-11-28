@@ -15,12 +15,20 @@
 
 TARGET = shell.o
 
+ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 OBJ = \
 	Shell.o	\
 	ParShell.o	\
 	ReadCell.o \
 	SimDump.o \
-	LoadTab.o \
+	LoadTab.o 
+else
+OBJ = \
+	Shell.o	\
+	ReadCell.o \
+	SimDump.o \
+	LoadTab.o 
+endif
 
 HEADERS = \
 	../basecode/header.h \
@@ -32,7 +40,11 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 
 Shell.o: Shell.h
+
+ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 ParShell.o: Shell.h ParShell.h
+endif
+
 ReadCell.o: ReadCell.h Shell.h
 
 

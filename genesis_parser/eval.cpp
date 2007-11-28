@@ -1308,7 +1308,7 @@ Result myFlexLexer::do_cmd(
 	if (setjmp(ReturnBuf) == 0)
 	  {
 	    SetAutoshell(do_autoshell);
-	    r = ExecuteCommand(argc, argv);
+	    r = this->ExecuteCommand(argc, argv);
 	  }
 	else
 	    r = ReturnResult;

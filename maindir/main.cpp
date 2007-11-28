@@ -27,6 +27,10 @@
 #include <mpi.h>
 #endif
 
+#ifdef CRL_MPI
+#include <mpi.h>
+#endif
+
 extern int mooseInit(std::string confFile);
 
 #ifdef DO_UNIT_TESTS
@@ -103,6 +107,11 @@ int main(int argc, char** argv)
 	}
 #endif
 
+#ifdef CRL_MPI
+	int iMyRank;
+	MPI_Init(&argc, &argv);
+	MPI_Comm_rank(MPI_COMM_WORLD, &iMyRank);
+#endif
 
 #ifdef USE_MPI
 	///////////////////////////////////////////////////////////////////
@@ -203,6 +212,10 @@ int main(int argc, char** argv)
 		const Finfo* parseFinfo = sli->findFinfo( "parse" );
 		assert ( parseFinfo != 0 );
 
+#ifdef CRL_MPI
+	if(iMyRank == 0)
+	{
+#endif
 		set< string >( sli, parseFinfo, line );
 		set< string >( sli, parseFinfo, "\n" );
 
@@ -228,6 +241,15 @@ int main(int argc, char** argv)
 #endif
 			// gui stuff here maybe.
 		}
+#ifdef CRL_MPI
+	}
+	else
+	{
+		set< string >( sli, parseFinfo, "nonroot" );
+	}
+#endif
+
+
 	}
 #endif
 #ifdef USE_MPI
@@ -237,5 +259,10 @@ int main(int argc, char** argv)
 	}
 	MPI::Finalize();
 #endif
+
+#ifdef USE_MPI
+	MPI_Finalize();
+#endif
+
 	cout << "done" << endl;
 }
