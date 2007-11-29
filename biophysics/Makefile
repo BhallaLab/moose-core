@@ -85,9 +85,9 @@ NeuroScan.o:	NeuroScan.h NeuroScanBase.h HSolveStructure.h
 NeuroHub.o:	NeuroHub.h HSolveStructure.h
 Cell.o:		Cell.h 
 StochSynchan.o:	StochSynchan.h StochSynInfo.h
-BinSynchan.o:	BinSynchan.h BinSynInfo.h
+BinSynchan.o:	BinSynchan.h BinSynInfo.h ../utility/randnum/BinomialRng.h
 .cpp.o:
-	$(CXX) $(CFLAGS) -I../basecode $< -c
+	$(CXX) $(CFLAGS) -I../basecode -I../utility/randnum -I.. $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)
