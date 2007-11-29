@@ -119,7 +119,7 @@ double Normal::BoxMueller()
 /**
    Refer to:
    Eine Alias-Methode zur Stichprohenentnahme aus Normalverteilungen.
-   JH Ahrens and U Dieter, 1988
+   JH Ahrens and U Dieter, 19 89, Computing
 
    We are assuming size of unsigned long to be 32 bit
 */
