@@ -67,38 +67,52 @@ BinomialRng::BinomialRng()
    This must be set before the actual generator is instantiated.
  */
 void BinomialRng::setN(const Conn& c, double n)
-{    
+{  
+    BinomialRng* gen = static_cast<BinomialRng*>(c.data());
+    if ( gen )
+    {
+        gen->innerSetN((int)n);        
+    }
+    else
+    {
+        cerr << "ERROR: BinomialRng::innerSetN - object does not exist!" <<endl;
+    }
+}
+
+void BinomialRng::innerSetN(int n)
+{
     if ( n <= 0 )
     {
-        cerr << "ERROR: BinomialRng::setN - n must be a positive integer." << endl;
+        cerr << "ERROR: BinomialRng::innerSetN - n must be a positive integer." << endl;
         return;
     }
-    BinomialRng* gen = static_cast<BinomialRng*>(c.data());
-    if(!gen->isNSet_)
+    
+    if(!isNSet_)
     {
-        gen->isNSet_ = true;
-        gen->n_ = (int)n;
+        isNSet_ = true;
+        n_ = n;
     }
     else 
     {
-        if (fabs(gen->n_- n) > EPSILON )
+        if (fabs(n_- n) > EPSILON )
         {
-            gen->n_ = (int)n;
-            gen->isModified_ = true;            
+            n_ = (int)n;
+            isModified_ = true;            
         }
     }
     
-    if ( gen->isNSet_ && gen->isPSet_ && gen->isModified_)
+    if ( isNSet_ && isPSet_ && isModified_)
     {   {
-            if ( gen->rng_ )
+            if ( rng_ )
             {
-                delete gen->rng_;
+                delete rng_;
             }           
-            gen->rng_ = new Binomial((unsigned long)gen->n_,gen->p_);
-            gen->isModified_ = false;            
+            rng_ = new Binomial((unsigned long)n_,p_);
+            isModified_ = false;            
         }     
     }
 }
+
 /**
    Returns parameter n.
  */
@@ -106,6 +120,12 @@ double BinomialRng::getN(const Element* e)
 {
     return (int)(static_cast <BinomialRng*>(e->data())->n_);
 }
+
+int BinomialRng::innerGetN()
+{
+    return n_;
+}
+
 /**
    Set parameter p ( the probability of the outcome of interest ).
    This must be set before the actual generator is instantiated.
@@ -113,34 +133,48 @@ double BinomialRng::getN(const Element* e)
 void BinomialRng::setP(const Conn& c, double p)
 {
  
+    
+    BinomialRng* gen = static_cast<BinomialRng*>(c.data());
+    if ( gen )
+    {
+        gen->innerSetP(p);        
+    }
+    else
+    {
+        cerr << "ERROR: BinomialRng::innerSetP - object does not exist!" <<endl;
+    }
+}
+
+void BinomialRng::innerSetP(double p)
+{
+    
     if ( p < 0 || p > 1)
     {
         cerr << "ERROR: BinomialRng::setP - p must be in (0,1) range." << endl;
         return;
     }
-    BinomialRng* gen = static_cast<BinomialRng*>(c.data());
-    if ( !gen->isPSet_)
+    if ( !isPSet_)
     {
-        gen->p_ = p;
-        gen->isPSet_ = true;
+        p_ = p;
+        isPSet_ = true;
     }
     else
     {
-        if (fabs(gen->p_ - p ) > EPSILON )
+        if (fabs(p_ - p ) > EPSILON )
         {
-            gen->p_ = p;
-            gen->isModified_ = true;            
+            p_ = p;
+            isModified_ = true;            
         }
     }        
     
-    if ( gen->isNSet_ && gen->isPSet_ && gen->isModified_)
+    if ( isNSet_ && isPSet_ && isModified_)
     {
-        if ( gen->rng_ )
+        if ( rng_ )
         {
-            delete gen->rng_;            
+            delete rng_;            
         }
-        gen->rng_ = new Binomial((long)(gen->n_),gen->p_);
-        gen->isModified_ = false;        
+        rng_ = new Binomial((long)(n_),p_);
+        isModified_ = false;        
     }
 }
 
@@ -150,6 +184,12 @@ void BinomialRng::setP(const Conn& c, double p)
 double BinomialRng::getP(const Element* e)
 {
     return static_cast <BinomialRng*>(e->data())->p_;
+}
+
+
+double BinomialRng::innerGetP()
+{
+    return p_;
 }
 
 /**
@@ -177,6 +217,18 @@ void BinomialRng::reinitFunc( const Conn& c, ProcInfo info)
     }
 }
 
+double BinomialRng::innerGetNextSample()
+{
+    if(rng_)
+    {
+        return rng_->getNextSample();
+    }
+    else
+    {
+        cerr << "ERROR: You cannot ask for sample without setting n and p" << endl;        
+    }
+    return 0;    
+}
 
 
 #endif

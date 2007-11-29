@@ -1,9 +1,9 @@
 /*******************************************************************
- * File:            SynReceptor.h
+ * File:            StochSynInfo.h
  * Description:      
  * Author:          Subhasis Ray
  * E-mail:          ray.subhasis@gmail.com
- * Created:         2007-11-13 14:04:05
+ * Created:         2007-11-29 12:00:25
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
@@ -15,21 +15,14 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _SYNRECEPTOR_H
-#define _SYNRECEPTOR_H
-#include "header.h"
+#ifndef _STOCHSYNINFO_H
+#define _STOCHSYNINFO_H
+#include "SynInfo.h"
 
-class SynReceptor
+class StochSynInfo: public SynInfo
 {
   public:
-    static double getScale(const Element* e);
-    static void setScale(const Conn& c, double scale);
-    static void setReceivedCount(const Conn& c, double count);
-    static void processFunc(const Conn&c, ProcInfo p);
-    static void reinitFunc(const Conn&c, ProcInfo p);
-  private:
-    double scale_;
-    double receivedCount_;
+    double releaseP;    
 };
 
     
