@@ -5117,5 +5117,55 @@ by the # of external objects that connect into sumTotals.
 
 Fixed. The molSumMap should only refer to external objects, and now it does.
 It now clears the test for tabsumtot.
+Checked in.
+Confirmed that it still works when unit tests are reinstated.
+Checked in again. Now at revision 276 with unit test compile flags on.
+
+==============================================================================
+29 Nov
+Doing some benchmarks, continuing from earlier. 40% of the compute time is
+in the sparse matrix row calculation, which is already pretty optimized.
+Perhaps the data struct of the sparse matrix itself could be improved, 
+but other than that I don't see much scope for improvement.
+Currently set up to compile with gprof.
+
+Also not clear why the nonscaf models don't work.
+
+==============================================================================
+30 Nov
+Redid the tests. Turns out that the new MOOSE nonscaf models were correct, the
+old ones were not. Compared against GENESIS EE. MOOSE is slow, though.
+Also the CaMKII trace is truly ugly.
+
+The mega model is not so nice. MOOSE has trouble going even 20 msec into the
+simulation. The dt is stuck around 1.4e-7 s.
+
+I think the basic speed issue with the rksolve is simply that the stoich
+matrix data structure is not good for fast calculations. Too many lookups
+and hopping around in memory. But I'll fix that later, first get mega.g
+to work.
+
+Discrepancy in mega.g remains. Seems to be due to some oddness in how GENESIS
+and MOOSE deal with table input to molecules. The mega.g model needs to be
+examined more closely on a couple of counts:  
+- It is using SUMTOTAL, was the original doing so? 
+- Its volumes are completely messed up: Are these funny values ruining the
+	calculations? Specifically, would the dt problems go away if this were
+	fixed?
+
+For now let us assume that MOOSE is OK for these models, but needs 
+optimization. Let us also assume it will clear the DOCQS model tests.
+Next: Smoldyn surfaces again.
+- Expand the test. Put in coordinates and neighbour relationships, and also
+	associate molecules with surfaces.
+- Implement the association of molecules with compartments.
+- Check out a few simple geometries
+- Set up kkit to define geometries.
+
+Setting up script-based geometry stuff.
+
+==============================================================================
+2 Dec 2007.
+Working on getting Smoldyn to read the surfaces.
 
 ==============================================================================

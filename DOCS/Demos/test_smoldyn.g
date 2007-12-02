@@ -7,11 +7,42 @@ create KinCompt /kinetics/geometry/membrane
 create KinCompt /kinetics/geometry/nuclearMembrane
 create KinCompt /kinetics/geometry/nucleus
 
+addmsg /kinetics/geometry/cytoplasm/outside /kinetics/geometry/membrane/inside
+addmsg /kinetics/geometry/nuclearMembrane/outside /kinetics/geometry/cytoplasm/inside
+addmsg /kinetics/geometry/nucleus/outside /kinetics/geometry/nuclearMembrane/inside
+
 create Surface /kinetics/geometry/surface0
 ce ^
 	create HemispherePanel cap1
+	setfield cap1 x[0] 1.5e-6
+	setfield cap1 y[0] 0
+	setfield cap1 z[0] 0
+	setfield cap1 x[1] 0.5e-6
+	setfield cap1 y[1] 0
+	setfield cap1 z[1] 0
+	setfield cap1 x[2] 1.0e-6
+	setfield cap1 y[2] 0
+	setfield cap1 z[2] 0
+
 	create CylPanel cyl
+	setfield cyl x[0] 1.5e-6
+	setfield cyl y[0] 0
+	setfield cyl z[0] 0
+	setfield cyl x[1] -1.5e-6
+	setfield cyl y[1] 0
+	setfield cyl z[1] 0
+	setfield cyl x[2] 0.5e-6
+
 	create HemispherePanel cap2
+	setfield cap2 x[0] -1.5e-6
+	setfield cap2 y[0] 0
+	setfield cap2 z[0] 0
+	setfield cap2 x[1] 0.5e-6
+	setfield cap2 y[1] 0
+	setfield cap2 z[1] 0
+	setfield cap2 x[2] -1.0e-6
+	setfield cap2 y[2] 0
+	setfield cap2 z[2] 0
 	addmsg cap1/neighborSrc cyl/neighbor
 	addmsg cap2/neighborSrc cyl/neighbor
 ce /
@@ -19,7 +50,17 @@ ce /
 create Surface /kinetics/geometry/surface1
 ce ^
 create SpherePanel nucleus
+	setfield cap1 x[0] 0
+	setfield cap1 y[0] 0
+	setfield cap1 z[0] 0
+	setfield cap1 x[1] 0.2e-6
 ce /
+
+addmsg /kinetics/geometry/surface0/surface /kinetics/geometry/membrane/exterior
+addmsg /kinetics/geometry/surface0/surface /kinetics/geometry/cytoplasm/exterior
+addmsg /kinetics/geometry/surface1/surface /kinetics/geometry/cytoplasm/interior
+addmsg /kinetics/geometry/surface1/surface /kinetics/geometry/nuclearMembrane/exterior
+addmsg /kinetics/geometry/surface1/surface /kinetics/geometry/nucleus/exterior
 
 setfield /kinetics method Smoldyn
 reset

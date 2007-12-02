@@ -20,6 +20,11 @@
 #include "ThisFinfo.h"
 #include "SolveFinfo.h"
 
+void dummyStringFunc( const Conn& c, string s )
+{
+	;
+}
+
 const Cinfo* initKineticHubCinfo()
 {
 	static Finfo* processShared[] =
@@ -82,8 +87,10 @@ const Cinfo* initKineticHubCinfo()
 			RFCAST( &KineticHub::mmEnzConnectionFunc )
 		),
 		new DestFinfo( "completeSetup",
-			Ftype0::global(),
-			&dummyFunc ), // The Kinetic hub doesn't need this call.
+			Ftype1< string >::global(),
+			RFCAST( &dummyStringFunc )
+		), 
+			// The Kinetic hub doesn't need this call.
 		new DestFinfo( "clear",
 			Ftype0::global(),
 			RFCAST( &KineticHub::clearFunc )

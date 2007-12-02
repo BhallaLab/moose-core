@@ -37,14 +37,15 @@
 # in the working directory of moose. Also you have to do some editing to get the 
 # generated code to work. 
 # It is completely harmless except for a few file existence checks at startup.
-#CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER 
-CFLAGS = -g -Wall -pedantic -DNDEBUG -DUSE_GENESIS_PARSER 
+CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER 
+#CFLAGS = -g -Wall -pedantic -DNDEBUG -DUSE_GENESIS_PARSER 
 
 # CFLAGS to be used for parallel moose
 #CFLAGS = -g -Wall -pedantic -DUSE_GENESIS_PARSER -DCRL_MPI
 
 #CFLAGS = -O3 -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DGENERATE_WRAPPERS -DNDEBUG
 #CFLAGS = -O3 -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+#CFLAGS = -O3 -pg -Wall -pedantic -DNDEBUG -DUSE_GENESIS_PARSER 
 
 # Use the options below for compiling on GCC4.1
 # GNU C++ 4.1 and newer might need -ffriend-injection
