@@ -53,7 +53,7 @@ const Cinfo* initStoichCinfo()
 			Ftype2< unsigned int, Element* >::global()
 		),
 		new SrcFinfo( "completeSetupSrc",
-			Ftype0::global()
+			Ftype1< string >::global()
 		),
 		new SrcFinfo( "clearSrc",
 			Ftype0::global()
@@ -902,8 +902,10 @@ void Stoich::setupReacSystem( Element* stoich )
 {
 	// At this point the Stoich has sent out all info to the target
 	// objects and the Hubs. It now requests them to do something with it.
+	// Since these objects may have to do stuff the stoich doesn't know
+	// about, it also sends them the path to work on.
 	// cout << "Don't yet know how to setupReacSystem\n";
-	send0( stoich, completeSetupSlot );
+	send1< string >( stoich, completeSetupSlot, path_ );
 }
 
 // Update the v_ vector for individual reac velocities.
