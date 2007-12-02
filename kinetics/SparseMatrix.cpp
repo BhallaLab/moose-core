@@ -160,12 +160,12 @@ double SparseMatrix::computeRowRate(
 	assert( v.size() == ncolumns_ );
 
 	vector< int >::const_iterator i;
+	unsigned int rs = rowStart_[ row ];
+	vector< unsigned int >::const_iterator j = colIndex_.begin() + rs;
 	vector< int >::const_iterator end = N_.begin() + rowStart_[ row + 1 ];
-	vector< unsigned int >::const_iterator j = 
-		colIndex_.begin() + rowStart_[ row ];
 	
 	double ret = 0.0;
-	for ( i = N_.begin() + rowStart_[ row ]; i != end; i++ )
+	for ( i = N_.begin() + rs; i != end; i++ )
 		ret += *i * v[ *j++ ];
 
 	// assert ( !( ret !<>= 0.0 ) );

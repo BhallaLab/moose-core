@@ -89,7 +89,7 @@ const Cinfo* initSmoldynHubCinfo()
 			RFCAST( &SmoldynHub::mmEnzConnectionFunc )
 		),
 		new DestFinfo( "completeSetup",
-			Ftype0::global(),
+			Ftype1< string >::global(),
 			RFCAST( &SmoldynHub::completeReacSetupFunc )
 		),
 		new DestFinfo( "clear",
@@ -408,7 +408,7 @@ void SmoldynHub::reinitFuncLocal( Element* e, ProcInfo info )
 	simptr_->dt = info->dt_;
 }
 
-void SmoldynHub::completeReacSetupLocal()
+void SmoldynHub::completeReacSetupLocal( const string& path )
 {
 	simptr_->boxs->mpbox = 5.0;
 	simptr_->wlist[0]->pos = -1.0e-6;
@@ -532,6 +532,10 @@ void SmoldynHub::completeReacSetupLocal()
 	// Steve tells me that he'll put in this flexibility some time soon,
 	// so for now I'm going to kludge it.
 	simptr_->dt = 0.01;
+
+	// Here we fill up the surface info.
+	setSurfaces( path );
+
 	scmdsetfnames( simptr_->cmds, "smoldyn.out" );
 	scmdstr2cmd( simptr_->cmds, "e molcount smoldyn.out", simptr_->tmin, simptr_->tmax, simptr_->dt );
 	if ( setupsim( NULL, NULL, &simptr_, NULL ) ) {
@@ -611,7 +615,12 @@ void assignNeighbors( Element* e, panelptr pptr,
 // The surface and panel instances hold this info.
 ///////////////////////////////////////////////////
 
+// This is deprecated. I should only use the setSurfaces.
 void SmoldynHub::localSetPath( Element* stoich, const string& value )
+{
+}
+
+void SmoldynHub::setSurfaces( const string& value )
 {
 	static const Cinfo* panelCinfo = Cinfo::find( "Panel" );
 	static const Cinfo* surfaceCinfo = Cinfo::find( "Surface" );
@@ -1128,9 +1137,9 @@ void SmoldynHub::zombify(
  * has called all the individual reaction operations and now is telling
  * the SmoldynHub to wrap it up.
  */
-void SmoldynHub::completeReacSetupFunc( const Conn& c )
+void SmoldynHub::completeReacSetupFunc( const Conn& c, string s )
 {
-	static_cast< SmoldynHub* >( c.data() )->completeReacSetupLocal();
+	static_cast< SmoldynHub* >( c.data() )->completeReacSetupLocal( s );
 }
 
 /**
