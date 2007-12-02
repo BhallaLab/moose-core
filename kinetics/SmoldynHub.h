@@ -170,8 +170,8 @@ class SmoldynHub
 
 		static void clearFunc( const Conn& c );
 
-		static void completeReacSetupFunc( const Conn& c );
-		void completeReacSetupLocal();
+		static void completeReacSetupFunc( const Conn& c, string s );
+		void completeReacSetupLocal( const string& s );
 
 		static void childFunc( const Conn& c, int stage );
 		static void destroy( const Conn& c );
@@ -181,6 +181,9 @@ class SmoldynHub
 				size_t reacIndex );
 
 		static const Finfo* molSolveFinfo;
+
+		// Inner function for parsing the path and assigning surfaces.
+		void setSurfaces( const string& path );
 
 
 	private:
