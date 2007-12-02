@@ -22,7 +22,7 @@ const Cinfo* initSpherePanelCinfo()
 	static Cinfo spherePanelCinfo(
 		"SpherePanel",
 		"Upinder S. Bhalla, 2007, NCBS",
-		"SpherePanel: Sphereangular panel shape for portion of compartmental surface.",
+		"SpherePanel: Spherical panel shape for portion of compartmental surface.",
 		initPanelCinfo(),
 		0,
 		0,

@@ -1,23 +1,40 @@
 Oct 21 2007
+Nov 26 2007
 
 Times in seconds.
 
-Benchmark script: kholodenko.g
+Benchmark script: kholodenko.g: cleared.
 Simulator	Machine	Method	Simtime	Runtime	Flags
+GENESIS		kadam	ee	1e5	11	O3
+MOOSE		kadam	ee	1e5	14	No unit tests or assertions
 MOOSE		kadam	rk5	1e7	43	Unit tests on, Assertions on.
+MOOSE		kadam	rk5	1e7	45	No unit tests or assertions
+MOOSE		kadam	rkck	1e7	44	No unit tests or assertions
+MOOSE		kadam	rk8pd	1e7	71	No unit tests or assertions
 oldMOOSE	kadam	rk5	1e7	49
 
-Script: acc4_1.6e-21.g
-MOOSE		kadam	rk5	1000	
+Script: acc4_1.6e-21.g: Cleared.
+MOOSE		kadam	rk5	1000	48	No unit tests or assertions.
+MOOSE		kadam	rk2imp	1000	140	No unit tests or assertions.
+MOOSE		kadam	ee	1000	>150	No unit tests or assertions.
 oldMOOSE	kadam	rk5	1000	24
 
+Script: AMPAR_traff.g:
+oldMOOSE	kadam	rk5	1e5	12
+MOOSE		kadam	rk5	1e5	16	No unit tests or assertions.
 
-Script: nonscaf6_1.6e-21b.g
-MOOSE		kadam	rk5	500	
-oldMOOSE	kadam	rk5	500	106
+
+Script: nonscaf6_1.6e-21b.g: Cleared.
+MOOSE		kadam	rk5	500	220	OK. Ca4.CaM trace is ugly.
+MOOSE		kadam	ee	500	130	OK.
+oldMOOSE	kadam	rk5	500	106	Failed: wrong output.
+GENESIS		kadam	ee	500	72	Reference.
 
 
-Script: mega_1.6e-21.g
-MOOSE		kadam	rk5	20	
+Script: mega_1.6e-21.g:
+MOOSE		kadam	rk5	20	Failed even for 0.001 sec.
 oldMOOSE	kadam	rk5	20	74
+MOOSE		kadam	ee	20	205
+GENESIS		kadam	ee	20	105	
+
 

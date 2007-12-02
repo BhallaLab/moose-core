@@ -44,6 +44,11 @@ const Cinfo* initSurfaceCinfo()
 		new SrcFinfo( "transmit", Ftype0::global() ),
 		new SrcFinfo( "jump", Ftype0::global() ),
 		new SrcFinfo( "mixture", Ftype0::global() ),
+
+		// Connects up to a compartment, either as interior or exterior
+		// Args are volume, area, perimeter
+		new SrcFinfo( "surface", 
+			Ftype3< double, double, double >::global() ),
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
