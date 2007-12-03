@@ -15,8 +15,10 @@
 #include "../scheduling/ClockJob.h"
 #include "../builtins/Interpol.h"
 #include "../builtins/Table.h"
-
+#include "../maindir/init.h"
 using namespace std;
+
+extern int mooseInit(string configFile);
 
 extern const Cinfo* initShellCinfo();
 extern const Cinfo* initTickCinfo();
@@ -517,19 +519,24 @@ Id PyMooseContext::getShell()
    @param string contextElement - name of this context
    @returns PyMooseContext* pointer to the newly created PyMooseContext object.
 */
-PyMooseContext* PyMooseContext::createPyMooseContext(string shellName, string contextName)
+PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string shellName)
 {
-	static const Cinfo* shellCinfo = initShellCinfo();
-	static const Cinfo* tickCinfo = initTickCinfo();
-	static const Cinfo* clockJobCinfo = initClockJobCinfo();
-	static const Cinfo* tableCinfo = initTableCinfo();
-	static const Cinfo* pyMooseContextCinfo = initPyMooseContextCinfo();
+    static const Cinfo* shellCinfo = initShellCinfo();
+    static const Cinfo* tickCinfo = initTickCinfo();
+    static const Cinfo* clockJobCinfo = initClockJobCinfo();
+    static const Cinfo* tableCinfo = initTableCinfo();
+    static const Cinfo* pyMooseContextCinfo = initPyMooseContextCinfo();
 
-    Id shellId;
+    
     Element* shell;
     bool ret;
+    // Call the global initialization function
+    mooseInit("config.xml");
+    cout << "Trying to find shell with name " << shellName << endl;
+    Id shellId(shellName);
     
-    lookupGet<Id, string > (Element::root(), "lookupChild", shellId, shellName );
+    //lookupGet<Id, string > (Element::root(), "lookupChild", shellId, shellName );
+    
     if (shellId.bad() )
     {
         cerr << "Warning: shell does not exist, trying to create a new one!" << endl;
@@ -567,25 +574,18 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string shellName, string co
     context->shell_ = shellId;    
     context->myId_ = contextElement->id();
     context->setCwe(Element::root()->id() ); // set initial element = root
-    // Create the scheduler explicitly, how does it happen in parser?
-    //     set<std::string, std::string>( Element::root(), "create", "Neutral", "sched");
-    context->scheduler_ = Neutral::create( "Neutral", "sched", Element::root() )->id();
-//     cout << "PyMooseContext::createPyMooseContext() - scheduler id: " << context->scheduler_ << endl;
+//    context->scheduler_ = Neutral::create( "Neutral", "sched", Element::root() )->id();    
+//    context->clockJob_ = Neutral::create( "ClockJob", "cj", context->scheduler_() )->id();
+    lookupGet<Id, string > (Element::root(), "lookupChild", context->scheduler_, "sched" );
+    if ( context->scheduler_.bad() )
+    {
+        cerr << "Scheduler not found" << endl;
+    }
     
-//     set<std::string, std::string>( Element::element(context->scheduler_), "create", "ClockJob", "cj");
-    context->clockJob_ = Neutral::create( "ClockJob", "cj", context->scheduler_() )->id();
-//     cout << "PyMooseContext::createPyMooseContext() - clockjob id: " << context->clockJob_ << endl;
-//     set<std::string, std::string>( Element::element(context->clockJob_), "create", "Tick", "t0");
-//     Neutral::create( "Tick", "t0", context->clockJob_() )->id();
-//     cout << "PyMooseContext::createPyMooseContext() - tick id: " << context->tick0_ << endl;
-
+    lookupGet<Id, string > (Element::root(), "lookupChild", context->clockJob_, "cj" );
     Element* cj =  context->clockJob_();
-    Element* t0 = Neutral::create( "Tick", "t0", cj );
-    Element* t1 = Neutral::create( "Tick", "t1", cj );
-//     Element* t2 = Neutral::create( "Tick", "t2", cj );
-//     Element* t3 = Neutral::create( "Tick", "t3", cj );
-//     Element* t4 = Neutral::create( "Tick", "t4", cj );
-//     Element* t5 = Neutral::create( "Tick", "t5", cj );
+//     Element* t0 = Neutral::create( "Tick", "t0", cj );
+//     Element* t1 = Neutral::create( "Tick", "t1", cj );
 
     
     return context;        
@@ -1119,7 +1119,8 @@ void PyMooseContext::tabFill(Id table, int xdivs, int mode)
 
 void PyMooseContext::readCell( string filename, string cellpath )
 {
-    send2< string, string >( myId_(), 
+    cerr << "PyMooseContext::readCell( " << filename << ", " << cellpath << ")" << endl;    
+    send2< string, string >( shell_(), 
                              readCellSlot, filename, cellpath );
 }
 #ifdef DO_UNIT_TESTS
@@ -1235,6 +1236,8 @@ bool PyMooseContext::testPyMooseContext(int testCount, bool doPrint)
     
     return overallResult;
 }
+
+
 #endif // DO_UNIT_TESTS
 
 #endif // _PYMOOSE_CONTEXT_CPP

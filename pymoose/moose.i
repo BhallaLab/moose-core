@@ -5,6 +5,7 @@
 %{
 	#include "../basecode/header.h"
 	#include "../basecode/moose.h"
+	#include "PyMooseIterable.h"
 	#include "PyMooseContext.h"
 	#include "PyMooseBase.h"
 	#include "Neutral.h"
@@ -17,6 +18,7 @@
 	#include "TableIterator.h"
 	#include "Table.h"
 	#include "SynChan.h"
+	#include "BinSynchan.h"
 	#include "SpikeGen.h"
 	#include "Nernst.h"
 	#include "CaConc.h"
@@ -161,6 +163,20 @@
 %attribute(SynChan, double, synapse, __get_synapse, __set_synapse)
 %attribute(SynChan, double, activation, __get_activation, __set_activation)
 %attribute(SynChan, double, modulator, __get_modulator, __set_modulator)
+
+%include "BinSynchan.h"
+%attribute(BinSynchan, double, Gbar, __get_Gbar, __set_Gbar)
+%attribute(BinSynchan, double, Ek, __get_Ek, __set_Ek)
+%attribute(BinSynchan, double, tau1, __get_tau1, __set_tau1)
+%attribute(BinSynchan, double, tau2, __get_tau2, __set_tau2)
+%attribute(BinSynchan, bool, normalizeWeights, __get_normalizeWeights, __set_normalizeWeights)
+%attribute(BinSynchan, double, Gk, __get_Gk, __set_Gk)
+%attribute(BinSynchan, double, Ik, __get_Ik, __set_Ik)
+%attribute(BinSynchan, unsigned int, numSynapses, __get_numSynapses, __set_numSynapses)
+%attribute(BinSynchan, double, synapse, __get_synapse, __set_synapse)
+%attribute(BinSynchan, double, activation, __get_activation, __set_activation)
+%attribute(BinSynchan, double, modulator, __get_modulator, __set_modulator)
+
 %include "SpikeGen.h"
 %attribute(SpikeGen, double, threshold, __get_threshold, __set_threshold)
 %attribute(SpikeGen, double, refractT, __get_refractT, __set_refractT)
@@ -296,6 +312,7 @@
 //**********************************
 %include "../utility/randnum/randnum.h"
 /* These are the raw generic C++ classes - without any dependency on MOOSE */
+%include "../utility/randnum/Probability.h"
 %include "../utility/randnum/Binomial.h"
 %include "../utility/randnum/Gamma.h"
 %include "../utility/randnum/Normal.h"
