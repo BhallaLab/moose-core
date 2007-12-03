@@ -1,3 +1,22 @@
+/*******************************************************************
+ * File:            pymoose/BinomialRng.cpp
+ * Description:      SWIG wrapper class for BinomialRng. This class
+ *                      deviates from the general pattern of pymoose
+ *                      classes. It has been manually modified from
+ *                      the generated class definition.
+ * Author:          Subhasis Ray
+ * E-mail:          ray.subhasis@gmail.com
+ * Created:         2007-11-30 20:20:09
+ ********************************************************************/
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU General Public License version 2
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
 #ifndef _pymoose_BinomialRng_cpp
 #define _pymoose_BinomialRng_cpp
 #include "BinomialRng.h"
