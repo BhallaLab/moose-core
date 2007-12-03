@@ -42,7 +42,7 @@ OBJFILES = ../basecode/basecode.o \
 	../scheduling/scheduling.o \
 	../utility/utility.o	\
 	../utility/randnum/randnum.o	\
-
+	../maindir/init.o	\
 
 OBJ = PyMooseBase.o \
 	PyMooseContext.o \
@@ -57,6 +57,7 @@ OBJ = PyMooseBase.o \
 	CaConc.o \
 	SpikeGen.o \
 	SynChan.o \
+	BinSynchan.o	\
 	Table.o \
 	Nernst.o \
 	Tick.o \
@@ -89,6 +90,7 @@ HEADERS = PyMooseUtil.h \
 	CaConc.h \
 	SpikeGen.h \
 	SynChan.h \
+	BinSynchan.h	\
 	Table.h \
 	Nernst.h \
 	Tick.h \
@@ -114,13 +116,13 @@ HEADERS = PyMooseUtil.h \
 	../utility/randnum/Gamma.h	\
 	../utility/randnum/Normal.h	\
 	../utility/randnum/Poisson.h	\
+	../maindir/init.h		\
 
-
-# TEST_MAIN = SquidTest.cpp
+# TEST_MAIN = main.cpp
 # TEST_MAIN = SwigTest.cpp
 
-#test_swig: $(OBJFILES) $(HEADERS) $(TEST_MAIN)
-#	$(CXX) $(CXXFLAGS) -o test_swig $(TEST_MAIN) $(OBJFILES)  
+# testPyMoose: $(OBJ) $(OBJFILES) $(HEADERS) $(TEST_MAIN)
+# 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 
 default: $(TARGET)

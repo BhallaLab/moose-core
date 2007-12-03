@@ -104,10 +104,13 @@ Binomial::Binomial( long n, double p):n_(n), p_(p)
     double tmp;
     isInverted_ = false;
     
-    tmpMean = n*((p < 0.5)? p : (1-p));
+//     tmpMean = n*((p < 0.5)? p : (1-p));
     
-    if ((tmpMean > 10.0))
-    {
+//     if ((tmpMean > 10.0))
+//     {
+    // the above can be simplified as: ( saves one floating point comparison, aesthetically pleasing :D )
+    if ( n > 20 )
+    {        
         if( p < 0.5 )
         {
             p_ = p;
@@ -117,8 +120,9 @@ Binomial::Binomial( long n, double p):n_(n), p_(p)
             p_ = 1.0 - p;
             isInverted_ = true;
         }
+        tmpMean = n*p_;
         
-        tmp = sqrt(n_*p_*(1.0 - p_));
+        tmp = sqrt(tmpMean*(1.0 - p_));
         paramC_ = tmpMean + 0.5;
         paramB_ = 1.15 + 2.53*tmp;
         paramA_ = -0.0873 + 0.0248*paramB_ + 0.01*p_;
