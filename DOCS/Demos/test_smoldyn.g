@@ -14,35 +14,48 @@ addmsg /kinetics/geometry/nucleus/outside /kinetics/geometry/nuclearMembrane/ins
 create Surface /kinetics/geometry/surface0
 ce ^
 	create HemispherePanel cap1
-	setfield cap1 x[0] 1.5e-6
+	setfield cap1 x[0] 1.5e-5
 	setfield cap1 y[0] 0
 	setfield cap1 z[0] 0
-	setfield cap1 x[1] 0.5e-6
+	setfield cap1 x[1] 0.5e-5
 	setfield cap1 y[1] 0
 	setfield cap1 z[1] 0
-	setfield cap1 x[2] 1.0e-6
+	setfield cap1 x[2] 0.5e-5
 	setfield cap1 y[2] 0
 	setfield cap1 z[2] 0
 
+	showfield cap1 x[0]
+	showfield cap1 x[1]
+	showfield cap1 x[2]
+
 	create CylPanel cyl
-	setfield cyl x[0] 1.5e-6
+	setfield cyl x[0] 1.5e-5
 	setfield cyl y[0] 0
 	setfield cyl z[0] 0
-	setfield cyl x[1] -1.5e-6
+	setfield cyl x[1] -1.5e-5
 	setfield cyl y[1] 0
 	setfield cyl z[1] 0
-	setfield cyl x[2] 0.5e-6
+	setfield cyl x[2] 0.5e-5
+
+	showfield cyl x[0]
+	showfield cyl x[1]
+	showfield cyl x[2]
 
 	create HemispherePanel cap2
-	setfield cap2 x[0] -1.5e-6
+	setfield cap2 x[0] -1.5e-5
 	setfield cap2 y[0] 0
 	setfield cap2 z[0] 0
-	setfield cap2 x[1] 0.5e-6
+	setfield cap2 x[1] 0.5e-5
 	setfield cap2 y[1] 0
 	setfield cap2 z[1] 0
-	setfield cap2 x[2] -1.0e-6
+	setfield cap2 x[2] -0.5e-5
 	setfield cap2 y[2] 0
 	setfield cap2 z[2] 0
+
+	showfield cap2 x[0]
+	showfield cap2 x[1]
+	showfield cap2 x[2]
+
 	addmsg cap1/neighborSrc cyl/neighbor
 	addmsg cap2/neighborSrc cyl/neighbor
 ce /
@@ -53,7 +66,10 @@ create SpherePanel nucleus
 	setfield cap1 x[0] 0
 	setfield cap1 y[0] 0
 	setfield cap1 z[0] 0
-	setfield cap1 x[1] 0.2e-6
+	setfield cap1 x[1] 0.2e-5
+
+	showfield nucleus x[0]
+	showfield nucleus x[1]
 ce /
 
 addmsg /kinetics/geometry/surface0/surface /kinetics/geometry/membrane/exterior

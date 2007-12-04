@@ -227,6 +227,11 @@ Element* Neutral::create(
 		const string& cinfo, const string& name, Element* parent )
 {
 	// Need to check here if the name is an existing one.
+	Id existing = getChildByName( parent, name );
+	if ( existing.good() ) {
+		cout << "Error: Neutral::create: Attempt to overwrite existing element '" << existing.path() << "'. Using original.\n";
+		return existing();
+	}
 	const Cinfo* c = Cinfo::find( cinfo );
 	if ( c ) {
 		Element* kid = c->create( Id::scratchId(), name );
