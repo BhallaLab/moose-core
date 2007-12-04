@@ -120,9 +120,12 @@ void testSched()
 	cout << "\nTesting sched basic stuff";
 
 	Element* sched =
-			Neutral::create( "Neutral", "sched", Element::root() );
-	
+			Neutral::create( "Neutral", "tsched", Element::root() );
+	// Element* sched = Id( "/sched" )();
+	ASSERT( sched != 0, "/tsched object created\n" );
+	// Element* cj = Id( "/sched/cj" )();
 	Element* cj = Neutral::create( "ClockJob", "cj", sched );
+	ASSERT( cj != 0, "/tsched/cj object created\n" );
 	Element* t1a = Neutral::create( "Tick", "t1a", cj );
 	Element* t1b = Neutral::create( "Tick", "t1b", cj );
 	Element* t2 = Neutral::create( "Tick", "t2", cj );
@@ -328,8 +331,8 @@ void testSchedProcess()
 	s1 = Neutral::create( "Sched1", "s1", n );
 	s2 = Neutral::create( "Sched2", "s2", n );
 
-	Element* shell = Neutral::create( "Shell", "shell",
-					Element::root() );
+	Element* shell = Neutral::create( "Shell", "tshell", Element::root());
+	// Element* shell = Id( "/shell" )();
 	ASSERT( shell != 0 , "shell creation");
 	Conn c( shell, 0 );
 	vector< Id > path;
