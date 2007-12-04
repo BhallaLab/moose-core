@@ -400,12 +400,16 @@ void testMolecule()
 {
 	cout << "\nTesting Molecule" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root() );
-	Element* m0 = Neutral::create( "Molecule", "m0", n );
+	Element* n = Neutral::create( "Neutral", "n", Element::root(),
+		Id::scratchId() );
+	Element* m0 = Neutral::create( "Molecule", "m0", n,
+		Id::scratchId() );
 	ASSERT( m0 != 0, "creating molecule" );
-	Element* m1 = Neutral::create( "Molecule", "m1", n );
+	Element* m1 = Neutral::create( "Molecule", "m1", n,
+		Id::scratchId() );
 	ASSERT( m1 != 0, "creating molecule" );
-	Element* r0 = Neutral::create( "Reaction", "r0", n );
+	Element* r0 = Neutral::create( "Reaction", "r0", n,
+		Id::scratchId() );
 	ASSERT( r0 != 0, "creating reaction" );
 
 	bool ret;

@@ -199,12 +199,16 @@ void testAverage()
 
 	cout << "\nTesting Average" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root() );
-	Element* m0 = Neutral::create( "Average", "m0", n );
+	Element* n = Neutral::create( "Neutral", "n", Element::root(),
+		Id::scratchId() );
+	Element* m0 = Neutral::create( "Average", "m0", n,
+		Id::scratchId() );
 	ASSERT( m0 != 0, "creating average" );
-	Element* m1 = Neutral::create( "Average", "m1", n );
+	Element* m1 = Neutral::create( "Average", "m1", n,
+		Id::scratchId() );
 	ASSERT( m1 != 0, "creating average" );
-	Element* m2 = Neutral::create( "Average", "m2", n );
+	Element* m2 = Neutral::create( "Average", "m2", n,
+		Id::scratchId() );
 	ASSERT( m2 != 0, "creating average" );
 
 	bool ret;

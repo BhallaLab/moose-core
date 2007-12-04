@@ -219,8 +219,10 @@ void testCaConc()
 {
 	cout << "\nTesting CaConc" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root() );
-	Element* Ca = Neutral::create( "CaConc", "Ca", n );
+	Element* n = Neutral::create( "Neutral", "n", Element::root(), 
+		Id::scratchId() );
+	Element* Ca = Neutral::create( "CaConc", "Ca", n, 
+		Id::scratchId() );
 	ASSERT( Ca != 0, "creating CaConc" );
 	ProcInfoBase p;
 	Conn c( Ca, 0 );

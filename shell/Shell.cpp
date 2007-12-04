@@ -1144,7 +1144,7 @@ void Shell::setClock( const Conn& c, int clockNo, double dt,
 	Element* tick = 0;
 	if ( id.zero() || id.bad() ) {
 		tick = Neutral::create( 
-						"Tick", TickName, cj() );
+						"Tick", TickName, cj(), Id::scratchId() );
 	} else {
 		tick = id();
 	}
@@ -1587,35 +1587,18 @@ void Shell::readFile( const Conn& c, string filename, bool linemode ){
 // Helper functions.
 //////////////////////////////////////////////////////////////////
 
-// Regular function
+/**
+ * Creates a child element with the specified id, and schedules it.
+ * Regular function.
+ */
 bool Shell::create( const string& type, const string& name, 
 		Id parent, Id id )
 {
-	const Cinfo* c = Cinfo::find( type );
 	Element* p = parent();
-	if ( !p ) {
-		cout << "Error: Shell::create: No parent " << p << endl;
-		return 0;
-	}
-
-	const Finfo* childSrc = p->findFinfo( "childSrc" );
-	if ( !childSrc ) {
-		// Sorry, couldn't resist it.
-		cout << "Error: Shell::create: parent cannot handle child\n";
-		return 0;
-	}
-	if ( c != 0 && p != 0 ) {
-		Element* e = c->create( id, name );
-		bool ret = childSrc->add( p, e, e->findFinfo( "child" ) );
-		assert( ret );
-		// cout << "OK\n";
+	Element* child = Neutral::create( type, name, p, id );
+	if ( child ) {
 		recentElement_ = id;
-		ret = c->schedule( e );
-		assert( ret );
 		return 1;
-	} else  {
-		cout << "Error: Shell::create: Unable to find type " <<
-			type << endl;
 	}
 	return 0;
 }
@@ -1805,7 +1788,8 @@ void testShell()
 	/////////////////////////////////////////
 	// Test the loadTab operation
 	/////////////////////////////////////////
-	Element* tab = Neutral::create( "Table", "t1", Element::root() );
+	Element* tab = Neutral::create( "Table", "t1", Element::root(),
+		Id::scratchId() );
 	static const double EPSILON = 1.0e-9;
 	static double values[] = 
 		{ 1, 1.0628, 1.1253, 1.1874, 1.2487, 1.309,

@@ -53,7 +53,8 @@ void testStoich()
 	cout << "\nTesting Stoich" << flush;
 	const unsigned int NUM_COMPT = 10;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	Element* n = Neutral::create( "Neutral", "n", Element::root(),
+		Id::scratchId() );
 	vector< Element* >m;
 	vector< Element* >r;
 	char name[10];
@@ -74,7 +75,8 @@ void testStoich()
 	//////////////////////////////////////////////////////////////////
 	for ( unsigned int i = 0; i < NUM_COMPT; i++ ) {
 		sprintf( name, "m%d", i );
-		Element* mtemp = Neutral::create( "Molecule", name, n );
+		Element* mtemp = Neutral::create( "Molecule", name, n,
+			Id::scratchId() );
 		assert( mtemp != 0 );
 		set< double >( mtemp, "nInit", 1.0 * i );
 		set< double >( mtemp, "n", 1.0 * i );
@@ -84,7 +86,8 @@ void testStoich()
 		if ( i > 0 ) {
 			sprintf( name, "r%d", i );
 			Element* rtemp = 
-				Neutral::create( "Reaction", name, n );
+				Neutral::create( "Reaction", name, n,
+					Id::scratchId() );
 			assert( rtemp != 0 );
 			set< double >( rtemp, "kf", 0.1 );
 			set< double >( rtemp, "kb", 0.1 );
@@ -100,7 +103,8 @@ void testStoich()
 	// Assign reaction system to a Stoich object
 	///////////////////////////////////////////////////////////
 
-	Element* stoich = Neutral::create( "Stoich", "s", Element::root() );
+	Element* stoich = Neutral::create( "Stoich", "s", Element::root(),
+		Id::scratchId() );
 
 	ret = set< string >( stoich, "path", "/n/##" );
 	ASSERT( ret, "Setting path" );
@@ -181,8 +185,10 @@ void testStoich()
 	// Clean out the old stoich
 	set( stoich, "destroy" );
 
-	stoich = Neutral::create( "Stoich", "s", Element::root() );
-	Element* hub = Neutral::create( "KineticHub", "hub", Element::root() );
+	stoich = Neutral::create( "Stoich", "s", Element::root(),
+		Id::scratchId() );
+	Element* hub = Neutral::create( "KineticHub", "hub", Element::root(),
+		Id::scratchId() );
 	ret = stoich->findFinfo( "hub" )->
 		add( stoich, hub, hub->findFinfo( "hub" ) );
 	ASSERT( ret, "connecting stoich to hub" );
@@ -254,15 +260,18 @@ void testStoich()
 	set( hub, "destroy" );
 	set( stoich, "destroy" );
 
-	Element* table = Neutral::create( "Table", "table", Element::root() );
+	Element* table = Neutral::create( "Table", "table", Element::root(),
+		Id::scratchId() );
 	ret = table->findFinfo( "outputSrc" )->add( table, m[5], 
 			m[5]->findFinfo( "sumTotal" ) );
 	ASSERT( ret, "Making test message" );
 
-	stoich = Neutral::create( "Stoich", "s", Element::root() );
+	stoich = Neutral::create( "Stoich", "s", Element::root(),
+		Id::scratchId() );
 	s = static_cast< Stoich* >( stoich->data() );
 
-	hub = Neutral::create( "KineticHub", "hub", Element::root() );
+	hub = Neutral::create( "KineticHub", "hub", Element::root(),
+		Id::scratchId() );
 	ret = stoich->findFinfo( "hub" )->
 		add( stoich, hub, hub->findFinfo( "hub" ) );
 	ASSERT( ret, "connecting stoich to hub" );
@@ -302,7 +311,8 @@ void testStoich()
 	set( stoich, "destroy" );
 	set( table, "destroy" );
 
-	table = Neutral::create( "Table", "table", Element::root() );
+	table = Neutral::create( "Table", "table", Element::root(),
+		Id::scratchId() );
 	set< int >( table, "stepmode", 3 );
 	set< int >( table, "xdivs", 1 );
 	set< double >( table, "xmin", 0.0 );
@@ -316,10 +326,12 @@ void testStoich()
 			m[4]->findFinfo( "n" ) );
 	ASSERT( ret, "Making test message" );
 
-	stoich = Neutral::create( "Stoich", "s", Element::root() );
+	stoich = Neutral::create( "Stoich", "s", Element::root(),
+		Id::scratchId() );
 	s = static_cast< Stoich* >( stoich->data() );
 
-	hub = Neutral::create( "KineticHub", "hub", Element::root() );
+	hub = Neutral::create( "KineticHub", "hub", Element::root(),
+		Id::scratchId() );
 	ret = stoich->findFinfo( "hub" )->
 		add( stoich, hub, hub->findFinfo( "hub" ) );
 	ASSERT( ret, "connecting stoich to hub" );
@@ -360,7 +372,8 @@ void testStoich()
 
 	// Here we check if a brand new DynamicFinfo automagically finds the
 	// solver.
-	Element* table2 = Neutral::create( "Table", "table2", table );
+	Element* table2 = Neutral::create( "Table", "table2", table,
+		Id::scratchId() );
 	set< int >( table2, "stepmode", 3 );
 	set< int >( table2, "xdivs", 1 );
 	set< double >( table2, "xmin", 0.0 );
@@ -417,7 +430,8 @@ void testKintegrator()
 	const unsigned int NUM_COMPT = 21;
 	const double RUNTIME = 500.0;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	Element* n = Neutral::create( "Neutral", "n", Element::root(),
+		Id::scratchId() );
 	vector< Element* >m;
 	vector< Element* >r;
 	char name[10];
@@ -438,7 +452,8 @@ void testKintegrator()
 	//////////////////////////////////////////////////////////////////
 	for ( unsigned int i = 0; i < NUM_COMPT; i++ ) {
 		sprintf( name, "m%d", i );
-		Element* mtemp = Neutral::create( "Molecule", name, n );
+		Element* mtemp = Neutral::create( "Molecule", name, n,
+			Id::scratchId() );
 		assert( mtemp != 0 );
 		set< double >( mtemp, "nInit", 0.0 );
 		set< double >( mtemp, "n", 0.0 );
@@ -448,7 +463,8 @@ void testKintegrator()
 		if ( i > 0 ) {
 			sprintf( name, "r%d", i );
 			Element* rtemp = 
-				Neutral::create( "Reaction", name, n );
+				Neutral::create( "Reaction", name, n,
+					Id::scratchId() );
 			assert( rtemp != 0 );
 			set< double >( rtemp, "kf", 1 );
 			set< double >( rtemp, "kb", 1 );
@@ -469,9 +485,12 @@ void testKintegrator()
 	// Assign reaction system to a Stoich object
 	///////////////////////////////////////////////////////////
 
-	Element* stoich = Neutral::create( "Stoich", "s", Element::root() );
-	Element* hub = Neutral::create( "KineticHub", "hub", Element::root() );
-	Element* integ = Neutral::create( "Kintegrator", "integ", Element::root() );
+	Element* stoich = Neutral::create( "Stoich", "s", Element::root(),
+		Id::scratchId() );
+	Element* hub = Neutral::create( "KineticHub", "hub", Element::root(),
+		Id::scratchId() );
+	Element* integ = Neutral::create( "Kintegrator", "integ", Element::root(),
+		Id::scratchId() );
 	Conn ci( integ, 0 );
 
 	ret = stoich->findFinfo( "hub" )->
@@ -485,7 +504,8 @@ void testKintegrator()
 	ASSERT( ret, "Setting path" );
 
 
-	Element* table = Neutral::create( "Table", "table", Element::root() );
+	Element* table = Neutral::create( "Table", "table", Element::root(),
+		Id::scratchId() );
 	ret = table->findFinfo( "inputRequest" )->add( table, m[4], 
 			m[4]->findFinfo( "n" ) );
 	ASSERT( ret, "Making test message" );
@@ -548,7 +568,8 @@ void testGslIntegrator()
 {
 	cout << "\nTesting GslIintegrator" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	Element* n = Neutral::create( "Neutral", "n", Element::root(),
+		Id::scratchId() );
 	vector< Element* >m;
 	vector< Element* >r;
 	char name[10];
@@ -569,7 +590,8 @@ void testGslIntegrator()
 	//////////////////////////////////////////////////////////////////
 	for ( unsigned int i = 0; i < NUM_COMPT; i++ ) {
 		sprintf( name, "m%d", i );
-		Element* mtemp = Neutral::create( "Molecule", name, n );
+		Element* mtemp = Neutral::create( "Molecule", name, n,
+			Id::scratchId() );
 		assert( mtemp != 0 );
 		set< double >( mtemp, "nInit", 0.0 );
 		set< double >( mtemp, "n", 0.0 );
@@ -579,7 +601,8 @@ void testGslIntegrator()
 		if ( i > 0 ) {
 			sprintf( name, "r%d", i );
 			Element* rtemp = 
-				Neutral::create( "Reaction", name, n );
+				Neutral::create( "Reaction", name, n,
+					Id::scratchId() );
 			assert( rtemp != 0 );
 			set< double >( rtemp, "kf", 1 );
 			set< double >( rtemp, "kb", 1 );
@@ -600,9 +623,12 @@ void testGslIntegrator()
 	// Assign reaction system to a Stoich object
 	///////////////////////////////////////////////////////////
 
-	Element* stoich = Neutral::create( "Stoich", "s", Element::root() );
-	Element* hub = Neutral::create( "KineticHub", "hub", Element::root() );
-	Element* integ = Neutral::create( "GslIntegrator", "integ", Element::root() );
+	Element* stoich = Neutral::create( "Stoich", "s", Element::root(),
+		Id::scratchId() );
+	Element* hub = Neutral::create( "KineticHub", "hub", Element::root(),
+		Id::scratchId() );
+	Element* integ = Neutral::create( "GslIntegrator", "integ", Element::root(),
+		Id::scratchId() );
 
 	ret = stoich->findFinfo( "hub" )->
 		add( stoich, hub, hub->findFinfo( "hub" ) );
@@ -615,7 +641,8 @@ void testGslIntegrator()
 	ASSERT( ret, "Setting path" );
 
 
-	Element* table = Neutral::create( "Table", "table", Element::root() );
+	Element* table = Neutral::create( "Table", "table", Element::root(),
+		Id::scratchId() );
 	ret = table->findFinfo( "inputRequest" )->add( table, m[4], 
 			m[4]->findFinfo( "n" ) );
 	ASSERT( ret, "Making test message" );

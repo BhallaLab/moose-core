@@ -343,10 +343,10 @@ void testWildcard()
 {
 	unsigned long i;
 	cout << "\nChecking wildcarding";
-	Element* a1 = Neutral::create( "Neutral", "a1", Element::root() );
-	Element* c1 = Neutral::create( "Compartment", "c1", a1 );
-	Element* c2 = Neutral::create( "Compartment", "c2", a1 );
-	Element* c3 = Neutral::create( "Compartment", "c3", a1 );
+	Element* a1 = Neutral::create( "Neutral", "a1", Element::root(), Id::scratchId() );
+	Element* c1 = Neutral::create( "Compartment", "c1", a1, Id::scratchId() );
+	Element* c2 = Neutral::create( "Compartment", "c2", a1, Id::scratchId() );
+	Element* c3 = Neutral::create( "Compartment", "c3", a1, Id::scratchId() );
 
 	Element* el1[] = { Element::root(), a1, c1 };
 	wildcardTestFunc( el1, 3, "/,/a1,/a1/c1" );
@@ -360,7 +360,7 @@ void testWildcard()
 	for ( i = 0 ; i < 100; i++ ) {
 		char name[10];
 		sprintf( name, "ch%ld", i );
-		el2[i] = Neutral::create( "HHChannel", name, c1 );
+		el2[i] = Neutral::create( "HHChannel", name, c1, Id::scratchId() );
 		set< double >( el2[i], "Ek", static_cast< double >( i ) );
 		set< double >( el2[i], "Gbar", static_cast< double >( i * 10 ));
 	}
@@ -376,18 +376,18 @@ void testWildcard()
 	// Here we set up some thoroughly ugly nesting.
 	// Note the sequence: The wildcarding goes depth first,
 	// and then in order of creation.
-	el2[0] = Neutral::create( "HHGate", "g0", el2[0] );
-	el2[1] = Neutral::create( "HHGate", "g1", el2[1] );
-	el2[2] = Neutral::create( "HHGate", "g2", el2[1] );
-	el2[3] = Neutral::create( "HHGate", "g3", el2[2] );
-	el2[4] = Neutral::create( "HHGate", "g4", el2[2] );
-	el2[5] = Neutral::create( "HHGate", "g5", el2[4] );
-	el2[6] = Neutral::create( "HHGate", "g6", el2[5] );
-	el2[7] = Neutral::create( "HHGate", "g7", el2[6] );
-	el2[8] = Neutral::create( "HHGate", "g8", el2[1] );
-	el2[9] = Neutral::create( "HHGate", "g9", el2[1] );
-	el2[10] = Neutral::create( "HHGate", "g10", c2 );
-	el2[11] = Neutral::create( "HHGate", "g11", c3 );
+	el2[0] = Neutral::create( "HHGate", "g0", el2[0], Id::scratchId() );
+	el2[1] = Neutral::create( "HHGate", "g1", el2[1], Id::scratchId() );
+	el2[2] = Neutral::create( "HHGate", "g2", el2[1], Id::scratchId() );
+	el2[3] = Neutral::create( "HHGate", "g3", el2[2], Id::scratchId() );
+	el2[4] = Neutral::create( "HHGate", "g4", el2[2], Id::scratchId() );
+	el2[5] = Neutral::create( "HHGate", "g5", el2[4], Id::scratchId() );
+	el2[6] = Neutral::create( "HHGate", "g6", el2[5], Id::scratchId() );
+	el2[7] = Neutral::create( "HHGate", "g7", el2[6], Id::scratchId() );
+	el2[8] = Neutral::create( "HHGate", "g8", el2[1], Id::scratchId() );
+	el2[9] = Neutral::create( "HHGate", "g9", el2[1], Id::scratchId() );
+	el2[10] = Neutral::create( "HHGate", "g10", c2, Id::scratchId() );
+	el2[11] = Neutral::create( "HHGate", "g11", c3, Id::scratchId() );
 	wildcardTestFunc( el2, 12, "/a1/##[TYPE=HHGate]" );
 	wildcardTestFunc( el2, 12, "/##[TYPE=HHGate]" );
 
