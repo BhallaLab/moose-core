@@ -1213,6 +1213,60 @@ void Shell::useClock( const Conn& c,
 	}
 }
 
+/**
+ * This function converts the path from relative, recent or other forms
+ * to a canonical absolute path form that the wildcards can handle.
+ */
+void Shell::digestPath( string& path )
+{
+	// Here we deal with all sorts of awful cases involving current and
+	// parent element paths.
+	if ( path.length() == 0 ) {
+		return;
+	} else if ( path.length() == 1 ) {
+		if ( path == "." ) {
+			path = cwe_.path();
+		} else if ( path == "^" ) {
+			path = recentElement_.path();
+		} else {
+			path = cwe_.path() + "/" + path;
+		}
+	} else if ( path.length() == 2 ) {
+		if ( path[0] == '.' ) {
+			if ( path[1] == '/' ) { // start from cwe
+				path = cwe_.path();
+			} else if ( path[1] == '.' ) {
+				if ( cwe_ == Id() ) {
+					path = "/";
+				} else  {
+					path = cwe_.path();
+					string::size_type pos = path.rfind( '/' );
+					path = path.substr( 0, pos );
+				}
+			}
+		}
+	} else {
+		string::size_type pos = path.find_first_of( '/' );
+		if ( pos == 1 ) {
+			if ( path[0] == '^' ) 
+				path = recentElement_.path() + path.substr( 1 );
+			else if ( path[0] == '.' )
+				path = cwe_.path() + path.substr( 1 );
+			else
+				path = cwe_.path() + "/" + path;
+		} else if ( pos == 2 && path[0] == '.' && path[1] == '.' ) {
+			if ( cwe_ == Id() ) {
+				path = path.substr( 2 );
+			} else { // get parent of cwe and tag path onto it.
+				string temp = cwe_.path();
+				string::size_type pos = temp.rfind( '/' );
+				path = temp.substr( 0, pos ) + path.substr( 2 );
+			}
+		} else if ( pos != 0 ) {
+			path = cwe_.path() + "/" + path;
+		}
+	}
+}
 // static function
 /** 
  * getWildcardList obtains a wildcard list specified by the path.
@@ -1224,12 +1278,16 @@ void Shell::useClock( const Conn& c,
 void Shell::getWildcardList( const Conn& c, string path, bool ordered )
 {
 	vector< Element* > list;
+	vector< Id > ret;
+
+	static_cast< Shell* >( c.data() )->digestPath( path );
+
+	// Finally, refer to the wildcard functions in Wildcard.cpp.
 	if ( ordered )
 		simpleWildcardFind( path, list );
 	else
 		wildcardFind( path, list );
 
-	vector< Id > ret;
 	ret.resize( list.size() );
 	vector< Id >::iterator i;
 	vector< Element* >::iterator j;
@@ -1776,6 +1834,80 @@ void testShell()
 	ASSERT( eid == a2, "a2 path2eid" );
 
 	/////////////////////////////////////////
+	// Test digestPath
+	/////////////////////////////////////////
+	/*
+	Id foo = Id::scratchId(); // first make another test element.
+	ret = sh.create( "Neutral", "foo", a2, foo );
+	ASSERT( ret, "creating /a/a2/foo" );
+	Id f = Id::scratchId(); // first make another test element.
+	ret = sh.create( "Neutral", "f", a2, f );
+	ASSERT( ret, "creating /a/a2/f" );
+	*/
+
+	sh.cwe_ = a2;
+	sh.recentElement_ = a1;
+	path = "";
+	sh.digestPath( path );
+	ASSERT( path == "", "path == blank" );
+
+	path = ".";
+	sh.digestPath( path );
+	ASSERT( path == "/a/a2", "path == /a/a2" );
+
+	path = "^";
+	sh.digestPath( path );
+	ASSERT( path == "/a/a1", "path == /a/a1" );
+
+	path = "f";
+	sh.digestPath( path );
+	ASSERT( path == "/a/a2/f", "path == /a/a2/f" );
+
+	path = "./";
+	sh.digestPath( path );
+	ASSERT( path == "/a/a2", "path == /a/a2" );
+
+	path = "..";
+	sh.digestPath( path );
+	ASSERT( path == "/a", "path == /a" );
+
+	sh.cwe_ = Id();
+	path = "..";
+	sh.digestPath( path );
+	ASSERT( path == "/", "path == /" );
+
+	path = "^/b/c/d";
+	sh.digestPath( path );
+	ASSERT( path == "/a/a1/b/c/d", "path == /a/a1/b/c/d" );
+
+	sh.cwe_ = a2;
+	path = "./b/c/d";
+	sh.digestPath( path );
+	ASSERT( path == "/a/a2/b/c/d", "path == /a/a2/b/c/d" );
+
+	path = "bba/bba";
+	sh.digestPath( path );
+	ASSERT( path == "/a/a2/bba/bba", "path == /a/a2/bba/bba" );
+
+	path = "../below";
+	sh.digestPath( path );
+	ASSERT( path == "/a/below", "path == /a/below" );
+
+	sh.cwe_ = Id();
+	path = "../rumbelow";
+	sh.digestPath( path );
+	ASSERT( path == "/rumbelow", "path == /rumbelow" );
+	
+	sh.cwe_ = a2;
+	path = "x/y/z";
+	sh.digestPath( path );
+	ASSERT( path == "/a/a2/x/y/z", "path == /a/a2/x/y/z" );
+
+	path = "/absolute/x/y/z";
+	sh.digestPath( path );
+	ASSERT( path == "/absolute/x/y/z", "path == /absolute/x/y/z" );
+	
+	/////////////////////////////////////////
 	// Test destroy operation
 	/////////////////////////////////////////
 	sh.destroy( a );
@@ -1806,6 +1938,7 @@ void testShell()
 		ASSERT( fabs( y - values[i] ) < EPSILON , "LoadTab" );
 	}
 	set( tab, "destroy" );
+
 }
 
 #endif // DO_UNIT_TESTS

@@ -5183,4 +5183,10 @@ Checked in as revision 284 with unit test compile flags on, Smoldyn on.
 
 Checked in as revision 285 with unit test compile flags on, Smoldyn off.
 
+Fixed Neutral::create so that it takes the Id of the new object as an
+argument. Often Id::scratchId() will do, but it will eventually be necessary
+to handle across nodes. Much collateral damage and many functions to fix to
+get it to work again.
+Checked in as revision 286 with unit test compile flags on, Smoldyn off.
+
 ==============================================================================
