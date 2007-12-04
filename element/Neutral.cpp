@@ -191,7 +191,7 @@ const string Neutral::getClass( const Element* e )
 void Neutral::mcreate( const Conn& conn,
 				const string cinfo, const string name )
 {
-		create( cinfo, name, conn.targetElement() );
+	create( cinfo, name, conn.targetElement(), Id::scratchId() );
 /*
 		Element* e = conn.targetElement();
 
@@ -218,34 +218,51 @@ void Neutral::mcreateArray( const Conn& conn,
 
 
 /**
- * Underlying utility function for creating objects in scratch space.
- * Not to be used when creating objects explicitly on commands from
- * the master node, because in those cases the Id of the new object
- * is defined.
+ * Underlying utility function for creating objects.
  */
 Element* Neutral::create(
-		const string& cinfo, const string& name, Element* parent )
+		const string& cinfo, const string& name, Element* parent, Id id )
 {
+	// Check that the parent exists.
+	if ( !parent ) {
+		cout << "Error: Neutral::create: No parent\n";
+		return 0;
+	}
+	// Check that the parent can handle children
+	const Finfo* childSrc = parent->findFinfo( "childSrc" );
+	if ( !childSrc ) {
+		cout << "Error: Neutral::create: object '" << parent->name() << 
+			"' cannot handle child\n";
+		return 0;
+	}
+
+	// Check that the child class is correct
+	const Cinfo* c = Cinfo::find( cinfo );
+	if ( !c ) {
+		cout << "Error: Neutral::create: class " << cinfo << 
+				" not found\n";
+		return 0;
+	}
+
 	// Need to check here if the name is an existing one.
 	Id existing = getChildByName( parent, name );
 	if ( existing.good() ) {
 		cout << "Error: Neutral::create: Attempt to overwrite existing element '" << existing.path() << "'. Using original.\n";
 		return existing();
 	}
-	const Cinfo* c = Cinfo::find( cinfo );
+
 	if ( c ) {
-		Element* kid = c->create( Id::scratchId(), name );
+		// Element* kid = c->create( Id::scratchId(), name );
+		Element* kid = c->create( id, name );
+		const Finfo* kFinfo = kid->findFinfo( "child" );
+		assert( kFinfo != 0 );
 		// Here a global absolute or a relative finfo lookup for
 		// the childSrc field would be useful.
-		bool ret = parent->findFinfo( "childSrc" )->
-				add( parent, kid, kid->findFinfo( "child" ) ); 
+		bool ret = childSrc->add( parent, kid, kFinfo );
 		assert( ret );
 		ret = c->schedule( kid );
 		assert( ret );
 		return kid;
-	} else {
-		cout << "Error: Neutral::create: class " << cinfo << 
-				" not found\n";
 	}
 	return 0;
 }
@@ -566,7 +583,8 @@ void testNeutral()
 		ASSERT( initialNumInstances - SimpleElement::numInstances == 2,
 						"Check that N2 is made" );
 
-		Element* foo = Neutral::create( "Neutral", "foo", n1 );
+		Element* foo = Neutral::create( "Neutral", "foo", n1, 
+			Id::scratchId() );
 		ASSERT( foo != 0, "Neutral::create" );
 		ASSERT( initialNumInstances - SimpleElement::numInstances == 1,
 						"Check that foo is made" );

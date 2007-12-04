@@ -357,15 +357,19 @@ Id gslSetup( Element* e, const string& method )
 			}
 		}
 	}
-	Element* solve = Neutral::create( "Neutral", "solve", e );
+	Element* solve = Neutral::create( "Neutral", "solve", e,
+		Id::scratchId() );
 	solveId = e->id();
 	assert( solveId.good() );
 
-	Element*  ki = Neutral::create( "GslIntegrator", "integ", solve );
+	Element*  ki = Neutral::create( "GslIntegrator", "integ", solve,
+		Id::scratchId() );
 	assert ( ki != 0 );
-	Element* ks = Neutral::create( "Stoich", "stoich", solve );
+	Element* ks = Neutral::create( "Stoich", "stoich", solve,
+		Id::scratchId() );
 	assert( ks != 0 );
-	Element* kh = Neutral::create( "KineticHub", "hub", solve );
+	Element* kh = Neutral::create( "KineticHub", "hub", solve,
+		Id::scratchId() );
 	assert( kh != 0 );
 	ks->findFinfo( "hub" )->add( ks, kh, kh->findFinfo( "hub" ) );
 	ks->findFinfo( "gsl" )->add( ks, ki, ki->findFinfo( "gsl" ) );
@@ -407,13 +411,16 @@ Id smoldynSetup( Element* e, const string& method )
 			}
 		}
 	}
-	Element* solve = Neutral::create( "Neutral", "solve", e );
+	Element* solve = Neutral::create( "Neutral", "solve", e,
+		Id::scratchId() );
 	solveId = e->id();
 	assert( solveId.good() );
 
-	Element* ks = Neutral::create( "Stoich", "stoich", solve );
+	Element* ks = Neutral::create( "Stoich", "stoich", solve,
+		Id::scratchId() );
 	assert( ks != 0 );
-	Element*  sh = Neutral::create( "SmoldynHub", "SmoldynHub", solve );
+	Element*  sh = Neutral::create( "SmoldynHub", "SmoldynHub", solve,
+		Id::scratchId() );
 	assert ( sh != 0 );
 	set< bool >( ks, "useOneWayReacs", 1 );
 	ks->findFinfo( "hub" )->add( ks, sh, sh->findFinfo( "hub" ) );

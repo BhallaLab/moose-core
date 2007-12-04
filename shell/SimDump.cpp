@@ -196,7 +196,7 @@ void SimDump::simUndump( const string& args )
 
 	string newClassName = i->second->newObject();
 
-	e = Neutral::create( newClassName, epath, parent );
+	e = Neutral::create( newClassName, epath, parent, Id::scratchId() );
 	if ( !e ) {
 		cout << "Error: simundumpFunc: Failed to create " << newClassName <<
 			" " << epath << endl;
