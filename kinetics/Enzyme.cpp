@@ -363,7 +363,8 @@ void Enzyme::makeComplex( Element* e )
 
 	bool ret = get< double >( parent, "volumeScale", vol );
 	assert( ret );
-	Element* complex = Neutral::create( "Molecule", cplxName, e );
+	Element* complex = Neutral::create( "Molecule", cplxName, e,
+		Id::scratchId() );
 	ret = cplxSrcFinfo->add( e, complex, complex->findFinfo( "reac" ) );
 	assert( ret );
 }
@@ -404,14 +405,19 @@ void testEnzyme()
 
 	cout << "\nTesting Enzyme" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root() );
-	Element* sub = Neutral::create( "Molecule", "sub", n );
+	Element* n = Neutral::create( "Neutral", "n", Element::root(),
+		Id::scratchId() );
+	Element* sub = Neutral::create( "Molecule", "sub", n,
+		Id::scratchId() );
 	ASSERT( sub != 0, "creating molecule" );
-	Element* prd = Neutral::create( "Molecule", "prd", n );
+	Element* prd = Neutral::create( "Molecule", "prd", n,
+		Id::scratchId() );
 	ASSERT( prd != 0, "creating molecule" );
-	Element* enzMol = Neutral::create( "Molecule", "enzMol", n );
+	Element* enzMol = Neutral::create( "Molecule", "enzMol", n,
+		Id::scratchId() );
 	ASSERT( enzMol != 0, "creating molecule" );
-	Element* enz = Neutral::create( "Enzyme", "enz", enzMol );
+	Element* enz = Neutral::create( "Enzyme", "enz", enzMol,
+		Id::scratchId() );
 	ASSERT( enz != 0, "creating enzyme" );
 
 	bool ret;

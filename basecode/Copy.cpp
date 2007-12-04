@@ -444,11 +444,11 @@ void copyTest()
 {
 	cout << "\nTesting copy";
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root() );
-	Element* c0 = Neutral::create( "Compartment", "c0", n );
+	Element* n = Neutral::create( "Neutral", "n", Element::root(), Id::scratchId() );
+	Element* c0 = Neutral::create( "Compartment", "c0", n, Id::scratchId() );
 	ASSERT( c0 != 0, "creating compartment" );
 
-	Element* ch = Neutral::create( "HHChannel", "ch", c0 );
+	Element* ch = Neutral::create( "HHChannel", "ch", c0, Id::scratchId() );
 	ASSERT( ch != 0, "creating channel" );
 	
 	ASSERT(

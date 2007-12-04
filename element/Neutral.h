@@ -42,9 +42,20 @@ class Neutral
 							const string cinfo, const string name );
 			static void mcreateArray( const Conn&,
 							const string cinfo, const string name, int n );
+			
+			/**
+			 * This version of the create function is meant for most use.
+			 * Here we explicitly set the id of the new object
+			 */
 			static Element* create(
 				const string& cinfo, const string& name, 
-				Element* parent );
+				Element* parent, Id id );
+			/**
+			 * This version of create uses Id::scratchId() for the id of
+			 * the new object
+			static Element* create(
+				const string& cinfo, const string& name, Element* parent );
+			 */
 			static Element* createArray(
 				const string& cinfo, const string& name, 
 				Element* parent, int n );
