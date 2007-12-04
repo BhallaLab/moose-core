@@ -113,7 +113,9 @@ void Cell::reinitFuncLocal( Element* e, ProcInfo info)
                     set( nsolve(), "path", (seed->id()).path() );
                 } else {
                     // make a new solver
-                    Element* ni = Neutral::create( "HSolve", solverName.str(), nsolvers() );
+                    Element* ni = Neutral::create( "HSolve", 
+						solverName.str(), nsolvers() , 
+						Id::scratchId() );
                     set( ni, "path", (seed->id()).path());
                     
                     // TODO: Check this part - each cell should set the clock

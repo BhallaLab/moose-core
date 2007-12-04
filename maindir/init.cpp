@@ -24,6 +24,7 @@ int mooseInit(std::string configFile)
     assert ( c != 0 );
     const Finfo* childSrc = Element::root()->findFinfo( "childSrc" );
     assert ( childSrc != 0 );
+	/// \todo Check if this can be replaced with the Neutral::create
     Element* shell = c->create( Id( 1 ), "shell" );
     assert( shell != 0 );
     bool ret = childSrc->add( Element::root(), shell, 
@@ -39,7 +40,7 @@ int mooseInit(std::string configFile)
 	Id::manager().setNodes( mynode, totalnodes );
 
 	Element* postmasters =
-			Neutral::create( "Neutral", "postmasters", Element::root());
+			Neutral::create( "Neutral", "postmasters", Element::root(), Id::scratchId());
 	vector< Element* > post;
 	post.reserve( totalnodes );
 	for ( unsigned int i = 0; i < totalnodes; i++ ) {
@@ -47,7 +48,7 @@ int mooseInit(std::string configFile)
 		if ( i != mynode ) {
 			sprintf( name, "node%d", i );
 			Element* p = Neutral::create(
-					"PostMaster", name, postmasters );
+					"PostMaster", name, postmasters, Id::scratchId() );
 			assert( p != 0 );
 			set< unsigned int >( p, "remoteNode", i );
 			post.push_back( p );
@@ -64,22 +65,22 @@ int mooseInit(std::string configFile)
      * exist simultaneously on each node.
      */
     Element* sched =
-        Neutral::create( "Neutral", "sched", Element::root() );
+        Neutral::create( "Neutral", "sched", Element::root(), Id::scratchId() );
     // This one handles the simulation clocks
     Element* cj =
-        Neutral::create( "ClockJob", "cj", sched );
+        Neutral::create( "ClockJob", "cj", sched, Id::scratchId() );
     // TODO: Put the solver creation here
 
     
-    Neutral::create( "Neutral", "library", Element::root() );
-    Neutral::create( "Neutral", "proto", Element::root() );
+    Neutral::create( "Neutral", "library", Element::root(), Id::scratchId() );
+    Neutral::create( "Neutral", "proto", Element::root(), Id::scratchId() );
     Element* solvers = 
-            Neutral::create( "Neutral", "solvers", Element::root() );
+            Neutral::create( "Neutral", "solvers", Element::root(), Id::scratchId() );
     // These two should really be solver managers because there are
     // a lot of decisions to be made about how the simulation is best
     // solved. For now let the Shell deal with it.
-    Neutral::create( "Neutral", "chem", solvers );
-    Neutral::create( "Neutral", "neuronal", solvers );
+    Neutral::create( "Neutral", "chem", solvers, Id::scratchId() );
+    Neutral::create( "Neutral", "neuronal", solvers, Id::scratchId() );
         
     if ( conf.properties[Configuration::CREATESOLVER].compare("true") == 0 )
     {
@@ -95,19 +96,19 @@ int mooseInit(std::string configFile)
 #ifdef USE_MPI
 	// This one handles parser and postmaster scheduling.
 	Element* pj =
-			Neutral::create( "ClockJob", "pj", sched );
+			Neutral::create( "ClockJob", "pj", sched, Id::scratchId() );
 	Element* t0 =
-			Neutral::create( "ParTick", "t0", cj );
+			Neutral::create( "ParTick", "t0", cj, Id::scratchId() );
 	Element* pt0 =
-			Neutral::create( "ParTick", "t0", pj );
+			Neutral::create( "ParTick", "t0", pj, Id::scratchId() );
 #else
 
     // Not really honouring AUTOSCHEDULE setting -
     // May need only t0 for AUTOSCHEDULE=false
     // But creating a few extra clock ticks does not hurt as much as
     // not allowing user to change the clock settings
-    Neutral::create( "Tick", "t0", cj );
-    Neutral::create( "Tick", "t1", cj );
+    Neutral::create( "Tick", "t0", cj, Id::scratchId() );
+    Neutral::create( "Tick", "t1", cj, Id::scratchId() );
 //     Neutral::create( "Tick", "t2", cj );
 //     Neutral::create( "Tick", "t3", cj );
 //     Neutral::create( "Tick", "t4", cj );
@@ -143,13 +144,13 @@ void initSolvers(Element *clockJob)
             set( ksolve(), "scanTicks" );
         } else { // make a whole new set.
             Element* ki = Neutral::create( "GslIntegrator", "integ",
-                                           ksolvers() );
+                                           ksolvers(), Id::scratchId() );
             if ( ki == 0 ) { // GslIntegrator class does not exist
                 cout << "ClockJob::checkSolvers: Warning: GslIntegrator does not exist.\nReverting to Exp Euler method\n";
                 return;
             }
-            Element* ks = Neutral::create( "Stoich", "stoich", ksolvers() );
-            Element* kh = Neutral::create( "KineticHub", "hub", ksolvers());
+            Element* ks = Neutral::create( "Stoich", "stoich", ksolvers(), Id::scratchId() );
+            Element* kh = Neutral::create( "KineticHub", "hub", ksolvers(), Id::scratchId() );
             ks->findFinfo( "hub" )->add( ks, kh, kh->findFinfo( "hub" ) );
             ks->findFinfo( "gsl" )->add( ks, ki, ki->findFinfo( "gsl" ) );
             set< string >( ki, "method", "rk5" );
@@ -173,7 +174,7 @@ void initSolvers(Element *clockJob)
         else
         { // make a whole new set.
             Element* ni = Neutral::create( "HSolve", "integ",
-                                           nsolvers() );
+                                           nsolvers(), Id::scratchId() );
             set( ni, "scanTicks" );
  
             childList[4]()->findFinfo( "process" )->add( childList[4](), ni, ni->findFinfo( "process" ) );

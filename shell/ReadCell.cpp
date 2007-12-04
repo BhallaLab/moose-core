@@ -83,7 +83,7 @@ Element* ReadCell::start( const string& cellpath )
 		cellname = cellpath.substr( pos + 1 );
 	}
 	
-	return Neutral::create( "Neutral", cellname, cellpa );
+	return Neutral::create( "Neutral", cellname, cellpa, Id::scratchId() );
 }
 
 void ReadCell::read( const string& filename, const string& cellpath )
@@ -234,7 +234,7 @@ Element* ReadCell::buildCompartment(
 		return 0;
 	}
 
-	Element* compt = Neutral::create( "Compartment", name, cell_ );
+	Element* compt = Neutral::create( "Compartment", name, cell_, Id::scratchId() );
 	++numCompartments_;
 	lastCompt_ = compt;
 
