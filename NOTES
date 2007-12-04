@@ -5167,5 +5167,12 @@ Setting up script-based geometry stuff.
 ==============================================================================
 2 Dec 2007.
 Working on getting Smoldyn to read the surfaces.
+Checked in. Now at revision 282 with unit test compile flags on, Smoldyn off.
 
 ==============================================================================
+3 Dec 2007
+Various steps to get Smoldyn to work better with MOOSE for the shapes.
+Current issue is that none of the shape coords are being assigned within MOOSE.
+==============================================================================
+4 Dec 2007
+When I create shapes standalone, the coordinate assignment works.
