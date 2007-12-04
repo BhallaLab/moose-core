@@ -183,8 +183,10 @@ void testSpikeGen()
 {
 	cout << "\nTesting SpikeGen" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root() );
-	Element* sg = Neutral::create( "SpikeGen", "c0", n );
+	Element* n = Neutral::create( "Neutral", "n", Element::root(), 
+		Id::scratchId() );
+	Element* sg = Neutral::create( "SpikeGen", "c0", n, 
+		Id::scratchId() );
 	ASSERT( sg != 0, "creating compartment" );
 	ProcInfoBase p;
 	Conn c( sg, 0 );

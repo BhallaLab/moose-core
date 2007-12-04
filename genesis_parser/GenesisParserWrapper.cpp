@@ -3031,9 +3031,9 @@ Element* makeGenesisParser()
 	Element* shell = shellId();
 
 #ifdef CRL_MPI
-	Element* sli = Neutral::create( "ParGenesisParser", "sli", shell );
+	Element* sli = Neutral::create( "ParGenesisParser", "sli", shell, Id::scratchId() );
 #else
-	Element* sli = Neutral::create( "GenesisParser", "sli", shell );
+	Element* sli = Neutral::create( "GenesisParser", "sli", shell, Id::scratchId() );
 #endif
 
 	// set< string, string >( shell, "create", "GenesisParser", "sli");
