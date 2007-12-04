@@ -5176,3 +5176,9 @@ Current issue is that none of the shape coords are being assigned within MOOSE.
 ==============================================================================
 4 Dec 2007
 When I create shapes standalone, the coordinate assignment works.
+Turned out there was a second 'geometry' object created. Went and fixed up
+the object creation code. This messed up a whole lot of unit tests (which 
+were by this count themselves broken). Fixed them too. 
+Checked in as revision 284 with unit test compile flags on, Smoldyn on.
+
+
