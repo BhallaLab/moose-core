@@ -13,9 +13,20 @@
 # License:      GPL-3 [http://www.gnu.org/licenses/gpl-3.0.html]
 ######################################################################
 import sys
-# This should be location of moose.py and _moose.so files
-sys.path.append('.')
-import moose
+
+# The PYTHONPATH should contain the location of moose.py and _moose.so
+# files.  Putting ".." with the assumption that moose.py and _moose.so
+# has been generated in ${MOOSE_SOURCE_DIRECTORY}/pymoose/ (as default
+# pymoose build does) and this file is located in
+# ${MOOSE_SOURCE_DIRECTORY}/pymoose/examples
+sys.path.append('..')
+try:
+    import moose
+except ImportError:
+    print "ERROR: Could not import moose. Please add the directory containing moose.py in your PYTHONPATH"
+    import sys
+    sys.exit(1)
+
 import math
 VMIN = -0.1
 VMAX = 0.05
