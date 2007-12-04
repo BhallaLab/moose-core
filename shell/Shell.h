@@ -18,6 +18,9 @@ class SimDump;
 
 class Shell
 {
+#ifdef DO_UNIT_TESTS
+	friend void testShell();
+#endif
 	public:
 		Shell();
 	
@@ -27,7 +30,7 @@ class Shell
 // holds the current working element, cwe. Second, many functions are
 // multinode and the Shell has to handle queries across nodes.
 ////////////////////////////////////////////////////////////////////
-		string expandPath( const std::string& path ) const;
+		// string expandPath( const std::string& path ) const;
 		static string eid2path( Id eid );
 		static Id path2eid( const string& path, const string& separator );
 		Id innerPath2eid( const string& path, const string& separator ) const;
@@ -35,6 +38,8 @@ class Shell
 		static Id traversePath( Id start, vector< string >& );
 		static string head( const string& path, const string& separator );
 		static string tail( const string& path, const string& separator );
+
+		void digestPath( string& path );
 
 //////////////////////////////////////////////////////////////////////
 // Special low-level operations that Shell handles using raw

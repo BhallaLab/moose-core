@@ -1,5 +1,6 @@
 //moose
 include kkit_enz_1000mol.g
+MAXTIME = 10
 
 create neutral /kinetics/geometry
 create KinCompt /kinetics/geometry/cytoplasm
@@ -63,10 +64,10 @@ ce /
 create Surface /kinetics/geometry/surface1
 ce ^
 create SpherePanel nucleus
-	setfield cap1 x[0] 0
-	setfield cap1 y[0] 0
-	setfield cap1 z[0] 0
-	setfield cap1 x[1] 0.2e-5
+	setfield nucleus x[0] 0
+	setfield nucleus y[0] 0
+	setfield nucleus z[0] 0
+	setfield nucleus x[1] 0.45e-5
 
 	showfield nucleus x[0]
 	showfield nucleus x[1]
