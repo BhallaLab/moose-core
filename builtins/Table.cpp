@@ -428,8 +428,10 @@ void testTable()
 {
 	cout << "\nTesting Table";
 	unsigned int i;
-	Element* t = Neutral::create( "Table", "t", Element::root() );
-	Element* t2 = Neutral::create( "Table", "t2", Element::root() );
+	Element* t = Neutral::create( "Table", "t", Element::root(),
+		Id::scratchId() );
+	Element* t2 = Neutral::create( "Table", "t2", Element::root(),
+		Id::scratchId() );
 	Conn c( t, 0 );
 	Conn c2( t2, 0 );
 	ASSERT( t != 0, "created table" );
@@ -574,7 +576,8 @@ void testTable()
 
 	// Testing inputRequest message and its ability to grab the
 	// field of another object.
-	Element* t3 = Neutral::create( "Table", "t3", Element::root() );
+	Element* t3 = Neutral::create( "Table", "t3", Element::root(),
+		Id::scratchId() );
 	ASSERT( 
 		t3->findFinfo( "inputRequest" )->
 			add( t3, t, t->findFinfo( "output" ) ),

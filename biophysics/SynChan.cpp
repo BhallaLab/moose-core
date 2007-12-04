@@ -401,10 +401,14 @@ void testSynChan()
 {
 	cout << "\nTesting SynChan" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root() );
-	Element* syn = Neutral::create( "SynChan", "syn", n );
-	Element* sg1 = Neutral::create( "SpikeGen", "sg1", n );
-	Element* sg2 = Neutral::create( "SpikeGen", "sg2", n );
+	Element* n = Neutral::create( "Neutral", "n", Element::root(), 
+		Id::scratchId() );
+	Element* syn = Neutral::create( "SynChan", "syn", n, 
+		Id::scratchId() );
+	Element* sg1 = Neutral::create( "SpikeGen", "sg1", n, 
+		Id::scratchId() );
+	Element* sg2 = Neutral::create( "SpikeGen", "sg2", n, 
+		Id::scratchId() );
 	ASSERT( syn != 0, "creating Synapse" );
 	ASSERT( sg1 != 0, "testing Synapse" );
 	ASSERT( sg2 != 0, "testing Synapse" );
