@@ -612,7 +612,7 @@ void testCompartment()
 	for (i = 1; i < 100; i++ ) {
 		char name[20];
 		sprintf( name, "c%d", i );
-		compts[i] = Neutral::create( "Compartment", "c0", n );
+		compts[i] = Neutral::create( "Compartment", name, n );
 		Conn temp( compts[i], 0 );
 		Compartment::setInject( temp, 0.0 );
 		Compartment::setRm( temp, Rm );

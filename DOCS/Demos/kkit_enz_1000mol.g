@@ -48,8 +48,7 @@ simobjdump transport input output alloced step_mode stepsize dt delay clock \
   kf xtree_fg_req xtree_textfg_req x y z
 simobjdump proto x y z
 simobjdump text str
-simundump geometry /kinetics/geometry 0 1.6667e-21 3 sphere "" white black 2 \
-  -1 0
+simundump geometry /kinetics/geometry 0 1.6667e-21 3 sphere "" white black 2 -1 0
 simundump kpool /kinetics/P 0 0 0 0 0 0 0 0 1000 0 /kinetics/geometry 62 \
   black 1 2 0
 simundump kpool /kinetics/E 0 0 1 1 1000 1000 0 0 1000 0 /kinetics/geometry \

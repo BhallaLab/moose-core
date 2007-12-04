@@ -411,12 +411,12 @@ void SmoldynHub::reinitFuncLocal( Element* e, ProcInfo info )
 void SmoldynHub::completeReacSetupLocal( const string& path )
 {
 	simptr_->boxs->mpbox = 5.0;
-	simptr_->wlist[0]->pos = -1.0e-6;
-	simptr_->wlist[1]->pos = 1.0e-6;
-	simptr_->wlist[2]->pos = -1.0e-6;
-	simptr_->wlist[3]->pos = 1.0e-6;
-	simptr_->wlist[4]->pos = -1.0e-6;
-	simptr_->wlist[5]->pos = 1.0e-6;
+	simptr_->wlist[0]->pos = -1.0e-5;
+	simptr_->wlist[1]->pos = 1.0e-5;
+	simptr_->wlist[2]->pos = -1.0e-5;
+	simptr_->wlist[3]->pos = 1.0e-5;
+	simptr_->wlist[4]->pos = -1.0e-5;
+	simptr_->wlist[5]->pos = 1.0e-5;
 
 	////////////////////////////////////////////////////////////////
 	//  On now to reactions.
@@ -536,8 +536,11 @@ void SmoldynHub::completeReacSetupLocal( const string& path )
 	// Here we fill up the surface info.
 	setSurfaces( path );
 
-	scmdsetfnames( simptr_->cmds, "smoldyn.out" );
+	scmdsetfnames( simptr_->cmds, "smoldyn.out smoldyn.coords" );
+	// scmdsetfnames( simptr_->cmds, "smoldyn.coords" );
 	scmdstr2cmd( simptr_->cmds, "e molcount smoldyn.out", simptr_->tmin, simptr_->tmax, simptr_->dt );
+
+	scmdstr2cmd( simptr_->cmds, "n 10 listmols3 P smoldyn.coords", simptr_->tmin, simptr_->tmax, simptr_->dt );
 	if ( setupsim( NULL, NULL, &simptr_, NULL ) ) {
 		cout << "Warning: SmoldynHub::reinitFuncLocal: Setupsim failed\n";
 	}
@@ -573,11 +576,18 @@ void assignPoints( Element* e, panelptr pptr )
 	bool ret = get< vector< double > >( e, "coords", coords );
 	assert( ret );
 	assert ( pptr->npts * nDim + nDim == coords.size() );
-	for ( int i = 0; i < pptr->npts; i++ )
-		for ( unsigned int j = 0; j < nDim; j++ )
+	for ( int i = 0; i < pptr->npts; i++ ) {
+		for ( unsigned int j = 0; j < nDim; j++ ) {
 			pptr->point[i][j] = coords[ i * nDim + j ];
-	for ( unsigned int j = 0; j < nDim; j++ )
+			cout << pptr->point[i][j] << "	";
+		}
+		cout << endl;
+	}
+	for ( unsigned int j = 0; j < nDim; j++ ) {
 		pptr->front[j] = coords[ pptr->npts * nDim + j ];
+		cout << pptr->front[j] << "	";
+	}
+	cout << endl;
 }
 
 void assignNeighbors( Element* e, panelptr pptr,
@@ -648,6 +658,7 @@ void SmoldynHub::setSurfaces( const string& value )
 	// Check with Steven about nMol_ + 1.
 	// Assume 3D.
 	simptr_->srfss = surfacessalloc( surfaces.size(), nMol_ + 1, 3 );
+	simptr_->srfss->nsrf = surfaces.size();
 	for ( unsigned int j = 0; j < surfaces.size(); j++ ) {
 		map< Element*, panelptr > panelMap;
 
@@ -673,6 +684,7 @@ void SmoldynHub::setSurfaces( const string& value )
 				panelsalloc( simptr_->srfss->srflist[j], dim, 
 					typedPanels[k].size(), 
 					static_cast< PanelShape >( k ) );
+				simptr_->srfss->srflist[j]->npanel[k] = typedPanels[k].size();
 			}
 			for ( unsigned int q = 0; q < typedPanels[k].size(); q++ ) {
 				Element* pe = typedPanels[k][q]();
@@ -894,9 +906,14 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 		for ( unsigned int q = 0; q < maxq; q++ ) {
 			// Here we want to scatter the molecules in space. Not
 			// so easy if we have a funny geometry.
-			d[ k ]->pos[0] = mtrand() * 2.0e-6 - 1.0e-6;
-			d[ k ]->pos[1] = mtrand() * 2.0e-6 - 1.0e-6;
-			d[ k ]->pos[2] = mtrand() * 2.0e-6 - 1.0e-6;
+			// For now let's put them in one corner of the geometry,
+			// which is a 3 micron by 1 micron cylinder capped with 
+			// hemispheres and with a 0.5 micron nucleus in the middle.
+			// So we want them all in a little cube of 0.5 micron side
+			// at 0.5 microns to the right of the origin.
+			d[ k ]->pos[0] = mtrand() * 0.5e-6 + 0.25e-6;
+			d[ k ]->pos[1] = mtrand() * 0.5e-6 - 0.25e-6;
+			d[ k ]->pos[2] = mtrand() * 0.5e-6 - 0.25e-6;
 			d[ k-- ]->ident = j;
 		}
 		j++;
