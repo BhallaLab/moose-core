@@ -5,7 +5,7 @@
 %{
 	#include "../basecode/header.h"
 	#include "../basecode/moose.h"
-	#include "PyMooseIterable.h"
+//	#include "PyMooseIterable.h"
 	#include "PyMooseContext.h"
 	#include "PyMooseBase.h"
 	#include "Neutral.h"
@@ -19,6 +19,7 @@
 	#include "Table.h"
 	#include "SynChan.h"
 	#include "BinSynchan.h"
+	#include "StochSynchan.h"
 	#include "SpikeGen.h"
 	#include "Nernst.h"
 	#include "CaConc.h"
@@ -51,12 +52,14 @@
 	#include "PoissonRng.h"
 	#include "ExponentialRng.h"
 %}
-%feature("autodoc", "1");
+//%feature("autodoc", "1");
 %template(uint_vector) std::vector<unsigned int>;
 %template(int_vector) std::vector<int>;
 %template(double_vector) std::vector<double>;
 %template(string_vector) std::vector<std::string>;
 %template(Id_vector) std::vector<Id>;
+
+
 %include "../basecode/header.h"
 %include "../basecode/moose.h"
 %ignore mooseInit;
@@ -156,11 +159,7 @@
 %attribute(SynChan, bool, normalizeWeights, __get_normalizeWeights, __set_normalizeWeights)
 %attribute(SynChan, double, Gk, __get_Gk, __set_Gk)
 %attribute(SynChan, double, Ik, __get_Ik, __set_Ik)
-%attribute(SynChan, unsigned int, numSynapses, __get_numSynapses, __set_numSynapses)
-%attribute(SynChan, double, weight, __get_weight, __set_weight)
-%attribute(SynChan, double, delay, __get_delay, __set_delay)
-%attribute(SynChan, double, IkSrc, __get_IkSrc, __set_IkSrc)
-%attribute(SynChan, double, synapse, __get_synapse, __set_synapse)
+%attribute(SynChan, unsigned int, numSynapses, __get_numSynapses)
 %attribute(SynChan, double, activation, __get_activation, __set_activation)
 %attribute(SynChan, double, modulator, __get_modulator, __set_modulator)
 
@@ -172,10 +171,25 @@
 %attribute(BinSynchan, bool, normalizeWeights, __get_normalizeWeights, __set_normalizeWeights)
 %attribute(BinSynchan, double, Gk, __get_Gk, __set_Gk)
 %attribute(BinSynchan, double, Ik, __get_Ik, __set_Ik)
-%attribute(BinSynchan, unsigned int, numSynapses, __get_numSynapses, __set_numSynapses)
-%attribute(BinSynchan, double, synapse, __get_synapse, __set_synapse)
+%attribute(BinSynchan, unsigned int, numSynapses, __get_numSynapses)
 %attribute(BinSynchan, double, activation, __get_activation, __set_activation)
 %attribute(BinSynchan, double, modulator, __get_modulator, __set_modulator)
+
+%include "StochSynchan.h"
+%attribute(StochSynchan, double, Gbar, __get_Gbar, __set_Gbar)
+%attribute(StochSynchan, double, Ek, __get_Ek, __set_Ek)
+%attribute(StochSynchan, double, tau1, __get_tau1, __set_tau1)
+%attribute(StochSynchan, double, tau2, __get_tau2, __set_tau2)
+%attribute(StochSynchan, bool, normalizeWeights, __get_normalizeWeights, __set_normalizeWeights)
+%attribute(StochSynchan, double, Gk, __get_Gk, __set_Gk)
+%attribute(StochSynchan, double, Ik, __get_Ik, __set_Ik)
+%attribute(StochSynchan, unsigned int, numSynapses, __get_numSynapses)
+%attribute(StochSynchan, double, activation, __get_activation, __set_activation)
+%attribute(StochSynchan, double, modulator, __get_modulator, __set_modulator)
+
+//%include "PyMooseIterable.h"
+//%template(BinSynchanDILookup) InnerPyMooseIterable < BinSynchan, unsigned int, double > ;
+//%template(StochSynchanDILookup) InnerPyMooseIterable < StochSynchan, unsigned int, double > ;
 
 %include "SpikeGen.h"
 %attribute(SpikeGen, double, threshold, __get_threshold, __set_threshold)
