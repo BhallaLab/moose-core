@@ -100,8 +100,8 @@ SimDump::SimDump()
 	// eventually evolve out of these. Perhaps SBML.
 	sid.push_back( new SimDumpInfo(
 		"kpool", "Molecule", 
-		"n nInit vol slave_enable", 
-		"n nInit volumeScale slave_enable") );
+		"DiffConst n nInit vol slave_enable", 
+		"D n nInit volumeScale slave_enable") );
 	sid.push_back( new SimDumpInfo(
 		"kreac", "Reaction", "kf kb", "kf kb") );
 	sid.push_back( new SimDumpInfo( "kenz", "Enzyme",
