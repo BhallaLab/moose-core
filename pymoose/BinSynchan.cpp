@@ -33,7 +33,7 @@ const std::string BinSynchan::className = "BinSynchan";
 */
 BinSynchan::BinSynchan(Id id):PyMooseBase(id)
 {
-    weight = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this, &BinSynchan::__get_weight, &BinSynchan::__set_weight);
+    weight = new BinSynchanDoubleArray (this, &BinSynchan::__get_weight, &BinSynchan::__set_weight);
     delay = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,&BinSynchan::__get_delay, &BinSynchan::__set_delay);
     poolSize = new InnerPyMooseIterable<BinSynchan, unsigned int, int > (this,  &BinSynchan::__get_poolSize, &BinSynchan::__set_poolSize);
     releaseP = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseP,  &BinSynchan::__set_releaseP);
@@ -70,7 +70,8 @@ BinSynchan::~BinSynchan()
     delete weight;
     delete delay;
     delete poolSize;
-    delete releaseP;    
+    delete releaseP;
+    delete releaseCount;    
 }
 const std::string& BinSynchan::getType(){ return className; }
 double BinSynchan::__get_Gbar() const
@@ -149,10 +150,6 @@ unsigned int BinSynchan::__get_numSynapses() const
     get < unsigned int > (id_(), "numSynapses",numSynapses);
     return numSynapses;
 }
-void BinSynchan::__set_numSynapses( unsigned int numSynapses )
-{
-    set < unsigned int > (id_(), "numSynapses", numSynapses);
-}
 double BinSynchan::__get_weight(unsigned int index) const
 {
     double weight;
@@ -199,10 +196,7 @@ double BinSynchan::__get_releaseCount(unsigned int index) const
     lookupGet < double,unsigned int > (id_(), "releaseCount", releaseCount, index);
     return releaseCount;
 }
-void BinSynchan::__set_releaseCount( unsigned int index,double releaseCount )
-{
-    lookupSet < double,unsigned int > (id_(), "releaseCount", releaseCount, index);
-}
+
 // double BinSynchan::__get_IkSrc() const
 // {
 //     double IkSrc;

@@ -44,7 +44,14 @@ template <typename KeyType, typename ValueType> class PyMooseIterable
 template <typename OuterType, typename KeyType, typename ValueType> class InnerPyMooseIterable
 {
   public:
-    InnerPyMooseIterable( OuterType* outer ,
+    InnerPyMooseIterable ()
+    {
+        outer_ = 0;
+        __setItem = 0;
+        __getItem = 0;        
+    }
+    
+    InnerPyMooseIterable ( OuterType* outer ,
                          ValueType (OuterType::*getItem)(KeyType index) const,
                          void (OuterType::*setItem)(KeyType index,ValueType value))
     {

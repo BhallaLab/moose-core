@@ -91,7 +91,8 @@ class StochSynchan
     static void setReleaseP(const Conn& c, double p, const unsigned int& index);
     static double getReleaseP(const Element* e, const unsigned int& index);
     
-
+    static double getReleaseCount( const Element* e, const unsigned int& i );
+    
 ///////////////////////////////////////////////////
 // Private fields.
 ///////////////////////////////////////////////////
