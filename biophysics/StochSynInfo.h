@@ -22,7 +22,8 @@
 class StochSynInfo: public SynInfo
 {
   public:
-    double releaseP;    
+    double releaseP;
+    bool hasReleased;    
 };
 
     
