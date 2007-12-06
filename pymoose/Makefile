@@ -58,6 +58,7 @@ OBJ = PyMooseBase.o \
 	SpikeGen.o \
 	SynChan.o \
 	BinSynchan.o	\
+	StochSynchan.o	\
 	Table.o \
 	Nernst.o \
 	Tick.o \
@@ -91,6 +92,7 @@ HEADERS = PyMooseUtil.h \
 	SpikeGen.h \
 	SynChan.h \
 	BinSynchan.h	\
+	StochSynchan.h	\
 	Table.h \
 	Nernst.h \
 	Tick.h \
