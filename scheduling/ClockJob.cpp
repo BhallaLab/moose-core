@@ -228,7 +228,7 @@ double ClockJob::getRunTime( const Element* e )
 
 double ClockJob::getCurrentTime( const Element* e )
 {
-	return static_cast< ClockJob* >( e->data() )->currentTime_;
+	return static_cast< ClockJob* >( e->data() )->info_.currTime_;
 }
 
 /**
@@ -255,9 +255,9 @@ int ClockJob::getCurrentStep( const Element* e )
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void ClockJob::receiveNextTime( const Conn& c, double nextTime )
+void ClockJob::receiveNextTime( const Conn& c, double time )
 {
-	static_cast< ClockJob* >( c.data() )->nextTime_ = nextTime;
+	static_cast< ClockJob* >( c.data() )->nextTime_ = time;
 }
 
 void ClockJob::startFunc( const Conn& c, double runtime)

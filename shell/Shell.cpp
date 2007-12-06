@@ -119,6 +119,9 @@ const Cinfo* initShellCinfo()
 		// Sending back the list of clocks times
 		new SrcFinfo( "returnClocksSrc",
 			Ftype1< vector< double > >::global() ),
+		new DestFinfo( "requestCurrTime",
+				Ftype0::global(), RFCAST( &Shell::requestCurrTime ) ),
+				// Returns it in the default string return value.
 
 		////////////////////////////////////////////////////////////
 		// Message info functions
@@ -1367,6 +1370,16 @@ void Shell::requestClocks( const Conn& c )
 	}
 
 	send1< vector< double > >( c.targetElement(), clockSlot, times );
+}
+
+void Shell::requestCurrTime( const Conn& c )
+{
+	Element* cj = findCj();
+	string ret;
+	const Finfo* f = cj->findFinfo( "currentTime" );
+	assert( f != 0 );
+	f->strGet( cj, ret );
+	send1< string >( c.targetElement(), getFieldSlot, ret );
 }
 
 /**

@@ -5189,4 +5189,38 @@ to handle across nodes. Much collateral damage and many functions to fix to
 get it to work again.
 Checked in as revision 286 with unit test compile flags on, Smoldyn off.
 
+Smoldyn shape definition still stuck. Turned out to be another basic issue,
+this time with the Shell. It was not handling set/get paths correctly if
+they were relative to the current element or to the recent element. Fixed.
+Smoldyn now sees the shape dimensions, but I can't tell if it is doing
+anything interesting with them.
+Checked in as revision 289 with unit test compile flags on, Smoldyn off.
+
+At some point need to check the O3 version of the code against the 
+original mega model from the AJ project. Perhaps the DOQCS version will run?
+Yes, I took accession 84 and it runs. Again, somewhat slower than the old
+MOOSE, but the output looks good.
+
+One more model to test: Pragati's production scripts. Preferably to get her
+parameter sensitivity analysis code to go.
+
+==============================================================================
+5 Dec 2007
+Several points to fix for the model. Steven has sent a Smoldyn instantiation
+too, to check against.
+
+- Fix coord assignment for starting positions
+- Figure out how to set diffusion constants for enzyme complexes
+- Check rates
+
+==============================================================================
+6 Dec 2007
+Now trying to bridge the Smoldyn and MOOSE setups.
+1. Tried to run test_smoldyn.g on MOOSE. Doesn't do anything.
+	Now does, but mix-up with scheduling, yet to resolve.
+2. Compiled Smoldyn on my machine. Had to install multiple libraries.
+3. Tried to run the equivalent to UpiCell.txt, which is meant to be the
+	Smoldyn script equivalent of test_smoldyn.g. Crashed. Now fixed.
+
+
 ==============================================================================
