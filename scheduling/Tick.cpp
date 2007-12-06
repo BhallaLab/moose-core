@@ -441,6 +441,11 @@ void Tick::innerStart( Element* e, ProcInfo info, double maxTime )
 
 		while ( nextTime_ <= endTime ) {
 			info->currTime_ = nextTime_;
+
+			// Send back the nextTime (which is now the current time)
+			// to the ClockJob.
+			send1< double >( e, returnNextTimeSlot, nextTime_ );
+
 			// Send out the process message to all and sundry
 			// send1< ProcInfo >( e, processSlot, info );
 			this->innerProcessFunc( e, info );

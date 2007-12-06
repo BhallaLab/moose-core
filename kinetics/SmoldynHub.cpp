@@ -284,9 +284,33 @@ void SmoldynHub::setPos( unsigned int molIndex, double value,
 {
 }
 
-double SmoldynHub::getPos( unsigned int molIndex, unsigned int i, 
+/**
+ * This gets the position of the specified molecule species molIndex,
+ * for particle #num of that species, on dimension dim.
+ * It is spectacularly inefficient, because it has to run through all 
+ * the 'live' molecules to find the one you want. If there is a 
+ * bigger plotting job one should use the getPosVector function instead.
+ */
+double SmoldynHub::getPos( unsigned int molIndex, unsigned int num, 
 			unsigned int dim )
 {
+	assert( dim < 3 );
+	unsigned int count = 0;
+	int smolIndex = molIndex + 1; // Add in the extra null molecule index
+
+	// i = 0 is fixed molecules, i = 1 is mobile.
+	for ( unsigned int i = 0; i < 2; i++ ) {
+		moleculestruct** live = simptr_->mols->live[ i ];
+		moleculestruct** live_end = live + simptr_->mols->nl[ i ];
+		while ( live < live_end ) {
+			if ( ( *(live++) )->ident == smolIndex ) {
+				if ( count == num ) {
+					return ( *live )->pos[dim];
+				}
+				count++;
+			}
+		}
+	}
 	return 0.0;
 }
 
@@ -295,9 +319,27 @@ void SmoldynHub::setPosVector( unsigned int molIndex,
 {
 }
 
+/**
+ * This gets the position of all molecules of the specified molecule 
+ * species molIndex, on dimension dim.
+ */
 void SmoldynHub::getPosVector( unsigned int molIndex,
 			vector< double >& value, unsigned int dim )
 {
+	assert( dim < 3 );
+	int smolIndex = molIndex + 1; // Add in the extra null molecule index
+	value.resize( 0 );
+
+	// i = 0 is fixed molecules, i = 1 is mobile.
+	for ( unsigned int i = 0; i < 2; i++ ) {
+		moleculestruct** live = simptr_->mols->live[ i ];
+		moleculestruct** live_end = live + simptr_->mols->nl[ i ];
+		while ( live < live_end ) {
+			if ( ( *(live++) )->ident == smolIndex ) {
+				value.push_back( ( *live )->pos[dim] );
+			}
+		}
+	}
 }
 
 void SmoldynHub::setNinit( unsigned int molIndex, unsigned int value )
@@ -411,12 +453,12 @@ void SmoldynHub::reinitFuncLocal( Element* e, ProcInfo info )
 void SmoldynHub::completeReacSetupLocal( const string& path )
 {
 	simptr_->boxs->mpbox = 5.0;
-	simptr_->wlist[0]->pos = -1.0e-5;
-	simptr_->wlist[1]->pos = 1.0e-5;
-	simptr_->wlist[2]->pos = -1.0e-5;
-	simptr_->wlist[3]->pos = 1.0e-5;
-	simptr_->wlist[4]->pos = -1.0e-5;
-	simptr_->wlist[5]->pos = 1.0e-5;
+	simptr_->wlist[0]->pos = -2.0e-5;
+	simptr_->wlist[1]->pos = 2.0e-5;
+	simptr_->wlist[2]->pos = -2.0e-5;
+	simptr_->wlist[3]->pos = 2.0e-5;
+	simptr_->wlist[4]->pos = -2.0e-5;
+	simptr_->wlist[5]->pos = 2.0e-5;
 
 	////////////////////////////////////////////////////////////////
 	//  On now to reactions.
@@ -475,7 +517,13 @@ void SmoldynHub::completeReacSetupLocal( const string& path )
 				"r0_%d", reacIndex );
 		} else if ( numForward == 1 ) {
 			reacIndex = num1Order++;
-			AddRxns2Struct( simptr_->rxn[1], 1 + molIndex[0], 1 , maxident );
+
+			// The 1 is the # of reactions added.
+			AddRxns2Struct( simptr_->rxn[1], 
+				1 + molIndex[0], MSsoln ,
+				0, MSsoln,
+				1, maxident ); 
+			
 			AddRxnProds2Struct( simptr_->rxn[1], reacIndex, numProds, 3 );
 			for ( unsigned int j = 0; j < numProds; j++ ) {
 				simptr_->rxn[1]->prod[reacIndex][j]->ident = 1 + molIndex[ numForward + j ];
@@ -490,7 +538,10 @@ void SmoldynHub::completeReacSetupLocal( const string& path )
 		} else if ( numForward == 2 ) {
 			reacIndex = num2Order++;
 			int i = ( 1 + molIndex[0] ) * maxident + molIndex[1] + 1;
-			AddRxns2Struct( simptr_->rxn[2], i, 1, maxident );
+			AddRxns2Struct( simptr_->rxn[2], 
+				1 + molIndex[0], MSsoln,	// Identifies first substrate
+				1 + molIndex[1], MSsoln,	// Identifies second substrate
+				1, maxident ); // 1 is the # of reactions added
 			AddRxnProds2Struct( simptr_->rxn[2], reacIndex, numProds, 3 );
 			for ( unsigned int j = 0; j < numProds; j++ ) {
 				simptr_->rxn[2]->prod[reacIndex][j]->ident = 1 + molIndex[ numForward + j ];
@@ -896,7 +947,8 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 		strncpy( simptr_->name[j], ( *i )->name().c_str(), 255 );
 		double D;
 		get< double >( *i, "D", D );
-		D = 1.0e-13; // a reasonable number.
+		cout << "Diff const of " << (*i)->name() << " = " << D << endl;
+		// D = 1.0e-12; // a reasonable number.
 		simptr_->mols->difc[j][ MSsoln ] = D;
 		// don't need to do: moleculeptr mp = molalloc( getGeomDim( *i ) );
 		// don't need to do: mp->serno = j;
@@ -911,7 +963,7 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 			// hemispheres and with a 0.5 micron nucleus in the middle.
 			// So we want them all in a little cube of 0.5 micron side
 			// at 0.5 microns to the right of the origin.
-			d[ k ]->pos[0] = mtrand() * 0.5e-6 + 0.25e-6;
+			d[ k ]->pos[0] = mtrand() * 0.5e-6 + 5e-6;
 			d[ k ]->pos[1] = mtrand() * 0.5e-6 - 0.25e-6;
 			d[ k ]->pos[2] = mtrand() * 0.5e-6 - 0.25e-6;
 			d[ k-- ]->ident = j;
