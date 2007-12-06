@@ -111,6 +111,11 @@ const Cinfo* initStochSynchanCinfo()
                                  GFCAST( &StochSynchan::getReleaseP ),
                                  RFCAST( &StochSynchan::setReleaseP )
                     ),
+                new LookupFinfo( "releaseCount",
+                                 LookupFtype< double, unsigned int>::global(),
+                                 GFCAST( &StochSynchan::getReleaseCount ),
+                                 &dummyFunc
+                    ),
                 
 ///////////////////////////////////////////////////////
 // Shared message definitions
@@ -314,6 +319,17 @@ double StochSynchan::getReleaseP( const Element* e, const unsigned int& i )
 	return 0.0;
 }
 
+double StochSynchan::getReleaseCount( const Element* e, const unsigned int& i )
+{
+	vector< StochSynInfo >& synapses = 
+			static_cast< StochSynchan* >( e->data() )->synapses_;
+	if ( i < synapses.size() )
+            return (synapses[i].hasReleased? 1.0 : 0.0);
+	cout << "Error: StochSynchan::getReleaseCount : Index " << i << 
+			" out of range\n";
+	return 0.0;
+}
+
 unsigned int StochSynchan::updateNumSynapse( const Element* e )
 {
 	static const Finfo* synFinfo = initStochSynchanCinfo()->findFinfo( "synapse" );
@@ -405,8 +421,14 @@ void StochSynchan::innerSynapseFunc( const Conn& c, double time )
 	// This goes into a priority_queue sorted by delay_.
         if ( mtrand() < synapses_[index].releaseP )
         {
-            pendingEvents_.push(synapses_[index].event( time ));                                
-        }     
+            pendingEvents_.push(synapses_[index].event( time ));
+            synapses_[index].hasReleased = true;            
+        }
+        else
+        {
+            synapses_[index].hasReleased = false;
+        }
+        
 }
 void StochSynchan::synapseFunc( const Conn& c, double time )
 {
