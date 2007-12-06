@@ -125,6 +125,7 @@ class Shell
 		static void stop( const Conn& c );
 		static void step( const Conn& c, double time );
 		static void requestClocks( const Conn& c );
+		static void requestCurrTime( const Conn& c );
 
 		//////////////////////////////////////////////////////////
 		// Major input functions.

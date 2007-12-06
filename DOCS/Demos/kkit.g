@@ -63,6 +63,6 @@ end
 
 function complete_loading
 	reset
-	step {MAXTIME} -t
-	do_save_all_plots glug.plot
+//	step {MAXTIME} -t
+//	do_save_all_plots glug.plot
 end
