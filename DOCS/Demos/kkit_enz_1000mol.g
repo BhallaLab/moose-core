@@ -1,7 +1,7 @@
 //genesis
 // kkit Version 11 flat dumpfile
  
-// Saved on Sun Nov 11 23:48:18 2007
+// Saved on Wed Dec  5 12:30:45 2007
  
 include kkit {argv 1}
  
@@ -48,15 +48,16 @@ simobjdump transport input output alloced step_mode stepsize dt delay clock \
   kf xtree_fg_req xtree_textfg_req x y z
 simobjdump proto x y z
 simobjdump text str
-simundump geometry /kinetics/geometry 0 1.6667e-21 3 sphere "" white black 2 -1 0
-simundump kpool /kinetics/P 0 0 0 0 0 0 0 0 1000 0 /kinetics/geometry 62 \
+simundump geometry /kinetics/geometry 0 1.6667e-21 3 sphere "" white black 2 \
+  -1 0
+simundump kpool /kinetics/P 0 1e-12 0 0 0 0 0 0 1000 0 /kinetics/geometry 62 \
   black 1 2 0
-simundump kpool /kinetics/E 0 0 1 1 1000 1000 0 0 1000 0 /kinetics/geometry \
-  33 black -1 0 0
+simundump kpool /kinetics/E 0 1e-12 1 1 1000 1000 0 0 1000 0 \
+  /kinetics/geometry 33 black -1 0 0
 simundump kenz /kinetics/E/kenz 0 0 0 0 0 1000 1e-04 0.4 0.1 0 0 "" red 33 "" \
   -1 1 0
-simundump kpool /kinetics/S 0 0 1 1 1000 1000 0 0 1000 0 /kinetics/geometry 8 \
-  black -3 2 0
+simundump kpool /kinetics/S 0 1e-12 1 1 1000 1000 0 0 1000 0 \
+  /kinetics/geometry 8 black -3 2 0
 simundump xgraph /graphs/conc1 0 0 100 0 1 0
 simundump xgraph /graphs/conc2 0 0 100 0 1 0
 simundump xplot /graphs/conc1/S.Co 3 524288 \

@@ -1,6 +1,6 @@
 //moose
 include kkit_enz_1000mol.g
-MAXTIME = 10
+MAXTIME = 20
 
 create neutral /kinetics/geometry
 create KinCompt /kinetics/geometry/cytoplasm
@@ -21,13 +21,13 @@ ce ^
 	setfield cap1 x[1] 0.5e-5
 	setfield cap1 y[1] 0
 	setfield cap1 z[1] 0
-	setfield cap1 x[2] 0.5e-5
+	setfield cap1 x[2] -0.5e-5
 	setfield cap1 y[2] 0
 	setfield cap1 z[2] 0
 
-	showfield cap1 x[0]
-	showfield cap1 x[1]
-	showfield cap1 x[2]
+// 	showfield cap1 x[0]
+// 	showfield cap1 x[1]
+// 	showfield cap1 x[2]
 
 	create CylPanel cyl
 	setfield cyl x[0] 1.5e-5
@@ -38,9 +38,9 @@ ce ^
 	setfield cyl z[1] 0
 	setfield cyl x[2] 0.5e-5
 
-	showfield cyl x[0]
-	showfield cyl x[1]
-	showfield cyl x[2]
+// 	showfield cyl x[0]
+// 	showfield cyl x[1]
+// 	showfield cyl x[2]
 
 	create HemispherePanel cap2
 	setfield cap2 x[0] -1.5e-5
@@ -49,13 +49,13 @@ ce ^
 	setfield cap2 x[1] 0.5e-5
 	setfield cap2 y[1] 0
 	setfield cap2 z[1] 0
-	setfield cap2 x[2] -0.5e-5
+	setfield cap2 x[2] 0.5e-5
 	setfield cap2 y[2] 0
 	setfield cap2 z[2] 0
 
-	showfield cap2 x[0]
-	showfield cap2 x[1]
-	showfield cap2 x[2]
+// 	showfield cap2 x[0]
+// 	showfield cap2 x[1]
+// 	showfield cap2 x[2]
 
 	addmsg cap1/neighborSrc cyl/neighbor
 	addmsg cap2/neighborSrc cyl/neighbor
@@ -83,3 +83,5 @@ setfield /kinetics method Smoldyn
 reset
 step {MAXTIME} -t
 do_save_all_plots smol.plot
+/*
+*/

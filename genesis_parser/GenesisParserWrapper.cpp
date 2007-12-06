@@ -104,6 +104,8 @@ const Cinfo* initGenesisParserCinfo()
 		new DestFinfo( "recvClocks", 
 					Ftype1< vector< double > >::global(), 
 					RFCAST( &GenesisParserWrapper::recvClocks ) ),
+		new SrcFinfo( "requestCurrentTime", Ftype0::global() ),
+		// Returns time in the default return value.
 		
 		///////////////////////////////////////////////////////////////
 		// Message info functions
@@ -249,6 +251,8 @@ static const unsigned int stepSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser.step" );
 static const unsigned int requestClocksSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.requestClocks" );
+static const unsigned int requestCurrentTimeSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.requestCurrentTime" );
 static const unsigned int listMessagesSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.listMessages" );
 static const unsigned int copySlot = 
@@ -2776,9 +2780,19 @@ void do_floatformat(int argc, const char** const argv, Id s ){
 	set_float_format(format);
 }
 
-float do_getstat(int argc, const char** const argv, Id s ){
-	cout << "getstat::Not yet implemented" << endl;
-	return 0;
+float do_getstat(int argc, const char** const argv, Id s )
+{
+	send0( s(), requestCurrentTimeSlot );
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( s()->data() );
+	double ret = atof( gpw->getFieldValue().c_str() );	
+	return static_cast< float >( ret );
+}
+
+void do_showstat(int argc, const char** const argv, Id s )
+{
+	float time = do_getstat( argc, argv, s );
+	cout << "current simulation time = " << time << endl;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -2894,6 +2908,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "INSTANTZ", reinterpret_cast< slifunc > ( do_INSTANTZ ), "int" );
 	AddFunc( "floatformat", do_floatformat, "void" );
 	AddFunc( "getstat", reinterpret_cast< slifunc > ( do_getstat ), "float" );
+	AddFunc( "showstat", do_showstat, "void" );
 }
 
 //////////////////////////////////////////////////////////////////

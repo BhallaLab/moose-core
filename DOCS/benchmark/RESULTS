@@ -19,7 +19,7 @@ MOOSE		kadam	rk2imp	1000	140	No unit tests or assertions.
 MOOSE		kadam	ee	1000	>150	No unit tests or assertions.
 oldMOOSE	kadam	rk5	1000	24
 
-Script: AMPAR_traff.g:
+Script: AMPAR_traff.g: cleared
 oldMOOSE	kadam	rk5	1e5	12
 MOOSE		kadam	rk5	1e5	16	No unit tests or assertions.
 
@@ -33,8 +33,19 @@ GENESIS		kadam	ee	500	72	Reference.
 
 Script: mega_1.6e-21.g:
 MOOSE		kadam	rk5	20	Failed even for 0.001 sec.
+					Issue with volume scaling.
 oldMOOSE	kadam	rk5	20	74
 MOOSE		kadam	ee	20	205
 GENESIS		kadam	ee	20	105	
 
+Script: acc84_withplots.g: Cleared
+GENESIS		kadam	ee	50	311	Uses 2 sec transient time.
+MOOSE		kadam	rk5	50	72	Looks OK. Needs scaling to uM,
+						using 1.3e-5 seems to fit OK
+						for all 4 plots.
+OLDMOOSE	kadam	rk5	50	42	Looks fine.
+
+Script: group68.g: production simulation from Pragati.
+GENESIS		kadam	ee	50	311	Uses 2 sec transient time.
+MOOSE		kadam	rk5	1000	14.8	
 
