@@ -27,6 +27,8 @@ extern "C"{
 #include "Smoldyn/source/smolload.h"
 }
 
+const double SmoldynHub::MINIMUM_DT = 1.0e-6;
+
 const Cinfo* initSmoldynHubCinfo()
 {
 	static Finfo* processShared[] =
@@ -123,6 +125,11 @@ const Cinfo* initSmoldynHubCinfo()
 			GFCAST( &SmoldynHub::getPath ),
 			RFCAST( &SmoldynHub::setPath )
 		),
+		new ValueFinfo( "dt", 
+			ValueFtype1< double >::global(),
+			GFCAST( &SmoldynHub::getDt ),
+			RFCAST( &SmoldynHub::setDt )
+		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -218,7 +225,7 @@ void unzombify( const Conn& c );
 ///////////////////////////////////////////////////
 
 SmoldynHub::SmoldynHub()
-	: simptr_( 0 )
+	: simptr_( 0 ), dt_( 0.01 )
 {
 		;
 }
@@ -426,13 +433,28 @@ unsigned int SmoldynHub::numEnz() const
 string SmoldynHub::getPath( const Element* e )
 {
 	return static_cast< const SmoldynHub* >( e->data() )->path_;
-	return "";
 }
 
 void SmoldynHub::setPath( const Conn& c, string value )
 {
 	Element* e = c.targetElement();
 	static_cast< SmoldynHub* >( e->data() )->localSetPath( e, value );
+}
+
+double SmoldynHub::getDt( const Element* e )
+{
+	return static_cast< const SmoldynHub* >( e->data() )->dt_;
+}
+
+void SmoldynHub::setDt( const Conn& c, double value )
+{
+	if ( value > SmoldynHub::MINIMUM_DT )
+		static_cast< SmoldynHub* >( c.data() )->dt_ = value;
+	else
+		cout << "Warning: Assigning dt to SmoldynHub '" <<
+			c.targetElement()->name() << "' : requested value = " << 
+			value << " out of range, ignored.\nUsing old dt = " <<
+			static_cast< const SmoldynHub* >( c.data() )->dt_ << endl;
 }
 
 ///////////////////////////////////////////////////
@@ -578,11 +600,24 @@ void SmoldynHub::completeReacSetupLocal( const string& path )
 	simptr_->time = 0.0;
 	simptr_->tmin = 0.0;
 	simptr_->tmax = 100.0;
+
+	// The SmoldynHub has to be informed about a preferred dt. This is
+	// automatically done in the KineticManager::smoldynSetup function,
+	// using an estimate based on Euler accuracy for dt. Perhaps this
+	// can be fine-tuned for Smoldyn numerical methods.
+	simptr_->dt = dt_;
+	
+	/*
 	// Ooops. Smoldyn currently needs dt to be set _before_ calling 
 	// setupsim. So I need to bung it in somehow.
 	// Steve tells me that he'll put in this flexibility some time soon,
 	// so for now I'm going to kludge it.
-	simptr_->dt = 0.01;
+	Id t0( "/sched/cj/t0" );
+	assert( t0.good() );
+	double dt = 0.1;
+	get< double >( t0(), "dt", dt );
+	simptr_->dt = dt;
+	*/
 
 	// Here we fill up the surface info.
 	setSurfaces( path );
@@ -591,7 +626,7 @@ void SmoldynHub::completeReacSetupLocal( const string& path )
 	// scmdsetfnames( simptr_->cmds, "smoldyn.coords" );
 	scmdstr2cmd( simptr_->cmds, "e molcount smoldyn.out", simptr_->tmin, simptr_->tmax, simptr_->dt );
 
-	scmdstr2cmd( simptr_->cmds, "n 10 listmols3 P smoldyn.coords", simptr_->tmin, simptr_->tmax, simptr_->dt );
+	scmdstr2cmd( simptr_->cmds, "n 1 listmols3 P smoldyn.coords", simptr_->tmin, simptr_->tmax, simptr_->dt );
 	if ( setupsim( NULL, NULL, &simptr_, NULL ) ) {
 		cout << "Warning: SmoldynHub::reinitFuncLocal: Setupsim failed\n";
 	}
@@ -1264,6 +1299,11 @@ void SmoldynHub::clearFunc( const Conn& c )
  * For the molecule set/get operations, the lookup order is identical
  * to the message order. So we don't need an intermediate table.
  */
+/*
+ * Not used. Instead we simply define a 'Particle', which is a zombie
+ * for a molecule with extra fields that can be accessed when solved
+ * with a SmoldynHub.
+ * 
 void SmoldynHub::setMolN( const Conn& c, double value )
 {
 	cout << "void SmoldynHub::setMolN( const Conn& c, double value= " <<
@@ -1287,6 +1327,7 @@ double SmoldynHub::getMolNinit( const Element* e )
 	cout << "double SmoldynHub::getMolNinit( const Element* e )\n";
 	return 0.0;
 }
+*/
 
 ///////////////////////////////////////////////////
 // Zombie object set/get function replacements for reactions
@@ -1340,7 +1381,7 @@ double SmoldynHub::getReacKb( const Element* e )
 void SmoldynHub::setEnzK1( const Conn& c, double value )
 {
 	cout << "void SmoldynHub::setEnzK1( const Conn& c, double value= "
-		<< value << ")\n";
+		<< value << "): Not yet implemented.\n";
 }
 
 // getEnzK1 does not really need to go to the solver to get the value,
@@ -1349,8 +1390,7 @@ void SmoldynHub::setEnzK1( const Conn& c, double value )
 // ValueFinfo.
 double SmoldynHub::getEnzK1( const Element* e )
 {
-	cout << "double SmoldynHub::getEnzK1( const Element* e )\n";
-	return 0.0123;
+	return Enzyme::getK1( e );
 }
 
 void SmoldynHub::setEnzK2( const Conn& c, double value )
@@ -1359,7 +1399,7 @@ void SmoldynHub::setEnzK2( const Conn& c, double value )
 
 double SmoldynHub::getEnzK2( const Element* e )
 {
-	return 0.0;
+	return Enzyme::getK2( e );
 }
 
 void SmoldynHub::setEnzK3( const Conn& c, double value )
@@ -1368,7 +1408,7 @@ void SmoldynHub::setEnzK3( const Conn& c, double value )
 
 double SmoldynHub::getEnzK3( const Element* e )
 {
-	return 0.0;
+	return Enzyme::getK3( e );
 }
 
 // This function does rather nasty scaling of all rates so as to
@@ -1386,7 +1426,7 @@ void SmoldynHub::setEnzKm( const Conn& c, double value )
 
 double SmoldynHub::getEnzKm( const Element* e )
 {
-	return 0.0;
+	return Enzyme::getKm( e );
 }
 
 
