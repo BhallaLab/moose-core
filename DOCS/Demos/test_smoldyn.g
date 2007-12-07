@@ -21,9 +21,12 @@ ce ^
 	setfield cap1 x[1] 0.5e-5
 	setfield cap1 y[1] 0
 	setfield cap1 z[1] 0
-	setfield cap1 x[2] -0.5e-5
+	setfield cap1 x[2] -1 // This is outward vector
 	setfield cap1 y[2] 0
 	setfield cap1 z[2] 0
+	setfield cap1 x[3] 1 // This is front: pointing outside.
+	setfield cap1 y[3] 0
+	setfield cap1 z[3] 0
 
 // 	showfield cap1 x[0]
 // 	showfield cap1 x[1]
@@ -37,6 +40,7 @@ ce ^
 	setfield cyl y[1] 0
 	setfield cyl z[1] 0
 	setfield cyl x[2] 0.5e-5
+	setfield cyl z[3] 1
 
 // 	showfield cyl x[0]
 // 	showfield cyl x[1]
@@ -49,9 +53,12 @@ ce ^
 	setfield cap2 x[1] 0.5e-5
 	setfield cap2 y[1] 0
 	setfield cap2 z[1] 0
-	setfield cap2 x[2] 0.5e-5
+	setfield cap2 x[2] 1 // This is outward vector
 	setfield cap2 y[2] 0
 	setfield cap2 z[2] 0
+	setfield cap2 x[3] 1 // This is front: pointing outward.
+	setfield cap2 y[3] 0
+	setfield cap2 z[3] 0
 
 // 	showfield cap2 x[0]
 // 	showfield cap2 x[1]
@@ -68,6 +75,9 @@ create SpherePanel nucleus
 	setfield nucleus y[0] 0
 	setfield nucleus z[0] 0
 	setfield nucleus x[1] 0.45e-5
+	setfield nucleus x[2] 1 // Front: pointing outside
+	setfield nucleus y[2] 0
+	setfield nucleus z[2] 0
 
 	showfield nucleus x[0]
 	showfield nucleus x[1]

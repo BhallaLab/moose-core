@@ -85,6 +85,11 @@ const Cinfo* initKineticManagerCinfo()
 			GFCAST( &KineticManager::getRecommendedDt ), 
 			dummyFunc
 		),
+		new ValueFinfo( "eulerError", 
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticManager::getEulerError ), 
+			RFCAST( &KineticManager::setEulerError )
+		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -208,7 +213,8 @@ KineticManager::KineticManager()
 	variableDt_( 1 ),
 	multiscale_( 0 ),
 	singleParticle_( 0 ),
-	recommendedDt_( 0.001 )
+	recommendedDt_( 0.001 ),
+	eulerError_( 0.01 )
 {
 		;
 }
@@ -307,6 +313,15 @@ double KineticManager::getRecommendedDt( const Element* e )
 	return static_cast< KineticManager* >( e->data() )->recommendedDt_;
 }
 
+void KineticManager::setEulerError( const Conn& c, double value )
+{
+	static_cast< KineticManager* >( c.data() )->eulerError_ = value;
+}
+
+double KineticManager::getEulerError( const Element* e )
+{
+	return static_cast< KineticManager* >( e->data() )->eulerError_;
+}
 
 //////////////////////////////////////////////////////////////////
 // Here we set up some of the messier inner functions.
@@ -393,7 +408,7 @@ Id gillespieSetup( Element* e, const string& method )
 }
 
 // Returns the solver set up for GSL integration, on the element e
-Id smoldynSetup( Element* e, const string& method )
+Id smoldynSetup( Element* e, const string& method, double recommendedDt )
 {
 	Id solveId;
 	if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" ) ) {
@@ -422,6 +437,7 @@ Id smoldynSetup( Element* e, const string& method )
 	Element*  sh = Neutral::create( "SmoldynHub", "SmoldynHub", solve,
 		Id::scratchId() );
 	assert ( sh != 0 );
+	set< double >( sh, "dt", recommendedDt );
 	set< bool >( ks, "useOneWayReacs", 1 );
 	ks->findFinfo( "hub" )->add( ks, sh, sh->findFinfo( "hub" ) );
 	string simpath = e->id().path() + "/##";
@@ -447,7 +463,7 @@ void KineticManager::setupSolver( Element* e )
 	} else if ( stochastic_ == 1 && multiscale_ == 0 && singleParticle_ == 0 ) {
 		Id solveId = gillespieSetup( e, method_ );
 	} else if ( stochastic_ == 1 && multiscale_ == 0 && singleParticle_ == 1 ) {
-		Id solveId = smoldynSetup( e, method_ );
+		Id solveId = smoldynSetup( e, method_, recommendedDt_ );
 	}
 }
 
@@ -458,7 +474,7 @@ void KineticManager::setupSolver( Element* e )
  * graphing. But there are complications yet to be sorted out, for the
  * case of external tables.
  */
-void KineticManager::setupDt( Element* e )
+void KineticManager::setupDt( Element* e, double dt )
 {
 	static char* fixedDtMethods[] = {
 		"ee", 
@@ -466,8 +482,6 @@ void KineticManager::setupDt( Element* e )
 	};
 	static unsigned int numFixedDtMethods = 
 		sizeof( fixedDtMethods ) / sizeof( char* );
-	static const double EULER_ACCURACY = 0.01; 
-		// Actually this is pretty tight for exponential Euler
 
 	Id cj( "/sched/cj" );
 	Id t0( "/sched/cj/t0" );
@@ -477,9 +491,11 @@ void KineticManager::setupDt( Element* e )
 	assert( t0.good() );
 	assert( t1.good() );
 
+	/*
 	Element* elm;
 	string field;
 	double dt = estimateDt( e, &elm, field, EULER_ACCURACY );
+	*/
 
 	for ( unsigned int i = 0; i < numFixedDtMethods; i++ ) {
 		if ( method_ == fixedDtMethods[i] ) {
@@ -535,8 +551,12 @@ void KineticManager::reschedFunc( const Conn& c )
 
 void KineticManager::reschedFuncLocal( Element* e )
 {
+
+	Element* elm;
+	string field;
+	double dt = estimateDt( e, &elm, field, eulerError_ );
 	setupSolver( e );
-	setupDt( e );
+	setupDt( e, dt );
 }
 
 /**
@@ -683,6 +703,8 @@ double KineticManager::findEnzPrdPropensity( Element* e ) const
  * assuming a forward Euler advance.
  * Also returns the element and field that have the highest propensity,
  * that is, the shortest dt.
+ * As a side-effect it assigns the KineticManager::recommendedDt_ to the
+ * calculated dt value.
  */
 #ifndef NDEBUG
 #include <limits>
