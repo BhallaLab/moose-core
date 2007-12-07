@@ -71,6 +71,9 @@ class SmoldynHub
 		static unsigned int getNenz( const Element* e );
 		unsigned int numEnz() const;
 
+		static double getDt( const Element* e );
+		static void setDt( const Conn& c, double value );
+
 		///////////////////////////////////////////////////
 		// Functions to override zombie field access funcs.
 		///////////////////////////////////////////////////
@@ -202,6 +205,8 @@ class SmoldynHub
 		vector< double >* S_;
 		vector< double >* Sinit_;
 		SparseMatrix* N_;
+		double dt_;
+		static const double MINIMUM_DT;
 };
 
 // Used by the solver

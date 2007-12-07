@@ -5222,5 +5222,35 @@ Now trying to bridge the Smoldyn and MOOSE setups.
 3. Tried to run the equivalent to UpiCell.txt, which is meant to be the
 	Smoldyn script equivalent of test_smoldyn.g. Crashed. Now fixed.
 
+Implemented first pass at getstat and showstat commands to help wit the testing.
+Found that sim is indeed going to 20 sec. Something wierd with Smoldyn
+stepping, then. 
+
+Checked in as revision 292 with unit test compile flags on, Smoldyn off.
+
+Tracked down problem with inconsistent runtimes. The internal Smoldyn dt was
+0.01 but the dt picked for MOOSE by the KineticManager::setupDt function
+was 0.008 ish. Need to make sure Smoldyn uses the right dt.
+
+Tried to use setupDt before setupSolver in KineticManager::reschedFuncLocal.
+Fails because default rk5 method expects a solver.
+If I do it the other way I delete the solver too many times. Also I don't then
+get the estimated dt to put into Smoldyn.
+Option 1: Just estimate dt, and put it in Smoldyn indept of the setupDt func.
+
+==============================================================================
+7 Dec 2007
+Kludged together a preliminary estimation of dt, followed by the assignment
+to the SmoldynHub to use for setting up the solver. Now Steven has implemented
+a dt assignment function but it is not yet released.
+
+Still problematic because dt gets reassigned when the simulation starts.
+To a different value.  Not at all clear why it should do so.
+OK, sorted out. I had not put in the correct function for looking up enzyme
+values.
+
+Next puzzle: The smoldyn diagnostics look the same, but the outcome is very
+different. 3x fewer P molecules in the MOOSE version, and they seem to be
+diffusing much more slowly in MOOSE.
 
 ==============================================================================
