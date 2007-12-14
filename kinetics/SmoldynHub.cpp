@@ -130,6 +130,11 @@ const Cinfo* initSmoldynHubCinfo()
 			GFCAST( &SmoldynHub::getDt ),
 			RFCAST( &SmoldynHub::setDt )
 		),
+		new ValueFinfo( "seed", 
+			ValueFtype1< unsigned int >::global(),
+			GFCAST( &SmoldynHub::getSeed ),
+			RFCAST( &SmoldynHub::setSeed )
+		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -225,7 +230,7 @@ void unzombify( const Conn& c );
 ///////////////////////////////////////////////////
 
 SmoldynHub::SmoldynHub()
-	: simptr_( 0 ), dt_( 0.01 )
+	: simptr_( 0 ), dt_( 0.01 ), seed_( 0 )
 {
 		;
 }
@@ -287,8 +292,27 @@ SmoldynHub* SmoldynHub::getHubFromZombie(
 }
 
 void SmoldynHub::setPos( unsigned int molIndex, double value, 
-			unsigned int i, unsigned int dim )
+			unsigned int num, unsigned int dim )
 {
+	assert( dim < 3 );
+	unsigned int count = 0;
+	int smolIndex = molIndex + 1; // Add in the extra null molecule index
+
+	// i = 0 is fixed molecules, i = 1 is mobile.
+	for ( unsigned int i = 0; i < 2; i++ ) {
+		moleculestruct** live = simptr_->mols->live[ i ];
+		moleculestruct** live_end = live + simptr_->mols->nl[ i ];
+		while ( live < live_end ) {
+			if ( ( *live )->ident == smolIndex ) {
+				if ( count == num ) {
+					( *live )->pos[dim] = value;
+					return;
+				}
+				++count;
+			}
+			++live;
+		}
+	}
 }
 
 /**
@@ -310,12 +334,13 @@ double SmoldynHub::getPos( unsigned int molIndex, unsigned int num,
 		moleculestruct** live = simptr_->mols->live[ i ];
 		moleculestruct** live_end = live + simptr_->mols->nl[ i ];
 		while ( live < live_end ) {
-			if ( ( *(live++) )->ident == smolIndex ) {
+			if ( ( *live )->ident == smolIndex ) {
 				if ( count == num ) {
 					return ( *live )->pos[dim];
 				}
-				count++;
+				++count;
 			}
+			++live;
 		}
 	}
 	return 0.0;
@@ -324,6 +349,21 @@ double SmoldynHub::getPos( unsigned int molIndex, unsigned int num,
 void SmoldynHub::setPosVector( unsigned int molIndex, 
 			const vector< double >& value, unsigned int dim )
 {
+	assert( dim < 3 );
+	int smolIndex = molIndex + 1; // Add in the extra null molecule index
+
+	// i = 0 is fixed molecules, i = 1 is mobile.
+	vector< double >::const_iterator v = value.begin();
+	for ( unsigned int i = 0; i < 2; i++ ) {
+		moleculestruct** live = simptr_->mols->live[ i ];
+		moleculestruct** live_end = live + simptr_->mols->nl[ i ];
+		while ( live < live_end && v != value.end() ) {
+			if ( ( *live )->ident == smolIndex ) {
+				( *live )->pos[dim] = *v++;
+			}
+			++live;
+		}
+	}
 }
 
 /**
@@ -342,9 +382,10 @@ void SmoldynHub::getPosVector( unsigned int molIndex,
 		moleculestruct** live = simptr_->mols->live[ i ];
 		moleculestruct** live_end = live + simptr_->mols->nl[ i ];
 		while ( live < live_end ) {
-			if ( ( *(live++) )->ident == smolIndex ) {
+			if ( ( *live )->ident == smolIndex ) {
 				value.push_back( ( *live )->pos[dim] );
 			}
+			++live;
 		}
 	}
 }
@@ -455,6 +496,16 @@ void SmoldynHub::setDt( const Conn& c, double value )
 			c.targetElement()->name() << "' : requested value = " << 
 			value << " out of range, ignored.\nUsing old dt = " <<
 			static_cast< const SmoldynHub* >( c.data() )->dt_ << endl;
+}
+
+unsigned int SmoldynHub::getSeed( const Element* e )
+{
+	return static_cast< const SmoldynHub* >( e->data() )->seed_;
+}
+
+void SmoldynHub::setSeed( const Conn& c, unsigned int value )
+{
+	static_cast< SmoldynHub* >( c.data() )->seed_ = value;
 }
 
 ///////////////////////////////////////////////////
@@ -606,6 +657,8 @@ void SmoldynHub::completeReacSetupLocal( const string& path )
 	// using an estimate based on Euler accuracy for dt. Perhaps this
 	// can be fine-tuned for Smoldyn numerical methods.
 	simptr_->dt = dt_;
+	simptr_->randseed = seed_;
+	srand( seed_ ); 
 	
 	/*
 	// Ooops. Smoldyn currently needs dt to be set _before_ calling 
@@ -993,6 +1046,11 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 		for ( unsigned int q = 0; q < maxq; q++ ) {
 			// Here we want to scatter the molecules in space. Not
 			// so easy if we have a funny geometry.
+			// It is up to the user to specify a starting position in
+			// the script file.
+			
+			/*
+			// As a default I'll put them all at zero.
 			// For now let's put them in one corner of the geometry,
 			// which is a 3 micron by 1 micron cylinder capped with 
 			// hemispheres and with a 0.5 micron nucleus in the middle.
@@ -1001,6 +1059,7 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 			d[ k ]->pos[0] = mtrand() * 0.5e-6 + 5e-6;
 			d[ k ]->pos[1] = mtrand() * 0.5e-6 - 0.25e-6;
 			d[ k ]->pos[2] = mtrand() * 0.5e-6 - 0.25e-6;
+			*/
 			d[ k-- ]->ident = j;
 		}
 		j++;
