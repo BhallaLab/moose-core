@@ -5285,3 +5285,4 @@ Next two steps:
 	its timestep, so that the OpenGL loop in Smoldyn still believes that it
 	is in control, while waiting for MOOSE to synchronize.
 
+Checked in as revision 293 with unit test compile flags on, Smoldyn on.
