@@ -5249,8 +5249,39 @@ To a different value.  Not at all clear why it should do so.
 OK, sorted out. I had not put in the correct function for looking up enzyme
 values.
 
+Checked in as revision 293 with unit test compile flags on, Smoldyn off.
+
 Next puzzle: The smoldyn diagnostics look the same, but the outcome is very
 different. 3x fewer P molecules in the MOOSE version, and they seem to be
 diffusing much more slowly in MOOSE.
 
 ==============================================================================
+13 Dec 2007
+Trying to get sims to run with same rand num seed as Smoldyn. Added 'seed'
+field to SmoldynHub. 
+
+Need a way to reset or reinit the smoldyn run after creating the smoldyn
+hub and setting parameters such as seed and the coords of the particles.
+
+==============================================================================
+14 Dec 2007
+Much progress with the Smoldyn interface. I can now assign the coordinates
+of points for initialization before starting off the model. Even better,
+the simulations now seem to agree. 
+
+Next two steps:
+- Implement multiscale models combining Smoldyn engine with other solvers
+	To do this I need to manage two things
+	- Coordinate timestep and function calls between SmoldynHub and
+	the GslInteg objects. SmoldynHub has to talk to an export list and
+	an import list that Smoldyn exposes for transfer of molecules.
+	- Do an extension to on the lines of the SUMTOTAL operation so that I 
+	can remove molecules from MOOSE objects according to some rule.
+	Furthermore, I have to link this rule to diffusion contants and the
+	surface that exchanges with the Smoldyn solver.
+- Implement threading to put Smoldyn on another thread so it can use its
+	OpenGL interface in conjunction with MOOSE.
+	The idea is that we need a barrier at the point where Smoldyn completes
+	its timestep, so that the OpenGL loop in Smoldyn still believes that it
+	is in control, while waiting for MOOSE to synchronize.
+
