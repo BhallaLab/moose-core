@@ -74,6 +74,9 @@ class SmoldynHub
 		static double getDt( const Element* e );
 		static void setDt( const Conn& c, double value );
 
+		static unsigned int getSeed( const Element* e );
+		static void setSeed( const Conn& c, unsigned int value );
+
 		///////////////////////////////////////////////////
 		// Functions to override zombie field access funcs.
 		///////////////////////////////////////////////////
@@ -190,11 +193,14 @@ class SmoldynHub
 
 
 	private:
-		// A pointer to the entire Smoldyn data structure
-		unsigned int nMol_;
-		unsigned int nBuf_;
-		unsigned int nSumTot_;
+		unsigned int nMol_; /// Number of molecules in model.
+		unsigned int nBuf_; /// Number of buffered molecules in model.
+		unsigned int nSumTot_; /// Number of sumtotalled molecules in model.
+
+		/// A pointer to the entire Smoldyn data structure
 		struct simstruct* simptr_;	
+
+		/// Path of objects managed by Smoldyn
 		string path_;
 		map< Element*, unsigned int > molMap_;
 		vector< unsigned int > molSumMap_;
@@ -205,7 +211,9 @@ class SmoldynHub
 		vector< double >* S_;
 		vector< double >* Sinit_;
 		SparseMatrix* N_;
-		double dt_;
+		double dt_;	// Timestep used by Smoldyn
+
+		unsigned int seed_; // Random number seed used by Smoldyn
 		static const double MINIMUM_DT;
 };
 
