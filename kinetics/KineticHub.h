@@ -11,6 +11,7 @@
 
 #ifndef _KineticHub_h
 #define _KineticHub_h
+
 class KineticHub
 {
 	public:
@@ -23,10 +24,12 @@ class KineticHub
 		static unsigned int getNreac( const Element* e );
 		static unsigned int getNenz( const Element* e );
 
+
 		///////////////////////////////////////////////////
 		// Dest function definitions
 		///////////////////////////////////////////////////
 		static void processFunc( const Conn& c, ProcInfo info );
+		void processFuncLocal( Element* hub, ProcInfo info );
 		static void reinitFunc( const Conn& c, ProcInfo info );
 		static void rateTermFunc( const Conn& c,
 			vector< RateTerm* >* rates, 
@@ -77,6 +80,11 @@ class KineticHub
 		
 		/// Clears out all messages to solved objects.
 		static void clearFunc( const Conn& c );
+
+		///////////////////////////////////////////////////
+		// Dest functions for handlng inter-hub flux 
+		///////////////////////////////////////////////////
+		static void flux( const Conn& c, vector< double > influx );
 		
 		///////////////////////////////////////////////////
 		// Overrides Neutral::destroy to clean up zombies.
@@ -138,5 +146,14 @@ class KineticHub
 		vector< unsigned int > enzMap_;
 		vector< unsigned int > mmEnzMap_;
 		vector< unsigned int > molSumMap_;
+
+		/**
+		 * The next field manages exchange of molecules with other
+		 * solvers, typically diffusive exchange at specified junctions
+		 * between the spatial domains of the respective solvers.
+		 * Indexed by # of target hub
+		 */
+		vector< InterHubFlux > flux_;
 };
+
 #endif // _KineticHub_h
