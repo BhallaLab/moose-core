@@ -10,9 +10,11 @@
 
 
 #include "moose.h"
+#include <math.h>
 #include "../element/Neutral.h"
 #include "RateTerm.h"
 #include "SparseMatrix.h"
+#include "InterHubFlux.h"
 #include "KineticHub.h"
 #include "Molecule.h"
 #include "Reaction.h"
@@ -97,6 +99,24 @@ const Cinfo* initKineticHubCinfo()
 		),
 	};
 
+	/**
+	 * This is used to handle fluxes between sets of molecules
+	 * solved in this KineticHub and solved by other Hubs. It is
+	 * implemented as a reciprocal vector of influx and efflux.
+	 * The influx during each timestep is added directly to the 
+	 * molecule number in S_. The efflux is computed by the
+	 * Hub, and subtracted from S_, and sent on to the target Hub.
+	 * Its main purpose, as the name implies, is for diffusive flux
+	 * across an interface. Typically used for mixed simulations where
+	 * the molecules in different spatial domains are solved differently.
+	 */
+	static Finfo* fluxShared[] =
+	{
+		new SrcFinfo( "efflux", Ftype1< vector < double > >::global() ),
+		new DestFinfo( "influx", Ftype1< vector< double > >::global(), 
+			RFCAST( &KineticHub::flux )),
+	};
+
 	static Finfo* kineticHubFinfos[] =
 	{
 	///////////////////////////////////////////////////////
@@ -117,6 +137,7 @@ const Cinfo* initKineticHubCinfo()
 			GFCAST( &KineticHub::getNenz ), 
 			&dummyFunc
 		),
+
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -146,6 +167,8 @@ const Cinfo* initKineticHubCinfo()
 			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "mmEnzSolve", zombieShared, 
 			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "flux", fluxShared, 
+			      sizeof( fluxShared ) / sizeof( Finfo* ) ),
 		/*
 		new SolveFinfo( "molSolve", molFields, 
 			sizeof( molFields ) / sizeof( const Finfo* ) );
@@ -179,12 +202,9 @@ static const Finfo* molSumFinfo =
 
 static const unsigned int molSumSlot =
 	initKineticHubCinfo()->getSlotIndex( "molSum" );
-/*
-static const unsigned int reacSlot =
-	initMoleculeCinfo()->getSlotIndex( "reac" );
-static const unsigned int nSlot =
-	initMoleculeCinfo()->getSlotIndex( "nSrc" );
-*/
+
+static const unsigned int fluxSlot =
+	initKineticHubCinfo()->getSlotIndex( "flux.efflux" );
 
 void redirectDestMessages(
 	Element* hub, Element* e, const Finfo* hubFinfo, const Finfo* eFinfo,
@@ -246,7 +266,6 @@ void KineticHub::childFunc( const Conn& c, int stage )
 	Neutral::childFunc( c, stage );
 }
 
-
 /**
  * Here we add external inputs to a molecule. This message replaces
  * the SumTot input to a molecule when it is used for controlling its
@@ -261,6 +280,162 @@ void KineticHub::molSum( const Conn& c, double val )
 	assert( index < kh->molSumMap_.size() );
 	( *kh->S_ )[ kh->molSumMap_[ index ] ] = val;
 }
+
+
+/**
+ * flux:
+ * This function handles molecule transfer into and out of the solver.
+ * Useful as an interface between solvers operating on different
+ * scales.
+ *
+ * Flux will typically work with a large number of molecules all diffusing
+ * through the same spatial interface between the solvers.
+ *
+ * Each pair of solvers will typically exchange only a single Flux message.
+ * A given solver may have to manage multiple target fluxes. Consider a
+ * dendrite with numerous spines each solved using Smoldyn.
+ *
+ * Internally the solver will have to stuff the flux values into its
+ * S_ entries, and figure out outgoing fluxes from each of the affected
+ * S_ entries. Usually the outgoing flux should be :
+ * S_ * dt * D * XA
+ * dt and XA is common to all terms in the message, but D is 
+ * molecule-specific. Simplest to precalculate this term (with possible
+ * exception of dt) and have a local array in the hub to do the scaling.
+ *
+ * May need a further extension in case the timesteps differ. Here
+ * we would accumulate the flux information each time the message was
+ * invoked, and the Process operation would clean up the accumulated
+ * flux entries. Could get numerically unpleasant. 
+ *
+ * The responsibility for sending the 'flux' message to a remote target
+ * rests with the _processFunc_ of the hub. Need to use the system clock
+ * here as a synchonization enforcer, because the solvers at either end
+ * of the flux message may have internal step sizes. For the Kinetic
+ * ODE solvers, this means that the KineticManager must work out a 
+ * sensible timestep.
+ *
+ * This is good for handling flux terms, but requires an extension to
+ * Molecules etc to handle a new message type if we want to operate 
+ * without solvers.
+ *
+ * It requires that someone should provide the outflux rate constant.
+ * This could perhaps be set directly in an array on the Kinetic Hub.
+ *
+ * The other drawback is that it means that all solvers will need an
+ * equivalent flux operation.
+ */
+
+void KineticHub::flux( const Conn& c, vector< double > influx )
+{
+	Element* hub = c.targetElement();
+	unsigned int index = hub->connDestRelativeIndex( c, fluxSlot );
+	KineticHub* kh = static_cast< KineticHub* >( hub->data() );
+
+	assert( index < kh->flux_.size() );
+	/**
+	 * The fluxMap is a key data structure here. It has pointers to
+	 * the array entries in S_, for the molecules encountering external
+	 * fluxes.
+	 */
+	vector< FluxTerm >& term = kh->flux_[ index ].term_;
+	assert ( influx.size() == term.size() );
+	vector< FluxTerm >::iterator i;
+	vector< double >::iterator j = influx.begin();
+	for ( i = term.begin(); i != term.end(); i++ )
+		*( i->map_ ) += *j++; // map points to the array entry in S_
+}
+
+/**
+ * The processFunc handles the efflux from the hub.
+ * For now I have a separate and persistent vector for all the efflux
+ * rates, but this is not really needed and if it is expensive could
+ * easily be made a local variable.
+ */
+void KineticHub::processFuncLocal( Element* hub, ProcInfo info )
+{
+	unsigned int j;
+	vector< FluxTerm >::iterator i;
+
+	for ( j = 0; j < flux_.size(); j++ ) {
+		InterHubFlux& ihf = flux_[j];
+		vector< double > efflux( ihf.term_.size() );
+		vector< double >::iterator k = efflux.begin();
+		for ( i = ihf.term_.begin(); i != ihf.term_.end(); i++ ) {
+			double &n = *( i->map_ );
+			assert( n >= 0 );
+			double flux = ( ihf.individualParticlesFlag_ ) ? 
+				round( n * info->dt_ * i->effluxRate_ ) :
+				n * info->dt_ * i->effluxRate_;
+			if ( n < flux ) {
+			/* 
+			 * Oops, tried to pump out more molecules than we have.
+			 * BAD! Should emit a warning here. But in any case,
+			 * don't allow -ve molecules, so we set the flux to the 
+			 * total # of molecules available.
+			 */
+				flux = ( ihf.individualParticlesFlag_ ) ?  round( n ) : n;
+			}
+			n -= flux;
+
+			*k++ = i->efflux_ = flux;
+		}
+		sendTo1< vector< double > >( hub, fluxSlot, j, efflux );
+	}
+}
+
+/**
+ * Deprecated version of flux, handling a single molecule
+
+void KineticHub::flux( const Conn& c, double influx, double outRateConst )
+{
+	Element* hub = c.targetElement();
+	unsigned int index = hub->connDestRelativeIndex( c, fluxSlot );
+	KineticHub* kh = static_cast< KineticHub* >( hub->data() );
+
+	assert( index < kh->fluxMap_.size() );
+	double& y = ( ( *kh->S_ )[ kh->fluxMap_[ index ] ] );
+	double z = y * outRateConst * dt;
+	sendTo1< double >( c.targetElement(), fluxSlot, 
+		c.targetIndex(), z );
+
+	y += influx - z;
+}
+*/
+
+/*
+ * We are likely to have only a single point of contact between any two
+ * solvers. If we use fluxVec as a way to manage robots we need more
+ * contact points.
+ * But flux is not the best way to do robots. The input value should just
+ * be a number equivalent to a concentration. This looks more like 
+ * sumtotal. The output value should also just be a set of conc values.
+ */
+/**
+ * This function is another attempt to handle molecule transfer outside 
+ * the solver, but using the existing A, B format for molecule changes.
+ *
+ * This is nice for retaining old reaction messaging, but asks that the
+ * external coupling figure out the rates. Not so useful.
+void KineticHub::extReac( const Conn& c, double A, double B )
+{
+	Element* hub = c.targetElement();
+	unsigned int index = hub->connDestRelativeIndex( c, extReacSlot );
+	KineticHub* kh = static_cast< KineticHub* >( hub->data() );
+
+	assert( index < kh->extReacMap_.size() );
+	double& y = ( ( *kh->S_ )[ kh->extReacMap_[ index ] ] );
+	// Here we do exp Euler addition onto y.
+	if ( y > EPSILON && B > EPSILON ) {
+		double C = exp ( - B * dt / y );
+		y *= C + ( A / B ) * ( 1.0 - C );
+	} else {
+		y += ( A - B ) * dt;
+	}
+	sendTo1< double >( c.targetElement(), extReacSlot, 
+		c.targetIndex(), y );
+}
+ */
 
 ///////////////////////////////////////////////////
 // Field function definitions

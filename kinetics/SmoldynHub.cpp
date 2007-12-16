@@ -100,6 +100,24 @@ const Cinfo* initSmoldynHubCinfo()
 		),
 	};
 
+	/**
+	 * This is used to handle fluxes between sets of molecules
+	 * solved in this SmoldynHub and solved by other Hubs. It is
+	 * implemented as a reciprocal vector of influx and efflux.
+	 * The influx during each timestep is added directly to the 
+	 * molecule number in S_. The efflux is computed by the
+	 * Hub, and subtracted from S_, and sent on to the target Hub.
+	 * Its main purpose, as the name implies, is for diffusive flux
+	 * across an interface. Typically used for mixed simulations where
+	 * the molecules in different spatial domains are solved differently.
+	 */
+	static Finfo* fluxShared[] =
+	{
+		new SrcFinfo( "efflux", Ftype1< vector < double > >::global() ),
+		new DestFinfo( "influx", Ftype1< vector< double > >::global(), 
+			RFCAST( &SmoldynHub::flux )),
+	};
+
 	static Finfo* smoldynHubFinfos[] =
 	{
 	///////////////////////////////////////////////////////
@@ -168,6 +186,8 @@ const Cinfo* initSmoldynHubCinfo()
 			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "mmEnzSolve", zombieShared, 
 			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "flux", fluxShared, 
+			      sizeof( fluxShared ) / sizeof( Finfo* ) ),
 	};
 
 	// Schedule smoldynHubs for the slower clock, stage 0.
@@ -209,6 +229,9 @@ static const Finfo* mmEnzSolveFinfo =
 
 static const unsigned int molSumSlot =
 	initSmoldynHubCinfo()->getSlotIndex( "molSum" );
+
+static const unsigned int fluxSlot =
+	initSmoldynHubCinfo()->getSlotIndex( "flux.efflux" );
 
 /*
 static const unsigned int reacSlot =
@@ -696,10 +719,51 @@ void SmoldynHub::processFuncLocal( Element* e, ProcInfo info )
 {
 	// do stuff here
 	int ret = simulatetimestep( simptr_ );
+	handleEfflux( e, info );
 	if ( ret > 1 ) { // 0 is OK, 1 is out of time. 2 and up are other errors
 		cout << "Bad things happened to Smoldyn\n";
 	} 
 }
+
+/**
+ * flux:
+ * This function handles molecule transfer into the solver.
+ * Useful as an interface between solvers operating on different
+ * scales.
+ *
+ * Flux will typically work with a large number of molecules all diffusing
+ * through the same spatial interface between the solvers.
+ *
+ * Each pair of solvers will typically exchange only a single Flux message.
+ * A given solver may have to manage multiple target fluxes. Consider a
+ * dendrite with numerous spines each solved using Smoldyn.
+ *
+ * Internally the solver will have to stuff the flux values into 
+ * the Smoldyn list, and do so at the correct spatial locations.
+ */
+
+void SmoldynHub::flux( const Conn& c, vector< double > influx )
+{
+	Element* hub = c.targetElement();
+	unsigned int index = hub->connDestRelativeIndex( c, fluxSlot );
+	SmoldynHub* sh = static_cast< SmoldynHub* >( hub->data() );
+
+	// Here we do some stuff to put the incoming molecules into
+	// Smoldyn. The key thing will be to map the correct identities
+	// between the two solvers.
+}
+
+/**
+ * The processFunc handles the efflux from the hub.
+ * Smoldyn provides an exportList of particles emerging from the
+ * surface at the junction between the domains of the solvers.
+ * Here we examine this export list and work out where to send them.
+ */
+void SmoldynHub::handleEfflux( Element* hub, ProcInfo info )
+{
+	;
+}
+
 
 ///////////////////////////////////////////////////
 // Geometry assignment utility functions.
