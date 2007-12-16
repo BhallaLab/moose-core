@@ -114,6 +114,10 @@ class SmoldynHub
 		// Dest function definitions
 		///////////////////////////////////////////////////
 		
+		static void flux( const Conn& c, vector< double > influx );
+		void handleEfflux( Element* hub, ProcInfo info ); // called from processFuncLocal
+
+		
 		static void reinitFunc( const Conn& c, ProcInfo info );
 		void reinitFuncLocal( Element* e, ProcInfo info );
 		static void processFunc( const Conn& c, ProcInfo info );
