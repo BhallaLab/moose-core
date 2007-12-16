@@ -5285,4 +5285,28 @@ Next two steps:
 	its timestep, so that the OpenGL loop in Smoldyn still believes that it
 	is in control, while waiting for MOOSE to synchronize.
 
-Checked in as revision 293 with unit test compile flags on, Smoldyn on.
+Checked in as revision 294 with unit test compile flags on, Smoldyn on.
+Checked in as revision 295 with unit test compile flags on, Smoldyn off.
+
+==============================================================================
+16 Dec 2007
+
+An additional step to round off the picture above:
+- Implement robots: Objects that wrap a biochemical simulation in a
+	different level simulation. Example is E.Coli chemotaxis. The signaling
+	system computes directions, and the robot handles swimming, 
+	interaction between cells, and other things.
+	The robot can use either SUMTOTAL or FLUX to talk
+	to molecules, and read out n using the usual message.
+	- This will need some extra work on the solver side since we will
+	often want arrays of robots, each with their own signaling 'brain'.
+
+
+OK, now on to implementations.
+Working on flux terms to handle communication between hubs. Implemented 
+skeleton for the KineticHub, but still have not advanced to the point where
+the flux terms are actually assigned. That will have to be a job for the
+KineticManager.
+Also implemented somewhat more skeletal stuff for SmoldynHub. This needs
+input from Steven to complete. At this point, though, the KineticManager
+should be able to do all the other work of seting up the flux terms.
