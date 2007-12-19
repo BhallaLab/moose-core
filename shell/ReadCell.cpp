@@ -20,7 +20,7 @@ ReadCell::ReadCell()
 		spineSurf( 0.0 ), spineDens( 0.0 ),
 		spineFreq( 0.0 ), membFactor( 0.0 ),
 		numCompartments_( 0 ), numChannels_( 0 ), numOthers_( 0 ),
-		cell_( 0 ), lastCompt_( 0 ),
+		cell_( 0 ), currCell_( 0 ), lastCompt_( 0 ),
 		polarFlag_( 0 ), relativeCoordsFlag_( 0 )
 {
 		Id libId;
@@ -91,6 +91,7 @@ void ReadCell::read( const string& filename, const string& cellpath )
 	ifstream fin( filename.c_str() );
 	cell_ = start( cellpath );
 	if ( !cell_ ) return;
+	currCell_ = cell_;
 
 	string line;
 	unsigned int lineNum = 0;
@@ -234,7 +235,7 @@ Element* ReadCell::buildCompartment(
 		return 0;
 	}
 
-	Element* compt = Neutral::create( "Compartment", name, cell_, Id::scratchId() );
+	Element* compt = Neutral::create( "Compartment", name, currCell_, Id::scratchId() );
 	++numCompartments_;
 	lastCompt_ = compt;
 
@@ -312,6 +313,17 @@ void ReadCell::readScript( const string& line, unsigned int lineNum )
 				CM_ = atof( argv[2].c_str() );
 		if ( argv[1] == "EREST_ACT" )
 				EREST_ACT_ = atof( argv[2].c_str() );
+	}
+
+	if ( argv[0] == "*start_cell" ) {
+		if ( argv.size() == 1 ) {
+			currCell_ = cell_;
+		} else if ( argv.size() == 2 ) {
+			currCell_ = start( argv[1] );
+		} else {
+			cout << "Error: readCell: Bad line: " << lineNum <<
+					": " << line << endl;
+		}
 	}
 }
 
