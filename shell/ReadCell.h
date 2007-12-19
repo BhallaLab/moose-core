@@ -56,6 +56,7 @@ class ReadCell
 
 		Element* cell_;
 
+		Element* currCell_;
 		Element* lastCompt_;
 		bool polarFlag_;
 		bool relativeCoordsFlag_;
