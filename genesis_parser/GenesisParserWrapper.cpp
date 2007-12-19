@@ -597,6 +597,8 @@ map< string, string >& sliFieldNameConvert()
 	if ( fieldnames.size() > 0 )
 		return fieldnames;
 	
+	fieldnames["Compartment.dia"] = "diameter";
+	fieldnames["Compartment.len"] = "length";
 	fieldnames["Molecule.Co"] = "conc";
 	fieldnames["Molecule.CoInit"] = "concInit";
 	fieldnames["SpikeGen.thresh"] = "threshold";
