@@ -479,6 +479,7 @@ map< string, string >& sliSrcLookup()
 
 	// Some messages for tables
 	src[ "INPUT Vm" ] = "Vm";
+	src[ "INPUT Ca" ] = "Ca";
 
 	// Messages for having tables pretend to be an xplot
 	src[ "PLOT Co" ] = "conc";
@@ -540,6 +541,7 @@ map< string, string >& sliDestLookup()
 
 	// Some messages for tables
 	dest[ "INPUT Vm" ] = "inputRequest";
+	dest[ "INPUT Ca" ] = "inputRequest";
 
 	// Messages for having tables pretend to be an xplot
 	dest[ "PLOT Co" ] = "inputRequest";
@@ -597,14 +599,17 @@ map< string, string >& sliFieldNameConvert()
 	if ( fieldnames.size() > 0 )
 		return fieldnames;
 	
-	fieldnames["Compartment.dia"] = "diameter";
-	fieldnames["Compartment.len"] = "length";
 	fieldnames["Molecule.Co"] = "conc";
 	fieldnames["Molecule.CoInit"] = "concInit";
 	fieldnames["SpikeGen.thresh"] = "threshold";
 	fieldnames["SpikeGen.output_amp"] = "amplitude";
 	fieldnames["Table.table->dx"] = "dx";
 	fieldnames["Table.table->invdx"] = "";
+	fieldnames["Table.table->xmin"] = "xmin";
+	fieldnames["Table.table->xmax"] = "xmax";
+	fieldnames["Compartment.dia"] = "diameter";
+	fieldnames["Compartment.len"] = "length";
+	fieldnames["SynChan.gmax"] = "Gbar";
 	return fieldnames;
 }
 
