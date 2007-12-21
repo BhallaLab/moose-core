@@ -28,6 +28,7 @@
 
 static const int MAX_COMMAND_ARGS = 25;
 static const int MAX_COMMAND_SIZE = 1024;
+#define MAX_MPI_PROCESSES	1024
 
 struct stCommand
 {
@@ -52,7 +53,6 @@ class ParGenesisParserWrapper:public GenesisParserWrapper
 {
 public:
 	ParGenesisParserWrapper();
-	void MyFunc();
 	/**
 	 * This function overrides functions to be called for a moose command. A map is populated by the serial parser
 	 * which maintains the functions to be called for every moose command. This function overrides some of these 		 * functions with for parallel moose. 
@@ -80,6 +80,27 @@ public:
 	 * This function broadcasts the parsed command to all non-root processes
 	 */
 	int SendCommand(int argc);
+	
+	/**
+	 * This function broadcasts the neuronal connections to all neurons
+	 */
+	void BCastConnections();
+
+	/**
+	 * This function randomly connects all neurons
+	 */
+        void generateRandomConnections();
+
+
+	/**
+	 * This function checks if a connection with a neuron repeats
+	 */
+        bool checkUnique(int randomVar, int spikeIndex);
+
+	/**
+	 * This function checks if a command should be executed on the root process
+	 */
+        bool RootCommand(char *command);
 
 	/**
 	 * This object contains the parsed command to be sent to the non-root processes on MPI
@@ -96,6 +117,9 @@ private:
 	 * The total count of processes.
 	 */
 	int	processcount_;
+
+
+
 };
 
 #endif	//_PARGENESIS_PARSER_H

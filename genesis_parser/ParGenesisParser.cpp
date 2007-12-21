@@ -101,6 +101,8 @@ const Cinfo* initParGenesisParserCinfo()
 		new DestFinfo( "recvClocks", 
 					Ftype1< vector< double > >::global(), 
 					RFCAST( &GenesisParserWrapper::recvClocks ) ),
+		new SrcFinfo( "requestCurrentTime", Ftype0::global() ),
+		// Returns time in the default return value.
 		
 		///////////////////////////////////////////////////////////////
 		// Message info functions
@@ -194,7 +196,7 @@ const Cinfo* initParGenesisParserCinfo()
 
 	};
 
-	static Cinfo parGenesisParserCinfo(
+	static Cinfo genesisParserCinfo(
 		"ParGenesisParser",
 		"Mayuresh Kulkarni, CRL, 2007",
 		"Parallel version of Genesis Parser",
@@ -204,24 +206,19 @@ const Cinfo* initParGenesisParserCinfo()
 		ValueFtype1< ParGenesisParserWrapper >::global()
 	);
 
-	return &parGenesisParserCinfo;
+	return &genesisParserCinfo;
 }
 
 static const Cinfo* parGenesisParserCinfo = initParGenesisParserCinfo();
-static const unsigned int planarconnectSlot = 
-	initParGenesisParserCinfo()->getSlotIndex( "parser.planarconnect" );
+static const unsigned int planarconnectSlot = initParGenesisParserCinfo()->getSlotIndex( "parser.planarconnect" );
+
+static	int	arrSpikegenConnections[MAX_MPI_PROCESSES][MAX_MPI_PROCESSES];
+static	int	arrSynchanConnections[MAX_MPI_PROCESSES][MAX_MPI_PROCESSES];
 
 ParGenesisParserWrapper::ParGenesisParserWrapper()
 {
 	loadBuiltinCommands();
 }
-
-
-void ParGenesisParserWrapper::MyFunc()
-{
-	cout<<endl<<"Reached Planarconnect";
-}
-
 
 void do_setrank( int argc, const char** const argv, Id s )
 {
@@ -236,14 +233,50 @@ void do_parquit( int argc, const char** const argv, Id s )
 
 void do_parplanarconnect( int argc, const char** const argv, Id s )
 {
-	cout<<endl<<"In do_planarconnect";
+	int j,iMyRank;
+
 	string source, dest;
+	string spikegenrank, synchanrank;
+	char arrTemp[10];
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &iMyRank);
+
 	source = argv[1];
 	dest = argv[2];
-	//Shell::planarconnect(conn, source, dest, probability)
-	send3<string, string, double>(s(), planarconnectSlot, source, dest, 0.5);
+
+        for(j=0; 0 != arrSpikegenConnections[iMyRank][j]; j++)
+        {
+                 sprintf(arrTemp, "%d", arrSpikegenConnections[iMyRank][j]);
+		 spikegenrank += arrTemp;
+		 spikegenrank += "|";
+        }
+
+
+        for(j=0; 0 != arrSynchanConnections[iMyRank][j]; j++)
+        {
+		sprintf(arrTemp, "%d", arrSynchanConnections[iMyRank][j]);
+		synchanrank += arrTemp;
+		synchanrank += "|";
+        }
+
+	send4<string, string, string, string>(s(), planarconnectSlot, source, dest, spikegenrank, synchanrank);
 
 }
+
+bool ParGenesisParserWrapper::checkUnique(int randomVar, int spikeIndex)
+{
+        int i;
+        for(i = 0; 0 != arrSpikegenConnections[spikeIndex][i]; i++) // check for duplication
+        {
+                if(arrSpikegenConnections[spikeIndex][i] == randomVar)
+                {
+                        return false;
+                }
+        }
+
+        return true;
+}
+
 
 void ParGenesisParserWrapper::loadBuiltinCommands()
 {
@@ -254,7 +287,6 @@ void ParGenesisParserWrapper::loadBuiltinCommands()
 
 void ParGenesisParserWrapper::parseFunc( const Conn& c, string s )
 {
-	//ParGenesisParserWrapper* data = static_cast< ParGenesisParserWrapper* >( c.targetElement()->data() );
 	ParGenesisParserWrapper &objParParser = *(static_cast< ParGenesisParserWrapper* >( c.targetElement()->data() ));
 	int i;
 	char **pArgs;
@@ -283,6 +315,11 @@ void ParGenesisParserWrapper::parseFunc( const Conn& c, string s )
 
 			}
 
+			if(!strcmp(objCommand.arrCommand[0], "planarconnect"))
+			{
+				static_cast< ParGenesisParserWrapper* >( c.targetElement()->data() )->BCastConnections();
+			}
+
 			objParParser.ExecuteCommand(objCommand.iSize, pArgs);
 
                         for(i=0; i<objCommand.iSize; i++)
@@ -298,6 +335,105 @@ void ParGenesisParserWrapper::parseFunc( const Conn& c, string s )
 	}
 }
 
+void ParGenesisParserWrapper::generateRandomConnections()
+{
+        int connectionCount;
+        int i,j,k;
+        bool bValid = false;
+        int randomVar;
+
+
+        memset(arrSpikegenConnections, 0, MAX_MPI_PROCESSES * MAX_MPI_PROCESSES);
+        memset(arrSynchanConnections, 0, MAX_MPI_PROCESSES * MAX_MPI_PROCESSES);
+
+
+        for(i=1; i<processcount_; i++)
+        {
+                bValid = false;
+                while(bValid == false)
+                {
+                      connectionCount = rand()%processcount_;
+                      if(connectionCount != 0)
+                                bValid = true;
+                }
+
+                for(j=0; j<connectionCount; j++)
+                {
+                        bValid = false;
+                        while(bValid == false)
+                        {
+                                randomVar = rand()%processcount_;
+                                if(randomVar != 0 && randomVar != i)
+                                {
+                                        bValid = true;
+                                }
+                        }
+
+                        if(checkUnique(randomVar, i) == true)
+                        {
+                                arrSpikegenConnections[i][j] = randomVar;
+
+                                for(k=0; 0 != arrSynchanConnections[randomVar][k]; k++);
+
+                                arrSynchanConnections[randomVar][k] = i;
+                        }
+                }
+        }
+	
+	BCastConnections();
+	
+        /*cout<<endl<<"Planarconnect arguments";
+        for(i=1; i < processcount_; i++)
+        {
+                cout<<endl<<" For Process "<<i;
+
+                strcpy(arrArgs[argc], "");
+                for(j=0; 0 != arrSpikegenConnections[i][j]; j++)
+                {
+                        sprintf(szRandomNumber, "%d", arrSpikegenConnections[i][j]);
+                        strcat(arrArgs[argc], szRandomNumber );
+                        strcat(arrArgs[argc], "|");
+                }
+
+                strcpy(arrArgs[argc+1], "");
+                for(j=0; 0 != arrSynchanConnections[i][j]; j++)
+                {
+                        sprintf(szRandomNumber, "%d", arrSynchanConnections[i][j]);
+                        strcat(arrArgs[argc+1], szRandomNumber );
+                        strcat(arrArgs[argc+1], "|");
+                }
+
+                for(j=0; j < argc+2; j++)
+                {
+                        cout<<endl<<arrArgs[j]<<flush;
+                }
+
+                SendCommand(argc+2);
+        }*/
+
+}
+
+bool ParGenesisParserWrapper::RootCommand(char *command)
+{
+	if(
+		!strcmp("abs", command) ||
+		!strcmp("exp", command) ||
+		!strcmp("log", command) ||
+		!strcmp("log0", command) ||
+		!strcmp("sin", command) ||
+		!strcmp("cos", command) ||
+		!strcmp("tan", command) ||
+		!strcmp("sqrt", command) ||
+		!strcmp("pow", command)
+	  )
+	{
+		return true;
+	}
+
+	return false;
+}
+
+
 Result ParGenesisParserWrapper::ExecuteCommand(int argc, char** argv)
 {
 	FILE            *pfile;
@@ -310,6 +446,7 @@ Result ParGenesisParserWrapper::ExecuteCommand(int argc, char** argv)
 	// int          ival;
 	func_entry      *command;
 
+	//Result	result;
 	result.r_type = IntType();
 	result.r.r_int = 0;
  
@@ -319,7 +456,7 @@ Result ParGenesisParserWrapper::ExecuteCommand(int argc, char** argv)
 		return(result);
 	}
 
-	if(processrank_ == 0)
+	if(processrank_ == 0 && RootCommand(argv[0])==false )
 	{
 		if(argc > MAX_COMMAND_ARGS)
 		{
@@ -334,7 +471,14 @@ Result ParGenesisParserWrapper::ExecuteCommand(int argc, char** argv)
 			strcpy(objCommand_.arrCommand[i], argv[i]);
 		}
 
+
 		SendCommand(argc);
+		
+		if(!strcmp(objCommand_.arrCommand[0], "planarconnect"))
+		{
+			generateRandomConnections();
+		}
+
 		if(!strcmp(argv[0], "quit"))
 		{
 			MPI_Finalize();
@@ -486,6 +630,9 @@ Result ParGenesisParserWrapper::ExecuteCommand(int argc, char** argv)
 	    result.r_type = IntType();
 	    result.r.r_int = 0;
 	    return(result);	
+
+	    //GenesisParserWrapper::ExecuteCommand(argc, argv);
+
 	}
 	
 	return result;
@@ -495,5 +642,30 @@ int ParGenesisParserWrapper::SendCommand(int argc)
 {
 	MPI_Bcast(&objCommand_, sizeof(int) + MAX_COMMAND_SIZE * MAX_COMMAND_ARGS * sizeof(char), MPI_CHAR, 0, MPI_COMM_WORLD);
 	return 0;
+}
+
+void ParGenesisParserWrapper::BCastConnections()
+{
+	//int i,j;
+
+	MPI_Bcast(arrSpikegenConnections, MAX_MPI_PROCESSES * MAX_MPI_PROCESSES , MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(arrSynchanConnections, MAX_MPI_PROCESSES * MAX_MPI_PROCESSES, MPI_INT, 0, MPI_COMM_WORLD);
+
+        /*for(i=1; i < processcount_; i++)
+        {
+                cout<<endl<<" "<<i<<": ";
+
+                for(j=0; 0 != arrSpikegenConnections[i][j]; j++)
+                {
+                        cout<<arrSpikegenConnections[i][j]<<" , ";
+                }
+
+                cout<<" ---- ";
+
+                for(j=0; 0 != arrSynchanConnections[i][j]; j++)
+                {
+                        cout<<arrSynchanConnections[i][j]<<" , ";
+                }
+        }*/
 }
 
