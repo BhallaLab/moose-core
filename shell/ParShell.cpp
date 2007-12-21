@@ -58,10 +58,10 @@ const Cinfo* initParShellCinfo()
 				RFCAST( &ParShell::planarconnect ) ),
 		new DestFinfo( "planardelay",
 				Ftype2< string, double >::global(),
-				RFCAST( &Shell::planardelay ) ),
+				RFCAST( &ParShell::planardelay ) ),
 		new DestFinfo( "planarweight",
 				Ftype2< string, double >::global(),
-				RFCAST( &Shell::planarweight ) ),
+				RFCAST( &ParShell::planarweight ) ),
 		// The create func returns the id of the created object.
 		new SrcFinfo( "createSrc", Ftype1< Id >::global() ),
 		// Deleting an object
@@ -118,6 +118,9 @@ const Cinfo* initParShellCinfo()
 		// Sending back the list of clocks times
 		new SrcFinfo( "returnClocksSrc",
 			Ftype1< vector< double > >::global() ),
+		new DestFinfo( "requestCurrTime",
+				Ftype0::global(), RFCAST( &Shell::requestCurrTime ) ),
+				// Returns it in the default string return value.
 
 		////////////////////////////////////////////////////////////
 		// Message info functions
@@ -318,16 +321,82 @@ const Cinfo* initParShellCinfo()
 	return &shellCinfo;
 }
 
+
+
+
+
+
 static const Cinfo* shellCinfo = initParShellCinfo();
 
 ParShell::ParShell()
 {
-	cout<<endl<<"Reached Parshell Contr";
 }
 
 
-void ParShell::planarconnect(const Conn& c, string source, string dest, double probability)
+void ParShell::planarconnect(const Conn& c, string source, string dest, string spikegenRank, string synchanRank)
 {
-	cout<<endl<<"In Parshell: planarconnect";
+        int next, previous;
+        bool ret;
+
+        Id spkId(source);
+        Id synId(dest);
+
+        Element *eSpkGen = spkId();
+        Element *eSynChan = synId();
+
+        previous = 0;
+        while(1)
+        {
+                next = spikegenRank.find('|', previous);
+                if(next == -1)
+                        break;
+
+
+                ret = set< int >( eSpkGen, "sendRank", atoi(spikegenRank.substr(previous, next-previous).c_str()) );
+                previous = next+1;
+        }
+
+        previous = 0;
+        while(1)
+        {
+                next = synchanRank.find('|', previous);
+
+                if(next == -1)
+                        break;
+
+                ret = set< int >( eSynChan, "recvRank", atoi(synchanRank.substr(previous, next-previous).c_str()) );
+                previous = next+1;
+        }
+
+}
+
+void ParShell::planardelay(const Conn& c, string source, double delay){
+	vector <Element* > src_list;
+	simpleWildcardFind( source, src_list );
+	for (size_t i = 0 ; i < src_list.size(); i++){
+		if (src_list[i]->className() != "ParSynChan"){cout<<"ParShell::planardelay: error!!";}
+		unsigned int numSynapses;
+		bool ret;
+		ret = get< unsigned int >( src_list[i], "numSynapses", numSynapses );
+		if (!ret) {cout << "error" <<endl;}
+		for (size_t j = 0 ; j < numSynapses; j++){
+			lookupSet< double, unsigned int >( src_list[i], "delay", delay, j );
+		}
+	}
+}
+
+void ParShell::planarweight(const Conn& c, string source, double weight){
+	vector <Element* > src_list;
+	simpleWildcardFind( source, src_list );
+	for (size_t i = 0 ; i < src_list.size(); i++){
+		if (src_list[i]->className() != "ParSynChan"){cout<<"ParShell::planarweight: error";}
+		unsigned int numSynapses;
+		bool ret;
+		ret = get< unsigned int >( src_list[i], "numSynapses", numSynapses );
+		if (!ret) {/*error!*/}
+		for (size_t j = 0 ; j < numSynapses; j++){
+			lookupSet< double, unsigned int >( src_list[i], "weight", weight, j );
+		}
+	}
 }
 
