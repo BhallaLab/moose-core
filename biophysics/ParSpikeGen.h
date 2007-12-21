@@ -27,5 +27,20 @@ class ParSpikeGen : public SpikeGen
 {
 	public:
 		ParSpikeGen();
+
+		/**
+		 * This function receives the set of ranks it will send spikes to
+		 */
+		static void sendRank( const Conn& c, int rank );
+	        void innerProcessFunc( const Conn& c, ProcInfo p );
+        	static void processFunc( const Conn& c, ProcInfo p );
+
+	private:
+	
+		/**
+		 * Stores the ranks to which spike will be sent
+		 */
+		vector < int > sendRank_;
+
 };
 #endif // _ParSpikeGen_h

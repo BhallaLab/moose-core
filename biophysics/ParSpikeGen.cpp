@@ -9,9 +9,11 @@
 
 #include "moose.h"
 #include <math.h>
+#include <mpi.h>
 
 #include "SpikeGen.h"
 #include "ParSpikeGen.h"
+
 
 const Cinfo* initParSpikeGenCinfo()
 {
@@ -22,7 +24,7 @@ const Cinfo* initParSpikeGenCinfo()
 	static Finfo* processShared[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-				RFCAST( &SpikeGen::processFunc ) ),
+				RFCAST( &ParSpikeGen::processFunc ) ),
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 				RFCAST( &SpikeGen::reinitFunc ) ),
 	};
@@ -78,6 +80,9 @@ const Cinfo* initParSpikeGenCinfo()
 	//////////////////////////////////////////////////////////////////
 		new DestFinfo( "Vm", Ftype1< double >::global(),
 			RFCAST( &SpikeGen::VmFunc ) ),
+
+               new DestFinfo( "sendRank", Ftype1< int >::global(),
+                        RFCAST( &ParSpikeGen::sendRank ) ),
 	};
 
 	// We want the spikeGen to update after the compartments have done so
@@ -97,9 +102,50 @@ const Cinfo* initParSpikeGenCinfo()
 	return &spikeGenCinfo;
 }
 
+static const int SPIKE_TAG = 3;
 static const Cinfo* spikeGenCinfo = initParSpikeGenCinfo();
+static const unsigned int eventSlot =
+	initParSpikeGenCinfo()->getSlotIndex( "event" );
 
 ParSpikeGen::ParSpikeGen()
 {
+}
+
+void ParSpikeGen::sendRank( const Conn& c, int rank )
+{
+        static_cast< ParSpikeGen* >( c.data() )->sendRank_.push_back(rank);
+}
+
+void ParSpikeGen::innerProcessFunc( const Conn& c, ProcInfo p )
+{
+        double t;
+        MPI_Request request;
+
+        t = p->currTime_;
+
+
+        if ( V_ > threshold_ && t >= lastEvent_ + refractT_ ) {
+
+                cout<<endl<<"V_ "<<V_<<" threshold "<<threshold_<<" t "<<t<<flush;
+                for(unsigned int i=0; i<sendRank_.size(); i++)
+                {
+                        cout<<endl<<"Sent a tick to rank "<< sendRank_[i] <<flush;
+                        MPI_Send(&t, 1, MPI_DOUBLE, sendRank_[i], SPIKE_TAG, MPI_COMM_WORLD);
+
+                        MPI_Isend(&t, 1, MPI_DOUBLE, sendRank_[i], SPIKE_TAG, MPI_COMM_WORLD, &request);
+                        MPI_Wait(&request, MPI_STATUS_IGNORE);
+                }
+
+                send1< double >( c.targetElement(), eventSlot, t );
+                lastEvent_ = t;
+                state_ = amplitude_;
+        } else {
+                state_ = 0.0;
+        }
+}
+
+void ParSpikeGen::processFunc( const Conn& c, ProcInfo p )
+{
+        static_cast< ParSpikeGen* >( c.data() )->innerProcessFunc( c, p );
 }
 

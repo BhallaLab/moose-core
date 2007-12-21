@@ -46,7 +46,7 @@ class SpikeGen
 	static void reinitFunc( const Conn& c, ProcInfo p );
 	static void VmFunc( const Conn& c, double val );
 
-	private:
+	protected:
 		double threshold_;
 		double refractT_;
 		double amplitude_;
