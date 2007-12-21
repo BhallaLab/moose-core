@@ -23,10 +23,29 @@
 #ifndef _ParSynChan_h
 #define _ParSynChan_h
 
-class ParSynChan : public SynChan
+class ParSynChan : protected SynChan
 {
+
 	public:
 		ParSynChan();
+		static void reinitFunc( const Conn& c, ProcInfo p );
+		static void processFunc( const Conn& c, ProcInfo p );
+
+		/**
+		 * This function receives the ranks of neurons it will receive Spikes from
+		 */
+		static void recvRank( const Conn& c, int rank );
+
+		void innerProcessFunc( Element* e, ProcInfo info );
+		unsigned int updateNumSynapse( const Element* e );
+		void innerReinitFunc( Element* e, ProcInfo info );
+
+	private:
+
+		/**
+		 * Stores the ranks from which a spike will be sent
+		 */
+	        vector< int > recvRank_;
 
 };
 #endif // _ParSynChan_h
