@@ -65,6 +65,7 @@ const Cinfo* initParGenesisParserCinfo()
 		// Value assignment: set and get.
 		///////////////////////////////////////////////////////////////
 		// Getting a field value as a string: send out request:
+		new SrcFinfo( "add", Ftype2<Id, string>::global() ),
 		new SrcFinfo( "get", Ftype2< Id, string >::global() ),
 		// Getting a field value as a string: Recv the value.
 		new DestFinfo( "recvField",
@@ -205,9 +206,15 @@ const Cinfo* initParGenesisParserCinfo()
 		sizeof(genesisParserFinfos) / sizeof( Finfo* ),
 		ValueFtype1< ParGenesisParserWrapper >::global()
 	);
-
 	return &genesisParserCinfo;
 }
+
+
+
+ 
+
+
+
 
 static const Cinfo* parGenesisParserCinfo = initParGenesisParserCinfo();
 static const unsigned int planarconnectSlot = initParGenesisParserCinfo()->getSlotIndex( "parser.planarconnect" );
@@ -218,11 +225,11 @@ static	int	arrSynchanConnections[MAX_MPI_PROCESSES][MAX_MPI_PROCESSES];
 ParGenesisParserWrapper::ParGenesisParserWrapper()
 {
 	loadBuiltinCommands();
+	sendrank_ = 0;
 }
 
 void do_setrank( int argc, const char** const argv, Id s )
 {
-	cout<<endl<<"In do_setrank";
 }
 
 void do_parquit( int argc, const char** const argv, Id s )
@@ -280,7 +287,7 @@ bool ParGenesisParserWrapper::checkUnique(int randomVar, int spikeIndex)
 
 void ParGenesisParserWrapper::loadBuiltinCommands()
 {
-	AddFunc( "setrank", do_setrank, "void" );
+	AddFunc( "setrank", do_setrank, "void");
 	AddFunc( "planarconnect", do_parplanarconnect, "void");
 	AddFunc( "quit", do_parquit, "void");
 }
@@ -305,7 +312,13 @@ void ParGenesisParserWrapper::parseFunc( const Conn& c, string s )
 		while(1)
 		{
 			MPI_Bcast(&objCommand, sizeof(int) + MAX_COMMAND_SIZE * MAX_COMMAND_ARGS * sizeof(char), MPI_CHAR, 0, MPI_COMM_WORLD);
-	
+
+			if(objCommand.iRank != 0 && objCommand.iRank != objParParser.processrank_)
+			{
+				//Ignore command if it is not for the current rank
+				continue;
+			}
+
 			pArgs = new char* [objCommand.iSize];
 
 			for(i=0; i<objCommand.iSize; i++)
@@ -319,6 +332,14 @@ void ParGenesisParserWrapper::parseFunc( const Conn& c, string s )
 			{
 				static_cast< ParGenesisParserWrapper* >( c.targetElement()->data() )->BCastConnections();
 			}
+
+			if(!strcmp(objCommand.arrCommand[0], "step"))
+			{
+				// Execute Barrier before executing step command
+				//cout<<endl<<"Executing barrier at rank: "<<objParParser.processrank_<<endl<<flush;
+				MPI_Barrier(MPI_COMM_WORLD);		
+			}
+
 
 			objParParser.ExecuteCommand(objCommand.iSize, pArgs);
 
@@ -413,20 +434,34 @@ void ParGenesisParserWrapper::generateRandomConnections()
 
 }
 
-bool ParGenesisParserWrapper::RootCommand(char *command)
+bool ParGenesisParserWrapper::RootCommand(char **argv)
 {
 	if(
-		!strcmp("abs", command) ||
-		!strcmp("exp", command) ||
-		!strcmp("log", command) ||
-		!strcmp("log0", command) ||
-		!strcmp("sin", command) ||
-		!strcmp("cos", command) ||
-		!strcmp("tan", command) ||
-		!strcmp("sqrt", command) ||
-		!strcmp("pow", command)
+		!strcmp("abs", argv[0]) ||
+		!strcmp("exp", argv[0]) ||
+		!strcmp("log", argv[0]) ||
+		!strcmp("log0", argv[0]) ||
+		!strcmp("sin", argv[0]) ||
+		!strcmp("cos", argv[0]) ||
+		!strcmp("tan", argv[0]) ||
+		!strcmp("sqrt", argv[0]) ||
+		!strcmp("pow", argv[0])
 	  )
 	{
+		return true;
+	}
+	else if(!strcmp("setrank", argv[0]))
+	{
+		if(argv[1] == NULL)
+			cout<<endl<<"Error: Missing argument to setrank"<<endl<<flush;
+		else
+		{
+			if(atoi(argv[1]) >= processcount_)
+				cout<<endl<<"Error: Invalid rank value passed as argument to setrank"<<endl<<flush;
+			else
+				sendrank_ = atoi(argv[1]);
+		}
+
 		return true;
 	}
 
@@ -456,7 +491,7 @@ Result ParGenesisParserWrapper::ExecuteCommand(int argc, char** argv)
 		return(result);
 	}
 
-	if(processrank_ == 0 && RootCommand(argv[0])==false )
+	if(processrank_ == 0 && RootCommand(argv) ==false )
 	{
 		if(argc > MAX_COMMAND_ARGS)
 		{
@@ -466,14 +501,21 @@ Result ParGenesisParserWrapper::ExecuteCommand(int argc, char** argv)
 
 		objCommand_.clear();	
 		objCommand_.iSize = argc;
+		objCommand_.iRank = sendrank_;
 		for(int i=0; i<argc; i++)
 		{
 			strcpy(objCommand_.arrCommand[i], argv[i]);
 		}
 
-
 		SendCommand(argc);
 		
+		if(!strcmp(objCommand_.arrCommand[0], "step"))
+		{
+			//Execute Barrier at step command
+			//cout<<endl<<"Executing barrier at rank: "<<processrank_<<endl<<flush;
+			MPI_Barrier(MPI_COMM_WORLD);
+		}
+
 		if(!strcmp(objCommand_.arrCommand[0], "planarconnect"))
 		{
 			generateRandomConnections();
