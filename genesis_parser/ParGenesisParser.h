@@ -33,6 +33,7 @@ static const int MAX_COMMAND_SIZE = 1024;
 struct stCommand
 {
 	int iSize;
+	int iRank;
 	char arrCommand[MAX_COMMAND_ARGS][MAX_COMMAND_SIZE];
 
 	stCommand()
@@ -43,6 +44,7 @@ struct stCommand
 	void clear()
 	{
 		iSize = 0;
+		iRank = 0;
 		memset(arrCommand, 0, MAX_COMMAND_ARGS*MAX_COMMAND_SIZE*sizeof(char));
 	};
 
@@ -100,7 +102,7 @@ public:
 	/**
 	 * This function checks if a command should be executed on the root process
 	 */
-        bool RootCommand(char *command);
+        bool RootCommand(char **argv);
 
 	/**
 	 * This object contains the parsed command to be sent to the non-root processes on MPI
@@ -118,6 +120,10 @@ private:
 	 */
 	int	processcount_;
 
+	/**
+	 * The rank to which a command must be sent
+	 */
+	int	sendrank_;
 
 
 };
