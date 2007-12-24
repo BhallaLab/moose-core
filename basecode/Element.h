@@ -254,7 +254,13 @@ class Element
 		 */
 		virtual unsigned int listLocalFinfos( vector< Finfo* >& flist )
 				= 0;
-
+		
+		/**
+		 * For adding ExtFieldFinfo for addfield command
+		 */
+		
+		virtual void addExtFinfo( Finfo* f ) = 0;
+		
 		/**
 		 * Appends a new Finfo onto the Element. Typically this new
 		 * Finfo is a Dynamic Finfo used to store messages that are

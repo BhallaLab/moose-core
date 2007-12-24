@@ -9,8 +9,6 @@
 **********************************************************************/
 #ifndef _EXT_FIELD_FINFO_H
 #define _EXT_FIELD_FINFO_H
-
-
 /**
  * Finfo used to create and manage arbitrary extended fields.
  * These include data as well as the ability to send and receive
@@ -19,15 +17,18 @@
 class ExtFieldFinfo: public Finfo
 {
 		public:
-			ExtFieldFinfo( const string& name, const Ftype* type,
-						unsigned int size = 0 )
+			ExtFieldFinfo( const string& name, const Ftype* type )
 					: Finfo( name, type )
-			{;}
+			{
+				val_ = "";
+			}
+			
 
 			// Assert that the affected conns have been cleaned up
 			// before deleteing this.
 			~ExtFieldFinfo()
 			{;}
+			
 
 			/**
 			 * This should be almost the regular SrcFinfo::add
@@ -36,7 +37,8 @@ class ExtFieldFinfo: public Finfo
 			 */
 			bool add( 
 					Element* e, Element* destElm, const Finfo* destFinfo
-			) const;
+			) const
+			{ return true; }
 			
 			/**
 			 * Again, this should be similar to the regular
@@ -47,37 +49,47 @@ class ExtFieldFinfo: public Finfo
 					Element* e, Element* src, const Ftype *srcType,
 					FuncList& srcfl, FuncList& returnFl,
 					unsigned int& destIndex, unsigned int& numDest
-			) const;
+			) const
+			{ return true; }
 
-			void dropAll( Element* e ) const;
-			bool drop( Element* e, unsigned int i ) const;
+			void dropAll( Element* e ) const	{;}
+			bool drop( Element* e, unsigned int i ) const	{ return true;}
 			
-			unsigned int numIncoming( const Element* e ) const;
-			unsigned int numOutgoing( const Element* e ) const;
+			unsigned int numIncoming( const Element* e ) const	{return 0;}
+			unsigned int numOutgoing( const Element* e ) const	{return 0;}
 			unsigned int incomingConns(
-					const Element* e, vector< Conn >& list ) const;
+					const Element* e, vector< Conn >& list ) const	{return 0;}
 			unsigned int outgoingConns(
-					const Element* e, vector< Conn >& list ) const;
+					const Element* e, vector< Conn >& list ) const	{return 0;}
 
 			/**
 			 * The Ftype knows how to do this conversion.
 			 */
-			bool strSet( Element* e, const std::string &s ) const;
+			bool strSet( Element* e, const std::string &s ) const {
+				return const_cast<ExtFieldFinfo *>(this)->strSet(e, s);
+			}
+			
+			bool strSet( Element* e, const std::string &s ) {
+				val_ = s;	
+				return true;
+			}
 			
 			// The Ftype handles this conversion.
-			bool strGet( const Element* e, std::string &s ) const;
+			bool strGet( const Element* e, std::string &s ) const {
+				s = val_;
+				return true;
+			}
 			
 			/// Public RecvFunc for receiving function args.
 			RecvFunc recvFunc() const {
 				return recvFunc_;
 			}
 			
-			/*
+			
 			/// Public RecvFunc for receiving requests to send value.
 			RecvFunc trigFunc() const {
-				return trigFunc_;
+				return 0;
 			}
-			*/
 			
 			/**
 			 * Internal RecvFunc for passing to Ftype to construct
@@ -123,10 +135,11 @@ class ExtFieldFinfo: public Finfo
 			}
 
 			const Finfo* match( 
-				const Element* e, unsigned int connIndex ) const;
+				const Element* e, unsigned int connIndex ) const
+				{return 0;}
 
 			void countMessages( 
-				unsigned int& srcIndex, unsigned int& destIndex );
+				unsigned int& srcIndex, unsigned int& destIndex ){;}
 
 			/**
 			 * The ExtFieldFinfo is one of the few Finfos that has
@@ -164,7 +177,7 @@ class ExtFieldFinfo: public Finfo
 			 * must only be called within properly type-protected
 			 * functions.
 			 */
-			void* traverseIndirection( void* data ) const;
+			void* traverseIndirection( void* data ) const {return 0;}
 
 			/**
 			 * This operation makes no sense for the ExtFieldFinfo
@@ -196,11 +209,12 @@ class ExtFieldFinfo: public Finfo
 			unsigned int srcIndex_;
 			unsigned int destIndex_;
 			// vector< IndirectType > indirect_;
+			string val_;
 };
 
 /**
  * This function looks up the ExtFieldFonfo matching the incoming Conn
  */
-extern const ExtFieldFinfo* getDF( const Conn& );
+//extern const ExtFieldFinfo* getDF( const Conn& );
 
 #endif // _EXT_FIELD_FINFO_H

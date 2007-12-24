@@ -35,6 +35,7 @@
 #include "DynamicFinfo.h"
 #include "ValueFinfo.h"
 #include "LookupFinfo.h"
+#include "ExtFieldFinfo.h"
 
 #include "ProcInfo.h"
 #include "send.h"

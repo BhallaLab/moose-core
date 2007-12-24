@@ -291,6 +291,7 @@ class SimpleElement: public Element
 		 */
 		unsigned int listLocalFinfos( vector< Finfo* >& flist );
 
+		void addExtFinfo( Finfo* f );
 		void addFinfo( Finfo* f );
 		bool dropFinfo( const Finfo* f );
 		void setThisFinfo( Finfo* f );

@@ -68,6 +68,7 @@ const Cinfo* initGenesisParserCinfo()
 		// Value assignment: set and get.
 		///////////////////////////////////////////////////////////////
 		// Getting a field value as a string: send out request:
+		new SrcFinfo( "add", Ftype2<Id, string>::global() ),
 		new SrcFinfo( "get", Ftype2< Id, string >::global() ),
 		// Getting a field value as a string: Recv the value.
 		new DestFinfo( "recvField",
@@ -231,6 +232,8 @@ static const unsigned int planarweightSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser.planarweight" );
 static const unsigned int deleteSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.delete" );
+static const unsigned int addfieldSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.add" );
 static const unsigned int requestFieldSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.get" );
 static const unsigned int setFieldSlot = 
@@ -2219,7 +2222,7 @@ int doArgc( int argc, const char** const argv, Id s )
 // addfield [element] field-name -type field_type
 void do_addfield( int argc, const char** const argv, Id s )
 {
-	if ( argc == 2 ) {
+/*	if ( argc == 2 ) {
 		// const char * nargv[] = { argv[0], ".", argv[1] };
 //		s->commandFuncLocal( 3, nargv );
 	} else if ( argc == 3 ) {
@@ -2233,6 +2236,11 @@ void do_addfield( int argc, const char** const argv, Id s )
 //	} else {
 		; // s->error( "usage: addfield [element] field-name -type field_type" );
 	}
+*/
+	string classname = argv[1];
+	string fieldname = argv[2];
+	send2<Id, string>(s(), addfieldSlot, Id(classname), fieldname);
+	
 }
 
 void do_loadtab ( int argc, const char** const argv, Id s )
