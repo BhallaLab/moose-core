@@ -68,6 +68,9 @@ const Cinfo* initParShellCinfo()
 		new DestFinfo( "delete", Ftype1< Id >::global(), 
 				RFCAST( &Shell::staticDestroy ) ),
 
+		new DestFinfo( "add",
+				Ftype2< Id, string >::global(),
+				RFCAST( &Shell::addField ) ),
 		// Getting a field value as a string: handling request
 		new DestFinfo( "get",
 				Ftype2< Id, string >::global(),
@@ -320,9 +323,6 @@ const Cinfo* initParShellCinfo()
 
 	return &shellCinfo;
 }
-
-
-
 
 
 
