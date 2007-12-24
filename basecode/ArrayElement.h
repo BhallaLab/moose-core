@@ -306,6 +306,7 @@ class ArrayElement: public Element
 		*/
 		void CopyFinfosSimpleToArray(const SimpleElement *se);
 
+		void addExtFinfo( Finfo * );
 		void addFinfo( Finfo* f );
 		bool dropFinfo( const Finfo* f );
 		void setThisFinfo( Finfo* f );
