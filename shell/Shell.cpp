@@ -69,6 +69,9 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "delete", Ftype1< Id >::global(), 
 				RFCAST( &Shell::staticDestroy ) ),
 
+		new DestFinfo( "add",
+				Ftype2< Id, string >::global(),
+				RFCAST( &Shell::addField ) ),
 		// Getting a field value as a string: handling request
 		new DestFinfo( "get",
 				Ftype2< Id, string >::global(),
@@ -795,6 +798,23 @@ void Shell::staticDestroy( const Conn& c, Id victim )
 {
 	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 	s->destroy( victim );
+}
+
+/**
+ * This function adds a ExtFieldFinfo
+ */
+
+void Shell::addField( const Conn& c, Id id, string fieldname )
+{
+	if ( id.bad() )
+		return;
+	string ret;
+	Element* e = id();
+	//cout << e->name() << endl;
+	
+	// Appropriate off-node stuff here.
+	Finfo* f = new ExtFieldFinfo(fieldname, Ftype1<string>::global());
+	e->addExtFinfo( f );
 }
 
 // Static function
