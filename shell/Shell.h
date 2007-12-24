@@ -84,6 +84,7 @@ class Shell
 		static void staticDestroy( const Conn&, Id victim );
 
 		static void getField( const Conn& c, Id id, string field );
+		static void addField( const Conn& c, Id id, string fieldname );
 		static void setField( const Conn& c, 
 						Id id, string field, string value );
 		static void setVecField( const Conn& c, 

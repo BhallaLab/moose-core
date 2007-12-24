@@ -626,6 +626,10 @@ unsigned int ArrayElement::listLocalFinfos( vector< Finfo* >& flist )
 	return flist.size();
 }
 
+void ArrayElement::addExtFinfo(Finfo *f){
+	finfo_.push_back(f);
+}
+
 /**
  * Here we need to put in the new Finfo, and also check if it
  * requires allocation of any MsgSrc or MsgDest slots.
