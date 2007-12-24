@@ -34,6 +34,7 @@ OBJ = \
 	GlobalMarkerFinfo.o \
 	Cinfo.o \
 	DynamicFinfo.o \
+	ExtFieldFinfo.o \
 	UnitTests.o \
 	TestBasecode.o \
 	strconv.o \
@@ -71,6 +72,7 @@ DestFinfo.o: 	DestFinfo.h
 ThisFinfo.o: 	ThisFinfo.h
 DynamicFinfo.o:	DynamicFinfo.h
 ValueFinfo.o:	ValueFinfo.h DynamicFinfo.h send.h
+ExtFieldFinfo.o:	ExtFieldFinfo.h
 DerivedFtype.o:	DerivedFtype.h
 SharedFtype.o:	SharedFtype.h
 SharedFinfo.o:	SharedFinfo.h SharedFtype.h
