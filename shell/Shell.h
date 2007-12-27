@@ -75,6 +75,8 @@ class Shell
 		 */
 		static void staticCreate( const Conn&, string type,
 						string name, Id parent );
+		static void staticCreateArray1( const Conn&, string type,
+						string name, Id parent, vector <double> parameter );
 		static void staticCreateArray( const Conn&, string type,
 						string name, Id parent, vector <double> parameter );
 		static void planarconnect( const Conn& c, string source, string dest, double probability);
@@ -103,6 +105,7 @@ class Shell
 
 		static void copy( const Conn& c, Id src, Id parent, string name );
 		static void copyIntoArray( const Conn& c, Id src, Id parent, string name, vector <double> parameter );
+		static void copyIntoArray1( const Conn& c, Id src, Id parent, string name, vector <double> parameter );
 		static void move( const Conn& c, Id src, Id parent, string name );
 
 ////////////////////////////////////////////////////////////////////
