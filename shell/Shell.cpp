@@ -681,7 +681,53 @@ void Shell::staticCreate( const Conn& c, string type,
 
 // Static function
 // parameter has following clumped in the order mentioned, Nx, Ny, dx, dy, xorigin, yorigin
+// creates array of simple elements. Will swtich to arrayelements later.
 void Shell::staticCreateArray( const Conn& c, string type,
+					string name, Id parent, vector <double> parameter )
+{
+	Element* e = c.targetElement();
+	Shell* s = static_cast< Shell* >( e->data() );
+
+	int n = (int) (parameter[0]*parameter[1]);
+	
+	for (int i = 0; i < n; i++){
+		Id id = Id::childId( parent );
+		Element* child = id();
+		char sname[20];
+		sprintf(sname, "%s[%d]", name.c_str(), i); 
+		if ( child == 0 ) { // local node
+			bool ret = s->create( type, sname, parent, id );
+			if ( ret ) { // Tell the parser it was created happily.
+				//GenesisParserWrapper::recvCreate(conn, id)
+				sendTo1< Id >( e, createSlot, c.targetIndex(), id);
+			}
+		}
+		else {
+			// Shell-to-shell messaging here with the request to
+			// create a child.
+			// This must only happen on node 0.
+			assert( e->id().node() == 0 );
+			assert( id.node() > 0 );
+			OffNodeInfo* oni = static_cast< OffNodeInfo* >( child->data() );
+			// Element* post = oni->post;
+			unsigned int target = 
+			e->connSrcBegin( rCreateSlot ) - e->lookupConn( 0 ) +
+				id.node() - 1;
+			sendTo4< string , string, Id, Id>( 
+				e, rCreateSlot, target,
+				type, sname, 
+				parent, oni->id );
+			// Here it needs to fork till the object creation is complete.
+			delete oni;
+			delete child;
+		}
+	}
+}
+
+
+// Static function
+// parameter has following clumped in the order mentioned, Nx, Ny, dx, dy, xorigin, yorigin
+void Shell::staticCreateArray1( const Conn& c, string type,
 					string name, Id parent, vector <double> parameter )
 {
 	Element* e = c.targetElement();
@@ -1004,13 +1050,30 @@ void Shell::copy( const Conn& c,
 	}
 }
 
+void Shell::copyIntoArray( const Conn& c, 
+				Id src, Id parent, string name, vector <double> parameter )
+{
+	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	int n = (int) (parameter[0]*parameter[1]);
+	for (int i = 0; i < n; i ++){
+		char sname[20];
+		sprintf(sname, "%s[%d]", src()->name().c_str(), i);
+		Element* e = src()->copy( parent(), sname );
+		//assign the other parameters to the arrayelement
+		if ( e )  // Send back the id of the new element base
+			sendTo1< Id >( c.targetElement(),
+						createSlot, c.targetIndex(), e->id() );
+	}
+}
+
+
 /**
  * This function copies the prototype element in form of an array.
  * It is similar to copy() only that it creates an array of copies 
  * elements
 */
 
-void Shell::copyIntoArray( const Conn& c, 
+void Shell::copyIntoArray1( const Conn& c, 
 				Id src, Id parent, string name, vector <double> parameter )
 {
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
