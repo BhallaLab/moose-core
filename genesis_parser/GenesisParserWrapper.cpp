@@ -20,6 +20,9 @@
 #include "GenesisParserWrapper.h"
 #include "../element/Neutral.h"
 #include "func_externs.h"
+#include <iostream>
+#include <fstream>
+	using namespace std;
 
 const Cinfo* initGenesisParserCinfo()
 {
@@ -2351,20 +2354,49 @@ void do_createmap(int argc, const char** const argv, Id s){
 	parameter.push_back(xorigin);
 	parameter.push_back(yorigin);
 	
-	
+	string parent = dest;	
+	Id pa(parent);
+	if ( pa.bad()){
+		string headpath = Shell::head( dest, "/" );
+		//cout << "'" << headpath << "'" << endl;
+		Id head(headpath);
+		if (head.bad()){
+			cout << "'" << headpath  << "'" << " is not defined."  << dest << "." << endl;
+			return;
+		}
+		send3< string, string, Id >( s(),
+			createSlot, "Neutral", Shell::tail(dest, "/"), head );
+	}
 	if (object){
 		string className = source;
 		if ( !Cinfo::find( className ) )  {
-			cout << "Not handled yet!!" << endl;
 			/*WORK*/
+			map< string, string >::iterator i = 
+				sliClassNameConvert().find( argv[1] );
+			if ( i != sliClassNameConvert().end() ) {
+				className = i->second;
+				if ( className == "Sli" ) {
+					// We bail out of these classes as MOOSE does not
+					// yet handle them.
+					cout << "Do not know how to handle class: " << 
+							className << endl;
+					return;
+				}
+			} else {
+				cout << "GenesisParserWrapper::do_create: Do not know class: " << className << endl;
+				return;
+			}
 		}
-		string name = Shell::tail(dest, "/");
+		//string name = Shell::tail(dest, "/");
+		string name = className;
 		if ( name.length() < 1 ) {
 			cout << "Error: invalid object name : " << name << endl;
 			return;
 		}
-		string parent = Shell::head( argv[2], "/" );
-		Id pa(parent);
+		//string parent = Shell::head( argv[2], "/" );
+		
+		pa = Id(parent);
+		if (pa.bad()) cout << "Too bad" <<endl;
 		//Shell::staticCreateArray( conn, className, name, pa, n )
 		send4< string, string, Id, vector <double> >( s(),
 		createArraySlot, className, name, pa, parameter );
@@ -2744,11 +2776,11 @@ float do_rand( int argc, const char** const argv, Id s ){
 }
 
 void do_disable( int argc, const char** const argv, Id s ){
-	cout << "Not yet implemented!!" << endl;
+	cout << "disable not yet implemented!!" << endl;
 }
 
 void do_setup_table2( int argc, const char** const argv, Id s ){
-	cout << "Not yet implemented!!" << endl;
+	cout << "setup_table2 not yet implemented!!" << endl;
 }
 
 int do_INSTANTX(int argc, const char** const argv, Id s ){
@@ -2809,6 +2841,29 @@ void do_showstat(int argc, const char** const argv, Id s )
 	float time = do_getstat( argc, argv, s );
 	cout << "current simulation time = " << time << endl;
 }
+
+void do_help(int argc, const char** const argv, Id s ){
+	if (argc == 1){
+		cout << "For info on a particular command, type help <commandname>" << endl;
+		return;
+	}
+	char filename[40];
+	sprintf(filename, "../DOCS/documentation/%s.txt", argv[1]);
+	cout << filename << endl;
+	string line;
+	ifstream docfile("eval.cpp");
+	if (docfile.is_open()){
+		while (! docfile.eof() ){
+			getline (docfile,line);
+			cout << line << endl;
+		}
+    		docfile.close();
+	}
+	else {
+		cout << "Help not present for this command." << endl;
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper load command
@@ -2924,6 +2979,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "floatformat", do_floatformat, "void" );
 	AddFunc( "getstat", reinterpret_cast< slifunc > ( do_getstat ), "float" );
 	AddFunc( "showstat", do_showstat, "void" );
+	AddFunc( "help", do_help, "void" );
 }
 
 //////////////////////////////////////////////////////////////////
