@@ -162,6 +162,12 @@ class Shell
 		static void listFiles( const Conn& c );
 		static void loadtab( const Conn& c, string data );
 		void innerLoadTab( const string& data );
+
+		//////////////////////////////////////////////////////////
+		// Table special functions
+		//////////////////////////////////////////////////////////
+		static void tabop( const Conn& c, Id tab, char op, double min, 
+			double max );
 			/*
 		void add( const string& src, const string& dest );
 		void drop( const string& src, const string& dest );

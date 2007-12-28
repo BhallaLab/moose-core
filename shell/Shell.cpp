@@ -15,6 +15,7 @@
 #include "Shell.h"
 #include "ReadCell.h"
 #include "SimDump.h"
+#include "Ftype3.h"
 //#include <stdlib.h>
 //#include <time.h>
 
@@ -209,6 +210,9 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "loadtab",
 				Ftype1< string >::global(),
 				RFCAST( &Shell::loadtab ) ),	
+		new DestFinfo( "tabop",
+				Ftype4< Id, char, double, double >::global(),
+				RFCAST( &Shell::tabop ) ),	
 	};
 
 	/**
@@ -1636,6 +1640,11 @@ void Shell::loadtab( const Conn& c, string data )
 {
 	Shell* sh = static_cast< Shell* >( c.data() );
 	sh->innerLoadTab( data );
+}
+
+void Shell::tabop( const Conn& c, Id tab, char op, double min, double max )
+{
+	set< char, double, double >( tab(), "tabop", op, min, max );
 }
 
 //////////////////////////////////////////////////////////////////

@@ -5309,4 +5309,13 @@ the flux terms are actually assigned. That will have to be a job for the
 KineticManager.
 Also implemented somewhat more skeletal stuff for SmoldynHub. This needs
 input from Steven to complete. At this point, though, the KineticManager
-should be able to do all the other work of seting up the flux terms.
+should have all the hooks needed for the other work of seting up the flux 
+terms.
+
+Checked in as revision 296 with unit test compile flags on, Smoldyn off.
+Next stage: the KineticManager has to scan the surfaces and shapes till
+it finds the surface of interchange between the methods.
+This is defined by an extra flag on the MOOSE surface. 
+==============================================================================
+19 Dec 2007
+Begun work on connecting Smoldyn up to the smoldynHub
