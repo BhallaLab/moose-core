@@ -184,6 +184,8 @@ const Cinfo* initGenesisParserCinfo()
 			Ftype3< vector< Id >, string, string >::global() ),
 		new SrcFinfo( "loadtab", 
 			Ftype1< string >::global() ),
+		new SrcFinfo( "tabop", 
+			Ftype4< Id, char, double, double >::global() ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -302,6 +304,8 @@ static const unsigned int setVecFieldSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser.setVecField" );
 static const unsigned int loadtabSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.loadtab" );
+static const unsigned int tabopSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.tabop" );
 
 
 //////////////////////////////////////////////////////////////////
@@ -998,6 +1002,32 @@ void do_call( int argc, const char** const argv, Id s )
 			setFieldSlot, gate, "tabFill", argstr );
 
 		return;
+	}
+
+	// syntax: call table TABOP op [min max]
+	if ( strcmp ( argv[2], "TABOP" ) == 0 ) { 
+		Id table( argv[1] );
+		if ( table.bad() ) {
+			cout << "Error: " << argv[0] << 
+					" could not find object '" << table << "'\n";
+			return;
+		}
+		if ( argc == 4 ) {
+			send4< Id, char, double, double >( s(),
+				tabopSlot, table, argv[3][0], 0.0, 0.0 );
+		} else if ( argc == 6 ) {
+			double min = atof( argv[4] );
+			double max = atof( argv[5] );
+			send4< Id, char, double, double >( s(),
+				tabopSlot, table, argv[3][0], min, max );
+		} else {
+			cout << "usage: " << argv[0] << 
+					" element TABOP op [min max]\n";
+			cout << "valid operations:\n";
+			cout << "a = average, m = min, M = Max, r= range\n";
+			cout << "s = slope, i = intercept, f = freq\n";
+			cout << "S = Sqrt(sum of squares)\n";
+		}
 	}
 }
 

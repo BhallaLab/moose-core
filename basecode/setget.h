@@ -140,4 +140,89 @@ template < class T1, class T2 > bool set(
 	}
 	return set( e, finfo, v1, v2 );
 }
+
+/**
+* This is the utility func for calling 3-argument functions.
+* It does appropriate typechecking of the finfo before doing anything.
+*/
+template < class T1, class T2, class T3 > bool set(
+				Element* e, const Finfo* f, T1 v1, T2 v2, T3 v3 )
+{
+	// make sure that the Finfo f is on the element.
+	///\todo Later we can remove this check by using a safe call function.
+	vector< const Finfo* > flist;
+	e->listFinfos( flist );
+	if ( find( flist.begin(), flist.end(), f ) == flist.end() ) {
+		cout << "Error: set( " << e->name() << ", " << f->name() <<
+				" T ): Finfo not found\n";
+		return 0;
+	}
+
+	const Ftype3< T1, T2, T3 >* f3 =
+			dynamic_cast< const Ftype3< T1, T2, T3 >* >( f->ftype() );
+	if ( f3 ) {
+		return f3->set( e, f, v1, v2, v3 );
+	}
+	cout << "Error: set3( " << e->name() << ", " << f->name() <<
+			" T1, T2, T3 ): Finfo type mismatch\n";
+	return 0;
+}
+
+/**
+ * Utility function for doing the set using a string lookup for Finfo
+ */
+template < class T1, class T2, class T3 > bool set( 
+			Element* e, const string& f, T1 v1, T2 v2, T3 v3 )
+{
+	const Finfo* finfo = e->findFinfo( f );
+	if ( finfo == 0 ) {
+		cout << "Error: set( " << e->name() << ", " << f <<
+				" T1, T2, T3 ): Finfo not found\n";
+		return 0;
+	}
+	return set( e, finfo, v1, v2, v3 );
+}
+
+
+/**
+* This is the utility func for calling 4-argument functions.
+* It does appropriate typechecking of the finfo before doing anything.
+*/
+template < class T1, class T2, class T3, class T4 > bool set(
+				Element* e, const Finfo* f, T1 v1, T2 v2, T3 v3, T4 v4 )
+{
+	// make sure that the Finfo f is on the element.
+	///\todo Later we can remove this check by using a safe call function.
+	vector< const Finfo* > flist;
+	e->listFinfos( flist );
+	if ( find( flist.begin(), flist.end(), f ) == flist.end() ) {
+		cout << "Error: set( " << e->name() << ", " << f->name() <<
+				" T ): Finfo not found\n";
+		return 0;
+	}
+
+	const Ftype4< T1, T2, T3, T4 >* f4 =
+			dynamic_cast< const Ftype4< T1, T2, T3, T4 >* >( f->ftype() );
+	if ( f4 ) {
+		return f4->set( e, f, v1, v2, v3, v4 );
+	}
+	cout << "Error: set4( " << e->name() << ", " << f->name() <<
+			" T1, T2, T3, T4 ): Finfo type mismatch\n";
+	return 0;
+}
+
+/**
+ * Utility function for doing the set using a string lookup for Finfo
+ */
+template < class T1, class T2, class T3, class T4 > bool set( 
+			Element* e, const string& f, T1 v1, T2 v2, T3 v3, T4 v4 )
+{
+	const Finfo* finfo = e->findFinfo( f );
+	if ( finfo == 0 ) {
+		cout << "Error: set( " << e->name() << ", " << f <<
+				" T1, T2, T3, T4 ): Finfo not found\n";
+		return 0;
+	}
+	return set( e, finfo, v1, v2, v3, v4 );
+}
 #endif // _SETGET_H
