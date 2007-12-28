@@ -717,12 +717,12 @@ void SmoldynHub::processFunc( const Conn& c, ProcInfo info )
 
 void SmoldynHub::processFuncLocal( Element* e, ProcInfo info )
 {
-	// do stuff here
+	handleInflux();
 	int ret = simulatetimestep( simptr_ );
-	handleEfflux( e, info );
 	if ( ret > 1 ) { // 0 is OK, 1 is out of time. 2 and up are other errors
 		cout << "Bad things happened to Smoldyn\n";
 	} 
+	handleEfflux( e, info );
 }
 
 /**
@@ -744,24 +744,40 @@ void SmoldynHub::processFuncLocal( Element* e, ProcInfo info )
 
 void SmoldynHub::flux( const Conn& c, vector< double > influx )
 {
+	assert( influx.size() == nMol_;
 	Element* hub = c.targetElement();
 	unsigned int index = hub->connDestRelativeIndex( c, fluxSlot );
 	SmoldynHub* sh = static_cast< SmoldynHub* >( hub->data() );
+
+	for ( i = 0; i < nMol_; i++ ) {
+		int in = influx[i];
+		int ret = molputimport( sh->simptr_, in, i + 1, 
+			1,  // molece state, what does it mean?
+			panelMap_[ molMap_[ i ] ], // Looking up comput.
+			0, // panel face
+			0 );
+		}
+	}
+			
+	}
 
 	// Here we do some stuff to put the incoming molecules into
 	// Smoldyn. The key thing will be to map the correct identities
 	// between the two solvers.
 }
 
+
 /**
  * The processFunc handles the efflux from the hub.
  * Smoldyn provides an exportList of particles emerging from the
  * surface at the junction between the domains of the solvers.
  * Here we examine this export list and work out where to send them.
+ * This should really be done indepenednetly 
  */
 void SmoldynHub::handleEfflux( Element* hub, ProcInfo info )
 {
-	;
+	molputimport( sh_->shiptr, int nmol, int ident, 
+	MolState ms, parallelptr prl, enum panelFunc	
 }
 
 
@@ -901,12 +917,14 @@ void SmoldynHub::setSurfaces( const string& value )
 				Element* pe = typedPanels[k][q]();
 				panelptr pptr = simptr_->srfss->srflist[j]->panels[k][q];
 				strncpy( pptr->pname, pe->name().c_str(), 199 );
-				// Todo. This extracts the points from pe and puts into
-				// pptr.
+				// This extracts the points from pe and puts into pptr.
 				assignPoints( pe, pptr );
 
 				// Traverse neighbours and set them up.
 				assignNeighbors( pe, pptr, panelMap );
+
+				// Check if panel is an interface to other solvers
+				setupTrade( pe );
 			}
 		}
 	}
@@ -915,7 +933,23 @@ void SmoldynHub::setSurfaces( const string& value )
 	cout << surfaces.size() << " surfaces, \n";
 }
 
-
+/**
+ * This function sets up import/export of molecules from smoldyn and
+ * ties it to a specific panel.
+ * At this point Smoldyn assumes a single interface for traffic, and any
+ * panel(s) can be part of this interface. There may be improbable cases
+ * where we may have the Smoldyn zone as a sandwich between two others,
+ * in which case we need more complicated interfacing. Later.
+ */
+void SmoldynHub::setupTrade( Element* pe )
+{
+	bool tradeFlag;
+	bool ret = get< bool >( pe, "tradeFlag", tradeFlag );
+	tradePanel_.resize( 0 );
+	if ( tradeFlag ) {
+		tradePanel_.push_back( pe );
+	}
+}
 
 ///////////////////////////////////////////////////
 // This is where the reaction system from MOOSE is zombified and 

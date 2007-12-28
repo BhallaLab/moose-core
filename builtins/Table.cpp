@@ -153,6 +153,18 @@ const Cinfo* initTableCinfo()
 			RFCAST( &Table::input2 )
 		),
 
+		/**
+		 * Handle calls to perform operations on table entries.
+		 * This is a backward compatibility feature.
+		 * call table TABOP op [min max] was old syntax
+		 * Here we always require min and max. If both zero we assume
+		 * that it is the same as the range of the table.
+		 * The result of the TABOP is put into 'output' field of table.
+		 */
+		new DestFinfo( "tabop", Ftype3< char, double, double >::global(), 
+			RFCAST( &Table::tabop )
+		),
+
 	};
 
 	static SchedInfo schedInfo[] = { { process, 0, 0 } };
@@ -263,6 +275,11 @@ void Table::process( const Conn& c, ProcInfo p )
 void Table::reinit( const Conn& c, ProcInfo p )
 {
 	static_cast< Table* >( c.data() )->innerReinit( c, p );
+}
+
+void Table::tabop( const Conn& c, char op, double min, double max )
+{
+	static_cast< Table* >( c.data() )->innerTabop( op, min, max );
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -418,6 +435,98 @@ void Table::innerReinit( const Conn& c, ProcInfo p )
 	}
 }
 
+void Table::innerTabop( char op, double min, double max )
+{
+	unsigned int istart = 0;
+	unsigned int istop = 0;
+	if ( table_.size() == 0 ) {
+		output_ = 0.0;
+		input_ = -1;
+		return;
+	}
+
+	if ( min == 0.0 && max == 0.0 ) {
+		// Use the full table range here 
+		istart = 0;
+		istop = table_.size();
+	} else {
+		if ( min >= xmin_ && min < xmax_ )
+			istart = static_cast< unsigned int >( ( min - xmin_ ) * invDx() );
+		if ( max <= min ) {
+			output_ = table_[ istart ];
+			input_ = -1;
+			return;
+		}
+			
+		if ( max > xmax_ )
+			istop = table_.size();
+		else if ( max < xmin_ )
+			istop = 0;
+		else
+			istop = static_cast< unsigned int >( ( max - xmin_ ) * invDx() );
+	}
+
+	doOp( op, istart, istop );
+}
+
+void Table::doOp( char op, unsigned int istart, unsigned int istop )
+{
+	double sum = 0.0;
+	double temp = 0.0;
+	unsigned int i;
+
+	switch( op ) {
+		case 'a': /* average */
+			sum = 0.0;
+			for( i = istart; i < istop; i++ )
+				sum += table_[ i ];
+			output_ = sum / ( istop-istart );
+		break;
+		case 'm': /* minimum */
+			sum = table_[istart];
+			for( i = istart + 1; i < istop; i++ ) {
+				if ( sum > table_[i] )
+					sum = table_[i];
+			}
+			output_ = sum;
+		break;
+		case 'M': /* maximum */
+			sum = table_[ istart ];
+			for( i = istart + 1; i < istop; i++ ) {
+				if (sum < table_[i])
+					sum = table_[i];
+			}
+			output_ = sum;
+		break;
+		case 'r': /* range */
+			temp = sum = table_[ istart ];
+			for( i = istart + 1; i < istop; i++ ) {
+				if ( sum < table_[ i ] ) 
+					sum = table_[ i ];
+				if (temp > table_[ i ] )
+					temp = table_[ i ];
+			}
+			output_ = temp - sum;
+		break;
+		case 's': /* slope - Just an easy hack for now */
+			if ( istart == istop ) {
+				output_ = 0.0;
+			} else {
+				sum = table_[ istart ];
+				temp = table_[ istop ];
+				output_ = ( temp - sum )/( istop - istart );
+			}
+		break;
+		case 'S': /* Sumsq */
+			sum = 0.0;
+			for( i = istart + 1; i < istop; i++ )
+				sum += table_[ i ] * table_[ i ];
+			output_ = sqrt( sum );
+		break;
+		default: 
+		break;
+	}
+}
 
 #ifdef DO_UNIT_TESTS
 
