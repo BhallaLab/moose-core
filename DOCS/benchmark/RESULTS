@@ -45,7 +45,8 @@ MOOSE		kadam	rk5	50	72	Looks OK. Needs scaling to uM,
 						for all 4 plots.
 OLDMOOSE	kadam	rk5	50	42	Looks fine.
 
-Script: group68.g: production simulation from Pragati.
-GENESIS		kadam	ee	50	311	Uses 2 sec transient time.
+Script: group68.g: production simulation from Pragati. 
+	Not quite cleared. Issue with the Ca input table. Other fields look good
+GENESIS		kadam	ee	1000	311	Uses 2 sec transient time.
 MOOSE		kadam	rk5	1000	14.8	
 

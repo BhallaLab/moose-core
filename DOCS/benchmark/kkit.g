@@ -33,8 +33,10 @@ function enddump
 	useclock /kinetics/##[TYPE=Enzyme],/kinetics/##[TYPE=Reaction] 1
 	*/
 	useclock /graphs/##[TYPE=Table] 2
+	useclock /moregraphs/##[TYPE=Table] 2
 
 	setfield /graphs/##[TYPE=Table] step_mode 3
+	setfield /moregraphs/##[TYPE=Table] step_mode 3
 
 	echo done reading dump
 	reset
@@ -44,6 +46,13 @@ function do_save_all_plots( filename )
 	str filename
 	str name
 	foreach name ( {el /graphs/##[TYPE=Table] } )
+		openfile {filename} a
+		writefile {filename} "/newplot"
+		writefile {filename} "/plotname "{name}
+		closefile {filename}
+		setfield {name} print {filename}
+	end
+	foreach name ( {el /moregraphs/##[TYPE=Table] } )
 		openfile {filename} a
 		writefile {filename} "/newplot"
 		writefile {filename} "/plotname "{name}

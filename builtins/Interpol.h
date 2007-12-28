@@ -74,6 +74,9 @@ class Interpol
 		// Later do interpolation etc to preserve contents.
 		void localSetDx( double value );
 		double localGetDx() const;
+		double invDx() const {
+			return invDx_;
+		}
 		void localSetSy( double value );
 
 		void setTableValue( double value, unsigned int index );

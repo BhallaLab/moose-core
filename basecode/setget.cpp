@@ -17,6 +17,8 @@
 #include "ProcInfo.h"
 #include "DerivedFtype.h"
 #include "Ftype2.h"
+#include "Ftype3.h"
+#include "Ftype4.h"
 #include "setget.h"
 
 bool set( Element* e, const Finfo* f )
