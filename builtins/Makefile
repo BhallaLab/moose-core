@@ -23,13 +23,16 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Interpol.o:	Interpol.h ../basecode/Ftype2.h
-Table.o:	Table.h Interpol.h ../basecode/Ftype2.h
+Table.o:	Table.h Interpol.h ../basecode/Ftype2.h ../basecode/Ftype3.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c
 
+#$(TARGET):		$(OBJ) $(HEADERS)
+#	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
+
 $(TARGET):		$(OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
+	$(LD) -r -o $(TARGET) $(OBJ)
 
 clean:
 	-rm -f *.o $(TARGET) core core.*

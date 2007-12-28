@@ -40,6 +40,7 @@ class Table: public Interpol
 		static void input2( const Conn& c, double y, unsigned int x );
 		static void process( const Conn& c, ProcInfo p );
 		static void reinit( const Conn& c, ProcInfo p );
+		static void tabop( const Conn& c, char op, double min, double max );
 
 		////////////////////////////////////////////////////////////
 		// Here are the internal functions
@@ -47,6 +48,8 @@ class Table: public Interpol
 		void innerProcess( Element* e, ProcInfo p );
 		void innerReinit( const Conn& c, ProcInfo p );
 		unsigned long expandTable( Element* e, double size );
+		void innerTabop( char op, double min, double max );
+		void doOp( char op, unsigned int istart, unsigned int istop );
 
 	private:
 		double input_;
