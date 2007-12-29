@@ -5319,3 +5319,11 @@ This is defined by an extra flag on the MOOSE surface.
 ==============================================================================
 19 Dec 2007
 Begun work on connecting Smoldyn up to the smoldynHub
+
+==============================================================================
+28 Dec 2007
+Implemented table TABOP as a backward compatibility feature for old GENESIS
+scripts.
+
+Checked in as revision 305 with unit test compile flags on, Smoldyn off.
+==============================================================================
