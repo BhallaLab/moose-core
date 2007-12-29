@@ -5327,3 +5327,10 @@ scripts.
 
 Checked in as revision 305 with unit test compile flags on, Smoldyn off.
 ==============================================================================
+29 Dec 2007
+Implemented symcompartment for backward compatibility with GENESIS.
+
+Checked in as revision 306 with unit test compile flags on, Smoldyn off.
+
+Implemented a couple of initial regression tests, and the framework for doing
+a whole lot more.
