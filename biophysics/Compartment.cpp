@@ -63,8 +63,8 @@ const Cinfo* initCompartmentCinfo()
 	{
 		new DestFinfo( "init", Ftype1< ProcInfo >::global(),
 				RFCAST( &Compartment::initFunc ) ),
-		new DestFinfo( "dummy", Ftype1< ProcInfo >::global(),
-				RFCAST( &dummyFunc ) ),
+		new DestFinfo( "initReinit", Ftype1< ProcInfo >::global(),
+				RFCAST( &Compartment::initReinitFunc ) ),
 	};
 	static Finfo* init = new SharedFinfo( "init", initShared,
 			sizeof( initShared ) / sizeof( Finfo* ) );
@@ -228,6 +228,8 @@ const Cinfo* initCompartmentCinfo()
 			RFCAST( &Compartment::randInjectFunc ) ),
 	};
 
+	// This sets up two clocks: first a process clock at stage 0, tick 0,
+	// then an init clock at stage 0, tick 1.
 	static SchedInfo schedInfo[] = { { process, 0, 0 }, { init, 0, 1 } };
 
 	static Cinfo compartmentCinfo(
@@ -485,16 +487,26 @@ void Compartment::reinitFunc( const Conn& c, ProcInfo p )
 void Compartment::initFunc( const Conn& c, ProcInfo p )
 {
 	Element* e = c.targetElement();
-	Compartment* compt = static_cast< Compartment* >( e->data() );
-	// Send out the axial messages
-	send1< double >( e, axialSlot, compt->Vm_ );
-	// Send out the raxial messages
-	send2< double >( e, raxialSlot, compt->Ra_, compt->Vm_ );
+	static_cast< Compartment* >( e->data() )->innerInitFunc( e, p );
 }
 
-void Compartment::dummyInitFunc( const Conn& c, ProcInfo p )
+void Compartment::innerInitFunc( Element* e, ProcInfo p )
 {
-		; // nothing happens here.
+	// Send out the axial messages
+	send1< double >( e, axialSlot, Vm_ );
+	// Send out the raxial messages
+	send2< double >( e, raxialSlot, Ra_, Vm_ );
+}
+
+void Compartment::initReinitFunc( const Conn& c, ProcInfo p )
+{
+	Element* e = c.targetElement();
+	static_cast< Compartment* >( e->data() )->innerInitReinitFunc( e, p );
+}
+
+void Compartment::innerInitReinitFunc( Element* e, ProcInfo p )
+{
+	; // Nothing happens here
 }
 
 void Compartment::channelFunc( const Conn& c, double Gk, double Ek)
