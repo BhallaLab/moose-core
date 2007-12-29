@@ -13,6 +13,7 @@ TARGET = biophysics.o
 ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 OBJ = \
 	Compartment.o	\
+	SymCompartment.o	\
 	HHChannel.o	\
 	Mg_block.o	\
 	HHGate.o	\
@@ -34,6 +35,7 @@ OBJ = \
 else
 OBJ = \
 	Compartment.o	\
+	SymCompartment.o	\
 	HHChannel.o	\
 	Mg_block.o	\
 	HHGate.o	\
@@ -61,6 +63,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Compartment.o:	Compartment.h ../basecode/Ftype2.h
+SymCompartment.o:	Compartment.h SymCompartment.h ../basecode/Ftype2.h
 HHChannel.o:	HHChannel.h ../basecode/Ftype2.h ../basecode/Ftype3.h
 Mg_block.o:	Mg_block.h ../basecode/Ftype2.h ../basecode/Ftype3.h
 HHGate.o:	HHGate.h ../builtins/Interpol.h

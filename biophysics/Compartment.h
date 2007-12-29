@@ -21,6 +21,7 @@ class Compartment
 {
 	public:
 			Compartment();
+			virtual ~Compartment() {;}
 
 			// Value Field access function definitions.
 			static void setVm( const Conn& c, double Vm );
@@ -54,7 +55,7 @@ class Compartment
 			static void processFunc( const Conn& c, ProcInfo p );
 			static void reinitFunc( const Conn& c, ProcInfo p );
 			static void initFunc( const Conn& c, ProcInfo p );
-			static void dummyInitFunc( const Conn& c, ProcInfo p );
+			static void initReinitFunc( const Conn& c, ProcInfo p );
 			static void channelFunc( const Conn& c, double Gk, double Ek);
 			static void raxialFunc(const Conn& c, double Ra, double Vm);
 			static void axialFunc(const Conn& c, double Vm);
@@ -64,24 +65,62 @@ class Compartment
 			static bool rangeWarning( 
 					const Conn& c, const string& field, double value );
 
+	protected:
+			double Ra_;
+			double Vm_;
+			double Im_;
+			double A_;
+			double B_;
+
+			/**
+			 * The innerReinitFunc reinitializes all fields.
+			 */
+			virtual void innerReinitFunc( Element* e, ProcInfo p );
+
 	private:
-			void innerProcessFunc( Element* e, ProcInfo p );
-			void innerReinitFunc( Element* e, ProcInfo p );
-			void innerRaxialFunc( double Ra, double Vm );
+			/**
+			 * The innerProcessFunc does the object updating and sends out
+			 * messages to channels, nernsts, and so on.
+			 */
+			virtual void innerProcessFunc( Element* e, ProcInfo p );
+
+			/**
+			 * The innerInitFunc sends the axial and raxial messages
+			 * to other compartments. It has to be executed out of phase
+			 * with the process so that all compartments are equivalent and
+			 * there is no calling order dependence in the results.
+			 */
+			virtual void innerInitFunc( Element* e, ProcInfo p );
+
+			/**
+			 * Unused function to do another reinit step out of phase
+			 * with the main one.
+			 */
+			virtual void innerInitReinitFunc( Element* e, ProcInfo p );
+
+			/**
+			 * innerRaxialFunc handles incoming raxial message data.
+			 */
+			virtual void innerRaxialFunc( double Ra, double Vm );
+
+			/**
+			 * innerAxialFunc handles incoming axial message data.
+			 */
 			void innerAxialFunc( double Vm );
 
-			double Vm_;
+			//double Vm_;
+
 			double Em_;
 			double Cm_;
 			double Rm_;
-			double Ra_;
-			double Im_;
+			// double Ra_;
+			// double Im_;
 			double initVm_;
 			double Inject_;
 			double diameter_;
 			double length_;
-			double A_;
-			double B_;
+			// double A_;
+			// double B_;
 			double invRm_;
 			double sumInject_;
 			double x_;
