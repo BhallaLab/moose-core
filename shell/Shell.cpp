@@ -1538,7 +1538,7 @@ void Shell::setupTau( const Conn& c, Id gateId,
 {
 	static const Finfo* setupTauFinfo = 
 			Cinfo::find( "HHGate")->findFinfo( "setupTau" );
-	assert( gateId.bad() );
+	assert( !gateId.bad() );
 	Element* gate = gateId();
 	if ( gate->className() != "HHGate" ) {
 		cout << "Error: Shell::setupTau: element is not an HHGate: "
