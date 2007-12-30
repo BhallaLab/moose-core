@@ -1,3 +1,12 @@
+/**********************************************************************
+** This program compares two files with numbers in xplot format.
+** It allows for a difference EPSILON between corresponding numbers.
+**           Copyright (C) 2007 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
 #include <iostream>
 #include <fstream>
 #include <vector>
