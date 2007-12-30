@@ -202,6 +202,8 @@ Element* ReadCell::buildCompartment(
 			Cinfo::find( "Compartment" )->findFinfo( "Ra" );
 	static const Finfo* initVmFinfo = 
 			Cinfo::find( "Compartment" )->findFinfo( "initVm" );
+	static const Finfo* EmFinfo = 
+			Cinfo::find( "Compartment" )->findFinfo( "Em" );
 	static const Finfo* VmFinfo = 
 			Cinfo::find( "Compartment" )->findFinfo( "Vm" );
 
@@ -273,6 +275,7 @@ Element* ReadCell::buildCompartment(
 	double Cm = CM_ * ( d * length * PI );
 	set< double >( compt, CmFinfo, Cm );
 	set< double >( compt, initVmFinfo, EREST_ACT_ );
+	set< double >( compt, EmFinfo, EREST_ACT_ );
 	set< double >( compt, VmFinfo, EREST_ACT_ );
 
 	return compt;
@@ -336,6 +339,17 @@ Element* ReadCell::findChannel( const string& name )
 	return 0;
 }
 
+double calcSurf( double len, double dia )
+{
+	double area = 0.0;
+	if ( len == 0.0 ) // Spherical
+		area = dia * dia * PI;
+	else
+		area = len * dia * PI;
+
+	return area;
+}
+
 bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 				double diameter, double length)
 {
@@ -344,23 +358,38 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 		return 0;
 	}
 	for ( unsigned int j = 6; j < argv.size(); j++ ) {
-		// Here we explicitly set compt fields
-		// But I can't quite figure out what GENESIS did here.
-		if ( argv[j] == "RA" ) {
-		} else if ( argv[j] == "RA" ) {
-		} else if ( argv[j] == "CM" ) {
+		// Here we explicitly set compt fields by scaling from the 
+		// specific value applied here.
+		string chan = argv[j];
+
+		double value = atof( argv[ ++j ].c_str() );
+		if ( chan == "RA" ) {
+			double temp;
+			if ( length >= 0.0 ) // spherical flag. Assume length = dia.
+				temp = 8.0 * value / (diameter * PI );
+			else
+				temp = 4.0 * value * length / (diameter * diameter * PI );
+			set< double >( compt, "Ra", temp );
+		} else if ( chan == "RM" ) {
+			set< double >( compt, "Rm", value * calcSurf( length, diameter ) );
+		} else if ( chan == "CM" ) {
+			set< double >( compt, "Cm", value * calcSurf( length, diameter ) );
+		} else if ( chan == "Rm" ) {
+			set< double >( compt, "Rm", value );
+		} else if ( chan == "Ra" ) {
+			set< double >( compt, "Ra", value );
+		} else if ( chan == "Cm" ) {
+			set< double >( compt, "Cm", value );
 		} else {
-			Element* chan = findChannel( argv[j] );
-			if ( chan == 0 ) {
-				cout << "Error: readCell: Channel '" << argv[j] <<
+			Element* chanElm = findChannel( chan );
+			if ( chanElm == 0 ) {
+				cout << "Error: readCell: Channel '" << chan <<
 						"' not found\n";
-				return 0;
+				continue;
 			}
 
-			j++;
-			double value = atof( argv[j].c_str() );
-			if ( !addChannel( compt, chan, value, diameter, length ) )
-					return 0;
+			if ( !addChannel( compt, chanElm, value, diameter, length ) )
+				continue;
 		}
 	}
 	return 1;
