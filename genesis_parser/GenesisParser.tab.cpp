@@ -572,16 +572,16 @@ static const yytype_uint16 yyrline[] =
      128,   129,   130,   131,   132,   133,   134,   135,   136,   137,
      138,   139,   140,   141,   144,   165,   164,   182,   181,   204,
      210,   203,   228,   227,   245,   248,   251,   250,   267,   283,
-     282,   292,   335,   372,   375,   389,   388,   403,   402,   434,
-     433,   477,   485,   484,   506,   509,   515,   519,   525,   526,
-     529,   530,   533,   534,   537,   543,   551,   558,   565,   573,
-     577,   572,   586,   590,   594,   603,   622,   628,   659,   697,
-     701,   696,   717,   718,   722,   733,   746,   752,   758,   766,
-     772,   774,   773,   787,   786,   798,   799,   803,   815,   821,
-     830,   833,   835,   837,   839,   842,   845,   847,   849,   851,
-     853,   855,   857,   860,   862,   864,   867,   869,   871,   873,
-     875,   877,   880,   900,   907,   914,   922,   930,   933,   936,
-     939
+     282,   292,   335,   376,   379,   393,   392,   407,   406,   438,
+     437,   481,   489,   488,   510,   513,   519,   523,   529,   530,
+     533,   534,   537,   538,   541,   547,   555,   562,   569,   577,
+     581,   576,   590,   594,   598,   607,   626,   632,   663,   701,
+     705,   700,   721,   722,   726,   737,   750,   756,   762,   770,
+     776,   778,   777,   791,   790,   802,   803,   807,   819,   825,
+     834,   837,   839,   841,   843,   846,   849,   851,   853,   855,
+     857,   859,   861,   864,   866,   868,   871,   873,   875,   877,
+     879,   881,   884,   904,   911,   918,   926,   934,   937,   940,
+     943
 };
 #endif
 
@@ -1956,6 +1956,7 @@ yyreduce:
 		    int		argc;
 		    char	*argv[100];
 		    char	argbuf[1000];
+			bool	doneFree = 0;
 		    // jmp_buf	save;
 		    // Result	r;
 
@@ -1969,6 +1970,7 @@ yyreduce:
 		      {
 			sprintf(argbuf, "Script '%s' not found", (yyvsp[(2) - (3)].str));
 			free((yyvsp[(2) - (3)].str));
+			doneFree = 1;
 			yyerror(argbuf);
 		      }
 
@@ -1979,35 +1981,37 @@ yyreduce:
 		      }
 		    else
 		      {
-			free((yyvsp[(2) - (3)].str));
+			  if ( doneFree == 0 ) {
+				free((yyvsp[(2) - (3)].str));
+			}
 			(yyval.pn) = NULL;
 		      }
 		  ;}
     break;
 
   case 43:
-#line 372 "GenesisParser.ypp"
+#line 376 "GenesisParser.ypp"
     {
 		    (yyval.pn) = (ParseNode*) NULL;
 		  ;}
     break;
 
   case 44:
-#line 376 "GenesisParser.ypp"
+#line 380 "GenesisParser.ypp"
     {
 		    (yyval.pn) = (yyvsp[(1) - (1)].pn);
 		  ;}
     break;
 
   case 45:
-#line 389 "GenesisParser.ypp"
+#line 393 "GenesisParser.ypp"
     {
 		    Pushyybgin(LIT);
 		  ;}
     break;
 
   case 46:
-#line 393 "GenesisParser.ypp"
+#line 397 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 
@@ -2020,14 +2024,14 @@ yyreduce:
     break;
 
   case 47:
-#line 403 "GenesisParser.ypp"
+#line 407 "GenesisParser.ypp"
     {
 		    Pushyybgin(LIT);
 		  ;}
     break;
 
   case 48:
-#line 407 "GenesisParser.ypp"
+#line 411 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 		    char*	varname;
@@ -2044,14 +2048,14 @@ yyreduce:
     break;
 
   case 49:
-#line 434 "GenesisParser.ypp"
+#line 438 "GenesisParser.ypp"
     {
 		    BEGIN LIT;
 		  ;}
     break;
 
   case 50:
-#line 438 "GenesisParser.ypp"
+#line 442 "GenesisParser.ypp"
     {
 		    // ResultValue	v;
 		    // Result	*rp;
@@ -2092,7 +2096,7 @@ yyreduce:
     break;
 
   case 51:
-#line 478 "GenesisParser.ypp"
+#line 482 "GenesisParser.ypp"
     {
 		    Pushyybgin(LIT);
 		    (yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2100,14 +2104,14 @@ yyreduce:
     break;
 
   case 52:
-#line 485 "GenesisParser.ypp"
+#line 489 "GenesisParser.ypp"
     {
 		    BEGIN LIT;
 		  ;}
     break;
 
   case 53:
-#line 489 "GenesisParser.ypp"
+#line 493 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 		    Result	*rp;
@@ -2125,35 +2129,35 @@ yyreduce:
     break;
 
   case 54:
-#line 506 "GenesisParser.ypp"
+#line 510 "GenesisParser.ypp"
     {
 		    (yyval.pn) = NULL;
 		  ;}
     break;
 
   case 55:
-#line 510 "GenesisParser.ypp"
+#line 514 "GenesisParser.ypp"
     {
 		    (yyval.pn) = PTNew(ARGLIST, RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn));
 		  ;}
     break;
 
   case 56:
-#line 516 "GenesisParser.ypp"
+#line 520 "GenesisParser.ypp"
     {
 		    (yyval.pn) = PTNew(ARGLIST, RV, NULL, (yyvsp[(1) - (1)].pn));
 		  ;}
     break;
 
   case 57:
-#line 520 "GenesisParser.ypp"
+#line 524 "GenesisParser.ypp"
     {
 		    (yyval.pn) = PTNew(ARGLIST, RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn));
 		  ;}
     break;
 
   case 64:
-#line 538 "GenesisParser.ypp"
+#line 542 "GenesisParser.ypp"
     {
 			    ResultValue	v;
 
@@ -2162,7 +2166,7 @@ yyreduce:
     break;
 
   case 65:
-#line 544 "GenesisParser.ypp"
+#line 548 "GenesisParser.ypp"
     {
 			    ResultValue	v;
 
@@ -2171,7 +2175,7 @@ yyreduce:
     break;
 
   case 66:
-#line 552 "GenesisParser.ypp"
+#line 556 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 
@@ -2181,7 +2185,7 @@ yyreduce:
     break;
 
   case 67:
-#line 559 "GenesisParser.ypp"
+#line 563 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 
@@ -2191,7 +2195,7 @@ yyreduce:
     break;
 
   case 68:
-#line 566 "GenesisParser.ypp"
+#line 570 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 
@@ -2201,42 +2205,42 @@ yyreduce:
     break;
 
   case 69:
-#line 573 "GenesisParser.ypp"
+#line 577 "GenesisParser.ypp"
     {
 		    Pushyybgin(0);
 		  ;}
     break;
 
   case 70:
-#line 577 "GenesisParser.ypp"
+#line 581 "GenesisParser.ypp"
     {
 		    Popyybgin();
 		  ;}
     break;
 
   case 71:
-#line 581 "GenesisParser.ypp"
+#line 585 "GenesisParser.ypp"
     {
 		    (yyval.pn) = (yyvsp[(3) - (5)].pn);
 		  ;}
     break;
 
   case 72:
-#line 587 "GenesisParser.ypp"
-    {
-		    (yyval.pn) = (yyvsp[(1) - (1)].pn);
-		  ;}
-    break;
-
-  case 73:
 #line 591 "GenesisParser.ypp"
     {
 		    (yyval.pn) = (yyvsp[(1) - (1)].pn);
 		  ;}
     break;
 
-  case 74:
+  case 73:
 #line 595 "GenesisParser.ypp"
+    {
+		    (yyval.pn) = (yyvsp[(1) - (1)].pn);
+		  ;}
+    break;
+
+  case 74:
+#line 599 "GenesisParser.ypp"
     {
 		    if ((yyvsp[(1) - (1)].pn)->pn_val.r_type == STRCONST)
 			(yyvsp[(1) - (1)].pn)->pn_val.r_type = LITERAL;
@@ -2246,7 +2250,7 @@ yyreduce:
     break;
 
   case 75:
-#line 604 "GenesisParser.ypp"
+#line 608 "GenesisParser.ypp"
     {
 		    ParseNode	*funcpn;
 		    ResultValue	v;
@@ -2268,14 +2272,14 @@ yyreduce:
     break;
 
   case 76:
-#line 623 "GenesisParser.ypp"
+#line 627 "GenesisParser.ypp"
     {
 		    (yyval.pn) = NULL;
 		  ;}
     break;
 
   case 77:
-#line 629 "GenesisParser.ypp"
+#line 633 "GenesisParser.ypp"
     {
 		    ParseNode	*funcpn;
 		    ResultValue	v;
@@ -2309,7 +2313,7 @@ yyreduce:
     break;
 
   case 78:
-#line 660 "GenesisParser.ypp"
+#line 664 "GenesisParser.ypp"
     {
 		    ParseNode	*funcpn;
 		    // ResultValue	v;
@@ -2347,21 +2351,21 @@ yyreduce:
     break;
 
   case 79:
-#line 697 "GenesisParser.ypp"
+#line 701 "GenesisParser.ypp"
     {
 		    ReturnIdents = 1;
 		  ;}
     break;
 
   case 80:
-#line 701 "GenesisParser.ypp"
+#line 705 "GenesisParser.ypp"
     {
 		    ReturnIdents = 0;
 		  ;}
     break;
 
   case 81:
-#line 705 "GenesisParser.ypp"
+#line 709 "GenesisParser.ypp"
     {
 		    InFunctionDefinition--;
 
@@ -2374,17 +2378,17 @@ yyreduce:
     break;
 
   case 82:
-#line 717 "GenesisParser.ypp"
+#line 721 "GenesisParser.ypp"
     { (yyval.pn) = NULL; ;}
     break;
 
   case 83:
-#line 719 "GenesisParser.ypp"
+#line 723 "GenesisParser.ypp"
     { (yyval.pn) = (yyvsp[(2) - (3)].pn); ;}
     break;
 
   case 84:
-#line 723 "GenesisParser.ypp"
+#line 727 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 		    ParseNode	*init;
@@ -2398,7 +2402,7 @@ yyreduce:
     break;
 
   case 85:
-#line 734 "GenesisParser.ypp"
+#line 738 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 		    ParseNode	*init;
@@ -2412,7 +2416,7 @@ yyreduce:
     break;
 
   case 86:
-#line 747 "GenesisParser.ypp"
+#line 751 "GenesisParser.ypp"
     {
 		    ReturnIdents = 1;
 		    DefType = INT;
@@ -2421,7 +2425,7 @@ yyreduce:
     break;
 
   case 87:
-#line 753 "GenesisParser.ypp"
+#line 757 "GenesisParser.ypp"
     {
 		    ReturnIdents = 1;
 		    DefType = FLOAT;
@@ -2430,7 +2434,7 @@ yyreduce:
     break;
 
   case 88:
-#line 759 "GenesisParser.ypp"
+#line 763 "GenesisParser.ypp"
     {
 		    ReturnIdents = 1;
 		    DefType = STR;
@@ -2439,21 +2443,21 @@ yyreduce:
     break;
 
   case 89:
-#line 767 "GenesisParser.ypp"
+#line 771 "GenesisParser.ypp"
     {
 		    (yyval.pn) = (yyvsp[(2) - (2)].pn);
 		  ;}
     break;
 
   case 91:
-#line 774 "GenesisParser.ypp"
+#line 778 "GenesisParser.ypp"
     {
 		    ReturnIdents = 1;
 		  ;}
     break;
 
   case 92:
-#line 778 "GenesisParser.ypp"
+#line 782 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 
@@ -2463,14 +2467,14 @@ yyreduce:
     break;
 
   case 93:
-#line 787 "GenesisParser.ypp"
+#line 791 "GenesisParser.ypp"
     {
 		    ReturnIdents = 0;
 		  ;}
     break;
 
   case 94:
-#line 791 "GenesisParser.ypp"
+#line 795 "GenesisParser.ypp"
     {
 		    (yyval.pn) = vardef((yyvsp[(1) - (3)].str), DefType, DefCast, (yyvsp[(3) - (3)].pn));
 		    free((yyvsp[(1) - (3)].str));
@@ -2478,17 +2482,17 @@ yyreduce:
     break;
 
   case 95:
-#line 798 "GenesisParser.ypp"
+#line 802 "GenesisParser.ypp"
     { (yyval.pn) = NULL; ;}
     break;
 
   case 96:
-#line 800 "GenesisParser.ypp"
+#line 804 "GenesisParser.ypp"
     { (yyval.pn) = (yyvsp[(2) - (2)].pn); ;}
     break;
 
   case 97:
-#line 804 "GenesisParser.ypp"
+#line 808 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 
@@ -2501,7 +2505,7 @@ yyreduce:
     break;
 
   case 98:
-#line 816 "GenesisParser.ypp"
+#line 820 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 
@@ -2510,7 +2514,7 @@ yyreduce:
     break;
 
   case 99:
-#line 822 "GenesisParser.ypp"
+#line 826 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 
@@ -2519,117 +2523,117 @@ yyreduce:
     break;
 
   case 100:
-#line 830 "GenesisParser.ypp"
+#line 834 "GenesisParser.ypp"
     { (yyval.pn) = NULL; ;}
     break;
 
   case 101:
-#line 834 "GenesisParser.ypp"
+#line 838 "GenesisParser.ypp"
     { (yyval.pn) = PTNew('|', RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 102:
-#line 836 "GenesisParser.ypp"
+#line 840 "GenesisParser.ypp"
     { (yyval.pn) = PTNew('&', RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 103:
-#line 838 "GenesisParser.ypp"
+#line 842 "GenesisParser.ypp"
     { (yyval.pn) = PTNew('^', RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 104:
-#line 840 "GenesisParser.ypp"
+#line 844 "GenesisParser.ypp"
     { (yyval.pn) = PTNew('~', RV, (yyvsp[(2) - (2)].pn), NULL); ;}
     break;
 
   case 105:
-#line 843 "GenesisParser.ypp"
+#line 847 "GenesisParser.ypp"
     { (yyval.pn) = PTNew('@', RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 106:
-#line 846 "GenesisParser.ypp"
+#line 850 "GenesisParser.ypp"
     { (yyval.pn) = PTNew('+', RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 107:
-#line 848 "GenesisParser.ypp"
+#line 852 "GenesisParser.ypp"
     { (yyval.pn) = PTNew('-', RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 108:
-#line 850 "GenesisParser.ypp"
+#line 854 "GenesisParser.ypp"
     { (yyval.pn) = PTNew('*', RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 109:
-#line 852 "GenesisParser.ypp"
+#line 856 "GenesisParser.ypp"
     { (yyval.pn) = PTNew('/', RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 110:
-#line 854 "GenesisParser.ypp"
+#line 858 "GenesisParser.ypp"
     { (yyval.pn) = PTNew('%', RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 111:
-#line 856 "GenesisParser.ypp"
+#line 860 "GenesisParser.ypp"
     { (yyval.pn) = PTNew(POW, RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 112:
-#line 858 "GenesisParser.ypp"
+#line 862 "GenesisParser.ypp"
     { (yyval.pn) = PTNew(UMINUS, RV, (yyvsp[(2) - (2)].pn), NULL); ;}
     break;
 
   case 113:
-#line 861 "GenesisParser.ypp"
+#line 865 "GenesisParser.ypp"
     { (yyval.pn) = PTNew(OR, RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 114:
-#line 863 "GenesisParser.ypp"
+#line 867 "GenesisParser.ypp"
     { (yyval.pn) = PTNew(AND, RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 115:
-#line 865 "GenesisParser.ypp"
+#line 869 "GenesisParser.ypp"
     { (yyval.pn) = PTNew('!', RV, (yyvsp[(2) - (2)].pn), NULL); ;}
     break;
 
   case 116:
-#line 868 "GenesisParser.ypp"
+#line 872 "GenesisParser.ypp"
     { (yyval.pn) = PTNew(LT, RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 117:
-#line 870 "GenesisParser.ypp"
+#line 874 "GenesisParser.ypp"
     { (yyval.pn) = PTNew(LE, RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 118:
-#line 872 "GenesisParser.ypp"
+#line 876 "GenesisParser.ypp"
     { (yyval.pn) = PTNew(GT, RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 119:
-#line 874 "GenesisParser.ypp"
+#line 878 "GenesisParser.ypp"
     { (yyval.pn) = PTNew(GE, RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 120:
-#line 876 "GenesisParser.ypp"
+#line 880 "GenesisParser.ypp"
     { (yyval.pn) = PTNew(EQ, RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 121:
-#line 878 "GenesisParser.ypp"
+#line 882 "GenesisParser.ypp"
     { (yyval.pn) = PTNew(NE, RV, (yyvsp[(1) - (3)].pn), (yyvsp[(3) - (3)].pn)); ;}
     break;
 
   case 122:
-#line 881 "GenesisParser.ypp"
+#line 885 "GenesisParser.ypp"
     { 
 		    Result	*rp;
 		    ResultValue	v;
@@ -2651,7 +2655,7 @@ yyreduce:
     break;
 
   case 123:
-#line 901 "GenesisParser.ypp"
+#line 905 "GenesisParser.ypp"
     { 
 		    ResultValue	v;
 
@@ -2661,7 +2665,7 @@ yyreduce:
     break;
 
   case 124:
-#line 908 "GenesisParser.ypp"
+#line 912 "GenesisParser.ypp"
     { 
 		    ResultValue	v;
 
@@ -2671,7 +2675,7 @@ yyreduce:
     break;
 
   case 125:
-#line 915 "GenesisParser.ypp"
+#line 919 "GenesisParser.ypp"
     { 
 		    ResultValue	v;
 
@@ -2681,7 +2685,7 @@ yyreduce:
     break;
 
   case 126:
-#line 923 "GenesisParser.ypp"
+#line 927 "GenesisParser.ypp"
     {
 		    ResultValue	v;
 
@@ -2691,28 +2695,28 @@ yyreduce:
     break;
 
   case 127:
-#line 931 "GenesisParser.ypp"
+#line 935 "GenesisParser.ypp"
     { (yyval.pn) = (yyvsp[(2) - (3)].pn); ;}
     break;
 
   case 128:
-#line 934 "GenesisParser.ypp"
+#line 938 "GenesisParser.ypp"
     { (yyval.pn) = (yyvsp[(2) - (3)].pn); ;}
     break;
 
   case 129:
-#line 937 "GenesisParser.ypp"
+#line 941 "GenesisParser.ypp"
     { (yyval.pn) = (yyvsp[(2) - (3)].pn); ;}
     break;
 
   case 130:
-#line 940 "GenesisParser.ypp"
+#line 944 "GenesisParser.ypp"
     { (yyval.pn) = (yyvsp[(2) - (3)].pn); ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 2716 "GenesisParser.tab.cpp"
+#line 2720 "GenesisParser.tab.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2926,7 +2930,7 @@ yyreturn:
 }
 
 
-#line 944 "GenesisParser.ypp"
+#line 948 "GenesisParser.ypp"
 
 
 
