@@ -339,6 +339,7 @@ include_stmnt	: include_hdr LITERAL WHITESPACE arg_list ws
 		    int		argc;
 		    char	*argv[100];
 		    char	argbuf[1000];
+			bool	doneFree = 0;
 		    // jmp_buf	save;
 		    // Result	r;
 
@@ -352,6 +353,7 @@ include_stmnt	: include_hdr LITERAL WHITESPACE arg_list ws
 		      {
 			sprintf(argbuf, "Script '%s' not found", $2);
 			free($2);
+			doneFree = 1;
 			yyerror(argbuf);
 		      }
 
@@ -362,7 +364,9 @@ include_stmnt	: include_hdr LITERAL WHITESPACE arg_list ws
 		      }
 		    else
 		      {
-			free($2);
+			  if ( doneFree == 0 ) {
+				free($2);
+			}
 			$$ = NULL;
 		      }
 		  }
