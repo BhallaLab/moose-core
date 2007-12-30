@@ -601,7 +601,7 @@ func_entry	*command;
 	    return(result);
 	} else
 */
-	cerr << "undefined function " << argv[0] << std::endl;
+	cout << "undefined function " << argv[0] << std::endl;
     }
     result.r_type = IntType();
     result.r.r_int = 0;
