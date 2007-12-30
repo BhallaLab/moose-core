@@ -14,7 +14,9 @@ using namespace std;
 // written by Upi and Niraj.
 int mooseInit(std::string configFile)
 {
-    static Configuration conf(configFile);    
+    // Commented out as configuration file is not used now
+    // may put it back later when we have a solid scheme for configuration management
+//    static Configuration conf(configFile);    
 #ifdef CRL_MPI
 	    const Cinfo* c = Cinfo::find( "ParShell" );
 #else
@@ -81,17 +83,19 @@ int mooseInit(std::string configFile)
     // solved. For now let the Shell deal with it.
     Neutral::create( "Neutral", "chem", solvers, Id::scratchId() );
     Neutral::create( "Neutral", "neuronal", solvers, Id::scratchId() );
+
+// Configuration file is now skipped to avoid the error message
+// Will be put back if required later                
+//     if ( conf.properties[Configuration::CREATESOLVER].compare("true") == 0 )
+//     {
+//         cout << "Creating solvers...." << endl;
         
-    if ( conf.properties[Configuration::CREATESOLVER].compare("true") == 0 )
-    {
-        cout << "Creating solvers...." << endl;
-        
-        initSolvers(cj);        
-    }
-    else 
-    {
-        cout << "No solvers created" << endl;
-    }
+//         initSolvers(cj);        
+//     }
+//     else 
+//     {
+//         cout << "No solvers created" << endl;
+//     }
     
 #ifdef USE_MPI
 	// This one handles parser and postmaster scheduling.
