@@ -11,6 +11,12 @@
 #
 # $Log: $
 #
+# Normally this Makefile is called from the master Makefile to make the
+# default SLI.o
+#
+# If you want to rebuild the parser from scratch, you need to do
+# 'make parser' in this directory. You will need bison, flex, and sed.
+#
 
 TARGET = SLI.o
 
@@ -53,6 +59,18 @@ ParGenesisParser.o:		GenesisParserWrapper.h ParGenesisParser.h ../shell/Shell.h
 endif
 GenesisParser.yy.o:			GenesisParser.yy.cpp
 #GenesisParser.yy.o:			GenesisParser.yy.l
+
+
+parser:
+	flex++ -+ -oGenesisParser.yy.cpp GenesisParser.yy.l
+	bison -d GenesisParser.ypp
+	sed -e "/^extern\ YYSTYPE/D" GenesisParser.tab.hpp > GenesisParser.tab.h
+#/bin/mv GenesisParser.tab.hpp GenesisParser.tab.h
+	sed -e "s/^yyparse/myFlexLexer::yyparse/" GenesisParser.tab.cpp > temp
+	sed -e "s/YYSTACK_FREE (yyss);/    ;\/\/ Deleted YYSTACK_FREE( yyss);/" temp > temp2
+	sed -e "s/^YY_DECL_VARIABLES/\/\/ Shifted YY_DECL_VARIABLES to inside myFlexLexer class/" temp2 > GenesisParser.tab.cpp 
+	sed -e "s/^    #define yyFlexLexer yyFlexLexer/\/\/ Deleted    #define yyFlexLexer yyFlexLexer/" GenesisParser.yy.cpp > temp
+	sed -e "s/^extern \"C\" int isatty (int );/\/\/ Deleted extern C int isatty/" temp > GenesisParser.yy.cpp
 
 # GenesisParser.yy.cpp: GenesisParser.yy.l
 # 	flex++ -+ -oGenesisParser.yy.cpp GenesisParser.yy.l
