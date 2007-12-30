@@ -5342,3 +5342,24 @@ Checked in as revision 307 with unit test compile flags on, Smoldyn off.
 Fixed bug id 1860410 which crashes when nonexistent script file given. This
 involved messing with the .ypp file, and then I had to redo the Makefile to
 rebuild the parser.
+
+Checked in as revision 308 with unit test compile flags on, Smoldyn off.
+
+Now working on the generic readcell and channel setup capabilities.
+Two obvious issues:
+- Kca_mit_usb does not get created properly. Need to do some table stuff here
+	as well as channel stuff.
+- Even without Kca_mit_usb, the output does not match properly with genesis.
+- Eliminated all channels. Even then output does not match. Suggests that
+	my readcell is connecting the compartments backward.
+	Reversed it. Now the MOOSE result is on the other side of the genesis
+	plot. Am I missing branches? Or is it a clock issue? Or is the
+	solver doing things?
+	OK: Two discrepancies in settings of simple compartments: Rm and Em.
+	Rm for soma is set directly in the mit.p file. MOOSE is not seeing this.
+	OK, fixed both. Now the charging plots match exactly without channels.
+Restored all channels except for the Kca_mit_usb. Match is pretty close but
+	not perfect. Quite likely the cumulative effect of using floats in
+	GENESIS. Time to check in.
+
+==============================================================================
