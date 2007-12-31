@@ -4,7 +4,7 @@
 // This test program works the same in GENESIS and MOOSE. Loads in a 
 // cell model, runs it, saves output in test.plot, quits.
 
-float RUNTIME = 0.1
+float RUNTIME = 0.01
 float DT = 1e-5
 float PLOTDT = 1e-4
 float EREST_ACT = -0.065
@@ -41,7 +41,7 @@ make_KM_bsg_yka
 make_K_mit_usb
 make_K2_mit_usb
 make_Na_mit_usb
-//make_Kca_mit_usb
+make_Kca_mit_usb
 make_Ca_mit_conc
 create compartment compartment
 ce /
@@ -67,4 +67,4 @@ writefile "test.plot" "/plotname Vm"
 closefile "test.plot"
 
 tab2file test.plot /somaplot table
-quit
+// quit
