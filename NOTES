@@ -5361,5 +5361,16 @@ Two obvious issues:
 Restored all channels except for the Kca_mit_usb. Match is pretty close but
 	not perfect. Quite likely the cumulative effect of using floats in
 	GENESIS. Time to check in.
+	
+Checked in as revision 310 with unit test compile flags on, Smoldyn off.
+
+Still struggling with the error:
+Error: cannot find field: qv.table->table[39]
+The call does not seem to go through the expected places in the Genesis parser.
+
+==============================================================================
+31 Dec 2007
+Fixed a number of field assignment problems, all stemming from hacks done in
+the GenesisParserWrapper.cpp to handle channel assignments in tables.
 
 ==============================================================================
