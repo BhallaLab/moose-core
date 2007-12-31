@@ -583,6 +583,7 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "tabchannel" ] = "HHChannel";
 	classnames[ "vdep_channel" ] = "HHChannel";
 	classnames[ "vdep_gate" ] = "HHGate";
+	classnames[ "tabgate" ] = "HHGate";
 	classnames[ "spikegen" ] = "SpikeGen";
 	classnames[ "synchan" ] = "SynChan";
 	classnames[ "table" ] = "Table";
@@ -617,9 +618,13 @@ map< string, string >& sliFieldNameConvert()
 	fieldnames["Table.table->invdx"] = "";
 	fieldnames["Table.table->xmin"] = "xmin";
 	fieldnames["Table.table->xmax"] = "xmax";
+	fieldnames["Table.table->table"] = "table";
 	fieldnames["Compartment.dia"] = "diameter";
 	fieldnames["Compartment.len"] = "length";
+	fieldnames["SymCompartment.dia"] = "diameter";
+	fieldnames["SymCompartment.len"] = "length";
 	fieldnames["SynChan.gmax"] = "Gbar";
+	fieldnames["HHChannel.gbar"] = "Gbar";
 	return fieldnames;
 }
 
@@ -764,7 +769,9 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 	tabmap[ "Y_A" ] = "yGate/A";
 	tabmap[ "Y_B" ] = "yGate/B";
 	tabmap[ "Z_A" ] = "zGate/A";
-	tabmap[ "Z_B" ] = "zGate/B";
+	tabmap[ "Z_B" ] = "zGate/B"; 
+	tabmap[ "bet" ] = "B"; 	// Short for beta: truncated at 3 chars.
+	tabmap[ "alp" ] = "A"; 	// Short for alpha
 
 	Element* sh = s();
 	int start = 2;
@@ -801,33 +808,42 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 	for ( int i = start; i < argc; i += 2 ) {
 		// s->setFuncLocal( path + "/" + argv[ i ], argv[ i + 1 ] );
 		string field = argv[i];
+		const string& className = elist_[0]()->className();
 		map< string, string >::iterator iter = 
-			sliFieldNameConvert().find( elist_[0]()->className() + "." + field );
+			sliFieldNameConvert().find( className + "." + field );
 		if ( iter != sliFieldNameConvert().end() ) 
 			field = iter->second;
 		string value = argv[ i+1 ];
-		string::size_type pos = field.find( "->table" );
-		if ( pos == string::npos )
-				pos = field.find( "->calc_mode" );
-		if ( pos == string::npos )
-				pos = field.find( "->sy" );
-		if ( pos != string::npos ) { // Fill table
-			map< string, string >::iterator i = 
-					tabmap.find( field.substr( 0, 3 ) );
-			if ( i != tabmap.end() ) {
-				string path;
-				if ( start == 1 )
-					path = "./" + i->second;
-				else
-					path = string( argv[1] ) + "/" + i->second;
-				// Id e = GenesisParserWrapper::path2eid( path, s );
-				Id e( path );
-				elist_.resize( 0 );
-				elist_.push_back( e );
-				field = field.substr( pos + 2 );
-				send3< vector< Id >, string, string >( s(),
-					setVecFieldSlot, elist_, field, value );
-				continue;
+		if ( field.substr( 0, 12 ) == "table->table" ) { // regular table
+			field = field.substr( 7 ); // snip off the initial table->
+		} else {
+			string::size_type pos = field.find( "->table" );
+			if ( pos == string::npos )
+					pos = field.find( "->calc_mode" );
+			if ( pos == string::npos )
+					pos = field.find( "->sy" );
+			if ( pos != string::npos ) { // Fill table
+				map< string, string >::iterator j = 
+						tabmap.find( field.substr( 0, 3 ) );
+				if ( j != tabmap.end() ) {
+					string path;
+					if ( start == 1 )
+						path = "./" + j->second;
+					else
+						path = string( argv[1] ) + "/" + j->second;
+					// Id e = GenesisParserWrapper::path2eid( path, s );
+					// Here we should expand the path with the new 
+					// additions. Note that we need to use a temporary
+					// elist for this so as not to interfere with the 
+					// original.
+					Id e( path );
+					vector< Id > el;
+					el.push_back( e );
+					field = field.substr( pos + 2 );
+					send3< vector< Id >, string, string >( s(),
+						setVecFieldSlot, el, field, value );
+					continue;
+				}
 			}
 		}
 		// cout << "in do_set " << path << "." << field << " " <<

@@ -1168,6 +1168,7 @@ void Shell::move( const Conn& c,
 void Shell::setField( const Conn& c, 
 				Id id, string field, string value )
 {
+	assert( id.good() );
 	Element* e = id();
 	if ( !e ) {
 		cout << "Shell::setField:Error: Element not found: " 
@@ -1182,7 +1183,7 @@ void Shell::setField( const Conn& c,
 			cout << "Error: cannot set field " << e->name() <<
 					"." << field << " to " << value << endl;
 	} else {
-		cout << "Error: cannot find field: " << e->name() <<
+		cout << "Error: cannot find field: " << id.path() << ", " << e->name() <<
 				"." << field << endl;
 	}
 }
@@ -1197,6 +1198,7 @@ void Shell::setVecField( const Conn& c,
 {
 	vector< Id >::iterator i;
 	for ( i = elist.begin(); i != elist.end(); i++ ) {
+		assert( i->good() );
 		Element* e = ( *i )();
 		// Appropriate off-node stuff here.
 	
@@ -1206,8 +1208,8 @@ void Shell::setVecField( const Conn& c,
 				cout << "Error: cannot set field " << e->name() <<
 						"." << field << " to " << value << endl;
 		} else {
-			cout << "Error: cannot find field: " << e->name() <<
-					"." << field << endl;
+			cout << "Error: cannot find field: " << i->path() << ", " <<
+				e->name() << "." << field << endl;
 		}
 	}
 }
