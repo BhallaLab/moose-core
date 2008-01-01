@@ -5382,4 +5382,11 @@ it will facilitate conversion of many old GENESIS channels automatically,
 and they will be able to run with the solver. Still some way to go.
 Checked in as revision 313 with unit test compile flags on, Smoldyn off.
 
+Fixed bug found by Raamesh where 2-char object names did not get fields 
+assigned.
+Checked in as revision 314 with unit test compile flags on, Smoldyn off.
+
+Fixed bug in location of created objects that turned up when I was looking
+at previous bug. Put in unit tests for this case.
+
 ==============================================================================
