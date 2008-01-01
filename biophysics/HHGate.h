@@ -23,8 +23,10 @@ class HHGate
 		static void setupTau( const Conn& c, vector< double > parms );
 		static void tweakAlpha( const Conn& c );
 		static void tweakTau( const Conn& c );
+		static void setupGate( const Conn& c, vector< double > parms );
 		void setupTables( const vector< double >& parms, bool doTau );
 		void tweakTables( bool doTau );
+		void innerSetupGate( const vector< double >& parms );
 
 	private:
 		Interpol A_;

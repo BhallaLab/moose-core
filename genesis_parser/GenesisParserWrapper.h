@@ -57,6 +57,9 @@ class GenesisParserWrapper: public myFlexLexer
 		bool fieldExists( Id eid, const string& field, Id s );
 		string getFieldValue();
 
+		string handleMultGate( int argc, const char** const argv, Id s,
+			string& gate, double& gatePower );
+
 		////////////////////////////////////////////////
 		//  Utility functions
 		////////////////////////////////////////////////

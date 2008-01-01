@@ -5373,4 +5373,12 @@ The call does not seem to go through the expected places in the Genesis parser.
 Fixed a number of field assignment problems, all stemming from hacks done in
 the GenesisParserWrapper.cpp to handle channel assignments in tables.
 
+Checked in as revision 311 with unit test compile flags on, Smoldyn off.
+==============================================================================
+1 Jan 2007
+
+Much grunge work in implementing setupgate. It might be worth it only because
+it will facilitate conversion of many old GENESIS channels automatically,
+and they will be able to run with the solver. Still some way to go.
+
 ==============================================================================
