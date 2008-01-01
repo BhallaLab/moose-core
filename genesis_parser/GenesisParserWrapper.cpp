@@ -151,6 +151,9 @@ const Cinfo* initGenesisParserCinfo()
 		// tweaktau
 		new SrcFinfo( "tweakTau", Ftype1< Id >::global() ),
 
+		new SrcFinfo( "setupGate", 
+					Ftype2< Id, vector< double > >::global() ),
+
 		///////////////////////////////////////////////////////////////
 		// SimDump facilities
 		///////////////////////////////////////////////////////////////
@@ -280,6 +283,8 @@ static const unsigned int tweakAlphaSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser.tweakAlpha" );
 static const unsigned int tweakTauSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.tweakTau" );
+static const unsigned int setupGateSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.setupGate" );
 
 static const unsigned int readDumpFileSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.readDumpFile" );
@@ -481,6 +486,10 @@ map< string, string >& sliSrcLookup()
 	src[ "VOLTAGE Vm" ] = "";
 	src[ "CHANNEL Gk Ek" ] = "channel";
 	src[ "SynChan.Mg_block.CHANNEL Gk Ek" ] = "origChannel";
+	src[ "MULTGATE m" ] = ""; // Have to handle specially. Don't make msg
+	src[ "useX.MULTGATE" ] = "xGate";
+	src[ "useY.MULTGATE" ] = "yGate";
+	src[ "useZ.MULTGATE" ] = "zGate";
 
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
@@ -542,7 +551,15 @@ map< string, string >& sliDestLookup()
 	// Some messages for channels.
 	dest[ "VOLTAGE Vm" ] = "";
 	dest[ "CHANNEL Gk Ek" ] = "channel";
+
+	// Some of these funny comparisons are inserted when the code finds
+	// cases which need special work.
 	dest[ "SynChan.Mg_block.CHANNEL Gk Ek" ] = "origChannel";
+	dest[ "MULTGATE m" ] = "";	// This needs to be handled specially, so
+								// simply block the use of this message.
+	dest[ "useX.MULTGATE" ] = "gate";
+	dest[ "useY.MULTGATE" ] = "gate";
+	dest[ "useZ.MULTGATE" ] = "gate";
 
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
@@ -688,6 +705,73 @@ bool GenesisParserWrapper::innerAdd(
 	return 0;
 }
 
+bool hasCa( string s ) {
+	return ( s.find( "ca" ) != string::npos || 
+		s.find( "Ca" ) != string::npos ||  
+		s.find( "CA" ) != string::npos );
+}
+
+
+string GenesisParserWrapper::handleMultGate( 
+	int argc, const char** const argv, Id s,
+	string& gate, double& gatePower )
+{
+	// The MULTGATE message has the crucial information
+	// about the power to use for the gate. But the info about
+	// which gate to use is only specified with the extended field
+	// addmsgs which come later. The whole thing is hideously ugly.
+
+	// We need to infer the following:
+	// - Which gate to use. 
+	// - Whether to set the useConcentration flag
+	// - Which power to use. This is the last arg in the message.
+
+	// Which gate to use: If there is a 'ca' in the name of the
+	// gate, then definitely use zGate and set useConc flag.
+	// If there is a 'ca' in the name of the channel, and the
+	// power is 1, then use zGate and set useConc 
+	// flag. If there is no Ca or the zGate is used, then use
+	// x.
+	// Use conc flag follows from rules above.
+
+	// - Which power to use. This is the last arg in the message.
+	gatePower = atof( argv[5] );
+
+	string msgType = "";
+	// Now the rest of the heuristics.
+	string srcName = argv[1];
+	string destName = argv[2];
+	Id dest( destName );
+	bool useConc = 0;
+	bool zGateUsed = 0;
+	send2< Id, string >( s(), requestFieldSlot, dest, "Zpower" );
+	if ( fieldValue_.length() > 0 ) {
+		if ( fieldValue_ != "0" )
+			zGateUsed = 1;
+	}
+	
+	useConc = hasCa( srcName );
+	if ( hasCa( destName ) && gatePower == 1.0 ) {
+		useConc = 1;
+	}
+	if ( useConc ) {
+		msgType = "useZ.MULTGATE";
+		gate = "Z";
+	} else if ( zGateUsed == 0 ) {
+		msgType = "useX.MULTGATE";
+		gate = "X";
+	} else {
+		msgType = "useY.MULTGATE";
+		gate = "Y";
+	}
+
+	if ( useConc )
+		send3< Id, string, string >( s(),
+			setFieldSlot, dest, "useConcentration", "1" );
+
+	return msgType;
+}
+
 void GenesisParserWrapper::doAdd(
 				int argc, const char** const argv, Id s )
 {
@@ -720,7 +804,16 @@ void GenesisParserWrapper::doAdd(
 		
 		if ( msgType == "CHANNEL Gk Ek" && src()->className() == "SynChan" && dest()->className() == "Mg_block" )
 			msgType = src()->className() + "." + dest()->className() + "." + msgType;
-		
+
+		bool usingMULTGATE = 0;
+		string gate = "";
+		double power = 0;
+		// Typically used between tabgate and vdep_channel.
+		if ( msgType.substr( 0, 10 ) == "MULTGATE m" ) {
+			msgType = handleMultGate( argc, argv, s, gate, power );
+			usingMULTGATE = 1;
+		}
+
 		string srcF = sliMessage( msgType, sliSrcLookup() );
 		string destF = sliMessage( msgType, sliDestLookup() );
 
@@ -733,6 +826,14 @@ void GenesisParserWrapper::doAdd(
 			if ( !innerAdd( src, srcF, dest, destF ) )
 	 			cout << "Error in do_add " << argv[1] << " " << argv[2] << " " << msgType << endl;
 		}
+
+		if ( gate.length() == 1 && power > 0.0 ) {
+		// finish off multgate by assigning the gate power.
+			string field = gate + "power";
+			send3< Id, string, string >( s(), setFieldSlot, 
+				dest, field, argv[5] );
+		}
+
 		//	s->addFuncLocal( src, dest );
 	} else {
 		cout << "usage:: " << argv[0] << " src dest\n";
@@ -2009,6 +2110,7 @@ void setupChanFunc( int argc, const char** const argv, Id s,
  	send2< Id, vector< double > >( s(), slot, gateId, parms );
 }
 
+
 void do_setupalpha( int argc, const char** const argv, Id s )
 {
 	setupChanFunc( argc, argv, s, setupAlphaSlot );
@@ -2044,9 +2146,66 @@ void do_tweaktau( int argc, const char** const argv, Id s )
 	tweakChanFunc( argc, argv, s, tweakTauSlot );
 }
 
+void do_setupgate( int argc, const char** const argv, Id s ) 
+{
+	if (argc < 8 ) {
+		cout << "usage:: " << argv[0] << " channel-element table A B C D F -size n -range min max -noalloc\n";
+		return;
+	}
 
+	Id gateId = findChanGateId( argc, argv, s );
+	if ( gateId.bad() ) {
+		cout << "Error: " << argv[0] << ": Could not find gate " <<
+			argv[1] << "." << argv[2] << endl;
+			return;
+	}
 
+	vector< double > parms;
+	parms.push_back( atof( argv[3] ) ); // A
+	parms.push_back( atof( argv[4] ) ); // B
+	parms.push_back( atof( argv[5] ) ); // C
+	parms.push_back( atof( argv[6] ) ); // D
+	parms.push_back( atof( argv[7] ) ); // F
 
+	double size = 3000.0;
+	double min = -0.100;
+	double max = 0.050;
+	int nextArg;
+	if ( argc >=10 ) {
+		if ( strncmp( argv[8], "-s", 2 ) == 0 ) {
+			size = atof( argv[9] );
+			nextArg = 10;
+		} else {
+			nextArg = 8;
+		}
+
+		if ( strncmp( argv[nextArg], "-r", 2 ) == 0 ) {
+			if ( argc == nextArg + 3 ) {
+				min = atof( argv[nextArg + 1] );
+				max = atof( argv[nextArg + 2] );
+			}
+		}
+	}
+	parms.push_back( size );
+	parms.push_back( min );
+	parms.push_back( max );
+
+	if ( strcmp( argv[2], "beta" ) == 0 ) {
+		parms.push_back( 1.0 );
+	} else if ( strcmp( argv[2], "alpha" ) == 0 ) {
+		parms.push_back( 0.0 );
+	} else if ( strcmp( argv[2], "table" ) == 0 ) {
+		cout << "Warning: " << argv[0] << ": Moose cannot yet handle tables: " <<
+			argv[1] << "." << argv[2] << endl;
+			return;
+	} else {
+		cout << "Error: " << argv[0] << ": Could not find gate " <<
+			argv[1] << "." << argv[2] << endl;
+			return;
+	}
+
+ 	send2< Id, vector< double > >( s(), setupGateSlot, gateId, parms );
+}
 
 /**
  * Equivalent to simdump
@@ -2964,6 +3123,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "setuptau", do_setuptau, "void" );
 	AddFunc( "tweakalpha", do_tweakalpha, "void" );
 	AddFunc( "tweaktau", do_tweaktau, "void" );
+	AddFunc( "setupgate", do_setupgate, "void" );
 
 	AddFunc( "simdump", doWriteDump, "void" );
 	AddFunc( "simundump", doSimUndump, "void" );
