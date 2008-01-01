@@ -1364,6 +1364,8 @@ void do_create( int argc, const char** const argv, Id s )
 		cout << "usage:: " << argv[0] << " class name\n";
 		return;
 	}
+
+	assert( strlen( argv[2] ) > 0 );
 	string className = argv[1];
 	if ( !Cinfo::find( className ) )  {
 		// Possibly it is aliased for backward compatibility.
@@ -1390,6 +1392,8 @@ void do_create( int argc, const char** const argv, Id s )
 		return;
 	}
 	string parent = Shell::head( argv[2], "/" );
+	if ( argv[2][0] == '/' && parent == "" )
+		parent = "/";
 	// Id pa = GenesisParserWrapper::path2eid( parent, s );
 	Id pa( parent );
 
@@ -3384,6 +3388,14 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "le", "bar " );
 	gpAssert( "le /foo", "bar " );
 	gpAssert( "le ..", lestr + "foo " );
+
+	gpAssert( "create neutral /hop", "" );
+	gpAssert( "le", "bar " );
+	gpAssert( "le /foo", "bar " );
+	gpAssert( "le ..", lestr + "foo hop " );
+	gpAssert( "delete /hop", "" );
+	gpAssert( "le ..", lestr + "foo " );
+
 	gpAssert( "ce bar", "" );
 	gpAssert( "pwe", "/foo/bar " );
 	gpAssert( "ce ../..", "" );
