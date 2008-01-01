@@ -93,6 +93,18 @@ class Interpol
 			table_.push_back( value );
 		}
 
+		double xmin() const {
+			return xmin_;
+		}
+
+		double xmax() const {
+			return xmax_;
+		}
+
+		int mode() const {
+			return mode_;
+		}
+
 		/**
 		 * Expand out the table, using the specified mode.  
 		 * Mode 0 : Linear interpolation for fill 

@@ -55,8 +55,11 @@ const Cinfo* initHHGateCinfo()
 			&HHGate::tweakAlpha ),
 		new DestFinfo( "tweakTau", Ftype0::global(),
 			&HHGate::tweakTau ),
+		new DestFinfo( "setupGate",
+			Ftype1< vector< double > >::global(),
+			RFCAST( &HHGate::setupGate ) ),
 	};
-	
+
 	static Cinfo HHGateCinfo(
 		"HHGate",
 		"Upinder S. Bhalla, 2005, NCBS",
@@ -153,6 +156,17 @@ void HHGate::tweakTau( const Conn& c )
 	static_cast< HHGate *>( c.data() )->tweakTables( 1 );
 }
 
+// static func
+void HHGate::setupGate( const Conn& c, vector< double > parms )
+{
+	if ( parms.size() != 9 ) {
+			cout << "HHGate::setupGate: Error: parms.size() != 9\n";
+			return;
+	}
+	// static_cast< HHGate *>( c.data() )->innerGateFunc( c, v );
+	static_cast< HHGate *>( c.data() )->innerSetupGate( parms );
+}
+
 /**
  * Sets up the tables. See code in GENESIS/src/olf/new_interp.c,
  * function setup_tab_values,
@@ -160,6 +174,7 @@ void HHGate::tweakTau( const Conn& c )
  */
 void HHGate::setupTables( const vector< double >& parms, bool doTau )
 {
+	assert( parms.size() == 13 );
 	static const int XDIVS = 10;
 	static const int XMIN = 11;
 	static const int XMAX = 12;
@@ -267,5 +282,68 @@ void HHGate::tweakTables( bool doTau )
 		for ( i = 0; i < size; i++ )
 			B_.setTableValue( 
 				A_.getTableValue( i ) + B_.getTableValue( i ), i );
+	}
+}
+
+void HHGate::innerSetupGate( const vector< double >& parms )
+{
+	// The nine arguments are :
+	// A B C D F size min max isbeta
+	// If size == 0 then we check that the gate has already been allocated.
+	// If isbeta is true then we also have to do the conversion to 
+	// HHGate form of alpha, alpha+beta, assuming that the alpha gate 
+	// has already been setup. This uses tweakTables.
+	// We may need to resize the tables if they don't match here.
+
+	assert( parms.size() == 9 );
+	const double& A = parms[0];
+	const double& B = parms[1];
+	const double& C = parms[2];
+	const double& D = parms[3];
+	const double& F = parms[4];
+	int size = static_cast< int > (parms[5] );
+	const double& min = parms[6];
+	const double& max = parms[7];
+	bool isBeta = static_cast< bool >( parms[8] );
+
+	Interpol& ip = ( isBeta ) ? B_ : A_;
+	if ( size <= 0 ) { // Look up size, min, max from the interpol
+		size = ip.size() - 1;
+		if ( size <= 0 ) {
+			cout << "Error: setupGate has zero size\n";
+			return;
+		}
+	} else {
+		ip.resize( size + 1 );
+	}
+
+	double dx = ( max - min ) / static_cast< double >( size );
+	double x = min + dx / 2.0;
+	for ( int i = 0; i <= size; i++ ) {
+		if ( fabs ( F ) < SINGULARITY ) {
+			ip.setTableValue( 0.0, i );
+		} else {
+			double temp2 = C + exp( ( x + D ) / F );
+			if ( fabs( temp2 ) < SINGULARITY )
+				ip.setTableValue( ip.getTableValue( i - 1 ), i );
+			else
+				ip.setTableValue( ( A + B * x ) / temp2 , i );
+		}
+	}
+
+	if ( isBeta ) {
+		assert( A_.size() > 0 );
+		// Here we ensure that the tables are the same size
+		if ( A_.size() != B_.size() ) {
+			if ( A_.size() > B_.size() ) {
+				int mode = B_.mode();
+				B_.innerTabFill( A_.size(), mode );
+			} else {
+				int mode = A_.mode();
+				A_.innerTabFill( B_.size(), mode );
+			}
+		}
+		// Then we do the tweaking to convert to HHChannel form.
+		tweakTables( 0 );
 	}
 }

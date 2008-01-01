@@ -139,7 +139,7 @@ const Cinfo* initHHChannelCinfo()
 		new ValueFinfo( "useConcentration",
 			ValueFtype1< int >::global(),
 			GFCAST( &HHChannel::getUseConcentration ), 
-			&dummyFunc
+			RFCAST( &HHChannel::setUseConcentration )
 		),
 ///////////////////////////////////////////////////////
 // Shared message definitions
@@ -399,6 +399,11 @@ void HHChannel::setZ( const Conn& c, double Z )
 double HHChannel::getZ( const Element* e )
 {
 	return static_cast< HHChannel* >( e->data() )->Z_;
+}
+
+void HHChannel::setUseConcentration( const Conn& c, int value )
+{
+	static_cast< HHChannel* >( c.data() )->useConcentration_ = value;
 }
 
 int HHChannel::getUseConcentration( const Element* e )
