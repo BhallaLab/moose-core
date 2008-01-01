@@ -146,6 +146,8 @@ class Shell
 				vector< double > parms );
 		static void tweakAlpha( const Conn& c, Id gateId );
 		static void tweakTau( const Conn& c, Id gateId );
+		static void setupGate( const Conn& c, Id gate,
+				vector< double > parms );
 
 		//////////////////////////////////////////////////////////
 		// SimDump functions

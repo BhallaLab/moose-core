@@ -95,6 +95,7 @@ class HHChannel
 		static double getY( const Element* );
 		static void setZ( const Conn& c, double Z );
 		static double getZ( const Element* );
+		static void setUseConcentration( const Conn& c, int value );
 		static int getUseConcentration( const Element* );
 
 		/////////////////////////////////////////////////////////////
