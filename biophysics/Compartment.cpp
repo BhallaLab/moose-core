@@ -275,6 +275,11 @@ Compartment::Compartment()
 	initVm_ = -0.06;
 	A_ = 0.0;
 	B_ = 0.0;
+	x_ = 0.0;
+	y_ = 0.0;
+	z_ = 0.0;
+	diameter_ = 0.0;
+	length_ = 0.0;
 }
 
 bool Compartment::rangeWarning( const Conn& c, const string& field, double value )

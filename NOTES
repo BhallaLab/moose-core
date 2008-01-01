@@ -5380,5 +5380,6 @@ Checked in as revision 311 with unit test compile flags on, Smoldyn off.
 Much grunge work in implementing setupgate. It might be worth it only because
 it will facilitate conversion of many old GENESIS channels automatically,
 and they will be able to run with the solver. Still some way to go.
+Checked in as revision 313 with unit test compile flags on, Smoldyn off.
 
 ==============================================================================

@@ -1316,9 +1316,11 @@ void Shell::digestPath( string& path )
 {
 	// Here we deal with all sorts of awful cases involving current and
 	// parent element paths.
-	if ( path.length() == 0 ) {
+	if ( path.length() == 0 )
 		return;
-	} else if ( path.length() == 1 ) {
+	if ( path[0] == '/' ) // already canonical form.
+		return;
+	if ( path.length() == 1 ) {
 		if ( path == "." ) {
 			path = cwe_.path();
 		} else if ( path == "^" ) {
@@ -1339,6 +1341,8 @@ void Shell::digestPath( string& path )
 					path = path.substr( 0, pos );
 				}
 			}
+		} else {
+			path = cwe_.path() + "/" + path;
 		}
 	} else {
 		string::size_type pos = path.find_first_of( '/' );
@@ -1993,6 +1997,14 @@ void testShell()
 	ASSERT( path == "/a/a2", "path == /a/a2" );
 
 	path = "..";
+	sh.digestPath( path );
+	ASSERT( path == "/a", "path == /a" );
+
+	path = "ax";
+	sh.digestPath( path );
+	ASSERT( path == "/a/a2/ax", "path == /a/a2/ax" );
+
+	path = "/a";
 	sh.digestPath( path );
 	ASSERT( path == "/a", "path == /a" );
 
