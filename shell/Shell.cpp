@@ -167,6 +167,9 @@ const Cinfo* initShellCinfo()
 			Ftype1< Id >::global(), RFCAST( &Shell::tweakAlpha ) ),
 		new DestFinfo( "tweakTau",
 			Ftype1< Id >::global(), RFCAST( &Shell::tweakTau ) ),
+		new DestFinfo( "setupGate",
+			Ftype2< Id, vector< double > >::global(), 
+					RFCAST( &Shell::setupGate ) ),
 		////////////////////////////////////////////////////////////
 		// SimDump facility
 		////////////////////////////////////////////////////////////
@@ -1576,6 +1579,21 @@ void Shell::tweakTau( const Conn& c, Id gateId )
 		return;
 	}
 	set( gate, tweakTauFinfo );
+}
+
+void Shell::setupGate( const Conn& c, Id gateId,
+				vector< double > parms )
+{
+	static const Finfo* setupGateFinfo = 
+			Cinfo::find( "HHGate")->findFinfo( "setupGate" );
+	assert( !gateId.bad() );
+	Element* gate = gateId();
+	if ( gate->className() != "HHGate" ) {
+		cout << "Error: Shell::setupGate: element is not an HHGate: "
+				<< gate->name() << endl;
+		return;
+	}
+	set< vector< double > >( gate, setupGateFinfo, parms );
 }
 
 //////////////////////////////////////////////////////////////////
