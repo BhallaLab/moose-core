@@ -5388,5 +5388,24 @@ Checked in as revision 314 with unit test compile flags on, Smoldyn off.
 
 Fixed bug in location of created objects that turned up when I was looking
 at previous bug. Put in unit tests for this case.
+Checked in as revision 315 with unit test compile flags on, Smoldyn off.
 
+Back now to issue of tabgates and vdep_channels. I don't see that the PRD_ALPHA
+or SUM_ALPHA messages onto the tabgate are something I can or should
+implement. Instead at a later point I need to have a more general form for
+such channels that the solver can use as an external channel.
+
+However, I need to put in another set of regression tests that exercise
+each channel type one at a time. Also Nernst and calcium. 
+To wrap up the 'readcell' for now, I'll eliminate this channel subtype 
+from the model.
+
+==============================================================================
+2 Jan 2007
+
+Implemented a script to go through many channel definitions and check
+the responses: moose_channels.g
+
+Much work to further clean up the handling of tables in MOOSE. This is
+nearly done, now the program is stuck in the 'getpath' command.
 ==============================================================================
