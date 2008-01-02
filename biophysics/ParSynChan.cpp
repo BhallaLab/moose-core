@@ -201,7 +201,7 @@ void ParSynChan::innerProcessFunc( Element* e, ProcInfo info )
                         if(flag == true)
                         {
                                 MPI_Comm_rank(MPI_COMM_WORLD, &iMyRank);
-                                cout<<endl<<"Process "<<iMyRank<<" received spike from "<<objRecvStatus[i].status.MPI_SOURCE<<flush;
+                                //cout<<endl<<"Process "<<iMyRank<<" received spike from "<<objRecvStatus[i].status.MPI_SOURCE<<flush;
                                 pendingEvents_.push( synapses_[i].event( info->currTime_ ) );
                                 objRecvStatus[i].bExecutedRecv = false;
                         }
