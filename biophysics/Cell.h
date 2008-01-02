@@ -1,27 +1,71 @@
+/**********************************************************************
+ ** This program is part of 'MOOSE', the
+ ** Messaging Object Oriented Simulation Environment.
+ **   copyright (C) 2003-2007 Upinder S. Bhalla, Niraj Dudani and NCBS
+ ** It is made available under the terms of the
+ ** GNU Lesser General Public License version 2.1
+ ** See the file COPYING.LIB for the full notice.
+ **********************************************************************/
+
+/*
+ * 24 December 2007
+ * Updating Subhasis' Cell class to manage automatic solver creation.
+ * Niraj Dudani
+ */
+
 /*******************************************************************
- * File:            Cell.h
- * Description:      Generic container for interconnected objects
- *                   that can be handled by a single solver.
+ * File:            Cell.cpp
+ * Description:      
  * Author:          Subhasis Ray
  * E-mail:          ray.subhasis@gmail.com
- * Created:         2007-10-02 13:36:46
+ * Created:         2007-10-02 13:38:29
  ********************************************************************/
 
 #ifndef _CELL_H
 #define _CELL_H
-class Cell
+
+struct MethodInfo
 {
-  public:
-    Cell();
-    static void processFunc( const Conn& c, ProcInfo info );
-    void processFuncLocal( Element* e, ProcInfo info );
-    static void reinitFunc( const Conn& c, ProcInfo info );
-    void reinitFuncLocal(  Element* e, ProcInfo info );
-
-  private:
-    
-
+	string description;
+	bool isVariableDt;
+	bool isImplicit;
+	// May need other info here as well
 };
 
+class Cell
+{
+public:
+	Cell();
+	
+	static void setMethod( const Conn& c, string value );
+	static string getMethod( const Element* e );
+	
+	// Some readonly fields with more info about the methods.
+	static bool getVariableDt( const Element* e );
+	static bool getImplicit( const Element* e );
+	static string getDescription( const Element* e );
+	
+	static void reinitFunc( const Conn& c, ProcInfo p );
+	static void comptListFunc( const Conn& c,
+		const vector< Element* >* clist );
+	
+	static void addMethod( const string& name, 
+		const string& description,
+		bool isVariableDt, bool isImplicit );
+	
+private:
+	void innerReinitFunc( const Id& cell );
+	void innerSetMethod( string value );
+	
+	static Id findCompt( const Id& cell );
+	void setupSolver( const Id& cell, const Id& seed ) const;
+	void checkTree( ) const;
+	
+	string method_;
+	bool implicit_;
+	bool variableDt_;
+	string description_;
+	static map< string, MethodInfo > methodMap_;
+};
 
-#endif
+#endif // _CELL_H
