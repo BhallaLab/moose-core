@@ -59,4 +59,9 @@ class IdManager;
 #include "Id.h"
 #include "Element.h"
 
+#ifdef CRL_MPI
+	#define MAX_MPI_RECV_RECORD_SIZE 1500 
+	#define VISLN_CHUNK_SIZE (MAX_MPI_RECV_RECORD_SIZE/10)
+#endif
+
 #endif // _HEADER_H

@@ -111,30 +111,53 @@ ParSpikeGen::ParSpikeGen()
 {
 }
 
+ParSpikeGen::~ParSpikeGen()
+{
+	for(unsigned int i=0; i<request_.size(); i++)
+		delete request_[i];
+
+	request_.clear();
+}
+
 void ParSpikeGen::sendRank( const Conn& c, int rank )
 {
         static_cast< ParSpikeGen* >( c.data() )->sendRank_.push_back(rank);
+        static_cast< ParSpikeGen* >( c.data() )->request_.push_back( new MPI_Request);
 }
 
 void ParSpikeGen::innerProcessFunc( const Conn& c, ProcInfo p )
 {
         double t;
-        MPI_Request request;
-
+	unsigned int i;
         t = p->currTime_;
-
+	static bool bSpikeSent = false;
+	//int iMyRank;
 
         if ( V_ > threshold_ && t >= lastEvent_ + refractT_ ) {
 
-                cout<<endl<<"V_ "<<V_<<" threshold "<<threshold_<<" t "<<t<<flush;
-                for(unsigned int i=0; i<sendRank_.size(); i++)
-                {
-                        cout<<endl<<"Sent a tick to rank "<< sendRank_[i] <<flush;
-                        MPI_Send(&t, 1, MPI_DOUBLE, sendRank_[i], SPIKE_TAG, MPI_COMM_WORLD);
 
-                        MPI_Isend(&t, 1, MPI_DOUBLE, sendRank_[i], SPIKE_TAG, MPI_COMM_WORLD, &request);
-                        MPI_Wait(&request, MPI_STATUS_IGNORE);
+		//MPI_Comm_rank(MPI_COMM_WORLD, &iMyRank);
+                //cout<<endl<<"V_ "<<V_<<" threshold "<<threshold_<<" t "<<t<<flush;
+
+		if(bSpikeSent == true)
+		{
+	                for(i=0; i<sendRank_.size(); i++)
+			{
+                	        MPI_Wait(request_[i], MPI_STATUS_IGNORE);
+			}
+			bSpikeSent = false;
+		}
+
+
+                for(i=0; i<sendRank_.size(); i++)
+                {
+                        //cout<<endl<<"Process: "<<iMyRank<<" sent a tick to rank "<< sendRank_[i]<<" Tag: "<<SPIKE_TAG<<flush;
+                        //MPI_Send(&t, 1, MPI_DOUBLE, sendRank_[i], SPIKE_TAG, MPI_COMM_WORLD);
+			
+                        MPI_Isend(&t, 1, MPI_DOUBLE, sendRank_[i], SPIKE_TAG, MPI_COMM_WORLD, request_[i]);
+			bSpikeSent = true;
                 }
+
 
                 send1< double >( c.targetElement(), eventSlot, t );
                 lastEvent_ = t;
