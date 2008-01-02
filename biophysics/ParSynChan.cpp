@@ -152,6 +152,16 @@ const Cinfo* initParSynChanCinfo()
 }
 
 static const Cinfo* synChanCinfo = initParSynChanCinfo();
+
+static const unsigned int channelSlot =
+	initParSynChanCinfo()->getSlotIndex( "channel" );
+static const unsigned int origChannelSlot =
+	initParSynChanCinfo()->getSlotIndex( "origChannel" );
+static const unsigned int ikSlot =
+	initParSynChanCinfo()->getSlotIndex( "IkSrc" );
+static const unsigned int synapseSlot =
+	initParSynChanCinfo()->getSlotIndex( "synapse" );
+
 static const double SynE = 2.7182818284590452354;
 static const int MAX_MPI_PROCESSES = 1024;
 static const int SPIKE_TAG = 3;
@@ -208,7 +218,28 @@ void ParSynChan::innerProcessFunc( Element* e, ProcInfo info )
                 }
         }
 
-	SynChan::innerProcessFunc( e, info );
+	while ( !pendingEvents_.empty() &&
+		pendingEvents_.top().delay <= info->currTime_ ) {
+		activation_ += pendingEvents_.top().weight / info->dt_;
+		pendingEvents_.pop();
+	}
+	X_ = modulation_ * activation_ * xconst1_ + X_ * xconst2_;
+	Y_ = X_ * yconst1_ + Y_ * yconst2_;
+	Gk_ = Y_ * norm_;
+	Ik_ = ( Ek_ - Vm_ ) * Gk_;
+
+	if(Ik_ != 0)
+	{
+		Ik_ = 0.1e-6;
+	}
+
+	activation_ = 0.0;
+	modulation_ = 1.0;
+	send2< double, double >( e, channelSlot, Gk_, Ek_ );
+	send2< double, double >( e, origChannelSlot, Gk_, Ek_ );
+	send1< double >( e, ikSlot, Ik_ );
+
+	//SynChan::innerProcessFunc( e, info );
 
 }
 
