@@ -83,7 +83,7 @@ Element* ReadCell::start( const string& cellpath )
 		cellname = cellpath.substr( pos + 1 );
 	}
 	
-	return Neutral::create( "Neutral", cellname, cellpa, Id::scratchId() );
+	return Neutral::create( "Cell", cellname, cellpa, Id::scratchId() );
 }
 
 void ReadCell::read( const string& filename, const string& cellpath )
@@ -327,6 +327,11 @@ void ReadCell::readScript( const string& line, unsigned int lineNum )
 			cout << "Error: readCell: Bad line: " << lineNum <<
 					": " << line << endl;
 		}
+	}
+
+	if ( argv[0] == "*makeproto" ) {
+		const Finfo* procFinfo = currCell_->findFinfo( "process" );
+		procFinfo->dropAll( currCell_ );
 	}
 }
 

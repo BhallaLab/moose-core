@@ -1,13 +1,14 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
-**           copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+**   copyright (C) 2003-2007 Upinder S. Bhalla, Niraj Dudani and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
 #include "moose.h"
+#include "../element/Neutral.h"
 #include "HSolveStructure.h"
 #include "NeuroHub.h"
 #include "NeuroScanBase.h"
@@ -15,24 +16,6 @@
 
 const Cinfo* initNeuroScanCinfo()
 {
-	/** Shared message from solver:
-	 *  (Dest) hubCreate: Receives solver element.
-	 *                    Solver delegates hub creation to the scan element.
-	 *  (Dest) readModel: Receives 'seed' compartment, dt.
-	 *                    This message is a request to read in the model.
-	 *                    The seed compartment is the starting point for
-	 *                    reading in the model.
-	 */
-	static Finfo* scanShared[] =
-	{
-		new DestFinfo( "hubCreate",
-			Ftype1< Element* >::global(),
-			RFCAST( &NeuroScan::hubCreateFunc ) ),
-		new DestFinfo( "readModel",
-			Ftype2< Element*, double >::global(),
-			RFCAST( &NeuroScan::readModelFunc ) ),
-	};
-
 	// Shared message to NeuroHub
 	static Finfo* hubShared[] =
 	{
@@ -74,19 +57,23 @@ const Cinfo* initNeuroScanCinfo()
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfo definitions
 	//////////////////////////////////////////////////////////////////
-		new SharedFinfo( "scan", scanShared,
-			sizeof( scanShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "hub", hubShared,
 			sizeof( hubShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "gate", gateShared,
 			sizeof( gateShared ) / sizeof( Finfo* ) ),
 	//////////////////////////////////////////////////////////////////
-	// MsgSrc definitions
+	// SrcFinfo definitions
 	//////////////////////////////////////////////////////////////////
 	
 	//////////////////////////////////////////////////////////////////
 	// DestFinfo definitions
 	//////////////////////////////////////////////////////////////////
+		new DestFinfo( "hubCreate",
+			Ftype0::global(),
+			&NeuroScan::hubCreateFunc ),
+		new DestFinfo( "readModel",
+			Ftype2< Element*, double >::global(),
+			RFCAST( &NeuroScan::readModelFunc ) ),
 	};
 
 	static Cinfo neuroScanCinfo(
@@ -110,8 +97,6 @@ static const unsigned int hubChannelSlot =
 	initNeuroScanCinfo()->getSlotIndex( "hub.channel" );
 static const unsigned int hubGateSlot =
 	initNeuroScanCinfo()->getSlotIndex( "hub.gate" );
-static const unsigned int scanShipSlot =
-	initNeuroScanCinfo()->getSlotIndex( "scan.ship" );
 static const unsigned int gateVmSlot =
 	initNeuroScanCinfo()->getSlotIndex( "gate.Vm" );
 static const unsigned int gateSlot =
@@ -159,26 +144,27 @@ double NeuroScan::getVHi( const Element* e )
 ///////////////////////////////////////////////////
 
 /// Creating hub as solver's child.
-void NeuroScan::hubCreateFunc( const Conn& c, Element* solver )
+void NeuroScan::hubCreateFunc( const Conn& c )
 {
 	static_cast< NeuroScan* >( c.data() )->
-		innerHubCreateFunc( c.targetElement(), solver );
+		innerHubCreateFunc( c.targetElement() );
 }
 
-void NeuroScan::innerHubCreateFunc( Element* e, Element* solver )
+void NeuroScan::innerHubCreateFunc( Element* scan )
 {
 	// Hub element's data field is owned by its parent HSolve
 	// structure, so we set it's noDelFlag to 1.
-	Element* nh = initNeuroHubCinfo()->create( 
+	Id solve = Neutral::getParent( scan );
+	Element* hub = initNeuroHubCinfo()->create( 
 		Id::scratchId(), "hub",
 		static_cast< void* >( &hub_ ), 1 );
-	bool ret = solver->findFinfo( "childSrc" )->
-		add( solver, nh, nh->findFinfo( "child" ) );
+	bool ret = solve()->findFinfo( "childSrc" )->
+		add( solve(), hub, hub->findFinfo( "child" ) );
 	assert( ret );
 	
 	// Setting up shared msg between scanner and hub.
-	ret = e->findFinfo( "hub" )->
-		add( e, nh, nh->findFinfo( "hub" ) );
+	ret = scan->findFinfo( "hub" )->
+		add( scan, hub, hub->findFinfo( "hub" ) );
 	assert( ret );
 }
 
