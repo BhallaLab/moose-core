@@ -125,6 +125,7 @@ function make_channel (path)
 		setfield {path}/Na/yGate/B table[{iIndex}] { { calc_Na_h_A { v } } +  { calc_Na_h_B { v } } }
 		setfield {path}/K/xGate/A table[{iIndex}] { calc_K_n_A { v } }
 		setfield {path}/K/xGate/B table[{iIndex}] { { calc_K_n_A { v } } + { calc_K_n_B { v } } }
+
 	//	echo {v} { calc_K_n_B { v } }
 		v = {v} + {dv}
 	//	echo {v}
@@ -141,6 +142,7 @@ function make_compartment (path, index, inject)
 	int index
 	float inject
 	
+
 	float PI = 3.141592654
 	float PI_D_L = {PI} * {DIAMETER} * {LENGTH}
 	float Ra = 4.0 * {LENGTH} * {RA} / {PI_D_L}
@@ -168,7 +170,6 @@ function make_neuron (path)
 	str path
 	int iComptIndex
 
-
 	make_compartment {path}/c1 1 0
 
 	for(iComptIndex=2; iComptIndex <= {N_COMPARTMENT}; iComptIndex = iComptIndex + 1)
@@ -176,15 +177,17 @@ function make_neuron (path)
 		link_compartment {path}/c{iComptIndex-1} {path}/c{iComptIndex}
 	end
 
-	create SpikeGen /channel/spkgn
-	create SynChan /channel/syncn
+	create ParSpikeGen /channel/spkgn
+	create ParSynChan /channel/syncn
 
-	create Table {path}/V1
-	create Table {path}/Vm
+	create ParTable {path}/V1
+	create ParTable {path}/Vm
 
 	setfield {path}/V1 stepmode 3
 	setfield {path}/Vm stepmode 3
 
+	setfield {path}/V1 index 1
+	setfield {path}/Vm index 2
 
 	setfield /channel/syncn "tau1" 1.0e-3
 	setfield /channel/syncn "tau2" 1.0e-3
@@ -206,7 +209,7 @@ function make_neuron (path)
 	//useclock {path}/squid,{path}/squid/# 0
 	useclock {path}/##[TYPE=Compartment] 0
 	useclock {path}/##[TYPE=HHChannel] 0
-	useclock {path}/##[TYPE=Table] 1
+	useclock {path}/##[TYPE=ParTable] 1
         useclock /channel/spkgn 0
         useclock /channel/syncn 0
 end
@@ -219,28 +222,36 @@ create Neutral /channel
 create Neutral /neuron
 make_neuron /neuron
 
-//planarconnect /channel/spkgn /channel/syncn
+planarconnect /channel/spkgn /channel/syncn
 
 echo "Multi neuron model setup"
 
 reset
 
 
-//planardelay /channel/syncn 0.005
-//planarweight /channel/syncn 1
+planardelay /channel/syncn 0.005
+planarweight /channel/syncn 1
 
-//setfield /neuron1/c1 inject 0
-//step 0.005 -t
-
+setrank 1
 setfield /neuron/c1 inject {INJECT}
+setrank 0
+
+step 1.16 -t
+
 
 //step 0.160 -t
-step 0.16 -t
+//step 1.16 -t
 //setfield /neuron1/c1 inject 0
 //step 0.005 -t
 
-setfield /neuron/V1 print "squid.plot1"
-setfield /neuron/Vm print "squid.plot2"
+/*echo "Dumping plot files"
+for(iNeuronIndex =1 ; iNeuronIndex < 4; iNeuronIndex = iNeuronIndex +1)
+	setrank {iNeuronIndex}
+	setfield /neuron/V1 print "squid.plot0"{iNeuronIndex}
+	setfield /neuron/Vm print "squid.plotx"{iNeuronIndex}
+end
+setrank 0
+echo "Plot files dumped to squid.plot*"*/
 
-echo "Plot files dumped to squid.plot*"
 quit
+
