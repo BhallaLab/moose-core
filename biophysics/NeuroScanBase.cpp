@@ -1,7 +1,7 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
-**           copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+**   copyright (C) 2003-2007 Upinder S. Bhalla, Niraj Dudani and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -91,7 +91,8 @@ void NeuroScanBase::constructMatrix( ) {
 			     N_ - 1;
 		
 		for ( ; ic < 1 + checkpoint; ++ic, ia += 5 ) {
-			field( compartment_[ ic ], "Vm", Vm );
+			// Read initVm instead of Vm, since we are at reset time
+			field( compartment_[ ic ], "initVm", Vm );
 			field( compartment_[ ic ], "Em", Em );
 			field( compartment_[ ic ], "Cm", Cm );
 			field( compartment_[ ic ], "Rm", Rm );

@@ -10,17 +10,18 @@
 #ifndef _HSOLVE_H
 #define _HSOLVE_H
 
+/**
+ * HSolve adapts the integrator HSolveBase into a MOOSE class.
+ */
 class HSolve: public HSolveBase
 {
 public:
 	HSolve()
 	:
 		scanData_( structure_ ),
-		scanElm_( 0 ),
-		seed_( 0 )
+		scanElm_( 0 )
 	{ ; }
 	
-	static void setPath( const Conn& c, string path );
 	static string getPath( const Element* e );
 	static void setNDiv( const Conn& c, int NDiv );
 	static int getNDiv( const Element* e );
@@ -29,21 +30,17 @@ public:
 	static void setVHi( const Conn& c, double VHi );
 	static double getVHi( const Element* e );
 	static void processFunc( const Conn& c, ProcInfo p );
-	static void reinitFunc( const Conn& c, ProcInfo p );
-	static void postCreateFunc( const Conn& c );
-	static void scanTicksFunc( const Conn& c );
+	static void scanCreateFunc( const Conn& c );
+	static void initFunc( const Conn& c, const Element* seed, double dt );
 	
 private:
-	void innerSetPath( Element* e, const string& path );
-	void innerReinitFunc( Element* e, const ProcInfo& p );
 	void innerProcessFunc( );
-	void innerPostCreateFunc( Element* e );
-	void innerScanTicksFunc( );
+	void innerScanCreateFunc( Element* e );
+	void innerInitFunc( Element* solve, const Element* seed, double dt );
 	
 	NeuroScan scanData_;
 	Element* scanElm_;
 	string path_;
-	Element* seed_;
 };
 
 #endif // _HSOLVE_H
