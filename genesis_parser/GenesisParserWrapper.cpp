@@ -487,9 +487,9 @@ map< string, string >& sliSrcLookup()
 	src[ "CHANNEL Gk Ek" ] = "channel";
 	src[ "SynChan.Mg_block.CHANNEL Gk Ek" ] = "origChannel";
 	src[ "MULTGATE m" ] = ""; // Have to handle specially. Don't make msg
-	src[ "useX.MULTGATE" ] = "xGate";
-	src[ "useY.MULTGATE" ] = "yGate";
-	src[ "useZ.MULTGATE" ] = "zGate";
+	src[ "useX.MULTGATE" ] = "gate";
+	src[ "useY.MULTGATE" ] = "gate";
+	src[ "useZ.MULTGATE" ] = "gate";
 
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
@@ -557,9 +557,9 @@ map< string, string >& sliDestLookup()
 	dest[ "SynChan.Mg_block.CHANNEL Gk Ek" ] = "origChannel";
 	dest[ "MULTGATE m" ] = "";	// This needs to be handled specially, so
 								// simply block the use of this message.
-	dest[ "useX.MULTGATE" ] = "gate";
-	dest[ "useY.MULTGATE" ] = "gate";
-	dest[ "useZ.MULTGATE" ] = "gate";
+	dest[ "useX.MULTGATE" ] = "xGate";
+	dest[ "useY.MULTGATE" ] = "yGate";
+	dest[ "useZ.MULTGATE" ] = "zGate";
 
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
@@ -636,6 +636,7 @@ map< string, string >& sliFieldNameConvert()
 	fieldnames["Table.table->xmin"] = "xmin";
 	fieldnames["Table.table->xmax"] = "xmax";
 	fieldnames["Table.table->table"] = "table";
+	fieldnames["Table.table->xdivs"] = "xdivs";
 	fieldnames["Compartment.dia"] = "diameter";
 	fieldnames["Compartment.len"] = "length";
 	fieldnames["SymCompartment.dia"] = "diameter";
@@ -739,25 +740,32 @@ string GenesisParserWrapper::handleMultGate(
 
 	string msgType = "";
 	// Now the rest of the heuristics.
-	string srcName = argv[1];
-	string destName = argv[2];
+	string srcName = Shell::tail( argv[1], "/" ); // This is the gate
+	string destName = argv[2]; // This is the channel
 	Id dest( destName );
 	bool useConc = 0;
 	bool zGateUsed = 0;
+	bool xGateUsed = 0;
 	send2< Id, string >( s(), requestFieldSlot, dest, "Zpower" );
 	if ( fieldValue_.length() > 0 ) {
 		if ( fieldValue_ != "0" )
 			zGateUsed = 1;
+	}
+
+	send2< Id, string >( s(), requestFieldSlot, dest, "Xpower" );
+	if ( fieldValue_.length() > 0 ) {
+		if ( fieldValue_ != "0" )
+			xGateUsed = 1;
 	}
 	
 	useConc = hasCa( srcName );
 	if ( hasCa( destName ) && gatePower == 1.0 ) {
 		useConc = 1;
 	}
-	if ( useConc ) {
+	if ( useConc && zGateUsed == 0 ) {
 		msgType = "useZ.MULTGATE";
 		gate = "Z";
-	} else if ( zGateUsed == 0 ) {
+	} else if ( xGateUsed == 0 ) {
 		msgType = "useX.MULTGATE";
 		gate = "X";
 	} else {
@@ -918,11 +926,14 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 		if ( field.substr( 0, 12 ) == "table->table" ) { // regular table
 			field = field.substr( 7 ); // snip off the initial table->
 		} else {
+			string::size_type pos = field.find( "->" );
+			/*
 			string::size_type pos = field.find( "->table" );
 			if ( pos == string::npos )
 					pos = field.find( "->calc_mode" );
 			if ( pos == string::npos )
 					pos = field.find( "->sy" );
+			*/
 			if ( pos != string::npos ) { // Fill table
 				map< string, string >::iterator j = 
 						tabmap.find( field.substr( 0, 3 ) );
@@ -1207,8 +1218,20 @@ char* do_get( int argc, const char** const argv, Id s )
 	return gpw->doGet( argc, argv, s );
 }
 
+
+
 char* GenesisParserWrapper::doGet( int argc, const char** argv, Id s )
 {
+	static map< string, string > tabmap;
+	tabmap[ "X_A" ] = "xGate/A";
+	tabmap[ "X_B" ] = "xGate/B";
+	tabmap[ "Y_A" ] = "yGate/A";
+	tabmap[ "Y_B" ] = "yGate/B";
+	tabmap[ "Z_A" ] = "zGate/A";
+	tabmap[ "Z_B" ] = "zGate/B"; 
+	tabmap[ "bet" ] = "B"; 	// Short for beta: truncated at 3 chars.
+	tabmap[ "alp" ] = "A"; 	// Short for alpha
+
 	string field;
 	string value;
 	Id e;
@@ -1231,6 +1254,27 @@ char* GenesisParserWrapper::doGet( int argc, const char** argv, Id s )
 			sliFieldNameConvert().find( e()->className() + "." + field );
 	if ( i != sliFieldNameConvert().end() ) 
 		field = i->second;
+
+	// Hack section to handle table field lookups.
+	if ( field.substr( 0, 12 ) == "table->table" ) { // regular table
+		field = field.substr( 7 ); // snip off the initial table->
+	} else {
+		string::size_type pos = field.find( "->" );
+		if ( pos != string::npos ) { // Other table fields.
+			map< string, string >::iterator j = 
+					tabmap.find( field.substr( 0, 3 ) );
+			if ( j != tabmap.end() ) {
+				string path;
+				if ( argc == 2 )
+					path = "./" + j->second;
+				else
+					path = string( argv[1] ) + "/" + j->second;
+				e = Id( path );
+				field = field.substr( pos + 2 );
+			}
+		}
+	}
+
 	fieldValue_ = "";
 	send2< Id, string >( s(),
 		requestFieldSlot, e, field );

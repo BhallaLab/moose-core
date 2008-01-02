@@ -337,10 +337,12 @@ void HHGate::innerSetupGate( const vector< double >& parms )
 		if ( A_.size() != B_.size() ) {
 			if ( A_.size() > B_.size() ) {
 				int mode = B_.mode();
-				B_.innerTabFill( A_.size(), mode );
+				// Note that the innerTabFill expects to allocate the
+				// terminating entry, so we put in size - 1.
+				B_.innerTabFill( A_.size() - 1, mode );
 			} else {
 				int mode = A_.mode();
-				A_.innerTabFill( B_.size(), mode );
+				A_.innerTabFill( B_.size() - 1, mode );
 			}
 		}
 		// Then we do the tweaking to convert to HHChannel form.
