@@ -85,9 +85,7 @@ void HSolveBase::forwardEliminate( ) {
 }
 
 void HSolveBase::backwardSubstitute( ) {
-	static vector< double > VMid;
-	if ( VMid.empty( ) )
-		VMid.resize( N_ );
+	vector< double > VMid( N_ );
 	
 	long ic = ( long )( N_ ) - 1;
 	vector< double >::reverse_iterator ivmid = VMid.rbegin();
