@@ -51,7 +51,7 @@ class Table: public Interpol
 		void innerTabop( char op, double min, double max );
 		void doOp( char op, unsigned int istart, unsigned int istop );
 
-	private:
+	protected:
 		double input_;
 		double output_;
 		double stepSize_;

@@ -84,6 +84,11 @@ public:
 	int SendCommand(int argc);
 	
 	/**
+	 * This function handles visulalization functionality after a step command has been sent
+	 */
+	void PostStepCommand();
+
+	/**
 	 * This function broadcasts the neuronal connections to all neurons
 	 */
 	void BCastConnections();
@@ -105,6 +110,11 @@ public:
         bool RootCommand(char **argv);
 
 	/**
+	 * This function accepts visualization data and displays it using gnuplot
+	 */
+        void DisplayData(void* pArgs);
+
+	/**
 	 * This object contains the parsed command to be sent to the non-root processes on MPI
 	 */
 	struct stCommand objCommand_; 
@@ -124,8 +134,6 @@ private:
 	 * The rank to which a command must be sent
 	 */
 	int	sendrank_;
-
-
 };
 
 #endif	//_PARGENESIS_PARSER_H
