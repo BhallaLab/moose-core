@@ -165,6 +165,9 @@ const Cinfo* initParShellCinfo()
 			Ftype1< Id >::global(), RFCAST( &Shell::tweakAlpha ) ),
 		new DestFinfo( "tweakTau",
 			Ftype1< Id >::global(), RFCAST( &Shell::tweakTau ) ),
+		new DestFinfo( "setupGate",
+			Ftype2< Id, vector< double > >::global(), 
+					RFCAST( &Shell::setupGate ) ),
 		////////////////////////////////////////////////////////////
 		// SimDump facility
 		////////////////////////////////////////////////////////////
@@ -208,6 +211,9 @@ const Cinfo* initParShellCinfo()
 		new DestFinfo( "loadtab",
 				Ftype1< string >::global(),
 				RFCAST( &Shell::loadtab ) ),	
+		new DestFinfo( "tabop",
+				Ftype4< Id, char, double, double >::global(),
+				RFCAST( &Shell::tabop ) ),	
 	};
 
 	/**
@@ -310,6 +316,7 @@ const Cinfo* initParShellCinfo()
 		new SharedFinfo( "slave", slaveShared,
 				sizeof( slaveShared ) / sizeof( Finfo* ) ), 
 	};
+
 
 	static Cinfo shellCinfo(
 		"ParShell",

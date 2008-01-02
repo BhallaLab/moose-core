@@ -234,7 +234,7 @@ void ParTable::innerProcess( Element* e, ProcInfo p )
 	int i;
 	static int iSentChunkCount = 0;
 
-	usleep(1000);
+	//usleep(1000);
 
 	if(stepMode_ == TAB_BUF && index_ != -1)
 	{

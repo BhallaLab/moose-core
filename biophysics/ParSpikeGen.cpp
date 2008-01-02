@@ -127,7 +127,7 @@ void ParSpikeGen::sendRank( const Conn& c, int rank )
 
 void ParSpikeGen::innerProcessFunc( const Conn& c, ProcInfo p )
 {
-        double t;
+        static double t;
 	unsigned int i;
         t = p->currTime_;
 	static bool bSpikeSent = false;

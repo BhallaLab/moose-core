@@ -148,6 +148,9 @@ const Cinfo* initParGenesisParserCinfo()
 		// tweaktau
 		new SrcFinfo( "tweakTau", Ftype1< Id >::global() ),
 
+		new SrcFinfo( "setupGate", 
+					Ftype2< Id, vector< double > >::global() ),
+
 		///////////////////////////////////////////////////////////////
 		// SimDump facilities
 		///////////////////////////////////////////////////////////////
@@ -181,6 +184,8 @@ const Cinfo* initParGenesisParserCinfo()
 			Ftype3< vector< Id >, string, string >::global() ),
 		new SrcFinfo( "loadtab", 
 			Ftype1< string >::global() ),
+		new SrcFinfo( "tabop", 
+			Ftype4< Id, char, double, double >::global() ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -211,12 +216,6 @@ const Cinfo* initParGenesisParserCinfo()
 	);
 	return &genesisParserCinfo;
 }
-
-
-
- 
-
-
 
 
 static const Cinfo* parGenesisParserCinfo = initParGenesisParserCinfo();
@@ -900,6 +899,7 @@ void ParGenesisParserWrapper::DisplayData(void *pArgs)
 	static double	arrYOutput[MAX_MPI_RECV_RECORD_SIZE];
 	static double arrVislnData[MAX_MPI_RECV_RECORD_SIZE];
 	double lCount;
+	char	chGraphTitle[256];
 
 	struct stUserInput& objUserInput = *(stUserInput*)pArgs;
 
@@ -930,9 +930,9 @@ void ParGenesisParserWrapper::DisplayData(void *pArgs)
 		if(status.MPI_TAG == objUserInput.iNeuron*10 + objUserInput.iIndex)
 		{
 			MPI_Get_count(&status, MPI_DOUBLE, &iRecordCount);
-			cout<<endl<<"Root received data from: "<<status.MPI_SOURCE<<" Value: "<<arrVislnData[0]<<" Count: "<<iRecordCount<<flush;
+			//cout<<endl<<"Root received data from: "<<status.MPI_SOURCE<<" Value: "<<arrVislnData[0]<<" Count: "<<iRecordCount<<flush;
 			objVislnData.Insert(iRecordCount-1, &arrVislnData[1]);
-			cout<<endl<<"Index: "<<objVislnData.ulCurrentIndex<<" RecordCounter: "<<objVislnData.ulRecordCounter<<flush;
+			//cout<<endl<<"Index: "<<objVislnData.ulCurrentIndex<<" RecordCounter: "<<objVislnData.ulRecordCounter<<flush;
 
 			if( objVislnData.ulRecordCounter > MAX_MPI_RECV_RECORD_SIZE)
 			{
@@ -940,10 +940,29 @@ void ParGenesisParserWrapper::DisplayData(void *pArgs)
 				{
 					arrXCounter[i] = lCount;
 				}
-				cout<<endl<<"arrXCounter [0] = "<<arrXCounter[0]<<" arrXCounter[x] = "<<arrXCounter[MAX_MPI_RECV_RECORD_SIZE-1]<<flush;
+				//cout<<endl<<"arrXCounter [0] = "<<arrXCounter[0]<<" arrXCounter[x] = "<<arrXCounter[MAX_MPI_RECV_RECORD_SIZE-1]<<flush;
+				memcpy	(
+						arrYOutput, 
+						objVislnData.arrOutput + objVislnData.ulCurrentIndex, 
+						sizeof(double) * (MAX_MPI_RECV_RECORD_SIZE - objVislnData.ulCurrentIndex)
+					);
 
-				
+				memcpy	(	arrYOutput + (MAX_MPI_RECV_RECORD_SIZE - objVislnData.ulCurrentIndex), 
+						objVislnData.arrOutput, 
+						sizeof(double) * objVislnData.ulCurrentIndex
+					);
 
+                                sprintf	(
+						chGraphTitle, 
+						"set xrange[%g:%g]", 
+						arrXCounter[0], 
+						arrXCounter[MAX_MPI_RECV_RECORD_SIZE-1]
+					);
+
+                                gnuplot_cmd	(
+							objVislnData.hNodeGraph, 
+							chGraphTitle
+						);
 			}
 			else
 			{
@@ -953,14 +972,44 @@ void ParGenesisParserWrapper::DisplayData(void *pArgs)
 				{
 					arrXCounter[i] = lCount;
 				}
-				cout<<endl<<"arrXCounter [0] = "<<arrXCounter[0]<<" arrXCounter[i] = "<<arrXCounter[i-1]<<flush;
+				//cout<<endl<<"arrXCounter [0] = "<<arrXCounter[0]<<" arrXCounter[i] = "<<arrXCounter[i-1]<<flush;
 
+				memcpy	(
+						arrYOutput, 
+						objVislnData.arrOutput, 
+						sizeof(double) * objVislnData.ulCurrentIndex
+					);
+
+                                sprintf	(
+						chGraphTitle, 
+						"set xrange[%g:%g]", 
+						arrXCounter[0], 
+						arrXCounter[objVislnData.ulCurrentIndex-1]
+					);
+
+                                gnuplot_cmd	(
+							objVislnData.hNodeGraph, 
+							chGraphTitle
+						);
 
 
 			}
 
+                        sprintf	(
+					chGraphTitle, 
+					"Neuron: %d Index: %d", 
+					objUserInput.iNeuron, 
+					objUserInput.iIndex
+				);
 
-
+                        gnuplot_plot_xy_file	(
+							objVislnData.hNodeGraph, 
+							arrXCounter, 
+							arrYOutput, 
+							(objVislnData.ulRecordCounter > MAX_MPI_RECV_RECORD_SIZE ? 
+							MAX_MPI_RECV_RECORD_SIZE : objVislnData.ulRecordCounter), 
+							chGraphTitle
+						);
 		}
 	}
 }
