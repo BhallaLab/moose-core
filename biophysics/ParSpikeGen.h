@@ -27,6 +27,7 @@ class ParSpikeGen : public SpikeGen
 {
 	public:
 		ParSpikeGen();
+		~ParSpikeGen();
 
 		/**
 		 * This function receives the set of ranks it will send spikes to
@@ -41,6 +42,7 @@ class ParSpikeGen : public SpikeGen
 		 * Stores the ranks to which spike will be sent
 		 */
 		vector < int > sendRank_;
+		vector < MPI_Request* > request_;
 
 };
 #endif // _ParSpikeGen_h

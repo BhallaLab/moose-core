@@ -109,7 +109,16 @@ int main(int argc, char** argv)
 
 #ifdef CRL_MPI
 	int iMyRank;
-	MPI_Init(&argc, &argv);
+	int iProvidedThreadSupport;
+	int iRequiredThreadSupport = MPI_THREAD_SINGLE;
+
+	MPI_Init_thread(&argc, &argv, iRequiredThreadSupport, &iProvidedThreadSupport);
+	if(iProvidedThreadSupport != iRequiredThreadSupport)
+	{
+		cout<<endl<<"Error: Expected thread support not provided"<<endl<<flush;
+		MPI_Finalize();
+		exit(1);
+	}
 	MPI_Comm_rank(MPI_COMM_WORLD, &iMyRank);
 #endif
 
