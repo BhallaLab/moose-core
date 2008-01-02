@@ -16,7 +16,7 @@ float  LENGTH          = {CABLE_LENGTH} / {N_COMPARTMENT}
 
 make_compartment /proto/cc {RA} {RM} {CM} {EM} 0.0 {DIAMETER} {LENGTH}
 
-create Neutral /axon
+create Cell /axon
 copy /proto/cc axon/c1
 setfield axon/c1 inject {INJECT}
 
@@ -35,13 +35,9 @@ setfield /plot/v1,/plot/vn stepmode 3
 addmsg /plot/v1/inputRequest /axon/c1/Vm
 addmsg /plot/vn/inputRequest /axon/c{N_COMPARTMENT}/Vm
 
-/*
- * Solver will get attached to clock 4 automatically. Setting dt explicitly.
- * Tables are not yet autoscheduled.
- */
-setclock 4 {SIMDT} 0
-setclock 5 {PLOTDT} 0
-useclock /plot/##[TYPE=Table] 5
+setclock 0 {SIMDT} 0
+setclock 1 {PLOTDT} 1
+useclock /plot/##[TYPE=Table] 1
 reset
 
 step {SIMLENGTH} -t

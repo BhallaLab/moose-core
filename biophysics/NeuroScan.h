@@ -10,6 +10,9 @@
 #ifndef _NEURO_SCAN_H
 #define _NEURO_SCAN_H
 
+/**
+ * NeuroScan adapts NeuroScanBase into a MOOSE class.
+ */
 class NeuroScan: public NeuroScanBase
 {
 public:
@@ -39,12 +42,12 @@ public:
 	static double getVHi( const Element* e );
 	
 	// Dest function definitions.
-	static void hubCreateFunc( const Conn& c, Element* solver );
+	static void hubCreateFunc( const Conn& c );
 	static void readModelFunc( const Conn& c, Element* seed, double dt );
 	static void gateFunc( const Conn& c, double A, double B );
 	
 private:
-	void innerHubCreateFunc( Element* e, Element* solver );
+	void innerHubCreateFunc( Element* e );
 	void innerReadModelFunc( Element* e, Element* seed, double dt );
 	
 	struct GateInfo

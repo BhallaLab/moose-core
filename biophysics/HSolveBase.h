@@ -10,6 +10,10 @@
 #ifndef _HSOLVE_BASE_H
 #define _HSOLVE_BASE_H
 
+/**
+ * HSolveBase integrates the equations arising from the compartmental model
+ * of a single cell, using the Hines' algorithm.
+ */
 class HSolveBase
 {
 public:

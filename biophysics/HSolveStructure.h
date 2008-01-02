@@ -10,6 +10,10 @@
 #ifndef _HSOLVE_STRUCTURE_H
 #define _HSOLVE_STRUCTURE_H
 
+/**
+ * This struct holds the data structures of the Hines's solver. These are shared
+ * by the Hub, Scan and HSolve classes.
+ */
 struct HSolveStructure
 {
 	unsigned long            N_;
