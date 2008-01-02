@@ -1,7 +1,7 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment
-**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+**   copyright (C) 2003-2007 Upinder S. Bhalla, Niraj Dudani and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -10,6 +10,12 @@
 #ifndef _NEURO_HUB_H
 #define _NEURO_HUB_H
 
+/**
+ * Biophysical elements in a neuronal model hand over control (computation,
+ * fields, messages) to the solver. NeuroHub handles the fields and messages--
+ * it can do so because the solver's data structures are shared between the
+ * integrator, hub and the scanner.
+ */
 class NeuroHub
 {
 public:
@@ -57,13 +63,11 @@ public:
 	///////////////////////////////////////////////////
 	// Dest functions
 	///////////////////////////////////////////////////
-	static void compartmentFunc( const Conn& c,
-		vector< Element* >* elist );
-	static void channelFunc( const Conn& c,
-		vector< Element* >* elist );
-	static void gateFunc( const Conn& c,
-		vector< Element* >* elist );
-	static void destroy( const Conn& c);
+	static void compartmentFunc( const Conn& c, vector< Element* >* elist );
+	static void channelFunc( const Conn& c, vector< Element* >* elist );
+	static void gateFunc( const Conn& c, vector< Element* >* elist );
+	static void destroy( const Conn& c );
+	static void childFunc( const Conn& c, int stage );
 	
 	///////////////////////////////////////////////////
 	// Field functions (Biophysics)
@@ -73,7 +77,7 @@ public:
 	
 	static void setInject( const Conn& c, double value );
 	static double getInject( const Element* e );
-
+	
 	///////////////////////////////////////////////////
 	// Dest functions (Biophysics)
 	///////////////////////////////////////////////////
@@ -86,6 +90,8 @@ private:
 	static void zombify( 
 		Element* hub, Element* e,
 		const Finfo* hubFinfo, Finfo* solveFinfo );
+	static void unzombify( const Conn& c );
+	static void clearFunc( const Conn& c );
 	static void redirectDestMessages(
 		Element* hub, Element* e,
 		const Finfo* hubFinfo, const Finfo* eFinfo,

@@ -32,14 +32,10 @@ setfield /plot/v1,/plot/vn stepmode 3
 addmsg /plot/v1/inputRequest /cable/c1/Vm
 addmsg /plot/vn/inputRequest /cable/c{N_COMPARTMENT}/Vm
 
-/*
- * Solver will get attached to clock 4 automatically. Setting dt explicitly.
- * Tables are not yet autoscheduled.
- */
-setclock 4 {SIMDT} 0
-setclock 5 {PLOTDT} 0
-useclock /plot/##[TYPE=Table] 5
-reset
+setclock 0 {SIMDT} 0
+setclock 1 {PLOTDT} 1
+useclock /plot/##[TYPE=Table] 1
+
 reset
 step {SIMLENGTH} -t
 setfield /plot/v1 print "sim_cable.0"

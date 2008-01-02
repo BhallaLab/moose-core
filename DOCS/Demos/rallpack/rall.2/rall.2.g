@@ -13,7 +13,7 @@ float  INJECT          = 0.1e-9
 float  DIAMETER_0      = 16e-6
 float  LENGTH_0        = 32e-6
 
-create Neutral /cell
+create Cell /cell
 
 float diameter = {DIAMETER_0}
 float length   = {LENGTH_0}
@@ -43,13 +43,9 @@ setfield /plot/v1,/plot/vn stepmode 3
 addmsg /plot/v1/inputRequest /cell/c1/Vm
 addmsg /plot/vn/inputRequest /cell/c{2 ** MAX_DEPTH - 1}/Vm
 
-/*
- * Solver will get attached to clock 4 automatically. Setting dt explicitly.
- * Tables are not yet autoscheduled.
- */
-setclock 4 {SIMDT} 0
-setclock 5 {PLOTDT} 0
-useclock /plot/##[TYPE=Table] 5
+setclock 0 {SIMDT} 0
+setclock 1 {PLOTDT} 1
+useclock /plot/##[TYPE=Table] 1
 reset
 
 step {SIMLENGTH} -t
