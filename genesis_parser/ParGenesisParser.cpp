@@ -11,10 +11,13 @@
 #include "GenesisParserWrapper.h"
 #include "../element/Neutral.h"
 #include "func_externs.h"
+#include "../gnuplot/gnuplot_i.h"
 
 #include "ParGenesisParser.h"
 
+
 #include <mpi.h>
+#include <pthread.h>
 
 using namespace std;
 
@@ -222,6 +225,105 @@ static const unsigned int planarconnectSlot = initParGenesisParserCinfo()->getSl
 static	int	arrSpikegenConnections[MAX_MPI_PROCESSES][MAX_MPI_PROCESSES];
 static	int	arrSynchanConnections[MAX_MPI_PROCESSES][MAX_MPI_PROCESSES];
 
+static const int STEP_ACK_TAG = 4;
+
+void* ThreadFunc(void* pArgs);
+
+struct stVislnData
+{
+        double arrOutput[MAX_MPI_RECV_RECORD_SIZE];
+        unsigned long ulCurrentIndex;
+        unsigned long ulRecordCounter;
+	gnuplot_ctrl    *hNodeGraph;
+
+        stVislnData()
+        {
+                clear();
+		hNodeGraph = NULL;
+        };
+
+	void clear()
+	{
+                memset(arrOutput, 0, MAX_MPI_RECV_RECORD_SIZE * sizeof(double));
+                ulCurrentIndex = 0;
+                ulRecordCounter = 0;
+	};
+
+        void Insert(unsigned long ulRecordCount, double* arrRecv)
+        {
+                unsigned long ulIndex = 0;
+
+		// Check for overflow condition                
+                if( ( (ulCurrentIndex + ulRecordCount) > (unsigned long)MAX_MPI_RECV_RECORD_SIZE) )
+                {
+                        // Partial copy to output array - current to end of array, copy input array from start
+                        ulIndex = MAX_MPI_RECV_RECORD_SIZE - ulCurrentIndex;
+                        memcpy(arrOutput+ulCurrentIndex, arrRecv, ulIndex * sizeof(double));
+
+                        // Partial copy to
+                        memcpy(arrOutput, arrRecv+ulIndex, (ulRecordCount-ulIndex) * sizeof(double));
+                        ulCurrentIndex = ulRecordCount-ulIndex+1;
+                }
+                else
+                {
+                        memcpy(arrOutput+ulCurrentIndex, arrRecv, ulRecordCount * sizeof(double));
+                        ulCurrentIndex += ulRecordCount;
+                }
+
+                ulRecordCounter += ulRecordCount;
+        }
+};
+
+static stVislnData	objVislnData;
+
+struct stUserInput
+{
+	int iNeuron;
+	int iIndex;
+	int iPrevNeuron;
+	int iPrevIndex;
+	bool bContinue;
+	bool bNeuronSelected;
+	const int iNeuronCount;
+
+	stUserInput(int NeuronCount):iNeuronCount(NeuronCount)
+	{
+		bContinue = true;
+		iPrevNeuron = 0;
+		iPrevIndex = 0;
+		clear();
+	};
+	void clear()
+	{
+		iNeuron = 0;
+		iIndex = 0;
+		bNeuronSelected = false;
+		restore();
+	};
+	void backup()
+	{
+		iPrevNeuron = iNeuron;
+		iPrevIndex = iIndex;
+	};
+
+	void restore()
+	{
+		iNeuron = iPrevNeuron;
+		iIndex = iPrevIndex;
+		bNeuronSelected = false;
+	};
+	bool ValidPrevUserInput()
+	{
+		return (iPrevNeuron != 0 && iPrevIndex != 0);
+	}
+
+	bool ValidUserInput()
+	{
+		return (iNeuron != 0 && iIndex != 0);
+	}
+};
+
+
 ParGenesisParserWrapper::ParGenesisParserWrapper()
 {
 	loadBuiltinCommands();
@@ -342,6 +444,14 @@ void ParGenesisParserWrapper::parseFunc( const Conn& c, string s )
 
 
 			objParParser.ExecuteCommand(objCommand.iSize, pArgs);
+
+			if(!strcmp(objCommand.arrCommand[0], "step"))
+			{
+				int j = 1;
+				MPI_Send(&j, 1, MPI_INT, 0, STEP_ACK_TAG, MPI_COMM_WORLD);
+				//cout<<endl<<"Process "<<objParParser.processrank_<<" sending ACK"<<endl<<flush; 
+			}
+
 
                         for(i=0; i<objCommand.iSize; i++)
                         {
@@ -502,7 +612,7 @@ Result ParGenesisParserWrapper::ExecuteCommand(int argc, char** argv)
 		objCommand_.clear();	
 		objCommand_.iSize = argc;
 		objCommand_.iRank = sendrank_;
-		for(int i=0; i<argc; i++)
+		for(i=0; i<argc; i++)
 		{
 			strcpy(objCommand_.arrCommand[i], argv[i]);
 		}
@@ -511,9 +621,7 @@ Result ParGenesisParserWrapper::ExecuteCommand(int argc, char** argv)
 		
 		if(!strcmp(objCommand_.arrCommand[0], "step"))
 		{
-			//Execute Barrier at step command
-			//cout<<endl<<"Executing barrier at rank: "<<processrank_<<endl<<flush;
-			MPI_Barrier(MPI_COMM_WORLD);
+			PostStepCommand();
 		}
 
 		if(!strcmp(objCommand_.arrCommand[0], "planarconnect"))
@@ -709,5 +817,207 @@ void ParGenesisParserWrapper::BCastConnections()
                         cout<<arrSynchanConnections[i][j]<<" , ";
                 }
         }*/
+}
+
+
+void ParGenesisParserWrapper::PostStepCommand()
+{
+	int i;
+        int iReceivedACK = false;
+        int iACK;
+	pthread_t	thread_id;
+	MPI_Request	request;
+	double	lRequest;
+
+	//Execute Barrier at step command
+	//cout<<endl<<"Executing barrier at rank: "<<processrank_<<endl<<flush;
+	MPI_Barrier(MPI_COMM_WORLD);
+
+         //cout <<endl<<"moose "<<processrank_<<" Waiting for Step ACK# > "<< flush;
+	stUserInput objUserInput(processcount_-1);
+
+	objVislnData.hNodeGraph = gnuplot_init() ;
+	if( objVislnData.hNodeGraph == NULL)
+	{
+		cout<<endl<<"Error in initializing Gnuplot"<<flush;
+	}
+
+
+	pthread_create(&thread_id, NULL, ThreadFunc, &objUserInput);
+        for(i=1; i < processcount_; i++)
+        {
+               MPI_Request req;
+               MPI_Status status;
+
+               iReceivedACK = false;
+               MPI_Irecv (&iACK, 1, MPI_INT, MPI_ANY_SOURCE, STEP_ACK_TAG, MPI_COMM_WORLD, &req);
+
+               while(iReceivedACK == false)
+               {
+                        MPI_Test(&req, &iReceivedACK, &status);
+
+			if(objUserInput.bNeuronSelected)
+			{
+				//cout<<endl<<"Selected Neuron: "<<objUserInput.iNeuron<<" Index: "<<objUserInput.iIndex<<flush;
+				if(objUserInput.ValidPrevUserInput() == true)
+				{
+					lRequest = 0;
+					//cout<<endl<<"Sending STOP to: "<<objUserInput.iPrevNeuron<<" Index: "<<objUserInput.iPrevIndex<<flush;
+	                        	MPI_Isend(&lRequest, 1, MPI_DOUBLE, objUserInput.iPrevNeuron,objUserInput.iPrevIndex, MPI_COMM_WORLD, &request);
+	                        	MPI_Wait(&request, MPI_STATUS_IGNORE);
+				}
+				
+				objUserInput.backup();
+				objVislnData.clear();
+
+				objUserInput.bNeuronSelected = false;
+				lRequest = 1;
+				//cout<<endl<<"Sending START to: "<<objUserInput.iNeuron<<" Index: "<<objUserInput.iIndex<<flush;
+                        	MPI_Isend(&lRequest, 1, MPI_DOUBLE, objUserInput.iNeuron,objUserInput.iIndex, MPI_COMM_WORLD, &request);
+	                        MPI_Wait(&request, MPI_STATUS_IGNORE);
+			}
+                        	DisplayData(&objUserInput);
+                }
+                cout<<endl<<"Received ACK from: "<<status.MPI_SOURCE<<flush;
+         }
+
+	objUserInput.bContinue = false;
+	gnuplot_close(objVislnData.hNodeGraph);
+	pthread_cancel(thread_id);
+	//pthread_join(thread_id, NULL);
+
+}
+
+void ParGenesisParserWrapper::DisplayData(void *pArgs)
+{
+	static MPI_Request request;
+	static bool bRecvCalled = false;
+	MPI_Status status;
+	int iFlag;
+	int iRecordCount;
+	int i;
+	static double	arrXCounter[MAX_MPI_RECV_RECORD_SIZE];
+	static double	arrYOutput[MAX_MPI_RECV_RECORD_SIZE];
+	static double arrVislnData[MAX_MPI_RECV_RECORD_SIZE];
+	double lCount;
+
+	struct stUserInput& objUserInput = *(stUserInput*)pArgs;
+
+	if(objUserInput.ValidUserInput() == false )
+	{
+		return;
+	}
+
+	if(bRecvCalled == false)
+	{
+		MPI_Irecv (
+				arrVislnData, 
+				MAX_MPI_RECV_RECORD_SIZE, 
+				MPI_DOUBLE, 
+				objUserInput.iNeuron, 
+				objUserInput.iNeuron*10+objUserInput.iIndex, 
+				MPI_COMM_WORLD, 
+				&request
+			  );
+
+		bRecvCalled = true;
+	}
+
+	MPI_Test(&request, &iFlag, &status);
+	if(iFlag == true)
+	{
+		bRecvCalled = false;
+		if(status.MPI_TAG == objUserInput.iNeuron*10 + objUserInput.iIndex)
+		{
+			MPI_Get_count(&status, MPI_DOUBLE, &iRecordCount);
+			cout<<endl<<"Root received data from: "<<status.MPI_SOURCE<<" Value: "<<arrVislnData[0]<<" Count: "<<iRecordCount<<flush;
+			objVislnData.Insert(iRecordCount-1, &arrVislnData[1]);
+			cout<<endl<<"Index: "<<objVislnData.ulCurrentIndex<<" RecordCounter: "<<objVislnData.ulRecordCounter<<flush;
+
+			if( objVislnData.ulRecordCounter > MAX_MPI_RECV_RECORD_SIZE)
+			{
+				for(i=0, lCount = (arrVislnData[0] - MAX_MPI_RECV_RECORD_SIZE + 1); lCount <=arrVislnData[0]; i++, lCount++ )
+				{
+					arrXCounter[i] = lCount;
+				}
+				cout<<endl<<"arrXCounter [0] = "<<arrXCounter[0]<<" arrXCounter[x] = "<<arrXCounter[MAX_MPI_RECV_RECORD_SIZE-1]<<flush;
+
+				
+
+			}
+			else
+			{
+				for(	i=0, lCount = (arrVislnData[0] - objVislnData.ulRecordCounter + 1); 
+					lCount <=arrVislnData[0]; 
+					i++, lCount++ )
+				{
+					arrXCounter[i] = lCount;
+				}
+				cout<<endl<<"arrXCounter [0] = "<<arrXCounter[0]<<" arrXCounter[i] = "<<arrXCounter[i-1]<<flush;
+
+
+
+			}
+
+
+
+		}
+	}
+}
+
+
+void* ThreadFunc(void* pArgs)
+{
+	char szCommand[40];
+	int iNeuron = 0, iIndex = 0;
+	char szUserInput [40];
+	struct stUserInput& objUserInput = *(stUserInput*)pArgs;
+	while(1 && objUserInput.bContinue)
+	{
+		if(objUserInput.bNeuronSelected == true)
+			continue;
+	
+		cout<<endl<<"Moose Thread >>"<<flush;
+		memset(szUserInput, 0, 40);
+		fgets(szUserInput, 40, stdin);
+		if(objUserInput.bContinue == true)
+		{
+			sscanf(szUserInput, "%s %d %d", szCommand, &iNeuron, &iIndex);
+		}
+		else
+		{
+			continue;
+		}
+
+
+		if(!strcmp(szCommand, "list"))
+		{
+			for(int i=1; i<= objUserInput.iNeuronCount; i++)
+				cout<<endl<<i;
+
+			cout<<endl<<flush;
+		}
+		else if( !strcmp(szCommand, "show"))
+		{
+			if(iNeuron > objUserInput.iNeuronCount || iNeuron < 1)
+			{
+				cout<<endl<<"Error: Invalid Neuron number"<<flush;
+				objUserInput.clear();
+			}
+			else
+			{
+				objUserInput.iNeuron = iNeuron;
+				objUserInput.iIndex = iIndex;
+				objUserInput.bNeuronSelected = true;
+			}
+
+		}
+		else
+		{
+			cout<<endl<<"Error: Invalid command"<<flush;
+		}
+	}
+
+	pthread_exit(NULL);
 }
 
