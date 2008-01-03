@@ -44,13 +44,21 @@ class SynChan
 
 		static int getNumSynapses( const Element* e );
 
+		void innerSetWeight(
+				const Element* e, double val, unsigned int i );
 		static void setWeight(
 				const Conn& c, double val, const unsigned int& i );
+		double innerGetWeight(
+				const Element* e, unsigned int i );
 		static double getWeight( 
 				const Element* e, const unsigned int& i );
 
+		void innerSetDelay(
+				const Element* e, double val, unsigned int i );
 		static void setDelay(
 				const Conn& c, double val, const unsigned int& i );
+		double innerGetDelay(
+				const Element* e, unsigned int i );
 		static double getDelay( 
 				const Element* e, const unsigned int& i );
 
