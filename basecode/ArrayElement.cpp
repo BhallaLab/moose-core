@@ -838,7 +838,7 @@ Element* ArrayElement::innerCopy(int n) const
 }
 
 bool ArrayElement::innerCopyMsg( 
-	Conn& c, const Element* orig, Element* dup )
+	const Conn& c, const Element* orig, Element* dup )
 {
 	return 0;
 }
