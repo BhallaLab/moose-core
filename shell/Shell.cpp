@@ -1790,7 +1790,7 @@ bool Shell::create( const string& type, const string& name,
 	Element* p = parent();
 	Element* child = Neutral::create( type, name, p, id );
 	if ( child ) {
-		recentElement_ = id;
+		recentElement_ = child->id();
 		return 1;
 	}
 	return 0;
