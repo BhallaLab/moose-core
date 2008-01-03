@@ -476,6 +476,8 @@ Id Shell::path2eid( const string& path, const string& separator )
 
 string Shell::eid2path( Id eid ) 
 {
+	if ( eid.zero() )
+		return string( "/" );
 	static const string slash = "/";
 	string n( "" );
 	while ( !eid.zero() ) {
@@ -1201,18 +1203,19 @@ void Shell::setVecField( const Conn& c,
 {
 	vector< Id >::iterator i;
 	for ( i = elist.begin(); i != elist.end(); i++ ) {
-		assert( i->good() );
+		// Cannot use i->good() here because we might set fields on /root.
+		assert( !i->bad() ); 
 		Element* e = ( *i )();
 		// Appropriate off-node stuff here.
 	
 		const Finfo* f = e->findFinfo( field );
 		if ( f ) {
 			if ( !f->strSet( e, value ) )
-				cout << "Error: cannot set field " << e->name() <<
+				cout << "Error: cannot set field " << i->path() <<
 						"." << field << " to " << value << endl;
 		} else {
-			cout << "Error: cannot find field: " << i->path() << ", " <<
-				e->name() << "." << field << endl;
+			cout << "Error: cannot find field: " << i->path() <<
+				"." << field << endl;
 		}
 	}
 }
@@ -1365,6 +1368,9 @@ void Shell::digestPath( string& path )
 			path = cwe_.path() + "/" + path;
 		}
 	}
+	// Handle issues with initial double slash.
+	if ( path[0] == '/' && path[1] == '/' )
+		path = path.substr( 1 );
 }
 // static function
 /** 
