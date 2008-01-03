@@ -2842,7 +2842,6 @@ char* do_strcat(int argc, const char** const argv, Id s ){
 	return copyString(concat.c_str());
 }
 
-
 char* do_substring(int argc, const char** const argv, Id s ){
 	if (argc < 3 || argc > 4){
 		cout << "usage:: substring <str1> <start> <end>" << endl;
@@ -2863,6 +2862,48 @@ char* do_substring(int argc, const char** const argv, Id s ){
 	}
 	string substr = str.substr(start, end);	
 	return copyString(substr.c_str());
+}
+
+char* do_getpath(int argc, const char** const argv, Id s ){
+	if ( argc != 3 ) {
+		cout << "usage:: " << argv[0] << " path -tail -head" << endl;
+		return 0;
+	}
+	bool doHead = 0;
+	if ( strncmp( argv[2], "-t", 2 ) == 0 )
+		doHead = 0;
+	else if ( strncmp( argv[2], "-h", 2 ) == 0 )
+		doHead = 1;
+	else {
+		cout << "usage:: " << argv[0] << " path -tail -head" << endl;
+		return 0;
+	}
+	string path = argv[1];
+	string::size_type pos = path.find_last_of( "/" );
+
+	if (pos == string::npos ) {
+		if ( doHead ) 
+			return copyString( "" );
+		else
+			return copyString( argv[1] );
+	}
+
+	/*
+	if ( pos == path.length() - 1 ) {
+		if ( doHead ) 
+			return copyString( argv[1] );
+		else
+			return copyString( "" );
+	}
+	*/
+	
+	string temp;
+	if ( doHead )
+		temp = path.substr( 0, pos + 1 );
+	else
+		temp = path.substr( pos + 1 );
+
+	return copyString( temp.c_str() );
 }
 
  
@@ -3214,6 +3255,8 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "strlen", reinterpret_cast< slifunc >(do_strlen), "int" );
 	AddFunc( "strcat", reinterpret_cast< slifunc >(do_strcat), "char*" );
 	AddFunc( "substring", reinterpret_cast< slifunc >(do_substring), "char*" );
+	AddFunc( "getpath", reinterpret_cast< slifunc >(do_getpath), "char*" );
+	
 	AddFunc( "findchar", reinterpret_cast< slifunc >(do_findchar), "int" );
 	AddFunc( "getelementlist", reinterpret_cast< slifunc >(do_element_list ), "char*");
 	AddFunc( "openfile", do_openfile, "void" );
@@ -3489,6 +3532,15 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "echo {strcmp \"hello\" \"hello\"} ", "0 " );
 	gpAssert( "echo {strcmp \"hello\" \"hell\"} ", "1 " );
 	gpAssert( "echo {strcmp \"hell\" \"hello\"} ", "-1 " );
+
+	gpAssert( "echo {getpath /foo/bar -tail}", "bar " );
+	gpAssert( "echo {getpath /foo/bar -head}", "/foo/ " );
+	gpAssert( "echo {getpath foo -tail}", "foo " );
+	gpAssert( "echo {getpath foo -head}", " " );
+	gpAssert( "echo {getpath /foo -tail}", "foo " );
+	gpAssert( "echo {getpath /foo -head}", "/ " );
+	gpAssert( "echo {getpath /foo/ -tail}", " " );
+	gpAssert( "echo {getpath /foo/ -head}", "/foo/ " );
 	cout << "\n";
 }
 #endif

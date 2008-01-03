@@ -5408,4 +5408,6 @@ the responses: moose_channels.g
 
 Much work to further clean up the handling of tables in MOOSE. This is
 nearly done, now the program is stuck in the 'getpath' command.
+
+Checked in as revision 322 with unit test compile flags on, Smoldyn off.
 ==============================================================================
