@@ -1556,7 +1556,11 @@ void do_ce( int argc, const char** const argv, Id s )
 	if ( argc == 2 ) {
 		// Id e = GenesisParserWrapper::path2eid( argv[1], s );
 		Id e( argv[1] );
-		send1< Id >( s(), setCweSlot, e );
+		if ( e.bad() ) {
+			cout << "Error - cannot change to '" << argv[1] << "'\n";
+		} else {
+			send1< Id >( s(), setCweSlot, e );
+		}
 	} else {
 		cout << "usage:: " << argv[0] << " Element\n";
 	}

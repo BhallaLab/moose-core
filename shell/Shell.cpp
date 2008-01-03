@@ -607,9 +607,11 @@ void Shell::setCwe( const Conn& c, Id id )
 {
 	/// \todo: Need some work here to fix up with new id scheme.
 	// This should only be called on master node.
-	if ( id() != 0 ) {
+	if ( !id.bad() ) {
 		Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 		s->cwe_ = id;
+	} else {
+		cout << "Error: Attempt to change to nonexistent element.\n";
 	}
 }
 
