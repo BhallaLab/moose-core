@@ -5426,6 +5426,10 @@ Checked in as revision 327 with unit test compile flags on, Smoldyn off.
 
 Fixed bug# 1862959 of segfault when using ^ for assignment, following 
 attempt to create object of same name.
+Checked in as revision 328 with unit test compile flags on, Smoldyn off.
+
+Fixed bug# 1862925: No element found error should be shown if ce to nonexistent
+element.
 
 
 ==============================================================================
