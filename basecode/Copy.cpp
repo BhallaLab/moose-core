@@ -171,7 +171,7 @@ Element* SimpleElement::innerDeepCopy(
  * A special case happens if one of the source elements in the tree
  * has the isGlobal flag. This flag means that the source, typically
  * an object on the library, is not to be duplicated but instead
- * its messages into the tree should be duplicate. This is used,
+ * its messages into the tree should be duplicated. This is used,
  * for example, for HHGates on HHChannels. All channel duplicates
  * should use the same HHGates.
  * The global elements are put into the tree as their own copy.
@@ -185,6 +185,12 @@ Element* SimpleElement::innerDeepCopy(
  * it is single-node stuff.
  */
 
+	struct DupInfo {
+		Element* tgt;
+		Element* orig;
+		Element* dup;
+		unsigned int connIdx;
+	};
 Element* SimpleElement::copy( Element* parent, const string& newName )
 		const
 {
@@ -224,15 +230,41 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 	}
 
 	// Second pass: Delete any outgoing messages or messages to globals
+	// If it is to a global, we need to store the message for rebuilding.
 	vector< pair< Element*, unsigned int > >::iterator j;
-	for ( j = delConns.begin(); j != delConns.end(); j++ )
+
+	// The Conn is between the original Element and the global
+	// The Element is the duplicate element
+	vector< DupInfo > globalConns;
+	for ( j = delConns.begin(); j != delConns.end(); j++ ) {
+		// Check for global targets
+		const Conn& c = *( j->first->lookupConn( j->second ) );
+		Element* tgt = c.targetElement();
+		if ( tgt->isGlobal() ) {
+			DupInfo di;
+			di.tgt = tgt;
+			di.orig = c.sourceElement();
+			di.dup = j->first;
+			di.connIdx = c.targetIndex();
+			globalConns.push_back( di );
+		}
 		j->first->deleteHalfConn( j->second );
+	}
 	
 	// Third pass: Copy over messages to any global elements.
+	// This includes target global elements which were on the original 
+	// tree, as well as messages which were originally connected up to
+	// globals which were not on the tree.
+	/*
 	for ( i = tree.begin(); i != tree.end(); i++ ) {
 		if ( i->first == i->second ) { // a global
 			i->second->copyMsg( tree );
 		}
+	}
+	*/
+	vector< DupInfo >::iterator k;
+	for ( k = globalConns.begin(); k != globalConns.end(); k++ ) {
+		k->tgt->innerCopyMsg( *k->tgt->lookupConn( k->connIdx ), k->orig, k->dup );
 	}
 	
 	// Fourth pass: stick the copied tree onto the parent Element.
@@ -350,7 +382,7 @@ void SimpleElement::copyMsg( map< const Element*, Element* >& tree )
  * Still need to check if it handles all cases of src/dest finfos.
  */
 bool SimpleElement::innerCopyMsg(
-	Conn& c, const Element* orig, Element* dup )
+	const Conn& c, const Element* orig, Element* dup )
 {
 	assert( orig != dup );
 	assert( orig->className() == dup->className() );
@@ -457,6 +489,10 @@ void copyTest()
 	set< double >( ch, "Xpower", 3.0 );
 	set< double >( ch, "Ypower", 1.0 );
 
+	Element* xGate = Neutral::getChildByName( ch, "xGate" )( );
+	ASSERT( xGate != 0, "xGate formed" );
+	Element* yGate = Neutral::getChildByName( ch, "yGate" )( );
+	ASSERT( yGate != 0, "yGate formed" );
 
 	ProcInfoBase p;
 	Conn c( c0, 0 );
@@ -522,6 +558,7 @@ void copyTest()
 
 	temp = Neutral::getChildByName( ch, "xGate" )( );
 	ASSERT( temp != 0, "original xgate" );
+	ASSERT( temp == xGate, "original xgate" );
 	ASSERT( temp == clist[0].targetElement(), "Testing orig gate" );
 
 	numConns = xGateFinfo->incomingConns( e, clist );
@@ -531,6 +568,7 @@ void copyTest()
 
 	temp = Neutral::getChildByName( ch, "yGate" )( );
 	ASSERT( temp != 0, "original ygate" );
+	ASSERT( temp == yGate, "original ygate" );
 	const Finfo* yGateFinfo = ch->findFinfo( "yGate" );
 	numConns = yGateFinfo->incomingConns( ch, clist );
 	ASSERT( numConns == 1, "Original connections on y gate" );
@@ -540,8 +578,62 @@ void copyTest()
 	ASSERT( numConns == 1, "Shifted connections on y gate" );
 	ASSERT( temp == clist[0].targetElement(), "Testing that gate msg is to same place as orig gate" );
 
-
+	//////////////////////////////////////////////////////////////////
+	// Test out second-generation copies which have a message going to
+	// a global element. The messages to the globals should be copied
+	// even though the global is not in the tree of the first-generation
+	// copies.
+	//////////////////////////////////////////////////////////////////
 	
+	Element* c2 = c1->copy( n, "c2" );
+	ASSERT( c2 != c1, "copying" );
+	ASSERT( c2 != 0, "copying" );
+
+	ASSERT( c2->name() == "c2", "copying" );
+
+	// Check copied values
+	get< double >( c2, "inject", dret );
+	ASSERT( dret == 0.1, "copying" );
+	get< double >( c2, "Rm", dret );
+	ASSERT( dret == 2.0, "copying" );
+	get< double >( c2, "Ra", dret );
+	ASSERT( dret == 3.0, "copying" );
+	get< double >( c2, "Cm", dret );
+	ASSERT( dret == 4.0, "copying" );
+	get< double >( c2, "Em", dret );
+	ASSERT( dret == 5.0, "copying" );
+	get< double >( c2, "Vm", dret );
+	ASSERT( dret == 6.0, "copying" );
+
+	// Check copied tree
+	e = Neutral::getChildByName( c2, "ch" )();
+	ASSERT( e != 0, "copied child" );
+	get< double >( e, "Xpower", dret );
+	ASSERT( dret == 3.0, "copying" );
+
+	// Here is the critical part. Check that we still have the messages off
+	// to the global.
+	temp = Neutral::getChildByName( e, "xGate" )( );
+	ASSERT( temp == 0, "copied global child: should not exist" );
+	temp = Neutral::getChildByName( e, "yGate" )( );
+	ASSERT( temp == 0, "copied global child: should not exist" );
+
+	// See if the messages go to the original Gates. 
+	// ch is the original channel
+	clist.resize( 0 );
+	numConns = xGateFinfo->incomingConns( ch, clist );
+	ASSERT( numConns == 1, "Connections from orig chan to x gate" );
+
+	temp = Neutral::getChildByName( ch, "xGate" )( );
+	ASSERT( temp != 0, "original xgate" );
+	ASSERT( temp == xGate, "original xgate" );
+	ASSERT( temp == clist[0].targetElement(), "Testing orig gate" );
+
+	clist.resize( 0 );
+	const Finfo* hhGateFinfo = xGate->findFinfo( "gate" );
+	numConns = hhGateFinfo->incomingConns( xGate, clist );
+	ASSERT( numConns == 3, "Accumulated connections on x gate" );
+
 	//////////////////////////////////////////////////////////////////
 	// Check copy preserving old name. Copy c0 onto c1.
 	//////////////////////////////////////////////////////////////////
