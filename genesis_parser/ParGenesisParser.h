@@ -28,7 +28,6 @@
 
 static const int MAX_COMMAND_ARGS = 25;
 static const int MAX_COMMAND_SIZE = 1024;
-#define MAX_MPI_PROCESSES	1024
 
 struct stCommand
 {
