@@ -163,7 +163,6 @@ static const unsigned int synapseSlot =
 	initParSynChanCinfo()->getSlotIndex( "synapse" );
 
 static const double SynE = 2.7182818284590452354;
-static const int MAX_MPI_PROCESSES = 1024;
 static const int SPIKE_TAG = 3;
 
 struct stMPIRecvStatus
