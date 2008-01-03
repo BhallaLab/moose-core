@@ -900,6 +900,8 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 		//Shell::getWildCardList(conn, path, 0);
 		send2< string, bool >( sh, requestWildcardListSlot, path, 0 );
 		if ( elist_.size() == 0 ) {
+			cout << "Error: " << argv[0] << " : cannot find element " <<
+				path << endl;
 			return;
 		}
 		// e = GenesisParserWrapper::path2eid( argv[1], s );

@@ -5419,6 +5419,9 @@ Fixed bug# 1861991 of successive copying of objects connected to globals.
 Earlier the 2nd generation copies failed to set up messages to the global.
 Incorporated into unit tests.
 
+Checked in as revision 326 with unit test compile flags on, Smoldyn off.
+
+Fixed bug# 1862237 of crash when field value was not specified.
 
 
 ==============================================================================
