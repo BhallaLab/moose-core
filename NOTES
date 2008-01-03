@@ -5422,6 +5422,10 @@ Incorporated into unit tests.
 Checked in as revision 326 with unit test compile flags on, Smoldyn off.
 
 Fixed bug# 1862237 of crash when field value was not specified.
+Checked in as revision 327 with unit test compile flags on, Smoldyn off.
+
+Fixed bug# 1862959 of segfault when using ^ for assignment, following 
+attempt to create object of same name.
 
 
 ==============================================================================
