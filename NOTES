@@ -5411,3 +5411,14 @@ nearly done, now the program is stuck in the 'getpath' command.
 
 Checked in as revision 322 with unit test compile flags on, Smoldyn off.
 ==============================================================================
+3 Jan 2007
+Implemented getpath and its unit tests.
+Checked in as revision 323 with unit test compile flags on, Smoldyn off.
+
+Fixed bug# 1861991 of successive copying of objects connected to globals.
+Earlier the 2nd generation copies failed to set up messages to the global.
+Incorporated into unit tests.
+
+
+
+==============================================================================
