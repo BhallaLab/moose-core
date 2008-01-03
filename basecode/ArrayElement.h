@@ -365,11 +365,11 @@ class ArrayElement: public Element
 			ycoord = yorigin_ + (index%Ny_)*dy_;
 		}
 
+		bool innerCopyMsg( const Conn& c, const Element* orig, Element* dup );
 	protected:
 		Element* innerCopy() const;
 		Element* innerCopy(int n) const;
 
-		bool innerCopyMsg( Conn& c, const Element* orig, Element* dup );
 
 	private:
 		string name_;
