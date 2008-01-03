@@ -230,45 +230,71 @@ int SynChan::getNumSynapses( const Element* e )
 	return static_cast< SynChan* >( e->data() )->synapses_.size();
 }
 
-void SynChan::setWeight(
-				const Conn& c, double val, const unsigned int& i )
+void SynChan::setWeight( const Conn& c, double val, const unsigned int& i )
 {
-	vector< SynInfo >& synapses = 
-			static_cast< SynChan* >( c.data() )->synapses_;
-	if ( i < synapses.size() )
-		synapses[i].weight = val;
+	Element* e = c.targetElement();
+	static_cast< SynChan* >( e->data() )->
+		innerSetWeight( e, val, i );
+}
+
+void SynChan::innerSetWeight( const Element* e, double val, unsigned int i )
+{
+	updateNumSynapse( e );
+	
+	if ( i < synapses_.size() )
+		synapses_[i].weight = val;
 	else 
 		cout << "Error: SynChan::setWeight: Index " << i << 
 			" out of range\n";
 }
+  
 double SynChan::getWeight( const Element* e, const unsigned int& i )
 {
-	vector< SynInfo >& synapses = 
-			static_cast< SynChan* >( e->data() )->synapses_;
-	if ( i < synapses.size() )
-		return synapses[i].weight;
+	return static_cast< SynChan* >( e->data() )->
+		innerGetWeight( e, i );
+}
+
+double SynChan::innerGetWeight( const Element* e, unsigned int i )
+{
+	updateNumSynapse( e );
+	
+	if ( i < synapses_.size() )
+		return synapses_[i].weight;
 	cout << "Error: SynChan::getWeight: Index " << i << 
 			" out of range\n";
 	return 0.0;
 }
 
-void SynChan::setDelay(
-				const Conn& c, double val, const unsigned int& i )
+void SynChan::setDelay( const Conn& c, double val, const unsigned int& i )
 {
-	vector< SynInfo >& synapses = 
-			static_cast< SynChan* >( c.data() )->synapses_;
-	if ( i < synapses.size() )
-		synapses[i].delay = val;
+	Element* e = c.targetElement();
+	static_cast< SynChan* >( e->data() )->
+		innerSetDelay( e, val, i );
+}
+
+void SynChan::innerSetDelay( const Element* e, double val, unsigned int i )
+{
+	updateNumSynapse( e );
+	
+	if ( i < synapses_.size() )
+		synapses_[i].delay = val;
 	else 
 		cout << "Error: SynChan::setDelay: Index " << i << 
 			" out of range\n";
 }
+  
 double SynChan::getDelay( const Element* e, const unsigned int& i )
 {
-	vector< SynInfo >& synapses = 
-			static_cast< SynChan* >( e->data() )->synapses_;
-	if ( i < synapses.size() )
-		return synapses[i].delay;
+	return static_cast< SynChan* >( e->data() )->
+		innerGetDelay( e, i );
+}
+
+double SynChan::innerGetDelay( const Element* e, unsigned int i )
+{
+	updateNumSynapse( e );
+	
+	if ( i < synapses_.size() )
+		return synapses_[i].delay;
 	cout << "Error: SynChan::getDelay: Index " << i << 
 			" out of range\n";
 	return 0.0;
