@@ -61,6 +61,7 @@ const Cinfo* initGenesisParserCinfo()
 		new SrcFinfo( "planarconnect", Ftype3< string, string, double >::global() ),
 		new SrcFinfo( "planardelay", Ftype2< string, double >::global() ),
 		new SrcFinfo( "planarweight", Ftype2< string, double >::global() ),
+		new SrcFinfo( "getSynCount", Ftype1< Id >::global() ),
 		new DestFinfo( "recvCreate",
 					Ftype1< Id >::global(),
 					RFCAST( &GenesisParserWrapper::recvCreate ) ),
@@ -238,6 +239,8 @@ static const unsigned int planardelaySlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser.planardelay" );
 static const unsigned int planarweightSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.planarweight" );
+static const unsigned int getSynCountSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.getSynCount" );
 static const unsigned int deleteSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.delete" );
 static const unsigned int addfieldSlot = 
@@ -615,7 +618,7 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "conc_chan" ] = "ConcChan";
 	classnames[ "Ca_concen" ] = "CaConc";
 	classnames[ "compartment" ] = "Compartment";
-	classnames[ "symcompartment" ] = "Compartment";//needs to be changed
+	classnames[ "symcompartment" ] = "SymCompartment";
 	classnames[ "hh_channel" ] = "HHChannel";
 	classnames[ "tabchannel" ] = "HHChannel";
 	classnames[ "vdep_channel" ] = "HHChannel";
@@ -803,6 +806,7 @@ string GenesisParserWrapper::handleMultGate(
 void GenesisParserWrapper::doAdd(
 				int argc, const char** const argv, Id s )
 {
+	//if (argc >= 3) cout << argv[1] << " " << argv[2] << endl;
 	if ( argc == 3 ) {
 		string srcE = Shell::head( argv[1], "/" );
 		string srcF = Shell::tail( argv[1], "/" );
@@ -1198,7 +1202,7 @@ bool GenesisParserWrapper::fieldExists(
 	//conversion of field
 	map< string, string >::iterator i = 
 			sliFieldNameConvert().find( eid()->className() + "." + field );
-	string newfield;
+	string newfield = field;
 	if ( i != sliFieldNameConvert().end() ) 
 		newfield = i->second;
 	//conversion of field, if needed, complete
@@ -1659,7 +1663,7 @@ void GenesisParserWrapper::step( int argc, const char** const argv )
 	double runtime;
 	Element* e = element()();
 	if ( argc == 3 ) {
-		if ( strcmp( argv[ 2 ], "-t" ) == 0 ) {
+		if ( strcmp( argv[ 2 ], "-t" ) == 0 || strcmp( argv[ 2 ], "-time" ) == 0) {
 			runtime = strtod( argv[ 1 ], 0 );
 		} else {
 			cout << "usage:: " << argv[0] << 
@@ -2667,7 +2671,9 @@ void do_createmap(int argc, const char** const argv, Id s){
 			}
 		}
 		//string name = Shell::tail(dest, "/");
-		string name = className;
+		string name;
+		if (className == "Neutral") {name = "proto";}
+		else name = source;
 		if ( name.length() < 1 ) {
 			cout << "Error: invalid object name : " << name << endl;
 			return;
@@ -2714,26 +2720,26 @@ planarconnect / dest-path -relative -sourcemask box -1 -1 1 1 -destmask box 1 1 
 void do_planardelay( int argc, const char** const argv, Id s )
 {
 	if (argc < 3){
-		cout << "usage:: planardelay <srcelements> <delay>" << endl;
+		cout << "usage:: planardelay <srcelements> -fixed <delay>" << endl;
 		return;
 	}	
 	string source;
 	source = argv[1];
 	//check whether argv[2] is proper float
-	double delay = atof(argv[2]);
+	double delay = atof(argv[3]);
 	send2<string, double>(s(), planardelaySlot, source, delay);
 }
 
 void do_planarweight( int argc, const char** const argv, Id s )
 {
 	if (argc < 3){
-		cout << "usage:: planarweight <srcelements> <weight>" << endl;
+		cout << "usage:: planarweight <srcelements> -fixed <weight>" << endl;
 		return;
 	}
 	string source;
 	source = argv[1];
 	//check whether argv[2] is proper float
-	double weight = atof(argv[2]);
+	double weight = atof(argv[3]);
 	send2<string, double>(s(), planarweightSlot, source, weight);
 }
 
@@ -2756,13 +2762,17 @@ int do_getsyncount( int argc, const char** const argv, Id s )
 		return count;
 	}
 	else if (argc == 2){
-		Element* src = Id(argv[1])();
-		if (src->className() != "SynChan"){
+		Element* dest = Id(argv[1])();
+		if (dest->className() != "SynChan"){
 			cout << "getsyncount:: The src element is not of type SynChan." << endl;
 			return 0;
 		}
-		src->findFinfo("event")->outgoingConns(src, conn);
-		return conn.size();
+		send1 <Id> (s(), getSynCountSlot, dest->id());
+		GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( s()->data() );
+		string value = gpw->getFieldValue();
+		int numSynapses = atoi(value.c_str());
+		return numSynapses;
 	}
 	return 0;
 	//send2<string, string>(s(), planarweightSlot, source, dest);
