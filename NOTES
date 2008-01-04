@@ -5430,6 +5430,40 @@ Checked in as revision 328 with unit test compile flags on, Smoldyn off.
 
 Fixed bug# 1862925: No element found error should be shown if ce to nonexistent
 element.
+Checked in as revision 329 with unit test compile flags on, Smoldyn off.
 
+Now back to the channel regression tests. Turns out all but 5 of the 21
+channels work with MOOSE: a pretty good success rate. The bad ones are:
++Ca_bsg_yka: Has table/MULTGATE via the 'output' msg. should be doable.
+	Also has Nernsts, though this is only set up in a readcell.
+*Kahp_hip_traub91: Tabchannel, taking Ca message, but conc flag not set.
+	Table values look good.
+	After some munging, turned out to be a GENESIS bug: an uninitialized
+	variable was being used.
+	At a later stage in these tests should send a value to Ca.
+Kca_hip_traub: Uses setupgate but has a PRD_ALPHA from the qv table.
+K_hip_traub: Uses setup_table, setup_table3 and SUM_ALPHA. 
+*Ca_hip_traub: setup_table on tabgates: does it work? This too uses lots of 
+	readcell messaging. This too needs a CONCEN message to hold down.
+
+In addition, there is a small quantitative difference in the peak for 
+K_bsg_yka: Uses tweaktau then tabfill: does it work right? Should
+	simply compare table entries.
+
+So only 2 or 3 channels don't really work. The SUM_ALPHA and PRD_ALPHA are
+too messy and probably too rare to make a high priority.
+
+For now: tweak these regression tests so that each plot goes in on its
+own and we can individually rate each of the channels.
+
+I think enough work on channels. On to other things.
 
 ==============================================================================
+4 Jan 2007
+Attempt to get the channels set up with regression tests.
+Vastly messy. First the old readcell regression test stopped working. 
+Turned out to be due to the newly incorporated automatic creation of the 
+solver in MOOSE, which presumably gives a more accurate answer, but 
+different from the genesis one.
+
+Then the tests seem to fail a lot more than they look like they should.
