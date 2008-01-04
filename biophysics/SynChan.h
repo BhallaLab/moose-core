@@ -108,4 +108,7 @@ class SynChan
 		vector< SynInfo > synapses_;
 		priority_queue< SynInfo > pendingEvents_;
 };
+
+extern const Cinfo* initSynChanCinfo();
+
 #endif // _SynChan_h
