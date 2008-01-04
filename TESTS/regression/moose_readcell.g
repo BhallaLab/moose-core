@@ -58,6 +58,7 @@ setfield /somaplot step_mode 3
 addmsg /mit/soma /somaplot INPUT Vm
 
 setfield /mit/soma inject 5.0e-10
+setfield /mit method ee
 
 reset
 step {RUNTIME} -t
