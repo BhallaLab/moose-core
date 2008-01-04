@@ -487,22 +487,32 @@ map< string, string >& sliSrcLookup()
 	src[ "CHANNEL Gk Ek" ] = "channel";
 	src[ "SynChan.Mg_block.CHANNEL Gk Ek" ] = "origChannel";
 	src[ "MULTGATE m" ] = ""; // Have to handle specially. Don't make msg
+	src[ "MULTGATE output" ] = "gate"; 
 	src[ "useX.MULTGATE" ] = "gate";
 	src[ "useY.MULTGATE" ] = "gate";
 	src[ "useZ.MULTGATE" ] = "gate";
+	src[ "CONCEN Ca" ] = "concSrc";
 
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
 	// done already through the existing messaging.
 	src[ "EREST Vm" ] = "";
 
-	// Some messages for tables
+	// Some messages for tables, specially used for I/O
 	src[ "INPUT Vm" ] = "Vm";
 	src[ "INPUT Ca" ] = "Ca";
+	src[ "INPUT Ik" ] = "Ik";
+	src[ "INPUT Gk" ] = "Gk";
+	src[ "INPUT n" ] = "n";
+	src[ "INPUT Co" ] = "conc";
 
 	// Messages for having tables pretend to be an xplot
 	src[ "PLOT Co" ] = "conc";
 	src[ "PLOT n" ] = "n";
+	src[ "PLOT Vm" ] = "Vm";
+	src[ "PLOT Ca" ] = "Ca";
+	src[ "PLOT Ik" ] = "Ik";
+	src[ "PLOT Gk" ] = "Gk";
 	return src;
 }
 
@@ -555,11 +565,13 @@ map< string, string >& sliDestLookup()
 	// Some of these funny comparisons are inserted when the code finds
 	// cases which need special work.
 	dest[ "SynChan.Mg_block.CHANNEL Gk Ek" ] = "origChannel";
-	dest[ "MULTGATE m" ] = "";	// This needs to be handled specially, so
-								// simply block the use of this message.
+	dest[ "MULTGATE m" ] = "";		// This needs to be handled specially,
+	// so block the use of this message.
 	dest[ "useX.MULTGATE" ] = "xGate";
 	dest[ "useY.MULTGATE" ] = "yGate";
 	dest[ "useZ.MULTGATE" ] = "zGate";
+	dest[ "MULTGATE output" ] = "zGate";	// Rare use case from table.
+	dest[ "CONCEN Ca" ] = "concen";
 
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
@@ -569,10 +581,18 @@ map< string, string >& sliDestLookup()
 	// Some messages for tables
 	dest[ "INPUT Vm" ] = "inputRequest";
 	dest[ "INPUT Ca" ] = "inputRequest";
+	dest[ "INPUT Ik" ] = "inputRequest";
+	dest[ "INPUT Gk" ] = "inputRequest";
+	dest[ "INPUT n" ] = "inputRequest";
+	dest[ "INPUT Co" ] = "inputRequest";
 
 	// Messages for having tables pretend to be an xplot
-	dest[ "PLOT Co" ] = "inputRequest";
+	dest[ "PLOT Vm" ] = "inputRequest";
+	dest[ "PLOT Ca" ] = "inputRequest";
+	dest[ "PLOT Ik" ] = "inputRequest";
+	dest[ "PLOT Gk" ] = "inputRequest";
 	dest[ "PLOT n" ] = "inputRequest";
+	dest[ "PLOT Co" ] = "inputRequest";
 
 	return dest;
 }
