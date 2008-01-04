@@ -12,6 +12,10 @@
 #include "moose.h"
 #include "Shell.h"
 #include "ReadCell.h"
+#include "../biophysics/Compartment.h"
+#include "../biophysics/SynInfo.h"
+#include <queue>
+#include "../biophysics/SynChan.h"
 #include "../element/Neutral.h"
 
 ReadCell::ReadCell()
@@ -421,16 +425,25 @@ bool ReadCell::addHHChannel(
 		Element* compt, Element* chan, 
 		double value, double dia, double length )
 {
+
 	static const Finfo* chanSrcFinfo =
-			Cinfo::find( "Compartment" )->findFinfo( "channel" );
+			initCompartmentCinfo()->findFinfo( "channel" );
 	static const Finfo* hhChanDestFinfo = 
-		Cinfo::find( "HHChannel" )->findFinfo( "channel" );
+		initSynChanCinfo()->findFinfo( "channel" );
 	static const Finfo* gbarFinfo =
 		Cinfo::find( "HHChannel" )->findFinfo( "Gbar" );
+	
+// 	static const Finfo* chanSrcFinfo =
+// 			Cinfo::find( "Compartment" )->findFinfo( "channel" );
+// 	static const Finfo* hhChanDestFinfo = 
+// 		Cinfo::find( "HHChannel" )->findFinfo( "channel" );
+// 	static const Finfo* gbarFinfo =
+// 		Cinfo::find( "HHChannel" )->findFinfo( "Gbar" );
 
 	if ( chan->className() == "HHChannel" ) {
 		bool ret = chanSrcFinfo->add( compt, chan, hhChanDestFinfo );
 		assert( ret );
+			
 		if ( value > 0 ) {
 			value *= dia * length * PI;
 		} else {
@@ -455,8 +468,36 @@ bool ReadCell::addSynChan(
 		Cinfo::find( "SynChan" )->findFinfo( "Gbar" );
 
 	if ( chan->className() == "SynChan" ) {
+		/*	
+		if (compt->name() == "apical_18" && chan->name() == "glu"){
+			int a = 5;
+		}*/
 		bool ret = chanSrcFinfo->add( compt, chan, synChanDestFinfo );
 		assert( ret );
+		
+		
+// 		if (compt->name() == "apical_18" && chan->name() == "glu"){
+// 			vector <Conn> list;
+// 			chanSrcFinfo->outgoingConns( compt, list );
+// 			for (size_t i = 0; i < list.size(); i++){
+// 				Element *temp = list[i].targetElement();
+// 				cout << temp->name() << " " ;
+// 				const Finfo* targetFinfo = 
+// 					temp->findFinfo( list[i].targetIndex() );
+// 				cout << targetFinfo->name() << endl;
+// 				
+// 				vector <Conn> conn;
+// 				targetFinfo->outgoingConns(temp, conn);
+// 				for (size_t j = 0; j < conn.size(); j++){
+// 					Element* t = conn[j].targetElement();
+// 					const Finfo* tFinfo = 
+// 					t->findFinfo( list[j].targetIndex() );
+// 					cout << tFinfo << " " << chanSrcFinfo << endl;
+// 					cout << t->name() << " " << tFinfo->name() << endl;
+// 				}
+// 			}
+// 		}
+		
 		if ( value > 0 ) {
 			value *= dia * length * PI;
 		} else {
