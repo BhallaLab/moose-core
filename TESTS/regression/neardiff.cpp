@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 #include <cassert>
+#include <algorithm>
 #include <math.h>
 
 const int TAB_SIZE = 1000;
@@ -43,6 +44,9 @@ class Plot {
 
 				bool empty() const {
 					return ( y.size() == 0 );
+				}
+				double max() const {
+					return *max_element( y.begin(), y.end() );
 				}
 
 		private:
@@ -96,12 +100,14 @@ Plot* findPlot( vector< Plot* >& p, const string& name )
 int main(int argc, char** argv)
 {
 		if (argc < 4) {
-				cerr << "Usage: " << argv[0] << " file1 file2 epsilon\n";
+				cerr << "Usage: " << argv[0] << " file1 file2 epsilon [-fraction_of_peak]\n";
 				return 0;
 		}
 		fstream f0( argv[1] );
 		fstream f1( argv[2] );
 		double EPSILON = atof( argv[3] );
+		bool useFrac = 
+			(argc == 5 && argv[4][0] == '-' && argv[4][1] == 'f' );
 		assert( f0.good() );
 		assert( f1.good() );
 		assert( EPSILON > 0.0 );
@@ -130,18 +136,22 @@ int main(int argc, char** argv)
 			cout << argv[1] << ": empty plots\n";
 			return 0;
 		}
-	
+
 		// Go through all plots in p0 and compare with matching plots in p1
 		// If any point differs by more than EPSILON, complain.
 		vector< Plot* >::iterator i;
 		for ( i = p0.begin(); i != p0.end(); i++ ) {
+			double eps = EPSILON;
+			if ( useFrac ) {
+				eps = EPSILON * (*i)->max();
+			}
 			Plot* temp = findPlot( p1, ( *i )->name() );
 			if ( !temp ) {
 				cout << argv[1] << ": " << ( *i )->name() << 
 					": no matching plotname\n";
 				return 0;
 			}
-			if ( ( *i )->differs( temp, EPSILON ) ) {
+			if ( ( *i )->differs( temp, eps ) ) {
 				cout << argv[1] << ": " << ( *i )->name() << 
 					": plot differs\n";
 				return 0;
