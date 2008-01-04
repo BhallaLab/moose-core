@@ -64,6 +64,9 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "planarweight",
 				Ftype2< string, double >::global(),
 				RFCAST( &Shell::planarweight ) ),
+		new DestFinfo( "getSynCount",
+				Ftype1< Id >::global(),
+				RFCAST( &Shell::getSynCount2 ) ),
 		// The create func returns the id of the created object.
 		new SrcFinfo( "createSrc", Ftype1< Id >::global() ),
 		// Deleting an object
@@ -791,11 +794,12 @@ void Shell::planarconnect(const Conn& c, string source, string dest, double prob
 			/*error! The source element must be SpikeGen*/
 		}
 		for(size_t j = 0; j < dst_list.size(); j++) {
+			//cout << src_list[i]->id().path() << " " << dst_list[i]->id().path() << endl;
 			if (dst_list[j]->className() != "SynChan"){
 				/*error! Thes dest element must be SynChan*/
 			}
 			if ((rand()%100)/100.0 <= probability){
-				cout << i+1 << " " << j+1 << endl;
+				//cout << i+1 << " " << j+1 << endl;
 				src_list[i]->findFinfo("event")->add(src_list[i], dst_list[j], dst_list[j]->findFinfo("synapse"));
 			}
 		}
@@ -806,14 +810,18 @@ void Shell::planardelay(const Conn& c, string source, double delay){
 	vector <Element* > src_list;
 	simpleWildcardFind( source, src_list );
 	for (size_t i = 0 ; i < src_list.size(); i++){
-		if (src_list[i]->className() != "SynChan"){/*error!!*/}
-		unsigned int numSynapses;
-		bool ret;
-		ret = get< unsigned int >( src_list[i], "numSynapses", numSynapses );
-		if (!ret) {cout << "error" <<endl;}
-		cout<< numSynapses << endl;
-		for (size_t j = 0 ; j < numSynapses; j++){
-			lookupSet< double, unsigned int >( src_list[i], "delay", delay, j );
+		if (src_list[i]->className() != "SpikeGen"){cout << "Shell::planardelay: Error1" << endl; return;}
+		vector <Conn> conn;
+		src_list[i]->findFinfo("event")->outgoingConns(src_list[i], conn);
+		for (size_t j = 0; j < conn.size(); j++){
+			unsigned int numSynapses;
+			bool ret;
+			Element *dest = conn[j].targetElement();
+			ret = get< unsigned int >( dest, "numSynapses", numSynapses );
+			if (!ret) {cout << "Shell::planardelay: Error2" << endl; return;}
+			for (size_t k = 0 ; k < numSynapses; k++){
+				lookupSet< double, unsigned int >( dest, "delay", delay, k );
+			}
 		}
 	}
 }
@@ -822,30 +830,37 @@ void Shell::planarweight(const Conn& c, string source, double weight){
 	vector <Element* > src_list;
 	simpleWildcardFind( source, src_list );
 	for (size_t i = 0 ; i < src_list.size(); i++){
-		if (src_list[i]->className() != "SynChan"){/*error!!*/}
-		unsigned int numSynapses;
-		bool ret;
-		ret = get< unsigned int >( src_list[i], "numSynapses", numSynapses );
-		if (!ret) {/*error!*/}
-		for (size_t j = 0 ; j < numSynapses; j++){
-			lookupSet< double, unsigned int >( src_list[i], "weight", weight, j );
+		if (src_list[i]->className() != "SpikeGen"){cout << "Shell::planarweight: Error1" << endl; return;}
+		vector <Conn> conn;
+		src_list[i]->findFinfo("event")->outgoingConns(src_list[i], conn);
+		for (size_t j = 0; j < conn.size(); j++){
+			unsigned int numSynapses;
+			bool ret;
+			Element *dest = conn[j].targetElement();
+			ret = get< unsigned int >( dest, "numSynapses", numSynapses );
+			if (!ret) {cout << "Shell::planarweight: Error2" << endl; return;}
+			for (size_t k = 0 ; k < numSynapses; k++){
+				lookupSet< double, unsigned int >( dest, "weight", weight, k );
+			}
 		}
 	}
 }
 
-/*void Shell::getSynCount(const Conn& c, string source, string dest){
-	Element* src = Id(source)();
-	Element* dst = Id(dest)();
-	vector <Conn> conn;
-	
-	src->findFinfo("event")->outgoingConns(src, conn);
-	unsigned int count = 0;
-	for(size_t i = 0; i < conn.size(); i++){
-		if(conn[i].targetElement() == dst)
-			count++;
+// does not do - destination is a SynChan test
+void Shell::getSynCount2(const Conn& c, Id dest){
+	Element* dst = dest();
+	unsigned int numSynapses;
+	bool b = get< unsigned int >( dst, "numSynapses", numSynapses );
+	if (!b) {
+		cout << "Shell:: syncount failed at" << dst->name() <<endl; 
+		return;
 	}
-	
-}*/
+	char e[10];
+	sprintf (e, "%d", numSynapses);
+	string ret = e;
+	sendTo1< string >( c.targetElement(),
+				getFieldSlot, c.targetIndex(), ret );
+}
 
 
 
