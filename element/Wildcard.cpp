@@ -33,7 +33,8 @@ static bool wildcardName( Element* &e, const string& n)
 	}
 	
 	//handling arrays
-	if (e->name().size() < n.size()){
+	// put in shelf for now. Will be opened after the beta release. 
+	/*if (e->name().size() < n.size()){
 		string base = n.substr(0, e->name().size());
 		string index = n.substr(e->name().size());
 		if (index[0] == '['){
@@ -52,6 +53,34 @@ static bool wildcardName( Element* &e, const string& n)
 				// think what to do!! Error??
 			}
 		}
+	}*/
+	
+	// Not fully fixed. Has loop holes. This function needs to be revamped. It does not entertain regular expressions, while GENESIS does. 
+	if (n.find('[') != string::npos && e->name().find('[')!=string::npos){
+		size_t pos1 = n.find('[');
+		string name1 = n.substr(0, pos1);
+		string index1 = n.substr(pos1);
+		string n2 = e->name();
+		size_t pos2 = n2.find('[');
+		string name2 = n2.substr(0, pos2);
+		string index2 = n2.substr(pos2);
+		if (name1 == name2 && index1[1] == ']' && index2.find(']') != string::npos && index2.find(']') > 1 ){
+			string onlyindex = index2.substr(1, index2.find(']') - 1);
+			for (size_t i = 0; i < onlyindex.size(); i++){
+				char c = onlyindex[i];
+				if (!(c >= '0' && c <= '9')){
+					return 0;
+				}
+			}
+			return 1;
+		}
+		
+		else {
+			if (index2[1] == '['){
+				cout << "The name of " << e->name() << " is not proper. Should have indices within the square brackets. " << endl;
+			}
+			return 0;
+		}
 	}
 	
 	// Need to put in code to handle partial string matches
@@ -67,6 +96,7 @@ static bool wildcardName( Element* &e, const string& n)
 	
 	
 	if (pos != string::npos){
+		// everything before the hash is the same and it is not the case there is just #
 		if (n.substr(0, pos) != e->name().substr(0, pos) && pos != 0){ 
 			return 0;
 		}
