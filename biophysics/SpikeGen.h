@@ -54,4 +54,8 @@ class SpikeGen
 		double lastEvent_;
 		double V_;
 };
+
+// Used by solver, readcell, etc.
+extern const Cinfo* initSpikeGenCinfo();
+
 #endif // _SpikeGen_h

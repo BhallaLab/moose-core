@@ -33,7 +33,7 @@ class HHGate
 		Interpol B_;
 };
 
-// Used by the solver
+// Used by solver, readcell, etc.
 extern const Cinfo* initHHGateCinfo();
 
 #endif // _HHGate_h
