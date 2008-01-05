@@ -14,6 +14,8 @@
 #include "NeuroScanBase.h"
 #include "NeuroScan.h"
 
+#include "HHChannel.h"
+
 const Cinfo* initNeuroScanCinfo()
 {
 	// Shared message to NeuroHub
@@ -315,6 +317,13 @@ unsigned int NeuroScan::logElement( Element* el, EClass eclass )
 	e2id_[ el ] = id;
 	id2e_.push_back( el );
 	eclass_.push_back( eclass );
+	
+	if ( eclass == CHANNEL ) {
+		Conn c( el, 0 );
+		ProcInfoBase p;
+		p.dt_ = dt_;
+		HHChannel::reinitFunc( c, &p );
+	}
 	
 	if ( eclass == GATE )
 	{
