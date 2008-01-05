@@ -12,11 +12,28 @@
 #include "moose.h"
 #include "Shell.h"
 #include "ReadCell.h"
+#include "../element/Neutral.h"
+
+// Following headers are required for accessing static Cinfo initializers.
+// Alternatively, one could use non-static Cinfo's below.
 #include "../biophysics/Compartment.h"
+#include "../biophysics/HHChannel.h"
+#include "../builtins/Interpol.h"
+#include "../biophysics/HHGate.h"
 #include "../biophysics/SynInfo.h"
 #include <queue>
 #include "../biophysics/SynChan.h"
-#include "../element/Neutral.h"
+#include "../biophysics/SpikeGen.h"
+#include "../biophysics/Nernst.h"
+#include "../biophysics/CaConc.h"
+
+static const Cinfo* comptCinfo = initCompartmentCinfo();
+static const Cinfo* chanCinfo = initHHChannelCinfo();
+static const Cinfo* gateCinfo = initHHGateCinfo();
+static const Cinfo* synchanCinfo = initSynChanCinfo();
+static const Cinfo* spikegenCinfo = initSpikeGenCinfo();
+static const Cinfo* nernstCinfo = initNernstCinfo();
+static const Cinfo* caconcCinfo = initCaConcCinfo();
 
 ReadCell::ReadCell()
 		: RM_( 0.0 ), CM_( 0.0 ), RA_( 0.0 ), EREST_ACT_( 0.0 ),
@@ -184,33 +201,19 @@ Element* ReadCell::buildCompartment(
 				double x, double y, double z, double d, double& length,
 				vector< string >& argv )
 {
-	static const Finfo* axial = 
-			Cinfo::find( "Compartment" )->findFinfo( "axial" );
-	static const Finfo* raxial = 
-			Cinfo::find( "Compartment" )->findFinfo( "raxial" );
-	static const Finfo* xFinfo = 
-			Cinfo::find( "Compartment" )->findFinfo( "x" );
-	static const Finfo* yFinfo = 
-			Cinfo::find( "Compartment" )->findFinfo( "y" );
-	static const Finfo* zFinfo = 
-			Cinfo::find( "Compartment" )->findFinfo( "z" );
-	static const Finfo* dFinfo = 
-			Cinfo::find( "Compartment" )->findFinfo( "diameter" );
-	static const Finfo* lengthFinfo = 
-			Cinfo::find( "Compartment" )->findFinfo( "length" );
-	static const Finfo* RmFinfo = 
-			Cinfo::find( "Compartment" )->findFinfo( "Rm" );
-	static const Finfo* CmFinfo = 
-			Cinfo::find( "Compartment" )->findFinfo( "Cm" );
-	static const Finfo* RaFinfo = 
-			Cinfo::find( "Compartment" )->findFinfo( "Ra" );
-	static const Finfo* initVmFinfo = 
-			Cinfo::find( "Compartment" )->findFinfo( "initVm" );
-	static const Finfo* EmFinfo = 
-			Cinfo::find( "Compartment" )->findFinfo( "Em" );
-	static const Finfo* VmFinfo = 
-			Cinfo::find( "Compartment" )->findFinfo( "Vm" );
-
+	static const Finfo* axial = comptCinfo->findFinfo( "axial" );
+	static const Finfo* raxial = comptCinfo->findFinfo( "raxial" );
+	static const Finfo* xFinfo = comptCinfo->findFinfo( "x" );
+	static const Finfo* yFinfo = comptCinfo->findFinfo( "y" );
+	static const Finfo* zFinfo = comptCinfo->findFinfo( "z" );
+	static const Finfo* dFinfo = comptCinfo->findFinfo( "diameter" );
+	static const Finfo* lengthFinfo = comptCinfo->findFinfo( "length" );
+	static const Finfo* RmFinfo = comptCinfo->findFinfo( "Rm" );
+	static const Finfo* CmFinfo = comptCinfo->findFinfo( "Cm" );
+	static const Finfo* RaFinfo = comptCinfo->findFinfo( "Ra" );
+	static const Finfo* initVmFinfo = comptCinfo->findFinfo( "initVm" );
+	static const Finfo* EmFinfo = comptCinfo->findFinfo( "Em" );
+	static const Finfo* VmFinfo = comptCinfo->findFinfo( "Vm" );
 
 	Element* pa;
 	if ( parent == "." ) { // Shorthand: use the previous compartment.
@@ -425,21 +428,10 @@ bool ReadCell::addHHChannel(
 		Element* compt, Element* chan, 
 		double value, double dia, double length )
 {
-
-	static const Finfo* chanSrcFinfo =
-			initCompartmentCinfo()->findFinfo( "channel" );
-	static const Finfo* hhChanDestFinfo = 
-		initSynChanCinfo()->findFinfo( "channel" );
-	static const Finfo* gbarFinfo =
-		Cinfo::find( "HHChannel" )->findFinfo( "Gbar" );
+	static const Finfo* chanSrcFinfo = comptCinfo->findFinfo( "channel" );
+	static const Finfo* hhChanDestFinfo = chanCinfo->findFinfo( "channel" );
+	static const Finfo* gbarFinfo = chanCinfo->findFinfo( "Gbar" );
 	
-// 	static const Finfo* chanSrcFinfo =
-// 			Cinfo::find( "Compartment" )->findFinfo( "channel" );
-// 	static const Finfo* hhChanDestFinfo = 
-// 		Cinfo::find( "HHChannel" )->findFinfo( "channel" );
-// 	static const Finfo* gbarFinfo =
-// 		Cinfo::find( "HHChannel" )->findFinfo( "Gbar" );
-
 	if ( chan->className() == "HHChannel" ) {
 		bool ret = chanSrcFinfo->add( compt, chan, hhChanDestFinfo );
 		assert( ret );
@@ -468,35 +460,8 @@ bool ReadCell::addSynChan(
 		Cinfo::find( "SynChan" )->findFinfo( "Gbar" );
 
 	if ( chan->className() == "SynChan" ) {
-		/*	
-		if (compt->name() == "apical_18" && chan->name() == "glu"){
-			int a = 5;
-		}*/
 		bool ret = chanSrcFinfo->add( compt, chan, synChanDestFinfo );
 		assert( ret );
-		
-		
-// 		if (compt->name() == "apical_18" && chan->name() == "glu"){
-// 			vector <Conn> list;
-// 			chanSrcFinfo->outgoingConns( compt, list );
-// 			for (size_t i = 0; i < list.size(); i++){
-// 				Element *temp = list[i].targetElement();
-// 				cout << temp->name() << " " ;
-// 				const Finfo* targetFinfo = 
-// 					temp->findFinfo( list[i].targetIndex() );
-// 				cout << targetFinfo->name() << endl;
-// 				
-// 				vector <Conn> conn;
-// 				targetFinfo->outgoingConns(temp, conn);
-// 				for (size_t j = 0; j < conn.size(); j++){
-// 					Element* t = conn[j].targetElement();
-// 					const Finfo* tFinfo = 
-// 					t->findFinfo( list[j].targetIndex() );
-// 					cout << tFinfo << " " << chanSrcFinfo << endl;
-// 					cout << t->name() << " " << tFinfo->name() << endl;
-// 				}
-// 			}
-// 		}
 		
 		if ( value > 0 ) {
 			value *= dia * length * PI;
@@ -514,12 +479,9 @@ bool ReadCell::addSpikeGen(
 		Element* compt, Element* chan, 
 		double value, double dia, double length )
 {
-	static const Finfo* vmSrcFinfo = 
-		Cinfo::find( "Compartment" )->findFinfo( "VmSrc" );
-	static const Finfo* vmDestFinfo = 
-		Cinfo::find( "SpikeGen" )->findFinfo( "Vm" );
-	static const Finfo* threshFinfo = 
-		Cinfo::find( "SpikeGen" )->findFinfo( "threshold" );
+	static const Finfo* vmSrcFinfo = comptCinfo->findFinfo( "VmSrc" );
+	static const Finfo* vmDestFinfo = spikegenCinfo->findFinfo( "Vm" );
+	static const Finfo* threshFinfo = spikegenCinfo->findFinfo( "threshold" );
 	if ( chan->className() == "SpikeGen" ) {
 		bool ret = vmSrcFinfo->add( compt, chan, vmDestFinfo  );
 		assert( ret );
@@ -536,13 +498,10 @@ bool ReadCell::addCaConc(
 		double value, double dia, double length )
 {
 		/*
-	static const Finfo* concSrcFinfo = 
-		Cinfo::find( "CaConc" )->findFinfo( "concSrc" );
-	static const Finfo* currentFinfo = 
-		Cinfo::find( "CaConc" )->findFinfo( "current" );
+	static const Finfo* concSrcFinfo = caconcCinfo->findFinfo( "concSrc" );
+	static const Finfo* currentFinfo = caconcCinfo->findFinfo( "current" );
 		*/
-	static const Finfo* bFinfo = 
-		Cinfo::find( "CaConc" )->findFinfo( "B" );
+	static const Finfo* bFinfo = caconcCinfo->findFinfo( "B" );
 	if ( chan->className() == "CaConc" ) {
 		// assert( vmSrcFinfo->add( compt, chan, vmDestFinfo  ) );
 		++numOthers_;
