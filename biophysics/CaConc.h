@@ -78,4 +78,7 @@ class CaConc
 		double c_;
 		double activation_;
 };
+
+extern const Cinfo* initCaConcCinfo();
+
 #endif // _CACONC_H

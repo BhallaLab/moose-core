@@ -109,6 +109,7 @@ class SynChan
 		priority_queue< SynInfo > pendingEvents_;
 };
 
+// Used by solver, readcell, etc.
 extern const Cinfo* initSynChanCinfo();
 
 #endif // _SynChan_h
