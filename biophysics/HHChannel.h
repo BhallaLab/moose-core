@@ -220,7 +220,7 @@ class HHChannel
 		static double powerN( double x, double p );
 };
 
-// Used by the solver
+// Used by solver, readcell, etc.
 extern const Cinfo* initHHChannelCinfo();
 
 #endif // _HHChannel_h

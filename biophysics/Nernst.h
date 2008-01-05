@@ -68,4 +68,8 @@ class Nernst
 		static const double R_OVER_F;
 		static const double ZERO_CELSIUS;
 };
+
+// Used by solver, readcell, etc.
+extern const Cinfo* initNernstCinfo();
+
 #endif // _Nernst_h
