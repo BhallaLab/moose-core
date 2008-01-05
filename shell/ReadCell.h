@@ -39,6 +39,8 @@ class ReadCell
 		bool addNernst( Element* compt, Element* chan, double value );
 
 	private:
+		void countProtos( );
+		
 		double RM_;
 		double CM_;
 		double RA_;
@@ -58,8 +60,17 @@ class ReadCell
 
 		Element* currCell_;
 		Element* lastCompt_;
+		Element* protoCompt_;
+		unsigned int numProtoCompts_;
+		unsigned int numProtoChans_;
+		unsigned int numProtoOthers_;
+
+		/** To flag if we are building the main cell, or just a part
+		 *  which will be grafted on later.
+		 */
+		bool graftFlag_;
 		bool polarFlag_;
 		bool relativeCoordsFlag_;
-		vector< Element* >chanProtos_;
+		vector< Element* > chanProtos_;
 };
 #endif
