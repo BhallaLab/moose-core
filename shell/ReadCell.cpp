@@ -41,7 +41,10 @@ ReadCell::ReadCell()
 		spineSurf( 0.0 ), spineDens( 0.0 ),
 		spineFreq( 0.0 ), membFactor( 0.0 ),
 		numCompartments_( 0 ), numChannels_( 0 ), numOthers_( 0 ),
-		cell_( 0 ), currCell_( 0 ), lastCompt_( 0 ),
+		cell_( 0 ), currCell_( 0 ),
+		lastCompt_( 0 ), protoCompt_( 0 ),
+		numProtoCompts_( 0 ), numProtoChans_( 0 ),
+		numProtoOthers_( 0 ), graftFlag_( 0 ),
 		polarFlag_( 0 ), relativeCoordsFlag_( 0 )
 {
 		Id libId;
@@ -104,7 +107,13 @@ Element* ReadCell::start( const string& cellpath )
 		cellname = cellpath.substr( pos + 1 );
 	}
 	
-	return Neutral::create( "Cell", cellname, cellpa, Id::scratchId() );
+	if ( graftFlag_ ) {
+		return Neutral::create( "Compartment",
+			cellname, cellpa, Id::scratchId() );
+	} else {
+		return Neutral::create( "Cell",
+			cellname, cellpa, Id::scratchId() );
+	}
 }
 
 void ReadCell::read( const string& filename, const string& cellpath )
@@ -221,10 +230,7 @@ Element* ReadCell::buildCompartment(
 	} else if ( parent == "none" || parent == "nil" ) {
 			pa = Element::root();
 	} else {
-		Id paId;
-		bool ret = lookupGet< Id , string >(
-					cell_, "lookupChild", paId, parent );
-		assert( ret );
+		Id paId( currCell_->id().path() + "/" + parent );
 		if ( paId.bad() ) {
 			cout << "Error: ReadCell: could not find parent compt '" <<
 					parent << "' for child '" << name << "'\n";
@@ -236,7 +242,7 @@ Element* ReadCell::buildCompartment(
 		return 0;
 	Id childId;
 	bool ret = lookupGet< Id, string >(
-				cell_, "lookupChild", childId, name );
+				currCell_, "lookupChild", childId, name );
 	assert( ret );
 	if ( !childId.bad() ) {
 		cout << "Error: ReadCell: duplicate child on parent compt '" <<
@@ -244,8 +250,22 @@ Element* ReadCell::buildCompartment(
 		return 0;
 	}
 
-	Element* compt = Neutral::create( "Compartment", name, currCell_, Id::scratchId() );
-	++numCompartments_;
+	Element* compt;
+	if ( graftFlag_ && ( parent == "none" || parent == "nil" ) ) {
+		compt = currCell_;
+	} else {
+		if ( protoCompt_ ) {
+			compt = protoCompt_->copy( currCell_, name );
+			numCompartments_ += numProtoCompts_;
+			numChannels_ += numProtoChans_;
+			numOthers_ += numProtoOthers_;
+		} else {
+			compt = Neutral::create( "Compartment",
+				name, currCell_, Id::scratchId() );
+			if ( !graftFlag_ )
+				++numCompartments_;
+		}
+	}
 	lastCompt_ = compt;
 
 	if ( pa != Element::root() ) {
@@ -314,6 +334,7 @@ void ReadCell::readScript( const string& line, unsigned int lineNum )
 		if ( argv.size() != 3 ) {
 			cout << "Error: readCell: Bad line: " << lineNum <<
 					": " << line << endl;
+			return;
 		}
 		if ( argv[1] == "RM" )
 				RM_ = atof( argv[2].c_str() );
@@ -327,18 +348,39 @@ void ReadCell::readScript( const string& line, unsigned int lineNum )
 
 	if ( argv[0] == "*start_cell" ) {
 		if ( argv.size() == 1 ) {
+			graftFlag_ = 0;
 			currCell_ = cell_;
 		} else if ( argv.size() == 2 ) {
+			graftFlag_ = 1;
 			currCell_ = start( argv[1] );
 		} else {
 			cout << "Error: readCell: Bad line: " << lineNum <<
 					": " << line << endl;
+			return;
 		}
 	}
 
+	if ( argv[0] == "*compt" ) {
+		if ( argv.size() != 2 ) {
+			cout << "Error: readCell: Bad line: " << lineNum <<
+					": " << line << endl;
+			return;
+		}
+
+		Id protoId( argv[1] );
+		if ( protoId.bad() ) {
+			cout << "Error: readCell: Bad path: " << lineNum <<
+					": " << line << endl;
+			return;
+		}
+		
+		protoCompt_ = protoId();
+		countProtos( );
+		return;
+	}
+
 	if ( argv[0] == "*makeproto" ) {
-		const Finfo* procFinfo = currCell_->findFinfo( "process" );
-		procFinfo->dropAll( currCell_ );
+		return; // Should traverse tree below and drop process messages.
 	}
 }
 
@@ -442,7 +484,8 @@ bool ReadCell::addHHChannel(
 			value = - value;
 		}
 
-		++numChannels_;
+		if ( !graftFlag_ )
+			++numChannels_;
 		return set< double >( chan, gbarFinfo, value );
 	}
 	return 0;
@@ -452,12 +495,12 @@ bool ReadCell::addSynChan(
 		Element* compt, Element* chan, 
 		double value, double dia, double length )
 {
-	static const Finfo* chanSrcFinfo =
-			Cinfo::find( "Compartment" )->findFinfo( "channel" );
+	static const Finfo* chanSrcFinfo = 
+		comptCinfo->findFinfo( "channel" );
 	static const Finfo* synChanDestFinfo = 
-		Cinfo::find( "SynChan" )->findFinfo( "channel" );
+		synchanCinfo->findFinfo( "channel" );
 	static const Finfo* synGbarFinfo = 
-		Cinfo::find( "SynChan" )->findFinfo( "Gbar" );
+		synchanCinfo->findFinfo( "Gbar" );
 
 	if ( chan->className() == "SynChan" ) {
 		bool ret = chanSrcFinfo->add( compt, chan, synChanDestFinfo );
@@ -469,7 +512,8 @@ bool ReadCell::addSynChan(
 			value = - value;
 		}
 
-		++numChannels_;
+		if ( !graftFlag_ )
+			++numChannels_;
 		return set< double >( chan, synGbarFinfo, value );
 	}
 	return 0;
@@ -479,13 +523,17 @@ bool ReadCell::addSpikeGen(
 		Element* compt, Element* chan, 
 		double value, double dia, double length )
 {
-	static const Finfo* vmSrcFinfo = comptCinfo->findFinfo( "VmSrc" );
-	static const Finfo* vmDestFinfo = spikegenCinfo->findFinfo( "Vm" );
-	static const Finfo* threshFinfo = spikegenCinfo->findFinfo( "threshold" );
+	static const Finfo* vmSrcFinfo =
+		comptCinfo->findFinfo( "VmSrc" );
+	static const Finfo* vmDestFinfo =
+		spikegenCinfo->findFinfo( "Vm" );
+	static const Finfo* threshFinfo =
+		spikegenCinfo->findFinfo( "threshold" );
 	if ( chan->className() == "SpikeGen" ) {
 		bool ret = vmSrcFinfo->add( compt, chan, vmDestFinfo  );
 		assert( ret );
-		++numOthers_;
+		if ( !graftFlag_ )
+			++numOthers_;
 		return set< double >( chan, threshFinfo, value );
 	}
 	return 0;
@@ -504,7 +552,8 @@ bool ReadCell::addCaConc(
 	static const Finfo* bFinfo = caconcCinfo->findFinfo( "B" );
 	if ( chan->className() == "CaConc" ) {
 		// assert( vmSrcFinfo->add( compt, chan, vmDestFinfo  ) );
-		++numOthers_;
+		if ( !graftFlag_ )
+			++numOthers_;
 		return set< double >( chan, bFinfo, value );
 	}
 	return 0;
@@ -514,6 +563,47 @@ bool ReadCell::addCaConc(
 bool ReadCell::addNernst( 
 		Element* compt, Element* chan, double value )
 {
-	++numOthers_;
+	if ( !graftFlag_ )
+		++numOthers_;
 	return 0;
+}
+
+/**
+ * Count elements under a tree.
+ */
+void ReadCell::countProtos( )
+{
+	if ( protoCompt_ == 0 )
+		return;
+	
+	numProtoCompts_ = 1; // protoCompt_ itself
+	numProtoChans_ = 0;
+	numProtoOthers_ = 0;
+
+	vector< vector< Id > > cstack;
+	cstack.push_back( Neutral::getChildList( protoCompt_ ) );
+	while ( !cstack.empty() ) {
+		vector< Id >& child = cstack.back();
+		
+		if ( child.empty() ) {
+			cstack.pop_back();
+			if ( !cstack.empty() )
+				cstack.back().pop_back();
+		} else {
+			const Id& curr = child.back();
+			const Cinfo* currCinfo = curr()->cinfo();
+			
+			if ( currCinfo->isA( comptCinfo ) )
+				++numProtoCompts_;
+			else if ( currCinfo->isA( chanCinfo ) ||
+			          currCinfo->isA( synchanCinfo ) )
+				++numProtoChans_;
+			else if ( currCinfo->isA( spikegenCinfo ) ||
+			          currCinfo->isA( caconcCinfo ) ||
+			          currCinfo->isA( nernstCinfo ) )
+				++numProtoOthers_;
+			
+			cstack.push_back( Neutral::getChildList( curr() ) );
+		}
+	}
 }
