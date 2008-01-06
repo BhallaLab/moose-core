@@ -30,6 +30,14 @@ echo -n readcell2
 $NEARDIFF moose_readcell.plot test.plot 5.0e-3
 
 /bin/rm -f test.plot
+$MOOSE moose_synchan.g > /dev/null
+echo -n "synchan..."
+$NEARDIFF moose_synchan.plot test.plot 5.0e-11
+# There is a small numerical divergence between moose and genesis
+# on the upswing of the synchan. This is because of how they handle the
+# timing event arrival, so the MOOSE version is one dt later.
+
+/bin/rm -f test.plot
 echo -n "channels..."
 $MOOSE moose_channels.g > /dev/null
 
