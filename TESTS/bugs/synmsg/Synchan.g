@@ -11,7 +11,7 @@ ce /
 readcell axon.p /cell
 
 ce /cell/soma
-showfield . Im
+create SynChan syn
 addmsg ./channel syn/channel
 ce /
 
