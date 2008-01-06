@@ -14,7 +14,7 @@ class SynInfo
 {
 	public:
 		SynInfo() 
-			: weight( 0.0 ), delay( 0.0 )
+			: weight( 1.0 ), delay( 0.0 )
 		{
 			;
 		}
