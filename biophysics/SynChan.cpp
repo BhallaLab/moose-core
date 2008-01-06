@@ -149,7 +149,7 @@ const Cinfo* initSynChanCinfo()
 static const Cinfo* synChanCinfo = initSynChanCinfo();
 
 static const unsigned int channelSlot =
-	initSynChanCinfo()->getSlotIndex( "channel" );
+	initSynChanCinfo()->getSlotIndex( "channel.channel" );
 static const unsigned int origChannelSlot =
 	initSynChanCinfo()->getSlotIndex( "origChannel" );
 static const unsigned int ikSlot =
