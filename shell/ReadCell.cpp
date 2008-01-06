@@ -35,8 +35,8 @@ static const Cinfo* spikegenCinfo = initSpikeGenCinfo();
 static const Cinfo* nernstCinfo = initNernstCinfo();
 static const Cinfo* caconcCinfo = initCaConcCinfo();
 
-ReadCell::ReadCell()
-		: RM_( 0.0 ), CM_( 0.0 ), RA_( 0.0 ), EREST_ACT_( 0.0 ),
+ReadCell::ReadCell( const vector< double >& globalParms )
+		: RM_( 10.0 ), CM_( 0.01 ), RA_( 1.0 ), EREST_ACT_( -0.065 ),
 		dendrDiam( 0.0 ), aveLength( 0.0 ),
 		spineSurf( 0.0 ), spineDens( 0.0 ),
 		spineFreq( 0.0 ), membFactor( 0.0 ),
@@ -55,6 +55,18 @@ ReadCell::ReadCell()
 			cout << "Warning: ReadCell: No library for channels\n";
 			return;
 		}
+
+		// We aren't using index 4, which is ELEAK.
+		assert( globalParms.size() == 5 );
+
+		if ( globalParms[0] != 0.0 )
+			CM_ = globalParms[0];
+		if ( globalParms[1] != 0.0 )
+			RM_ = globalParms[1];
+		if ( globalParms[2] != 0.0 )
+			RA_ = globalParms[2];
+		if ( globalParms[3] != 0.0 )
+			EREST_ACT_ = globalParms[3];
 
 		Element* lib = libId();
 

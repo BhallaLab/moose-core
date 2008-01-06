@@ -246,6 +246,11 @@ class myFlexLexer: public yyFlexLexer
 		}
 
 		Id element_;
+
+		Symtab* getGlobalSymbols() {
+			return &GlobalSymbols;
+		}
+
 	private:
 		std::string currstr;
 		std::string outstr;
