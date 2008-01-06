@@ -59,6 +59,8 @@ class Shell
 		static void setCwe( const Conn&, Id id );
 		static Id getCwe( const Element* );
 		static void trigCwe( const Conn& );
+		static void pushe( const Conn&, Id id );
+		static void pope( const Conn& );
 
 		static void trigLe( const Conn&, Id parent );
 
@@ -136,7 +138,8 @@ class Shell
 		// Major input functions.
 		//////////////////////////////////////////////////////////
 		static void readCell( 
-					const Conn& c, string filename, string cellpath);
+					const Conn& c, string filename, string cellpath,
+					vector< double > globalParms );
 
 		//////////////////////////////////////////////////////////
 		// Channel setup functions.

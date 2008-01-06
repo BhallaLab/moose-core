@@ -10,10 +10,21 @@
 #define READCELL_H
 enum ParseStage { COMMENT, DATA, SCRIPT };
 
+/**
+ * The ReadCell class implements the old GENESIS cellreader
+ * functionality. 
+ * 
+ * ReadCell is partially implemented but works for most common uses and
+ * will evolve to some further point.
+ *
+ * On significant semantic difference from the GENESIS version is that
+ * in MOOSE ReadCell can accept values of globals defined in the script,
+ * but will NOT alter the script global values.
+ */
 class ReadCell
 {
 	public:
-		ReadCell();
+		ReadCell( const vector< double >& globalParms );
 		Element* start( const string& cellpath );
 		void read( const string& filename, const string& cellpath );
 		void readData( const string& line, unsigned int lineNum );

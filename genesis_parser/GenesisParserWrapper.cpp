@@ -38,6 +38,10 @@ const Cinfo* initGenesisParserCinfo()
 		// Then receive the cwe info
 		new DestFinfo( "recvCwe", Ftype1< Id >::global(),
 					RFCAST( &GenesisParserWrapper::recvCwe ) ),
+		// Setting pushe. This returns with the new cwe.
+		new SrcFinfo( "pushe", Ftype1< Id >::global() ),
+		// Doing pope. This returns with the new cwe.
+		new SrcFinfo( "pope", Ftype0::global() ),
 
 		// Getting a list of child ids: First send a request with
 		// the requested parent elm id.
@@ -136,7 +140,8 @@ const Cinfo* initGenesisParserCinfo()
 		///////////////////////////////////////////////////////////////
 		// Cell reader: filename cellpath
 		///////////////////////////////////////////////////////////////
-		new SrcFinfo( "readcell", Ftype2< string, string >::global() ),
+		new SrcFinfo( "readcell", Ftype3< string, string, 
+			vector< double > >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// Channel setup functions
@@ -229,6 +234,10 @@ static const unsigned int requestCweSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser.trigCwe" );
 static const unsigned int requestLeSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.trigLe" );
+static const unsigned int pusheSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.pushe" );
+static const unsigned int popeSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.pope" );
 static const unsigned int createSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.create" );
 static const unsigned int createArraySlot = 
@@ -1592,8 +1601,18 @@ void do_ce( int argc, const char** const argv, Id s )
 
 void do_pushe( int argc, const char** const argv, Id s )
 {
+	GenesisParserWrapper* gpw = 
+		static_cast< GenesisParserWrapper* > ( s()->data() );
 	if ( argc == 2 ) {
 		// s->pusheFuncLocal( argv[1] );
+		Id e( argv[1] );
+		if ( e.bad() ) {
+			gpw->print( string( "Error - cannot change to '" ) +
+				string( argv[1] ) + "'" );
+		} else {
+			send1< Id >( s(), pusheSlot, e );
+			gpw->printCwe();
+		}
 	} else {
 		cout << "usage:: " << argv[0] << " Element\n";
 	}
@@ -1603,6 +1622,10 @@ void do_pope( int argc, const char** const argv, Id s )
 {
 	if ( argc == 1 ) {
 		// s->popeFuncLocal( );
+		send0( s(), popeSlot );
+		GenesisParserWrapper* gpw = 
+			static_cast< GenesisParserWrapper* > ( s()->data() );
+		gpw->printCwe();
 	} else {
 		cout << "usage:: " << argv[0] << "\n";
 	}
@@ -1904,11 +1927,16 @@ void GenesisParserWrapper::doLe( int argc, const char** argv, Id s )
 
 void do_pwe( int argc, const char** const argv, Id s )
 {
+	// Here we need to wait for the shell to service this message
+	// request and put the requested value in the local cwe_.
+	send0( s(), requestCweSlot );
+	// print it out.
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
 			( s()->data() );
-	gpw->doPwe( argc, argv, s );
+	gpw->printCwe();
 }
 
+/*
 void GenesisParserWrapper::doPwe( int argc, const char** argv, Id s )
 {
 	send0( s(), requestCweSlot );
@@ -1916,6 +1944,12 @@ void GenesisParserWrapper::doPwe( int argc, const char** argv, Id s )
 	// request and put the requested value in the local cwe_.
 	
 	// print( GenesisParserWrapper::eid2path( cwe_ ) );
+	print( cwe_.path() );
+}
+*/
+
+void GenesisParserWrapper::printCwe()
+{
 	print( cwe_.path() );
 }
 
@@ -2082,6 +2116,39 @@ void do_addtask( int argc, const char** const argv, Id s )
 	// cout << "usage:: " << argv[0] << " path clockNum [funcname]\n";
 }
 
+// Extracts the global values for the readcell parameters if defined.
+void GenesisParserWrapper::getReadcellGlobals( 
+	vector< double >& globalParms )
+{
+	globalParms.resize( 0 );
+	globalParms.resize( 5, 0.0 );
+
+	Result *rp;
+	Symtab* GlobalSymbols = getGlobalSymbols();
+
+	rp=SymtabLook(GlobalSymbols,"CM");
+	if (rp)
+		globalParms[0] = GetScriptDouble("CM");
+		
+	rp=SymtabLook(GlobalSymbols,"RM");
+	if (rp)
+		globalParms[1] = GetScriptDouble("RM");
+		
+	rp=SymtabLook(GlobalSymbols,"RA");
+	if (rp)
+		globalParms[2] = GetScriptDouble("RA");
+		
+	rp=SymtabLook(GlobalSymbols,"EREST_ACT");
+	if (rp)
+		globalParms[3] = GetScriptDouble("EREST_ACT");
+		
+	rp=SymtabLook(GlobalSymbols,"ELEAK");
+	if (rp)
+		globalParms[4] = GetScriptDouble("ELEAK");
+	else
+		globalParms[4] = globalParms[3];
+}
+
 void do_readcell( int argc, const char** const argv, Id s )
 {
 	if (argc != 3 ) {
@@ -2089,10 +2156,17 @@ void do_readcell( int argc, const char** const argv, Id s )
 		return;
 	}
 
+	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
+			( s()->data() );
+	vector< double > globalParms;
+	gpw->getReadcellGlobals( globalParms );
+
+
 	string filename = argv[1];
 	string cellpath = argv[2];
 
- 	send2< string, string >( s(), readCellSlot, filename, cellpath );
+ 	send3< string, string, vector< double > >( 
+		s(), readCellSlot, filename, cellpath, globalParms );
 }
 
 Id findChanGateId( int argc, const char** const argv, Id s ) 
@@ -3577,6 +3651,14 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "echo {getpath /foo -head}", "/ " );
 	gpAssert( "echo {getpath /foo/ -tail}", " " );
 	gpAssert( "echo {getpath /foo/ -head}", "/foo/ " );
+
+	// Checking pushe/pope
+	gpAssert( "pushe /proto", "/proto " );
+	gpAssert( "pwe", "/proto " );
+	gpAssert( "pope", "/ " );
+	gpAssert( "pwe", "/ " );
+	gpAssert( "pushe /foobarzod", "Error - cannot change to '/foobarzod' " );
+	gpAssert( "pwe", "/ " );
 	cout << "\n";
 }
 #endif
