@@ -5479,5 +5479,13 @@ Reorganized the regressions directory a bit.
 Checked in as revision 337 with unit test compile flags on, Smoldyn off.
 
 Fixed implementation of pushe and pope. This resolves bug# 1864443
+Implemented unit tests too.
+Checked in as revision 338 with unit test compile flags on, Smoldyn off.
+
+Fixed message passing aliases and an initialization bug in SynChan.
+Implemented a little regression test for it. There is a 1 dt difference
+in the output of the moose and genesis synchans.
+There may still be remaining issues with the messaging in synchans reported
+by Niraj, but this is a first pass regression test for synchans.
 
 ==============================================================================
