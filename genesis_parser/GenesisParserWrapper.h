@@ -38,7 +38,8 @@ class GenesisParserWrapper: public myFlexLexer
 // Helper functions
 //////////////////////////////////////////////////////////////////
 		void doLe( int argc, const char** argv, Id s );
-		void doPwe( int argc, const char** argv, Id s );
+		// void doPwe( int argc, const char** argv, Id s );
+		void printCwe();
 		char* doGet( int argc, const char** argv, Id s );
 		void doSet( int argc, const char** argv, Id s );
 		void doShow( int argc, const char** argv, Id s );
@@ -59,6 +60,8 @@ class GenesisParserWrapper: public myFlexLexer
 
 		string handleMultGate( int argc, const char** const argv, Id s,
 			string& gate, double& gatePower );
+
+		void getReadcellGlobals( vector< double >& globalParms );
 
 		////////////////////////////////////////////////
 		//  Utility functions

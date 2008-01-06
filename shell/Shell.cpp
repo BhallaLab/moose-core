@@ -40,6 +40,15 @@ const Cinfo* initShellCinfo()
 		// Then send out the cwe info
 		new SrcFinfo( "cweSrc", Ftype1< Id >::global() ),
 
+		// doing pushe: pushing current element onto stack and using
+		// argument for new cwe. It sends back the cweSrc.
+		new DestFinfo( "pushe", Ftype1< Id >::global(),
+						RFCAST( &Shell::pushe ) ),
+		// Doing pope: popping element off stack onto cwe. 
+		// It sends back the cweSrc.
+		new DestFinfo( "pope", Ftype0::global(), 
+						RFCAST( &Shell::pope ) ),
+
 		// Getting a list of child ids: First handle a request with
 		// the requested parent elm id.
 		new DestFinfo( "trigLe", Ftype1< Id >::global(), 
@@ -154,8 +163,9 @@ const Cinfo* initShellCinfo()
 		////////////////////////////////////////////////////////////
 		// Cell reader
 		////////////////////////////////////////////////////////////
+		// Args are: file cellpath globalParms
 		new DestFinfo( "readcell",
-			Ftype2< string, string >::global(), 
+			Ftype3< string, string, vector< double > >::global(), 
 					RFCAST( &Shell::readCell ) ),
 		////////////////////////////////////////////////////////////
 		// Channel setup functions
@@ -629,8 +639,36 @@ void Shell::trigCwe( const Conn& c )
 						
 {
 	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
-	sendTo1< Id >( c.targetElement(), cweSlot,
-					c.targetIndex(), s->cwe_ );
+	sendTo1< Id >( c.targetElement(), cweSlot, c.targetIndex(), s->cwe_ );
+}
+
+void Shell::pushe( const Conn& c, Id id )
+{
+	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	if ( !id.bad() ) {
+		s->workingElementStack_.push_back( s->cwe_ );
+		s->cwe_ = id;
+	} else {
+		cout << "Error: Attempt to pushe to nonexistent element.\n";
+	}
+	sendTo1< Id >( c.targetElement(), cweSlot, c.targetIndex(), s->cwe_ );
+}
+
+void Shell::pope( const Conn& c )
+{
+	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	if ( s->workingElementStack_.size() > 0 ) {
+		s->cwe_ = s->workingElementStack_.back();
+		if ( s->cwe_.bad() ) { 
+			// In case we went back to an element that got deleted in
+			// the interim.
+			s->cwe_ = Id();
+		}
+		s->workingElementStack_.pop_back();
+	} else {
+		cout << "Error: empty element stack.\n";
+	}
+	sendTo1< Id >( c.targetElement(), cweSlot, c.targetIndex(), s->cwe_ );
 }
 
 
@@ -1543,9 +1581,10 @@ void Shell::listMessages( const Conn& c,
 		c.targetElement(), listMessageSlot, ret, remoteFields );
 }
 
-void Shell::readCell( const Conn& c, string filename, string cellpath )
+void Shell::readCell( const Conn& c, string filename, string cellpath,
+	vector< double > globalParms )
 {
-	ReadCell rc;
+	ReadCell rc( globalParms );
 	
 	rc.read( filename, cellpath );
 }
