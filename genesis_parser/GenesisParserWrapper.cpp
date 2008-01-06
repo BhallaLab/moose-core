@@ -505,12 +505,16 @@ map< string, string >& sliSrcLookup()
 	src[ "useZ.MULTGATE" ] = "gate";
 	src[ "CONCEN Ca" ] = "concSrc";
 
+	// Message for synchan
+	src[ "SpikeGen.SPIKE" ] = "event";
+
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
 	// done already through the existing messaging.
 	src[ "EREST Vm" ] = "";
 
 	// Some messages for tables, specially used for I/O
+	src[ "SpikeGen.INPUT Vm" ] = "VmSrc";
 	src[ "INPUT Vm" ] = "Vm";
 	src[ "INPUT Ca" ] = "Ca";
 	src[ "INPUT Ik" ] = "Ik";
@@ -573,6 +577,10 @@ map< string, string >& sliDestLookup()
 	// Some messages for channels.
 	dest[ "VOLTAGE Vm" ] = "";
 	dest[ "CHANNEL Gk Ek" ] = "channel";
+
+	// Special messages for spikegen and synapse
+	dest[ "SpikeGen.SPIKE" ] = "synapse";
+	dest[ "SpikeGen.INPUT Vm" ] = "Vm";
 
 	// Some of these funny comparisons are inserted when the code finds
 	// cases which need special work.
@@ -845,6 +853,10 @@ void GenesisParserWrapper::doAdd(
 		
 		if ( msgType == "CHANNEL Gk Ek" && src()->className() == "SynChan" && dest()->className() == "Mg_block" )
 			msgType = src()->className() + "." + dest()->className() + "." + msgType;
+		if ( msgType == "SPIKE" && src()->className() == "SpikeGen" )
+			msgType = src()->className() + "." + msgType;
+		if ( msgType == "INPUT Vm" && dest()->className() == "SpikeGen" )
+			msgType = dest()->className() + "." + msgType;
 
 		bool usingMULTGATE = 0;
 		string gate = "";

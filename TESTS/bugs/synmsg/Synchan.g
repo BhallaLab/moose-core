@@ -12,7 +12,8 @@ readcell axon.p /cell
 
 ce /cell/soma
 create SynChan syn
-addmsg ./channel syn/channel
+// addmsg ./channel syn/channel
+
 ce /
 
 showmsg /cell/soma
