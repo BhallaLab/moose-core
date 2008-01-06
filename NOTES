@@ -5467,3 +5467,17 @@ solver in MOOSE, which presumably gives a more accurate answer, but
 different from the genesis one.
 
 Then the tests seem to fail a lot more than they look like they should.
+Implemented a fractional error margin in the neardiff test. Much better.
+Included lots of plots and regression stuff in the subversion checkin.
+Checked in as revision 330 with unit test compile flags on, Smoldyn off.
+
+==============================================================================
+6 Jan 2007
+Implemented passing of globals to readcell. This resolves bug# 1860797
+Implemented regression test for this
+Reorganized the regressions directory a bit.
+Checked in as revision 337 with unit test compile flags on, Smoldyn off.
+
+Fixed implementation of pushe and pope. This resolves bug# 1864443
+
+==============================================================================
