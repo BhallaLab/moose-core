@@ -17,7 +17,7 @@
 class NeuroScanBase
 {
 public:
-	NeuroScanBase( HSolveStructure& structure )
+	NeuroScanBase( HSolveStruct& structure )
 	:
 		N_( structure.N_ ),
 		checkpoint_( structure.checkpoint_ ),
@@ -39,7 +39,9 @@ public:
 		NDiv_( structure.NDiv_ ),
 		VLo_( structure.VLo_ ),
 		VHi_( structure.VHi_ ),
-		dV_( structure.dV_ )
+		dV_( structure.dV_ ),
+		spikegen_( structure.spikegen_ ),
+		synchan_( structure.synchan_ )
 	{ ; }
 	
 	virtual ~NeuroScanBase()
@@ -64,12 +66,18 @@ protected:
 	virtual vector< unsigned int > neighbours( unsigned int compartment ) = 0;
 	virtual vector< unsigned int > channels( unsigned int compartment ) = 0;
 	virtual vector< unsigned int > gates( unsigned int channel ) = 0;
+	virtual unsigned int presyn( unsigned int compartment ) = 0;
+	virtual vector< unsigned int > postsyn( unsigned int compartment ) = 0;
 	virtual void field(
 		unsigned int object,
 		string field,
 		double& value ) = 0;
 	virtual void rates( unsigned int gate,
 		double Vm, double& A, double& B ) = 0;
+	virtual void synchanFields(
+		unsigned int synchan,
+		SynChanStruct& scs ) = 0;
+	virtual Element* elm( unsigned int id ) = 0;
 	
 	vector< unsigned int > compartment_;
 	vector< unsigned int > channel_;
@@ -80,6 +88,7 @@ private:
 	void constructMatrix( );
 	void constructChannelDatabase( );
 	void constructLookupTables( );
+	void constructSynapses( );
 	void concludeInit( );
 	
 	struct CNode
@@ -116,6 +125,8 @@ protected:
 	double&                   VHi_;
 	double&                   dV_;
 	double                    dt_;
+	vector< SpikeGenStruct >& spikegen_;
+	vector< SynChanStruct >& synchan_;
 };
 
 #endif // _NEURO_SCAN_BASE_H

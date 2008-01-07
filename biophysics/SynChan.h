@@ -44,21 +44,13 @@ class SynChan
 
 		static int getNumSynapses( const Element* e );
 
-		void innerSetWeight(
-				const Element* e, double val, unsigned int i );
 		static void setWeight(
 				const Conn& c, double val, const unsigned int& i );
-		double innerGetWeight(
-				const Element* e, unsigned int i );
 		static double getWeight( 
 				const Element* e, const unsigned int& i );
 
-		void innerSetDelay(
-				const Element* e, double val, unsigned int i );
 		static void setDelay(
 				const Conn& c, double val, const unsigned int& i );
-		double innerGetDelay(
-				const Element* e, unsigned int i );
 		static double getDelay( 
 				const Element* e, const unsigned int& i );
 
@@ -66,28 +58,43 @@ class SynChan
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-		void innerSynapseFunc( const Conn& c, double time );
 		static void synapseFunc( const Conn& c, double time );
 
 		static void channelFunc( const Conn& c, double Vm );
 
-		void innerProcessFunc( Element* e, ProcInfo p );
 		static void processFunc( const Conn& c, ProcInfo p );
-		void innerReinitFunc( Element* e,  ProcInfo p );
 		static void reinitFunc( const Conn& c, ProcInfo p );
 
 		static void activationFunc( const Conn& c, double val );
 		static void modulatorFunc( const Conn& c, double val );
 
+		static void scanFunc( const Conn& c, SynChanStruct* scs );
+
+///////////////////////////////////////////////////
+// Protected fields and functions.
+///////////////////////////////////////////////////
+
+	protected:
+///////////////////////////////////////////////////
+// Local dest function definitions
+///////////////////////////////////////////////////
+		void innerSetWeight(
+				const Element* e, double val, unsigned int i );
+		double innerGetWeight(
+				const Element* e, unsigned int i );
+		void innerSetDelay(
+				const Element* e, double val, unsigned int i );
+		double innerGetDelay(
+				const Element* e, unsigned int i );
+		void innerSynapseFunc( const Conn& c, double time );
+		void innerProcessFunc( Element* e, ProcInfo p );
+		void innerReinitFunc( Element* e,  ProcInfo p );
+
 ///////////////////////////////////////////////////
 // Utility function
 ///////////////////////////////////////////////////
 		unsigned int updateNumSynapse( const Element* e );
-///////////////////////////////////////////////////
-// Protected fields.
-///////////////////////////////////////////////////
-
-	protected:
+		
 		double Ek_;
 		double Gk_;
 		double Ik_;

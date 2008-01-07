@@ -8,7 +8,9 @@
 **********************************************************************/
 
 #include "moose.h"
-#include "HSolveStructure.h"
+#include <queue>
+#include "SynInfo.h"
+#include "HSolveStruct.h"
 #include "NeuroScanBase.h"
 #include <stack>
 #include <set>
@@ -22,6 +24,8 @@ void NeuroScanBase::initialize( unsigned int seed, double dt )
 	constructMatrix( );
 	constructChannelDatabase( );
 	constructLookupTables( );
+	constructSynapses( );
+	concludeInit( );
 }
 
 void NeuroScanBase::constructTree( unsigned int seed ) {
@@ -130,7 +134,8 @@ void NeuroScanBase::constructChannelDatabase( ) {
 	
 	for ( icompt = compartment_.begin();
 	      icompt != compartment_.end();
-	      ++icompt ) {
+	      ++icompt )
+	{
 		channel = channels( *icompt );
 		channel_.insert( channel_.end(), channel.begin(), channel.end() );
 		channelCount_.push_back( ( unsigned char )( channel.size( ) ) );
@@ -185,6 +190,35 @@ void NeuroScanBase::constructLookupTables( ) {
 			*( il++ ) = ( 2.0 - dt_ * B ) / ( 2.0 + dt_ * B );
 			*( il++ ) = dt_ * A / ( 1.0 + dt_ * B / 2.0 );
 		}
+	}
+}
+
+void NeuroScanBase::constructSynapses( ) {
+	unsigned int spike;
+	vector< unsigned int > syn;
+	vector< unsigned int >::iterator isyn;
+	SpikeGenStruct spikegen;
+	SynChanStruct synchan;
+	
+	for ( unsigned int ic = 0; ic < N_; ++ic ) {
+		syn = postsyn( compartment_[ ic ] );
+		for ( isyn = syn.begin(); isyn != syn.end(); ++isyn ) {
+			synchan.compt_ = ic;
+			synchan.elm_ = elm( *isyn );
+			synchanFields( *isyn, synchan );
+			synchan_.push_back( synchan );
+		}
+		
+		spike = presyn( compartment_[ ic ] );
+		if ( spike == 0 )
+			continue;
+		spikegen.compt_ = ic;
+		// Bad, bad, bad
+		spikegen.elm_ = elm( spike );
+		field( spike, "threshold", spikegen.threshold_ );
+		field( spike, "refractT", spikegen.refractT_ );
+		field( spike, "state", spikegen.state_ );
+		spikegen_.push_back( spikegen );
 	}
 }
 
