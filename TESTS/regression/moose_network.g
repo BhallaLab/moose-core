@@ -76,6 +76,10 @@ step {RUNTIME/2} -t
 setfield /inarray/incompt[] Vm 0.0
 step {RUNTIME/2} -t
 
+openfile "test.plot" a
+writefile "test.plot" "/newplot"
+writefile "test.plot" "/plotname Vm"
+closefile "test.plot"
 for (i = 0; i < 10; i = i + 1)
 	str filename = "test.plot"
 	tab2file {filename} /plots/plot[{i}] table	
