@@ -7,14 +7,54 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _HSOLVE_STRUCTURE_H
-#define _HSOLVE_STRUCTURE_H
+#ifndef _HSOLVE_STRUCT_H
+#define _HSOLVE_STRUCT_H
+
+struct SpikeGenStruct
+{
+	// Index of parent compartment
+	unsigned int compt_;
+	Element* elm_;
+	// SpikeGen fields
+	double threshold_;
+	double refractT_;
+	double amplitude_;
+	double state_;
+	double lastEvent_;
+};
+
+struct SynChanStruct
+{
+	// Index of parent compartment
+	unsigned int compt_;
+	Element* elm_;
+	// SynChan fields
+	double Ek_;
+	double Gk_;
+	double Gbar_;
+	double tau1_;
+	double tau2_;
+	double xconst1_;
+	double yconst1_;
+	double xconst2_;
+	double yconst2_;
+	double norm_;
+	double X_;
+	double Y_;
+	// The following 3 are still under SynChan's control. Here we simply
+	// peek into their values.
+	double *activation_;
+	double *modulation_;
+	priority_queue< SynInfo >* pendingEvents_;
+	
+	void process( ProcInfo p );
+};
 
 /**
  * This struct holds the data structures of the Hines's solver. These are shared
  * by the Hub, Scan and HSolve classes.
  */
-struct HSolveStructure
+struct HSolveStruct
 {
 	unsigned long            N_;
 	vector< unsigned long >  checkpoint_;
@@ -36,7 +76,10 @@ struct HSolveStructure
 	int                      NDiv_;
 	double                   VLo_;
 	double                   VHi_;
-	double                   dV_;        
+	double                   dV_;
+	
+	vector< SpikeGenStruct > spikegen_;
+	vector< SynChanStruct > synchan_;
 };
 
-#endif // _HSOLVE_STRUCTURE_H
+#endif // _HSOLVE_STRUCT_H

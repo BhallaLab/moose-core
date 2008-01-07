@@ -19,7 +19,7 @@
 class NeuroHub
 {
 public:
-	NeuroHub( HSolveStructure& structure )
+	NeuroHub( HSolveStruct& structure )
 	:
 		M_( structure.M_ ),
 		V_( structure.V_ ),
@@ -65,7 +65,8 @@ public:
 	///////////////////////////////////////////////////
 	static void compartmentFunc( const Conn& c, vector< Element* >* elist );
 	static void channelFunc( const Conn& c, vector< Element* >* elist );
-	static void gateFunc( const Conn& c, vector< Element* >* elist );
+	static void spikegenFunc( const Conn& c, vector< Element* >* elist );
+	static void synchanFunc( const Conn& c, vector< Element* >* elist );
 	static void destroy( const Conn& c );
 	static void childFunc( const Conn& c, int stage );
 	
@@ -78,6 +79,11 @@ public:
 	static void setInject( const Conn& c, double value );
 	static double getInject( const Element* e );
 	
+	static void setChanGbar( const Conn& c, double value );
+	static double getChanGbar( const Element* e );
+	
+	static void setSynChanGbar( const Conn& c, double value );
+	static double getSynChanGbar( const Element* e );
 	///////////////////////////////////////////////////
 	// Dest functions (Biophysics)
 	///////////////////////////////////////////////////
@@ -85,6 +91,12 @@ public:
 	
 private:
 	void innerCompartmentFunc( Element* e,
+		vector< Element* >* elist );
+	void innerChannelFunc( Element* e,
+		vector< Element* >* elist );
+	void innerSpikegenFunc( Element* e,
+		vector< Element* >* elist );
+	void innerSynchanFunc( Element* e,
 		vector< Element* >* elist );
 	
 	static void zombify( 

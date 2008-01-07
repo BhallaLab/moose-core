@@ -34,7 +34,6 @@ public:
 	static void initFunc( const Conn& c, const Element* seed, double dt );
 	
 private:
-	void innerProcessFunc( );
 	void innerScanCreateFunc( Element* e );
 	void innerInitFunc( Element* solve, const Element* seed, double dt );
 	
