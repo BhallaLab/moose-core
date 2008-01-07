@@ -11,6 +11,7 @@
 #include "moose.h"
 #include <queue>
 #include "SynInfo.h"
+#include "HSolveStruct.h"
 #include "SynChan.h"
 #include "ParSynChan.h"
 #include "../element/Neutral.h"
@@ -26,9 +27,9 @@ const Cinfo* initParSynChanCinfo()
 	static Finfo* processShared[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-				RFCAST( &ParSynChan::processFunc ) ),
-	    	new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
-				RFCAST( &ParSynChan::reinitFunc ) ),
+				RFCAST( &SynChan::processFunc ) ),
+	    new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
+				RFCAST( &SynChan::reinitFunc ) ),
 	};
 	static Finfo* process =	new SharedFinfo( "process", processShared, 
 			sizeof( processShared ) / sizeof( Finfo* ) );
@@ -128,11 +129,18 @@ const Cinfo* initParSynChanCinfo()
 		new DestFinfo( "modulator", Ftype1< double >::global(),
 				RFCAST( &SynChan::modulatorFunc ) ),
 
+		// Solver requests for access to variables which stay
+		// under synchan's control
+		new DestFinfo( "scan", Ftype1< SynChanStruct* >::global(),
+				RFCAST( &SynChan::scanFunc ) ),  
+
 		// Accept rank from planarconnect
                 new DestFinfo( "recvRank", Ftype1< int >::global(),
                                 RFCAST( &ParSynChan::recvRank ) ),
-
+     
 	};
+
+
 
 	// SynChan is scheduled after the compartment calculations.
 	static SchedInfo schedInfo[] = { { process, 0, 1 } };
