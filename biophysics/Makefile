@@ -43,6 +43,7 @@ OBJ = \
 	Nernst.o	\
 	SpikeGen.o	\
 	SynChan.o	\
+	HSolveStruct.o	\
 	HSolveBase.o	\
 	HSolve.o \
 	NeuroScanBase.o \
@@ -81,11 +82,12 @@ ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 ParSynChan.o:	SynChan.h SynInfo.h ParSynChan.h
 endif
 
-HSolveBase.o:	HSolveBase.h HSolveStructure.h
-HSolve.o:	HSolve.h HSolveBase.h HSolveStructure.h
-NeuroScanBase.o:	NeuroScanBase.h HSolveStructure.h
-NeuroScan.o:	NeuroScan.h NeuroScanBase.h HSolveStructure.h
-NeuroHub.o:	NeuroHub.h HSolveStructure.h
+HSolveStruct.o:	HSolveStruct.h
+HSolveBase.o:	HSolveBase.h HSolveStruct.h
+HSolve.o:	HSolve.h HSolveBase.h HSolveStruct.h
+NeuroScanBase.o:	NeuroScanBase.h HSolveStruct.h
+NeuroScan.o:	NeuroScan.h NeuroScanBase.h HSolveStruct.h
+NeuroHub.o:	NeuroHub.h HSolveStruct.h
 Cell.o:		Cell.h 
 StochSynchan.o:	StochSynchan.h StochSynInfo.h
 BinSynchan.o:	BinSynchan.h BinSynInfo.h ../utility/randnum/BinomialRng.h

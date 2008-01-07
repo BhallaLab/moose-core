@@ -20,8 +20,9 @@
 #include "../biophysics/HHChannel.h"
 #include "../builtins/Interpol.h"
 #include "../biophysics/HHGate.h"
-#include "../biophysics/SynInfo.h"
 #include <queue>
+#include "../biophysics/SynInfo.h"
+#include "../biophysics/HSolveStruct.h"
 #include "../biophysics/SynChan.h"
 #include "../biophysics/SpikeGen.h"
 #include "../biophysics/Nernst.h"
