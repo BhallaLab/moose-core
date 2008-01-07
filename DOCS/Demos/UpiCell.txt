@@ -1,4 +1,4 @@
-# A simulation
+# A simulation for running on Smoldyn.
 # Now units are SI
 
 # ---------- General parameters ---------

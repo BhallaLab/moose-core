@@ -5514,3 +5514,4 @@ earler attempt as a branch named /moose/branches/moose_synchan_bug
 at revision 341. Then reverted back. Then did a minor fix to the ordering
 of the finfos that should patch over the problem till the true fix is done.
 
+Checked in as revision 342 with unit test compile flags on, Smoldyn off.

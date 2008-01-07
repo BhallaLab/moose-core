@@ -25,6 +25,11 @@ echo -n readcell1
 $NEARDIFF moose_readcell_global_parms.plot test.plot 1.0e-5 -fractional
 
 /bin/rm -f test.plot
+$MOOSE moose_single_compt.g > /dev/null
+echo -n single_compt
+$NEARDIFF moose_single_compt.plot test.plot 1.0e-3
+
+/bin/rm -f test.plot
 $MOOSE moose_readcell.g > /dev/null
 echo -n readcell2
 $NEARDIFF moose_readcell.plot test.plot 5.0e-3
