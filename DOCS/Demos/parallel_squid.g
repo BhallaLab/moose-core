@@ -229,8 +229,8 @@ echo "Multi neuron model setup"
 reset
 
 
-planardelay /channel/syncn 0.005
-planarweight /channel/syncn 1
+planardelay /channel/syncn -fixed 0.005
+planarweight /channel/syncn -fixed 1
 
 setrank 1
 setfield /neuron/c1 inject {INJECT}
