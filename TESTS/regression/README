@@ -30,5 +30,7 @@ The current regression tests are:
 6. A 2 cell model with a single synapse in between.
 	Uses hsolve
 	Uses readcell
+7. Simple network of single compartment neurons. Uses createmap and
+   planarconnect. Does not use solver.
 
 =============================================================================
