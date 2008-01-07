@@ -8,20 +8,26 @@
 **********************************************************************/
 
 #include "moose.h"
-#include "HSolveStructure.h"
+#include <queue>
+#include "SynInfo.h"
+#include "HSolveStruct.h"
 #include "HSolveBase.h"
 #include <cmath>
+
+#include "SpikeGen.h"
 
 // This macro is used for linear interpolation during table lookup of rate
 // constants. Will not be included in coming versions.
 #define WT_AVG( A, B, FRACTION ) \
         ( ( A ) * ( 1.0 - ( FRACTION ) ) + ( B ) * ( FRACTION ) )
 
-void HSolveBase::step( ) {
+void HSolveBase::step( ProcInfo info ) {
 	updateMatrix( );
 	forwardEliminate( );
 	backwardSubstitute( );
 	advanceChannels( );
+	advanceSynChans( info );
+	sendSpikes( info );
 }
 
 // This function needs cleanup. Many immediate optimizations come in here.
@@ -62,6 +68,14 @@ void HSolveBase::updateMatrix( ) {
 		*( 4 + ia ) = *iileak + *ialpha * *iv + GkEkSum + *iinject;
 		++icco, ia += 5, ++ialpha, ++iv, ++iileak, ++iinject;
 	}
+	
+	unsigned int ic;
+	vector< SynChanStruct >::iterator isyn;
+	for ( isyn = synchan_.begin(); isyn != synchan_.end(); ++isyn ) {
+		ic = isyn->compt_;
+		M_[ 5 * ic ] += isyn->Gk_;
+		M_[ 5 * ic + 4 ] += isyn->Gk_ * isyn->Ek_;
+	}
 }
 
 void HSolveBase::forwardEliminate( ) {
@@ -77,7 +91,7 @@ void HSolveBase::forwardEliminate( ) {
 		M_[ 5 * *++icp ]    -= *( 2 + ia ) / *ia;
 		M_[ 4 + 5 * *icp ]  -= *( 1 + ia ) * *( 4 + ia ) / *ia;
 	}
-
+	
 	for ( ; ic < N_ - 1; ++ic, ia += 5 ) {
 		*( 5 + ia ) -= *( 2 + ia ) / *ia;
 		*( 9 + ia ) -= *( 1 + ia ) * *( 4 + ia ) / *ia;
@@ -141,4 +155,19 @@ void HSolveBase::advanceChannels( ) {
 					WT_AVG( *( 1 + ilookup ), *( ( 1 + lookupBlocSize_ ) + ilookup ), fraction );
 			}
 		}
+}
+
+void HSolveBase::advanceSynChans( ProcInfo info ) {
+	vector< SynChanStruct >::iterator isyn;
+	for ( isyn = synchan_.begin(); isyn != synchan_.end(); ++isyn )
+		isyn->process( info );
+}
+
+void HSolveBase::sendSpikes( ProcInfo info ) {
+	vector< SpikeGenStruct >::iterator ispike;
+	for ( ispike = spikegen_.begin(); ispike != spikegen_.end(); ++ispike ) {
+		set< double >( ispike->elm_, "Vm", V_[ ispike->compt_ ] );
+		Conn c( ispike->elm_, 0 );
+		SpikeGen::processFunc( c, info );
+	}
 }

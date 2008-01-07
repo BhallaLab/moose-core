@@ -37,7 +37,9 @@ public:
 		lookup_( structure_.lookup_ ),
 		lookupBlocSize_( structure_.lookupBlocSize_ ),
 		VLo_( structure_.VLo_ ),
-		dV_( structure_.dV_ )
+		dV_( structure_.dV_ ),
+		spikegen_( structure_.spikegen_ ),
+		synchan_( structure_.synchan_ )
 	{ ; }
 
 	HSolveBase& operator=( const HSolveBase& hsb )
@@ -46,14 +48,16 @@ public:
 	}
 	
 protected:
-	void step( );
-	HSolveStructure          structure_;
+	void step( ProcInfo info );
+	HSolveStruct structure_;
 	
 private:
 	void updateMatrix( );
 	void forwardEliminate( );
 	void backwardSubstitute( );
 	void advanceChannels( );
+	void advanceSynChans( ProcInfo info );
+	void sendSpikes( ProcInfo info );
 	
 	unsigned long&            N_;
 	vector< unsigned long >&  checkpoint_;
@@ -75,6 +79,9 @@ private:
 	int&                      lookupBlocSize_;
 	double&                   VLo_;
 	double&                   dV_;
+	
+	vector< SpikeGenStruct >& spikegen_;
+	vector< SynChanStruct >&  synchan_;
 };
 
 #endif // _HSOLVE_BASE_H

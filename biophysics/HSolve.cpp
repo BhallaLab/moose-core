@@ -9,7 +9,9 @@
 
 #include "moose.h"
 #include "../element/Neutral.h"
-#include "HSolveStructure.h"
+#include <queue>
+#include "SynInfo.h"
+#include "HSolveStruct.h"
 #include "NeuroHub.h"
 #include "NeuroScanBase.h"
 #include "NeuroScan.h"
@@ -163,12 +165,8 @@ double HSolve::getVHi( const Element* e )
 
 void HSolve::processFunc( const Conn&c, ProcInfo p )
 {
-	static_cast< HSolve* >( c.data() )->innerProcessFunc();
-}
-
-void HSolve::innerProcessFunc( )
-{
-	step();
+	static_cast< HSolve* >( c.data() )->
+		step( p );
 }
 
 void HSolve::initFunc( const Conn& c,
