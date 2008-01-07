@@ -11,6 +11,7 @@
 #include "moose.h"
 #include <queue>
 #include "SynInfo.h"
+#include "HSolveStruct.h"
 #include "SynChan.h"
 #include "../element/Neutral.h"
 
@@ -127,6 +128,11 @@ const Cinfo* initSynChanCinfo()
 		// Modulate channel response
 		new DestFinfo( "modulator", Ftype1< double >::global(),
 				RFCAST( &SynChan::modulatorFunc ) ),
+
+		// Solver requests for access to variables which stay
+		// under synchan's control
+		new DestFinfo( "scan", Ftype1< SynChanStruct* >::global(),
+				RFCAST( &SynChan::scanFunc ) ),       
 	};
 
 	// SynChan is scheduled after the compartment calculations.
@@ -406,6 +412,30 @@ void SynChan::activationFunc( const Conn& c, double val )
 void SynChan::modulatorFunc( const Conn& c, double val )
 {
 	static_cast< SynChan* >( c.data() )->modulation_ *= val;
+}
+
+void SynChan::scanFunc( const Conn& c, SynChanStruct* scs )
+{
+	SynChan* local = static_cast< SynChan* >( c.data() );
+	
+	scs->Gbar_ = local->Gbar_;
+	scs->Gk_ = local->Gk_;
+	scs->Ek_ = local->Ek_;
+	scs->tau1_ = local->tau1_;
+	scs->tau2_ = local->tau2_;
+	scs->xconst1_ = local->xconst1_;
+	scs->yconst1_ = local->yconst1_;
+	scs->xconst2_ = local->xconst2_;
+	scs->yconst2_ = local->yconst2_;
+	scs->norm_ = local->norm_;
+	scs->X_ = local->X_;
+	scs->Y_ = local->Y_;
+	
+	// Following three remain under SynChan's control, being updated
+	// by respective messages. The solvers maintains handles to them.
+	scs->activation_ = &( local->activation_ );
+	scs->modulation_ = &( local->modulation_ );
+	scs->pendingEvents_ = &( local->pendingEvents_ );
 }
 
 ///////////////////////////////////////////////////
