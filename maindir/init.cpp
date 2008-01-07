@@ -6,21 +6,19 @@
  * Created:         2007-09-25 15:38:08
  ********************************************************************/
 #include "init.h"
-#include <utility/Configuration.h>
+#include <utility/utility.h>
 #include <scheduling/ClockJob.h>
+
 using namespace std;
 
 // Most of this code is a compilation from ClockJob.cpp and main.cpp
 // written by Upi and Niraj.
-int mooseInit(std::string configFile)
+int mooseInit()
 {
-    // Commented out as configuration file is not used now
-    // may put it back later when we have a solid scheme for configuration management
-//    static Configuration conf(configFile);    
 #ifdef CRL_MPI
-	    const Cinfo* c = Cinfo::find( "ParShell" );
+    const Cinfo* c = Cinfo::find( "ParShell" );
 #else
-	    const Cinfo* c = Cinfo::find( "Shell" );
+    const Cinfo* c = Cinfo::find( "Shell" );
 #endif
 
     assert ( c != 0 );
@@ -34,8 +32,7 @@ int mooseInit(std::string configFile)
     assert( ret );
 
 #ifdef USE_MPI
-// 	Element* shell =
-// 			Neutral::create( "Shell", "shell", Element::root() );
+    
 	MPI::Init( argc, argv );
 	unsigned int totalnodes = MPI::COMM_WORLD.Get_size();
 	mynode = MPI::COMM_WORLD.Get_rank();
@@ -71,8 +68,6 @@ int mooseInit(std::string configFile)
     // This one handles the simulation clocks
     Element* cj =
         Neutral::create( "ClockJob", "cj", sched, Id::scratchId() );
-    // TODO: Put the solver creation here
-
     
     Neutral::create( "Neutral", "library", Element::root(), Id::scratchId() );
     Neutral::create( "Neutral", "proto", Element::root(), Id::scratchId() );
@@ -84,18 +79,6 @@ int mooseInit(std::string configFile)
     Neutral::create( "Neutral", "chem", solvers, Id::scratchId() );
     Neutral::create( "Neutral", "neuronal", solvers, Id::scratchId() );
 
-// Configuration file is now skipped to avoid the error message
-// Will be put back if required later                
-//     if ( conf.properties[Configuration::CREATESOLVER].compare("true") == 0 )
-//     {
-//         cout << "Creating solvers...." << endl;
-        
-//         initSolvers(cj);        
-//     }
-//     else 
-//     {
-//         cout << "No solvers created" << endl;
-//     }
     
 #ifdef USE_MPI
 	// This one handles parser and postmaster scheduling.
@@ -113,75 +96,6 @@ int mooseInit(std::string configFile)
     // not allowing user to change the clock settings
     Neutral::create( "Tick", "t0", cj, Id::scratchId() );
     Neutral::create( "Tick", "t1", cj, Id::scratchId() );
-//     Neutral::create( "Tick", "t2", cj );
-//     Neutral::create( "Tick", "t3", cj );
-//     Neutral::create( "Tick", "t4", cj );
-//     Neutral::create( "Tick", "t5", cj );
-//    setupDefaultSchedule(t0,t1,t2,t3,t4,t5,cj); // cannot put here - dt causes failure in SchedTest
 #endif
     return 0;    
-}
-
-// This is insufficient - we have to create the solvers at reset time - see discussion with Niraj and Raamesh
-void initSolvers(Element *clockJob)
-{
-    vector<Id> childList = Neutral::getChildList(clockJob);
-    
-    static const Cinfo* tickCinfo = Cinfo::find( "Tick" );
-    assert ( tickCinfo != 0 );
-    static const Finfo* procFinfo = tickCinfo->findFinfo( "process" );
-    assert ( procFinfo != 0 );
-    static Id ksolvers( "/solvers/chem" );
-    static Id nsolvers( "/solvers/neuronal" );
-    // This is a really dumb first pass on solver assignment,
-    // puts all chem stuff onto a single solver
-	
-    if ( childList.size() != 6 ) // This happens during unit tests.
-        return;
-    // assert( childList.size() == 6 );
-
-    if ( procFinfo->numOutgoing( childList[2]() ) > 0 && 
-         procFinfo->numOutgoing( childList[3]() ) > 0 ) {
-        // Set up kinetic solver
-        Id ksolve( "/solvers/chem/stoich" );
-        if ( !ksolve.bad() ) { // alter existing ksolve
-            set( ksolve(), "scanTicks" );
-        } else { // make a whole new set.
-            Element* ki = Neutral::create( "GslIntegrator", "integ",
-                                           ksolvers(), Id::scratchId() );
-            if ( ki == 0 ) { // GslIntegrator class does not exist
-                cout << "ClockJob::checkSolvers: Warning: GslIntegrator does not exist.\nReverting to Exp Euler method\n";
-                return;
-            }
-            Element* ks = Neutral::create( "Stoich", "stoich", ksolvers(), Id::scratchId() );
-            Element* kh = Neutral::create( "KineticHub", "hub", ksolvers(), Id::scratchId() );
-            ks->findFinfo( "hub" )->add( ks, kh, kh->findFinfo( "hub" ) );
-            ks->findFinfo( "gsl" )->add( ks, ki, ki->findFinfo( "gsl" ) );
-            set< string >( ki, "method", "rk5" );
-            set< double >( ki, "relativeAccuracy", 1.0e-5 );
-            set< double >( ki, "absoluteAccuracy", 1.0e-5 );
-            set( ks, "scanTicks" );
-            childList[4]()->findFinfo( "process" )->add( 
-                childList[4](), ki, ki->findFinfo( "process" ) );
-        }
-    }
-    
-    // Similar stuff here for hsolver.
-    // childList[0] is clock tick 0
-    if ( procFinfo->numOutgoing( childList[0]() ) > 0 ) {
-        // Set up neuronal solver
-        Id nsolve( "/solvers/neuronal/integ" );
-        if ( !nsolve.bad() )
-        { // alter existing nsolve
-            set( nsolve(), "scanTicks" );
-        }
-        else
-        { // make a whole new set.
-            Element* ni = Neutral::create( "HSolve", "integ",
-                                           nsolvers(), Id::scratchId() );
-            set( ni, "scanTicks" );
- 
-            childList[4]()->findFinfo( "process" )->add( childList[4](), ni, ni->findFinfo( "process" ) );
-        }
-    }
 }
