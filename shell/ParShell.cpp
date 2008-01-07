@@ -38,6 +38,15 @@ const Cinfo* initParShellCinfo()
 		// Then send out the cwe info
 		new SrcFinfo( "cweSrc", Ftype1< Id >::global() ),
 
+		// doing pushe: pushing current element onto stack and using
+		// argument for new cwe. It sends back the cweSrc.
+		new DestFinfo( "pushe", Ftype1< Id >::global(),
+						RFCAST( &Shell::pushe ) ),
+		// Doing pope: popping element off stack onto cwe. 
+		// It sends back the cweSrc.
+		new DestFinfo( "pope", Ftype0::global(), 
+						RFCAST( &Shell::pope ) ),
+
 		// Getting a list of child ids: First handle a request with
 		// the requested parent elm id.
 		new DestFinfo( "trigLe", Ftype1< Id >::global(), 
@@ -62,6 +71,9 @@ const Cinfo* initParShellCinfo()
 		new DestFinfo( "planarweight",
 				Ftype2< string, double >::global(),
 				RFCAST( &ParShell::planarweight ) ),
+		new DestFinfo( "getSynCount",
+				Ftype1< Id >::global(),
+				RFCAST( &Shell::getSynCount2 ) ),
 		// The create func returns the id of the created object.
 		new SrcFinfo( "createSrc", Ftype1< Id >::global() ),
 		// Deleting an object
@@ -149,8 +161,9 @@ const Cinfo* initParShellCinfo()
 		////////////////////////////////////////////////////////////
 		// Cell reader
 		////////////////////////////////////////////////////////////
+		// Args are: file cellpath globalParms
 		new DestFinfo( "readcell",
-			Ftype2< string, string >::global(), 
+			Ftype3< string, string, vector< double > >::global(), 
 					RFCAST( &Shell::readCell ) ),
 		////////////////////////////////////////////////////////////
 		// Channel setup functions
@@ -316,6 +329,7 @@ const Cinfo* initParShellCinfo()
 		new SharedFinfo( "slave", slaveShared,
 				sizeof( slaveShared ) / sizeof( Finfo* ) ), 
 	};
+
 
 
 	static Cinfo shellCinfo(

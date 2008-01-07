@@ -35,6 +35,10 @@ const Cinfo* initParGenesisParserCinfo()
 		// Then receive the cwe info
 		new DestFinfo( "recvCwe", Ftype1< Id >::global(),
 					RFCAST( &GenesisParserWrapper::recvCwe ) ),
+		// Setting pushe. This returns with the new cwe.
+		new SrcFinfo( "pushe", Ftype1< Id >::global() ),
+		// Doing pope. This returns with the new cwe.
+		new SrcFinfo( "pope", Ftype0::global() ),
 
 		// Getting a list of child ids: First send a request with
 		// the requested parent elm id.
@@ -58,6 +62,7 @@ const Cinfo* initParGenesisParserCinfo()
 		new SrcFinfo( "planarconnect", Ftype3< string, string, double >::global() ),
 		new SrcFinfo( "planardelay", Ftype2< string, double >::global() ),
 		new SrcFinfo( "planarweight", Ftype2< string, double >::global() ),
+		new SrcFinfo( "getSynCount", Ftype1< Id >::global() ),
 		new DestFinfo( "recvCreate",
 					Ftype1< Id >::global(),
 					RFCAST( &GenesisParserWrapper::recvCreate ) ),
@@ -132,7 +137,8 @@ const Cinfo* initParGenesisParserCinfo()
 		///////////////////////////////////////////////////////////////
 		// Cell reader: filename cellpath
 		///////////////////////////////////////////////////////////////
-		new SrcFinfo( "readcell", Ftype2< string, string >::global() ),
+		new SrcFinfo( "readcell", Ftype3< string, string, 
+			vector< double > >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// Channel setup functions
@@ -204,6 +210,7 @@ const Cinfo* initParGenesisParserCinfo()
 		new SrcFinfo( "echo", Ftype1< string>::global() ),
 
 	};
+
 
 	static Cinfo genesisParserCinfo(
 		"ParGenesisParser",
