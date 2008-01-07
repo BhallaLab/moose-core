@@ -18,7 +18,6 @@
 #include <mpi.h>
 #endif
 
-int mooseInit(std::string configFile);
-
+int mooseInit();
 
 #endif
