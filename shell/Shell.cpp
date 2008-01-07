@@ -829,15 +829,17 @@ void Shell::planarconnect(const Conn& c, string source, string dest, double prob
 	simpleWildcardFind( dest, dst_list );
 	for(size_t i = 0; i < src_list.size(); i++) {
 		if (src_list[i]->className() != "SpikeGen" ){
-			/*error! The source element must be SpikeGen*/
+			cout << "The source element must be SpikeGen" << endl;
+			return;
 		}
 		for(size_t j = 0; j < dst_list.size(); j++) {
 			//cout << src_list[i]->id().path() << " " << dst_list[i]->id().path() << endl;
 			if (dst_list[j]->className() != "SynChan"){
-				/*error! Thes dest element must be SynChan*/
+				cout <<  "The dest element must be SynChan" << endl;
+				return;
 			}
 			if ((rand()%100)/100.0 <= probability){
-				//cout << i+1 << " " << j+1 << endl;
+//				cout << i+1 << " " << j+1 << endl;
 				src_list[i]->findFinfo("event")->add(src_list[i], dst_list[j], dst_list[j]->findFinfo("synapse"));
 			}
 		}
