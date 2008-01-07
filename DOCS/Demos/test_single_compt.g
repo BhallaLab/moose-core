@@ -52,12 +52,12 @@ setfield /axon/soma inject {INJECT}
 step 0.050 -t
 setfield /Vm0 print "axon0.plot"
 
-setfield /axon/soma/Na_mit_usb/xGate/A print "Na_xa.plot"
-setfield /axon/soma/Na_mit_usb/xGate/B print "Na_xb.plot"
-setfield /axon/soma/Na_mit_usb/yGate/A print "Na_ya.plot"
-setfield /axon/soma/Na_mit_usb/yGate/B print "Na_yb.plot"
+setfield /library/Na_mit_usb/xGate/A print "Na_xa.plot"
+setfield /library/Na_mit_usb/xGate/B print "Na_xb.plot"
+setfield /library/Na_mit_usb/yGate/A print "Na_ya.plot"
+setfield /library/Na_mit_usb/yGate/B print "Na_yb.plot"
 
-setfield /axon/soma/K_mit_usb/xGate/A print "K_xa.plot"
-setfield /axon/soma/K_mit_usb/xGate/B print "K_xb.plot"
-setfield /axon/soma/K_mit_usb/yGate/A print "K_ya.plot"
-setfield /axon/soma/K_mit_usb/yGate/B print "K_yb.plot"
+setfield /library/K_mit_usb/xGate/A print "K_xa.plot"
+setfield /library/K_mit_usb/xGate/B print "K_xb.plot"
+setfield /library/K_mit_usb/yGate/A print "K_ya.plot"
+setfield /library/K_mit_usb/yGate/B print "K_yb.plot"

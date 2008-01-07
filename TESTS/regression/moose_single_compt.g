@@ -1,11 +1,13 @@
+// genesis
 //moose
 // This simulation tests readcell formation of a compartmental model
-// of an axon.
+// of an axon. Works both with MOOSE and GENESIS.
 
-float SIMDT = 1e-5
+float SIMDT = 2e-6
 float PLOTDT = 1e-4
-float RUNTIME = 0.05
+float RUNTIME = 0.02
 float INJECT = 1e-9
+float EREST_ACT = -0.065
 
 // settab2const sets a range of entries in a tabgate table to a constant
 function settab2const(gate, table, imin, imax, value)
@@ -28,6 +30,7 @@ include bulbchan.g
 
 create neutral /library
 create compartment /library/compartment
+setfield /library/compartment initVm -0.065 Vm -0.065 Em -0.065
 
 ce /library
 make_K_mit_usb
@@ -35,9 +38,13 @@ make_Na_mit_usb
 ce /
 
 readcell soma.p /axon
+// A concession to compatibility with MOOSE
+if ( {exists /axon method } )
+	setfield /axon method ee
+end
 
 create table /Vm0
-call /Vm0 TABCREATE {RUNTIME / PLOTDT} 0 {RUNTIME}
+call /Vm0 TABCREATE {1 + RUNTIME / PLOTDT} 0 {RUNTIME}
 setfield /Vm0 step_mode 3
 addmsg /axon/soma /Vm0 INPUT Vm
 
@@ -51,6 +58,11 @@ useclock /Vm0 2
 
 reset
 setfield /axon/soma inject {INJECT}
-step {RUNTIME} -t
+step {RUNTIME + SIMDT} -t
 
-tab2file axon0.plot /Vm0 table
+openfile "test.plot" a
+writefile "test.plot" "/newplot"
+writefile "test.plot" "/plotname Vm"
+closefile "test.plot"
+tab2file test.plot /Vm0 table
+quit
