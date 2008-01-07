@@ -13,6 +13,7 @@
 #include "Shell.h"
 #include "ReadCell.h"
 #include "../element/Neutral.h"
+#include "../utility/utility.h"
 
 // Following headers are required for accessing static Cinfo initializers.
 // Alternatively, one could use non-static Cinfo's below.
@@ -131,7 +132,15 @@ Element* ReadCell::start( const string& cellpath )
 
 void ReadCell::read( const string& filename, const string& cellpath )
 {
+        PathUtility pathUtil(Property::getProperty(Property::SIMPATH));
+    
 	ifstream fin( filename.c_str() );
+        for (unsigned int i = 0; i < pathUtil.size() && !fin.is_open(); ++i )
+        {
+            string path = pathUtil.makeFilePath(filename, i);            
+            fin.open( path.c_str());
+        }
+        
 	cell_ = start( cellpath );
 	if ( !cell_ ) return;
 	currCell_ = cell_;
