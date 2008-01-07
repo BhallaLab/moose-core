@@ -5,14 +5,16 @@ CFLAGS += -I..
 TARGET = utility.o
 
 OBJ = \
-	Configuration.o \
+	ArgParser.o	\
+	PathUtility.o	\
 	StringUtil.o	\
-	PropertyReader.o \
+	Property.o	\
 
 HEADERS = \
-	PropertyReader.h	\
+	ArgParser.h	\
+	PathUtility.h	\
+	Property.h	\
 	StringUtil.h	\
-	Configuration.h	\
 	utility.h
 
 default: $(TARGET)
@@ -20,8 +22,11 @@ default: $(TARGET)
 .cpp.o:
 	$(CXX) $(CFLAGS)  $< -c
 
-$(TARGET): $(OBJ) $(HEADERS)
+$(TARGET): $(OBJ) $(HEADERS) randgen
 	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
 
+randgen:
+	@(echo cd randnum; cd randnum; $(MAKE); cd ..)
 clean:
+	@(echo cd randnum; cd randnum; $(MAKE) clean; cd ..)
 	-rm -f *.o $(TARGET) core core.*

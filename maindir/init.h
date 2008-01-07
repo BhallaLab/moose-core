@@ -20,12 +20,5 @@
 
 int mooseInit(std::string configFile);
 
-void setupDefaultSchedule(
-    Element* t0, Element* t1, 
-    Element* t2, Element* t3, 
-    Element* t4, Element* t5,
-    Element* cj);
-
-void initSolvers(Element *clockJob);
 
 #endif
