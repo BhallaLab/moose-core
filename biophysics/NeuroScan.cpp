@@ -9,7 +9,11 @@
 
 #include "moose.h"
 #include "../element/Neutral.h"
-#include "HSolveStructure.h"
+#include "SpikeGen.h"
+#include <queue>
+#include "SynInfo.h"
+#include "HSolveStruct.h"
+#include "SynChan.h"
 #include "NeuroHub.h"
 #include "NeuroScanBase.h"
 #include "NeuroScan.h"
@@ -25,7 +29,9 @@ const Cinfo* initNeuroScanCinfo()
 			Ftype1< vector< Element* >* >::global() ),
 		new SrcFinfo( "channel",
 			Ftype1< vector< Element* >* >::global() ),
-		new SrcFinfo( "gate",
+		new SrcFinfo( "spikegen",
+			Ftype1< vector< Element* >* >::global() ),
+		new SrcFinfo( "synchan",
 			Ftype1< vector< Element* >* >::global() ),
 	};
 	
@@ -97,8 +103,10 @@ static const unsigned int hubCompartmentSlot =
 	initNeuroScanCinfo()->getSlotIndex( "hub.compartment" );
 static const unsigned int hubChannelSlot =
 	initNeuroScanCinfo()->getSlotIndex( "hub.channel" );
-static const unsigned int hubGateSlot =
-	initNeuroScanCinfo()->getSlotIndex( "hub.gate" );
+static const unsigned int hubSpikegenSlot =
+	initNeuroScanCinfo()->getSlotIndex( "hub.spikegen" );
+static const unsigned int hubSynchanSlot =
+	initNeuroScanCinfo()->getSlotIndex( "hub.synchan" );
 static const unsigned int gateVmSlot =
 	initNeuroScanCinfo()->getSlotIndex( "gate.Vm" );
 static const unsigned int gateSlot =
@@ -197,10 +205,18 @@ void NeuroScan::innerReadModelFunc( Element* e, Element* seed, double dt  )
 		scanElm_, hubChannelSlot, &elist );
 	
 	elist.clear();
-	for ( i = gate_.begin(); i != gate_.end(); ++i )
-		elist.push_back( id2e_[ *i ] );
+	vector< SpikeGenStruct >::iterator j;
+	for ( j = spikegen_.begin(); j != spikegen_.end(); ++j )
+		elist.push_back( j->elm_ );
 	send1< const vector< Element* >* >(
-		scanElm_, hubGateSlot, &elist );
+		scanElm_, hubSpikegenSlot, &elist );
+	
+	elist.clear();
+	vector< SynChanStruct >::iterator k;
+	for ( k = synchan_.begin(); k != synchan_.end(); ++k )
+		elist.push_back( k->elm_ );
+	send1< const vector< Element* >* >(
+		scanElm_, hubSynchanSlot, &elist );
 }
 
 void NeuroScan::gateFunc( const Conn& c, double A, double B )
@@ -250,6 +266,37 @@ vector< unsigned int > NeuroScan::gates( unsigned int channel )
 	return logElement( gate, GATE );
 }
 
+unsigned int NeuroScan::presyn( unsigned int compartment )
+{
+	vector< Element* > spikegen;
+	targets( compartment, "VmSrc", spikegen );
+	if ( spikegen.size() > 0 ) {
+		Conn c( spikegen[ 0 ], 0 );
+		ProcInfoBase p;
+		SpikeGen::reinitFunc( c, &p );
+		return logElement( spikegen, SPIKEGEN )[ 0 ];
+	}
+	else
+		return 0;
+}
+
+vector< unsigned int > NeuroScan::postsyn( unsigned int compartment )
+{
+	vector< Element* > synchan;
+	targets( compartment, "channel", synchan );
+	ProcInfoBase p;
+	p.dt_ = dt_;
+	vector< unsigned int > ret = logElement( synchan, SYNCHAN );
+	vector< unsigned int >::iterator isyn;
+	Element* syn;
+	for ( isyn = ret.begin(); isyn != ret.end(); ++isyn ) {
+		syn = id2e_[ *isyn ];
+		Conn c( syn, 0 );
+		SynChan::reinitFunc( c, &p );
+	}
+	return ret;
+}
+
 void NeuroScan::field(
 	unsigned int object,
 	string field,
@@ -272,6 +319,19 @@ void NeuroScan::field(
 	get< double >( id2e_[ object ], field, value );
 }
 
+void NeuroScan::synchanFields(
+	unsigned int synchan,
+	SynChanStruct& scs )
+{
+	Element* e = id2e_[ synchan ];
+	Conn c( e, 0 );
+	ProcInfoBase p;
+	p.dt_ = dt_;
+	
+	SynChan::reinitFunc( c, &p );
+	set< SynChanStruct* >( e, "scan", &scs );
+}
+
 void NeuroScan::rates(
 	unsigned int gate,
 	double Vm, double& A, double& B )
@@ -288,6 +348,10 @@ void NeuroScan::rates(
 	B = B_;
 }
 
+Element* NeuroScan::elm( unsigned int id )
+{
+	return id2e_[ id ];
+}
 ///////////////////////////////////////////////////
 // Utility functions
 ///////////////////////////////////////////////////
@@ -299,6 +363,10 @@ vector< unsigned int > NeuroScan::logElement(
 	for ( unsigned int i = 0; i < el.size(); ++i ) {
 		if ( eclass == GATE )
 			currentXIndex_ = i;
+		if ( eclass == SYNCHAN && type( el[ i ] ) != SYNCHAN )
+			continue;
+		if ( eclass == CHANNEL && type( el[ i ] ) != CHANNEL )
+			continue;
 		id.push_back(
 			logElement( el[ i ], eclass )
 		);
@@ -338,6 +406,16 @@ unsigned int NeuroScan::logElement( Element* el, EClass eclass )
 	}
 	
 	return id;
+}
+
+NeuroScan::EClass NeuroScan::type( Element* e )
+{
+	const Cinfo* cinfo = e->cinfo();
+	if ( cinfo->isA( Cinfo::find( "SynChan" ) ) )
+		return SYNCHAN;
+	if ( cinfo->isA( Cinfo::find( "HHChannel" ) ) )
+		return CHANNEL;
+	return NONE;
 }
 
 void NeuroScan::targets(

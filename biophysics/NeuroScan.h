@@ -16,7 +16,7 @@
 class NeuroScan: public NeuroScanBase
 {
 public:
-	NeuroScan( HSolveStructure& structure )
+	NeuroScan( HSolveStruct& structure )
 	:
 		NeuroScanBase( structure ),
 		hub_( structure )
@@ -29,8 +29,8 @@ public:
 	// To keep compiler happy. Should purge it eventually.
 	NeuroScan()
 	:
-		NeuroScanBase( *(new HSolveStructure()) ),
-		hub_( *(new HSolveStructure()) )
+		NeuroScanBase( *(new HSolveStruct()) ),
+		hub_( *(new HSolveStruct()) )
 	{ ; }
   
 	// Value Field access function definitions.
@@ -61,7 +61,10 @@ private:
 	{
 		COMPARTMENT,
 		CHANNEL,
-		GATE
+		GATE,
+		SPIKEGEN,
+		SYNCHAN,
+		NONE
 	};
 	
 	/** Portal functions.
@@ -73,12 +76,18 @@ private:
 	vector< unsigned int > neighbours( unsigned int compartment );
 	vector< unsigned int > channels( unsigned int compartment );
 	vector< unsigned int > gates( unsigned int channel );
+	unsigned int presyn( unsigned int compartment );
+	vector< unsigned int > postsyn( unsigned int compartment );
 	void field(
 		unsigned int object,
 		string field,
 		double& value );
 	void rates( unsigned int gate,
 		double Vm, double& A, double& B );
+	void synchanFields(
+		unsigned int compartment,
+		SynChanStruct& scs );
+	Element* elm( unsigned int id );
 	
 	unsigned int logElement(
 		Element* el, EClass eclass );
@@ -88,6 +97,7 @@ private:
 		unsigned int id,
 		const string& msg,
 		vector< Element* >& target ) const;
+	EClass type( Element* el );
 	
 	map< Element*, unsigned int > e2id_;
 	vector< Element* > id2e_;
