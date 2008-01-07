@@ -1,0 +1,51 @@
+7 January 2007
+These are the release notes for MOOSE Beta 1.0.0
+
+Websites:
+http://moose.ncbs.res.in
+http://moose.sourceforge.net
+
+What is MOOSE:
+A GENESIS compatible (well, mostly) simulator rewritten from scratch in C++.
+Models everything from single molecule dynamics to large neural networks.
+Runs natively on Linux, Solaris, Mac, (probably other Unices), and Windows.
+Designed for automatic parallelization and Python and XML interfaces.
+
+What to get:
+Binaries for your favourite platform
+(Optional) DOCS tree for documentation and TESTS tree for examples.
+(For the brave) Source tree for building the whole thing on your system.
+
+Why to get it:
+To begin the process of getting your GENESIS models to run on MOOSE.
+To help with building a next-generation simulator.
+
+What the main distro does:
+GENESIS scripting
+Kinetic simulations
+Single-neuron simulations
+Network simulations.
+
+You can see examples in the TESTS/regression and DOCS/Demos directories.
+Hopefully, your GENESIS program will Just Work.
+More likely, you will need to fine-tune a few scripts to work around calls
+	we haven't implemented yet.
+Also likely, you need features we haven't put in. Let us know through bug
+	reports and we'll prioritize.
+Possible, it doesn't work. See above.
+
+What you can play with:
+GSL integration for chemical kinetic models (some 9 numerical methods)
+	This needs you to have GSL libraries installed.
+SMOLDYN interface for single-particle reaction-diffusion kinetic simulations
+	(Thanks, Steven Andrews) This needs SMOLDYN to be installed.
+MPI-based parallel simulations (Thanks, Mayuresh, Parag, and CRL team).
+	This needs MPI to be installed.
+
+What to do when it crashes or if it doesn't do what you need:
+Submit a bug report on SourceForge at 
+http://sourceforge.net/tracker/?group_id=165660&atid=836272
+
+What to do if you want to contribute code:
+Email us!
+bhalla@ncbs.res.in, niraj@ncbs.res.in, subha@ncbs.res.in, raameshd@ncbs.res.in
