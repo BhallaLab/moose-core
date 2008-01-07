@@ -13,7 +13,8 @@
 #define _UTILITY_H
 #include "randnum/randnum.h"
 #include "StringUtil.h"
-#include "PropertyReader.h"
-#include "Configuration.h"
+#include "Property.h"
+#include "PathUtility.h"
+#include "ArgParser.h"
 #include "randnum/NumUtil.h"
 #endif

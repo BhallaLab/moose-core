@@ -23,6 +23,8 @@
 #include <basecode/moose.h>
 #include <element/Neutral.h>
 #include <basecode/IdManager.h>
+#include <utility/utility.h>
+
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
@@ -31,7 +33,7 @@
 #include <mpi.h>
 #endif
 
-extern int mooseInit(std::string confFile);
+extern int mooseInit();
 
 #ifdef DO_UNIT_TESTS
 	extern void testBasecode();
@@ -56,25 +58,6 @@ extern int mooseInit(std::string confFile);
 	extern bool nonBlockingGetLine( string& s );
 #endif
 
-/*
-void setupDefaultSchedule( 
-	Element* t0, Element* t1, 
-	Element* t2, Element* t3, 
-	Element* t4, Element* t5,
-	Element* cj)
-{
-	set< double >( t0, "dt", 1e-5 );
-	set< double >( t1, "dt", 1e-5 );
-	set< int >( t1, "stage", 1 );
-	set< double >( t2, "dt", 5e-3 );
-	set< double >( t3, "dt", 5e-3 );
-	set< int >( t3, "stage", 1 );
-	set< double >( t4, "dt", 5e-3 );
-	set< double >( t5, "dt", 1.0 );
-	set( cj, "resched" );
-	set( cj, "reinit" );
-}
-*/
 void setupDefaultSchedule( 
 	Element* t0, Element* t1, Element* cj)
 {
@@ -88,7 +71,17 @@ void setupDefaultSchedule(
 int main(int argc, char** argv)
 {
 	unsigned int mynode = 0;
-        mooseInit("config.xml");
+        // TODO : check the repurcussions of MPI command line
+        ArgParser::parseArguments(argc, argv);
+        
+        Property::initialize(ArgParser::getConfigFile(),Property::PROP_FORMAT);
+        PathUtility simpathHandler(ArgParser::getSimPath());
+        simpathHandler.addPath(Property::getProperty(Property::SIMPATH)); // merge the SIMPATH from command line and property file
+        Property::setProperty(Property::SIMPATH, simpathHandler.getAllPaths()); // put the updated path list in Property
+        cout << "SIMPATH = " << Property::getProperty(Property::SIMPATH) << endl;
+        
+        mooseInit();
+        
 #ifdef DO_UNIT_TESTS
 	// if ( mynode == 0 )
 	if ( 1 )
@@ -188,20 +181,18 @@ int main(int argc, char** argv)
 #ifdef USE_GENESIS_PARSER
 	if ( mynode == 0 ) {
 		string line = "";
-		if ( argc > 1 ) {
-			int len = strlen( argv[1] );
-			if ( len > 3 && strcmp( argv[1] + len - 2, ".g" ) == 0 )
-				line = "include";
-			else if ( len > 4 && 
-							strcmp( argv[1] + len - 3, ".mu" ) == 0 )
-				line = "include";
-
-			if ( line == "include" ) {
-				for ( int i = 1; i < argc; i++ )
-					line = line + " " + argv[ i ];
-				line.push_back( '\n' );
-			}
-		}
+                vector<string> scriptArgs = ArgParser::getScriptArgs();
+                
+                if ( scriptArgs.size() > 0 )
+                {
+                    line = "include";
+                    for ( unsigned int i = 0; i < scriptArgs.size(); ++i )
+                    {
+                        line = line + " " + scriptArgs[i];
+                    }
+                    line.push_back('\n');
+                }
+                
 		Element* sli = makeGenesisParser();
 		assert( sli != 0 );
 		// Need to do this before the first script is loaded, but
@@ -209,13 +200,7 @@ int main(int argc, char** argv)
                 Id cj("/sched/cj");
                 Id t0("/sched/cj/t0");
                 Id t1("/sched/cj/t1");
-				/*
-                Id t2("/sched/cj/t2");
-                Id t3("/sched/cj/t3");
-                Id t4("/sched/cj/t4");
-                Id t5("/sched/cj/t5");
-		setupDefaultSchedule( t0(), t1(), t2(), t3(), t4(), t5(), cj() );
-				*/
+                
 		setupDefaultSchedule( t0(), t1(), cj() );
 
 		const Finfo* parseFinfo = sli->findFinfo( "parse" );
