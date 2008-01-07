@@ -14,6 +14,9 @@ ce /cell/soma
 create SynChan syn
 // addmsg ./channel syn/channel
 
+addmsg . syn VOLTAGE Vm
+addmsg syn . CHANNEL Gk Ek
+
 ce /
 
 showmsg /cell/soma

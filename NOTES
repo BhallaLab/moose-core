@@ -5488,4 +5488,29 @@ in the output of the moose and genesis synchans.
 There may still be remaining issues with the messaging in synchans reported
 by Niraj, but this is a first pass regression test for synchans.
 
+I think I have found the source of the problem. Turns out to be a nasty one:
+a problem with message management. When we have a new message with a 
+different recvfunc, it is assigned to a linked msgsrc at the end of the 
+msgsrc vector. Then the conn is inserted, but updates happen only after the
+linked msgsrc, even though the intervening older msgsrcs may now refer
+to conns before the linked one. Hence the error.
+Can't do updates based on conn indices. Have to do updates based on 
+src sequence, starting from originating src and not its linked entries.
+Need to pass extra info in to do so.
+
+Implemented and this seems to work partway. It passes the obvious messaging
+unit tests but croaks when we get to scheduling. Possibly has issues with
+creation and removal of messages, which is done a lot in scheduling.
+See dropConn in MsgSrc.h. Should be a MsgSrc.cpp. But it doesn't seem likely,
+see calling function SimpleElement.cpp:525: deleteHalfConn.
+
 ==============================================================================
+7 Jan 2007
+
+The attempt to fix the shared messaging/synchan bug was spiralling into
+a tangle because of the way the shared messaging is implemented. This really
+awaits the proposed messaging cleanup. In the meantime, checked in the
+earler attempt as a branch named /moose/branches/moose_synchan_bug
+at revision 341. Then reverted back. Then did a minor fix to the ordering
+of the finfos that should patch over the problem till the true fix is done.
+
