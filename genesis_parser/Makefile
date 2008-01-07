@@ -19,6 +19,7 @@
 #
 
 TARGET = SLI.o
+CFLAGS += -I..
 
 ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 OBJ = \
@@ -47,6 +48,7 @@ HEADERS = \
 	../basecode/header.h \
 	../basecode/Conn.h \
 	../basecode/Element.h \
+	../utility/utility.h	\
 
 default: $(TARGET)
 

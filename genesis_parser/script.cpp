@@ -7,8 +7,8 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-// #include "ss_func_ext.h"
-// #include "shell_ext.h"
+
+#include "utility/utility.h"
 
 #include "script.h"
 
@@ -107,35 +107,6 @@ void SetScript(char* ptr, FILE* fp, int argc, char** argv, short type)
 }
 #endif
 
-/*
-// Now defined in tp.cpp
-void myFlexLexer::AddScript(
-	char* ptr, FILE* fp, int argc, char** argv, short type)
-{
-    if ((type == FILE_TYPE && fp == NULL)
-	|| (type == STR_TYPE && ptr == NULL)) {
-	return;
-    }
-
-    if (script_ptr+1 < MAXSCRIPTS) {
-	script_ptr++;
-	script[script_ptr].ptr = ptr;
-	script[script_ptr].file = fp;
-	script[script_ptr].current = ptr;
-	script[script_ptr].type = type;
-	script[script_ptr].argc = argc;
-	script[script_ptr].argv = CopyArgv(argc,argv);
-	script[script_ptr].line = 0;
-    } else {
-	// Error();
-	printf("file script stack overflow\n");
-    }
-#ifdef NEW
-    if(argc > 0)
-	PushLocalVars(argc,argv,NULL);
-#endif
-}
-*/
 
 #if 0
 char* TopLevelNamedScriptFileName()
@@ -205,29 +176,6 @@ FILE *NextScriptFp()
     }
 }
 #endif
-
-/*
-// Moved to tp.cpp
-Script *NextScript()
-{
-    if (script_ptr > 0) {
-	if (script[script_ptr].type == FILE_TYPE){
-	    fclose(script[script_ptr].file);
-	} else {
-	    script[script_ptr].current = script[script_ptr].ptr;
-	}
-#ifdef NEW
-	if (script[script_ptr].argc > 0) {
-	    PopLocalVars();
-	}
-#endif
-	FreeArgv(script[script_ptr].argc, script[script_ptr].argv);
-	return(&(script[--script_ptr]));
-    } else {
-	return(NULL);
-    }
-}
-*/
 
 #if 0
 ClearScriptStack()
@@ -373,52 +321,38 @@ size_t len;
 ** current directory
 */
 FILE *SearchForScript(char* name, char* mode)
-{
-char prefix[300];
-char *prefixptr;
-char *path;
-FILE *fp;
-
+{    
+    FILE *fp;
+    
+    
     if(name == NULL) return(NULL);
-    path = getenv("SIMPATH");
+
+    PathUtility pathHandler(Property::getProperty(Property::SIMPATH));
+    
     fp = NULL;
-    /*
-    ** if there is no search path defined or it is an absolute
-    ** or relative path then dont search
-    */
-    if((path == NULL) || (strchr(name, '/') != NULL)){
-	/*
+
+    if ( strchr(name, '/') != NULL )
+    {
+        /*
 	** just look it up in current directory
 	*/
-	fp = OpenScriptFile(name,mode);
-    } else {
-	/*
-	** follow the paths in order trying to find the file
-	*/
-	while(fp == NULL && path != NULL && *path != '\0'){
-	    /*
-	    ** skip white space
-	    */
-	    while(IsWhiteSpace(*path) && *path != '\0') path++;
-	    /*
-	    ** copy the path up to a space
-	    */
-	    prefixptr = prefix;
-	    while(!IsWhiteSpace(*path) && *path != '\0') {
-		*prefixptr++ = *path++;
-	    }
-	    *prefixptr = '\0';
-	    /*
-	    ** now try to open the file
-	    */
-	    if(prefix[0] != '\0'){
-		strcat(prefix,"/");
-		strcat(prefix,name);
-		fp = OpenScriptFile(prefix,mode);
-	    }
-	}
+	fp = OpenScriptFile(name, mode);
     }
-    return(fp);
+    else
+    {
+        for( unsigned int i = 0; i < pathHandler.size(); ++i )
+        {
+            string path = pathHandler.makeFilePath(string(name), i);
+            char pathBuffer[300]; // this arbitrary and likely to cause problem 
+            strncpy(pathBuffer, path.c_str(), 300);
+            fp = OpenScriptFile(pathBuffer, mode);
+            if (fp != NULL )
+            {
+                break;                
+            }            
+        }
+    }
+    return fp;    
 }
 
 #if 0
@@ -520,21 +454,6 @@ FILE	*pfile;
     }
 }
 #endif
-
-/*
-// Moved to tp.cpp
-int IncludeScript(int argc, char** argv)
-{
-FILE	*pfile;
-
-    if((pfile = SearchForScript(argv[0],"r")) != NULL){
-	AddScript((char *)NULL, pfile, argc, argv, FILE_TYPE);
-	return(1);
-    } else {
-	return(0);
-    }
-}
-*/
 
 int IsInclude(char* s)
 {
