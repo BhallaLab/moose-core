@@ -60,4 +60,9 @@ foreach i ( Ca_hip_traub91 K2_mit_usb KA_bsg_yka Ka_hip_traub91 Kahp_hip_traub91
 	$NEARDIFF channelplots/moose_$i.plot test_$i.plot 5.0e-2 -f
 end
 
+/bin/rm -f test.plot
+$MOOSE moose_synapse_solve.g > /dev/null
+echo -n "solver|readcell|synchan..."
+$NEARDIFF moose_synapse_solve.plot test.plot 1.0e-3
+
 /bin/rm -f test_*.plot
