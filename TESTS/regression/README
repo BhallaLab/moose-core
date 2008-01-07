@@ -27,5 +27,8 @@ The current regression tests are:
 	This family of ion channels should cover many kinds that GENESIS users
 	would like to implement.
 	There is also a list of the channels that do NOT work.
+6. A 2 cell model with a single synapse in between.
+	Uses hsolve
+	Uses readcell
 
 =============================================================================
