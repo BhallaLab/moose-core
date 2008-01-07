@@ -23,6 +23,7 @@ OBJ = \
 	ParSpikeGen.o	\
 	SynChan.o	\
 	ParSynChan.o	\
+	HSolveStruct.o	\
 	HSolveBase.o	\
 	HSolve.o \
 	NeuroScanBase.o \
