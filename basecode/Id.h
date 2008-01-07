@@ -21,7 +21,7 @@ class Id
 	// This access is needed so that main can assign the nodes to
 	// the manager.
 	friend int main( int argc, char** argv );
-        friend int mooseInit(std::string confFile);
+        friend int mooseInit();
         
     
     
