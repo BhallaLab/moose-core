@@ -181,6 +181,12 @@ const Cinfo* initCompartmentCinfo()
 			reinterpret_cast< RecvFunc >( &Compartment::setZ )
 		),
 
+	///////////////////////////////////////////////////////
+	// MsgSrc definitions
+	///////////////////////////////////////////////////////
+		// Sends out the membrane potential. Used for SpikeGen.
+		new SrcFinfo( "VmSrc", Ftype1< double >::global() ),
+
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfo definitions
 	//////////////////////////////////////////////////////////////////
@@ -192,12 +198,12 @@ const Cinfo* initCompartmentCinfo()
 		new SharedFinfo( "init", initShared,
 			sizeof( initShared ) / sizeof( Finfo* ) ),
 		*/
-		new SharedFinfo( "channel", channelShared,
-			sizeof( channelShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "axial", axialShared,
 			sizeof( axialShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "raxial", raxialShared,
 			sizeof( raxialShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "channel", channelShared,
+			sizeof( channelShared ) / sizeof( Finfo* ) ),
 		/*
 		new SharedFinfo( "process", processTypes, 2 ),
 		new SharedFinfo( "init", initTypes, 2 ),
@@ -205,12 +211,6 @@ const Cinfo* initCompartmentCinfo()
 		new SharedFinfo( "axial", axialTypes, 2 ),
 		new SharedFinfo( "raxial", raxialTypes, 2 ),
 		*/
-
-	///////////////////////////////////////////////////////
-	// MsgSrc definitions
-	///////////////////////////////////////////////////////
-		// Sends out the membrane potential. Used for SpikeGen.
-		new SrcFinfo( "VmSrc", Ftype1< double >::global() ),
 
 	//////////////////////////////////////////////////////////////////
 	// DestFinfo definitions
