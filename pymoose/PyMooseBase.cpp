@@ -148,8 +148,8 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseB
 */
 PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fileName)
 {
-    ReadCell reader;
-    reader.read(fileName, path);
+    //ReadCell reader;
+    //reader.read(fileName, path);
     id_ = context_->pathToId(path, false);
 }
 
