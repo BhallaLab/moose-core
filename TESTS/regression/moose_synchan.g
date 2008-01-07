@@ -18,6 +18,7 @@ create compartment compt
 setfield compt Rm 1e9
 setfield compt Cm 1e-11
 setfield compt Em -0.065
+setfield compt initVm -0.06
 copy /compt /incompt
 
 create synchan compt/syn
