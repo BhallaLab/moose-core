@@ -969,6 +969,12 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 			sliFieldNameConvert().find( className + "." + field );
 		if ( iter != sliFieldNameConvert().end() ) 
 			field = iter->second;
+		//hack for synapse[i].weight type of fields
+		if (field.substr(0, 8) == "synapse["){
+			size_t pos = field.find(']');
+			if (pos != string::npos)
+				field = field.substr(pos+2) + '[' + field.substr(8, pos - 8) + ']';
+		}
 		string value = argv[ i+1 ];
 		if ( field.substr( 0, 12 ) == "table->table" ) { // regular table
 			field = field.substr( 7 ); // snip off the initial table->
@@ -2796,8 +2802,13 @@ planarconnect / dest-path -relative -sourcemask box -1 -1 1 1 -destmask box 1 1 
 	string source, dest;
 	source = argv[1];
 	dest = argv[2];
+	double probability = 0;
+	for (int i = 3; i < argc; i++ ){
+		if (strcmp(argv[i], "-probability") == 0 && (argc != i+1))
+			probability = atof(argv[i+1]);
+	}
 	//Shell::planarconnect(conn, source, dest, probability)
-	send3<string, string, double>(s(), planarconnectSlot, source, dest, 0.5);
+	send3<string, string, double>(s(), planarconnectSlot, source, dest, probability);
 	//GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >( e->data() );
 	//return gpw->doPlanarConnect( argc, argv, s );
 	
