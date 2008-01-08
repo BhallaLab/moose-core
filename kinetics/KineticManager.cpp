@@ -356,6 +356,8 @@ void KineticManager::innerSetMethod( Element* e, string value )
 // Returns the solver set up for GSL integration, on the element e
 Id gslSetup( Element* e, const string& method )
 {
+	if ( Cinfo::find( "GslIntegrator" ) == 0 ) // No GSL defined
+		return Id();
 	Id solveId;
 	if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" ) ) {
 		if ( solveId.good() ) {
@@ -410,6 +412,8 @@ Id gillespieSetup( Element* e, const string& method )
 // Returns the solver set up for GSL integration, on the element e
 Id smoldynSetup( Element* e, const string& method, double recommendedDt )
 {
+	if ( Cinfo::find( "SmoldynHub" ) == 0 ) // No Smoldyn defined
+		return Id();
 	Id solveId;
 	if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" ) ) {
 		if ( solveId.good() ) {
@@ -450,20 +454,32 @@ Id smoldynSetup( Element* e, const string& method, double recommendedDt )
 
 void KineticManager::setupSolver( Element* e )
 {
-	if ( method_ == "ee" ) {
-		Id solveId;
+
+	Id solveId;
+	if ( method_ == "ee" ) { // Handle default and fallback case.
 		if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" )){
 			if ( solveId.good() ) {
 				set( solveId(), "destroy" );
 			}
 		}
-	} else if ( stochastic_ == 0 && multiscale_ == 0 ) {
+		return;
+	} 
+
+	if ( stochastic_ == 0 && multiscale_ == 0 ) {
 		// Use a GSL deterministic method.
-		Id solveId = gslSetup( e, method_ );
+		solveId = gslSetup( e, method_ );
 	} else if ( stochastic_ == 1 && multiscale_ == 0 && singleParticle_ == 0 ) {
-		Id solveId = gillespieSetup( e, method_ );
+		solveId = gillespieSetup( e, method_ );
 	} else if ( stochastic_ == 1 && multiscale_ == 0 && singleParticle_ == 1 ) {
-		Id solveId = smoldynSetup( e, method_, recommendedDt_ );
+		solveId = smoldynSetup( e, method_, recommendedDt_ );
+	} 
+
+	// method failed.
+	if ( !solveId.good() ) {
+		cout << "Warning: Unable to set up method " << method_ << 
+			". Using Exp Euler (ee)\n";
+		method_ = "ee";
+		setupSolver( e );
 	}
 }
 
@@ -641,9 +657,27 @@ double KineticManager::findEnzSubPropensity( Element* e ) const
 	assert( e->cinfo()->isA( eCinfo ) );
 
 	bool ret;
-	double prop;
-	ret = get< double >( e, "k1", prop );
+	bool mode;
+	ret = get< bool >( e, "mode", mode );
 	assert( ret );
+
+	double prop;
+
+	if ( mode ) { // An MM enzyme, implicit form.
+		// Here we compute it as rate / nmin.
+		double Km;
+		double k3;
+		ret = get< double >( e, "Km", Km );
+		assert( ret );
+		ret = get< double >( e, "k3", k3 );
+		assert( ret );
+		assert( Km > 0 );
+		prop = k3 / Km;
+	} else {
+		ret = get< double >( e, "k1", prop );
+		assert( ret );
+	}
+
 	double min = 1.0e10;
 	double mval;
 
@@ -657,6 +691,10 @@ double KineticManager::findEnzSubPropensity( Element* e ) const
 	assert( list2.size() == 1 );
 	list.insert( list.end(), list2.begin(), list2.end() );
 
+	// This is a little fishy for the MM case, because we don't take
+	// the (Km + sub) term into account properly for the denominator.
+	// The outcome of this is therefore more stringent than it needs
+	// to be.
 	for( i = list.begin(); i != list.end(); i++ ) {
 		Element* m = i->targetElement();
 		assert( m->cinfo()->isA( mCinfo ) );
@@ -688,6 +726,12 @@ double KineticManager::findEnzPrdPropensity( Element* e ) const
 	assert( e->cinfo()->isA( eCinfo ) );
 
 	bool ret;
+	bool mode;
+	ret = get< bool >( e, "mode", mode );
+	assert( ret );
+	if ( mode ) // MM enzyme, so don't use this term at all
+		return 0.0;
+
 	double k2;
 	double k3;
 	ret = get< double >( e, "k2", k2 );
