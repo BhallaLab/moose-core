@@ -850,7 +850,17 @@ void GenesisParserWrapper::doAdd(
 
 		Id src( argv[1] );
 		Id dest( argv[2] );
-		
+		if ( src.bad() ) {
+	 		cout << "Error in doAdd: " << argv[1]
+			     << " does not exist." << endl;
+			return;
+		}
+		if ( dest.bad() ) {
+	 		cout << "Error in doAdd: " << argv[2]
+			     << " does not exist." << endl;
+			return;
+		}
+
 		if ( msgType == "CHANNEL Gk Ek" && src()->className() == "SynChan" && dest()->className() == "Mg_block" )
 			msgType = src()->className() + "." + dest()->className() + "." + msgType;
 		if ( msgType == "SPIKE" && src()->className() == "SpikeGen" )
