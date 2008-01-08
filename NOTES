@@ -5527,3 +5527,10 @@ KineticHandler.
 The release is done!!!!
 Fixed the non-GSL version for kinetic simulations. This turned up issues
 with the timestep calculation. Improved but not perfect.
+
+Checked in as revision 364 with unit test compile flags on, Smoldyn off.
+
+Fixed bug# 1866549 which was a problem with copy onto objects when using
+an absolute path. Put it into unit tests.
+
+==============================================================================
