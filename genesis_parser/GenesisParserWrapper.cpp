@@ -1545,7 +1545,7 @@ bool parseCopyMove( int argc, const char** const argv, Id s,
 			pa = Id( argv[2] );
 			if ( pa.bad() ) { // Possibly we are renaming it too.
 				string pastr = argv[2];
-				if ( pastr.find( "/" ) == 0 ) {
+				if ( pastr.find( "/" ) == string::npos ) {
 					pastr = "/";
 				} else {
 					pastr = Shell::head( argv[2], "/" );
@@ -3692,6 +3692,20 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "pwe", "/ " );
 	gpAssert( "pushe /foobarzod", "Error - cannot change to '/foobarzod' " );
 	gpAssert( "pwe", "/ " );
+
+	// Checking copy syntax
+	gpAssert( "create neutral /a", "" );
+	gpAssert( "create neutral /a/b", "" );
+	gpAssert( "create neutral /c", "" );
+	gpAssert( "copy /a/b /c/d", "" );
+	gpAssert( "le /c", "d " );
+	gpAssert( "copy /a/b /c/d", "" );
+	gpAssert( "le /c", "d " );
+	gpAssert( "le /c/d", "b " );
+	gpAssert( "copy /a/b c", "" );
+	gpAssert( "le /c", "d b " );
+	gpAssert( "delete /a", "" );
+	
 	cout << "\n";
 }
 #endif
