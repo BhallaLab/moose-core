@@ -5518,3 +5518,12 @@ Checked in as revision 342 with unit test compile flags on, Smoldyn off.
 
 Some cleanup of demos and regression tests.
 Checked in as revision 346 with unit test compile flags on, Smoldyn off.
+
+The kholodenko model dumps core when run without GSL. Issues with 
+KineticHandler.
+
+==============================================================================
+8 Jan 2007
+The release is done!!!!
+Fixed the non-GSL version for kinetic simulations. This turned up issues
+with the timestep calculation. Improved but not perfect.
