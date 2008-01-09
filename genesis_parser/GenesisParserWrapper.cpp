@@ -3705,6 +3705,7 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "copy /a/b c", "" );
 	gpAssert( "le /c", "d b " );
 	gpAssert( "delete /a", "" );
+	gpAssert( "delete /c", "" );
 	
 	cout << "\n";
 }
