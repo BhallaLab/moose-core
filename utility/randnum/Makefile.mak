@@ -1,4 +1,4 @@
-LOCAL_DIR := utility/randnum
+LOCAL_DIR := utility$/randnum
 LOCAL_SRCS := \
 	mt19937ar.cpp	\
 	Binomial.cpp	\
@@ -29,12 +29,12 @@ LOCAL_HEADERS := \
 	BinomialRng.h	\
 	ExponentialRng.h	\
 	GammaRng.h	\
-# 	../../basecode/header.h	\
-# 	../../basecode/Element.h	\
-# 	../../basecode/Conn.h	\
+# 	..$/..$/basecode$/header.h	\
+# 	..$/..$/basecode$/Element.h	\
+# 	..$/..$/basecode$/Conn.h	\
 
 LOCAL_OBJS := $(subst .cpp,.o, $(LOCAL_SRCS))
 
-SOURCES += $(addprefix $(LOCAL_DIR)/, $(LOCAL_SRCS))
+SOURCES += $(addprefix $(LOCAL_DIR)$/, $(LOCAL_SRCS))
 
-HEADERS += $(addprefix $(LOCAL_DIR)/, $(LOCAL_HEADERS))
+HEADERS += $(addprefix $(LOCAL_DIR)$/, $(LOCAL_HEADERS))
