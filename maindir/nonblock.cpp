@@ -2,13 +2,14 @@
 #include <string>
 #include <vector>
 #include<stdio.h>
+using namespace std;
+
+#ifdef UNIX
+
 #include<termios.h>
 #include<unistd.h>
 #include<sys/select.h>
 #include<sys/time.h>
-
-using namespace std;
-
 //kbhit, Non-blocking keypress detector, when go keypress, return 1 else always return 0
 int kbhit()
 {
@@ -68,3 +69,15 @@ bool nonBlockingGetLine( string& s )
 	}
 	return 0;
 }
+#else 
+bool nonBlockingGetLine( string& s )
+{
+	// static vector< string > history;
+	// static unsigned int historyIndex = 0;
+	static char line[400];	
+	fgets( line, 399, stdin );
+	s = line;
+		// history.push_back( s );
+	return 1;
+}
+#endif

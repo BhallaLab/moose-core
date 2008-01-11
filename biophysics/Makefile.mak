@@ -1,4 +1,4 @@
-#/**********************************************************************
+#$/**********************************************************************
 #** This program is part of 'MOOSE', the
 #** Messaging Object Oriented Simulation Environment,
 #** also known as GENESIS 3 base code.
@@ -6,7 +6,7 @@
 #** It is made available under the terms of the
 #** GNU General Public License version 2
 #** See the file COPYING.LIB for the full notice.
-#**********************************************************************/
+#**********************************************************************$/
 
 LOCAL_DIR := biophysics
 
@@ -31,12 +31,12 @@ LOCAL_SRCS := \
 	BinSynchan.cpp	\
 	StochSynchan.cpp	
 
-$(LOCAL_DIR)/Compartment.o: $(LOCAL_DIR)/Compartment.h basecode/Ftype2.h
-$(LOCAL_DIR)/SymCompartment.o: $(LOCAL_DIR)/Compartment.h $(LOCAL_DIR)/SymCompartment.h basecode/Ftype2.h
-$(LOCAL_DIR)/HHChannel.o: $(LOCAL_DIR)/HHChannel.h basecode/Ftype2.h basecode/Ftype3.h
-$(LOCAL_DIR)/Mg_block.o: $(LOCAL_DIR)/Mg_block.h basecode/Ftype2.h basecode/Ftype3.h
-$(LOCAL_DIR)/HHGate.o: $(LOCAL_DIR)/HHGate.h builtins/Interpol.h
-$(LOCAL_DIR)/BinSynInfo.h: utility/randnum/BinomialRng.h
+$(LOCAL_DIR)$/Compartment.o: $(LOCAL_DIR)$/Compartment.h basecode$/Ftype2.h
+$(LOCAL_DIR)$/SymCompartment.o: $(LOCAL_DIR)$/Compartment.h $(LOCAL_DIR)$/SymCompartment.h basecode$/Ftype2.h
+$(LOCAL_DIR)$/HHChannel.o: $(LOCAL_DIR)$/HHChannel.h basecode$/Ftype2.h basecode$/Ftype3.h
+$(LOCAL_DIR)$/Mg_block.o: $(LOCAL_DIR)$/Mg_block.h basecode$/Ftype2.h basecode$/Ftype3.h
+$(LOCAL_DIR)$/HHGate.o: $(LOCAL_DIR)$/HHGate.h builtins$/Interpol.h
+$(LOCAL_DIR)$/BinSynInfo.h: utility$/randnum$/BinomialRng.h
 
 LOCAL_HEADERS := 	\
 	Compartment.h	\
@@ -59,7 +59,7 @@ LOCAL_HEADERS := 	\
 	StochSynchan.h	
 
 
-SOURCES += $(addprefix $(LOCAL_DIR)/, $(LOCAL_SRCS))
+SOURCES += $(addprefix $(LOCAL_DIR)$/, $(LOCAL_SRCS))
 
-HEADERS += $(addprefix $(LOCAL_DIR)/, $(LOCAL_HEADERS))
+HEADERS += $(addprefix $(LOCAL_DIR)$/, $(LOCAL_HEADERS))
 
