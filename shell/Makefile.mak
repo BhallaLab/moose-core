@@ -1,4 +1,4 @@
-#/**********************************************************************
+#$/**********************************************************************
 #** This program is part of 'MOOSE', the
 #** Messaging Object Oriented Simulation Environment,
 #** also known as GENESIS 3 base code.
@@ -6,7 +6,7 @@
 #** It is made available under the terms of the
 #** GNU General Public License version 2
 #** See the file COPYING.LIB for the full notice.
-#**********************************************************************/
+#**********************************************************************$/
 #
 # Here we do extra dependencies to get SWIG to compile. The
 # final stage of compilation and assorted flags are to be set
@@ -26,6 +26,6 @@ LOCAL_HEADERS :=  \
 	ReadCell.h \
 	SimDump.h \
 
-SOURCES += $(addprefix $(LOCAL_DIR)/, $(LOCAL_SRCS))
+SOURCES += $(addprefix $(LOCAL_DIR)$/, $(LOCAL_SRCS))
 
-HEADERS += $(addprefix $(LOCAL_DIR)/, $(LOCAL_HEADERS))
+HEADERS += $(addprefix $(LOCAL_DIR)$/, $(LOCAL_HEADERS))
