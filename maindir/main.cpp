@@ -54,7 +54,7 @@ extern int mooseInit();
 
 #ifdef USE_GENESIS_PARSER
 	extern Element* makeGenesisParser( );
-	extern void nonblock( int state );
+//	extern void nonblock( int state );
 	extern bool nonBlockingGetLine( string& s );
 #endif
 
