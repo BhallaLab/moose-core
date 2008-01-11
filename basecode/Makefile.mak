@@ -72,6 +72,6 @@ LOCAL_HEADERS := \
 	FunctionData.h \
 	Class.h	\
 
-SOURCES += $(addprefix $(LOCAL_DIR)/, $(LOCAL_SRCS))
+SOURCES += $(addprefix $(LOCAL_DIR)$/, $(LOCAL_SRCS))
 
-HEADERS += $(addprefix $(LOCAL_DIR)/, $(LOCAL_HEADERS))
+HEADERS += $(addprefix $(LOCAL_DIR)$/, $(LOCAL_HEADERS))
