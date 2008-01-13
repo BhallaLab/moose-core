@@ -16,7 +16,83 @@
 #include <math.h>
 #include "KineticManager.h"
 
-map< string, MethodInfo > KineticManager::methodMap_;
+static map< string, MethodInfo >& methodMap()
+{
+	static map< string, MethodInfo > methodMap_;
+
+	return methodMap_;
+}
+
+
+static map< string, MethodInfo >& fillMethodMap()
+{
+ // static void addMethod( name, description,
+ // 					isStochastic,isSpatial, 
+ // 					isVariableDt, isImplicit,
+ //						isSingleParticle, isMultiscale );
+	KineticManager::addMethod( "ee", 
+		"GENESIS Exponential Euler method.",
+		0, 0, 0, 0, 0, 0 );
+	KineticManager::addMethod( "rk2", 
+		"Runge Kutta 2, 3 from GSL",
+		0, 0, 0, 0, 0, 0 );
+	KineticManager::addMethod( "rk4", 
+		"Runge Kutta 4th order (classical) from GSL",
+		0, 0, 0, 0, 0, 0 );
+	KineticManager::addMethod( "rk5", 
+		"Embedded Runge-Kutta-Fehlberg (4, 5) method, variable timestep. Default kinetic method from GSL",
+		0, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "rkck", 
+		"Embedded Runge-Kutta Cash-Karp (4, 5) from GSL",
+		0, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "rk8pd", 
+		"Embedded Runge-Kutta Prince-Dormand (8,9) from GSL",
+		0, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "rk2imp", 
+		"Implicit 2nd order Runge-Kutta at Gaussian points from GSL",
+		0, 0, 1, 1, 0, 0 );
+	KineticManager::addMethod( "rk4imp", 
+		"Implicit 4nd order Runge-Kutta at Gaussian points from GSL",
+		0, 0, 1, 1, 0, 0 );
+	KineticManager::addMethod( "bsimp", 
+		"Implicit Bulirsch-Stoer method of Bader and Deuflhard: Not yet implemented as it needs the Jacobian. From GSL",
+		0, 0, 1, 1, 0, 0 );
+	KineticManager::addMethod( "gear1", 
+		"Implicit M = 1 Gear method. From GSL",
+		0, 0, 1, 1, 0, 0 );
+	KineticManager::addMethod( "gear2", 
+		"Implicit M = 2 Gear method. From GSL",
+		0, 0, 1, 1, 0, 0 );
+	KineticManager::addMethod( "Gillespie1", 
+		"Optimized Direct Reaction Method of Gillespie",
+		1, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "Gillespie2", 
+		"Optimized Next Reaction Method of Gillespie",
+		1, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "Gibson-Bruck", 
+		"Gibson-Bruck optimzed version of Gillespie's next reaction method",
+		1, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "tau_leap", 
+		"Gillespie's tau-leap method",
+		1, 0, 1, 0, 0, 0 );
+	KineticManager::addMethod( "adstoch", 
+		"Explicit adaptive stochastic method of Vasudeva and Bhalla",
+		1, 0, 1, 0, 0, 1 );
+	KineticManager::addMethod( "smoldyn", 
+		"Smoldyn numerical engine for single particle stochastic calculations using Smoluchowski dynamics, from Andrews and Bray",
+		1, 1, 0, 0, 1, 0 );
+	KineticManager::addMethod( "Smoldyn", 
+		"Smoldyn numerical engine for single particle stochastic calculations using Smoluchowski dynamics, from Andrews and Bray",
+		1, 1, 0, 0, 1, 0 );
+	KineticManager::addMethod( "Elf3d", 
+		"Elf-Ehrenberg spatial Gillespie (square grid) method",
+		1, 1, 0, 0, 0, 0 );
+	KineticManager::addMethod( "Wils", 
+		"Wils spatial Gillespie (finite element grid) method",
+		1, 1, 0, 0, 0, 0 );
+
+	return methodMap();
+}
 
 const Cinfo* initKineticManagerCinfo()
 {
@@ -123,71 +199,8 @@ const Cinfo* initKineticManagerCinfo()
 			schedInfo, 1
 	);
 
- // static void addMethod( name, description,
- // 					isStochastic,isSpatial, 
- // 					isVariableDt, isImplicit,
- //						isSingleParticle, isMultiscale );
-
-	KineticManager::addMethod( "ee", 
-		"GENESIS Exponential Euler method.",
-		0, 0, 0, 0, 0, 0 );
-	KineticManager::addMethod( "rk2", 
-		"Runge Kutta 2, 3 from GSL",
-		0, 0, 0, 0, 0, 0 );
-	KineticManager::addMethod( "rk4", 
-		"Runge Kutta 4th order (classical) from GSL",
-		0, 0, 0, 0, 0, 0 );
-	KineticManager::addMethod( "rk5", 
-		"Embedded Runge-Kutta-Fehlberg (4, 5) method, variable timestep. Default kinetic method from GSL",
-		0, 0, 1, 0, 0, 0 );
-	KineticManager::addMethod( "rkck", 
-		"Embedded Runge-Kutta Cash-Karp (4, 5) from GSL",
-		0, 0, 1, 0, 0, 0 );
-	KineticManager::addMethod( "rk8pd", 
-		"Embedded Runge-Kutta Prince-Dormand (8,9) from GSL",
-		0, 0, 1, 0, 0, 0 );
-	KineticManager::addMethod( "rk2imp", 
-		"Implicit 2nd order Runge-Kutta at Gaussian points from GSL",
-		0, 0, 1, 1, 0, 0 );
-	KineticManager::addMethod( "rk4imp", 
-		"Implicit 4nd order Runge-Kutta at Gaussian points from GSL",
-		0, 0, 1, 1, 0, 0 );
-	KineticManager::addMethod( "bsimp", 
-		"Implicit Bulirsch-Stoer method of Bader and Deuflhard: Not yet implemented as it needs the Jacobian. From GSL",
-		0, 0, 1, 1, 0, 0 );
-	KineticManager::addMethod( "gear1", 
-		"Implicit M = 1 Gear method. From GSL",
-		0, 0, 1, 1, 0, 0 );
-	KineticManager::addMethod( "gear2", 
-		"Implicit M = 2 Gear method. From GSL",
-		0, 0, 1, 1, 0, 0 );
-	KineticManager::addMethod( "Gillespie1", 
-		"Optimized Direct Reaction Method of Gillespie",
-		1, 0, 1, 0, 0, 0 );
-	KineticManager::addMethod( "Gillespie2", 
-		"Optimized Next Reaction Method of Gillespie",
-		1, 0, 1, 0, 0, 0 );
-	KineticManager::addMethod( "Gibson-Bruck", 
-		"Gibson-Bruck optimzed version of Gillespie's next reaction method",
-		1, 0, 1, 0, 0, 0 );
-	KineticManager::addMethod( "tau_leap", 
-		"Gillespie's tau-leap method",
-		1, 0, 1, 0, 0, 0 );
-	KineticManager::addMethod( "adstoch", 
-		"Explicit adaptive stochastic method of Vasudeva and Bhalla",
-		1, 0, 1, 0, 0, 1 );
-	KineticManager::addMethod( "smoldyn", 
-		"Smoldyn numerical engine for single particle stochastic calculations using Smoluchowski dynamics, from Andrews and Bray",
-		1, 1, 0, 0, 1, 0 );
-	KineticManager::addMethod( "Smoldyn", 
-		"Smoldyn numerical engine for single particle stochastic calculations using Smoluchowski dynamics, from Andrews and Bray",
-		1, 1, 0, 0, 1, 0 );
-	KineticManager::addMethod( "Elf3d", 
-		"Elf-Ehrenberg spatial Gillespie (square grid) method",
-		1, 1, 0, 0, 0, 0 );
-	KineticManager::addMethod( "Wils", 
-		"Wils spatial Gillespie (finite element grid) method",
-		1, 1, 0, 0, 0, 0 );
+	static map< string, MethodInfo >& methodMap = fillMethodMap();
+	methodMap.size(); // dummy function to keep compiler happy.
 
 	return &kineticManagerCinfo;
 }
@@ -233,7 +246,7 @@ void KineticManager::addMethod( const string& name,
 	mi.isImplicit = isImplicit;
 	mi.isSingleParticle = isSingleParticle;
 	mi.isMultiscale = isMultiscale;
-	methodMap_[name] = mi;
+	methodMap()[name] = mi;
 }
 
 
@@ -329,8 +342,8 @@ double KineticManager::getEulerError( const Element* e )
 
 void KineticManager::innerSetMethod( Element* e, string value )
 {
-	map< string, MethodInfo >::iterator i = methodMap_.find( value );
-	if ( i != methodMap_.end() ) {
+	map< string, MethodInfo >::iterator i = methodMap().find( value );
+	if ( i != methodMap().end() ) {
 		method_ = value;
 		stochastic_ = i->second.isStochastic;
 		spatial_ = i->second.isSpatial;
@@ -601,7 +614,6 @@ void KineticManager::processFunc( const Conn& c, ProcInfo info )
 double KineticManager::findReacPropensity( Element* e, bool isPrd ) const
 {
 	static const Cinfo* rCinfo = Cinfo::find( "Reaction" );
-	static const Cinfo* mCinfo = Cinfo::find( "Molecule" );
 	static const Finfo* substrateFinfo = rCinfo->findFinfo( "sub" );
 	static const Finfo* productFinfo = rCinfo->findFinfo( "prd" );
 
@@ -649,7 +661,6 @@ double KineticManager::findReacPropensity( Element* e, bool isPrd ) const
 double KineticManager::findEnzSubPropensity( Element* e ) const
 {
 	static const Cinfo* eCinfo = Cinfo::find( "Enzyme" );
-	static const Cinfo* mCinfo = Cinfo::find( "Molecule" );
 	static const Finfo* substrateFinfo = eCinfo->findFinfo( "sub" );
 	static const Finfo* enzymeFinfo = eCinfo->findFinfo( "enz" );
 	static const Finfo* intramolFinfo = eCinfo->findFinfo( "intramol" );
@@ -722,7 +733,6 @@ double KineticManager::findEnzSubPropensity( Element* e ) const
 
 double KineticManager::findEnzPrdPropensity( Element* e ) const
 {
-	static const Cinfo* eCinfo = Cinfo::find( "Enzyme" );
 	assert( e->cinfo()->isA( eCinfo ) );
 
 	bool ret;
