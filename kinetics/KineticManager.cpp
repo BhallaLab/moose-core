@@ -8,7 +8,6 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-
 #include "moose.h"
 #include "setgetLookup.h"
 #include "../element/Neutral.h"
@@ -16,15 +15,15 @@
 #include <math.h>
 #include "KineticManager.h"
 
-static map< string, MethodInfo >& methodMap()
+static map< string, KMethodInfo >& methodMap()
 {
-	static map< string, MethodInfo > methodMap_;
+	static map< string, KMethodInfo > methodMap_;
 
 	return methodMap_;
 }
 
 
-static map< string, MethodInfo >& fillMethodMap()
+static map< string, KMethodInfo >& fillMethodMap()
 {
  // static void addMethod( name, description,
  // 					isStochastic,isSpatial, 
@@ -134,32 +133,32 @@ const Cinfo* initKineticManagerCinfo()
 		new ValueFinfo( "variableDt", 
 			ValueFtype1< bool >::global(),
 			GFCAST( &KineticManager::getVariableDt ), 
-			dummyFunc
+			&dummyFunc
 		),
 		new ValueFinfo( "singleParticle", 
 			ValueFtype1< bool >::global(),
 			GFCAST( &KineticManager::getSingleParticle ), 
-			dummyFunc
+			&dummyFunc
 		),
 		new ValueFinfo( "multiscale", 
 			ValueFtype1< bool >::global(),
 			GFCAST( &KineticManager::getMultiscale ), 
-			dummyFunc
+			&dummyFunc
 		),
 		new ValueFinfo( "implicit", 
 			ValueFtype1< bool >::global(),
 			GFCAST( &KineticManager::getImplicit ), 
-			dummyFunc
+			&dummyFunc
 		),
 		new ValueFinfo( "description", 
 			ValueFtype1< string >::global(),
 			GFCAST( &KineticManager::getDescription ), 
-			dummyFunc
+			&dummyFunc
 		),
 		new ValueFinfo( "recommendedDt", 
 			ValueFtype1< double >::global(),
 			GFCAST( &KineticManager::getRecommendedDt ), 
-			dummyFunc
+			&dummyFunc
 		),
 		new ValueFinfo( "eulerError", 
 			ValueFtype1< double >::global(),
@@ -199,11 +198,12 @@ const Cinfo* initKineticManagerCinfo()
 			schedInfo, 1
 	);
 
-	static map< string, MethodInfo >& methodMap = fillMethodMap();
-	methodMap.size(); // dummy function to keep compiler happy.
+	// methodMap.size(); // dummy function to keep compiler happy.
 
 	return &kineticManagerCinfo;
 }
+
+static map< string, KMethodInfo >& extMethodMap = fillMethodMap();
 
 static const Cinfo* kineticManagerCinfo = initKineticManagerCinfo();
 
@@ -232,21 +232,25 @@ KineticManager::KineticManager()
 		;
 }
 
-void KineticManager::addMethod( const string& name,
-	const string& description,
+void KineticManager::addMethod( const char* name,
+	const char* description,
 	bool isStochastic,
 	bool isSpatial, bool isVariableDt, bool isImplicit,
 	bool isSingleParticle, bool isMultiscale )
 {
-	MethodInfo mi;
-	mi.description = description;
+	KMethodInfo mi( isStochastic, isSpatial, isVariableDt, isImplicit,
+		isSingleParticle, isMultiscale, string( description ) );
+	/*
 	mi.isStochastic = isStochastic;
 	mi.isSpatial = isSpatial;
 	mi.isVariableDt = isVariableDt;
 	mi.isImplicit = isImplicit;
 	mi.isSingleParticle = isSingleParticle;
 	mi.isMultiscale = isMultiscale;
-	methodMap()[name] = mi;
+	mi.description = description;
+	*/
+	string temp( name );
+	methodMap()[temp] = mi;
 }
 
 
@@ -342,7 +346,7 @@ double KineticManager::getEulerError( const Element* e )
 
 void KineticManager::innerSetMethod( Element* e, string value )
 {
-	map< string, MethodInfo >::iterator i = methodMap().find( value );
+	map< string, KMethodInfo >::iterator i = methodMap().find( value );
 	if ( i != methodMap().end() ) {
 		method_ = value;
 		stochastic_ = i->second.isStochastic;
@@ -638,7 +642,7 @@ double KineticManager::findReacPropensity( Element* e, bool isPrd ) const
 
 	for( i = list.begin(); i != list.end(); i++ ) {
 		Element* m = i->targetElement();
-		assert( m->cinfo()->isA( mCinfo ) );
+		assert( m->cinfo()->isA( Cinfo::find( "Molecule" ) ) );
 		ret = get< double >( m, "nInit", mval );
 		// should really be 'n' but there is a problem with initialization
 		// of the S_ array if we want to be able to do on-the-fly solver
@@ -708,7 +712,7 @@ double KineticManager::findEnzSubPropensity( Element* e ) const
 	// to be.
 	for( i = list.begin(); i != list.end(); i++ ) {
 		Element* m = i->targetElement();
-		assert( m->cinfo()->isA( mCinfo ) );
+		assert( m->cinfo()->isA( Cinfo::find( "Molecule" ) ) );
 		ret = get< double >( m, "nInit", mval );
 		assert( ret );
 		prop *= mval;
@@ -719,7 +723,7 @@ double KineticManager::findEnzSubPropensity( Element* e ) const
 	intramolFinfo->incomingConns( e, list );
 	for( i = list.begin(); i != list.end(); i++ ) {
 		Element* m = i->targetElement();
-		assert( m->cinfo()->isA( mCinfo ) );
+		assert( m->cinfo()->isA( Cinfo::find( "Molecule" ) ) );
 		ret = get< double >( m, "nInit", mval );
 		assert( ret );
 		if ( mval > 0.0 )
@@ -733,7 +737,7 @@ double KineticManager::findEnzSubPropensity( Element* e ) const
 
 double KineticManager::findEnzPrdPropensity( Element* e ) const
 {
-	assert( e->cinfo()->isA( eCinfo ) );
+	assert( e->cinfo()->isA( Cinfo::find( "Enzyme" ) ) );
 
 	bool ret;
 	bool mode;
