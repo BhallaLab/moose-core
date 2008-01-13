@@ -5559,4 +5559,12 @@ remains, causing it to fail on two of the tests. The GSL is not compiled in,
 causing failure with the kholodenko test. Anyway, I'll check in the current
 fixes.
 
+Checked in as revision 374 with unit test compile flags off, Smoldyn off, O3.
+
+Fixed copy bug. This fixes all but the moose_kholodenko.g regression test,
+which depends on GSL. This is a good version of the O3 binaries.
+
+Compiled with GSL libraries. This clears all the regression tests. This
+too is a good version of the O3 binaries.
+
 ==============================================================================
