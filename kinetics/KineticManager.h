@@ -11,15 +11,29 @@
 #ifndef _KINETIC_MANAGER_H
 #define _KINETIC_MANAGER_H
 
-struct MethodInfo
+class KMethodInfo
 {
-	string description;
-	bool isStochastic;
-	bool isSpatial;
-	bool isVariableDt;
-	bool isImplicit;
-	bool isSingleParticle;
-	bool isMultiscale;
+	public:
+		KMethodInfo()
+		: isStochastic( 0 ), isSpatial( 0 ), isVariableDt( 0 ),
+		isImplicit( 0 ), isSingleParticle( 0 ), isMultiscale( 0 ),
+		description( "" )
+		{;}
+
+		KMethodInfo( bool stoch, bool spat, bool var, bool imp, bool sp, bool ms, const string& desc )
+		: isStochastic( stoch ), isSpatial( spat ), isVariableDt( var ),
+		isImplicit( imp ), isSingleParticle( sp ), isMultiscale( ms ),
+		description( desc )
+		{;}
+
+		~KMethodInfo() {;}
+		bool isStochastic;
+		bool isSpatial;
+		bool isVariableDt;
+		bool isImplicit;
+		bool isSingleParticle;
+		bool isMultiscale;
+		string description;
 	// May need other info here as well
 };
 
@@ -79,8 +93,8 @@ class KineticManager
  // 					isStochastic,isSpatial, 
  // 					isVariableDt, isImplicit,
  //						isSingleParticle, isMultiscale );
-		static void addMethod( const string& name, 
-			const string& description,
+		static void addMethod( const char* name, 
+			const char* description,
 			bool isStochastic, bool isSpatial, 
 			bool isVariableDt, bool isImplicit,
 			bool isSingleParticle, bool isMultiscale );
