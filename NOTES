@@ -5559,12 +5559,23 @@ remains, causing it to fail on two of the tests. The GSL is not compiled in,
 causing failure with the kholodenko test. Anyway, I'll check in the current
 fixes.
 
-Checked in as revision 374 with unit test compile flags off, Smoldyn off, O3.
+Checked in as revision 375 with unit test compile flags off, Smoldyn off, O3.
 
 Fixed copy bug. This fixes all but the moose_kholodenko.g regression test,
 which depends on GSL. This is a good version of the O3 binaries.
 
 Compiled with GSL libraries. This clears all the regression tests. This
 too is a good version of the O3 binaries.
+
+Checked in as revision 376 with unit test compile flags off, Smoldyn off, O3,GSL
+
+Cleaned up the Makefiles a bit. For some reason the GSL libraries were being
+brought in at the main Makefile. They should be done locally unless we have
+multiple GSL dependencies, in which case the flags should be passed in from the
+main Makefile. We'll need to do this systematically at some point.
+
+Recompiled the whole mess back down to -g, no optimization, so as to get 
+back to using unit tests and doing development. This clears unit tests and
+regression tests.
 
 ==============================================================================
