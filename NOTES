@@ -5547,4 +5547,16 @@ Fixed O3 compilation (32 bit version) halfway. Now moose starts up and
 runs OK, but on quitting it dumps core. Something ugly to do with the
 MethodInfo structure, I think it is a gcc or STL bug.
 
+Checked in as revision 374 with unit test compile flags off, Smoldyn off, O3.
+
+Found problem. There is another structure called MethodInfo defined in the
+biophysics/Cell.h file. This seems to be confusing the compiler, which should
+actually have complained about there being two structures with the same
+name. Anyway, the system must have been trying to write the data from one into
+the struct of the other, and stomping on bad memory. Now runs with O3.
+O3 has a mixed bag with the regression tests. The problem with 'copy'
+remains, causing it to fail on two of the tests. The GSL is not compiled in,
+causing failure with the kholodenko test. Anyway, I'll check in the current
+fixes.
+
 ==============================================================================
