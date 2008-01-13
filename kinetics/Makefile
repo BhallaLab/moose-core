@@ -44,7 +44,7 @@ HEADERS = \
 # use it. Should be fine for academic use.
 # Optional: Comment out the following three items if not using GSL
 GSL_OBJ = GslIntegrator.o
-#GSL_LIBS = -lgsl -lgslcblas
+GSL_LIBS = -lgsl -lgslcblas
 GSL_FLAGS = -DUSE_GSL
 
 # Smoldyn, written by Steven Andrews, provides a numerical engine for
