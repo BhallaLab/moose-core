@@ -5533,4 +5533,18 @@ Checked in as revision 364 with unit test compile flags on, Smoldyn off.
 Fixed bug# 1866549 which was a problem with copy onto objects when using
 an absolute path. Put it into unit tests.
 
+Checked in as revision 365 with unit test compile flags on, Smoldyn off.
+
+==============================================================================
+11 Jan 2007.
+Attempting to fix compilation problem with O3 and GSL. Perhaps step down to
+O2. That too fails. So does O. So now trying to compile deugger with -O. 
+Should help us track bug.
+
+==============================================================================
+13 Jan 2007
+Fixed O3 compilation (32 bit version) halfway. Now moose starts up and 
+runs OK, but on quitting it dumps core. Something ugly to do with the
+MethodInfo structure, I think it is a gcc or STL bug.
+
 ==============================================================================
