@@ -98,7 +98,6 @@ class KineticManager
 		bool variableDt_; // Default False
 		bool multiscale_; // Default False
 		bool singleParticle_; // Default False
-		static map< string, MethodInfo > methodMap_;
 		string description_;
 		double recommendedDt_;
 		double eulerError_;
