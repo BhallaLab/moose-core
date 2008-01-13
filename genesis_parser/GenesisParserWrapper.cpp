@@ -1546,7 +1546,7 @@ bool parseCopyMove( int argc, const char** const argv, Id s,
 			if ( pa.bad() ) { // Possibly we are renaming it too.
 				string pastr = argv[2];
 				if ( pastr.find( "/" ) == string::npos ) {
-					pastr = "/";
+					pastr = ".";
 				} else {
 					pastr = Shell::head( argv[2], "/" );
 				}
@@ -3704,6 +3704,12 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "le /c/d", "b " );
 	gpAssert( "copy /a/b c", "" );
 	gpAssert( "le /c", "d b " );
+
+	gpAssert( "ce /a", "" );
+	gpAssert( "le", "b " );
+	gpAssert( "copy b q", "" );
+	gpAssert( "le", "b q " );
+	gpAssert( "ce /", "" );
 	gpAssert( "delete /a", "" );
 	gpAssert( "delete /c", "" );
 	
