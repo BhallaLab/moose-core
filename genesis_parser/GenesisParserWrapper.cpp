@@ -1075,7 +1075,7 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s)
 			}
 			// id = path2eid( tempA, s );
 			id = Id( tempA );
-			if ( id.zero() || id.bad() ) { //creating the gates
+			if ( id.zero() || id.bad() ) { //creating the gates'
 				string name;
 				if ( string( argv[3] ) == "X" ) {
 					name = "xGate";
@@ -1084,11 +1084,20 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s)
 				} else if ( string( argv[3] ) == "Z" ) {
 					name = "zGate";
 				}
-				send3< string, string, Id >( s(),
-				createSlot, "HHGate", name, Id(path) );
+				vector < Id > el;
+				el.push_back(Id(path));
+				send3< vector< Id >, string, string >( s(),
+						setVecFieldSlot, el, string(argv[3]) + "power", "1.0" );
+// 				set<double> (Id(path)(), "Xpower", 1.0);
+// 				send3< string, string, Id >( s(),
+// 				createSlot, "HHGate", name, Id(path) );
+				
 				id = Id( tempA );
 			}
-			if ( id.zero() || id.bad() ) return 0; //Error msg here
+			if ( id.zero() || id.bad() ){ 
+				cout << "tabCreate::Error" << endl;
+				return 0; //Error msg here
+			}
 			send3< Id, string, string >( s(),
 				setFieldSlot, id, "xdivs", argv[4] );
 			send3< Id, string, string >( s(),
@@ -1097,7 +1106,10 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s)
 				setFieldSlot, id, "xmax", argv[6] );
 			// id = path2eid( tempB, s );
 			id = Id( tempB );
-			if ( id.zero() || id.bad() ) return 0; //Error msg here
+			if ( id.zero() || id.bad() ){ 
+				cout << "tabCreate::Error" << endl;
+				return 0; //Error msg here
+			}
 			send3< Id, string, string >( s(),
 				setFieldSlot, id, "xdivs", argv[4] );
 			send3< Id, string, string >( s(),
