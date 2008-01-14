@@ -11,6 +11,14 @@
 #ifndef _SIMPLE_ELEMENT_H
 #define _SIMPLE_ELEMENT_H
 
+#include <string>
+#include "Cinfo.h"
+#include "Conn.h"
+#include "RecvFunc.h"
+#include "MsgSrc.h"
+#include "MsgDest.h"
+using namespace std;
+
 /**
  * The SimpleElement class implements Element functionality in the
  * most common vanilla way. It manages a set of vectors and pointers

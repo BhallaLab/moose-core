@@ -10,6 +10,11 @@
 #ifndef _VALUE_FINFO_H
 #define _VALUE_FINFO_H
 
+#include "Ftype.h"
+#include "Finfo.h"
+#include "Element.h"
+#include "RecvFunc.h"
+
 /**
  * Finfo for handling data fields that are accessed through get/set
  * functions. Such fields are atomic, that is, they cannot be the

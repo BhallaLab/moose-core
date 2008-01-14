@@ -9,6 +9,8 @@
 
 #ifndef _ID_MANAGER_H
 #define _ID_MANAGER_H
+#include <vector>
+#include "Id.h"
 
 class Element;
 
@@ -52,7 +54,7 @@ class IdManager
 
 		void setNodes( unsigned int myNode, unsigned int numNodes );
 
-		void setPostMasters( vector< Element* >& post );
+                void setPostMasters( std::vector< Element* >& post );
 
 		//////////////////////////////////////////////////////////////////
 		// Id creation
@@ -164,9 +166,9 @@ class IdManager
 		 * Keep track of assigned load on each node
 		 * This is the job only of the master node.
 		 */
-		vector< NodeLoad > nodeLoad;
-		vector< Element* > elementList_;
-		vector< Element* > post_;
+                std::vector< NodeLoad > nodeLoad;
+                std::vector< Element* > elementList_;
+                std::vector< Element* > post_;
 
 		/**
 		 * This keeps track of the # of scratch ids. Only on slave nodes.
