@@ -9,6 +9,9 @@
 **********************************************************************/
 #ifndef _FINFO_H
 #define _FINFO_H
+#include <vector>
+#include "Ftype.h"
+using namespace std;
 
 /**
  * Virtual base class for field info.

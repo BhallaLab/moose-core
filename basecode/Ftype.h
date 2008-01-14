@@ -10,6 +10,13 @@
 #ifndef _FTYPE_H
 #define _FTYPE_H
 #include <map>
+#include <string>
+#include <iostream>
+#include "RecvFunc.h"
+using namespace std;
+class Conn;
+class Finfo;
+
 /*
 enum FinfoIdentifier { VALUE_SET, VALUE_TRIG, 
 		ARRAY_SET, ARRAY_TRIG, 
