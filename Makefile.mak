@@ -2,11 +2,12 @@
 #/:=$(strip \) #  this for Windows and comment out the line line for unix below
 / := / # this is for unix - comment out for windows
 
-SUBDIRS := basecode utility utility$/randnum element builtins biophysics kinetics scheduling shell genesis_parser maindir
+SUBDIRS := basecode utility utility$(/)randnum element builtins biophysics kinetics scheduling shell genesis_parser maindir
 
-CXX = g++
-LD = ld
-
+#CXX = g++
+CXX = cl
+#LD = ld
+LD = link
 OBJDIR=bin
 
 SOURCES :=
@@ -14,37 +15,37 @@ HEADERS :=
 OBJECTS = $(subst .cpp,.o,$(SOURCES))
 DEPENDENCIES = $(subst .cpp,.d,$(SOURCES))
 EXTRA_CLEAN := 
-INCLUDE_DIRS := . basecode external$/include utility utility$/randnum element builtins biophysics kinetics scheduling shell genesis_parser maindir
+INCLUDE_DIRS := . basecode external$(/)include utility utility$(/)randnum element builtins biophysics kinetics scheduling shell genesis_parser maindir
 
 CXXFLAGS += $(addprefix -I,$(INCLUDE_DIRS)) -DYYMALLOC -DYYFREE -DYYSTYPE_IS_DECLARED -DUSE_GENESIS_PARSER -DWINDOWS
 
 VPATH = $(INCLUDE_DIRS)
 
-#RM := $/bin$/rm -f
+#RM := $(/)bin$(/)rm -f
 ##### INCLUDE SUB-MAKEFILES #########
 all:
 
-include maindir$/Makefile.mak
+include maindir$(/)Makefile.mak
 
-include basecode$/Makefile.mak
+include basecode$(/)Makefile.mak
 
-include utility$/Makefile.mak
+include utility$(/)Makefile.mak
 
-include utility$/randnum$/Makefile.mak
+include utility$(/)randnum$(/)Makefile.mak
 
-include element$/Makefile.mak
+include element$(/)Makefile.mak
 
-include builtins$/Makefile.mak
+include builtins$(/)Makefile.mak
 
-include biophysics$/Makefile.mak
+include biophysics$(/)Makefile.mak
 
-include kinetics$/Makefile.mak
+include kinetics$(/)Makefile.mak
 
-include scheduling$/Makefile.mak
+include scheduling$(/)Makefile.mak
 
-include shell$/Makefile.mak
+include shell$(/)Makefile.mak
 
-include genesis_parser$/Makefile.mak
+include genesis_parser$(/)Makefile.mak
 
 
 
@@ -55,6 +56,9 @@ include genesis_parser$/Makefile.mak
 
 all: moose
 
+%.o: %.cpp
+	$(CXX) -c $(CXXFLAGS) $<
+	
 moose: $(OBJECTS) $(DEPENDENCIES)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS)
 
