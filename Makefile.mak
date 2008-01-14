@@ -1,13 +1,10 @@
-
-#/:=$(strip \) #  this for Windows and comment out the line line for unix below
-/ := / # this is for unix - comment out for windows
+/:=$(strip \)
 
 SUBDIRS := basecode utility utility$(/)randnum element builtins biophysics kinetics scheduling shell genesis_parser maindir
 
-#CXX = g++
-CXX = cl
-#LD = ld
-LD = link
+CXX = g++
+LD = ld
+
 OBJDIR=bin
 
 SOURCES :=
@@ -16,7 +13,6 @@ OBJECTS = $(subst .cpp,.o,$(SOURCES))
 DEPENDENCIES = $(subst .cpp,.d,$(SOURCES))
 EXTRA_CLEAN := 
 INCLUDE_DIRS := . basecode external$(/)include utility utility$(/)randnum element builtins biophysics kinetics scheduling shell genesis_parser maindir
-
 CXXFLAGS += $(addprefix -I,$(INCLUDE_DIRS)) -DYYMALLOC -DYYFREE -DYYSTYPE_IS_DECLARED -DUSE_GENESIS_PARSER -DWINDOWS
 
 VPATH = $(INCLUDE_DIRS)
@@ -56,9 +52,6 @@ include genesis_parser$(/)Makefile.mak
 
 all: moose
 
-%.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $<
-	
 moose: $(OBJECTS) $(DEPENDENCIES)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS)
 
@@ -70,8 +63,10 @@ moose: $(OBJECTS) $(DEPENDENCIES)
 
 clean:
 	$(RM) $(OBJECTS) $(OBJLIBS) $(DEPENDENCIES) $(EXTRA_CLEAN)
-
+	
+ifneq ($(MAKECMDGOALS),clean)
 include $(DEPENDENCIES)
+endif
 
 %.d: %.cpp
 	$(CXX) $(CXXFLAGS) -M $< > $@
