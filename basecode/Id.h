@@ -10,7 +10,13 @@
 #ifndef _ID_H
 #define _ID_H
 
+#include <iostream>
+#include <string>
+
+using namespace std;
+
 class Element;
+class IdManager;
 
 /**
  * This class manages id lookups for elements. Ids provide a uniform
@@ -133,7 +139,7 @@ class Id
 		/**
 		 * Returns a string holding the ascii value of the id_ .
 		 */
-		static string id2str( Id id );
+                static std::string id2str( Id id );
 
 		//////////////////////////////////////////////////////////////
 		//	Here we have a set of status check functions for ids.

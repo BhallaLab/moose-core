@@ -9,7 +9,8 @@
 
 #ifndef _FUNCTION_DATA_H
 #define _FUNCTION_DATA_H
-
+#include "RecvFunc.h"
+#include "Ftype.h"
 class Finfo;
 
 class FunctionData

@@ -9,8 +9,13 @@
 **********************************************************************/
 #ifndef _SRC_FINFO_H
 #define _SRC_FINFO_H
+#include <string>
+#include "Ftype.h"
+#include "Finfo.h"
+#include "Element.h"
+using namespace std;
 
-/**
+/** 
  * Finfo for handling message sources
  */
 class SrcFinfo: public Finfo

@@ -10,7 +10,8 @@
 **********************************************************************/
 #ifndef _CINFO_H
 #define _CINFO_H
-
+#include "Finfo.h"
+#include "Element.h"
 struct SchedInfo
 {
 	const Finfo* finfo;
