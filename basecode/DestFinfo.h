@@ -9,6 +9,12 @@
 **********************************************************************/
 #ifndef _DEST_FINFO_H
 #define _DEST_FINFO_H
+#include <string>
+#include "Ftype.h"
+#include "Finfo.h"
+#include "Element.h"
+
+using namespace std;
 
 /**
  * Finfo for handling message destinations with a single message.

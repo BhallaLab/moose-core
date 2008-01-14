@@ -10,6 +10,9 @@
 
 #ifndef _RecvFunc_h
 #define _RecvFunc_h
+#include <vector>
+class Conn;
+class Element;
 
 typedef void ( *RecvFunc )( const Conn& );
 
@@ -19,7 +22,7 @@ typedef double ( *GetFunc )( const Element* );
 
 #define GFCAST(x) reinterpret_cast< GetFunc >( x )
 
-typedef vector< RecvFunc > FuncList;
+typedef std::vector < RecvFunc > FuncList;
 
 void dummyFunc( const Conn& c );
 

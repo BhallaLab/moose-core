@@ -10,6 +10,10 @@
 
 #ifndef _SEND_H
 #define _SEND_H
+#include <vector>
+#include "Element.h"
+#include "SimpleElement.h"
+#include "Conn.h"
 
 /**
  * This function sends zero-argument messages.

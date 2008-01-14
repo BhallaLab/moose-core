@@ -9,6 +9,7 @@
 **********************************************************************/
 #ifndef _CONN_H
 #define _CONN_H
+class Element;
 
 /**
  * This definition is used to indicate that a conn is a dummy one.

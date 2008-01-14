@@ -9,7 +9,8 @@
 **********************************************************************/
 #ifndef _LOOKUP_FINFO_H
 #define _LOOKUP_FINFO_H
-
+#include "RecvFunc.h"
+#include "header.h"
 /**
  * Finfo for handling data fields that are accessed through get/set
  * functions plus an arbitrary type index lookup.
