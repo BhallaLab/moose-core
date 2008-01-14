@@ -11,6 +11,7 @@
 #ifndef _ELEMENT_H
 #define _ELEMENT_H
 
+#include "header.h"
 /**
  * The Element class handles all the MOOSE infrastructure: messages,
  * field information and class information. It manages the actual
@@ -20,6 +21,7 @@
  */
 
 class Cinfo;
+class Id;
 
 class Element
 {

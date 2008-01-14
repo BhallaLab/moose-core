@@ -10,6 +10,12 @@
 
 #ifndef _ARRAY_WRAPPER_ELEMENT_H
 #define _ARRAY_WRAPPER_ELEMENT_H
+#include <string>
+#include <vector>
+#include "Finfo.h"
+#include "Element.h"
+#include "SimpleElement.h"
+
 
 /**
  * The SimpleElement class implements Element functionality in the
