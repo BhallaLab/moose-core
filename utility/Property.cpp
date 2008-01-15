@@ -42,6 +42,7 @@ void Property::initDefaults()
     
     properties_[AUTOSCHEDULE] = "true";
     properties_[CREATESOLVER] = "true";
+    properties_[SIMPATH] = ".";    
     properties_[SIMNOTES] = "notes";
     properties_[DOCPATH] = "doc";
     properties_[HOME] = "~";    
@@ -49,7 +50,7 @@ void Property::initDefaults()
     if (( home != NULL ) && (home[0] != '\0'))
     {
         properties_[SIMPATH] = "." + PathUtility::PATH_SEPARATOR + string(home);
-    }    
+    }
 }
 
 string Property::getProperty(string key)
