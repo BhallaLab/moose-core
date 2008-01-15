@@ -15,6 +15,16 @@ using namespace std;
 // written by Upi and Niraj.
 int mooseInit()
 {
+    static bool initialized = false;
+    if(initialized)
+    {
+        return 0;
+    }
+    else
+    {
+        initialized = true;
+    }
+    
 #ifdef CRL_MPI
     const Cinfo* c = Cinfo::find( "ParShell" );
 #else
@@ -24,7 +34,7 @@ int mooseInit()
     assert ( c != 0 );
     const Finfo* childSrc = Element::root()->findFinfo( "childSrc" );
     assert ( childSrc != 0 );
-	/// \todo Check if this can be replaced with the Neutral::create
+    	/// \todo Check if this can be replaced with the Neutral::create
     Element* shell = c->create( Id( 1 ), "shell" );
     assert( shell != 0 );
     bool ret = childSrc->add( Element::root(), shell, 
@@ -98,4 +108,14 @@ int mooseInit()
     Neutral::create( "Tick", "t1", cj, Id::scratchId() );
 #endif
     return 0;    
+}
+
+void setupDefaultSchedule( 
+	Element* t0, Element* t1, Element* cj)
+{
+	set< double >( t0, "dt", 1e-2 );
+	set< double >( t1, "dt", 1e-2 );
+	set< int >( t1, "stage", 1 );
+	set( cj, "resched" );
+	set( cj, "reinit" );
 }
