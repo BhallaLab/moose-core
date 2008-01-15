@@ -72,7 +72,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id paren
    with viewing the moose object tree as a unix file system tree, this
    constructor is for you. Just specify a full valid path, and voila,
    your object is there! No need to fool around with the id's. But you
-   need to provide a valid path. Make sure yoyu know it.
+   need to provide a valid path. Make sure you know it.
 
    @param className - name of the class to be actually instantiated.
 
