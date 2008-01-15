@@ -20,4 +20,7 @@
 
 int mooseInit();
 
+void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
+
+
 #endif

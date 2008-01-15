@@ -34,6 +34,7 @@
 #endif
 
 extern int mooseInit();
+extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 
 #ifdef DO_UNIT_TESTS
 	extern void testBasecode();
@@ -58,15 +59,6 @@ extern int mooseInit();
 	extern bool nonBlockingGetLine( string& s );
 #endif
 
-void setupDefaultSchedule( 
-	Element* t0, Element* t1, Element* cj)
-{
-	set< double >( t0, "dt", 1e-2 );
-	set< double >( t1, "dt", 1e-2 );
-	set< int >( t1, "stage", 1 );
-	set( cj, "resched" );
-	set( cj, "reinit" );
-}
 
 int main(int argc, char** argv)
 {
