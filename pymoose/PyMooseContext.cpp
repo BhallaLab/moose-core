@@ -18,7 +18,8 @@
 #include "../maindir/init.h"
 using namespace std;
 
-extern int mooseInit(string configFile);
+extern int mooseInit();
+extern void setupDefaultSchedule(Element*, Element*, Element*);
 
 extern const Cinfo* initShellCinfo();
 extern const Cinfo* initTickCinfo();
@@ -324,37 +325,11 @@ static const unsigned int tabopSlot =
 //////////////////////////
 const string PyMooseContext::separator = "/";
 
-
-// void PyMooseContext::processFunc( const Conn& c )
-// {
-//     PyMooseContext* data =
-// 	static_cast< PyMooseContext* >( c.targetElement()->data() );
-
-//     data->Process();
-// }
-
 char* copyString( const string& s )
 {
     char* ret = ( char* ) calloc ( s.length() + 1, sizeof( char ) );
     strcpy( ret, s.c_str() );
     return ret;
-}
-void setupDefaultSchedule( 
-	Element* t0, Element* t1, 
-	Element* t2, Element* t3, 
-	Element* t4, Element* t5,
-	Element* cj)
-{
-	set< double >( t0, "dt", 1e-5 );
-	set< double >( t1, "dt", 1e-5 );
-	set< int >( t1, "stage", 1 );
-	set< double >( t2, "dt", 5e-3 );
-	set< double >( t3, "dt", 5e-3 );
-	set< int >( t3, "stage", 1 );
-	set< double >( t4, "dt", 5e-3 );
-	set< double >( t5, "dt", 1.0 );
-	set( cj, "resched" );
-	set( cj, "reinit" );
 }
 
 //////////////////////////////////////////////////////////////////
@@ -528,6 +503,16 @@ Id PyMooseContext::getShell()
 */
 PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string shellName)
 {
+    static PyMooseContext* context = 0;
+    
+    
+    if (context)
+    {
+        return context;
+    }
+    
+    Property::initialize("",0); // create default Property map
+       
     static const Cinfo* shellCinfo = initShellCinfo();
     static const Cinfo* tickCinfo = initTickCinfo();
     static const Cinfo* clockJobCinfo = initClockJobCinfo();
@@ -538,11 +523,9 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     Element* shell;
     bool ret;
     // Call the global initialization function
-    mooseInit("config.xml");
+    mooseInit();
     cout << "Trying to find shell with name " << shellName << endl;
     Id shellId(shellName);
-    
-    //lookupGet<Id, string > (Element::root(), "lookupChild", shellId, shellName );
     
     if (shellId.bad() )
     {
@@ -577,23 +560,21 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
 
     assert(ret);
     
-    PyMooseContext* context = static_cast<PyMooseContext*> (contextElement->data() );
+    context = static_cast<PyMooseContext*> (contextElement->data() );
     context->shell_ = shellId;    
     context->myId_ = contextElement->id();
     context->setCwe(Element::root()->id() ); // set initial element = root
-//    context->scheduler_ = Neutral::create( "Neutral", "sched", Element::root() )->id();    
-//    context->clockJob_ = Neutral::create( "ClockJob", "cj", context->scheduler_() )->id();
     lookupGet<Id, string > (Element::root(), "lookupChild", context->scheduler_, "sched" );
     if ( context->scheduler_.bad() )
     {
         cerr << "Scheduler not found" << endl;
     }
     
-    lookupGet<Id, string > (Element::root(), "lookupChild", context->clockJob_, "cj" );
-    Element* cj =  context->clockJob_();
-//     Element* t0 = Neutral::create( "Tick", "t0", cj );
-//     Element* t1 = Neutral::create( "Tick", "t1", cj );
-
+    Element* cj =  Neutral::create( "ClockJob", "/sched/cj/t0", context->scheduler_(), Id::scratchId());
+    Element* t0 = Neutral::create( "Tick", "/sched/cj/t0", cj, Id::scratchId() );
+    Element* t1 = Neutral::create( "Tick", "/sched/cj/t1", cj, Id::scratchId() );
+    setupDefaultSchedule(t0, t1, cj);
+    
     
     return context;        
 }
