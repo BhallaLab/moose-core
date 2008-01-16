@@ -1,6 +1,7 @@
 #ifndef _pymoose_SpikeGen_cpp
 #define _pymoose_SpikeGen_cpp
 #include "SpikeGen.h"
+using namespace pymoose;
 const std::string SpikeGen::className = "SpikeGen";
 SpikeGen::SpikeGen(Id id):PyMooseBase(id){}
 SpikeGen::SpikeGen(std::string path):PyMooseBase(className, path){}

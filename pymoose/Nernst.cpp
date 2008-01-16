@@ -1,6 +1,7 @@
 #ifndef _pymoose_Nernst_cpp
 #define _pymoose_Nernst_cpp
 #include "Nernst.h"
+using namespace pymoose;
 const std::string Nernst::className = "Nernst";
 Nernst::Nernst(Id id):PyMooseBase(id){}
 Nernst::Nernst(std::string path):PyMooseBase(className, path){}

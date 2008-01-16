@@ -1,8 +1,11 @@
 #ifndef _pymoose_Kintegrator_h
 #define _pymoose_Kintegrator_h
 #include "PyMooseBase.h"
-class Kintegrator : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class Kintegrator : public PyMooseBase
+    {
+      public:
         static const std::string className;
         Kintegrator(Id id);
         Kintegrator(std::string path);
@@ -14,8 +17,10 @@ class Kintegrator : public PyMooseBase
         void __set_isInitiatilized(bool isInitiatilized);
 //         string __get_method() const;
 //         void __set_method(string method);
-     std::string imethod() const;
-     std::string imethod(std::string);
+        std::string imethod() const;
+        std::string imethod(std::string);
     
-};
+    };
+}
+
 #endif

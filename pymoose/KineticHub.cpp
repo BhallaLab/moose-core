@@ -1,6 +1,7 @@
 #ifndef _pymoose_KineticHub_cpp
 #define _pymoose_KineticHub_cpp
 #include "KineticHub.h"
+using namespace pymoose;
 const std::string KineticHub::className = "KineticHub";
 KineticHub::KineticHub(Id id):PyMooseBase(id){}
 KineticHub::KineticHub(std::string path):PyMooseBase(className, path){}

@@ -18,6 +18,7 @@
 #ifndef _TESTPYMOOSE_CPP
 #define _TESTPYMOOSE_CPP
 #include "pymoose.h"
+using namespace pymoose;
 
 int main(int argc, char **argv)
 {

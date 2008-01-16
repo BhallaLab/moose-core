@@ -1,6 +1,7 @@
 #ifndef _pymoose_Enzyme_cpp
 #define _pymoose_Enzyme_cpp
 #include "Enzyme.h"
+using namespace pymoose;
 const std::string Enzyme::className = "Enzyme";
 Enzyme::Enzyme(Id id):PyMooseBase(id){}
 Enzyme::Enzyme(std::string path):PyMooseBase(className, path){}

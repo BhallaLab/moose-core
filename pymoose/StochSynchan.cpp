@@ -1,6 +1,7 @@
 #ifndef _pymoose_StochSynchan_cpp
 #define _pymoose_StochSynchan_cpp
 #include "StochSynchan.h"
+using namespace pymoose;
 const std::string StochSynchan::className = "StochSynchan";
 
 const std::string& StochSynchan::getType(){ return className; }

@@ -8,6 +8,9 @@
 #ifndef _TABLEITERATOR_H
 #define _TABLEITERATOR_H
 #include "Interpol.h"
+namespace pymoose
+{
+
     /**
        This class is for allowing iteration over the table in an interpol object
        The swig wrapper should extend it with the help of __next__ method to implement the next() method
@@ -41,4 +44,6 @@
         InterpolationTable *table_;
         int next_;        
     };
+}
+
 #endif

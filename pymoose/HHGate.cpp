@@ -1,6 +1,7 @@
 #ifndef _pymoose_HHGate_cpp
 #define _pymoose_HHGate_cpp
 #include "HHGate.h"
+using namespace pymoose;
 const std::string HHGate::className = "HHGate";
 HHGate::HHGate(Id id):PyMooseBase(id){}
 HHGate::HHGate(std::string path):PyMooseBase(className, path){}

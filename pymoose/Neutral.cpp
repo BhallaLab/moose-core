@@ -1,6 +1,7 @@
 #ifndef _pymoose_Neutral_cpp
 #define _pymoose_Neutral_cpp
 #include "Neutral.h"
+using namespace pymoose;
 const std::string Neutral::className = "Neutral";
 Neutral::Neutral(Id id):PyMooseBase(id){}
 Neutral::Neutral(std::string path):PyMooseBase(className, path){}

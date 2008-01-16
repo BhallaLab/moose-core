@@ -1,11 +1,13 @@
 #ifndef _pymoose_RandGenerator_h
 #define _pymoose_RandGenerator_h
 #include "PyMooseBase.h"
-class RandGenerator : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class RandGenerator : public PyMooseBase
+    {    public:
         static const std::string className;
         RandGenerator(Id id);
-    RandGenerator(string className, std::string path);
+        RandGenerator(string className, std::string path);
         RandGenerator(string className, std::string name, Id parentId);
         RandGenerator(string className, std::string name, PyMooseBase* parent);
 //        ~RandGenerator();
@@ -18,5 +20,7 @@ class RandGenerator : public PyMooseBase
         void __set_variance(double variance);
         double __get_output() const;
         void __set_output(double output);
-};
+    };
+}
+
 #endif

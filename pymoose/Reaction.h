@@ -1,8 +1,10 @@
 #ifndef _pymoose_Reaction_h
 #define _pymoose_Reaction_h
 #include "PyMooseBase.h"
-class Reaction : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class Reaction : public PyMooseBase
+    {    public:
         static const std::string className;
         Reaction(Id id);
         Reaction(std::string path);
@@ -18,5 +20,7 @@ class Reaction : public PyMooseBase
         void __set_scaleKf(double scaleKf);
         double __get_scaleKb() const;
         void __set_scaleKb(double scaleKb);
-};
+    };
+}
+
 #endif

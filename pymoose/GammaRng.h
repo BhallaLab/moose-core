@@ -1,8 +1,11 @@
 #ifndef _pymoose_GammaRng_h
 #define _pymoose_GammaRng_h
 #include "RandGenerator.h"
-class GammaRng : public RandGenerator
-{    public:
+namespace pymoose
+{
+    class GammaRng : public RandGenerator
+    {
+      public:
         static const std::string className;
         GammaRng(Id id);
         GammaRng(std::string path);
@@ -14,5 +17,7 @@ class GammaRng : public RandGenerator
         void __set_alpha(double alpha);
         double __get_theta() const;
         void __set_theta(double theta);
-};
+    };
+}
+
 #endif

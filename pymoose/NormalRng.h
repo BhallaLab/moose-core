@@ -1,8 +1,10 @@
 #ifndef _pymoose_NormalRng_h
 #define _pymoose_NormalRng_h
 #include "RandGenerator.h"
-class NormalRng : public RandGenerator
-{    public:
+namespace pymoose
+{
+    class NormalRng : public RandGenerator
+    {    public:
         static const std::string className;
         NormalRng(Id id);
         NormalRng(std::string path);
@@ -16,5 +18,7 @@ class NormalRng : public RandGenerator
         void __set_variance(double variance);
         int __get_method() const;
         void __set_method(int method);
-};
+    };
+}
+
 #endif

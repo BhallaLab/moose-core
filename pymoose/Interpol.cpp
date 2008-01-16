@@ -3,6 +3,7 @@
 #include "Interpol.h"
 #include "TableIterator.h"
 #include "../builtins/Interpol.h"
+using namespace pymoose;
 // We had to change the class name in order to avoid conflict with included moose class Interpol
 // But Interpol is the class name to be passed to base constructor
 const std::string InterpolationTable::className = "InterpolationTable";
