@@ -2,6 +2,7 @@
 #ifndef _pymoose_ClockJob_cpp
 #define _pymoose_ClockJob_cpp
 #include "ClockJob.h"
+using namespace pymoose;
 const std::string ClockJob::className = "ClockJob";
 ClockJob::ClockJob(Id id):PyMooseBase(id){}
 ClockJob::ClockJob(std::string path):PyMooseBase(className, path){}

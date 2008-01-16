@@ -1,8 +1,10 @@
 #ifndef _pymoose_Nernst_h
 #define _pymoose_Nernst_h
 #include "PyMooseBase.h"
-class Nernst : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class Nernst : public PyMooseBase
+    {    public:
         static const std::string className;
         Nernst(Id id);
         Nernst(std::string path);
@@ -28,5 +30,7 @@ class Nernst : public PyMooseBase
         void __set_CinMsg(double CinMsg);
         double __get_CoutMsg() const;
         void __set_CoutMsg(double CoutMsg);
-};
+    };
+}
+
 #endif

@@ -1,12 +1,16 @@
 #ifndef _pymoose_Compartment_h
 #define _pymoose_Compartment_h
 #include "PyMooseBase.h"
-class Compartment : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    
+    class Compartment : public pymoose::PyMooseBase
+    {
+      public:
         static const std::string className;
-        Compartment(Id id);
+        Compartment(::Id id);
         Compartment(std::string path);
-        Compartment(std::string name, Id parentId);
+        Compartment(std::string name, ::Id parentId);
         Compartment(std::string name, PyMooseBase* parent);
         ~Compartment();
         const std::string& getType();
@@ -40,5 +44,7 @@ class Compartment : public PyMooseBase
         void __set_VmSrc(double VmSrc);
         double __get_injectMsg() const;
         void __set_injectMsg(double injectMsg);
-};
+    };
+} // namespace
+
 #endif

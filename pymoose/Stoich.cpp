@@ -1,6 +1,8 @@
 #ifndef _pymoose_Stoich_cpp
 #define _pymoose_Stoich_cpp
+
 #include "Stoich.h"
+using namespace pymoose;
 const std::string Stoich::className = "Stoich";
 Stoich::Stoich(Id id):PyMooseBase(id){}
 Stoich::Stoich(std::string path):PyMooseBase(className, path){}

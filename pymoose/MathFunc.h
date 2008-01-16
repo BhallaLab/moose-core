@@ -1,8 +1,11 @@
 #ifndef _pymoose_MathFunc_h
 #define _pymoose_MathFunc_h
 #include "PyMooseBase.h"
-class MathFunc : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class MathFunc : public PyMooseBase
+    {
+      public:
         static const std::string className;
         MathFunc(Id id);
         MathFunc(std::string path);
@@ -28,5 +31,7 @@ class MathFunc : public PyMooseBase
         void __set_arg3(double arg3);
         double __get_arg4() const;
         void __set_arg4(double arg4);
-};
+    };
+}
+
 #endif

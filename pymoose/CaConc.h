@@ -1,13 +1,17 @@
 #ifndef _pymoose_CaConc_h
 #define _pymoose_CaConc_h
 #include "PyMooseBase.h"
-class CaConc : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    
+    class CaConc : public pymoose::PyMooseBase
+    {
+      public:
         static const std::string className;
-        CaConc(Id id);
+        CaConc(::Id id);
         CaConc(std::string path);
-        CaConc(std::string name, Id parentId);
-        CaConc(std::string name, PyMooseBase* parent);
+        CaConc(std::string name, ::Id parentId);
+        CaConc(std::string name, pymoose::PyMooseBase* parent);
         ~CaConc();
         const std::string& getType();
         double __get_Ca() const;
@@ -30,5 +34,7 @@ class CaConc : public PyMooseBase
         void __set_decrease(double decrease);
         double __get_basalMsg() const;
         void __set_basalMsg(double basalMsg);
-};
+    };
+} // namespace pymoose
+
 #endif

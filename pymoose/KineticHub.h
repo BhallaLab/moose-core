@@ -1,8 +1,11 @@
 #ifndef _pymoose_KineticHub_h
 #define _pymoose_KineticHub_h
 #include "PyMooseBase.h"
-class KineticHub : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class KineticHub : public PyMooseBase
+    {
+      public:
         static const std::string className;
         KineticHub(Id id);
         KineticHub(std::string path);
@@ -18,9 +21,11 @@ class KineticHub : public PyMooseBase
         void __set_nEnz(unsigned int nEnz);
         void destroy();
     
-    // none __get_destroy() const;
+        // none __get_destroy() const;
 //         void __set_destroy(none destroy);
         double __get_molSum() const;
         void __set_molSum(double molSum);
-};
+    };
+}
+
 #endif

@@ -1,6 +1,8 @@
 #ifndef _pymoose_Tick_cpp
 #define _pymoose_Tick_cpp
 #include "Tick.h"
+using namespace pymoose;
+
 const std::string ClockTick::className = "ClockTick";
 ClockTick::ClockTick(Id id):PyMooseBase(id){}
 ClockTick::ClockTick(std::string path):PyMooseBase(className, path){}

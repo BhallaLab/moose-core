@@ -1,6 +1,7 @@
 #ifndef _pymoose_GammaRng_cpp
 #define _pymoose_GammaRng_cpp
 #include "GammaRng.h"
+using namespace pymoose;
 const std::string GammaRng::className = "GammaRng";
 GammaRng::GammaRng(Id id):RandGenerator(id){}
 GammaRng::GammaRng(std::string path):RandGenerator(className, path){}

@@ -1,6 +1,7 @@
 #ifndef _pymoose_MathFunc_cpp
 #define _pymoose_MathFunc_cpp
 #include "MathFunc.h"
+using namespace pymoose;
 const std::string MathFunc::className = "MathFunc";
 MathFunc::MathFunc(Id id):PyMooseBase(id){}
 MathFunc::MathFunc(std::string path):PyMooseBase(className, path){}
