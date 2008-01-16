@@ -17,7 +17,7 @@
 #include "../builtins/Table.h"
 #include "../maindir/init.h"
 using namespace std;
-
+using namespace pymoose;
 extern int mooseInit();
 extern void setupDefaultSchedule(Element*, Element*, Element*);
 
@@ -529,18 +529,8 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     
     if (shellId.bad() )
     {
-        cerr << "Warning: shell does not exist, trying to create a new one!" << endl;
-        const Cinfo* c = Cinfo::find("Shell");
-        assert(c!=0);
-        const Finfo* childSrc = Element::root()->findFinfo("childSrc" );
-        assert( childSrc != 0 );
-        shell = c->create( Id(1), shellName);
-        assert(shell != 0 );
-        ret = childSrc->add( Element::root(), shell, 
-		shell->findFinfo( "child" ) );
-        assert(ret);
-        shellId = shell->id();
-    
+        cerr << "ERROR: shell does not exist, trying to create a new one!" << endl;
+        exit(1);    
     }
     else
     {
@@ -677,9 +667,9 @@ void PyMooseContext::end()
 //     }    
 }
 
-const Id PyMooseContext::getParent( Id e ) const
+const Id& PyMooseContext::getParent( Id e ) const
 {
-    Id ret = Id::badId();
+    static Id ret = Id::badId();
     Element* elm = e();
     if (elm == NULL)
     {

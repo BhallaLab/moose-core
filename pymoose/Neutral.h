@@ -1,8 +1,10 @@
 #ifndef _pymoose_Neutral_h
 #define _pymoose_Neutral_h
 #include "PyMooseBase.h"
-class Neutral : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class Neutral : public PyMooseBase
+    {    public:
         static const std::string className;
         Neutral(Id id);
         Neutral(std::string path);
@@ -16,5 +18,7 @@ class Neutral : public PyMooseBase
         void __set_childSrc(int childSrc);
         int __get_child() const;
         void __set_child(int child);
-};
+    };
+}
+
 #endif

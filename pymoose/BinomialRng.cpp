@@ -20,6 +20,7 @@
 #ifndef _pymoose_BinomialRng_cpp
 #define _pymoose_BinomialRng_cpp
 #include "BinomialRng.h"
+using namespace pymoose;
 const std::string BinomialRng::className = "BinomialRng";
 BinomialRng::BinomialRng(Id id):RandGenerator(id){}
 BinomialRng::BinomialRng(std::string path):RandGenerator(className, path){}

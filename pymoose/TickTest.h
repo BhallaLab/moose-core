@@ -1,8 +1,10 @@
 #ifndef _pymoose_TickTest_h
 #define _pymoose_TickTest_h
 #include "PyMooseBase.h"
-class TickTest : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class TickTest : public PyMooseBase
+    {    public:
         static const std::string className;
         TickTest(Id id);
         TickTest(std::string path);
@@ -10,5 +12,7 @@ class TickTest : public PyMooseBase
         TickTest(std::string name, PyMooseBase* parent);
         ~TickTest();
         const std::string& getType();
-};
+    };
+}
+
 #endif

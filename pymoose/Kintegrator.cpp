@@ -1,6 +1,7 @@
 #ifndef _pymoose_Kintegrator_cpp
 #define _pymoose_Kintegrator_cpp
 #include "Kintegrator.h"
+using namespace pymoose;
 const std::string Kintegrator::className = "Kintegrator";
 Kintegrator::Kintegrator(Id id):PyMooseBase(id){}
 Kintegrator::Kintegrator(std::string path):PyMooseBase(className, path){}

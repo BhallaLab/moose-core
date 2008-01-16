@@ -18,6 +18,7 @@
 #ifndef _pymoose_Cell_cpp
 #define _pymoose_Cell_cpp
 #include "Cell.h"
+using namespace pymoose;
 const std::string Cell::className = "Cell";
 Cell::Cell(Id id):PyMooseBase(id){}
 Cell::Cell(std::string path):PyMooseBase(className, path){}

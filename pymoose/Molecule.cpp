@@ -1,6 +1,7 @@
 #ifndef _pymoose_Molecule_cpp
 #define _pymoose_Molecule_cpp
 #include "Molecule.h"
+using namespace pymoose;
 const std::string Molecule::className = "Molecule";
 Molecule::Molecule(Id id):PyMooseBase(id){}
 Molecule::Molecule(std::string path):PyMooseBase(className, path){}

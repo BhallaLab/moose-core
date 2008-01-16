@@ -1,6 +1,7 @@
 #ifndef _pymoose_Sched0_cpp
 #define _pymoose_Sched0_cpp
 #include "Sched0.h"
+using namespace pymoose;
 const std::string Sched0::className = "Sched0";
 Sched0::Sched0(Id id):PyMooseBase(id){}
 Sched0::Sched0(std::string path):PyMooseBase(className, path){}

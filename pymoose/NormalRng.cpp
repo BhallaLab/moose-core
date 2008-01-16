@@ -1,6 +1,7 @@
 #ifndef _pymoose_NormalRng_cpp
 #define _pymoose_NormalRng_cpp
 #include "NormalRng.h"
+using namespace pymoose;
 const std::string NormalRng::className = "NormalRng";
 NormalRng::NormalRng(Id id):RandGenerator(id){}
 NormalRng::NormalRng(std::string path):RandGenerator(className, path){}
