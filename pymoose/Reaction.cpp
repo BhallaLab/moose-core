@@ -1,6 +1,7 @@
 #ifndef _pymoose_Reaction_cpp
 #define _pymoose_Reaction_cpp
 #include "Reaction.h"
+using namespace pymoose;
 const std::string Reaction::className = "Reaction";
 Reaction::Reaction(Id id):PyMooseBase(id){}
 Reaction::Reaction(std::string path):PyMooseBase(className, path){}

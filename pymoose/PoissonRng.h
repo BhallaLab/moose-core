@@ -1,8 +1,10 @@
 #ifndef _pymoose_PoissonRng_h
 #define _pymoose_PoissonRng_h
 #include "RandGenerator.h"
-class PoissonRng : public RandGenerator
-{    public:
+namespace pymoose
+{
+    class PoissonRng : public RandGenerator
+    {    public:
         static const std::string className;
         PoissonRng(Id id);
         PoissonRng(std::string path);
@@ -12,5 +14,7 @@ class PoissonRng : public RandGenerator
         const std::string& getType();
         double __get_mean() const;
         void __set_mean(double mean);
-};
+    };
+}
+
 #endif

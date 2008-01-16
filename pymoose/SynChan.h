@@ -1,8 +1,10 @@
 #ifndef _pymoose_SynChan_h
 #define _pymoose_SynChan_h
 #include "PyMooseBase.h"
-class SynChan : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class SynChan : public PyMooseBase
+    {    public:
         static const std::string className;
         SynChan(Id id);
         SynChan(std::string path);
@@ -38,5 +40,7 @@ class SynChan : public PyMooseBase
         void __set_activation(double activation);
         double __get_modulator() const;
         void __set_modulator(double modulator);
-};
+    };
+}
+
 #endif

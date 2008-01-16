@@ -1,6 +1,7 @@
 #ifndef _pymoose_ExponentialRng_cpp
 #define _pymoose_ExponentialRng_cpp
 #include "ExponentialRng.h"
+using namespace pymoose;
 const std::string ExponentialRng::className = "ExponentialRng";
 ExponentialRng::ExponentialRng(Id id):RandGenerator(id){}
 ExponentialRng::ExponentialRng(std::string path):RandGenerator(className, path){}

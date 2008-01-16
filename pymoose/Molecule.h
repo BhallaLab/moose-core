@@ -1,8 +1,10 @@
 #ifndef _pymoose_Molecule_h
 #define _pymoose_Molecule_h
 #include "PyMooseBase.h"
-class Molecule : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class Molecule : public PyMooseBase
+    {    public:
         static const std::string className;
         Molecule(Id id);
         Molecule(std::string path);
@@ -30,5 +32,7 @@ class Molecule : public PyMooseBase
 //        void __set_prd(double,double prd);
         double __get_sumTotal() const;
         void __set_sumTotal(double sumTotal);
-};
+    };
+}
+
 #endif

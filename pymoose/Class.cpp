@@ -18,6 +18,7 @@
 #define _pymoose_Class_cpp
 
 #include "Class.h"
+using namespace pymoose;
 const std::string Class::className = "Class";
 Class::Class(Id id):PyMooseBase(id){}
 Class::Class(std::string path, std::string name):PyMooseBase(className, path)

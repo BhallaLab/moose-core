@@ -1,6 +1,7 @@
 #ifndef _pymoose_Mg_block_cpp
 #define _pymoose_Mg_block_cpp
 #include "Mg_block.h"
+using namespace pymoose;
 const std::string Mg_block::className = "Mg_block";
 Mg_block::Mg_block(Id id):PyMooseBase(id){}
 Mg_block::Mg_block(std::string path):PyMooseBase(className, path){}

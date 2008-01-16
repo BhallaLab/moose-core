@@ -1,8 +1,10 @@
 #ifndef _pymoose_SpikeGen_h
 #define _pymoose_SpikeGen_h
 #include "PyMooseBase.h"
-class SpikeGen : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class SpikeGen : public PyMooseBase
+    {    public:
         static const std::string className;
         SpikeGen(Id id);
         SpikeGen(std::string path);
@@ -24,5 +26,7 @@ class SpikeGen : public PyMooseBase
         void __set_event(double event);
         double __get_Vm() const;
         void __set_Vm(double Vm);
-};
+    };
+}
+
 #endif

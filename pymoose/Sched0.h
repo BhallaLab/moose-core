@@ -1,8 +1,10 @@
 #ifndef _pymoose_Sched0_h
 #define _pymoose_Sched0_h
 #include "PyMooseBase.h"
-class Sched0 : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class Sched0 : public PyMooseBase
+    {    public:
         static const std::string className;
         Sched0(Id id);
         Sched0(std::string path);
@@ -10,5 +12,7 @@ class Sched0 : public PyMooseBase
         Sched0(std::string name, PyMooseBase* parent);
         ~Sched0();
         const std::string& getType();
-};
+    };
+}
+
 #endif
