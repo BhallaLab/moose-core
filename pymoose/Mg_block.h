@@ -1,8 +1,12 @@
 #ifndef _pymoose_Mg_block_h
 #define _pymoose_Mg_block_h
 #include "PyMooseBase.h"
-class Mg_block : public PyMooseBase
-{    public:
+namespace pymoose
+{
+
+    class Mg_block : public PyMooseBase
+    {
+      public:
         static const std::string className;
         Mg_block(Id id);
         Mg_block(std::string path);
@@ -26,5 +30,7 @@ class Mg_block : public PyMooseBase
         void __set_Zk(double Zk);
         double,double __get_origChannel() const;
         void __set_origChannel(double,double origChannel);
-};
+    };
+}
+
 #endif

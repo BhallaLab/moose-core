@@ -1,6 +1,7 @@
 #ifndef _pymoose_HSolve_cpp
 #define _pymoose_HSolve_cpp
 #include "HSolve.h"
+using namespace pymoose;
 const std::string HSolve::className = "HSolve";
 HSolve::HSolve(Id id):PyMooseBase(id){}
 HSolve::HSolve(std::string path):PyMooseBase(className, path){}

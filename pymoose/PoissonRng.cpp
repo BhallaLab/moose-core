@@ -1,6 +1,7 @@
 #ifndef _pymoose_PoissonRng_cpp
 #define _pymoose_PoissonRng_cpp
 #include "PoissonRng.h"
+using namespace pymoose;
 const std::string PoissonRng::className = "PoissonRng";
 PoissonRng::PoissonRng(Id id):RandGenerator(id){}
 PoissonRng::PoissonRng(std::string path):RandGenerator(className, path){}

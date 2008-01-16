@@ -2,8 +2,10 @@
 #define _pymoose_Table_h
 #include "PyMooseBase.h"
 #include "Interpol.h"
-class Table : public InterpolationTable
-{    public:
+namespace pymoose
+{
+    class Table : public InterpolationTable
+    {    public:
         static const std::string className;
         Table(Id id);
         Table(std::string path);
@@ -23,7 +25,7 @@ class Table : public InterpolationTable
         void __set_stepsize(double stepsize);
         double __get_threshold() const;
         void __set_threshold(double threshold);
-    // todo: tackle these two functiosn properly
+        // todo: tackle these two functiosn properly
 //        double __get_tableLookup() const;
 //        void __set_tableLookup(double tableLookup);
         double __get_outputSrc() const;
@@ -35,7 +37,9 @@ class Table : public InterpolationTable
         double __get_prd() const;
         void __set_prd(double prd);
 
-    void createTable(int xdiv, double xmin, double xmax );
+        void createTable(int xdiv, double xmin, double xmax );
     
-};
+    };
+}
+
 #endif

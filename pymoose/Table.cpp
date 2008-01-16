@@ -1,6 +1,7 @@
 #ifndef _pymoose_Table_cpp
 #define _pymoose_Table_cpp
 #include "Table.h"
+using namespace pymoose;
 const std::string Table::className = "Table";
 Table::Table(Id id):InterpolationTable(id){}
 Table::Table(std::string path):InterpolationTable(className, path){}

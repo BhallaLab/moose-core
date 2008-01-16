@@ -1,6 +1,7 @@
 #ifndef _pymoose_ParTick_cpp
 #define _pymoose_ParTick_cpp
 #include "ParTick.h"
+using namespace pymoose;
 const std::string ParTick::className = "ParTick";
 ParTick::ParTick(Id id):PyMooseBase(id){}
 ParTick::ParTick(std::string path):PyMooseBase(className, path){}

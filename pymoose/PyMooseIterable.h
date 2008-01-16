@@ -15,66 +15,70 @@
  * Created:         2007-12-03 11:14:47
  ********************************************************************/
 /**********************************************************************
-** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment,
-** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
-** It is made available under the terms of the
-** GNU General Public License version 2
-** See the file COPYING.LIB for the full notice.
-**********************************************************************/
+ ** This program is part of 'MOOSE', the
+ ** Messaging Object Oriented Simulation Environment,
+ ** also known as GENESIS 3 base code.
+ **           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+ ** It is made available under the terms of the
+ ** GNU General Public License version 2
+ ** See the file COPYING.LIB for the full notice.
+ **********************************************************************/
 
 #ifndef _PYMOOSEITERABLE_H
 #define _PYMOOSEITERABLE_H
-template <typename KeyType, typename ValueType> class PyMooseIterable 
+namespace pymoose
 {
-  public:
-    void __setitem__(KeyType index, ValueType value)
-    {
-        __setItem(index, value);        
-    }
-    ValueType __getitem(KeyType index)
-    {
-        return __getItem(index);
-    }
-    void (*__setItem)(KeyType index,ValueType value);
-    ValueType (*__getItem)(KeyType index);    
-};
 
-template <typename OuterType, typename KeyType, typename ValueType> class InnerPyMooseIterable
-{
-  public:
-    InnerPyMooseIterable ()
+    template <typename KeyType, typename ValueType> class PyMooseIterable 
     {
-        outer_ = 0;
-        __setItem = 0;
-        __getItem = 0;        
-    }
+      public:
+        void __setitem__(KeyType index, ValueType value)
+        {
+            __setItem(index, value);        
+        }
+        ValueType __getitem(KeyType index)
+        {
+            return __getItem(index);
+        }
+        void (*__setItem)(KeyType index,ValueType value);
+        ValueType (*__getItem)(KeyType index);    
+    };
+
+    template <typename OuterType, typename KeyType, typename ValueType> class InnerPyMooseIterable
+    {
+      public:
+        InnerPyMooseIterable ()
+        {
+            outer_ = 0;
+            __setItem = 0;
+            __getItem = 0;        
+        }
     
-    InnerPyMooseIterable ( OuterType* outer ,
-                         ValueType (OuterType::*getItem)(KeyType index) const,
-                         void (OuterType::*setItem)(KeyType index,ValueType value))
-    {
-        outer_ = outer;
-        __setItem = setItem;
-        __getItem = getItem;        
-    }
-    void __setitem__(KeyType index, ValueType value)
-    {
-        (outer_->*(__setItem))(index, value);        
-    }
-    ValueType __getitem__(KeyType index)
-    {
-        return (outer_->*(__getItem))(index);
-    }
-  private:
-    void (OuterType::*__setItem)(KeyType index,ValueType value);
-    ValueType (OuterType::*__getItem)(KeyType index) const;
-    OuterType* outer_;
+        InnerPyMooseIterable ( OuterType* outer ,
+                               ValueType (OuterType::*getItem)(KeyType index) const,
+                               void (OuterType::*setItem)(KeyType index,ValueType value))
+        {
+            outer_ = outer;
+            __setItem = setItem;
+            __getItem = getItem;        
+        }
+        void __setitem__(KeyType index, ValueType value)
+        {
+            (outer_->*(__setItem))(index, value);        
+        }
+        ValueType __getitem__(KeyType index)
+        {
+            return (outer_->*(__getItem))(index);
+        }
+      private:
+        void (OuterType::*__setItem)(KeyType index,ValueType value);
+        ValueType (OuterType::*__getItem)(KeyType index) const;
+        OuterType* outer_;
     
-};
+    };
 
     
+}
 
     
 #endif

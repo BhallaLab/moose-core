@@ -1,8 +1,11 @@
 #ifndef _pymoose_Enzyme_h
 #define _pymoose_Enzyme_h
 #include "PyMooseBase.h"
-class Enzyme : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class Enzyme : public PyMooseBase
+    {
+      public:
         static const std::string className;
         Enzyme(Id id);
         Enzyme(std::string path);
@@ -22,7 +25,7 @@ class Enzyme : public PyMooseBase
         void __set_kcat(double kcat);
         bool __get_mode() const;
         void __set_mode(bool mode);
-    //     double,double __get_prd() const;
+        //     double,double __get_prd() const;
 //        void __set_prd(double,double prd);
         double __get_scaleKm() const;
         void __set_scaleKm(double scaleKm);
@@ -30,5 +33,7 @@ class Enzyme : public PyMooseBase
         void __set_scaleKcat(double scaleKcat);
         double __get_intramol() const;
         void __set_intramol(double intramol);
-};
+    };
+}
+
 #endif

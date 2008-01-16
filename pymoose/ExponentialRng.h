@@ -1,8 +1,11 @@
 #ifndef _pymoose_ExponentialRng_h
 #define _pymoose_ExponentialRng_h
 #include "RandGenerator.h"
-class ExponentialRng : public RandGenerator
-{    public:
+namespace pymoose
+{
+    class ExponentialRng : public RandGenerator
+    {
+      public:
         static const std::string className;
         ExponentialRng(Id id);
         ExponentialRng(std::string path);
@@ -14,5 +17,6 @@ class ExponentialRng : public RandGenerator
         void __set_mean(double mean);
         int __get_method() const;
         void __set_method(int method);
-};
+    };
+} // namepsace pymoose
 #endif

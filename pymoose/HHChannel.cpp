@@ -2,6 +2,7 @@
 #ifndef _pymoose_HHChannel_cpp
 #define _pymoose_HHChannel_cpp
 #include "pymoose.h"
+using namespace pymoose;
 const std::string HHChannel::className = "HHChannel";
 HHChannel::HHChannel(Id id):PyMooseBase(id){}
 HHChannel::HHChannel(std::string path):PyMooseBase(className, path){}

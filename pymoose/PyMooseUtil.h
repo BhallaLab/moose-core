@@ -12,21 +12,26 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-template <typename T>
-std::string toString( T data)
+namespace pymoose
 {
-    std::string value;
-    std::ostringstream s;
     
-    if (s << data)
+    template <typename T>
+    std::string toString( T data)
     {
-        return s.str();
+        std::string value;
+        std::ostringstream s;
+    
+        if (s << data)
+        {
+            return s.str();
+        }
+        else 
+        {
+            return 0;
+        }    
     }
-    else 
-    {
-        return 0;
-    }    
-}
-bool isEqual(double , double, double);
+    bool isEqual(double , double, double);
+
+} // namespace
 
 #endif
