@@ -1,11 +1,14 @@
 #ifndef _pymoose_Interpol_h
 #define _pymoose_Interpol_h
 #include "PyMooseBase.h"
-class TableIterator;
-
-class InterpolationTable : public PyMooseBase
+namespace pymoose
 {
-  public:    
+
+    class TableIterator;
+
+    class InterpolationTable : public PyMooseBase
+    {
+      public:    
         static const std::string className;
         InterpolationTable(Id id);
         InterpolationTable(std::string path);
@@ -27,12 +30,12 @@ class InterpolationTable : public PyMooseBase
         void __set_dx(double dx);
         double __get_sy() const;
         void __set_sy(double sy);
-    // Manually edited the following two
-    double __getitem__(unsigned int index) const;
-    void __setitem__( unsigned int index, double value );
-    TableIterator* __iter__();
-    int __len__();
-    void tabFill(int xdivs, int mode);
+        // Manually edited the following two
+        double __getitem__(unsigned int index) const;
+        void __setitem__( unsigned int index, double value );
+        TableIterator* __iter__();
+        int __len__();
+        void tabFill(int xdivs, int mode);
     
         double __get_lookupSrc() const;
         void __set_lookupSrc(double lookupSrc);
@@ -42,12 +45,14 @@ class InterpolationTable : public PyMooseBase
         void dumpFile(string fileName);
     
     
-  protected:
-    // This constructor is for allowing derived type (Table) to
-    // have constructors exactly as if it was directly derived from PyMooseBase.
+      protected:
+        // This constructor is for allowing derived type (Table) to
+        // have constructors exactly as if it was directly derived from PyMooseBase.
     
-    InterpolationTable(std::string className, std::string objectName, Id parentId);
-    InterpolationTable(std::string className, std::string path);    
-    InterpolationTable(std::string className, std::string objectName, PyMooseBase* parent);
-};
+        InterpolationTable(std::string className, std::string objectName, Id parentId);
+        InterpolationTable(std::string className, std::string path);    
+        InterpolationTable(std::string className, std::string objectName, PyMooseBase* parent);
+    };
+}
+
 #endif

@@ -18,17 +18,20 @@
 #ifndef _pymoose_Cell_h
 #define _pymoose_Cell_h
 #include "PyMooseBase.h"
-class Cell : public PyMooseBase
+namespace pymoose
 {
-  public:
-    static const std::string className;
-    Cell(Id id);
-    Cell(std::string path);
-    Cell(std::string name, Id parentId);
-    Cell(std::string name, PyMooseBase* parent);
-    ~Cell();
-    const std::string& getType();
-};
-
+    
+    class Cell : public PyMooseBase
+    {
+      public:
+        static const std::string className;
+        Cell(Id id);
+        Cell(std::string path);
+        Cell(std::string name, Id parentId);
+        Cell(std::string name, PyMooseBase* parent);
+        ~Cell();
+        const std::string& getType();
+    };
+}// namepsace pymoose
     
 #endif

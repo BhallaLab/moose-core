@@ -1,6 +1,7 @@
 #ifndef _pymoose_CaConc_cpp
 #define _pymoose_CaConc_cpp
 #include "CaConc.h"
+using namespace pymoose;
 const std::string CaConc::className = "CaConc";
 CaConc::CaConc(Id id):PyMooseBase(id){}
 CaConc::CaConc(std::string path):PyMooseBase(className, path){}

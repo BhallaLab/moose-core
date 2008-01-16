@@ -1,6 +1,8 @@
 #ifndef _pymoose_TickTest_cpp
 #define _pymoose_TickTest_cpp
 #include "TickTest.h"
+using namespace pymoose;
+
 const std::string TickTest::className = "TickTest";
 TickTest::TickTest(Id id):PyMooseBase(id){}
 TickTest::TickTest(std::string path):PyMooseBase(className, path){}

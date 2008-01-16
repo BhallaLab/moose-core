@@ -1,8 +1,10 @@
 #ifndef _pymoose_Stoich_h
 #define _pymoose_Stoich_h
 #include "PyMooseBase.h"
-class Stoich : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class Stoich : public PyMooseBase
+    {    public:
         static const std::string className;
         Stoich(Id id);
         Stoich(std::string path);
@@ -30,10 +32,12 @@ class Stoich : public PyMooseBase
         void __set_useOneWayReacs(bool useOneWayReacs);
 //         string __get_path() const;
 //         void __set_path(string path);
-    std::string path() const;
-    std::string path(std::string path);
+        std::string path() const;
+        std::string path(std::string path);
     
         unsigned int __get_rateVectorSize() const;
         void __set_rateVectorSize(unsigned int rateVectorSize);
-};
+    };
+}
+
 #endif

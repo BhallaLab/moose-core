@@ -12,7 +12,8 @@
 #include <iostream>
 #include <sstream>
 using namespace std;
-
+using namespace pymoose;
+    
 string PyMooseBase::separator_ = "/"; /// this is default separator is the unix path separator
 
 PyMooseContext* PyMooseBase::context_ = PyMooseContext::createPyMooseContext("BaseContext", "shell");
@@ -198,7 +199,7 @@ const Id* PyMooseBase::__get_id() const
 
 const Id* PyMooseBase::__get_parent() const 
 {
-    return &(context_->getParent(id_));
+    return &context_->getParent(id_);
 }
 
 vector <Id>& PyMooseBase::__get_children() const

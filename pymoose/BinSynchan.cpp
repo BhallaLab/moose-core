@@ -18,6 +18,7 @@
 #ifndef _pymoose_BinSynchan_cpp
 #define _pymoose_BinSynchan_cpp
 #include "BinSynchan.h"
+using namespace pymoose;
 const std::string BinSynchan::className = "BinSynchan";
 /*
   Be very afraid to touch these constructors. Make sure you

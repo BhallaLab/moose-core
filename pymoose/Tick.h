@@ -1,8 +1,10 @@
 #ifndef _pymoose_Tick_h
 #define _pymoose_Tick_h
 #include "PyMooseBase.h"
-class ClockTick : public PyMooseBase
-{    public:
+namespace pymoose
+{
+    class ClockTick : public PyMooseBase
+    {    public:
         static const std::string className;
         ClockTick(Id id);
         ClockTick(std::string path);
@@ -22,5 +24,7 @@ class ClockTick : public PyMooseBase
         void __set_path(string path);
         double __get_updateDtSrc() const;
         void __set_updateDtSrc(double updateDtSrc);
-};
+    };
+}
+
 #endif

@@ -1,6 +1,7 @@
 #ifndef _pymoose_SynChan_cpp
 #define _pymoose_SynChan_cpp
 #include "SynChan.h"
+using namespace pymoose;
 const std::string SynChan::className = "SynChan";
 SynChan::SynChan(Id id):PyMooseBase(id){}
 SynChan::SynChan(std::string path):PyMooseBase(className, path){}

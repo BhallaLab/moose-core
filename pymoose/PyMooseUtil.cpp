@@ -11,6 +11,7 @@
 #include <string>
 #include <cassert>
 #include "PyMooseUtil.h"
+using namespace pymoose;
 bool isEqual(double val1, double val2, double epsilon)
 {
     bool result = false;
