@@ -211,8 +211,8 @@ void ReadCell::readData( const string& line, unsigned int lineNum )
 	double d = 1.0e-6 * atof( argv[5].c_str() );
 	if ( polarFlag_ ) {
 		double r = x;
-		double theta = y * PI / 180.0;
-		double phi = z * PI / 180.0;
+		double theta = y * M_PI / 180.0;
+		double phi = z * M_PI / 180.0;
 		x = r * sin( phi ) * cos ( theta );
 		y = r * sin( phi ) * sin ( theta );
 		z = r * cos( phi );
@@ -317,11 +317,11 @@ Element* ReadCell::buildCompartment(
 	set< double >( compt, dFinfo, d );
 
 	set< double >( compt, lengthFinfo, length );
-	double Rm = RM_ / ( d * length * PI );
+	double Rm = RM_ / ( d * length * M_PI );
 	set< double >( compt, RmFinfo, Rm );
-	double Ra = RA_ * length * 4.0 / ( d * d * PI );
+	double Ra = RA_ * length * 4.0 / ( d * d * M_PI );
 	set< double >( compt, RaFinfo, Ra );
-	double Cm = CM_ * ( d * length * PI );
+	double Cm = CM_ * ( d * length * M_PI );
 	set< double >( compt, CmFinfo, Cm );
 	set< double >( compt, initVmFinfo, EREST_ACT_ );
 	set< double >( compt, EmFinfo, EREST_ACT_ );
@@ -419,9 +419,9 @@ double calcSurf( double len, double dia )
 {
 	double area = 0.0;
 	if ( len == 0.0 ) // Spherical
-		area = dia * dia * PI;
+		area = dia * dia * M_PI;
 	else
-		area = len * dia * PI;
+		area = len * dia * M_PI;
 
 	return area;
 }
@@ -442,9 +442,9 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 		if ( chan == "RA" ) {
 			double temp;
 			if ( length >= 0.0 ) // spherical flag. Assume length = dia.
-				temp = 8.0 * value / (diameter * PI );
+				temp = 8.0 * value / (diameter * M_PI );
 			else
-				temp = 4.0 * value * length / (diameter * diameter * PI );
+				temp = 4.0 * value * length / (diameter * diameter * M_PI );
 			set< double >( compt, "Ra", temp );
 		} else if ( chan == "RM" ) {
 			set< double >( compt, "Rm", value * calcSurf( length, diameter ) );
@@ -501,7 +501,7 @@ bool ReadCell::addHHChannel(
 		assert( ret );
 			
 		if ( value > 0 ) {
-			value *= dia * length * PI;
+			value *= dia * length * M_PI;
 		} else {
 			value = - value;
 		}
@@ -529,7 +529,7 @@ bool ReadCell::addSynChan(
 		assert( ret );
 		
 		if ( value > 0 ) {
-			value *= dia * length * PI;
+			value *= dia * length * M_PI;
 		} else {
 			value = - value;
 		}

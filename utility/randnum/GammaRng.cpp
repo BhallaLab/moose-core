@@ -67,7 +67,7 @@ double GammaRng::getAlpha(const Element* e)
 void GammaRng::setAlpha(const Conn& c, double alpha)
 {
     
-    if (fabs(alpha) < EPSILON)
+    if (fabs(alpha) < DBL_MIN)
     {
         cerr << "ERROR: Shape parameter alpha must be non-zero." << endl;
         return;
@@ -99,7 +99,7 @@ double GammaRng::getTheta(const Element* e)
 void GammaRng::setTheta(const Conn& c, double theta)
 {
     
-    if (fabs(theta) < EPSILON)
+    if (fabs(theta) < DBL_MIN)
     {
         cerr << "ERROR: Scale parameter theta must be non-zero." << endl;
         return;

@@ -12,8 +12,8 @@ HEADERS :=
 OBJECTS = $(subst .cpp,.o,$(SOURCES))
 DEPENDENCIES = $(subst .cpp,.d,$(SOURCES))
 EXTRA_CLEAN := 
-INCLUDE_DIRS := . basecode external$(/)include utility utility$(/)randnum element builtins biophysics kinetics scheduling shell genesis_parser maindir
-CXXFLAGS += $(addprefix -I,$(INCLUDE_DIRS)) -DYYMALLOC -DYYFREE -DYYSTYPE_IS_DECLARED -DUSE_GENESIS_PARSER -DWINDOWS
+INCLUDE_DIRS := . basecode external$(/)include utility utility$(/)randnum element builtins biophysics kinetics scheduling shell genesis_parser maindir example
+CXXFLAGS += $(addprefix -I,$(INCLUDE_DIRS)) -DYYMALLOC -DYYFREE -DYYSTYPE_IS_DECLARED -DUSE_GENESIS_PARSER -DWINDOWS -DDO_UNIT_TESTS
 
 VPATH = $(INCLUDE_DIRS)
 
@@ -43,7 +43,7 @@ include shell$(/)Makefile.mak
 
 include genesis_parser$(/)Makefile.mak
 
-
+include example$(/)Makefile.mak
 
 
 ##### END OF INCLUDES #########

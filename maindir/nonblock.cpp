@@ -4,8 +4,7 @@
 #include<stdio.h>
 using namespace std;
 
-#ifdef UNIX
-
+#if defined(unix) || defined(__unix__) || defined(__unix)
 #include<termios.h>
 #include<unistd.h>
 #include<sys/select.h>
