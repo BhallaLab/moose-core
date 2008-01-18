@@ -63,7 +63,7 @@ double Gamma::getNextSample() const
     {
         result = gammaLarge();
     }
-    if ( fabs(theta_ - 1.0) >= EPSILON )
+    if ( !isEqual(theta_, 1.0))
     {
         result *= theta_;
     }
