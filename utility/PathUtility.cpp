@@ -20,16 +20,17 @@
 #include "PathUtility.h"
 #include "StringUtil.h"
 #include <iostream>
-#ifdef unix
+#if defined(unix) || defined(__unix__) || defined(__unix)
 
 const string PathUtility::PATH_SEPARATOR = ":";
 const string PathUtility::DIR_SEPARATOR = "/";
 
-#else //if defined WINDOWS
+#elif defined(_WIN32) //if defined WINDOWS
 
 const string PathUtility::PATH_SEPARATOR = ";";
 const string PathUtility::DIR_SEPARATOR = "\\";
-
+#else
+#error System type is neither Unix nor Windows. Failing
 #endif // UNIX / WINDOWS
 
 PathUtility::PathUtility(string paths)
