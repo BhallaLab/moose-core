@@ -94,9 +94,9 @@ void BinomialRng::innerSetN(int n)
     }
     else 
     {
-        if (fabs(n_- n) > EPSILON )
+        if (n_!= n  )
         {
-            n_ = (int)n;
+            n_ = n;
             isModified_ = true;            
         }
     }
@@ -160,7 +160,7 @@ void BinomialRng::innerSetP(double p)
     }
     else
     {
-        if (fabs(p_ - p ) > EPSILON )
+        if (!isEqual(p_,p))
         {
             p_ = p;
             isModified_ = true;            

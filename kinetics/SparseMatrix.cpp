@@ -8,11 +8,12 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <algorithm>
 #include <vector>
 #include <iostream>
 #include <cassert>
 #include <math.h> // used for isnan
-
+#include "../utility/utility.h" // isnan is undefined in VC++ and BC5, utility.h contains a workaround macro
 using namespace std;
 
 #include "SparseMatrix.h"
