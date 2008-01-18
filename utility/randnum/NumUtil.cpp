@@ -17,18 +17,38 @@
 
 #ifndef _NUMUTIL_CPP
 #define _NUMUTIL_CPP
-
-const double getMachineEpsilon()
+#include <cmath>
+bool isEqual(float x, float y, float epsilon)
 {
-    double epsilon = 1;
-    double x = 1.0;
-    double y = x + epsilon;
-    while ( y > x )
-    {
-        epsilon = epsilon/2.0;
-        y = x+epsilon;
-    }
-    return epsilon;    
+	if (fabs(x) > fabs(y)) 
+	{
+		return fabs(x - y) < fabs(epsilon*x);
+	}
+	else
+	{
+		return fabs(x-y) < fabs(epsilon*y);
+	}
 }
-const double EPSILON = getMachineEpsilon();
+bool isEqual(double x, double y, double epsilon)
+{
+	if (fabs(x) > fabs(y)) 
+	{
+		return fabs(x - y) < fabs(epsilon*x);
+	}
+	else
+	{
+		return fabs(x-y) < fabs(epsilon*y);
+	}
+}
+bool isEqual(long double x, long double y, long double epsilon)
+{
+	if (fabs(x) > fabs(y)) 
+	{
+		return fabs(x - y) < fabs(epsilon*x);
+	}
+	else
+	{
+		return fabs(x-y) < fabs(epsilon*y);
+	}
+}
 #endif

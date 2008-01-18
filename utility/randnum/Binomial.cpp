@@ -26,8 +26,6 @@
 #include <climits>
 using namespace std;
 
-const double EPSILON = getMachineEpsilon();
-
 // First 10 entries in lookup table
 const double fc[] = {
     0.08106146679532726,
@@ -185,7 +183,7 @@ double Binomial::getNextSample() const
     {
         sample = (double)0;
     }
-    else if ( fabs(1.0-p_) <= EPSILON )
+    else if ( isEqual(1.0,p_))
     {
         sample = (double)n_;
     }

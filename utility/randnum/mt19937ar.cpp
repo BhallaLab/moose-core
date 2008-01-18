@@ -42,7 +42,7 @@
 */
 
 /* Modified slightly for use in MOOSE by Upi Bhalla, NCBS, 2004 */
-#ifdef WINDOWS
+#ifdef _WIN32
 #include <Winsock2.h>
 #else
 #include <sys/time.h>
@@ -76,7 +76,7 @@ void init_genrand(unsigned long s)
 }
 
 //Add code for gettimeofday
-#ifdef WINDOWS
+#ifdef _WIN32
 	int gettimeofday( struct timeval* tv, void* timezone ) {
      FILETIME time;
      double   timed;
