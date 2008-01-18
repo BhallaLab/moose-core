@@ -21,6 +21,7 @@
 #include "Enzyme.h"
 #include "ThisFinfo.h"
 #include "SolveFinfo.h"
+#include "../utility/utility.h"
 
 void dummyStringFunc( const Conn& c, string s )
 {

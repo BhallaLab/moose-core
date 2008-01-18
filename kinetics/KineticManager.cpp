@@ -14,6 +14,7 @@
 #include "../element/Wildcard.h"
 #include <math.h>
 #include "KineticManager.h"
+#include "../utility/utility.h"
 
 static map< string, KMethodInfo >& methodMap()
 {

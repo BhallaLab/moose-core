@@ -22,6 +22,8 @@
 
 #include <map>
 #include <string>
+#include "basecode/Id.h"
+#include "script.h"
 
 // Particularly ugly macro definition 
 //#define BEGIN yy_start = 1 + 2 *
