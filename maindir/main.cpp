@@ -25,6 +25,11 @@
 #include <basecode/IdManager.h>
 #include <utility/utility.h>
 
+#ifdef USE_READLINE
+#include <readline/readline.h>
+#include <readline/history.h>
+#endif //USE_READLINE
+
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
@@ -212,8 +217,22 @@ int main(int argc, char** argv)
 		 */
 		string s = "";
 		unsigned int lineNum = 0;
+		#ifndef USE_READLINE
 		cout << "moose #" << lineNum << " > " << flush;
+		#endif //n USE_READLINE
 		while( 1 ) {
+			#ifdef USE_READLINE
+			char cname[10];
+			sprintf(cname, "moose #%d > ", lineNum);
+			char * foo  = readline(cname);
+			s = string (foo);
+			set< string >( sli, parseFinfo, s );
+			if ( s.find_first_not_of( " \t\n" ) != s.npos ){
+				lineNum++;
+				add_history(foo);
+			}
+			s = "";
+			#else
 			if ( nonBlockingGetLine( s ) ) {
 				set< string >( sli, parseFinfo, s );
 				if ( s.find_first_not_of( " \t\n" ) != s.npos )
@@ -221,6 +240,7 @@ int main(int argc, char** argv)
 				s = "";
 				cout << "moose #" << lineNum << " > " << flush;
 			}
+			#endif //USE_READLINE
 #ifdef USE_MPI
 			// Here we poll the postmaster
 			ret = set< int >( pj, stepFinfo, 1 );
