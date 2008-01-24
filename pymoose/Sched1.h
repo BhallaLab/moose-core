@@ -9,7 +9,7 @@ namespace pymoose
         Sched1(Id id);
         Sched1(std::string path);
         Sched1(std::string name, Id parentId);
-        Sched1(std::string name, PyMooseBase* parent);
+        Sched1(std::string name, PyMooseBase& parent);
         ~Sched1();
         const std::string& getType();
     };

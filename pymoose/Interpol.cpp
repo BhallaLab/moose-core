@@ -10,7 +10,7 @@ const std::string InterpolationTable::className = "InterpolationTable";
 InterpolationTable::InterpolationTable(Id id):PyMooseBase(id){}
 InterpolationTable::InterpolationTable(std::string path):PyMooseBase("Interpol", path){}
 InterpolationTable::InterpolationTable(std::string name, Id parentId):PyMooseBase("Interpol", name, parentId){}
-InterpolationTable::InterpolationTable(std::string name, PyMooseBase* parent):PyMooseBase("Interpol", name, parent){}
+InterpolationTable::InterpolationTable(std::string name, PyMooseBase& parent):PyMooseBase("Interpol", name, parent){}
 InterpolationTable::~InterpolationTable(){}
 //Manually edited
 // These are for allowing Table access to constructors in PyMooseBase
@@ -24,7 +24,7 @@ InterpolationTable::InterpolationTable(std::string typeName, std::string path):
 {
 }
 
-InterpolationTable::InterpolationTable(std::string typeName, std::string objectName, PyMooseBase* parent):
+InterpolationTable::InterpolationTable(std::string typeName, std::string objectName, PyMooseBase& parent):
     PyMooseBase(typeName, objectName, parent)
 {
 }

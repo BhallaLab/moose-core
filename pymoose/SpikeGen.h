@@ -9,7 +9,7 @@ namespace pymoose
         SpikeGen(Id id);
         SpikeGen(std::string path);
         SpikeGen(std::string name, Id parentId);
-        SpikeGen(std::string name, PyMooseBase* parent);
+        SpikeGen(std::string name, PyMooseBase& parent);
         ~SpikeGen();
         const std::string& getType();
         double __get_threshold() const;

@@ -9,7 +9,7 @@ namespace pymoose
         NormalRng(Id id);
         NormalRng(std::string path);
         NormalRng(std::string name, Id parentId);
-        NormalRng(std::string name, PyMooseBase* parent);
+        NormalRng(std::string name, PyMooseBase& parent);
         ~NormalRng();
         const std::string& getType();
         double __get_mean() const;

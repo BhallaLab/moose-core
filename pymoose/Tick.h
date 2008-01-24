@@ -9,7 +9,7 @@ namespace pymoose
         ClockTick(Id id);
         ClockTick(std::string path);
         ClockTick(std::string name, Id parentId);
-        ClockTick(std::string name, PyMooseBase* parent);
+        ClockTick(std::string name, PyMooseBase& parent);
         ~ClockTick();
         const std::string& getType();
         double __get_dt() const;

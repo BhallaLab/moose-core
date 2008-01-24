@@ -6,7 +6,7 @@ const std::string GammaRng::className = "GammaRng";
 GammaRng::GammaRng(Id id):RandGenerator(id){}
 GammaRng::GammaRng(std::string path):RandGenerator(className, path){}
 GammaRng::GammaRng(std::string name, Id parentId):RandGenerator(className, name, parentId){}
-GammaRng::GammaRng(std::string name, PyMooseBase* parent):RandGenerator(className, name, parent){}
+GammaRng::GammaRng(std::string name, PyMooseBase& parent):RandGenerator(className, name, parent){}
 GammaRng::~GammaRng(){}
 const std::string& GammaRng::getType(){ return className; }
 double GammaRng::__get_alpha() const
