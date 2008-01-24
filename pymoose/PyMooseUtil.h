@@ -30,8 +30,6 @@ namespace pymoose
             return 0;
         }    
     }
-    bool isEqual(double , double, double);
-
 } // namespace
 
 #endif
