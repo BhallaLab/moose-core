@@ -6,7 +6,7 @@ const std::string SpikeGen::className = "SpikeGen";
 SpikeGen::SpikeGen(Id id):PyMooseBase(id){}
 SpikeGen::SpikeGen(std::string path):PyMooseBase(className, path){}
 SpikeGen::SpikeGen(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-SpikeGen::SpikeGen(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+SpikeGen::SpikeGen(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 SpikeGen::~SpikeGen(){}
 const std::string& SpikeGen::getType(){ return className; }
 double SpikeGen::__get_threshold() const

@@ -7,7 +7,7 @@ const std::string ClockTick::className = "ClockTick";
 ClockTick::ClockTick(Id id):PyMooseBase(id){}
 ClockTick::ClockTick(std::string path):PyMooseBase(className, path){}
 ClockTick::ClockTick(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-ClockTick::ClockTick(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+ClockTick::ClockTick(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 ClockTick::~ClockTick(){}
 const std::string& ClockTick::getType(){ return className; }
 double ClockTick::__get_dt() const

@@ -220,6 +220,8 @@
 %attribute(pymoose::CaConc, double, decrease, __get_decrease, __set_decrease)
 %attribute(pymoose::CaConc, double, basalMsg, __get_basalMsg, __set_basalMsg)
 %include "HHGate.h"
+%attribute(pymoose::HHGate, InterpolationTable*, A, __get_A)
+%attribute(pymoose::HHGate, InterpolationTable*, B, __get_B)
 %include "HHChannel.h"
 %attribute(pymoose::HHChannel, double, Gbar, __get_Gbar, __set_Gbar)
 %attribute(pymoose::HHChannel, double, Ek, __get_Ek, __set_Ek)

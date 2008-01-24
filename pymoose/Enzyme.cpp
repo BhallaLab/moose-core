@@ -6,7 +6,7 @@ const std::string Enzyme::className = "Enzyme";
 Enzyme::Enzyme(Id id):PyMooseBase(id){}
 Enzyme::Enzyme(std::string path):PyMooseBase(className, path){}
 Enzyme::Enzyme(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Enzyme::Enzyme(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+Enzyme::Enzyme(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 Enzyme::~Enzyme(){}
 const std::string& Enzyme::getType(){ return className; }
 double Enzyme::__get_k1() const

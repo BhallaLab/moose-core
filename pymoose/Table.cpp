@@ -6,7 +6,7 @@ const std::string Table::className = "Table";
 Table::Table(Id id):InterpolationTable(id){}
 Table::Table(std::string path):InterpolationTable(className, path){}
 Table::Table(std::string name, Id parentId):InterpolationTable(className, name, parentId){}
-Table::Table(std::string name, PyMooseBase* parent):InterpolationTable(className, name, parent){}
+Table::Table(std::string name, PyMooseBase& parent):InterpolationTable(className, name, parent){}
 Table::~Table(){}
 const std::string& Table::getType(){ return className; }
 double Table::__get_input() const

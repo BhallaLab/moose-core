@@ -13,7 +13,7 @@ namespace pymoose
         InterpolationTable(Id id);
         InterpolationTable(std::string path);
         InterpolationTable(std::string name, Id parentId);
-        InterpolationTable(std::string name, PyMooseBase* parent);
+        InterpolationTable(std::string name, PyMooseBase& parent);
         ~InterpolationTable();
         const std::string& getType();
         double __get_xmin() const;
@@ -51,7 +51,7 @@ namespace pymoose
     
         InterpolationTable(std::string className, std::string objectName, Id parentId);
         InterpolationTable(std::string className, std::string path);    
-        InterpolationTable(std::string className, std::string objectName, PyMooseBase* parent);
+        InterpolationTable(std::string className, std::string objectName, PyMooseBase& parent);
     };
 }
 

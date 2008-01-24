@@ -17,7 +17,7 @@ namespace pymoose
       public:  
         PyMooseBase(std::string className, std::string objectName, Id parentId);
         PyMooseBase(std::string className, std::string path);
-        PyMooseBase(std::string className, std::string objectName, PyMooseBase* parent);
+        PyMooseBase(std::string className, std::string objectName, PyMooseBase& parent);
     
         virtual ~PyMooseBase();
         static bool destroy(Id id);    

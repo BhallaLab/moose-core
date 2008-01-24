@@ -9,7 +9,7 @@ namespace pymoose
         Molecule(Id id);
         Molecule(std::string path);
         Molecule(std::string name, Id parentId);
-        Molecule(std::string name, PyMooseBase* parent);
+        Molecule(std::string name, PyMooseBase& parent);
         ~Molecule();
         const std::string& getType();
         double __get_nInit() const;

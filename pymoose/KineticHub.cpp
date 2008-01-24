@@ -6,7 +6,7 @@ const std::string KineticHub::className = "KineticHub";
 KineticHub::KineticHub(Id id):PyMooseBase(id){}
 KineticHub::KineticHub(std::string path):PyMooseBase(className, path){}
 KineticHub::KineticHub(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-KineticHub::KineticHub(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+KineticHub::KineticHub(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 KineticHub::~KineticHub(){}
 const std::string& KineticHub::getType(){ return className; }
 unsigned int KineticHub::__get_nMol() const

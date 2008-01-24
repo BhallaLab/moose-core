@@ -9,7 +9,7 @@ namespace pymoose
         Reaction(Id id);
         Reaction(std::string path);
         Reaction(std::string name, Id parentId);
-        Reaction(std::string name, PyMooseBase* parent);
+        Reaction(std::string name, PyMooseBase& parent);
         ~Reaction();
         const std::string& getType();
         double __get_kf() const;

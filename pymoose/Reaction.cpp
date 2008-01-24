@@ -6,7 +6,7 @@ const std::string Reaction::className = "Reaction";
 Reaction::Reaction(Id id):PyMooseBase(id){}
 Reaction::Reaction(std::string path):PyMooseBase(className, path){}
 Reaction::Reaction(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Reaction::Reaction(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+Reaction::Reaction(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 Reaction::~Reaction(){}
 const std::string& Reaction::getType(){ return className; }
 double Reaction::__get_kf() const

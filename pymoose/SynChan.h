@@ -9,7 +9,7 @@ namespace pymoose
         SynChan(Id id);
         SynChan(std::string path);
         SynChan(std::string name, Id parentId);
-        SynChan(std::string name, PyMooseBase* parent);
+        SynChan(std::string name, PyMooseBase& parent);
         ~SynChan();
         const std::string& getType();
         double __get_Gbar() const;
