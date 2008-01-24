@@ -9,7 +9,7 @@ namespace pymoose
         Neutral(Id id);
         Neutral(std::string path);
         Neutral(std::string name, Id parentId);
-        Neutral(std::string name, PyMooseBase* parent);
+        Neutral(std::string name, PyMooseBase& parent);
         Neutral(std::string path, std::string fileName);
     
         ~Neutral();

@@ -7,7 +7,7 @@ const std::string ClockJob::className = "ClockJob";
 ClockJob::ClockJob(Id id):PyMooseBase(id){}
 ClockJob::ClockJob(std::string path):PyMooseBase(className, path){}
 ClockJob::ClockJob(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-ClockJob::ClockJob(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+ClockJob::ClockJob(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 ClockJob::~ClockJob(){}
 const std::string& ClockJob::getType(){ return className; }
 double ClockJob::__get_runTime() const

@@ -10,7 +10,7 @@ namespace pymoose
         GammaRng(Id id);
         GammaRng(std::string path);
         GammaRng(std::string name, Id parentId);
-        GammaRng(std::string name, PyMooseBase* parent);
+        GammaRng(std::string name, PyMooseBase& parent);
         ~GammaRng();
         const std::string& getType();
         double __get_alpha() const;

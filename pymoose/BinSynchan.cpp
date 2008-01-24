@@ -58,7 +58,7 @@ BinSynchan::BinSynchan(std::string name, Id parentId):PyMooseBase(className, nam
     releaseP = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseP,  &BinSynchan::__set_releaseP);
     releaseCount = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseCount,  &BinSynchan::__set_releaseCount);
 }
-BinSynchan::BinSynchan(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent)
+BinSynchan::BinSynchan(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent)
 {    
      weight = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this, &BinSynchan::__get_weight, &BinSynchan::__set_weight);
     delay = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,&BinSynchan::__get_delay, &BinSynchan::__set_delay);

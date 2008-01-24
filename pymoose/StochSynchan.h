@@ -36,7 +36,7 @@ namespace pymoose
         StochSynchan(Id id);
         StochSynchan(std::string path);
         StochSynchan(std::string name, Id parentId);
-        StochSynchan(std::string name, PyMooseBase* parent);
+        StochSynchan(std::string name, PyMooseBase& parent);
         ~StochSynchan();
         const std::string& getType();
         double __get_Gbar() const;

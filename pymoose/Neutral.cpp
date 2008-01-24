@@ -6,7 +6,7 @@ const std::string Neutral::className = "Neutral";
 Neutral::Neutral(Id id):PyMooseBase(id){}
 Neutral::Neutral(std::string path):PyMooseBase(className, path){}
 Neutral::Neutral(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Neutral::Neutral(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+Neutral::Neutral(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 Neutral::Neutral(std::string path, std::string fileName):PyMooseBase(className, path, fileName){}
 
 Neutral::~Neutral(){}

@@ -10,7 +10,7 @@ namespace pymoose
         HHChannel(Id id);
         HHChannel(std::string path);
         HHChannel(std::string name, Id parentId);
-        HHChannel(std::string name, PyMooseBase* parent);
+        HHChannel(std::string name, PyMooseBase& parent);
         ~HHChannel();
         const std::string& getType();
         double __get_Gbar() const;
@@ -48,8 +48,7 @@ namespace pymoose
         void setupAlpha(std::string gate, vector <double> params);
         void setupAlpha(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size = 3000, double min = -0.1, double max = 0.05);
         void setupTau(std::string gate, vector <double> params);
-        void setupTau(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size = 3000, double min = -0.1, double max=0.05);
-    
+        void setupTau(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size = 3000, double min = -0.1, double max=0.05);    
     };
 }
 

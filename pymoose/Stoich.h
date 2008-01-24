@@ -9,7 +9,7 @@ namespace pymoose
         Stoich(Id id);
         Stoich(std::string path);
         Stoich(std::string name, Id parentId);
-        Stoich(std::string name, PyMooseBase* parent);
+        Stoich(std::string name, PyMooseBase& parent);
         ~Stoich();
         const std::string& getType();
         unsigned int __get_nMols() const;

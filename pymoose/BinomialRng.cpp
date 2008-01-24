@@ -25,7 +25,7 @@ const std::string BinomialRng::className = "BinomialRng";
 BinomialRng::BinomialRng(Id id):RandGenerator(id){}
 BinomialRng::BinomialRng(std::string path):RandGenerator(className, path){}
 BinomialRng::BinomialRng(std::string name, Id parentId):RandGenerator(className, name, parentId){}
-BinomialRng::BinomialRng(std::string name, PyMooseBase* parent):RandGenerator(className, name, parent){}
+BinomialRng::BinomialRng(std::string name, PyMooseBase& parent):RandGenerator(className, name, parent){}
 BinomialRng::~BinomialRng(){}
 const std::string& BinomialRng::getType(){ return className; }
 int BinomialRng::__get_n() const
