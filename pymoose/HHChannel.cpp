@@ -7,7 +7,7 @@ const std::string HHChannel::className = "HHChannel";
 HHChannel::HHChannel(Id id):PyMooseBase(id){}
 HHChannel::HHChannel(std::string path):PyMooseBase(className, path){}
 HHChannel::HHChannel(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-HHChannel::HHChannel(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+HHChannel::HHChannel(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 HHChannel::~HHChannel(){}
 const std::string& HHChannel::getType(){ return className; }
 double HHChannel::__get_Gbar() const
@@ -169,7 +169,7 @@ void HHChannel::setupAlpha(std::string gate, vector <double> params)
 
 void HHChannel::setupAlpha(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max )
 {
-    // TODO:
+    this->getContext()->setupAlpha(this->path(),gate, AA, AB, AC,AD,AF, BA, BB, BC, BD, BF, size, min, max );    
 }
 
 
@@ -179,9 +179,22 @@ void HHChannel::setupTau(std::string gate, vector <double> params)
 }
 void HHChannel::setupTau(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max)
 {
-    // TODO:
+    this->getContext()->setupTau(this->path(),gate, AA, AB, AC,AD,AF, BA, BB, BC, BD, BF, size, min, max );    
 }
+/**
+   This function creates A and B interpolation tables inside a
+   specified gate.
 
+   @param gate - if it starts with x then the tables are created
+   inside xGate similarly, for parameter starting with y and z create
+   tables inside yGate and zGate respectively.
+
+   @param divs - the number of divisions in the interpolation tables.
+
+   @param min - the lowest entry value in the tables.
+
+   @param max - the highest entry value in the tables.
+*/
 void HHChannel::createTable(std::string gate, unsigned int divs, double min, double max)
 {
     if (gate.empty())

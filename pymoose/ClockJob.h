@@ -10,7 +10,7 @@ namespace pymoose
         ClockJob(Id id);
         ClockJob(std::string path);
         ClockJob(std::string name, Id parentId);
-        ClockJob(std::string name, PyMooseBase* parent);
+        ClockJob(std::string name, PyMooseBase& parent);
         ~ClockJob();
         const std::string& getType();
         double __get_runTime() const;

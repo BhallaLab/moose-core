@@ -6,7 +6,7 @@ const std::string PoissonRng::className = "PoissonRng";
 PoissonRng::PoissonRng(Id id):RandGenerator(id){}
 PoissonRng::PoissonRng(std::string path):RandGenerator(className, path){}
 PoissonRng::PoissonRng(std::string name, Id parentId):RandGenerator(className, name, parentId){}
-PoissonRng::PoissonRng(std::string name, PyMooseBase* parent):RandGenerator(className, name, parent){}
+PoissonRng::PoissonRng(std::string name, PyMooseBase& parent):RandGenerator(className, name, parent){}
 PoissonRng::~PoissonRng(){}
 const std::string& PoissonRng::getType(){ return className; }
 double PoissonRng::__get_mean() const

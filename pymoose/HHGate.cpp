@@ -6,24 +6,24 @@ const std::string HHGate::className = "HHGate";
 HHGate::HHGate(Id id):PyMooseBase(id){}
 HHGate::HHGate(std::string path):PyMooseBase(className, path){}
 HHGate::HHGate(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-HHGate::HHGate(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+HHGate::HHGate(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 HHGate::~HHGate(){}
 const std::string& HHGate::getType(){ return className; }
 
 // Manually edited part
-Table* HHGate::getA() const
+InterpolationTable* HHGate::__get_A() const
 {
-    return new Table(PyMooseBase::pathToId(this->path()+"/A"));    
+    return new InterpolationTable(PyMooseBase::pathToId(this->path()+"/A"));    
 }
-Table* HHGate::getB() const
+InterpolationTable* HHGate::__get_B() const
 {
-    return new Table(PyMooseBase::pathToId(this->path()+"/B"));
+    return new InterpolationTable(PyMooseBase::pathToId(this->path()+"/B"));
 }
 
 void HHGate::tabFill(int xdivs, int mode)
 {
-    this->getA()->tabFill(xdivs, mode);
-    this->getB()->tabFill(xdivs, mode);
+    this->__get_A()->tabFill(xdivs, mode);
+    this->__get_B()->tabFill(xdivs, mode);
 }
 void HHGate::setupAlpha(double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max)
 {

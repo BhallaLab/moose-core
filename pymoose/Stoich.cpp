@@ -7,7 +7,7 @@ const std::string Stoich::className = "Stoich";
 Stoich::Stoich(Id id):PyMooseBase(id){}
 Stoich::Stoich(std::string path):PyMooseBase(className, path){}
 Stoich::Stoich(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Stoich::Stoich(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+Stoich::Stoich(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 Stoich::~Stoich(){}
 const std::string& Stoich::getType(){ return className; }
 unsigned int Stoich::__get_nMols() const

@@ -6,7 +6,7 @@ const std::string ExponentialRng::className = "ExponentialRng";
 ExponentialRng::ExponentialRng(Id id):RandGenerator(id){}
 ExponentialRng::ExponentialRng(std::string path):RandGenerator(className, path){}
 ExponentialRng::ExponentialRng(std::string name, Id parentId):RandGenerator(className, name, parentId){}
-ExponentialRng::ExponentialRng(std::string name, PyMooseBase* parent):RandGenerator(className, name, parent){}
+ExponentialRng::ExponentialRng(std::string name, PyMooseBase& parent):RandGenerator(className, name, parent){}
 ExponentialRng::~ExponentialRng(){}
 const std::string& ExponentialRng::getType(){ return className; }
 double ExponentialRng::__get_mean() const

@@ -10,7 +10,7 @@ namespace pymoose
         MathFunc(Id id);
         MathFunc(std::string path);
         MathFunc(std::string name, Id parentId);
-        MathFunc(std::string name, PyMooseBase* parent);
+        MathFunc(std::string name, PyMooseBase& parent);
         ~MathFunc();
         const std::string& getType();
         string __get_mathML() const;
