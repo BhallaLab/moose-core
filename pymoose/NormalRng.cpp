@@ -6,7 +6,7 @@ const std::string NormalRng::className = "NormalRng";
 NormalRng::NormalRng(Id id):RandGenerator(id){}
 NormalRng::NormalRng(std::string path):RandGenerator(className, path){}
 NormalRng::NormalRng(std::string name, Id parentId):RandGenerator(className, name, parentId){}
-NormalRng::NormalRng(std::string name, PyMooseBase* parent):RandGenerator(className, name, parent){}
+NormalRng::NormalRng(std::string name, PyMooseBase& parent):RandGenerator(className, name, parent){}
 NormalRng::~NormalRng(){}
 const std::string& NormalRng::getType(){ return className; }
 double NormalRng::__get_mean() const

@@ -23,7 +23,7 @@ const std::string Cell::className = "Cell";
 Cell::Cell(Id id):PyMooseBase(id){}
 Cell::Cell(std::string path):PyMooseBase(className, path){}
 Cell::Cell(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Cell::Cell(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+Cell::Cell(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 Cell::~Cell(){}
 const std::string& Cell::getType(){ return className; }
 #endif

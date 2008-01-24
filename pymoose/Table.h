@@ -10,7 +10,7 @@ namespace pymoose
         Table(Id id);
         Table(std::string path);
         Table(std::string name, Id parentId);
-        Table(std::string name, PyMooseBase* parent);
+        Table(std::string name, PyMooseBase& parent);
         ~Table();
         const std::string& getType();
         double __get_input() const;

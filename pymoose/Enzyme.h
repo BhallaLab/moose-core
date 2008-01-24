@@ -10,7 +10,7 @@ namespace pymoose
         Enzyme(Id id);
         Enzyme(std::string path);
         Enzyme(std::string name, Id parentId);
-        Enzyme(std::string name, PyMooseBase* parent);
+        Enzyme(std::string name, PyMooseBase& parent);
         ~Enzyme();
         const std::string& getType();
         double __get_k1() const;

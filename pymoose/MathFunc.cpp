@@ -6,7 +6,7 @@ const std::string MathFunc::className = "MathFunc";
 MathFunc::MathFunc(Id id):PyMooseBase(id){}
 MathFunc::MathFunc(std::string path):PyMooseBase(className, path){}
 MathFunc::MathFunc(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-MathFunc::MathFunc(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+MathFunc::MathFunc(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 MathFunc::~MathFunc(){}
 const std::string& MathFunc::getType(){ return className; }
 string MathFunc::__get_mathML() const

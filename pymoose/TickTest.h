@@ -9,7 +9,7 @@ namespace pymoose
         TickTest(Id id);
         TickTest(std::string path);
         TickTest(std::string name, Id parentId);
-        TickTest(std::string name, PyMooseBase* parent);
+        TickTest(std::string name, PyMooseBase& parent);
         ~TickTest();
         const std::string& getType();
     };

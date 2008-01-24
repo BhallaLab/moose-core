@@ -6,7 +6,7 @@ const std::string SynChan::className = "SynChan";
 SynChan::SynChan(Id id):PyMooseBase(id){}
 SynChan::SynChan(std::string path):PyMooseBase(className, path){}
 SynChan::SynChan(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-SynChan::SynChan(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+SynChan::SynChan(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 SynChan::~SynChan(){}
 const std::string& SynChan::getType(){ return className; }
 double SynChan::__get_Gbar() const

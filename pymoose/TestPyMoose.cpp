@@ -28,6 +28,9 @@ int main(int argc, char **argv)
     cout << "Successfully created contex ... " << endl;
     cout << "Resetting context .... " << endl;
     Compartment c("test");
+    HHChannel ch ("Na",c);
+    ch.__set_Ek(1.0);
+    
     ctx->setClock(0, 1e-4, 0);
     ctx->useClock(PyMooseBase::pathToId("/sched/cj/t0"), "/test");    
     ctx ->reset();
@@ -35,6 +38,10 @@ int main(int argc, char **argv)
     cout << "Doing step ... " << endl;
     ctx->step(0.05);
     cout << "Successful step ... " << endl;
+    Compartment d("test");
+    HHChannel dch("Na", d);
+    dch.__set_Ek(1.1);
+    
     cout << "Calling destroy ... " << endl;
     PyMooseContext::destroyPyMooseContext(ctx);
     cout << "Successful destroy ... " << endl;

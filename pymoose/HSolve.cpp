@@ -6,7 +6,7 @@ const std::string HSolve::className = "HSolve";
 HSolve::HSolve(Id id):PyMooseBase(id){}
 HSolve::HSolve(std::string path):PyMooseBase(className, path){}
 HSolve::HSolve(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-HSolve::HSolve(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+HSolve::HSolve(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 HSolve::~HSolve(){}
 const std::string& HSolve::getType(){ return className; }
 
