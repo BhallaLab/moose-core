@@ -27,7 +27,7 @@ namespace pymoose
         Class(Id id);
         Class(std::string path, std::string name);
         Class(std::string name, Id parentId);
-        Class(std::string name, PyMooseBase* parent);
+        Class(std::string name, PyMooseBase& parent);
         ~Class();
         const std::string& getType();
         std::string __get_name();

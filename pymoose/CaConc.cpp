@@ -6,7 +6,7 @@ const std::string CaConc::className = "CaConc";
 CaConc::CaConc(Id id):PyMooseBase(id){}
 CaConc::CaConc(std::string path):PyMooseBase(className, path){}
 CaConc::CaConc(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-CaConc::CaConc(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+CaConc::CaConc(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 CaConc::~CaConc(){}
 const std::string& CaConc::getType(){ return className; }
 double CaConc::__get_Ca() const

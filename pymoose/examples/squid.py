@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import math
+
 # The PYTHONPATH should contain the location of moose.py and _moose.so
 # files.  Putting ".." with the assumption that moose.py and _moose.so
 # has been generated in ${MOOSE_SOURCE_DIRECTORY}/pymoose/ (as default
@@ -14,7 +15,6 @@ except ImportError:
     import sys
     sys.exit(1)
 
-import math
 VMIN = -0.1
 VMAX = 0.05
 NDIVS = 150
@@ -60,106 +60,116 @@ def calc_K_n_A( v ):
 def calc_K_n_B( v ):
 	return 0.125e3 * math.exp((EREST - v ) / 0.08 )
 
-# Make the squid object global
-
 context = moose.PyMooseBase.getContext()
 
-def setupModel():
-    """Set up the MOOSE model for squid demo"""
-    global context
+class Squid(moose.Compartment):
+    """A squid giant axon compartment - initialized to default property values"""
+    def __init__(self, path):
+        """Set up the squid giant axon model with defaults"""
+        global context
+        moose.Compartment.__init__(self,path)
 
-    if context.exists('squid'):
-        return moose.Compartment('squid')
-    squid = moose.Compartment('squid')
-    squid.Rm = RM
-    squid.Ra = RA
-    squid.Cm = CM
-    squid.Em = VLEAK
+        self.vmTable = moose.Table('Vm')
+        self.Rm = RM
+        self.Ra = RA
+        self.Cm = CM
+        self.Em = VLEAK
+        self.initVm = EREST
+        self.inject = 0
+        self.Na =  moose.HHChannel('Na', self)
+        self.Na.Ek = VNa
+        self.Na.Gbar = GNa
+        self.Na.Xpower = 3 # This will create HHGate instance xGate inside the Na channel
+        self.Na.Ypower = 1 # This will create HHGate instance yGate inside the Na channel
+        self.K = moose.HHChannel('K', self)
+        self.K.Ek = VK
+        self.K.Gbar = GK
+        self.K.Xpower = 4 # This will create HHGate instance xGate inside the K channel
+        self.connect('channel', self.Na, 'channel')
+        self.connect('channel', self.K, 'channel')
+        # These gates get created only after Xpower or Ypower are set to nonzero values
+        # So we have to explicitly insert these fields in the class
+        self.Na.xGate = moose.HHGate(self.Na.path() + '/xGate')
+        self.Na.yGate = moose.HHGate(self.Na.path() + '/yGate')
+        self.K.xGate = moose.HHGate(self.K.path() + '/xGate')
+        self.K.yGate = moose.HHGate(self.K.path() + '/yGate')
 
-    Na =  moose.HHChannel('Na', squid)
-    Na.Ek = VNa
-    Na.Gbar = GNa
-    Na.Xpower = 3
-    Na.Ypower = 1
-    
-    K = moose.HHChannel('K', squid)
-    K.Ek = VK
-    K.Gbar = GK
-    K.Xpower = 4
-
-    squid.connect('channel', Na, 'channel')
-    squid.connect('channel', K, 'channel')
-    
-    
-    Na_xA = moose.InterpolationTable('/squid/Na/xGate/A')
-    Na_xB = moose.InterpolationTable('/squid/Na/xGate/B')
-    Na_yA = moose.InterpolationTable('/squid/Na/yGate/A')
-    Na_yB = moose.InterpolationTable('/squid/Na/yGate/B')
-    K_xA = moose.InterpolationTable('/squid/K/xGate/A')
-    K_xB = moose.InterpolationTable('/squid/K/xGate/B')
-
-   
-    Na_xA.xmin = VMIN
-    Na_xA.xmax = VMAX
-    Na_xA.xdivs = NDIVS
-
-    Na_xB.xmin = VMIN
-    Na_xB.xmax = VMAX
-    Na_xB.xdivs = NDIVS
-
-    Na_yA.xmin = VMIN
-    Na_yA.xmax = VMAX
-    Na_yA.xdivs = NDIVS
-
-    Na_yB.xmin = VMIN
-    Na_yB.xmax = VMAX
-    Na_yB.xdivs = NDIVS
-
-    K_xA.xmin = VMIN
-    K_xA.xmax = VMAX
-    K_xA.xdivs = NDIVS
-
-    K_xB.xmin = VMIN
-    K_xB.xmax = VMAX
-    K_xB.xdivs = NDIVS
-    
-    v = VMIN
-
-    for i in range(NDIVS+1):
-	Na_xA[i] = calc_Na_m_A ( v )
-	Na_xB[i]  =  calc_Na_m_A (v)   +  calc_Na_m_B ( v   )
-	Na_yA[i] = calc_Na_h_A  (v )
-	Na_yB[i] =  calc_Na_h_A  (v)   +   calc_Na_h_B  (v   )
-	K_xA[i] = calc_K_n_A  (v )
-	K_xB[i] =  calc_K_n_A ( v)   +  calc_K_n_B ( v )
-	v = v + dv
-
-    context = moose.PyMooseBase.getContext()
-    context.setClock(0, SIMDT, 0)
-    context.setClock(1, PLOTDT, 0)
+        self.Na.xGate.A.xmin = VMIN
+        self.Na.xGate.A.xmax = VMAX
+        self.Na.xGate.A.xdivs = NDIVS
 
 
-    squid.initVm = EREST
-    return squid
+        self.Na.xGate.B.xmin = VMIN
+        self.Na.xGate.B.xmax = VMAX
+        self.Na.xGate.B.xdivs = NDIVS
 
 
-def runDemo():
-    """Run the simulation steps, setup the model if required"""
-    Vm = moose.Table('Vm')
-    Vm.stepmode = 3
-    squid = setupModel()
-    Vm.connect('inputRequest', squid, 'Vm')
-    context.useClock(moose.PyMooseBase.pathToId('/sched/cj/t0'), '/Vm,/squid,/squid/#')
-    context.reset()
-    squid.inject = 0
-    context.step(0.005)
-    squid.inject = INJECT
-    context.step(0.040)
-    squid.inject = 0
-    context.step(0.005)
-    Vm.dumpFile("squid.plot")
-    return Vm
+        self.Na.yGate.A.xmin = VMIN
+        self.Na.yGate.A.xmax = VMAX
+        self.Na.yGate.A.xdivs = NDIVS
+
+        self.Na.yGate.B.xmin = VMIN
+        self.Na.yGate.B.xmax = VMAX
+        self.Na.yGate.B.xdivs = NDIVS
+
+        self.K.xGate.A.xmin = VMIN
+        self.K.xGate.A.xmax = VMAX
+        self.K.xGate.A.xdivs = NDIVS
+        
+        self.K.xGate.B.xmin = VMIN
+        self.K.xGate.B.xmax = VMAX
+        self.K.xGate.B.xdivs = NDIVS
+
+        v = VMIN
+
+        for i in range(NDIVS+1):
+            self.Na.xGate.A[i] = calc_Na_m_A(v)
+            self.Na.xGate.B[i] = calc_Na_m_A(v) + calc_Na_m_B(v)
+            self.Na.yGate.A[i] = calc_Na_h_A(v)
+            self.Na.yGate.B[i] = calc_Na_h_A(v) + calc_Na_h_B(v)
+            self.K.xGate.A[i]  = calc_K_n_A(v)
+            self.K.xGate.B[i]  = calc_K_n_A(v) + calc_K_n_B(v)
+            v = v + dv
+
+        context = moose.PyMooseBase.getContext()
+        context.setClock(0, SIMDT, 0)
+        context.setClock(1, PLOTDT, 0)
+        print 'Inside the constructor'
+        # Create and connect a table to dump data
+        self.vmTable.stepmode = 3
+        self.vmTable.connect('inputRequest', self, 'Vm')
+        clockTargets ='/Vm,'+self.path()+','+self.path()+'/#'
+        print 'Clock targets = ', clockTargets
+        context.useClock(moose.PyMooseBase.pathToId('/sched/cj/t0'), clockTargets)
+
+
+        
+    def doRun(self, totTime,preTime, pulseWidth, injectBase, injectHigh):
+        global context
+        if ( preTime > totTime ):
+            print "ERROR: total simulation time is less than pre-pulse time."
+            return self.vmTable
+        elif preTime + pulseWidth > totTime:
+            pulseWidth = totTime - preTime
+            cout << "Warning: Pulse width exceeds total simulation time."
+        self.initVm = EREST
+        context.reset()
+        self.inject = injectBase
+        time = preTime
+        context.step(time)
+        self.inject = injectHigh
+        time = pulseWidth
+        context.step(time)
+        self.inject = injectBase
+        time = totTime - preTime - pulseWidth
+        if  time > 0 :
+            context.step(time)
+        return self.vmTable
 
 if __name__ == '__main__':
-    runDemo()
+    squid = Squid('/squid')
+    vm = squid.doRun(0.050, 0.005, 0.040, 0, INJECT)
+    for i in vm:
+        print 'vm = ',i
+    vm.dumpFile('squid.plot')
     print 'The output is available in squid.plot'

@@ -58,13 +58,29 @@ PyMooseBase::PyMooseBase(Id id)
 */
 PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id parentId )
 {
-    if ( objectName.find(getSeparator()) == std::string::npos)
+    if ( objectName.find(getSeparator()) != std::string::npos)
     {
         cerr << "Error: PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id parentId ) - object name should not have " << getSeparator() << endl;
         id_ = Id::badId();
         return;        
     }
+    string path = parentId.path(getSeparator())+getSeparator()+objectName;
     
+    id_ = PyMooseBase::pathToId(path,false);
+    if (!id_.bad())
+    {
+        cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
+        
+        if ( path == getSeparator() || path == (getSeparator()+"root"))
+        {
+            cerr << "Returning the predefined root element." << endl;
+        } else 
+        {
+            cerr << "Returning already existing object." << endl;
+        }
+        return;
+    }
+
     id_ = context_->create(className, objectName, parentId);    
 }
 
@@ -110,22 +126,23 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
     std::string::size_type name_start = path.rfind(getSeparator(),path.length()-1);
     std::string myName;    
     std::string parentPath;
-    Id parentId;
     
     if (name_start == std::string::npos)
     {
         name_start = 0;
         myName = path;
-        parentId = context_->getCwe();        
+        Id parentId = context_->getCwe();
+        id_ = context_->create(className, myName, parentId );
     }
     else 
     {
         myName = path.substr(name_start+1);
         parentPath = path.substr(0,name_start);
-        parentId = context_->pathToId(parentPath, false);        
+        Id parentId = context_->pathToId(parentPath, false);
+        id_ = context_->create(className, myName, parentId );
     }
     
-    id_ = context_->create(className, myName, parentId );
+
 }
 
 /**
@@ -139,9 +156,31 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
    @param parent - the object under which the newly instantiated
    object will be placed.
 */
-PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseBase* parent)
+PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseBase& parent)
 {
-    id_ = context_->create(className, objectName, parent->id_);
+    if ( parent.id_.bad() )
+    {
+        cerr << "Error: Invalid parent Id" << endl;
+        id_ = Id::badId();        
+        return;
+    }
+    
+    string path = parent.path() + getSeparator() + objectName;
+    id_ = PyMooseBase::pathToId(path,false);
+    if (!id_.bad())
+    {
+        cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
+        
+        if ( path == getSeparator() || path == (getSeparator()+"root"))
+        {
+            cerr << "Returning the predefined root element." << endl;
+        } else 
+        {
+            cerr << "Returning already existing object." << endl;
+        }
+        return;
+    }
+    id_ = context_->create(className, objectName, parent.id_);
 }
 
 /**

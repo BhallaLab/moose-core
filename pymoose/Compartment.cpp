@@ -7,7 +7,7 @@ const std::string Compartment::className = "Compartment";
 Compartment::Compartment(Id id):PyMooseBase(id){}
 Compartment::Compartment(std::string path):PyMooseBase(className, path){}
 Compartment::Compartment(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Compartment::Compartment(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}
+Compartment::Compartment(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 Compartment::~Compartment(){}
 const std::string& Compartment::getType(){ return className; }
 double Compartment::__get_Vm() const

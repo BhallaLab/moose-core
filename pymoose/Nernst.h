@@ -9,7 +9,7 @@ namespace pymoose
         Nernst(Id id);
         Nernst(std::string path);
         Nernst(std::string name, Id parentId);
-        Nernst(std::string name, PyMooseBase* parent);
+        Nernst(std::string name, PyMooseBase& parent);
         ~Nernst();
         const std::string& getType();
         double __get_E() const;
