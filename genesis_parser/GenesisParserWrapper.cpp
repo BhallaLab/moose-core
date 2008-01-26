@@ -86,6 +86,8 @@ const Cinfo* initGenesisParserCinfo()
 		new SrcFinfo( "set", // object, field, value 
 				Ftype3< Id, string, string >::global() ),
 
+		new SrcFinfo( "file2tab", // object, filename, skiplines 
+				Ftype3< Id, string, unsigned int >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// Clock control and scheduling
@@ -258,6 +260,8 @@ static const unsigned int requestFieldSlot =
 	initGenesisParserCinfo()->getSlotIndex( "parser.get" );
 static const unsigned int setFieldSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.set" );
+static const unsigned int file2tabSlot = 
+	initGenesisParserCinfo()->getSlotIndex( "parser.file2tab" );
 static const unsigned int setClockSlot = 
 	initGenesisParserCinfo()->getSlotIndex( "parser.setClock" );
 static const unsigned int useClockSlot = 
@@ -2058,6 +2062,35 @@ void do_tab2file( int argc, const char** const argv, Id s )
 				elmname << endl;
 }
 
+
+/**
+ * file2tab: Loads a file into a table.
+ */
+void do_file2tab( int argc, const char** const argv, Id s )
+{
+	if ( argc < 4 ) {
+		cout << argv[0] << ": Too few command arguments\n";
+		cout << "usage: " << argv[0] << " file-name element table -table2 table -table3 table -skiplines number\n\n";
+		return;
+	}
+	string fname = argv[1];
+	string elmname = argv[2];
+	string tabname = argv[3];
+	unsigned int skiplines = 0;
+	if ( argc > 5 && string( argv[4] ) == "-skiplines" )
+		skiplines = atoi( argv[5] );
+	
+
+	// Id e = GenesisParserWrapper::path2eid( elmname, s );
+	Id e( elmname );
+	if ( !e.zero() && !e.bad() )
+		send3< Id, string, unsigned int >( s(),
+			file2tabSlot, e, fname, skiplines );
+	else
+		cout << "Error: " << argv[0] << ": element not found: " <<
+				elmname << endl;
+}
+
 /**
  * Utility function for returning an empty argv list
  */
@@ -3354,6 +3387,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "listobjects", do_listobjects, "void" );
 	AddFunc( "echo", do_echo, "void" );
 	AddFunc( "tab2file", do_tab2file, "void" );
+	AddFunc( "file2tab", do_file2tab, "void" );
 	AddFunc( "el",
 			reinterpret_cast< slifunc >( do_element_list ), "char**" );
 	AddFunc( "element_list",
