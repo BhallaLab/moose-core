@@ -142,8 +142,21 @@ class Squid(moose.Compartment):
         print 'Clock targets = ', clockTargets
         context.useClock(moose.PyMooseBase.pathToId('/sched/cj/t0'), clockTargets)
 
+    def toggleNaChannels(self, arg):
+        if arg == 0:
+            self.Na.Gbar = GNa
+        else:
+            self.Na.Gbar = 0.0
 
-        
+    def toggleKChannels(self, arg):
+        if arg == 0:
+            self.K.Gbar = GK
+        else:
+            self.K.Gbar = 0.0
+
+    def getVmTable(self):
+        return self.vmTable
+
     def doRun(self, totTime,preTime, pulseWidth, injectBase, injectHigh):
         global context
         if ( preTime > totTime ):
