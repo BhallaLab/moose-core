@@ -32,5 +32,6 @@ The current regression tests are:
 	Uses readcell
 7. Simple network of single compartment neurons. Uses createmap and
    planarconnect. Does not use solver.
+8. Test of tab2file and file2tab commands.
 
 =============================================================================

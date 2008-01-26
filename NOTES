@@ -5578,4 +5578,6 @@ Recompiled the whole mess back down to -g, no optimization, so as to get
 back to using unit tests and doing development. This clears unit tests and
 regression tests.
 
+Checked in as revision 377 with unit test flags on, Smoldyn off, -g ,GSL
+
 ==============================================================================

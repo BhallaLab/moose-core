@@ -96,6 +96,11 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "set",
 				Ftype3< Id, string, string >::global(),
 				RFCAST( &Shell::setField ) ),
+		// Assigning a file into a table.
+		// ElementId, filename, skiplines
+		new DestFinfo( "file2tab",
+				Ftype3< Id, string, unsigned int >::global(),
+				RFCAST( &Shell::file2tab ) ),
 
 		// Handle requests for setting values for a clock tick.
 		// args are clockNo, dt, stage
@@ -1242,10 +1247,10 @@ void Shell::setField( const Conn& c,
 	const Finfo* f = e->findFinfo( field );
 	if ( f ) {
 		if ( !f->strSet( e, value ) )
-			cout << "Error: cannot set field " << e->name() <<
+			cout << "setField: Error: cannot set field " << e->name() <<
 					"." << field << " to " << value << endl;
 	} else {
-		cout << "Error: cannot find field: " << id.path() << ", " << e->name() <<
+		cout << "setField: Error: cannot find field: " << id.path() << ", " << e->name() <<
 				"." << field << endl;
 	}
 }
@@ -1268,12 +1273,33 @@ void Shell::setVecField( const Conn& c,
 		const Finfo* f = e->findFinfo( field );
 		if ( f ) {
 			if ( !f->strSet( e, value ) )
-				cout << "Error: cannot set field " << i->path() <<
+				cout << "setVecField: Error: cannot set field " << i->path() <<
 						"." << field << " to " << value << endl;
 		} else {
-			cout << "Error: cannot find field: " << i->path() <<
+			cout << "setVecField: Error: cannot find field: " << i->path() <<
 				"." << field << endl;
 		}
+	}
+}
+
+/**
+ * This function handles request to load a file into an Interpol object
+ */
+void Shell::file2tab( const Conn& c, 
+				Id id, string filename, unsigned int skiplines )
+{
+	assert( id.good() );
+	Element* e = id();
+	if ( !e ) {
+		cout << "Shell::file2tab:Error: Element not found: " 
+			<< id << endl;
+		return;
+	}
+	// Appropriate off-node stuff here.
+
+	if ( !set< string, unsigned int >( e, "load", filename, skiplines ) ) {
+			cout << "Shell::file2tab Error: cannot set field " <<
+				e->name() << ".load\n";
 	}
 }
 

@@ -70,6 +70,11 @@ $MOOSE moose_network.g > /dev/null
 echo -n "network"
 $NEARDIFF moose_network.plot test.plot 1.0e-11
 
+/bin/rm -f test.plot
+$MOOSE moose_file2tab2file.g > /dev/null
+echo -n "file2tab and tab2file"
+$NEARDIFF moose_file2tab.plot test.plot 1.0e-6
+
 echo
 /bin/rm -f test.plot
 /bin/rm -f test_*.plot
