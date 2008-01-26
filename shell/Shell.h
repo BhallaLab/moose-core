@@ -174,6 +174,8 @@ class Shell
 		//////////////////////////////////////////////////////////
 		static void tabop( const Conn& c, Id tab, char op, double min, 
 			double max );
+		static void file2tab( const Conn& c, 
+				Id id, string filename, unsigned int skiplines );
 			/*
 		void add( const string& src, const string& dest );
 		void drop( const string& src, const string& dest );

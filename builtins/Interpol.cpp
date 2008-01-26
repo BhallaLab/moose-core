@@ -97,6 +97,11 @@ const Cinfo* initInterpolCinfo()
 		new DestFinfo( "print", Ftype1< string >::global(), 
 			RFCAST( &Interpol::print )
 		),
+		/// Load contents from file.
+		//  load filename skiplines
+		new DestFinfo( "load", Ftype2< string, unsigned int >::global(), 
+			RFCAST( &Interpol::load )
+		),
 		/// Append to existing table. Used in loadtab -continue.
 		new DestFinfo( "appendTableVector", 
 			Ftype1< vector< double > >::global(), 
@@ -239,6 +244,11 @@ void Interpol::tabFill( const Conn& c, int xdivs, int mode )
 void Interpol::print( const Conn& c, string fname )
 {
 	static_cast< Interpol* >( c.data() )->innerPrint( fname );
+}
+
+void Interpol::load( const Conn& c, string fname, unsigned int skiplines )
+{
+	static_cast< Interpol* >( c.data() )->innerLoad( fname, skiplines );
 }
 
 void Interpol::appendTableVector( const Conn& c, vector< double > value ) 
@@ -435,6 +445,31 @@ void Interpol::innerPrint( const string& fname )
 	std::ofstream fout( fname.c_str(), std::ios::app );
 	for ( i = table_.begin(); i != table_.end(); i++ )
 		fout << *i << endl;
+}
+
+void Interpol::innerLoad( const string& fname, unsigned int skiplines )
+{
+	vector< double >::iterator i;
+	std::ifstream fin( fname.c_str() );
+	string line;
+	if ( fin.good() ) {
+		unsigned int i;
+		for ( i = 0; i < skiplines; i++ ) {
+			if ( fin.good () )
+				getline( fin, line );
+			else
+				break;
+		}
+		if ( !fin.good() )
+			return;
+		double y;
+		table_.resize( 0 );
+		while ( fin >> y ) 
+			table_.push_back( y );
+	} else {
+		cout << "Error: Interpol::innerLoad: Failed to open file " << 
+			fname << endl;
+	}
 }
 
 #ifdef DO_UNIT_TESTS
