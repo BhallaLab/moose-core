@@ -3,9 +3,9 @@
 
 # ---------- General parameters ---------
 
-#graphics opengl
-graphics none
-#graphic_iter 1
+graphics opengl
+#graphics none
+graphic_iter 1
 
 
 dim 3
