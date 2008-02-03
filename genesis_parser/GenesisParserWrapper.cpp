@@ -517,6 +517,8 @@ map< string, string >& sliSrcLookup()
 	// done already through the existing messaging.
 	src[ "EREST Vm" ] = "";
 
+        // Messages for PulseGen
+        src[ "INPUT output" ] = "outputSrc";
 	// Some messages for tables, specially used for I/O
 	src[ "SpikeGen.INPUT Vm" ] = "VmSrc";
 	src[ "INPUT Vm" ] = "Vm";
@@ -601,7 +603,13 @@ map< string, string >& sliDestLookup()
 	// is used to set the reset value of Vm in the gates, which is 
 	// done already through the existing messaging.
 	dest[ "EREST Vm" ] = "";
-
+        
+        // Messages for PulseGen
+        dest[ "INPUT" ] = "input";
+        dest[ "LEVEL" ] = "level";
+        dest[ "WIDTH" ] = "width";
+        dest[ "DELAY" ] = "delay";
+        
 	// Some messages for tables
 	dest[ "INPUT Vm" ] = "inputRequest";
 	dest[ "INPUT Ca" ] = "inputRequest";
@@ -646,6 +654,7 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "vdep_gate" ] = "HHGate";
 	classnames[ "tabgate" ] = "HHGate";
 	classnames[ "spikegen" ] = "SpikeGen";
+        classnames[ "pulsegen" ] = "PulseGen";        
 	classnames[ "synchan" ] = "SynChan";
 	classnames[ "table" ] = "Table";
 	classnames[ "xbutton" ] = "Sli";
@@ -687,6 +696,16 @@ map< string, string >& sliFieldNameConvert()
 	fieldnames["SymCompartment.len"] = "length";
 	fieldnames["SynChan.gmax"] = "Gbar";
 	fieldnames["HHChannel.gbar"] = "Gbar";
+        fieldnames["PulseGen.level1"] = "firstLevel";
+        fieldnames["PulseGen.width1"] = "firstWidth";
+        fieldnames["PulseGen.delay1"] = "firstDelay";        
+        fieldnames["PulseGen.level2"] = "secondLevel";
+        fieldnames["PulseGen.width2"] = "secondWidth";
+        fieldnames["PulseGen.delay2"] = "secondDelay";
+        fieldnames["PulseGen.baselevel"] = "baseLevel";
+        fieldnames["PulseGen.trig_time"] = "trigTime";
+        fieldnames["PulseGen.trig_mode"] = "trigMode";
+        fieldnames["PulseGen.previous_input"] = "prevInput";
 	return fieldnames;
 }
 
