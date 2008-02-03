@@ -32,7 +32,8 @@ OBJ = \
 	Cell.o	\
 	TestBiophysics.o	\
 	BinSynchan.o	\
-	StochSynchan.o	
+	StochSynchan.o	\
+	PulseGen.o	
 else
 OBJ = \
 	Compartment.o	\
@@ -53,7 +54,8 @@ OBJ = \
 	Cell.o	\
 	TestBiophysics.o	\
 	BinSynchan.o	\
-	StochSynchan.o	
+	StochSynchan.o	\
+	PulseGen.o
 endif
 
 HEADERS = \
