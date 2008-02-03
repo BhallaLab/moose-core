@@ -18,6 +18,7 @@ OBJ = \
 	BinomialRng.o	\
 	ExponentialRng.o	\
 	GammaRng.o	\
+	UniformRng.o	\
 
 HEADERS = \
 	Probability.h	\
@@ -34,6 +35,7 @@ HEADERS = \
 	BinomialRng.h	\
 	ExponentialRng.h	\
 	GammaRng.h	\
+	UniformRng.h	\
 	../../basecode/header.h	\
 	../../basecode/Element.h	\
 	../../basecode/Conn.h	\

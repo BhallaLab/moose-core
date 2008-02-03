@@ -13,6 +13,7 @@ LOCAL_SRCS := \
 	BinomialRng.cpp	\
 	ExponentialRng.cpp	\
 	GammaRng.cpp	\
+	UniformRng.cpp	\
 
 LOCAL_HEADERS := \
 	Probability.h	\
@@ -29,6 +30,7 @@ LOCAL_HEADERS := \
 	BinomialRng.h	\
 	ExponentialRng.h	\
 	GammaRng.h	\
+	UniformRng.h	\
 # 	..$/..$/basecode$/header.h	\
 # 	..$/..$/basecode$/Element.h	\
 # 	..$/..$/basecode$/Conn.h	\
