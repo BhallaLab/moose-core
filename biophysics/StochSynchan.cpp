@@ -154,7 +154,7 @@ const Cinfo* initStochSynchanCinfo()
 
 	static Cinfo stochSynchanCinfo(
 		"StochSynchan",
-		"Upinder S. Bhalla, 2007, NCBS",
+		"Subhasis Ray, 2007, NCBS",
 		"StochSynchan: Synaptic channel incorporating weight and delay. Does not\nhandle activity-dependent modification, see HebbStochSynchan for \nthat. Very similiar to the old synchan from GENESIS.", 
 		initNeutralCinfo(),
 		stochSynchanFinfos,
