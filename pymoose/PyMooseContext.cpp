@@ -86,6 +86,10 @@ const Cinfo* initPyMooseContextCinfo()
 		new SrcFinfo( "set", // object, field, value 
 				Ftype3< Id, string, string >::global() ),
 
+		new SrcFinfo( "file2tab", // object, filename, skiplines 
+				Ftype3< Id, string, unsigned int >::global() ),
+
+
 
 		///////////////////////////////////////////////////////////////
 		// Clock control and scheduling
@@ -254,6 +258,8 @@ static const unsigned int requestFieldSlot =
 	initPyMooseContextCinfo()->getSlotIndex( "parser.get" );
 static const unsigned int setFieldSlot = 
 	initPyMooseContextCinfo()->getSlotIndex( "parser.set" );
+static const unsigned int file2tabSlot = 
+	initPyMooseContextCinfo()->getSlotIndex( "parser.file2tab" );
 static const unsigned int setClockSlot = 
 	initPyMooseContextCinfo()->getSlotIndex( "parser.setClock" );
 static const unsigned int useClockSlot = 
