@@ -33,7 +33,8 @@ OBJ = \
 	TestBiophysics.o	\
 	BinSynchan.o	\
 	StochSynchan.o	\
-	PulseGen.o	
+	PulseGen.o	\
+	RandomSpike.o	
 else
 OBJ = \
 	Compartment.o	\
@@ -55,7 +56,8 @@ OBJ = \
 	TestBiophysics.o	\
 	BinSynchan.o	\
 	StochSynchan.o	\
-	PulseGen.o
+	PulseGen.o	\
+	RandomSpike.o
 endif
 
 HEADERS = \
