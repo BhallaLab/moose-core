@@ -89,7 +89,7 @@ const Cinfo* initPulseGenCinfo()
             //////////////////////////////////////////////////////////////////
             // MessageDestinations
             //////////////////////////////////////////////////////////////////
-            new DestFinfo("input", Ftype1<int>::global(),
+            new DestFinfo("input", Ftype1<double>::global(),
                           RFCAST(&PulseGen::inputFunc)),
             new DestFinfo("level", Ftype2<int, double>::global(),
                           RFCAST( &PulseGen::setPulseLevel)),
@@ -272,11 +272,11 @@ void PulseGen::setPulseDelay(const Conn& c, int index, double delay)
     index == 0? obj->firstDelay_ = delay: obj->secondDelay_ = delay;
 }
 
-void PulseGen::inputFunc(const Conn& c, int value)
+void PulseGen::inputFunc(const Conn& c, double value)
 {
     PulseGen* obj = static_cast<PulseGen*> (c.data());
     ASSERT( obj != NULL, "PulseGen::inputFunc(const Conn&, int) - target data pointer is NULL.");
-    obj->input_ = value;
+    obj->input_ = (value == 0.0)? 0: 1;
 }
 
 //////////////////////////////////////////////////////////////////

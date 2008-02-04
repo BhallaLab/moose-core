@@ -69,9 +69,10 @@ BinomialRng::BinomialRng()
 void BinomialRng::setN(const Conn& c, double n)
 {  
     BinomialRng* gen = static_cast<BinomialRng*>(c.data());
+    ASSERT( n > 0 , "BinomialRng::setN(const Conn& c, double n) - n must be positive");    
     if ( gen )
     {
-        gen->innerSetN((int)n);        
+        gen->innerSetN((unsigned int)n);        
     }
     else
     {
@@ -79,7 +80,7 @@ void BinomialRng::setN(const Conn& c, double n)
     }
 }
 
-void BinomialRng::innerSetN(int n)
+void BinomialRng::innerSetN(unsigned int n)
 {
     if ( n <= 0 )
     {

@@ -518,7 +518,10 @@ map< string, string >& sliSrcLookup()
 	src[ "EREST Vm" ] = "";
 
         // Messages for PulseGen
-        src[ "INPUT output" ] = "outputSrc";
+        src[ "PulseGen.INPUT output" ] = "outputSrc";
+        // Messages for RandomSpike
+        src[ "RandomSpike.SPIKE"] = "eventSrc";
+        
 	// Some messages for tables, specially used for I/O
 	src[ "SpikeGen.INPUT Vm" ] = "VmSrc";
 	src[ "INPUT Vm" ] = "Vm";
@@ -579,7 +582,7 @@ map< string, string >& sliDestLookup()
 	dest[ "RAXIAL Ra Vm" ] = "";
 	dest[ "RAXIAL Ra previous_state" ] = "";
 	dest[ "INJECT output" ] = "injectMsg";
-
+        
 	// Some messages for channels.
 	dest[ "VOLTAGE Vm" ] = "";
 	dest[ "CHANNEL Gk Ek" ] = "channel";
@@ -603,12 +606,12 @@ map< string, string >& sliDestLookup()
 	// is used to set the reset value of Vm in the gates, which is 
 	// done already through the existing messaging.
 	dest[ "EREST Vm" ] = "";
+
+        // Messages for RandomSpike
+        dest[ "RandomSpike.SPIKE" ] = "synapse";
         
         // Messages for PulseGen
-        dest[ "INPUT" ] = "input";
-        dest[ "LEVEL" ] = "level";
-        dest[ "WIDTH" ] = "width";
-        dest[ "DELAY" ] = "delay";
+        dest[ "PulseGen.INPUT output" ] = "input";
         
 	// Some messages for tables
 	dest[ "INPUT Vm" ] = "inputRequest";
@@ -653,7 +656,8 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "vdep_channel" ] = "HHChannel";
 	classnames[ "vdep_gate" ] = "HHGate";
 	classnames[ "tabgate" ] = "HHGate";
-	classnames[ "spikegen" ] = "SpikeGen";
+	classnames[ "randomspike" ] = "RandomSpike";
+        classnames[ "spikegen" ] = "SpikeGen";
         classnames[ "pulsegen" ] = "PulseGen";        
 	classnames[ "synchan" ] = "SynChan";
 	classnames[ "table" ] = "Table";
@@ -706,6 +710,10 @@ map< string, string >& sliFieldNameConvert()
         fieldnames["PulseGen.trig_time"] = "trigTime";
         fieldnames["PulseGen.trig_mode"] = "trigMode";
         fieldnames["PulseGen.previous_input"] = "prevInput";
+        fieldnames["RandomSpike.min_amp"] = "minAmp";
+        fieldnames["RandomSpike.max_amp"] = "maxAmp";
+        fieldnames["RandomSpike.reset_value"] = "resetValue";
+        fieldnames["RandomSpike.abs_refract"] = "absRefract";        
 	return fieldnames;
 }
 
@@ -890,6 +898,11 @@ void GenesisParserWrapper::doAdd(
 			msgType = src()->className() + "." + msgType;
 		if ( msgType == "INPUT Vm" && dest()->className() == "SpikeGen" )
 			msgType = dest()->className() + "." + msgType;
+                if( msgType == "SPIKE" && src()->className() == "RandomSpike" )
+                        msgType = src()->className() + "." + msgType;
+                if( msgType == "INPUT output" && src()->className() == "PulseGen" )
+                        msgType = src()->className() + "." + msgType;
+                                        
 
 		bool usingMULTGATE = 0;
 		string gate = "";
