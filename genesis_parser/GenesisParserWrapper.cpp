@@ -524,6 +524,7 @@ map< string, string >& sliSrcLookup()
         
 	// Some messages for tables, specially used for I/O
 	src[ "SpikeGen.INPUT Vm" ] = "VmSrc";
+        src[ "RandomSpike.INPUT Vm" ] = "eventSrc";        
 	src[ "INPUT Vm" ] = "Vm";
 	src[ "INPUT Ca" ] = "Ca";
 	src[ "INPUT Ik" ] = "Ik";
