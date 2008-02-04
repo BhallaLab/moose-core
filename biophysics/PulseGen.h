@@ -55,7 +55,7 @@ class PulseGen
     //////////////////////////////////////////////////////////////////
     // Message dest functions.
     //////////////////////////////////////////////////////////////////
-    static void inputFunc(const Conn& c, int input);
+    static void inputFunc(const Conn& c, double input);
     static void setPulseLevel(const Conn& c, int pulseNo, double level);
     static void setPulseWidth(const Conn& c, int pulseNo, double width);
     static void setPulseDelay(const Conn& c, int pulseNo, double delay);

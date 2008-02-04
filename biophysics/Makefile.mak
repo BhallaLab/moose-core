@@ -29,7 +29,9 @@ LOCAL_SRCS := \
 	Cell.cpp	\
 	TestBiophysics.cpp	\
 	BinSynchan.cpp	\
-	StochSynchan.cpp	
+	StochSynchan.cpp	\
+	PulseGen.cpp		\
+	RandomSpike.cpp		\
 
 $(LOCAL_DIR)$/Compartment.o: $(LOCAL_DIR)$/Compartment.h basecode$/Ftype2.h
 $(LOCAL_DIR)$/SymCompartment.o: $(LOCAL_DIR)$/Compartment.h $(LOCAL_DIR)$/SymCompartment.h basecode$/Ftype2.h
@@ -56,8 +58,9 @@ LOCAL_HEADERS := 	\
 	NeuroHub.h \
 	Cell.h	\
 	BinSynchan.h	\
-	StochSynchan.h	
-
+	StochSynchan.h	\
+	PulseGen.h	\
+	RandomSpike.h
 
 SOURCES += $(addprefix $(LOCAL_DIR)$/, $(LOCAL_SRCS))
 

@@ -28,7 +28,7 @@ class BinomialRng: public RandGenerator
 {
   public:
     BinomialRng();
-    void innerSetN(int n);
+    void innerSetN(unsigned int n);
     int innerGetN();
     void innerSetP(double p);
     double innerGetP();
