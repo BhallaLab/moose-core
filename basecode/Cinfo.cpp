@@ -122,25 +122,28 @@ Cinfo::Cinfo(const std::string& name,
             header << "#ifndef _pymoose_" << name << "_h\n"
                    << "#define _pymoose_"<< name << "_h\n"
                    << "#include \"PyMooseBase.h\"\n"
-                   << "class " << name << " : public PyMooseBase\n"
-                   << "{"
-                   << "    public:\n"
+                
+                   << "namespace pymoose{\n"
+                   << "    class " << name << " : public PyMooseBase\n"
+                   << "    {"
+                   << "      public:\n"
                    << "        static const std::string className;\n"
                    << "        " << name << "(Id id);\n"
                    << "        " << name << "(std::string path);\n"
                    << "        " << name << "(std::string name, Id parentId);\n"
-                   << "        " << name << "(std::string name, PyMooseBase* parent);\n"
+                   << "        " << name << "(std::string name, PyMooseBase& parent);\n"
                    << "        ~" << name <<"();\n"
                    << "        const std::string& getType();\n";
         
             cpp << "#ifndef _pymoose_" << name << "_cpp\n"
                 << "#define _pymoose_"<< name << "_cpp\n"
                 << "#include \"" << name << ".h\"\n"
+                << "using namespace pymoose;\n"             
                 << "const std::string "<< name <<"::className = \"" << name <<"\";\n"
                 << name << "::" << name << "(Id id):PyMooseBase(id){}\n"
                 << name << "::" << name <<"(std::string path):PyMooseBase(className, path){}\n"
                 << name << "::" << name << "(std::string name, Id parentId):PyMooseBase(className, name, parentId){}\n"
-                << name << "::" << name << "(std::string name, PyMooseBase* parent):PyMooseBase(className, name, parent){}\n"
+                << name << "::" << name << "(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}\n"
                 << name << "::~" << name <<"(){}\n"
                 << "const std::string& "<< name <<"::getType(){ return className; }\n";
             swig << "%include \"" << name << ".h\"\n";        
@@ -159,8 +162,8 @@ Cinfo::Cinfo(const std::string& name,
                 if (fieldType != "void")
                 {
                     /* Insert the getters and setters */                  
-                    header << "        " << fieldType << " __get_" << fieldName << "() const;\n";
-                    header << "        void" << " __set_" << fieldName << "(" << fieldType << " " << fieldName << ");\n";
+                    header << "            " << fieldType << " __get_" << fieldName << "() const;\n";
+                    header << "            void" << " __set_" << fieldName << "(" << fieldType << " " << fieldName << ");\n";
                 
                     cpp << fieldType <<" " <<  name << "::__get_" <<  fieldName << "() const\n"
                         << "{\n"
@@ -172,7 +175,7 @@ Cinfo::Cinfo(const std::string& name,
                         << "{\n"
                         << "    set < " << fieldType << " > (id_(), \"" << fieldName << "\", "<< fieldName << ");\n"
                         << "}" << endl;
-                    swig << "%attribute(" << name << ", " << fieldType << ", " << fieldName << ", __get_" << fieldName << ", __set_" << fieldName << ")\n";                
+                    swig << "%attribute(pymoose::" << name << ", " << fieldType << ", " << fieldName << ", __get_" << fieldName << ", __set_" << fieldName << ")\n";                
                 }
             }
 #endif
@@ -180,7 +183,8 @@ Cinfo::Cinfo(const std::string& name,
 #ifdef GENERATE_WRAPPERS
         if (created)
         {
-            header << "};\n"
+            header << "    };\n"
+                   << "}\n"
                    << "#endif" << endl;
             cpp << "#endif" << endl;
             header.close();
