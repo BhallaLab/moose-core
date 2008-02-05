@@ -511,7 +511,9 @@ map< string, string >& sliSrcLookup()
 
 	// Message for synchan
 	src[ "SpikeGen.SPIKE" ] = "event";
-
+        
+        // Messages for RandomSpike
+        src[ "RandomSpike.SPIKE"] = "eventSrc";
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
 	// done already through the existing messaging.
@@ -519,8 +521,6 @@ map< string, string >& sliSrcLookup()
 
         // Messages for PulseGen
         src[ "PulseGen.INPUT output" ] = "outputSrc";
-        // Messages for RandomSpike
-        src[ "RandomSpike.SPIKE"] = "eventSrc";
         
 	// Some messages for tables, specially used for I/O
 	src[ "SpikeGen.INPUT Vm" ] = "VmSrc";
@@ -539,6 +539,8 @@ map< string, string >& sliSrcLookup()
 	src[ "PLOT Ca" ] = "Ca";
 	src[ "PLOT Ik" ] = "Ik";
 	src[ "PLOT Gk" ] = "Gk";
+        src[ "PLOT output" ] = "output";
+        
 	return src;
 }
 
@@ -591,7 +593,9 @@ map< string, string >& sliDestLookup()
 	// Special messages for spikegen and synapse
 	dest[ "SpikeGen.SPIKE" ] = "synapse";
 	dest[ "SpikeGen.INPUT Vm" ] = "Vm";
-
+        // Messages for RandomSpike
+        dest[ "RandomSpike.SPIKE" ] = "synapse";
+        
 	// Some of these funny comparisons are inserted when the code finds
 	// cases which need special work.
 	dest[ "SynChan.Mg_block.CHANNEL Gk Ek" ] = "origChannel";
@@ -608,8 +612,6 @@ map< string, string >& sliDestLookup()
 	// done already through the existing messaging.
 	dest[ "EREST Vm" ] = "";
 
-        // Messages for RandomSpike
-        dest[ "RandomSpike.SPIKE" ] = "synapse";
         
         // Messages for PulseGen
         dest[ "PulseGen.INPUT output" ] = "input";
@@ -621,7 +623,8 @@ map< string, string >& sliDestLookup()
 	dest[ "INPUT Gk" ] = "inputRequest";
 	dest[ "INPUT n" ] = "inputRequest";
 	dest[ "INPUT Co" ] = "inputRequest";
-
+        dest[ "INPUT output" ] = "inputRequest";
+        
 	// Messages for having tables pretend to be an xplot
 	dest[ "PLOT Vm" ] = "inputRequest";
 	dest[ "PLOT Ca" ] = "inputRequest";
@@ -629,7 +632,7 @@ map< string, string >& sliDestLookup()
 	dest[ "PLOT Gk" ] = "inputRequest";
 	dest[ "PLOT n" ] = "inputRequest";
 	dest[ "PLOT Co" ] = "inputRequest";
-
+        dest[ "PLOT output" ] = "inputRequest";
 	return dest;
 }
 
@@ -899,11 +902,15 @@ void GenesisParserWrapper::doAdd(
 			msgType = src()->className() + "." + msgType;
 		if ( msgType == "INPUT Vm" && dest()->className() == "SpikeGen" )
 			msgType = dest()->className() + "." + msgType;
-                if( msgType == "SPIKE" && src()->className() == "RandomSpike" )
-                        msgType = src()->className() + "." + msgType;
+                if ( msgType == "SPIKE" && src()->className() == "RandomSpike" )
+                         msgType = src()->className() + "." + msgType;
+                if (msgType == "INPUT Vm" && dest()->className() == "RandomSpike")
+                         msgType = dest()->className() + "." + msgType;                
                 if( msgType == "INPUT output" && src()->className() == "PulseGen" )
-                        msgType = src()->className() + "." + msgType;
-                                        
+                         msgType = src()->className() + "." + msgType;
+                if( msgType == "INPUT output" && dest()->className() == "PulseGen" )
+                         msgType = dest()->className() + "." + msgType;
+                
 
 		bool usingMULTGATE = 0;
 		string gate = "";
