@@ -37,7 +37,7 @@
 # in the working directory of moose. Also you have to do some editing to get the 
 # generated code to work. 
 # It is completely harmless except for a few file existence checks at startup.
-CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DGENERATE_WRAPPERS
 #use this for readline library
 #CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DUSE_READLINE
 #CFLAGS = -O3 -Wall -pedantic -DNDEBUG -DUSE_GENESIS_PARSER 
