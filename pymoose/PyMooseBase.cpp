@@ -188,9 +188,24 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseB
 */
 PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fileName)
 {
-    //ReadCell reader;
-    //reader.read(fileName, path);
-    id_ = context_->pathToId(path, false);
+    // ReadCell reader;
+//     reader.read(fileName, path);
+    id_ = PyMooseBase::pathToId(path,false);
+    if (!id_.bad())
+    {
+        cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
+        
+        if ( path == getSeparator() || path == (getSeparator()+"root"))
+        {
+            cerr << "Returning the predefined root element." << endl;
+        }
+        else 
+        {
+            cerr << "Returning already existing object." << endl;
+        }
+        return;
+    }
+    context_->readCell(path, fileName);    
 }
 
 

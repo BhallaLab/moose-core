@@ -69,7 +69,7 @@ namespace pymoose
         static void recvClocks( const Conn& c, vector< double > dbls);
         static void recvMessageList( 
             const Conn& c, vector< Id > elist, string s);
-    
+        
         static PyMooseContext* createPyMooseContext(string contextName, string shellName);
         static void destroyPyMooseContext(PyMooseContext* context);
         std::string getField(Id, std::string);
@@ -105,12 +105,19 @@ namespace pymoose
         void setupTau( Id gateId, vector <double> parms );
         void tweakAlpha( Id gateId );
         void tweakTau( Id gateId);
-        void readCell(std::string fileName, std::string cellPath);    
+        void readCell(string cellpath, string filename, double cm, double rm, double ra, double erestAct, double eleak);
+        void readCell(string cellpath, string filename, vector <double> params);        
+        void readCell(std::string cellPath, std::string fileName);    
         bool exists(Id id);
         bool exists(std::string path);
-//    static Element* getShell( Id g );
-//    void processFunc( const Conn& c );
-    
+
+        void createMap(string src, string dest, unsigned int nx, unsigned int ny, double dx = 1.0, double dy = 1.0, double xo = 0.0, double yo = 0.0, bool isObject = true);
+        void createMap(Id src, Id dest, string name, unsigned int nx, unsigned int ny, double dx = 1.0, double dy = 1.0, double xo = 0.0, double yo = 0.0);
+        void createMap(Id src, Id dest, string name, vector<double> param);
+        void planarConnect(string src, string dst, double probability = 0.0);
+        void plannarDelay(string src, double delay);
+        void planarWeight(string src, double weight);
+        
 #ifdef DO_UNIT_TESTS    
         static bool testPyMooseContext(int count, bool print);
         bool testCreateDestroy(std::string className, int count, bool print);
@@ -130,7 +137,8 @@ namespace pymoose
     
         void setupChanFunc( Id gateId, vector <double> parms, unsigned int slot);
         void tweakChanFunc( Id gateId, unsigned int slot );
-    
+        bool parseCopyMove( string src, string dest, Id s, Id& e, Id& pa, string& childname );
+        
         Id myId_;    
         // Present working element
         Id cwe_;

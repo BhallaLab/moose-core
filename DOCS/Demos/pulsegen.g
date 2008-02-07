@@ -54,7 +54,10 @@ setfield /plot_trig step_mode 3
 addmsg /trig /plot_trig INPUT output
 
 setclock 0 {SIMDT}
-useclock /pulse0,/pulse1,/trig,/gate,/plot0,/plot1,/plot2,/plot_trig,/plot_gate 0
+setclock 1 {SIMDT}
+useclock /pulse0,/pulse1,/trig,/gate 0
+useclock /plot0,/plot1,/plot2,/plot_trig,/plot_gate 1
+reset
 step {RUNTIME} -t
 tab2file pulse0.plot /plot0 table -nentries {STEPS} -overwrite
 tab2file pulse1.plot /plot1 table -nentries {STEPS} -overwrite
