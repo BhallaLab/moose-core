@@ -20,6 +20,8 @@
 	#include "BinSynchan.h"
 	#include "StochSynchan.h"
 	#include "SpikeGen.h"
+	#include "PulseGen.h"
+	#include "RandomSpike.h"
 	#include "Nernst.h"
 	#include "CaConc.h"
 	#include "HHGate.h"
@@ -50,6 +52,7 @@
 	#include "NormalRng.h"
 	#include "PoissonRng.h"
 	#include "ExponentialRng.h"
+	#include "UniformRng.h"
 %}
 //%feature("autodoc", "1");
 %template(uint_vector) std::vector<unsigned int>;
@@ -198,6 +201,28 @@
 %attribute(pymoose::SpikeGen, double, state, __get_state, __set_state)
 %attribute(pymoose::SpikeGen, double, event, __get_event, __set_event)
 %attribute(pymoose::SpikeGen, double, Vm, __get_Vm, __set_Vm)
+%include "RandomSpike.h"
+%attribute(pymoose::RandomSpike, double, minAmp, __get_minAmp, __set_minAmp)
+%attribute(pymoose::RandomSpike, double, maxAmp, __get_maxAmp, __set_maxAmp)
+%attribute(pymoose::RandomSpike, double, rate, __get_rate, __set_rate)
+%attribute(pymoose::RandomSpike, double, resetValue, __get_resetValue, __set_resetValue)
+%attribute(pymoose::RandomSpike, double, state, __get_state, __set_state)
+%attribute(pymoose::RandomSpike, double, absRefract, __get_absRefract, __set_absRefract)
+%attribute(pymoose::RandomSpike, double, lastEvent, __get_lastEvent)
+%attribute(pymoose::RandomSpike, int, reset, __get_reset, __set_reset)
+%include "PulseGen.h"
+%attribute(pymoose::PulseGen, double, firstLevel, __get_firstLevel, __set_firstLevel)
+%attribute(pymoose::PulseGen, double, firstWidth, __get_firstWidth, __set_firstWidth)
+%attribute(pymoose::PulseGen, double, firstDelay, __get_firstDelay, __set_firstDelay)
+%attribute(pymoose::PulseGen, double, secondLevel, __get_secondLevel, __set_secondLevel)
+%attribute(pymoose::PulseGen, double, secondWidth, __get_secondWidth, __set_secondWidth)
+%attribute(pymoose::PulseGen, double, secondDelay, __get_secondDelay, __set_secondDelay)
+%attribute(pymoose::PulseGen, double, baseLevel, __get_baseLevel, __set_baseLevel)
+%attribute(pymoose::PulseGen, double, output, __get_output)
+%attribute(pymoose::PulseGen, double, trigTime, __get_trigTime)
+%attribute(pymoose::PulseGen, int, trigMode, __get_trigMode, __set_trigMode)
+%attribute(pymoose::PulseGen, int, prevInput, __get_prevInput)
+
 %include "Nernst.h"
 %attribute(pymoose::Nernst, double, E, __get_E, __set_E)
 %attribute(pymoose::Nernst, double, Temperature, __get_Temperature, __set_Temperature)
@@ -340,6 +365,11 @@
 %attribute(pymoose::RandGenerator, double, mean, __get_mean, __set_mean)
 %attribute(pymoose::RandGenerator, double, variance, __get_variance, __set_variance)
 %attribute(pymoose::RandGenerator, double, output, __get_output, __set_output)
+%include "UniformRng.h"
+%attribute(pymoose::UniformRng, double, mean, __get_mean, __set_mean)
+%attribute(pymoose::UniformRng, double, variance, __get_variance, __set_variance)
+%attribute(pymoose::UniformRng, double, min, __get_min, __set_min)
+%attribute(pymoose::UniformRng, double, max, __get_max, __set_max)
 %include "GammaRng.h"
 %attribute(pymoose::GammaRng, double, alpha, __get_alpha, __set_alpha)
 %attribute(pymoose::GammaRng, double, theta, __get_theta, __set_theta)

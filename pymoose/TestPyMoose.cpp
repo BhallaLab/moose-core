@@ -41,6 +41,9 @@ int main(int argc, char **argv)
     Compartment d("test");
     HHChannel dch("Na", d);
     dch.__set_Ek(1.1);
+
+    ctx->readCell( "/soma", "soma.p", 1.0, 1.0, 1.0, 1.0, 1.0 );
+    Compartment e("/soma");
     
     cout << "Calling destroy ... " << endl;
     PyMooseContext::destroyPyMooseContext(ctx);
