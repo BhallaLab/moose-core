@@ -897,6 +897,136 @@ bool PyMooseContext::connect(Id src, string srcField, Id dest, string destField)
     }
     return false;    
 }
+/**
+   createmap
+*/
+void PyMooseContext::createMap(Id src, Id parent, string name, vector<double> params)
+{
+    send4< Id, Id, string, vector <double> >( myId_(), copyIntoArraySlot, src, parent, name, params );
+}
+void PyMooseContext::createMap(Id src, Id parent, string name, unsigned int nx, unsigned int ny, double dx, double dy, double xo, double yo)
+{
+    vector < double > params;
+    params.push_back(nx);
+    params.push_back(ny);
+    params.push_back(dx);
+    params.push_back(dy);
+    params.push_back(xo);
+    params.push_back(yo);    
+    send4< Id, Id, string, vector <double> >( myId_(), copyIntoArraySlot, src, parent, name, params );
+}
+
+    
+void PyMooseContext::createMap(string src, string dest, unsigned int nx, unsigned int ny, double dx, double dy, double xo, double yo, bool isObject)
+{
+    
+        
+    vector <double> params;
+    params.push_back(nx);
+    params.push_back(ny);
+    params.push_back(dx);
+    params.push_back(dy);
+    params.push_back(xo);
+    params.push_back(yo);    
+    Id parent(dest);
+    if (parent.bad())
+    {
+        string headpath = Shell::head(dest, "/");
+        Id head(headpath);
+        if (head.bad())
+        {
+            cout << "Error: '" << headpath << "'" << " is not defined for destination path " << dest << "." << endl;
+            return;            
+        }
+        send3< string, string, Id >( myId_(), createSlot, "Neutral", Shell::tail(dest, "/"), head);
+    }
+    if (isObject)
+    {
+        string className = src;
+        if ( !Cinfo::find( className ))
+        {
+            cout << "Error: Unknown class: " << className << endl;
+            return;
+        }
+        string name = ( className == "Neutral")? "proto": src;
+        if (name.length() < 1)
+        {
+            cout << "Error: Invalid object name: " << name << endl;
+            return;
+        }
+        send4 < string, string, Id, vector <double> >( myId_(), createArraySlot, className, name, parent, params );
+    }
+    else
+    {
+        Id e;
+        Id pa;
+        string name;        
+	if ( parseCopyMove( src, dest, myId_, e, parent, name ) ) {
+            send4< Id, Id, string, vector <double> >( myId_(), copyIntoArraySlot, e, pa, name, params );
+        }
+    }
+    
+}
+/**
+ * This function figures out destination and name for moves
+ * and copies. The rules are:
+ * 1. Target can be existing element, in which case name is retained.
+ *  In this case the childname is set to the empty string "".
+ * 2. Target might not exist. In this case the parent of the target
+ * 	must exist, and the object e is going to be renamed. This new
+ * 	name is returned in the childname.
+ * Modified from the function with same name in GenesisParserWrapper.cpp
+ */
+bool PyMooseContext::parseCopyMove( string src, string dest, Id s,
+		Id& e, Id& pa, string& childname )
+{
+    e = Id( src );
+    if ( !e.zero() && !e.bad() ) {
+        childname = "";
+        // pa = GenesisParserWrapper::path2eid( dest, s );
+        pa = Id( dest );
+        if ( pa.bad() ) { // Possibly we are renaming it too.
+            string pastr = dest;
+            if ( pastr.find( "/" ) == string::npos ) {
+                pastr = ".";
+            } else {
+                pastr = Shell::head( dest, "/" );
+            }
+            if ( pastr == "" )
+                pastr = ".";
+            // pa = GenesisParserWrapper::path2eid( pastr, s );
+            pa = Id( pastr );
+            if ( pa.bad() ) { // Nope, even that doesn't work.
+                cout << "Error: Parent element " << dest << 
+                    " not found\n";
+                return 0;
+            }
+            childname = Shell::tail( dest, "/" );
+        }
+        return 1;
+    } else {
+        cout << "Error: source element " <<
+            src << " not found\n";
+    }
+
+    return 0;
+}
+
+void PyMooseContext::planarConnect(string src, string dst, double probability)
+{
+    send3<string, string, double> (myId_(), planarconnectSlot, src, dst, probability);    
+}
+
+void PyMooseContext::plannarDelay(string src, double delay)
+{
+    send2< string, double > ( myId_(), planardelaySlot, src, delay);    
+}
+
+void PyMooseContext::planarWeight(string src, double weight)
+{
+    send2< string, double >( myId_(), planarweightSlot, src, weight);
+}
+
 /*
   The following functions are for manipulating HHChannels.  They
   should ideally be part of HHChannel/HHGate class only.  But I had to
@@ -1101,12 +1231,42 @@ void PyMooseContext::tabFill(Id table, int xdivs, int mode)
     send3< Id, string, string >( myId_(), setFieldSlot, table, "tabFill", argstr );
 }
 
-void PyMooseContext::readCell( string filename, string cellpath )
+
+/**
+   params should have these entries:
+   CM, RM, RA, EREST_ACT, ELEAK
+
+*/
+void PyMooseContext::readCell(std::string cellpath, std::string filename)
 {
-    cerr << "PyMooseContext::readCell( " << filename << ", " << cellpath << ")" << endl;    
-    send2< string, string >( shell_(), 
-                             readCellSlot, filename, cellpath );
+    vector <double> params;
+    params.push_back(0.0);
+    params.push_back(0.0);
+    params.push_back(0.0);
+    params.push_back(0.0);
+    params.push_back(0.0);
+    send3< string, string, vector < double > >( myId_(), 
+                                                readCellSlot, filename, cellpath , params);
 }
+
+void PyMooseContext::readCell(string cellpath, string filename, vector <double> params)
+{
+    send3< string, string, vector < double > >( myId_(), 
+                             readCellSlot, filename, cellpath , params);
+}
+
+void PyMooseContext::readCell(string cellpath, string filename, double cm, double rm, double ra, double erestAct, double eleak)
+{
+    vector <double> params;
+    params.push_back(cm);
+    params.push_back(rm);
+    params.push_back(ra);
+    params.push_back(erestAct);
+    params.push_back(eleak);
+    send3< string, string, vector < double > >( myId_(), 
+                             readCellSlot, filename, cellpath , params);
+}
+
 #ifdef DO_UNIT_TESTS
 /**
    These are the unit tests
