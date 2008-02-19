@@ -79,6 +79,7 @@
 %attribute(pymoose::PyMooseBase, vector <Id>&, children, __get_children)
 %attribute(pymoose::PyMooseBase, vector <std::string>&, inMessages, __get_incoming_messages)
 %attribute(pymoose::PyMooseBase, vector <std::string>&, outMessages, __get_outgoing_messages)
+%attribute(pymoose::PyMooseBase, const std::string, name, __get_name)
 //%attribute(pymoose::PyMooseBase, string& , path, _path)
 // The above gives segmentation fault, path is dynamically generated,
 // so when using pointers, the memory may already have been deallocated
