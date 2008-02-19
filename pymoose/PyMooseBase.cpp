@@ -69,6 +69,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id paren
     id_ = PyMooseBase::pathToId(path,false);
     if (!id_.bad())
     {
+#ifndef NDEBUG
         cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
         
         if ( path == getSeparator() || path == (getSeparator()+"root"))
@@ -78,6 +79,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id paren
         {
             cerr << "Returning already existing object." << endl;
         }
+#endif
         return;
     }
 
@@ -110,6 +112,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
     id_ = PyMooseBase::pathToId(path,false);
     if (!id_.bad())
     {
+#ifndef NDEBUG
         cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
         
         if ( path == getSeparator() || path == (getSeparator()+"root"))
@@ -119,6 +122,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
         {
             cerr << "Returning already existing object." << endl;
         }
+#endif
         return;
     }
 
@@ -169,6 +173,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseB
     id_ = PyMooseBase::pathToId(path,false);
     if (!id_.bad())
     {
+#ifndef NDEBUG
         cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
         
         if ( path == getSeparator() || path == (getSeparator()+"root"))
@@ -178,6 +183,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseB
         {
             cerr << "Returning already existing object." << endl;
         }
+#endif
         return;
     }
     id_ = context_->create(className, objectName, parent.id_);
@@ -193,6 +199,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
     id_ = PyMooseBase::pathToId(path,false);
     if (!id_.bad())
     {
+#ifndef NDEBUG
         cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
         
         if ( path == getSeparator() || path == (getSeparator()+"root"))
@@ -203,6 +210,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
         {
             cerr << "Returning already existing object." << endl;
         }
+#endif
         return;
     }
     context_->readCell(path, fileName);    
@@ -261,6 +269,11 @@ vector <Id>& PyMooseBase::__get_children() const
     return context_->getChildren(id_);
 }
 
+const std::string PyMooseBase::__get_name() const
+{
+    return id_()->name();
+}
+
 bool PyMooseBase::connect(std::string srcField, PyMooseBase* dest, std::string destField)
 {
     return context_->connect(this->id_, srcField, dest->id_, destField);    
@@ -273,6 +286,10 @@ bool PyMooseBase::connect(std::string srcField, Id dest, std::string destField)
 
 PyMooseContext* PyMooseBase::getContext()
 {
+    if (context_ == NULL)
+    {
+        context_ = PyMooseContext::createPyMooseContext("BaseContext", "shell");
+    }    
     return context_;
 }
 
