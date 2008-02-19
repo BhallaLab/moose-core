@@ -917,7 +917,7 @@ void PyMooseContext::createMap(Id src, Id parent, string name, unsigned int nx, 
 }
 
     
-void PyMooseContext::createMap(string src, string dest, unsigned int nx, unsigned int ny, double dx, double dy, double xo, double yo, bool isObject)
+void PyMooseContext::createMap(string src, string dest, unsigned int nx, unsigned int ny, double dx, double dy, double xo, double yo, bool copy)
 {
     
         
@@ -940,7 +940,7 @@ void PyMooseContext::createMap(string src, string dest, unsigned int nx, unsigne
         }
         send3< string, string, Id >( myId_(), createSlot, "Neutral", Shell::tail(dest, "/"), head);
     }
-    if (isObject)
+    if (!copy)
     {
         string className = src;
         if ( !Cinfo::find( className ))
