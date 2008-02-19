@@ -30,7 +30,8 @@ namespace pymoose
         const Id* __get_parent() const;
         const std::string path() const;   
         const Id* __get_id() const;
-
+        const std::string __get_name() const;
+        
         bool connect(std::string field, PyMooseBase* dest, std::string destField);
         bool connect(std::string field, Id dest, std::string destField);
         std::vector <std::string> getMessageList(string field, bool isIncoming );
