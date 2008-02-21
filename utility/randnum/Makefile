@@ -19,6 +19,7 @@ OBJ = \
 	ExponentialRng.o	\
 	GammaRng.o	\
 	UniformRng.o	\
+	Uniform.o	\
 
 HEADERS = \
 	Probability.h	\
@@ -36,6 +37,7 @@ HEADERS = \
 	ExponentialRng.h	\
 	GammaRng.h	\
 	UniformRng.h	\
+	Uniform.h	\
 	../../basecode/header.h	\
 	../../basecode/Element.h	\
 	../../basecode/Conn.h	\
