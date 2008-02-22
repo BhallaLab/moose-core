@@ -16,9 +16,11 @@
 #include "ReadCell.h"
 #include "SimDump.h"
 #include "Ftype3.h"
-//#include <stdlib.h>
-//#include <time.h>
-
+#include "../utility/randnum/Probability.h"
+#include "../utility/randnum/Uniform.h"
+#include "../utility/randnum/Exponential.h"
+#include "../utility/randnum/Normal.h"
+#include "math.h"
 //////////////////////////////////////////////////////////////////////
 // Shell MOOSE object creation stuff
 //////////////////////////////////////////////////////////////////////
@@ -68,10 +70,10 @@ const Cinfo* initShellCinfo()
 				Ftype3< string, string, double >::global(),
 				RFCAST( &Shell::planarconnect ) ),
 		new DestFinfo( "planardelay",
-				Ftype2< string, double >::global(),
+				Ftype3< string, string, vector <double> >::global(),
 				RFCAST( &Shell::planardelay ) ),
 		new DestFinfo( "planarweight",
-				Ftype2< string, double >::global(),
+				Ftype3< string, string, vector<double> >::global(),
 				RFCAST( &Shell::planarweight ) ),
 		new DestFinfo( "getSynCount",
 				Ftype1< Id >::global(),
@@ -844,48 +846,172 @@ void Shell::planarconnect(const Conn& c, string source, string dest, double prob
 				return;
 			}
 			if ((rand()%100)/100.0 <= probability){
-//				cout << i+1 << " " << j+1 << endl;
+// 				cout << i+1 << " " << j+1 << endl;
 				src_list[i]->findFinfo("event")->add(src_list[i], dst_list[j], dst_list[j]->findFinfo("synapse"));
 			}
 		}
 	}
 }
 
-void Shell::planardelay(const Conn& c, string source, double delay){
+void Shell::planardelay(const Conn& c, string source, string destination, vector <double> parameter){
+	assert (parameter.size() == 11);
+	double delay = parameter[0];
+// 	double conduction_velocity = parameter[1];
+	bool add = parameter[2];
+	double scale = parameter[3];
+	double stdev = parameter[4];
+	double maxdev = parameter[5];
+	double mid = parameter[6];
+	double max = parameter[7];
+	bool absoluterandom = parameter[8];
+	int delaychoice = int(parameter[9]);
+	int randchoice = int(parameter[10]);
+	double maxallowed;
+	Probability *p;
+	switch (randchoice){
+		case 0:
+			break;
+		case 1:
+			p = new Uniform(-scale, scale);
+			maxallowed = scale;
+			break;
+		case 2: 
+			p = new Normal(0, stdev);
+			maxallowed = maxdev;
+			break;
+		case 3: 
+			p = new Exponential(log(2)/mid);
+			maxallowed = max;
+			break;
+	}
 	vector <Element* > src_list;
+	vector <Element* > dst_list;
 	simpleWildcardFind( source, src_list );
+	if (destination != "")
+		simpleWildcardFind( destination, dst_list );
 	for (size_t i = 0 ; i < src_list.size(); i++){
 		if (src_list[i]->className() != "SpikeGen"){cout << "Shell::planardelay: Error1" << endl; return;}
 		vector <Conn> conn;
 		src_list[i]->findFinfo("event")->outgoingConns(src_list[i], conn);
 		for (size_t j = 0; j < conn.size(); j++){
 			unsigned int numSynapses;
-			bool ret;
 			Element *dest = conn[j].targetElement();
-			ret = get< unsigned int >( dest, "numSynapses", numSynapses );
+			if (destination != ""){
+				bool found = false;
+				for (vector<Element *>::iterator iter = dst_list.begin(); 
+					iter != dst_list.end(); iter++)
+					if (*iter == dest) {found = true; break;}
+				if (!found) continue;
+			}
+			bool ret = get< unsigned int >( dest, "numSynapses", numSynapses );
 			if (!ret) {cout << "Shell::planardelay: Error2" << endl; return;}
 			for (size_t k = 0 ; k < numSynapses; k++){
-				lookupSet< double, unsigned int >( dest, "delay", delay, k );
+				double number = 0;
+				if (delaychoice){
+					cout << "planardelay:: radial not implemented."<< endl;
+					// Not decided what to do
+				}
+				else {
+					number = delay;
+				}
+				if (randchoice){
+					double random = p->getNextSample();
+					while (random > maxallowed ) random = p->getNextSample();
+					if (absoluterandom)
+						{number += random;}
+					else 
+						{number += number*random;}
+				}
+				if (add){
+					double delay_old = 0;
+					ret = lookupGet< double, unsigned int >( dest, "delay", delay_old, k );
+					if (!ret) {
+						cout << "planardelay:: Error3" << endl;
+					}
+					number += delay_old;
+				}
+				lookupSet< double, unsigned int >( dest, "delay", number, k );
 			}
 		}
 	}
 }
 
-void Shell::planarweight(const Conn& c, string source, double weight){
+
+void Shell::planarweight(const Conn& c, string source, string  destination, vector <double> parameter){
+	assert (parameter.size() == 12);
+	double weight = parameter[0];
+// 	double decay_rate = parameter[1];
+// 	double max_weight = parameter[2];
+// 	double min_weight = parameter[3];
+	double scale = parameter[4];
+	double stdev = parameter[5];
+	double maxdev = parameter[6];
+	double mid = parameter[7];
+	double max = parameter[8];
+	bool absoluterandom = parameter[9];
+	int weightchoice = int(parameter[10]);
+	int randchoice = int(parameter[11]);
+	double maxallowed;
+	Probability *p;
+	switch (randchoice){
+		case 0:
+			break;
+		case 1:
+			p = new Uniform(-scale, scale);
+			maxallowed = scale;
+			break;
+		case 2: 
+			p = new Normal(0, stdev);
+			maxallowed = maxdev;
+			break;
+		case 3: 
+			p = new Exponential(log(2)/mid);
+			maxallowed = max;
+			break;
+	}
 	vector <Element* > src_list;
+	vector <Element* > dst_list;
 	simpleWildcardFind( source, src_list );
+	if (destination != "")
+		simpleWildcardFind( destination, dst_list );
+	
 	for (size_t i = 0 ; i < src_list.size(); i++){
-		if (src_list[i]->className() != "SpikeGen"){cout << "Shell::planarweight: Error1" << endl; return;}
+		if (src_list[i]->className() != "SpikeGen"){
+			cout << "Shell::planarweight: The element is not a SpikeGen" << endl; 
+			return;
+		}
 		vector <Conn> conn;
 		src_list[i]->findFinfo("event")->outgoingConns(src_list[i], conn);
 		for (size_t j = 0; j < conn.size(); j++){
 			unsigned int numSynapses;
-			bool ret;
 			Element *dest = conn[j].targetElement();
+			if (destination != ""){
+				bool found = false;
+				for (vector<Element *>::iterator iter = dst_list.begin(); 
+					iter != dst_list.end(); iter++)
+					if (*iter == dest) {found = true; break;}
+				if (!found) continue;
+			}
+			bool ret;
 			ret = get< unsigned int >( dest, "numSynapses", numSynapses );
 			if (!ret) {cout << "Shell::planarweight: Error2" << endl; return;}
 			for (size_t k = 0 ; k < numSynapses; k++){
-				lookupSet< double, unsigned int >( dest, "weight", weight, k );
+				double number = 0;
+				if (weightchoice){
+					cout << "planarweight:: decay not implemented."<< endl;
+				}
+				else {
+					number = weight;
+				}
+				if (randchoice){
+					double random = p->getNextSample();
+					while (random > maxallowed ) random = p->getNextSample();
+					if (absoluterandom)
+						{number += random;}
+					else 
+						{number += number*random;}
+				}
+				lookupSet< double, unsigned int >( dest, "weight", number, k );
 			}
 		}
 	}

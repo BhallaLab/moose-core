@@ -48,11 +48,11 @@ double Uniform::getVariance()const
 {
     return (max_-min_)*(max_ - min_)/12.0;
 }
-double Uniform::getMin()
+double Uniform::getMin() const
 {
     return min_;
 }
-double Uniform::getMax()
+double Uniform::getMax() const
 {
     return max_;
 }
@@ -64,7 +64,7 @@ void Uniform::setMax(double max)
 {
     max_ = max;
 }
-double Uniform::getNextSample()
+double Uniform::getNextSample() const
 {
     return mtrand()*(max_-min_)+min_;
 }
