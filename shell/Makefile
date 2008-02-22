@@ -39,7 +39,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 
-Shell.o: Shell.h
+Shell.o: Shell.h ../utility/randnum/Probability.h ../utility/randnum/Uniform.h ../utility/randnum/Exponential.h ../utility/randnum/Normal.h
 
 ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 ParShell.o: Shell.h ParShell.h

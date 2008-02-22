@@ -63,8 +63,8 @@ const Cinfo* initGenesisParserCinfo()
 		new SrcFinfo( "createArray",
 				Ftype4< string, string, Id, vector <double> >::global() ),
 		new SrcFinfo( "planarconnect", Ftype3< string, string, double >::global() ),
-		new SrcFinfo( "planardelay", Ftype2< string, double >::global() ),
-		new SrcFinfo( "planarweight", Ftype2< string, double >::global() ),
+		new SrcFinfo( "planardelay", Ftype3< string, string, vector <double> >::global() ),
+		new SrcFinfo( "planarweight", Ftype3< string, string, vector<double> >::global() ),
 		new SrcFinfo( "getSynCount", Ftype1< Id >::global() ),
 		new DestFinfo( "recvCreate",
 					Ftype1< Id >::global(),
@@ -2912,27 +2912,260 @@ planarconnect / dest-path -relative -sourcemask box -1 -1 1 1 -destmask box 1 1 
 void do_planardelay( int argc, const char** const argv, Id s )
 {
 	if (argc < 3){
-		cout << "usage:: planardelay <srcelements> -fixed <delay>" << endl;
+		cout << "usage:: " << endl;
+		cout << "planarweight sourcepath [destination_path]\t\\ " << endl;
+		cout << "\t-fixed delay\t\t\t\t\\ " << endl;
+                cout << "\t-radial conduction_velocity\t\t\\ " << endl;
+                cout << "\t-add\t\t\t\t\t\\ " << endl;
+                cout << "\t-uniform scale\t\t\t\t\\ " << endl;
+                cout << "\t-gaussian stdev maxdev\t\t\t\\ " << endl;
+                cout << "\t-exponential mid max\t\t\t\\ " << endl;
+                cout << "\t-absoluterandom" << endl;
 		return;
-	}	
-	string source;
-	source = argv[1];
-	//check whether argv[2] is proper float
-	double delay = atof(argv[3]);
-	send2<string, double>(s(), planardelaySlot, source, delay);
+	}
+	string source = argv[1];
+	string destination = argv[2];
+	int start = 3;
+	if (destination == "-fixed"       || destination == "-radial"    || 
+	    destination == "-uniform"     || destination == "-gaussian" || 
+	    destination == "-exponential" || destination == "-absoluterandom" ||
+	    destination == "-add"
+	   ){
+		start = 2;
+		destination = "";
+	}
+	double delay = 0;
+	double conduction_velocity = 0;
+	double scale = 0;
+	double stdev = 0;
+	double maxdev = 0;
+	double mid = 0;
+	double max = 0;
+	bool absoluterandom = false;
+	bool add = false;
+	double delaychoice = 0;
+	double randchoice = 0;
+	
+	int delayoptions = 0;
+	int randoptions = 0;
+	for (int i = start; i < argc; i++){
+		if (strcmp(argv[i], "-fixed") == 0){
+			if (argc - i <= 1){
+				cout << "Error: Delay missing" << endl;
+				continue;
+			}
+			delay = atof(argv[i+1]);
+			i+=1;
+			delayoptions++;
+			delaychoice = 0;
+			continue;
+		}
+		if (strcmp(argv[i], "-radial") == 0){
+			if (argc - i <= 3){
+				cout << "Error: Conduction velocity not given" << endl;
+				continue;
+			}
+			conduction_velocity = atof(argv[i+3]);
+			i+=1;
+			delayoptions++;
+			delaychoice = 1;
+			continue;
+		}
+		if (strcmp(argv[i], "-uniform") == 0){
+			if (argc - i <= 1){
+				cout << "Error: Scale missing" << endl;
+				continue;
+			}
+			scale = atof(argv[i+1]);
+			i+=1;
+			randoptions++;
+			randchoice = 1;
+			continue;
+		}
+		if (strcmp(argv[i], "-gaussian") == 0){
+			if (argc - i <= 2){
+				cout << "Error: All the parameters for gaussian not given" << endl;
+				continue;
+			}
+			stdev = atof(argv[i+1]);
+			maxdev = atof(argv[i+2]);
+			i+=2;
+			randoptions++;
+			randchoice = 2;
+			continue;
+		}
+		if (strcmp(argv[i], "-exponential") == 0){
+			if (argc - i <= 2){
+				cout << "Error: All the parameters for exponential not given" << endl;
+				continue;
+			}
+			mid = atof(argv[i+1]);
+			max = atof(argv[i+2]);
+			i+=2;
+			randoptions++;
+			randchoice = 3;
+			continue;
+		}
+		if (strcmp(argv[i], "-absoluterandom") == 0){
+			absoluterandom = true;
+			continue;
+		}
+		if (strcmp(argv[i], "-add") == 0){
+			add = true;
+			continue;
+		}
+	}
+	if (delayoptions > 1){
+		cout << "planardelay::Must have exactly one of -fixed, -radial options." << endl;
+		return;
+	}
+	if (randoptions > 1){
+		cout << "planardelay::Must have at most one of -uniform, -gaussian, -exponential options." << endl;
+		return;
+	}
+	vector <double> parameter(11, 0);
+	parameter[0] = delay;
+	parameter[1] = conduction_velocity;
+	if (add) parameter[2] = 1;
+	parameter[3] = scale;
+	parameter[4] = stdev;
+	parameter[5] = maxdev;
+	parameter[6] = mid;
+	parameter[7] = max;
+	if (absoluterandom) parameter[8] = 1;
+	parameter[9] = delaychoice;
+	parameter[10] = randchoice;
+	send3<string, string, vector<double> >(s(), planardelaySlot, source, destination, parameter);
 }
 
 void do_planarweight( int argc, const char** const argv, Id s )
 {
 	if (argc < 3){
-		cout << "usage:: planarweight <srcelements> -fixed <weight>" << endl;
+		cout << "usage:: " << endl;
+		cout << "planarweight sourcepath [destination_path]\t\\ " << endl;
+		cout << "\t-fixed weight\t\t\t\t\\ " << endl;
+                cout << "\t-decay decay_rate max_weight min_weight\t\\ " << endl;
+                cout << "\t-uniform scale\t\t\t\t\\ " << endl;
+                cout << "\t-gaussian stdev maxdev\t\t\t\\ " << endl;
+                cout << "\t-exponential mid max\t\t\t\\ " << endl;
+                cout << "\t-absoluterandom				  " << endl;
 		return;
 	}
-	string source;
-	source = argv[1];
-	//check whether argv[2] is proper float
-	double weight = atof(argv[3]);
-	send2<string, double>(s(), planarweightSlot, source, weight);
+	string source = argv[1];
+	string destination = argv[2];
+	int start = 3;
+	if (destination == "-fixed"       || destination == "-decay"    || 
+	    destination == "-uniform"     || destination == "-gaussian" || 
+	    destination == "-exponential" || destination == "-absoluterandom"){
+		start = 2;
+		destination = "";
+	}
+	
+	int randoptions = 0;
+	int weightoptions = 0;
+	
+	double weightchoice = 0;
+	double randchoice = 0;
+	double fixedweight = 0;
+	double decay_rate = 0;
+	double max_weight = 0;
+	double min_weight = 0;
+	double scale = 0;
+	double stdev = 0;
+	double maxdev = 0;
+	double mid = 0;
+	double max = 0;
+	bool absoluterandom = false;
+	
+	for (int i = start; i < argc; i++){
+		if (strcmp(argv[i], "-fixed") == 0){
+			if (argc - i <= 1){
+				cout << "Error: Weight missing" << endl;
+				continue;
+			}
+			fixedweight = atof(argv[i+1]);
+			i+=1;
+			weightoptions++;
+			weightchoice = 0;
+			continue;
+		}
+		if (strcmp(argv[i], "-decay") == 0){
+			if (argc - i <= 3){
+				cout << "Error: All the parameters for decay not given" << endl;
+				continue;
+			}
+			decay_rate = atof(argv[i+1]);
+			max_weight = atof(argv[i+2]);
+			min_weight = atof(argv[i+3]);
+			i+=3;
+			weightoptions++;
+			weightchoice = 1;
+			continue;
+		}
+		if (strcmp(argv[i], "-uniform") == 0){
+			if (argc - i <= 1){
+				cout << "Error: Scale missing" << endl;
+				continue;
+			}
+			scale = atof(argv[i+1]);
+			i+=1;
+			randoptions++;
+			randchoice = 1;
+			continue;
+		}
+		if (strcmp(argv[i], "-gaussian") == 0){
+			if (argc - i <= 2){
+				cout << "Error: All the parameters for gaussian not given" << endl;
+				continue;
+			}
+			stdev = atof(argv[i+1]);
+			maxdev = atof(argv[i+2]);
+			i+=2;
+			randoptions++;
+			randchoice = 2;
+			continue;
+		}
+		if (strcmp(argv[i], "-exponential") == 0){
+			if (argc - i <= 2){
+				cout << "Error: All the parameters for exponential not given" << endl;
+				continue;
+			}
+			mid = atof(argv[i+1]);
+			max = atof(argv[i+2]);
+			i+=2;
+			randoptions++;
+			randchoice = 3;
+			continue;
+		}
+		if (strcmp(argv[i], "-absoluterandom") == 0){
+			absoluterandom = true;
+			continue;
+		}
+	}
+	if (weightoptions > 1){
+		cout << "Must have exactly one of -fixed, -decay options." << endl;
+		return;
+	}
+	if (randoptions > 1){
+		cout << "Must have at most one of -uniform, -gaussian, -exponential options." << endl;
+		return;
+	}
+	
+	vector <double> parameter(12, 0);
+	parameter[0] = fixedweight;
+	parameter[1] = decay_rate;
+	parameter[2] = max_weight;
+	parameter[3] =  min_weight;
+	parameter[4] = scale;
+	parameter[5] = stdev;
+	parameter[6] = maxdev;
+	parameter[7] = mid;
+	parameter[8] = max;
+	if (absoluterandom)
+		parameter[9] = 1;
+	parameter[10] = weightchoice;
+	parameter[11] = randchoice;
+	send3<string, string, vector<double> >(s(), planarweightSlot, source, destination, parameter);
 }
 
 int do_getsyncount( int argc, const char** const argv, Id s )
