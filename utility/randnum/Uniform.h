@@ -25,7 +25,7 @@ class Uniform: public Probability
     Uniform(double min, double max);
     double getMean() const;
     double getVariance() const;
-    double getNextSample();
+    double getNextSample() const;
     double getMin() const;
     double getMax() const;
     void setMin(double min);
