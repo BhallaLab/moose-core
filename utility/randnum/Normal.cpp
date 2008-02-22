@@ -289,7 +289,8 @@ bool Normal::testAcceptance(unsigned long t_num, unsigned long v_num)
     
     double t = t_num/4294967296.0;
     double v = v_num/4294967296.0;
-     
+    return (v > exp(-t));
+    /* 
     while(cont)
     {   // a)
         if ( t >= LN2 )
@@ -352,7 +353,7 @@ bool Normal::testAcceptance(unsigned long t_num, unsigned long v_num)
             }
         }           
     }
-    return accept;    
+    return accept;    */
 }
 
 
