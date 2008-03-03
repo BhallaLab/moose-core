@@ -40,6 +40,12 @@ int main(int argc, char **argv)
     cout << "Successful step ... " << endl;
     Compartment d("test");
     HHChannel dch("Na", d);
+    Neutral root = Neutral("/");
+    vector<Id> children = root.__get_children();
+    cout << "Listing children of root..." << endl;
+    for ( int i = 0; i < children.size(); ++i ){
+	cout << children[i].path() << endl;
+    }
     dch.__set_Ek(1.1);
 
     ctx->readCell( "/soma", "soma.p", 1.0, 1.0, 1.0, 1.0, 1.0 );
