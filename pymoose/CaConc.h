@@ -24,16 +24,6 @@ namespace pymoose
         void __set_tau(double tau);
         double __get_B() const;
         void __set_B(double B);
-        double __get_concSrc() const;
-        void __set_concSrc(double concSrc);
-        double __get_current() const;
-        void __set_current(double current);
-        double __get_increase() const;
-        void __set_increase(double increase);
-        double __get_decrease() const;
-        void __set_decrease(double decrease);
-        double __get_basalMsg() const;
-        void __set_basalMsg(double basalMsg);
     };
 } // namespace pymoose
 

@@ -1,3 +1,4 @@
+-*- text-mode fill-column: 78 -*-
 /*******************************************************************
  * File:            GtoPy.txt
  * Description:      
@@ -64,3 +65,40 @@ and Table.createTable(xmin, xmax, xdivs)
 	setfield mychannel X_A->tab[N] valueN
 ----------------------------------------------
 // WORK IN PROGRESS
+----------------------------------------------
+ Connecting a channel to CaConc
+----------------------------------------------
+
+The CaConc in a compartment is affected by the Ca currents. And this
+in turn affects the Ca dependent channels in the compartment.  If you
+have an HHChannel CaL for long lasting high threshold Ca2+ current and
+CaT for the transient low threshold Ca2+ current and you want to
+update the Ca2+ concentration in the compartment due to these
+currents, create a CaConc object in the compartment and connect the
+"IkSrc" source-field in the chnnels to the "current" destination field
+in the CaConc object.
+
+caConc = CaConc("caConc", compartment)
+caL.connect("IkSrc", caConc, "current")
+caT.connect("IkSrc", caConc, "current")
+
+This will result in the individual currents being added to the
+"activation" variable in the CaConc object. The "activation" is used
+for calculating the Ca2+ concentration as in the foloowing formula:
+
+    x = exp( -dt / tau );
+    c = c * x + ( B * activation * tau )  * ( 1.0 - x );    
+    Ca = Ca_Basal + c;
+
+where dt is the timestep, tau is a time constant, B is constant and
+Ca_Basal is the basal concentration of Ca2+.
+
+
+For a [Ca2+] dependent channel we have to connect the CaConc object to
+the channel as follows:
+
+    caConc.connect("concSrc", kAHP, "concen")
+			  
+where kAHP is an HHChannel whose conductance is dependent on
+[Ca2+]. The concentration is used for looking up an entry in the
+tables in the "zGate" of the channel.
