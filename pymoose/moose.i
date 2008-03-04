@@ -240,11 +240,6 @@
 %attribute(pymoose::CaConc, double, Ca_base, __get_Ca_base, __set_Ca_base)
 %attribute(pymoose::CaConc, double, tau, __get_tau, __set_tau)
 %attribute(pymoose::CaConc, double, B, __get_B, __set_B)
-%attribute(pymoose::CaConc, double, concSrc, __get_concSrc, __set_concSrc)
-%attribute(pymoose::CaConc, double, current, __get_current, __set_current)
-%attribute(pymoose::CaConc, double, increase, __get_increase, __set_increase)
-%attribute(pymoose::CaConc, double, decrease, __get_decrease, __set_decrease)
-%attribute(pymoose::CaConc, double, basalMsg, __get_basalMsg, __set_basalMsg)
 %include "HHGate.h"
 %attribute(pymoose::HHGate, InterpolationTable*, A, __get_A)
 %attribute(pymoose::HHGate, InterpolationTable*, B, __get_B)

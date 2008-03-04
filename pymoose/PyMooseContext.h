@@ -86,34 +86,34 @@ namespace pymoose
         void stop();
         void setClock(int clockNo, double dt, int stage);    
         vector <double>& getClocks();
-        void useClock(Id tickId, std::string path, std::string func = "process");
+        void useClock(const Id& tickId, std::string path, std::string func = "process");
         void useClock(int tickNo, std::string path, std::string func = "process");
         void addTask(std::string arg);
-        void do_deep_copy( Id object, std::string new_name, Id dest);
-        Id deepCopy( Id object, std::string new_name, Id dest);    
-        void move( Id object, std::string new_name, Id dest);
-        bool connect(Id src, std::string srcField, Id dest, std::string destField);
+        void do_deep_copy( const Id& object, std::string new_name, const Id& dest);
+        Id deepCopy( const Id& object, std::string new_name, const Id& dest);    
+        void move( const Id& object, std::string new_name, const Id& dest);
+        bool connect(const Id& src, std::string srcField, const Id& dest, std::string destField);
         void setupAlpha( std::string channel, std::string gate, vector <double> parms );
         void setupAlpha(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max);
         void setupTau( std::string channel, std::string gate, vector <double> parms );
         void setupTau(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max);
         void tweakAlpha( std::string channel, std::string gate );
         void tweakTau( std::string channel, std::string gate);
-        void tabFill(Id table, int xdivs, int mode);    
+        void tabFill(const Id& table, int xdivs, int mode);    
         
-        void setupAlpha( Id gateId, vector <double> parms );
-        void setupTau( Id gateId, vector <double> parms );
-        void tweakAlpha( Id gateId );
-        void tweakTau( Id gateId);
+        void setupAlpha( const Id& gateId, vector <double> parms );
+        void setupTau( const Id& gateId, vector <double> parms );
+        void tweakAlpha( const Id& gateId );
+        void tweakTau( const Id& gateId);
         void readCell(string cellpath, string filename, double cm, double rm, double ra, double erestAct, double eleak);
         void readCell(string cellpath, string filename, vector <double> params);        
         void readCell(std::string cellPath, std::string fileName);    
-        bool exists(Id id);
+        bool exists(const Id& id);
         bool exists(std::string path);
 
         void createMap(string src, string dest, unsigned int nx, unsigned int ny, double dx = 1.0, double dy = 1.0, double xo = 0.0, double yo = 0.0, bool isObject = true);
-        void createMap(Id src, Id dest, string name, unsigned int nx, unsigned int ny, double dx = 1.0, double dy = 1.0, double xo = 0.0, double yo = 0.0);
-        void createMap(Id src, Id dest, string name, vector<double> param);
+        void createMap( Id src,  Id dest, string name, unsigned int nx, unsigned int ny, double dx = 1.0, double dy = 1.0, double xo = 0.0, double yo = 0.0);
+        void createMap( Id src, Id dest, string name, vector<double> param);
         void planarConnect(string src, string dst, double probability = 0.0);
         void plannarDelay(string src, double delay);
         void planarWeight(string src, double weight);
@@ -135,9 +135,9 @@ namespace pymoose
     
         void tweakChanFunc( std::string channel, std::string gate, unsigned int slot );
     
-        void setupChanFunc( Id gateId, vector <double> parms, unsigned int slot);
-        void tweakChanFunc( Id gateId, unsigned int slot );
-        bool parseCopyMove( string src, string dest, Id s, Id& e, Id& pa, string& childname );
+        void setupChanFunc( const Id& gateId, vector <double> parms, unsigned int slot);
+        void tweakChanFunc( const Id& gateId, unsigned int slot );
+        bool parseCopyMove( string src, string dest,  Id s,  Id& e, Id& pa, string& childname );
         
         Id myId_;    
         // Present working element

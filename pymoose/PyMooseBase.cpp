@@ -145,8 +145,6 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
         Id parentId = context_->pathToId(parentPath, false);
         id_ = context_->create(className, myName, parentId );
     }
-    
-
 }
 
 /**
@@ -216,6 +214,51 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
     context_->readCell(path, fileName);    
 }
 
+PyMooseBase::PyMooseBase(PyMooseBase& src, std::string objectName, PyMooseBase& parent)
+{
+    id_ = context_->deepCopy(src.id_, objectName, parent.id_);
+    
+}
+
+PyMooseBase::PyMooseBase(PyMooseBase& src, std::string path)
+{
+    id_ = PyMooseBase::pathToId(path,false);
+    if (!id_.bad())
+    {
+        cerr << "Warning: target object exists. No copying done." << endl;        
+        return;
+    }
+    
+    std::string::size_type name_start = path.rfind(getSeparator(),path.length()-1);
+    std::string myName;    
+    std::string parentPath;
+    
+    if (name_start == std::string::npos)
+    {
+        name_start = 0;
+        myName = path;
+        Id parentId = context_->getCwe();
+        id_ = context_->deepCopy(src.id_, myName, parentId);        
+    }
+    else 
+    {
+        myName = path.substr(name_start+1);
+        parentPath = path.substr(0,name_start);
+        Id parentId = context_->pathToId(parentPath, false);
+        id_ = context_->deepCopy(src.id_, myName, parentId);
+    }
+}
+
+PyMooseBase::PyMooseBase(Id src, string name, Id parent)
+{
+    id_ = context_->deepCopy(src, name, parent);    
+}
+
+
+PyMooseBase::PyMooseBase(PyMooseBase& src, std::string objectName, Id parent)
+{
+    id_ = context_->deepCopy(src.id_, objectName, parent);
+}
 
 /**
    I still have a big dilemma with the destructor. Should an object be
