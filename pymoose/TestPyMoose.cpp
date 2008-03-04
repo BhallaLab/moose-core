@@ -27,6 +27,7 @@ int main(int argc, char **argv)
     PyMooseContext* ctx = PyMooseContext::createPyMooseContext("context", "shell");
     cout << "Successfully created contex ... " << endl;
     cout << "Resetting context .... " << endl;
+    
     Compartment c("test");
     HHChannel ch ("Na",c);
     ch.__set_Ek(1.0);
@@ -41,6 +42,11 @@ int main(int argc, char **argv)
     Compartment d("test");
     HHChannel dch("Na", d);
     Neutral root = Neutral("/");
+    cout << "Obtained handle for root element: Id " << root.__get_id() << endl;
+   
+    ctx->deepCopy(*dch.__get_id(), "Na1", *root.__get_id());
+    cout << "Deep copy successful" << endl;
+    
     vector<Id> children = root.__get_children();
     cout << "Listing children of root..." << endl;
     for ( int i = 0; i < children.size(); ++i ){

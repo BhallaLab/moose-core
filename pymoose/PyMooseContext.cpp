@@ -711,7 +711,7 @@ Id PyMooseContext::pathToId(string path, bool echo)
     return returnValue;    
 }
 
-bool PyMooseContext::exists(Id id)
+bool PyMooseContext::exists(const Id& id)
 {
     Element* e = id();
     return e != NULL;    
@@ -817,7 +817,7 @@ vector <double> & PyMooseContext::getClocks()
     return dbls_;        
 }
 
-void PyMooseContext::useClock(Id tickId, string path, string func)
+void PyMooseContext::useClock(const Id& tickId, string path, string func)
 {
     Element * e = myId_();
     send2< string, bool >( e, requestWildcardListSlot, path, 0 );
@@ -859,18 +859,39 @@ void PyMooseContext::addTask(string arg)
    This just does the copying without returning anything.
    Corresponds to the procedural technique used in Genesis shell
 */
-void PyMooseContext::do_deep_copy( Id object, string new_name, Id dest)
+void PyMooseContext::do_deep_copy( const Id& object, string new_name, const Id& dest)
 {
     send3< Id, Id, string >  ( myId_(), copySlot, object, dest, new_name);
 }
 /**
    This is the object oriented version. It returns Id of new copy.
 */
-Id PyMooseContext::deepCopy( Id object, string new_name, Id dest)
+Id PyMooseContext::deepCopy( const Id& object, string new_name, const Id& dest)
 {
+    if ( new_name.find(PyMooseContext::separator) != std::string::npos )
+    {
+        cerr << "Error: object name may not contain "<< PyMooseContext::separator << endl;
+        Id id;
+        return id;    
+    }
+    
     do_deep_copy( object,  new_name, dest);
     
-    string path = getPath(dest) + PyMooseContext::separator+new_name;
+    string path = getPath(dest);
+    size_t len = path.length();
+    
+    if ( len > 0 ){
+        if ( path.substr(len-1) != PyMooseContext::separator )
+        {
+            path += PyMooseContext::separator;            
+        }
+    }
+    else
+    {
+        path += PyMooseContext::separator;
+    }
+    
+    path += new_name;
     Id id(path);
     return id;
 }
@@ -878,13 +899,13 @@ Id PyMooseContext::deepCopy( Id object, string new_name, Id dest)
 /**
    move object into the element specified by dest and rename the object to new_name
 */
-void PyMooseContext::move( Id object, string new_name, Id dest)
+void PyMooseContext::move( const Id& object, string new_name, const Id& dest)
 {
     send3< Id, Id, string >(
         myId_(), moveSlot, object, dest, new_name );
 }
 
-bool PyMooseContext::connect(Id src, string srcField, Id dest, string destField)
+bool PyMooseContext::connect(const Id& src, string srcField, const Id& dest, string destField)
 {
     if ( !src.bad() && !dest.bad() ) {
         Element* se = src( );
@@ -978,7 +999,7 @@ void PyMooseContext::createMap(string src, string dest, unsigned int nx, unsigne
  * Modified from the function with same name in GenesisParserWrapper.cpp
  */
 bool PyMooseContext::parseCopyMove( string src, string dest, Id s,
-		Id& e, Id& pa, string& childname )
+		Id& e,  Id& pa, string& childname )
 {
     e = Id( src );
     if ( !e.zero() && !e.bad() ) {
@@ -1169,7 +1190,7 @@ void PyMooseContext::tweakTau( string channel, string gate)
 // do better programming than the genesis parser allows
 //=================================================================
 
-void PyMooseContext::setupChanFunc(Id gateId, vector <double> parms, unsigned int slot)
+void PyMooseContext::setupChanFunc(const Id& gateId, vector <double> parms, unsigned int slot)
 {
     
     if (parms.size() < 10 ) {
@@ -1198,34 +1219,34 @@ void PyMooseContext::setupChanFunc(Id gateId, vector <double> parms, unsigned in
     send2< Id, vector< double > >( myId_(), slot, gateId, parms );
 }
 
-void PyMooseContext::setupAlpha( Id gateId, vector <double> parms )
+void PyMooseContext::setupAlpha(const Id& gateId, vector <double> parms )
 {
     setupChanFunc( gateId, parms, setupAlphaSlot );
 }
 
-void PyMooseContext::setupTau( Id gateId, vector <double> parms )
+void PyMooseContext::setupTau(const Id& gateId, vector <double> parms )
 {
     setupChanFunc( gateId, parms, setupTauSlot );
 }
 
-void PyMooseContext::tweakChanFunc( Id gateId, unsigned int slot )
+void PyMooseContext::tweakChanFunc(const Id& gateId, unsigned int slot )
 {
     if ( gateId.bad() )
         return;
     send1< Id >( myId_(), slot, gateId );
 }
 
-void PyMooseContext::tweakAlpha( Id gateId )
+void PyMooseContext::tweakAlpha( const Id& gateId )
 {
     tweakChanFunc( gateId, tweakAlphaSlot );
 }
-void PyMooseContext::tweakTau( Id gateId)
+void PyMooseContext::tweakTau( const Id& gateId)
 {
     tweakChanFunc( gateId, tweakTauSlot );
 }
 //========================
 
-void PyMooseContext::tabFill(Id table, int xdivs, int mode)
+void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
 {
     string argstr = xdivs + "," + mode;
     send3< Id, string, string >( myId_(), setFieldSlot, table, "tabFill", argstr );
