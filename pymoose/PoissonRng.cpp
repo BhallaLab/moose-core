@@ -7,6 +7,16 @@ PoissonRng::PoissonRng(Id id):RandGenerator(id){}
 PoissonRng::PoissonRng(std::string path):RandGenerator(className, path){}
 PoissonRng::PoissonRng(std::string name, Id parentId):RandGenerator(className, name, parentId){}
 PoissonRng::PoissonRng(std::string name, PyMooseBase& parent):RandGenerator(className, name, parent){}
+PoissonRng::PoissonRng(const PoissonRng& src, std::string objectName,  PyMooseBase& parent):RandGenerator(src, objectName, parent){}
+
+PoissonRng::PoissonRng(const PoissonRng& src, std::string objectName, Id& parent):RandGenerator(src, objectName, parent){}
+PoissonRng::PoissonRng(const PoissonRng& src, std::string path):RandGenerator(src, path)
+{
+}
+
+PoissonRng::PoissonRng(const Id& src, string name, Id& parent):RandGenerator(src, name, parent)
+{
+}
 PoissonRng::~PoissonRng(){}
 const std::string& PoissonRng::getType(){ return className; }
 double PoissonRng::__get_mean() const

@@ -12,6 +12,10 @@ namespace pymoose
         Mg_block(std::string path);
         Mg_block(std::string name, Id parentId);
         Mg_block(std::string name, PyMooseBase& parent);
+        Mg_block(const Mg_block& src,std::string name, PyMooseBase& parent);
+        Mg_block(const Mg_block& src,std::string name, Id& parent);
+        Mg_block(const Id& src,std::string name, Id& parent);
+        Mg_block(const Mg_block& src,std::string path);
         ~Mg_block();
         const std::string& getType();
         double __get_KMg_A() const;

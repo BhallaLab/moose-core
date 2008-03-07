@@ -13,6 +13,10 @@ namespace pymoose
         HHGate(std::string path);
         HHGate(std::string name, Id parentId);
         HHGate(std::string name, PyMooseBase& parent);
+        HHGate(const HHGate& src,std::string name, PyMooseBase& parent);
+        HHGate(const HHGate& src,std::string name, Id& parent);
+        HHGate(const Id& src,std::string name, Id& parent);
+        HHGate(const HHGate& src,std::string path);
         ~HHGate();
         const std::string& getType();
         // These are manually inserted

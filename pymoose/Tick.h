@@ -10,6 +10,10 @@ namespace pymoose
         ClockTick(std::string path);
         ClockTick(std::string name, Id parentId);
         ClockTick(std::string name, PyMooseBase& parent);
+        ClockTick(const ClockTick& src,std::string name, PyMooseBase& parent);
+        ClockTick(const ClockTick& src,std::string name, Id& parent);
+        ClockTick(const Id& src,std::string name, Id& parent);
+        ClockTick(const ClockTick& src,std::string path);
         ~ClockTick();
         const std::string& getType();
         double __get_dt() const;

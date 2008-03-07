@@ -102,3 +102,93 @@ the channel as follows:
 where kAHP is an HHChannel whose conductance is dependent on
 [Ca2+]. The concentration is used for looking up an entry in the
 tables in the "zGate" of the channel.
+
+-----------------------------------------------------------------
+
+
+PyMooseBase.pwe() 
+
+returns the Id of the current working element. By default, MOOSE
+initializes current working element to: root ("/"). The above command
+will print some info about the swig proxy object for the Id, something
+like:
+
+<moosee.Id; proxy of <Swig Object of type 'Id *' at 0x8208ad8> >
+
+To see something more meaningful, enter:
+ 
+print PyMooseBase.pwe().path()
+
+
+Now let us create a neutral object, which is often used as a container
+for more interesting objects:
+
+x = Neutral("test")
+
+When you do not specify the full path for the object, it is created
+under the current working element. The above command creates a Neutral
+object called test under the root element.
+
+Now let us change the present working element to "test":
+
+PyMooseBase.ce("/test") 
+
+Now:
+print PyMooseBase.pwe().path()
+
+results in: 
+'/test'
+
+
+Now let us create a compartment:
+
+comp = Compartment("cmp")
+
+Since "/test" is the present working element, "cmp" will be created as
+a child of "/test".
+
+print comp.path()
+will give the output:
+'/test/cmp'
+
+We could specify the path to the desired parent as a second parameter
+to the constructor. For example:
+
+comp = Compartment("cmp", "/")
+
+will create the compartment as a child of root element instead of the
+current working element.
+
+print comp.path()
+
+should give the output:
+
+'/cmp'
+
+
+Now let us make this compartment our new working element.
+
+PyMooseBase.ce(comp)
+
+Now try:
+
+for element in PyMooseBase.le():
+   print element.path()
+
+this will not give any output because there are no elements under our
+newly created compartment. Now let us create soem objects inside it:
+
+naChan = HHChan("Na")
+kChan = HHChan("K", comp)
+caChan = HHChan("Ca", "/test/cmp")
+kAChan = HHChan("/test/cmp/KA")
+
+Notice the various ways of creating objects in MOOSE. Each of them are
+created as a child of the compartment object. The naChan was created
+with just the name of the object, so it will be created under the
+present working element, which is "/test/cmp". When constructing the
+kChan we specified the comp object as a second parameter. This is the
+parent of the kChan object. In caChan construction, we specify the
+path to the parent object. And in kAChan, we specify the full path of
+the channel to be created. The full (absolute) path always starts with
+"/" like unix file system.

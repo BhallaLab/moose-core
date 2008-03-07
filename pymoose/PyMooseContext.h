@@ -76,8 +76,8 @@ namespace pymoose
         void setField(Id, std::string, std::string);
         const Id& getParent(Id id) const;
         const std::string getPath(Id id) const;
-        vector <Id>& getChildren(Id id);
-        vector <Id>& getChildren(std::string path);    
+        vector <Id> getChildren(Id id);
+        vector <Id> getChildren(std::string path);    
         Id pathToId(std::string path, bool echo = true);
         void step(double runTime);
         void step(long multiple);

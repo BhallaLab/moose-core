@@ -11,6 +11,10 @@ namespace pymoose
         Neutral(std::string name, Id parentId);
         Neutral(std::string name, PyMooseBase& parent);
         Neutral(std::string path, std::string fileName);
+        Neutral(const Neutral& src,std::string name, PyMooseBase& parent);
+        Neutral(const Neutral& src,std::string name, Id& parent);
+        Neutral(const Id& src,std::string name, Id& parent);
+        Neutral(const Neutral& src,std::string path);
     
         ~Neutral();
         const std::string& getType();

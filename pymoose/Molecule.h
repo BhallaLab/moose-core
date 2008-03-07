@@ -10,6 +10,10 @@ namespace pymoose
         Molecule(std::string path);
         Molecule(std::string name, Id parentId);
         Molecule(std::string name, PyMooseBase& parent);
+        Molecule(const Molecule& src,std::string name, PyMooseBase& parent);
+        Molecule(const Molecule& src,std::string name, Id& parent);
+        Molecule(const Id& src,std::string name, Id& parent);
+        Molecule(const Molecule& src,std::string path);
         ~Molecule();
         const std::string& getType();
         double __get_nInit() const;
