@@ -24,6 +24,16 @@ Cell::Cell(Id id):PyMooseBase(id){}
 Cell::Cell(std::string path):PyMooseBase(className, path){}
 Cell::Cell(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 Cell::Cell(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Cell::Cell(const Cell& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+Cell::Cell(const Cell& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+Cell::Cell(const Cell& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+Cell::Cell(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 Cell::~Cell(){}
 const std::string& Cell::getType(){ return className; }
 #endif

@@ -132,6 +132,10 @@ Cinfo::Cinfo(const std::string& name,
                    << "        " << name << "(std::string path);\n"
                    << "        " << name << "(std::string name, Id parentId);\n"
                    << "        " << name << "(std::string name, PyMooseBase& parent);\n"
+                   << "        " << name << "( const " << name << "& src, std::string name, PyMooseBase& parent);\n"
+                   << "        " << name << "( const " << name << "& src, std::string name, Id parent);\n"
+                   << "        " << name << "( const " << name << "& src, std::string path);\n"
+                   << "        " << name << "( const Id& src, std::string name, Id parent);\n"
                    << "        ~" << name <<"();\n"
                    << "        const std::string& getType();\n";
         

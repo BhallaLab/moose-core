@@ -7,6 +7,16 @@ CaConc::CaConc(Id id):PyMooseBase(id){}
 CaConc::CaConc(std::string path):PyMooseBase(className, path){}
 CaConc::CaConc(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 CaConc::CaConc(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+CaConc::CaConc(const CaConc& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+CaConc::CaConc(const CaConc& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+CaConc::CaConc(const CaConc& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+CaConc::CaConc(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 CaConc::~CaConc(){}
 const std::string& CaConc::getType(){ return className; }
 double CaConc::__get_Ca() const

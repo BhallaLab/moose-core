@@ -10,6 +10,10 @@ namespace pymoose
         Sched1(std::string path);
         Sched1(std::string name, Id parentId);
         Sched1(std::string name, PyMooseBase& parent);
+        Sched1(const Sched1& src,std::string name, PyMooseBase& parent);
+        Sched1(const Sched1& src,std::string name, Id& parent);
+        Sched1(const Id& src,std::string name, Id& parent);
+        Sched1(const Sched1& src,std::string path);
         ~Sched1();
         const std::string& getType();
     };

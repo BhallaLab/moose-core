@@ -11,6 +11,10 @@ namespace pymoose
         ExponentialRng(std::string path);
         ExponentialRng(std::string name, Id parentId);
         ExponentialRng(std::string name, PyMooseBase& parent);
+        ExponentialRng(const ExponentialRng& src,std::string name, PyMooseBase& parent);
+        ExponentialRng(const ExponentialRng& src,std::string name, Id& parent);
+        ExponentialRng(const Id& src,std::string name, Id& parent);
+        ExponentialRng(const ExponentialRng& src,std::string path);
         ~ExponentialRng();
         const std::string& getType();
         double __get_mean() const;

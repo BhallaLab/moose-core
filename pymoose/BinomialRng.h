@@ -31,6 +31,10 @@ namespace pymoose
         BinomialRng(std::string path);
         BinomialRng(std::string name, Id parentId);
         BinomialRng(std::string name, PyMooseBase& parent);
+        BinomialRng(const BinomialRng& src,std::string name, PyMooseBase& parent);
+        BinomialRng(const BinomialRng& src,std::string name, Id& parent);
+        BinomialRng(const Id& src,std::string name, Id& parent);
+        BinomialRng(const BinomialRng& src,std::string path);
         ~BinomialRng();
         const std::string& getType();
         int __get_n() const;

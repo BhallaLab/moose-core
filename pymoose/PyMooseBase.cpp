@@ -64,7 +64,15 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id paren
         id_ = Id::badId();
         return;        
     }
-    string path = parentId.path(getSeparator())+getSeparator()+objectName;
+    string path = parentId.path(getSeparator());
+    if (path != getSeparator())
+    {
+        path = getSeparator()+objectName;
+    }
+    else
+    {
+        path += objectName;
+    }    
     
     id_ = PyMooseBase::pathToId(path,false);
     if (!id_.bad())
@@ -167,7 +175,16 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseB
         return;
     }
     
-    string path = parent.path() + getSeparator() + objectName;
+    string path = parent.path();
+    if ( path == getSeparator() )
+    {
+        path += objectName;
+    }
+    else
+    {
+        path = path + getSeparator() + objectName;
+    }
+    
     id_ = PyMooseBase::pathToId(path,false);
     if (!id_.bad())
     {
@@ -214,13 +231,13 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
     context_->readCell(path, fileName);    
 }
 
-PyMooseBase::PyMooseBase(PyMooseBase& src, std::string objectName, PyMooseBase& parent)
+PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string objectName, PyMooseBase& parent)
 {
     id_ = context_->deepCopy(src.id_, objectName, parent.id_);
     
 }
 
-PyMooseBase::PyMooseBase(PyMooseBase& src, std::string path)
+PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string path)
 {
     id_ = PyMooseBase::pathToId(path,false);
     if (!id_.bad())
@@ -249,13 +266,13 @@ PyMooseBase::PyMooseBase(PyMooseBase& src, std::string path)
     }
 }
 
-PyMooseBase::PyMooseBase(Id src, string name, Id parent)
+PyMooseBase::PyMooseBase(const Id& src, string name, Id& parent)
 {
     id_ = context_->deepCopy(src, name, parent);    
 }
 
 
-PyMooseBase::PyMooseBase(PyMooseBase& src, std::string objectName, Id parent)
+PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string objectName, Id& parent)
 {
     id_ = context_->deepCopy(src.id_, objectName, parent);
 }
@@ -307,7 +324,7 @@ const Id* PyMooseBase::__get_parent() const
     return &context_->getParent(id_);
 }
 
-vector <Id>& PyMooseBase::__get_children() const
+const vector <Id> PyMooseBase::children() const
 {
     return context_->getChildren(id_);
 }
@@ -457,7 +474,7 @@ Id PyMooseBase::getParent(Id id)
     return context_->getParent(id);
 }
 
-vector <Id>& PyMooseBase::getChildren(Id id)
+vector <Id> PyMooseBase::getChildren(Id id)
 {
     return context_->getChildren(id);
 }
@@ -471,8 +488,7 @@ bool PyMooseBase::exists(std::string path)
 {
     return context_->exists(path);    
 }
-
-vector <Id>& PyMooseBase::le()
+vector <Id> PyMooseBase::le()
 {
     return context_->getChildren(context_->getCwe());
 }

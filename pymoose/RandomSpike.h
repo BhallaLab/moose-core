@@ -10,6 +10,10 @@ namespace pymoose{
         RandomSpike(std::string path);
         RandomSpike(std::string name, Id parentId);
         RandomSpike(std::string name, PyMooseBase& parent);
+        RandomSpike(const RandomSpike& src,std::string name, PyMooseBase& parent);
+        RandomSpike(const RandomSpike& src,std::string name, Id& parent);
+        RandomSpike(const Id& src,std::string name, Id& parent);
+        RandomSpike(const RandomSpike& src,std::string path);
         ~RandomSpike();
         const std::string& getType();
         double __get_minAmp() const;
