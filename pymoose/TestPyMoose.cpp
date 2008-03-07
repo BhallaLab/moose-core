@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     ctx->deepCopy(*dch.__get_id(), "Na1", *root.__get_id());
     cout << "Deep copy successful" << endl;
     
-    vector<Id> children = root.__get_children();
+    vector<Id> children = root.children();
     cout << "Listing children of root..." << endl;
     for ( int i = 0; i < children.size(); ++i ){
 	cout << children[i].path() << endl;

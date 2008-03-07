@@ -24,7 +24,7 @@
 ############################################################################
 
 TARGET = pymoose
-CXXFLAGS +=-DDO_UNIT_TESTS -fPIC
+CXXFLAGS +=-g -DDO_UNIT_TESTS -DNDEBUG -fPIC
 DYNAMIC_FLAGS=-shared 
 # The library location and flags for creating dll in Mac is different from Linux
 SYSTEM=$(shell (uname))
@@ -32,7 +32,7 @@ ifeq ($(SYSTEM),Darwin)
 	DYNAMIC_FLAGS=-bundle -flat_namespace -undefined suppress 
 endif
 
-INCLUDES=-I/usr/include/python2.4 -I..
+INCLUDES=-I/usr/include/python2.5 -I..
 
 OBJFILES = ../basecode/basecode.o \
 	../element/element.o \
@@ -56,6 +56,8 @@ OBJ = PyMooseBase.o \
 	Interpol.o \
 	CaConc.o \
 	SpikeGen.o \
+	PulseGen.o	\
+	RandomSpike.o	\
 	SynChan.o \
 	BinSynchan.o	\
 	StochSynchan.o	\
@@ -76,7 +78,7 @@ OBJ = PyMooseBase.o \
 	GammaRng.o	\
 	NormalRng.o	\
 	PoissonRng.o	\
-
+	UniformRng.o	\
 
 HEADERS = PyMooseUtil.h \
 	PyMooseContext.h \
@@ -90,6 +92,8 @@ HEADERS = PyMooseUtil.h \
 	Interpol.h \
 	CaConc.h \
 	SpikeGen.h \
+	RandomSpike.h	\
+	PulseGen.h	\
 	SynChan.h \
 	BinSynchan.h	\
 	StochSynchan.h	\
@@ -111,6 +115,7 @@ HEADERS = PyMooseUtil.h \
 	GammaRng.h	\
 	NormalRng.h	\
 	PoissonRng.h	\
+	UniformRng.h	\
 	../utility/randnum/randnum.h	\
 	../utility/randnum/Probability.h	\
 	../utility/randnum/Binomial.h	\
@@ -120,11 +125,10 @@ HEADERS = PyMooseUtil.h \
 	../utility/randnum/Poisson.h	\
 	../maindir/init.h		\
 
-# TEST_MAIN = main.cpp
-# TEST_MAIN = SwigTest.cpp
+#TEST_MAIN = TestPyMoose.o
 
-# testPyMoose: $(OBJ) $(OBJFILES) $(HEADERS) $(TEST_MAIN)
-# 	$(CXX) $(CXXFLAGS) -o $@ $^
+#testPyMoose: $(OBJ) $(OBJFILES) $(HEADERS) $(TEST_MAIN)
+#	$(CXX) $(CXXFLAGS) -o $@ $^
 
 
 default: $(TARGET)
@@ -132,7 +136,7 @@ default: $(TARGET)
 .PHONY: pymoose
 .PHONY: clean
 
-pymoose: _moose.so moose.py 
+pymoose: _moose.so moose.py #testPyMoose 
 
 _moose.so: moose_wrap.o $(OBJ) $(OBJFILES)
 	$(CXX) $(CXXFLAGS) $(DYNAMIC_FLAGS) -o $@ $^ $(LDFLAGS)
@@ -141,7 +145,7 @@ moose_wrap.o: moose_wrap.cxx
 	$(CXX) $(CXXFLAGS) -c $^ -o $@ $(INCLUDES)
 
 moose.py moose_wrap.cxx: moose.i $(HEADERS)
-	swig -modern -c++ -python -threads moose.i
+	/usr/local/bin/swig -modern -c++ -python -threads moose.i
 
 # This is not required - gnumake does it by implicit rule
 # .cpp.o:

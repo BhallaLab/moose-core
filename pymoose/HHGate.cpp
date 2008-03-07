@@ -7,6 +7,16 @@ HHGate::HHGate(Id id):PyMooseBase(id){}
 HHGate::HHGate(std::string path):PyMooseBase(className, path){}
 HHGate::HHGate(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 HHGate::HHGate(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+HHGate::HHGate(const HHGate& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+HHGate::HHGate(const HHGate& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+HHGate::HHGate(const HHGate& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+HHGate::HHGate(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 HHGate::~HHGate(){}
 const std::string& HHGate::getType(){ return className; }
 

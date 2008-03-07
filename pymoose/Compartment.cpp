@@ -8,6 +8,16 @@ Compartment::Compartment(Id id):PyMooseBase(id){}
 Compartment::Compartment(std::string path):PyMooseBase(className, path){}
 Compartment::Compartment(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 Compartment::Compartment(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Compartment::Compartment(const Compartment& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+Compartment::Compartment(const Compartment& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+Compartment::Compartment(const Compartment& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+Compartment::Compartment(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 Compartment::~Compartment(){}
 const std::string& Compartment::getType(){ return className; }
 double Compartment::__get_Vm() const

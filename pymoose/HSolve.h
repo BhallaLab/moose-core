@@ -11,6 +11,10 @@ namespace pymoose
         HSolve(std::string path);
         HSolve(std::string name, Id parentId);
         HSolve(std::string name, PyMooseBase& parent);
+        HSolve(const HSolve& src,std::string name, PyMooseBase& parent);
+        HSolve(const HSolve& src,std::string name, Id& parent);
+        HSolve(const Id& src,std::string name, Id& parent);
+        HSolve(const HSolve& src,std::string path);
         ~HSolve();
         const std::string& getType();
     
