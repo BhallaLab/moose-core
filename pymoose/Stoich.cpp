@@ -8,6 +8,16 @@ Stoich::Stoich(Id id):PyMooseBase(id){}
 Stoich::Stoich(std::string path):PyMooseBase(className, path){}
 Stoich::Stoich(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 Stoich::Stoich(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Stoich::Stoich(const Stoich& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+Stoich::Stoich(const Stoich& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+Stoich::Stoich(const Stoich& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+Stoich::Stoich(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 Stoich::~Stoich(){}
 const std::string& Stoich::getType(){ return className; }
 unsigned int Stoich::__get_nMols() const

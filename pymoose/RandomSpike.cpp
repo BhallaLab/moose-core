@@ -7,6 +7,16 @@ RandomSpike::RandomSpike(Id id):PyMooseBase(id){}
 RandomSpike::RandomSpike(std::string path):PyMooseBase(className, path){}
 RandomSpike::RandomSpike(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 RandomSpike::RandomSpike(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+RandomSpike::RandomSpike(const RandomSpike& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+RandomSpike::RandomSpike(const RandomSpike& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+RandomSpike::RandomSpike(const RandomSpike& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+RandomSpike::RandomSpike(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 RandomSpike::~RandomSpike(){}
 const std::string& RandomSpike::getType(){ return className; }
 double RandomSpike::__get_minAmp() const

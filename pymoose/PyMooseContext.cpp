@@ -723,7 +723,7 @@ bool PyMooseContext::exists(string path)
     return !id.bad();    
 }
 
-vector < Id >& PyMooseContext::getChildren(Id id)
+vector < Id > PyMooseContext::getChildren(Id id)
 {
     elist_.resize(0);
     if ( id() != NULL )
@@ -738,7 +738,7 @@ vector < Id >& PyMooseContext::getChildren(Id id)
     return elist_;
 }
 
-vector < Id >& PyMooseContext::getChildren(string path)
+vector < Id > PyMooseContext::getChildren(string path)
 {
     elist_.resize(0);    
     Id id(path);

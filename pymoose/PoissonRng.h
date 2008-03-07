@@ -10,6 +10,10 @@ namespace pymoose
         PoissonRng(std::string path);
         PoissonRng(std::string name, Id parentId);
         PoissonRng(std::string name, PyMooseBase& parent);
+        PoissonRng(const PoissonRng& src,std::string name, PyMooseBase& parent);
+        PoissonRng(const PoissonRng& src,std::string name, Id& parent);
+        PoissonRng(const Id& src,std::string name, Id& parent);
+        PoissonRng(const PoissonRng& src,std::string path);
         ~PoissonRng();
         const std::string& getType();
         double __get_mean() const;

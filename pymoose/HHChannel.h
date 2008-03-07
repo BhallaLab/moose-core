@@ -11,6 +11,10 @@ namespace pymoose
         HHChannel(std::string path);
         HHChannel(std::string name, Id parentId);
         HHChannel(std::string name, PyMooseBase& parent);
+        HHChannel(const HHChannel& src,std::string name, PyMooseBase& parent);
+        HHChannel(const HHChannel& src,std::string name, Id& parent);
+        HHChannel(const Id& src,std::string name, Id& parent);
+        HHChannel(const HHChannel& src,std::string path);
         ~HHChannel();
         const std::string& getType();
         double __get_Gbar() const;

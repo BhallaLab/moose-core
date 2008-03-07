@@ -7,6 +7,16 @@ Molecule::Molecule(Id id):PyMooseBase(id){}
 Molecule::Molecule(std::string path):PyMooseBase(className, path){}
 Molecule::Molecule(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 Molecule::Molecule(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Molecule::Molecule(const Molecule& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+Molecule::Molecule(const Molecule& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+Molecule::Molecule(const Molecule& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+Molecule::Molecule(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 Molecule::~Molecule(){}
 const std::string& Molecule::getType(){ return className; }
 double Molecule::__get_nInit() const

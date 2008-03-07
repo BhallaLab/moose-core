@@ -38,6 +38,10 @@ namespace pymoose
         BinSynchan(std::string path);
         BinSynchan(std::string name, ::Id parentId);
         BinSynchan(std::string name, PyMooseBase& parent);
+        BinSynchan(const BinSynchan& src,std::string name, PyMooseBase& parent);
+        BinSynchan(const BinSynchan& src,std::string name, Id& parent);
+        BinSynchan(const Id& src,std::string name, Id& parent);
+        BinSynchan(const BinSynchan& src,std::string path);
         ~BinSynchan();
         const std::string& getType();
     
