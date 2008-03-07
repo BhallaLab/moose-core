@@ -7,6 +7,16 @@ Kintegrator::Kintegrator(Id id):PyMooseBase(id){}
 Kintegrator::Kintegrator(std::string path):PyMooseBase(className, path){}
 Kintegrator::Kintegrator(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 Kintegrator::Kintegrator(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Kintegrator::Kintegrator(const Kintegrator& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+Kintegrator::Kintegrator(const Kintegrator& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+Kintegrator::Kintegrator(const Kintegrator& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+Kintegrator::Kintegrator(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 Kintegrator::~Kintegrator(){}
 const std::string& Kintegrator::getType(){ return className; }
 bool Kintegrator::__get_isInitiatilized() const

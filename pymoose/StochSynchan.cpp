@@ -143,6 +143,16 @@ StochSynchan::StochSynchan(std::string name, PyMooseBase& parent):PyMooseBase(cl
     releaseP = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseP,  &StochSynchan::__set_releaseP);
     releaseCount = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseCount,  &StochSynchan::__set_releaseCount);
 }
+StochSynchan::StochSynchan(const StochSynchan& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+StochSynchan::StochSynchan(const StochSynchan& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+StochSynchan::StochSynchan(const StochSynchan& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+StochSynchan::StochSynchan(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 StochSynchan::~StochSynchan()
 {
     delete weight;

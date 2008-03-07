@@ -10,6 +10,10 @@ namespace pymoose
         ParTick(std::string path);
         ParTick(std::string name, Id parentId);
         ParTick(std::string name, PyMooseBase& parent);
+        ParTick(const ParTick& src,std::string name, PyMooseBase& parent);
+        ParTick(const ParTick& src,std::string name, Id& parent);
+        ParTick(const Id& src,std::string name, Id& parent);
+        ParTick(const ParTick& src,std::string path);
         ~ParTick();
         const std::string& getType();
     };

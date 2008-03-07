@@ -8,6 +8,17 @@ UniformRng::UniformRng(Id id):RandGenerator(id){}
 UniformRng::UniformRng(std::string path):RandGenerator(className, path){}
 UniformRng::UniformRng(std::string name, Id parentId):RandGenerator(className, name, parentId){}
 UniformRng::UniformRng(std::string name, PyMooseBase& parent):RandGenerator(className, name, parent){}
+UniformRng::UniformRng(const UniformRng& src, std::string objectName,  PyMooseBase& parent):RandGenerator(src, objectName, parent){}
+
+UniformRng::UniformRng(const UniformRng& src, std::string objectName, Id& parent):RandGenerator(src, objectName, parent){}
+UniformRng::UniformRng(const UniformRng& src, std::string path):RandGenerator(src, path)
+{
+}
+
+UniformRng::UniformRng(const Id& src, string name, Id& parent):RandGenerator(src, name, parent)
+{
+}
+
 UniformRng::~UniformRng(){}
 const std::string& UniformRng::getType(){ return className; }
 double UniformRng::__get_mean() const

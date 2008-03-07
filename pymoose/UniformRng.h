@@ -11,6 +11,11 @@ namespace pymoose
         UniformRng(std::string path);
         UniformRng(std::string name, Id parentId);
         UniformRng(std::string name, PyMooseBase& parent);
+        UniformRng(const UniformRng& src,std::string name, PyMooseBase& parent);
+        UniformRng(const UniformRng& src,std::string name, Id& parent);
+        UniformRng(const Id& src,std::string name, Id& parent);
+        UniformRng(const UniformRng& src,std::string path);
+
         ~UniformRng();
         const std::string& getType();
         double __get_mean() const;
