@@ -7,6 +7,16 @@ RandGenerator::RandGenerator(Id id):PyMooseBase(id){}
 RandGenerator::RandGenerator(string className, std::string path):PyMooseBase(className, path){}
 RandGenerator::RandGenerator(string className, std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 RandGenerator::RandGenerator(string className, std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+RandGenerator::RandGenerator(const RandGenerator& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+RandGenerator::RandGenerator(const RandGenerator& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+RandGenerator::RandGenerator(const RandGenerator& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+RandGenerator::RandGenerator(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 //RandGenerator::~RandGenerator(){}
 const std::string& RandGenerator::getType(){ return className; }
 double RandGenerator::__get_sample() const

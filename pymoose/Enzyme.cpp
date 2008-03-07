@@ -7,6 +7,16 @@ Enzyme::Enzyme(Id id):PyMooseBase(id){}
 Enzyme::Enzyme(std::string path):PyMooseBase(className, path){}
 Enzyme::Enzyme(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 Enzyme::Enzyme(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Enzyme::Enzyme(const Enzyme& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+Enzyme::Enzyme(const Enzyme& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+Enzyme::Enzyme(const Enzyme& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+Enzyme::Enzyme(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 Enzyme::~Enzyme(){}
 const std::string& Enzyme::getType(){ return className; }
 double Enzyme::__get_k1() const

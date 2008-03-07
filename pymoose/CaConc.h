@@ -12,6 +12,10 @@ namespace pymoose
         CaConc(std::string path);
         CaConc(std::string name, ::Id parentId);
         CaConc(std::string name, pymoose::PyMooseBase& parent);
+        CaConc(const CaConc& src,std::string name, PyMooseBase& parent);
+        CaConc(const CaConc& src,std::string name, Id& parent);
+        CaConc(const Id& src,std::string name, Id& parent);
+        CaConc(const CaConc& src,std::string path);
         ~CaConc();
         const std::string& getType();
         double __get_Ca() const;

@@ -8,6 +8,16 @@ Neutral::Neutral(std::string path):PyMooseBase(className, path){}
 Neutral::Neutral(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 Neutral::Neutral(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
 Neutral::Neutral(std::string path, std::string fileName):PyMooseBase(className, path, fileName){}
+Neutral::Neutral(const Neutral& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+Neutral::Neutral(const Neutral& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+Neutral::Neutral(const Neutral& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+Neutral::Neutral(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 
 Neutral::~Neutral(){}
 const std::string& Neutral::getType(){ return className; }

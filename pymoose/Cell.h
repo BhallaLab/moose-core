@@ -29,6 +29,10 @@ namespace pymoose
         Cell(std::string path);
         Cell(std::string name, Id parentId);
         Cell(std::string name, PyMooseBase& parent);
+        Cell(const Cell& src,std::string name, PyMooseBase& parent);
+        Cell(const Cell& src,std::string name, Id& parent);
+        Cell(const Id& src,std::string name, Id& parent);
+        Cell(const Cell& src,std::string path);
         ~Cell();
         const std::string& getType();
     };

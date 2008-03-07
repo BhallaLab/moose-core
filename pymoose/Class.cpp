@@ -27,6 +27,16 @@ Class::Class(std::string path, std::string name):PyMooseBase(className, path)
 }
 Class::Class(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 Class::Class(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Class::Class(const Class& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+Class::Class(const Class& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+Class::Class(const Class& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+Class::Class(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 Class::~Class(){}
 const std::string& Class::getType(){ return className; }
 

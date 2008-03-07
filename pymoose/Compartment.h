@@ -12,6 +12,10 @@ namespace pymoose
         Compartment(std::string path);
         Compartment(std::string name, ::Id parentId);
         Compartment(std::string name, PyMooseBase& parent);
+        Compartment(const Compartment& src,std::string name, PyMooseBase& parent);
+        Compartment(const Compartment& src,std::string name, Id& parent);
+        Compartment(const Id& src,std::string name, Id& parent);
+        Compartment(const Compartment& src,std::string path);
         ~Compartment();
         const std::string& getType();
         double __get_Vm() const;

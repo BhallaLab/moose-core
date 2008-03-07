@@ -19,10 +19,10 @@ namespace pymoose
         PyMooseBase(std::string className, std::string path);
         PyMooseBase(std::string className, std::string objectName, PyMooseBase& parent);
         /** This does a deep copy of the source object as a child of parent and sets the name to objectName*/
-        PyMooseBase(PyMooseBase& src, std::string objectName,  PyMooseBase& parent);
-        PyMooseBase(PyMooseBase& src, std::string objectName, Id parent);
-        PyMooseBase(PyMooseBase& src, std::string path);
-        PyMooseBase(Id src, string name, Id parent);
+        PyMooseBase(const PyMooseBase& src, std::string objectName,  PyMooseBase& parent);
+        PyMooseBase(const PyMooseBase& src, std::string objectName, Id& parent);
+        PyMooseBase(const PyMooseBase& src, std::string path);
+        PyMooseBase(const Id& src, string name, Id& parent);
         
         virtual ~PyMooseBase();
         static bool destroy(Id id);    
@@ -31,7 +31,7 @@ namespace pymoose
         const std::string& getSeparator() const;
         static pymoose::PyMooseContext* getContext();
 
-        vector< Id >& __get_children() const;
+        const vector< Id > children() const;
         const Id* __get_parent() const;
         const std::string path() const;   
         const Id* __get_id() const;
@@ -45,14 +45,14 @@ namespace pymoose
     
         static bool exists(Id id);
         static bool exists(string path);
-        static std::vector <Id>& le();
+        static std::vector <Id> le();
         static Id pwe();
         static Id ce(Id newElement);
         static Id ce(std::string path);
         static Id pathToId(std::string path, bool echo = true);
         static const std::string idToPath(Id id);
         static Id getParent(Id id);
-        static std::vector < Id >& getChildren(Id id);    
+        static std::vector < Id > getChildren(Id id);    
         static void initSimulation();
     
 // Think about this - are we going to allow people to access objects by their ID?

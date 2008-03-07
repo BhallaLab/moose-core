@@ -7,6 +7,16 @@ Nernst::Nernst(Id id):PyMooseBase(id){}
 Nernst::Nernst(std::string path):PyMooseBase(className, path){}
 Nernst::Nernst(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
 Nernst::Nernst(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Nernst::Nernst(const Nernst& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+
+Nernst::Nernst(const Nernst& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+Nernst::Nernst(const Nernst& src, std::string path):PyMooseBase(src, path)
+{
+}
+
+Nernst::Nernst(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+{
+}
 Nernst::~Nernst(){}
 const std::string& Nernst::getType(){ return className; }
 double Nernst::__get_E() const

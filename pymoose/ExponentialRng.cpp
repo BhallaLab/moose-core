@@ -7,6 +7,16 @@ ExponentialRng::ExponentialRng(Id id):RandGenerator(id){}
 ExponentialRng::ExponentialRng(std::string path):RandGenerator(className, path){}
 ExponentialRng::ExponentialRng(std::string name, Id parentId):RandGenerator(className, name, parentId){}
 ExponentialRng::ExponentialRng(std::string name, PyMooseBase& parent):RandGenerator(className, name, parent){}
+ExponentialRng::ExponentialRng(const ExponentialRng& src, std::string objectName,  PyMooseBase& parent):RandGenerator(src, objectName, parent){}
+
+ExponentialRng::ExponentialRng(const ExponentialRng& src, std::string objectName, Id& parent):RandGenerator(src, objectName, parent){}
+ExponentialRng::ExponentialRng(const ExponentialRng& src, std::string path):RandGenerator(src, path)
+{
+}
+
+ExponentialRng::ExponentialRng(const Id& src, string name, Id& parent):RandGenerator(src, name, parent)
+{
+}
 ExponentialRng::~ExponentialRng(){}
 const std::string& ExponentialRng::getType(){ return className; }
 double ExponentialRng::__get_mean() const
