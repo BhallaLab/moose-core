@@ -57,7 +57,7 @@ const Cinfo * initRandGeneratorCinfo()
     return &randGeneratorCinfo;
 }
 
-static const unsigned int outputSlot = initRandGeneratorCinfo()->getSlotIndex("output");
+static const Slot outputSlot = initRandGeneratorCinfo()->getSlot("output");
 
 RandGenerator::RandGenerator()
 {
@@ -72,9 +72,9 @@ RandGenerator::~RandGenerator()
     }    
 }
 
-double RandGenerator::getMean(const Element* e)
+double RandGenerator::getMean(Eref e)
 {
-    Probability* gen = static_cast<RandGenerator*>(e->data())->rng_;
+    Probability* gen = static_cast<RandGenerator*>(e.data())->rng_;
     
     if (gen)
     {
@@ -82,49 +82,49 @@ double RandGenerator::getMean(const Element* e)
     }
     else
     {
-        cerr << "WARNING: RandGenerator::getMean - parameters not set for object " << e->name() << endl;
+        cerr << "WARNING: RandGenerator::getMean - parameters not set for object " << e.e->name() << endl;
         return 0;
     }            
 }
 
-double RandGenerator::getVariance(const Element* e)
+double RandGenerator::getVariance(Eref e)
 {
-    Probability* gen = static_cast<RandGenerator*>(e->data())->rng_;
+    Probability* gen = static_cast<RandGenerator*>(e.data())->rng_;
     if (gen)
     {
         return gen->getVariance();    
     }
     else
     {
-        cerr << "WARNING: RandGenerator::getVariance - parameters not set for object " << e->name() << endl;
+        cerr << "WARNING: RandGenerator::getVariance - parameters not set for object " << e.e->name() << endl;
         return 0;
     }
     
         
 }
 
-double RandGenerator::getSample(const Element* e)
+double RandGenerator::getSample(Eref e)
 {
-    Probability* gen = static_cast<RandGenerator*>(e->data())->rng_;
+    Probability* gen = static_cast<RandGenerator*>(e.data())->rng_;
     if (gen)
     {
         return gen->getNextSample();
     }
     else
     {
-        cerr << "WARNING: RandGenerator::getSample  - parameters not set for object " << e->name() << endl;
+        cerr << "WARNING: RandGenerator::getSample  - parameters not set for object " << e.e->name() << endl;
         return 0;
     }    
 }
 
 void RandGenerator::processFunc( const Conn& c, ProcInfo info )
 {
-    send1<double>(c.targetElement(), outputSlot, getSample(c.targetElement()));    
+    send1<double>(c.target(), outputSlot, getSample(c.target()));    
 }
 
 void RandGenerator::reinitFunc(const Conn& c, ProcInfo info)
 {
-    cerr << "ERROR: RandGenerator::reinitFunc - this function should never be reached. Guilty party: " << c.targetElement()->name() << endl;
+    cerr << "ERROR: RandGenerator::reinitFunc - this function should never be reached. Guilty party: " << c.target().e->name() << endl;
 }
 
 

@@ -7,11 +7,8 @@
 ** GNU General Public License version 2
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include <iostream>
 #include <fstream>
-#include <map>
 #include "moose.h"
-#include "Cinfo.h"
 #include "ThisFinfo.h"
 #ifdef GENERATE_WRAPPERS
 #include "filecheck.h"
@@ -20,16 +17,9 @@
 // requiring an instantiable Element class. Could get worse if we
 // permit multiple variants of Element, say an array form.
 
-#include "MsgSrc.h"
-#include "MsgDest.h"
-#include "SimpleElement.h"
 #include "../element/Neutral.h"
 
 // These includes are needed to call set
-#include <algorithm>
-#include "DerivedFtype.h"
-#include "Ftype2.h"
-#include "setget.h"
 
 //////////////////////////////////////////////////////////////////
 // Cinfo is the class info for the MOOSE classes.
@@ -56,12 +46,11 @@ Cinfo::Cinfo(const std::string& name,
 )
 		: name_(name), author_(author), 
 		description_(description), baseCinfo_(baseCinfo),
-		ftype_( ftype ), nSrc_( 0 ), nDest_( 0 )
+		ftype_( ftype ), nMsg_( 0 ), numSrc_( 0 )
 {
 	unsigned int i;
 	if ( baseCinfo ) {
-		nSrc_ = baseCinfo->nSrc_;
-		nDest_ = baseCinfo->nDest_;
+		nMsg_ = baseCinfo->nMsg_;
 		for ( i = 0; i < baseCinfo->finfos_.size(); i++ ) {
 			Finfo* f = findMatchingFinfo(
 				baseCinfo->finfos_[i]->name(), finfoArray, nFinfos );
@@ -72,7 +61,7 @@ Cinfo::Cinfo(const std::string& name,
 				assert( ret );
 				finfos_.push_back( f );
 			} else
-				finfos_.push_back( baseCinfo->finfos_[i] );
+				finfos_.push_back( baseCinfo->finfos_[i]->copy() );
 		}
 	}
 
@@ -155,7 +144,11 @@ Cinfo::Cinfo(const std::string& name,
 #endif
 
 	for ( i = 0 ; i < nFinfos; i++ ) {
-            finfoArray[i]->countMessages( nSrc_, nDest_ );
+            finfoArray[i]->countMessages( nMsg_ );
+			// This sends in the new Cinfo name needed to set up the
+			// FuncVecs within the finfoArray.
+			finfoArray[i]->addFuncVec( name );
+
             finfos_.push_back( finfoArray[i] );
 #ifdef GENERATE_WRAPPERS                
             if ( created )
@@ -196,29 +189,35 @@ Cinfo::Cinfo(const std::string& name,
             swig.close();        
         }
 #endif
+	
+	// Now we shift the DestFinfos to the back of the set.
+	// Have to maintain ordering here
+	// because the base classes will need consistency.
+	// At this time we also assign the msg numbering for all Finfos.
+	shuffleFinfos();
         
 	thisFinfo_ = new ThisFinfo( this );
 	noDelFinfo_ = new ThisFinfo( this, 1 );
 	///\todo: here need to put in additional initialization stuff from base class
 	lookup()[name] = this;
-	// This funny call is used to ensure that the root element is
-	// created at static initialization time.
-	// Element::root();
 }
 
 Cinfo::~Cinfo()
 {
-	unsigned int i;
-	unsigned int start = 0;
-	if ( baseCinfo_ )
-		start = baseCinfo_->finfos_.size();
-	for ( i = start; i < finfos_.size(); i++ )
-		delete finfos_[i];
+	map< string, Cinfo* >::iterator pos = lookup().find( name_ );
+	assert( pos != lookup().end() );
+	lookup().erase( lookup().find( name_ ) );
+	pos = lookup().find( name_ );
+	assert( pos == lookup().end() );
+
 	/*
-	vector< Finfo* >::iterator i;
-	for ( i = finfos_.begin(); i != finfos_.end(); i++ )
-		delete *i;
-		*/
+	 * I won't delete the allocated Finfos. This is because
+	 * they get shuffled around so it is hard to figure out which
+	 * belongs to a base class and which is local.
+	 * The number of Finfos that accumulate is small, and does not
+	 * go up once setup is over, so it can 
+	 * wait till the end of the simulation.
+	 */
 	delete thisFinfo_;
 	delete noDelFinfo_;
 }
@@ -241,21 +240,21 @@ const Finfo* Cinfo::findFinfo( Element* e, const string& name ) const
 			return ret;
 	}
 
-	/*
-	// Fallthrough. No matches were found, so ask the base class.
-	if (base_ != 0 && base_ != this)
-		return base_->findFinfo( e, name );
-		*/
-
 	return 0;
 }
 
 const Finfo* Cinfo::findFinfo( 
-		const Element* e, unsigned int connIndex) const
+		const Element* e, const ConnTainer* c ) const
 {
+	// if ( c->msg2() < finfos_.size() && finfos_[ c->msg2() ].isDest() )
+	// 	return finfos_[ c->msg2() ];
+	// else if ( c->msg1() < finfos_.size() )
+	// 	return finfos_[ c->msg1() ];
+	// else
+	// 	return 0;
 	vector< Finfo* >::const_iterator i;
 	for ( i = finfos_.begin(); i != finfos_.end(); i++ ) {
-		const Finfo* ret = (*i)->match( e, connIndex );
+		const Finfo* ret = (*i)->match( e, c );
 		if ( ret )
 			return ret;
 	}
@@ -272,6 +271,22 @@ const Finfo* Cinfo::findFinfo(
 	return 0;
 }
 
+/**
+* Returns the Finfo identified by the specified msg number.
+* Source Finfos should have a positive index
+* pure Dest finfos have a negative index.
+* Not all Finfos will have a msgNum, but any valid msgNum 
+* should have a Finfo.
+*/
+const Finfo* Cinfo::findFinfo( int msgNum ) const
+{
+	if ( msgNum >= 0 && msgNum < static_cast< int >( numSrc_ ) )
+		return finfos_[msgNum];
+	if ( msgNum < 0 && ( -msgNum < static_cast< int >( finfos_.size() ) ) )
+		return finfos_[ -msgNum ];
+	return 0;
+}
+
 const Finfo* Cinfo::findFinfo( const string& name ) const
 {
 	vector< Finfo* >::const_iterator i;
@@ -280,13 +295,44 @@ const Finfo* Cinfo::findFinfo( const string& name ) const
 				return (*i);
 	}
 
-	/*
-	// Fallthrough. No matches were found, so ask the base class.
-	if (base_ != 0 && base_ != this)
-		return base_->findFinfo( name );
-		*/
-
 	return 0;
+}
+
+/**
+ * Puts SrcFinfos in front, DestFinfos next, and finally ValueFinfos
+ * while keeping relative order the same. SharedFinfos can be either
+ * Src or Dest depending on their quota of functions.
+ *
+ * Must be called after the initialization of FuncVecs.
+ *
+ * Side-effects:
+ * - Assign numSrc_.
+ * - Put msg_ numbers on each, where the msg_ is just the index.
+ *   Note that ValueFinfos do not get messages. That is left to the
+ *   DynamicFinfos.
+ */
+unsigned int Cinfo::shuffleFinfos()
+{
+	vector< Finfo* > temp;
+	vector< Finfo* >::iterator i;
+	for ( i = finfos_.begin(); i != finfos_.end(); i++ )
+		if ( !( *i )->isDestOnly() ) // Is Src.
+			temp.push_back( *i );
+	numSrc_ = temp.size();
+	for ( i = finfos_.begin(); i != finfos_.end(); i++ )
+		if ( ( *i )->isDestOnly() && ( *i )->msg() != INT_MAX )
+			temp.push_back( *i );
+	for ( i = finfos_.begin(); i != finfos_.end(); i++ )
+		if ( ( *i )->isDestOnly() && ( *i )->msg() == INT_MAX )
+			temp.push_back( *i );
+
+	assert( temp.size() == finfos_.size() );
+
+	unsigned int j = 0;
+	finfos_ = temp;
+	for ( i = finfos_.begin(); i != finfos_.end(); i++ )
+		( *i )->countMessages( j );
+	return numSrc_;
 }
 
 /*
@@ -348,7 +394,7 @@ Element* Cinfo::create( Id id, const std::string& name,
 			void* data, bool noDeleteFlag ) const
 {
 	SimpleElement* ret = 
-		new SimpleElement( id, name, nSrc_, nDest_, data );
+		new SimpleElement( id, name, data, numSrc_ );
 	if ( noDeleteFlag )
 		ret->addFinfo( noDelFinfo_ );
 	else
@@ -375,9 +421,10 @@ Element* Cinfo::createArray( Id id, const std::string& name,
 			void* data, unsigned int numEntries, size_t objectSize,
 			bool noDeleteFlag ) const
 {
+	return 0;
+	/*
 	ArrayElement* ret = 
-		new ArrayElement( id, name, nSrc_, nDest_, data, 
-			numEntries, objectSize );
+		new ArrayElement( id, name, nMsg_, data, numEntries, objectSize );
 	if ( noDeleteFlag )
 		ret->addFinfo( noDelFinfo_ );
 	else
@@ -385,6 +432,7 @@ Element* Cinfo::createArray( Id id, const std::string& name,
 	set( ret, "postCreate" );
 	
 	return ret;
+	*/
 }
 
 /**
@@ -454,17 +502,17 @@ void Cinfo::listFinfos( vector< const Finfo* >& flist ) const
  * Finfo class. Used to set up named static indices for various
  * finfos, for use in the send() functions
  */
-unsigned int Cinfo::getSlotIndex( const string& name ) const
+Slot Cinfo::getSlot( const string& name ) const
 {
 	vector< Finfo* >::const_iterator i;
-	unsigned int ret = 0;
+	Slot ret;
 	for ( i = finfos_.begin() ; i < finfos_.end(); i++ ) {
-		if ( (*i)->getSlotIndex( name, ret ) )
+		if ( (*i)->getSlot( name, ret ) )
 			return ret;
 //		if ( (*i)->name() == name )
 //			return (*i)->getSlotIndex();
 	}
-	return 0;
+	return ret;
 }
 
 bool Cinfo::isA( const Cinfo* other ) const {

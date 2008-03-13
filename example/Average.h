@@ -52,13 +52,13 @@ class Average
 		Average();
 
 
-		static void process( const Conn& c, ProcInfo p );
+		static void process( const Conn* c, ProcInfo p );
 
 		/**
 		 * The input function called by other connected objects. 
 		 * v is value sent by the calling object
 		 */
-		static void input( const Conn& c, double v );
+		static void input( const Conn* c, double v );
 
 		/**
 		 * The non-static function called by the input function.
@@ -77,7 +77,7 @@ class Average
 		/**
 		 * Set the value of "total_" data member
 		 */
-		static void setTotal( const Conn& c, double v );
+		static void setTotal( const Conn* c, double v );
 
 		/**
 		 * Retrieves the value of "baseline_" data member
@@ -86,7 +86,7 @@ class Average
 		/**
 		 * Set the value of "baseline_" data member
 		 */
-		static void setBaseline( const Conn& c, double v );
+		static void setBaseline( const Conn* c, double v );
 
 		/**
 		 * Retrieves the value of "n_" data member
@@ -95,7 +95,7 @@ class Average
 		/**
 		 * Set the value of "n_" data member
 		 */
-		static void setN( const Conn& c, unsigned int v );
+		static void setN( const Conn* c, unsigned int v );
 
 		/**
 		 * Calculates and returns the average value of data members
@@ -105,7 +105,7 @@ class Average
 		/**
 		 * The process function called by scheduler on every tick 
 		 */
-		static void processFunc( const Conn& c, ProcInfo info );
+		static void processFunc( const Conn* c, ProcInfo info );
 		/**
 		 * The non-static function called by the "processFunc" function.
 		 */
@@ -114,7 +114,7 @@ class Average
 		/**
 		 * The reinit function called by scheduler for the reset command
 		 */
-		static void reinitFunc( const Conn& c, ProcInfo info );
+		static void reinitFunc( const Conn* c, ProcInfo info );
 		/**
 		 * The non-static function called by the "reinitFunc" function.
 		 */

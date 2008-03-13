@@ -10,12 +10,6 @@
 
 #ifndef _ARRAY_ELEMENT_H
 #define _ARRAY_ELEMENT_H
-#include <climits>
-#include <string>
-#include "SimpleElement.h"
-#include "Cinfo.h"
-#include "MsgSrc.h"
-#include "MsgDest.h"
 
 /**
  * The ArrayElement class implements Element functionality in the
@@ -113,12 +107,12 @@ class ArrayElement: public Element
 
 		/// Finds the relative index of a conn arriving at this element.
 		unsigned int connDestRelativeIndex(
-				const Conn& c, unsigned int slot ) const;
+				const Conn* c, unsigned int slot ) const;
 
 		// Finds relative index of conn arriving at this element on
 		// the MsgSrc vector identified by slot.
 		unsigned int connSrcRelativeIndex(
-				const Conn& c, unsigned int slot ) const;
+				const Conn* c, unsigned int slot ) const;
 
 		// Returns size of the conn vector.
 		unsigned int connSize( ) const {
@@ -370,7 +364,7 @@ class ArrayElement: public Element
 			ycoord = yorigin_ + (index%Ny_)*dy_;
 		}
 
-		bool innerCopyMsg( const Conn& c, const Element* orig, Element* dup );
+		bool innerCopyMsg( const Conn* c, const Element* orig, Element* dup );
 	protected:
 		Element* innerCopy() const;
 		Element* innerCopy(int n) const;

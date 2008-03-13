@@ -23,16 +23,16 @@ class Class
     Class(string name="Class");
     
     static const string getName(const Element* e);
-    static void setName(const Conn& conn,string name);
+    static void setName(const Conn* conn,string name);
     
     static const string getAuthor(const Element* e);
     static const string getDescription(const Element* e);
     
-    static void setClock(const Conn& conn, string function, Id tickId);
+    static void setClock(const Conn* conn, string function, Id tickId);
     static unsigned int getTick(const Element* e);    
-    static void setTick(const Conn& conn, unsigned int tick);
+    static void setTick(const Conn* conn, unsigned int tick);
     static unsigned int getStage(const Element* e);    
-    static void setStage(const Conn& conn, unsigned int stage);
+    static void setStage(const Conn* conn, unsigned int stage);
     static vector < string > getFieldList(const Element* e); /// returns a list of field names
         
   private:

@@ -127,9 +127,9 @@ Panel::Panel( unsigned int nDims, unsigned int nPts )
 // Regular field functions 
 ///////////////////////////////////////////////////
 
-unsigned int Panel::getNpts( const Element* e )
+unsigned int Panel::getNpts( Eref e )
 {
-	return static_cast< Panel* >( e->data() )->localNpts();
+	return static_cast< Panel* >( e.data() )->localNpts();
 }
 
 // Default version
@@ -137,14 +137,14 @@ unsigned int Panel::localNpts() const {
 	return 2;  // Centre coord, and then radius, with sign.
 }
 
-unsigned int Panel::getNdims( const Element* e )
+unsigned int Panel::getNdims( Eref e )
 {
-	return static_cast< Panel* >( e->data() )->nDims_;
+	return static_cast< Panel* >( e.data() )->nDims_;
 }
 
-unsigned int Panel::getShapeId( const Element* e )
+unsigned int Panel::getShapeId( Eref e )
 {
-	return static_cast< Panel* >( e->data() )->localShapeId();
+	return static_cast< Panel* >( e.data() )->localShapeId();
 }
 
 // Default version
@@ -152,15 +152,15 @@ unsigned int Panel::localShapeId() const {
 	return Moose::PSsph; 
 }
 
-unsigned int Panel::getNneighbors( const Element* e )
+unsigned int Panel::getNneighbors( Eref e )
 {
-	return neighborSrcFinfo->numIncoming( e ) + 
-		neighborDestFinfo->numIncoming( e );
+	return e.e->numTargets( neighborSrcFinfo->msg() ) + 
+		e.e->numTargets( neighborDestFinfo->msg() );
 }
 
-vector< double > Panel::getCoords( const Element* e )
+vector< double > Panel::getCoords( Eref e )
 {
-	return static_cast< Panel* >( e->data() )->coords_;
+	return static_cast< Panel* >( e.data() )->coords_;
 }
 
 //////////////////////////////////////////////////////////
@@ -169,10 +169,10 @@ vector< double > Panel::getCoords( const Element* e )
 
 // We don't have dynamic shapes yet, so this update to the solver is
 // not needed. Furthermore we don't want to tie this to Smoldyn.
-void Panel::setPos( const Conn& c, double value, 
+void Panel::setPos( const Conn* c, double value, 
 	unsigned int i, unsigned int dim )
 {
-	static_cast< Panel* >( c.data() )->localSetPos( value, i, dim );
+	static_cast< Panel* >( c->data() )->localSetPos( value, i, dim );
 }
 
 void Panel::localSetPos( double value, unsigned int i, unsigned int dim )
@@ -181,24 +181,24 @@ void Panel::localSetPos( double value, unsigned int i, unsigned int dim )
 	coords_[ i * nDims_ + dim ] = value;
 }
 
-void Panel::setX( const Conn& c, double value, const unsigned int& i )
+void Panel::setX( const Conn* c, double value, const unsigned int& i )
 {
 	setPos( c, value, i, 0 );
 }
 
-void Panel::setY( const Conn& c, double value, const unsigned int& i )
+void Panel::setY( const Conn* c, double value, const unsigned int& i )
 {
 	setPos( c, value, i, 1 );
 }
 
-void Panel::setZ( const Conn& c, double value, const unsigned int& i )
+void Panel::setZ( const Conn* c, double value, const unsigned int& i )
 {
 	setPos( c, value, i, 2 );
 }
 
-double Panel::getPos( const Element* e, unsigned int i, unsigned int dim)
+double Panel::getPos( Eref e, unsigned int i, unsigned int dim)
 {
-	return static_cast< Panel* >( e->data() )->localGetPos( i, dim );
+	return static_cast< Panel* >( e.data() )->localGetPos( i, dim );
 }
 
 double Panel::localGetPos( unsigned int i, unsigned int dim )
@@ -207,17 +207,17 @@ double Panel::localGetPos( unsigned int i, unsigned int dim )
 	return coords_[ i * nDims_ + dim ];
 }
 
-double Panel::getX( const Element* e, const unsigned int& i )
+double Panel::getX( Eref e, const unsigned int& i )
 {
 	return getPos( e, i, 0 );
 }
 
-double Panel::getY( const Element* e, const unsigned int& i )
+double Panel::getY( Eref e, const unsigned int& i )
 {
 	return getPos( e, i, 1 );
 }
 
-double Panel::getZ( const Element* e, const unsigned int& i )
+double Panel::getZ( Eref e, const unsigned int& i )
 {
 	return getPos( e, i, 2 );
 }
@@ -232,10 +232,10 @@ double Panel::getZ( const Element* e, const unsigned int& i )
  * grid is set by the 'area' argument.
  */
 vector< double > Panel::getFiniteElementVertices(
-		const Element* e, double area )
+		Eref e, double area )
 {
 	vector< double > ret;
-	static_cast< Panel* >( e->data() )->
+	static_cast< Panel* >( e.data() )->
 		localFiniteElementVertices( ret, area );
 	return ret;
 }

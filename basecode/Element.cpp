@@ -145,3 +145,152 @@ unsigned int Element::lastId()
 	return elementList().size() - 1;
 }
 */
+
+bool Element::add( int m1, Element* e2, int m2 )
+{
+	assert( e2 != 0 );
+	assert( validMsg( m1 ) );
+	assert( validMsg( m2 ) );
+	const Finfo* srcF = findFinfo( m1 );
+	const Finfo* destF = e2->findFinfo( m2 );
+
+	if ( srcF && destF )
+		return srcF->add( this, e2, destF );
+	cout << "Element::add: Error: Could not find Finfos " <<
+		srcF->name() << ", " << destF->name() << endl;
+	return 0;
+}
+
+bool Element::add( const string& f1, Element* e2, const string& f2 )
+{
+	assert( e2 != 0 );
+	const Finfo* srcF = findFinfo( f1 );
+	const Finfo* destF = e2->findFinfo( f2 );
+	if ( !srcF ) {
+		cout << "Element::add: Error: Could not find element.srcFinfo " <<
+			name() << "." << f1 << endl;
+		return 0;
+	}
+	if ( !destF ) {
+		cout << "Element::add: Error: Could not find element.srcFinfo " <<
+			e2->name() << "." << f2 << endl;
+		return 0;
+	}
+	return srcF->add( this, e2, destF );
+}
+
+
+bool Element::drop( int msg, unsigned int doomed )
+{
+	if ( !validMsg( msg ) )
+		return 0;
+	if ( msg >= 0 ) {
+		return varMsg( msg )->drop( this, doomed );
+	} else {
+		cout << "Not sure what to do here, as the lookup is non-sequential\n";
+		vector< ConnTainer* >* ctv = getDest( msg );
+		if ( doomed >= ctv->size() )
+			return 0;
+	}
+	return 0;
+}
+
+/*
+bool Element::drop( int msg, const ConnTainer* doomed )
+{
+	if ( !validMsg( msg ) )
+		return 0;
+	if ( msg >= 0 ) {
+		varMsg( msg )->drop( this, doomed );
+		return 1;
+	} else {
+		cout << "Not sure what to do here in Element::drop\n";
+		return 0;
+	}
+}
+*/
+
+bool Element::dropAll( int msg )
+{
+	if ( !validMsg( msg ) )
+		return 0;
+	if ( msg >= 0 ) {
+		varMsg( msg )->dropAll( this );
+		return 1;
+	} else {
+		vector< ConnTainer* >* ctv = getDest( msg );
+		vector< ConnTainer* >::iterator k;
+		for ( k = ctv->begin(); k != ctv->end(); k++ ) {
+			bool ret = Msg::innerDrop( ( *k )->e1(), ( *k )->msg1(), *k );
+			if ( ret )
+				delete ( *k );
+			else
+				cout << "Error: Element::dropAll(): innerDrop failed\n";
+			*k = 0;
+		}
+		ctv->resize( 0 );
+		// I could erase the entry in the dest_ map too. Later.
+		return 1;
+	}
+}
+
+bool Element::dropAll( const string& finfo )
+{
+	const Finfo* f = findFinfo( finfo );
+	if ( f ) {
+		return dropAll( f->msg() );
+	}
+	return 0;
+}
+
+/**
+ * Returns number dropped. Check to confirm that all went.
+ * Concern in doing this is that we don't want to mess up the iterators.
+ * Also need to be sure that no one else is using the iterators.
+ */
+bool Element::dropVec( int msg, const vector< const ConnTainer* >& vec )
+{
+	if ( vec.size() == 0 )
+		return 0;
+
+	if ( !validMsg( msg ) )
+		return 0;
+
+	if ( msg >= 0 ) {
+		Msg* m = varMsg( msg );
+		assert ( m != 0 );
+		vector< const ConnTainer* >::const_iterator i;
+		for ( i = vec.begin(); i != vec.end(); i++ ) {
+			bool ret = m->drop( ( *i )->e1(), *i );
+			assert( ret );
+		}
+		return 1;
+	} else {
+		vector< ConnTainer* >* ctv = getDest( msg );
+		assert ( ctv->size() >= vec.size() );
+		vector< const ConnTainer* >::const_iterator i;
+		for ( i = vec.begin(); i != vec.end(); i++ ) {
+			int otherMsg = ( *i )->msg1();
+			Element* otherElement = ( *i )->e1();
+			Msg* om = otherElement->varMsg( otherMsg );
+			assert( om );
+			bool ret = om->drop( otherElement, *i );
+			assert( ret );
+		}
+		return 1;
+	}
+	return 0;
+}
+
+bool Element::validMsg( int msg ) const
+{
+	const Cinfo* c = cinfo();
+	if ( msg > 0 && msg < static_cast< int >( c->numSrc() ) )
+		return 1;
+	if ( msg < 0 && -msg < static_cast< int >( c->numSrc() ) )
+		return 0;
+	if ( msg < 0 && -msg < static_cast< int >( c->numFinfos() ) )
+		return 1;
+
+	return 0;
+}

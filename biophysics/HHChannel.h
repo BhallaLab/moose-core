@@ -71,32 +71,32 @@ class HHChannel
 		// Value field access function definitions
 		/////////////////////////////////////////////////////////////
 
-		static void setGbar( const Conn& c, double Gbar );
-		static double getGbar( const Element* );
-		static void setEk( const Conn& c, double Ek );
-		static double getEk( const Element* );
-		static void setXpower( const Conn& c, double Xpower );
-		static double getXpower( const Element* );
-		static void setYpower( const Conn& c, double Ypower );
-		static double getYpower( const Element* );
-		static void setZpower( const Conn& c, double Zpower );
-		static double getZpower( const Element* );
-		static void setSurface( const Conn& c, double Surface );
-		static double getSurface( const Element* );
-		static void setInstant( const Conn& c, int Instant );
-		static int getInstant( const Element* );
-		static void setGk( const Conn& c, double Gk );
-		static double getGk( const Element* );
-		static void setIk( const Conn& c, double Ik );
-		static double getIk( const Element* );
-		static void setX( const Conn& c, double X );
-		static double getX( const Element* );
-		static void setY( const Conn& c, double Y );
-		static double getY( const Element* );
-		static void setZ( const Conn& c, double Z );
-		static double getZ( const Element* );
-		static void setUseConcentration( const Conn& c, int value );
-		static int getUseConcentration( const Element* );
+		static void setGbar( const Conn* c, double Gbar );
+		static double getGbar( Eref );
+		static void setEk( const Conn* c, double Ek );
+		static double getEk( Eref );
+		static void setXpower( const Conn* c, double Xpower );
+		static double getXpower( Eref );
+		static void setYpower( const Conn* c, double Ypower );
+		static double getYpower( Eref );
+		static void setZpower( const Conn* c, double Zpower );
+		static double getZpower( Eref );
+		static void setSurface( const Conn* c, double Surface );
+		static double getSurface( Eref );
+		static void setInstant( const Conn* c, int Instant );
+		static int getInstant( Eref );
+		static void setGk( const Conn* c, double Gk );
+		static double getGk( Eref );
+		static void setIk( const Conn* c, double Ik );
+		static double getIk( Eref );
+		static void setX( const Conn* c, double X );
+		static double getX( Eref );
+		static void setY( const Conn* c, double Y );
+		static double getY( Eref );
+		static void setZ( const Conn* c, double Z );
+		static double getZ( Eref );
+		static void setUseConcentration( const Conn* c, int value );
+		static int getUseConcentration( Eref );
 
 		/////////////////////////////////////////////////////////////
 		// Dest function definitions
@@ -114,8 +114,8 @@ class HHChannel
 		 * send back to the parent compartment through regular 
 		 * messages.
 		 */
-		static void processFunc( const Conn& c, ProcInfo p );
-		void innerProcessFunc( Element* e, ProcInfo p );
+		static void processFunc( const Conn* c, ProcInfo p );
+		void innerProcessFunc( Eref e, ProcInfo p );
 
 		/**
 		 * Reinitializes the values for the channel. This involves
@@ -124,13 +124,13 @@ class HHChannel
 		 * involves a similar cycle through the gates and then 
 		 * updates to the parent compartment as for the processFunc.
 		 */
-		static void reinitFunc( const Conn& c, ProcInfo p );
-		void innerReinitFunc( Element* e, ProcInfo p );
+		static void reinitFunc( const Conn* c, ProcInfo p );
+		void innerReinitFunc( Eref e, ProcInfo p );
 
 		/**
 		 * Assign the local Vm_ to the incoming Vm from the compartment
 		 */
-		static void channelFunc( const Conn& c, double Vm );
+		static void channelFunc( const Conn* c, double Vm );
 
 		/**
 		 * Assign the local conc_ to the incoming conc from the
@@ -138,20 +138,20 @@ class HHChannel
 		 * the message source will be a CaConc object, but there
 		 * are other options for computing the conc.
 		 */
-		static void concFunc( const Conn& c, double conc );
+		static void concFunc( const Conn* c, double conc );
 
 		/**
 		 * These three functions receive the return values for
 		 * gate state variable X,Y,Z and the conductance, as evaluated
 		 * by the specified gate.
 		 */
-		static void xGateFunc( const Conn& c, double X, double g );
-		static void yGateFunc( const Conn& c, double Y, double g );
-		static void zGateFunc( const Conn& c, double Z, double g );
+		static void xGateFunc( const Conn* c, double X, double g );
+		static void yGateFunc( const Conn* c, double Y, double g );
+		static void zGateFunc( const Conn* c, double Z, double g );
 
 	private:
 		// Utility function for making gates.
-		static void makeGate( Element *e, const Finfo* f, double power);
+		static void makeGate( Element* e, const Finfo* f, double power);
 
 		/// Channel maximal conductance
 		double Gbar_;

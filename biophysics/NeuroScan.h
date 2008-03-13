@@ -34,17 +34,17 @@ public:
 	{ ; }
   
 	// Value Field access function definitions.
-	static void setNDiv( const Conn& c, int NDiv );
+	static void setNDiv( const Conn* c, int NDiv );
 	static int getNDiv( const Element* e );
-	static void setVLo( const Conn& c, double VLo );
+	static void setVLo( const Conn* c, double VLo );
 	static double getVLo( const Element* e );
-	static void setVHi( const Conn& c, double VHi );
+	static void setVHi( const Conn* c, double VHi );
 	static double getVHi( const Element* e );
 	
 	// Dest function definitions.
-	static void hubCreateFunc( const Conn& c );
-	static void readModelFunc( const Conn& c, Element* seed, double dt );
-	static void gateFunc( const Conn& c, double A, double B );
+	static void hubCreateFunc( const Conn* c );
+	static void readModelFunc( const Conn* c, Element* seed, double dt );
+	static void gateFunc( const Conn* c, double A, double B );
 	
 private:
 	void innerHubCreateFunc( Element* e );

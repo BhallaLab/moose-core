@@ -46,48 +46,48 @@ class KineticManager
 		// Field assignment functions
 		///////////////////////////////////////////////////
 		
-		static void setAuto( const Conn& c, bool value );
-		static bool getAuto( const Element* e );
-		static void setStochastic( const Conn& c, bool value );
-		static bool getStochastic( const Element* e );
-		static void setSpatial( const Conn& c, bool value );
-		static bool getSpatial( const Element* e );
-		static void setMethod( const Conn& c, string value );
-		static string getMethod( const Element* e );
+		static void setAuto( const Conn* c, bool value );
+		static bool getAuto( Eref e );
+		static void setStochastic( const Conn* c, bool value );
+		static bool getStochastic( Eref e );
+		static void setSpatial( const Conn* c, bool value );
+		static bool getSpatial( Eref e );
+		static void setMethod( const Conn* c, string value );
+		static string getMethod( Eref e );
 
 		// Some readonly fields with more info about the methods.
-		static bool getVariableDt( const Element* e );
-		static bool getSingleParticle( const Element* e );
-		static bool getMultiscale( const Element* e );
-		static bool getImplicit( const Element* e );
-		static string getDescription( const Element* e );
-		static double getRecommendedDt( const Element* e );
-		static void setEulerError( const Conn& c, double value );
-		static double getEulerError( const Element* e );
+		static bool getVariableDt( Eref e );
+		static bool getSingleParticle( Eref e );
+		static bool getMultiscale( Eref e );
+		static bool getImplicit( Eref e );
+		static string getDescription( Eref e );
+		static double getRecommendedDt( Eref e );
+		static void setEulerError( const Conn* c, double value );
+		static double getEulerError( Eref e );
 
-		// static string getMethodList( const Element* e );
+		// static string getMethodList( Eref e );
 		//
-		void innerSetMethod( Element* e, string value );
-		void setupSolver( Element* e );
-		void setupDt( Element* e, double dt );
+		void innerSetMethod( Eref e, string value );
+		void setupSolver( Eref e );
+		void setupDt( Eref e, double dt );
 		double estimateDt( Element* e, Element** elm, string& field, 
 			double error );
-		double findEnzSubPropensity( Element* e ) const;
-		double findEnzPrdPropensity( Element* e ) const;
-		double findReacPropensity( Element* e, bool isPrd ) const;
+		double findEnzSubPropensity( Eref e ) const;
+		double findEnzPrdPropensity( Eref e ) const;
+		double findReacPropensity( Eref e, bool isPrd ) const;
 		
 		///////////////////////////////////////////////////
 		// Dest function definitions
 		///////////////////////////////////////////////////
 		
-		static void reinitFunc( const Conn& c, ProcInfo info );
-		void reinitFuncLocal( Element* e );
-		static void processFunc( const Conn& c, ProcInfo info );
+		static void reinitFunc( const Conn* c, ProcInfo info );
+		void reinitFuncLocal( Eref e );
+		static void processFunc( const Conn* c, ProcInfo info );
 		/*
 		void processFuncLocal( Element* e, ProcInfo info );
 		*/
-		static void reschedFunc( const Conn& c );
-		void reschedFuncLocal( Element* e );
+		static void reschedFunc( const Conn* c );
+		void reschedFuncLocal( Eref e );
 
  // static void addMethod( name, description,
  // 					isStochastic,isSpatial, 

@@ -41,19 +41,13 @@ class ThisFinfo: public Finfo
 			
 			bool respondToAdd(
 					Element* e, Element* dest, const Ftype *destType,
-					FuncList& destfl, FuncList& returnFl,
+					unsigned int& destFuncId, unsigned int& returnFuncId,
 					unsigned int& destIndex, unsigned int& numDest
 			) const;
 			
-			void dropAll( Element* e ) const;
-			bool drop( Element* e, unsigned int i ) const;
-
-			unsigned int numIncoming( const Element* e ) const;
-			unsigned int numOutgoing( const Element* e ) const;
-			unsigned int incomingConns(
-					const Element* e, vector< Conn >& list ) const;
-			unsigned int outgoingConns(
-					const Element* e, vector< Conn >& list ) const;
+			int msg() const {
+				return INT_MAX;
+			}
 
 			RecvFunc recvFunc() const {
 					return 0;
@@ -63,28 +57,26 @@ class ThisFinfo: public Finfo
 			/**
 			 * Call the RecvFunc with the arguments in the string.
 			 */
-			bool strSet( Element* e, const std::string &s )
+			bool strSet( Eref e, const std::string &s )
 					const;
 			
 			/// strGet doesn't work for DestFinfo
-			bool strGet( const Element* e, std::string &s ) const {
+			bool strGet( Eref e, std::string &s ) const {
 				return 0;
 			}
 
 			const Finfo* match( Element* e, const string& name ) const;
+
 			const Finfo* match( 
-					const Element* e, unsigned int connIndex) const;
+					const Element* e, const ConnTainer* c ) const;
 
 			// ThisFinfo must go to the cinfo to build up the list.
 			void listFinfos( vector< const Finfo* >& flist ) const;
 
 			// ThisFinfo does not allocate any MsgSrc or MsgDest
 			// so it does not use this function.
-			void countMessages( 
-					unsigned int& srcNum, unsigned int& destNum )
-			{
-					;
-			}
+			void countMessages( unsigned int& num )
+			{ ; }
 
 			/**
 			 * This cannot be inherited. Returns 0 always.
@@ -109,6 +101,9 @@ class ThisFinfo: public Finfo
 			Finfo* copy() const {
 				return new ThisFinfo( *this );
 			}
+
+			void addFuncVec( const string& cname )
+			{;}
 
 		private:
 			const Cinfo* cinfo_;

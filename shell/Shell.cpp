@@ -92,7 +92,7 @@ const Cinfo* initShellCinfo()
 				Ftype2< Id, string >::global(),
 				RFCAST( &Shell::getField ) ),
 		// Getting a field value as a string: Sending value back.
-		new SrcFinfo( "getSrc", Ftype1< string >::global(), 0 ),
+		new SrcFinfo( "getSrc", Ftype1< string >::global() ),
 
 		// Setting a field value as a string: handling request
 		new DestFinfo( "set",
@@ -355,36 +355,31 @@ const Cinfo* initShellCinfo()
 static const Cinfo* shellCinfo = initShellCinfo();
 
 
-static const unsigned int cweSlot =
-	initShellCinfo()->getSlotIndex( "parser.cweSrc" );
-static const unsigned int elistSlot =
-	initShellCinfo()->getSlotIndex( "parser.leSrc" );
+static const Slot cweSlot = initShellCinfo()->getSlot( "parser.cweSrc" );
+static const Slot elistSlot = initShellCinfo()->getSlot( "parser.leSrc" );
 
 // Returns the id of the created object
-static const unsigned int createSlot =
-	initShellCinfo()->getSlotIndex( "parser.createSrc" );
-static const unsigned int getFieldSlot =
-	initShellCinfo()->getSlotIndex( "parser.getSrc" );
-static const unsigned int clockSlot =
-	initShellCinfo()->getSlotIndex( "parser.returnClocksSrc" );
-static const unsigned int listMessageSlot =
-	initShellCinfo()->getSlotIndex( "parser.listMessagesSrc" );
-static const unsigned int rCreateSlot =
-	initShellCinfo()->getSlotIndex( "master.create" );
-static const unsigned int rGetSlot =
-	initShellCinfo()->getSlotIndex( "master.get" );
-static const unsigned int rSetSlot =
-	initShellCinfo()->getSlotIndex( "master.set" );
-static const unsigned int rAddSlot =
-	initShellCinfo()->getSlotIndex( "master.add" );
-static const unsigned int recvGetSlot =
-	initShellCinfo()->getSlotIndex( "slave.recvGet" );
+static const Slot createSlot =
+	initShellCinfo()->getSlot( "parser.createSrc" );
+static const Slot getFieldSlot =
+	initShellCinfo()->getSlot( "parser.getSrc" );
+static const Slot clockSlot =
+	initShellCinfo()->getSlot( "parser.returnClocksSrc" );
+static const Slot listMessageSlot =
+	initShellCinfo()->getSlot( "parser.listMessagesSrc" );
+static const Slot rCreateSlot =
+	initShellCinfo()->getSlot( "master.create" );
+static const Slot rGetSlot = initShellCinfo()->getSlot( "master.get" );
+static const Slot rSetSlot = initShellCinfo()->getSlot( "master.set" );
+static const Slot rAddSlot = initShellCinfo()->getSlot( "master.add" );
+static const Slot recvGetSlot =
+	initShellCinfo()->getSlot( "slave.recvGet" );
 
-static const unsigned int pollSlot =
-	initShellCinfo()->getSlotIndex( "pollSrc" );
+static const Slot pollSlot =
+	initShellCinfo()->getSlot( "pollSrc" );
 
 
-void printNodeInfo( const Conn& c );
+void printNodeInfo( const Conn* c );
 
 //////////////////////////////////////////////////////////////////////
 // Initializer
@@ -490,7 +485,7 @@ Id Shell::path2eid( const string& path, const string& separator )
 	assert( !shellId.bad() );
 	Shell* s = static_cast< Shell* >( shellId()->data() );
 	*/
-	Shell* s = static_cast< Shell* >( ( Id::shellId() )()->data() );
+	Shell* s = static_cast< Shell* >( ( Id::shellId() )()->data( 0 ) );
 	return s->innerPath2eid( path, separator );
 }
 
@@ -538,9 +533,9 @@ string Shell::tail( const string& path, const string& separator )
 // serialized strings from PostMaster.
 //////////////////////////////////////////////////////////////////////
 
-void Shell::rawAddFunc( const Conn& c, string s )
+void Shell::rawAddFunc( const Conn* c, string s )
 {
-	Element* post = c.sourceElement();
+	Element* post = c->source().e;
 	assert( post->className() == "PostMaster" );
 	unsigned int mynode;
 	unsigned int remotenode;
@@ -586,14 +581,14 @@ void Shell::rawAddFunc( const Conn& c, string s )
 	// cout << "Shell::rawAddFunc: Successfully added msg on remote node\n";
 }
 
-void Shell::rawCopyFunc( const Conn& c, string s )
+void Shell::rawCopyFunc( const Conn* c, string s )
 {
 	cout << "Shell::rawCopyFunc( " << s << " )\n";
 }
 
-void Shell::rawTestFunc( const Conn& c, string s )
+void Shell::rawTestFunc( const Conn* c, string s )
 {
-	Element* post = c.sourceElement();
+	Element* post = c->source().e;
 	ASSERT( post->className() == "PostMaster", "rawTestFunc" );
 	unsigned int mynode;
 	unsigned int remotenode;
@@ -609,11 +604,11 @@ void Shell::rawTestFunc( const Conn& c, string s )
 	// cout << "Shell::rawTestFunc( " << s << " )\n";
 }
 
-void Shell::pollFunc( const Conn& c )
+void Shell::pollFunc( const Conn* c )
 {
 	while( 1 ) {
 		// cout << "." << flush;
-		send1< int >( c.targetElement(), pollSlot, 1 );
+		send1< int >( c->target(), pollSlot, 1 );
 		// Surprisingly, the usleep seems to worsen the responsiveness.
 		// usleep( 10 );
 	}
@@ -623,12 +618,12 @@ void Shell::pollFunc( const Conn& c )
 // Moose fields for Shell
 //////////////////////////////////////////////////////////////////////
 
-void Shell::setCwe( const Conn& c, Id id )
+void Shell::setCwe( const Conn* c, Id id )
 {
 	/// \todo: Need some work here to fix up with new id scheme.
 	// This should only be called on master node.
 	if ( !id.bad() ) {
-		Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+		Shell* s = static_cast< Shell* >( c->data() );
 		s->cwe_ = id;
 	} else {
 		cout << "Error: Attempt to change to nonexistent element.\n";
@@ -638,32 +633,34 @@ void Shell::setCwe( const Conn& c, Id id )
 Id Shell::getCwe( const Element* e )
 {
 	assert( e != 0 );
-	const Shell* s = static_cast< const Shell* >( e->data() );
+	const Shell* s = static_cast< const Shell* >( e->data( 0 ) );
 	return s->cwe_;
 }
 
-void Shell::trigCwe( const Conn& c )
+void Shell::trigCwe( const Conn* c )
 						
 {
-	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
-	sendTo1< Id >( c.targetElement(), cweSlot, c.targetIndex(), s->cwe_ );
+	Shell* s = static_cast< Shell* >( c->data() );
+	sendBack1< Id >( c, cweSlot, s->cwe_ );
+	// sendTo1< Id >( c->target(), cweSlot, c->targetIndex(), s->cwe_);
 }
 
-void Shell::pushe( const Conn& c, Id id )
+void Shell::pushe( const Conn* c, Id id )
 {
-	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	Shell* s = static_cast< Shell* >( c->data() );
 	if ( !id.bad() ) {
 		s->workingElementStack_.push_back( s->cwe_ );
 		s->cwe_ = id;
 	} else {
 		cout << "Error: Attempt to pushe to nonexistent element.\n";
 	}
-	sendTo1< Id >( c.targetElement(), cweSlot, c.targetIndex(), s->cwe_ );
+	sendBack1< Id >( c, cweSlot, s->cwe_ );
+	// sendTo1< Id >( c->targetElement(), 0, cweSlot, c->targetIndex(), s->cwe_);
 }
 
-void Shell::pope( const Conn& c )
+void Shell::pope( const Conn* c )
 {
-	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	Shell* s = static_cast< Shell* >( c->data() );
 	if ( s->workingElementStack_.size() > 0 ) {
 		s->cwe_ = s->workingElementStack_.back();
 		if ( s->cwe_.bad() ) { 
@@ -675,7 +672,8 @@ void Shell::pope( const Conn& c )
 	} else {
 		cout << "Error: empty element stack.\n";
 	}
-	sendTo1< Id >( c.targetElement(), cweSlot, c.targetIndex(), s->cwe_ );
+	sendBack1< Id >( c, cweSlot, s->cwe_ );
+	// sendTo1< Id >( c->targetElement(), 0, cweSlot, c->targetIndex(), s->cwe_ );
 }
 
 
@@ -686,7 +684,7 @@ void Shell::pope( const Conn& c )
 //////////////////////////////////////////////////////////////////////
 
 
-void Shell::trigLe( const Conn& c, Id parent )
+void Shell::trigLe( const Conn* c, Id parent )
 						
 {
 	Element* pa = parent();
@@ -694,18 +692,19 @@ void Shell::trigLe( const Conn& c, Id parent )
 	if ( pa ) {
 		vector< Id > ret;
 		if ( get< vector< Id > >( pa, "childList", ret ) ) {
-			Element* e = c.targetElement();
-			sendTo1< vector< Id > >( e, elistSlot, c.targetIndex(), ret );
+			sendBack1< vector< Id > >( c, elistSlot, ret );
+			// Element* e = c->targetElement();
+			// sendTo1< vector< Id > >( e, 0, elistSlot, c->targetIndex(), ret );
 		}
 	}
 }
 
 // Static function
-void Shell::staticCreate( const Conn& c, string type,
+void Shell::staticCreate( const Conn* c, string type,
 					string name, Id parent )
 {
-	Element* e = c.targetElement();
-	Shell* s = static_cast< Shell* >( e->data() );
+	Element* e = c->target().e;
+	Shell* s = static_cast< Shell* >( c->data() );
 
 	// This is where the IdManager does clever load balancing etc
 	// to assign child node.
@@ -715,7 +714,8 @@ void Shell::staticCreate( const Conn& c, string type,
 	if ( child == 0 ) { // local node
 		bool ret = s->create( type, name, parent, id );
 		if ( ret ) { // Tell the parser it was created happily.
-			sendTo1< Id >( e, createSlot, c.targetIndex(), id );
+			sendBack1< Id >( c, createSlot, id );
+		//	sendTo1< Id >( e, 0, createSlot, c->targetIndex(), id );
 		}
 	} else {
 		// Shell-to-shell messaging here with the request to
@@ -723,11 +723,14 @@ void Shell::staticCreate( const Conn& c, string type,
 		// This must only happen on node 0.
 		assert( e->id().node() == 0 );
 		assert( id.node() > 0 );
-		OffNodeInfo* oni = static_cast< OffNodeInfo* >( child->data() );
+		OffNodeInfo* oni = static_cast< OffNodeInfo* >( child->data( 0 ) );
 		// Element* post = oni->post;
+		unsigned int target = 0;
+		/*
 		unsigned int target = 
-		e->connSrcBegin( rCreateSlot ) - e->lookupConn( 0 ) +
+		e->connSrcBegin( rCreateSlot.msg() ) - e->lookupConn( 0 ) +
 			id.node() - 1;
+			*/
 		sendTo4< string , string, Id, Id>( 
 			e, rCreateSlot, target,
 			type, name, 
@@ -741,11 +744,12 @@ void Shell::staticCreate( const Conn& c, string type,
 // Static function
 // parameter has following clumped in the order mentioned, Nx, Ny, dx, dy, xorigin, yorigin
 // creates array of simple elements. Will swtich to arrayelements later.
-void Shell::staticCreateArray( const Conn& c, string type,
+void Shell::staticCreateArray( const Conn* c, string type,
 					string name, Id parent, vector <double> parameter )
 {
-	Element* e = c.targetElement();
-	Shell* s = static_cast< Shell* >( e->data() );
+	/*
+	Element* e = c->targetElement();
+	Shell* s = static_cast< Shell* >( c->data() );
 
 	int n = (int) (parameter[0]*parameter[1]);
 	
@@ -758,7 +762,7 @@ void Shell::staticCreateArray( const Conn& c, string type,
 			bool ret = s->create( type, sname, parent, id );
 			if ( ret ) { // Tell the parser it was created happily.
 				//GenesisParserWrapper::recvCreate(conn, id)
-				sendTo1< Id >( e, createSlot, c.targetIndex(), id);
+				sendTo1< Id >( e, 0, createSlot, c->targetIndex(), id);
 			}
 		}
 		else {
@@ -767,13 +771,13 @@ void Shell::staticCreateArray( const Conn& c, string type,
 			// This must only happen on node 0.
 			assert( e->id().node() == 0 );
 			assert( id.node() > 0 );
-			OffNodeInfo* oni = static_cast< OffNodeInfo* >( child->data() );
+			OffNodeInfo* oni = static_cast< OffNodeInfo* >( child->data( 0 ) );
 			// Element* post = oni->post;
 			unsigned int target = 
-			e->connSrcBegin( rCreateSlot ) - e->lookupConn( 0 ) +
+			e->connSrcBegin( rCreateSlot.msg() ) - e->lookupConn( 0 ) +
 				id.node() - 1;
-			sendTo4< string , string, Id, Id>( 
-				e, rCreateSlot, target,
+			sendTo4< string, string, Id, Id>( 
+				e, 0, rCreateSlot, target,
 				type, sname, 
 				parent, oni->id );
 			// Here it needs to fork till the object creation is complete.
@@ -781,16 +785,18 @@ void Shell::staticCreateArray( const Conn& c, string type,
 			delete child;
 		}
 	}
+	*/
 }
 
 
 // Static function
 // parameter has following clumped in the order mentioned, Nx, Ny, dx, dy, xorigin, yorigin
-void Shell::staticCreateArray1( const Conn& c, string type,
+void Shell::staticCreateArray1( const Conn* c, string type,
 					string name, Id parent, vector <double> parameter )
 {
-	Element* e = c.targetElement();
-	Shell* s = static_cast< Shell* >( e->data() );
+/*
+	Element* e = c->targetElement();
+	Shell* s = static_cast< Shell* >( c->data() );
 
 	// This is where the IdManager does clever load balancing etc
 	// to assign child node.
@@ -807,7 +813,7 @@ void Shell::staticCreateArray1( const Conn& c, string type,
 		f->setOrigin(parameter[4], parameter[5]);
 		if ( ret ) { // Tell the parser it was created happily.
 			//GenesisParserWrapper::recvCreate(conn, id)
-			sendTo1< Id >( e, createSlot, c.targetIndex(), id);
+			sendTo1< Id >( e, 0, createSlot, c->targetIndex(), id);
 		}
 	} else {
 		// Shell-to-shell messaging here with the request to
@@ -818,19 +824,20 @@ void Shell::staticCreateArray1( const Conn& c, string type,
 		OffNodeInfo* oni = static_cast< OffNodeInfo* >( child->data() );
 		// Element* post = oni->post;
 		unsigned int target = 
-		e->connSrcBegin( rCreateSlot ) - e->lookupConn( 0 ) +
+		e->connSrcBegin( rCreateSlot.msg() ) - e->lookupConn( 0 ) +
 			id.node() - 1;
 		sendTo4< string , string, Id, Id>( 
-			e, rCreateSlot, target,
+			e, 0, rCreateSlot, target,
 			type, name, 
 			parent, oni->id );
 		// Here it needs to fork till the object creation is complete.
 		delete oni;
 		delete child;
 	}
+*/
 }
 
-void Shell::planarconnect(const Conn& c, string source, string dest, double probability){
+void Shell::planarconnect(const Conn* c, string source, string dest, double probability){
 	vector <Element* > src_list, dst_list;
 	simpleWildcardFind( source, src_list );
 	simpleWildcardFind( dest, dst_list );
@@ -853,46 +860,34 @@ void Shell::planarconnect(const Conn& c, string source, string dest, double prob
 	}
 }
 
-void Shell::planardelay(const Conn& c, string source, string destination, vector <double> parameter){
-	assert (parameter.size() == 11);
-	double delay = parameter[0];
-// 	double conduction_velocity = parameter[1];
-	bool add = parameter[2];
-	double scale = parameter[3];
-	double stdev = parameter[4];
-	double maxdev = parameter[5];
-	double mid = parameter[6];
-	double max = parameter[7];
-	bool absoluterandom = parameter[8];
-	int delaychoice = int(parameter[9]);
-	int randchoice = int(parameter[10]);
-	double maxallowed;
-	Probability *p;
-	switch (randchoice){
-		case 0:
-			break;
-		case 1:
-			p = new Uniform(-scale, scale);
-			maxallowed = scale;
-			break;
-		case 2: 
-			p = new Normal(0, stdev);
-			maxallowed = maxdev;
-			break;
-		case 3: 
-			p = new Exponential(log(2)/mid);
-			maxallowed = max;
-			break;
-	}
-	vector <Element* > src_list;
-	vector <Element* > dst_list;
-	simpleWildcardFind( source, src_list );
-	if (destination != "")
-		simpleWildcardFind( destination, dst_list );
-	for (size_t i = 0 ; i < src_list.size(); i++){
-		if (src_list[i]->className() != "SpikeGen"){cout << "Shell::planardelay: Error1" << endl; return;}
+void Shell::planardelay(const Conn* c, string source, double delay)
+{
+	static const Cinfo* sgCinfo = Cinfo::find( "SpikeGen" );
+	// static const Finfo* eventFinfo = sgCinfo->findFinfo( "event" );
+	static const Slot eventSlot = sgCinfo->getSlot( "event" );
+
+	vector <Element* > srcList;
+	simpleWildcardFind( source, srcList );
+	for ( size_t i = 0 ; i < srcList.size(); i++){
+		if ( srcList[ i ]->className() != "SpikeGen"){
+			cout << "Shell::planardelay: Error: Source is not SpikeGen" << endl; 	
+			return;
+		}
+
+		vector< ConnTainer* >::const_iterator j;
+		const Msg* m = srcList[ i ]->msg( eventSlot.msg() );
+
+		for( j = m->begin(); j != m->end(); j++ ) {
+			// Need to sort out the iteration through all targets, here.
+			// Many targets will be ArrayElements and should have
+			// special fast assignment for all indices.
+			// for ( Conn* k = ( *j )->conn( eIndex, m->isDest() ); j->good(); j++ )
+				// setDelay( k );
+		}
+		
+		/*
 		vector <Conn> conn;
-		src_list[i]->findFinfo("event")->outgoingConns(src_list[i], conn);
+		srcList[i]->findFinfo("event")->outgoingConns(srcList[i], conn);
 		for (size_t j = 0; j < conn.size(); j++){
 			unsigned int numSynapses;
 			Element *dest = conn[j].targetElement();
@@ -933,42 +928,12 @@ void Shell::planardelay(const Conn& c, string source, string destination, vector
 				lookupSet< double, unsigned int >( dest, "delay", number, k );
 			}
 		}
+		*/
 	}
 }
 
-
-void Shell::planarweight(const Conn& c, string source, string  destination, vector <double> parameter){
-	assert (parameter.size() == 12);
-	double weight = parameter[0];
-// 	double decay_rate = parameter[1];
-// 	double max_weight = parameter[2];
-// 	double min_weight = parameter[3];
-	double scale = parameter[4];
-	double stdev = parameter[5];
-	double maxdev = parameter[6];
-	double mid = parameter[7];
-	double max = parameter[8];
-	bool absoluterandom = parameter[9];
-	int weightchoice = int(parameter[10]);
-	int randchoice = int(parameter[11]);
-	double maxallowed;
-	Probability *p;
-	switch (randchoice){
-		case 0:
-			break;
-		case 1:
-			p = new Uniform(-scale, scale);
-			maxallowed = scale;
-			break;
-		case 2: 
-			p = new Normal(0, stdev);
-			maxallowed = maxdev;
-			break;
-		case 3: 
-			p = new Exponential(log(2)/mid);
-			maxallowed = max;
-			break;
-	}
+void Shell::planarweight(const Conn* c, string source, double weight){
+/*
 	vector <Element* > src_list;
 	vector <Element* > dst_list;
 	simpleWildcardFind( source, src_list );
@@ -1015,10 +980,11 @@ void Shell::planarweight(const Conn& c, string source, string  destination, vect
 			}
 		}
 	}
+*/
 }
 
 // does not do - destination is a SynChan test
-void Shell::getSynCount2(const Conn& c, Id dest){
+void Shell::getSynCount2(const Conn* c, Id dest){
 	Element* dst = dest();
 	unsigned int numSynapses;
 	bool b = get< unsigned int >( dst, "numSynapses", numSynapses );
@@ -1029,17 +995,20 @@ void Shell::getSynCount2(const Conn& c, Id dest){
 	char e[10];
 	sprintf (e, "%d", numSynapses);
 	string ret = e;
-	sendTo1< string >( c.targetElement(),
-				getFieldSlot, c.targetIndex(), ret );
+	sendBack1< string >( c, getFieldSlot, ret );
+	/*
+	sendTo1< string >( c->targetElement(),
+				getFieldSlot, c->targetIndex(), 0, ret );
+	*/
 }
 
 
 
 
 // Static function
-void Shell::staticDestroy( const Conn& c, Id victim )
+void Shell::staticDestroy( const Conn* c, Id victim )
 {
-	Shell* s = static_cast< Shell* >( c.targetElement()->data() );
+	Shell* s = static_cast< Shell* >( c->data() );
 	s->destroy( victim );
 }
 
@@ -1047,7 +1016,7 @@ void Shell::staticDestroy( const Conn& c, Id victim )
  * This function adds a ExtFieldFinfo
  */
 
-void Shell::addField( const Conn& c, Id id, string fieldname )
+void Shell::addField( const Conn* c, Id id, string fieldname )
 {
 	if ( id.bad() )
 		return;
@@ -1068,7 +1037,7 @@ void Shell::addField( const Conn& c, Id id, string fieldname )
  * we will eventually need to be able to handle this for off-node
  * object requests.
  */
-void Shell::getField( const Conn& c, Id id, string field )
+void Shell::getField( const Conn* c, Id id, string field )
 {
 	if ( id.bad() )
 		return;
@@ -1083,9 +1052,10 @@ void Shell::getField( const Conn& c, Id id, string field )
 	// the value when it is good and leave the rest to the parser.
 	if ( f )
 		if ( f->strGet( e, ret ) ){
+			sendBack1< string >( c, getFieldSlot, ret );
 			//GenesisParserWrapper::recvField (conn, ret);
-			sendTo1< string >( c.targetElement(),
-				getFieldSlot, c.targetIndex(), ret );
+			// sendTo1< string >( c->targetElement(), 0,
+				// getFieldSlot, c->targetIndex(), ret );
 		}
 }
 
@@ -1096,10 +1066,9 @@ void Shell::getField( const Conn& c, Id id, string field )
 // To be called from the node on which the Master shell resides.
 void testMess( Element* e, unsigned int numNodes )
 {
-	/*
-	 * Here we create a set of neutrals on all the slave nodes.
-	*/
-	unsigned int startConn = e->connSrcBegin( rCreateSlot ) - 
+/*
+	// Here we create a set of neutrals on all the slave nodes.
+	unsigned int startConn = e->connSrcBegin( rCreateSlot.msg() ) - 
 		e->lookupConn( 0 );
 	vector< Id > offNodeObjs( numNodes );
 	for ( unsigned int i = 1; i < numNodes; i++ ) {
@@ -1117,10 +1086,9 @@ void testMess( Element* e, unsigned int numNodes )
 
 	// Poll the postmasters.
 	send1< int >( e, pollSlot, 1 );
-	/*
-	 * Here we assign new names to each of these neutrals
-	*/
-	startConn = e->connSrcBegin( rSetSlot ) - e->lookupConn( 0 );
+
+	// Here we assign new names to each of these neutrals
+	startConn = e->connSrcBegin( rSetSlot.msg() ) - e->lookupConn( 0 );
 	for ( unsigned int i = 1; i < numNodes; i++ ) {
 		char name[20];
 		sprintf( name, "OffNodeCreateTest_%d", i );
@@ -1130,10 +1098,8 @@ void testMess( Element* e, unsigned int numNodes )
 	}
 	send1< int >( e, pollSlot, 1 );
 
-	/*
-	 * Here we check the names of the neutrals.
-	*/
-	startConn = e->connSrcBegin( rGetSlot ) - e->lookupConn( 0 );
+	// Here we check the names of the neutrals.
+	startConn = e->connSrcBegin( rGetSlot.msg() ) - e->lookupConn( 0 );
 	for ( unsigned int i = 1; i < numNodes; i++ ) {
 		char name[20];
 		sprintf( name, "OffNodeCreateTest_%d", i );
@@ -1148,11 +1114,12 @@ void testMess( Element* e, unsigned int numNodes )
 		"destfield" );
 
 	send1< int >( e, pollSlot, 1 );
+*/
 }
 
-void printNodeInfo( const Conn& c )
+void printNodeInfo( const Conn* c )
 {
-	Element* post = c.sourceElement();
+	Element* post = c->source().e;
 	assert( post->className() == "PostMaster" );
 	unsigned int mynode;
 	unsigned int remotenode;
@@ -1162,7 +1129,7 @@ void printNodeInfo( const Conn& c )
 	cout << "on " << mynode << " from " << remotenode << ":";
 }
 
-void Shell::slaveGetField( const Conn& c, Id id, string field )
+void Shell::slaveGetField( const Conn* c, Id id, string field )
 {
 	printNodeInfo( c );
 	// cout << "in slaveGetFunc on " << id << " with field :" << field << "\n";
@@ -1176,11 +1143,10 @@ void Shell::slaveGetField( const Conn& c, Id id, string field )
 	const Finfo* f = e->findFinfo( field );
 	if ( f )
 		if ( f->strGet( e, ret ) )
-			sendTo1< string >( c.targetElement(),
-				recvGetSlot, c.targetIndex(), ret );
+			sendBack1< string >( c, recvGetSlot, ret );
 }
 
-void Shell::recvGetFunc( const Conn& c, string value )
+void Shell::recvGetFunc( const Conn* c, string value )
 {
 	printNodeInfo( c );
 	cout << "in recvGetFunc with field value :'" << value << "'\n";
@@ -1189,18 +1155,17 @@ void Shell::recvGetFunc( const Conn& c, string value )
 	// Bigger problem that this is asynchronous now.
 	// Maybe it is OK if only one parser.
 	// sendTo1< string >( c.targetElement(), getFieldSlot, 0, value );
-	send1< string >( c.targetElement(), getFieldSlot, value );
+	send1< string >( c->target(), getFieldSlot, value );
 }
 
-void Shell::slaveCreateFunc ( const Conn& c, 
+void Shell::slaveCreateFunc ( const Conn* c, 
 				string objtype, string objname, 
 				Id parent, Id newobj )
 {
 	printNodeInfo( c );
 	cout << "in slaveCreateFunc :" << objtype << " " << objname << " " << parent << " " << newobj << "\n";
 
-	Element* e = c.targetElement();
-	Shell* s = static_cast< Shell* >( e->data() );
+	Shell* s = static_cast< Shell* >( c->data() );
 
 	bool ret = s->create( objtype, objname, parent, newobj );
 	if ( ret ) { // Tell the master node it was created happily.
@@ -1221,7 +1186,7 @@ void Shell::slaveCreateFunc ( const Conn& c,
 	*/
 }
 
-void Shell::addFunc ( const Conn& c, 
+void Shell::addFunc ( const Conn* c, 
 				Id src, string srcField,
 				Id dest, string destField )
 {
@@ -1236,18 +1201,17 @@ void Shell::addFunc ( const Conn& c,
  * that the planned new object has a different name from any of
  * the existing children of the prospective parent.
  */
-void Shell::copy( const Conn& c, 
+void Shell::copy( const Conn* c, 
 				Id src, Id parent, string name )
 {
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 	Element* e = src()->copy( parent(), name );
 	if ( e ) { // Send back the id of the new element base
-		sendTo1< Id >( c.targetElement(),
-					createSlot, c.targetIndex(), e->id() );
+		sendBack1< Id >( c, createSlot, e->id() );
 	}
 }
 
-void Shell::copyIntoArray( const Conn& c, 
+void Shell::copyIntoArray( const Conn* c, 
 				Id src, Id parent, string name, vector <double> parameter )
 {
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
@@ -1258,8 +1222,7 @@ void Shell::copyIntoArray( const Conn& c,
 		Element* e = src()->copy( parent(), sname );
 		//assign the other parameters to the arrayelement
 		if ( e )  // Send back the id of the new element base
-			sendTo1< Id >( c.targetElement(),
-						createSlot, c.targetIndex(), e->id() );
+			sendBack1< Id >( c, createSlot, e->id() );
 	}
 }
 
@@ -1270,9 +1233,10 @@ void Shell::copyIntoArray( const Conn& c,
  * elements
 */
 
-void Shell::copyIntoArray1( const Conn& c, 
+void Shell::copyIntoArray1( const Conn* c, 
 				Id src, Id parent, string name, vector <double> parameter )
 {
+	/*
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 	int n = (int) (parameter[0]*parameter[1]);
 	Element* e = src()->copyIntoArray( parent(), name, n );
@@ -1283,8 +1247,8 @@ void Shell::copyIntoArray1( const Conn& c,
 	f->setDistances(parameter[2], parameter[3]);
 	f->setOrigin(parameter[4], parameter[5]);
 	if ( e )  // Send back the id of the new element base
-		sendTo1< Id >( c.targetElement(),
-					createSlot, c.targetIndex(), e->id() );
+		sendBack1< Id >( c->targetElement(), createSlot, c, e->id() );
+*/
 }
 
 // Static placeholder.
@@ -1296,8 +1260,7 @@ void Shell::copyIntoArray1( const Conn& c,
  * Unlike the 'copy', this function is handled by the shell and may
  * involve interesting node relocation issues.
  */
-void Shell::move( const Conn& c,
-				Id src, Id parent, string name )
+void Shell::move( const Conn* c, Id src, Id parent, string name )
 {
 	assert( !src.bad() );
 	assert( !parent.bad() );
@@ -1334,9 +1297,10 @@ void Shell::move( const Conn& c,
 			if ( name != "" )
 				e->setName( name );
 			/// \todo: Here we don't take into acount multiple parents.
-			bool ret = e->findFinfo( "child" )->drop( e, 0 );
-			assert ( ret );
-			ret = pa->findFinfo( "childSrc" )->add(
+			// Here we drop all parents.
+			e->dropAll( "child" );
+
+			bool ret = pa->findFinfo( "childSrc" )->add(
 				pa, e, e->findFinfo( "child" ) );
 			assert ( ret );
 			// OK();
@@ -1358,8 +1322,7 @@ void Shell::move( const Conn& c,
  * we will eventually need to be able to handle this for off-node
  * object requests.
  */
-void Shell::setField( const Conn& c, 
-				Id id, string field, string value )
+void Shell::setField( const Conn* c, Id id, string field, string value )
 {
 	assert( id.good() );
 	Element* e = id();
@@ -1386,7 +1349,7 @@ void Shell::setField( const Conn& c,
  * This function handles request to set identical field value for a 
  * vector of objects. Used for the GENESIS SET function.
  */
-void Shell::setVecField( const Conn& c, 
+void Shell::setVecField( const Conn* c, 
 				vector< Id > elist, string field, string value )
 {
 	vector< Id >::iterator i;
@@ -1438,10 +1401,10 @@ void Shell::file2tab( const Conn& c,
  * similar in Python. Otherwise it can readily go into the
  * GenesisParserWrapper.
  */
-void Shell::setClock( const Conn& c, int clockNo, double dt,
+void Shell::setClock( const Conn* c, int clockNo, double dt,
 				int stage )
 {
-	Shell* sh = static_cast< Shell* >( c.data() );
+	Shell* sh = static_cast< Shell* >( c->data() );
 	char line[20];
 	sprintf( line, "t%d", clockNo );
 	string TickName = line;
@@ -1478,7 +1441,7 @@ void Shell::setClock( const Conn& c, int clockNo, double dt,
  * It is the job of the parser to provide defaults
  * and to decode the path list from wildcards.
  */
-void Shell::useClock( const Conn& c,
+void Shell::useClock( const Conn* c,
 	Id tickId, vector< Id > path, string function )
 {
 	assert( !tickId.zero() );
@@ -1499,17 +1462,24 @@ void Shell::useClock( const Conn& c,
 		assert ( e && e != Element::root() );
 		const Finfo* func = e->findFinfo( function );
 		if ( func ) {
-			if ( func->numIncoming( e ) == 0 ) {
+			Msg* m = e->varMsg( func->msg() );
+			if ( m->size() == 0 ) {
+			// if ( func->numIncoming( e ) == 0 )
 				ret = tickProc->add( tick, e, func );
 				assert( ret );
 			} else {
-				vector< Conn > list;
-				ret = func->incomingConns( e, list ) > 0;
+				if ( ( *m->begin() )->e1() != tick ) {
+					m->dropAll( e );
+					tickProc->add( tick, e, func );
+				}
+				/*
 				assert ( ret );
-				if ( list[0].sourceElement() != tick ) {
+				if ( list[0].first != tick ) {
+					m->dropAll( e );
 					func->dropAll( e );
 					tickProc->add( tick, e, func );
 				}
+				*/
 			}
 		} else {
 			// This cannot be an 'assertion' error because the 
@@ -1589,12 +1559,12 @@ void Shell::digestPath( string& path )
  * The flag specifies if we want a list in breadth-first order,
  * in which case commas are not permitted.
  */
-void Shell::getWildcardList( const Conn& c, string path, bool ordered )
+void Shell::getWildcardList( const Conn* c, string path, bool ordered )
 {
 	vector< Element* > list;
 	vector< Id > ret;
 
-	static_cast< Shell* >( c.data() )->digestPath( path );
+	static_cast< Shell* >( c->data() )->digestPath( path );
 
 	// Finally, refer to the wildcard functions in Wildcard.cpp.
 	if ( ordered )
@@ -1610,7 +1580,7 @@ void Shell::getWildcardList( const Conn& c, string path, bool ordered )
 			*i = ( *j )->id();
 	
 	//GenesisParserWrapper::recvElist(conn, elist)
-	send1< vector< Id > >( c.targetElement(), elistSlot, ret );
+	sendBack1< vector< Id > >( c, elistSlot, ret );
 }
 
 /**
@@ -1629,7 +1599,7 @@ Element* findCj()
 	return cjId();
 }
 
-void Shell::resched( const Conn& c )
+void Shell::resched( const Conn* c )
 {
 	// Should be a msg
 	Element* cj = findCj();
@@ -1639,20 +1609,20 @@ void Shell::resched( const Conn& c )
 		set( kinetics(), "resched" );
 }
 
-void Shell::reinit( const Conn& c )
+void Shell::reinit( const Conn* c )
 {
 	// Should be a msg
 	Element* cj = findCj();
 	set( cj, "reinit" );
 }
 
-void Shell::stop( const Conn& c )
+void Shell::stop( const Conn* c )
 {
 	// Element* cj = findCj();
 	// set( cj, "stop" ); // Not yet implemented
 }
 
-void Shell::step( const Conn& c, double time )
+void Shell::step( const Conn* c, double time )
 {
 	// Should be a msg
 	Element* cj = findCj();
@@ -1666,9 +1636,24 @@ void Shell::step( const Conn& c, double time )
  * \todo: Need to fix requestClocks as it will give the wrong index
  * if we have non-contiguous clock ticks.
  */
-void Shell::requestClocks( const Conn& c )
+void Shell::requestClocks( const Conn* c )
 {
 	// Here we fill up the clock timings.
+	Element* cj = findCj();
+
+	Conn* ct = cj->targets( "childSrc" );
+	vector< double > times;
+
+	while ( ct->good() ) {
+		double dt;
+		if ( get< double >( ct->target(), "dt", dt ) )
+			times.push_back( dt );
+		ct->increment();
+	}
+	delete ct;
+	sendBack1< vector< double > >( c, clockSlot, times );
+
+	/*
 	Element* cj = findCj();
 	vector< Conn > kids;
 	vector< Conn >::iterator i;
@@ -1680,17 +1665,18 @@ void Shell::requestClocks( const Conn& c )
 			times.push_back( dt );
 	}
 
-	send1< vector< double > >( c.targetElement(), clockSlot, times );
+	send1< vector< double > >( c->targetElement(), clockSlot, times );
+	*/
 }
 
-void Shell::requestCurrTime( const Conn& c )
+void Shell::requestCurrTime( const Conn* c )
 {
 	Element* cj = findCj();
 	string ret;
 	const Finfo* f = cj->findFinfo( "currentTime" );
 	assert( f != 0 );
 	f->strGet( cj, ret );
-	send1< string >( c.targetElement(), getFieldSlot, ret );
+	sendBack1< string >( c, getFieldSlot, ret );
 }
 
 /**
@@ -1700,42 +1686,36 @@ void Shell::requestCurrTime( const Conn& c )
  * target element from the connections, and puts this into a
  * vector of unsigned ints.
  */
-void Shell::listMessages( const Conn& c,
+void Shell::listMessages( const Conn* c,
 				Id id, string field, bool isIncoming )
 {
 	assert( !id.bad() );
 	Element* e = id();
 	const Finfo* f = e->findFinfo( field );
 	assert( f != 0 );
-	vector< Conn > list;
+
+	vector< pair< Element*, unsigned int > > list;
 	vector< Id > ret;
 	string remoteFields = "";
-	
-	if ( isIncoming )
-		f->incomingConns( e, list );
-	else
-		f->outgoingConns( e, list );
 
-	if ( list.size() > 0 ) {
-		vector< Conn >::iterator i;
-		for ( i = list.begin(); i != list.end(); i++ ) {
-			Element* temp = i->targetElement();
-			ret.push_back( temp->id() );
-			const Finfo* targetFinfo = 
-					temp->findFinfo( i->targetIndex() );
-			assert( targetFinfo != 0 );
-			if ( i == list.begin() )
-				remoteFields = remoteFields + targetFinfo->name();
-			else
-				remoteFields = remoteFields + ", " +
-						targetFinfo->name();
-		}
+	const Msg* m = e->msg( f->msg() );
+	vector< ConnTainer* >::const_iterator i;
+	for ( i = m->begin(); i != m->end(); i++ ) {
+		Element* temp = ( isIncoming ) ? ( *i )->e1() : ( *i )->e2();
+		ret.push_back( temp->id() );
+		const Finfo* targetFinfo = temp->findFinfo( *i );
+		assert( targetFinfo != 0 );
+		if ( i == m->begin() )
+			remoteFields = remoteFields + targetFinfo->name();
+		else
+			remoteFields = remoteFields + ", " + targetFinfo->name();
 	}
-	send2< vector< Id >, string >(
-		c.targetElement(), listMessageSlot, ret, remoteFields );
+
+	sendBack2< vector< Id >, string >(
+		c, listMessageSlot, ret, remoteFields );
 }
 
-void Shell::readCell( const Conn& c, string filename, string cellpath,
+void Shell::readCell( const Conn* c, string filename, string cellpath,
 	vector< double > globalParms )
 {
 	ReadCell rc( globalParms );
@@ -1743,7 +1723,7 @@ void Shell::readCell( const Conn& c, string filename, string cellpath,
 	rc.read( filename, cellpath );
 }
 
-void Shell::setupAlpha( const Conn& c, Id gateId,
+void Shell::setupAlpha( const Conn* c, Id gateId,
 				vector< double > parms )
 {
 	static const Finfo* setupAlphaFinfo = 
@@ -1758,7 +1738,7 @@ void Shell::setupAlpha( const Conn& c, Id gateId,
 	set< vector< double > >( gate, setupAlphaFinfo, parms );
 }
 
-void Shell::setupTau( const Conn& c, Id gateId,
+void Shell::setupTau( const Conn* c, Id gateId,
 				vector< double > parms )
 {
 	static const Finfo* setupTauFinfo = 
@@ -1773,7 +1753,7 @@ void Shell::setupTau( const Conn& c, Id gateId,
 	set< vector< double > >( gate, setupTauFinfo, parms );
 }
 
-void Shell::tweakAlpha( const Conn& c, Id gateId )
+void Shell::tweakAlpha( const Conn* c, Id gateId )
 {
 	static const Finfo* tweakAlphaFinfo = 
 			Cinfo::find( "HHGate")->findFinfo( "tweakAlpha" );
@@ -1787,7 +1767,7 @@ void Shell::tweakAlpha( const Conn& c, Id gateId )
 	set( gate, tweakAlphaFinfo );
 }
 
-void Shell::tweakTau( const Conn& c, Id gateId )
+void Shell::tweakTau( const Conn* c, Id gateId )
 {
 	static const Finfo* tweakTauFinfo = 
 			Cinfo::find( "HHGate")->findFinfo( "tweakTau" );
@@ -1801,7 +1781,7 @@ void Shell::tweakTau( const Conn& c, Id gateId )
 	set( gate, tweakTauFinfo );
 }
 
-void Shell::setupGate( const Conn& c, Id gateId,
+void Shell::setupGate( const Conn* c, Id gateId,
 				vector< double > parms )
 {
 	static const Finfo* setupGateFinfo = 
@@ -1830,7 +1810,7 @@ void Shell::setupGate( const Conn& c, Id gateId,
  * This uses a local instance of SimDump, and does not interfere
  * with the private version in the Shell.
  */
-void Shell::readDumpFile( const Conn& c, string filename )
+void Shell::readDumpFile( const Conn* c, string filename )
 {
 	SimDump localSid;
 	
@@ -1845,9 +1825,9 @@ void Shell::readDumpFile( const Conn& c, string filename )
  * This uses the private SimDump object on the Shell because the
  * simObjDump function may need to set its state.
  */
-void Shell::writeDumpFile( const Conn& c, string filename, string path )
+void Shell::writeDumpFile( const Conn* c, string filename, string path )
 {
-	Shell* sh = static_cast< Shell* >( c.data() );
+	Shell* sh = static_cast< Shell* >( c->data() );
 	sh->simDump_->write( filename, path );
 }
 
@@ -1858,9 +1838,9 @@ void Shell::writeDumpFile( const Conn& c, string filename, string path )
  * information.
  * First argument is the function call, second is the name of the class.
  */
-void Shell::simObjDump( const Conn& c, string fields )
+void Shell::simObjDump( const Conn* c, string fields )
 {
-	Shell* sh = static_cast< Shell* >( c.data() );
+	Shell* sh = static_cast< Shell* >( c->data() );
 	sh->simDump_->simObjDump( fields );
 }
 /**
@@ -1870,19 +1850,19 @@ void Shell::simObjDump( const Conn& c, string fields )
  * This uses the private SimDump object on the Shell because the
  * simObjDump function may need to set its state.
  */
-void Shell::simUndump( const Conn& c, string args )
+void Shell::simUndump( const Conn* c, string args )
 {
-	Shell* sh = static_cast< Shell* >( c.data() );
+	Shell* sh = static_cast< Shell* >( c->data() );
 	sh->simDump_->simUndump( args );
 }
 
-void Shell::loadtab( const Conn& c, string data )
+void Shell::loadtab( const Conn* c, string data )
 {
-	Shell* sh = static_cast< Shell* >( c.data() );
+	Shell* sh = static_cast< Shell* >( c->data() );
 	sh->innerLoadTab( data );
 }
 
-void Shell::tabop( const Conn& c, Id tab, char op, double min, double max )
+void Shell::tabop( const Conn* c, Id tab, char op, double min, double max )
 {
 	set< char, double, double >( tab(), "tabop", op, min, max );
 }
@@ -1897,7 +1877,7 @@ vector <string> Shell::filenames;
 vector <string> Shell::modes;
 vector <FILE*> Shell::filehandles;
 
-void Shell::openFile( const Conn& c, string filename, string mode )
+void Shell::openFile( const Conn* c, string filename, string mode )
 {
 	FILE* o = fopen( filename.c_str(), mode.c_str() );
 	if (o == NULL){
@@ -1917,7 +1897,7 @@ void Shell::openFile( const Conn& c, string filename, string mode )
 
 
 
-void Shell::writeFile( const Conn& c, string filename, string text )
+void Shell::writeFile( const Conn* c, string filename, string text )
 {
 	size_t i = 0;
 	while (filenames[i] != filename && ++i);
@@ -1934,7 +1914,7 @@ void Shell::writeFile( const Conn& c, string filename, string text )
 	}
 }
 
-void Shell::closeFile( const Conn& c, string filename ){
+void Shell::closeFile( const Conn* c, string filename ){
 	size_t i = 0;
 	while (filenames[i] != filename && ++i);
 	if ( i < filenames.size() ){
@@ -1952,18 +1932,18 @@ void Shell::closeFile( const Conn& c, string filename ){
 	}
 }
 
-void Shell::listFiles( const Conn& c ){
+void Shell::listFiles( const Conn* c ){
 	string ret = "";
 	for ( size_t i = 0; i < filenames.size(); i++ ) 
 		ret = ret + filenames[i] + "\n";
-	sendTo1< string >( c.targetElement(), getFieldSlot, c.targetIndex(), ret );	
+	sendBack1< string >( c, getFieldSlot, ret );	
 }
 
 
 /*
 Limitation: lines should be shorter than 1000 chars
 */
-void Shell::readFile( const Conn& c, string filename, bool linemode ){
+void Shell::readFile( const Conn* c, string filename, bool linemode ){
 	size_t i = 0;
 	while (filenames[i] != filename && ++i);
 	if ( i < filenames.size() ){
@@ -1976,7 +1956,7 @@ void Shell::readFile( const Conn& c, string filename, bool linemode ){
 		string ret = str;
 		if (ret[ ret.size() -1 ] == '\n' && !linemode)
 			ret.erase( ret.end() - 1 );
-		sendTo1< string >( c.targetElement(), getFieldSlot, c.targetIndex(), ret );
+		sendBack1< string >( c, getFieldSlot, ret );
 	}
 	else {
 		cout << "Error:: File "<< filename << " not opened!!" << endl;

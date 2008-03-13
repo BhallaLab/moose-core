@@ -139,9 +139,9 @@ Particle::Particle()
 ///////////////////////////////////////////////////
 
 /*
-void Particle::setVolumeScale( const Conn& c, double value )
+void Particle::setVolumeScale( const Conn* c, double value )
 {
-	static_cast< Particle* >( c.data() )->volumeScale_ = value;
+	static_cast< Particle* >( c->data() )->volumeScale_ = value;
 }
 
 double Particle::getVolumeScale( const Element* e )
@@ -150,29 +150,29 @@ double Particle::getVolumeScale( const Element* e )
 }
 */
 
-void Particle::setPos( const Conn& c, double value, 
+void Particle::setPos( const Conn* c, double value, 
 	unsigned int i, unsigned int dim )
 {
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie(
-		c.targetElement(), SmoldynHub::molSolveFinfo, molIndex );
+		c->targetElement(), SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
 		sh->setPos( molIndex, value, i, dim );
 	}
 }
 
-void Particle::setX( const Conn& c, double value, const unsigned int& i )
+void Particle::setX( const Conn* c, double value, const unsigned int& i )
 {
 	setPos( c, value, i, 0 );
 }
 
-void Particle::setY( const Conn& c, double value, const unsigned int& i )
+void Particle::setY( const Conn* c, double value, const unsigned int& i )
 {
 	setPos( c, value, i, 1 );
 }
 
-void Particle::setZ( const Conn& c, double value, const unsigned int& i )
+void Particle::setZ( const Conn* c, double value, const unsigned int& i )
 {
 	setPos( c, value, i, 2 );
 }
@@ -204,11 +204,11 @@ double Particle::getZ( const Element* e, const unsigned int& i )
 	return getPos( e, i, 2 );
 }
 
-void Particle::setN( const Conn& c, double value )
+void Particle::setN( const Conn* c, double value )
 {
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie( 
-		c.targetElement(), SmoldynHub::molSolveFinfo, molIndex );
+		c->targetElement(), SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
 		sh->setNparticles( molIndex, static_cast< unsigned int >( value ) );
@@ -236,10 +236,10 @@ double Particle::getN( const Element* e )
  * estimates of volume by drawing on the base Molecule class for the
  * conversion.
  */
-void Particle::setConc( const Conn& c, double value )
+void Particle::setConc( const Conn* c, double value )
 {
 	Molecule::setConc( c, value );
-	double n = Molecule::getN( c.targetElement() );
+	double n = Molecule::getN( c->targetElement() );
 	setN( c, n );
 }
 
@@ -251,29 +251,29 @@ double Particle::getConc( const Element* e )
 	return Molecule::getConc( e );
 }
 
-void Particle::setPosVector( const Conn& c, const vector< double >& value, 
+void Particle::setPosVector( const Conn* c, const vector< double >& value, 
 	unsigned int dim )
 {
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie( 
-		c.targetElement(), SmoldynHub::molSolveFinfo, molIndex );
+		c->targetElement(), SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
 		sh->setPosVector( molIndex, value, dim );
 	}
 }
 
-void Particle::setXvector( const Conn& c, vector< double > value )
+void Particle::setXvector( const Conn* c, vector< double > value )
 {
 	setPosVector( c, value, 0 );
 }
 
-void Particle::setYvector( const Conn& c, vector< double > value )
+void Particle::setYvector( const Conn* c, vector< double > value )
 {
 	setPosVector( c, value, 1 );
 }
 
-void Particle::setZvector( const Conn& c, vector< double > value )
+void Particle::setZvector( const Conn* c, vector< double > value )
 {
 	setPosVector( c, value, 2 );
 }
@@ -306,12 +306,12 @@ vector< double > Particle::getZvector( const Element* e )
 	return getPosVector( e, 2 );
 }
 
-void Particle::setD( const Conn& c, double value )
+void Particle::setD( const Conn* c, double value )
 {
 	Molecule::setD( c, value );
 	unsigned int molIndex;
 	SmoldynHub* sh = SmoldynHub::getHubFromZombie( 
-		c.targetElement(), SmoldynHub::molSolveFinfo, molIndex );
+		c->targetElement(), SmoldynHub::molSolveFinfo, molIndex );
 	if ( sh ) {
 		assert( molIndex < sh->numSpecies() );
 		sh->setD( molIndex, value );

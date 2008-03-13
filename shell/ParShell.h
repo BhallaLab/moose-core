@@ -32,17 +32,17 @@ class ParShell:public Shell
 	/**
 	 * This function provides functionality for the planarconnect command on parallel moose.
 	 */
-	static void planarconnect(const Conn& c, string source, string dest, string spikegenRank, string synchanRank);
+	static void planarconnect(const Conn* c, string source, string dest, string spikegenRank, string synchanRank);
 	
 	/**
 	 * This function provides functionality for the planardelay command on parallel moose.
 	 */
-	static void planardelay(const Conn& c, string source, double delay);
+	static void planardelay(const Conn* c, string source, double delay);
 	
 	/**
 	 * This function provides functionality for the planarweight command on parallel moose.
 	 */
-	static void planarweight(const Conn& c, string source, double weight);
+	static void planarweight(const Conn* c, string source, double weight);
 
 
 };

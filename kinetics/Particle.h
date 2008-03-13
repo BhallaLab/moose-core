@@ -19,38 +19,38 @@ class Particle: public Molecule
 		// Field assignment functions
 		///////////////////////////////////////////////////
 		
-		static void setPos( const Conn& c, double value, 
+		static void setPos( const Conn* c, double value, 
 				unsigned int i, unsigned int dim );
 		static double getPos( const Element* e, unsigned int i, 
 				unsigned int dim);
-		static void setX( const Conn& c, double val, const unsigned int& i);
+		static void setX( const Conn* c, double val, const unsigned int& i);
 		static double getX( const Element* e, const unsigned int& i );
-		static void setY( const Conn& c, double val, const unsigned int& i);
+		static void setY( const Conn* c, double val, const unsigned int& i);
 		static double getY( const Element* e, const unsigned int& i );
-		static void setZ( const Conn& c, double val, const unsigned int& i);
+		static void setZ( const Conn* c, double val, const unsigned int& i);
 		static double getZ( const Element* e, const unsigned int& i );
 
-		static void setPosVector( const Conn& c, 
+		static void setPosVector( const Conn* c, 
 			const vector< double >& value, unsigned int dim );
 		static vector< double > getPosVector( 
 			const Element* e, unsigned int dim);
-		static void setXvector( const Conn& c, vector< double > value );
+		static void setXvector( const Conn* c, vector< double > value );
 		static vector< double > getXvector( const Element* e );
-		static void setYvector( const Conn& c, vector< double > value );
+		static void setYvector( const Conn* c, vector< double > value );
 		static vector< double > getYvector( const Element* e );
-		static void setZvector( const Conn& c, vector< double > value );
+		static void setZvector( const Conn* c, vector< double > value );
 		static vector< double > getZvector( const Element* e );
 
 		//  Override the Molecule operations here
 		//  For compatibility I use doubles, but here it is always integral
-		static void setN( const Conn& c, double value );
+		static void setN( const Conn* c, double value );
 		static double getN( const Element* e );
-		static void setConc( const Conn& c, double value );
+		static void setConc( const Conn* c, double value );
 		static double getConc( const Element* e );
-		static void setNinit( const Conn& c, double value );
+		static void setNinit( const Conn* c, double value );
 		static double getNinit( const Element* e );
 
-		static void setD( const Conn& c, double value );
+		static void setD( const Conn* c, double value );
 		static double getD( const Element* e );
 
 		// Perhaps have a link to the geom?
@@ -62,13 +62,13 @@ class Particle: public Molecule
 		///////////////////////////////////////////////////
 		
 		/*
-		static void reacFunc( const Conn& c, double A, double B );
-		static void sumTotalFunc( const Conn& c, double n );
+		static void reacFunc( const Conn* c, double A, double B );
+		static void sumTotalFunc( const Conn* c, double n );
 		void sumProcessFuncLocal( );
-		static void sumProcessFunc( const Conn& c, ProcInfo info );
-		static void reinitFunc( const Conn& c, ProcInfo info );
+		static void sumProcessFunc( const Conn* c, ProcInfo info );
+		static void reinitFunc( const Conn* c, ProcInfo info );
 		void reinitFuncLocal( Element* e );
-		static void processFunc( const Conn& c, ProcInfo info );
+		static void processFunc( const Conn* c, ProcInfo info );
 		void processFuncLocal( Element* e, ProcInfo info );
 		*/
 

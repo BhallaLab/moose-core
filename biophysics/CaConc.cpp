@@ -108,47 +108,47 @@ const Cinfo* initCaConcCinfo()
 
 static const Cinfo* caConcCinfo = initCaConcCinfo();
 
-static const unsigned int concSlot =
-	initCaConcCinfo()->getSlotIndex( "concSrc" );
+static const Slot concSlot =
+	initCaConcCinfo()->getSlot( "concSrc" );
 
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void CaConc::setCa( const Conn& c, double Ca )
+void CaConc::setCa( const Conn* c, double Ca )
 {
-	static_cast< CaConc* >( c.data() )->Ca_ = Ca;
+	static_cast< CaConc* >( c->data() )->Ca_ = Ca;
 }
-double CaConc::getCa( const Element* e )
+double CaConc::getCa( Eref e )
 {
-	return static_cast< CaConc* >( e->data() )->Ca_;
-}
-
-void CaConc::setCaBasal( const Conn& c, double CaBasal )
-{
-	static_cast< CaConc* >( c.data() )->CaBasal_ = CaBasal;
-}
-double CaConc::getCaBasal( const Element* e )
-{
-	return static_cast< CaConc* >( e->data() )->CaBasal_;
+	return static_cast< CaConc* >( e.data() )->Ca_;
 }
 
-void CaConc::setTau( const Conn& c, double tau )
+void CaConc::setCaBasal( const Conn* c, double CaBasal )
 {
-	static_cast< CaConc* >( c.data() )->tau_ = tau;
+	static_cast< CaConc* >( c->data() )->CaBasal_ = CaBasal;
 }
-double CaConc::getTau( const Element* e )
+double CaConc::getCaBasal( Eref e )
 {
-	return static_cast< CaConc* >( e->data() )->tau_;
+	return static_cast< CaConc* >( e.data() )->CaBasal_;
 }
 
-void CaConc::setB( const Conn& c, double B )
+void CaConc::setTau( const Conn* c, double tau )
 {
-	static_cast< CaConc* >( c.data() )->B_ = B;
+	static_cast< CaConc* >( c->data() )->tau_ = tau;
 }
-double CaConc::getB( const Element* e )
+double CaConc::getTau( Eref e )
 {
-	return static_cast< CaConc* >( e->data() )->B_;
+	return static_cast< CaConc* >( e.data() )->tau_;
+}
+
+void CaConc::setB( const Conn* c, double B )
+{
+	static_cast< CaConc* >( c->data() )->B_ = B;
+}
+double CaConc::getB( Eref e )
+{
+	return static_cast< CaConc* >( e.data() )->B_;
 }
 
 
@@ -156,58 +156,58 @@ double CaConc::getB( const Element* e )
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void CaConc::reinitFunc( const Conn& c, ProcInfo info )
+void CaConc::reinitFunc( const Conn* c, ProcInfo info )
 {
-	static_cast< CaConc* >( c.data() )->innerReinitFunc( c );
+	static_cast< CaConc* >( c->data() )->innerReinitFunc( c );
 }
 
-void CaConc::innerReinitFunc( const Conn& c )
+void CaConc::innerReinitFunc( const Conn* c )
 {
 	activation_ = 0.0;
 	c_ = 0.0;
 	Ca_ = CaBasal_;
-	send1< double >( c.targetElement(), concSlot, Ca_ );
+	send1< double >( c->target(), concSlot, Ca_ );
 }
 
-void CaConc::processFunc( const Conn& c, ProcInfo info )
+void CaConc::processFunc( const Conn* c, ProcInfo info )
 {
-	static_cast< CaConc* >( c.data() )->innerProcessFunc( c, info );
+	static_cast< CaConc* >( c->data() )->innerProcessFunc( c, info );
 }
 
-void CaConc::innerProcessFunc( const Conn& conn, ProcInfo info )
+void CaConc::innerProcessFunc( const Conn* conn, ProcInfo info )
 {
 	double x = exp( -info->dt_ / tau_ );
 	c_ = c_ * x + ( B_ * activation_ * tau_ )  * ( 1.0 - x );
 	Ca_ = CaBasal_ + c_;
-	send1< double >( conn.targetElement(), concSlot, Ca_ );
+	send1< double >( conn->target(), concSlot, Ca_ );
 	activation_ = 0;
 }
 
 
-void CaConc::currentFunc( const Conn& c, double I )
+void CaConc::currentFunc( const Conn* c, double I )
 {
-	static_cast< CaConc* >( c.data() )->activation_ += I;
+	static_cast< CaConc* >( c->data() )->activation_ += I;
 }
 
 void CaConc::currentFractionFunc(
-				const Conn& c, double I, double fraction )
+				const Conn* c, double I, double fraction )
 {
-	static_cast< CaConc* >( c.data() )->activation_ += I * fraction;
+	static_cast< CaConc* >( c->data() )->activation_ += I * fraction;
 }
 
-void CaConc::increaseFunc( const Conn& c, double I )
+void CaConc::increaseFunc( const Conn* c, double I )
 {
-	static_cast< CaConc* >( c.data() )->activation_ += fabs( I );
+	static_cast< CaConc* >( c->data() )->activation_ += fabs( I );
 }
 
-void CaConc::decreaseFunc( const Conn& c, double I )
+void CaConc::decreaseFunc( const Conn* c, double I )
 {
-	static_cast< CaConc* >( c.data() )->activation_ -= fabs( I );
+	static_cast< CaConc* >( c->data() )->activation_ -= fabs( I );
 }
 
-void CaConc::basalMsgFunc( const Conn& c, double value )
+void CaConc::basalMsgFunc( const Conn* c, double value )
 {
-	static_cast< CaConc* >( c.data() )->CaBasal_ = value;
+	static_cast< CaConc* >( c->data() )->CaBasal_ = value;
 }
 
 ///////////////////////////////////////////////////
@@ -225,14 +225,14 @@ void testCaConc()
 		Id::scratchId() );
 	ASSERT( Ca != 0, "creating CaConc" );
 	ProcInfoBase p;
-	Conn c( Ca, 0 );
+	SetConn c( Ca, 0 );
 	double tau = 0.10;
 	double basal = 0.0001;
-	CaConc::setCa( c, basal );
-	CaConc::setCaBasal( c, basal );
-	CaConc::setTau( c, tau );
+	CaConc::setCa( &c, basal );
+	CaConc::setCaBasal( &c, basal );
+	CaConc::setTau( &c, tau );
 	// Here we use a volume of 1e-15 m^3, i.e., a 10 micron cube.
-	CaConc::setB( c, 5.2e-6 / 1e-15 );
+	CaConc::setB( &c, 5.2e-6 / 1e-15 );
 	// Faraday constant = 96485.3415 s A / mol
 	// Use a 1 pA input current. This should give (0.5e-12/F) moles/sec
 	// influx, because Ca has valence of 2. 
@@ -248,14 +248,14 @@ void testCaConc()
 	
 	p.dt_ = 0.001;
 	p.currTime_ = 0.0;
-	CaConc::reinitFunc( c, &p );
+	CaConc::reinitFunc( &c, &p );
 	double y;
 	double conc;
 	double delta = 0.0;
 	for ( p.currTime_ = 0.0; p.currTime_ < 0.5; p.currTime_ += p.dt_ )
 	{
-		CaConc::currentFunc( c, curr );
-		CaConc::processFunc( c, &p );
+		CaConc::currentFunc( &c, curr );
+		CaConc::processFunc( &c, &p );
 		y = basal + 526.0e-6 * ( 1.0 - exp( -p.currTime_ / tau ) );
 		conc = CaConc::getCa( Ca );
 		delta += ( y - conc ) * ( y - conc );

@@ -49,6 +49,9 @@ class SolveFinfo: public ThisFinfo
 			return new SolveFinfo( *this );
 		}
 
+		void addFuncVec( const string& cname )
+		{;}
+
 		////////////////////////////////////////////////////
 		// Special functions for SolveFinfo
 		////////////////////////////////////////////////////
@@ -57,7 +60,7 @@ class SolveFinfo: public ThisFinfo
 		* Returns the Conn going from solved 
 		* object e to the solver
 		*/
-		const Conn& getSolvedConn( const Element* e ) const;
+		const Conn* getSolvedConn( const Element* e ) const;
 
 	private:
 		unsigned int procSlot_;

@@ -10,11 +10,6 @@
 #ifndef _VALUE_FINFO_H
 #define _VALUE_FINFO_H
 
-#include "Ftype.h"
-#include "Finfo.h"
-#include "Element.h"
-#include "RecvFunc.h"
-
 /**
  * Finfo for handling data fields that are accessed through get/set
  * functions. Such fields are atomic, that is, they cannot be the
@@ -50,62 +45,29 @@ class ValueFinfo: public Finfo
 			
 			bool respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
-					FuncList& srcFl, FuncList& returnFl,
+					unsigned int& srcFuncId, unsigned int& returnFuncId,
 					unsigned int& destIndex, unsigned int& numDest
 			) const;
 
-			void dropAll( Element* e ) const;
-			bool drop( Element* e, unsigned int i ) const;
+			/**
+			 * Returns a flag for a bad msg.
+			 */
+			int msg() const {
+				return INT_MAX;
+			}
 
 			/**
 			 * The Ftype knows how to do this conversion.
 			 */
-			bool strSet( Element* e, const std::string &s ) const
+			bool strSet( Eref e, const std::string &s ) const
 			{ 
 					return ftype()->strSet( e, this, s );
 			}
 			
 			// The Ftype handles this conversion.
-			bool strGet( const Element* e, std::string &s ) const
+			bool strGet( Eref e, std::string &s ) const
 			{
 					return ftype()->strGet( e, this, s );
-			}
-
-			unsigned int numIncoming( const Element* e ) const {
-					return 0;
-			}
-
-			unsigned int numOutgoing( const Element* e ) const {
-					return 0;
-			}
-
-			unsigned int incomingConns(
-					const Element* e, vector< Conn >& list ) const {
-					return 0;
-			}
-			unsigned int outgoingConns(
-					const Element* e, vector< Conn >& list ) const {
-					return 0;
-			}
-
-			/**
-			 * We don't need to do anything here because ValueFinfo
-			 * does not deal with messages directly. If we need to
-			 * send messages to a ValueFinfo, then a DynamicFinfo
-			 * must be created
-			 */
-			void countMessages( 
-					unsigned int& srcNum, unsigned int& destNum )
-			{ ; }
-
-			/**
-			 * The ValueFinfo never has messages going to or from it:
-			 * they all go via DynamicFinfo if needed. So it cannot
-			 * match any connIndex.
-			 */
-			const Finfo* match( 
-				const Element* e, unsigned int connIndex ) const {
-				return 0;
 			}
 
 			bool isTransient() const {
@@ -129,9 +91,28 @@ class ValueFinfo: public Finfo
 				return new ValueFinfo( *this );
 			}
 
+			void addFuncVec( const string& cname );
+
+			/**
+			 * Returns the identifier for its FuncVec, which handles
+			 * its RecvFunc.
+			 */
+			unsigned int funcId() const {
+				return fv_->id();
+			}
+
+			/**
+			 * The ValueFinfo does not handle any messages itself, so
+			 * does not need to allocate any on the parent object.
+			 */
+			void countMessages( unsigned int& num ) {
+				;
+			}
+
 		private:
 			GetFunc get_;
 			RecvFunc set_;
+			FuncVec* fv_;
 };
 
 #endif // _VALUE_FINFO_H
