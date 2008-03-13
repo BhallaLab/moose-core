@@ -97,10 +97,10 @@ const Cinfo* initHSolveCinfo()
 
 static const Cinfo* hsolveCinfo = initHSolveCinfo();
 
-static const unsigned int readModelSlot =
-	initHSolveCinfo()->getSlotIndex( "readModel" );
-static const unsigned int comptListSlot =
-	initHSolveCinfo()->getSlotIndex( "cell-solve.comptList" );
+static const Slot readModelSlot =
+	initHSolveCinfo()->getSlot( "readModel" );
+static const Slot comptListSlot =
+	initHSolveCinfo()->getSlot( "cell-solve.comptList" );
 
 ///////////////////////////////////////////////////
 // Field function definitions
@@ -114,9 +114,9 @@ string HSolve::getPath( const Element* e )
 /** Lookup table specifics (NDiv, VLo, VHi) actually are fields on NeuroScan.
  *  Here we provide port-holes to access the same.
  */
-void HSolve::setNDiv( const Conn& c, int NDiv )
+void HSolve::setNDiv( const Conn* c, int NDiv )
 {
-	HSolve* solve = static_cast< HSolve* >( c.data() );
+	HSolve* solve = static_cast< HSolve* >( c->data() );
 	set< int >( solve->scanElm_, "NDiv", NDiv );
 }
 
@@ -131,9 +131,9 @@ int HSolve::getNDiv( const Element* e )
 /** Lookup table specifics (NDiv, VLo, VHi) actually are fields on NeuroScan.
  *  Here we provide port-holes to access the same.
  */
-void HSolve::setVLo( const Conn& c, double VLo )
+void HSolve::setVLo( const Conn* c, double VLo )
 {
-	HSolve* solve = static_cast< HSolve* >( c.data() );
+	HSolve* solve = static_cast< HSolve* >( c->data() );
 	set< double >( solve->scanElm_, "VLo", VLo );
 }
 
@@ -145,9 +145,9 @@ double HSolve::getVLo( const Element* e )
 	return VLo;
 }
 
-void HSolve::setVHi( const Conn& c, double VHi )
+void HSolve::setVHi( const Conn* c, double VHi )
 {
-	HSolve* solve = static_cast< HSolve* >( c.data() );
+	HSolve* solve = static_cast< HSolve* >( c->data() );
 	set< double >( solve->scanElm_, "VHi", VHi );
 }
 
@@ -163,18 +163,15 @@ double HSolve::getVHi( const Element* e )
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void HSolve::processFunc( const Conn&c, ProcInfo p )
+void HSolve::processFunc( const Conn* c, ProcInfo p )
 {
-	static_cast< HSolve* >( c.data() )->
-		step( p );
+	static_cast< HSolve* >( c->data() )->step( p );
 }
 
-void HSolve::initFunc( const Conn& c,
-	const Element* seed, double dt )
+void HSolve::initFunc( const Conn* c, const Element* seed, double dt )
 {
-	Element* e = c.targetElement();
-	static_cast< HSolve* >( c.data() )->
-		innerInitFunc( e, seed, dt );
+	Element* e = c->targetElement();
+	static_cast< HSolve* >( c->data() )->innerInitFunc( e, seed, dt );
 }
 
 void HSolve::innerInitFunc( Element* solve,
@@ -184,10 +181,10 @@ void HSolve::innerInitFunc( Element* solve,
 	send2< const Element*, double >( solve, readModelSlot, seed, dt );
 }
 
-void HSolve::scanCreateFunc( const Conn& c )
+void HSolve::scanCreateFunc( const Conn* c )
 {
-	static_cast< HSolve* >( c.data() )->
-		innerScanCreateFunc( c.targetElement() );
+	static_cast< HSolve* >( c->data() )->
+		innerScanCreateFunc( c->targetElement() );
 }
 
 void HSolve::innerScanCreateFunc( Element* integ )

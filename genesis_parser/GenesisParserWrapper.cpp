@@ -230,103 +230,103 @@ const Cinfo* initGenesisParserCinfo()
 }
 
 static const Cinfo* genesisParserCinfo = initGenesisParserCinfo();
-static const unsigned int setCweSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.cwe" );
-static const unsigned int requestCweSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.trigCwe" );
-static const unsigned int requestLeSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.trigLe" );
-static const unsigned int pusheSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.pushe" );
-static const unsigned int popeSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.pope" );
-static const unsigned int createSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.create" );
-static const unsigned int createArraySlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.createArray" );
-static const unsigned int planarconnectSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.planarconnect" );
-static const unsigned int planardelaySlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.planardelay" );
-static const unsigned int planarweightSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.planarweight" );
-static const unsigned int getSynCountSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.getSynCount" );
-static const unsigned int deleteSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.delete" );
-static const unsigned int addfieldSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.add" );
-static const unsigned int requestFieldSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.get" );
-static const unsigned int setFieldSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.set" );
-static const unsigned int file2tabSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.file2tab" );
-static const unsigned int setClockSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.setClock" );
-static const unsigned int useClockSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.useClock" );
-static const unsigned int requestWildcardListSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.el" );
-static const unsigned int reschedSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.resched" );
-static const unsigned int reinitSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.reinit" );
-static const unsigned int stopSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.stop" );
-static const unsigned int stepSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.step" );
-static const unsigned int requestClocksSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.requestClocks" );
-static const unsigned int requestCurrentTimeSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.requestCurrentTime" );
-static const unsigned int listMessagesSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.listMessages" );
-static const unsigned int copySlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.copy" );
-static const unsigned int copyIntoArraySlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.copyIntoArray" );
-static const unsigned int moveSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.move" );
-static const unsigned int readCellSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.readcell" );
+static const Slot setCweSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.cwe" );
+static const Slot requestCweSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.trigCwe" );
+static const Slot requestLeSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.trigLe" );
+static const Slot pusheSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.pushe" );
+static const Slot popeSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.pope" );
+static const Slot createSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.create" );
+static const Slot createArraySlot = 
+	initGenesisParserCinfo()->getSlot( "parser.createArray" );
+static const Slot planarconnectSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.planarconnect" );
+static const Slot planardelaySlot = 
+	initGenesisParserCinfo()->getSlot( "parser.planardelay" );
+static const Slot planarweightSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.planarweight" );
+static const Slot getSynCountSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.getSynCount" );
+static const Slot deleteSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.delete" );
+static const Slot addfieldSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.add" );
+static const Slot requestFieldSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.get" );
+static const Slot setFieldSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.set" );
+static const Slot file2tabSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.file2tab" );
+static const Slot setClockSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.setClock" );
+static const Slot useClockSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.useClock" );
+static const Slot requestWildcardListSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.el" );
+static const Slot reschedSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.resched" );
+static const Slot reinitSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.reinit" );
+static const Slot stopSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.stop" );
+static const Slot stepSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.step" );
+static const Slot requestClocksSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.requestClocks" );
+static const Slot requestCurrentTimeSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.requestCurrentTime" );
+static const Slot listMessagesSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.listMessages" );
+static const Slot copySlot = 
+	initGenesisParserCinfo()->getSlot( "parser.copy" );
+static const Slot copyIntoArraySlot = 
+	initGenesisParserCinfo()->getSlot( "parser.copyIntoArray" );
+static const Slot moveSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.move" );
+static const Slot readCellSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.readcell" );
 
-static const unsigned int setupAlphaSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.setupAlpha" );
-static const unsigned int setupTauSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.setupTau" );
-static const unsigned int tweakAlphaSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.tweakAlpha" );
-static const unsigned int tweakTauSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.tweakTau" );
-static const unsigned int setupGateSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.setupGate" );
+static const Slot setupAlphaSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.setupAlpha" );
+static const Slot setupTauSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.setupTau" );
+static const Slot tweakAlphaSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.tweakAlpha" );
+static const Slot tweakTauSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.tweakTau" );
+static const Slot setupGateSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.setupGate" );
 
-static const unsigned int readDumpFileSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.readDumpFile" );
-static const unsigned int writeDumpFileSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.writeDumpFile" );
-static const unsigned int simObjDumpSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.simObjDump" );
-static const unsigned int simUndumpSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.simUndump" );
+static const Slot readDumpFileSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.readDumpFile" );
+static const Slot writeDumpFileSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.writeDumpFile" );
+static const Slot simObjDumpSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.simObjDump" );
+static const Slot simUndumpSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.simUndump" );
 
-static const unsigned int openFileSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.openfile" );
-static const unsigned int writeFileSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.writefile" );
-static const unsigned int listFilesSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.listfiles" );
-static const unsigned int closeFileSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.closefile" );
-static const unsigned int readFileSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.readfile" );
-static const unsigned int setVecFieldSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.setVecField" );
-static const unsigned int loadtabSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.loadtab" );
-static const unsigned int tabopSlot = 
-	initGenesisParserCinfo()->getSlotIndex( "parser.tabop" );
+static const Slot openFileSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.openfile" );
+static const Slot writeFileSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.writefile" );
+static const Slot listFilesSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.listfiles" );
+static const Slot closeFileSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.closefile" );
+static const Slot readFileSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.readfile" );
+static const Slot setVecFieldSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.setVecField" );
+static const Slot loadtabSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.loadtab" );
+static const Slot tabopSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.tabop" );
 
 
 //////////////////////////////////////////////////////////////////
@@ -347,34 +347,34 @@ GenesisParserWrapper::GenesisParserWrapper()
 		loadBuiltinCommands();
 }
 
-void GenesisParserWrapper::readlineFunc( const Conn& c, string s )
+void GenesisParserWrapper::readlineFunc( const Conn* c, string s )
 {
 	GenesisParserWrapper* data =
-	static_cast< GenesisParserWrapper* >( c.targetElement()->data() );
+	static_cast< GenesisParserWrapper* >( c->data() );
 
 	data->AddInput( s );
 }
 
-void GenesisParserWrapper::processFunc( const Conn& c )
+void GenesisParserWrapper::processFunc( const Conn* c )
 {
 	GenesisParserWrapper* data =
-	static_cast< GenesisParserWrapper* >( c.targetElement()->data() );
+	static_cast< GenesisParserWrapper* >( c->data() );
 
 	data->Process();
 }
 
-void GenesisParserWrapper::parseFunc( const Conn& c, string s )
+void GenesisParserWrapper::parseFunc( const Conn* c, string s )
 {
 	GenesisParserWrapper* data =
-	static_cast< GenesisParserWrapper* >( c.targetElement()->data() );
+	static_cast< GenesisParserWrapper* >( c->data() );
 
 	data->ParseInput( s );
 }
 
-void GenesisParserWrapper::setReturnId( const Conn& c, Id id )
+void GenesisParserWrapper::setReturnId( const Conn* c, Id id )
 {
 	GenesisParserWrapper* data =
-	static_cast< GenesisParserWrapper* >( c.targetElement()->data() );
+	static_cast< GenesisParserWrapper* >( c->data() );
 
 	data->returnId_ = id;
 }
@@ -406,49 +406,49 @@ void GenesisParserWrapper::print( const string& s, bool noNewLine )
 // GenesisParserWrapper Message recv functions
 //////////////////////////////////////////////////////////////////
 
-void GenesisParserWrapper::recvCwe( const Conn& c, Id cwe )
+void GenesisParserWrapper::recvCwe( const Conn* c, Id cwe )
 {
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( c.targetElement()->data() );
+			( c->data() );
 	gpw->cwe_ = cwe;
 }
 
 //
 //This is used for Le, for WildcardList, and others
-void GenesisParserWrapper::recvElist( const Conn& c, vector< Id > elist)
+void GenesisParserWrapper::recvElist( const Conn* c, vector< Id > elist)
 {
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( c.targetElement()->data() );
+			( c->data() );
 	gpw->elist_ = elist;
 }
 
-void GenesisParserWrapper::recvCreate( const Conn& c, Id e )
+void GenesisParserWrapper::recvCreate( const Conn* c, Id e )
 {
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( c.targetElement()->data() );
+			( c->data() );
 	gpw->createdElm_ = e;
 }
 
-void GenesisParserWrapper::recvField( const Conn& c, string value )
+void GenesisParserWrapper::recvField( const Conn* c, string value )
 {
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( c.targetElement()->data() );
+			( c->data() );
 	gpw->fieldValue_ = value;
 }
 
 void GenesisParserWrapper::recvClocks( 
-				const Conn& c, vector< double > dbls)
+				const Conn* c, vector< double > dbls)
 {
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( c.targetElement()->data() );
+			( c->data() );
 	gpw->dbls_ = dbls;
 }
 
 void GenesisParserWrapper::recvMessageList( 
-				const Conn& c, vector< Id > elist, string s)
+				const Conn* c, vector< Id > elist, string s)
 {
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( c.targetElement()->data() );
+			( c->data() );
 	gpw->elist_ = elist;
 	gpw->fieldValue_ = s;
 }
@@ -761,7 +761,7 @@ void do_add( int argc, const char** const argv, Id s )
 {
 	Element* e = s();
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( e->data() );
+			( e->data( 0 ) );
 	return gpw->doAdd( argc, argv, s );
 }
 
@@ -937,7 +937,7 @@ void GenesisParserWrapper::doAdd(
 		if ( gate.length() == 1 && power > 0.0 ) {
 		// finish off multgate by assigning the gate power.
 			string field = gate + "power";
-			send3< Id, string, string >( s(), setFieldSlot, 
+			send3< Id, string, string >( s(), setFieldSlot,
 				dest, field, argv[5] );
 		}
 
@@ -965,7 +965,7 @@ void do_set( int argc, const char** const argv, Id s )
 {
 	Element* e = s();
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( e->data() );
+			( e->data( 0 ) );
 	return gpw->doSet( argc, argv, s );
 }
 
@@ -1090,8 +1090,7 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s)
 	// Id id = path2eid( path, s );
 	Id id( path );
 	if ( !id.zero() && !id.bad() ) {
-		send2< Id, string >( s(),
-			requestFieldSlot, id, "class" );
+		send2< Id, string >( s(), requestFieldSlot, id, "class" );
 		if ( fieldValue_.length() == 0 ) // Nothing came back
 			return 0;
 		if ( fieldValue_ == "HHChannel" && argc == 7 ) {
@@ -1133,7 +1132,7 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s)
 				send3< vector< Id >, string, string >( s(),
 						setVecFieldSlot, el, string(argv[3]) + "power", "1.0" );
 // 				set<double> (Id(path)(), "Xpower", 1.0);
-// 				send3< string, string, Id >( s(),
+// 				send3< string, string, Id >( s(), 0,
 // 				createSlot, "HHGate", name, Id(path) );
 				
 				id = Id( tempA );
@@ -1183,7 +1182,7 @@ void do_call( int argc, const char** const argv, Id s )
 	}
 	Element* e = s();
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( e->data() );
+			( e->data( 0 ) );
 	// Ugly hack to avoid LOAD call for notes on kkit dumpfiles
 	if ( strcmp ( argv[2], "LOAD" ) == 0 ) {
 		// cout << "in do_call LOAD " << endl;
@@ -1317,7 +1316,7 @@ int do_exists( int argc, const char** const argv, Id s )
 		Id eid( argv[1] );
 		if ( !eid.bad() ) {
 			GenesisParserWrapper* gpw =
-				static_cast< GenesisParserWrapper* >( s()->data() );
+				static_cast< GenesisParserWrapper* >( s()->data( 0 ) );
 			return gpw->fieldExists( eid, argv[2], s );
 		}
 	} else {
@@ -1333,7 +1332,7 @@ char* do_get( int argc, const char** const argv, Id s )
 {
 	Element* e = s();
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( e->data() );
+			( e->data( 0 ) );
 	return gpw->doGet( argc, argv, s );
 }
 
@@ -1422,7 +1421,7 @@ void do_showmsg( int argc, const char** const argv, Id s )
 {
 	Element* e = s();
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( e->data() );
+			( e->data( 0 ) );
 	gpw->doShowMsg( argc, argv, s );
 }
 
@@ -1686,7 +1685,7 @@ void do_ce( int argc, const char** const argv, Id s )
 void do_pushe( int argc, const char** const argv, Id s )
 {
 	GenesisParserWrapper* gpw = 
-		static_cast< GenesisParserWrapper* > ( s()->data() );
+		static_cast< GenesisParserWrapper* > ( s()->data( 0 ) );
 	if ( argc == 2 ) {
 		// s->pusheFuncLocal( argv[1] );
 		Id e( argv[1] );
@@ -1708,7 +1707,7 @@ void do_pope( int argc, const char** const argv, Id s )
 		// s->popeFuncLocal( );
 		send0( s(), popeSlot );
 		GenesisParserWrapper* gpw = 
-			static_cast< GenesisParserWrapper* > ( s()->data() );
+			static_cast< GenesisParserWrapper* > ( s()->data( 0 ) );
 		gpw->printCwe();
 	} else {
 		cout << "usage:: " << argv[0] << "\n";
@@ -1727,7 +1726,7 @@ void do_alias( int argc, const char** const argv, Id s )
 	}
 	Element* e = s();
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( e->data() );
+			( e->data( 0 ) );
 	gpw->alias( alias, old );
 }
 
@@ -1761,7 +1760,7 @@ void do_step( int argc, const char** const argv, Id s )
 {
 	Element* e = s();
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( e->data() );
+			( e->data( 0 ) );
 	gpw->step( argc, argv );
 }
 
@@ -1830,7 +1829,7 @@ void do_showclocks( int argc, const char** const argv, Id s )
 	if ( argc == 1 ) {
 		Element* e = s();
 		GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-				( e->data() );
+				( e->data( 0 ) );
 		gpw->showClocks( e );
 
 	} else {
@@ -1863,7 +1862,7 @@ void do_useclock( int argc, const char** const argv, Id s )
 	string path = argv[1];
 	Element* e = s();
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( e->data() );
+			( e->data( 0 ) );
 	gpw->useClock( tickId, path, func, s );
 }
 
@@ -1887,7 +1886,7 @@ void do_show( int argc, const char** const argv, Id s )
 {
 	Element* e = s();
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( e->data() );
+			( e->data( 0 ) );
 	gpw->doShow( argc, argv, s );
 }
 
@@ -1982,7 +1981,7 @@ void do_le( int argc, const char** const argv, Id s )
 {
 	Element* e = s();
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( e->data() );
+			( e->data( 0 ) );
 	gpw->doLe( argc, argv, s );
 }
 
@@ -2016,7 +2015,7 @@ void do_pwe( int argc, const char** const argv, Id s )
 	send0( s(), requestCweSlot );
 	// print it out.
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( s()->data() );
+			( s()->data( 0 ) );
 	gpw->printCwe();
 }
 
@@ -2040,7 +2039,7 @@ void GenesisParserWrapper::printCwe()
 void do_listcommands( int argc, const char** const argv, Id s )
 {
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( s()->data() );
+			( s()->data( 0 ) );
 	gpw->listCommands( );
 }
 
@@ -2066,7 +2065,7 @@ void do_echo( int argc, const char** const argv, Id s )
 	}
 
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( s()->data() );
+			( s()->data( 0 ) );
 	gpw->print( temp, options );
 
 	/*
@@ -2162,7 +2161,7 @@ char** do_element_list( int argc, const char** const argv, Id s )
 	}
 	string path = argv[1];
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( s()->data() );
+			( s()->data( 0 ) );
 	return gpw->elementList( path, s );
 
 	// return copyString( s->getmsgFuncLocal( field, options ) );
@@ -2270,7 +2269,7 @@ void do_readcell( int argc, const char** const argv, Id s )
 	}
 
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( s()->data() );
+			( s()->data( 0 ) );
 	vector< double > globalParms;
 	gpw->getReadcellGlobals( globalParms );
 
@@ -2309,7 +2308,7 @@ Id findChanGateId( int argc, const char** const argv, Id s )
 			gateId = id;
 		else if ( el->className() == "HHChannel" ) {
 			if (type != "") {
-				send3< string, string, Id >( s(),
+				send3< string, string, Id >( s(), 
 					createSlot, "HHGate", type, id );
 				gateId = Id(gate);
 			}
@@ -2326,7 +2325,7 @@ Id findChanGateId( int argc, const char** const argv, Id s )
 }
 
 void setupChanFunc( int argc, const char** const argv, Id s, 
-				unsigned int slot )
+				Slot slot )
 {
 	if (argc < 13 ) {
 		cout << "usage:: " << argv[0] << " channel-element gate AA AB AC AD AF BA BB BC BD BF -size n -range min max\n";
@@ -2386,8 +2385,7 @@ void do_setuptau( int argc, const char** const argv, Id s )
 	setupChanFunc( argc, argv, s, setupTauSlot );
 }
 
-void tweakChanFunc( int argc, const char** const argv, Id s, 
-				unsigned int slot )
+void tweakChanFunc( int argc, const char** const argv, Id s, Slot slot )
 {
 	if (argc < 3 ) {
 		cout << "usage:: " << argv[0] << " channel-element gate\n";
@@ -2879,7 +2877,8 @@ void do_createmap(int argc, const char** const argv, Id s){
 		Id pa;
 		if ( parseCopyMove( 3, argv, s, e, pa, name ) ) {
 			//Shell::copy(conn, e, pa, name);
-			send4< Id, Id, string, vector <double> >( s(), copyIntoArraySlot, e, pa, name, parameter );
+			send4< Id, Id, string, vector <double> >( s(), 
+				copyIntoArraySlot, e, pa, name, parameter );
 		}
 	}
 	//src = src_list[0];
@@ -2903,8 +2902,9 @@ planarconnect / dest-path -relative -sourcemask box -1 -1 1 1 -destmask box 1 1 
 			probability = atof(argv[i+1]);
 	}
 	//Shell::planarconnect(conn, source, dest, probability)
-	send3<string, string, double>(s(), planarconnectSlot, source, dest, probability);
-	//GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >( e->data() );
+	send3<string, string, double>(s(), 
+		planarconnectSlot, source, dest, probability);
+	//GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >( e->data( 0 ) );
 	//return gpw->doPlanarConnect( argc, argv, s );
 	
 }
@@ -3170,6 +3170,8 @@ void do_planarweight( int argc, const char** const argv, Id s )
 
 int do_getsyncount( int argc, const char** const argv, Id s )
 {
+	cout << "getsyncount:: under repair\n";
+	/*
 	vector <Conn> conn;
 	if (argc == 3){
 		Element* src = Id(argv[1])();
@@ -3192,19 +3194,23 @@ int do_getsyncount( int argc, const char** const argv, Id s )
 			cout << "getsyncount:: The src element is not of type SynChan." << endl;
 			return 0;
 		}
-		send1 <Id> (s(), getSynCountSlot, dest->id());
+		send1 <Id> (s(), 0, getSynCountSlot, dest->id());
 		GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( s()->data() );
+			( s()->data( 0 ) );
 		string value = gpw->getFieldValue();
 		int numSynapses = atoi(value.c_str());
 		return numSynapses;
 	}
+	*/
 	return 0;
-	//send2<string, string>(s(), planarweightSlot, source, dest);
+	//send2<string, string>(s(), 0, planarweightSlot, source, dest);
 }
 
 char* do_getsynsrc( int argc, const char** const argv, Id s ){
 //getsynsrc <postsynaptic-element> <index>
+	cout << "getsynsrc : under repair\n";
+	return copyString( "foo" );
+	/*
 	if (argc != 3) {
 		cout << "usage:: getsynsrc <postsynaptic-element> <index>" << endl;
 		string s = "";
@@ -3220,15 +3226,21 @@ char* do_getsynsrc( int argc, const char** const argv, Id s ){
 	}
 	dst->findFinfo("synapse")->incomingConns(dst, conn);
 	unsigned int index = atoi(argv[2]);
-	if (index >= conn.size()){/*error*/}
+	if (index >= conn.size()){
+		assert( 0 )
+	}
 	Element *src = conn[index].targetElement();
 	ret = src->id().path();
 	return copyString(ret.c_str());
+	*/
 }
 
 
 char* do_getsyndest( int argc, const char** const argv, Id s ){
 //getsynsrc <presynaptic-element> <index>
+	cout << "getsynsrc: under repair\n";
+	return copyString( "foo" );
+	/*
 	if (argc != 3) {
 		cout << "usage:: getsynsrc <presynaptic-element> <index>" << endl;
 		string s = "";
@@ -3244,14 +3256,20 @@ char* do_getsyndest( int argc, const char** const argv, Id s ){
 	}
 	src->findFinfo("event")->outgoingConns(src, conn);
 	unsigned int index = atoi(argv[2]);
-	if (index >= conn.size()){/*error*/}
+	if (index >= conn.size()){ 
+		assert( 0 ) }
 	Element *dst = conn[index].targetElement();
 	ret = dst->id().path();
 	return copyString(ret.c_str());
+	*/
 }
 
 int do_getsynindex( int argc, const char** const argv, Id s ){
 //getsynsrc <presynaptic-element> <postsynaptic-element> [-number n]
+	cout << "getsynsrc: under repair\n";
+	return 0;
+
+/*
 	if (argc != 3) {
 		cout << "usage:: getsynsrc <presynaptic-element> <postsynaptic-element> [-number n]" << endl;
 		return -1; 
@@ -3274,6 +3292,7 @@ int do_getsynindex( int argc, const char** const argv, Id s ){
 		}
 	}
 	return -1;
+	*/
 }
 
 int do_strcmp(int argc, const char** const argv, Id s ){
@@ -3454,7 +3473,7 @@ void do_listfiles(int argc, const char** const argv, Id s){
 	}
 	send0( s(), listFilesSlot );
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( s()->data() );
+			( s()->data( 0 ) );
 	cout << gpw->getFieldValue();	
 }
 
@@ -3474,7 +3493,7 @@ char* do_readfile(int argc, const char** const argv, Id s){
 			linemode = true;
 	send2< string , bool > ( s(), readFileSlot, filename, linemode );
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( s()->data() );
+			( s()->data( 0 ) );
 	string text = "" + gpw->getFieldValue();
 	return copyString(text.c_str());
 }
@@ -3586,7 +3605,7 @@ float do_getstat(int argc, const char** const argv, Id s )
 {
 	send0( s(), requestCurrentTimeSlot );
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( s()->data() );
+			( s()->data( 0 ) );
 	double ret = atof( gpw->getFieldValue().c_str() );	
 	return static_cast< float >( ret );
 }
@@ -3770,7 +3789,7 @@ Id GenesisParserWrapper::innerPath2eid( const string& path, Id g )
 			return Id();
 
 	if ( path == "" || path == "." ) {
-		send0( g(), requestCweSlot );
+		send0( g(), 0, requestCweSlot );
 		return cwe_;
 	}
 
@@ -3778,7 +3797,7 @@ Id GenesisParserWrapper::innerPath2eid( const string& path, Id g )
 		return createdElm_;
 
 	if ( path == ".." ) {
-		send0( g(), requestCweSlot );
+		send0( g(), 0, requestCweSlot );
 		if ( cwe_ == Id() )
 			return Id();
 		return Shell::parent( cwe_ );
@@ -3794,7 +3813,7 @@ Id GenesisParserWrapper::innerPath2eid( const string& path, Id g )
 		start = Id();
 		separateString( path.substr( 5 ), names, separator );
 	} else {
-		send0( g(), requestCweSlot );
+		send0( g(), 0, requestCweSlot );
 		start = cwe_;
 		separateString( path, names, separator );
 	}
@@ -3842,6 +3861,7 @@ string GenesisParserWrapper::eid2path( Id eid )
  * Looks up the shell attached to the parser specified by g.
  * Static func.
  */
+/*
 Element* GenesisParserWrapper::getShell( Id g )
 {
 	/// \todo: shift connDestBegin function to base Element class.
@@ -3851,6 +3871,7 @@ Element* GenesisParserWrapper::getShell( Id g )
 	Element* ret = i->targetElement();
 	return ret;
 }
+*/
 
 //////////////////////////////////////////////////////////////////
 // Utility function for creating a GenesisParserWrapper, and 
@@ -3883,7 +3904,7 @@ Element* makeGenesisParser()
 
 	// set< string, string >( shell, "create", "GenesisParser", "sli");
 	// Element* sli = Element::lastElement();
-	static_cast< GenesisParserWrapper* >( sli->data() )->
+	static_cast< GenesisParserWrapper* >( sli->data( 0 ) )->
 		setElement( sli->id() );
 
 	unsigned int ret = shell->findFinfo( "parser" )->add( shell, sli, 
@@ -3891,7 +3912,7 @@ Element* makeGenesisParser()
 	assert( ret );
 
 #ifdef DO_UNIT_TESTS
-	static_cast< GenesisParserWrapper* >( sli->data() )->unitTest();
+	static_cast< GenesisParserWrapper* >( sli->data( 0 ) )->unitTest();
 #endif
 
 	return sli;

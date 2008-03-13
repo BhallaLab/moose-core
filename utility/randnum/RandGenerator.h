@@ -29,9 +29,9 @@ class RandGenerator
   public:
     RandGenerator();
     ~RandGenerator();
-    static double getMean(const Element* e);    
-    static double getVariance(const Element* e);
-    static double getSample(const Element* e);
+    static double getMean(Eref e);    
+    static double getVariance(Eref e);
+    static double getSample(Eref e);
     static void processFunc( const Conn& c, ProcInfo info);
     static void reinitFunc( const Conn& c, ProcInfo info);
 

@@ -59,7 +59,7 @@ ExponentialRng::ExponentialRng()
  */
 double ExponentialRng::getMean(const Element* e)
 {
-    return static_cast<ExponentialRng*> (e->data())->mean_;    
+    return static_cast<ExponentialRng*> (e->data( 0 ))->mean_;    
 }
 /**
    Sets the mean. Since exponential distribution is defined in terms
@@ -94,7 +94,7 @@ void ExponentialRng::reinitFunc(const Conn& c, ProcInfo info)
  */
 int ExponentialRng::getMethod(const Element* e)
 {
-   return static_cast<ExponentialRng*>(e->data())->method_;    
+   return static_cast<ExponentialRng*>(e->data( 0 ))->method_;    
 }
 
 /**

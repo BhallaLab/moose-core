@@ -15,11 +15,11 @@
 //  parallel code to use.
 //////////////////////////////////////////////////////////////////
 #ifndef USE_MPI
-void* getParBuf( const Conn& c, unsigned int size )
+void* getParBuf( const Conn* c, unsigned int size )
 {
 	return 0;
 }
-void* getAsyncParBuf( const Conn& c, unsigned int size )
+void* getAsyncParBuf( const Conn* c, unsigned int size )
 {
 	return 0;
 }

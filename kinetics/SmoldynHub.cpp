@@ -227,18 +227,9 @@ static const Finfo* enzSolveFinfo =
 static const Finfo* mmEnzSolveFinfo = 
 	initSmoldynHubCinfo()->findFinfo( "mmEnzSolve" );
 
-static const unsigned int molSumSlot =
-	initSmoldynHubCinfo()->getSlotIndex( "molSum" );
-
-static const unsigned int fluxSlot =
-	initSmoldynHubCinfo()->getSlotIndex( "flux.efflux" );
-
-/*
-static const unsigned int reacSlot =
-	initSmoldynHubCinfo()->getSlotIndex( "reac.n" );
-static const unsigned int nSlot =
-	initSmoldynHubCinfo()->getSlotIndex( "nSrc" );
-*/
+static const Slot molSumSlot = initSmoldynHubCinfo()->getSlot( "molSum" );
+static const Slot fluxSlot =
+	initSmoldynHubCinfo()->getSlot( "flux.efflux" );
 
 void redirectDestMessages(
 	Element* hub, Element* e, const Finfo* hubFinfo, const Finfo* eFinfo,
@@ -246,7 +237,7 @@ void redirectDestMessages(
 	vector< Element* >* elist, bool retain = 0 );
 
 void redirectDynamicMessages( Element* e );
-void unzombify( const Conn& c );
+void unzombify( const Conn* c );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -258,13 +249,13 @@ SmoldynHub::SmoldynHub()
 		;
 }
 
-void SmoldynHub::destroy( const Conn& c )
+void SmoldynHub::destroy( const Conn* c )
 {
 	clearFunc( c );
 	Neutral::destroy( c );
 }
 
-void SmoldynHub::childFunc( const Conn& c, int stage )
+void SmoldynHub::childFunc( const Conn* c, int stage )
 {
 	if ( stage == 1 ) // Clean out zombies before deleting messages.
 		clearFunc( c );
@@ -278,9 +269,9 @@ void SmoldynHub::childFunc( const Conn& c, int stage )
  * It is a bit tricky in Smoldyn, because we cannot just add numbers, but
  * have to give them a position.
  */
-void SmoldynHub::molSum( const Conn& c, double val )
+void SmoldynHub::molSum( const Conn* c, double val )
 {
-	Element* hub = c.targetElement();
+	Element* hub = c->targetElement();
 	unsigned int index = hub->connDestRelativeIndex( c, molSumSlot );
 	SmoldynHub* sh = static_cast< SmoldynHub* >( hub->data() );
 
@@ -499,10 +490,10 @@ string SmoldynHub::getPath( const Element* e )
 	return static_cast< const SmoldynHub* >( e->data() )->path_;
 }
 
-void SmoldynHub::setPath( const Conn& c, string value )
+void SmoldynHub::setPath( const Conn* c, string value )
 {
-	Element* e = c.targetElement();
-	static_cast< SmoldynHub* >( e->data() )->localSetPath( e, value );
+	Element* e = c->targetElement();
+	static_cast< SmoldynHub* >( c->data() )->localSetPath( e, value );
 }
 
 double SmoldynHub::getDt( const Element* e )
@@ -510,15 +501,15 @@ double SmoldynHub::getDt( const Element* e )
 	return static_cast< const SmoldynHub* >( e->data() )->dt_;
 }
 
-void SmoldynHub::setDt( const Conn& c, double value )
+void SmoldynHub::setDt( const Conn* c, double value )
 {
 	if ( value > SmoldynHub::MINIMUM_DT )
-		static_cast< SmoldynHub* >( c.data() )->dt_ = value;
+		static_cast< SmoldynHub* >( c->data() )->dt_ = value;
 	else
 		cout << "Warning: Assigning dt to SmoldynHub '" <<
-			c.targetElement()->name() << "' : requested value = " << 
+			c->targetElement()->name() << "' : requested value = " << 
 			value << " out of range, ignored.\nUsing old dt = " <<
-			static_cast< const SmoldynHub* >( c.data() )->dt_ << endl;
+			static_cast< const SmoldynHub* >( c->data() )->dt_ << endl;
 }
 
 unsigned int SmoldynHub::getSeed( const Element* e )
@@ -526,19 +517,19 @@ unsigned int SmoldynHub::getSeed( const Element* e )
 	return static_cast< const SmoldynHub* >( e->data() )->seed_;
 }
 
-void SmoldynHub::setSeed( const Conn& c, unsigned int value )
+void SmoldynHub::setSeed( const Conn* c, unsigned int value )
 {
-	static_cast< SmoldynHub* >( c.data() )->seed_ = value;
+	static_cast< SmoldynHub* >( c->data() )->seed_ = value;
 }
 
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void SmoldynHub::reinitFunc( const Conn& c, ProcInfo info )
+void SmoldynHub::reinitFunc( const Conn* c, ProcInfo info )
 {
-	static_cast< SmoldynHub* >( c.data() )->reinitFuncLocal( 
-					c.targetElement(), info );
+	static_cast< SmoldynHub* >( c->data() )->reinitFuncLocal( 
+					c->targetElement(), info );
 }
 
 void SmoldynHub::reinitFuncLocal( Element* e, ProcInfo info )
@@ -709,9 +700,9 @@ void SmoldynHub::completeReacSetupLocal( const string& path )
 	scmdopenfiles( simptr_->cmds, 0 );
 }
 
-void SmoldynHub::processFunc( const Conn& c, ProcInfo info )
+void SmoldynHub::processFunc( const Conn* c, ProcInfo info )
 {
-	Element* e = c.targetElement();
+	Element* e = c*targetElement();
 	static_cast< SmoldynHub* >( e->data() )->processFuncLocal( e, info );
 }
 
@@ -742,10 +733,10 @@ void SmoldynHub::processFuncLocal( Element* e, ProcInfo info )
  * the Smoldyn list, and do so at the correct spatial locations.
  */
 
-void SmoldynHub::flux( const Conn& c, vector< double > influx )
+void SmoldynHub::flux( const Conn* c, vector< double > influx )
 {
-	assert( influx.size() == nMol_;
-	Element* hub = c.targetElement();
+	assert( influx.size() == nMol_ );
+	Element* hub = c->targetElement();
 	unsigned int index = hub->connDestRelativeIndex( c, fluxSlot );
 	SmoldynHub* sh = static_cast< SmoldynHub* >( hub->data() );
 
@@ -756,9 +747,6 @@ void SmoldynHub::flux( const Conn& c, vector< double > influx )
 			panelMap_[ molMap_[ i ] ], // Looking up comput.
 			0, // panel face
 			0 );
-		}
-	}
-			
 	}
 
 	// Here we do some stuff to put the incoming molecules into
@@ -960,13 +948,13 @@ void SmoldynHub::setupTrade( Element* pe )
  * This sets up the local version of the rate term array, used to 
  * figure out reaction structures.
  */
-void SmoldynHub::rateTermFunc( const Conn& c,
+void SmoldynHub::rateTermFunc( const Conn* c,
 	vector< RateTerm* >* rates, SparseMatrix* N, bool useHalfReacs )
 {
 	// the useHalfReacs flag is irrelevant here, since Smoldyn always 
 	// considers irreversible reactions
 	
-	static_cast< SmoldynHub* >( c.data() )->localRateTermFunc( rates, N );
+	static_cast< SmoldynHub* >( c->data() )->localRateTermFunc( rates, N );
 }
 
 void SmoldynHub::localRateTermFunc( vector< RateTerm* >* rates,
@@ -982,10 +970,10 @@ void SmoldynHub::localRateTermFunc( vector< RateTerm* >* rates,
  * assign the correct messages. The next call should come from the
  * molConnectionFunc which will provide the actual vectors.
  */
-void SmoldynHub::molSizeFunc(  const Conn& c,
+void SmoldynHub::molSizeFunc(  const Conn* c,
 	unsigned int nMol, unsigned int nBuf, unsigned int nSumTot )
 {
-	static_cast< SmoldynHub* >( c.data() )->molSizeFuncLocal(
+	static_cast< SmoldynHub* >( c->data() )->molSizeFuncLocal(
 			nMol, nBuf, nSumTot );
 }
 void SmoldynHub::molSizeFuncLocal( 
@@ -999,12 +987,12 @@ void SmoldynHub::molSizeFuncLocal(
 /**
  * This function zombifies the molecules
  */
-void SmoldynHub::molConnectionFunc( const Conn& c,
+void SmoldynHub::molConnectionFunc( const Conn* c,
 	       	vector< double >*  S, vector< double >*  Sinit, 
 		vector< Element *>*  elist )
 {
-	Element* e = c.targetElement();
-	static_cast< SmoldynHub* >( e->data() )->
+	Element* e = c->targetElement();
+	static_cast< SmoldynHub* >( c->data() )->
 		molConnectionFuncLocal( e, S, Sinit, elist );
 }
 
@@ -1171,10 +1159,10 @@ void SmoldynHub::molConnectionFuncLocal( Element* hub,
 	
 }
 
-void SmoldynHub::rateSizeFunc(  const Conn& c,
+void SmoldynHub::rateSizeFunc(  const Conn* c,
 	unsigned int nReac, unsigned int nEnz, unsigned int nMmEnz )
 {
-	static_cast< SmoldynHub* >( c.data() )->rateSizeFuncLocal(
+	static_cast< SmoldynHub* >( c->data() )->rateSizeFuncLocal(
 		c.targetElement(), nReac, nEnz, nMmEnz );
 }
 void SmoldynHub::rateSizeFuncLocal( Element* hub, 
@@ -1189,11 +1177,11 @@ void SmoldynHub::rateSizeFuncLocal( Element* hub,
 	// cout << "in rateSizeFuncLocal\n";
 }
 
-void SmoldynHub::reacConnectionFunc( const Conn& c,
+void SmoldynHub::reacConnectionFunc( const Conn* c,
 	unsigned int index, Element* reac )
 {
-	Element* e = c.targetElement();
-	static_cast< SmoldynHub* >( e->data() )->
+	Element* e = c->targetElement();
+	static_cast< SmoldynHub* >( c->data() )->
 		reacConnectionFuncLocal( e, index, reac );
 }
 
@@ -1236,11 +1224,11 @@ void SmoldynHub::reacConnectionFuncLocal(
 	reacMap_[connIndex - 1] = rateTermIndex;
 }
 
-void SmoldynHub::enzConnectionFunc( const Conn& c,
+void SmoldynHub::enzConnectionFunc( const Conn* c,
 	unsigned int index, Element* enz )
 {
-	Element* e = c.targetElement();
-	static_cast< SmoldynHub* >( e->data() )->
+	Element* e = c->targetElement();
+	static_cast< SmoldynHub* >( c->data() )->
 		enzConnectionFuncLocal( e, index, enz );
 }
 
@@ -1251,12 +1239,12 @@ void SmoldynHub::enzConnectionFunc( const Conn& c,
  * be equivalent. the other is that the enz-substrate complex must not
  * deplete the originating enzymes.
  */
-void SmoldynHub::mmEnzConnectionFunc( const Conn& c,
+void SmoldynHub::mmEnzConnectionFunc( const Conn* c,
 	unsigned int index, Element* mmEnz )
 {
 	// cout << "in mmEnzConnectionFunc for " << mmEnz->name() << endl;
-	Element* e = c.targetElement();
-	static_cast< SmoldynHub* >( e->data() )->
+	Element* e = c->targetElement();
+	static_cast< SmoldynHub* >( c->data() )->
 		mmEnzConnectionFuncLocal( e, index, mmEnz );
 }
 
@@ -1359,10 +1347,10 @@ void SmoldynHub::mmEnzConnectionFuncLocal(
 }
 
 /*
-void unzombify( const Conn& c )
+void unzombify( const Conn* c )
 {
-	Element* e = c.targetElement();
-	const Cinfo* ci = e->cinfo();
+	Element* e = c->targetElement();
+	const Cinfo* ci = c->cinfo();
 	bool ret = ci->schedule( e );
 	assert( ret );
 	e->setThisFinfo( const_cast< Finfo* >( ci->getThisFinfo() ) );
@@ -1398,18 +1386,18 @@ void SmoldynHub::zombify(
  * has called all the individual reaction operations and now is telling
  * the SmoldynHub to wrap it up.
  */
-void SmoldynHub::completeReacSetupFunc( const Conn& c, string s )
+void SmoldynHub::completeReacSetupFunc( const Conn* c, string s )
 {
-	static_cast< SmoldynHub* >( c.data() )->completeReacSetupLocal( s );
+	static_cast< SmoldynHub* >( c->data() )->completeReacSetupLocal( s );
 }
 
 /**
  * Clears out all the messages to zombie objects
  */
-void SmoldynHub::clearFunc( const Conn& c )
+void SmoldynHub::clearFunc( const Conn* c )
 {
 	// cout << "Starting clearFunc for " << c.targetElement()->name() << endl;
-	Element* e = c.targetElement();
+	Element* e = c->targetElement();
 
 	// First unzombify all targets
 	vector< Conn > list;
@@ -1498,9 +1486,9 @@ double SmoldynHub::getMolNinit( const Element* e )
  * different from the message order. So we need an intermediate
  * table, the reacMap_, to map from one to the other.
  */
-void SmoldynHub::setReacKf( const Conn& c, double value )
+void SmoldynHub::setReacKf( const Conn* c, double value )
 {
-	cout << "void SmoldynHub::setReacKf( const Conn& c, double value= "
+	cout << "void SmoldynHub::setReacKf( const Conn* c, double value= "
 		<< value << ")\n";
 }
 
@@ -1514,7 +1502,7 @@ double SmoldynHub::getReacKf( const Element* e )
 	return 0.0;
 }
 
-void SmoldynHub::setReacKb( const Conn& c, double value )
+void SmoldynHub::setReacKb( const Conn* c, double value )
 {
 }
 
@@ -1535,9 +1523,9 @@ double SmoldynHub::getReacKb( const Element* e )
  * different from the message order. So we need an intermediate
  * table, the enzMap_, to map from one to the other.
  */
-void SmoldynHub::setEnzK1( const Conn& c, double value )
+void SmoldynHub::setEnzK1( const Conn* c, double value )
 {
-	cout << "void SmoldynHub::setEnzK1( const Conn& c, double value= "
+	cout << "void SmoldynHub::setEnzK1( const Conn* c, double value= "
 		<< value << "): Not yet implemented.\n";
 }
 
@@ -1550,7 +1538,7 @@ double SmoldynHub::getEnzK1( const Element* e )
 	return Enzyme::getK1( e );
 }
 
-void SmoldynHub::setEnzK2( const Conn& c, double value )
+void SmoldynHub::setEnzK2( const Conn* c, double value )
 {
 }
 
@@ -1559,7 +1547,7 @@ double SmoldynHub::getEnzK2( const Element* e )
 	return Enzyme::getK2( e );
 }
 
-void SmoldynHub::setEnzK3( const Conn& c, double value )
+void SmoldynHub::setEnzK3( const Conn* c, double value )
 {
 }
 
@@ -1570,14 +1558,14 @@ double SmoldynHub::getEnzK3( const Element* e )
 
 // This function does rather nasty scaling of all rates so as to
 // end up with the same overall Km when k3 is changed.
-void SmoldynHub::setEnzKcat( const Conn& c, double value )
+void SmoldynHub::setEnzKcat( const Conn* c, double value )
 {
 }
 
 
 // This function does rather nasty scaling of all rates so as to
 // end up with the same overall Km when k3 is changed.
-void SmoldynHub::setEnzKm( const Conn& c, double value )
+void SmoldynHub::setEnzKm( const Conn* c, double value )
 {
 }
 
@@ -1591,7 +1579,7 @@ double SmoldynHub::getEnzKm( const Element* e )
 // Here we set up stuff for mmEnzymes. It is similar, but not identical,
 // to what we did for ordinary enzymes.
 //////////////////////////////////////////////////////////////////
-void SmoldynHub::setMmEnzK1( const Conn& c, double value )
+void SmoldynHub::setMmEnzK1( const Conn* c, double value )
 {
 }
 
@@ -1603,7 +1591,7 @@ double SmoldynHub::getMmEnzK1( const Element* e )
 }
 
 // Ugh. Should perhaps ignore this mess.
-void SmoldynHub::setMmEnzK2( const Conn& c, double value )
+void SmoldynHub::setMmEnzK2( const Conn* c, double value )
 {
 }
 
@@ -1614,7 +1602,7 @@ double SmoldynHub::getMmEnzK2( const Element* e )
 
 // Note that this differs from assigning kcat. k3 leads to changes
 // in Km and kcat, whereas kcat only affects kcat.
-void SmoldynHub::setMmEnzK3( const Conn& c, double value )
+void SmoldynHub::setMmEnzK3( const Conn* c, double value )
 {
 }
 
@@ -1623,14 +1611,14 @@ double SmoldynHub::getMmEnzKcat( const Element* e )
 	return 0.0;
 }
 
-void SmoldynHub::setMmEnzKcat( const Conn& c, double value )
+void SmoldynHub::setMmEnzKcat( const Conn* c, double value )
 {
 }
 
 
 // This function does rather nasty scaling of all rates so as to
 // end up with the same overall Km when k3 is changed.
-void SmoldynHub::setMmEnzKm( const Conn& c, double value )
+void SmoldynHub::setMmEnzKm( const Conn* c, double value )
 {
 }
 

@@ -175,77 +175,77 @@ const Cinfo* initBinSynchanCinfo()
 
 static const Cinfo* binSynchanCinfo = initBinSynchanCinfo();
 
-static const unsigned int channelSlot =
-	initBinSynchanCinfo()->getSlotIndex( "channel" );
-static const unsigned int origChannelSlot =
-	initBinSynchanCinfo()->getSlotIndex( "origChannel" );
-static const unsigned int ikSlot =
-	initBinSynchanCinfo()->getSlotIndex( "IkSrc" );
-static const unsigned int synapseSlot =
-	initBinSynchanCinfo()->getSlotIndex( "synapse" );
+static const Slot channelSlot =
+	initBinSynchanCinfo()->getSlot( "channel" );
+static const Slot origChannelSlot =
+	initBinSynchanCinfo()->getSlot( "origChannel" );
+static const Slot ikSlot =
+	initBinSynchanCinfo()->getSlot( "IkSrc" );
+static const Slot synapseSlot =
+	initBinSynchanCinfo()->getSlot( "synapse" );
 
 
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void BinSynchan::setGbar( const Conn& c, double Gbar )
+void BinSynchan::setGbar( const Conn* c, double Gbar )
 {
-	static_cast< BinSynchan* >( c.data() )->Gbar_ = Gbar;
+	static_cast< BinSynchan* >( c->data() )->Gbar_ = Gbar;
 }
 double BinSynchan::getGbar( const Element* e )
 {
 	return static_cast< BinSynchan* >( e->data() )->Gbar_;
 }
 
-void BinSynchan::setEk( const Conn& c, double Ek )
+void BinSynchan::setEk( const Conn* c, double Ek )
 {
-	static_cast< BinSynchan* >( c.data() )->Ek_ = Ek;
+	static_cast< BinSynchan* >( c->data() )->Ek_ = Ek;
 }
 double BinSynchan::getEk( const Element* e )
 {
 	return static_cast< BinSynchan* >( e->data() )->Ek_;
 }
 
-void BinSynchan::setTau1( const Conn& c, double tau1 )
+void BinSynchan::setTau1( const Conn* c, double tau1 )
 {
-	static_cast< BinSynchan* >( c.data() )->tau1_ = tau1;
+	static_cast< BinSynchan* >( c->data() )->tau1_ = tau1;
 }
 double BinSynchan::getTau1( const Element* e )
 {
 	return static_cast< BinSynchan* >( e->data() )->tau1_;
 }
 
-void BinSynchan::setTau2( const Conn& c, double tau2 )
+void BinSynchan::setTau2( const Conn* c, double tau2 )
 {
-	static_cast< BinSynchan* >( c.data() )->tau2_ = tau2;
+	static_cast< BinSynchan* >( c->data() )->tau2_ = tau2;
 }
 double BinSynchan::getTau2( const Element* e )
 {
 	return static_cast< BinSynchan* >( e->data() )->tau2_;
 }
 
-void BinSynchan::setNormalizeWeights( const Conn& c, bool value )
+void BinSynchan::setNormalizeWeights( const Conn* c, bool value )
 {
-	static_cast< BinSynchan* >( c.data() )->normalizeWeights_ = value;
+	static_cast< BinSynchan* >( c->data() )->normalizeWeights_ = value;
 }
 bool BinSynchan::getNormalizeWeights( const Element* e )
 {
 	return static_cast< BinSynchan* >( e->data() )->normalizeWeights_;
 }
 
-void BinSynchan::setGk( const Conn& c, double Gk )
+void BinSynchan::setGk( const Conn* c, double Gk )
 {
-	static_cast< BinSynchan* >( c.data() )->Gk_ = Gk;
+	static_cast< BinSynchan* >( c->data() )->Gk_ = Gk;
 }
 double BinSynchan::getGk( const Element* e )
 {
 	return static_cast< BinSynchan* >( e->data() )->Gk_;
 }
 
-void BinSynchan::setIk( const Conn& c, double Ik )
+void BinSynchan::setIk( const Conn* c, double Ik )
 {
-	static_cast< BinSynchan* >( c.data() )->Ik_ = Ik;
+	static_cast< BinSynchan* >( c->data() )->Ik_ = Ik;
 }
 double BinSynchan::getIk( const Element* e )
 {
@@ -258,10 +258,10 @@ int BinSynchan::getNumSynapses( const Element* e )
 }
 
 void BinSynchan::setWeight(
-				const Conn& c, double val, const unsigned int& i )
+				const Conn* c, double val, const unsigned int& i )
 {
 	vector< BinSynInfo >& synapses = 
-			static_cast< BinSynchan* >( c.data() )->synapses_;
+			static_cast< BinSynchan* >( c->data() )->synapses_;
 	if ( i < synapses.size() )
 		synapses[i].weight = val;
 	else 
@@ -280,10 +280,10 @@ double BinSynchan::getWeight( const Element* e, const unsigned int& i )
 }
 
 void BinSynchan::setDelay(
-				const Conn& c, double val, const unsigned int& i )
+				const Conn* c, double val, const unsigned int& i )
 {
 	vector< BinSynInfo >& synapses = 
-			static_cast< BinSynchan* >( c.data() )->synapses_;
+			static_cast< BinSynchan* >( c->data() )->synapses_;
 	if ( i < synapses.size() )
 		synapses[i].delay = val;
 	else 
@@ -303,10 +303,10 @@ double BinSynchan::getDelay( const Element* e, const unsigned int& i )
 }
 
 void BinSynchan::setPoolSize(
-				const Conn& c, int val, const unsigned int& i )
+				const Conn* c, int val, const unsigned int& i )
 {
 	vector< BinSynInfo >& synapses = 
-			static_cast< BinSynchan* >( c.data() )->synapses_;
+			static_cast< BinSynchan* >( c->data() )->synapses_;
 	if ( i < synapses.size() )
             synapses[i].setPoolSize( val );
 	else 
@@ -326,10 +326,10 @@ int BinSynchan::getPoolSize( const Element* e, const unsigned int& i )
 }
 
 void BinSynchan::setReleaseP(
-				const Conn& c, double val, const unsigned int& i )
+				const Conn* c, double val, const unsigned int& i )
 {
 	vector< BinSynInfo >& synapses = 
-			static_cast< BinSynchan* >( c.data() )->synapses_;
+			static_cast< BinSynchan* >( c->data() )->synapses_;
 	if ( i < synapses.size() )
             synapses[i].setReleaseP( val);
 	else 
@@ -391,10 +391,10 @@ void BinSynchan::innerProcessFunc( Element* e, ProcInfo info )
 	send2< double, double >( e, origChannelSlot, Gk_, Ek_ );
 	send1< double >( e, ikSlot, Ik_ );
 }
-void BinSynchan::processFunc( const Conn& c, ProcInfo p )
+void BinSynchan::processFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c.targetElement();
-	static_cast< BinSynchan* >( e->data() )->innerProcessFunc( e, p );
+	Element* e = c->targetElement();
+	static_cast< BinSynchan* >( c->data() )->innerProcessFunc( e, p );
 }
 
 /*
@@ -429,16 +429,16 @@ void BinSynchan::innerReinitFunc( Element* e, ProcInfo info )
 	while ( !pendingEvents_.empty() )
 		pendingEvents_.pop();
 }
-void BinSynchan::reinitFunc( const Conn& c, ProcInfo p )
+void BinSynchan::reinitFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c.targetElement();
-	static_cast< BinSynchan* >( e->data() )->innerReinitFunc( e, p );
+	Element* e = c->targetElement();
+	static_cast< BinSynchan* >( c->data() )->innerReinitFunc( e, p );
 }
 
-void BinSynchan::innerSynapseFunc( const Conn& c, double time )
+void BinSynchan::innerSynapseFunc( const Conn* c, double time )
 {
 	unsigned int index = 
-		c.targetElement()->connDestRelativeIndex( c, synapseSlot );
+		c->targetElement()->connDestRelativeIndex( c, synapseSlot.msg() );
 	// Actually we should simply ignore any message where the
 	// index is bigger than synapses_.size(), because the syn
 	// strength will not yet have been set.
@@ -448,24 +448,24 @@ void BinSynchan::innerSynapseFunc( const Conn& c, double time )
 	// This goes into a priority_queue sorted by delay_.
 	pendingEvents_.push( SynInfo(synapses_[index].weight, synapses_[index].delay + time ) );
 }
-void BinSynchan::synapseFunc( const Conn& c, double time )
+void BinSynchan::synapseFunc( const Conn* c, double time )
 {
-	static_cast< BinSynchan* >( c.data() )->innerSynapseFunc( c, time );
+	static_cast< BinSynchan* >( c->data() )->innerSynapseFunc( c, time );
 }
 
-void BinSynchan::channelFunc( const Conn& c, double Vm )
+void BinSynchan::channelFunc( const Conn* c, double Vm )
 {
-	static_cast< BinSynchan* >( c.data() )->Vm_ = Vm;
+	static_cast< BinSynchan* >( c->data() )->Vm_ = Vm;
 }
 
-void BinSynchan::activationFunc( const Conn& c, double val )
+void BinSynchan::activationFunc( const Conn* c, double val )
 {
-	static_cast< BinSynchan* >( c.data() )->activation_ += val;
+	static_cast< BinSynchan* >( c->data() )->activation_ += val;
 }
 
-void BinSynchan::modulatorFunc( const Conn& c, double val )
+void BinSynchan::modulatorFunc( const Conn* c, double val )
 {
-	static_cast< BinSynchan* >( c.data() )->modulation_ *= val;
+	static_cast< BinSynchan* >( c->data() )->modulation_ *= val;
 }
 
 

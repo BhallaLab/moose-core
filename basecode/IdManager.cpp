@@ -11,7 +11,7 @@
 #include "moose.h"
 #include "IdManager.h"
 #include "ThisFinfo.h"
-#include "ArrayWrapperElement.h"
+// #include "ArrayWrapperElement.h"
 #ifdef USE_MPI
 const Cinfo* initPostMasterCinfo();
 #endif
@@ -173,10 +173,12 @@ Element* IdManager::getElement( const Id& id ) const
 		}
 #else
 	if ( id.index_ > 0 ) {
+		/*
 		if ( ret->numEntries() > id.index_ )
 			return new ArrayWrapperElement( ret , id.index_ );
 		else
 			return 0;
+		*/
 	} else {
 		return ret;
 	}

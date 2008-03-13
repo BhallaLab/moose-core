@@ -200,9 +200,9 @@ ParTable::ParTable()
 // Here we set up Table value fields
 ////////////////////////////////////////////////////////////////////
 
-void ParTable::setIndex( const Conn& c, int input ) 
+void ParTable::setIndex( const Conn* c, int input ) 
 {
-	static_cast< ParTable* >( c.data() )->index_ = input;
+	static_cast< ParTable* >( c->data() )->index_ = input;
 }
 int ParTable::getIndex( const Element* e )
 {
@@ -214,16 +214,18 @@ int ParTable::getIndex( const Element* e )
 // Here we set up private Table class functions.
 ////////////////////////////////////////////////////////////////////
 
-void ParTable::process( const Conn& c, ProcInfo p )
+void ParTable::process( const Conn* c, ProcInfo p )
 {
-	static_cast< Table* >( c.data() )->innerProcess( c.targetElement(), p );
-	static_cast< ParTable* >( c.data() )->innerProcess( c.targetElement(), p );
+	static_cast< Table* >( c->data() )->
+		innerProcess( c->targetElement(), p );
+	static_cast< ParTable* >( c->data() )->
+		innerProcess( c->targetElement(), p );
 }
 
-void ParTable::reinit( const Conn& c, ProcInfo p )
+void ParTable::reinit( const Conn* c, ProcInfo p )
 {
-	static_cast< Table* >( c.data() )->innerReinit( c, p );
-	static_cast< ParTable* >( c.data() )->innerReinit( c, p );
+	static_cast< Table* >( c->data() )->innerReinit( c, p );
+	static_cast< ParTable* >( c->data() )->innerReinit( c, p );
 	memset(arrVislnData, 0, sizeof(arrVislnData));
 }
 
@@ -308,7 +310,7 @@ void ParTable::innerProcess( Element* e, ProcInfo p )
 
 
 
-void ParTable::innerReinit( const Conn& c, ProcInfo p )
+void ParTable::innerReinit( const Conn* c, ProcInfo p )
 {
 }
 

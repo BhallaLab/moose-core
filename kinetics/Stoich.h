@@ -22,33 +22,33 @@ class Stoich
 		///////////////////////////////////////////////////
 		// Field function definitions
 		///////////////////////////////////////////////////
-		static unsigned int getNmols( const Element* e );
-		static unsigned int getNvarMols( const Element* e );
-		static unsigned int getNsumTot( const Element* e );
-		static unsigned int getNbuffered( const Element* e );
-		static unsigned int getNreacs( const Element* e );
-		static unsigned int getNenz( const Element* e );
-		static unsigned int getNmmEnz( const Element* e );
-		static unsigned int getNexternalRates( const Element* e );
-		static void setUseOneWayReacs( const Conn& c, int value );
-		static bool getUseOneWayReacs( const Element* e );
-		static string getPath( const Element* e );
-		static void setPath( const Conn& c, string value );
-		static unsigned int getRateVectorSize( const Element* e );
+		static unsigned int getNmols( Eref e );
+		static unsigned int getNvarMols( Eref e );
+		static unsigned int getNsumTot( Eref e );
+		static unsigned int getNbuffered( Eref e );
+		static unsigned int getNreacs( Eref e );
+		static unsigned int getNenz( Eref e );
+		static unsigned int getNmmEnz( Eref e );
+		static unsigned int getNexternalRates( Eref e );
+		static void setUseOneWayReacs( const Conn* c, int value );
+		static bool getUseOneWayReacs( Eref e );
+		static string getPath( Eref e );
+		static void setPath( const Conn* c, string value );
+		static unsigned int getRateVectorSize( Eref e );
 
 		///////////////////////////////////////////////////
 		// Msg Dest function definitions
 		///////////////////////////////////////////////////
-		static void scanTicks( const Conn& c );
-		static void reinitFunc( const Conn& c );
+		static void scanTicks( const Conn* c );
+		static void reinitFunc( const Conn* c );
 		static void integrateFunc( 
-			const Conn& c, vector< double >* v, double dt );
+			const Conn* c, vector< double >* v, double dt );
 
 		unsigned int nVarMols() const {
 			return nVarMols_;
 		}
-		void clear( Element* stoich );
-		// static void rebuild( const Conn& c );
+		void clear( Eref stoich );
+		// static void rebuild( const Conn* c );
 		// void localRebuild( Element* stoich );
 
 		///////////////////////////////////////////////////
@@ -70,23 +70,34 @@ class Stoich
 		}
 		void runStats();
 #endif // USE_GSL
-		void rebuildMatrix( Element* stoich, vector< Element* >& ret );
-		void localScanTicks( Element* stoich );
+		void rebuildMatrix( Eref stoich, vector< Element* >& ret );
+		void localScanTicks( Eref stoich );
 	private:
 		///////////////////////////////////////////////////
 		// Setup function definitions
 		///////////////////////////////////////////////////
-		void localSetPath( Element* e, const string& value );
+		void localSetPath( Eref e, const string& value );
 
 		void setupMols(
-			Element* e,
+			Eref e,
 			vector< Element* >& varMolVec,
 			vector< Element* >& bufVec,
 			vector< Element* >& sumTotVec
 			);
 
-		void addSumTot( Element* e );
+		void addSumTot( Eref e );
 
+		/**
+		 * Finds all target molecules of the specified msgField on 
+		 * Element e. Puts the points into the vector ret, which is 
+		 * cleaned out first.
+		 * This function replaces findIncoming and findReactants.
+		 */
+		bool findTargets(
+			Element* e, const string& msgFieldName, 
+			vector< const double* >& ret );
+
+		/*
 		unsigned int findReactants( 
 			Element* e, const string& msgFieldName, 
 			vector< const double* >& ret );
@@ -94,6 +105,7 @@ class Stoich
 		bool findIncoming( 
 			Element* e, const string& msgFieldName, 
 			vector< const double* >& ret );
+			*/
 
 		void fillHalfStoich( const double* baseptr, 
 			vector< const double* >& reactant,
@@ -104,8 +116,8 @@ class Stoich
 			vector< const double* >& prd, 
 			int reacNum );
 
-		void addReac( Element* stoich, Element* e );
-		bool checkEnz( Element* e,
+		void addReac( Eref stoich, Element* e );
+		bool checkEnz( Eref e,
 				vector< const double* >& sub,
 				vector< const double* >& prd,
 				vector< const double* >& enz,
@@ -113,11 +125,11 @@ class Stoich
 				double& k1, double& k2, double& k3,
 				bool isMM
 		);
-		void addEnz( Element* stoich, Element* e );
-		void addMmEnz( Element* stoich, Element* e );
-		void addTab( Element* stoich, Element* e );
-		void addRate( Element* stoich, Element* e );
-		void setupReacSystem( Element* stoich );
+		void addEnz( Eref stoich, Element* e );
+		void addMmEnz( Eref stoich, Element* e );
+		void addTab( Eref stoich, Element* e );
+		void addRate( Eref stoich, Element* e );
+		void setupReacSystem( Eref stoich );
 
 		///////////////////////////////////////////////////
 		// These functions control the updates of state
@@ -147,9 +159,9 @@ class Stoich
 		SparseMatrix N_; 
 		vector< int > path2mol_;
 		vector< int > mol2path_;
-		map< const Element*, unsigned int > molMap_;
+		map< Eref, unsigned int > molMap_;
 #ifdef DO_UNIT_TESTS
-		map< const Element*, unsigned int > reacMap_;
+		map< Eref, unsigned int > reacMap_;
 #endif
 		static const double EPSILON;
 		///////////////////////////////////////////////////
