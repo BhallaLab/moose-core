@@ -25,26 +25,26 @@ class SpikeGen
 	//////////////////////////////////////////////////////////////////
 	// Field functions.
 	//////////////////////////////////////////////////////////////////
-		static void setThreshold( const Conn& c, double threshold );
+		static void setThreshold( const Conn* c, double threshold );
 		static double getThreshold( const Element* e );
 
-		static void setRefractT( const Conn& c, double val );
+		static void setRefractT( const Conn* c, double val );
 		static double getRefractT( const Element* e );
 
-		static void setAmplitude( const Conn& c, double val );
+		static void setAmplitude( const Conn* c, double val );
 		static double getAmplitude( const Element* e );
 
-		static void setState( const Conn& c, double val );
+		static void setState( const Conn* c, double val );
 		static double getState( const Element* e );
 
 	//////////////////////////////////////////////////////////////////
 	// Message dest functions.
 	//////////////////////////////////////////////////////////////////
 
-	void innerProcessFunc( const Conn& c, ProcInfo p );
-	static void processFunc( const Conn& c, ProcInfo p );
-	static void reinitFunc( const Conn& c, ProcInfo p );
-	static void VmFunc( const Conn& c, double val );
+	void innerProcessFunc( const Conn* c, ProcInfo p );
+	static void processFunc( const Conn* c, ProcInfo p );
+	static void reinitFunc( const Conn* c, ProcInfo p );
+	static void VmFunc( const Conn* c, double val );
 
 	protected:
 		double threshold_;

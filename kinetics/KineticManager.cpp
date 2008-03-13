@@ -208,10 +208,8 @@ static map< string, KMethodInfo >& extMethodMap = fillMethodMap();
 
 static const Cinfo* kineticManagerCinfo = initKineticManagerCinfo();
 
-static const unsigned int reacSlot =
-	initKineticManagerCinfo()->getSlotIndex( "reac.n" );
-static const unsigned int nSlot =
-	initKineticManagerCinfo()->getSlotIndex( "nSrc" );
+static const Slot reacSlot = initKineticManagerCinfo()->getSlot( "reac.n" );
+static const Slot nSlot = initKineticManagerCinfo()->getSlot( "nSrc" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -259,93 +257,92 @@ void KineticManager::addMethod( const char* name,
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void KineticManager::setAuto( const Conn& c, bool value )
+void KineticManager::setAuto( const Conn* c, bool value )
 {
-	static_cast< KineticManager* >( c.data() )->auto_ = value;
+	static_cast< KineticManager* >( c->data() )->auto_ = value;
 }
 
-bool KineticManager::getAuto( const Element* e )
+bool KineticManager::getAuto( Eref e )
 {
-	return static_cast< KineticManager* >( e->data() )->auto_;
+	return static_cast< KineticManager* >( e.data() )->auto_;
 }
 
-void KineticManager::setStochastic( const Conn& c, bool value )
+void KineticManager::setStochastic( const Conn* c, bool value )
 {
-	static_cast< KineticManager* >( c.data() )->stochastic_ = value;
+	static_cast< KineticManager* >( c->data() )->stochastic_ = value;
 }
 
-bool KineticManager::getStochastic( const Element* e )
+bool KineticManager::getStochastic( Eref e )
 {
-	return static_cast< KineticManager* >( e->data() )->stochastic_;
+	return static_cast< KineticManager* >( e.data() )->stochastic_;
 }
 
-void KineticManager::setSpatial( const Conn& c, bool value )
+void KineticManager::setSpatial( const Conn* c, bool value )
 {
-	static_cast< KineticManager* >( c.data() )->spatial_ = value;
+	static_cast< KineticManager* >( c->data() )->spatial_ = value;
 }
 
-bool KineticManager::getSpatial( const Element* e )
+bool KineticManager::getSpatial( Eref e )
 {
-	return static_cast< KineticManager* >( e->data() )->spatial_;
+	return static_cast< KineticManager* >( e.data() )->spatial_;
 }
 
-void KineticManager::setMethod( const Conn& c, string value )
+void KineticManager::setMethod( const Conn* c, string value )
 {
-	Element* e = c.targetElement();
-
-	static_cast< KineticManager* >( e->data() )->innerSetMethod( e, value );
+	static_cast< KineticManager* >( c->data() )->
+		innerSetMethod( c->target(), value );
 }
 
-string KineticManager::getMethod( const Element* e )
+string KineticManager::getMethod( Eref e )
 {
-	return static_cast< KineticManager* >( e->data() )->method_;
+	return static_cast< KineticManager* >( e.data() )->method_;
 }
 
-bool KineticManager::getVariableDt( const Element* e )
+bool KineticManager::getVariableDt( Eref e )
 {
-	return static_cast< KineticManager* >( e->data() )->variableDt_;
+	return static_cast< KineticManager* >( e.data() )->variableDt_;
 }
 
-bool KineticManager::getSingleParticle( const Element* e )
+bool KineticManager::getSingleParticle( Eref e )
 {
-	return static_cast< KineticManager* >( e->data() )->singleParticle_;
+	return static_cast< KineticManager* >( e.data() )->singleParticle_;
 }
 
-bool KineticManager::getMultiscale( const Element* e )
+bool KineticManager::getMultiscale( Eref e )
 {
-	return static_cast< KineticManager* >( e->data() )->multiscale_;
+	return static_cast< KineticManager* >( e.data() )->multiscale_;
 }
 
-bool KineticManager::getImplicit( const Element* e )
+bool KineticManager::getImplicit( Eref e )
 {
-	return static_cast< KineticManager* >( e->data() )->implicit_;
+	return static_cast< KineticManager* >( e.data() )->implicit_;
 }
 
-string KineticManager::getDescription( const Element* e )
+string KineticManager::getDescription( Eref e )
 {
-	return static_cast< KineticManager* >( e->data() )->description_;
+	return static_cast< KineticManager* >( e.data() )->description_;
 }
 
-double KineticManager::getRecommendedDt( const Element* e )
+double KineticManager::getRecommendedDt( Eref e )
 {
-	return static_cast< KineticManager* >( e->data() )->recommendedDt_;
+	return static_cast< KineticManager* >( e.data() )->recommendedDt_;
 }
 
-void KineticManager::setEulerError( const Conn& c, double value )
+void KineticManager::setEulerError( const Conn* c, double value )
 {
-	static_cast< KineticManager* >( c.data() )->eulerError_ = value;
+	static_cast< KineticManager* >( c->data() )->eulerError_ = value;
 }
 
-double KineticManager::getEulerError( const Element* e )
+double KineticManager::getEulerError( Eref e )
 {
-	return static_cast< KineticManager* >( e->data() )->eulerError_;
+	return static_cast< KineticManager* >( e.data() )->eulerError_;
 }
 
 //////////////////////////////////////////////////////////////////
 // Here we set up some of the messier inner functions.
 //////////////////////////////////////////////////////////////////
 
-void KineticManager::innerSetMethod( Element* e, string value )
+void KineticManager::innerSetMethod( Eref e, string value )
 {
 	map< string, KMethodInfo >::iterator i = methodMap().find( value );
 	if ( i != methodMap().end() ) {
@@ -372,7 +369,7 @@ void KineticManager::innerSetMethod( Element* e, string value )
 }
 
 // Returns the solver set up for GSL integration, on the element e
-Id gslSetup( Element* e, const string& method )
+Id gslSetup( Eref e, const string& method )
 {
 	if ( Cinfo::find( "GslIntegrator" ) == 0 ) // No GSL defined
 		return Id();
@@ -392,9 +389,9 @@ Id gslSetup( Element* e, const string& method )
 			}
 		}
 	}
-	Element* solve = Neutral::create( "Neutral", "solve", e,
+	Element* solve = Neutral::create( "Neutral", "solve", e.e,
 		Id::scratchId() );
-	solveId = e->id();
+	solveId = e.id();
 	assert( solveId.good() );
 
 	Element*  ki = Neutral::create( "GslIntegrator", "integ", solve,
@@ -409,26 +406,26 @@ Id gslSetup( Element* e, const string& method )
 	ks->findFinfo( "hub" )->add( ks, kh, kh->findFinfo( "hub" ) );
 	ks->findFinfo( "gsl" )->add( ks, ki, ki->findFinfo( "gsl" ) );
 	set< string >( ki, "method", method );
-	string simpath = e->id().path() + "/##";
+	string simpath = e.id().path() + "/##";
 	set< string >( ks, "path", simpath );
 	set< double >( ki, "relativeAccuracy", 1.0e-5 );
 	set< double >( ki, "absoluteAccuracy", 1.0e-5 );
 	return solveId;
 }
 
-void eeSetup( Element* e )
+void eeSetup( Eref e )
 {
 	cout << "doing ee setup\n";
 }
 
-Id gillespieSetup( Element* e, const string& method )
+Id gillespieSetup( Eref e, const string& method )
 {
 	cout << "doing Gillespie setup\n";
 	return Id();
 }
 
 // Returns the solver set up for GSL integration, on the element e
-Id smoldynSetup( Element* e, const string& method, double recommendedDt )
+Id smoldynSetup( Eref e, const string& method, double recommendedDt )
 {
 	if ( Cinfo::find( "SmoldynHub" ) == 0 ) // No Smoldyn defined
 		return Id();
@@ -448,9 +445,9 @@ Id smoldynSetup( Element* e, const string& method, double recommendedDt )
 			}
 		}
 	}
-	Element* solve = Neutral::create( "Neutral", "solve", e,
+	Element* solve = Neutral::create( "Neutral", "solve", e.e,
 		Id::scratchId() );
-	solveId = e->id();
+	solveId = e.id();
 	assert( solveId.good() );
 
 	Element* ks = Neutral::create( "Stoich", "stoich", solve,
@@ -462,7 +459,7 @@ Id smoldynSetup( Element* e, const string& method, double recommendedDt )
 	set< double >( sh, "dt", recommendedDt );
 	set< bool >( ks, "useOneWayReacs", 1 );
 	ks->findFinfo( "hub" )->add( ks, sh, sh->findFinfo( "hub" ) );
-	string simpath = e->id().path() + "/##";
+	string simpath = e.id().path() + "/##";
 	set< string >( ks, "path", simpath );
 
 	// This sets up additional things like the geometry information.
@@ -470,7 +467,7 @@ Id smoldynSetup( Element* e, const string& method, double recommendedDt )
 	return solveId;
 }
 
-void KineticManager::setupSolver( Element* e )
+void KineticManager::setupSolver( Eref e )
 {
 
 	Id solveId;
@@ -508,7 +505,7 @@ void KineticManager::setupSolver( Element* e )
  * graphing. But there are complications yet to be sorted out, for the
  * case of external tables.
  */
-void KineticManager::setupDt( Element* e, double dt )
+void KineticManager::setupDt( Eref e, double dt )
 {
 	static char* fixedDtMethods[] = {
 		"ee", 
@@ -539,7 +536,7 @@ void KineticManager::setupDt( Element* e, double dt )
 		}
 	}
 
-	Id integ( e->id().path() + "/solve/integ" );
+	Id integ( e.id().path() + "/solve/integ" );
 	assert( integ.good() );
 	set< double >( integ(), "internalDt", dt );
 
@@ -562,13 +559,13 @@ void KineticManager::setupDt( Element* e, double dt )
  * Reinit Function restarts the simulation from time 0.
  */
 
-void KineticManager::reinitFunc( const Conn& c, ProcInfo info )
+void KineticManager::reinitFunc( const Conn* c, ProcInfo info )
 {
-	static_cast< KineticManager* >( c.data() )->reinitFuncLocal( 
-					c.targetElement() );
+	static_cast< KineticManager* >( c->data() )->reinitFuncLocal( 
+					c->target() );
 }
 
-void KineticManager::reinitFuncLocal( Element* e )
+void KineticManager::reinitFuncLocal( Eref e )
 {
 	;
 }
@@ -577,18 +574,17 @@ void KineticManager::reinitFuncLocal( Element* e )
  * Resched Function makes sure that all child elements are scheduled,
  * either directly from the clock ticks, or through a solver.
  */
-void KineticManager::reschedFunc( const Conn& c )
+void KineticManager::reschedFunc( const Conn* c )
 {
-	static_cast< KineticManager* >( c.data() )->reschedFuncLocal( 
-					c.targetElement() );
+	static_cast< KineticManager* >( c->data() )->reschedFuncLocal( 
+					c->target() );
 }
 
-void KineticManager::reschedFuncLocal( Element* e )
+void KineticManager::reschedFuncLocal( Eref e )
 {
-
 	Element* elm;
 	string field;
-	double dt = estimateDt( e, &elm, field, eulerError_ );
+	double dt = estimateDt( e.e, &elm, field, eulerError_ );
 	setupSolver( e );
 	setupDt( e, dt );
 }
@@ -596,11 +592,11 @@ void KineticManager::reschedFuncLocal( Element* e )
 /**
  * processFunc doesn't do anything.
  */
-void KineticManager::processFunc( const Conn& c, ProcInfo info )
+void KineticManager::processFunc( const Conn* c, ProcInfo info )
 {
 	;
 //	Element* e = c.targetElement();
-//static_cast< KineticManager* >( e->data() )->processFuncLocal( e, info );
+//static_cast< KineticManager* >( e.data() )->processFuncLocal( e, info );
 
 }
 
@@ -616,13 +612,13 @@ void KineticManager::processFunc( const Conn& c, ProcInfo info )
  * Returns largest propensity for a reaction Element e. Direction of
  * reaction calculation is set by the isPrd flag.
  */
-double KineticManager::findReacPropensity( Element* e, bool isPrd ) const
+double KineticManager::findReacPropensity( Eref e, bool isPrd ) const
 {
 	static const Cinfo* rCinfo = Cinfo::find( "Reaction" );
 	static const Finfo* substrateFinfo = rCinfo->findFinfo( "sub" );
 	static const Finfo* productFinfo = rCinfo->findFinfo( "prd" );
 
-	assert( e->cinfo()->isA( rCinfo ) );
+	assert( e.e->cinfo()->isA( rCinfo ) );
 
 	bool ret;
 	double prop;
@@ -633,6 +629,31 @@ double KineticManager::findReacPropensity( Element* e, bool isPrd ) const
 	assert( ret );
 	double min = 1.0e10;
 	double mval;
+
+	Conn* c;
+	if ( isPrd )
+		c = e.e->targets( productFinfo->msg() );
+	else
+		c = e.e->targets( substrateFinfo->msg() );
+
+	while ( c->good() ) {
+		Element* m = c->target().e;
+		assert( m->cinfo()->isA( Cinfo::find( "Molecule" ) ) );
+		ret = get< double >( c->target(), "nInit", mval );
+		// should really be 'n' but there is a problem with initialization
+		// of the S_ array if we want to be able to do on-the-fly solver
+		// rebuilding.
+		assert( ret );
+		prop *= mval;
+		if ( min > mval )
+			min = mval;
+
+		c->increment();
+	}
+	delete c;
+
+
+/*
 
 	vector< Conn > list;
 	vector< Conn >::iterator i;
@@ -653,6 +674,7 @@ double KineticManager::findReacPropensity( Element* e, bool isPrd ) const
 		if ( min > mval )
 			min = mval;
 	}
+*/
 	if ( min > 0.0 )
 		return prop / min;
 	else
@@ -663,6 +685,83 @@ double KineticManager::findReacPropensity( Element* e, bool isPrd ) const
  * Returns largest propensity for a reaction Element e. Direction of
  * reaction calculation is set by the isPrd flag.
  */
+double KineticManager::findEnzSubPropensity( Eref e ) const
+{
+	static const Cinfo* eCinfo = Cinfo::find( "Enzyme" );
+	static const Cinfo* mCinfo = Cinfo::find( "Molecule" );
+	static const Finfo* substrateFinfo = eCinfo->findFinfo( "sub" );
+	static const Finfo* enzymeFinfo = eCinfo->findFinfo( "enz" );
+	static const Finfo* intramolFinfo = eCinfo->findFinfo( "intramol" );
+	assert( e.e->cinfo()->name() == "Enzyme" );
+
+	bool ret;
+	bool mode;
+	ret = get< bool >( e, "mode", mode );
+	assert( ret );
+
+	double prop;
+
+	if ( mode ) { // An MM enzyme, implicit form.
+		// Here we compute it as rate / nmin.
+		double Km;
+		double k3;
+		ret = get< double >( e, "Km", Km );
+		assert( ret );
+		ret = get< double >( e, "k3", k3 );
+		assert( ret );
+		assert( Km > 0 );
+		prop = k3 / Km;
+	} else {
+		ret = get< double >( e, "k1", prop );
+		assert( ret );
+	}
+	double min = 1.0e10;
+	double mval;
+	Conn* sc = e.e->targets( substrateFinfo->msg() );
+	if ( !sc->good() ) { // A dangling enzyme, no substrates.
+		delete sc;
+		return 0.0;
+	}
+	Conn* ec = e.e->targets( enzymeFinfo->msg() );
+	assert( ec->good() );
+	ret = get< double >( ec->target(), "nInit", mval );
+	prop *= mval;
+	assert( ret );
+	min = mval;
+	delete ec;
+
+	while ( sc->good() ) {
+		Eref m = sc->target();
+		assert( m.e->cinfo()->isA( mCinfo ) );
+		ret = get< double >( m, "nInit", mval );
+		assert( ret );
+		prop *= mval;
+		if ( min > mval )
+			min = mval;
+
+		sc->increment();
+	}
+	delete sc;
+
+	Conn* ic = e.e->targets( intramolFinfo->msg() );
+	while ( ic->good() ) {
+		Eref m = ic->target();
+		assert( m.e->cinfo()->isA( mCinfo ) );
+		ret = get< double >( m, "nInit", mval );
+		assert( ret );
+		if ( mval > 0.0 )
+			prop /= mval;
+		ic->increment();
+	}
+	delete ic;
+	
+	if ( min > 0.0 )
+		return prop / min;
+	else
+		return 0.0;
+}
+
+/*
 double KineticManager::findEnzSubPropensity( Element* e ) const
 {
 	static const Cinfo* eCinfo = Cinfo::find( "Enzyme" );
@@ -735,10 +834,11 @@ double KineticManager::findEnzSubPropensity( Element* e ) const
 	else
 		return 0.0;
 }
+*/
 
-double KineticManager::findEnzPrdPropensity( Element* e ) const
+double KineticManager::findEnzPrdPropensity( Eref e ) const
 {
-	assert( e->cinfo()->isA( Cinfo::find( "Enzyme" ) ) );
+	assert( e.e->cinfo()->isA( Cinfo::find( "Enzyme" ) ) );
 
 	bool ret;
 	bool mode;

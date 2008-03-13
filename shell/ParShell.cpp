@@ -354,7 +354,7 @@ ParShell::ParShell()
 }
 
 
-void ParShell::planarconnect(const Conn& c, string source, string dest, string spikegenRank, string synchanRank)
+void ParShell::planarconnect(const Conn* c, string source, string dest, string spikegenRank, string synchanRank)
 {
         int next, previous;
         bool ret;
@@ -391,7 +391,7 @@ void ParShell::planarconnect(const Conn& c, string source, string dest, string s
 
 }
 
-void ParShell::planardelay(const Conn& c, string source, double delay){
+void ParShell::planardelay(const Conn* c, string source, double delay){
 	vector <Element* > src_list;
 	simpleWildcardFind( source, src_list );
 	for (size_t i = 0 ; i < src_list.size(); i++){
@@ -406,7 +406,7 @@ void ParShell::planardelay(const Conn& c, string source, double delay){
 	}
 }
 
-void ParShell::planarweight(const Conn& c, string source, double weight){
+void ParShell::planarweight(const Conn* c, string source, double weight){
 	vector <Element* > src_list;
 	simpleWildcardFind( source, src_list );
 	for (size_t i = 0 ; i < src_list.size(); i++){

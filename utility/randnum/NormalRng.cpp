@@ -60,7 +60,7 @@ static const Cinfo* normalRngCinfo = initNormalRngCinfo();
  */
 double NormalRng::getMean( const Element *e)
 {    
-    return static_cast<NormalRng*>(e->data())->mean_;
+    return static_cast<NormalRng*>(e->data( 0 ))->mean_;
 }
 
 /**
@@ -88,7 +88,7 @@ void NormalRng::setMean(const Conn& c, double mean)
  */
 double NormalRng::getVariance(const Element* e)
 {
-    return static_cast<NormalRng*>(e->data())->variance_;
+    return static_cast<NormalRng*>(e->data( 0 ))->variance_;
 }
 
 /**
@@ -118,7 +118,7 @@ void NormalRng::setVariance(const Conn& c, double variance)
  */
 int NormalRng::getMethod(const Element* e)
 {
-    return static_cast <NormalRng*> (e->data())->method_;
+    return static_cast <NormalRng*> (e->data( 0 ))->method_;
 }
 /**
    Set the algorithm to be used.

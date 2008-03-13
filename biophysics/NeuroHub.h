@@ -63,31 +63,31 @@ public:
 	///////////////////////////////////////////////////
 	// Dest functions
 	///////////////////////////////////////////////////
-	static void compartmentFunc( const Conn& c, vector< Element* >* elist );
-	static void channelFunc( const Conn& c, vector< Element* >* elist );
-	static void spikegenFunc( const Conn& c, vector< Element* >* elist );
-	static void synchanFunc( const Conn& c, vector< Element* >* elist );
-	static void destroy( const Conn& c );
-	static void childFunc( const Conn& c, int stage );
+	static void compartmentFunc( const Conn* c, vector< Element* >* elist );
+	static void channelFunc( const Conn* c, vector< Element* >* elist );
+	static void spikegenFunc( const Conn* c, vector< Element* >* elist );
+	static void synchanFunc( const Conn* c, vector< Element* >* elist );
+	static void destroy( const Conn* c );
+	static void childFunc( const Conn* c, int stage );
 	
 	///////////////////////////////////////////////////
 	// Field functions (Biophysics)
 	///////////////////////////////////////////////////
-	static void setComptVm( const Conn& c, double value );
+	static void setComptVm( const Conn* c, double value );
 	static double getComptVm( const Element* e );
 	
-	static void setInject( const Conn& c, double value );
+	static void setInject( const Conn* c, double value );
 	static double getInject( const Element* e );
 	
-	static void setChanGbar( const Conn& c, double value );
+	static void setChanGbar( const Conn* c, double value );
 	static double getChanGbar( const Element* e );
 	
-	static void setSynChanGbar( const Conn& c, double value );
+	static void setSynChanGbar( const Conn* c, double value );
 	static double getSynChanGbar( const Element* e );
 	///////////////////////////////////////////////////
 	// Dest functions (Biophysics)
 	///////////////////////////////////////////////////
-	static void comptInjectMsgFunc( const Conn& c, double I );
+	static void comptInjectMsgFunc( const Conn* c, double I );
 	
 private:
 	void innerCompartmentFunc( Element* e,
@@ -102,8 +102,8 @@ private:
 	static void zombify( 
 		Element* hub, Element* e,
 		const Finfo* hubFinfo, Finfo* solveFinfo );
-	static void unzombify( const Conn& c );
-	static void clearFunc( const Conn& c );
+	static void unzombify( const Conn* c );
+	static void clearFunc( const Conn* c );
 	static void redirectDestMessages(
 		Element* hub, Element* e,
 		const Finfo* hubFinfo, const Finfo* eFinfo,

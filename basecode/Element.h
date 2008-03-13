@@ -40,114 +40,95 @@ class Element
 		/// Returns the name of the element class
 		virtual const std::string& className( ) const = 0;
 
-		/// Returns the class infor of the element class.
+		/// Returns the class info of the element class.
 		virtual const Cinfo* cinfo( ) const = 0;
 
-		/// Looks up the specific indexed conn
-		virtual vector< Conn >::const_iterator 
-				lookupConn( unsigned int i ) const = 0;
-
-		/// Looks up the specific indexed conn, allows modification.
-		virtual vector< Conn >::iterator 
-				lookupVariableConn( unsigned int i ) = 0;
-
-		/// Finds the index of the specified conn
-		virtual unsigned int 
-				connIndex( const Conn* ) const = 0;
+		///////////////////////////////////////////////////////////////
+		// Msg traversal functions. Use as API
+		///////////////////////////////////////////////////////////////
 
 		/**
-		 * Finds the relative index of a conn arriving at this
-		 * element onto a MsgDest entry identified by slot.
-		 * Relative index means it is based on the specified
-		 * MsgDest slot, so that the first conn in this slot would
-		 * have an index of 0.
+		 * msgNum specifies the message.
+		 * Returns a Conn* iterator for going through all the targets,
+		 * as well as providing lots of collateral information.
+		 * Targets can be advanced by increment(), which goes one Element
+		 * and its index at a time, or by nextElement(), which goes
+		 * one Element at a time even if the Element is an array.
+		 * The Conn* must be deleted after use.
 		 */
-		virtual unsigned int connDestRelativeIndex(
-				const Conn& c, unsigned int slot ) const = 0;
+		virtual Conn* targets( int msgNum ) const = 0;
 
 		/**
-		 * Finds the relative index of a conn arriving at this
-		 * element onto a MsgSrc entry identified by the slot.
-		 * Relative index means it is based on the specified
-		 * MsgSrc slot, so that the first conn in this slot would
-		 * have an index of 0.
+		 * finfoName specifies the finfo connecting to these targets.
+		 * Returns a Conn* iterator for going through all the targets.
+		 * Must be deleted after use.
 		 */
-		virtual unsigned int connSrcRelativeIndex(
-				const Conn& c, unsigned int slot ) const = 0;
+		virtual Conn* targets( const string& finfoName ) const = 0;
+
+		/**
+		 * Finds the number of targets to this Msg, either src or dest.
+		 * Faster than iterating through the whole lot.
+		 */
+		virtual unsigned int numTargets( int msgNum ) const = 0;
+		/**
+		 * Finds the number of targets to this Finfo.
+		 * Faster than iterating through the whole lot.
+		 */
+		virtual unsigned int numTargets( const string& finfoName ) const = 0;
+
+		///////////////////////////////////////////////////////////////
+		// Msg handling functions
+		///////////////////////////////////////////////////////////////
+
+		/**
+		 * Add a message from field f1 on current Element to field f2 on e2
+		 * Return true if success.
+		 */
+		bool add( const string& f1, Element* e2, const string& f2 );
+
+		/**
+		 * Add a message from Msg m1 on current Element to Msg m2 on e2
+		 * Return true if success.
+		 */
+		bool add( int m1, Element* e2, int m2 );
+
+		/**
+		 * Drop slot 'doomed' on Msg msg
+		 */
+		bool drop( int msg, unsigned int doomed );
+
+		/**
+		 * Drop ConnTainer 'doomed' on Msg msg
+		 */
+		bool drop( int msg, const ConnTainer* doomed );
+
+		/**
+		 * Drop ConnTainer 'doomed' on Msg msg
+		 */
+		// bool drop( int msg, const ConnTainer* doomed );
+
+		/**
+		 * Drop all msgs going out of the identified msg.
+		 */
+		bool dropAll( int msg );
+
+		/**
+		 * Drop all msgs going out of the identified Finfo.
+		 */
+		bool dropAll( const string& finfo );
+
+		/**
+		 * Drop all entries on a vector of connTainers. In due course
+		 * this will be updated to be more efficient than just a sequence
+		 * of individual calls to drop.
+		 */
+		bool dropVec( int msg, const vector< const ConnTainer* >& vec );
+
+
+		///////////////////////////////////////////////////////////////
+		// Information functions
+		///////////////////////////////////////////////////////////////
 		
-		/// Returns the size of the conn vector.
-		virtual unsigned int connSize() const = 0;
-
-		/**
-		 * This function returns the iterator to conn_ at the beginning
-		 * of the Src range specified by i. Note that we don't need
-		 * to know how the Element handles MsgSrcs here.
-		 */
-		virtual vector< Conn >::const_iterator
-				connSrcBegin( unsigned int src ) const = 0;
-
-		/**
-		 * This function returns the iterator to conn_ at the end
-		 * of the Src range specified by the src arg.
-		 * End here is in the same
-		 * sense as the end() operator on vectors: one past the last
-		 * entry. Note that we don't need
-		 * to know how the Element handles MsgSrcs here.
-		 * Note also that this call does NOT follow the linked list of
-		 * Srcs to the very end. It applies only to the Conns that are
-		 * on the src_ entry given by the src argument.
-		 * If you want to follow the linked list, use the nextSrc
-		 * function.
-		 * If you want to go to the very end of the linked list, use
-		 * connSrcVeryEnd
-		 */
-		virtual vector< Conn >::const_iterator
-				connSrcEnd( unsigned int src ) const = 0;
-
-		/**
-		 * This function returns to the iterator to conn_ at the end
-		 * of the linked list of srcs starting with the src arg.
-		 * End here is in the same
-		 * sense as the end() operator on vectors: one past the last.
-		 */
-		virtual vector< Conn >::const_iterator
-				connSrcVeryEnd( unsigned int src ) const = 0;
-
-		/**
-		 * Returns the index of the next src entry on this
-		 * linked list of srcs.
-		 * Returns zero at the end of the list.
-		 */
-		virtual unsigned int nextSrc( unsigned int src ) const = 0;
-		
-		virtual unsigned int destSize() const = 0;
-		
-		/**
-		 * This function returns the iterator to conn_ at the beginning
-		 * of the Dest range specified by i.
-		 */
-		virtual vector< Conn >::const_iterator
-				connDestBegin( unsigned int dest ) const = 0;
-
-		/**
-		 * This function returns the iterator to conn_ at the end
-		 * of the Dest range specified by i. End here is in the same
-		 * sense as the end() operator on vectors: one past the last
-		 * entry.
-		 */
-		virtual vector< Conn >::const_iterator
-				connDestEnd( unsigned int dest ) const = 0;
-
-		/// Sets up a connection between previously created Conn entries
-		virtual void connect( unsigned int myConn,
-			Element* targetElement, unsigned int targetConn) = 0;
-
-		/// Deletes a connection, one side has enough info.
-		virtual void disconnect( unsigned int connIndex ) = 0;
-
-		/// Deletes the local half of the connection.
-		virtual void deleteHalfConn( unsigned int connIndex ) = 0;
-
 		/// True if element is marked for deletion.
 		virtual bool isMarkedForDeletion() const = 0;
 
@@ -157,43 +138,10 @@ class Element
 		/// Before actual delete, mark all victims for message cleanup.
 		virtual void prepareForDeletion( bool stage ) = 0;
 
-		/** Makes a source conn and returns the index of the new conn.
-		 * It is placed on the appropriate location
-		 * according to which MsgSrc and MsgDests (if any) are involved
-		 * in this message. The FuncList of recvFuncs is compared
-		 * with existing ones to see if the new conn can just be
-		 * appended on an existing MsgSrc, or if a new one needs to
-		 * be set up to handle it.
-		 * The MsgDests have to be included here
-		 * because the conn may be for a shared message.
-		 * All the Srcs and Dests are updated in case the new Conn
-		 * has altered indices.
-		 */
-		virtual unsigned int insertConnOnSrc(
-				unsigned int src, FuncList& rf,
-				unsigned int dest, unsigned int nDest
-		) = 0;
-
-		virtual unsigned int insertSeparateConnOnSrc(
-				unsigned int src, FuncList& rf,
-				unsigned int dest, unsigned int nDest
-		) = 0;
-
-		/** Makes a dest conn and returns the index of the new conn.
-		 * Here we only have to worry about placing it on one or more
-		 * dests. If it were a shared message with any srcs then the
-		 * insertConnOnSrc function would have applied.
-		 * All the Dests are updated in case the new Conn
-		 * has altered indices. The Srcs are safe in the lower indices.
-		 */
-		virtual unsigned int insertConnOnDest(
-				unsigned int dest, unsigned int nDest
-		) = 0;
-
 		/**
 		 * Returns a pointer to the data stored on this Element.
 		 */
-		virtual void* data() const = 0;
+		virtual void* data( unsigned int eIndex = 0 ) const = 0;
 
 		/**
 		 * Returns number of entries in the data. 1 for SimpleElement,
@@ -201,9 +149,6 @@ class Element
 		 */
 		virtual unsigned int numEntries() const = 0;
 		
-		virtual unsigned int index() const = 0;
-
-
 		/** Returns a Finfo that matches the path given by 'name'.
 		 * This can be a general path including field indirection
 		 * and indices. If necessary the function will generate
@@ -213,24 +158,25 @@ class Element
 		virtual const Finfo* findFinfo( const string& name ) = 0;
 
 		/**
+		 * Returns the Finfo identified by the specified msg number.
+		 * Source Finfos should have a positive index
+		 * pure Dest finfos have a negative index.
+		 * Not all Finfos will have a msgNum, but any valid msgNum 
+		 * should have a Finfo.
+		 */
+		virtual const Finfo* findFinfo( int msgNum ) const = 0;
+
+		/**
+		 * Returns finfo ptr associated with specified ConnTainer.
+		 */
+		virtual const Finfo* findFinfo( const ConnTainer* c ) const = 0;
+
+		/**
 		 * Returns a Finfo as above, except that it cannot handle any
 		 * dynamic Finfo thus limiting it to predefined finfos. Has the
 		 * merit that it is a const function
 		 */
 		virtual const Finfo* constFindFinfo( const string& name ) const = 0;
-
-		/**
-		 * Returns finfo ptr associated with specified conn index.
-		 * For ordinary finfos, this is a messy matter of comparing
-		 * the conn index with the ranges of MsgSrc or MsgDest
-		 * entries associated with the finfo. However, this search
-		 * happens after the dynamic finfos on the local element.
-		 * For Dynamic Finfos, this is fast: it just scans through
-		 * all finfos on the local finfo_ vector to find the one that 
-		 * has the matching connIndex.
-		 */
-		virtual const Finfo* findFinfo( unsigned int connIndex )
-				const = 0;
 
 		/**
 		 * Returns finfo ptr on local vector of Finfos. 0 if we are out
@@ -298,20 +244,6 @@ class Element
 
 
 		/**
-		 * Returns true if the specified connection is on the specified
-		 * MsgSrc
-		 */
-		virtual bool isConnOnSrc(
-			unsigned int src, unsigned int conn ) const = 0;
-
-		/**
-		 * Returns true if the specified connection is on the specified
-		 * MsgDest
-		 */
-		virtual bool isConnOnDest(
-			unsigned int dest, unsigned int conn ) const = 0;
-
-		/**
 		 * Returns the root element. This function is declared
 		 * in Neutral.cpp, because that is the data type of the 
 		 * root Element.
@@ -321,6 +253,71 @@ class Element
 		virtual Id id() const {
 			return id_;
 		}
+
+		///////////////////////////////////////////////////////////////
+		// Msg functions. Not to be used by mortals.
+		///////////////////////////////////////////////////////////////
+
+		/**
+		 * Returns the identified Msg.
+		 * Returns 0 if the msgNum is unreasonable.
+		 * Only used for looking up Src msgs, of course.
+		 */
+		virtual const Msg* msg( unsigned int msgNum ) const = 0;
+		virtual Msg* varMsg( unsigned int msgNum ) = 0;
+
+		/**
+		 * Returns the identified destMsg, which is just a 
+		 * vector of ConnTainers. This entails scanning
+		 * through the dest map looking for matches. 
+		 * Returns 0 if not found. Not used in
+		 * message passing, but only in traversal.
+		 */
+		virtual const vector< ConnTainer* >* dest( int msgNum ) const = 0;
+
+		/**
+		 * Scan through dest entries looking for dest msg. Return it if
+		 * found. If not found, create a new entry for it and return that. 
+		 * This is currently managed by a map indexed by the msgNum.
+		 */
+		virtual vector< ConnTainer* >* getDest( int msgNum ) = 0;
+
+		/**
+		 * Returns a pointer to the specified msg by looking up the named
+		 * Finfo. This may entail construction of a DynamicFinfo or a 
+		 * dest Msg, so the function is not const.
+		 * deprecated
+		 */
+		// virtual const Msg* msg( const string& fName ) = 0;
+
+		/**
+		 * Ensures that the requested msg is allocated. If it isn't,
+		 * it allocates it.
+		 * Deprecated.
+		virtual void checkMsgAlloc( unsigned int num ) = 0;
+		 */
+
+		/**
+		 * Create a new 'next' msg entry and return its index.
+		 * Called by Msg when adding a target that has a new, non-matching
+		 * funcId.
+		 * It will be inserted after the last of the existing 'next'
+		 * entries, before the DestMsgs.
+		 */
+		virtual unsigned int addNextMsg() = 0;
+
+
+		/**
+		 * Returns the # of msgs
+		 */
+		virtual unsigned int numMsg() const = 0;
+
+		/**
+		 * Checks if the msgNum is OK. Looks at #finfos and #src.
+		 * Rejects negative below #src, rejects others out of range.
+		 * Does not consider indices into 'next' as valid.
+		 */
+		bool validMsg( int msg ) const;
 
 		///////////////////////////////////////////////////////////////
 		// Element Id management functions
@@ -381,25 +378,11 @@ class Element
 				const = 0;
 
 		/**
-		 * This function replaces Element* pointers in the conn_ vector
-		 * with corresponding ones from the copied tree.
-		 * It fills the delConns vector with entries where the conns
-		 * have to be deleted. These include conns
-		 * to global objects; they will later be reconstructed using
-		 * the CopyMsg function.
-		 */
-		virtual void replaceCopyPointers(
-				map< const Element*, Element* >& tree,
-				vector< pair < Element*, unsigned int > >& delConns ) = 0;
-
-		/**
-		 * This function takes all the messages between this
-		 * element and the key (original) portion of the tree,
-		 * and makes duplicates of the messages to go between the 
-		 * current element and the data (copied) portion of the tree.
-		 * Excludes child messages.
-		 */
-		virtual void copyMsg( map< const Element*, Element* >& tree ) = 0;
+ 		* Copies messages from current element to duplicate provided dest is
+ 		* also on tree.
+ 		*/
+		virtual void copyMessages( Element* dup, 
+			map< const Element*, Element* >& origDup ) const = 0;
 		
 		/**
 		 * Returns the memory use of the Element and its messages, 
@@ -412,8 +395,6 @@ class Element
 		 * for this element.
 		 */
 		virtual void dumpMsgInfo() const = 0;
-		virtual bool innerCopyMsg(
-				const Conn& c, const Element* orig, Element* dup ) = 0;
 	protected:
 		/**
 		 * This function copies the element, its data and its
@@ -426,12 +407,15 @@ class Element
 		 * or child.
 		 */
 		virtual Element* innerCopy() const = 0;
+
+		/**
+		 * Placeholder function: Copies current element into an array
+		 * Element with n entries instead of 1.
+		 */
 		virtual Element* innerCopy(int n) const = 0;
 
 
 	private:
-		// static vector< Element* >& elementList();
-		// static vector< Element* > elementList;
 		Id id_;
 };
 

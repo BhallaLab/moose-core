@@ -47,16 +47,16 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			 * to search for a Finfo based on the index.
 			 */
 			virtual bool set(
-				Element* e, const Finfo* f, T1 v1, T2 v2 ) const {
+				Eref e, const Finfo* f, T1 v1, T2 v2 ) const {
 
-				void (*set)( const Conn&, T1 v1, T2 v2 ) =
+				void (*set)( const Conn*, T1 v1, T2 v2 ) =
 					reinterpret_cast< 
-						void (*)( const Conn&, T1 v1, T2 v2 )
+						void (*)( const Conn*, T1 v1, T2 v2 )
 					>(
 									f->recvFunc()
 					);
-				Conn c( e, MAXUINT );
-				set( c, v1, v2 );
+				SetConn c( e );
+				set( &c, v1, v2 );
 				return 1;
 			}
 
@@ -67,7 +67,7 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			 * It will run into trouble if the contents are strings
 			 * with spaces or commas.
 			 */
-			bool strSet( Element* e, const Finfo* f, const string& s )
+			bool strSet( Eref e, const Finfo* f, const string& s )
 					const
 			{
 				string::size_type pos = s.find_first_of( ", 	" );
@@ -119,14 +119,14 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			 * next field.
 			 */
 			static const void* incomingFunc(
-				const Conn& c, const void* data, RecvFunc rf )
+				const Conn* c, const void* data, RecvFunc rf )
 			{
 				T1 v1;
 				T2 v2;
 				data = unserialize< T1 >( v1, data );
 				data = unserialize< T2 >( v2, data );
 				( reinterpret_cast< 
-					void (*)( const Conn& c, T1, T2 ) 
+					void (*)( const Conn* c, T1, T2 ) 
 				> ( rf ) )( c, v1, v2 );
 				return data;
 			}
@@ -136,7 +136,7 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			 * This variant is used when the data is synchronous: sent
 			 * every clock step, so that the sequence is fixed.
 			 */
-			static void outgoingSync( const Conn& c, T1 v1, T2 v2 ) {
+			static void outgoingSync( const Conn* c, T1 v1, T2 v2 ) {
 				unsigned int size1 = serialSize< T1 >( v1 );
 				unsigned int size2 = serialSize< T2 >( v2 );
 				void* data = getParBuf( c, size1 + size2 ); 
@@ -150,7 +150,7 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			 * therefore adds additional data to identify the message
 			 * source
 			 */
-			static void outgoingAsync( const Conn& c, T1 v1, T2 v2 ) {
+			static void outgoingAsync( const Conn* c, T1 v1, T2 v2 ) {
 				unsigned int size1 = serialSize< T1 >( v1 );
 				unsigned int size2 = serialSize< T2 >( v2 );
 				void* data = getAsyncParBuf( c, size1 + size2 ); 

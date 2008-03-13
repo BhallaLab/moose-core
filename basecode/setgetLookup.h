@@ -15,27 +15,29 @@
  * This is essentially equivalent to set< T1, T2 > and even can use
  * identical interface internally.
 */
-template < class T1, class T2 > bool lookupSet( Element* e, const Finfo* f, T1 v, const T2& index )
+template < class T1, class T2 > bool lookupSet( 
+	Eref e, const Finfo* f, T1 v, const T2& index )
 {
 	const LookupFtype< T1, T2 >* lf =
 			dynamic_cast< const LookupFtype< T1, T2 >* >( f->ftype() );
 	if ( lf ) {
 		return lf->lookupSet( e, f, v, index );
 	}
-	cout << "Error: set( " << e->name() << ", " << f->name() <<
-			" T ): Finfo type mismatch\n";
+	cout << "Error: set( " << e.e->name() << "." << e.i << ", " << 
+		f->name() << " T ): Finfo type mismatch\n";
 	return 0;
 }
 
 /**
  * Utility function for doing the set using a string lookup for Finfo
  */
-template < class T1, class T2 > bool lookupSet( Element* e, const string& f, T1 v, const T2& index )
+template < class T1, class T2 > bool lookupSet( Eref e,
+	const string& f, T1 v, const T2& index )
 {
-	const Finfo* finfo = e->findFinfo( f );
+	const Finfo* finfo = e.e->findFinfo( f );
 	if ( finfo == 0 ) {
-		cout << "Error: set( " << e->name() << ", " << f <<
-				" T1, T2 ): Finfo not found\n";
+		cout << "Error: set( " << e.e->name() << "." << e.i << ", " <<
+			f << " T1, T2 ): Finfo not found\n";
 		return 0;
 	}
 	return lookupSet<T1, T2>( e, finfo, v, index );
@@ -46,9 +48,9 @@ template < class T1, class T2 > bool lookupSet( Element* e, const string& f, T1 
 * from a lookup function such as array or map.
 */
 template < class T1, class T2 > bool lookupGet(
-		const Element* e, const Finfo* f, T1& v, const T2& index )
+		Eref e, const Finfo* f, T1& v, const T2& index )
 {
-	assert( e != 0 );
+	assert( e.e != 0 );
 	assert( f != 0 );
 
 	const LookupFtype< T1, T2 >* lf =
@@ -56,8 +58,8 @@ template < class T1, class T2 > bool lookupGet(
 	if ( lf ) {
 		return lf->lookupGet( e, f, v, index );
 	}
-	cout << "Error: lookupget( " << e->name() << ", " << f->name() <<
-			" T1, T2 ): Finfo Type mismatch\n";
+	cout << "Error: lookupget( " << e.e->name() << "." << e.i << 
+		", " << f->name() << " T1, T2 ): Finfo Type mismatch\n";
 	return 0;
 }
 
@@ -69,12 +71,12 @@ template < class T1, class T2 > bool lookupGet(
  * modifying it.
  */
 template < class T1, class T2 > bool lookupGet(
-	Element* e, const string& f, T1& v, const T2& index )
+	Eref e, const string& f, T1& v, const T2& index )
 {
-	const Finfo* finfo = e->findFinfo( f );
+	const Finfo* finfo = e.e->findFinfo( f );
 	if ( finfo == 0 ) {
-		cout << "Error: lookupGet( " << e->name() << ", " << f <<
-				" T1, T2 ): Finfo not found\n";
+		cout << "Error: lookupGet( " << e.e->name() << "." << e.i << 
+			", " << f << " T1, T2 ): Finfo not found\n";
 		return 0;
 	}
 	return lookupGet< T1, T2 >( e, finfo, v, index );

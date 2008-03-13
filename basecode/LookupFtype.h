@@ -60,17 +60,17 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 			 * to keep track of the original setFunc of the ArrayFinfo,
 			 * and to hold the lookup data. Has to be in a void*.
 			 */
-			static void lookupRecvFunc( const Conn& c, T1 v )
+			static void lookupRecvFunc( const Conn* c, T1 v )
 			{
 				const DynamicFinfo* f = getDF( c );
 				assert ( f != 0 );
 				const T2* index = static_cast< const T2* >(
 								f->generalIndex() );
 
-				void (*rf)( const Conn& c, T1 v, const T2& index ) =
+				void (*rf)( const Conn* c, T1 v, const T2& index ) =
 					reinterpret_cast<
-					void (*)( const Conn&, T1, const T2& ) > (
-									f->innerSetFunc() );
+					void (*)( const Conn*, T1, const T2& ) > (
+									f->recvFunc() );
 				rf( c, v, *index );
 			}
 
@@ -90,18 +90,20 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 			 * - The GetFunc for the array type.
 			 * - The message response handling for later adds.
 			 */
-			static void lookupTrigFunc( const Conn& c )
+			static void lookupTrigFunc( const Conn* c )
 			{
 				const DynamicFinfo* f = getDF( c );
-				T1 (*getLookup)( const Element*, const T2& index ) =
+				T1 (*getLookup)( Eref, const T2& index ) =
 					reinterpret_cast< 
-					T1 (*)( const Element*, const T2& ) >
+					T1 (*)( Eref, const T2& ) >
 					( f->innerGetFunc() );
 
-				Element* e = c.targetElement();
+				Eref e = c->target();
 				const T2* index = static_cast< const T2* >(
 								f->generalIndex() );
-				send1< T1 >( e, f->srcIndex(), getLookup( e, *index ) );
+				///\todo Fix hack involving Slot
+				send1< T1 >( e, Slot( f->msg(), 0 ), 
+					getLookup( e, *index ) );
 			}
 
 			RecvFunc recvFunc() const {
@@ -130,13 +132,12 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 			 * be available through the Finfo, which must be a 
 			 * DynamicFinfo. Returns true on success.
 			 */
-			bool get( const Element* e, const Finfo* f, T1& v ) const {
+			bool get( Eref e, const Finfo* f, T1& v ) const {
 				const DynamicFinfo* df =
 						dynamic_cast< const DynamicFinfo* >( f );
 				assert( df != 0 );
-				T1 ( *g )( const Element*, const T2& ) =
-					reinterpret_cast<
-					T1 (*)( const Element*, const T2& ) >(
+				T1 ( *g )( Eref, const T2& ) =
+					reinterpret_cast< T1 (*)( Eref, const T2& ) >(
 							df->innerGetFunc()
 					);
 				const T2* index = static_cast< const T2* >(
@@ -151,20 +152,20 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 			 * be a DynamicFinfo. Returns true on success.
 			 * It specializes the generic version in the parent Ftype1
 			 */
-			bool set( Element* e, const Finfo* f, T1 v ) const {
+			bool set( Eref e, const Finfo* f, T1 v ) const {
 				const DynamicFinfo* df =
 						dynamic_cast< const DynamicFinfo* >( f );
 				assert( df != 0 );
 
-				void (*set)( const Conn&, T1 v, const T2& ) =
+				void (*set)( const Conn*, T1 v, const T2& ) =
 					reinterpret_cast<
-					void (*)( const Conn&, T1, const T2& ) >(
-						df->innerSetFunc()
+					void (*)( const Conn*, T1, const T2& ) >(
+						df->recvFunc()
 					);
-				Conn c( e, 0 );
+				SetConn c( e );
 				const T2* index = static_cast< const T2* >(
 								df->generalIndex() );
-				set( c, v, *index );
+				set( &c, v, *index );
 				return 1;
 			}
 
@@ -173,8 +174,7 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 			 * returning true if everything worked.
 			 * This may only be called from a DynamicFinfo
 			 */
-			bool strGet( const Element* e, const Finfo* f, string& s )
-					const
+			bool strGet( Eref e, const Finfo* f, string& s ) const
 			{
 				T1 val;
 				if ( get( e, f, val ) )
@@ -187,7 +187,7 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 			 * returning true if everything worked.
 			 * This may only be called from a DynamicFinfo
 			 */
-			bool strSet( Element* e, const Finfo* f, const string& s )
+			bool strSet( Eref e, const Finfo* f, const string& s )
 					const
 			{
 				T1 val;
@@ -222,15 +222,14 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 			 * or as a LookupFinfo.
 			 * \todo Unresolved issue: How to report bad index?
 			 */
-			bool lookupGet( const Element* e, const Finfo* f,
+			bool lookupGet( Eref e, const Finfo* f,
 							T1& v, const T2& index ) const {
 				const LookupFinfo* lf = 
 					dynamic_cast< const LookupFinfo* >( f );
 				if ( lf ) {
-					T1 ( *g )( const Element*, const T2& ) =
+					T1 ( *g )( Eref, const T2& ) =
 						reinterpret_cast<
-						T1 (*)( const Element*, const T2& ) >(
-								lf->innerGetFunc()
+						T1 (*)( Eref, const T2& ) >( lf->innerGetFunc()
 						);
 					v = g( e, index );
 					return 1;
@@ -238,9 +237,9 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 				const DynamicFinfo* df = 
 					dynamic_cast< const DynamicFinfo* >( f );
 				if ( df ) {
-					T1 ( *g )( const Element*, const T2& ) =
+					T1 ( *g )( Eref, const T2& ) =
 						reinterpret_cast<
-						T1 (*)( const Element*, const T2& ) >(
+						T1 (*)( Eref, const T2& ) >(
 								df->innerGetFunc()
 						);
 					v = g( e, index );
@@ -257,14 +256,14 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 			 * or as a LookupFinfo
 			 * \todo Unresolved issue: How to report bad index?
 			 */
-			bool lookupSet( Element* e, const Finfo* f,
+			bool lookupSet( Eref e, const Finfo* f,
 							T1 v, const T2& index ) const {
 				const LookupFinfo* lf = 
 					dynamic_cast< const LookupFinfo* >( f );
-				void (*set)( const Conn&, T1 v, const T2& ) = 0;
+				void (*set)( const Conn*, T1 v, const T2& ) = 0;
 				if ( lf ) {
 					set = reinterpret_cast<
-						void (*)( const Conn&, T1 v, const T2& ) >(
+						void (*)( const Conn*, T1 v, const T2& ) >(
 								lf->recvFunc()
 						);
 				} else {
@@ -272,14 +271,14 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 						dynamic_cast< const DynamicFinfo* >( f );
 					if ( df ) {
 						set = reinterpret_cast<
-							void (*)( const Conn&, T1 v, const T2& ) >(
-									df->innerSetFunc()
+							void (*)( const Conn*, T1 v, const T2& ) >(
+									df->recvFunc()
 							);
 					}
 				}
 				if ( set != 0 ) {
-					Conn c( e, 0 );
-					set( c , v, index );
+					SetConn c( e );
+					set( &c , v, index );
 					return 1;
 				}
 				return 0;

@@ -37,8 +37,7 @@ class ExtFieldFinfo: public Finfo
 			 */
 			bool add( 
 					Element* e, Element* destElm, const Finfo* destFinfo
-			) const
-			{ return true; }
+			) const;
 			
 			/**
 			 * Again, this should be similar to the regular
@@ -47,35 +46,31 @@ class ExtFieldFinfo: public Finfo
 			 */
 			bool respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
-					FuncList& srcfl, FuncList& returnFl,
+					unsigned int& srcFuncId, unsigned int& returnFuncId,
 					unsigned int& destIndex, unsigned int& numDest
-			) const
-			{ return true; }
+			) const;
 
-			void dropAll( Element* e ) const	{;}
-			bool drop( Element* e, unsigned int i ) const	{ return true;}
-			
-			unsigned int numIncoming( const Element* e ) const	{return 0;}
-			unsigned int numOutgoing( const Element* e ) const	{return 0;}
-			unsigned int incomingConns(
-					const Element* e, vector< Conn >& list ) const	{return 0;}
-			unsigned int outgoingConns(
-					const Element* e, vector< Conn >& list ) const	{return 0;}
+			/**
+			 * Returns a flag for a bad msg.
+			 */
+			int msg() const {
+				return INT_MAX;
+			}
 
 			/**
 			 * The Ftype knows how to do this conversion.
 			 */
-			bool strSet( Element* e, const std::string &s ) const {
+			bool strSet( Eref e, const std::string &s ) const {
 				return const_cast<ExtFieldFinfo *>(this)->strSet(e, s);
 			}
 			
-			bool strSet( Element* e, const std::string &s ) {
+			bool strSet( Eref e, const std::string &s ) {
 				val_ = s;	
 				return true;
 			}
 			
 			// The Ftype handles this conversion.
-			bool strGet( const Element* e, std::string &s ) const {
+			bool strGet( Eref e, std::string &s ) const {
 				s = val_;
 				return true;
 			}
@@ -134,12 +129,13 @@ class ExtFieldFinfo: public Finfo
 					return 0;
 			}
 
-			const Finfo* match( 
-				const Element* e, unsigned int connIndex ) const
-				{return 0;}
-
-			void countMessages( 
-				unsigned int& srcIndex, unsigned int& destIndex ){;}
+			/**
+			 * The ExtFieldFinfo does not handle any messages itself, so
+			 * does not need to allocate any on the parent object.
+			 */
+			void countMessages( unsigned int& num ) {
+				;
+			}
 
 			/**
 			 * The ExtFieldFinfo is one of the few Finfos that has
@@ -190,6 +186,15 @@ class ExtFieldFinfo: public Finfo
 				return new ExtFieldFinfo( *this );
 			}
 
+			/**
+			 * For the ExtFieldFinfo, we should pass in an existing
+			 * FuncVec for set, get, and recv. This will need changes
+			 * in constructor and associated code. We do not expect to
+			 * create a new FuncVec here.
+			 */
+			void addFuncVec( const string& cname )
+			{;}
+
 		private:
 			const Finfo* origFinfo_;
 
@@ -215,6 +220,6 @@ class ExtFieldFinfo: public Finfo
 /**
  * This function looks up the ExtFieldFonfo matching the incoming Conn
  */
-//extern const ExtFieldFinfo* getDF( const Conn& );
+//extern const ExtFieldFinfo* getDF( const Conn* );
 
 #endif // _EXT_FIELD_FINFO_H

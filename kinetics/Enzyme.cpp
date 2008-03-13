@@ -125,14 +125,14 @@ const Cinfo* initEnzymeCinfo()
 
 static const Cinfo* enzymeCinfo = initEnzymeCinfo();
 
-static const unsigned int subSlot =
-	initEnzymeCinfo()->getSlotIndex( "sub.reac" );
-static const unsigned int enzSlot =
-	initEnzymeCinfo()->getSlotIndex( "enz.reac" );
-static const unsigned int cplxSlot =
-	initEnzymeCinfo()->getSlotIndex( "cplx.reac" );
-static const unsigned int prdSlot =
-	initEnzymeCinfo()->getSlotIndex( "prd" );
+static const Slot subSlot =
+	initEnzymeCinfo()->getSlot( "sub.reac" );
+static const Slot enzSlot =
+	initEnzymeCinfo()->getSlot( "enz.reac" );
+static const Slot cplxSlot =
+	initEnzymeCinfo()->getSlot( "cplx.reac" );
+static const Slot prdSlot =
+	initEnzymeCinfo()->getSlot( "prd" );
 
 ///////////////////////////////////////////////////
 // Enzyme class function definitions
@@ -148,43 +148,43 @@ Enzyme::Enzyme()
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void Enzyme::setK1( const Conn& c, double value )
+void Enzyme::setK1( const Conn* c, double value )
 {
-	static_cast< Enzyme* >( c.data() )->k1_ = value;
+	static_cast< Enzyme* >( c->data() )->k1_ = value;
 }
 
-double Enzyme::getK1( const Element* e )
+double Enzyme::getK1( Eref e )
 {
-	return static_cast< Enzyme* >( e->data() )->k1_;
+	return static_cast< Enzyme* >( e.data() )->k1_;
 }
 
-void Enzyme::setK2( const Conn& c, double value )
+void Enzyme::setK2( const Conn* c, double value )
 {
-	static_cast< Enzyme* >( c.data() )->k2_ = value;
+	static_cast< Enzyme* >( c->data() )->k2_ = value;
 }
 
-double Enzyme::getK2( const Element* e )
+double Enzyme::getK2( Eref e )
 {
-	return static_cast< Enzyme* >( e->data() )->k2_;
+	return static_cast< Enzyme* >( e.data() )->k2_;
 }
 
-void Enzyme::setK3( const Conn& c, double value )
+void Enzyme::setK3( const Conn* c, double value )
 {
-	static_cast< Enzyme* >( c.data() )->k3_ = value;
+	static_cast< Enzyme* >( c->data() )->k3_ = value;
 }
 
-double Enzyme::getK3( const Element* e )
+double Enzyme::getK3( Eref e )
 {
-	return static_cast< Enzyme* >( e->data() )->k3_;
+	return static_cast< Enzyme* >( e.data() )->k3_;
 }
 
-double Enzyme::getKm( const Element* e )
+double Enzyme::getKm( Eref e )
 {
-	return static_cast< Enzyme* >( e->data() )->Km_;
+	return static_cast< Enzyme* >( e.data() )->Km_;
 }
-void Enzyme::setKm( const Conn& c, double value )
+void Enzyme::setKm( const Conn* c, double value )
 {
-	static_cast< Enzyme* >( c.data() )->innerSetKm( value );
+	static_cast< Enzyme* >( c->data() )->innerSetKm( value );
 }
 void Enzyme::innerSetKm( double value )
 {
@@ -195,13 +195,13 @@ void Enzyme::innerSetKm( double value )
 }
 
 
-double Enzyme::getKcat( const Element* e )
+double Enzyme::getKcat( Eref e )
 {
-	return static_cast< Enzyme* >( e->data() )->k3_;
+	return static_cast< Enzyme* >( e.data() )->k3_;
 }
-void Enzyme::setKcat( const Conn& c, double value )
+void Enzyme::setKcat( const Conn* c, double value )
 {
-	static_cast< Enzyme* >( c.data() )->innerSetKcat( value );
+	static_cast< Enzyme* >( c->data() )->innerSetKcat( value );
 }
 void Enzyme::innerSetKcat( double value )
 {
@@ -217,26 +217,26 @@ void Enzyme::innerSetKcat( double value )
  * By default we have an explicit enzyme with enz-sub complex: this is
  * mode FALSE.
  */
-bool Enzyme::getMode( const Element* e )
+bool Enzyme::getMode( Eref e )
 {
-	return static_cast< Enzyme* >( e->data() )->innerGetMode();
+	return static_cast< Enzyme* >( e.data() )->innerGetMode();
 }
 bool Enzyme::innerGetMode() const
 {
 	return ( procFunc_ == &Enzyme::implicitProcFunc );
 }
-void Enzyme::setMode( const Conn& c, bool value )
+void Enzyme::setMode( const Conn* c, bool value )
 {
-	static_cast< Enzyme* >( c.data() )->innerSetMode(
-		       c.targetElement(), value );
+	static_cast< Enzyme* >( c->data() )->innerSetMode(
+		       c->target(), value );
 }
-void Enzyme::innerSetMode( Element* e, bool mode )
+void Enzyme::innerSetMode( Eref e, bool mode )
 {
 	Km_ = ( k2_ + k3_ ) / k1_;
 	if ( mode == innerGetMode() )
 		return;
 	if ( mode ) { 
-		Id id = Neutral::getChildByName( e, e->name() + "_cplx" );
+		Id id = Neutral::getChildByName( e.e, e.e->name() + "_cplx" );
 		if ( !id.bad() ) {
 			Element* cplx = id();
 			if ( cplx )
@@ -254,24 +254,24 @@ void Enzyme::innerSetMode( Element* e, bool mode )
 // Shared message function definitions
 ///////////////////////////////////////////////////
 
-void Enzyme::innerProcessFunc( Element* e )
+void Enzyme::innerProcessFunc( Eref e )
 {
 	(this->*procFunc_)( e );
 }
 
-void Enzyme::processFunc( const Conn& c, ProcInfo p )
+void Enzyme::processFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c.targetElement();
-	static_cast< Enzyme* >( e->data() )->innerProcessFunc( e );
+	Eref e = c->target();
+	static_cast< Enzyme* >( c->data() )->innerProcessFunc( e );
 }
-void Enzyme::implicitProcFunc( Element* e )
+void Enzyme::implicitProcFunc( Eref e )
 {
 	B_ = s_ * e_ * k3_ * sk1_ / ( s_ + Km_ );
 	s_ = 1.0;
 	send2< double, double >( e, subSlot, 0.0, B_ );
 	send2< double, double >( e, prdSlot, B_, 0.0 );
 }
-void Enzyme::explicitProcFunc( Element* e )
+void Enzyme::explicitProcFunc( Eref e )
 {
 	eA_ = sA_ + pA_;
 	B_ = s_ * e_;
@@ -290,34 +290,34 @@ void Enzyme::innerReinitFunc(  )
 	s_ = 1.0;
 }
 		
-void Enzyme::reinitFunc( const Conn& c, ProcInfo p )
+void Enzyme::reinitFunc( const Conn* c, ProcInfo p )
 {
-	static_cast< Enzyme* >( c.data() )->innerReinitFunc( );
+	static_cast< Enzyme* >( c->data() )->innerReinitFunc( );
 }
 
-void Enzyme::substrateFunc( const Conn& c, double n )
+void Enzyme::substrateFunc( const Conn* c, double n )
 {
-	static_cast< Enzyme* >( c.data() )->s_ *= n;
+	static_cast< Enzyme* >( c->data() )->s_ *= n;
 }
 
-void Enzyme::enzymeFunc( const Conn& c, double n )
+void Enzyme::enzymeFunc( const Conn* c, double n )
 {
-	static_cast< Enzyme* >( c.data() )->e_ = n;
+	static_cast< Enzyme* >( c->data() )->e_ = n;
 }
 
-void Enzyme::complexFunc( const Conn& c, double n )
+void Enzyme::complexFunc( const Conn* c, double n )
 {
-	static_cast< Enzyme* >( c.data() )->sA_ *= n;
-	static_cast< Enzyme* >( c.data() )->pA_ *= n;
+	static_cast< Enzyme* >( c->data() )->sA_ *= n;
+	static_cast< Enzyme* >( c->data() )->pA_ *= n;
 }
 
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void Enzyme::intramolFunc( const Conn& c, double n )
+void Enzyme::intramolFunc( const Conn* c, double n )
 {
-	static_cast< Enzyme* >( c.data() )->innerIntramolFunc( n );
+	static_cast< Enzyme* >( c->data() )->innerIntramolFunc( n );
 }
 void Enzyme::innerIntramolFunc( double n )
 {
@@ -326,9 +326,9 @@ void Enzyme::innerIntramolFunc( double n )
 	else
 		sk1_ = 1.0;
 }
-void Enzyme::scaleKmFunc( const Conn& c, double k )
+void Enzyme::scaleKmFunc( const Conn* c, double k )
 {
-	static_cast< Enzyme* >( c.data() )->innerScaleKmFunc( k );
+	static_cast< Enzyme* >( c->data() )->innerScaleKmFunc( k );
 }
 void Enzyme::innerScaleKmFunc( double k )
 {
@@ -338,17 +338,18 @@ void Enzyme::innerScaleKmFunc( double k )
 		cout << "Error: Enzyme::scaleKm msg: negative k = " <<
 			k << endl;
 }
-void Enzyme::scaleKcatFunc( const Conn& c, double k )
+void Enzyme::scaleKcatFunc( const Conn* c, double k )
 {
-	static_cast< Enzyme* >( c.data() )->pA_ *= k;
+	static_cast< Enzyme* >( c->data() )->pA_ *= k;
 }
 
 ///////////////////////////////////////////////////////
 // Other func definitions
 ///////////////////////////////////////////////////////
 
-void Enzyme::makeComplex( Element* e )
+void Enzyme::makeComplex( Eref er )
 {
+	Element* e = er.e;
 	static const Finfo* cplxSrcFinfo = enzymeCinfo->findFinfo( "cplx" );
 	string cplxName = e->name() + "_cplx";
 	Id id = Neutral::getChildByName( e, cplxName );
@@ -423,10 +424,10 @@ void testEnzyme()
 	bool ret;
 
 	ProcInfoBase p;
-	Conn csub( sub, 0 );
-	Conn cprd( prd, 0 );
-	Conn cenzMol( enzMol, 0 );
-	Conn cenz( enz, 0 );
+	SetConn csub( sub, 0 );
+	SetConn cprd( prd, 0 );
+	SetConn cenzMol( enzMol, 0 );
+	SetConn cenz( enz, 0 );
 	p.dt_ = 0.001;
 	set< double >( sub, "concInit", 1.0 );
 	set< int >( sub, "mode", 0 );
@@ -442,7 +443,7 @@ void testEnzyme()
 	Id cplxId = Neutral::getChildByName( enz, "enz_cplx" );
 	ASSERT( !cplxId.bad(), "making Enzyme cplx" );
 	Element* cplx = cplxId();
-	Conn ccplx( cplx, 0 );
+	SetConn ccplx( cplx, 0 );
 
 	ret = sub->findFinfo( "reac" )->add( sub, enz, enz->findFinfo( "sub" ));
 	ASSERT( ret, "adding substrate msg" );
@@ -455,10 +456,10 @@ void testEnzyme()
 	// We want our charging curve to be a nice simple exponential
 	// n = 0.5 + 0.5 * exp( - t * 0.2 );
 	double delta = 0.0;
-	Enzyme::reinitFunc( cenz, &p );
-	Molecule::reinitFunc( csub, &p );
-	Molecule::reinitFunc( cprd, &p );
-	Molecule::reinitFunc( cenzMol, &p );
+	Enzyme::reinitFunc( &cenz, &p );
+	Molecule::reinitFunc( &csub, &p );
+	Molecule::reinitFunc( &cprd, &p );
+	Molecule::reinitFunc( &cenzMol, &p );
 	unsigned int i = 0;
 	unsigned int j = 0;
 	cout << "\n";
@@ -475,11 +476,11 @@ void testEnzyme()
 		}
 		//	cout << p.currTime_ << "	" << nprd << endl;
 
-		Enzyme::processFunc( cenz, &p );
-		Molecule::processFunc( ccplx, &p );
-		Molecule::processFunc( csub, &p );
-		Molecule::processFunc( cprd, &p );
-		Molecule::processFunc( cenzMol, &p );
+		Enzyme::processFunc( &cenz, &p );
+		Molecule::processFunc( &ccplx, &p );
+		Molecule::processFunc( &csub, &p );
+		Molecule::processFunc( &cprd, &p );
+		Molecule::processFunc( &cenzMol, &p );
 	}
 	ASSERT( delta < 5.0e-6, "Testing molecule and enzyme" );
 
@@ -501,10 +502,10 @@ void testEnzyme()
 	cplxId = Neutral::getChildByName( enz, "enz_cplx" );
 	ASSERT( cplxId.bad(), "removing Enzyme cplx" );
 
-	Enzyme::reinitFunc( cenz, &p );
-	Molecule::reinitFunc( csub, &p );
-	Molecule::reinitFunc( cprd, &p );
-	Molecule::reinitFunc( cenzMol, &p );
+	Enzyme::reinitFunc( &cenz, &p );
+	Molecule::reinitFunc( &csub, &p );
+	Molecule::reinitFunc( &cprd, &p );
+	Molecule::reinitFunc( &cenzMol, &p );
 	i = 0;
 	j = 0;
 	delta = 0.0;
@@ -521,10 +522,10 @@ void testEnzyme()
 		}
 		//	cout << p.currTime_ << "	" << nprd << endl;
 
-		Enzyme::processFunc( cenz, &p );
-		Molecule::processFunc( csub, &p );
-		Molecule::processFunc( cprd, &p );
-		Molecule::processFunc( cenzMol, &p );
+		Enzyme::processFunc( &cenz, &p );
+		Molecule::processFunc( &csub, &p );
+		Molecule::processFunc( &cprd, &p );
+		Molecule::processFunc( &cenzMol, &p );
 	}
 	ASSERT( delta < 5.0e-6, "Testing molecule and enzyme" );
 

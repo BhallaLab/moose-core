@@ -180,28 +180,28 @@ const Cinfo* initStoichCinfo()
 
 static const Cinfo* stoichCinfo = initStoichCinfo();
 
-static const unsigned int rateTermInfoSlot =
-	initStoichCinfo()->getSlotIndex( "hub.rateTermInfoSrc" );
-static const unsigned int rateSizeSlot =
-	initStoichCinfo()->getSlotIndex( "hub.rateSizeSrc" );
-static const unsigned int molSizeSlot =
-	initStoichCinfo()->getSlotIndex( "hub.molSizeSrc" );
-static const unsigned int molConnectionSlot =
-	initStoichCinfo()->getSlotIndex( "hub.molConnectionSrc" );
-static const unsigned int reacConnectionSlot =
-	initStoichCinfo()->getSlotIndex( "hub.reacConnectionSrc" );
-static const unsigned int enzConnectionSlot =
-	initStoichCinfo()->getSlotIndex( "hub.enzConnectionSrc" );
-static const unsigned int mmEnzConnectionSlot =
-	initStoichCinfo()->getSlotIndex( "hub.mmEnzConnectionSrc" );
-static const unsigned int completeSetupSlot =
-	initStoichCinfo()->getSlotIndex( "hub.completeSetupSrc" );
-static const unsigned int clearSlot =
-	initStoichCinfo()->getSlotIndex( "hub.clearSrc" );
-static const unsigned int allocateSlot =
-	initStoichCinfo()->getSlotIndex( "integrate.allocate" );
-static const unsigned int assignStoichSlot =
-	initStoichCinfo()->getSlotIndex( "gsl.assignStoich" );
+static const Slot rateTermInfoSlot =
+	initStoichCinfo()->getSlot( "hub.rateTermInfoSrc" );
+static const Slot rateSizeSlot =
+	initStoichCinfo()->getSlot( "hub.rateSizeSrc" );
+static const Slot molSizeSlot =
+	initStoichCinfo()->getSlot( "hub.molSizeSrc" );
+static const Slot molConnectionSlot =
+	initStoichCinfo()->getSlot( "hub.molConnectionSrc" );
+static const Slot reacConnectionSlot =
+	initStoichCinfo()->getSlot( "hub.reacConnectionSrc" );
+static const Slot enzConnectionSlot =
+	initStoichCinfo()->getSlot( "hub.enzConnectionSrc" );
+static const Slot mmEnzConnectionSlot =
+	initStoichCinfo()->getSlot( "hub.mmEnzConnectionSrc" );
+static const Slot completeSetupSlot =
+	initStoichCinfo()->getSlot( "hub.completeSetupSrc" );
+static const Slot clearSlot =
+	initStoichCinfo()->getSlot( "hub.clearSrc" );
+static const Slot allocateSlot =
+	initStoichCinfo()->getSlot( "integrate.allocate" );
+static const Slot assignStoichSlot =
+	initStoichCinfo()->getSlot( "gsl.assignStoich" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -226,56 +226,55 @@ Stoich::Stoich()
 // Field function definitions
 ///////////////////////////////////////////////////
 
-unsigned int Stoich::getNmols( const Element* e ) {
-	return static_cast< const Stoich* >( e->data() )->nMols_;
+unsigned int Stoich::getNmols( Eref e ) {
+	return static_cast< const Stoich* >( e.data() )->nMols_;
 }
 
-unsigned int Stoich::getNvarMols( const Element* e ) {
-	return static_cast< const Stoich* >( e->data() )->nVarMols_;
+unsigned int Stoich::getNvarMols( Eref e ) {
+	return static_cast< const Stoich* >( e.data() )->nVarMols_;
 }
 
-unsigned int Stoich::getNsumTot( const Element* e ) {
-	return static_cast< const Stoich* >( e->data() )->nSumTot_;
+unsigned int Stoich::getNsumTot( Eref e ) {
+	return static_cast< const Stoich* >( e.data() )->nSumTot_;
 }
 
-unsigned int Stoich::getNbuffered( const Element* e ) {
-	return static_cast< const Stoich* >( e->data() )->nBuffered_;
+unsigned int Stoich::getNbuffered( Eref e ) {
+	return static_cast< const Stoich* >( e.data() )->nBuffered_;
 }
 
-unsigned int Stoich::getNreacs( const Element* e ) {
-	return static_cast< const Stoich* >( e->data() )->nReacs_;
+unsigned int Stoich::getNreacs( Eref e ) {
+	return static_cast< const Stoich* >( e.data() )->nReacs_;
 }
 
-unsigned int Stoich::getNenz( const Element* e ) {
-	return static_cast< const Stoich* >( e->data() )->nEnz_;
+unsigned int Stoich::getNenz( Eref e ) {
+	return static_cast< const Stoich* >( e.data() )->nEnz_;
 }
 
-unsigned int Stoich::getNmmEnz( const Element* e ) {
-	return static_cast< const Stoich* >( e->data() )->nMmEnz_;
+unsigned int Stoich::getNmmEnz( Eref e ) {
+	return static_cast< const Stoich* >( e.data() )->nMmEnz_;
 }
 
-unsigned int Stoich::getNexternalRates( const Element* e ) {
-	return static_cast< const Stoich* >( e->data() )->nExternalRates_;
+unsigned int Stoich::getNexternalRates( Eref e ) {
+	return static_cast< const Stoich* >( e.data() )->nExternalRates_;
 }
-void Stoich::setUseOneWayReacs( const Conn& c, int value ) {
-	static_cast< Stoich* >( c.data() )->useOneWayReacs_ = value;
+void Stoich::setUseOneWayReacs( const Conn* c, int value ) {
+	static_cast< Stoich* >( c->data() )->useOneWayReacs_ = value;
 }
 
-bool Stoich::getUseOneWayReacs( const Element* e ) {
-	return static_cast< const Stoich* >( e->data() )->
+bool Stoich::getUseOneWayReacs( Eref e ) {
+	return static_cast< const Stoich* >( e.data() )->
 		useOneWayReacs_;
 }
-string Stoich::getPath( const Element* e ) {
-	return static_cast< const Stoich* >( e->data() )->path_;
+string Stoich::getPath( Eref e ) {
+	return static_cast< const Stoich* >( e.data() )->path_;
 }
 
-void Stoich::setPath( const Conn& c, string value ) {
-	Element* e = c.targetElement();
-	static_cast< Stoich* >( e->data() )->localSetPath( e, value);
+void Stoich::setPath( const Conn* c, string value ) {
+	static_cast< Stoich* >( c->data() )->localSetPath( c->target(), value);
 }
 
-unsigned int Stoich::getRateVectorSize( const Element* e ) {
-	return static_cast< const Stoich* >( e->data() )->rates_.size();
+unsigned int Stoich::getRateVectorSize( Eref e ) {
+	return static_cast< const Stoich* >( e.data() )->rates_.size();
 }
 
 ///////////////////////////////////////////////////
@@ -283,17 +282,16 @@ unsigned int Stoich::getRateVectorSize( const Element* e ) {
 ///////////////////////////////////////////////////
 
 /*
-void Stoich::rebuild( const Conn& c ) {
-	Element* e = c.targetElement();
-	static_cast< Stoich* >( e->data() )->localRebuild( e );
+void Stoich::rebuild( const Conn* c ) {
+	Element* e = c->targetElement();
+	static_cast< Stoich* >( c->data() )->localRebuild( e );
 }
 */
 
 // Static func
-void Stoich::reinitFunc( const Conn& c )
+void Stoich::reinitFunc( const Conn* c )
 {
-	Element* e = c.targetElement();
-	Stoich* s = static_cast< Stoich* >( e->data() );
+	Stoich* s = static_cast< Stoich* >( c->data() );
 	s->S_ = s->Sinit_;
 	// send1< vector< double >* >( e, allocateSlot, &s->S_ );
 	// send1< void* >( e, assignStoichSlot, e->data() );
@@ -303,9 +301,9 @@ void Stoich::reinitFunc( const Conn& c )
 }
 
 // static func
-void Stoich::integrateFunc( const Conn& c, vector< double >* v, double dt )
+void Stoich::integrateFunc( const Conn* c, vector< double >* v, double dt )
 {
-	Stoich* s = static_cast< Stoich* >( c.data() );
+	Stoich* s = static_cast< Stoich* >( c->data() );
 	s->updateRates( v, dt );
 }
 
@@ -337,7 +335,7 @@ unsigned int countRates( Element* e, bool useOneWayReacs )
 	return 0;
 }
 
-void Stoich::clear( Element* stoich )
+void Stoich::clear( Eref stoich )
 {
 	// cout << "Sending clear signal for " << stoich->name() << "\n" << flush;
 	send0( stoich, clearSlot ); // Sends command to KineticHub to clear
@@ -408,7 +406,7 @@ void Stoich::localRebuild( Element* stoich )
 }
 */
 
-void Stoich::localSetPath( Element* stoich, const string& value )
+void Stoich::localSetPath( Eref stoich, const string& value )
 {
 	path_ = value;
 	vector< Element* > ret;
@@ -422,14 +420,14 @@ void Stoich::localSetPath( Element* stoich, const string& value )
 		send1< vector< double >* >( stoich, allocateSlot, &S_ );
 
 		// The second target is for GSL integrator types.
-		send1< void* >( stoich, assignStoichSlot, stoich->data() );
+		send1< void* >( stoich, assignStoichSlot, stoich.data() );
 	} else {
 		cout << "No objects to simulate in path '" << value << "'\n";
 	}
 }
 
 // Need to clean out existing stuff first.
-void Stoich::rebuildMatrix( Element* stoich, vector< Element* >& ret )
+void Stoich::rebuildMatrix( Eref stoich, vector< Element* >& ret )
 {
 	static const Cinfo* molCinfo = Cinfo::find( "Molecule" );
 	vector< Element* >::iterator i;
@@ -515,7 +513,7 @@ void Stoich::rebuildMatrix( Element* stoich, vector< Element* >& ret )
 
 
 void Stoich::setupMols(
-	Element* e,
+	Eref e,
 	vector< Element* >& varMolVec,
 	vector< Element* >& bufVec,
 	vector< Element* >& sumTotVec
@@ -538,19 +536,19 @@ void Stoich::setupMols(
 	for ( i = varMolVec.begin(); i != varMolVec.end(); i++ ) {
 		get< double >( *i, nInitFinfo, nInit );
 		Sinit_[j] = nInit;
-		molMap_[ *i ] = j++;
+		molMap_[ Eref( *i ) ] = j++;
 		elist.push_back( *i );
 	}
 	for ( i = sumTotVec.begin(); i != sumTotVec.end(); i++ ) {
 		get< double >( *i, nInitFinfo, nInit );
 		Sinit_[j] = nInit;
-		molMap_[ *i ] = j++;
+		molMap_[ Eref( *i ) ] = j++;
 		elist.push_back( *i );
 	}
 	for ( i = bufVec.begin(); i != bufVec.end(); i++ ) {
 		get< double >( *i, nInitFinfo, nInit );
 		Sinit_[j] = nInit;
-		molMap_[ *i ] = j++;
+		molMap_[ Eref( *i ) ] = j++;
 		elist.push_back( *i );
 	}
 	for ( i = sumTotVec.begin(); i != sumTotVec.end(); i++ ) {
@@ -564,52 +562,46 @@ void Stoich::setupMols(
 		e, molConnectionSlot, &S_, &Sinit_, &elist );
 }
 
-void Stoich::addSumTot( Element* e )
+void Stoich::addSumTot( Eref e )
 {
 	vector< const double* > mol;
-	// vector< const Element* > tab;
-	if ( findIncoming( e, "sumTotal", mol ) ) {
-		map< const Element*, unsigned int >::iterator j = molMap_.find( e );
+	// vector< Eref > tab;
+	if ( findTargets( e.e, "sumTotal", mol ) ) {
+		map< Eref, unsigned int >::iterator j = molMap_.find( e );
 		assert( j != molMap_.end() );
 		SumTotal st( &S_[ j->second ], mol );
 		sumTotals_.push_back( st );
 	}
 }
 
-bool Stoich::findIncoming(
+// This replaces findIncoming and findReactants.
+bool Stoich::findTargets(
 	Element* e, const string& msgFieldName, vector< const double* >& ret )
 {
-	const Finfo* srcFinfo = e->findFinfo( msgFieldName );
-	assert( srcFinfo != 0 );
-	vector< Conn > srcList;
-	vector< Conn >::iterator i;
-	map< const Element*, unsigned int >::iterator j;
-	srcFinfo->incomingConns( e, srcList );
-
-	// vector< Element* >::iterator i;
-	// srcField.dest( srclist );
-	for (i = srcList.begin() ; i != srcList.end(); i++ ) {
-		Element* src = i->targetElement();
+	Conn* c = e->targets( msgFieldName );
+	map< Eref, unsigned int >::iterator j;
+	ret.resize( 0 );
+	while ( c->good() ) {
+		Eref src = c->target();
 		j = molMap_.find( src );
 		if ( j != molMap_.end() ) {
-			ret.push_back( & S_[ j->second ] );
-		} else { // Should be a table or other object.
-			// tab.push_back( src );
-			/*
-			cerr << "Error: Unable to locate " << 
-				src->name() <<
-				" as incoming for " << e->name();
+			ret.push_back( &S_[ j->second ] );
+		} else { 
+			// Table or other object, not handled.
+			cerr << "Error: findTargets: Unable to locate " << 
+				src.e->name() << "[" << src.i << "]" <<
+				" as target for " << e->name();
 			return 0;
-			*/
 		}
+		c->increment();
 	}
-	// return ( ( ret.size() + tab.size() ) > 0 );
+	delete c;
 	return ( ret.size() > 0 );
 }
 
 /**
  * Looks for all substrates of reaction or enzyme
- */
+ * Deprecated, merged into findTargets.
 unsigned int Stoich::findReactants( 
 	Element* e, const string& msgFieldName, 
 	vector< const double* >& ret )
@@ -619,7 +611,7 @@ unsigned int Stoich::findReactants(
 	vector< Conn > srcList;
 	vector< Conn >::iterator i;
 	ret.resize( 0 );
-	map< const Element*, unsigned int >::iterator j;
+	map< Eref, unsigned int >::iterator j;
 	// Fill in the list of incoming messages.
 	srcFinfo->outgoingConns( e, srcList );
 	for (i = srcList.begin() ; i != srcList.end(); i++ ) {
@@ -636,34 +628,7 @@ unsigned int Stoich::findReactants(
 	}
 	return ret.size();
 }
-
-/*
-unsigned int Stoich::findProducts( 
-	Element* e, const string& msgFieldName, 
-	vector< const double* >& ret )
-{
-	const Finfo* prdFinfo = e->findFinfo( msgFieldName );
-	assert( prdFinfo != 0 );
-	vector< Conn > prdList;
-	vector< Conn >::iterator i;
-	ret.resize( 0 );
-	map< const Element*, unsigned int >::iterator j;
-	// Fill in the list of incoming messages.
-	prdFinfo->outgoingConns( e, prdList );
-	for (i = prdList.begin() ; i != prdList.end(); i++ ) {
-		Element* prd = i->targetElement();
-		j = molMap_.find( prd );
-		if ( j != molMap_.end() ) {
-			ret.push_back( & S_[ j->second ] );
-		} else {
-			cerr << "Error: Unable to locate " << prd->name() <<
-				" as product for " << e->name();
-			return 0;
-		}
-	}
-	return ret.size();
-}
-*/
+ */
 
 class ZeroOrder* makeHalfReaction( double k, vector< const double*> v )
 {
@@ -726,7 +691,7 @@ void Stoich::fillStoich(
 /**
  * Adds the reaction-element e to the solved system.
  */
-void Stoich::addReac( Element* stoich, Element* e )
+void Stoich::addReac( Eref stoich, Element* e )
 {
 	vector< const double* > sub;
 	vector< const double* > prd;
@@ -739,10 +704,10 @@ void Stoich::addReac( Element* stoich, Element* e )
 	isOK = get< double >( e, "kb", kb );
 	assert ( isOK );
 
-	if ( findReactants( e, "sub", sub ) > 0 ) {
+	if ( findTargets( e, "sub", sub ) > 0 ) {
 		freac = makeHalfReaction( kf, sub );
 	}
-	if ( findReactants( e, "prd", prd ) > 0 ) {
+	if ( findTargets( e, "prd", prd ) > 0 ) {
 		breac = makeHalfReaction( kb, prd );
 	}
 
@@ -775,7 +740,7 @@ void Stoich::addReac( Element* stoich, Element* e )
 	++nReacs_;
 }
 
-bool Stoich::checkEnz( Element* e,
+bool Stoich::checkEnz( Eref e,
 		vector< const double* >& sub,
 		vector< const double* >& prd,
 		vector< const double* >& enz,
@@ -792,28 +757,28 @@ bool Stoich::checkEnz( Element* e,
 	ret = get< double >( e, "k3", k3 );
 	assert( ret );
 
-	if ( findReactants( e, "sub", sub ) < 1 ) {
+	if ( findTargets( e.e, "sub", sub ) < 1 ) {
 		cerr << "Error: Stoich::addEnz: Failed to find subs\n";
 		return 0;
 	}
-	if ( findReactants( e, "enz", enz ) != 1 ) {
+	if ( findTargets( e.e, "enz", enz ) != 1 ) {
 		cerr << "Error: Stoich::addEnz: Failed to find enzyme\n";
 		return 0;
 	}
 	if ( !isMM ) {
-		if ( findReactants( e, "cplx", cplx ) != 1 ) {  
+		if ( findTargets( e.e, "cplx", cplx ) != 1 ) {  
 			cerr << "Error: Stoich::addEnz: Failed to find cplx\n";
 			return 0;
 		}
 	}
-	if ( findReactants( e, "prd", prd ) < 1 ) {
+	if ( findTargets( e.e, "prd", prd ) < 1 ) {
 		cerr << "Error: Stoich::addEnz: Failed to find prds\n";
 		return 0;
 	}
 	return 1;
 }
 
-void Stoich::addEnz( Element* stoich, Element* e )
+void Stoich::addEnz( Eref stoich, Element* e )
 {
 	vector< const double* > sub;
 	vector< const double* > prd;
@@ -852,7 +817,7 @@ void Stoich::addEnz( Element* stoich, Element* e )
 	}
 }
 
-void Stoich::addMmEnz( Element* stoich, Element* e )
+void Stoich::addMmEnz( Eref stoich, Element* e )
 {
 	vector< const double* > sub;
 	vector< const double* > prd;
@@ -886,19 +851,19 @@ void Stoich::addMmEnz( Element* stoich, Element* e )
 	}
 }
 
-void Stoich::addTab( Element* stoich, Element* e )
+void Stoich::addTab( Eref stoich, Element* e )
 {
 	// nothing to do here. It is handled by keeping the tab as an external,
 	// unmanaged object.
 	// cout << "Don't yet know how to addTab for " << e->name() << "\n";
 }
 
-void Stoich::addRate( Element* stoich, Element* e )
+void Stoich::addRate( Eref stoich, Element* e )
 {
 	cout << "Don't yet know how to addRate for " << e->name() << "\n";
 }
 
-void Stoich::setupReacSystem( Element* stoich )
+void Stoich::setupReacSystem( Eref stoich )
 {
 	// At this point the Stoich has sent out all info to the target
 	// objects and the Hubs. It now requests them to do something with it.

@@ -40,19 +40,14 @@ const Finfo* LookupFinfo::match( Element* e, const string& s ) const
 		string indexStr = 
 			s.substr( openpos + 1, closepos - openpos - 1 );
 
-		///\todo: need to define the strToIndex function
 		void* index = ftype()->strToIndexPtr( indexStr );
-		// string* index = new string( indexStr );
 		string n = name() + "[" + indexStr + "]";
 		DynamicFinfo* ret = 
 				DynamicFinfo::setupDynamicFinfo(
 					e, n, this, 
-					set_, get_,
-					ftype()->recvFunc(), ftype()->trigFunc(),
+					get_,
 					index
 				);
-		// ret->setGeneralIndex( index );
-		// e->addFinfo( ret );
 		return ret;
 	}
 	return 0;
@@ -75,7 +70,7 @@ bool LookupFinfo::add(
 */
 bool LookupFinfo::respondToAdd(
 		Element* e, Element* src, const Ftype *srcType,
-		FuncList& srcFl, FuncList& returnFl,
+		unsigned int& srcFuncId, unsigned int& returnFuncId,
 		unsigned int& destIndex, unsigned int& numDest
 ) const
 {
@@ -83,23 +78,22 @@ bool LookupFinfo::respondToAdd(
 		return 0;
 }
 
-
-/// Dummy function: DynamicFinfo should handle
-void LookupFinfo::dropAll( Element* e ) const
+void LookupFinfo::addFuncVec( const string& cname )
 {
-		assert( 0 );
+	fv_ = new FuncVec( cname, name() );
+	fv_->addFunc( set_, ftype() );
+	fv_->setDest();
+	fv_->makeTrig(); // Make a trigger funcVec
+	fv_->makeLookup(); // Make a Lookup funcVec to deal with indexing
 }
-
-/// Dummy function: DynamicFinfo should handle
-bool LookupFinfo::drop( Element* e, unsigned int i ) const
-{
-		assert( 0 );
-		return 0;
-}
-
 
 #ifdef DO_UNIT_TESTS
 
+// Hack to put in Slot globals, which are assigned below in lookupFinfoTest
+// but used elsewhere in the class definitions for LookupTestClass
+static Slot procSlot;
+static Slot sumSlot;
+static Slot requestSlot;
 
 /**
  * This test class contains a vector of doubles, a regular double,
@@ -117,10 +111,10 @@ class LookupTestClass
 				dmap["3"] = 0.4;
 			}
 
-			static double getDmap( const Element* e, const string& s ) {
+			static double getDmap( Eref e, const string& s ) {
 				map< string, double >::iterator i;
 				LookupTestClass* atc = 
-						static_cast< LookupTestClass* >( e->data() );
+						static_cast< LookupTestClass* >( e.data() );
 				i = atc->dmap.find( s );
 				if ( i != atc->dmap.end() )
 					return i->second;
@@ -130,10 +124,9 @@ class LookupTestClass
 			}
 
 			static void setDmap( 
-						const Conn& c, double val, const string& s ) {
+						const Conn* c, double val, const string& s ) {
 				LookupTestClass* atc = 
-					static_cast< LookupTestClass* >(
-									c.targetElement()->data() );
+					static_cast< LookupTestClass* >( c->data( ) );
 				map< string, double >::iterator i = atc->dmap.find( s );
 				if ( i != atc->dmap.end() )
 					i->second = val;
@@ -141,48 +134,40 @@ class LookupTestClass
 					cout << "Error: LookupTestClass::setDvec: index not found\n";
 			}
 
-			static double getDval( const Element* e ) {
-				return static_cast< LookupTestClass* >( e->data() )->dval;
+			static double getDval( Eref e ) {
+				return static_cast< LookupTestClass* >( e.data() )->dval;
 			}
-			static void setDval( const Conn& c, double val ) {
-				static_cast< LookupTestClass* >( 
-					c.targetElement()->data() )->dval = val;
+			static void setDval( const Conn* c, double val ) {
+				static_cast< LookupTestClass* >( c->data( ) )->dval = val;
 			}
 
 			// A proper message, adds incoming val to dval.
-			static void dsum( const Conn& c, double val ) {
-				static_cast< LookupTestClass* >( 
-					c.targetElement()->data() )->dval += val;
+			static void dsum( const Conn* c, double val ) {
+				static_cast< LookupTestClass* >( c->data( ) )->dval += val;
 			}
 
 			// another proper message. Triggers a local operation,
 			// triggers sending of dval, and triggers a trigger out.
-			static void proc( const Conn& c ) {
-				Element* e = c.targetElement();
+			static void proc( const Conn* c ) {
+				void* data = c->data();
 				LookupTestClass* tc =
-						static_cast< LookupTestClass* >( e->data() );
+						static_cast< LookupTestClass* >( data );
 				tc->dval = 0.0;
 				map< string, double >::iterator i;
 				for ( i = tc->dmap.begin(); i != tc->dmap.end(); i++ )
 					tc->dval += i->second;
 
 				// This sends the double value out to a target
-				// dsumout == 0, but we make it one because of
-				// base neutral class adding fields.
-				send1< double >( e, 1, tc->dval );
+				send1< double >( c->target(), sumSlot, tc->dval );
 
 				// This just sends a trigger to the remote object.
-				// procout == 1, but set to 2 because of base class
-				// Either it will trigger dproc itself, or it
-				// could trigger a getfunc.
-				send0( e, 2 );
+				send0( c->target(), procSlot );
 			}
 
 		private:
 			map< string, double > dmap;
 			double dval;
 };
-
 
 void lookupFinfoTest()
 {
@@ -192,6 +177,11 @@ void lookupFinfoTest()
 	const Ftype* f1a = LookupFtype< double, string >::global();
 	const Ftype* f1d = ValueFtype1< double >::global();
 	const Ftype* f0 = Ftype0::global();
+	static Finfo* requestValShared[] =
+	{
+		new SrcFinfo( "procout", f0 ),
+		new DestFinfo( "dsum", f1d, RFCAST( &LookupTestClass::dsum ) ),
+	};
 	static Finfo* testFinfos[] = 
 	{
 		new LookupFinfo( "dmap", f1a,
@@ -200,6 +190,8 @@ void lookupFinfoTest()
 		new ValueFinfo( "dval", f1d,
 				LookupTestClass::getDval,
 				reinterpret_cast< RecvFunc >( &LookupTestClass::setDval ) ),
+		new SharedFinfo( "requestVal", requestValShared,
+			sizeof( requestValShared ) / sizeof( Finfo* ) ),
 		new SrcFinfo( "dsumout", f1d ),
 		new SrcFinfo( "procout", f0 ),
 		new DestFinfo( "dsum", f1d, RFCAST( &LookupTestClass::dsum ) ),
@@ -212,6 +204,13 @@ void lookupFinfoTest()
 					testFinfos, 
 					sizeof( testFinfos ) / sizeof( Finfo*),
 					ValueFtype1< LookupTestClass >::global() );
+
+	FuncVec::sortFuncVec();
+
+	sumSlot = lookuptestclass.getSlot( "dsumout" );
+	procSlot = lookuptestclass.getSlot( "procout" );
+	requestSlot = lookuptestclass.getSlot( "requestVal.procout" );
+
 
 	Element* a1 = lookuptestclass.create( Id::scratchId(), "a1" );
 	double dret = 0;
@@ -317,103 +316,103 @@ void lookupFinfoTest()
 	//   to a1->dmap[3]. The send is created first. Check it.
 
 	// 1. We will follow a1 messages to call proc on a2. Check a2->dval.
-	ASSERT( a1->findFinfo( "procout" )->
-			add( a1, a2, a2->findFinfo( "proc" ) ),
-			"adding procout to proc"
-			);
+	const Finfo *f1 = a1->findFinfo( "procout" );
+	const Finfo *f2 = a2->findFinfo( "proc" );
+	bret = f1->add( a1, a2, f2 );
+	ASSERT( bret, "adding procout to proc");
 
 	// 2. proc on a2 will send this value of dval to a1->dmap[0].
-	ASSERT( 
-		a2->findFinfo( "dsumout" )->
-			add( a2, a1, a1->findFinfo( "dmap[0]" ) ),
-			"Adding dsumout to dval"
-		);
+	f1 = a2->findFinfo( "dsumout" );
+	f2 = a1->findFinfo( "dmap[0]" );
+	bret = f1->add( a2, a1, f2 );
+	ASSERT( bret, "Adding dsumout to dval");
 	// We have already made a finfo for a1->dmap[0]. Check that this
 	// is the one that is used for the messaging.
 	ASSERT( a1->listLocalFinfos( flist ) == 1, "Counting DynFinfos" );
 
-	// 3. a1 trigger message will call send on a2->dmap[1]. This goes
-	//   to a1->dval.
-	ASSERT( 
-		a1->findFinfo( "procout" )->
-			add( a1, a2, a2->findFinfo( "dmap[1]" ) ),
-			"Adding procout to dmap[1]"
-		);
-	ASSERT( 
-		a2->findFinfo( "dmap[1]" )->
-			add( a2, a1, a1->findFinfo( "dval" ) ),
-			"Adding dmap[1] to dval"
-		);
+	// 3. a1 trigger message will call request on a2->dmap[1]. The
+	// value comes back to a1, and is added to dval.
+	f1 = a1->findFinfo( "requestVal" );
+	f2 = a2->findFinfo( "dmap[1]" );
+	bret = f1->add( a1, a2, f2 );
+	ASSERT( bret, "Adding requestVal to dmap[1]");
 	// Here we made a new DynamicFinfo for the regular ValueFinfo.
-	ASSERT( a1->listLocalFinfos( flist ) == 2, "Counting DynFinfos" );
+	ASSERT( a2->listLocalFinfos( flist ) == 1, "Counting DynFinfos" );
 
-	// 4. a1 trigger message will call send on a2->dmap[2]. This goes
-	//   to a1->dmap[2]. The trigger is created first. Check it.
-	ASSERT( 
-		a1->findFinfo( "procout" )->
-			add( a1, a2, a2->findFinfo( "dmap[2]" ) ),
-			"Adding procout to dmap[2]"
-		);
-	ASSERT( 
-		a2->findFinfo( "dmap[2]" )->
-			add( a2, a1, a1->findFinfo( "dmap[2]" ) ),
-			"Adding dmap[2] to dmap[2] after trigger"
-		);
+	// 4. a2 trigger message will call request on a1->dmap[2]. This
+	//   is set up using reverse Shared messaging calls. The
+	//   value comes back to a2 and is added to dval.
+	f1 = a1->findFinfo( "dmap[2]" );
+	f2 = a2->findFinfo( "requestVal" );
+	bret = f1->add( a1, a2, f2 );
+	ASSERT( bret, "Adding a1.dmap[2] to a2.requestVal");
+
 	// We have not made a finfo for a1->dmap[2]. Check that this
 	// new one is used for the messaging.
-	ASSERT( a1->listLocalFinfos( flist ) == 3, "Counting DynFinfos" );
+	ASSERT( a1->listLocalFinfos( flist ) == 2, "Counting DynFinfos" );
 
-	// 5. a1 trigger message will call send on a2->dmap[3]. This goes
-	//   to a1->dmap[3]. The send is created first. Check it.
-	ASSERT( 
-		a2->findFinfo( "dmap[3]" )->
-			add( a2, a1, a1->findFinfo( "dmap[3]" ) ),
-			"Adding dmap[3] to dmap[3] before trigger"
-		);
-	ASSERT( 
-		a1->findFinfo( "procout" )->
-			add( a1, a2, a2->findFinfo( "dmap[3]" ) ),
-			"Adding procout to dmap[3]"
-		);
-	// We have not made a finfo for a1->dmap[3]. Check that this
-	// new one is used for the messaging.
-	ASSERT( a1->listLocalFinfos( flist ) == 4, "Counting DynFinfos" );
+	///////////////////////////////////////////////////////////////////
+	// Now setup is done, let's start sending info around.
+	///////////////////////////////////////////////////////////////////
+	bret = set< double >( a1, "dval", 4321.0 );
+	bret &= set< double >( a2, "dval", 1234.0 );
+	bret &= set< double >( a1, "dmap[0]", 10.0 );
+	bret &= set< double >( a1, "dmap[1]", 20.0 );
+	bret &= set< double >( a1, "dmap[2]", 30.0 );
+	bret &= set< double >( a1, "dmap[3]", 40.0 );
+	bret &= set< double >( a2, "dmap[0]", 1.0 );
+	bret &= set< double >( a2, "dmap[1]", 2.0 );
+	bret &= set< double >( a2, "dmap[2]", 3.0 );
+	bret &= set< double >( a2, "dmap[3]", 4.0 );
+	ASSERT( bret, "assignment");
 
-	unsigned int procOutSlot = lookuptestclass.getSlotIndex( "procout");
+	bret = get< double >( a1, a1->findFinfo( "dmap[2]" ), dret );
+	ASSERT( bret, "test assignment");
+	ASSERT( dret == 30.0, "test assignment");
 
-	send0( a1, procOutSlot ); // procout
+	send0( a1, procSlot ); // procout
 	// Here a2->dval should simply become the sum of its lookup entries.
-	// As this has just been initialized, the sum should be 1.0.
+	// As this has just been initialized, the sum should be 10.0.
 	// Bad Upi: should never test for equality of doubles.
 	get< double >( a2, a2->findFinfo( "dval" ), dret );
-	ASSERT( dret == 1.0, "test msg1");
+	ASSERT( dret == 10.0, "test msg1");
 
 	// proc on a2 will send this value of dval to a1->dmap[0]. Check it.
 	dret = 0.0;
 	get< double >( a1, a1->findFinfo( "dmap[0]" ), dret );
-	ASSERT( dret == 1.0, "test msg2");
+	ASSERT( dret == 10.0, "test msg2");
 
-	// a1 trigger message will call send on a2->dmap[1]. This goes
-	//   to a1->dval. Check it.
+	//////////////////////////////////////////////////////////////////////
+	// a1 trigger message will call send on a2->dmap[1], which currently
+	// holds the value 2. The value is added to a1->dval, which is 4321
+	send0( a1, requestSlot ); // procout
 	dret = 0.0;
 	get< double >( a1, a1->findFinfo( "dval" ), dret );
-	ASSERT( dret == 0.2, "test msg3");
+	ASSERT( dret == 4323.0, "test msg3");
 
-	// a1 trigger message will call send on a2->dmap[2]. This goes
-	//   to a1->dmap[2]. The trigger is created first. Check it.
-	dret = 0.0;
-	get< double >( a1, a1->findFinfo( "dmap[2]" ), dret );
-	ASSERT( dret == 0.3, "test msg4");
+	// 4. a2 trigger message will call request on a1->dmap[2]. This
+	//   is set up using reverse Shared messaging calls. The
+	//   value ( 30 ) comes back to a2 and is added to dval (10).
+	bret = get< double >( a2, a2->findFinfo( "dval" ), dret );
+	ASSERT( bret, "test msg4");
+	ASSERT( dret == 10.0, "test msg4");
+	dret = 0;
+	bret = get< double >( a1, a1->findFinfo( "dmap[2]" ), dret );
+	ASSERT( bret, "test msg4");
+	ASSERT( dret == 30.0, "test msg4");
 
-	// a1 trigger message will call send on a2->dmap[3]. This goes
-	//   to a1->dmap[3]. The send is created first. Check it.
+	send0( a2, requestSlot ); // procout
 	dret = 0.0;
-	get< double >( a1, a1->findFinfo( "dmap[3]" ), dret );
-	ASSERT( dret == 0.4, "test msg5");
+	get< double >( a2, a2->findFinfo( "dval" ), dret );
+	ASSERT( dret == 40, "test msg4");
 
 	// Check that there are no strange things happening with the
 	// Finfos when the messaging is actually used.
-	ASSERT( a1->listLocalFinfos( flist ) == 4, "Counting DynFinfos" );
+	// Note that we set all of a1.dmap[], only 2 of which were already used
+	// Note that we set all of a2.dmap[], only 1 of which was already used
+	// Since the system reuses when it can, the net increment in each is 1.
+	ASSERT( a1->listLocalFinfos( flist ) == 3, "Counting DynFinfos" );
+	ASSERT( a2->listLocalFinfos( flist ) == 2, "Counting DynFinfos" );
 }
 
 #endif // DO_UNIT_TESTS

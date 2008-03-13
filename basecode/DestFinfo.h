@@ -9,10 +9,6 @@
 **********************************************************************/
 #ifndef _DEST_FINFO_H
 #define _DEST_FINFO_H
-#include <string>
-#include "Ftype.h"
-#include "Finfo.h"
-#include "Element.h"
 
 using namespace std;
 
@@ -46,29 +42,20 @@ class DestFinfo: public Finfo
 			
 			bool respondToAdd(
 					Element* e, Element* dest, const Ftype *destType,
-					FuncList& destfl, FuncList& returnFl,
-					unsigned int& destIndex, unsigned int& numDest
+					unsigned int& myFuncId, unsigned int& returnFuncId,
+					unsigned int& destMsgId, unsigned int& numDest
 			) const;
 			
-			void dropAll( Element* e ) const;
-			bool drop( Element* e, unsigned int i ) const;
-
-			unsigned int numIncoming( const Element* e ) const;
-			unsigned int numOutgoing( const Element* e ) const;
-			unsigned int incomingConns(
-					const Element* e, vector< Conn >& list ) const;
-			unsigned int outgoingConns(
-					const Element* e, vector< Conn >& list ) const;
-
+			int msg() const;
 
 			/**
 			 * Call the RecvFunc with the arguments in the string.
 			 */
-			bool strSet( Element* e, const std::string &s )
+			bool strSet( Eref e, const std::string &s )
 					const;
 			
 			/// strGet doesn't work for DestFinfo
-			bool strGet( const Element* e, std::string &s ) const {
+			bool strGet( Eref e, std::string &s ) const {
 				return 0;
 			}
 
@@ -76,22 +63,12 @@ class DestFinfo: public Finfo
 					return rfunc_;
 			}
 
-			void countMessages( 
-					unsigned int& srcNum, unsigned int& destNum )
-			{
-				destIndex_ = destNum++;
-			}
+			void countMessages( unsigned int& num );
 
-			bool getSlotIndex( const string& name, 
-					unsigned int& ret ) const;
-			/*
-			unsigned int getSlotIndex() const {
-				return destIndex_;
-			}
-			*/
+			bool getSlot( const string& name, Slot& ret ) const;
 
 			const Finfo* match( 
-				const Element* e, unsigned int connIndex ) const;
+				const Element* e, const ConnTainer* c ) const;
 
 			bool isTransient() const {
 					return 0;
@@ -103,9 +80,35 @@ class DestFinfo: public Finfo
 				return new DestFinfo( *this );
 			}
 
+			/**
+			 * Sets up the FuncVec on the DestFinfo, by filling in the
+			 * name and RecvFunc.
+			 */
+			void addFuncVec( const string& cname );
+
+			/**
+			 * Returns the func id of this DestFinfo.
+			 */
+			unsigned int funcId() const {
+				return fv_->id();
+			}
+
 		private:
+			/**
+			 * This is the function executed when a message arrives at this
+			 * Finfo.
+			 */
 			RecvFunc rfunc_;
-			unsigned int destIndex_;
+
+			/**
+			 * This identifies the msg associated with this DestFinfo.
+			 */
+			int msg_;
+
+			/**
+			 * The FuncVec data structure manages RecvFuncs
+			 */
+			FuncVec* fv_;
 };
 
 #endif // _DEST_FINFO_H

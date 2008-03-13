@@ -21,26 +21,26 @@ class ClockJob
 		//////////////////////////////////////////////////////////
 		//  Field assignment functions
 		//////////////////////////////////////////////////////////
-		static void setRunTime( const Conn& c, double v );
-		static double getRunTime( const Element* e );
-		static double getCurrentTime( const Element* e );
-		static void setNsteps( const Conn& c, int v );
-		static int getNsteps( const Element* e );
-		static int getCurrentStep( const Element* e );
+		static void setRunTime( const Conn* c, double v );
+		static double getRunTime( Eref e );
+		static double getCurrentTime( Eref e );
+		static void setNsteps( const Conn* c, int v );
+		static int getNsteps( Eref e );
+		static int getCurrentStep( Eref e );
 		
 		//////////////////////////////////////////////////////////
 		//  Dest functions
 		//////////////////////////////////////////////////////////
-		static void receiveNextTime( const Conn&, double nextTime );
-		static void startFunc( const Conn& c, double runTime );
-		void startFuncLocal( Element* e, double runTime );
-		static void stepFunc( const Conn& c, int nsteps );
-		static void reinitFunc( const Conn& c );
-		void reinitFuncLocal( Element* e );
-		static void reschedFunc( const Conn& c );
-		void reschedFuncLocal( Element* e );
-		static void dtFunc( const Conn& c, double dt );
-		void dtFuncLocal( Element* e, double dt );
+		static void receiveNextTime( const Conn*, double nextTime );
+		static void startFunc( const Conn* c, double runTime );
+		void startFuncLocal( Eref e, double runTime );
+		static void stepFunc( const Conn* c, int nsteps );
+		static void reinitFunc( const Conn* c );
+		void reinitFuncLocal( Eref e );
+		static void reschedFunc( const Conn* c );
+		void reschedFuncLocal( Eref e );
+		static void dtFunc( const Conn* c, double dt );
+		void dtFuncLocal( Eref e, double dt );
 
 		//////////////////////////////////////////////////////////
 		//  Utility functions

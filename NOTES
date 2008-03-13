@@ -5581,3 +5581,721 @@ regression tests.
 Checked in as revision 377 with unit test flags on, Smoldyn off, -g ,GSL
 
 ==============================================================================
+24 Jan 2008
+Set up a branch, msg_2008, for doing development on improved messaging design.
+This will mess up everything so best to do it in isolation.
+This is based on revision 390.
+The first revision here is 391.
+
+Now working on incremental implementation as far as it can go. For now,
+setting up new data structs for Conn without messing with the other parts
+of the message. Still unable to compile, see SimpleElement.cpp:465
+==============================================================================
+29 Jan 2008.
+Conn now set up, working after numerous headaches arising from deprecating
+the Conn::sourceIndex( Element* ) function. Cleared unit and regression tests.
+
+Checked in as revision 395 with unit test flags on, Smoldyn off, -g, GSL
+
+Next to flesh out ConnInfo and its variants.
+==============================================================================
+30 Jan 2008.
+First pass done for ConnInfo and SimpleConnInfo. The latter is now 
+automatically inserted as a global pointer in regular conns, which is what they
+all are for now. However, there is an element::connect function which 
+does not do so. This function needs to be deprecated.
+
+Stuff that can still be done before breaking everything:
+	* FuncList code. Note I had done a FuncData struct for parallel stuff.
+		* Has to harvest all functions in SharedFinfos
+		* Has to manage the FuncLists
+		* Has to provide a way to sync lists across nodes.
+	* Slot upgrade to include FuncList specification
+	- Add further kinds of ConnInfos that could in principle handle
+		complex messaging.
+	* Change Conn access to pointers.
+
+Stuff to look at before the transition:
+	* Element::connect function. It does not have a way to tie 
+		src/dest index to Conns.
+		- Checked. Need to work out how we're handling Conns to figure
+		this one out.
+	- MsgSrc/Dest Id sorting out for ConnInfos
+
+Stuff that will break everything
+	- Replace MsgSrc and MsgDest with new forms.
+
+Stuff to do after transition
+	- Benchmark simple messaging with old and new versions.
+
+
+Perhaps I should use a pointer for Conns. Several issues either way.
+- Will need to refer to a virtual class ptr for ConnInfo anyway for data access
+Minor memory considerations
+	- Save one ptr in SimpleConn struct, lose it again in virtual table.
+	- Possibly save a uint in element index for SimpleConn.
+	- Lose space in ptr table and then allocation info.
+Speed considerations
+	- One or two less indirections for data
+	- one more indirection for element info.
+	- Cache hopping if conns are widely separated/created far apart.
+Organization considerations
+	- Cleaner data structs and access. Expandable.
+	- Memory management headaches: frees and copies
+	- May need special constructor to be efficient.
+
+For now hold off. Doing this will break a lot of stuff.
+
+
+Setting off on FuncList code. Turns out we have a FuncList name, so I
+called it the FuncVec. To set things up automatically in the cinfo 
+initialization I still need to
+	* modify Cinfo::Cinfo to set up a funcVec for all Shared and 
+		Src Finfos.
+	* Add a virtual function to the Finfo base class to set up and
+		incorporate a FuncVec.
+	- Add operations for Ftype::parFuncSync  and Ftype::parFuncAsync
+==============================================================================
+31 Jan 2008.
+
+Checked in first part of FuncVec implementation,
+as revision 398 with unit test flags on, Smoldyn off, -g, GSL
+
+Checked in second part of FuncVec implementation. Still need to complete
+other messy tie-ups needed for handling FuncVecs for SharedFinfo.
+
+Checked in as revision 399 with unit test flags on, Smoldyn off, -g, GSL
+
+Now begun on setting up Slots. This involves changes everywhere.
+A huge number of hacks at this point. Especially when it comes to
+assigning msgIndexes.
+
+Now I've marched the compilation through to Compartment.cpp
+
+==============================================================================
+1 Feb 2008
+Now done biophysics, into kinetics.
+Now done the whole lot. Compiles and runs. When I convert to the new form I
+will have to undo some intermediate hacks done to get it to work.
+
+Checked in as revision 400 with unit test flags on, Smoldyn off, -g, GSL
+
+Another thing to do before messing it all up: convert conns to pointers.
+
+Got through: parser, basecode, biophysics, kinetics, all the rest.
+Astonishingly it ran and cleared unit tests first time.
+Checked in as revision 402 with unit test flags on, Smoldyn off, -g, GSL
+
+Designing iteration through Conn vector and through composite Conns on it.
+- Iterate through vector as usual. Need to check for empty Conns.
+- Iterate then through special Conns, each of which have their own
+	iterators.
+- The iterator needs to present a Conn to the target: A simple looking Conn
+	with all the usual access funcs.
+- We need to be thread-safe. The iterator must refer to the primary Conn.
+
+
+==============================================================================
+2 Feb
+Considering a still more radical overhaul of messaging, now possible because
+conns are done through pointers. This is the old idea that the conn info
+should be shared. Now doable because both sides of the message can point to the
+same Conn. In principle this can also do away with the need for 
+Conn indexes, which were originally so that the two sides of the conn could
+point to each other. 
+Cases where indexing remains critical
+	- Synapses and any conn-specific target operations.
+		We need a stable index here to look up weight etc.
+		Note that the index need not be tied to position in Conn vector.
+	- SendTo calls
+		- Most of these are return calls, trivially (and faster)
+		handled through the conn pointer itself if it has full info.
+		- Some of these, like synapses, have conn-specific data
+		to go out on specific lines. These include solver control
+		of specific zombies, and shell sending distinct info to
+		specific nodes.
+		Here the index does need to be tied to position in Conn
+		vector, so it can look it up.
+		- Here is an example. Solvers send messages to zombies that
+		are used for bidirectional value assignment.
+			- If solver calls a zombie:
+				Solver must know which internal object is
+				tied to which Conn#
+			- If a zombie calls a solver:
+				Target (on solver) must have indexing so that
+				solver knows which zombie made the request.
+
+A related point: If we do away with Conn indices and have a unitary Conn
+seen by both source and dest of each message, we need extra care in our
+use of 'source' and 'target' terms. This is doable in the code, provided
+we have a well-defined direction in which all messages always must go,
+even if they are nominally bidirectional like shared messages.
+
+==============================================================================
+4 Feb 2008
+Wrote a preliminary document for describing messaging for MOOSE programmers.
+
+Issues to solve in the connections
+- Separate MsgSrc/Dest tables?
+	No. Too messy. have just a Msg table.
+- Related: How to identify Src/Dest in Slots?
+	Problem goes away if there is just a Msg table.
+- How to type-protect Slots?
+- How to manage flexible allocation of MsgSrc/Dest?
+- How do we ensure that SharedMessages are always connected with the same
+	directionality?
+	Take the first entry in the SharedMessage. If it is a Src, the
+	Shared Msg is a source, and vice versa.
+- What is target/dest in a Conn that can be seen from either side?
+	The ConnTainer::conn() function takes an argument indicating if it is
+	forward or reverse direction, as per info in each Msg.
+	Thus the ConnTainer creates different classes of Conn depending on
+	direction.
+- Can we identify when targets need indexing from Conns, and use the
+	appropriate Conns on the fly?
+	Not on the fly. But the target Finfo will have enough info to decide.
+- How to manage Conn indexing in messages with multiple kinds of Conn? 
+	Double index? Cumulative index?
+- How to handle Conn iteration on Send?
+	See below.
+- How to protect against iterator corruption when operations modify conns?
+	See below.
+- How to set up the msg indices? We need to pre-allocate a certain number
+	of msg slots, but many of them are rarely used so it would be
+	wasteful to always allocate all. One option is a 'prealloc' 
+	argument somewhere in the Cinfo. Somewhere a check will be needed...
+	OK, put the check at the message add or respondToAdd step.
+
+==============================================================================
+5 Feb 2008
+
+Kinds of aggregate Conns (ConnTainers)
+Simple Conns:
+- VectorConn: Just a set of simple Conns.
+- RegionConnectSimpleConn: Manages regionconnect between simple objects.
+	Probably just a VectorConn with additional info about setup call.
+Simple objects to arrays:
+- One2SomeConn: Single simple Element to some subset in an array.
+- One2AllConn: Single simple Element to all in an array.
+Arrays to Arrays:
+- One2OneMapConn: Both sides are arrays, and there is a one-to-one mapping.
+- SparseMatrixConn: Sparse connectivity matrix between arrays
+- MatrixConn: Dense connectivity matrix between arrays
+- All2AllConn: Both sides are arrays and there is complete connectivity.
+- GeomRuleConn: Geometric rule connection. Static vs dynamic.
+- RandMatrixConn: Partial connectivity matrix with random rules
+- RegionConnectConn: Implementation of regionconnect between arrays.
+
+Iteration Requirements:
+- Sequentially go through all connections (send)
+- Go to a specific connection, identified by src and dest. Search is OK.
+- Go to a specific connection, identified by index. Must be fast.
+- Thread safe. Must store info locally.
+- Handle insertions and removals. Options here are: 
+	- queue for operations.
+		Register # of iterators, and handle queue when they go to zero.
+		Issue that the queued conns may point to defunct objects...
+		So queue would have to be entire operation, and managed by
+		clock ticks, not on individual Msgs
+	- Register each active iterator and update it as needed
+		Expensive.
+	- Flag for removed entries. Doesn't deal with insertions. 
+	- Integer indexing. Slow.
+
+If I use a Conn as an iterator, I will need distinct variants for each
+of these. That means I'll still need the 3-tier version: A ConnIterator,
+which is on the stack, a Conn, which is what the RecvFuncs see, and then
+the aggregate ConnTainers.
+
+==============================================================================
+7 Feb
+
+Things taking shape. Some more qs:
+- At what level do we specify the type of ConnTainer? Does the user do
+it explicitly (ugh) or do have special funcs that do certain containers,
+and let the Msg figure out the rest itself (ugh too).
+	- User specifies indirectly, by the src, dest and form of the 
+		message 'add' command (post-genesis especially). For example 
+		a single to an array[]
+		or just array object would set up a One2AllConn. All this needs
+		to be parsed ahead of time.
+	- User also specifies indirectly by the use of special commands like
+		regionconnect.
+	- System specifies magically when doing createmap type commands.
+	- Msg has to do some figuring if the src or dest is array, in case
+		there is an expandable array connection like 
+		SparseMatrix, FullMatrix, RandMatrix, One2Some.
+		Actually, the operation on Msg should be selected by virtual func
+		of Element* so that it does add, addOne2Array, addOne2All etc.
+
+
+==============================================================================
+8 Feb 2008
+
+Current best implementation is All2AllConn.h. It handles the issue of reverse
+messaging. 
+Need to use this to look closely at VectorConns to see if they still work.
+Seems OK.
+
+Now coordinating many code files to begin to pull together the new messaging
+stuff. Looking at send.cpp
+==============================================================================
+9 Feb 2008
+Slow progress on VectorConn, which is the most like the old connection scheme.
+Working through the functions, the Drop and Traverse functions need to know
+the target Msg. This can be done with no extra storage if we template it
+in, but if we use local VectorConnEntries instead of pointers we have to
+store the remote msg info explicitly. Also we need to decide if the 
+two ConnEntries are going to be complementary like the old variant, or
+comprehensive with full info. If the latter then we may need to go to the
+pointer variant.
+
+I'll keep this issue pending and work through the create/delete/find process
+on the All2All to see where things should match up.
+
+Some thoughts:
+Need to expand the interface for Conn* to include src and dest Msg#.
+Should shift the SimpleConns back to the ConnTainer vector because they
+are isomorphic to OneToOne Conns. This will also bring uniformity in the
+assumption that each ConnTainer has a unique src and dest element. We can
+optimize stuff later.
+One issue is that the higher-level description for things like RegionConnect
+won't work as planned unless all the created SimpleConns have a pointer to
+the RegionConnect object. Hm.
+
+
+Starting to take shape.
+Status:
+Msg.cpp, .h: Need to figure out how it stores isDest flag.
+ConnTainer.h: OK
+Conn.h: OK	:
+SimpleConn.h: OK. May need to implement .cpp
+All2AllConn.h: OK. May need to implement .cpp
+Element: Getting there
+SimpleElement: Getting there
+send.cpp: OK
+send.h: Need to put in the higher N sends.
+Finfo.h: Much to do. Shifting a lot of things out of it, let the Msg
+	handle all the operations relating to Conns. Add operations remain.
+SrcFinfo.cpp: All to do: esp, add func.
+DestFinfo.cpp: All to do.
+SharedFinfo.cpp: All to do, esp assigning isDest.
+
+
+==============================================================================
+10 Feb 2008.
+
+Marching through. Now doing compilation.
+
+Now working on Copy.cpp.
+
+The ConnTainer::add commands for SimpleConnTainer and All2AllConnTainer
+are wrong.
+
+Still need to fix issues of handling 'next' in Msg.
+
+Copy.cpp compiles but only after excising several aspects of copy handling,
+especially to do with msg to globals that are not in the tree.
+
+==============================================================================
+11 Feb 2008.
+
+Moved the isDest flag to FuncVec, which is a natural place for it.
+Still struggling with handling of 'next' Msgs.
+
+Compilation proceeding up to DynamicFinfo.cpp. About halfway through the
+.cpp files of the basecode.
+
+==============================================================================
+13 Feb 2008
+
+DynamicFinfo is a mess. Currently trying to clean up the 'add' function
+at the point where it figures out the FuncId for the trig func, which is
+of course created using templating.
+For now I'll have to bypass it in order to compile.
+Much bypassing later, now getting to UnitTests.cpp. This too is full of stuff
+that will need complete rewriting.
+Bypassed. Now masses of errors in SharedFinfo.
+
+==============================================================================
+14 Feb 2008
+Compilation has reached UnitTests in basecode. I should check in as it is
+a private branch and there has been so much work.
+
+Checked in as revision 411 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+18 Feb 2008
+Slowly inching through the debugging/compiling process for UnitTests.cpp
+
+==============================================================================
+19 Feb 2008
+Completed compilation of basecode. Much of the UnitTests have been removed,
+because the calls don't make sense in the new messaging.
+Checked in as revision 413 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+23 Feb 2008
+Completed compilation of Shell. Several things have been left only as
+placeholders, specially stuff to do with array operations like planarconnect.
+
+Checked in as revision 417 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+24 Feb 2008
+Completed remaining library compilation: element and maindir. Huge number of
+errors remain in the linking stage.
+
+Checked in as revision 418 with unit test flags on, Smoldyn off, -g, GSL
+
+Compiled and linked. It crashes at once when run, but major step forward
+anyway.
+Checked in as revision 419 with unit test flags on, Smoldyn off, -g, GSL
+
+Slow steady progress going through unit tests.
+
+==============================================================================
+25 Feb 2008
+Sent first message, after considerable fixing up of related code. However
+~Msg() barfs. Long way to go yet.
+Checked in as revision 420 with unit test flags on, Smoldyn off, -g, GSL
+
+Fixed ~Msg. Involved a fair amount of fixing to get the logic of the isDest
+sorted out on various Finfos and in the initialization code. Now we're
+partly into the class formation tests.
+
+Checked in as revision 421 with unit test flags on, Smoldyn off, -g, GSL
+
+Somewhat stuck some way on in FinfoTest, I suspect that a bad ptr access
+has corrupted things. Yup, valgrind confirms that I'm sending data that has
+been freed.
+
+==============================================================================
+26 Feb
+Fixed. It was a problem with the ~Msg(), which was doing a dropAll. Cannot do
+so because the Msg vector gets resized, and we don't want to lose messages
+when that happens.
+New issue: We can attempt to send messages that have not yet been allocated.
+One option is to always put SrcFinfos first. As all elements must be a child
+of something, the Msg array will always have the places allocated. But this
+won't work if we interleave src and dests, which will happen for inheritance.
+
+Could force all Srcs to be allocated during the create function.
+Did so. Now have the issue of ballooning # of Msg slots preallocated. Defer.
+
+Checked in as revision 422 with unit test flags on, Smoldyn off, -g, GSL
+
+More serious problem: Need to sort out multi-target-class messages that use
+the next_ field.
+Linked list with ptrs: 
+	- Need special updates in copies
+	- Need special updates when deleting.
+	- But all these are local to the msg.
+Linked list on main Msg array
+	- Need special updates when inserting a new msg.
+	- Not local to the msg.
+
+==============================================================================
+27 Feb 2008
+More unit tests now work. Messaging with Finfo::add now works.
+Current issue is with the messaging into regular ValueFinfosb in other works
+how the DynamicFinfo handles it. See line 800 of UnitTests.cpp
+
+Checked in as revision 423 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+28 Feb 2008
+Currently stuck at UnitTest.cpp:830, but the real issue is that in Send.h
+a FuncVec claims isDest() == 0 when it clearly should be 1.
+
+==============================================================================
+29 Feb 2008
+Fixed the bug. It had ramifications in many places:
+Cleaned up FuncVec initialization.
+Cleaned up DynamicFinfo message handling.
+Cleaned up earlier unit tests
+Checked in as revision 424 with unit test flags on, Smoldyn off, -g, GSL
+
+Now bug has moved on to another stage, line 863.
+This bug looks like it has to do with other cases for adding dynamic finfo:
+adding a trigger message to a value field.
+
+This boils down to asking how we are going to represent trigger func ids.
+At present there are no such ids, but we could easily generate the actual
+function in the FuncVec.
+For the respondToAdd I could: 
+	- return the original func id with the idea that the requester knows
+	what it wants
+	- create a set of dummy funcIds which signify that we really want the
+	trigger func
+	- Create an additional funcVec with its own id, that holds the 
+		trigFunc. The original funcVec would point to this
+		id if it exists. This would be an additional verification that
+		the Finfo supports trig funcs.
+
+Implemented the third option, it is pretty clean.
+Got trig messages into the DynamicFinfo to work.
+Next: 
+	- Add messages to go out of the DynamicFinfo
+	- Handle Shared messages into dynamicFinfo.
+
+Decided to get rid of single outgoing or single trig incoming messages
+to DynamicFinfo: complicated and unlikely.
+
+That advanced things to SharedFinfos. Where they are stuck.
+==============================================================================
+1 March 2008
+Fixed SharedFinfos. One key restriction now is that we cannot have a Shared
+Finfo sending to itself even on a different element. This is because we
+require each Finfo to have directionality: it is either a src or a dest.
+
+Checked in as revision 425 with unit test flags on, Smoldyn off, -g, GSL
+
+Now stuck in LookupFinfo.cpp:330
+
+==============================================================================
+2 March 2008
+Progress on LookupFinfo. Current issue is that DynamicFinfo needs to know
+when to use the original RecvFunc of the finfo, and when to generate one
+that uses the lookup index.
+
+Got LookupFinfo to work and clear unit tests. Had to add another FuncVec
+for handling the LookupFinfo recvFuncs.
+Checked in as revision 426 with unit test flags on, Smoldyn off, -g, GSL
+
+Working on Copy, but it needs to test the elaborate stuff between channels and
+Gates. So I had to compile in parts of the biophysics library, which in turn
+depend on the builtins library. Now at least it compiles, but the unit tests
+are still stuck.
+Checked in as revision 427 with unit test flags on, Smoldyn off, -g, GSL
+
+Continuing the attempt to get Copy working. Turns out that the Compartments
+etc from biophysics need the scheduling stuff to work. So those too had to
+be fixed up and compiled in. That done, the unit tests are still stuck.
+Checked in as revision 428 with unit test flags on, Smoldyn off, -g, GSL
+
+Now it is stuck because the sched stuff has not yet been initialized in main.
+
+I need to redo these 'copy' unit tests without any of these dependencies.
+One should not need any of this in the basecode unit tests.
+
+Did major overhaul of unit tests for Copy, and it now clears them.
+Still need to incorporate more aspects of messaging and DynamicFinfos.
+Also issues of messages going to globals need to be tested.
+Checked in as revision 429 with unit test flags on, Smoldyn off, -g, GSL
+
+Some loose ends:
+	- Msg::target. The pair< Element*, unsigned int> is awkward.
+		Subha has suggested a solution for this
+	- Need consistent use of index in sends. Where do I get the index from?
+		Same solution as above.
+	- Hide all uses of iterating through Msg::c_ except in sends.
+	- Msg::next. Fill up the implementation
+		Needs clarity.
+	- Need to fix the proliferation of Msgs.
+		Needs implementation to be sorted.
+
+==============================================================================
+4 March 2008
+Cleaning up deletes. Need to use the STL erase-remove type operation to 
+do so without messing up msg->c_ vector. See Msg.cpp:201.
+
+Deletes now working. Still need to fully test that and the copies. Still
+niggling issues with the 'next' in msgs. But the tests now clear till Shell.
+
+Checked in as revision 432 with unit test flags on, Smoldyn off, -g, GSL
+
+
+Msg::next implementation possibilities:
+- Separate Src and Dest, keep next on Src.
+	- Need unique, compiled in Src for quick sends.
+	- Need to prealloc Src so we know where to put next?
+	- Dest used for all DestFinfos and SharedFinfos without any src. 
+	- Need it only for traversal, so a little speed hit not bad
+	- Decide which to look up by comparing fv_ on msg ?
+	- Use -ve #s for Dest, use a map to look up the vector< ConnTainer* >.
+- Separate Src, Dest, Next.
+	- Src and dest alloced as needed
+	- Src has predefined indices
+	- Dest does a scan-through to find match (minimal # are defined)
+	- Next just adds on to end as needed.
+	- Messy to manage.
+- Single Src, Dest, Next
+	- Src preallocated to required #
+	- numSrc_ stored in Cinfo.
+	- Separate index in SimpleElement to keep track of end of Dest.
+	- Next accessed end of Src, no particular juggling needed.
+	- Dest accessed at end of Next. Keep the index of end of Next handy
+		for starting with Dest and other things.
+	- Dest accessed by scan-through to desired #. So it does not need
+		any juggling when we insert additional 'next' entries.
+	+ Assign msg indices to all Finfos as at present, but do the 
+		Srcs first.
+	+ Use the same index for the Finfo and the Msg. This means
+		copying out the basecode Finfos for inheritance.
+	- Need separate access to all 'Dest' msgs. Much cleanup in code.
+
+==============================================================================
+5 March 2008
+Did implementation of Msg::next and associated code. Now it compiles but
+we're back to trying to go through the first few unit tests.
+
+==============================================================================
+6 March 2008
+Checked in as revision 433 with unit test flags on, Smoldyn off, -g, GSL
+
+Looks like I need to convert destMsg into a separate class and separate
+vector. The current arrangement is too messy and prone to error. It may
+even save space to convert.
+
+Now things are moving toward the first option above. The really nasty part of
+this is that numbers are used for two things: (src) Msgs and Dests. Worse,
+sometimes Msgs are at the dest and sometimes not.
+
+Now if we separate the arrays, the thing to do is to put the dests into a 
+map, in which case the dest is not even a message, but a vector< ConnTainer* >&
+This is no worse than the above two issues, but by putting a distinct
+type on it certainly looks uglier. Forces the problems to attention.
+
+OK. This is all fine, provided that there is a simple, uniform API that
+hides it. If we use this we cannot use Msg as a handle for other operations
+any more.
+
+I think the only thing outside functions need is the target list. This
+brings us to the next issue: How to handle Element arrays? Should we treat
+Elements as ConnTainers, where each one may be an entire array? We would
+need an ElementIter as an orthlog of Conn, providing the Element API including
+its current index. We could provide sparse as well as full ArrayElement
+variants. Bad thing with all this is the extra indirection. But could
+we parallelize the Sends? OK, deal with this later. For now, provide target
+list. Element::targets( int msgNum ) and Element::targets( const string name )
+How about nodes/edges view. Msg was the original idea for an edge, but actually
+it should be a ConnTainer. Or a Conn, that handles an entire 
+vector< ConnTainer* > or multiple of them, as needed.
+
+void Conn::increment() // goes one element and index at a time.
+void Conn::nextElement() // goes one element at a time, skips indices.
+const ConnTainer* Conn::connTainer(); // Gives the current ConnTainer of Conn.
+
+Conn* Element::targets( int msgNum );
+Conn* Element::targets( const string& finfoname );
+
+// for later:
+Conn* Element::targets( int msgNum, id elm ); // A true edge, between 2 elms.
+Conn* Element::targets( id elm ); // A true edge, between 2 elms, any finfos.
+Conn* Element::targets( int msgNum, int eIndex );
+
+int Finfo::msg();
+Finfo* Element::findFinfo( int msgNum );
+
+
+==============================================================================
+7 March
+Implementation of revised messages and revised 'targets' nearly done.
+Going through compilation.
+
+Compiled. Back to grinding through unit tests.
+
+More API cleanups needed:
+bool Element::add( int msg1, Element* e2, int msg2 );
+bool Element::add( const string& f1, Element* e2, const string& f2 );
+
+bool Element::drop( int msg, unsigned int doomed );
+bool Element::drop( int msg, const ConnTainer* doomed );
+bool Element::dropAll( int msg );
+bool Element::dropAll( const string& finfo );
+
+==============================================================================
+8 March
+Most of these updated things implemented.
+Checked in as revision 435 with unit test flags on, Smoldyn off, -g, GSL
+
+Now stuck in a nasty memory bug which seems to be due to trying to access
+an already deleted Finfo in the UnitTests. With valgrind I fixed one
+of the problems, but the other is still confusing.
+==============================================================================
+9 March 2008
+Many ugly bugs fixed in the process of getting past these early
+Unit Tests. Valgrind helped a lot. The UnitTests.cpp is OK now.
+
+Some more cleanup. Much to my astonishment, it suddenly progressed through
+to the command line, clearing lots of parser tests. Hooray!
+Even valgrind is pretty happy about it. Lots of leaks at the end, but
+no bad stuff through the tests.
+
+More unit tests to add:
+* Direct test of handling 'next' msg
+* Copy tests should use messages between objects and verify them
+* Copy tests should check DynamicFinfo copies too
+- Copy tests need to handle copies to globals.
+
+Next (big) steps:
+	+ Complete unit tests listed above.
+	- Fix Element/Element Index confusion.
+	- Include rest of code 
+		- Unit tests
+		- Regression tests
+		- Benchmarks
+	- Merge back with main distro
+	- Incorporate arrays.
+		- Lots of unit tests for arrays too.
+	- Incorporate proper volume handling for kinetics
+
+Copy tests reveal nasty bugs with freeing dynamic finfos. Perhaps I have
+been using the same one twice. In cleaning up setupDynamicFinfo it now
+breaks in LookupFinfo unit tests.
+
+Anyway, network is now up so I'll check stuff in.
+LookupFinfo stuff now works.
+Copy stuff problem is because I have used the same DynamicFinfo twice in 
+the same finfos_ vector
+
+OK, sorted it out. The SimpleElement::innerCopy was both assigning the
+Finfo and calling addFinfo. This bug took ages to fix.
+
+Checked in as revision 437 with unit test flags on, Smoldyn off, -g, GSL
+
+Bunch of crucial files were left out of the previous commit. Added.
+
+Checked in as revision 438 with unit test flags on, Smoldyn off, -g, GSL
+
+Looking at the rest of the code. There isn't much: just kinetics and
+example, and to finish up biophysics.
+
+Possibilities to resolve Element/Element Index stuff:
+- A wrapper Element, as I used earlier for Arrays. 
+	- Additional indirection.
+	- Additional messy code.
+- An Eref class like pair< Element*, unsigned int >
+	Pass as reference in argument for all the functions,
+	including sends, that used to use Elements, and now also bodge in the
+	index somehow.
+	- Actually references may have other overhead. Best to keep it simple.
+	- Additional field data to pass around. Don't know if it matters.
+
+Other features:
+	- Define a special index (UINT_MAX?) to indicate entire array.
+
+
+Much work done on converting to Eref for send, set and get. Conn also 
+returns Eref rather than Element and Eindex.
+Checked in as revision 439 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+10 March 2008
+
+Continuing conversion to Eref. Completed basecode, shell, and element dirs.
+Checked in as revision 440 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+11 March.
+Continuing Eref conversion. Adding in kinetics stuff.
+Compiled Kinetic Hub. More on the way.
+
+==============================================================================
+13 March.
+Finally done Eref conversion, including kinetics stuff and the GSL solver. 
+The biophysics solver stuff has been left out for now.
+Clears unit tests right off.
+
+==============================================================================

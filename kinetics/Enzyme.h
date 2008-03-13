@@ -18,49 +18,49 @@ class Enzyme
 		///////////////////////////////////////////////////
 		// Field function definitions
 		///////////////////////////////////////////////////
-		static void setK1( const Conn& c, double value );
-		static double getK1( const Element* e );
-		static void setK2( const Conn& c, double value );
-		static double getK2( const Element* e );
-		static void setK3( const Conn& c, double value );
-		static double getK3( const Element* e );
-		static double getKm( const Element* e );
-		static void setKm( const Conn& c, double value );
+		static void setK1( const Conn* c, double value );
+		static double getK1( Eref e );
+		static void setK2( const Conn* c, double value );
+		static double getK2( Eref e );
+		static void setK3( const Conn* c, double value );
+		static double getK3( Eref e );
+		static double getKm( Eref e );
+		static void setKm( const Conn* c, double value );
 		void innerSetKm( double value );
-		static double getKcat( const Element* e );
-		static void setKcat( const Conn& c, double value );
+		static double getKcat( Eref e );
+		static void setKcat( const Conn* c, double value );
 		void innerSetKcat( double value );
-		static bool getMode( const Element* e );
+		static bool getMode( Eref e );
 		bool innerGetMode() const;
-		static void setMode( const Conn& c, bool value );
-		void innerSetMode( Element* e, bool mode );
+		static void setMode( const Conn* c, bool value );
+		void innerSetMode( Eref e, bool mode );
 
 		///////////////////////////////////////////////////
 		// Shared message function definitions
 		///////////////////////////////////////////////////
-		static void processFunc( const Conn& c, ProcInfo p );
-		void innerProcessFunc( Element* e );
-		void implicitProcFunc( Element* e );
-		void explicitProcFunc( Element* e );
+		static void processFunc( const Conn* c, ProcInfo p );
+		void innerProcessFunc( Eref e );
+		void implicitProcFunc( Eref e );
+		void explicitProcFunc( Eref e );
 		void innerReinitFunc(  );
-		static void reinitFunc( const Conn& c, ProcInfo p );
-		static void substrateFunc( const Conn& c, double n );
-		static void enzymeFunc( const Conn& c, double n );
-		static void complexFunc( const Conn& c, double n );
+		static void reinitFunc( const Conn* c, ProcInfo p );
+		static void substrateFunc( const Conn* c, double n );
+		static void enzymeFunc( const Conn* c, double n );
+		static void complexFunc( const Conn* c, double n );
 		
 		///////////////////////////////////////////////////
 		// Dest function definitions
 		///////////////////////////////////////////////////
-		static void intramolFunc( const Conn& c, double n );
+		static void intramolFunc( const Conn* c, double n );
 		void innerIntramolFunc( double n );
-		static void scaleKmFunc( const Conn& c, double k );
+		static void scaleKmFunc( const Conn* c, double k );
 		void innerScaleKmFunc( double k );
-		static void scaleKcatFunc( const Conn& c, double k );
+		static void scaleKcatFunc( const Conn* c, double k );
 
 		///////////////////////////////////////////////////////
 		// Other func definitions
 		///////////////////////////////////////////////////////
-		void makeComplex( Element* e );
+		void makeComplex( Eref e );
 		
 	private:
 		double k1_;
@@ -74,7 +74,7 @@ class Enzyme
 		double s_;
 		double sk1_;	
 		double Km_;
-		void (Enzyme::*procFunc_ )( Element* e );
+		void (Enzyme::*procFunc_ )( Eref e );
 };
 
 // Used by the solver
