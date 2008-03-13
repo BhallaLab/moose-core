@@ -9,9 +9,6 @@
 **********************************************************************/
 #ifndef _FINFO_H
 #define _FINFO_H
-#include <vector>
-#include "Ftype.h"
-using namespace std;
 
 /**
  * Virtual base class for field info.
@@ -27,7 +24,7 @@ class Finfo
 			{;}
 
 			/**
-			 * This function creates a connection between to Finfos.
+			 * This function creates a connection between two Finfos.
 			 */
 			virtual bool add( 
 					Element* e, Element* destElm, const Finfo* destFinfo
@@ -42,63 +39,10 @@ class Finfo
 			 */
 			virtual bool respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
-					FuncList& srcfl, FuncList& returnFl,
+					unsigned int& srcFuncId, unsigned int& destFuncId,
 					unsigned int& destIndex, unsigned int& numDest
 			) const = 0;
 			
-			/**
-			 * This function removes all messages into/out of this
-			 * Finfo. It does not have an error status.
-			 */
-			virtual void dropAll( Element* e ) const = 0;
-
-			/**
-			 * This function removes the specified connection into/out
-			 * of this Finfo. The index refers to the index within
-			 * this Finfo, not the global connection index for the 
-			 * Element. Returns True if the int was in the right
-			 * range for this Finfo, False otherwise.
-			 */
-			virtual bool drop( Element* e, unsigned int i ) const = 0;
-
-			/**
-			 * We were going to have respondToDrop functions, but
-			 * this adds a lot of overhead and complexity. Instead
-			 * we guarantee that there are no side-effects from
-			 * deleting connections.
-			 * virtual bool respondToDrop( Element* e) const = 0;
-			 * virtual bool respondToDrop( Element* e, unsigned int i )
-			 *	const = 0;
-			 *
-			 */
-
-			/**
-			 * This function counts the number of incoming connections
-			 * on this Finfo.
-			 */
-			virtual unsigned int numIncoming( const Element* e )
-					const = 0;
-
-			/**
-			 * This function counts the number of outgoing connections
-			 * on this Finfo.
-			 */
-			virtual unsigned int numOutgoing( const Element* e )
-					const = 0;
-
-			/**
-			 * This function returns a vector all of connections 
-			 * arriving at this Finfo.
-			 */
-			virtual unsigned int incomingConns(
-					const Element* e, vector< Conn >& list ) const = 0;
-			/**
-			 * This function returns a vector all of connections 
-			 * originating from this Finfo.
-			 */
-			virtual unsigned int outgoingConns(
-					const Element* e, vector< Conn >& list ) const = 0;
-
 			/**
 			 * This function utilizes the hard-coded string conversions
 			 * for the type of this Finfo, if present, for doing Set.
@@ -106,36 +50,21 @@ class Finfo
 			 * Returns true if the
 			 * conversion and assignment succeeded.
 			 */
-			virtual bool strSet(
-							Element* e, const std::string &s
-				) const = 0;
+			virtual bool strSet( Eref e, const std::string &s) const = 0;
 
 			/**
 			 * This function utilizes the hard-coded string conversions
 			 * if present, for getting the field value. Returns true
 			 * if the conversion and assignment succeeded.
 			 */
-			virtual bool strGet( 
-							const Element* e, std::string &s
-				) const = 0;
+			virtual bool strGet( Eref e, std::string &s) const = 0;
 
 			/**
-			 * In Finfos that handle data values, this returns the
-			 * GetFunc defined in RecvFunc.h:
-			 * typedef double( *GetFunc )( const Element* )
-			 * It has to be typecast into the correct type, of course,
-			 * and that * needs to be done under the protection of a
-			 * tyepcheck.
-			 * If the Finfo does not support data values this
-			 * returns 0. This is a common case so I set it up
-			 * as a default.
-			 * \todo
-			 * I have eliminated this function. I don't  think it
-			 * should be exposed here.
-			virtual GetFunc getFunc() const {
-					return 0;
-			}
+			 * This returns the message identifier for this Finfo.
+			 * Zero and positive values are srcs, and are used by Slots.
+			 * Negative values are dest only.
 			 */
+			virtual int msg() const = 0;
 
 			/**
 			 * In any Finfo that has a RecvFunc, this returns it.
@@ -166,15 +95,20 @@ class Finfo
 			}
 
 			/** 
-			 * Returns the matching finfo if the specified connIndex
+			 * Returns the matching finfo if the specified ConnTainer
 			 * is managed by the messages handled by this finfo.
 			 * The primary use for this is to track down DynamicFinfos.
 			 * The secondary
 			 * use is to locate statically defined Finfos that
 			 * manage the specified conn.
+			 *
+			 * Many Finfos don't handle messages, so the default is to
+			 * return 0 here.
 			 */
 			virtual const Finfo* match( 
-				const Element* e, unsigned int connIndex ) const = 0;
+				const Element* e, const ConnTainer* c) const {
+				return 0;
+			}
 
 			/**
 			 * Helps to build up a list of Finfos. Most Finfos will
@@ -203,30 +137,13 @@ class Finfo
 			}
 
 			/**
-			 * This function is used to build up both the internal
-			 * Finfo numbering of current srcIndex and destIndex, and
-			 * also for the calling function to keep track of the
-			 * tally. The Finfo has to increment the indices depending
-			 * on how many src and dest slots it uses.
-			 * The ConnIndex is used in a few special cases like
-			 * DynamicFinfos, but it is not returned.
-			 * Note this is NOT a const
-			 * function, as it may alter the Finfo.
-			 * Normally called during Cinfo initialization, and
-			 * also whenever a new Finfo is created dynamically.
-			 */
-			virtual void countMessages(
-				unsigned int& srcIndex, unsigned int& destIndex ) = 0;
-
-			/**
 			 * Returns true if the name matches and if the
 			 * Finfo has a suitable srcIndex or destIndex
 			 * to pass back in the 'ret' argument.
 			 * Many Finfos do not have such a number, 
-			 * so it returns 0 by default.
+			 * so it returns 0 by default to indicate failure.
 			 */
-			virtual bool getSlotIndex( const string& name, 
-					unsigned int& ret ) const {
+			virtual bool getSlot( const string& name, Slot& ret ) const {
 				return 0;
 			}
 
@@ -248,15 +165,61 @@ class Finfo
 			virtual bool inherit( const Finfo* baseFinfo ) = 0;
 
 			/**
-			 * Makes a duplicate of the current Finfo. Is useful
-			 * mainly for the DynamicFinfos, the ExtFieldFinfos and
+			 * Makes a duplicate of the current Finfo. 
+			 * Needed whenever a Finfo is inherited, as its index may
+			 * differ in the duplicate.
+			 * Is useful
+			 * also for the DynamicFinfos, the ExtFieldFinfos and
 			 * other ones that have an element-specific existence
 			 * in the nether regions of the finfo_ array.
-			 * Nevertheless, I want the other Finfos to come up with
-			 * a reasonable copy operation too.
 			 */
 			virtual Finfo* copy() const = 0;
 
+			/**
+			 * This function sets up a FuncVec for the Finfo
+			 * classes that might be targets for messages. The
+			 * FuncVec organizes all the RecvFuncs that handle incoming
+			 * messages. The argument is the name of the parent Cinfo,
+			 * essential to avoid naming conflicts among the FuncVecs.
+			 * This function alters the internal state of the Finfo, so
+			 * it should only be called at set up time.
+			 */
+			virtual void addFuncVec( const string& cname ) = 0;
+
+			/**
+			 * This returns the id of the FuncVec belonging to this
+			 * Finfo. Most of them don't handle FuncVecs, so return
+			 * the empty id which is zero.
+			 */
+			virtual unsigned int funcId() const {
+				return 0;
+			}
+
+			/**
+			 * Returns true if the Finfo never acts as a Source. This
+			 * is more precise than the isDest() from the FuncVec, because
+			 * that does not know about what may happen on the 
+			 * SharedMessages which have both Src and Dest.
+			 * Usually true.
+			 */
+			virtual bool isDestOnly() const {
+				return 1;
+			}
+
+			/**
+			 * This function assignes the msg index to use for this
+			 * Finfo, if needed.
+			 */
+			virtual void countMessages( unsigned int& num ) = 0;
+
+		protected:
+			/**
+			 * setName is used by the DynamicFinfo when it renames
+			 * and reuses an existing one.
+			 */
+			void setName( const string& name ) {
+				name_ = name;
+			}
 		private:
 			string name_;
 			const Ftype* ftype_;

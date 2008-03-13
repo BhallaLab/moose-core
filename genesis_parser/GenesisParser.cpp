@@ -317,7 +317,7 @@ void myFlexLexer::print( const string& s )
 	// Element* e = Element::element( element_ );
 	Element* e = element_();
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
-			( e->data() );
+			( e->data( 0 ) );
 	gpw->print( s );
 }
 

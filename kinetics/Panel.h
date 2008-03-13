@@ -32,34 +32,34 @@ class Panel
 
 		
 		/// Returns number of defining pts for panel
-		static unsigned int getNpts( const Element* e );
+		static unsigned int getNpts( Eref e );
 		virtual unsigned int localNpts() const;
 
 		/// Returns dimensions of panel
-		static unsigned int getNdims( const Element* e );
+		static unsigned int getNdims( Eref e );
 
 		/// Returns shape id, using the same fields of Smoldyn.
-		static unsigned int getShapeId( const Element* e );
+		static unsigned int getShapeId( Eref e );
 		virtual unsigned int localShapeId() const;
 
 		/// Returns number of neighbors of panel
-		static unsigned int getNneighbors( const Element* e );
+		static unsigned int getNneighbors( Eref e );
 
-		static void setPos( const Conn& c, double value, 
+		static void setPos( const Conn* c, double value, 
 				unsigned int i, unsigned int dim );
 		void localSetPos( double value, unsigned int i, unsigned int dim );
 
-		static double getPos( const Element* e, unsigned int i, 
+		static double getPos( Eref e, unsigned int i, 
 				unsigned int dim);
 		double localGetPos( unsigned int i, unsigned int dim);
 
-		static void setX( const Conn& c, double val, const unsigned int& i);
-		static double getX( const Element* e, const unsigned int& i );
-		static void setY( const Conn& c, double val, const unsigned int& i);
-		static double getY( const Element* e, const unsigned int& i );
-		static void setZ( const Conn& c, double val, const unsigned int& i);
-		static double getZ( const Element* e, const unsigned int& i );
-		static vector< double > getCoords( const Element* e );
+		static void setX( const Conn* c, double val, const unsigned int& i);
+		static double getX( Eref e, const unsigned int& i );
+		static void setY( const Conn* c, double val, const unsigned int& i);
+		static double getY( Eref e, const unsigned int& i );
+		static void setZ( const Conn* c, double val, const unsigned int& i);
+		static double getZ( Eref e, const unsigned int& i );
+		static vector< double > getCoords( Eref e );
 
 
 		/**
@@ -69,7 +69,7 @@ class Panel
 		 * grid is set by the 'area' argument.
 		*/
 		static vector< double > getFiniteElementVertices(
-			const Element* e, double area );
+			Eref e, double area );
 		virtual void localFiniteElementVertices( 
 			vector< double >& ret,  double area ) const;
 

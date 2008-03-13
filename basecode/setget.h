@@ -17,34 +17,34 @@
 * for larger numbers of arguments.
 */
 
-extern bool set( Element* e, const Finfo* f );
-extern bool set( Element* e, const string& f );
+extern bool set( Eref e, const Finfo* f );
+extern bool set( Eref e, const string& f );
 
 /**
 * This is the utility func everyone should use for setting values.
 * It does appropriate typechecking of the finfo before doing anything.
 */
-template < class T > bool set( Element* e, const Finfo* f, T v )
+template < class T > bool set( Eref e, const Finfo* f, T v )
 {
 	const Ftype1< T >* f1 =
 			dynamic_cast< const Ftype1< T >* >( f->ftype() );
 	if ( f1 ) {
 		return f1->set( e, f, v );
 	}
-	cout << "Error: set( " << e->name() << ", " << f->name() <<
-			" T ): Finfo type mismatch\n";
+	cout << "Error: set( " << e.e->name() << "." << e.i << ", " <<
+		f->name() << " T ): Finfo type mismatch\n";
 	return 0;
 }
 
 /**
  * Utility function for doing the set using a string lookup for Finfo
  */
-template < class T > bool set( Element* e, const string& f, T v )
+template < class T > bool set( Eref e, const string& f, T v )
 {
-	const Finfo* finfo = e->findFinfo( f );
+	const Finfo* finfo = e.e->findFinfo( f );
 	if ( finfo == 0 ) {
-		cout << "Error: set( " << e->name() << ", " << f <<
-				" T ): Finfo not found\n";
+		cout << "Error: set( " << e.e->name() << "." << e.i << ", " << 
+			f << " T ): Finfo not found\n";
 		return 0;
 	}
 	return set( e, finfo, v );
@@ -65,9 +65,9 @@ template < class T > bool set( Element* e, const string& f, T v )
 * Or we do not permit direct access via the Finfo pointer,
 * only via the string so that we have a self-contained variant.
 */
-template < class T > bool get( const Element* e, const Finfo* f, T& v )
+template < class T > bool get( Eref e, const Finfo* f, T& v )
 {
-	assert( e != 0 );
+	assert( e.e != 0 );
 	assert( f != 0 );
 
 	const Ftype1< T >* f1 =
@@ -75,8 +75,8 @@ template < class T > bool get( const Element* e, const Finfo* f, T& v )
 	if ( f1 ) {
 		return f1->get( e, f, v );
 	}
-	cout << "Error: get( " << e->name() << ", " << f->name() <<
-			" T ): Finfo Type mismatch\n";
+	cout << "Error: get( " << e.e->name() << "." << e.i << ", " << 
+		f->name() << " T ): Finfo Type mismatch\n";
 	return 0;
 }
 
@@ -87,12 +87,12 @@ template < class T > bool get( const Element* e, const Finfo* f, T& v )
  * of a temporary Finfo which is attached to the Element, thus
  * modifying it.
  */
-template < class T > bool get( Element* e, const string& f, T& v )
+template < class T > bool get( Eref e, const string& f, T& v )
 {
-	const Finfo* finfo = e->findFinfo( f );
+	const Finfo* finfo = e.e->findFinfo( f );
 	if ( finfo == 0 ) {
-		cout << "Error: get( " << e->name() << ", " << f <<
-				" T ): Finfo not found\n";
+		cout << "Error: get( " << e.e->name() << "." << e.i << ", " << 
+			f << " T ): Finfo not found\n";
 		return 0;
 	}
 	return get( e, finfo, v );
@@ -104,15 +104,15 @@ template < class T > bool get( Element* e, const string& f, T& v )
 * It does appropriate typechecking of the finfo before doing anything.
 */
 template < class T1, class T2 > bool set(
-				Element* e, const Finfo* f, T1 v1, T2 v2 )
+				Eref e, const Finfo* f, T1 v1, T2 v2 )
 {
 	// make sure that the Finfo f is on the element.
 	///\todo Later we can remove this check by using a safe call function.
 	vector< const Finfo* > flist;
-	e->listFinfos( flist );
+	e.e->listFinfos( flist );
 	if ( find( flist.begin(), flist.end(), f ) == flist.end() ) {
-		cout << "Error: set( " << e->name() << ", " << f->name() <<
-				" T ): Finfo not found\n";
+		cout << "Error: set( " << e.e->name() << "." << e.i << 
+			", " << f->name() << " T ): Finfo not found\n";
 		return 0;
 	}
 
@@ -121,8 +121,8 @@ template < class T1, class T2 > bool set(
 	if ( f2 ) {
 		return f2->set( e, f, v1, v2 );
 	}
-	cout << "Error: set2( " << e->name() << ", " << f->name() <<
-			" T1, T2 ): Finfo type mismatch\n";
+	cout << "Error: set2( " << e.e->name() << "." << e.i << ", " << 
+		f->name() << " T1, T2 ): Finfo type mismatch\n";
 	return 0;
 }
 
@@ -130,12 +130,12 @@ template < class T1, class T2 > bool set(
  * Utility function for doing the set using a string lookup for Finfo
  */
 template < class T1, class T2 > bool set( 
-			Element* e, const string& f, T1 v1, T2 v2 )
+			Eref e, const string& f, T1 v1, T2 v2 )
 {
-	const Finfo* finfo = e->findFinfo( f );
+	const Finfo* finfo = e.e->findFinfo( f );
 	if ( finfo == 0 ) {
-		cout << "Error: set( " << e->name() << ", " << f <<
-				" T1, T2 ): Finfo not found\n";
+		cout << "Error: set( " << e.e->name() << "." << e.i << ", " << 
+			f << " T1, T2 ): Finfo not found\n";
 		return 0;
 	}
 	return set( e, finfo, v1, v2 );
@@ -146,15 +146,15 @@ template < class T1, class T2 > bool set(
 * It does appropriate typechecking of the finfo before doing anything.
 */
 template < class T1, class T2, class T3 > bool set(
-				Element* e, const Finfo* f, T1 v1, T2 v2, T3 v3 )
+				Eref e, const Finfo* f, T1 v1, T2 v2, T3 v3 )
 {
 	// make sure that the Finfo f is on the element.
 	///\todo Later we can remove this check by using a safe call function.
 	vector< const Finfo* > flist;
-	e->listFinfos( flist );
+	e.e->listFinfos( flist );
 	if ( find( flist.begin(), flist.end(), f ) == flist.end() ) {
-		cout << "Error: set( " << e->name() << ", " << f->name() <<
-				" T ): Finfo not found\n";
+		cout << "Error: set( " << e.e->name() << "." << e.i << 
+			", " << f->name() << " T1, T2, T3 ): Finfo not found\n";
 		return 0;
 	}
 
@@ -163,8 +163,8 @@ template < class T1, class T2, class T3 > bool set(
 	if ( f3 ) {
 		return f3->set( e, f, v1, v2, v3 );
 	}
-	cout << "Error: set3( " << e->name() << ", " << f->name() <<
-			" T1, T2, T3 ): Finfo type mismatch\n";
+	cout << "Error: set3( " << e.e->name() << "." << e.i << ", " << 
+		f->name() << " T1, T2, T3 ): Finfo type mismatch\n";
 	return 0;
 }
 
@@ -172,12 +172,12 @@ template < class T1, class T2, class T3 > bool set(
  * Utility function for doing the set using a string lookup for Finfo
  */
 template < class T1, class T2, class T3 > bool set( 
-			Element* e, const string& f, T1 v1, T2 v2, T3 v3 )
+			Eref e, const string& f, T1 v1, T2 v2, T3 v3 )
 {
-	const Finfo* finfo = e->findFinfo( f );
+	const Finfo* finfo = e.e->findFinfo( f );
 	if ( finfo == 0 ) {
-		cout << "Error: set( " << e->name() << ", " << f <<
-				" T1, T2, T3 ): Finfo not found\n";
+		cout << "Error: set( " << e.e->name() << "." << e.i << ", " << 
+			f << " T1, T2, T3 ): Finfo not found\n";
 		return 0;
 	}
 	return set( e, finfo, v1, v2, v3 );
@@ -189,15 +189,15 @@ template < class T1, class T2, class T3 > bool set(
 * It does appropriate typechecking of the finfo before doing anything.
 */
 template < class T1, class T2, class T3, class T4 > bool set(
-				Element* e, const Finfo* f, T1 v1, T2 v2, T3 v3, T4 v4 )
+				Eref e, const Finfo* f, T1 v1, T2 v2, T3 v3, T4 v4 )
 {
 	// make sure that the Finfo f is on the element.
 	///\todo Later we can remove this check by using a safe call function.
 	vector< const Finfo* > flist;
-	e->listFinfos( flist );
+	e.e->listFinfos( flist );
 	if ( find( flist.begin(), flist.end(), f ) == flist.end() ) {
-		cout << "Error: set( " << e->name() << ", " << f->name() <<
-				" T ): Finfo not found\n";
+		cout << "Error: set( " << e.e->name() << "." << e.i << ", " <<
+			f->name() << " T1, T2, T3, T4 ): Finfo not found\n";
 		return 0;
 	}
 
@@ -206,8 +206,8 @@ template < class T1, class T2, class T3, class T4 > bool set(
 	if ( f4 ) {
 		return f4->set( e, f, v1, v2, v3, v4 );
 	}
-	cout << "Error: set4( " << e->name() << ", " << f->name() <<
-			" T1, T2, T3, T4 ): Finfo type mismatch\n";
+	cout << "Error: set4( " << e.e->name() << "." << e.i << ", " <<
+		f->name() << " T1, T2, T3, T4 ): Finfo type mismatch\n";
 	return 0;
 }
 
@@ -215,12 +215,12 @@ template < class T1, class T2, class T3, class T4 > bool set(
  * Utility function for doing the set using a string lookup for Finfo
  */
 template < class T1, class T2, class T3, class T4 > bool set( 
-			Element* e, const string& f, T1 v1, T2 v2, T3 v3, T4 v4 )
+			Eref e, const string& f, T1 v1, T2 v2, T3 v3, T4 v4 )
 {
-	const Finfo* finfo = e->findFinfo( f );
+	const Finfo* finfo = e.e->findFinfo( f );
 	if ( finfo == 0 ) {
-		cout << "Error: set( " << e->name() << ", " << f <<
-				" T1, T2, T3, T4 ): Finfo not found\n";
+		cout << "Error: set( " << e.e->name() << "." << e.i << ", " <<
+			f << " T1, T2, T3, T4 ): Finfo not found\n";
 		return 0;
 	}
 	return set( e, finfo, v1, v2, v3, v4 );

@@ -37,7 +37,7 @@ class Cell
 public:
 	Cell();
 	
-	static void setMethod( const Conn& c, string value );
+	static void setMethod( const Conn* c, string value );
 	static string getMethod( const Element* e );
 	
 	// Some readonly fields with more info about the methods.
@@ -45,8 +45,8 @@ public:
 	static bool getImplicit( const Element* e );
 	static string getDescription( const Element* e );
 	
-	static void reinitFunc( const Conn& c, ProcInfo p );
-	static void comptListFunc( const Conn& c,
+	static void reinitFunc( const Conn* c, ProcInfo p );
+	static void comptListFunc( const Conn* c,
 		const vector< Element* >* clist );
 	
 	static void addMethod( const string& name, 

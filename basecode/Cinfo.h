@@ -10,8 +10,7 @@
 **********************************************************************/
 #ifndef _CINFO_H
 #define _CINFO_H
-#include "Finfo.h"
-#include "Element.h"
+
 struct SchedInfo
 {
 	const Finfo* finfo;
@@ -69,16 +68,32 @@ class Cinfo
 					const;
 
 			/**
-			 * Finds Finfo on an element based on the connIndex.
+			 * Finds Finfo on an element based on the ConnTainer.
 			 */
 			const Finfo* findFinfo( 
-					const Element* e, unsigned int connIndex) const;
+					const Element* e, const ConnTainer* c ) const;
 
 			/**
 			 * Finds Finfo by name in the list for this class, 
 			 * ignoring any element-specific fields.
 			 */
 			const Finfo* findFinfo( const string& name) const;
+
+			/**
+			* Returns the Finfo identified by the specified msg number.
+			* Source Finfos should have a positive index
+			* pure Dest finfos have a negative index.
+			* Not all Finfos will have a msgNum, but any valid msgNum 
+			* should have a Finfo.
+			*/
+			const Finfo* findFinfo( int msgNum ) const;
+
+			/**
+			 * Reorders the Finfo vector provided by the user. The
+			 * new ordering has SrcFinfos and src SharedFinfos first,
+			 * then DestFinfos, then ValueFinfos.
+			 */
+			unsigned int shuffleFinfos();
 
 			static void initialize();
 
@@ -107,9 +122,17 @@ class Cinfo
 
 			void listFinfos( vector< const Finfo* >& flist ) const;
 
-			unsigned int getSlotIndex( const string& name ) const;
+			Slot getSlot( const string& name ) const;
 			const Finfo* getThisFinfo() const {
 				return thisFinfo_;
+			}
+
+			unsigned int numSrc() const {
+				return numSrc_;
+			}
+
+			unsigned int numFinfos() const {
+				return finfos_.size();
 			}
 
 		private:
@@ -130,9 +153,8 @@ class Cinfo
 			 */
 			Finfo* thisFinfo_;
 			Finfo* noDelFinfo_;
-			unsigned int nSrc_;
-			unsigned int nDest_;
-
+			unsigned int nMsg_; // All messages
+			unsigned int numSrc_; // Highest index of SrcFinfos: need to preallocate at least this many.
 			static std::map< std::string, Cinfo* >& lookup();
 };
 

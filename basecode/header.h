@@ -11,6 +11,14 @@
 #ifndef _HEADER_H
 #define _HEADER_H
 
+/**
+ * This header file includes the essential files in the correct order.
+ * moose.h has this header plus more of the basecode headers.
+ * You should NEVER have to do includes within any of your headers,
+ * and if you do you are likely to get the order wrong.
+ * Instead your .cpp should include header.h, or possibly moose.h,
+ * and then some file specific headers.
+ */
 
 /// Here we set up an enhanced variant of assert, used in unit tests.
 #ifndef NDEBUG
@@ -29,6 +37,10 @@
 #include <string>
 #include <map>
 #include <iostream>
+
+// Used for INT_MAX and UINT_MAX, but may be done within the compiler
+// #include <limits.h> 
+//
 #include <cassert>
 
 using namespace std;
@@ -40,19 +52,24 @@ class Finfo;
 // This is here because parallel messaging needs a way to
 // access PostMaster buffer from within all the templated
 // Ftypes. Ugly.
-extern void* getParBuf( const Conn& c, unsigned int size );
-extern void* getAsyncParBuf( const Conn& c, unsigned int size );
+extern void* getParBuf( const Conn* c, unsigned int size );
+extern void* getAsyncParBuf( const Conn* c, unsigned int size );
 
 // Another ugly global, this one for accessing the ids.
+class Id;
 class IdManager;
 // extern IdManager* idManager();
 
+#include "Eref.h"
 #include "RecvFunc.h"
 #include "Conn.h"
+#include "ConnTainer.h"
 #include "Ftype.h"
-#include "FunctionData.h"
+#include "FuncVec.h"
+#include "Slot.h"
 #include "Finfo.h"
 #include "Id.h"
+#include "Msg.h"
 #include "Element.h"
 
 #ifdef CRL_MPI

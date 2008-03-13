@@ -323,11 +323,10 @@ int wildcardRelativeFind( Element* e,
 	if (doublehash == 0 && head.find("##") != string::npos)
 		doublehash = 1;
 
-	vector< Conn > kids;
-	vector< Conn >::iterator i;
-	e->findFinfo( "childSrc" )->outgoingConns( e, kids );
+	vector< Id > kids = Neutral::getChildList( e );
+	vector< Id >::iterator i;
 	for ( i = kids.begin(); i != kids.end(); i++ ) {
-		Element* temp = i->targetElement();
+		Element* temp = ( *i )();
 		if ( wildcardName( temp, head ) ) {
 			if (pos == string::npos) {
 				ret.push_back(temp);

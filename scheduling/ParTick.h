@@ -24,19 +24,19 @@ class ParTick: public Tick
 		///////////////////////////////////////////////////////
 		// Functions for DestMessages
 		///////////////////////////////////////////////////////
-		static void pollFunc( const Conn& c, unsigned int node );
+		static void pollFunc( const Conn* c, unsigned int node );
 
 		///////////////////////////////////////////////////////
 		// Virtual functions for handling scheduling of PostMaster,
 		// locally connected, and remote connected objects.
 		///////////////////////////////////////////////////////
-		void innerProcessFunc( Element* e, ProcInfo info );
-		void innerReinitFunc( Element* e, ProcInfo info );
+		void innerProcessFunc( Eref e, ProcInfo info );
+		void innerReinitFunc( Eref e, ProcInfo info );
 
 		///////////////////////////////////////////////////////
 		// Utility function to set up the pending list.
 		///////////////////////////////////////////////////////
-		void initPending( Element* e );
+		void initPending( Eref e );
 		void innerPollFunc( unsigned int node );
 		bool pendingData() const;
 

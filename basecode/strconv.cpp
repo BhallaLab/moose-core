@@ -9,10 +9,9 @@
 **********************************************************************/
 
 #include "header.h"
-#include "MsgSrc.h"
-#include "MsgDest.h"
 #include "SimpleElement.h"
-#include "send.h"
+#include "Send.h"
+#include "SetConn.h"
 #include "ProcInfo.h"
 #include "DerivedFtype.h"
 

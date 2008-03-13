@@ -119,12 +119,12 @@ const Cinfo* initNeutralCinfo()
 }
 
 static const Cinfo* neutralCinfo = initNeutralCinfo();
-static const Element* root = Element::root();
-const unsigned int Neutral::childSrcIndex = initNeutralCinfo()->
-	getSlotIndex( "childSrc" );
-const unsigned int Neutral::childIndex = initNeutralCinfo()->
-	getSlotIndex( "child" );
+// static const Element* root = Element::root();
+// const Slot Neutral::childIndex = initNeutralCinfo()->
+//	getSlotIndex( "child" );
 
+static const Slot childSrcSlot = initNeutralCinfo()->
+	getSlot( "childSrc" );
 
 //////////////////////////////////////////////////////////////////
 // Here we put the Neutral class functions.
@@ -141,22 +141,22 @@ const unsigned int Neutral::childIndex = initNeutralCinfo()->
  * local Conn arrays.
  * 3. Delete.
  */
-void Neutral::childFunc( const Conn& c , int stage )
+void Neutral::childFunc( const Conn* c , int stage )
 {
-		Element* e = c.targetElement();
+		Element* e = c->target().e;
 		assert( stage == 0 || stage == 1 || stage == 2 );
 
 		switch ( stage ) {
 				case MARK_FOR_DELETION:
-					send1< int >( e, 0, MARK_FOR_DELETION );
+					send1< int >( e, childSrcSlot, MARK_FOR_DELETION );
 					e->prepareForDeletion( 0 );
 				break;
 				case CLEAR_MESSAGES:
-					send1< int >( e, 0, CLEAR_MESSAGES );
+					send1< int >( e, childSrcSlot, CLEAR_MESSAGES );
 					e->prepareForDeletion( 1 );
 				break;
 				case COMPLETE_DELETION:
-					send1< int >( e, 0, COMPLETE_DELETION );
+					send1< int >( e, childSrcSlot, COMPLETE_DELETION );
 					///\todo: Need to cleanly delete the data part too.
 					delete e;
 				break;
@@ -166,19 +166,19 @@ void Neutral::childFunc( const Conn& c , int stage )
 		}
 }
 
-const string Neutral::getName( const Element* e )
+const string Neutral::getName( Eref e )
 {
-		return e->name();
+		return e.e->name();
 }
 
-void Neutral::setName( const Conn& c, const string s )
+void Neutral::setName( const Conn* c, const string s )
 {
-	c.targetElement()->setName( s );
+	c->target().e->setName( s );
 }
 
-const string Neutral::getClass( const Element* e )
+const string Neutral::getClass( Eref e )
 {
-		return e->className();
+		return e.e->className();
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -188,10 +188,10 @@ const string Neutral::getClass( const Element* e )
 // Perhaps this should take a Cinfo* for the first arg, except that
 // I don't want to add yet another class into the header.
 // An alternative would be to use an indexed lookup for all Cinfos
-void Neutral::mcreate( const Conn& conn,
+void Neutral::mcreate( const Conn* conn,
 				const string cinfo, const string name )
 {
-	create( cinfo, name, conn.targetElement(), Id::scratchId() );
+	create( cinfo, name, conn->target().e, Id::scratchId() );
 /*
 		Element* e = conn.targetElement();
 
@@ -210,10 +210,10 @@ void Neutral::mcreate( const Conn& conn,
 */
 }
 
-void Neutral::mcreateArray( const Conn& conn,
+void Neutral::mcreateArray( const Conn* conn,
 				const string cinfo, const string name, int n )
 {
-		createArray( cinfo, name, conn.targetElement(), n );
+		createArray( cinfo, name, conn->target().e, n );
 }
 
 
@@ -290,66 +290,38 @@ Element* Neutral::createArray(
 }
 
 
-void Neutral::destroy( const Conn& c )
+void Neutral::destroy( const Conn* c )
 {
 	childFunc( c, MARK_FOR_DELETION );
 	childFunc( c, CLEAR_MESSAGES );
 	childFunc( c, COMPLETE_DELETION );
 }
 
-Id Neutral::getParent( const Element* e )
+Id Neutral::getParent( Eref e )
 {
-	if ( e->id().index() > 0 ){
-		Id i = e->id().assignIndex(0);
-		e = i();
-	}
-	const Element *se = e;
-	//const SimpleElement* se = dynamic_cast< const SimpleElement* >( e );
-	/*if (se == 0){//to allow array elements
-		const ArrayElement* ae = dynamic_cast< const ArrayElement* >( e );
-		assert(ae != 0);
-		assert( ae->destSize() > 0 );//Why do we need it?
-		// The zero dest is the child dest.
-		assert( ae->connDestEnd( 0 ) > ae->connDestBegin( 0 ) );
-		return ae->connDestBegin( 0 )->targetElement()->id();
-	}*/
-	
-	assert( se != 0 );
-	assert( se->destSize() > 0 );
+	assert( e.e != 0 );
+	if ( e.e == Element::root() )
+		return Id();
 
-	const Finfo* f = se->constFindFinfo( "child" );
-	assert( f != 0 );
-	vector< Conn > list;
-
-	f->incomingConns( se, list );
-	assert( list.size() > 0 );
-	return list[0].targetElement()->id();
-
-	/*
-	// The zero dest is the child dest.
-	assert( se->connDestEnd( 0 ) > se->connDestBegin( 0 ) );
-
-	return se->connDestBegin( 0 )->targetElement()->id();
-	*/
+	Conn* c = e.e->targets( "child" );
+	assert( c->good() );
+	return c->target().e->id();
+	delete c;
 }
 
 /**
- * Looks up the child with the specified name, and returns the eid.
+ * Looks up the child with the specified name, and returns its id.
  */
-Id Neutral::getChildByName( const Element* elm, const string& s )
+Id Neutral::getChildByName( Eref er, const string& s )
 {
-	// const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
-	// assert( e != 0 );
-	// assert that the element is a neutral.
-
-	// Here we should put in one of the STL algorithms.
-	vector< Conn >::const_iterator i;
-	// For neutral, src # 0 is the childSrc.
-	vector< Conn >::const_iterator begin = elm->connSrcBegin( 0 );
-	vector< Conn >::const_iterator end = elm->connSrcVeryEnd( 0 );
-
-	string name;
+	Element *e = er.e;
+	assert( e != 0 );
 	assert( s.length() > 0 );
+	const Msg* m = e->msg( childSrcSlot.msg() );
+	assert( m != 0 );
+	vector< ConnTainer* >::const_iterator i;
+	
+	string name;
 	unsigned int index = 0;
 	if ( s[s.length() - 1] == ']' ) {
 		string::size_type pos = s.rfind( '[' );
@@ -367,43 +339,10 @@ Id Neutral::getChildByName( const Element* elm, const string& s )
 		name = s;
 		index = 0;
 	}
-	for ( i = begin; i != end; i++ ) {
-		Element* kid = i->targetElement();
-		const string& n = kid->name();
-		assert( n.length() > 0 );
-		if ( n[ n.length() - 1 ] == ']' ) { // name-indexing
-			if ( n == s )
-		// But note this forestalls the use of foo[ i ][ j ] type indexing.
-		// Note also multiple use cases.
-				return kid->id();
-		} else if ( i->targetElement()->name() == name ) {
-			// Four cases here:
-			// index == 0, elm->index == 0: simple element return
-			// index == 0, elm->index > 0
-			// index > 0, elm->index == 0
-			// index > 0, elm->index > 0
-			if ( elm->numEntries() == 0 ) {
-				// index == 0, elm->index == 0: simple element return
-				if ( index == 0 )
-					return kid->id();
-				else{ // index > 0, elm->index == 0: Child should be an array
-					// Here we might have explicit name indexing, so go
-					// around again.
-					if ( kid->numEntries() < index )
-						continue;
-					else
-						return kid->id().assignIndex( index );
-				}
-			} else {
-				if ( index == 0 ) // Here the child id inherits the parent indx
-					return kid->id().assignIndex( elm->id().index() );
-				else{ // Nasty: indices for parent as well as child. Work out later.
-					return Id::badId();
-				}
-			}
-		}
-	}
-	// Failure option: return BAD_ID.
+
+	for ( i = m->begin(); i != m->end(); i++ )
+		if ( ( *i )->e2()->name() == name )
+			return ( *i )->e2()->id().assignIndex( index );
 	return Id::badId();
 }
 
@@ -411,53 +350,26 @@ Id Neutral::getChildByName( const Element* elm, const string& s )
  * Looks up the child with the specified name, and sends its eid
  * in a message back to sender.
  */
-void Neutral::lookupChild( const Conn& c, const string s )
+void Neutral::lookupChild( const Conn* c, const string s )
 {
-	SimpleElement* e =
-			dynamic_cast< SimpleElement* >( c.targetElement() );
-	assert( e != 0 );
-	// assert that the element is a neutral.
-
-	// Here we should put in one of the STL algorithms.
-	vector< Conn >::const_iterator i;
-	// For neutral, src # 0 is the childSrc.
-	vector< Conn >::const_iterator begin = e->connSrcBegin( 0 );
-	vector< Conn >::const_iterator end = e->connSrcVeryEnd( 0 );
-	for ( i = begin; i != end; i++ ) {
-		if ( i->targetElement()->name() == s ) {
-			// For neutral, src # 1 is the shared message.
-			sendTo1< Id >( e, 1, c.sourceIndex( e ), 
-				i->targetElement()->id() );
-			return;
-		}
-	}
-	// Hm. What is the best thing to do if it fails? Return an
-	// error value, or not return anything at all?
-	// Perhaps best to be consistent about returning something.
-	sendTo1< Id >( e, 1, c.sourceIndex( e ), Id::badId() );
+	Id ret = getChildByName( c->target().e, s );
+	sendBack1< Id >( c, childSrcSlot, ret );
 }
 
-vector< Id > Neutral::getChildList( const Element* e )
+vector< Id > Neutral::getChildList( Eref e )
 {
-	// const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
-	// assert( e != 0 );
-
-	vector< Conn >::const_iterator i;
-	// For neutral, src # 0 is the childSrc.
-	vector< Conn >::const_iterator begin = e->connSrcBegin( 0 );
-	vector< Conn >::const_iterator end = e->connSrcVeryEnd( 0 );
-
+	assert( e.e != 0 );
 	vector< Id > ret;
-	if ( end == begin ) // zero children
-			return ret;
-	ret.reserve( end - begin );
-	for ( i = begin; i != end; i++ )
-		ret.push_back( i->targetElement()->id() );
-
+	Conn* c = e.e->targets( childSrcSlot.msg() );
+	while ( c->good() ) {
+		ret.push_back( c->target().e->id() );
+		c->increment();
+	}
+	delete c;
 	return ret;
 }
 
-vector< string > Neutral::getFieldList( const Element* elm )
+vector< string > Neutral::getFieldList( Eref elm )
 {
 	// const SimpleElement* e = dynamic_cast< const SimpleElement *>(elm);
 	// assert( e != 0 );
@@ -465,7 +377,7 @@ vector< string > Neutral::getFieldList( const Element* elm )
 	vector< string > ret;
 	vector< const Finfo* > flist;
 	vector< const Finfo* >::const_iterator i;
-	elm->listFinfos( flist );
+	elm.e->listFinfos( flist );
 
 	for ( i = flist.begin(); i != flist.end(); i++ )
 		ret.push_back( (*i)->name() );
@@ -473,20 +385,20 @@ vector< string > Neutral::getFieldList( const Element* elm )
 	return ret;
 }
 
-double Neutral::getCpu( const Element* e )
+double Neutral::getCpu( Eref e )
 {
 	return 0.0;
 }
 
-unsigned int Neutral::getDataMem( const Element* e )
+unsigned int Neutral::getDataMem( Eref e )
 {
-	const Finfo *f = e->getThisFinfo();
+	const Finfo *f = e.e->getThisFinfo();
 	return f->ftype()->size();
 }
 
-unsigned int Neutral::getMsgMem( const Element* e )
+unsigned int Neutral::getMsgMem( Eref e )
 {
-	return e->getMsgMem();
+	return e.e->getMsgMem();
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -504,20 +416,20 @@ void testNeutral()
 		const Finfo* childSrcFinfo = 
 			Element::root()->findFinfo( "childSrc" );
 		assert( childSrcFinfo != 0 );
+		int childDestMsg = Element::root()->findFinfo( "child" )->msg();
 
-
-		Element* n1 = neutralCinfo->create( Id::scratchId(), "n1" );
+		Element* n1 = neutralCinfo->create( Id::scratchId(), "N1" );
 		bool ret = childSrcFinfo->add( 
 			Element::root(), n1, n1->findFinfo( "child" ) );
 		ASSERT( ret, "adding n1");
 
 		string s;
 		get< string >( n1, n1->findFinfo( "name" ), s );
-		ASSERT( s == "n1", "Neutral name get" );
-		set< string >( n1, n1->findFinfo( "name" ), "N1" );
+		ASSERT( s == "N1", "Neutral name get" );
+		set< string >( n1, n1->findFinfo( "name" ), "n1" );
 		s = "";
 		get< string >( n1, n1->findFinfo( "name" ), s );
-		ASSERT( s == "N1", "Neutral name set" );
+		ASSERT( s == "n1", "Neutral name set" );
 
 		Element* n2 = neutralCinfo->create( Id::scratchId(), "n2" );
 		
@@ -539,34 +451,47 @@ void testNeutral()
 		ret = childSrcFinfo->add( n2, n22, n22->findFinfo( "child" ) );
 		ASSERT( ret, "adding child");
 
-		ASSERT( n1->connSize() == 3, "count children and parent" );
+		ASSERT( n1->msg( childSrcSlot.msg() )->size() == 2, "count children and parent" );
+		ASSERT( n1->dest( childDestMsg )->size() == 1,
+			"count children and parent" );
 
 		// n2 has n1 as parent, and n21 and n22 as children
-		ASSERT( n2->connSize() == 3, "count children" );
+		ASSERT( n2->msg( childSrcSlot.msg() )->size() == 2, "count children" );
+		ASSERT( n2->dest( childDestMsg )->size() == 1, "count parent" );
 
 		// Send the command to mark selected children for deletion.
 		// In this case the selected child should be n2.
-		sendTo1< int >( n1, 0, 0, 0 );
+		sendTo1< int >( n1, childSrcSlot, 0, 0 );
 
 		// At this point n1 still has both n2 and n3 as children
-		ASSERT( n1->connSize() == 3, "Should still have 2 children and parent" );
+		ASSERT( n1->msg( childSrcSlot.msg() )->size() == 2, "Should still have 2 children and parent" );
 		// and n2 still has n1 as parent, and n21 and n22 as children
-		ASSERT( n2->connSize() == 3, "2 kids and a parent" );
+		ASSERT( n2->msg( childSrcSlot.msg() )->size() == 2, "2 kids and a parent" );
 
 		// Send the command to clean up messages. This still does
-		// not delete anything.
-		sendTo1< int >( n1, 0, 0, 1 );
-		ASSERT( n1->connSize() == 2, "As far as n1 is concerned, n2 is removed" );
+		// not delete anything, but now n2 and children are isolated.
+		// The CLEAR_MESSAGES (== 1) flag says to delete all messages 
+		// outside delete tree, which includes n1 here because n1 is 
+		// outside delete tree.
+		// But n3 should still be there as a child of n1.
+		sendTo1< int >( n1, childSrcSlot, 0, 1 );
+		ASSERT( n1->msg( childSrcSlot.msg() )->size() == 1,
+			"Now n1 should have only n3 as a child." );
+		ASSERT( ( *n1->msg( childSrcSlot.msg() )->begin() )->e2() == n3, 
+			"n3 is the only remaining child." );
 		// n2 still has n1 as parent, and n21 and n22 as children
-		ASSERT( n2->connSize() == 3, "2 kids and a parent" );
+		ASSERT( n2->msg( childSrcSlot.msg() )->size() == 2,
+			"2 kids and a parent" );
+		ASSERT( n2->dest( childDestMsg )->size() == 0, "2 kids, no parent" );
 
 
 		int initialNumInstances = SimpleElement::numInstances;
 		// Finally, tell n2 to die. We can't use messages
 		// any more because the handle has gone off n1.
-		set< int >( n2, n2->findFinfo( "child" ), 2 );
+		// sendTo1< int >( n1, 0, childSrcSlot, 0, 2 );
+		set< int >( n2, "child", 2 );
 		// Now we've gotten rid of n2.
-		ASSERT( n1->connSize() == 2, "Now only 1 child." );
+		ASSERT( n1->msg( childSrcSlot.msg() )->size() == 1, "Now only 1 child." );
 
 		// Now check that n2, n21, and n22 are really gwan.
 
