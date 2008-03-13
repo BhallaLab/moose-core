@@ -16,23 +16,23 @@ class GenesisParserWrapper: public myFlexLexer
     public:
 		GenesisParserWrapper();
 
-		static void readlineFunc( const Conn& c, string s );
+		static void readlineFunc( const Conn* c, string s );
 
-		static void processFunc( const Conn& c );
+		static void processFunc( const Conn* c );
 
-		static void parseFunc( const Conn& c, string s );
+		static void parseFunc( const Conn* c, string s );
 
-		static void setReturnId( const Conn& c, Id i );
+		static void setReturnId( const Conn* c, Id i );
 
-		static void recvCwe( const Conn& c, Id i );
-		static void recvElist( const Conn& c, vector< Id > elist);
-		static void recvCreate( const Conn& c, Id i );
-		static void recvField( const Conn& c, string value );
-		static void recvWildcardList( const Conn& c,
+		static void recvCwe( const Conn* c, Id i );
+		static void recvElist( const Conn* c, vector< Id > elist);
+		static void recvCreate( const Conn* c, Id i );
+		static void recvField( const Conn* c, string value );
+		static void recvWildcardList( const Conn* c,
 						vector< Id > value );
-		static void recvClocks( const Conn& c, vector< double > dbls);
+		static void recvClocks( const Conn* c, vector< double > dbls);
 		static void recvMessageList( 
-				const Conn& c, vector< Id > elist, string s);
+				const Conn* c, vector< Id > elist, string s);
 
 //////////////////////////////////////////////////////////////////
 // Helper functions
@@ -75,7 +75,7 @@ class GenesisParserWrapper: public myFlexLexer
 //		static Id path2eid( const string& path, Id i );
 //		Id innerPath2eid( const string& path, Id g );
 //		static string eid2path( Id i );
-		static Element* getShell( Id g );
+//		static Element* getShell( Id g );
 
 		/**
 		 * This utility function directs output either to cout, or

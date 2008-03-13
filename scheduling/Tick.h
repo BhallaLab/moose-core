@@ -29,31 +29,31 @@ class Tick
 		///////////////////////////////////////////////////////
 		// Functions for handling field assignments.
 		///////////////////////////////////////////////////////
-		static void setDt( const Conn& c, double v );
-		static double getDt( const Element* e );
-		static void setStage( const Conn& c, int v );
-		static int getStage( const Element* e );
-		static int getOrdinal( const Element* e );
-		static double getNextTime( const Element* e );
+		static void setDt( const Conn* c, double v );
+		static double getDt( Eref e );
+		static void setStage( const Conn* c, int v );
+		static int getStage( Eref e );
+		static int getOrdinal( Eref e );
+		static double getNextTime( Eref e );
 
-		static void setPath( const Conn& c, string v );
-		static string getPath( const Element* e );
+		static void setPath( const Conn* c, string v );
+		static string getPath( Eref e );
 
 		///////////////////////////////////////////////////////
 		// Functions for handling messages
 		///////////////////////////////////////////////////////
 
-		static void receiveNextTime( const Conn& c, double v );
-		static void incrementTick( const Conn& c, ProcInfo p, double v);
-		void innerIncrementTick( Element* e, ProcInfo p, double v );
-		static void resched( const Conn& c);
-		void updateNextTickTime( Element* e );
-		static void reinit( const Conn& c, ProcInfo p );
+		static void receiveNextTime( const Conn* c, double v );
+		static void incrementTick( const Conn* c, ProcInfo p, double v);
+		void innerIncrementTick( Eref e, ProcInfo p, double v );
+		static void resched( const Conn* c);
+		void updateNextTickTime( Eref e );
+		static void reinit( const Conn* c, ProcInfo p );
 
-		static void handleNextTimeRequest( const Conn& c );
+		static void handleNextTimeRequest( const Conn* c );
 
-		static void start( const Conn& c, ProcInfo p, double maxTime );
-		void innerStart( Element* e, ProcInfo p, double maxTime );
+		static void start( const Conn* c, ProcInfo p, double maxTime );
+		void innerStart( Eref e, ProcInfo p, double maxTime );
 		///////////////////////////////////////////////////////
 		// Utility function
 		///////////////////////////////////////////////////////
@@ -64,8 +64,8 @@ class Tick
 		// Virtual functions for handling scheduling. The
 		// derived ParTick class puts in its own versions.
 		///////////////////////////////////////////////////////
-		virtual void innerProcessFunc( Element* e, ProcInfo info );
-		virtual void innerReinitFunc( Element* e, ProcInfo info );
+		virtual void innerProcessFunc( Eref e, ProcInfo info );
+		virtual void innerReinitFunc( Eref e, ProcInfo info );
 
 	private:
 		double dt_;

@@ -197,16 +197,16 @@ const Cinfo* initClockJobCinfo()
 
 static const Cinfo* clockJobCinfo = initClockJobCinfo();
 
-static const unsigned int startSlot = 
-	initClockJobCinfo()->getSlotIndex( "startSrc" );
-static const unsigned int incrementSlot = 
-	initClockJobCinfo()->getSlotIndex( "tick.incrementTick" );
-static const unsigned int requestNextTimeSlot = 
-	initClockJobCinfo()->getSlotIndex( "tick.nextTime" );
-static const unsigned int reschedSlot = 
-	initClockJobCinfo()->getSlotIndex( "tick.resched" );
-static const unsigned int reinitSlot = 
-	initClockJobCinfo()->getSlotIndex( "tick.reinit" );
+static const Slot startSlot = 
+	initClockJobCinfo()->getSlot( "startSrc" );
+static const Slot incrementSlot = 
+	initClockJobCinfo()->getSlot( "tick.incrementTick" );
+static const Slot requestNextTimeSlot = 
+	initClockJobCinfo()->getSlot( "tick.nextTime" );
+static const Slot reschedSlot = 
+	initClockJobCinfo()->getSlot( "tick.resched" );
+static const Slot reinitSlot = 
+	initClockJobCinfo()->getSlot( "tick.reinit" );
 
 ///////////////////////////////////////////////////
 // Field function definitions
@@ -217,18 +217,18 @@ static const unsigned int reinitSlot =
  * Perhaps this should not be assignable, but readonly.
  * Or The assignment should be a message.
  */
-void ClockJob::setRunTime( const Conn& c, double v )
+void ClockJob::setRunTime( const Conn* c, double v )
 {
-	static_cast< ClockJob* >( c.data() )->runTime_ = v;
+	static_cast< ClockJob* >( c->data() )->runTime_ = v;
 }
-double ClockJob::getRunTime( const Element* e )
+double ClockJob::getRunTime( Eref e )
 {
-	return static_cast< ClockJob* >( e->data() )->runTime_;
+	return static_cast< ClockJob* >( e.data() )->runTime_;
 }
 
-double ClockJob::getCurrentTime( const Element* e )
+double ClockJob::getCurrentTime( Eref e )
 {
-	return static_cast< ClockJob* >( e->data() )->info_.currTime_;
+	return static_cast< ClockJob* >( e.data() )->info_.currTime_;
 }
 
 /**
@@ -237,36 +237,36 @@ double ClockJob::getCurrentTime( const Element* e )
  * Or The assignment should be a message.
  * It is a variant of the runtime function.
  */
-void ClockJob::setNsteps( const Conn& c, int v )
+void ClockJob::setNsteps( const Conn* c, int v )
 {
-	static_cast< ClockJob* >( c.data() )->nSteps_ = v;
+	static_cast< ClockJob* >( c->data() )->nSteps_ = v;
 }
-int ClockJob::getNsteps( const Element* e )
+int ClockJob::getNsteps( Eref e )
 {
-	return static_cast< ClockJob* >( e->data() )->nSteps_;
+	return static_cast< ClockJob* >( e.data() )->nSteps_;
 }
 
-int ClockJob::getCurrentStep( const Element* e )
+int ClockJob::getCurrentStep( Eref e )
 {
-	return static_cast< ClockJob* >( e->data() )->currentStep_;
+	return static_cast< ClockJob* >( e.data() )->currentStep_;
 }
 
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void ClockJob::receiveNextTime( const Conn& c, double time )
+void ClockJob::receiveNextTime( const Conn* c, double time )
 {
-	static_cast< ClockJob* >( c.data() )->nextTime_ = time;
+	static_cast< ClockJob* >( c->data() )->nextTime_ = time;
 }
 
-void ClockJob::startFunc( const Conn& c, double runtime)
+void ClockJob::startFunc( const Conn* c, double runtime)
 {
-	static_cast< ClockJob* >( c.data() )->startFuncLocal( 
-					c.targetElement(), runtime );
+	static_cast< ClockJob* >( c->data() )->startFuncLocal( 
+					c->target(), runtime );
 }
 
-void ClockJob::startFuncLocal( Element* e, double runTime )
+void ClockJob::startFuncLocal( Eref e, double runTime )
 {
 	// cout << "starting run for " << runTime << " sec.\n";
 
@@ -281,10 +281,10 @@ void ClockJob::startFuncLocal( Element* e, double runTime )
 	*/
 }
 
-void ClockJob::stepFunc( const Conn& c, int nsteps )
+void ClockJob::stepFunc( const Conn* c, int nsteps )
 {
-	ClockJob* cj = static_cast< ClockJob* >( c.data() );
-	cj->startFuncLocal( c.targetElement(), nsteps * cj->dt_ );
+	ClockJob* cj = static_cast< ClockJob* >( c->data() );
+	cj->startFuncLocal( c->target(), nsteps * cj->dt_ );
 }
 
 /**
@@ -292,12 +292,12 @@ void ClockJob::stepFunc( const Conn& c, int nsteps )
  * reorder any of the clock ticks, it assumes that they are scheduled
  * correctly
  */
-void ClockJob::reinitFunc( const Conn& c )
+void ClockJob::reinitFunc( const Conn* c )
 {
-	static_cast< ClockJob* >( c.data() )->reinitFuncLocal(
-					c.targetElement() );
+	static_cast< ClockJob* >( c->data() )->reinitFuncLocal(
+					c->target() );
 }
-void ClockJob::reinitFuncLocal( Element* e )
+void ClockJob::reinitFuncLocal( Eref e )
 {
 	currentTime_ = 0.0;
 	nextTime_ = 0.0;
@@ -313,10 +313,10 @@ void ClockJob::reinitFuncLocal( Element* e )
  * This function does NOT mess with the current simulation time: you
  * can resched an ongoing simulation.
  */
-void ClockJob::reschedFunc( const Conn& c )
+void ClockJob::reschedFunc( const Conn* c )
 {
-	static_cast< ClockJob* >( c.data() )->reschedFuncLocal(
-					c.targetElement() );
+	static_cast< ClockJob* >( c->data() )->reschedFuncLocal(
+					c->target() );
 }
 
 class TickSeq {
@@ -348,8 +348,10 @@ class TickSeq {
 			int stage_;
 };
 
-void ClockJob::reschedFuncLocal( Element* e )
+void ClockJob::reschedFuncLocal( Eref er )
 {
+	Element* e = er.e;
+
 	vector< Id > childList = Neutral::getChildList( e );
 	if ( childList.size() == 0 )
 			return;
@@ -373,7 +375,7 @@ void ClockJob::reschedFuncLocal( Element* e )
 	for ( i = childList.begin(); i != childList.end(); i++ ) {
 		const Finfo* procFinfo = (*i)()->findFinfo( "process" );
 		assert ( procFinfo != 0 );
-		unsigned int numTargets = procFinfo->numOutgoing( (*i)() );
+		unsigned int numTargets = ( *i )()->msg( procFinfo->msg() )->size();
 		if ( numTargets > 0 )
 			tickList.push_back( TickSeq( *i ) );
 	}
@@ -394,7 +396,7 @@ void ClockJob::reschedFuncLocal( Element* e )
 			buildMessages( last, j->element() );
 			last = j->element();
 	}
-	send0( e, reschedSlot );
+	send0( er, reschedSlot );
 }
 
 /**
@@ -404,8 +406,8 @@ void ClockJob::reschedFuncLocal( Element* e )
  */
 void ClockJob::clearMessages( Element* e )
 {
-	e->findFinfo( "prev" )->dropAll( e );
-	e->findFinfo( "start" )->dropAll( e );
+	e->dropAll( "prev" );
+	e->dropAll( "start" );
 }
 
 /**
@@ -424,12 +426,12 @@ void ClockJob::buildMessages( Element* last, Element* e )
  * it must redo the ordering of the ticks and call a resched on them.
  * \todo Currently only a placeholder.
  */
-void ClockJob::dtFunc( const Conn& c, double dt )
+void ClockJob::dtFunc( const Conn* c, double dt )
 {
-	static_cast< ClockJob* >( c.data() )->dtFuncLocal(
-					c.targetElement(), dt );
+	static_cast< ClockJob* >( c->data() )->dtFuncLocal( c->target(), dt );
 }
-void ClockJob::dtFuncLocal( Element* e, double dt )
+
+void ClockJob::dtFuncLocal( Eref e, double dt )
 {
 		/*
 	if ( tick_ == 0 )

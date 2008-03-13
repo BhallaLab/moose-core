@@ -35,18 +35,12 @@ class DynamicFinfo: public Finfo
 {
 		public:
 			DynamicFinfo( const string& name, const Finfo* origFinfo,
-							RecvFunc setFunc, GetFunc getFunc,
-							RecvFunc recvFunc, RecvFunc trigFunc,
-							void* index = 0 )
+							GetFunc getFunc, void* index = 0 )
 					: Finfo( name, origFinfo->ftype() ),
 					origFinfo_( origFinfo ), 
-					setFunc_( setFunc ),
 					getFunc_( getFunc ),
-					recvFunc_( recvFunc ) ,
-					trigFunc_( trigFunc ) ,
 					generalIndex_( index ),
-					srcIndex_( 0 ),
-					destIndex_( 0 )
+					msg_( 0 )
 			{;}
 
 			// Assert that the affected conns have been cleaned up
@@ -60,8 +54,7 @@ class DynamicFinfo: public Finfo
 			 */
 			static DynamicFinfo* setupDynamicFinfo(
 				Element* e, const string& name, const Finfo* origFinfo,
-				RecvFunc setFunc, GetFunc getFunc,
-				RecvFunc recvFunc, RecvFunc trigFunc,
+				GetFunc getFunc,
 				void* index = 0 );
 
 			/**
@@ -80,12 +73,18 @@ class DynamicFinfo: public Finfo
 			 */
 			bool respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
-					FuncList& srcfl, FuncList& returnFl,
+					unsigned int& srcFuncId, unsigned int& returnFuncId,
 					unsigned int& destIndex, unsigned int& numDest
 			) const;
 
-			void dropAll( Element* e ) const;
-			bool drop( Element* e, unsigned int i ) const;
+
+			/**
+			 * This msg is always placed on the msg_ src vector, amid
+			 * the nexts.
+			 */
+			int msg() const {
+				return msg_;
+			}
 
 			/**
 			 * This function erases contents of a DynamicFinfo, including
@@ -94,35 +93,18 @@ class DynamicFinfo: public Finfo
 			 * an old DynamicFinfo, in the Element::findFinfo( name )
 			 */
 			void clear( Element* e );
-			
-			unsigned int numIncoming( const Element* e ) const;
-			unsigned int numOutgoing( const Element* e ) const;
-			unsigned int incomingConns(
-					const Element* e, vector< Conn >& list ) const;
-			unsigned int outgoingConns(
-					const Element* e, vector< Conn >& list ) const;
-
 
 			/**
 			 * The Ftype knows how to do this conversion.
 			 */
-			bool strSet( Element* e, const std::string &s ) const;
+			bool strSet( Eref e, const std::string &s ) const;
 			
 			// The Ftype handles this conversion.
-			bool strGet( const Element* e, std::string &s ) const;
+			bool strGet( Eref e, std::string &s ) const;
 			
 			/// Public RecvFunc for receiving function args.
 			RecvFunc recvFunc() const {
-				return recvFunc_;
-			}
-			
-			/**
-			 * Internal RecvFunc for passing to Ftype to construct
-			 * recvFunc. May be the same as recvFunc for some classes,
-			 * such as ValueFinfo or DestFinfo.
-			 */
-			RecvFunc innerSetFunc() const {
-				return setFunc_;
+				return origFinfo_->recvFunc();
 			}
 			
 			/**
@@ -155,10 +137,9 @@ class DynamicFinfo: public Finfo
 			const Finfo* match( Element* e, const string& n ) const;
 
 			const Finfo* match( 
-				const Element* e, unsigned int connIndex ) const;
+				const Element* e, const ConnTainer* c ) const;
 
-			void countMessages( 
-				unsigned int& srcIndex, unsigned int& destIndex );
+			void countMessages( unsigned int& num );
 
 			/**
 			 * The dynamicFinfo is one of the few Finfos that has
@@ -168,8 +149,7 @@ class DynamicFinfo: public Finfo
 					return 1;
 			}
 
-			bool getSlotIndex( const string& name, 
-					unsigned int& ret ) const;
+			bool getSlot( const string& name, Slot& ret ) const;
 
 			/**
 			 * This operation makes no sense for the DynamicFinfo
@@ -187,6 +167,15 @@ class DynamicFinfo: public Finfo
 			 */
 			Finfo* copy() const;
 
+			/**
+			 * For the DynamicFinfo, we should pass in an existing
+			 * FuncVec for set, get ,and recv. This will need changes
+			 * in constructor and associated code. We do not expect to
+			 * create a new FuncVec here.
+			 */
+			void addFuncVec( const string& cname )
+			{;}
+
 			/////////////////////////////////////////////////////////
 			// Here we define the functions that are unique to this
 			// class.
@@ -195,45 +184,49 @@ class DynamicFinfo: public Finfo
 			const Finfo* origFinfo() const {
 					return origFinfo_;
 			}
-			
-			unsigned int destIndex() const {
-				return destIndex_;
-			}
-			
-			unsigned int srcIndex() const {
-				return srcIndex_;
-			}
 
 			const void* generalIndex( ) const {
 					return generalIndex_;
+			}
+
+			/**
+			 * Returns the func id of this DynamicFinfo by looking up
+			 * the original.
+			 */
+			unsigned int funcId() const {
+				return origFinfo_->funcId();
+			}
+
+			/**
+			 * This should be true if the Finfo never acts as a 
+			 * message Source, but it is tricky here in the case of
+			 * the DynamicFinfo. This is because the role of the 
+			 * DynamicFinfo may be a pure dest (when the field is
+			 * assigned by a message) or as a mixed one (when the
+			 * field is requested to send its value back).
+			 * Probably doesn't matter, so I'll choose the conservative
+			 * option.
+			 */
+			bool isDestOnly() const {
+				return 0;
 			}
 
 
 		private:
 			const Finfo* origFinfo_;
 
-			/// Inner RecvFunc from Finfo for handling assignment
-			RecvFunc setFunc_;
-
 			/// Inner GetFunc from Finfo, gets value if applicable.
 			GetFunc getFunc_;
-
-			/// Public RecvFunc for receiving function args.
-			RecvFunc recvFunc_;
-
-			/// Public RecvFunc for receiving requests to send value.
-			RecvFunc trigFunc_;
 
 			/// This is used by LookupFinfo.
 			void* generalIndex_;
 
-			unsigned int srcIndex_;
-			unsigned int destIndex_;		
+			unsigned int msg_;
 };
 
 /**
  * This function looks up the DynamicFinfo matching the incoming Conn
  */
-extern const DynamicFinfo* getDF( const Conn& );
+extern const DynamicFinfo* getDF( const Conn* );
 
 #endif // _DYNAMIC_FINFO_H

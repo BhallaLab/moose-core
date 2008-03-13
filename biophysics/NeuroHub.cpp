@@ -118,36 +118,32 @@ static const Finfo* synSolveFinfo =
 // Dest functions (for Hub)
 ///////////////////////////////////////////////////
 
-void NeuroHub::compartmentFunc( const Conn& c,
+void NeuroHub::compartmentFunc( const Conn* c,
 	vector< Element* >* elist )
 {
-	Element* hub = c.targetElement();
-	static_cast< NeuroHub* >( hub->data() )->
-		innerCompartmentFunc( hub, elist );
+	Element* hub = c->targetElement();
+	static_cast< NeuroHub* >( c->data() )->innerCompartmentFunc( hub, elist );
 }
 
-void NeuroHub::channelFunc( const Conn& c,
+void NeuroHub::channelFunc( const Conn* c,
 	vector< Element* >* elist )
 {
-	Element* hub = c.targetElement();
-	static_cast< NeuroHub* >( hub->data() )->
-		innerChannelFunc( hub, elist );
+	Element* hub = c->targetElement();
+	static_cast< NeuroHub* >( c->data() )->innerChannelFunc( hub, elist );
 }
 
-void NeuroHub::spikegenFunc( const Conn& c,
+void NeuroHub::spikegenFunc( const Conn* c,
 	vector< Element* >* elist )
 {
-	Element* hub = c.targetElement();
-	static_cast< NeuroHub* >( hub->data() )->
-		innerSpikegenFunc( hub, elist );
+	Element* hub = c->targetElement();
+	static_cast< NeuroHub* >( c->data() )->innerSpikegenFunc( hub, elist );
 }
 
-void NeuroHub::synchanFunc( const Conn& c,
+void NeuroHub::synchanFunc( const Conn* c,
 	vector< Element* >* elist )
 {
-	Element* hub = c.targetElement();
-	static_cast< NeuroHub* >( hub->data() )->
-		innerSynchanFunc( hub, elist );
+	Element* hub = c->targetElement();
+	static_cast< NeuroHub* >( c->data() )->innerSynchanFunc( hub, elist );
 }
 
 void NeuroHub::innerCompartmentFunc(
@@ -275,7 +271,7 @@ void NeuroHub::innerSynchanFunc(
  * and we need to replace the SolveFinfos on zombies with the
  * original ThisFinfo.
  */
-void NeuroHub::destroy( const Conn& c )
+void NeuroHub::destroy( const Conn* c )
 {
 /*
 	static Finfo* origMolFinfo =
@@ -301,7 +297,7 @@ void NeuroHub::destroy( const Conn& c )
 	Neutral::destroy( c );
 }
 
-void NeuroHub::childFunc( const Conn& c, int stage )
+void NeuroHub::childFunc( const Conn* c, int stage )
 {
 	if ( stage == 1 ) // clear messages: first clean out zombies before
 		// the messages are all deleted.
@@ -310,9 +306,9 @@ void NeuroHub::childFunc( const Conn& c, int stage )
 	Neutral::childFunc( c, stage );
 }
 
-void NeuroHub::unzombify( const Conn& c )
+void NeuroHub::unzombify( const Conn* c )
 {
-	Element* e = c.targetElement();
+	Element* e = c->targetElement();
 	const Cinfo* ci = e->cinfo();
 	bool ret = ci->schedule( e );
 	assert( ret );
@@ -323,9 +319,9 @@ void NeuroHub::unzombify( const Conn& c )
 /**
  * Clears out all the messages to zombie objects
  */
-void NeuroHub::clearFunc( const Conn& c )
+void NeuroHub::clearFunc( const Conn* c )
 {
-	Element* e = c.targetElement();
+	Element* e = c->targetElement();
 	
 	// First unzombify all targets
 	vector< Conn > list;
@@ -333,19 +329,24 @@ void NeuroHub::clearFunc( const Conn& c )
 	
 	comptSolveFinfo->outgoingConns( e, list );
 	comptSolveFinfo->dropAll( e );
-	for_each ( list.begin(), list.end(), unzombify );
+	// I'll soon enough reinstate all this.
+	// for_each ( list.begin(), list.end(), unzombify );
+	for( i = list.begin(); i != list.end(); i++ ) unzombify( &( *i ) );
 	
 	chanSolveFinfo->outgoingConns( e, list );
 	chanSolveFinfo->dropAll( e );
-	for_each ( list.begin(), list.end(), unzombify );
+	// for_each ( list.begin(), list.end(), unzombify );
+	for( i = list.begin(); i != list.end(); i++ ) unzombify( &( *i ) );
 	
 	spikeSolveFinfo->outgoingConns( e, list );
 	spikeSolveFinfo->dropAll( e );
-	for_each ( list.begin(), list.end(), unzombify );
+	// for_each ( list.begin(), list.end(), unzombify );
+	for( i = list.begin(); i != list.end(); i++ ) unzombify( &( *i ) );
 	
 	synSolveFinfo->outgoingConns( e, list );
 	synSolveFinfo->dropAll( e );
-	for_each ( list.begin(), list.end(), unzombify );
+	// for_each ( list.begin(), list.end(), unzombify );
+	for( i = list.begin(); i != list.end(); i++ ) unzombify( &( *i ) );
 }
 
 ///////////////////////////////////////////////////
@@ -359,11 +360,11 @@ void NeuroHub::clearFunc( const Conn& c )
  * For the compartment set/get operations, the lookup order is identical
  * to the message order. So we don't need an intermediate table.
  */
-void NeuroHub::setComptVm( const Conn& c, double value )
+void NeuroHub::setComptVm( const Conn* c, double value )
 {
 	unsigned int comptIndex;
 	NeuroHub* nh = getHubFromZombie( 
-		c.targetElement(), comptSolveFinfo, comptIndex );
+		c->targetElement(), comptSolveFinfo, comptIndex );
 	if ( nh ) {
 		assert ( comptIndex < nh->V_.size() );
 		( nh->V_ )[ comptIndex ] = value;
@@ -381,11 +382,11 @@ double NeuroHub::getComptVm( const Element* e )
 	return 0.0;
 }
 
-void NeuroHub::setInject( const Conn& c, double value )
+void NeuroHub::setInject( const Conn* c, double value )
 {
 	unsigned int comptIndex;
 	NeuroHub* nh = getHubFromZombie( 
-		c.targetElement(), comptSolveFinfo, comptIndex );
+		c->targetElement(), comptSolveFinfo, comptIndex );
 	if ( nh ) {
 		assert ( comptIndex < nh->inject_.size() );
 		( nh->inject_ )[ comptIndex ] = value;
@@ -403,7 +404,7 @@ double NeuroHub::getInject( const Element* e )
 	return 0.0;
 }
 
-void NeuroHub::setChanGbar( const Conn& c, double value )
+void NeuroHub::setChanGbar( const Conn* c, double value )
 {
 	;
 }
@@ -413,7 +414,7 @@ double NeuroHub::getChanGbar( const Element* e )
 	return 0.0;
 }
 
-void NeuroHub::setSynChanGbar( const Conn& c, double value )
+void NeuroHub::setSynChanGbar( const Conn* c, double value )
 {
 	;
 }
@@ -426,7 +427,7 @@ double NeuroHub::getSynChanGbar( const Element* e )
 ///////////////////////////////////////////////////
 // Dest functions (Biophysics)
 ///////////////////////////////////////////////////
-void NeuroHub::comptInjectMsgFunc( const Conn& c, double I )
+void NeuroHub::comptInjectMsgFunc( const Conn* c, double I )
 {
 /*
 	Compartment* compt = static_cast< Compartment* >(
@@ -571,10 +572,10 @@ NeuroHub* NeuroHub::getHubFromZombie(
 	const SolveFinfo* f = dynamic_cast< const SolveFinfo* > (
 		e->getThisFinfo() );
 	if ( !f ) return 0;
-	const Conn& c = f->getSolvedConn( e );
-	unsigned int slot;
-	srcFinfo->getSlotIndex( srcFinfo->name(), slot );
-	Element* hub = c.targetElement();
-	index = hub->connSrcRelativeIndex( c, slot );
+	const Conn* c = f->getSolvedConn( e );
+	Slot slot;
+	srcFinfo->getSlot( srcFinfo->name(), slot );
+	Element* hub = c->targetElement();
+	index = hub->connSrcRelativeIndex( c, slot.msg() );
 	return static_cast< NeuroHub* >( hub->data() );
 }

@@ -248,14 +248,14 @@ const Cinfo* initCompartmentCinfo()
 
 static const Cinfo* compartmentCinfo = initCompartmentCinfo();
 
-static const unsigned int channelSlot =
-	initCompartmentCinfo()->getSlotIndex( "channel.Vm" );
-static const unsigned int axialSlot =
-	initCompartmentCinfo()->getSlotIndex( "axial.axialSrc" );
-static const unsigned int raxialSlot =
-	initCompartmentCinfo()->getSlotIndex( "raxial.raxialSrc" );
-static const unsigned int VmSlot =
-	initCompartmentCinfo()->getSlotIndex( "VmSrc" );
+static const Slot channelSlot =
+	initCompartmentCinfo()->getSlot( "channel.Vm" );
+static const Slot axialSlot =
+	initCompartmentCinfo()->getSlot( "axial.axialSrc" );
+static const Slot raxialSlot =
+	initCompartmentCinfo()->getSlot( "raxial.raxialSrc" );
+static const Slot VmSlot =
+	initCompartmentCinfo()->getSlot( "VmSrc" );
 
 //////////////////////////////////////////////////////////////////
 // Here we put the Compartment class functions.
@@ -282,12 +282,12 @@ Compartment::Compartment()
 	length_ = 0.0;
 }
 
-bool Compartment::rangeWarning( const Conn& c, const string& field, double value )
+bool Compartment::rangeWarning( const Conn* c, const string& field, double value )
 {
 	if ( value < Compartment::EPSILON ) {
 		cout << "Warning: Ignored attempt to set " << field <<
 				" of compartment " <<
-				c.targetElement()->name() << 
+				c->target().e->name() << 
 				" to less than " << EPSILON << endl;
 		return 1;
 	}
@@ -295,153 +295,153 @@ bool Compartment::rangeWarning( const Conn& c, const string& field, double value
 }
 
 // Value Field access function definitions.
-void Compartment::setVm( const Conn& c, double Vm )
+void Compartment::setVm( const Conn* c, double Vm )
 {
-	static_cast< Compartment* >( c.targetElement()->data() )->Vm_ = Vm;
+	static_cast< Compartment* >( c->data() )->Vm_ = Vm;
 }
 
-double Compartment::getVm( const Element* e )
+double Compartment::getVm( Eref e )
 {
-	return static_cast< Compartment* >( e->data() )->Vm_;
+	return static_cast< Compartment* >( e.data() )->Vm_;
 }
 
-void Compartment::setEm( const Conn& c, double Em )
+void Compartment::setEm( const Conn* c, double Em )
 {
-	static_cast< Compartment* >( c.targetElement()->data() )->Em_ = Em;
+	static_cast< Compartment* >( c->data() )->Em_ = Em;
 }
 
-double Compartment::getEm( const Element* e )
+double Compartment::getEm( Eref e )
 {
-	return static_cast< Compartment* >( e->data() )->Em_;
+	return static_cast< Compartment* >( e.data() )->Em_;
 }
 
-void Compartment::setCm( const Conn& c, double Cm )
+void Compartment::setCm( const Conn* c, double Cm )
 {
 	if ( rangeWarning( c, "Cm", Cm ) ) return;
-	static_cast< Compartment* >( c.targetElement()->data() )->Cm_ = Cm;
+	static_cast< Compartment* >( c->data() )->Cm_ = Cm;
 }
 
-double Compartment::getCm( const Element* e )
+double Compartment::getCm( Eref e )
 {
-	return static_cast< const Compartment* >( e->data() )->Cm_;
+	return static_cast< const Compartment* >( e.data() )->Cm_;
 }
 
-void Compartment::setRm( const Conn& c, double Rm )
+void Compartment::setRm( const Conn* c, double Rm )
 {
 	if ( rangeWarning( c, "Rm", Rm ) ) return;
-	static_cast< Compartment* >( c.targetElement()->data() )->Rm_ = Rm;
-	static_cast< Compartment* >( c.targetElement()->data() )->invRm_ =
+	static_cast< Compartment* >( c->data() )->Rm_ = Rm;
+	static_cast< Compartment* >( c->data() )->invRm_ =
 			1.0/Rm;
 }
 
-double Compartment::getRm( const Element* e )
+double Compartment::getRm( Eref e )
 {
-	return static_cast< Compartment* >( e->data() )->Rm_;
+	return static_cast< Compartment* >( e.data() )->Rm_;
 }
 
-void Compartment::setRa( const Conn& c, double Ra )
+void Compartment::setRa( const Conn* c, double Ra )
 {
 	if ( rangeWarning( c, "Ra", Ra ) ) return;
-	static_cast< Compartment* >( c.targetElement()->data() )->Ra_ = Ra;
+	static_cast< Compartment* >( c->data() )->Ra_ = Ra;
 }
 
-double Compartment::getRa( const Element* e )
+double Compartment::getRa( Eref e )
 {
-	return static_cast< Compartment* >( e->data() )->Ra_;
+	return static_cast< Compartment* >( e.data() )->Ra_;
 }
 
-void Compartment::setIm( const Conn& c, double Im )
+void Compartment::setIm( const Conn* c, double Im )
 {
-	static_cast< Compartment* >( c.targetElement()->data() )->Im_ = Im;
+	static_cast< Compartment* >( c->data() )->Im_ = Im;
 }
 
-double Compartment::getIm( const Element* e )
+double Compartment::getIm( Eref e )
 {
-	return static_cast< Compartment* >( e->data() )->Im_;
+	return static_cast< Compartment* >( e.data() )->Im_;
 }
 
-void Compartment::setInject( const Conn& c, double Inject )
+void Compartment::setInject( const Conn* c, double Inject )
 {
-	static_cast< Compartment* >( c.targetElement()->data() )->Inject_ =
+	static_cast< Compartment* >( c->data() )->Inject_ =
 			Inject;
 }
 
-double Compartment::getInject( const Element* e )
+double Compartment::getInject( Eref e )
 {
-	return static_cast< Compartment* >( e->data() )->Inject_;
+	return static_cast< Compartment* >( e.data() )->Inject_;
 }
 
-void Compartment::setInitVm( const Conn& c, double initVm )
+void Compartment::setInitVm( const Conn* c, double initVm )
 {
-	static_cast< Compartment* >( c.targetElement()->data() )->initVm_ =
+	static_cast< Compartment* >( c->data() )->initVm_ =
 			initVm;
 }
 
-double Compartment::getInitVm( const Element* e )
+double Compartment::getInitVm( Eref e )
 {
-	return static_cast< Compartment* >( e->data() )->initVm_;
+	return static_cast< Compartment* >( e.data() )->initVm_;
 }
 
-void Compartment::setDiameter( const Conn& c, double value )
+void Compartment::setDiameter( const Conn* c, double value )
 {
-	static_cast< Compartment* >( c.targetElement()->data() )->
+	static_cast< Compartment* >( c->data() )->
 			diameter_ = value;
 }
 
-double Compartment::getDiameter( const Element* e )
+double Compartment::getDiameter( Eref e )
 {
-	return static_cast< Compartment* >( e->data() )->diameter_;
+	return static_cast< Compartment* >( e.data() )->diameter_;
 }
 
-void Compartment::setLength( const Conn& c, double value )
+void Compartment::setLength( const Conn* c, double value )
 {
-	static_cast< Compartment* >( c.targetElement()->data() )->length_ =
+	static_cast< Compartment* >( c->data() )->length_ =
 			value;
 }
 
-double Compartment::getLength( const Element* e )
+double Compartment::getLength( Eref e )
 {
-	return static_cast< Compartment* >( e->data() )->length_;
+	return static_cast< Compartment* >( e.data() )->length_;
 }
 
-void Compartment::setX( const Conn& c, double value )
+void Compartment::setX( const Conn* c, double value )
 {
-	static_cast< Compartment* >( c.targetElement()->data() )->x_ =
-			value;
-		
-}
-double Compartment::getX( const Element* e )
-{
-	return static_cast< Compartment* >( e->data() )->x_;
-}
-
-void Compartment::setY( const Conn& c, double value )
-{
-	static_cast< Compartment* >( c.targetElement()->data() )->y_ =
+	static_cast< Compartment* >( c->data() )->x_ =
 			value;
 		
 }
-double Compartment::getY( const Element* e )
+double Compartment::getX( Eref e )
 {
-	return static_cast< Compartment* >( e->data() )->y_;
+	return static_cast< Compartment* >( e.data() )->x_;
 }
 
-void Compartment::setZ( const Conn& c, double value )
+void Compartment::setY( const Conn* c, double value )
 {
-	static_cast< Compartment* >( c.targetElement()->data() )->z_ =
+	static_cast< Compartment* >( c->data() )->y_ =
 			value;
 		
 }
-double Compartment::getZ( const Element* e )
+double Compartment::getY( Eref e )
 {
-	return static_cast< Compartment* >( e->data() )->z_;
+	return static_cast< Compartment* >( e.data() )->y_;
+}
+
+void Compartment::setZ( const Conn* c, double value )
+{
+	static_cast< Compartment* >( c->data() )->z_ =
+			value;
+		
+}
+double Compartment::getZ( Eref e )
+{
+	return static_cast< Compartment* >( e.data() )->z_;
 }
 
 //////////////////////////////////////////////////////////////////
 // Compartment::Dest function definitions.
 //////////////////////////////////////////////////////////////////
 
-void Compartment::innerProcessFunc( Element* e, ProcInfo p )
+void Compartment::innerProcessFunc( Eref e, ProcInfo p )
 {
 	A_ += Inject_ + sumInject_ + Em_ * invRm_; 
 	if ( B_ > EPSILON ) {
@@ -464,13 +464,13 @@ void Compartment::innerProcessFunc( Element* e, ProcInfo p )
 	// send2< double >( e, raxialSlot, Ra_, Vm_ );
 }
 
-void Compartment::processFunc( const Conn& c, ProcInfo p )
+void Compartment::processFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c.targetElement();
-	static_cast< Compartment* >( e->data() )->innerProcessFunc( e, p );
+	static_cast< Compartment* >( c->data() )->
+		innerProcessFunc( c->target(), p );
 }
 
-void Compartment::innerReinitFunc( Element* e, ProcInfo p )
+void Compartment::innerReinitFunc(  Eref e, ProcInfo p )
 {
 	Vm_ = initVm_;
 	A_ = 0.0;
@@ -483,19 +483,19 @@ void Compartment::innerReinitFunc( Element* e, ProcInfo p )
 	send1< double >( e, VmSlot, Vm_ );
 }
 
-void Compartment::reinitFunc( const Conn& c, ProcInfo p )
+void Compartment::reinitFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c.targetElement();
-	static_cast< Compartment* >( e->data() )->innerReinitFunc( e, p );
+	static_cast< Compartment* >( c->data() )->
+		innerReinitFunc( c->target(), p );
 }
 
-void Compartment::initFunc( const Conn& c, ProcInfo p )
+void Compartment::initFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c.targetElement();
-	static_cast< Compartment* >( e->data() )->innerInitFunc( e, p );
+	static_cast< Compartment* >( c->data() )->
+		innerInitFunc( c->target(), p );
 }
 
-void Compartment::innerInitFunc( Element* e, ProcInfo p )
+void Compartment::innerInitFunc( Eref e, ProcInfo p )
 {
 	// Send out the axial messages
 	send1< double >( e, axialSlot, Vm_ );
@@ -503,21 +503,20 @@ void Compartment::innerInitFunc( Element* e, ProcInfo p )
 	send2< double >( e, raxialSlot, Ra_, Vm_ );
 }
 
-void Compartment::initReinitFunc( const Conn& c, ProcInfo p )
+void Compartment::initReinitFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c.targetElement();
-	static_cast< Compartment* >( e->data() )->innerInitReinitFunc( e, p );
+	static_cast< Compartment* >( c->data() )->
+		innerInitReinitFunc( c->target(), p );
 }
 
-void Compartment::innerInitReinitFunc( Element* e, ProcInfo p )
+void Compartment::innerInitReinitFunc( Eref e, ProcInfo p )
 {
 	; // Nothing happens here
 }
 
-void Compartment::channelFunc( const Conn& c, double Gk, double Ek)
+void Compartment::channelFunc( const Conn* c, double Gk, double Ek)
 {
-	Element* e = c.targetElement();
-	Compartment* compt = static_cast< Compartment* >( e->data() );
+	Compartment* compt = static_cast< Compartment* >( c->data() );
 	compt->A_ += Gk * Ek;
 	compt->B_ += Gk;
 }
@@ -529,9 +528,9 @@ void Compartment::innerRaxialFunc( double Ra, double Vm)
 	Im_ += ( Vm - Vm_ ) / Ra;
 }
 
-void Compartment::raxialFunc( const Conn& c, double Ra, double Vm)
+void Compartment::raxialFunc( const Conn* c, double Ra, double Vm)
 {
-	static_cast< Compartment* >( c.targetElement()->data() )->
+	static_cast< Compartment* >( c->data() )->
 			innerRaxialFunc( Ra, Vm );
 }
 
@@ -543,21 +542,21 @@ void Compartment::innerAxialFunc( double Vm)
 	Im_ += ( Vm - Vm_ ) / Ra_;
 }
 
-void Compartment::axialFunc( const Conn& c, double Vm)
+void Compartment::axialFunc( const Conn* c, double Vm)
 {
-	static_cast< Compartment* >( c.targetElement()->data() )->
+	static_cast< Compartment* >( c->data() )->
 			innerAxialFunc( Vm );
 }
 
-void Compartment::injectMsgFunc( const Conn& c, double I)
+void Compartment::injectMsgFunc( const Conn* c, double I)
 {
 	Compartment* compt = static_cast< Compartment* >(
-					c.targetElement()->data() );
+					c->data() );
 	compt->sumInject_ += I;
 	compt->Im_ += I;
 }
 
-void Compartment::randInjectFunc( const Conn& c, double prob, double I)
+void Compartment::randInjectFunc( const Conn* c, double prob, double I)
 {
 		/*
 	if ( mtrand() < prob * dt_ ) {
@@ -587,14 +586,14 @@ void testCompartment()
 		Id::scratchId() );
 	ASSERT( c0 != 0, "creating compartment" );
 	ProcInfoBase p;
-	Conn c( c0, 0 );
+	SetConn c( c0, 0 );
 	p.dt_ = 0.002;
-	Compartment::setInject( c, 1.0 );
-	Compartment::setRm( c, 1.0 );
-	Compartment::setRa( c, 0.0025 );
-	Compartment::setCm( c, 1.0 );
-	Compartment::setEm( c, 0.0 );
-	Compartment::setVm( c, 0.0 );
+	Compartment::setInject( &c, 1.0 );
+	Compartment::setRm( &c, 1.0 );
+	Compartment::setRa( &c, 0.0025 );
+	Compartment::setCm( &c, 1.0 );
+	Compartment::setEm( &c, 0.0 );
+	Compartment::setVm( &c, 0.0 );
 
 	// First, test charging curve for a single compartment
 	// We want our charging curve to be a nice simple exponential
@@ -609,7 +608,7 @@ void testCompartment()
 		Vm = Compartment::getVm( c0 );
 		x = Vmax - Vmax * exp( -p.currTime_ / tau );
 		delta += ( Vm - x ) * ( Vm - x );
-		Compartment::processFunc( c, &p );
+		Compartment::processFunc( &c, &p );
 	}
 	ASSERT( delta < 1.0e-6, "Testing compartment time" );
 
@@ -626,20 +625,20 @@ void testCompartment()
 	compts[0] = c0;
 	const Finfo* axial = c0->findFinfo( "axial" );
 	const Finfo* raxial = c0->findFinfo( "raxial" );
-	Compartment::setVm( c, 0.0 );
-	Compartment::setInject( c, 20.5 );
+	Compartment::setVm( &c, 0.0 );
+	Compartment::setInject( &c, 20.5 );
 	for (i = 1; i < 100; i++ ) {
 		char name[20];
 		sprintf( name, "c%d", i );
 		compts[i] = Neutral::create( "Compartment", name, n, 
 			Id::scratchId() );
-		Conn temp( compts[i], 0 );
-		Compartment::setInject( temp, 0.0 );
-		Compartment::setRm( temp, Rm );
-		Compartment::setRa( temp, Ra );
-		Compartment::setCm( temp, 1.0 );
-		Compartment::setEm( temp, 0.0 );
-		Compartment::setVm( temp, 0.0 );
+		SetConn temp( compts[i], 0 );
+		Compartment::setInject( &temp, 0.0 );
+		Compartment::setRm( &temp, Rm );
+		Compartment::setRa( &temp, Ra );
+		Compartment::setCm( &temp, 1.0 );
+		Compartment::setEm( &temp, 0.0 );
+		Compartment::setVm( &temp, 0.0 );
 
 		assert( raxial->add( compts[i - 1], compts[i], axial ) ); 
 	}

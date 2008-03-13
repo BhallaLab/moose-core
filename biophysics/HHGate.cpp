@@ -74,8 +74,8 @@ const Cinfo* initHHGateCinfo()
 }
 
 static const Cinfo* hhGateCinfo = initHHGateCinfo();
-static const unsigned int gateSlot =
-	initHHGateCinfo()->getSlotIndex( "gate" );
+static const Slot gateSlot =
+	initHHGateCinfo()->getSlot( "gate" );
 
 
 ///////////////////////////////////////////////////
@@ -86,14 +86,12 @@ static const unsigned int gateSlot =
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void HHGate::gateFunc(
-				const Conn& c, double v )
+void HHGate::gateFunc( const Conn* c, double v )
 {
 	// static_cast< HHGate *>( c.data() )->innerGateFunc( c, v );
-	HHGate *h = static_cast< HHGate *>( c.data() );
+	HHGate *h = static_cast< HHGate *>( c->data() );
 
-	sendTo2< double, double >( c.targetElement(), gateSlot,
-		c.targetIndex(),
+	sendBack2< double, double >( c, gateSlot,
 		h->A_.innerLookup( v ) , h->B_.innerLookup( v ) );
 }
 
@@ -104,10 +102,10 @@ void HHGate::gateFunc(
  * without zapping the data fields of these child objects.
  */
 
-void HHGate::postCreate( const Conn& c )
+void HHGate::postCreate( const Conn* c )
 {
-	HHGate* h = static_cast< HHGate *>( c.data() );
-	Element* e = c.targetElement();
+	HHGate* h = static_cast< HHGate *>( c->data() );
+	Element* e = c->target().e;
 
 	// cout << "HHGate::postCreate called\n";
 	const Cinfo* ic = initInterpolCinfo();
@@ -123,48 +121,48 @@ void HHGate::postCreate( const Conn& c )
 }
 
 // static func
-void HHGate::setupAlpha( const Conn& c, vector< double > parms )
+void HHGate::setupAlpha( const Conn* c, vector< double > parms )
 {
 	if ( parms.size() != 13 ) {
 			cout << "HHGate::setupAlpha: Error: parms.size() != 13\n";
 			return;
 	}
 	// static_cast< HHGate *>( c.data() )->innerGateFunc( c, v );
-	static_cast< HHGate *>( c.data() )->setupTables( parms, 0 );
+	static_cast< HHGate *>( c->data() )->setupTables( parms, 0 );
 }
 
 // static func
-void HHGate::setupTau( const Conn& c, vector< double > parms )
+void HHGate::setupTau( const Conn* c, vector< double > parms )
 {
 	if ( parms.size() != 13 ) {
 			cout << "HHGate::setupTau: Error: parms.size() != 13\n";
 			return;
 	}
 	// static_cast< HHGate *>( c.data() )->innerGateFunc( c, v );
-	static_cast< HHGate *>( c.data() )->setupTables( parms, 1 );
+	static_cast< HHGate *>( c->data() )->setupTables( parms, 1 );
 }
 
 // static func
-void HHGate::tweakAlpha( const Conn& c )
+void HHGate::tweakAlpha( const Conn* c )
 {
-	static_cast< HHGate *>( c.data() )->tweakTables( 0 );
+	static_cast< HHGate *>( c->data() )->tweakTables( 0 );
 }
 
 // static func
-void HHGate::tweakTau( const Conn& c )
+void HHGate::tweakTau( const Conn* c )
 {
-	static_cast< HHGate *>( c.data() )->tweakTables( 1 );
+	static_cast< HHGate *>( c->data() )->tweakTables( 1 );
 }
 
 // static func
-void HHGate::setupGate( const Conn& c, vector< double > parms )
+void HHGate::setupGate( const Conn* c, vector< double > parms )
 {
 	if ( parms.size() != 9 ) {
 			cout << "HHGate::setupGate: Error: parms.size() != 9\n";
 			return;
 	}
 	// static_cast< HHGate *>( c.data() )->innerGateFunc( c, v );
-	static_cast< HHGate *>( c.data() )->innerSetupGate( parms );
+	static_cast< HHGate *>( c->data() )->innerSetupGate( parms );
 }
 
 /**

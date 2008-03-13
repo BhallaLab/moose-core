@@ -31,44 +31,28 @@ class DeletionMarkerFinfo: public Finfo
 			
 			bool respondToAdd(
 					Element* e, Element* dest, const Ftype *destType,
-					FuncList& destfl, FuncList& returnFl,
+					unsigned int& destFuncId, unsigned int& returnFuncId,
 					unsigned int& destIndex, unsigned int& numDeletionMarker
 			) const 
 			{
 					return 0;
 			}
 
-			void dropAll( Element* e ) const { ; }
-			bool drop( Element* e, unsigned int i ) const { return 0; }
-
-			unsigned int numIncoming( const Element* e ) const {
-					return 0;
-			}
-
-			unsigned int numOutgoing( const Element* e ) const {
-					return 0;
-			}
-
-			unsigned int incomingConns(
-					const Element* e, vector< Conn >& list ) const {
-					return 0;
-			}
-			unsigned int outgoingConns(
-					const Element* e, vector< Conn >& list ) const {
-					return 0;
+			int msg() const {
+				return INT_MAX;
 			}
 
 			/**
 			 * Call the RecvFunc with the arguments in the string.
 			 */
-			bool strSet( Element* e, const std::string &s )
+			bool strSet( Eref e, const std::string &s )
 					const
 					{
 							return 0;
 					}
 			
 			/// strGet doesn't work for DeletionMarkerFinfo
-			bool strGet( const Element* e, std::string &s ) const {
+			bool strGet( Eref e, std::string &s ) const {
 				return 0;
 			}
 
@@ -76,17 +60,10 @@ class DeletionMarkerFinfo: public Finfo
 					return 0;
 			}
 
-			void countMessages( 
-					unsigned int& srcNum, unsigned int& destNum )
-			{
-				;
-			}
-
-			const Finfo* match( 
-				const Element* e, unsigned int connIndex ) const
-			{
-					return 0;
-			}
+			// DeletionMarkerFinfo does not allocate any MsgSrc or MsgDest
+			// so it does not use this function.
+			void countMessages( unsigned int& num )
+			{ ; }
 
 			bool isTransient() const {
 					return 0;
@@ -99,6 +76,9 @@ class DeletionMarkerFinfo: public Finfo
 			Finfo* copy() const {
 				return new DeletionMarkerFinfo( *this );
 			}
+
+			void addFuncVec( const string& cname )
+			{;}
 
 			///////////////////////////////////////////////////////
 			// Class-specific functions below

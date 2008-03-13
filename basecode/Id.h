@@ -86,7 +86,10 @@ class Id
 		 */
 		static Id shellId();
 
-		Id assignIndex( unsigned int index );
+		/**
+		 * This creates a new Id with the same element id but a new index
+		 */
+		Id assignIndex( unsigned int index ) const;
 		
 		void setIndex( unsigned int index );
 
@@ -111,9 +114,17 @@ class Id
 		 */
 		Element* operator()() const;
 
+		/**
+		 * Returns the Element index/
+		 */
 		unsigned int index() const {
 			return index_;
 		}
+
+		/**
+		 * Returns the Eref to the element plus index
+		 */
+		Eref eref() const;
 
 		/**
 		 * Returns node on which id is located.

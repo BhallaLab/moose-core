@@ -14,6 +14,9 @@
  * needed for the external MOOSE API used to control MOOSE and 
  * access fields, but is used by developers implementing
  * their own MOOSE classes.
+ *
+ * Please do NOT put #includes in your own headers. The .cpps
+ * should include moose.h and other headers and that should do it.
  */
 
 #include "header.h"
@@ -26,11 +29,11 @@
  * MsgSrc, MsgDest and SimpleElement, if the Element is expanded
  * to give an interface to the Conn lookup functions.
  */
-#include "MsgSrc.h"
-#include "MsgDest.h"
+#include "TraverseMsgConn.h"
+#include "TraverseDestConn.h"
 #include "SimpleElement.h"
-#include "ArrayElement.h"
-#include "ArrayWrapperElement.h"
+// #include "ArrayElement.h"
+// #include "ArrayWrapperElement.h"
 
 #include "DynamicFinfo.h"
 #include "ValueFinfo.h"
@@ -38,7 +41,8 @@
 #include "ExtFieldFinfo.h"
 
 #include "ProcInfo.h"
-#include "send.h"
+#include "Send.h"
+#include "SetConn.h"
 #include "DerivedFtype.h"
 #include "Ftype2.h"
 #include "Ftype3.h"

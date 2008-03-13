@@ -168,6 +168,6 @@ void HSolveBase::sendSpikes( ProcInfo info ) {
 	for ( ispike = spikegen_.begin(); ispike != spikegen_.end(); ++ispike ) {
 		set< double >( ispike->elm_, "Vm", V_[ ispike->compt_ ] );
 		Conn c( ispike->elm_, 0 );
-		SpikeGen::processFunc( c, info );
+		SpikeGen::processFunc( &c, info );
 	}
 }

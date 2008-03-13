@@ -168,77 +168,77 @@ const Cinfo* initStochSynchanCinfo()
 
 static const Cinfo* stochSynchanCinfo = initStochSynchanCinfo();
 
-static const unsigned int channelSlot =
-	initStochSynchanCinfo()->getSlotIndex( "channel" );
-static const unsigned int origChannelSlot =
-	initStochSynchanCinfo()->getSlotIndex( "origChannel" );
-static const unsigned int ikSlot =
-	initStochSynchanCinfo()->getSlotIndex( "IkSrc" );
-static const unsigned int synapseSlot =
-	initStochSynchanCinfo()->getSlotIndex( "synapse" );
+static const Slot channelSlot =
+	initStochSynchanCinfo()->getSlot( "channel" );
+static const Slot origChannelSlot =
+	initStochSynchanCinfo()->getSlot( "origChannel" );
+static const Slot ikSlot =
+	initStochSynchanCinfo()->getSlot( "IkSrc" );
+static const Slot synapseSlot =
+	initStochSynchanCinfo()->getSlot( "synapse" );
 
 
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void StochSynchan::setGbar( const Conn& c, double Gbar )
+void StochSynchan::setGbar( const Conn* c, double Gbar )
 {
-	static_cast< StochSynchan* >( c.data() )->Gbar_ = Gbar;
+	static_cast< StochSynchan* >( c->data() )->Gbar_ = Gbar;
 }
 double StochSynchan::getGbar( const Element* e )
 {
 	return static_cast< StochSynchan* >( e->data() )->Gbar_;
 }
 
-void StochSynchan::setEk( const Conn& c, double Ek )
+void StochSynchan::setEk( const Conn* c, double Ek )
 {
-	static_cast< StochSynchan* >( c.data() )->Ek_ = Ek;
+	static_cast< StochSynchan* >( c->data() )->Ek_ = Ek;
 }
 double StochSynchan::getEk( const Element* e )
 {
 	return static_cast< StochSynchan* >( e->data() )->Ek_;
 }
 
-void StochSynchan::setTau1( const Conn& c, double tau1 )
+void StochSynchan::setTau1( const Conn* c, double tau1 )
 {
-	static_cast< StochSynchan* >( c.data() )->tau1_ = tau1;
+	static_cast< StochSynchan* >( c->data() )->tau1_ = tau1;
 }
 double StochSynchan::getTau1( const Element* e )
 {
 	return static_cast< StochSynchan* >( e->data() )->tau1_;
 }
 
-void StochSynchan::setTau2( const Conn& c, double tau2 )
+void StochSynchan::setTau2( const Conn* c, double tau2 )
 {
-	static_cast< StochSynchan* >( c.data() )->tau2_ = tau2;
+	static_cast< StochSynchan* >( c->data() )->tau2_ = tau2;
 }
 double StochSynchan::getTau2( const Element* e )
 {
 	return static_cast< StochSynchan* >( e->data() )->tau2_;
 }
 
-void StochSynchan::setNormalizeWeights( const Conn& c, bool value )
+void StochSynchan::setNormalizeWeights( const Conn* c, bool value )
 {
-	static_cast< StochSynchan* >( c.data() )->normalizeWeights_ = value;
+	static_cast< StochSynchan* >( c->data() )->normalizeWeights_ = value;
 }
 bool StochSynchan::getNormalizeWeights( const Element* e )
 {
 	return static_cast< StochSynchan* >( e->data() )->normalizeWeights_;
 }
 
-void StochSynchan::setGk( const Conn& c, double Gk )
+void StochSynchan::setGk( const Conn* c, double Gk )
 {
-	static_cast< StochSynchan* >( c.data() )->Gk_ = Gk;
+	static_cast< StochSynchan* >( c->data() )->Gk_ = Gk;
 }
 double StochSynchan::getGk( const Element* e )
 {
 	return static_cast< StochSynchan* >( e->data() )->Gk_;
 }
 
-void StochSynchan::setIk( const Conn& c, double Ik )
+void StochSynchan::setIk( const Conn* c, double Ik )
 {
-	static_cast< StochSynchan* >( c.data() )->Ik_ = Ik;
+	static_cast< StochSynchan* >( c->data() )->Ik_ = Ik;
 }
 double StochSynchan::getIk( const Element* e )
 {
@@ -251,10 +251,10 @@ int StochSynchan::getNumSynapses( const Element* e )
 }
 
 void StochSynchan::setWeight(
-				const Conn& c, double val, const unsigned int& i )
+				const Conn* c, double val, const unsigned int& i )
 {
 	vector< StochSynInfo >& synapses = 
-			static_cast< StochSynchan* >( c.data() )->synapses_;
+			static_cast< StochSynchan* >( c->data() )->synapses_;
 	if ( i < synapses.size() )
 		synapses[i].weight = val;
 	else 
@@ -273,10 +273,10 @@ double StochSynchan::getWeight( const Element* e, const unsigned int& i )
 }
 
 void StochSynchan::setDelay(
-				const Conn& c, double val, const unsigned int& i )
+				const Conn* c, double val, const unsigned int& i )
 {
 	vector< StochSynInfo >& synapses = 
-			static_cast< StochSynchan* >( c.data() )->synapses_;
+			static_cast< StochSynchan* >( c->data() )->synapses_;
 	if ( i < synapses.size() )
 		synapses[i].delay = val;
 	else 
@@ -297,10 +297,10 @@ double StochSynchan::getDelay( const Element* e, const unsigned int& i )
 
 
 void StochSynchan::setReleaseP(
-				const Conn& c, double val, const unsigned int& i )
+				const Conn* c, double val, const unsigned int& i )
 {
 	vector< StochSynInfo >& synapses = 
-			static_cast< StochSynchan* >( c.data() )->synapses_;
+			static_cast< StochSynchan* >( c->data() )->synapses_;
 	if ( i < synapses.size() )
             synapses[i].releaseP = val;
 	else 
@@ -364,10 +364,10 @@ void StochSynchan::innerProcessFunc( Element* e, ProcInfo info )
 	send1< double >( e, ikSlot, Ik_ );
 }
 
-void StochSynchan::processFunc( const Conn& c, ProcInfo p )
+void StochSynchan::processFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c.targetElement();
-	static_cast< StochSynchan* >( e->data() )->innerProcessFunc( e, p );
+	Element* e = c->targetElement();
+	static_cast< StochSynchan* >( c->data() )->innerProcessFunc( e, p );
 }
 
 /*
@@ -402,16 +402,16 @@ void StochSynchan::innerReinitFunc( Element* e, ProcInfo info )
 	while ( !pendingEvents_.empty() )
 		pendingEvents_.pop();
 }
-void StochSynchan::reinitFunc( const Conn& c, ProcInfo p )
+void StochSynchan::reinitFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c.targetElement();
-	static_cast< StochSynchan* >( e->data() )->innerReinitFunc( e, p );
+	Element* e = c->targetElement();
+	static_cast< StochSynchan* >( c->data() )->innerReinitFunc( e, p );
 }
 
-void StochSynchan::innerSynapseFunc( const Conn& c, double time )
+void StochSynchan::innerSynapseFunc( const Conn* c, double time )
 {
 	unsigned int index = 
-            c.targetElement()->connDestRelativeIndex( c, synapseSlot );
+		c->targetElement()->connDestRelativeIndex( c, synapseSlot.msg() );
 	// Actually we should simply ignore any message where the
 	// index is bigger than synapses_.size(), because the syn
 	// strength will not yet have been set.
@@ -430,23 +430,23 @@ void StochSynchan::innerSynapseFunc( const Conn& c, double time )
         }
         
 }
-void StochSynchan::synapseFunc( const Conn& c, double time )
+void StochSynchan::synapseFunc( const Conn* c, double time )
 {
-	static_cast< StochSynchan* >( c.data() )->innerSynapseFunc( c, time );
+	static_cast< StochSynchan* >( c->data() )->innerSynapseFunc( c, time );
 }
 
-void StochSynchan::channelFunc( const Conn& c, double Vm )
+void StochSynchan::channelFunc( const Conn* c, double Vm )
 {
-	static_cast< StochSynchan* >( c.data() )->Vm_ = Vm;
+	static_cast< StochSynchan* >( c->data() )->Vm_ = Vm;
 }
 
-void StochSynchan::activationFunc( const Conn& c, double val )
+void StochSynchan::activationFunc( const Conn* c, double val )
 {
-	static_cast< StochSynchan* >( c.data() )->activation_ += val;
+	static_cast< StochSynchan* >( c->data() )->activation_ += val;
 }
 
-void StochSynchan::modulatorFunc( const Conn& c, double val )
+void StochSynchan::modulatorFunc( const Conn* c, double val )
 {
-	static_cast< StochSynchan* >( c.data() )->modulation_ *= val;
+	static_cast< StochSynchan* >( c->data() )->modulation_ *= val;
 }
 #endif

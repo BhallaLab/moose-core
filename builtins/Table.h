@@ -20,34 +20,34 @@ class Table: public Interpol
 		////////////////////////////////////////////////////////////
 		// Here are the interface functions for the MOOSE class
 		////////////////////////////////////////////////////////////
-		static void setInput( const Conn& c, double value );
-		static double getInput( const Element* e );
-		static void setOutput( const Conn& c, double value );
-		static double getOutput( const Element* e );
-		static void setMode( const Conn& c, int value );
-		static int getMode( const Element* e );
-		static void setStepsize( const Conn& c, double value );
-		static double getStepsize( const Element* e );
-		static void setStepMode( const Conn& c, int value );
-		static int getStepMode( const Element* e );
-		static double getLookup( const Element* e, const double& x );
+		static void setInput( const Conn* c, double value );
+		static double getInput( Eref e );
+		static void setOutput( const Conn* c, double value );
+		static double getOutput( Eref e );
+		static void setMode( const Conn* c, int value );
+		static int getMode( Eref e );
+		static void setStepsize( const Conn* c, double value );
+		static double getStepsize( Eref e );
+		static void setStepMode( const Conn* c, int value );
+		static int getStepMode( Eref e );
+		static double getLookup( Eref e, const double& x );
 
 		////////////////////////////////////////////////////////////
 		// Here are the Table Destination functions
 		////////////////////////////////////////////////////////////
-		static void sum( const Conn& c, double val );
-		static void prd( const Conn& c, double val );
-		static void input2( const Conn& c, double y, unsigned int x );
-		static void process( const Conn& c, ProcInfo p );
-		static void reinit( const Conn& c, ProcInfo p );
-		static void tabop( const Conn& c, char op, double min, double max );
+		static void sum( const Conn* c, double val );
+		static void prd( const Conn* c, double val );
+		static void input2( const Conn* c, double y, unsigned int x );
+		static void process( const Conn* c, ProcInfo p );
+		static void reinit( const Conn* c, ProcInfo p );
+		static void tabop( const Conn* c, char op, double min, double max );
 
 		////////////////////////////////////////////////////////////
 		// Here are the internal functions
 		////////////////////////////////////////////////////////////
-		void innerProcess( Element* e, ProcInfo p );
-		void innerReinit( const Conn& c, ProcInfo p );
-		unsigned long expandTable( Element* e, double size );
+		void innerProcess( Eref e, ProcInfo p );
+		void innerReinit( const Conn* c, ProcInfo p );
+		unsigned long expandTable( Eref e, double size );
 		void innerTabop( char op, double min, double max );
 		void doOp( char op, unsigned int istart, unsigned int istop );
 

@@ -80,10 +80,10 @@ const Cinfo* initGeometryCinfo()
 
 static const Cinfo* geometryCinfo = initGeometryCinfo();
 
-static const unsigned int epsilonSlot =
-	initGeometryCinfo()->getSlotIndex( "geom.epsilonSrc" );
-static const unsigned int neighDistSlot =
-	initGeometryCinfo()->getSlotIndex( "geom.neighDistSrc" );
+static const Slot epsilonSlot =
+	initGeometryCinfo()->getSlot( "geom.epsilonSrc" );
+static const Slot neighDistSlot =
+	initGeometryCinfo()->getSlot( "geom.neighDistSrc" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -98,31 +98,31 @@ Geometry::Geometry()
 // Field access functions.
 ///////////////////////////////////////////////////
 		
-void Geometry::setEpsilon( const Conn& c, double value )
+void Geometry::setEpsilon( const Conn* c, double value )
 {
 	if ( value >= 0.0 )
-		static_cast< Geometry* >( c.data() )->epsilon_ = value;
+		static_cast< Geometry* >( c->data() )->epsilon_ = value;
 	
 	// Send the update over to the solver
-	send1< double >( c.targetElement(), epsilonSlot, value );
+	send1< double >( c->target(), epsilonSlot, value );
 }
 
-double Geometry::getEpsilon( const Element* e )
+double Geometry::getEpsilon( Eref e )
 {
-	return static_cast< Geometry* >( e->data() )->epsilon_;
+	return static_cast< Geometry* >( e.data() )->epsilon_;
 }
 
-void Geometry::setNeighDist( const Conn& c, double value )
+void Geometry::setNeighDist( const Conn* c, double value )
 {
 	if ( value >= 0.0 )
-		static_cast< Geometry* >( c.data() )->neighDist_ = value;
+		static_cast< Geometry* >( c->data() )->neighDist_ = value;
 	
 	// Send the update over to the solver
-	send1< double >( c.targetElement(), neighDistSlot, value );
+	send1< double >( c->target(), neighDistSlot, value );
 }
 
-double Geometry::getNeighDist( const Element* e )
+double Geometry::getNeighDist( Eref e )
 {
-	return static_cast< Geometry* >( e->data() )->neighDist_;
+	return static_cast< Geometry* >( e.data() )->neighDist_;
 }
 

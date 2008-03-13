@@ -9,8 +9,8 @@
 **********************************************************************/
 
 #include "header.h"
+#include "SimpleConn.h"
 #include "SrcFinfo.h"
-#include "MsgSrc.h"
 
 bool SrcFinfo::add(
 	Element* e, Element* destElm, const Finfo* destFinfo
@@ -20,120 +20,58 @@ bool SrcFinfo::add(
 	assert( e != 0 );
 	assert( destElm != 0 );
 
-	FuncList srcFl;
-	FuncList destFl;
-	unsigned int destIndex;
+	unsigned int srcFuncId = 0;
+	unsigned int destFuncId;
+	unsigned int destMsg;
 	unsigned int numDest;
 	if ( destFinfo->respondToAdd( destElm, e, ftype(),
-							srcFl, destFl,
-							destIndex, numDest ) )
+							srcFuncId, destFuncId,
+							destMsg, numDest ) )
 	{
 		// All these assertions say that this is a single message,
 		// not a shared one.
-		assert( srcFl.size() == 0 );
-		assert( destFl.size() == 1 );
+		assert( FuncVec::getFuncVec( srcFuncId )->size() == 0 );
+		assert( FuncVec::getFuncVec( destFuncId )->size() == 1 );
 		assert( numDest == 1 );
 
-		unsigned int srcConn = 
-				e->insertConnOnSrc( srcIndex_, destFl, 0, 0);
-		unsigned int destConn = 
-				destElm->insertConnOnDest( destIndex, 1 );
-		e->connect( srcConn, destElm, destConn );
-		return 1;
+		SimpleConnTainer* ct = new SimpleConnTainer( 
+			e, destElm, msg_, destMsg );
+
+		return Msg::add( ct, srcFuncId, destFuncId );
+		/*
+		return Msg::add( e, destElm, msg_, destMsg,
+			srcFuncId, destFuncId );
+			*/
 	}
 	return 0;
 }
 
 bool SrcFinfo::respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
-					FuncList& srcfl, FuncList& returnFl,
-					unsigned int& destIndex, unsigned int& numDest
+					unsigned int& srcFuncId, unsigned int& destFuncId,
+					unsigned int& destMsgId, unsigned int& numDest
 ) const
 {
 	return 0; // for now we cannot handle this.
 }
 
-/**
- * Disconnects all messages out of this SrcFinfo.
- */
-void SrcFinfo::dropAll( Element* e ) const
+bool SrcFinfo::strSet( Eref e, const std::string &s ) const
 {
-	vector< Conn >::const_iterator i;
-	unsigned int begin;
-	unsigned int end;
-	if ( srcIndex_ > 0 ) {
-		begin = e->connSrcBegin( srcIndex_ )->sourceIndex( e );
-		end = e->connSrcVeryEnd( srcIndex_ )->sourceIndex( e );
-		for ( unsigned int j = end; j > begin; j-- )
-			e->disconnect( j - 1 );
-	}
+		return 0;
 }
 
-/**
- * Delete a specific message emerging from this SrcFinfo. Returns True
- * if the index is valid and the operation succeeds.
- */
-bool SrcFinfo::drop( Element* e, unsigned int i ) const
+
+const Finfo* SrcFinfo::match( const Element* e, const ConnTainer* c ) const
 {
-	unsigned int begin = e->connSrcBegin( srcIndex_ )->sourceIndex( e );
-	unsigned int end = e->connSrcVeryEnd( srcIndex_ )->sourceIndex( e );
-	i += begin;
-	if ( i < end ) {
-		e->disconnect( i );
-		return 1;
-	}
+	const Msg* m = e->msg( msg() ); 
+	assert ( !m->isDest() ); // This is a SrcFinfo so it must be a src
+	// If we wanted to be really really picky we should go through the
+	// ConnTainer vector on the msg, and find 'c' on it. But this is
+	// fast and should work provided we're not in the middle of rebuilding
+	// the messaging.
+	if ( c->e1() == e && c->msg1() == msg() )
+		return this;
 	return 0;
-}
-
-/**
- * for now numIncoming does not look at possible future internal
- * messages or relayed messages.
- */
-unsigned int SrcFinfo::numIncoming( const Element* e ) const
-{
-		return 0;
-}
-
-unsigned int SrcFinfo::numOutgoing( const Element* e ) const
-{
-	return ( e->connSrcVeryEnd( srcIndex_ ) - e->connSrcBegin( srcIndex_ ));
-}
-			
-/**
- * Here we look up all the inputs to this MsgSrc, especially the 
- * internal messages that deal with traversal.
- * \todo: We don't yet have internal messages handled.
- * Return the list size.
- */
-unsigned int SrcFinfo::incomingConns(
-				const Element* e, vector< Conn >& list ) const
-{
-	return list.size();
-}
-
-/**
- * Here we look up all the targets on this MsgSrc, and fill up the 
- * list. Return the list size.
- */
-unsigned int SrcFinfo::outgoingConns(
-				const Element* e, vector< Conn >& list ) const
-{
-	list.resize( 0 );
-	list.insert( list.end(), e->connSrcBegin( srcIndex_ ),
-					e->connSrcVeryEnd( srcIndex_ ) );
-	return list.size();
-}
-
-bool SrcFinfo::strSet( Element* e, const std::string &s ) const
-{
-		return 0;
-}
-
-
-const Finfo* SrcFinfo::match( 
-				const Element* e, unsigned int connIndex ) const
-{
-	return ( e->isConnOnSrc( srcIndex_, connIndex ) ? this : 0 );
 }
 
 bool SrcFinfo::inherit( const Finfo* baseFinfo )
@@ -141,16 +79,16 @@ bool SrcFinfo::inherit( const Finfo* baseFinfo )
 	const SrcFinfo* other =
 			dynamic_cast< const SrcFinfo* >( baseFinfo );
 	if ( other && ftype()->isSameType( baseFinfo->ftype() ) ) {
-			srcIndex_ = other->srcIndex_;
+			msg_ = other->msg_;
 			return 1;
 	} 
 	return 0;
 }
 
 
-bool SrcFinfo::getSlotIndex( const string& name, unsigned int& ret ) const
+bool SrcFinfo::getSlot( const string& name, Slot& ret ) const
 {
 	if ( name != this->name() ) return 0;
-	ret = srcIndex_;
+	ret = Slot( msg_, 0 );
 	return 1;
 }

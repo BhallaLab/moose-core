@@ -88,79 +88,79 @@ const Cinfo* initMg_blockCinfo()
 
 static const Cinfo* Mg_blockCinfo = initMg_blockCinfo();
 
-static const unsigned int channelSlot =
-	initMg_blockCinfo()->getSlotIndex( "channel.channel" );
+static const Slot channelSlot =
+	initMg_blockCinfo()->getSlot( "channel.channel" );
 
 
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void Mg_block::setKMg_A( const Conn& c, double KMg_A )
+void Mg_block::setKMg_A( const Conn* c, double KMg_A )
 {
-	static_cast< Mg_block* >( c.data() )->KMg_A_ = KMg_A;
+	static_cast< Mg_block* >( c->data() )->KMg_A_ = KMg_A;
 }
-double Mg_block::getKMg_A( const Element* e )
+double Mg_block::getKMg_A( Eref e )
 {
-	return static_cast< Mg_block* >( e->data() )->KMg_A_;
+	return static_cast< Mg_block* >( e.data() )->KMg_A_;
 }
-void Mg_block::setKMg_B( const Conn& c, double KMg_B )
+void Mg_block::setKMg_B( const Conn* c, double KMg_B )
 {
-	static_cast< Mg_block* >( c.data() )->KMg_B_ = KMg_B;
+	static_cast< Mg_block* >( c->data() )->KMg_B_ = KMg_B;
 }
-double Mg_block::getKMg_B( const Element* e )
+double Mg_block::getKMg_B( Eref e )
 {
-	return static_cast< Mg_block* >( e->data() )->KMg_B_;
+	return static_cast< Mg_block* >( e.data() )->KMg_B_;
 }
-void Mg_block::setCMg( const Conn& c, double CMg )
+void Mg_block::setCMg( const Conn* c, double CMg )
 {
-	static_cast< Mg_block* >( c.data() )->CMg_ = CMg;
+	static_cast< Mg_block* >( c->data() )->CMg_ = CMg;
 }
-double Mg_block::getCMg( const Element* e )
+double Mg_block::getCMg( Eref e )
 {
-	return static_cast< Mg_block* >( e->data() )->CMg_;
+	return static_cast< Mg_block* >( e.data() )->CMg_;
 }
-void Mg_block::setIk( const Conn& c, double Ik )
+void Mg_block::setIk( const Conn* c, double Ik )
 {
-	static_cast< Mg_block* >( c.data() )->Ik_ = Ik;
+	static_cast< Mg_block* >( c->data() )->Ik_ = Ik;
 }
-double Mg_block::getIk( const Element* e )
+double Mg_block::getIk( Eref e )
 {
-	return static_cast< Mg_block* >( e->data() )->Ik_;
+	return static_cast< Mg_block* >( e.data() )->Ik_;
 }
-void Mg_block::setGk( const Conn& c, double Gk )
+void Mg_block::setGk( const Conn* c, double Gk )
 {
-	static_cast< Mg_block* >( c.data() )->Gk_ = Gk;
+	static_cast< Mg_block* >( c->data() )->Gk_ = Gk;
 }
-double Mg_block::getGk( const Element* e )
+double Mg_block::getGk( Eref e )
 {
-	return static_cast< Mg_block* >( e->data() )->Gk_;
+	return static_cast< Mg_block* >( e.data() )->Gk_;
 }
-void Mg_block::setEk( const Conn& c, double Ek )
+void Mg_block::setEk( const Conn* c, double Ek )
 {
-	static_cast< Mg_block* >( c.data() )->Ek_ = Ek;
+	static_cast< Mg_block* >( c->data() )->Ek_ = Ek;
 }
-double Mg_block::getEk( const Element* e )
+double Mg_block::getEk( Eref e )
 {
-	return static_cast< Mg_block* >( e->data() )->Ek_;
+	return static_cast< Mg_block* >( e.data() )->Ek_;
 }
-double Mg_block::getZk( const Element* e )
+double Mg_block::getZk( Eref e )
 {
-	return static_cast< Mg_block* >( e->data() )->Zk_;
+	return static_cast< Mg_block* >( e.data() )->Zk_;
 }
-void Mg_block::setZk( const Conn& c, double Zk )
+void Mg_block::setZk( const Conn* c, double Zk )
 {
-	static_cast< Mg_block* >( c.data() )->Zk_ = Zk;
-}
-
-
-void Mg_block::processFunc( const Conn& c, ProcInfo p )
-{
-	Element* e = c.targetElement();
-	static_cast< Mg_block* >( e->data() )->innerProcessFunc( e, p );
+	static_cast< Mg_block* >( c->data() )->Zk_ = Zk;
 }
 
-void Mg_block::innerProcessFunc( Element* e, ProcInfo info )
+
+void Mg_block::processFunc( const Conn* c, ProcInfo p )
+{
+	Eref e = c->target();
+	static_cast< Mg_block* >( c->data() )->innerProcessFunc( e, p );
+}
+
+void Mg_block::innerProcessFunc( Eref e, ProcInfo info )
 {
 	
 	double KMg = KMg_A_ * exp(Vm_/KMg_B_);
@@ -169,13 +169,13 @@ void Mg_block::innerProcessFunc( Element* e, ProcInfo info )
 	Ik_ = Gk_ * (Ek_ - Vm_);
 }
 
-void Mg_block::reinitFunc( const Conn& c, ProcInfo p )
+void Mg_block::reinitFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c.targetElement();
-	static_cast< Mg_block* >( e->data() )->innerReinitFunc( e, p );
+	Eref e = c->target();
+	static_cast< Mg_block* >( c->data() )->innerReinitFunc( e, p );
 }
 
-void Mg_block::innerReinitFunc( Element* e, ProcInfo info )
+void Mg_block::innerReinitFunc( Eref e, ProcInfo info )
 {
 	Zk_ = 0;
 	CMg_ = 0;
@@ -183,14 +183,14 @@ void Mg_block::innerReinitFunc( Element* e, ProcInfo info )
 	KMg_B_ = 0;
 }
 
-void Mg_block::channelFunc( const Conn& c, double Vm )
+void Mg_block::channelFunc( const Conn* c, double Vm )
 {
-	static_cast< Mg_block* >( c.data() )->Vm_ = Vm;
+	static_cast< Mg_block* >( c->data() )->Vm_ = Vm;
 }
 
-void Mg_block::origChannelFunc( const Conn& c, double Gk, double Ek )
+void Mg_block::origChannelFunc( const Conn* c, double Gk, double Ek )
 {
-	Mg_block *e = static_cast< Mg_block* >( c.data() );
+	Mg_block *e = static_cast< Mg_block* >( c->data() );
 	e->Gk_ = Gk;
 	e->Ek_ = Ek;
 }

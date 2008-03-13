@@ -69,7 +69,7 @@ Id Id::str2Id( const std::string& s )
 	return Id( val );
 }
 
-Id Id::assignIndex( unsigned int index )
+Id Id::assignIndex( unsigned int index ) const
 {
 	Id i( id_ );
 	i.index_ = index;
