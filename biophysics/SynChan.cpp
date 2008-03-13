@@ -154,77 +154,77 @@ const Cinfo* initSynChanCinfo()
 
 static const Cinfo* synChanCinfo = initSynChanCinfo();
 
-static const unsigned int channelSlot =
-	initSynChanCinfo()->getSlotIndex( "channel.channel" );
-static const unsigned int origChannelSlot =
-	initSynChanCinfo()->getSlotIndex( "origChannel" );
-static const unsigned int ikSlot =
-	initSynChanCinfo()->getSlotIndex( "IkSrc" );
-static const unsigned int synapseSlot =
-	initSynChanCinfo()->getSlotIndex( "synapse" );
+static const Slot channelSlot =
+	initSynChanCinfo()->getSlot( "channel.channel" );
+static const Slot origChannelSlot =
+	initSynChanCinfo()->getSlot( "origChannel" );
+static const Slot ikSlot =
+	initSynChanCinfo()->getSlot( "IkSrc" );
+static const Slot synapseSlot =
+	initSynChanCinfo()->getSlot( "synapse" );
 
 
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void SynChan::setGbar( const Conn& c, double Gbar )
+void SynChan::setGbar( const Conn* c, double Gbar )
 {
-	static_cast< SynChan* >( c.data() )->Gbar_ = Gbar;
+	static_cast< SynChan* >( c->data() )->Gbar_ = Gbar;
 }
 double SynChan::getGbar( const Element* e )
 {
 	return static_cast< SynChan* >( e->data() )->Gbar_;
 }
 
-void SynChan::setEk( const Conn& c, double Ek )
+void SynChan::setEk( const Conn* c, double Ek )
 {
-	static_cast< SynChan* >( c.data() )->Ek_ = Ek;
+	static_cast< SynChan* >( c->data() )->Ek_ = Ek;
 }
 double SynChan::getEk( const Element* e )
 {
 	return static_cast< SynChan* >( e->data() )->Ek_;
 }
 
-void SynChan::setTau1( const Conn& c, double tau1 )
+void SynChan::setTau1( const Conn* c, double tau1 )
 {
-	static_cast< SynChan* >( c.data() )->tau1_ = tau1;
+	static_cast< SynChan* >( c->data() )->tau1_ = tau1;
 }
 double SynChan::getTau1( const Element* e )
 {
 	return static_cast< SynChan* >( e->data() )->tau1_;
 }
 
-void SynChan::setTau2( const Conn& c, double tau2 )
+void SynChan::setTau2( const Conn* c, double tau2 )
 {
-	static_cast< SynChan* >( c.data() )->tau2_ = tau2;
+	static_cast< SynChan* >( c->data() )->tau2_ = tau2;
 }
 double SynChan::getTau2( const Element* e )
 {
 	return static_cast< SynChan* >( e->data() )->tau2_;
 }
 
-void SynChan::setNormalizeWeights( const Conn& c, bool value )
+void SynChan::setNormalizeWeights( const Conn* c, bool value )
 {
-	static_cast< SynChan* >( c.data() )->normalizeWeights_ = value;
+	static_cast< SynChan* >( c->data() )->normalizeWeights_ = value;
 }
 bool SynChan::getNormalizeWeights( const Element* e )
 {
 	return static_cast< SynChan* >( e->data() )->normalizeWeights_;
 }
 
-void SynChan::setGk( const Conn& c, double Gk )
+void SynChan::setGk( const Conn* c, double Gk )
 {
-	static_cast< SynChan* >( c.data() )->Gk_ = Gk;
+	static_cast< SynChan* >( c->data() )->Gk_ = Gk;
 }
 double SynChan::getGk( const Element* e )
 {
 	return static_cast< SynChan* >( e->data() )->Gk_;
 }
 
-void SynChan::setIk( const Conn& c, double Ik )
+void SynChan::setIk( const Conn* c, double Ik )
 {
-	static_cast< SynChan* >( c.data() )->Ik_ = Ik;
+	static_cast< SynChan* >( c->data() )->Ik_ = Ik;
 }
 double SynChan::getIk( const Element* e )
 {
@@ -236,11 +236,10 @@ int SynChan::getNumSynapses( const Element* e )
 	return static_cast< SynChan* >( e->data() )->synapses_.size();
 }
 
-void SynChan::setWeight( const Conn& c, double val, const unsigned int& i )
+void SynChan::setWeight( const Conn* c, double val, const unsigned int& i )
 {
-	Element* e = c.targetElement();
-	static_cast< SynChan* >( e->data() )->
-		innerSetWeight( e, val, i );
+	Element* e = c->targetElement();
+	static_cast< SynChan* >( c->data() )->innerSetWeight( e, val, i );
 }
 
 void SynChan::innerSetWeight( const Element* e, double val, unsigned int i )
@@ -271,11 +270,10 @@ double SynChan::innerGetWeight( const Element* e, unsigned int i )
 	return 0.0;
 }
 
-void SynChan::setDelay( const Conn& c, double val, const unsigned int& i )
+void SynChan::setDelay( const Conn* c, double val, const unsigned int& i )
 {
-	Element* e = c.targetElement();
-	static_cast< SynChan* >( e->data() )->
-		innerSetDelay( e, val, i );
+	Element* e = c->targetElement();
+	static_cast< SynChan* >( c->data() )->innerSetDelay( e, val, i );
 }
 
 void SynChan::innerSetDelay( const Element* e, double val, unsigned int i )
@@ -337,10 +335,10 @@ void SynChan::innerProcessFunc( Element* e, ProcInfo info )
 	send2< double, double >( e, origChannelSlot, Gk_, Ek_ );
 	send1< double >( e, ikSlot, Ik_ );
 }
-void SynChan::processFunc( const Conn& c, ProcInfo p )
+void SynChan::processFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c.targetElement();
-	static_cast< SynChan* >( e->data() )->innerProcessFunc( e, p );
+	Element* e = c->targetElement();
+	static_cast< SynChan* >( c->data() )->innerProcessFunc( e, p );
 }
 
 /*
@@ -375,16 +373,16 @@ void SynChan::innerReinitFunc( Element* e, ProcInfo info )
 	while ( !pendingEvents_.empty() )
 		pendingEvents_.pop();
 }
-void SynChan::reinitFunc( const Conn& c, ProcInfo p )
+void SynChan::reinitFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c.targetElement();
-	static_cast< SynChan* >( e->data() )->innerReinitFunc( e, p );
+	Element* e = c->targetElement();
+	static_cast< SynChan* >( c->data() )->innerReinitFunc( e, p );
 }
 
-void SynChan::innerSynapseFunc( const Conn& c, double time )
+void SynChan::innerSynapseFunc( const Conn* c, double time )
 {
 	unsigned int index = 
-		c.targetElement()->connDestRelativeIndex( c, synapseSlot );
+		c->targetElement()->connDestRelativeIndex( c, synapseSlot.msg() );
 	// Actually we should simply ignore any message where the
 	// index is bigger than synapses_.size(), because the syn
 	// strength will not yet have been set.
@@ -394,29 +392,29 @@ void SynChan::innerSynapseFunc( const Conn& c, double time )
 	// This goes into a priority_queue sorted by delay_.
 	pendingEvents_.push( synapses_[index].event( time ) );
 }
-void SynChan::synapseFunc( const Conn& c, double time )
+void SynChan::synapseFunc( const Conn* c, double time )
 {
-	static_cast< SynChan* >( c.data() )->innerSynapseFunc( c, time );
+	static_cast< SynChan* >( c->data() )->innerSynapseFunc( c, time );
 }
 
-void SynChan::channelFunc( const Conn& c, double Vm )
+void SynChan::channelFunc( const Conn* c, double Vm )
 {
-	static_cast< SynChan* >( c.data() )->Vm_ = Vm;
+	static_cast< SynChan* >( c->data() )->Vm_ = Vm;
 }
 
-void SynChan::activationFunc( const Conn& c, double val )
+void SynChan::activationFunc( const Conn* c, double val )
 {
-	static_cast< SynChan* >( c.data() )->activation_ += val;
+	static_cast< SynChan* >( c->data() )->activation_ += val;
 }
 
-void SynChan::modulatorFunc( const Conn& c, double val )
+void SynChan::modulatorFunc( const Conn* c, double val )
 {
-	static_cast< SynChan* >( c.data() )->modulation_ *= val;
+	static_cast< SynChan* >( c->data() )->modulation_ *= val;
 }
 
-void SynChan::scanFunc( const Conn& c, SynChanStruct* scs )
+void SynChan::scanFunc( const Conn* c, SynChanStruct* scs )
 {
-	SynChan* local = static_cast< SynChan* >( c.data() );
+	SynChan* local = static_cast< SynChan* >( c->data() );
 	
 	scs->Gbar_ = local->Gbar_;
 	scs->Gk_ = local->Gk_;
@@ -487,7 +485,7 @@ void testSynChan()
 	ret = sg2->findFinfo( "event" )->
 			add( sg2, syn, syn->findFinfo( "synapse" ) );
 	ASSERT( ret, "setup SynChan" );
-	SynChan::reinitFunc( c, &p );
+	SynChan::reinitFunc( &c, &p );
 	
 	ret = set< double >( sg1, "threshold", 0.0 );
 	ret = set< double >( sg1, "refractT", 1.0 );
@@ -495,8 +493,8 @@ void testSynChan()
 	ret = set< double >( sg2, "threshold", 0.0 );
 	ret = set< double >( sg2, "refractT", 1.0 );
 	ret = set< double >( sg2, "amplitude", 1.0 );
-	SpikeGen::reinitFunc( csg1, &p );
-	SpikeGen::reinitFunc( csg2, &p );
+	SpikeGen::reinitFunc( &csg1, &p );
+	SpikeGen::reinitFunc( &csg2, &p );
 
 	unsigned int temp;
 	ret = get< unsigned int >( syn, "numSynapses", temp );
@@ -530,47 +528,47 @@ void testSynChan()
 	ASSERT( dret == 0.0, "setup SynChan" );
 	// Set off the two action potls. They should arrive at 1 and 10 msec
 	// respectively
-	SpikeGen::processFunc( csg1, &p );
-	SpikeGen::processFunc( csg2, &p );
+	SpikeGen::processFunc( &csg1, &p );
+	SpikeGen::processFunc( &csg2, &p );
 
 	// First 1 msec is the delay, so response should be zero.
 	for ( p.currTime_ = 0.0; p.currTime_ < 0.001; p.currTime_ += p.dt_ )
-		SynChan::processFunc( c, &p );
+		SynChan::processFunc( &c, &p );
 	ret = get< double >( syn, "Gk", dret );
 	// cout << "t = " << p.currTime_ << " dret = " << dret << endl;
 	ASSERT( dret == 0.0, "Testing SynChan response" );
 
 	// At 0.5 msec after delay, that is, 1.5 msec, it is at half-tau.
 	for ( ; p.currTime_ < 0.0015; p.currTime_ += p.dt_ )
-		SynChan::processFunc( c, &p );
+		SynChan::processFunc( &c, &p );
 	ret = get< double >( syn, "Gk", dret );
 	// cout << "t = " << p.currTime_ << " dret = " << dret << endl;
 	ASSERT( fabs( dret - 0.825  ) < 1e-3 , "Testing SynChan response " );
 
 	// At 1 msec it should be at the peak, almost exactly 1.
 	for ( ; p.currTime_ < 0.002; p.currTime_ += p.dt_ )
-		SynChan::processFunc( c, &p );
+		SynChan::processFunc( &c, &p );
 	ret = get< double >( syn, "Gk", dret );
 	// cout << "t = " << p.currTime_ << " dret = " << dret << endl;
 	ASSERT( fabs( dret - 1.0  ) < 2e-3 , "Testing SynChan response" );
 
 	// At 2 msec it is down to 70% of peak.
 	for ( ; p.currTime_ < 0.003; p.currTime_ += p.dt_ )
-		SynChan::processFunc( c, &p );
+		SynChan::processFunc( &c, &p );
 	ret = get< double >( syn, "Gk", dret );
 	// cout << "t = " << p.currTime_ << " dret = " << dret << endl;
 	ASSERT( fabs( dret - 0.7  ) < 1e-3 , "Testing SynChan response" );
 
 	// At 3 msec it is down to 38% of peak.
 	for ( ; p.currTime_ < 0.004; p.currTime_ += p.dt_ )
-		SynChan::processFunc( c, &p );
+		SynChan::processFunc( &c, &p );
 	ret = get< double >( syn, "Gk", dret );
 	// cout << "t = " << p.currTime_ << " dret = " << dret << endl;
 	ASSERT( fabs( dret - 0.38  ) < 1e-3 , "Testing SynChan response" );
 
 	// Go on to next peak.
 	for ( ; p.currTime_ < 0.011; p.currTime_ += p.dt_ )
-		SynChan::processFunc( c, &p );
+		SynChan::processFunc( &c, &p );
 	ret = get< double >( syn, "Gk", dret );
 	// cout << "t = " << p.currTime_ << ", dret = " << dret << endl;
 	ASSERT( fabs( dret - 1.0  ) < 2e-3 , "Testing SynChan response 2" );

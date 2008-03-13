@@ -20,7 +20,8 @@ SolveFinfo::SolveFinfo(
 	for ( unsigned int i = 0; i < nFinfos; i++ ) {
 		finfos_.push_back( finfos[i] );
 	}
-	procSlot_ = tf->cinfo()->getSlotIndex( "process" );
+	/// \todo Need to fix.
+	procSlot_ = tf->cinfo()->getSlot( "process" ).msg();
 }
 
 const Finfo* SolveFinfo::match( Element* e, const string& name ) const
@@ -46,11 +47,10 @@ void SolveFinfo::listFinfos( vector< const Finfo* >& flist ) const
 
 /**
 * Returns the Conn going from solved object e to the solver
+* Why is this on the solver?
+* \todo Also, will need to do something about the memory of the Conn
 */
-const Conn& SolveFinfo::getSolvedConn( const Element* e ) const
+const Conn* SolveFinfo::getSolvedConn( const Element* e ) const
 {
-	vector< Conn >::const_iterator i = 
-		e->connDestBegin( procSlot_ );
-	assert( e->connDestEnd( procSlot_ ) != i );
-	return *i;
+	return e->msg( procSlot_ )->findConn( 0, 0 );
 }

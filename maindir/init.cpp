@@ -24,6 +24,12 @@ int mooseInit()
     {
         initialized = true;
     }
+
+	/**
+	 * This function puts the FuncVecs in order and must be called
+	 * after static initialization but before any messaging
+	 */
+	FuncVec::sortFuncVec();
     
 #ifdef CRL_MPI
     const Cinfo* c = Cinfo::find( "ParShell" );

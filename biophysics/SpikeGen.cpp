@@ -98,44 +98,44 @@ const Cinfo* initSpikeGenCinfo()
 
 static const Cinfo* spikeGenCinfo = initSpikeGenCinfo();
 
-static const unsigned int eventSlot =
-	initSpikeGenCinfo()->getSlotIndex( "event" );
+static const Slot eventSlot =
+	initSpikeGenCinfo()->getSlot( "event" );
 
 //////////////////////////////////////////////////////////////////
 // Here we put the SpikeGen class functions.
 //////////////////////////////////////////////////////////////////
 
 // Value Field access function definitions.
-void SpikeGen::setThreshold( const Conn& c, double threshold )
+void SpikeGen::setThreshold( const Conn* c, double threshold )
 {
-	static_cast< SpikeGen* >( c.data() )->threshold_ = threshold;
+	static_cast< SpikeGen* >( c->data() )->threshold_ = threshold;
 }
 double SpikeGen::getThreshold( const Element* e )
 {
 	return static_cast< SpikeGen* >( e->data() )->threshold_;
 }
 
-void SpikeGen::setRefractT( const Conn& c, double val )
+void SpikeGen::setRefractT( const Conn* c, double val )
 {
-	static_cast< SpikeGen* >( c.data() )->refractT_ = val;
+	static_cast< SpikeGen* >( c->data() )->refractT_ = val;
 }
 double SpikeGen::getRefractT( const Element* e )
 {
 	return static_cast< SpikeGen* >( e->data() )->refractT_;
 }
 
-void SpikeGen::setAmplitude( const Conn& c, double val )
+void SpikeGen::setAmplitude( const Conn* c, double val )
 {
-	static_cast< SpikeGen* >( c.data() )->amplitude_ = val;
+	static_cast< SpikeGen* >( c->data() )->amplitude_ = val;
 }
 double SpikeGen::getAmplitude( const Element* e )
 {
 	return static_cast< const SpikeGen* >( e->data() )->amplitude_;
 }
 
-void SpikeGen::setState( const Conn& c, double val )
+void SpikeGen::setState( const Conn* c, double val )
 {
-	static_cast< SpikeGen* >( c.data() )->state_ = val;
+	static_cast< SpikeGen* >( c->data() )->state_ = val;
 }
 double SpikeGen::getState( const Element* e )
 {
@@ -146,32 +146,32 @@ double SpikeGen::getState( const Element* e )
 // SpikeGen::Dest function definitions.
 //////////////////////////////////////////////////////////////////
 
-void SpikeGen::innerProcessFunc( const Conn& c, ProcInfo p )
+void SpikeGen::innerProcessFunc( const Conn* c, ProcInfo p )
 {
 	double t = p->currTime_;
 	if ( V_ > threshold_ && t >= lastEvent_ + refractT_ ) {
-		send1< double >( c.targetElement(), eventSlot, t );
+		send1< double >( c->targetElement(), eventSlot, t );
 		lastEvent_ = t;
 		state_ = amplitude_;
 	} else {
 		state_ = 0.0;
 	}
 }
-void SpikeGen::processFunc( const Conn& c, ProcInfo p )
+void SpikeGen::processFunc( const Conn* c, ProcInfo p )
 {
-	static_cast< SpikeGen* >( c.data() )->innerProcessFunc( c, p );
+	static_cast< SpikeGen* >( c->data() )->innerProcessFunc( c, p );
 }
 
 // Set it so that first spike is allowed.
-void SpikeGen::reinitFunc( const Conn& c, ProcInfo p )
+void SpikeGen::reinitFunc( const Conn* c, ProcInfo p )
 {
-	static_cast< SpikeGen* >( c.data() )->lastEvent_ = 
-			- static_cast< SpikeGen* >( c.data() )->refractT_ ;
+	static_cast< SpikeGen* >( c->data() )->lastEvent_ = 
+			- static_cast< SpikeGen* >( c->data() )->refractT_ ;
 }
 
-void SpikeGen::VmFunc( const Conn& c, double val )
+void SpikeGen::VmFunc( const Conn* c, double val )
 {
-	static_cast< SpikeGen* >( c.data() )->V_ = val;
+	static_cast< SpikeGen* >( c->data() )->V_ = val;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -192,38 +192,38 @@ void testSpikeGen()
 	Conn c( sg, 0 );
 	p.dt_ = 0.001;
 	p.currTime_ = 0.0;
-	SpikeGen::setThreshold( c, 1.0 );
-	SpikeGen::setAmplitude( c, 1.0 );
-	SpikeGen::setRefractT( c, 0.005 );
-	SpikeGen::reinitFunc( c, &p );
+	SpikeGen::setThreshold( &c, 1.0 );
+	SpikeGen::setAmplitude( &c, 1.0 );
+	SpikeGen::setRefractT( &c, 0.005 );
+	SpikeGen::reinitFunc( &c, &p );
 
-	SpikeGen::VmFunc( c, 0.5 );
-	SpikeGen::processFunc( c, &p );
+	SpikeGen::VmFunc( &c, 0.5 );
+	SpikeGen::processFunc( &c, &p );
 	ASSERT( SpikeGen::getState( sg ) == 0.0, "SpikeGen" );
 	p.currTime_ += p.dt_;
 
-	SpikeGen::VmFunc( c, 0.999 );
-	SpikeGen::processFunc( c, &p );
+	SpikeGen::VmFunc( &c, 0.999 );
+	SpikeGen::processFunc( &c, &p );
 	ASSERT( SpikeGen::getState( sg ) == 0.0, "SpikeGen" );
 	p.currTime_ += p.dt_;
 
-	SpikeGen::VmFunc( c, 1.01 ); // First spike
-	SpikeGen::processFunc( c, &p );
+	SpikeGen::VmFunc( &c, 1.01 ); // First spike
+	SpikeGen::processFunc( &c, &p );
 	ASSERT( SpikeGen::getState( sg ) == 1.0, "SpikeGen" );
 	p.currTime_ += p.dt_;
 
-	SpikeGen::VmFunc( c, 0.999 );
-	SpikeGen::processFunc( c, &p );
+	SpikeGen::VmFunc( &c, 0.999 );
+	SpikeGen::processFunc( &c, &p );
 	ASSERT( SpikeGen::getState( sg ) == 0.0, "SpikeGen" );
 	p.currTime_ += p.dt_;
 
-	SpikeGen::VmFunc( c, 2.0 ); // Too soon, refractory.
-	SpikeGen::processFunc( c, &p );
+	SpikeGen::VmFunc( &c, 2.0 ); // Too soon, refractory.
+	SpikeGen::processFunc( &c, &p );
 	ASSERT( SpikeGen::getState( sg ) == 0.0, "SpikeGen" );
 
 	p.currTime_ = 0.010;
-	SpikeGen::VmFunc( c, 2.0 ); // Now not refractory.
-	SpikeGen::processFunc( c, &p );
+	SpikeGen::VmFunc( &c, 2.0 ); // Now not refractory.
+	SpikeGen::processFunc( &c, &p );
 	ASSERT( SpikeGen::getState( sg ) == 1.0, "SpikeGen" );
 
 	// Get rid of all the test objects

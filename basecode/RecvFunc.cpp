@@ -10,7 +10,7 @@
 
 #include "header.h"
 
-void dummyFunc( const Conn& c )
+void dummyFunc( const Conn* c )
 {
 		;
 }

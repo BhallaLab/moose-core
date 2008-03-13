@@ -59,7 +59,7 @@ GammaRng::GammaRng()
 */
 double GammaRng::getAlpha(const Element* e)
 {
-    return static_cast<GammaRng*> (e->data())->alpha_;    
+    return static_cast<GammaRng*> (e->data( 0 ))->alpha_;    
 }
 /**
    Sets parameter alpha. Also known as the shape parameter.
@@ -90,7 +90,7 @@ void GammaRng::setAlpha(const Conn& c, double alpha)
 */
 double GammaRng::getTheta(const Element* e)
 {
-    return static_cast<GammaRng*> (e->data())->theta_;    
+    return static_cast<GammaRng*> (e->data( 0 ))->theta_;    
 }
 
 /**

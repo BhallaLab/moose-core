@@ -19,20 +19,20 @@ class ParTable: public Table
 		////////////////////////////////////////////////////////////
 		// Here are the interface functions for the MOOSE class
 		////////////////////////////////////////////////////////////
-		static void setIndex( const Conn& c, int value );
+		static void setIndex( const Conn* c, int value );
 		static int getIndex( const Element* e );
 
 		////////////////////////////////////////////////////////////
 		// Here are the Table Destination functions
 		////////////////////////////////////////////////////////////
-		static void process( const Conn& c, ProcInfo p );
-		static void reinit( const Conn& c, ProcInfo p );
+		static void process( const Conn* c, ProcInfo p );
+		static void reinit( const Conn* c, ProcInfo p );
 
 		////////////////////////////////////////////////////////////
 		// Here are the internal functions
 		////////////////////////////////////////////////////////////
 		void innerProcess( Element* e, ProcInfo p );
-		void innerReinit( const Conn& c, ProcInfo p );
+		void innerReinit( const Conn* c, ProcInfo p );
 
 	private:
 		int index_;

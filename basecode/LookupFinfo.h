@@ -20,7 +20,7 @@
  * The get_ and set_ funcs are similar to those for the ValueFinfo,
  * but have an extra argument for the index, which can be any type.
  * So, we have: T1 ( *get )( const Element*, const T2& index )
- * and void( *set )( const Conn&, T1 v, const T2& index )
+ * and void( *set )( const Conn*, T1 v, const T2& index )
  *
  * The ArrayFinfo is a special case of LookupFinfo, with an
  * unsigned int index.
@@ -82,58 +82,30 @@ class LookupFinfo: public Finfo
 			
 			bool respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
-					FuncList& srcFl, FuncList& returnFl,
+					unsigned int& srcFuncId, unsigned int& returnFuncId,
 					unsigned int& destIndex, unsigned int& numDest
 			) const;
 
-			/// This is a dummy function. The Dynamic Finfo handles it.
-			void dropAll( Element* e ) const;
-
-			/// This is a dummy function. The Dynamic Finfo handles it.
-			bool drop( Element* e, unsigned int i ) const;
+			/**
+			 * Returns a flag for a bad msg.
+			 */
+			int msg() const {
+				return INT_MAX;
+			}
 
 			/**
 			 * The Ftype knows how to do this conversion.
 			 */
-			bool strSet( Element* e, const std::string &s ) const
+			bool strSet( Eref e, const std::string &s ) const
 			{ 
 					return 0;
 			}
 			
 			// The Ftype handles this conversion.
-			bool strGet( const Element* e, std::string &s ) const
+			bool strGet( Eref e, std::string &s ) const
 			{
 					return 0;
 			}
-
-			// The following 4 functions are dummies because the
-			// DynamicFinfo deals with them.
-			unsigned int numIncoming( const Element* e ) const {
-					return 0;
-			}
-
-			unsigned int numOutgoing( const Element* e ) const {
-					return 0;
-			}
-
-			unsigned int incomingConns(
-					const Element* e, vector< Conn >& list ) const {
-					return 0;
-			}
-			unsigned int outgoingConns(
-					const Element* e, vector< Conn >& list ) const {
-					return 0;
-			}
-
-			/**
-			 * We don't need to do anything here because LookupFinfo
-			 * does not deal with messages directly. If we need to
-			 * send messages to a LookupFinfo, then a DynamicFinfo
-			 * must be created
-			 */
-			void countMessages( 
-					unsigned int& srcNum, unsigned int& destNum )
-			{ ; }
 
 			/** The LookupFinfo must handle indexing at this
 			 * stage. It returns a DynamicFinfo to deal with it.
@@ -141,16 +113,6 @@ class LookupFinfo: public Finfo
 			 * Dynamic Finfo should stay or be cleared out.
 			 */
 			const Finfo* match( Element* e, const string& name ) const;
-			
-			/**
-			 * The LookupFinfo never has messages going to or from it:
-			 * they all go via DynamicFinfo if needed. So it cannot
-			 * match any connIndex.
-			 */
-			const Finfo* match( 
-				const Element* e, unsigned int connIndex ) const {
-				return 0;
-			}
 
 			RecvFunc recvFunc() const {
 					return set_;
@@ -176,9 +138,28 @@ class LookupFinfo: public Finfo
 				return new LookupFinfo( *this );
 			}
 
+			void addFuncVec( const string& cname );
+
+			/**
+			 * Returns the identifier for its FuncVec, which handles
+			 * its set_ RecvFunc
+			 */
+			unsigned int funcId() const {
+				return fv_->id();
+			}
+
+			/**
+			 * The LookupFinfo does not handle any messages itself, so
+			 * does not need to allocate any on the parent object.
+			 */
+			void countMessages( unsigned int& num ) {
+				;
+			}
+
 		private:
 			GetFunc get_;
 			RecvFunc set_;
+			FuncVec* fv_;
 };
 
 #endif // _LOOKUP_FINFO_H

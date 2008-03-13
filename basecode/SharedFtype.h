@@ -106,6 +106,7 @@ class SharedFtype: public Ftype
 			SharedFtype* match_;
 			unsigned int nValues_;
 			unsigned int size_;
+			FuncVec* fv_;
 };
 
 #endif // _SHARED_FTYPE_H

@@ -47,17 +47,17 @@ template < class T1, class T2, class T3 > class Ftype3: public Ftype
 			 * to search for a Finfo based on the index.
 			 */
 			virtual bool set(
-				Element* e, const Finfo* f, T1 v1, T2 v2, T3 v3 ) const
+				Eref e, const Finfo* f, T1 v1, T2 v2, T3 v3 ) const
 			{
 
-				void (*set)( const Conn&, T1 v1, T2 v2, T3 v3 ) =
+				void (*set)( const Conn*, T1 v1, T2 v2, T3 v3 ) =
 					reinterpret_cast< 
-						void (*)( const Conn&, T1 v1, T2 v2, T3 v3 )
+						void (*)( const Conn*, T1 v1, T2 v2, T3 v3 )
 					>(
 									f->recvFunc()
 					);
-				Conn c( e, MAXUINT );
-				set( c, v1, v2, v3 );
+				SetConn c( e );
+				set( &c, v1, v2, v3 );
 				return 1;
 			}
 
@@ -90,7 +90,7 @@ virtual std::string getTemplateParameters() const
 			 * next field.
 			 */
 			static const void* incomingFunc(
-				const Conn& c, const void* data, RecvFunc rf )
+				const Conn* c, const void* data, RecvFunc rf )
 			{
 				T1 v1;
 				T2 v2;
@@ -99,7 +99,7 @@ virtual std::string getTemplateParameters() const
 				data = unserialize< T2 >( v2, data );
 				data = unserialize< T3 >( v3, data );
 				( reinterpret_cast< 
-					void (*)( const Conn& c, T1, T2, T3 ) 
+					void (*)( const Conn* c, T1, T2, T3 ) 
 				> ( rf ) )( c, v1, v2, v3 );
 				return data;
 			}
@@ -109,7 +109,7 @@ virtual std::string getTemplateParameters() const
 			 * This variant is used when the data is synchronous: sent
 			 * every clock step, so that the sequence is fixed.
 			 */
-			static void outgoingSync( const Conn& c, T1 v1, T2 v2, T3 v3 ) {
+			static void outgoingSync( const Conn* c, T1 v1, T2 v2, T3 v3 ) {
 				unsigned int size1 = serialSize< T1 >( v1 );
 				unsigned int size2 = serialSize< T2 >( v2 );
 				unsigned int size3 = serialSize< T3 >( v3 );
@@ -125,7 +125,7 @@ virtual std::string getTemplateParameters() const
 			 * therefore adds additional data to identify the message
 			 * source
 			 */
-			static void outgoingAsync( const Conn& c, T1 v1, T2 v2, T3 v3 ){
+			static void outgoingAsync( const Conn* c, T1 v1, T2 v2, T3 v3 ){
 				unsigned int size1 = serialSize< T1 >( v1 );
 				unsigned int size2 = serialSize< T2 >( v2 );
 				unsigned int size3 = serialSize< T3 >( v3 );

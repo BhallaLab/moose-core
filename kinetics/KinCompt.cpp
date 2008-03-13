@@ -124,8 +124,8 @@ const Cinfo* initKinComptCinfo()
 
 static const Cinfo* kinComptCinfo = initKinComptCinfo();
 
-static const unsigned int extentSlot =
-	initKinComptCinfo()->getSlotIndex( "extent.returnExtent" );
+static const Slot extentSlot =
+	initKinComptCinfo()->getSlot( "extent.returnExtent" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -141,11 +141,11 @@ KinCompt::KinCompt()
 // Field access functions.
 ///////////////////////////////////////////////////
 		
-void KinCompt::setVolume( const Conn& c, double value )
+void KinCompt::setVolume( const Conn* c, double value )
 {
 	if ( value < 0.0 )
 		return;
-	static_cast< KinCompt* >( c.data() )->innerSetVolume( value );
+	static_cast< KinCompt* >( c->data() )->innerSetVolume( value );
 }
 
 void KinCompt::innerSetVolume( double value )
@@ -155,16 +155,16 @@ void KinCompt::innerSetVolume( double value )
 		size_ = value;
 }
 
-double KinCompt::getVolume( const Element* e )
+double KinCompt::getVolume( Eref e )
 {
-	return static_cast< KinCompt* >( e->data() )->volume_;
+	return static_cast< KinCompt* >( e.data() )->volume_;
 }
 
-void KinCompt::setArea( const Conn& c, double value )
+void KinCompt::setArea( const Conn* c, double value )
 {
 	if ( value < 0.0 )
 		return;
-	static_cast< KinCompt* >( c.data() )->innerSetArea( value );
+	static_cast< KinCompt* >( c->data() )->innerSetArea( value );
 }
 
 void KinCompt::innerSetArea( double value )
@@ -174,17 +174,17 @@ void KinCompt::innerSetArea( double value )
 		size_ = value;
 }
 
-double KinCompt::getArea( const Element* e )
+double KinCompt::getArea( Eref e )
 {
-	return static_cast< KinCompt* >( e->data() )->volume_;
+	return static_cast< KinCompt* >( e.data() )->volume_;
 }
 
 
-void KinCompt::setPerimeter( const Conn& c, double value )
+void KinCompt::setPerimeter( const Conn* c, double value )
 {
 	if ( value < 0.0 )
 		return;
-	static_cast< KinCompt* >( c.data() )->innerSetPerimeter( value );
+	static_cast< KinCompt* >( c->data() )->innerSetPerimeter( value );
 }
 
 void KinCompt::innerSetPerimeter( double value )
@@ -194,17 +194,17 @@ void KinCompt::innerSetPerimeter( double value )
 		size_ = value;
 }
 
-double KinCompt::getPerimeter( const Element* e )
+double KinCompt::getPerimeter( Eref e )
 {
-	return static_cast< KinCompt* >( e->data() )->perimeter_;
+	return static_cast< KinCompt* >( e.data() )->perimeter_;
 }
 
 
-void KinCompt::setSize( const Conn& c, double value )
+void KinCompt::setSize( const Conn* c, double value )
 {
 	if ( value < 0.0 )
 		return;
-	static_cast< KinCompt* >( c.data() )->innerSetSize( value );
+	static_cast< KinCompt* >( c->data() )->innerSetSize( value );
 }
 
 void KinCompt::innerSetSize( double value )
@@ -218,21 +218,21 @@ void KinCompt::innerSetSize( double value )
 		perimeter_ = value;
 }
 
-double KinCompt::getSize( const Element* e )
+double KinCompt::getSize( Eref e )
 {
-	return static_cast< KinCompt* >( e->data() )->size_;
+	return static_cast< KinCompt* >( e.data() )->size_;
 }
 
-void KinCompt::setNumDimensions( const Conn& c, unsigned int value )
+void KinCompt::setNumDimensions( const Conn* c, unsigned int value )
 {
 	if ( value == 0 || value > 3 )
 		return;
-	static_cast< KinCompt* >( c.data() )->numDimensions_ = value;
+	static_cast< KinCompt* >( c->data() )->numDimensions_ = value;
 }
 
-unsigned int KinCompt::getNumDimensions( const Element* e )
+unsigned int KinCompt::getNumDimensions( Eref e )
 {
-	return static_cast< KinCompt* >( e->data() )->numDimensions_;
+	return static_cast< KinCompt* >( e.data() )->numDimensions_;
 }
 
 
@@ -240,13 +240,13 @@ unsigned int KinCompt::getNumDimensions( const Element* e )
 // MsgDest functions.
 ///////////////////////////////////////////////////
 
-void KinCompt::requestExtent( const Conn& c )
+void KinCompt::requestExtent( const Conn* c )
 {
-	static_cast< KinCompt* >( c.data() )->
-		innerRequestExtent( c.targetElement() );
+	static_cast< KinCompt* >( c->data() )->
+		innerRequestExtent( c->target() );
 }
 
-void KinCompt::innerRequestExtent( const Element* e ) const 
+void KinCompt::innerRequestExtent( Eref e ) const 
 {
 	send2< double, unsigned int >( e, extentSlot, size_, numDimensions_ );
 }
@@ -265,9 +265,9 @@ void KinCompt::localExteriorFunction( double v1, double v2, double v3 )
 }
 
 void KinCompt::exteriorFunction( 
-	const Conn& c, double v1, double v2, double v3 )
+	const Conn* c, double v1, double v2, double v3 )
 {
-	static_cast< KinCompt* >( c.data() )->localExteriorFunction( v1, v2, v3 );
+	static_cast< KinCompt* >( c->data() )->localExteriorFunction( v1, v2, v3 );
 }
 
 void KinCompt::localInteriorFunction( double v1, double v2, double v3 )
@@ -286,7 +286,7 @@ void KinCompt::localInteriorFunction( double v1, double v2, double v3 )
 }
 
 void KinCompt::interiorFunction( 
-	const Conn& c, double v1, double v2, double v3 )
+	const Conn* c, double v1, double v2, double v3 )
 {
-	static_cast< KinCompt* >( c.data() )->localInteriorFunction( v1, v2, v3 );
+	static_cast< KinCompt* >( c->data() )->localInteriorFunction( v1, v2, v3 );
 }

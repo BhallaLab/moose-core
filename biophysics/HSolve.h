@@ -23,15 +23,15 @@ public:
 	{ ; }
 	
 	static string getPath( const Element* e );
-	static void setNDiv( const Conn& c, int NDiv );
+	static void setNDiv( const Conn* c, int NDiv );
 	static int getNDiv( const Element* e );
-	static void setVLo( const Conn& c, double VLo );
+	static void setVLo( const Conn* c, double VLo );
 	static double getVLo( const Element* e );
-	static void setVHi( const Conn& c, double VHi );
+	static void setVHi( const Conn* c, double VHi );
 	static double getVHi( const Element* e );
-	static void processFunc( const Conn& c, ProcInfo p );
-	static void scanCreateFunc( const Conn& c );
-	static void initFunc( const Conn& c, const Element* seed, double dt );
+	static void processFunc( const Conn* c, ProcInfo p );
+	static void scanCreateFunc( const Conn* c );
+	static void initFunc( const Conn* c, const Element* seed, double dt );
 	
 private:
 	void innerScanCreateFunc( Element* e );

@@ -28,13 +28,13 @@ class ParSynChan : protected SynChan
 
 	public:
 		ParSynChan();
-		static void reinitFunc( const Conn& c, ProcInfo p );
-		static void processFunc( const Conn& c, ProcInfo p );
+		static void reinitFunc( const Conn* c, ProcInfo p );
+		static void processFunc( const Conn* c, ProcInfo p );
 
 		/**
 		 * This function receives the ranks of neurons it will receive Spikes from
 		 */
-		static void recvRank( const Conn& c, int rank );
+		static void recvRank( const Conn* c, int rank );
 
 		void innerProcessFunc( Element* e, ProcInfo info );
 		unsigned int updateNumSynapse( const Element* e );

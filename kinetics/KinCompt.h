@@ -27,32 +27,32 @@ class KinCompt
 		///////////////////////////////////////////////////
 		// Field assignment functions
 		///////////////////////////////////////////////////
-		static double getVolume( const Element* e );
-		static void setVolume( const Conn& c, double value );
+		static double getVolume( Eref e );
+		static void setVolume( const Conn* c, double value );
 		void innerSetVolume( double value );
-		static double getArea( const Element* e );
-		static void setArea( const Conn& c, double value );
+		static double getArea( Eref e );
+		static void setArea( const Conn* c, double value );
 		void innerSetArea( double value );
-		static double getPerimeter( const Element* e );
-		static void setPerimeter( const Conn& c, double value );
+		static double getPerimeter( Eref e );
+		static void setPerimeter( const Conn* c, double value );
 		void innerSetPerimeter( double value );
-		static double getSize( const Element* e );
-		static void setSize( const Conn& c, double value );
+		static double getSize( Eref e );
+		static void setSize( const Conn* c, double value );
 		void innerSetSize( double value );
-		static unsigned int getNumDimensions( const Element* e );
-		static void setNumDimensions( const Conn& c, unsigned int value );
+		static unsigned int getNumDimensions( Eref e );
+		static void setNumDimensions( const Conn* c, unsigned int value );
 
 		///////////////////////////////////////////////////
 		// Message handlers
 		///////////////////////////////////////////////////
-		static void requestExtent( const Conn& c );
-		void innerRequestExtent( const Element* e ) const;
+		static void requestExtent( const Conn* c );
+		void innerRequestExtent( Eref e ) const;
 
-		static void exteriorFunction( const Conn& c, 
+		static void exteriorFunction( const Conn* c, 
 			double v1, double v2, double v3 );
 		void localExteriorFunction( double v1, double v2, double v3 );
 
-		static void interiorFunction( const Conn& c, 
+		static void interiorFunction( const Conn* c, 
 			double v1, double v2, double v3 );
 		void localInteriorFunction( double v1, double v2, double v3 );
 

@@ -17,13 +17,13 @@ class HHGate
 		{ ; }
 
 		static void gateFunc(
-				const Conn& c, double v );
-		static void postCreate( const Conn& c );
-		static void setupAlpha( const Conn& c, vector< double > parms );
-		static void setupTau( const Conn& c, vector< double > parms );
-		static void tweakAlpha( const Conn& c );
-		static void tweakTau( const Conn& c );
-		static void setupGate( const Conn& c, vector< double > parms );
+				const Conn* c, double v );
+		static void postCreate( const Conn* c );
+		static void setupAlpha( const Conn* c, vector< double > parms );
+		static void setupTau( const Conn* c, vector< double > parms );
+		static void tweakAlpha( const Conn* c );
+		static void tweakTau( const Conn* c );
+		static void setupGate( const Conn* c, vector< double > parms );
 		void setupTables( const vector< double >& parms, bool doTau );
 		void tweakTables( bool doTau );
 		void innerSetupGate( const vector< double >& parms );

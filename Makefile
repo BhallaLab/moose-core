@@ -89,21 +89,24 @@ endif
 
 LD = ld
 
-SUBDIR = genesis_parser basecode shell element maindir biophysics kinetics builtins scheduling example utility utility/randnum $(PARALLEL_DIR)
+SUBDIR = genesis_parser basecode shell element maindir scheduling biophysics kinetics builtins utility utility/randnum
+
+#SUBDIR = genesis_parser basecode shell element maindir biophysics kinetics builtins scheduling example utility utility/randnum $(PARALLEL_DIR)
 
 OBJLIBS =	\
 	basecode/basecode.o \
-	utility/utility.o \
-	utility/randnum/randnum.o	\
 	maindir/maindir.o \
 	genesis_parser/SLI.o \
 	element/element.o \
 	shell/shell.o \
+	utility/utility.o \
+	utility/randnum/randnum.o	\
+	scheduling/scheduling.o \
 	biophysics/biophysics.o \
 	kinetics/kinetics.o \
 	builtins/builtins.o \
-	scheduling/scheduling.o \
-	example/example.o \
+
+# example/example.o \
 
 export CFLAGS
 export LD
