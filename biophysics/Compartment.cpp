@@ -168,6 +168,18 @@ const Cinfo* initCompartmentCinfo()
 			reinterpret_cast< GetFunc >( &Compartment::getLength ),
 			reinterpret_cast< RecvFunc >( &Compartment::setLength )
 		),
+		new ValueFinfo( "x0", ValueFtype1< double >::global(),
+			reinterpret_cast< GetFunc >( &Compartment::getX ),
+			reinterpret_cast< RecvFunc >( &Compartment::setX )
+		),
+		new ValueFinfo( "y0", ValueFtype1< double >::global(),
+			reinterpret_cast< GetFunc >( &Compartment::getY ),
+			reinterpret_cast< RecvFunc >( &Compartment::setY )
+		),
+		new ValueFinfo( "z0", ValueFtype1< double >::global(),
+			reinterpret_cast< GetFunc >( &Compartment::getZ ),
+			reinterpret_cast< RecvFunc >( &Compartment::setZ )
+		),
 		new ValueFinfo( "x", ValueFtype1< double >::global(),
 			reinterpret_cast< GetFunc >( &Compartment::getX ),
 			reinterpret_cast< RecvFunc >( &Compartment::setX )
@@ -404,12 +416,45 @@ double Compartment::getLength( Eref e )
 	return static_cast< Compartment* >( e.data() )->length_;
 }
 
+void Compartment::setX0( const Conn* c, double value )
+{
+	static_cast< Compartment* >( c->data() )->x0_ =
+			value;
+}
+
+double Compartment::getX0( Eref e )
+{
+	return static_cast< Compartment* >( e.data() )->x0_;
+}
+
+void Compartment::setY0( const Conn* c, double value )
+{
+	static_cast< Compartment* >( c->data() )->y0_ =
+			value;
+}
+
+double Compartment::getY0( Eref e )
+{
+	return static_cast< Compartment* >( e.data() )->y0_;
+}
+
+void Compartment::setZ0( const Conn* c, double value )
+{
+	static_cast< Compartment* >( c->data() )->z0_ =
+			value;
+}
+
+double Compartment::getZ0( Eref e )
+{
+	return static_cast< Compartment* >( e.data() )->z0_;
+}
+
 void Compartment::setX( const Conn* c, double value )
 {
 	static_cast< Compartment* >( c->data() )->x_ =
 			value;
-		
 }
+
 double Compartment::getX( Eref e )
 {
 	return static_cast< Compartment* >( e.data() )->x_;
@@ -419,8 +464,8 @@ void Compartment::setY( const Conn* c, double value )
 {
 	static_cast< Compartment* >( c->data() )->y_ =
 			value;
-		
 }
+
 double Compartment::getY( Eref e )
 {
 	return static_cast< Compartment* >( e.data() )->y_;
@@ -430,8 +475,8 @@ void Compartment::setZ( const Conn* c, double value )
 {
 	static_cast< Compartment* >( c->data() )->z_ =
 			value;
-		
 }
+
 double Compartment::getZ( Eref e )
 {
 	return static_cast< Compartment* >( e.data() )->z_;

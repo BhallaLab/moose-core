@@ -40,7 +40,7 @@ static const Cinfo* caconcCinfo = initCaConcCinfo();
 */
 static const Cinfo* comptCinfo = 0;
 static const Cinfo* chanCinfo = 0;
-static const Cinfo* gateCinfo = 0;
+//static const Cinfo* gateCinfo = 0;
 static const Cinfo* synchanCinfo = 0;
 static const Cinfo* spikegenCinfo = 0;
 static const Cinfo* nernstCinfo = 0;
@@ -56,7 +56,8 @@ ReadCell::ReadCell( const vector< double >& globalParms )
 		lastCompt_( 0 ), protoCompt_( 0 ),
 		numProtoCompts_( 0 ), numProtoChans_( 0 ),
 		numProtoOthers_( 0 ), graftFlag_( 0 ),
-		polarFlag_( 0 ), relativeCoordsFlag_( 0 )
+		polarFlag_( 0 ), relativeCoordsFlag_( 0 ),
+		doubleEndpointFlag_( 0 )
 {
 		Id libId;
 		bool ret = lookupGet< Id, string >(
@@ -141,17 +142,18 @@ Element* ReadCell::start( const string& cellpath )
 
 void ReadCell::read( const string& filename, const string& cellpath )
 {
-        PathUtility pathUtil(Property::getProperty(Property::SIMPATH));
-    
+	PathUtility pathUtil(Property::getProperty(Property::SIMPATH));
+
 	ifstream fin( filename.c_str() );
-        for (unsigned int i = 0; i < pathUtil.size() && !fin.is_open(); ++i )
-        {
-            string path = pathUtil.makeFilePath(filename, i);            
-            fin.open( path.c_str());
-        }
-        
+	for (unsigned int i = 0; i < pathUtil.size() && !fin.is_open(); ++i )
+	{
+		string path = pathUtil.makeFilePath(filename, i);            
+		fin.open( path.c_str());
+	}
+
 	cell_ = start( cellpath );
-	if ( !cell_ ) return;
+	if ( !cell_ )
+		return;
 	currCell_ = cell_;
 
 	string line;
@@ -212,12 +214,34 @@ void ReadCell::readData( const string& line, unsigned int lineNum )
 					", should be > 6\n";
 			return;
 	}
+	
+	double x0, y0, z0, x, y, z, d;
+	int argOffset = 0;
 	string name = argv[0];
 	string parent = argv[1];
-	double x = 1.0e-6 * atof( argv[2].c_str() );
-	double y = atof( argv[3].c_str() );
-	double z = atof( argv[4].c_str() );
-	double d = 1.0e-6 * atof( argv[5].c_str() );
+	
+	if ( doubleEndpointFlag_ ) {
+		argOffset = 3;
+		
+		x0 = 1.0e-6 * atof( argv[2].c_str() );
+		y0 = atof( argv[3].c_str() );
+		z0 = atof( argv[4].c_str() );
+		if ( polarFlag_ ) {
+			double r = x;
+			double theta = y * M_PI / 180.0;
+			double phi = z * M_PI / 180.0;
+			x0 = r * sin( phi ) * cos ( theta );
+			y0 = r * sin( phi ) * sin ( theta );
+			z0 = r * cos( phi );
+		} else {
+			y0 *= 1.0e-6;
+			z0 *= 1.0e-6;
+		}
+	}
+	
+	x = 1.0e-6 * atof( argv[argOffset + 2].c_str() );
+	y = atof( argv[argOffset + 3].c_str() );
+	z = atof( argv[argOffset + 4].c_str() );
 	if ( polarFlag_ ) {
 		double r = x;
 		double theta = y * M_PI / 180.0;
@@ -230,19 +254,26 @@ void ReadCell::readData( const string& line, unsigned int lineNum )
 		z *= 1.0e-6;
 	}
 
+	d = 1.0e-6 * atof( argv[argOffset + 5].c_str() );
+
 	double length;
 	Element* compt =
-		buildCompartment( name, parent, x, y, z, d, length, argv );
+		buildCompartment( name, parent, x0, y0, z0, x, y, z, d, length, argv );
 	buildChannels( compt, argv, d, length );
 }
 
 Element* ReadCell::buildCompartment( 
 				const string& name, const string& parent,
-				double x, double y, double z, double d, double& length,
+				double x0, double y0, double z0,
+				double x, double y, double z,
+				double d, double& length,
 				vector< string >& argv )
 {
 	static const Finfo* axial = comptCinfo->findFinfo( "axial" );
 	static const Finfo* raxial = comptCinfo->findFinfo( "raxial" );
+	static const Finfo* x0Finfo = comptCinfo->findFinfo( "x0" );
+	static const Finfo* y0Finfo = comptCinfo->findFinfo( "y0" );
+	static const Finfo* z0Finfo = comptCinfo->findFinfo( "z0" );
 	static const Finfo* xFinfo = comptCinfo->findFinfo( "x" );
 	static const Finfo* yFinfo = comptCinfo->findFinfo( "y" );
 	static const Finfo* zFinfo = comptCinfo->findFinfo( "z" );
@@ -300,18 +331,29 @@ Element* ReadCell::buildCompartment(
 	lastCompt_ = compt;
 
 	if ( pa != Element::root() ) {
-		double dx, dy, dz;
-		get< double >( pa, xFinfo, dx );
-		get< double >( pa, yFinfo, dy );
-		get< double >( pa, zFinfo, dz );
-		if ( relativeCoordsFlag_ == 1 ) {
-			x += dx;
-			y += dy;
-			z += dz;
+		double px, py, pz, dx, dy, dz;
+		get< double >( pa, xFinfo, px );
+		get< double >( pa, yFinfo, py );
+		get< double >( pa, zFinfo, pz );
+		
+		if ( !doubleEndpointFlag_ ) {
+			x0 = px;
+			y0 = py;
+			z0 = pz;
 		}
-		dx = x - dx;
-		dy = y - dy;
-		dz = z - dz;
+		if ( relativeCoordsFlag_ == 1 ) {
+			x += px;
+			y += py;
+			z += pz;
+			if ( doubleEndpointFlag_ ) {
+				x0 += px;
+				y0 += py;
+				z0 += pz;
+			}
+		}
+		dx = x - x0;
+		dy = y - y0;
+		dz = z - z0;
 
 		length = sqrt( dx * dx + dy * dy + dz * dz );
 		axial->add( pa, compt, raxial );
@@ -320,6 +362,9 @@ Element* ReadCell::buildCompartment(
 		// or it coult be a sphere.
 	}
 
+	set< double >( compt, x0Finfo, x0 );
+	set< double >( compt, y0Finfo, y0 );
+	set< double >( compt, z0Finfo, z0 );
 	set< double >( compt, xFinfo, x );
 	set< double >( compt, yFinfo, y );
 	set< double >( compt, zFinfo, z );
@@ -409,7 +454,15 @@ void ReadCell::readScript( const string& line, unsigned int lineNum )
 		countProtos( );
 		return;
 	}
+	
+	if ( argv[0] == "*double_endpoint" ) {
+		doubleEndpointFlag_ = 1;
+	}
 
+	if ( argv[0] == "*double_endpoint_off" ) {
+		doubleEndpointFlag_ = 0;
+	}
+	
 	if ( argv[0] == "*makeproto" ) {
 		return; // Should traverse tree below and drop process messages.
 	}
@@ -438,11 +491,22 @@ double calcSurf( double len, double dia )
 bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 				double diameter, double length)
 {
-	if ( ( argv.size() % 2 ) == 1 ) {
+	bool isArgOK;
+	int argStart;
+	
+	if ( doubleEndpointFlag_ ) {
+		isArgOK = ( argv.size() % 2 ) == 1;
+		argStart = 9;
+	} else {
+		isArgOK = ( argv.size() % 2 ) == 0;
+		argStart = 6;
+	}
+	
+	if ( !isArgOK ) {
 		cout << "Error: readCell: Bad number of arguments in channel list\n";
 		return 0;
 	}
-	for ( unsigned int j = 6; j < argv.size(); j++ ) {
+	for ( unsigned int j = argStart; j < argv.size(); j++ ) {
 		// Here we explicitly set compt fields by scaling from the 
 		// specific value applied here.
 		string chan = argv[j];

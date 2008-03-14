@@ -44,6 +44,12 @@ class Compartment
 			static double getDiameter( Eref );
 			static void setLength( const Conn* c, double length );
 			static double getLength( Eref );
+			static void setX0( const Conn* c, double value );
+			static double getX0( Eref );
+			static void setY0( const Conn* c, double value );
+			static double getY0( Eref );
+			static void setZ0( const Conn* c, double value );
+			static double getZ0( Eref );
 			static void setX( const Conn* c, double value );
 			static double getX( Eref );
 			static void setY( const Conn* c, double value );
@@ -123,6 +129,9 @@ class Compartment
 			// double B_;
 			double invRm_;
 			double sumInject_;
+			double x0_;
+			double y0_;
+			double z0_;
 			double x_;
 			double y_;
 			double z_;
