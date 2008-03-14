@@ -110,8 +110,7 @@ const Cinfo* initPulseGenCinfo()
 
 static const Cinfo* pulseGenCinfo = initPulseGenCinfo();
 
-static const unsigned int outputSlot =
-    initPulseGenCinfo()->getSlotIndex( "outputSrc");
+static const Slot outputSlot = initPulseGenCinfo()->getSlot( "outputSrc");
 
 PulseGen::PulseGen()
 {
@@ -137,10 +136,10 @@ void PulseGen::setFirstLevel(const Conn& c, double level)
     obj->firstLevel_ = level;    
 }
 
-double PulseGen::getFirstLevel(const Element* e)
+double PulseGen::getFirstLevel(Eref e)
 {
-    PulseGen* obj = static_cast <PulseGen*> (e->data());
-    ASSERT(obj != NULL,"PulseGen::getFirstLevel(const Element* ) - target data pointer is NULL.");
+    PulseGen* obj = static_cast <PulseGen*> (e.data());
+    ASSERT(obj != NULL,"PulseGen::getFirstLevel(Eref ) - target data pointer is NULL.");
     return obj->firstLevel_;    
 }
     
@@ -151,10 +150,10 @@ void PulseGen::setFirstWidth(const Conn& c, double width)
     obj->firstWidth_ = width;    
 }
 
-double PulseGen::getFirstWidth(const Element * e)
+double PulseGen::getFirstWidth(Eref e)
 {
-    PulseGen* obj = static_cast <PulseGen*> (e->data());
-    ASSERT( obj != NULL, "PulseGen::getFirstWidth(const Element* ) - target data pointer is NULL." );
+    PulseGen* obj = static_cast <PulseGen*> (e.data());
+    ASSERT( obj != NULL, "PulseGen::getFirstWidth(Eref ) - target data pointer is NULL." );
     return obj->firstWidth_;    
 }
 void PulseGen::setFirstDelay(const Conn & c, double delay)
@@ -163,10 +162,10 @@ void PulseGen::setFirstDelay(const Conn & c, double delay)
     ASSERT( obj != NULL, "PulseGen::setFirstDelay(const Conn&, double) - target data pointer is NULL.");
     obj->firstDelay_ = delay;    
 }
-double PulseGen::getFirstDelay(const Element* e)
+double PulseGen::getFirstDelay(Eref e)
 {
-    PulseGen* obj = static_cast <PulseGen*> (e->data());
-    ASSERT( obj != NULL, "PulseGen::getFirstDelay(const Element* ) - target data pointer is NULL.");    
+    PulseGen* obj = static_cast <PulseGen*> (e.data());
+    ASSERT( obj != NULL, "PulseGen::getFirstDelay(Eref ) - target data pointer is NULL.");    
     return obj->firstDelay_;
 }
     
@@ -176,10 +175,10 @@ void PulseGen::setSecondLevel(const Conn& c, double level)
     ASSERT( obj != NULL, "PulseGen::setSecondLevel(const Conn&, double) - target data pointer is NULL.");
     obj->secondLevel_ = level;
 }
-double PulseGen::getSecondLevel(const Element* e)
+double PulseGen::getSecondLevel(Eref e)
 {
-    PulseGen* obj = static_cast <PulseGen*> (e->data());
-    ASSERT( obj != NULL, "PulseGen::getSecondLevel(const Element* ) - target data pointer is NULL.");
+    PulseGen* obj = static_cast <PulseGen*> (e.data());
+    ASSERT( obj != NULL, "PulseGen::getSecondLevel(Eref ) - target data pointer is NULL.");
     return obj->secondLevel_;
 }
 void PulseGen::setSecondWidth(const Conn& c, double width)
@@ -188,10 +187,10 @@ void PulseGen::setSecondWidth(const Conn& c, double width)
     ASSERT( obj != NULL, "PulseGen::setFirstWidth(const Conn&, double) - target data pointer is NULL.");
     obj->secondWidth_ = width;
 }
-double PulseGen::getSecondWidth(const Element* e)
+double PulseGen::getSecondWidth(Eref e)
 {
-    PulseGen* obj = static_cast <PulseGen*> (e->data());
-    ASSERT( obj != NULL, "PulseGen::getSecondWidth(const Element* ) - target data pointer is NULL.");    
+    PulseGen* obj = static_cast <PulseGen*> (e.data());
+    ASSERT( obj != NULL, "PulseGen::getSecondWidth(Eref ) - target data pointer is NULL.");    
     return obj->secondWidth_;
 }
 void PulseGen::setSecondDelay(const Conn& c, double delay)
@@ -200,10 +199,10 @@ void PulseGen::setSecondDelay(const Conn& c, double delay)
     ASSERT( obj != NULL, "PulseGen::setSecondDelay(const Conn&, double) - target data pointer is NULL.");
     obj->secondDelay_ = delay;
 }
-double PulseGen::getSecondDelay(const Element* e)
+double PulseGen::getSecondDelay(Eref e)
 {
-    PulseGen* obj = static_cast <PulseGen*> (e->data());
-    ASSERT( obj != NULL, "PulseGen::getSecondDelay(const Element* ) - target data pointer is NULL.");
+    PulseGen* obj = static_cast <PulseGen*> (e.data());
+    ASSERT( obj != NULL, "PulseGen::getSecondDelay(Eref ) - target data pointer is NULL.");
     return obj->secondDelay_;    
 }
 
@@ -213,10 +212,10 @@ void PulseGen::setBaseLevel(const Conn& c, double level)
     ASSERT( obj != NULL, "PulseGen::setBaseLevel(const Conn&, double) - target data pointer is NULL.");
     obj->baseLevel_ = level;    
 }
-double PulseGen::getBaseLevel(const Element* e)
+double PulseGen::getBaseLevel(Eref e)
 {
-    PulseGen* obj = static_cast <PulseGen*> (e->data());
-    ASSERT( obj != NULL, "PulseGen::getFirstDelay(const Element* ) - target data pointer is NULL.");
+    PulseGen* obj = static_cast <PulseGen*> (e.data());
+    ASSERT( obj != NULL, "PulseGen::getFirstDelay(Eref ) - target data pointer is NULL.");
     return obj->baseLevel_;    
 }
 void PulseGen::setTrigMode(const Conn& c, int mode)
@@ -225,29 +224,29 @@ void PulseGen::setTrigMode(const Conn& c, int mode)
     ASSERT( obj != NULL, "PulseGen::setTrigMode(const Conn&, double) - target data pointer is NULL.");
     obj->trigMode_ = mode;    
 }
-int PulseGen::getTrigMode(const Element* e)
+int PulseGen::getTrigMode(Eref e)
 {
-    PulseGen* obj = static_cast <PulseGen*> (e->data());
-    ASSERT( obj != NULL, "PulseGen::getTrigMode(const Element* ) - target data pointer is NULL.");
+    PulseGen* obj = static_cast <PulseGen*> (e.data());
+    ASSERT( obj != NULL, "PulseGen::getTrigMode(Eref ) - target data pointer is NULL.");
     return obj->trigMode_;
 }
-double PulseGen::getOutput(const Element* e)
+double PulseGen::getOutput(Eref e)
 {
-    PulseGen* obj = static_cast <PulseGen*> (e->data());
-    ASSERT( obj != NULL, "PulseGen::getOutput(const Element* ) - target data pointer is NULL.");
+    PulseGen* obj = static_cast <PulseGen*> (e.data());
+    ASSERT( obj != NULL, "PulseGen::getOutput(Eref ) - target data pointer is NULL.");
     return obj->output_;
 }
-double PulseGen::getTrigTime(const Element* e)
+double PulseGen::getTrigTime(Eref e)
 {
-    PulseGen* obj = static_cast <PulseGen*> (e->data());
-    ASSERT( obj != NULL, "PulseGen::getTrigTime(const Element* ) - target data pointer is NULL." );    
+    PulseGen* obj = static_cast <PulseGen*> (e.data());
+    ASSERT( obj != NULL, "PulseGen::getTrigTime(Eref ) - target data pointer is NULL." );    
     return obj->trigTime_;
 }
 
-int PulseGen::getPreviousInput(const Element* e)
+int PulseGen::getPreviousInput(Eref e)
 {
-    PulseGen* obj = static_cast <PulseGen*> (e->data());
-    ASSERT( obj != NULL, "PulseGen::getPreviousInput(const Element* ) - target data pointer is NULL.");
+    PulseGen* obj = static_cast <PulseGen*> (e.data());
+    ASSERT( obj != NULL, "PulseGen::getPreviousInput(Eref ) - target data pointer is NULL.");
     return obj->prevInput_;    
 }
 
@@ -371,7 +370,7 @@ void PulseGen::innerProcessFunc(const Conn& c, ProcInfo p)
         output_ = baseLevel_;
     else 
         output_ = secondLevel_;
-    send1<double>(c.targetElement(), outputSlot, output_);    
+    send1<double>( c.target(), outputSlot, output_);    
 }
     
                      
