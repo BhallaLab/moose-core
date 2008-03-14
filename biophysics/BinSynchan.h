@@ -38,37 +38,37 @@ class BinSynchan
     }
 
     static void setGbar( const Conn* c, double Gbar );
-    static double getGbar( const Element* e );
+    static double getGbar( Eref e );
 
     static void setEk( const Conn* c, double Ek );
-    static double getEk( const Element* e );
+    static double getEk( Eref e );
 
     static void setTau1( const Conn* c, double tau1 );
-    static double getTau1( const Element* e );
+    static double getTau1( Eref e );
 
     static void setTau2( const Conn* c, double tau2 );
-    static double getTau2( const Element* e );
+    static double getTau2( Eref e );
 
     static void setNormalizeWeights( const Conn* c, bool value );
-    static bool getNormalizeWeights( const Element* e );
+    static bool getNormalizeWeights( Eref e );
 
     static void setGk( const Conn* c, double Gk );
-    static double getGk( const Element* e );
+    static double getGk( Eref e );
 
     static void setIk( const Conn* c, double Ik );
-    static double getIk( const Element* e );
+    static double getIk( Eref e );
 
-    static int getNumSynapses( const Element* e );
+    static int getNumSynapses( Eref e );
 
     static void setWeight(
         const Conn* c, double val, const unsigned int& i );
     static double getWeight( 
-        const Element* e, const unsigned int& i );
+        Eref e, const unsigned int& i );
 
     static void setDelay(
         const Conn* c, double val, const unsigned int& i );
     static double getDelay( 
-        const Element* e, const unsigned int& i );
+        Eref e, const unsigned int& i );
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
@@ -78,9 +78,9 @@ class BinSynchan
 
     static void channelFunc( const Conn* c, double Vm );
 
-    void innerProcessFunc( Element* e, ProcInfo p );
+    void innerProcessFunc( Eref e, ProcInfo p );
     static void processFunc( const Conn* c, ProcInfo p );
-    void innerReinitFunc( Element* e,  ProcInfo p );
+    void innerReinitFunc( Eref e,  ProcInfo p );
     static void reinitFunc( const Conn* c, ProcInfo p );
 
     static void activationFunc( const Conn* c, double val );
@@ -89,16 +89,16 @@ class BinSynchan
 ///////////////////////////////////////////////////
 // Utility function
 ///////////////////////////////////////////////////
-    unsigned int updateNumSynapse( const Element* e );
+    unsigned int updateNumSynapse( Eref e );
 
     ///////////////////////////////////////
     // Functions specific to BinSynchan
     ///////////////////////////////////////
     static void setReleaseP(const Conn* c, double p, const unsigned int& index);
-    static double getReleaseP(const Element* e, const unsigned int& index);
+    static double getReleaseP(Eref e, const unsigned int& index);
     static void setPoolSize(const Conn* c, int poolSize, const unsigned int& index);
-    static int getPoolSize( const Element* e, const unsigned int& index );
-    static double getReleaseCount( const Element* e, const unsigned int& i );
+    static int getPoolSize( Eref e, const unsigned int& index );
+    static double getReleaseCount( Eref e, const unsigned int& i );
     
 
 ///////////////////////////////////////////////////

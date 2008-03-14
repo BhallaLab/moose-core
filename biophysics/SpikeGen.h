@@ -26,16 +26,16 @@ class SpikeGen
 	// Field functions.
 	//////////////////////////////////////////////////////////////////
 		static void setThreshold( const Conn* c, double threshold );
-		static double getThreshold( const Element* e );
+		static double getThreshold( Eref e );
 
 		static void setRefractT( const Conn* c, double val );
-		static double getRefractT( const Element* e );
+		static double getRefractT( Eref e );
 
 		static void setAmplitude( const Conn* c, double val );
-		static double getAmplitude( const Element* e );
+		static double getAmplitude( Eref e );
 
 		static void setState( const Conn* c, double val );
-		static double getState( const Element* e );
+		static double getState( Eref e );
 
 	//////////////////////////////////////////////////////////////////
 	// Message dest functions.

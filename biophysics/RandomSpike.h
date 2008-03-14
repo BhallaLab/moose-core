@@ -80,26 +80,26 @@ See also:
 class RandomSpike
 {
   public:
-    static void setMinAmp(const Conn& c, double value);    
-    static double getMinAmp(const Element* e);
-    static void setMaxAmp(const Conn& c, double value);
-    static double getMaxAmp(const Element* e);
-    static void setRate(const Conn& c, double value);
-    static double getRate(const Element* e);
-    static void setResetValue(const Conn& c, double value);
-    static double getResetValue(const Element* e);
-    static void setState(const Conn& c, double value);
-    static double getState(const Element* e);
-    static void setAbsRefract(const Conn& c, double value);
-    static double getAbsRefract(const Element* e);
-    static void setLastEvent(const Conn& c, double value);
-    static double getLastEvent(const Element* e);
-    static void setReset(const Conn& c, int value);
-    static int getReset(const Element* e);
-    static void setMinMaxAmp(const Conn & c, double min, double max);    
-    static void processFunc(const Conn& c, ProcInfo p);
-    void innerProcessFunc(const Conn & c, ProcInfo p);
-    static void reinitFunc(const Conn& c, ProcInfo p);
+    static void setMinAmp(const Conn* c, double value);    
+    static double getMinAmp(Eref e);
+    static void setMaxAmp(const Conn* c, double value);
+    static double getMaxAmp(Eref e);
+    static void setRate(const Conn* c, double value);
+    static double getRate(Eref e);
+    static void setResetValue(const Conn* c, double value);
+    static double getResetValue(Eref e);
+    static void setState(const Conn* c, double value);
+    static double getState(Eref e);
+    static void setAbsRefract(const Conn* c, double value);
+    static double getAbsRefract(Eref e);
+    static void setLastEvent(const Conn* c, double value);
+    static double getLastEvent(Eref e);
+    static void setReset(const Conn* c, int value);
+    static int getReset(Eref e);
+    static void setMinMaxAmp(const Conn* c, double min, double max);    
+    static void processFunc(const Conn* c, ProcInfo p);
+    void innerProcessFunc(const Conn* c, ProcInfo p);
+    static void reinitFunc(const Conn* c, ProcInfo p);
     
     RandomSpike();
     

@@ -154,7 +154,7 @@ const Cinfo* initStochSynchanCinfo()
 
 	static Cinfo stochSynchanCinfo(
 		"StochSynchan",
-		"Subhasis Ray, 2007, NCBS",
+		"Upinder S. Bhalla, 2007, NCBS",
 		"StochSynchan: Synaptic channel incorporating weight and delay. Does not\nhandle activity-dependent modification, see HebbStochSynchan for \nthat. Very similiar to the old synchan from GENESIS.", 
 		initNeutralCinfo(),
 		stochSynchanFinfos,
@@ -186,68 +186,68 @@ void StochSynchan::setGbar( const Conn* c, double Gbar )
 {
 	static_cast< StochSynchan* >( c->data() )->Gbar_ = Gbar;
 }
-double StochSynchan::getGbar( const Element* e )
+double StochSynchan::getGbar( Eref e )
 {
-	return static_cast< StochSynchan* >( e->data() )->Gbar_;
+	return static_cast< StochSynchan* >( e.data() )->Gbar_;
 }
 
 void StochSynchan::setEk( const Conn* c, double Ek )
 {
 	static_cast< StochSynchan* >( c->data() )->Ek_ = Ek;
 }
-double StochSynchan::getEk( const Element* e )
+double StochSynchan::getEk( Eref e )
 {
-	return static_cast< StochSynchan* >( e->data() )->Ek_;
+	return static_cast< StochSynchan* >( e.data() )->Ek_;
 }
 
 void StochSynchan::setTau1( const Conn* c, double tau1 )
 {
 	static_cast< StochSynchan* >( c->data() )->tau1_ = tau1;
 }
-double StochSynchan::getTau1( const Element* e )
+double StochSynchan::getTau1( Eref e )
 {
-	return static_cast< StochSynchan* >( e->data() )->tau1_;
+	return static_cast< StochSynchan* >( e.data() )->tau1_;
 }
 
 void StochSynchan::setTau2( const Conn* c, double tau2 )
 {
 	static_cast< StochSynchan* >( c->data() )->tau2_ = tau2;
 }
-double StochSynchan::getTau2( const Element* e )
+double StochSynchan::getTau2( Eref e )
 {
-	return static_cast< StochSynchan* >( e->data() )->tau2_;
+	return static_cast< StochSynchan* >( e.data() )->tau2_;
 }
 
 void StochSynchan::setNormalizeWeights( const Conn* c, bool value )
 {
 	static_cast< StochSynchan* >( c->data() )->normalizeWeights_ = value;
 }
-bool StochSynchan::getNormalizeWeights( const Element* e )
+bool StochSynchan::getNormalizeWeights( Eref e )
 {
-	return static_cast< StochSynchan* >( e->data() )->normalizeWeights_;
+	return static_cast< StochSynchan* >( e.data() )->normalizeWeights_;
 }
 
 void StochSynchan::setGk( const Conn* c, double Gk )
 {
 	static_cast< StochSynchan* >( c->data() )->Gk_ = Gk;
 }
-double StochSynchan::getGk( const Element* e )
+double StochSynchan::getGk( Eref e )
 {
-	return static_cast< StochSynchan* >( e->data() )->Gk_;
+	return static_cast< StochSynchan* >( e.data() )->Gk_;
 }
 
 void StochSynchan::setIk( const Conn* c, double Ik )
 {
 	static_cast< StochSynchan* >( c->data() )->Ik_ = Ik;
 }
-double StochSynchan::getIk( const Element* e )
+double StochSynchan::getIk( Eref e )
 {
-	return static_cast< StochSynchan* >( e->data() )->Ik_;
+	return static_cast< StochSynchan* >( e.data() )->Ik_;
 }
 
-int StochSynchan::getNumSynapses( const Element* e )
+int StochSynchan::getNumSynapses( Eref e )
 {
-	return static_cast< StochSynchan* >( e->data() )->synapses_.size();
+	return static_cast< StochSynchan* >( e.data() )->synapses_.size();
 }
 
 void StochSynchan::setWeight(
@@ -261,10 +261,10 @@ void StochSynchan::setWeight(
 		cout << "Error: StochSynchan::setWeight: Index " << i << 
 			" out of range\n";
 }
-double StochSynchan::getWeight( const Element* e, const unsigned int& i )
+double StochSynchan::getWeight( Eref e, const unsigned int& i )
 {
 	vector< StochSynInfo >& synapses = 
-			static_cast< StochSynchan* >( e->data() )->synapses_;
+			static_cast< StochSynchan* >( e.data() )->synapses_;
 	if ( i < synapses.size() )
 		return synapses[i].weight;
 	cout << "Error: StochSynchan::getWeight: Index " << i << 
@@ -284,10 +284,10 @@ void StochSynchan::setDelay(
 			" out of range\n";
 }
 
-double StochSynchan::getDelay( const Element* e, const unsigned int& i )
+double StochSynchan::getDelay( Eref e, const unsigned int& i )
 {
 	vector< StochSynInfo >& synapses = 
-			static_cast< StochSynchan* >( e->data() )->synapses_;
+			static_cast< StochSynchan* >( e.data() )->synapses_;
 	if ( i < synapses.size() )
 		return synapses[i].delay;
 	cout << "Error: StochSynchan::getDelay: Index " << i << 
@@ -308,10 +308,10 @@ void StochSynchan::setReleaseP(
 			" out of range\n";
 }
 
-double StochSynchan::getReleaseP( const Element* e, const unsigned int& i )
+double StochSynchan::getReleaseP( Eref e, const unsigned int& i )
 {
 	vector< StochSynInfo >& synapses = 
-			static_cast< StochSynchan* >( e->data() )->synapses_;
+			static_cast< StochSynchan* >( e.data() )->synapses_;
 	if ( i < synapses.size() )
             return synapses[i].releaseP;
 	cout << "Error: StochSynchan::getReleaseP : Index " << i << 
@@ -319,10 +319,10 @@ double StochSynchan::getReleaseP( const Element* e, const unsigned int& i )
 	return 0.0;
 }
 
-double StochSynchan::getReleaseCount( const Element* e, const unsigned int& i )
+double StochSynchan::getReleaseCount( Eref e, const unsigned int& i )
 {
 	vector< StochSynInfo >& synapses = 
-			static_cast< StochSynchan* >( e->data() )->synapses_;
+			static_cast< StochSynchan* >( e.data() )->synapses_;
 	if ( i < synapses.size() )
             return (synapses[i].hasReleased? 1.0 : 0.0);
 	cout << "Error: StochSynchan::getReleaseCount : Index " << i << 
@@ -330,11 +330,11 @@ double StochSynchan::getReleaseCount( const Element* e, const unsigned int& i )
 	return 0.0;
 }
 
-unsigned int StochSynchan::updateNumSynapse( const Element* e )
+unsigned int StochSynchan::updateNumSynapse( Eref e )
 {
 	static const Finfo* synFinfo = initStochSynchanCinfo()->findFinfo( "synapse" );
 
-	unsigned int n = synFinfo->numIncoming( e );
+	unsigned int n = e.e->numTargets( synFinfo->msg() );
 	if ( n >= synapses_.size() )
 			synapses_.resize( n );
 	return synapses_.size();
@@ -346,7 +346,7 @@ unsigned int StochSynchan::updateNumSynapse( const Element* e )
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void StochSynchan::innerProcessFunc( Element* e, ProcInfo info )
+void StochSynchan::innerProcessFunc( Eref e, ProcInfo info )
 {
 	while ( !pendingEvents_.empty() &&
 		pendingEvents_.top().delay <= info->currTime_ ) {
@@ -366,14 +366,14 @@ void StochSynchan::innerProcessFunc( Element* e, ProcInfo info )
 
 void StochSynchan::processFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c->targetElement();
-	static_cast< StochSynchan* >( c->data() )->innerProcessFunc( e, p );
+	static_cast< StochSynchan* >( c->data() )->
+		innerProcessFunc( c->target(), p );
 }
 
 /*
  * Note that this causes issues if we have variable dt.
  */
-void StochSynchan::innerReinitFunc( Element* e, ProcInfo info )
+void StochSynchan::innerReinitFunc( Eref e, ProcInfo info )
 {
 	double dt = info->dt_;
 	activation_ = 0.0;
@@ -404,14 +404,13 @@ void StochSynchan::innerReinitFunc( Element* e, ProcInfo info )
 }
 void StochSynchan::reinitFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c->targetElement();
-	static_cast< StochSynchan* >( c->data() )->innerReinitFunc( e, p );
+	static_cast< StochSynchan* >( c->data() )->
+		innerReinitFunc( c->target(), p );
 }
 
 void StochSynchan::innerSynapseFunc( const Conn* c, double time )
 {
-	unsigned int index = 
-		c->targetElement()->connDestRelativeIndex( c, synapseSlot.msg() );
+	unsigned int index = c->targetIndex();
 	// Actually we should simply ignore any message where the
 	// index is bigger than synapses_.size(), because the syn
 	// strength will not yet have been set.
