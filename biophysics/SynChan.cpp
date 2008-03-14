@@ -172,77 +172,77 @@ void SynChan::setGbar( const Conn* c, double Gbar )
 {
 	static_cast< SynChan* >( c->data() )->Gbar_ = Gbar;
 }
-double SynChan::getGbar( const Element* e )
+double SynChan::getGbar( Eref e )
 {
-	return static_cast< SynChan* >( e->data() )->Gbar_;
+	return static_cast< SynChan* >( e.data() )->Gbar_;
 }
 
 void SynChan::setEk( const Conn* c, double Ek )
 {
 	static_cast< SynChan* >( c->data() )->Ek_ = Ek;
 }
-double SynChan::getEk( const Element* e )
+double SynChan::getEk( Eref e )
 {
-	return static_cast< SynChan* >( e->data() )->Ek_;
+	return static_cast< SynChan* >( e.data() )->Ek_;
 }
 
 void SynChan::setTau1( const Conn* c, double tau1 )
 {
 	static_cast< SynChan* >( c->data() )->tau1_ = tau1;
 }
-double SynChan::getTau1( const Element* e )
+double SynChan::getTau1( Eref e )
 {
-	return static_cast< SynChan* >( e->data() )->tau1_;
+	return static_cast< SynChan* >( e.data() )->tau1_;
 }
 
 void SynChan::setTau2( const Conn* c, double tau2 )
 {
 	static_cast< SynChan* >( c->data() )->tau2_ = tau2;
 }
-double SynChan::getTau2( const Element* e )
+double SynChan::getTau2( Eref e )
 {
-	return static_cast< SynChan* >( e->data() )->tau2_;
+	return static_cast< SynChan* >( e.data() )->tau2_;
 }
 
 void SynChan::setNormalizeWeights( const Conn* c, bool value )
 {
 	static_cast< SynChan* >( c->data() )->normalizeWeights_ = value;
 }
-bool SynChan::getNormalizeWeights( const Element* e )
+bool SynChan::getNormalizeWeights( Eref e )
 {
-	return static_cast< SynChan* >( e->data() )->normalizeWeights_;
+	return static_cast< SynChan* >( e.data() )->normalizeWeights_;
 }
 
 void SynChan::setGk( const Conn* c, double Gk )
 {
 	static_cast< SynChan* >( c->data() )->Gk_ = Gk;
 }
-double SynChan::getGk( const Element* e )
+double SynChan::getGk( Eref e )
 {
-	return static_cast< SynChan* >( e->data() )->Gk_;
+	return static_cast< SynChan* >( e.data() )->Gk_;
 }
 
 void SynChan::setIk( const Conn* c, double Ik )
 {
 	static_cast< SynChan* >( c->data() )->Ik_ = Ik;
 }
-double SynChan::getIk( const Element* e )
+double SynChan::getIk( Eref e )
 {
-	return static_cast< SynChan* >( e->data() )->Ik_;
+	return static_cast< SynChan* >( e.data() )->Ik_;
 }
 
-int SynChan::getNumSynapses( const Element* e )
+int SynChan::getNumSynapses( Eref e )
 {
-	return static_cast< SynChan* >( e->data() )->synapses_.size();
+	return static_cast< SynChan* >( e.data() )->synapses_.size();
 }
 
 void SynChan::setWeight( const Conn* c, double val, const unsigned int& i )
 {
-	Element* e = c->targetElement();
-	static_cast< SynChan* >( c->data() )->innerSetWeight( e, val, i );
+	static_cast< SynChan* >( c->data() )->
+		innerSetWeight( c->target(), val, i );
 }
 
-void SynChan::innerSetWeight( const Element* e, double val, unsigned int i )
+void SynChan::innerSetWeight( Eref e, double val, unsigned int i )
 {
 	updateNumSynapse( e );
 	
@@ -253,13 +253,13 @@ void SynChan::innerSetWeight( const Element* e, double val, unsigned int i )
 			" out of range\n";
 }
   
-double SynChan::getWeight( const Element* e, const unsigned int& i )
+double SynChan::getWeight( Eref e, const unsigned int& i )
 {
-	return static_cast< SynChan* >( e->data() )->
+	return static_cast< SynChan* >( e.data() )->
 		innerGetWeight( e, i );
 }
 
-double SynChan::innerGetWeight( const Element* e, unsigned int i )
+double SynChan::innerGetWeight( Eref e, unsigned int i )
 {
 	updateNumSynapse( e );
 	
@@ -272,11 +272,11 @@ double SynChan::innerGetWeight( const Element* e, unsigned int i )
 
 void SynChan::setDelay( const Conn* c, double val, const unsigned int& i )
 {
-	Element* e = c->targetElement();
-	static_cast< SynChan* >( c->data() )->innerSetDelay( e, val, i );
+	static_cast< SynChan* >( c->data() )->
+		innerSetDelay( c->target(), val, i );
 }
 
-void SynChan::innerSetDelay( const Element* e, double val, unsigned int i )
+void SynChan::innerSetDelay( Eref e, double val, unsigned int i )
 {
 	updateNumSynapse( e );
 	
@@ -287,13 +287,13 @@ void SynChan::innerSetDelay( const Element* e, double val, unsigned int i )
 			" out of range\n";
 }
   
-double SynChan::getDelay( const Element* e, const unsigned int& i )
+double SynChan::getDelay( Eref e, const unsigned int& i )
 {
-	return static_cast< SynChan* >( e->data() )->
+	return static_cast< SynChan* >( e.data() )->
 		innerGetDelay( e, i );
 }
 
-double SynChan::innerGetDelay( const Element* e, unsigned int i )
+double SynChan::innerGetDelay( Eref e, unsigned int i )
 {
 	updateNumSynapse( e );
 	
@@ -304,11 +304,12 @@ double SynChan::innerGetDelay( const Element* e, unsigned int i )
 	return 0.0;
 }
 
-unsigned int SynChan::updateNumSynapse( const Element* e )
+unsigned int SynChan::updateNumSynapse( Eref e )
 {
 	static const Finfo* synFinfo = initSynChanCinfo()->findFinfo( "synapse" );
 
-	unsigned int n = synFinfo->numIncoming( e );
+	unsigned int n = e.e->numTargets( synFinfo->msg() );
+
 	if ( n >= synapses_.size() )
 			synapses_.resize( n );
 	return synapses_.size();
@@ -318,7 +319,7 @@ unsigned int SynChan::updateNumSynapse( const Element* e )
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void SynChan::innerProcessFunc( Element* e, ProcInfo info )
+void SynChan::innerProcessFunc( Eref e, ProcInfo info )
 {
 	while ( !pendingEvents_.empty() &&
 		pendingEvents_.top().delay <= info->currTime_ ) {
@@ -335,16 +336,17 @@ void SynChan::innerProcessFunc( Element* e, ProcInfo info )
 	send2< double, double >( e, origChannelSlot, Gk_, Ek_ );
 	send1< double >( e, ikSlot, Ik_ );
 }
+
 void SynChan::processFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c->targetElement();
-	static_cast< SynChan* >( c->data() )->innerProcessFunc( e, p );
+	static_cast< SynChan* >( c->data() )->
+		innerProcessFunc( c->target(), p );
 }
 
 /*
  * Note that this causes issues if we have variable dt.
  */
-void SynChan::innerReinitFunc( Element* e, ProcInfo info )
+void SynChan::innerReinitFunc( Eref e, ProcInfo info )
 {
 	double dt = info->dt_;
 	activation_ = 0.0;
@@ -375,14 +377,13 @@ void SynChan::innerReinitFunc( Element* e, ProcInfo info )
 }
 void SynChan::reinitFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c->targetElement();
-	static_cast< SynChan* >( c->data() )->innerReinitFunc( e, p );
+	static_cast< SynChan* >( c->data() )->innerReinitFunc( c->target(), p );
 }
 
 void SynChan::innerSynapseFunc( const Conn* c, double time )
 {
-	unsigned int index = 
-		c->targetElement()->connDestRelativeIndex( c, synapseSlot.msg() );
+	unsigned int index = c->targetIndex();
+		// c->targetElement()->connDestRelativeIndex( c, synapseSlot.msg() );
 	// Actually we should simply ignore any message where the
 	// index is bigger than synapses_.size(), because the syn
 	// strength will not yet have been set.
@@ -469,9 +470,9 @@ void testSynChan()
 	ProcInfoBase p;
 	p.dt_ = 1.0e-4;
 	p.currTime_ = 0;
-	Conn c( syn, 0 );
-	Conn csg1( sg1, 0 );
-	Conn csg2( sg2, 0 );
+	SetConn c( syn, 0 );
+	SetConn csg1( sg1, 0 );
+	SetConn csg2( sg2, 0 );
 	bool ret;
 	ret = set< double >( syn, "tau1", 1.0e-3 );
 	ASSERT( ret, "setup SynChan" );
