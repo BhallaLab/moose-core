@@ -31,7 +31,9 @@ class ReadCell
 		void readScript( const string& line, unsigned int lineNum );
 		Element*  buildCompartment( 
 				const string& name, const string& parent,
-				double x, double y, double z, double d, double& length,
+				double x0, double y0, double z0,
+				double x, double y, double z,
+				double d, double& length,
 				vector< string >& argv );
 		bool buildChannels( 
 				Element* compt, vector< string >& argv,
@@ -82,6 +84,7 @@ class ReadCell
 		bool graftFlag_;
 		bool polarFlag_;
 		bool relativeCoordsFlag_;
+		bool doubleEndpointFlag_;
 		vector< Element* > chanProtos_;
 };
 #endif
