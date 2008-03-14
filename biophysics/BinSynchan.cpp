@@ -193,68 +193,68 @@ void BinSynchan::setGbar( const Conn* c, double Gbar )
 {
 	static_cast< BinSynchan* >( c->data() )->Gbar_ = Gbar;
 }
-double BinSynchan::getGbar( const Element* e )
+double BinSynchan::getGbar( Eref e )
 {
-	return static_cast< BinSynchan* >( e->data() )->Gbar_;
+	return static_cast< BinSynchan* >( e.data() )->Gbar_;
 }
 
 void BinSynchan::setEk( const Conn* c, double Ek )
 {
 	static_cast< BinSynchan* >( c->data() )->Ek_ = Ek;
 }
-double BinSynchan::getEk( const Element* e )
+double BinSynchan::getEk( Eref e )
 {
-	return static_cast< BinSynchan* >( e->data() )->Ek_;
+	return static_cast< BinSynchan* >( e.data() )->Ek_;
 }
 
 void BinSynchan::setTau1( const Conn* c, double tau1 )
 {
 	static_cast< BinSynchan* >( c->data() )->tau1_ = tau1;
 }
-double BinSynchan::getTau1( const Element* e )
+double BinSynchan::getTau1( Eref e )
 {
-	return static_cast< BinSynchan* >( e->data() )->tau1_;
+	return static_cast< BinSynchan* >( e.data() )->tau1_;
 }
 
 void BinSynchan::setTau2( const Conn* c, double tau2 )
 {
 	static_cast< BinSynchan* >( c->data() )->tau2_ = tau2;
 }
-double BinSynchan::getTau2( const Element* e )
+double BinSynchan::getTau2( Eref e )
 {
-	return static_cast< BinSynchan* >( e->data() )->tau2_;
+	return static_cast< BinSynchan* >( e.data() )->tau2_;
 }
 
 void BinSynchan::setNormalizeWeights( const Conn* c, bool value )
 {
 	static_cast< BinSynchan* >( c->data() )->normalizeWeights_ = value;
 }
-bool BinSynchan::getNormalizeWeights( const Element* e )
+bool BinSynchan::getNormalizeWeights( Eref e )
 {
-	return static_cast< BinSynchan* >( e->data() )->normalizeWeights_;
+	return static_cast< BinSynchan* >( e.data() )->normalizeWeights_;
 }
 
 void BinSynchan::setGk( const Conn* c, double Gk )
 {
 	static_cast< BinSynchan* >( c->data() )->Gk_ = Gk;
 }
-double BinSynchan::getGk( const Element* e )
+double BinSynchan::getGk( Eref e )
 {
-	return static_cast< BinSynchan* >( e->data() )->Gk_;
+	return static_cast< BinSynchan* >( e.data() )->Gk_;
 }
 
 void BinSynchan::setIk( const Conn* c, double Ik )
 {
 	static_cast< BinSynchan* >( c->data() )->Ik_ = Ik;
 }
-double BinSynchan::getIk( const Element* e )
+double BinSynchan::getIk( Eref e )
 {
-	return static_cast< BinSynchan* >( e->data() )->Ik_;
+	return static_cast< BinSynchan* >( e.data() )->Ik_;
 }
 
-int BinSynchan::getNumSynapses( const Element* e )
+int BinSynchan::getNumSynapses( Eref e )
 {
-	return static_cast< BinSynchan* >( e->data() )->synapses_.size();
+	return static_cast< BinSynchan* >( e.data() )->synapses_.size();
 }
 
 void BinSynchan::setWeight(
@@ -268,10 +268,10 @@ void BinSynchan::setWeight(
 		cout << "Error: BinSynchan::setWeight: Index " << i << 
 			" out of range\n";
 }
-double BinSynchan::getWeight( const Element* e, const unsigned int& i )
+double BinSynchan::getWeight( Eref e, const unsigned int& i )
 {
 	vector< BinSynInfo >& synapses = 
-			static_cast< BinSynchan* >( e->data() )->synapses_;
+			static_cast< BinSynchan* >( e.data() )->synapses_;
 	if ( i < synapses.size() )
 		return synapses[i].weight;
 	cout << "Error: BinSynchan::getWeight: Index " << i << 
@@ -291,10 +291,10 @@ void BinSynchan::setDelay(
 			" out of range\n";
 }
 
-double BinSynchan::getDelay( const Element* e, const unsigned int& i )
+double BinSynchan::getDelay( Eref e, const unsigned int& i )
 {
 	vector< BinSynInfo >& synapses = 
-			static_cast< BinSynchan* >( e->data() )->synapses_;
+			static_cast< BinSynchan* >( e.data() )->synapses_;
 	if ( i < synapses.size() )
 		return synapses[i].delay;
 	cout << "Error: BinSynchan::getDelay: Index " << i << 
@@ -314,10 +314,10 @@ void BinSynchan::setPoolSize(
 			" out of range\n";
 }
 
-int BinSynchan::getPoolSize( const Element* e, const unsigned int& i )
+int BinSynchan::getPoolSize( Eref e, const unsigned int& i )
 {
 	vector< BinSynInfo >& synapses = 
-			static_cast< BinSynchan* >( e->data() )->synapses_;
+			static_cast< BinSynchan* >( e.data() )->synapses_;
 	if ( i < synapses.size() )
             return synapses[i].getPoolSize();
 	cout << "Error: BinSynchan::getPoolSize : Index " << i << 
@@ -337,10 +337,10 @@ void BinSynchan::setReleaseP(
 			" out of range\n";
 }
 
-double BinSynchan::getReleaseP( const Element* e, const unsigned int& i )
+double BinSynchan::getReleaseP( Eref e, const unsigned int& i )
 {
 	vector< BinSynInfo >& synapses = 
-			static_cast< BinSynchan* >( e->data() )->synapses_;
+			static_cast< BinSynchan* >( e.data() )->synapses_;
 	if ( i < synapses.size() )
             return synapses[i].getReleaseP();
 	cout << "Error: BinSynchan::getReleaseP : Index " << i << 
@@ -348,10 +348,10 @@ double BinSynchan::getReleaseP( const Element* e, const unsigned int& i )
 	return 0.0;
 }
 
-double BinSynchan::getReleaseCount( const Element* e, const unsigned int& i )
+double BinSynchan::getReleaseCount( Eref e, const unsigned int& i )
 {
 	vector< BinSynInfo >& synapses = 
-			static_cast< BinSynchan* >( e->data() )->synapses_;
+			static_cast< BinSynchan* >( e.data() )->synapses_;
 	if ( i < synapses.size() )
             return synapses[i].getReleaseCount();
 	cout << "Error: BinSynchan::getReleaseCount : Index " << i << 
@@ -359,11 +359,11 @@ double BinSynchan::getReleaseCount( const Element* e, const unsigned int& i )
 	return 0.0;
 }
 
-unsigned int BinSynchan::updateNumSynapse( const Element* e )
+unsigned int BinSynchan::updateNumSynapse( Eref e )
 {
 	static const Finfo* synFinfo = initBinSynchanCinfo()->findFinfo( "synapse" );
 
-	unsigned int n = synFinfo->numIncoming( e );
+	unsigned int n = e.e->numTargets( synFinfo->msg() );
 	if ( n >= synapses_.size() )
 			synapses_.resize( n );
 	return synapses_.size();
@@ -374,7 +374,7 @@ unsigned int BinSynchan::updateNumSynapse( const Element* e )
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void BinSynchan::innerProcessFunc( Element* e, ProcInfo info )
+void BinSynchan::innerProcessFunc( Eref e, ProcInfo info )
 {
 	while ( !pendingEvents_.empty() &&
 		pendingEvents_.top().delay <= info->currTime_ ) {
@@ -393,14 +393,14 @@ void BinSynchan::innerProcessFunc( Element* e, ProcInfo info )
 }
 void BinSynchan::processFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c->targetElement();
-	static_cast< BinSynchan* >( c->data() )->innerProcessFunc( e, p );
+	static_cast< BinSynchan* >( c->data() )->
+		innerProcessFunc( c->target(), p );
 }
 
 /*
  * Note that this causes issues if we have variable dt.
  */
-void BinSynchan::innerReinitFunc( Element* e, ProcInfo info )
+void BinSynchan::innerReinitFunc( Eref e, ProcInfo info )
 {
 	double dt = info->dt_;
 	activation_ = 0.0;
@@ -431,14 +431,13 @@ void BinSynchan::innerReinitFunc( Element* e, ProcInfo info )
 }
 void BinSynchan::reinitFunc( const Conn* c, ProcInfo p )
 {
-	Element* e = c->targetElement();
-	static_cast< BinSynchan* >( c->data() )->innerReinitFunc( e, p );
+	static_cast< BinSynchan* >( c->data() )->
+		innerReinitFunc( c->target(), p );
 }
 
 void BinSynchan::innerSynapseFunc( const Conn* c, double time )
 {
-	unsigned int index = 
-		c->targetElement()->connDestRelativeIndex( c, synapseSlot.msg() );
+	unsigned int index = c->targetIndex();
 	// Actually we should simply ignore any message where the
 	// index is bigger than synapses_.size(), because the syn
 	// strength will not yet have been set.

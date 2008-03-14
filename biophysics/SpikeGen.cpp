@@ -110,36 +110,36 @@ void SpikeGen::setThreshold( const Conn* c, double threshold )
 {
 	static_cast< SpikeGen* >( c->data() )->threshold_ = threshold;
 }
-double SpikeGen::getThreshold( const Element* e )
+double SpikeGen::getThreshold( Eref e )
 {
-	return static_cast< SpikeGen* >( e->data() )->threshold_;
+	return static_cast< SpikeGen* >( e.data() )->threshold_;
 }
 
 void SpikeGen::setRefractT( const Conn* c, double val )
 {
 	static_cast< SpikeGen* >( c->data() )->refractT_ = val;
 }
-double SpikeGen::getRefractT( const Element* e )
+double SpikeGen::getRefractT( Eref e )
 {
-	return static_cast< SpikeGen* >( e->data() )->refractT_;
+	return static_cast< SpikeGen* >( e.data() )->refractT_;
 }
 
 void SpikeGen::setAmplitude( const Conn* c, double val )
 {
 	static_cast< SpikeGen* >( c->data() )->amplitude_ = val;
 }
-double SpikeGen::getAmplitude( const Element* e )
+double SpikeGen::getAmplitude( Eref e )
 {
-	return static_cast< const SpikeGen* >( e->data() )->amplitude_;
+	return static_cast< const SpikeGen* >( e.data() )->amplitude_;
 }
 
 void SpikeGen::setState( const Conn* c, double val )
 {
 	static_cast< SpikeGen* >( c->data() )->state_ = val;
 }
-double SpikeGen::getState( const Element* e )
+double SpikeGen::getState( Eref e )
 {
-	return static_cast< SpikeGen* >( e->data() )->state_;
+	return static_cast< SpikeGen* >( e.data() )->state_;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -150,7 +150,7 @@ void SpikeGen::innerProcessFunc( const Conn* c, ProcInfo p )
 {
 	double t = p->currTime_;
 	if ( V_ > threshold_ && t >= lastEvent_ + refractT_ ) {
-		send1< double >( c->targetElement(), eventSlot, t );
+		send1< double >( c->target(), eventSlot, t );
 		lastEvent_ = t;
 		state_ = amplitude_;
 	} else {
@@ -189,7 +189,7 @@ void testSpikeGen()
 		Id::scratchId() );
 	ASSERT( sg != 0, "creating compartment" );
 	ProcInfoBase p;
-	Conn c( sg, 0 );
+	SetConn c( sg, 0 );
 	p.dt_ = 0.001;
 	p.currTime_ = 0.0;
 	SpikeGen::setThreshold( &c, 1.0 );

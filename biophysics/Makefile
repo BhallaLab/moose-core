@@ -44,21 +44,22 @@ OBJ = \
 	HHGate.o	\
 	CaConc.o	\
 	Nernst.o	\
-
-#	SpikeGen.o	\
+	SpikeGen.o	\
 	SynChan.o	\
-	HSolveStruct.o	\
+	BinSynchan.o	\
+	StochSynchan.o	\
+	PulseGen.o	\
+	RandomSpike.o \
+	TestBiophysics.o
+
+#	HSolveStruct.o	\
 	HSolveBase.o	\
 	HSolve.o \
 	NeuroScanBase.o \
 	NeuroScan.o \
 	NeuroHub.o \
-	Cell.o	\
-	TestBiophysics.o	\
-	BinSynchan.o	\
-	StochSynchan.o	\
-	PulseGen.o	\
-	RandomSpike.o
+	Cell.o
+
 endif
 
 HEADERS = \

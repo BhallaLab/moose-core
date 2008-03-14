@@ -31,26 +31,26 @@ class PulseGen
     //////////////////////////////////////////////////////////////////
     
     static void setFirstLevel(const Conn& c, double level);
-    static double getFirstLevel(const Element* e);
+    static double getFirstLevel(Eref e);
     static void setFirstWidth(const Conn& c, double width);
-    static double getFirstWidth(const Element * e);
+    static double getFirstWidth(Eref e);
     static void setFirstDelay(const Conn & c, double delay);
-    static double getFirstDelay(const Element* e);
+    static double getFirstDelay(Eref e);
     
     static void setSecondLevel(const Conn& c, double level);
-    static double getSecondLevel(const Element* e);
+    static double getSecondLevel(Eref e);
     static void setSecondWidth(const Conn& c, double width);
-    static double getSecondWidth(const Element* e);
+    static double getSecondWidth(Eref e);
     static void setSecondDelay(const Conn& c, double delay);
-    static double getSecondDelay(const Element* e);
+    static double getSecondDelay(Eref e);
 
     static void setBaseLevel(const Conn& c, double level);
-    static double getBaseLevel(const Element* e);
+    static double getBaseLevel(Eref e);
     static void setTrigMode(const Conn& c, int mode);
-    static int getTrigMode(const Element* e);
-    static double getOutput(const Element* e);
-    static double getTrigTime(const Element* e);
-    static int getPreviousInput(const Element* e);
+    static int getTrigMode(Eref e);
+    static double getOutput(Eref e);
+    static double getTrigTime(Eref e);
+    static int getPreviousInput(Eref e);
     
     //////////////////////////////////////////////////////////////////
     // Message dest functions.
