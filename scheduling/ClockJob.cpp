@@ -375,7 +375,8 @@ void ClockJob::reschedFuncLocal( Eref er )
 	for ( i = childList.begin(); i != childList.end(); i++ ) {
 		const Finfo* procFinfo = (*i)()->findFinfo( "process" );
 		assert ( procFinfo != 0 );
-		unsigned int numTargets = ( *i )()->msg( procFinfo->msg() )->size();
+		unsigned int numTargets = ( *i )()->numTargets( procFinfo->msg() );
+		// unsigned int numTargets = ( *i )()->msg( procFinfo->msg() )->size();
 		if ( numTargets > 0 )
 			tickList.push_back( TickSeq( *i ) );
 	}
@@ -386,15 +387,23 @@ void ClockJob::reschedFuncLocal( Eref er )
 	sort( tickList.begin(), tickList.end() );
 
 	Element* last = tickList.front().element();
+	bool ret = e->add( "tick", last, "prev" );
+	assert( ret );
+	ret = e->add( "startSrc", last, "start" );
+	assert( ret );
+	/*
 	bool ret = e->findFinfo( "tick" )->
 					add( e, last, last->findFinfo( "prev" ) );
 	assert( ret );
 	ret = e->findFinfo( "startSrc" )->
 					add( e, last, last->findFinfo( "start" ) );
 	assert( ret );
+	*/
 	for ( j = tickList.begin() + 1; j != tickList.end(); j++ ) {
-			buildMessages( last, j->element() );
-			last = j->element();
+		bool ret = last->add( "next", j->element(), "prev" );
+		assert( ret );
+			// buildMessages( last, j->element() );
+		last = j->element();
 	}
 	send0( er, reschedSlot );
 }
@@ -412,13 +421,14 @@ void ClockJob::clearMessages( Element* e )
 
 /**
  * BuildMessages sets up the next/prev messages for each Tick.
- */
+ * deprecated
 void ClockJob::buildMessages( Element* last, Element* e )
 {
 	bool ret = 
 		last->findFinfo( "next" )->add( last, e, e->findFinfo( "prev" ) );
 	assert( ret );
 }
+ */
 
 
 /**

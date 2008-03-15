@@ -6303,4 +6303,17 @@ Clears unit tests right off.
 Converted a few more of the non-solver objects in the biophysics directory.
 Now working with the merge back into the main MOOSE tree.
 
+Checked in as revision 444 with unit test flags on, Smoldyn off, -g, GSL
+
+Working through other unit tests. Currently stuck right at the end of
+scheduling.
+
+==============================================================================
+15 March
+Tracked down a nasty bug in the send code: If Msg::next_ != 0 but ct_.size()==0
+then the send does not happen.
+
+Replaced with a check that the funcId is good. Not an ideal solution but 
+it clears the sched tests now. More tests fail.
+
 ==============================================================================
