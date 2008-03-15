@@ -215,15 +215,6 @@ class Msg
 		 */
 		bool copy( const ConnTainer* c, Element* e1, Element* e2 ) const;
 
-		/**
-		 * Matches against message number. Used in lookup of destMsgs.
-		 * As a hack here it compares with next_
-		 */
-		bool matchNum( unsigned int msgNum ) const {
-			return msgNum == next_;
-		}
-
-
 	private:
 		/**
 		 * This manages the ConnTainers.
