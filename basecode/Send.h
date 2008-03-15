@@ -45,7 +45,7 @@ void sendBack0( const Conn* c, Slot src );
 template < class T > void send1( Eref e, Slot src, T val )
 {
 	const Msg* m = e.e->msg( src.msg() );
-	if ( m->size() == 0 ) return;
+	if ( m->funcId() == 0 ) return;
 	do {
 		void( *rf )( const Conn*, T ) = 
 			reinterpret_cast< void ( * )( const Conn*, T ) >(
@@ -102,7 +102,7 @@ template < class T1, class T2 > void send2(
 		Eref e, Slot src, T1 v1, T2 v2 )
 {
 	const Msg* m = e.e->msg( src.msg() );
-	if ( m->size() == 0 ) return;
+	if ( m->funcId() == 0 ) return;
 	do {
 		void( *rf )( const Conn*, T1, T2 ) = 
 			reinterpret_cast< void ( * )( const Conn*, T1, T2 ) >(
@@ -161,7 +161,7 @@ template < class T1, class T2, class T3 > void send3(
 	Eref e, Slot src, T1 v1, T2 v2, T3 v3 )
 {
 	const Msg* m = e.e->msg( src.msg() );
-	if ( m->size() == 0 ) return;
+	if ( m->funcId() == 0 ) return;
 	do {
 		void( *rf )( const Conn*, T1, T2, T3 ) = 
 			reinterpret_cast< void ( * )( const Conn*, T1, T2, T3 ) >(
@@ -219,7 +219,7 @@ template < class T1, class T2, class T3, class T4 > void send4(
 	Eref e, Slot src, T1 v1, T2 v2, T3 v3, T4 v4 )
 {
 	const Msg* m = e.e->msg( src.msg() );
-	if ( m->size() == 0 ) return;
+	if ( m->funcId() == 0 ) return;
 	do {
 		void( *rf )( const Conn*, T1, T2, T3, T4 ) = 
 			reinterpret_cast< void ( * )( const Conn*, T1, T2, T3, T4 ) >(

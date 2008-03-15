@@ -46,7 +46,7 @@ class ClockJob
 		//  Utility functions
 		//////////////////////////////////////////////////////////
 		void clearMessages( Element* e );
-		void buildMessages( Element* last, Element* e );
+		// void buildMessages( Element* last, Element* e );
 
 	private:
 		double runTime_;

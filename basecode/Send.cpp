@@ -16,7 +16,7 @@
 void send0( Eref e, Slot src )
 {
 	const Msg* m = e.e->msg( src.msg() );
-	if ( m->size() == 0 ) return;
+	if ( m->funcId() == 0 ) return;
 	do {
 		RecvFunc rf = m->func( src.func() );
 		vector< ConnTainer* >::const_iterator i;

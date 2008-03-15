@@ -1449,7 +1449,7 @@ void Shell::useClock( const Conn* c,
 	assert ( tick != 0 );
 	const Finfo* tickProc = tick->findFinfo( "process" );
 
-	vector< Conn > list;
+	// vector< Conn > list;
 
 	// Scan through path and check for existing process connections.
 	// If they are to the same tick, skip the object
@@ -1462,6 +1462,20 @@ void Shell::useClock( const Conn* c,
 		assert ( e && e != Element::root() );
 		const Finfo* func = e->findFinfo( function );
 		if ( func ) {
+			Conn* c = e->targets( func->msg() );
+			if ( !c || !c->good() ) {
+				ret = tickProc->add( tick, e, func );
+				assert( ret );
+			} else {
+				if ( c->target().e != tick ) {
+					e->dropAll( func->msg() );
+					tick->add( tickProc->msg(), e, func->msg() );
+				}
+			}
+			if ( c ) 
+				delete c;
+
+			/*
 			Msg* m = e->varMsg( func->msg() );
 			if ( m->size() == 0 ) {
 			// if ( func->numIncoming( e ) == 0 )
@@ -1472,15 +1486,8 @@ void Shell::useClock( const Conn* c,
 					m->dropAll( e );
 					tickProc->add( tick, e, func );
 				}
-				/*
-				assert ( ret );
-				if ( list[0].first != tick ) {
-					m->dropAll( e );
-					func->dropAll( e );
-					tickProc->add( tick, e, func );
-				}
-				*/
 			}
+			*/
 		} else {
 			// This cannot be an 'assertion' error because the 
 			// user might do a typo.
