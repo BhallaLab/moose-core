@@ -48,10 +48,10 @@ extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 	extern void testInterpol();
 	extern void testTable();
 	extern void testWildcard();
-//	extern void testSched();
-//	extern void testSchedProcess();
-//	extern void testBiophysics();
-//	extern void testKinetics();
+	extern void testSched();
+	extern void testSchedProcess();
+	extern void testBiophysics();
+	extern void testKinetics();
 //	extern void testAverage();
 #ifdef USE_MPI
 	extern void testPostMaster();
@@ -89,10 +89,10 @@ int main(int argc, char** argv)
 		testWildcard();
 		testInterpol();
 		testTable();
-//		testSched();
-//		testSchedProcess();
-//		testBiophysics();
-//		testKinetics();
+		testSched();
+		testSchedProcess();
+	//	testBiophysics();
+	//	testKinetics();
 //		testAverage();
 	}
 #endif

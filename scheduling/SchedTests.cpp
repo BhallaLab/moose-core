@@ -116,6 +116,8 @@ void testSched()
 		ValueFtype1< TickTest >::global()
 	);
 
+	FuncVec::sortFuncVec();
+
 	cout << "\nTesting sched basic stuff";
 
 	Element* sched =
@@ -135,6 +137,8 @@ void testSched()
 		Id::scratchId() );
 	Element* t5 = Neutral::create( "Tick", "t5", cj,
 		Id::scratchId() );
+
+	ASSERT( cj->numTargets( "childSrc" ) == 4, "sched num ticks" );
 
 	Element* tt =
 			Neutral::create( "TickTest", "tt", Element::root(),
@@ -156,7 +160,12 @@ void testSched()
 	ASSERT( t5->findFinfo( "process" )->add( t5, tt,
 				tt->findFinfo( "process" ) ), "connect process" );
 
+	ASSERT( tt->numTargets( "process" ) == 4, "sched num ticks" );
+
 	ASSERT( set( cj, "resched" ), "resched" );
+
+	ASSERT( cj->numTargets( "tick" ) == 1, "sched num ticks" );
+
 	ASSERT( set( cj, "reinit" ), "reinit" );
 	ASSERT( TickTest::countReinit_ == 4, "reinit cascading" );
 
@@ -306,6 +315,7 @@ void testSchedProcess()
 		ValueFtype1< double >::global()
 	);
 
+	FuncVec::sortFuncVec();
 /////////////////////////////////////////////////////////////////
 	cout << "\nTesting sched process sequencing";
 	Element* n = Neutral::create( "Neutral", "n", Element::root(),
@@ -369,7 +379,9 @@ void testSchedProcess()
 	ASSERT( !t0Id.zero() && !t0Id.bad(), "find t0Id" );
 
 	Shell::useClock( &c, t0Id, path, string( "process" ) );
+	ASSERT( t0Id()->numTargets( proc->msg() ) == 4, "useClock" );
 	Shell::resched( &c );
+	ASSERT( t0Id()->numTargets( proc->msg() ) == 4, "useClock" );
 	seqStr = reinitSeq;
 	seqCount = 0;
 	Shell::reinit( &c );

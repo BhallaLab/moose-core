@@ -364,7 +364,8 @@ void Tick::updateNextTickTime( Eref e )
 	// to the nextTime_ value of the next tick.
 	// SimpleElement* se = static_cast< SimpleElement* >( e );
 	
-	if ( e.e->msg( nextSlot.msg() )->size() > 0 ) {
+	next_ = ( e.e->msg( nextSlot.msg() )->size() > 0 );
+	if ( next_ ) {
 		// This asks for the nextTime_ of the next tick
 		send0( e, requestNextTimeSlot );
 
