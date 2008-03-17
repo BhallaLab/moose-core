@@ -43,7 +43,7 @@ class DestFinfo: public Finfo
 			bool respondToAdd(
 					Element* e, Element* dest, const Ftype *destType,
 					unsigned int& myFuncId, unsigned int& returnFuncId,
-					unsigned int& destMsgId, unsigned int& numDest
+					int& destMsgId, unsigned int& destIndex
 			) const;
 			
 			int msg() const;
