@@ -76,9 +76,13 @@ Id Id::assignIndex( unsigned int index ) const
 	return i;
 }
 
+/**
+ *
+ * Deprecated
 void Id::setIndex(unsigned int index){
 	id_ = index;
 }
+*/
 
 //////////////////////////////////////////////////////////////
 //	Id manager static access function. Private.
