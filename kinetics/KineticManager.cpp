@@ -391,7 +391,7 @@ Id gslSetup( Eref e, const string& method )
 	}
 	Element* solve = Neutral::create( "Neutral", "solve", e.e,
 		Id::scratchId() );
-	solveId = e.id();
+	solveId = solve->id();
 	assert( solveId.good() );
 
 	Element*  ki = Neutral::create( "GslIntegrator", "integ", solve,
