@@ -29,9 +29,12 @@ extern const Cinfo* initSchedulerCinfo();
 
 const Cinfo* initPyMooseContextCinfo()
 {
-    static Finfo* contextShared[] =
+	/**
+	 * This is a shared message to talk to the Shell.
+	 */
+	static Finfo* parserShared[] =
 	{
-	// Setting cwe
+		// Setting cwe
 		new SrcFinfo( "cwe", Ftype1< Id >::global() ),
 		// Getting cwe back: First trigger a request
 		new SrcFinfo( "trigCwe", Ftype0::global() ),
@@ -63,8 +66,8 @@ const Cinfo* initPyMooseContextCinfo()
 		new SrcFinfo( "createArray",
 				Ftype4< string, string, Id, vector <double> >::global() ),
 		new SrcFinfo( "planarconnect", Ftype3< string, string, double >::global() ),
-		new SrcFinfo( "planardelay", Ftype2< string, double >::global() ),
-		new SrcFinfo( "planarweight", Ftype2< string, double >::global() ),
+		new SrcFinfo( "planardelay", Ftype3< string, string, vector <double> >::global() ),
+		new SrcFinfo( "planarweight", Ftype3< string, string, vector<double> >::global() ),
 		new SrcFinfo( "getSynCount", Ftype1< Id >::global() ),
 		new DestFinfo( "recvCreate",
 					Ftype1< Id >::global(),
@@ -88,8 +91,6 @@ const Cinfo* initPyMooseContextCinfo()
 
 		new SrcFinfo( "file2tab", // object, filename, skiplines 
 				Ftype3< Id, string, unsigned int >::global() ),
-
-
 
 		///////////////////////////////////////////////////////////////
 		// Clock control and scheduling
@@ -201,22 +202,34 @@ const Cinfo* initPyMooseContextCinfo()
 			Ftype4< Id, char, double, double >::global() ),
 	};
 	
-    static Finfo* pyMooseContextFinfos[] =
+	static Finfo* pyMooseContextFinfos[] =
 	{
-            new SharedFinfo( "parser", contextShared,
-                             sizeof( contextShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "parser", parserShared,
+				sizeof( parserShared ) / sizeof( Finfo* ) ),
+		new DestFinfo( "readline",
+			Ftype1< string >::global(),
+			RFCAST( &dummyFunc ) ),
+		new DestFinfo( "process",
+			Ftype0::global(),
+			RFCAST( &dummyFunc ) ), 
+		new DestFinfo( "parse",
+			Ftype1< string >::global(),
+			RFCAST( &dummyFunc ) ), 
+		new SrcFinfo( "echo", Ftype1< string>::global() ),
+
 	};
 
-    static Cinfo pyMooseContextCinfo(
-        "PyMooseContext",
-        "Upinder S. Bhalla, NCBS, 2004-2007",
-        "Object to handle the old Genesis parser",
-        initNeutralCinfo(),
-        pyMooseContextFinfos,
-        sizeof(pyMooseContextFinfos) / sizeof( Finfo* ),
-        ValueFtype1< PyMooseContext >::global()
+	static Cinfo pyMooseContextCinfo(
+		"PyMooseContext",
+		"Upinder S. Bhalla, NCBS, 2004-2007",
+		"Object to handle the old Genesis parser",
+		initNeutralCinfo(),
+		pyMooseContextFinfos,
+		sizeof(pyMooseContextFinfos) / sizeof( Finfo* ),
+		ValueFtype1< PyMooseContext >::global()
 	);
-    return &pyMooseContextCinfo;
+
+	return &pyMooseContextCinfo;
 }
 
 // These static initializations are required to ensure proper sequence
@@ -227,7 +240,6 @@ static const Cinfo* clockJobCinfo = initClockJobCinfo();
 static const Cinfo* tableCinfo = initTableCinfo();
 
 static const Cinfo* pyMooseContextCinfo = initPyMooseContextCinfo();
-
 static const Slot setCweSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.cwe" );
 static const Slot requestCweSlot = 
@@ -285,7 +297,7 @@ static const Slot copySlot =
 static const Slot copyIntoArraySlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.copyIntoArray" );
 static const Slot moveSlot = 
-initPyMooseContextCinfo()->getSlot( "parser.move" );
+	initPyMooseContextCinfo()->getSlot( "parser.move" );
 static const Slot readCellSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.readcell" );
 
@@ -325,6 +337,7 @@ static const Slot loadtabSlot =
 	initPyMooseContextCinfo()->getSlot( "parser.loadtab" );
 static const Slot tabopSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.tabop" );
+
 
 //////////////////////////
 // Static constants
@@ -518,7 +531,8 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     }
     
     Property::initialize("",0); // create default Property map
-       
+    mooseInit();
+    
     static const Cinfo* shellCinfo = initShellCinfo();
     static const Cinfo* tickCinfo = initTickCinfo();
     static const Cinfo* clockJobCinfo = initClockJobCinfo();
@@ -556,7 +570,7 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
 
     assert(ret);
     
-    context = static_cast<PyMooseContext*> (contextElement->data() );
+    context = static_cast<PyMooseContext*> (contextElement->data(0) );
     context->shell_ = shellId;    
     context->myId_ = contextElement->id();
     context->setCwe(Element::root()->id() ); // set initial element = root
@@ -566,10 +580,14 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
         cerr << "Scheduler not found" << endl;
     }
     
-    Element* cj =  Neutral::create( "ClockJob", "/sched/cj/t0", context->scheduler_(), Id::scratchId());
-    Element* t0 = Neutral::create( "Tick", "/sched/cj/t0", cj, Id::scratchId() );
-    Element* t1 = Neutral::create( "Tick", "/sched/cj/t1", cj, Id::scratchId() );
-    setupDefaultSchedule(t0, t1, cj);
+//     Element* cj =  Neutral::create( "ClockJob", "/sched/cj/t0", context->scheduler_(), Id::scratchId());
+//     Element* t0 = Neutral::create( "Tick", "/sched/cj/t0", cj, Id::scratchId() );
+//     Element* t1 = Neutral::create( "Tick", "/sched/cj/t1", cj, Id::scratchId() );
+    Id cj("/sched/cj");
+    Id t0("/sched/cj/t0");
+    Id t1("/sched/cj/t1");
+            
+    setupDefaultSchedule(t0(), t1(), cj());
     
     
     return context;        
