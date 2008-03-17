@@ -59,21 +59,24 @@ namespace pymoose
         bool destroy(Id victim);
         void end();    
         // Receive functions
-        static void recvCwe( const Conn& c, Id i );
-        static void recvElist( const Conn& c, vector< Id > elist );
-        static void recvCreate( const Conn& c, Id i );
-        static void recvField( const Conn& c, string value );
-        static void recvWildcardList( const Conn& c,
+        static void recvCwe( const Conn* c, Id i );
+        static void recvElist( const Conn* c, vector< Id > elist );
+        static void recvCreate( const Conn* c, Id i );
+        static void recvField( const Conn* c, string value );
+        static void recvWildcardList( const Conn* c,
                                       vector< Id > value );
     
-        static void recvClocks( const Conn& c, vector< double > dbls);
+        static void recvClocks( const Conn* c, vector< double > dbls);
         static void recvMessageList( 
-            const Conn& c, vector< Id > elist, string s);
+            const Conn* c, vector< Id > elist, string s);
         
         static PyMooseContext* createPyMooseContext(string contextName, string shellName);
         static void destroyPyMooseContext(PyMooseContext* context);
         std::string getField(Id, std::string);
         void setField(Id, std::string, std::string);
+        vector <string> getMessageList(Id obj, string field, bool incoming);
+        vector <string> getMessageList(Id obj, bool incoming);
+        
         const Id& getParent(Id id) const;
         const std::string getPath(Id id) const;
         vector <Id> getChildren(Id id);
@@ -128,15 +131,15 @@ namespace pymoose
     
       private:
         Id findChanGateId( std::string channel, std::string gate);
-        void setupChanFunc( std::string channel, std::string gate, vector <double>& parms, const unsigned int& slot);
+        void setupChanFunc( std::string channel, std::string gate, vector <double>& parms, const Slot& slot);
     
-        void setupChanFunc(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max, const unsigned int& slot);
+        void setupChanFunc(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max, const Slot& slot);
 
     
-        void tweakChanFunc( std::string channel, std::string gate, unsigned int slot );
+        void tweakChanFunc( std::string channel, std::string gate, const Slot& slot );
     
-        void setupChanFunc( const Id& gateId, vector <double> parms, unsigned int slot);
-        void tweakChanFunc( const Id& gateId, unsigned int slot );
+        void setupChanFunc( const Id& gateId, vector <double> parms, const Slot& slot);
+        void tweakChanFunc( const Id& gateId, const Slot& slot );
         bool parseCopyMove( string src, string dest,  Id s,  Id& e, Id& pa, string& childname );
         
         Id myId_;    
