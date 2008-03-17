@@ -228,103 +228,103 @@ static const Cinfo* tableCinfo = initTableCinfo();
 
 static const Cinfo* pyMooseContextCinfo = initPyMooseContextCinfo();
 
-static const unsigned int setCweSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.cwe" );
-static const unsigned int requestCweSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.trigCwe" );
-static const unsigned int requestLeSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.trigLe" );
-static const unsigned int pusheSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.pushe" );
-static const unsigned int popeSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.pope" );
-static const unsigned int createSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.create" );
-static const unsigned int createArraySlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.createArray" );
-static const unsigned int planarconnectSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.planarconnect" );
-static const unsigned int planardelaySlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.planardelay" );
-static const unsigned int planarweightSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.planarweight" );
-static const unsigned int getSynCountSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.getSynCount" );
-static const unsigned int deleteSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.delete" );
-static const unsigned int addfieldSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.add" );
-static const unsigned int requestFieldSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.get" );
-static const unsigned int setFieldSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.set" );
-static const unsigned int file2tabSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.file2tab" );
-static const unsigned int setClockSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.setClock" );
-static const unsigned int useClockSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.useClock" );
-static const unsigned int requestWildcardListSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.el" );
-static const unsigned int reschedSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.resched" );
-static const unsigned int reinitSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.reinit" );
-static const unsigned int stopSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.stop" );
-static const unsigned int stepSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.step" );
-static const unsigned int requestClocksSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.requestClocks" );
-static const unsigned int requestCurrentTimeSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.requestCurrentTime" );
-static const unsigned int listMessagesSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.listMessages" );
-static const unsigned int copySlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.copy" );
-static const unsigned int copyIntoArraySlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.copyIntoArray" );
-static const unsigned int moveSlot = 
-initPyMooseContextCinfo()->getSlotIndex( "parser.move" );
-static const unsigned int readCellSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.readcell" );
+static const Slot setCweSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.cwe" );
+static const Slot requestCweSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.trigCwe" );
+static const Slot requestLeSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.trigLe" );
+static const Slot pusheSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.pushe" );
+static const Slot popeSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.pope" );
+static const Slot createSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.create" );
+static const Slot createArraySlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.createArray" );
+static const Slot planarconnectSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.planarconnect" );
+static const Slot planardelaySlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.planardelay" );
+static const Slot planarweightSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.planarweight" );
+static const Slot getSynCountSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.getSynCount" );
+static const Slot deleteSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.delete" );
+static const Slot addfieldSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.add" );
+static const Slot requestFieldSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.get" );
+static const Slot setFieldSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.set" );
+static const Slot file2tabSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.file2tab" );
+static const Slot setClockSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.setClock" );
+static const Slot useClockSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.useClock" );
+static const Slot requestWildcardListSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.el" );
+static const Slot reschedSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.resched" );
+static const Slot reinitSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.reinit" );
+static const Slot stopSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.stop" );
+static const Slot stepSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.step" );
+static const Slot requestClocksSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.requestClocks" );
+static const Slot requestCurrentTimeSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.requestCurrentTime" );
+static const Slot listMessagesSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.listMessages" );
+static const Slot copySlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.copy" );
+static const Slot copyIntoArraySlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.copyIntoArray" );
+static const Slot moveSlot = 
+initPyMooseContextCinfo()->getSlot( "parser.move" );
+static const Slot readCellSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.readcell" );
 
-static const unsigned int setupAlphaSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.setupAlpha" );
-static const unsigned int setupTauSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.setupTau" );
-static const unsigned int tweakAlphaSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.tweakAlpha" );
-static const unsigned int tweakTauSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.tweakTau" );
-static const unsigned int setupGateSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.setupGate" );
+static const Slot setupAlphaSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.setupAlpha" );
+static const Slot setupTauSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.setupTau" );
+static const Slot tweakAlphaSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.tweakAlpha" );
+static const Slot tweakTauSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.tweakTau" );
+static const Slot setupGateSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.setupGate" );
 
-static const unsigned int readDumpFileSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.readDumpFile" );
-static const unsigned int writeDumpFileSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.writeDumpFile" );
-static const unsigned int simObjDumpSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.simObjDump" );
-static const unsigned int simUndumpSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.simUndump" );
+static const Slot readDumpFileSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.readDumpFile" );
+static const Slot writeDumpFileSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.writeDumpFile" );
+static const Slot simObjDumpSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.simObjDump" );
+static const Slot simUndumpSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.simUndump" );
 
-static const unsigned int openFileSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.openfile" );
-static const unsigned int writeFileSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.writefile" );
-static const unsigned int listFilesSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.listfiles" );
-static const unsigned int closeFileSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.closefile" );
-static const unsigned int readFileSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.readfile" );
-static const unsigned int setVecFieldSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.setVecField" );
-static const unsigned int loadtabSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.loadtab" );
-static const unsigned int tabopSlot = 
-	initPyMooseContextCinfo()->getSlotIndex( "parser.tabop" );
+static const Slot openFileSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.openfile" );
+static const Slot writeFileSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.writefile" );
+static const Slot listFilesSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.listfiles" );
+static const Slot closeFileSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.closefile" );
+static const Slot readFileSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.readfile" );
+static const Slot setVecFieldSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.setVecField" );
+static const Slot loadtabSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.loadtab" );
+static const Slot tabopSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.tabop" );
 
 //////////////////////////
 // Static constants
@@ -342,57 +342,57 @@ char* copyString( const string& s )
 // PyMooseContext Message recv functions
 //////////////////////////////////////////////////////////////////
 
-void PyMooseContext::recvCwe( const Conn& c, Id cwe )
+void PyMooseContext::recvCwe( const Conn* c, Id cwe )
 {
     PyMooseContext* gpw = static_cast< PyMooseContext* >
-        ( c.targetElement()->data() );
+        ( c->data() );
     gpw->cwe_ = cwe;
 }
 
-void PyMooseContext::recvElist( const Conn& c, vector< Id > elist )
+void PyMooseContext::recvElist( const Conn* c, vector< Id > elist )
 {
     PyMooseContext* gpw = static_cast< PyMooseContext* >
-        ( c.targetElement()->data() );
+        ( c->data() );
     gpw->elist_ = elist;
 }
 
-void PyMooseContext::recvCreate( const Conn& c, Id e )
+void PyMooseContext::recvCreate( const Conn* c, Id e )
 {
     PyMooseContext* gpw = static_cast< PyMooseContext* >
-        ( c.targetElement()->data() );
+        ( c->data() );
     gpw->createdElm_ = e;
 }
 
-void PyMooseContext::recvField( const Conn& c, string value )
+void PyMooseContext::recvField( const Conn* c, string value )
 {
     PyMooseContext* gpw = static_cast< PyMooseContext* >
-        ( c.targetElement()->data() );
+        ( c->data() );
     gpw->fieldValue_ = value;
 }
 
 
 void PyMooseContext::recvWildcardList(
-    const Conn& c, vector< Id > value )
+    const Conn* c, vector< Id > value )
 {
     PyMooseContext* gpw = static_cast< PyMooseContext* >
-        ( c.targetElement()->data() );
+        ( c->data() );
     gpw->elist_ = value;
 }
 
 
 void PyMooseContext::recvClocks( 
-    const Conn& c, vector< double > dbls)
+    const Conn* c, vector< double > dbls)
 {
     PyMooseContext* gpw = static_cast< PyMooseContext* >
-        ( c.targetElement()->data() );
+        ( c->data() );
     gpw->dbls_ = dbls;
 }
 
 void PyMooseContext::recvMessageList( 
-    const Conn& c, vector< Id > elist, string s)
+    const Conn* c, vector< Id > elist, string s)
 {
     PyMooseContext* gpw = static_cast< PyMooseContext* >
-        ( c.targetElement()->data() );
+        ( c->data() );
     gpw->elist_ = elist;
     gpw->fieldValue_ = s;
 }
@@ -545,7 +545,7 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     
     
     Element* contextElement = Neutral::create( "PyMooseContext",contextName, shell, Id::scratchId());
-    
+
     const Finfo* shellFinfo, *contextFinfo;
     shellFinfo = shell->findFinfo( "parser" );
     assert(shellFinfo!=NULL);
@@ -1032,6 +1032,57 @@ bool PyMooseContext::parseCopyMove( string src, string dest, Id s,
 
     return 0;
 }
+/**
+   Get list of messages for object "obj" from/to field "field".
+*/
+vector <string> PyMooseContext::getMessageList(Id obj, string field, bool incoming)
+{
+    // The return message puts the elements in elist_ and the 
+    // target field names in fieldValue_
+    send3 < Id, string, bool > (myId_(), listMessagesSlot, obj, field, incoming);
+    vector <string> list;
+    separateString( fieldValue_, list, ", ");
+    if (elist_.size() > 0)
+    {
+        assert(elist_.size() == list.size());
+        for ( int i = 0; i < elist_.size(); ++i )
+        {
+            list.push_back("["+elist_[i].path()+"]."+list[i]);
+        }                
+    }
+    return list;    
+}
+/**
+   Get list of messages from/to object "obj" for all fields.
+*/
+vector <string> PyMooseContext::getMessageList(Id obj, bool incoming)
+{
+    vector <string> msgList;
+    if ( obj.bad() ) {
+        cout << "Error: PyMooseContext::getMessageList" << ": unknown element." << endl;
+        return msgList;
+    }
+    string direction = incoming? "<-":"->";
+    vector <string> fieldList;    
+    send2<Id, string>(myId_(), requestFieldSlot, obj, "fieldList" );
+    separateString(fieldValue_, fieldList, ",");
+    for ( unsigned int i = 0; i < fieldList.size(); i++)
+    {
+        if ( fieldList[i] == "fieldList")
+        {
+            continue;
+        }
+        else{
+            vector <string> tmpList = getMessageList(obj, fieldList[i], incoming);
+            for ( int j = 0; j < tmpList.size(); ++j)
+            {
+                string msgInfo = "["+obj.path()+"]."+ fieldList[i] + direction + tmpList[j];
+                msgList.push_back(msgInfo);
+            }
+        }       
+    }
+    return msgList;    
+}
 
 void PyMooseContext::planarConnect(string src, string dst, double probability)
 {
@@ -1086,7 +1137,7 @@ Id PyMooseContext::findChanGateId( string channel, string gate)
    The actual gate used is xGate or yGate or xGate when the gate
    parameter starts with 'x', 'y' or 'z' respectively.
 */
-void PyMooseContext::setupChanFunc(string channel, string gate, vector <double>& parms, const unsigned int& slot)
+void PyMooseContext::setupChanFunc(string channel, string gate, vector <double>& parms, const Slot& slot)
 {    
     if (parms.size() < 10 ) {
         cerr << "Error: PyMooseContext::setupChanFunc() -  We need a vector for these items: AA AB AC AD AF BA BB BC BD BF size min max (length should be at least 10)" << endl;
@@ -1125,7 +1176,7 @@ void PyMooseContext::setupChanFunc(string channel, string gate, vector <double>&
    The actual gate used is xGate or yGate or xGate when the gate
    parameter starts with 'x', 'y' or 'z' respectively.
 */
-void PyMooseContext::setupChanFunc(string channel, string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max, const unsigned int& slot)
+void PyMooseContext::setupChanFunc(string channel, string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max, const Slot& slot)
 {
     Id gateId = findChanGateId(channel, gate );
     if (gateId.bad() )
@@ -1165,7 +1216,7 @@ void PyMooseContext::setupTau(string channel, string gate, double AA, double AB,
 {
     setupChanFunc(channel, gate, AA, AB, AC, AD, AF, BA, BB, BC, BD, BF, size, min, max, setupTauSlot);    
 }
-void PyMooseContext::tweakChanFunc( string  channel, string gate, unsigned int slot )
+void PyMooseContext::tweakChanFunc( string  channel, string gate, const Slot& slot )
 {
     Id gateId = findChanGateId( channel, gate );
     if ( gateId.bad() )
@@ -1190,7 +1241,7 @@ void PyMooseContext::tweakTau( string channel, string gate)
 // do better programming than the genesis parser allows
 //=================================================================
 
-void PyMooseContext::setupChanFunc(const Id& gateId, vector <double> parms, unsigned int slot)
+void PyMooseContext::setupChanFunc(const Id& gateId, vector <double> parms, const Slot& slot)
 {
     
     if (parms.size() < 10 ) {
@@ -1229,7 +1280,7 @@ void PyMooseContext::setupTau(const Id& gateId, vector <double> parms )
     setupChanFunc( gateId, parms, setupTauSlot );
 }
 
-void PyMooseContext::tweakChanFunc(const Id& gateId, unsigned int slot )
+void PyMooseContext::tweakChanFunc(const Id& gateId, const Slot& slot )
 {
     if ( gateId.bad() )
         return;
