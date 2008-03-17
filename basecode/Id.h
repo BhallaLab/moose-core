@@ -91,7 +91,10 @@ class Id
 		 */
 		Id assignIndex( unsigned int index ) const;
 		
-		void setIndex( unsigned int index );
+		/**
+		 * Deprecated
+		// void setIndex( unsigned int index );
+		 */
 
 		//////////////////////////////////////////////////////////////
 		//	Id info
