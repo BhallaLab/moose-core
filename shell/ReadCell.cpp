@@ -29,22 +29,13 @@
 #include "../biophysics/Nernst.h"
 #include "../biophysics/CaConc.h"
 
-/*
+
 static const Cinfo* comptCinfo = initCompartmentCinfo();
 static const Cinfo* chanCinfo = initHHChannelCinfo();
-static const Cinfo* gateCinfo = initHHGateCinfo();
 static const Cinfo* synchanCinfo = initSynChanCinfo();
 static const Cinfo* spikegenCinfo = initSpikeGenCinfo();
 static const Cinfo* nernstCinfo = initNernstCinfo();
 static const Cinfo* caconcCinfo = initCaConcCinfo();
-*/
-static const Cinfo* comptCinfo = 0;
-static const Cinfo* chanCinfo = 0;
-//static const Cinfo* gateCinfo = 0;
-static const Cinfo* synchanCinfo = 0;
-static const Cinfo* spikegenCinfo = 0;
-static const Cinfo* nernstCinfo = 0;
-static const Cinfo* caconcCinfo = 0;
 
 ReadCell::ReadCell( const vector< double >& globalParms )
 		: RM_( 10.0 ), CM_( 0.01 ), RA_( 1.0 ), EREST_ACT_( -0.065 ),
@@ -259,7 +250,8 @@ void ReadCell::readData( const string& line, unsigned int lineNum )
 	double length;
 	Element* compt =
 		buildCompartment( name, parent, x0, y0, z0, x, y, z, d, length, argv );
-	buildChannels( compt, argv, d, length );
+	if ( compt )
+		buildChannels( compt, argv, d, length );
 }
 
 Element* ReadCell::buildCompartment( 
