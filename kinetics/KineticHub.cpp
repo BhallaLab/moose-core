@@ -829,8 +829,10 @@ void clearMsgsFromFinfo( Element* e, const Finfo * f )
 	Conn* c = e->targets( f->msg() );
 	vector< Element* > list;
 	vector< Element* >::iterator i;
-	while ( c->good() )
+	while ( c->good() ) {
 		list.push_back( c->target().e );
+		c->increment();
+	}
 	delete c;
 	e->dropAll( f->msg() );
 	for ( i = list.begin(); i != list.end(); i++ ) unzombify( *i );
