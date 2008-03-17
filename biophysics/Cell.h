@@ -38,12 +38,12 @@ public:
 	Cell();
 	
 	static void setMethod( const Conn* c, string value );
-	static string getMethod( const Element* e );
+	static string getMethod( Eref e );
 	
 	// Some readonly fields with more info about the methods.
-	static bool getVariableDt( const Element* e );
-	static bool getImplicit( const Element* e );
-	static string getDescription( const Element* e );
+	static bool getVariableDt( Eref e );
+	static bool getImplicit( Eref e );
+	static string getDescription( Eref e );
 	
 	static void reinitFunc( const Conn* c, ProcInfo p );
 	static void comptListFunc( const Conn* c,
