@@ -6315,5 +6315,62 @@ then the send does not happen.
 
 Replaced with a check that the funcId is good. Not an ideal solution but 
 it clears the sched tests now. More tests fail.
+Checked in as revision 445 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+16 March.
+
+Some cleanups to do:
+	- More operations, especially many of the new Element:: operations,
+	need to be handled by Eref instead. These include add, drop, target
+	and so on.
+	- All the fields need their own msg_ number. The DynamicFinfo should
+	not invent any such numbers, Problem here with handling return value
+	requests, since this needs a full Msg structure.
+
+Working through KineticSolver unit tests. Issue now is that the solver
+has substituted access functions for fields without providing matching
+trig and other funcs. Should ideally automate all these variants.
+
+Posit a Hub base class. It has to provide a common interface for one or
+more of the following:
+- handling regular messages
+	- src
+	- dest
+	- shared.
+- handling fields
+	- set
+	- get
+- handling incoming messages to DynamicFinfos:
+	- set
+	- trigger/return.
+
+Currently we replace the entire ThisFinfo of the zombie, and in that all
+the Finfos can be updated. This is a loosely structured way of doing it
+and needs a lot of additional work.
+
+Ideally we should be able to use the templates to do all this without user
+effort. The solver writer would still need to write to an interface, but
+to a much tighter one.
+
+Possible interfaces:
+	- a set of Finfos for the Hub, much like the current ones, which
+	  specify how to get at each individual value and function.
+	- a mirror set of object definitions for each object taken over
+	  by the solver. I do something like this for the SmoldynHub.
+	- a set of virtual functions in the hub which somehow manage to
+ 	  account for all the functions and fields. 
+
+For now slowly working on fix  for unit test issues with KineticHub.
+The fix entails making a proper class for the arrival objects, since this will
+also generate the proper Ids for trigger etc. Have to do it using static
+initialization else it will mess up the FuncIds at run time. In fact need
+a way to lock down funcIds after initialization.
+
+==============================================================================
+17 March 2008
+Partial fix to issue of KineticHub set up for the replacement Molecule fields.
+This does not involve a static Cinfo, but instead a static SolveFinfo where
+the necessary initialization of FuncIds happens. Works, clears unit tests.
 
 ==============================================================================

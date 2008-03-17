@@ -63,28 +63,46 @@ bool SharedFinfo::add(
 {
 	unsigned int srcFuncId = fv_->id();
 	unsigned int destFuncId = 0;
-	unsigned int destMsg = 0;
-	unsigned int numDest = 0;
+	int destMsg = 0;
+	unsigned int destIndex = 0;
 
 	if ( destFinfo->respondToAdd( destElm, e, ftype(),
 							srcFuncId, destFuncId,
-							destMsg, numDest ) )
+							destMsg, destIndex ) )
 	{
 		assert ( FuncVec::getFuncVec( destFuncId )->size() == 
 			names_.size() );
 		assert ( names_.size() > 0 );
 
+		unsigned int srcIndex = e->numTargets( msg_ );
+
 		if ( isDest_ ) {
+			if ( FuncVec::getFuncVec( destFuncId )->isDest() ) {
+				cout << "Error: SharedFinfo::add: dest at both ends: " <<
+				e->name() << "." << name() << " to " << 
+				destElm->name() << "." << destFinfo->name() << endl;
+				return 0;
+			}
 			SimpleConnTainer* ct = new SimpleConnTainer( 
-				destElm, e, destMsg, msg_ );
+				destElm, e, destMsg, msg_,
+				0, 0,		// Hack. Can't use for arrays
+				destIndex, srcIndex );
 			return Msg::add( ct, destFuncId, srcFuncId );
 			/*
 			return Msg::add( destElm, e, destMsg, msg_,
 				destFuncId, srcFuncId );
 				*/
 		} else {
+			if ( !FuncVec::getFuncVec( destFuncId )->isDest() ) {
+				cout << "Error: SharedFinfo::add: src at both ends: " <<
+				e->name() << "." << name() << " to " << 
+				destElm->name() << "." << destFinfo->name() << endl;
+				return 0;
+			}
 			SimpleConnTainer* ct = new SimpleConnTainer( 
-				e, destElm, msg_, destMsg );
+				e, destElm, msg_, destMsg,
+				0, 0,		// Hack. Can't use for arrays
+				srcIndex, destIndex );
 
 			return Msg::add( ct, srcFuncId, destFuncId );
 		
@@ -110,7 +128,7 @@ bool SharedFinfo::add(
 bool SharedFinfo::respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& returnFuncId,
-					unsigned int& destMsg, unsigned int& numDest
+					int& destMsg, unsigned int& destIndex
 ) const
 {
 	assert ( srcType != 0 );
@@ -123,7 +141,7 @@ bool SharedFinfo::respondToAdd(
 		FuncVec::getFuncVec( srcFuncId )->size() == names_.size() ) {
 		returnFuncId = fv_->id();
 		destMsg = msg_;
-		numDest = 1;
+		destIndex = e->numTargets( msg_ );
 		return 1;
 	}
 	return 0;

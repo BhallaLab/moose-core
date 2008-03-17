@@ -18,6 +18,7 @@ SolveFinfo::SolveFinfo(
 	: ThisFinfo( *tf )
 {
 	for ( unsigned int i = 0; i < nFinfos; i++ ) {
+		finfos[i]->addFuncVec( tf->cinfo()->name() + ".solve" );
 		finfos_.push_back( finfos[i] );
 	}
 	/// \todo Need to fix.
@@ -49,8 +50,9 @@ void SolveFinfo::listFinfos( vector< const Finfo* >& flist ) const
 * Returns the Conn going from solved object e to the solver
 * Why is this on the solver?
 * \todo Also, will need to do something about the memory of the Conn
-*/
+* deprecated
 const Conn* SolveFinfo::getSolvedConn( const Element* e ) const
 {
 	return e->msg( procSlot_ )->findConn( 0, 0 );
 }
+*/

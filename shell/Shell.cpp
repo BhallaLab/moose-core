@@ -1463,7 +1463,7 @@ void Shell::useClock( const Conn* c,
 		const Finfo* func = e->findFinfo( function );
 		if ( func ) {
 			Conn* c = e->targets( func->msg() );
-			if ( !c || !c->good() ) {
+			if ( !c->good() ) {
 				ret = tickProc->add( tick, e, func );
 				assert( ret );
 			} else {
@@ -1472,8 +1472,7 @@ void Shell::useClock( const Conn* c,
 					tick->add( tickProc->msg(), e, func->msg() );
 				}
 			}
-			if ( c ) 
-				delete c;
+			delete c;
 
 			/*
 			Msg* m = e->varMsg( func->msg() );

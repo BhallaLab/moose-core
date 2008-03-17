@@ -97,18 +97,18 @@ const Cinfo* initCompartmentCinfo()
 	 * In other words, raxial messages should face outward from the
 	 * soma.
 	 *
-	 * The first entry is a MsgDest for the info coming from the other
-	 * compt. It expects Ra and Vm from the other compt as args.
-	 * The second is a MsgSrc sending Vm to the axialFunc
+	 * The first entry is a MsgSrc sending Vm to the axialFunc
 	 * of the target compartment.
+	 * The second entry is a MsgDest for the info coming from the other
+	 * compt. It expects Ra and Vm from the other compt as args.
 	 *
 	 * Note that the message is named after the source type.
 	 */
 	static Finfo* axialShared[] =
 	{
+		new SrcFinfo( "axialSrc", Ftype1< double >::global() ),
 		new DestFinfo( "handleRaxial", Ftype2< double, double >::global(),
 				RFCAST( &Compartment::raxialFunc ) ),
-		new SrcFinfo( "axialSrc", Ftype1< double >::global() )
 	};
 
 	/**
@@ -672,6 +672,7 @@ void testCompartment()
 	const Finfo* raxial = c0->findFinfo( "raxial" );
 	Compartment::setVm( &c, 0.0 );
 	Compartment::setInject( &c, 20.5 );
+	bool ret;
 	for (i = 1; i < 100; i++ ) {
 		char name[20];
 		sprintf( name, "c%d", i );
@@ -685,9 +686,11 @@ void testCompartment()
 		Compartment::setEm( &temp, 0.0 );
 		Compartment::setVm( &temp, 0.0 );
 
-		assert( raxial->add( compts[i - 1], compts[i], axial ) ); 
+		ret = raxial->add( compts[i - 1], compts[i], axial ); 
+		assert( ret );
 	}
 	ASSERT( 1, "messaging in compartments" );
+	ASSERT( n->numTargets( "childSrc" ) == 100, "Check children" );
 
 #ifdef DO_SPATIAL_TESTS
 	double lambda = sqrt( Rm / Ra );
