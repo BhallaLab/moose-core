@@ -6378,4 +6378,8 @@ Checked in as revision 446 with unit test flags on, Smoldyn off, -g, GSL
 Working now on regression tests. Fixed an infinite loop in the kholodenko test
 for the kinetics solver. Many of the biophysics tests still fail in regression.
 
+Checked in as revision 448 with unit test flags on, Smoldyn off, -g, GSL
+
+Fixed a bug (SourceForge# 1916705) in showmsg.
+
 ==============================================================================
