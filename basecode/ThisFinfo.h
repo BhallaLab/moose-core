@@ -42,7 +42,7 @@ class ThisFinfo: public Finfo
 			bool respondToAdd(
 					Element* e, Element* dest, const Ftype *destType,
 					unsigned int& destFuncId, unsigned int& returnFuncId,
-					unsigned int& destIndex, unsigned int& numDest
+					int& destMsgId, unsigned int& destIndex
 			) const;
 			
 			int msg() const {

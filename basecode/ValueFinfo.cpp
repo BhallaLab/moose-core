@@ -89,7 +89,7 @@ bool ValueFinfo::add(
 bool ValueFinfo::respondToAdd(
 		Element* e, Element* src, const Ftype *srcType,
 		unsigned int& srcFuncId, unsigned int& returnFuncId,
-		unsigned int& destIndex, unsigned int& numDest
+		int& destMsgId, unsigned int& destIndex
 ) const
 {
 	assert( srcType != 0 );
@@ -106,7 +106,7 @@ bool ValueFinfo::respondToAdd(
 	e->addFinfo( df );
 	*/
 	return df->respondToAdd( e, src, srcType, srcFuncId, returnFuncId,
-					destIndex, numDest );
+					destMsgId, destIndex );
 }
 
 /**

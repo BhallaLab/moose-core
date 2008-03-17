@@ -59,8 +59,9 @@ class SolveFinfo: public ThisFinfo
 		/**
 		* Returns the Conn going from solved 
 		* object e to the solver
+		* deprecated
 		*/
-		const Conn* getSolvedConn( const Element* e ) const;
+		// const Conn* getSolvedConn( const Element* e ) const;
 
 	private:
 		unsigned int procSlot_;

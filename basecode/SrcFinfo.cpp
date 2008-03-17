@@ -21,21 +21,23 @@ bool SrcFinfo::add(
 	assert( destElm != 0 );
 
 	unsigned int srcFuncId = 0;
-	unsigned int destFuncId;
-	unsigned int destMsg;
-	unsigned int numDest;
+	unsigned int destFuncId = 0;
+	int destMsg = 0;
+	unsigned int destIndex = 0;
 	if ( destFinfo->respondToAdd( destElm, e, ftype(),
 							srcFuncId, destFuncId,
-							destMsg, numDest ) )
+							destMsg, destIndex ) )
 	{
 		// All these assertions say that this is a single message,
 		// not a shared one.
 		assert( FuncVec::getFuncVec( srcFuncId )->size() == 0 );
 		assert( FuncVec::getFuncVec( destFuncId )->size() == 1 );
-		assert( numDest == 1 );
+		unsigned int srcIndex = e->numTargets( msg_ );
 
 		SimpleConnTainer* ct = new SimpleConnTainer( 
-			e, destElm, msg_, destMsg );
+			e, destElm, msg_, destMsg, 
+			0, 0,	// Hack. Won't work for arrays.
+			srcIndex, destIndex );
 
 		return Msg::add( ct, srcFuncId, destFuncId );
 		/*
@@ -49,7 +51,7 @@ bool SrcFinfo::add(
 bool SrcFinfo::respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& destFuncId,
-					unsigned int& destMsgId, unsigned int& numDest
+					int& destMsgId, unsigned int& destIndex
 ) const
 {
 	return 0; // for now we cannot handle this.
