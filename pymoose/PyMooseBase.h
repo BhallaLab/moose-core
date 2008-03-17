@@ -40,8 +40,8 @@ namespace pymoose
         bool connect(std::string field, PyMooseBase* dest, std::string destField);
         bool connect(std::string field, Id dest, std::string destField);
         std::vector <std::string> getMessageList(string field, bool isIncoming );
-        std::vector <std::string>& __get_incoming_messages();
-        std::vector <std::string>& __get_outgoing_messages();
+        std::vector <std::string> inMessages();
+        std::vector <std::string> outMessages();
     
         static bool exists(Id id);
         static bool exists(string path);

@@ -70,15 +70,21 @@
 %ignore Id::operator();
 %ignore operator<<;
 %ignore operator>>;
-%include "../basecode/Id.h"
+%ignore Id::eref;   
 
+%include "../basecode/Id.h"
 %include "PyMooseContext.h"
 %include "PyMooseBase.h"
 %attribute(pymoose::PyMooseBase, Id*, id, __get_id)
 %attribute(pymoose::PyMooseBase, Id*, parent, __get_parent)
-#%attribute(pymoose::PyMooseBase, vector <Id>, children, __get_children)
-%attribute(pymoose::PyMooseBase, vector <std::string>&, inMessages, __get_incoming_messages)
-%attribute(pymoose::PyMooseBase, vector <std::string>&, outMessages, __get_outgoing_messages)
+
+// The following attributes, when traversed without assigning to a
+// variable, give segmentation fault. May be some problem with the
+// swig interface to vectors. But sticking to function form helps.
+
+//%attribute(pymoose::PyMooseBase, vector <Id>, children, __get_children)
+// %attribute(pymoose::PyMooseBase, vector <std::string>&, inMessages, __get_incoming_messages)
+// %attribute(pymoose::PyMooseBase, vector <std::string>&, outMessages, __get_outgoing_messages)
 %attribute(pymoose::PyMooseBase, const std::string, name, __get_name)
 //%attribute(pymoose::PyMooseBase, string& , path, _path)
 // The above gives segmentation fault, path is dynamically generated,
