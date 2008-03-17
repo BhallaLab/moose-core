@@ -50,16 +50,14 @@ OBJ = \
 	StochSynchan.o	\
 	PulseGen.o	\
 	RandomSpike.o \
-	TestBiophysics.o
-
+	TestBiophysics.o \
+	Cell.o
 #	HSolveStruct.o	\
 	HSolveBase.o	\
 	HSolve.o \
 	NeuroScanBase.o \
 	NeuroScan.o \
 	NeuroHub.o \
-	Cell.o
-
 endif
 
 HEADERS = \

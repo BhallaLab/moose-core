@@ -167,24 +167,24 @@ void Cell::innerSetMethod( string value )
 	}
 }
 
-string Cell::getMethod( const Element* e )
+string Cell::getMethod( Eref e )
 {
-	return static_cast< Cell* >( e->data() )->method_;
+	return static_cast< Cell* >( e.data() )->method_;
 }
 
-bool Cell::getVariableDt( const Element* e )
+bool Cell::getVariableDt( Eref e )
 {
-	return static_cast< Cell* >( e->data() )->variableDt_;
+	return static_cast< Cell* >( e.data() )->variableDt_;
 }
 
-bool Cell::getImplicit( const Element* e )
+bool Cell::getImplicit( Eref e )
 {
-	return static_cast< Cell* >( e->data() )->implicit_;
+	return static_cast< Cell* >( e.data() )->implicit_;
 }
 
-string Cell::getDescription( const Element* e )
+string Cell::getDescription( Eref e )
 {
-	return static_cast< Cell* >( e->data() )->description_;
+	return static_cast< Cell* >( e.data() )->description_;
 }
 
 ///////////////////////////////////////////////////
@@ -194,7 +194,7 @@ string Cell::getDescription( const Element* e )
 void Cell::reinitFunc( const Conn* c, ProcInfo p )
 {
 	static_cast< Cell* >( c->data() )->
-		innerReinitFunc( c->targetElement()->id() );
+		innerReinitFunc( c->target().id() );
 }
 
 void Cell::innerReinitFunc( const Id& cell )
