@@ -129,18 +129,24 @@ const Cinfo* SimpleElement::cinfo( ) const
 
 /**
  * The Conn iterators have to be deleted by the recipient function.
+ * I check the msgNum against the size of the msg_ vector rather than 
+ * the cinfo()->numSrc(). This is to allow traversing DynamicFinfos,
+ * whose msgNums are allocated above numSrc. Also it removes 
+ * dependencies outside the SimpleElement data structures.
+ * Danger is if the msgNum is a 'next' message. In such cases the iterator
+ * will be OK, but will miss the pre-next region of the message.
  */
 Conn* SimpleElement::targets( int msgNum ) const
 {
 	if ( msgNum >= 0 && 
-		static_cast< unsigned int >( msgNum ) < cinfo()->numSrc() )
+		static_cast< unsigned int >( msgNum ) < msg_.size() )
 		return new TraverseMsgConn( &msg_[ msgNum ], this, 0 );
 	else if ( msgNum < 0 ) {
 		const vector< ConnTainer* >* d = dest( msgNum );
 		if ( d )
 			return new TraverseDestConn( d, 0 );
 	}
-	return 0;
+	return new SetConn( root(), 0 ); // SetConn always has good() == 0
 }
 
 /**
@@ -149,17 +155,23 @@ Conn* SimpleElement::targets( int msgNum ) const
 Conn* SimpleElement::targets( const string& finfoName ) const
 {
 	const Finfo* f = cinfo()->findFinfo( finfoName );
-	if ( !f )
-		return 0;
+	if ( !f ) // SetConn always is !good().
+		return new SetConn( root(), 0 );
 	return targets( f->msg() );
 }
 
+/**
+ * The return value is undefined if msgNum is greater the numSrc but
+ * below the # of entries in msg_
+ * I could do a check on the cinfo, but that brings in too many dependencies
+ * outside the SimpleElement data structures.
+ */
 unsigned int SimpleElement::numTargets( int msgNum ) const
 {
-	if ( msgNum >= 0 && 
-		static_cast< unsigned int >( msgNum ) < cinfo()->numSrc() )
-		return msg_[ msgNum ].numTargets( this );
-	else if ( msgNum < 0 ) {
+	if ( msgNum >= 0 ) {
+		if ( static_cast< unsigned int >( msgNum ) < msg_.size() )
+			return msg_[ msgNum ].numTargets( this );
+	} else {
 		const vector< ConnTainer* >* d = dest( msgNum );
 		if ( d )
 			return d->size();

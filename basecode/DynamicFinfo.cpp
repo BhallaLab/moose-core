@@ -90,8 +90,8 @@ bool DynamicFinfo::add(
 {
 	unsigned int srcFuncId = 0;
 	unsigned int destFuncId = 0;
-	unsigned int destMsg = 0;
-	unsigned int numDest = 0;
+	int destMsg = 0;
+	unsigned int destIndex = 0;
 
 	// How do we know what the target expects: a simple message
 	// or a shared one? Here we use the respondToAdd to query it.
@@ -107,13 +107,16 @@ bool DynamicFinfo::add(
 	assert ( FuncVec::getFuncVec( srcFuncId )->size() == 1 );
 	if ( destFinfo->respondToAdd( destElm, e, &sf,
 						srcFuncId, destFuncId,
-						destMsg, numDest ) )
+						destMsg, destIndex ) )
 	{
-		assert( numDest == 1 );
+		unsigned int srcIndex = e->numTargets( msg_ );
+		
 		// Note that the Dynamic Finfo must be the dest, even
 		// if it was called as the originator.
 		SimpleConnTainer* ct = new SimpleConnTainer( 
-			destElm, e, destMsg, msg_ );
+			destElm, e, destMsg, msg_,
+			0, 0,		// Hack. Can't use for arrays
+			srcIndex, destIndex );
 		return Msg::add( ct, destFuncId, srcFuncId );
 			/*
 		return Msg::add( destElm, e, destMsg, msg_,
@@ -137,7 +140,7 @@ bool DynamicFinfo::add(
 bool DynamicFinfo::respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& returnFuncId,
-					unsigned int& destIndex, unsigned int& numDest
+					int& destMsg, unsigned int& destIndex
 ) const
 {
 	assert ( src != 0 && e != 0 );
@@ -154,8 +157,8 @@ bool DynamicFinfo::respondToAdd(
 			assert( lookupId != 0 );
 		}
 		returnFuncId = lookupId;
-		destIndex = msg_;
-		numDest = 1;
+		destMsg = msg_;
+		destIndex = e->numTargets( msg_ );
 		return 1;
 	}
 
@@ -186,8 +189,8 @@ bool DynamicFinfo::respondToAdd(
 	if ( fv->size() == 1  && trigId != 0 && sf.isSameType( srcType ) )
 	{
 		returnFuncId = trigId;
-		destIndex = msg_;
-		numDest = 1;
+		destMsg = msg_;
+		destIndex = e->numTargets( msg_ );
 		return 1;
 	}
 	return 0;

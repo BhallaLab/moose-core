@@ -206,6 +206,65 @@ static const Slot molSumSlot =
 
 static const Slot fluxSlot =
 	initKineticHubCinfo()->getSlot( "flux.efflux" );
+	
+/////////////////////////////////////////////////////////////////////////
+
+Finfo* initMolZombieFinfo()
+{
+	// These fields will replace the original molecule fields so that
+	// the lookups refer to the solver rather than the molecule.
+	static Finfo* molFields[] =
+	{
+		new ValueFinfo( "n",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getMolN ),
+			RFCAST( &KineticHub::setMolN )
+		),
+		new ValueFinfo( "nInit",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getMolNinit ),
+			RFCAST( &KineticHub::setMolNinit )
+		),
+		new ValueFinfo( "conc",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getMolN ),
+			RFCAST( &KineticHub::setMolN )
+		),
+		new ValueFinfo( "concInit",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticHub::getMolNinit ),
+			RFCAST( &KineticHub::setMolNinit )
+		),
+	};
+	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
+		initMoleculeCinfo()->getThisFinfo( ) );
+	assert( tf != 0 );
+	static SolveFinfo molZombieFinfo( 
+		molFields, 
+		sizeof( molFields ) / sizeof( Finfo* ),
+		tf
+	);
+
+	/*
+	static Cinfo molZombieCinfo(
+		"MolZombie",
+		"Upinder S. Bhalla, 2008, NCBS",
+		"MolZombie: Class to take over molecules",
+		initNeutralCinfo(),
+		molFields,
+		sizeof(molFields )/sizeof(Finfo *),
+		ValueFtype1< Molecule >::global()
+	);
+	return &molZombieCinfo;
+	*/
+
+	return &molZombieFinfo;
+}
+
+static Finfo* molZombieFinfo = initMolZombieFinfo();
+/////////////////////////////////////////////////////////////////////////
+// End of static initializers.
+/////////////////////////////////////////////////////////////////////////
 
 void redirectDestMessages(
 	Eref hub, Element* e, const Finfo* hubFinfo, const Finfo* eFinfo,
@@ -517,6 +576,7 @@ void KineticHub::molConnectionFuncLocal( Eref hub,
 	       	vector< double >*  S, vector< double >*  Sinit, 
 		vector< Element *>*  elist )
 {
+	/*
 	// These fields will replace the original molecule fields so that
 	// the lookups refer to the solver rather than the molecule.
 	static Finfo* molFields[] =
@@ -550,6 +610,7 @@ void KineticHub::molConnectionFuncLocal( Eref hub,
 		sizeof( molFields ) / sizeof( Finfo* ),
 		tf
 	);
+	*/
 
 	assert( nMol_ + nBuf_ + nSumTot_ == elist->size() );
 
@@ -564,7 +625,7 @@ void KineticHub::molConnectionFuncLocal( Eref hub,
 	// that get set up between the Hub and the objects.
 	const Finfo* sumTotFinfo = initMoleculeCinfo()->findFinfo( "sumTotal" );
 	for ( i = elist->begin(); i != elist->end(); i++ ) {
-		zombify( hub, *i, molSolveFinfo, &molZombieFinfo );
+		zombify( hub, *i, molSolveFinfo, initMolZombieFinfo() );
 		redirectDynamicMessages( *i );
 	}
 	// Here we should really set up a 'set' of mols to check if the
@@ -806,6 +867,18 @@ void KineticHub::clearFunc( const Conn* c )
 KineticHub* getHubFromZombie( Eref e, const Finfo* srcFinfo,
 		unsigned int& index )
 {
+	Conn* c = e.e->targets( "process" );
+	if ( c->good() ) {
+		index = c->targetIndex();
+		KineticHub* kh = static_cast< KineticHub* >( c->target().data() );
+		c->increment();
+		assert( !c->good() ); // Should only be one process incoming.
+		return dynamic_cast< KineticHub* >( kh );
+	}
+	delete c;
+	return 0;
+
+	/*
 	const SolveFinfo* f = dynamic_cast< const SolveFinfo* > (
 			       	e.e->getThisFinfo() );
 	if ( !f ) return 0;
@@ -815,6 +888,7 @@ KineticHub* getHubFromZombie( Eref e, const Finfo* srcFinfo,
 	index = c->targetIndex();
 	// index = hub->connSrcRelativeIndex( c, slot.msg() );
 	return static_cast< KineticHub* >( c->target().data() );
+	*/
 }
 
 /**
@@ -1384,10 +1458,11 @@ void redirectDestMessages(
 		if ( find( elist->begin(), elist->end(), tgt ) == elist->end() ) {
 			map.push_back( eIndex );
 			srcElements.push_back( i->target().e );
-			srcMsg.push_back( i->sourceMsg() );
+			srcMsg.push_back( i->targetMsg() );
 			if ( !retain )
 				dropList.push_back( i->connTainer() );
 		}
+		i->increment();
 	}
 	delete i;
 
@@ -1402,7 +1477,6 @@ void redirectDestMessages(
 
 
 /*
-
 	vector< Conn > clist;
 	if ( eFinfo->incomingConns( e, clist ) == 0 )
 		return;
@@ -1447,14 +1521,61 @@ void redirectDestMessages(
 
 /**
  * Here we replace the existing DynamicFinfos and their messages with
- * new ones for the updated access functions
+ * new ones for the updated access functions.
+ *
+ * It would be nice to retain everything and only replace the 
+ * access functions, but this gets too messy as it requires poking the
+ * new funcVecs into the remote Msgs. So instead we delete the 
+ * old DynamicFinfos and recreate them.
  */
 void redirectDynamicMessages( Element* e )
 {
+	vector< Finfo* > flist;
+	// We get a list of DynamicFinfos independent of the Finfo vector on 
+	// the Element, because we will be messing up the iterators on the
+	// element.
+	e->listLocalFinfos( flist );
+	vector< Finfo* >::iterator i;
+
+	// Go through flist noting messages, deleting finfo, and rebuilding.
+	for( i = flist.begin(); i != flist.end(); ++i )
+	{
+		const DynamicFinfo *df = dynamic_cast< const DynamicFinfo* >( *i );
+		assert( df != 0 );
+		vector< Element* > srcElements;
+		vector< const Finfo* > srcFinfos;
+		Conn* c = e->targets( ( *i )->msg() );
+
+		// note messages.
+		while( c->good() ) {
+			srcElements.push_back( c->target().e );
+			srcFinfos.push_back( 
+				c->target().e->findFinfo( c->targetMsg() ) );
+			c->increment();
+		}
+		delete c;
+		string name = df->name();
+		bool ret = e->dropFinfo( df );
+		assert( ret );
+		const Finfo* origFinfo = e->findFinfo( name );
+		assert( origFinfo );
+
+		unsigned int max = srcFinfos.size();
+		for ( unsigned int i =  0; i < max; i++ ) {
+			ret = srcFinfos[ i ]->add( srcElements[ i ], e, origFinfo );
+			assert( ret );
+		}
+	}
+
+/*
+
+
+
+
 	const Finfo* f;
 	unsigned int finfoNum = 1;
 
-	vector< Conn > clist;
+	while ( ( f = e->localFinfo( finfoNum ) ) ) {
 
 	while ( ( f = e->localFinfo( finfoNum ) ) ) {
 		const DynamicFinfo *df = dynamic_cast< const DynamicFinfo* >( f );
@@ -1464,10 +1585,12 @@ void redirectDynamicMessages( Element* e )
 		vector< Element* > srcElements;
 		vector< const Finfo* > srcFinfos;
 		Conn* c = e->targets( f->msg() );
+
 		while( c->good() ) {
 			srcElements.push_back( c->target().e );
-			// srcMsg.push_back( c->sourceMsg() );
-			srcFinfos.push_back( c->target().e->findFinfo( c->sourceMsg() ) );
+			srcFinfos.push_back( 
+				c->target().e->findFinfo( c->targetMsg() ) );
+			c->increment();
 		}
 		delete c;
 
@@ -1480,14 +1603,10 @@ void redirectDynamicMessages( Element* e )
 
 		unsigned int max = srcFinfos.size();
 		for ( unsigned int i =  0; i < max; i++ ) {
-			if ( srcFinfos[i]->isDestOnly() ) {
-				ret = origFinfo->add( e, srcElements[ i ], srcFinfos[ i ] );
-				assert( ret );
-			} else {
-				ret = srcFinfos[ i ]->add( srcElements[ i ], e, origFinfo );
-			}
+			ret = srcFinfos[ i ]->add( srcElements[ i ], e, origFinfo );
 			assert( ret );
 		}
 		finfoNum++;
 	}
+	*/
 }

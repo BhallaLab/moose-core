@@ -83,7 +83,7 @@ class LookupFinfo: public Finfo
 			bool respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& returnFuncId,
-					unsigned int& destIndex, unsigned int& numDest
+					int& destMsgId, unsigned int& destIndex
 			) const;
 
 			/**
