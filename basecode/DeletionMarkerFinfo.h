@@ -32,7 +32,7 @@ class DeletionMarkerFinfo: public Finfo
 			bool respondToAdd(
 					Element* e, Element* dest, const Ftype *destType,
 					unsigned int& destFuncId, unsigned int& returnFuncId,
-					unsigned int& destIndex, unsigned int& numDeletionMarker
+					int& destMsgId, unsigned int& destIndex
 			) const 
 			{
 					return 0;

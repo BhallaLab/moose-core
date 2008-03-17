@@ -462,7 +462,7 @@ void testEnzyme()
 	Molecule::reinitFunc( &cenzMol, &p );
 	unsigned int i = 0;
 	unsigned int j = 0;
-	cout << "\n";
+	cout << " ";
 	for ( p.currTime_ = 0.0; p.currTime_ < 9.5; p.currTime_ += p.dt_ ) 
 	{
 		double nprd = Molecule::getN( prd );

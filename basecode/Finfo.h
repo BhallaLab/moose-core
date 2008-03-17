@@ -36,11 +36,24 @@ class Finfo
 			 * message creation is legal. It also handles passing the
 			 * message function pointers back and forth between source
 			 * and destination objects.
+			 * Arguments:
+			 * 	e: target Element
+			 * 	src: src Element
+			 * 	srcType: src type
+			 *	srcFuncId: src func
+			 *	destFuncId: dest func id, filled here and passed back.
+			 *	destMsgId: Msg id of dest, filled here and passed back.
+			 *	destIndex: Index of dest connection. Used in special cases
+			 *		like synapses where the destination Conn needs to be
+			 *		identified, but passed back every time. Typically is
+			 *		the count of the # of incoming messages on this dest.
+			 *		Note that if the connection is a vector we
+			 *		increment this by the size of the vector.
 			 */
 			virtual bool respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& destFuncId,
-					unsigned int& destIndex, unsigned int& numDest
+					int& destMsgId, unsigned int& destIndex
 			) const = 0;
 			
 			/**

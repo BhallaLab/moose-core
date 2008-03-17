@@ -22,7 +22,7 @@
 bool ThisFinfo::respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& returnFuncId,
-					unsigned int& destIndex, unsigned int& numThis
+					int& destMsgId, unsigned int& destIndex
 ) const
 {
 		/*

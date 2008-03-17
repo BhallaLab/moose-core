@@ -27,7 +27,7 @@ DestFinfo::DestFinfo( const string& name, const Ftype *f,
 bool DestFinfo::respondToAdd(
 					Element* e, Element* src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int & returnFuncId,
-					unsigned int& destMsgId, unsigned int& numDest
+					int& destMsgId, unsigned int& destIndex
 ) const
 {
 	assert ( srcType != 0 );
@@ -37,7 +37,8 @@ bool DestFinfo::respondToAdd(
 		assert ( src != 0 && e != 0 );
 		returnFuncId = fv_->id();
 		destMsgId = msg_;
-		numDest = 1;
+		destIndex = e->numTargets( msg_ );
+		// numDest = 1;
 		return 1;
 	}
 	return 0;
