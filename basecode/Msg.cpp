@@ -356,10 +356,9 @@ void Msg::dropDestRemote( vector< ConnTainer* >& ctv  )
  */
 void Msg::dropForDeletion()
 {
-	vector< ConnTainer* >::iterator i;
-
-	for ( i = c_.begin(); i != c_.end(); i++ ) {
-		if ( fv_->isDest() ) { // The current msg is source.
+	if ( fv_->isDest() ) { // The current msg is source.
+		vector< ConnTainer* >::iterator i;
+		for ( i = c_.begin(); i != c_.end(); i++ ) {
 			/*
 			 * Can't refer to remote object: it may not exist any more.
 			remoteMsg = ( *i )->e2()->varMsg( ( *i )->msg2() );

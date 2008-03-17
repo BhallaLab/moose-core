@@ -91,8 +91,8 @@ int main(int argc, char** argv)
 		testTable();
 		testSched();
 		testSchedProcess();
-	//	testBiophysics();
-	//	testKinetics();
+		testBiophysics();
+		testKinetics();
 //		testAverage();
 	}
 #endif
