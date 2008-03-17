@@ -6373,4 +6373,9 @@ Partial fix to issue of KineticHub set up for the replacement Molecule fields.
 This does not involve a static Cinfo, but instead a static SolveFinfo where
 the necessary initialization of FuncIds happens. Works, clears unit tests.
 
+Checked in as revision 446 with unit test flags on, Smoldyn off, -g, GSL
+
+Working now on regression tests. Fixed an infinite loop in the kholodenko test
+for the kinetics solver. Many of the biophysics tests still fail in regression.
+
 ==============================================================================
