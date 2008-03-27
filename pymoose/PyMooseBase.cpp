@@ -334,6 +334,15 @@ const std::string PyMooseBase::__get_name() const
     return id_()->name();
 }
 
+void PyMooseBase::useClock(int clockNo, string func)
+{
+    context_->useClock(clockNo, id_.path(), func);
+}
+void PyMooseBase::useClock(Id clock, string func)
+{
+    context_->useClock(clock, id_.path(), func);
+}
+
 bool PyMooseBase::connect(std::string srcField, PyMooseBase* dest, std::string destField)
 {
     return context_->connect(this->id_, srcField, dest->id_, destField);    
