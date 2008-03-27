@@ -87,7 +87,7 @@ namespace pymoose
         void step();
         void reset();
         void stop();
-        void setClock(int clockNo, double dt, int stage);    
+        void setClock(int clockNo, double dt, int stage = 0);    
         vector <double>& getClocks();
         void useClock(const Id& tickId, std::string path, std::string func = "process");
         void useClock(int tickNo, std::string path, std::string func = "process");
