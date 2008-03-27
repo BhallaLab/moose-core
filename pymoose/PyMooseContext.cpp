@@ -823,7 +823,7 @@ void PyMooseContext::step(void)
     step((long)1);    
 }
 
-void PyMooseContext::setClock(int clockNo, double dt, int stage = 0)
+void PyMooseContext::setClock(int clockNo, double dt, int stage)
 {
     send3< int, double, int >(myId_(), setClockSlot, clockNo, dt, stage);
 }

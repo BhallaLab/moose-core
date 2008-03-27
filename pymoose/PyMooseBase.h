@@ -30,13 +30,14 @@ namespace pymoose
         virtual const std::string& getType() = 0;
         const std::string& getSeparator() const;
         static pymoose::PyMooseContext* getContext();
-
+        
         const vector< Id > children() const;
         const Id* __get_parent() const;
         const std::string path() const;   
         const Id* __get_id() const;
         const std::string __get_name() const;
-        
+        void useClock(int clockNo, string func="process");
+        void useClock(Id clock, string func="process");        
         bool connect(std::string field, PyMooseBase* dest, std::string destField);
         bool connect(std::string field, Id dest, std::string destField);
         std::vector <std::string> getMessageList(string field, bool isIncoming );
@@ -54,7 +55,7 @@ namespace pymoose
         static Id getParent(Id id);
         static std::vector < Id > getChildren(Id id);    
         static void initSimulation();
-    
+        
 // Think about this - are we going to allow people to access objects by their ID?
 // If we do, that breaks the idea of interpreter doing the object lifetime management
 // gets broken. If we don't, user can create objects and re-assign to same variable,
