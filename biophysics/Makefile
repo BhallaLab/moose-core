@@ -52,13 +52,13 @@ OBJ = \
 	RandomSpike.o \
 	TestBiophysics.o \
 	Cell.o
-#	HSolveStruct.o	\
-	HSolveBase.o	\
-	HSolve.o \
-	NeuroScanBase.o \
-	NeuroScan.o \
-	NeuroHub.o \
 endif
+#	HSolveStruct.o	\
+# 	HSolveBase.o	\
+# 	HSolve.o \
+# 	NeuroScanBase.o \
+# 	NeuroScan.o \
+# 	NeuroHub.o \
 
 HEADERS = \
 	../basecode/header.h \
