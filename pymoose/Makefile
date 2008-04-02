@@ -145,7 +145,7 @@ moose_wrap.o: moose_wrap.cxx
 	$(CXX) $(CXXFLAGS) -c $^ -o $@ $(INCLUDES)
 
 moose.py moose_wrap.cxx: moose.i $(HEADERS)
-	/usr/local/bin/swig -modern -c++ -python -threads moose.i
+	swig -modern -c++ -python -threads moose.i
 
 # This is not required - gnumake does it by implicit rule
 # .cpp.o:
