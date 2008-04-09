@@ -1058,15 +1058,18 @@ vector <string> PyMooseContext::getMessageList(Id obj, string field, bool incomi
     // The return message puts the elements in elist_ and the 
     // target field names in fieldValue_
     send3 < Id, string, bool > (myId_(), listMessagesSlot, obj, field, incoming);
+    vector <string> fieldlist;
     vector <string> list;
-    separateString( fieldValue_, list, ", ");
+    
+    separateString( fieldValue_, fieldlist, ", ");
+    
     if (elist_.size() > 0)
     {
-        assert(elist_.size() == list.size());
+        assert(elist_.size() == fieldlist.size());
         for ( int i = 0; i < elist_.size(); ++i )
         {
-            list.push_back("["+elist_[i].path()+"]."+list[i]);
-        }                
+            list.push_back("["+elist_[i].path()+"]."+fieldlist[i]);
+        }              
     }
     return list;    
 }
@@ -1083,21 +1086,32 @@ vector <string> PyMooseContext::getMessageList(Id obj, bool incoming)
     string direction = incoming? "<-":"->";
     vector <string> fieldList;    
     send2<Id, string>(myId_(), requestFieldSlot, obj, "fieldList" );
-    separateString(fieldValue_, fieldList, ",");
+    separateString(fieldValue_, fieldList, ", ");
     for ( unsigned int i = 0; i < fieldList.size(); i++)
     {
-        if ( fieldList[i] == "fieldList")
+        if ( (fieldList[i] == "fieldList") || ( trim(fieldList[i]).length() == 0 ))
         {
             continue;
         }
-        else{
-            vector <string> tmpList = getMessageList(obj, fieldList[i], incoming);
-            for ( int j = 0; j < tmpList.size(); ++j)
+        cout << "getMessageList: getting for field: " << fieldList[i] << endl;
+            
+        vector <string> tmpList = getMessageList(obj, fieldList[i], incoming);
+        for ( int j = 0; j < tmpList.size(); ++j)
             {
                 string msgInfo = "["+obj.path()+"]."+ fieldList[i] + direction + tmpList[j];
                 msgList.push_back(msgInfo);
             }
-        }       
+//             send3< Id, string, bool >( myId_(), listMessagesSlot, obj, fieldList[i], incoming );
+//             vector <string> tmpList = separateString(fieldValue_, tmpList, ", ");
+//             if ( elist_.size() > 0)
+//             {
+//                 assert ( elist_.size() == tmpList.size() );                
+//                 for ( int j = 0; j < elist_.size(); ++j )
+//                 {
+//                     list.push_back("["+elist_[j].path()+"]."+list[j]);
+//                 }                
+            
+//         }       
     }
     return msgList;    
 }
