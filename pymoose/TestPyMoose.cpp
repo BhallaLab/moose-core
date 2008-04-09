@@ -41,6 +41,16 @@ int main(int argc, char **argv)
     cout << "Successful step ... " << endl;
     Compartment d("test");
     HHChannel dch("Na", d);
+    d.connect("channel", &dch, "channel");
+    
+    vector <string> list = ctx->getMessageList(*dch.__get_id(), false);
+    cout << "Outgoing Messages from dch" << endl;
+    
+    for ( int i = 0; i < list.size(); ++i )
+    {
+        cout << list[i] << endl;
+    }
+    
     Neutral root = Neutral("/");
     cout << "Obtained handle for root element: Id " << root.__get_id() << endl;
    
