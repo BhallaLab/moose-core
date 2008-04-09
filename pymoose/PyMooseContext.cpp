@@ -1083,35 +1083,22 @@ vector <string> PyMooseContext::getMessageList(Id obj, bool incoming)
         cout << "Error: PyMooseContext::getMessageList" << ": unknown element." << endl;
         return msgList;
     }
-    string direction = incoming? "<-":"->";
+    string direction = incoming? " <- ":" -> ";
     vector <string> fieldList;    
     send2<Id, string>(myId_(), requestFieldSlot, obj, "fieldList" );
     separateString(fieldValue_, fieldList, ", ");
     for ( unsigned int i = 0; i < fieldList.size(); i++)
     {
-        if ( (fieldList[i] == "fieldList") || ( trim(fieldList[i]).length() == 0 ))
+        if (fieldList[i] == "fieldList")
         {
             continue;
         }
-        cout << "getMessageList: getting for field: " << fieldList[i] << endl;
-            
         vector <string> tmpList = getMessageList(obj, fieldList[i], incoming);
         for ( int j = 0; j < tmpList.size(); ++j)
             {
                 string msgInfo = "["+obj.path()+"]."+ fieldList[i] + direction + tmpList[j];
                 msgList.push_back(msgInfo);
             }
-//             send3< Id, string, bool >( myId_(), listMessagesSlot, obj, fieldList[i], incoming );
-//             vector <string> tmpList = separateString(fieldValue_, tmpList, ", ");
-//             if ( elist_.size() > 0)
-//             {
-//                 assert ( elist_.size() == tmpList.size() );                
-//                 for ( int j = 0; j < elist_.size(); ++j )
-//                 {
-//                     list.push_back("["+elist_[j].path()+"]."+list[j]);
-//                 }                
-            
-//         }       
     }
     return msgList;    
 }
