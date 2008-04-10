@@ -341,6 +341,7 @@ void HHChannel::setZpower( const Conn* c, double Zpower )
 	makeGate( e, e->findFinfo( "zGate" ), Zpower );
 	chan->Zpower_ = Zpower;
 	chan->takeZpower_ = selectPower( Zpower );
+        chan->useConcentration_ = 1;        
 }
 double HHChannel::getZpower( Eref e )
 {
