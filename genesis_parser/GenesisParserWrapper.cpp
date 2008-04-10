@@ -511,6 +511,8 @@ map< string, string >& sliSrcLookup()
 
 	// Message for synchan
 	src[ "SpikeGen.SPIKE" ] = "event";
+        // Message for CaConcen
+        src[ "I_Ca Ik" ] = "IkSrc";
         
         // Messages for RandomSpike
         src[ "RandomSpike.SPIKE"] = "eventSrc";
@@ -606,7 +608,9 @@ map< string, string >& sliDestLookup()
 	dest[ "useZ.MULTGATE" ] = "zGate";
 	dest[ "MULTGATE output" ] = "zGate";	// Rare use case from table.
 	dest[ "CONCEN Ca" ] = "concen";
-
+        // for CaConc object
+        dest[ "I_Ca Ik" ] = "current";
+        
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
 	// done already through the existing messaging.
