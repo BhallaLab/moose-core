@@ -1490,8 +1490,7 @@ void Shell::useClock( const Conn* c,
 		} else {
 			// This cannot be an 'assertion' error because the 
 			// user might do a typo.
-			cout << "Error: Shell::useClock: unknown function " <<
-					function << endl;
+			cout << "Error: Shell::useClock: unknown function " << function << " in " << i->path() << endl;
 		}
 	}
 }
