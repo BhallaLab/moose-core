@@ -708,6 +708,7 @@ map< string, string >& sliFieldNameConvert()
 	fieldnames["SymCompartment.len"] = "length";
 	fieldnames["SynChan.gmax"] = "Gbar";
 	fieldnames["HHChannel.gbar"] = "Gbar";
+        fieldnames["HHChannel.Z_conc"] = "useConcentration";
         fieldnames["PulseGen.level1"] = "firstLevel";
         fieldnames["PulseGen.width1"] = "firstWidth";
         fieldnames["PulseGen.delay1"] = "firstDelay";        
