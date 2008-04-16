@@ -26,32 +26,24 @@ class ArrayElement: public Element
 			friend void finfoLookupTest(); // to do these tests
 			static int numInstances;
 #endif
-		ArrayElement( Id id, const string& name );
-
 		ArrayElement(
 				Id id,
 				const std::string& name, 
-				unsigned int srcSize,
-				unsigned int destSize,
-				void* data = 0,
+				void* data,
+				unsigned int numSrc, 
 				unsigned int numEntries = 0,
 				size_t objectSize = 0
 		);
 
-		// Used in copies.
+		/**
+		 * Copies over the name of the ArrayElement, and assigns a
+		 * scratch id.
+		 * Does not copy the data or the Finfos.
+		 * Those are done in the 'innerCopy'
+		 * The messages are still more complicated and are done
+		 * in other stages of the Copy command.
+		 */
 		ArrayElement( const ArrayElement* orig );
-		
-		//used in copies
-		ArrayElement(
-				const std::string& name, 
-				const vector< MsgSrc >& src,
-				const vector< MsgDest >& dest,
-				const vector< Conn >& conn,
-				const vector< Finfo* >& finfo,
-				void* data,
-				unsigned int numEntries,
-				size_t objectSize
-		);
 
 		/// This cleans up the data_ and finfo_ if needed.
 		~ArrayElement();
@@ -68,157 +60,48 @@ class ArrayElement: public Element
 
 		const Cinfo* cinfo() const;
 
-		/**
-		 * Looks up a Conn entry.
-		 */
-		vector< Conn >::const_iterator
-				lookupConn( unsigned int i ) const;
-
-		/**
-		 * Looks up a Conn entry, specialized variant for cases where
-		 * we want to modify it.
-		 */
-		vector< Conn >::iterator lookupVariableConn( unsigned int i );
-
-		/**
-		 * This function takes an absolute Conn index 'conn' and
-		 * a specified MsgSrc 'src' and returns the appropriate
-		 * RecvFunc. It may have to search through the link list of
-		 * MsgSrcs to find the correct src and its RecvFunc.
-		 * Returns dummyFunc on failure.
-		 *
-		 * This function is likely to be called by SendTo functions.
-		 * There are three likely use cases:
-		 * An incoming message is being returned to sender.
-		 * A subset of messages are being activated following a search
-		 * A local array is maintained and one of them is triggered
-		 * Only the last of these seems to need relative indexing,
-		 * so we'll keep that in abeyance for now and implement an
-		 * absolute send.
-		 *
-		 */
-		RecvFunc lookupRecvFunc( unsigned int src, unsigned int conn )
-				const;
-
-		/**
-		 * Returns the index of the specified Conn.
-		 */
-		unsigned int connIndex( const Conn* ) const;
-
-		/// Finds the relative index of a conn arriving at this element.
-		unsigned int connDestRelativeIndex(
-				const Conn* c, unsigned int slot ) const;
-
-		// Finds relative index of conn arriving at this element on
-		// the MsgSrc vector identified by slot.
-		unsigned int connSrcRelativeIndex(
-				const Conn* c, unsigned int slot ) const;
-
-		// Returns size of the conn vector.
-		unsigned int connSize( ) const {
-				return conn_.size();
-		}
-
 		/////////////////////////////////////////////////////////////
-		// Src handling functions
+		// Msg traversal functions, part of API
 		/////////////////////////////////////////////////////////////
 
 		/**
-		 * This function returns the iterator to conn_ at the beginning
-		 * of the Src range specified by i. Note that we don't need
-		 * to know how the Element handles MsgSrcs here.
+		 * msgNum specifies the message.
+		 * Returns a Conn* iterator for going through all the targets,
+		 * as well as providing lots of collateral information.
+		 * Targets can be advanced by increment(), which goes one Element
+		 * and its index at a time, or by nextElement(), which goes
+		 * one Element at a time even if the Element is an array.
+		 * The Conn* must be deleted after use.
 		 */
-		vector< Conn >::const_iterator
-				connSrcBegin( unsigned int src ) const;
+		Conn* targets( int msgNum ) const;
 
 		/**
-		 * This function returns the iterator to conn_ at the end
-		 * of the Src range specified by i. End here is in the same
-		 * sense as the end() operator on vectors: one past the last
-		 * entry. Note that we don't need
-		 * to know how the Element handles MsgSrcs here.
-		 * Note: this call does NOT follow the linked list of src_ to
-		 * the very end. It applies only to the set of Conns that are
-		 * attached to a given recvFunc and are therefore on a single
-		 * src_ entry.
-		 * If you want to follow the linked list, use the nextSrc
-		 * function.
+		 * finfoName specifies the finfo connecting to these targets.
+		 * Returns a Conn* iterator for going through all the targets.
+		 * Must be deleted after use.
 		 */
-		vector< Conn >::const_iterator
-				connSrcEnd( unsigned int src ) const;
+		Conn* targets( const string& finfoName ) const;
 
 		/**
-		 * This function does follow the linked list of src_ to the
-		 * very end.
+		 * Finds the number of targets to this Msg, either src or dest.
+		 * Faster than iterating through the whole lot.
 		 */
-		vector< Conn >::const_iterator
-				connSrcVeryEnd( unsigned int src ) const;
-
+		unsigned int numTargets( int msgNum ) const;
 		/**
-		 * Returns the index of the next src entry on this list of srcs.
-		 * Zero if there is none.
+		 * Finds the number of targets to this Finfo.
+		 * Faster than iterating through the whole lot.
 		 */
-		unsigned int nextSrc( unsigned int src ) const;
+		unsigned int numTargets( const string& finfoName ) const;
 
-		/**
-		 * Looks up the RecvFunc placed on the specified src.
-		 * This function is a little low-level because it looks
-		 * directly into the src_ vector.
-		 * It assumes we know exactly which src to use, even if
-		 * it is one downstream on the src link list.
-		 * The current function is mostly used in the send function.
-		 *
-		 * Use the lookupRecvFunc function if you only know the 
-		 * beginning src index and the Conn index, but do not know
-		 * which specific src to use.
-		 */
-		RecvFunc srcRecvFunc( unsigned int src ) const;
-
-		/**
-		 * Returns the number of MsgSrc entries
-		 */
-		unsigned int srcSize() const {
-				return src_.size();
-		}
-
-		/// Computes the memory use by the Element and its messages.
-		unsigned int getMsgMem() const;
 		/////////////////////////////////////////////////////////////
-		// Dest handling functions
+		// Information functions
 		/////////////////////////////////////////////////////////////
-		/**
-		 * This function returns the iterator to conn_ at the beginning
-		 * of the Dest range specified by i.
-		 */
-		vector< Conn >::const_iterator
-				connDestBegin( unsigned int dest ) const;
-
-		/**
-		 * This function returns the iterator to conn_ at the end
-		 * of the Dest range specified by i. End here is in the same
-		 * sense as the end() operator on vectors: one past the last
-		 * entry.
-		 */
-		vector< Conn >::const_iterator
-				connDestEnd( unsigned int dest ) const;
 		
-		/**
-		 * Returns the number of MsgDest entries
-		 */
-		unsigned int destSize() const {
-				return dest_.size();
-		}
+		/// Computes the memory use by the Element, data and its messages.
+		unsigned int getTotalMem() const;
 
-		unsigned int insertConn(
-				unsigned int src, unsigned int nSrc,
-				unsigned int dest, unsigned int nDest );
-
-		void connect( unsigned int myConn, 
-				Element* targetElement, unsigned int targetConn );
-
-		void disconnect( unsigned int connIndex );
-
-		void deleteHalfConn( unsigned int connIndex );
+		/// Computes the memory use by the messages.
+		unsigned int getMsgMem() const;
 
 		/**
 		 * Reports if this element is going to be deleted.
@@ -235,48 +118,48 @@ class ArrayElement: public Element
 		 */
 		void prepareForDeletion( bool stage );
 
-		unsigned int insertConnOnSrc(
-				unsigned int src, FuncList& rf,
-				unsigned int dest, unsigned int nDest
-		);
 
-		unsigned int insertSeparateConnOnSrc(
-			unsigned int src, FuncList& rf,
-			unsigned int dest, unsigned int nDest );
-
-		unsigned int insertConnOnDest(
-						unsigned int dest, unsigned int nDest );
-
-		void* data() const {
-			return data_;
+		/**
+		 * Returns data contents of ArrayElement
+		 */
+		void* data( unsigned int eIndex ) const {
+			return (void *)((char *)data_ + eIndex*objectSize_);
 		}
 
+		/**
+		 * Returns size of data array. For ArrayElement it is always 1.
+		 */
 		unsigned int numEntries() const {
-			return numEntries_;
+			return 1;
 		}
 
-		unsigned int index() const {
-			return UINT_MAX;
-		}
-		
+		/////////////////////////////////////////////////////////////
+		// Finfo functions
+		/////////////////////////////////////////////////////////////
+
+
 		/**
 		 * Regular lookup for Finfo from its name.
 		 */
 		const Finfo* findFinfo( const string& name );
 
+		/**
+		 * Lookup Finfo from its msgNum. Not all Finfos will have a 
+		 * msgNum, but any valid msgNum should have a Finfo.
+		 */
+		const Finfo* findFinfo( int msgNum ) const;
+
+		/**
+		 * Special const lookup for Finfo from its name, where the returned
+		 * Finfo is limited to the ones already defined in the class
+		 * and cannot be an array or other dynamic finfo
+		 */
 		const Finfo* constFindFinfo( const string& name ) const;
 
 		/**
-		 * Returns finfo ptr associated with specified conn index.
-		 * For ordinary finfos, this is a messy matter of comparing
-		 * the conn index with the ranges of MsgSrc or MsgDest
-		 * entries associated with the finfo. However, this search
-		 * happens after the dynamic finfos on the local element.
-		 * For Dynamic Finfos, this is fast: it just scans through
-		 * all finfos on the local finfo_ vector to find the one that 
-		 * has the matching connIndex.
+		 * Returns finfo ptr associated with specified ConnTainer.
 		 */
-		const Finfo* findFinfo( unsigned int connIndex ) const;
+		const Finfo* findFinfo( const ConnTainer* c ) const;
 
 		/**
 		 * Local finfo_ lookup.
@@ -298,145 +181,144 @@ class ArrayElement: public Element
 		 * Returns number of Finfos found.
 		 */
 		unsigned int listLocalFinfos( vector< Finfo* >& flist );
-		
-		/**
-		 * Copies Finfos from the SimpleElement to the current Array
-		 * Element
-		*/
-		void CopyFinfosSimpleToArray(const SimpleElement *se);
 
-		void addExtFinfo( Finfo * );
+		void addExtFinfo( Finfo* f );
 		void addFinfo( Finfo* f );
 		bool dropFinfo( const Finfo* f );
 		void setThisFinfo( Finfo* f );
 		const Finfo* getThisFinfo( ) const;
 
-		bool isConnOnSrc(
-			unsigned int src, unsigned int conn ) const;
+		/////////////////////////////////////////////////////////////
+		// Msg handling functions
+		/////////////////////////////////////////////////////////////
 
-		bool isConnOnDest(
-			unsigned int dest, unsigned int conn ) const;
+		/**
+		 * Returns a pointer to the specified msg.
+		 */
+		const Msg* msg( unsigned int msgNum ) const;
+		
+		Msg* varMsg( unsigned int msgNum );
+
+		const vector< ConnTainer* >* dest( int msgNum ) const;
+
+		/**
+		 * Scan through dest entries looking for dest msg. Return it if
+		 * found. If not found, create a new entry for it and return it. 
+		 * This is currently managed by a map indexed by the msgNum.
+		 */
+		vector< ConnTainer* >* getDest( int msgNum );
+
+		/**
+		 * Returns a pointer to the specified msg by looking up the named
+		 * Finfo. This may entail construction of a DynamicFinfo, so the
+		 * function is not const.
+		 * deprecated.
+		 */
+		// const Msg* msg( const string& fName );
+
+		unsigned int addNextMsg();
+
+		/**
+		 * Returns the # of msgs
+		 */
+		unsigned int numMsg() const;
 
 		///////////////////////////////////////////////////////////////
 		// Functions for the copy operation. All 5 are virtual
 		///////////////////////////////////////////////////////////////
-		Element* copy( Element* parent, const string& newName ) const;
-		Element* copyIntoArray( Element* parent, const string& newName, int n ) const;
-		bool isDescendant( const Element* ancestor ) const;
+		Element* copy( Element* parent, const string& newName ) const{return 0;}
+		Element* copyIntoArray( Element* parent, const string& newName, int n ) const{return 0;}
+		bool isDescendant( const Element* ancestor ) const{return 0;}
 
-		Element* innerDeepCopy( 
-						map< const Element*, Element* >& tree ) const;
 		Element* innerDeepCopy(
-						map< const Element*, Element* >& tree, int n ) const;
-
+						map< const Element*, Element* >& tree ) const{return 0;}
+		Element* innerDeepCopy(
+						map< const Element*, Element* >& tree, int n ) const{return 0;}
+		
+		/*
 		void replaceCopyPointers(
 					map< const Element*, Element* >& tree,
 					vector< pair< Element*, unsigned int > >& delConns );
 		void copyMsg( map< const Element*, Element* >& tree );
+		*/
+
+		/**
+ 		* Copies messages from current element to duplicate provided dest is
+ 		* also on tree.
+ 		*/
+		void copyMessages( Element* dup, 
+			map< const Element*, Element* >& origDup ) const{;}
 
 		///////////////////////////////////////////////////////////////
 		// Debugging function
 		///////////////////////////////////////////////////////////////
 		void dumpMsgInfo() const;
-		
-		void setNoOfElements(int Nx, int Ny){
-			Nx_ = Nx;
-			Ny_ = Ny;
-		}
-		
-		void setDistances(double dx, double dy){
-			dx_ = dx;
-			dy_ = dy;
-		}
-		
-		void setOrigin(double xorigin, double yorigin){
-			xorigin_ = xorigin;
-			yorigin_ = yorigin;
-		}
-		
-		void getElementPosition(int& nx, int& ny, const unsigned int index){
-			nx = index%Nx_;
-			ny = index/Ny_;
-		}
-		
-		void getElementCoordinates(double& xcoord, double& ycoord, const unsigned int index ){
-			xcoord = xorigin_ + (index%Nx_)*dx_;
-			ycoord = yorigin_ + (index%Ny_)*dy_;
-		}
 
-		bool innerCopyMsg( const Conn* c, const Element* orig, Element* dup );
+		// bool innerCopyMsg( const Conn* c, const Element* orig, Element* dup );
 	protected:
-		Element* innerCopy() const;
-		Element* innerCopy(int n) const;
-
+		Element* innerCopy() const {return 0;}
+		Element* innerCopy(int n) const{return 0;}
 
 	private:
+		/**
+		 * Name of element.
+		 */
 		string name_;
 
 		/**
-		 * The conn_ vector contains all the connections emanating
-		 * from this Element. Conns belonging to different MsgSrcs
-		 * or MsgDests are sequentially ordered, without gaps.
-		 * Furthermore, if there are subsets of a MsgSrc that are
-		 * going to targets with a given RecvFunc, these too are
-		 * sequential. The grouping of such sets is done by putting
-		 * extra MsgSrcs in a linked list.
-		 * The sequential order also makes it possible to extract the
-		 * index of any Conn by referring back to the parent pointer.
+		 * This stores the field info (Finfo) entries that describe
+		 * everything about what the Element does. The Finfo[0] is
+		 * special as it also points to the class info, which in turn 
+		 * points to the static finfos that define the built-in fields.
+		 * The local finfo_ fields are dynamic and are used to extend
+		 * the class in various ways.
 		 */
-		vector< Conn > conn_; /// All the conns 
-
-		/**
-		 * The MsgSrc manages groups of ranges. The MsgSrcs are
-		 * pre-allocated and at least the initial set are hard-coded
-		 * to refer to specific message groups.
-		 */
-		vector< MsgSrc > src_;
-
-		/**
-		 * The dest_ vector is two ints, specifying the beginning and
-		 * end of the group of ranges being used. Here we cannot assume
-		 * sequential definitions, so we have to specify the
-		 * ranges explicitly.
-		 */
-		vector< MsgDest > dest_;
-
 		vector< Finfo* > finfo_;
 
 		/**
-		 * This void* points to the start of an array of the object
-		 * data. Note that it is NOT an array of object data pointers,
-		 * but the actual allocated data.
+		 * This stores the actual data contents of the element. Can be
+		 * any object.
 		 */
 		void* data_;
 
 		/**
-		 * This is the number of allocated entries in the data array.
+		 * The Msg manages messages. The Msg vector contains three
+		 * sections: the first is for the src, the second for 'next',
+		 * and the third for 'dest' entries.
+		 * The vector is allocated to the 'src' set when the Element is
+		 * initialized. The entries in the src set are hard-coded
+		 * by index to refer to specific message groups. 
 		 */
-		unsigned int numEntries_;
+		vector< Msg > msg_;
+
+		/**
+		 * The destMsg manages pure destination messages. It puts them
+		 * into a map to avoid having to store all the possible
+		 * locations explicitly. It is not accessed as often, so it
+		 * does not need to be a vector.
+		 */
+		map< int, vector< ConnTainer* > > dest_;
+
+		/**
+		 * Index of last entry in 'next_' set of msgs. At initialization,
+		 * it indexes the end of the entire msg_ vector, and expands out
+		 * as next entries are added, always at the end. After this point
+		 * the dests start.
+		 */
+		 
+		 unsigned int numEntries_;
 
 		/**
 		 * This is the size of each object in the array.
 		 */
 		size_t objectSize_;
-
-		/**
-		 * Scans through all MsgSrcs to find the highest Conn index
-		 * used for MsgSrcs.
-		 */
-		unsigned int lastSrcConnIndex() const;
-
-		/**
-		 * Scans through all MsgDests to find the highest Conn index
-		 * used for MsgDests.
-		 */
-		unsigned int lastDestConnIndex() const;
 		
 		//createmap specific variables
 		int Nx_, Ny_;
 		double dx_, dy_;
 		double xorigin_, yorigin_;
-
+		// Deprecated
+		// unsigned int destMsgBegin_;
 };
 
 #endif // _ARRAY_ELEMENT_H

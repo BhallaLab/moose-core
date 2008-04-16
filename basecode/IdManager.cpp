@@ -150,38 +150,37 @@ Element* IdManager::getElement( const Id& id ) const
 {
 	static ThisFinfo dummyFinfo( initNeutralCinfo(), 1 );
 	if ( id.id_ < mainIndex_ ) {
-	Element* ret = elementList_[ id.id_ ];
-	if ( ret == 0 )
-		return 0;
-#ifdef USE_MPI
-		if ( ret == UNKNOWN_NODE )
-			// don't know how to handle this yet. It should trigger
-			// a request to the master node to update the elist.
-			// We then get into managing how many entries are unknown...
-			assert( 0 );
-		if ( ret->cinfo() != initPostMasterCinfo() ) {
-			return ret;
-		} else if ( ret->id().id_ == id.id_ ) {
-			// This is the postmaster itself
-			return ret;
-		} else {
-			OffNodeInfo* oni = new OffNodeInfo( ret, Id( index ) );
-
-			Element* wrap = new SimpleElement( Id(), "wrapper", 0, 0, oni );
-			wrap->addFinfo( &dummyFinfo );
-			return wrap;
-		}
-#else
-	if ( id.index_ > 0 ) {
-		/*
-		if ( ret->numEntries() > id.index_ )
-			return new ArrayWrapperElement( ret , id.index_ );
-		else
+		Element* ret = elementList_[ id.id_ ];
+		if ( ret == 0 )
 			return 0;
-		*/
-	} else {
+#ifdef USE_MPI
+			if ( ret == UNKNOWN_NODE )
+				// don't know how to handle this yet. It should trigger
+				// a request to the master node to update the elist.
+				// We then get into managing how many entries are unknown...
+				assert( 0 );
+			if ( ret->cinfo() != initPostMasterCinfo() ) {
+				return ret;
+			} else if ( ret->id().id_ == id.id_ ) {
+				// This is the postmaster itself
+				return ret;
+			} else {
+				OffNodeInfo* oni = new OffNodeInfo( ret, Id( index ) );
+	
+				Element* wrap = new SimpleElement( Id(), "wrapper", 0, 0, oni );
+				wrap->addFinfo( &dummyFinfo );
+				return wrap;
+			}
+#else
+		/*if ( id.index_ > 0 ) {
+			
+			if ( ret->numEntries() > id.index_ )
+				return new ArrayWrapperElement( ret , id.index_ );
+			else
+				return 0;
+		} else {*/
 		return ret;
-	}
+		//}
 #endif
 	}
 	return 0;

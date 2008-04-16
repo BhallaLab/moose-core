@@ -32,7 +32,7 @@
 #include "TraverseMsgConn.h"
 #include "TraverseDestConn.h"
 #include "SimpleElement.h"
-// #include "ArrayElement.h"
+#include "ArrayElement.h"
 // #include "ArrayWrapperElement.h"
 
 #include "DynamicFinfo.h"

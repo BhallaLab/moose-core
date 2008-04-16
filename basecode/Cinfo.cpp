@@ -421,10 +421,9 @@ Element* Cinfo::createArray( Id id, const std::string& name,
 			void* data, unsigned int numEntries, size_t objectSize,
 			bool noDeleteFlag ) const
 {
-	return 0;
-	/*
 	ArrayElement* ret = 
-		new ArrayElement( id, name, nMsg_, data, numEntries, objectSize );
+		new ArrayElement( id, name,  data, numSrc_, numEntries, objectSize);
+		//new ArrayElement( id, name, numSrc_, data, numEntries, objectSize );
 	if ( noDeleteFlag )
 		ret->addFinfo( noDelFinfo_ );
 	else
@@ -432,7 +431,6 @@ Element* Cinfo::createArray( Id id, const std::string& name,
 	set( ret, "postCreate" );
 	
 	return ret;
-	*/
 }
 
 /**
@@ -440,10 +438,10 @@ Element* Cinfo::createArray( Id id, const std::string& name,
  * the MsgSrc and MsgDest allocated.
  */
 Element* Cinfo::createArray( Id id, const std::string& name,
-	unsigned int numEntries, size_t objectSize )	const
+	unsigned int numEntries)	const
 {
 	return createArray( id, name, ftype_->create( numEntries ), 
-		numEntries, objectSize );
+		numEntries, ftype_->size() );
 }
 
 /**
