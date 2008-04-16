@@ -21,6 +21,8 @@
  */
 class Eref {
 	public:
+		Eref()
+		{;}
 		Eref( Element* eArg, unsigned int iArg = 0 )
 			: e( eArg ), i( iArg )
 		{;}
