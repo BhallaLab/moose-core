@@ -82,8 +82,8 @@ class Shell
 		static void staticCreateArray( const Conn*, string type,
 						string name, Id parent, vector <double> parameter );
 		static void planarconnect( const Conn* c, string source, string dest, double probability);
-		static void planardelay(const Conn* c, string source, double delay);
-		static void planarweight(const Conn* c, string source, double weight);
+		static void planardelay(const Conn& c, string source, string destination, vector <double> parameter);
+		static void planarweight(const Conn& c, string source, string  destination, vector <double> parameter);
 		static void getSynCount2(const Conn* c, Id dest);
 		
 		static void staticDestroy( const Conn*, Id victim );

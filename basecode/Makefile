@@ -25,6 +25,7 @@ OBJ = \
 	TraverseMsgConn.o	\
 	TraverseDestConn.o	\
 	SimpleElement.o	\
+	ArrayElement.o \
 	Copy.o \
 	Send.o \
 	SrcFinfo.o \
@@ -64,10 +65,9 @@ HEADERS = \
 	Msg.h \
 	Element.h \
 	Class.h \
-
 #	AssignFinfo.h
 #	ArrayFinfo.o \
-#	ArrayElement.o	\
+
 #	ArrayWrapperElement.o	\
 
 default: $(TARGET)
@@ -96,7 +96,7 @@ strconv.o:		DerivedFtype.h
 filecheck.o: filecheck.h
 IdManager.o:	Id.h IdManager.h ArrayWrapperElement.h
 ArrayElement.o:	ArrayElement.h SimpleElement.h DeletionMarkerFinfo.h
-ArrayWrapperElement.o:	ArrayWrapperElement.h SimpleElement.h DeletionMarkerFinfo.h
+ArrayWrapperElement.o:	ArrayWrapperElement.h SimpleElement.h DeletionMarkerFinfo.h GlobalMarkerFinfo.h ThisFinfo.h
 Class.o: Class.h Cinfo.h Cinfo.cpp
 FuncVec.o: RecvFunc.h Ftype.h FuncVec.h
 TraverseMsgConn.o: TraverseMsgConn.h

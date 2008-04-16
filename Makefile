@@ -106,7 +106,7 @@ OBJLIBS =	\
 	kinetics/kinetics.o \
 	builtins/builtins.o \
 
-# example/example.o \
+# example/example.o 
 
 export CFLAGS
 export LD

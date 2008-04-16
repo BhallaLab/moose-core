@@ -213,7 +213,7 @@ void Neutral::mcreate( const Conn* conn,
 void Neutral::mcreateArray( const Conn* conn,
 				const string cinfo, const string name, int n )
 {
-		createArray( cinfo, name, conn->target().e, n );
+		createArray( cinfo, name, conn->target().e, Id::scratchId(), n );
 }
 
 
@@ -268,9 +268,52 @@ Element* Neutral::create(
 }
 
 Element* Neutral::createArray(
-		const string& cinfo, const string& name, Element* parent, int n )
+		const string& cinfo, const string& name, Element* parent, Id id, int n )
 {
+	// Check that the parent exists.
+	if ( !parent ) {
+		cout << "Error: Neutral::create: No parent\n";
+		return 0;
+	}
+	// Check that the parent can handle children
+	const Finfo* childSrc = parent->findFinfo( "childSrc" );
+	if ( !childSrc ) {
+		cout << "Error: Neutral::create: object '" << parent->name() << 
+			"' cannot handle child\n";
+		return 0;
+	}
+
+	// Check that the child class is correct
+	const Cinfo* c = Cinfo::find( cinfo );
+	if ( !c ) {
+		cout << "Error: Neutral::create: class " << cinfo << 
+				" not found\n";
+		return 0;
+	}
+
 	// Need to check here if the name is an existing one.
+	Id existing = getChildByName( parent, name );
+	if ( existing.good() ) {
+		cout << "Error: Neutral::create: Attempt to overwrite existing element '" << existing.path() << "'. Using original.\n";
+		return existing();
+	}
+
+	if ( c ) {
+		// Element* kid = c->create( Id::scratchId(), name );
+		Element* kid = c->createArray( id, name, n );
+		const Finfo* kFinfo = kid->findFinfo( "child" );
+		assert( kFinfo != 0 );
+		// Here a global absolute or a relative finfo lookup for
+		// the childSrc field would be useful.
+		bool ret = childSrc->add( parent, kid, kFinfo );
+		assert( ret );
+		ret = c->schedule( kid );
+		assert( ret );
+		return kid;
+	}
+	return 0;
+	
+	/*// Need to check here if the name is an existing one.
 	const Cinfo* c = Cinfo::find( cinfo );
 	if ( c ) {
 		Element* kid = c->createArray( Id::scratchId(), name, n, 0 );
@@ -286,7 +329,7 @@ Element* Neutral::createArray(
 		cout << "Error: Neutral::create: class " << cinfo << 
 				" not found\n";
 	}
-	return 0;
+	return 0;*/
 }
 
 
