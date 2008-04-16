@@ -8,48 +8,34 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-/*
-#include "header.h"
-#include "MsgSrc.h"
-#include "MsgDest.h"
-#include "DeletionMarkerFinfo.h"
-#include "ArrayElement.h"
-#include "ThisFinfo.h"
-*/
-
 #include "moose.h"
 #include "DeletionMarkerFinfo.h"
 #include "GlobalMarkerFinfo.h"
 #include "ThisFinfo.h"
-#include<sstream>
+
+/**
+ * This sets up initial space on each ArrayElement for 4 messages.
+ * We expect always to see the parent, process and usually something else.
+ */
+static const unsigned int INITIAL_MSG_SIZE = 4;
 
 #ifdef DO_UNIT_TESTS
 int ArrayElement::numInstances = 0;
 #endif
 
-ArrayElement::ArrayElement( Id id, const std::string& name )
-	: Element( id ), name_( name ), data_( 0 ), numEntries_( 0 ),
-		objectSize_( 0 )
-{
-#ifdef DO_UNIT_TESTS
-		numInstances++;
-#endif
-		;
-}
-
 ArrayElement::ArrayElement(
 				Id id,
 				const std::string& name, 
-				unsigned int srcSize,
-				unsigned int destSize,
 				void* data,
+				unsigned int numSrc, 
 				unsigned int numEntries,
 				size_t objectSize
 	)
 	: Element( id ), name_( name ), 
-		src_( srcSize ), dest_( destSize ), 
 		data_( data ), 
-		numEntries_( numEntries ), objectSize_( objectSize )
+		msg_( numSrc ), 
+		numEntries_(numEntries), 
+		objectSize_(objectSize)
 {
 #ifdef DO_UNIT_TESTS
 		numInstances++;
@@ -57,41 +43,21 @@ ArrayElement::ArrayElement(
 		;
 }
 
-
-ArrayElement::ArrayElement(
-				const std::string& name, 
-				const vector< MsgSrc >& src,
-				const vector< MsgDest >& dest,
-				const vector< Conn >& conn,
-				const vector< Finfo* >& finfo,
-				void* data,
-				unsigned int numEntries,
-				size_t objectSize
-	)
-	: Element( Id::scratchId() ), name_( name ), 
-		conn_(conn), src_( src ), dest_( dest ), 
-		finfo_( finfo ), data_( data ), 
-		numEntries_( numEntries ), objectSize_( objectSize )
-{
-	for (size_t i = 1; i < finfo.size(); i++)
-		finfo_[i] = finfo[i]->copy();
-#ifdef DO_UNIT_TESTS
-		numInstances++;
-#endif	
-		;
-}
-
+/**
+ * Copies a ArrayElement. Does NOT copy data or messages.
+ */
 ArrayElement::ArrayElement( const ArrayElement* orig )
 		: Element( Id::scratchId() ),
 		name_( orig->name_ ), 
-		conn_( orig->conn_ ), 
-		src_( orig->src_ ),
-		dest_( orig->dest_ ),
-		finfo_( orig->finfo_ ),
-		data_( 0 ), 
-		numEntries_( orig->numEntries_ ), 
-		objectSize_( orig->objectSize_ )
+		finfo_( 1 ),
+		data_( 0 ),
+		msg_( orig->cinfo()->numSrc() )
 {
+	assert( finfo_.size() > 0 );
+	// Copy over the 'this' finfo
+	finfo_[0] = orig->finfo_[0];
+
+///\todo should really copy over the data as well.
 #ifdef DO_UNIT_TESTS
 		numInstances++;
 #endif	
@@ -122,12 +88,31 @@ ArrayElement::~ArrayElement()
 		}
 	}
 
+	/**
+	 * Need to explicitly drop messages, because we cannot tie the 
+	 * operation to the Msg destructor. This is because the Msg vector
+	 * changes size all the time but the Msgs themselves should not
+	 * be removed.
+	 * Note that we don't use DropAll, because by the time the call has
+	 * come here we should have cleared out all the messages going outside
+	 * the tree being deleted. Here we just destroy the allocated
+	 * ConnTainers and their vectors in all messages.
+	 */
+	vector< Msg >::iterator m;
+	for ( m = msg_.begin(); m!= msg_.end(); m++ )
+		m->dropForDeletion();
 
 	// Check if Finfo is one of the transient set, if so, clean it up.
 	vector< Finfo* >::iterator i;
-	for ( i = finfo_.begin(); i != finfo_.end(); i++ )
-		if ( (*i)->isTransient() )
+	// cout << name() << " " << id() << " f = ";
+	for ( i = finfo_.begin(); i != finfo_.end(); i++ ) {
+		assert( *i != 0 );
+		// cout << ( *i )->name()  << " ptr= " << *i << " " ;
+		if ( (*i)->isTransient() ) {
 			delete *i;
+		}
+	}
+	// cout << endl;
 }
 
 const std::string& ArrayElement::className( ) const
@@ -142,404 +127,164 @@ const Cinfo* ArrayElement::cinfo( ) const
 	return tf->cinfo();
 }
 
+//////////////////////////////////////////////////////////////////
+// Msg traversal functions
+//////////////////////////////////////////////////////////////////
+
 /**
- * Returns the index of the first matching MsgSrc of the shared set,
- * or if it doesn't exist, it makes a new set of MsgSrcs and returns
- * the starting index of this set.
- * Assumes that the Finfo that called this function has done the
- * necessary type matching to the src.
- * Ensures that all Conns belonging to the linked list of MsgSrcs are
- * contiguous.
+ * The Conn iterators have to be deleted by the recipient function.
  */
-unsigned int ArrayElement::insertConnOnSrc(
-		unsigned int src, FuncList& rf,
-		unsigned int dest, unsigned int nDest )
+Conn* ArrayElement::targets( int msgNum ) const
 {
-	assert ( rf.size() > 0 );
-	assert ( src_.size() > 0 );
-	assert ( src_.size() >= src + rf.size() );
-
-	vector< RecvFunc > oldFuncs;
-	MsgSrc& s( src_[ src ] );
-	unsigned int begin = s.begin();
-	unsigned int end = s.end();
-	unsigned int next = s.next();
-
-	for (unsigned int i = 0; i < rf.size(); i++ ) {
-		// MsgSrc& s( src_[ src + i ] );
-		// assert( begin == s.begin() );
-		// assert( end == s.end() );
-		// assert( next == s.next() );
-		oldFuncs.push_back( src_[ src + i ].recvFunc() );
+	if ( msgNum >= 0 && 
+		static_cast< unsigned int >( msgNum ) < cinfo()->numSrc() )
+		return new TraverseMsgConn( &msg_[ msgNum ], this, 0 );
+	else if ( msgNum < 0 ) {
+		const vector< ConnTainer* >* d = dest( msgNum );
+		if ( d )
+			return new TraverseDestConn( d, 0 );
 	}
-
-	if ( begin == end ) { // Need to initialize current MsgSrc
-		unsigned int i;
-		for ( i = 0; i < rf.size(); i++ ) {
-			assert( src_[ src + i ].recvFunc() == dummyFunc );
-			src_[ src + i ].setFunc( rf[i] );
-		}
-		return insertConn( src, rf.size(), dest, nDest );
-	}
-
-	if ( oldFuncs == rf ) // This src matches, insertion in this src
-		return insertConn( src, rf.size(), dest, nDest );
-
-	if ( next != 0 ) // Look in next range for insertion
-		return insertConnOnSrc( src + next, rf, dest, nDest );
-
-	// Nothing matches. So we create a new range at the end of the src_.
-	unsigned int offset = src_.size() - src;
-	for (unsigned int i = 0; i < rf.size(); i++ ) {
-		src_[ src + i ].setNext( offset );
-		// Note that the new src uses the 'end' from the previous one.
-		// This ensures that all Conns within a MsgSrc are contiguous.
-		src_.push_back( MsgSrc( end, end, rf[i] ) );
-	}
-	return insertConn( src_.size() - rf.size(), rf.size(), dest, nDest);
+	return 0;
 }
 
 /**
- * This variant inserts a connection on the MsgSrc, putting it on
- * the separate index. It is used to expand out shared messages into
- * individual ones for connecting to the PostMaster.
- * Returns the index of the first matching Conn of the shared set,
- * or if it doesn't exist, it makes a new set of MsgSrcs and returns
- * the starting index of this set.
- * Assumes that the Finfo that called this function has done the
- * necessary type matching to the src.
- * Ensures that all Conns belonging to the linked list of MsgSrcs are
- * contiguous.
- * Assumes that the FuncList rf has been expanded out in case there are
- * extra Conn entries needed for incoming messages.
+ * The Conn iterators have to be deleted by the recipient function.
  */
-unsigned int ArrayElement::insertSeparateConnOnSrc(
-		unsigned int src, FuncList& rf,
-		unsigned int dest, unsigned int nDest )
+Conn* ArrayElement::targets( const string& finfoName ) const
 {
-	assert ( rf.size() > 0 );
-	assert ( src_.size() > 0 );
-	assert ( src_.size() >= src + rf.size() );
+	const Finfo* f = cinfo()->findFinfo( finfoName );
+	if ( !f )
+		return 0;
+	return targets( f->msg() );
+}
 
-	vector< RecvFunc > oldFuncs;
-	MsgSrc& s( src_[ src ] );
-	unsigned int begin = s.begin();
-	unsigned int end = s.end();
-	unsigned int next = s.next();
-
-	if ( begin == end ) { // Need to initialize current MsgSrc
-		unsigned int i;
-		unsigned int ret = 0;
-		for ( i = 0; i < rf.size(); i++ ) {
-			assert( src_[ src + i ].recvFunc() == dummyFunc );
-			src_[ src + i ].setFunc( rf[i] );
-			if ( i == 0 )
-				ret = insertConn( src, 1, dest, nDest );
-			else 
-				insertConn( src + i, 1, dest, nDest );
-		}
-		return ret;
+unsigned int ArrayElement::numTargets( int msgNum ) const
+{
+	if ( msgNum >= 0 && 
+		static_cast< unsigned int >( msgNum ) < cinfo()->numSrc() )
+		return msg_[ msgNum ].numTargets( this );
+	else if ( msgNum < 0 ) {
+		const vector< ConnTainer* >* d = dest( msgNum );
+		if ( d )
+			return d->size();
 	}
-
-	for (unsigned int i = 0; i < rf.size(); i++ ) {
-		oldFuncs.push_back( src_[ src + i ].recvFunc() );
-	}
-
-	if ( oldFuncs == rf ) { // This src matches, insertion in this src
-		unsigned int i;
-		unsigned int ret = 0;
-		for ( i = 0; i < rf.size(); i++ ) {
-			assert( src_[ src + i ].recvFunc() == rf[i] );
-			if ( i == 0 )
-				ret = insertConn( src, 1, dest, nDest );
-			else 
-				insertConn( src + i, 1, dest, nDest );
-		}
-		return ret;
-	}
-
-	if ( next != 0 ) // Look in next range for insertion
-		return insertSeparateConnOnSrc( src + next, rf, dest, nDest );
-
-	// Nothing matches. So we create a new range at the end of the src_.
-	unsigned int offset = src_.size() - src;
-	for (unsigned int i = 0; i < rf.size(); i++ ) {
-		src_[ src + i ].setNext( offset );
-		// Note that the new src uses the 'end' from the previous one.
-		// This ensures that all Conns within a MsgSrc are contiguous.
-		src_.push_back( MsgSrc( end, end, rf[i] ) );
-	}
-	src = src_.size() - rf.size();
-		unsigned int i;
-		unsigned int ret = 0;
-		for ( i = 0; i < rf.size(); i++ ) {
-			assert( src_[ src + i ].recvFunc() == rf[i] );
-			if ( i == 0 )
-				ret = insertConn( src, 1, dest, nDest );
-			else 
-				insertConn( src + i, 1, dest, nDest );
-		}
-		return ret;
-	//return insertConn( src_.size() - rf.size(), rf.size(), dest, nDest);
+	return 0;
 }
 
-/**
- * Inserts a Conn for the desired dest. Returns the index of the
- * new Conn. Assumes that there are no shared Srcs to be dealt with.
- * The nDest is in case this is a shared dest, and we may have to
- * increment multiple dest entries.
- * \todo: Perhaps we don't have to increment multiple entries. If
- * it is a shared dest then a single one will do for all. In that
- * case we should eliminate the nDest argument.
- */
-unsigned int ArrayElement::insertConnOnDest(
-		unsigned int dest, unsigned int nDest )
+unsigned int ArrayElement::numTargets( const string& finfoName ) const
 {
-	assert( dest_.size() >= dest + nDest );
-
-	return insertConn( 0, 0, dest, nDest );
-}
-
-vector< Conn >::const_iterator
-	ArrayElement::lookupConn( unsigned int i ) const
-{
-	assert ( i < conn_.size() );
-	return conn_.begin() + i;
-}
-
-vector< Conn >::iterator
-	ArrayElement::lookupVariableConn( unsigned int i )
-{
-	assert ( i < conn_.size() );
-	return conn_.begin() + i;
-}
-
-RecvFunc ArrayElement::lookupRecvFunc(
-		unsigned int src, unsigned int conn ) const
-{
-	assert ( src < src_.size() );
-	assert ( conn < conn_.size() );
-	assert ( src_[src].begin() <= conn );
-	vector< MsgSrc >::const_iterator i = src_.begin() + src;
-	while ( i->end() <= conn ) {
-		assert ( i->next() != 0 );
-		i += i->next();
-	}
-	return i->recvFunc();
-}
-
-unsigned int ArrayElement::connIndex( const Conn* c ) const
-{
-	return static_cast< unsigned int >( c - &conn_.front() );
-}
-
-/**
- * This finds the relative index of a conn arriving at this element.
- */
-unsigned int ArrayElement::connDestRelativeIndex(
-				const Conn* c, unsigned int slot ) const
-{
-	assert ( slot < dest_.size() );
-	assert ( conn_.size() >= dest_[ slot ].begin() );
-	assert ( c->targetIndex() >= dest_[ slot ].begin() );
-	return c->targetIndex() - dest_[ slot ].begin();
-}
-/**
- * This finds the relative index of a conn arriving at this element on the
- * MsgSrc vector.
- */
-unsigned int ArrayElement::connSrcRelativeIndex(
-				const Conn* c, unsigned int slot ) const
-{
-	assert ( slot < src_.size() );
-	assert ( conn_.size() >= src_[ slot ].begin() );
-	assert ( c->targetIndex() >= src_[ slot ].begin() );
-	return c->targetIndex() - src_[ slot ].begin();
+	const Finfo* f = cinfo()->findFinfo( finfoName );
+	if ( !f )
+		return 0;
+	return numTargets( f->msg() );
 }
 
 //////////////////////////////////////////////////////////////////
-// Src functions
+// Msg functions
 //////////////////////////////////////////////////////////////////
 
-vector< Conn >::const_iterator
-	ArrayElement::connSrcBegin( unsigned int src ) const
+const Msg* ArrayElement::msg( unsigned int msgNum ) const
 {
-	assert ( src < src_.size() );
-	assert ( conn_.size() >= src_[ src ].begin() );
-	return conn_.begin() + src_[ src ].begin();
+	assert ( msgNum < msg_.size() );
+	return ( &( msg_[ msgNum ] ) );
 }
 
-vector< Conn >::const_iterator
-	ArrayElement::connSrcEnd( unsigned int src ) const
+Msg* ArrayElement::varMsg( unsigned int msgNum )
 {
-	assert (  src  < src_.size() );
-	assert ( conn_.size() >= src_[ src ].end() );
-	return conn_.begin() + src_[ src ].end();
+	assert ( msgNum < msg_.size() );
+	return ( &( msg_[ msgNum ] ) );
 }
 
-
-vector< Conn >::const_iterator
-	ArrayElement::connSrcVeryEnd( unsigned int src ) const
+const vector< ConnTainer* >* ArrayElement::dest( int msgNum ) const
 {
-	assert (  src  < src_.size() );
-	assert ( conn_.size() >= src_[ src ].end() );
-	unsigned int n = nextSrc( src );
-	if ( n != 0 )
-		return connSrcVeryEnd( n );
-
-	return conn_.begin() + src_[ src ].end();
+	if ( msgNum >= 0 )
+		return 0;
+	map< int, vector< ConnTainer* > >::const_iterator i = dest_.find( msgNum );
+	if ( i != dest_.end() ) {
+		return &( *i ).second;
+	}
+	return 0;
 }
 
-unsigned int ArrayElement::nextSrc( unsigned int src ) const
+vector< ConnTainer* >* ArrayElement::getDest( int msgNum ) 
 {
-	assert ( src < src_.size() );
-	return ( src_[ src ].next() == 0 ) ? 0 : src + src_[ src ].next();
-	// return src_[ src ].next();
+	return &dest_[ msgNum ];
 }
 
-RecvFunc ArrayElement::srcRecvFunc( unsigned int src ) const
+/*
+const Msg* ArrayElement::msg( const string& fName )
 {
-	assert ( src < src_.size() );
-	return src_[ src ].recvFunc();
+	const Finfo* f = findFinfo( fName );
+	if ( f ) {
+		int msgNum = f->msg();
+		if ( msgNum < msg_.size() )
+			return ( &( msg_[ msgNum ] ) );
+	}
+	return 0;
+}
+*/
+
+unsigned int ArrayElement::addNextMsg()
+{
+	msg_.push_back( Msg() );
+	return msg_.size() - 1;
+}
+
+unsigned int ArrayElement::numMsg() const
+{
+	return msg_.size();
+}
+
+//////////////////////////////////////////////////////////////////
+// Information functions
+//////////////////////////////////////////////////////////////////
+
+unsigned int ArrayElement::getTotalMem() const
+{
+	return sizeof( ArrayElement ) + 
+		sizeof( name_ ) + name_.length() + 
+		sizeof( finfo_ ) + finfo_.size() * sizeof( Finfo* ) +
+		getMsgMem();
 }
 
 unsigned int ArrayElement::getMsgMem() const
 {
-	return sizeof( ArrayElement ) + 
-		sizeof( name_ ) + name_.length() + 
-		sizeof( conn_ ) + conn_.size() * sizeof( Conn ) + 
-		sizeof( src_ ) +  src_.size() * sizeof( MsgSrc ) + 
-		sizeof( dest_ ) +  dest_.size() * sizeof( MsgDest ) + 
-		sizeof( finfo_ ) + finfo_.size() * sizeof( Finfo* );
-}
-
-//////////////////////////////////////////////////////////////////
-// Dest functions
-//////////////////////////////////////////////////////////////////
-vector< Conn >::const_iterator
-	ArrayElement::connDestBegin( unsigned int dest ) const
-{
-	assert ( dest < dest_.size() );
-	assert ( conn_.size() >= dest_[ dest ].begin() );
-	return conn_.begin() + dest_[ dest ].begin();
-}
-
-vector< Conn >::const_iterator
-	ArrayElement::connDestEnd( unsigned int dest ) const
-{
-	assert (  dest  < dest_.size() );
-	assert ( conn_.size() >= dest_[ dest ].end() );
-	return conn_.begin() + dest_[ dest ].end();
-}
-
-//////////////////////////////////////////////////////////////////
-// Conn functions
-//////////////////////////////////////////////////////////////////
-
-/**
- * Puts a new Conn at the end of the set of srcs and dests specified,
- * and update this set and all later ones.
- * Return the location of the inserted Conn.
- */
-unsigned int ArrayElement::insertConn(
-				unsigned int src, unsigned int nSrc,
-				unsigned int dest, unsigned int nDest )
-{
-	assert( src + nSrc <= src_.size() );
-	assert( dest + nDest <= dest_.size() );
-	assert( nSrc + nDest > 0 );
-
-	unsigned int location;
-	if ( nSrc > 0 )
-			location = src_[ src ].end();
-	else // if ( nDest > 0 ) is always true, given the above assertion.
-			location = dest_[ dest ].end();
-
-	conn_.insert( conn_.begin() + location, Conn() );
-
-	// Update the src_ and dest_ ranges. This is the easy part.
-	vector< MsgSrc >::iterator i;
-	if ( nSrc > 0 ) {
-		vector< MsgSrc >::iterator j = src_.begin() + src + nSrc;
-		for ( i = src_.begin() + src; i != j; i++ )
-			i->insertWithin( );
-		for ( ; i != src_.end(); i++ )
-			i->insertBefore( );
+	vector< Msg >::const_iterator i;
+	unsigned int ret = 0;
+	for ( i = msg_.begin(); i < msg_.end(); i++ ) {
+		ret += i->size();
 	}
-
-	vector< MsgDest >::iterator k;
-	for ( k = dest_.begin() + dest; 
-					k != dest_.begin() + dest + nDest; k++ )
-		k->insertWithin();
-	for ( ; k != dest_.end(); k++ )
-		k->insertBefore( );
-
-	// Update the Conns. This is the hard part.
-	//for ( unsigned int j = location + 1; j < conn_.size(); j++ )
-		//cout << "hi* " << conn_[j].sourceIndex(this)<< endl;
-	for ( unsigned int j = location + 1; j < conn_.size(); j++ )
-		conn_[j].updateIndex( j );
-
-	return location;
+	return ret;
 }
+
+bool ArrayElement::isMarkedForDeletion() const
+{
+	if ( finfo_.size() > 0 )
+		return finfo_.back() == DeletionMarkerFinfo::global();
+	// This fallback case should only occur during unit testing.
+	return 0;
+}
+
+bool ArrayElement::isGlobal() const
+{
+	if ( finfo_.size() > 0 )
+		return finfo_.back() == GlobalMarkerFinfo::global();
+	// This fallback case should only occur during unit testing.
+	return 0;
+}
+
+
+//////////////////////////////////////////////////////////////////
+// Finfo functions
+//////////////////////////////////////////////////////////////////
 
 /**
- * Take two naive Conns, and assign their values so that they point
- * to each other
+ * Returns a finfo matching the target name.
+ * Note that this is not a const function because the 'match'
+ * function may generate dynamic finfos on the fly. If you need
+ * a simpler, const string comparison then use constFindFinfo below,
+ * which has limitations for special fields and arrays.
  */
-void ArrayElement::connect( unsigned int myConn, 
-				Element* targetElement, unsigned int targetConn)
-{
-	assert( conn_.size() > myConn );
-	assert( targetElement != 0 );
-	assert( targetElement->connSize() > targetConn );
-
-	// conn_[myConn].set( targetElement, targetConn );
-	conn_[myConn] = Conn( targetElement, targetConn );
-	*( targetElement->lookupVariableConn( targetConn ) ) =
-			Conn( this, myConn );
-}
-
-/**
- * Delete a Conn. Deleting a single conn_ also deletes its partner. 
- * This involves cleaning up the range_ and the conn_
- * vectors locally, as well as at the target.
- */
-void ArrayElement::disconnect( unsigned int connIndex )
-{
-	assert( connIndex < conn_.size() );
-	conn_[ connIndex ].targetElement()->
-			deleteHalfConn( conn_[ connIndex ].targetIndex() );
-	deleteHalfConn( connIndex );
-}
-
-/**
- * Do the clean up only from the viewpoint of the conn on the local
- * object. This involves cleaning up the src_ and dest_ and updating
- * the * return index of each of the targets of the conn_ vector.
- * The calling function has to ensure that the target conn is likewise
- * cleaned up.
- * Note that this function may leave orphan src_ ranges that have
- * a function set but are empty. Arrayst to ignore, as it is unlikely
- * to be a major source of garbage.
- */
-void ArrayElement::deleteHalfConn( unsigned int connIndex )
-{
-	assert( connIndex < conn_.size() );
-
-	vector< MsgSrc >::iterator i;
-	for ( i = src_.begin(); i != src_.end(); i++ )
-		i->dropConn( connIndex );
-
-	vector< MsgDest >::iterator j;
-	for ( j = dest_.begin(); j != dest_.end(); j++ )
-		j->dropConn( connIndex );
-
-	conn_.erase( conn_.begin() + connIndex );
-	for ( unsigned int k = connIndex; k < conn_.size(); k++ )
-		conn_[k].updateIndex( k );
-}
-
 const Finfo* ArrayElement::findFinfo( const string& name )
 {
 	vector< Finfo* >::reverse_iterator i;
@@ -559,6 +304,11 @@ const Finfo* ArrayElement::findFinfo( const string& name )
 	return 0;
 }
 
+/**
+ * This is a const version of findFinfo. Instead of match it does a
+ * simple strcmp against the field name. Cannot handle complex fields
+ * like ones with indices.
+ */
 const Finfo* ArrayElement::constFindFinfo( const string& name ) const
 {
 	vector< Finfo* >::const_reverse_iterator i;
@@ -572,11 +322,15 @@ const Finfo* ArrayElement::constFindFinfo( const string& name ) const
 			if ( (*i)->name() == name )
 				return *i;
 	}
+
+	// If it is not on the dynamically created finfos, maybe it is on
+	// the static set.
 	return cinfo()->findFinfo( name );
+	
 	return 0;
 }
 
-const Finfo* ArrayElement::findFinfo( unsigned int connIndex ) const
+const Finfo* ArrayElement::findFinfo( const ConnTainer* c ) const
 {
 	vector< Finfo* >::const_reverse_iterator i;
 	const Finfo* ret;
@@ -588,11 +342,17 @@ const Finfo* ArrayElement::findFinfo( unsigned int connIndex ) const
 	// and we want more recent finfos to override old ones.
 	for ( i = finfo_.rbegin(); i != finfo_.rend(); i++ )
 	{
-			ret = (*i)->match( this, connIndex );
+			ret = (*i)->match( this, c );
 			if ( ret )
 					return ret;
 	}
 	return 0;
+}
+
+const Finfo* ArrayElement::findFinfo( int msgNum ) const
+{
+	const Cinfo* c = cinfo();
+	return c->findFinfo( msgNum );
 }
 
 const Finfo* ArrayElement::localFinfo( unsigned int index ) const
@@ -628,6 +388,7 @@ unsigned int ArrayElement::listLocalFinfos( vector< Finfo* >& flist )
 }
 
 void ArrayElement::addExtFinfo(Finfo *f){
+	//don't think anything just add the finfo to the list
 	finfo_.push_back(f);
 }
 
@@ -637,22 +398,10 @@ void ArrayElement::addExtFinfo(Finfo *f){
  */
 void ArrayElement::addFinfo( Finfo* f )
 {
-	unsigned int nSrc = src_.size();
-	unsigned int nDest = dest_.size();
-	f->countMessages( nSrc, nDest );
-
-	if ( nSrc > src_.size() ) {
-		unsigned int end = lastSrcConnIndex();
-		MsgSrc temp( end, end, dummyFunc );
-		src_.push_back( temp );
-		assert( src_.size() == nSrc );
-	}
-	if ( nDest > dest_.size() ) {
-		unsigned int end = lastDestConnIndex();
-		MsgDest temp( end, end );
-		dest_.push_back( temp );
-		assert( dest_.size() == nDest );
-	}
+	unsigned int num = msg_.size();
+	f->countMessages( num );
+	if ( num > msg_.size() )
+		msg_.resize( num );
 	finfo_.push_back( f );
 }
 
@@ -670,7 +419,8 @@ bool ArrayElement::dropFinfo( const Finfo* f )
 	vector< Finfo* >::iterator i;
 	for ( i = finfo_.begin() + 1; i != finfo_.end(); i++ ) {
 		if ( *i == f ) {
-			f->dropAll( this );
+			assert ( f->msg() < static_cast< int >( msg_.size() ) );
+			msg_[ f->msg() ].dropAll( this );
 			delete *i;
 			finfo_.erase( i );
 			return 1;
@@ -693,208 +443,38 @@ const Finfo* ArrayElement::getThisFinfo( ) const
 	return finfo_[0];
 }
 
-bool ArrayElement::isConnOnSrc(
-			unsigned int srcIndex, unsigned int connIndex ) const
-{
-	assert( srcIndex < src_.size() );
-	assert( connIndex < conn_.size() );
-	vector< MsgSrc >::const_iterator i = src_.begin() + srcIndex;
-
-	while ( i != src_.end() ) {
-		if ( i->begin() <= connIndex && i->end() > connIndex )
-				return 1;
-		if ( i->next() > 0 )
-				i += i->next();
-		else
-			return 0;
-	}
-	assert( 0 ); // should never get here
-	return 0;
-}
-
-bool ArrayElement::isConnOnDest(
-			unsigned int destIndex, unsigned int connIndex ) const
-{
-	assert( destIndex < dest_.size() );
-	assert( connIndex < conn_.size() );
-	return (
-			dest_[ destIndex ].begin() <= connIndex &&
-			dest_[ destIndex ].end() > connIndex
-	);
-}
-
-unsigned int ArrayElement::lastSrcConnIndex() const
-{
-	vector< MsgSrc >::const_iterator i;
-	unsigned int ret = 0;
-	for (i = src_.begin(); i != src_.end(); i++ )
-		if ( ret < i->end() )
-				ret = i->end();
-
-	return ret;
-}
-
-unsigned int ArrayElement::lastDestConnIndex() const
-{
-	vector< MsgDest >::const_iterator i;
-	unsigned int ret = 0;
-	for (i = dest_.begin(); i != dest_.end(); i++ )
-		if ( ret < i->end() )
-				ret = i->end();
-
-	return ret;
-}
-
-bool ArrayElement::isMarkedForDeletion() const
-{
-	if ( finfo_.size() > 0 )
-		return finfo_.back() == DeletionMarkerFinfo::global();
-	// This fallback case should only occur during unit testing.
-	return 0;
-}
-
-bool ArrayElement::isGlobal() const
-{
-	if ( finfo_.size() > 0 )
-		return finfo_.back() == GlobalMarkerFinfo::global();
-	// This fallback case should only occur during unit testing.
-	return 0;
-}
 
 void ArrayElement::prepareForDeletion( bool stage )
 {
 	if ( stage == 0 ) {
 		finfo_.push_back( DeletionMarkerFinfo::global() );
-	} else {
-		vector< Conn >::iterator i;
-		for ( i = conn_.begin(); i != conn_.end(); i++ ) {
-			if ( !i->targetElement()->isMarkedForDeletion() )
-				i->targetElement()->deleteHalfConn( i->targetIndex() );
+	} else { // Delete all the remote conns that have not been marked.
+		vector< Msg >::iterator m;
+		for ( m = msg_.begin(); m!= msg_.end(); m++ ) {
+			m->dropRemote();
+		}
+
+		// Delete the dest connections too
+		map< int, vector< ConnTainer* > >::iterator j;
+		for ( j = dest_.begin(); j != dest_.end(); j++ ) {
+			Msg::dropDestRemote( j->second );
 		}
 	}
 }
 
+/**
+ * Debugging function to print out msging info
+ */
 void ArrayElement::dumpMsgInfo() const
 {
 	unsigned int i;
 	cout << "Element " << name_ << ":\n";
-	cout << "dest_:	begin, end\n";
-	for ( i = 0; i < dest_.size(); i++ )
-		cout << i << ":	" << dest_[i].begin() << ", " << dest_[i].end() << endl;
-	cout << "src_:	begin, end, next, func\n";
-	for ( i = 0; i < src_.size(); i++ ) {
-		string temp = "dummyFunc";
-		if ( src_[i].recvFunc() != &dummyFunc ) {
-			const FunctionData* fd =
-				lookupFunctionData( src_[i].recvFunc() );
-			temp = ( fd ) ? fd->funcFinfo()->name() : "unknown func";
-		}
-		cout << i << ":	" << src_[i].begin() << ", " << src_[i].end() << 
-			", " << src_[i].next() << ", " << temp << endl;
-
+	cout << "msg_: funcid, sizes\n";
+	for ( i = 0; i < msg_.size(); i++ ) {
+		vector< ConnTainer* >::const_iterator j;
+		cout << i << ":	funcid =" << msg_[i].funcId() << ": ";
+		for ( j = msg_[i].begin(); j != msg_[i].end(); j++ )
+			cout << ( *j )->size() << ", ";
 	}
-	cout << "conn:	target index, target Element:\n";
-	for ( i = 0; i < conn_.size(); i++ ) {
-		Element* e = conn_[i].targetElement();
-		string name = ( e ) ? e->name() : "EMPTY CONN";
-		cout << i << ":	" << conn_[i].targetIndex() << ", " << name << endl;
-	}
+	cout << endl;
 }
-
-
-Element* ArrayElement::copy( Element* parent, const string& newName ) const
-{ return 0;}
-
-Element* ArrayElement::copyIntoArray( Element* parent, const string& newName, int n )
-		const
-{ return 0; }
-
-bool ArrayElement::isDescendant( const Element* ancestor ) const
-{ return 0;}
-
-Element* ArrayElement::innerDeepCopy( 
-						map< const Element*, Element* >& tree ) const
-{ return 0;}
-
-Element* ArrayElement::innerDeepCopy(
-	map< const Element*, Element* >& tree, int n ) const
-{ return 0; }
-
-/*void ArrayElement::replaceCopyPointers(
-					map< const Element*, Element* >& tree,
-					vector< pair< Element*, unsigned int > >& delConns )
-{;}*/
-
-void ArrayElement::copyMsg( map< const Element*, Element* >& tree )
-{;}
-
-Element* ArrayElement::innerCopy() const 
-{
-	return 0;
-}
-
-Element* ArrayElement::innerCopy(int n) const 
-{
-	return 0;
-}
-
-bool ArrayElement::innerCopyMsg( 
-	const Conn* c, const Element* orig, Element* dup )
-{
-	return 0;
-}
-
-////////////////////////////////////////////////////////////////////////
-#ifdef DO_UNIT_TESTS
-
-#include "ArrayWrapperElement.h"
-#include "../builtins/Interpol.h"
-
-static const unsigned int ArraySize = 100;
-void ArrayElementTest()
-{
-	cout << "\nTesting ArrayElements";
-	Interpol* foo = new Interpol[ArraySize];
-	for ( unsigned int i = 0 ; i < ArraySize; i++ ) {
-		foo[i].localSetXmax( static_cast< double >( i + 1 ) );
-		foo[i].localSetXdivs( 2 * (i + 1) );
-	}
-
-	///////////////////////////////////////////////////////////////////
-	// Low level access to ArrayElement
-	///////////////////////////////////////////////////////////////////
-	Element* e = new ArrayElement( Id::scratchId(), "array", 0, 0, 
-		static_cast< void* >( foo ), 
-		ArraySize, sizeof( double ) );
-	const Finfo* iFinfo = initInterpolCinfo()->getThisFinfo();
-	e->addFinfo( const_cast< Finfo* >( iFinfo ) );
-
-	ASSERT( e->numEntries() == ArraySize,
-		"ArrayElement: testing numEntries" );
-
-	Element* awe = new ArrayWrapperElement( e, 27 );
-	// Interpol x = *( static_cast< Interpol* >( awe->data() ) );
-	ASSERT( Interpol::getXmax( awe ) == 28, "ArrayWrapperElement test" );
-	ASSERT( Interpol::getXdivs( awe ) == 56, "ArrayWrapperElement test" );
-	// Lots more to do here: Check set/get now.
-	
-	double d;
-	int i;
-	bool ret;
-	ret = get< double >( awe, awe->findFinfo( "xmax" ), d );
-	ASSERT( ret, "ArrayWrapperElement test" );
-	ASSERT( d == 28, "ArrayWrapperElement test" );
-
-	ret = get< int >( awe, awe->findFinfo( "xdivs" ), i );
-	ASSERT( ret, "ArrayWrapperElement test" );
-	ASSERT( i == 56, "ArrayWrapperElement test" );
-
-	///////////////////////////////////////////////////////////////////
-	// Now we look at higher level access to array elements.
-	///////////////////////////////////////////////////////////////////
-
-	delete[] foo;
-	delete awe;
-	// delete e;
-}
-#endif
