@@ -430,10 +430,12 @@ Id Shell::traversePath( Id start, vector< string >& names )
 			Id ret;
 			Element* e = start();
 			//Neutral::getChildByName(e, *i);
+			
 			lookupGet< Id, string >( e, "lookupChild", ret, *i );
 			//if ( ret.zero() || ret.bad() ) cout << "Shell:traversePath: The id is bad" << endl;
-			if ( ret.zero() || ret.bad() )
+			if ( ret.zero() || ret.bad() ){
 					return Id::badId();
+			}
 			start = ret;
 		}
 	}
@@ -744,11 +746,12 @@ void Shell::staticCreate( const Conn* c, string type,
 // Static function
 // parameter has following clumped in the order mentioned, Nx, Ny, dx, dy, xorigin, yorigin
 // creates array of simple elements. Will swtich to arrayelements later.
-void Shell::staticCreateArray( const Conn* c, string type,
+void Shell::staticCreateArray1( const Conn* c, string type,
 					string name, Id parent, vector <double> parameter )
 {
-	/*
-	Element* e = c->targetElement();
+	
+	Eref eref = c->target();
+// 	Element* e = c->targetElement();
 	Shell* s = static_cast< Shell* >( c->data() );
 
 	int n = (int) (parameter[0]*parameter[1]);
@@ -762,22 +765,23 @@ void Shell::staticCreateArray( const Conn* c, string type,
 			bool ret = s->create( type, sname, parent, id );
 			if ( ret ) { // Tell the parser it was created happily.
 				//GenesisParserWrapper::recvCreate(conn, id)
-				sendTo1< Id >( e, 0, createSlot, c->targetIndex(), id);
+				sendBack1< Id >( c, createSlot, id);
+				//sendTo1< Id >( e, 0, createSlot, c->targetIndex(), id);
 			}
 		}
 		else {
 			// Shell-to-shell messaging here with the request to
 			// create a child.
 			// This must only happen on node 0.
-			assert( e->id().node() == 0 );
+			assert( eref.id().node() == 0 );
 			assert( id.node() > 0 );
 			OffNodeInfo* oni = static_cast< OffNodeInfo* >( child->data( 0 ) );
 			// Element* post = oni->post;
-			unsigned int target = 
-			e->connSrcBegin( rCreateSlot.msg() ) - e->lookupConn( 0 ) +
-				id.node() - 1;
+			unsigned int target = 0;
+			//eref.connSrcBegin( rCreateSlot.msg() ) - e->lookupConn( 0 ) +
+			//	id.node() - 1;
 			sendTo4< string, string, Id, Id>( 
-				e, 0, rCreateSlot, target,
+				eref, rCreateSlot, target,
 				type, sname, 
 				parent, oni->id );
 			// Here it needs to fork till the object creation is complete.
@@ -785,17 +789,17 @@ void Shell::staticCreateArray( const Conn* c, string type,
 			delete child;
 		}
 	}
-	*/
 }
 
 
 // Static function
 // parameter has following clumped in the order mentioned, Nx, Ny, dx, dy, xorigin, yorigin
-void Shell::staticCreateArray1( const Conn* c, string type,
+void Shell::staticCreateArray( const Conn* c, string type,
 					string name, Id parent, vector <double> parameter )
 {
-/*
-	Element* e = c->targetElement();
+
+	Eref eref = c->target();
+	//Element* e = c->targetElement();
 	Shell* s = static_cast< Shell* >( c->data() );
 
 	// This is where the IdManager does clever load balancing etc
@@ -807,34 +811,33 @@ void Shell::staticCreateArray1( const Conn* c, string type,
 		int n = (int) (parameter[0]*parameter[1]);
 		bool ret = s->createArray( type, name, parent, id, n );
 		assert(parameter.size() == 6);
-		ArrayElement* f = static_cast <ArrayElement *> (e);
-		f->setNoOfElements((int)(parameter[0]), (int)(parameter[1]));
-		f->setDistances(parameter[2], parameter[3]);
-		f->setOrigin(parameter[4], parameter[5]);
+// 		ArrayElement* f = static_cast <ArrayElement *> (e);
+// 		f->setNoOfElements((int)(parameter[0]), (int)(parameter[1]));
+// 		f->setDistances(parameter[2], parameter[3]);
+// 		f->setOrigin(parameter[4], parameter[5]);
 		if ( ret ) { // Tell the parser it was created happily.
 			//GenesisParserWrapper::recvCreate(conn, id)
-			sendTo1< Id >( e, 0, createSlot, c->targetIndex(), id);
+			sendBack1< Id >( c, createSlot, id);
 		}
 	} else {
 		// Shell-to-shell messaging here with the request to
 		// create a child.
 		// This must only happen on node 0.
-		assert( e->id().node() == 0 );
+		assert( eref.id().node() == 0 );
 		assert( id.node() > 0 );
 		OffNodeInfo* oni = static_cast< OffNodeInfo* >( child->data() );
 		// Element* post = oni->post;
-		unsigned int target = 
-		e->connSrcBegin( rCreateSlot.msg() ) - e->lookupConn( 0 ) +
-			id.node() - 1;
+		unsigned int target = 0;
+		//e->connSrcBegin( rCreateSlot.msg() ) - e->lookupConn( 0 ) +
+		//	id.node() - 1;
 		sendTo4< string , string, Id, Id>( 
-			e, 0, rCreateSlot, target,
+			eref, rCreateSlot, target,
 			type, name, 
 			parent, oni->id );
 		// Here it needs to fork till the object creation is complete.
 		delete oni;
 		delete child;
 	}
-*/
 }
 
 void Shell::planarconnect(const Conn* c, string source, string dest, double probability){
@@ -860,46 +863,140 @@ void Shell::planarconnect(const Conn* c, string source, string dest, double prob
 	}
 }
 
-void Shell::planardelay(const Conn* c, string source, double delay)
-{
+// void Shell::planardelay(const Conn* c, string source, double delay)
+// {
+// 	static const Cinfo* sgCinfo = Cinfo::find( "SpikeGen" );
+// 	// static const Finfo* eventFinfo = sgCinfo->findFinfo( "event" );
+// 	static const Slot eventSlot = sgCinfo->getSlot( "event" );
+// 
+// 	vector <Element* > srcList;
+// 	simpleWildcardFind( source, srcList );
+// 	for ( size_t i = 0 ; i < srcList.size(); i++){
+// 		if ( srcList[ i ]->className() != "SpikeGen"){
+// 			cout << "Shell::planardelay: Error: Source is not SpikeGen" << endl; 	
+// 			return;
+// 		}
+// 
+// 		vector< ConnTainer* >::const_iterator j;
+// 		const Msg* m = srcList[ i ]->msg( eventSlot.msg() );
+// 
+// 		for( j = m->begin(); j != m->end(); j++ ) {
+// 			// Need to sort out the iteration through all targets, here.
+// 			// Many targets will be ArrayElements and should have
+// 			// special fast assignment for all indices.
+// 			// for ( Conn* k = ( *j )->conn( eIndex, m->isDest() ); j->good(); j++ )
+// 				// setDelay( k );
+// 		}
+// 		
+// 		/*
+// 		vector <Conn> conn;
+// 		srcList[i]->findFinfo("event")->outgoingConns(srcList[i], conn);
+// 		for (size_t j = 0; j < conn.size(); j++){
+// 			unsigned int numSynapses;
+// 			Element *dest = conn[j].targetElement();
+// 			if (destination != ""){
+// 				bool found = false;
+// 				for (vector<Element *>::iterator iter = dst_list.begin(); 
+// 					iter != dst_list.end(); iter++)
+// 					if (*iter == dest) {found = true; break;}
+// 				if (!found) continue;
+// 			}
+// 			bool ret = get< unsigned int >( dest, "numSynapses", numSynapses );
+// 			if (!ret) {cout << "Shell::planardelay: Error2" << endl; return;}
+// 			for (size_t k = 0 ; k < numSynapses; k++){
+// 				double number = 0;
+// 				if (delaychoice){
+// 					cout << "planardelay:: radial not implemented."<< endl;
+// 					// Not decided what to do
+// 				}
+// 				else {
+// 					number = delay;
+// 				}
+// 				if (randchoice){
+// 					double random = p->getNextSample();
+// 					while (random > maxallowed ) random = p->getNextSample();
+// 					if (absoluterandom)
+// 						{number += random;}
+// 					else 
+// 						{number += number*random;}
+// 				}
+// 				if (add){
+// 					double delay_old = 0;
+// 					ret = lookupGet< double, unsigned int >( dest, "delay", delay_old, k );
+// 					if (!ret) {
+// 						cout << "planardelay:: Error3" << endl;
+// 					}
+// 					number += delay_old;
+// 				}
+// 				lookupSet< double, unsigned int >( dest, "delay", number, k );
+// 			}
+// 		}
+// 		*/
+// 	}
+// }
+
+
+void Shell::planardelay(const Conn& c, string source, string destination, vector <double> parameter){
+	assert (parameter.size() == 11);
+	double delay = parameter[0];
+// 	double conduction_velocity = parameter[1];
+	bool add = parameter[2];
+	double scale = parameter[3];
+	double stdev = parameter[4];
+	double maxdev = parameter[5];
+	double mid = parameter[6];
+	double max = parameter[7];
+	bool absoluterandom = parameter[8];
+	int delaychoice = int(parameter[9]);
+	int randchoice = int(parameter[10]);
+	double maxallowed;
+	Probability *p;
+	switch (randchoice){
+		case 0:
+			break;
+		case 1:
+			p = new Uniform(-scale, scale);
+			maxallowed = scale;
+			break;
+		case 2: 
+			p = new Normal(0, stdev);
+			maxallowed = maxdev;
+			break;
+		case 3: 
+			p = new Exponential(log(2)/mid);
+			maxallowed = max;
+			break;
+	}
+	
 	static const Cinfo* sgCinfo = Cinfo::find( "SpikeGen" );
-	// static const Finfo* eventFinfo = sgCinfo->findFinfo( "event" );
 	static const Slot eventSlot = sgCinfo->getSlot( "event" );
-
 	vector <Element* > srcList;
+	vector <Element* > dst_list;
 	simpleWildcardFind( source, srcList );
-	for ( size_t i = 0 ; i < srcList.size(); i++){
-		if ( srcList[ i ]->className() != "SpikeGen"){
-			cout << "Shell::planardelay: Error: Source is not SpikeGen" << endl; 	
-			return;
-		}
-
+	if (destination != "")
+		simpleWildcardFind( destination, dst_list );
+	for (size_t i = 0 ; i < srcList.size(); i++){
+		if (srcList[i]->className() != "SpikeGen"){cout << "Shell::planardelay: Source is not SpikeGen" << endl; return;}
 		vector< ConnTainer* >::const_iterator j;
 		const Msg* m = srcList[ i ]->msg( eventSlot.msg() );
-
+		//srcList[i]->findFinfo("event")->outgoingConns(srcList[i], conn);
 		for( j = m->begin(); j != m->end(); j++ ) {
-			// Need to sort out the iteration through all targets, here.
-			// Many targets will be ArrayElements and should have
-			// special fast assignment for all indices.
-			// for ( Conn* k = ( *j )->conn( eIndex, m->isDest() ); j->good(); j++ )
-				// setDelay( k );
-		}
-		
-		/*
-		vector <Conn> conn;
-		srcList[i]->findFinfo("event")->outgoingConns(srcList[i], conn);
-		for (size_t j = 0; j < conn.size(); j++){
 			unsigned int numSynapses;
-			Element *dest = conn[j].targetElement();
+			//Element *dest = (*j)->e2();
+			Eref eref;
+			for ( Conn* k = ( *j )->conn( /*eIndex*/0, m->isDest() ); k->good(); k++ ){
+				eref = k->target();
+				
+			}
 			if (destination != ""){
 				bool found = false;
 				for (vector<Element *>::iterator iter = dst_list.begin(); 
 					iter != dst_list.end(); iter++)
-					if (*iter == dest) {found = true; break;}
+					if (*iter == eref.id()()) {found = true; break;}
 				if (!found) continue;
 			}
-			bool ret = get< unsigned int >( dest, "numSynapses", numSynapses );
-			if (!ret) {cout << "Shell::planardelay: Error2" << endl; return;}
+			bool ret = get< unsigned int >( eref, "numSynapses", numSynapses );
+			if (!ret) {cout << "Shell::planardelay: Could not access number of synapses." << endl; return;}
 			for (size_t k = 0 ; k < numSynapses; k++){
 				double number = 0;
 				if (delaychoice){
@@ -919,47 +1016,80 @@ void Shell::planardelay(const Conn* c, string source, double delay)
 				}
 				if (add){
 					double delay_old = 0;
-					ret = lookupGet< double, unsigned int >( dest, "delay", delay_old, k );
+					ret = lookupGet< double, unsigned int >( eref, "delay", delay_old, k );
 					if (!ret) {
 						cout << "planardelay:: Error3" << endl;
 					}
 					number += delay_old;
 				}
-				lookupSet< double, unsigned int >( dest, "delay", number, k );
+				lookupSet< double, unsigned int >( eref, "delay", number, k );
 			}
 		}
-		*/
 	}
 }
 
-void Shell::planarweight(const Conn* c, string source, double weight){
-/*
-	vector <Element* > src_list;
+void Shell::planarweight(const Conn& c, string source, string  destination, vector <double> parameter){
+	assert (parameter.size() == 12);
+	double weight = parameter[0];
+// 	double decay_rate = parameter[1];
+// 	double max_weight = parameter[2];
+// 	double min_weight = parameter[3];
+	double scale = parameter[4];
+	double stdev = parameter[5];
+	double maxdev = parameter[6];
+	double mid = parameter[7];
+	double max = parameter[8];
+	bool absoluterandom = parameter[9];
+	int weightchoice = int(parameter[10]);
+	int randchoice = int(parameter[11]);
+	double maxallowed;
+	Probability *p;
+	switch (randchoice){
+		case 0:
+			break;
+		case 1:
+			p = new Uniform(-scale, scale);
+			maxallowed = scale;
+			break;
+		case 2: 
+			p = new Normal(0, stdev);
+			maxallowed = maxdev;
+			break;
+		case 3: 
+			p = new Exponential(log(2)/mid);
+			maxallowed = max;
+			break;
+	}
+	
+	static const Cinfo* sgCinfo = Cinfo::find( "SpikeGen" );
+	static const Slot eventSlot = sgCinfo->getSlot( "event" );
+	vector <Element* > srcList;
 	vector <Element* > dst_list;
-	simpleWildcardFind( source, src_list );
+	simpleWildcardFind( source, srcList );
 	if (destination != "")
 		simpleWildcardFind( destination, dst_list );
-	
-	for (size_t i = 0 ; i < src_list.size(); i++){
-		if (src_list[i]->className() != "SpikeGen"){
-			cout << "Shell::planarweight: The element is not a SpikeGen" << endl; 
-			return;
-		}
-		vector <Conn> conn;
-		src_list[i]->findFinfo("event")->outgoingConns(src_list[i], conn);
-		for (size_t j = 0; j < conn.size(); j++){
+	for (size_t i = 0 ; i < srcList.size(); i++){
+		if (srcList[i]->className() != "SpikeGen"){cout << "Shell::planarweight: Source is not SpikeGen" << endl; return;}
+		vector< ConnTainer* >::const_iterator j;
+		const Msg* m = srcList[ i ]->msg( eventSlot.msg() );
+		//srcList[i]->findFinfo("event")->outgoingConns(srcList[i], conn);
+		for( j = m->begin(); j != m->end(); j++ ) {
 			unsigned int numSynapses;
-			Element *dest = conn[j].targetElement();
+			//Element *dest = (*j)->e2();
+			Eref eref;
+			for ( Conn* k = ( *j )->conn( /*eIndex*/0, m->isDest() ); k->good(); k++ ){
+				eref = k->target();
+				
+			}
 			if (destination != ""){
 				bool found = false;
 				for (vector<Element *>::iterator iter = dst_list.begin(); 
 					iter != dst_list.end(); iter++)
-					if (*iter == dest) {found = true; break;}
+					if (*iter == eref.id()()) {found = true; break;}
 				if (!found) continue;
 			}
-			bool ret;
-			ret = get< unsigned int >( dest, "numSynapses", numSynapses );
-			if (!ret) {cout << "Shell::planarweight: Error2" << endl; return;}
+			bool ret = get< unsigned int >( eref, "numSynapses", numSynapses );
+			if (!ret) {cout << "Shell::planarweight: Could not access number of synapses." << endl; return;}
 			for (size_t k = 0 ; k < numSynapses; k++){
 				double number = 0;
 				if (weightchoice){
@@ -976,12 +1106,14 @@ void Shell::planarweight(const Conn* c, string source, double weight){
 					else 
 						{number += number*random;}
 				}
-				lookupSet< double, unsigned int >( dest, "weight", number, k );
+				lookupSet< double, unsigned int >( eref, "weight", number, k );
 			}
 		}
 	}
-*/
 }
+
+
+
 
 // does not do - destination is a SynChan test
 void Shell::getSynCount2(const Conn* c, Id dest){
@@ -2010,7 +2142,15 @@ bool Shell::create( const string& type, const string& name,
 bool Shell::createArray( const string& type, const string& name, 
 		Id parent, Id id, int n )
 {	
-	const Cinfo* c = Cinfo::find( type );
+	Element* p = parent();
+	Element* child = Neutral::createArray( type, name, p, id, n );
+	if ( child ) {
+		recentElement_ = child->id();
+		return 1;
+	}
+	return 0;
+	
+	/*const Cinfo* c = Cinfo::find( type );
 	Element* p = parent();
 	if ( !p ) {
 		cout << "Error: Shell::create: No parent " << p << endl;
@@ -2025,10 +2165,8 @@ bool Shell::createArray( const string& type, const string& name,
 	}
 	if ( c != 0 && p != 0 ) {
 		Element* e = c->createArray( id, name, n, 0 );
-		//cout << e->name() << endl;
 		bool ret = childSrc->add( p, e, e->findFinfo( "child" ) );
 		assert( ret );
-		//cout << "OK\n";
 		recentElement_ = id;
 		ret = c->schedule( e );
 		assert( ret );
@@ -2038,6 +2176,7 @@ bool Shell::createArray( const string& type, const string& name,
 			type << endl;
 	}
 	return 0;
+	*/
 }
 
 
