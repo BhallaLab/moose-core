@@ -169,16 +169,16 @@ const Cinfo* initCompartmentCinfo()
 			reinterpret_cast< RecvFunc >( &Compartment::setLength )
 		),
 		new ValueFinfo( "x0", ValueFtype1< double >::global(),
-			reinterpret_cast< GetFunc >( &Compartment::getX ),
-			reinterpret_cast< RecvFunc >( &Compartment::setX )
+			reinterpret_cast< GetFunc >( &Compartment::getX0 ),
+			reinterpret_cast< RecvFunc >( &Compartment::setX0 )
 		),
 		new ValueFinfo( "y0", ValueFtype1< double >::global(),
-			reinterpret_cast< GetFunc >( &Compartment::getY ),
-			reinterpret_cast< RecvFunc >( &Compartment::setY )
+			reinterpret_cast< GetFunc >( &Compartment::getY0 ),
+			reinterpret_cast< RecvFunc >( &Compartment::setY0 )
 		),
 		new ValueFinfo( "z0", ValueFtype1< double >::global(),
-			reinterpret_cast< GetFunc >( &Compartment::getZ ),
-			reinterpret_cast< RecvFunc >( &Compartment::setZ )
+			reinterpret_cast< GetFunc >( &Compartment::getZ0 ),
+			reinterpret_cast< RecvFunc >( &Compartment::setZ0 )
 		),
 		new ValueFinfo( "x", ValueFtype1< double >::global(),
 			reinterpret_cast< GetFunc >( &Compartment::getX ),
@@ -290,6 +290,9 @@ Compartment::Compartment()
 	x_ = 0.0;
 	y_ = 0.0;
 	z_ = 0.0;
+	x0_ = 0.0;
+	y0_ = 0.0;
+	z0_ = 0.0;
 	diameter_ = 0.0;
 	length_ = 0.0;
 }

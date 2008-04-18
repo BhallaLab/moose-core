@@ -876,8 +876,8 @@ double KineticManager::estimateDt( Element* mgr,
 	static const Cinfo* rCinfo = Cinfo::find( "Reaction" );
 
 	assert( error > 0.0 );
-	vector< Element* > elist;
-	vector< Element* >::iterator i;
+	vector< Id > elist;
+	vector< Id >::iterator i;
 
 	if ( wildcardRelativeFind( mgr, "##", elist, 1 ) == 0 ) {
 		*elm = 0;
@@ -890,30 +890,30 @@ double KineticManager::estimateDt( Element* mgr,
 
 	for ( i = elist.begin(); i != elist.end(); i++ )
 	{
-		if ( ( *i )->cinfo()->isA( rCinfo ) ) {
-			prop = findReacPropensity( *i, 0 );
+		if ( ( *i )()->cinfo()->isA( rCinfo ) ) {
+			prop = findReacPropensity( ( *i )(), 0 );
 			if ( maxProp < prop ) {
 				maxProp = prop;
-				*elm = *i;
+				*elm = ( *i )();
 				field = "kf";
 			}
-			prop = findReacPropensity( *i, 1 );
+			prop = findReacPropensity( ( *i )(), 1 );
 			if ( maxProp < prop ) {
 				maxProp = prop;
-				*elm = *i;
+				*elm = ( *i )();
 				field = "kb";
 			}
-		} else if ( ( *i )->cinfo()->isA( eCinfo ) ) {
-			prop = findEnzSubPropensity( *i );
+		} else if ( ( *i )()->cinfo()->isA( eCinfo ) ) {
+			prop = findEnzSubPropensity( ( *i )() );
 			if ( maxProp < prop ) {
 				maxProp = prop;
-				*elm = *i;
+				*elm = ( *i )();
 				field = "k1";
 			}
-			prop = findEnzPrdPropensity( *i );
+			prop = findEnzPrdPropensity( ( *i )() );
 			if ( maxProp < prop ) {
 				maxProp = prop;
-				*elm = *i;
+				*elm = ( *i )();
 				field = "k3";
 			}
 		}

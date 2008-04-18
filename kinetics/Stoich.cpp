@@ -409,7 +409,7 @@ void Stoich::localRebuild( Element* stoich )
 void Stoich::localSetPath( Eref stoich, const string& value )
 {
 	path_ = value;
-	vector< Element* > ret;
+	vector< Id > ret;
 	wildcardFind( path_, ret );
 	clear( stoich );
 	if ( ret.size() > 0 ) {
@@ -427,10 +427,10 @@ void Stoich::localSetPath( Eref stoich, const string& value )
 }
 
 // Need to clean out existing stuff first.
-void Stoich::rebuildMatrix( Eref stoich, vector< Element* >& ret )
+void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 {
 	static const Cinfo* molCinfo = Cinfo::find( "Molecule" );
-	vector< Element* >::iterator i;
+	vector< Id >::iterator i;
 	vector< Element* > varMolVec;
 	vector< Element* > bufVec;
 	vector< Element* > sumTotVec;
@@ -438,18 +438,18 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Element* >& ret )
 	bool isOK;
 	unsigned int numRates = 0;
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		if ( ( *i )->cinfo()->isA( molCinfo ) ) {
-			isOK = get< int >( *i, "mode", mode );
+		if ( ( *i )()->cinfo()->isA( molCinfo ) ) {
+			isOK = get< int >( ( *i )(), "mode", mode );
 			assert( isOK );
 			if ( mode == 0 ) {
-				varMolVec.push_back( *i );
+				varMolVec.push_back( ( *i )() );
 			} else if ( mode == 4 ) {
-				bufVec.push_back( *i );
+				bufVec.push_back( ( *i )() );
 			} else {
-				sumTotVec.push_back( *i );
+				sumTotVec.push_back( ( *i )() );
 			}
 		} else {
-			numRates += countRates( *i, useOneWayReacs_ );
+			numRates += countRates( ( *i )(), useOneWayReacs_ );
 		}
 	}
 	/*
@@ -468,11 +468,11 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Element* >& ret )
 	int nEnz = 0;
 	int nMmEnz = 0;
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		if ( ( *i )->className() == "Reaction" ) {
+		if ( ( *i )()->className() == "Reaction" ) {
 			nReac++;
-		} else if ( ( *i )->className() == "Enzyme" ) {
+		} else if ( ( *i )()->className() == "Enzyme" ) {
 			bool enzmode = 0;
-			isOK = get< bool >( *i, "mode", enzmode );
+			isOK = get< bool >( ( *i )(), "mode", enzmode );
 			assert( isOK );
 			if ( enzmode == 0 )
 				nEnz++;
@@ -483,29 +483,29 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Element* >& ret )
 	send3< unsigned int, unsigned int, unsigned int >(
 			stoich, rateSizeSlot, nReac, nEnz, nMmEnz );
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		const string& cn = ( *i )->className();
+		const string& cn = ( *i )()->className();
 		if ( cn == "Reaction" ) {
-			addReac( stoich, *i );
+			addReac( stoich, ( *i )() );
 		} else if ( cn == "Enzyme" ) {
 			bool enzmode = 0;
-			isOK = get< bool >( *i, "mode", enzmode );
+			isOK = get< bool >( ( *i )(), "mode", enzmode );
 			assert( isOK );
 			if ( enzmode == 0 )
-				addEnz( stoich, *i );
+				addEnz( stoich, ( *i )() );
 			else
-				addMmEnz( stoich, *i );
+				addMmEnz( stoich, ( *i )() );
 		} else if ( cn == "Table" ) {
-			addTab( stoich, *i );
+			addTab( stoich, ( *i )() );
 		} else if ( cn == "Neutral" ) {
-			// cout << (*i)->name() << " is a Neutral\n";
+			// cout << (*i)()->name() << " is a Neutral\n";
 		} else if ( cn == "GslIntegrator" ||
 			cn == "Kintegrator" ||
 			cn == "KineticHub" ||
 			cn == "Stoich" )
 		{
 			// Ignore this too.
-		} else if ( !( *i )->cinfo()->isA( molCinfo ) ) {
-			addRate( stoich, *i );
+		} else if ( !( *i )()->cinfo()->isA( molCinfo ) ) {
+			addRate( stoich, ( *i )() );
 		}
 	}
 	setupReacSystem( stoich );
