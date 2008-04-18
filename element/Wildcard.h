@@ -14,8 +14,8 @@
 // Just a couple of extern definitions for general use.
 
 int wildcardRelativeFind( Element* e,
-	const string& n, vector< Element* >& ret, int doublehash);
-int simpleWildcardFind( const string& path, vector<Element *>& ret);
-int wildcardFind(const string& n, vector<Element *>& ret);
+	const string& n, vector< Id >& ret, int doublehash);
+int simpleWildcardFind( const string& path, vector<Id>& ret);
+int wildcardFind(const string& n, vector<Id>& ret);
 
 #endif // _WILDCARD_H
