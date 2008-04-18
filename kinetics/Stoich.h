@@ -70,7 +70,7 @@ class Stoich
 		}
 		void runStats();
 #endif // USE_GSL
-		void rebuildMatrix( Eref stoich, vector< Element* >& ret );
+		void rebuildMatrix( Eref stoich, vector< Id >& ret );
 		void localScanTicks( Eref stoich );
 	private:
 		///////////////////////////////////////////////////
