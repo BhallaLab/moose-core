@@ -841,23 +841,23 @@ void Shell::staticCreateArray( const Conn* c, string type,
 }
 
 void Shell::planarconnect(const Conn* c, string source, string dest, double probability){
-	vector <Element* > src_list, dst_list;
+	vector <Id> src_list, dst_list;
 	simpleWildcardFind( source, src_list );
 	simpleWildcardFind( dest, dst_list );
 	for(size_t i = 0; i < src_list.size(); i++) {
-		if (src_list[i]->className() != "SpikeGen" ){
+		if (src_list[i]()->className() != "SpikeGen" ){
 			cout << "The source element must be SpikeGen" << endl;
 			return;
 		}
 		for(size_t j = 0; j < dst_list.size(); j++) {
 			//cout << src_list[i]->id().path() << " " << dst_list[i]->id().path() << endl;
-			if (dst_list[j]->className() != "SynChan"){
+			if (dst_list[j]()->className() != "SynChan"){
 				cout <<  "The dest element must be SynChan" << endl;
 				return;
 			}
 			if ((rand()%100)/100.0 <= probability){
 // 				cout << i+1 << " " << j+1 << endl;
-				src_list[i]->findFinfo("event")->add(src_list[i], dst_list[j], dst_list[j]->findFinfo("synapse"));
+				src_list[i]()->findFinfo("event")->add(src_list[i](), dst_list[j](), dst_list[j]()->findFinfo("synapse"));
 			}
 		}
 	}
@@ -970,15 +970,15 @@ void Shell::planardelay(const Conn& c, string source, string destination, vector
 	
 	static const Cinfo* sgCinfo = Cinfo::find( "SpikeGen" );
 	static const Slot eventSlot = sgCinfo->getSlot( "event" );
-	vector <Element* > srcList;
-	vector <Element* > dst_list;
+	vector <Id> srcList;
+	vector <Id> dst_list;
 	simpleWildcardFind( source, srcList );
 	if (destination != "")
 		simpleWildcardFind( destination, dst_list );
 	for (size_t i = 0 ; i < srcList.size(); i++){
-		if (srcList[i]->className() != "SpikeGen"){cout << "Shell::planardelay: Source is not SpikeGen" << endl; return;}
+		if (srcList[i]()->className() != "SpikeGen"){cout << "Shell::planardelay: Source is not SpikeGen" << endl; return;}
 		vector< ConnTainer* >::const_iterator j;
-		const Msg* m = srcList[ i ]->msg( eventSlot.msg() );
+		const Msg* m = srcList[ i ]()->msg( eventSlot.msg() );
 		//srcList[i]->findFinfo("event")->outgoingConns(srcList[i], conn);
 		for( j = m->begin(); j != m->end(); j++ ) {
 			unsigned int numSynapses;
@@ -990,9 +990,9 @@ void Shell::planardelay(const Conn& c, string source, string destination, vector
 			}
 			if (destination != ""){
 				bool found = false;
-				for (vector<Element *>::iterator iter = dst_list.begin(); 
+				for (vector<Id>::iterator iter = dst_list.begin(); 
 					iter != dst_list.end(); iter++)
-					if (*iter == eref.id()()) {found = true; break;}
+					if (*iter == eref.id()) {found = true; break;}
 				if (!found) continue;
 			}
 			bool ret = get< unsigned int >( eref, "numSynapses", numSynapses );
@@ -1063,15 +1063,15 @@ void Shell::planarweight(const Conn& c, string source, string  destination, vect
 	
 	static const Cinfo* sgCinfo = Cinfo::find( "SpikeGen" );
 	static const Slot eventSlot = sgCinfo->getSlot( "event" );
-	vector <Element* > srcList;
-	vector <Element* > dst_list;
+	vector <Id> srcList;
+	vector <Id> dst_list;
 	simpleWildcardFind( source, srcList );
 	if (destination != "")
 		simpleWildcardFind( destination, dst_list );
 	for (size_t i = 0 ; i < srcList.size(); i++){
-		if (srcList[i]->className() != "SpikeGen"){cout << "Shell::planarweight: Source is not SpikeGen" << endl; return;}
+		if (srcList[i]()->className() != "SpikeGen"){cout << "Shell::planarweight: Source is not SpikeGen" << endl; return;}
 		vector< ConnTainer* >::const_iterator j;
-		const Msg* m = srcList[ i ]->msg( eventSlot.msg() );
+		const Msg* m = srcList[ i ]()->msg( eventSlot.msg() );
 		//srcList[i]->findFinfo("event")->outgoingConns(srcList[i], conn);
 		for( j = m->begin(); j != m->end(); j++ ) {
 			unsigned int numSynapses;
@@ -1083,9 +1083,9 @@ void Shell::planarweight(const Conn& c, string source, string  destination, vect
 			}
 			if (destination != ""){
 				bool found = false;
-				for (vector<Element *>::iterator iter = dst_list.begin(); 
+				for (vector<Id>::iterator iter = dst_list.begin(); 
 					iter != dst_list.end(); iter++)
-					if (*iter == eref.id()()) {found = true; break;}
+					if (*iter == eref.id()) {found = true; break;}
 				if (!found) continue;
 			}
 			bool ret = get< unsigned int >( eref, "numSynapses", numSynapses );
@@ -1174,16 +1174,15 @@ void Shell::getField( const Conn* c, Id id, string field )
 	if ( id.bad() )
 		return;
 	string ret;
-	Element* e = id();
-	//cout << e->name() << endl;
+	Eref eref(id(), id.index());
 	
 	// Appropriate off-node stuff here.
 
-	const Finfo* f = e->findFinfo( field );
+	const Finfo* f = eref.e->findFinfo( field );
 	// Error messages are the job of the parser. So we just return
 	// the value when it is good and leave the rest to the parser.
 	if ( f )
-		if ( f->strGet( e, ret ) ){
+		if ( f->strGet( eref, ret ) ){
 			sendBack1< string >( c, getFieldSlot, ret );
 			//GenesisParserWrapper::recvField (conn, ret);
 			// sendTo1< string >( c->targetElement(), 0,
@@ -1488,12 +1487,13 @@ void Shell::setVecField( const Conn* c,
 	for ( i = elist.begin(); i != elist.end(); i++ ) {
 		// Cannot use i->good() here because we might set fields on /root.
 		assert( !i->bad() ); 
-		Element* e = ( *i )();
+		//Element* e = ( *i )();
+		Eref eref( ( *i )(), ( *i ).index() );
 		// Appropriate off-node stuff here.
 	
-		const Finfo* f = e->findFinfo( field );
+		const Finfo* f = eref.e->findFinfo( field );
 		if ( f ) {
-			if ( !f->strSet( e, value ) )
+			if ( !f->strSet( eref, value ) )
 				cout << "setVecField: Error: cannot set field " << i->path() <<
 						"." << field << " to " << value << endl;
 		} else {
@@ -1698,8 +1698,8 @@ void Shell::digestPath( string& path )
  */
 void Shell::getWildcardList( const Conn* c, string path, bool ordered )
 {
-	vector< Element* > list;
-	vector< Id > ret;
+	vector<Id> list;
+	//vector< Id > ret;
 
 	static_cast< Shell* >( c->data() )->digestPath( path );
 
@@ -1709,15 +1709,15 @@ void Shell::getWildcardList( const Conn* c, string path, bool ordered )
 	else
 		wildcardFind( path, list );
 
-	ret.resize( list.size() );
+	//ret.resize( list.size() );
 	vector< Id >::iterator i;
 	vector< Element* >::iterator j;
 
-	for (i = ret.begin(), j = list.begin(); j != list.end(); i++, j++ )
-			*i = ( *j )->id();
+	//for (i = ret.begin(), j = list.begin(); j != list.end(); i++, j++ )
+	//		*i = ( *j )->id();
 	
 	//GenesisParserWrapper::recvElist(conn, elist)
-	sendBack1< vector< Id > >( c, elistSlot, ret );
+	sendBack1< vector< Id > >( c, elistSlot, list );
 }
 
 /**

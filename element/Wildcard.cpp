@@ -19,17 +19,17 @@ static bool wildcardFieldComparison( Element* e, const string& mid );
  * The name must be nonzero.
  * It returns a pointer to the found element or 0 on failure
  */
-static bool wildcardName( Element* &e, const string& n)
+static Id wildcardName( Element* &e, const string& n)
 {
 	size_t pos;
-
+	unsigned int index = -1;
 	if (n == "") {
 		cerr << "Error in wildcardName: zero length name\n";
-			return 0;
+			return Id::badId();
 	}
 
 	if (n == "#" || n == e->name() || n == "##") {
-		return 1;
+		return e->id().assignIndex(index);
 	}
 	
 	//handling arrays
@@ -56,6 +56,24 @@ static bool wildcardName( Element* &e, const string& n)
 	}*/
 	
 	// Not fully fixed. Has loop holes. This function needs to be revamped. It does not entertain regular expressions, while GENESIS does. 
+	size_t pos1, pos2;
+	if (( pos1 = n.find('[') ) != string::npos){
+		// to take care of SimpleElements of the form cc[2]
+		if (n == e->name()){
+			return e->id();
+		}
+		pos2 = n.find(']');
+		if ( pos2 > pos1 && pos2 != string::npos && pos2 == n.size() - 1){
+			string onlyindex = n.substr(pos1+1, pos2 - pos1);
+			index = atoi(onlyindex.c_str());
+			return e->id().assignIndex(index);
+		}
+		else{
+			cout << "The positioning of \']\' is either not present or not correct in " << n << endl;
+			return Id::badId();
+		}
+	}
+	/*
 	if (n.find('[') != string::npos && e->name().find('[')!=string::npos){
 		size_t pos1 = n.find('[');
 		string name1 = n.substr(0, pos1);
@@ -65,23 +83,29 @@ static bool wildcardName( Element* &e, const string& n)
 		string name2 = n2.substr(0, pos2);
 		string index2 = n2.substr(pos2);
 		if (name1 == name2 && index1[1] == ']' && index2.find(']') != string::npos && index2.find(']') > 1 ){
-			string onlyindex = index2.substr(1, index2.find(']') - 1);
+			string onlyindex1 = index1.substr(1, index1.find(']') - 1);
+			string onlyindex2 = index2.substr(1, index2.find(']') - 1);
 			for (size_t i = 0; i < onlyindex.size(); i++){
 				char c = onlyindex[i];
 				if (!(c >= '0' && c <= '9')){
-					return 0;
+					return Id::badId();
 				}
 			}
-			return 1;
+			index = atoi(onlyindex.c_str());
+			if (index < e->numEntries()){
+				return e->id().assignIndex(index);
+				cout << index << endl;
+			}
+			else 
+				return Id::badId();
 		}
-		
 		else {
 			if (index2[1] == '['){
 				cout << "The name of " << e->name() << " is not proper. Should have indices within the square brackets. " << endl;
 			}
-			return 0;
+			return Id::badId();
 		}
-	}
+	}*/
 	
 	// Need to put in code to handle partial string matches
 	size_t last;
@@ -98,17 +122,17 @@ static bool wildcardName( Element* &e, const string& n)
 	if (pos != string::npos){
 		// everything before the hash is the same and it is not the case there is just #
 		if (n.substr(0, pos) != e->name().substr(0, pos) && pos != 0){ 
-			return 0;
+			return Id::badId();
 		}
 		else if (last == n.size() - 1 ){ // there is nothing to follow the hashes
-			return 1;
+			return e->id().assignIndex(index);
 		}
 		else{
 			mid = n.substr(last+1);
 		}
 	}
 	else 
-		return 0;
+		return Id::badId();
 	
 	/*
 	string mid;
@@ -137,7 +161,7 @@ static bool wildcardName( Element* &e, const string& n)
 		pos = mid.find(']');
 		if ( pos == string::npos ) {
 			cerr << "wildcardName(" << n << "): Missing ']'\n";
-			return 0;
+			return Id::badId();
 		}
 		head = mid.substr(end, pos - end);
 		// Hack here to handle GENESIS Parser stuff.
@@ -146,14 +170,18 @@ static bool wildcardName( Element* &e, const string& n)
 
 		if ( mid[5] == '!' || mid[6] == '!' ) {
 			if ( head == e->className() )
-				return 0;
+				return Id::badId();
 		} else {
 			if ( head != e->className() )
-				return 0;
+				return Id::badId();
 		}
 		mid = mid.substr( pos + 1 ); // In case there are further tests
 	}
-	return wildcardFieldComparison( e, mid );
+	if (wildcardFieldComparison( e, mid )){
+		return e->id().assignIndex(index);
+	}
+	else
+		return Id::badId();
 }
 
 /**
@@ -222,18 +250,18 @@ static int wildcardRelativeFind( Element* start,
 }
 */
 
-static int innerFind( const string& n_arg, vector< Element* >& ret)
+static int innerFind( const string& n_arg, vector< Id >& ret)
 {
 	string n = n_arg;
 	if (n == "/") {
-		ret.push_back( Element::root() );
+		ret.push_back( Element::root()->id() );
 		return 1;
 	}
 	if (n.rfind('/') == n.length() - 1)
 		n = n.substr(0,n.length() - 1);
 	
 	if (n == "/root") {
-		ret.push_back( Element::root() );
+		ret.push_back( Element::root()->id() );
 		return 1;
 	}
 	if (n.find('/') == 0)
@@ -252,7 +280,7 @@ static int innerFind( const string& n_arg, vector< Element* >& ret)
  * depth-first search.
  * It returns the number of Elements found.
  */
-int simpleWildcardFind( const string& path, vector<Element *>& ret)
+int simpleWildcardFind( const string& path, vector<Id>& ret)
 {
 	if ( path.length() == 0 )
 		return 0;
@@ -268,7 +296,7 @@ int simpleWildcardFind( const string& path, vector<Element *>& ret)
 	return n;
 }
 
-static void my_unique(vector<Element *>& ret)
+static void my_unique(vector<Id>& ret)
 {
 	sort(ret.begin(), ret.end());
 	unsigned int i, j;
@@ -283,7 +311,7 @@ static void my_unique(vector<Element *>& ret)
 		ret.resize(j);
 }
 
-int wildcardFind(const string& n, vector<Element *>& ret) 
+int wildcardFind(const string& n, vector<Id>& ret) 
 {
 	if (n == "")
 		return 0;
@@ -314,7 +342,7 @@ int wildcardFind(const string& n, vector<Element *>& ret)
  * \todo: Check if still have problem that it currently returns duplicates.
  */
 int wildcardRelativeFind( Element* e,
-	const string& n, vector< Element* >& ret, int doublehash)
+	const string& n, vector< Id >& ret, int doublehash)
 {
 	unsigned long pos = n.find('/');
 	string head = n.substr(0, pos);
@@ -327,9 +355,10 @@ int wildcardRelativeFind( Element* e,
 	vector< Id >::iterator i;
 	for ( i = kids.begin(); i != kids.end(); i++ ) {
 		Element* temp = ( *i )();
-		if ( wildcardName( temp, head ) ) {
+		Id id;
+		if ( (id = wildcardName( temp, head )) != Id::badId() ) {
 			if (pos == string::npos) {
-				ret.push_back(temp);
+				ret.push_back(id);
 				nret++;
 			} else {
 				nret += wildcardRelativeFind( temp,
@@ -350,7 +379,7 @@ int wildcardRelativeFind( Element* e,
 void wildcardTestFunc( 
 	Element** elist, unsigned int ne, const string& path )
 {
-	vector< Element* > ret;
+	vector< Id > ret;
 	simpleWildcardFind( path, ret );
 	if ( ne != ret.size() ) {
 		cout << "!\nAssert	'" << path << "' : expected " <<
@@ -358,10 +387,10 @@ void wildcardTestFunc(
 		return;
 	}
 	for ( unsigned int i = 0; i < ne ; i++ ) {
-		if ( elist[ i ] != ret[ i ] ) {
+		if ( elist[ i ] != ret[ i ]() ) {
 			cout << "!\nAssert	" << path << ": item " << i << 
 				": " << elist[ i ]->name() << " != " <<
-					ret[ i ]->name() << "\n";
+					ret[ i ]()->name() << "\n";
 			return;
 		}
 	}
