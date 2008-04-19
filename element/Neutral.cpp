@@ -352,6 +352,12 @@ Id Neutral::getParent( Eref e )
 	delete c;
 }
 
+string str(int a){
+	char e[6];
+	sprintf(e, "%d", a);
+	return string(e);
+}
+
 /**
  * Looks up the child with the specified name, and returns its id.
  */
@@ -383,9 +389,13 @@ Id Neutral::getChildByName( Eref er, const string& s )
 		index = 0;
 	}
 
-	for ( i = m->begin(); i != m->end(); i++ )
+	for ( i = m->begin(); i != m->end(); i++ ){
 		if ( ( *i )->e2()->name() == name )
 			return ( *i )->e2()->id().assignIndex( index );
+		//takes care of simple elements which are of the form cc[2]
+		if ( ( *i )->e2()->name() == name + '[' + str(index) + ']' )
+			return ( *i )->e2()->id().assignIndex( index );
+	}
 	return Id::badId();
 }
 
