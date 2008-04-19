@@ -22,7 +22,7 @@ static bool wildcardFieldComparison( Element* e, const string& mid );
 static Id wildcardName( Element* &e, const string& n)
 {
 	size_t pos;
-	unsigned int index = -1;
+	unsigned int index = 0;
 	if (n == "") {
 		cerr << "Error in wildcardName: zero length name\n";
 			return Id::badId();
