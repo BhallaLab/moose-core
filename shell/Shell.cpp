@@ -1490,7 +1490,6 @@ void Shell::setVecField( const Conn* c,
 		//Element* e = ( *i )();
 		Eref eref( ( *i )(), ( *i ).index() );
 		// Appropriate off-node stuff here.
-	
 		const Finfo* f = eref.e->findFinfo( field );
 		if ( f ) {
 			if ( !f->strSet( eref, value ) )
@@ -1700,7 +1699,6 @@ void Shell::getWildcardList( const Conn* c, string path, bool ordered )
 {
 	vector<Id> list;
 	//vector< Id > ret;
-
 	static_cast< Shell* >( c->data() )->digestPath( path );
 
 	// Finally, refer to the wildcard functions in Wildcard.cpp.
@@ -1708,10 +1706,9 @@ void Shell::getWildcardList( const Conn* c, string path, bool ordered )
 		simpleWildcardFind( path, list );
 	else
 		wildcardFind( path, list );
-
 	//ret.resize( list.size() );
-	vector< Id >::iterator i;
-	vector< Element* >::iterator j;
+// 	vector< Id >::iterator i;
+// 	vector< Element* >::iterator j;
 
 	//for (i = ret.begin(), j = list.begin(); j != list.end(); i++, j++ )
 	//		*i = ( *j )->id();
