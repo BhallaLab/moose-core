@@ -58,20 +58,20 @@ static Id wildcardName( Element* &e, const string& n)
 	// Not fully fixed. Has loop holes. This function needs to be revamped. It does not entertain regular expressions, while GENESIS does. 
 	size_t pos1, pos2;
 	if (( pos1 = n.find('[') ) != string::npos){
-		// to take care of SimpleElements of the form cc[2]
-		if (n == e->name()){
-			return e->id();
-		}
 		pos2 = n.find(']');
-		if ( pos2 > pos1 && pos2 != string::npos && pos2 == n.size() - 1){
+		string base = n.substr(pos1);
+		if ( pos2 > pos1 && pos2 != string::npos && pos2 == n.size() - 1 && base == e->name()){
 			string onlyindex = n.substr(pos1+1, pos2 - pos1);
 			index = atoi(onlyindex.c_str());
 			return e->id().assignIndex(index);
 		}
 		else{
-			cout << "The positioning of \']\' is either not present or not correct in " << n << endl;
+			//cout << "The positioning of \']\' is either not present or not correct in " << n << endl;
 			return Id::badId();
 		}
+	}
+	else {
+		return Id::badId();
 	}
 	/*
 	if (n.find('[') != string::npos && e->name().find('[')!=string::npos){
