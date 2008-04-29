@@ -17,7 +17,7 @@
  *
  * Don't go overboard on using this. It is meant for dealing with
  * sets, gets and sends. Most other things need to deal separately
- * with Element and index.
+ * with Element and index, or should use an Id.
  */
 class Eref {
 	public:
