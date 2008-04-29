@@ -6394,4 +6394,9 @@ square braces. Lots of fixes to do here.
 
 Re-implementing the wildcards with ids. Much cleaner.
 
+Checked in as revision 462 with unit test flags on, Smoldyn off, -g, GSL
+
+Fixed up and tested some additional stuff for doing wildcards against
+field values.
+
 ==============================================================================
