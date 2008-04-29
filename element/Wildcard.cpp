@@ -39,10 +39,10 @@ static bool wildcardFieldComparison( Id id, const string& mid )
 	if ( pos == string::npos )
 		return 0;
 	string fieldName = mid.substr( 0, pos );
-	string::size_type pos2 = mid.rfind( '=' );
+	string::size_type pos2 = mid.find_last_of( "=<>" );
 	if ( pos2 == string::npos )
 		return 0;
-	string op = mid.substr( pos, pos2 );
+	string op = mid.substr( pos + 1, pos2 - pos );
 
 	string testValue = mid.substr( pos2 + 1 );
 
@@ -61,21 +61,21 @@ static bool wildcardFieldComparison( Id id, const string& mid )
 	bool ret = f->strGet( id.eref(), actualValue );
 	if ( ret == 0 )
 		return 0;
-	if ( op == "==" )
+	if ( op == "==" || op == "=" )
 		return ( testValue == actualValue );
 	if ( op == "!=" )
 		return ( testValue != actualValue );
 	
-	double v1 = atof( testValue.c_str() );
-	double v2 = atof( actualValue.c_str() );
+	double v1 = atof( actualValue.c_str() );
+	double v2 = atof( testValue.c_str() );
 	if ( op == ">" )
 		return ( v1 > v2 );
 	if ( op == ">=" )
 		return ( v1 >= v2 );
 	if ( op == "<" )
-		return ( v1 > v2 );
+		return ( v1 < v2 );
 	if ( op == "<=" )
-		return ( v1 >= v2 );
+		return ( v1 <= v2 );
 
 	return 0;
 }
@@ -457,8 +457,26 @@ void testWildcard()
 	ASSERT( ret, "matchInsideBrace" );
 	ret = matchInsideBrace( c3->id(), "TYPE=membrane" );
 	ASSERT( ret, "matchInsideBrace" );
-	// ret = matchInsideBrace( c3->id(), "FIELD(Vm)=-0.06" );
-	// ASSERT( ret, "Field matchInsideBrace" );
+
+	set< double >( c3, "Em", double( 123.5 ) );
+	ret = matchInsideBrace( c3->id(), "FIELD(Em)=123.5" );
+	ASSERT( ret, "Field matchInsideBrace" );
+	ret = matchInsideBrace( c3->id(), "FIELD(Em)==123.5" );
+	ASSERT( ret, "Field matchInsideBrace" );
+	ret = matchInsideBrace( c3->id(), "FIELD(Em)!=123.4" );
+	ASSERT( ret, "Field matchInsideBrace" );
+	ret = matchInsideBrace( c3->id(), "FIELD(Em)>123.4" );
+	ASSERT( ret, "Field matchInsideBrace" );
+	ret = matchInsideBrace( c3->id(), "FIELD(Em)<123.6" );
+	ASSERT( ret, "Field matchInsideBrace" );
+	ret = matchInsideBrace( c3->id(), "FIELD(Em)>=123.4" );
+	ASSERT( ret, "Field matchInsideBrace" );
+	ret = matchInsideBrace( c3->id(), "FIELD(Em)<=123.6" );
+	ASSERT( ret, "Field matchInsideBrace" );
+	ret = matchInsideBrace( c3->id(), "FIELD(Em)>=123.5" );
+	ASSERT( ret, "Field matchInsideBrace" );
+	ret = matchInsideBrace( c3->id(), "FIELD(Em)<=123.5" );
+	ASSERT( ret, "Field matchInsideBrace" );
 
 
 	Element* el1[] = { Element::root(), a1, c1 };
