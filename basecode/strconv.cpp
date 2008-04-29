@@ -15,6 +15,10 @@
 #include "ProcInfo.h"
 #include "DerivedFtype.h"
 
+
+void separateString( const string& s, vector< string>& v, 
+	const string& separator );
+
 // Some template specializations to handle common conversions.
 template<> bool val2str< string >( string v, string& ret)
 {
@@ -127,10 +131,6 @@ template<> bool val2str< vector< string > >(
 	}
 	return 1;
 }
-
-// Function forward declaration.
-void separateString( const string& s, vector< string>& v, 
-				const string& separator );
 
 template<> bool str2val< vector< string > >( 
 				const string& s, vector< string >& ret )

@@ -11,292 +11,131 @@
 #include "Neutral.h"
 #include "Wildcard.h"
 
-static bool wildcardFieldComparison( Element* e, const string& mid );
+static int wildcardRelativeFind( Id start, const vector< string >& path, 
+		unsigned int depth, vector< Id >& ret );
 
+static void findBraceContent( const string& path, string& beforeBrace, 
+	string& insideBrace, unsigned int& index );
+
+static bool matchName( Id id, 
+	const string& beforeBrace, const string& insideBrace, 
+	unsigned int index );
+
+static bool matchBeforeBrace( Id id, const string& name );
+
+static bool matchInsideBrace( Id id, const string& inside );
 /**
- * wildcardName checks match for the name of an element.
- * The name must not contain any following slashes.
- * The name must be nonzero.
- * It returns a pointer to the found element or 0 on failure
- */
-static Id wildcardName( Element* &e, const string& n)
-{
-	size_t pos;
-	unsigned int index = 0;
-	if (n == "") {
-		cerr << "Error in wildcardName: zero length name\n";
-			return Id::badId();
-	}
-
-	if (n == "#" || n == e->name() || n == "##") {
-		return e->id().assignIndex(index);
-	}
-	
-	//handling arrays
-	// put in shelf for now. Will be opened after the beta release. 
-	/*if (e->name().size() < n.size()){
-		string base = n.substr(0, e->name().size());
-		string index = n.substr(e->name().size());
-		if (index[0] == '['){
-			size_t pos = index.find("]");
-			index = index.substr(1, pos-1);
-			// check whether index is an integer
-			size_t i;
-			if (index.find_first_not_of("01234567879") == string::npos){
-				i = atoi(index.c_str());
-				if (i < e->numEntries()){
-					e = new ArrayWrapperElement(e, i);
-					return 1;
-				}
-			}
-			else{
-				// think what to do!! Error??
-			}
-		}
-	}*/
-	
-	// Not fully fixed. Has loop holes. This function needs to be revamped. It does not entertain regular expressions, while GENESIS does. 
-	size_t pos1, pos2;
-	if (( pos1 = n.find('[') ) != string::npos){
-		pos2 = n.find(']');
-		string base = n.substr(pos1);
-		if ( pos2 > pos1 && pos2 != string::npos && pos2 == n.size() - 1 && base == e->name()){
-			string onlyindex = n.substr(pos1+1, pos2 - pos1);
-			index = atoi(onlyindex.c_str());
-			return e->id().assignIndex(index);
-		}
-		else{
-			//cout << "The positioning of \']\' is either not present or not correct in " << n << endl;
-			return Id::badId();
-		}
-	}
-	else {
-		return Id::badId();
-	}
-	/*
-	if (n.find('[') != string::npos && e->name().find('[')!=string::npos){
-		size_t pos1 = n.find('[');
-		string name1 = n.substr(0, pos1);
-		string index1 = n.substr(pos1);
-		string n2 = e->name();
-		size_t pos2 = n2.find('[');
-		string name2 = n2.substr(0, pos2);
-		string index2 = n2.substr(pos2);
-		if (name1 == name2 && index1[1] == ']' && index2.find(']') != string::npos && index2.find(']') > 1 ){
-			string onlyindex1 = index1.substr(1, index1.find(']') - 1);
-			string onlyindex2 = index2.substr(1, index2.find(']') - 1);
-			for (size_t i = 0; i < onlyindex.size(); i++){
-				char c = onlyindex[i];
-				if (!(c >= '0' && c <= '9')){
-					return Id::badId();
-				}
-			}
-			index = atoi(onlyindex.c_str());
-			if (index < e->numEntries()){
-				return e->id().assignIndex(index);
-				cout << index << endl;
-			}
-			else 
-				return Id::badId();
-		}
-		else {
-			if (index2[1] == '['){
-				cout << "The name of " << e->name() << " is not proper. Should have indices within the square brackets. " << endl;
-			}
-			return Id::badId();
-		}
-	}*/
-	
-	// Need to put in code to handle partial string matches
-	size_t last;
-	string mid;
-	pos=n.find("##");
-	if (pos == string::npos){
-		pos = n.find("#");
-		last = pos;
-	}
-	else 
-		last = pos +1;
-	
-	
-	if (pos != string::npos){
-		// everything before the hash is the same and it is not the case there is just #
-		if (n.substr(0, pos) != e->name().substr(0, pos) && pos != 0){ 
-			return Id::badId();
-		}
-		else if (last == n.size() - 1 ){ // there is nothing to follow the hashes
-			return e->id().assignIndex(index);
-		}
-		else{
-			mid = n.substr(last+1);
-		}
-	}
-	else 
-		return Id::badId();
-	
-	/*
-	string mid;
-	if (n.substr(0, 2) == "##")
-		mid = n.substr(2);
-	else if (n.substr(0, 1) == "#")
-		mid = n.substr(1);
-	else 
-		return 0;
-	*/
-
-	string head;
-
-	// Look for type checks
-	unsigned int end = 0;
-	if (mid.substr(0, 7) == "[TYPE==") end = 7;
-	else if (mid.substr(0, 6) == "[TYPE=") end = 6;
-	else if (mid.substr(0, 7) == "[CLASS=") end = 7;
-	else if (mid.substr(0, 5) == "[ISA=") end = 5;
-	else if (mid.substr(0, 6) == "[ISA==") end = 5;
-	else if (mid.substr(0, 7) == "[TYPE!=") end = 7;
-	else if (mid.substr(0, 8) == "[CLASS!=") end = 8;
-	else if (mid.substr(0, 6) == "[ISA!=") end = 6;
-
-	if ( end > 0 ) {
-		pos = mid.find(']');
-		if ( pos == string::npos ) {
-			cerr << "wildcardName(" << n << "): Missing ']'\n";
-			return Id::badId();
-		}
-		head = mid.substr(end, pos - end);
-		// Hack here to handle GENESIS Parser stuff.
-		if ( head == "membrane" )
-			head = "Compartment";
-
-		if ( mid[5] == '!' || mid[6] == '!' ) {
-			if ( head == e->className() )
-				return Id::badId();
-		} else {
-			if ( head != e->className() )
-				return Id::badId();
-		}
-		mid = mid.substr( pos + 1 ); // In case there are further tests
-	}
-	if (wildcardFieldComparison( e, mid )){
-		return e->id().assignIndex(index);
-	}
-	else
-		return Id::badId();
-}
-
-/**
- * wildcardFieldComparison returns the Element if the value of the
+ * wildcardFieldComparison returns true if the value of the
  * specified field matches the value in the comparsion string mid.
  * Format is FIELD(name)=val
- * If the format does not match, return 0
- * Return the current element e if the comparison matches.
- * The actual comparison is done by Ftype.
- * Return 0 otherwise.
+ * If the format or the value does not match, return 0
  */
-static bool wildcardFieldComparison( Element* e, const string& mid )
+static bool wildcardFieldComparison( Id id, const string& mid )
 {
 	// where = could be the usual comparison operators and val
 	// could be a number. No strings yet
 
-	if (mid.substr(0,7) == "[FIELD(") {
-		unsigned int pos = mid.find(']');
-		string head = mid.substr(7, pos - 7);
-		// mid = mid.substr(pos);
-		pos = head.find(')');
-		string fieldName = head.substr(0,pos);
-		const Finfo* f = e->findFinfo( fieldName );
-		if ( !f )
-				return 0;
-
-		// At this point we don't want to compare multivalue fields.
-		if ( f->ftype()->nValues() != 1 )
-				return 0;
-
-		string temp = head.substr(pos + 1);
-		int opLength;
-		if ( temp[1] == '=' )
-			opLength = 2;
-		else
-			opLength = 1;
-		
-		string op = temp.substr( 0, opLength );
-		string value = temp.substr( opLength );
-
-		/*
-		 * \Todo: Figure out how to set this up cleanly.
-		if ( f->ftype()->compareValue( e, op, value ) )
-			return 1;
-			*/
-
+	string::size_type pos = mid.find(')');
+	if ( pos == string::npos )
 		return 0;
-	}
-	return 1;
-}
+	string fieldName = mid.substr( 0, pos );
+	string::size_type pos2 = mid.rfind( '=' );
+	if ( pos2 == string::npos )
+		return 0;
+	string op = mid.substr( pos, pos2 );
 
-/*
- * This was the function for the Element in the old MOOSE, which
- * did not allow children.
-// Builds a wildcard list based on path, starting from an element
-// in the path. Returns number found.
-// We are in an Element that matches. n is nonzero.
-static int wildcardRelativeFind( Element* start,
-	const string& n, vector< Element* >& ret, int doublehash)
-{
-	if (wildcardName( start, n )) {
-		ret.push_back( start );
-		return 1;
-	}
-	return 0;
-}
-*/
+	string testValue = mid.substr( pos2 + 1 );
 
-static int innerFind( const string& n_arg, vector< Id >& ret)
-{
-	string n = n_arg;
-	if (n == "/") {
-		ret.push_back( Element::root()->id() );
-		return 1;
-	}
-	if (n.rfind('/') == n.length() - 1)
-		n = n.substr(0,n.length() - 1);
+	if ( testValue.length() == 0 )
+		return 0;
+
+	const Finfo* f = id()->findFinfo( fieldName );
+	if ( !f )
+		return 0;
+
+	// At this point we don't want to compare multivalue fields.
+	if ( f->ftype()->nValues() != 1 )
+		return 0;
 	
-	if (n == "/root") {
-		ret.push_back( Element::root()->id() );
-		return 1;
-	}
-	if (n.find('/') == 0)
-		return wildcardRelativeFind(
-			Element::root(), n.substr(1), ret, 0 );
-	else
-		return wildcardRelativeFind(
-			Element::root(), n, ret, 0 );
+	string actualValue;
+	bool ret = f->strGet( id.eref(), actualValue );
+	if ( ret == 0 )
+		return 0;
+	if ( op == "==" )
+		return ( testValue == actualValue );
+	if ( op == "!=" )
+		return ( testValue != actualValue );
+	
+	double v1 = atof( testValue.c_str() );
+	double v2 = atof( actualValue.c_str() );
+	if ( op == ">" )
+		return ( v1 > v2 );
+	if ( op == ">=" )
+		return ( v1 >= v2 );
+	if ( op == "<" )
+		return ( v1 > v2 );
+	if ( op == "<=" )
+		return ( v1 >= v2 );
+
+	return 0;
 }
 
 /**
+ * Does the wildcard find on a single path
+ */
+static int innerFind( const string& path, vector< Id >& ret)
+{
+	if ( path == "/" || path == "/root") {
+		ret.push_back( Id() );
+		return 1;
+	}
+
+	vector< string > names;
+	Id start; // set to root id.
+	if ( path[0] == '/' ) {
+		// separateString puts in a blank first entry if the first char
+		// is a separator.
+		separateString( path.substr( 1 ) , names, "/" );
+	} else {
+		separateString( path, names, "/" );
+		bool ret = get( Id::shellId().eref(), "cwe", start );
+		assert( ret );
+	}
+
+	return wildcardRelativeFind( start, names, 0, ret );
+}
+
+/*
+static int wildcardRelativeFind( Id start, const vector< string >& path, 
+		unsigned int depth, vector< Id >& ret )
+		*/
+
+/**
  * This is the basic wildcardFind function, working on a single
- * tree. It fills up the vector 'ret' with Element* found according
- * to the path string. It preserves the order of the returned Elements
- * as the order of elements traversed in the search. This is a 
- * depth-first search.
- * It returns the number of Elements found.
+ * tree. It adds entries into the vector 'ret' with Ids found according
+ * to the path string. It preserves the order of the returned Ids
+ * as the order of elements traversed in the search. It does NOT
+ * eliminate duplicates. This is a depth-first search.
+ * Note that it does the dumb but backward compatible thing with
+ * Ids of arrays: it lists every entry.
+ *
+ * It returns the number of Ids found here.
  */
 int simpleWildcardFind( const string& path, vector<Id>& ret)
 {
 	if ( path.length() == 0 )
 		return 0;
-	int n = 0;
-	string temp = path;
-	unsigned long pos = 0;
-	while ( pos != string::npos ) {
-		if ( pos > 0 )
-			temp = temp.substr( pos + 1 );
-		pos = temp.find(",");
-		n += innerFind( temp.substr( 0, pos ), ret );
-	}
-	return n;
+	unsigned int n = ret.size();
+	vector< string > wildcards;
+	separateString( path, wildcards, "," );
+	vector< string >::iterator i;
+	for ( i = wildcards.begin(); i != wildcards.end(); ++i )
+		innerFind( *i, ret );
+
+	return ret.size() - n;
 }
 
-static void my_unique(vector<Id>& ret)
+static void myUnique(vector<Id>& ret)
 {
 	sort(ret.begin(), ret.end());
 	unsigned int i, j;
@@ -311,63 +150,208 @@ static void my_unique(vector<Id>& ret)
 		ret.resize(j);
 }
 
-int wildcardFind(const string& n, vector<Id>& ret) 
+int wildcardFind(const string& path, vector<Id>& ret) 
 {
-	if (n == "")
-		return 0;
-	
-	int nret = 0;
-	string s = n;
-	unsigned long i = 0;
-	string mid;
-	do {
-		i = s.find(',');
-		mid = s.substr(0, i);
-		s = s.substr(i + 1);
-		nret += simpleWildcardFind( mid, ret );
-	} while (i < string::npos);
-	my_unique( ret );
+	ret.resize( 0 );
+	simpleWildcardFind( path, ret );
+	myUnique( ret );
 	return ret.size();
 }
 
+/**
+ * 	singleLevelWildcard parses a single level of the path and returns all
+ * 	ids that match it. If there is a suitable doublehash, it will recurse
+ * 	into child elements.
+ * 	Returns # of ids found.
+ */
+int singleLevelWildcard( Id start, const string& path, vector< Id >& ret )
+{
+	if ( path.length() == 0 )
+		return 0;
+
+	unsigned int nret = ret.size();
+	string beforeBrace;
+	string insideBrace;
+	unsigned int index;
+	// This has to handle ghastly cases like foo[][FIELD(x)=12.3]
+	findBraceContent( path, beforeBrace, insideBrace, index );
+	if ( beforeBrace == "##" )
+		return allChildren( start, insideBrace, index, ret ); // recursive.
+
+	vector< Id > kids; 
+	Neutral::getChildren( start.eref(), kids );
+	vector< Id >::iterator i;
+	for ( i = kids.begin(); i != kids.end(); i++ ) 
+		if ( matchName( *i, beforeBrace, insideBrace, index ) )
+			ret.push_back( *i );
+
+	return ret.size() - nret;
+}
+
+/**
+ * Parses the name and separates out the stuff before the brace, 
+ * the stuff inside it, and if present, the index which is also in a 
+ * brace.
+ * Assume order is foo[index][insideBrace]
+ */
+void findBraceContent( const string& path, string& beforeBrace, 
+	string& insideBrace, unsigned int& index )
+{
+	beforeBrace = "";
+	insideBrace = "";
+	index = 0;
+
+	if ( path.length() == 0 )
+		return;
+	vector< string > names;
+	separateString( path, names, "[" );
+	if ( names.size() == 0 )
+		return;
+	if ( names.size() >= 1 )
+		beforeBrace = names[0];
+	if ( names.size() >= 2 ) {
+		if ( names[1].find_first_not_of( " 	]" ) == string::npos ) {
+			index = Id::AnyIndex;
+		} else {
+			string n1 = names[1].substr( 0, names[1].length() - 1 );
+			if ( n1[0] >= '0' && n1[0] <= '9' ) { // An index
+				index = atoi( n1.c_str() );
+			} else { // Some wildcard conditionals
+				insideBrace = n1;
+			}
+		}
+	}
+	if ( names.size() >= 3 ) {
+		insideBrace = names[2].substr( 0, names[2].length() - 1 );
+	}
+}
+
+/**
+ * Compares the various parts of the wildcard name with the id
+ */
+bool matchName( Id id, 
+	const string& beforeBrace, const string& insideBrace, 
+	unsigned int index )
+{
+	if ( !( index == Id::AnyIndex || id.index() == index ) )
+		return 0;
+
+	if ( matchBeforeBrace( id, beforeBrace ) ) {
+		if ( insideBrace.length() == 0 ) {
+			return 1;
+		} else {
+			return matchInsideBrace( id, insideBrace );
+		}
+	}
+	return 0;
+}
+
+/**
+ * matchInsideBrace checks for element property matches
+ */
+bool matchInsideBrace( Id id, const string& inside )
+{
+	if ( inside.substr(0, 4 ) == "TYPE" ||
+		inside.substr(0, 5 ) == "CLASS" ||
+		inside.substr(0, 3 ) == "ISA" )
+	{
+		string::size_type pos = inside.rfind( "=" );
+		if ( pos == string::npos ) 
+			return 0;
+		bool isEquality = ( inside[ pos - 1 ] != '!' );
+		string typeName = inside.substr( pos + 1 );
+		if ( typeName == "membrane" )
+			typeName = "Compartment";
+		return ( ( typeName == id()->className() ) == isEquality );
+	} else if ( inside.substr( 0, 6 ) == "FIELD(" ) {
+		return wildcardFieldComparison( id, inside.substr( 6 ) );
+	}
+	return 0;
+}
+
+/**
+ * matchBeforeBrace checks to see if the wildcard string 'name' matches
+ * up with the name of the id.
+ * Rules:
+ *      # may only be used once in the wildcard, but substitutes for any
+ *      number of characters.
+ *
+ * 		? may be used any number of times in the wildcard, and
+ * 		must substitute exactly for characters.
+ */
+bool matchBeforeBrace( Id id, const string& name )
+{
+	if ( name == "#" )
+		return 1;
+	
+	string ename = id()->name();
+
+	if ( name == ename )
+		return 1;
+
+	string::size_type pre = name.find( "#" );
+	string::size_type post = name.rfind( "#" );
+
+	// # may only be used once in the wildcard, but substitutes for any
+	// number of characters.
+	if ( pre != string::npos && post == pre ) {
+		unsigned int epos = ename.length() - ( name.length() - post - 1 );
+		return ( name.substr( 0, pre ) == ename.substr( 0, pre ) &&
+			name.substr( post + 1 ) == ename.substr( epos ) );
+	}
+
+	// ? may be used any number of times in the wildcard, and
+	// must substitute exactly for characters.
+	if ( name.length() != ename.length() )
+		return 0;
+	for ( unsigned int i = 0; i < name.length(); i++ )
+		if ( name[i] != '?' && name[i] != ename[i] )
+			return 0;
+	return 1;
+}
+
+/**
+ * Recursive function to compare all descendants and cram matches into ret.
+ * Returns number of matches.
+ */
+int allChildren( Id start, const string& insideBrace, unsigned int index,
+	vector< Id >& ret )
+{
+	unsigned int nret = ret.size();
+	vector< Id > kids;
+	Neutral::getChildren( start.eref(), kids );
+	vector< Id >::iterator i;
+	for ( i = kids.begin(); i != kids.end(); i++ ) {
+		if ( matchName( *i, "#", insideBrace, index ) )
+			ret.push_back( *i );
+		allChildren( *i, insideBrace, index, ret );
+	}
+	return ret.size() - nret;
+}
 
 /**
  * This is the main recursive function of the wildcarding scheme.
- * It builds a wildcard list based on path. Returns number found.
- * The start element is one that already matches.
- * The string n is nonzero: there is more to come.
- * If doublehash is set then the branches as well as leaves are used.
+ * It builds a wildcard list based on path. Puts found Ids into ret,
+ * and returns # found.
+ * The start id is one that already matches.
+ * depth is the position on the path.
  * Note that this is a single-node function: does not work for 
  * multi-node wildcard searches.
- * \todo: Check if still have problem that it currently returns duplicates.
  */
-int wildcardRelativeFind( Element* e,
-	const string& n, vector< Id >& ret, int doublehash)
+int wildcardRelativeFind( Id start, const vector< string >& path, 
+		unsigned int depth, vector< Id >& ret )
 {
-	unsigned long pos = n.find('/');
-	string head = n.substr(0, pos);
 	int nret = 0;
+	vector< Id > currentLevelIds;
+	if ( depth == path.size() ) {
+		ret.push_back( start );
+		return 1;
+	}
 
-	if (doublehash == 0 && head.find("##") != string::npos)
-		doublehash = 1;
-
-	vector< Id > kids = Neutral::getChildList( e );
-	vector< Id >::iterator i;
-	for ( i = kids.begin(); i != kids.end(); i++ ) {
-		Element* temp = ( *i )();
-		Id id;
-		if ( (id = wildcardName( temp, head )) != Id::badId() ) {
-			if (pos == string::npos) {
-				ret.push_back(id);
-				nret++;
-			} else {
-				nret += wildcardRelativeFind( temp,
-					n.substr(pos + 1, string::npos), ret, doublehash);
-			}
-		}
-		if (doublehash) { // apply the search string recursively.
-			nret += wildcardRelativeFind( temp, n, ret, doublehash );
-		}
+	if ( singleLevelWildcard( start, path[depth], currentLevelIds ) > 0 ) {
+		vector< Id >::iterator i;
+		for ( i = currentLevelIds.begin(); i != currentLevelIds.end(); ++i )
+			nret += wildcardRelativeFind( *i, path, depth + 1, ret );
 	}
 	return nret;
 }
@@ -401,10 +385,81 @@ void testWildcard()
 {
 	unsigned long i;
 	cout << "\nChecking wildcarding";
+
+	
+	string bb;
+	string ib;
+	unsigned int ii;
+	findBraceContent( "foo[23][TYPE=Compartment]", bb, ib, ii );
+	ASSERT( bb == "foo", "findBraceContent" );
+	ASSERT( ib == "TYPE=Compartment", "findBraceContent" );
+	ASSERT( ii == 23, "findBraceContent" );
+	findBraceContent( "foo[][TYPE=Channel]", bb, ib, ii );
+	ASSERT( bb == "foo", "findBraceContent" );
+	ASSERT( ib == "TYPE=Channel", "findBraceContent" );
+	ASSERT( ii == Id::AnyIndex, "findBraceContent" );
+	findBraceContent( "foo[TYPE=membrane]", bb, ib, ii );
+	ASSERT( bb == "foo", "findBraceContent" );
+	ASSERT( ib == "TYPE=membrane", "findBraceContent" );
+	ASSERT( ii == 0, "findBraceContent" );
+	findBraceContent( "bar[]", bb, ib, ii );
+	ASSERT( bb == "bar", "findBraceContent" );
+	ASSERT( ib == "", "findBraceContent" );
+	ASSERT( ii == Id::AnyIndex, "findBraceContent" );
+	findBraceContent( "zod[24]", bb, ib, ii );
+	ASSERT( bb == "zod", "findBraceContent" );
+	ASSERT( ib == "", "findBraceContent" );
+	ASSERT( ii == 24, "findBraceContent" );
+
+
 	Element* a1 = Neutral::create( "Neutral", "a1", Element::root(), Id::scratchId() );
 	Element* c1 = Neutral::create( "Compartment", "c1", a1, Id::scratchId() );
 	Element* c2 = Neutral::create( "Compartment", "c2", a1, Id::scratchId() );
 	Element* c3 = Neutral::create( "Compartment", "c3", a1, Id::scratchId() );
+
+
+	bool ret = matchBeforeBrace( a1->id(), "a1" );
+	ASSERT( ret, "matchBeforeBrace" );
+	ret = matchBeforeBrace( a1->id(), "a2" );
+	ASSERT( ret == 0, "matchBeforeBrace" );
+	ret = matchBeforeBrace( a1->id(), "a?" );
+	ASSERT( ret == 1, "matchBeforeBrace" );
+	ret = matchBeforeBrace( a1->id(), "?1" );
+	ASSERT( ret == 1, "matchBeforeBrace" );
+	ret = matchBeforeBrace( a1->id(), "??" );
+	ASSERT( ret == 1, "matchBeforeBrace" );
+	ret = matchBeforeBrace( a1->id(), "#" );
+	ASSERT( ret == 1, "matchBeforeBrace" );
+	ret = matchBeforeBrace( a1->id(), "a#" );
+	ASSERT( ret == 1, "matchBeforeBrace" );
+	ret = matchBeforeBrace( a1->id(), "#1" );
+	ASSERT( ret == 1, "matchBeforeBrace" );
+
+	ret = matchInsideBrace( a1->id(), "TYPE=Neutral" );
+	ASSERT( ret, "matchInsideBrace" );
+	ret = matchInsideBrace( a1->id(), "TYPE==Neutral" );
+	ASSERT( ret, "matchInsideBrace" );
+	ret = matchInsideBrace( a1->id(), "CLASS=Neutral" );
+	ASSERT( ret, "matchInsideBrace" );
+	ret = matchInsideBrace( a1->id(), "ISA=Neutral" );
+	ASSERT( ret, "matchInsideBrace" );
+	ret = matchInsideBrace( a1->id(), "CLASS=Neutral" );
+	ASSERT( ret, "matchInsideBrace" );
+	ret = matchInsideBrace( a1->id(), "TYPE!=Channel" );
+	ASSERT( ret, "matchInsideBrace" );
+	ret = matchInsideBrace( a1->id(), "CLASS!=Channel" );
+	ASSERT( ret, "matchInsideBrace" );
+	ret = matchInsideBrace( a1->id(), "ISA!=Channel" );
+	ASSERT( ret, "matchInsideBrace" );
+	ret = matchInsideBrace( c3->id(), "ISA!=Neutral" );
+	ASSERT( ret, "matchInsideBrace" );
+	ret = matchInsideBrace( c3->id(), "ISA=Compartment" );
+	ASSERT( ret, "matchInsideBrace" );
+	ret = matchInsideBrace( c3->id(), "TYPE=membrane" );
+	ASSERT( ret, "matchInsideBrace" );
+	// ret = matchInsideBrace( c3->id(), "FIELD(Vm)=-0.06" );
+	// ASSERT( ret, "Field matchInsideBrace" );
+
 
 	Element* el1[] = { Element::root(), a1, c1 };
 	wildcardTestFunc( el1, 3, "/,/a1,/a1/c1" );

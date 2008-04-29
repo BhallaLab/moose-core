@@ -18,6 +18,7 @@ end
 
 create KineticManager /kinetics
 // create neutral /kinetics
+setfield /kinetics method ee
 
 create neutral /graphs
 create neutral /moregraphs
