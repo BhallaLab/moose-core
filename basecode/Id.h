@@ -208,6 +208,8 @@ class Id
 		//	Element assignment. Only allowed for a few functions.
 		//////////////////////////////////////////////////////////////
 		bool setElement( Element* e );
+		static const unsigned int AnyIndex;
+		static const unsigned int BadIndex;
 	private:
 		// static void setManager( Manager* m );
 

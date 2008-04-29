@@ -76,25 +76,25 @@ class SimpleConn: public Conn
 		{;}
 
 		Eref target() const {
-			return Eref( s_->e2(), s_->eI2() );
+			return Eref( s_->SimpleConnTainer::e2(), s_->SimpleConnTainer::eI2() );
 		}
 		unsigned int targetIndex() const {
-			return s_->i2();
+			return s_->SimpleConnTainer::i2();
 		}
 		int targetMsg() const {
-			return s_->msg2();
+			return s_->SimpleConnTainer::msg2();
 		}
 		Eref source() const {
-			return Eref( s_->e1(), s_->eI2() );
+			return Eref( s_->SimpleConnTainer::e1(), s_->SimpleConnTainer::eI2() );
 		}
 		unsigned int sourceIndex() const {
-			return s_->i1();
+			return s_->SimpleConnTainer::i1();
 		}
 		int sourceMsg() const {
-			return s_->msg1();
+			return s_->SimpleConnTainer::msg1();
 		}
 		void* data() const {
-			return s_->e2()->data( s_->eI2() );
+			return s_->SimpleConnTainer::e2()->data( s_->SimpleConnTainer::eI2() );
 		}
 
 		/**
@@ -141,28 +141,28 @@ class ReverseSimpleConn: public Conn
 		{;}
 
 		Eref target() const {
-			return Eref( s_->e1() , s_->eI1() );
+			return Eref( s_->SimpleConnTainer::e1() , s_->SimpleConnTainer::eI1() );
 		}
 		unsigned int targetEindex() const {
-			return s_->eI1();
+			return s_->SimpleConnTainer::eI1();
 		}
 		unsigned int targetIndex() const {
-			return s_->i1();
+			return s_->SimpleConnTainer::i1();
 		}
 		int targetMsg() const {
-			return s_->msg1();
+			return s_->SimpleConnTainer::msg1();
 		}
 		Eref source() const {
-			return Eref( s_->e2(), s_->eI2() );
+			return Eref( s_->SimpleConnTainer::e2(), s_->SimpleConnTainer::eI2() );
 		}
 		unsigned int sourceIndex() const {
-			return s_->i2();
+			return s_->SimpleConnTainer::i2();
 		}
 		int sourceMsg() const {
-			return s_->msg2();
+			return s_->SimpleConnTainer::msg2();
 		}
 		void* data() const {
-			return s_->e1()->data( s_->eI1() );
+			return s_->e1()->data( s_->SimpleConnTainer::eI1() );
 		}
 
 		/**

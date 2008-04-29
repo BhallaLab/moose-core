@@ -40,6 +40,13 @@ class Neutral
 			 * Returns a vector of child ids for this element
 			 */
 			static vector< Id > getChildList( Eref e );
+			/**
+			 * Gets list of children, but puts into a supplied vector.
+			 * This is more efficient than getChildList.
+			 * Mostly used in wildcarding.
+			 */
+			static void getChildren( const Eref e, vector< Id >& kids);
+
 			static double getCpu( Eref e );
 			static unsigned int getDataMem( Eref e );
 			static unsigned int getMsgMem( Eref e );

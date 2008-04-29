@@ -70,8 +70,7 @@ class KineticManager
 		void innerSetMethod( Eref e, string value );
 		void setupSolver( Eref e );
 		void setupDt( Eref e, double dt );
-		double estimateDt( Element* e, Element** elm, string& field, 
-			double error );
+		double estimateDt( Id mgr, Id& elm, string& field, double error ) ;
 		double findEnzSubPropensity( Eref e ) const;
 		double findEnzPrdPropensity( Eref e ) const;
 		double findReacPropensity( Eref e, bool isPrd ) const;
