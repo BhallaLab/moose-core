@@ -6381,5 +6381,17 @@ for the kinetics solver. Many of the biophysics tests still fail in regression.
 Checked in as revision 448 with unit test flags on, Smoldyn off, -g, GSL
 
 Fixed a bug (SourceForge# 1916705) in showmsg.
+Checked in as revision 451 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+28 Apr 2008
+Trying to clear old regression tests with kinetic models. Stuck. Turns out
+that there are problems with wildcarding so it is not saving the output.
+Basic doublehash works but seems to foul up when doing the conditionals with
+square braces. Lots of fixes to do here.
+==============================================================================
+29 Apr 2008
+
+Re-implementing the wildcards with ids. Much cleaner.
 
 ==============================================================================

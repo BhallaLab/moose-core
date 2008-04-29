@@ -13,6 +13,8 @@
 
 #include "../shell/Shell.h"
 
+const unsigned int Id::BadIndex = UINT_MAX;
+const unsigned int Id::AnyIndex = UINT_MAX - 1;
 const unsigned int BAD_ID = ~0;
 const unsigned int MAX_ID = 1000000;
 
@@ -129,6 +131,11 @@ string Id::path( const string& separator) const
 Element* Id::operator()() const
 {
 	return manager().getElement( *this );
+}
+
+Eref Id::eref() const 
+{
+	return Eref( manager().getElement( *this ), index_ );
 }
 
 unsigned int Id::node() const 
