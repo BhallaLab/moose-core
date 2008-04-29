@@ -10,9 +10,6 @@
 #ifndef _SHELL_H
 #define _SHELL_H
 
-extern void separateString( const string& s, vector< string>& v, 
-				const string& separator );
-
 // forward declaration
 class SimDump;
 

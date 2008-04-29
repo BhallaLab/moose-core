@@ -582,9 +582,9 @@ void KineticManager::reschedFunc( const Conn* c )
 
 void KineticManager::reschedFuncLocal( Eref e )
 {
-	Element* elm;
+	Id offendingElm;
 	string field;
-	double dt = estimateDt( e.e, &elm, field, eulerError_ );
+	double dt = estimateDt( e.id(), offendingElm, field, eulerError_ );
 	setupSolver( e );
 	setupDt( e, dt );
 }
@@ -869,8 +869,8 @@ double KineticManager::findEnzPrdPropensity( Eref e ) const
 #include <limits>
 #endif
 
-double KineticManager::estimateDt( Element* mgr, 
-	Element** elm, string& field, double error ) 
+double KineticManager::estimateDt( Id mgr, 
+	Id& elm, string& field, double error ) 
 {
 	static const Cinfo* eCinfo = Cinfo::find( "Enzyme" );
 	static const Cinfo* rCinfo = Cinfo::find( "Reaction" );
@@ -879,8 +879,9 @@ double KineticManager::estimateDt( Element* mgr,
 	vector< Id > elist;
 	vector< Id >::iterator i;
 
-	if ( wildcardRelativeFind( mgr, "##", elist, 1 ) == 0 ) {
-		*elm = 0;
+	// int allChildren( start, insideBrace, index, ret)
+	if ( allChildren( mgr, "", Id::AnyIndex, elist ) == 0 ) {
+		elm = Id::badId();
 		field = "";
 		return 1.0;
 	}
@@ -894,26 +895,26 @@ double KineticManager::estimateDt( Element* mgr,
 			prop = findReacPropensity( ( *i )(), 0 );
 			if ( maxProp < prop ) {
 				maxProp = prop;
-				*elm = ( *i )();
+				elm = *i;
 				field = "kf";
 			}
 			prop = findReacPropensity( ( *i )(), 1 );
 			if ( maxProp < prop ) {
 				maxProp = prop;
-				*elm = ( *i )();
+				elm = *i;
 				field = "kb";
 			}
 		} else if ( ( *i )()->cinfo()->isA( eCinfo ) ) {
 			prop = findEnzSubPropensity( ( *i )() );
 			if ( maxProp < prop ) {
 				maxProp = prop;
-				*elm = ( *i )();
+				elm = *i;
 				field = "k1";
 			}
 			prop = findEnzPrdPropensity( ( *i )() );
 			if ( maxProp < prop ) {
 				maxProp = prop;
-				*elm = ( *i )();
+				elm = *i;
 				field = "k3";
 			}
 		}

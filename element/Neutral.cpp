@@ -411,15 +411,21 @@ void Neutral::lookupChild( const Conn* c, const string s )
 
 vector< Id > Neutral::getChildList( Eref e )
 {
-	assert( e.e != 0 );
 	vector< Id > ret;
+	getChildren( e, ret );
+	return ret;
+}
+
+void Neutral::getChildren( const Eref e, vector< Id >& ret )
+{
+	assert( e.e != 0 );
+	ret.resize( 0 );
 	Conn* c = e.e->targets( childSrcSlot.msg() );
 	while ( c->good() ) {
-		ret.push_back( c->target().e->id() );
+		ret.push_back( c->target().id() );
 		c->increment();
 	}
 	delete c;
-	return ret;
 }
 
 vector< string > Neutral::getFieldList( Eref elm )
