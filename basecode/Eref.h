@@ -32,6 +32,10 @@ class Eref {
 
 		bool operator<( const Eref& other ) const;
 
+		Element* operator->() {
+			return e;
+		}
+
 		Id id();
 		
 		Element* e;

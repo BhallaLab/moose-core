@@ -40,11 +40,11 @@ class ValueFinfo: public Finfo
 			 * \todo: Still to implement.
 			 */
 			bool add( 
-					Element* e, Element* destElm, const Finfo* destFinfo
+					Eref e, Eref destElm, const Finfo* destFinfo
 			) const ;
 			
 			bool respondToAdd(
-					Element* e, Element* src, const Ftype *srcType,
+					Eref e, Eref src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& returnFuncId,
 					int& destMsgId, unsigned int& destIndex
 			) const;
