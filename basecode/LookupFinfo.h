@@ -77,11 +77,11 @@ class LookupFinfo: public Finfo
 			 * not assigned a message src or dest.
 			 */
 			bool add( 
-					Element* e, Element* destElm, const Finfo* destFinfo
+					Eref e, Eref destElm, const Finfo* destFinfo
 			) const ;
 			
 			bool respondToAdd(
-					Element* e, Element* src, const Ftype *srcType,
+					Eref e, Eref src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& returnFuncId,
 					int& destMsgId, unsigned int& destIndex
 			) const;

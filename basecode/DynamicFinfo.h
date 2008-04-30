@@ -53,7 +53,7 @@ class DynamicFinfo: public Finfo
 			 * otherwise it makes a new one.
 			 */
 			static DynamicFinfo* setupDynamicFinfo(
-				Element* e, const string& name, const Finfo* origFinfo,
+				Eref e, const string& name, const Finfo* origFinfo,
 				GetFunc getFunc,
 				void* index = 0 );
 
@@ -63,7 +63,7 @@ class DynamicFinfo: public Finfo
 			 * a MsgSrc slot.
 			 */
 			bool add( 
-					Element* e, Element* destElm, const Finfo* destFinfo
+					Eref e, Eref destElm, const Finfo* destFinfo
 			) const;
 			
 			/**
@@ -72,7 +72,7 @@ class DynamicFinfo: public Finfo
 			 * MsgDest slot.
 			 */
 			bool respondToAdd(
-					Element* e, Element* src, const Ftype *srcType,
+					Eref e, Eref src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& returnFuncId,
 					int& destMsgId, unsigned int& destIndex
 			) const;
