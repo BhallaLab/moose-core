@@ -35,15 +35,15 @@ DynamicFinfo::~DynamicFinfo()
 }
 
 DynamicFinfo* DynamicFinfo::setupDynamicFinfo(
-	Element* e, const string& name, const Finfo* origFinfo,
+	Eref e, const string& name, const Finfo* origFinfo,
 	GetFunc getFunc, void* index )
 {
-	assert( e != 0 );
+	assert( e.e != 0 );
 
 	// Here we check if there is a vacant Dynamic Finfo to use
 	vector< Finfo* > flist;
 	vector< Finfo* >::iterator i;
-	e->listLocalFinfos( flist );
+	e.e->listLocalFinfos( flist );
 	for ( i = flist.begin(); i != flist.end(); i++ ) {
 		DynamicFinfo* df = dynamic_cast< DynamicFinfo* >( *i );
 		if ( df ) {
@@ -56,7 +56,7 @@ DynamicFinfo* DynamicFinfo::setupDynamicFinfo(
 				return df;
 			}
 			// This is an old DynamicFinfo without a message.
-			if ( e->msg( df->msg() )->size() == 0 ) {
+			if ( e.e->msg( df->msg() )->size() == 0 ) {
 				if ( df->generalIndex_ != 0 ) {
 					df->ftype()->destroyIndex( df->generalIndex_ );
 				}
@@ -71,7 +71,7 @@ DynamicFinfo* DynamicFinfo::setupDynamicFinfo(
 
 	// Nope, we have to use the new DynamicFinfo.
 	DynamicFinfo* ret = new DynamicFinfo( name, origFinfo, getFunc, index);
-	e->addFinfo( ret );
+	e.e->addFinfo( ret );
 	return ret;
 }
 
@@ -86,7 +86,7 @@ DynamicFinfo* DynamicFinfo::setupDynamicFinfo(
  *   value out to the target.
  */
 bool DynamicFinfo::add( 
-		Element* e, Element* destElm, const Finfo* destFinfo) const
+		Eref e, Eref destElm, const Finfo* destFinfo) const
 {
 	unsigned int srcFuncId = 0;
 	unsigned int destFuncId = 0;
@@ -109,13 +109,13 @@ bool DynamicFinfo::add(
 						srcFuncId, destFuncId,
 						destMsg, destIndex ) )
 	{
-		unsigned int srcIndex = e->numTargets( msg_ );
+		unsigned int srcIndex = e.e->numTargets( msg_ );
 		
 		// Note that the Dynamic Finfo must be the dest, even
 		// if it was called as the originator.
 		SimpleConnTainer* ct = new SimpleConnTainer( 
-			destElm, e, destMsg, msg_,
-			0, 0,		// Hack. Can't use for arrays
+			destElm.e, e.e, destMsg, msg_,
+			destElm.i, e.i,		// Hack. Can't use for arrays
 			srcIndex, destIndex );
 		return Msg::add( ct, destFuncId, srcFuncId );
 			/*
@@ -138,12 +138,12 @@ bool DynamicFinfo::add(
  * - A sharedFinfo request: Set up both the trigger and the return.
  */
 bool DynamicFinfo::respondToAdd(
-					Element* e, Element* src, const Ftype *srcType,
+					Eref e, Eref src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& returnFuncId,
 					int& destMsg, unsigned int& destIndex
 ) const
 {
-	assert ( src != 0 && e != 0 );
+	assert ( src.e != 0 && e.e != 0 );
 
 	// Handle assignment message inputs when ftype is the same
 	// as the original Finfo
@@ -158,7 +158,7 @@ bool DynamicFinfo::respondToAdd(
 		}
 		returnFuncId = lookupId;
 		destMsg = msg_;
-		destIndex = e->numTargets( msg_ );
+		destIndex = e.e->numTargets( msg_ );
 		return 1;
 	}
 
@@ -190,7 +190,7 @@ bool DynamicFinfo::respondToAdd(
 	{
 		returnFuncId = trigId;
 		destMsg = msg_;
-		destIndex = e->numTargets( msg_ );
+		destIndex = e.e->numTargets( msg_ );
 		return 1;
 	}
 	return 0;
