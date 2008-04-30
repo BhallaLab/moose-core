@@ -25,7 +25,7 @@ DestFinfo::DestFinfo( const string& name, const Ftype *f,
  * the necessary information if all is well.
  */
 bool DestFinfo::respondToAdd(
-					Element* e, Element* src, const Ftype *srcType,
+					Eref e, Eref src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int & returnFuncId,
 					int& destMsgId, unsigned int& destIndex
 ) const
@@ -34,10 +34,10 @@ bool DestFinfo::respondToAdd(
 
 	if ( ftype()->isSameType( srcType ) && 
 		FuncVec::getFuncVec( srcFuncId )->size() == 0 ) {
-		assert ( src != 0 && e != 0 );
+		assert ( src.e != 0 && e.e != 0 );
 		returnFuncId = fv_->id();
 		destMsgId = msg_;
-		destIndex = e->numTargets( msg_ );
+		destIndex = e.e->numTargets( msg_ );
 		// numDest = 1;
 		return 1;
 	}

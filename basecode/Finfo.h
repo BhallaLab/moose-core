@@ -27,7 +27,7 @@ class Finfo
 			 * This function creates a connection between two Finfos.
 			 */
 			virtual bool add( 
-					Element* e, Element* destElm, const Finfo* destFinfo
+					Eref e, Eref destElm, const Finfo* destFinfo
 			) const = 0;
 
 			/**
@@ -37,8 +37,8 @@ class Finfo
 			 * message function pointers back and forth between source
 			 * and destination objects.
 			 * Arguments:
-			 * 	e: target Element
-			 * 	src: src Element
+			 * 	e: target Element ref
+			 * 	src: src Element ref
 			 * 	srcType: src type
 			 *	srcFuncId: src func
 			 *	destFuncId: dest func id, filled here and passed back.
@@ -51,7 +51,7 @@ class Finfo
 			 *		increment this by the size of the vector.
 			 */
 			virtual bool respondToAdd(
-					Element* e, Element* src, const Ftype *srcType,
+					Eref e, Eref src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& destFuncId,
 					int& destMsgId, unsigned int& destIndex
 			) const = 0;
