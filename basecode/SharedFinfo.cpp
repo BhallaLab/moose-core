@@ -58,7 +58,7 @@ SharedFinfo::SharedFinfo( const string& name, Finfo** finfos,
  *
  */
 bool SharedFinfo::add(
-	Element* e, Element* destElm, const Finfo* destFinfo
+	Eref e, Eref destElm, const Finfo* destFinfo
 ) const
 {
 	unsigned int srcFuncId = fv_->id();
@@ -74,18 +74,18 @@ bool SharedFinfo::add(
 			names_.size() );
 		assert ( names_.size() > 0 );
 
-		unsigned int srcIndex = e->numTargets( msg_ );
+		unsigned int srcIndex = e.e->numTargets( msg_ );
 
 		if ( isDest_ ) {
 			if ( FuncVec::getFuncVec( destFuncId )->isDest() ) {
 				cout << "Error: SharedFinfo::add: dest at both ends: " <<
-				e->name() << "." << name() << " to " << 
-				destElm->name() << "." << destFinfo->name() << endl;
+				e.e->name() << "." << name() << " to " << 
+				destElm.e->name() << "." << destFinfo->name() << endl;
 				return 0;
 			}
 			SimpleConnTainer* ct = new SimpleConnTainer( 
-				destElm, e, destMsg, msg_,
-				0, 0,		// Hack. Can't use for arrays
+				destElm.e, e.e, destMsg, msg_,
+				destElm.i, e.i,		// Hack. Can't use for arrays
 				destIndex, srcIndex );
 			return Msg::add( ct, destFuncId, srcFuncId );
 			/*
@@ -95,13 +95,13 @@ bool SharedFinfo::add(
 		} else {
 			if ( !FuncVec::getFuncVec( destFuncId )->isDest() ) {
 				cout << "Error: SharedFinfo::add: src at both ends: " <<
-				e->name() << "." << name() << " to " << 
-				destElm->name() << "." << destFinfo->name() << endl;
+				e.e->name() << "." << name() << " to " << 
+				destElm.e->name() << "." << destFinfo->name() << endl;
 				return 0;
 			}
 			SimpleConnTainer* ct = new SimpleConnTainer( 
-				e, destElm, msg_, destMsg,
-				0, 0,		// Hack. Can't use for arrays
+				e.e, destElm.e, msg_, destMsg,
+				e.i, destElm.i,		// Hack. Can't use for arrays
 				srcIndex, destIndex );
 
 			return Msg::add( ct, srcFuncId, destFuncId );
@@ -126,13 +126,13 @@ bool SharedFinfo::add(
  *
  */
 bool SharedFinfo::respondToAdd(
-					Element* e, Element* src, const Ftype *srcType,
+					Eref e, Eref src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& returnFuncId,
 					int& destMsg, unsigned int& destIndex
 ) const
 {
 	assert ( srcType != 0 );
-	assert ( src != 0 && e != 0 );
+	assert ( src.e != 0 && e.e != 0 );
 	assert ( returnFuncId == 0 );
 
 	// The type comparison uses SharedFtypes, which are a composite
@@ -141,7 +141,7 @@ bool SharedFinfo::respondToAdd(
 		FuncVec::getFuncVec( srcFuncId )->size() == names_.size() ) {
 		returnFuncId = fv_->id();
 		destMsg = msg_;
-		destIndex = e->numTargets( msg_ );
+		destIndex = e.e->numTargets( msg_ );
 		return 1;
 	}
 	return 0;

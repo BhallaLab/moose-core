@@ -57,7 +57,7 @@ const Finfo* LookupFinfo::match( Element* e, const string& s ) const
 * Dynamic Finfo should handle it.
 */
 bool LookupFinfo::add( 
-	Element* e, Element* destElm, const Finfo* destFinfo
+	Eref e, Eref destElm, const Finfo* destFinfo
 	) const 
 {
 		assert( 0 );
@@ -69,7 +69,7 @@ bool LookupFinfo::add(
 * handle it.
 */
 bool LookupFinfo::respondToAdd(
-		Element* e, Element* src, const Ftype *srcType,
+		Eref e, Eref src, const Ftype *srcType,
 		unsigned int& srcFuncId, unsigned int& returnFuncId,
 		int& destMsgId, unsigned int& destIndex
 ) const

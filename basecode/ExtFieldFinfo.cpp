@@ -14,7 +14,7 @@
 * a MsgSrc slot.
 */
 bool ExtFieldFinfo::add(
-	Element* e, Element* destElm, const Finfo* destFinfo) const
+	Eref e, Eref destElm, const Finfo* destFinfo) const
 { 
 	return 0;
 }
@@ -25,7 +25,7 @@ bool ExtFieldFinfo::add(
 * MsgDest slot.
 */
 bool ExtFieldFinfo::respondToAdd(
-	Element* e, Element* src, const Ftype *srcType,
+	Eref e, Eref src, const Ftype *srcType,
 	unsigned int& srcFuncId, unsigned int& returnFuncId,
 	int& destMsgId, unsigned int& destIndex
 ) const

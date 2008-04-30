@@ -6398,5 +6398,24 @@ Checked in as revision 462 with unit test flags on, Smoldyn off, -g, GSL
 
 Fixed up and tested some additional stuff for doing wildcards against
 field values.
+Checked in as revision 463 with unit test flags on, Smoldyn off, -g, GSL
 
 ==============================================================================
+30 Apr 2008
+Setting up array messages.
+*  bool SrcFinfo::add( Element* e, Element* destElm, const Finfo* destFinfo )
+	should use Erefs instead of Element*, so that we get index info.
+* Likewise, respondToAdd
+- Should write a function to generate a ConnTainer based on src and dest
+	erefs and the other args to each msg.
+	- Select appropriate type of ConnTainer depending on indices.
+	- In some cases want to look up an existing ConnTainer and add to it,
+		rather than make a new one.
+		- So the subsequent Msg::add may need to be conditional.
+	- Or, a single function like 
+		Msg::add( e, destElm, msg_, destMsg, srcIndex, destIndex,
+			srcFuncId, destFuncId );
+	
+
+Changed arguments to add and respondToAdd to use Erefs rather than Element*.
+Compiled and cleared unit tests.
