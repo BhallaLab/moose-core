@@ -20,7 +20,7 @@
  * as the 'thisFinfo' does not manage predefined messages.
  */
 bool ThisFinfo::respondToAdd(
-					Element* e, Element* src, const Ftype *srcType,
+					Eref e, Eref src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& returnFuncId,
 					int& destMsgId, unsigned int& destIndex
 ) const

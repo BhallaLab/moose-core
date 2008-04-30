@@ -13,12 +13,12 @@
 #include "SrcFinfo.h"
 
 bool SrcFinfo::add(
-	Element* e, Element* destElm, const Finfo* destFinfo
+	Eref e, Eref destElm, const Finfo* destFinfo
 ) const
 {
 	assert( destFinfo != 0 );
-	assert( e != 0 );
-	assert( destElm != 0 );
+	assert( e.e != 0 );
+	assert( destElm.e != 0 );
 
 	unsigned int srcFuncId = 0;
 	unsigned int destFuncId = 0;
@@ -32,11 +32,13 @@ bool SrcFinfo::add(
 		// not a shared one.
 		assert( FuncVec::getFuncVec( srcFuncId )->size() == 0 );
 		assert( FuncVec::getFuncVec( destFuncId )->size() == 1 );
-		unsigned int srcIndex = e->numTargets( msg_ );
+		unsigned int srcIndex = e.e->numTargets( msg_ );
 
+		// return Msg::add( e, destElm, msg_, destMsg, srcIndex, destIndex, srcFuncId, destFuncId );
+		
 		SimpleConnTainer* ct = new SimpleConnTainer( 
-			e, destElm, msg_, destMsg, 
-			0, 0,	// Hack. Won't work for arrays.
+			e.e, destElm.e, msg_, destMsg, 
+			e.i, destElm.i,
 			srcIndex, destIndex );
 
 		return Msg::add( ct, srcFuncId, destFuncId );
@@ -49,7 +51,7 @@ bool SrcFinfo::add(
 }
 
 bool SrcFinfo::respondToAdd(
-					Element* e, Element* src, const Ftype *srcType,
+					Eref e, Eref src, const Ftype *srcType,
 					unsigned int& srcFuncId, unsigned int& destFuncId,
 					int& destMsgId, unsigned int& destIndex
 ) const

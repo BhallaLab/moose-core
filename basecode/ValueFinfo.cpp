@@ -30,7 +30,7 @@ ValueFinfo::ValueFinfo(
 * If it doesn't work that will sit around unused.
 */
 bool ValueFinfo::add( 
-	Element* e, Element* destElm, const Finfo* destFinfo
+	Eref e, Eref destElm, const Finfo* destFinfo
 	) const 
 {
 	// If this is going to be a message source, then we will
@@ -87,13 +87,13 @@ bool ValueFinfo::add(
  * DynamicFinfo and then letting it handle all the cases.
  */
 bool ValueFinfo::respondToAdd(
-		Element* e, Element* src, const Ftype *srcType,
+		Eref e, Eref src, const Ftype *srcType,
 		unsigned int& srcFuncId, unsigned int& returnFuncId,
 		int& destMsgId, unsigned int& destIndex
 ) const
 {
 	assert( srcType != 0 );
-	assert( src != 0 && e != 0 );
+	assert( src.e != 0 && e.e != 0 );
 
 	DynamicFinfo *df = DynamicFinfo::setupDynamicFinfo(
 					e,

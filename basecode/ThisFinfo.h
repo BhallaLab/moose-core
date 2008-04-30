@@ -33,14 +33,14 @@ class ThisFinfo: public Finfo
 			 * For now we ignore it in the DestFinfo.
 			 */
 			bool add( 
-					Element* e, Element* destElm, const Finfo* destFinfo
+					Eref e, Eref destElm, const Finfo* destFinfo
 			) const 
 			{
 					return 0;
 			}
 			
 			bool respondToAdd(
-					Element* e, Element* dest, const Ftype *destType,
+					Eref e, Eref dest, const Ftype *destType,
 					unsigned int& destFuncId, unsigned int& returnFuncId,
 					int& destMsgId, unsigned int& destIndex
 			) const;
