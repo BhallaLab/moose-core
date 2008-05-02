@@ -51,6 +51,9 @@ class ValueFinfo: public Finfo
 
 			/**
 			 * Returns a flag for a bad msg.
+			 * \todo: convert to a value that is initialized to INT_MAX
+			 * \todo: on creation, but then is set to a sensible value in
+			 * \todo: Cinfo::shuffleFinfos.
 			 */
 			int msg() const {
 				return INT_MAX;
