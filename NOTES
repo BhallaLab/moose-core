@@ -6419,3 +6419,31 @@ Setting up array messages.
 
 Changed arguments to add and respondToAdd to use Erefs rather than Element*.
 Compiled and cleared unit tests.
+
+Checked in as revision 464 with unit test flags on, Smoldyn off, -g, GSL
+
+Several issues now with handling array messages:
+	- The 'add' function is implemented directly in the 
+		GenesisParserWrapper rather than the Shell where it should be.
+	- The 'add' function has no way to specify what kind of connection
+		to set up. Several of the options can be figured out from
+		the element specifications, more if there were wildcards
+		in the arguments.
+	- The 'add' function is set up to use the Finfo::add. Fine, as long
+		as the Finfo::add can pass in a desired Conn type.
+	- We need subsequent access to the ConnTainer.	
+
+==============================================================================
+1 May 2008
+Discussed the array messages. Plan is to have an optional extension to the
+'add' function for specifying exactly which ConnTainer to use, otherwise use
+some sensible defaults.
+
+Will separate out the 'add' function from genesisParser and put in a 
+shell command to issue it.
+
+==============================================================================
+2 May 2008
+Implemented skeleton of the One2ManyConn stuff. Also implemented the
+Fid class, to specify a field including the element Id it is on.
+Passes unit tests, still to implement new set of tests for One2Many.

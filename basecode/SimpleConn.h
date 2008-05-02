@@ -20,6 +20,10 @@ class SimpleConnTainer: public ConnTainer
 			unsigned int eI1 = 0, unsigned int eI2 = 0,
 			unsigned int i1 = 0, unsigned int i2 = 0 );
 
+		SimpleConnTainer( Eref e1, Eref e2, 
+			int msg1, int msg2,
+			unsigned int i1 = 0, unsigned int i2 = 0 );
+
 		Conn* conn( unsigned int eIndex, bool isReverse ) const;
 		Conn* conn( unsigned int eIndex, bool isReverse,
 			unsigned int connIndex ) const;
@@ -85,7 +89,7 @@ class SimpleConn: public Conn
 			return s_->SimpleConnTainer::msg2();
 		}
 		Eref source() const {
-			return Eref( s_->SimpleConnTainer::e1(), s_->SimpleConnTainer::eI2() );
+			return Eref( s_->SimpleConnTainer::e1(), s_->SimpleConnTainer::eI1() );
 		}
 		unsigned int sourceIndex() const {
 			return s_->SimpleConnTainer::i1();
