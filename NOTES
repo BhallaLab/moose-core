@@ -6447,3 +6447,7 @@ shell command to issue it.
 Implemented skeleton of the One2ManyConn stuff. Also implemented the
 Fid class, to specify a field including the element Id it is on.
 Passes unit tests, still to implement new set of tests for One2Many.
+
+Checked in as revision 465 with unit test flags on, Smoldyn off, -g, GSL
+
+Oops, forgot to add in the new files to svn. Check those in as well.
