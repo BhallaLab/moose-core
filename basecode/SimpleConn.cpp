@@ -11,6 +11,8 @@
 #include "header.h"
 #include "SimpleConn.h"
 
+const unsigned int ConnTainer::Default = UINT_MAX;
+
 SimpleConnTainer::SimpleConnTainer( Element* e1, Element* e2, 
 			int msg1, int msg2,
 			unsigned int eI1, unsigned int eI2,
@@ -18,6 +20,15 @@ SimpleConnTainer::SimpleConnTainer( Element* e1, Element* e2,
 			: 
 	ConnTainer( e1, e2, msg1, msg2 ),
 		eI1_( eI1 ), eI2_( eI2 ),
+		i1_( i1 ), i2_( i2 )
+{;}
+
+SimpleConnTainer::SimpleConnTainer( Eref e1, Eref e2, 
+			int msg1, int msg2,
+			unsigned int i1, unsigned int i2 )
+			: 
+	ConnTainer( e1.e, e2.e, msg1, msg2 ),
+		eI1_( e1.i ), eI2_( e2.i ),
 		i1_( i1 ), i2_( i2 )
 {;}
 
