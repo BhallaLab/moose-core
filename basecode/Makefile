@@ -19,9 +19,11 @@ OBJ = \
 	Eref.o	\
 	Id.o	\
 	IdManager.o	\
+	Fid.o	\
 	RecvFunc.o \
 	Msg.o \
 	SimpleConn.o	\
+	One2AllConn.o	\
 	TraverseMsgConn.o	\
 	TraverseDestConn.o	\
 	SimpleElement.o	\

@@ -44,19 +44,19 @@ class ConnTainer
 
 		// virtual bool add( Element* e1, Element* e2 ) = 0;
 
-		virtual Element* e1() const {
+		Element* e1() const {
 			return e1_;
 		}
 
-		virtual Element* e2() const {
+		Element* e2() const {
 			return e2_;
 		}
 
-		virtual int msg1() const {
+		int msg1() const {
 			return msg1_;
 		}
 
-		virtual int msg2() const {
+		int msg2() const {
 			return msg2_;
 		}
 
@@ -73,11 +73,29 @@ class ConnTainer
  		 * Returns the new ConnTainer on success, otherwise 0.
  		*/
 		virtual ConnTainer* copy( Element* e1, Element* e2 ) const = 0;
+
+		static const unsigned int Default;
 		
 	private:
-		Element* e1_;
-		Element* e2_;
-		int msg1_;
+		Element* e1_; // Pointer to element 1
+		Element* e2_; // Pointer to element 2
+		
+		/**
+		 * Identifier1 for Conntainer. 
+		 * If +ve, it is a src and msg1 looks up the Msg on e1->msg_. 
+		 * This in turn has a vector of ConnTainers.
+		 * If -ve, it is a dest, and msg1 does a map lookup on e1->dest_.
+		 * This too has a vector of ConnTainers.
+		 */
+		int msg1_;	
+
+		/**
+		 * Identifier2 for Conntainer. 
+		 * If +ve, it is a src and msg2 looks up the Msg on e2->msg_.
+		 * This in turn has a vector of ConnTainers.
+		 * If -ve, it is a dest, and msg2 does a map lookup on e2->dest_.
+		 * This too has a vector of ConnTainers.
+		 */
 		int msg2_;
 };
 

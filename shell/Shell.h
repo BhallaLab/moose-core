@@ -100,6 +100,45 @@ class Shell
 		static void getWildcardList( const Conn* c,
 						string path, bool ordered );
 
+
+		/**
+		 * addMessage creates a message between two Ids, which could
+		 * also represent array elements.
+		 */
+		static void addMessage( const Conn* c,
+			vector< Id >src, string srcField, vector< Id >dest, 
+			string destField );
+
+		/**
+		 * This is a more general form of the addMessage command,
+		 * as it lets the user specify the connection type. Currently
+		 * not available in the GENESIS parser.
+		 */
+		static void addEdge( const Conn* c,
+			Fid src, Fid dest, int connType );
+
+		/**
+		 * deleteMessage gets rid of the message identified by the id and
+		 * the integer lookup for it.
+		 */
+		static void deleteMessage( const Conn* c, Id id, int msg );
+
+		/**
+		 * deleteEdge gets rid of messages specified as edges, that is,
+		 * using the same src/field and dest/field info that was used
+		 * to create the message.
+		 */
+		static void deleteMessageByDest( const Conn* c,
+			Id src, string srcField, Id dest, string destField );
+		static void deleteEdge( const Conn* c, Fid src, Fid dest );
+
+		/**
+ 		* listMessages builds a list of messages associated with the 
+ 		* specified element on the named field, and sends it back to
+ 		* the calling parser. It extracts the
+ 		* target element from the connections, and puts this into a
+ 		* vector of unsigned ints.
+ 		*/
 		static void listMessages( const Conn* c,
 				Id id, string field, bool isIncoming );
 
