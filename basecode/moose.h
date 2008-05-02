@@ -57,6 +57,7 @@
 
 #include "setget.h"
 #include "setgetLookup.h"
+#include "Fid.h"
 
 #include "../utility/utility.h"
 

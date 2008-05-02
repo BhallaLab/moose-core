@@ -46,7 +46,7 @@ class GenesisParserWrapper: public myFlexLexer
 		void doShowMsg( int argc, const char** argv, Id s );
 		void showAllFields( Id e, Id s );
 		void doAdd( int argc, const char** const argv, Id s );
-		bool innerAdd( Id src, const string& srcF, Id dest,
+		bool innerAdd( Id s, Id src, const string& srcF, Id dest,
 						const string& destF );
 		void useClock( Id tickId, const string& path,
 						const string& func, Id s );

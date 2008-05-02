@@ -10,6 +10,7 @@
 
 #include "header.h"
 #include "IdManager.h"
+#include "Fid.h"
 
 #include "../shell/Shell.h"
 

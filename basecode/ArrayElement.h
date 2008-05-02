@@ -127,7 +127,8 @@ class ArrayElement: public Element
 		}
 
 		/**
-		 * Returns size of data array. For ArrayElement it is always 1.
+		 * Returns size of data array. For ArrayElement it can be any
+		 * positive integer.
 		 */
 		unsigned int numEntries() const {
 			return numEntries_;

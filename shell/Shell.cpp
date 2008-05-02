@@ -84,7 +84,8 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "delete", Ftype1< Id >::global(), 
 				RFCAST( &Shell::staticDestroy ) ),
 
-		new DestFinfo( "add",
+		// Create a dynamic field on specified object.
+		new DestFinfo( "addField",
 				Ftype2< Id, string >::global(),
 				RFCAST( &Shell::addField ) ),
 		// Getting a field value as a string: handling request
@@ -147,8 +148,19 @@ const Cinfo* initShellCinfo()
 				// Returns it in the default string return value.
 
 		////////////////////////////////////////////////////////////
-		// Message info functions
+		// Message functions
 		////////////////////////////////////////////////////////////
+
+		new DestFinfo( "addMessage",
+				Ftype4< vector< Id >, string, vector< Id >, string >::global(),
+				RFCAST( &Shell::addMessage ) ),
+		new DestFinfo( "deleteMessage",
+				Ftype2< Id, int >::global(),
+				RFCAST( &Shell::deleteMessage ) ),
+		new DestFinfo( "deleteEdge",
+				Ftype4< Id, string, Id, string >::global(),
+				RFCAST( &Shell::deleteEdge ) ),
+
 		// Handle request for message list:
 		// id elm, string field, bool isIncoming
 		new DestFinfo( "listMessages",
@@ -273,7 +285,7 @@ const Cinfo* initShellCinfo()
 			// objId, field, value
 			Ftype3< Id, string, string >::global() ),
 		new SrcFinfo( "add",
-				// srcObjId, srcFiekd, destObjId, destField
+				// srcObjId, srcField, destObjId, destField
 			Ftype4< Id, string, Id, string >::global()
 		),
 		new SrcFinfo( "create", 
@@ -298,7 +310,7 @@ const Cinfo* initShellCinfo()
 			RFCAST( &Shell::setField )
 		),
 		new DestFinfo( "add",
-				// srcObjId, srcFiekd, destObjId, destField
+				// srcObjId, srcField, destObjId, destField
 			Ftype4< Id, string, Id, string >::global(),
 			RFCAST( &Shell::addFunc )
 		),
@@ -1318,13 +1330,14 @@ void Shell::slaveCreateFunc ( const Conn* c,
 }
 
 void Shell::addFunc ( const Conn* c, 
-				Id src, string srcField,
-				Id dest, string destField )
+		Id src, string srcField,
+		Id dest, string destField )
 {
 	printNodeInfo( c );
 	cout << "in slaveAddFunc :" << src << " " << srcField << 
 		" " << dest << " " << destField << "\n";
 }
+
 // Static function
 /**
  * This copies the element tree from src to parent. If name arg is 
@@ -1811,6 +1824,29 @@ void Shell::requestCurrTime( const Conn* c )
 	assert( f != 0 );
 	f->strGet( cj, ret );
 	sendBack1< string >( c, getFieldSlot, ret );
+}
+
+void Shell::addMessage( const Conn* c,
+	vector< Id > src, string srcField,
+	vector< Id > dest, string destField )
+{
+}
+
+void Shell::addEdge( const Conn* c, Fid src, Fid dest, int connType )
+{
+}
+
+void Shell::deleteMessage( const Conn* c, Id src, int msg )
+{
+}
+
+void Shell::deleteMessageByDest( const Conn* c, 
+	Id src, string srcField, Id dest, string destField )
+{
+}
+
+void Shell::deleteEdge( const Conn* c, Fid src, Fid dest )
+{
 }
 
 /**

@@ -75,8 +75,9 @@ const Cinfo* initGenesisParserCinfo()
 		///////////////////////////////////////////////////////////////
 		// Value assignment: set and get.
 		///////////////////////////////////////////////////////////////
+		// Create a dynamic field on the specified object
+		new SrcFinfo( "addField", Ftype2<Id, string>::global() ),
 		// Getting a field value as a string: send out request:
-		new SrcFinfo( "add", Ftype2<Id, string>::global() ),
 		new SrcFinfo( "get", Ftype2< Id, string >::global() ),
 		// Getting a field value as a string: Recv the value.
 		new DestFinfo( "recvField",
@@ -119,8 +120,17 @@ const Cinfo* initGenesisParserCinfo()
 		// Returns time in the default return value.
 		
 		///////////////////////////////////////////////////////////////
-		// Message info functions
+		// Message functions
 		///////////////////////////////////////////////////////////////
+		// Create a message. srcId, srcField, destId, destField
+		new SrcFinfo( "addMsg", 
+		Ftype4< vector< Id >, string, vector< Id >, string >::global() ),
+		// Delete a message based on number 
+		new SrcFinfo( "deleteMsg", Ftype2< Id, int >::global() ),
+		// Delete a message based on src id.field and dest id.field
+		// This is how to specify an edge, so call it deleteEdge
+		new SrcFinfo( "deleteEdge", 
+					Ftype4< Id, string, Id, string >::global() ),
 		// Request message list: id elm, string field, bool isIncoming
 		new SrcFinfo( "listMessages", 
 					Ftype3< Id, string, bool >::global() ),
@@ -255,7 +265,7 @@ static const Slot getSynCountSlot =
 static const Slot deleteSlot = 
 	initGenesisParserCinfo()->getSlot( "parser.delete" );
 static const Slot addfieldSlot = 
-	initGenesisParserCinfo()->getSlot( "parser.add" );
+	initGenesisParserCinfo()->getSlot( "parser.addField" );
 static const Slot requestFieldSlot = 
 	initGenesisParserCinfo()->getSlot( "parser.get" );
 static const Slot setFieldSlot = 
@@ -280,8 +290,16 @@ static const Slot requestClocksSlot =
 	initGenesisParserCinfo()->getSlot( "parser.requestClocks" );
 static const Slot requestCurrentTimeSlot = 
 	initGenesisParserCinfo()->getSlot( "parser.requestCurrentTime" );
+
+static const Slot addMessageSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.addMessage" );
+static const Slot deleteMessageSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.deleteMessage" );
+static const Slot deleteEdgeSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.deleteEdge" );
 static const Slot listMessagesSlot = 
 	initGenesisParserCinfo()->getSlot( "parser.listMessages" );
+
 static const Slot copySlot = 
 	initGenesisParserCinfo()->getSlot( "parser.copy" );
 static const Slot copyIntoArraySlot = 
@@ -770,10 +788,15 @@ void do_add( int argc, const char** const argv, Id s )
 	return gpw->doAdd( argc, argv, s );
 }
 
-bool GenesisParserWrapper::innerAdd(
+bool GenesisParserWrapper::innerAdd( Id s,
 	Id src, const string& srcF, Id dest, const string& destF )
 {
+	// Should this be vector< Id > ?
 	if ( !src.bad() && !dest.bad() ) {
+		send4< Id, string, Id, string >( s(), addMessageSlot,
+			src, srcF, dest, destF );
+		return 1;
+		/*
 		Element* se = src();
 		Element* de = dest();
 		const Finfo* sf = se->findFinfo( srcF );
@@ -782,6 +805,7 @@ bool GenesisParserWrapper::innerAdd(
 		if ( !df ) return 0;
 
 		return se->findFinfo( srcF )->add( se, de, de->findFinfo( destF )) ;
+		*/
 	}
 	return 0;
 }
@@ -875,7 +899,7 @@ void GenesisParserWrapper::doAdd(
 		// Id dest = path2eid( destE, s );
 
 		// Should ideally send this off to the shell.
-		if ( !innerAdd( src, srcF, dest, destF ) )
+		if ( !innerAdd( s, src, srcF, dest, destF ) )
 	 		cout << "Error in doAdd " << argv[1] << " " << argv[2] << endl;
 	} else if ( argc > 3 ) {
 	// Old-fashioned addmsg. Backward Compatibility conversions here.
@@ -935,7 +959,7 @@ void GenesisParserWrapper::doAdd(
 			// Id src = path2eid( argv[1], s );
 			// Id dest = path2eid( argv[2], s );
 	// 		cout << "in do_add " << src << ", " << dest << endl;
-			if ( !innerAdd( src, srcF, dest, destF ) )
+			if ( !innerAdd( s, src, srcF, dest, destF ) )
 	 			cout << "Error in do_add " << argv[1] << " " << argv[2] << " " << msgType << endl;
 		}
 
