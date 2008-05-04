@@ -155,7 +155,7 @@ const Cinfo* initShellCinfo()
 				Ftype4< vector< Id >, string, vector< Id >, string >::global(),
 				RFCAST( &Shell::addMessage ) ),
 		new DestFinfo( "deleteMessage",
-				Ftype2< Id, int >::global(),
+				Ftype2< Fid, int >::global(),
 				RFCAST( &Shell::deleteMessage ) ),
 		new DestFinfo( "deleteEdge",
 				Ftype4< Id, string, Id, string >::global(),
@@ -869,7 +869,9 @@ void Shell::planarconnect(const Conn* c, string source, string dest, double prob
 			}
 			if ((rand()%100)/100.0 <= probability){
 // 				cout << i+1 << " " << j+1 << endl;
-				src_list[i]()->findFinfo("event")->add(src_list[i](), dst_list[j](), dst_list[j]()->findFinfo("synapse"));
+
+				src_list[i].eref().add( "event", dst_list[j].eref(), "synapse" );
+				// src_list[i]()->findFinfo("event")->add(src_list[i](), dst_list[j](), dst_list[j]()->findFinfo("synapse"));
 			}
 		}
 	}
@@ -1442,10 +1444,9 @@ void Shell::move( const Conn* c, Id src, Id parent, string name )
 				e->setName( name );
 			/// \todo: Here we don't take into acount multiple parents.
 			// Here we drop all parents.
-			e->dropAll( "child" );
+			Eref( e ).dropAll( "child" );
 
-			bool ret = pa->findFinfo( "childSrc" )->add(
-				pa, e, e->findFinfo( "child" ) );
+			bool ret = Eref( pa ).add( "childSrc", e, "child" );
 			assert ( ret );
 			// OK();
 			return;
@@ -1608,12 +1609,16 @@ void Shell::useClock( const Conn* c,
 		if ( func ) {
 			Conn* c = e->targets( func->msg() );
 			if ( !c->good() ) {
-				ret = tickProc->add( tick, e, func );
+				ret = Eref( tick ).add( tickProc->msg(), e, func->msg(),
+					ConnTainer::Default );
+				// ret = tickProc->add( tick, e, func );
 				assert( ret );
 			} else {
 				if ( c->target().e != tick ) {
-					e->dropAll( func->msg() );
-					tick->add( tickProc->msg(), e, func->msg() );
+					Eref( e ).dropAll( func->msg() );
+					Eref( tick ).add( tickProc->msg(), e, func->msg(),
+						ConnTainer::Default);
+					// tick->add( tickProc->msg(), e, func->msg() );
 				}
 			}
 			delete c;
@@ -1830,14 +1835,23 @@ void Shell::addMessage( const Conn* c,
 	vector< Id > src, string srcField,
 	vector< Id > dest, string destField )
 {
+	vector< Id >::iterator i;
+	vector< Id >::iterator j;
+	for ( i = src.begin(); i != src.end(); ++i )
+		for ( j = src.begin(); j != src.end(); ++j )
+			i->eref().add( srcField, j->eref(), destField, 
+				ConnTainer::Default );
 }
 
 void Shell::addEdge( const Conn* c, Fid src, Fid dest, int connType )
 {
+	src.eref().add( src.fieldNum(), dest.eref(), 
+		dest.fieldNum(), connType );
 }
 
-void Shell::deleteMessage( const Conn* c, Id src, int msg )
+void Shell::deleteMessage( const Conn* c, Fid src, int msg )
 {
+	src.eref().drop( src.fieldNum(), msg );
 }
 
 void Shell::deleteMessageByDest( const Conn* c, 

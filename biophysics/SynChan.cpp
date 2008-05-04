@@ -480,11 +480,11 @@ void testSynChan()
 	ASSERT( ret, "setup SynChan" );
 	ret = set< double >( syn, "Gbar", 1.0 );
 	ASSERT( ret, "setup SynChan" );
-	ret = sg1->findFinfo( "event" )->
-			add( sg1, syn, syn->findFinfo( "synapse" ) );
+
+	ret = Eref( sg1 ).add( "event", syn, "synapse" );
 	ASSERT( ret, "setup SynChan" );
-	ret = sg2->findFinfo( "event" )->
-			add( sg2, syn, syn->findFinfo( "synapse" ) );
+	ret = Eref( sg2 ).add( "event", syn, "synapse" );
+
 	ASSERT( ret, "setup SynChan" );
 	SynChan::reinitFunc( &c, &p );
 	

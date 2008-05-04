@@ -14,7 +14,9 @@
 * a MsgSrc slot.
 */
 bool ExtFieldFinfo::add(
-	Eref e, Eref destElm, const Finfo* destFinfo) const
+	Eref e, Eref destElm, const Finfo* destFinfo,
+	unsigned int connTainerOption
+	) const
 { 
 	return 0;
 }

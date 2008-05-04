@@ -75,7 +75,7 @@ class Element
 		 * Faster than iterating through the whole lot.
 		 */
 		virtual unsigned int numTargets( const string& finfoName ) const = 0;
-
+#if 0
 		///////////////////////////////////////////////////////////////
 		// Msg handling functions
 		///////////////////////////////////////////////////////////////
@@ -123,7 +123,7 @@ class Element
 		 * of individual calls to drop.
 		 */
 		bool dropVec( int msg, const vector< const ConnTainer* >& vec );
-
+#endif
 
 		///////////////////////////////////////////////////////////////
 		// Information functions
@@ -317,7 +317,7 @@ class Element
 		 * Rejects negative below #src, rejects others out of range.
 		 * Does not consider indices into 'next' as valid.
 		 */
-		bool validMsg( int msg ) const;
+		// bool validMsg( int msg ) const;
 
 		///////////////////////////////////////////////////////////////
 		// Element Id management functions

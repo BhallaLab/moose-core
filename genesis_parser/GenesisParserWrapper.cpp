@@ -126,7 +126,7 @@ const Cinfo* initGenesisParserCinfo()
 		new SrcFinfo( "addMsg", 
 		Ftype4< vector< Id >, string, vector< Id >, string >::global() ),
 		// Delete a message based on number 
-		new SrcFinfo( "deleteMsg", Ftype2< Id, int >::global() ),
+		new SrcFinfo( "deleteMsg", Ftype2< Fid, int >::global() ),
 		// Delete a message based on src id.field and dest id.field
 		// This is how to specify an edge, so call it deleteEdge
 		new SrcFinfo( "deleteEdge", 
@@ -2815,6 +2815,11 @@ void do_createmap(int argc, const char** const argv, Id s){
 	
 	//if (argc != 11 && argc != 12) {/*error*/;}
 	
+	if ( argc < 5 ) {
+		cout << "Usage: " << argv[0] << " source dest Nx Ny -delta dx dy -origin x y\n";
+		return;
+	}
+	
 	source = argv[1];
 	dest = argv[2];
 	Nx = atoi(argv[3]);
@@ -3936,8 +3941,12 @@ Element* makeGenesisParser()
 	static_cast< GenesisParserWrapper* >( sli->data( 0 ) )->
 		setElement( sli->id() );
 
+	bool ret = shellId.eref().add( "parser", sli, "parser", 
+		ConnTainer::Default );
+	/*
 	unsigned int ret = shell->findFinfo( "parser" )->add( shell, sli, 
 		sli->findFinfo( "parser" ) );
+		*/
 	assert( ret );
 
 #ifdef DO_UNIT_TESTS

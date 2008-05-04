@@ -105,7 +105,7 @@ void HHGate::gateFunc( const Conn* c, double v )
 void HHGate::postCreate( const Conn* c )
 {
 	HHGate* h = static_cast< HHGate *>( c->data() );
-	Element* e = c->target().e;
+	Eref e = c->target();
 
 	// cout << "HHGate::postCreate called\n";
 	const Cinfo* ic = initInterpolCinfo();
@@ -113,11 +113,16 @@ void HHGate::postCreate( const Conn* c )
 	// parts belong to the parent HHGate structure.
 	Element* A = ic->create( 
 		Id::scratchId(), "A", static_cast< void* >( &h->A_ ), 1 );
-	e->findFinfo( "childSrc" )->add( e, A, A->findFinfo( "child" ) );
+
+	e.add( "childSrc", A, "child" );
+	// e->findFinfo( "childSrc" )->add( e, A, A->findFinfo( "child" ) );
 
 	Element* B = ic->create( 
 		Id::scratchId(), "B", static_cast< void* >( &h->B_), 1 );
-	e->findFinfo( "childSrc" )->add( e, B, B->findFinfo( "child" ) );
+
+	e.add( "childSrc", B, "child" );
+
+	// e->findFinfo( "childSrc" )->add( e, B, B->findFinfo( "child" ) );
 }
 
 // static func

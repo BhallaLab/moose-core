@@ -549,10 +549,8 @@ void testTable()
 	pb.dt_ = 1.0;
 	
 	ASSERT( 
-		t->findFinfo( "outputSrc" )->
-			add( t, t2, t2->findFinfo( "input" ) ),
-			"making msg"
-	);
+		Eref( t ).add( "outputSrc", t2, "input" ), "making msg" );
+		// t->findFinfo( "outputSrc" )-> add( t, t2, t2->findFinfo( "input" ) ), "making msg"
 	set< double >( t, "xmin", 0.0 );
 	set< double >( t, "xmax", 10.0 );
 	set< int >( t, "xdivs", 10 );
@@ -688,9 +686,9 @@ void testTable()
 	Element* t3 = Neutral::create( "Table", "t3", Element::root(),
 		Id::scratchId() );
 	ASSERT( 
-		t3->findFinfo( "inputRequest" )->
-			add( t3, t, t->findFinfo( "output" ) ),
+		Eref( t3 ).add( "inputRequest", t, "output" ), 
 			"making inputRequest msg"
+		// t3->findFinfo( "inputRequest" )-> add( t3, t, t->findFinfo( "output" ) ), "making inputRequest msg"
 	);
 	ASSERT( set< double >( t, "output", 42.345 ) , "inputRequest" );
 	SetConn c3( t3, 0 );

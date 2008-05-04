@@ -403,8 +403,12 @@ Id gslSetup( Eref e, const string& method )
 	Element* kh = Neutral::create( "KineticHub", "hub", solve,
 		Id::scratchId() );
 	assert( kh != 0 );
-	ks->findFinfo( "hub" )->add( ks, kh, kh->findFinfo( "hub" ) );
-	ks->findFinfo( "gsl" )->add( ks, ki, ki->findFinfo( "gsl" ) );
+
+	// ks->findFinfo( "hub" )->add( ks, kh, kh->findFinfo( "hub" ) );
+	// ks->findFinfo( "gsl" )->add( ks, ki, ki->findFinfo( "gsl" ) );
+	Eref( ks ).add( "hub", kh, "hub" );
+	Eref( ks ).add( "gsl", ki, "gsl" );
+
 	set< string >( ki, "method", method );
 	string simpath = e.id().path() + "/##";
 	set< string >( ks, "path", simpath );
@@ -458,7 +462,8 @@ Id smoldynSetup( Eref e, const string& method, double recommendedDt )
 	assert ( sh != 0 );
 	set< double >( sh, "dt", recommendedDt );
 	set< bool >( ks, "useOneWayReacs", 1 );
-	ks->findFinfo( "hub" )->add( ks, sh, sh->findFinfo( "hub" ) );
+	Eref( ks ).add( "hub", sh, "hub" );
+	// ks->findFinfo( "hub" )->add( ks, sh, sh->findFinfo( "hub" ) );
 	string simpath = e.id().path() + "/##";
 	set< string >( ks, "path", simpath );
 

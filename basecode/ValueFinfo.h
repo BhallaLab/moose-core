@@ -40,7 +40,8 @@ class ValueFinfo: public Finfo
 			 * \todo: Still to implement.
 			 */
 			bool add( 
-					Eref e, Eref destElm, const Finfo* destFinfo
+					Eref e, Eref destElm, const Finfo* destFinfo,
+					unsigned int connTainerOption
 			) const ;
 			
 			bool respondToAdd(
@@ -50,13 +51,14 @@ class ValueFinfo: public Finfo
 			) const;
 
 			/**
-			 * Returns a flag for a bad msg.
-			 * \todo: convert to a value that is initialized to INT_MAX
-			 * \todo: on creation, but then is set to a sensible value in
-			 * \todo: Cinfo::shuffleFinfos.
+			 * Returns msg number. This is initialized to INT_MAX,
+			 * and is used to separate out ValueFinfos for the last
+			 * batch of msg numbers. 
+			 * Finally it gets assigned by Cinfo::shuffleFinfos which
+			 * calls this->countMessages.
 			 */
 			int msg() const {
-				return INT_MAX;
+				return msg_;
 			}
 
 			/**
@@ -109,13 +111,15 @@ class ValueFinfo: public Finfo
 			 * does not need to allocate any on the parent object.
 			 */
 			void countMessages( unsigned int& num ) {
-				;
+				msg_ = -num;
+				num++;
 			}
 
 		private:
 			GetFunc get_;
 			RecvFunc set_;
 			FuncVec* fv_;
+			int msg_;
 };
 
 #endif // _VALUE_FINFO_H

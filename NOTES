@@ -6451,3 +6451,46 @@ Passes unit tests, still to implement new set of tests for One2Many.
 Checked in as revision 465 with unit test flags on, Smoldyn off, -g, GSL
 
 Oops, forgot to add in the new files to svn. Check those in as well.
+
+Checked in as revision 466 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+3 May 2008
+Working on createmap. It comes to Shell::createArray which should use
+a one-to-many message
+
+Testing if the system really does use Element::add and family. Yes, in
+multiple places. But this function call is flawed because it does not
+have indexing info.
+
+I should then check where the system uses other variants of add, and 
+phase those out.
+
+==============================================================================
+4 May 2008
+
+Some more thought on design needed here. I have a proliferation of handle
+classes for index and field info, and several of the older functions should
+really use those.
+
+Fid: Id + field index (Needs more work so that all fields have indices)
+Eref: Element* + Eindex. Currently a rather bare class
+Id: Element lookup index + Eindex. Pretty well populated and well used.
+
+One option is to remove all the message related utility ops from Element*
+and put them into Eref, so that Eindex is always there. Additional
+merit is that these are just utility functions, so do not percolate to
+derived classes.
+
+Done. Major cleanup involved, still at it.
+One issue is that we now rely on a valid Finfo->msg(). This is OK for
+src and dest Msgs, but Value msgs and dynamic msgs are not set up.
+
+Even after fixing up the msg_ field for value msgs, I still have a problem in 
+KineticHub.cpp when I try to use the msg_ field to set up a message. msg_
+for the target is still INT_MAX.
+
+For a temporary fix, I replaced the add msg call with the variant that uses
+strings. Slower, but works and clears unit tests. Time to check in this mess.
+
+==============================================================================

@@ -258,7 +258,9 @@ Element* Neutral::create(
 		assert( kFinfo != 0 );
 		// Here a global absolute or a relative finfo lookup for
 		// the childSrc field would be useful.
-		bool ret = childSrc->add( parent, kid, kFinfo );
+		bool ret = Eref( parent ).add( childSrc->msg(), kid, kFinfo->msg(),
+			ConnTainer::Default );
+		// bool ret = childSrc->add( parent, kid, kFinfo );
 		assert( ret );
 		ret = c->schedule( kid );
 		assert( ret );
@@ -305,7 +307,10 @@ Element* Neutral::createArray(
 		assert( kFinfo != 0 );
 		// Here a global absolute or a relative finfo lookup for
 		// the childSrc field would be useful.
-		bool ret = childSrc->add( parent, kid, kFinfo );
+		// bool ret = childSrc->add( parent, kid, kFinfo );
+		bool ret = Eref( parent ).add( childSrc->msg(), kid, kFinfo->msg(),
+			ConnTainer::One2All );
+			// childSrc->add( parent, kid, kFinfo );
 		assert( ret );
 		ret = c->schedule( kid );
 		assert( ret );
@@ -478,8 +483,8 @@ void testNeutral()
 		int childDestMsg = Element::root()->findFinfo( "child" )->msg();
 
 		Element* n1 = neutralCinfo->create( Id::scratchId(), "N1" );
-		bool ret = childSrcFinfo->add( 
-			Element::root(), n1, n1->findFinfo( "child" ) );
+		bool ret = Eref::root().add( "childSrc", n1, "child" );
+		// bool ret = childSrcFinfo->add( Element::root(), n1, n1->findFinfo( "child" ) );
 		ASSERT( ret, "adding n1");
 
 		string s;
@@ -492,22 +497,26 @@ void testNeutral()
 
 		Element* n2 = neutralCinfo->create( Id::scratchId(), "n2" );
 		
-		ret = childSrcFinfo->add( n1, n2, n2->findFinfo( "child" ) );
+		ret = Eref( n1 ).add( "childSrc", n2, "child" );
+		// ret = childSrcFinfo->add( n1, n2, n2->findFinfo( "child" ) );
 		ASSERT( ret , "adding child");
 
 		Element* n3 = neutralCinfo->create( Id::scratchId(), "n3" );
 		
-		ret = childSrcFinfo->add( n1, n3, n3->findFinfo( "child" ) );
+		ret = Eref( n1 ).add( "childSrc", n3, "child" );
+		// ret = childSrcFinfo->add( n1, n3, n3->findFinfo( "child" ) );
 		ASSERT( ret, "adding child");
 
 		Element* n21 = neutralCinfo->create( Id::scratchId(), "n21" );
 		
-		ret = childSrcFinfo->add( n2, n21, n21->findFinfo( "child" ) );
+		ret = Eref( n2 ).add( "childSrc", n21, "child" );
+		// ret = childSrcFinfo->add( n2, n21, n21->findFinfo( "child" ) );
 		ASSERT( ret, "adding child");
 
 		Element* n22 = neutralCinfo->create( Id::scratchId(), "n22" );
 		
-		ret = childSrcFinfo->add( n2, n22, n22->findFinfo( "child" ) );
+		ret = Eref( n2 ).add( "childSrc", n22, "child" );
+		// ret = childSrcFinfo->add( n2, n22, n22->findFinfo( "child" ) );
 		ASSERT( ret, "adding child");
 
 		ASSERT( n1->msg( childSrcSlot.msg() )->size() == 2, "count children and parent" );
