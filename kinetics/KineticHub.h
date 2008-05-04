@@ -131,8 +131,7 @@ class KineticHub
 
 
 		static void zombify( 
-			Eref hub, Element* e, const Finfo* hubFinfo,
-	       		Finfo* solveFinfo );
+			Eref hub, Eref e, const Finfo* hubFinfo, Finfo* solveFinfo );
 	private:
 		vector< double >* S_;
 		vector< double >* Sinit_;

@@ -151,6 +151,12 @@ void testSched()
 	set< int >( t1a, "stage", 0 );
 	set< int >( t1b, "stage", 1 );
 
+	ASSERT( Eref( t1a ).add( "process", tt, "process" ), "connect process");
+	ASSERT( Eref( t1b ).add( "process", tt, "process" ), "connect process");
+	ASSERT( Eref( t2 ).add( "process", tt, "process" ), "connect process" );
+	ASSERT( Eref( t5 ).add( "process", tt, "process" ), "connect process" );
+
+	/*
 	ASSERT( t1a->findFinfo( "process" )->add( t1a, tt,
 				tt->findFinfo( "process" ) ), "connect process" );
 	ASSERT( t1b->findFinfo( "process" )->add( t1b, tt,
@@ -159,6 +165,7 @@ void testSched()
 				tt->findFinfo( "process" ) ), "connect process" );
 	ASSERT( t5->findFinfo( "process" )->add( t5, tt,
 				tt->findFinfo( "process" ) ), "connect process" );
+				*/
 
 	ASSERT( tt->numTargets( "process" ) == 4, "sched num ticks" );
 
@@ -334,10 +341,10 @@ void testSchedProcess()
 		Id::scratchId() );
 
 	const Finfo* proc = t0->findFinfo( "process" );
-	proc->add( t0, s0_0, s0_0->findFinfo( "process" ) );
-	proc->add( t0, s0_1, s0_1->findFinfo( "process" ) );
-	proc->add( t0, s1, s1->findFinfo( "process" ) );
-	proc->add( t0, s2, s2->findFinfo( "process" ) );
+	Eref( t0 ).add( "process", s0_0, "process" );
+	Eref( t0 ).add( "process", s0_1, "process" );
+	Eref( t0 ).add( "process", s1, "process" );
+	Eref( t0 ).add( "process", s2, "process" );
 
 	seqStr = procSeq1;
 	seqCount = 0;

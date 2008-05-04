@@ -29,6 +29,10 @@ class Fid
 				return id_;
 			}
 
+			Eref eref() const {
+				return id_.eref();
+			}
+
 			const Finfo* finfo();
 
 			int fieldNum() const {

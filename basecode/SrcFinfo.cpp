@@ -13,7 +13,8 @@
 #include "SrcFinfo.h"
 
 bool SrcFinfo::add(
-	Eref e, Eref destElm, const Finfo* destFinfo
+	Eref e, Eref destElm, const Finfo* destFinfo, 
+	unsigned int connTainerOption
 ) const
 {
 	assert( destFinfo != 0 );
@@ -36,16 +37,17 @@ bool SrcFinfo::add(
 
 		// return Msg::add( e, destElm, msg_, destMsg, srcIndex, destIndex, srcFuncId, destFuncId );
 		
+		ConnTainer* ct = selectConnTainer( e, destElm,
+			msg_, destMsg, srcIndex, destIndex, connTainerOption );
+
+		/*
 		SimpleConnTainer* ct = new SimpleConnTainer( 
 			e.e, destElm.e, msg_, destMsg, 
 			e.i, destElm.i,
 			srcIndex, destIndex );
+			*/
 
 		return Msg::add( ct, srcFuncId, destFuncId );
-		/*
-		return Msg::add( e, destElm, msg_, destMsg,
-			srcFuncId, destFuncId );
-			*/
 	}
 	return 0;
 }

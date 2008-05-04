@@ -45,7 +45,7 @@ class ClockJob
 		//////////////////////////////////////////////////////////
 		//  Utility functions
 		//////////////////////////////////////////////////////////
-		void clearMessages( Element* e );
+		void clearMessages( Eref e );
 		// void buildMessages( Element* last, Element* e );
 
 	private:

@@ -17,7 +17,7 @@ ValueFinfo::ValueFinfo(
 				const Ftype* f,
 				GetFunc get, RecvFunc set
 )
-	: Finfo( name, f ), get_( get ), set_( set )
+	: Finfo( name, f ), get_( get ), set_( set ), msg_( INT_MAX )
 {
 	;
 }
@@ -30,7 +30,8 @@ ValueFinfo::ValueFinfo(
 * If it doesn't work that will sit around unused.
 */
 bool ValueFinfo::add( 
-	Eref e, Eref destElm, const Finfo* destFinfo
+	Eref e, Eref destElm, const Finfo* destFinfo,
+	unsigned int connTainerOption
 	) const 
 {
 	// If this is going to be a message source, then we will
@@ -40,7 +41,7 @@ bool ValueFinfo::add(
 					e,
 					name(), this,
 					get_);
-	return df->add( e, destElm, destFinfo );
+	return df->add( e, destElm, destFinfo, connTainerOption );
 }
 			
 /**
