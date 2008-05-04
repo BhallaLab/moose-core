@@ -348,7 +348,9 @@ Element* ReadCell::buildCompartment(
 		dz = z - z0;
 
 		length = sqrt( dx * dx + dy * dy + dz * dz );
-		axial->add( pa, compt, raxial );
+		Eref( pa ).add( axial->msg(), compt, raxial->msg(), 
+			ConnTainer::Default );
+		// axial->add( pa, compt, raxial );
 	} else {
 		length = sqrt( x * x + y * y + z * z ); 
 		// or it coult be a sphere.
@@ -562,7 +564,8 @@ bool ReadCell::addHHChannel(
 	static const Finfo* gbarFinfo = chanCinfo->findFinfo( "Gbar" );
 	
 	if ( chan->className() == "HHChannel" ) {
-		bool ret = chanSrcFinfo->add( compt, chan, hhChanDestFinfo );
+		bool ret = Eref( compt ).add( chanSrcFinfo->msg(), chan, hhChanDestFinfo->msg(), ConnTainer::Default );
+		// bool ret = chanSrcFinfo->add( compt, chan, hhChanDestFinfo );
 		assert( ret );
 			
 		if ( value > 0 ) {
@@ -590,7 +593,11 @@ bool ReadCell::addSynChan(
 		synchanCinfo->findFinfo( "Gbar" );
 
 	if ( chan->className() == "SynChan" ) {
-		bool ret = chanSrcFinfo->add( compt, chan, synChanDestFinfo );
+		// bool ret = chanSrcFinfo->add( compt, chan, synChanDestFinfo );
+
+		bool ret = Eref( compt ).add( chanSrcFinfo->msg(), 
+			chan, synChanDestFinfo->msg(), ConnTainer::Default );
+
 		assert( ret );
 		
 		if ( value > 0 ) {
@@ -617,7 +624,9 @@ bool ReadCell::addSpikeGen(
 	static const Finfo* threshFinfo =
 		spikegenCinfo->findFinfo( "threshold" );
 	if ( chan->className() == "SpikeGen" ) {
-		bool ret = vmSrcFinfo->add( compt, chan, vmDestFinfo  );
+		// bool ret = vmSrcFinfo->add( compt, chan, vmDestFinfo  );
+		bool ret = Eref( compt ).add( vmSrcFinfo->msg(), 
+			chan, vmDestFinfo->msg(), ConnTainer::Default );
 		assert( ret );
 		if ( !graftFlag_ )
 			++numOthers_;

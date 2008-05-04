@@ -13,12 +13,12 @@
 
 /**
  * Wrapper for Element and its index, for passing around as a unit.
- * Might as well use a pair, except that this is a more terse notation
+ * Provides several utility functions including for messaging.
  *
- * Don't go overboard on using this. It is meant for dealing with
- * sets, gets and sends. Most other things need to deal separately
- * with Element and index, or should use an Id.
  */
+
+class ConnTainer; // required forward declaration.
+
 class Eref {
 	public:
 		Eref()
@@ -37,6 +37,72 @@ class Eref {
 		}
 
 		Id id();
+
+		/**
+		 * Returns the Element name with optional index if it is an
+		 * array element.
+		 */
+		string name() const;
+
+		///////////////////////////////////////////////////////////////
+		// Msg handling functions
+		///////////////////////////////////////////////////////////////
+
+		/**
+		 * Add a message from field f1 on current Element to field f2 on e2
+		 * Return true if success.
+		 */
+		bool add( const string& f1, Eref e2, const string& f2,
+			unsigned int connTainerOption );
+		bool add( const string& f1, Eref e2, const string& f2 ); 
+		// using default option
+
+		/**
+		 * Add a message from Msg m1 on current Element to Msg m2 on e2
+		 * Return true if success.
+		 */
+		bool add( int m1, Eref e2, int m2, unsigned int connTainerOption );
+
+		/**
+		 * Drop slot 'doomed' on Msg msg
+		 */
+		bool drop( int msg, unsigned int doomed );
+
+		/**
+		 * Drop ConnTainer 'doomed' on Msg msg
+		 */
+		bool drop( int msg, const ConnTainer* doomed );
+
+		/**
+		 * Drop ConnTainer 'doomed' on Msg msg
+		 */
+		// bool drop( int msg, const ConnTainer* doomed );
+
+		/**
+		 * Drop all msgs going out of the identified msg.
+		 */
+		bool dropAll( int msg );
+
+		/**
+		 * Drop all msgs going out of the identified Finfo.
+		 */
+		bool dropAll( const string& finfo );
+
+		/**
+		 * Drop all entries on a vector of connTainers. In due course
+		 * this will be updated to be more efficient than just a sequence
+		 * of individual calls to drop.
+		 */
+		bool dropVec( int msg, const vector< const ConnTainer* >& vec );
+
+		/**
+		 * Checks if the msgNum is OK. Looks at #finfos and #src.
+		 * Rejects negative below #src, rejects others out of range.
+		 * Does not consider indices into 'next' as valid.
+		 */
+		bool validMsg( int msg ) const;
+
+		static Eref root();
 		
 		Element* e;
 		unsigned int i;

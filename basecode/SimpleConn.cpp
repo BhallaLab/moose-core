@@ -11,8 +11,6 @@
 #include "header.h"
 #include "SimpleConn.h"
 
-const unsigned int ConnTainer::Default = UINT_MAX;
-
 SimpleConnTainer::SimpleConnTainer( Element* e1, Element* e2, 
 			int msg1, int msg2,
 			unsigned int eI1, unsigned int eI2,
