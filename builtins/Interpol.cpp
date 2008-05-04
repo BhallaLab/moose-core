@@ -509,10 +509,9 @@ void testInterpol()
 	// lookup operation, which takes place on i1.
 
 	ASSERT(
-			i1->findFinfo( "lookupSrc" )->add(
-			i1, i2, i2->findFinfo( "xmin" ) ),
-			"connecting interpols"
-	);
+		Eref( i1 ).add( "lookupSrc", i2, "xmin" ), "connecting interpols" );
+
+		//	i1->findFinfo( "lookupSrc" )->add( i1, i2, i2->findFinfo( "xmin" ) ), "connecting interpols"
 
 	set< double >( i1, "lookup", -10.0 );
 	get< double >( i2, "xmin", ret );

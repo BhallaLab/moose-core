@@ -424,9 +424,12 @@ void testMolecule()
 	set< int >( m1, "mode", 0 );
 	set< double >( r0, "kf", 0.1 );
 	set< double >( r0, "kb", 0.1 );
-	ret = m0->findFinfo( "reac" )->add( m0, r0, r0->findFinfo( "sub" ) );
+
+	// ret = m0->findFinfo( "reac" )->add( m0, r0, r0->findFinfo( "sub" ) );
+	ret = Eref( m0 ).add( "reac", r0, "sub" );
 	ASSERT( ret, "adding msg 0" );
-	ret = m1->findFinfo( "reac" )->add( m1, r0, r0->findFinfo( "prd" ) );
+	// ret = m1->findFinfo( "reac" )->add( m1, r0, r0->findFinfo( "prd" ) );
+	ret = Eref( m1 ).add( "reac", r0, "prd" );
 	ASSERT( ret, "adding msg 1" );
 
 	// First, test charging curve for a single compartment

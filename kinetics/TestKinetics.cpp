@@ -92,9 +92,9 @@ void testStoich()
 			set< double >( rtemp, "kf", 0.1 );
 			set< double >( rtemp, "kb", 0.1 );
 			r.push_back( rtemp );
-			ret = rFinfo->add( m[i - 1], rtemp, sFinfo );
+			ret = Eref( m[ i - 1 ] ).add( "reac", rtemp, "sub" );
 			ASSERT( ret, "adding msg 0" );
-			ret = rFinfo->add( mtemp, rtemp, pFinfo );
+			ret = Eref( mtemp ).add( "reac", rtemp, "prd" );
 			ASSERT( ret, "adding msg 1" );
 		}
 	}
@@ -189,8 +189,8 @@ void testStoich()
 		Id::scratchId() );
 	Element* hub = Neutral::create( "KineticHub", "hub", Element::root(),
 		Id::scratchId() );
-	ret = stoich->findFinfo( "hub" )->
-		add( stoich, hub, hub->findFinfo( "hub" ) );
+	// ret = stoich->findFinfo( "hub" )->add( stoich, hub, hub->findFinfo( "hub" ) );
+	ret = Eref( stoich ).add( "hub", hub, "hub" );
 	ASSERT( ret, "connecting stoich to hub" );
 
 	// Rebuild the path now that the hub is connected.
@@ -262,8 +262,8 @@ void testStoich()
 
 	Element* table = Neutral::create( "Table", "table", Element::root(),
 		Id::scratchId() );
-	ret = table->findFinfo( "outputSrc" )->add( table, m[5], 
-			m[5]->findFinfo( "sumTotal" ) );
+	ret = Eref( table ).add( "outputSrc", m[5], "sumTotal" );
+	// ret = table->findFinfo( "outputSrc" )->add( table, m[5], m[5]->findFinfo( "sumTotal" ) );
 	ASSERT( ret, "Making test message" );
 
 	stoich = Neutral::create( "Stoich", "s", Element::root(),
@@ -272,8 +272,8 @@ void testStoich()
 
 	hub = Neutral::create( "KineticHub", "hub", Element::root(),
 		Id::scratchId() );
-	ret = stoich->findFinfo( "hub" )->
-		add( stoich, hub, hub->findFinfo( "hub" ) );
+	ret = Eref( stoich ).add( "hub", hub, "hub" );
+	// ret = stoich->findFinfo( "hub" )->add( stoich, hub, hub->findFinfo( "hub" ) );
 	ASSERT( ret, "connecting stoich to hub" );
 
 	// Rebuild the path now that the hub is connected.
@@ -322,8 +322,8 @@ void testStoich()
 	p.dt_ = 0.001;
 	p.currTime_ = 0.0;
 
-	ret = table->findFinfo( "inputRequest" )->add( table, m[4], 
-			m[4]->findFinfo( "n" ) );
+	ret = Eref( table ).add( "inputRequest", m[4], "n" );
+	// ret = table->findFinfo( "inputRequest" )->add( table, m[4], m[4]->findFinfo( "n" ) );
 	ASSERT( ret, "Making test message" );
 
 	stoich = Neutral::create( "Stoich", "s", Element::root(),
@@ -332,8 +332,8 @@ void testStoich()
 
 	hub = Neutral::create( "KineticHub", "hub", Element::root(),
 		Id::scratchId() );
-	ret = stoich->findFinfo( "hub" )->
-		add( stoich, hub, hub->findFinfo( "hub" ) );
+	ret = Eref( stoich ).add( "hub", hub, "hub" );
+	// ret = stoich->findFinfo( "hub" )->add( stoich, hub, hub->findFinfo( "hub" ) );
 	ASSERT( ret, "connecting stoich to hub" );
 
 	// Rebuild the path now that the hub is connected.
@@ -380,8 +380,8 @@ void testStoich()
 	set< double >( table2, "xmax", 10.0 );
 	set< double >( table2, "output", 0.0 );
 
-	ret = table2->findFinfo( "inputRequest" )->add( table2, m[8], 
-			m[8]->findFinfo( "n" ) );
+	ret = Eref( table2 ).add( "inputRequest", m[8], "n" );
+	// ret = table2->findFinfo( "inputRequest" )->add( table2, m[8], m[8]->findFinfo( "n" ) );
 	ASSERT( ret, "Making test message" );
 
 	SetConn c2( table2, 0 );
@@ -469,9 +469,12 @@ void testKintegrator()
 			set< double >( rtemp, "kf", 1 );
 			set< double >( rtemp, "kb", 1 );
 			r.push_back( rtemp );
-			ret = rFinfo->add( m[i - 1], rtemp, sFinfo );
+
+			// ret = rFinfo->add( m[i - 1], rtemp, sFinfo );
+			ret = Eref( m[i-1]).add( "reac", rtemp, "sub" );
 			ASSERT( ret, "adding msg 0" );
-			ret = rFinfo->add( mtemp, rtemp, pFinfo );
+			ret = Eref( mtemp ).add( "reac", rtemp, "prd" );
+			// ret = rFinfo->add( mtemp, rtemp, pFinfo );
 			ASSERT( ret, "adding msg 1" );
 		}
 	}
@@ -493,11 +496,11 @@ void testKintegrator()
 		Id::scratchId() );
 	SetConn ci( integ, 0 );
 
-	ret = stoich->findFinfo( "hub" )->
-		add( stoich, hub, hub->findFinfo( "hub" ) );
+	ret = Eref( stoich ).add( "hub", hub, "hub" );
+	// ret = stoich->findFinfo( "hub" )->add( stoich, hub, hub->findFinfo( "hub" ) );
 	ASSERT( ret, "connecting stoich to hub" );
-	ret = stoich->findFinfo( "integrate" )->
-		add( stoich, integ, integ->findFinfo( "integrate" ) );
+	ret = Eref( stoich ).add( "integrate", integ, "integrate" );
+	// ret = stoich->findFinfo( "integrate" )->add( stoich, integ, integ->findFinfo( "integrate" ) );
 	ASSERT( ret, "connecting stoich to integ" );
 
 	ret = set< string >( stoich, "path", "/n/##" );
@@ -506,8 +509,9 @@ void testKintegrator()
 
 	Element* table = Neutral::create( "Table", "table", Element::root(),
 		Id::scratchId() );
-	ret = table->findFinfo( "inputRequest" )->add( table, m[4], 
-			m[4]->findFinfo( "n" ) );
+
+	ret = Eref( table ).add( "inputRequest", m[4], "n" );
+	// ret = table->findFinfo( "inputRequest" )->add( table, m[4], m[4]->findFinfo( "n" ) );
 	ASSERT( ret, "Making test message" );
 
 	set< int >( table, "stepmode", 3 );
@@ -607,9 +611,11 @@ void testGslIntegrator()
 			set< double >( rtemp, "kf", 1 );
 			set< double >( rtemp, "kb", 1 );
 			r.push_back( rtemp );
-			ret = rFinfo->add( m[i - 1], rtemp, sFinfo );
+			ret = Eref( m[i-1] ).add( "reac", rtemp, "sub" );
+			// ret = rFinfo->add( m[i - 1], rtemp, sFinfo );
 			ASSERT( ret, "adding msg 0" );
-			ret = rFinfo->add( mtemp, rtemp, pFinfo );
+			ret = Eref( mtemp ).add( "reac", rtemp, "prd" );
+			// ret = rFinfo->add( mtemp, rtemp, pFinfo );
 			ASSERT( ret, "adding msg 1" );
 		}
 	}
@@ -630,11 +636,12 @@ void testGslIntegrator()
 	Element* integ = Neutral::create( "GslIntegrator", "integ", Element::root(),
 		Id::scratchId() );
 
-	ret = stoich->findFinfo( "hub" )->
-		add( stoich, hub, hub->findFinfo( "hub" ) );
+	ret = Eref( stoich ).add( "hub", hub, "hub" );
+	// ret = stoich->findFinfo( "hub" )->add( stoich, hub, hub->findFinfo( "hub" ) );
 	ASSERT( ret, "connecting stoich to hub" );
-	ret = stoich->findFinfo( "gsl" )->
-		add( stoich, integ, integ->findFinfo( "gsl" ) );
+
+	ret = Eref( stoich ).add( "gsl", integ, "gsl" );
+	// ret = stoich->findFinfo( "gsl" )->add( stoich, integ, integ->findFinfo( "gsl" ) );
 	ASSERT( ret, "connecting stoich to gsl integ" );
 
 	ret = set< string >( stoich, "path", "/n/##" );
@@ -643,8 +650,9 @@ void testGslIntegrator()
 
 	Element* table = Neutral::create( "Table", "table", Element::root(),
 		Id::scratchId() );
-	ret = table->findFinfo( "inputRequest" )->add( table, m[4], 
-			m[4]->findFinfo( "n" ) );
+
+	ret = Eref( table ).add( "inputRequest", m[4], "n" );
+	// ret = table->findFinfo( "inputRequest" )->add( table, m[4], m[4]->findFinfo( "n" ) );
 	ASSERT( ret, "Making test message" );
 
 	set< int >( table, "stepmode", 3 );

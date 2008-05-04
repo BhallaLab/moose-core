@@ -77,7 +77,8 @@ class LookupFinfo: public Finfo
 			 * not assigned a message src or dest.
 			 */
 			bool add( 
-					Eref e, Eref destElm, const Finfo* destFinfo
+					Eref e, Eref destElm, const Finfo* destFinfo,
+					unsigned int connTainerOption
 			) const ;
 			
 			bool respondToAdd(

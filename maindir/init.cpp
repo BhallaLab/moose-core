@@ -43,8 +43,7 @@ int mooseInit()
     	/// \todo Check if this can be replaced with the Neutral::create
     Element* shell = c->create( Id( 1 ), "shell" );
     assert( shell != 0 );
-    bool ret = childSrc->add( Element::root(), shell, 
-                              shell->findFinfo( "child" ) );
+	bool ret = Eref::root().add( "childSrc", shell, "child" );
     assert( ret );
 
 #ifdef USE_MPI

@@ -118,10 +118,10 @@ class Shell
 			Fid src, Fid dest, int connType );
 
 		/**
-		 * deleteMessage gets rid of the message identified by the id and
+		 * deleteMessage gets rid of the message identified by the Fid and
 		 * the integer lookup for it.
 		 */
-		static void deleteMessage( const Conn* c, Id id, int msg );
+		static void deleteMessage( const Conn* c, Fid src, int msg );
 
 		/**
 		 * deleteEdge gets rid of messages specified as edges, that is,

@@ -477,7 +477,9 @@ bool Cinfo::schedule( Element* e ) const
 			tick = t->id();
 		}
 		assert( tick.good() );
-		procFinfo->add( tick(), e, i->finfo );
+		tick.eref().add( procFinfo->msg(), e, i->finfo->msg(),
+			ConnTainer::Default );
+		// procFinfo->add( tick(), e, i->finfo );
 	}
 	
 	// cout << "scheduling new object " << e->name() << endl;

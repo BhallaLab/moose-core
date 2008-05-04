@@ -350,7 +350,7 @@ void Enzyme::scaleKcatFunc( const Conn* c, double k )
 void Enzyme::makeComplex( Eref er )
 {
 	Element* e = er.e;
-	static const Finfo* cplxSrcFinfo = enzymeCinfo->findFinfo( "cplx" );
+	// static const Finfo* cplxSrcFinfo = enzymeCinfo->findFinfo( "cplx" );
 	string cplxName = e->name() + "_cplx";
 	Id id = Neutral::getChildByName( e, cplxName );
 	if ( !id.bad() )
@@ -366,7 +366,9 @@ void Enzyme::makeComplex( Eref er )
 	assert( ret );
 	Element* complex = Neutral::create( "Molecule", cplxName, e,
 		Id::scratchId() );
-	ret = cplxSrcFinfo->add( e, complex, complex->findFinfo( "reac" ) );
+
+	ret = er.add( "cplx", complex, "reac" );
+	// ret = cplxSrcFinfo->add( e, complex, complex->findFinfo( "reac" ) );
 	assert( ret );
 }
 
@@ -445,11 +447,16 @@ void testEnzyme()
 	Element* cplx = cplxId();
 	SetConn ccplx( cplx, 0 );
 
-	ret = sub->findFinfo( "reac" )->add( sub, enz, enz->findFinfo( "sub" ));
+	// ret = sub->findFinfo( "reac" )->add( sub, enz, enz->findFinfo( "sub" ));
+	// ret = enz->findFinfo( "prd" )->add( enz, prd, prd->findFinfo( "prd" ) );
+	// ret = enzMol->findFinfo( "reac" )->add( enzMol, enz, enz->findFinfo( "enz" ) );
+	ret = Eref( sub ).add( "reac", enz, "sub" );
 	ASSERT( ret, "adding substrate msg" );
-	ret = enz->findFinfo( "prd" )->add( enz, prd, prd->findFinfo( "prd" ) );
+
+	ret = Eref( enz ).add( "prd", prd, "prd" );
 	ASSERT( ret, "adding product msg" );
-	ret = enzMol->findFinfo( "reac" )->add( enzMol, enz, enz->findFinfo( "enz" ) );
+
+	ret = Eref( enzMol ).add( "reac", enz, "enz" );
 	ASSERT( ret, "adding enzMol msg" );
 
 	// First, test charging curve for a single compartment
