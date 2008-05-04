@@ -274,8 +274,12 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 	// Still to fill in.
 	
 	// Phase 4: stick the copied tree onto the parent Element.
+	ret = Eref( parent ).add( "childSrc", child, "child", 
+		ConnTainer::Default );
+	/*
 	ret = parent->findFinfo( "childSrc" )->add(
 					parent, child, child->findFinfo( "child" ) );
+					*/
 	assert( ret );
 
 	// Phase 5: Schedule all the objects
@@ -550,14 +554,14 @@ void copyTest()
 	ASSERT( g1 != 0, "creating CopyClass grandchild" );
 
 	// Some messages inside tree
-	c0->add( "xSrc", k0, "xDest" );
-	k0->add( "xSrc", k1, "xDest" );
-	g1->add( "xSrc", c0, "xDest" );
-	g1->add( "xSrc", k0, "x" );
-	k1->add( "iShared", c0, "i" );
+	Eref( c0 ).add( "xSrc", k0, "xDest", ConnTainer::Default );
+	Eref( k0 ).add( "xSrc", k1, "xDest", ConnTainer::Default );
+	Eref( g1 ).add( "xSrc", c0, "xDest", ConnTainer::Default );
+	Eref( g1 ).add( "xSrc", k0, "x", ConnTainer::Default );
+	Eref( k1 ).add( "iShared", c0, "i", ConnTainer::Default );
 	// a couple of messages outside tree
-	k1->add( "iShared", outsider, "i" );
-	c0->add( "xSrc", outsider, "xDest" );
+	Eref( k1 ).add( "iShared", outsider, "i", ConnTainer::Default );
+	Eref( c0 ).add( "xSrc", outsider, "xDest", ConnTainer::Default );
 
 	/////////////////////////////////////////////////////////////////////
 	// Do the copy

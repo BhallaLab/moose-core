@@ -146,6 +146,7 @@ unsigned int Element::lastId()
 }
 */
 
+#if 0
 bool Element::add( int m1, Element* e2, int m2 )
 {
 	assert( e2 != 0 );
@@ -178,7 +179,6 @@ bool Element::add( const string& f1, Element* e2, const string& f2 )
 	}
 	return srcF->add( this, e2, destF );
 }
-
 
 bool Element::drop( int msg, unsigned int doomed )
 {
@@ -294,3 +294,4 @@ bool Element::validMsg( int msg ) const
 
 	return 0;
 }
+#endif

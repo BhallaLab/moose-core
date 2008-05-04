@@ -57,7 +57,8 @@ const Finfo* LookupFinfo::match( Element* e, const string& s ) const
 * Dynamic Finfo should handle it.
 */
 bool LookupFinfo::add( 
-	Eref e, Eref destElm, const Finfo* destFinfo
+	Eref e, Eref destElm, const Finfo* destFinfo,
+	unsigned int connTainerOption 
 	) const 
 {
 		assert( 0 );
@@ -318,13 +319,13 @@ void lookupFinfoTest()
 	// 1. We will follow a1 messages to call proc on a2. Check a2->dval.
 	const Finfo *f1 = a1->findFinfo( "procout" );
 	const Finfo *f2 = a2->findFinfo( "proc" );
-	bret = f1->add( a1, a2, f2 );
+	bret = f1->add( a1, a2, f2, ConnTainer::Default );
 	ASSERT( bret, "adding procout to proc");
 
 	// 2. proc on a2 will send this value of dval to a1->dmap[0].
 	f1 = a2->findFinfo( "dsumout" );
 	f2 = a1->findFinfo( "dmap[0]" );
-	bret = f1->add( a2, a1, f2 );
+	bret = f1->add( a2, a1, f2, ConnTainer::Default );
 	ASSERT( bret, "Adding dsumout to dval");
 	// We have already made a finfo for a1->dmap[0]. Check that this
 	// is the one that is used for the messaging.
@@ -334,7 +335,7 @@ void lookupFinfoTest()
 	// value comes back to a1, and is added to dval.
 	f1 = a1->findFinfo( "requestVal" );
 	f2 = a2->findFinfo( "dmap[1]" );
-	bret = f1->add( a1, a2, f2 );
+	bret = f1->add( a1, a2, f2, ConnTainer::Default );
 	ASSERT( bret, "Adding requestVal to dmap[1]");
 	// Here we made a new DynamicFinfo for the regular ValueFinfo.
 	ASSERT( a2->listLocalFinfos( flist ) == 1, "Counting DynFinfos" );
@@ -344,7 +345,7 @@ void lookupFinfoTest()
 	//   value comes back to a2 and is added to dval.
 	f1 = a1->findFinfo( "dmap[2]" );
 	f2 = a2->findFinfo( "requestVal" );
-	bret = f1->add( a1, a2, f2 );
+	bret = f1->add( a1, a2, f2, ConnTainer::Default );
 	ASSERT( bret, "Adding a1.dmap[2] to a2.requestVal");
 
 	// We have not made a finfo for a1->dmap[2]. Check that this

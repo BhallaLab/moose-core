@@ -58,7 +58,8 @@ SharedFinfo::SharedFinfo( const string& name, Finfo** finfos,
  *
  */
 bool SharedFinfo::add(
-	Eref e, Eref destElm, const Finfo* destFinfo
+	Eref e, Eref destElm, const Finfo* destFinfo,
+	unsigned int connTainerOption 
 ) const
 {
 	unsigned int srcFuncId = fv_->id();
@@ -83,15 +84,17 @@ bool SharedFinfo::add(
 				destElm.e->name() << "." << destFinfo->name() << endl;
 				return 0;
 			}
+			ConnTainer* ct = selectConnTainer( 
+				destElm, e, destMsg, msg_,
+				destIndex, srcIndex, 
+				connTainerOption );
+			/*
 			SimpleConnTainer* ct = new SimpleConnTainer( 
 				destElm.e, e.e, destMsg, msg_,
 				destElm.i, e.i,		// Hack. Can't use for arrays
 				destIndex, srcIndex );
-			return Msg::add( ct, destFuncId, srcFuncId );
-			/*
-			return Msg::add( destElm, e, destMsg, msg_,
-				destFuncId, srcFuncId );
 				*/
+			return Msg::add( ct, destFuncId, srcFuncId );
 		} else {
 			if ( !FuncVec::getFuncVec( destFuncId )->isDest() ) {
 				cout << "Error: SharedFinfo::add: src at both ends: " <<
@@ -99,17 +102,17 @@ bool SharedFinfo::add(
 				destElm.e->name() << "." << destFinfo->name() << endl;
 				return 0;
 			}
+			ConnTainer* ct = selectConnTainer( 
+				e, destElm, msg_, destMsg,
+				srcIndex, destIndex, connTainerOption );
+			/*
 			SimpleConnTainer* ct = new SimpleConnTainer( 
 				e.e, destElm.e, msg_, destMsg,
 				e.i, destElm.i,		// Hack. Can't use for arrays
 				srcIndex, destIndex );
+				*/
 
 			return Msg::add( ct, srcFuncId, destFuncId );
-		
-			/*
-			return Msg::add( e, destElm, msg_, destMsg,
-				srcFuncId, destFuncId );
-				*/
 		}
 		return 1;
 	}
@@ -372,9 +375,20 @@ void sharedFinfoTest()
 	cout << "\nTesting SharedFinfo";
 
 
+	bool bret = Eref( e1 ).add( "readVal", e2, "dval", ConnTainer::Default);
+	ASSERT( bret, "Adding readVal to dval" );
+	bret = Eref( e1 ).add( "pingPongSrc", e2, "pingPong", ConnTainer::Default );
+	ASSERT( bret, "Adding pingPongSrc to pingPong" );
+	// Note that here we test adding a Shared message backward.
+	bret = Eref( e1 ).add( "pingPong", e2, "pingPongSrc", ConnTainer::Default );
+	ASSERT( bret, "reverse Adding pingPongSrc to pingPong" );
+
+/*
+
 	const Finfo* readVal = e1->findFinfo( "readVal" );
 	const Finfo* pingPongSrc = e1->findFinfo( "pingPongSrc" );
 	const Finfo* pingPong = e1->findFinfo( "pingPong" );
+
 	ASSERT( readVal->add( e1, e2, e2->findFinfo( "dval" ) ),
 					"Adding readVal to dval" );
 	ASSERT( pingPongSrc->add( e1, e2, pingPong ),
@@ -383,6 +397,8 @@ void sharedFinfoTest()
 	// Note that here we test adding a Shared message backward.
 	ASSERT( pingPong->add( e1, e2, pingPongSrc ),
 					"reverse Adding pingPongSrc to pingPong" );
+
+*/
 
 	set< double >( e1, "dval", 1.0 );
 	set< double >( e2, "dval", 2.0 );

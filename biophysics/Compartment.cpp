@@ -671,8 +671,8 @@ void testCompartment()
 	unsigned int i;
 	Element* compts[100];
 	compts[0] = c0;
-	const Finfo* axial = c0->findFinfo( "axial" );
-	const Finfo* raxial = c0->findFinfo( "raxial" );
+	// const Finfo* axial = c0->findFinfo( "axial" );
+	// const Finfo* raxial = c0->findFinfo( "raxial" );
 	Compartment::setVm( &c, 0.0 );
 	Compartment::setInject( &c, 20.5 );
 	bool ret;
@@ -689,7 +689,8 @@ void testCompartment()
 		Compartment::setEm( &temp, 0.0 );
 		Compartment::setVm( &temp, 0.0 );
 
-		ret = raxial->add( compts[i - 1], compts[i], axial ); 
+		ret = Eref( compts[i - 1] ).add( "raxial", compts[i], "axial" ); 
+		// ret = raxial->add( compts[i - 1], compts[i], axial ); 
 		assert( ret );
 	}
 	ASSERT( 1, "messaging in compartments" );

@@ -267,7 +267,7 @@ static Finfo* molZombieFinfo = initMolZombieFinfo();
 /////////////////////////////////////////////////////////////////////////
 
 void redirectDestMessages(
-	Eref hub, Element* e, const Finfo* hubFinfo, const Finfo* eFinfo,
+	Eref hub, Eref e, const Finfo* hubFinfo, const Finfo* eFinfo,
 	unsigned int eIndex, vector< unsigned int >& map,
 	vector< Element* >* elist, bool retain = 0 );
 
@@ -824,9 +824,9 @@ void unzombify( Element* e )
 	redirectDynamicMessages( e );
 }
 
-void clearMsgsFromFinfo( Element* e, const Finfo * f )
+void clearMsgsFromFinfo( Eref e, const Finfo * f )
 {
-	Conn* c = e->targets( f->msg() );
+	Conn* c = e.e->targets( f->msg() );
 	vector< Element* > list;
 	vector< Element* >::iterator i;
 	while ( c->good() ) {
@@ -834,7 +834,7 @@ void clearMsgsFromFinfo( Element* e, const Finfo * f )
 		c->increment();
 	}
 	delete c;
-	e->dropAll( f->msg() );
+	e.dropAll( f->msg() );
 	for ( i = list.begin(); i != list.end(); i++ ) unzombify( *i );
 }
 
@@ -844,14 +844,14 @@ void clearMsgsFromFinfo( Element* e, const Finfo * f )
 void KineticHub::clearFunc( const Conn* c )
 {
 	// cout << "Starting clearFunc for " << c.targetElement()->name() << endl;
-	Element* e = c->target().e;
+	Eref e = c->target();
 
 	clearMsgsFromFinfo( e, molSolveFinfo );
 	clearMsgsFromFinfo( e, reacSolveFinfo );
 	clearMsgsFromFinfo( e, enzSolveFinfo );
 	clearMsgsFromFinfo( e, mmEnzSolveFinfo );
 
-	e->dropAll( molSumFinfo->msg() );
+	e.dropAll( molSumFinfo->msg() );
 }
 
 ///////////////////////////////////////////////////
@@ -1418,15 +1418,16 @@ void KineticHubWrapper::mmEnzFuncLocal( double k1, double k2, double k3, long in
  * the zombie and replaces it with one from the solver.
  */
 void KineticHub::zombify( 
-		 Eref hub, Element* e, const Finfo* hubFinfo,
+		 Eref hub, Eref e, const Finfo* hubFinfo,
 	       	Finfo* solveFinfo )
 {
 	// Replace the original procFinfo with one from the hub.
 	const Finfo* procFinfo = e->findFinfo( "process" );
-	e->dropAll( procFinfo->msg() );
+	e.dropAll( procFinfo->msg() );
 	// procFinfo->dropAll( e );
-	bool ret;
-	ret = hubFinfo->add( hub.e, e, procFinfo );
+	bool ret = hub.add( hubFinfo->msg(), e, procFinfo->msg(), 
+		ConnTainer::Default );
+	// ret = hubFinfo->add( hub.e, e, procFinfo );
 	assert( ret );
 
 	// Redirect original messages from the zombie to the hub.
@@ -1445,12 +1446,12 @@ void KineticHub::zombify(
  * eIndex is the index to look up the element.
 */
 void redirectDestMessages(
-	Eref hub, Element* e, const Finfo* hubFinfo, const Finfo* eFinfo,
+	Eref hub, Eref e, const Finfo* hubFinfo, const Finfo* eFinfo,
 	unsigned int eIndex, vector< unsigned int >& map, 
 		vector< Element *>*  elist, bool retain )
 {
 	Conn* i = e->targets( eFinfo->msg() );
-	vector< Element* > srcElements;
+	vector< Eref > srcElements;
 	vector< int > srcMsg;
 	vector< const ConnTainer* > dropList;
 
@@ -1459,7 +1460,7 @@ void redirectDestMessages(
 		// Handle messages going outside purview of solver.
 		if ( find( elist->begin(), elist->end(), tgt ) == elist->end() ) {
 			map.push_back( eIndex );
-			srcElements.push_back( i->target().e );
+			srcElements.push_back( i->target() );
 			srcMsg.push_back( i->targetMsg() );
 			if ( !retain )
 				dropList.push_back( i->connTainer() );
@@ -1468,11 +1469,11 @@ void redirectDestMessages(
 	}
 	delete i;
 
-	e->dropVec( eFinfo->msg(), dropList );
+	e.dropVec( eFinfo->msg(), dropList );
 
 	for ( unsigned int j = 0; j != srcElements.size(); j++ ) {
-		bool ret = srcElements[j]->
-			add( srcMsg[j], hub.e, hubFinfo->msg() );
+		bool ret = srcElements[j].add( srcMsg[j], hub, hubFinfo->msg(),
+			ConnTainer::Default );
 		assert( ret );
 	}
 }
@@ -1544,13 +1545,13 @@ void redirectDynamicMessages( Element* e )
 	{
 		const DynamicFinfo *df = dynamic_cast< const DynamicFinfo* >( *i );
 		assert( df != 0 );
-		vector< Element* > srcElements;
+		vector< Eref > srcElements;
 		vector< const Finfo* > srcFinfos;
 		Conn* c = e->targets( ( *i )->msg() );
 
 		// note messages.
 		while( c->good() ) {
-			srcElements.push_back( c->target().e );
+			srcElements.push_back( c->target() );
 			srcFinfos.push_back( 
 				c->target().e->findFinfo( c->targetMsg() ) );
 			c->increment();
@@ -1564,7 +1565,13 @@ void redirectDynamicMessages( Element* e )
 
 		unsigned int max = srcFinfos.size();
 		for ( unsigned int i =  0; i < max; i++ ) {
-			ret = srcFinfos[ i ]->add( srcElements[ i ], e, origFinfo );
+			ret = srcElements[ i ].add( srcFinfos[ i ]->name(),
+				e, name );
+			/*
+			ret = srcElements[ i ].add( srcFinfos[ i ]->msg(),
+				e, origFinfo->msg(), ConnTainer::Default );
+				*/
+			// ret = srcFinfos[ i ]->add( srcElements[ i ], e, origFinfo );
 			assert( ret );
 		}
 	}
@@ -1576,8 +1583,6 @@ void redirectDynamicMessages( Element* e )
 
 	const Finfo* f;
 	unsigned int finfoNum = 1;
-
-	while ( ( f = e->localFinfo( finfoNum ) ) ) {
 
 	while ( ( f = e->localFinfo( finfoNum ) ) ) {
 		const DynamicFinfo *df = dynamic_cast< const DynamicFinfo* >( f );

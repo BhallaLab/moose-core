@@ -23,7 +23,8 @@ class DeletionMarkerFinfo: public Finfo
 			{;}
 
 			bool add( 
-					Eref e, Eref destElm, const Finfo* destFinfo
+					Eref e, Eref destElm, const Finfo* destFinfo,
+					unsigned int connTainerOption
 			) const 
 			{
 					return 0;
