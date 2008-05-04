@@ -22,6 +22,7 @@ OBJ = \
 	Fid.o	\
 	RecvFunc.o \
 	Msg.o \
+	ConnTainer.o	\
 	SimpleConn.o	\
 	One2AllConn.o	\
 	TraverseMsgConn.o	\

@@ -241,6 +241,7 @@ double HHChannel::getEk( Eref e )
  * It is only if we subsequently alter the HHGate of this channel that
  * we need to make our own variant of the HHGate, or disconnect from
  * an existing one.
+ * \todo: May need to convert to handling arrays and Erefs.
  */
 
 void HHChannel::makeGate( Element* e, const Finfo* f, double power )
@@ -260,7 +261,7 @@ void HHChannel::makeGate( Element* e, const Finfo* f, double power )
 				// Here we have multiple channels using this gate. So
 				// we don't mess with the original.
 				// Get rid of local connection to gate, but don't delete
-				e->dropAll( f->msg() );
+				Eref( e ).dropAll( f->msg() );
 			} else { // Delete the single gate.
 				bool ret = set( gate, "destroy" );
 				assert( ret );
@@ -281,7 +282,8 @@ void HHChannel::makeGate( Element* e, const Finfo* f, double power )
 			gate = Neutral::create( "HHGate", "xGate", e, 
 				Id::scratchId() );
 			gate->addFinfo( GlobalMarkerFinfo::global() );
-			bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
+			bool ret = Eref( e ).add( f->name(), gate, "gate" );
+			// bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
 			assert( ret );
 		}
 	} else { // No gate, make a new one.
@@ -290,7 +292,8 @@ void HHChannel::makeGate( Element* e, const Finfo* f, double power )
 		// Make it a global so that duplicates do not happen unless
 		// the table values change.
 		gate->addFinfo( GlobalMarkerFinfo::global() );
-		bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
+		bool ret = Eref( e ).add( f->name(), gate, "gate" );
+		// bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
 		assert( ret );
 	}
 	delete gateConn;
@@ -685,9 +688,10 @@ void testHHChannel()
 	
 	Slot childSlot = initHHChannelCinfo()->getSlot( "childSrc" );
 
-	ASSERT( compt->findFinfo( "channel" )->add( compt, chan,
-					chan->findFinfo( "channel" ) ),
-					"Setting up channel" );
+	bool ret = Eref( compt ).add( "channel", chan, "channel" );
+	ASSERT( ret, "Setting up channel" );
+
+	// ASSERT( compt->findFinfo( "channel" )->add( compt, chan, chan->findFinfo( "channel" ) ), "Setting up channel" );
 
 	// Check gate construction and removal when powers are assigned
 	
@@ -703,7 +707,7 @@ void testHHChannel()
 	ASSERT( chan->msg( xGateSlot.msg() )->size() == 1, "Creating xGate again");
 
 	Id xGateId;
-	bool ret = lookupGet< Id, string >(
+	ret = lookupGet< Id, string >(
 		chan, "lookupChild", xGateId, "xGate" );
 	ASSERT( ret, "Look up xGate");
 	ASSERT( !xGateId.zero() && !xGateId.bad(), "Lookup xGate" );
@@ -795,9 +799,12 @@ void testHHChannel()
 	
 	Element* kchan = Neutral::create( "HHChannel", "K", compt, 
 		Id::scratchId() );
-	ASSERT( compt->findFinfo( "channel" )->add( compt, kchan,
-					kchan->findFinfo( "channel" ) ),
-					"Setting up K channel" );
+
+	ret = Eref( compt ).add( "channel", kchan, "channel" );
+	ASSERT( ret, "Setting up K channel" );
+
+	// ASSERT( compt->findFinfo( "channel" )->add( compt, kchan, kchan->findFinfo( "channel" ) ), "Setting up K channel" );
+
 	static const double VMIN = -0.1;
 	static const double VMAX = 0.05;
 	static const unsigned int XDIVS = 150;

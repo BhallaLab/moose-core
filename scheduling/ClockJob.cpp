@@ -325,7 +325,7 @@ class TickSeq {
 			{;}
 
 			TickSeq( Id id)
-					: e_( id() )
+					: e_( id.eref() )
 			{
 					get< double >( e_, "dt", dt_ );
 					get< int >( e_, "stage", stage_ );
@@ -338,21 +338,19 @@ class TickSeq {
 				return 0;
 			}
 
-			Element* element() {
+			Eref element() {
 					return e_;
 			}
 
 	private:
-			Element* e_;
+			Eref e_;
 			double dt_;
 			int stage_;
 };
 
 void ClockJob::reschedFuncLocal( Eref er )
 {
-	Element* e = er.e;
-
-	vector< Id > childList = Neutral::getChildList( e );
+	vector< Id > childList = Neutral::getChildList( er.e );
 	if ( childList.size() == 0 )
 			return;
         // Commented this to avoid remapping of solvers to clock ticks
@@ -386,21 +384,13 @@ void ClockJob::reschedFuncLocal( Eref er )
 
 	sort( tickList.begin(), tickList.end() );
 
-	Element* last = tickList.front().element();
-	bool ret = e->add( "tick", last, "prev" );
+	Eref last = tickList.front().element();
+	bool ret = er.add( "tick", last, "prev" );
 	assert( ret );
-	ret = e->add( "startSrc", last, "start" );
+	ret = er.add( "startSrc", last, "start" );
 	assert( ret );
-	/*
-	bool ret = e->findFinfo( "tick" )->
-					add( e, last, last->findFinfo( "prev" ) );
-	assert( ret );
-	ret = e->findFinfo( "startSrc" )->
-					add( e, last, last->findFinfo( "start" ) );
-	assert( ret );
-	*/
 	for ( j = tickList.begin() + 1; j != tickList.end(); j++ ) {
-		bool ret = last->add( "next", j->element(), "prev" );
+		bool ret = last.add( "next", j->element(), "prev" );
 		assert( ret );
 			// buildMessages( last, j->element() );
 		last = j->element();
@@ -413,10 +403,10 @@ void ClockJob::reschedFuncLocal( Eref er )
  * It does not touch the process messages from the Tick to the 
  * objects it controls.
  */
-void ClockJob::clearMessages( Element* e )
+void ClockJob::clearMessages( Eref e )
 {
-	e->dropAll( "prev" );
-	e->dropAll( "start" );
+	e.dropAll( "prev" );
+	e.dropAll( "start" );
 }
 
 /**

@@ -36,7 +36,8 @@ class ExtFieldFinfo: public Finfo
 			 * a MsgSrc slot.
 			 */
 			bool add( 
-					Eref e, Eref destElm, const Finfo* destFinfo
+					Eref e, Eref destElm, const Finfo* destFinfo,
+					unsigned int connTainerOption
 			) const;
 			
 			/**

@@ -270,8 +270,8 @@ void Cell::setupSolver( const Id& cell, const Id& seed ) const
 	Element* integ = Neutral::create( "HSolve", "integ",
 		solve, Id::scratchId() );
 	assert( integ != 0 );
-	bool ret = cell()->findFinfo( "cell-solve" )->
-		add( cell(), integ, integ->findFinfo( "cell-solve" ) );
+	bool ret = cell.eref().add( "cell-solve", integ, "cell-solve" );
+	// bool ret = cell()->findFinfo( "cell-solve" )->add( cell(), integ, integ->findFinfo( "cell-solve" ) );
 	assert( ret );
 	
 	// scan

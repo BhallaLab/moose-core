@@ -185,13 +185,13 @@ void msgFinfoTest()
 
 	FuncVec::sortFuncVec();
 
-	ASSERT (sf1.add( &e1, &e2, &df1 ) == 1,
+	ASSERT (sf1.add( &e1, &e2, &df1, ConnTainer::Default ) == 1,
 					"zero to zero ftype message" );
-	ASSERT (sf1.add( &e1, &e2, &df2 ) == 0,
+	ASSERT (sf1.add( &e1, &e2, &df2, ConnTainer::Default ) == 0,
 					"Zero to dbl message" );
-	ASSERT (sf2.add( &e1, &e2, &df1 ) == 0,
+	ASSERT (sf2.add( &e1, &e2, &df1, ConnTainer::Default ) == 0,
 					"dbl to zero ftype message" );
-	ASSERT (sf2.add( &e1, &e2, &df2 ) == 1,
+	ASSERT (sf2.add( &e1, &e2, &df2, ConnTainer::Default ) == 1,
 					"dbl to dbl message" );
 
 	ASSERT( e1.msg_.size() == 2, "Finfo Msg" );
@@ -380,14 +380,18 @@ void cinfoTest()
 	SimpleElement* se1 = static_cast< SimpleElement* >( e1 );
 
 	ASSERT( testFinfos[4]->msg() == 1, "Msg # assignment by Cinfo::shuffleFinfos");
-	// 1 src + 5 dests from Neutral, 4 more srcs from testclass, so start
-	// at -10.
-	ASSERT( testFinfos[0]->msg() == -10, "Msg # assignment by Cinfo::shuffleFinfos");
+
+	int numNeutralFinfos = initNeutralCinfo()->numFinfos();
+	// numNeutralFinfos from Neutral, 4 more srcs from testclass,
+	// but starting with a zero index so we reduce by one.
+	// The whole thing is given a -ve sign.
+	ASSERT( testFinfos[0]->msg() == -( numNeutralFinfos + 4 - 1 ),
+		"Msg # assignment by Cinfo::shuffleFinfos");
 	ASSERT( e1->numMsg() == testclass.numSrc(), "" );
 	ASSERT( e2->numMsg() == testclass.numSrc(), "" );
 	ASSERT( e1->msg( testFinfos[4]->msg() )->size() == 0, "" );
 	ASSERT( e2->dest( testFinfos[0]->msg() ) == 0, "Look up dest: doesn't exist yet." );
-	testFinfos[4]->add( e1, e2, testFinfos[0] );
+	testFinfos[4]->add( e1, e2, testFinfos[0], ConnTainer::Default );
 	ASSERT( e1->numMsg() == testclass.numSrc(), "" );
 	ASSERT( e2->numMsg() == testclass.numSrc(), "" );
 	ASSERT( e1->msg( testFinfos[4]->msg() )->size() == 1, "" );
@@ -395,18 +399,18 @@ void cinfoTest()
 	ASSERT( e2->dest( testFinfos[0]->msg() )->size() == 1, "" );
 	// Fill in stuff here for checking that the Conn points where it should
 
-	testFinfos[4]->add( e1, e3, testFinfos[0] );
+	testFinfos[4]->add( e1, e3, testFinfos[0], ConnTainer::Default );
 	ASSERT( e1->numMsg() == testclass.numSrc(), "" );
 
-	testFinfos[4]->add( e2, e3, testFinfos[0] );
-	testFinfos[5]->add( e3, e1, testFinfos[1] );
+	testFinfos[4]->add( e2, e3, testFinfos[0], ConnTainer::Default );
+	testFinfos[5]->add( e3, e1, testFinfos[1], ConnTainer::Default );
 
-	testFinfos[6]->add( clock, e1, testFinfos[2] );
-	testFinfos[6]->add( clock, e2, testFinfos[2] );
-	testFinfos[6]->add( clock, e3, testFinfos[2] );
-	testFinfos[7]->add( clock, e1, testFinfos[3] );
-	testFinfos[7]->add( clock, e2, testFinfos[3] );
-	testFinfos[7]->add( clock, e3, testFinfos[3] );
+	testFinfos[6]->add( clock, e1, testFinfos[2], ConnTainer::Default );
+	testFinfos[6]->add( clock, e2, testFinfos[2], ConnTainer::Default );
+	testFinfos[6]->add( clock, e3, testFinfos[2], ConnTainer::Default );
+	testFinfos[7]->add( clock, e1, testFinfos[3], ConnTainer::Default );
+	testFinfos[7]->add( clock, e2, testFinfos[3], ConnTainer::Default );
+	testFinfos[7]->add( clock, e3, testFinfos[3], ConnTainer::Default );
 
 	Slot printOutSlotIndex = testclass.getSlot( "printout" );
 	Slot procOutSlotIndex = testclass.getSlot( "procout" );
@@ -481,7 +485,7 @@ void cinfoTest()
 	ASSERT( ( *cti )->e2() == e3, "setting up next msg" );
 
 	// testFinfos[4] is sumout, testFinfos[1] is sub (dest).
-	bool ret = testFinfos[4]->add( e1, e3, testFinfos[1] );
+	bool ret = testFinfos[4]->add( e1, e3, testFinfos[1], ConnTainer::Default );
 	ASSERT( ret, "next msg" );
 	ASSERT( e1->numMsg() == 6, "next msg" );
 
@@ -611,28 +615,42 @@ void finfoLookupTest()
 	
 	SimpleElement* se1 = static_cast< SimpleElement* >( e1 );
 
-	e1->findFinfo( "sumout" )->add( e1, e2, e2->findFinfo( "sum" ) );
+	Eref( e1 ).add( "sumout", e2, "sum" );
+	// e1->findFinfo( "sumout" )->add( e1, e2, e2->findFinfo( "sum" ) );
 	
 	Slot sumOutSlotIndex = testclass.getSlot( "sumout" );
 
 	ASSERT( se1->msg( sumOutSlotIndex.msg() )->size() == 1, "" );
 
-	e1->findFinfo( "sumout" )->add( e1, e3, e3->findFinfo( "sum" ) );
+	Eref( e1 ).add( "sumout", e3, "sum" );
+	// e1->findFinfo( "sumout" )->add( e1, e3, e3->findFinfo( "sum" ) );
 	ASSERT( se1->msg( sumOutSlotIndex.msg() )->size() == 2, "" );
 
-	e2->findFinfo( "sumout" )->add( e2, e3, e3->findFinfo( "sum" ) );
-	e3->findFinfo( "subout" )->add( e3, e1, e1->findFinfo( "sub" ) );
+	Eref( e2 ).add( "sumout", e3, "sum" );
+	// e2->findFinfo( "sumout" )->add( e2, e3, e3->findFinfo( "sum" ) );
+	Eref( e3 ).add( "subout", e1, "sub" );
+	// e3->findFinfo( "subout" )->add( e3, e1, e1->findFinfo( "sub" ) );
 	ASSERT( e2->msg( sumOutSlotIndex.msg() )->size() == 1, "" );
 
 	Slot subOutSlotIndex = testclass.getSlot( "subout" );
 	ASSERT( e3->msg( subOutSlotIndex.msg() )->size() == 1, "" );
 
+	Eref( clock ).add( "printout", e1, "print" );
+	Eref( clock ).add( "printout", e2, "print" );
+	Eref( clock ).add( "printout", e3, "print" );
+
+	Eref( clock ).add( "procout", e1, "proc" );
+	Eref( clock ).add( "procout", e2, "proc" );
+	Eref( clock ).add( "procout", e3, "proc" );
+
+	/*
 	clock->findFinfo( "printout" )->add( clock, e1, e1->findFinfo( "print" ) );
 	clock->findFinfo( "printout" )->add( clock, e2, e2->findFinfo( "print" ) );
 	clock->findFinfo( "printout" )->add( clock, e3, e3->findFinfo( "print" ) );
 	clock->findFinfo( "procout" )->add( clock, e1, e1->findFinfo( "proc" ) );
 	clock->findFinfo( "procout" )->add( clock, e2, e2->findFinfo( "proc" ) );
 	clock->findFinfo( "procout" )->add( clock, e3, e3->findFinfo( "proc" ) );
+	*/
 	// testFinfos[6]->add( clock, e1, testFinfos[2] );
 	// testFinfos[6]->add( clock, e2, testFinfos[2] );
 	// testFinfos[6]->add( clock, e3, testFinfos[2] );
@@ -904,9 +922,13 @@ void valueFinfoTest()
 	ASSERT( bret, "assignment" );
 	bret = set< int >( e2, e2->findFinfo( "ival" ), -2 );
 	ASSERT( bret, "assignment" );
-	bret = clock->findFinfo( "procout" )->add( clock, e1, e1->findFinfo( "proc" ) );
+
+
+	bret = Eref( clock ).add( "procout", e1, "proc" );
+	// bret = clock->findFinfo( "procout" )->add( clock, e1, e1->findFinfo( "proc" ) );
 	ASSERT( bret, "adding msg" );
-	bret = e1->findFinfo( "dsumout" )->add( e1, e2, e2->findFinfo( "dsum" ) );
+	bret = Eref( e1 ).add( "dsumout", e2, "dsum" );
+	// bret = e1->findFinfo( "dsumout" )->add( e1, e2, e2->findFinfo( "dsum" ) );
 	ASSERT( bret, "adding msg" );
 	
 	send0( clock, procOutSlot ); // procout
@@ -931,7 +953,8 @@ void valueFinfoTest()
 	get< int >( e3, e3->findFinfo( "ival" ), iret );
 	ASSERT( iret == -3, "proc--> e1/isetout --> e3/ival" );
 
-	bret = e1->findFinfo( "isetout" )->add( e1, e3, e3->findFinfo( "ival" ) );
+	bret = Eref( e1 ).add( "isetout", e3, "ival" );
+	// bret = e1->findFinfo( "isetout" )->add( e1, e3, e3->findFinfo( "ival" ) );
 	ASSERT( bret, "adding msg" );
 	send0( clock, procOutSlot ); // procout
 
@@ -943,211 +966,6 @@ void valueFinfoTest()
 	ASSERT( dret == 3.0, "proc--> e1/isetout --> e3/ival" );
 	get< int >( e3, e3->findFinfo( "ival" ), iret );
 	ASSERT( iret == -1, "proc--> e1/isetout --> e3/ival" );
-
-	
-	/////////////////////////////////////////////////////////////////// 
-	// This set is deprecated. We only have incoming value msgs and
-	// shared msgs now.
-	/////////////////////////////////////////////////////////////////// 
-	/*
-	cout << "\nTesting trig then dval: --proc--> e1/procout --> e0/dval --> e4/dsum";
-	// --proc--> e1/procout --> e0/dval --> e4/dsum
-	Element* e0 = testclass.create( Id::scratchId(), "e0" );
-	Element* e4 = testclass.create( Id::scratchId(), "e4" );
-	set< double >( e0, e0->findFinfo( "dval" ), 2 );
-	set< int >( e0, e0->findFinfo( "ival" ), -2 );
-	set< double >( e4, e4->findFinfo( "dval" ), 4 );
-	set< int >( e4, e4->findFinfo( "ival" ), -4 );
-
-	dret = 123455.0;
-	get< double >( e0, e0->findFinfo( "dval" ), dret );
-	ASSERT( dret == 2.0,"--proc--> e1/procout --> e0/dval --> e4/dsum");
-	dret = 23455.0;
-	get< double >( e4, e4->findFinfo( "dval" ), dret );
-	ASSERT( dret == 4.0,"--proc--> e1/procout --> e0/dval --> e4/dsum");
-
-	ASSERT( 
-		e1->findFinfo( "procout" )->
-			add( e1, e0, e0->findFinfo( "dval" ) ),
-			"Adding procout to dval"
-		);
-	ASSERT( e0->findFinfo( "dval" )->
-			add( e0, e4, e4->findFinfo( "dsum" ) ),
-			"adding dval to dsum"
-			);
-
-	dret = 123456.0;
-	get< double >( e0, e0->findFinfo( "dval" ), dret );
-	ASSERT( dret == 2.0,"--proc--> e1/procout --> e0/dval --> e4/dsum");
-
-	send0( clock, 0, procOutSlotIndex ); // procout
-
-
-	get< double >( e1, e1->findFinfo( "dval" ), dret );
-	ASSERT(dret == -1.0,"--proc--> e1/procout --> e0/dval --> e4/dsum");
-	get< int >( e1, e1->findFinfo( "ival" ), iret );
-	ASSERT( iret == -1, "--proc--> e1/procout --> e0/dval --> e4/dsum");
-
-	get< double >( e0, e0->findFinfo( "dval" ), dret );
-	ASSERT( dret == 2.0,"--proc--> e1/procout --> e0/dval --> e4/dsum");
-	get< int >( e0, e0->findFinfo( "ival" ), iret );
-	ASSERT( iret == -2, "--proc--> e1/procout --> e0/dval --> e4/dsum");
-
-	get< double >( e4, e4->findFinfo( "dval" ), dret );
-	ASSERT( dret == 6.0,"--proc--> e1/procout --> e0/dval --> e4/dsum");
-	get< int >( e4, e4->findFinfo( "ival" ), iret );
-	ASSERT( iret == -4, "--proc--> e1/procout --> e0/dval --> e4/dsum");
- 
-	/////////////////////////////////////////////////////////////////// 
-	cout << "\nTesting dval then trig: --proc--> e1/procout --> e5/dval --> e6/dsum";
-	// Here we first add the message from d5 to e6, then the trigger.
-	Element* e5 = testclass.create( Id::scratchId(), "e5" );
-	Element* e6 = testclass.create( Id::scratchId(), "e6" );
-	set< double >( e5, e5->findFinfo( "dval" ), 5 );
-	set< int >( e5, e5->findFinfo( "ival" ), -5 );
-	set< double >( e6, e6->findFinfo( "dval" ), 6 );
-	set< int >( e6, e6->findFinfo( "ival" ), -6 );
-
-	dret = 123455.0;
-	get< double >( e5, e5->findFinfo( "dval" ), dret );
-	ASSERT( dret == 5.0,"--proc--> e1/procout --> e5/dval --> e6/dsum");
-	dret = 23455.0;
-	get< double >( e6, e6->findFinfo( "dval" ), dret );
-	ASSERT( dret == 6.0,"--proc--> e1/procout --> e5/dval --> e6/dsum");
-
-	// Note the order of the operations here.
-	ASSERT( e5->findFinfo( "dval" )->
-			add( e5, e6, e6->findFinfo( "dsum" ) ),
-			"adding dval to dsum"
-			);
-	ASSERT( 
-		e1->findFinfo( "procout" )->
-			add( e1, e5, e5->findFinfo( "dval" ) ),
-			"Adding procout to dval"
-		);
-
-	dret = 123456.0;
-	get< double >( e5, e5->findFinfo( "dval" ), dret );
-	ASSERT( dret == 5.0,"--proc--> e1/procout --> e5/dval --> e6/dsum");
-
-	send0( clock, 0, procOutSlotIndex ); // procout
-
-
-	get< double >( e1, e1->findFinfo( "dval" ), dret );
-	ASSERT(dret == 1.0,"--proc--> e1/procout --> e5/dval --> e6/dsum");
-	get< int >( e1, e1->findFinfo( "ival" ), iret );
-	ASSERT( iret == -1, "--proc--> e1/procout --> e5/dval --> e6/dsum");
-
-	get< double >( e5, e5->findFinfo( "dval" ), dret );
-	ASSERT( dret == 5.0,"--proc--> e1/procout --> e5/dval --> e6/dsum");
-	get< int >( e5, e5->findFinfo( "ival" ), iret );
-	ASSERT( iret == -5, "--proc--> e1/procout --> e5/dval --> e6/dsum");
-
-	get< double >( e6, e6->findFinfo( "dval" ), dret );
-	ASSERT( dret == 11.0,"--proc--> e1/procout --> e5/dval --> e6/dsum");
-	get< int >( e6, e6->findFinfo( "ival" ), iret );
-	ASSERT( iret == -6, "--proc--> e1/procout --> e5/dval --> e6/dsum");
- 
-	/////////////////////////////////////////////////////////////////// 
-	cout << "\nTesting trig then dval: --proc--> e1/procout --> e7/dval --> e8/dval";
-	// First set up trigger,  then we send message from value to value.
-	Element* e7 = testclass.create( Id::scratchId(), "e7" );
-	Element* e8 = testclass.create( Id::scratchId(), "e8" );
-	set< double >( e7, e7->findFinfo( "dval" ), 7 );
-	set< int >( e7, e7->findFinfo( "ival" ), -7 );
-	set< double >( e8, e8->findFinfo( "dval" ), 8 );
-	set< int >( e8, e8->findFinfo( "ival" ), -8 );
-
-	dret = 11111.0;
-	get< double >( e7, e7->findFinfo( "dval" ), dret );
-	ASSERT( dret == 7.0,"--proc--> e1/procout --> e7/dval --> e8/dsum");
-	dret = 22222.0;
-	get< double >( e8, e8->findFinfo( "dval" ), dret );
-	ASSERT( dret == 8.0,"--proc--> e1/procout --> e7/dval --> e8/dsum");
-
-	// Note the order of the operations here.
-	ASSERT( 
-		e1->findFinfo( "procout" )->
-			add( e1, e7, e7->findFinfo( "dval" ) ),
-			"Adding procout to dval"
-		);
-	ASSERT( e7->findFinfo( "dval" )->
-			add( e7, e8, e8->findFinfo( "dval" ) ),
-			"adding dval to dval"
-			);
-
-	dret = 333333.0;
-	get< double >( e7, e7->findFinfo( "dval" ), dret );
-	ASSERT( dret == 7.0,"--proc--> e1/procout --> e7/dval --> e8/dsum");
-
-	send0( clock, 0, procOutSlotIndex ); // procout
-
-
-	get< double >( e1, e1->findFinfo( "dval" ), dret );
-	ASSERT(dret == -1.0,"--proc--> e1/procout --> e7/dval --> e8/dsum");
-	get< int >( e1, e1->findFinfo( "ival" ), iret );
-	ASSERT( iret == -1, "--proc--> e1/procout --> e7/dval --> e8/dsum");
-
-	get< double >( e7, e7->findFinfo( "dval" ), dret );
-	ASSERT( dret == 7.0,"--proc--> e1/procout --> e7/dval --> e8/dsum");
-	get< int >( e7, e7->findFinfo( "ival" ), iret );
-	ASSERT( iret == -7, "--proc--> e1/procout --> e7/dval --> e8/dsum");
-
-	get< double >( e8, e8->findFinfo( "dval" ), dret );
-	ASSERT( dret == 7.0,"--proc--> e1/procout --> e7/dval --> e8/dsum");
-	get< int >( e8, e8->findFinfo( "ival" ), iret );
-	ASSERT( iret == -8, "--proc--> e1/procout --> e7/dval --> e8/dsum");
-
-	/////////////////////////////////////////////////////////////////// 
-	cout << "\nTesting dval then trig: --proc--> e1/procout --> e9/dval --> e10/dval";
-	// First set up message from value to value, then trigger.
-	Element* e9 = testclass.create( Id::scratchId(), "e9" );
-	Element* e10 = testclass.create( Id::scratchId(), "e10" );
-	set< double >( e9, e9->findFinfo( "dval" ), 9 );
-	set< int >( e9, e9->findFinfo( "ival" ), -9 );
-	set< double >( e10, e10->findFinfo( "dval" ), 10 );
-	set< int >( e10, e10->findFinfo( "ival" ), -10 );
-
-	dret = 10101.0;
-	get< double >( e9, e9->findFinfo( "dval" ), dret );
-	ASSERT( dret == 9.0,"--proc--> e1/procout --> e9/dval --> e10/dsum");
-	dret = 20202.0;
-	get< double >( e10, e10->findFinfo( "dval" ), dret );
-	ASSERT( dret == 10.0,"--proc--> e1/procout --> e9/dval --> e10/dsum");
-
-	// Note the order of the operations here.
-	ASSERT( e9->findFinfo( "dval" )->
-			add( e9, e10, e10->findFinfo( "dval" ) ),
-			"adding dval to dval"
-			);
-	ASSERT( 
-		e1->findFinfo( "procout" )->
-			add( e1, e9, e9->findFinfo( "dval" ) ),
-			"Adding procout to dval"
-		);
-
-	dret = 303030.0;
-	get< double >( e9, e9->findFinfo( "dval" ), dret );
-	ASSERT( dret == 9.0,"--proc--> e1/procout --> e9/dval --> e10/dsum");
-
-	send0( clock, 0, procOutSlotIndex ); // procout
-
-
-	get< double >( e1, e1->findFinfo( "dval" ), dret );
-	ASSERT(dret == 1.0,"--proc--> e1/procout --> e9/dval --> e10/dsum");
-	get< int >( e1, e1->findFinfo( "ival" ), iret );
-	ASSERT( iret == -1, "--proc--> e1/procout --> e9/dval --> e10/dsum");
-
-	get< double >( e9, e9->findFinfo( "dval" ), dret );
-	ASSERT( dret == 9.0,"--proc--> e1/procout --> e9/dval --> e10/dsum");
-	get< int >( e9, e9->findFinfo( "ival" ), iret );
-	ASSERT( iret == -9, "--proc--> e1/procout --> e9/dval --> e10/dsum");
-
-	get< double >( e10, e10->findFinfo( "dval" ), dret );
-	ASSERT( dret == 9.0,"--proc--> e1/procout --> e9/dval --> e10/dsum");
-	get< int >( e10, e10->findFinfo( "ival" ), iret );
-	ASSERT( iret == -10, "--proc--> e1/procout --> e9/dval --> e10/dsum");
-	*/
 }
 
 /**

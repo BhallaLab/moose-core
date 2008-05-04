@@ -75,6 +75,8 @@ class ConnTainer
 		virtual ConnTainer* copy( Element* e1, Element* e2 ) const = 0;
 
 		static const unsigned int Default;
+		static const unsigned int One2All;
+		static const unsigned int Simple;
 		
 	private:
 		Element* e1_; // Pointer to element 1
@@ -98,5 +100,15 @@ class ConnTainer
 		 */
 		int msg2_;
 };
+
+/**
+ * Utility function to generate a suitable ConnTainer for the message,
+ * depending on src and dest Element subclass and indexing.
+ * Currently most of the options revert to SimpleConnTainer.
+ */
+extern ConnTainer* selectConnTainer( Eref src, Eref dest, 
+	unsigned int srcMsg, unsigned int destMsg,
+	unsigned int srcIndex, unsigned int destIndex,
+	unsigned int connTainerOption = ConnTainer::Default );
 
 #endif // _CONN_TAINER_H
