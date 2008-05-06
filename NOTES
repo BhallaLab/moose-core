@@ -6503,5 +6503,9 @@ array children from createmap, but their indices are all 0.
 Put in first few unit tests for ArrayElements, fixed a few bugs. Now we
 can create and list the ArrayElements. Showfield on them still causes
 core dumps.
+Checked in as revision 468 with unit test flags on, Smoldyn off, -g, GSL
+
+Added test for field reads and assignment for the ArrayElement. Along the
+way also fixed issue with deleting data contents of ArraysElements.
 
 ==============================================================================
