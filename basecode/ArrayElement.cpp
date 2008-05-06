@@ -85,7 +85,7 @@ ArrayElement::~ArrayElement()
 		if ( finfo_.size() > 0 && finfo_[0] != 0 ) {
 			ThisFinfo* tf = dynamic_cast< ThisFinfo* >( finfo_[0] );
 			if ( tf && tf->noDeleteFlag() == 0 )
-				finfo_[0]->ftype()->destroy( data_, 0 );
+				finfo_[0]->ftype()->destroy( data_, 1 );
 		}
 	}
 
@@ -488,12 +488,13 @@ Id ArrayElement::id() const {
 #ifdef DO_UNIT_TESTS
 void arrayElementTest()
 {
+	static const unsigned int NUMKIDS = 12;
 	cout << "\nTesting Array Elements";
 	Element* n = Neutral::create( "Neutral", "n", Element::root(), Id::scratchId() ); 
 
 	Id childId = Id::scratchId();
 	Element* child = 
-		Neutral::createArray( "Neutral", "foo", n, childId, 30 );
+		Neutral::createArray( "Compartment", "foo", n, childId, NUMKIDS );
 
 	ASSERT( child != 0, "Array Element" );
 	ASSERT( child == childId(), "Array Element" );
@@ -503,9 +504,17 @@ void arrayElementTest()
 	vector< Id > kids;
 	bool ret = get< vector< Id > >( n, "childList", kids );
 	ASSERT( ret, "Array kids" );
-	ASSERT( kids.size() == 30, "Array kids" );
-	for ( unsigned int i = 0 ; i < 30; i++ ) {
+	ASSERT( kids.size() == NUMKIDS, "Array kids" );
+	for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
 		ASSERT( kids[i].index() == i, "Array kids" );
+		int index;
+		bool ret = get< int >( kids[i].eref(), "index", index );
+		ASSERT( ret && index == static_cast< int >( i ), "Array kids" );
+		double Vm = i;
+		bool sret = set< double >( kids[i].eref(), "Vm", Vm );
+		Vm = 0;
+		ret = get< double >( kids[i].eref(), "Vm", Vm );
+		ASSERT( sret && ret && Vm == i, "Array kids" );
 	}
 
 	set( n, "destroy" );
