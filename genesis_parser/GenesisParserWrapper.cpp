@@ -2033,7 +2033,7 @@ void GenesisParserWrapper::doLe( int argc, const char** argv, Id s )
 	// This operation should really do it in a parallel-clean way.
 	/// \todo If any children, we should suffix the name with a '/'
 	for ( i = elist_.begin(); i != elist_.end(); i++ )
-		print( ( *i )()->name() );
+		print( i->eref().name() );
 	elist_.resize( 0 );
 }
 

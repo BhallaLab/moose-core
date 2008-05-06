@@ -9,6 +9,7 @@
 **********************************************************************/
 
 #include "moose.h"
+#include "../element/Neutral.h"
 #include "DeletionMarkerFinfo.h"
 #include "GlobalMarkerFinfo.h"
 #include "ThisFinfo.h"
@@ -478,3 +479,35 @@ void ArrayElement::dumpMsgInfo() const
 	}
 	cout << endl;
 }
+
+// Overrides Element version.
+Id ArrayElement::id() const {
+	return Element::id().assignIndex( Id::AnyIndex );
+}
+
+#ifdef DO_UNIT_TESTS
+void arrayElementTest()
+{
+	cout << "\nTesting Array Elements";
+	Element* n = Neutral::create( "Neutral", "n", Element::root(), Id::scratchId() ); 
+
+	Id childId = Id::scratchId();
+	Element* child = 
+		Neutral::createArray( "Neutral", "foo", n, childId, 30 );
+
+	ASSERT( child != 0, "Array Element" );
+	ASSERT( child == childId(), "Array Element" );
+	ASSERT( childId.index() == 0, "Array Element" );
+	ASSERT( child->id().index() == Id::AnyIndex, "Array Element" );
+
+	vector< Id > kids;
+	bool ret = get< vector< Id > >( n, "childList", kids );
+	ASSERT( ret, "Array kids" );
+	ASSERT( kids.size() == 30, "Array kids" );
+	for ( unsigned int i = 0 ; i < 30; i++ ) {
+		ASSERT( kids[i].index() == i, "Array kids" );
+	}
+
+	set( n, "destroy" );
+}
+#endif

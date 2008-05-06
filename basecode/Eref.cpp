@@ -32,8 +32,7 @@ bool Eref::operator<( const Eref& other ) const
 Id Eref::id()
 {
 	Id ret = e->id();
-	ret.assignIndex( i );
-	return ret;
+	return ret.assignIndex( i );
 }
 
 

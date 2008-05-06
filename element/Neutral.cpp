@@ -43,6 +43,10 @@ const Cinfo* initNeutralCinfo()
 					reinterpret_cast< GetFunc >( &Neutral::getName ),
 					reinterpret_cast< RecvFunc >( &Neutral::setName )
 		),
+		new ValueFinfo( "index", ValueFtype1< string >::global(),
+					reinterpret_cast< GetFunc >( &Neutral::getIndex ),
+					&dummyFunc
+		),
 		new ValueFinfo( "parent", ValueFtype1< Id >::global(),
 					reinterpret_cast< GetFunc >( &Neutral::getParent ),
 					&dummyFunc
@@ -135,16 +139,24 @@ static const Slot childSrcSlot = initNeutralCinfo()->
  * It is a bit tricky, because while we delete things the conn
  * vector gets altered as each child is removed. So the iterators
  * don't work.
- * \todo It actually needs to work in three stages.
+ * It actually needs to work in three stages.
  * 1. Mark all children for deletion.
  * 2. Clear out messages outside local set, without altering
  * local Conn arrays.
  * 3. Delete.
+ *
+ * There is a further complication for arrays. We don't permit removal
+ * of individual entries: the whole array goes. Later we may permit
+ * shrinking the array: the last entry can be removed. For now we
+ * do the operation only for the index 0.
+ * Also need to work out what to do for index AnyIndex
  */
 void Neutral::childFunc( const Conn* c , int stage )
 {
 		Element* e = c->target().e;
 		assert( stage == 0 || stage == 1 || stage == 2 );
+		if ( c->target().i > 0 )
+			return;
 
 		switch ( stage ) {
 				case MARK_FOR_DELETION:
@@ -174,6 +186,11 @@ const string Neutral::getName( Eref e )
 void Neutral::setName( const Conn* c, const string s )
 {
 	c->target().e->setName( s );
+}
+
+const int Neutral::getIndex( Eref e )
+{
+		return e.i;
 }
 
 const string Neutral::getClass( Eref e )
