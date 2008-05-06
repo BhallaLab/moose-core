@@ -27,6 +27,7 @@ class Neutral
 
 			static void childFunc( const Conn* c, int stage );
 			static const string getName( Eref e );
+			static const int getIndex( Eref e );
 			static const string getClass( Eref e );
 
 			/**
