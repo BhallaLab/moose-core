@@ -256,6 +256,11 @@ class ArrayElement: public Element
 		void dumpMsgInfo() const;
 
 		// bool innerCopyMsg( const Conn* c, const Element* orig, Element* dup );
+		/**
+		 * Overrides the default function provided by the Element. Here we
+		 * assign the index to AnyIndex
+		 */
+		Id id() const;
 	protected:
 		Element* innerCopy() const {return 0;}
 		Element* innerCopy(int n) const{return 0;}
