@@ -24,7 +24,7 @@ extern void sharedFtypeTest(); // in SharedFtype.cpp
 extern void sharedFinfoTest(); // in SharedFinfo.cpp
 extern void lookupFinfoTest(); // in LookupFinfo.cpp
 extern void copyTest(); // in Copy.cpp
-// extern void ArrayElementTest(); // in ArrayElement.cpp
+extern void arrayElementTest(); // in ArrayElement.cpp
 
 void testBasecode()
 {
@@ -40,7 +40,7 @@ void testBasecode()
 	sharedFinfoTest();
 	lookupFinfoTest();
 	copyTest();
-	// ArrayElementTest();
+	arrayElementTest();
 }
 
 #endif

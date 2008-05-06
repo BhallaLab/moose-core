@@ -78,7 +78,7 @@ class One2AllConn: public Conn
 			return Eref( s_->One2AllConnTainer::e2(), index_ );
 		}
 		unsigned int targetIndex() const {
-			return index_;
+			return s_->One2AllConnTainer::i2();
 		}
 		int targetMsg() const {
 			return s_->One2AllConnTainer::msg2();
