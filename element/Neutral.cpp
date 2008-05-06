@@ -43,7 +43,7 @@ const Cinfo* initNeutralCinfo()
 					reinterpret_cast< GetFunc >( &Neutral::getName ),
 					reinterpret_cast< RecvFunc >( &Neutral::setName )
 		),
-		new ValueFinfo( "index", ValueFtype1< string >::global(),
+		new ValueFinfo( "index", ValueFtype1< int >::global(),
 					reinterpret_cast< GetFunc >( &Neutral::getIndex ),
 					&dummyFunc
 		),
