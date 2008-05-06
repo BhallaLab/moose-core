@@ -6493,4 +6493,15 @@ for the target is still INT_MAX.
 For a temporary fix, I replaced the add msg call with the variant that uses
 strings. Slower, but works and clears unit tests. Time to check in this mess.
 
+Checked in as revision 467 with unit test flags on, Smoldyn off, -g, GSL
+
+A preliminary test with a script in DEMOS/array gives the correct # of
+array children from createmap, but their indices are all 0.
+
+==============================================================================
+6 May 2008
+Put in first few unit tests for ArrayElements, fixed a few bugs. Now we
+can create and list the ArrayElements. Showfield on them still causes
+core dumps.
+
 ==============================================================================
