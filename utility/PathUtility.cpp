@@ -20,7 +20,7 @@
 #include "PathUtility.h"
 #include "StringUtil.h"
 #include <iostream>
-#if defined(unix) || defined(__unix__) || defined(__unix)
+#if defined(unix) || defined(__unix__) || defined(__unix) || defined(__MACH__)
 
 const string PathUtility::PATH_SEPARATOR = ":";
 const string PathUtility::DIR_SEPARATOR = "/";
