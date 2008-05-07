@@ -13,7 +13,7 @@
 #
 
 TARGET = basecode.o
-CFLAGS += -I..
+CFLAGS += -I.. -I../connections
 OBJ = \
 	Element.o	\
 	Eref.o	\
@@ -22,11 +22,6 @@ OBJ = \
 	Fid.o	\
 	RecvFunc.o \
 	Msg.o \
-	ConnTainer.o	\
-	SimpleConn.o	\
-	One2AllConn.o	\
-	TraverseMsgConn.o	\
-	TraverseDestConn.o	\
 	SimpleElement.o	\
 	ArrayElement.o \
 	Copy.o \
@@ -58,8 +53,8 @@ HEADERS = \
 	header.h \
 	Eref.h \
 	RecvFunc.h \
-	Conn.h \
-	ConnTainer.h \
+	../connections/Conn.h \
+	../connections/ConnTainer.h \
 	Ftype.h \
 	FuncVec.h \
 	Slot.h \
@@ -102,8 +97,6 @@ ArrayElement.o:	ArrayElement.h SimpleElement.h DeletionMarkerFinfo.h
 ArrayWrapperElement.o:	ArrayWrapperElement.h SimpleElement.h DeletionMarkerFinfo.h GlobalMarkerFinfo.h ThisFinfo.h
 Class.o: Class.h Cinfo.h Cinfo.cpp
 FuncVec.o: RecvFunc.h Ftype.h FuncVec.h
-TraverseMsgConn.o: TraverseMsgConn.h
-TraverseDestConn.o: TraverseDestConn.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) $< -c
