@@ -40,7 +40,7 @@ HEADERS = \
 	Uniform.h	\
 	../../basecode/header.h	\
 	../../basecode/Element.h	\
-	../../basecode/Conn.h	\
+	../../connections/Conn.h	\
 
 default: $(TARGET)
 

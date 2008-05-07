@@ -12,26 +12,47 @@
 # $Log: $
 #
 
-TARGET = maindir.o
+TARGET = connections.o
+
+#CFLAGS += -I.. -I../basecode
 
 OBJ = \
-	main.o	\
-	nonblock.o \
-	init.o
+	ConnTainer.o	\
+	SimpleConn.o	\
+	One2AllConn.o	\
+	TraverseMsgConn.o	\
+	TraverseDestConn.o	\
+
 HEADERS = \
 	../basecode/header.h \
-	../connections/Conn.h \
+	../basecode/Eref.h \
+	../basecode/RecvFunc.h \
+	Conn.h \
+	ConnTainer.h \
+	../basecode/Ftype.h \
+	../basecode/FuncVec.h \
+	../basecode/Slot.h \
+	../basecode/Finfo.h \
+	../basecode/Id.h \
+	../basecode/Msg.h \
 	../basecode/Element.h \
-	../basecode/Id.h
+	../basecode/Class.h \
+
+INCLUDE = -I../basecode -I../element
 
 default: $(TARGET)
 
-$(OBJ)	: $(HEADERS)
+$(OBJ)	: $(HEADERS) ConnTainer.h
+#TestBasecode.o:	Shell.h ShellWrapper.h
 
-#MyClassWrapper.o: MyClassWrapper.h
+ConnTainer.o: ConnTainer.h
+SimpleConn.o: SimpleConn.h
+One2AllConn.o: One2AllConn.h
+TraverseMsgConn.o: TraverseMsgConn.h
+TraverseDestConn.o: TraverseDestConn.h
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -I.. -I../basecode $< -c
+	$(CXX) $(CFLAGS) $(INCLUDE) $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)
