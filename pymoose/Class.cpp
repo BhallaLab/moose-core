@@ -19,84 +19,84 @@
 
 #include "Class.h"
 using namespace pymoose;
-const std::string Class::className = "Class";
-Class::Class(Id id):PyMooseBase(id){}
-Class::Class(std::string path, std::string name):PyMooseBase(className, path)
+const std::string pymoose::Class::className = "Class";
+pymoose::Class::Class(Id id):PyMooseBase(id){}
+pymoose::Class::Class(std::string path, std::string name):PyMooseBase(className, path)
 {
     set <std::string> (id_(), "name", name);    
 }
-Class::Class(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Class::Class(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
-Class::Class(const Class& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+pymoose::Class::Class(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
+pymoose::Class::Class(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+pymoose::Class::Class(const pymoose::Class& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
-Class::Class(const Class& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-Class::Class(const Class& src, std::string path):PyMooseBase(src, path)
+pymoose::Class::Class(const pymoose::Class& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+pymoose::Class::Class(const pymoose::Class& src, std::string path):PyMooseBase(src, path)
 {
 }
 
-Class::Class(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+pymoose::Class::Class(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
-Class::~Class(){}
-const std::string& Class::getType(){ return className; }
+pymoose::Class::~Class(){}
+const std::string& pymoose::Class::getType(){ return className; }
 
-std::string Class::__get_name()
+std::string pymoose::Class::__get_name()
 {
     std::string name;
     get <std::string> (id_(), "name", name);
     return name;    
 }
 
-void Class::__set_name(std::string name)
+void pymoose::Class::__set_name(std::string name)
 {
     set < std::string > ( id_(), "name", name);    
 }
 
-const std::string Class::__get_author()
+const std::string pymoose::Class::__get_author()
 {
     std::string author;
     get < std::string > ( id_(), "author", author);
     return author;
 }
 
-const std::string Class::__get_description()
+const std::string pymoose::Class::__get_description()
 {
     std::string description;
     get < std::string > ( id_(), "description", description);
     return description;
 }
 
-unsigned int Class::__get_tick()
+unsigned int pymoose::Class::__get_tick()
 {
     unsigned int tick;
     get <unsigned int > ( id_(), "tick", tick);
     return tick;
 }
 
-void Class::__set_tick(unsigned int tick)
+void pymoose::Class::__set_tick(unsigned int tick)
 {
     set < unsigned int > ( id_(), "tick", tick);    
 }
 
-unsigned int Class::__get_stage()
+unsigned int pymoose::Class::__get_stage()
 {
     unsigned int stage;
     get < unsigned int > ( id_(), "stage", stage);
     return stage;
 }
-void Class::__set_stage(unsigned int stage)
+void pymoose::Class::__set_stage(unsigned int stage)
 {
     set < unsigned int > (id_(), "stage", stage);
 }
 
-std::string Class::__get_clock()
+std::string pymoose::Class::__get_clock()
 {
     string clock;
     get < string > (id_(), "clock", clock);
     return clock;
 }
 
-void Class::setClock(std::string function, std::string clock)
+void pymoose::Class::setClock(std::string function, std::string clock)
 {
     set < std::string, std::string > (id_(), "clock", function, clock);    
 }
