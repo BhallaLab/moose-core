@@ -18,7 +18,7 @@ OBJ = \
 
 HEADERS = \
 	../basecode/header.h \
-	../basecode/Conn.h \
+	../connections/Conn.h \
 	../basecode/Element.h \
 
 default: $(TARGET)

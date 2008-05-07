@@ -62,8 +62,8 @@ class IdManager;
 
 #include "Eref.h"
 #include "RecvFunc.h"
-#include "Conn.h"
-#include "ConnTainer.h"
+#include "../connections/Conn.h"
+#include "../connections/ConnTainer.h"
 #include "Ftype.h"
 #include "FuncVec.h"
 #include "Slot.h"
