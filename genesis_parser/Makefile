@@ -46,7 +46,7 @@ endif
 
 HEADERS = \
 	../basecode/header.h \
-	../basecode/Conn.h \
+	../connections/Conn.h \
 	../basecode/Element.h \
 	../utility/utility.h	\
 
