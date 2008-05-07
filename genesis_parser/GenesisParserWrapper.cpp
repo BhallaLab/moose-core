@@ -4050,9 +4050,9 @@ void GenesisParserWrapper::unitTest()
 //	gpAssert( "useclock /##[TYPE=Compartment] 1", "" );
 	gpAssert( "delete /compt", "" );
 	gpAssert( "le", lestr );
-	gpAssert( "echo {strcmp \"hello\" \"hello\"} ", "0 " );
-	gpAssert( "echo {strcmp \"hello\" \"hell\"} ", "1 " );
-	gpAssert( "echo {strcmp \"hell\" \"hello\"} ", "-1 " );
+	//	gpAssert( "echo {strcmp \"hello\" \"hello\"} ", "0 " );
+	//	gpAssert( "echo {strcmp \"hello\" \"hell\"} ", "1 " );
+	//	gpAssert( "echo {strcmp \"hell\" \"hello\"} ", "-1 " );
 
 	gpAssert( "echo {getpath /foo/bar -tail}", "bar " );
 	gpAssert( "echo {getpath /foo/bar -head}", "/foo/ " );
