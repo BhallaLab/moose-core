@@ -486,6 +486,7 @@ Id ArrayElement::id() const {
 }
 
 #ifdef DO_UNIT_TESTS
+#include "../biophysics/Compartment.h"
 void arrayElementTest()
 {
 	static const unsigned int NUMKIDS = 12;
@@ -512,9 +513,36 @@ void arrayElementTest()
 		ASSERT( ret && index == static_cast< int >( i ), "Array kids" );
 		double Vm = i;
 		bool sret = set< double >( kids[i].eref(), "Vm", Vm );
-		Vm = 0;
-		ret = get< double >( kids[i].eref(), "Vm", Vm );
-		ASSERT( sret && ret && Vm == i, "Array kids" );
+		ASSERT( sret, "Array kids" );
+		sret = set< double >( kids[i].eref(), "Im", 0.0 );
+	}
+
+	for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+		double Vm = 0;
+		bool ret = get< double >( kids[i].eref(), "Vm", Vm );
+		ASSERT( ret && Vm == i, "Array kids" );
+
+		if ( i > 0 ) {
+			ret = kids[i-1].eref().add( "axial", kids[i].eref(), "raxial" );
+			ASSERT( ret, "Array simple msgs" );
+		}
+	}
+	ProcInfoBase proc;
+	for ( unsigned int i = 0 ; i < NUMKIDS - 1; i++ ) {
+		// bool ret = set< ProcInfo >( kids[i].eref(), "init", &proc );
+		SetConn temp( kids[i].eref() );
+		Compartment::initFunc ( &temp, &proc );
+		ASSERT( ret, "Array simple msgs and proc" );
+	}
+	// Current flow is balanced at all points except the ends.
+	// Since Ra is 1 and DeltaVm = 1, the end compts will have an Im of +-1
+	for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+		double Im;
+		double pred = -1.0;
+		bool ret = get< double >( kids[i].eref(), "Im", Im );
+		if ( i == 0 )
+			pred = 0.0;
+		ASSERT( ret && Im == pred, "Array simple msgs and proc" );
 	}
 
 	set( n, "destroy" );
