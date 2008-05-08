@@ -92,9 +92,8 @@ SimpleElement.o:	SimpleElement.h DeletionMarkerFinfo.h
 setget.o:		setget.h DerivedFtype.h
 strconv.o:		DerivedFtype.h
 filecheck.o: filecheck.h
-IdManager.o:	Id.h IdManager.h ArrayWrapperElement.h
+IdManager.o:	Id.h IdManager.h
 ArrayElement.o:	ArrayElement.h SimpleElement.h DeletionMarkerFinfo.h
-ArrayWrapperElement.o:	ArrayWrapperElement.h SimpleElement.h DeletionMarkerFinfo.h GlobalMarkerFinfo.h ThisFinfo.h
 Class.o: Class.h Cinfo.h Cinfo.cpp
 FuncVec.o: RecvFunc.h Ftype.h FuncVec.h
 

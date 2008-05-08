@@ -6513,3 +6513,30 @@ Also valgrind is happy with it, at least during runtime. At clearup
 it has a fair number of lost blocks.
 
 ==============================================================================
+7 May 2008
+Made a subdirectory 'connections' for the Conn classes. Various makefile
+fixes to get it to compile.
+
+ArrayElement messages are being set up, trying to do checks on their function.
+
+Turns out that all the messages are being sent to all the targets. When I 
+analyzed it, after much messing around it turns out that the problem is that
+all of the messages on the ArrayElement are sent out even if only one of the
+ArrayElement entries actually invokes it.
+Checking each ConnTainer for ElementIndex match at the time that it creates 
+its Conn. This is horribly wasteful. For example, here I have a dozen elements
+in the array, of which only one will send a single message at a time.
+Clearly I must not do a sequential scan for matching ConnTainers or Conns for
+the long term.
+
+Some incremental improvements to make in the Send command:
+SimpleElements:
+	- get func as at present
+	- Consolidate all (SimpleConns) into one ConnTainer, 
+	- Make an efficient iterator. Avoid virtual funcs. Possibly a single one
+
+ArrayElements
+	- get func as at present
+	- Can we cascade downstream msgs from x2AllConn ? 
+		No, that is the job of solvers
+	- Look up Msgs or ConnTainers by index.
