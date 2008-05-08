@@ -10,6 +10,7 @@
 
 #include "header.h"
 #include "SimpleConn.h"
+#include "SetConn.h"
 
 SimpleConnTainer::SimpleConnTainer( Element* e1, Element* e2, 
 			int msg1, int msg2,
@@ -33,6 +34,8 @@ SimpleConnTainer::SimpleConnTainer( Eref e1, Eref e2,
 Conn* SimpleConnTainer::conn( unsigned int eIndex, bool isReverse ) const
 {
 	//	numIter_++; // For reference counting. Do we need it?
+	if ( eIndex != eI1_ )
+		return new SetConn( Element::root(), 0 );
 	if ( isReverse )
 		return new ReverseSimpleConn( this );
 	else
