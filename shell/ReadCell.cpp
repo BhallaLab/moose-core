@@ -36,7 +36,7 @@ static const Cinfo* synchanCinfo = initSynChanCinfo();
 static const Cinfo* spikegenCinfo = initSpikeGenCinfo();
 static const Cinfo* nernstCinfo = initNernstCinfo();
 static const Cinfo* caconcCinfo = initCaConcCinfo();
-
+double calcSurf(double, double);
 ReadCell::ReadCell( const vector< double >& globalParms )
 		: RM_( 10.0 ), CM_( 0.01 ), RA_( 1.0 ), EREST_ACT_( -0.065 ),
 		dendrDiam( 0.0 ), aveLength( 0.0 ),
@@ -365,11 +365,12 @@ Element* ReadCell::buildCompartment(
 	set< double >( compt, dFinfo, d );
 
 	set< double >( compt, lengthFinfo, length );
-	double Rm = RM_ / ( d * length * M_PI );
+
+	double Rm = RM_ / calcSurf(length, d);
 	set< double >( compt, RmFinfo, Rm );
 	double Ra = RA_ * length * 4.0 / ( d * d * M_PI );
 	set< double >( compt, RaFinfo, Ra );
-	double Cm = CM_ * ( d * length * M_PI );
+	double Cm = CM_ * calcSurf(length, d);
 	set< double >( compt, CmFinfo, Cm );
 	set< double >( compt, initVmFinfo, EREST_ACT_ );
 	set< double >( compt, EmFinfo, EREST_ACT_ );
