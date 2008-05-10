@@ -126,13 +126,13 @@ template < class T > class SparseMatrix
 		 * Returns the entry identified by row, column. Returns T(0)
 		 * if not found
 		 */
-		T get( unsigned int row, unsigned int column )
+		T get( unsigned int row, unsigned int column ) const
 		{
 			assert( row < nrows_ && column < ncolumns_ );
-			vector< unsigned int >::iterator i;
-			vector< unsigned int >::iterator begin = 
+			vector< unsigned int >::const_iterator i;
+			vector< unsigned int >::const_iterator begin = 
 				colIndex_.begin() + rowStart_[ row ];
-			vector< unsigned int >::iterator end = 
+			vector< unsigned int >::const_iterator end = 
 				colIndex_.begin() + rowStart_[ row + 1 ];
 		
 			i = find( begin, end, column );
@@ -205,15 +205,15 @@ template < class T > class SparseMatrix
 				f( *i );
 		}
 
-		unsigned int nRows() {
+		unsigned int nRows() const {
 			return nrows_;
 		}
 
-		unsigned int nColumns() {
+		unsigned int nColumns() const {
 			return ncolumns_;
 		}
 
-		unsigned int nEntries() {
+		unsigned int nEntries() const {
 			return N_.size();
 		}
 
