@@ -6587,3 +6587,10 @@ I've set up to use the SparseMatrix in a new Many2Many class.
 Need to compile and run lots of unit tests before deploying.
 
 ==============================================================================
+10 May 2008
+Implemented SparseMatrix template, including unit tests.
+Shifted old one to KinSparseMatrix. Later to merge.
+
+Added getColumn to SparseMatrix. Did more extensive unit tests.
+
+==============================================================================
