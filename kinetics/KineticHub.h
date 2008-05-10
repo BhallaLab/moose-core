@@ -33,7 +33,7 @@ class KineticHub
 		static void reinitFunc( const Conn* c, ProcInfo info );
 		static void rateTermFunc( const Conn* c,
 			vector< RateTerm* >* rates, 
-			SparseMatrix* N,
+			KinSparseMatrix* N,
 			bool useHalfReacs );
 		static void rateSizeFunc( const Conn* c,
 			unsigned int nReac, unsigned int nEnz, 

@@ -13,7 +13,7 @@
 #include "../element/Neutral.h"
 #include "../element/Wildcard.h"
 #include "RateTerm.h"
-#include "SparseMatrix.h"
+#include "KinSparseMatrix.h"
 #include "SmoldynHub.h"
 #include "Molecule.h"
 #include "Particle.h"
@@ -58,7 +58,7 @@ const Cinfo* initSmoldynHubCinfo()
 	static Finfo* hubShared[] =
 	{
 		new DestFinfo( "rateTermInfo",
-			Ftype3< vector< RateTerm* >*, SparseMatrix*, bool >::global(),
+			Ftype3< vector< RateTerm* >*, KinSparseMatrix*, bool >::global(),
 			RFCAST( &SmoldynHub::rateTermFunc )
 		),
 		new DestFinfo( "rateSize", 
@@ -949,7 +949,7 @@ void SmoldynHub::setupTrade( Element* pe )
  * figure out reaction structures.
  */
 void SmoldynHub::rateTermFunc( const Conn* c,
-	vector< RateTerm* >* rates, SparseMatrix* N, bool useHalfReacs )
+	vector< RateTerm* >* rates, KinSparseMatrix* N, bool useHalfReacs )
 {
 	// the useHalfReacs flag is irrelevant here, since Smoldyn always 
 	// considers irreversible reactions
@@ -958,7 +958,7 @@ void SmoldynHub::rateTermFunc( const Conn* c,
 }
 
 void SmoldynHub::localRateTermFunc( vector< RateTerm* >* rates,
-	SparseMatrix* N )
+	KinSparseMatrix* N )
 {
 	rates_ = rates;
 	N_ = N;
