@@ -44,6 +44,7 @@ extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 #ifdef DO_UNIT_TESTS
 	extern void testBasecode();
 	extern void testNeutral();
+	extern void testSparseMatrix();
 	extern void testShell();
 	extern void testInterpol();
 	extern void testTable();
@@ -85,6 +86,7 @@ int main(int argc, char** argv)
 	{
 		testBasecode();
 		testNeutral();
+		testSparseMatrix();
 		testShell();
 		testWildcard();
 		testInterpol();

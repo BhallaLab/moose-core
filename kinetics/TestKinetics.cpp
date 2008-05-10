@@ -16,12 +16,12 @@
 #include "../builtins/Interpol.h"
 #include "../builtins/Table.h"
 #include "RateTerm.h"
-#include "SparseMatrix.h"
+#include "KinSparseMatrix.h"
 #include "Stoich.h"
 
 extern void testMolecule(); // Defined in Molecule.cpp
 extern void testEnzyme(); // Defined in Enzyme.cpp
-extern void testSparseMatrix(); // Defined in SparseMatrix.cpp
+extern void testKinSparseMatrix(); // Defined in KinSparseMatrix.cpp
 extern void testMathFunc(); //Defined in MathFunc.cpp
 void testStoich();
 void testKintegrator();
@@ -33,7 +33,7 @@ void testKinetics()
 {
 	testMolecule();
 	testEnzyme();
-	testSparseMatrix();
+	testKinSparseMatrix();
 	testStoich();
 	testMathFunc();
 	testKintegrator();

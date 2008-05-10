@@ -12,7 +12,7 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv.h>
 #include "RateTerm.h"
-#include "SparseMatrix.h"
+#include "KinSparseMatrix.h"
 #include "Stoich.h"
 #include "GslIntegrator.h"
 
