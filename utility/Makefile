@@ -9,13 +9,15 @@ OBJ = \
 	PathUtility.o	\
 	StringUtil.o	\
 	Property.o	\
+	SparseMatrix.o	\
 
 HEADERS = \
 	ArgParser.h	\
 	PathUtility.h	\
 	Property.h	\
 	StringUtil.h	\
-	utility.h
+	utility.h	\
+	SparseMatrix.h
 
 default: $(TARGET)
 

@@ -13,7 +13,7 @@ OBJ = \
 	Molecule.o	\
 	Reaction.o	\
 	Enzyme.o	\
-	SparseMatrix.o	\
+	KinSparseMatrix.o	\
 	KineticHub.o	\
 	Stoich.o	\
 	Kintegrator.o	\
@@ -80,20 +80,20 @@ HemispherePanel.o:	Panel.h HemispherePanel.h
 CylPanel.o:	Panel.h CylPanel.h
 DiskPanel.o:	Panel.h DiskPanel.h
 KinCompt.o:	KinCompt.h
-SparseMatrix.o:	SparseMatrix.h
+KinSparseMatrix.o:	KinSparseMatrix.h
 KineticHub.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h
-Stoich.o:	RateTerm.h Stoich.h SparseMatrix.h Makefile
+Stoich.o:	RateTerm.h Stoich.h KinSparseMatrix.h Makefile
 Kintegrator.o:	Kintegrator.h
 KineticManager.o:	KineticManager.h
-TestKinetics.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h Stoich.h SparseMatrix.h Makefile
+TestKinetics.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h Stoich.h KinSparseMatrix.h Makefile
 
 #Optional: Comment out the following two items if not using GSL.
 $(GSL_OBJ) : $(HEADERS)
-GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h SparseMatrix.h 
+GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h KinSparseMatrix.h 
 
 $(SMOLDYN_OBJ) : $(HEADERS)
 Particle.o:		SmoldynHub.h Particle.h Molecule.h
-SmoldynHub.o:	SparseMatrix.h SmoldynHub.h Smoldyn/source/smolrun.h
+SmoldynHub.o:	KinSparseMatrix.h SmoldynHub.h Smoldyn/source/smolrun.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) $(GSL_FLAGS) $(SMOLDYN_FLAGS) -I../basecode $< -c
