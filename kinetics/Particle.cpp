@@ -13,7 +13,6 @@
 #include <math.h>
 #include "Molecule.h"
 #include "RateTerm.h"
-#include "SparseMatrix.h"
 #include "SmoldynHub.h"
 #include "Particle.h"
 
