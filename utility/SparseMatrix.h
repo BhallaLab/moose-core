@@ -176,14 +176,13 @@ template < class T > class SparseMatrix
 			entry.resize( 0 );
 			rowIndex.resize( 0 );
 
-			vector< unsigned int >::const_iterator rs = rowStart_.begin();
-			unsigned int lastRow = 0;
+			unsigned int row = 0;
 			for ( unsigned int i = 0; i < N_.size(); ++i ) {
-				if ( col = colIndex_[i] ) {
+				if ( col == colIndex_[i] ) {
 					entry.push_back( N_[i] );
-					while ( *rs < i )
-						lastRow = *rs++;
-					rowIndex.push_back( lastRow );
+					while ( rowStart_[ row + 1 ] <= i )
+						row++;
+					rowIndex.push_back( row );
 				}
 			}
 			return entry.size();
