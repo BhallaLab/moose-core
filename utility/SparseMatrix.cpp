@@ -41,9 +41,12 @@ void testSparseMatrix()
 
 	const int* entry;
 	const unsigned int* colIndex;
+	unsigned int numEntries = 0;
+	vector< int > e;
+	vector< unsigned int > ri;
 
 	for ( unsigned int i = 0; i < NR; i++ ) {
-		sm.getRow( i, &entry, &colIndex );
+		numEntries = sm.getRow( i, &entry, &colIndex );
 		for ( unsigned int j = 0; j < NC; j++ ) {
 			if ( j != *colIndex++ )
 				continue;
@@ -52,18 +55,44 @@ void testSparseMatrix()
 		}
 	}
 
-	/*
 	for ( unsigned int i = 0; i < NC; i++ ) {
-		sm.getColumn( i, entry, colIndex );
-		for ( unsigned int j = 0; j < NR; j++ ) {
-			if ( j != *colIndex++ )
-				continue;
-			int ret = 10 * i + j;
-			ASSERT( ret == *entry++ , "getRow" );
+		unsigned int rowIndex = 0;
+
+		numEntries = sm.getColumn( i, e, ri );
+		for ( unsigned int j = 0; j < numEntries; j++ ) {
+			rowIndex = ri[j];
+			int ret = 10 * rowIndex + i;
+			ASSERT( ret == e[j] , "getColumn" );
 		}
 	}
-	*/
 
+	sm.set( 2, 0, 0 );
+	sm.set( 2, 1, 0 );
+	sm.set( 2, 2, 0 );
+	sm.set( 2, 3, 0 );
+	sm.set( 2, 4, 0 );
+
+	numEntries = sm.getRow( 1, &entry, &colIndex );
+	ASSERT( numEntries == 5, "check Row" );
+	ASSERT( entry[2] == 12, "check Row" );
+
+	numEntries = sm.getRow( 2, &entry, &colIndex );
+	ASSERT( numEntries == 0, "check Row" );
+
+	numEntries = sm.getRow( 3, &entry, &colIndex );
+	ASSERT( numEntries == 5, "check Row" );
+	ASSERT( entry[3] == 33, "check Row" );
+
+	numEntries = sm.getColumn( 0, e, ri );
+	ASSERT( numEntries == 2, "check Column" );
+	ASSERT( e[0] == 10, "check Column" );
+	ASSERT( e[1] == 30, "check Column" );
+
+	numEntries = sm.getColumn( 2, e, ri );
+	ASSERT( numEntries == 3, "check Column" );
+	ASSERT( e[0] == 2, "check Column" );
+	ASSERT( e[1] == 12, "check Column" );
+	ASSERT( e[2] == 32, "check Column" );
 
 	/*
 	vector< double > v( 5, 1.0 );
