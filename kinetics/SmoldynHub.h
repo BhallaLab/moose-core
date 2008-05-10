@@ -133,10 +133,10 @@ class SmoldynHub
 
 		static void rateTermFunc( const Conn* c,
 			vector< RateTerm* >* rates, 
-			SparseMatrix* N,
+			KinSparseMatrix* N,
 			bool useHalfReacs );
 		void localRateTermFunc( vector< RateTerm* >* rates,
-			SparseMatrix* N );
+			KinSparseMatrix* N );
 		static void rateSizeFunc( const Conn* c,
 			unsigned int nReac, unsigned int nEnz, 
 			unsigned int nMmEnz);
@@ -214,7 +214,7 @@ class SmoldynHub
 		vector< RateTerm* >* rates_;
 		vector< double >* S_;
 		vector< double >* Sinit_;
-		SparseMatrix* N_;
+		KinSparseMatrix* N_;
 		double dt_;	// Timestep used by Smoldyn
 
 		unsigned int seed_; // Random number seed used by Smoldyn

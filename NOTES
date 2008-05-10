@@ -6540,3 +6540,50 @@ ArrayElements
 	- Can we cascade downstream msgs from x2AllConn ? 
 		No, that is the job of solvers
 	- Look up Msgs or ConnTainers by index.
+
+Checked in as revision 474 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+8 May 2008
+What we would like:
+- The iterator should line up all the individual msgs as Erefs. They all 
+have the same src info, so that never changes. Additional dest info is just 
+index. 
+- The *2All msgs are also Erefs and index, use the wildcard info in the Eref.
+- The *2Many msgs should have the target EIs already lined up.
+
+class sendOne {
+	class Node {
+		Eref e;
+		index i;
+	};
+	Node src;
+	vector< Node > dest;
+	Some iterator for the target() and data() args.
+};
+
+Not so simple for AllConns: Either need another sendList or another
+phase of the send. Assume AllConns are rare so we can line up the allSends.
+class sendAll{
+	Node src;
+	Element* dest;
+	unsigned int numDest; // Will iterate through to numDest
+	unsigned int index; // starting index.
+}
+class sendMany {
+	Node src;
+	Element* dest;
+	vector< unsigned int > destIndex;
+	unsigned int index; // starting index.
+}
+
+
+==============================================================================
+9 May 2008
+
+Muddling along, making a SparseMatrix template but it isn't so good with
+the original Kinetic class implementation which was special purpose.
+I've set up to use the SparseMatrix in a new Many2Many class.
+Need to compile and run lots of unit tests before deploying.
+
+==============================================================================

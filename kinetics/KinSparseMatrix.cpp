@@ -16,13 +16,13 @@
 #include "../utility/utility.h" // isnan is undefined in VC++ and BC5, utility.h contains a workaround macro
 using namespace std;
 
-#include "SparseMatrix.h"
+#include "KinSparseMatrix.h"
 
 // Substantially bigger than possible using a full matrix.
-const unsigned int SparseMatrix::MAX_ROWS = 10000;
-const unsigned int SparseMatrix::MAX_COLUMNS = 10000;
+const unsigned int KinSparseMatrix::MAX_ROWS = 10000;
+const unsigned int KinSparseMatrix::MAX_COLUMNS = 10000;
 
-SparseMatrix::SparseMatrix()
+KinSparseMatrix::KinSparseMatrix()
 	: nrows_( 0 ), ncolumns_( 0 )
 {
 	N_.resize( 0 );
@@ -32,7 +32,7 @@ SparseMatrix::SparseMatrix()
 }
 
 
-ostream& operator <<( ostream& s, SparseMatrix& m )
+ostream& operator <<( ostream& s, KinSparseMatrix& m )
 {
 	for ( unsigned int i = 0; i < m.nrows_; i++) {
 		unsigned int start = m.rowStart_[i];
@@ -59,7 +59,7 @@ ostream& operator <<( ostream& s, SparseMatrix& m )
 	return s;
 }
 
-void SparseMatrix::setSize( unsigned int nrows, unsigned int ncolumns )
+void KinSparseMatrix::setSize( unsigned int nrows, unsigned int ncolumns )
 {
 	if ( nrows < MAX_ROWS && ncolumns < MAX_COLUMNS ) {
 		N_.resize( 0 );
@@ -70,7 +70,7 @@ void SparseMatrix::setSize( unsigned int nrows, unsigned int ncolumns )
 		colIndex_.resize( 0 );
 		colIndex_.reserve( 2 * nrows );
 	} else {
-		cout << "Error: SparseMatrix::setSize( " << 
+		cout << "Error: KinSparseMatrix::setSize( " << 
 			nrows << ", " << ncolumns << ") out of range: ( " <<
 			MAX_ROWS << ", " << MAX_COLUMNS << ")\n";
 	}
@@ -81,7 +81,7 @@ void SparseMatrix::setSize( unsigned int nrows, unsigned int ncolumns )
  * cases are when we add a new non-zero entry. If we were to use it to
  * exhaustively fill up all coords in the matrix it would be quite slow.
  */
-void SparseMatrix::set( 
+void KinSparseMatrix::set( 
 	unsigned int row, unsigned int column, int value )
 {
 	vector< unsigned int >::iterator i;
@@ -136,7 +136,7 @@ void SparseMatrix::set(
 	}
 }
 
-int SparseMatrix::get( unsigned int row, unsigned int column )
+int KinSparseMatrix::get( unsigned int row, unsigned int column )
 {
 	assert( row < nrows_ && column < ncolumns_ );
 	vector< unsigned int >::iterator i;
@@ -153,7 +153,7 @@ int SparseMatrix::get( unsigned int row, unsigned int column )
 	}
 }
 
-double SparseMatrix::computeRowRate( 
+double KinSparseMatrix::computeRowRate( 
 	unsigned int row, const vector< double >& v
 ) const
 {
@@ -178,13 +178,13 @@ double SparseMatrix::computeRowRate(
 #ifdef DO_UNIT_TESTS
 #include "header.h"
 
-void testSparseMatrix()
+void testKinSparseMatrix()
 {
-	cout << "\nTesting SparseMatrix" << flush;
+	cout << "\nTesting KinSparseMatrix" << flush;
 	const unsigned int NR = 4;
 	const unsigned int NC = 5;
 
-	SparseMatrix sm( NR, NC);
+	KinSparseMatrix sm( NR, NC);
 
 	for ( unsigned int i = 0; i < NR; i++ ) {
 		for ( unsigned int j = 0; j < NC; j++ ) {

@@ -8,14 +8,16 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-class SparseMatrix
+#ifndef _KIN_SPARSE_MATRIX_H
+#define _KIN_SPARSE_MATRIX_H
+class KinSparseMatrix
 {
-	friend ostream& operator <<( ostream& s, SparseMatrix& sm );
+	friend ostream& operator <<( ostream& s, KinSparseMatrix& sm );
 
 	public:
-		SparseMatrix();
+		KinSparseMatrix();
 
-		SparseMatrix( unsigned int nrows, unsigned int ncolumns )
+		KinSparseMatrix( unsigned int nrows, unsigned int ncolumns )
 		{
 			setSize( nrows, ncolumns );
 		}
@@ -41,7 +43,7 @@ class SparseMatrix
 	private:
 		unsigned int nrows_;
 		unsigned int ncolumns_;
-		vector< int > N_;	/// Non-zero entries in the SparseMatrix.
+		vector< int > N_;	/// Non-zero entries in the KinSparseMatrix.
 
 		/* 
 		 * Column index of each non-zero entry. 
@@ -54,3 +56,5 @@ class SparseMatrix
 		static const unsigned int MAX_ROWS;
 		static const unsigned int MAX_COLUMNS;
 };
+
+#endif // _KIN_SPARSE_MATRIX_H
