@@ -21,6 +21,14 @@ HEADERS = \
 
 default: $(TARGET)
 
+$(OBJ): $(HEADERS)
+
+ArgParser.o : ArgParser.h
+PathUtility.o : PathUtility.h
+StringUtil.o : StringUtil.h
+Property.o : Property.h
+SparseMatrix.o : SparseMatrix.h
+
 .cpp.o:
 	$(CXX) $(CFLAGS)  $< -c
 
