@@ -13,7 +13,7 @@
 #include "moose.h"
 #include "../element/Wildcard.h"
 #include "RateTerm.h"
-#include "SparseMatrix.h"
+#include "KinSparseMatrix.h"
 #include "Stoich.h"
 
 #ifdef USE_GSL
@@ -27,7 +27,7 @@ const Cinfo* initStoichCinfo()
 	static Finfo* hubShared[] =
 	{
 		new SrcFinfo( "rateTermInfoSrc", 
-			Ftype3< vector< RateTerm* >*, SparseMatrix*, bool >::global()
+			Ftype3< vector< RateTerm* >*, KinSparseMatrix*, bool >::global()
 		),
 		new SrcFinfo( "rateSizeSrc", 
 			Ftype3< unsigned int, unsigned int, unsigned int >::
@@ -462,7 +462,7 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 	setupMols( stoich, varMolVec, bufVec, sumTotVec );
 	N_.setSize( nMols_, numRates );
 	v_.resize( numRates, 0.0 );
-	send3< vector< RateTerm* >*, SparseMatrix*, bool >( 
+	send3< vector< RateTerm* >*, KinSparseMatrix*, bool >( 
 		stoich, rateTermInfoSlot, &rates_, &N_, useOneWayReacs_ );
 	int nReac = 0;
 	int nEnz = 0;

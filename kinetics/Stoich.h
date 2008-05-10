@@ -156,7 +156,7 @@ class Stoich
 		vector< double > v_;	
 		vector< RateTerm* > rates_; 
 		vector< SumTotal > sumTotals_;
-		SparseMatrix N_; 
+		KinSparseMatrix N_; 
 		vector< int > path2mol_;
 		vector< int > mol2path_;
 		map< Eref, unsigned int > molMap_;
