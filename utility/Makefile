@@ -21,7 +21,7 @@ HEADERS = \
 
 default: $(TARGET)
 
-$(OBJ): $(HEADERS)
+#$(OBJ): $(HEADERS)
 
 ArgParser.o : ArgParser.h
 PathUtility.o : PathUtility.h
