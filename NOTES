@@ -6592,5 +6592,8 @@ Implemented SparseMatrix template, including unit tests.
 Shifted old one to KinSparseMatrix. Later to merge.
 
 Added getColumn to SparseMatrix. Did more extensive unit tests.
+Checked in as revision 476 with unit test flags on, Smoldyn off, -g, GSL
+
+Now trying to implement Many2Many. Lots of compiler fun. Compiled. Yet to test.
 
 ==============================================================================
