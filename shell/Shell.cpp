@@ -1357,7 +1357,7 @@ void Shell::copy( const Conn* c,
 	}
 }
 
-void Shell::copyIntoArray( const Conn* c, 
+void Shell::copyIntoArray1( const Conn* c, 
 				Id src, Id parent, string name, vector <double> parameter )
 {
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
@@ -1379,22 +1379,20 @@ void Shell::copyIntoArray( const Conn* c,
  * elements
 */
 
-void Shell::copyIntoArray1( const Conn* c, 
+void Shell::copyIntoArray( const Conn* c, 
 				Id src, Id parent, string name, vector <double> parameter )
 {
-	/*
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 	int n = (int) (parameter[0]*parameter[1]);
 	Element* e = src()->copyIntoArray( parent(), name, n );
 	//assign the other parameters to the arrayelement
 	assert(parameter.size() == 6);
-	ArrayElement* f = static_cast <ArrayElement *> (e);
-	f->setNoOfElements((int)(parameter[0]), (int)(parameter[1]));
-	f->setDistances(parameter[2], parameter[3]);
-	f->setOrigin(parameter[4], parameter[5]);
+// 	ArrayElement* f = static_cast <ArrayElement *> (e);
+// 	f->setNoOfElements((int)(parameter[0]), (int)(parameter[1]));
+// 	f->setDistances(parameter[2], parameter[3]);
+// 	f->setOrigin(parameter[4], parameter[5]);
 	if ( e )  // Send back the id of the new element base
-		sendBack1< Id >( c->targetElement(), createSlot, c, e->id() );
-*/
+		sendBack1< Id >( c, createSlot, e->id() );
 }
 
 // Static placeholder.
