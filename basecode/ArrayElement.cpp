@@ -44,6 +44,19 @@ ArrayElement::ArrayElement(
 		;
 }
 
+ArrayElement::ArrayElement( const std::string& name, 
+			const vector< Msg >& msg, 
+			const map< int, vector< ConnTainer* > >& dest,
+			const vector< Finfo* >& finfo, 
+			void *data, 
+			int numEntries, 
+			size_t objectSize
+		): Element (Id::scratchId()), name_(name), msg_(msg), dest_(dest), 
+			finfo_(finfo), data_(data), numEntries_(numEntries), objectSize_(objectSize)
+		{
+		;
+		}
+
 /**
  * Copies a ArrayElement. Does NOT copy data or messages.
  */

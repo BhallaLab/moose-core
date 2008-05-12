@@ -2799,12 +2799,6 @@ void do_xps ( int argc, const char** const argv, Id s ){
 }
 
 void do_createmap(int argc, const char** const argv, Id s){
-//#define DEBUG
-	//createmap source dest 
-	//	Nx Ny 
-	//	-delta dx dy 
-	//	-origin x y
-	//	-object
 	
 	const char* source, *dest;
 	int Nx, Ny;
@@ -2812,8 +2806,6 @@ void do_createmap(int argc, const char** const argv, Id s){
 	double xorigin, yorigin;
 	bool object = false;
 	vector <double> parameter;
-	
-	//if (argc != 11 && argc != 12) {/*error*/;}
 	
 	if ( argc < 5 ) {
 		cout << "Usage: " << argv[0] << " source dest Nx Ny -delta dx dy -origin x y\n";
@@ -2827,12 +2819,17 @@ void do_createmap(int argc, const char** const argv, Id s){
 	
 	for(int i = 0; i < argc; i++){
 		if (strcmp(argv[i], "-delta") == 0){
-		if (i+2 >= argc) {/*error*/}
+		if (i+2 >= argc) {
+			cout << "Parser:: -delta option requires two arguments..Ignoring it" << endl;
+			continue;
+		}
 		dx = atof(argv[i+1]);
 		dy = atof(argv[i+2]);
 		}	
 		else if (strcmp(argv[i], "-origin") == 0){
-			if (i+2 >= argc) {/*error*/}
+			if (i+2 >= argc) {
+				cout << "Parser:: -origin option requires two arguments...Ignoring it." << endl;
+			}
 			xorigin = atof(argv[i+1]);
 			yorigin = atof(argv[i+2]);
 		}
@@ -2841,14 +2838,6 @@ void do_createmap(int argc, const char** const argv, Id s){
 		}
 	}
 	
-#ifdef DEBUG
-	cout << source << endl;
-	cout << dest << endl;
-	cout << Nx << " " << Ny << endl;
-	cout << dx << " " << dy << endl;
-	cout << xorigin << " " << yorigin << endl;
-	cout << object << endl;
-#endif //DEBUG
 	parameter.push_back(Nx);
 	parameter.push_back(Ny);
 	parameter.push_back(dx);
@@ -2860,7 +2849,6 @@ void do_createmap(int argc, const char** const argv, Id s){
 	Id pa(parent);
 	if ( pa.bad()){
 		string headpath = Shell::head( dest, "/" );
-		//cout << "'" << headpath << "'" << endl;
 		Id head(headpath);
 		if (head.bad()){
 			cout << "'" << headpath  << "'" << " is not defined."  << dest << "." << endl;
@@ -2915,8 +2903,6 @@ void do_createmap(int argc, const char** const argv, Id s){
 				copyIntoArraySlot, e, pa, name, parameter );
 		}
 	}
-	//src = src_list[0];
-	//dst = dst_list[0];
 	
 	
 }
