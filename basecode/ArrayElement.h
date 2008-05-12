@@ -43,6 +43,16 @@ class ArrayElement: public Element
 		 * The messages are still more complicated and are done
 		 * in other stages of the Copy command.
 		 */
+		 
+		ArrayElement( const std::string& name, 
+			const vector< Msg >& msg, 
+			const map< int, vector< ConnTainer* > >& dest,
+			const vector< Finfo* >& finfo, 
+			void *data, 
+			int numEntries, 
+			size_t objectSize
+		);
+		
 		ArrayElement( const ArrayElement* orig );
 
 		/// This cleans up the data_ and finfo_ if needed.
@@ -123,6 +133,13 @@ class ArrayElement: public Element
 		 * Returns data contents of ArrayElement
 		 */
 		void* data( unsigned int eIndex ) const {
+			if (eIndex >= numEntries_){
+				cout << "ArrayElement: Bad Index...Prepare to crash" << endl;
+				return 0;
+			}
+// 			if (eIndex > 0){
+// 				cout << (void *)((char *)data_ + eIndex*objectSize_) << "###" << eIndex * objectSize_ << " "<< objectSize_ << endl;
+// 			}
 			return (void *)((char *)data_ + eIndex*objectSize_);
 		}
 

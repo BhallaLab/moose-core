@@ -134,6 +134,10 @@ class Cinfo
 			unsigned int numFinfos() const {
 				return finfos_.size();
 			}
+			
+			size_t size() const{
+				return ftype_->size();
+			}
 
 		private:
 			const std::string name_;
