@@ -75,17 +75,11 @@ Element* SimpleElement::innerCopy() const
 
 Element* SimpleElement::innerCopy(int n) const
 {	
-	return 0;
-	/*
 	assert( finfo_.size() > 0 );
 	assert( dynamic_cast< ThisFinfo* >( finfo_[0] ) != 0 );
-	// void *data = finfo_[0]->ftype()->copyIntoArray( data_, 1, n );
-	ArrayElement* ret = new ArrayElement( name_, src_, dest_, conn_, finfo_, data, n, 0 );
-	//cout <<  "IDS "<< ret->id() << " " << id() << endl;
-	//cout << (ret->id())()->id() << endl;
-	//ret->CopyFinfosSimpleToArray(this);
+	void *data = finfo_[0]->ftype()->copyIntoArray( data_, 1, n );
+	ArrayElement* ret = new ArrayElement( name_, msg_, dest_, finfo_, data, n, cinfo()->size());
 	return ret;
-	*/
 }
 
 
@@ -114,7 +108,6 @@ Element* SimpleElement::innerDeepCopy(
 
 	if ( isGlobal() && tree.size() >= 0 ) {
 		Element* cme = const_cast< SimpleElement* >( this );
-		// RDWORRY: What about the ArrayElement*?
 		tree[ this ] = cme;
 		return cme;
 	}
@@ -145,31 +138,38 @@ Element* SimpleElement::innerDeepCopy(
 Element* SimpleElement::innerDeepCopy(
 	map< const Element*, Element* >& tree, int n ) const
 {
-	return 0;
-/*
+	static unsigned int childSrcMsg = 
+		initNeutralCinfo()->getSlot( "childSrc" ).msg();
+
+	assert ( childSrcMsg == 0 );
+
 	if ( isGlobal() && tree.size() >= 0 ) {
 		Element* cme = const_cast< SimpleElement* >( this );
-		// RDWORRY: What about the ArrayElement*?
 		tree[ this ] = cme;
 		return cme;
 	}
 
 	Element* duplicate = innerCopy(n);
 	tree[ this ] = duplicate;
-	
-	// The 0 slot in the MsgSrc array is for child elements.
-	vector< Conn >::const_iterator i;
-	vector< Conn >::const_iterator begin = connSrcBegin( 0 );
-	vector< Conn >::const_iterator end = connSrcVeryEnd( 0 );
-	for ( i = begin; i != end; i++ ) {
-		// Watch out for loops.
-		if ( tree.find( i->targetElement() ) != tree.end() )
-			cout << "Warning: SimpleElement::innerDeepCopy: Loop in element tree at " << i->targetElement()->name() << endl;
+
+	const Msg* childMsg = msg( childSrcMsg );
+	assert( childMsg != 0 );
+	if ( childMsg->size() > 0 )
+		assert( childMsg->isDest() == 0 );
+
+	/**
+	 * Note that we iterate through ConnTainers here. Each unique child,
+	 * whether simple or array, is stored in an individual ConnTainer.
+	 */
+	vector< ConnTainer* >::const_iterator i;
+	for ( i = childMsg->begin(); i != childMsg->end(); i++ ) {
+		Element* tgt = ( *i )->e2();
+		if ( tree.find( tgt ) != tree.end() )
+			cout << "Warning: SimpleElement::innerDeepCopy: Loop in element tree at " << tgt->name() << endl;
 		else 
-			i->targetElement()->innerDeepCopy( tree, n );
+			tgt->innerDeepCopy( tree, n );
 	}
 	return duplicate;
-	*/
 }
 
 /**
@@ -298,8 +298,7 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 Element* SimpleElement::copyIntoArray( Element* parent, const string& newName, int n )
 		const
 {
-	return 0;
-/*
+
 	static const Element* library = Id( "/library" )();
 	static const Element* proto = Id( "/proto" )();
 
@@ -320,49 +319,51 @@ Element* SimpleElement::copyIntoArray( Element* parent, const string& newName, i
 		cout << "Warning: SimpleElement::copy: pre-existing child with target name: " << parent->name() << "/" << nm << endl;
 		return 0;
 	}
-
+	
+	// Phase 1. Copy Elements, but not building up parent-child info.
 	// First is original, second is copy
-	map< const Element*, Element* > tree;
+	// However, if it was a Global, both original and second are the same.
+	map< const Element*, Element* > origDup;
 	map< const Element*, Element* >::iterator i;
+
 	vector< pair< Element*, unsigned int > > delConns;
 
-	Element* child = innerDeepCopy( tree, n );
+	Element* child = innerDeepCopy( origDup, n );
 	child->setName( nm );
 
-	// First pass: Replace copy pointers so that the dup is set up right
-	for ( i = tree.begin(); i != tree.end(); i++ ) {
+	// Phase 2. Copy over messages that are within the tree.
+	// Here we need only copy from message sources.
+	for ( i = origDup.begin(); i != origDup.end(); i++ ) {
 		if ( i->first != i->second ) {
-			i->second->replaceCopyPointers( tree, delConns );
+			i->first->copyMessages( i->second, origDup );
 		}
 	}
 
-	// Second pass: Delete any outgoing messages or messages to globals
-	vector< pair< Element*, unsigned int > >::iterator j;
-	for ( j = delConns.begin(); j != delConns.end(); j++ )
-		j->first->deleteHalfConn( j->second );
 	
-	// Third pass: Copy over messages to any global elements.
-	for ( i = tree.begin(); i != tree.end(); i++ ) {
-		if ( i->first == i->second ) { // a global
-			i->second->copyMsg( tree );
-		}
-	}
+	// Phase 3 : Copy over messages to any global elements that were
+	// not on the original tree.
+	// Still to fill in.
 	
-	// Fourth pass: stick the copied tree onto the parent Element.
-	ret = parent->findFinfo( "childSrc" )->add(parent, child, child->findFinfo( "child" ) );
+	// Phase 4: stick the copied tree onto the parent Element.
+	ret = Eref( parent ).add( "childSrc", child, "child", 
+		ConnTainer::One2All );
+	
+	/*ret = parent->findFinfo( "childSrc" )->add(
+					parent, child, child->findFinfo( "child" ) );*/
 	assert( ret );
 
-	// Fifth pass: Schedule all the objects
+	// Phase 5: Schedule all the objects
 	if ( !( 
 		parent->isDescendant( library ) || parent->isDescendant( proto )
 		) ) {
-		for ( i = tree.begin(); i != tree.end(); i++ ) {
+		for ( i = origDup.begin(); i != origDup.end(); i++ ) {
 			if ( i->first != i->second ) // a global
 				i->second->cinfo()->schedule( i->second );
 		}
 	}
+
 	return child;
-*/
+
 }
 
 #ifdef DO_UNIT_TESTS
@@ -376,21 +377,23 @@ class CopyTestClass
 		CopyTestClass()
 			: i_( 0 ), x_( 0.0), s_( "" )
 		{;}
-
-		static int getI( const Element* e ) {
-			return static_cast< CopyTestClass *>( e->data( 0 ) )->i_;
+		
+		virtual ~CopyTestClass(){;}
+		
+		static int getI( Eref e ) {
+			return static_cast< CopyTestClass *>( e.data(  ) )->i_;
 		}
 		static void setI( const Conn* c, int val ) {
 			static_cast< CopyTestClass *>( c->data( ) )->i_ = val;
 		}
-		static double getX( const Element* e ) {
-			return static_cast< CopyTestClass *>( e->data( 0 ) )->x_;
+		static double getX( Eref e ) {
+			return static_cast< CopyTestClass *>( e.data(  ) )->x_;
 		}
 		static void setX( const Conn* c, double val ) {
 			static_cast< CopyTestClass *>( c->data( ) )->x_ = val;
 		}
-		static string getS( const Element* e ) {
-			return static_cast< CopyTestClass *>( e->data( 0 ) )->s_;
+		static string getS( Eref e ) {
+			return static_cast< CopyTestClass *>( e.data(  ) )->s_;
 		}
 		static void setS( const Conn* c, string val ) {
 			static_cast< CopyTestClass *>( c->data( ) )->s_ = val;
@@ -528,7 +531,7 @@ void copyTest()
 	set< double >( outsider, "x", 0.0 );
 	set< string >( outsider, "s", "0.0" );
 	ASSERT( outsider != 0, "creating CopyClass" );
-
+	
 	Element* c0 = Neutral::create( "CopyClass", "c0", n, Id::scratchId() );
 	set< int >( c0, "i", 10 );
 	set< double >( c0, "x", 10.0 );
@@ -647,7 +650,31 @@ void copyTest()
 	ASSERT( kids[2] == c1->id() , "copy kids" );
 
 	// set( c10, "destroy" );
-
+	
+// 	create Neutral m 
+// 	create CopyClass m/c_simple
+// 	createmap m/c_s
+	
+	Element* m = Neutral::create( "Neutral", "m", Element::root(), Id::scratchId() );
+	Element *c_simple = Neutral::create( "CopyClass", "c_simple", m, Id::scratchId() );
+	ret = set <double> (c_simple, "x", 100);
+	ASSERT(ret, "set value to compartment");
+	Element *c_array = c_simple->copyIntoArray(m, "c_array", 4);
+	ASSERT(c_array->numEntries() == 4, "number of entries")
+	ASSERT(c_array != 0, "simple element copied into array element")
+	Eref eref = Eref(c_array, 2);
+	double x;
+	get <double> (eref, "x", x);
+	ASSERT(x == 100, "checking initial value of index element");
+	set <double> (eref, "x", 200);
+	get <double> (eref, "x", x);
+	ASSERT(x == 200, "checking index element");
+	eref = Eref(c_array, 1);
+	get <double> (eref, "x", x);
+	get <double> (c_simple, "x", x);
+	ASSERT(x == 100, "checking other index element")
+	
+	set( m, "destroy" );
 	set( n, "destroy" );
 }
 

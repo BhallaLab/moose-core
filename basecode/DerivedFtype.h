@@ -257,7 +257,7 @@ template < class T > class Ftype1: public Ftype
 			void* copyIntoArray( const void* orig, const unsigned int num, unsigned int numCopies ) const
 			{
 				if ( num > 1 ) {
-					//not done
+					//not done....num*numCopies
 					T* ret = new T[ num ];
 					const T* optr = static_cast< const T* >( orig );
 					for ( unsigned int i = 0; i < num; i++ )
@@ -265,18 +265,23 @@ template < class T > class Ftype1: public Ftype
 					return ret;
 				} else {
 					T* ret = new T[ numCopies ];
-					for ( unsigned int i = 0; i < numCopies; i++ )
+					for ( unsigned int i = 0; i < numCopies; i++ ){
 						ret[ i ] = *( new T( *static_cast< const T* >( orig ) ) );
+					}
 					return ret;
 				}
 			}
-
+			
 			void destroy( void* data, bool isArray ) const
 			{
-				if ( isArray )
-					delete[] static_cast< T* >( data );
-				else
-					delete static_cast< T* >( data );
+				if ( isArray ){
+					T* del = static_cast< T* >( data );
+					delete[] del;
+				}
+				else{
+					T* del = static_cast< T* >( data );
+					delete del;
+				}
 			}
 
 			virtual bool get( Eref, const Finfo* f, T& v )
