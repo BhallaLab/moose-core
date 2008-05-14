@@ -74,9 +74,21 @@ class ConnTainer
  		*/
 		virtual ConnTainer* copy( Element* e1, Element* e2 ) const = 0;
 
+		/**
+		 * Returns the identifying integer for the ConnTainer type.
+		 */
+		virtual unsigned int option() const = 0;
+
+		/**
+		 * Add a new connection to the ConnTainer. Returns true on success
+		 */
+		virtual bool addToConnTainer( unsigned int srcIndex, 
+			unsigned int destIndex ) = 0;
+
 		static const unsigned int Default;
-		static const unsigned int One2All;
 		static const unsigned int Simple;
+		static const unsigned int One2All;
+		static const unsigned int Many2Many;
 		
 	private:
 		Element* e1_; // Pointer to element 1
