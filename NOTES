@@ -6595,5 +6595,42 @@ Added getColumn to SparseMatrix. Did more extensive unit tests.
 Checked in as revision 476 with unit test flags on, Smoldyn off, -g, GSL
 
 Now trying to implement Many2Many. Lots of compiler fun. Compiled. Yet to test.
+Checked in as revision 477 with unit test flags on, Smoldyn off, -g, GSL
+
+- Unit tests with explicit assignment of Many2Many
+- Getting at ConnTainer.
+- Incremental assignment
+- Getting at msg indices.
 
 ==============================================================================
+11 May 2008
+Did an analysis using pen and paper, of lookup patterns for the most common 
+array message category: synaptic projections. In this case the dest index
+is essential. 
+Result is that the sparse matrix should indeed store the index in its contents.
+I assume that the lookup process produces an array of non-zero entries and
+their indices. The matrix column indices are simply the target element indices.
+There is a bit of an issue in the current implementation where a zero is taken
+as a null connection. Need to fix this.
+Also the current implementation is expensive for inserts because it has a
+single big vector. A set of individual vectors might be faster but a bit
+more expensive.
+
+Fixed the zero==null situation with setting up the matrix. Added to unit tests.
+
+==============================================================================
+12 May 2008
+Cleaning up unit tests for ArrayElement. I've now put in a separate local
+test class, will be useful soon for also doing message index tests.
+Currently stuck with the Many2Many messaging. It clears the first set of 
+tests with SimpleConns.
+
+==============================================================================
+13 May 2008
+Got the Many2Many messaging to work, but so far it does one such ConnTainer
+for each message in a set rather than putting them all in a single ConnTainer.
+Now to try that.
+
+==============================================================================
+14 May 2008
+Did some setup work for reusing Many2Many, but now long overdue to check in.

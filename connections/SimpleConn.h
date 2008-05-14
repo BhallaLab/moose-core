@@ -61,6 +61,16 @@ class SimpleConnTainer: public ConnTainer
  		 * Returns the new ConnTainer on success, otherwise 0.
  		*/
 		ConnTainer* copy( Element* e1, Element* e2 ) const;
+
+		unsigned int option() const {
+			return Simple;
+		}
+
+		bool addToConnTainer( 
+			unsigned int srcIndex, unsigned int destIndex )
+		{
+			return 0;
+		}
 		
 	private:
 		unsigned int eI1_;
