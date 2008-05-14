@@ -17,16 +17,20 @@ Many2ManyConnTainer::Many2ManyConnTainer( Eref e1, Eref e2,
 			int msg1, int msg2,
 			unsigned int i1, unsigned int i2 )
 			: 
-	ConnTainer( e1.e, e2.e, msg1, msg2 ), i1_( i1 )
-{;}
+	ConnTainer( e1.e, e2.e, msg1, msg2 ), 
+	entries_( e1.e->numEntries(), e2.e->numEntries() ),
+	i1_( i1 )
+{
+	entries_.set( e1.i, e2.i, i2 );
+}
 
 Conn* Many2ManyConnTainer::conn( unsigned int eIndex, bool isReverse ) const
 {
 	//	numIter_++; // For reference counting. Do we need it?
 	if ( isReverse )
-		return new ReverseMany2ManyConn( this, 0 );
+		return new ReverseMany2ManyConn( this, eIndex );
 	else
-		return new Many2ManyConn( this, 0 );
+		return new Many2ManyConn( this, eIndex );
 }
 
 Conn* Many2ManyConnTainer::conn( unsigned int eIndex, bool isReverse,
@@ -58,6 +62,17 @@ ConnTainer* Many2ManyConnTainer::copy( Element* e1, Element* e2 ) const
 		new Many2ManyConnTainer( e1, e2, msg1(), msg2(), i1_, 0 );
 	ret->entries_ = entries_;
 	return ret;
+}
+
+
+/**
+ * Traverse through all messages to find one that matches
+ * Check connTainer type.
+ * Add it.
+ */
+bool addToConnTainer( unsigned int srcI, unsigned int destI )
+{
+	
 }
 
 unsigned int Many2ManyConnTainer::getRow( unsigned int i, 

@@ -57,9 +57,33 @@ class Many2ManyConnTainer: public ConnTainer
  		*/
 		ConnTainer* copy( Element* e1, Element* e2 ) const;
 
-		unsigned int getRow( unsigned int i, 
+		unsigned int option() const {
+			return Many2Many;
+		}
+
+		bool addToConnTainer( 
+			unsigned int srcIndex, unsigned int destIndex );
+
+		///////////////////////////////////////////////////////////
+		// class-specific functions
+		///////////////////////////////////////////////////////////
+		/**
+		 * Passes back row of entries as a pointer. Returns the number of 
+		 * entries in the row. Also passes back the
+		 * corresponding eIndex of the targets. All are of course on 
+		 * the target ArrayElement.
+		 * This is a fast operation and just returns a pointer into
+		 * existing internal data structures.
+		 */
+		unsigned int getRow( unsigned int rowNum, 
 			const unsigned int** index, const unsigned int** eIndex ) const;
 
+		/**
+		 * Passes back a column of entries and their eIndices in the
+		 * provided vectors. This is a slow operation and has to munge
+		 * through the entire sparse matrix to build up the vectors.
+		 * Returns number of entries.
+		 */
 		unsigned int getColumn( unsigned int i, 
 			vector< unsigned int >& index,
 			vector< unsigned int >& eIndex ) const;

@@ -34,6 +34,14 @@ void testSparseMatrix()
 			ASSERT( ret == static_cast< int >( 10 * i + j ), "set/get" );
 		}
 	}
+
+	// Initially all entries are filled. Check this.
+	ASSERT( sm.nEntries() == NR * NC, "Check initial fill" );
+
+	// Now zap the 0,0 entry.
+	sm.unset( 0 , 0 );
+	ASSERT( sm.nEntries() == NR * NC - 1, "Check unset" );
+
 	// cout << sm;
 	//
 	// vector< int >::const_iterator entry;
@@ -66,11 +74,11 @@ void testSparseMatrix()
 		}
 	}
 
-	sm.set( 2, 0, 0 );
-	sm.set( 2, 1, 0 );
-	sm.set( 2, 2, 0 );
-	sm.set( 2, 3, 0 );
-	sm.set( 2, 4, 0 );
+	sm.unset( 2, 0 );
+	sm.unset( 2, 1 );
+	sm.unset( 2, 2 );
+	sm.unset( 2, 3 );
+	sm.unset( 2, 4 );
 
 	numEntries = sm.getRow( 1, &entry, &colIndex );
 	ASSERT( numEntries == 5, "check Row" );

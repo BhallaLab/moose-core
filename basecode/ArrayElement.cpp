@@ -499,16 +499,88 @@ Id ArrayElement::id() const {
 }
 
 #ifdef DO_UNIT_TESTS
-#include "../biophysics/Compartment.h"
-void arrayElementTest()
+
+/**
+ * Here we define a test class that sends 'output' to 'input' at
+ * 'process'.
+ * It does not do any numerics at all.
+ */
+
+Slot outputSlot;
+
+class Atest {
+	public: 
+		static void setInput( const Conn* c, double value ) {
+			static_cast< Atest* >( c->data() )->input_ = value;
+		}
+		static double getInput( Eref e ) {
+			return static_cast< Atest* >( e.data() )->input_;
+		}
+		static void setOutput( const Conn* c, double value ) {
+			static_cast< Atest* >( c->data() )->output_ = value;
+		}
+		static double getOutput( Eref e ) {
+			return static_cast< Atest* >( e.data() )->output_;
+		}
+		static void process( Eref e ) {
+			send1< double >( e, outputSlot, getOutput( e ) );
+		}
+	private:
+		double input_;
+		double output_;
+};
+
+const Cinfo* initAtestCinfo()
 {
-	static const unsigned int NUMKIDS = 12;
-	cout << "\nTesting Array Elements";
-	Element* n = Neutral::create( "Neutral", "n", Element::root(), Id::scratchId() ); 
+	static Finfo* aTestFinfos[] = 
+	{
+		new ValueFinfo( "input", ValueFtype1< double >::global(),
+			GFCAST( &Atest::getInput ),
+			RFCAST( &Atest::setInput )
+		),
+	
+		new ValueFinfo( "output", ValueFtype1< double >::global(),
+			GFCAST( &Atest::getOutput ),
+			RFCAST( &Atest::setOutput )
+		),
+		new SrcFinfo( "outputSrc", Ftype1< double >::global() ),
+		new DestFinfo( "msgInput", Ftype1< double >::global(),
+			RFCAST( &Atest::setInput )
+		),
+	};
+
+	static Cinfo aTest( "Atest", "Upi", "Array Test class",
+		initNeutralCinfo(),
+		aTestFinfos,
+		sizeof( aTestFinfos ) / sizeof( Finfo* ),
+		ValueFtype1< Atest >::global()
+	);
+
+	return &aTest;
+}
+
+/**
+ * This tests message passing within an ArrayElement, from one entry
+ * to the next. One can force the connOption to a specific value,
+ * which works for Simple and Many2Many. Should also work for
+ * One2Many and Many2One.
+ */
+static const unsigned int NUMKIDS = 12;
+Element* arrayElementInternalTest( unsigned int connOption )
+{
+	cout << "\nTesting Array Elements, option= " << connOption << ": ";
+
+	const Cinfo* aTestCinfo = initAtestCinfo();
+
+	FuncVec::sortFuncVec();
+	outputSlot = aTestCinfo->getSlot( "outputSrc" );
+
+	Element* n = Neutral::create( "Neutral", "n", 
+		Element::root(), Id::scratchId() ); 
 
 	Id childId = Id::scratchId();
 	Element* child = 
-		Neutral::createArray( "Compartment", "foo", n, childId, NUMKIDS );
+		Neutral::createArray( "Atest", "foo", n, childId, NUMKIDS );
 
 	ASSERT( child != 0, "Array Element" );
 	ASSERT( child == childId(), "Array Element" );
@@ -524,40 +596,75 @@ void arrayElementTest()
 		int index;
 		bool ret = get< int >( kids[i].eref(), "index", index );
 		ASSERT( ret && index == static_cast< int >( i ), "Array kids" );
-		double Vm = i;
-		bool sret = set< double >( kids[i].eref(), "Vm", Vm );
+		double output = i;
+		bool sret = set< double >( kids[i].eref(), "output", output );
+		output = 0.0;
 		ASSERT( sret, "Array kids" );
-		sret = set< double >( kids[i].eref(), "Im", 0.0 );
+		sret = set< double >( kids[i].eref(), "input", 0.0 );
+		ret = get< double >( kids[i].eref(), "output", output );
+		ASSERT( sret && ret && ( output == i ), "Array kid assignment" );
 	}
 
 	for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+		if ( i > 0 ) {
+			ret = kids[i-1].eref().add( "outputSrc",
+				kids[i].eref(), "msgInput", connOption );
+			ASSERT( ret, "Array msg setup" );
+		}
+	}
+	for ( unsigned int i = 0 ; i < NUMKIDS - 1; i++ ) {
+		double output = i * i + 1.0;
+		bool ret = set< double >( kids[i].eref(), "output", output );
+		Atest::process( kids[i].eref() );
+		if ( i > 0 ) {
+			double input = 0.0;
+			double result = ( i - 1 ) * ( i - 1 ) + 1.0;
+			ret = get< double >( kids[i].eref(), "input", input );
+			ASSERT( ret && ( input == result ), "Array kid messaging" );
+		}
+	}
+	return n;
+}
+
+void arrayElementTest()
+{
+	Element* n = arrayElementInternalTest( ConnTainer::Simple ); 
+	set( n, "destroy" );
+	n = arrayElementInternalTest( ConnTainer::Many2Many ); 
+
+	Element* m = Neutral::create( "Neutral", "m", Element::root(), Id::scratchId() ); 
+	Id destId = Id::scratchId();
+	Element* dest = 
+		Neutral::createArray( "Atest", "dest", m, destId, NUMKIDS );
+
+	ASSERT( dest != 0, "Array Element" );
+	ASSERT( dest == destId(), "Array Element" );
+	ASSERT( destId.index() == 0, "Array Element" );
+	ASSERT( dest->id().index() == Id::AnyIndex, "Array Element" );
+
+	vector< Id > destKids;
+	bool ret = get< vector< Id > >( m, "childList", destKids );
+	ASSERT( ret, "Array kids" );
+	ASSERT( destKids.size() == NUMKIDS, "Array kids" );
+
+	// ret = childId.eref().add( "axial", destId.eref(), "raxial" );
+	ASSERT( ret, "Array Many2Many msgs" );
+
+	for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+		for ( unsigned int j = 0 ; j < NUMKIDS; j++ ) {
+			if ( i + j == NUMKIDS || i - j == NUMKIDS ) 
+				continue;
+		/*
 		double Vm = 0;
 		bool ret = get< double >( kids[i].eref(), "Vm", Vm );
 		ASSERT( ret && Vm == i, "Array kids" );
-
-		if ( i > 0 ) {
-			ret = kids[i-1].eref().add( "axial", kids[i].eref(), "raxial" );
-			ASSERT( ret, "Array simple msgs" );
+		*/
+			// ret = kids[i].eref().add( "axial", destKids[j].eref(), "raxial" );
+			ASSERT( ret, "Array Many2Many msgs" );
 		}
-	}
-	ProcInfoBase proc;
-	for ( unsigned int i = 0 ; i < NUMKIDS - 1; i++ ) {
-		// bool ret = set< ProcInfo >( kids[i].eref(), "init", &proc );
-		SetConn temp( kids[i].eref() );
-		Compartment::initFunc ( &temp, &proc );
-		ASSERT( ret, "Array simple msgs and proc" );
-	}
-	// Current flow is balanced at all points except the ends.
-	// Since Ra is 1 and DeltaVm = 1, the end compts will have an Im of +-1
-	for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
-		double Im;
-		double pred = -1.0;
-		bool ret = get< double >( kids[i].eref(), "Im", Im );
-		if ( i == 0 )
-			pred = 0.0;
-		ASSERT( ret && Im == pred, "Array simple msgs and proc" );
 	}
 
 	set( n, "destroy" );
+	set( m, "destroy" );
 }
 #endif
