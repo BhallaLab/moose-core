@@ -17,8 +17,7 @@
  * it can extract entire rows efficiently, for marching through a 
  * specified row for a matrix multiplication or for traversing messages.
  *
- * Requires that type T have an equality operator == and that this can
- * be compared with zero to decide if an entry should vanish.
+ * Requires that type T have an equality operator ==
  */
 
 extern const unsigned int SM_MAX_ROWS;
@@ -64,9 +63,8 @@ template < class T > class SparseMatrix
 		}
 
 		/**
-		 * Assigns and if necessary adds an entry in the matrix. If the
-		 * value is equal to zero any existing entry is removed. Note that
-		 * this requires that type T provide a bool operator== 0
+		 * Assigns and if necessary adds an entry in the matrix. 
+		 * This variant does NOT remove any existing entry.
 		 */
 		void set( unsigned int row, unsigned int column, T value )
 		{
@@ -77,8 +75,6 @@ template < class T > class SparseMatrix
 				colIndex_.begin() + rowStart_[ row + 1 ];
 		
 			if ( begin == end ) { // Entire row was empty.
-				if ( value == 0 ) // Don't need to change an already zero entry
-					return;
 				unsigned long offset = begin - colIndex_.begin();
 				colIndex_.insert( colIndex_.begin() + offset, column );
 				N_.insert( N_.begin() + offset, value );
@@ -88,8 +84,6 @@ template < class T > class SparseMatrix
 			}
 		
 			if ( column > *( end - 1 ) ) { // add entry at end of row.
-				if ( value == 0 )
-					return;
 				unsigned long offset = end - colIndex_.begin();
 				colIndex_.insert( colIndex_.begin() + offset, column );
 				N_.insert( N_.begin() + offset, value );
@@ -99,24 +93,46 @@ template < class T > class SparseMatrix
 			}
 			for ( i = begin; i != end; i++ ) {
 				if ( *i == column ) { // Found desired entry. By defn it is nonzero.
-					if ( ! (value == 0 ) ) // Assign value
-						N_[ i - colIndex_.begin()] = value;
-					else { // Clear out value and entry.
-						unsigned long offset = i - colIndex_.begin();
-						colIndex_.erase( i );
-						N_.erase( N_.begin() + offset );
-						for ( unsigned int j = row + 1; j <= nrows_; j++ )
-							rowStart_[ j ]--;
-					}
+					N_[ i - colIndex_.begin()] = value;
 					return;
 				} else if ( *i > column ) { // Desired entry is blank.
-					if ( value == 0 ) // Don't need to change an already zero entry
-						return;
 					unsigned long offset = i - colIndex_.begin();
 					colIndex_.insert( colIndex_.begin() + offset, column );
 					N_.insert( N_.begin() + offset, value );
 					for ( unsigned int j = row + 1; j <= nrows_; j++ )
 						rowStart_[ j ]++;
+					return;
+				}
+			}
+		}
+
+		/**
+		 * Removes specified entry.
+		 */
+		void unset( unsigned int row, unsigned int column )
+		{
+			vector< unsigned int >::iterator i;
+			vector< unsigned int >::iterator begin = 
+				colIndex_.begin() + rowStart_[ row ];
+			vector< unsigned int >::iterator end = 
+				colIndex_.begin() + rowStart_[ row + 1 ];
+		
+			if ( begin == end ) { // Entire row was empty. Ignore
+				return;
+			}
+		
+			if ( column > *( end - 1 ) ) { // End of row. Ignore
+				return;
+			}
+			for ( i = begin; i != end; i++ ) {
+				if ( *i == column ) { // Found desired entry. Zap it.
+					unsigned long offset = i - colIndex_.begin();
+					colIndex_.erase( i );
+					N_.erase( N_.begin() + offset );
+					for ( unsigned int j = row + 1; j <= nrows_; j++ )
+						rowStart_[ j ]--;
+					return;
+				} else if ( *i > column ) { //Desired entry is blank. Ignore
 					return;
 				}
 			}

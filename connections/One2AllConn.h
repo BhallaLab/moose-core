@@ -56,6 +56,20 @@ class One2AllConnTainer: public ConnTainer
  		 * Returns the new ConnTainer on success, otherwise 0.
  		*/
 		ConnTainer* copy( Element* e1, Element* e2 ) const;
+
+		unsigned int option() const {
+			return One2All;
+		}
+
+		/**
+		 * Cannot add more messages to a One2All: already goes to all
+		 * possible targets.
+		 */
+		bool addToConnTainer( 
+			unsigned int srcIndex, unsigned int destIndex )
+		{
+			return 0;
+		}
 		
 	private:
 		unsigned int eI1_;
@@ -205,7 +219,7 @@ class ReverseOne2AllConn: public Conn
 // Some temporary typedefs while I think about implementations
 typedef SimpleConnTainer One2ManyConnTainer;
 typedef SimpleConnTainer Many2OneConnTainer;
-typedef SimpleConnTainer Many2ManyConnTainer;
+// typedef SimpleConnTainer Many2ManyConnTainer;
 typedef SimpleConnTainer Many2AllConnTainer;
 typedef SimpleConnTainer All2OneConnTainer;
 typedef SimpleConnTainer All2ManyConnTainer;
