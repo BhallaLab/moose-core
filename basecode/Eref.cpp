@@ -35,7 +35,6 @@ Id Eref::id()
 	return ret.assignIndex( i );
 }
 
-
 bool Eref::add( int m1, Eref e2, int m2, unsigned int connTainerOption )
 {
 	assert( e != 0 && e2.e != 0 );

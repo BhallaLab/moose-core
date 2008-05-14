@@ -10,10 +10,13 @@
 #include "header.h"
 #include "SimpleConn.h"
 #include "One2AllConn.h"
+#include "../utility/SparseMatrix.h"
+#include "Many2ManyConn.h"
 
 const unsigned int ConnTainer::Default = UINT_MAX;
 const unsigned int ConnTainer::Simple = 0;
 const unsigned int ConnTainer::One2All = 2;
+const unsigned int ConnTainer::Many2Many = 4;
 
 /**
  * Add a new message with a container decided by the optional final 
@@ -54,6 +57,15 @@ ConnTainer* selectConnTainer( Eref src, Eref dest,
 	}
 
 	ConnTainer* ct = 0;
+	ct = findExistingConnTainer( src, dest, srcMsg, destMsg, 
+		connTainerOption );
+	if ( ct ) {
+		bool ret = ct->addToConnTainer( srcIndex, destIndex );
+		if ( ret )
+			return ct;
+		return 0;
+	}
+		
 	switch ( connTainerOption )
 	{
 		case 0:
@@ -75,6 +87,10 @@ ConnTainer* selectConnTainer( Eref src, Eref dest,
 		case 4:
 			ct = new Many2ManyConnTainer( src, dest, srcMsg, destMsg,
 				srcIndex, destIndex );
+			/*
+			ct = new SimpleConnTainer( src, dest, srcMsg, destMsg,
+				srcIndex, destIndex );
+			*/
 		break;
 		case 5:
 			ct = new Many2AllConnTainer( src, dest, srcMsg, destMsg,
@@ -101,4 +117,19 @@ ConnTainer* selectConnTainer( Eref src, Eref dest,
 		break;
 	}
 	return ct;
+}
+
+ConnTainer* findExistingConnTainer( Eref src, Eref dest, 
+	int srcMsg, int destMsg, unsigned int connTainerOption )
+{
+	if ( srcMsg >= 0 ) {
+		Msg* m = src->varMsg( static_cast< unsigned int >( srcMsg ) );
+		vector< ConnTainer* >::iterator i;
+		for ( i = 0; i < varBegin(); i++ ) {
+			if ( (*i)->e2() == dest.e && (*i)->msg2() == destMsg && 
+				(*i)->option == connTainerOption )
+				return *i;
+		}
+	}
+	return 0;
 }
