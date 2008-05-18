@@ -113,7 +113,7 @@ bool Msg::add( Eref src, Eref dest,
 	// the simple messages and 'Any' messages don't care, and the One2One
 	// map does not apply.
 	if ( ct && dynamic_cast< Many2ManyConnTainer* >( ct ) ) {
-		return ct->addToConnTainer( srcIndex, destIndex, 1 );
+		return ct->addToConnTainer( src.i, dest.i, destIndex );
 		///\todo: temporarily put in 1 for the connIndex, but needs fixing
 	}
 
@@ -532,6 +532,8 @@ ConnTainer* findExistingConnTainer( Eref src, Eref dest,
 	if ( srcMsg >= 0 ) {
 		Msg* m = src->varMsg( static_cast< unsigned int >( srcMsg ) );
 		m = m->matchByFuncId( src.e, destFuncId );
+		if ( !m )
+			return 0;
 		vector< ConnTainer* >::iterator i;
 		for ( i = m->varBegin(); i != m->varEnd(); i++ ) {
 			if ( (*i)->e2() == dest.e && (*i)->msg2() == destMsg && 
