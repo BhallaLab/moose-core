@@ -111,7 +111,14 @@ bool DynamicFinfo::add(
 						destMsg, destIndex ) )
 	{
 		unsigned int srcIndex = e.e->numTargets( msg_ );
+
+		// Note that the Dynamic Finfo must be the dest, even
+		// if it was called as the originator.
+		return Msg::add( destElm, e, destMsg, msg_,
+			destIndex, srcIndex,
+			destFuncId, srcFuncId, connTainerOption );
 		
+		/*
 		// Note that the Dynamic Finfo must be the dest, even
 		// if it was called as the originator.
 		ConnTainer* ct = selectConnTainer( 
@@ -119,17 +126,8 @@ bool DynamicFinfo::add(
 			destMsg, msg_,
 			destIndex, srcIndex );
 
-		/*
-		SimpleConnTainer* ct = new SimpleConnTainer( 
-			destElm.e, e.e, destMsg, msg_,
-			destElm.i, e.i,		// Hack. Can't use for arrays
-			srcIndex, destIndex );
-			*/
 		return Msg::add( ct, destFuncId, srcFuncId );
-			/*
-		return Msg::add( destElm, e, destMsg, msg_,
-			destFuncId, srcFuncId );
-			*/
+		*/
 	}
 	return 0;
 }
