@@ -12,6 +12,12 @@
 #define _ONE2ALL_CONN_H
 
 
+/**
+ * This class handles connections where a single object projects to
+ * every entry in an array. An example is a simple object with an
+ * array object child, or the scheduler tick going to all compartments
+ * on a cell.
+ */
 class One2AllConnTainer: public ConnTainer
 {
 	public:
@@ -220,11 +226,9 @@ class ReverseOne2AllConn: public Conn
 // Some temporary typedefs while I think about implementations
 typedef SimpleConnTainer One2ManyConnTainer;
 typedef SimpleConnTainer Many2OneConnTainer;
-// typedef SimpleConnTainer Many2ManyConnTainer;
 typedef SimpleConnTainer Many2AllConnTainer;
 typedef SimpleConnTainer All2OneConnTainer;
 typedef SimpleConnTainer All2ManyConnTainer;
-typedef SimpleConnTainer One2OneMapConnTainer;
 typedef SimpleConnTainer All2AllMapConnTainer;
 
 #endif // _ONE2ALL_CONN_H
