@@ -62,7 +62,8 @@ class Many2ManyConnTainer: public ConnTainer
 		}
 
 		bool addToConnTainer( 
-			unsigned int srcIndex, unsigned int destIndex );
+			unsigned int srcIndex, 
+			unsigned int destIndex, unsigned int index );
 
 		///////////////////////////////////////////////////////////
 		// class-specific functions
