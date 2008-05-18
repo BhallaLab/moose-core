@@ -12,11 +12,13 @@
 #include "One2AllConn.h"
 #include "../utility/SparseMatrix.h"
 #include "Many2ManyConn.h"
+#include "One2OneMapConn.h"
 
 const unsigned int ConnTainer::Default = UINT_MAX;
 const unsigned int ConnTainer::Simple = 0;
 const unsigned int ConnTainer::One2All = 2;
 const unsigned int ConnTainer::Many2Many = 4;
+const unsigned int ConnTainer::One2OneMap = 8;
 
 /*
 ConnTainer* findExistingConnTainer( Eref src, Eref dest, 
