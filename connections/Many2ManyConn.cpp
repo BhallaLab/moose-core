@@ -64,15 +64,19 @@ ConnTainer* Many2ManyConnTainer::copy( Element* e1, Element* e2 ) const
 	return ret;
 }
 
-
 /**
- * Traverse through all messages to find one that matches
- * Check connTainer type.
- * Add it.
+ * Add new pair of src and dest element indices to current ConnTainer.
+ * Return true on success. Fails if the msg already exists, or
+ * if the indices are out of range.
  */
-bool addToConnTainer( unsigned int srcI, unsigned int destI )
+bool Many2ManyConnTainer::addToConnTainer( 
+	unsigned int srcEi, unsigned int destEi, unsigned int i2 )
 {
-	
+	if ( srcEi < entries_.nRows() && destEi < entries_.nColumns() ) {
+		entries_.set( srcEi, destEi, i2 );
+		return 1;
+	}
+	return 0;
 }
 
 unsigned int Many2ManyConnTainer::getRow( unsigned int i, 
