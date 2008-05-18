@@ -66,7 +66,8 @@ class One2AllConnTainer: public ConnTainer
 		 * possible targets.
 		 */
 		bool addToConnTainer( 
-			unsigned int srcIndex, unsigned int destIndex )
+			unsigned int srcIndex, 
+			unsigned int destIndex, unsigned int index )
 		{
 			return 0;
 		}
