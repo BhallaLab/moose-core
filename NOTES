@@ -6670,6 +6670,11 @@ Checked in as revision 480 with unit test flags on, Smoldyn off, -g, GSL
 
 Now the new Msg::add call is implemented and seems to work. Also the
 Many2Many message seems to be handling multiple entries OK.
+Checked in as revision 481 with unit test flags on, Smoldyn off, -g, GSL
 
+Raamesh needs a One2One map message for array copies. Let's set that up next.
+Message set up, unit tests to do. Set up and cleared unit tests too. At this
+point the One2One map will do the basic message passing correctly, but the
+issue of destination indices is still dangling.
 
 ==============================================================================

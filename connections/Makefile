@@ -21,6 +21,7 @@ OBJ = \
 	SimpleConn.o	\
 	One2AllConn.o	\
 	Many2ManyConn.o	\
+	One2OneMapConn.o	\
 	TraverseMsgConn.o	\
 	TraverseDestConn.o	\
 
@@ -52,6 +53,7 @@ One2AllConn.o: One2AllConn.h
 Many2ManyConn.o: Many2ManyConn.h ../utility/SparseMatrix.h
 TraverseMsgConn.o: TraverseMsgConn.h
 TraverseDestConn.o: TraverseDestConn.h
+One2OneMapConn.o: One2OneMapConn.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) $(INCLUDE) $< -c
