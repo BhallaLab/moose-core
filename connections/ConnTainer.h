@@ -88,6 +88,7 @@ class ConnTainer
 		static const unsigned int Default;
 		static const unsigned int Simple;
 		static const unsigned int One2All;
+		static const unsigned int One2OneMap;
 		static const unsigned int Many2Many;
 		
 	private:
