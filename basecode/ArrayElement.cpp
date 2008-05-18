@@ -51,8 +51,12 @@ ArrayElement::ArrayElement( const std::string& name,
 			void *data, 
 			int numEntries, 
 			size_t objectSize
-		): Element (Id::scratchId()), name_(name), msg_(msg), dest_(dest), 
-			finfo_(finfo), data_(data), numEntries_(numEntries), objectSize_(objectSize)
+		): Element (Id::scratchId()), name_(name),
+			finfo_(finfo), 
+			data_(data), 
+			msg_(msg),
+			dest_(dest), 
+			numEntries_(numEntries), objectSize_(objectSize)
 		{
 		;
 		}
@@ -566,13 +570,12 @@ const Cinfo* initAtestCinfo()
  * One2Many and Many2One.
  */
 static const unsigned int NUMKIDS = 12;
-Element* arrayElementInternalTest( unsigned int connOption )
+void arrayElementInternalTest( unsigned int connOption )
 {
 	cout << "\nTesting Array Elements, option= " << connOption << ": ";
 
 	const Cinfo* aTestCinfo = initAtestCinfo();
 
-	FuncVec::sortFuncVec();
 	outputSlot = aTestCinfo->getSlot( "outputSrc" );
 
 	Element* n = Neutral::create( "Neutral", "n", 
@@ -623,48 +626,104 @@ Element* arrayElementInternalTest( unsigned int connOption )
 			ASSERT( ret && ( input == result ), "Array kid messaging" );
 		}
 	}
-	return n;
+	set( n, "destroy" );
+}
+
+/**
+ * This test checks how two arrays connect up to each other.
+ * Different options do different things: 
+ * 	Many2Many can have any mapping
+ * 	One2OneMap does one-to-one mapping
+ * 	All2All makes a fully connected map
+ */
+void arrayElementMapTest( unsigned int option )
+{
+	cout << "\nTesting Array Elements mapping connections, option= " <<
+		option << ": ";
+	// Make the arrays.
+	Element* m = Neutral::create( "Neutral", "m", Element::root(), Id::scratchId() ); 
+	Element* n = Neutral::create( "Neutral", "n", Element::root(), Id::scratchId() ); 
+
+	Id srcId = Id::scratchId();
+	Element* src = 
+		Neutral::createArray( "Atest", "src", m, srcId, NUMKIDS );
+
+	Id destId = Id::scratchId();
+	Element* dest = 
+		Neutral::createArray( "Atest", "dest", n, destId, NUMKIDS );
+
+	ASSERT( src != 0 && dest != 0, "Array Map" );
+	ASSERT( src == srcId() && dest == destId(), "Array Map" );
+	ASSERT( srcId.index() == 0, "Array Map" );
+	ASSERT( src->id().index() == Id::AnyIndex, "Array Map" );
+	ASSERT( destId.index() == 0, "Array Map" );
+	ASSERT( dest->id().index() == Id::AnyIndex, "Array Map" );
+
+	// Get the child lists.
+	vector< Id > srcKids;
+	vector< Id > destKids;
+	bool ret = get< vector< Id > >( m, "childList", srcKids );
+	bool sret = get< vector< Id > >( n, "childList", destKids );
+	ASSERT( sret && ret, "Array kids" );
+	ASSERT( srcKids.size() == NUMKIDS, "Array kids" );
+	ASSERT( destKids.size() == NUMKIDS, "Array kids" );
+
+	vector< vector< int > > pattern( NUMKIDS );
+	for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+		pattern[i].resize( NUMKIDS, 0 );
+		set< double >( destKids[i].eref(), "input", 0.0 );
+	}
+
+	// Set up the connections.
+	if ( option == ConnTainer::Many2Many ) {
+		for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+			for ( unsigned int j = 0 ; j < NUMKIDS; j++ ) {
+				if ( i + j == NUMKIDS || i == j || ( i + j ) % 3 == 0 ){
+					pattern[i][j] = 1;
+					ret = srcKids[i].eref().add( "outputSrc",
+						destKids[j].eref(), "msgInput", option );
+					ASSERT( ret, "Array Many2Many map setup" );
+				}
+			}
+		}
+	} else if ( option == ConnTainer::One2OneMap ) {
+		ret = srcKids[0].eref().add( "outputSrc",
+			destKids[0].eref(), "msgInput", option );
+		ASSERT( ret, "Array One2OneMap setup" );
+		for ( unsigned int i = 0 ; i < NUMKIDS; i++ )
+			pattern[i][i] = 1;
+	}
+
+	cout << "+" << flush;
+
+	// Stimulate each input and check all the outputs.
+
+	for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+		double output = i * i + 1.0;
+		bool ret = set< double >( srcKids[i].eref(), "output", output );
+		Atest::process( srcKids[i].eref() );
+		for ( unsigned int j = 0 ; j < NUMKIDS; j++ ) {
+			double input = 0.0;
+			ret = get< double >( destKids[j].eref(), "input", input );
+			if ( pattern[i][j] != 0 ) {
+				ASSERT( ret && ( input == output ), "Array map messaging" );
+			} else {
+				ASSERT( ret && ( input == 0.0 ), "Array map messaging" );
+			}
+			ret = set< double >( destKids[j].eref(), "input", 0.0 );
+		}
+	}
+	set( n, "destroy" );
+	set( m, "destroy" );
 }
 
 void arrayElementTest()
 {
-	Element* n = arrayElementInternalTest( ConnTainer::Simple ); 
-	set( n, "destroy" );
-	n = arrayElementInternalTest( ConnTainer::Many2Many ); 
-
-	Element* m = Neutral::create( "Neutral", "m", Element::root(), Id::scratchId() ); 
-	Id destId = Id::scratchId();
-	Element* dest = 
-		Neutral::createArray( "Atest", "dest", m, destId, NUMKIDS );
-
-	ASSERT( dest != 0, "Array Element" );
-	ASSERT( dest == destId(), "Array Element" );
-	ASSERT( destId.index() == 0, "Array Element" );
-	ASSERT( dest->id().index() == Id::AnyIndex, "Array Element" );
-
-	vector< Id > destKids;
-	bool ret = get< vector< Id > >( m, "childList", destKids );
-	ASSERT( ret, "Array kids" );
-	ASSERT( destKids.size() == NUMKIDS, "Array kids" );
-
-	// ret = childId.eref().add( "axial", destId.eref(), "raxial" );
-	ASSERT( ret, "Array Many2Many msgs" );
-
-	for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
-		for ( unsigned int j = 0 ; j < NUMKIDS; j++ ) {
-			if ( i + j == NUMKIDS || i - j == NUMKIDS ) 
-				continue;
-		/*
-		double Vm = 0;
-		bool ret = get< double >( kids[i].eref(), "Vm", Vm );
-		ASSERT( ret && Vm == i, "Array kids" );
-		*/
-			// ret = kids[i].eref().add( "axial", destKids[j].eref(), "raxial" );
-			ASSERT( ret, "Array Many2Many msgs" );
-		}
-	}
-
-	set( n, "destroy" );
-	set( m, "destroy" );
+	initAtestCinfo();
+	FuncVec::sortFuncVec();
+	arrayElementInternalTest( ConnTainer::Simple ); 
+	arrayElementInternalTest( ConnTainer::Many2Many ); 
+	arrayElementMapTest( ConnTainer::Many2Many ); 
+	arrayElementMapTest( ConnTainer::One2OneMap ); 
 }
 #endif
