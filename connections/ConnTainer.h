@@ -83,7 +83,7 @@ class ConnTainer
 		 * Add a new connection to the ConnTainer. Returns true on success
 		 */
 		virtual bool addToConnTainer( unsigned int srcIndex, 
-			unsigned int destIndex ) = 0;
+			unsigned int destIndex, unsigned int index ) = 0;
 
 		static const unsigned int Default;
 		static const unsigned int Simple;

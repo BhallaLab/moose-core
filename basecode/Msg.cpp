@@ -10,7 +10,16 @@
 #include "header.h"
 #include "SimpleConn.h"
 #include "One2AllConn.h"
+#include "../utility/SparseMatrix.h"
+#include "Many2ManyConn.h"
 #include "Msg.h"
+
+ConnTainer* findExistingConnTainer( Eref src, Eref dest, 
+	int srcMsg, int destMsg, 
+	int srcFuncId, unsigned int destFuncId,
+	unsigned int connTainerOption );
+
+
 
 Msg::Msg()
 	: fv_( FuncVec::getFuncVec( 0 ) ), next_( 0 )
@@ -61,7 +70,94 @@ bool Msg::assignMsgByFuncId(
 	return 1;
 }
 
+/**
+ * Follows through the link list of msgs to match the funcId
+ */
+Msg* Msg::matchByFuncId( Element* e, unsigned int funcId )
+{
+	if ( funcId == fv_->id() )
+		return this;
+	if ( funcId == 0 ) 
+		return 0;
+	if ( next_ == 0 )
+		return 0;
+	assert( next_ < e->numMsg() );
 
+	return e->varMsg( next_ )->matchByFuncId( e, funcId );
+}
+
+/**
+ * Adds a new message either by finding an existing ConnTainer that
+ * matches, and inserting the eIndices in that, or by creating a new 
+ * Conntainer. Later may also want to change one ConnTainer type to 
+ * another.
+ *
+ * Returns true on success.
+ */
+
+bool Msg::add( Eref src, Eref dest, 
+     int srcMsg, int destMsg,
+     unsigned int srcIndex, unsigned int destIndex,
+	 unsigned int srcFuncId, unsigned int destFuncId,
+     unsigned int connTainerOption )
+{
+	if ( srcMsg < 0 )
+		return 0;
+	
+	// Start out by looking for matches among existing Msgs.
+	// This is relevant only if there are possible 'fat' edges, that is,
+	// array messages.
+	ConnTainer* ct = findExistingConnTainer( src, dest, srcMsg, destMsg,
+		srcFuncId, destFuncId, connTainerOption );
+	// Also it only applies if the connTainerOption is a 'Many', since
+	// the simple messages and 'Any' messages don't care, and the One2One
+	// map does not apply.
+	if ( ct && dynamic_cast< Many2ManyConnTainer* >( ct ) ) {
+		return ct->addToConnTainer( srcIndex, destIndex, 1 );
+		///\todo: temporarily put in 1 for the connIndex, but needs fixing
+	}
+
+	// Give up and generate a new ConnTainer.
+
+	ct = selectConnTainer( src, dest, 
+		srcMsg, destMsg,
+		srcIndex, destIndex,
+		connTainerOption );
+
+	return add( ct, srcFuncId, destFuncId );
+}
+
+bool Msg::add( ConnTainer* ct,
+	unsigned int funcId1, unsigned int funcId2 )
+{
+	// Must always have a nonzero func on the destination
+	assert( funcId2 != 0 );
+
+	Msg* m1 = ct->e1()->varMsg( ct->msg1() );
+	if ( !m1 ) return 0;
+
+	// We need to check for msg2 because DynamicFinfos have a +ve
+	// msg, even if they are handling pure dests.
+	if ( funcId1 == 0 && ct->msg2() < 0 ) { // a destOnly msg, terminating in destMsg_.
+		// Look for, and if necessary create the connTainer.
+		vector< ConnTainer* >* dct = ct->e2()->getDest( ct->msg2() ); 
+		assert( dct != 0 );
+		bool ret = m1->assignMsgByFuncId( ct->e1(), funcId2, ct );
+		assert( ret );
+		dct->push_back( ct );
+	} else { // A msg terminating in the msg_ vector
+		Msg* m2 = ct->e2()->varMsg( ct->msg2() );
+		if ( !m2 ) return 0;
+		bool ret;
+		ret = m1->assignMsgByFuncId( ct->e1(), funcId2, ct );
+		assert( ret );
+		ret = m2->assignMsgByFuncId( ct->e2(), funcId1, ct );
+		assert( ret );
+	}
+	return 1;
+}
+
+#if  0
 /**
  * Add a new message using the specified ConnTainer.
  * The e1 (source ) and e2 (dest), are in the ConnTainer, as are
@@ -103,25 +199,7 @@ bool Msg::add( ConnTainer* ct,
 	}
 	return 1;
 }
-
-
-/*
-ConnTainer* Msg::addAll2All( Element* e1, Element* e2, 
-	unsigned int m1Index, unsigned int m2Index )
-{
-	Msg* current = e1->msg( m1Index );
-	if ( !current ) return 0;
-
-	Msg* other = e2->msg( m2Index );
-	if ( !other ) return 0;
-
-	All2AllConnTainer* ct = 
-		new All2AllConnTainer( e1, e2, m1Index, m2Index );
-	current->c_.push_back( ct );
-	other->c_.push_back( ct );
-	return ct;
-}
-*/
+#endif
 
 
 /**
@@ -443,4 +521,23 @@ bool Msg::copy( const ConnTainer* c, Element* e1, Element* e2 ) const
 	if ( ct == 0 )
 		return 0;
 	return add( ct, funcId1, funcId2 );
+}
+
+
+ConnTainer* findExistingConnTainer( Eref src, Eref dest, 
+	int srcMsg, int destMsg, 
+	int srcFuncId, unsigned int destFuncId,
+	unsigned int connTainerOption )
+{
+	if ( srcMsg >= 0 ) {
+		Msg* m = src->varMsg( static_cast< unsigned int >( srcMsg ) );
+		m = m->matchByFuncId( src.e, destFuncId );
+		vector< ConnTainer* >::iterator i;
+		for ( i = m->varBegin(); i != m->varEnd(); i++ ) {
+			if ( (*i)->e2() == dest.e && (*i)->msg2() == destMsg && 
+				(*i)->option() == connTainerOption )
+				return *i;
+		}
+	}
+	return 0;
 }

@@ -18,6 +18,13 @@ const unsigned int ConnTainer::Simple = 0;
 const unsigned int ConnTainer::One2All = 2;
 const unsigned int ConnTainer::Many2Many = 4;
 
+/*
+ConnTainer* findExistingConnTainer( Eref src, Eref dest, 
+	int srcMsg, int destMsg, 
+	int srcFuncId, unsigned int destFuncId,
+	unsigned int connTainerOption );
+	*/
+
 /**
  * Add a new message with a container decided by the optional final 
  * argument. It defaults to a sensible guess based on the indices of the
@@ -57,14 +64,6 @@ ConnTainer* selectConnTainer( Eref src, Eref dest,
 	}
 
 	ConnTainer* ct = 0;
-	ct = findExistingConnTainer( src, dest, srcMsg, destMsg, 
-		connTainerOption );
-	if ( ct ) {
-		bool ret = ct->addToConnTainer( srcIndex, destIndex );
-		if ( ret )
-			return ct;
-		return 0;
-	}
 		
 	switch ( connTainerOption )
 	{
@@ -119,17 +118,22 @@ ConnTainer* selectConnTainer( Eref src, Eref dest,
 	return ct;
 }
 
+/*
 ConnTainer* findExistingConnTainer( Eref src, Eref dest, 
-	int srcMsg, int destMsg, unsigned int connTainerOption )
+	int srcMsg, int destMsg, 
+	int srcFuncId, unsigned int destFuncId,
+	unsigned int connTainerOption )
 {
 	if ( srcMsg >= 0 ) {
 		Msg* m = src->varMsg( static_cast< unsigned int >( srcMsg ) );
+		m = m->matchByFuncId( src.e, destFuncId );
 		vector< ConnTainer* >::iterator i;
-		for ( i = 0; i < varBegin(); i++ ) {
+		for ( i = m->varBegin(); i != m->varEnd(); i++ ) {
 			if ( (*i)->e2() == dest.e && (*i)->msg2() == destMsg && 
-				(*i)->option == connTainerOption )
+				(*i)->option() == connTainerOption )
 				return *i;
 		}
 	}
 	return 0;
 }
+*/
