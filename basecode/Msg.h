@@ -73,6 +73,29 @@ class Msg
 		Conn* findConn( unsigned int eIndex, unsigned int tgt ) const;
 
 		/**
+		 * Follows through the link list of msgs to find one that matches
+		 * the funcId. 
+		 * Used by findExistingConnTainer
+		 */
+		Msg* matchByFuncId( Element* e, unsigned int funcId );
+
+		/**
+ 		* Adds a new message either by finding an existing ConnTainer that
+ 		* matches, and inserting the eIndices in that, or by creating a new 
+ 		* Conntainer.
+		*
+		* This is meant to be used internally by Finfos to set up messages.
+ 		*
+ 		* Returns true on success.
+ 		*/
+		
+		static bool add( Eref src, Eref dest,
+			int srcMsg, int destMsg,
+			unsigned int srcIndex, unsigned int destIndex,
+			unsigned int srcFuncId, unsigned int destFuncId,
+			unsigned int connTainerOption );
+
+		/**
 		 * Add a new message using the specified ConnTainer.
 		 * The e1 (source ) and e2 (dest), are in the ConnTainer, as are
 		 * m1 and m2 which indicate source and dest msg indices.
