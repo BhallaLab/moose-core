@@ -6634,3 +6634,30 @@ Now to try that.
 ==============================================================================
 14 May 2008
 Did some setup work for reusing Many2Many, but now long overdue to check in.
+
+Checked in as revision 479 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+17 May 2008
+Not sure how the previous build worked. Lots of bugs in adding messages
+to existing ConnTainers.
+
+Current program flow:
+Eref::add( m1, e2, m2, connTainerOption)
+	==> Logical place to put the 'add' API function.
+	bool Finfo::add( e1, e2, destFinfo, connTainerOption )
+		==> Several Finfo class-specific vfunc options here.
+		ConnTainer* selectConnTainer( all args here )
+			findExistingConnTainer(), or new ConnTainer.
+				==> The findExisting needs to match up funcIds.
+		Msg::add( ConnTainer, srcFuncId, destFuncId )
+				==> This step not needed if we put info in
+				existing ConnTainer.
+
+
+OK, we can flatten this out by putting the selectConnTainer stuff within
+Msg::add, after we expand its arguments.
+	- Fixes issues with handling existing ConnTainers
+	- Msg::add is a cleaner place to put the operations.
+
+Msg.cpp:83.
