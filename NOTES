@@ -6661,3 +6661,15 @@ Msg::add, after we expand its arguments.
 	- Msg::add is a cleaner place to put the operations.
 
 Msg.cpp:83.
+==============================================================================
+18 May 2008
+Set up to do the 'flattening', yet to put the new Msg::add call in to the
+Finfos. Still have a dangling issue of how to put in the connIndex needed
+to look up synaptic weights etc.
+Checked in as revision 480 with unit test flags on, Smoldyn off, -g, GSL
+
+Now the new Msg::add call is implemented and seems to work. Also the
+Many2Many message seems to be handling multiple entries OK.
+
+
+==============================================================================

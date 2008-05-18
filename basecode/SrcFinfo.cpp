@@ -35,19 +35,15 @@ bool SrcFinfo::add(
 		assert( FuncVec::getFuncVec( destFuncId )->size() == 1 );
 		unsigned int srcIndex = e.e->numTargets( msg_ );
 
-		// return Msg::add( e, destElm, msg_, destMsg, srcIndex, destIndex, srcFuncId, destFuncId );
-		
+		return Msg::add( e, destElm,
+			msg_, destMsg, srcIndex, destIndex, 
+			srcFuncId, destFuncId,
+			connTainerOption );
+		/*
 		ConnTainer* ct = selectConnTainer( e, destElm,
 			msg_, destMsg, srcIndex, destIndex, connTainerOption );
-
-		/*
-		SimpleConnTainer* ct = new SimpleConnTainer( 
-			e.e, destElm.e, msg_, destMsg, 
-			e.i, destElm.i,
-			srcIndex, destIndex );
-			*/
-
 		return Msg::add( ct, srcFuncId, destFuncId );
+		*/
 	}
 	return 0;
 }
