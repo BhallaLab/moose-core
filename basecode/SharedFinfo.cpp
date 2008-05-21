@@ -90,13 +90,6 @@ bool SharedFinfo::add(
 				destIndex, srcIndex, 
 				destFuncId, srcFuncId,
 				connTainerOption );
-			/*
-			ConnTainer* ct = selectConnTainer( 
-				destElm, e, destMsg, msg_,
-				destIndex, srcIndex, 
-				connTainerOption );
-			return Msg::add( ct, destFuncId, srcFuncId );
-			*/
 		} else {
 			if ( !FuncVec::getFuncVec( destFuncId )->isDest() ) {
 				cout << "Error: SharedFinfo::add: src at both ends: " <<
@@ -109,12 +102,6 @@ bool SharedFinfo::add(
 				srcIndex, destIndex, 
 				srcFuncId, destFuncId,
 				connTainerOption );
-			/*
-			ConnTainer* ct = selectConnTainer( 
-				e, destElm, msg_, destMsg,
-				srcIndex, destIndex, connTainerOption );
-			return Msg::add( ct, srcFuncId, destFuncId );
-			*/
 		}
 		return 1;
 	}
