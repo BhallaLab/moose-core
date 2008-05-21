@@ -189,6 +189,22 @@ unsigned int ArrayElement::numTargets( int msgNum ) const
 	return 0;
 }
 
+/*
+unsigned int ArrayElement::numTargets( int msgNum, unsigned int eIndex )
+	const
+{
+	if ( msgNum >= 0 && 
+		static_cast< unsigned int >( msgNum ) < cinfo()->numSrc() )
+		return msg_[ msgNum ].numTargets( this, eIndex );
+	else if ( msgNum < 0 ) {
+		const vector< ConnTainer* >* d = dest( msgNum );
+		if ( d )
+			return d->size();
+	}
+	return 0;
+}
+*/
+
 unsigned int ArrayElement::numTargets( const string& finfoName ) const
 {
 	const Finfo* f = cinfo()->findFinfo( finfoName );
@@ -511,6 +527,7 @@ Id ArrayElement::id() const {
  */
 
 Slot outputSlot;
+int synFinfoMsg;
 
 class Atest {
 	public: 
@@ -529,9 +546,38 @@ class Atest {
 		static void process( Eref e ) {
 			send1< double >( e, outputSlot, getOutput( e ) );
 		}
+		static void wtInput( const Conn* c, double value ) {
+			Atest* a = static_cast< Atest* >( c->data() );
+			assert( a->wt_.size() > c->targetIndex() );
+			a->input_ = value + a->wt_[ c->targetIndex() ];
+		}
+
+		void updateNumSynapses( Eref e ) {
+			// This is not quite working yet.
+			unsigned int n = e->numTargets( synFinfoMsg );
+			if ( n > wt_.size() )
+				wt_.resize( n );
+		}
+
+		static double getWt( Eref e, int index ) {
+			Atest* a = static_cast< Atest* >( e.data() );
+			a->updateNumSynapses( e );
+			if ( index >= 0 && a->wt_.size() > static_cast< unsigned int >( index ) )
+				return a->wt_[index];
+			return 0.0;
+		}
+
+		static void setWt( Eref e, double val, int index ) {
+			Atest* a = static_cast< Atest* >( e.data() );
+			a->updateNumSynapses( e );
+			if ( index >= 0 && a->wt_.size() > static_cast< unsigned int >( index ) )
+				a->wt_[index] = val;
+		}
+
 	private:
 		double input_;
 		double output_;
+		vector< double > wt_;
 };
 
 const Cinfo* initAtestCinfo()
@@ -542,14 +588,20 @@ const Cinfo* initAtestCinfo()
 			GFCAST( &Atest::getInput ),
 			RFCAST( &Atest::setInput )
 		),
-	
 		new ValueFinfo( "output", ValueFtype1< double >::global(),
 			GFCAST( &Atest::getOutput ),
 			RFCAST( &Atest::setOutput )
 		),
+		new LookupFinfo( "wt", LookupFtype< double, int >::global(),
+			GFCAST( &Atest::getWt ),
+			RFCAST( &Atest::setWt )
+		),
 		new SrcFinfo( "outputSrc", Ftype1< double >::global() ),
 		new DestFinfo( "msgInput", Ftype1< double >::global(),
 			RFCAST( &Atest::setInput )
+		),
+		new DestFinfo( "wtInput", Ftype1< double >::global(),
+			RFCAST( &Atest::wtInput )
 		),
 	};
 
@@ -577,6 +629,7 @@ void arrayElementInternalTest( unsigned int connOption )
 	const Cinfo* aTestCinfo = initAtestCinfo();
 
 	outputSlot = aTestCinfo->getSlot( "outputSrc" );
+	synFinfoMsg = aTestCinfo->findFinfo( "wtInput" )->msg();
 
 	Element* n = Neutral::create( "Neutral", "n", 
 		Element::root(), Id::scratchId() ); 
@@ -717,6 +770,99 @@ void arrayElementMapTest( unsigned int option )
 	set( m, "destroy" );
 }
 
+/**
+ * This test checks how two arrays connect up to each other using 
+ * synapse-type input, where the message uses an index to identify itself.
+ * The looked up 'weight' is assigned to the same value as comes in the
+ * msg data.
+ *
+ * This has the same connectivity patterns as arrayElementMapTest.
+ * Different options do different things: 
+ * 	Many2Many can have any mapping
+ * 	One2OneMap does one-to-one mapping
+ * 	All2All makes a fully connected map
+ */
+void arrayElementSynTest( unsigned int option )
+{
+	cout << "\nTesting Array Elements mapping connections, option= " <<
+		option << ": ";
+	// Make the arrays.
+	Element* m = Neutral::create( "Neutral", "m", Element::root(), Id::scratchId() ); 
+	Element* n = Neutral::create( "Neutral", "n", Element::root(), Id::scratchId() ); 
+
+	Id srcId = Id::scratchId();
+	Element* src = 
+		Neutral::createArray( "Atest", "src", m, srcId, NUMKIDS );
+
+	Id destId = Id::scratchId();
+	Element* dest = 
+		Neutral::createArray( "Atest", "dest", n, destId, NUMKIDS );
+
+	ASSERT( src != 0 && dest != 0, "Array Syn" );
+	ASSERT( src == srcId() && dest == destId(), "Array Syn" );
+	ASSERT( srcId.index() == 0, "Array Syn" );
+	ASSERT( src->id().index() == Id::AnyIndex, "Array Syn" );
+	ASSERT( destId.index() == 0, "Array Syn" );
+	ASSERT( dest->id().index() == Id::AnyIndex, "Array Syn" );
+
+	// Get the child lists.
+	vector< Id > srcKids;
+	vector< Id > destKids;
+	bool ret = get< vector< Id > >( m, "childList", srcKids );
+	bool sret = get< vector< Id > >( n, "childList", destKids );
+	ASSERT( sret && ret, "Array kids" );
+	ASSERT( srcKids.size() == NUMKIDS, "Array kids" );
+	ASSERT( destKids.size() == NUMKIDS, "Array kids" );
+
+	vector< vector< int > > pattern( NUMKIDS );
+	for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+		pattern[i].resize( NUMKIDS, 0 );
+		set< double >( destKids[i].eref(), "input", 0.0 );
+	}
+
+	// Set up the connections.
+	if ( option == ConnTainer::Many2Many || option == ConnTainer::Simple ) {
+		for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+			for ( unsigned int j = 0 ; j < NUMKIDS; j++ ) {
+				if ( i + j == NUMKIDS || i == j || ( i + j ) % 3 == 0 ){
+					pattern[i][j] = 1;
+					ret = srcKids[i].eref().add( "outputSrc",
+						destKids[j].eref(), "wtInput", option );
+					ASSERT( ret, "Array Many2Many map setup" );
+				}
+			}
+		}
+	} else if ( option == ConnTainer::One2OneMap ) {
+		ret = srcKids[0].eref().add( "outputSrc",
+			destKids[0].eref(), "wtInput", option );
+		ASSERT( ret, "Array One2OneMap setup" );
+		for ( unsigned int i = 0 ; i < NUMKIDS; i++ )
+			pattern[i][i] = 1;
+	}
+
+	cout << "+" << flush;
+
+	// Stimulate each input and check all the outputs.
+
+	for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+		double output = i * i + 1.0;
+		bool ret = set< double >( srcKids[i].eref(), "output", output );
+		Atest::process( srcKids[i].eref() );
+		for ( unsigned int j = 0 ; j < NUMKIDS; j++ ) {
+			double input = 0.0;
+			ret = get< double >( destKids[j].eref(), "input", input );
+			if ( pattern[i][j] != 0 ) {
+				ASSERT( ret && ( input == output ), "Array Syn messaging" );
+			} else {
+				ASSERT( ret && ( input == 0.0 ), "Array Syn messaging" );
+			}
+			ret = set< double >( destKids[j].eref(), "input", 0.0 );
+		}
+	}
+	set( n, "destroy" );
+	set( m, "destroy" );
+}
+
 void arrayElementTest()
 {
 	initAtestCinfo();
@@ -725,5 +871,10 @@ void arrayElementTest()
 	arrayElementInternalTest( ConnTainer::Many2Many ); 
 	arrayElementMapTest( ConnTainer::Many2Many ); 
 	arrayElementMapTest( ConnTainer::One2OneMap ); 
+	/*
+	arrayElementSynTest( ConnTainer::Simple ); 
+	arrayElementSynTest( ConnTainer::Many2Many ); 
+	arrayElementSynTest( ConnTainer::One2OneMap ); 
+	*/
 }
 #endif
