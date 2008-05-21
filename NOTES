@@ -6677,4 +6677,108 @@ Message set up, unit tests to do. Set up and cleared unit tests too. At this
 point the One2One map will do the basic message passing correctly, but the
 issue of destination indices is still dangling.
 
+Checked in as revision 482 with unit test flags on, Smoldyn off, -g, GSL
+
+Next step is to do unit tests for message indices. The nomenclature here
+is ugly:
+
+eIndex: Element index, identifies element in an array, usually part of an Eref.
+msgIndex: Index to identify a message, now closely related to an identifier for
+	Finfos. Sorted so that a limited set of hard-coded msgs are 
+	preallocated, and the rest are set up as needed.
+index: Message index, identifies specific connection to target.
+	Usually not needed. Most remaining cases need it only for destination
+	and we can do a slow lookup to get the source index in the rare 
+	cases the reverse index is needed.
+
+Our tests should make a connection matrix where each target has to handle
+multiple incoming messages, of different kinds. Each input is associated with
+a weight. I'll put the weights in as the same value as the expected
+message argument, which is based on the Eindex of the src and dest element.
+
+Much of the bread and butter of the new Atest class operations are done,
+but we need to know how to couple the addition of messages to the 
+expansion of the weights vector.
+
+We have lots of issues now cropping up. One is the problem of managing
+the synaptic wt_ vector. In the implementation of SynChan, this is done
+by having all the access functions first resize the wt_ vector to 
+accommodate all synapses. To do so we get the number of incoming synapses,
+which was easy for simpleElements:
+Element::numTargets( int msgNum )
+
+but now we need to redo to handle ArrayElements. It would be nice to put
+these wt on the ArrayElement, as it would also simplify the indexing.
+
 ==============================================================================
+19 May 2008
+Revisit question: Why not put weights on the connection?
+- Need specific Conns. 
+- Need Conns with index info for parallel messaging
+- The RF does need this info in conjunction with the Conns.
+- When do we ever need weight info on a per-element basis?
+	- Planarweight
+	- When rescaling
+	Both of these are rare
+	- Plasticity
+	This is common. But one would have single synapse input here.
+
+==============================================================================
+20 May 2008
+
+Currently we don't do the right thing for getting the connIndex in 
+DestFinfo::respondToAdd. It just takes the total # of incoming msgs onto
+the element, not those dedicated to the specified eIndex. The function
+for calculating this # of msgs is already slow, will be slower still to
+do so for arrays.
+
+Treat different synapses as elements? 
+	- Expand as new syns are formed.
+	- Eliminates msgIndex field in Conns.
+	- Messes up all2all and one2oneMap. But Many2Many is fine.
+	- Not readily BC
+	- Will need 2dArrayElement because we may have array of cells and syns.
+	This gets too clever. Don't do it, at least till simple 
+		implementation works.
+
+We have three possible approaches here:
+- Current: Maintain indexes for each connection. 
+	- Gets messy and expensive to manage indices
+	- General and uniform.
+	- Costly. Most messages don't use it.
+	- Element-centric syn info management.
+- Eliminate indices, use eIndex as surrogate
+	- Need to set up 2DArrayElements
+	- Single index has to be quickly extracted into 2 levels of array index:
+		one for the parent eref, and one for the synapse #
+	- Element-centric syn info management.
+- Put syn data into Conns.
+	- Need way to access this generally (another void* ?)
+	- Proliferation of ConnTainer classes (But OK if we regard as fat edges).
+		- How do we specify which one we want? Magic templates?
+	- Conn centric syn info management
+
+Consider three specific use cases:
+	- Local synapse. Here we need to manage wt and delay (doubles)
+	- Off-node message call. Here we need to manage target and buffer 
+		indexing data.
+	- Plastic synapse. Here each synapse has to manage history for the input
+		and work out plasticity rules. Perhaps each synapse needs to
+		be an independent object: combining the worst of the 2dArray
+		elements and the fat Conns with extra info. But we could just
+		put the full plastic syn state info into the fat connTainer too.
+
+Assume we are going with option 3: Syn data in Conns.
+	- ConnTainer defined with a templated Ftype, including void which is 
+		specialised so it takes no space.
+	- Need derivative of DestFinfo to provide Conn spec at msg setup.
+		- This means respondToAdd has to do more work.
+	- Concurrently, convert Conn to a single simple class 
+		(not virtual as now), optimized for iteration and having a 
+		uniform interface. Passed around on heap, no separate
+		destruction step needed.
+		
+==============================================================================
+21 May 2008
+Checkin to put in the new One2One conn files I had left out by mistake 
+last time. Currently none of the above ideas is set up.
