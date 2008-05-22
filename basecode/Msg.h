@@ -233,6 +233,20 @@ class Msg
 		unsigned int numTargets( const Element* e ) const;
 
 		/**
+		 * Counts the number of messages that terminate on specified
+		 * Element/eIndex. 
+		 * Somewhat slow specially for Many2Many messages.
+		 */
+		unsigned int numSrc( const Element* e, unsigned int i ) const;
+
+		/**
+		 * Counts the number of messages that originate from specified
+		 * Element/eIndex. 
+		 * Somewhat slow specially for Many2Many messages.
+		 */
+		unsigned int numDest( const Element* e, unsigned int i ) const;
+
+		/**
 		 * Makes a duplicate of the current message specified by c,
 		 * to now go between e1 and e2.
 		 */

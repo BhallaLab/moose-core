@@ -189,21 +189,26 @@ unsigned int ArrayElement::numTargets( int msgNum ) const
 	return 0;
 }
 
-/*
 unsigned int ArrayElement::numTargets( int msgNum, unsigned int eIndex )
 	const
 {
 	if ( msgNum >= 0 && 
 		static_cast< unsigned int >( msgNum ) < cinfo()->numSrc() )
-		return msg_[ msgNum ].numTargets( this, eIndex );
-	else if ( msgNum < 0 ) {
+	{ // This is acting as a source for the messages.
+		return msg_[ msgNum ].numDest( this, eIndex );
+	} else if ( msgNum < 0 )
+	{ // acting as a destination.
 		const vector< ConnTainer* >* d = dest( msgNum );
-		if ( d )
-			return d->size();
+		unsigned int ret = 0;
+		if ( d ) {
+			vector< ConnTainer* >::const_iterator i;
+			for ( i = d->begin(); i != d->end(); i++ )
+				ret += (*i)->numSrc( eIndex );
+			return ret;
+		}
 	}
 	return 0;
 }
-*/
 
 unsigned int ArrayElement::numTargets( const string& finfoName ) const
 {
