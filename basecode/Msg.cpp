@@ -509,6 +509,32 @@ unsigned int Msg::numTargets( const Element* e ) const
 	return ret;
 }
 
+unsigned int Msg::numSrc( const Element* e, unsigned int ei ) const
+{
+	vector< ConnTainer* >::const_iterator i;
+	unsigned int ret = 0;
+	for ( i = c_.begin(); i != c_.end(); i++ ) {
+		ret += ( *i )->numSrc( ei );
+	}
+	if ( next_ )
+		ret += e->msg( next_ )->numSrc( e, ei );
+
+	return ret;
+}
+
+unsigned int Msg::numDest( const Element* e, unsigned int ei ) const
+{
+	vector< ConnTainer* >::const_iterator i;
+	unsigned int ret = 0;
+	for ( i = c_.begin(); i != c_.end(); i++ ) {
+		ret += ( *i )->numDest( ei );
+	}
+	if ( next_ )
+		ret += e->msg( next_ )->numDest( e, ei );
+
+	return ret;
+}
+
 bool Msg::copy( const ConnTainer* c, Element* e1, Element* e2 ) const
 {
 	unsigned int funcId1 = 0; // True if it was a pure Dest.

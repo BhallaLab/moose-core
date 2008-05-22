@@ -6782,3 +6782,13 @@ Assume we are going with option 3: Syn data in Conns.
 21 May 2008
 Checkin to put in the new One2One conn files I had left out by mistake 
 last time. Currently none of the above ideas is set up.
+
+Checked in as revision 483 with unit test flags on, Smoldyn off, -g, GSL
+Computation of Many2ManyConn.cpp::size needs to be done.
+Issue of src vs dest in this call.
+
+==============================================================================
+22 May
+Working through the process of getting the # of src and dests for each 
+index of an element. Now it compiles and clears unit tests, though I haven't
+started to explicitly test for the accuracy of these numbers.
