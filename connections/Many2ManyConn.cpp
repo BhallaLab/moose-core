@@ -92,6 +92,22 @@ unsigned int Many2ManyConnTainer::getColumn( unsigned int i,
 	return entries_.getColumn( i, index, eIndex );
 }
 
+// # of srcs that terminate on the destEindex.
+unsigned int Many2ManyConnTainer::numSrc( unsigned int destEindex ) const
+{
+	vector< unsigned int > index;
+	vector< unsigned int > eIndex;
+	return entries_.getColumn( destEindex, index, eIndex );
+}
+
+// # of targets starting at srcEindex
+unsigned int Many2ManyConnTainer::numDest( unsigned int srcEindex ) const
+{
+	const unsigned int** index;
+	const unsigned int** eIndex;
+	return entries_.getRow( srcEindex, index, eIndex );
+}
+
 //////////////////////////////////////////////////////////////////////
 //  Many2ManyConn
 //////////////////////////////////////////////////////////////////////

@@ -187,6 +187,16 @@ unsigned int SimpleElement::numTargets( const string& finfoName ) const
 	return numTargets( f->msg() );
 }
 
+/**
+ * Finds the number of targets to this Msg, either src or dest,
+ * on the specified eIndex.
+ */
+unsigned int SimpleElement::numTargets( int msgNum, unsigned int eIndex )
+	const
+{
+	return numTargets( msgNum );
+}
+
 //////////////////////////////////////////////////////////////////
 // Msg functions
 //////////////////////////////////////////////////////////////////

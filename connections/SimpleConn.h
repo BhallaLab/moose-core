@@ -37,6 +37,22 @@ class SimpleConnTainer: public ConnTainer
 			return 1;
 		}
 
+		/**
+		 * Returns the number of sources coming to the specified
+		 * eIndex,
+		 */
+		unsigned int numSrc( unsigned int eIndex ) const {
+			return ( eIndex == eI2_ );
+		}
+
+		/**
+		 * Returns the number of targets originating from the specified
+		 * eIndex, on this ConnTainer.
+		 */
+		unsigned int numDest( unsigned int eIndex ) const {
+			return ( eIndex == eI1_ );
+		}
+
 		unsigned int eI1() const {
 			return eI1_;
 		}
