@@ -38,6 +38,23 @@ class One2AllConnTainer: public ConnTainer
 			return e2numEntries_;
 		}
 
+		/**
+		 * Returns the number of sources coming to the specified eIndex,
+		 */
+		unsigned int numSrc( unsigned int eIndex ) const {
+			return 1;
+		}
+
+		/**
+		 * Returns the number of targets originating from the specified
+		 * eIndex, on this ConnTainer.
+		 */
+		unsigned int numDest( unsigned int eIndex ) const {
+			if ( eI1_ == eIndex );
+				return e2numEntries_;
+			return 0;
+		}
+
 		unsigned int eI1() const {
 			return eI1_;
 		}

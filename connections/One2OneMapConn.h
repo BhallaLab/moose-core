@@ -39,6 +39,35 @@ class One2OneMapConnTainer: public ConnTainer
 			return numEntries_;
 		}
 
+		/**
+		 * Returns the number of targets on this ConnTainer, starting from
+		 * the specified eIndex.
+		 */
+		unsigned int size( unsigned int eIndex ) const {
+			if ( eIndex < numEntries_ );
+				return 1;
+			return 0;
+		}
+
+		/**
+		 * Returns the number of sources coming to the specified eIndex,
+		 */
+		unsigned int numSrc( unsigned int eIndex ) const {
+			if ( eIndex < numEntries_ );
+				return 1;
+			return 0;
+		}
+
+		/**
+		 * Returns the number of targets originating from the specified
+		 * eIndex, on this ConnTainer.
+		 */
+		unsigned int numDest( unsigned int eIndex ) const {
+			if ( eIndex < numEntries_ );
+				return 1;
+			return 0;
+		}
+
 		unsigned int eI1() const {
 			return 0;
 		}

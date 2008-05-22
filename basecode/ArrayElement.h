@@ -97,6 +97,15 @@ class ArrayElement: public Element
 		 * Faster than iterating through the whole lot.
 		 */
 		unsigned int numTargets( int msgNum ) const;
+
+		/**
+		 * Finds the number of targets to this Msg, either src or dest,
+		 * on the specified eIndex.
+		 * Slow, but faster than iterating through the whole lot if there
+		 * are composite messages.
+		 */
+		unsigned int numTargets( int msgNum, unsigned int eIndex ) const;
+
 		/**
 		 * Finds the number of targets to this Finfo.
 		 * Faster than iterating through the whole lot.
