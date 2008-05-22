@@ -532,6 +532,7 @@ Id ArrayElement::id() const {
  */
 
 Slot outputSlot;
+int inFinfoMsg;
 int synFinfoMsg;
 
 class Atest {
@@ -634,6 +635,7 @@ void arrayElementInternalTest( unsigned int connOption )
 	const Cinfo* aTestCinfo = initAtestCinfo();
 
 	outputSlot = aTestCinfo->getSlot( "outputSrc" );
+	inFinfoMsg = aTestCinfo->findFinfo( "msgInput" )->msg();
 	synFinfoMsg = aTestCinfo->findFinfo( "wtInput" )->msg();
 
 	Element* n = Neutral::create( "Neutral", "n", 
@@ -744,12 +746,46 @@ void arrayElementMapTest( unsigned int option )
 				}
 			}
 		}
+		// Let's check if our message counting code works
+		// First work out the correct answer.
+		vector< unsigned int > numSrc( NUMKIDS, 0 );
+		vector< unsigned int > numDest( NUMKIDS, 0 );
+		for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+			for ( unsigned int j = 0 ; j < NUMKIDS; j++ ) {
+				if ( pattern[i][j] != 0 ) {
+					numDest[i]++;
+					numSrc[j]++;
+				}
+			}
+		}
+		// Then check it
+		Element* src = srcKids[0].eref().e;
+		Element* dest = destKids[0].eref().e;
+		unsigned int tgts = 0;
+		cout << "+" << flush;
+		for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+			tgts = src->numTargets( outputSlot.msg(), i );
+			ASSERT( tgts == numDest[i], "Many2Many numTargets" ); 
+			tgts = dest->numTargets( inFinfoMsg, i );
+			ASSERT( tgts == numSrc[i], "Many2Many numTargets" ); 
+		}
 	} else if ( option == ConnTainer::One2OneMap ) {
 		ret = srcKids[0].eref().add( "outputSrc",
 			destKids[0].eref(), "msgInput", option );
 		ASSERT( ret, "Array One2OneMap setup" );
 		for ( unsigned int i = 0 ; i < NUMKIDS; i++ )
 			pattern[i][i] = 1;
+		// Check message counting code
+		Element* src = srcKids[0].eref().e;
+		Element* dest = destKids[0].eref().e;
+		unsigned int tgts = 0;
+		cout << "+" << flush;
+		for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
+			tgts = src->numTargets( outputSlot.msg(), i );
+			ASSERT( tgts == 1, "One2One numTargets" ); 
+			tgts = dest->numTargets( inFinfoMsg, i );
+			ASSERT( tgts == 1, "One2One numTargets" ); 
+		}
 	}
 
 	cout << "+" << flush;
