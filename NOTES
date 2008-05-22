@@ -6792,3 +6792,5 @@ Issue of src vs dest in this call.
 Working through the process of getting the # of src and dests for each 
 index of an element. Now it compiles and clears unit tests, though I haven't
 started to explicitly test for the accuracy of these numbers.
+
+Checked in as revision 484 with unit test flags on, Smoldyn off, -g, GSL
