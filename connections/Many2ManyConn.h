@@ -32,6 +32,18 @@ class Many2ManyConnTainer: public ConnTainer
 			return entries_.nEntries();
 		}
 
+		/**
+		 * Returns the number of sources coming to the specified
+		 * eIndex,
+		 */
+		unsigned int numSrc( unsigned int eIndex ) const;
+
+		/**
+		 * Returns the number of targets originating from the specified
+		 * eIndex, on this ConnTainer.
+		 */
+		unsigned int numDest( unsigned int eIndex ) const;
+
 		unsigned int eI1() const { // Irrelevant
 			return 0;
 		}

@@ -61,9 +61,21 @@ class ConnTainer
 		}
 
 		/**
-		 * Returns the number of targets on this ConnTainer
+		 * Returns the number of entries (src/dest pairs) in this ConnTainer
 		 */
 		virtual unsigned int size() const = 0;
+
+		/**
+		 * Returns the number of sources coming to the specified
+		 * eIndex,
+		 */
+		virtual unsigned int numSrc( unsigned int eIndex ) const = 0;
+
+		/**
+		 * Returns the number of targets originating from the specified
+		 * eIndex, on this ConnTainer.
+		 */
+		virtual unsigned int numDest( unsigned int eIndex ) const = 0;
 
 		/**
  		 * Creates a duplicate ConnTainer for message(s) between 

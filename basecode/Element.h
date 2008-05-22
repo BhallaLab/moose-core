@@ -71,6 +71,15 @@ class Element
 		 */
 		virtual unsigned int numTargets( int msgNum ) const = 0;
 		/**
+		 * Finds the number of targets to this Msg, either src or dest,
+		 * on the specified eIndex.
+		 * Slow, but faster than iterating through the whole lot if there
+		 * are composite messages.
+		 */
+		virtual unsigned int numTargets( int msgNum, unsigned int eIndex )
+			const = 0;
+
+		/**
 		 * Finds the number of targets to this Finfo.
 		 * Faster than iterating through the whole lot.
 		 */
