@@ -103,9 +103,9 @@ unsigned int Many2ManyConnTainer::numSrc( unsigned int destEindex ) const
 // # of targets starting at srcEindex
 unsigned int Many2ManyConnTainer::numDest( unsigned int srcEindex ) const
 {
-	const unsigned int** index;
-	const unsigned int** eIndex;
-	return entries_.getRow( srcEindex, index, eIndex );
+	const unsigned int* index;
+	const unsigned int* eIndex;
+	return entries_.getRow( srcEindex, &index, &eIndex );
 }
 
 //////////////////////////////////////////////////////////////////////
