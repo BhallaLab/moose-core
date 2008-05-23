@@ -553,19 +553,28 @@ class Atest {
 			send1< double >( e, outputSlot, getOutput( e ) );
 		}
 		static void wtInput( const Conn* c, double value ) {
+			Eref e = c->target();
 			Atest* a = static_cast< Atest* >( c->data() );
 			assert( a->wt_.size() > c->targetIndex() );
 			a->input_ = value + a->wt_[ c->targetIndex() ];
+			/*
+			cout << endl;
+			cout << e->name() << "[" << e.i << "]: input = " << value <<
+				", tgtIndex = " << c->targetIndex() << "wts = ";
+			for ( unsigned int i = 0; i < a->wt_.size(); i++ )
+				cout << a->wt_[i] << ", ";
+			cout << endl;
+			*/
 		}
 
 		void updateNumSynapses( Eref e ) {
 			// This is not quite working yet.
-			unsigned int n = e->numTargets( synFinfoMsg );
+			unsigned int n = e->numTargets( synFinfoMsg, e.i );
 			if ( n > wt_.size() )
 				wt_.resize( n );
 		}
 
-		static double getWt( Eref e, int index ) {
+		static double getWt( Eref e, const int& index ) {
 			Atest* a = static_cast< Atest* >( e.data() );
 			a->updateNumSynapses( e );
 			if ( index >= 0 && a->wt_.size() > static_cast< unsigned int >( index ) )
@@ -573,11 +582,14 @@ class Atest {
 			return 0.0;
 		}
 
-		static void setWt( Eref e, double val, int index ) {
-			Atest* a = static_cast< Atest* >( e.data() );
-			a->updateNumSynapses( e );
+		static void setWt( const Conn* c, double val, const int& index ) {
+			Atest* a = static_cast< Atest* >( c->data() );
+			a->updateNumSynapses( c->target() );
 			if ( index >= 0 && a->wt_.size() > static_cast< unsigned int >( index ) )
 				a->wt_[index] = val;
+			else
+				cout << "Index out of range: " << c->target()->name() << 
+					"[" << c->target().i << "], index=" << index << endl;
 		}
 
 	private:
@@ -825,7 +837,7 @@ void arrayElementMapTest( unsigned int option )
  */
 void arrayElementSynTest( unsigned int option )
 {
-	cout << "\nTesting Array Elements mapping connections, option= " <<
+	cout << "\nTesting Array Elements synapses and weights, option= " <<
 		option << ": ";
 	// Make the arrays.
 	Element* m = Neutral::create( "Neutral", "m", Element::root(), Id::scratchId() ); 
@@ -860,16 +872,25 @@ void arrayElementSynTest( unsigned int option )
 		pattern[i].resize( NUMKIDS, 0 );
 		set< double >( destKids[i].eref(), "input", 0.0 );
 	}
-
+			
 	// Set up the connections.
 	if ( option == ConnTainer::Many2Many || option == ConnTainer::Simple ) {
 		for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
 			for ( unsigned int j = 0 ; j < NUMKIDS; j++ ) {
-				if ( i + j == NUMKIDS || i == j || ( i + j ) % 3 == 0 ){
+				if ( i + j == NUMKIDS || i == j || ( i + j ) % 3 == 0 ) {
 					pattern[i][j] = 1;
 					ret = srcKids[i].eref().add( "outputSrc",
 						destKids[j].eref(), "wtInput", option );
 					ASSERT( ret, "Array Many2Many map setup" );
+
+					int numTgts = 
+						destKids[j].eref().e->numTargets(
+						synFinfoMsg, destKids[j].eref().i );
+					assert( numTgts > 0 );
+					// Set up the syn weights
+					double x = i * i + 2.0;
+					lookupSet< double, int >( destKids[j].eref(), "wt", x, numTgts - 1 );
+					// cout << i << ", " << j << ", numTgts= " << numTgts << ", wt= " << x << endl;
 				}
 			}
 		}
@@ -877,8 +898,12 @@ void arrayElementSynTest( unsigned int option )
 		ret = srcKids[0].eref().add( "outputSrc",
 			destKids[0].eref(), "wtInput", option );
 		ASSERT( ret, "Array One2OneMap setup" );
-		for ( unsigned int i = 0 ; i < NUMKIDS; i++ )
+		for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
 			pattern[i][i] = 1;
+			// Set up the syn weights
+			double x = i * i + 2.0;
+			lookupSet< double, int >( destKids[i].eref(), "wt", x, 0 );
+		}
 	}
 
 	cout << "+" << flush;
@@ -893,7 +918,8 @@ void arrayElementSynTest( unsigned int option )
 			double input = 0.0;
 			ret = get< double >( destKids[j].eref(), "input", input );
 			if ( pattern[i][j] != 0 ) {
-				ASSERT( ret && ( input == output ), "Array Syn messaging" );
+				ASSERT( ret && ( input == 2 * output+ 1 ), 
+					"Array Syn messaging" );
 			} else {
 				ASSERT( ret && ( input == 0.0 ), "Array Syn messaging" );
 			}
@@ -912,10 +938,8 @@ void arrayElementTest()
 	arrayElementInternalTest( ConnTainer::Many2Many ); 
 	arrayElementMapTest( ConnTainer::Many2Many ); 
 	arrayElementMapTest( ConnTainer::One2OneMap ); 
-	/*
 	arrayElementSynTest( ConnTainer::Simple ); 
 	arrayElementSynTest( ConnTainer::Many2Many ); 
-	arrayElementSynTest( ConnTainer::One2OneMap ); 
-	*/
+// 	arrayElementSynTest( ConnTainer::One2OneMap ); 
 }
 #endif

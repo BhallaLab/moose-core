@@ -37,7 +37,7 @@ bool DestFinfo::respondToAdd(
 		assert ( src.e != 0 && e.e != 0 );
 		returnFuncId = fv_->id();
 		destMsgId = msg_;
-		destIndex = e.e->numTargets( msg_ );
+		destIndex = e.e->numTargets( msg_, e.i );
 		// numDest = 1;
 		return 1;
 	}
