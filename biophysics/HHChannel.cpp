@@ -244,10 +244,12 @@ double HHChannel::getEk( Eref e )
  * \todo: May need to convert to handling arrays and Erefs.
  */
 
+// Assuming that the elements are simple elements. Use Eref for 
+// general case
 void HHChannel::makeGate( Element* e, const Finfo* f, double power )
 {
 	Element* gate = 0;	
-	Conn* gateConn = e->targets( f->msg() );
+	Conn* gateConn = e->targets( f->msg(), 0 ); //zero index for SE
 	unsigned int numGates = e->msg( f->msg() )->numTargets( e );
 	assert( numGates <= 1 );
 	if ( power <= 0 ) {
