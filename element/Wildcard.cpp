@@ -181,9 +181,10 @@ int singleLevelWildcard( Id start, const string& path, vector< Id >& ret )
 	vector< Id > kids; 
 	Neutral::getChildren( start.eref(), kids );
 	vector< Id >::iterator i;
-	for ( i = kids.begin(); i != kids.end(); i++ ) 
+	for ( i = kids.begin(); i != kids.end(); i++ ) {
 		if ( matchName( *i, beforeBrace, insideBrace, index ) )
 			ret.push_back( *i );
+	}
 
 	return ret.size() - nret;
 }
