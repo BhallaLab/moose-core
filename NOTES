@@ -6810,3 +6810,34 @@ Not able to check in, servers seem to be down.
 
 
 ==============================================================================
+23 May
+
+Checked in as revision 486 with unit test flags on, Smoldyn off, -g, GSL
+
+Now to fix the One2One conns to manage indices correctly.
+
+On the bigger scale, I think here we set the goals for the feature freeze:
+- Functioning arrays and array messages
+- Functioning createmap, planarconnect and planarweight/delay using arrays and
+	simple elements both.
+- Functioning solver, but not array version of solver. 
+	Perhaps at this point we don't even ask the solver to handle 
+	ArrayElements at all.
+- Set of regression tests including big cell models and simple network
+	models.
+- Set of Python regression tests.
+
+Longer-term project goals:
+- Connection refactoring
+- Full integration of array messages including accessible fields
+- Full integration of arrays and solvers
+- Parallel implementation
+- SBML/NeuroML/Neuroconstruct integration
+- Shifting over to Python for production simulations.
+
+
+For now. Fixed the One2One conns. Done quite neatly in the constructor.
+Passes unit tests first time round.
+
+==============================================================================
+
