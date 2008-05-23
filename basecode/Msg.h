@@ -250,7 +250,7 @@ class Msg
 		 * Makes a duplicate of the current message specified by c,
 		 * to now go between e1 and e2.
 		 */
-		bool copy( const ConnTainer* c, Element* e1, Element* e2 ) const;
+		bool copy( const ConnTainer* c, Element* e1, Element* e2, bool isArray) const;
 
 	private:
 		/**

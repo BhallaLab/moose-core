@@ -56,7 +56,7 @@ class Element
 		 * one Element at a time even if the Element is an array.
 		 * The Conn* must be deleted after use.
 		 */
-		virtual Conn* targets( int msgNum ) const = 0;
+		virtual Conn* targets( int msgNum, unsigned int eIndex ) const = 0;
 
 		/**
 		 * finfoName specifies the finfo connecting to these targets.
@@ -391,7 +391,7 @@ class Element
  		* also on tree.
  		*/
 		virtual void copyMessages( Element* dup, 
-			map< const Element*, Element* >& origDup ) const = 0;
+			map< const Element*, Element* >& origDup, bool isArray ) const = 0;
 		
 		/**
 		 * Returns the memory use of the Element and its messages, 

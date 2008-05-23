@@ -53,7 +53,9 @@ Conn* Many2ManyConnTainer::conn( unsigned int eIndex, bool isReverse,
  * e1 must be the new source element.
  * Returns the new ConnTainer on success, otherwise 0.
  */
-ConnTainer* Many2ManyConnTainer::copy( Element* e1, Element* e2 ) const
+ 
+ //TODO array copy
+ConnTainer* Many2ManyConnTainer::copy( Element* e1, Element* e2, bool isArray ) const
 {
 	// assert( e1->numMsg() > msg1() );
 	// assert( e2->numMsg() > msg2() );

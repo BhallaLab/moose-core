@@ -78,7 +78,7 @@ class One2AllConnTainer: public ConnTainer
  		 * one on. e1 must be the new source element.
  		 * Returns the new ConnTainer on success, otherwise 0.
  		*/
-		ConnTainer* copy( Element* e1, Element* e2 ) const;
+		ConnTainer* copy( Element* e1, Element* e2, bool isArray ) const;
 
 		unsigned int option() const {
 			return One2All;

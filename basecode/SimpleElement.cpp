@@ -136,17 +136,18 @@ const Cinfo* SimpleElement::cinfo( ) const
  * Danger is if the msgNum is a 'next' message. In such cases the iterator
  * will be OK, but will miss the pre-next region of the message.
  */
-Conn* SimpleElement::targets( int msgNum ) const
+Conn* SimpleElement::targets( int msgNum, unsigned int eIndex ) const
 {
+	assert (eIndex == 0);
 	if ( msgNum >= 0 && 
 		static_cast< unsigned int >( msgNum ) < msg_.size() )
-		return new TraverseMsgConn( &msg_[ msgNum ], this, 0 );
+		return new TraverseMsgConn( &msg_[ msgNum ], this, eIndex );
 	else if ( msgNum < 0 ) {
 		const vector< ConnTainer* >* d = dest( msgNum );
 		if ( d )
-			return new TraverseDestConn( d, 0 );
+			return new TraverseDestConn( d, eIndex );
 	}
-	return new SetConn( root(), 0 ); // SetConn always has good() == 0
+	return new SetConn( root(), eIndex ); // SetConn always has good() == 0
 }
 
 /**
@@ -157,7 +158,7 @@ Conn* SimpleElement::targets( const string& finfoName ) const
 	const Finfo* f = cinfo()->findFinfo( finfoName );
 	if ( !f ) // SetConn always is !good().
 		return new SetConn( root(), 0 );
-	return targets( f->msg() );
+	return targets( f->msg(), 0 );
 }
 
 /**
