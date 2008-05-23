@@ -14,12 +14,15 @@
 
 One2OneMapConnTainer::One2OneMapConnTainer( Eref e1, Eref e2, 
 			int msg1, int msg2,
-			unsigned int i1, unsigned int i2 )
+			unsigned int i1 )
 			: 
 	ConnTainer( e1.e, e2.e, msg1, msg2 ),
-		numEntries_( e2.e->numEntries() ),
-		i1_( i1 ), i2_( i2 )
-{;}
+		i1_( i1 ), i2_( e2.e->numEntries() )
+{
+	for ( unsigned int i = 0; i < i2_.size(); i++ ) {
+		i2_[i] = e2->numTargets( msg2, i );
+	}
+}
 
 Conn* One2OneMapConnTainer::conn( unsigned int eIndex, bool isReverse ) const
 {

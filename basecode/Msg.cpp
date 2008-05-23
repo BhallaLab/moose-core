@@ -12,6 +12,7 @@
 #include "One2AllConn.h"
 #include "../utility/SparseMatrix.h"
 #include "Many2ManyConn.h"
+// #include "One2OneMapConn.h"
 #include "Msg.h"
 
 ConnTainer* findExistingConnTainer( Eref src, Eref dest, 
@@ -114,7 +115,6 @@ bool Msg::add( Eref src, Eref dest,
 	// map does not apply.
 	if ( ct && dynamic_cast< Many2ManyConnTainer* >( ct ) ) {
 		return ct->addToConnTainer( src.i, dest.i, destIndex );
-		///\todo: temporarily put in 1 for the connIndex, but needs fixing
 	}
 
 	// Give up and generate a new ConnTainer.
