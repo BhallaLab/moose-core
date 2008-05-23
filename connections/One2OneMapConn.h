@@ -22,9 +22,16 @@
 class One2OneMapConnTainer: public ConnTainer
 {
 	public:
+		/**
+		 * Constructor for One2OneMapConnTainer.
+		 * This is a bit unusual because it does a lot of work.
+		 * Scans through all the dests to fill up the i2_ vector that
+		 * identifies each message as it arrives at the dest. It queries
+		 * each e2 entry for its numTargets.
+		 */
 		One2OneMapConnTainer( Eref e1, Eref e2, 
 			int msg1, int msg2,
-			unsigned int i1 = 0, unsigned int i2 = 0 );
+			unsigned int i1 = 0 );
 
 		Conn* conn( unsigned int eIndex, bool isReverse ) const;
 		Conn* conn( unsigned int eIndex, bool isReverse,
@@ -36,7 +43,7 @@ class One2OneMapConnTainer: public ConnTainer
 		 * Returns the number of targets on this ConnTainer
 		 */
 		unsigned int size() const {
-			return numEntries_;
+			return i2_.size();
 		}
 
 		/**
@@ -44,7 +51,7 @@ class One2OneMapConnTainer: public ConnTainer
 		 * the specified eIndex.
 		 */
 		unsigned int size( unsigned int eIndex ) const {
-			if ( eIndex < numEntries_ );
+			if ( eIndex < i2_.size() );
 				return 1;
 			return 0;
 		}
@@ -53,7 +60,7 @@ class One2OneMapConnTainer: public ConnTainer
 		 * Returns the number of sources coming to the specified eIndex,
 		 */
 		unsigned int numSrc( unsigned int eIndex ) const {
-			if ( eIndex < numEntries_ );
+			if ( eIndex < i2_.size() );
 				return 1;
 			return 0;
 		}
@@ -63,7 +70,7 @@ class One2OneMapConnTainer: public ConnTainer
 		 * eIndex, on this ConnTainer.
 		 */
 		unsigned int numDest( unsigned int eIndex ) const {
-			if ( eIndex < numEntries_ );
+			if ( eIndex < i2_.size() );
 				return 1;
 			return 0;
 		}
@@ -80,7 +87,7 @@ class One2OneMapConnTainer: public ConnTainer
 			return i1_;
 		}
 
-		unsigned int i2() const {
+		const vector< unsigned int >& i2() const {
 			return i2_;
 		}
 
@@ -109,9 +116,8 @@ class One2OneMapConnTainer: public ConnTainer
 		}
 		
 	private:
-		unsigned int numEntries_;
-		unsigned int i1_;
-		unsigned int i2_;
+		unsigned int i1_; // We don't really worry about this.
+		vector< unsigned int > i2_;
 };
 
 class One2OneMapConn: public Conn
@@ -119,7 +125,9 @@ class One2OneMapConn: public Conn
 	public:
 		One2OneMapConn( const One2OneMapConnTainer* s, unsigned int index )
 			: s_( s ), index_( index )
-		{;}
+		{
+			assert ( index < s->size() );
+		}
 
 		~One2OneMapConn()
 		{;}
@@ -128,7 +136,7 @@ class One2OneMapConn: public Conn
 			return Eref( s_->One2OneMapConnTainer::e2(), index_ );
 		}
 		unsigned int targetIndex() const {
-			return s_->One2OneMapConnTainer::i2() + index_;
+			return s_->One2OneMapConnTainer::i2()[ index_ ]; 
 		}
 		int targetMsg() const {
 			return s_->One2OneMapConnTainer::msg2();
@@ -136,8 +144,10 @@ class One2OneMapConn: public Conn
 		Eref source() const {
 			return Eref( s_->One2OneMapConnTainer::e1(), index_ );
 		}
+
+		// This is a cop-out. But we should not really use i1().
 		unsigned int sourceIndex() const {
-			return s_->One2OneMapConnTainer::i1() + index_;
+			return s_->One2OneMapConnTainer::i1();
 		}
 		int sourceMsg() const {
 			return s_->One2OneMapConnTainer::msg1();
@@ -198,7 +208,7 @@ class ReverseOne2OneMapConn: public Conn
 			return s_->One2OneMapConnTainer::eI1();
 		}
 		unsigned int targetIndex() const {
-			return s_->One2OneMapConnTainer::i1() + index_;
+			return s_->One2OneMapConnTainer::i1();
 		}
 		int targetMsg() const {
 			return s_->One2OneMapConnTainer::msg1();
@@ -207,7 +217,7 @@ class ReverseOne2OneMapConn: public Conn
 			return Eref( s_->One2OneMapConnTainer::e2(), index_ );
 		}
 		unsigned int sourceIndex() const {
-			return s_->One2OneMapConnTainer::i2() + index_;
+			return s_->One2OneMapConnTainer::i2()[ index_ ];
 		}
 		int sourceMsg() const {
 			return s_->One2OneMapConnTainer::msg2();

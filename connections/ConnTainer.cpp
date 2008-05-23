@@ -20,13 +20,6 @@ const unsigned int ConnTainer::One2All = 2;
 const unsigned int ConnTainer::Many2Many = 4;
 const unsigned int ConnTainer::One2OneMap = 8;
 
-/*
-ConnTainer* findExistingConnTainer( Eref src, Eref dest, 
-	int srcMsg, int destMsg, 
-	int srcFuncId, unsigned int destFuncId,
-	unsigned int connTainerOption );
-	*/
-
 /**
  * Add a new message with a container decided by the optional final 
  * argument. It defaults to a sensible guess based on the indices of the
@@ -88,10 +81,6 @@ ConnTainer* selectConnTainer( Eref src, Eref dest,
 		case 4:
 			ct = new Many2ManyConnTainer( src, dest, srcMsg, destMsg,
 				srcIndex, destIndex );
-			/*
-			ct = new SimpleConnTainer( src, dest, srcMsg, destMsg,
-				srcIndex, destIndex );
-			*/
 		break;
 		case 5:
 			ct = new Many2AllConnTainer( src, dest, srcMsg, destMsg,
@@ -106,8 +95,11 @@ ConnTainer* selectConnTainer( Eref src, Eref dest,
 				srcIndex, destIndex );
 		break;
 		case 8:
+			// This constructor is special, as it also scans the
+			// dest to obtain a vector of destIndex for each of the
+			// targets.
 			ct = new One2OneMapConnTainer( src, dest, srcMsg, destMsg,
-				srcIndex, destIndex );
+				srcIndex );
 		break;
 		case 9:
 			ct = new All2AllMapConnTainer( src, dest, srcMsg, destMsg,
@@ -120,22 +112,3 @@ ConnTainer* selectConnTainer( Eref src, Eref dest,
 	return ct;
 }
 
-/*
-ConnTainer* findExistingConnTainer( Eref src, Eref dest, 
-	int srcMsg, int destMsg, 
-	int srcFuncId, unsigned int destFuncId,
-	unsigned int connTainerOption )
-{
-	if ( srcMsg >= 0 ) {
-		Msg* m = src->varMsg( static_cast< unsigned int >( srcMsg ) );
-		m = m->matchByFuncId( src.e, destFuncId );
-		vector< ConnTainer* >::iterator i;
-		for ( i = m->varBegin(); i != m->varEnd(); i++ ) {
-			if ( (*i)->e2() == dest.e && (*i)->msg2() == destMsg && 
-				(*i)->option() == connTainerOption )
-				return *i;
-		}
-	}
-	return 0;
-}
-*/
