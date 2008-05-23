@@ -51,7 +51,8 @@ OBJ = \
 	PulseGen.o	\
 	RandomSpike.o \
 	TestBiophysics.o \
-	Cell.o
+	Cell.o		\
+	script_out.o
 endif
 #	HSolveStruct.o	\
 # 	HSolveBase.o	\
@@ -76,6 +77,7 @@ HHGate.o:	HHGate.h ../builtins/Interpol.h
 CaConc.o:	CaConc.h
 Nernst.o:	Nernst.h
 SpikeGen.o:	SpikeGen.h
+script_out.o:	script_out.h
 
 ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 ParSpikeGen.o:	SpikeGen.h ParSpikeGen.h

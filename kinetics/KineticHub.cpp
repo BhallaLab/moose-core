@@ -301,15 +301,16 @@ void KineticHub::destroy( const Conn* c)
 		const_cast< Finfo* >(
 		initReactionCinfo()->getThisFinfo( ) );
 	Element* hub = c->target().e;
+	unsigned int eIndex = c->target().i;
 
-	Conn* i = hub->targets( molSolveFinfo->msg() );
+	Conn* i = hub->targets( molSolveFinfo->msg(), eIndex );
 	while ( i->good() ) {
 		i->target().e->setThisFinfo( origMolFinfo );
 		i->increment();
 	}
 	delete i;
 
-	i = hub->targets( reacSolveFinfo->msg() );
+	i = hub->targets( reacSolveFinfo->msg(), eIndex );
 	while ( i->good() ) {
 		i->target().e->setThisFinfo( origReacFinfo );
 		i->increment();
@@ -826,7 +827,7 @@ void unzombify( Element* e )
 
 void clearMsgsFromFinfo( Eref e, const Finfo * f )
 {
-	Conn* c = e.e->targets( f->msg() );
+	Conn* c = e.e->targets( f->msg(), e.i );
 	vector< Element* > list;
 	vector< Element* >::iterator i;
 	while ( c->good() ) {
@@ -1450,7 +1451,7 @@ void redirectDestMessages(
 	unsigned int eIndex, vector< unsigned int >& map, 
 		vector< Element *>*  elist, bool retain )
 {
-	Conn* i = e->targets( eFinfo->msg() );
+	Conn* i = e.e->targets( eFinfo->msg(), e.i );
 	vector< Eref > srcElements;
 	vector< int > srcMsg;
 	vector< const ConnTainer* > dropList;
@@ -1531,6 +1532,7 @@ void redirectDestMessages(
  * new funcVecs into the remote Msgs. So instead we delete the 
  * old DynamicFinfos and recreate them.
  */
+// Assumption e is a simple element. Replace it with Eref to make it general
 void redirectDynamicMessages( Element* e )
 {
 	vector< Finfo* > flist;
@@ -1547,7 +1549,7 @@ void redirectDynamicMessages( Element* e )
 		assert( df != 0 );
 		vector< Eref > srcElements;
 		vector< const Finfo* > srcFinfos;
-		Conn* c = e->targets( ( *i )->msg() );
+		Conn* c = e->targets( ( *i )->msg(), 0 ); //zero index for SE
 
 		// note messages.
 		while( c->good() ) {
