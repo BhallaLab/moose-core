@@ -940,6 +940,6 @@ void arrayElementTest()
 	arrayElementMapTest( ConnTainer::One2OneMap ); 
 	arrayElementSynTest( ConnTainer::Simple ); 
 	arrayElementSynTest( ConnTainer::Many2Many ); 
-// 	arrayElementSynTest( ConnTainer::One2OneMap ); 
+ 	arrayElementSynTest( ConnTainer::One2OneMap ); 
 }
 #endif
