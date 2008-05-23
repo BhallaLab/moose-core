@@ -6794,3 +6794,19 @@ index of an element. Now it compiles and clears unit tests, though I haven't
 started to explicitly test for the accuracy of these numbers.
 
 Checked in as revision 484 with unit test flags on, Smoldyn off, -g, GSL
+
+Added unit tests for message counting code.
+Checked in as revision 485 with unit test flags on, Smoldyn off, -g, GSL
+
+Got synapses to work with Simple and Many2Many connections, all in the
+ArrayElement unit tests. This fails for now with One2One because we need 
+to manage an 'indices' vector for each of the managed synapses. At this
+point the implementation is option 1, where connections manage a target
+'conn index' to identify synaptic weights and other entries on the 
+destination.
+I have continued with this for now because it was the existing idea and I don't
+want to get into a major refactoring at this stage
+Not able to check in, servers seem to be down.
+
+
+==============================================================================
