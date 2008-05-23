@@ -45,20 +45,24 @@ ArrayElement::ArrayElement(
 }
 
 ArrayElement::ArrayElement( const std::string& name, 
-			const vector< Msg >& msg, 
-			const map< int, vector< ConnTainer* > >& dest,
+			const unsigned int numSrc,
+// 			const vector< Msg >& msg, 
+// 			const map< int, vector< ConnTainer* > >& dest,
 			const vector< Finfo* >& finfo, 
 			void *data, 
 			int numEntries, 
 			size_t objectSize
 		): Element (Id::scratchId()), name_(name),
-			finfo_(finfo), 
+			finfo_(1), 
 			data_(data), 
-			msg_(msg),
-			dest_(dest), 
+			msg_(numSrc),
+// 			dest_(dest), 
 			numEntries_(numEntries), objectSize_(objectSize)
 		{
-		;
+#ifdef DO_UNIT_TESTS
+		numInstances++;
+#endif	
+		finfo_[0] = finfo[0];
 		}
 
 /**
@@ -125,7 +129,7 @@ ArrayElement::~ArrayElement()
 	// cout << name() << " " << id() << " f = ";
 	for ( i = finfo_.begin(); i != finfo_.end(); i++ ) {
 		assert( *i != 0 );
-		// cout << ( *i )->name()  << " ptr= " << *i << " " ;
+// 		cout << ( *i )->name()  << " ptr= " << *i << " " << endl;
 		if ( (*i)->isTransient() ) {
 			delete *i;
 		}
@@ -152,15 +156,15 @@ const Cinfo* ArrayElement::cinfo( ) const
 /**
  * The Conn iterators have to be deleted by the recipient function.
  */
-Conn* ArrayElement::targets( int msgNum ) const
+Conn* ArrayElement::targets( int msgNum, unsigned int eIndex ) const
 {
 	if ( msgNum >= 0 && 
 		static_cast< unsigned int >( msgNum ) < cinfo()->numSrc() )
-		return new TraverseMsgConn( &msg_[ msgNum ], this, 0 );
+		return new TraverseMsgConn( &msg_[ msgNum ], this, eIndex );
 	else if ( msgNum < 0 ) {
 		const vector< ConnTainer* >* d = dest( msgNum );
 		if ( d )
-			return new TraverseDestConn( d, 0 );
+			return new TraverseDestConn( d, eIndex );
 	}
 	return 0;
 }
@@ -173,7 +177,7 @@ Conn* ArrayElement::targets( const string& finfoName ) const
 	const Finfo* f = cinfo()->findFinfo( finfoName );
 	if ( !f )
 		return 0;
-	return targets( f->msg() );
+	return targets( f->msg(), Id::AnyIndex );
 }
 
 unsigned int ArrayElement::numTargets( int msgNum ) const

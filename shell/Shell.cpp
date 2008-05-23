@@ -705,7 +705,7 @@ void Shell::trigLe( const Conn* c, Id parent )
 	// Here we do something intelligent for off-node le.
 	if ( pa ) {
 		vector< Id > ret;
-		if ( get< vector< Id > >( pa, "childList", ret ) ) {
+		if ( get< vector< Id > >( Eref(pa, parent.index()), "childList", ret ) ) {
 			sendBack1< vector< Id > >( c, elistSlot, ret );
 			// Element* e = c->targetElement();
 			// sendTo1< vector< Id > >( e, 0, elistSlot, c->targetIndex(), ret );
@@ -857,8 +857,8 @@ void Shell::planarconnect(const Conn* c, string source, string dest, double prob
 	simpleWildcardFind( source, src_list );
 	simpleWildcardFind( dest, dst_list );
 	for(size_t i = 0; i < src_list.size(); i++) {
-		if (src_list[i]()->className() != "SpikeGen" ){
-			cout << "The source element must be SpikeGen" << endl;
+		if (src_list[i]()->className() != "SpikeGen" && src_list[i]()->className() != "RandomSpike"){
+			cout << "The source element must be SpikeGen or RandomSpike" << endl;
 			return;
 		}
 		for(size_t j = 0; j < dst_list.size(); j++) {
@@ -983,60 +983,74 @@ void Shell::planardelay(const Conn& c, string source, string destination, vector
 	}
 	
 	static const Cinfo* sgCinfo = Cinfo::find( "SpikeGen" );
-	static const Slot eventSlot = sgCinfo->getSlot( "event" );
+	static const Slot sgeventSlot = sgCinfo->getSlot( "event" );
+	static const Cinfo* rsCinfo = Cinfo::find( "RandomSpike" );
+	static const Slot rseventSlot = rsCinfo->getSlot( "event" );
 	vector <Id> srcList;
 	vector <Id> dst_list;
 	simpleWildcardFind( source, srcList );
 	if (destination != "")
 		simpleWildcardFind( destination, dst_list );
 	for (size_t i = 0 ; i < srcList.size(); i++){
-		if (srcList[i]()->className() != "SpikeGen"){cout << "Shell::planardelay: Source is not SpikeGen" << endl; return;}
+		if (srcList[i]()->className() != "SpikeGen" && srcList[i]()->className() != "RandomSpike"){cout << "Shell::planardelay: Source = " << srcList[i]()->className() << " is not SpikeGen" << endl; return;}
 		vector< ConnTainer* >::const_iterator j;
-		const Msg* m = srcList[ i ]()->msg( eventSlot.msg() );
+		
+		const Msg* m;
+		if (srcList[i]()->className() == "SpikeGen"){ 
+			m= srcList[ i ]()->msg( sgeventSlot.msg() );
+		}
+		else if (srcList[i]()->className() == "RandomSpike"){ 
+			m= srcList[ i ]()->msg( rseventSlot.msg() );
+		}
 		//srcList[i]->findFinfo("event")->outgoingConns(srcList[i], conn);
 		for( j = m->begin(); j != m->end(); j++ ) {
 			unsigned int numSynapses;
 			//Element *dest = (*j)->e2();
 			Eref eref;
-			for ( Conn* k = ( *j )->conn( /*eIndex*/0, m->isDest() ); k->good(); k++ ){
+			Conn* k = ( *j )->conn( 0, m->isDest());
+			size_t eIndex = 0;
+// 			for ( Conn* k = ( *j )->conn( 0, m->isDest() ); k->good(); k++ ){
+			while (k->good()){
 				eref = k->target();
-				
-			}
-			if (destination != ""){
-				bool found = false;
-				for (vector<Id>::iterator iter = dst_list.begin(); 
-					iter != dst_list.end(); iter++)
-					if (*iter == eref.id()) {found = true; break;}
-				if (!found) continue;
-			}
-			bool ret = get< unsigned int >( eref, "numSynapses", numSynapses );
-			if (!ret) {cout << "Shell::planardelay: Could not access number of synapses." << endl; return;}
-			for (size_t k = 0 ; k < numSynapses; k++){
-				double number = 0;
-				if (delaychoice){
-					cout << "planardelay:: radial not implemented."<< endl;
-					// Not decided what to do
+// 				eref = ( *j )->conn( /*eIndex*/0, m->isDest())->target();
+				if (destination != ""){
+					bool found = false;
+					for (vector<Id>::iterator iter = dst_list.begin(); 
+						iter != dst_list.end(); iter++)
+						if (*iter == eref.id()) {found = true; break;}
+					if (!found) continue;
 				}
-				else {
-					number = delay;
-				}
-				if (randchoice){
-					double random = p->getNextSample();
-					while (random > maxallowed ) random = p->getNextSample();
-					if (absoluterandom)
-						{number += random;}
-					else 
-						{number += number*random;}
-				}
-				if (add){
-					double delay_old = 0;
-					ret = lookupGet< double, unsigned int >( eref, "delay", delay_old, k );
-					if (!ret) {
-						cout << "planardelay:: Error3" << endl;
+				bool ret = get< unsigned int >( eref, "numSynapses", numSynapses );
+				if (!ret) {cout << "Shell::planardelay: Could not access number of synapses." << endl; return;}
+				for (size_t l = 0 ; l < numSynapses; l++){
+					double number = 0;
+					if (delaychoice){
+						cout << "planardelay:: radial not implemented."<< endl;
+						// Not decided what to do
 					}
-					number += delay_old;
+					else {
+						number = delay;
+					}
+					if (randchoice){
+						double random = p->getNextSample();
+						while (random > maxallowed ) random = p->getNextSample();
+						if (absoluterandom)
+							{number += random;}
+						else 
+							{number += number*random;}
+					}
+					if (add){
+						double delay_old = 0;
+						ret = lookupGet< double, unsigned int >( eref, "delay", delay_old, l );
+						if (!ret) {
+							cout << "planardelay:: Error3" << endl;
+						}
+						number += delay_old;
+					}
+					lookupSet< double, unsigned int >( eref, "delay", number, l );
 				}
-				lookupSet< double, unsigned int >( eref, "delay", number, k );
+				eIndex++;
+				k = ( *j )->conn( eIndex, m->isDest());
 			}
 		}
 	}
@@ -1076,51 +1090,62 @@ void Shell::planarweight(const Conn& c, string source, string  destination, vect
 	}
 	
 	static const Cinfo* sgCinfo = Cinfo::find( "SpikeGen" );
-	static const Slot eventSlot = sgCinfo->getSlot( "event" );
+	static const Slot sgeventSlot = sgCinfo->getSlot( "event" );
+	static const Cinfo* rsCinfo = Cinfo::find( "RandomSpike" );
+	static const Slot rseventSlot = rsCinfo->getSlot( "event" );
 	vector <Id> srcList;
 	vector <Id> dst_list;
 	simpleWildcardFind( source, srcList );
 	if (destination != "")
 		simpleWildcardFind( destination, dst_list );
 	for (size_t i = 0 ; i < srcList.size(); i++){
-		if (srcList[i]()->className() != "SpikeGen"){cout << "Shell::planarweight: Source is not SpikeGen" << endl; return;}
+		if (srcList[i]()->className() != "SpikeGen" && srcList[i]()->className() != "RandomSpike"){cout << "Shell::planarweight: Source is not SpikeGen or RandomSpike" << endl; return;}
 		vector< ConnTainer* >::const_iterator j;
-		const Msg* m = srcList[ i ]()->msg( eventSlot.msg() );
+		const Msg* m;
+		if (srcList[i]()->className() == "SpikeGen"){ 
+			m= srcList[ i ]()->msg( sgeventSlot.msg() );
+		}
+		else if (srcList[i]()->className() == "RandomSpike"){ 
+			m= srcList[ i ]()->msg( rseventSlot.msg() );
+		}
 		//srcList[i]->findFinfo("event")->outgoingConns(srcList[i], conn);
 		for( j = m->begin(); j != m->end(); j++ ) {
 			unsigned int numSynapses;
 			//Element *dest = (*j)->e2();
 			Eref eref;
-			for ( Conn* k = ( *j )->conn( /*eIndex*/0, m->isDest() ); k->good(); k++ ){
+			Conn* k = ( *j )->conn( 0, m->isDest());
+			size_t eIndex = 0;
+// 			for ( Conn* k = ( *j )->conn( /*eIndex*/0, m->isDest() ); k->good(); k++ ){
+			while (k->good()){
 				eref = k->target();
-				
-			}
-			if (destination != ""){
-				bool found = false;
-				for (vector<Id>::iterator iter = dst_list.begin(); 
-					iter != dst_list.end(); iter++)
-					if (*iter == eref.id()) {found = true; break;}
-				if (!found) continue;
-			}
-			bool ret = get< unsigned int >( eref, "numSynapses", numSynapses );
-			if (!ret) {cout << "Shell::planarweight: Could not access number of synapses." << endl; return;}
-			for (size_t k = 0 ; k < numSynapses; k++){
-				double number = 0;
-				if (weightchoice){
-					cout << "planarweight:: decay not implemented."<< endl;
+				if (destination != ""){
+					bool found = false;
+					for (vector<Id>::iterator iter = dst_list.begin(); 
+						iter != dst_list.end(); iter++)
+						if (*iter == eref.id()) {found = true; break;}
+					if (!found) continue;
 				}
-				else {
-					number = weight;
+				bool ret = get< unsigned int >( eref, "numSynapses", numSynapses );
+				if (!ret) {cout << "Shell::planarweight: Could not access number of synapses." << endl; return;}
+				for (size_t l = 0 ; l < numSynapses; l++){
+					double number = 0;
+					if (weightchoice){
+						cout << "planarweight:: decay not implemented."<< endl;
+					}
+					else {
+						number = weight;
+					}
+					if (randchoice){
+						double random = p->getNextSample();
+						while (random > maxallowed ) random = p->getNextSample();
+						if (absoluterandom)
+							{number += random;}
+						else 
+							{number += number*random;}
+					}
+					lookupSet< double, unsigned int >( eref, "weight", number, l );
 				}
-				if (randchoice){
-					double random = p->getNextSample();
-					while (random > maxallowed ) random = p->getNextSample();
-					if (absoluterandom)
-						{number += random;}
-					else 
-						{number += number*random;}
-				}
-				lookupSet< double, unsigned int >( eref, "weight", number, k );
+				k = ( *j )->conn( ++eIndex, m->isDest());
 			}
 		}
 	}
@@ -1605,7 +1630,7 @@ void Shell::useClock( const Conn* c,
 		assert ( e && e != Element::root() );
 		const Finfo* func = e->findFinfo( function );
 		if ( func ) {
-			Conn* c = e->targets( func->msg() );
+			Conn* c = e->targets( func->msg(), i->index() );
 			if ( !c->good() ) {
 				ret = Eref( tick ).add( tickProc->msg(), e, func->msg(),
 					ConnTainer::Default );
@@ -1881,7 +1906,7 @@ void Shell::listMessages( const Conn* c,
 	string remoteFields = "";
 	string separator = "";
 
-	Conn* tc = e->targets( f->msg() );
+	Conn* tc = e->targets( f->msg(), id.index() );
 	while( tc->good() ) {
 		Eref tgt = tc->target();
 		ret.push_back( tgt.id() );

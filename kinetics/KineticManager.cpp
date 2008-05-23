@@ -637,9 +637,9 @@ double KineticManager::findReacPropensity( Eref e, bool isPrd ) const
 
 	Conn* c;
 	if ( isPrd )
-		c = e.e->targets( productFinfo->msg() );
+		c = e.e->targets( productFinfo->msg(), e.i );
 	else
-		c = e.e->targets( substrateFinfo->msg() );
+		c = e.e->targets( substrateFinfo->msg(), e.i );
 
 	while ( c->good() ) {
 		Element* m = c->target().e;
@@ -722,12 +722,12 @@ double KineticManager::findEnzSubPropensity( Eref e ) const
 	}
 	double min = 1.0e10;
 	double mval;
-	Conn* sc = e.e->targets( substrateFinfo->msg() );
+	Conn* sc = e.e->targets( substrateFinfo->msg(), e.i );
 	if ( !sc->good() ) { // A dangling enzyme, no substrates.
 		delete sc;
 		return 0.0;
 	}
-	Conn* ec = e.e->targets( enzymeFinfo->msg() );
+	Conn* ec = e.e->targets( enzymeFinfo->msg(), e.i );
 	assert( ec->good() );
 	ret = get< double >( ec->target(), "nInit", mval );
 	prop *= mval;
@@ -748,7 +748,7 @@ double KineticManager::findEnzSubPropensity( Eref e ) const
 	}
 	delete sc;
 
-	Conn* ic = e.e->targets( intramolFinfo->msg() );
+	Conn* ic = e.e->targets( intramolFinfo->msg(), e.i );
 	while ( ic->good() ) {
 		Eref m = ic->target();
 		assert( m.e->cinfo()->isA( mCinfo ) );

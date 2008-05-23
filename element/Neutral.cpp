@@ -442,7 +442,7 @@ void Neutral::getChildren( const Eref e, vector< Id >& ret )
 {
 	assert( e.e != 0 );
 	ret.resize( 0 );
-	Conn* c = e.e->targets( childSrcSlot.msg() );
+	Conn* c = e.e->targets( childSrcSlot.msg(), e.i );
 	while ( c->good() ) {
 		ret.push_back( c->target().id() );
 		c->increment();

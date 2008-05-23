@@ -535,7 +535,8 @@ unsigned int Msg::numDest( const Element* e, unsigned int ei ) const
 	return ret;
 }
 
-bool Msg::copy( const ConnTainer* c, Element* e1, Element* e2 ) const
+// bool Msg::copy( const ConnTainer* c, Element* e1, Element* e2 ) const
+bool Msg::copy( const ConnTainer* c, Element* e1, Element* e2, bool isArray ) const
 {
 	unsigned int funcId1 = 0; // True if it was a pure Dest.
 	if ( c->msg2() >= 0 ) {
@@ -543,7 +544,7 @@ bool Msg::copy( const ConnTainer* c, Element* e1, Element* e2 ) const
 		funcId1 = m2->fv_->id();
 	}
 	unsigned int funcId2 = fv_->id(); // from e2, stored on m1.
-	ConnTainer* ct = c->copy( e1, e2 );
+	ConnTainer* ct = c->copy( e1, e2, isArray );
 	if ( ct == 0 )
 		return 0;
 	return add( ct, funcId1, funcId2 );

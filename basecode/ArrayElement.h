@@ -45,8 +45,9 @@ class ArrayElement: public Element
 		 */
 		 
 		ArrayElement( const std::string& name, 
-			const vector< Msg >& msg, 
-			const map< int, vector< ConnTainer* > >& dest,
+			const unsigned int numSrc,
+// 			const vector< Msg >& msg, 
+// 			const map< int, vector< ConnTainer* > >& dest,
 			const vector< Finfo* >& finfo, 
 			void *data, 
 			int numEntries, 
@@ -83,7 +84,7 @@ class ArrayElement: public Element
 		 * one Element at a time even if the Element is an array.
 		 * The Conn* must be deleted after use.
 		 */
-		Conn* targets( int msgNum ) const;
+		Conn* targets( int msgNum, unsigned int eIndex ) const;
 
 		/**
 		 * finfoName specifies the finfo connecting to these targets.
@@ -274,7 +275,7 @@ class ArrayElement: public Element
  		* also on tree.
  		*/
 		void copyMessages( Element* dup, 
-			map< const Element*, Element* >& origDup ) const{;}
+			map< const Element*, Element* >& origDup, bool isArray ) const{;}
 
 		///////////////////////////////////////////////////////////////
 		// Debugging function
