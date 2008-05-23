@@ -23,7 +23,7 @@ template < class T1, class T2 > bool lookupSet(
 	if ( lf ) {
 		return lf->lookupSet( e, f, v, index );
 	}
-	cout << "Error: set( " << e.e->name() << "." << e.i << ", " << 
+	cout << "Error: lookupSet( " << e.e->name() << "." << e.i << ", " << 
 		f->name() << " T ): Finfo type mismatch\n";
 	return 0;
 }
@@ -36,7 +36,7 @@ template < class T1, class T2 > bool lookupSet( Eref e,
 {
 	const Finfo* finfo = e.e->findFinfo( f );
 	if ( finfo == 0 ) {
-		cout << "Error: set( " << e.e->name() << "." << e.i << ", " <<
+		cout << "Error: lookupSet( " << e.e->name() << "." << e.i << ", " <<
 			f << " T1, T2 ): Finfo not found\n";
 		return 0;
 	}
@@ -58,7 +58,7 @@ template < class T1, class T2 > bool lookupGet(
 	if ( lf ) {
 		return lf->lookupGet( e, f, v, index );
 	}
-	cout << "Error: lookupget( " << e.e->name() << "." << e.i << 
+	cout << "Error: lookupGet( " << e.e->name() << "." << e.i << 
 		", " << f->name() << " T1, T2 ): Finfo Type mismatch\n";
 	return 0;
 }
