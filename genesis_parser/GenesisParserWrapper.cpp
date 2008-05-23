@@ -2981,7 +2981,7 @@ void do_planardelay( int argc, const char** const argv, Id s )
 			continue;
 		}
 		if (strcmp(argv[i], "-radial") == 0){
-			if (argc - i <= 3){
+			if (argc - i <= 1){
 				cout << "Error: Conduction velocity not given" << endl;
 				continue;
 			}

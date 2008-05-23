@@ -79,12 +79,12 @@ class ConnTainer
 
 		/**
  		 * Creates a duplicate ConnTainer for message(s) between 
- 		 * new elements e1 and e2,
+ 		 * new elements e1 and e2, isArray tell whether e1, e2 are arrays
  		 * It checks the original version for which msgs to put the new
  		 * one on. e1 must be the new source element.
  		 * Returns the new ConnTainer on success, otherwise 0.
  		*/
-		virtual ConnTainer* copy( Element* e1, Element* e2 ) const = 0;
+		virtual ConnTainer* copy( Element* e1, Element* e2, bool isArray ) const = 0;
 
 		/**
 		 * Returns the identifying integer for the ConnTainer type.

@@ -67,7 +67,7 @@ const Cinfo* initRandomSpikeCinfo()
             ///////////////////////////////////////////////////////
             // MsgSrc definitions
             ///////////////////////////////////////////////////////
-            new SrcFinfo("eventSrc", Ftype1<double>::global()),
+            new SrcFinfo("event", Ftype1<double>::global()),
             
             //////////////////////////////////////////////////////////////////
             // MessageDestinations

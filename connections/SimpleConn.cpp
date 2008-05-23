@@ -11,6 +11,7 @@
 #include "header.h"
 #include "SimpleConn.h"
 #include "SetConn.h"
+#include "One2OneMapConn.h"
 
 SimpleConnTainer::SimpleConnTainer( Element* e1, Element* e2, 
 			int msg1, int msg2,
@@ -62,12 +63,15 @@ Conn* SimpleConnTainer::conn( unsigned int eIndex, bool isReverse,
  * e1 must be the new source element.
  * Returns the new ConnTainer on success, otherwise 0.
  */
-ConnTainer* SimpleConnTainer::copy( Element* e1, Element* e2 ) const
+ConnTainer* SimpleConnTainer::copy( Element* e1, Element* e2, bool isArray ) const
 {
 	// assert( e1->numMsg() > msg1() );
 	// assert( e2->numMsg() > msg2() );
-
-	return new SimpleConnTainer( e1, e2, msg1(), msg2() );
+	if (isArray){
+		return new One2OneMapConnTainer(e1, e2, msg1(), msg2());
+	}
+	else 
+		return new SimpleConnTainer( e1, e2, msg1(), msg2() );
 }
 
 //////////////////////////////////////////////////////////////////////
