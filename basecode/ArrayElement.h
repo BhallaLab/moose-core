@@ -91,7 +91,7 @@ class ArrayElement: public Element
 		 * Returns a Conn* iterator for going through all the targets.
 		 * Must be deleted after use.
 		 */
-		Conn* targets( const string& finfoName ) const;
+		Conn* targets( const string& finfoName, unsigned int eIndex ) const;
 
 		/**
 		 * Finds the number of targets to this Msg, either src or dest.
@@ -106,6 +106,14 @@ class ArrayElement: public Element
 		 * are composite messages.
 		 */
 		unsigned int numTargets( int msgNum, unsigned int eIndex ) const;
+		
+		/**
+		  * Returns the element is of type Array
+		  */
+		virtual string elementType() const
+		{
+			return "Array";
+		}
 
 		/**
 		 * Finds the number of targets to this Finfo.
