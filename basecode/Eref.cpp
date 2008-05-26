@@ -205,3 +205,12 @@ string Eref::name() const
 
 	return e->name();
 }
+
+string Eref::saneName(Id parent) const{
+	if (e->elementType()=="Array" && parent()->elementType() == "Simple"){
+		ostringstream s1;
+		s1 << e->name() << "[" << i << "]";
+		return s1.str();
+	}
+	return e->name();
+}

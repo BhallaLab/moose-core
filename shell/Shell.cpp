@@ -21,6 +21,7 @@
 #include "../utility/randnum/Exponential.h"
 #include "../utility/randnum/Normal.h"
 #include "math.h"
+#include "sstream"
 //////////////////////////////////////////////////////////////////////
 // Shell MOOSE object creation stuff
 //////////////////////////////////////////////////////////////////////
@@ -413,11 +414,11 @@ Shell::Shell()
  */
 Id Shell::parent( Id eid )
 {
-	Element* e = eid();
+	Eref eref (eid(), eid.index());
 	Id ret;
 	// Check if eid is on local node, otherwise go to remote node
 	// ret = Neutral::getParent(e)
-	if ( get< Id >( e, "parent", ret ) )
+	if ( get< Id >( eref , "parent", ret ) )
 		return ret;
 	return Id::badId();
 }
@@ -440,10 +441,8 @@ Id Shell::traversePath( Id start, vector< string >& names )
 			start = parent( start );
 		} else {
 			Id ret;
-			Element* e = start();
 			//Neutral::getChildByName(e, *i);
-			
-			lookupGet< Id, string >( e, "lookupChild", ret, *i );
+			lookupGet< Id, string >( start.eref(), "lookupChild", ret, *i );
 			//if ( ret.zero() || ret.bad() ) cout << "Shell:traversePath: The id is bad" << endl;
 			if ( ret.zero() || ret.bad() ){
 					return Id::badId();
@@ -510,8 +509,16 @@ string Shell::eid2path( Id eid )
 	static const string slash = "/";
 	string n( "" );
 	while ( !eid.zero() ) {
-		n = slash + eid()->name() + n;
-		eid = parent( eid );
+		Id pid = parent( eid );
+		if (pid()->elementType() == "Simple" && eid()->elementType() == "Array"){
+			ostringstream s1;
+			s1 << eid()->name() << "[" << eid.index() << "]";
+			n = slash + s1.str() + n;
+		}
+		else {
+			n = slash + eid()->name() + n;
+		}
+		eid = pid;
 	}
 	return n;
 }
@@ -1525,7 +1532,7 @@ void Shell::setVecField( const Conn* c,
 		// Cannot use i->good() here because we might set fields on /root.
 		assert( !i->bad() ); 
 		//Element* e = ( *i )();
-		Eref eref( ( *i )(), ( *i ).index() );
+		Eref eref = i->eref(); 
 		// Appropriate off-node stuff here.
 		const Finfo* f = eref.e->findFinfo( field );
 		if ( f ) {
@@ -1814,9 +1821,13 @@ void Shell::step( const Conn* c, double time )
 void Shell::requestClocks( const Conn* c )
 {
 	// Here we fill up the clock timings.
+	
 	Element* cj = findCj();
-
-	Conn* ct = cj->targets( "childSrc" );
+	//RD assuming that cj is a simple element
+	// assert for this (assert is not fool proof)
+	assert(cj->numEntries() == 1);
+	
+	Conn* ct = cj->targets( "childSrc", 0 );// zero index for SE
 	vector< double > times;
 
 	while ( ct->good() ) {

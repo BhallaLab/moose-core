@@ -368,9 +368,9 @@ Id Neutral::getParent( Eref e )
 	if ( e.e == Element::root() )
 		return Id();
 
-	Conn* c = e.e->targets( "child" );
+	Conn* c = e.e->targets( "child", e.i );
 	assert( c->good() );
-	return c->target().e->id();
+	return c->target().id();
 	delete c;
 }
 
@@ -408,7 +408,7 @@ Id Neutral::getChildByName( Eref er, const string& s )
 		}
 	} else {
 		name = s;
-		index = 0;
+		index = er.i;
 	}
 
 	for ( i = m->begin(); i != m->end(); i++ ){
