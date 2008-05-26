@@ -6834,10 +6834,31 @@ Longer-term project goals:
 - Parallel implementation
 - SBML/NeuroML/Neuroconstruct integration
 - Shifting over to Python for production simulations.
-
+Suggestions from the group:
+- Documentation and tutorials
+- Graphics
 
 For now. Fixed the One2One conns. Done quite neatly in the constructor.
 Passes unit tests first time round.
+Checked in as revision 487 with unit test flags on, Smoldyn off, -g, GSL
 
 ==============================================================================
+25 May 2008
 
+Fixed an old bug (they all are old) in the SourceForge tracker. This was that
+element wildcards don't work in showfield. Recorded test in 
+TESTS/bugs/SourceForgeTracker/1863862_showfield_hash/example.g.
+
+Tried to check in. There is a discrepancy on SourceForge and the unit
+tests are not cleared. The biophysics directory Makefile claims that 
+files script_out.cpp and script_out.h should exist. They do not. Don't
+know if it is an error in the Makefile or that the files have not been 
+uploaded.
+
+
+==============================================================================
+26 May 2008
+Upload missing. Fixed. Now works. Time to check in the showfield wildcard fix.
+
+
+==============================================================================
