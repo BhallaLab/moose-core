@@ -172,12 +172,12 @@ Conn* ArrayElement::targets( int msgNum, unsigned int eIndex ) const
 /**
  * The Conn iterators have to be deleted by the recipient function.
  */
-Conn* ArrayElement::targets( const string& finfoName ) const
+Conn* ArrayElement::targets( const string& finfoName, unsigned int eIndex ) const
 {
 	const Finfo* f = cinfo()->findFinfo( finfoName );
 	if ( !f )
 		return 0;
-	return targets( f->msg(), Id::AnyIndex );
+	return targets( f->msg(), eIndex );
 }
 
 unsigned int ArrayElement::numTargets( int msgNum ) const

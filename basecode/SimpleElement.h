@@ -78,7 +78,7 @@ class SimpleElement: public Element
 		 * Returns a Conn* iterator for going through all the targets.
 		 * Must be deleted after use.
 		 */
-		Conn* targets( const string& finfoName ) const;
+		Conn* targets( const string& finfoName, unsigned int eIndex ) const;
 
 		/**
 		 * Finds the number of targets to this Msg, either src or dest.
@@ -99,6 +99,14 @@ class SimpleElement: public Element
 		 * Faster than iterating through the whole lot.
 		 */
 		unsigned int numTargets( const string& finfoName ) const;
+		
+		/**
+		  * Returns the element is of type Array
+		  */
+		virtual string elementType() const
+		{
+			return "Simple";
+		}
 
 		/////////////////////////////////////////////////////////////
 		// Information functions
