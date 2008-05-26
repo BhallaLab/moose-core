@@ -1038,7 +1038,6 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 			// return;
 		start = 2;
 	}
-
 	// Hack here to deal with the special case of filling tables
 	// in tabchannels. Example command looks like:
 	// 		setfield Ca Y_A->table[{i}] {y}
@@ -2035,12 +2034,15 @@ void do_le( int argc, const char** const argv, Id s )
 
 void GenesisParserWrapper::doLe( int argc, const char** argv, Id s )
 {
+	Id current;
 	if ( argc == 1 ) { // Look in the cwe first.
 		send0( s(), requestCweSlot );
 		send1< Id >( s(), requestLeSlot, cwe_ );
+		current = cwe_;
 	} else if ( argc >= 2 ) {
 		// Id e = path2eid( argv[1], s );
 		Id e( argv[1] );
+		current = e;
 		/// \todo: Use better test for a bad path than this.
 		if ( e.bad() ) {
 			print( string( "cannot find object '" ) + argv[1] + "'" );
@@ -2052,7 +2054,7 @@ void GenesisParserWrapper::doLe( int argc, const char** argv, Id s )
 	// This operation should really do it in a parallel-clean way.
 	/// \todo If any children, we should suffix the name with a '/'
 	for ( i = elist_.begin(); i != elist_.end(); i++ )
-		print( i->eref().name() );
+		print( i->eref().saneName(current) );
 	elist_.resize( 0 );
 }
 

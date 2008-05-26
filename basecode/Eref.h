@@ -43,6 +43,13 @@ class Eref {
 		 * array element.
 		 */
 		string name() const;
+		
+		/**
+		 * Returns the Element name with index only if the parent element
+		 * is simple and current element is array. Otherwise, returns the 
+		 * name of the element. Faking business!!
+		 */	
+		string saneName(Id parent) const;
 
 		///////////////////////////////////////////////////////////////
 		// Msg handling functions
