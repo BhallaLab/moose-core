@@ -153,12 +153,13 @@ Conn* SimpleElement::targets( int msgNum, unsigned int eIndex ) const
 /**
  * The Conn iterators have to be deleted by the recipient function.
  */
-Conn* SimpleElement::targets( const string& finfoName ) const
+Conn* SimpleElement::targets( const string& finfoName, unsigned int eIndex ) const
 {
+	assert (eIndex == 0);
 	const Finfo* f = cinfo()->findFinfo( finfoName );
 	if ( !f ) // SetConn always is !good().
-		return new SetConn( root(), 0 );
-	return targets( f->msg(), 0 );
+		return new SetConn( root(), eIndex );
+	return targets( f->msg(), eIndex );
 }
 
 /**

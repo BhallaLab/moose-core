@@ -870,7 +870,7 @@ void KineticHub::clearFunc( const Conn* c )
 KineticHub* getHubFromZombie( Eref e, const Finfo* srcFinfo,
 		unsigned int& index )
 {
-	Conn* c = e.e->targets( "process" );
+	Conn* c = e.e->targets( "process", e.i );
 	if ( c->good() ) {
 		index = c->targetIndex();
 		KineticHub* kh = static_cast< KineticHub* >( c->target().data() );

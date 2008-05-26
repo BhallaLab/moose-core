@@ -578,7 +578,11 @@ void Stoich::addSumTot( Eref e )
 bool Stoich::findTargets(
 	Element* e, const string& msgFieldName, vector< const double* >& ret )
 {
-	Conn* c = e->targets( msgFieldName );
+	//assuming that e is a simple element
+	//not a fool proof assert for this
+	assert(e->numEntries() == 1);
+	
+	Conn* c = e->targets( msgFieldName, 0 );
 	map< Eref, unsigned int >::iterator j;
 	ret.resize( 0 );
 	while ( c->good() ) {

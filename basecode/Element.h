@@ -63,7 +63,7 @@ class Element
 		 * Returns a Conn* iterator for going through all the targets.
 		 * Must be deleted after use.
 		 */
-		virtual Conn* targets( const string& finfoName ) const = 0;
+		virtual Conn* targets( const string& finfoName, unsigned int eIndex ) const = 0;
 
 		/**
 		 * Finds the number of targets to this Msg, either src or dest.
@@ -157,6 +157,11 @@ class Element
 		 * any value for ArrayElement
 		 */
 		virtual unsigned int numEntries() const = 0;
+		
+		/**
+		  * Returns what whether the element is Simple or Array
+		  */
+		virtual string elementType() const = 0;
 		
 		/** Returns a Finfo that matches the path given by 'name'.
 		 * This can be a general path including field indirection
