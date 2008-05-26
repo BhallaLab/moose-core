@@ -28,7 +28,7 @@ bool SimpleElement::isDescendant( const Element* ancestor ) const
 	if ( this == Element::root() )
 			return 0;
 
-	Conn* c = targets( "child" );
+	Conn* c = targets( "child", 0 ); //zero index for SE
 	assert( c->good() ); // It better have a parent!
 	const Element* parent = c->target().e;
 	delete c;
@@ -443,8 +443,10 @@ class CopyTestClass
 // Only used for tests, so I can be inefficient.
 void getCopyTree( Element* c0, vector< Element* >& ret )
 {
+	//This assert for assumption that c0 is SE (not fool proof)
+	assert(c0->numEntries() == 1);
 	ret.push_back( c0 );
-	Conn* c = c0->targets( "childSrc" );
+	Conn* c = c0->targets( "childSrc", 0); // zero index for SE
 	while ( c->good() ) {
 		getCopyTree( c->target().e, ret );
 		c->increment();

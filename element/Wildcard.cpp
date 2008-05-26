@@ -11,6 +11,7 @@
 #include "Neutral.h"
 #include "Wildcard.h"
 
+
 static int wildcardRelativeFind( Id start, const vector< string >& path, 
 		unsigned int depth, vector< Id >& ret );
 
@@ -101,7 +102,6 @@ static int innerFind( const string& path, vector< Id >& ret)
 		bool ret = get( Id::shellId().eref(), "cwe", start );
 		assert( ret );
 	}
-
 	return wildcardRelativeFind( start, names, 0, ret );
 }
 
@@ -177,7 +177,6 @@ int singleLevelWildcard( Id start, const string& path, vector< Id >& ret )
 	findBraceContent( path, beforeBrace, insideBrace, index );
 	if ( beforeBrace == "##" )
 		return allChildren( start, insideBrace, index, ret ); // recursive.
-
 	vector< Id > kids; 
 	Neutral::getChildren( start.eref(), kids );
 	vector< Id >::iterator i;
@@ -200,7 +199,7 @@ void findBraceContent( const string& path, string& beforeBrace,
 {
 	beforeBrace = "";
 	insideBrace = "";
-	index = 0;
+	index = Id::AnyIndex;
 
 	if ( path.length() == 0 )
 		return;
@@ -236,7 +235,6 @@ bool matchName( Id id,
 {
 	if ( !( index == Id::AnyIndex || id.index() == index ) )
 		return 0;
-
 	if ( matchBeforeBrace( id, beforeBrace ) ) {
 		if ( insideBrace.length() == 0 ) {
 			return 1;
@@ -402,7 +400,7 @@ void testWildcard()
 	findBraceContent( "foo[TYPE=membrane]", bb, ib, ii );
 	ASSERT( bb == "foo", "findBraceContent" );
 	ASSERT( ib == "TYPE=membrane", "findBraceContent" );
-	ASSERT( ii == 0, "findBraceContent" );
+	ASSERT( ii == Id::AnyIndex, "findBraceContent" );
 	findBraceContent( "bar[]", bb, ib, ii );
 	ASSERT( bb == "bar", "findBraceContent" );
 	ASSERT( ib == "", "findBraceContent" );
