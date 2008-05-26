@@ -1957,20 +1957,31 @@ void GenesisParserWrapper::showAllFields( Id e, Id s )
 void GenesisParserWrapper::doShow( int argc, const char** argv, Id s )
 {
 	Id e;
+	char temp[200];
 	int firstField = 2;
-	char temp[80];
 
 	if ( argc < 2 ) {
 		print( "Usage: showfield [object/wildcard] [fields] -all" );
 		return;
 	}
 
-
 	if ( argc == 2 ) { // show fields of cwe.
 		send0( s(), requestCweSlot );
-		e = cwe_;
+		elist_.resize( 1, cwe_ );
+		// e = cwe_;
 		firstField = 1;
 	} else {
+		string path = argv[1];
+		//Shell::getWildCardList(conn, path, 0);
+		send2< string, bool >( s(), requestWildcardListSlot, path, 0 );
+		if ( elist_.size() == 0 ) {
+			cout << "Error: " << argv[0] << " : cannot find element " <<
+				path << endl;
+			return;
+		}
+		firstField = 2;
+
+		/*
 		// e = path2eid( argv[1], s );
 		e = Id( argv[1] );
 		if ( e.bad() ) {
@@ -1979,28 +1990,36 @@ void GenesisParserWrapper::doShow( int argc, const char** argv, Id s )
 		} else {
 			firstField = 2;
 		}
+		*/
 	}
 	// print( "[ " + eid2path( e ) + " ]" );
-	print( "[ " + e.path() + " ]" );
-	for ( int i = firstField; i < argc; i++ ) {
-		if ( strcmp( argv[i], "*") == 0 ) {
-			showAllFields( e, s );
-		} else { // get specific field here.
-			fieldValue_ = "";
-			//Shell::getField(conn, e, argv[i])
-			string field = argv[i];
-			map< string, string >::iterator iter = 
-				sliFieldNameConvert().find( e()->className() + "." + field );
-			if ( iter != sliFieldNameConvert().end() ) 
-				field = iter->second;
-				
-			send2< Id, string >( s(), requestFieldSlot, e, field );
-			if ( fieldValue_.length() > 0 ) {
-				sprintf( temp, "%-25s%s", field.c_str(), "= " );//printing the new field name 
-				print( temp + fieldValue_ );
-			} else {
-				cout << "'" << field << "' is not an element or the field of the working element\n";
-				return;
+	
+	vector< Id >::iterator j;
+	vector< Id > tempList = elist_; // In case it gets bashed elsewhere.
+	for ( j = tempList.begin(); j != tempList.end(); j++ ) {
+		e = *j;
+		print( "[ " + e.path() + " ]" );
+		for ( int i = firstField; i < argc; i++ ) {
+			if ( strcmp( argv[i], "*") == 0 ) {
+				showAllFields( e, s );
+			} else { // get specific field here.
+				fieldValue_ = "";
+				//Shell::getField(conn, e, argv[i])
+				string field = argv[i];
+				map< string, string >::iterator iter = 
+					sliFieldNameConvert().find( e()->className() + "." + field );
+				if ( iter != sliFieldNameConvert().end() ) 
+					field = iter->second;
+					
+				send2< Id, string >( s(), requestFieldSlot, e, field );
+				if ( fieldValue_.length() > 0 ) {
+				///\todo: Should use C++ formatting to avoid overflow.
+					sprintf( temp, "%-25s%s", field.c_str(), "= " );//printing the new field name 
+					print( temp + fieldValue_ );
+				} else {
+					cout << "'" << field << "' is not an element or the field of the working element\n";
+					return;
+				}
 			}
 		}
 	}
