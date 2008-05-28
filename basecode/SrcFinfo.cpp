@@ -33,7 +33,7 @@ bool SrcFinfo::add(
 		// not a shared one.
 		assert( FuncVec::getFuncVec( srcFuncId )->size() == 0 );
 		assert( FuncVec::getFuncVec( destFuncId )->size() == 1 );
-		unsigned int srcIndex = e.e->numTargets( msg_ );
+		unsigned int srcIndex = e.e->numTargets( msg_, e.i );
 
 		return Msg::add( e, destElm,
 			msg_, destMsg, srcIndex, destIndex, 

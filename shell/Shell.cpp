@@ -1589,7 +1589,7 @@ void Shell::setClock( const Conn* c, int clockNo, double dt,
 	Element* tick = 0;
 	if ( id.zero() || id.bad() ) {
 		tick = Neutral::create( 
-						"Tick", TickName, cj(), Id::scratchId() );
+						"Tick", TickName, cj, Id::scratchId() );
 	} else {
 		tick = id();
 	}
@@ -2210,8 +2210,8 @@ void Shell::readFile( const Conn* c, string filename, bool linemode ){
 bool Shell::create( const string& type, const string& name, 
 		Id parent, Id id )
 {
-	Element* p = parent();
-	Element* child = Neutral::create( type, name, p, id );
+	//Element* p = parent();
+	Element* child = Neutral::create( type, name, parent, id );
 	if ( child ) {
 		recentElement_ = child->id();
 		return 1;
@@ -2493,7 +2493,7 @@ void testShell()
 	/////////////////////////////////////////
 	// Test the loadTab operation
 	/////////////////////////////////////////
-	Element* tab = Neutral::create( "Table", "t1", Element::root(),
+	Element* tab = Neutral::create( "Table", "t1", Element::root()->id(),
 		Id::scratchId() );
 	static const double EPSILON = 1.0e-9;
 	static double values[] = 

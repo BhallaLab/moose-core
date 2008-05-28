@@ -364,7 +364,7 @@ void Enzyme::makeComplex( Eref er )
 
 	bool ret = get< double >( parent, "volumeScale", vol );
 	assert( ret );
-	Element* complex = Neutral::create( "Molecule", cplxName, e,
+	Element* complex = Neutral::create( "Molecule", cplxName, e->id(),
 		Id::scratchId() );
 
 	ret = er.add( "cplx", complex, "reac" );
@@ -408,18 +408,18 @@ void testEnzyme()
 
 	cout << "\nTesting Enzyme" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root(),
+	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(),
 		Id::scratchId() );
-	Element* sub = Neutral::create( "Molecule", "sub", n,
+	Element* sub = Neutral::create( "Molecule", "sub", n->id(),
 		Id::scratchId() );
 	ASSERT( sub != 0, "creating molecule" );
-	Element* prd = Neutral::create( "Molecule", "prd", n,
+	Element* prd = Neutral::create( "Molecule", "prd", n->id(),
 		Id::scratchId() );
 	ASSERT( prd != 0, "creating molecule" );
-	Element* enzMol = Neutral::create( "Molecule", "enzMol", n,
+	Element* enzMol = Neutral::create( "Molecule", "enzMol", n->id(),
 		Id::scratchId() );
 	ASSERT( enzMol != 0, "creating molecule" );
-	Element* enz = Neutral::create( "Enzyme", "enz", enzMol,
+	Element* enz = Neutral::create( "Enzyme", "enz", enzMol->id(),
 		Id::scratchId() );
 	ASSERT( enz != 0, "creating enzyme" );
 

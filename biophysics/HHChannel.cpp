@@ -281,7 +281,7 @@ void HHChannel::makeGate( Element* e, const Finfo* f, double power )
 			// Here we have multiple channels using this gate. So
 			// we don't mess with the original.
 			// make a new gate which we can change.
-			gate = Neutral::create( "HHGate", "xGate", e, 
+			gate = Neutral::create( "HHGate", "xGate", e->id(), 
 				Id::scratchId() );
 			gate->addFinfo( GlobalMarkerFinfo::global() );
 			bool ret = Eref( e ).add( f->name(), gate, "gate" );
@@ -289,7 +289,7 @@ void HHChannel::makeGate( Element* e, const Finfo* f, double power )
 			assert( ret );
 		}
 	} else { // No gate, make a new one.
-		gate = Neutral::create( "HHGate", f->name(), e, 
+		gate = Neutral::create( "HHGate", f->name(), e->id(), 
 			Id::scratchId() );
 		// Make it a global so that duplicates do not happen unless
 		// the table values change.
@@ -681,11 +681,11 @@ void testHHChannel()
 {
 	cout << "\nTesting HHChannel";
 	// Check message construction with compartment
-	Element* n = Neutral::create( "Neutral", "n", Element::root(), 
+	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(), 
 		Id::scratchId() );
-	Element* compt = Neutral::create( "Compartment", "compt", n, 
+	Element* compt = Neutral::create( "Compartment", "compt", n->id(), 
 		Id::scratchId() );
-	Element* chan = Neutral::create( "HHChannel", "Na", compt, 
+	Element* chan = Neutral::create( "HHChannel", "Na", compt->id(), 
 		Id::scratchId() );
 	
 	Slot childSlot = initHHChannelCinfo()->getSlot( "childSrc" );
@@ -799,7 +799,7 @@ void testHHChannel()
 	// Check construction and result of HH squid simulation
 	////////////////////////////////////////////////////////////////
 	
-	Element* kchan = Neutral::create( "HHChannel", "K", compt, 
+	Element* kchan = Neutral::create( "HHChannel", "K", compt->id(), 
 		Id::scratchId() );
 
 	ret = Eref( compt ).add( "channel", kchan, "channel" );
