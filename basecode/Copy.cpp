@@ -32,7 +32,6 @@ bool SimpleElement::isDescendant( const Element* ancestor ) const
 	assert( c->good() ); // It better have a parent!
 	const Element* parent = c->target().e;
 	delete c;
-
 	if ( parent == ancestor )
 		return 1;
 	else
@@ -547,32 +546,32 @@ void copyTest()
 ///////////////////////////////////////////////////////////////////////
 
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root(), Id::scratchId() );
-	Element* outsider = Neutral::create( "CopyClass", "outsider", n, Id::scratchId() );
+	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(), Id::scratchId() );
+	Element* outsider = Neutral::create( "CopyClass", "outsider", n->id(), Id::scratchId() );
 	set< int >( outsider, "i", 0 );
 	set< double >( outsider, "x", 0.0 );
 	set< string >( outsider, "s", "0.0" );
 	ASSERT( outsider != 0, "creating CopyClass" );
 	
-	Element* c0 = Neutral::create( "CopyClass", "c0", n, Id::scratchId() );
+	Element* c0 = Neutral::create( "CopyClass", "c0", n->id(), Id::scratchId() );
 	set< int >( c0, "i", 10 );
 	set< double >( c0, "x", 10.0 );
 	set< string >( c0, "s", "10.0" );
 	ASSERT( c0 != 0, "creating CopyClass" );
 
-	Element* k0 = Neutral::create( "CopyClass", "k0", c0, Id::scratchId() );
+	Element* k0 = Neutral::create( "CopyClass", "k0", c0->id(), Id::scratchId() );
 	set< int >( k0, "i", 100 );
 	set< double >( k0, "x", 100.0 );
 	set< string >( k0, "s", "100.0" );
 	ASSERT( k0 != 0, "creating CopyClass child" );
 
-	Element* k1 = Neutral::create( "CopyClass", "k1", c0, Id::scratchId() );
+	Element* k1 = Neutral::create( "CopyClass", "k1", c0->id(), Id::scratchId() );
 	set< int >( k1, "i", 101 );
 	set< double >( k1, "x", 101.0 );
 	set< string >( k1, "s", "101.0" );
 	ASSERT( k1 != 0, "creating CopyClass child" );
 
-	Element* g1 = Neutral::create( "CopyClass", "g1", k1, Id::scratchId() );
+	Element* g1 = Neutral::create( "CopyClass", "g1", k1->id(), Id::scratchId() );
 	set< int >( g1, "i", 110 );
 	set< double >( g1, "x", 110.0 );
 	set< string >( g1, "s", "110.0" );

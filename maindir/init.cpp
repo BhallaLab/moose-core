@@ -79,38 +79,38 @@ int mooseInit()
      * exist simultaneously on each node.
      */
     Element* sched =
-        Neutral::create( "Neutral", "sched", Element::root(), Id::scratchId() );
+        Neutral::create( "Neutral", "sched", Element::root()->id(), Id::scratchId() );
     // This one handles the simulation clocks
     Element* cj =
-        Neutral::create( "ClockJob", "cj", sched, Id::scratchId() );
+        Neutral::create( "ClockJob", "cj", sched->id(), Id::scratchId() );
     
-    Neutral::create( "Neutral", "library", Element::root(), Id::scratchId() );
-    Neutral::create( "Neutral", "proto", Element::root(), Id::scratchId() );
+    Neutral::create( "Neutral", "library", Element::root()->id(), Id::scratchId() );
+    Neutral::create( "Neutral", "proto", Element::root()->id(), Id::scratchId() );
     Element* solvers = 
-            Neutral::create( "Neutral", "solvers", Element::root(), Id::scratchId() );
+            Neutral::create( "Neutral", "solvers", Element::root()->id(), Id::scratchId() );
     // These two should really be solver managers because there are
     // a lot of decisions to be made about how the simulation is best
     // solved. For now let the Shell deal with it.
-    Neutral::create( "Neutral", "chem", solvers, Id::scratchId() );
-    Neutral::create( "Neutral", "neuronal", solvers, Id::scratchId() );
+    Neutral::create( "Neutral", "chem", solvers->id(), Id::scratchId() );
+    Neutral::create( "Neutral", "neuronal", solvers->id(), Id::scratchId() );
 
     
 #ifdef USE_MPI
 	// This one handles parser and postmaster scheduling.
 	Element* pj =
-			Neutral::create( "ClockJob", "pj", sched, Id::scratchId() );
+			Neutral::create( "ClockJob", "pj", sched->id(), Id::scratchId() );
 	Element* t0 =
-			Neutral::create( "ParTick", "t0", cj, Id::scratchId() );
+			Neutral::create( "ParTick", "t0", cj->id(), Id::scratchId() );
 	Element* pt0 =
-			Neutral::create( "ParTick", "t0", pj, Id::scratchId() );
+			Neutral::create( "ParTick", "t0", pj->id(), Id::scratchId() );
 #else
 
     // Not really honouring AUTOSCHEDULE setting -
     // May need only t0 for AUTOSCHEDULE=false
     // But creating a few extra clock ticks does not hurt as much as
     // not allowing user to change the clock settings
-    Neutral::create( "Tick", "t0", cj, Id::scratchId() );
-    Neutral::create( "Tick", "t1", cj, Id::scratchId() );
+    Neutral::create( "Tick", "t0", cj->id(), Id::scratchId() );
+    Neutral::create( "Tick", "t1", cj->id(), Id::scratchId() );
 #endif
     return 0;    
 }

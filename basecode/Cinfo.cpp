@@ -472,7 +472,7 @@ bool Cinfo::schedule( Element* e ) const
 			Id cjId( "/sched/cj" );
 			assert( cjId.good() );
 			sprintf( line, "t%d", i->tick * 2 + i->stage );
-			Element* t = Neutral::create( "Tick", line, cjId(), Id::scratchId() );
+			Element* t = Neutral::create( "Tick", line, cjId, Id::scratchId() );
 			assert( t != 0 );
 			tick = t->id();
 		}
