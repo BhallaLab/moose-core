@@ -178,9 +178,9 @@ void testNernst()
 {
 	cout << "\nTesting Nernst" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root(), 
+	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(), 
 		Id::scratchId() );
-	Element* nernst = Neutral::create( "Nernst", "Ca", n, 
+	Element* nernst = Neutral::create( "Nernst", "Ca", n->id(), 
 		Id::scratchId() );
 	SetConn c( nernst, 0 );
 	ASSERT( nernst != 0, "creating Nernst" );

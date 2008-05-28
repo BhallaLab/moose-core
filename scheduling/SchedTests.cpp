@@ -121,27 +121,27 @@ void testSched()
 	cout << "\nTesting sched basic stuff";
 
 	Element* sched =
-			Neutral::create( "Neutral", "tsched", Element::root(),
+			Neutral::create( "Neutral", "tsched", Element::root()->id(),
 				Id::scratchId() );
 	// Element* sched = Id( "/sched" )();
 	ASSERT( sched != 0, "/tsched object created\n" );
 	// Element* cj = Id( "/sched/cj" )();
-	Element* cj = Neutral::create( "ClockJob", "cj", sched,
+	Element* cj = Neutral::create( "ClockJob", "cj", sched->id(),
 		Id::scratchId() );
 	ASSERT( cj != 0, "/tsched/cj object created\n" );
-	Element* t1a = Neutral::create( "Tick", "t1a", cj,
+	Element* t1a = Neutral::create( "Tick", "t1a", cj->id(),
 		Id::scratchId() );
-	Element* t1b = Neutral::create( "Tick", "t1b", cj,
+	Element* t1b = Neutral::create( "Tick", "t1b", cj->id(),
 		Id::scratchId() );
-	Element* t2 = Neutral::create( "Tick", "t2", cj,
+	Element* t2 = Neutral::create( "Tick", "t2", cj->id(),
 		Id::scratchId() );
-	Element* t5 = Neutral::create( "Tick", "t5", cj,
+	Element* t5 = Neutral::create( "Tick", "t5", cj->id(),
 		Id::scratchId() );
 
 	ASSERT( cj->numTargets( "childSrc" ) == 4, "sched num ticks" );
 
 	Element* tt =
-			Neutral::create( "TickTest", "tt", Element::root(),
+			Neutral::create( "TickTest", "tt", Element::root()->id(),
 				Id::scratchId() );
 
 	set< double >( t1a, "dt", 1.0 );
@@ -325,19 +325,19 @@ void testSchedProcess()
 	FuncVec::sortFuncVec();
 /////////////////////////////////////////////////////////////////
 	cout << "\nTesting sched process sequencing";
-	Element* n = Neutral::create( "Neutral", "n", Element::root(),
+	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(),
 		Id::scratchId() );
-	Element* cj = Neutral::create( "ClockJob", "cj", n,
+	Element* cj = Neutral::create( "ClockJob", "cj", n->id(),
 		Id::scratchId() );
-	Element* t0 = Neutral::create( "Tick", "t0", cj,
+	Element* t0 = Neutral::create( "Tick", "t0", cj->id(),
 		Id::scratchId() );
-	Element* s0_0 = Neutral::create( "Sched0", "s0_0", n,
+	Element* s0_0 = Neutral::create( "Sched0", "s0_0", n->id(),
 		Id::scratchId() );
-	Element* s0_1 = Neutral::create( "Sched0", "s0_1", n,
+	Element* s0_1 = Neutral::create( "Sched0", "s0_1", n->id(),
 		Id::scratchId() );
-	Element* s1 = Neutral::create( "Sched1", "s1", n,
+	Element* s1 = Neutral::create( "Sched1", "s1", n->id(),
 		Id::scratchId() );
-	Element* s2 = Neutral::create( "Sched2", "s2", n,
+	Element* s2 = Neutral::create( "Sched2", "s2", n->id(),
 		Id::scratchId() );
 
 	const Finfo* proc = t0->findFinfo( "process" );
@@ -356,18 +356,18 @@ void testSchedProcess()
 
 	cout << "\nTesting Shell-based scheduling commands";
 
-	n = Neutral::create( "Neutral", "n", Element::root(),
+	n = Neutral::create( "Neutral", "n", Element::root()->id(),
 		Id::scratchId() );
-	s0_0 = Neutral::create( "Sched0", "s0_0", n,
+	s0_0 = Neutral::create( "Sched0", "s0_0", n->id(),
 		Id::scratchId() );
-	s0_1 = Neutral::create( "Sched0", "s0_1", n,
+	s0_1 = Neutral::create( "Sched0", "s0_1", n->id(),
 		Id::scratchId() );
-	s1 = Neutral::create( "Sched1", "s1", n,
+	s1 = Neutral::create( "Sched1", "s1", n->id(),
 		Id::scratchId() );
-	s2 = Neutral::create( "Sched2", "s2", n,
+	s2 = Neutral::create( "Sched2", "s2", n->id(),
 		Id::scratchId() );
 
-	Element* shell = Neutral::create( "Shell", "tshell", Element::root(),
+	Element* shell = Neutral::create( "Shell", "tshell", Element::root()->id(),
 		Id::scratchId() );
 	// Element* shell = Id( "/shell" )();
 	ASSERT( shell != 0 , "shell creation");
