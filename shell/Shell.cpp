@@ -708,11 +708,10 @@ void Shell::pope( const Conn* c )
 void Shell::trigLe( const Conn* c, Id parent )
 						
 {
-	Element* pa = parent();
 	// Here we do something intelligent for off-node le.
-	if ( pa ) {
+	if ( !parent.bad() ) {
 		vector< Id > ret;
-		if ( get< vector< Id > >( Eref(pa, parent.index()), "childList", ret ) ) {
+		if ( get< vector< Id > >( parent.eref(), "childList", ret ) ) {
 			sendBack1< vector< Id > >( c, elistSlot, ret );
 			// Element* e = c->targetElement();
 			// sendTo1< vector< Id > >( e, 0, elistSlot, c->targetIndex(), ret );
@@ -1416,7 +1415,7 @@ void Shell::copyIntoArray( const Conn* c,
 {
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 	int n = (int) (parameter[0]*parameter[1]);
-	Element* e = src()->copyIntoArray( parent(), name, n );
+	Element* e = src()->copyIntoArray( parent, name, n );
 	//assign the other parameters to the arrayelement
 	assert(parameter.size() == 6);
 // 	ArrayElement* f = static_cast <ArrayElement *> (e);
@@ -2223,8 +2222,7 @@ bool Shell::create( const string& type, const string& name,
 bool Shell::createArray( const string& type, const string& name, 
 		Id parent, Id id, int n )
 {	
-	Element* p = parent();
-	Element* child = Neutral::createArray( type, name, p, id, n );
+	Element* child = Neutral::createArray( type, name, parent, id, n );
 	if ( child ) {
 		recentElement_ = child->id();
 		return 1;

@@ -237,12 +237,12 @@ class SimpleElement: public Element
 		 * Returns the # of msgs
 		 */
 		unsigned int numMsg() const;
-
+		
 		///////////////////////////////////////////////////////////////
 		// Functions for the copy operation. All 5 are virtual
 		///////////////////////////////////////////////////////////////
 		Element* copy( Element* parent, const string& newName ) const;
-		Element* copyIntoArray( Element* parent, const string& newName, int n ) const;
+		Element* copyIntoArray( Id parent, const string& newName, int n ) const;
 		bool isDescendant( const Element* ancestor ) const;
 
 		Element* innerDeepCopy(
