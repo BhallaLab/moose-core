@@ -369,7 +369,7 @@ class Element
 		   \param n number of copies
 		   \return An Element * pointing to a ArrayElement object
 		*/
-		virtual Element* copyIntoArray( Element* parent, const string& newName, 
+		virtual Element* copyIntoArray( Id parent, const string& newName, 
 			int n ) const = 0;
 		/**
 		 * True if current element descends from the specified ancestor.

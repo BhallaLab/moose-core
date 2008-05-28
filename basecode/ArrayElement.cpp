@@ -659,7 +659,7 @@ void arrayElementInternalTest( unsigned int connOption )
 
 	Id childId = Id::scratchId();
 	Element* child = 
-		Neutral::createArray( "Atest", "foo", n, childId, NUMKIDS );
+		Neutral::createArray( "Atest", "foo", n->id(), childId, NUMKIDS );
 
 	ASSERT( child != 0, "Array Element" );
 	ASSERT( child == childId(), "Array Element" );
@@ -722,11 +722,11 @@ void arrayElementMapTest( unsigned int option )
 
 	Id srcId = Id::scratchId();
 	Element* src = 
-		Neutral::createArray( "Atest", "src", m, srcId, NUMKIDS );
+		Neutral::createArray( "Atest", "src", m->id(), srcId, NUMKIDS );
 
 	Id destId = Id::scratchId();
 	Element* dest = 
-		Neutral::createArray( "Atest", "dest", n, destId, NUMKIDS );
+		Neutral::createArray( "Atest", "dest", n->id(), destId, NUMKIDS );
 
 	ASSERT( src != 0 && dest != 0, "Array Map" );
 	ASSERT( src == srcId() && dest == destId(), "Array Map" );
@@ -849,11 +849,11 @@ void arrayElementSynTest( unsigned int option )
 
 	Id srcId = Id::scratchId();
 	Element* src = 
-		Neutral::createArray( "Atest", "src", m, srcId, NUMKIDS );
+		Neutral::createArray( "Atest", "src", m->id(), srcId, NUMKIDS );
 
 	Id destId = Id::scratchId();
 	Element* dest = 
-		Neutral::createArray( "Atest", "dest", n, destId, NUMKIDS );
+		Neutral::createArray( "Atest", "dest", n->id(), destId, NUMKIDS );
 
 	ASSERT( src != 0 && dest != 0, "Array Syn" );
 	ASSERT( src == srcId() && dest == destId(), "Array Syn" );
