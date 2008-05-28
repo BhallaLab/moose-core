@@ -1118,9 +1118,9 @@ void testMathFunc(){
 	cout << "\nTesting MathFunc" << flush ;
 	
 	/*infix function*/
-	Element* n = Neutral::create( "Neutral", "n", Element::root(),
+	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(),
 		Id::scratchId() );
-	Element* m = Neutral::create( "MathFunc", "m", n,
+	Element* m = Neutral::create( "MathFunc", "m", n->id(),
 		Id::scratchId() );
 	ASSERT( m != 0, "creating mathfunc" );
 	ProcInfoBase p;

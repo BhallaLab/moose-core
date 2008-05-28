@@ -67,7 +67,7 @@ class Neutral
 			 */
 			static Element* create(
 				const string& cinfo, const string& name, 
-				Element* parent, Id id );
+				Id parent, Id id );
 			/**
 			 * This version of create uses Id::scratchId() for the id of
 			 * the new object

@@ -272,9 +272,9 @@ void testSymCompartment()
 {
 	cout << "\nTesting SymCompartment" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root(), 
+	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(), 
 		Id::scratchId() );
-	Element* c0 = Neutral::create( "SymCompartment", "c0", n, 
+	Element* c0 = Neutral::create( "SymCompartment", "c0", n->id(), 
 		Id::scratchId() );
 	ASSERT( c0 != 0, "creating symCompartment" );
 	ProcInfoBase p;

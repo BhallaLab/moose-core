@@ -208,7 +208,7 @@ const string Neutral::getClass( Eref e )
 void Neutral::mcreate( const Conn* conn,
 				const string cinfo, const string name )
 {
-	create( cinfo, name, conn->target().e, Id::scratchId() );
+	create( cinfo, name, conn->target().id(), Id::scratchId() );
 /*
 		Element* e = conn.targetElement();
 
@@ -238,17 +238,17 @@ void Neutral::mcreateArray( const Conn* conn,
  * Underlying utility function for creating objects.
  */
 Element* Neutral::create(
-		const string& cinfo, const string& name, Element* parent, Id id )
+		const string& cinfo, const string& name, Id parent, Id id )
 {
 	// Check that the parent exists.
-	if ( !parent ) {
+	if ( parent.bad() ) {
 		cout << "Error: Neutral::create: No parent\n";
 		return 0;
 	}
 	// Check that the parent can handle children
-	const Finfo* childSrc = parent->findFinfo( "childSrc" );
+	const Finfo* childSrc = parent()->findFinfo( "childSrc" );
 	if ( !childSrc ) {
-		cout << "Error: Neutral::create: object '" << parent->name() << 
+		cout << "Error: Neutral::create: object '" << parent()->name() << 
 			"' cannot handle child\n";
 		return 0;
 	}
@@ -262,7 +262,7 @@ Element* Neutral::create(
 	}
 
 	// Need to check here if the name is an existing one.
-	Id existing = getChildByName( parent, name );
+	Id existing = getChildByName( parent.eref(), name );
 	if ( existing.good() ) {
 		cout << "Error: Neutral::create: Attempt to overwrite existing element '" << existing.path() << "'. Using original.\n";
 		return existing();
@@ -275,7 +275,7 @@ Element* Neutral::create(
 		assert( kFinfo != 0 );
 		// Here a global absolute or a relative finfo lookup for
 		// the childSrc field would be useful.
-		bool ret = Eref( parent ).add( childSrc->msg(), kid, kFinfo->msg(),
+		bool ret = parent.eref().add( childSrc->msg(), kid, kFinfo->msg(),
 			ConnTainer::Default );
 		// bool ret = childSrc->add( parent, kid, kFinfo );
 		assert( ret );
@@ -427,7 +427,7 @@ Id Neutral::getChildByName( Eref er, const string& s )
  */
 void Neutral::lookupChild( const Conn* c, const string s )
 {
-	Id ret = getChildByName( c->target().e, s );
+	Id ret = getChildByName( c->target(), s );
 	sendBack1< Id >( c, childSrcSlot, ret );
 }
 
@@ -593,7 +593,7 @@ void testNeutral()
 		ASSERT( initialNumInstances - SimpleElement::numInstances == 2,
 						"Check that N2 is made" );
 
-		Element* foo = Neutral::create( "Neutral", "foo", n1, 
+		Element* foo = Neutral::create( "Neutral", "foo", n1->id(), 
 			Id::scratchId() );
 		ASSERT( foo != 0, "Neutral::create" );
 		ASSERT( initialNumInstances - SimpleElement::numInstances == 1,

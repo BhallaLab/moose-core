@@ -456,13 +456,13 @@ void testSynChan()
 {
 	cout << "\nTesting SynChan" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root(), 
+	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(), 
 		Id::scratchId() );
-	Element* syn = Neutral::create( "SynChan", "syn", n, 
+	Element* syn = Neutral::create( "SynChan", "syn", n->id(), 
 		Id::scratchId() );
-	Element* sg1 = Neutral::create( "SpikeGen", "sg1", n, 
+	Element* sg1 = Neutral::create( "SpikeGen", "sg1", n->id(), 
 		Id::scratchId() );
-	Element* sg2 = Neutral::create( "SpikeGen", "sg2", n, 
+	Element* sg2 = Neutral::create( "SpikeGen", "sg2", n->id(), 
 		Id::scratchId() );
 	ASSERT( syn != 0, "creating Synapse" );
 	ASSERT( sg1 != 0, "testing Synapse" );
