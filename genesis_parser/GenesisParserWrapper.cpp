@@ -3935,12 +3935,12 @@ Element* makeGenesisParser()
 		shellId, "shell" );
 		*/
 	assert( !shellId.bad() );
-	Element* shell = shellId();
+	//Element* shell = shellId();
 
 #ifdef CRL_MPI
-	Element* sli = Neutral::create( "ParGenesisParser", "sli", shell, Id::scratchId() );
+	Element* sli = Neutral::create( "ParGenesisParser", "sli", shellId, Id::scratchId() );
 #else
-	Element* sli = Neutral::create( "GenesisParser", "sli", shell, Id::scratchId() );
+	Element* sli = Neutral::create( "GenesisParser", "sli", shellId, Id::scratchId() );
 #endif
 
 	// set< string, string >( shell, "create", "GenesisParser", "sli");

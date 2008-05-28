@@ -655,7 +655,7 @@ void arrayElementInternalTest( unsigned int connOption )
 	synFinfoMsg = aTestCinfo->findFinfo( "wtInput" )->msg();
 
 	Element* n = Neutral::create( "Neutral", "n", 
-		Element::root(), Id::scratchId() ); 
+		Element::root()->id(), Id::scratchId() ); 
 
 	Id childId = Id::scratchId();
 	Element* child = 
@@ -717,8 +717,8 @@ void arrayElementMapTest( unsigned int option )
 	cout << "\nTesting Array Elements mapping connections, option= " <<
 		option << ": ";
 	// Make the arrays.
-	Element* m = Neutral::create( "Neutral", "m", Element::root(), Id::scratchId() ); 
-	Element* n = Neutral::create( "Neutral", "n", Element::root(), Id::scratchId() ); 
+	Element* m = Neutral::create( "Neutral", "m", Element::root()->id(), Id::scratchId() ); 
+	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(), Id::scratchId() ); 
 
 	Id srcId = Id::scratchId();
 	Element* src = 
@@ -844,8 +844,8 @@ void arrayElementSynTest( unsigned int option )
 	cout << "\nTesting Array Elements synapses and weights, option= " <<
 		option << ": ";
 	// Make the arrays.
-	Element* m = Neutral::create( "Neutral", "m", Element::root(), Id::scratchId() ); 
-	Element* n = Neutral::create( "Neutral", "n", Element::root(), Id::scratchId() ); 
+	Element* m = Neutral::create( "Neutral", "m", Element::root()->id(), Id::scratchId() ); 
+	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(), Id::scratchId() ); 
 
 	Id srcId = Id::scratchId();
 	Element* src = 

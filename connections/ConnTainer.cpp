@@ -44,22 +44,22 @@ ConnTainer* selectConnTainer( Eref src, Eref dest,
 {
 	// This is flawed: We could have a single-entry ArrayElement that
 	// later gets expanded.
+	// RD: flaw corrected by using elementType function
 	
 	if ( connTainerOption == ConnTainer::Default ) {
 		int srcNum;
-		if ( src.e->numEntries() == 1 ) srcNum = 0;
+		if ( src.e->elementType() == "Simple" ) srcNum = 0;
 		else if ( src.i == Id::AnyIndex ) srcNum = 2;
 		else srcNum = 1;
 	
 		int destNum;
-		if ( dest.e->numEntries() == 1 ) destNum = 0;
+		if ( dest.e->elementType() == "Simple" ) destNum = 0;
 		else if ( dest.i == Id::AnyIndex ) destNum = 2;
 		else destNum = 1;
 		connTainerOption = srcNum * 3 + destNum;
 	}
 
 	ConnTainer* ct = 0;
-		
 	switch ( connTainerOption )
 	{
 		case 0:

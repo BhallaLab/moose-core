@@ -628,9 +628,9 @@ void testCompartment()
 {
 	cout << "\nTesting Compartment" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root(), 
+	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(), 
 		Id::scratchId() );
-	Element* c0 = Neutral::create( "Compartment", "c0", n, 
+	Element* c0 = Neutral::create( "Compartment", "c0", n->id(), 
 		Id::scratchId() );
 	ASSERT( c0 != 0, "creating compartment" );
 	ProcInfoBase p;
@@ -679,7 +679,7 @@ void testCompartment()
 	for (i = 1; i < 100; i++ ) {
 		char name[20];
 		sprintf( name, "c%d", i );
-		compts[i] = Neutral::create( "Compartment", name, n, 
+		compts[i] = Neutral::create( "Compartment", name, n->id(), 
 			Id::scratchId() );
 		SetConn temp( compts[i], 0 );
 		Compartment::setInject( &temp, 0.0 );
