@@ -258,12 +258,12 @@ class ArrayElement: public Element
 		 * Returns the # of msgs
 		 */
 		unsigned int numMsg() const;
-
+		
 		///////////////////////////////////////////////////////////////
 		// Functions for the copy operation. All 5 are virtual
 		///////////////////////////////////////////////////////////////
 		Element* copy( Element* parent, const string& newName ) const{return 0;}
-		Element* copyIntoArray( Element* parent, const string& newName, int n ) const{return 0;}
+		Element* copyIntoArray( Id parent, const string& newName, int n ) const{return 0;}
 		bool isDescendant( const Element* ancestor ) const{return 0;}
 
 		Element* innerDeepCopy(
