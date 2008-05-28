@@ -230,7 +230,7 @@ void Neutral::mcreate( const Conn* conn,
 void Neutral::mcreateArray( const Conn* conn,
 				const string cinfo, const string name, int n )
 {
-		createArray( cinfo, name, conn->target().e, Id::scratchId(), n );
+		createArray( cinfo, name, conn->target().id(), Id::scratchId(), n );
 }
 
 
@@ -287,17 +287,17 @@ Element* Neutral::create(
 }
 
 Element* Neutral::createArray(
-		const string& cinfo, const string& name, Element* parent, Id id, int n )
+		const string& cinfo, const string& name, Id parent, Id id, int n )
 {
 	// Check that the parent exists.
-	if ( !parent ) {
+	if ( parent.bad() ) {
 		cout << "Error: Neutral::create: No parent\n";
 		return 0;
 	}
 	// Check that the parent can handle children
-	const Finfo* childSrc = parent->findFinfo( "childSrc" );
+	const Finfo* childSrc = parent()->findFinfo( "childSrc" );
 	if ( !childSrc ) {
-		cout << "Error: Neutral::create: object '" << parent->name() << 
+		cout << "Error: Neutral::create: object '" << parent()->name() << 
 			"' cannot handle child\n";
 		return 0;
 	}
@@ -311,7 +311,7 @@ Element* Neutral::createArray(
 	}
 
 	// Need to check here if the name is an existing one.
-	Id existing = getChildByName( parent, name );
+	Id existing = getChildByName( parent.eref(), name );
 	if ( existing.good() ) {
 		cout << "Error: Neutral::create: Attempt to overwrite existing element '" << existing.path() << "'. Using original.\n";
 		return existing();
@@ -325,7 +325,7 @@ Element* Neutral::createArray(
 		// Here a global absolute or a relative finfo lookup for
 		// the childSrc field would be useful.
 		// bool ret = childSrc->add( parent, kid, kFinfo );
-		bool ret = Eref( parent ).add( childSrc->msg(), kid, kFinfo->msg(),
+		bool ret = parent.eref().add( childSrc->msg(), kid, kFinfo->msg(),
 			ConnTainer::One2All );
 			// childSrc->add( parent, kid, kFinfo );
 		assert( ret );
@@ -412,10 +412,14 @@ Id Neutral::getChildByName( Eref er, const string& s )
 	}
 
 	for ( i = m->begin(); i != m->end(); i++ ){
-		if ( ( *i )->e2()->name() == name )
-			return ( *i )->e2()->id().assignIndex( index );
+		if ( ( *i )->e2()->name() == name ){
+			if ( ( *i )->e2()->elementType() == "Simple" )
+				return ( *i )->e2()->id();
+			else 
+				return ( *i )->e2()->id().assignIndex( index );
+		}
 		//takes care of simple elements which are of the form cc[2]
-		if ( ( *i )->e2()->name() == name + '[' + str(index) + ']' )
+		if ( ( ( *i )->e2()->name() == name + '[' + str(index) + ']' ) && ( *i )->e2()->elementType() == "Simple")
 			return ( *i )->e2()->id().assignIndex( index );
 	}
 	return Id::badId();

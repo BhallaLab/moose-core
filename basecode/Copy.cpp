@@ -303,15 +303,14 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 	return child;
 }
 
-Element* SimpleElement::copyIntoArray( Element* parent, const string& newName, int n )
+Element* SimpleElement::copyIntoArray( Id parent, const string& newName, int n )
 		const
 {
-
 	static const Element* library = Id( "/library" )();
 	static const Element* proto = Id( "/proto" )();
 
-	if ( parent->isDescendant( this ) ) {
-		cout << "Warning: SimpleElement::copy: Attempt to copy within descendant tree" << parent->name() << endl;
+	if ( parent()->isDescendant( this ) ) {
+		cout << "Warning: SimpleElement::copy: Attempt to copy within descendant tree" << parent()->name() << endl;
 		return 0;
 	}
 	string nm = newName;
@@ -321,10 +320,10 @@ Element* SimpleElement::copyIntoArray( Element* parent, const string& newName, i
 	Id oldChild;
 	//oldChild = Neutral::getChildByName( parent, nm)
 	bool ret = lookupGet< Id, string >(
-					parent, "lookupChild", oldChild, nm );
+					parent.eref(), "lookupChild", oldChild, nm );
 	assert( ret );
 	if ( !oldChild.bad() ) {
-		cout << "Warning: SimpleElement::copy: pre-existing child with target name: " << parent->name() << "/" << nm << endl;
+		cout << "Warning: SimpleElement::copy: pre-existing child with target name: " << parent()->name() << "/" << nm << endl;
 		return 0;
 	}
 	
@@ -361,7 +360,7 @@ Element* SimpleElement::copyIntoArray( Element* parent, const string& newName, i
 	// Still to fill in.
 	
 	// Phase 4: stick the copied tree onto the parent Element.
-	ret = Eref( parent ).add( "childSrc", child, "child", 
+	ret = parent.eref().add( "childSrc", child, "child", 
 		ConnTainer::One2All );
 		
 	
@@ -372,14 +371,13 @@ Element* SimpleElement::copyIntoArray( Element* parent, const string& newName, i
 
 	// Phase 5: Schedule all the objects
 	if ( !( 
-		parent->isDescendant( library ) || parent->isDescendant( proto )
+		parent()->isDescendant( library ) || parent()->isDescendant( proto )
 		) ) {
 		for ( i = origDup.begin(); i != origDup.end(); i++ ) {
 			if ( i->first != i->second ) // a global
 				i->second->cinfo()->schedule( i->second );
 		}
 	}
-
 	return child;
 
 }
@@ -675,7 +673,7 @@ void copyTest()
 // 	create CopyClass m/c_simple
 // 	createmap m/c_s
 
-	Element* cc = c0->copyIntoArray( n, "cc", 10 );
+	Element* cc = c0->copyIntoArray( n->id(), "cc", 10 );
 	ASSERT( cc != c0, "copying" );
 	ASSERT( cc != 0, "copying" );
 
@@ -707,13 +705,13 @@ void copyTest()
 		ASSERT( compareCopyMsgs( t0, t1, outsider ), "copy Msgs" );
 	}
 
-	Element* cc0 = c0->copyIntoArray( cc, "", 10 );
+	Element* cc0 = c0->copyIntoArray( cc->id().assignIndex(2), "", 10 );
 	ASSERT( cc0 != c0, "copying" );
 	ASSERT( cc0 != 0, "copying" );
 	ASSERT( cc0->name() == "c0", "copying" );
 
 	get< Id >( cc0, "parent", p10 );
-	//ASSERT( p10 == cc->id(), "copy parent" );
+	ASSERT( p10 == cc->id().assignIndex(2), "copy parent" );
 
 	// Check that the copy has a unique id (this was an actual bug!)
 	ASSERT( cc0->id() != c0->id(), "unique copy id" );
@@ -730,7 +728,7 @@ void copyTest()
 	Element *c_simple = Neutral::create( "CopyClass", "c_simple", m->id(), Id::scratchId() );
 	ret = set <double> (c_simple, "x", 100);
 	ASSERT(ret, "set value to compartment");
-	Element *c_array = c_simple->copyIntoArray(m, "c_array", 4);
+	Element *c_array = c_simple->copyIntoArray(m->id(), "c_array", 4);
 	ASSERT(c_array->numEntries() == 4, "number of entries")
 	ASSERT(c_array != 0, "simple element copied into array element")
 	Eref eref = Eref(c_array, 2);
