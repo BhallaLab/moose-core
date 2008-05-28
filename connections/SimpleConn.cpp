@@ -35,7 +35,8 @@ SimpleConnTainer::SimpleConnTainer( Eref e1, Eref e2,
 Conn* SimpleConnTainer::conn( unsigned int eIndex, bool isReverse ) const
 {
 	//	numIter_++; // For reference counting. Do we need it?
-	if ( eIndex != eI1_ )
+	if ( ( !isReverse && eIndex != eI1_) || (isReverse && eIndex != eI2_) )
+// 	if ( eIndex != eI1_ )
 		return new SetConn( Element::root(), 0 );
 	if ( isReverse )
 		return new ReverseSimpleConn( this );

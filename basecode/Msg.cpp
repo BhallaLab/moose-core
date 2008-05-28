@@ -123,7 +123,7 @@ bool Msg::add( Eref src, Eref dest,
 		srcMsg, destMsg,
 		srcIndex, destIndex,
 		connTainerOption );
-
+	
 	return add( ct, srcFuncId, destFuncId );
 }
 

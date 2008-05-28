@@ -389,18 +389,18 @@ Id gslSetup( Eref e, const string& method )
 			}
 		}
 	}
-	Element* solve = Neutral::create( "Neutral", "solve", e.e,
+	Element* solve = Neutral::create( "Neutral", "solve", e.id(),
 		Id::scratchId() );
 	solveId = solve->id();
 	assert( solveId.good() );
 
-	Element*  ki = Neutral::create( "GslIntegrator", "integ", solve,
+	Element*  ki = Neutral::create( "GslIntegrator", "integ", solve->id(),
 		Id::scratchId() );
 	assert ( ki != 0 );
-	Element* ks = Neutral::create( "Stoich", "stoich", solve,
+	Element* ks = Neutral::create( "Stoich", "stoich", solve->id(),
 		Id::scratchId() );
 	assert( ks != 0 );
-	Element* kh = Neutral::create( "KineticHub", "hub", solve,
+	Element* kh = Neutral::create( "KineticHub", "hub", solve->id(),
 		Id::scratchId() );
 	assert( kh != 0 );
 
@@ -449,15 +449,15 @@ Id smoldynSetup( Eref e, const string& method, double recommendedDt )
 			}
 		}
 	}
-	Element* solve = Neutral::create( "Neutral", "solve", e.e,
+	Element* solve = Neutral::create( "Neutral", "solve", e.id(),
 		Id::scratchId() );
 	solveId = e.id();
 	assert( solveId.good() );
 
-	Element* ks = Neutral::create( "Stoich", "stoich", solve,
+	Element* ks = Neutral::create( "Stoich", "stoich", solve->id(),
 		Id::scratchId() );
 	assert( ks != 0 );
-	Element*  sh = Neutral::create( "SmoldynHub", "SmoldynHub", solve,
+	Element*  sh = Neutral::create( "SmoldynHub", "SmoldynHub", solve->id(),
 		Id::scratchId() );
 	assert ( sh != 0 );
 	set< double >( sh, "dt", recommendedDt );

@@ -124,10 +124,10 @@ Element* ReadCell::start( const string& cellpath )
 	
 	if ( graftFlag_ ) {
 		return Neutral::create( "Compartment",
-			cellname, cellpa, Id::scratchId() );
+			cellname, cellpa->id(), Id::scratchId() );
 	} else {
 		return Neutral::create( "Cell",
-			cellname, cellpa, Id::scratchId() );
+			cellname, cellpa->id(), Id::scratchId() );
 	}
 }
 
@@ -315,7 +315,7 @@ Element* ReadCell::buildCompartment(
 			numOthers_ += numProtoOthers_;
 		} else {
 			compt = Neutral::create( "Compartment",
-				name, currCell_, Id::scratchId() );
+				name, currCell_->id(), Id::scratchId() );
 			if ( !graftFlag_ )
 				++numCompartments_;
 		}
