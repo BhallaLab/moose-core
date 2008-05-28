@@ -440,24 +440,22 @@ class CopyTestClass
 
 // Gets a vector of elements of c0 and all descendants.
 // Only used for tests, so I can be inefficient.
-void getCopyTree( Element* c0, vector< Element* >& ret )
+void getCopyTree( Eref c0, vector< Eref >& ret )
 {
-	//This assert for assumption that c0 is SE (not fool proof)
-	assert(c0->numEntries() == 1);
 	ret.push_back( c0 );
-	Conn* c = c0->targets( "childSrc", 0); // zero index for SE
+	Conn* c = c0.e->targets( "childSrc", c0.i); // zero index for SE
 	while ( c->good() ) {
-		getCopyTree( c->target().e, ret );
+		getCopyTree( c->target(), ret );
 		c->increment();
 	}
 	delete c;
 }
 
 // Compares values on two single elements
-bool compareCopyValues( const Element* c0, const Element* c1 )
+bool compareCopyValues( const Eref c0, const Eref c1 )
 {
-	CopyTestClass* v0 = static_cast< CopyTestClass* >( c0->data( 0 ) );
-	CopyTestClass* v1 = static_cast< CopyTestClass* >( c1->data( 0 ) );
+	CopyTestClass* v0 = static_cast< CopyTestClass* >( c0.e->data( c0.i ) );
+	CopyTestClass* v1 = static_cast< CopyTestClass* >( c1.e->data( c1.i ) );
 	
 	return ( *v0 == *v1 );
 }
@@ -472,7 +470,9 @@ bool checkMsgMatch( Conn* ic0, Conn* ic1, const Element* outsider )
 	while ( ic1->good() ) {
 		if ( ic0->target().e->name() == ic1->target().e->name() ||
 			( ic0->target().e->name() == "c0" &&
-			  ic1->target().e->name() == "c1" )
+			  ic1->target().e->name() == "c1" ) ||
+			( ic0->target().e->name() == "c0" &&
+			  ic1->target().e->name() == "cc" )  
 		)
 			if ( ic0->sourceMsg() == ic1->sourceMsg() )
 				return 1;
@@ -483,17 +483,16 @@ bool checkMsgMatch( Conn* ic0, Conn* ic1, const Element* outsider )
 
 // Compares msgs on two single elements, excluding any going to the
 // outsider. c0 is original, c1 is dup.
-bool compareCopyMsgs( const Element* c0, const Element* c1,
+bool compareCopyMsgs( const Eref c0, const Eref c1,
 	const Element* outsider )
 {	
-	unsigned eIndex = 0;
-	unsigned int numSrc = c0->cinfo()->numSrc();
+	unsigned int numSrc = c0.e->cinfo()->numSrc();
 	for ( unsigned int i = 0; i < numSrc; i++ ) {
 
-		Conn* ic0 = c0->targets( i, eIndex );
+		Conn* ic0 = c0.e->targets( i, c0.i );
 		while ( ic0->good() )
 		{
-			Conn* ic1 = c1->targets( i, eIndex );
+			Conn* ic1 = c1.e->targets( i, c1.i );
 			if ( checkMsgMatch( ic0, ic1, outsider ) == 0 )
 				return 0;
 			delete ic1;
@@ -611,19 +610,19 @@ void copyTest()
 	ASSERT( kids[1] == c0->id() , "copy kids" );
 	ASSERT( kids[2] == c1->id() , "copy kids" );
 
-	vector< Element* > c0family;
-	vector< Element* > c1family;
-	getCopyTree( c0, c0family );
-	getCopyTree( c1, c1family );
+	vector< Eref > c0family;
+	vector< Eref > c1family;
+	getCopyTree( Eref(c0, 0), c0family );
+	getCopyTree( Eref(c1, 0), c1family );
 	
 	ASSERT( c0family.size() == c1family.size(), "copy tree" );
 	for ( unsigned int i = 0; i < c0family.size(); i++ ) {
-		Element* t0 = c0family[ i ];
-		Element* t1 = c1family[ i ];
-		ASSERT( t0 != t1, "uniqueness of Elements" );
-		ASSERT( t0->id() != t1->id(), "uniqueness of ids" );
+		Eref t0 = c0family[ i ];
+		Eref t1 = c1family[ i ];
+		ASSERT( t0.e != t1.e, "uniqueness of Elements" );
+		ASSERT( t0.id() != t1.id(), "uniqueness of ids" );
 		if ( i > 0 )
-			ASSERT( t0->name() == t1->name(), "copy names" );
+			ASSERT( t0.name() == t1.name(), "copy names" );
 		ASSERT( compareCopyValues( t0, t1 ), "copy values" );
 		ASSERT( compareCopyMsgs( t0, t1, outsider ), "copy Msgs" );
 	}
@@ -680,77 +679,72 @@ void copyTest()
 	ASSERT( cc != c0, "copying" );
 	ASSERT( cc != 0, "copying" );
 
-// 	ASSERT( cc->name() == "cc", "copying" );
-// 
-// 	get< Id >( c0, "parent", p0 );
-// 	get< Id >( cc, "parent", p1 );
-// 	ASSERT( p0 == n->id(), "copy parent" );
-// 	ASSERT( p1 == n->id(), "copy parent" );
-// 
-// 	get< vector< Id > >( n, "childList", kids );
-// 	ASSERT( kids.size() == 13 , "copy kids" ); // what should we do about it? 
-// 	ASSERT( kids[0] == outsider->id() , "copy kids" );
-// 	ASSERT( kids[1] == c0->id() , "copy kids" );
-// 	ASSERT( kids[2] == c1->id() , "copy kids" );
-// 	ASSERT( kids[3] == cc->id().assignIndex(0) , "copy kids" );
-// 	vector< Element* > ccfamily;
-// 	getCopyTree( cc, ccfamily );
-// 	get< vector< Id > >( cc, "childList", kids );
-// 	cout << kids.size() << endl;
-// 	for (int i = 0; i < kids.size(); i++){
-// 		cout << kids[i]()->name() << endl;
-// 	}
-// 	cout << c0family.size() << " " << ccfamily.size() << endl;
-// 	ASSERT( c0family.size() == ccfamily.size(), "copy tree" );
-// 	for ( unsigned int i = 0; i < c0family.size(); i++ ) {
-// 		Element* t0 = c0family[ i ];
-// 		Element* t1 = ccfamily[ i ];
-// 		ASSERT( t0 != t1, "uniqueness of Elements" );
-// 		ASSERT( t0->id() != t1->id(), "uniqueness of ids" );
-// 		if ( i > 0 )
-// 			ASSERT( t0->name() == t1->name(), "copy names" );
-// 		ASSERT( compareCopyValues( t0, t1 ), "copy values" );
-// 		ASSERT( compareCopyMsgs( t0, t1, outsider ), "copy Msgs" );
-// 	}
-// 
-// 	Element* cc0 = c0->copyIntoArray( cc, "", 10 );
-// 	ASSERT( cc0 != c0, "copying" );
-// 	ASSERT( cc0 != 0, "copying" );
-// 	ASSERT( cc0->name() == "c0", "copying" );
-// 
-// 	get< Id >( cc0, "parent", p10 );
-// 	ASSERT( p10 == cc->id(), "copy parent" );
-// 
-// 	// Check that the copy has a unique id (this was an actual bug!)
-// 	ASSERT( cc0->id() != c0->id(), "unique copy id" );
-// 
-// 	kids.resize( 0 );
-// 	get< vector< Id > >( n, "childList", kids );
-// 	ASSERT( kids.size() == 13 , "copy kids" );
-// 	ASSERT( kids[0] == outsider->id() , "copy kids" );
-// 	ASSERT( kids[1] == c0->id() , "copy kids" );
-// 	ASSERT( kids[2] == c1->id() , "copy kids" );
-// 	ASSERT( kids[2] == cc->id() , "copy kids" );
-// 	
-// 	Element* m = Neutral::create( "Neutral", "m", Element::root(), Id::scratchId() );
-// 	Element *c_simple = Neutral::create( "CopyClass", "c_simple", m, Id::scratchId() );
-// 	ret = set <double> (c_simple, "x", 100);
-// 	ASSERT(ret, "set value to compartment");
-// 	Element *c_array = c_simple->copyIntoArray(m, "c_array", 4);
-// 	ASSERT(c_array->numEntries() == 4, "number of entries")
-// 	ASSERT(c_array != 0, "simple element copied into array element")
-// 	Eref eref = Eref(c_array, 2);
-// 	double x;
-// 	get <double> (eref, "x", x);
-// 	ASSERT(x == 100, "checking initial value of index element");
-// 	set <double> (eref, "x", 200);
-// 	get <double> (eref, "x", x);
-// 	ASSERT(x == 200, "checking index element");
-// 	eref = Eref(c_array, 1);
-// 	get <double> (eref, "x", x);
-// 	get <double> (c_simple, "x", x);
-// 	ASSERT(x == 100, "checking other index element")
-// 	set( m, "destroy" );
+	ASSERT( cc->name() == "cc", "copying" );
+
+	get< Id >( c0, "parent", p0 );
+	get< Id >( cc, "parent", p1 );
+	ASSERT( p0 == n->id(), "copy parent" );
+	ASSERT( p1 == n->id(), "copy parent" );
+
+	get< vector< Id > >( n, "childList", kids );
+	ASSERT( kids.size() == 13 , "copy kids" ); // what should we do about it? 
+	ASSERT( kids[0] == outsider->id() , "copy kids" );
+	ASSERT( kids[1] == c0->id() , "copy kids" );
+	ASSERT( kids[2] == c1->id() , "copy kids" );
+	ASSERT( kids[3] == cc->id().assignIndex(0) , "copy kids" );
+	
+	vector< Eref > ccfamily;
+	getCopyTree( Eref(cc, 0), ccfamily );
+	ASSERT( c0family.size() == ccfamily.size(), "copy tree" );
+	for ( unsigned int i = 0; i < c0family.size(); i++ ) {
+		Eref t0 = c0family[ i ];
+		Eref t1 = ccfamily[ i ];
+		ASSERT( t0.e != t1.e, "uniqueness of Elements" );
+		ASSERT( t0.id() != t1.id(), "uniqueness of ids" );
+		if ( i > 0 )
+			ASSERT( t0.e->name() == t1.e->name(), "copy names" );
+		ASSERT( compareCopyValues( t0, t1 ), "copy values" );
+		ASSERT( compareCopyMsgs( t0, t1, outsider ), "copy Msgs" );
+	}
+
+	Element* cc0 = c0->copyIntoArray( cc, "", 10 );
+	ASSERT( cc0 != c0, "copying" );
+	ASSERT( cc0 != 0, "copying" );
+	ASSERT( cc0->name() == "c0", "copying" );
+
+	get< Id >( cc0, "parent", p10 );
+	//ASSERT( p10 == cc->id(), "copy parent" );
+
+	// Check that the copy has a unique id (this was an actual bug!)
+	ASSERT( cc0->id() != c0->id(), "unique copy id" );
+
+	kids.resize( 0 );
+	get< vector< Id > >( n, "childList", kids );
+	ASSERT( kids.size() == 13 , "copy kids" );
+	ASSERT( kids[0] == outsider->id() , "copy kids" );
+	ASSERT( kids[1] == c0->id() , "copy kids" );
+	ASSERT( kids[2] == c1->id() , "copy kids" );
+	ASSERT( kids[3] == cc->id().assignIndex(0) , "copy kids" );
+	
+	Element* m = Neutral::create( "Neutral", "m", Element::root()->id(), Id::scratchId() );
+	Element *c_simple = Neutral::create( "CopyClass", "c_simple", m->id(), Id::scratchId() );
+	ret = set <double> (c_simple, "x", 100);
+	ASSERT(ret, "set value to compartment");
+	Element *c_array = c_simple->copyIntoArray(m, "c_array", 4);
+	ASSERT(c_array->numEntries() == 4, "number of entries")
+	ASSERT(c_array != 0, "simple element copied into array element")
+	Eref eref = Eref(c_array, 2);
+	double x;
+	get <double> (eref, "x", x);
+	ASSERT(x == 100, "checking initial value of index element");
+	set <double> (eref, "x", 200);
+	get <double> (eref, "x", x);
+	ASSERT(x == 200, "checking index element");
+	eref = Eref(c_array, 1);
+	get <double> (eref, "x", x);
+	get <double> (c_simple, "x", x);
+	ASSERT(x == 100, "checking other index element")
+	set( m, "destroy" );
 	
 	set( n, "destroy" );
 }

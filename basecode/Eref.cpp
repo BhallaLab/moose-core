@@ -197,7 +197,7 @@ string Eref::name() const
 {
 	if ( i == Id::AnyIndex )
 		return ( e->name() + "[]" );
-	if ( i > 0 || e->numEntries() > 1 ) {
+	if ( e->elementType() == "Array" ) {
 		ostringstream s1;
 		s1 << e->name() << "[" << i << "]";
 		return s1.str();
