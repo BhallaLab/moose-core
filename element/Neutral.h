@@ -76,7 +76,7 @@ class Neutral
 			 */
 			static Element* createArray(
 				const string& cinfo, const string& name, 
-				Element* parent, Id id, int n );
+				Id parent, Id id, int n );
 			static void destroy( const Conn* c );
 			static void setName( const Conn*, const string s );
 			static void lookupChild( const Conn*, const string s );
