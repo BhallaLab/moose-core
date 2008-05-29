@@ -16,6 +16,7 @@
 #include "../builtins/Interpol.h"
 #include "../builtins/Table.h"
 #include "../maindir/init.h"
+#include "../connections/ConnTainer.h"
 using namespace std;
 using namespace pymoose;
 extern int mooseInit();
@@ -26,7 +27,6 @@ extern const Cinfo* initTickCinfo();
 extern const Cinfo* initClockJobCinfo();
 extern const Cinfo* initTableCinfo();
 extern const Cinfo* initSchedulerCinfo();
-
 const Cinfo* initPyMooseContextCinfo()
 {
 	/**
@@ -78,8 +78,9 @@ const Cinfo* initPyMooseContextCinfo()
 		///////////////////////////////////////////////////////////////
 		// Value assignment: set and get.
 		///////////////////////////////////////////////////////////////
+		// Create a dynamic field on the specified object
+		new SrcFinfo( "addField", Ftype2<Id, string>::global() ),
 		// Getting a field value as a string: send out request:
-		new SrcFinfo( "add", Ftype2<Id, string>::global() ),
 		new SrcFinfo( "get", Ftype2< Id, string >::global() ),
 		// Getting a field value as a string: Recv the value.
 		new DestFinfo( "recvField",
@@ -122,8 +123,17 @@ const Cinfo* initPyMooseContextCinfo()
 		// Returns time in the default return value.
 		
 		///////////////////////////////////////////////////////////////
-		// Message info functions
+		// Message functions
 		///////////////////////////////////////////////////////////////
+		// Create a message. srcId, srcField, destId, destField
+		new SrcFinfo( "addMsg", 
+		Ftype4< vector< Id >, string, vector< Id >, string >::global() ),
+		// Delete a message based on number 
+		new SrcFinfo( "deleteMsg", Ftype2< Fid, int >::global() ),
+		// Delete a message based on src id.field and dest id.field
+		// This is how to specify an edge, so call it deleteEdge
+		new SrcFinfo( "deleteEdge", 
+					Ftype4< Id, string, Id, string >::global() ),
 		// Request message list: id elm, string field, bool isIncoming
 		new SrcFinfo( "listMessages", 
 					Ftype3< Id, string, bool >::global() ),
@@ -208,13 +218,16 @@ const Cinfo* initPyMooseContextCinfo()
 				sizeof( parserShared ) / sizeof( Finfo* ) ),
 		new DestFinfo( "readline",
 			Ftype1< string >::global(),
-			RFCAST( &dummyFunc ) ),
+                               RFCAST( &dummyFunc ) ),
+//			RFCAST( &PyMooseContext::readlineFunc ) ),
 		new DestFinfo( "process",
 			Ftype0::global(),
-			RFCAST( &dummyFunc ) ), 
+                               RFCAST( &dummyFunc ) ),
+//			RFCAST( &PyMooseContext::processFunc ) ), 
 		new DestFinfo( "parse",
 			Ftype1< string >::global(),
-			RFCAST( &dummyFunc ) ), 
+                               RFCAST( &dummyFunc ) ),
+//			RFCAST( &PyMooseContext::parseFunc ) ), 
 		new SrcFinfo( "echo", Ftype1< string>::global() ),
 
 	};
@@ -231,13 +244,6 @@ const Cinfo* initPyMooseContextCinfo()
 
 	return &pyMooseContextCinfo;
 }
-
-// These static initializations are required to ensure proper sequence
-// of static object creation
-static const Cinfo* shellCinfo = initShellCinfo();
-static const Cinfo* tickCinfo = initTickCinfo();
-static const Cinfo* clockJobCinfo = initClockJobCinfo();
-static const Cinfo* tableCinfo = initTableCinfo();
 
 static const Cinfo* pyMooseContextCinfo = initPyMooseContextCinfo();
 static const Slot setCweSlot = 
@@ -265,7 +271,7 @@ static const Slot getSynCountSlot =
 static const Slot deleteSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.delete" );
 static const Slot addfieldSlot = 
-	initPyMooseContextCinfo()->getSlot( "parser.add" );
+	initPyMooseContextCinfo()->getSlot( "parser.addField" );
 static const Slot requestFieldSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.get" );
 static const Slot setFieldSlot = 
@@ -290,8 +296,16 @@ static const Slot requestClocksSlot =
 	initPyMooseContextCinfo()->getSlot( "parser.requestClocks" );
 static const Slot requestCurrentTimeSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.requestCurrentTime" );
+
+static const Slot addMessageSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.addMessage" );
+static const Slot deleteMessageSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.deleteMessage" );
+static const Slot deleteEdgeSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.deleteEdge" );
 static const Slot listMessagesSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.listMessages" );
+
 static const Slot copySlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.copy" );
 static const Slot copyIntoArraySlot = 
@@ -337,6 +351,7 @@ static const Slot loadtabSlot =
 	initPyMooseContextCinfo()->getSlot( "parser.loadtab" );
 static const Slot tabopSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.tabop" );
+
 
 
 //////////////////////////
@@ -545,28 +560,19 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     // Call the global initialization function
     mooseInit();
     cout << "Trying to find shell with name " << shellName << endl;
-    Id shellId(shellName);
-    
-    if (shellId.bad() )
-    {
-        cerr << "ERROR: shell does not exist, trying to create a new one!" << endl;
-        exit(1);    
-    }
-    else
-    {
-        shell = shellId();
-    }
-    
-    
-    Element* contextElement = Neutral::create( "PyMooseContext",contextName, shell, Id::scratchId());
+    Id shellId = Id::shellId();
+    Element* contextElement = Neutral::create( "PyMooseContext",contextName, shellId, Id::scratchId());
 
-    const Finfo* shellFinfo, *contextFinfo;
-    shellFinfo = shell->findFinfo( "parser" );
-    assert(shellFinfo!=NULL);
+//     const Finfo* shellFinfo, *contextFinfo;
+//     shellFinfo = shell->findFinfo( "parser" );
+//     assert(shellFinfo!=NULL);
     
-    contextFinfo = contextElement->findFinfo( "parser" );
-    assert(contextFinfo!=NULL);
-    ret = shellFinfo->add( shell, contextElement, contextFinfo);
+//     contextFinfo = contextElement->findFinfo( "parser" );
+//     assert(contextFinfo!=NULL);
+//     ret = shellFinfo->add( shell, contextElement, contextFinfo);
+
+//     assert(ret);
+    ret = shellId.eref().add( "parser", contextElement, "parser", ConnTainer::Default);
 
     assert(ret);
     
@@ -926,15 +932,32 @@ void PyMooseContext::move( const Id& object, string new_name, const Id& dest)
 bool PyMooseContext::connect(const Id& src, string srcField, const Id& dest, string destField)
 {
     if ( !src.bad() && !dest.bad() ) {
-        Element* se = src( );
-        Element* de = dest( );
-        const Finfo* sf = se->findFinfo( srcField );
-        if ( !sf ) return false;
-        const Finfo* df = de->findFinfo( destField );
-        if ( !df ) return false;
-        return (bool)(se->findFinfo( srcField )->add( se, de, de->findFinfo( destField ) ));
-    }
-    return false;    
+		send4< Id, string, Id, string >( myId_(), addMessageSlot,
+			src, srcField, dest, destField );
+		return 1;
+		/*
+		Element* se = src();
+		Element* de = dest();
+		const Finfo* sf = se->findFinfo( srcF );
+		if ( !sf ) return 0;
+		const Finfo* df = de->findFinfo( destF );
+		if ( !df ) return 0;
+
+		return se->findFinfo( srcF )->add( se, de, de->findFinfo( destF )) ;
+		*/
+	}
+	return 0;
+    // if ( !src.bad() && !dest.bad() ) {
+//         Element* se = src( );
+//         Element* de = dest( );
+//         const Finfo* sf = se->findFinfo( srcField );
+//         if ( !sf ) return false;
+//         const Finfo* df = de->findFinfo( destField );
+//         if ( !df ) return false;
+//         return (bool)(se->findFinfo( srcField )->add( se, de, de->findFinfo( destField ) ));
+//     }
+//     return false;  
+    
 }
 /**
    createmap

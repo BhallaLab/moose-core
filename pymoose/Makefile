@@ -43,6 +43,7 @@ OBJFILES = ../basecode/basecode.o \
 	../utility/utility.o	\
 	../utility/randnum/randnum.o	\
 	../maindir/init.o	\
+	../connections/connections.o
 
 OBJ = PyMooseBase.o \
 	PyMooseContext.o \

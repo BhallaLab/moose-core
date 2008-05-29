@@ -34,7 +34,7 @@
 	#include "Molecule.h"
 	#include "Reaction.h"
 	#include "Stoich.h"
-	#include "../kinetics/SparseMatrix.h"
+//	#include "../kinetics/SparseMatrix.h"
 	#include "../utility/utility.h"
 	/* Random number related utilities */
 	#include "../utility/randnum/randnum.h"
@@ -67,6 +67,7 @@
 %ignore mooseInit;
 %include "../utility/utility.h"
 %ignore main; // this does not work, friend main() seems to interfere inspite of otherwise being stated in documentation
+//%ignore ConnTainer;
 %ignore Id::operator();
 %ignore operator<<;
 %ignore operator>>;
