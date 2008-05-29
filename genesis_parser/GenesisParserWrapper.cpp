@@ -2728,6 +2728,11 @@ float do_abs( int argc, const char** const argv, Id s )
 	}
 }
 
+float do_version( int argc, const char** const argv, Id s )
+{
+	return 3.0;
+}
+
 char** doArgv( int argc, const char** const argv, Id s )
 {
 	return 0;
@@ -3763,6 +3768,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "sqrt", reinterpret_cast< slifunc>( do_sqrt ), "float" );
 	AddFunc( "pow", reinterpret_cast< slifunc>( do_pow ), "float" );
 	AddFunc( "abs", reinterpret_cast< slifunc>( do_abs ), "float" );
+	AddFunc( "version", reinterpret_cast< slifunc>( do_version ), "float");
 	AddFunc( "xshow", do_xshow, "void" );
 	AddFunc( "xhide", do_xhide, "void" );
 	AddFunc( "xshowontop", do_xshowontop, "void" );
