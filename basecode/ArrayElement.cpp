@@ -405,6 +405,7 @@ const Finfo* ArrayElement::localFinfo( unsigned int index ) const
 	return finfo_[ index ];
 }
 
+/*
 unsigned int ArrayElement::listFinfos( 
 				vector< const Finfo* >& flist ) const
 {
@@ -417,6 +418,40 @@ unsigned int ArrayElement::listFinfos(
 	{
 		(*i)->listFinfos( flist );
 	}
+
+	return flist.size();
+}
+*/
+
+unsigned int ArrayElement::listFinfos( 
+				vector< const Finfo* >& flist ) const
+{
+	vector< Finfo* >::const_iterator i;
+	vector< Finfo* > dynos;
+
+	// We should always have a base finfo.
+	assert( finfo_.size() > 0 );
+
+	for ( i = finfo_.begin() + 1; i != finfo_.end(); i++ )
+		dynos.push_back( *i );
+
+	for ( i = finfo_.begin(); i != finfo_.end(); i++ )
+		(*i)->listFinfos( flist );
+
+	// Replace all earlier entries with later ones if the names match.
+	unsigned int j, k;
+	unsigned int mainSize = flist.size() - dynos.size();
+	// Could do this using STL, but it is too painful to figure out.
+	for ( j = 0; j < mainSize; ++j ) {
+		for ( k = 0; k < dynos.size(); ++k ) {
+			if ( flist[j]->name() == dynos[k]->name() ) {
+				flist[j] = dynos[k];
+				flist[ mainSize + k ] = 0; // get rid of the dyno entry.
+			}
+		}
+	}
+	const Finfo* cond = 0;
+	flist.erase( remove( flist.begin(), flist.end(), cond ), flist.end() );
 
 	return flist.size();
 }

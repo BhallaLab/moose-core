@@ -6885,4 +6885,10 @@ Added in 'version' function to return 3.0 for MOOSE. This lets programs
 run correctly in both MOOSE and GENESIS, if they want to use different
 features. GENESIS versions are all below 2.5.
 
+Checked in as revision 497 with unit test flags on, Smoldyn off, -g, GSL
+
+Fixed another old bug: 
+[ 1859530 ] Message to ValueFinfo causes field duplication
+This involved some extra work in the SimpleElement::listFinfos code
+and its counterpart in ArrayElement.
 
