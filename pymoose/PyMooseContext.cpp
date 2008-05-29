@@ -32,7 +32,7 @@ const Cinfo* initPyMooseContextCinfo()
 	/**
 	 * This is a shared message to talk to the Shell.
 	 */
-	static Finfo* parserShared[] =
+	static Finfo* contextShared[] =
 	{
 		// Setting cwe
 		new SrcFinfo( "cwe", Ftype1< Id >::global() ),
@@ -214,8 +214,8 @@ const Cinfo* initPyMooseContextCinfo()
 	
 	static Finfo* pyMooseContextFinfos[] =
 	{
-		new SharedFinfo( "parser", parserShared,
-				sizeof( parserShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "parser", contextShared,
+				sizeof( contextShared ) / sizeof( Finfo* ) ),
 		new DestFinfo( "readline",
 			Ftype1< string >::global(),
                                RFCAST( &dummyFunc ) ),
@@ -298,9 +298,9 @@ static const Slot requestCurrentTimeSlot =
 	initPyMooseContextCinfo()->getSlot( "parser.requestCurrentTime" );
 
 static const Slot addMessageSlot = 
-	initPyMooseContextCinfo()->getSlot( "parser.addMessage" );
+	initPyMooseContextCinfo()->getSlot( "parser.addMsg" );
 static const Slot deleteMessageSlot = 
-	initPyMooseContextCinfo()->getSlot( "parser.deleteMessage" );
+	initPyMooseContextCinfo()->getSlot( "parser.deleteMsg" );
 static const Slot deleteEdgeSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.deleteEdge" );
 static const Slot listMessagesSlot = 
@@ -931,9 +931,12 @@ void PyMooseContext::move( const Id& object, string new_name, const Id& dest)
 
 bool PyMooseContext::connect(const Id& src, string srcField, const Id& dest, string destField)
 {
-    if ( !src.bad() && !dest.bad() ) {
-		send4< Id, string, Id, string >( myId_(), addMessageSlot,
-			src, srcField, dest, destField );
+    vector< Id > srcList( 1, src );
+    vector< Id > destList( 1, dest );
+    if ( !src.bad() && !dest.bad() )
+    {
+        send4< vector<Id>, string, vector <Id>, string >( myId_(), addMessageSlot,
+			srcList, srcField, destList, destField );
 		return 1;
 		/*
 		Element* se = src();
