@@ -292,9 +292,9 @@ static const Slot requestCurrentTimeSlot =
 	initGenesisParserCinfo()->getSlot( "parser.requestCurrentTime" );
 
 static const Slot addMessageSlot = 
-	initGenesisParserCinfo()->getSlot( "parser.addMessage" );
+	initGenesisParserCinfo()->getSlot( "parser.addMsg" );
 static const Slot deleteMessageSlot = 
-	initGenesisParserCinfo()->getSlot( "parser.deleteMessage" );
+	initGenesisParserCinfo()->getSlot( "parser.deleteMsg" );
 static const Slot deleteEdgeSlot = 
 	initGenesisParserCinfo()->getSlot( "parser.deleteEdge" );
 static const Slot listMessagesSlot = 
@@ -505,6 +505,7 @@ map< string, string >& sliSrcLookup()
 	src[ "SUMTOTAL n nInit" ] = "nSrc";	// for molecules
 	src[ "SUMTOTAL output output" ] = "outputSrc";	// for tables
 	src[ "SLAVE output" ] = "outputSrc";	// for tables
+	src[ "SLAVE n" ] = "nSrc";	// for direct connections between mols.
 	src[ "INTRAMOL n" ] = "nOut"; 	// target is an enzyme.
 	src[ "CONSERVE n nInit" ] = ""; 	// Deprecated
 	src[ "CONSERVE nComplex nComplexInit" ] = ""; 	// Deprecated
@@ -595,6 +596,7 @@ map< string, string >& sliDestLookup()
 	dest[ "SUMTOTAL n nInit" ] = "sumTotal";	// for molecules
 	dest[ "SUMTOTAL output output" ] = "sumTotal";	// for molecules
 	dest[ "SLAVE output" ] = "sumTotal";	// for molecules
+	dest[ "SLAVE n" ] = "sumTotal";	// for molecules
 	dest[ "INTRAMOL n" ] = "intramolIn"; 	// target is an enzyme.
 	dest[ "CONSERVE n nInit" ] = ""; 	// Deprecated
 	dest[ "CONSERVE nComplex nComplexInit" ] = ""; 	// Deprecated
@@ -712,6 +714,7 @@ map< string, string >& sliFieldNameConvert()
 	
 	fieldnames["Molecule.Co"] = "conc";
 	fieldnames["Molecule.CoInit"] = "concInit";
+	fieldnames["Molecule.vol"] = "volumeScale";
 	fieldnames["SpikeGen.thresh"] = "threshold";
 	fieldnames["SpikeGen.output_amp"] = "amplitude";
 	fieldnames["Table.table->dx"] = "dx";
@@ -791,10 +794,12 @@ void do_add( int argc, const char** const argv, Id s )
 bool GenesisParserWrapper::innerAdd( Id s,
 	Id src, const string& srcF, Id dest, const string& destF )
 {
+	vector< Id > srcList( 1, src );
+	vector< Id > destList( 1, dest );
 	// Should this be vector< Id > ?
 	if ( !src.bad() && !dest.bad() ) {
-		send4< Id, string, Id, string >( s(), addMessageSlot,
-			src, srcF, dest, destF );
+		send4< vector< Id >, string, vector< Id >, string >( s(), addMessageSlot,
+			srcList, srcF, destList, destF );
 		return 1;
 		/*
 		Element* se = src();

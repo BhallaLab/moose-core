@@ -1870,10 +1870,16 @@ void Shell::addMessage( const Conn* c,
 {
 	vector< Id >::iterator i;
 	vector< Id >::iterator j;
+	bool ok = 0;
 	for ( i = src.begin(); i != src.end(); ++i )
-		for ( j = src.begin(); j != src.end(); ++j )
-			i->eref().add( srcField, j->eref(), destField, 
-				ConnTainer::Default );
+		for ( j = dest.begin(); j != dest.end(); ++j )
+			if ( i->eref().add( srcField, j->eref(), destField, 
+				ConnTainer::Default ) )
+					ok = 1; 
+				else
+					cout << "Error: Shell::addMessage failed\n";
+	if ( ok )
+		cout << "msg add OK\n";
 }
 
 void Shell::addEdge( const Conn* c, Fid src, Fid dest, int connType )
