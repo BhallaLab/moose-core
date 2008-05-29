@@ -6879,3 +6879,10 @@ I am going to keep it this way, for two reasons:
 - The original verison is arguably less logical. With the current version I
         can scale SUMTOTAL inputs or not, as the case may be.
 
+Checked in as revision 496 with unit test flags on, Smoldyn off, -g, GSL
+
+Added in 'version' function to return 3.0 for MOOSE. This lets programs
+run correctly in both MOOSE and GENESIS, if they want to use different
+features. GENESIS versions are all below 2.5.
+
+
