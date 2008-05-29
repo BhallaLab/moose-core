@@ -118,6 +118,13 @@ const Cinfo* initMoleculeCinfo()
 			Ftype1< double >::global(),
 			RFCAST( &Molecule::sumTotalFunc )
 		),
+	
+		/*
+		new DestFinfo( "sumConcTotal",
+			Ftype1< double >::global(),
+			RFCAST( &Molecule::sumConcTotalFunc )
+		),
+		*/
 	///////////////////////////////////////////////////////
 	// Synapse definitions
 	///////////////////////////////////////////////////////
@@ -305,8 +312,16 @@ void Molecule::reacFunc( const Conn* c, double A, double B )
 
 void Molecule::sumTotalFunc( const Conn* c, double n )
 {
-	static_cast< Molecule* >( c->data() )->total_ += n;
+	Molecule* m = static_cast< Molecule* >( c->data() );
+	m->total_ += n;
 }
+
+/*
+void Molecule::sumTotalConcFunc( const Conn* c, double conc )
+{
+	static_cast< Molecule* >( c->data() )->total_ += conc * volumeScale_;
+}
+*/
 
 /*
 void Molecule::sumProcessFuncLocal( )

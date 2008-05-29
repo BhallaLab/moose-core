@@ -41,6 +41,7 @@ bool DestFinfo::respondToAdd(
 		// numDest = 1;
 		return 1;
 	}
+	cout << "DestFinfo::add: Error: Message Type mismatch for " << e.name() << " to " << src.name() << "\n";
 	return 0;
 }
 
