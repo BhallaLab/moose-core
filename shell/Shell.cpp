@@ -829,10 +829,10 @@ void Shell::staticCreateArray( const Conn* c, string type,
 		int n = (int) (parameter[0]*parameter[1]);
 		bool ret = s->createArray( type, name, parent, id, n );
 		assert(parameter.size() == 6);
-// 		ArrayElement* f = static_cast <ArrayElement *> (e);
-// 		f->setNoOfElements((int)(parameter[0]), (int)(parameter[1]));
-// 		f->setDistances(parameter[2], parameter[3]);
-// 		f->setOrigin(parameter[4], parameter[5]);
+		ArrayElement* f = static_cast <ArrayElement *> (child);
+		f->setNoOfElements((int)(parameter[0]), (int)(parameter[1]));
+		f->setDistances(parameter[2], parameter[3]);
+		f->setOrigin(parameter[4], parameter[5]);
 		if ( ret ) { // Tell the parser it was created happily.
 			//GenesisParserWrapper::recvCreate(conn, id)
 			sendBack1< Id >( c, createSlot, id);
@@ -1418,10 +1418,10 @@ void Shell::copyIntoArray( const Conn* c,
 	Element* e = src()->copyIntoArray( parent, name, n );
 	//assign the other parameters to the arrayelement
 	assert(parameter.size() == 6);
-// 	ArrayElement* f = static_cast <ArrayElement *> (e);
-// 	f->setNoOfElements((int)(parameter[0]), (int)(parameter[1]));
-// 	f->setDistances(parameter[2], parameter[3]);
-// 	f->setOrigin(parameter[4], parameter[5]);
+	ArrayElement* f = static_cast <ArrayElement *> (e);
+	f->setNoOfElements((int)(parameter[0]), (int)(parameter[1]));
+	f->setDistances(parameter[2], parameter[3]);
+	f->setOrigin(parameter[4], parameter[5]);
 	if ( e )  // Send back the id of the new element base
 		sendBack1< Id >( c, createSlot, e->id() );
 }
@@ -1921,7 +1921,6 @@ void Shell::listMessages( const Conn* c,
 	vector< Id > ret;
 	string remoteFields = "";
 	string separator = "";
-
 	Conn* tc = e->targets( f->msg(), id.index() );
 	while( tc->good() ) {
 		Eref tgt = tc->target();
