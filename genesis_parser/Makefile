@@ -29,6 +29,7 @@ OBJ = \
 	GenesisParser.tab.o \
 	symtab.o \
 	eval.o \
+	exec_fork.o \
 	parse.o \
 	getopt.o \
 	script.o 
@@ -39,6 +40,7 @@ OBJ = \
 	GenesisParser.tab.o \
 	symtab.o \
 	eval.o \
+	exec_fork.o \
 	parse.o \
 	getopt.o \
 	script.o 
