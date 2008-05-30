@@ -55,7 +55,7 @@ bool Eref::add( const string& f1, Eref e2, const string& f2,
 {
 	assert( e2.e != 0 );
 	const Finfo* srcF = e->findFinfo( f1 );
-	const Finfo* destF = e2->findFinfo( f2 );
+	const Finfo* destF = e2.e->findFinfo( f2 );
 	if ( !srcF ) {
 		cout << "Eref::add: Error: Could not find element.srcFinfo " <<
 			name() << "." << f1 << endl;
