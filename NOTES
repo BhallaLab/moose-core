@@ -6829,6 +6829,7 @@ On the bigger scale, I think here we set the goals for the feature freeze:
 
 Longer-term project goals:
 - Connection refactoring
+- Better merging in Smoldyn and geometries for diffusion.
 - Full integration of array messages including accessible fields
 - Full integration of arrays and solvers
 - Parallel implementation
@@ -6892,3 +6893,11 @@ Fixed another old bug:
 This involved some extra work in the SimpleElement::listFinfos code
 and its counterpart in ArrayElement.
 
+Checked in as revision 498 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+30 May 2008
+[ 1861628 ] Unix shell commands not accessible within MOOSE interpreter
+Implemented this. Borrowed some stuff from the old GENESIS code tree to do so.
+
+==============================================================================

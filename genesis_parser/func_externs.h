@@ -63,7 +63,10 @@ extern void EndScript();
 extern char **CopyArgv(int argc, char** argv);
 extern void FreeArgv(int argc, char* argv[]);
 
-
+/**
+ * From exec_fork.cpp
+ */
+int ExecFork( int argc, char** argv);
 /*
 ** Obsolete functions from tools library
 
