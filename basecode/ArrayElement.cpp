@@ -166,7 +166,7 @@ Conn* ArrayElement::targets( int msgNum, unsigned int eIndex ) const
 		if ( d )
 			return new TraverseDestConn( d, eIndex );
 	}
-	return 0;
+	return new SetConn( root(), eIndex );
 }
 
 /**
