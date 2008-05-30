@@ -75,7 +75,7 @@ bool SharedFinfo::add(
 			names_.size() );
 		assert ( names_.size() > 0 );
 
-		unsigned int srcIndex = e.e->numTargets( msg_ );
+		unsigned int srcIndex = e.e->numTargets( msg_, e.i );
 
 		if ( isDest_ ) {
 			if ( FuncVec::getFuncVec( destFuncId )->isDest() ) {
