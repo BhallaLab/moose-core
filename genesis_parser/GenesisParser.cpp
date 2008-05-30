@@ -48,6 +48,19 @@ using std::string;
 
 #define MOOSE_THREADS 0
 
+/**
+ * Decides if the parser automatically should fall back to the system
+ * shell (csh) if a command is not found. This is OK for most Unices,
+ * but MPI is unhappy with fork calls. 
+ */
+bool Autoshell() {
+#ifdef USE_MPI
+	return 0;
+#else
+	return 1;
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////
 //
 // Basic GenesisParser functions
@@ -376,8 +389,10 @@ int myFlexLexer::IsCommand(const char* name)
 		// cout << "Found it!!\n";
 		return 1;
 	}
+	/*
 	cout << "Error: in IsCommand: Did not find command '" <<
 		name << "'\n";
+	*/
 	return 0;
 }
 
@@ -585,24 +600,23 @@ func_entry	*command;
 	** check to see if system functions should be
 	** tried
 	*/
-	// May 2004. USB.
-	// For MOOSE, we cannot permit system calls because they are not
-	// cross-platform
-/*
-	if(Autoshell()){
-	    normal_tty();
-	    if((code = ExecFork(argc,argv)) != 0){
-		Error();
-		printf("code %d\n",code);
-	    };
-	    genesis_tty();
-	    result.r_type = IntType();
-	    result.r.r_int = code;
-	    return(result);
-	} else
-*/
-	cout << "undefined function " << argv[0] << std::endl;
-    }
+	/**
+	 * May 2008. USB
+	 * This is risky in MPI environments, because they tend to barf
+	 * at system and fork calls. Autoshell should return 0 for these
+	 * cases.
+	 * Also these calls don't work in non-Unix OSs.
+	 */
+		if( Autoshell() ) {
+			int code;
+	    	if((code = ExecFork(argc,argv)) != 0){
+				printf("Error: System call returned code %d\n", code);
+	    	};
+	    		result.r_type = IntType();
+	    	result.r.r_int = code;
+	    	return(result);
+		} 
+	}
     result.r_type = IntType();
     result.r.r_int = 0;
     return(result);
