@@ -296,6 +296,37 @@ class ArrayElement: public Element
 		 * assign the index to AnyIndex
 		 */
 		Id id() const;
+		
+		/**
+		 * set values to inter element distance variables
+		 */
+		void setDistances(double dx, double dy){
+			dx_ = dx;
+			dy_ = dy;
+		}
+		
+		void setNoOfElements(unsigned int Nx, unsigned int Ny){
+			Nx_ = Nx;
+			Ny_ = Ny;
+		}
+		
+		void setOrigin(double x, double y){
+			xorigin_ = x;
+			yorigin_ = y;
+		}
+		
+		double getX(unsigned int index){
+			assert(index < numEntries_);
+			unsigned int colno = index % Nx_;
+			return xorigin_ + dx_*colno;
+		}
+		
+		double getY(unsigned int index){
+			assert(index < numEntries_);
+			unsigned int colno = index / Nx_;
+			return yorigin_ + dy_*colno;
+		}
+		
 	protected:
 		Element* innerCopy() const {return 0;}
 		Element* innerCopy(int n) const{return 0;}
@@ -355,7 +386,7 @@ class ArrayElement: public Element
 		size_t objectSize_;
 		
 		//createmap specific variables
-		int Nx_, Ny_;
+		unsigned int Nx_, Ny_;
 		double dx_, dy_;
 		double xorigin_, yorigin_;
 		// Deprecated
