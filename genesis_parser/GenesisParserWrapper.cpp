@@ -2143,6 +2143,11 @@ void do_tab2file( int argc, const char** const argv, Id s )
 	string fname = argv[1];
 	string elmname = argv[2];
 	string tabname = argv[3];
+	const char* printMode = "append";
+	if ( argc > 4 ) {
+		if ( argv[ argc - 1 ][0] == '-' && argv[ argc - 1 ][1] == 'o' )
+			printMode = "print"; // overwrite.
+	}
 
 	// Here we will later have to put in checks for tables on channels.
 	// Also lots of options remain.
@@ -2151,7 +2156,7 @@ void do_tab2file( int argc, const char** const argv, Id s )
 	Id e( elmname );
 	if ( !e.zero() && !e.bad() )
 		send3< Id, string, string >( s(),
-			setFieldSlot, e, "print", fname );
+			setFieldSlot, e, printMode, fname );
 	else
 		cout << "Error: " << argv[0] << ": element not found: " <<
 				elmname << endl;
