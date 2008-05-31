@@ -4032,6 +4032,12 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "le", lestr );
 	gpAssert( "le /foo", "cannot find object '/foo' " );
 	gpAssert( "echo foo", "foo " );
+
+	// Testing backslash carryover of lines
+	gpAssert( "echo foo \\\n", "" );
+	gpAssert( "bar", "foo bar " );
+
+	// Testing noline
 	gpAssert( "echo bar -n", "bar " );
 	gpAssert( "echo {2 + 3}", "5 " );
 	gpAssert( "echo {sqrt { 13 - 4 }}", "3 " );
