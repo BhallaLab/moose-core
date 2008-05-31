@@ -6900,4 +6900,11 @@ Checked in as revision 498 with unit test flags on, Smoldyn off, -g, GSL
 [ 1861628 ] Unix shell commands not accessible within MOOSE interpreter
 Implemented this. Borrowed some stuff from the old GENESIS code tree to do so.
 
+Checked in as revision 501 with unit test flags on, Smoldyn off, -g, GSL
+
+==============================================================================
+31 May 2008
+[ 1863902 ] '\' does not works in MOOSE interactive mode
+Fixed.
+
 ==============================================================================
