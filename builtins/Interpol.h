@@ -55,6 +55,7 @@ class Interpol
 		static void lookup( const Conn* c, double val );
 		static void tabFill( const Conn* c, int xdivs, int mode );
 		static void print( const Conn* c, string fname );
+		static void append( const Conn* c, string fname );
 		static void load( const Conn* c, string fname,
 			unsigned int skiplines );
 		static void appendTableVector( const Conn* c, 
@@ -113,7 +114,7 @@ class Interpol
 		 * Mode 1 : Splines (Not yet implemented. )
 		 */
 		void innerTabFill( int xdivs, int mode );
-		void innerPrint( const string& fname );
+		void innerPrint( const string& fname, bool doAppend );
 		void innerLoad( const string& fname, unsigned int skiplines );
 
 	protected:
