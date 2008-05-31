@@ -97,6 +97,10 @@ const Cinfo* initInterpolCinfo()
 		new DestFinfo( "print", Ftype1< string >::global(), 
 			RFCAST( &Interpol::print )
 		),
+		/// Append contents to file.
+		new DestFinfo( "append", Ftype1< string >::global(), 
+			RFCAST( &Interpol::append )
+		),
 		/// Load contents from file.
 		//  load filename skiplines
 		new DestFinfo( "load", Ftype2< string, unsigned int >::global(), 
@@ -241,7 +245,12 @@ void Interpol::tabFill( const Conn* c, int xdivs, int mode )
 
 void Interpol::print( const Conn* c, string fname )
 {
-	static_cast< Interpol* >( c->data() )->innerPrint( fname );
+	static_cast< Interpol* >( c->data() )->innerPrint( fname, 0 );
+}
+
+void Interpol::append( const Conn* c, string fname )
+{
+	static_cast< Interpol* >( c->data() )->innerPrint( fname, 1 );
 }
 
 void Interpol::load( const Conn* c, string fname, unsigned int skiplines )
@@ -437,12 +446,18 @@ void Interpol::innerTabFill( int xdivs, int mode )
 	invDx_ = 1.0/dx;
 }
 
-void Interpol::innerPrint( const string& fname )
+void Interpol::innerPrint( const string& fname, bool appendFlag )
 {
 	vector< double >::iterator i;
-	std::ofstream fout( fname.c_str(), std::ios::app );
-	for ( i = table_.begin(); i != table_.end(); i++ )
-		fout << *i << endl;
+	if ( appendFlag ) {
+		std::ofstream fout( fname.c_str(), std::ios::app );
+		for ( i = table_.begin(); i != table_.end(); i++ )
+			fout << *i << endl;
+	} else {
+		std::ofstream fout( fname.c_str(), std::ios::trunc );
+		for ( i = table_.begin(); i != table_.end(); i++ )
+			fout << *i << endl;
+	}
 }
 
 void Interpol::innerLoad( const string& fname, unsigned int skiplines )
