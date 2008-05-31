@@ -178,7 +178,14 @@ void myFlexLexer::Process() {
 }
 
 void myFlexLexer::ParseInput(const string& s) {
-	currstr += s + "\n";
+	string temp = s;
+	unsigned int len = temp.length();
+	if ( len > 2 && temp[ len - 2 ] == '\\' ) {
+		temp = temp.substr( 0, len - 2 );
+		currstr += temp;
+		return;
+	}
+	currstr += temp + "\n";
 	while (currstr.length() > 0) {
 		 yyparse();
 	}
@@ -187,7 +194,14 @@ void myFlexLexer::ParseInput(const string& s) {
 void myFlexLexer::AddInput(const string& s) {
 #if MOOSE_THREADS
 	int status = pthread_mutex_lock(&mutex);
-	currstr += s + "\n";
+	string temp = s;
+	unsigned int len = temp.length();
+	if ( len > 2 && temp[ len - 2 ] == '\\' ) {
+		temp = temp.substr( 0, len - 2 );
+		currstr += temp;
+		return;
+	}
+	currstr += temp + "\n";
 	status = pthread_cond_signal(&cond);
 	status = pthread_mutex_unlock(&mutex);
 #else
