@@ -24,20 +24,20 @@ for ( i = 1; i < {N_COMPARTMENT}; i = i + 1 )
 end
 
 echo "Rallpack 1 model set up."
-// create Neutral /plot
-// create Table /plot/v1
-// create Table /plot/vn
-// setfield /plot/v1,/plot/vn stepmode 3
-// addmsg /plot/v1/inputRequest /cable/c1/Vm
-// addmsg /plot/vn/inputRequest /cable/c{N_COMPARTMENT}/Vm
-// 
-// setclock 0 {SIMDT} 0
-// setclock 1 {PLOTDT} 1
-// useclock /plot/##[TYPE=Table] 1
-// 
-// reset
-// step {SIMLENGTH} -t
-// setfield /plot/v1 print "sim_cable.0"
-// setfield /plot/vn print "sim_cable.x"
-// echo "Plots written to 'sim_cable.*'"
-// quit
+create Neutral /plot
+create Table /plot/vfirst
+create Table /plot/vlast
+setfield /plot/vfirst,/plot/vlast stepmode 3
+addmsg /plot/vfirst/inputRequest /cable/c[0]/Vm
+addmsg /plot/vlast/inputRequest /cable/c[{N_COMPARTMENT-1}]/Vm
+
+setclock 0 {SIMDT} 0
+setclock 1 {PLOTDT} 1
+useclock /plot/##[TYPE=Table] 1
+
+reset
+step {SIMLENGTH} -t
+setfield /plot/vfirst print "sim_cable.0"
+setfield /plot/vlast print "sim_cable.x"
+echo "Plots written to 'sim_cable.*'"
+//quit
