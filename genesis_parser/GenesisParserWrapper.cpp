@@ -4005,7 +4005,7 @@ void GenesisParserWrapper::gpAssert(
 void GenesisParserWrapper::unitTest()
 {
 #ifdef USE_MPI
-	string lestr = "shell postmasters sched library proto solvers ";
+	string lestr = "shell sched library proto solvers postmasters ";
 #else
 	string lestr = "shell sched library proto solvers ";
 #endif
@@ -4070,7 +4070,12 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "alias gf getfield", "" );
 	gpAssert( "alias", "gf\tgetfield shf\tshowfield " );
 	gpAssert( "alias gf", "getfield " );
+#ifdef USE_MPI
+	// The order gets flipped in the PostMaster unit tests.
+	gpAssert( "le /sched/cj", "t1 t0 " );
+#else
 	gpAssert( "le /sched/cj", "t0 t1 " );
+#endif
 //	Autoscheduling causes solver to spawn here
 //	gpAssert( "setclock 1 0.1", "" );
 	// gpAssert( "le /sched/cj", "t0 t1 t2 t3 t4 t5 " );
