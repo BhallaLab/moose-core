@@ -14,10 +14,6 @@
 #include "../element/Neutral.h"
 #include "../basecode/IdManager.h"
 
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
-
 int mooseInit();
 
 void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);

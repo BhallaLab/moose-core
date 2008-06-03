@@ -84,55 +84,6 @@ class Element
 		 * Faster than iterating through the whole lot.
 		 */
 		virtual unsigned int numTargets( const string& finfoName ) const = 0;
-#if 0
-		///////////////////////////////////////////////////////////////
-		// Msg handling functions
-		///////////////////////////////////////////////////////////////
-
-		/**
-		 * Add a message from field f1 on current Element to field f2 on e2
-		 * Return true if success.
-		 */
-		bool add( const string& f1, Element* e2, const string& f2 );
-
-		/**
-		 * Add a message from Msg m1 on current Element to Msg m2 on e2
-		 * Return true if success.
-		 */
-		bool add( int m1, Element* e2, int m2 );
-
-		/**
-		 * Drop slot 'doomed' on Msg msg
-		 */
-		bool drop( int msg, unsigned int doomed );
-
-		/**
-		 * Drop ConnTainer 'doomed' on Msg msg
-		 */
-		bool drop( int msg, const ConnTainer* doomed );
-
-		/**
-		 * Drop ConnTainer 'doomed' on Msg msg
-		 */
-		// bool drop( int msg, const ConnTainer* doomed );
-
-		/**
-		 * Drop all msgs going out of the identified msg.
-		 */
-		bool dropAll( int msg );
-
-		/**
-		 * Drop all msgs going out of the identified Finfo.
-		 */
-		bool dropAll( const string& finfo );
-
-		/**
-		 * Drop all entries on a vector of connTainers. In due course
-		 * this will be updated to be more efficient than just a sequence
-		 * of individual calls to drop.
-		 */
-		bool dropVec( int msg, const vector< const ConnTainer* >& vec );
-#endif
 
 		///////////////////////////////////////////////////////////////
 		// Information functions
@@ -295,21 +246,6 @@ class Element
 		 * This is currently managed by a map indexed by the msgNum.
 		 */
 		virtual vector< ConnTainer* >* getDest( int msgNum ) = 0;
-
-		/**
-		 * Returns a pointer to the specified msg by looking up the named
-		 * Finfo. This may entail construction of a DynamicFinfo or a 
-		 * dest Msg, so the function is not const.
-		 * deprecated
-		 */
-		// virtual const Msg* msg( const string& fName ) = 0;
-
-		/**
-		 * Ensures that the requested msg is allocated. If it isn't,
-		 * it allocates it.
-		 * Deprecated.
-		virtual void checkMsgAlloc( unsigned int num ) = 0;
-		 */
 
 		/**
 		 * Create a new 'next' msg entry and return its index.

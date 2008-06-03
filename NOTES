@@ -6910,6 +6910,18 @@ Checked in as revision 503 with unit test flags on, Smoldyn off, -g, GSL
 
 [ 1888537 ] -overwrite option for tab2file command actually appends
 Fixed. Also made an 'append' DestFinfo for Interpol, which is inherited by
-Table.
+Table. Put in a test in 
+TESTS/bugs/SourceForgeTracker/1888537_tab2file_overwrite
 
+Checked in as revision 504 with unit test flags on, Smoldyn off, -g, GSL
+
+.........................................................................
+Some parallel messaging design:
+Shifted over to DOCS/PARALLEL.
+
+Mostly there with compile of PostMaster stuff..
 ==============================================================================
+3 June 2008
+
+Now MOOSE compiles with the PostMaster stuff, and clears unit tests on single
+node. Haven't begun multi-node work yet.

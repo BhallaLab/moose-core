@@ -46,34 +46,6 @@ int mooseInit()
 	bool ret = Eref::root().add( "childSrc", shell, "child" );
     assert( ret );
 
-#ifdef USE_MPI
-    
-	MPI::Init( argc, argv );
-	unsigned int totalnodes = MPI::COMM_WORLD.Get_size();
-	mynode = MPI::COMM_WORLD.Get_rank();
-	Id::manager().setNodes( mynode, totalnodes );
-
-	Element* postmasters =
-			Neutral::create( "Neutral", "postmasters", Element::root(), Id::scratchId());
-	vector< Element* > post;
-	post.reserve( totalnodes );
-	for ( unsigned int i = 0; i < totalnodes; i++ ) {
-		char name[10];
-		if ( i != mynode ) {
-			sprintf( name, "node%d", i );
-			Element* p = Neutral::create(
-					"PostMaster", name, postmasters, Id::scratchId() );
-			assert( p != 0 );
-			set< unsigned int >( p, "remoteNode", i );
-			post.push_back( p );
-		}
-	}
-	Id::manager().setPostMasters( post );
-	// Perhaps we will soon want to also connect up the clock ticks.
-	// How do we handle different timesteps?
-#else	
-//	Neutral::create( "Shell", "shell", Element::root() );
-#endif
     /**
      * Here we set up a bunch of predefined objects, that
      * exist simultaneously on each node.
@@ -94,24 +66,12 @@ int mooseInit()
     Neutral::create( "Neutral", "chem", solvers->id(), Id::scratchId() );
     Neutral::create( "Neutral", "neuronal", solvers->id(), Id::scratchId() );
 
-    
-#ifdef USE_MPI
-	// This one handles parser and postmaster scheduling.
-	Element* pj =
-			Neutral::create( "ClockJob", "pj", sched->id(), Id::scratchId() );
-	Element* t0 =
-			Neutral::create( "ParTick", "t0", cj->id(), Id::scratchId() );
-	Element* pt0 =
-			Neutral::create( "ParTick", "t0", pj->id(), Id::scratchId() );
-#else
-
     // Not really honouring AUTOSCHEDULE setting -
     // May need only t0 for AUTOSCHEDULE=false
     // But creating a few extra clock ticks does not hurt as much as
     // not allowing user to change the clock settings
     Neutral::create( "Tick", "t0", cj->id(), Id::scratchId() );
     Neutral::create( "Tick", "t1", cj->id(), Id::scratchId() );
-#endif
     return 0;    
 }
 

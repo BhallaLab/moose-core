@@ -213,3 +213,9 @@ bool Id::setElement( Element* e )
 	return manager().setElement( id_, e );
 }
 
+
+void Id::setNodes(  unsigned int myNode, unsigned int numNodes,
+			vector< Element* >& post )
+{
+	manager().setNodes( myNode, numNodes, post );
+}
