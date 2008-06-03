@@ -900,7 +900,6 @@ void GenesisParserWrapper::doAdd(
 		string destF = Shell::tail( argv[2], "/" );
 		Id src( srcE );
 		Id dest( destE );
-		cout << src.eref().name() << " " << dest.eref().name() << endl;
 		// Id src = path2eid( srcE, s );
 		// Id dest = path2eid( destE, s );
 

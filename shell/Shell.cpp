@@ -873,7 +873,8 @@ void Shell::planarconnect(const Conn* c, string source, string dest, double prob
 				cout <<  "The dest element must be SynChan" << endl;
 				return;
 			}
-			if ((rand()%100)/100.0 <= probability){
+			// RD: random number has to be changed. 
+			if (mtrand() <= probability){
 // 				cout << i+1 << " " << j+1 << endl;
 
 				src_list[i].eref().add( "event", dst_list[j].eref(), "synapse" );
