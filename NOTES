@@ -6925,3 +6925,4 @@ Mostly there with compile of PostMaster stuff..
 
 Now MOOSE compiles with the PostMaster stuff, and clears unit tests on single
 node. Haven't begun multi-node work yet.
+Checked in as revision 505 with unit test flags on, Smoldyn off, -g, GSL, MPI on
