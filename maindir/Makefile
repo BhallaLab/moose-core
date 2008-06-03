@@ -17,7 +17,9 @@ TARGET = maindir.o
 OBJ = \
 	main.o	\
 	nonblock.o \
-	init.o
+	init.o \
+	mpiSetup.o
+
 HEADERS = \
 	../basecode/header.h \
 	../connections/Conn.h \
@@ -29,6 +31,12 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 
 #MyClassWrapper.o: MyClassWrapper.h
+
+ifneq (,$(findstring DUSE_MPI,$(CFLAGS)))
+    CXX = mpicxx
+else
+    CXX = g++
+endif
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I.. -I../basecode $< -c

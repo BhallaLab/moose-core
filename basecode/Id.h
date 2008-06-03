@@ -201,6 +201,9 @@ class Id
 				( id_ == other.id_ && index_ < other.index_ );
 		}
 
+		static void setNodes( unsigned int myNode, unsigned int numNodes,
+			vector< Element* >& post );
+
 		friend ostream& operator <<( ostream& s, const Id& i );
 		friend istream& operator >>( istream& s, Id& i );
 
@@ -221,8 +224,8 @@ class Id
 		 * and the rest of the time you should not be using this.
 		 */
 		Id( unsigned int id );
-		unsigned int id_;
-		unsigned int index_;
+		unsigned int id_; // Unique identifier for Element*
+		unsigned int index_; // Index of array entry within element.
 		static IdManager& manager();
 };
 

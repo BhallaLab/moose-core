@@ -12,6 +12,25 @@
 #define _POST_MASTER_H
 
 #ifdef USE_MPI
+
+typedef void ( *TransferFunc )( Eref e, const char* );
+class ParSyncMsgInfo
+{
+	public:
+		ParSyncMsgInfo( TransferFunc tf )
+			: tf_( tf )
+		{;}
+
+		void addTarget( Eref e )
+		{
+			proxies_.push_back( e );
+		}
+
+	private:
+		TransferFunc tf_;
+		vector< Eref > proxies_;
+};
+
 /**
  * A skeleton class for starting out the postmaster.
  */
@@ -22,17 +41,25 @@ class PostMaster
 		//////////////////////////////////////////////////////////////
 		// Field access functions
 		//////////////////////////////////////////////////////////////
-		static unsigned int getMyNode( const Element* e );
-		static unsigned int getRemoteNode( const Element* e );
-		static void setRemoteNode( const Conn& c, unsigned int node );
-		static Id getTargetId( const Element* e );
-		static void setTargetId( const Conn& c, Id value );
-		static string getTargetField( const Element* e );
-		static void setTargetField( const Conn& c, string value );
+		/**
+		 * Returns node on which this postmaster is running
+		 */
+		static unsigned int getMyNode( Eref e );
+
+		/**
+		 * Returns node with which this postmaster communicates
+		 */
+		static unsigned int getRemoteNode( Eref e );
+
+		/**
+		 * Assigns node with which to communicate
+		 */
+		static void setRemoteNode( const Conn* c, unsigned int node );
 
 		//////////////////////////////////////////////////////////////
 		// Transmit/receive Data buffer handling functions.
 		//////////////////////////////////////////////////////////////
+		/*
 		void* innerGetParBuf( unsigned int targetIndex,
 						unsigned int size );
 		void* innerGetAsyncParBuf(
@@ -40,46 +67,42 @@ class PostMaster
 		void placeIncomingFuncs( 
 					vector< IncomingFunc >&, unsigned int msgIndex );
 
-		void outgoingFunc( );
 		void parseMsgRequest( const char* req, Element* self );
+					*/
+
 	// Message handling
-		static void postIrecv( const Conn& c, int ordinal );
+		static void postIrecv( const Conn* c, int ordinal );
 		void innerPostIrecv();
-		static void poll( const Conn& c, int ordinal );
-		void innerPoll( const Conn& c );
-		static void postSend( const Conn& c, int ordinal );
+		static void poll( const Conn* c, int ordinal );
+		void innerPoll( const Conn* c );
+		static void postSend( const Conn* c, int ordinal );
 		void innerPostSend( );
 
+		/*
 		void addIncomingFunc( unsigned int connId, unsigned int index );
 		// This static function handles response to an addmsg request,
 		// including operations on the element portion of the postmaster
 		// and tranmitting info to the remote node.
 		static unsigned int respondToAdd(
 		Element* e, const string& respondString, unsigned int numDest );
+		*/
 	private:
 		unsigned int localNode_;
 		unsigned int remoteNode_;
-		char* inBuf_;
-		unsigned int inBufSize_;
-		vector< unsigned int > incomingFunc_;
+		vector< char > sendBuf_;
+		unsigned int sendBufPos_;
 
-		char* outBuf_;
-		unsigned int outBufPos_;
-		unsigned int outBufSize_;
-//		unsigned int outgoingSlotNum_;
+		vector< char > recvBuf_;
+
+		vector< ParSyncMsgInfo > syncInfo_;
+
 		bool donePoll_;
-
-		// Here are some fields used to ferry data into off-node
-		// messaging code in ParFinfo.
-		Id targetId_;
-		string targetField_;
 		
 		MPI::Request request_;
 		MPI::Status status_;
 		MPI::Comm* comm_;
 };
 
-// extern const char* ftype2str( const Ftype *f );
 extern const Cinfo* initPostMasterCinfo();
 
 #endif
