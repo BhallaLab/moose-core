@@ -10,7 +10,7 @@
 #include "moose.h"
 #include "Neutral.h"
 #include "Wildcard.h"
-
+#define NOINDEX (UINT_MAX - 2)
 
 static int wildcardRelativeFind( Id start, const vector< string >& path, 
 		unsigned int depth, vector< Id >& ret );
@@ -18,7 +18,7 @@ static int wildcardRelativeFind( Id start, const vector< string >& path,
 static void findBraceContent( const string& path, string& beforeBrace, 
 	string& insideBrace, unsigned int& index );
 
-static bool matchName( Id id, 
+static bool matchName( Id parent, Id id, 
 	const string& beforeBrace, const string& insideBrace, 
 	unsigned int index );
 
@@ -184,7 +184,7 @@ int singleLevelWildcard( Id start, const string& path, vector< Id >& ret )
 // 		cout << "* " << kids[i].eref().name() << endl;
 	vector< Id >::iterator i;
 	for ( i = kids.begin(); i != kids.end(); i++ ) {
-		if ( matchName( *i, beforeBrace, insideBrace, index ) )
+		if ( matchName( start, *i, beforeBrace, insideBrace, index ) )
 			ret.push_back( *i );
 	}
 
@@ -202,7 +202,7 @@ void findBraceContent( const string& path, string& beforeBrace,
 {
 	beforeBrace = "";
 	insideBrace = "";
-	index = Id::AnyIndex;
+	index = NOINDEX;
 
 	if ( path.length() == 0 )
 		return;
@@ -232,12 +232,23 @@ void findBraceContent( const string& path, string& beforeBrace,
 /**
  * Compares the various parts of the wildcard name with the id
  */
-bool matchName( Id id, 
+bool matchName( Id parent, Id id, 
 	const string& beforeBrace, const string& insideBrace, 
 	unsigned int index )
 {
-	if ( !( index == Id::AnyIndex || id.index() == index ) )
+	if ( !( index == Id::AnyIndex || id.index() == index || 
+		index == NOINDEX ) )
 		return 0;
+	
+	if (index == NOINDEX){
+		if ( parent()->elementType() == "Simple" ){
+			index = 0;
+			if (id.index() != 0) return 0;
+		}
+		else if ( parent()->elementType() == "Array" )
+			index = parent.index();
+	}
+	
 	if ( matchBeforeBrace( id, beforeBrace ) ) {
 		if ( insideBrace.length() == 0 ) {
 			return 1;
@@ -324,7 +335,7 @@ int allChildren( Id start, const string& insideBrace, unsigned int index,
 	Neutral::getChildren( start.eref(), kids );
 	vector< Id >::iterator i;
 	for ( i = kids.begin(); i != kids.end(); i++ ) {
-		if ( matchName( *i, "#", insideBrace, index ) )
+		if ( matchName( start, *i, "#", insideBrace, index ) )
 			ret.push_back( *i );
 		allChildren( *i, insideBrace, index, ret );
 	}
@@ -403,7 +414,7 @@ void testWildcard()
 	findBraceContent( "foo[TYPE=membrane]", bb, ib, ii );
 	ASSERT( bb == "foo", "findBraceContent" );
 	ASSERT( ib == "TYPE=membrane", "findBraceContent" );
-	ASSERT( ii == Id::AnyIndex, "findBraceContent" );
+	ASSERT( ii == NOINDEX, "findBraceContent" );
 	findBraceContent( "bar[]", bb, ib, ii );
 	ASSERT( bb == "bar", "findBraceContent" );
 	ASSERT( ib == "", "findBraceContent" );

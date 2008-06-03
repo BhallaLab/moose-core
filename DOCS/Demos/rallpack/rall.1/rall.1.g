@@ -14,7 +14,7 @@ float  INJECT          = 1e-10
 float  DIAMETER        = 1e-6
 float  LENGTH          = {CABLE_LENGTH} / {N_COMPARTMENT}
 
-create Cell /cable
+create neutral /cable
 make_compartment /cable/c1 {RA} {RM} {CM} {EM} {INJECT} {DIAMETER} {LENGTH}
 
 int i
@@ -41,4 +41,4 @@ step {SIMLENGTH} -t
 setfield /plot/v1 print "sim_cable.0"
 setfield /plot/vn print "sim_cable.x"
 echo "Plots written to 'sim_cable.*'"
-quit
+//quit
