@@ -33,7 +33,8 @@ IdManager::IdManager()
 	post_.resize( 1 );
 }
 
-void IdManager::setNodes( unsigned int myNode, unsigned int numNodes )
+void IdManager::setNodes( unsigned int myNode, unsigned int numNodes,
+	vector< Element* >& post )
 {
 	myNode_ = myNode;
 	numNodes_ = numNodes;
@@ -43,21 +44,10 @@ void IdManager::setNodes( unsigned int myNode, unsigned int numNodes )
 			nodeLoad.resize( numNodes );
 		elementList_.resize( numScratch + blockSize );
 		mainIndex_ = numScratch;
-		post_.resize( numNodes );
+		post_ = post;
 	} else {
 		post_.resize( 1 );
 		post_[0] = 0;
-	}
-}
-
-void IdManager::setPostMasters( vector< Element* >& post )
-{
-	unsigned int j = 0;
-	for ( unsigned int i = 0; i < numNodes_; i++ ) {
-		if ( i == myNode_ )
-			post_[ i ] = 0;
-		else
-			post_[ i ] = post[ j++ ];
 	}
 }
 
@@ -165,22 +155,10 @@ Element* IdManager::getElement( const Id& id ) const
 				// This is the postmaster itself
 				return ret;
 			} else {
-				OffNodeInfo* oni = new OffNodeInfo( ret, Id( index ) );
-	
-				Element* wrap = new SimpleElement( Id(), "wrapper", 0, 0, oni );
-				wrap->addFinfo( &dummyFinfo );
-				return wrap;
+				return 0;
 			}
 #else
-		/*if ( id.index_ > 0 ) {
-			
-			if ( ret->numEntries() > id.index_ )
-				return new ArrayWrapperElement( ret , id.index_ );
-			else
-				return 0;
-		} else {*/
 		return ret;
-		//}
 #endif
 	}
 	return 0;

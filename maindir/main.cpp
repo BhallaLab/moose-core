@@ -30,15 +30,10 @@
 #include <readline/history.h>
 #endif //USE_READLINE
 
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
-
-#ifdef CRL_MPI
-#include <mpi.h>
-#endif
-
 extern int mooseInit();
+extern void initMPI( int argc, char** argv); // Defined in mpiSetup.cpp
+extern void terminateMPI( unsigned int mynode );
+extern void pollPostmaster(); 
 extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 
 #ifdef DO_UNIT_TESTS
@@ -114,68 +109,10 @@ int main(int argc, char** argv)
 	MPI_Comm_rank(MPI_COMM_WORLD, &iMyRank);
 #endif
 
-#ifdef USE_MPI
 	///////////////////////////////////////////////////////////////////
 	//	Here we connect up the postmasters to the shell and the ParTick.
 	///////////////////////////////////////////////////////////////////
-	const Finfo* serialFinfo = shell->findFinfo( "serial" );
-	assert( serialFinfo != 0 );
-	const Finfo* masterFinfo = shell->findFinfo( "master" );
-	assert( masterFinfo != 0 );
-	const Finfo* slaveFinfo = shell->findFinfo( "slave" );
-	assert( slaveFinfo != 0 );
-	const Finfo* pollFinfo = shell->findFinfo( "pollSrc" );
-	assert( pollFinfo != 0 );
-	const Finfo* tickFinfo = t0->findFinfo( "parTick" );
-	assert( tickFinfo != 0 );
-	const Finfo* stepFinfo = pj->findFinfo( "step" );
-	assert( stepFinfo != 0 );
-
-	bool glug = (argc == 2 && 
-		strcmp( argv[1], "-debug" ) == 0 );
-	// Breakpoint for parallel debugging
-	while ( glug );
-	for ( vector< Element* >::iterator j = post.begin();
-		j != post.end(); j++ ) {
-		bool ret = serialFinfo->add( shell, *j, (*j)->findFinfo( "data" ) );
-		// bool ret = (*j)->findFinfo( "data" )->add( *j, shell, serialFinfo );
-		assert( ret );
-		ret = tickFinfo->add( t0, *j, (*j)->findFinfo( "parTick" ) );
-		assert( ret );
-		ret = tickFinfo->add( pt0, *j, (*j)->findFinfo( "parTick" ) );
-		assert( ret );
-
-		if ( mynode == 0 ) {
-			ret = masterFinfo->add( shell, *j, (*j)->findFinfo( "data" ) );
-			assert( ret );
-		} else {
-			ret = slaveFinfo->add( shell, *j, (*j)->findFinfo( "data" ) );
-			assert( ret );
-		}
-		/*
-		cout << "On " << mynode << ", post: " << (*j)->name() << endl;
-		(*j)->dumpMsgInfo();
-		assert( ret );
-		*/
-	}
-	ret = pollFinfo->add( shell, pj, pj->findFinfo( "step" ) );
-	assert( ret );
-
-	// cout << "On " << mynode << ", shell: " << shell->name() << endl;
-	// shell->dumpMsgInfo();
-	set( cj, "resched" );
-	set( pj, "resched" );
-	set( cj, "reinit" );
-	set( pj, "reinit" );
-#ifdef DO_UNIT_TESTS
-	MPI::COMM_WORLD.Barrier();
-	if ( mynode == 0 )
-		cout << "\nInitialized " << totalnodes << " nodes\n";
-	MPI::COMM_WORLD.Barrier();
-	testPostMaster();
-#endif
-#endif
-
+	initMPI( argc, argv );
 
 #ifdef USE_GENESIS_PARSER
 	if ( mynode == 0 ) {
@@ -205,10 +142,6 @@ int main(int argc, char** argv)
 		const Finfo* parseFinfo = sli->findFinfo( "parse" );
 		assert ( parseFinfo != 0 );
 
-#ifdef CRL_MPI
-	if(iMyRank == 0)
-	{
-#endif
 		set< string >( sli, parseFinfo, line );
 		set< string >( sli, parseFinfo, "\n" );
 
@@ -243,34 +176,13 @@ int main(int argc, char** argv)
 				cout << "moose #" << lineNum << " > " << flush;
 			}
 			#endif //USE_READLINE
-#ifdef USE_MPI
-			// Here we poll the postmaster
-			ret = set< int >( pj, stepFinfo, 1 );
-#endif
+			pollPostmaster();
+			
 			// gui stuff here maybe.
 		}
-#ifdef CRL_MPI
-	}
-	else
-	{
-		set< string >( sli, parseFinfo, "nonroot" );
 	}
 #endif
-
-
-	}
-#endif
-#ifdef USE_MPI
-	if ( mynode != 0 ) {
-		ret = set( shell, "poll" );
-		assert( ret );
-	}
-	MPI::Finalize();
-#endif
-
-#ifdef USE_MPI
-	MPI_Finalize();
-#endif
+	terminateMPI( mynode );
 
 	cout << "done" << endl;
 }

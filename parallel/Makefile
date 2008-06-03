@@ -12,18 +12,22 @@ TARGET = parallel.o
 
 OBJ = \
 	PostMaster.o	\
-	ParFinfo.o	\
 
 HEADERS = \
 	../basecode/header.h \
-	../basecode/Conn.h \
+	../connections/Conn.h \
 	../basecode/Element.h \
 
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-PostMaster.o:	PostMaster.h ParFinfo.h ../basecode/Ftype2.h
-ParFinfo.o:		ParFinfo.h
+PostMaster.o:	PostMaster.h
+
+ifneq (,$(findstring DUSE_MPI,$(CFLAGS)))
+    CXX = mpicxx
+else
+    CXX = g++
+endif
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode $< -c

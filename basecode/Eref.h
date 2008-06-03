@@ -81,11 +81,6 @@ class Eref {
 		bool drop( int msg, const ConnTainer* doomed );
 
 		/**
-		 * Drop ConnTainer 'doomed' on Msg msg
-		 */
-		// bool drop( int msg, const ConnTainer* doomed );
-
-		/**
 		 * Drop all msgs going out of the identified msg.
 		 */
 		bool dropAll( int msg );
