@@ -52,7 +52,8 @@ class IdManager
 	public:
 		IdManager();
 
-		void setNodes( unsigned int myNode, unsigned int numNodes );
+		void setNodes( unsigned int myNode, unsigned int numNodes,
+			vector< Element* >& post );
 
                 void setPostMasters( std::vector< Element* >& post );
 

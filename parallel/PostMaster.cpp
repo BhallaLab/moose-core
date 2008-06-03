@@ -11,24 +11,14 @@
 #include "moose.h"
 #include <mpi.h>
 #include "PostMaster.h"
-#include "ParFinfo.h"
+// #include "ParFinfo.h"
 #include <sstream>
-#include <typeinfo>
-#include "../element/Neutral.h" // Possibly only need this for testing.
-#include "../shell/Shell.h" // Possibly only need this for testing.
+// #include <typeinfo>
+// #include "../element/Neutral.h" // Possibly only need this for testing.
+// #include "../shell/Shell.h" // Possibly only need this for testing.
 
 #define DATA_TAG 0
 
-/**
- * Declaration of the neutralCinfo() function is here because
- * we ensure the correct sequence of static initialization by having
- * each Cinfo use this call to find its base class. Most Cinfos
- * inherit from neutralCinfo. This function
- * uses the common trick of having an internal static value which
- * is created the first time the function is called.
- * The function for neutralCinfo has an additional line to statically
- * initialize the root element.
- */
 const Cinfo* initPostMasterCinfo()
 {
 	/**
@@ -39,15 +29,15 @@ const Cinfo* initPostMasterCinfo()
 	{
 		// This first entry is to tell the PostMaster to post iRecvs
 		// The argument is the ordinal number of the clock tick
-		new DestFinfo( "postIrecv",
-			Ftype1< int >::global(), RFCAST( &PostMaster::postIrecv ) ),
+		new DestFinfo( "postIrecv", Ftype1< int >::global(), 
+			RFCAST( &PostMaster::postIrecv ) ),
 		// The second entry is to tell the PostMaster to post 'send'
-		new DestFinfo( "postSend",
-			Ftype1< int >::global(), RFCAST( &PostMaster::postSend ) ),
+		new DestFinfo( "postSend", Ftype1< int >::global(), 
+			RFCAST( &PostMaster::postSend ) ),
 		// The third entry is for polling the receipt of incoming data.
 		// Each PostMaster does an MPI_Test on the earlier posted iRecv.
-		new DestFinfo( "poll",
-			Ftype1< int >::global(), RFCAST( &PostMaster::poll ) ),
+		new DestFinfo( "poll", Ftype1< int >::global(), 
+			RFCAST( &PostMaster::poll ) ),
 		// The fourth entry is for harvesting the poll request.
 		// The argument is the node number handled by the postmaster.
 		// It comes back when the polling on that postmaster is done.
@@ -75,20 +65,6 @@ const Cinfo* initPostMasterCinfo()
 					GFCAST( &PostMaster::getRemoteNode ),
 					RFCAST( &PostMaster::setRemoteNode )
 		),
-		new ValueFinfo( "targetId",  // deprecated
-					ValueFtype1< Id >::global(),
-					GFCAST( &PostMaster::getTargetId ),
-					RFCAST( &PostMaster::setTargetId )
-		),
-		new ValueFinfo( "targetField", 
-					ValueFtype1< string >::global(),
-					GFCAST( &PostMaster::getTargetField ),
-					RFCAST( &PostMaster::setTargetField )
-		),
-		////////////////////////////////////////////////////////////////
-		//	Special Finfo for the postmaster for handling serialization.
-		////////////////////////////////////////////////////////////////
-		new ParFinfo( "data" ),
 
 		////////////////////////////////////////////////////////////////
 		//	Shared messages.
@@ -114,75 +90,47 @@ const Cinfo* initPostMasterCinfo()
 
 static const Cinfo* postMasterCinfo = initPostMasterCinfo();
 
-static const unsigned int pollSlot = 
-	initPostMasterCinfo()->getSlotIndex( "parTick.harvestPoll" );
-static const unsigned int addSlot = 
-	initPostMasterCinfo()->getSlotIndex( "serial.rawAdd" );
-static const unsigned int copySlot = 
-	initPostMasterCinfo()->getSlotIndex( "serial.rawCopy" );
-static const unsigned int testSlot = 
-	initPostMasterCinfo()->getSlotIndex( "serial.rawTest" );
-static const unsigned int dataSlot = 
-	initPostMasterCinfo()->getSlotIndex( "data" );
+static const Slot pollSlot = 
+	initPostMasterCinfo()->getSlot( "parTick.harvestPoll" );
+static const Slot addSlot = 
+	initPostMasterCinfo()->getSlot( "serial.rawAdd" );
+static const Slot copySlot = 
+	initPostMasterCinfo()->getSlot( "serial.rawCopy" );
+static const Slot testSlot = 
+	initPostMasterCinfo()->getSlot( "serial.rawTest" );
 
 //////////////////////////////////////////////////////////////////
-// Here we put the PostMaster class functions.
+// Here are the PostMaster class functions.
 //////////////////////////////////////////////////////////////////
 PostMaster::PostMaster()
-	: remoteNode_( 0 ), donePoll_( 0 ), comm_( &MPI::COMM_WORLD )
+	: remoteNode_( 0 ), 
+	sendBuf_( 1000, 0 ), 
+	sendBufPos_( 0 ), 
+	recvBuf_( 1000, 0 ), 
+	donePoll_( 0 ), comm_( &MPI::COMM_WORLD )
 {
-	localNode_ = MPI::COMM_WORLD.Get_rank();
-	outBufSize_ = 10000;
-	outBuf_ = new char[ outBufSize_ ];
-	inBufSize_ = 10000;
-	inBuf_ = new char[ inBufSize_ ];
-	incomingFunc_.push_back( lookupFunctionData( RFCAST( Neutral::childFunc ) )->index() );
+	localNode_ = MPI::COMM_WORLD.Get_rank(); 
 	request_ = 0;
-//		incomingFunc_.push_back( lookupFunctionData( RFCAST( Shell::rawAddFunc ) )->index() );
-		// cout << "incoming func[0] = " << incomingFunc_[0] << endl;
 }
 
 //////////////////////////////////////////////////////////////////
 // Here we put the PostMaster Moose functions.
 //////////////////////////////////////////////////////////////////
 
-unsigned int PostMaster::getMyNode( const Element* e )
+unsigned int PostMaster::getMyNode( Eref e )
 {
-		return static_cast< PostMaster* >( e->data() )->localNode_;
+		return static_cast< PostMaster* >( e.data() )->localNode_;
 }
 
-unsigned int PostMaster::getRemoteNode( const Element* e )
+unsigned int PostMaster::getRemoteNode( Eref e )
 {
-		return static_cast< PostMaster* >( e->data() )->remoteNode_;
+		return static_cast< PostMaster* >( e.data() )->remoteNode_;
 }
 
-void PostMaster::setRemoteNode( const Conn& c, unsigned int node )
+void PostMaster::setRemoteNode( const Conn* c, unsigned int node )
 {
-		static_cast< PostMaster* >( c.data() )->remoteNode_ = node;
+		static_cast< PostMaster* >( c->data() )->remoteNode_ = node;
 }
-
-
-Id PostMaster::getTargetId( const Element* e )
-{
-		return static_cast< PostMaster* >( e->data() )->targetId_;
-}
-
-void PostMaster::setTargetId( const Conn& c, Id value )
-{
-		static_cast< PostMaster* >( c.data() )->targetId_ = value;
-}
-
-
-string PostMaster::getTargetField( const Element* e )
-{
-		return static_cast< PostMaster* >( e->data() )->targetField_;
-}
-
-void PostMaster::setTargetField( const Conn& c, string value )
-{
-		static_cast< PostMaster* >( c.data() )->targetField_ = value;
-}
-
 
 /////////////////////////////////////////////////////////////////////
 // Here we handle passing messages to off-nodes
@@ -198,6 +146,7 @@ const char* ftype2str( const Ftype *f )
 }
 */
 
+#if 0
 
 /////////////////////////////////////////////////////////////////////
 // Utility function for accessing postmaster data buffer.
@@ -286,15 +235,8 @@ void PostMaster::parseMsgRequest( const char* req, Element* self )
 	}
 	// send back success report.
 }
+#endif
 
-void PostMaster::addIncomingFunc( unsigned int connId, unsigned int index )
-{
-	if ( incomingFunc_.size() <= connId )
-		incomingFunc_.resize( connId + 1 );
-	incomingFunc_[ connId ] = index;
-	// incomingFunc_.push_back( index );
-	// cout << "incomingFunc_.size() = " << incomingFunc_.size() << endl;
-}
 /////////////////////////////////////////////////////////////////////
 // This function does the main work of sending incoming messages
 // to dests.
@@ -308,14 +250,15 @@ void PostMaster::innerPostIrecv()
 	// cout << "!" << flush;
 	// cout << "inner PostIrecv on node " << localNode_ << " from " << remoteNode_ << endl << flush;
 	request_ = comm_->Irecv(
-			inBuf_, inBufSize_, MPI_CHAR, remoteNode_, DATA_TAG );
+		&( recvBuf_[0] ), recvBuf_.size(), MPI_CHAR, 
+			remoteNode_, DATA_TAG );
 	// cout << inBufSize_ << " innerPostIrecv: request_ empty?" << ( request_ == static_cast< MPI::Request >( 0 ) ) << "\n";
 	donePoll_ = 0;
 }
 
-void PostMaster::postIrecv( const Conn& c, int ordinal )
+void PostMaster::postIrecv( const Conn* c, int ordinal )
 {
-	static_cast< PostMaster* >( c.data() )->innerPostIrecv();
+	static_cast< PostMaster* >( c->data() )->innerPostIrecv();
 }
 
 /**
@@ -324,10 +267,10 @@ void PostMaster::postIrecv( const Conn& c, int ordinal )
  * to local dest objects.
  * This is called by the poll function
  */
-void PostMaster::innerPoll( const Conn& c )
+void PostMaster::innerPoll( const Conn* c )
 {
-	Element* e = c.targetElement();
-	unsigned int pollMsgIndex = c.targetIndex();
+	Eref e = c->target();
+	unsigned int pollMsgIndex = c->targetIndex();
 	// Look up the irecv'ed data here
 	// cout << "inner Poll on node " << localNode_ << " from " << remoteNode_ << endl << flush;
 	if ( donePoll_ )
@@ -354,37 +297,19 @@ void PostMaster::innerPoll( const Conn& c )
 		*/
 		// Here we skip the location for the msgId, so this is only for
 		// async msgs.
-		const char* data = inBuf_;
-		while ( data < inBuf_ + dataSize ) {
-			// cout << "1:"<<localNode_ << "," << remoteNode_ << ", datapos = " << data - inBuf_ << endl << flush;
-			unsigned int msgId =  *static_cast< const unsigned int *>(
-				static_cast< const void* >( data ) );
-				// the funcVec_ has msgId entries matching each Conn
-			data += sizeof( unsigned int );
-			// cout << "1.5:"<<localNode_ << "," << remoteNode_ << "msgid = " << msgId << endl << flush;
-			// Hack for testing: sometimes msgId comes in out of range.
-			if ( msgId >= incomingFunc_.size() ) {
-				cout << "PostMaster::innerPoll: Warning: incoming msgId too big: " << msgId << " >= " << incomingFunc_.size() << endl;
-				break;
-			}
-			unsigned int funcId = incomingFunc_[ msgId ]; 
-			RecvFunc rf = lookupFunctionData( funcId )->func();
-			IncomingFunc pf = 
-				lookupFunctionData( funcId )->funcType()->inFunc();
-			data = static_cast< const char* >(
-				pf( *( e->connDestBegin( dataSlot ) + msgId ), data, rf ) );
-			// cout << "4:"<<localNode_ << "," << remoteNode_ << ", datapos = " << data - inBuf_ << endl << flush;
-			assert (data != 0 );
+		const char* data = &( recvBuf_[0] );
+		const char* dataEnd = &( recvBuf_[ dataSize ] );
+		while ( data < dataEnd ) {
+			data++; // dummy
 		}
 
-		sendTo1< unsigned int >( e, pollSlot, pollMsgIndex, remoteNode_ );
 		donePoll_ = 1;
 	}
 }
 
-void PostMaster::poll( const Conn& c, int ordinal )
+void PostMaster::poll( const Conn* c, int ordinal )
 {
-	static_cast< PostMaster* >( c.data() )->innerPoll( c );
+	static_cast< PostMaster* >( c->data() )->innerPoll( c );
 }
 
 /**
@@ -397,18 +322,20 @@ void PostMaster::innerPostSend( )
 	// send out the filled buffer here to the other nodes..
 	// cout << "*" << flush;
 	// cout << "sending " << outBufPos_ << " bytes: " << outBuf_ << endl << flush;
-	comm_->Send(
-			outBuf_, outBufPos_, MPI_CHAR, remoteNode_, DATA_TAG
+	comm_->Send( &( sendBuf_[0] ), sendBufPos_, 
+		MPI_CHAR, remoteNode_, DATA_TAG
 	);
-	outBufPos_ = 0;
+	sendBufPos_ = 0;
 }
 
-void PostMaster::postSend( const Conn& c, int ordinal )
+void PostMaster::postSend( const Conn* c, int ordinal )
 {
-	static_cast< PostMaster* >( c.data() )->innerPostSend();
+	static_cast< PostMaster* >( c->data() )->innerPostSend();
 }
 
 /////////////////////////////////////////////////////////////////////
+
+#if 0
 /**
  * This static function handles requests to set up a message. It does the
  * following:
@@ -453,21 +380,26 @@ void PostMaster::placeIncomingFuncs(
 }
 /////////////////////////////////////////////////////////////////////
 
-void* getParBuf( const Conn& c, unsigned int size )
+#endif
+void* getParBuf( const Conn* c, unsigned int size )
 {
-	PostMaster* pm = static_cast< PostMaster* >( c.data() );
+	PostMaster* pm = static_cast< PostMaster* >( c->data() );
 	assert( pm != 0 );
-	return pm->innerGetParBuf( c.targetIndex(), size );
+//	return pm->innerGetParBuf( c.targetIndex(), size );
+	return 0;
 }
 
-void* getAsyncParBuf( const Conn& c, unsigned int size )
+void* getAsyncParBuf( const Conn* c, unsigned int size )
 {
-	Element* post = c.targetElement();
-	PostMaster* pm = static_cast< PostMaster* >( post->data() );
+	Eref post = c->target();
+	PostMaster* pm = static_cast< PostMaster* >( post.data() );
 	assert( pm != 0 );
+	/*
 	unsigned int msgId = c.targetIndex() - 
 		 ( post->connDestBegin( dataSlot ) - post->lookupConn( 0 ) );
 	return pm->innerGetAsyncParBuf( msgId, size );
+	*/
+	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -489,7 +421,7 @@ void testPostMaster()
 	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
 	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
 	Id* postId = new Id[numNodes];
-	Element* post;
+	Eref post;
 	unsigned int i;
 	if ( myNode == 0 )
 		cout << "\nTesting PostMaster: " << numNodes << " nodes";
@@ -528,7 +460,8 @@ void testPostMaster()
 	///////////////////////////////////////////////////////////////
 	// On all nodes, create a table and fill it up.
 	
-	Element* table = Neutral::create( "Table", "tab", Element::root() );
+	Element* table = Neutral::create( "Table", "tab", Id(), 
+		Id::scratchId() );
 	// cout << myNode << ": tabId = " << table->id() << endl;
 	ASSERT( table != 0, "Checking data flow" );
 	set< int >( table, "xdivs", 10 );
@@ -550,12 +483,10 @@ void testPostMaster()
 		// Here we are being sneaky because we have the same id on all 
 		// nodes.
 		for ( i = 1; i < numNodes; i++ ) {
-			post = postId[i]();
+			post = postId[i].eref();
 			set< Id >( post, "targetId", table->id() );
 			set< string >( post, "targetField", "msgInput" );
-			const Finfo* outFinfo = table->findFinfo( "outputSrc" );
-			const Finfo* dataFinfo = post->findFinfo( "data" );
-			bool ret = outFinfo->add( table, post, dataFinfo );
+			bool ret = Eref( table ).add( "outputSrc", post, "data" );
 			ASSERT( ret, "Node 0 Making input message to postmaster" );
 		}
 	}
@@ -582,17 +513,15 @@ void testPostMaster()
 		if ( i == myNode )
 			continue;
 		post = postId[i]();
-		PostMaster* pdata = static_cast< PostMaster* >( post->data() );
+		// PostMaster* pdata = static_cast< PostMaster* >( post->data() );
 		sprintf( sendstr, "My name is Michael Caine %d,%d", myNode, i );
 
 		// Find the Conn# of the message to the shell. Assume same
 		// index is used on all nodes.
-		unsigned int shellIndex = 2;
+		// unsigned int shellIndex = 2;
 //		cout << "dataslot = " << dataSlot << ", shellIndex = " << shellIndex << ", sendstr = " << sendstr << endl << flush;
-		char* buf = static_cast< char* >(
-			pdata->innerGetAsyncParBuf( shellIndex, strlen( sendstr ) + 1 )
-		);
-		strcpy( buf, sendstr );
+		// char* buf = static_cast< char* >( pdata->innerGetAsyncParBuf( shellIndex, strlen( sendstr ) + 1 ));
+		// strcpy( buf, sendstr );
 	}
 	MPI::COMM_WORLD.Barrier();
 	bool glug = 0; // Breakpoint for parallel debugging
@@ -620,7 +549,7 @@ void testPostMaster()
 	// with the lower table index, regardless of whether the
 	// message is to or from the table.
 	////////////////////////////////////////////////////////////////
-	Element* n = Neutral::create( "Neutral", "n", Element::root() );
+	Element* n = Neutral::create( "Neutral", "n", Id(), Id::scratchId() );
 	vector< Element* > tables( numNodes, 0 );
 	Id tickId;
 	lookupGet< Id, string >( cj, "lookupChild", tickId, "t0" );
@@ -630,7 +559,7 @@ void testPostMaster()
 	for ( i = 0; i < numNodes; i++ ) {
 		char tabname[20];
 		sprintf( tabname, "tab%d", i );
-		tables[ i ] = Neutral::create( "Table", tabname, n );
+		tables[ i ] = Neutral::create( "Table", tabname, n->id(), Id::scratchId() );
 		ASSERT( tables[i] != 0, "Checking data flow" );
 		const Finfo* outFinfo = tables[i]->findFinfo( "outputSrc" );
 		const Finfo* inFinfo = tables[i]->findFinfo( "input" );
@@ -638,8 +567,8 @@ void testPostMaster()
 		set< double >( tables[i], "xmin", 0.0 );
 		set< double >( tables[i], "xmax", 10.0 );
 		set< double >( tables[i], "input", 0.0 );
-		bool ret = tickProcFinfo->add( 
-			tick, tables[i], tables[i]->findFinfo( "process" ) );
+		bool ret = tickId.eref().add( "outgoingProcess", 
+			tables[i], "process" );
 		ASSERT( ret, "scheduling tables" );
 
 		if ( i == myNode ) { // This is source table
@@ -652,10 +581,12 @@ void testPostMaster()
 			for ( unsigned int j = 0; j < numNodes; j++ ) {
 				if ( j == myNode ) continue;
 				Element* p = postId[j]();
-				const Finfo* dataFinfo = p->findFinfo( "data" );
+				// const Finfo* dataFinfo = p->findFinfo( "data" );
 				set< Id >( p, "targetId", tables[i]->id() );
 				set< string >( p, "targetField", "msgInput" );
-				bool ret = outFinfo->add( tables[i], p, dataFinfo );
+				// bool ret = outFinfo->add( tables[i], p, dataFinfo );
+				ret = Eref( tables[i] ).add( "outputSrc", 
+					p, "data" );
 				ASSERT( ret, "Making input message to postmaster" );
 	MPI::COMM_WORLD.Barrier();
 			}
@@ -668,7 +599,8 @@ void testPostMaster()
 				lookupSet< double, unsigned int >( 
 								tables[i], "table", 0.0, k );
 
-			bool ret = dataFinfo->add( post, tables[i], inFinfo );
+			ret = postId[i].eref().add( "data", tables[i], "input" );
+			// bool ret = dataFinfo->add( post, tables[i], inFinfo );
 			ASSERT( ret, "Making output message from postmaster" );
 		}
 	}
