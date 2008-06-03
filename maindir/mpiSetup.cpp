@@ -20,7 +20,7 @@ extern void testPostMaster();
 
 using namespace std;
 
-static Element* pj;
+static Element* pj = 0;
 static const Finfo* stepFinfo;
 
 void initMPI( int argc, char** argv )
@@ -158,6 +158,8 @@ void terminateMPI( unsigned int mynode )
 
 void pollPostmaster()
 {
-	bool ret = set< int >( pj, stepFinfo, 1 );
-	assert( ret );
+	if ( pj != 0 ) {
+		bool ret = set< int >( pj, stepFinfo, 1 );
+		assert( ret );
+	}
 }
