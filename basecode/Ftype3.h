@@ -10,12 +10,26 @@
 #ifndef _FTYPE3_H
 #define _FTYPE3_H
 
+// Forward declaration of send3 needed for proxyFunc.
+template < class T1, class T2, class T3 > 
+	void send3( Eref e, Slot src, T1 v1, T2 v2, T3 v3);
 /**
  * The Ftype3 handles 3-argument functions.
  */
 template < class T1, class T2, class T3 > class Ftype3: public Ftype
 {
 		public:
+			Ftype3()
+				: Ftype( "ftype3" )
+			{
+				addSyncFunc( RFCAST( 
+					&( Ftype3< T1, T2, T3 >::syncFunc ) ) );
+				addAsyncFunc( RFCAST( 
+					&( Ftype3< T1, T2, T3 >::asyncFunc ) ) );
+				addProxyFunc( RFCAST( 
+					&( Ftype3< T1, T2, T3 >::proxyFunc ) ) );
+			}
+
 			unsigned int nValues() const {
 				return 3;
 			}
@@ -73,12 +87,12 @@ template < class T1, class T2, class T3 > class Ftype3: public Ftype
 			RecvFunc trigFunc() const {
 				return 0;
 			}
-virtual std::string getTemplateParameters() const
-    {
-        static std::string s = Ftype::full_type(std::string(typeid(T1).name())) +","+Ftype::full_type(std::string(typeid(T2).name()))+","+Ftype::full_type(std::string (typeid(T3).name()));
-        cout << "Ftype3::getTemplateParameters() - " << s << endl;        
-        return s;
-    }
+			std::string getTemplateParameters() const
+			{
+				static std::string s = Ftype::full_type(std::string(typeid(T1).name())) +","+Ftype::full_type(std::string(typeid(T2).name()))+","+Ftype::full_type(std::string (typeid(T3).name()));
+				cout << "Ftype3::getTemplateParameters() - " << s << endl;        
+				return s;
+			}
 			///////////////////////////////////////////////////////
 			// Here we define the functions for handling 
 			// messages of this type for parallel messaging.
@@ -89,8 +103,8 @@ virtual std::string getTemplateParameters() const
 			 * target Conn. It returns the data pointer set to the
 			 * next field.
 			 */
-			static const void* incomingFunc(
-				const Conn* c, const void* data, RecvFunc rf )
+			static void proxyFunc(
+				const Conn* c, const void* data, Slot slot )
 			{
 				T1 v1;
 				T2 v2;
@@ -98,10 +112,7 @@ virtual std::string getTemplateParameters() const
 				data = unserialize< T1 >( v1, data );
 				data = unserialize< T2 >( v2, data );
 				data = unserialize< T3 >( v3, data );
-				( reinterpret_cast< 
-					void (*)( const Conn* c, T1, T2, T3 ) 
-				> ( rf ) )( c, v1, v2, v3 );
-				return data;
+				send3< T1, T2, T3 >( c->target(), slot, v1, v2, v3 );
 			}
 
 			/**
@@ -109,7 +120,7 @@ virtual std::string getTemplateParameters() const
 			 * This variant is used when the data is synchronous: sent
 			 * every clock step, so that the sequence is fixed.
 			 */
-			static void outgoingSync( const Conn* c, T1 v1, T2 v2, T3 v3 ) {
+			static void syncFunc( const Conn* c, T1 v1, T2 v2, T3 v3 ) {
 				unsigned int size1 = serialSize< T1 >( v1 );
 				unsigned int size2 = serialSize< T2 >( v2 );
 				unsigned int size3 = serialSize< T3 >( v3 );
@@ -125,7 +136,7 @@ virtual std::string getTemplateParameters() const
 			 * therefore adds additional data to identify the message
 			 * source
 			 */
-			static void outgoingAsync( const Conn* c, T1 v1, T2 v2, T3 v3 ){
+			static void asyncFunc( const Conn* c, T1 v1, T2 v2, T3 v3 ){
 				unsigned int size1 = serialSize< T1 >( v1 );
 				unsigned int size2 = serialSize< T2 >( v2 );
 				unsigned int size3 = serialSize< T3 >( v3 );
@@ -133,26 +144,6 @@ virtual std::string getTemplateParameters() const
 				data = serialize< T1 >( data, v1 );
 				data = serialize< T2 >( data, v2 );
 				serialize< T3 >( data, v3 );
-			}
-
-			/// Returns the statically defined incoming func
-			IncomingFunc inFunc() const {
-				return this->incomingFunc;
-			}
-			/*
-			void inFunc( vector< IncomingFunc >& ret ) const {
-				ret.push_back( this->incomingFunc );
-			}
-			*/
-
-			/// Returns the statically defined outgoingSync function
-			void syncFunc( vector< RecvFunc >& ret ) const {
-				ret.push_back( RFCAST( this->outgoingSync ) );
-			}
-
-			/// Returns the statically defined outgoingAsync function
-			void asyncFunc( vector< RecvFunc >& ret ) const {
-				ret.push_back( RFCAST( this->outgoingAsync ) );
 			}
 };
 

@@ -10,12 +10,22 @@
 #ifndef _FTYPE2_H
 #define _FTYPE2_H
 
+// Forward declaration of send2 needed for proxyFunc.
+template < class T1, class T2 > void send2( Eref e, Slot src, T1 v1, T2 v2);
 /**
  * The Ftype2 handles 2-argument functions.
  */
 template < class T1, class T2 > class Ftype2: public Ftype
 {
 		public:
+			Ftype2()
+				: Ftype( "ftype2" )
+			{
+				addSyncFunc( RFCAST( &( Ftype2< T1, T2 >::syncFunc ) ) );
+				addAsyncFunc( RFCAST( &( Ftype2< T1, T2 >::asyncFunc ) ) );
+				addProxyFunc( RFCAST( &( Ftype2< T1, T2 >::proxyFunc ) ) );
+			}
+
 			unsigned int nValues() const {
 				return 2;
 			}
@@ -92,6 +102,7 @@ template < class T1, class T2 > class Ftype2: public Ftype
 
 			static const Ftype* global() {
 				static Ftype* ret = new Ftype2< T1, T2 >();
+
 				return ret;
 			}
 
@@ -102,11 +113,12 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			RecvFunc trigFunc() const {
 				return 0;
 			}
-                	virtual std::string getTemplateParameters() const
-                        {
-                                static std::string s = Ftype::full_type(typeid(T1).name())+","+Ftype::full_type(typeid(T2).name());
-                                return s;
-                	}
+
+          	std::string getTemplateParameters() const
+			{
+            	static std::string s = Ftype::full_type(typeid(T1).name())+","+Ftype::full_type(typeid(T2).name());
+				return s;
+			}
 			
 			///////////////////////////////////////////////////////
 			// Here we define the functions for handling 
@@ -118,6 +130,7 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			 * target Conn. It returns the data pointer set to the
 			 * next field.
 			 */
+			/*
 			static const void* incomingFunc(
 				const Conn* c, const void* data, RecvFunc rf )
 			{
@@ -130,13 +143,24 @@ template < class T1, class T2 > class Ftype2: public Ftype
 				> ( rf ) )( c, v1, v2 );
 				return data;
 			}
+			*/
+
+			static void proxyFunc(
+				const Conn* c, const void* data, Slot slot )
+			{
+				T1 v1;
+				T2 v2;
+				data = unserialize< T1 >( v1, data );
+				data = unserialize< T2 >( v2, data );
+				send2< T1, T2 >( c->target(), slot , v1, v2 );
+			}
 
 			/**
 			 * This function inserts data into the outgoing buffer.
 			 * This variant is used when the data is synchronous: sent
 			 * every clock step, so that the sequence is fixed.
 			 */
-			static void outgoingSync( const Conn* c, T1 v1, T2 v2 ) {
+			static void syncFunc( const Conn* c, T1 v1, T2 v2 ) {
 				unsigned int size1 = serialSize< T1 >( v1 );
 				unsigned int size2 = serialSize< T2 >( v2 );
 				void* data = getParBuf( c, size1 + size2 ); 
@@ -150,7 +174,7 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			 * therefore adds additional data to identify the message
 			 * source
 			 */
-			static void outgoingAsync( const Conn* c, T1 v1, T2 v2 ) {
+			static void asyncFunc( const Conn* c, T1 v1, T2 v2 ) {
 				unsigned int size1 = serialSize< T1 >( v1 );
 				unsigned int size2 = serialSize< T2 >( v2 );
 				void* data = getAsyncParBuf( c, size1 + size2 ); 
@@ -158,16 +182,20 @@ template < class T1, class T2 > class Ftype2: public Ftype
 				serialize< T2 >( data, v2 );
 			}
 
+			
+			/*
 			/// Returns the statically defined incoming func
 			IncomingFunc inFunc() const {
 				return this->incomingFunc;
 			}
+			*/
 			/*
 			void inFunc( vector< IncomingFunc >& ret ) const {
 				ret.push_back( this->incomingFunc );
 			}
 			*/
 
+			/*
 			/// Returns the statically defined outgoingSync function
 			void syncFunc( vector< RecvFunc >& ret ) const {
 				ret.push_back( RFCAST( this->outgoingSync ) );
@@ -177,6 +205,7 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			void asyncFunc( vector< RecvFunc >& ret ) const {
 				ret.push_back( RFCAST( this->outgoingAsync ) );
 			}
+			*/
 };
 
 #endif // _FTYPE2_H

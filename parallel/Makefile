@@ -12,6 +12,8 @@ TARGET = parallel.o
 
 OBJ = \
 	PostMaster.o	\
+	ProxyElement.o	\
+	AsyncDestFinfo.o	\
 
 HEADERS = \
 	../basecode/header.h \

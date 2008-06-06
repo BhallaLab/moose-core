@@ -6926,3 +6926,42 @@ Mostly there with compile of PostMaster stuff..
 Now MOOSE compiles with the PostMaster stuff, and clears unit tests on single
 node. Haven't begun multi-node work yet.
 Checked in as revision 505 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Fixed issue with non-MPI compiled version: the pollPostmaster function was
+called with a zero clock tick. Now bypasses the function.
+
+Checked in as revision 506 with unit test flags on, Smoldyn off, -g, GSL, no MPI
+
+Beginning to compile after folding in some of the async postmaster operations.
+Still need to set up proxies.
+==============================================================================
+4 June 2008
+Compiled in proxy element, doesn't do anything yet.
+
+==============================================================================
+5 June 2008
+Compiling in AsyncDestFinfo.
+
+Here we run into some issues with managing the FuncVecs for async, sync and
+proxies. These FuncVecs can be tied to the Ftypes, but there are questions
+about how to initialize them and how to guarantee their order. Once this is
+done I think I can have a framework of getting them from their Ftypes.
+
+A related possibility is to put an ordinal number on Ftypes, and use that
+instead to access the associated FuncVecs.
+
+I think I'll just put a sorting routine in the mooseInit function
+called from main. Base it on the FuncVec names. Oh. I already do this in
+sortFuncVec(), which is called in mooseInit.
+
+==============================================================================
+6 June 2008
+Major changes to Ftypes to handle formation of FuncVecs for parallel messaging.
+Those seem to be ready now, but some compilation stuff to do with the 
+AsyncDestFinfo.
+
+Along the way got rid of the last vestiges of the TypeFuncPair initialization
+for shared ftypes.
+
+
+==============================================================================
