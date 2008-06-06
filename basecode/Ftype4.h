@@ -10,6 +10,9 @@
 #ifndef _FTYPE4_H
 #define _FTYPE4_H
 
+template < class T1, class T2, class T3, class T4 > 
+	void send4( Eref e, Slot src, T1 v1, T2 v2, T3 v3, T4 v4 );
+
 /**
  * The Ftype4 handles 4-argument functions.
  */
@@ -17,6 +20,17 @@ template < class T1, class T2, class T3, class T4 >
 	class Ftype4: public Ftype
 {
 		public:
+			Ftype4()
+				: Ftype( "ftype4" )
+			{
+				addSyncFunc( RFCAST( 
+					&( Ftype4< T1, T2, T3, T4 >::syncFunc ) ) );
+				addAsyncFunc( RFCAST( 
+					&( Ftype4< T1, T2, T3, T4 >::asyncFunc ) ) );
+				addProxyFunc( RFCAST( 
+					&( Ftype4< T1, T2, T3, T4 >::proxyFunc ) ) );
+			}
+
 			unsigned int nValues() const {
 				return 4;
 			}
@@ -95,8 +109,8 @@ virtual std::string getTemplateParameters() const
 			 * target Conn. It returns the data pointer set to the
 			 * next field.
 			 */
-			static const void* incomingFunc(
-				const Conn* c, const void* data, RecvFunc rf )
+			static void proxyFunc(
+				const Conn* c, const void* data, Slot slot )
 			{
 				T1 v1;
 				T2 v2;
@@ -106,10 +120,7 @@ virtual std::string getTemplateParameters() const
 				data = unserialize< T2 >( v2, data );
 				data = unserialize< T3 >( v3, data );
 				data = unserialize< T4 >( v4, data );
-				( reinterpret_cast< 
-					void (*)( const Conn* c, T1, T2, T3, T4 ) 
-				> ( rf ) )( c, v1, v2, v3, v4 );
-				return data;
+				send4< T1, T2, T3, T4 >( c->target(), slot, v1, v2, v3, v4);
 			}
 
 			/**
@@ -117,7 +128,7 @@ virtual std::string getTemplateParameters() const
 			 * This variant is used when the data is synchronous: sent
 			 * every clock step, so that the sequence is fixed.
 			 */
-			static void outgoingSync( const Conn* c, T1 v1, T2 v2, T3 v3,
+			static void syncFunc( const Conn* c, T1 v1, T2 v2, T3 v3,
 				T4 v4 ) {
 				unsigned int size1 = serialSize< T1 >( v1 );
 				unsigned int size2 = serialSize< T2 >( v2 );
@@ -136,7 +147,7 @@ virtual std::string getTemplateParameters() const
 			 * therefore adds additional data to identify the message
 			 * source
 			 */
-			static void outgoingAsync( const Conn* c, T1 v1, T2 v2, T3 v3, T4 v4 ){
+			static void asyncFunc( const Conn* c, T1 v1, T2 v2, T3 v3, T4 v4 ){
 				unsigned int size1 = serialSize< T1 >( v1 );
 				unsigned int size2 = serialSize< T2 >( v2 );
 				unsigned int size3 = serialSize< T3 >( v3 );
@@ -146,26 +157,6 @@ virtual std::string getTemplateParameters() const
 				data = serialize< T2 >( data, v2 );
 				data = serialize< T3 >( data, v3 );
 				serialize< T4 >( data, v4 );
-			}
-
-			/// Returns the statically defined incoming func
-			IncomingFunc inFunc() const {
-				return this->incomingFunc;
-			}
-			/*
-			void inFunc( vector< IncomingFunc >& ret ) const {
-				ret.push_back( this->incomingFunc );
-			}
-			*/
-
-			/// Returns the statically defined outgoingSync function
-			void syncFunc( vector< RecvFunc >& ret ) const {
-				ret.push_back( RFCAST( this->outgoingSync ) );
-			}
-
-			/// Returns the statically defined outgoingAsync function
-			void asyncFunc( vector< RecvFunc >& ret ) const {
-				ret.push_back( RFCAST( this->outgoingAsync ) );
 			}
 };
 

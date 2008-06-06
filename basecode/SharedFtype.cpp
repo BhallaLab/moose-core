@@ -13,40 +13,14 @@
 #include "SetConn.h"
 #include "SharedFtype.h"
 #include "DestFinfo.h"
-
-/**
- * This variang of the constructor is deprecated. We will no longer
- * be using TypeFuncPairs.
- */
-SharedFtype::SharedFtype( TypeFuncPair* types, unsigned int n )
-{
-		nValues_ = 0;
-		size_ = 0;
-		for (unsigned int i = 0; i < n; i++ ) {
-			nValues_ += types[i].first->nValues();
-			size_ += types[i].first->size();
-			if ( types[i].second == 0 )
-				srcTypes_.push_back( types[i].first );
-			else
-				destTypes_.push_back( types[i].first );
-		}
-		match_ = new SharedFtype;
-		match_->nValues_ = nValues_;
-		match_->size_ = size_;
-		match_->match_ = this;
-		vector< const Ftype* >::iterator i;
-		for ( i = destTypes_.begin(); i != destTypes_.end(); i++ )
-			match_->srcTypes_.push_back( ( *i )->makeMatchingType() );
-		for ( i = srcTypes_.begin(); i != srcTypes_.end(); i++ )
-			match_->destTypes_.push_back( ( *i )->makeMatchingType() );
-}
-
+#include "SrcFinfo.h"
 
 /**
  * Here we construct the SharedFtype using Finfos. The array has either
  * Src or Dest Finfos and we extract their Ftypes from them.
  */
 SharedFtype::SharedFtype( Finfo** finfos, unsigned int n )
+	: Ftype( "shared" )
 {
 	nValues_ = 0;
 	size_ = 0;
@@ -60,15 +34,22 @@ SharedFtype::SharedFtype( Finfo** finfos, unsigned int n )
 		else
 			destTypes_.push_back( f );
 	}
-	match_ = new SharedFtype;
+	/*
+	match_ = new SharedFtype();
 	match_->nValues_ = nValues_;
 	match_->size_ = size_;
 	match_->match_ = this;
+	*/
 	vector< const Ftype* >::iterator i;
-	for ( i = destTypes_.begin(); i != destTypes_.end(); i++ )
-		match_->srcTypes_.push_back( ( *i )->makeMatchingType() );
-	for ( i = srcTypes_.begin(); i != srcTypes_.end(); i++ )
-		match_->destTypes_.push_back( ( *i )->makeMatchingType() );
+	for ( i = destTypes_.begin(); i != destTypes_.end(); i++ ) {
+		// match_->srcTypes_.push_back( ( *i )->makeMatchingType() );
+		addSyncFunc( *i );
+		addAsyncFunc( *i );
+	}
+	for ( i = srcTypes_.begin(); i != srcTypes_.end(); i++ ) {
+		// match_->destTypes_.push_back( ( *i )->makeMatchingType() );
+		addProxyFunc( *i );
+	}
 }
 
 /*
@@ -115,6 +96,7 @@ void inFunc( vector< IncomingFunc >& ret ) const
 }
 */
 
+/*
 void SharedFtype::syncFunc( vector< RecvFunc >& ret ) const
 {
 	vector< const Ftype* >::const_iterator i;
@@ -128,6 +110,7 @@ void SharedFtype::asyncFunc( vector< RecvFunc >& ret ) const
 	for ( i = srcTypes_.begin(); i != srcTypes_.end(); i++ )
 		( *i )->asyncFunc( ret );
 }
+*/
 
 /**
  * This returns a precomputed Ftype with its baseType
@@ -163,6 +146,49 @@ void tempFunc( const Conn* c )
 void sharedFtypeTest()
 {
 	cout << "\nTesting sharedFtype matching";
+	// This one can match itself
+	static Finfo* testArray1[] = {
+			new DestFinfo( "d1", Ftype0::global(), &tempFunc ),
+			new DestFinfo( "d2", Ftype1< int >::global(), &tempFunc ),
+			new SrcFinfo( "s1", Ftype0::global() ),
+			new SrcFinfo( "s2", Ftype1< int >::global() ),
+	};
+	// This one cannot match itself, but matches 3.
+	static Finfo* testArray2[] = {
+			new DestFinfo( "d1", Ftype0::global(), &tempFunc ),
+			new DestFinfo( "d2", Ftype1< int >::global(), &tempFunc ),
+			new SrcFinfo( "s1", Ftype1< int >::global() ),
+			new SrcFinfo( "s2", Ftype0::global() ),
+	};
+	// This one matches with 2 in either direction.
+	static Finfo* testArray3[] = {
+			new DestFinfo( "d1", Ftype1< int >::global(), &tempFunc ),
+			new DestFinfo( "d2", Ftype0::global(), &tempFunc ),
+			new SrcFinfo( "s1", Ftype0::global() ),
+			new SrcFinfo( "s2", Ftype1< int >::global() ),
+	};
+
+	// This one matches with 2 in either direction even 
+	// though definition order is different
+	static Finfo* testArray4[] = {
+			new SrcFinfo( "s1", Ftype0::global() ),
+			new SrcFinfo( "s2", Ftype1< int >::global() ),
+			new DestFinfo( "d1", Ftype1< int >::global(), &tempFunc ),
+			new DestFinfo( "d2", Ftype0::global(), &tempFunc ),
+	};
+	// This one has a different number of entries and doesn't match.
+	static Finfo* testArray5[] = {
+			new DestFinfo( "d1", Ftype1< int >::global(), &tempFunc ),
+			new DestFinfo( "d2", Ftype0::global(), &tempFunc ),
+			new SrcFinfo( "s1", Ftype0::global() ),
+			new SrcFinfo( "s2", Ftype1< int >::global() ),
+			new SrcFinfo( "s3", Ftype0::global() ),
+	};
+
+/*
+
+
+
 	// This one can match itself
 	static TypeFuncPair testArray1[] = {
 			TypeFuncPair( Ftype0::global(), &tempFunc ),
@@ -204,7 +230,7 @@ void sharedFtypeTest()
 			TypeFuncPair( Ftype1< int >::global(), 0 ),
 			TypeFuncPair( Ftype0::global(), 0 ),
 	};
-
+*/
 
 	SharedFtype s1( testArray1, 4 );
 	SharedFtype s2( testArray2, 4 );

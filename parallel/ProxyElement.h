@@ -20,10 +20,7 @@
 class ProxyElement: public Element
 {
 	public:
-		ProxyElement(
-				Id id,
-				unsigned int node
-		);
+		ProxyElement( Id id, unsigned int node);
 
 		/// Nothing much to do here.
 		~ProxyElement() {
@@ -31,10 +28,11 @@ class ProxyElement: public Element
 		}
 
 		const std::string& name( ) const {
-				// Should look up original on postmaster, or
-				// better, the request should not have come here but
-				// gone to the original node.
-				return "proxy";
+			static string ret = "proxy";
+			// Should look up original on postmaster, or
+			// better, the request should not have come here but
+			// gone to the original node.
+			return ret;
 		}
 
 		void setName( const std::string& name ) {
@@ -42,7 +40,8 @@ class ProxyElement: public Element
 		}
 
 		const std::string& className( ) const {
-			return "proxy";
+			static string ret = "proxy";
+			return ret;
 		}
 
 		const Cinfo* cinfo() const {
@@ -291,8 +290,9 @@ class ProxyElement: public Element
 			return 0;
 		}
 		Element* copyIntoArray( Id parent, const string& newName, int n ) const {
-			;
+			return 0;
 		}
+
 		bool isDescendant( const Element* ancestor ) const {
 			return 0;
 		}
@@ -334,6 +334,7 @@ class ProxyElement: public Element
 
 	private:
 		Msg msg_;
+		unsigned int node_;
 };
 
 #endif // _PROXY_ELEMENT_H

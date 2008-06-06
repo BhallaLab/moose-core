@@ -20,12 +20,21 @@ example, the kinetic solver has one key line where calculation of rate updates
 could be done in a multithreaded way. Key issues:
 	- Specifying environment to solver: # of threads to use
 In principle I could to extensive message traversal to work out multithreading
-of regular messages. This is probably not so valuable right now.
+of regular messages. This is probably not so valuable right now. In due course
+(>4 CPUs, many neurons per node) it will be necessary to do some more 
+intelligent multithreading, possibly by putting several solvers to work at
+once. 
 
 MPI parallelization
 This is slow and expensive in terms of memory, but can scale well
-and is pretty general. See below. If we keep the multithreaded and MPI
-parallization code separate, we may have a good mix.
+and is pretty general. See below. 
+
+The plan is to have MPI code handle internode communications for now, and
+use multithreading as an option for solvers because they need very compact
+thread operations. For example, in the kinetic solver there is a very tight
+inner loop which could be separated into multiple threads. For the 
+neuronal solver the channels could be farmed out.
+
 Postmasters:
 
 ............................................................................
@@ -55,7 +64,7 @@ and common situation.
 At src:
 Conn provides 4 pieces of info: to the destination RecvFunc on the PostMaster:
 - data: e.g., the time stamp. This is passed in as the arg of the RecvFunc.
-- Id of src: Passed in from Conn.
+- Id of tgt: Passed in from Conn.
 - Target message#: This identifies the target synapse Finfo. Passed from Conn.
 - Source Message#: The Message# is a way to look up Ftype. Passed in from Conn.
 

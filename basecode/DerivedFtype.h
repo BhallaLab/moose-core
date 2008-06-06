@@ -13,6 +13,14 @@
 class Ftype0: public Ftype
 {
 		public:
+			Ftype0()
+				: Ftype( "ftype0" )
+			{
+				addSyncFunc( RFCAST( &( Ftype0::syncFunc ) ) );
+				addAsyncFunc( RFCAST( &( Ftype0::asyncFunc ) ) );
+				addProxyFunc( RFCAST( &( Ftype0::proxyFunc ) ) );
+			}
+
 			unsigned int nValues() const {
 				return 0;
 			}
@@ -53,19 +61,39 @@ class Ftype0: public Ftype
 			// for parallel messaging.
 			///////////////////////////////////////////////////////
 
+			static void proxyFunc(
+				const Conn* c, const void* data, Slot slot )
+			{
+				extern void send0( Eref e, Slot src );
+				send0( c->target(), slot );
+			}
+
+			static void syncFunc( const Conn* c )
+			{
+				; // Don't have to do anything at all here: no data is added
+				// Actually data-less sync messages don't make much sense
+			}
+
+			static void asyncFunc( const Conn* c )
+			{
+				// Although we don't add anything to the buffer, this 
+				// function adds the info for the presence of this message.
+				getAsyncParBuf( c, 0 );
+			}
+
 			/**
 			 * This function extracts the value for this field from
 			 * the data, and executes the function call for its
 			 * target Conn. It returns the data pointer set to the
 			 * next field. Here we don't have any arguments so the function
 			 * just executes the target function.
-			 */
 			static const void* incomingFunc(
 				const Conn* c, const void* data, RecvFunc rf )
 			{
 				rf( c );
 				return data;
 			}
+			 */
 
 			/**
 			 * This function inserts data into the outgoing buffer.
@@ -74,10 +102,10 @@ class Ftype0: public Ftype
 			 * For the Ftype0, this function is pretty useless: it 
 			 * amounts to a function executed without args every dt.
 			 * We define it here for compiler satisfaction.
-			 */
 			static void outgoingSync( const Conn* c ) {
 				;
 			}
+			 */
 
 			/**
 			 * This variant is used for asynchronous data, where data
@@ -86,6 +114,7 @@ class Ftype0: public Ftype
 			 * index of the conn into the data buffer by the getAsyncParBuf
 			 * function. 
 			 */
+			/*
 			static void outgoingAsync( const Conn* c ) {
 				getAsyncParBuf( c, 0 ); 
 			}
@@ -104,6 +133,7 @@ class Ftype0: public Ftype
 			void asyncFunc( vector< RecvFunc >& ret ) const {
 				ret.push_back( RFCAST( this->outgoingAsync ) );
 			}
+			*/
 };
 
 
@@ -195,6 +225,9 @@ template< class T > size_t serialSize( const T& value )
 }
 
 
+// Forward declaration of send1 needed for the proxyFunc.
+template < class T > void send1( Eref e, Slot src, T v );
+
 /**
  * The Ftype1 is the most used Ftype as it handles values.
  * This is still a virtual base class as it lacks the
@@ -203,9 +236,19 @@ template< class T > size_t serialSize( const T& value )
  * It also introduces the get function that needs to be specialized
  * depending on the Finfo type.
  */
+
+
 template < class T > class Ftype1: public Ftype
 {
 		public:
+			Ftype1()
+				: Ftype( "ftype1" )
+			{
+				addSyncFunc( RFCAST( &( Ftype1< T >::syncFunc ) ) );
+				addAsyncFunc( RFCAST( &( Ftype1< T >::asyncFunc ) ) );
+				addProxyFunc( RFCAST( &( Ftype1< T >::proxyFunc ) ) );
+			}
+
 			unsigned int nValues() const {
 				return 1;
 			}
@@ -385,14 +428,13 @@ template < class T > class Ftype1: public Ftype
 			 * target Conn. It returns the data pointer set to the
 			 * next field.
 			 */
-			static const void* incomingFunc(
-				const Conn* c, const void* data, RecvFunc rf )
+			// template <class MYCHAR> int lr_pair_type<MYCHAR>::id_string;
+			static void proxyFunc(
+				const Conn* c, const void* data, Slot slot )
 			{
-				T ret;
-				data = unserialize< T >( ret, data );
-				( reinterpret_cast< void (*)( const Conn*, T ) >( rf ) )(
-					c, ret );
-				return data;
+				T v;
+				data = unserialize< T >( v, data );
+				send1< T >( c->target(), slot, v );
 			}
 
 			/**
@@ -400,7 +442,7 @@ template < class T > class Ftype1: public Ftype
 			 * This variant is used when the data is synchronous: sent
 			 * every clock step, so that the sequence is fixed.
 			 */
-			static void outgoingSync( const Conn* c, T value ) {
+			static void syncFunc( const Conn* c, T value ) {
 				void* data = getParBuf( c, serialSize< T >( value ) ); 
 				serialize< T >( data, value );
 			}
@@ -411,29 +453,9 @@ template < class T > class Ftype1: public Ftype
 			 * therefore adds additional data to identify the message
 			 * source
 			 */
-			static void outgoingAsync( const Conn* c, T value ) {
+			static void asyncFunc( const Conn* c, T value ) {
 				void* data = getAsyncParBuf( c, serialSize< T >( value ) ); 
 				serialize< T >( data, value );
-			}
-
-			/// Returns the statically defined incoming func
-			IncomingFunc inFunc() const {
-				return this->incomingFunc;
-			}
-			/*
-			void inFunc( vector< IncomingFunc >& ret ) const {
-				ret.push_back( this->incomingFunc );
-			}
-			*/
-
-			/// Returns the statically defined outgoingSync function
-			void syncFunc( vector< RecvFunc >& ret ) const {
-				ret.push_back( RFCAST( this->outgoingSync ) );
-			}
-
-			/// Returns the statically defined outgoingAsync function
-			void asyncFunc( vector< RecvFunc >& ret ) const {
-				ret.push_back( RFCAST( this->outgoingAsync ) );
 			}
 };
 
