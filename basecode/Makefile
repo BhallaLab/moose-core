@@ -21,6 +21,7 @@ OBJ = \
 	IdManager.o	\
 	Fid.o	\
 	RecvFunc.o \
+	Ftype.o \
 	Msg.o \
 	SimpleElement.o	\
 	ArrayElement.o \
@@ -96,6 +97,7 @@ IdManager.o:	Id.h IdManager.h
 ArrayElement.o:	ArrayElement.h SimpleElement.h DeletionMarkerFinfo.h
 Class.o: Class.h Cinfo.h Cinfo.cpp
 FuncVec.o: RecvFunc.h Ftype.h FuncVec.h
+Ftype.o: Ftype.h
 
 .cpp.o:
 	$(CXX) $(CFLAGS) $< -c

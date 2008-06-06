@@ -232,7 +232,50 @@ The FuncVec.
 When two objects interact, they often need to do so through multiple 
 different functions. This would normally require multiple different
 messages. To economize, such messages can share the same underlying
-connections.
+connection. The FuncVec manages all RecvFuncs that can be called on the
+same message/connection. 
+As a metaphor, many signals can use the same wire. The wire
+is the connection. The list of potential signals is the FuncVec.
+
+FuncVecs are identified by a unique, unsigned int id. This
+acts as a lookup into a static table of FuncVecs. This id is useful because
+it is common across nodes, although the actual function pointers are likely
+to differ. 
+A funcVecId of 0 (zero) indicates that the funcVec is empty. This is not just
+a failure option: all SrcFinfos and many SharedFinfos have a funcVecId of 0.
+The FuncVec can also be looked up using a unique name string of the format 
+<className>.<finfoName>
+but this is hardly ever done.
+
+Each FuncVec defined for a Finfo provides four supplementary FuncVecs:
+trigFuncVec 	Generated for ValueFinfos/LookupFinfos for returning a value.
+lookupFuncVec	Generated for LookupFinfos for returning values with an index
+			(need to check how this works, it looks strange).
+asyncFuncVec	Generated for Src/Shared Finfos as a target func for postmaster
+syncFuncVec	Generated for Src/Shared Finfos as a target func for postmaster
+
+There is currently a problem here for getting at these values, because we
+look up by the original FuncVecId, which is often zero.
+Options:
+- Lookup using string naming. Slow.
+x Lookup all FuncIds from Ftype, including SharedFinfo: 
+	Can't do. Multiple Funcs may have same Ftype.
+- But the parallel functions are all unique to an Ftype.
+	Could separate out FuncIds from the ones the Finfos use.
+- Put an id on Ftypes and get global FuncVecs from there.
+	Messy static initialization management needed here.
+- Pass original Finfo into RespondToAdd, and provide a new Finfo::getFuncVec
+	through which we can traverse to the fundId of the AsyncFuncVec.
+- Pass original Finfo into RespondToAdd, and provide a new Finfo::getAsyncFuncId
+x Don't use FuncId = 0, instead have an empty FuncId for SrcFinfos that can
+	be used to track down the AsyncFuncId. 
+	Messes up too much other stuff.
+
+Each of these FuncVecs also has its own Id, so we can pass them around in
+the same way as the original. They can also be looked up, using the naming
+<className>.<finfoName>.<[trig][lookup][async][sync]>
+
+
 For example, when displaying a cell membrane potential
 through a colorful 3-D diagram, we want to know the membrane potential as
 well as the coordinates of the compartment. However, we probably only want
@@ -249,6 +292,7 @@ Here, FuncVec would have as entries:
 
 The Slot, therefore, specifies both the MsgSrc and the index of the correct
 function in the FuncVec.
+
 
 ...........................................................................
 
