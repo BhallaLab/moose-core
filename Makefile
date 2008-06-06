@@ -16,7 +16,7 @@
 # lines below:
 #
 # Debug mode:
-CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+#CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 
 # Optimized mode:
 #CFLAGS  =	-O3 -Wall -pedantic -DNDEBUG
@@ -43,7 +43,7 @@ CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 
 
 # For parallel (MPI) version:
-#CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DUSE_MPI
+CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DUSE_MPI
 
 # The -DMPICH_IGNORE_CXX_SEEK flag is because of a bug in the
 # MPI-2 standard. Hopefully it won't affect you, but if it does use

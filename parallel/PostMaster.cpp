@@ -11,7 +11,8 @@
 #include "moose.h"
 #include <mpi.h>
 #include "PostMaster.h"
-// #include "ParFinfo.h"
+#include "ProxyElement.h"
+#include "AsyncDestFinfo.h"
 #include <sstream>
 // #include <typeinfo>
 // #include "../element/Neutral.h" // Possibly only need this for testing.
@@ -65,6 +66,12 @@ const Cinfo* initPostMasterCinfo()
 					GFCAST( &PostMaster::getRemoteNode ),
 					RFCAST( &PostMaster::setRemoteNode )
 		),
+
+		// derived from DestFinfo, main difference is it accepts all
+		// kinds of incoming data.
+		new AsyncDestFinfo( "async", 
+			Ftype2< char*, unsigned int >::global(), 
+			RFCAST( &PostMaster::async ) ),
 
 		////////////////////////////////////////////////////////////////
 		//	Shared messages.
@@ -133,6 +140,17 @@ void PostMaster::setRemoteNode( const Conn* c, unsigned int node )
 }
 
 /////////////////////////////////////////////////////////////////////
+// Stuff data into async buffer. Used mostly for testing.
+/////////////////////////////////////////////////////////////////////
+void PostMaster::async( const Conn* c, char* data, unsigned int size )
+{
+	PostMaster* pm = static_cast< PostMaster* >( c->data() );
+	assert( pm != 0 );
+	void* addr = pm->innerGetAsyncParBuf( c, size );
+	memcpy( addr, data, size );
+}
+
+/////////////////////////////////////////////////////////////////////
 // Here we handle passing messages to off-nodes
 /////////////////////////////////////////////////////////////////////
 
@@ -146,7 +164,6 @@ const char* ftype2str( const Ftype *f )
 }
 */
 
-#if 0
 
 /////////////////////////////////////////////////////////////////////
 // Utility function for accessing postmaster data buffer.
@@ -158,6 +175,7 @@ const char* ftype2str( const Ftype *f )
  * If we don't use MPI, then this whole file is unlikely to be compiled.
  * So we define the dummy version of the function in DerivedFtype.cpp.
  */
+#if 0
 void* PostMaster::innerGetParBuf( 
 				unsigned int targetIndex, unsigned int size )
 {
@@ -167,28 +185,6 @@ void* PostMaster::innerGetParBuf(
 		return 0;
 	}
 	outBufPos_ += size;
-	return static_cast< void* >( outBuf_ + outBufPos_ - size );
-}
-
-/**
- * This function puts in the id of the message into the data buffer
- * and passes the next free location over to the calling function.
- * It internally increments the current location of the buffer.
- * If we don't use MPI, then this whole file is unlikely to be compiled.
- * So we define the dummy version of the function in DerivedFtype.cpp.
- */
-void* PostMaster::innerGetAsyncParBuf( 
-				unsigned int targetIndex, unsigned int size )
-{
-	if ( size + outBufPos_ > outBufSize_ ) {
-		cout << "in getParBuf: Out of space in outBuf.\n";
-		// Do something clever here to send another installment
-		return 0;
-	}
-	*static_cast< unsigned int* >( 
-			static_cast< void* >( outBuf_ + outBufPos_ ) ) =
-			targetIndex;
-	outBufPos_ += sizeof( unsigned int ) + size;
 	return static_cast< void* >( outBuf_ + outBufPos_ - size );
 }
 
@@ -261,6 +257,15 @@ void PostMaster::postIrecv( const Conn* c, int ordinal )
 	static_cast< PostMaster* >( c->data() )->innerPostIrecv();
 }
 
+
+/**
+ * Transmits data to proxy element, which then sends data out to targets.
+ */
+unsigned int proxy2tgt( const AsyncStruct& as, const char* data )
+{
+	return 0;
+}
+
 /**
  * This function does the main work of sending incoming messages
  * to dests. It grinds through the irecv'ed data and sends it out
@@ -288,16 +293,21 @@ void PostMaster::innerPoll( const Conn* c )
 		if ( dataSize < sizeof( unsigned int ) ) return;
 
 		// Handle async data in the buffer
-		/*
-		unsigned int nMsgs = *static_cast< unsigned int *>(
-						static_cast< void* >( inBuf_ ) );
-		const char* data = inBuf_ + sizeof( unsigned int );
+		const char* data = &( recvBuf_[ 0 ] );
+		unsigned int nMsgs = *static_cast< const unsigned int* >(
+						static_cast< const void* >( data ) );
+		data += sizeof( unsigned int );
 		for ( unsigned int i = 0; i < nMsgs; i++ ) {
+			AsyncStruct as( data );
+			data += sizeof( AsyncStruct );
+			unsigned int size = proxy2tgt( as, data );
+			// assert( size == as.size() );
+			data += size;
 		}
-		*/
+
 		// Here we skip the location for the msgId, so this is only for
 		// async msgs.
-		const char* data = &( recvBuf_[0] );
+		data = &( recvBuf_[0] );
 		const char* dataEnd = &( recvBuf_[ dataSize ] );
 		while ( data < dataEnd ) {
 			data++; // dummy
@@ -391,15 +401,31 @@ void* getParBuf( const Conn* c, unsigned int size )
 
 void* getAsyncParBuf( const Conn* c, unsigned int size )
 {
-	Eref post = c->target();
-	PostMaster* pm = static_cast< PostMaster* >( post.data() );
+	PostMaster* pm = static_cast< PostMaster* >( c->data() );
 	assert( pm != 0 );
-	/*
-	unsigned int msgId = c.targetIndex() - 
-		 ( post->connDestBegin( dataSlot ) - post->lookupConn( 0 ) );
-	return pm->innerGetAsyncParBuf( msgId, size );
-	*/
-	return 0;
+	return pm->innerGetAsyncParBuf( c, size );
+}
+
+/**
+ * This function puts in the id of the message into the data buffer
+ * and passes the next free location over to the calling function.
+ * It internally increments the current location of the buffer.
+ * If we don't use MPI, then this whole file is unlikely to be compiled.
+ * So we define the dummy version of the function in DerivedFtype.cpp.
+ */
+void* PostMaster::innerGetAsyncParBuf( const Conn* c, unsigned int size )
+{
+	if ( size + sendBufPos_ > sendBuf_.size() ) {
+		cout << "in getParBuf: Out of space in sendBuf_\n";
+		// Do something clever here to send another installment
+		return 0;
+	}
+	AsyncStruct as( c->target().id(), c->targetMsg(), c->sourceMsg() );
+	char* sendBufPtr = &( sendBuf_[ sendBufPos_ ] );
+	*static_cast< AsyncStruct* >( static_cast< void* >( sendBufPtr ) ) = as;
+	sendBufPtr += sizeof( AsyncStruct );
+	sendBufPos_ += sizeof( AsyncStruct ) + size;
+	return static_cast< void* >( sendBufPtr );
 }
 
 /////////////////////////////////////////////////////////////////////
