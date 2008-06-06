@@ -39,9 +39,8 @@ typedef pair< const Ftype*, RecvFunc > TypeFuncPair;
 class SharedFtype: public Ftype
 {
 		public:
-			SharedFtype() {;}
+			// SharedFtype();
 
-			SharedFtype( pair< const Ftype*, RecvFunc >*, unsigned int);
 			SharedFtype( Finfo**, unsigned int);
 
 			unsigned int nValues() const {
@@ -82,21 +81,14 @@ class SharedFtype: public Ftype
 			// apply here, so we just put in dummy functions and
 			// throw an error.
 			//////////////////////////////////////////////////////////////
-			/// Returns the statically defined incoming func
-			IncomingFunc inFunc() const {
-				assert( 0 );
-				return 0;
-			}
-			/*
-			void inFunc( vector< IncomingFunc >& ret ) const {
-				assert( 0 );
-			}
-			*/
 
-			/// Returns the statically defined outgoingSync function
+			/// Returns the statically defined proxy functions
+			void proxyFunc( vector< RecvFunc >& ret ) const;
+
+			/// Returns the statically defined outgoingSync functions
 			void syncFunc( vector< RecvFunc >& ret ) const;
 
-			/// Returns the statically defined outgoingAsync function
+			/// Returns the statically defined outgoingAsync functions
 			void asyncFunc( vector< RecvFunc >& ret ) const;
 
 		private:

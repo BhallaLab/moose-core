@@ -54,7 +54,6 @@
 template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
 {
 		public:
-
 			/**
 			 * The LookupRecvFunc here uses the DynamicFinfo
 			 * to keep track of the original setFunc of the ArrayFinfo,

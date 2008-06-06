@@ -9,10 +9,9 @@
 **********************************************************************/
 #ifndef _FTYPE_H
 #define _FTYPE_H
-#include <map>
-#include <string>
-#include <iostream>
-#include "RecvFunc.h"
+
+class FuncVec;
+
 using namespace std;
 class Conn;
 class Finfo;
@@ -23,7 +22,7 @@ enum FinfoIdentifier { VALUE_SET, VALUE_TRIG,
 		NEST_SET, NEST_TRIG };
 		*/
 
-/**
+/*
  * This typedef is used for functions converting serial data
  * into calls to messages on the target end of a parallel message.
  * The IncomingFunc munches through serial data stream to send data to
@@ -31,9 +30,9 @@ enum FinfoIdentifier { VALUE_SET, VALUE_TRIG,
  * PostMaster on target node. Returns the data pointer
  * incremented with the size of the fields in the Ftype.
  * Index looks up the message slot (MsgSrc) to send from.
- */
 typedef const void* ( *IncomingFunc )( 
 			const Conn* c, const void* data, RecvFunc rf );
+ */
 
 /**
  * Virtual base class for typing information. 
@@ -41,9 +40,16 @@ typedef const void* ( *IncomingFunc )(
 class Ftype
 {
 		public:
-			Ftype()
-			{;}
 
+			/**
+			 * This initialization function sets up the FuncVecs defined
+			 * by the Ftype for parallel message passing.
+			 */
+			Ftype( const string& name );
+
+			/**
+			 * Common destructor. We don't really need to do anything.
+			 */
 			virtual ~Ftype()
 			{;}
 
@@ -73,6 +79,13 @@ class Ftype
 				return this;
 			}
 			
+			/**
+			 * Size of the data contents of the Ftype. For simple
+			 * types like float or double, it is just sizeof, but for
+			 * things like vectors we need to specify the total number
+			 * of bytes needed to serialize the data.
+			 * If there are multiple data types then add all together.
+			 */
 			virtual size_t size() const = 0;
 
 			virtual RecvFunc recvFunc() const = 0;
@@ -128,6 +141,11 @@ class Ftype
 				return 0;
 			}
 			
+			/**
+			 * Not sure why Raamesh has numCopies here: I thought that 
+			 * num was doing the job.
+			 * \todo: Fix the numCopies.
+			 */
 			virtual void* copyIntoArray( 
 					const void* orig, const unsigned int num, 
 					const unsigned int numCopies ) const
@@ -163,31 +181,7 @@ class Ftype
 			////////////////////////////////////////////////////////
 			// I believe these are used by the Python code.
 			
-			static std::string full_type(std::string type)
-    		{
-        		static map < std::string, std::string > type_map;
-				if (type_map.find("j") == type_map.end())
-        		{
-            		type_map["j"] = "unsigned int";
-            		type_map["i"] = "int";        
-            		type_map["f"] = "float";        
-            		type_map["d"] = "double";        
-            		type_map["Ss"] = "string";        
-            		type_map["s"] = "short";
-            		type_map["b"] = "bool";            
-        		}
-        		const map< std::string, std::string >::iterator i = type_map.find(type);
-        		if (i == type_map.end())
-        		{
-            		cout << "Not found - " << type << endl;
-            		
-            		return type;
-        		}
-        		else 
-        		{
-            		return i->second;
-        		}
-    		}
+			static std::string full_type(std::string type);
 
 			virtual std::string getTemplateParameters() const
     		{
@@ -212,31 +206,20 @@ class Ftype
 			////////////////////////////////////////////////////////
 
 			/**
-			 * This returns the IncomingFunc from the specific
-			 * Ftype in the vector ret. The vector is needed because
-			 * SharedFtype may return many funcs. 
-			 * The job of the IncomingFunc is to
-			 * munch through serial data stream to send data to
-			 * destination objects. This function is called from 
-			 * PostMaster on target node.
+			 * This returns the funcId of a FuncVec whose entries are
+			 * filled out by the Ftype to handle synchronous parallel
+			 * messages. These function(s) simply take the arguments
+			 * from the incoming message, serialize them, and put them
+			 * in the buffer at locations specified by the connIndex of
+			 * the message. All the target coding etc is handled by
+			 * the ordering of the message, which is predefined during
+			 * message setup.
+			 * The FuncVec is set up by the base class constructor.
+			 * We can't store the id directly because it is computed
+			 * only after all the static initialization.
 			 */
-			virtual IncomingFunc inFunc() const = 0;
-			// virtual void inFunc( vector< IncomingFunc >& ret ) const = 0;
+			unsigned int syncFuncId() const;
 
-			/**
-			 * This puts into the return vector ret, one or more suitably 
-			 * typecast RecvFuncs for handling messages going into the 
-			 * PostMaster. Many may be entered by a SharedFtype. 
-			 * Each Ftype has
-			 * to provide a static function to return here.
-			 * The job of the RecvFunc is to call a global function
-			 * 'getParbuf' that returns the current location in
-			 * the postmaster outBuf, and then to copy
-			 * the arguments of the recvFunc into this buffer.
-			 * The syncFunc stores only value data in the buffer, and
-			 * requires that the data sequence is identical every timestep.
-			 */
-			virtual void syncFunc( vector< RecvFunc >& ret ) const = 0;
 			/**
 			 * The asyncFunc is similar to the syncFunc, but it is for
 			 * data that is transmitted sporadically such as action
@@ -245,19 +228,52 @@ class Ftype
 			 * The target node figures out which target object to call
 			 * using the conn index.
 			 */
-			virtual void asyncFunc( vector< RecvFunc >& ret ) const = 0;
+			unsigned int asyncFuncId() const;
 
 			/**
-			 * This is used for making messages from postmasters to
-			 * their dests. The PostMaster needs to be able to
-			 * send to arbitrary targets, so the targets have to
-			 * be able to supply the Ftype that they want.
-			 * In most cases self will do,
-			 * but for SharedFtypes it gets more interesting.
+			 * These Funcs calls the send<T>(... ) function in the proxy, 
+			 * reading from the specified block of memory. Not really
+			 * a bunch of RecvFuncs for FuncVec, but since the management 
+			 * stuff is all there...
 			 */
-			virtual const Ftype* makeMatchingType() const {
-				return this;
-			}
+			unsigned int proxyFuncId() const;
+
+			/*
+			/// Returns the statically defined proxy functions
+			virtual void proxyFunc( vector< RecvFunc >& ret ) const = 0;
+
+			/// Returns the statically defined outgoingSync functions
+			virtual void syncFunc( vector< RecvFunc >& ret ) const = 0;
+
+			/// Returns the statically defined outgoingAsync functions
+			virtual void asyncFunc( vector< RecvFunc >& ret ) const = 0;
+			*/
+	protected:
+			/**
+			 * These three functions are called during the Ftype subclass
+			 * creation to add their locally generated recvfunc(s) to the 
+			 * FuncVecs for handling parallel messaging
+			 */
+			void addProxyFunc( RecvFunc r );
+			void addSyncFunc( RecvFunc r );
+			void addAsyncFunc( RecvFunc r );
+
+			/**
+			 * These three variants are called for SharedFtype
+			 * initialization, otherwise we'll need to tap into the
+			 * FuncVecs directly.
+			 */
+			void addProxyFunc( const Ftype* ft );
+			void addSyncFunc( const Ftype* ft );
+			void addAsyncFunc( const Ftype* ft );
+	private:
+		/**
+		 * These three fields store the FuncVec ids for the Ftype-generated
+		 * functions used in parallel messaging.
+		 */
+		FuncVec* proxyFuncs_;
+		FuncVec* asyncFuncs_;
+		FuncVec* syncFuncs_;
 };
 
 #endif // _FTYPE_H
