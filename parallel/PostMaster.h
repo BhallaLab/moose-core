@@ -57,8 +57,15 @@ class PostMaster
 		static void setRemoteNode( const Conn* c, unsigned int node );
 
 		//////////////////////////////////////////////////////////////
+		// Function to stuff data into async buffer. Used mostly
+		// for testing.
+		//////////////////////////////////////////////////////////////
+		static void async( const Conn* c, char* data, unsigned int size );
+
+		//////////////////////////////////////////////////////////////
 		// Transmit/receive Data buffer handling functions.
 		//////////////////////////////////////////////////////////////
+		void* innerGetAsyncParBuf( const Conn* c, unsigned int size );
 		/*
 		void* innerGetParBuf( unsigned int targetIndex,
 						unsigned int size );
@@ -101,6 +108,30 @@ class PostMaster
 		MPI::Request request_;
 		MPI::Status status_;
 		MPI::Comm* comm_;
+};
+
+class AsyncStruct {
+	public: 
+		AsyncStruct( Id tgt, int tgtMsg, int srcMsg )
+			: tgt_( tgt ), tgtMsg_( tgtMsg ), srcMsg_( srcMsg )
+		{;}
+
+		AsyncStruct( const char* data )
+		{ 
+			// tgt_ = *( static_cast< const Id* >( data ) );
+			tgt_ = *( const Id* ) ( data );
+			data += sizeof( Id );
+			tgtMsg_ = *( const int* )( data );
+			// tgtMsg_ = *( static_cast< const int* >( data ) );
+			data += sizeof( int );
+			srcMsg_ = *( const int* ) ( data );
+			// srcMsg_ = *( static_cast< const int* >( data ) );
+		}
+
+	private:
+		Id tgt_;
+		int tgtMsg_;
+		int srcMsg_;
 };
 
 extern const Cinfo* initPostMasterCinfo();
