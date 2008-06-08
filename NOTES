@@ -6963,5 +6963,17 @@ AsyncDestFinfo.
 Along the way got rid of the last vestiges of the TypeFuncPair initialization
 for shared ftypes.
 
+Checked in as revision 509 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+Checked in as revision 510 with unit test flags on, Smoldyn off, -g, GSL, no MPI
+
+==============================================================================
+7 June 2008
+Set up comprehensive unit tests in run up to doing internode messaging.
+First set: Send async data into PostMaster.
+
+==============================================================================
+8 June 2008
+Unit tests set up for postmaster data transfer. First set of tests on 
+async data transfer into source PostMaster buffer OK.
 
 ==============================================================================
