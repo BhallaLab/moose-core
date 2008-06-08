@@ -36,6 +36,9 @@ class ParSyncMsgInfo
  */
 class PostMaster
 {
+#ifdef DO_UNIT_TESTS
+	friend void testParAsyncMessaging();
+#endif
 	public:
 		PostMaster();
 		//////////////////////////////////////////////////////////////
@@ -126,6 +129,18 @@ class AsyncStruct {
 			data += sizeof( int );
 			srcMsg_ = *( const int* ) ( data );
 			// srcMsg_ = *( static_cast< const int* >( data ) );
+		}
+
+		Id target() const {
+			return tgt_;
+		}
+
+		int targetMsg() const {
+			return tgtMsg_;
+		}
+
+		int sourceMsg() const {
+			return srcMsg_;
 		}
 
 	private:
