@@ -47,14 +47,17 @@ Ftype::Ftype( const string& name )
 
 void Ftype::addSyncFunc( RecvFunc r ) {
 	syncFuncs_->addFunc( r, this );
+	syncFuncs_->setDest();
 }
 
 void Ftype::addAsyncFunc( RecvFunc r ) {
 	asyncFuncs_->addFunc( r, this );
+	asyncFuncs_->setDest();
 }
 
 void Ftype::addProxyFunc( RecvFunc r ) {
 	proxyFuncs_->addFunc( r, this );
+	proxyFuncs_->setDest();
 }
 
 
