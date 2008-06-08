@@ -263,6 +263,10 @@ void PostMaster::postIrecv( const Conn* c, int ordinal )
  */
 unsigned int proxy2tgt( const AsyncStruct& as, const char* data )
 {
+	// Make a Conn
+	// call appropriate proxyFunc from the AsyncStruct, which could
+	// be improved here.
+	// Figure out how much data was sent and return that.
 	return 0;
 }
 
@@ -440,9 +444,173 @@ void* PostMaster::innerGetAsyncParBuf( const Conn* c, unsigned int size )
 
 extern void testMess( Element* e, unsigned int numNodes );
 
+static Slot iSlot;
+static Slot xSlot;
+static Slot sSlot;
+static Slot idVecSlot;
+static Slot sVecSlot;
+
+class TestParClass {
+	public:
+		static void sendI( const Conn* c ) {
+			TestParClass* tp = static_cast< TestParClass* >( c->data() );
+			send1< int >( c->target(), iSlot, tp->i_ ) ;
+		}
+		static void sendX( const Conn* c ) {
+			TestParClass* tp = static_cast< TestParClass* >( c->data() );
+			send1< double >( c->target(), xSlot, tp->x_ ) ;
+		}
+		static void sendS( const Conn* c ) {
+			TestParClass* tp = static_cast< TestParClass* >( c->data() );
+			send1< string >( c->target(), sSlot, tp->s_ ) ;
+		}
+		static void sendIdVec( const Conn* c ) {
+			TestParClass* tp = static_cast< TestParClass* >( c->data() );
+			send1< vector< Id > >( c->target(), idVecSlot, tp->idVec_ ) ;
+		}
+		static void sendSvec( const Conn* c ) {
+			TestParClass* tp = static_cast< TestParClass* >( c->data() );
+			send1< vector< string > >( c->target(), sVecSlot, tp->sVec_ ) ;
+		}
+
+		static void setI( const Conn* c, int value )
+		{
+			static_cast< TestParClass* >( c->data() )->i_ = value;
+		}
+
+		static void setX( const Conn* c, double value )
+		{
+			static_cast< TestParClass* >( c->data() )->x_ = value;
+		}
+
+		static void setS( const Conn* c, string value )
+		{
+			static_cast< TestParClass* >( c->data() )->s_ = value;
+		}
+
+		static void setIdVec( const Conn* c, vector< Id > value )
+		{
+			static_cast< TestParClass* >( c->data() )->idVec_ = value;
+		}
+
+		static void setSvec( const Conn* c, vector< string > value )
+		{
+			static_cast< TestParClass* >( c->data() )->sVec_ = value;
+		}
+
+		int i_;
+		double x_;
+		string s_;
+		vector< Id > idVec_;
+		vector< string > sVec_;
+};
+
+/**
+ * This test class has messages for ints, doubles, strings, vectors.
+ */
+const Cinfo* initTestParClass()
+{
+	static Finfo* testParClassFinfos[] =
+	{
+		new DestFinfo( "i", Ftype1< int >::global(),
+			RFCAST( &TestParClass::setI ) ),
+		new DestFinfo( "x", Ftype1< double >::global(),
+			RFCAST( &TestParClass::setX ) ),
+		new DestFinfo( "s", Ftype1< string >::global(),
+			RFCAST( &TestParClass::setS ) ),
+		new DestFinfo( "idVec", Ftype1< vector< Id > >::global(),
+			RFCAST( &TestParClass::setIdVec ) ),
+		new DestFinfo( "sVec", Ftype1< vector< string > >::global(),
+			RFCAST( &TestParClass::setSvec ) ),
+
+		new SrcFinfo( "iSrc", Ftype1< int >::global() ),
+		new SrcFinfo( "xSrc", Ftype1< double >::global() ),
+		new SrcFinfo( "sSrc", Ftype1< string >::global() ),
+		new SrcFinfo( "idVecSrc", Ftype1< vector< Id > >::global() ),
+		new SrcFinfo( "sVecSrc", Ftype1< vector< string > >::global() ),
+	};
+
+	static Cinfo testParClassCinfo(
+		"TestPar",
+		"Upi Bhalla, 2008, NCBS",
+		"Test class for parallel messaging",
+		initNeutralCinfo(),
+		testParClassFinfos,
+		sizeof( testParClassFinfos ) / sizeof( Finfo* ),
+		ValueFtype1< TestParClass >::global()
+	);
+	return & testParClassCinfo;
+}
+
+void testParAsyncMessaging()
+{
+	cout << "\nTesting Parallel Async messaging\n";
+	const Cinfo* tpCinfo = initTestParClass();
+	iSlot = tpCinfo->getSlot( "iSrc" );
+	xSlot = tpCinfo->getSlot( "xSrc" );
+	sSlot = tpCinfo->getSlot( "sSrc" );
+	idVecSlot = tpCinfo->getSlot( "idVecSrc" );
+	sVecSlot = tpCinfo->getSlot( "sVecSrc" );
+
+	FuncVec::sortFuncVec();
+
+	Element* n = Neutral::create( "Neutral", "n", Id(), Id::scratchId() );
+
+	Element* p = Neutral::create(
+			"PostMaster", "node0", n->id(), Id::scratchId());
+	ASSERT( p != 0, "created Test Postmaster" );
+
+	Element* t = 
+		Neutral::create( "TestPar", "tp", n->id(), Id::scratchId() );
+	ASSERT( t != 0, "created TestPar" );
+	TestParClass* tdata = static_cast< TestParClass* >( t->data() );
+
+	SetConn c( t, 0 );
+
+	PostMaster* pm = static_cast< PostMaster* >( p->data() );
+
+	// Send an int to the postmaster
+	tdata->i_ = 44332211;
+	bool ret = Eref( t ).add( "iSrc", p, "async" );
+	ASSERT( ret, "msg to post" );
+	TestParClass::sendI( &c );
+	char* abuf = &( pm->sendBuf_[0] );
+	AsyncStruct as( abuf );
+	int asyncMsgNum = p->findFinfo( "async" )->msg();
+	int iSendMsgNum = t->findFinfo( "iSrc" )->msg();
+	ASSERT( as.target() == p->id(), "async info to post" );
+	ASSERT( as.targetMsg() == asyncMsgNum, "async info to post" );
+	ASSERT( as.sourceMsg() == iSendMsgNum, "async info to post" );
+
+	void* vabuf = static_cast< void* >( abuf + sizeof( AsyncStruct ) );
+	int i = *static_cast< int* >( vabuf );
+	ASSERT( i == tdata->i_, "sending int" );
+
+	// Send a double to the postmaster
+	// Send a string to the postmaster
+	// Send a vector of ints to the postmaster
+	// Send a vector of Ids to the postmaster
+	// Send a vector of strings to the postmaster
+
+	// Make a message to an int via a proxy
+	// Make a message to 100 ints via the proxy
+	// Send a value to an int through the proxy
+	//
+	// Repeat for a vector of strings or something equally awful.
+	//
+
+	// Using a buffer-to-buffer memcpy, do a single-node check on the
+	// complete transfer from int to int and all of the above.
+	//
+	// Also confirm that they work with multiple messages appearing
+	// in random order each time.
+	set( n, "destroy" );
+}
+
 void testPostMaster()
 {
 	// First, ensure that all nodes are synced.
+	testParAsyncMessaging();
 	MPI::COMM_WORLD.Barrier();
 	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
 	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
