@@ -6975,5 +6975,11 @@ First set: Send async data into PostMaster.
 8 June 2008
 Unit tests set up for postmaster data transfer. First set of tests on 
 async data transfer into source PostMaster buffer OK.
+Checked in as revision 511 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+==============================================================================
+9 June 2008
+Split parallel development into separate code branch. The current trunk will
+be for release fixes.
 
 ==============================================================================
