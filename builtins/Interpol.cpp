@@ -434,6 +434,7 @@ void Interpol::localAppendTableVector( const vector< double >& value )
 
 void Interpol::innerTabFill( int xdivs, int mode )
 {
+	int oldMode = mode_;
 	vector< double > newtab;
 	newtab.resize( xdivs + 1, 0.0 );
 	double dx = ( xmax_ - xmin_ ) / static_cast< double >( xdivs );
@@ -442,7 +443,7 @@ void Interpol::innerTabFill( int xdivs, int mode )
 		newtab[ i ] = innerLookup(
 			xmin_ + dx * static_cast< double >( i ) );
 	table_ = newtab;
-	mode_ = mode;
+	mode_ = oldMode;
 	invDx_ = 1.0/dx;
 }
 
