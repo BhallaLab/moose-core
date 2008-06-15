@@ -17,6 +17,10 @@
 
 #include "SpikeGen.h"
 
+const int HSolveBase::INSTANT_X = 1;
+const int HSolveBase::INSTANT_Y = 2;
+const int HSolveBase::INSTANT_Z = 4;
+
 void HSolveBase::step( ProcInfo info ) {
 	if ( !Gk_.size() ) {
 		Gk_.resize( channel_.size() );
@@ -190,8 +194,12 @@ void HSolveBase::advanceChannels( double dt ) {
 				ilookup->rates( key, C1, C2 );
 				//~ *istate = *istate * C1 + C2;
 				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
-				double temp = 1.0 + dt / 2.0 * C2;
-				*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
+				if ( ichan->instant_ & INSTANT_X )
+					*istate = C1 / C2;
+				else {
+					double temp = 1.0 + dt / 2.0 * C2;
+					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
+				}
 				
 				++ilookup, ++istate;
 			}
@@ -200,9 +208,13 @@ void HSolveBase::advanceChannels( double dt ) {
 				ilookup->rates( key, C1, C2 );
 				//~ *istate = *istate * C1 + C2;
 				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
-				double temp = 1.0 + dt / 2.0 * C2;
-				*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
-				
+				if ( ichan->instant_ & INSTANT_Y )
+					*istate = C1 / C2;
+				else {
+					double temp = 1.0 + dt / 2.0 * C2;
+					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
+				}
+								
 				++ilookup, ++istate;
 			}
 			
@@ -215,8 +227,12 @@ void HSolveBase::advanceChannels( double dt ) {
 				
 				//~ *istate = *istate * C1 + C2;
 				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
-				double temp = 1.0 + dt / 2.0 * C2;
-				*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
+				if ( ichan->instant_ & INSTANT_Z )
+					*istate = C1 / C2;
+				else {
+					double temp = 1.0 + dt / 2.0 * C2;
+					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
+				}
 				
 				++ilookup, ++istate;
 			}
