@@ -50,16 +50,17 @@ OBJ = \
 	StochSynchan.o	\
 	PulseGen.o	\
 	RandomSpike.o \
-	TestBiophysics.o \
 	Cell.o		\
+	RateLookup.o	\
+	HSolveStruct.o	\
+ 	HSolveBase.o	\
+ 	HSolve.o \
+ 	NeuroScanBase.o \
+ 	NeuroScan.o \
+ 	NeuroHub.o \
+	TestBiophysics.o \
 	script_out.o
 endif
-#	HSolveStruct.o	\
-# 	HSolveBase.o	\
-# 	HSolve.o \
-# 	NeuroScanBase.o \
-# 	NeuroScan.o \
-# 	NeuroHub.o \
 
 HEADERS = \
 	../basecode/header.h \
@@ -89,6 +90,7 @@ ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 ParSynChan.o:	SynChan.h SynInfo.h ParSynChan.h
 endif
 
+RateLookup.o:	RateLookup.h
 HSolveStruct.o:	HSolveStruct.h
 HSolveBase.o:	HSolveBase.h HSolveStruct.h
 HSolve.o:	HSolve.h HSolveBase.h HSolveStruct.h

@@ -10,63 +10,67 @@
 #include "moose.h"
 #include <queue>
 #include "SynInfo.h"
+#include "RateLookup.h"
 #include "HSolveStruct.h"
 #include "HSolveBase.h"
 #include <cmath>
 
 #include "SpikeGen.h"
 
-// This macro is used for linear interpolation during table lookup of rate
-// constants. Will not be included in coming versions.
-#define WT_AVG( A, B, FRACTION ) \
-        ( ( A ) * ( 1.0 - ( FRACTION ) ) + ( B ) * ( FRACTION ) )
-
 void HSolveBase::step( ProcInfo info ) {
+	if ( !Gk_.size() ) {
+		Gk_.resize( channel_.size() );
+		GkEk_.resize( channel_.size() );
+	}
+
+	//~ advanceChannels( );
+	advanceChannels( info->dt_ );
+	calculateChannelCurrents( );
 	updateMatrix( );
 	forwardEliminate( );
 	backwardSubstitute( );
-	advanceChannels( );
+	advanceCalcium( );
 	advanceSynChans( info );
 	sendSpikes( info );
 }
 
-// This function needs cleanup. Many immediate optimizations come in here.
+void HSolveBase::calculateChannelCurrents( ) {
+	vector< ChannelStruct >::iterator ichan;
+	vector< double >::iterator igk = Gk_.begin();
+	vector< double >::iterator igkek = GkEk_.begin();
+	double* istate = &state_[ 0 ];
+	
+	for ( ichan = channel_.begin(); ichan != channel_.end(); ++ichan ) {
+		ichan->process( istate, *igk, *igkek );
+		++igk, ++igkek;
+	}
+}
+
 void HSolveBase::updateMatrix( ) {
-	double Gk, GkEk,
-	       GkSum, GkEkSum;
-	double state;
+	double GkSum, GkEkSum;
 	
 	unsigned char ichan;
-	unsigned char igate;
 	vector< unsigned char >::iterator icco = channelCount_.begin();
-	vector< unsigned char >::iterator igco = gateCount1_.begin();
-	vector< double >::iterator igbar   = Gbar_.begin();
-	vector< double >::iterator igbarek = GbarEk_.begin();
-	vector< double >::iterator ipower  = power_.begin();
-	vector< double >::iterator istate  = state_.begin();
 	vector< double >::iterator ia      = M_.begin();
 	vector< double >::iterator iv      = V_.begin();
-	vector< double >::iterator ialpha  = CmByDt_.begin();
-	vector< double >::iterator iileak  = EmByRm_.begin();
+	vector< double >::iterator icmbydt = CmByDt_.begin();
+	vector< double >::iterator iembyrm = EmByRm_.begin();
 	vector< double >::iterator iinject = inject_.begin();
+	vector< double >::iterator igk     = Gk_.begin();
+	vector< double >::iterator igkek   = GkEk_.begin();
 	for ( unsigned long ic = 0; ic < N_; ++ic ) {
 		GkSum   = 0.0;
 		GkEkSum = 0.0;
-		for ( ichan = 0; ichan < *icco; ++ichan, ++igco ) {
-			Gk   = *( igbar++ );
-			GkEk = *( igbarek++ );
-			for ( igate = 0; igate < *igco; ++igate ) {
-				state = pow( *( istate++ ), *( ipower++ ) );
-				Gk   *= state;
-				GkEk *= state;
-			}
-			GkSum   += Gk;
-			GkEkSum += GkEk;
+		for ( ichan = 0; ichan < *icco; ++ichan ) {
+			GkSum   += *( igk++ );
+			GkEkSum += *( igkek++ );
 		}
 		
 		*ia         = *( 3 + ia ) + GkSum;
-		*( 4 + ia ) = *iileak + *ialpha * *iv + GkEkSum + *iinject;
-		++icco, ia += 5, ++ialpha, ++iv, ++iileak, ++iinject;
+		*( 4 + ia ) = *iembyrm + *icmbydt * *iv + GkEkSum + *iinject;
+		//~ *ia         = *( 3 + ia ) + *icmbydt * GkSum;
+		//~ *( 4 + ia ) = *iv + *icmbydt * (*iembyrm + GkEkSum + *iinject);
+		++icco, ia += 5, ++icmbydt, ++iv, ++iembyrm, ++iinject;
 	}
 	
 	unsigned int ic;
@@ -99,10 +103,8 @@ void HSolveBase::forwardEliminate( ) {
 }
 
 void HSolveBase::backwardSubstitute( ) {
-	vector< double > VMid( N_ );
-	
 	long ic = ( long )( N_ ) - 1;
-	vector< double >::reverse_iterator ivmid = VMid.rbegin();
+	vector< double >::reverse_iterator ivmid = VMid_.rbegin();
 	vector< double >::reverse_iterator iv = V_.rbegin();
 	vector< double >::reverse_iterator ia = M_.rbegin();
 	vector< unsigned long >::reverse_iterator icp;
@@ -121,7 +123,7 @@ void HSolveBase::backwardSubstitute( ) {
 			*iv    = 2 * *ivmid - *iv;
 		}
 		
-		*ivmid = ( *ia - *( 3 + ia ) * VMid[ *icp ] )
+		*ivmid = ( *ia - *( 3 + ia ) * VMid_[ *icp ] )
 			 / *( 4 + ia );
 		*iv    = 2 * *ivmid - *iv;
 	}
@@ -133,28 +135,93 @@ void HSolveBase::backwardSubstitute( ) {
 	}
 }
 
-void HSolveBase::advanceChannels( ) {
+void HSolveBase::advanceCalcium( ) {
+	unsigned char ichan;
+	vector< double* >::iterator icatarget = caTarget_.begin();
+	vector< double >::iterator igk = Gk_.begin();
+	vector< double >::iterator igkek = GkEk_.begin();
+	vector< double >::iterator ivmid = VMid_.begin();
+	vector< unsigned char >::iterator icco;
+	
+	caActivation_.assign( caActivation_.size(), 0.0 );
+	
+double v;
+vector< double >::iterator iv = V_.begin();
+	for ( icco = channelCount_.begin(); icco != channelCount_.end(); ++icco, ++ivmid,
+	++iv )
+		for ( ichan = 0; ichan < *icco; ++ichan, ++icatarget, ++igk, ++igkek )
+		{
+			v = 2 * *ivmid - *iv;
+			if ( *icatarget )
+				**icatarget += *igkek - *igk * v;
+				//~ **icatarget += *igkek - *igk * *ivmid;
+		}
+	
+	vector< CaConcStruct >::iterator icaconc;
+	vector< double >::iterator icaactivation = caActivation_.begin();
+	vector< double >::iterator ica = ca_.begin();
+	for ( icaconc = caConc_.begin(); icaconc != caConc_.end(); ++icaconc )
+	{
+		*ica = icaconc->process( *icaactivation );
+		++ica, ++icaactivation;
+	}
+}
+
+void HSolveBase::advanceChannels( double dt ) {
 	vector< double >::iterator iv;
-	vector< double >::iterator ibase;
-	vector< double >::iterator ilookup;
 	vector< double >::iterator istate = state_.begin();
-	vector< unsigned char >::iterator ifamily = gateFamily_.begin();
-	vector< unsigned char >::iterator igco = gateCount_.begin();
-	double distance, fraction;
-	unsigned char ig;
-	for ( iv = V_.begin(); iv != V_.end(); ++iv, ++igco )
-		if ( *igco ) {
-			distance = ( *iv - VLo_ ) / dV_;
-			ibase    = lookup_.begin() + lookupBlocSize_ *
-				   ( unsigned long )( distance );
-			fraction = distance - floor( distance );
-			for ( ig = 0; ig < *igco; ++ig, ++istate ) {
-				ilookup = ibase + 2 * *( ifamily++ );
-				*istate = *istate * \
-					WT_AVG( *ilookup, *( lookupBlocSize_ + ilookup ), fraction ) + \
-					WT_AVG( *( 1 + ilookup ), *( ( 1 + lookupBlocSize_ ) + ilookup ), fraction );
+	vector< double* >::iterator icadepend = caDepend_.begin();
+	vector< RateLookup >::iterator ilookup = lookup_.begin();
+	vector< unsigned char >::iterator icco = channelCount_.begin();
+	
+	LookupKey key;
+	LookupKey keyCa;
+	double C1, C2;
+	vector< ChannelStruct >::iterator ichan = channel_.begin();
+	vector< ChannelStruct >::iterator nextChan;
+	for ( iv = V_.begin(); iv != V_.end(); ++iv, ++icco ) {
+		if ( *icco == 0 )
+			continue;
+		
+		ilookup->getKey( *iv, key );
+		nextChan = ichan + *icco;
+		for ( ; ichan < nextChan; ++ichan, ++icadepend ) {
+			if ( ichan->Xpower_ ) {
+				ilookup->rates( key, C1, C2 );
+				//~ *istate = *istate * C1 + C2;
+				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
+				double temp = 1.0 + dt / 2.0 * C2;
+				*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
+				
+				++ilookup, ++istate;
+			}
+			
+			if ( ichan->Ypower_ ) {
+				ilookup->rates( key, C1, C2 );
+				//~ *istate = *istate * C1 + C2;
+				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
+				double temp = 1.0 + dt / 2.0 * C2;
+				*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
+				
+				++ilookup, ++istate;
+			}
+			
+			if ( ichan->Zpower_ ) {
+				if ( *icadepend ) {
+					ilookup->getKey( **icadepend, keyCa );
+					ilookup->rates( keyCa, C1, C2 );
+				} else
+					ilookup->rates( key, C1, C2 );
+				
+				//~ *istate = *istate * C1 + C2;
+				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
+				double temp = 1.0 + dt / 2.0 * C2;
+				*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
+				
+				++ilookup, ++istate;
 			}
 		}
+	}
 }
 
 void HSolveBase::advanceSynChans( ProcInfo info ) {
@@ -164,10 +231,10 @@ void HSolveBase::advanceSynChans( ProcInfo info ) {
 }
 
 void HSolveBase::sendSpikes( ProcInfo info ) {
-	vector< SpikeGenStruct >::iterator ispike;
+/*	vector< SpikeGenStruct >::iterator ispike;
 	for ( ispike = spikegen_.begin(); ispike != spikegen_.end(); ++ispike ) {
 		set< double >( ispike->elm_, "Vm", V_[ ispike->compt_ ] );
 		Conn c( ispike->elm_, 0 );
-		SpikeGen::processFunc( &c, info );
-	}
+		SpikeGen::processFunc( c, info );
+	}*/
 }
