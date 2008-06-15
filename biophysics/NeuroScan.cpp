@@ -12,6 +12,7 @@
 #include "SpikeGen.h"
 #include <queue>
 #include "SynInfo.h"
+#include "RateLookup.h"
 #include "HSolveStruct.h"
 #include "SynChan.h"
 #include "NeuroHub.h"
@@ -26,7 +27,7 @@ const Cinfo* initNeuroScanCinfo()
 	static Finfo* hubShared[] =
 	{
 		new SrcFinfo( "compartment",
-			Ftype1< vector< Element* >* >::global() ),
+			Ftype2< vector< double >*, vector< Element* >* >::global() ),
 		new SrcFinfo( "channel",
 			Ftype1< vector< Element* >* >::global() ),
 		new SrcFinfo( "spikegen",
@@ -49,23 +50,35 @@ const Cinfo* initNeuroScanCinfo()
 	//////////////////////////////////////////////////////////////////
 	// Field definitions
 	//////////////////////////////////////////////////////////////////
-		new ValueFinfo( "NDiv", ValueFtype1< int >::global(),
-			GFCAST( &NeuroScan::getNDiv ),
-			RFCAST( &NeuroScan::setNDiv )
+		new ValueFinfo( "VDiv", ValueFtype1< int >::global(),
+			GFCAST( &NeuroScan::getVDiv ),
+			RFCAST( &NeuroScan::setVDiv )
 		),
-		new ValueFinfo( "VLo", ValueFtype1< double >::global(),
-			GFCAST( &NeuroScan::getVLo ),
-			RFCAST( &NeuroScan::setVLo )
+		new ValueFinfo( "VMin", ValueFtype1< double >::global(),
+			GFCAST( &NeuroScan::getVMin ),
+			RFCAST( &NeuroScan::setVMin )
 		),
-		new ValueFinfo( "VHi", ValueFtype1< double >::global(),
-			GFCAST( &NeuroScan::getVHi ),
-			RFCAST( &NeuroScan::setVHi )
+		new ValueFinfo( "VMax", ValueFtype1< double >::global(),
+			GFCAST( &NeuroScan::getVMax ),
+			RFCAST( &NeuroScan::setVMax )
+		),
+		new ValueFinfo( "CaDiv", ValueFtype1< int >::global(),
+			GFCAST( &NeuroScan::getCaDiv ),
+			RFCAST( &NeuroScan::setCaDiv )
+		),
+		new ValueFinfo( "CaMin", ValueFtype1< double >::global(),
+			GFCAST( &NeuroScan::getCaMin ),
+			RFCAST( &NeuroScan::setCaMin )
+		),
+		new ValueFinfo( "CaMax", ValueFtype1< double >::global(),
+			GFCAST( &NeuroScan::getCaMax ),
+			RFCAST( &NeuroScan::setCaMax )
 		),
 		
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfo definitions
 	//////////////////////////////////////////////////////////////////
-		new SharedFinfo( "hub", hubShared,
+		new SharedFinfo( "scan-hub", hubShared,
 			sizeof( hubShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "gate", gateShared,
 			sizeof( gateShared ) / sizeof( Finfo* ) ),
@@ -80,14 +93,14 @@ const Cinfo* initNeuroScanCinfo()
 			Ftype0::global(),
 			&NeuroScan::hubCreateFunc ),
 		new DestFinfo( "readModel",
-			Ftype2< Element*, double >::global(),
+			Ftype2< Id, double >::global(),
 			RFCAST( &NeuroScan::readModelFunc ) ),
 	};
 
 	static Cinfo neuroScanCinfo(
 		"NeuroScan",
 		"Niraj Dudani, 2007, NCBS",
-		"NeuroScan: Portal for reading in neuronal models from MOOSE object tree.",
+		"NeuroScan: HSolve component for reading in neuronal models from MOOSE object tree.",
 		initNeutralCinfo(),
 		neuroScanFinfos,
 		sizeof( neuroScanFinfos ) / sizeof( Finfo* ),
@@ -100,53 +113,80 @@ const Cinfo* initNeuroScanCinfo()
 static const Cinfo* neuroScanCinfo = initNeuroScanCinfo();
 
 static const Slot hubCompartmentSlot =
-	initNeuroScanCinfo()->getSlot( "hub.compartment" );
+	initNeuroScanCinfo()->getSlot( "scan-hub.compartment" );
 static const Slot hubChannelSlot =
-	initNeuroScanCinfo()->getSlot( "hub.channel" );
+	initNeuroScanCinfo()->getSlot( "scan-hub.channel" );
 static const Slot hubSpikegenSlot =
-	initNeuroScanCinfo()->getSlot( "hub.spikegen" );
+	initNeuroScanCinfo()->getSlot( "scan-hub.spikegen" );
 static const Slot hubSynchanSlot =
-	initNeuroScanCinfo()->getSlot( "hub.synchan" );
+	initNeuroScanCinfo()->getSlot( "scan-hub.synchan" );
 static const Slot gateVmSlot =
 	initNeuroScanCinfo()->getSlot( "gate.Vm" );
 static const Slot gateSlot =
 	initNeuroScanCinfo()->getSlot( "gate" );
 
-static const Finfo* gateFinfo =
-	initNeuroScanCinfo()->findFinfo( "gate" );
-
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void NeuroScan::setNDiv( const Conn* c, int NDiv )
+void NeuroScan::setVDiv( const Conn* c, int vDiv )
 {
-	static_cast< NeuroScan* >( c->data() )->NDiv_ = NDiv;
+	static_cast< NeuroScan* >( c->data() )->vDiv_ = vDiv;
 }
 
-int NeuroScan::getNDiv( const Element* e )
+int NeuroScan::getVDiv( Eref e )
 {
-	return static_cast< NeuroScan* >( e->data() )->NDiv_;
+	return static_cast< NeuroScan* >( e.data() )->vDiv_;
 }
 
-void NeuroScan::setVLo( const Conn* c, double VLo )
+void NeuroScan::setVMin( const Conn* c, double vMin )
 {
-	static_cast< NeuroScan* >( c->data() )->VLo_ = VLo;
+	static_cast< NeuroScan* >( c->data() )->vMin_ = vMin;
 }
 
-double NeuroScan::getVLo( const Element* e )
+double NeuroScan::getVMin( Eref e )
 {
-	return static_cast< NeuroScan* >( e->data() )->VLo_;
+	return static_cast< NeuroScan* >( e.data() )->vMin_;
 }
 
-void NeuroScan::setVHi( const Conn* c, double VHi )
+void NeuroScan::setVMax( const Conn* c, double vMax )
 {
-	static_cast< NeuroScan* >( c->data() )->VHi_ = VHi;
+	static_cast< NeuroScan* >( c->data() )->vMax_ = vMax;
 }
 
-double NeuroScan::getVHi( const Element* e )
+double NeuroScan::getVMax( Eref e )
 {
-	return static_cast< NeuroScan* >( e->data() )->VHi_;
+	return static_cast< NeuroScan* >( e.data() )->vMax_;
+}
+
+void NeuroScan::setCaDiv( const Conn* c, int caDiv )
+{
+	static_cast< NeuroScan* >( c->data() )->caDiv_ = caDiv;
+}
+
+int NeuroScan::getCaDiv( Eref e )
+{
+	return static_cast< NeuroScan* >( e.data() )->caDiv_;
+}
+
+void NeuroScan::setCaMin( const Conn* c, double caMin )
+{
+	static_cast< NeuroScan* >( c->data() )->caMin_ = caMin;
+}
+
+double NeuroScan::getCaMin( Eref e )
+{
+	return static_cast< NeuroScan* >( e.data() )->caMin_;
+}
+
+void NeuroScan::setCaMax( const Conn* c, double caMax )
+{
+	static_cast< NeuroScan* >( c->data() )->caMax_ = caMax;
+}
+
+double NeuroScan::getCaMax( Eref e )
+{
+	return static_cast< NeuroScan* >( e.data() )->caMax_;
 }
 
 ///////////////////////////////////////////////////
@@ -157,10 +197,10 @@ double NeuroScan::getVHi( const Element* e )
 void NeuroScan::hubCreateFunc( const Conn* c )
 {
 	static_cast< NeuroScan* >( c->data() )->
-		innerHubCreateFunc( c->targetElement() );
+		innerHubCreateFunc( c->target() );
 }
 
-void NeuroScan::innerHubCreateFunc( Element* scan )
+void NeuroScan::innerHubCreateFunc( Eref scan )
 {
 	// Hub element's data field is owned by its parent HSolve
 	// structure, so we set it's noDelFlag to 1.
@@ -168,54 +208,48 @@ void NeuroScan::innerHubCreateFunc( Element* scan )
 	Element* hub = initNeuroHubCinfo()->create( 
 		Id::scratchId(), "hub",
 		static_cast< void* >( &hub_ ), 1 );
-	bool ret = solve()->findFinfo( "childSrc" )->
-		add( solve(), hub, hub->findFinfo( "child" ) );
-	assert( ret );
+	Eref( solve() ).add( "childSrc", hub, "child" );
 	
 	// Setting up shared msg between scanner and hub.
-	ret = scan->findFinfo( "hub" )->
-		add( scan, hub, hub->findFinfo( "hub" ) );
-	assert( ret );
+	Eref( scan ).add( "scan-hub", hub, "scan-hub" );
 }
 
-void NeuroScan::readModelFunc( const Conn* c, Element* seed, double dt  )
+void NeuroScan::readModelFunc( const Conn* c, Id seed, double dt  )
 {
 	static_cast< NeuroScan* >( c->data() )->
-		innerReadModelFunc( c->targetElement(), seed, dt );
+		innerReadModelFunc( c->target(), seed, dt );
 }
 
-void NeuroScan::innerReadModelFunc( Element* e, Element* seed, double dt  )
+void NeuroScan::innerReadModelFunc( Eref e, Id seed, double dt  )
 {
 	scanElm_ = e;
+	initialize( seed, dt );
 	
-	unsigned int seedLocal = logElement( seed, COMPARTMENT );
-	initialize( seedLocal, dt );
-	
-	vector< unsigned int >::iterator i;
+	vector< Id >::iterator i;
 	vector< Element* > elist;
-	for ( i = compartment_.begin(); i != compartment_.end(); ++i )
-		elist.push_back( id2e_[ *i ] );
-	send1< const vector< Element* >* >(
-		scanElm_, hubCompartmentSlot, &elist );
+	for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i )
+		elist.push_back( ( *i )() );
+	send2< vector< double >*, vector< Element* >* >(
+		scanElm_, hubCompartmentSlot, &V_, &elist );
 	
 	elist.clear();
-	for ( i = channel_.begin(); i != channel_.end(); ++i )
-		elist.push_back( id2e_[ *i ] );
-	send1< const vector< Element* >* >(
+	for ( i = channelId_.begin(); i != channelId_.end(); ++i )
+		elist.push_back( ( *i )() );
+	send1< vector< Element* >* >(
 		scanElm_, hubChannelSlot, &elist );
 	
 	elist.clear();
 	vector< SpikeGenStruct >::iterator j;
 	for ( j = spikegen_.begin(); j != spikegen_.end(); ++j )
 		elist.push_back( j->elm_ );
-	send1< const vector< Element* >* >(
+	send1< vector< Element* >* >(
 		scanElm_, hubSpikegenSlot, &elist );
 	
 	elist.clear();
 	vector< SynChanStruct >::iterator k;
 	for ( k = synchan_.begin(); k != synchan_.end(); ++k )
 		elist.push_back( k->elm_ );
-	send1< const vector< Element* >* >(
+	send1< vector< Element* >* >(
 		scanElm_, hubSynchanSlot, &elist );
 }
 
@@ -230,10 +264,9 @@ void NeuroScan::gateFunc( const Conn* c, double A, double B )
 // Portal functions (to scan model)
 ///////////////////////////////////////////////////
 
-vector< unsigned int > NeuroScan::children(
-	unsigned int self, unsigned int parent )
+vector< Id > NeuroScan::children( Id self, Id parent )
 {
-	vector< unsigned int > child = neighbours( self );
+	vector< Id > child = neighbours( self );
 	child.erase(
 		remove( child.begin(), child.end(), parent ),
 		child.end()
@@ -241,195 +274,149 @@ vector< unsigned int > NeuroScan::children(
 	return child;
 }
 
-vector< unsigned int > NeuroScan::neighbours( unsigned int compartment )
+vector< Id > NeuroScan::neighbours( Id compartment )
 {
-	vector< Element* > neighbour;
+	vector< Id > neighbour;
 	targets( compartment, "axial", neighbour );
 	targets( compartment, "raxial", neighbour );
-	return logElement( neighbour, COMPARTMENT );
+	return neighbour;
 }
 
-vector< unsigned int > NeuroScan::channels( unsigned int compartment )
+vector< Id > NeuroScan::channels( Id compartment )
 {
-	vector< Element* > channel;
+	vector< Id > channel;
 	targets( compartment, "channel", channel );
-	return logElement( channel, CHANNEL );
+	return channel;
 }
 
-vector< unsigned int > NeuroScan::gates( unsigned int channel )
+int NeuroScan::gates( Id channel, vector< Id >& ret )
 {
-	vector< Element* > gate;
-	currentChanId_ = channel;
+	vector< Id > gate;
 	targets( channel, "xGate", gate );
 	targets( channel, "yGate", gate );
 	targets( channel, "zGate", gate );
-	return logElement( gate, GATE );
+	ret.insert( ret.end(), gate.begin(), gate.end() );
+	return gate.size();
 }
 
-unsigned int NeuroScan::presyn( unsigned int compartment )
+Id NeuroScan::presyn( Id compartment )
 {
-	vector< Element* > spikegen;
+	vector< Id > spikegen;
 	targets( compartment, "VmSrc", spikegen );
 	if ( spikegen.size() > 0 ) {
-		Conn c( spikegen[ 0 ], 0 );
-		ProcInfoBase p;
-		SpikeGen::reinitFunc( &c, &p );
-		return logElement( spikegen, SPIKEGEN )[ 0 ];
+		//~ Conn c( spikegen[ 0 ](), 0 );
+		//~ ProcInfoBase p;
+		//~ SpikeGen::reinitFunc( c, &p );
+		return spikegen[ 0 ];
 	}
 	else
-		return 0;
+		return Id::badId();
 }
 
-vector< unsigned int > NeuroScan::postsyn( unsigned int compartment )
+vector< Id > NeuroScan::postsyn( Id compartment )
 {
-	vector< Element* > synchan;
-	targets( compartment, "channel", synchan );
+	vector< Id > channel, synchan;
+	targets( compartment, "channel", channel );
 	ProcInfoBase p;
 	p.dt_ = dt_;
-	vector< unsigned int > ret = logElement( synchan, SYNCHAN );
-	vector< unsigned int >::iterator isyn;
-	Element* syn;
-	for ( isyn = ret.begin(); isyn != ret.end(); ++isyn ) {
-		syn = id2e_[ *isyn ];
-		Conn c( syn, 0 );
-		SynChan::reinitFunc( &c, &p );
-	}
-	return ret;
-}
-
-void NeuroScan::field(
-	unsigned int object,
-	string field,
-	double& value )
-{
-	if ( eclass_[ object ] == GATE ) {
-		const GateInfo& gi = gateInfo_[ object ];
-		object = gi.chanId;
-		
-		if ( field == "power" ) {
-			string chanField[] = { "Xpower", "Ypower", "Zpower" };
-			field = chanField[ gi.xIndex ];
+	vector< Id >::iterator ichan;
+	for ( ichan = channel.begin(); ichan != channel.end(); ++ichan )
+		if ( isType( *ichan, "SynChan" ) ) {
+			synchan.push_back( *ichan );
+			//~ Conn c( ( *ichan )(), 0 );
+			//~ SynChan::reinitFunc( c, &p );
 		}
-		else if ( field == "state" ) {
-			string chanField[] = { "X", "Y", "Z" };
-			field = chanField[ gi.xIndex ];
-		}
-	}
 	
-	get< double >( id2e_[ object ], field, value );
+	return synchan;
 }
 
-void NeuroScan::synchanFields(
-	unsigned int synchan,
-	SynChanStruct& scs )
+int NeuroScan::caTarget( Id channel, vector< Id >& ret )
 {
-	Element* e = id2e_[ synchan ];
-	Conn c( e, 0 );
-	ProcInfoBase p;
-	p.dt_ = dt_;
-	
-	SynChan::reinitFunc( &c, &p );
-	set< SynChanStruct* >( e, "scan", &scs );
+	return targets( channel, "IkSrc", ret );
 }
 
+int NeuroScan::caDepend( Id channel, vector< Id >& ret )
+{
+	return targets( channel, "concen", ret );
+}
+
+void NeuroScan::field( Id object, string field, double& value )
+{
+	get< double >( object(), field, value );
+}
+
+void NeuroScan::field( Id object, string field, int& value )
+{
+	get< int >( object(), field, value );
+}
+
+void NeuroScan::synchanFields( Id synchan, SynChanStruct& scs )
+{
+	//~ Conn c( synchan(), 0 );
+	//~ ProcInfoBase p;
+	//~ p.dt_ = dt_;
+	//~ 
+	//~ SynChan::reinitFunc( c, &p );
+	//~ set< SynChanStruct* >( synchan(), "scan", &scs );
+}
+
+#include "../builtins/Interpol.h"
+#include "HHGate.h"
 void NeuroScan::rates(
-	unsigned int gate,
-	double Vm, double& A, double& B )
+	Id gate,
+	const vector< double >& grid,
+	vector< double >& A,
+	vector< double >& B )
 {
-	unsigned int connIndex =
-		scanElm_->connSrcBegin( gateSlot.msg() ) -
-		scanElm_->lookupConn( 0 ) +
-		gateInfo_[ gate ].rIndex;
+//~ Temporary
+HHGate* h = static_cast< HHGate *>( gate()->data() );
+	scanElm_.add( "gate", gate(), "gate" );
 	
-	sendTo1< double >(
-		scanElm_, gateVmSlot,
-		connIndex, Vm );
-	A = A_;
-	B = B_;
+	A.resize( grid.size() );
+	B.resize( grid.size() );
+	
+	vector< double >::const_iterator igrid;
+	vector< double >::iterator ia = A.begin();
+	vector< double >::iterator ib = B.begin();
+	for ( igrid = grid.begin(); igrid != grid.end(); ++igrid ) {
+		//~ send1< double >( scanElm_, gateVmSlot, *igrid );
+		//~ Temporary
+		A_ = h->A().innerLookup( *igrid );
+		B_ = h->B().innerLookup( *igrid );
+		
+		// locals A_ and B_ receive rate values from gate via a callback.
+		*ia = A_;
+		*ib = B_;
+		++ia, ++ib;
+	}
+	
+	scanElm_.dropAll( "gate" );
 }
 
-Element* NeuroScan::elm( unsigned int id )
-{
-	return id2e_[ id ];
-}
 ///////////////////////////////////////////////////
 // Utility functions
 ///////////////////////////////////////////////////
 
-vector< unsigned int > NeuroScan::logElement(
-	const vector< Element* >& el, EClass eclass )
-{
-	vector< unsigned int > id;
-	for ( unsigned int i = 0; i < el.size(); ++i ) {
-		if ( eclass == GATE )
-			currentXIndex_ = i;
-		if ( eclass == SYNCHAN && type( el[ i ] ) != SYNCHAN )
-			continue;
-		if ( eclass == CHANNEL && type( el[ i ] ) != CHANNEL )
-			continue;
-		id.push_back(
-			logElement( el[ i ], eclass )
-		);
-	}
-	
-	return id;
-}
-
-unsigned int NeuroScan::logElement( Element* el, EClass eclass )
-{
-	if ( e2id_.find( el ) != e2id_.end() )
-		return e2id_[ el ];
-	
-	unsigned int id = static_cast< unsigned int >( id2e_.size() );
-	assert( id == id2e_.size() );
-	e2id_[ el ] = id;
-	id2e_.push_back( el );
-	eclass_.push_back( eclass );
-	
-	if ( eclass == CHANNEL ) {
-		Conn c( el, 0 );
-		ProcInfoBase p;
-		p.dt_ = dt_;
-		HHChannel::reinitFunc( &c, &p );
-	}
-	
-	if ( eclass == GATE )
-	{
-		bool ret = gateFinfo->add(
-			scanElm_, el, el->findFinfo( "gate" ) );
-		assert( ret );
-		
-		GateInfo& gi = gateInfo_[ id ];
-		gi.chanId = currentChanId_;
-		gi.xIndex = currentXIndex_;
-		gi.rIndex = gateFinfo->numOutgoing( scanElm_ ) - 1;
-	}
-	
-	return id;
-}
-
-NeuroScan::EClass NeuroScan::type( Element* e )
-{
-	const Cinfo* cinfo = e->cinfo();
-	if ( cinfo->isA( Cinfo::find( "SynChan" ) ) )
-		return SYNCHAN;
-	if ( cinfo->isA( Cinfo::find( "HHChannel" ) ) )
-		return CHANNEL;
-	return NONE;
-}
-
-void NeuroScan::targets(
-	unsigned int id,
+int NeuroScan::targets(
+	Id object,
 	const string& msg,
-	vector< Element* >& target ) const
+	vector< Id >& target ) const
 {
-	vector< Conn > c;
-	vector< Conn >::iterator ic;
+	unsigned int oldSize = target.size();
 	
-	Element* e = id2e_[ id ];
-	e->findFinfo( msg )->outgoingConns( e, c );
-	for ( ic = c.begin(); ic != c.end(); ++ic )
-		target.push_back( ic->targetElement() );
+	Conn* i = object()->targets( msg, 0 );
+	while ( i->good() ) {
+		target.push_back( i->target()->id() );
+		i->increment();
+	}
+	delete i;
+	
+	return target.size() - oldSize;
+}
+
+bool NeuroScan::isType( Id object, string type )
+{
+	return object()->cinfo()->isA( Cinfo::find( type ) );
 }
 
 ///////////////////////////////////////////////////

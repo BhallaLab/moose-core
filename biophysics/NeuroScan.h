@@ -18,94 +18,69 @@ class NeuroScan: public NeuroScanBase
 public:
 	NeuroScan( HSolveStruct& structure )
 	:
-		NeuroScanBase( structure ),
-		hub_( structure )
+		NeuroScanBase( structure )
 	{
-		NDiv_ = 3000;
-		VLo_  = -0.100;
-		VHi_  = 0.100;
+		vDiv_ = 3000;
+		vMin_ = -0.100;
+		vMax_ = 0.050;
+		caDiv_ = 3000;
+		caMin_ = 0.0;
+		caMax_ = 1000.0;
 	}
 	
 	// To keep compiler happy. Should purge it eventually.
 	NeuroScan()
 	:
-		NeuroScanBase( *(new HSolveStruct()) ),
-		hub_( *(new HSolveStruct()) )
+		NeuroScanBase( *(new HSolveStruct()) )
 	{ ; }
   
 	// Value Field access function definitions.
-	static void setNDiv( const Conn* c, int NDiv );
-	static int getNDiv( const Element* e );
-	static void setVLo( const Conn* c, double VLo );
-	static double getVLo( const Element* e );
-	static void setVHi( const Conn* c, double VHi );
-	static double getVHi( const Element* e );
+	static void setVDiv( const Conn* c, int VDiv );
+	static int getVDiv( Eref e );
+	static void setVMin( const Conn* c, double VMin );
+	static double getVMin( Eref e );
+	static void setVMax( const Conn* c, double VMax );
+	static double getVMax( Eref e );
+	static void setCaDiv( const Conn* c, int CaDiv );
+	static int getCaDiv( Eref e );
+	static void setCaMin( const Conn* c, double CaMin );
+	static double getCaMin( Eref e );
+	static void setCaMax( const Conn* c, double CaMax );
+	static double getCaMax( Eref e );
 	
 	// Dest function definitions.
 	static void hubCreateFunc( const Conn* c );
-	static void readModelFunc( const Conn* c, Element* seed, double dt );
+	static void readModelFunc( const Conn* c, Id seed, double dt );
 	static void gateFunc( const Conn* c, double A, double B );
 	
 private:
-	void innerHubCreateFunc( Element* e );
-	void innerReadModelFunc( Element* e, Element* seed, double dt );
+	void innerHubCreateFunc( Eref e );
+	void innerReadModelFunc( Eref e, Id seed, double dt );
 	
-	struct GateInfo
-	{
-		unsigned int chanId;
-		unsigned int xIndex;
-		unsigned int rIndex;
-	};
+	vector< Id > children( Id self, Id parent );
+	vector< Id > neighbours( Id compartment );
+	vector< Id > channels( Id compartment );
+	int gates( Id channel, vector< Id >& );
+	Id presyn( Id compartment );
+	vector< Id > postsyn( Id compartment );
+	int caTarget( Id channel, vector< Id >& );
+	int caDepend( Id channel, vector< Id >& );
+	void field( Id object, string field, double& value );
+	void field( Id object, string field, int& value );
+	void rates(
+		Id gate,
+		const vector< double >& grid,
+		vector< double >& A,
+		vector< double >& B );
+	void synchanFields( Id compartment, SynChanStruct& scs );
 	
-	enum EClass
-	{
-		COMPARTMENT,
-		CHANNEL,
-		GATE,
-		SPIKEGEN,
-		SYNCHAN,
-		NONE
-	};
-	
-	/** Portal functions.
-	 *  Some of these are not const because they call logElement, which
-	 *  maintains local-id <--> global-id mappings.
-	 */
-	vector< unsigned int > children(
-		unsigned int self, unsigned int parent );
-	vector< unsigned int > neighbours( unsigned int compartment );
-	vector< unsigned int > channels( unsigned int compartment );
-	vector< unsigned int > gates( unsigned int channel );
-	unsigned int presyn( unsigned int compartment );
-	vector< unsigned int > postsyn( unsigned int compartment );
-	void field(
-		unsigned int object,
-		string field,
-		double& value );
-	void rates( unsigned int gate,
-		double Vm, double& A, double& B );
-	void synchanFields(
-		unsigned int compartment,
-		SynChanStruct& scs );
-	Element* elm( unsigned int id );
-	
-	unsigned int logElement(
-		Element* el, EClass eclass );
-	vector< unsigned int > logElement(
-		const vector< Element* >& el, EClass eclass );
-	void targets(
-		unsigned int id,
+	int targets(
+		Id object,
 		const string& msg,
-		vector< Element* >& target ) const;
-	EClass type( Element* el );
+		vector< Id >& target ) const;
+	bool isType( Id object, string type );
 	
-	map< Element*, unsigned int > e2id_;
-	vector< Element* > id2e_;
-	vector< EClass > eclass_;
-	map< unsigned int, GateInfo > gateInfo_;
-	Element* scanElm_;
-	unsigned int currentChanId_;
-	unsigned int currentXIndex_;
+	Eref scanElm_;
 	double A_;
 	double B_;
 	

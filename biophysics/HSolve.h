@@ -22,20 +22,26 @@ public:
 		scanElm_( 0 )
 	{ ; }
 	
-	static string getPath( const Element* e );
-	static void setNDiv( const Conn* c, int NDiv );
-	static int getNDiv( const Element* e );
-	static void setVLo( const Conn* c, double VLo );
-	static double getVLo( const Element* e );
-	static void setVHi( const Conn* c, double VHi );
-	static double getVHi( const Element* e );
+	static string getPath( Eref e );
+	static void setVDiv( const Conn* c, int vDiv );
+	static int getVDiv( Eref e );
+	static void setVMin( const Conn* c, double vMin );
+	static double getVMin( Eref e );
+	static void setVMax( const Conn* c, double vMax );
+	static double getVMax( Eref e );
+	static void setCaDiv( const Conn* c, int caDiv );
+	static int getCaDiv( Eref e );
+	static void setCaMin( const Conn* c, double caMin );
+	static double getCaMin( Eref e );
+	static void setCaMax( const Conn* c, double caMax );
+	static double getCaMax( Eref e );
 	static void processFunc( const Conn* c, ProcInfo p );
 	static void scanCreateFunc( const Conn* c );
-	static void initFunc( const Conn* c, const Element* seed, double dt );
+	static void initFunc( const Conn* c, Id seed, double dt );
 	
 private:
-	void innerScanCreateFunc( Element* e );
-	void innerInitFunc( Element* solve, const Element* seed, double dt );
+	void innerScanCreateFunc( Eref e );
+	void innerInitFunc( Eref solve, Id seed, double dt );
 	
 	NeuroScan scanData_;
 	Element* scanElm_;
