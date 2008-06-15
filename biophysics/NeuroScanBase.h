@@ -22,26 +22,29 @@ public:
 		N_( structure.N_ ),
 		checkpoint_( structure.checkpoint_ ),
 		channelCount_( structure.channelCount_ ),
-		gateCount_( structure.gateCount_ ),
-		gateCount1_( structure.gateCount1_ ),
-		gateFamily_( structure.gateFamily_ ),
 		M_( structure.M_ ),
 		V_( structure.V_ ),
+		VMid_( structure.VMid_ ),
 		CmByDt_( structure.CmByDt_ ),
 		EmByRm_( structure.EmByRm_ ),
 		inject_( structure.inject_ ),
-		Gbar_( structure.Gbar_ ),
-		GbarEk_( structure.GbarEk_ ),
 		state_( structure.state_ ),
-		power_( structure.power_ ),
+		lookupGroup_( structure.lookupGroup_ ),
 		lookup_( structure.lookup_ ),
-		lookupBlocSize_( structure.lookupBlocSize_ ),
-		NDiv_( structure.NDiv_ ),
-		VLo_( structure.VLo_ ),
-		VHi_( structure.VHi_ ),
-		dV_( structure.dV_ ),
+		vDiv_( structure.vDiv_ ),
+		vMin_( structure.vMin_ ),
+		vMax_( structure.vMax_ ),
+		caDiv_( structure.caDiv_ ),
+		caMin_( structure.caMin_ ),
+		caMax_( structure.caMax_ ),
+		channel_( structure.channel_ ),
 		spikegen_( structure.spikegen_ ),
-		synchan_( structure.synchan_ )
+		synchan_( structure.synchan_ ),
+		caConc_( structure.caConc_ ),
+		ca_( structure.ca_ ),
+		caActivation_( structure.caActivation_ ),
+		caTarget_( structure.caTarget_ ),
+		caDepend_( structure.caDepend_ )
 	{ ; }
 	
 	virtual ~NeuroScanBase()
@@ -59,74 +62,79 @@ public:
 	}
 	
 protected:
-	void initialize( unsigned int seed, double dt );
+	void initialize( Id seed, double dt );
 	
-	virtual vector< unsigned int > children(
-		unsigned int self, unsigned int parent ) = 0;
-	virtual vector< unsigned int > neighbours( unsigned int compartment ) = 0;
-	virtual vector< unsigned int > channels( unsigned int compartment ) = 0;
-	virtual vector< unsigned int > gates( unsigned int channel ) = 0;
-	virtual unsigned int presyn( unsigned int compartment ) = 0;
-	virtual vector< unsigned int > postsyn( unsigned int compartment ) = 0;
-	virtual void field(
-		unsigned int object,
-		string field,
-		double& value ) = 0;
-	virtual void rates( unsigned int gate,
-		double Vm, double& A, double& B ) = 0;
-	virtual void synchanFields(
-		unsigned int synchan,
-		SynChanStruct& scs ) = 0;
-	virtual Element* elm( unsigned int id ) = 0;
+	virtual vector< Id > children( Id self, Id parent ) = 0;
+	virtual vector< Id > neighbours( Id compartment ) = 0;
+	virtual vector< Id > channels( Id compartment ) = 0;
+	virtual int gates( Id channel, vector< Id >& ) = 0;
+	virtual Id presyn( Id compartment ) = 0;
+	virtual vector< Id > postsyn( Id compartment ) = 0;
+	virtual int caTarget( Id channel, vector< Id >& ) = 0;
+	virtual int caDepend( Id channel, vector< Id >& ) = 0;
+	virtual void field( Id object, string field, double& value ) = 0;
+	virtual void field( Id object, string field, int& value ) = 0;
+	virtual void rates(
+		Id gate,
+		const vector< double >& grid,
+		vector< double >& A,
+		vector< double >& B ) = 0;
+	virtual void synchanFields( Id synchan, SynChanStruct& scs ) = 0;
 	
-	vector< unsigned int > compartment_;
-	vector< unsigned int > channel_;
-	vector< unsigned int > gate_;
+	vector< Id > compartmentId_;
+	vector< Id > channelId_;
+	vector< Id > gateId_;
+	vector< bool > gCaDepend_;
 	
 private:
-	void constructTree( unsigned int seed );
-	void constructMatrix( );
-	void constructChannelDatabase( );
-	void constructLookupTables( );
-	void constructSynapses( );
+	void readCompartments( Id seed );
+	void readChannels( );
+	void readGates( );
+	void readCalcium( );
+	void readSynapses( );
+	void createMatrix( );
+	void createLookupTables( );
 	void concludeInit( );
 	
 	struct CNode
 	{
-		unsigned int parent_;
-		unsigned int self_;
-		vector< unsigned int > child_;
+		Id parent_;
+		Id self_;
+		vector< Id > child_;
 		unsigned int state_;
 		unsigned int label_;
 	};
 	
-	unsigned long&            N_;
-	vector< unsigned long >&  checkpoint_;
-	vector< unsigned char >&  channelCount_;
-	vector< unsigned char >&  gateCount_;
-	vector< unsigned char >&  gateCount1_;
-	vector< unsigned char >&  gateFamily_;
-	vector< double >&         M_;
-	vector< double >&         V_;
-	vector< double >&         CmByDt_;
-	vector< double >&         EmByRm_;
-	vector< double >&         inject_;
-	vector< double >&         Gbar_;
-	vector< double >&         GbarEk_;
-	vector< double >&         state_;
-	vector< double >&         power_;
-	
-	vector< double >&         lookup_;
-	int&                      lookupBlocSize_;
-	
 protected:
-	int&                      NDiv_;
-	double&                   VLo_;
-	double&                   VHi_;
-	double&                   dV_;
-	double                    dt_;
-	vector< SpikeGenStruct >& spikegen_;
-	vector< SynChanStruct >& synchan_;
+	unsigned long&             N_;
+	vector< unsigned long >&   checkpoint_;
+	vector< unsigned char >&   channelCount_;
+	vector< double >&          M_;
+	vector< double >&          V_;
+	vector< double >&          VMid_;
+	vector< double >&          CmByDt_;
+	vector< double >&          EmByRm_;
+	vector< double >&          inject_;
+	vector< double >&          state_;
+	
+	vector< RateLookupGroup >& lookupGroup_;
+	vector< RateLookup >&      lookup_;
+	
+	int&                       vDiv_;
+	double&                    vMin_;
+	double&                    vMax_;
+	int&                       caDiv_;
+	double&                    caMin_;
+	double&                    caMax_;
+	double                     dt_;
+	vector< ChannelStruct >&   channel_;
+	vector< SpikeGenStruct >&  spikegen_;
+	vector< SynChanStruct >&   synchan_;
+	vector< CaConcStruct >&    caConc_;
+	vector< double >&          ca_;
+	vector< double >&          caActivation_;
+	vector< double* >&         caTarget_;
+	vector< double* >&         caDepend_;
 };
 
 #endif // _NEURO_SCAN_BASE_H

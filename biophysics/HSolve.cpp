@@ -11,6 +11,7 @@
 #include "../element/Neutral.h"
 #include <queue>
 #include "SynInfo.h"
+#include "RateLookup.h"
 #include "HSolveStruct.h"
 #include "NeuroHub.h"
 #include "NeuroScanBase.h"
@@ -34,7 +35,7 @@ const Cinfo* initHSolveCinfo()
 	static Finfo* cellShared[] =
 	{
 		new DestFinfo( "solveInit",
-			Ftype2< const Element*, double >::global(),
+			Ftype2< Id, double >::global(),
 			RFCAST( &HSolve::initFunc ) ),
 		new SrcFinfo( "comptList",
 			Ftype1< const vector< Id >* >::global() ),
@@ -49,23 +50,35 @@ const Cinfo* initHSolveCinfo()
 			GFCAST( &HSolve::getPath ),
 			dummyFunc
 		),
-		new ValueFinfo( "NDiv", ValueFtype1< int >::global(),
-			GFCAST( &HSolve::getNDiv ),
-			RFCAST( &HSolve::setNDiv )
+		new ValueFinfo( "VDiv", ValueFtype1< int >::global(),
+			GFCAST( &HSolve::getVDiv ),
+			RFCAST( &HSolve::setVDiv )
 		),
-		new ValueFinfo( "VLo", ValueFtype1< double >::global(),
-			GFCAST( &HSolve::getVLo ),
-			RFCAST( &HSolve::setVLo )
+		new ValueFinfo( "VMin", ValueFtype1< double >::global(),
+			GFCAST( &HSolve::getVMin ),
+			RFCAST( &HSolve::setVMin )
 		),
-		new ValueFinfo( "VHi", ValueFtype1< double >::global(),
-			GFCAST( &HSolve::getVHi ),
-			RFCAST( &HSolve::setVHi )
+		new ValueFinfo( "VMax", ValueFtype1< double >::global(),
+			GFCAST( &HSolve::getVMax ),
+			RFCAST( &HSolve::setVMax )
+		),
+		new ValueFinfo( "CaDiv", ValueFtype1< int >::global(),
+			GFCAST( &HSolve::getCaDiv ),
+			RFCAST( &HSolve::setCaDiv )
+		),
+		new ValueFinfo( "CaMin", ValueFtype1< double >::global(),
+			GFCAST( &HSolve::getCaMin ),
+			RFCAST( &HSolve::setCaMin )
+		),
+		new ValueFinfo( "CaMax", ValueFtype1< double >::global(),
+			GFCAST( &HSolve::getCaMax ),
+			RFCAST( &HSolve::setCaMax )
 		),
 	//////////////////////////////////////////////////////////////////
 	// MsgSrc definitions
 	//////////////////////////////////////////////////////////////////
 		new SrcFinfo( "readModel",
-			Ftype2< Element*, double >::global() ),
+			Ftype2< Id, double >::global() ),
 	//////////////////////////////////////////////////////////////////
 	// MsgDest definitions
 	//////////////////////////////////////////////////////////////////
@@ -106,88 +119,124 @@ static const Slot comptListSlot =
 // Field function definitions
 ///////////////////////////////////////////////////
 
-string HSolve::getPath( const Element* e )
+string HSolve::getPath( Eref e )
 {
-	return static_cast< const HSolve* >( e->data() )->path_;
+	return static_cast< const HSolve* >( e.data() )->path_;
 }
 
-/** Lookup table specifics (NDiv, VLo, VHi) actually are fields on NeuroScan.
- *  Here we provide port-holes to access the same.
- */
-void HSolve::setNDiv( const Conn* c, int NDiv )
+void HSolve::setVDiv( const Conn* c, int vDiv )
 {
 	HSolve* solve = static_cast< HSolve* >( c->data() );
-	set< int >( solve->scanElm_, "NDiv", NDiv );
+	set< int >( solve->scanElm_, "vDiv", vDiv );
 }
 
-int HSolve::getNDiv( const Element* e )
+int HSolve::getVDiv( Eref e )
 {
-	int NDiv;
-	HSolve* solve = static_cast< HSolve* >( e->data() );
-	get< int >( solve->scanElm_, "NDiv", NDiv );
-	return NDiv;
+	int vDiv;
+	HSolve* solve = static_cast< HSolve* >( e.data() );
+	get< int >( solve->scanElm_, "vDiv", vDiv );
+	return vDiv;
 }
 
-/** Lookup table specifics (NDiv, VLo, VHi) actually are fields on NeuroScan.
- *  Here we provide port-holes to access the same.
- */
-void HSolve::setVLo( const Conn* c, double VLo )
+void HSolve::setVMin( const Conn* c, double vMin )
 {
 	HSolve* solve = static_cast< HSolve* >( c->data() );
-	set< double >( solve->scanElm_, "VLo", VLo );
+	set< double >( solve->scanElm_, "vMin", vMin );
 }
 
-double HSolve::getVLo( const Element* e )
+double HSolve::getVMin( Eref e )
 {
-	double VLo;
-	HSolve* solve = static_cast< HSolve* >( e->data() );
-	get< double >( solve->scanElm_, "VLo", VLo );
-	return VLo;
+	double vMin;
+	HSolve* solve = static_cast< HSolve* >( e.data() );
+	get< double >( solve->scanElm_, "vMin", vMin );
+	return vMin;
 }
 
-void HSolve::setVHi( const Conn* c, double VHi )
+void HSolve::setVMax( const Conn* c, double vMax )
 {
 	HSolve* solve = static_cast< HSolve* >( c->data() );
-	set< double >( solve->scanElm_, "VHi", VHi );
+	set< double >( solve->scanElm_, "vMax", vMax );
 }
 
-double HSolve::getVHi( const Element* e )
+double HSolve::getVMax( Eref e )
 {
-	double VHi;
-	HSolve* solve = static_cast< HSolve* >( e->data() );
-	get< double >( solve->scanElm_, "VHi", VHi );
-	return VHi;
+	double vMax;
+	HSolve* solve = static_cast< HSolve* >( e.data() );
+	get< double >( solve->scanElm_, "vMax", vMax );
+	return vMax;
+}
+
+int HSolve::getCaDiv( Eref e )
+{
+	int caDiv;
+	HSolve* solve = static_cast< HSolve* >( e.data() );
+	get< int >( solve->scanElm_, "vDiv", caDiv );
+	return caDiv;
+}
+
+void HSolve::setCaDiv( const Conn* c, int caDiv )
+{
+	HSolve* solve = static_cast< HSolve* >( c->data() );
+	set< int >( solve->scanElm_, "vDiv", caDiv );
+}
+
+void HSolve::setCaMin( const Conn* c, double caMin )
+{
+	HSolve* solve = static_cast< HSolve* >( c->data() );
+	set< double >( solve->scanElm_, "vMin", caMin );
+}
+
+double HSolve::getCaMin( Eref e )
+{
+	double caMin;
+	HSolve* solve = static_cast< HSolve* >( e.data() );
+	get< double >( solve->scanElm_, "vMin", caMin );
+	return caMin;
+}
+
+void HSolve::setCaMax( const Conn* c, double caMax )
+{
+	HSolve* solve = static_cast< HSolve* >( c->data() );
+	set< double >( solve->scanElm_, "vMax", caMax );
+}
+
+double HSolve::getCaMax( Eref e )
+{
+	double caMax;
+	HSolve* solve = static_cast< HSolve* >( e.data() );
+	get< double >( solve->scanElm_, "vMax", caMax );
+	return caMax;
 }
 
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void HSolve::processFunc( const Conn* c, ProcInfo p )
+void HSolve::processFunc( const Conn*c, ProcInfo p )
 {
-	static_cast< HSolve* >( c->data() )->step( p );
+	static_cast< HSolve* >( c->data() )->
+		step( p );
 }
 
-void HSolve::initFunc( const Conn* c, const Element* seed, double dt )
+void HSolve::initFunc( const Conn* c, Id seed, double dt )
 {
-	Element* e = c->targetElement();
-	static_cast< HSolve* >( c->data() )->innerInitFunc( e, seed, dt );
+	static_cast< HSolve* >( c->data() )->
+		innerInitFunc( c->target(), seed, dt );
 }
 
-void HSolve::innerInitFunc( Element* solve,
-	const Element* seed, double dt )
+void HSolve::innerInitFunc( Eref solve, Id seed, double dt )
 {
-	path_ = seed->id().path();
-	send2< const Element*, double >( solve, readModelSlot, seed, dt );
+	path_ = seed.path();
+	send2< Id, double >( solve, readModelSlot, seed, dt );
 }
 
 void HSolve::scanCreateFunc( const Conn* c )
 {
 	static_cast< HSolve* >( c->data() )->
-		innerScanCreateFunc( c->targetElement() );
+		innerScanCreateFunc( c->target() );
 }
 
-void HSolve::innerScanCreateFunc( Element* integ )
+void HSolve::innerScanCreateFunc( Eref integ )
 {
 	Id solve = Neutral::getParent( integ );
 	// Scan element's data field is owned by its parent HSolve
@@ -195,11 +244,7 @@ void HSolve::innerScanCreateFunc( Element* integ )
 	scanElm_ = initNeuroScanCinfo()->create( 
 		Id::scratchId(), "scan",
 		static_cast< void* >( &scanData_ ), 1 );
-	bool ret = solve()->findFinfo( "childSrc" )->
-		add( solve(), scanElm_, scanElm_->findFinfo( "child" ) );
-	assert( ret );
 	
-	ret = integ->findFinfo( "readModel" )->
-		add( integ, scanElm_, scanElm_->findFinfo( "readModel" ) );
-	assert( ret );
+	Eref( solve() ).add( "childSrc", scanElm_, "child" );
+	Eref( integ ).add( "readModel", scanElm_, "readModel" );
 }
