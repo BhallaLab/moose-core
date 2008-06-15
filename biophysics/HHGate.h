@@ -27,7 +27,18 @@ class HHGate
 		void setupTables( const vector< double >& parms, bool doTau );
 		void tweakTables( bool doTau );
 		void innerSetupGate( const vector< double >& parms );
-
+		
+		/* Dirty hack: Allow world to read Interpols.
+		 * Remove once "sendback" is fixed.
+		 */
+		const Interpol& A( ) {
+			return A_;
+		}
+		
+		const Interpol& B( ) {
+			return B_;
+		}
+		
 	private:
 		Interpol A_;
 		Interpol B_;
