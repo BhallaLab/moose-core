@@ -42,7 +42,7 @@ const Cinfo* initCellCinfo()
 	static Finfo* solveShared[] =
 	{
 		new SrcFinfo( "solveInit",
-			Ftype2< const Element*, double >::global() ),
+			Ftype2< Id, double >::global() ),
 		// Placeholder for receiving list of compartments from solver.
 		new DestFinfo( "comptList",
 			Ftype1< const vector< Id >* >::global(),
@@ -194,7 +194,7 @@ string Cell::getDescription( Eref e )
 void Cell::reinitFunc( const Conn* c, ProcInfo p )
 {
 	static_cast< Cell* >( c->data() )->
-		innerReinitFunc( c->target().id() );
+		innerReinitFunc( c->target()->id() );
 }
 
 void Cell::innerReinitFunc( const Id& cell )
@@ -270,12 +270,10 @@ void Cell::setupSolver( const Id& cell, const Id& seed ) const
 	Element* integ = Neutral::create( "HSolve", "integ",
 		solve->id(), Id::scratchId() );
 	assert( integ != 0 );
-	bool ret = cell.eref().add( "cell-solve", integ, "cell-solve" );
-	// bool ret = cell()->findFinfo( "cell-solve" )->add( cell(), integ, integ->findFinfo( "cell-solve" ) );
-	assert( ret );
+	Eref( cell() ).add( "cell-solve", integ, "cell-solve" );
 	
 	// scan
-	ret = set( integ, "scanCreate" );
+	bool ret = set( integ, "scanCreate" );
 	assert( ret );
 	
 	// hub
@@ -293,9 +291,9 @@ void Cell::setupSolver( const Id& cell, const Id& seed ) const
 	
 	double dt;
 	get< double >( t0(), "dt", dt );
-	send2< const Element*, double >( 
+	send2< Id, double >(
 		cell(), solveInitSlot,
-		seed(), dt );
+		seed, dt );
 	
 	set( cj(), "resched" );
 }

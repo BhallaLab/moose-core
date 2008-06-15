@@ -11,6 +11,7 @@
 #include "moose.h"
 #include <queue>
 #include "SynInfo.h"
+#include "RateLookup.h"
 #include "HSolveStruct.h"
 #include "SynChan.h"
 #include "../element/Neutral.h"
