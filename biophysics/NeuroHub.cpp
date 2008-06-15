@@ -11,6 +11,7 @@
 #include "../element/Neutral.h"
 #include <queue>
 #include "SynInfo.h"
+#include "RateLookup.h"
 #include "HSolveStruct.h"
 #include "NeuroHub.h"
 #include "Compartment.h"
@@ -39,7 +40,7 @@ const Cinfo* initNeuroHubCinfo()
 	static Finfo* hubShared[] =
 	{
 		new DestFinfo( "compartment",
-			Ftype1< vector< Element* >* >::global(),
+			Ftype2< vector< double >*, vector< Element* >* >::global(),
 			RFCAST( &NeuroHub::compartmentFunc ) ),
 		new DestFinfo( "channel",
 			Ftype1< vector< Element* >* >::global(),
@@ -74,15 +75,15 @@ const Cinfo* initNeuroHubCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "hub", hubShared, 
+		new SharedFinfo( "scan-hub", hubShared, 
 			sizeof( hubShared ) / sizeof( Finfo* ) ),
-		new SharedFinfo( "comptSolve", zombieShared, 
+		new SharedFinfo( "compartmentSolve", zombieShared, 
 			sizeof( zombieShared ) / sizeof( Finfo* ) ),
-		new SharedFinfo( "chanSolve", zombieShared, 
+		new SharedFinfo( "channelSolve", zombieShared, 
 			sizeof( zombieShared ) / sizeof( Finfo* ) ),
-		new SharedFinfo( "spikeSolve", zombieShared, 
+		new SharedFinfo( "spikegenSolve", zombieShared, 
 			sizeof( zombieShared ) / sizeof( Finfo* ) ),
-		new SharedFinfo( "synSolve", zombieShared, 
+		new SharedFinfo( "synchanSolve", zombieShared, 
 			sizeof( zombieShared ) / sizeof( Finfo* ) ),
 	};
 	
@@ -101,63 +102,29 @@ const Cinfo* initNeuroHubCinfo()
 
 static const Cinfo* neuroHubCinfo = initNeuroHubCinfo();
 
-static const Finfo* comptSolveFinfo = 
-	initNeuroHubCinfo()->findFinfo( "comptSolve" );
-static const Finfo* chanSolveFinfo = 
-	initNeuroHubCinfo()->findFinfo( "chanSolve" );
-static const Finfo* spikeSolveFinfo = 
-	initNeuroHubCinfo()->findFinfo( "spikeSolve" );
-static const Finfo* synSolveFinfo = 
-	initNeuroHubCinfo()->findFinfo( "synSolve" );
+static const Finfo* compartmentSolveFinfo = 
+	initNeuroHubCinfo()->findFinfo( "compartmentSolve" );
+static const Finfo* channelSolveFinfo = 
+	initNeuroHubCinfo()->findFinfo( "channelSolve" );
+static const Finfo* spikegenSolveFinfo = 
+	initNeuroHubCinfo()->findFinfo( "spikegenSolve" );
+static const Finfo* synchanSolveFinfo = 
+	initNeuroHubCinfo()->findFinfo( "synchanSolve" );
 
-///////////////////////////////////////////////////
-// Field access functions (for Hub)
-///////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+// Replacement fields for aspiring zombies
+/////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////
-// Dest functions (for Hub)
-///////////////////////////////////////////////////
-
-void NeuroHub::compartmentFunc( const Conn* c,
-	vector< Element* >* elist )
-{
-	Element* hub = c->targetElement();
-	static_cast< NeuroHub* >( c->data() )->innerCompartmentFunc( hub, elist );
-}
-
-void NeuroHub::channelFunc( const Conn* c,
-	vector< Element* >* elist )
-{
-	Element* hub = c->targetElement();
-	static_cast< NeuroHub* >( c->data() )->innerChannelFunc( hub, elist );
-}
-
-void NeuroHub::spikegenFunc( const Conn* c,
-	vector< Element* >* elist )
-{
-	Element* hub = c->targetElement();
-	static_cast< NeuroHub* >( c->data() )->innerSpikegenFunc( hub, elist );
-}
-
-void NeuroHub::synchanFunc( const Conn* c,
-	vector< Element* >* elist )
-{
-	Element* hub = c->targetElement();
-	static_cast< NeuroHub* >( c->data() )->innerSynchanFunc( hub, elist );
-}
-
-void NeuroHub::innerCompartmentFunc(
-	Element* hub,
-	vector< Element* >* elist )
+Finfo* initCompartmentZombieFinfo()
 {
 	// These fields will replace the original compartment fields so that
 	// the lookups refer to the solver rather than the compartment.
-	static Finfo* comptFields[] =
+	static Finfo* compartmentFields[] =
 	{
 		new ValueFinfo( "Vm",
 			ValueFtype1< double >::global(),
-			GFCAST( &NeuroHub::getComptVm ),
-			RFCAST( &NeuroHub::setComptVm )
+			GFCAST( &NeuroHub::getCompartmentVm ),
+			RFCAST( &NeuroHub::setCompartmentVm )
 		),
 		new ValueFinfo( "inject",
 			ValueFtype1< double >::global(),
@@ -165,80 +132,48 @@ void NeuroHub::innerCompartmentFunc(
 			RFCAST( &NeuroHub::setInject )
 		),
 	};
-	
+
 	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
 		initCompartmentCinfo()->getThisFinfo( ) );
 	assert( tf != 0 );
-	static SolveFinfo comptZombieFinfo( 
-		comptFields, 
-		sizeof( comptFields ) / sizeof( Finfo* ),
+
+	static SolveFinfo compartmentZombieFinfo( 
+		compartmentFields, 
+		sizeof( compartmentFields ) / sizeof( Finfo* ),
 		tf
 	);
-	
-	vector< Element* >::iterator i;
-	for ( i = elist->begin(); i != elist->end(); ++i ) {
-		zombify( hub, *i,
-			 comptSolveFinfo,
-			 &comptZombieFinfo );
-		// Compartment receives 2 messages from Tick process
-		const Finfo* initFinfo = ( *i )->findFinfo( "init" );
-		initFinfo->dropAll( *i );
-//		redirectDestMessages( hub, *i, molSumFinfo, sumTotFinfo );
-		redirectDynamicMessages( *i );
-	}
+
+	return &compartmentZombieFinfo;
 }
 
-void NeuroHub::innerChannelFunc(
-	Element* hub,
-	vector< Element* >* elist )
+Finfo* initChannelZombieFinfo()
 {
-	static Finfo* chanFields[] =
+	static Finfo* channelFields[] =
 	{
 		new ValueFinfo( "Gbar", ValueFtype1< double >::global(),
-			GFCAST( &NeuroHub::getChanGbar ), 
-			RFCAST( &NeuroHub::setChanGbar )
+			//~ GFCAST( &NeuroHub::getChannelGbar ), 
+			//~ RFCAST( &NeuroHub::setChannelGbar )
+			GFCAST( &HHChannel::getGbar ), 
+			RFCAST( &HHChannel::setGbar )
 		),
 	};
-	
+
 	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
 		initHHChannelCinfo()->getThisFinfo( ) );
 	assert( tf != 0 );
-	static SolveFinfo chanZombieFinfo( 
-		chanFields, 
-		sizeof( chanFields ) / sizeof( Finfo* ),
+
+	static SolveFinfo channelZombieFinfo( 
+		channelFields, 
+		sizeof( channelFields ) / sizeof( Finfo* ),
 		tf
 	);
-	
-	vector< Element* >::iterator i;
-	for ( i = elist->begin(); i != elist->end(); ++i ) {
-		zombify( hub, *i,
-			 chanSolveFinfo,
-			 &chanZombieFinfo );
-//		redirectDestMessages( hub, *i, molSumFinfo, sumTotFinfo );
-		redirectDynamicMessages( *i );
-	}
+
+	return &channelZombieFinfo;
 }
 
-void NeuroHub::innerSpikegenFunc(
-	Element* hub,
-	vector< Element* >* elist )
+Finfo* initSynChanZombieFinfo()
 {
-	vector< Element* >::iterator i;
-	for ( i = elist->begin(); i != elist->end(); ++i ) {
-		const Finfo* procFinfo = ( *i )->findFinfo( "process" );
-		procFinfo->dropAll( *i );
-		bool ret = spikeSolveFinfo->add( hub, *i, procFinfo );
-		assert( ret );
-//		redirectDestMessages( hub, *i, molSumFinfo, sumTotFinfo );
-		redirectDynamicMessages( *i );
-	}
-}
-
-void NeuroHub::innerSynchanFunc(
-	Element* hub,
-	vector< Element* >* elist )
-{
-	static Finfo* synFields[] =
+	static Finfo* synchanFields[] =
 	{
 		new ValueFinfo( "Gbar", ValueFtype1< double >::global(),
 			GFCAST( &NeuroHub::getSynChanGbar ), 
@@ -249,215 +184,249 @@ void NeuroHub::innerSynchanFunc(
 	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
 		initSynChanCinfo()->getThisFinfo( ) );
 	assert( tf != 0 );
-	static SolveFinfo synZombieFinfo( 
-		synFields, 
-		sizeof( synFields ) / sizeof( Finfo* ),
+
+	static SolveFinfo synchanZombieFinfo( 
+		synchanFields, 
+		sizeof( synchanFields ) / sizeof( Finfo* ),
 		tf
 	);
-	
-	vector< Element* >::iterator i;
-	for ( i = elist->begin(); i != elist->end(); ++i ) {
-		zombify( hub, *i,
-			 synSolveFinfo,
-			 &synZombieFinfo );
-//		redirectDestMessages( hub, *i, molSumFinfo, sumTotFinfo );
-		redirectDynamicMessages( *i );
-	}
+
+	return &synchanZombieFinfo;
 }
 
+static Finfo* compartmentZombieFinfo = initCompartmentZombieFinfo();
+static Finfo* channelZombieFinfo = initChannelZombieFinfo();
+static Finfo* synchanZombieFinfo = initSynChanZombieFinfo();
+
+/////////////////////////////////////////////////////////////////////////
+// End of static initializers.
+/////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+// Constructor
+/////////////////////////////////////////////////////////////////////////
+NeuroHub::NeuroHub( )
+	:	V_( 0 ), state_( 0 )
+{ ; }
+
+/////////////////////////////////////////////////////////////////////////
+// Field access functions (for Hub)
+/////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+// Dest functions (for Hub)
+/////////////////////////////////////////////////////////////////////////
+
 /**
- * Overrides Neutral::destroy to clean up zombies.
  * In this destructor we need to put messages back to process,
  * and we need to replace the SolveFinfos on zombies with the
- * original ThisFinfo.
+ * original ThisFinfo. This should really just use the clearFunc.
  */
 void NeuroHub::destroy( const Conn* c )
 {
-/*
-	static Finfo* origMolFinfo =
+	static Finfo* origCompartmentFinfo =
 		const_cast< Finfo* >(
-		initMoleculeCinfo()->getThisFinfo( ) );
-	static Finfo* origReacFinfo =
+			initCompartmentCinfo()->getThisFinfo( ) );
+	static Finfo* origChannelFinfo =
 		const_cast< Finfo* >(
-		initReactionCinfo()->getThisFinfo( ) );
-	Element* hub = c.targetElement();
-	vector< Conn > targets;
-	vector< Conn >::iterator i;
+			initHHChannelCinfo()->getThisFinfo( ) );
+	static Finfo* origSpikeGenFinfo =
+		const_cast< Finfo* >(
+			initSpikeGenCinfo()->getThisFinfo( ) );
+	static Finfo* origSynChanFinfo =
+		const_cast< Finfo* >(
+			initSynChanCinfo()->getThisFinfo( ) );
+	
+	Element* hub = c->target().e;
+	unsigned int eIndex = c->target().i;
 
-	// First (todo) put the messages back onto the scheduler.
-	// Second, replace the SolveFinfos
-	molSolveFinfo->outgoingConns( hub, targets );
-	for ( i = targets.begin(); i != targets.end(); i++ )
-		i->targetElement()->setThisFinfo( origMolFinfo );
+	Conn* i = hub->targets( compartmentSolveFinfo->msg(), eIndex );
+	while ( i->good() ) {
+		i->target().e->setThisFinfo( origCompartmentFinfo );
+		i->increment();
+	}
+	delete i;
 
-	reacSolveFinfo->outgoingConns( hub, targets );
-	for ( i = targets.begin(); i != targets.end(); i++ )
-		i->targetElement()->setThisFinfo( origReacFinfo );
-*/
+	i = hub->targets( channelSolveFinfo->msg(), eIndex );
+	while ( i->good() ) {
+		i->target().e->setThisFinfo( origChannelFinfo );
+		i->increment();
+	}
+	delete i;
+
+	i = hub->targets( spikegenSolveFinfo->msg(), eIndex );
+	while ( i->good() ) {
+		i->target().e->setThisFinfo( origSpikeGenFinfo );
+		i->increment();
+	}
+	delete i;
+
+	i = hub->targets( synchanSolveFinfo->msg(), eIndex );
+	while ( i->good() ) {
+		i->target().e->setThisFinfo( origSynChanFinfo );
+		i->increment();
+	}
+	delete i;
+
 	Neutral::destroy( c );
 }
 
 void NeuroHub::childFunc( const Conn* c, int stage )
 {
-	if ( stage == 1 ) // clear messages: first clean out zombies before
-		// the messages are all deleted.
-		clearFunc( c );
+	// clear messages: first clean out zombies before the messages are
+	// all deleted.
+	if ( stage == 1 )
+		clearFunc( c->target() );
+	
 	// Then fall back into what the Neutral version does
 	Neutral::childFunc( c, stage );
 }
 
-void NeuroHub::unzombify( const Conn* c )
+void NeuroHub::compartmentFunc(
+	const Conn* c,
+	vector< double >* V,
+	vector< Element* >* elist )
 {
-	Element* e = c->targetElement();
+	static_cast< NeuroHub* >( c->data() )->
+		innerCompartmentFunc( c->target(), V, elist );
+}
+
+void NeuroHub::innerCompartmentFunc(
+	Eref hub,
+	vector< double >* V,
+	vector< Element* >* elist )
+{
+	V_ = V;
+	
+	//~ // for redirecting inject messages
+	//~ const Finfo* injectFinfo = initCompartmentCinfo()->findFinfo( "inject" );
+	const Finfo* initFinfo = initCompartmentCinfo()->findFinfo( "init" );
+	
+	// Note that here we have perfect alignment between the order of the
+	// V_ vector and the elist vector. This is used implicitly in the
+	// ordering of the process messages that get set up between the Hub
+	// and the objects.
+	vector< Element* >::iterator i;
+	for ( i = elist->begin(); i != elist->end(); ++i ) {
+		zombify( hub, *i, compartmentSolveFinfo, compartmentZombieFinfo );
+		// Compartment receives 2 shared messages from Tick's "process"
+		Eref( *i ).dropAll( initFinfo->msg() );
+		redirectDynamicMessages( *i );
+	}
+	
+	//~ for ( i = elist->begin(); i != elist->end(); i++ ) {
+		//~ // Here we replace the injectMessages from outside the tree.
+		//~ // The 'retain' flag at the end is 1: we do not want to delete
+		//~ // the original message to the compartment.
+		//~ redirectDestMessages( hub, *i, molSumFinfo, sumTotFinfo, 
+			//~ i - elist->begin(), molSumMap_, elist, 1 );
+	//~ }
+}
+
+void NeuroHub::channelFunc( const Conn* c, vector< Element* >* elist )
+{
+	static_cast< NeuroHub* >( c->data() )->
+		innerChannelFunc( c->target(), elist );
+}
+
+void NeuroHub::innerChannelFunc( Eref hub, vector< Element* >* elist )
+{
+	vector< Element* >::iterator i;
+	for ( i = elist->begin(); i != elist->end(); ++i ) {
+		zombify( hub, *i, channelSolveFinfo, channelZombieFinfo );
+		//~ redirectDynamicMessages( *i );
+	}
+}
+
+void NeuroHub::spikegenFunc( const Conn* c, vector< Element* >* elist )
+{
+	static_cast< NeuroHub* >( c->data() )->
+		innerSpikegenFunc( c->target(), elist );
+}
+
+void NeuroHub::innerSpikegenFunc( Eref hub, vector< Element* >* elist )
+{
+	vector< Element* >::iterator i;
+	for ( i = elist->begin(); i != elist->end(); ++i ) {
+//		zombify( hub, *i, spikegenSolveFinfo, spikegenZombieFinfo );
+		redirectDynamicMessages( *i );
+	}
+}
+
+void NeuroHub::synchanFunc( const Conn* c, vector< Element* >* elist )
+{
+	static_cast< NeuroHub* >( c->data() )->
+		innerSynchanFunc( c->target(), elist );
+}
+
+void NeuroHub::innerSynchanFunc( Eref hub, vector< Element* >* elist )
+{
+	vector< Element* >::iterator i;
+	for ( i = elist->begin(); i != elist->end(); ++i ) {
+		zombify( hub, *i, synchanSolveFinfo, synchanZombieFinfo );
+		redirectDynamicMessages( *i );
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Class functions
+/////////////////////////////////////////////////////////////////////////
+/**
+ * Clears out all the messages to zombie objects
+ */
+void NeuroHub::clearFunc( Eref hub )
+{
+	clearMsgsFromFinfo( hub, compartmentSolveFinfo );
+	clearMsgsFromFinfo( hub, channelSolveFinfo );
+	clearMsgsFromFinfo( hub, spikegenSolveFinfo );
+	clearMsgsFromFinfo( hub, synchanSolveFinfo );
+
+	//~ hub.dropAll( injectFinfo->msg() );
+}
+
+void NeuroHub::clearMsgsFromFinfo( Eref hub, const Finfo * f )
+{
+	Conn* c = hub.e->targets( f->msg(), hub.i );
+	vector< Element* > list;
+	while ( c->good() ) {
+		list.push_back( c->target().e );
+		c->increment();
+	}
+	delete c;
+	hub.dropAll( f->msg() );
+	
+	vector< Element* >::iterator i;
+	for ( i = list.begin(); i != list.end(); i++ ) unzombify( *i );
+}
+
+void NeuroHub::unzombify( Element* e )
+{
 	const Cinfo* ci = e->cinfo();
 	bool ret = ci->schedule( e );
 	assert( ret );
 	e->setThisFinfo( const_cast< Finfo* >( ci->getThisFinfo() ) );
-//	redirectDynamicMessages( e );
+	redirectDynamicMessages( e );
 }
 
-/**
- * Clears out all the messages to zombie objects
- */
-void NeuroHub::clearFunc( const Conn* c )
-{
-	Element* e = c->targetElement();
-	
-	// First unzombify all targets
-	vector< Conn > list;
-	vector< Conn >::iterator i;
-	
-	comptSolveFinfo->outgoingConns( e, list );
-	comptSolveFinfo->dropAll( e );
-	// I'll soon enough reinstate all this.
-	// for_each ( list.begin(), list.end(), unzombify );
-	for( i = list.begin(); i != list.end(); i++ ) unzombify( &( *i ) );
-	
-	chanSolveFinfo->outgoingConns( e, list );
-	chanSolveFinfo->dropAll( e );
-	// for_each ( list.begin(), list.end(), unzombify );
-	for( i = list.begin(); i != list.end(); i++ ) unzombify( &( *i ) );
-	
-	spikeSolveFinfo->outgoingConns( e, list );
-	spikeSolveFinfo->dropAll( e );
-	// for_each ( list.begin(), list.end(), unzombify );
-	for( i = list.begin(); i != list.end(); i++ ) unzombify( &( *i ) );
-	
-	synSolveFinfo->outgoingConns( e, list );
-	synSolveFinfo->dropAll( e );
-	// for_each ( list.begin(), list.end(), unzombify );
-	for( i = list.begin(); i != list.end(); i++ ) unzombify( &( *i ) );
-}
-
-///////////////////////////////////////////////////
-// Field access functions (Biophysics)
-///////////////////////////////////////////////////
-
-/**
- * Here we provide the zombie function to set the 'Vm' field of the 
- * compartment. It first sets the solver location handling this
- * field, then the compartment itself.
- * For the compartment set/get operations, the lookup order is identical
- * to the message order. So we don't need an intermediate table.
- */
-void NeuroHub::setComptVm( const Conn* c, double value )
-{
-	unsigned int comptIndex;
-	NeuroHub* nh = getHubFromZombie( 
-		c->targetElement(), comptSolveFinfo, comptIndex );
-	if ( nh ) {
-		assert ( comptIndex < nh->V_.size() );
-		( nh->V_ )[ comptIndex ] = value;
-	}
-}
-
-double NeuroHub::getComptVm( const Element* e )
-{
-	unsigned int comptIndex;
-	NeuroHub* nh = getHubFromZombie( e, comptSolveFinfo, comptIndex );
-	if ( nh ) {
-		assert ( comptIndex < nh->V_.size() );
-		return ( nh->V_ )[ comptIndex ];
-	}
-	return 0.0;
-}
-
-void NeuroHub::setInject( const Conn* c, double value )
-{
-	unsigned int comptIndex;
-	NeuroHub* nh = getHubFromZombie( 
-		c->targetElement(), comptSolveFinfo, comptIndex );
-	if ( nh ) {
-		assert ( comptIndex < nh->inject_.size() );
-		( nh->inject_ )[ comptIndex ] = value;
-	}
-}
-
-double NeuroHub::getInject( const Element* e )
-{
-	unsigned int comptIndex;
-	NeuroHub* nh = getHubFromZombie( e, comptSolveFinfo, comptIndex );
-	if ( nh ) {
-		assert ( comptIndex < nh->inject_.size() );
-		return ( nh->inject_ )[ comptIndex ];
-	}
-	return 0.0;
-}
-
-void NeuroHub::setChanGbar( const Conn* c, double value )
-{
-	;
-}
-
-double NeuroHub::getChanGbar( const Element* e )
-{
-	return 0.0;
-}
-
-void NeuroHub::setSynChanGbar( const Conn* c, double value )
-{
-	;
-}
-
-double NeuroHub::getSynChanGbar( const Element* e )
-{
-	return 0.0;
-}
-
-///////////////////////////////////////////////////
-// Dest functions (Biophysics)
-///////////////////////////////////////////////////
-void NeuroHub::comptInjectMsgFunc( const Conn* c, double I )
-{
-/*
-	Compartment* compt = static_cast< Compartment* >(
-		c.targetElement()->data() );
-	compt->sumInject_ += I;
-	compt->Im_ += I;
-*/
-}
-
-///////////////////////////////////////////////////
-// Utility functions
-///////////////////////////////////////////////////
 /**
  * This operation turns the target element e into a zombie controlled
  * by the hub/solver. It gets rid of any process message coming into 
  * the zombie and replaces it with one from the solver.
  */
-void NeuroHub::zombify(
-	Element* hub, Element* e,
+void NeuroHub::zombify( 
+	Eref hub, Eref e,
 	const Finfo* hubFinfo, Finfo* solveFinfo )
 {
 	// Replace the original procFinfo with one from the hub.
 	const Finfo* procFinfo = e->findFinfo( "process" );
-	procFinfo->dropAll( e );
-	bool ret = hubFinfo->add( hub, e, procFinfo );
+	e.dropAll( procFinfo->msg() );
+	bool ret = hub.add( hubFinfo->msg(), e, procFinfo->msg(), 
+		ConnTainer::Default );
 	assert( ret );
-	
+
 	// Redirect original messages from the zombie to the hub.
 	// Pending.
-	
+
 	// Replace the 'ThisFinfo' on the solved element
 	e->setThisFinfo( solveFinfo );
 }
@@ -469,91 +438,93 @@ void NeuroHub::zombify(
  * eFinfo is the Finfo holding those messages.
  * hubFinfo is the Finfo on the hub which will now handle the messages.
  * eIndex is the index to look up the element.
- */
+*/
 void NeuroHub::redirectDestMessages(
-	Element* hub, Element* e,
-	const Finfo* hubFinfo, const Finfo* eFinfo,
-	unsigned int eIndex = 0, vector< unsigned int >* map = 0 )
+	Eref hub, Eref e, const Finfo* hubFinfo, const Finfo* eFinfo,
+	unsigned int eIndex, vector< unsigned int >& map, 
+	vector< Element *>* elist, bool retain )
 {
-	vector< Conn > clist;
-	if ( eFinfo->incomingConns( e, clist ) == 0 )
-		return;
-	
-	unsigned int i;
-	unsigned int max = clist.size();
-	vector< Element* > srcElements( max );
-	vector< const Finfo* > srcFinfos( max );
-	
-	if ( map )
-		map->push_back( eIndex );
-	
-	// An issue here: Do I check if the src is on the solved tree?
-	for ( i = 0; i != max; i++ ) {
-		Conn& c = clist[ i ];
-		srcElements[ i ] = c.targetElement();
-		srcFinfos[ i ]   = c.targetElement()->
-			findFinfo( c.targetIndex() );
+	Conn* i = e.e->targets( eFinfo->msg(), e.i );
+	vector< Eref > srcElements;
+	vector< int > srcMsg;
+	vector< const ConnTainer* > dropList;
+
+	while( i->good() ) {
+		Element* tgt = i->target().e;
+		// Handle messages going outside purview of solver.
+		if ( find( elist->begin(), elist->end(), tgt ) == elist->end() ) {
+			map.push_back( eIndex );
+			srcElements.push_back( i->target() );
+			srcMsg.push_back( i->targetMsg() );
+			if ( !retain )
+				dropList.push_back( i->connTainer() );
+		}
+		i->increment();
 	}
-	eFinfo->dropAll( e );
-	for ( i = 0; i != max; i++ ) {
-		srcFinfos[ i ]->add( srcElements[ i ], hub, hubFinfo );
+	delete i;
+
+	e.dropVec( eFinfo->msg(), dropList );
+
+	for ( unsigned int j = 0; j != srcElements.size(); j++ ) {
+		bool ret = srcElements[j].add( srcMsg[j], hub, hubFinfo->msg(),
+			ConnTainer::Default );
+		assert( ret );
 	}
 }
 
 /**
  * Here we replace the existing DynamicFinfos and their messages with
- * new ones for the updated access functions
+ * new ones for the updated access functions.
+ *
+ * It would be nice to retain everything and only replace the 
+ * access functions, but this gets too messy as it requires poking the
+ * new funcVecs into the remote Msgs. So instead we delete the 
+ * old DynamicFinfos and recreate them.
  */
+// Assumption e is a simple element. Replace it with Eref to make it general
 void NeuroHub::redirectDynamicMessages( Element* e )
 {
-	const Finfo* f;
-	unsigned int finfoNum = 1;
-	unsigned int i;
+	vector< Finfo* > flist;
+	// We get a list of DynamicFinfos independent of the Finfo vector on 
+	// the Element, because we will be messing up the iterators on the
+	// element.
+	e->listLocalFinfos( flist );
+	vector< Finfo* >::iterator i;
 
-	vector< Conn > clist;
-
-	while ( ( f = e->localFinfo( finfoNum ) ) ) {
-		const DynamicFinfo *df = dynamic_cast< const DynamicFinfo* >( f );
+	// Go through flist noting messages, deleting finfo, and rebuilding.
+	for( i = flist.begin(); i != flist.end(); ++i )
+	{
+		const DynamicFinfo *df = dynamic_cast< const DynamicFinfo* >( *i );
 		assert( df != 0 );
-		f->incomingConns( e, clist );
-		unsigned int max = clist.size();
-		vector< Element* > srcElements( max );
-		vector< const Finfo* > srcFinfos( max );
-		// An issue here: Do I check if the src is on the solved tree?
-		for ( i = 0; i != max; i++ ) {
-			Conn& c = clist[ i ];
-			srcElements[ i ] = c.targetElement();
-			srcFinfos[ i ]= c.targetElement()->findFinfo( c.targetIndex() );
-		}
+		vector< Eref > srcElements;
+		vector< const Finfo* > srcFinfos;
+		Conn* c = e->targets( ( *i )->msg(), 0 ); //zero index for SE
 
-		f->outgoingConns( e, clist );
-		max = clist.size();
-		vector< Element* > destElements( max );
-		vector< const Finfo* > destFinfos( max );
-		for ( i = 0; i != max; i++ ) {
-			Conn& c = clist[ i ];
-			destElements[ i ] = c.targetElement();
-			destFinfos[ i ] = c.targetElement()->findFinfo( c.targetIndex() );
+		// note messages.
+		while( c->good() ) {
+			srcElements.push_back( c->target() );
+			srcFinfos.push_back( 
+				c->target().e->findFinfo( c->targetMsg() ) );
+			c->increment();
 		}
+		delete c;
 		string name = df->name();
 		bool ret = e->dropFinfo( df );
 		assert( ret );
-
 		const Finfo* origFinfo = e->findFinfo( name );
 		assert( origFinfo );
 
-		max = srcFinfos.size();
-		for ( i =  0; i < max; i++ ) {
-			ret = srcFinfos[ i ]->add( srcElements[ i ], e, origFinfo );
+		unsigned int max = srcFinfos.size();
+		for ( unsigned int i =  0; i < max; i++ ) {
+			ret = srcElements[ i ].add( srcFinfos[ i ]->name(),
+				e, name );
+			/*
+			ret = srcElements[ i ].add( srcFinfos[ i ]->msg(),
+				e, origFinfo->msg(), ConnTainer::Default );
+			*/
+			// ret = srcFinfos[ i ]->add( srcElements[ i ], e, origFinfo );
 			assert( ret );
 		}
-		max = destFinfos.size();
-		for ( i =  0; i < max; i++ ) {
-			ret = origFinfo->add( e, destElements[ i ], destFinfos[ i ] );
-			assert( ret );
-		}
-
-		finfoNum++;
 	}
 }
 
@@ -565,17 +536,104 @@ void NeuroHub::redirectDynamicMessages( Element* e )
  * Also passes back the index of the zombie element on this set of
  * messages. This is NOT the absolute Conn index.
  */
-NeuroHub* NeuroHub::getHubFromZombie(
-	const Element* e, const Finfo* srcFinfo,
-	unsigned int& index )
+NeuroHub* NeuroHub::getHubFromZombie( Eref e, unsigned int& index )
 {
-	const SolveFinfo* f = dynamic_cast< const SolveFinfo* > (
-		e->getThisFinfo() );
-	if ( !f ) return 0;
-	const Conn* c = f->getSolvedConn( e );
-	Slot slot;
-	srcFinfo->getSlot( srcFinfo->name(), slot );
-	Element* hub = c->targetElement();
-	index = hub->connSrcRelativeIndex( c, slot.msg() );
-	return static_cast< NeuroHub* >( hub->data() );
+	Conn* c = e.e->targets( "process", e.i );
+	if ( c->good() ) {
+		index = c->targetIndex();
+		NeuroHub* nh = static_cast< NeuroHub* >( c->target().data() );
+		c->increment();
+		assert( !c->good() ); // Should only be one process incoming.
+		return dynamic_cast< NeuroHub* >( nh );
+	}
+	delete c;
+	return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Field access functions (Biophysics)
+/////////////////////////////////////////////////////////////////////////
+
+/**
+ * Here we provide the zombie function to set the 'Vm' field of the 
+ * compartment. It first sets the solver location handling this
+ * field, then the compartment itself.
+ * For the compartment set/get operations, the lookup order is identical
+ * to the message order. So we don't need an intermediate table.
+ */
+void NeuroHub::setCompartmentVm( const Conn* c, double value )
+{
+	unsigned int comptIndex;
+	NeuroHub* nh = getHubFromZombie( c->target(), comptIndex );
+	if ( nh ) {
+		assert ( comptIndex < nh->V_->size() );
+		( *nh->V_ )[ comptIndex ] = value;
+	}
+}
+
+double NeuroHub::getCompartmentVm( Eref e )
+{
+	unsigned int comptIndex;
+	NeuroHub* nh = getHubFromZombie( e, comptIndex );
+	if ( nh ) {
+		assert ( comptIndex < nh->V_->size() );
+		return ( *nh->V_ )[ comptIndex ];
+	}
+	return 0.0;
+}
+
+void NeuroHub::setInject( const Conn* c, double value )
+{
+	//~ unsigned int comptIndex;
+	//~ NeuroHub* nh = getHubFromZombie( 
+		//~ c.targetElement(), comptIndex );
+	//~ if ( nh ) {
+		//~ assert ( comptIndex < nh->inject_.size() );
+		//~ ( nh->inject_ )[ comptIndex ] = value;
+	//~ }
+}
+
+double NeuroHub::getInject( Eref e )
+{
+	//~ unsigned int comptIndex;
+	//~ NeuroHub* nh = getHubFromZombie( e, comptIndex );
+	//~ if ( nh ) {
+		//~ assert ( comptIndex < nh->inject_.size() );
+		//~ return ( nh->inject_ )[ comptIndex ];
+	//~ }
+	//~ return 0.0;
+	return 0.0;
+}
+
+void NeuroHub::setChannelGbar( const Conn* c, double value )
+{
+	;
+}
+
+double NeuroHub::getChannelGbar( Eref e )
+{
+	return 0.0;
+}
+
+void NeuroHub::setSynChanGbar( const Conn* c, double value )
+{
+	;
+}
+
+double NeuroHub::getSynChanGbar( Eref e )
+{
+	return 0.0;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Dest functions (Biophysics)
+/////////////////////////////////////////////////////////////////////////
+void NeuroHub::comptInjectMsgFunc( const Conn* c, double I )
+{
+/*
+	Compartment* compt = static_cast< Compartment* >(
+		c.targetElement()->data() );
+	compt->sumInject_ += I;
+	compt->Im_ += I;
+*/
 }

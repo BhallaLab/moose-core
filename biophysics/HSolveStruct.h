@@ -10,6 +10,41 @@
 #ifndef _HSOLVE_STRUCT_H
 #define _HSOLVE_STRUCT_H
 
+typedef double ( *PFDD )( double, double );
+
+struct ChannelStruct
+{
+public:
+	double Gbar_;
+	double GbarEk_;
+	PFDD takeXpower_;
+	PFDD takeYpower_;
+	PFDD takeZpower_;
+	double Xpower_;
+	double Ypower_;
+	double Zpower_;
+	
+	void setPowers( double Xpower, double Ypower, double Zpower );
+	void process( double*& state, double& gk, double& gkek );
+	
+private:
+	static PFDD selectPower( double power );
+	
+	static double power1( double x, double p ) {
+		return x;
+	}
+	static double power2( double x, double p ) {
+		return x * x;
+	}
+	static double power3( double x, double p ) {
+		return x * x * x;
+	}
+	static double power4( double x, double p ) {
+		return power2( x * x, p );
+	}
+	static double powerN( double x, double p );
+};
+
 struct SpikeGenStruct
 {
 	// Index of parent compartment
@@ -31,9 +66,9 @@ struct SynChanStruct
 	// SynChan fields
 	double Ek_;
 	double Gk_;
+double tau1_;
+double tau2_;
 	double Gbar_;
-	double tau1_;
-	double tau2_;
 	double xconst1_;
 	double yconst1_;
 	double xconst2_;
@@ -50,36 +85,51 @@ struct SynChanStruct
 	void process( ProcInfo p );
 };
 
+struct CaConcStruct
+{
+	double c_;
+	double CaBasal_;
+	double factor1_;
+	double factor2_;
+	
+	double process( double activation );
+};
+
 /**
  * This struct holds the data structures of the Hines's solver. These are shared
  * by the Hub, Scan and HSolve classes.
  */
 struct HSolveStruct
 {
-	unsigned long            N_;
-	vector< unsigned long >  checkpoint_;
-	vector< unsigned char >  channelCount_;
-	vector< unsigned char >  gateCount_;
-	vector< unsigned char >  gateCount1_;
-	vector< unsigned char >  gateFamily_;
-	vector< double >         M_;
-	vector< double >         V_;
-	vector< double >         CmByDt_;
-	vector< double >         EmByRm_;
-	vector< double >         inject_;
-	vector< double >         Gbar_;
-	vector< double >         GbarEk_;
-	vector< double >         state_;
-	vector< double >         power_;
-	vector< double >         lookup_;
-	int                      lookupBlocSize_;
-	int                      NDiv_;
-	double                   VLo_;
-	double                   VHi_;
-	double                   dV_;
+	unsigned long             N_;
+	vector< unsigned long >   checkpoint_;
+	vector< unsigned char >   channelCount_;
+	vector< double >          M_;
+	vector< double >          V_;
+	vector< double >          VMid_;
+	vector< double >          CmByDt_;
+	vector< double >          EmByRm_;
+	vector< double >          inject_;
+	vector< double >          Gk_;
+	vector< double >          GkEk_;
+	vector< double >          state_;
+	double                    vMin_;
+	double                    vMax_;
+	int                       vDiv_;
+	double                    caMin_;
+	double                    caMax_;
+	int                       caDiv_;
 	
-	vector< SpikeGenStruct > spikegen_;
-	vector< SynChanStruct > synchan_;
+	vector< RateLookup >      lookup_;
+	vector< RateLookupGroup > lookupGroup_;
+	vector< ChannelStruct >   channel_;
+	vector< SpikeGenStruct >  spikegen_;
+	vector< SynChanStruct >   synchan_;
+	vector< CaConcStruct >    caConc_;
+	vector< double >          ca_;
+	vector< double >          caActivation_;
+	vector< double* >         caTarget_;
+	vector< double* >         caDepend_;
 };
 
 #endif // _HSOLVE_STRUCT_H
