@@ -29,6 +29,7 @@ public:
 		EmByRm_( structure.EmByRm_ ),
 		inject_( structure.inject_ ),
 		state_( structure.state_ ),
+		instant_( structure.instant_ ),
 		lookupGroup_( structure.lookupGroup_ ),
 		lookup_( structure.lookup_ ),
 		vDiv_( structure.vDiv_ ),
@@ -116,6 +117,7 @@ protected:
 	vector< double >&          EmByRm_;
 	vector< double >&          inject_;
 	vector< double >&          state_;
+	vector< int >&             instant_;
 	
 	vector< RateLookupGroup >& lookupGroup_;
 	vector< RateLookup >&      lookup_;
