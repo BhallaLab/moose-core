@@ -23,6 +23,7 @@ public:
 	double Xpower_;
 	double Ypower_;
 	double Zpower_;
+	int instant_;
 	
 	void setPowers( double Xpower, double Ypower, double Zpower );
 	void process( double*& state, double& gk, double& gkek );
@@ -113,6 +114,7 @@ struct HSolveStruct
 	vector< double >          Gk_;
 	vector< double >          GkEk_;
 	vector< double >          state_;
+	vector< int >             instant_;
 	double                    vMin_;
 	double                    vMax_;
 	int                       vDiv_;
