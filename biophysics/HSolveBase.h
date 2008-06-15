@@ -31,6 +31,7 @@ public:
 		Gk_( structure_.Gk_ ),
 		GkEk_( structure_.GkEk_ ),
 		state_( structure_.state_ ),
+		instant_( structure_.instant_ ),
 		lookup_( structure_.lookup_ ),
 		channel_( structure_.channel_ ),
 		spikegen_( structure_.spikegen_ ),
@@ -74,6 +75,7 @@ private:
 	vector< double >&         Gk_;
 	vector< double >&         GkEk_;
 	vector< double >&         state_;
+	vector< int >&            instant_;
 	
 	vector< RateLookup >&     lookup_;
 	vector< ChannelStruct >&  channel_;
@@ -84,6 +86,10 @@ private:
 	vector< double >&         caActivation_;
 	vector< double* >&        caTarget_;
 	vector< double* >&        caDepend_;
+	
+	static const int INSTANT_X;
+	static const int INSTANT_Y;
+	static const int INSTANT_Z;
 };
 
 #endif // _HSOLVE_BASE_H
