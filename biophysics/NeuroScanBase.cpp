@@ -90,6 +90,7 @@ void NeuroScanBase::readChannels( ) {
 	double Gbar, Ek;
 	double X, Y, Z;
 	double Xpower, Ypower, Zpower;
+	int instant;
 	
 	for ( icompt = compartmentId_.begin();
 	      icompt != compartmentId_.end();
@@ -113,10 +114,12 @@ reverse( channelId.begin(), channelId.end() );
 			field( *ichan, "Xpower", Xpower );
 			field( *ichan, "Ypower", Ypower );
 			field( *ichan, "Zpower", Zpower );
+			field( *ichan, "instant", instant );
 			
 			channel.Gbar_ = Gbar;
 			channel.GbarEk_ = Gbar * Ek;
 			channel.setPowers( Xpower, Ypower, Zpower );
+			channel.instant_ = instant;
 			
 			if ( Xpower )
 				state_.push_back( X );
