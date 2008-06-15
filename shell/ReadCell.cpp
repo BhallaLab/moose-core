@@ -23,6 +23,7 @@
 #include "../biophysics/HHGate.h"
 #include <queue>
 #include "../biophysics/SynInfo.h"
+#include "../biophysics/RateLookup.h"
 #include "../biophysics/HSolveStruct.h"
 #include "../biophysics/SynChan.h"
 #include "../biophysics/SpikeGen.h"
@@ -649,6 +650,13 @@ bool ReadCell::addCaConc(
 	static const Finfo* bFinfo = caconcCinfo->findFinfo( "B" );
 	if ( chan->className() == "CaConc" ) {
 		// assert( vmSrcFinfo->add( compt, chan, vmDestFinfo  ) );
+
+		if ( value > 0 ) {
+			value *= 1.0;		// Put appropriate scaling factor
+		} else {
+			value = - value;
+		}
+
 		if ( !graftFlag_ )
 			++numOthers_;
 		return set< double >( chan, bFinfo, value );

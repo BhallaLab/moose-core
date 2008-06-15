@@ -19,51 +19,20 @@
 class NeuroHub
 {
 public:
-	NeuroHub( HSolveStruct& structure )
-	:
-		M_( structure.M_ ),
-		V_( structure.V_ ),
-		CmByDt_( structure.CmByDt_ ),
-		EmByRm_( structure.EmByRm_ ),
-		inject_( structure.inject_ ),
-		Gbar_( structure.Gbar_ ),
-		GbarEk_( structure.GbarEk_ ),
-		state_( structure.state_ ),
-		power_( structure.power_ )
-	{ ; }
-	
-	// To keep compiler happy. Should purge it eventually.
-	NeuroHub()
-	:
-		M_( *(new std::vector<double>()) ),
-		V_( *(new std::vector<double>()) ),
-		CmByDt_( *(new std::vector<double>()) ),
-		EmByRm_( *(new std::vector<double>()) ),
-		inject_( *(new std::vector<double>()) ),
-		Gbar_( *(new std::vector<double>()) ),
-		GbarEk_( *(new std::vector<double>()) ),
-		state_( *(new std::vector<double>()) ),
-		power_( *(new std::vector<double>()) )
-	{ ; }
-	
-	///////////////////////////////////////////////////
-	// Default assignment operator needed since we have
-	// reference members. Currently just returns self.
-	///////////////////////////////////////////////////
-	NeuroHub& operator=( const NeuroHub& nh )
-	{
-		return *this;
-	}
+	NeuroHub();
 	
 	///////////////////////////////////////////////////
 	// Field functions
 	///////////////////////////////////////////////////
-	static unsigned int getNcompt( const Element* e );
+	static unsigned int getNcompt( Eref e );
 	
 	///////////////////////////////////////////////////
 	// Dest functions
 	///////////////////////////////////////////////////
-	static void compartmentFunc( const Conn* c, vector< Element* >* elist );
+	static void compartmentFunc(
+		const Conn* c,
+		vector< double >* V,
+		vector< Element* >* elist );
 	static void channelFunc( const Conn* c, vector< Element* >* elist );
 	static void spikegenFunc( const Conn* c, vector< Element* >* elist );
 	static void synchanFunc( const Conn* c, vector< Element* >* elist );
@@ -73,55 +42,48 @@ public:
 	///////////////////////////////////////////////////
 	// Field functions (Biophysics)
 	///////////////////////////////////////////////////
-	static void setComptVm( const Conn* c, double value );
-	static double getComptVm( const Element* e );
+	static void setCompartmentVm( const Conn* c, double value );
+	static double getCompartmentVm( Eref e );
 	
 	static void setInject( const Conn* c, double value );
-	static double getInject( const Element* e );
+	static double getInject( Eref e );
 	
-	static void setChanGbar( const Conn* c, double value );
-	static double getChanGbar( const Element* e );
+	static void setChannelGbar( const Conn* c, double value );
+	static double getChannelGbar( Eref e );
 	
 	static void setSynChanGbar( const Conn* c, double value );
-	static double getSynChanGbar( const Element* e );
+	static double getSynChanGbar( Eref e );
+	
 	///////////////////////////////////////////////////
 	// Dest functions (Biophysics)
 	///////////////////////////////////////////////////
 	static void comptInjectMsgFunc( const Conn* c, double I );
 	
 private:
-	void innerCompartmentFunc( Element* e,
+	void innerCompartmentFunc(
+		Eref e,
+		vector< double >* V,
 		vector< Element* >* elist );
-	void innerChannelFunc( Element* e,
-		vector< Element* >* elist );
-	void innerSpikegenFunc( Element* e,
-		vector< Element* >* elist );
-	void innerSynchanFunc( Element* e,
-		vector< Element* >* elist );
+	void innerChannelFunc( Eref e, vector< Element* >* elist );
+	void innerSpikegenFunc( Eref e, vector< Element* >* elist );
+	void innerSynchanFunc( Eref e, vector< Element* >* elist );
 	
 	static void zombify( 
-		Element* hub, Element* e,
+		Eref hub, Eref e,
 		const Finfo* hubFinfo, Finfo* solveFinfo );
-	static void unzombify( const Conn* c );
-	static void clearFunc( const Conn* c );
+	static void unzombify( Element* e );
+	static void clearFunc( Eref e );
+	static void clearMsgsFromFinfo( Eref e, const Finfo * f );
 	static void redirectDestMessages(
-		Element* hub, Element* e,
+		Eref hub, Eref e,
 		const Finfo* hubFinfo, const Finfo* eFinfo,
-		unsigned int eIndex, vector< unsigned int >* map );
+		unsigned int eIndex, vector< unsigned int >& map,
+		vector< Element *>* elist, bool retain );
 	static void redirectDynamicMessages( Element* e );
-	static NeuroHub* getHubFromZombie(
-		const Element* e, const Finfo* srcFinfo,
-		unsigned int& index );
+	static NeuroHub* getHubFromZombie( Eref e, unsigned int& index );
 	
-	vector< double >&        M_;
-	vector< double >&        V_;
-	vector< double >&        CmByDt_;
-	vector< double >&        EmByRm_;
-	vector< double >&        inject_;
-	vector< double >&        Gbar_;
-	vector< double >&        GbarEk_;
-	vector< double >&        state_;
-	vector< double >&        power_;
+	vector< double >* V_;
+	vector< double >* state_;
 };
 
 // Used by the scanner
