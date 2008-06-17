@@ -819,7 +819,7 @@ void KineticHub::mmEnzConnectionFuncLocal(
 void unzombify( Element* e )
 {
 	const Cinfo* ci = e->cinfo();
-	bool ret = ci->schedule( e );
+	bool ret = ci->schedule( e, ConnTainer::Default );
 	assert( ret );
 	e->setThisFinfo( const_cast< Finfo* >( ci->getThisFinfo() ) );
 	redirectDynamicMessages( e );
