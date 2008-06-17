@@ -296,7 +296,7 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 		) ) {
 		for ( i = origDup.begin(); i != origDup.end(); i++ ) {
 			if ( i->first != i->second ) // a global
-				i->second->cinfo()->schedule( i->second );
+				i->second->cinfo()->schedule( i->second, ConnTainer::Default );
 		}
 	}
 
@@ -375,7 +375,7 @@ Element* SimpleElement::copyIntoArray( Id parent, const string& newName, int n )
 		) ) {
 		for ( i = origDup.begin(); i != origDup.end(); i++ ) {
 			if ( i->first != i->second ) // a global
-				i->second->cinfo()->schedule( i->second );
+				i->second->cinfo()->schedule( i->second, ConnTainer::One2All );
 		}
 	}
 	return child;
