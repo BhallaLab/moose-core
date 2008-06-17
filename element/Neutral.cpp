@@ -279,7 +279,7 @@ Element* Neutral::create(
 			ConnTainer::Default );
 		// bool ret = childSrc->add( parent, kid, kFinfo );
 		assert( ret );
-		ret = c->schedule( kid );
+		ret = c->schedule( kid, ConnTainer::Default );
 		assert( ret );
 		return kid;
 	}
@@ -329,7 +329,7 @@ Element* Neutral::createArray(
 			ConnTainer::One2All );
 			// childSrc->add( parent, kid, kFinfo );
 		assert( ret );
-		ret = c->schedule( kid );
+		ret = c->schedule( kid, ConnTainer::One2All );
 		assert( ret );
 		return kid;
 	}
