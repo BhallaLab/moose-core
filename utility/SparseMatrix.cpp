@@ -8,14 +8,15 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifdef DO_UNIT_TESTS
-#include <functional>
 #include "../basecode/header.h"
 #include "SparseMatrix.h"
-
+#include <functional>
 const unsigned int SM_MAX_ROWS = 10000;
 const unsigned int SM_MAX_COLUMNS = 10000;
 const unsigned int SM_RESERVE = 8;
+
+#ifdef DO_UNIT_TESTS
+
 
 
 void testSparseMatrix()

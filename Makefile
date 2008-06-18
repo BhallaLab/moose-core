@@ -19,7 +19,7 @@
 CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 
 # Optimized mode:
-#CFLAGS  =	-O3 -Wall -pedantic -DNDEBUG
+# CFLAGS  =	-O3 -Wall -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
 
 ##########################################################################
 #
