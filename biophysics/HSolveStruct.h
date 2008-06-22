@@ -67,8 +67,6 @@ struct SynChanStruct
 	// SynChan fields
 	double Ek_;
 	double Gk_;
-double tau1_;
-double tau2_;
 	double Gbar_;
 	double xconst1_;
 	double yconst1_;

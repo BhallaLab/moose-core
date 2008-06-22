@@ -194,11 +194,12 @@ string Cell::getDescription( Eref e )
 void Cell::reinitFunc( const Conn* c, ProcInfo p )
 {
 	static_cast< Cell* >( c->data() )->
-		innerReinitFunc( c->target()->id() );
+		innerReinitFunc( c->target()->id(), p );
 }
 
-void Cell::innerReinitFunc( const Id& cell )
+void Cell::innerReinitFunc( Id cell, ProcInfo p )
 {
+	double dt = p->dt_;
 	if ( method_ == "ee" ) {
 		// Delete existing solver
 		Id oldSolve( cell.path() + "/solve" );
@@ -212,7 +213,7 @@ void Cell::innerReinitFunc( const Id& cell )
 		return;
 	
 	// The solver could be set up to send back a list of solved compartments.
-	setupSolver( cell, seed );
+	setupSolver( cell, seed, dt );
 	
 	// The compartment list could then be used to see if the tree below the
 	// cell is built correctly. For instance, one could check if there are
@@ -224,7 +225,7 @@ void Cell::innerReinitFunc( const Id& cell )
  * This function performs a depth-first search of the tree under the current
  * cell. First compartment found is returned as the seed.
  */ 
-Id Cell::findCompt( const Id& cell )
+Id Cell::findCompt( Id cell )
 {
 	/* 'curr' is the current element under consideration. 'cstack' is a list
 	 * of all elements (and their immediate siblings) found on the path from
@@ -255,7 +256,7 @@ Id Cell::findCompt( const Id& cell )
 	return seed;
 }
 
-void Cell::setupSolver( const Id& cell, const Id& seed ) const
+void Cell::setupSolver( Id cell, Id seed, double dt ) const
 {
 	// Destroy any existing child called 'solve'.
 	Id oldSolve( cell.path() + "/solve" );
@@ -282,20 +283,9 @@ void Cell::setupSolver( const Id& cell, const Id& seed ) const
 	ret = set( scan(), "hubCreate" );
 	assert( ret );
 	
-	// Solver initialization.
-	// Scheduling is currently simple: all solvers attach to t0.
-	Id cj( "/sched/cj" );
-	Id t0( "/sched/cj/t0" );
-	assert( cj.good() );
-	assert( t0.good() );
-	
-	double dt;
-	get< double >( t0(), "dt", dt );
-	send2< Id, double >(
-		cell(), solveInitSlot,
-		seed, dt );
-	
-	set( cj(), "resched" );
+	// Request solver to read model, and initialize itself.
+	// Solver gets autoscheduled on t0 during its creation.
+	send2< Id, double >( cell(), solveInitSlot,	seed, dt );
 }
 
 void Cell::checkTree( ) const
