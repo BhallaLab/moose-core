@@ -53,9 +53,12 @@ RateLookupGroup::RateLookupGroup(
 {
 	min_ = min;
 	max_ = max;
-	nPts_ = 1 + nDivs;
+	// Number of points is 1 more than number of divisions.
+	// Then add one more since we may interpolate at the last point in the table.
+	nPts_ = nDivs + 1 + 1;
 	dx_ = ( max - min ) / nDivs;
-	nColumns_ = 2 * nSpecies; // Every row has 2 entries for each type of gate
+	// Every row has 2 entries for each type of gate
+	nColumns_ = 2 * nSpecies;
 	
 	table_.resize( nPts_ * nColumns_ );
 }
@@ -67,11 +70,18 @@ void RateLookupGroup::addTable(
 {
 	vector< double >::const_iterator ic1 = C1.begin();
 	vector< double >::const_iterator ic2 = C2.begin();
-	for ( unsigned int igrid = 0; igrid < nPts_ ; ++igrid ) {
-		table_[ nColumns_ * igrid + 2 * species ] = *ic1;
-		table_[ nColumns_ * igrid + 2 * species + 1 ] = *ic2;
+	vector< double >::iterator iTable = table_.begin() + 2 * species;
+	// Loop until last but one point
+	for ( unsigned int igrid = 0; igrid < nPts_ - 1 ; ++igrid ) {
+		*( iTable )     = *ic1;
+		*( iTable + 1 ) = *ic2;
+		
+		iTable += nColumns_;
 		++ic1, ++ic2;
 	}
+	// Then duplicate the last point
+	*( iTable )     = C1.back();
+	*( iTable + 1 ) = C2.back();
 }
 
 RateLookup RateLookupGroup::slice( unsigned int species )
@@ -81,8 +91,13 @@ RateLookup RateLookupGroup::slice( unsigned int species )
 
 void RateLookupGroup::getKey( double x, LookupKey& key )
 {
-	double div   = ( x - min_ ) / dx_;
-	unsigned int integer  = ( unsigned int )( div );
+	if ( x < min_ )
+		x = min_;
+	else if ( x > max_ )
+		x = max_;
+	
+	double div = ( x - min_ ) / dx_;
+	unsigned int integer = ( unsigned int )( div );
 	
 	key.fraction = div - integer;
 	key.offset1  = integer * nColumns_;
