@@ -285,7 +285,9 @@ vector< Id > NeuroScan::neighbours( Id compartment )
 vector< Id > NeuroScan::channels( Id compartment )
 {
 	vector< Id > channel;
-	targets( compartment, "channel", channel );
+	// Request only for elements of type "HHChannel" since
+	// channel messages can lead to synchans as well.
+	targets( compartment, "channel", channel, "HHChannel" );
 	return channel;
 }
 
@@ -303,10 +305,10 @@ Id NeuroScan::presyn( Id compartment )
 {
 	vector< Id > spikegen;
 	targets( compartment, "VmSrc", spikegen );
+	ProcInfoBase p;
 	if ( spikegen.size() > 0 ) {
-		//~ Conn c( spikegen[ 0 ](), 0 );
-		//~ ProcInfoBase p;
-		//~ SpikeGen::reinitFunc( c, &p );
+		SetConn c( spikegen.front()(), 0 );
+		SpikeGen::reinitFunc( &c, &p );
 		return spikegen[ 0 ];
 	}
 	else
@@ -316,16 +318,19 @@ Id NeuroScan::presyn( Id compartment )
 vector< Id > NeuroScan::postsyn( Id compartment )
 {
 	vector< Id > channel, synchan;
-	targets( compartment, "channel", channel );
+	// "channel" msgs lead to SynChans as well HHChannels, so request
+	// explicitly for former.
+	targets( compartment, "channel", channel, "SynChan" );
 	ProcInfoBase p;
 	p.dt_ = dt_;
 	vector< Id >::iterator ichan;
-	for ( ichan = channel.begin(); ichan != channel.end(); ++ichan )
-		if ( isType( *ichan, "SynChan" ) ) {
-			synchan.push_back( *ichan );
-			//~ Conn c( ( *ichan )(), 0 );
-			//~ SynChan::reinitFunc( c, &p );
-		}
+	for ( ichan = channel.begin(); ichan != channel.end(); ++ichan ) {
+		// Initializing element
+		SetConn c( ( *ichan )(), 0 );
+		SynChan::reinitFunc( &c, &p );
+		// Remembering it
+		synchan.push_back( *ichan );
+	}
 	
 	return synchan;
 }
@@ -352,14 +357,15 @@ void NeuroScan::field( Id object, string field, int& value )
 
 void NeuroScan::synchanFields( Id synchan, SynChanStruct& scs )
 {
-	//~ Conn c( synchan(), 0 );
-	//~ ProcInfoBase p;
-	//~ p.dt_ = dt_;
-	//~ 
-	//~ SynChan::reinitFunc( c, &p );
-	//~ set< SynChanStruct* >( synchan(), "scan", &scs );
+	SetConn c( synchan(), 0 );
+	ProcInfoBase p;
+	p.dt_ = dt_;
+	
+	SynChan::reinitFunc( &c, &p );
+	set< SynChanStruct* >( synchan(), "scan", &scs );
 }
 
+//~ Meant for small hack below. Temporary.
 #include "../builtins/Interpol.h"
 #include "HHGate.h"
 void NeuroScan::rates(
@@ -374,6 +380,15 @@ HHGate* h = static_cast< HHGate *>( gate()->data() );
 	
 	A.resize( grid.size() );
 	B.resize( grid.size() );
+	
+	//~ Uglier hack to access Interpol's tables directly.
+	//~ Strictly for debugging purposes
+	//~ const vector< double >& AA = h->A().table();
+	//~ const vector< double >& BB = h->B().table();
+	//~ for ( unsigned int i = 0; i < grid.size(); i++ ) {
+		//~ A[ i ] = AA[ i ];
+		//~ B[ i ] = BB[ i ];
+	//~ }
 	
 	vector< double >::const_iterator igrid;
 	vector< double >::iterator ia = A.begin();
@@ -400,21 +415,26 @@ HHGate* h = static_cast< HHGate *>( gate()->data() );
 int NeuroScan::targets(
 	Id object,
 	const string& msg,
-	vector< Id >& target ) const
+	vector< Id >& target,
+	const string& type ) const
 {
 	unsigned int oldSize = target.size();
 	
+	Id found;
 	Conn* i = object()->targets( msg, 0 );
-	while ( i->good() ) {
-		target.push_back( i->target()->id() );
-		i->increment();
+	for ( ; i->good(); i->increment() ) {
+		found = i->target()->id();
+		if ( type != "" && !isType( found, type ) )	// speed this up
+			continue;
+		
+		target.push_back( found );
 	}
 	delete i;
 	
 	return target.size() - oldSize;
 }
 
-bool NeuroScan::isType( Id object, string type )
+bool NeuroScan::isType( Id object, const string& type ) const
 {
 	return object()->cinfo()->isA( Cinfo::find( type ) );
 }

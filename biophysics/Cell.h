@@ -54,11 +54,11 @@ public:
 		bool isVariableDt, bool isImplicit );
 	
 private:
-	void innerReinitFunc( const Id& cell );
+	void innerReinitFunc( Id e, ProcInfo p );
 	void innerSetMethod( string value );
 	
-	static Id findCompt( const Id& cell );
-	void setupSolver( const Id& cell, const Id& seed ) const;
+	static Id findCompt( Id cell );
+	void setupSolver( Id cell, Id seed, double dt ) const;
 	void checkTree( ) const;
 	
 	string method_;

@@ -421,8 +421,6 @@ void SynChan::scanFunc( const Conn* c, SynChanStruct* scs )
 	scs->Gbar_ = local->Gbar_;
 	scs->Gk_ = local->Gk_;
 	scs->Ek_ = local->Ek_;
-	scs->tau1_ = local->tau1_;
-	scs->tau2_ = local->tau2_;
 	scs->xconst1_ = local->xconst1_;
 	scs->yconst1_ = local->yconst1_;
 	scs->xconst2_ = local->xconst2_;
