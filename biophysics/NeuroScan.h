@@ -77,8 +77,9 @@ private:
 	int targets(
 		Id object,
 		const string& msg,
-		vector< Id >& target ) const;
-	bool isType( Id object, string type );
+		vector< Id >& target,
+		const string& type = "" ) const;
+	bool isType( Id object, const string& type ) const;
 	
 	Eref scanElm_;
 	double A_;

@@ -77,7 +77,9 @@ void NeuroScanBase::readCompartments( Id seed ) {
 		}
 	
 	N_ = compartmentId_.size( );
-	//~ reverse( compartmentId_.begin(), compartmentId_.end() );
+//~ 
+if ( checkpoint_.size() )
+	reverse( compartmentId_.begin(), compartmentId_.end() );
 	reverse( checkpoint_.begin(), checkpoint_.end() );
 	for ( unsigned long icp = 0; icp < checkpoint_.size(); ++icp )
 		checkpoint_[ icp ] = ( N_ - 1 ) - checkpoint_[ icp ];
@@ -160,14 +162,11 @@ void NeuroScanBase::readCalcium( ) {
 		nTarget = caTarget( channelId_[ ichan ], caConcId );
 		if ( nTarget == 0 )
 			// No calcium pools fed by this channel.
-			// Signal this using bitwise complement of (unsigned int)(0)
-			//~ caTargetIndex.push_back( ~( 0U ) );
 			caTargetIndex.push_back( -1 );
 		
 		nDepend = caDepend( channelId_[ ichan ], caConcId );
 		if ( nDepend == 0 )
 			// Channel does not depend on calcium.
-			// Signal this using bitwise complement of (unsigned int)(0)
 			caDependIndex.push_back( -1 );
 		
 		if ( caConcId.size() == 0 )
