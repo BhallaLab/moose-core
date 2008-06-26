@@ -38,5 +38,5 @@ $(TARGET): $(OBJ) $(HEADERS) randgen
 randgen:
 	@(echo cd randnum; cd randnum; $(MAKE); cd ..)
 clean:
-	@(echo cd randnum; cd randnum; $(MAKE) clean; cd ..)
+	$(MAKE) -C randnum clean
 	-rm -f *.o $(TARGET) core core.*
