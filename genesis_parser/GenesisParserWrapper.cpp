@@ -2838,8 +2838,8 @@ void do_createmap(int argc, const char** const argv, Id s){
 	
 	const char* source, *dest;
 	int Nx, Ny;
-	double dx, dy;
-	double xorigin, yorigin;
+	double dx = 1.0, dy = 1.0;
+	double xorigin = 0.0, yorigin = 0.0;
 	bool object = false;
 	vector <double> parameter;
 	
@@ -2855,19 +2855,26 @@ void do_createmap(int argc, const char** const argv, Id s){
 	
 	for(int i = 0; i < argc; i++){
 		if (strcmp(argv[i], "-delta") == 0){
-		if (i+2 >= argc) {
+                    if (i+2 >= argc) {
 			cout << "Parser:: -delta option requires two arguments..Ignoring it" << endl;
-			continue;
-		}
-		dx = atof(argv[i+1]);
-		dy = atof(argv[i+2]);
+                    }
+                    else 
+                    {
+                        dx = atof(argv[i+1]);
+                        dy = atof(argv[i+2]);
+                    }
+                    
 		}	
 		else if (strcmp(argv[i], "-origin") == 0){
 			if (i+2 >= argc) {
 				cout << "Parser:: -origin option requires two arguments...Ignoring it." << endl;
 			}
-			xorigin = atof(argv[i+1]);
-			yorigin = atof(argv[i+2]);
+                        else
+                        {
+                            xorigin = atof(argv[i+1]);
+                            yorigin = atof(argv[i+2]);
+                        }
+                        
 		}
 		else if (strcmp(argv[i], "-object") == 0){
 			object = true;
