@@ -12,6 +12,7 @@
 #include "SimpleConn.h"
 #include "SetConn.h"
 #include "One2OneMapConn.h"
+#include "One2AllConn.h"
 
 SimpleConnTainer::SimpleConnTainer( Element* e1, Element* e2, 
 			int msg1, int msg2,
@@ -69,7 +70,11 @@ ConnTainer* SimpleConnTainer::copy( Element* e1, Element* e2, bool isArray ) con
 	// assert( e1->numMsg() > msg1() );
 	// assert( e2->numMsg() > msg2() );
 	if (isArray){
-		return new One2OneMapConnTainer(e1, e2, msg1(), msg2());
+		if (e2->isGlobal()){
+			return new One2AllConnTainer(e1, e2, msg1(), msg2());
+		}
+		else 
+			return new One2OneMapConnTainer(e1, e2, msg1(), msg2());
 	}
 	else 
 		return new SimpleConnTainer( e1, e2, msg1(), msg2() );

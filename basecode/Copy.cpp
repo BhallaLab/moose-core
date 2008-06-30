@@ -74,7 +74,6 @@ Element* SimpleElement::innerCopy() const
 
 Element* SimpleElement::innerCopy(int n) const
 {	
-// 	cout << numMsg() << " " << cinfo()->numSrc() <<  endl;
 	assert( finfo_.size() > 0 );
 	assert( dynamic_cast< ThisFinfo* >( finfo_[0] ) != 0 );
 	void *data = finfo_[0]->ftype()->copyIntoArray( data_, 1, n );
@@ -348,12 +347,9 @@ Element* SimpleElement::copyIntoArray( Id parent, const string& newName, int n )
 		}
 	}
 	
-// 	vector <Id> kids;
-// 	get< vector< Id > >( Eref(child, 1), "childList", kids );
-// 	cout << kids.size()<< endl;
-// 	for (size_t i = 0; i < kids.size(); i++){
-// 		cout << kids[i]()->name() << " " << kids[i].index() << " " << kids[i]()->numEntries() << endl;
-// 	}
+	vector <Id> kids;
+	get< vector< Id > >( Eref(child, 1), "childList", kids );
+	
 	
 	// Phase 3 : Copy over messages to any global elements that were
 	// not on the original tree.
