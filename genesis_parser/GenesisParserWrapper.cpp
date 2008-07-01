@@ -2959,7 +2959,7 @@ planarconnect / dest-path -relative -sourcemask box -1 -1 1 1 -destmask box 1 1 
 	string source, dest;
 	source = argv[1];
 	dest = argv[2];
-	double probability = 0;
+	double probability = 1;
 	for (int i = 3; i < argc; i++ ){
 		if (strcmp(argv[i], "-probability") == 0 && (argc != i+1))
 			probability = atof(argv[i+1]);
