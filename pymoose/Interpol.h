@@ -46,7 +46,7 @@ namespace pymoose
         double __get_lookup() const;
         void __set_lookup(double lookup);
         string dumpFile() const;
-        void dumpFile(string fileName);
+        void dumpFile(string fileName, bool append = false);
     
     
       protected:
