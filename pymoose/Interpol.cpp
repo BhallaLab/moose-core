@@ -154,13 +154,22 @@ void InterpolationTable::__set_lookup( double lookup )
 string InterpolationTable::dumpFile() const
 {
     string print;
-    get < string > (id_(), "print",print);
+    get < string > (id_(), "print", print);
     return print;
 }
-void InterpolationTable::dumpFile( string fileName )
+
+void InterpolationTable::dumpFile( string fileName, bool append )
 {
-    set < string > (id_(), "print", fileName);
+    if (append)
+    {
+        set < string > ( id_(), "append", fileName);
+    }
+    else
+    {
+        set < string > (id_(), "print", fileName);
+    }    
 }
+
 /**
    What are the possible values for mode?
  */

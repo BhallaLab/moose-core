@@ -39,16 +39,6 @@ void Table::__set_output( double output )
 {
     set < double > (id_(), "output", output);
 }
-int Table::__get_step_mode() const
-{
-    int step_mode;
-    get < int > (id_(), "step_mode",step_mode);
-    return step_mode;
-}
-void Table::__set_step_mode( int step_mode )
-{
-    set < int > (id_(), "step_mode", step_mode);
-}
 int Table::__get_stepmode() const
 {
     int stepmode;
