@@ -21,8 +21,6 @@ namespace pymoose
         void __set_input(double input);
         double __get_output() const;
         void __set_output(double output);
-        int __get_step_mode() const;
-        void __set_step_mode(int step_mode);
         int __get_stepmode() const;
         void __set_stepmode(int stepmode);
         double __get_stepsize() const;

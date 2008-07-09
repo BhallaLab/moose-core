@@ -192,3 +192,46 @@ parent of the kChan object. In caChan construction, we specify the
 path to the parent object. And in kAChan, we specify the full path of
 the channel to be created. The full (absolute) path always starts with
 "/" like unix file system.
+
+
+
+-------------------------------
+createmap
+
+planarconnect
+
+planardelay
+
+planarweight
+-------------------------------
+
+These are implemented as member functions of PyMooseContext class.
+See planarconnect.py in examples directory to see how to use them.
+The names have become camel case.
+
+Assuming context is the PyMooseContext instance, the mapping of the
+functions are shown below:
+
+createmap sourceObject destinationContainer {nx} {ny} -delta {dx} {dy} -origin {xo} {yo}
+
+will map to:
+
+context.createMap(sourceObject, destinationContainer, nx, ny, dx, dy, xo, yo)
+
+
+planarconnect source dest -probability {probabilityValue}
+
+becomes:
+
+context.planarConnect(sourcePathString, destPathString, probabilityValue)
+
+NOTE: we do not yet have implementation of all the options in GENESIS.
+
+planardelay source -fixed {delay}
+
+becomes
+
+context.planarDelay(sourcePath, delay)
+
+
+

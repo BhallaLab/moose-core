@@ -152,7 +152,6 @@
 %include "Table.h"
 %attribute(pymoose::Table, double, input, __get_input, __set_input)
 %attribute(pymoose::Table, double, output, __get_output, __set_output)
-%attribute(pymoose::Table, int, step_mode, __get_step_mode, __set_step_mode)
 %attribute(pymoose::Table, int, stepmode, __get_stepmode, __set_stepmode)
 %attribute(pymoose::Table, double, stepsize, __get_stepsize, __set_stepsize)
 %attribute(pymoose::Table, double, threshold, __get_threshold, __set_threshold)
@@ -204,7 +203,7 @@
 %include "SpikeGen.h"
 %attribute(pymoose::SpikeGen, double, threshold, __get_threshold, __set_threshold)
 %attribute(pymoose::SpikeGen, double, refractT, __get_refractT, __set_refractT)
-%attribute(pymoose::SpikeGen, double, abs_refract, __get_abs_refract, __set_abs_refract)
+%attribute(pymoose::SpikeGen, double, absRefractT, __get_absRefractT, __set_absRefractT)
 %attribute(pymoose::SpikeGen, double, amplitude, __get_amplitude, __set_amplitude)
 %attribute(pymoose::SpikeGen, double, state, __get_state, __set_state)
 %attribute(pymoose::SpikeGen, double, event, __get_event, __set_event)
