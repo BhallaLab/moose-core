@@ -39,13 +39,13 @@ void SpikeGen::__set_refractT( double refractT )
 {
     set < double > (id_(), "refractT", refractT);
 }
-double SpikeGen::__get_abs_refract() const
+double SpikeGen::__get_absRefractT() const
 {
     double abs_refract;
     get < double > (id_(), "abs_refract",abs_refract);
     return abs_refract;
 }
-void SpikeGen::__set_abs_refract( double abs_refract )
+void SpikeGen::__set_absRefractT( double abs_refract )
 {
     set < double > (id_(), "abs_refract", abs_refract);
 }

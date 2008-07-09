@@ -20,8 +20,8 @@ namespace pymoose
         void __set_threshold(double threshold);
         double __get_refractT() const;
         void __set_refractT(double refractT);
-        double __get_abs_refract() const;
-        void __set_abs_refract(double abs_refract);
+        double __get_absRefractT() const;
+        void __set_absRefractT(double abs_refract);
         double __get_amplitude() const;
         void __set_amplitude(double amplitude);
         double __get_state() const;
