@@ -117,7 +117,7 @@ namespace pymoose
         void createMap(string src, string dest, unsigned int nx, unsigned int ny, double dx = 1.0, double dy = 1.0, double xo = 0.0, double yo = 0.0, bool isObject = true);
         void createMap( Id src,  Id dest, string name, unsigned int nx, unsigned int ny, double dx = 1.0, double dy = 1.0, double xo = 0.0, double yo = 0.0);
         void createMap( Id src, Id dest, string name, vector<double> param);
-        void planarConnect(string src, string dst, double probability = 0.0);
+        void planarConnect(string src, string dst, double probability = 1.0);
         void plannarDelay(string src, double delay);
         void planarWeight(string src, double weight);
         
