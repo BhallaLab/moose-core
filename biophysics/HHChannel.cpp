@@ -563,6 +563,7 @@ void HHChannel::xGateFunc( const Conn* c, double A, double B )
 	HHChannel* h = static_cast< HHChannel* >( c->data() );
 	h->A_ = A;
 	h->B_ = B;
+	
 }
 
 void HHChannel::yGateFunc( const Conn* c, double A, double B )

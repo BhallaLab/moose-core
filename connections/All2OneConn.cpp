@@ -10,42 +10,27 @@
 
 #include "header.h"
 #include "SimpleConn.h"
-#include "SetConn.h"
-#include "One2OneMapConn.h"
 #include "All2OneConn.h"
 
-SimpleConnTainer::SimpleConnTainer( Element* e1, Element* e2, 
-			int msg1, int msg2,
-			unsigned int eI1, unsigned int eI2,
-			unsigned int i1, unsigned int i2 )
-			: 
-	ConnTainer( e1, e2, msg1, msg2 ),
-		eI1_( eI1 ), eI2_( eI2 ),
-		i1_( i1 ), i2_( i2 )
-{;}
-
-SimpleConnTainer::SimpleConnTainer( Eref e1, Eref e2, 
+All2OneConnTainer::All2OneConnTainer( Eref e1, Eref e2, 
 			int msg1, int msg2,
 			unsigned int i1, unsigned int i2 )
 			: 
 	ConnTainer( e1.e, e2.e, msg1, msg2 ),
-		eI1_( e1.i ), eI2_( e2.i ),
+		eI2_( e2.i ), e1numEntries_( e1.e->numEntries() ),
 		i1_( i1 ), i2_( i2 )
 {;}
 
-Conn* SimpleConnTainer::conn( unsigned int eIndex, bool isReverse ) const
+Conn* All2OneConnTainer::conn( unsigned int eIndex, bool isReverse ) const
 {
 	//	numIter_++; // For reference counting. Do we need it?
-	if ( ( !isReverse && eIndex != eI1_) || (isReverse && eIndex != eI2_) )
-// 	if ( eIndex != eI1_ )
-		return new SetConn( Element::root(), 0 );
 	if ( isReverse )
-		return new ReverseSimpleConn( this );
+		return new ReverseAll2OneConn( this, eIndex );
 	else
-		return new SimpleConn( this );
+		return new All2OneConn( this, eIndex );
 }
 
-Conn* SimpleConnTainer::conn( unsigned int eIndex, bool isReverse,
+Conn* All2OneConnTainer::conn( unsigned int eIndex, bool isReverse,
 	unsigned int connIndex ) const
 {
 	//	numIter_++; // For reference counting. Do we need it?
@@ -53,9 +38,9 @@ Conn* SimpleConnTainer::conn( unsigned int eIndex, bool isReverse,
 		return 0;
 
 	if ( isReverse )
-		return new ReverseSimpleConn( this );
+		return new ReverseAll2OneConn( this, 0 );
 	else
-		return new SimpleConn( this );
+		return new All2OneConn( this, 0 );
 }
 
 /**
@@ -65,26 +50,20 @@ Conn* SimpleConnTainer::conn( unsigned int eIndex, bool isReverse,
  * e1 must be the new source element.
  * Returns the new ConnTainer on success, otherwise 0.
  */
-ConnTainer* SimpleConnTainer::copy( Element* e1, Element* e2, bool isArray ) const
+//TODO array copy 
+ConnTainer* All2OneConnTainer::copy( Element* e1, Element* e2, bool isArray ) const
 {
 	// assert( e1->numMsg() > msg1() );
 	// assert( e2->numMsg() > msg2() );
-	if (isArray){
-		if (e2->isGlobal()){
-			return new All2OneConnTainer(e1, e2, msg1(), msg2());
-		}
-		else 
-			return new One2OneMapConnTainer(e1, e2, msg1(), msg2());
-	}
-	else 
-		return new SimpleConnTainer( e1, e2, msg1(), msg2() );
+
+	return new All2OneConnTainer( e1, e2, msg1(), msg2() );
 }
 
 //////////////////////////////////////////////////////////////////////
-//  SimpleConn
+//  All2OneConn
 //////////////////////////////////////////////////////////////////////
 
-const Conn* SimpleConn::flip() const
+const Conn* All2OneConn::flip() const
 {
-	return new ReverseSimpleConn( s_ );
+	return new ReverseAll2OneConn( s_, index_ );
 }
