@@ -20,6 +20,7 @@ OBJ = \
 	ConnTainer.o	\
 	SimpleConn.o	\
 	One2AllConn.o	\
+	All2OneConn.o	\
 	Many2ManyConn.o	\
 	One2OneMapConn.o	\
 	TraverseMsgConn.o	\
@@ -50,6 +51,7 @@ $(OBJ)	: $(HEADERS) ConnTainer.h
 ConnTainer.o: ConnTainer.h
 SimpleConn.o: SimpleConn.h
 One2AllConn.o: One2AllConn.h
+All2OneConn.o: All2OneConn.h
 Many2ManyConn.o: Many2ManyConn.h ../utility/SparseMatrix.h
 TraverseMsgConn.o: TraverseMsgConn.h
 TraverseDestConn.o: TraverseDestConn.h
