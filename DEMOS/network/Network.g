@@ -60,21 +60,18 @@ planarconnect /inarray/incompt[]/axon /outarray/outcompt[]/glu -probability 1 -s
 //planarweight /inarray/incompt[]/axon /outarray/outcompt[]/glu -fixed 1
 //planardelay /inarray/incompt[]/axon /outarray/outcompt[]/glu -fixed 0
 
-
+//create table /plot
+createmap table /plots 1 10 -object
 int i
 int j
-create neutral plots
-for (i = 0; i < 10; i = i + 1)
-	create table /plots/plot{i}
-end
+
 
 for ( i = 0; i < 10; i = i + 1 )
-	call /plots/plot{i} TABCREATE {RUNTIME / PLOTDT} 0 {RUNTIME}
-	useclock /plots/plot{i} 2
-	setfield /plots/plot{i} step_mode 3
-	addmsg /outarray/outcompt[{i}]/glu /plots/plot{i} INPUT Gk
+	call /plots/table[{i}] TABCREATE {RUNTIME / PLOTDT} 0 {RUNTIME}
+	useclock /plots/table[{i}] 2
+	setfield /plots/table[{i}] step_mode 3
+	addmsg /outarray/outcompt[{i}]/glu /plots/table[{i}] INPUT Gk
 end
-
 reset
 
 for (i = 0; i < 10; i = i + 1)
@@ -94,7 +91,7 @@ writefile "test.plot" "/plotname Vm"
 closefile "test.plot"
 for (i = 0; i < 10; i = i + 1)
 	str filename = "test.plot"
-	tab2file {filename} /plots/plot{i} table	
+	tab2file {filename} /plots/table[{i}] table	
 end 
 
 
