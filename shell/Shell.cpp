@@ -829,7 +829,7 @@ void Shell::staticCreateArray( const Conn* c, string type,
 		int n = (int) (parameter[0]*parameter[1]);
 		bool ret = s->createArray( type, name, parent, id, n );
 		assert(parameter.size() == 6);
-		ArrayElement* f = static_cast <ArrayElement *> (child);
+		ArrayElement* f = static_cast <ArrayElement *> (id());
 		f->setNoOfElements((int)(parameter[0]), (int)(parameter[1]));
 		f->setDistances(parameter[2], parameter[3]);
 		f->setOrigin(parameter[4], parameter[5]);
@@ -1508,7 +1508,7 @@ void Shell::setField( const Conn* c, Id id, string field, string value )
 
 	const Finfo* f = e->findFinfo( field );
 	if ( f ) {
-		if ( !f->strSet( e, value ) )
+		if ( !f->strSet( id.eref(), value ) )
 			cout << "setField: Error: cannot set field " << e->name() <<
 					"." << field << " to " << value << endl;
 	} else {
@@ -1872,8 +1872,8 @@ void Shell::addMessage( const Conn* c,
 	bool ok = 0;
 	for ( i = src.begin(); i != src.end(); ++i )
 		for ( j = dest.begin(); j != dest.end(); ++j ){
-			if ( i->eref().add( srcField, j->eref(), destField/*, 
-				ConnTainer::Default*/ ) )
+			if ( i->eref().add( srcField, j->eref(), destField, 
+				ConnTainer::Default ) )
 					ok = 1; 
 				else
 					cout << "Error: Shell::addMessage failed\n";
