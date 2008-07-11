@@ -309,7 +309,7 @@ unsigned int SynChan::updateNumSynapse( Eref e )
 {
 	static const Finfo* synFinfo = initSynChanCinfo()->findFinfo( "synapse" );
 
-	unsigned int n = e.e->numTargets( synFinfo->msg() );
+	unsigned int n = e.e->numTargets( synFinfo->msg(), e.i );
 
 	if ( n >= synapses_.size() )
 			synapses_.resize( n );
