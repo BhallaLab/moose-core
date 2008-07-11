@@ -873,10 +873,8 @@ void Shell::planarconnect(const Conn* c, string source, string dest, double prob
 				cout <<  "The dest element must be SynChan" << endl;
 				return;
 			}
-			// RD: random number has to be changed. 
 			if (mtrand() <= probability){
 // 				cout << i+1 << " " << j+1 << endl;
-
 				src_list[i].eref().add( "event", dst_list[j].eref(), "synapse" );
 				// src_list[i]()->findFinfo("event")->add(src_list[i](), dst_list[j](), dst_list[j]()->findFinfo("synapse"));
 			}
@@ -1639,14 +1637,14 @@ void Shell::useClock( const Conn* c,
 		if ( func ) {
 			Conn* c = e->targets( func->msg(), i->index() );
 			if ( !c->good() ) {
-				ret = Eref( tick ).add( tickProc->msg(), e, func->msg(),
+				ret = Eref( tick ).add( tickProc->msg(), i->eref(), func->msg(),
 					ConnTainer::Default );
 				// ret = tickProc->add( tick, e, func );
 				assert( ret );
 			} else {
 				if ( c->target().e != tick ) {
-					Eref( e ).dropAll( func->msg() );
-					Eref( tick ).add( tickProc->msg(), e, func->msg(),
+					i->eref().dropAll( func->msg() );
+					Eref( tick ).add( tickProc->msg(), i->eref(), func->msg(),
 						ConnTainer::Default);
 					// tick->add( tickProc->msg(), e, func->msg() );
 				}
@@ -1873,12 +1871,13 @@ void Shell::addMessage( const Conn* c,
 	vector< Id >::iterator j;
 	bool ok = 0;
 	for ( i = src.begin(); i != src.end(); ++i )
-		for ( j = dest.begin(); j != dest.end(); ++j )
-			if ( i->eref().add( srcField, j->eref(), destField, 
-				ConnTainer::Default ) )
+		for ( j = dest.begin(); j != dest.end(); ++j ){
+			if ( i->eref().add( srcField, j->eref(), destField/*, 
+				ConnTainer::Default*/ ) )
 					ok = 1; 
 				else
 					cout << "Error: Shell::addMessage failed\n";
+		}
 	if ( ok )
 		cout << "msg add OK\n";
 }
