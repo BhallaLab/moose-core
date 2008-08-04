@@ -42,7 +42,7 @@ class All2OneConnTainer: public ConnTainer
 		 * Returns the number of sources coming to the specified eIndex,
 		 */
 		unsigned int numSrc( unsigned int eIndex ) const {
-			if ( eI2_ == eIndex );
+			if ( eI2_ == eIndex )
 				return e1numEntries_;
 			return 0;
 		}
