@@ -1,298 +1,652 @@
-<?xml version="1.0" encoding = "Windows-1252"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.00"
+	Version="8.00"
 	Name="MusWin"
 	ProjectGUID="{0FE584C3-5854-42F6-94CA-C48170639F5C}"
-	Keyword="ManagedCProj">
+	Keyword="ManagedCProj"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
 			CharacterSet="2"
-			ManagedExtensions="TRUE">
+			ManagedExtensions="4"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/I basecode\ /DDO_UNIT_TESTS /Zm500 /GR"
 				Optimization="0"
 				PreprocessorDefinitions="WIN32;_DEBUG"
-				MinimalRebuild="FALSE"
+				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				WarningLevel="3"
-				DebugInformationFormat="3"/>
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/MusWin.exe"
 				LinkIncremental="2"
-				GenerateDebugInformation="TRUE"/>
+				GenerateDebugInformation="true"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
 			CharacterSet="2"
-			ManagedExtensions="TRUE">
+			ManagedExtensions="4"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				PreprocessorDefinitions="WIN32;NDEBUG"
-				MinimalRebuild="FALSE"
-				WarningLevel="3"/>
+				MinimalRebuild="false"
+				WarningLevel="3"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/MusWin.exe"
 				LinkIncremental="1"
-				GenerateDebugInformation="TRUE"/>
+				GenerateDebugInformation="true"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
+	<References>
+	</References>
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
-			<File
-				RelativePath="maindir\main.cpp">
-			</File>
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm"
+			>
 			<Filter
 				Name="basecode"
-				Filter="">
+				>
 				<File
-					RelativePath="basecode\ArrayFinfo.cpp">
+					RelativePath="basecode\ArrayFinfo.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\Cinfo.cpp">
+					RelativePath="basecode\Cinfo.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\Conn.cpp">
+					RelativePath="basecode\Conn.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\DeletionMarkerFinfo.cpp">
+					RelativePath="basecode\DeletionMarkerFinfo.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\DestFinfo.cpp">
+					RelativePath="basecode\DestFinfo.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\DynamicFinfo.cpp">
+					RelativePath="basecode\DynamicFinfo.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\Element.cpp">
+					RelativePath="basecode\Element.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\LookupFinfo.cpp">
+					RelativePath="basecode\LookupFinfo.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\RecvFunc.cpp">
+					RelativePath="basecode\RecvFunc.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\SharedFinfo.cpp">
+					RelativePath="basecode\send.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\SharedFtype.cpp">
+					RelativePath="basecode\setget.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\SimpleElement.cpp">
+					RelativePath="basecode\SharedFinfo.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\SrcFinfo.cpp">
+					RelativePath="basecode\SharedFtype.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\TestBasecode.cpp">
+					RelativePath="basecode\SimpleElement.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\ThisFinfo.cpp">
+					RelativePath="basecode\SrcFinfo.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\UnitTests.cpp">
+					RelativePath="basecode\TestBasecode.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\ValueFinfo.cpp">
+					RelativePath="basecode\ThisFinfo.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\send.cpp">
+					RelativePath="basecode\UnitTests.cpp"
+					>
 				</File>
 				<File
-					RelativePath="basecode\setget.cpp">
+					RelativePath="basecode\ValueFinfo.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="element"
-				Filter="">
+				>
 				<File
-					RelativePath="element\Neutral.cpp">
+					RelativePath="element\Neutral.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="shell"
-				Filter="">
+				>
 				<File
-					RelativePath="shell\Shell.cpp">
+					RelativePath="shell\Shell.cpp"
+					>
 				</File>
 				<File
-					RelativePath="shell\SwigFuncs.cpp">
+					RelativePath="shell\SwigFuncs.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="biophysics"
+				>
+				<File
+					RelativePath=".\biophysics\BinSynchan.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\CaConc.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\Cell.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\Compartment.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\HHChannel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\HHGate.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\HSolve.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\HSolveBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\HSolveStruct.cpp"
+					>
+				</File>
+				<File
+					RelativePath="maindir\main.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\Mg_block.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\Nernst.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\NeuroHub.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\NeuroScan.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\NeuroScanBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\ParSpikeGen.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\ParSynChan.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\PulseGen.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\RandomSpike.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\RateLookup.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\script_out.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\SpikeGen.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\StochSynchan.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\SymCompartment.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\SynChan.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\TestBiophysics.cpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc">
+			Filter="h;hpp;hxx;hm;inl;inc"
+			>
 			<Filter
 				Name="basecode"
-				Filter="">
+				>
 				<File
-					RelativePath="basecode\ArrayFinfo.h">
+					RelativePath="basecode\ArrayFinfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\ArrayFtype.h">
+					RelativePath="basecode\ArrayFtype.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\Cinfo.h">
+					RelativePath="basecode\Cinfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\Conn.h">
+					RelativePath="basecode\Conn.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\DeletionMarkerFinfo.h">
+					RelativePath="basecode\DeletionMarkerFinfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\DerivedFtype.h">
+					RelativePath="basecode\DerivedFtype.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\DestFinfo.h">
+					RelativePath="basecode\DestFinfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\DynamicFinfo.h">
+					RelativePath="basecode\DynamicFinfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\Element.h">
+					RelativePath="basecode\Element.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\ExtFieldFinfo.h">
+					RelativePath="basecode\ExtFieldFinfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\Finfo.h">
+					RelativePath="basecode\Finfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\Ftype.h">
+					RelativePath="basecode\Ftype.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\Ftype2.h">
+					RelativePath="basecode\Ftype2.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\IndirectFinfo.h">
+					RelativePath="basecode\header.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\LookupFinfo.h">
+					RelativePath="basecode\IndirectFinfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\LookupFtype.h">
+					RelativePath="basecode\LookupFinfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\MsgDest.h">
+					RelativePath="basecode\LookupFtype.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\MsgSrc.h">
+					RelativePath="basecode\MsgDest.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\NestFtype.h">
+					RelativePath="basecode\MsgSrc.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\RecvFunc.h">
+					RelativePath="basecode\NestFtype.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\SharedFinfo.h">
+					RelativePath="basecode\RecvFunc.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\SharedFtype.h">
+					RelativePath="basecode\send.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\SimpleElement.h">
+					RelativePath="basecode\setget.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\SrcFinfo.h">
+					RelativePath="basecode\setgetLookup.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\ThisFinfo.h">
+					RelativePath="basecode\SharedFinfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\ValueFinfo.h">
+					RelativePath="basecode\SharedFtype.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\ValueFtype.h">
+					RelativePath="basecode\SimpleElement.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\header.h">
+					RelativePath="basecode\SrcFinfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\send.h">
+					RelativePath="basecode\ThisFinfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\setget.h">
+					RelativePath="basecode\ValueFinfo.h"
+					>
 				</File>
 				<File
-					RelativePath="basecode\setgetLookup.h">
+					RelativePath="basecode\ValueFtype.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="element"
-				Filter="">
+				>
 				<File
-					RelativePath="element\Neutral.h">
+					RelativePath="element\Neutral.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="shell"
-				Filter="">
+				>
 				<File
-					RelativePath="shell\Shell.h">
+					RelativePath="shell\Shell.h"
+					>
 				</File>
 				<File
-					RelativePath="shell\Swig.h">
+					RelativePath="shell\Swig.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="biophysics"
+				>
+				<File
+					RelativePath=".\biophysics\BinSynchan.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\BinSynInfo.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\CaConc.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\Cell.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\Compartment.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\HHChannel.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\HHGate.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\HSolve.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\HSolveBase.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\HSolveStruct.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\Mg_block.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\Nernst.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\NeuroHub.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\NeuroScan.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\NeuroScanBase.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\ParSpikeGen.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\ParSynChan.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\PulseGen.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\RandomSpike.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\RateLookup.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\script_out.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\SpikeGen.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\StochSynchan.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\StochSynInfo.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\SymCompartment.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\SynChan.h"
+					>
+				</File>
+				<File
+					RelativePath=".\biophysics\SynInfo.h"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;r">
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;r"
+			>
 		</Filter>
 	</Files>
 	<Globals>

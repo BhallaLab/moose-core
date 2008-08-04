@@ -33,6 +33,7 @@
 # define ASSERT( unused, message ) do {} while ( false )
 #endif
 
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <map>
