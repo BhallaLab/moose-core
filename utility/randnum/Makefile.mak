@@ -1,6 +1,7 @@
 LOCAL_DIR := utility$/randnum
 LOCAL_SRCS := \
 	mt19937ar.cpp	\
+	Uniform.cpp \
 	Binomial.cpp	\
 	Normal.cpp	\
 	Exponential.cpp	\
@@ -17,6 +18,7 @@ LOCAL_SRCS := \
 
 LOCAL_HEADERS := \
 	Probability.h	\
+	Uniform.h   \
 	Binomial.h	\
 	Normal.h	\
 	Exponential.h	\

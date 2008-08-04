@@ -26,6 +26,7 @@ LOCAL_SRCS := \
 	GenesisParser.tab.cpp \
 	symtab.cpp \
 	eval.cpp \
+	exec_fork.cpp   \
 	parse.cpp \
 	getopt.cpp \
 	script.cpp \
