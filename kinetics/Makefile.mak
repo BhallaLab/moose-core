@@ -13,7 +13,7 @@ LOCAL_SRCS := \
 	Molecule.cpp	\
 	Reaction.cpp	\
 	Enzyme.cpp	\
-	SparseMatrix.cpp	\
+	KinSparseMatrix.cpp	\
 	KineticHub.cpp	\
 	Stoich.cpp	\
 	Kintegrator.cpp	\

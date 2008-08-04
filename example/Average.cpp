@@ -30,24 +30,24 @@ const Cinfo* initAverageCinfo()
 	///////////////////////////////////////////////////////
 	// Field definitions
 	///////////////////////////////////////////////////////
-		new ValueFinfo( "total", 
+		new ValueFinfo( "total",
 			ValueFtype1< double >::global(),
-			GFCAST( &Average::getTotal ), 
-			RFCAST( &Average::setTotal ) 
+			GFCAST( &Average::getTotal ),
+			RFCAST( &Average::setTotal )
 		),
-		new ValueFinfo( "baseline", 
+		new ValueFinfo( "baseline",
 			ValueFtype1< double >::global(),
-			GFCAST( &Average::getBaseline ), 
+			GFCAST( &Average::getBaseline ),
 			RFCAST( &Average::setBaseline )
 		),
-		new ValueFinfo( "n", 
+		new ValueFinfo( "n",
 			ValueFtype1< unsigned int >::global(),
-			GFCAST( &Average::getN ), 
+			GFCAST( &Average::getN ),
 			RFCAST( &Average::setN )
 		),
-		new ValueFinfo( "mean", 
+		new ValueFinfo( "mean",
 			ValueFtype1< double >::global(),
-			GFCAST( &Average::getMean ), 
+			GFCAST( &Average::getMean ),
 			&dummyFunc
 		),
 	///////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ const Cinfo* initAverageCinfo()
 
 	// Schedule molecules for the slower clock, stage 0.
 	static SchedInfo schedInfo[] = { { process, 0, 0 } };
-	
+
 	static Cinfo averageCinfo(
 		"Average",
 		"Upinder S. Bhalla, 2007, NCBS",
@@ -97,7 +97,7 @@ static const Slot outputSlot = initAverageCinfo()->getSlot( "output" );
 
 Average::Average()
 	:
-	total_( 0.0 ), 
+	total_( 0.0 ),
 	baseline_( 0.0 ),
 	n_( 0 )
 {
@@ -113,9 +113,9 @@ void Average::setTotal( const Conn* c, double value )
 	static_cast< Average* >( c->data() )->total_ = value;
 }
 
-double Average::getTotal( const Element* e )
+double Average::getTotal( Eref e )
 {
-	return static_cast< Average* >( e->data() )->total_;
+	return static_cast< Average* >( e.data() )->total_;
 }
 
 void Average::setBaseline( const Conn* c, double value )
@@ -123,9 +123,9 @@ void Average::setBaseline( const Conn* c, double value )
 	static_cast< Average* >( c->data() )->baseline_ = value;
 }
 
-double Average::getBaseline( const Element* e )
+double Average::getBaseline( Eref e )
 {
-	return static_cast< Average* >( e->data() )->baseline_;
+	return static_cast< Average* >( e.data() )->baseline_;
 }
 
 void Average::setN( const Conn* c, unsigned int value )
@@ -133,14 +133,14 @@ void Average::setN( const Conn* c, unsigned int value )
 	static_cast< Average* >( c->data() )->n_ = value;
 }
 
-unsigned int Average::getN( const Element* e )
+unsigned int Average::getN( Eref e )
 {
-	return static_cast< Average* >( e->data() )->n_;
+	return static_cast< Average* >( e.data() )->n_;
 }
 
-double Average::getMean( const Element* e )
+double Average::getMean( Eref e )
 {
-	return static_cast< Average* >( e->data() )->mean();
+	return static_cast< Average* >( e.data() )->mean();
 }
 
 ///////////////////////////////////////////////////
@@ -171,8 +171,7 @@ void Average::reinitFuncLocal( )
 
 void Average::processFunc( const Conn* c, ProcInfo info )
 {
-	Element* e = c->targetElement();
-	static_cast< Average* >( c->data() )->processFuncLocal( e, info );
+	static_cast< Average* >( c->data() )->processFuncLocal( c->target(), info );
 }
 
 double Average::mean() const
@@ -180,7 +179,7 @@ double Average::mean() const
 	return ( n_ > 0 ) ? baseline_ + total_ / n_ : baseline_;
 }
 
-void Average::processFuncLocal( Element* e, ProcInfo info )
+void Average::processFuncLocal( Eref e, ProcInfo info )
 {
 	send1< double >( e, outputSlot, mean() );
 }
@@ -198,37 +197,41 @@ void testAverage()
 
 	cout << "\nTesting Average" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root(),
+	Eref n = Neutral::create( "Neutral", "n", Element::root()->id(),
 		Id::scratchId() );
-	Element* m0 = Neutral::create( "Average", "m0", n,
+	Element* m0 = Neutral::create( "Average", "m0", n->id(),
 		Id::scratchId() );
 	ASSERT( m0 != 0, "creating average" );
-	Element* m1 = Neutral::create( "Average", "m1", n,
+	Element* m1 = Neutral::create( "Average", "m1", n->id(),
 		Id::scratchId() );
 	ASSERT( m1 != 0, "creating average" );
-	Element* m2 = Neutral::create( "Average", "m2", n,
+	Element* m2 = Neutral::create( "Average", "m2", n->id(),
 		Id::scratchId() );
 	ASSERT( m2 != 0, "creating average" );
 
 	bool ret;
 
 	ProcInfoBase p;
-	Conn cm0( m0, 0 );
-	Conn cm1( m1, 0 );
-	Conn cm2( m2, 0 );
+	SetConn cm0( m0, 0 );
+	SetConn cm1( m1, 0 );
+	SetConn cm2( m2, 0 );
 	p.dt_ = 1.0;
 	set< double >( m0, "baseline", 1.0 );
 	set< double >( m1, "baseline", 10.0 );
 	set< double >( m2, "baseline", 0.1 );
 
-	ret = m0->findFinfo( "output" )->add( m0, m1, m1->findFinfo( "input" ) );
+	//ret = m0->findFinfo( "output" )->add( m0, m1, m1->findFinfo( "input" ) );
+	ret = Eref(m0).add("output", m1, "input");
 	ASSERT( ret, "adding msg 0" );
-	ret = m0->findFinfo( "output" )->add( m0, m2, m2->findFinfo( "input" ) );
+	//ret = m0->findFinfo( "output" )->add( m0, m2, m2->findFinfo( "input" ) );
+	ret = Eref(m0).add("output", m2, "input");
 	ASSERT( ret, "adding msg 1" );
-	ret = m1->findFinfo( "output" )->add( m1, m2, m2->findFinfo( "input" ) );
+	//ret = m1->findFinfo( "output" )->add( m1, m2, m2->findFinfo( "input" ) );
+	ret = Eref(m1).add("output", m2, "input");
 	ASSERT( ret, "adding msg 2" );
 
-	ret = m2->findFinfo( "output" )->add( m2, m0, m0->findFinfo( "input" ) );
+	//ret = m2->findFinfo( "output" )->add( m2, m0, m0->findFinfo( "input" ) );
+	ret = Eref(m2).add("output", m0, "input");
 	ASSERT( ret, "adding msg 3" );
 
 	Average::reinitFunc( &cm0, &p );
@@ -236,7 +239,7 @@ void testAverage()
 	Average::reinitFunc( &cm2, &p );
 
 	unsigned int i = 0;
-	for ( p.currTime_ = 0.0; p.currTime_ < 10.0; p.currTime_ += p.dt_ ) 
+	for ( p.currTime_ = 0.0; p.currTime_ < 10.0; p.currTime_ += p.dt_ )
 	{
 //		double n0 = Average::getMean( m0 );
 //		double n1 = Average::getMean( m1 );

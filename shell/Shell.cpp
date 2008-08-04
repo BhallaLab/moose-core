@@ -38,7 +38,7 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "cwe", Ftype1< Id >::global(),
 						RFCAST( &Shell::setCwe ) ),
 		// Getting cwe back: First handle a request
-		new DestFinfo( "trigCwe", Ftype0::global(), 
+		new DestFinfo( "trigCwe", Ftype0::global(),
 						RFCAST( &Shell::trigCwe ) ),
 		// Then send out the cwe info
 		new SrcFinfo( "cweSrc", Ftype1< Id >::global() ),
@@ -47,18 +47,18 @@ const Cinfo* initShellCinfo()
 		// argument for new cwe. It sends back the cweSrc.
 		new DestFinfo( "pushe", Ftype1< Id >::global(),
 						RFCAST( &Shell::pushe ) ),
-		// Doing pope: popping element off stack onto cwe. 
+		// Doing pope: popping element off stack onto cwe.
 		// It sends back the cweSrc.
-		new DestFinfo( "pope", Ftype0::global(), 
+		new DestFinfo( "pope", Ftype0::global(),
 						RFCAST( &Shell::pope ) ),
 
 		// Getting a list of child ids: First handle a request with
 		// the requested parent elm id.
-		new DestFinfo( "trigLe", Ftype1< Id >::global(), 
+		new DestFinfo( "trigLe", Ftype1< Id >::global(),
 						RFCAST( &Shell::trigLe ) ),
 		// Then send out the vector of child ids.
 		new SrcFinfo( "leSrc", Ftype1< vector< Id > >::global() ),
-		
+
 		// Creating an object
 		new DestFinfo( "create",
 				Ftype3< string, string, Id >::global(),
@@ -82,7 +82,7 @@ const Cinfo* initShellCinfo()
 		// The create func returns the id of the created object.
 		new SrcFinfo( "createSrc", Ftype1< Id >::global() ),
 		// Deleting an object
-		new DestFinfo( "delete", Ftype1< Id >::global(), 
+		new DestFinfo( "delete", Ftype1< Id >::global(),
 				RFCAST( &Shell::staticDestroy ) ),
 
 		// Create a dynamic field on specified object.
@@ -117,7 +117,7 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "useClock",
 				Ftype3< Id, vector< Id >, string >::global(),
 				RFCAST( &Shell::useClock ) ),
-		
+
 		// Getting a wildcard path of elements: handling request
 		new DestFinfo( // args are path, flag true for breadth-first list
 				"el",
@@ -185,23 +185,23 @@ const Cinfo* initShellCinfo()
 		////////////////////////////////////////////////////////////
 		// Args are: file cellpath globalParms
 		new DestFinfo( "readcell",
-			Ftype3< string, string, vector< double > >::global(), 
+			Ftype3< string, string, vector< double > >::global(),
 					RFCAST( &Shell::readCell ) ),
 		////////////////////////////////////////////////////////////
 		// Channel setup functions
 		////////////////////////////////////////////////////////////
 		new DestFinfo( "setupAlpha",
-			Ftype2< Id, vector< double > >::global(), 
+			Ftype2< Id, vector< double > >::global(),
 					RFCAST( &Shell::setupAlpha ) ),
 		new DestFinfo( "setupTau",
-			Ftype2< Id, vector< double > >::global(), 
+			Ftype2< Id, vector< double > >::global(),
 					RFCAST( &Shell::setupTau ) ),
 		new DestFinfo( "tweakAlpha",
 			Ftype1< Id >::global(), RFCAST( &Shell::tweakAlpha ) ),
 		new DestFinfo( "tweakTau",
 			Ftype1< Id >::global(), RFCAST( &Shell::tweakTau ) ),
 		new DestFinfo( "setupGate",
-			Ftype2< Id, vector< double > >::global(), 
+			Ftype2< Id, vector< double > >::global(),
 					RFCAST( &Shell::setupGate ) ),
 		////////////////////////////////////////////////////////////
 		// SimDump facility
@@ -211,11 +211,11 @@ const Cinfo* initShellCinfo()
 					RFCAST( &Shell::readDumpFile ) ),
 		new DestFinfo(	"writeDumpFile",
 			// args are filename, path to dump
-			Ftype2< string, string >::global(), 
+			Ftype2< string, string >::global(),
 					RFCAST( &Shell::writeDumpFile ) ),
 		new DestFinfo(	"simObjDump",
 			// arg is a set of fields for the desired class
-			// The list of fields is a space-delimited list and 
+			// The list of fields is a space-delimited list and
 			// can be extracted using separateString.
 			Ftype1< string >::global(), RFCAST( &Shell::simObjDump ) ),
 		new DestFinfo(	"simUndump",
@@ -232,10 +232,10 @@ const Cinfo* initShellCinfo()
 				RFCAST( &Shell::listFiles ) ),
 		new DestFinfo( "closefile",
 				Ftype1< string >::global(),
-				RFCAST( &Shell::closeFile ) ),	
+				RFCAST( &Shell::closeFile ) ),
 		new DestFinfo( "readfile",
 				Ftype2< string, bool >::global(),
-				RFCAST( &Shell::readFile) ),	
+				RFCAST( &Shell::readFile) ),
 		////////////////////////////////////////////////////////////
 		// field assignment for a vector of objects
 		////////////////////////////////////////////////////////////
@@ -245,10 +245,10 @@ const Cinfo* initShellCinfo()
 				RFCAST( &Shell::setVecField ) ),
 		new DestFinfo( "loadtab",
 				Ftype1< string >::global(),
-				RFCAST( &Shell::loadtab ) ),	
+				RFCAST( &Shell::loadtab ) ),
 		new DestFinfo( "tabop",
 				Ftype4< Id, char, double, double >::global(),
-				RFCAST( &Shell::tabop ) ),	
+				RFCAST( &Shell::tabop ) ),
 	};
 
 	/**
@@ -273,7 +273,7 @@ const Cinfo* initShellCinfo()
 		),
 	};
 
-	static Finfo* masterShared[] = 
+	static Finfo* masterShared[] =
 	{
 		new SrcFinfo( "get",
 			// objId, field
@@ -289,13 +289,13 @@ const Cinfo* initShellCinfo()
 				// srcObjId, srcField, destObjId, destField
 			Ftype4< Id, string, Id, string >::global()
 		),
-		new SrcFinfo( "create", 
+		new SrcFinfo( "create",
 			// type, name, parentId, newObjId.
 			Ftype4< string, string, Id, Id >::global()
 		),
 	};
 
-	static Finfo* slaveShared[] = 
+	static Finfo* slaveShared[] =
 	{
 		new DestFinfo( "get",
 			// objId, field
@@ -315,7 +315,7 @@ const Cinfo* initShellCinfo()
 			Ftype4< Id, string, Id, string >::global(),
 			RFCAST( &Shell::addFunc )
 		),
-		new DestFinfo( "create", 
+		new DestFinfo( "create",
 			// type, name, parentId, newObjId.
 			Ftype4< string, string, Id, Id >::global(),
 			RFCAST( &Shell::slaveCreateFunc )
@@ -336,20 +336,20 @@ const Cinfo* initShellCinfo()
 			Ftype0::global(),
 			RFCAST( &Shell::pollFunc )
 		),
-		new SrcFinfo( "pollSrc", 
-			// # of steps. 
+		new SrcFinfo( "pollSrc",
+			// # of steps.
 			// This talks to /sched/pj:step to poll the postmasters
 			Ftype1< int >::global()
 		),
 
-		new SharedFinfo( "parser", parserShared, 
-				sizeof( parserShared ) / sizeof( Finfo* ) ), 
+		new SharedFinfo( "parser", parserShared,
+				sizeof( parserShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "serial", serialShared,
-				sizeof( serialShared ) / sizeof( Finfo* ) ), 
+				sizeof( serialShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "master", masterShared,
-				sizeof( masterShared ) / sizeof( Finfo* ) ), 
+				sizeof( masterShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "slave", slaveShared,
-				sizeof( slaveShared ) / sizeof( Finfo* ) ), 
+				sizeof( slaveShared ) / sizeof( Finfo* ) ),
 	};
 
 	static Cinfo shellCinfo(
@@ -455,7 +455,7 @@ Id Shell::traversePath( Id start, vector< string >& names )
 
 // Requires a path argument without a starting space
 // Perhaps this should be in the interpreter?
-Id Shell::innerPath2eid( 
+Id Shell::innerPath2eid(
 		const string& path, const string& separator ) const
 {
 	if ( path == separator || path == "/root" )
@@ -502,7 +502,7 @@ Id Shell::path2eid( const string& path, const string& separator )
 	return s->innerPath2eid( path, separator );
 }
 
-string Shell::eid2path( Id eid ) 
+string Shell::eid2path( Id eid )
 {
 	if ( eid.zero() )
 		return string( "/" );
@@ -574,12 +574,12 @@ void Shell::rawAddFunc( const Conn* c, string s )
 	if ( destId.bad() ) {
 		cout << "Error: Shell::rawAddFunc: msgdest is a bad elm on " << mynode << " from " << remotenode << " with str " << s << "\n";
 		return;
-	} 
+	}
 	Element* dest = destId();
 	if ( dest == 0 ) {
 		cout << "Error: Shell::rawAddFunc: msgdest ptr for id " << destId << " is empty on " << mynode << " from " << remotenode << " with str " << s << "\n";
 		return;
-	} 
+	}
 	if ( dest->className() == "PostMaster" ) { //oops, off node.
 		cout << "Error: Shell::rawAddFunc: msgdest is off node on " << mynode << " from " << remotenode << " with str " << s << "\n";
 		return;
@@ -597,7 +597,7 @@ void Shell::rawAddFunc( const Conn* c, string s )
 			typeSig << "' != '" << svec[3] << "' on " << mynode << " from " << remotenode << "\n";
 		return;
 	}
-	
+
 	// post->findFinfo( "data" )->add( post, dest, destField );
 	// cout << "Shell::rawAddFunc: Successfully added msg on remote node\n";
 }
@@ -616,11 +616,11 @@ void Shell::rawTestFunc( const Conn* c, string s )
 	get< unsigned int >( post, "localNode", mynode );
 	get< unsigned int >( post, "remoteNode", remotenode );
 	char teststr[30];
-	sprintf( teststr, "My name is Michael Caine %d,%d", 
+	sprintf( teststr, "My name is Michael Caine %d,%d",
 		remotenode, mynode );
 
 	// cout << "Shell::rawTestFunc( " << s << " )," << teststr << "\n";
-	
+
 	ASSERT( s == teststr, "Shell::rawTestFunc" );
 	// cout << "Shell::rawTestFunc( " << s << " )\n";
 }
@@ -659,7 +659,7 @@ Id Shell::getCwe( const Element* e )
 }
 
 void Shell::trigCwe( const Conn* c )
-						
+
 {
 	Shell* s = static_cast< Shell* >( c->data() );
 	sendBack1< Id >( c, cweSlot, s->cwe_ );
@@ -684,7 +684,7 @@ void Shell::pope( const Conn* c )
 	Shell* s = static_cast< Shell* >( c->data() );
 	if ( s->workingElementStack_.size() > 0 ) {
 		s->cwe_ = s->workingElementStack_.back();
-		if ( s->cwe_.bad() ) { 
+		if ( s->cwe_.bad() ) {
 			// In case we went back to an element that got deleted in
 			// the interim.
 			s->cwe_ = Id();
@@ -706,7 +706,7 @@ void Shell::pope( const Conn* c )
 
 
 void Shell::trigLe( const Conn* c, Id parent )
-						
+
 {
 	// Here we do something intelligent for off-node le.
 	if ( !parent.bad() ) {
@@ -747,13 +747,13 @@ void Shell::staticCreate( const Conn* c, string type,
 		// Element* post = oni->post;
 		unsigned int target = 0;
 		/*
-		unsigned int target = 
+		unsigned int target =
 		e->connSrcBegin( rCreateSlot.msg() ) - e->lookupConn( 0 ) +
 			id.node() - 1;
 			*/
-		sendTo4< string , string, Id, Id>( 
+		sendTo4< string , string, Id, Id>(
 			e, rCreateSlot, target,
-			type, name, 
+			type, name,
 			parent, oni->id );
 		// Here it needs to fork till the object creation is complete.
 		delete oni;
@@ -767,18 +767,18 @@ void Shell::staticCreate( const Conn* c, string type,
 void Shell::staticCreateArray1( const Conn* c, string type,
 					string name, Id parent, vector <double> parameter )
 {
-	
+
 	Eref eref = c->target();
 // 	Element* e = c->targetElement();
 	Shell* s = static_cast< Shell* >( c->data() );
 
 	int n = (int) (parameter[0]*parameter[1]);
-	
+
 	for (int i = 0; i < n; i++){
 		Id id = Id::childId( parent );
 		Element* child = id();
 		char sname[20];
-		sprintf(sname, "%s[%d]", name.c_str(), i); 
+		sprintf(sname, "%s[%d]", name.c_str(), i);
 		if ( child == 0 ) { // local node
 			bool ret = s->create( type, sname, parent, id );
 			if ( ret ) { // Tell the parser it was created happily.
@@ -798,9 +798,9 @@ void Shell::staticCreateArray1( const Conn* c, string type,
 			unsigned int target = 0;
 			//eref.connSrcBegin( rCreateSlot.msg() ) - e->lookupConn( 0 ) +
 			//	id.node() - 1;
-			sendTo4< string, string, Id, Id>( 
+			sendTo4< string, string, Id, Id>(
 				eref, rCreateSlot, target,
-				type, sname, 
+				type, sname,
 				parent, oni->id );
 			// Here it needs to fork till the object creation is complete.
 			delete oni;
@@ -848,9 +848,9 @@ void Shell::staticCreateArray( const Conn* c, string type,
 		unsigned int target = 0;
 		//e->connSrcBegin( rCreateSlot.msg() ) - e->lookupConn( 0 ) +
 		//	id.node() - 1;
-		sendTo4< string , string, Id, Id>( 
+		sendTo4< string , string, Id, Id>(
 			eref, rCreateSlot, target,
-			type, name, 
+			type, name,
 			parent, oni->id );
 		// Here it needs to fork till the object creation is complete.
 		delete oni;
@@ -887,18 +887,18 @@ void Shell::planarconnect(const Conn* c, string source, string dest, double prob
 // 	static const Cinfo* sgCinfo = Cinfo::find( "SpikeGen" );
 // 	// static const Finfo* eventFinfo = sgCinfo->findFinfo( "event" );
 // 	static const Slot eventSlot = sgCinfo->getSlot( "event" );
-// 
+//
 // 	vector <Element* > srcList;
 // 	simpleWildcardFind( source, srcList );
 // 	for ( size_t i = 0 ; i < srcList.size(); i++){
 // 		if ( srcList[ i ]->className() != "SpikeGen"){
-// 			cout << "Shell::planardelay: Error: Source is not SpikeGen" << endl; 	
+// 			cout << "Shell::planardelay: Error: Source is not SpikeGen" << endl;
 // 			return;
 // 		}
-// 
+//
 // 		vector< ConnTainer* >::const_iterator j;
 // 		const Msg* m = srcList[ i ]->msg( eventSlot.msg() );
-// 
+//
 // 		for( j = m->begin(); j != m->end(); j++ ) {
 // 			// Need to sort out the iteration through all targets, here.
 // 			// Many targets will be ArrayElements and should have
@@ -906,7 +906,7 @@ void Shell::planarconnect(const Conn* c, string source, string dest, double prob
 // 			// for ( Conn* k = ( *j )->conn( eIndex, m->isDest() ); j->good(); j++ )
 // 				// setDelay( k );
 // 		}
-// 		
+//
 // 		/*
 // 		vector <Conn> conn;
 // 		srcList[i]->findFinfo("event")->outgoingConns(srcList[i], conn);
@@ -915,7 +915,7 @@ void Shell::planarconnect(const Conn* c, string source, string dest, double prob
 // 			Element *dest = conn[j].targetElement();
 // 			if (destination != ""){
 // 				bool found = false;
-// 				for (vector<Element *>::iterator iter = dst_list.begin(); 
+// 				for (vector<Element *>::iterator iter = dst_list.begin();
 // 					iter != dst_list.end(); iter++)
 // 					if (*iter == dest) {found = true; break;}
 // 				if (!found) continue;
@@ -936,7 +936,7 @@ void Shell::planarconnect(const Conn* c, string source, string dest, double prob
 // 					while (random > maxallowed ) random = p->getNextSample();
 // 					if (absoluterandom)
 // 						{number += random;}
-// 					else 
+// 					else
 // 						{number += number*random;}
 // 				}
 // 				if (add){
@@ -977,16 +977,16 @@ void Shell::planardelay(const Conn& c, string source, string destination, vector
 			p = new Uniform(-scale, scale);
 			maxallowed = scale;
 			break;
-		case 2: 
+		case 2:
 			p = new Normal(0, stdev);
 			maxallowed = maxdev;
 			break;
-		case 3: 
+		case 3:
 			p = new Exponential(log(2)/mid);
 			maxallowed = max;
 			break;
 	}
-	
+
 	static const Cinfo* sgCinfo = Cinfo::find( "SpikeGen" );
 	static const Slot sgeventSlot = sgCinfo->getSlot( "event" );
 	static const Cinfo* rsCinfo = Cinfo::find( "RandomSpike" );
@@ -999,12 +999,12 @@ void Shell::planardelay(const Conn& c, string source, string destination, vector
 	for (size_t i = 0 ; i < srcList.size(); i++){
 		if (srcList[i]()->className() != "SpikeGen" && srcList[i]()->className() != "RandomSpike"){cout << "Shell::planardelay: Source = " << srcList[i]()->className() << " is not SpikeGen" << endl; return;}
 		vector< ConnTainer* >::const_iterator j;
-		
+
 		const Msg* m;
-		if (srcList[i]()->className() == "SpikeGen"){ 
+		if (srcList[i]()->className() == "SpikeGen"){
 			m= srcList[ i ]()->msg( sgeventSlot.msg() );
 		}
-		else if (srcList[i]()->className() == "RandomSpike"){ 
+		else if (srcList[i]()->className() == "RandomSpike"){
 			m= srcList[ i ]()->msg( rseventSlot.msg() );
 		}
 		//srcList[i]->findFinfo("event")->outgoingConns(srcList[i], conn);
@@ -1020,7 +1020,7 @@ void Shell::planardelay(const Conn& c, string source, string destination, vector
 // 				eref = ( *j )->conn( /*eIndex*/0, m->isDest())->target();
 				if (destination != ""){
 					bool found = false;
-					for (vector<Id>::iterator iter = dst_list.begin(); 
+					for (vector<Id>::iterator iter = dst_list.begin();
 						iter != dst_list.end(); iter++)
 						if (*iter == eref.id()) {found = true; break;}
 					if (!found) continue;
@@ -1041,7 +1041,7 @@ void Shell::planardelay(const Conn& c, string source, string destination, vector
 						while (random > maxallowed ) random = p->getNextSample();
 						if (absoluterandom)
 							{number += random;}
-						else 
+						else
 							{number += number*random;}
 					}
 					if (add){
@@ -1084,16 +1084,16 @@ void Shell::planarweight(const Conn& c, string source, string  destination, vect
 			p = new Uniform(-scale, scale);
 			maxallowed = scale;
 			break;
-		case 2: 
+		case 2:
 			p = new Normal(0, stdev);
 			maxallowed = maxdev;
 			break;
-		case 3: 
+		case 3:
 			p = new Exponential(log(2)/mid);
 			maxallowed = max;
 			break;
 	}
-	
+
 	static const Cinfo* sgCinfo = Cinfo::find( "SpikeGen" );
 	static const Slot sgeventSlot = sgCinfo->getSlot( "event" );
 	static const Cinfo* rsCinfo = Cinfo::find( "RandomSpike" );
@@ -1107,10 +1107,10 @@ void Shell::planarweight(const Conn& c, string source, string  destination, vect
 		if (srcList[i]()->className() != "SpikeGen" && srcList[i]()->className() != "RandomSpike"){cout << "Shell::planarweight: Source is not SpikeGen or RandomSpike" << endl; return;}
 		vector< ConnTainer* >::const_iterator j;
 		const Msg* m;
-		if (srcList[i]()->className() == "SpikeGen"){ 
+		if (srcList[i]()->className() == "SpikeGen"){
 			m= srcList[ i ]()->msg( sgeventSlot.msg() );
 		}
-		else if (srcList[i]()->className() == "RandomSpike"){ 
+		else if (srcList[i]()->className() == "RandomSpike"){
 			m= srcList[ i ]()->msg( rseventSlot.msg() );
 		}
 		//srcList[i]->findFinfo("event")->outgoingConns(srcList[i], conn);
@@ -1125,7 +1125,7 @@ void Shell::planarweight(const Conn& c, string source, string  destination, vect
 				eref = k->target();
 				if (destination != ""){
 					bool found = false;
-					for (vector<Id>::iterator iter = dst_list.begin(); 
+					for (vector<Id>::iterator iter = dst_list.begin();
 						iter != dst_list.end(); iter++)
 						if (*iter == eref.id()) {found = true; break;}
 					if (!found) continue;
@@ -1145,7 +1145,7 @@ void Shell::planarweight(const Conn& c, string source, string  destination, vect
 						while (random > maxallowed ) random = p->getNextSample();
 						if (absoluterandom)
 							{number += random;}
-						else 
+						else
 							{number += number*random;}
 					}
 					lookupSet< double, unsigned int >( eref, "weight", number, l );
@@ -1165,7 +1165,7 @@ void Shell::getSynCount2(const Conn* c, Id dest){
 	unsigned int numSynapses;
 	bool b = get< unsigned int >( dst, "numSynapses", numSynapses );
 	if (!b) {
-		cout << "Shell:: syncount failed at" << dst->name() <<endl; 
+		cout << "Shell:: syncount failed at" << dst->name() <<endl;
 		return;
 	}
 	char e[10];
@@ -1199,7 +1199,7 @@ void Shell::addField( const Conn* c, Id id, string fieldname )
 	string ret;
 	Element* e = id();
 	//cout << e->name() << endl;
-	
+
 	// Appropriate off-node stuff here.
 	Finfo* f = new ExtFieldFinfo(fieldname, Ftype1<string>::global());
 	e->addExtFinfo( f );
@@ -1219,7 +1219,7 @@ void Shell::getField( const Conn* c, Id id, string field )
 		return;
 	string ret;
 	Eref eref(id(), id.index());
-	
+
 	// Appropriate off-node stuff here.
 
 	const Finfo* f = eref.e->findFinfo( field );
@@ -1243,14 +1243,14 @@ void testMess( Element* e, unsigned int numNodes )
 {
 /*
 	// Here we create a set of neutrals on all the slave nodes.
-	unsigned int startConn = e->connSrcBegin( rCreateSlot.msg() ) - 
+	unsigned int startConn = e->connSrcBegin( rCreateSlot.msg() ) -
 		e->lookupConn( 0 );
 	vector< Id > offNodeObjs( numNodes );
 	for ( unsigned int i = 1; i < numNodes; i++ ) {
 		offNodeObjs[ i ] = Id::makeIdOnNode( i );
-		sendTo4< string , string, Id, Id>( 
-			e, rCreateSlot, startConn + i - 1, 
-			"Neutral", "OffNodeCreateTest", 
+		sendTo4< string , string, Id, Id>(
+			e, rCreateSlot, startConn + i - 1,
+			"Neutral", "OffNodeCreateTest",
 			Id::str2Id( "0" ), offNodeObjs[ i ] );
 	}
 
@@ -1284,7 +1284,7 @@ void testMess( Element* e, unsigned int numNodes )
 	}
 	send1< int >( e, pollSlot, 1 );
 
-	send4< Id, string, Id, string >( e, rAddSlot, 
+	send4< Id, string, Id, string >( e, rAddSlot,
 		Id::str2Id( "5432" ), "srcfield", Id::str2Id( "9876" ),
 		"destfield" );
 
@@ -1333,8 +1333,8 @@ void Shell::recvGetFunc( const Conn* c, string value )
 	send1< string >( c->target(), getFieldSlot, value );
 }
 
-void Shell::slaveCreateFunc ( const Conn* c, 
-				string objtype, string objname, 
+void Shell::slaveCreateFunc ( const Conn* c,
+				string objtype, string objname,
 				Id parent, Id newobj )
 {
 	printNodeInfo( c );
@@ -1361,23 +1361,23 @@ void Shell::slaveCreateFunc ( const Conn* c,
 	*/
 }
 
-void Shell::addFunc ( const Conn* c, 
+void Shell::addFunc ( const Conn* c,
 		Id src, string srcField,
 		Id dest, string destField )
 {
 	printNodeInfo( c );
-	cout << "in slaveAddFunc :" << src << " " << srcField << 
+	cout << "in slaveAddFunc :" << src << " " << srcField <<
 		" " << dest << " " << destField << "\n";
 }
 
 // Static function
 /**
- * This copies the element tree from src to parent. If name arg is 
+ * This copies the element tree from src to parent. If name arg is
  * not empty, it renames the resultant object. It first verifies
  * that the planned new object has a different name from any of
  * the existing children of the prospective parent.
  */
-void Shell::copy( const Conn* c, 
+void Shell::copy( const Conn* c,
 				Id src, Id parent, string name )
 {
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
@@ -1387,7 +1387,7 @@ void Shell::copy( const Conn* c,
 	}
 }
 
-void Shell::copyIntoArray1( const Conn* c, 
+void Shell::copyIntoArray1( const Conn* c,
 				Id src, Id parent, string name, vector <double> parameter )
 {
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
@@ -1405,11 +1405,11 @@ void Shell::copyIntoArray1( const Conn* c,
 
 /**
  * This function copies the prototype element in form of an array.
- * It is similar to copy() only that it creates an array of copies 
+ * It is similar to copy() only that it creates an array of copies
  * elements
 */
 
-void Shell::copyIntoArray( const Conn* c, 
+void Shell::copyIntoArray( const Conn* c,
 				Id src, Id parent, string name, vector <double> parameter )
 {
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
@@ -1427,7 +1427,7 @@ void Shell::copyIntoArray( const Conn* c,
 
 // Static placeholder.
 /**
- * This moves the element tree from src to parent. If name arg is 
+ * This moves the element tree from src to parent. If name arg is
  * not empty, it renames the resultant object. It first verifies
  * that the planned new object has a different name from any of
  * the existing children of the prospective parent.
@@ -1442,8 +1442,8 @@ void Shell::move( const Conn* c, Id src, Id parent, string name )
 	Element* e = src();
 	Element* pa = parent();
 	if ( pa->isDescendant( e ) ) {
-		cout << "Error: move '" << e->name() << "' to '" << 
-				pa->name() << 
+		cout << "Error: move '" << e->name() << "' to '" <<
+				pa->name() <<
 				"': cannot move object onto itself or descendant\n";
 		return;
 	}
@@ -1458,8 +1458,8 @@ void Shell::move( const Conn* c, Id src, Id parent, string name )
 			return;
 		} else {
 			// Bad, we do have name duplication. This should not happen
-			// because this ought to mean that we are moving the 
-			// object as a child of the named object. 
+			// because this ought to mean that we are moving the
+			// object as a child of the named object.
 			assert( 0 );
 		}
 	} else { // Move the object onto a new parent.
@@ -1481,7 +1481,7 @@ void Shell::move( const Conn* c, Id src, Id parent, string name )
 		} else {
 			// Bad, we do have name duplication. GENESIS
 			// allows this but we will not.
-			cout << "Error: move '" << e->name() << "' to '" << 
+			cout << "Error: move '" << e->name() << "' to '" <<
 				pa->name() << "': same name child already exists.\n";
 			return;
 		}
@@ -1500,7 +1500,7 @@ void Shell::setField( const Conn* c, Id id, string field, string value )
 	assert( id.good() );
 	Element* e = id();
 	if ( !e ) {
-		cout << "Shell::setField:Error: Element not found: " 
+		cout << "Shell::setField:Error: Element not found: "
 			<< id << endl;
 		return;
 	}
@@ -1519,18 +1519,18 @@ void Shell::setField( const Conn* c, Id id, string field, string value )
 
 // Static function
 /**
- * This function handles request to set identical field value for a 
+ * This function handles request to set identical field value for a
  * vector of objects. Used for the GENESIS SET function.
  */
-void Shell::setVecField( const Conn* c, 
+void Shell::setVecField( const Conn* c,
 				vector< Id > elist, string field, string value )
 {
 	vector< Id >::iterator i;
 	for ( i = elist.begin(); i != elist.end(); i++ ) {
 		// Cannot use i->good() here because we might set fields on /root.
-		assert( !i->bad() ); 
+		assert( !i->bad() );
 		//Element* e = ( *i )();
-		Eref eref = i->eref(); 
+		Eref eref = i->eref();
 		// Appropriate off-node stuff here.
 		const Finfo* f = eref.e->findFinfo( field );
 		if ( f ) {
@@ -1547,13 +1547,13 @@ void Shell::setVecField( const Conn* c,
 /**
  * This function handles request to load a file into an Interpol object
  */
-void Shell::file2tab( const Conn& c, 
+void Shell::file2tab( const Conn& c,
 				Id id, string filename, unsigned int skiplines )
 {
 	assert( id.good() );
 	Element* e = id();
 	if ( !e ) {
-		cout << "Shell::file2tab:Error: Element not found: " 
+		cout << "Shell::file2tab:Error: Element not found: "
 			<< id << endl;
 		return;
 	}
@@ -1586,7 +1586,7 @@ void Shell::setClock( const Conn* c, int clockNo, double dt,
 	Id cj = sh->innerPath2eid( "/sched/cj", "/" );
 	Element* tick = 0;
 	if ( id.zero() || id.bad() ) {
-		tick = Neutral::create( 
+		tick = Neutral::create(
 						"Tick", TickName, cj, Id::scratchId() );
 	} else {
 		tick = id();
@@ -1600,7 +1600,7 @@ void Shell::setClock( const Conn* c, int clockNo, double dt,
 
 // static function
 /**
- * Sets up the path controlled by a given clock tick. The final 
+ * Sets up the path controlled by a given clock tick. The final
  * argument sets up the target finfo for the message. Usually this
  * is 'process' but some objects need multi-phase clocking so we
  * add the 'function' argument to specify what the target finfo is.
@@ -1665,7 +1665,7 @@ void Shell::useClock( const Conn* c,
 			}
 			*/
 		} else {
-			// This cannot be an 'assertion' error because the 
+			// This cannot be an 'assertion' error because the
 			// user might do a typo.
 			cout << "Error: Shell::useClock: unknown function " << function << " in " << i->path() << endl;
 		}
@@ -1711,7 +1711,7 @@ void Shell::digestPath( string& path )
 	} else {
 		string::size_type pos = path.find_first_of( '/' );
 		if ( pos == 1 ) {
-			if ( path[0] == '^' ) 
+			if ( path[0] == '^' )
 				path = recentElement_.path() + path.substr( 1 );
 			else if ( path[0] == '.' )
 				path = cwe_.path() + path.substr( 1 );
@@ -1734,7 +1734,7 @@ void Shell::digestPath( string& path )
 		path = path.substr( 1 );
 }
 // static function
-/** 
+/**
  * getWildcardList obtains a wildcard list specified by the path.
  * Normally the list is tested for uniqueness and sorted by pointer -
  * it becomes effectively random.
@@ -1758,7 +1758,7 @@ void Shell::getWildcardList( const Conn* c, string path, bool ordered )
 
 	//for (i = ret.begin(), j = list.begin(); j != list.end(); i++, j++ )
 	//		*i = ( *j )->id();
-	
+
 	//GenesisParserWrapper::recvElist(conn, elist)
 	sendBack1< vector< Id > >( c, elistSlot, list );
 }
@@ -1769,11 +1769,11 @@ void Shell::getWildcardList( const Conn* c, string path, bool ordered )
 Element* findCj()
 {
 	Id schedId;
-	lookupGet< Id, string >( 
+	lookupGet< Id, string >(
 		Element::root(), "lookupChild", schedId, "sched" );
 	assert( !schedId.bad() );
 	Id cjId;
-	lookupGet< Id, string >( 
+	lookupGet< Id, string >(
 		schedId(), "lookupChild", cjId, "cj" );
 	assert( !cjId.bad() );
 	return cjId();
@@ -1819,12 +1819,12 @@ void Shell::step( const Conn* c, double time )
 void Shell::requestClocks( const Conn* c )
 {
 	// Here we fill up the clock timings.
-	
+
 	Element* cj = findCj();
 	//RD assuming that cj is a simple element
 	// assert for this (assert is not fool proof)
 	assert(cj->numEntries() == 1);
-	
+
 	Conn* ct = cj->targets( "childSrc", 0 );// zero index for SE
 	vector< double > times;
 
@@ -1872,9 +1872,9 @@ void Shell::addMessage( const Conn* c,
 	bool ok = 0;
 	for ( i = src.begin(); i != src.end(); ++i )
 		for ( j = dest.begin(); j != dest.end(); ++j ){
-			if ( i->eref().add( srcField, j->eref(), destField, 
+			if ( i->eref().add( srcField, j->eref(), destField,
 				ConnTainer::Default ) )
-					ok = 1; 
+					ok = 1;
 				else
 					cout << "Error: Shell::addMessage failed\n";
 		}
@@ -1884,7 +1884,7 @@ void Shell::addMessage( const Conn* c,
 
 void Shell::addEdge( const Conn* c, Fid src, Fid dest, int connType )
 {
-	src.eref().add( src.fieldNum(), dest.eref(), 
+	src.eref().add( src.fieldNum(), dest.eref(),
 		dest.fieldNum(), connType );
 }
 
@@ -1893,7 +1893,7 @@ void Shell::deleteMessage( const Conn* c, Fid src, int msg )
 	src.eref().drop( src.fieldNum(), msg );
 }
 
-void Shell::deleteMessageByDest( const Conn* c, 
+void Shell::deleteMessageByDest( const Conn* c,
 	Id src, string srcField, Id dest, string destField )
 {
 }
@@ -1903,7 +1903,7 @@ void Shell::deleteEdge( const Conn* c, Fid src, Fid dest )
 }
 
 /**
- * listMessages builds a list of messages associated with the 
+ * listMessages builds a list of messages associated with the
  * specified element on the named field, and sends it back to
  * the calling parser. It extracts the
  * target element from the connections, and puts this into a
@@ -1956,14 +1956,14 @@ void Shell::readCell( const Conn* c, string filename, string cellpath,
 	vector< double > globalParms )
 {
 	ReadCell rc( globalParms );
-	
+
 	rc.read( filename, cellpath );
 }
 
 void Shell::setupAlpha( const Conn* c, Id gateId,
 				vector< double > parms )
 {
-	static const Finfo* setupAlphaFinfo = 
+	static const Finfo* setupAlphaFinfo =
 			Cinfo::find( "HHGate")->findFinfo( "setupAlpha" );
 	assert( !gateId.bad() );
 	Element* gate = gateId();
@@ -1978,7 +1978,7 @@ void Shell::setupAlpha( const Conn* c, Id gateId,
 void Shell::setupTau( const Conn* c, Id gateId,
 				vector< double > parms )
 {
-	static const Finfo* setupTauFinfo = 
+	static const Finfo* setupTauFinfo =
 			Cinfo::find( "HHGate")->findFinfo( "setupTau" );
 	assert( !gateId.bad() );
 	Element* gate = gateId();
@@ -1992,7 +1992,7 @@ void Shell::setupTau( const Conn* c, Id gateId,
 
 void Shell::tweakAlpha( const Conn* c, Id gateId )
 {
-	static const Finfo* tweakAlphaFinfo = 
+	static const Finfo* tweakAlphaFinfo =
 			Cinfo::find( "HHGate")->findFinfo( "tweakAlpha" );
 	assert( !gateId.bad() );
 	Element* gate = gateId();
@@ -2006,7 +2006,7 @@ void Shell::tweakAlpha( const Conn* c, Id gateId )
 
 void Shell::tweakTau( const Conn* c, Id gateId )
 {
-	static const Finfo* tweakTauFinfo = 
+	static const Finfo* tweakTauFinfo =
 			Cinfo::find( "HHGate")->findFinfo( "tweakTau" );
 	assert( !gateId.bad() );
 	Element* gate = gateId();
@@ -2021,7 +2021,7 @@ void Shell::tweakTau( const Conn* c, Id gateId )
 void Shell::setupGate( const Conn* c, Id gateId,
 				vector< double > parms )
 {
-	static const Finfo* setupGateFinfo = 
+	static const Finfo* setupGateFinfo =
 			Cinfo::find( "HHGate")->findFinfo( "setupGate" );
 	assert( !gateId.bad() );
 	Element* gate = gateId();
@@ -2039,7 +2039,7 @@ void Shell::setupGate( const Conn* c, Id gateId,
 /**
  * readDumpFile loads in a simulation from a GENESIS simdump file.
  * Works specially for reading in Kinetikit dump files.
- * In many old simulations the dump files are loaded in as regular script 
+ * In many old simulations the dump files are loaded in as regular script
  * files. Here it is the job of the GENESIS parser to detect that these
  * are simDump files and treat them accordingly.
  * In a few cases the simulation commands and the simdump file have been
@@ -2050,7 +2050,7 @@ void Shell::setupGate( const Conn* c, Id gateId,
 void Shell::readDumpFile( const Conn* c, string filename )
 {
 	SimDump localSid;
-	
+
 	localSid.read( filename );
 }
 
@@ -2171,9 +2171,9 @@ void Shell::closeFile( const Conn* c, string filename ){
 
 void Shell::listFiles( const Conn* c ){
 	string ret = "";
-	for ( size_t i = 0; i < filenames.size(); i++ ) 
+	for ( size_t i = 0; i < filenames.size(); i++ )
 		ret = ret + filenames[i] + "\n";
-	sendBack1< string >( c, getFieldSlot, ret );	
+	sendBack1< string >( c, getFieldSlot, ret );
 }
 
 
@@ -2188,7 +2188,7 @@ void Shell::readFile( const Conn* c, string filename, bool linemode ){
 		if (linemode){
 			fgets( str, 1000, filehandles[i] );
 		}
-		else 
+		else
 			fscanf( filehandles[i], "%s", str);
 		string ret = str;
 		if (ret[ ret.size() -1 ] == '\n' && !linemode)
@@ -2211,7 +2211,7 @@ void Shell::readFile( const Conn* c, string filename, bool linemode ){
  * Creates a child element with the specified id, and schedules it.
  * Regular function.
  */
-bool Shell::create( const string& type, const string& name, 
+bool Shell::create( const string& type, const string& name,
 		Id parent, Id id )
 {
 	//Element* p = parent();
@@ -2224,16 +2224,16 @@ bool Shell::create( const string& type, const string& name,
 }
 
 // Regular function
-bool Shell::createArray( const string& type, const string& name, 
+bool Shell::createArray( const string& type, const string& name,
 		Id parent, Id id, int n )
-{	
+{
 	Element* child = Neutral::createArray( type, name, parent, id, n );
 	if ( child ) {
 		recentElement_ = child->id();
 		return 1;
 	}
 	return 0;
-	
+
 	/*const Cinfo* c = Cinfo::find( type );
 	Element* p = parent();
 	if ( !p ) {
@@ -2346,7 +2346,7 @@ void testShell()
 	ASSERT( vs[1] == "b", "separate string" );
 	ASSERT( vs[2] == "ghij", "separate string" );
 	ASSERT( vs[3] == "k", "separate string" );
-	
+
 	Shell sh;
 
 	/////////////////////////////////////////
@@ -2473,7 +2473,7 @@ void testShell()
 	path = "../rumbelow";
 	sh.digestPath( path );
 	ASSERT( path == "/rumbelow", "path == /rumbelow" );
-	
+
 	sh.cwe_ = a2;
 	path = "x/y/z";
 	sh.digestPath( path );
@@ -2482,7 +2482,7 @@ void testShell()
 	path = "/absolute/x/y/z";
 	sh.digestPath( path );
 	ASSERT( path == "/absolute/x/y/z", "path == /absolute/x/y/z" );
-	
+
 	/////////////////////////////////////////
 	// Test destroy operation
 	/////////////////////////////////////////
@@ -2499,7 +2499,7 @@ void testShell()
 	Element* tab = Neutral::create( "Table", "t1", Element::root()->id(),
 		Id::scratchId() );
 	static const double EPSILON = 1.0e-9;
-	static double values[] = 
+	static double values[] =
 		{ 1, 1.0628, 1.1253, 1.1874, 1.2487, 1.309,
 			1.3681, 1.4258, 1.4817, 1.5358, 1.5878 };
 	sh.innerLoadTab( "/t1 table 1 10 0 10		1 1.0628 1.1253 1.1874 1.2487 1.309 1.3681 1.4258 1.4817 1.5358 1.5878" );

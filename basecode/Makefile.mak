@@ -2,13 +2,15 @@ LOCAL_DIR := basecode
 
 LOCAL_SRCS := \
 	Element.cpp	\
+    Eref.cpp    \
 	Id.cpp	\
 	IdManager.cpp	\
-	Conn.cpp	\
+	Fid.cpp \
 	RecvFunc.cpp \
+	Ftype.cpp   \
+	Msg.cpp \
 	SimpleElement.cpp	\
 	ArrayElement.cpp	\
-	ArrayWrapperElement.cpp	\
 	Copy.cpp \
 	send.cpp \
 	SrcFinfo.cpp \
@@ -30,28 +32,25 @@ LOCAL_SRCS := \
 	SolveFinfo.cpp \
 	setget.cpp \
 	filecheck.cpp \
-	FunctionData.cpp \
 	ParallelDummy.cpp \
 	Class.cpp	\
+	FuncVec.cpp \
 
 LOCAL_HEADERS := \
 	header.h \
 	RecvFunc.h \
-	Conn.h \
 	Ftype.h \
-	FunctionData.h \
 	Finfo.h \
 	Element.h \
 	Id.h \
 	Class.h \
 	Element.h	\
+	Eref.h  \
 	Id.h	\
 	IdManager.h	\
-	Conn.h	\
 	RecvFunc.h \
 	SimpleElement.h	\
 	ArrayElement.h	\
-	ArrayWrapperElement.h	\
 	send.h \
 	SrcFinfo.h \
 	DestFinfo.h \
@@ -69,7 +68,6 @@ LOCAL_HEADERS := \
 	SolveFinfo.h \
 	setget.h \
 	filecheck.h \
-	FunctionData.h \
 	Class.h	\
 
 SOURCES += $(addprefix $(LOCAL_DIR)$/, $(LOCAL_SRCS))

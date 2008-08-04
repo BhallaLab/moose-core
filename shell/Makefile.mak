@@ -19,7 +19,16 @@ LOCAL_SRCS := \
 	Shell.cpp	\
 	ReadCell.cpp \
 	SimDump.cpp \
-	LoadTab.cpp 
+	LoadTab.cpp \
+
+
+$(LOCAL_DIR)$/Shell.o: $(LOCAL_DIR)$/Shell.h \
+    utility$/randnum$/Probability.h \
+    utility$/randnum$/Uniform.h \
+    utility$/randnum$/Exponential.h \
+    utility$/randnum$/Normal.h  \
+
+$(LOCAL_DIR)$/ReadCell.o: $(LOCAL_DIR)$/ReadCell.h $(LOCAL_DIR)$/Shell.h
 
 LOCAL_HEADERS :=  \
 	Shell.h	\
