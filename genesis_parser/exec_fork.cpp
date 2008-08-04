@@ -8,9 +8,6 @@
 #include <math.h>
 #include <signal.h>
 #include <string.h>
-#include <unistd.h>
-
-#include <sys/wait.h>
 // #include "system_deps.h"
 
 extern int debug;
@@ -21,9 +18,10 @@ void Beep(){
 
 int ExecFork( int argc, char** argv)
 {
-#ifdef WINDOWS
-  return -1;
-#else
+#if defined(unix) || defined(__unix__) || defined(__unix)
+#include <unistd.h>
+#include <sys/wait.h>
+
 int pid;
 int status;
 char	*newargv[4];
@@ -50,11 +48,11 @@ int	i;
     if(pid == -1){
 	printf("run: fork unsuccessful in ExecFork() for %s\n",string);
 	_exit(0);
-    } else 
+    } else
     if(pid ==0){
 	/*
 	** pid = 0 indicates that this is the child resulting
-	** from the fork so execute the program 
+	** from the fork so execute the program
 	** which overlays the current process and therefore
 	** does not return
 	*/
@@ -77,5 +75,8 @@ int	i;
 	// printf("child process %d done. Status = %d\n", pid, status);
     // }
     return(status);
-#endif // WINDOWS
+
+#else
+  return -1; // not a unix system - do nothing
+#endif // unix
 }
