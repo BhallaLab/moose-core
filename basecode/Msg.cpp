@@ -396,7 +396,7 @@ void Msg::dropRemote()
 	}
 	// STL magic here. Gag me with an ANSI committee.
 	// The idea is to first shuffle all the zero c_ entries to the end.
-	i = remove_if( c_.begin(), c_.end(), bind2nd( equal_to< ConnTainer* >(), 0 ) );
+	i = remove_if( c_.begin(), c_.end(), bind2nd( equal_to< ConnTainer* >(), (ConnTainer *)NULL ) );
 	// Then we get rid of them.
 	c_.erase( i, c_.end() );
 }
@@ -426,7 +426,7 @@ void Msg::dropDestRemote( vector< ConnTainer* >& ctv  )
 	// Note that this cleanup is not strictly necessary, as the
 	// eventual deletion will remove all these too. But it is
 	// cleaner to be done here than leave it to later.
-	k = remove_if ( ctv.begin(), ctv.end(), bind2nd( equal_to< ConnTainer* >(), 0 ) );
+	k = remove_if ( ctv.begin(), ctv.end(), bind2nd( equal_to< ConnTainer* >(), (ConnTainer*)0 ) );
 	ctv.erase( k, ctv.end() );
 }
 
