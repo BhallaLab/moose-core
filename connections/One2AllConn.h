@@ -50,7 +50,7 @@ class One2AllConnTainer: public ConnTainer
 		 * eIndex, on this ConnTainer.
 		 */
 		unsigned int numDest( unsigned int eIndex ) const {
-			if ( eI1_ == eIndex );
+			if ( eI1_ == eIndex )
 				return e2numEntries_;
 			return 0;
 		}
