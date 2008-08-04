@@ -27,11 +27,13 @@ LOCAL_SRCS := \
 	NeuroScan.cpp \
 	NeuroHub.cpp \
 	Cell.cpp	\
+	RateLookup.cpp	\
 	TestBiophysics.cpp	\
 	BinSynchan.cpp	\
 	StochSynchan.cpp	\
 	PulseGen.cpp		\
 	RandomSpike.cpp		\
+	script_out.cpp
 
 $(LOCAL_DIR)$/Compartment.o: $(LOCAL_DIR)$/Compartment.h basecode$/Ftype2.h
 $(LOCAL_DIR)$/SymCompartment.o: $(LOCAL_DIR)$/Compartment.h $(LOCAL_DIR)$/SymCompartment.h basecode$/Ftype2.h

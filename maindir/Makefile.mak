@@ -3,10 +3,8 @@ LOCAL_DIR := maindir
 LOCAL_SRCS := \
 	   main.cpp	\
 	   init.cpp	\
-	   nonblock.cpp
-	   
-#nonblock.cpp	\
-
+	   nonblock.cpp \
+       mpiSetup.cpp
 
 LOCAL_HEADERS := \
 	      init.h	\

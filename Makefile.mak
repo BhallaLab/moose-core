@@ -8,11 +8,11 @@ LD = ld
 OBJDIR=bin
 
 SOURCES :=
-HEADERS := 
+HEADERS :=
 OBJECTS = $(subst .cpp,.o,$(SOURCES))
 DEPENDENCIES = $(subst .cpp,.d,$(SOURCES))
-EXTRA_CLEAN := 
-INCLUDE_DIRS := . basecode external$(/)include utility utility$(/)randnum element builtins biophysics kinetics scheduling shell genesis_parser maindir example
+EXTRA_CLEAN :=
+INCLUDE_DIRS := . basecode connections external$(/)include utility utility$(/)randnum element builtins biophysics kinetics scheduling shell genesis_parser maindir example
 CXXFLAGS += $(addprefix -I,$(INCLUDE_DIRS)) -DYYMALLOC -DYYFREE -DYYSTYPE_IS_DECLARED -DUSE_GENESIS_PARSER -DWINDOWS -DDO_UNIT_TESTS
 
 VPATH = $(INCLUDE_DIRS)
@@ -24,6 +24,8 @@ all:
 include maindir$(/)Makefile.mak
 
 include basecode$(/)Makefile.mak
+
+include connections$(/)Makefile.mak
 
 include utility$(/)Makefile.mak
 
@@ -55,7 +57,15 @@ all: moose
 moose: $(OBJECTS) $(DEPENDENCIES)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS)
 
-# .PHONY: OBJLIBS			
+
+pymoose: CFLAGS += -fPIC
+pymoose: SUBDIR += pymoose
+pymoose:
+    include pymoose$(/)Makefile.mak
+
+pymoose: $(OBJECTS) $(DEPENDENCIES)
+
+# .PHONY: OBJLIBS
 
 # OBJLIBS: $(OBJLIBS)
 
@@ -63,7 +73,7 @@ moose: $(OBJECTS) $(DEPENDENCIES)
 
 clean:
 	$(RM) $(OBJECTS) $(OBJLIBS) $(DEPENDENCIES) $(EXTRA_CLEAN)
-	
+
 ifneq ($(MAKECMDGOALS),clean)
 include $(DEPENDENCIES)
 endif
