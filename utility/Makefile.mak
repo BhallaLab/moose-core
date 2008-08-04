@@ -5,16 +5,17 @@ LOCAL_SRCS := \
 	PathUtility.cpp	\
 	StringUtil.cpp	\
 	Property.cpp	\
-
+    SparseMatrix.cpp\
 
 # the line below are for easy inclusion of libxml++
-#CFLAGS += $(shell pkg-config libxml++-2.6 --cflags) 
+#CFLAGS += $(shell pkg-config libxml++-2.6 --cflags)
 
 LOCAL_HEADERS := \
 	ArgParser.h	\
 	PathUtility.h	\
 	Property.h	\
 	StringUtil.h	\
+	SparseMatrix.h  \
 	utility.h
 
 SOURCES += $(addprefix $(LOCAL_DIR)/, $(LOCAL_SRCS))
