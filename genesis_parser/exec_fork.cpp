@@ -9,7 +9,10 @@
 #include <signal.h>
 #include <string.h>
 // #include "system_deps.h"
-
+#if defined(unix) || defined(__unix__) || defined(__unix)
+#include <unistd.h>
+#include <sys/wait.h>
+#endif
 extern int debug;
 
 void Beep(){
@@ -19,9 +22,6 @@ void Beep(){
 int ExecFork( int argc, char** argv)
 {
 #if defined(unix) || defined(__unix__) || defined(__unix)
-#include <unistd.h>
-#include <sys/wait.h>
-
 int pid;
 int status;
 char	*newargv[4];
