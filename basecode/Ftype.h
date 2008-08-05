@@ -10,6 +10,7 @@
 #ifndef _FTYPE_H
 #define _FTYPE_H
 
+#include <typeinfo>
 class FuncVec;
 
 using namespace std;
