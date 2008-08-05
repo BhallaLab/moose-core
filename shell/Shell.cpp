@@ -983,8 +983,6 @@ void Shell::planardelay(const Conn& c, string source, string destination, vector
 			break;
 		case 3:
 			p = new Exponential(log(2.0)/mid);
-		case 3:
-			p = new Exponential(log(2.0)/mid);
 			maxallowed = max;
 			break;
 	}
