@@ -982,7 +982,9 @@ void Shell::planardelay(const Conn& c, string source, string destination, vector
 			maxallowed = maxdev;
 			break;
 		case 3:
-			p = new Exponential(log(2)/mid);
+			p = new Exponential(log(2.0)/mid);
+		case 3:
+			p = new Exponential(log(2.0)/mid);
 			maxallowed = max;
 			break;
 	}
@@ -1089,7 +1091,7 @@ void Shell::planarweight(const Conn& c, string source, string  destination, vect
 			maxallowed = maxdev;
 			break;
 		case 3:
-			p = new Exponential(log(2)/mid);
+			p = new Exponential(log(2.0)/mid);
 			maxallowed = max;
 			break;
 	}

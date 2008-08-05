@@ -8,15 +8,17 @@
 **********************************************************************/
 
 #include "header.h"
+#include "Cinfo.h"
 #include "SimpleConn.h"
 #include "One2AllConn.h"
 #include "../utility/SparseMatrix.h"
 #include "Many2ManyConn.h"
 // #include "One2OneMapConn.h"
 #include "Msg.h"
+#include <functional>
 
-ConnTainer* findExistingConnTainer( Eref src, Eref dest, 
-	int srcMsg, int destMsg, 
+ConnTainer* findExistingConnTainer( Eref src, Eref dest,
+	int srcMsg, int destMsg,
 	int srcFuncId, unsigned int destFuncId,
 	unsigned int connTainerOption );
 
@@ -27,7 +29,7 @@ Msg::Msg()
 {;}
 
 /**
- * Originally the ~Msg performed a dropAll. However, every time we 
+ * Originally the ~Msg performed a dropAll. However, every time we
  * resize the Msg vector we delete and recreate messages, so this is
  * wrong. Instead we need to do the dropAll explicitly when the object
  * is being deleted, but not when the individual msg is.
@@ -35,7 +37,7 @@ Msg::Msg()
 Msg::~Msg()
 { ; }
 
-bool Msg::assignMsgByFuncId( 
+bool Msg::assignMsgByFuncId(
 	Element* e, unsigned int funcId, ConnTainer* ct )
 {
 	if ( fv_->id() == 0 )
@@ -53,7 +55,7 @@ bool Msg::assignMsgByFuncId(
 			return 0;
 		return ( m->assignMsgByFuncId( e, funcId, ct ) );
 	}
-	
+
 	// No matching slot, so make a new one.
 	// Note that the addNextMsg function may invalidate 'this'
 	// because it resizes the Element::msg_ vector. So don't access
@@ -78,7 +80,7 @@ Msg* Msg::matchByFuncId( Element* e, unsigned int funcId )
 {
 	if ( funcId == fv_->id() )
 		return this;
-	if ( funcId == 0 ) 
+	if ( funcId == 0 )
 		return 0;
 	if ( next_ == 0 )
 		return 0;
@@ -89,14 +91,14 @@ Msg* Msg::matchByFuncId( Element* e, unsigned int funcId )
 
 /**
  * Adds a new message either by finding an existing ConnTainer that
- * matches, and inserting the eIndices in that, or by creating a new 
- * Conntainer. Later may also want to change one ConnTainer type to 
+ * matches, and inserting the eIndices in that, or by creating a new
+ * Conntainer. Later may also want to change one ConnTainer type to
  * another.
  *
  * Returns true on success.
  */
 
-bool Msg::add( Eref src, Eref dest, 
+bool Msg::add( Eref src, Eref dest,
      int srcMsg, int destMsg,
      unsigned int srcIndex, unsigned int destIndex,
 	 unsigned int srcFuncId, unsigned int destFuncId,
@@ -104,7 +106,7 @@ bool Msg::add( Eref src, Eref dest,
 {
 	if ( srcMsg < 0 )
 		return 0;
-	
+
 	// Start out by looking for matches among existing Msgs.
 	// This is relevant only if there are possible 'fat' edges, that is,
 	// array messages.
@@ -119,11 +121,11 @@ bool Msg::add( Eref src, Eref dest,
 
 	// Give up and generate a new ConnTainer.
 
-	ct = selectConnTainer( src, dest, 
+	ct = selectConnTainer( src, dest,
 		srcMsg, destMsg,
 		srcIndex, destIndex,
 		connTainerOption );
-	
+
 	return add( ct, srcFuncId, destFuncId );
 }
 
@@ -140,7 +142,7 @@ bool Msg::add( ConnTainer* ct,
 	// msg, even if they are handling pure dests.
 	if ( funcId1 == 0 && ct->msg2() < 0 ) { // a destOnly msg, terminating in destMsg_.
 		// Look for, and if necessary create the connTainer.
-		vector< ConnTainer* >* dct = ct->e2()->getDest( ct->msg2() ); 
+		vector< ConnTainer* >* dct = ct->e2()->getDest( ct->msg2() );
 		assert( dct != 0 );
 		bool ret = m1->assignMsgByFuncId( ct->e1(), funcId2, ct );
 		assert( ret );
@@ -183,7 +185,7 @@ bool Msg::add( ConnTainer* ct,
 	// msg, even if they are handling pure dests.
 	if ( funcId1 == 0 && ct->msg2() < 0 ) { // a destOnly msg, terminating in destMsg_.
 		// Look for, and if necessary create the connTainer.
-		vector< ConnTainer* >* dct = ct->e2()->getDest( ct->msg2() ); 
+		vector< ConnTainer* >* dct = ct->e2()->getDest( ct->msg2() );
 		assert( dct != 0 );
 		bool ret = m1->assignMsgByFuncId( ct->e1(), funcId2, ct );
 		assert( ret );
@@ -212,12 +214,12 @@ bool Msg::add( ConnTainer* ct,
  * If the element is to survive, only then it goes through the bother
  * of erasing.
  *
- * Note that this does not do garbage collection if a 'next' Msg is 
+ * Note that this does not do garbage collection if a 'next' Msg is
  * emptied. Something to think about, much later.
  */
 bool Msg::innerDrop( const ConnTainer* doomed )
 {
-	vector< ConnTainer* >::iterator pos = 
+	vector< ConnTainer* >::iterator pos =
 		find( c_.begin(), c_.end(), doomed );
 	if ( pos != c_.end() ) {
 		c_.erase( pos );
@@ -228,12 +230,12 @@ bool Msg::innerDrop( const ConnTainer* doomed )
 		else
 			return doomed->e2()->varMsg( next_ )->innerDrop( doomed );
 	}
-	cout << "Msg::drop( const ConnTainer* doomed ): can't find doomed\n"; 
+	cout << "Msg::drop( const ConnTainer* doomed ): can't find doomed\n";
 	return 0;
 }
 
 /**
- * Utility function for dropping target, whether it is 
+ * Utility function for dropping target, whether it is
  * on a pure dest or another Msg.
  * Does not clear the ConnTainer.
  * NOT the primary call to drop a message.
@@ -263,7 +265,7 @@ bool Msg::innerDrop( Element* remoteElm, int remoteMsgNum,
 
 /**
  * This variant of drop initiates the removal of a specific ConnTainer,
- * identified by its index within the Msg. 
+ * identified by its index within the Msg.
  * Clearly, this cannot be called from a pure dest.
  */
 bool Msg::drop( Element* e, unsigned int doomed )
@@ -292,7 +294,7 @@ bool Msg::drop( Element* e, unsigned int doomed )
 			return e->varMsg( next_ )->drop( e, doomed - c_.size() );
 	}
 	// No, the conn doesn't exist at all.
-	cout << "Msg::drop( unsigned int doomed ): doomed outside range\n"; 
+	cout << "Msg::drop( unsigned int doomed ): doomed outside range\n";
 	return 0;
 }
 
@@ -304,7 +306,7 @@ bool Msg::drop( Element* e, unsigned int doomed )
 bool Msg::drop( Element* e, const ConnTainer* doomed )
 {
 	vector< ConnTainer * >::iterator pos;
-	pos = find( c_.begin(), c_.end(), doomed );
+	pos = find ( c_.begin(), c_.end(), doomed );
 	if ( pos != c_.end() ) {
 		int remoteMsgNum;
 		Element* remoteElm;
@@ -328,7 +330,7 @@ bool Msg::drop( Element* e, const ConnTainer* doomed )
 			return e->varMsg( next_ )->drop( e, doomed );
 	}
 	// No, the conn doesn't exist at all.
-	cout << "Msg::drop( ConnTainer* doomed ): doomed not on Msg.\n"; 
+	cout << "Msg::drop( ConnTainer* doomed ): doomed not on Msg.\n";
 	return 0;
 }
 
@@ -353,7 +355,7 @@ void Msg::dropAll( Element* e )
 		if ( ret )
 			delete( *i );
 		else
-			cout << "Error: Msg::dropAll(): remoteMsg failed to drop\n"; 
+			cout << "Error: Msg::dropAll(): remoteMsg failed to drop\n";
 	}
 	assert ( next_ < e->numMsg() );
 	if ( next_ )
@@ -368,7 +370,7 @@ void Msg::dropAll( Element* e )
  * Msg. Used when
  * dropAll cleans up all messages to targets outside tree being deleted.
  * The objects within the tree have their 'isMarkedForDeletion' flag set.
- * We don't need to worry about 'next' here because it is called 
+ * We don't need to worry about 'next' here because it is called
  * sequentially for every single entry in the msg_ vector
  */
 void Msg::dropRemote()
@@ -396,7 +398,7 @@ void Msg::dropRemote()
 	}
 	// STL magic here. Gag me with an ANSI committee.
 	// The idea is to first shuffle all the zero c_ entries to the end.
-	i = remove_if( c_.begin(), c_.end(), bind2nd( equal_to< ConnTainer* >(), (ConnTainer *)NULL ) );
+	i = remove_if( c_.begin(), c_.end(), bind2nd( equal_to< ConnTainer* >(), static_cast< ConnTainer* >(0) ) );
 	// Then we get rid of them.
 	c_.erase( i, c_.end() );
 }
@@ -426,7 +428,7 @@ void Msg::dropDestRemote( vector< ConnTainer* >& ctv  )
 	// Note that this cleanup is not strictly necessary, as the
 	// eventual deletion will remove all these too. But it is
 	// cleaner to be done here than leave it to later.
-	k = remove_if ( ctv.begin(), ctv.end(), bind2nd( equal_to< ConnTainer* >(), (ConnTainer*)0 ) );
+	k = remove_if ( ctv.begin(), ctv.end(), bind2nd( equal_to< ConnTainer* >(), static_cast< ConnTainer*> (0) ) );
 	ctv.erase( k, ctv.end() );
 }
 
@@ -551,8 +553,8 @@ bool Msg::copy( const ConnTainer* c, Element* e1, Element* e2, bool isArray ) co
 }
 
 
-ConnTainer* findExistingConnTainer( Eref src, Eref dest, 
-	int srcMsg, int destMsg, 
+ConnTainer* findExistingConnTainer( Eref src, Eref dest,
+	int srcMsg, int destMsg,
 	int srcFuncId, unsigned int destFuncId,
 	unsigned int connTainerOption )
 {
@@ -563,7 +565,7 @@ ConnTainer* findExistingConnTainer( Eref src, Eref dest,
 			return 0;
 		vector< ConnTainer* >::iterator i;
 		for ( i = m->varBegin(); i != m->varEnd(); i++ ) {
-			if ( (*i)->e2() == dest.e && (*i)->msg2() == destMsg && 
+			if ( (*i)->e2() == dest.e && (*i)->msg2() == destMsg &&
 				(*i)->option() == connTainerOption )
 				return *i;
 		}
