@@ -18,7 +18,11 @@
 
 TraverseMsgConn::TraverseMsgConn( const Msg* m, const Element* e,
 	unsigned int eIndex )
-	: msg_( m ), e_( e ), eIndex_( eIndex ), c_( 0 ), cti_( (vector <ConnTainer*>::const_iterator )0 )
+	: msg_( m ), 
+	e_( e ), 
+	eIndex_( eIndex ), 
+	c_( 0 )
+	//, cti_( 0 )
 {
 	// Advance till we get to a 'good' conn, or to the end.
 	for ( mi_ = msg_; mi_; mi_ = mi_->next( e ) ) {

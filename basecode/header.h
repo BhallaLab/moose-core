@@ -40,7 +40,7 @@
 #include <iostream>
 
 // Used for INT_MAX and UINT_MAX, but may be done within the compiler
-// #include <limits.h> 
+// #include <limits.h>
 //
 #include <cassert>
 
@@ -75,7 +75,7 @@ class IdManager;
 #include "Element.h"
 
 #ifdef CRL_MPI
-	#define MAX_MPI_RECV_RECORD_SIZE 1500 
+	#define MAX_MPI_RECV_RECORD_SIZE 1500
 	#define VISLN_CHUNK_SIZE (MAX_MPI_RECV_RECORD_SIZE/10)
 	#define MAX_MPI_PROCESSES 1024
 #endif
