@@ -55,7 +55,7 @@ typedef struct _pn
     struct _pn  *pn_right;
   } ParseNode;
 
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+
 typedef union _yyvals
   {
     int     iconst;
@@ -64,7 +64,7 @@ typedef union _yyvals
     ParseNode   *pn;
   } YYSTYPE;
 #define YYSTYPE_IS_DECLARED 1
-#endif
+
 
 typedef struct _symtabent
   {
