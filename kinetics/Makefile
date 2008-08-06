@@ -46,7 +46,12 @@ HEADERS = \
 GSL_OBJ = GslIntegrator.o
 GSL_LIBS = -lgsl -lgslcblas
 GSL_FLAGS = -DUSE_GSL
+L64=-L/usr/lib64
+TYPE=$(shell arch)
 
+ifeq ($(TYPE),x86_64)
+GSL_LIBS += $(L64)
+endif
 # Smoldyn, written by Steven Andrews, provides a numerical engine for
 # 3-D single-particle simulations using Smoluchowsky dynamics. It is
 # licenced on a non-commercial license. Should be fine for academic use.
@@ -99,7 +104,7 @@ SmoldynHub.o:	KinSparseMatrix.h SmoldynHub.h Smoldyn/source/smolrun.h
 	$(CXX) $(CFLAGS) $(GSL_FLAGS) $(SMOLDYN_FLAGS) -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(GSL_LIBS) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS)
+	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(GSL_LIBS) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 
 
 clean:
 	-rm -f *.o $(TARGET) core core.*
