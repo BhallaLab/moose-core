@@ -1344,8 +1344,9 @@ void PyMooseContext::tweakTau( const Id& gateId)
 
 void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
 {
-    string argstr = xdivs + "," + mode;
-    send3< Id, string, string >( myId_(), setFieldSlot, table, "tabFill", argstr );
+    // THIS IS BAD! 
+//     string argstr = string(xdivs) + "," + string(mode);
+//     send3< Id, string, string >( myId_(), setFieldSlot, table, "tabFill", argstr );
 }
 
 

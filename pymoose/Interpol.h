@@ -1,6 +1,10 @@
 #ifndef _pymoose_Interpol_h
 #define _pymoose_Interpol_h
 #include "PyMooseBase.h"
+
+#include "Python.h"
+#include "numpy/arrayobject.h"
+
 namespace pymoose
 {
 
@@ -28,8 +32,8 @@ namespace pymoose
         void __set_xdivs(int xdivs);
         int __get_mode() const;
         void __set_mode(int mode);
-        int __get_calc_mode() const;
-        void __set_calc_mode(int calc_mode);
+//         int __get_calc_mode() const;
+//         void __set_calc_mode(int calc_mode);
         double __get_dx() const;
         void __set_dx(double dx);
         double __get_sy() const;
@@ -39,15 +43,16 @@ namespace pymoose
         void __setitem__( unsigned int index, double value );
         TableIterator* __iter__();
         int __len__();
-        void tabFill(int xdivs, int mode);
+    //     void tabFill(int xdivs, int mode);
     
-        double __get_lookupSrc() const;
-        void __set_lookupSrc(double lookupSrc);
-        double __get_lookup() const;
-        void __set_lookup(double lookup);
+//         double __get_lookupSrc() const;
+//         void __set_lookupSrc(double lookupSrc);
+//         double __get_lookup() const;
+//         void __set_lookup(double lookup);
         string dumpFile() const;
         void dumpFile(string fileName, bool append = false);
-    
+        PyObject* __array_struct__();
+        
     
       protected:
         // This constructor is for allowing derived type (Table) to
