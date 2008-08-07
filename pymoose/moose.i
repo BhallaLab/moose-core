@@ -120,16 +120,25 @@
 %attribute(pymoose::ClockJob, int, currentStep, __get_currentStep, __set_currentStep)
 %attribute(pymoose::ClockJob, double, start, __get_start, __set_start)
 %attribute(pymoose::ClockJob, int, step, __get_step, __set_step)
+/* Numpy interface for InterpolationTable */
+%extend pymoose::InterpolationTable{
+  %pythoncode {
+  __array_struct__ = property(__array_struct__,
+                                                 doc='Array protocol')
+  }
+} // end of extend
+	
 
+// WORK IN PROGRESS
+/**/
 %include "Interpol.h"
 %attribute(pymoose::InterpolationTable, double, xmin, __get_xmin, __set_xmin)
 %attribute(pymoose::InterpolationTable, double, xmax, __get_xmax, __set_xmax)
 %attribute(pymoose::InterpolationTable, int, xdivs, __get_xdivs, __set_xdivs)
 %attribute(pymoose::InterpolationTable, int, mode, __get_mode, __set_mode)
-%attribute(pymoose::InterpolationTable, int, calc_mode, __get_calc_mode, __set_calc_mode)
 %attribute(pymoose::InterpolationTable, double, dx, __get_dx, __set_dx)
 %attribute(pymoose::InterpolationTable, double, sy, __get_sy, __set_sy)
-%attribute(pymoose::InterpolationTable, double, lookup, __get_lookup, __set_lookup)
+
 %include "TableIterator.h"
 %extend pymoose::TableIterator
 {	%insert("python")%{
@@ -156,8 +165,8 @@
 %attribute(pymoose::Table, double, stepsize, __get_stepsize, __set_stepsize)
 %attribute(pymoose::Table, double, threshold, __get_threshold, __set_threshold)
 //%attribute(pymoose::Table, double, tableLookup, __get_tableLookup, __set_tableLookup)
-%attribute(pymoose::Table, double, outputSrc, __get_outputSrc, __set_outputSrc)
-%attribute(pymoose::Table, double, msgInput, __get_msgInput, __set_msgInput)
+//%attribute(pymoose::Table, double, outputSrc, __get_outputSrc, __set_outputSrc)
+//%attribute(pymoose::Table, double, msgInput, __get_msgInput, __set_msgInput)
 %attribute(pymoose::Table, double, sum, __get_sum, __set_sum)
 %attribute(pymoose::Table, double, prd, __get_prd, __set_prd)
 %include "SynChan.h"
