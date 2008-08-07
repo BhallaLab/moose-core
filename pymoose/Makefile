@@ -24,7 +24,7 @@
 ############################################################################
 
 TARGET = pymoose
-CXXFLAGS +=-g -DDO_UNIT_TESTS -DNDEBUG -fPIC
+CXXFLAGS +=-g -DDO_UNIT_TESTS -DNDEBUG -fPIC -DNUMPY -I/usr/include/python2.5 -I.. -I/usr/local/lib/python2.5/site-packages/numpy/core/include
 DYNAMIC_FLAGS=-shared 
 # The library location and flags for creating dll in Mac is different from Linux
 SYSTEM=$(shell (uname))
@@ -32,7 +32,7 @@ ifeq ($(SYSTEM),Darwin)
 	DYNAMIC_FLAGS=-bundle -flat_namespace -undefined suppress 
 endif
 
-INCLUDES=-I/usr/include/python2.5 -I..
+INCLUDES=-I/usr/include/python2.5 -I.. -I/usr/local/lib/python2.5/site-packages/numpy/core/include
 
 OBJFILES = ../basecode/basecode.o \
 	../element/element.o \
