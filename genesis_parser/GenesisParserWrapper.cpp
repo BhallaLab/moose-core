@@ -2228,6 +2228,30 @@ char** do_element_list( int argc, const char** const argv, Id s )
 //	return copyString( ret.c_str() );
 }
 /**
+   This function converts a single string into a list of strings using
+   space as delimiter
+*/
+char **do_arglist( int argc, const char ** const argv, Id s)
+{
+    if ( argc != 2 )
+    {
+        cout << "usage:: " << argv[0] << " list\n";
+        return NULLArgv();
+    }
+    string argument = argv[1];
+    vector<string> list;
+    parseString(argument, list, " \t\n");    
+    char ** ret = (char**) calloc(list.size()+1, sizeof(char*));
+    char ** ptr = ret;
+    
+    for ( vector <string>::iterator i = list.begin(); i != list.end(); ++i )
+    {
+        *ptr++ = copyString(i->c_str());
+    }
+    return ret; 
+}
+
+/**
  * Allocates and returns an array of char* for the element list
  * entries, just like the old GENESIS sim_list.c::do_construct_list
  * function. There too I did not know how the list was supposed to be
@@ -3747,6 +3771,8 @@ void GenesisParserWrapper::loadBuiltinCommands()
 			reinterpret_cast< slifunc >( do_element_list ), "char**" );
 	AddFunc( "element_list",
 			reinterpret_cast< slifunc >( do_element_list ), "char*" );
+        AddFunc( "arglist",
+                 reinterpret_cast< slifunc> ( do_arglist ), "char**" );        
 	AddFunc( "addtask", do_addtask, "void" );
 
 	AddFunc( "readcell", do_readcell, "void" );

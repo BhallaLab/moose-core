@@ -81,16 +81,16 @@ void InterpolationTable::__set_mode( int mode )
 {
     set < int > (id_(), "mode", mode);
 }
-int InterpolationTable::__get_calc_mode() const
-{
-    int calc_mode;
-    get < int > (id_(), "calc_mode",calc_mode);
-    return calc_mode;
-}
-void InterpolationTable::__set_calc_mode( int calc_mode )
-{
-    set < int > (id_(), "calc_mode", calc_mode);
-}
+// int InterpolationTable::__get_calc_mode() const
+// {
+//     int calc_mode;
+//     get < int > (id_(), "calc_mode",calc_mode);
+//     return calc_mode;
+// }
+// void InterpolationTable::__set_calc_mode( int calc_mode )
+// {
+//     set < int > (id_(), "calc_mode", calc_mode);
+// }
 double InterpolationTable::__get_dx() const
 {
     double dx;
@@ -131,26 +131,57 @@ int InterpolationTable::__len__()
     return __get_xdivs()+1;    
 }
 
-double InterpolationTable::__get_lookupSrc() const
+#include "numpy/noprefix.h"
+PyObject* InterpolationTable::__array_struct__()
 {
-    double lookupSrc;
-    get < double > (id_(), "lookupSrc",lookupSrc);
-    return lookupSrc;
+    PyArrayInterface* array = NULL;
+    int dim = this->__get_xdivs() + 1;
+    if ( dim > 1 )
+    {  
+        array = (PyArrayInterface*)PyArray_malloc(sizeof(PyArrayInterface));
+        array->two = 2;
+        array->nd = 1;
+        array->typekind = 'f';
+        array->itemsize = sizeof(double);
+        array->flags = (NPY_CONTIGUOUS | NPY_OWNDATA | NPY_ALIGNED | NPY_NOTSWAPPED); 
+        array->shape = (intp *)_pya_malloc(2*sizeof(intp));        
+        array->strides = array->shape + 1;
+        *(array->shape) = dim;
+        *(array->strides) = 1;
+        array->data = (char *)calloc(dim,sizeof(double));
+        vector <double> data = static_cast < Interpol*> (id_()->data())->getTableVector();
+//        get < vector <double> > (this->id_(), "tableVector", data); // obtain the vector of data from InterpolTable
+        
+        memcpy(&data[0], array->data, sizeof(double)*(data.size())); // copy data from table to array obj
+        for ( int i = 0; i < data.size(); ++i )
+        {
+            cout << data[i] << "\t" << (double)((double*)(array->data))[i] << endl;
+        }
+        
+        array->descr = 0;
+       
+    }
+    return PyCObject_FromVoidPtr(array, 0);
 }
-void InterpolationTable::__set_lookupSrc( double lookupSrc )
-{
-    set < double > (id_(), "lookupSrc", lookupSrc);
-}
-double InterpolationTable::__get_lookup() const
-{
-    double lookup;
-    get < double > (id_(), "lookup",lookup);
-    return lookup;
-}
-void InterpolationTable::__set_lookup( double lookup )
-{
-    set < double > (id_(), "lookup", lookup);
-}
+
+// this is invalid
+// double InterpolationTable::__get_lookupSrc() const
+// {
+//     double lookupSrc;
+//     get < double > (id_(), "lookupSrc",lookupSrc);
+//     return lookupSrc;
+// }
+// void InterpolationTable::__set_lookupSrc( double lookupSrc )
+// {
+//     set < double > (id_(), "lookupSrc", lookupSrc);
+// }
+// this is incorrect - lookup is not a valuefinfo - so cannot use it
+// double InterpolationTable::lookup(double index) const
+// {
+//     double lookup;
+//     get < double > (id_(), "lookup",lookup);
+//     return lookup;
+// }
 string InterpolationTable::dumpFile() const
 {
     string print;
@@ -172,10 +203,32 @@ void InterpolationTable::dumpFile( string fileName, bool append )
 
 /**
    What are the possible values for mode?
+   - THIS FUNCTION IS INVALID
  */
-void InterpolationTable::tabFill( int xdivs, int mode )
+// void InterpolationTable::tabFill( int xdivs, int mode )
+// {
+//     this->getContext()->tabFill(id_(), xdivs, mode);    
+// }
+
+#ifdef DO_UNIT_TESTS
+void testInterpolationTable(void)
 {
-    this->getContext()->tabFill(id_, xdivs, mode);    
+    InterpolationTable table("/interptbl");
+    double xmin = 0.0;
+    double xmax = 10.0;
+    int xdivs = 100;
+    
+    table.__set_xmin ( xmin );
+    assert (fabs(table.__get_xmin() - xmin) < 1e-6 );
+    
+    table.__set_xmax ( xmax );
+    assert (fabs(table.__get_xmax() - xmax) < 1e-6 );
+
+    table.__set_xdivs ( xdivs );
+    assert (table.__get_xdivs() == xdivs);
+    
 }
+
+#endif
 
 #endif
