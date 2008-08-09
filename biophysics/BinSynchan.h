@@ -127,5 +127,4 @@ class BinSynchan
     priority_queue< SynInfo > pendingEvents_;
 };
 
-    
 #endif
