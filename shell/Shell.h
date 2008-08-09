@@ -9,7 +9,7 @@
 **********************************************************************/
 #ifndef _SHELL_H
 #define _SHELL_H
-
+#include "Fid.h"
 // forward declaration
 class SimDump;
 
