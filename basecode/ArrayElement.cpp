@@ -719,12 +719,10 @@ void arrayElementInternalTest( unsigned int connOption )
 		ASSERT( sret && ret && ( output == i ), "Array kid assignment" );
 	}
 
-	for ( unsigned int i = 0 ; i < NUMKIDS; i++ ) {
-		if ( i > 0 ) {
-			ret = kids[i-1].eref().add( "outputSrc",
-				kids[i].eref(), "msgInput", connOption );
-			ASSERT( ret, "Array msg setup" );
-		}
+	for ( unsigned int i = 1 ; i < NUMKIDS; i++ ) {
+		ret = kids[i-1].eref().add( "outputSrc",
+			kids[i].eref(), "msgInput", connOption );
+		ASSERT( ret, "Array msg setup" );
 	}
 	for ( unsigned int i = 0 ; i < NUMKIDS - 1; i++ ) {
 		double output = i * i + 1.0;
