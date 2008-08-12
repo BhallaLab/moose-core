@@ -149,7 +149,7 @@ PyObject* InterpolationTable::__array_struct__()
         *(array->shape) = dim;
         *(array->strides) = 1;
         array->data = (char *)calloc(dim,sizeof(double));
-        vector <double> data = static_cast < Interpol*> (id_()->data())->getTableVector();
+        vector <double> data = static_cast < Interpol*> (id_()->data())->getTableVector(id_());
 //        get < vector <double> > (this->id_(), "tableVector", data); // obtain the vector of data from InterpolTable
         
         memcpy(&data[0], array->data, sizeof(double)*(data.size())); // copy data from table to array obj
