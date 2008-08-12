@@ -39,7 +39,14 @@ endif
 ifeq ($(OSTYPE),win32)
 PLATFORM=win32
 endif
-ifeq ($(OSTYPE),darwin)
+ifneq ($(PLATFORM),win32)
+	OSTYPE=$(shell uname)
+	ifeq ($(OSTYPE),Darwin)
+		PLATFORM=mac
+	endif
+endif
+
+ifeq ($(OSTYPE),Darwin)
 PLATFORM=mac
 endif
 
@@ -102,7 +109,7 @@ endif
 # Libraries are defined below. For now we do not use threads.
 SUBLIBS = 
 #LIBS = 		-lm -lpthread
-LIBS = 		-lm 
+LIBS = 		-lm -lgsl -lgslcblas
 #use this to use readline library
 #LIBS = 		-lm -lreadline
 
@@ -142,6 +149,7 @@ export LD
 export LIBS
 
 moose: libs $(OBJLIBS) $(PARALLEL_LIB)
+	@echo "Platform is: $(PLATFORM) but OSTYPE is $(OSTYPE)"
 	$(CXX) $(CFLAGS) $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o moose
 	@echo "Moose compilation finished"
 
