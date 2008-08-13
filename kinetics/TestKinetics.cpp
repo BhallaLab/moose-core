@@ -29,6 +29,7 @@ void testKintegrator();
 void testGslIntegrator();
 #endif // USE_GSL
 
+
 void testKinetics()
 {
 	testMolecule();
@@ -41,7 +42,6 @@ void testKinetics()
 	testGslIntegrator();
 #endif // USE_GSL
 }
-
 
 //////////////////////////////////////////////////////////////////
 // Here we set up a small reaction system for testing with the
@@ -561,7 +561,10 @@ void testKintegrator()
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv.h>
 #include "GslIntegrator.h"
-#include <sys/time.h>
+#ifndef WIN32
+	#include <sys/time.h>
+#endif
+
 #include <time.h>
 
 static const unsigned int NUM_COMPT = 21;
@@ -570,6 +573,7 @@ void doGslRun( const string& method, Element* integ, Element* stoich,
 
 void testGslIntegrator()
 {
+#ifndef WIN32
 	cout << "\nTesting GslIintegrator" << flush;
 
 	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(),
@@ -666,7 +670,7 @@ void testGslIntegrator()
 	struct timeval tv1;
 	struct timeval tv2;
 	gettimeofday( &tv1, 0 );
-        
+	    
 	doGslRun( "rk2", integ, stoich, &ct, m, 1.0e-6 );
 	doGslRun( "rk4", integ, stoich, &ct, m, 1.0e-4 );
 	doGslRun( "rk5", integ, stoich, &ct, m, 1.0e-6 );
@@ -680,6 +684,7 @@ void testGslIntegrator()
 	doGslRun( "rk2imp", integ, stoich, &ct, m, 1.0e-6 );
 	doGslRun( "gear1", integ, stoich, &ct, m, 1.0e-6 );
 	doGslRun( "gear2", integ, stoich, &ct, m, 2.0e-4 );
+	
 	gettimeofday( &tv2, 0 );
 	unsigned long time = tv2.tv_sec - tv1.tv_sec;
 	time *= 1000000;
@@ -692,11 +697,13 @@ void testGslIntegrator()
 	set( hub, "destroy" );
 	set( stoich, "destroy" );
 	set( n, "destroy" );
+#endif
 }
 
 void doGslRun( const string& method, Element* integ, Element* stoich,
 	const Conn* ct, vector< Element* >& m, double accuracy )
 {
+#ifndef WIN32
 	double EPSILON = accuracy * 50.0;
 	const double RUNTIME = 500.0;
 	SetConn ci( integ, 0 );
@@ -735,7 +742,7 @@ void doGslRun( const string& method, Element* integ, Element* stoich,
 	// static_cast< Stoich* >( stoich->data() )->runStats();
 	// set< string >( table, "print", "kinteg.plot" );
 	ASSERT ( tot < EPSILON, "Diffusion between source and sink by GslIntegrator");
-
+#endif
 }
 
 #endif // USE_GSL
