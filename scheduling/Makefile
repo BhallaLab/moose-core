@@ -29,7 +29,7 @@ Tick.o:	Tick.h
 ParTick.o:	Tick.h ParTick.h
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -I../basecode $< -c
+	$(CXX) $(CFLAGS) -I../basecode -I.. $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
