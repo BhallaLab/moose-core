@@ -47,7 +47,7 @@ GSL_OBJ = GslIntegrator.o
 GSL_LIBS = -lgsl -lgslcblas
 GSL_FLAGS = -DUSE_GSL
 L64=-L/usr/lib64
-TYPE=$(shell arch)
+TYPE=$(shell uname -m)
 
 ifeq ($(TYPE),x86_64)
 GSL_LIBS += $(L64)
@@ -101,7 +101,7 @@ Particle.o:		SmoldynHub.h Particle.h Molecule.h
 SmoldynHub.o:	KinSparseMatrix.h SmoldynHub.h Smoldyn/source/smolrun.h
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $(GSL_FLAGS) $(SMOLDYN_FLAGS) -I../basecode $< -c
+	$(CXX) $(CFLAGS) $(GSL_FLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(GSL_LIBS) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 

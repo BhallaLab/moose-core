@@ -29,7 +29,6 @@ void testKintegrator();
 void testGslIntegrator();
 #endif // USE_GSL
 
-
 void testKinetics()
 {
 	testMolecule();
