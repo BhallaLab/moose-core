@@ -43,31 +43,28 @@ HEADERS = \
 # under the GPL, so only GPL-compliant uses of MOOSE will be able to
 # use it. Should be fine for academic use.
 # Optional: Comment out the following three items if not using GSL
+ifdef ($(USE_GSL))
 GSL_OBJ = GslIntegrator.o
 GSL_LIBS = -lgsl -lgslcblas
 GSL_FLAGS = -DUSE_GSL
-L64=-L/usr/lib64
-TYPE=$(shell uname -m)
-
-ifeq ($(TYPE),x86_64)
-GSL_LIBS += $(L64)
 endif
+
 # Smoldyn, written by Steven Andrews, provides a numerical engine for
 # 3-D single-particle simulations using Smoluchowsky dynamics. It is
 # licenced on a non-commercial license. Should be fine for academic use.
 # Optional: Comment out the following three items if not using Smoldyn
-#SMOLDYN_OBJ = \
+ifdef ($(USE_SMOLDYN))
+SMOLDYN_OBJ = \
 	Particle.o \
 	SmoldynHub.o \
-
-
-#SMOLDYN_FLAGS = -DUSE_SMOLDYN
+SMOLDYN_FLAGS = -DUSE_SMOLDYN
 # This is a static lib version, does not need the lib_path
 #SMOLDYN_LIBS = /home/bhalla/genesis/SFmus/moose-g3/kinetics/Smoldyn/source/libsmoldyn.a
 
 # This version uses dynamic libs. Not yet confirmed to work.
 #SMOLDYN_LIB_PATH = -L/home/bhalla/genesis/SFmus/moose-g3/kinetics/Smoldyn/source
 #SMOLDYN_LIBS = libsmoldyn.so
+endif # !USE_SMOLDYN
 
 default: $(TARGET)
 
@@ -92,19 +89,21 @@ Kintegrator.o:	Kintegrator.h
 KineticManager.o:	KineticManager.h
 TestKinetics.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h Stoich.h KinSparseMatrix.h Makefile
 
+ifdef ($(USE_GSL))
 #Optional: Comment out the following two items if not using GSL.
 $(GSL_OBJ) : $(HEADERS)
 GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h KinSparseMatrix.h 
-
+endif # !USE_GSL
+ifdef ($(USE_SMOLDYN)
 $(SMOLDYN_OBJ) : $(HEADERS)
 Particle.o:		SmoldynHub.h Particle.h Molecule.h
 SmoldynHub.o:	KinSparseMatrix.h SmoldynHub.h Smoldyn/source/smolrun.h
-
+endif # !USE_SMOLDYN
 .cpp.o:
 	$(CXX) $(CFLAGS) $(GSL_FLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(GSL_LIBS) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 
+	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(LIBS) $(GSL_LIBS) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 
 
 clean:
 	-rm -f *.o $(TARGET) core core.*
