@@ -131,6 +131,8 @@ int InterpolationTable::__len__()
     return __get_xdivs()+1;    
 }
 
+#ifdef NUMPY // Only for NumPy support
+// TODO: work in progress
 #include "numpy/noprefix.h"
 PyObject* InterpolationTable::__array_struct__()
 {
@@ -163,25 +165,7 @@ PyObject* InterpolationTable::__array_struct__()
     }
     return PyCObject_FromVoidPtr(array, 0);
 }
-
-// this is invalid
-// double InterpolationTable::__get_lookupSrc() const
-// {
-//     double lookupSrc;
-//     get < double > (id_(), "lookupSrc",lookupSrc);
-//     return lookupSrc;
-// }
-// void InterpolationTable::__set_lookupSrc( double lookupSrc )
-// {
-//     set < double > (id_(), "lookupSrc", lookupSrc);
-// }
-// this is incorrect - lookup is not a valuefinfo - so cannot use it
-// double InterpolationTable::lookup(double index) const
-// {
-//     double lookup;
-//     get < double > (id_(), "lookup",lookup);
-//     return lookup;
-// }
+#endif // NUMPY
 string InterpolationTable::dumpFile() const
 {
     string print;
@@ -200,15 +184,6 @@ void InterpolationTable::dumpFile( string fileName, bool append )
         set < string > (id_(), "print", fileName);
     }    
 }
-
-/**
-   What are the possible values for mode?
-   - THIS FUNCTION IS INVALID
- */
-// void InterpolationTable::tabFill( int xdivs, int mode )
-// {
-//     this->getContext()->tabFill(id_(), xdivs, mode);    
-// }
 
 #ifdef DO_UNIT_TESTS
 void testInterpolationTable(void)
@@ -229,6 +204,7 @@ void testInterpolationTable(void)
     
 }
 
-#endif
+#endif // DO_UNIT_TESTS
 
 #endif
+

@@ -23,23 +23,24 @@
 #
 ############################################################################
 
-TARGET = pymoose
-CXXFLAGS +=-g -DDO_UNIT_TESTS -DNDEBUG -fPIC -DNUMPY -I/usr/include/python2.5 -I.. -I/usr/local/lib/python2.5/site-packages/numpy/core/include
-DYNAMIC_FLAGS=-shared 
+TARGET=pymoose
+CFLAGS+=-g -DDO_UNIT_TESTS -DNDEBUG -DNUMPY -I/usr/include/python2.5 -I.. -I/usr/local/lib/python2.5/site-packages/numpy/core/include
 # The library location and flags for creating dll in Mac is different from Linux
 SYSTEM=$(shell (uname))
 ifeq ($(SYSTEM),Darwin)
-	DYNAMIC_FLAGS=-bundle -flat_namespace -undefined suppress 
+	CFLAGS+=-bundle -flat_namespace -undefined suppress 
 endif
-
+CXXFLAGS=$(CFLAGS)
 INCLUDES=-I/usr/include/python2.5 -I.. -I/usr/local/lib/python2.5/site-packages/numpy/core/include
-
+LDFLAGS=-lm -lpython2.5 
 OBJFILES = ../basecode/basecode.o \
 	../element/element.o \
 	../shell/shell.o \
 	../builtins/builtins.o \
 	../biophysics/biophysics.o \
 	../scheduling/scheduling.o \
+	../maindir/init.o	\
+	../connections/connections.o \
 	../utility/utility.o	\
 	../utility/randnum/randnum.o	\
 	../maindir/init.o	\
@@ -117,19 +118,19 @@ HEADERS = PyMooseUtil.h \
 	NormalRng.h	\
 	PoissonRng.h	\
 	UniformRng.h	\
-	../utility/randnum/randnum.h	\
-	../utility/randnum/Probability.h	\
-	../utility/randnum/Binomial.h	\
-	../utility/randnum/Exponential.h	\
-	../utility/randnum/Gamma.h	\
-	../utility/randnum/Normal.h	\
-	../utility/randnum/Poisson.h	\
+	../randnum/randnum.h	\
+	../randnum/Probability.h	\
+	../randnum/Binomial.h	\
+	../randnum/Exponential.h	\
+	../randnum/Gamma.h	\
+	../randnum/Normal.h	\
+	../randnum/Poisson.h	\
 	../maindir/init.h		\
 
 #TEST_MAIN = TestPyMoose.o
 
 #testPyMoose: $(OBJ) $(OBJFILES) $(HEADERS) $(TEST_MAIN)
-#	$(CXX) $(CXXFLAGS) -o $@ $^
+#	$(CXX) $(CFLAGS) -o $@ $^
 
 
 default: $(TARGET)
@@ -140,17 +141,17 @@ default: $(TARGET)
 pymoose: _moose.so moose.py #testPyMoose 
 
 _moose.so: moose_wrap.o $(OBJ) $(OBJFILES)
-	$(CXX) $(CXXFLAGS) $(DYNAMIC_FLAGS) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 moose_wrap.o: moose_wrap.cxx
-	$(CXX) $(CXXFLAGS) -c $^ -o $@ $(INCLUDES)
+	$(CXX) $(CFLAGS) -c $^ -o $@ $(INCLUDES)
 
 moose.py moose_wrap.cxx: moose.i $(HEADERS)
 	swig -modern -c++ -python -threads moose.i
 
 # This is not required - gnumake does it by implicit rule
 # .cpp.o:
-# 	$(CXX) $(CXXFLAGS) $(INCLUDES) $< -c
+# 	$(CXX) $(CFLAGS) $(INCLUDES) $< -c
 
 clean:
 	-rm -f *.o moose_wrap.cxx *.so moose.py test_swig *.pyc
