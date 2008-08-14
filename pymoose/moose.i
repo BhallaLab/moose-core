@@ -37,14 +37,14 @@
 //	#include "../kinetics/SparseMatrix.h"
 	#include "../utility/utility.h"
 	/* Random number related utilities */
-	#include "../utility/randnum/randnum.h"
+	#include "../randnum/randnum.h"
 	/* These are the raw generic C++ classes - without any dependency on MOOSE */
-	#include "../utility/randnum/Probability.h"
-	#include "../utility/randnum/Binomial.h"
-	#include "../utility/randnum/Gamma.h"
-	#include "../utility/randnum/Normal.h"
-	#include "../utility/randnum/Poisson.h"
-	#include "../utility/randnum/Exponential.h"
+	#include "../randnum/Probability.h"
+	#include "../randnum/Binomial.h"
+	#include "../randnum/Gamma.h"
+	#include "../randnum/Normal.h"
+	#include "../randnum/Poisson.h"
+	#include "../randnum/Exponential.h"
 	/* The following are moose classes */
 	#include "RandGenerator.h"
 	#include "BinomialRng.h"
@@ -121,6 +121,7 @@
 %attribute(pymoose::ClockJob, double, start, __get_start, __set_start)
 %attribute(pymoose::ClockJob, int, step, __get_step, __set_step)
 /* Numpy interface for InterpolationTable */
+#ifdef NUMPY
 %extend pymoose::InterpolationTable{
   %pythoncode {
   __array_struct__ = property(__array_struct__,
@@ -128,7 +129,7 @@
   }
 } // end of extend
 	
-
+#endif
 // WORK IN PROGRESS
 /**/
 %include "Interpol.h"
@@ -361,14 +362,14 @@
 //**********************************
 // Random number related utilities *	
 //**********************************
-%include "../utility/randnum/randnum.h"
+%include "../randnum/randnum.h"
 /* These are the raw generic C++ classes - without any dependency on MOOSE */
-%include "../utility/randnum/Probability.h"
-%include "../utility/randnum/Binomial.h"
-%include "../utility/randnum/Gamma.h"
-%include "../utility/randnum/Normal.h"
-%include "../utility/randnum/Poisson.h"
-%include "../utility/randnum/Exponential.h"
+%include "../randnum/Probability.h"
+%include "../randnum/Binomial.h"
+%include "../randnum/Gamma.h"
+%include "../randnum/Normal.h"
+%include "../randnum/Poisson.h"
+%include "../randnum/Exponential.h"
 /* The following are moose classes */
 
 %include "RandGenerator.h"

@@ -36,7 +36,7 @@ ParTable.o:	ParTable.h Table.h Interpol.h ../basecode/Ftype2.h
 endif
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -I../basecode $< -c
+	$(CXX) $(CFLAGS) -I.. -I../basecode $< -c
 
 #$(TARGET):		$(OBJ) $(HEADERS)
 #	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)

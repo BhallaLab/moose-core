@@ -80,3 +80,4 @@ class BinSynInfo:public SynInfo
 };
 
 #endif
+
