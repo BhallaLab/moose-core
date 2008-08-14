@@ -1,4 +1,4 @@
-CFLAGS += -I.. -I../..
+CFLAGS += -I..
 # the line below are for easy inclusion of libxml++
 #CFLAGS += $(shell pkg-config libxml++-2.6 --cflags) 
 
@@ -38,9 +38,9 @@ HEADERS = \
 	GammaRng.h	\
 	UniformRng.h	\
 	Uniform.h	\
-	../../basecode/header.h	\
-	../../basecode/Element.h	\
-	../../connections/Conn.h	\
+	../basecode/header.h	\
+	../basecode/Element.h	\
+	../connections/Conn.h	\
 
 default: $(TARGET)
 

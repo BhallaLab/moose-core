@@ -1,4 +1,4 @@
-LOCAL_DIR := utility$/randnum
+LOCAL_DIR := randnum
 LOCAL_SRCS := \
 	mt19937ar.cpp	\
 	Uniform.cpp \
