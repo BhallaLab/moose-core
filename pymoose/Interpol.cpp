@@ -186,6 +186,9 @@ void InterpolationTable::dumpFile( string fileName, bool append )
 }
 
 #ifdef DO_UNIT_TESTS
+#include <cmath>
+using namespace std;
+
 void testInterpolationTable(void)
 {
     InterpolationTable table("/interptbl");

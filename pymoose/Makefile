@@ -24,15 +24,16 @@
 ############################################################################
 
 TARGET=pymoose
-CFLAGS+=-g -DDO_UNIT_TESTS -DNDEBUG -DNUMPY -I/usr/include/python2.5 -I.. -I/usr/local/lib/python2.5/site-packages/numpy/core/include
+CFLAGS+= -I/usr/include/python2.5 -I..
+ifdef ($(USE_NUMPY))
+CFLAGS+=-I/usr/local/lib/python2.5/site-packages/numpy/core/include
+endif
 # The library location and flags for creating dll in Mac is different from Linux
-SYSTEM=$(shell (uname))
-ifeq ($(SYSTEM),Darwin)
+ifeq ($(OSTYPE),Darwin)
 	CFLAGS+=-bundle -flat_namespace -undefined suppress 
 endif
 CXXFLAGS=$(CFLAGS)
-INCLUDES=-I/usr/include/python2.5 -I.. -I/usr/local/lib/python2.5/site-packages/numpy/core/include
-LDFLAGS=-lm -lpython2.5 
+LIBS+=-lpython2.5 
 OBJFILES = ../basecode/basecode.o \
 	../element/element.o \
 	../shell/shell.o \
@@ -42,7 +43,7 @@ OBJFILES = ../basecode/basecode.o \
 	../maindir/init.o	\
 	../connections/connections.o \
 	../utility/utility.o	\
-	../utility/randnum/randnum.o	\
+	../randnum/randnum.o	\
 	../maindir/init.o	\
 	../connections/connections.o
 
@@ -141,17 +142,17 @@ default: $(TARGET)
 pymoose: _moose.so moose.py #testPyMoose 
 
 _moose.so: moose_wrap.o $(OBJ) $(OBJFILES)
-	$(CXX) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CFLAGS) -shared -o $@ $^ $(LIBS)
 
 moose_wrap.o: moose_wrap.cxx
-	$(CXX) $(CFLAGS) -c $^ -o $@ $(INCLUDES)
+	$(CXX) $(CFLAGS) -c $^ -o $@
 
 moose.py moose_wrap.cxx: moose.i $(HEADERS)
 	swig -modern -c++ -python -threads moose.i
 
 # This is not required - gnumake does it by implicit rule
 # .cpp.o:
-# 	$(CXX) $(CFLAGS) $(INCLUDES) $< -c
+# 	$(CXX) $(CFLAGS) $< -c
 
 clean:
 	-rm -f *.o moose_wrap.cxx *.so moose.py test_swig *.pyc

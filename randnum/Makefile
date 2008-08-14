@@ -49,7 +49,7 @@ default: $(TARGET)
 #	$(CXX) $(CFLAGS) $(shell pkg-config libxml++-2.6 --cflags) $< -c
 
 $(TARGET): $(OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
+	$(LD) -r -o $(TARGET) $(OBJ)
 
 clean:
 	-rm -f *.o $(TARGET) core core.*

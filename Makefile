@@ -111,7 +111,7 @@ endif
 # Libraries are defined below. For now we do not use threads.
 SUBLIBS = 
 #LIBS =	-lm -lpthread
-LIBS = 		-lm -lgsl -lgslcblas
+LIBS = 	-lm
 # For 64 bit Linux systems add paths to 64 bit libraries 
 ifeq ($(OSTYPE),Linux)
 ifeq ($(MACHINE),x86_64)
