@@ -7,6 +7,14 @@
 #** GNU General Public License version 2
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
+#######################################################################
+# NOTE:
+# This Makefile is compatible with _GNU Make_.
+# This does not work with nmake or borland make.
+# You may have to specify some variables when calling gnu make as 
+# described in the comments below. The defaults should work on most
+# Unix clones. 
+########################################################################
 
 # Linux compilation:
 # We recommend two levels of compilation: either full debug, with gdb,
@@ -30,29 +38,23 @@ ifndef BUILD
 BUILD=debug
 endif
 
-# PLATFORM (= linux, win32, mach)
+# PLATFORM (= Linux, win32, Darwin)
 
-ifndef PLATFORM
-PLATFORM=linux
+# Get the processor architecture - i686 or x86_64
+# All these should be taken care of in a script, not in the 
+# Makefile. But we are
+ifndef MACHINE
+MACHINE=i686 
 endif
-
-ifeq ($(OSTYPE),win32)
-PLATFORM=win32
-endif
-ifneq ($(PLATFORM),win32)
-	OSTYPE=$(shell uname)
-	ifeq ($(OSTYPE),Darwin)
-		PLATFORM=mac
-	endif
-endif
-
-ifeq ($(OSTYPE),Darwin)
-PLATFORM=mac
+# We are assuming all non-win32 systems to be POSIX compliant
+# and thus have the command uname for getting Unix system name
+ifneq ($(OSTYPE),win32)
+MACHINE=$(shell uname -m)
 endif
 
 # Debug mode:
 ifeq ($(BUILD),debug)
-CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CFLAGS = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
@@ -108,8 +110,14 @@ endif
 
 # Libraries are defined below. For now we do not use threads.
 SUBLIBS = 
-#LIBS = 		-lm -lpthread
+#LIBS =	-lm -lpthread
 LIBS = 		-lm -lgsl -lgslcblas
+# For 64 bit Linux systems add paths to 64 bit libraries 
+ifeq ($(OSTYPE),Linux)
+ifeq ($(MACHINE),x86_64)
+LIBS=-L/lib64 -L/usr/lib64 $(LIBS) 
+endif
+endif
 #use this to use readline library
 #LIBS = 		-lm -lreadline
 
@@ -125,7 +133,7 @@ endif
 
 LD = ld
 
-SUBDIR = genesis_parser basecode connections shell element maindir scheduling biophysics kinetics builtins $(PARALLEL_DIR) utility 
+SUBDIR = genesis_parser basecode connections shell element maindir scheduling biophysics kinetics builtins $(PARALLEL_DIR) utility randnum
 
 
 OBJLIBS =	\
@@ -136,7 +144,7 @@ OBJLIBS =	\
 	element/element.o \
 	shell/shell.o \
 	utility/utility.o \
-	utility/randnum/randnum.o	\
+	randnum/randnum.o	\
 	scheduling/scheduling.o \
 	biophysics/biophysics.o \
 	kinetics/kinetics.o \
@@ -159,7 +167,7 @@ libmoose.so: libs
 
 pymoose: CFLAGS += -fPIC
 pymoose: SUBDIR += pymoose
-pymoose: libs $(OBJLIBS) $(PARALLEL_LIB)
+pymoose: libs $(OBJLIBS) 
 	$(MAKE) -C $@
 
 libs:

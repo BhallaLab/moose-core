@@ -20,7 +20,7 @@
 #include <math.h>
 #include "moose.h"
 #include <queue>
-#include "utility/randnum/randnum.h"
+#include "randnum/randnum.h"
 
 #include "StochSynchan.h"
 

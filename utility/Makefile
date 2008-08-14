@@ -32,11 +32,7 @@ SparseMatrix.o : SparseMatrix.h
 .cpp.o:
 	$(CXX) $(CFLAGS)  $< -c
 
-$(TARGET): $(OBJ) $(HEADERS) randgen
-	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
-
-randgen:
-	@(echo cd randnum; cd randnum; $(MAKE); cd ..)
+$(TARGET): $(OBJ) $(HEADERS)
+	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS) 
 clean:
-	$(MAKE) -C randnum clean
 	-rm -f *.o $(TARGET) core core.*
