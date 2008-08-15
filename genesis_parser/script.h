@@ -18,7 +18,7 @@ typedef struct script_type {
     FILE        *file;
 } Script;
 
-extern FILE *SearchForScript(char* name, char* mode);
+extern FILE *SearchForScript(const char* name, const char* mode);
 extern int ValidScript(FILE* fp);
 extern void AddScript(char* ptr, FILE* fp, int argc, char** argv, short type);
 

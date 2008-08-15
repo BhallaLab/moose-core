@@ -1434,7 +1434,7 @@ char* GenesisParserWrapper::doGet( int argc, const char** argv, Id s )
 	return copyString( fieldValue_.c_str() );
 }
 
-char* do_getmsg( int argc, const char** const argv, Id s )
+const char* do_getmsg( int argc, const char** const argv, Id s )
 {
 	static string space = " ";
 	if ( argc < 3 ) {
