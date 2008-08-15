@@ -7,7 +7,7 @@
 ** Script variables
 */
 
-extern double GetScriptDouble(char* name);
+extern double GetScriptDouble(const char* name);
 extern int GetScriptInt(char* name);
 extern char* GetScriptStr(char* name);
 
@@ -45,7 +45,7 @@ extern void   FreeScriptInfo(ScriptInfo* si);
 extern int   InControlStructure();
 extern int   IntType();
 extern int   StrType();
-extern void   set_float_format(char* format);
+extern void   set_float_format(const char* format);
 extern char *ConvertBuf();
 extern void CompileScriptVars();
 extern int IsCommand(char* name);
@@ -53,7 +53,7 @@ extern int IsInclude(char* name);
 
 extern Symtab *SymtabCreate();
 extern void SymtabDestroy(Symtab* symtab);
-extern Result* SymtabLook(Symtab* symtab, char* sym);
+extern Result* SymtabLook(Symtab* symtab, const char* sym);
 extern Result* SymtabNew(Symtab* symtab, char* sym);
 extern char* SymtabKey(Symtab* symtab, Result* rp);
 

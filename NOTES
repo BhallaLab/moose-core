@@ -6981,5 +6981,79 @@ Checked in as revision 511 with unit test flags on, Smoldyn off, -g, GSL, MPI on
 9 June 2008
 Split parallel development into separate code branch. The current trunk will
 be for release fixes.
+Checked in as revision 514 with unit test flags on, Smoldyn off, -g, GSL, MPI on
 
 ==============================================================================
+24 June 2008
+Discussion with Stefan Wils about his 3-D stochastic simulator STEPS. STEPS
+uses tetrahedral meshes and Gillespie-type calculations. It has a Python
+front-end through SWIG, and is C++ for the number crunching. It would be 
+a good complement to Smoldyn for 3-D stochastic reac-diff calculations.
+He has sent a prelim doc file and will in due course send some example sims.
+Some points:
+Molecule definitions are global
+	Molecules concs are initialized by explicit functions at reset.
+Reaction definitions are attached to group-like entities
+Diffusion properties are attached to compartments (idea being that different
+	compts may have different viscosities)
+Somewhere in there the reactions are attached to volume entitites/compartments.
+Any number of groups can be attached to a geometry.
+The spatial mesh is generated from geometries using a variety of tools
+	One of the interesting ones uses a surface-distance function for
+	any geometry to generate the mesh. This would be the one to use for
+	building a mesh for a neuronal compartmental geometry.
+There are two solution engines: 
+	one uses a compartmental form, ignoring geometry except for volume
+	one does full 3-d reac diff.
+There is a runtime loop for extracting conc values. MOOSE could easily
+	encapsulate it.
+==============================================================================
+1 July 2008
+Some other discussions highlighted the fact that several people want to
+do multiscale simulations and would like to try GENESIS, but the script
+language is too horrible. Should provide a nice general interface for this.
+
+Thoughts on a general interface. This relates to several existing ideas,
+most notably the thoughts about a 'robot' for E. Coli.
+
+Contexts:		To			Comm lines
+1. E-Coli Robot		Signalling model of	Mol concs
+Either solo, with GUI	chemotax		Prob of ccw turn of motor
+Or multiple in crowd
+
+2. Detailed neuron	ANN or			Spikes <---> rates
+			Integ/Fire network	Spikes to syns on dends
+
+3. Elect neuron model	Biochem model of syn	Calcium
+						Channel phosph ---> chan numb
+
+4. Detailed chem model	Savageau model or	Activities to multiple tgts.
+			Simple chem model
+
+5. Fly robot		Neuronal network	Visual stim
+			model of vis-motor	Motor control
+
+...........................................................................
+Thought is to have an interface class that can handle many of these
+'robot' and related tasks in a general way, acting as wrapper where needed.
+Kinds of interfaces:
+1. Message redirect
+2. Message argument shuffle
+3. Math/lookup message transform
+4. Time filter transform
+5. Timestep juggling / Quasi-steady-state assumptions
+6. Chemical activity (see Bioinformatics 2002)
+7. Array building (multicompt diffusion in another way)
+
+Key test cases:
+1. Electrical <---> biochem neuronal models
+2. E Coli robots
+3. Chemical module interface.
+
+==============================================================================
+15 August 2008
+The new g++ (GCC) 4.2.3 (Ubuntu 4.2.3-2ubuntu7) is now getting picky about
+const char* declarations. I have fixed about 25 of these, and there seem to
+be several hundred left, almost all in the parser. May have to use an upgraded
+flex/bison to rebuild the parser to fix this.
+

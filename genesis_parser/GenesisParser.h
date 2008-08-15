@@ -97,7 +97,7 @@ typedef struct _localvars
     ScriptInfo      *lv_si; 
   } LocalVars;
 
-extern Result* SymtabLook(Symtab* symtab, char* sym);
+extern Result* SymtabLook(Symtab* symtab, const char* sym);
 extern "C" int yywrap( void );
 typedef void (*slifunc)(int argc, const char** argv, Id s );
 typedef int (*PFI)(int argc, const char** argv, Id s );
@@ -204,7 +204,7 @@ class myFlexLexer: public yyFlexLexer
 			char* cmdname, ParseNode* args, short do_autoshell);
 		char* do_cmd_args(ParseNode* arg, int* argc, char* argv[]);
 
-		double GetScriptDouble(char*);
+		double GetScriptDouble(const char*);
 		void SetScriptDouble(char*, double);
 		int GetScriptInt(char*);
 		void SetScriptInt(char*, int);

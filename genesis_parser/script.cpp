@@ -287,7 +287,7 @@ struct stat buf;
     }
 }
 
-FILE *OpenScriptFile(char* name,char* mode)
+FILE *OpenScriptFile(const char* name, const char* mode)
 {
 FILE *fp;
 char extname[300];
@@ -320,7 +320,7 @@ size_t len;
 ** if the SIMPATH variable is not found then just search the
 ** current directory
 */
-FILE *SearchForScript(char* name, char* mode)
+FILE *SearchForScript(const char* name, const char* mode)
 {    
     FILE *fp;
     
