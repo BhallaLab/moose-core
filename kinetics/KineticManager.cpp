@@ -512,7 +512,7 @@ void KineticManager::setupSolver( Eref e )
  */
 void KineticManager::setupDt( Eref e, double dt )
 {
-	static char* fixedDtMethods[] = {
+	static const char* fixedDtMethods[] = {
 		"ee", 
 		"Smoldyn", 
 	};

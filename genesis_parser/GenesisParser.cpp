@@ -481,7 +481,7 @@ FILE		*pfile;
 short 		redirect_mode = 0;
 int 		start = 0;
 int 		i;
-char 		*mode = "a";
+const char*	mode = "a";
 Result		result;
 // int		ival;
 func_entry	*command;

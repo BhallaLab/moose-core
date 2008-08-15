@@ -46,7 +46,7 @@ void SymtabDestroy(Symtab *symtab)
 }	/* SymtabDestroy */
 
 
-Result *SymtabLook(Symtab* symtab, char* sym)
+Result *SymtabLook(Symtab* symtab, const char* sym)
 {	/* SymtabLook --- Look for symbol table entry for sym */
 
 	SymtabEnt	*symtabent;
