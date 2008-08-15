@@ -2039,7 +2039,7 @@ void myFlexLexer::PTInit()
 /*
 ** Hack to enable access to this static variable from other directories
 */
-void set_float_format(char* format)
+void set_float_format(const char* format)
 {
 	strcpy(float_format,format);
 }
@@ -2076,7 +2076,7 @@ char *ConvertBuf()
 ** set of these routines.
 */
 
-double myFlexLexer::GetScriptDouble(char* name)
+double myFlexLexer::GetScriptDouble(const char* name)
 {	/* GetScriptDouble --- Return value of a script variable as a double */
 
 	Result*	rp;
