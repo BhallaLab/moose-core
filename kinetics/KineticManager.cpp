@@ -929,7 +929,8 @@ double KineticManager::estimateDt( Id mgr,
 		maxProp = 10.0;
 
 	recommendedDt_ = sqrt( error ) / maxProp;
-	assert ( !isinf( recommendedDt_ ) );
+	// isinf is in 'utility.h'
+	assert ( !isInfinity< double >( recommendedDt_ ) );
 
 	return recommendedDt_;
 }

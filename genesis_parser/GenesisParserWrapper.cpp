@@ -3457,8 +3457,8 @@ int do_findchar(int argc, const char** const argv, Id s ){
 	}
 	string str1 = argv[1];
 	string str2 = argv[2];
-	size_t pos = str1.find(str2, 0); 	
-	if (pos == string::npos)
+	int pos = str1.find(str2, 0); 	
+	if ( pos == ( int )( string::npos ) )
 		pos = -1;
 	return pos;
 }
