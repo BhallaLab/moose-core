@@ -103,7 +103,7 @@ endif # !USE_SMOLDYN
 	$(CXX) $(CFLAGS) $(GSL_FLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(LIBS) $(GSL_LIBS) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 
+	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ)  $(GSL_LIBS) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 
 
 clean:
 	-rm -f *.o $(TARGET) core core.*

@@ -17,4 +17,22 @@
 #include "PathUtility.h"
 #include "ArgParser.h"
 #include "randnum/NumUtil.h"
+
+/**
+ * Functions for floating point comparisons
+ */
+#include <limits>
+
+template<class T>
+bool isNaN( T value )
+{
+	return value != value;
+}
+
+template< typename T >
+bool isInfinity( T value )
+{
+	return value == std::numeric_limits< T >::infinity();
+}
+
 #endif
