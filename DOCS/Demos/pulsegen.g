@@ -55,7 +55,7 @@ addmsg /trig /plot_trig INPUT output
 
 setclock 0 {SIMDT}
 setclock 1 {SIMDT}
-useclock /pulse0,/pulse1,/trig,/gate 0
+useclock /pulse0,/pulse1,/pulse2,/trig,/gate 0
 useclock /plot0,/plot1,/plot2,/plot_trig,/plot_gate 1
 reset
 step {RUNTIME} -t

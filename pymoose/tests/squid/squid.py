@@ -97,7 +97,7 @@ k_channel.Xpower = 4
 squid.connect('channel', na_channel, 'channel')
 squid.connect('channel', k_channel, 'channel')
 vm_table = Table('Vm')
-vm_table.stepmode = 3
+vm_table.stepMode = 3
 vm_table.connect('inputRequest', squid, 'Vm')
 v = VMIN
 na_XA = Table('/squid/Na/xGate/A')
