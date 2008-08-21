@@ -21,10 +21,10 @@ namespace pymoose
         void __set_input(double input);
         double __get_output() const;
         void __set_output(double output);
-        int __get_stepmode() const;
-        void __set_stepmode(int stepmode);
-        double __get_stepsize() const;
-        void __set_stepsize(double stepsize);
+        int __get_stepMode() const;
+        void __set_stepMode(int stepMode);
+        double __get_stepSize() const;
+        void __set_stepSize(double stepSize);
         double __get_threshold() const;
         void __set_threshold(double threshold);
         // todo: tackle these two functiosn properly

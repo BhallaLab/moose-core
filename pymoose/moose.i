@@ -162,8 +162,8 @@
 %include "Table.h"
 %attribute(pymoose::Table, double, input, __get_input, __set_input)
 %attribute(pymoose::Table, double, output, __get_output, __set_output)
-%attribute(pymoose::Table, int, stepmode, __get_stepmode, __set_stepmode)
-%attribute(pymoose::Table, double, stepsize, __get_stepsize, __set_stepsize)
+%attribute(pymoose::Table, int, stepMode, __get_stepMode, __set_stepMode)
+%attribute(pymoose::Table, double, stepSize, __get_stepSize, __set_stepSize)
 %attribute(pymoose::Table, double, threshold, __get_threshold, __set_threshold)
 //%attribute(pymoose::Table, double, tableLookup, __get_tableLookup, __set_tableLookup)
 //%attribute(pymoose::Table, double, outputSrc, __get_outputSrc, __set_outputSrc)
