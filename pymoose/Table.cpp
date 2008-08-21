@@ -39,23 +39,23 @@ void Table::__set_output( double output )
 {
     set < double > (id_(), "output", output);
 }
-int Table::__get_stepmode() const
+int Table::__get_stepMode() const
 {
     int stepmode;
     get < int > (id_(), "stepmode",stepmode);
     return stepmode;
 }
-void Table::__set_stepmode( int stepmode )
+void Table::__set_stepMode( int stepmode )
 {
     set < int > (id_(), "stepmode", stepmode);
 }
-double Table::__get_stepsize() const
+double Table::__get_stepSize() const
 {
     double stepsize;
     get < double > (id_(), "stepsize",stepsize);
     return stepsize;
 }
-void Table::__set_stepsize( double stepsize )
+void Table::__set_stepSize( double stepsize )
 {
     set < double > (id_(), "stepsize", stepsize);
 }

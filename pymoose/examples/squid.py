@@ -136,7 +136,7 @@ class Squid(moose.Compartment):
         context.setClock(1, PLOTDT, 0)
         print 'Inside the constructor'
         # Create and connect a table to dump data
-        self.vmTable.stepmode = 3
+        self.vmTable.stepMode = 3
         self.vmTable.connect('inputRequest', self, 'Vm')
         clockTargets ='/Vm,'+self.path()+','+self.path()+'/#'
         print 'Clock targets = ', clockTargets

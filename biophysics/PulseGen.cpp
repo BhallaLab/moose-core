@@ -299,7 +299,7 @@ void PulseGen::reinitFunc( const Conn& c, ProcInfo p )
     obj->output_ = obj->baseLevel_;    
 }
 /**
-   This has been adapted from the original genesis code by by
+   This has been adapted from the original genesis code written by
    M. Nelson
 */
 void PulseGen::innerProcessFunc(const Conn& c, ProcInfo p)
