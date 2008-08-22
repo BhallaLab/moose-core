@@ -44,7 +44,7 @@ class PulseGen
     static const  int EXT_TRIG = 1;
     /**
        With trigMode = EXT_GATE, the pulse occurs firstDelay later
-       from the leading age of the input.  from a low to high state.
+       from the leading edge of the input.
      */
     static const int EXT_GATE = 2;    
 
