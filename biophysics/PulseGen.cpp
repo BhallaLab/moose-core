@@ -296,7 +296,8 @@ void PulseGen::reinitFunc( const Conn& c, ProcInfo p )
     ASSERT( obj != NULL, "PulseGen::reinitFunc(const Conn&, ProcInfo) - target data pointer is NULL.");
     obj->trigTime_ = -1;
     obj->prevInput_ = 0;
-    obj->output_ = obj->baseLevel_;    
+    obj->output_ = obj->baseLevel_;
+    obj->input_ = 0.0;    
 }
 /**
    This has been adapted from the original genesis code written by
