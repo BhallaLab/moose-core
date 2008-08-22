@@ -20,8 +20,32 @@
 class PulseGen
 {
   public:
+    /**
+       With trigMode = FREE_RUN the pulse generator will create a
+       train of pulses determined by the firstDealy, firstWidth,
+       firstLevel, secondDelay, secondWidth and secondLevel.       
+    */
     static const int FREE_RUN = 0;
+    /**
+       With trigMode = EXT_TRIG the pulse generator may be triggered
+       or may generate a single pulse and then stop.  The logic
+       depends on trigTime field. If trigTime is negative ( which it
+       is by default and remains so unless there is a non zero input
+       trigger to the PulseGen object ), the output remains at
+       baselevel. For trigTime >= 0, if there is no input trigger, the
+       PulseGen object will produce pair of pulses, the first one
+       starting at firstDelay and staying at firstLevel for firstWidth
+       time. And then the second one starting at secondDelay time
+       after the start of the first pulse, staying at secondLevel for
+       secondWidth time. If secondDelay is less than firstWidth, there
+       will be no second pulse.
+
+     */
     static const  int EXT_TRIG = 1;
+    /**
+       With trigMode = EXT_GATE, the pulse occurs firstDelay later
+       from the leading age of the input.  from a low to high state.
+     */
     static const int EXT_GATE = 2;    
 
     PulseGen();
