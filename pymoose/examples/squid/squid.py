@@ -15,6 +15,10 @@ except ImportError:
     import sys
     sys.exit(1)
 
+
+GAS_CONST = 8.314
+FARADAY = 9.65e4
+
 VMIN = -0.1
 VMAX = 0.05
 NDIVS = 150
@@ -71,6 +75,8 @@ class Squid(moose.Compartment):
         self.Em = VLEAK
         self.initVm = EREST
         self.inject = 0
+        self._innerNaConc = 70.96
+        self._innerKConc = 301.4
         self._Na =  moose.HHChannel("Na", self)
         self._Na.Ek = VNa
         self._Na.Gbar = GNa
@@ -138,6 +144,14 @@ class Squid(moose.Compartment):
         else:
             self._K.Gbar = GK
 
+    def setIonPotential(self, temperature, naConc, kConc):
+        print "Setting [K] =", kConc, ", [Na] =", naConc
+        try:
+            self._Na.Ek = (GAS_CONST*temperature/FARADAY) * math.log(naConc/self._innerNaConc) + 0.07 + EREST
+            self._K.Ek =  (GAS_CONST*temperature/FARADAY) * math.log(kConc/self._innerKConc) + 0.07 + EREST
+        except OverflowError:
+            raise OverflowError("Cannot handle 0 conc of ion.")
+ 
 def testSquid():
     model = moose.Neutral("/model")
     data = moose.Neutral("/data")
