@@ -90,7 +90,11 @@ class SquidModel(moose.Neutral):
             self._pulseGen.secondDelay = paramDict["secondDelay"]
             self._pulseGen.baseLevel = paramDict["baseLevel"]
             if paramDict["singlePulse"]:
-                self._pulseGen.secondDelay = 1e8 # Set a large delay to prevent a second pulse within the simulation time
+                self._pulseGen.trigMode = 1
+            #                 self._pulseGen.secondDelay = 1e8 # Set a large delay to prevent a second pulse within the simulation time
+            else:
+                self._pulseGen.trigMode = 0
+
             print "firstLevel:", self._pulseGen.firstLevel, \
                 "firstWidth:", self._pulseGen.firstWidth, \
                 "firstDelay:", self._pulseGen.firstDelay, \
@@ -191,6 +195,8 @@ class SquidModel(moose.Neutral):
             self._squidAxon.setIonPotential(paramDict["temperature"], paramDict["naConc"], paramDict["kConc"])
 #             self._runTime = paramDict["runTime"]
         self.getContext().reset()
+        if paramDict["singlePulse"]: # This is an ugly hack borrowed from GENESIS squid demo
+            self._pulseGen.trigTime = 0.0 
         # !SquidModel.doResetForIClamp
 
     def doRun(self, runTime=None):
