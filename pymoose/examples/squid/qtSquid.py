@@ -13,13 +13,29 @@ from squidModel import *
 
 STATEPLOT_COLORMAP = { "V-h": QtCore.Qt.red, "h-V": QtCore.Qt.darkRed, "m-n": QtCore.Qt.green, "n-m": QtCore.Qt.darkGreen, "n-V":QtCore.Qt.blue, "V-n":QtCore.Qt.darkBlue, "h-n": QtCore.Qt.cyan, "n-h": QtCore.Qt.darkCyan, "m-h": QtCore.Qt.magenta, "h-m": QtCore.Qt.darkMagenta, "V-m": QtCore.Qt.lightGray, "m-V": QtCore.Qt.gray, "V-V": QtCore.Qt.black, "h-h":QtCore.Qt.black, "m-m": QtCore.Qt.black, "n-n": QtCore.Qt.black }
 
+COLORLIST = [ QtCore.Qt.red, 
+              QtCore.Qt.blue, 
+              QtCore.Qt.darkYellow, 
+              QtCore.Qt.green, 
+              QtCore.Qt.magenta, 
+              QtCore.Qt.darkCyan,
+              QtCore.Qt.black, 
+              QtCore.Qt.cyan, 
+              QtCore.Qt.darkRed, 
+              QtCore.Qt.darkGreen, 
+              QtCore.Qt.yellow, 
+              QtCore.Qt.darkMagenta,  
+              QtCore.Qt.gray,   
+              QtCore.Qt.darkBlue, 
+              QtCore.Qt.lightGray ]
+
 class QtSquid(QtGui.QMainWindow):
     """The squid demo using PyQt4 and PyQwt5"""
     def __init__(self, *args):
         QtGui.QMainWindow.__init__(self,*args)
         self.setWindowTitle("SquidAxon")
         self.overlay = False
-        self.runCount = 0
+        self.runCount = -1
         self.connect(self, QtCore.SIGNAL("destroyed()"), QtGui.qApp, QtCore.SLOT("closeAllWindows()"))
         self.statePlotParams = {"V": [], "m": [], "h": [], "n": []}
         self.statePlotWindow = self.createStatePlotWindow()
@@ -37,7 +53,7 @@ class QtSquid(QtGui.QMainWindow):
         self.connect(self.plotPanel, QtCore.SIGNAL("destroyed()"), QtGui.qApp, QtCore.SLOT("closeAllWindows()"))
         self.plotPanel.show()
         self.squidModel = SquidModel("/squidModel")
-        
+        self.runNo = 0
     # !QtSquid.__init__
 
     def initMenubar(self):
@@ -371,6 +387,7 @@ class QtSquid(QtGui.QMainWindow):
         print "resetSlot"
         if not self.overlay:
             print "Overlay is off. Clearing all plots."
+            self.runCount = -1
             self.vmPlot.clear()
             self.injectionPlot.clear()
             self.conductancePlot.clear()
@@ -383,6 +400,7 @@ class QtSquid(QtGui.QMainWindow):
             self.chanCurrentPlot.replot()
             self.statePlot.replot()
             self.activationPlot.replot()
+
         # The stuff below could as well go to the run method.
         simdt = float(self.simTimeStepEdit.text())
         plotdt = float(self.plotTimeStepEdit.text())
@@ -430,8 +448,9 @@ class QtSquid(QtGui.QMainWindow):
             zoomer.setRubberBandPen(QtGui.QPen(QtCore.Qt.white))
             zoomer.setTrackerPen(QtGui.QPen(QtCore.Qt.cyan))
             plot.zoomer = zoomer
-        plot.zoomer.setZoomBase()
+            plot.zoomer.setZoomBase()
         plot.replot()
+
     def runSlot(self):
         """Run the simulation"""
         print "runSlot"
@@ -449,22 +468,22 @@ class QtSquid(QtGui.QMainWindow):
         mParamTable = numpy.array(self.squidModel.mParamTable())
         hParamTable = numpy.array(self.squidModel.hParamTable())
         xData = numpy.linspace(0,runtime,len(vmTable)) * 1e3 
-#         tmpFile = open("data.txt","w")
-#         for ii in range(len(xData)):
-#             tmpFile.write(str(xData[ii]) + " " + \
-#                               str(vmTable[ii]) + " " + \
-#                               str(injectionTable[ii]) + " " + \
-#                               str(iNaTable[ii]) + " " + \
-#                               str(iKTable[ii]) + " " + \
-#                               str(gNaTable[ii]) + " " + \
-#                               str(gKTable[ii]) + "\n")
-#         tmpFile.close()
-        self.addCurve(self.vmPlot, "Vm", QtCore.Qt.red, xData, vmTable)
-        self.addCurve(self.injectionPlot, "I", QtCore.Qt.red, xData, injectionTable)
-        self.addCurve(self.chanCurrentPlot, "Na", QtCore.Qt.blue, xData, iNaTable)
-        self.addCurve(self.chanCurrentPlot, "K", QtCore.Qt.red, xData, iKTable)
-        self.addCurve(self.conductancePlot, "Na", QtCore.Qt.blue, xData, gNaTable)
-        self.addCurve(self.conductancePlot, "K", QtCore.Qt.red, xData, gKTable)
+        
+        if self.overlay:
+            self.runCount = self.runCount + 1
+        else:
+            self.runCount = 0
+
+        color0 = self.runCount % len(COLORLIST)
+        color1 = ( 2 * self.runCount ) % len(COLORLIST)
+        color2 = ( 2 * self.runCount + 1) % len(COLORLIST)
+
+        self.addCurve(self.vmPlot, "Vm#"+str(self.runCount), COLORLIST[color0], xData, vmTable)
+        self.addCurve(self.injectionPlot, "I #"+str(self.runCount), COLORLIST[color0], xData, injectionTable)
+        self.addCurve(self.chanCurrentPlot, "Na#"+str(self.runCount), COLORLIST[color1], xData, iNaTable)
+        self.addCurve(self.chanCurrentPlot, "K #"+str(self.runCount), COLORLIST[color2], xData, iKTable)
+        self.addCurve(self.conductancePlot, "Na#"+str(self.runCount), COLORLIST[color1], xData, gNaTable)
+        self.addCurve(self.conductancePlot, "K #"+str(self.runCount), COLORLIST[color2], xData, gKTable)
         self.statePlotParams = {"V":vmTable, "n":nParamTable, "m":mParamTable, "h":hParamTable}
         key = self.statePlotX + "-" + self.statePlotY
         self.addCurve(self.statePlot, key, STATEPLOT_COLORMAP[key],

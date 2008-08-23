@@ -236,7 +236,7 @@
 %attribute(pymoose::PulseGen, double, secondDelay, __get_secondDelay, __set_secondDelay)
 %attribute(pymoose::PulseGen, double, baseLevel, __get_baseLevel, __set_baseLevel)
 %attribute(pymoose::PulseGen, double, output, __get_output)
-%attribute(pymoose::PulseGen, double, trigTime, __get_trigTime)
+%attribute(pymoose::PulseGen, double, trigTime, __get_trigTime, __set_trigTime)
 %attribute(pymoose::PulseGen, int, trigMode, __get_trigMode, __set_trigMode)
 %attribute(pymoose::PulseGen, int, prevInput, __get_prevInput)
 
