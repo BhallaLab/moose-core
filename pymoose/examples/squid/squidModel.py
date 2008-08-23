@@ -188,6 +188,7 @@ class SquidModel(moose.Neutral):
             self._setupPulseGen(paramDict)
             self._squidAxon.blockNaChannel(paramDict["blockNa"])
             self._squidAxon.blockKChannel(paramDict["blockK"])
+            self._squidAxon.setIonPotential(paramDict["temperature"], paramDict["naConc"], paramDict["kConc"])
 #             self._runTime = paramDict["runTime"]
         self.getContext().reset()
         # !SquidModel.doResetForIClamp
