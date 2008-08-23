@@ -74,6 +74,7 @@ class PulseGen
     static int getTrigMode(Eref e);
     static double getOutput(Eref e);
     static double getTrigTime(Eref e);
+    static void setTrigTime(const Conn& c, double trigTime);
     static int getPreviousInput(Eref e);
     
     //////////////////////////////////////////////////////////////////
