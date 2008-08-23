@@ -31,6 +31,7 @@ namespace pymoose{
         void __set_baseLevel(double baseLevel);
         double __get_output() const;
         double __get_trigTime() const;
+        void __set_trigTime(double trigTime);        
         int __get_trigMode() const;
         void __set_trigMode(int trigMode);
         int __get_prevInput() const;

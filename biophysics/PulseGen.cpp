@@ -62,7 +62,7 @@ const Cinfo* initPulseGenCinfo()
                            &dummyFunc),            
             new ValueFinfo("trigTime", ValueFtype1<double>::global(),
                            GFCAST( &PulseGen::getTrigTime),
-                           &dummyFunc),
+                           RFCAST( &PulseGen::setTrigTime)),
             
             /** TRIGGER MODES: 	
              **         trig_mode = 0	free run
@@ -236,6 +236,29 @@ double PulseGen::getOutput(Eref e)
     ASSERT( obj != NULL, "PulseGen::getOutput(Eref ) - target data pointer is NULL.");
     return obj->output_;
 }
+
+/**
+   trigTime is supposed to be an internal state variable according to
+   GENESIS documentation. But in GENESIS it is available for
+   manipulation by the user and there are scripts out there which use
+   this.
+
+   One particular case one changes this field is in association with
+   the generation of single pulse. In trigMode = 1 (EXT_TRIG), if
+   there is 0 input to the PulseGen object, and trigTime >= 0, then a
+   pulse is generated at firstDelay time after the trigTime, i.e. the
+   pulse starts at time = (trigTime + firstDelay).
+
+   But note that the reset method sets the trigTime to -1, so if you
+   want a single pulse, you need to set trigTime after the reset.
+*/
+void PulseGen::setTrigTime(const Conn& conn, double trigTime)
+{
+    PulseGen* obj = static_cast<PulseGen*> (conn.data());
+    ASSERT( obj != NULL, "PulseGen::setTrigTime(const Conn&, double) - target data pointer is NULL.");
+    obj->trigTime_ = trigTime;    
+}
+
 double PulseGen::getTrigTime(Eref e)
 {
     PulseGen* obj = static_cast <PulseGen*> (e.data());

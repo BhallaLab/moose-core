@@ -101,6 +101,11 @@ double PulseGen::__get_trigTime() const
     get < double > (id_(), "trigTime",trigTime);
     return trigTime;
 }
+void PulseGen::__set_trigTime(double trigTime)
+{
+    set <double>(id_(), "trigTime", trigTime);
+}
+
 int PulseGen::__get_trigMode() const
 {
     int trigMode;
