@@ -119,6 +119,8 @@ class QtSquid(QtGui.QMainWindow):
 
     def createConcCtrl(self):
         self.concCtrlBox = QtGui.QGroupBox("External ion concentration", self)
+        self.temperatureLabel = QtGui.QLabel("Temperature (K)", self)
+        self.temperatureEdit = QtGui.QLineEdit("279.45", self)
         self.kConcLabel = QtGui.QLabel("[K] mM", self)
         self.kConcEdit = QtGui.QLineEdit("10.0",self)
         self.naConcLabel = QtGui.QLabel("[Na] mM", self)
@@ -128,6 +130,9 @@ class QtSquid(QtGui.QMainWindow):
         concCtrlLayout.addWidget(self.kConcEdit, 0, 1)
         concCtrlLayout.addWidget(self.naConcLabel, 1, 0)
         concCtrlLayout.addWidget(self.naConcEdit, 1, 1)
+        concCtrlLayout.addWidget(self.temperatureLabel, 2, 0)
+        concCtrlLayout.addWidget(self.temperatureEdit, 2, 1)
+
         self.concCtrlBox.setLayout(concCtrlLayout)
     # !QtSquid.createConcCtrl
 
@@ -402,6 +407,9 @@ class QtSquid(QtGui.QMainWindow):
             paramDict["singlePulse"] = (self.pulseMode.currentIndex() == 0)
             paramDict["blockNa"] = self.naChannelBlock.isChecked()
             paramDict["blockK"] = self.kChannelBlock.isChecked()
+            paramDict["temperature"] = float(self.temperatureEdit.text())
+            paramDict["naConc"] = float(self.naConcEdit.text())
+            paramDict["kConc"] = float(self.kConcEdit.text())
             self.squidModel.doResetForIClamp(paramDict)
         else:
             print "Voltage clamp not yet implemented."
