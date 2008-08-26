@@ -39,6 +39,8 @@ BUILD=debug
 endif
 
 # PLATFORM (= Linux, win32, Darwin)
+#If using mac uncomment the following line
+#PLATFORM = mac
 
 # Get the processor architecture - i686 or x86_64
 # All these should be taken care of in a script, not in the 
@@ -54,17 +56,17 @@ endif
 
 # Debug mode:
 ifeq ($(BUILD),debug)
-CFLAGS = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CFLAGS = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER 
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
-CFLAGS  = -O3 -Wall -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
+CFLAGS  = -O3 -Wall -pedantic -DNDEBUG -DUSE_GENESIS_PARSER 
 endif
 ##########################################################################
 #
 # MAC OS X compilation, Debug mode:
 ifeq ($(PLATFORM),mac)
-CFLAGS += -Wno-deprecated
+CFLAGS += -Wno-deprecated -force_cpusubtype_ALL -mmacosx-version-min=10.4  -arch x86_64
 endif
 ##########################################################################
 #
