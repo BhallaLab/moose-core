@@ -72,6 +72,9 @@ namespace pymoose
         
         static PyMooseContext* createPyMooseContext(string contextName, string shellName);
         static void destroyPyMooseContext(PyMooseContext* context);
+        void loadG(); /// load a GENESIS script file
+        void runG(std::string s); /// run a GENESIS statement
+        
         std::string getField(Id, std::string);
         void setField(Id, std::string, std::string);
         vector <string> getMessageList(Id obj, string field, bool incoming);
@@ -158,6 +161,9 @@ namespace pymoose
         Id shell_;
         Id scheduler_;
         Id clockJob_;
+        Element* genesisSli_;
+        const Finfo* genesisParseFinfo_;
+        
     };
 } // namespace pymoose
 
