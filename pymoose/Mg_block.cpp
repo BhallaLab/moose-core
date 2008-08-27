@@ -89,14 +89,4 @@ void Mg_block::__set_Zk( double Zk )
 {
     set < double > (id_(), "Zk", Zk);
 }
-double,double Mg_block::__get_origChannel() const
-{
-    double,double origChannel;
-    get < double,double > (id_(), "origChannel",origChannel);
-    return origChannel;
-}
-void Mg_block::__set_origChannel( double,double origChannel )
-{
-    set < double,double > (id_(), "origChannel", origChannel);
-}
 #endif

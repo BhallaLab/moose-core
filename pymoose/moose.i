@@ -26,6 +26,7 @@
 	#include "CaConc.h"
 	#include "HHGate.h"
 	#include "HHChannel.h"
+	#include "Mg_block.h"
 	#include "Compartment.h"
 	#include "HSolve.h"
 	#include "Enzyme.h"
@@ -271,6 +272,15 @@
 %attribute(pymoose::HHChannel, int, useConcentration, __get_useConcentration, __set_useConcentration)
 %attribute(pymoose::HHChannel, double, IkSrc, __get_IkSrc, __set_IkSrc)
 %attribute(pymoose::HHChannel, double, concen, __get_concen, __set_concen)
+%include "Mg_block.h"
+%attribute(pymoose::Mg_block, double, KMg_A, __get_KMg_A, __set_KMg_A)
+%attribute(pymoose::Mg_block, double, K_MgB, __get_KMg_B, __set_KMg_B)
+%attribute(pymoose::Mg_block, double, __get_CMg, __set_CMg)
+%attribute(pymoose::Mg_block, double, Ik, __get_Ik, __set_Ik)
+%attribute(pymoose::Mg_block, double, Gk, __get_Gk,  __set_Gk)
+%attribute(pymoose::Mg_block, double, Ek, __get_Ek, __set_Ek)
+%attribute(pymoose::Mg_block, double, Zk, __get_Zk, __set_Zk)
+
 %include "Compartment.h"
 %attribute(pymoose::Compartment, double, Vm, __get_Vm, __set_Vm)
 %attribute(pymoose::Compartment, double, Cm, __get_Cm, __set_Cm)
