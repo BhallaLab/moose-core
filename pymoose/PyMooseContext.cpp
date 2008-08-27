@@ -21,6 +21,7 @@ using namespace std;
 using namespace pymoose;
 extern int mooseInit();
 extern void setupDefaultSchedule(Element*, Element*, Element*);
+extern Element* makeGenesisParser();
 
 extern const Cinfo* initShellCinfo();
 extern const Cinfo* initTickCinfo();
@@ -438,6 +439,8 @@ void PyMooseContext::recvMessageList(
 
 PyMooseContext::PyMooseContext()
 {
+    genesisSli_ = NULL;
+    genesisParseFinfo_ = NULL;    
 }
 
 PyMooseContext::~PyMooseContext()
@@ -586,14 +589,17 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
         cerr << "Scheduler not found" << endl;
     }
     
-//     Element* cj =  Neutral::create( "ClockJob", "/sched/cj/t0", context->scheduler_(), Id::scratchId());
-//     Element* t0 = Neutral::create( "Tick", "/sched/cj/t0", cj, Id::scratchId() );
-//     Element* t1 = Neutral::create( "Tick", "/sched/cj/t1", cj, Id::scratchId() );
+    // From maindir/main.cpp: parser requires to be created before the clock job
+    context->genesisSli_ = makeGenesisParser();
+    assert(context->genesisSli_ != 0);
+    
     Id cj("/sched/cj");
     Id t0("/sched/cj/t0");
     Id t1("/sched/cj/t1");
             
     setupDefaultSchedule(t0(), t1(), cj());
+    context->genesisParseFinfo_ = context->genesisSli_->findFinfo("parse");
+    assert(context->genesisParseFinfo_!=0);
     
     
     return context;        
