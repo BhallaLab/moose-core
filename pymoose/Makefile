@@ -45,7 +45,9 @@ OBJFILES = ../basecode/basecode.o \
 	../utility/utility.o	\
 	../randnum/randnum.o	\
 	../maindir/init.o	\
-	../connections/connections.o
+	../connections/connections.o \
+	../genesis_parser/SLI.o
+
 
 OBJ = PyMooseBase.o \
 	PyMooseContext.o \

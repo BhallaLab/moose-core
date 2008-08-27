@@ -72,8 +72,8 @@ namespace pymoose
         
         static PyMooseContext* createPyMooseContext(string contextName, string shellName);
         static void destroyPyMooseContext(PyMooseContext* context);
-        void loadG(); /// load a GENESIS script file
-        void runG(std::string s); /// run a GENESIS statement
+        void loadG(std::string script); /// load a GENESIS script file
+        void runG(std::string statement); /// run a GENESIS statement
         
         std::string getField(Id, std::string);
         void setField(Id, std::string, std::string);
