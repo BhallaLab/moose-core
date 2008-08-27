@@ -5041,7 +5041,8 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
 #define pymoose_Mg_block_K_MgB_set(self_, val_) self_->__set_KMg_B(val_)
   
 
-#define pymoose_Mg_block___get_CMg_get(self_) self_->__set_CMg()
+#define pymoose_Mg_block_CMg_get(self_) self_->__get_CMg()
+#define pymoose_Mg_block_CMg_set(self_, val_) self_->__set_CMg(val_)
   
 
 #define pymoose_Mg_block_Ik_get(self_) self_->__get_Ik()
@@ -18309,6 +18310,73 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_destroyPyMooseContext(PyObject *SWIGUN
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     pymoose::PyMooseContext::destroyPyMooseContext(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PyMooseContext_loadG(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_loadG",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_loadG" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->loadG();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PyMooseContext_runG(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  std::string arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_runG",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_runG" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_runG" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->runG(arg2);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -57573,6 +57641,73 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Mg_block_CMg_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Mg_block *arg1 = (pymoose::Mg_block *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Mg_block_CMg_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Mg_block, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mg_block_CMg_set" "', argument " "1"" of type '" "pymoose::Mg_block *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Mg_block * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Mg_block_CMg_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_Mg_block_CMg_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Mg_block_CMg_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Mg_block *arg1 = (pymoose::Mg_block *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Mg_block_CMg_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Mg_block, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mg_block_CMg_get" "', argument " "1"" of type '" "pymoose::Mg_block *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Mg_block * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_Mg_block_CMg_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Mg_block_Ik_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::Mg_block *arg1 = (pymoose::Mg_block *) 0 ;
@@ -77923,6 +78058,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"PyMooseContext_recvMessageList", _wrap_PyMooseContext_recvMessageList, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_createPyMooseContext", _wrap_PyMooseContext_createPyMooseContext, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_destroyPyMooseContext", _wrap_PyMooseContext_destroyPyMooseContext, METH_VARARGS, NULL},
+	 { (char *)"PyMooseContext_loadG", _wrap_PyMooseContext_loadG, METH_VARARGS, NULL},
+	 { (char *)"PyMooseContext_runG", _wrap_PyMooseContext_runG, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_getField", _wrap_PyMooseContext_getField, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_setField", _wrap_PyMooseContext_setField, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_getMessageList", _wrap_PyMooseContext_getMessageList, METH_VARARGS, NULL},
@@ -78596,6 +78733,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Mg_block_KMg_A_get", _wrap_Mg_block_KMg_A_get, METH_VARARGS, NULL},
 	 { (char *)"Mg_block_K_MgB_set", _wrap_Mg_block_K_MgB_set, METH_VARARGS, NULL},
 	 { (char *)"Mg_block_K_MgB_get", _wrap_Mg_block_K_MgB_get, METH_VARARGS, NULL},
+	 { (char *)"Mg_block_CMg_set", _wrap_Mg_block_CMg_set, METH_VARARGS, NULL},
+	 { (char *)"Mg_block_CMg_get", _wrap_Mg_block_CMg_get, METH_VARARGS, NULL},
 	 { (char *)"Mg_block_Ik_set", _wrap_Mg_block_Ik_set, METH_VARARGS, NULL},
 	 { (char *)"Mg_block_Ik_get", _wrap_Mg_block_Ik_get, METH_VARARGS, NULL},
 	 { (char *)"Mg_block_Gk_set", _wrap_Mg_block_Gk_set, METH_VARARGS, NULL},
