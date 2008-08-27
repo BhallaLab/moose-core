@@ -1923,30 +1923,18 @@ void Shell::listMessages( const Conn* c,
 	string separator = "";
 	Conn* tc = e->targets( f->msg(), id.index() );
 	while( tc->good() ) {
+            if ( tc->isDest() == isIncoming )
+            {                
 		Eref tgt = tc->target();
 		ret.push_back( tgt.id() );
 		const Finfo* targetFinfo = tgt.e->findFinfo( tc->targetMsg() );
 		assert( targetFinfo != 0 );
 		remoteFields = remoteFields + separator + targetFinfo->name();
 		separator = ", ";
-		tc->increment();
+            }            
+            tc->increment();
 	}
 	delete tc;
-
-	/*
-	const Msg* m = e->msg( f->msg() );
-	vector< ConnTainer* >::const_iterator i;
-	for ( i = m->begin(); i != m->end(); i++ ) {
-		Element* temp = ( isIncoming ) ? ( *i )->e1() : ( *i )->e2();
-		ret.push_back( temp->id() );
-		const Finfo* targetFinfo = temp->findFinfo( *i );
-		assert( targetFinfo != 0 );
-		if ( i == m->begin() )
-			remoteFields = remoteFields + targetFinfo->name();
-		else
-			remoteFields = remoteFields + ", " + targetFinfo->name();
-	}
-	*/
 
 	sendBack2< vector< Id >, string >(
 		c, listMessageSlot, ret, remoteFields );
