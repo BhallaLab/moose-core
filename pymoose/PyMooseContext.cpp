@@ -22,6 +22,7 @@ using namespace pymoose;
 extern int mooseInit();
 extern void setupDefaultSchedule(Element*, Element*, Element*);
 extern Element* makeGenesisParser();
+extern char* copyString(const string& s);
 
 extern const Cinfo* initShellCinfo();
 extern const Cinfo* initTickCinfo();
@@ -360,12 +361,12 @@ static const Slot tabopSlot =
 //////////////////////////
 const string PyMooseContext::separator = "/";
 
-char* copyString( const string& s )
-{
-    char* ret = ( char* ) calloc ( s.length() + 1, sizeof( char ) );
-    strcpy( ret, s.c_str() );
-    return ret;
-}
+// char* copyString( const string& s )
+// {
+//     char* ret = ( char* ) calloc ( s.length() + 1, sizeof( char ) );
+//     strcpy( ret, s.c_str() );
+//     return ret;
+// }
 
 //////////////////////////////////////////////////////////////////
 // PyMooseContext Message recv functions
@@ -446,6 +447,25 @@ PyMooseContext::PyMooseContext()
 PyMooseContext::~PyMooseContext()
 {
     end();    
+}
+
+/**
+   load a genesis script.
+   script - filename/full path for loading the script file
+*/
+void PyMooseContext::loadG(std::string script)
+{
+    string stmt = "include "+script;
+    set<std::string>( this->genesisSli_, this->genesisParseFinfo_, stmt);
+    set<std::string>( this->genesisSli_, this->genesisParseFinfo_, "\n");
+}
+/**
+   Run a genesis statement.
+   stmt - statement to be executed.
+*/
+void PyMooseContext::runG(std::string stmt)
+{
+    set<std::string>( this->genesisSli_, this->genesisParseFinfo_, stmt);    
 }
 
 /**
