@@ -234,8 +234,8 @@ const Cinfo* initPyMooseContextCinfo()
 
 	static Cinfo pyMooseContextCinfo(
 		"PyMooseContext",
-		"Upinder S. Bhalla, NCBS, 2004-2007",
-		"Object to handle the old Genesis parser",
+		"Subhasis Ray, NCBS",
+		"Object to interact with MOOSE shell object",
 		initNeutralCinfo(),
 		pyMooseContextFinfos,
 		sizeof(pyMooseContextFinfos) / sizeof( Finfo* ),
