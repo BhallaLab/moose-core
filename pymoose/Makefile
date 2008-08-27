@@ -56,6 +56,7 @@ OBJ = PyMooseBase.o \
 	PyMooseUtil.o \
 	HHChannel.o \
 	HHGate.o \
+	Mg_block.o	\
 	Interpol.o \
 	CaConc.o \
 	SpikeGen.o \
@@ -92,6 +93,7 @@ HEADERS = PyMooseUtil.h \
 	Cell.h	\
 	HHChannel.h \
 	HHGate.h \
+	Mg_block.h	\
 	Interpol.h \
 	CaConc.h \
 	SpikeGen.h \
