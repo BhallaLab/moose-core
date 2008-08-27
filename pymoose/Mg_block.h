@@ -32,8 +32,6 @@ namespace pymoose
         void __set_Ek(double Ek);
         double __get_Zk() const;
         void __set_Zk(double Zk);
-        double,double __get_origChannel() const;
-        void __set_origChannel(double,double origChannel);
     };
 }
 
