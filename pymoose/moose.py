@@ -1132,6 +1132,40 @@ HHChannel_swigregister = _moose.HHChannel_swigregister
 HHChannel_swigregister(HHChannel)
 HHChannel.className = _moose.cvar.HHChannel_className
 
+class Mg_block(PyMooseBase):
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _moose.new_Mg_block(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_Mg_block
+    __del__ = lambda self : None;
+    def getType(*args): return _moose.Mg_block_getType(*args)
+    def __get_KMg_A(*args): return _moose.Mg_block___get_KMg_A(*args)
+    def __set_KMg_A(*args): return _moose.Mg_block___set_KMg_A(*args)
+    def __get_KMg_B(*args): return _moose.Mg_block___get_KMg_B(*args)
+    def __set_KMg_B(*args): return _moose.Mg_block___set_KMg_B(*args)
+    def __get_CMg(*args): return _moose.Mg_block___get_CMg(*args)
+    def __set_CMg(*args): return _moose.Mg_block___set_CMg(*args)
+    def __get_Ik(*args): return _moose.Mg_block___get_Ik(*args)
+    def __set_Ik(*args): return _moose.Mg_block___set_Ik(*args)
+    def __get_Gk(*args): return _moose.Mg_block___get_Gk(*args)
+    def __set_Gk(*args): return _moose.Mg_block___set_Gk(*args)
+    def __get_Ek(*args): return _moose.Mg_block___get_Ek(*args)
+    def __set_Ek(*args): return _moose.Mg_block___set_Ek(*args)
+    def __get_Zk(*args): return _moose.Mg_block___get_Zk(*args)
+    def __set_Zk(*args): return _moose.Mg_block___set_Zk(*args)
+    KMg_A = _swig_property(_moose.Mg_block_KMg_A_get, _moose.Mg_block_KMg_A_set)
+    K_MgB = _swig_property(_moose.Mg_block_K_MgB_get, _moose.Mg_block_K_MgB_set)
+    Ik = _swig_property(_moose.Mg_block_Ik_get, _moose.Mg_block_Ik_set)
+    Gk = _swig_property(_moose.Mg_block_Gk_get, _moose.Mg_block_Gk_set)
+    Ek = _swig_property(_moose.Mg_block_Ek_get, _moose.Mg_block_Ek_set)
+    Zk = _swig_property(_moose.Mg_block_Zk_get, _moose.Mg_block_Zk_set)
+Mg_block_swigregister = _moose.Mg_block_swigregister
+Mg_block_swigregister(Mg_block)
+Mg_block.className = _moose.cvar.Mg_block_className
+
 class Compartment(PyMooseBase):
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
