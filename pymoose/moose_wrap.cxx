@@ -18324,20 +18324,31 @@ fail:
 SWIGINTERN PyObject *_wrap_PyMooseContext_loadG(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  std::string arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_loadG",1,1,&obj0)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_loadG",2,2,&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_loadG" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
   }
   arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
   {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_loadG" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    (arg1)->loadG();
+    (arg1)->loadG(arg2);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
