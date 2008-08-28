@@ -7,7 +7,7 @@ import math
 # has been generated in ${MOOSE_SOURCE_DIRECTORY}/pymoose/ (as default
 # pymoose build does) and this file is located in
 # ${MOOSE_SOURCE_DIRECTORY}/pymoose/examples
-sys.path.append('../..')
+sys.path.append('..\..')
 try:
     import moose
 except ImportError:
