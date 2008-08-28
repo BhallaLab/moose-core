@@ -16,7 +16,7 @@ using namespace pymoose;
     
 string PyMooseBase::separator_ = "/"; /// this is default separator is the unix path separator
 
-PyMooseContext* PyMooseBase::context_ = PyMooseContext::createPyMooseContext("BaseContext", "shell");
+pymoose::PyMooseContext* PyMooseBase::context_ = pymoose::PyMooseContext::createPyMooseContext("BaseContext", "shell");
 
 /**
    This constructor is protected and is intended for use by the
@@ -353,7 +353,7 @@ bool PyMooseBase::connect(std::string srcField, Id dest, std::string destField)
     return context_->connect(this->id_, srcField, dest, destField);    
 }
 
-PyMooseContext* PyMooseBase::getContext()
+pymoose::PyMooseContext* PyMooseBase::getContext()
 {
     if (context_ == NULL)
     {
