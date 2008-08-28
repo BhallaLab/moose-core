@@ -17,6 +17,8 @@
 #include "../builtins/Table.h"
 #include "../maindir/init.h"
 #include "../connections/ConnTainer.h"
+#include <stdio.h>
+
 using namespace std;
 using namespace pymoose;
 extern int mooseInit();
@@ -42,7 +44,7 @@ const Cinfo* initPyMooseContextCinfo()
 		new SrcFinfo( "trigCwe", Ftype0::global() ),
 		// Then receive the cwe info
 		new DestFinfo( "recvCwe", Ftype1< Id >::global(),
-					RFCAST( &PyMooseContext::recvCwe ) ),
+					RFCAST(&pymoose::PyMooseContext::recvCwe ) ),
 		// Setting pushe. This returns with the new cwe.
 		new SrcFinfo( "pushe", Ftype1< Id >::global() ),
 		// Doing pope. This returns with the new cwe.
@@ -56,7 +58,7 @@ const Cinfo* initPyMooseContextCinfo()
 		// the elist into a temporary local buffer.
 		new DestFinfo( "recvElist", 
 					Ftype1< vector< Id > >::global(), 
-					RFCAST( &PyMooseContext::recvElist ) ),
+					RFCAST(&pymoose::PyMooseContext::recvElist ) ),
 
 		///////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions.
@@ -73,7 +75,7 @@ const Cinfo* initPyMooseContextCinfo()
 		new SrcFinfo( "getSynCount", Ftype1< Id >::global() ),
 		new DestFinfo( "recvCreate",
 					Ftype1< Id >::global(),
-					RFCAST( &PyMooseContext::recvCreate ) ),
+					RFCAST(&pymoose::PyMooseContext::recvCreate ) ),
 		// Deleting an object: Send out the request.
 		new SrcFinfo( "delete", Ftype1< Id >::global() ),
 
@@ -87,7 +89,7 @@ const Cinfo* initPyMooseContextCinfo()
 		// Getting a field value as a string: Recv the value.
 		new DestFinfo( "recvField",
 					Ftype1< string >::global(),
-					RFCAST( &PyMooseContext::recvField ) ),
+					RFCAST( &pymoose::PyMooseContext::recvField ) ),
 		// Setting a field value as a string: send out request:
 		new SrcFinfo( "set", // object, field, value 
 				Ftype3< Id, string, string >::global() ),
@@ -120,7 +122,7 @@ const Cinfo* initPyMooseContextCinfo()
 					Ftype0::global() ), //request clocks
 		new DestFinfo( "recvClocks", 
 					Ftype1< vector< double > >::global(), 
-					RFCAST( &PyMooseContext::recvClocks ) ),
+					RFCAST( &pymoose::PyMooseContext::recvClocks ) ),
 		new SrcFinfo( "requestCurrentTime", Ftype0::global() ),
 		// Returns time in the default return value.
 		
@@ -142,7 +144,7 @@ const Cinfo* initPyMooseContextCinfo()
 		// Receive message list and string with remote fields for msgs
 		new DestFinfo( "recvMessageList",
 					Ftype2< vector < Id >, string >::global(), 
-					RFCAST( &PyMooseContext::recvMessageList ) ),
+					RFCAST(&pymoose::PyMooseContext::recvMessageList ) ),
 
 		///////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions.
@@ -241,7 +243,7 @@ const Cinfo* initPyMooseContextCinfo()
 		initNeutralCinfo(),
 		pyMooseContextFinfos,
 		sizeof(pyMooseContextFinfos) / sizeof( Finfo* ),
-		ValueFtype1< PyMooseContext >::global()
+		ValueFtype1< pymoose::PyMooseContext >::global()
 	);
 
 	return &pyMooseContextCinfo;
@@ -359,7 +361,7 @@ static const Slot tabopSlot =
 //////////////////////////
 // Static constants
 //////////////////////////
-const string PyMooseContext::separator = "/";
+const string pymoose::PyMooseContext::separator = "/";
 
 // char* copyString( const string& s )
 // {
@@ -372,7 +374,7 @@ const string PyMooseContext::separator = "/";
 // PyMooseContext Message recv functions
 //////////////////////////////////////////////////////////////////
 
-void PyMooseContext::recvCwe( const Conn* c, Id cwe )
+void pymoose::PyMooseContext::recvCwe( const Conn* c, Id cwe )
 {
     PyMooseContext* gpw = static_cast< PyMooseContext* >
         ( c->data() );
@@ -880,7 +882,7 @@ void PyMooseContext::useClock(const Id& tickId, string path, string func)
 void PyMooseContext::useClock(int tickNo, std::string path, std::string func)
 {
     char tickName[40];
-    snprintf(tickName, (size_t)(39), "/sched/cj/t%d",tickNo);
+	_snprintf(tickName, (size_t)(39), "/sched/cj/t%d",tickNo);
     Id tickId(tickName);
     if (tickId.bad())
     {

@@ -19,7 +19,9 @@ using namespace std;
 class Eref;
 class Element;
 class IdManager;
-
+namespace pymoose{
+	class PyMooseContext;
+}
 /**
  * This class manages id lookups for elements. Ids provide a uniform
  * handle for every object, independent of which node they are located on.
@@ -34,7 +36,7 @@ class Id
     
     
 	friend class IdManager;
-        friend class PyMooseContext;
+	friend class pymoose::PyMooseContext;
     
 #ifdef DO_UNIT_TESTS
 	friend void testShell();
