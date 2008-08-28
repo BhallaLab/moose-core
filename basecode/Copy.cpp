@@ -725,8 +725,8 @@ void copyTest()
 	ret = set <double> (c_simple, "x", 100);
 	ASSERT(ret, "set value to compartment");
 	Element *c_array = c_simple->copyIntoArray(m->id(), "c_array", 4);
-	ASSERT(c_array->numEntries() == 4, "number of entries")
-	ASSERT(c_array != 0, "simple element copied into array element")
+	ASSERT(c_array->numEntries() == 4, "number of entries");
+	ASSERT(c_array != 0, "simple element copied into array element");
 	Eref eref = Eref(c_array, 2);
 	double x;
 	get <double> (eref, "x", x);
@@ -737,7 +737,7 @@ void copyTest()
 	eref = Eref(c_array, 1);
 	get <double> (eref, "x", x);
 	get <double> (c_simple, "x", x);
-	ASSERT(x == 100, "checking other index element")
+	ASSERT(x == 100, "checking other index element");
 	set( m, "destroy" );
 	
 	set( n, "destroy" );
