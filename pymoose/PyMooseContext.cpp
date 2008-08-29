@@ -457,9 +457,21 @@ PyMooseContext::~PyMooseContext()
 */
 void PyMooseContext::loadG(std::string script)
 {
+    // Disconnect the PyMooseContext object temporarily and connect
+    // GenesisParserWrapper to the shell
+    bool ret;
+    ret = this->shell_.eref().dropAll("parser"); // disconnect the context from shell
+    assert(ret);
+    ret = this->shell_.eref().add("parser", this->genesisSli_, "parser", ConnTainer::Default); // connect genesis parser
+    assert(ret);
+        
     string stmt = "include "+script;
     set<std::string>( this->genesisSli_, this->genesisParseFinfo_, stmt);
     set<std::string>( this->genesisSli_, this->genesisParseFinfo_, "\n");
+    ret = this->shell_.eref().dropAll("parser"); // disconnect genesis parser
+    assert(ret);
+    ret = this->shell_.eref().add( "parser", this->myId_(), "parser", ConnTainer::Default); // reconnect context
+    assert(ret);    
 }
 /**
    Run a genesis statement.
@@ -467,7 +479,23 @@ void PyMooseContext::loadG(std::string script)
 */
 void PyMooseContext::runG(std::string stmt)
 {
-    set<std::string>( this->genesisSli_, this->genesisParseFinfo_, stmt);    
+    bool ret;
+    ret = this->shell_.eref().dropAll("parser"); // disconnect the context from shell
+    assert(ret);
+    ret = this->myId_.eref().dropAll("parser"); // disconnect the context from shell
+    assert(ret);
+    ret = this->shell_.eref().add("parser", this->genesisSli_, "parser", ConnTainer::Default); // connect genesis parser
+    assert(ret);
+    
+    set<std::string>( this->genesisSli_, this->genesisParseFinfo_, stmt);
+    set<std::string>( this->genesisSli_, this->genesisParseFinfo_, "\n");
+    
+    ret = this->shell_.eref().dropAll("parser"); // disconnect genesis parser
+    assert(ret);
+    ret = this->genesisSli_->id().eref().dropAll("parser");
+    assert(ret);
+    ret = this->shell_.eref().add( "parser", this->myId_(), "parser", ConnTainer::Default); // reconnect context
+    assert(ret);    
 }
 
 /**
@@ -587,20 +615,6 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     cout << "Trying to find shell with name " << shellName << endl;
     Id shellId = Id::shellId();
     Element* contextElement = Neutral::create( "PyMooseContext",contextName, shellId, Id::scratchId());
-
-//     const Finfo* shellFinfo, *contextFinfo;
-//     shellFinfo = shell->findFinfo( "parser" );
-//     assert(shellFinfo!=NULL);
-    
-//     contextFinfo = contextElement->findFinfo( "parser" );
-//     assert(contextFinfo!=NULL);
-//     ret = shellFinfo->add( shell, contextElement, contextFinfo);
-
-//     assert(ret);
-    ret = shellId.eref().add( "parser", contextElement, "parser", ConnTainer::Default);
-
-    assert(ret);
-    
     context = static_cast<PyMooseContext*> (contextElement->data(0) );
     context->shell_ = shellId;    
     context->myId_ = contextElement->id();
@@ -613,7 +627,12 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     
     // From maindir/main.cpp: parser requires to be created before the clock job
     context->genesisSli_ = makeGenesisParser();
-    assert(context->genesisSli_ != 0);
+    ret = shellId.eref().dropAll("parser"); // disconnect genesis parser
+    assert(ret);
+    ret = context->genesisSli_->id().eref().dropAll("parser");
+    assert(ret);
+    ret = shellId.eref().add( "parser", contextElement, "parser", ConnTainer::Default);// reconnect context
+    assert(ret);
     
     Id cj("/sched/cj");
     Id t0("/sched/cj/t0");
@@ -965,30 +984,9 @@ bool PyMooseContext::connect(const Id& src, string srcField, const Id& dest, str
     {
         send4< vector<Id>, string, vector <Id>, string >( myId_(), addMessageSlot,
 			srcList, srcField, destList, destField );
-		return 1;
-		/*
-		Element* se = src();
-		Element* de = dest();
-		const Finfo* sf = se->findFinfo( srcF );
-		if ( !sf ) return 0;
-		const Finfo* df = de->findFinfo( destF );
-		if ( !df ) return 0;
-
-		return se->findFinfo( srcF )->add( se, de, de->findFinfo( destF )) ;
-		*/
-	}
-	return 0;
-    // if ( !src.bad() && !dest.bad() ) {
-//         Element* se = src( );
-//         Element* de = dest( );
-//         const Finfo* sf = se->findFinfo( srcField );
-//         if ( !sf ) return false;
-//         const Finfo* df = de->findFinfo( destField );
-//         if ( !df ) return false;
-//         return (bool)(se->findFinfo( srcField )->add( se, de, de->findFinfo( destField ) ));
-//     }
-//     return false;  
-    
+        return 1;
+    }
+    return 0;
 }
 /**
    createmap
@@ -1076,7 +1074,6 @@ bool PyMooseContext::parseCopyMove( string src, string dest, Id s,
     e = Id( src );
     if ( !e.zero() && !e.bad() ) {
         childname = "";
-        // pa = GenesisParserWrapper::path2eid( dest, s );
         pa = Id( dest );
         if ( pa.bad() ) { // Possibly we are renaming it too.
             string pastr = dest;
