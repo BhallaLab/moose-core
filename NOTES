@@ -7062,5 +7062,9 @@ Checked in as revision 601: unit test flags on, Smoldyn off, -g, no GSL, MPI off
 ==============================================================================
 29 August 2008
 Added a fix to Msg::dropAll, so that it now clears the old FuncVec.
+Checked in as revision 646: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
+Fixed a problem with handling parsers. The Shell used a 'send' call 
+to return a field value to the parser. Changed it to sendBack.
 
 ==============================================================================
