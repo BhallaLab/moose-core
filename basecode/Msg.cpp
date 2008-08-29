@@ -362,6 +362,7 @@ void Msg::dropAll( Element* e )
 		e->varMsg( next_ )->dropAll( e );
 	next_ = 0; // Note that we don't yet do garbage collection to
 				// reuse the 'next' msg location on the vector.
+	fv_ = FuncVec::getFuncVec( 0 ); // reset to empty.
 	c_.resize( 0 );
 }
 
