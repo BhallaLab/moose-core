@@ -1330,7 +1330,7 @@ void Shell::recvGetFunc( const Conn* c, string value )
 	// Bigger problem that this is asynchronous now.
 	// Maybe it is OK if only one parser.
 	// sendTo1< string >( c.targetElement(), getFieldSlot, 0, value );
-	send1< string >( c->target(), getFieldSlot, value );
+	sendBack1< string >( c, getFieldSlot, value );
 }
 
 void Shell::slaveCreateFunc ( const Conn* c,
