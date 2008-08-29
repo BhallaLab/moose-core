@@ -17,7 +17,7 @@
 #include "../builtins/Table.h"
 #include "../maindir/init.h"
 #include "../connections/ConnTainer.h"
-#include <stdio.h>
+#include <cstdio>
 
 using namespace std;
 using namespace pymoose;
@@ -882,7 +882,7 @@ void PyMooseContext::useClock(const Id& tickId, string path, string func)
 void PyMooseContext::useClock(int tickNo, std::string path, std::string func)
 {
     char tickName[40];
-	_snprintf(tickName, (size_t)(39), "/sched/cj/t%d",tickNo);
+	snprintf(tickName, (size_t)(39), "/sched/cj/t%d",tickNo);
     Id tickId(tickName);
     if (tickId.bad())
     {
