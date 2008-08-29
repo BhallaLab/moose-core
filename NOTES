@@ -7057,3 +7057,10 @@ const char* declarations. I have fixed about 25 of these, and there seem to
 be several hundred left, almost all in the parser. May have to use an upgraded
 flex/bison to rebuild the parser to fix this.
 
+Checked in as revision 601: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
+==============================================================================
+29 August 2008
+Added a fix to Msg::dropAll, so that it now clears the old FuncVec.
+
+==============================================================================
