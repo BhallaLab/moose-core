@@ -62,6 +62,7 @@ ConnTainer* selectConnTainer( Eref src, Eref dest,
 	}
 
 	ConnTainer* ct = 0;
+	 // cout << "selectContainer: option " << connTainerOption << " from " << src->name() << "." << src.i << " to " << dest->name() << "." << dest.i << endl;
 	switch ( connTainerOption )
 	{
 		case 0:
