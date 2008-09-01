@@ -122,12 +122,12 @@ Cinfo::Cinfo(const std::string& name,
                    << "        " << name << "(std::string name, Id parentId);\n"
                    << "        " << name << "(std::string name, PyMooseBase& parent);\n"
                    << "        " << name << "( const " << name << "& src, std::string name, PyMooseBase& parent);\n"
-                   << "        " << name << "( const " << name << "& src, std::string name, Id parent);\n"
+                   << "        " << name << "( const " << name << "& src, std::string name, Id& parent);\n"
                    << "        " << name << "( const " << name << "& src, std::string path);\n"
-                   << "        " << name << "( const Id& src, std::string name, Id parent);\n"
+                   << "        " << name << "( const Id& src, std::string name, Id& parent);\n"
                    << "        ~" << name <<"();\n"
                    << "        const std::string& getType();\n";
-        
+
             cpp << "#ifndef _pymoose_" << name << "_cpp\n"
                 << "#define _pymoose_"<< name << "_cpp\n"
                 << "#include \"" << name << ".h\"\n"
@@ -137,6 +137,10 @@ Cinfo::Cinfo(const std::string& name,
                 << name << "::" << name <<"(std::string path):PyMooseBase(className, path){}\n"
                 << name << "::" << name << "(std::string name, Id parentId):PyMooseBase(className, name, parentId){}\n"
                 << name << "::" << name << "(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}\n"
+                << name << "::" << name << "(const " << name << "& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}\n"
+                << name << "::" << name << "(const " << name << "& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}\n"
+                << name << "::" << name << "(const " << name << "& src, std::string path):PyMooseBase(src, path){}\n"
+                << name << "::" << name << "(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}\n"
                 << name << "::~" << name <<"(){}\n"
                 << "const std::string& "<< name <<"::getType(){ return className; }\n";
             swig << "%include \"" << name << ".h\"\n";        
@@ -156,11 +160,10 @@ Cinfo::Cinfo(const std::string& name,
                 std::string fieldName = finfoArray[i]->name();
                 std::string fieldType = finfoArray[i]->ftype()->getTemplateParameters();
                                 
-                if (fieldType != "void")
+                if (fieldType != "void" && dynamic_cast<ValueFinfo*>(finfoArray[i]) != NULL)
                 {
                     /* Insert the getters and setters */                  
                     header << "            " << fieldType << " __get_" << fieldName << "() const;\n";
-                    header << "            void" << " __set_" << fieldName << "(" << fieldType << " " << fieldName << ");\n";
                 
                     cpp << fieldType <<" " <<  name << "::__get_" <<  fieldName << "() const\n"
                         << "{\n"
@@ -168,11 +171,19 @@ Cinfo::Cinfo(const std::string& name,
                         << "    get < " << fieldType << " > (id_(), \""<< fieldName << "\"," << fieldName << ");\n"
                         << "    return " << fieldName << ";\n"
                         << "}" << endl;
-                    cpp << "void " << name << "::__set_" << fieldName <<"( " << fieldType << " " << fieldName << " )\n"
-                        << "{\n"
-                        << "    set < " << fieldType << " > (id_(), \"" << fieldName << "\", "<< fieldName << ");\n"
-                        << "}" << endl;
-                    swig << "%attribute(pymoose::" << name << ", " << fieldType << ", " << fieldName << ", __get_" << fieldName << ", __set_" << fieldName << ")\n";                
+                    swig << "%attribute(pymoose::" << name << ", " << fieldType << ", " << fieldName << ", __get_" << fieldName;
+                    
+                    if ( finfoArray[i]->recvFunc() != &dummyFunc) // read-write field - put setter
+                    {
+                        header << "            void" << " __set_" << fieldName << "(" << fieldType << " " << fieldName << ");\n";
+                    
+                        cpp << "void " << name << "::__set_" << fieldName <<"( " << fieldType << " " << fieldName << " )\n"
+                            << "{\n"
+                            << "    set < " << fieldType << " > (id_(), \"" << fieldName << "\", "<< fieldName << ");\n"
+                            << "}" << endl;
+                        swig << ", __set_" << fieldName;                        
+                    }                    
+                    swig << ")\n";                
                 }
             }
 #endif
