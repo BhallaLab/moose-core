@@ -46,7 +46,8 @@ OBJFILES = ../basecode/basecode.o \
 	../randnum/randnum.o	\
 	../maindir/init.o	\
 	../connections/connections.o \
-	../genesis_parser/SLI.o
+	../genesis_parser/SLI.o	\
+	../kinetics/kinetics.o	\
 
 
 OBJ = PyMooseBase.o \
@@ -74,10 +75,12 @@ OBJ = PyMooseBase.o \
 	Enzyme.o \
 	KineticHub.o \
 	Kintegrator.o \
+	KineticManager.o \
 	Molecule.o \
 	Reaction.o \
 	Stoich.o \
-	HSolve.o	\
+	NeuroScan.o \
+	HSolve.o \
 	RandGenerator.o	\
 	BinomialRng.o	\
 	ExponentialRng.o	\
@@ -85,7 +88,19 @@ OBJ = PyMooseBase.o \
 	NormalRng.o	\
 	PoissonRng.o	\
 	UniformRng.o	\
+	KinCompt.o \
+	Panel.o \
+	DiskPanel.o \
+	HemispherePanel.o \
+	RectPanel.o \
+	CylPanel.o \
+	SpherePanel.o \
+	TriPanel.o \
+	Surface.o \
+	Geometry.o	\
+	MathFunc.o
 
+	
 HEADERS = PyMooseUtil.h \
 	PyMooseContext.h \
 	PyMooseBase.h \
@@ -112,9 +127,11 @@ HEADERS = PyMooseUtil.h \
 	Enzyme.h \
 	KineticHub.h \
 	Kintegrator.h \
+	KineticManager.h	\
 	Molecule.h \
 	Reaction.h \
 	Stoich.h  \
+	NeuroScan.h \
 	HSolve.h	\
 	RandGenerator.h	\
 	BinomialRng.h	\
@@ -123,6 +140,17 @@ HEADERS = PyMooseUtil.h \
 	NormalRng.h	\
 	PoissonRng.h	\
 	UniformRng.h	\
+	KinCompt.h	\
+	Panel.h	\
+	DiskPanel.h	\
+	CylPanel.h	\
+	HemispherePanel.h	\
+	SpherePanel.h	\
+	TriPanel.h	\
+	RectPanel.h	\
+	Surface.h	\
+	Geometry.h	\
+	MathFunc.h	\
 	../randnum/randnum.h	\
 	../randnum/Probability.h	\
 	../randnum/Binomial.h	\
