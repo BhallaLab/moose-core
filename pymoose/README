@@ -52,3 +52,19 @@ should have the directory containing moose.py and _moose.so (the same
 directory where _this_ file is located ) in your PYTHONPATH
 environment variable.
 
+#-------- Classes that are generated but not included in PyMOOSE -------
+
+CopyClass - Copy.cpp has a test Cinfo which causes auto generation of
+CopyClass.h and CopyClass.cpp. These are not part of PyMoose or MOOSE.
+
+GenesisParser - This class is not to be exposed to user
+
+Sched0
+Sched1
+Sched2
+script_out.cpp
+script_out.h
+sharedFinfoTestClass.cpp
+sharedFinfoTestClass.h
+Shell.cpp
+Shell.h
