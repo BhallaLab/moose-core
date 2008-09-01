@@ -28,13 +28,26 @@
 	#include "HHChannel.h"
 	#include "Mg_block.h"
 	#include "Compartment.h"
+	#include "NeuroScan.h"
 	#include "HSolve.h"
 	#include "Enzyme.h"
 	#include "KineticHub.h"		
 	#include "Kintegrator.h"
+	#include "MathFunc.h"
 	#include "Molecule.h"
 	#include "Reaction.h"
 	#include "Stoich.h"
+	#include "KineticManager.h"
+	#include "KinCompt.h"
+	#include "Panel.h"
+	#include "DiskPanel.h"
+	#include "CylPanel.h"
+	#include "HemispherePanel.h"
+	#include "SpherePanel.h"
+	#include "TriPanel.h"
+	#include "RectPanel.h"
+	#include "Surface.h"
+	#include "Geometry.h"
 //	#include "../kinetics/SparseMatrix.h"
 	#include "../utility/utility.h"
 	/* Random number related utilities */
@@ -297,6 +310,13 @@
 %attribute(pymoose::Compartment, double, z, __get_z, __set_z)
 %attribute(pymoose::Compartment, double, VmSrc, __get_VmSrc, __set_VmSrc)
 %attribute(pymoose::Compartment, double, injectMsg, __get_injectMsg, __set_injectMsg)
+%include "NeuroScan.h"
+%attribute(pymoose::NeuroScan, int, VDiv, __get_VDiv, __set_VDiv)
+%attribute(pymoose::NeuroScan, double, VMin, __get_VMin, __set_VMin)
+%attribute(pymoose::NeuroScan, double, VMax, __get_VMax, __set_VMax)
+%attribute(pymoose::NeuroScan, int, CaDiv, __get_CaDiv, __set_CaDiv)
+%attribute(pymoose::NeuroScan, double, CaMin, __get_CaMin, __set_CaMin)
+%attribute(pymoose::NeuroScan, double, CaMax, __get_CaMax, __set_CaMax)
 
 
 %include "HSolve.h"
@@ -309,6 +329,11 @@
 %attribute(pymoose::Kintegrator, bool, isInitiatilized, __get_isInitiatilized, __set_isInitiatilized)
 //%attribute(pymoose::Kintegrator, string, integrate_method, __get_method, __set_method)
 //%attribute_ref(Kintegrator, string, method)
+%include "MathFunc.h"
+%attribute(pymoose::MathFunc, string, mathML, __get_mathML, __set_mathML)
+%attribute(pymoose::MathFunc, string, function, __get_function, __set_function)
+%attribute(pymoose::MathFunc, double, result, __get_result, __set_result)
+
 %include "Stoich.h"
 %attribute(pymoose::Stoich, unsigned int, nMols, __get_nMols, __set_nMols)
 %attribute(pymoose::Stoich, unsigned int, nVarMols, __get_nVarMols, __set_nVarMols)
@@ -407,3 +432,38 @@
 %attribute(pymoose::NormalRng, double, mean, __get_mean, __set_mean)
 %attribute(pymoose::NormalRng, double, variance, __get_variance, __set_variance)
 %attribute(pymoose::NormalRng, int, method, __get_method, __set_method)
+%include "KineticManager.h"
+%attribute(pymoose::KineticManager, bool, autoMode, __get_autoMode, __set_autoMode)
+%attribute(pymoose::KineticManager, bool, stochastic, __get_stochastic, __set_stochastic)
+%attribute(pymoose::KineticManager, bool, spatial, __get_spatial, __set_spatial)
+%attribute(pymoose::KineticManager, string, method, __get_method, __set_method)
+%attribute(pymoose::KineticManager, bool, variableDt, __get_variableDt)
+%attribute(pymoose::KineticManager, bool, singleParticle, __get_singleParticle)
+%attribute(pymoose::KineticManager, bool, multiscale, __get_multiscale)
+%attribute(pymoose::KineticManager, bool, implicit, __get_implicit)
+%attribute(pymoose::KineticManager, string, description, __get_description)
+%attribute(pymoose::KineticManager, double, recommendedDt, __get_recommendedDt)
+%attribute(pymoose::KineticManager, double, eulerError, __get_eulerError, __set_eulerError)
+%include "KinCompt.h"
+%attribute(pymoose::KinCompt, double, volume, __get_volume, __set_volume)
+%attribute(pymoose::KinCompt, double, area, __get_area, __set_area)
+%attribute(pymoose::KinCompt, double, perimeter, __get_perimeter, __set_perimeter)
+%attribute(pymoose::KinCompt, double, size, __get_size, __set_size)
+%attribute(pymoose::KinCompt, unsigned int, numDimensions, __get_numDimensions, __set_numDimensions)
+%include "Panel.h"
+%attribute(pymoose::Panel, unsigned int, nPts, __get_nPts)
+%attribute(pymoose::Panel, unsigned int, nDims, __get_nDims)
+%attribute(pymoose::Panel, unsigned int, nNeighbors, __get_nNeighbors)
+%attribute(pymoose::Panel, unsigned int, shapeId, __get_shapeId)
+%attribute(pymoose::Panel, const vector<double>&, coords, __get_coords)
+%include "DiskPanel.h"
+%include "CylPanel.h"
+%include "HemispherePanel.h"
+%include "SpherePanel.h"
+%include "TriPanel.h"
+%include "RectPanel.h"
+%include "Surface.h"
+%attribute(pymoose::Surface, double, volume, __get_volume)
+%include "Geometry.h"
+%attribute(pymoose::Geometry, double, epsilon, __get_epsilon, __set_epsilon)
+%attribute(pymoose::Geometry, double, neighdist, __get_neighdist, __set_neighdist)
