@@ -1878,8 +1878,6 @@ void Shell::addMessage( const Conn* c,
 				else
 					cout << "Error: Shell::addMessage failed\n";
 		}
-	if ( ok )
-		cout << "msg add OK\n";
 }
 
 void Shell::addEdge( const Conn* c, Fid src, Fid dest, int connType )
