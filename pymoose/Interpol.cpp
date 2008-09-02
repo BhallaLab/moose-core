@@ -10,15 +10,35 @@ const std::string InterpolationTable::className = "InterpolationTable";
 InterpolationTable::InterpolationTable(Id id):PyMooseBase(id){}
 InterpolationTable::InterpolationTable(std::string path):PyMooseBase("Interpol", path){}
 InterpolationTable::InterpolationTable(std::string name, Id parentId):PyMooseBase("Interpol", name, parentId){}
-InterpolationTable::InterpolationTable(std::string name, PyMooseBase& parent):PyMooseBase("Interpol", name, parent){}
-InterpolationTable::InterpolationTable(const InterpolationTable& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+InterpolationTable::InterpolationTable(
+    std::string name,
+    PyMooseBase& parent)
+    :PyMooseBase("Interpol", name, parent){}
 
-InterpolationTable::InterpolationTable(const InterpolationTable& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-InterpolationTable::InterpolationTable(const InterpolationTable& src, std::string path):PyMooseBase(src, path)
+InterpolationTable::InterpolationTable(
+    const InterpolationTable& src,
+    std::string objectName,
+    PyMooseBase& parent)
+    :PyMooseBase(src, objectName, parent){}
+
+InterpolationTable::InterpolationTable(
+    const InterpolationTable& src,
+    std::string objectName,
+    Id& parent)
+    :PyMooseBase(src, objectName, parent){}
+
+InterpolationTable::InterpolationTable(
+    const InterpolationTable& src,
+    std::string path)
+    :PyMooseBase(src, path)
 {
 }
 
-InterpolationTable::InterpolationTable(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+InterpolationTable::InterpolationTable(
+    const Id& src,
+    string name,
+    Id& parent)
+    :PyMooseBase(src, name, parent)
 {
 }
 InterpolationTable::~InterpolationTable(){}
