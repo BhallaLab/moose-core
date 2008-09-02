@@ -43,7 +43,7 @@ HEADERS = \
 # under the GPL, so only GPL-compliant uses of MOOSE will be able to
 # use it. Should be fine for academic use.
 # Optional: Comment out the following three items if not using GSL
-ifdef ($(USE_GSL))
+ifdef USE_GSL
 GSL_OBJ = GslIntegrator.o
 GSL_LIBS = -lgsl -lgslcblas
 GSL_FLAGS = -DUSE_GSL
