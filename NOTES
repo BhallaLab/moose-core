@@ -7066,5 +7066,12 @@ Checked in as revision 646: unit test flags on, Smoldyn off, -g, no GSL, MPI off
 
 Fixed a problem with handling parsers. The Shell used a 'send' call 
 to return a field value to the parser. Changed it to sendBack.
+Checked in as revision 647: unit test flags on, Smoldyn off, -g, no GSL, MPI off
 
+==============================================================================
+2 Sep 2008
+Begun work on robots/SigNeur.
+==============================================================================
+3 Sep 2008
+Begun work on robots/Adaptor.
 ==============================================================================
