@@ -10,6 +10,8 @@ float VARIABLE_DT_FLAG = 0
 float DEFAULT_VOL = 1
 float VERSION = 11.0
 
+addalias xtextload echo
+
 function kparms
 end
 
@@ -48,17 +50,18 @@ function do_save_all_plots( filename )
 	str name
 	foreach name ( {el /graphs/##[TYPE=Table] } )
 		openfile {filename} a
+		echo "Writing" {name}
 		writefile {filename} "/newplot"
 		writefile {filename} "/plotname "{name}
 		closefile {filename}
-		setfield {name} print {filename}
+		setfield {name} append {filename}
 	end
 	foreach name ( {el /moregraphs/##[TYPE=Table] } )
 		openfile {filename} a
 		writefile {filename} "/newplot"
 		writefile {filename} "/plotname "{name}
 		closefile {filename}
-		setfield {name} print {filename}
+		setfield {name} append {filename}
 	end
 end
 
