@@ -92,10 +92,10 @@ template < class T1, class T2, class T3, class T4 >
 virtual std::string getTemplateParameters() const
     {
         static std::string s = 
-			Ftype::full_type(std::string(typeid(T1).name())) +"," +
-			Ftype::full_type(std::string(typeid(T2).name()))+"," +
-			Ftype::full_type(std::string (typeid(T3).name())) + "," +
-			Ftype::full_type( std::string (typeid( T4 ).name () ) );
+			Ftype::full_type(typeid(T1)) +"," +
+			Ftype::full_type(typeid(T2))+"," +
+			Ftype::full_type(typeid(T3)) + "," +
+			Ftype::full_type(typeid( T4 )) ;
         cout << "Ftype4::getTemplateParameters() - " << s << endl;        
         return s;
     }
