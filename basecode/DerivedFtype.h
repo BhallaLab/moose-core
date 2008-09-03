@@ -412,7 +412,7 @@ template < class T > class Ftype1: public Ftype
 
 			virtual std::string getTemplateParameters() const
 			{
-				return Ftype::full_type(std::string(typeid(T).name()));
+				return Ftype::full_type(typeid(T));
 			}
 			
 			///////////////////////////////////////////////////////

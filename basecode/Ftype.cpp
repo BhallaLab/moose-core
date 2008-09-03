@@ -90,7 +90,96 @@ unsigned int Ftype::asyncFuncId() const {
 unsigned int Ftype::proxyFuncId() const {
 	return proxyFuncs_->id();
 }
+std::string Ftype::full_type(const type_info& paramType)
+{
+    if (paramType == typeid(unsigned char))
+    {
+        return "unsigned char";
+    }
+    else if ( paramType == typeid(char))
+    {
+        return "char";
+    }
+    else if (paramType == typeid(short))
+    {
+        return "short";
+    }
+    else if (paramType == typeid(unsigned short))
+    {
+        return "unsigned short";
+    }
+    else if ( paramType == typeid(unsigned int))
+    {
+        return "unsigned int";
+    }
+    else if ( paramType == typeid(int) )
+    {
+        return "int";
+    }
+    else if (paramType == typeid(float))
+    {
+        return "float";
+    }
+    else if ( paramType == typeid(double) )
+    {
+        return "double";
+    }
+    else if (paramType == typeid(string))
+    {
+        return "string";
+    }
+    else if (paramType == typeid(bool))
+    {
+        return "bool";
+    }
+    else if ( paramType == typeid(vector<bool>))
+    {
+        return "vector < bool >";
+    }
+    else if (paramType == typeid(vector <char>))
+    {
+        return "vector < char >";
+    }
+    else if (paramType == typeid(unsigned char))
+    {
+        return "unsigned char";
+    }
+    else if ( paramType == typeid(vector <short>))
+    {
+        return "vector < short >";
+    }
+    else if (paramType == typeid(unsigned short))
+    {
+        return "unsigned short";
+    }
+    else if ( paramType == typeid(vector <int>))
+    {
+        return "vector < int >";
+    }
+    else if (paramType == typeid(vector <unsigned int>))
+    {
+        return "vector < unsigned int >";
+    }
+    else if (paramType == typeid(vector<float>))
+    {
+        return "vector < float >";
+    }
+    else if (paramType == typeid(vector <double>))
+    {
+        return "vector < double >";
+    }
+    else if (paramType == typeid(vector <string >))
+    {
+        return "vector < string >";
+    }    
+    else
+    {
+        cout << "Type not in list: " << paramType.name() << endl;
+        return "none";
+    }
+}
 
+/*
 std::string Ftype::full_type(std::string type)
 {
 	static map < std::string, std::string > type_map;
@@ -116,3 +205,4 @@ std::string Ftype::full_type(std::string type)
 		return i->second;
 	}
 }
+*/
