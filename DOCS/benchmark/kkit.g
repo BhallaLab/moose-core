@@ -51,14 +51,14 @@ function do_save_all_plots( filename )
 		writefile {filename} "/newplot"
 		writefile {filename} "/plotname "{name}
 		closefile {filename}
-		setfield {name} print {filename}
+		setfield {name} append {filename}
 	end
 	foreach name ( {el /moregraphs/##[TYPE=Table] } )
 		openfile {filename} a
 		writefile {filename} "/newplot"
 		writefile {filename} "/plotname "{name}
 		closefile {filename}
-		setfield {name} print {filename}
+		setfield {name} append {filename}
 	end
 end
 
