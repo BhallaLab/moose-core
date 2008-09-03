@@ -182,7 +182,7 @@ class Ftype
 			////////////////////////////////////////////////////////
 			// I believe these are used by the Python code.
 			
-			static std::string full_type(std::string type);
+			static std::string full_type(const type_info& type);
 
 			virtual std::string getTemplateParameters() const
     		{
