@@ -11,6 +11,61 @@
 #ifndef _SIGNEUR_H
 #define _SIGNEUR_H
 
+
+/**
+ * enum of the different compartment types, worked out by analyzing the
+ * cell model. Each of these will get assigned a distinct signaling model
+ * and possibly different numberical method.
+ */
+enum CompartmentCategory { SOMA, DEND, SPINE, SPINE_NECK };
+
+/**
+ * Data structure that organizes the composite model.
+ * Assumes arrays for each of the signaling models.
+ */
+class TreeNode {
+	public:
+		TreeNode( Id c, unsigned int p, CompartmentCategory cc )
+			:
+				compt( c ),
+				parent( p ),
+				sigStart( 0 ),
+				sigEnd( 0 ),
+				category( cc )
+		{;}
+
+		Id compt; /// Id of electrical compartment on this node.
+
+		/// Parent compartment treeNode index. Empty for soma.
+		unsigned int parent; 
+
+		Id sigModel; /// Parent of array of sigModels.
+		unsigned int sigStart; /// Indices of sigModel entries.
+		unsigned int sigEnd; /// Indices of sigModel entries.
+
+		/// type of compartment and hence sigModel to use.
+		CompartmentCategory category; 
+};
+
+/**
+ * SigNeur: A multiscale model builder, aka a robot.
+ * This potentially interfaces 4 models: An electrical cell model, and
+ * chemical models for spines, dendrites and soma. The latter may be
+ * 3-D stochastic, ODE, and genetic respectively, but for now the
+ * class only handles ODE versions.
+ *
+ * Constructs a copy of the cell model on itself. The cell has its own
+ * cell manager. Then there is an array of dends, of spines and 
+ * soma models. Each of these incorporates diffusion, which may be
+ * between categories. The whole mess sits on a kinetic manager as it
+ * will start out by solving it using rk5. A 300-compartment model will
+ * have ~50,000 molecular species. This is about 10 times the biggest I
+ * have tried so far.
+ * There is also an array of adaptors, one per cell model compt.
+ * In due course need to put a distinct kind of solver for the spines,
+ * either 3D monte carlo or Gillespie. Fortunately these will be separated
+ * and hence can run on distinct processors.
+ */
 class SigNeur
 {
 	public:
@@ -21,13 +76,19 @@ class SigNeur
 		///////////////////////////////////////////////////
 		
 		// Object selection
-		static void setCell( const Conn* c, Id value );
+		static void setCellProto( const Conn* c, Id value );
+		static Id getCellProto( Eref e );
+		static void setSpineProto( const Conn* c, Id value );
+		static Id getSpineProto( Eref e );
+		static void setDendProto( const Conn* c, Id value );
+		static Id getDendProto( Eref e );
+		static void setSomaProto( const Conn* c, Id value );
+		static Id getSomaProto( Eref e );
+
+		// These are readonly.
 		static Id getCell( Eref e );
-		static void setSpine( const Conn* c, Id value );
 		static Id getSpine( Eref e );
-		static void setDend( const Conn* c, Id value );
 		static Id getDend( Eref e );
-		static void setSoma( const Conn* c, Id value );
 		static Id getSoma( Eref e );
 		
 		// Numerical Method selection for electrical cell model.
@@ -76,13 +137,22 @@ class SigNeur
 		///////////////////////////////////////////////////
 		// Setup function definitions
 		///////////////////////////////////////////////////
-		bool traverseCell();
+		bool traverseCell( Eref me );
+		Id findSoma( const vector< Id >& compts );
+		void buildTree( Id soma, const vector< Id >& compts );
+		void innerBuildTree( 
+			unsigned int parent, Eref e, unsigned int msg );
+		static CompartmentCategory guessCompartmentCategory( Eref e );
 
 	private:
-		Id cell_; /// Prototype cell electrical model
-		Id spine_; /// Prototype spine signaling model
-		Id dend_; /// prototype dendrite signaling model
-		Id soma_; /// prototype soma signaling model
+		Id cellProto_; /// Prototype cell electrical model
+		Id spineProto_; /// Prototype spine signaling model
+		Id dendProto_; /// prototype dendrite signaling model
+		Id somaProto_; /// prototype soma signaling model
+		Id cell_; /// cell electrical model base.
+		Id spine_; /// spine signaling model array base
+		Id dend_; /// dendrite signaling model array base
+		Id soma_; /// soma signaling model array base
 		string cellMethod_;
 		string spineMethod_;
 		string dendMethod_;
@@ -101,6 +171,7 @@ class SigNeur
 				// scaling for the channelMap is from gmax and CoInit, 
 				// and the baseline for calciumMap is CaBasal and CoInit,
 				// and it uses calciumScale for scaling.
+		vector< TreeNode > tree_;
 };
 
 #endif // _KINETIC_MANAGER_H
