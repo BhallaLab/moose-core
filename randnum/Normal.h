@@ -29,19 +29,24 @@ class Normal : public Probability
 {
     
   public:
-    Normal();
-    Normal(NormalGenerator algorithm);
-    Normal(double mean, double variance);
-    Normal(NormalGenerator algorithm, double mean, double variance);
+//     Normal();
+//     Normal(NormalGenerator algorithm);
+//     Normal(double mean, double variance);
+//     Normal(NormalGenerator algorithm, double mean, double variance);
+    Normal(double mean=0.0, double variance=1.0, NormalGenerator algorithm=ALIAS);
     double getMean()  const;
+    void setMean(double value);
     double getVariance() const;
+    void setVariance( double value );
+    NormalGenerator getMethod(void);
+    void setMethod(NormalGenerator method);
     double getNextSample() const;
   private:
     double mean_;
     double variance_;
     double (*generator_)();
     bool isStandard_;
-    
+    NormalGenerator method_;
     static double BoxMueller();
     static double aliasMethod();
     static bool testAcceptance(unsigned long t, unsigned long v);    

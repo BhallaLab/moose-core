@@ -78,12 +78,12 @@ void ExponentialRng::setMean(const Conn& c, double mean)
 /**
    Reports error in case the parameter mean has not been set.
  */
-void ExponentialRng::reinitFunc(const Conn& c, ProcInfo info)
+void ExponentialRng::innerReinitFunc(const Conn& c, ProcInfo info)
 {
     ExponentialRng* generator = static_cast < ExponentialRng* >(c.data());
     if (! generator->rng_ )
     {
-        cerr << "ERROR: ExponentialRng::reinitFunc - mean must be set before using the Exponential distribution generator." << endl;                
+        cerr << "ERROR: ExponentialRng::innerReinitFunc - mean must be set before using the Exponential distribution generator." << endl;                
     }
 }
 
