@@ -1307,6 +1307,7 @@ void do_call( int argc, const char** const argv, Id s )
 			cout << "s = slope, i = intercept, f = freq\n";
 			cout << "S = Sqrt(sum of squares)\n";
 		}
+		return;
 	}
 }
 

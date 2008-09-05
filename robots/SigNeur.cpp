@@ -21,25 +21,46 @@ const Cinfo* initSigNeurCinfo()
 	///////////////////////////////////////////////////////
 	// Field definitions
 	///////////////////////////////////////////////////////
+		new ValueFinfo( "cellProto", 
+			ValueFtype1< Id >::global(),
+			GFCAST( &SigNeur::getCellProto ), 
+			RFCAST( &SigNeur::setCellProto ) 
+		),
+		new ValueFinfo( "spineProto", 
+			ValueFtype1< Id >::global(),
+			GFCAST( &SigNeur::getSpineProto ), 
+			RFCAST( &SigNeur::setSpineProto )
+		),
+		new ValueFinfo( "dendProto", 
+			ValueFtype1< Id >::global(),
+			GFCAST( &SigNeur::getDendProto ), 
+			RFCAST( &SigNeur::setDendProto )
+		),
+		new ValueFinfo( "somaProto", 
+			ValueFtype1< Id >::global(),
+			GFCAST( &SigNeur::getSomaProto ), 
+			RFCAST( &SigNeur::setSomaProto )
+		),
+
 		new ValueFinfo( "cell", 
 			ValueFtype1< Id >::global(),
 			GFCAST( &SigNeur::getCell ), 
-			RFCAST( &SigNeur::setCell ) 
+			&dummyFunc
 		),
 		new ValueFinfo( "spine", 
 			ValueFtype1< Id >::global(),
 			GFCAST( &SigNeur::getSpine ), 
-			RFCAST( &SigNeur::setSpine )
+			&dummyFunc
 		),
 		new ValueFinfo( "dend", 
 			ValueFtype1< Id >::global(),
 			GFCAST( &SigNeur::getDend ), 
-			RFCAST( &SigNeur::setDend )
+			&dummyFunc
 		),
 		new ValueFinfo( "soma", 
 			ValueFtype1< Id >::global(),
 			GFCAST( &SigNeur::getSoma ), 
-			RFCAST( &SigNeur::setSoma )
+			&dummyFunc
 		),
 
 		new ValueFinfo( "cellMethod", 
@@ -154,19 +175,51 @@ SigNeur::SigNeur()
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void SigNeur::setCell( const Conn* c, Id value )
+// prototypes
+void SigNeur::setCellProto( const Conn* c, Id value )
 {
-	static_cast< SigNeur* >( c->data() )->cell_ = value;
+	static_cast< SigNeur* >( c->data() )->cellProto_ = value;
 }
 
+Id SigNeur::getCellProto( Eref e )
+{
+	return static_cast< SigNeur* >( e.data() )->cellProto_;
+}
+
+void SigNeur::setSpineProto( const Conn* c, Id value )
+{
+	static_cast< SigNeur* >( c->data() )->spineProto_ = value;
+}
+
+Id SigNeur::getSpineProto( Eref e )
+{
+	return static_cast< SigNeur* >( e.data() )->spineProto_;
+}
+
+void SigNeur::setDendProto( const Conn* c, Id value )
+{
+	static_cast< SigNeur* >( c->data() )->dendProto_ = value;
+}
+
+Id SigNeur::getDendProto( Eref e )
+{
+	return static_cast< SigNeur* >( e.data() )->dendProto_;
+}
+
+void SigNeur::setSomaProto( const Conn* c, Id value )
+{
+	static_cast< SigNeur* >( c->data() )->somaProto_ = value;
+}
+
+Id SigNeur::getSomaProto( Eref e )
+{
+	return static_cast< SigNeur* >( e.data() )->somaProto_;
+}
+
+// created arrays
 Id SigNeur::getCell( Eref e )
 {
 	return static_cast< SigNeur* >( e.data() )->cell_;
-}
-
-void SigNeur::setSpine( const Conn* c, Id value )
-{
-	static_cast< SigNeur* >( c->data() )->spine_ = value;
 }
 
 Id SigNeur::getSpine( Eref e )
@@ -174,25 +227,16 @@ Id SigNeur::getSpine( Eref e )
 	return static_cast< SigNeur* >( e.data() )->spine_;
 }
 
-void SigNeur::setDend( const Conn* c, Id value )
-{
-	static_cast< SigNeur* >( c->data() )->dend_ = value;
-}
-
 Id SigNeur::getDend( Eref e )
 {
 	return static_cast< SigNeur* >( e.data() )->dend_;
-}
-
-void SigNeur::setSoma( const Conn* c, Id value )
-{
-	static_cast< SigNeur* >( c->data() )->soma_ = value;
 }
 
 Id SigNeur::getSoma( Eref e )
 {
 	return static_cast< SigNeur* >( e.data() )->soma_;
 }
+
 
 void SigNeur::setCellMethod( const Conn* c, string value )
 {
@@ -313,19 +357,149 @@ void SigNeur::build( const Conn* c )
 
 void SigNeur::innerBuild( const Conn* c )
 {
-	if ( !( spine_.good() || dend_.good() || soma_.good() ) ) {
+	cout << "Building cell " << cellProto_.path() << endl;
+	if ( !cellProto_.good() ) {
+		cout << "SigNeur::build: " << c->target().name() << 
+			" : Warning: Cell model prototype not defined.\n";
+		return;
+	}
+	if ( !( spineProto_.good() || dendProto_.good() || somaProto_.good() ) ) {
 		cout << "SigNeur::build: " << c->target().name() << 
 			" : Warning: Unable to find any signaling models to use\n";
 		return;
 	}
-	if ( !traverseCell() ) {
+	if ( !traverseCell( c->target() ) ) {
 		cout << "SigNeur::build: " << c->target().name() << 
 		cout << " : Warning: Unable to traverse cell\n";
 		return;
 	}
+
+	
+}
+bool SigNeur::traverseCell( Eref me )
+{
+	Element* cell = cellProto_.eref()->copy( me.e, "cell" );
+	if ( !cell )
+		return 0;
+	cell_ = cell->id();
+
+	vector< Id > compts;
+	get< vector< Id > >( cell_.eref(), "childList", compts );
+	if ( compts.size() == 0 )
+		return 0;
+	// Find soma. Use name and biggest dia.
+	Id soma = findSoma( compts );
+
+	// Build a tree of compts. Root is soma, this is first entry in 
+	// tree_ vector. Depth-first.
+	buildTree( soma, compts );
+
+	// Figure out size of signaling model segments. Each elec compt must be
+	// an integral number of signaling models.
+	
+	return 0;
 }
 
-bool SigNeur::traverseCell()
+Id SigNeur::findSoma( const vector< Id >& compts )
 {
-	return 0;
+	double maxDia = 0;
+	Id maxCompt;
+	vector< Id > somaCompts; // Theoretically possible to have an array.
+	for ( vector< Id >::const_iterator i = compts.begin(); 
+		i != compts.end(); ++i )
+	{
+		string className = i->eref()->className();
+		if ( className == "Compartment" || className == "SymCompartment" ) {
+			string name = i->eref().e->name();
+			if ( name == "soma" || name == "Soma" || name == "SOMA" )
+				somaCompts.push_back( *i );
+			double dia;
+			get< double >( i->eref(), "dia", dia );
+			if ( dia > maxDia )
+				maxCompt = *i;
+		}
+	}
+	if ( somaCompts.size() == 1 ) // First, go by name.
+		return somaCompts[0];
+	if ( somaCompts.size() == 0 & maxCompt.good() ) //if no name, use maxdia
+		return maxCompt;
+	if ( somaCompts.size() > 1 ) { // Messy but unlikely cases.
+		if ( maxCompt.good() ) {
+			if ( find( somaCompts.begin(), somaCompts.end(), maxCompt ) != somaCompts.end() )
+				return maxCompt;
+			else
+				cout << "Error, soma '" << somaCompts.front().path() << 
+					"' != biggest compartment '" << maxCompt.path() << 
+					"'\n";
+		}
+		return somaCompts[0]; // Should never happen, but an OK response.
+	}
+	cout << "Error: SigNeur::findSoma failed to find soma\n";
+	return Id();
+}
+
+void SigNeur::buildTree( Id soma, const vector< Id >& compts )
+{
+	const Cinfo* symCinfo = Cinfo::find( "SymCompartment" );
+	assert( symCinfo != 0 );
+	const Finfo* axialFinfo;
+	const Finfo* raxialFinfo;
+	if ( soma.eref().e->cinfo() == symCinfo ) {
+		axialFinfo = symCinfo->findFinfo( "raxial1" );
+		raxialFinfo = symCinfo->findFinfo( "raxial2" );
+	} else {
+		const Cinfo* asymCinfo = Cinfo::find( "Compartment" );
+		assert( asymCinfo != 0 );
+		axialFinfo = asymCinfo->findFinfo( "raxial" );
+		raxialFinfo = asymCinfo->findFinfo( "raxial" );
+	}
+	assert( axialFinfo != 0 );
+	assert( raxialFinfo != 0 );
+	
+	// Soma may be in middle of messaging structure for cell, so we need
+	// to traverse both ways. But nothing below soma should 
+	// change direction in the traversal.
+	innerBuildTree( 0, soma.eref(), axialFinfo->msg() );
+	innerBuildTree( 0, soma.eref(), raxialFinfo->msg() );
+}
+
+// Recursive function to follow specified msg down to all kids.
+// Depth first.
+// Tree better not be circular, or it will not terminate.
+void SigNeur::innerBuildTree( unsigned int parent, Eref e, unsigned int msg)
+{
+	unsigned int paIndex = tree_.size();
+	TreeNode t( e.id(), parent, guessCompartmentCategory( e ) );
+	tree_.push_back( t );
+	Conn* c = e->targets( msg, e.i );
+	for ( ; c->good(); c->increment() ) {
+		innerBuildTree( paIndex, c->target(), msg );
+	}
+	delete c;
+}
+
+CompartmentCategory SigNeur::guessCompartmentCategory( Eref e )
+{
+	if ( e.e->name().find( "spine" ) != string::npos ||
+		e.e->name().find( "Spine" ) != string::npos ||
+		e.e->name().find( "SPINE" ) != string::npos )
+	{
+		if ( e.e->name().find( "neck" ) != string::npos ||
+			e.e->name().find( "Neck" ) != string::npos ||
+			e.e->name().find( "NECK" ) != string::npos ||
+			e.e->name().find( "shaft" ) != string::npos ||
+			e.e->name().find( "Shaft" ) != string::npos ||
+			e.e->name().find( "SHAFT" ) != string::npos
+		)
+			return SPINE_NECK;
+		else
+			return SPINE;
+	}
+	if ( e.e->name().find( "soma" ) != string::npos ||
+		e.e->name().find( "Soma" ) != string::npos ||
+		e.e->name().find( "SOMA" ) != string::npos)
+	{
+		return SOMA;
+	}
+	return DEND;
 }

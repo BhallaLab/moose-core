@@ -99,9 +99,8 @@ Element* SimpleElement::innerCopy(int n) const
  *
  * The function has to be careful if the element is a global. When
  * the global occurs at the root of the tree, it is assumed that we
- * really do want to make a copy. Otherwise it is bunged into the
- * tree itself and not copied, but later clever things are done with
- * the messaging.
+ * really do want to make a copy. Otherwise it is not copied,
+ * but later clever things are done with the messaging.
  */
 Element* SimpleElement::innerDeepCopy(
 	map< const Element*, Element* >& tree ) const
@@ -110,12 +109,6 @@ Element* SimpleElement::innerDeepCopy(
 		initNeutralCinfo()->getSlot( "childSrc" ).msg();
 
 	assert ( childSrcMsg == 0 );
-
-	if ( isGlobal() && tree.size() >= 0 ) {
-		Element* cme = const_cast< SimpleElement* >( this );
-		tree[ this ] = cme;
-		return cme;
-	}
 
 	Element* duplicate = innerCopy();
 	tree[ this ] = duplicate;
@@ -132,6 +125,11 @@ Element* SimpleElement::innerDeepCopy(
 	vector< ConnTainer* >::const_iterator i;
 	for ( i = childMsg->begin(); i != childMsg->end(); i++ ) {
 		Element* tgt = ( *i )->e2();
+
+		// Copy global children only if parent is also global
+		if ( !isGlobal() && tgt->isGlobal() ) 
+			continue;
+
 		if ( tree.find( tgt ) != tree.end() )
 			cout << "Warning: SimpleElement::innerDeepCopy: Loop in element tree at " << tgt->name() << endl;
 		else 
@@ -148,14 +146,7 @@ Element* SimpleElement::innerDeepCopy(
 
 	assert ( childSrcMsg == 0 );
 
-	if ( isGlobal() && tree.size() >= 0 ) {
-		Element* cme = const_cast< SimpleElement* >( this );
-		tree[ this ] = cme;
-		return cme;
-	}
-
 	Element* duplicate = innerCopy(n);
-	
 	tree[ this ] = duplicate;
 
 	const Msg* childMsg = msg( childSrcMsg );
@@ -170,12 +161,60 @@ Element* SimpleElement::innerDeepCopy(
 	vector< ConnTainer* >::const_iterator i;
 	for ( i = childMsg->begin(); i != childMsg->end(); i++ ) {
 		Element* tgt = ( *i )->e2();
+
+		// Copy global children only if parent is also global
+		if ( !isGlobal() && tgt->isGlobal() ) 
+			continue;
+
 		if ( tree.find( tgt ) != tree.end() )
 			cout << "Warning: SimpleElement::innerDeepCopy: Loop in element tree at " << tgt->name() << endl;
 		else 
 			tgt->innerDeepCopy( tree, n );
 	}
 	return duplicate;
+}
+
+/**
+ * Copies messages between current element and a global, to the
+ * duplicate element and the same global. Does so both for src and dest
+ * messages.
+ */
+void SimpleElement::copyGlobalMessages( Element* dup, bool isArray ) const
+{
+	
+	vector< Msg >::const_iterator m;
+	if ( msg_.size() > 1 ) { 
+		// Begin at msg + 1 because we don't want to copy childSrc msgs.
+		for ( m = msg_.begin() + 1; m != msg_.end(); m++ ) {
+			if ( m->size() == 0 )
+				continue;
+			vector< ConnTainer* >::const_iterator c;
+			for ( c = m->begin(); c != m->end(); c++ ) {
+				Element* tgt = ( *c )->e2();
+				if ( tgt == this )
+					tgt = ( *c )->e1();
+				if ( tgt->isGlobal() ) {
+					m->copy( *c, dup, tgt, isArray );
+				}
+			}
+		}
+	}
+
+	// Now we iterate through dests.
+	// Perhaps should check for child msgs?
+	map< int, vector< ConnTainer* > >::const_iterator k;
+	for ( k = dest_.begin(); k != dest_.end(); ++k ) {
+		vector< ConnTainer* >::const_iterator c;
+		for ( c = k->second.begin(); c != k->second.end(); c++ ) {
+			// Here check orientation of e1 and msg2
+			Element* tgt = ( *c )->e1();
+			assert( tgt != this );
+			if ( tgt->isGlobal() ) {
+				const Msg* m = tgt->msg( ( *c )->msg2() );
+				m->copy( *c, tgt, dup, isArray );
+			}
+		}
+	}
 }
 
 /**
@@ -199,7 +238,7 @@ void SimpleElement::copyMessages( Element* dup,
 		vector< ConnTainer* >::const_iterator c;
 		for ( c = m->begin(); c != m->end(); c++ ) {
 			k = origDup.find( ( *c )->e2() );
-			if ( k != origDup.end() ) {
+			if ( k != origDup.end() && k->first != k->second ) {
 				m->copy( *c, dup, k->second, isArray );
 			}
 		}
@@ -221,7 +260,6 @@ void SimpleElement::copyMessages( Element* dup,
  * its messages into the tree should be duplicated. This is used,
  * for example, for HHGates on HHChannels. All channel duplicates
  * should use the same HHGates.
- * The global elements are put into the tree as their own copy.
  * A further refinement is that global elements can be copied but only
  * if they are the root of the copy tree. In this case we assume that
  * the user really does want to copy the global element as they have
@@ -258,7 +296,8 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 
 	// Phase 1. Copy Elements, but not building up parent-child info.
 	// First is original, second is copy
-	// However, if it was a Global, both original and second are the same.
+	// However, if orig is a Global, copy is not done, unless this
+	// originating element is itself a global.
 	map< const Element*, Element* > origDup;
 	map< const Element*, Element* >::iterator i;
 
@@ -270,32 +309,26 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 	// Phase 2. Copy over messages that are within the tree.
 	// Here we need only copy from message sources.
 	for ( i = origDup.begin(); i != origDup.end(); i++ ) {
-		if ( i->first != i->second ) {
-			i->first->copyMessages( i->second, origDup, false );
-		}
+		i->first->copyMessages( i->second, origDup, false );
 	}
-
 	
-	// Phase 3 : Copy over messages to any global elements that were
-	// not on the original tree.
-	// Still to fill in.
+	// Phase 3 : Copy over messages to any global elements
+	// Here we have to deal with message sources as well as dests.
+	for ( i = origDup.begin(); i != origDup.end(); i++ ) {
+		i->first->copyGlobalMessages( i->second, false );
+	}
 	
 	// Phase 4: stick the copied tree onto the parent Element.
 	ret = Eref( parent ).add( "childSrc", child, "child", 
 		ConnTainer::Default );
-	/*
-	ret = parent->findFinfo( "childSrc" )->add(
-					parent, child, child->findFinfo( "child" ) );
-					*/
 	assert( ret );
 
 	// Phase 5: Schedule all the objects
 	if ( !( 
 		parent->isDescendant( library ) || parent->isDescendant( proto )
-		) ) {
+	) ) {
 		for ( i = origDup.begin(); i != origDup.end(); i++ ) {
-			if ( i->first != i->second ) // a global
-				i->second->cinfo()->schedule( i->second, ConnTainer::Default );
+			i->second->cinfo()->schedule( i->second, ConnTainer::Default );
 		}
 	}
 
@@ -497,6 +530,111 @@ bool compareCopyMsgs( const Eref c0, const Eref c1,
 	return 1;
 }
 
+Element* makeCopyTree( Element* n, Element* outsider )
+{
+	Element* c0 = Neutral::create( "CopyClass", "c0", n->id(), Id::scratchId() );
+	set< int >( c0, "i", 10 );
+	set< double >( c0, "x", 10.0 );
+	set< string >( c0, "s", "10.0" );
+	ASSERT( c0 != 0, "creating CopyClass" );
+
+	Element* k0 = Neutral::create( "CopyClass", "k0", c0->id(), Id::scratchId() );
+	set< int >( k0, "i", 100 );
+	set< double >( k0, "x", 100.0 );
+	set< string >( k0, "s", "100.0" );
+	ASSERT( k0 != 0, "creating CopyClass child" );
+
+	Element* k1 = Neutral::create( "CopyClass", "k1", c0->id(), Id::scratchId() );
+	set< int >( k1, "i", 101 );
+	set< double >( k1, "x", 101.0 );
+	set< string >( k1, "s", "101.0" );
+	ASSERT( k1 != 0, "creating CopyClass child" );
+
+	Element* g1 = Neutral::create( "CopyClass", "g1", k1->id(), Id::scratchId() );
+	set< int >( g1, "i", 110 );
+	set< double >( g1, "x", 110.0 );
+	set< string >( g1, "s", "110.0" );
+	ASSERT( g1 != 0, "creating CopyClass grandchild" );
+
+	// Some messages inside tree
+	Eref( c0 ).add( "xSrc", k0, "xDest", ConnTainer::Default );
+	Eref( k0 ).add( "xSrc", k1, "xDest", ConnTainer::Default );
+	Eref( g1 ).add( "xSrc", c0, "xDest", ConnTainer::Default );
+	Eref( g1 ).add( "xSrc", k0, "x", ConnTainer::Default );
+	Eref( k1 ).add( "iShared", c0, "i", ConnTainer::Default );
+	// a couple of messages outside tree
+	Eref( k1 ).add( "iShared", outsider, "i", ConnTainer::Default );
+	Eref( c0 ).add( "xSrc", outsider, "xDest", ConnTainer::Default );
+
+	return c0;
+}
+
+Element* checkBasicCopy( Element* c0, Element* n, Element* outsider,
+	vector< Eref >& c0family )
+{
+	Element* c1 = c0->copy( n, "c1" );
+	ASSERT( c1 != c0, "copying" );
+	ASSERT( c1 != 0, "copying" );
+
+	ASSERT( c1->name() == "c1", "copying" );
+
+	Id p0;
+	Id p1;
+	get< Id >( c0, "parent", p0 );
+	get< Id >( c1, "parent", p1 );
+	ASSERT( p0 == n->id(), "copy parent" );
+	ASSERT( p1 == n->id(), "copy parent" );
+
+	vector< Id > kids;
+	get< vector< Id > >( n, "childList", kids );
+	ASSERT( kids.size() == 3 , "copy kids" );
+	ASSERT( kids[0] == outsider->id() , "copy kids" );
+	ASSERT( kids[1] == c0->id() , "copy kids" );
+	ASSERT( kids[2] == c1->id() , "copy kids" );
+
+	vector< Eref > c1family;
+	getCopyTree( Eref(c0, 0), c0family );
+	getCopyTree( Eref(c1, 0), c1family );
+	
+	ASSERT( c0family.size() == c1family.size(), "copy tree" );
+	for ( unsigned int i = 0; i < c0family.size(); i++ ) {
+		Eref t0 = c0family[ i ];
+		Eref t1 = c1family[ i ];
+		ASSERT( t0.e != t1.e, "uniqueness of Elements" );
+		ASSERT( t0.id() != t1.id(), "uniqueness of ids" );
+		if ( i > 0 )
+			ASSERT( t0.name() == t1.name(), "copy names" );
+		ASSERT( compareCopyValues( t0, t1 ), "copy values" );
+		ASSERT( compareCopyMsgs( t0, t1, outsider ), "copy Msgs" );
+	}
+
+	// Check that copy is a unique object
+	bool ret;
+	int iret;
+	ret = set< int >( c1, "i", 333333 );
+	ASSERT( ret, "copy uniqueness" );
+	get< int >( c0, "i", iret );
+	ASSERT( iret == 10, "copy uniqueness" );
+
+	return c1;
+}
+
+Element* check1stGenGlobalCopy( Element* n, Element* c1 )
+{
+	Element* c2 = c1->copy( n, "c2" );
+
+	return c2;
+}
+
+void check2ndGenGlobalCopy( Element* n, Element* c2 )
+{
+	Element* c3 = c2->copy( n, "c3" );
+}
+
+///////////////////////////////////////////////////////////////////////
+// This is the wrapper test function for copies.
+///////////////////////////////////////////////////////////////////////
+
 void copyTest()
 {
 	cout << "\nTesting copy";
@@ -545,94 +683,22 @@ void copyTest()
 	set< double >( outsider, "x", 0.0 );
 	set< string >( outsider, "s", "0.0" );
 	ASSERT( outsider != 0, "creating CopyClass" );
+
+	Element* c0 = makeCopyTree( n, outsider );
+
+	/////////////////////////////////////////////////////////////////////
+	// Do and check the copy
+	/////////////////////////////////////////////////////////////////////
 	
-	Element* c0 = Neutral::create( "CopyClass", "c0", n->id(), Id::scratchId() );
-	set< int >( c0, "i", 10 );
-	set< double >( c0, "x", 10.0 );
-	set< string >( c0, "s", "10.0" );
-	ASSERT( c0 != 0, "creating CopyClass" );
-
-	Element* k0 = Neutral::create( "CopyClass", "k0", c0->id(), Id::scratchId() );
-	set< int >( k0, "i", 100 );
-	set< double >( k0, "x", 100.0 );
-	set< string >( k0, "s", "100.0" );
-	ASSERT( k0 != 0, "creating CopyClass child" );
-
-	Element* k1 = Neutral::create( "CopyClass", "k1", c0->id(), Id::scratchId() );
-	set< int >( k1, "i", 101 );
-	set< double >( k1, "x", 101.0 );
-	set< string >( k1, "s", "101.0" );
-	ASSERT( k1 != 0, "creating CopyClass child" );
-
-	Element* g1 = Neutral::create( "CopyClass", "g1", k1->id(), Id::scratchId() );
-	set< int >( g1, "i", 110 );
-	set< double >( g1, "x", 110.0 );
-	set< string >( g1, "s", "110.0" );
-	ASSERT( g1 != 0, "creating CopyClass grandchild" );
-
-	// Some messages inside tree
-	Eref( c0 ).add( "xSrc", k0, "xDest", ConnTainer::Default );
-	Eref( k0 ).add( "xSrc", k1, "xDest", ConnTainer::Default );
-	Eref( g1 ).add( "xSrc", c0, "xDest", ConnTainer::Default );
-	Eref( g1 ).add( "xSrc", k0, "x", ConnTainer::Default );
-	Eref( k1 ).add( "iShared", c0, "i", ConnTainer::Default );
-	// a couple of messages outside tree
-	Eref( k1 ).add( "iShared", outsider, "i", ConnTainer::Default );
-	Eref( c0 ).add( "xSrc", outsider, "xDest", ConnTainer::Default );
-
-	/////////////////////////////////////////////////////////////////////
-	// Do the copy
-	/////////////////////////////////////////////////////////////////////
-
-	Element* c1 = c0->copy( n, "c1" );
-	ASSERT( c1 != c0, "copying" );
-	ASSERT( c1 != 0, "copying" );
-
-	ASSERT( c1->name() == "c1", "copying" );
-
-	Id p0;
-	Id p1;
-	get< Id >( c0, "parent", p0 );
-	get< Id >( c1, "parent", p1 );
-	ASSERT( p0 == n->id(), "copy parent" );
-	ASSERT( p1 == n->id(), "copy parent" );
-
-	vector< Id > kids;
-	get< vector< Id > >( n, "childList", kids );
-	ASSERT( kids.size() == 3 , "copy kids" );
-	ASSERT( kids[0] == outsider->id() , "copy kids" );
-	ASSERT( kids[1] == c0->id() , "copy kids" );
-	ASSERT( kids[2] == c1->id() , "copy kids" );
-
 	vector< Eref > c0family;
-	vector< Eref > c1family;
-	getCopyTree( Eref(c0, 0), c0family );
-	getCopyTree( Eref(c1, 0), c1family );
-	
-	ASSERT( c0family.size() == c1family.size(), "copy tree" );
-	for ( unsigned int i = 0; i < c0family.size(); i++ ) {
-		Eref t0 = c0family[ i ];
-		Eref t1 = c1family[ i ];
-		ASSERT( t0.e != t1.e, "uniqueness of Elements" );
-		ASSERT( t0.id() != t1.id(), "uniqueness of ids" );
-		if ( i > 0 )
-			ASSERT( t0.name() == t1.name(), "copy names" );
-		ASSERT( compareCopyValues( t0, t1 ), "copy values" );
-		ASSERT( compareCopyMsgs( t0, t1, outsider ), "copy Msgs" );
-	}
-
-	// Check that copy is a unique object
-	bool ret;
-	int iret;
-	ret = set< int >( c1, "i", 333333 );
-	ASSERT( ret, "copy uniqueness" );
-	get< int >( c0, "i", iret );
-	ASSERT( iret == 10, "copy uniqueness" );
+	Element* c1 = checkBasicCopy( c0, n, outsider, c0family );
 
 	//////////////////////////////////////////////////////////////////
 	// Test out copies when there is a global element in the tree.
 	// The copy should have messages to the original global element.
 	//////////////////////////////////////////////////////////////////
+	
+	Element* c2 = check1stGenGlobalCopy( n, c1 );
 
 	//////////////////////////////////////////////////////////////////
 	// Test out second-generation copies which have a message going to
@@ -640,6 +706,8 @@ void copyTest()
 	// even though the global is not in the tree of the first-generation
 	// copies.
 	//////////////////////////////////////////////////////////////////
+	
+	check2ndGenGlobalCopy( n, c2 );
 
 	//////////////////////////////////////////////////////////////////
 	// Check copy preserving old name. Copy c0 onto c1.
@@ -656,9 +724,10 @@ void copyTest()
 	// Check that the copy has a unique id (this was an actual bug!)
 	ASSERT( c10->id() != c0->id(), "unique copy id" );
 
-	kids.resize( 0 );
+// 	kids.resize( 0 );	
+	vector< Id > kids;
 	get< vector< Id > >( n, "childList", kids );
-	ASSERT( kids.size() == 3 , "copy kids" );
+	ASSERT( kids.size() == 5 , "copy kids" );
 	ASSERT( kids[0] == outsider->id() , "copy kids" );
 	ASSERT( kids[1] == c0->id() , "copy kids" );
 	ASSERT( kids[2] == c1->id() , "copy kids" );
@@ -675,17 +744,19 @@ void copyTest()
 
 	ASSERT( cc->name() == "cc", "copying" );
 
+	Id p0;
+	Id p1;
 	get< Id >( c0, "parent", p0 );
 	get< Id >( cc, "parent", p1 );
 	ASSERT( p0 == n->id(), "copy parent" );
 	ASSERT( p1 == n->id(), "copy parent" );
 
 	get< vector< Id > >( n, "childList", kids );
-	ASSERT( kids.size() == 13 , "copy kids" ); // what should we do about it? 
+	ASSERT( kids.size() == 15 , "copy kids" ); // what should we do about it? 
 	ASSERT( kids[0] == outsider->id() , "copy kids" );
 	ASSERT( kids[1] == c0->id() , "copy kids" );
 	ASSERT( kids[2] == c1->id() , "copy kids" );
-	ASSERT( kids[3] == cc->id().assignIndex(0) , "copy kids" );
+	ASSERT( kids[5] == cc->id().assignIndex(0) , "copy kids" );
 	
 	vector< Eref > ccfamily;
 	getCopyTree( Eref(cc, 0), ccfamily );
@@ -714,15 +785,15 @@ void copyTest()
 
 	kids.resize( 0 );
 	get< vector< Id > >( n, "childList", kids );
-	ASSERT( kids.size() == 13 , "copy kids" );
+	ASSERT( kids.size() == 15 , "copy kids" );
 	ASSERT( kids[0] == outsider->id() , "copy kids" );
 	ASSERT( kids[1] == c0->id() , "copy kids" );
 	ASSERT( kids[2] == c1->id() , "copy kids" );
-	ASSERT( kids[3] == cc->id().assignIndex(0) , "copy kids" );
+	ASSERT( kids[5] == cc->id().assignIndex(0) , "copy kids" );
 	
 	Element* m = Neutral::create( "Neutral", "m", Element::root()->id(), Id::scratchId() );
 	Element *c_simple = Neutral::create( "CopyClass", "c_simple", m->id(), Id::scratchId() );
-	ret = set <double> (c_simple, "x", 100);
+	bool ret = set <double> (c_simple, "x", 100);
 	ASSERT(ret, "set value to compartment");
 	Element *c_array = c_simple->copyIntoArray(m->id(), "c_array", 4);
 	ASSERT(c_array->numEntries() == 4, "number of entries");

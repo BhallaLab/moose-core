@@ -562,6 +562,19 @@ Id ArrayElement::id() const {
 	return Element::id().assignIndex( Id::AnyIndex );
 }
 
+// Holders
+void ArrayElement::copyMessages( Element* dup,
+	map< const Element*, Element* >& origDup, bool isArray ) const
+{
+	;
+}
+
+void ArrayElement::copyGlobalMessages( Element* dup, bool isArray ) const
+{
+	;
+}
+
+
 #ifdef DO_UNIT_TESTS
 
 /**
