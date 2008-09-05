@@ -34,7 +34,7 @@ class RandGenerator
     static double getSample(Eref e);
     static void processFunc( const Conn& c, ProcInfo info);
     static void reinitFunc( const Conn& c, ProcInfo info);
-
+    virtual void innerReinitFunc( const Conn& c, ProcInfo info);    
   protected:
     Probability* rng_;    
 };

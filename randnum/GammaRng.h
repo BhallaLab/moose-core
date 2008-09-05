@@ -36,7 +36,7 @@ class GammaRng: public RandGenerator
     static void setAlpha(const Conn & c, double alpha);
     static void setTheta(const Conn & c, double theta);
     
-    static void reinitFunc( const Conn& c, ProcInfo info);
+    virtual void innerReinitFunc( const Conn& c, ProcInfo info);
 
   private:
     double alpha_;
