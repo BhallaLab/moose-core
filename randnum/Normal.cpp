@@ -25,26 +25,50 @@
 using namespace std;
 
 extern unsigned long genrand_int32(void);
-Normal::Normal():mean_(0.0),variance_(1.0), isStandard_(true)
+Normal::Normal(double mean, double variance, NormalGenerator method):mean_(mean), variance_(variance), method_(method)
 {
-    generator_ = &(Normal::aliasMethod);    
-}
-
-Normal::Normal(NormalGenerator method):mean_(0.0), variance_(1.0), isStandard_(true)
-{
+    if (variance <= 0.0 )
+    {
+        cout << "Warning: cannot set variance <= 0. Setting to 1.0." << endl;
+        variance_ = 1.0;
+    }
+    
+    isStandard_ = isEqual(0.0, mean) && isEqual(1.0, variance);
     switch(method)
     {
-        case BOX_MUELLER:
-            generator_ = &(Normal::BoxMueller);
-            break;            
         case ALIAS:
             generator_ = &(Normal::aliasMethod);
             break;
+        case BOX_MUELLER:
+            generator_ = &(Normal::BoxMueller);
+            break;            
         default:
             cerr << "ERROR: Normal() - generator method# " << method << ". Don't know how to do this. Using alias method."<<endl;
             generator_ = &(Normal::aliasMethod);
     }
 }
+    
+// Normal::Normal():mean_(0.0),variance_(1.0), method_(ALIAS), isStandard_(true)
+// {
+//     generator_ = &(Normal::aliasMethod);    
+// }
+
+// Normal::Normal(NormalGenerator method):mean_(0.0), variance_(1.0), isStandard_(true)
+// {
+//     method_ = method;
+//     switch(method)
+//     {
+//         case BOX_MUELLER:
+//             generator_ = &(Normal::BoxMueller);
+//             break;            
+//         case ALIAS:
+//             generator_ = &(Normal::aliasMethod);
+//             break;
+//         default:
+//             cerr << "ERROR: Normal() - generator method# " << method << ". Don't know how to do this. Using alias method."<<endl;
+//             generator_ = &(Normal::aliasMethod);
+//     }
+// }
 
 double dummy()
 {
@@ -52,26 +76,26 @@ double dummy()
 }
 
 
-Normal::Normal(double mean, double variance):mean_(mean), variance_(variance), isStandard_(false)
-{
-    generator_ = &(Normal::aliasMethod);
-}
+// Normal::Normal(double mean, double variance):mean_(mean), variance_(variance), method_(ALIAS), isStandard_(false)
+// {
+//     generator_ = &(Normal::aliasMethod);
+// }
 
-Normal::Normal(NormalGenerator method, double mean, double variance):mean_(mean), variance_(variance), isStandard_(false)
-{
-     switch(method)
-    {
-        case BOX_MUELLER:
-            generator_ = &(Normal::BoxMueller);
-            break;            
-        case ALIAS:
-            generator_ = &(Normal::aliasMethod);
-            break;
-        default:
-            cerr << "ERROR: Normal() - generator method# " << method << ". Don't know how to do this. Using alias method."<<endl;
-            generator_ = &(Normal::aliasMethod);
-    }
-}
+// Normal::Normal(NormalGenerator method, double mean, double variance):mean_(mean), variance_(variance), isStandard_(false)
+// {
+//      switch(method)
+//     {
+//         case BOX_MUELLER:
+//             generator_ = &(Normal::BoxMueller);
+//             break;            
+//         case ALIAS:
+//             generator_ = &(Normal::aliasMethod);
+//             break;
+//         default:
+//             cerr << "ERROR: Normal() - generator method# " << method << ". Don't know how to do this. Using alias method."<<endl;
+//             generator_ = &(Normal::aliasMethod);
+//     }
+// }
 
 double Normal::getNextSample() const
 {
@@ -92,11 +116,50 @@ double Normal::getMean() const
     return mean_;
 }
 
+void Normal::setMean( double mean)
+{
+    mean_ = mean;
+    isStandard_ = isEqual(0.0, mean_) && isEqual(1.0, variance_);
+}
+
 double Normal::getVariance() const
 {
     return variance_;
 }
 
+void Normal::setVariance( double variance )
+{
+    if (variance <= 0.0)
+    {
+        cout << "Warning: cannot set variance < 0." << endl;
+        return;
+    }    
+    variance_ = variance;
+    isStandard_ = isEqual(0.0, mean_) && isEqual(1.0, variance_);
+}
+
+NormalGenerator Normal::getMethod(void)
+{
+    return method_;
+}
+
+void Normal::setMethod(NormalGenerator method)
+{
+    method_ = method;
+    switch(method)
+    {
+        case ALIAS:
+            generator_ = &(Normal::aliasMethod);
+            break;
+        case BOX_MUELLER:
+            generator_ = &(Normal::BoxMueller);
+            break;            
+        default:
+            cerr << "ERROR: Normal() - generator method# " << method << ". Don't know how to do this. Using alias method."<<endl;
+            generator_ = &(Normal::aliasMethod);
+            method_ = ALIAS;            
+    }
+}
 
 /**
    Very simple but costly implementation

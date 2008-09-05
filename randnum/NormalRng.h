@@ -31,22 +31,11 @@ class NormalRng: public RandGenerator
 {
   public:
     NormalRng();
-    static double getMean(const Element* e);    
     static void setMean(const Conn& c, double mean);
-    static double getVariance(const Element* e);
     static void setVariance(const Conn& c, double variance);
-    static void setMethod(const Conn& c, int method);
-    static int getMethod(const Element* e);
-    static void reinitFunc( const Conn& c, ProcInfo info);
-
-  private:
-    double mean_;
-    double variance_;
-    NormalGenerator method_;    
-    bool isMeanSet_;
-    bool isVarianceSet_;
-    
-    
+    static void setMethod(const Conn& c, NormalGenerator method);
+    static NormalGenerator getMethod(const Element* e);
+    virtual void innerReinitFunc( const Conn& c, ProcInfo info);    
 };
 
     

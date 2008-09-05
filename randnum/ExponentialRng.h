@@ -35,7 +35,7 @@ class ExponentialRng: public RandGenerator
     static void setMean(const Conn& c, double mean);
     static int getMethod(const Element* e);    
     static void setMethod(const Conn& c, int method);    
-    static void reinitFunc( const Conn& c, ProcInfo info);
+    virtual void innerReinitFunc( const Conn& c, ProcInfo info);
 
   private:
     double mean_;    

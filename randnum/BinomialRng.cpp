@@ -196,7 +196,7 @@ double BinomialRng::innerGetP()
 /**
    reports error if one or more of the parameters are not set.
 */
-void BinomialRng::reinitFunc( const Conn& c, ProcInfo info)
+void BinomialRng::innerReinitFunc( const Conn& c, ProcInfo info)
 {
     BinomialRng* gen = static_cast<BinomialRng*>(c.data());
 
