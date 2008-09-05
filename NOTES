@@ -7091,3 +7091,15 @@ Messing around with test scripts in
 /home/bhalla/genesis/SFmus/moose-g3/TESTS/robot
 
 ==============================================================================
+5 Sep 2008
+
+More work on SigNeur.
+Working on a bug in copy, pertaining to globals. Here globals means objects
+that are not supposed to be copied, instead they get messages sent to them
+from the duplicates. Somewhat like pointers. Setting up to do unit tests for
+this. Due to accumulation of changes, checked in the beastly revision:
+Checked in as revision 666: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
+Well, that is odd. After a lot of work setting up 1st and 2nd generation
+global copy unit tests, and clearing all, the system still croaks with the
+copies in the real model.
