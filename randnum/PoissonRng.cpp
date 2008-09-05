@@ -67,12 +67,12 @@ void PoissonRng::setMean(const Conn& c, double mean)
 /**
    reports error in case the parameter mean has not been set.
 */
-void PoissonRng::reinitFunc(const Conn& c, ProcInfo info)
+void PoissonRng::innerReinitFunc(const Conn& c, ProcInfo info)
 {
     PoissonRng* generator = static_cast < PoissonRng* >(c.data());
     if (! generator->rng_ )
     {
-        cerr << "ERROR: PoissonRng::reinitFunc - mean must be set before using the Poisson distribution generator." << endl;                
+        cerr << "ERROR: PoissonRng::innerReinitFunc - mean must be set before using the Poisson distribution generator." << endl;                
     }
 }
 

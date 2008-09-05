@@ -23,7 +23,7 @@ class PoissonRng:public RandGenerator
 {
   public:
     static void setMean(const Conn& c, double mean);
-    static void reinitFunc(const Conn& c, ProcInfo p);
+    virtual void innerReinitFunc(const Conn& c, ProcInfo p);
   private:
     double mean_;    
 };

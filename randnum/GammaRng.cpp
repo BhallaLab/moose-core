@@ -120,12 +120,12 @@ void GammaRng::setTheta(const Conn& c, double theta)
 /**
    reports error if parameters have not been set properly.
 */
-void GammaRng::reinitFunc(const Conn& c, ProcInfo info)
+void GammaRng::innerReinitFunc(const Conn& c, ProcInfo info)
 {
     GammaRng* generator = static_cast < GammaRng* >(c.data());
     if (! generator->rng_ )
     {
-        cerr << "ERROR: GammaRng::reinitFunc - parameters alpha and theta must be set before using the Gamma distribution generator." << endl;                
+        cerr << "ERROR: GammaRng::innerReinitFunc - parameters alpha and theta must be set before using the Gamma distribution generator." << endl;                
     }
 }
 
