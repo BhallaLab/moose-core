@@ -7074,4 +7074,20 @@ Begun work on robots/SigNeur.
 ==============================================================================
 3 Sep 2008
 Begun work on robots/Adaptor.
+
+Checked in as revision 661: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+==============================================================================
+4 Sep 2008
+
+I now have it written up to the point where it should parse the cell.
+But I need a converter from strings to Ids, to be able to do things from
+the shell script.
+
+Converter done, works.
+
+Lots of headaches now with the cell copy. There is an infinite recursion,
+from an object where isGlobal() == true.
+Messing around with test scripts in 
+/home/bhalla/genesis/SFmus/moose-g3/TESTS/robot
+
 ==============================================================================

@@ -264,6 +264,13 @@ class SimpleElement: public Element
 		void copyMessages( Element* dup, 
 			map< const Element*, Element* >& origDup, bool isArray ) const;
 
+		/**
+		 * Copies messages present between current element and globals,
+		 * to go between the duplicate and the same globals. Handles
+		 * src as well as dest messages.
+		 */
+		void copyGlobalMessages( Element* dup, bool isArray ) const;
+
 		///////////////////////////////////////////////////////////////
 		// Debugging function
 		///////////////////////////////////////////////////////////////
