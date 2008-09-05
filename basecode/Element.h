@@ -333,6 +333,13 @@ class Element
  		*/
 		virtual void copyMessages( Element* dup, 
 			map< const Element*, Element* >& origDup, bool isArray ) const = 0;
+		/**
+		 * Copies messages present between current element and globals,
+		 * to go between the duplicate and the same globals. Handles
+		 * src as well as dest messages.
+		 */
+		virtual void copyGlobalMessages( Element* dup, bool isArray ) 
+			const = 0;
 		
 		/**
 		 * Returns the memory use of the Element and its messages, 

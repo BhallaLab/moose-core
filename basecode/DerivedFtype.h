@@ -55,7 +55,24 @@ class Ftype0: public Ftype
 			{
 				return "none";
 			}
-			
+
+			/**
+			 * This is a virtual function that calls the function.
+			 * It takes a string, but ignores its value.
+			 * Returns true on success.
+			 */
+			bool strSet( Eref e, const Finfo* f, const string& s )
+					const
+			{
+				RecvFunc rf = f->recvFunc();
+				if ( rf ) {
+					SetConn c( e );
+					rf( &c );
+					return 1;
+				}
+				return 0;
+			}
+
 			///////////////////////////////////////////////////////
 			// Here we define the functions for serializing data
 			// for parallel messaging.
