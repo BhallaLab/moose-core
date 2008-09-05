@@ -32,7 +32,7 @@ class All2AllConn: public Conn
 		unsigned int targetIndex() const {
 			return tgtPos_ + a->i2();
 		}
-		unsigned int targetMsg() const {
+		int targetMsg() const {
 			return a->msg2();
 		}
 		Element* sourceElement() const {
@@ -44,7 +44,7 @@ class All2AllConn: public Conn
 		unsigned int sourceIndex() const {
 			return srcPos_ + a->i1();
 		}
-		unsigned int sourceMsg() const {
+		int sourceMsg() const {
 			return a->msg1();
 		}
 		void* data() const {
@@ -98,7 +98,7 @@ class ReverseAll2AllConn: public Conn
 		unsigned int targetIndex() const {
 			return tgtPos_ + a->i1();
 		}
-		unsigned int targetMsg() const {
+		int targetMsg() const {
 			return a->msg1();
 		}
 		Element* sourceElement() const {
@@ -110,7 +110,7 @@ class ReverseAll2AllConn: public Conn
 		unsigned int sourceIndex() const {
 			return srcPos_ + a->i2();
 		}
-		unsigned int sourceMsg() const {
+		int sourceMsg() const {
 			return a->msg2();
 		}
 		void* data() const {
@@ -146,7 +146,7 @@ class All2AllConnTainer: public ConnTainer
 {
 	public:
 		All2AllConnTainer( Element* e1, Element* e2,
-			unsigned int msg1, unsigned int msg2,
+			int msg1, int msg2,
 			unsigned int i1 = 0, unsigned int i2 = 0 )
 			:
 			ConnTainer( e1, e2, msg1, msg2 )
