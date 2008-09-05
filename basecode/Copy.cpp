@@ -210,7 +210,10 @@ void SimpleElement::copyGlobalMessages( Element* dup, bool isArray ) const
 			Element* tgt = ( *c )->e1();
 			assert( tgt != this );
 			if ( tgt->isGlobal() ) {
-				const Msg* m = tgt->msg( ( *c )->msg2() );
+				assert( ( *c )->msg1() >= 0 );
+				unsigned int msgNum = ( *c )->msg1();
+				assert( msgNum < tgt->numMsg() );
+				const Msg* m = tgt->msg( msgNum );
 				m->copy( *c, tgt, dup, isArray );
 			}
 		}
@@ -412,9 +415,12 @@ Element* SimpleElement::copyIntoArray( Id parent, const string& newName, int n )
 }
 
 #ifdef DO_UNIT_TESTS
+#include "DeletionMarkerFinfo.h"
+#include "GlobalMarkerFinfo.h"
 
 static Slot iSlot;
 static Slot xSlot;
+static Slot xDestSlot;
 
 class CopyTestClass
 {
@@ -621,14 +627,179 @@ Element* checkBasicCopy( Element* c0, Element* n, Element* outsider,
 
 Element* check1stGenGlobalCopy( Element* n, Element* c1 )
 {
+	vector< Id > kids;
+	get< vector< Id > >( c1, "childList", kids );
+	ASSERT( kids.size() == 2 , "copy kids" );
+	Element* k0 = kids[0]();
+	ASSERT( k0->name() == "k0" , "copy global kids" );
+
+
+	// Correct numbers of targets before the copy.
+	ASSERT( k0->numTargets( xSlot.msg() ) == 1, "copying globals" );
+	ASSERT( k0->numTargets( xDestSlot.msg() ) == 1, "copying globals" );
+
+	k0->addFinfo( GlobalMarkerFinfo::global() ); // Mark as a global.
 	Element* c2 = c1->copy( n, "c2" );
+
+	ASSERT( c2 != c1, "copying Globals" );
+	ASSERT( c2 != 0, "copying Globals" );
+	ASSERT( c2->name() == "c2", "copying Globals" );
+
+	// Now check for messages. We expect to use the old k0 as a
+	// xSrc to k1 and as a xDest from c2.xSrc.
+	// k1 is a sibling of k0, and g1 a child of k1. We do not expect
+	// a copy of k0, but we do of the other two.
+	// Eref( k0 ).add( "xSrc", k1, "xDest", ConnTainer::Default );
+	// Eref( c0 ).add( "xSrc", k0, "xDest", ConnTainer::Default );
+	
+	Element* k1 = kids[1]();
+
+	// Correct kids are copied
+	kids.resize( 0 );
+	get< vector< Id > >( c2, "childList", kids );
+	ASSERT( kids.size() == 1 , "copying globals" );
+	Element* newK1 = kids[0]();
+	ASSERT( newK1->name() == "k1", "copying globals" );
+
+	Id newG1Id;
+	lookupGet< Id, string >( newK1, "lookupChild", newG1Id, "g1" );
+	Element* newG1 = newG1Id();
+	ASSERT( newG1->name() == "g1", "copying globals" );
+
+	// Correct numbers of targets following the copy.
+	ASSERT( k0->numTargets( xSlot.msg() ) == 2, "copying globals" );
+	ASSERT( k0->numTargets( xDestSlot.msg() ) == 2, "copying globals" );
+
+	// Both c2 and c1 point toward k0.
+	vector< ConnTainer* >::const_iterator i = 
+		c2->msg( xSlot.msg() )->begin();
+	ASSERT( (*i)->e1() == c2, "Copying globals" );
+	ASSERT( (*i)->e2() == k0, "Copying globals" );
+
+	i = c1->msg( xSlot.msg() )->begin();
+	ASSERT( (*i)->e1() == c1, "Copying globals" );
+	ASSERT( (*i)->e2() == k0, "Copying globals" );
+
+	// Both k1 and newK1 get msgs from k0
+	i = k0->msg( xSlot.msg() )->begin();
+	ASSERT( (*i)->e1() == k0, "Copying globals" );
+	ASSERT( (*i)->e2() == k1, "Copying globals" );
+	i++;
+	ASSERT( (*i)->e1() == k0, "Copying globals" );
+	ASSERT( (*i)->e2() == newK1, "Copying globals" );
+
+	// Now turn it around. k0 gets msgs from c1 and c2, in that order.
+	const vector< ConnTainer* >* dest = k0->dest( xDestSlot.msg() );
+	ASSERT( dest->size() == 2, "COPYING globals" );
+	ASSERT( (*dest)[0]->e1() == c1, "Copying globals" );
+	ASSERT( (*dest)[0]->e2() == k0, "Copying globals" );
+	ASSERT( (*dest)[1]->e1() == c2, "Copying globals" );
+	ASSERT( (*dest)[1]->e2() == k0, "Copying globals" );
+
+	// k1 gets a single message from k0
+	dest = k1->dest( xDestSlot.msg() );
+	ASSERT( dest->size() == 1, "COPYING globals" );
+	ASSERT( (*dest)[0]->e1() == k0, "Copying globals" );
+	ASSERT( (*dest)[0]->e2() == k1, "Copying globals" );
+
+	// newK1 gets a single message from k0
+	dest = newK1->dest( xDestSlot.msg() );
+	ASSERT( dest->size() == 1, "COPYING globals" );
+	ASSERT( (*dest)[0]->e1() == k0, "Copying globals" );
+	ASSERT( (*dest)[0]->e2() == newK1, "Copying globals" );
 
 	return c2;
 }
 
-void check2ndGenGlobalCopy( Element* n, Element* c2 )
+// This is much the same as above. Assumes that the above copies are done.
+void check2ndGenGlobalCopy( Element* n, Element* c1, Element* c2 )
 {
+
+	vector< Id > kids;
+	get< vector< Id > >( c1, "childList", kids );
+	ASSERT( kids.size() == 2 , "copy kids" );
+	Element* k0 = kids[0]();
+	ASSERT( k0->name() == "k0" , "copy global kids" );
+
+	// Correct numbers of targets before the copy.
+	ASSERT( k0->numTargets( xSlot.msg() ) == 2, "copying globals" );
+	ASSERT( k0->numTargets( xDestSlot.msg() ) == 2, "copying globals" );
+
 	Element* c3 = c2->copy( n, "c3" );
+
+	ASSERT( c3 != c2, "copying Globals" );
+	ASSERT( c3 != 0, "copying Globals" );
+	ASSERT( c3->name() == "c3", "copying Globals" );
+
+	// Now check for messages. We expect to use the old k0 as a
+	// xSrc to k1 and as a xDest from c3.xSrc.
+	// k1 is a sibling of k0, and g1 a child of k1. We do not expect
+	// a copy of k0, but we do of the other two.
+	// Eref( k0 ).add( "xSrc", k1, "xDest", ConnTainer::Default );
+	// Eref( c0 ).add( "xSrc", k0, "xDest", ConnTainer::Default );
+	
+	Element* k1 = kids[1]();
+
+	// Correct kids are copied
+	kids.resize( 0 );
+	get< vector< Id > >( c3, "childList", kids );
+	ASSERT( kids.size() == 1 , "copying globals" );
+	Element* newK1 = kids[0]();
+	ASSERT( newK1->name() == "k1", "copying globals" );
+
+	Id newG1Id;
+	lookupGet< Id, string >( newK1, "lookupChild", newG1Id, "g1" );
+	Element* newG1 = newG1Id();
+	ASSERT( newG1->name() == "g1", "copying globals" );
+
+	// Correct numbers of targets following the copy.
+	ASSERT( k0->numTargets( xSlot.msg() ) == 3, "copying globals" );
+	ASSERT( k0->numTargets( xDestSlot.msg() ) == 3, "copying globals" );
+
+	// all of  c3, c2 and c1 point toward k0.
+	vector< ConnTainer* >::const_iterator i = 
+		c3->msg( xSlot.msg() )->begin();
+	ASSERT( (*i)->e1() == c3, "Copying globals" );
+	ASSERT( (*i)->e2() == k0, "Copying globals" );
+
+	i = c2->msg( xSlot.msg() )->begin();
+	ASSERT( (*i)->e1() == c2, "Copying globals" );
+	ASSERT( (*i)->e2() == k0, "Copying globals" );
+
+	i = c1->msg( xSlot.msg() )->begin();
+	ASSERT( (*i)->e1() == c1, "Copying globals" );
+	ASSERT( (*i)->e2() == k0, "Copying globals" );
+
+	// Both k1 and newK1 get msgs from k0
+	i = k0->msg( xSlot.msg() )->begin();
+	ASSERT( (*i)->e1() == k0, "Copying globals" );
+	ASSERT( (*i)->e2() == k1, "Copying globals" );
+	i++; // This would bring us to c2/k1
+	i++; // Here we are now with c3/k1
+	ASSERT( (*i)->e1() == k0, "Copying globals" );
+	ASSERT( (*i)->e2() == newK1, "Copying globals" );
+
+	// Now turn it around. k0 gets msgs from c1, c2 and c3, in that order.
+	const vector< ConnTainer* >* dest = k0->dest( xDestSlot.msg() );
+	ASSERT( dest->size() == 3, "COPYING globals" );
+	ASSERT( (*dest)[0]->e1() == c1, "Copying globals" );
+	ASSERT( (*dest)[0]->e2() == k0, "Copying globals" );
+	ASSERT( (*dest)[1]->e1() == c2, "Copying globals" );
+	ASSERT( (*dest)[1]->e2() == k0, "Copying globals" );
+	ASSERT( (*dest)[2]->e1() == c3, "Copying globals" );
+	ASSERT( (*dest)[2]->e2() == k0, "Copying globals" );
+
+	// k1 gets a single message from k0
+	dest = k1->dest( xDestSlot.msg() );
+	ASSERT( dest->size() == 1, "COPYING globals" );
+	ASSERT( (*dest)[0]->e1() == k0, "Copying globals" );
+	ASSERT( (*dest)[0]->e2() == k1, "Copying globals" );
+
+	// newK1 gets a single message from k0
+	dest = newK1->dest( xDestSlot.msg() );
+	ASSERT( dest->size() == 1, "COPYING globals" );
+	ASSERT( (*dest)[0]->e1() == k0, "Copying globals" );
+	ASSERT( (*dest)[0]->e2() == newK1, "Copying globals" );
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -673,6 +844,7 @@ void copyTest()
 
 	iSlot = copyTestClass.getSlot( "iShared.trig" );
 	xSlot = copyTestClass.getSlot( "xSrc" );
+	xDestSlot = copyTestClass.getSlot( "xDest" );
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -707,7 +879,7 @@ void copyTest()
 	// copies.
 	//////////////////////////////////////////////////////////////////
 	
-	check2ndGenGlobalCopy( n, c2 );
+	check2ndGenGlobalCopy( n, c1, c2 );
 
 	//////////////////////////////////////////////////////////////////
 	// Check copy preserving old name. Copy c0 onto c1.
