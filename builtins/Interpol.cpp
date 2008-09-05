@@ -283,9 +283,9 @@ Interpol::Interpol( unsigned long xdivs, double xmin, double xmax )
 double Interpol::interpolateWithoutCheck( double x ) const
 {
 	double xv = ( x - xmin_ ) * invDx_;
-	// unsigned long i = static_cast< unsigned long >( xv );
-	// return table_[ i ] + ( table_[ i + 1 ] - table_ [ i ] ) * ( xv - i );
 	unsigned long ixv = static_cast< unsigned long >( xv );
+	assert( ixv < table_.size() - 1 );
+	// return table_[ i ] + ( table_[ i + 1 ] - table_ [ i ] ) * ( xv - i );
 	vector< double >::const_iterator i = table_.begin() + ixv;
 	return *i + ( *( i + 1 ) - *i ) * ( xv - ixv ); 
 

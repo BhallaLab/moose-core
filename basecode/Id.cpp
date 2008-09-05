@@ -69,8 +69,8 @@ Id Id::shellId()
  */
 Id Id::str2Id( const std::string& s )
 {
-	unsigned int val = atoi( s.c_str() );
-	return Id( val );
+	// unsigned int val = atoi( s.c_str() );
+	return Id( s );
 }
 
 Id Id::assignIndex( unsigned int index ) const
@@ -105,12 +105,15 @@ IdManager& Id::manager()
 // static func to convert id into a string.
 string Id::id2str( Id id )
 {
+	/*
 	char temp[40];
 	if ( id.index_ == 0 )
 		sprintf( temp, "%d", id.id_ );
 	else
 		sprintf( temp, "%d[%d]", id.id_, id.index_ );
 	return temp;
+	*/
+	return id.path();
 }
 
 // Function to convert it into its fully separated path.
