@@ -38,7 +38,7 @@ class BinomialRng: public RandGenerator
     static double getN(const Element* e);    
     static void setP(const Conn& c, double p);
     static double getP(const Element* e);    
-    static void reinitFunc( const Conn& c, ProcInfo info);
+    virtual void innerReinitFunc( const Conn& c, ProcInfo info);
 
   private:
     bool isNSet_;
