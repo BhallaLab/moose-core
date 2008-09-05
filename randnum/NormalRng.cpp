@@ -55,40 +55,12 @@ const Cinfo* initNormalRngCinfo()
 static const Cinfo* normalRngCinfo = initNormalRngCinfo();
 
 /**
-   Replaces the same method in base class since the mean is stored
-   independent of the generator Probability object.   
- */
-double NormalRng::getMean( const Element *e)
-{    
-    return static_cast<NormalRng*>(e->data( 0 ))->mean_;
-}
-
-/**
-   Since normal distribution is defined in terms of mean and variance, we
-   want to store them in order to create the internal generator object.   
+   Set the mean of the internal generator object.   
  */
 void NormalRng::setMean(const Conn& c, double mean)
 {
     NormalRng* generator = static_cast < NormalRng* >(c.data());
-    
-    generator->mean_ = mean;
-    generator->isMeanSet_ = true;
-    if ( generator->isVarianceSet_&& (!generator->rng_))
-    {
-        generator->rng_ = new Normal(generator->method_, generator->mean_, generator->variance_);
-    }
-    else if ( generator->rng_)
-    {
-        generator->mean_ = generator->rng_->getMean();        
-    }    
-}
-/**
-   Replaces the same method in base class as the variance is stored
-   independent of the generator object.
- */
-double NormalRng::getVariance(const Element* e)
-{
-    return static_cast<NormalRng*>(e->data( 0 ))->variance_;
+    static_cast < Normal* > (generator->rng_)->setMean(mean);          
 }
 
 /**
@@ -104,84 +76,50 @@ void NormalRng::setVariance(const Conn& c, double variance)
     }
         
     NormalRng* generator = static_cast < NormalRng* >(c.data());
-    generator->isVarianceSet_ = true;
-    if ( generator->isMeanSet_ && (!generator->rng_))
-    {
-        generator->rng_ = new Normal(generator->method_, generator->mean_, variance);        
-        generator->variance_ = variance;
-    }
+    static_cast < Normal* > (generator->rng_)->setVariance(variance);
 }
 /**
    Returns the algorithm used.
    0 for alias method.
    1 for BoxMueller method.
  */
-int NormalRng::getMethod(const Element* e)
+NormalGenerator NormalRng::getMethod(const Element* e)
 {
-    return static_cast <NormalRng*> (e->data( 0 ))->method_;
+    NormalRng* generator = static_cast <NormalRng*> (e->data( 0 ));
+    return static_cast<Normal*> (generator->rng_)->getMethod();
 }
 /**
    Set the algorithm to be used.
    1 for BoxMueller method.
    Anything else for alias method.
  */
-void NormalRng::setMethod(const Conn& c, int method)
+void NormalRng::setMethod(const Conn& c, NormalGenerator method)
 {
     NormalRng* generator = static_cast <NormalRng*> ( c.data());
     
-    if (! generator->rng_)
+    if ( generator->rng_)
     {
-        switch ( method )
-        {
-            case 1:
-                generator->method_ = BOX_MUELLER;
-                break;
-            default:
-                generator->method_ = ALIAS;
-        }
+        cout << "Warning: Changing method after generator object has been created. Current method: " << static_cast <Normal*> (generator->rng_)->getMethod() << ". New method: " << method << endl;
     }
-    else 
-    {
-        cerr << "Warning: cannot change method after generator object has been created. Method in use: " << static_cast <NormalRng*> ( c.data())->method_ << endl;
-    }
+    static_cast <Normal*> (generator->rng_)->setMethod(method);
 }
 
-void NormalRng::reinitFunc(const Conn& c, ProcInfo info)
+void NormalRng::innerReinitFunc(const Conn& c, ProcInfo info)
 {
-    NormalRng* generator = static_cast < NormalRng* >(c.data());
-    if (! generator->rng_ )
-    {
-        if (generator->isMeanSet_ && generator->isVarianceSet_)
-        {
-            generator->rng_ = new Normal(generator->method_, generator->mean_, generator->variance_);
-        } else 
-        {
-            cerr << "WARNING: creating default standard normal distribution generator." << endl;            
-            generator->rng_ = new Normal();
-        }        
-    }
+    // do nothing
 }
 
 /**
    By default the method used for normal distribution is alias method
-   by Ahrens and Dieter.  Mean and variance values are not presumed -
-   the user must explicitly specify these before trying to obtain a
-   sample.  The actual generator object is created only when both mean
-   and variance are set. To avoid checking for these settings each
-   time inside the process() call, we have booleans isMeanSet_ and
-   isVarianceSet_ to keep track of the mean and variance status. As
-   soon as both are set we instantiate Normal class with the mean_,
-   variance_ and method_ as parameters. In order to use some method
-   other than the default Alias method, one must call setMethod with a
-   proper method index before setting mean or variance.
+   by Ahrens and Dieter. In order to use some method other than the
+   default Alias method, one should call setMethod with a proper
+   method index before calling reset ( reinit ). Since different
+   methods create different random sequences, the combined sequence
+   may not have the intended distribution. By default mean and
+   variance are set to 0.0 and 1.0 respectively.
  */
 NormalRng::NormalRng():RandGenerator()
 {
-    
-    mean_ = 0;
-    variance_ = -1.0; // this indicates uninitialized object
-    isMeanSet_ = false;
-    isVarianceSet_ = false;
-    method_ = ALIAS;    
+    rng_ = new Normal();
 }
 #endif

@@ -124,8 +124,13 @@ void RandGenerator::processFunc( const Conn& c, ProcInfo info )
 
 void RandGenerator::reinitFunc(const Conn& c, ProcInfo info)
 {
-    cerr << "ERROR: RandGenerator::reinitFunc - this function should never be reached. Guilty party: " << c.target().e->name() << endl;
+    RandGenerator* generator = static_cast < RandGenerator* >(c.data());
+    generator->innerReinitFunc(c, info);    
 }
 
+void RandGenerator::innerReinitFunc(const Conn& c, ProcInfo info)
+{
+    cerr << "RandGenerator::innerReinitFunc() - this function should never be reached. Guilty party: " << c.target().e->name() << endl;
+}
 
 #endif
