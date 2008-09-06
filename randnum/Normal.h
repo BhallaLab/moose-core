@@ -29,10 +29,6 @@ class Normal : public Probability
 {
     
   public:
-//     Normal();
-//     Normal(NormalGenerator algorithm);
-//     Normal(double mean, double variance);
-//     Normal(NormalGenerator algorithm, double mean, double variance);
     Normal(double mean=0.0, double variance=1.0, NormalGenerator algorithm=ALIAS);
     double getMean()  const;
     void setMean(double value);

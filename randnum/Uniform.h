@@ -17,7 +17,9 @@
 
 #ifndef _UNIFORM_H
 #define _UNIFORM_H
+
 #include "Probability.h"
+
 class Uniform: public Probability
 {
   public:
