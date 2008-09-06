@@ -27,11 +27,11 @@ bool isEqual(float x, float y, float epsilon)
     
     if (fabs(x) > fabs(y)) 
     {
-        return fabs(x - y) < fabs(epsilon*x);
+        return fabs((x - y) / x) < epsilon;
     }
     else
     {
-        return fabs(x-y) < fabs(epsilon*y);
+        return fabs((x - y) / y) < epsilon;
     }
 }
 bool isEqual(double x, double y, double epsilon)
@@ -42,11 +42,11 @@ bool isEqual(double x, double y, double epsilon)
     }
     if (fabs(x) > fabs(y)) 
     {
-        return fabs(x - y) < fabs(epsilon*x);
+        return fabs((x - y) / x) < epsilon;
     }
     else
     {
-        return fabs(x-y) < fabs(epsilon*y);
+        return fabs((x - y) / y) < epsilon;
     }
 }
 bool isEqual(long double x, long double y, long double epsilon)
@@ -57,11 +57,11 @@ bool isEqual(long double x, long double y, long double epsilon)
     }
     if (fabs(x) > fabs(y)) 
     {
-        return fabs(x - y) < fabs(epsilon*x);
+        return fabs((x - y) / x) < epsilon;
     }
     else
     {
-        return fabs(x-y) < fabs(epsilon*y);
+        return fabs((x - y) / y) < epsilon;
     }
 }
 #endif
