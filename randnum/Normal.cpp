@@ -47,55 +47,11 @@ Normal::Normal(double mean, double variance, NormalGenerator method):mean_(mean)
             generator_ = &(Normal::aliasMethod);
     }
 }
-    
-// Normal::Normal():mean_(0.0),variance_(1.0), method_(ALIAS), isStandard_(true)
-// {
-//     generator_ = &(Normal::aliasMethod);    
-// }
-
-// Normal::Normal(NormalGenerator method):mean_(0.0), variance_(1.0), isStandard_(true)
-// {
-//     method_ = method;
-//     switch(method)
-//     {
-//         case BOX_MUELLER:
-//             generator_ = &(Normal::BoxMueller);
-//             break;            
-//         case ALIAS:
-//             generator_ = &(Normal::aliasMethod);
-//             break;
-//         default:
-//             cerr << "ERROR: Normal() - generator method# " << method << ". Don't know how to do this. Using alias method."<<endl;
-//             generator_ = &(Normal::aliasMethod);
-//     }
-// }
 
 double dummy()
 {
     return 0.0;    
 }
-
-
-// Normal::Normal(double mean, double variance):mean_(mean), variance_(variance), method_(ALIAS), isStandard_(false)
-// {
-//     generator_ = &(Normal::aliasMethod);
-// }
-
-// Normal::Normal(NormalGenerator method, double mean, double variance):mean_(mean), variance_(variance), isStandard_(false)
-// {
-//      switch(method)
-//     {
-//         case BOX_MUELLER:
-//             generator_ = &(Normal::BoxMueller);
-//             break;            
-//         case ALIAS:
-//             generator_ = &(Normal::aliasMethod);
-//             break;
-//         default:
-//             cerr << "ERROR: Normal() - generator method# " << method << ". Don't know how to do this. Using alias method."<<endl;
-//             generator_ = &(Normal::aliasMethod);
-//     }
-// }
 
 double Normal::getNextSample() const
 {
@@ -204,8 +160,12 @@ const unsigned long q[] =
 const double c = 0.004996971959878404;
 
 const double d = 1.861970434352886050;
-
-
+/*********************************************************************************************************************************/
+/* TODO: This implementation has a bug. The sample mean deviates a lot
+ * from the generator mean for very small numbers, like 1e-7
+ * Need to make sure that this is not due to 32/64 bit incompatibility. 
+ */
+/*********************************************************************************************************************************/
 double Normal::aliasMethod()
 {
     double result;
@@ -486,6 +446,62 @@ double algorithmF()
     double result = 0;
     return result;    
 }
+#endif // unimplemented methods
+
+#ifdef DO_UNIT_TESTS
+#include <cassert>
+#include <vector>
+
+void checkMeanVariance(Normal& normalGen, unsigned seqLen)
+{
+    vector < double > seq;
+    double mean = 0.0;
+    for ( unsigned ii = 0; ii < seqLen; ++ii)
+    {
+        double sample = normalGen.getNextSample();
+        seq.push_back(sample);
+        mean +=  sample;        
+    }
+    mean /= seqLen;
+    cout << "Testing Normal: " << normalGen.getMethod() << " method for " << seqLen << " samples :: mean set - " << normalGen.getMean() << ", sample mean - " << mean << ". ";
+    double variance = 0.0;
+    for ( unsigned ii = 0; ii < seqLen; ++ ii)
+    {
+        variance += (mean - seq[ii]) * (mean - seq[ii]);
+    }
+    variance /= seqLen;
+    cout << "variance set - " << normalGen.getVariance() << ", sample variance - " << variance << endl;
+}
+
+void testNormal()
+{
+    const unsigned SEQ_LEN = 1000;
+    
+    Normal* normalGen = new Normal();
+    // make sure default constructor creates standard normal
+    assert(isEqual(normalGen->getMean(), 0.0)); 
+    assert(isEqual(normalGen->getVariance(), 1.0));
+    // check if setting method is effective
+    normalGen->setMethod(ALIAS);
+    assert(normalGen->getMethod() == ALIAS);
+    checkMeanVariance(*normalGen, 1000); // check the sample mean and variance for "alias method"
+    delete normalGen;
+    normalGen = new Normal(100.0, 33.0, BOX_MUELLER);
+    assert(normalGen->getMethod() == BOX_MUELLER);
+    assert(isEqual(normalGen->getMean(), 100.0)); 
+    assert(isEqual(normalGen->getVariance(), 33.0));
+    checkMeanVariance(*normalGen, 1000); // check the sample mean and variance for "Box-Mueller method"
+    delete normalGen;
+    
+    // non standard normal distr.
+    normalGen = new Normal();
+    normalGen->setMean(-100.0);
+    normalGen->setVariance(3.0);
+    checkMeanVariance(*normalGen, 1000);
+}
+#endif  // !DO_UNIT_TESTS
+
+#if defined(DO_UNIT_TESTS) && defined(TEST_MAIN)
 // Test main
 
 int main(void)
@@ -523,11 +539,12 @@ int main(void)
     {
         cout << freq[i] << endl;
     }
-    
+ 
+    testNormal();
+ 
     return 0;
 }
+#endif // ! define(DO_UNIT_TESTS) && defined(TEST_MAIN)
 
-
-#endif // unimplemented methods
 
 #endif

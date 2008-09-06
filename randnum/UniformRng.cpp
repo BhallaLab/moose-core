@@ -17,22 +17,17 @@
 
 #ifndef _UNIFORMRNG_CPP
 #define _UNIFORMRNG_CPP
+#include "basecode/moose.h"
 #include "randnum.h"
 #include "UniformRng.h"
-#include "basecode/moose.h"
+#include "Uniform.h"
+
 extern const Cinfo* initRandGeneratorCinfo();
 
 const Cinfo* initUniformRngCinfo()
 {
     static Finfo* uniformRngFinfos[] =
         {
-            
-            new ValueFinfo("mean", ValueFtype1<double>::global(),
-                           GFCAST( &UniformRng::getMean),
-                           RFCAST( &dummyFunc)),
-            new ValueFinfo("variance", ValueFtype1<double>::global(),
-                           GFCAST( &UniformRng::getVariance),
-                           RFCAST( &dummyFunc)),
             /// The lower bound on the numbers generated 
             new ValueFinfo("min", ValueFtype1 <double>::global(),
                            GFCAST( &UniformRng::getMin),
@@ -58,36 +53,14 @@ const Cinfo* initUniformRngCinfo()
 
 static const Cinfo* uniformRngCinfo = initUniformRngCinfo();
 
-double UniformRng::getMean(const Element * e)
-{
-    UniformRng* rng = static_cast<UniformRng*> (e->data());
-    if ( rng )
-    {
-        return (rng->min_+ rng->max_)/2.0;
-    }
-    return 0.0;    
-}
-
-    
-double UniformRng::getVariance(const Element* e)
-{
-    UniformRng* rng = static_cast<UniformRng*> (e->data());
-    if ( rng )
-    {
-        return (rng->max_ - rng->min_)*(rng->max_ - rng->min_)/12.0;
-    }
-    return -1.0; // error    
-}
-
-
 double UniformRng::getMin(const Element * e)
 {
-    return static_cast<UniformRng*> (e->data())->min_;
+    return static_cast <Uniform *> (static_cast<UniformRng*> (e->data())->rng_)->getMin();
 }
 
 double UniformRng::getMax(const Element * e)
 {
-    return static_cast<UniformRng*> (e->data())->max_;
+    return static_cast <Uniform *> (static_cast<UniformRng*> (e->data())->rng_)->getMax();
 }
 
 void UniformRng::setMin(const Conn& c, double min)
@@ -95,7 +68,14 @@ void UniformRng::setMin(const Conn& c, double min)
     UniformRng* obj = static_cast <UniformRng*> (c.data());
     if (obj)
     {
-        obj->min_ = min;
+        if (obj->rng_)
+        {
+            static_cast<Uniform *> (obj->rng_)->setMin(min);
+        }
+        else 
+        {
+            cerr << "UniformRng::setMin() - generator Uniform object is null." << endl;
+        }        
     }
     else
     {
@@ -107,7 +87,14 @@ void UniformRng::setMax(const Conn& c, double max)
     UniformRng* obj = static_cast <UniformRng*> (c.data());
     if (obj)
     {
-        obj->max_ = max;
+        if (obj->rng_)
+        {
+            static_cast<Uniform *> (obj->rng_)->setMax( max );
+        }
+        else 
+        {
+            cerr << "UniformRng::setMax() - generator Uniform object is null." << endl;
+        }        
     }
     else
     {
@@ -115,29 +102,22 @@ void UniformRng::setMax(const Conn& c, double max)
     }
 }
 
-double UniformRng::getSample(const Element* e)
-{
-    UniformRng* rng = static_cast<UniformRng*> (e->data());
-    if ( rng)
-    {
-        return mtrand()*( rng->max_ - rng->min_ ) + rng->min_;
-    }
-    else
-    {
-        cerr << "UniformRng::getSample() - Element is NULL." << endl;
-        return 0.0; // Error condition
-    }    
-}
 
 UniformRng::UniformRng():RandGenerator()
 {
-    min_ = 0.0;
-    max_ = 1.0;
+    rng_ = new Uniform();
 }
 
-UniformRng::~UniformRng()
+void UniformRng::innerReinitFunc(const Conn& conn, ProcInfo info)
 {
+    ;    /* no use */
 }
 
-    
+#ifdef DO_UNIT_TESTS
+void testUniformRng()
+{
+    cout << "testUniformRng(): yet to be implemented" << endl;
+}
+
+#endif
 #endif
