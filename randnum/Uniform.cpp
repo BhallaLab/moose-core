@@ -17,9 +17,15 @@
 
 #ifndef _UNIFORM_CPP
 #define _UNIFORM_CPP
+
+#include <cassert>
+#include <iostream>
+#include <vector>
+
 #include "Uniform.h"
 #include "randnum.h"
-#include <iostream>
+#include "NumUtil.h"
+
 using namespace std;
 
 Uniform::Uniform()
@@ -42,11 +48,11 @@ Uniform::Uniform(double min, double max)
 }
 double Uniform::getMean() const
 {
-    return (max_ - min_)/2.0;
+    return (max_ + min_) / 2.0;
 }
 double Uniform::getVariance()const
 {
-    return (max_-min_)*(max_ - min_)/12.0;
+    return (max_- min_) * (max_ - min_)/12.0;
 }
 double Uniform::getMin() const
 {
@@ -66,8 +72,55 @@ void Uniform::setMax(double max)
 }
 double Uniform::getNextSample() const
 {
+    assert( max_ > min_ );
     return mtrand()*(max_-min_)+min_;
 }
 
+#ifdef DO_UNIT_TESTS
+void doTest(double min, double max, unsigned count)
+{
+    Uniform rng;
+    
+    rng.setMin(min);
+    rng.setMax(max);
+    assert(isEqual(min, rng.getMin()));
+    assert(isEqual(max, rng.getMax()));
+    vector <double> seq;
+    double mean = 0.0;
+    
+    
+    for (unsigned ii = 0; ii < count; ++ii )
+    {
+        double sample;
+        sample = rng.getNextSample();
+        mean += sample;
+        seq.push_back(sample);
+    }
+    mean /= count;
+    double var = 0.0;
+    for(unsigned ii = 0; ii <seq.size(); ++ii)
+    {
+        var += (mean - seq[ii]) * (mean - seq[ii]);
+    }
+    var = var / count;
+    cout << "theoretical mean: " << rng.getMean() << ", sample mean: " << mean << ", theoretical var: " << rng.getVariance() << ", sample var: " << var << ", sample size: " << count << endl;
+    
+}
+
+void testUniform()
+{
+    cout << "testUniform(): testing uniform rng.\n";
+    doTest(-10.0, 10.0, 1000);
+    doTest(1e-10, 1.1e-10, 1000);
+}
+
+#endif // DO_UNIT_TESTS
+#if defined( TEST_MAIN ) && defined(DO_UNIT_TESTS)
+int main(void)
+{
+    testUniform();    
+}
+
+#endif // !defined( TEST_MAIN ) && defined(DO_UNIT_TESTS)
 
 #endif

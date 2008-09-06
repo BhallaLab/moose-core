@@ -22,19 +22,16 @@
 #include "basecode/header.h"
 #include "basecode/moose.h"
 #include "RandGenerator.h"
+
 class UniformRng: public RandGenerator
 {
   public:
     UniformRng();
-    ~UniformRng();
-    
-    static double getMean(const Element*e );
-    static double getVariance(const Element *e );
     static double getMin(const Element* e);
     static double getMax(const Element* e);
     static void setMin(const Conn& c, double min);
     static void setMax(const Conn& c, double max);
-    static double getSample(const Element* e);
+    virtual void innerReinitFunc(const Conn& c, ProcInfo info);
   private:
     double min_;
     double max_;    
