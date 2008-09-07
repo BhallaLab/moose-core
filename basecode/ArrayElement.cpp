@@ -238,6 +238,25 @@ Msg* ArrayElement::varMsg( unsigned int msgNum )
 	return ( &( msg_[ msgNum ] ) );
 }
 
+/**
+ * Returns the base message on the linked list specified by msgNum.
+ * Returns 0 on failure.
+ * Each Msg has a next_ identifier for a subsequent message. Only the
+ * base message, whose index is < numSrc, is to be used for setup.
+ */
+Msg* ArrayElement::baseMsg( unsigned int msgNum )
+{
+	assert ( msgNum < msg_.size() );
+	unsigned int numSrc = cinfo()->numSrc();
+	if ( msgNum < numSrc )
+		return ( &( msg_[ msgNum ] ) );
+	for ( unsigned int i = 0; i < numSrc; ++i ) {
+		if ( msg_[i].linksToNum( this, msgNum ) )
+			return &( msg_[i] );
+	}
+	return 0;
+}
+
 const vector< ConnTainer* >* ArrayElement::dest( int msgNum ) const
 {
 	if ( msgNum >= 0 )
