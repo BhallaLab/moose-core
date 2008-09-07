@@ -16,12 +16,7 @@
 class Mg_block
 {
 	public:
-		Mg_block()
-			: Zk_( 0.0 ), KMg_A_( 0.0 ), KMg_B_( 0.0 ),
-			CMg_( 0.0 )
-		{
-			;
-		}
+		Mg_block();
 
 		/////////////////////////////////////////////////////////////
 		// Value field access function definitions

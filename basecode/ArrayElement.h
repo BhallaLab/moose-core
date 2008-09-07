@@ -235,6 +235,12 @@ class ArrayElement: public Element
 		
 		Msg* varMsg( unsigned int msgNum );
 
+		/**
+		 * Returns a variable pointer to the base msg, in case the 
+		 * msgNum indicates one of the later Msgs on the linked list
+		 */
+		Msg* baseMsg( unsigned int msgNum );
+
 		const vector< ConnTainer* >* dest( int msgNum ) const;
 
 		/**

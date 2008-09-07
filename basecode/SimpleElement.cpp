@@ -118,6 +118,7 @@ const std::string& SimpleElement::className( ) const
 
 const Cinfo* SimpleElement::cinfo( ) const
 {
+	assert ( finfo_.size() > 0 );
 	const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( finfo_[0] );
 	assert( tf != 0 );
 	return tf->cinfo();
@@ -213,6 +214,30 @@ Msg* SimpleElement::varMsg( unsigned int msgNum )
 {
 	assert ( msgNum < msg_.size() );
 	return ( &( msg_[ msgNum ] ) );
+}
+
+/**
+ * Returns the base message on the linked list specified by msgNum.
+ * Returns 0 on failure.
+ * Each Msg has a next_ identifier for a subsequent message. Only the
+ * base message, whose index is < numSrc, is to be used for setup.
+ */
+Msg* SimpleElement::baseMsg( unsigned int msgNum )
+{
+	assert ( msgNum < msg_.size() );
+#ifdef DO_UNIT_TESTS
+	// if ( finfo_.size() == 0 )
+		return ( &( msg_[ msgNum ] ) );
+#else
+	unsigned int numSrc = cinfo()->numSrc();
+	if ( msgNum < numSrc )
+		return ( &( msg_[ msgNum ] ) );
+	for ( unsigned int i = 0; i < numSrc; ++i ) {
+		if ( msg_[i].linksToNum( this, msgNum ) )
+			return &( msg_[i] );
+	}
+	return 0;
+#endif
 }
 
 const vector< ConnTainer* >* SimpleElement::dest( int msgNum ) const
@@ -505,13 +530,15 @@ void SimpleElement::prepareForDeletion( bool stage )
 void SimpleElement::dumpMsgInfo() const
 {
 	unsigned int i;
-	cout << "Element " << name_ << ":\n";
-	cout << "msg_: funcid, sizes\n";
+	cout << "E=" << id().path() << "	#numSrc=" << cinfo()->numSrc() << "	";
 	for ( i = 0; i < msg_.size(); i++ ) {
 		vector< ConnTainer* >::const_iterator j;
-		cout << i << ":	funcid =" << msg_[i].funcId() << ": ";
+		cout << i << "[f=" << msg_[i].funcId() << ": " << msg_[i].size();
+		/*
 		for ( j = msg_[i].begin(); j != msg_[i].end(); j++ )
 			cout << ( *j )->size() << ", ";
+			*/
+		cout << "]	";
 	}
 	cout << endl;
 }
