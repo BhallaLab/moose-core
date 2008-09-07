@@ -199,10 +199,12 @@ void FuncVec::sortFuncVec( )
 	}
 	// Note that 'empty' is at zero and 'dummy' at one.
 	for ( unsigned int i = 0; i < fv.size(); i++ ) {
-		if ( fv[i]->size() == 0 )
+		if ( fv[i]->size() == 0 ) {
 			fv[i]->id_ = EMPTY_ID;
-		else
+		} else {
 			fv[i]->id_ = i;
+			// cout << "FuncVec # " << i << " = " << fv[i]->name() << endl;
+		}
 	}
 }
 
