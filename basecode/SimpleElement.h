@@ -212,8 +212,20 @@ class SimpleElement: public Element
 		 */
 		const Msg* msg( unsigned int msgNum ) const;
 		
+		/**
+		 * Returns a variable pointer to the specified msg.
+		 */
 		Msg* varMsg( unsigned int msgNum );
 
+		/**
+		 * Returns a variable pointer to the base msg, in case the 
+		 * msgNum indicates one of the later Msgs on the linked list
+		 */
+		Msg* baseMsg( unsigned int msgNum );
+
+		/**
+		 * Returns the vector of ConnTainers for the specified msgDest.
+		 */
 		const vector< ConnTainer* >* dest( int msgNum ) const;
 
 		/**

@@ -135,7 +135,8 @@ bool Msg::add( ConnTainer* ct,
 	// Must always have a nonzero func on the destination
 	assert( funcId2 != 0 );
 
-	Msg* m1 = ct->e1()->varMsg( ct->msg1() );
+	Msg* m1 = ct->e1()->baseMsg( ct->msg1() );
+	// Msg* m1 = ct->e1()->varMsg( ct->msg1() );
 	if ( !m1 ) return 0;
 
 	// We need to check for msg2 because DynamicFinfos have a +ve
@@ -148,7 +149,8 @@ bool Msg::add( ConnTainer* ct,
 		assert( ret );
 		dct->push_back( ct );
 	} else { // A msg terminating in the msg_ vector
-		Msg* m2 = ct->e2()->varMsg( ct->msg2() );
+		// Msg* m2 = ct->e2()->varMsg( ct->msg2() );
+		Msg* m2 = ct->e2()->baseMsg( ct->msg2() );
 		if ( !m2 ) return 0;
 		bool ret;
 		ret = m1->assignMsgByFuncId( ct->e1(), funcId2, ct );
@@ -538,18 +540,39 @@ unsigned int Msg::numDest( const Element* e, unsigned int ei ) const
 	return ret;
 }
 
+/**
+ * Returns true if this Msg->next_ field is the same as msgNum, or
+ * if the same is true for the Msg pointed to by next_.
+ */
+bool Msg::linksToNum( const Element* e, unsigned int msgNum ) const
+{
+	if ( msgNum < e->cinfo()->numSrc() ) // Should not happen.
+		return ( e->msg( msgNum ) == this );
+
+	for ( const Msg* m = this; m != 0; m = m->next( e ) )
+		if ( m->next_ == msgNum )
+			return 1;
+	return 0;
+}
+
 // bool Msg::copy( const ConnTainer* c, Element* e1, Element* e2 ) const
-bool Msg::copy( const ConnTainer* c, Element* e1, Element* e2, bool isArray ) const
+bool Msg::copy( const ConnTainer* c, 
+	Element* e1, Element* e2, bool isArray ) const
 {
 	unsigned int funcId1 = 0; // True if it was a pure Dest.
 	if ( c->msg2() >= 0 ) {
-		const Msg* m2 = c->e2()->msg( c->msg2() );
-		funcId1 = m2->fv_->id();
+		unsigned int msg2 = c->msg2();
+		unsigned int msg1 = c->msg1();
+		// const Msg* m2 = c->e2()->msg( msg2 );
+		//funcId1 = m2->fv_->id();
+		// from e1, stored on m2
+		funcId1 = e1->findFinfo( msg1 )->funcId();
 	}
 	unsigned int funcId2 = fv_->id(); // from e2, stored on m1.
 	ConnTainer* ct = c->copy( e1, e2, isArray );
 	if ( ct == 0 )
 		return 0;
+	// cout << "in Msg::copy: e1,e2=" << e1->name() << ", " << e2->name() << ", f1,f2=" << funcId1 << ", " << funcId2 << endl;
 	return add( ct, funcId1, funcId2 );
 }
 
