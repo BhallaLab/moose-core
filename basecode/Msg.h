@@ -247,6 +247,13 @@ class Msg
 		unsigned int numDest( const Element* e, unsigned int i ) const;
 
 		/**
+		 * Returns true if this Msg->next_ field is the same as msgNum, or
+		 * if the same is true for the Msg pointed to by next_.
+		 */
+		bool linksToNum( const Element* e, unsigned int msgNum ) const;
+
+
+		/**
 		 * Makes a duplicate of the current message specified by c,
 		 * to now go between e1 and e2.
 		 */

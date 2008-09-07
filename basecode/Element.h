@@ -229,7 +229,17 @@ class Element
 		 * Only used for looking up Src msgs, of course.
 		 */
 		virtual const Msg* msg( unsigned int msgNum ) const = 0;
+
+		/**
+		 * Returns a variable pointer to the specified msg.
+		 */
 		virtual Msg* varMsg( unsigned int msgNum ) = 0;
+
+		/**
+		 * Returns a variable pointer to the base msg, in case the 
+		 * msgNum indicates one of the later Msgs on the linked list
+		 */
+		virtual Msg* baseMsg( unsigned int msgNum ) = 0;
 
 		/**
 		 * Returns the identified destMsg, which is just a 
