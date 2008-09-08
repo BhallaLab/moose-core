@@ -140,8 +140,10 @@ class SigNeur
 		bool traverseCell( Eref me );
 		Id findSoma( const vector< Id >& compts );
 		void buildTree( Id soma, const vector< Id >& compts );
-		void innerBuildTree( 
-			unsigned int parent, Eref e, unsigned int msg );
+		// void innerBuildTree( unsigned int parent, Eref e, int msg );
+		void innerBuildTree( unsigned int parent, Eref paE, Eref e, 
+			int msg1, int msg2 );
+		void countSig();
 		static CompartmentCategory guessCompartmentCategory( Eref e );
 
 	private:
