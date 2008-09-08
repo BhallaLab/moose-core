@@ -7172,3 +7172,12 @@ Bug reported by Johannes Hjorth: showfield/setfield don't handle simple
 element indices. Both were due to inability of wildcards to handle indices
 on simple elements. Messy. Fixed and added unit tests.
 
+Checked in as revision 674: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
+Working again on SigNeur. Got it to traverse tree correctly after some
+messaging confusion.
+
+Next step is to subdivide compartments according to diffusion lambda,
+and to assign index ranges in the tree. 
+
+==============================================================================
