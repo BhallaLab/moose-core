@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <sstream>
 #include "moose.h"
 #include "Neutral.h"
 #include "Wildcard.h"
@@ -22,7 +23,8 @@ static bool matchName( Id parent, Id id,
 	const string& beforeBrace, const string& insideBrace, 
 	unsigned int index );
 
-static bool matchBeforeBrace( Id id, const string& name );
+static bool matchBeforeBrace( Id id, const string& name,
+	bool bracesInName, unsigned int index );
 
 static bool matchInsideBrace( Id id, const string& inside );
 /**
@@ -231,12 +233,23 @@ void findBraceContent( const string& path, string& beforeBrace,
 
 /**
  * Compares the various parts of the wildcard name with the id
+ * Indexing is messy here because we may refer to any of 3 things:
+ * - Regular array indexing
+ * - Wildcards within the braces
+ * - Simple elements with index as part of their names.
  */
 bool matchName( Id parent, Id id, 
 	const string& beforeBrace, const string& insideBrace, 
 	unsigned int index )
 {
-	if ( !( index == Id::AnyIndex || id.index() == index || 
+	string temp = id()->name();
+	assert( temp.length() > 0 );
+	bool bracesInName = 
+		( temp.length() > 3 && 
+		temp[temp.length() - 1] == ']' && 
+		id()->elementType() == "Simple" );
+
+	if ( !( index == Id::AnyIndex || id.index() == index || bracesInName ||
 		index == NOINDEX ) )
 		return 0;
 	
@@ -249,7 +262,7 @@ bool matchName( Id parent, Id id,
 			index = parent.index();
 	}
 	
-	if ( matchBeforeBrace( id, beforeBrace ) ) {
+	if ( matchBeforeBrace( id, beforeBrace, bracesInName, index ) ) {
 		if ( insideBrace.length() == 0 ) {
 			return 1;
 		} else {
@@ -291,13 +304,31 @@ bool matchInsideBrace( Id id, const string& inside )
  *
  * 		? may be used any number of times in the wildcard, and
  * 		must substitute exactly for characters.
+ *
+ * 		If bracesInName, then the Id name itself includes braces.
  */
-bool matchBeforeBrace( Id id, const string& name )
+bool matchBeforeBrace( Id id, const string& name,
+	bool bracesInName, unsigned int index )
 {
 	if ( name == "#" )
 		return 1;
-	
+
 	string ename = id()->name();
+	if ( bracesInName ) {
+		string::size_type pos = ename.rfind( '[' );
+		if ( pos == string::npos )
+			return 0;
+		if ( pos == 0 )
+			return 0;
+		if ( index != Id::AnyIndex ) {
+			ostringstream ost( "ost" );
+			ost << "[" << index << "]";
+			if ( ost.str() != ename.substr( pos ) )
+				return 0;
+		}
+		ename = ename.substr( 0, pos );
+	}
+	
 
 	if ( name == ename )
 		return 1;
@@ -381,14 +412,14 @@ void wildcardTestFunc(
 	if ( ne != ret.size() ) {
 		cout << "!\nAssert	'" << path << "' : expected " <<
 			ne << ", found " << ret.size() << "\n";
-		return;
+		assert( 0 );
 	}
 	for ( unsigned int i = 0; i < ne ; i++ ) {
 		if ( elist[ i ] != ret[ i ]() ) {
 			cout << "!\nAssert	" << path << ": item " << i << 
 				": " << elist[ i ]->name() << " != " <<
 					ret[ i ]()->name() << "\n";
-			return;
+			assert( 0 );
 		}
 	}
 	cout << ".";
@@ -429,24 +460,45 @@ void testWildcard()
 	Element* c1 = Neutral::create( "Compartment", "c1", a1->id(), Id::scratchId() );
 	Element* c2 = Neutral::create( "Compartment", "c2", a1->id(), Id::scratchId() );
 	Element* c3 = Neutral::create( "Compartment", "c3", a1->id(), Id::scratchId() );
+	Element* cIndex = Neutral::create( "Compartment", "c4[1]", a1->id(), Id::scratchId() );
+
+	ASSERT( cIndex->elementType() == "Simple", "Wildcard test" );
 
 
-	bool ret = matchBeforeBrace( a1->id(), "a1" );
+	bool ret = matchBeforeBrace( a1->id(), "a1", 0, 0 );
 	ASSERT( ret, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "a2" );
+	ret = matchBeforeBrace( a1->id(), "a2", 0, 0 );
 	ASSERT( ret == 0, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "a?" );
+	ret = matchBeforeBrace( a1->id(), "a?", 0, 0 );
 	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "?1" );
+	ret = matchBeforeBrace( a1->id(), "?1", 0, 0 );
 	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "??" );
+	ret = matchBeforeBrace( a1->id(), "??", 0, 0 );
 	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "#" );
+	ret = matchBeforeBrace( a1->id(), "#", 0, 0 );
 	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "a#" );
+	ret = matchBeforeBrace( a1->id(), "a#", 0, 0 );
 	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "#1" );
+	ret = matchBeforeBrace( a1->id(), "#1", 0, 0 );
 	ASSERT( ret == 1, "matchBeforeBrace" );
+
+	ret = matchBeforeBrace( cIndex->id(), "c4", 1, 1 );
+	ASSERT( ret == 1, "matchBeforeBrace" );
+	ret = matchBeforeBrace( cIndex->id(), "c4", 1, Id::AnyIndex );
+	ASSERT( ret == 1, "matchBeforeBrace" );
+	ret = matchBeforeBrace( cIndex->id(), "#4", 1, 1 );
+	ASSERT( ret == 1, "matchBeforeBrace" );
+	ret = matchBeforeBrace( cIndex->id(), "#", 1, 1 );
+	ASSERT( ret == 1, "matchBeforeBrace" );
+	ret = matchBeforeBrace( cIndex->id(), "?4", 1, 1 );
+	ASSERT( ret == 1, "matchBeforeBrace" );
+	ret = matchBeforeBrace( cIndex->id(), "c4", 1, 2 );
+	ASSERT( ret == 0, "matchBeforeBrace" );
+	ret = matchBeforeBrace( cIndex->id(), "c1", 1, 2 );
+	ASSERT( ret == 0, "matchBeforeBrace" );
+	ret = matchBeforeBrace( cIndex->id(), "c4", 0, 0 );
+	ASSERT( ret == 0, "matchBeforeBrace" );
+
 
 	ret = matchInsideBrace( a1->id(), "TYPE=Neutral" );
 	ASSERT( ret, "matchInsideBrace" );
@@ -536,7 +588,7 @@ void testWildcard()
 	wildcardTestFunc( el2, 12, "/##[TYPE=HHGate]" );
 
 	ASSERT( set( a1, "destroy" ), "Cleaning up" );
-	ASSERT( SimpleElement::numInstances - initialNumInstances == -4,
+	ASSERT( SimpleElement::numInstances - initialNumInstances == -5,
 			"Check that array is gone" );
 
 	/*
