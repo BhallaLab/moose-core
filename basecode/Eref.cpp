@@ -29,6 +29,11 @@ bool Eref::operator<( const Eref& other ) const
 	return ( e < other.e );
 }
 
+bool Eref::operator==( const Eref& other ) const
+{
+	return ( e == other.e && i == other.i );
+}
+
 Id Eref::id()
 {
 	Id ret = e->id();
