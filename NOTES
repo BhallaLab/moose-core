@@ -7164,5 +7164,11 @@ Confirmed with tiny.g, and then with full.g
 
 This profoundly painful bug underlines the need to clean up and document
 the messaging API.
+Checked in as revision 673: unit test flags on, Smoldyn off, -g, no GSL, MPI off
 
 ==============================================================================
+8 Sep 2008
+Bug reported by Johannes Hjorth: showfield/setfield don't handle simple
+element indices. Both were due to inability of wildcards to handle indices
+on simple elements. Messy. Fixed and added unit tests.
+
