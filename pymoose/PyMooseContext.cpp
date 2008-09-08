@@ -1117,7 +1117,7 @@ vector <string> PyMooseContext::getMessageList(Id obj, string field, bool incomi
     if (elist_.size() > 0)
     {
         assert(elist_.size() == fieldlist.size());
-        for ( int i = 0; i < elist_.size(); ++i )
+        for ( unsigned int i = 0; i < elist_.size(); ++i )
         {
             list.push_back("["+elist_[i].path()+"]."+fieldlist[i]);
         }              
@@ -1145,7 +1145,7 @@ vector <string> PyMooseContext::getMessageList(Id obj, bool incoming)
             continue;
         }
         vector <string> tmpList = getMessageList(obj, fieldList[i], incoming);
-        for ( int j = 0; j < tmpList.size(); ++j)
+        for ( unsigned int j = 0; j < tmpList.size(); ++j)
             {
                 string msgInfo = "["+obj.path()+"]."+ fieldList[i] + direction + tmpList[j];
                 msgList.push_back(msgInfo);
