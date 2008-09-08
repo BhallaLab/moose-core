@@ -41,7 +41,12 @@ Normal::Normal(double mean, double variance, NormalGenerator method):mean_(mean)
             break;
         case BOX_MUELLER:
             generator_ = &(Normal::BoxMueller);
+            break;
+#ifdef USE_GSL
+        case ZIGGURAT:
+            generator_ = &(Normal::gslZiggurat);
             break;            
+#endif
         default:
             cerr << "ERROR: Normal() - generator method# " << method << ". Don't know how to do this. Using alias method."<<endl;
             generator_ = &(Normal::aliasMethod);
@@ -109,14 +114,42 @@ void Normal::setMethod(NormalGenerator method)
             break;
         case BOX_MUELLER:
             generator_ = &(Normal::BoxMueller);
-            break;            
+            break;
+#ifdef USE_GSL
+        case ZIGGURAT:
+            generator_ = &(Normal::gslZiggurat);
+            break;
+#endif
         default:
             cerr << "ERROR: Normal() - generator method# " << method << ". Don't know how to do this. Using alias method."<<endl;
             generator_ = &(Normal::aliasMethod);
             method_ = ALIAS;            
     }
 }
+#ifdef USE_GSL
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
+double Normal::gslZiggurat()
+{
+    static const gsl_rng_type * T;
+    static gsl_rng * r;
+    static bool inited = false;
+    if (!inited)
+    {
+        /* create a generator chosen by the 
+           environment variable GSL_RNG_TYPE */
+    
+        gsl_rng_env_setup();
+        
+        T = gsl_rng_default;
+        r = gsl_rng_alloc (T);
+        inited = true;        
+    }
+    return gsl_ran_gaussian_ziggurat(r, 1.0);    
+}
+
+#endif // !USE_GSL
 /**
    Very simple but costly implementation
 */
@@ -140,7 +173,7 @@ double Normal::BoxMueller()
    Eine Alias-Methode zur Stichprohenentnahme aus Normalverteilungen.
    JH Ahrens and U Dieter, 19 89, Computing
 
-   We are assuming size of unsigned long to be 32 bit
+   We are assuming size of long to be 32 bit
 */
 
 const unsigned long y[] = 
@@ -190,7 +223,7 @@ double Normal::aliasMethod()
         uniform = uniform & 0x7fffffffUL;
     
         // 2) i = B1[1..7]
-        i_num = (uniform >> (WORD_LENGTH-8));
+        i_num = uniform >> 24;
         // 3) k = (B2 ^ B4) and retain least significant 6 bits of k
         k_num = ((uniform >> 16) ^ uniform ) & 0x0000003fUL;
     
@@ -379,16 +412,16 @@ bool Normal::testAcceptance(unsigned long t_num, unsigned long v_num)
     return accept;    */
 }
 
-
-
-#if 0 // unimplemented
 /**
    See Knuth, TAOCP Vol 2 Sec 3.4.1
    Algorithm M: The Rectangle-wedge-tail method discovered by G Marsaglia
    TODO: implement it by filling the gaps
 */
-double algorithmM()
+double algorithmM() // not implemented
 {
+    cout << "algorithmM() - not yet implemented." << endl;
+    return 0.0;
+    
     double result;
     double u;
     int psi;
@@ -443,10 +476,12 @@ double algorithmM()
 */
 double algorithmF()
 {
+    cout << "algorithmF() - not implemented." << endl;
+    
     double result = 0;
     return result;    
 }
-#endif // unimplemented methods
+
 
 #ifdef DO_UNIT_TESTS
 #include <cassert>
@@ -499,6 +534,37 @@ void testNormal()
     normalGen->setVariance(3.0);
     checkMeanVariance(*normalGen, 1000);
 }
+#if 0 // keep it out of compilation
+void testByte2Double()
+{
+    double res;
+    
+    unsigned char bytes[] = 
+        {
+            0, 0, 0, 0, 0
+        };
+    bytes[4] = 0x5;
+    res = byte2double(bytes, 5);
+    printf("0.0000000005 H = %.20g\n", res);
+    bytes[3] = 0x4;
+    res = byte2double(bytes, 4);
+    printf("0.00000004 H = %.20g\n", res);
+    bytes[2] = 0x3;
+    res = byte2double(bytes, 3);
+    printf("0.000003 H = %.20g\n", res);
+    bytes[1] = 0x2;    
+    res = byte2double(bytes, 2);
+    printf("0.0002 H = %.20g\n", res);
+    assert(isEqual(res, 0.000030517578125));
+    bytes[0] = 0x1;
+    res = byte2double(bytes, 1);
+    printf("0.01 H = %.20g\n", res);
+    assert(res == 0.00390625);
+    res = byte2double(bytes, 5);    
+    printf("0.0102030405 in hex = %.20g\n", res);    
+    assert(isEqual(res,  0.0039369473279293742962, 1e-9));// the right comparison is from the same program. Should check for various architectures.
+}
+#endif // #if 0
 #endif  // !DO_UNIT_TESTS
 
 #if defined(DO_UNIT_TESTS) && defined(TEST_MAIN)

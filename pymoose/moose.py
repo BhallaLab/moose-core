@@ -1557,6 +1557,7 @@ Gamma_swigregister(Gamma)
 
 ALIAS = _moose.ALIAS
 BOX_MUELLER = _moose.BOX_MUELLER
+ZIGGURAT = _moose.ZIGGURAT
 class Normal(Probability):
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -1565,7 +1566,11 @@ class Normal(Probability):
         try: self.this.append(this)
         except: self.this = this
     def getMean(*args): return _moose.Normal_getMean(*args)
+    def setMean(*args): return _moose.Normal_setMean(*args)
     def getVariance(*args): return _moose.Normal_getVariance(*args)
+    def setVariance(*args): return _moose.Normal_setVariance(*args)
+    def getMethod(*args): return _moose.Normal_getMethod(*args)
+    def setMethod(*args): return _moose.Normal_setMethod(*args)
     def getNextSample(*args): return _moose.Normal_getNextSample(*args)
     __swig_destroy__ = _moose.delete_Normal
     __del__ = lambda self : None;

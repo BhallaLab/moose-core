@@ -48,6 +48,8 @@
 	#include "RectPanel.h"
 	#include "Surface.h"
 	#include "Geometry.h"
+// 	#include "Adaptor.h"
+// 	#include "SigNeur.h"
 //	#include "../kinetics/SparseMatrix.h"
 	#include "../utility/utility.h"
 	/* Random number related utilities */
@@ -467,3 +469,21 @@
 %include "Geometry.h"
 %attribute(pymoose::Geometry, double, epsilon, __get_epsilon, __set_epsilon)
 %attribute(pymoose::Geometry, double, neighdist, __get_neighdist, __set_neighdist)
+// %include "Adaptor.h"
+// %attribute(pymoose::Adaptor, double, inputOffset, __get_inputOffset, __set_inputOffset)
+// %attribute(pymoose::Adaptor, double, outputOffset, __get_outputOffset, __set_outputOffset)
+// %attribute(pymoose::Adaptor, double, scale, __get_scale, __set_scale)
+// %attribute(pymoose::Adaptor, double, output, __get_output)
+// %include "SigNeur.h"
+// %attribute(pymoose::SigNeur, none, cell, __get_cell, __set_cell)
+// %attribute(pymoose::SigNeur, none, spine, __get_spine, __set_spine)
+// %attribute(pymoose::SigNeur, none, dend, __get_dend, __set_dend)
+// %attribute(pymoose::SigNeur, none, soma, __get_soma, __set_soma)
+// %attribute(pymoose::SigNeur, string, cellMethod, __get_cellMethod, __set_cellMethod)
+// %attribute(pymoose::SigNeur, string, spineMethod, __get_spineMethod, __set_spineMethod)
+// %attribute(pymoose::SigNeur, string, dendMethod, __get_dendMethod, __set_dendMethod)
+// %attribute(pymoose::SigNeur, string, somaMethod, __get_somaMethod, __set_somaMethod)
+// %attribute(pymoose::SigNeur, double, Dscale, __get_Dscale, __set_Dscale)
+// %attribute(pymoose::SigNeur, int, parallelMode, __get_parallelMode, __set_parallelMode)
+// %attribute(pymoose::SigNeur, double, updateStep, __get_updateStep, __set_updateStep)
+// %attribute(pymoose::SigNeur, double, calciumScale, __get_calciumScale, __set_calciumScale)
