@@ -376,6 +376,30 @@ void SigNeur::innerBuild( const Conn* c )
 
 	
 }
+
+// Count signaling compts, also subdivide for long dend compts.
+void SigNeur::countSig()
+{
+	unsigned int numSoma = 0;
+	unsigned int numDend = 0;
+	unsigned int numSpine = 0;
+	unsigned int numNeck = 0;
+	for ( vector< TreeNode >::iterator i = tree_.begin(); 
+		i != tree_.end(); ++i ) {
+		if ( i->category == SOMA )
+			++numSoma;
+		else if ( i->category == DEND )
+			++numDend;
+		else if ( i->category == SPINE )
+			++numSpine;
+		else if ( i->category == SPINE_NECK )
+			++numNeck;
+	}
+	cout << "Tree size = " << tree_.size() << ", s=" << numSoma << 
+		", d=" << numDend << ", sp=" << numSpine <<
+		", neck=" << numNeck << endl;
+}
+
 bool SigNeur::traverseCell( Eref me )
 {
 	Element* cell = cellProto_.eref()->copy( me.e, "cell" );
@@ -396,8 +420,9 @@ bool SigNeur::traverseCell( Eref me )
 
 	// Figure out size of signaling model segments. Each elec compt must be
 	// an integral number of signaling models.
+	countSig();
 	
-	return 0;
+	return 1;
 }
 
 Id SigNeur::findSoma( const vector< Id >& compts )
@@ -414,7 +439,7 @@ Id SigNeur::findSoma( const vector< Id >& compts )
 			if ( name == "soma" || name == "Soma" || name == "SOMA" )
 				somaCompts.push_back( *i );
 			double dia;
-			get< double >( i->eref(), "dia", dia );
+			get< double >( i->eref(), "diameter", dia );
 			if ( dia > maxDia )
 				maxCompt = *i;
 		}
@@ -450,7 +475,7 @@ void SigNeur::buildTree( Id soma, const vector< Id >& compts )
 	} else {
 		const Cinfo* asymCinfo = Cinfo::find( "Compartment" );
 		assert( asymCinfo != 0 );
-		axialFinfo = asymCinfo->findFinfo( "raxial" );
+		axialFinfo = asymCinfo->findFinfo( "axial" );
 		raxialFinfo = asymCinfo->findFinfo( "raxial" );
 	}
 	assert( axialFinfo != 0 );
@@ -459,24 +484,48 @@ void SigNeur::buildTree( Id soma, const vector< Id >& compts )
 	// Soma may be in middle of messaging structure for cell, so we need
 	// to traverse both ways. But nothing below soma should 
 	// change direction in the traversal.
-	innerBuildTree( 0, soma.eref(), axialFinfo->msg() );
-	innerBuildTree( 0, soma.eref(), raxialFinfo->msg() );
+	innerBuildTree( 0, soma.eref(), soma.eref(), 
+		axialFinfo->msg(), raxialFinfo->msg() );
+	// innerBuildTree( 0, soma.eref(), soma.eref(), raxialFinfo->msg() );
 }
 
-// Recursive function to follow specified msg down to all kids.
-// Depth first.
-// Tree better not be circular, or it will not terminate.
-void SigNeur::innerBuildTree( unsigned int parent, Eref e, unsigned int msg)
+void SigNeur::innerBuildTree( unsigned int parent, Eref paE, Eref e, 
+	int msg1, int msg2 )
 {
 	unsigned int paIndex = tree_.size();
 	TreeNode t( e.id(), parent, guessCompartmentCategory( e ) );
 	tree_.push_back( t );
-	Conn* c = e->targets( msg, e.i );
+	// cout << e.name() << endl;
+	Conn* c = e->targets( msg1, e.i );
+
+	// Things are messy here because src/dest directions are flawed
+	// in Element::targets.
+	// The parallel moose fixes this mess, simply by checking against
+	// which the originating element is. Here we need to do the same
+	// explicitly.
 	for ( ; c->good(); c->increment() ) {
-		innerBuildTree( paIndex, c->target(), msg );
+		Eref tgtE = c->target();
+		if ( tgtE == e )
+			tgtE = c->source();
+		if ( !( tgtE == paE ) ) {
+			// cout << "paE=" << paE.name() << ", e=" << e.name() << ", msg1,2= " << msg1 << "," << msg2 << ", src=" << c->source().name() << ", tgt= " << tgtE.name() << endl;
+			innerBuildTree( paIndex, e, tgtE, msg1, msg2 );
+		}
+	}
+	delete c;
+	c = e->targets( msg2, e.i );
+	for ( ; c->good(); c->increment() ) {
+		Eref tgtE = c->target();
+		if ( tgtE == e )
+			tgtE = c->source();
+		if ( !( tgtE == paE ) ) {
+			// cout << "paE=" << paE.name() << ", e=" << e.name() << ", msg1,2= " << msg1 << "," << msg2 << ", src=" << c->source().name() << ", tgt= " << tgtE.name() << endl;
+			innerBuildTree( paIndex, e, tgtE, msg1, msg2 );
+		}
 	}
 	delete c;
 }
+
 
 CompartmentCategory SigNeur::guessCompartmentCategory( Eref e )
 {
