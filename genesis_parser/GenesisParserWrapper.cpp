@@ -2005,7 +2005,9 @@ void GenesisParserWrapper::doShow( int argc, const char** argv, Id s )
 		e = *j;
 		print( "[ " + e.path() + " ]" );
 		for ( int i = firstField; i < argc; i++ ) {
-			if ( strcmp( argv[i], "*") == 0 ) {
+			if ( strcmp( argv[i], "*") == 0 || 
+				strcmp( argv[i], "-all" ) == 0 ||
+				strcmp( argv[i], "-a" ) == 0 ) {
 				showAllFields( e, s );
 			} else { // get specific field here.
 				fieldValue_ = "";
