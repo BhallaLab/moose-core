@@ -3052,6 +3052,8 @@ SWIG_AsVal_ptrdiff_t (PyObject * obj, ptrdiff_t *val)
 	#include "RectPanel.h"
 	#include "Surface.h"
 	#include "Geometry.h"
+// 	#include "Adaptor.h"
+// 	#include "SigNeur.h"
 //	#include "../kinetics/SparseMatrix.h"
 	#include "../utility/utility.h"
 	/* Random number related utilities */
@@ -73544,13 +73546,40 @@ SWIGINTERN PyObject *Gamma_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject
 
 SWIGINTERN PyObject *_wrap_new_Normal__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
+  double arg1 ;
+  double arg2 ;
+  NormalGenerator arg3 ;
   Normal *result = 0 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_Normal",0,0)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Normal",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_Normal" "', argument " "1"" of type '" "double""'");
+  } 
+  arg1 = static_cast< double >(val1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "new_Normal" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "new_Normal" "', argument " "3"" of type '" "NormalGenerator""'");
+  } 
+  arg3 = static_cast< NormalGenerator >(val3);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (Normal *)new Normal();
+    result = (Normal *)new Normal(arg1,arg2,arg3);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Normal, SWIG_POINTER_NEW |  0 );
@@ -73563,35 +73592,6 @@ fail:
 
 
 SWIGINTERN PyObject *_wrap_new_Normal__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  NormalGenerator arg1 ;
-  Normal *result = 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_Normal",1,1,&obj0)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(obj0, &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_Normal" "', argument " "1"" of type '" "NormalGenerator""'");
-  } 
-  arg1 = static_cast< NormalGenerator >(val1);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (Normal *)new Normal(arg1);
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Normal, SWIG_POINTER_NEW |  0 );
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_Normal__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   double arg1 ;
   double arg2 ;
@@ -73629,42 +73629,44 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_Normal__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Normal__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  NormalGenerator arg1 ;
-  double arg2 ;
-  double arg3 ;
+  double arg1 ;
   Normal *result = 0 ;
-  int val1 ;
+  double val1 ;
   int ecode1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
-  double val3 ;
-  int ecode3 = 0 ;
   PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_Normal",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(obj0, &val1);
+  if(!PyArg_UnpackTuple(args,(char *)"new_Normal",1,1,&obj0)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_Normal" "', argument " "1"" of type '" "NormalGenerator""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_Normal" "', argument " "1"" of type '" "double""'");
   } 
-  arg1 = static_cast< NormalGenerator >(val1);
-  ecode2 = SWIG_AsVal_double(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "new_Normal" "', argument " "2"" of type '" "double""'");
-  } 
-  arg2 = static_cast< double >(val2);
-  ecode3 = SWIG_AsVal_double(obj2, &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "new_Normal" "', argument " "3"" of type '" "double""'");
-  } 
-  arg3 = static_cast< double >(val3);
+  arg1 = static_cast< double >(val1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (Normal *)new Normal(arg1,arg2,arg3);
+    result = (Normal *)new Normal(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Normal, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_Normal__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Normal *result = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Normal",0,0)) SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (Normal *)new Normal();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Normal, SWIG_POINTER_NEW |  0 );
@@ -73689,17 +73691,17 @@ SWIGINTERN PyObject *_wrap_new_Normal(PyObject *self, PyObject *args) {
   }
   if (argc == 0) {
     SWIG_PYTHON_THREAD_END_BLOCK;
-    return _wrap_new_Normal__SWIG_0(self, args);
+    return _wrap_new_Normal__SWIG_3(self, args);
   }
   if (argc == 1) {
     int _v;
     {
-      int res = SWIG_AsVal_int(argv[0], NULL);
+      int res = SWIG_AsVal_double(argv[0], NULL);
       _v = SWIG_CheckState(res);
     }
     if (_v) {
       SWIG_PYTHON_THREAD_END_BLOCK;
-      return _wrap_new_Normal__SWIG_1(self, args);
+      return _wrap_new_Normal__SWIG_2(self, args);
     }
   }
   if (argc == 2) {
@@ -73715,14 +73717,14 @@ SWIGINTERN PyObject *_wrap_new_Normal(PyObject *self, PyObject *args) {
       }
       if (_v) {
         SWIG_PYTHON_THREAD_END_BLOCK;
-        return _wrap_new_Normal__SWIG_2(self, args);
+        return _wrap_new_Normal__SWIG_1(self, args);
       }
     }
   }
   if (argc == 3) {
     int _v;
     {
-      int res = SWIG_AsVal_int(argv[0], NULL);
+      int res = SWIG_AsVal_double(argv[0], NULL);
       _v = SWIG_CheckState(res);
     }
     if (_v) {
@@ -73732,12 +73734,12 @@ SWIGINTERN PyObject *_wrap_new_Normal(PyObject *self, PyObject *args) {
       }
       if (_v) {
         {
-          int res = SWIG_AsVal_double(argv[2], NULL);
+          int res = SWIG_AsVal_int(argv[2], NULL);
           _v = SWIG_CheckState(res);
         }
         if (_v) {
           SWIG_PYTHON_THREAD_END_BLOCK;
-          return _wrap_new_Normal__SWIG_3(self, args);
+          return _wrap_new_Normal__SWIG_0(self, args);
         }
       }
     }
@@ -73745,7 +73747,7 @@ SWIGINTERN PyObject *_wrap_new_Normal(PyObject *self, PyObject *args) {
   
   SWIG_PYTHON_THREAD_END_BLOCK;
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_Normal'.\n  Possible C/C++ prototypes are:\n""    Normal()\n""    Normal(NormalGenerator)\n""    Normal(double,double)\n""    Normal(NormalGenerator,double,double)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_Normal'.\n  Possible C/C++ prototypes are:\n""    Normal(double,double,NormalGenerator)\n""    Normal(double,double)\n""    Normal(double)\n""    Normal()\n");
   return NULL;
 }
 
@@ -73779,6 +73781,43 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Normal_setMean(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Normal *arg1 = (Normal *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Normal_setMean",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Normal, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Normal_setMean" "', argument " "1"" of type '" "Normal *""'"); 
+  }
+  arg1 = reinterpret_cast< Normal * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Normal_setMean" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->setMean(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Normal_getVariance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Normal *arg1 = (Normal *) 0 ;
@@ -73800,6 +73839,109 @@ SWIGINTERN PyObject *_wrap_Normal_getVariance(PyObject *SWIGUNUSEDPARM(self), Py
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Normal_setVariance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Normal *arg1 = (Normal *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Normal_setVariance",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Normal, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Normal_setVariance" "', argument " "1"" of type '" "Normal *""'"); 
+  }
+  arg1 = reinterpret_cast< Normal * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Normal_setVariance" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->setVariance(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Normal_getMethod(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Normal *arg1 = (Normal *) 0 ;
+  NormalGenerator result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Normal_getMethod",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Normal, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Normal_getMethod" "', argument " "1"" of type '" "Normal *""'"); 
+  }
+  arg1 = reinterpret_cast< Normal * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (NormalGenerator)(arg1)->getMethod();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Normal_setMethod(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Normal *arg1 = (Normal *) 0 ;
+  NormalGenerator arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Normal_setMethod",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Normal, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Normal_setMethod" "', argument " "1"" of type '" "Normal *""'"); 
+  }
+  arg1 = reinterpret_cast< Normal * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Normal_setMethod" "', argument " "2"" of type '" "NormalGenerator""'");
+  } 
+  arg2 = static_cast< NormalGenerator >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->setMethod(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -90506,7 +90648,11 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Gamma_swigregister", Gamma_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_Normal", _wrap_new_Normal, METH_VARARGS, NULL},
 	 { (char *)"Normal_getMean", _wrap_Normal_getMean, METH_VARARGS, NULL},
+	 { (char *)"Normal_setMean", _wrap_Normal_setMean, METH_VARARGS, NULL},
 	 { (char *)"Normal_getVariance", _wrap_Normal_getVariance, METH_VARARGS, NULL},
+	 { (char *)"Normal_setVariance", _wrap_Normal_setVariance, METH_VARARGS, NULL},
+	 { (char *)"Normal_getMethod", _wrap_Normal_getMethod, METH_VARARGS, NULL},
+	 { (char *)"Normal_setMethod", _wrap_Normal_setMethod, METH_VARARGS, NULL},
 	 { (char *)"Normal_getNextSample", _wrap_Normal_getNextSample, METH_VARARGS, NULL},
 	 { (char *)"delete_Normal", _wrap_delete_Normal, METH_VARARGS, NULL},
 	 { (char *)"Normal_swigregister", Normal_swigregister, METH_VARARGS, NULL},
@@ -91816,6 +91962,7 @@ SWIGEXPORT void SWIG_init(void) {
   SWIG_addvarlink(SWIG_globals(),(char*)"Molecule_className",Swig_var_Molecule_className_get, Swig_var_Molecule_className_set);
   SWIG_Python_SetConstant(d, "ALIAS",SWIG_From_int(static_cast< int >(ALIAS)));
   SWIG_Python_SetConstant(d, "BOX_MUELLER",SWIG_From_int(static_cast< int >(BOX_MUELLER)));
+  SWIG_Python_SetConstant(d, "ZIGGURAT",SWIG_From_int(static_cast< int >(ZIGGURAT)));
   SWIG_Python_SetConstant(d, "LOGARITHMIC",SWIG_From_int(static_cast< int >(LOGARITHMIC)));
   SWIG_Python_SetConstant(d, "RANDOM_MINIMIZATION",SWIG_From_int(static_cast< int >(RANDOM_MINIMIZATION)));
   SWIG_addvarlink(SWIG_globals(),(char*)"RandGenerator_className",Swig_var_RandGenerator_className_get, Swig_var_RandGenerator_className_set);
