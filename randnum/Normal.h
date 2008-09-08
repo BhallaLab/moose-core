@@ -22,14 +22,15 @@
 enum NormalGenerator
 {
     ALIAS,
-    BOX_MUELLER
+    BOX_MUELLER,
+    ZIGGURAT
 };
 
 class Normal : public Probability
 {
     
   public:
-    Normal(double mean=0.0, double variance=1.0, NormalGenerator algorithm=ALIAS);
+    Normal(double mean=0.0, double variance=1.0, NormalGenerator algorithm=BOX_MUELLER);
     double getMean()  const;
     void setMean(double value);
     double getVariance() const;
@@ -45,6 +46,7 @@ class Normal : public Probability
     NormalGenerator method_;
     static double BoxMueller();
     static double aliasMethod();
+    static double gslZiggurat();
     static bool testAcceptance(unsigned long t, unsigned long v);    
 };
 
