@@ -7180,4 +7180,9 @@ messaging confusion.
 Next step is to subdivide compartments according to diffusion lambda,
 and to assign index ranges in the tree. 
 
+Checked in as revision 677: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
 ==============================================================================
+9 Sep 2008
+
+Signaling compartment subdividion and indices done.
