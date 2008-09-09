@@ -105,6 +105,10 @@ class SigNeur
 		static void setDscale( const Conn* c, double value );
 		static double getDscale( Eref e );
 
+		/// Characteristic length for linear diffusion.
+		static void setLambda( const Conn* c, double value );
+		static double getLambda( Eref e );
+
 		/// Options for parallel configuration. 
 		static void setParallelMode( const Conn* c, int value );
 		static int getParallelMode( Eref e );
@@ -143,7 +147,8 @@ class SigNeur
 		// void innerBuildTree( unsigned int parent, Eref e, int msg );
 		void innerBuildTree( unsigned int parent, Eref paE, Eref e, 
 			int msg1, int msg2 );
-		void countSig();
+		void assignSignalingCompts();
+		void makeSignalingModel();
 		static CompartmentCategory guessCompartmentCategory( Eref e );
 
 	private:
@@ -160,6 +165,7 @@ class SigNeur
 		string dendMethod_;
 		string somaMethod_;
 		double Dscale_;	/// Diffusion scale factor.
+		double lambda_; /// Length constant for diffusion.
 		int parallelMode_; /// Later redo to something more friendly
 		double updateStep_;
 		map< string, string > channelMap_; /// Channel name mapping
