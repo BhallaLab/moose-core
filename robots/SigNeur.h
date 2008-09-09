@@ -148,8 +148,12 @@ class SigNeur
 		void innerBuildTree( unsigned int parent, Eref paE, Eref e, 
 			int msg1, int msg2 );
 		void assignSignalingCompts();
-		void makeSignalingModel();
+		void makeSignalingModel( Eref e );
+		void insertDiffusion( Element* base );
+		void completeDiffusion();
 		static CompartmentCategory guessCompartmentCategory( Eref e );
+		Element* copySig( Id kinId, Id proto, 
+			const string& name, unsigned int num );
 
 	private:
 		Id cellProto_; /// Prototype cell electrical model
@@ -160,6 +164,12 @@ class SigNeur
 		Id spine_; /// spine signaling model array base
 		Id dend_; /// dendrite signaling model array base
 		Id soma_; /// soma signaling model array base
+
+		unsigned int numSpine_; /// # of spine signaling compartments
+		unsigned int numNeck_; /// # of neck compartments. Not for signaling
+		unsigned int numDend_; /// # of dend signaling compartments
+		unsigned int numSoma_; /// # of soma signaling compartments
+
 		string cellMethod_;
 		string spineMethod_;
 		string dendMethod_;

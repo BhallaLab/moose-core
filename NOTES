@@ -7186,3 +7186,27 @@ Checked in as revision 677: unit test flags on, Smoldyn off, -g, no GSL, MPI off
 9 Sep 2008
 
 Signaling compartment subdividion and indices done.
+
+Checked in as revision 678: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
+For the diffusion, we create a reac for each diffusing molecule, on the
+same index. It would be nice to have a nextIndex message, which
+connects to the specified element with the next index from the source.
+For now use SimpleConn for the nextIndex part, and One2One for the within-
+index conns. The last compartment will have to have zero rates for its 
+diffusion reaction.
+
+In principle I should have the framework in place now, only the 
+parameterization of volumes, diffusion constants and so on remains. Actually
+there are a few issues:
+- Making a new array in an existing one doesn't seem to go down well. This
+	was attemped for the diffusion reaction.
+	For now, best approach is to make a temporary copy of the proto
+	and insert the diffusion reaction into it, including the original
+	message. Then the whole lot comes over in the 'copy'.
+- showmsg and le misbehave with the array. Possibly the same issue as above.
+
+Implemented temporary copy. This seems good. Next to complete the 
+diffusion messaging onto the next compt.
+
+==============================================================================
