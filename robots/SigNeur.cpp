@@ -11,6 +11,8 @@
 #include "moose.h"
 #include "setgetLookup.h"
 #include "../element/Neutral.h"
+#include "../kinetics/Molecule.h"
+#include "../kinetics/Reaction.h"
 #include "SigNeur.h"
 
 
@@ -164,7 +166,12 @@ static const Cinfo* sigNeurCinfo = initSigNeurCinfo();
 ///////////////////////////////////////////////////
 
 SigNeur::SigNeur()
-	: 	cellMethod_( "hsolve" ), 
+	: 	
+		numSpine_( 0 ), 
+		numNeck_( 0 ), 
+		numDend_( 0 ), 
+		numSoma_( 0 ), 
+		cellMethod_( "hsolve" ), 
 		spineMethod_( "rk5" ), 
 		dendMethod_( "rk5" ), 
 		somaMethod_( "rk5" ), 
@@ -394,27 +401,27 @@ void SigNeur::innerBuild( const Conn* c )
 // Count signaling compts, also subdivide for long dend compts.
 void SigNeur::assignSignalingCompts()
 {
-	unsigned int numSoma = 0;
-	unsigned int numDend = 0;
-	unsigned int numSpine = 0;
-	unsigned int numNeck = 0;
+	numSoma_ = 0;
+	numDend_ = 0;
+	numSpine_ = 0;
+	numNeck_ = 0;
 	for ( vector< TreeNode >::iterator i = tree_.begin(); 
 		i != tree_.end(); ++i ) {
 		if ( i->category == SOMA ) {
-			i->sigStart = numSoma;
-			i->sigEnd = ++numSoma;
+			i->sigStart = numSoma_;
+			i->sigEnd = ++numSoma_;
 		} else if ( i->category == DEND ) {
 			double length;
 			get< double >( i->compt.eref(), "length", length );
 			unsigned int numSegments = 1 + length / lambda_;
-			i->sigStart = numDend;
-			i->sigEnd = numDend = numDend + numSegments;
+			i->sigStart = numDend_;
+			i->sigEnd = numDend_ = numDend_ + numSegments;
 			// cout << " " << numSegments;
 		} else if ( i->category == SPINE ) {
-			i->sigStart = numSpine;
-			i->sigEnd = ++numSpine;
+			i->sigStart = numSpine_;
+			i->sigEnd = ++numSpine_;
 		} else if ( i->category == SPINE_NECK ) {
-			++numNeck;
+			++numNeck_;
 		}
 	}
 	// cout << endl;
@@ -424,13 +431,13 @@ void SigNeur::assignSignalingCompts()
 		for ( vector< TreeNode >::iterator i = tree_.begin(); 
 				i != tree_.end(); ++i ) {
 			if ( i->category == DEND ) {
-				i->sigStart += numSoma;
-				i->sigEnd += numSoma;
+				i->sigStart += numSoma_;
+				i->sigEnd += numSoma_;
 			}
 		}
 	}
 	if ( dendMethod_ == "rk5" && spineMethod_ == dendMethod_ ) {
-		unsigned int offset = numSoma + numDend;
+		unsigned int offset = numSoma_ + numDend_;
 		for ( vector< TreeNode >::iterator i = tree_.begin(); 
 				i != tree_.end(); ++i ) {
 			if ( i->category == SPINE ) {
@@ -440,14 +447,208 @@ void SigNeur::assignSignalingCompts()
 		}
 	}
 
-	cout << "SigNeur: Tree size = " << tree_.size() << ", s=" << numSoma << 
-		", d=" << numDend << ", sp=" << numSpine <<
-		", neck=" << numNeck << endl;
+	cout << "SigNeur: Tree size = " << tree_.size() << 
+		", s=" << numSoma_ << 
+		", d=" << numDend_ << 
+		", sp=" << numSpine_ <<
+		", neck=" << numNeck_ << endl;
 }
 
-void SigNeur::makeSignalingModel()
+void SigNeur::insertDiffusion( Element* base )
 {
+	static const double EPSILON = 1.0e-20;
+	static const Finfo* childListFinfo = 
+		initNeutralCinfo()->findFinfo( "childList" );
+	static const Finfo* reacFinfo = 
+		initMoleculeCinfo()->findFinfo( "reac" );
+	static const Finfo* dFinfo = 
+		initMoleculeCinfo()->findFinfo( "D" );
+	static const Finfo* subFinfo = 
+		initReactionCinfo()->findFinfo( "sub" );
+
+	// Traverse all zero index children, find ones that have D > 0
+	// Create an array of diffs on these children
+	// Connect up to parent using One2OneMap
+	// Connect up to next index parent using SimpleConn for now
+	// Assign rates.
+	if ( base == 0 )
+		return;
+	
+	// Traverse children.
+	vector< Id > kids;
+	get< vector< Id > >( base, childListFinfo, kids );
+	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
+		insertDiffusion( i->eref().e );
+
+	// Be sure to compete traversal before skipping this element.
+	if ( !base->cinfo()->isA( initMoleculeCinfo() ) )
+		return;
+	
+	// Ensure D > 0 
+	double D = 0.0;
+	bool ret = get< double >( base, dFinfo, D );
+	if ( D <= EPSILON )
+		return;
+
+	// Create array of diffusion reactions.
+	Id baseId = base->id();
+	Id childId = Id::childId( baseId );
+	Element* diff = Neutral::create( "Reaction", "diff", baseId, childId );
+
+	assert( diff != 0 );
+	// Connect up to parent
+	ret = baseId.eref().add( reacFinfo->msg(), 
+		childId.eref(), subFinfo->msg(), ConnTainer::Default );
+	assert( ret );
+
+	// assign rates.
+	
+}
+
+/*
+void SigNeur::linearDiffusion( Element* base )
+{
+	static const double EPSILON = 1.0e-20;
+	static const Finfo* childSrcFinfo = 
+		initNeutralCinfo()->findFinfo( "childSrc" );
+	static const Finfo* reacFinfo = 
+		initMoleculeCinfo()->findFinfo( "reac" );
+	static const Finfo* dFinfo = 
+		initMoleculeCinfo()->findFinfo( "D" );
+	static const Finfo* subFinfo = 
+		initReactionCinfo()->findFinfo( "sub" );
+	static const Finfo* prdFinfo = 
+		initReactionCinfo()->findFinfo( "prd" );
+
+	assert( childSrcFinfo != 0 );
+	assert( childSrcFinfo->msg() == 0 );
+	// Traverse all zero index children, find ones that have D > 0
+	// Create an array of diffs on these children
+	// Connect up to parent using One2OneMap
+	// Connect up to next index parent using SimpleConn for now
+	// Assign rates.
+	if ( base == 0 )
+		return;
+	
+	// Traverse children.
+	const Msg* m = base->msg( childSrcFinfo->msg() );
+	for ( vector< ConnTainer* >::const_iterator i = m->begin();
+		i != m->end(); ++i ) {
+
+		if ( (*i)->e2() != base )
+			linearDiffusion( (*i)->e2() );
+		else
+			linearDiffusion( (*i)->e1() );
+	}
+	if ( !base->cinfo()->isA( initMoleculeCinfo() ) )
+		return;
+	
+	// Ensure D > 0 
+	double D = 0.0;
+	bool ret = get< double >( base, dFinfo, D );
+	if ( D <= EPSILON )
+		return;
+
+	// Create array of diffusion reactions.
+	Id temp = base->id();
+	Id baseId = temp.assignIndex( Id::AnyIndex );
+	temp = Id::childId( baseId );
+	Id childId = temp.assignIndex( Id::AnyIndex );
+	Element* diff = Neutral::createArray( "Reaction", "diff", 
+		baseId, childId, base->numEntries() );
+
+	assert( diff != 0 );
+	// Connect up to parent
+	ret = baseId.eref().add( reacFinfo->msg(), 
+		childId.eref(), subFinfo->msg(), ConnTainer::One2OneMap );
+	assert( ret );
+
+	// Connect up to next index.
+	for ( unsigned int i = 1; i < base->numEntries(); ++i ) {
+		Eref e1 = baseId.eref();
+		e1.i = i - 1;
+		Eref e2 = childId.eref();
+		e2.i = i;
+		ret = e1.add( reacFinfo->msg(), e2, prdFinfo->msg(), 
+			ConnTainer::Simple );
+		assert( ret );
+	}
+
+	// assign rates.
+	
+}
+*/
+
+void SigNeur::completeDiffusion()
+{
+	static const Finfo* prdFinfo = 
+		initReactionCinfo()->findFinfo( "prd" );
+/*
+	// Connect up to next index.
+	for ( unsigned int i = 1; i < base->numEntries(); ++i ) {
+		Eref e1 = baseId.eref();
+		e1.i = i - 1;
+		Eref e2 = childId.eref();
+		e2.i = i;
+		ret = e1.add( reacFinfo->msg(), e2, prdFinfo->msg(), 
+			ConnTainer::Simple );
+		assert( ret );
+	}
+	*/
 	;
+}
+
+// Kinid is destination of copy
+// proto is prototype
+Element* SigNeur::copySig( Id kinId, Id proto, 
+	const string& name, unsigned int num )
+{
+	Element* ret = 0;
+	if ( proto.good() ) {
+		Id lib( "/library" );
+		/*
+		Element* temp = Neutral::create( "Neutral", "temp", libId, 
+			Id::childId( libId ) );
+		*/
+		ret = proto()->copy( lib(), name + ".msgs" );
+		assert( ret );
+		insertDiffusion( ret ); // Scan through putting in diffs.
+
+		if ( num == 1 ) {
+			ret = ret->copy( kinId(), name );
+		} else if ( num > 1 ) {
+			ret = ret->copyIntoArray( kinId, name, num );
+		}
+	}
+	return ret;
+}
+
+void SigNeur::makeSignalingModel( Eref me )
+{
+	// Make kinetic manager on sigNeur
+	// Make array copy of soma model.
+	// Make array copy of dend model.
+	// Make array copy of spine model.
+	// Traverse tree, set up diffusion messages.
+	// If any are nonzero, activate kinetic manager
+	
+	Element* kin = Neutral::create( "KineticManager", "kinetics", 
+		me.id(), Id::childId( me.id() ) );
+ 	Id kinId = kin->id();
+	// Each of these protos should be a simple Element neutral.
+	Element* soma = copySig( kinId, somaProto_, "soma", numSoma_ );
+	Element* dend = copySig( kinId, dendProto_, "dend", numDend_ );
+	Element* spine = copySig( kinId, spineProto_, "spine", numSpine_ );
+
+	if ( soma )
+		soma_ = soma->id();
+	if ( dend )
+		dend_ = dend->id();
+	if ( spine )
+		spine_ = spine->id();
+	
+	// linearDiffusion( soma );
+	// linearDiffusion( dend );
 }
 
 bool SigNeur::traverseCell( Eref me )
@@ -473,7 +674,7 @@ bool SigNeur::traverseCell( Eref me )
 	assignSignalingCompts();
 	
 	// Set up the signaling models
-	makeSignalingModel();
+	makeSignalingModel( me );
 
 	return 1;
 }
