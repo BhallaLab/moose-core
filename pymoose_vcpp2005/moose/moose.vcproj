@@ -123,7 +123,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\utility;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;&quot;E:\Users\MOOSE\Compile\py-Moose\&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;C:\Python25\include"
+				AdditionalIncludeDirectories="..\..\utility;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;E:\Users\MOOSE\Compile\moose_sept9\;&quot;C:\Program Files\GnuWin32\include&quot;;C:\Python25\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;snprintf=_snprintf_s"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -874,6 +874,50 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\CylPanel.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\DiskPanel.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\Enzyme.cpp"
 					>
 					<FileConfiguration
@@ -919,6 +963,50 @@
 				</File>
 				<File
 					RelativePath="..\..\pymoose\GammaRng.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\Geometry.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\HemispherePanel.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -1028,6 +1116,28 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\KinCompt.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\KineticHub.cpp"
 					>
 					<FileConfiguration
@@ -1050,7 +1160,51 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\KineticManager.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\Kintegrator.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\MathFunc.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -1142,6 +1296,28 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\NeuroScan.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\Neutral.cpp"
 					>
 					<FileConfiguration
@@ -1165,6 +1341,28 @@
 				</File>
 				<File
 					RelativePath="..\..\pymoose\NormalRng.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\Panel.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -1308,6 +1506,50 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\RectPanel.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\SpherePanel.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\SpikeGen.cpp"
 					>
 					<FileConfiguration
@@ -1374,6 +1616,28 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\Surface.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\SynChan.cpp"
 					>
 					<FileConfiguration
@@ -1419,6 +1683,28 @@
 				</File>
 				<File
 					RelativePath="..\..\pymoose\Tick.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\TriPanel.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -2436,6 +2722,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\CylPanel.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\DiskPanel.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\Enzyme.h"
 					>
 				</File>
@@ -2445,6 +2739,14 @@
 				</File>
 				<File
 					RelativePath="..\..\pymoose\GammaRng.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\Geometry.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\HemispherePanel.h"
 					>
 				</File>
 				<File
@@ -2464,11 +2766,23 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\KinCompt.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\KineticHub.h"
 					>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\KineticManager.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\Kintegrator.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\MathFunc.h"
 					>
 				</File>
 				<File
@@ -2484,11 +2798,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\NeuroScan.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\Neutral.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\pymoose\NormalRng.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\Panel.h"
 					>
 				</File>
 				<File
@@ -2532,6 +2854,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\RectPanel.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\SpherePanel.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\SpikeGen.h"
 					>
 				</File>
@@ -2541,6 +2871,10 @@
 				</File>
 				<File
 					RelativePath="..\..\pymoose\Stoich.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\Surface.h"
 					>
 				</File>
 				<File
@@ -2561,6 +2895,10 @@
 				</File>
 				<File
 					RelativePath="..\..\pymoose\TickTest.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\TriPanel.h"
 					>
 				</File>
 				<File
