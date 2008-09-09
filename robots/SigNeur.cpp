@@ -89,6 +89,11 @@ const Cinfo* initSigNeurCinfo()
 			GFCAST( &SigNeur::getDscale ), 
 			RFCAST( &SigNeur::setDscale )
 		),
+		new ValueFinfo( "lambda", 
+			ValueFtype1< double >::global(),
+			GFCAST( &SigNeur::getLambda ), 
+			RFCAST( &SigNeur::setLambda )
+		),
 		new ValueFinfo( "parallelMode", 
 			ValueFtype1< int >::global(),
 			GFCAST( &SigNeur::getParallelMode ), 
@@ -164,6 +169,7 @@ SigNeur::SigNeur()
 		dendMethod_( "rk5" ), 
 		somaMethod_( "rk5" ), 
 		Dscale_( 1.0 ),
+		lambda_( 10.0e-6 ),
 		parallelMode_( 0 ),
 		updateStep_( 1.0 ),
 		calciumScale_( 1.0 )
@@ -288,6 +294,16 @@ double SigNeur::getDscale( Eref e )
 	return static_cast< SigNeur* >( e.data() )->Dscale_;
 }
 
+void SigNeur::setLambda( const Conn* c, double value )
+{
+	static_cast< SigNeur* >( c->data() )->lambda_ = value;
+}
+
+double SigNeur::getLambda( Eref e )
+{
+	return static_cast< SigNeur* >( e.data() )->lambda_;
+}
+
 void SigNeur::setParallelMode( const Conn* c, int value )
 {
 	static_cast< SigNeur* >( c->data() )->parallelMode_ = value;
@@ -373,12 +389,10 @@ void SigNeur::innerBuild( const Conn* c )
 		cout << " : Warning: Unable to traverse cell\n";
 		return;
 	}
-
-	
 }
 
 // Count signaling compts, also subdivide for long dend compts.
-void SigNeur::countSig()
+void SigNeur::assignSignalingCompts()
 {
 	unsigned int numSoma = 0;
 	unsigned int numDend = 0;
@@ -386,18 +400,54 @@ void SigNeur::countSig()
 	unsigned int numNeck = 0;
 	for ( vector< TreeNode >::iterator i = tree_.begin(); 
 		i != tree_.end(); ++i ) {
-		if ( i->category == SOMA )
-			++numSoma;
-		else if ( i->category == DEND )
-			++numDend;
-		else if ( i->category == SPINE )
-			++numSpine;
-		else if ( i->category == SPINE_NECK )
+		if ( i->category == SOMA ) {
+			i->sigStart = numSoma;
+			i->sigEnd = ++numSoma;
+		} else if ( i->category == DEND ) {
+			double length;
+			get< double >( i->compt.eref(), "length", length );
+			unsigned int numSegments = 1 + length / lambda_;
+			i->sigStart = numDend;
+			i->sigEnd = numDend = numDend + numSegments;
+			// cout << " " << numSegments;
+		} else if ( i->category == SPINE ) {
+			i->sigStart = numSpine;
+			i->sigEnd = ++numSpine;
+		} else if ( i->category == SPINE_NECK ) {
 			++numNeck;
+		}
 	}
-	cout << "Tree size = " << tree_.size() << ", s=" << numSoma << 
+	// cout << endl;
+	// Now reposition the indices for the dends and spines, depending on
+	// the numerical methods.
+	if ( dendMethod_ == "rk5" && somaMethod_ == dendMethod_ ) {
+		for ( vector< TreeNode >::iterator i = tree_.begin(); 
+				i != tree_.end(); ++i ) {
+			if ( i->category == DEND ) {
+				i->sigStart += numSoma;
+				i->sigEnd += numSoma;
+			}
+		}
+	}
+	if ( dendMethod_ == "rk5" && spineMethod_ == dendMethod_ ) {
+		unsigned int offset = numSoma + numDend;
+		for ( vector< TreeNode >::iterator i = tree_.begin(); 
+				i != tree_.end(); ++i ) {
+			if ( i->category == SPINE ) {
+				i->sigStart += offset;
+				i->sigEnd += offset;
+			}
+		}
+	}
+
+	cout << "SigNeur: Tree size = " << tree_.size() << ", s=" << numSoma << 
 		", d=" << numDend << ", sp=" << numSpine <<
 		", neck=" << numNeck << endl;
+}
+
+void SigNeur::makeSignalingModel()
+{
+	;
 }
 
 bool SigNeur::traverseCell( Eref me )
@@ -420,8 +470,11 @@ bool SigNeur::traverseCell( Eref me )
 
 	// Figure out size of signaling model segments. Each elec compt must be
 	// an integral number of signaling models.
-	countSig();
+	assignSignalingCompts();
 	
+	// Set up the signaling models
+	makeSignalingModel();
+
 	return 1;
 }
 
