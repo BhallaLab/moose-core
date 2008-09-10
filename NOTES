@@ -7209,4 +7209,6 @@ there are a few issues:
 Implemented temporary copy. This seems good. Next to complete the 
 diffusion messaging onto the next compt.
 
+Checked in as revision 683: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
 ==============================================================================
