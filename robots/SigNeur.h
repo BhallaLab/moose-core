@@ -150,10 +150,26 @@ class SigNeur
 		void assignSignalingCompts();
 		void makeSignalingModel( Eref e );
 		void insertDiffusion( Element* base );
-		void completeDiffusion();
 		static CompartmentCategory guessCompartmentCategory( Eref e );
 		Element* copySig( Id kinId, Id proto, 
 			const string& name, unsigned int num );
+
+		/**
+		 * This routine will recursively traverse all descendants of 
+		 * 'base' to complete the diffusion between compartments.
+		 * Once the model is set up as an array, we need to go in and 
+		 * connect diffusion reactions between compartments.
+		 * The 'parent' is the parent element of base.
+		 * The 'base' is the current element in the reaction tree.
+		 * The function looks for cases where the parent is a Molecule and 
+		 * the base is a reaction named "diff"
+		 * Since the 'base' is typically an array element, it then goes 
+		 * through
+		 * all the array entries to set up the diffusion reactions.
+		 */
+		void completeDiffusion( Element* parent, Element* base,
+				vector< unsigned int >& junctions );
+		void buildDiffusionJunctions( vector< unsigned int >& junctions );
 
 	private:
 		Id cellProto_; /// Prototype cell electrical model

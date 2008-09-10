@@ -409,7 +409,7 @@ Element* SimpleElement::copyIntoArray( Id parent, const string& newName, int n )
 	static const Element* proto = Id( "/proto" )();
 
 	if ( parent()->isDescendant( this ) ) {
-		cout << "Warning: SimpleElement::copy: Attempt to copy within descendant tree" << parent()->name() << endl;
+		cout << "Warning: SimpleElement::copyIntoArray: Attempt to copy within descendant tree" << parent()->name() << endl;
 		return 0;
 	}
 	string nm = newName;
@@ -442,27 +442,23 @@ Element* SimpleElement::copyIntoArray( Id parent, const string& newName, int n )
 	// Phase 2. Copy over messages that are within the tree.
 	// Here we need only copy from message sources.
 	for ( i = origDup.begin(); i != origDup.end(); i++ ) {
-		if ( i->first != i->second ) {
-			i->first->copyMessages( i->second, origDup, true );
-		}
+		i->first->copyMessages( i->second, origDup, true );
 	}
 	
-	vector <Id> kids;
-	get< vector< Id > >( Eref(child, 1), "childList", kids );
+	// vector <Id> kids;
+	// get< vector< Id > >( Eref(child, 1), "childList", kids );
 	
 	
-	// Phase 3 : Copy over messages to any global elements that were
-	// not on the original tree.
-	// Still to fill in.
+	// Phase 3 : Copy over messages to any global elements
+	// Here we have to deal with message sources as well as dests.
+	for ( i = origDup.begin(); i != origDup.end(); i++ ) {
+		i->first->copyGlobalMessages( i->second, true );
+	}
+	
 	
 	// Phase 4: stick the copied tree onto the parent Element.
 	ret = parent.eref().add( "childSrc", child, "child", 
 		ConnTainer::One2All );
-		
-	
-	
-	/*ret = parent->findFinfo( "childSrc" )->add(
-					parent, child, child->findFinfo( "child" ) );*/
 	assert( ret );
 
 	// Phase 5: Schedule all the objects

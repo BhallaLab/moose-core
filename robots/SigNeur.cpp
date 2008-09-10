@@ -579,27 +579,70 @@ void SigNeur::linearDiffusion( Element* base )
 }
 */
 
-void SigNeur::completeDiffusion()
+/**
+ * Once the model is set up as an array, we need to go in and connect
+ * diffusion reactions between compartments.
+ * The 'base' is any element in the reaction tree. This routine will 
+ * recursively traverse all descendants of 'base' to do its stuff.
+ * 'junctions' holds the indices of connected compartments. 
+ * The function looks for cases where the parent is a Molecule and the
+ * base is a reaction named "diff"
+ * Since the 'base' is typically an array element, it then goes through
+ * all the array entries to set up the diffusion reactions.
+ */
+void SigNeur::completeDiffusion( Element* parent, Element* base,
+	vector< unsigned int >& junctions )
 {
+	static const Finfo* childSrcFinfo = 
+		initNeutralCinfo()->findFinfo( "childSrc" );
+	static const Finfo* reacFinfo = 
+		initMoleculeCinfo()->findFinfo( "reac" );
 	static const Finfo* prdFinfo = 
 		initReactionCinfo()->findFinfo( "prd" );
-/*
-	// Connect up to next index.
-	for ( unsigned int i = 1; i < base->numEntries(); ++i ) {
-		Eref e1 = baseId.eref();
-		e1.i = i - 1;
-		Eref e2 = childId.eref();
-		e2.i = i;
-		ret = e1.add( reacFinfo->msg(), e2, prdFinfo->msg(), 
-			ConnTainer::Simple );
-		assert( ret );
+	
+	if ( parent == 0 || base == 0 )
+		return;
+	// Traverse children.
+	const Msg* m = base->msg( childSrcFinfo->msg() );
+	for ( vector< ConnTainer* >::const_iterator i = m->begin();
+		i != m->end(); ++i ) {
+		if ( (*i)->e2() != base )
+			completeDiffusion( base, (*i)->e2(), junctions );
+		else
+			completeDiffusion( base, (*i)->e1(), junctions );
 	}
-	*/
-	;
+
+	if ( parent->cinfo()->isA( initMoleculeCinfo() ) &&
+		base->cinfo()->isA( initReactionCinfo() ) &&
+		base->name() == "diff" ) {
+		// Connect up to next index.
+		for ( unsigned int i = 0; i < base->numEntries(); ++i ) {
+			if ( junctions[i] < base->numEntries() ) {
+				Eref e2( base, i );
+				Eref e1( parent, junctions[ i ] );
+				bool ret = e1.add( reacFinfo->msg(), e2, prdFinfo->msg(), 
+					ConnTainer::Simple );
+				assert( ret );
+			}
+		}
+	}
 }
 
-// Kinid is destination of copy
-// proto is prototype
+/*
+ * This function copies a signaling model. It first traverses the model and
+ * inserts any required diffusion reactions into the model. These are
+ * created as children of the molecule that diffuses, and are connected
+ * up locally for one-half of the diffusion process. Subsequently the
+ * system needs to connect up to the next compartment, to set up the 
+ * other half of the diffusion. Also the last diffusion reaction
+ * needs to have its rates nulled out.
+ *
+ * Returns the root element of the copy.
+ * Kinid is destination of copy
+ * proto is prototype
+ * Name is the name to assign to the copy.
+ * num is the number of duplicates needed.
+ */
 Element* SigNeur::copySig( Id kinId, Id proto, 
 	const string& name, unsigned int num )
 {
@@ -646,9 +689,48 @@ void SigNeur::makeSignalingModel( Eref me )
 		dend_ = dend->id();
 	if ( spine )
 		spine_ = spine->id();
+
+	// first soma indices, then dend, then spines.
+	vector< unsigned int > junctions( 
+		numSoma_ + numDend_ + numSpine_, UINT_MAX );
+	buildDiffusionJunctions( junctions );
+	for ( unsigned int j = 0; j < junctions.size(); ++j )
+		cout << " " << j << "," << junctions[j];
+	cout << endl;
+	completeDiffusion( soma, soma, junctions );
+	completeDiffusion( dend, dend, junctions );
 	
 	// linearDiffusion( soma );
 	// linearDiffusion( dend );
+}
+
+/**
+ * Traverses the cell tree to work out where the diffusion reactions
+ * must connect to each other. junction[i] is the index of the 
+ * compartment connected compartment[i]. The indexing of compartments
+ * themselves is first the soma block, then the dend block, then the
+ * spine block.
+ */
+void SigNeur::buildDiffusionJunctions( vector< unsigned int >& junctions )
+{
+	// TreeNode 0 is soma, has parent 0, rest should be a different compt. 
+	// The diffusion compartments start at the proximal compartment and
+	// end at the distal compartment, with respect to the soma.
+	// Because of the tree structure, sigStart must connect to the parent,
+	// so that every branch point has a diffusion reaction for each branch.
+	// Thus sigStart+1 must connect to sigStart, and so on.
+	// We ignore diffusive coupling between sibling branches.
+	for ( vector< TreeNode >::iterator i = tree_.begin(); 
+		i != tree_.end(); ++i ) {
+		
+		for ( unsigned int j = i->sigStart + 1; j < i->sigEnd; j++ )
+			junctions[ j ] = j - 1;
+
+		TreeNode* tn = &( tree_[ i->parent ] );
+		if ( tn != &(tree_[ 0 ] ) && tn->sigEnd != tn->sigStart ) {
+			junctions[ i->sigStart ] = tn->sigEnd - 1;
+		}
+	}
 }
 
 bool SigNeur::traverseCell( Eref me )
