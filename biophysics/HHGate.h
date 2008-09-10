@@ -16,6 +16,9 @@ class HHGate
 		HHGate()
 		{ ; }
 
+		static double getAValue( Eref e, const double& v );
+		static double getBValue( Eref e, const double& v );
+		
 		static void gateFunc(
 				const Conn* c, double v );
 		static void postCreate( const Conn* c );
@@ -27,17 +30,6 @@ class HHGate
 		void setupTables( const vector< double >& parms, bool doTau );
 		void tweakTables( bool doTau );
 		void innerSetupGate( const vector< double >& parms );
-		
-		/* Dirty hack: Allow world to read Interpols.
-		 * Remove once "sendback" is fixed.
-		 */
-		const Interpol& A( ) {
-			return A_;
-		}
-		
-		const Interpol& B( ) {
-			return B_;
-		}
 		
 	private:
 		Interpol A_;

@@ -24,7 +24,7 @@
 #ifndef NDEBUG
 # define ASSERT( isOK, message ) \
 	if ( !(isOK) ) { \
-   cout << "\nERROR: Assert '" << #isOK << "' failed on line " << __LINE__ << "\nin file " << __FILE__ << ": " << #message << endl; \
+   cout << "\nERROR: Assert '" << #isOK << "' failed on line " << __LINE__ << "\nin file " << __FILE__ << ": " << message << endl; \
     exit( 1 ); \
 } else { \
 	   	cout << "."; \

@@ -23,13 +23,6 @@ OBJ = \
 	ParSpikeGen.o	\
 	SynChan.o	\
 	ParSynChan.o	\
-	HSolveStruct.o	\
-	HSolveBase.o	\
-	HSolve.o \
-	NeuroScanBase.o \
-	NeuroScan.o \
-	NeuroHub.o \
-	Cell.o	\
 	TestBiophysics.o	\
 	BinSynchan.o	\
 	StochSynchan.o	\
@@ -51,13 +44,7 @@ OBJ = \
 	PulseGen.o	\
 	RandomSpike.o \
 	Cell.o		\
-	RateLookup.o	\
-	HSolveStruct.o	\
- 	HSolveBase.o	\
- 	HSolve.o \
- 	NeuroScanBase.o \
- 	NeuroScan.o \
- 	NeuroHub.o \
+	BioScan.o	\
 	TestBiophysics.o \
 	script_out.o
 endif
@@ -90,14 +77,8 @@ ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
 ParSynChan.o:	SynChan.h SynInfo.h ParSynChan.h
 endif
 
-RateLookup.o:	RateLookup.h
-HSolveStruct.o:	HSolveStruct.h
-HSolveBase.o:	HSolveBase.h HSolveStruct.h
-HSolve.o:	HSolve.h HSolveBase.h HSolveStruct.h
-NeuroScanBase.o:	NeuroScanBase.h HSolveStruct.h
-NeuroScan.o:	NeuroScan.h NeuroScanBase.h HSolveStruct.h
-NeuroHub.o:	NeuroHub.h HSolveStruct.h
-Cell.o:		Cell.h 
+Cell.o:	Cell.h ../element/Neutral.h
+BioScan.o:		BioScan.h
 StochSynchan.o:	StochSynchan.h StochSynInfo.h
 BinSynchan.o:	BinSynchan.h BinSynInfo.h ../randnum/BinomialRng.h
 .cpp.o:

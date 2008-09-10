@@ -8,7 +8,7 @@
 // #	name	parent		x	y	z	d	ch	dens	ch	dens...
 // *hsolve
 
-*asymmetric
+*symmetric
 *relative
 
 *set_global	RM	2.0

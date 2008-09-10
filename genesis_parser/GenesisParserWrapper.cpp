@@ -515,7 +515,7 @@ map< string, string >& sliSrcLookup()
 	src[ "AXIAL previous_state" ] = "axial";
 	src[ "RAXIAL Ra Vm" ] = "";
 	src[ "RAXIAL Ra previous_state" ] = "";
-	src[ "INJECT output" ] = "output";
+	src[ "INJECT output" ] = "outputSrc";
 
 	// Some messages for channels.
 	src[ "VOLTAGE Vm" ] = "";
@@ -547,9 +547,15 @@ map< string, string >& sliSrcLookup()
 	src[ "SpikeGen.INPUT Vm" ] = "VmSrc";
         src[ "RandomSpike.INPUT Vm" ] = "eventSrc";        
 	src[ "INPUT Vm" ] = "Vm";
+	src[ "INPUT Im" ] = "Im";
 	src[ "INPUT Ca" ] = "Ca";
 	src[ "INPUT Ik" ] = "Ik";
 	src[ "INPUT Gk" ] = "Gk";
+	src[ "INPUT Ek" ] = "Ek";
+	src[ "INPUT Gbar" ] = "Gbar";
+	src[ "INPUT X" ] = "X";
+	src[ "INPUT Y" ] = "Y";
+	src[ "INPUT Z" ] = "Z";
 	src[ "INPUT n" ] = "n";
 	src[ "INPUT Co" ] = "conc";
 
@@ -557,9 +563,15 @@ map< string, string >& sliSrcLookup()
 	src[ "PLOT Co" ] = "conc";
 	src[ "PLOT n" ] = "n";
 	src[ "PLOT Vm" ] = "Vm";
+	src[ "PLOT Im" ] = "Im";
 	src[ "PLOT Ca" ] = "Ca";
 	src[ "PLOT Ik" ] = "Ik";
 	src[ "PLOT Gk" ] = "Gk";
+	src[ "PLOT Ek" ] = "Ek";
+	src[ "PLOT Gbar" ] = "Gbar";
+	src[ "PLOT X" ] = "X";
+	src[ "PLOT Y" ] = "Y";
+	src[ "PLOT Z" ] = "Z";
         src[ "PLOT output" ] = "output";
         
 	return src;
@@ -642,18 +654,30 @@ map< string, string >& sliDestLookup()
         
 	// Some messages for tables
 	dest[ "INPUT Vm" ] = "inputRequest";
+	dest[ "INPUT Im" ] = "inputRequest";
 	dest[ "INPUT Ca" ] = "inputRequest";
 	dest[ "INPUT Ik" ] = "inputRequest";
 	dest[ "INPUT Gk" ] = "inputRequest";
+	dest[ "INPUT Ek" ] = "inputRequest";
+	dest[ "INPUT Gbar" ] = "inputRequest";
+	dest[ "INPUT X" ] = "inputRequest";
+	dest[ "INPUT Y" ] = "inputRequest";
+	dest[ "INPUT Z" ] = "inputRequest";
 	dest[ "INPUT n" ] = "inputRequest";
 	dest[ "INPUT Co" ] = "inputRequest";
         dest[ "INPUT output" ] = "inputRequest";
         
 	// Messages for having tables pretend to be an xplot
 	dest[ "PLOT Vm" ] = "inputRequest";
+	dest[ "PLOT Im" ] = "inputRequest";
 	dest[ "PLOT Ca" ] = "inputRequest";
 	dest[ "PLOT Ik" ] = "inputRequest";
 	dest[ "PLOT Gk" ] = "inputRequest";
+	dest[ "PLOT Ek" ] = "PLOTRequest";
+	dest[ "PLOT Gbar" ] = "PLOTRequest";
+	dest[ "PLOT X" ] = "PLOTRequest";
+	dest[ "PLOT Y" ] = "PLOTRequest";
+	dest[ "PLOT Z" ] = "PLOTRequest";
 	dest[ "PLOT n" ] = "inputRequest";
 	dest[ "PLOT Co" ] = "inputRequest";
         dest[ "PLOT output" ] = "inputRequest";

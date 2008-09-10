@@ -89,7 +89,11 @@ template < class T1, class T2 > class Ftype2: public Ftype
 				pos = s.find_last_of( ", 	" );
 				if ( pos >=  s.length() - 1 )
 						return 0;
+				
 				string s2 = s.substr( pos );
+				pos = s2.find_first_not_of( ", 	" );
+				s2 = s2.substr( pos );
+				
 				T1 val1;
 				if ( str2val( s1, val1 ) ) {
 					T2 val2;
