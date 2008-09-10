@@ -39,7 +39,7 @@ class ReadCell
 				Element* compt, vector< string >& argv,
 				double diameter, double length);
 		Element* findChannel( const string& name );
-		bool addChannel( Element* compt, Element* chan, 
+		Element* addChannel( Element* compt, Element* chan, 
 				double value, double dia, double length );
 		bool addHHChannel( Element* compt, Element* chan, 
 				double value, double dia, double length );
@@ -50,6 +50,7 @@ class ReadCell
 		bool addCaConc( Element* compt, Element* chan, 
 				double value, double dia, double length );
 		bool addNernst( Element* compt, Element* chan, double value );
+		void addChannelMessage( Element* chan );
 
 	private:
 		void countProtos( );

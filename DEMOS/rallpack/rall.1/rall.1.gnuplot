@@ -1,6 +1,7 @@
 # Gnuplot script
 # First run 'moose rall.1.g' to generate *.plot files
 
+set datafile comments '/'
 set title 'Rallpack 1 (Linear passive cable)'
 set xlabel 'Step # [dt = 50e-6 s]'
 set ylabel 'Vm (V)'
