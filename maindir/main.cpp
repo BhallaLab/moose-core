@@ -47,6 +47,7 @@ extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 	extern void testSched();
 	extern void testSchedProcess();
 	extern void testBiophysics();
+	extern void testHSolve();
 	extern void testKinetics();
 //	extern void testAverage();
 #ifdef USE_MPI
@@ -89,6 +90,7 @@ int main(int argc, char** argv)
 		testSched();
 		testSchedProcess();
 		testBiophysics();
+		testHSolve();
 		testKinetics();
 //		testAverage();
 	}

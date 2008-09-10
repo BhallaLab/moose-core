@@ -110,8 +110,8 @@ class Interpol
 
 		/**
 		 * Expand out the table, using the specified mode.  
-		 * Mode 0 : Linear interpolation for fill 
-		 * Mode 1 : Splines (Not yet implemented. )
+		 * Mode 0 : B-Splines
+		 * Mode 2 : Linear interpolation for fill 
 		 */
 		void innerTabFill( int xdivs, int mode );
 		void innerPrint( const string& fname, bool doAppend );

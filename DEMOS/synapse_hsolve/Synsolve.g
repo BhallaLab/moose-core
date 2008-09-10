@@ -1,56 +1,44 @@
-// moose || genesis
+// moose
+// genesis
+
 
 echo "
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Model: 2 linear cells, with a synapse. 1st cell is excitable, 2nd is not.     %
-% Solver is automatically created and setup. Script runs in either MOOSE or     %
-% GENESIS, depending on the state of the MOOSE flag defined below.              %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Model: 2 linear cells, with a synapse. 1st cell is excitable, 2nd is not.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
 
-int MOOSE = 1
+////////////////////////////////////////////////////////////////////////////////
+// COMPATIBILITY (between MOOSE and GENESIS)
+////////////////////////////////////////////////////////////////////////////////
+include compatibility.g
 
-float inj = 1.0e-10
-float dt = 50e-6
-float iodt = 100e-6
-float runtime = 0.05
+
+////////////////////////////////////////////////////////////////////////////////
+// MODEL CONSTRUCTION
+////////////////////////////////////////////////////////////////////////////////
+float SIMDT = 50e-6
+float IODT = 100e-6
+float SIMLENGTH = 0.05
+float INJECT = 1.0e-10
 float EREST_ACT = -0.065
-
-addalias setup_table2 setupgate
-addalias tweak_tabchan tweakalpha
-addalias tau_tweak_tabchan tweaktau
-addalias setup_tabchan setupalpha
-addalias setup_tabchan_tau setuptau
-
-function settab2const(gate, table, imin, imax, value)
-    str gate
-	str table
-	int i, imin, imax
-	float value
-	for (i = (imin); i <= (imax); i = i + 1)
-		setfield {gate} {table}->table[{i}] {value}
-	end
-end
 
 include simplechan.g
 
-if ( !{MOOSE} )
-	create neutral /library
-end
 ce /library
-make_Na_mit_usb
-make_K_mit_usb
-create compartment compartment
+	make_Na_mit_usb
+	make_K_mit_usb
 ce /
 
-/********************************************************************
-**                       Model construction                        **
-********************************************************************/
+//=====================================
+//  Create cells
+//=====================================
 readcell myelin2.p /axon
 readcell cable.p /cable
 
-/* create synapse */
-
+//=====================================
+//  Create synapse
+//=====================================
 ce /axon/n99/i20
 create spikegen spike
 setfield spike thresh 0.0 \
@@ -67,61 +55,84 @@ ce /
 
 addmsg /axon/n99/i20/spike /cable/c1/syn SPIKE
 
-/********************************************************************
-**                       File I/0                                  **
-********************************************************************/
+
+////////////////////////////////////////////////////////////////////////////////
+// PLOTTING
+////////////////////////////////////////////////////////////////////////////////
 create table /plot
-call /plot TABCREATE {runtime / iodt} 0 {runtime}
-useclock /plot 1
+call /plot TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
+useclock /plot 2
 setfield /plot step_mode 3
 
+//=====================================
+//  Record from compartment
+//=====================================
 addmsg /cable/c10 /plot INPUT Vm
 
-/********************************************************************
-**                       Simulation control                        **
-********************************************************************/
 
-/* Set up the clocks that we are going to use */
-setclock 0 {dt}
-setclock 1 {iodt}
+////////////////////////////////////////////////////////////////////////////////
+// SIMULATION CONTROL
+////////////////////////////////////////////////////////////////////////////////
 
-/* Set the stimulus conditions */
-setfield /axon/soma inject {inj}
+//=====================================
+//  Clocks
+//=====================================
+if ( MOOSE )
+	setclock 0 {SIMDT} 0
+	setclock 1 {SIMDT} 1
+	setclock 2 {IODT} 0
+else
+	setclock 0 {SIMDT}
+	setclock 1 {SIMDT}
+	setclock 2 {IODT}
+end
 
-/* Set up solver if in GENESIS */
-if ( !{MOOSE} )
+//=====================================
+//  Stimulus
+//=====================================
+setfield /axon/soma inject {INJECT}
+
+//=====================================
+//  Solvers
+//=====================================
+if ( GENESIS )
 	create hsolve /axon/solve
-	setfield /axon/solve path /axon/##[TYPE=compartment] comptmode 1  \
+	setfield /axon/solve \
+		path /axon/##[TYPE=symcompartment],/axon/##[TYPE=compartment] \
+		comptmode 1  \
 		chanmode 3
 	call /axon/solve SETUP
 	setmethod 11
-
+	
 	create hsolve /cable/solve
-	setfield /cable/solve path /cable/##[TYPE=compartment] comptmode 1  \
+	setfield /cable/solve \
+		path /cable/##[TYPE=symcompartment],/cable/##[TYPE=compartment] \
+		comptmode 1  \
 		chanmode 3
 	call /cable/solve SETUP
 	setmethod 11
-else
-	// Temporary hack to sidestep issues in channel init
-	setfield /axon method ee
-	reset
-	setfield /axon method hsolve
 end
 
-/* run the simulation */
+//=====================================
+//  Simulation
+//=====================================
 reset
-step {runtime} -time
+step {SIMLENGTH} -time
 
-/* write plots to file */
-openfile "test.plot" a
+
+////////////////////////////////////////////////////////////////////////////////
+//  Write Plots
+////////////////////////////////////////////////////////////////////////////////
+openfile "test.plot" w
 writefile "test.plot" "/newplot"
 writefile "test.plot" "/plotname Vm"
 closefile "test.plot"
 tab2file test.plot /plot table
 
+
 echo "
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Reference plot is included. Present curve is in test.plot.                    %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Reference plot is included. Present curve is in test.plot.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
 quit
