@@ -432,19 +432,113 @@ void Interpol::localAppendTableVector( const vector< double >& value )
 	}
 }
 
-void Interpol::innerTabFill( int xdivs, int mode )
+void Interpol::innerTabFill( int newXDivs, int mode )
 {
+	if ( newXDivs < 3 ) {
+		cout << "Error: TabFill: # divs must be >= 3. Not filling table.\n";
+		return;
+	}
+	
+	int oldXDivs = table_.size() - 1;
 	int oldMode = mode_;
+	
 	vector< double > newtab;
-	newtab.resize( xdivs + 1, 0.0 );
-	double dx = ( xmax_ - xmin_ ) / static_cast< double >( xdivs );
-	mode_ = 1; // Has to be, so we can interpolate.
-	for ( int i = 0; i <= xdivs; i++ )
-		newtab[ i ] = innerLookup(
-			xmin_ + dx * static_cast< double >( i ) );
+	newtab.resize( newXDivs + 1, 0.0 );
+	
+	double dx = ( xmax_ - xmin_ ) / static_cast< double >( newXDivs );
+	/**
+	 * During filling:
+	 *   Mode 0 : B-Splines
+	 *   Mode 2 : Linear interpolation for fill 
+	 * 
+	 * During lookup:
+	 *   Mode 0 : No interpolation
+	 *   Mode 1 : Linear interpolation
+	 */
+	if ( mode == 2 ) {
+		// Linear Interpolation
+		mode_ = 1;  // for lookup
+		for ( int i = 0; i <= newXDivs; i++ )
+			newtab[ i ] = innerLookup(
+				xmin_ + dx * static_cast< double >( i ) );
+		
+	} else if ( mode == 0 ) {
+		// B-spline
+		
+		/*
+		 * B-spline code copied here from GENESIS source, with some clean-up.
+		 */
+		double nsa = 1.0 / 6.0;
+		double nsb = 2.0 / 3.0;
+		double nc1, nc2, nc3, nc4;
+		
+		double step = 
+			static_cast< double >( oldXDivs ) / static_cast< double >( newXDivs );
+		
+		// i is index for old array, j for new array
+		int i = 0;
+		int j = 0;
+		double p;
+		
+		// filling up newtab till first element in old array
+		while( i <= 1 ) {
+			newtab[ j ] = 
+				( p - static_cast< double >( i ) ) *
+				( table_[ i + 1 ] - table_[ i ] ) + table_[ i ];
+			
+			p += step;
+			i = static_cast< int >( p );
+			j++;
+		}
+		
+		while( i < oldXDivs - 1 ) {
+			double t = p - static_cast< double >( i );
+			
+			nc1 =
+				- ( nsa ) * ( t * t * t )
+				+ ( t * t ) / 2.0
+				- ( t / 2.0 )
+				+ nsa;
+			
+			nc2 = 
+				( t * t * t ) / 2.0
+				- ( t * t )
+				+ nsb;
+			
+			nc3 = 
+				- ( t * t * t ) / 2.0
+				+ ( t * t ) / 2.0
+				+ ( t / 2.0 )
+				+ nsa;
+			
+			nc4 = nsa * ( t * t * t );
+			
+			newtab[ j ] = 
+				nc1 * table_[ i - 1 ] + nc2 * table_[ i ] +
+				nc3 * table_[ i + 1 ] + nc4 * table_[ i + 2 ];
+			
+			p += step;
+			i = static_cast< int >( p );
+			j++;
+		}
+		
+		while( j <= newXDivs ) {
+			if ( i < oldXDivs )
+				newtab[ j ] =
+					( p - static_cast< double >( i ) ) *
+					( table_[ i + 1 ] - table_[ i ] ) + table_[ i ];
+			else
+				newtab[ j ] = table_[ oldXDivs ];
+			
+			p += step;
+			i = static_cast< int >( p );
+			j++;
+		}
+	}
+	
 	table_ = newtab;
 	mode_ = oldMode;
-	invDx_ = 1.0/dx;
+	invDx_ = 1.0 / dx;
 }
 
 void Interpol::innerPrint( const string& fname, bool appendFlag )

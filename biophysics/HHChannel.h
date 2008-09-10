@@ -87,7 +87,7 @@ class HHChannel
 		static int getInstant( Eref );
 		static void setGk( const Conn* c, double Gk );
 		static double getGk( Eref );
-		static void setIk( const Conn* c, double Ik );
+		// Ik is read-only
 		static double getIk( Eref );
 		static void setX( const Conn* c, double X );
 		static double getX( Eref );

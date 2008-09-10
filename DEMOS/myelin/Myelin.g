@@ -1,4 +1,6 @@
 // moose
+// genesis
+
 
 echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,70 +9,113 @@ echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
 
-include defaults.g
+////////////////////////////////////////////////////////////////////////////////
+// COMPATIBILITY (between MOOSE and GENESIS)
+////////////////////////////////////////////////////////////////////////////////
+include compatibility.g
+
+
+////////////////////////////////////////////////////////////////////////////////
+// MODEL CONSTRUCTION
+////////////////////////////////////////////////////////////////////////////////
+float SIMDT = 50e-6
+float IODT = 100e-6
+float SIMLENGTH = 0.25
+float INJECT = 1e-10
+float EREST_ACT = -0.065
+
 include chan.g
 
-/********************************************************************
-**                                                                 **
-**                       Simulation parameters                     **
-**                                                                 **
-********************************************************************/
-float inj = 1.0e-10
-float dt = 50e-6
-float iodt = 50e-6
-float runtime = 0.25
-
-/********************************************************************
-**                                                                 **
-**                       Model construction                        **
-**                                                                 **
-********************************************************************/
 ce /library
-make_Na_mit_usb
-make_K_mit_usb
+	make_Na_mit_usb
+	make_K_mit_usb
 ce /
 
+//=====================================
+//  Create cells
+//=====================================
 readcell myelin2.p /axon
 
-/********************************************************************
-**                                                                 **
-**                       File I/0                                  **
-**                                                                 **
-********************************************************************/
-create Neutral /output
-create Table /output/out0
-create Table /output/outx
 
-addmsg /output/out0/inputRequest /axon/soma/Vm
-addmsg /output/outx/inputRequest /axon/n99/i20/Vm
+////////////////////////////////////////////////////////////////////////////////
+// PLOTTING
+////////////////////////////////////////////////////////////////////////////////
+create neutral /plot
 
-setfield /output/##[TYPE=Table] stepmode 3
-useclock /output/##[TYPE=Table] 1
+create table /plot/Vm0
+call /plot/Vm0 TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
+setfield /plot/Vm0 step_mode 3
+addmsg /axon/soma /plot/Vm0 INPUT Vm
 
-/********************************************************************
-**                                                                 **
-**                       Simulation control                        **
-**                                                                 **
-********************************************************************/
+create table /plot/Vm1
+call /plot/Vm1 TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
+setfield /plot/Vm1 step_mode 3
+addmsg /axon/n99/i20 /plot/Vm1 INPUT Vm
 
-/* Set up the clocks that we are going to use */
-setclock 0 {dt} 0
-setclock 1 {iodt} 1
 
-/* Set the stimulus conditions */
-setfield /axon/soma inject {inj}
+////////////////////////////////////////////////////////////////////////////////
+// SIMULATION CONTROL
+////////////////////////////////////////////////////////////////////////////////
 
-/* Run the simulation */
+//=====================================
+//  Clocks
+//=====================================
+if ( MOOSE )
+	setclock 0 {SIMDT} 0
+	setclock 1 {SIMDT} 1
+	setclock 2 {IODT} 0
+else
+	setclock 0 {SIMDT}
+	setclock 1 {SIMDT}
+	setclock 2 {IODT}
+end
+
+useclock /plot/Vm0 2
+useclock /plot/Vm1 2
+
+//=====================================
+//  Stimulus
+//=====================================
+setfield /axon/soma inject {INJECT}
+
+//=====================================
+//  Solvers
+//=====================================
+if ( GENESIS )
+	create hsolve /axon/solve
+	setfield /axon/solve \
+		path /axon/##[TYPE=symcompartment],/axon/##[TYPE=compartment] \
+		comptmode 1  \
+		chanmode 3
+	call /axon/solve SETUP
+	setmethod 11
+end
+
+//=====================================
+//  Simulation
+//=====================================
 reset
-step {runtime} -time
+step {SIMLENGTH} -time
 
-/* Write plots */
-setfield /output/out0 print "axon.out0"
-setfield /output/outx print "axon.outx"
+
+////////////////////////////////////////////////////////////////////////////////
+//  Write Plots
+////////////////////////////////////////////////////////////////////////////////
+openfile "axon.0.plot" w
+writefile "axon.0.plot" "/newplot"
+writefile "axon.0.plot" "/plotname Vm(0)"
+closefile "axon.0.plot"
+tab2file axon.0.plot /plot/Vm0 table
+
+openfile "axon.x.plot" w
+writefile "axon.x.plot" "/newplot"
+writefile "axon.x.plot" "/plotname Vm(100)"
+closefile "axon.x.plot"
+tab2file axon.x.plot /plot/Vm1 table
 
 echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Plots written to axon.out*.                                                   %
+% Plots written to axon.*.plot.                                                   %
 % If you have gnuplot, run 'gnuplot myelin.gnuplot' to view the graphs.           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "

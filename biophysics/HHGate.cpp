@@ -31,8 +31,16 @@ const Cinfo* initHHGateCinfo()
 	static Finfo* HHGateFinfos[] =
 	{
 	///////////////////////////////////////////////////////
-	// Field definitions.  Currently empty
+	// Field definitions.
 	///////////////////////////////////////////////////////
+		new LookupFinfo( "A",
+			LookupFtype< double, double >::global(),
+			GFCAST( &HHGate::getAValue ),
+			&dummyFunc ),
+		new LookupFinfo( "B",
+			LookupFtype< double, double >::global(),
+			GFCAST( &HHGate::getBValue ),
+			&dummyFunc ),
 		
 	///////////////////////////////////////////////////////
 	// Shared definitions
@@ -81,6 +89,18 @@ static const Slot gateSlot =
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
+
+double HHGate::getAValue( Eref e, const double& v )
+{
+	HHGate* h = static_cast< HHGate* >( e.data() );
+	return h->A_.innerLookup( v );
+}
+
+double HHGate::getBValue( Eref e, const double& v )
+{
+	HHGate* h = static_cast< HHGate* >( e.data() );
+	return h->B_.innerLookup( v );
+}
 
 ///////////////////////////////////////////////////
 // Dest function definitions
