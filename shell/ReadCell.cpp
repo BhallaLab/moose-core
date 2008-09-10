@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <fstream>
+#include <sstream>
 #include "moose.h"
 #include "Shell.h"
 #include "ReadCell.h"
@@ -23,13 +24,13 @@
 #include "../biophysics/HHGate.h"
 #include <queue>
 #include "../biophysics/SynInfo.h"
-#include "../biophysics/RateLookup.h"
-#include "../biophysics/HSolveStruct.h"
 #include "../biophysics/SynChan.h"
 #include "../biophysics/SpikeGen.h"
 #include "../biophysics/Nernst.h"
 #include "../biophysics/CaConc.h"
 
+// Defined in GenesisParserWrapper.cpp
+extern void do_add( int argc, const char** argv, Id s );
 
 static const Cinfo* comptCinfo = initCompartmentCinfo();
 static const Cinfo* chanCinfo = initHHChannelCinfo();
@@ -489,6 +490,7 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 {
 	bool isArgOK;
 	int argStart;
+	vector< Element* > goodChannels;
 	
 	if ( doubleEndpointFlag_ ) {
 		isArgOK = ( argv.size() % 2 ) == 1;
@@ -532,28 +534,36 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 						"' not found\n";
 				continue;
 			}
-
-			if ( !addChannel( compt, chanElm, value, diameter, length ) )
-				continue;
+			
+			Element* copy = addChannel( compt, chanElm, value, diameter, length );
+			if ( copy != 0 ) {
+				goodChannels.push_back( copy );
+			} else {
+				cout << "Error: readCell: Could not add " << chan
+					<< " in " << compt->name() << ".";
+			}
 		}
 	}
+	
+	for ( unsigned i = 0; i < goodChannels.size(); i++ )
+		addChannelMessage( goodChannels[ i ] );
+	
 	return 1;
 }
 
-
-bool ReadCell::addChannel( 
+Element* ReadCell::addChannel( 
 			Element* compt, Element* proto, double value, 
 			double dia, double length )
 {
-
-	Element* chan = proto->copy( compt, "" );
-	assert( chan != 0 );
-
-	if ( addHHChannel( compt, chan, value, dia, length ) ) return 1;
-	if ( addSynChan( compt, chan, value, dia, length ) ) return 1;
-	if ( addSpikeGen( compt, chan, value, dia, length ) ) return 1;
-	if ( addCaConc( compt, chan, value, dia, length ) ) return 1;
-	if ( addNernst( compt, chan, value ) ) return 1;
+	Element* copy = proto->copy( compt, "" );
+	assert( copy != 0 );
+	
+	if ( addHHChannel( compt, copy, value, dia, length ) ) return copy;
+	if ( addSynChan( compt, copy, value, dia, length ) ) return copy;
+	if ( addSpikeGen( compt, copy, value, dia, length ) ) return copy;
+	if ( addCaConc( compt, copy, value, dia, length ) ) return copy;
+	if ( addNernst( compt, copy, value ) ) return copy;
+	
 	return 0;
 }
 
@@ -671,6 +681,72 @@ bool ReadCell::addNernst(
 	if ( !graftFlag_ )
 		++numOthers_;
 	return 0;
+}
+
+void ReadCell::addChannelMessage( Element* chan )
+{
+	Id sli( "/shell/sli" );
+	
+	vector< const char* > argVector;
+	string argString;
+	string token;
+	vector< string > tokens;
+	
+	/*
+	 * Get extended Finfos on channel. (We're looking for fields added using
+	 * "addfield"
+	 */
+	vector< Finfo* > chanFinfo;
+	chan->listLocalFinfos( chanFinfo );
+	
+	vector< Finfo* >::iterator cfinfo;
+	for ( cfinfo = chanFinfo.begin(); cfinfo != chanFinfo.end(); cfinfo++ ) {
+		// Ignore a Finfo if its name does not begin with "addmsg"..
+		const string& name = ( *cfinfo )->name();
+		if ( name.find( "addmsg", 0 ) != 0 )
+			continue;
+		
+		// ..or if the "addmsg" is not followed by a positive integer.
+		unsigned int dummyInt;
+		stringstream remaining( name.substr( 6 ) );
+		if ( ( remaining >> dummyInt ).fail() )
+			continue;
+		
+		// Get the string contained in the field..
+		if ( ( *cfinfo )->strGet( chan, argString ) == false )
+			continue;
+		
+		// ..extract tokens from the string..
+		tokens.clear();
+		tokens.push_back( "addmsg" );
+		stringstream ss( argString );
+		while ( ss >> token )
+			tokens.push_back( token );
+		
+		/*
+		 * Convert token[ 1 ] and token[ 2 ] from relative paths to absolute ones.
+		 * Ignore if the tokens are not valid paths. (Possible if using the new
+		 * syntax: "addmsg src_elm/msg dest_elm/msg")
+		 */
+		if ( tokens.size() >= 3 ) {
+			Id token1( chan->id().path() + "/" + tokens[ 1 ] );
+			Id token2( chan->id().path() + "/" + tokens[ 2 ] );
+			
+			if ( token1.good() )
+				tokens[ 1 ] = token1.path();
+			if ( token2.good() )
+				tokens[ 2 ] = token2.path();
+		}
+		
+		// Get C-style strings
+		argVector.clear();
+		for ( unsigned i = 0; i < tokens.size(); i++ )
+			argVector.push_back( tokens[ i ].c_str() );
+		
+		// Request parser to add the message
+		do_add( argVector.size(), &argVector[ 0 ], sli );
+		// do_add is defined in GenesisParserWrapper.cpp
+	}
 }
 
 /**
