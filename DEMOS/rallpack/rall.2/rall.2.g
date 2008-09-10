@@ -19,7 +19,7 @@ float diameter = {DIAMETER_0}
 float length   = {LENGTH_0}
 int   label    = 1
 make_compartment /cell/c{label} \
-	{RA} {RM} {CM} {EM} {INJECT} {diameter} {length}
+	{RA} {RM} {CM} {EM} {0.0} {diameter} {length}
 
 int i, j
 for ( i = 2; i <= MAX_DEPTH; i = i + 1 )
@@ -46,6 +46,8 @@ addmsg /plot/vn/inputRequest /cell/c{2 ** MAX_DEPTH - 1}/Vm
 setclock 0 {SIMDT} 0
 setclock 1 {PLOTDT} 1
 useclock /plot/##[TYPE=Table] 1
+
+setfield /cell/c1023 inject {INJECT}
 
 // Temporary hack
 setfield /cell method ee

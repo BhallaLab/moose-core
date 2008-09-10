@@ -11,6 +11,8 @@
 LOCAL_DIR := biophysics
 
 LOCAL_SRCS := \
+	Cell.cpp	\
+	BioScan.cpp	\
 	Compartment.cpp	\
 	SymCompartment.cpp	\
 	HHChannel.cpp	\
@@ -20,21 +22,14 @@ LOCAL_SRCS := \
 	Nernst.cpp	\
 	SpikeGen.cpp	\
 	SynChan.cpp	\
-	HSolveStruct.cpp	\
-	HSolveBase.cpp	\
-	HSolve.cpp \
-	NeuroScanBase.cpp \
-	NeuroScan.cpp \
-	NeuroHub.cpp \
-	Cell.cpp	\
-	RateLookup.cpp	\
 	TestBiophysics.cpp	\
 	BinSynchan.cpp	\
 	StochSynchan.cpp	\
 	PulseGen.cpp		\
 	RandomSpike.cpp		\
-	script_out.cpp
 
+$(LOCAL_DIR)$/Cell.o: $(LOCAL_DIR)$/Cell.h element$/Neutral.h
+$(LOCAL_DIR)$/BioScan.o: $(LOCAL_DIR)$/BioScan.h
 $(LOCAL_DIR)$/Compartment.o: $(LOCAL_DIR)$/Compartment.h basecode$/Ftype2.h
 $(LOCAL_DIR)$/SymCompartment.o: $(LOCAL_DIR)$/Compartment.h $(LOCAL_DIR)$/SymCompartment.h basecode$/Ftype2.h
 $(LOCAL_DIR)$/HHChannel.o: $(LOCAL_DIR)$/HHChannel.h basecode$/Ftype2.h basecode$/Ftype3.h
@@ -43,6 +38,8 @@ $(LOCAL_DIR)$/HHGate.o: $(LOCAL_DIR)$/HHGate.h builtins$/Interpol.h
 $(LOCAL_DIR)$/BinSynInfo.h: utility$/randnum$/BinomialRng.h
 
 LOCAL_HEADERS := 	\
+	Cell.h	\
+	BioScan.h	\
 	Compartment.h	\
 	SymCompartment.h	\
 	HHChannel.h	\
@@ -52,13 +49,6 @@ LOCAL_HEADERS := 	\
 	Nernst.h	\
 	SpikeGen.h	\
 	SynChan.h	\
-	HSolveStruct.h	\
-	HSolveBase.h	\
-	HSolve.h \
-	NeuroScanBase.h \
-	NeuroScan.h \
-	NeuroHub.h \
-	Cell.h	\
 	BinSynchan.h	\
 	StochSynchan.h	\
 	PulseGen.h	\

@@ -122,7 +122,7 @@ const Cinfo* initHHChannelCinfo()
 		),
 		new ValueFinfo( "Ik", ValueFtype1< double >::global(),
 			GFCAST( &HHChannel::getIk ), 
-			RFCAST( &HHChannel::setIk )
+			&dummyFunc
 		),
 		new ValueFinfo( "X", ValueFtype1< double >::global(),
 			GFCAST( &HHChannel::getX ), 
@@ -372,10 +372,6 @@ double HHChannel::getGk( Eref e )
 	return static_cast< HHChannel* >( e.data() )->Gk_;
 }
 
-void HHChannel::setIk( const Conn* c, double Ik )
-{
-	static_cast< HHChannel* >( c->data() )->Ik_ = Ik;
-}
 double HHChannel::getIk( Eref e )
 {
 	return static_cast< HHChannel* >( e.data() )->Ik_;

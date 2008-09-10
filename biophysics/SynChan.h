@@ -39,7 +39,7 @@ class SynChan
 		static void setGk( const Conn* c, double Gk );
 		static double getGk( Eref e );
 
-		static void setIk( const Conn* c, double Ik );
+		// Ik is read-only
 		static double getIk( Eref e );
 
 		static int getNumSynapses( Eref e );
@@ -67,8 +67,6 @@ class SynChan
 
 		static void activationFunc( const Conn* c, double val );
 		static void modulatorFunc( const Conn* c, double val );
-
-		static void scanFunc( const Conn* c, SynChanStruct* scs );
 
 ///////////////////////////////////////////////////
 // Protected fields and functions.

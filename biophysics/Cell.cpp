@@ -39,9 +39,9 @@ const Cinfo* initCellCinfo()
 			RFCAST( &Cell::reinitFunc ) ),
 	};
 	
-	static Finfo* solveShared[] =
+	static Finfo* integShared[] =
 	{
-		new SrcFinfo( "solveInit",
+		new SrcFinfo( "integSetup",
 			Ftype2< Id, double >::global() ),
 		// Placeholder for receiving list of compartments from solver.
 		new DestFinfo( "comptList",
@@ -88,8 +88,8 @@ const Cinfo* initCellCinfo()
 	//////////////////////////////////////////////////////////////////
 	// Shared definitions
 	//////////////////////////////////////////////////////////////////
-		new SharedFinfo( "cell-solve", solveShared,
-			sizeof( solveShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "cell-integ", integShared,
+			sizeof( integShared ) / sizeof( Finfo* ) ),
 		process,
 	};
 	
@@ -119,8 +119,8 @@ const Cinfo* initCellCinfo()
 
 static const Cinfo* cellCinfo = initCellCinfo();
 
-static const Slot solveInitSlot =
-	initCellCinfo()->getSlot( "cell-solve.solveInit" );
+static const Slot integSetupSlot =
+	initCellCinfo()->getSlot( "cell-integ.integSetup" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -140,6 +140,105 @@ void Cell::addMethod(
 	mi.isVariableDt = isVariableDt;
 	mi.isImplicit = isImplicit;
 	methodMap_[name] = mi;
+}
+
+///////////////////////////////////////////////////
+// Dest function definitions
+///////////////////////////////////////////////////
+
+void Cell::reinitFunc( const Conn* c, ProcInfo p )
+{
+	static_cast< Cell* >( c->data() )->
+		innerReinitFunc( c->target()->id(), p );
+}
+
+void Cell::innerReinitFunc( Id cell, ProcInfo p )
+{
+	double dt;
+	
+	// Delete existing solver
+	Id oldSolve( cell.path() + "/solve" );
+	if ( oldSolve.good() )
+		set( oldSolve(), "destroy" );
+	
+	if ( method_ == "ee" )
+		return;
+	
+	// Find any compartment that is a (grand)child of this cell
+	Id seed = findCompt( cell );
+	if ( seed.bad() ) // No compartment found.
+		return;
+	
+	// t0's dt is used to set the solver's dt
+	Id t0( "/sched/cj/t0" );
+	assert( t0.good() );
+	get< double >( t0(), "dt", dt );
+	
+	// The solver could be set up to send back a list of solved compartments.
+	setupSolver( cell, seed, dt );
+	
+	// The compartment list could then be used to see if the tree below the
+	// cell is built correctly. For instance, one could check if there are
+	// compartments dangling outside the cell.
+	checkTree( );
+}
+
+/**
+ * This function performs a depth-first search of the tree under the current
+ * cell. First compartment found is returned as the seed.
+ */ 
+Id Cell::findCompt( Id cell )
+{
+	/* 'curr' is the current element under consideration. 'cstack' is a list
+	 * of all elements (and their immediate siblings) found on the path from
+	 * the root element (the Cell) to the current element.
+	 */
+	vector< vector< Id > > cstack;
+	Id seed = Id::badId();
+	const Cinfo* compartment = Cinfo::find( "Compartment" );
+	
+	cstack.push_back( Neutral::getChildList( cell() ) );
+	while ( !cstack.empty() ) {
+		vector< Id >& child = cstack.back();
+		
+		if ( child.empty() ) {
+			cstack.pop_back();
+			if ( !cstack.empty() )
+				cstack.back().pop_back();
+		} else {
+			const Id& curr = child.back();
+			if ( curr()->cinfo()->isA( compartment ) ) {
+				seed = curr;
+				break;
+			}
+			cstack.push_back( Neutral::getChildList( curr() ) );
+		}
+	}
+	
+	return seed;
+}
+
+void Cell::setupSolver( Id cell, Id seed, double dt ) const
+{
+	// Create solve, and its children: integ and hub.
+	Element* solve = Neutral::create( "Neutral", "solve",
+		cell, Id::scratchId() );
+	
+	// integ
+	Element* integ = Neutral::create( "HSolve", "integ",
+		solve->id(), Id::scratchId() );
+	assert( integ != 0 );
+	Eref( cell() ).add( "cell-integ", integ, "cell-integ" );
+	
+	// With this request, the HSolve integrator sets itself up (reads in the
+	// cell model). Then it creates the hub as its sibling (i.e., child of
+	// 'solve'). The solver gets autoscheduled on t0 during its creation.
+	send2< Id, double >( cell(), integSetupSlot, seed, dt );
+}
+
+void Cell::checkTree( ) const
+{
+	;
 }
 
 ///////////////////////////////////////////////////
@@ -187,108 +286,3 @@ string Cell::getDescription( Eref e )
 	return static_cast< Cell* >( e.data() )->description_;
 }
 
-///////////////////////////////////////////////////
-// Dest function definitions
-///////////////////////////////////////////////////
-
-void Cell::reinitFunc( const Conn* c, ProcInfo p )
-{
-	static_cast< Cell* >( c->data() )->
-		innerReinitFunc( c->target()->id(), p );
-}
-
-void Cell::innerReinitFunc( Id cell, ProcInfo p )
-{
-	double dt = p->dt_;
-	if ( method_ == "ee" ) {
-		// Delete existing solver
-		Id oldSolve( cell.path() + "/solve" );
-		if ( oldSolve.good() )
-			set( oldSolve(), "destroy" );
-		return;
-	}
-	
-	Id seed = findCompt( cell );
-	if ( seed.bad() ) // No compartment found.
-		return;
-	
-	// The solver could be set up to send back a list of solved compartments.
-	setupSolver( cell, seed, dt );
-	
-	// The compartment list could then be used to see if the tree below the
-	// cell is built correctly. For instance, one could check if there are
-	// compartments dangling outside the cell.
-	checkTree( );
-}
-
-/**
- * This function performs a depth-first search of the tree under the current
- * cell. First compartment found is returned as the seed.
- */ 
-Id Cell::findCompt( Id cell )
-{
-	/* 'curr' is the current element under consideration. 'cstack' is a list
-	 * of all elements (and their immediate siblings) found on the path from
-	 * the root element (the Cell) to the current element.
-	 */
-	vector< vector< Id > > cstack;
-	Id seed;
-	const Cinfo* compartment = Cinfo::find( "Compartment" );
-	
-	cstack.push_back( Neutral::getChildList( cell() ) );
-	while ( !cstack.empty() ) {
-		vector< Id >& child = cstack.back();
-		
-		if ( child.empty() ) {
-			cstack.pop_back();
-			if ( !cstack.empty() )
-				cstack.back().pop_back();
-		} else {
-			const Id& curr = child.back();
-			if ( curr()->cinfo()->isA( compartment ) ) {
-				seed = curr;
-				break;
-			}
-			cstack.push_back( Neutral::getChildList( curr() ) );
-		}
-	}
-	
-	return seed;
-}
-
-void Cell::setupSolver( Id cell, Id seed, double dt ) const
-{
-	// Destroy any existing child called 'solve'.
-	Id oldSolve( cell.path() + "/solve" );
-	if ( oldSolve.good() )
-		set( oldSolve(), "destroy" );
-	
-	// Create solve, and its children: scan, hub, integ.
-	Element* solve = Neutral::create( "Neutral", "solve",
-		cell, Id::scratchId() );
-	
-	// integ
-	Element* integ = Neutral::create( "HSolve", "integ",
-		solve->id(), Id::scratchId() );
-	assert( integ != 0 );
-	Eref( cell() ).add( "cell-solve", integ, "cell-solve" );
-	
-	// scan
-	bool ret = set( integ, "scanCreate" );
-	assert( ret );
-	
-	// hub
-	Id scan( solve->id().path() + "/scan" );
-	assert( scan.good() );
-	ret = set( scan(), "hubCreate" );
-	assert( ret );
-	
-	// Request solver to read model, and initialize itself.
-	// Solver gets autoscheduled on t0 during its creation.
-	send2< Id, double >( cell(), solveInitSlot,	seed, dt );
-}
-
-void Cell::checkTree( ) const
-{
-	;
-}
