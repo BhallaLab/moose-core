@@ -269,7 +269,7 @@ double Binomial::generateTrd() const
         // 3.0d: v = v*alpha/(a/(us*us)+b)
         varV = varV*paramAlpha_/(paramA_/(varUs*varUs) + paramB_ );
         // 3.0e: km = | k - m |
-        varKm = ( varKm < paramM_)? paramM_ - varKm : varKm - paramM_;
+        varKm = ( varK < paramM_)? paramM_ - varK : varK - paramM_;
         // 3.0f: if km > 15 go to 3.2 , else ...
         if ( varKm <= 15 )
         {
