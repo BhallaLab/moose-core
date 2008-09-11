@@ -10,25 +10,6 @@
 
 TARGET = biophysics.o
 
-ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
-OBJ = \
-	Compartment.o	\
-	SymCompartment.o	\
-	HHChannel.o	\
-	Mg_block.o	\
-	HHGate.o	\
-	CaConc.o	\
-	Nernst.o	\
-	SpikeGen.o	\
-	ParSpikeGen.o	\
-	SynChan.o	\
-	ParSynChan.o	\
-	TestBiophysics.o	\
-	BinSynchan.o	\
-	StochSynchan.o	\
-	PulseGen.o	\
-	RandomSpike.o	
-else
 OBJ = \
 	Compartment.o	\
 	SymCompartment.o	\
@@ -47,7 +28,6 @@ OBJ = \
 	BioScan.o	\
 	TestBiophysics.o \
 	script_out.o
-endif
 
 HEADERS = \
 	../basecode/header.h \
@@ -66,17 +46,7 @@ CaConc.o:	CaConc.h
 Nernst.o:	Nernst.h
 SpikeGen.o:	SpikeGen.h
 script_out.o:	script_out.h
-
-ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
-ParSpikeGen.o:	SpikeGen.h ParSpikeGen.h
-endif
-
 SynChan.o:	SynChan.h SynInfo.h
-
-ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
-ParSynChan.o:	SynChan.h SynInfo.h ParSynChan.h
-endif
-
 Cell.o:	Cell.h ../element/Neutral.h
 BioScan.o:		BioScan.h
 StochSynchan.o:	StochSynchan.h StochSynInfo.h
