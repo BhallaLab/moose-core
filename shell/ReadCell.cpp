@@ -209,7 +209,7 @@ void ReadCell::readData( const string& line, unsigned int lineNum )
 			return;
 	}
 	
-	double x0, y0, z0, x, y, z, d;
+	double x0 = 0.0, y0 = 0.0, z0 = 0.0, x, y, z, d;
 	int argOffset = 0;
 	string name = argv[0];
 	string parent = argv[1];
@@ -221,9 +221,9 @@ void ReadCell::readData( const string& line, unsigned int lineNum )
 		y0 = atof( argv[3].c_str() );
 		z0 = atof( argv[4].c_str() );
 		if ( polarFlag_ ) {
-			double r = x;
-			double theta = y * M_PI / 180.0;
-			double phi = z * M_PI / 180.0;
+			double r = x0;
+			double theta = y0 * M_PI / 180.0;
+			double phi = z0 * M_PI / 180.0;
 			x0 = r * sin( phi ) * cos ( theta );
 			y0 = r * sin( phi ) * sin ( theta );
 			z0 = r * cos( phi );
