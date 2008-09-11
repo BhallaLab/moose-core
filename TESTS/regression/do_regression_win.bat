@@ -1,7 +1,7 @@
 @echo off
 
 REM Give absolute location of MOOSE executable here:
-set MOOSE=..\..\moose_vcpp2005\moose\Release\moose
+set MOOSE=..\..\moose_vcpp2005\Debug\moose
 
 GOTO EndComment
 nearDiff is a function to see if two data files are within epsilon of each other. It assumes the files are in xplot format.If it succeeds, it prints out a period without a newline.If it fails, it prints out the first argument and indicates where it failed.
@@ -50,18 +50,16 @@ ERASE test.plot
 ECHO "channels"
 %MOOSE% moose_channels.g > NUL
 
-GOTO EndComment2
-These are all the channels.
-Bad channels are
-Ca_bsg_yka, Ca_hip_traub, Kca_hip_traub, Kc_hip_traub91, K_hip_traub. 
-K_bsg_yka is a little bit off.
-foreach i ( Ca_bsg_yka Ca_hip_traub91 Ca_hip_traub K2_mit_usb KA_bsg_yka Ka_hip_traub91 Kahp_hip_traub91 K_bsg_yka Kca_hip_traub Kc_hip_traub91 Kdr_hip_traub91 K_hh_tchan K_hip_traub KM_bsg_yka K_mit_usb LCa3_mit_usb Na_bsg_yka Na_hh_tchan Na_hip_traub91 Na_mit_usb Na_rat_smsnn )
+REM #############################################
+REM # These are all the channels.
+REM # Bad channels are
+REM # Ca_bsg_yka, Ca_hip_traub, Kca_hip_traub, Kc_hip_traub91, K_hip_traub. 
+REM # K_bsg_yka is a little bit off.
+REM # foreach i ( Ca_bsg_yka Ca_hip_traub91 Ca_hip_traub K2_mit_usb KA_bsg_yka Ka_hip_traub91 Kahp_hip_traub91 K_bsg_yka Kca_hip_traub Kc_hip_traub91 Kdr_hip_traub91 K_hh_tchan K_hip_traub KM_bsg_yka K_mit_usb LCa3_mit_usb Na_bsg_yka Na_hh_tchan Na_hip_traub91 Na_mit_usb Na_rat_smsnn )
 :EndComment2
+REM Ugly hack as DOS bat allows only single command in for loop // Subha
+FOR %%i IN ( Ca_hip_traub91 K2_mit_usb KA_bsg_yka Ka_hip_traub91 Kahp_hip_traub91 K_bsg_yka Kdr_hip_traub91 K_hh_tchan KM_bsg_yka K_mit_usb LCa3_mit_usb Na_bsg_yka Na_hh_tchan Na_hip_traub91 Na_mit_usb Na_rat_smsnn ) DO FOR %%a IN (ECHO %NEARDIFF%) %a% channelplots\moose_%i%.plot test_%i%.plot 5.0e-2 -f
 
-FOR %%i IN( Ca_hip_traub91 K2_mit_usb KA_bsg_yka Ka_hip_traub91 Kahp_hip_traub91 K_bsg_yka Kdr_hip_traub91 K_hh_tchan KM_bsg_yka K_mit_usb LCa3_mit_usb Na_bsg_yka Na_hh_tchan Na_hip_traub91 Na_mit_usb Na_rat_smsnn ) 	
-ECHO %i%
-%NEARDIFF% channelplots/moose_%i%.plot test_%i%.plot 5.0e-2 -f
-DO
 
 ERASE test.plot
 %MOOSE% moose_synapse_solve.g > NUL
