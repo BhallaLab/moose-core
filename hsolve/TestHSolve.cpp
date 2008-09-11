@@ -20,8 +20,8 @@ extern void testHSolvePassive(); // Defined in HSolvePassive.cpp
 
 void testHSolve()
 {
-//	testHinesMatrix();
-//	testHSolvePassive();
+	testHinesMatrix();
+	testHSolvePassive();
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -32,7 +32,7 @@ int    SYMMETRIC       = 1
 //  Create cells
 //=====================================
 if ( MOOSE )
-	create Neutral /cable
+	create Cell /cable
 else
 	create neutral /cable
 end
