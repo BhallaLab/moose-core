@@ -94,7 +94,7 @@ void HSolvePassive::initialize( ) {
 	
 	double Vm, Cm, Em, Rm, inject;
 	
-	for ( unsigned int ic; ic < compartmentId_.size(); ++ic ) {
+	for ( unsigned int ic = 0; ic < compartmentId_.size(); ++ic ) {
 		Eref e = compartmentId_[ ic ]();
 		
 		get< double >( e, "Vm", Vm );
