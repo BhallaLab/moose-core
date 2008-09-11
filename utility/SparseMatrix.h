@@ -155,7 +155,7 @@ template < class T > class SparseMatrix
 			if ( i == end ) { // most common situation for a sparse Stoich matrix.
 				return 0;
 			} else {
-				return N_[ rowStart_[row] + i - begin ];
+				return N_[ rowStart_[row] + (i - begin) ];
 			}
 		}
 
@@ -175,6 +175,8 @@ template < class T > class SparseMatrix
 			if ( row >= nrows_ )
 				return 0;
 			unsigned int rs = rowStart_[row];
+			if ( rs >= N_.size() )
+				return 0;			
 			*entry = &( N_[ rs ] );
 			*colIndex = &( colIndex_[rs] );
 			return rowStart_[row + 1] - rs;

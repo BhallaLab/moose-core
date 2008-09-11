@@ -289,7 +289,8 @@ bool eof (string mmlfile){
 }
 
 string getNextToken(string &s, string &mmlfile, int &lineno){
-  trim(s);
+  if ( s.size() > 0 )
+    trim(s);
   if (s.size() == 0) {
     if (eof(mmlfile)) return "done!";
     getLine (mmlfile, s);
