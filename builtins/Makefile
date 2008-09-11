@@ -14,12 +14,6 @@ OBJ = \
 	Interpol.o	\
 	Table.o	\
 
-
-ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
-	OBJ += ParTable.o
-endif
-
-
 HEADERS = \
 	../basecode/header.h \
 	../connections/Conn.h \
@@ -30,10 +24,6 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 Interpol.o:	Interpol.h ../basecode/Ftype2.h
 Table.o:	Table.h Interpol.h ../basecode/Ftype2.h ../basecode/Ftype3.h
-
-ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
-ParTable.o:	ParTable.h Table.h Interpol.h ../basecode/Ftype2.h
-endif
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -I.. -I../basecode $< -c
