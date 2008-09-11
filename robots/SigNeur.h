@@ -168,7 +168,7 @@ class SigNeur
 		 * all the array entries to set up the diffusion reactions.
 		 */
 		void completeDiffusion( Element* parent, Element* base,
-				vector< unsigned int >& junctions );
+				unsigned int startIndex, vector< unsigned int >& junctions );
 		void buildDiffusionJunctions( vector< unsigned int >& junctions );
 
 	private:
