@@ -19,7 +19,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="1"
 			>
 			<Tool
@@ -40,11 +40,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\utility;..\..\randnum;..\..\genesis_parser;..\..\shell;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..\pymoose;&quot;E:\Users\MOOSE\Compile\py-Moose\&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;C:\Python25\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL"
+				AdditionalIncludeDirectories="..\..\robots;..\..\hsolve;..\..\utility;..\..\randnum;..\..\genesis_parser;..\..\shell;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;E:\Users\MOOSE\Compile\sept11_moose\;&quot;C:\Program Files\GnuWin32\include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -63,7 +63,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="libgsl.a libgslcblas.a"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="C:\Python25\libs;&quot;C:\Program Files\GnuWin32\lib&quot;"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\GnuWin32\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -103,7 +103,6 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description=""
 				CommandLine=""
 			/>
 			<Tool
@@ -197,6 +196,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\biophysics\BioScan.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\biophysics\CaConc.cpp"
 					>
 				</File>
@@ -217,18 +220,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\biophysics\HSolve.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\HSolveBase.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\HSolveStruct.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\biophysics\Mg_block.cpp"
 					>
 				</File>
@@ -237,27 +228,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\biophysics\NeuroHub.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\NeuroScan.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\NeuroScanBase.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\biophysics\PulseGen.cpp"
 					>
 				</File>
 				<File
 					RelativePath="..\..\biophysics\RandomSpike.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\RateLookup.cpp"
 					>
 				</File>
 				<File
@@ -1073,6 +1048,112 @@
 					</FileConfiguration>
 				</File>
 			</Filter>
+			<Filter
+				Name="hsolve"
+				>
+				<File
+					RelativePath="..\..\hsolve\HinesMatrix.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolve.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveActive.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveHub.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveInterface.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolvePassive.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveStruct.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\RateLookup.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\TestHSolve.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="robots"
+				>
+				<File
+					RelativePath="..\..\robots\Adaptor.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeur.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -1088,6 +1169,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\moose_vcpp__\biophysics\BinSynInfo.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\BioScan.h"
 					>
 				</File>
 				<File
@@ -1111,18 +1196,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\biophysics\HSolve.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\HSolveBase.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\HSolveStruct.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\biophysics\Mg_block.h"
 					>
 				</File>
@@ -1131,27 +1204,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\biophysics\NeuroHub.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\NeuroScan.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\NeuroScanBase.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\biophysics\PulseGen.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\biophysics\RandomSpike.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\RateLookup.h"
 					>
 				</File>
 				<File
@@ -1724,6 +1781,54 @@
 				</File>
 				<File
 					RelativePath="..\..\randnum\UniformRng.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="hsolve"
+				>
+				<File
+					RelativePath="..\..\hsolve\HinesMatrix.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolve.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveActive.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveHub.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolvePassive.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveStruct.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\RateLookup.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\TestHSolve.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="robots"
+				>
+				<File
+					RelativePath="..\..\robots\Adaptor.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeur.h"
 					>
 				</File>
 			</Filter>
