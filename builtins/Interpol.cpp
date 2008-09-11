@@ -478,7 +478,7 @@ void Interpol::innerTabFill( int newXDivs, int mode )
 		// i is index for old array, j for new array
 		int i = 0;
 		int j = 0;
-		double p;
+		double p = 0.0;
 		
 		// filling up newtab till first element in old array
 		while( i <= 1 ) {
