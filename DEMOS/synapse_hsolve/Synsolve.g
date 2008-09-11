@@ -61,7 +61,6 @@ addmsg /axon/n99/i20/spike /cable/c1/syn SPIKE
 ////////////////////////////////////////////////////////////////////////////////
 create table /plot
 call /plot TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
-useclock /plot 2
 setfield /plot step_mode 3
 
 //=====================================
@@ -86,6 +85,8 @@ else
 	setclock 1 {SIMDT}
 	setclock 2 {IODT}
 end
+
+useclock /plot 2
 
 //=====================================
 //  Stimulus
