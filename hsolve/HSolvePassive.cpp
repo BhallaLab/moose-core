@@ -644,7 +644,7 @@ void testHSolvePassive()
 			set< double >( c[ i ](), "Rm", tree[ i ].Rm );
 			set< double >( c[ i ](), "Cm", tree[ i ].Cm );
 			set< double >( c[ i ](), "Em", Em[ i ] );
-			set< double >( c[ i ](), "Vm", V[ i ] );
+			set< double >( c[ i ](), "initVm", V[ i ] );
 		}
 		
 		for ( i = 0; i < nCompt; i++ ) {
