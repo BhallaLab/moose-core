@@ -41,7 +41,7 @@ else
 end
 
 make_compartment /cell/c{label} \
-	{RA} {RM} {CM} {EM} {INJECT} {diameter} {length} {SYMMETRIC}
+	{RA} {RM} {CM} {EM} {0.0} {diameter} {length} {SYMMETRIC}
 
 int i, j
 for ( i = 2; i <= MAX_DEPTH; i = i + 1 )
@@ -82,7 +82,7 @@ addmsg /cell/c{2 ** MAX_DEPTH - 1} /plots/vn INPUT Vm
 //=====================================
 //  Stimulus
 //=====================================
-setfield /cell/c1023 inject {INJECT}
+setfield /cell/c1 inject {INJECT}
 
 //=====================================
 //  Clocks

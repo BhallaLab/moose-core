@@ -10,6 +10,10 @@
 #include "moose.h"
 #include "BioScan.h"
 
+#include "Compartment.h"
+#include "HHChannel.h"
+#include "CaConc.h"
+
 int BioScan::adjacent( Id compartment, Id exclude, vector< Id >& ret )
 {
 	int size = ret.size();
@@ -137,6 +141,15 @@ int BioScan::targets(
 			continue;
 		
 		target.push_back( found );
+		
+		ProcInfoBase p;
+		SetConn c( found(), 0 );
+		if ( isType( found, "Compartment" ) )
+			Compartment::reinitFunc( &c, &p );
+		else if ( isType( found, "HHChannel" ) )
+			HHChannel::reinitFunc( &c, &p );
+		else if ( isType( found, "CaConc" ) )
+			CaConc::reinitFunc( &c, &p );
 	}
 	delete i;
 	
