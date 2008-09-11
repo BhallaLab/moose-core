@@ -149,7 +149,7 @@ int KinSparseMatrix::get( unsigned int row, unsigned int column )
 	if ( i == end ) { // most common situation for a sparse Stoich matrix.
 		return 0;
 	} else {
-		return N_[ rowStart_[row] + i - begin ];
+		return N_[ rowStart_[row] + (i - begin) ];
 	}
 }
 
