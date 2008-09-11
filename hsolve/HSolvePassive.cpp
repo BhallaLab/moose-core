@@ -739,7 +739,7 @@ void testHSolvePassive()
 		 * 
 		 */
 		
-		tolerance = 4.0;
+		tolerance = 4.0; // ratio to machine epsilon
 		
 		for ( int pass = 0; pass < 2; pass++ ) {
 			/*

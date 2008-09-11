@@ -7212,3 +7212,22 @@ diffusion messaging onto the next compt.
 Checked in as revision 683: unit test flags on, Smoldyn off, -g, no GSL, MPI off
 
 ==============================================================================
+9 Sep 2008
+Generic progress on setting up diffusion messaging. Currently a bit stuck.
+Minor fix to copyIntoArray.
+Checked in as revision 684: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
+Several issues now with completeDiffusion:
+- Minor: junctions array needs to indicate which type of target is involved
+	(soma, dend, spine)
+- Major: Need a way to align molecules in different models. For now name
+	identity will have to do, but in due course would like an identity
+	map. In either event, need to set up such a map.
+
+==============================================================================
+11 Sep 2008
+General cleanup of scattered CRL parallel code, prior to release. Also a bit
+of cleanup to stuff in progress on SigNeur so that it all compiles and clears
+unit tests.
+
+==============================================================================
