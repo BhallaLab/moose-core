@@ -591,7 +591,7 @@ void SigNeur::linearDiffusion( Element* base )
  * all the array entries to set up the diffusion reactions.
  */
 void SigNeur::completeDiffusion( Element* parent, Element* base,
-	vector< unsigned int >& junctions )
+	unsigned int startIndex, vector< unsigned int >& junctions )
 {
 	static const Finfo* childSrcFinfo = 
 		initNeutralCinfo()->findFinfo( "childSrc" );
@@ -607,19 +607,21 @@ void SigNeur::completeDiffusion( Element* parent, Element* base,
 	for ( vector< ConnTainer* >::const_iterator i = m->begin();
 		i != m->end(); ++i ) {
 		if ( (*i)->e2() != base )
-			completeDiffusion( base, (*i)->e2(), junctions );
+			completeDiffusion( base, (*i)->e2(), startIndex, junctions );
 		else
-			completeDiffusion( base, (*i)->e1(), junctions );
+			completeDiffusion( base, (*i)->e1(), startIndex, junctions );
 	}
 
 	if ( parent->cinfo()->isA( initMoleculeCinfo() ) &&
 		base->cinfo()->isA( initReactionCinfo() ) &&
 		base->name() == "diff" ) {
 		// Connect up to next index.
+		assert ( base->numEntries()  + startIndex <= junctions.size() );
 		for ( unsigned int i = 0; i < base->numEntries(); ++i ) {
-			if ( junctions[i] < base->numEntries() ) {
+			unsigned int j = i + startIndex;
+			if ( junctions[j] < base->numEntries() ) {
 				Eref e2( base, i );
-				Eref e1( parent, junctions[ i ] );
+				Eref e1( parent, junctions[ j ] - startIndex );
 				bool ret = e1.add( reacFinfo->msg(), e2, prdFinfo->msg(), 
 					ConnTainer::Simple );
 				assert( ret );
@@ -694,11 +696,12 @@ void SigNeur::makeSignalingModel( Eref me )
 	vector< unsigned int > junctions( 
 		numSoma_ + numDend_ + numSpine_, UINT_MAX );
 	buildDiffusionJunctions( junctions );
+	// buildMoleculeMatches();
 	for ( unsigned int j = 0; j < junctions.size(); ++j )
 		cout << " " << j << "," << junctions[j];
 	cout << endl;
-	completeDiffusion( soma, soma, junctions );
-	completeDiffusion( dend, dend, junctions );
+	completeDiffusion( soma, soma, 0, junctions );
+	completeDiffusion( dend, dend, numSoma_, junctions );
 	
 	// linearDiffusion( soma );
 	// linearDiffusion( dend );
@@ -732,6 +735,18 @@ void SigNeur::buildDiffusionJunctions( vector< unsigned int >& junctions )
 		}
 	}
 }
+
+/**
+ * Traverses the respective signaling trees to find corresponding
+ * molecules. These are identified simply by molecule name, and
+ * later we may add additional mapping options.
+ */
+/*
+void SigNeur::buildMoleculeMatches( Element* tree1, Element* tree2,
+	map< Element*, Element* >& molMap )
+{
+}
+*/
 
 bool SigNeur::traverseCell( Eref me )
 {
