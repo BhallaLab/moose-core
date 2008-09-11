@@ -29,8 +29,9 @@
 #include "../biophysics/Nernst.h"
 #include "../biophysics/CaConc.h"
 
+
 // Defined in GenesisParserWrapper.cpp
-extern void do_add( int argc, const char** argv, Id s );
+extern void do_add( int argc, const char** const argv, Id s );
 
 static const Cinfo* comptCinfo = initCompartmentCinfo();
 static const Cinfo* chanCinfo = initHHChannelCinfo();
