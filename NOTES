@@ -7229,5 +7229,16 @@ Several issues now with completeDiffusion:
 General cleanup of scattered CRL parallel code, prior to release. Also a bit
 of cleanup to stuff in progress on SigNeur so that it all compiles and clears
 unit tests.
+Brought over latest version including the hsolver. But it fails to clear
+unit tests: an issue with the 32 bit version.
+Checked in as revision 686: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
+Working on buildDiffusionJunction
+==============================================================================
+12 Sep 2008
+
+Cleaned up buildDiffusionJunction. All signaling compts except for soma0 now
+have someone to diffuse to. Still need to insert function to calculate which
+of the parent compartments to attach to, based on coords.
 
 ==============================================================================

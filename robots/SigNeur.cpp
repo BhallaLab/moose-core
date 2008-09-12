@@ -398,6 +398,22 @@ void SigNeur::innerBuild( const Conn* c )
 	}
 }
 
+/**
+ * For now don't deal with taper
+ */
+unsigned int numSegments( Id compt, double lambda )
+{
+	double length = 0.0;
+	// double dia = 0.0;
+	assert( compt.good() );
+	bool ret = get< double >( compt.eref(), "length", length );
+	assert( ret );
+	// ret = get< double >( compt.eref(), "diameter", dia );
+	assert( ret );
+	assert( length > 0.0 && lambda > 0.0 );
+	return ( 1 + length / lambda );
+}
+
 // Count signaling compts, also subdivide for long dend compts.
 void SigNeur::assignSignalingCompts()
 {
@@ -408,14 +424,13 @@ void SigNeur::assignSignalingCompts()
 	for ( vector< TreeNode >::iterator i = tree_.begin(); 
 		i != tree_.end(); ++i ) {
 		if ( i->category == SOMA ) {
+			unsigned int ns = numSegments( i->compt, lambda_ );
 			i->sigStart = numSoma_;
-			i->sigEnd = ++numSoma_;
+			i->sigEnd = numSoma_ = numSoma_ + ns;
 		} else if ( i->category == DEND ) {
-			double length;
-			get< double >( i->compt.eref(), "length", length );
-			unsigned int numSegments = 1 + length / lambda_;
+			unsigned int ns = numSegments( i->compt, lambda_ );
 			i->sigStart = numDend_;
-			i->sigEnd = numDend_ = numDend_ + numSegments;
+			i->sigEnd = numDend_ = numDend_ + ns;
 			// cout << " " << numSegments;
 		} else if ( i->category == SPINE ) {
 			i->sigStart = numSpine_;
@@ -504,80 +519,6 @@ void SigNeur::insertDiffusion( Element* base )
 	// assign rates.
 	
 }
-
-/*
-void SigNeur::linearDiffusion( Element* base )
-{
-	static const double EPSILON = 1.0e-20;
-	static const Finfo* childSrcFinfo = 
-		initNeutralCinfo()->findFinfo( "childSrc" );
-	static const Finfo* reacFinfo = 
-		initMoleculeCinfo()->findFinfo( "reac" );
-	static const Finfo* dFinfo = 
-		initMoleculeCinfo()->findFinfo( "D" );
-	static const Finfo* subFinfo = 
-		initReactionCinfo()->findFinfo( "sub" );
-	static const Finfo* prdFinfo = 
-		initReactionCinfo()->findFinfo( "prd" );
-
-	assert( childSrcFinfo != 0 );
-	assert( childSrcFinfo->msg() == 0 );
-	// Traverse all zero index children, find ones that have D > 0
-	// Create an array of diffs on these children
-	// Connect up to parent using One2OneMap
-	// Connect up to next index parent using SimpleConn for now
-	// Assign rates.
-	if ( base == 0 )
-		return;
-	
-	// Traverse children.
-	const Msg* m = base->msg( childSrcFinfo->msg() );
-	for ( vector< ConnTainer* >::const_iterator i = m->begin();
-		i != m->end(); ++i ) {
-
-		if ( (*i)->e2() != base )
-			linearDiffusion( (*i)->e2() );
-		else
-			linearDiffusion( (*i)->e1() );
-	}
-	if ( !base->cinfo()->isA( initMoleculeCinfo() ) )
-		return;
-	
-	// Ensure D > 0 
-	double D = 0.0;
-	bool ret = get< double >( base, dFinfo, D );
-	if ( D <= EPSILON )
-		return;
-
-	// Create array of diffusion reactions.
-	Id temp = base->id();
-	Id baseId = temp.assignIndex( Id::AnyIndex );
-	temp = Id::childId( baseId );
-	Id childId = temp.assignIndex( Id::AnyIndex );
-	Element* diff = Neutral::createArray( "Reaction", "diff", 
-		baseId, childId, base->numEntries() );
-
-	assert( diff != 0 );
-	// Connect up to parent
-	ret = baseId.eref().add( reacFinfo->msg(), 
-		childId.eref(), subFinfo->msg(), ConnTainer::One2OneMap );
-	assert( ret );
-
-	// Connect up to next index.
-	for ( unsigned int i = 1; i < base->numEntries(); ++i ) {
-		Eref e1 = baseId.eref();
-		e1.i = i - 1;
-		Eref e2 = childId.eref();
-		e2.i = i;
-		ret = e1.add( reacFinfo->msg(), e2, prdFinfo->msg(), 
-			ConnTainer::Simple );
-		assert( ret );
-	}
-
-	// assign rates.
-	
-}
-*/
 
 /**
  * Once the model is set up as an array, we need to go in and connect
@@ -696,12 +637,21 @@ void SigNeur::makeSignalingModel( Eref me )
 	vector< unsigned int > junctions( 
 		numSoma_ + numDend_ + numSpine_, UINT_MAX );
 	buildDiffusionJunctions( junctions );
-	// buildMoleculeMatches();
+	map< string, Element* > somaMap;
+	map< string, Element* > dendMap;
+	map< string, Element* > spineMap;
+	buildMoleculeNameMap( soma, somaMap );
+	buildMoleculeNameMap( dend, dendMap );
+	buildMoleculeNameMap( spine, spineMap );
+
+	/*
 	for ( unsigned int j = 0; j < junctions.size(); ++j )
 		cout << " " << j << "," << junctions[j];
 	cout << endl;
-	completeDiffusion( soma, soma, 0, junctions );
-	completeDiffusion( dend, dend, numSoma_, junctions );
+	*/
+
+	// completeDiffusion( soma, soma, 0, junctions );
+	// completeDiffusion( dend, dend, numSoma_, junctions );
 	
 	// linearDiffusion( soma );
 	// linearDiffusion( dend );
@@ -710,43 +660,88 @@ void SigNeur::makeSignalingModel( Eref me )
 /**
  * Traverses the cell tree to work out where the diffusion reactions
  * must connect to each other. junction[i] is the index of the 
- * compartment connected compartment[i]. The indexing of compartments
+ * compartment connected to compartment[i]. The indexing of compartments
  * themselves is first the soma block, then the dend block, then the
  * spine block.
  */
 void SigNeur::buildDiffusionJunctions( vector< unsigned int >& junctions )
 {
 	// TreeNode 0 is soma, has parent 0, rest should be a different compt. 
+	// The first soma compartment should not connect to anything.
+	// The next connects to the first soma, and so on.
 	// The diffusion compartments start at the proximal compartment and
 	// end at the distal compartment, with respect to the soma.
 	// Because of the tree structure, sigStart must connect to the parent,
 	// so that every branch point has a diffusion reaction for each branch.
 	// Thus sigStart+1 must connect to sigStart, and so on.
 	// We ignore diffusive coupling between sibling branches.
+	//
+	// Need to figure out how to put things at opposite ends of compt.
 	for ( vector< TreeNode >::iterator i = tree_.begin(); 
 		i != tree_.end(); ++i ) {
+		// cout << i - tree_.begin() << "	" << i->compt.path() << ", p=" << i->parent << ", sig=" << i->sigStart << "," << i->sigEnd << endl;;
+
 		
+		// First we assign the links within the electrical compartment,
+		//  this is easy.
 		for ( unsigned int j = i->sigStart + 1; j < i->sigEnd; j++ )
 			junctions[ j ] = j - 1;
 
+		//////////////// Now we assign sigSTart ///////////////
+		
+		if ( i == tree_.begin() ) 
+		// Skip sigStart for zero diffusion compartment
+			continue;
+
 		TreeNode* tn = &( tree_[ i->parent ] );
-		if ( tn != &(tree_[ 0 ] ) && tn->sigEnd != tn->sigStart ) {
+		// Attach spine not to neck, but to parent dend.
+		if ( i->category == SPINE && 
+			tn->category == SPINE_NECK && 
+			i->sigStart != i->sigEnd ) {
+			TreeNode* dend = &( tree_[ tn->parent ] );
+			// Should position based on coordinates and length and numSeg
+			// of parent dend. For now put it in middle
+			assert( dend->sigStart != dend->sigEnd );
+			junctions[ i->sigStart ] = ( dend->sigStart + dend->sigEnd )/ 2;
+		} else if ( i->category == DEND && i->sigStart != i->sigEnd ) {
+			// Attach it to last sig compt of parent electrical compartment
+			// Actually should do something spatial here.
 			junctions[ i->sigStart ] = tn->sigEnd - 1;
 		}
 	}
 }
 
 /**
- * Traverses the respective signaling trees to find corresponding
- * molecules. These are identified simply by molecule name, and
- * later we may add additional mapping options.
+ * Traverses the signaling tree to build a map of molecule Elements 
+ * looked up by name.
  */
-/*
-void SigNeur::buildMoleculeMatches( Element* tree1, Element* tree2,
-	map< Element*, Element* >& molMap )
+void SigNeur::buildMoleculeNameMap( Element* e,
+	map< string, Element* >& molMap )
 {
+	static const Finfo* childSrcFinfo = 
+		initNeutralCinfo()->findFinfo( "childSrc" );
+	if ( e == 0 )
+		return;
+	
+	if ( e->cinfo()->isA( initMoleculeCinfo() ) ) {
+		map< string, Element* >::iterator i = molMap.find( e->name() );
+		if ( i != molMap.end() ) {
+			cout << "buildMoleculeNameMap:: Warning: duplicate molecule: "
+				<< i->second->id().path() << ", " << e->id().path() << endl;
+		} else {
+			molMap[ e->name() ] = e;
+		}
+	}
+	// Traverse children.
+	const Msg* m = e->msg( childSrcFinfo->msg() );
+	for ( vector< ConnTainer* >::const_iterator i = m->begin();
+		i != m->end(); ++i ) {
+		if ( (*i)->e2() != e )
+			buildMoleculeNameMap( (*i)->e2(), molMap );
+		else
+			buildMoleculeNameMap( (*i)->e1(), molMap );
+	}
 }
-*/
 
 bool SigNeur::traverseCell( Eref me )
 {
