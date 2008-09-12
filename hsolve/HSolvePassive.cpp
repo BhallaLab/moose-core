@@ -719,7 +719,7 @@ void testHSolvePassive()
 		 * Compare initial matrices
 		 */
 		
-		tolerance = 1.0;
+		tolerance = 2.0;
 		
 		for ( i = 0; i < nCompt; ++i )
 			for ( j = 0; j < nCompt; ++j ) {
