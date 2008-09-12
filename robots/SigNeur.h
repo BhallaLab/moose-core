@@ -153,6 +153,12 @@ class SigNeur
 		static CompartmentCategory guessCompartmentCategory( Eref e );
 		Element* copySig( Id kinId, Id proto, 
 			const string& name, unsigned int num );
+		/**
+ 		 * Traverses the signaling tree to build a map of molecule Elements 
+ 		 * looked up by name.
+ 		 */
+		void buildMoleculeNameMap( Element* e, 
+			map< string, Element* >& molMap );
 
 		/**
 		 * This routine will recursively traverse all descendants of 
