@@ -123,7 +123,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\utility;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;E:\Users\MOOSE\Compile\moose_sept9\;&quot;C:\Program Files\GnuWin32\include&quot;;C:\Python25\include"
+				AdditionalIncludeDirectories="..\..\hsolve;..\..\utility;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;E:\Users\MOOSE\Compile\911moose\;&quot;C:\Program Files\GnuWin32\include&quot;;C:\Python25\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;snprintf=_snprintf_s"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -196,6 +196,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\biophysics\BioScan.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\biophysics\CaConc.cpp"
 					>
 				</File>
@@ -216,18 +220,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\biophysics\HSolve.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\HSolveBase.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\HSolveStruct.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\biophysics\Mg_block.cpp"
 					>
 				</File>
@@ -236,27 +228,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\biophysics\NeuroHub.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\NeuroScan.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\NeuroScanBase.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\biophysics\PulseGen.cpp"
 					>
 				</File>
 				<File
 					RelativePath="..\..\biophysics\RandomSpike.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\RateLookup.cpp"
 					>
 				</File>
 				<File
@@ -2104,6 +2080,46 @@
 					</FileConfiguration>
 				</File>
 			</Filter>
+			<Filter
+				Name="hsolve"
+				>
+				<File
+					RelativePath="..\..\hsolve\HinesMatrix.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolve.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveActive.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveHub.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveInterface.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolvePassive.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveStruct.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\RateLookup.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\TestHSolve.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -2119,6 +2135,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\moose_vcpp__\biophysics\BinSynInfo.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\BioScan.h"
 					>
 				</File>
 				<File
@@ -2142,18 +2162,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\biophysics\HSolve.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\HSolveBase.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\HSolveStruct.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\biophysics\Mg_block.h"
 					>
 				</File>
@@ -2162,27 +2170,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\biophysics\NeuroHub.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\NeuroScan.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\NeuroScanBase.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\biophysics\PulseGen.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\biophysics\RandomSpike.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\RateLookup.h"
 					>
 				</File>
 				<File
@@ -2971,6 +2963,42 @@
 				</File>
 				<File
 					RelativePath="..\..\randnum\UniformRng.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="hsolve"
+				>
+				<File
+					RelativePath="..\..\hsolve\HinesMatrix.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolve.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveActive.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveHub.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolvePassive.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\HSolveStruct.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\RateLookup.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\hsolve\TestHSolve.h"
 					>
 				</File>
 			</Filter>
