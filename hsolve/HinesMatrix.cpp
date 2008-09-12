@@ -275,9 +275,13 @@ void HinesMatrix::makeOperands( ) {
 					operand_.push_back( target );
 					operand_.push_back( above );
 					operand_.push_back( left );
-					
-					target += 2;
-					left += 2;
+					if (j<rank-i-1)
+
+					{
+						target += 2;
+						left += 2;
+					}
+
 				}
 				above += 2;
 			}
