@@ -521,6 +521,161 @@ void SigNeur::insertDiffusion( Element* base )
 }
 
 /**
+ * Return the diffusion reaction that is a child of this molecule, if
+ * present. Otherwise return 0
+ */
+Element* findDiff( Element* pa )
+{
+	static const Finfo* lookupChildFinfo =
+		initNeutralCinfo()->findFinfo( "lookupChild" );
+	Id ret;
+	string temp( "diff" );
+	lookupGet< Id, string >( pa, lookupChildFinfo, ret, temp );
+
+	if ( ret.good() )
+		return ret();
+
+	return 0;
+}
+
+void SigNeur::completeSomaDiffusion( 
+	map< string, Element* >& somaMap, // Never needs to go off-map.
+	vector< unsigned int >& junctions )
+{
+	static const Finfo* reacFinfo = 
+		initMoleculeCinfo()->findFinfo( "reac" );
+	static const Finfo* prdFinfo = 
+		initReactionCinfo()->findFinfo( "prd" );
+	
+	for ( map< string, Element* >::iterator i = somaMap.begin(); 
+		i != somaMap.end(); ++i ) {
+		Element* diff = findDiff( i->second );
+		if ( diff ) { // Connect up all diffn compts.
+			for ( unsigned int j = 0; j < numSoma_; ++j ) {
+				if ( junctions[ j ] != UINT_MAX ) {
+					assert( junctions[ j ] < i->second->numEntries() );
+					Eref e2( diff, j );
+					Eref e1( i->second, junctions[ j ] );
+					bool ret = e1.add( reacFinfo->msg(), 
+						e2, prdFinfo->msg(), 
+						ConnTainer::Simple );
+					assert( ret );
+				}
+			}
+		}
+	}
+}
+
+void SigNeur::completeDendDiffusion( 
+	map< string, Element* >& somaMap, // Some dends connect to soma.
+	map< string, Element* >& dendMap, 
+	vector< unsigned int >& junctions )
+{
+	static const Finfo* reacFinfo = 
+		initMoleculeCinfo()->findFinfo( "reac" );
+	static const Finfo* prdFinfo = 
+		initReactionCinfo()->findFinfo( "prd" );
+	
+	for ( map< string, Element* >::iterator i = dendMap.begin(); 
+		i != dendMap.end(); ++i ) {
+		Element* diff = findDiff( i->second );
+		if ( diff ) { // Connect up all diffn compts.
+			for ( unsigned int j = 0; j < numDend_; ++j ) {
+				unsigned int tgt = junctions[ j + numSoma_ ];
+				if ( tgt < numSoma_ ) { // connect to soma, if mol present
+					map< string, Element* >::iterator mol = 
+						somaMap.find( i->first );
+					if ( mol != somaMap.end() ) {
+						assert( tgt < mol->second->numEntries() );
+						Eref e2( diff, j );
+						Eref e1( i->second, tgt );
+						bool ret = e1.add( reacFinfo->msg(), 
+							e2, prdFinfo->msg(), 
+							ConnTainer::Simple );
+						assert( ret );
+					}
+				} else if 
+					( tgt >= numSoma_ && tgt < numDend_ + numSoma_ ) {
+				// Look for other dend diffn compartments. Here tgt
+				// is the same molecule, different index.
+					tgt -= numSoma_;
+					assert( tgt < i->second->numEntries() );
+					Eref e2( diff, j );
+					Eref e1( i->second, tgt );
+					bool ret = e1.add( reacFinfo->msg(), 
+						e2, prdFinfo->msg(), 
+						ConnTainer::Simple );
+					assert( ret );
+				} else { // Should not connect into spine.
+					assert( 0 );
+				}
+			}
+		}
+	}
+}
+
+void SigNeur::completeSpineDiffusion( 
+	map< string, Element* >& dendMap, // All spines connect to a dend
+	map< string, Element* >& spineMap, 
+	vector< unsigned int >& junctions )
+{
+	static const Finfo* reacFinfo = 
+		initMoleculeCinfo()->findFinfo( "reac" );
+	static const Finfo* prdFinfo = 
+		initReactionCinfo()->findFinfo( "prd" );
+	
+	for ( map< string, Element* >::iterator i = spineMap.begin(); 
+		i != spineMap.end(); ++i ) {
+		Element* diff = findDiff( i->second );
+		if ( diff ) { // Connect up all diffn compts.
+			for ( unsigned int j = 0; j < numSpine_; ++j ) {
+				unsigned int tgt = junctions[ j + numSoma_ + numDend_ ];
+				if ( tgt >= numSoma_ && tgt < numSoma_ + numDend_ ) {
+					// connect to dend, if mol present
+					map< string, Element* >::iterator mol = 
+						dendMap.find( i->first );
+					if ( mol != dendMap.end() ) {
+						assert( tgt < mol->second->numEntries() );
+						Eref e2( diff, j );
+						Eref e1( i->second, tgt );
+						bool ret = e1.add( reacFinfo->msg(), 
+							e2, prdFinfo->msg(), 
+							ConnTainer::Simple );
+						assert( ret );
+					}
+				}
+			}
+		}
+	}
+}
+
+/**
+ * The first diffusion reaction (i.e., the one on sigStart) is the one
+ * that crosses electrical compartment junctions. 
+ *
+ * For starters, we simply set the diameter at this and all other
+ * diffusion reactions to that of the local el compartment.
+ *
+ * To represent a tapering dend cylinder, we could take the el dia as
+ * that at sigStart, and the next compt dia as at sigEnd. But need
+ * to rethink for branches.
+ *
+ * For spines, just use their spineNeck dimensions.
+ *
+ * For soma, ignore the soma dimensions except within it?
+ *
+ * It would be cleaner to take the el dia as the middle dia.
+ *
+ */
+void SigNeur::setDiffusionRates( 
+	map< string, Element* >& somaMap, // Never needs to go off-map.
+	map< string, Element* >& dendMap, // May go off-map to soma
+	map< string, Element* >& spineMap, // Always goes off-map to dend.
+	vector< unsigned int >& junctions )
+{
+}
+
+/**
  * Once the model is set up as an array, we need to go in and connect
  * diffusion reactions between compartments.
  * The 'base' is any element in the reaction tree. This routine will 
@@ -530,7 +685,38 @@ void SigNeur::insertDiffusion( Element* base )
  * base is a reaction named "diff"
  * Since the 'base' is typically an array element, it then goes through
  * all the array entries to set up the diffusion reactions.
- */
+void SigNeur::completeDiffusion( 
+	map< string, Element* >& somaMap, // Never needs to go off-map.
+	map< string, Element* >& dendMap, // May go off-map to soma
+	map< string, Element* >& spineMap, // Always goes off-map to dend.
+	vector< unsigned int >& junctions )
+{
+	static const Finfo* reacFinfo = 
+		initMoleculeCinfo()->findFinfo( "reac" );
+	static const Finfo* prdFinfo = 
+		initReactionCinfo()->findFinfo( "prd" );
+	
+	for ( map< string, Element* >::iterator i = somaMap.begin(); 
+		i != somaMap.end(); ++i ) {
+		Element* diff = findDiff( *i );
+		if ( diff ) { // Connect up all diffn compts.
+			for ( unsigned int j = 0; j < numSoma_; ++j ) {
+				if ( junctions[ j ] != UINT_MAX ) {
+					assert( junctions[ j ] < i->second->numEntries() );
+					Eref e2( diff, j );
+					Eref e1( i->second, junctions[ j ] );
+					bool ret = e1.add( reacFinfo->msg(), 
+						e2, prdFinfo->msg(), 
+						ConnTainer::Simple );
+					assert( ret );
+				}
+			}
+		}
+	}
+}
+*/
+
+/*
 void SigNeur::completeDiffusion( Element* parent, Element* base,
 	unsigned int startIndex, vector< unsigned int >& junctions )
 {
@@ -570,6 +756,7 @@ void SigNeur::completeDiffusion( Element* parent, Element* base,
 		}
 	}
 }
+*/
 
 /*
  * This function copies a signaling model. It first traverses the model and
@@ -650,11 +837,11 @@ void SigNeur::makeSignalingModel( Eref me )
 	cout << endl;
 	*/
 
-	// completeDiffusion( soma, soma, 0, junctions );
-	// completeDiffusion( dend, dend, numSoma_, junctions );
-	
-	// linearDiffusion( soma );
-	// linearDiffusion( dend );
+	completeSomaDiffusion( somaMap, junctions );
+	completeDendDiffusion( somaMap, dendMap, junctions );
+	completeSpineDiffusion( dendMap, spineMap, junctions );
+
+	setDiffusionRates( somaMap, dendMap, spineMap );
 }
 
 /**
