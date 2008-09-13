@@ -172,9 +172,38 @@ class SigNeur
 		 * Since the 'base' is typically an array element, it then goes 
 		 * through
 		 * all the array entries to set up the diffusion reactions.
-		 */
 		void completeDiffusion( Element* parent, Element* base,
 				unsigned int startIndex, vector< unsigned int >& junctions );
+		 */
+
+		/**
+		 * Connect up appropriate compartments in the soma. Note that
+		 * soma never needs to connect to any other compartment type.
+		 */
+		void completeSomaDiffusion( 
+			map< string, Element* >& somaMap, // Never needs to go off-map.
+			vector< unsigned int >& junctions );
+
+		/**
+		 * Connect up diffusion for dendritic compartments. Most will
+		 * connect to adjacent dend compartments, but some will
+		 * connect to soma. So we need to check the somaMap for molecules
+		 * that diffuse.
+		 */
+		void completeDendDiffusion( 
+			map< string, Element* >& somaMap, // Some dends connect to soma.
+			map< string, Element* >& dendMap, 
+			vector< unsigned int >& junctions );
+
+		/**
+		 * Connect up diffusion to and from spines. All spines connect
+		 * to dend compartments.
+		 */
+		void completeSpineDiffusion( 
+			map< string, Element* >& dendMap,
+			map< string, Element* >& spineMap, 
+			vector< unsigned int >& junctions );
+
 		void buildDiffusionJunctions( vector< unsigned int >& junctions );
 
 	private:
