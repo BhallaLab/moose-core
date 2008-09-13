@@ -275,13 +275,17 @@ void HinesMatrix::makeOperands( ) {
 					operand_.push_back( target );
 					operand_.push_back( above );
 					operand_.push_back( left );
-					if (j<rank-i-1)
-
-					{
-						target += 2;
-						left += 2;
-					}
-
+					
+					/*
+					 * This check required because the MS VC++ compiler is
+					 * paranoid about iterators going out of bounds, even if
+					 * they are never used after that.
+					 */
+					if ( i == rank - 1 && j == rank - i - 1 )
+						continue;
+					
+					target += 2;
+					left += 2;
 				}
 				above += 2;
 			}
