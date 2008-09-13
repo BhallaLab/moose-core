@@ -7240,5 +7240,28 @@ Working on buildDiffusionJunction
 Cleaned up buildDiffusionJunction. All signaling compts except for soma0 now
 have someone to diffuse to. Still need to insert function to calculate which
 of the parent compartments to attach to, based on coords.
+Checked in as revision 698: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
+Compiled code with complete[soma,dend,spine]Diffusion functions. Clears
+unit test, also looks OK for sigNeur1.g
 
 ==============================================================================
+13 Sep 2008
+Major things remaining in SigNeur:
+- Assign parameters
+- Connect up adaptors
+- Set up ksolver
+- Fix up hsolver to work with the model
+- Tests for diffusion, branching and coupling between two kinds of model
+- Parallel decomposition.
+
+Minor things:
+- Do a better job of organizing junctions, based on element coordinates
+- Handle compartment taper
+
+
+A calculation of time-scales and parallelization options:
+The signaling model ran about 40x faster than GENESIS. GENESIS runs about
+1-10x faster than real time. The cell model runs at about real time.
+So at this point, even with ~400 signaling compartments, the bottleneck is
+the cell model.
