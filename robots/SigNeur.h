@@ -205,6 +205,24 @@ class SigNeur
 			vector< unsigned int >& junctions );
 
 		void buildDiffusionJunctions( vector< unsigned int >& junctions );
+		/**
+ 		* The first diffusion reaction (i.e., the one on sigStart) is the
+ 		* one that crosses electrical compartment junctions. 
+ 		* For starters, we simply set the diameter at this and all other
+ 		* diffusion reactions to that of the local electrical compartment.
+ 		* To represent a tapering dend cylinder, we could take the el dia as
+ 		* that at sigStart, and the next compt dia as at sigEnd. But need
+ 		* to rethink for branches.
+ 		* For spines, just use their spineNeck dimensions.
+ 		* For soma, ignore the soma dimensions except within it?
+ 		* It would be cleaner to take the el dia as the middle dia.
+ 		*
+ 		*/
+		void setDiffusionRates( 
+			map< string, Element* >& somaMap, // Never needs to go off-map.
+			map< string, Element* >& dendMap, // May go off-map to soma
+			map< string, Element* >& spineMap, // Always goes off-map to dend.
+			vector< unsigned int >& junctions );
 
 	private:
 		Id cellProto_; /// Prototype cell electrical model

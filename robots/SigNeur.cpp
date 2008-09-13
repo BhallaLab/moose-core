@@ -654,7 +654,7 @@ void SigNeur::completeSpineDiffusion(
  * that crosses electrical compartment junctions. 
  *
  * For starters, we simply set the diameter at this and all other
- * diffusion reactions to that of the local el compartment.
+ * diffusion reactions to that of the local electrical compartment.
  *
  * To represent a tapering dend cylinder, we could take the el dia as
  * that at sigStart, and the next compt dia as at sigEnd. But need
@@ -841,7 +841,7 @@ void SigNeur::makeSignalingModel( Eref me )
 	completeDendDiffusion( somaMap, dendMap, junctions );
 	completeSpineDiffusion( dendMap, spineMap, junctions );
 
-	setDiffusionRates( somaMap, dendMap, spineMap );
+	setDiffusionRates( somaMap, dendMap, spineMap, junctions );
 }
 
 /**
