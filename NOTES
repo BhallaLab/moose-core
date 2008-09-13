@@ -7247,6 +7247,9 @@ unit test, also looks OK for sigNeur1.g
 
 ==============================================================================
 13 Sep 2008
+
+Checked in as revision 699: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
 Major things remaining in SigNeur:
 - Assign parameters
 - Connect up adaptors
@@ -7265,3 +7268,5 @@ The signaling model ran about 40x faster than GENESIS. GENESIS runs about
 1-10x faster than real time. The cell model runs at about real time.
 So at this point, even with ~400 signaling compartments, the bottleneck is
 the cell model.
+
+Oops, previous revision had broken new code. Fixed.
