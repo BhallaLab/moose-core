@@ -217,7 +217,7 @@ void HSolvePassive::forwardEliminate( ) {
 			vdIterator s;
 			
 			s = *( iop + 1 );
-			division =*( j + 1 ) / pivot;
+			division = *( j + 1 ) / pivot;
 			*( s )     -= division * *j;
 			*( j + 4 ) -= division * *( j + 2 );
 			*( s + 3 ) -= division * *( ihs + 3 );
