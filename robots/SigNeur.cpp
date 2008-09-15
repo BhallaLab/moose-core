@@ -540,6 +540,62 @@ Element* findDiff( Element* pa )
 	return 0;
 }
 
+/**
+ * Utility function to do the diffusion calculations for the 
+ * diffusing molecules m0 and m1, and the reaction diff.
+ * Should be called at the point where the diffusion messages are set up.
+ */
+void diffCalc( double Dscale, Eref m0, Eref m1, Eref diff )
+{
+	static const Finfo* kfFinfo = 
+		initReactionCinfo()->findFinfo( "kf" );
+	static const Finfo* kbFinfo = 
+		initReactionCinfo()->findFinfo( "kb" );
+	static const Finfo* dFinfo = 
+		initMoleculeCinfo()->findFinfo( "D" );
+	static const Finfo* volFinfo = 
+		initMoleculeCinfo()->findFinfo( "volumeScale" );
+
+	double v0;
+	double v1;
+	double D0;
+	double D1;
+	bool ret = get< double >( m0, volFinfo, v0 );
+	assert( ret && v0 > 0.0 );
+	ret = get< double >( m0, dFinfo, D0 );
+	assert( ret && D0 > 0.0 );
+	ret = get< double >( m1, volFinfo, v1 );
+	assert( ret && v1 > 0.0 );
+	ret = get< double >( m1, dFinfo, D1 );
+	assert( ret && D1 > 0.0 );
+	double D = Dscale * ( D0 + D1 ) / 2.0;
+
+	// volscale is conversion factor from # to uM: # / volscale = uM.
+	// We need concs in #/m^3 to be consistent in unit terms.
+	// #/( volscale) = 6e20 / m^3
+	//
+	// ( 1000 * # / 6e23 ) / vol(in m^3) = uM
+	// # / ( 6e20 * vol ) = uM so volscale = 6e20 * vol
+	// or vol = volscale / 6e20
+	v0 /= 6.0e20;
+	v1 /= 6.0e20;
+
+	double kf = 0.0; // kf already set to Xarea / len
+	ret = get< double >( diff, kfFinfo, kf );
+	assert( ret && kf > 0.0 );
+	kf *= D / v0;
+	ret = set< double >( diff, kfFinfo, kf );
+	assert( ret );
+
+	double kb = 0.0; // kb already set to Xarea / len
+	ret = get< double >( diff, kbFinfo, kb );
+	assert( ret && kb > 0.0 );
+	kb *= D / v1;
+	ret = set< double >( diff, kbFinfo, kb );
+	assert( ret );
+}
+
+
 void SigNeur::completeSomaDiffusion( 
 	map< string, Element* >& somaMap, // Never needs to go off-map.
 	vector< unsigned int >& junctions )
@@ -562,11 +618,15 @@ void SigNeur::completeSomaDiffusion(
 						e2, prdFinfo->msg(), 
 						ConnTainer::Simple );
 					assert( ret );
+					Eref e0( i->second, j );
+					diffCalc( Dscale_, e0, e1, e2 );
 				}
 			}
 		}
 	}
 }
+
+// void diffCalc( Eref m0, Eref m1, Eref diff )
 
 void SigNeur::completeDendDiffusion( 
 	map< string, Element* >& somaMap, // Some dends connect to soma.
@@ -595,6 +655,8 @@ void SigNeur::completeDendDiffusion(
 							e2, prdFinfo->msg(), 
 							ConnTainer::Simple );
 						assert( ret );
+						Eref e0( i->second, j );
+						diffCalc( Dscale_, e0, e1, e2 );
 					}
 				} else if 
 					( tgt >= numSoma_ && tgt < numDend_ + numSoma_ ) {
@@ -608,6 +670,8 @@ void SigNeur::completeDendDiffusion(
 						e2, prdFinfo->msg(), 
 						ConnTainer::Simple );
 					assert( ret );
+					Eref e0( i->second, j );
+					diffCalc( Dscale_, e0, e1, e2 );
 				} else { // Should not connect into spine.
 					assert( 0 );
 				}
@@ -615,59 +679,6 @@ void SigNeur::completeDendDiffusion(
 		}
 	}
 }
-
-/**
- * Utility function to do the diffusion calculations for the 
- * diffusing molecules m0 and m1, and the reaction diff.
- */
-void diffCalc( Eref m0, Eref m1, Eref diff )
-{
-	static const Finfo* kfFinfo = 
-		initReactionCinfo()->findFinfo( "kf" );
-	static const Finfo* kbFinfo = 
-		initReactionCinfo()->findFinfo( "kb" );
-	static const Finfo* dFinfo = 
-		initMoleculeCinfo()->findFinfo( "D" );
-	static const Finfo* volFinfo = 
-		initMoleculeCinfo()->findFinfo( "volumeScale" );
-
-	double v0;
-	double v1;
-	double D0;
-	double D1;
-	bool ret = get< double >( m0, volFinfo, v0 );
-	assert( ret && v0 > 0.0 );
-	ret = get< double >( m0, dFinfo, D0 );
-	assert( ret && D0 > 0.0 );
-	ret = get< double >( m1, volFinfo, v1 );
-	assert( ret && v1 > 0.0 );
-	ret = get< double >( m1, dFinfo, D1 );
-	assert( ret && D1 > 0.0 );
-	double D = ( D0 + D1 ) / 2.0;
-
-	// volscale is conversion factor from # to uM: # / volscale = uM.
-	// We need concs in #/m^3 to be consistent in unit terms.
-	// ( 1000 * # / 6e23 ) / vol(in m^3) = uM
-	// # / ( 6e20 * vol ) = uM so volscale = 6e20 * vol
-	// or vol = volscale / 6e20
-	v0 /= 6.0e20;
-	v1 /= 6.0e20;
-
-	double kf = 0.0; // kf already set to Xarea / len
-	ret = get< double >( diff, kfFinfo, kf );
-	assert( ret && kf > 0.0 );
-	kf *= D / v0;
-	ret = set< double >( diff, kfFinfo, kf );
-	assert( ret );
-
-	double kb = 0.0; // kb already set to Xarea / len
-	ret = get< double >( diff, kbFinfo, kb );
-	assert( ret && kb > 0.0 );
-	kf *= D / v1;
-	ret = set< double >( diff, kbFinfo, kb );
-	assert( ret );
-}
-
 
 void SigNeur::completeSpineDiffusion( 
 	map< string, Element* >& dendMap, // All spines connect to a dend
@@ -686,24 +697,27 @@ void SigNeur::completeSpineDiffusion(
 			for ( unsigned int j = 0; j < numSpine_; ++j ) {
 				unsigned int tgt = junctions[ j + numSoma_ + numDend_ ];
 				if ( tgt >= numSoma_ && tgt < numSoma_ + numDend_ ) {
+					tgt -= numSoma_; // Fix up offset into dend array.
 					// connect to dend, if mol present
 					map< string, Element* >::iterator mol = 
 						dendMap.find( i->first );
 					if ( mol != dendMap.end() ) {
 						assert( tgt < mol->second->numEntries() );
-						Eref e0( i->second, j ); // Parent molecule
+						Eref e0( i->second, j ); // Parent spine molecule
 						Eref e2( diff, j ); // Diffusion object
-						Eref e1( i->second, tgt ); // Target molecule
+						Eref e1( mol->second, tgt ); //Target dend molecule
 						bool ret = e1.add( reacFinfo->msg(), 
 							e2, prdFinfo->msg(), 
 							ConnTainer::Simple );
 						assert( ret );
+						diffCalc( Dscale_, e0, e1, e2 );
 					}
 				}
 			}
 		}
 	}
 }
+
 
 /**
  * setAllVols traverses all signaling compartments  in the model and
@@ -727,7 +741,7 @@ void SigNeur::setAllVols(
 					dendMap, j - numSoma_, i->sigEnd - i->sigStart );
 			} else if ( i->category == SPINE ) {
 				setComptVols( i->compt.eref(), 
-					dendMap, j - ( numSoma_ + numDend_ ),
+					spineMap, j - ( numSoma_ + numDend_ ),
 					i->sigEnd - i->sigStart );
 			}
 		}

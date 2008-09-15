@@ -7284,3 +7284,6 @@ Checked, the Molecule is setting -ve D to zero. Changed so it sets it to 1.0.
 Now sigNeur2.g crashes. 
 
 ==============================================================================
+15 Sep 2008
+Looks like rates are getting to be more reasonable. Also not crashing, at
+least at setup time.
