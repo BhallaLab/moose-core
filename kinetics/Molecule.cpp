@@ -292,6 +292,8 @@ void Molecule::setD( const Conn* c, double value )
 {
 	if ( value >= 0.0 )
 		static_cast< Molecule* >( c->data() )->D_ = value;
+	else
+		static_cast< Molecule* >( c->data() )->D_ = 1.0;
 }
 
 double Molecule::getD( Eref e )

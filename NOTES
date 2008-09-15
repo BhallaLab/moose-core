@@ -7270,3 +7270,17 @@ So at this point, even with ~400 signaling compartments, the bottleneck is
 the cell model.
 
 Oops, previous revision had broken new code. Fixed.
+Checked in as revision 700: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
+==============================================================================
+14 Sep 2008
+
+Parameter assignment getting close. Compiled, yet to test.
+Looks like parameters are OK. Loaded in acc79.g. The diffusion rates
+are not working. In kkit, -ve diffusion rate means use the system default,
+0 means none, and +ve rates means use specified value. acc79.g has lots of
+-ve rates, but in MOOSE everything is being loaded as zero. 
+Checked, the Molecule is setting -ve D to zero. Changed so it sets it to 1.0.
+Now sigNeur2.g crashes. 
+
+==============================================================================
