@@ -160,21 +160,6 @@ class SigNeur
 		void buildMoleculeNameMap( Element* e, 
 			map< string, Element* >& molMap );
 
-		/**
-		 * This routine will recursively traverse all descendants of 
-		 * 'base' to complete the diffusion between compartments.
-		 * Once the model is set up as an array, we need to go in and 
-		 * connect diffusion reactions between compartments.
-		 * The 'parent' is the parent element of base.
-		 * The 'base' is the current element in the reaction tree.
-		 * The function looks for cases where the parent is a Molecule and 
-		 * the base is a reaction named "diff"
-		 * Since the 'base' is typically an array element, it then goes 
-		 * through
-		 * all the array entries to set up the diffusion reactions.
-		void completeDiffusion( Element* parent, Element* base,
-				unsigned int startIndex, vector< unsigned int >& junctions );
-		 */
 
 		/**
 		 * Connect up appropriate compartments in the soma. Note that
@@ -205,25 +190,27 @@ class SigNeur
 			vector< unsigned int >& junctions );
 
 		void buildDiffusionJunctions( vector< unsigned int >& junctions );
-		/**
- 		* The first diffusion reaction (i.e., the one on sigStart) is the
- 		* one that crosses electrical compartment junctions. 
- 		* For starters, we simply set the diameter at this and all other
- 		* diffusion reactions to that of the local electrical compartment.
- 		* To represent a tapering dend cylinder, we could take the el dia as
- 		* that at sigStart, and the next compt dia as at sigEnd. But need
- 		* to rethink for branches.
- 		* For spines, just use their spineNeck dimensions.
- 		* For soma, ignore the soma dimensions except within it?
- 		* It would be cleaner to take the el dia as the middle dia.
- 		*
- 		*/
-		void setDiffusionRates( 
-			map< string, Element* >& somaMap, // Never needs to go off-map.
-			map< string, Element* >& dendMap, // May go off-map to soma
-			map< string, Element* >& spineMap, // Always goes off-map to dend.
-			vector< unsigned int >& junctions );
 
+		/**
+ 		* This figures out dendritic segment dimensions. It assigns the 
+ 		* volumeScale for each signaling compt, and puts Xarea / len into
+ 		* each diffusion element for future use in setting up diffusion
+		* rates.
+ 		*/
+		void setComptVols( Eref compt, 
+			map< string, Element* >& molMap,
+			unsigned int index, unsigned int numSeg );
+
+		/**
+ 		* setAllVols traverses all signaling compartments  in the model and
+ 		* assigns volumes.
+ 		* This must be called before completeDiffusion because the vols
+ 		* computed here are needed to compute diffusion rates.
+ 		*/
+		void setAllVols( 
+			map< string, Element* >& somaMap,
+			map< string, Element* >& dendMap,
+			map< string, Element* >& spineMap );
 	private:
 		Id cellProto_; /// Prototype cell electrical model
 		Id spineProto_; /// Prototype spine signaling model
