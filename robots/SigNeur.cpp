@@ -13,8 +13,10 @@
 #include "../element/Neutral.h"
 #include "../kinetics/Molecule.h"
 #include "../kinetics/Reaction.h"
+#include "../biophysics/Compartment.h"
 #include "SigNeur.h"
 
+static const double PI = 3.1415926535;
 
 const Cinfo* initSigNeurCinfo()
 {
@@ -614,6 +616,59 @@ void SigNeur::completeDendDiffusion(
 	}
 }
 
+/**
+ * Utility function to do the diffusion calculations for the 
+ * diffusing molecules m0 and m1, and the reaction diff.
+ */
+void diffCalc( Eref m0, Eref m1, Eref diff )
+{
+	static const Finfo* kfFinfo = 
+		initReactionCinfo()->findFinfo( "kf" );
+	static const Finfo* kbFinfo = 
+		initReactionCinfo()->findFinfo( "kb" );
+	static const Finfo* dFinfo = 
+		initMoleculeCinfo()->findFinfo( "D" );
+	static const Finfo* volFinfo = 
+		initMoleculeCinfo()->findFinfo( "volumeScale" );
+
+	double v0;
+	double v1;
+	double D0;
+	double D1;
+	bool ret = get< double >( m0, volFinfo, v0 );
+	assert( ret && v0 > 0.0 );
+	ret = get< double >( m0, dFinfo, D0 );
+	assert( ret && D0 > 0.0 );
+	ret = get< double >( m1, volFinfo, v1 );
+	assert( ret && v1 > 0.0 );
+	ret = get< double >( m1, dFinfo, D1 );
+	assert( ret && D1 > 0.0 );
+	double D = ( D0 + D1 ) / 2.0;
+
+	// volscale is conversion factor from # to uM: # / volscale = uM.
+	// We need concs in #/m^3 to be consistent in unit terms.
+	// ( 1000 * # / 6e23 ) / vol(in m^3) = uM
+	// # / ( 6e20 * vol ) = uM so volscale = 6e20 * vol
+	// or vol = volscale / 6e20
+	v0 /= 6.0e20;
+	v1 /= 6.0e20;
+
+	double kf = 0.0; // kf already set to Xarea / len
+	ret = get< double >( diff, kfFinfo, kf );
+	assert( ret && kf > 0.0 );
+	kf *= D / v0;
+	ret = set< double >( diff, kfFinfo, kf );
+	assert( ret );
+
+	double kb = 0.0; // kb already set to Xarea / len
+	ret = get< double >( diff, kbFinfo, kb );
+	assert( ret && kb > 0.0 );
+	kf *= D / v1;
+	ret = set< double >( diff, kbFinfo, kb );
+	assert( ret );
+}
+
+
 void SigNeur::completeSpineDiffusion( 
 	map< string, Element* >& dendMap, // All spines connect to a dend
 	map< string, Element* >& spineMap, 
@@ -636,8 +691,9 @@ void SigNeur::completeSpineDiffusion(
 						dendMap.find( i->first );
 					if ( mol != dendMap.end() ) {
 						assert( tgt < mol->second->numEntries() );
-						Eref e2( diff, j );
-						Eref e1( i->second, tgt );
+						Eref e0( i->second, j ); // Parent molecule
+						Eref e2( diff, j ); // Diffusion object
+						Eref e1( i->second, tgt ); // Target molecule
 						bool ret = e1.add( reacFinfo->msg(), 
 							e2, prdFinfo->msg(), 
 							ConnTainer::Simple );
@@ -646,6 +702,97 @@ void SigNeur::completeSpineDiffusion(
 				}
 			}
 		}
+	}
+}
+
+/**
+ * setAllVols traverses all signaling compartments  in the model and
+ * assigns volumes.
+ * This must be called before completeDiffusion because the vols
+ * computed here are needed to compute diffusion rates.
+ */
+void SigNeur::setAllVols( 
+	map< string, Element* >& somaMap,
+	map< string, Element* >& dendMap,
+	map< string, Element* >& spineMap )
+{
+	for ( vector< TreeNode >::iterator i = tree_.begin();
+		i != tree_.end(); ++i ) {
+		for ( unsigned int j = i->sigStart; j < i->sigEnd; ++j ) {
+			if ( i->category == SOMA ) {
+				setComptVols( i->compt.eref(), 
+					somaMap, j, i->sigEnd - i->sigStart );
+			} else if ( i->category == DEND ) {
+				setComptVols( i->compt.eref(), 
+					dendMap, j - numSoma_, i->sigEnd - i->sigStart );
+			} else if ( i->category == SPINE ) {
+				setComptVols( i->compt.eref(), 
+					dendMap, j - ( numSoma_ + numDend_ ),
+					i->sigEnd - i->sigStart );
+			}
+		}
+	}
+}
+
+/**
+ * This figures out dendritic segment dimensions. It assigns the 
+ * volumeScale for each signaling compt, and puts Xarea / len into
+ * each diffusion element for future use in setting up diffusion rates.
+ */
+void SigNeur::setComptVols( Eref compt, 
+	map< string, Element* >& molMap,
+	unsigned int index, unsigned int numSeg )
+{
+	static const Finfo* diaFinfo = 
+		initCompartmentCinfo()->findFinfo( "diameter" );
+	static const Finfo* lenFinfo = 
+		initCompartmentCinfo()->findFinfo( "length" );
+	static const Finfo* volFinfo = 
+		initMoleculeCinfo()->findFinfo( "volumeScale" );
+	static const Finfo* nInitFinfo = 
+		initMoleculeCinfo()->findFinfo( "nInit" );
+	static const Finfo* kfFinfo = 
+		initReactionCinfo()->findFinfo( "kf" );
+	static const Finfo* kbFinfo = 
+		initReactionCinfo()->findFinfo( "kb" );
+	assert( diaFinfo != 0 );
+	assert( lenFinfo != 0 );
+	assert( numSeg > 0 );
+	double dia = 0.0;
+	double len = 0.0;
+	bool ret = get< double >( compt, diaFinfo, dia );
+	assert( ret && dia > 0.0 );
+	ret = get< double >( compt, lenFinfo, len );
+	assert( ret && len > 0.0 );
+	len /= numSeg;
+
+	// Conversion factor from uM to #/m^3
+	double volscale = len * dia * dia * ( PI / 4.0 ) * 6.0e20;
+	double xByL = dia * dia * ( PI / 4.0 ) / len;
+	
+	// Set all the volumes. 
+	for ( map< string, Element* >::iterator i = molMap.begin(); 
+		i != molMap.end(); ++i ) {
+		Element* de = findDiff( i->second );
+		if ( !de )
+			continue;
+		Eref mol( i->second, index );
+		Eref diff( de, index );
+		double oldvol;
+		double nInit;
+		ret = get< double >( mol, volFinfo, oldvol );
+		assert( ret != 0 && oldvol > 0.0 );
+		ret = get< double >( mol, nInitFinfo, nInit );
+		assert( ret );
+
+		ret = set< double >( mol, volFinfo, volscale );
+		assert( ret );
+		ret = set< double >( mol, nInitFinfo, nInit * volscale / oldvol );
+		assert( ret );
+		ret = set< double >( diff, kfFinfo, xByL );
+		assert( ret );
+		ret = set< double >( diff, kbFinfo, xByL );
+		assert( ret );
 	}
 }
 
@@ -666,14 +813,33 @@ void SigNeur::completeSpineDiffusion(
  *
  * It would be cleaner to take the el dia as the middle dia.
  *
- */
 void SigNeur::setDiffusionRates( 
 	map< string, Element* >& somaMap, // Never needs to go off-map.
 	map< string, Element* >& dendMap, // May go off-map to soma
 	map< string, Element* >& spineMap, // Always goes off-map to dend.
 	vector< unsigned int >& junctions )
 {
+	// flux = dN/dt = D.A.(C2 - C1) / L
+	// We need to calculate: Vol of each compt
+	// Then L = ( L1 + L2 ) / 2
+	
+	for ( vector< TreeNode >::iterator i = tree_.begin(); 
+		i != tree_.end(); ++i ) {
+		for ( unsigned int j = i->sigStart; j < i->sigEnd; ++j ) {
+			if ( category == SOMA ) {
+				setRates( i->compt(), somaMap, j, numSoma_ );
+			} else if ( category == DEND ) {
+				setRates( i->compt(), dendMap, j - numSoma_, 
+					i->sigEnd - i->sigStart );
+			} else if ( category == SPINE ) {
+				setSpineRates( i->compt(), i->parent, spineMap, 
+					j - ( numSoma_ + numDend_ ) );
+			}
+		}
+	}
+	
 }
+ */
 
 /**
  * Once the model is set up as an array, we need to go in and connect
@@ -837,11 +1003,11 @@ void SigNeur::makeSignalingModel( Eref me )
 	cout << endl;
 	*/
 
+	setAllVols( somaMap, dendMap, spineMap );
+
 	completeSomaDiffusion( somaMap, junctions );
 	completeDendDiffusion( somaMap, dendMap, junctions );
 	completeSpineDiffusion( dendMap, spineMap, junctions );
-
-	setDiffusionRates( somaMap, dendMap, spineMap, junctions );
 }
 
 /**
