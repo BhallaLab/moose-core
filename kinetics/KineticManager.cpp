@@ -14,6 +14,7 @@
 #include "../element/Wildcard.h"
 #include <math.h>
 #include "KineticManager.h"
+#include "Molecule.h"
 #include "../utility/utility.h"
 
 static map< string, KMethodInfo >& methodMap()
@@ -527,12 +528,6 @@ void KineticManager::setupDt( Eref e, double dt )
 	assert( t0.good() );
 	assert( t1.good() );
 
-	/*
-	Element* elm;
-	string field;
-	double dt = estimateDt( e, &elm, field, EULER_ACCURACY );
-	*/
-
 	for ( unsigned int i = 0; i < numFixedDtMethods; i++ ) {
 		if ( method_ == fixedDtMethods[i] ) {
 			set< double >( t0(), "dt", dt );
@@ -642,9 +637,9 @@ double KineticManager::findReacPropensity( Eref e, bool isPrd ) const
 		c = e.e->targets( substrateFinfo->msg(), e.i );
 
 	while ( c->good() ) {
-		Element* m = c->target().e;
-		assert( m->cinfo()->isA( Cinfo::find( "Molecule" ) ) );
-		ret = get< double >( c->target(), "nInit", mval );
+		Eref m = c->target();
+		assert( m.e->cinfo()->isA( initMoleculeCinfo() ) );
+		ret = get< double >( m, "nInit", mval );
 		// should really be 'n' but there is a problem with initialization
 		// of the S_ array if we want to be able to do on-the-fly solver
 		// rebuilding.
@@ -657,29 +652,6 @@ double KineticManager::findReacPropensity( Eref e, bool isPrd ) const
 	}
 	delete c;
 
-
-/*
-
-	vector< Conn > list;
-	vector< Conn >::iterator i;
-	if ( isPrd )
-		productFinfo->incomingConns( e, list );
-	else
-		substrateFinfo->incomingConns( e, list );
-
-	for( i = list.begin(); i != list.end(); i++ ) {
-		Element* m = i->targetElement();
-		assert( m->cinfo()->isA( Cinfo::find( "Molecule" ) ) );
-		ret = get< double >( m, "nInit", mval );
-		// should really be 'n' but there is a problem with initialization
-		// of the S_ array if we want to be able to do on-the-fly solver
-		// rebuilding.
-		assert( ret );
-		prop *= mval;
-		if ( min > mval )
-			min = mval;
-	}
-*/
 	if ( min > 0.0 )
 		return prop / min;
 	else
@@ -765,81 +737,6 @@ double KineticManager::findEnzSubPropensity( Eref e ) const
 	else
 		return 0.0;
 }
-
-/*
-double KineticManager::findEnzSubPropensity( Element* e ) const
-{
-	static const Cinfo* eCinfo = Cinfo::find( "Enzyme" );
-	static const Finfo* substrateFinfo = eCinfo->findFinfo( "sub" );
-	static const Finfo* enzymeFinfo = eCinfo->findFinfo( "enz" );
-	static const Finfo* intramolFinfo = eCinfo->findFinfo( "intramol" );
-
-	assert( e->cinfo()->isA( eCinfo ) );
-
-	bool ret;
-	bool mode;
-	ret = get< bool >( e, "mode", mode );
-	assert( ret );
-
-	double prop;
-
-	if ( mode ) { // An MM enzyme, implicit form.
-		// Here we compute it as rate / nmin.
-		double Km;
-		double k3;
-		ret = get< double >( e, "Km", Km );
-		assert( ret );
-		ret = get< double >( e, "k3", k3 );
-		assert( ret );
-		assert( Km > 0 );
-		prop = k3 / Km;
-	} else {
-		ret = get< double >( e, "k1", prop );
-		assert( ret );
-	}
-
-	double min = 1.0e10;
-	double mval;
-
-	vector< Conn > list;
-	vector< Conn > list2;
-	vector< Conn >::iterator i;
-	substrateFinfo->incomingConns( e, list );
-	if ( list.size() == 0 ) // It is possible to have a dangling enzyme
-		return 0.0;
-	enzymeFinfo->incomingConns( e, list2 );
-	assert( list2.size() == 1 );
-	list.insert( list.end(), list2.begin(), list2.end() );
-
-	// This is a little fishy for the MM case, because we don't take
-	// the (Km + sub) term into account properly for the denominator.
-	// The outcome of this is therefore more stringent than it needs
-	// to be.
-	for( i = list.begin(); i != list.end(); i++ ) {
-		Element* m = i->targetElement();
-		assert( m->cinfo()->isA( Cinfo::find( "Molecule" ) ) );
-		ret = get< double >( m, "nInit", mval );
-		assert( ret );
-		prop *= mval;
-		if ( min > mval )
-			min = mval;
-	}
-
-	intramolFinfo->incomingConns( e, list );
-	for( i = list.begin(); i != list.end(); i++ ) {
-		Element* m = i->targetElement();
-		assert( m->cinfo()->isA( Cinfo::find( "Molecule" ) ) );
-		ret = get< double >( m, "nInit", mval );
-		assert( ret );
-		if ( mval > 0.0 )
-			prop /= mval;
-	}
-	if ( min > 0.0 )
-		return prop / min;
-	else
-		return 0.0;
-}
-*/
 
 double KineticManager::findEnzPrdPropensity( Eref e ) const
 {

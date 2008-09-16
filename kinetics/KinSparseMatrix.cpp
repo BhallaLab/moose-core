@@ -19,8 +19,8 @@ using namespace std;
 #include "KinSparseMatrix.h"
 
 // Substantially bigger than possible using a full matrix.
-const unsigned int KinSparseMatrix::MAX_ROWS = 10000;
-const unsigned int KinSparseMatrix::MAX_COLUMNS = 10000;
+const unsigned int KinSparseMatrix::MAX_ROWS = 100000;
+const unsigned int KinSparseMatrix::MAX_COLUMNS = 100000;
 
 KinSparseMatrix::KinSparseMatrix()
 	: nrows_( 0 ), ncolumns_( 0 )

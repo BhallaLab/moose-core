@@ -82,9 +82,6 @@ class KineticManager
 		static void reinitFunc( const Conn* c, ProcInfo info );
 		void reinitFuncLocal( Eref e );
 		static void processFunc( const Conn* c, ProcInfo info );
-		/*
-		void processFuncLocal( Element* e, ProcInfo info );
-		*/
 		static void reschedFunc( const Conn* c );
 		void reschedFuncLocal( Eref e );
 
