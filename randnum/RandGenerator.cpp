@@ -52,7 +52,7 @@ const Cinfo * initRandGeneratorCinfo()
             {
                 process, 0, 0 
             }
-        }
+        };
     
     static Cinfo randGeneratorCinfo("RandGenerator",
                                     "Subhasis Ray",
