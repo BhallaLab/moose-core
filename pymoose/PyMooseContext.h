@@ -85,6 +85,9 @@ namespace pymoose
         vector <Id> getChildren(Id id);
         vector <Id> getChildren(std::string path);    
         Id pathToId(std::string path, bool echo = true);
+        /// set the seed for random number generator
+        static void srandom(long seed);
+        
         void step(double runTime);
         void step(long multiple);
         void step();
