@@ -73,20 +73,20 @@ const Cinfo* initKineticHubCinfo()
 		new DestFinfo( "molConnection",
 			Ftype3< vector< double >* , 
 				vector< double >* , 
-				vector< Element *>*  
+				vector< Eref >*  
 				>::global(),
 			RFCAST( &KineticHub::molConnectionFunc )
 		),
 		new DestFinfo( "reacConnection",
-			Ftype2< unsigned int, Element* >::global(),
+			Ftype2< unsigned int, Eref >::global(),
 			RFCAST( &KineticHub::reacConnectionFunc )
 		),
 		new DestFinfo( "enzConnection",
-			Ftype2< unsigned int, Element* >::global(),
+			Ftype2< unsigned int, Eref >::global(),
 			RFCAST( &KineticHub::enzConnectionFunc )
 		),
 		new DestFinfo( "mmEnzConnection",
-			Ftype2< unsigned int, Element* >::global(),
+			Ftype2< unsigned int, Eref >::global(),
 			RFCAST( &KineticHub::mmEnzConnectionFunc )
 		),
 		new DestFinfo( "completeSetup",
@@ -269,9 +269,9 @@ static Finfo* molZombieFinfo = initMolZombieFinfo();
 void redirectDestMessages(
 	Eref hub, Eref e, const Finfo* hubFinfo, const Finfo* eFinfo,
 	unsigned int eIndex, vector< unsigned int >& map,
-	vector< Element* >* elist, bool retain = 0 );
+	vector< Eref >* elist, bool retain = 0 );
 
-void redirectDynamicMessages( Element* e );
+void redirectDynamicMessages( Eref e );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -300,17 +300,16 @@ void KineticHub::destroy( const Conn* c)
 	static Finfo* origReacFinfo =
 		const_cast< Finfo* >(
 		initReactionCinfo()->getThisFinfo( ) );
-	Element* hub = c->target().e;
-	unsigned int eIndex = c->target().i;
+	Eref hub = c->target();
 
-	Conn* i = hub->targets( molSolveFinfo->msg(), eIndex );
+	Conn* i = hub.e->targets( molSolveFinfo->msg(), hub.i );
 	while ( i->good() ) {
 		i->target().e->setThisFinfo( origMolFinfo );
 		i->increment();
 	}
 	delete i;
 
-	i = hub->targets( reacSolveFinfo->msg(), eIndex );
+	i = hub.e->targets( reacSolveFinfo->msg(), hub.i );
 	while ( i->good() ) {
 		i->target().e->setThisFinfo( origReacFinfo );
 		i->increment();
@@ -336,10 +335,10 @@ void KineticHub::childFunc( const Conn* c, int stage )
  */
 void KineticHub::molSum( const Conn* c, double val )
 {
-	Element* hub = c->target().e;
+	Eref hub = c->target();
 	unsigned int index = c->targetIndex();
 	// hub->connDestRelativeIndex( c, molSumSlot.msg() );
-	KineticHub* kh = static_cast< KineticHub* >( hub->data() );
+	KineticHub* kh = static_cast< KineticHub* >( hub.data() );
 
 	assert( index < kh->molSumMap_.size() );
 	( *kh->S_ )[ kh->molSumMap_[ index ] ] = val;
@@ -449,59 +448,6 @@ void KineticHub::processFuncLocal( Eref hub, ProcInfo info )
 	}
 }
 
-/**
- * Deprecated version of flux, handling a single molecule
-
-void KineticHub::flux( const Conn& c, double influx, double outRateConst )
-{
-	Element* hub = c.targetElement();
-	unsigned int index = hub->connDestRelativeIndex( c, fluxSlot );
-	KineticHub* kh = static_cast< KineticHub* >( hub->data() );
-
-	assert( index < kh->fluxMap_.size() );
-	double& y = ( ( *kh->S_ )[ kh->fluxMap_[ index ] ] );
-	double z = y * outRateConst * dt;
-	sendTo1< double >( c.targetElement(), fluxSlot, 
-		c.targetIndex(), z );
-
-	y += influx - z;
-}
-*/
-
-/*
- * We are likely to have only a single point of contact between any two
- * solvers. If we use fluxVec as a way to manage robots we need more
- * contact points.
- * But flux is not the best way to do robots. The input value should just
- * be a number equivalent to a concentration. This looks more like 
- * sumtotal. The output value should also just be a set of conc values.
- */
-/**
- * This function is another attempt to handle molecule transfer outside 
- * the solver, but using the existing A, B format for molecule changes.
- *
- * This is nice for retaining old reaction messaging, but asks that the
- * external coupling figure out the rates. Not so useful.
-void KineticHub::extReac( const Conn& c, double A, double B )
-{
-	Element* hub = c.targetElement();
-	unsigned int index = hub->connDestRelativeIndex( c, extReacSlot );
-	KineticHub* kh = static_cast< KineticHub* >( hub->data() );
-
-	assert( index < kh->extReacMap_.size() );
-	double& y = ( ( *kh->S_ )[ kh->extReacMap_[ index ] ] );
-	// Here we do exp Euler addition onto y.
-	if ( y > EPSILON && B > EPSILON ) {
-		double C = exp ( - B * dt / y );
-		y *= C + ( A / B ) * ( 1.0 - C );
-	} else {
-		y += ( A - B ) * dt;
-	}
-	sendTo1< double >( c.targetElement(), extReacSlot, 
-		c.targetIndex(), y );
-}
- */
-
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
@@ -529,12 +475,14 @@ void KineticHub::reinitFunc( const Conn* c, ProcInfo info )
 {
 	// Element* e = c.targetElement();
 	// static_cast< KineticHub* >( e.data() )->processFuncLocal( e, info );
+	;
 }
 
 void KineticHub::processFunc( const Conn* c, ProcInfo info )
 {
 	// Element* e = c.targetElement();
 	// static_cast< KineticHub* >( e.data() )->processFuncLocal( e, info );
+	;
 }
 
 void KineticHub::rateTermFunc( const Conn* c,
@@ -567,59 +515,23 @@ void KineticHub::molSizeFuncLocal(
 
 void KineticHub::molConnectionFunc( const Conn* c,
 	       	vector< double >*  S, vector< double >*  Sinit, 
-		vector< Element *>*  elist )
+		vector< Eref >*  elist )
 {
 	static_cast< KineticHub* >( c->data() )->
-		molConnectionFuncLocal( c->target().e, S, Sinit, elist );
+		molConnectionFuncLocal( c->target(), S, Sinit, elist );
 }
 
 void KineticHub::molConnectionFuncLocal( Eref hub,
 	       	vector< double >*  S, vector< double >*  Sinit, 
-		vector< Element *>*  elist )
+		vector< Eref >*  elist )
 {
-	/*
-	// These fields will replace the original molecule fields so that
-	// the lookups refer to the solver rather than the molecule.
-	static Finfo* molFields[] =
-	{
-		new ValueFinfo( "n",
-			ValueFtype1< double >::global(),
-			GFCAST( &KineticHub::getMolN ),
-			RFCAST( &KineticHub::setMolN )
-		),
-		new ValueFinfo( "nInit",
-			ValueFtype1< double >::global(),
-			GFCAST( &KineticHub::getMolNinit ),
-			RFCAST( &KineticHub::setMolNinit )
-		),
-		new ValueFinfo( "conc",
-			ValueFtype1< double >::global(),
-			GFCAST( &KineticHub::getMolN ),
-			RFCAST( &KineticHub::setMolN )
-		),
-		new ValueFinfo( "concInit",
-			ValueFtype1< double >::global(),
-			GFCAST( &KineticHub::getMolNinit ),
-			RFCAST( &KineticHub::setMolNinit )
-		),
-	};
-	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
-		initMoleculeCinfo()->getThisFinfo( ) );
-	assert( tf != 0 );
-	static SolveFinfo molZombieFinfo( 
-		molFields, 
-		sizeof( molFields ) / sizeof( Finfo* ),
-		tf
-	);
-	*/
-
 	assert( nMol_ + nBuf_ + nSumTot_ == elist->size() );
 
 	S_ = S;
 	Sinit_ = Sinit;
 
 	// cout << "in molConnectionFuncLocal\n";
-	vector< Element* >::iterator i;
+	vector< Eref >::iterator i;
 	// Note that here we have perfect alignment between the
 	// order of the S_ and Sinit_ vectors and the elist vector.
 	// This is used implicitly in the ordering of the process messages
@@ -660,14 +572,14 @@ void KineticHub::rateSizeFuncLocal( Eref e,
 }
 
 void KineticHub::reacConnectionFunc( const Conn* c,
-	unsigned int index, Element* reac )
+	unsigned int index, Eref reac )
 {
 	static_cast< KineticHub* >( c->data() )->
 		reacConnectionFuncLocal( c->target(), index, reac );
 }
 
 void KineticHub::reacConnectionFuncLocal( 
-		Eref hub, int rateTermIndex, Element* reac )
+		Eref hub, int rateTermIndex, Eref reac )
 {
 	// These fields will replace the original reaction fields so that
 	// the lookups refer to the solver rather than the molecule.
@@ -703,14 +615,14 @@ void KineticHub::reacConnectionFuncLocal(
 }
 
 void KineticHub::enzConnectionFunc( const Conn* c,
-	unsigned int index, Element* enz )
+	unsigned int index, Eref enz )
 {
 	static_cast< KineticHub* >( c->data() )->
 		enzConnectionFuncLocal( c->target(), index, enz );
 }
 
 void KineticHub::mmEnzConnectionFunc( const Conn* c,
-	unsigned int index, Element* mmEnz )
+	unsigned int index, Eref mmEnz )
 {
 	// cout << "in mmEnzConnectionFunc for " << mmEnz->name() << endl;
 	static_cast< KineticHub* >( c->data() )->
@@ -718,7 +630,7 @@ void KineticHub::mmEnzConnectionFunc( const Conn* c,
 }
 
 void KineticHub::enzConnectionFuncLocal(
-	Eref hub, int rateTermIndex, Element* enz )
+	Eref hub, int rateTermIndex, Eref enz )
 {
 	static Finfo* enzFields[] =
 	{
@@ -768,7 +680,7 @@ void KineticHub::enzConnectionFuncLocal(
 }
 
 void KineticHub::mmEnzConnectionFuncLocal(
-	Eref hub, int rateTermIndex, Element* mmEnz )
+	Eref hub, int rateTermIndex, Eref mmEnz )
 {
 	static Finfo* enzFields[] =
 	{
@@ -816,27 +728,30 @@ void KineticHub::mmEnzConnectionFuncLocal(
 	mmEnzMap_[connIndex - 1] = rateTermIndex;
 }
 
-void unzombify( Element* e )
+void unzombify( Eref e )
 {
-	const Cinfo* ci = e->cinfo();
-	bool ret = ci->schedule( e, ConnTainer::Default );
-	assert( ret );
-	e->setThisFinfo( const_cast< Finfo* >( ci->getThisFinfo() ) );
+	if ( e.i == 0 ) {
+		const Cinfo* ci = e->cinfo();
+		bool ret = ci->schedule( e.e, ConnTainer::Default );
+		assert( ret );
+		e.e->setThisFinfo( const_cast< Finfo* >( ci->getThisFinfo() ) );
+	}
 	redirectDynamicMessages( e );
 }
 
 void clearMsgsFromFinfo( Eref e, const Finfo * f )
 {
+	vector< Eref > list;
+	vector< Eref >::iterator i;
 	Conn* c = e.e->targets( f->msg(), e.i );
-	vector< Element* > list;
-	vector< Element* >::iterator i;
 	while ( c->good() ) {
-		list.push_back( c->target().e );
+		list.push_back( c->target() );
 		c->increment();
 	}
 	delete c;
 	e.dropAll( f->msg() );
-	for ( i = list.begin(); i != list.end(); i++ ) unzombify( *i );
+	for ( i = list.begin(); i != list.end(); i++ )
+		unzombify( *i );
 }
 
 /**
@@ -880,18 +795,6 @@ KineticHub* getHubFromZombie( Eref e, const Finfo* srcFinfo,
 	}
 	delete c;
 	return 0;
-
-	/*
-	const SolveFinfo* f = dynamic_cast< const SolveFinfo* > (
-			       	e.e->getThisFinfo() );
-	if ( !f ) return 0;
-	const Conn* c = f->getSolvedConn( e.e );
-	Slot slot;
-   	srcFinfo->getSlot( srcFinfo->name(), slot );
-	index = c->targetIndex();
-	// index = hub->connSrcRelativeIndex( c, slot.msg() );
-	return static_cast< KineticHub* >( c->target().data() );
-	*/
 }
 
 /**
@@ -1449,7 +1352,7 @@ void KineticHub::zombify(
 void redirectDestMessages(
 	Eref hub, Eref e, const Finfo* hubFinfo, const Finfo* eFinfo,
 	unsigned int eIndex, vector< unsigned int >& map, 
-		vector< Element *>*  elist, bool retain )
+		vector< Eref >*  elist, bool retain )
 {
 	Conn* i = e.e->targets( eFinfo->msg(), e.i );
 	vector< Eref > srcElements;
@@ -1457,7 +1360,7 @@ void redirectDestMessages(
 	vector< const ConnTainer* > dropList;
 
 	while( i->good() ) {
-		Element* tgt = i->target().e;
+		Eref tgt = i->target();
 		// Handle messages going outside purview of solver.
 		if ( find( elist->begin(), elist->end(), tgt ) == elist->end() ) {
 			map.push_back( eIndex );
@@ -1479,50 +1382,6 @@ void redirectDestMessages(
 	}
 }
 
-
-/*
-	vector< Conn > clist;
-	if ( eFinfo->incomingConns( e, clist ) == 0 )
-		return;
-
-	unsigned int i;
-	unsigned int max = clist.size();
-	vector< Element* > srcElements;
-	vector< const Finfo* > srcFinfos;
-	
-	
-	for ( i = 0; i != max; i++ ) {
-		Element* tgt = clist[i].targetElement();
-		if ( find( elist->begin(), elist->end(), tgt ) == elist->end() )
-		// Only add the molSum message if the src is outside the mol tree
-		// Add as many references to this molecule as there are
-		// messages coming in.
-			map.push_back( eIndex );
-	}
-
-	// An issue here: Do I check if the src is on the solved tree?
-	// This is a bad iteration: dropping connections is going to affect
-	// the list size and position of i in the list.
-	i = max;
-	while ( i > 0 ) {
-		i--;
-		Conn& c = clist[ i ];
-		if ( find( elist->begin(), elist->end(), c.targetElement() ) == elist->end() )  {
-			srcElements.push_back( c.targetElement() );
-			srcFinfos.push_back( c.targetElement()->findFinfo( c.targetIndex() ) );
-				
-			if ( !retain )
-				eFinfo->drop( e, i );
-		}
-	}
-	// eFinfo->dropAll( e );
-	for ( i = 0; i != srcElements.size(); i++ ) {
-		bool ret = srcFinfos[ i ]->add( srcElements[ i ], hub, hubFinfo );
-		assert( ret );
-	}
-}
-*/
-
 /**
  * Here we replace the existing DynamicFinfos and their messages with
  * new ones for the updated access functions.
@@ -1532,14 +1391,15 @@ void redirectDestMessages(
  * new funcVecs into the remote Msgs. So instead we delete the 
  * old DynamicFinfos and recreate them.
  */
-// Assumption e is a simple element. Replace it with Eref to make it general
-void redirectDynamicMessages( Element* e )
+void redirectDynamicMessages( Eref e )
 {
+	if ( e.i != 0 ) // Do this only for the base Eref.
+		return;
 	vector< Finfo* > flist;
 	// We get a list of DynamicFinfos independent of the Finfo vector on 
 	// the Element, because we will be messing up the iterators on the
 	// element.
-	e->listLocalFinfos( flist );
+	e.e->listLocalFinfos( flist );
 	vector< Finfo* >::iterator i;
 
 	// Go through flist noting messages, deleting finfo, and rebuilding.
@@ -1549,73 +1409,28 @@ void redirectDynamicMessages( Element* e )
 		assert( df != 0 );
 		vector< Eref > srcElements;
 		vector< const Finfo* > srcFinfos;
-		Conn* c = e->targets( ( *i )->msg(), 0 ); //zero index for SE
-
-		// note messages.
-		while( c->good() ) {
-			srcElements.push_back( c->target() );
-			srcFinfos.push_back( 
-				c->target().e->findFinfo( c->targetMsg() ) );
-			c->increment();
+		for ( unsigned int j = 0; j < e.e->numEntries(); ++j ) {
+			Conn* c = e.e->targets( ( *i )->msg(), j ); //zero index for SE
+			// note messages.
+			while( c->good() ) {
+				srcElements.push_back( c->target() );
+				srcFinfos.push_back( 
+					c->target().e->findFinfo( c->targetMsg() ) );
+				c->increment();
+			}
+			delete c;
 		}
-		delete c;
 		string name = df->name();
-		bool ret = e->dropFinfo( df );
+		bool ret = e.e->dropFinfo( df );
 		assert( ret );
-		const Finfo* origFinfo = e->findFinfo( name );
+		const Finfo* origFinfo = e.e->findFinfo( name );
 		assert( origFinfo );
 
 		unsigned int max = srcFinfos.size();
 		for ( unsigned int i =  0; i < max; i++ ) {
 			ret = srcElements[ i ].add( srcFinfos[ i ]->name(),
 				e, name );
-			/*
-			ret = srcElements[ i ].add( srcFinfos[ i ]->msg(),
-				e, origFinfo->msg(), ConnTainer::Default );
-				*/
-			// ret = srcFinfos[ i ]->add( srcElements[ i ], e, origFinfo );
 			assert( ret );
 		}
 	}
-
-/*
-
-
-
-
-	const Finfo* f;
-	unsigned int finfoNum = 1;
-
-	while ( ( f = e->localFinfo( finfoNum ) ) ) {
-		const DynamicFinfo *df = dynamic_cast< const DynamicFinfo* >( f );
-		assert( df != 0 );
-
-		// Note that this loop will harvest both incoming and outgoing msgs
-		vector< Element* > srcElements;
-		vector< const Finfo* > srcFinfos;
-		Conn* c = e->targets( f->msg() );
-
-		while( c->good() ) {
-			srcElements.push_back( c->target().e );
-			srcFinfos.push_back( 
-				c->target().e->findFinfo( c->targetMsg() ) );
-			c->increment();
-		}
-		delete c;
-
-		string name = df->name();
-		bool ret = e->dropFinfo( df );
-		assert( ret );
-
-		const Finfo* origFinfo = e->findFinfo( name );
-		assert( origFinfo );
-
-		unsigned int max = srcFinfos.size();
-		for ( unsigned int i =  0; i < max; i++ ) {
-			ret = srcFinfos[ i ]->add( srcElements[ i ], e, origFinfo );
-			assert( ret );
-		}
-		finfoNum++;
-	}
-	*/
 }

@@ -15,6 +15,8 @@
 #include "RateTerm.h"
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
+#include "Reaction.h"
+#include "Enzyme.h"
 
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
@@ -40,17 +42,17 @@ const Cinfo* initStoichCinfo()
 		new SrcFinfo( "molConnectionSrc",
 			Ftype3< vector< double >* , 
 				vector< double >* , 
-				vector< Element *>*  
+				vector< Eref >*  
 				>::global() 
 		),
 		new SrcFinfo( "reacConnectionSrc",
-			Ftype2< unsigned int, Element* >::global()
+			Ftype2< unsigned int, Eref >::global()
 		),
 		new SrcFinfo( "enzConnectionSrc",
-			Ftype2< unsigned int, Element* >::global()
+			Ftype2< unsigned int, Eref >::global()
 		),
 		new SrcFinfo( "mmEnzConnectionSrc",
-			Ftype2< unsigned int, Element* >::global()
+			Ftype2< unsigned int, Eref >::global()
 		),
 		new SrcFinfo( "completeSetupSrc",
 			Ftype1< string >::global()
@@ -281,13 +283,6 @@ unsigned int Stoich::getRateVectorSize( Eref e ) {
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-/*
-void Stoich::rebuild( const Conn* c ) {
-	Element* e = c->targetElement();
-	static_cast< Stoich* >( c->data() )->localRebuild( e );
-}
-*/
-
 // Static func
 void Stoich::reinitFunc( const Conn* c )
 {
@@ -311,15 +306,15 @@ void Stoich::integrateFunc( const Conn* c, vector< double >* v, double dt )
 // Other function definitions
 ///////////////////////////////////////////////////
 
-unsigned int countRates( Element* e, bool useOneWayReacs )
+unsigned int countRates( Eref e, bool useOneWayReacs )
 {
-	if ( e->className() == "Reaction" ) {
+	if ( e.e->cinfo()->isA( initReactionCinfo() ) ) {
 		if ( useOneWayReacs)
 			return 2;
 		else
 			return 1;
 	}
-	if ( e->className() == "Enzyme" ) {
+	if ( e.e->cinfo()->isA( initEnzymeCinfo() ) ) {
 		bool enzmode = 0;
 		bool isOK = get< bool >( e, "mode", enzmode );
 		assert( isOK );
@@ -366,46 +361,6 @@ void Stoich::clear( Eref stoich )
 	nCall_ = 0;
 }
 
-// 
-// Instead of scanning the ticks, we'll scan the path itself.
-// First, check if the EL from the path matches that from the 
-// outgoing solver messages.
-// If so, no rebuild needed.
-// Otherwise, wipe clean and rebuild from the path.
-// The 'clear' call to the hub tells it to clear out all messages to
-// the zombie objects, after updating them with the latest values.
-/*
-void Stoich::localRebuild( Element* stoich )
-{
-	send0( stoich, clearSlot ); // Clears out the old messages to solved objects
-	nMols_ = 0;
-	nVarMols_ = 0;
-	nSumTot_ = 0;
-	nBuffered_ =0;
-	nReacs_ = 0;
-	nEnz_ = 0;
-	nMmEnz_ = 0;
-	nExternalRates_ = 0;
-	S_.resize( 0 );
-	Sinit_.resize( 0 );
-	v_.resize( 0 );
-	rates_.resize( 0 );
-	sumTotals_.resize( 0 );
-	path2mol_.resize( 0 );
-	mol2path_.resize( 0 );
-	molMap_.clear( );
-#ifdef DO_UNIT_TESTS
-	reacMap_.clear( );
-#endif // DO_UNIT_TESTS
-	nVarMolsBytes_ = 0;
-	nCopy_ = 0;
-	nCall_ = 0;
-
-	// rebuildMatrix( stoich, ret );
-	localSetPath( stoich, path_ );
-}
-*/
-
 void Stoich::localSetPath( Eref stoich, const string& value )
 {
 	path_ = value;
@@ -431,9 +386,9 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 {
 	static const Cinfo* molCinfo = Cinfo::find( "Molecule" );
 	vector< Id >::iterator i;
-	vector< Element* > varMolVec;
-	vector< Element* > bufVec;
-	vector< Element* > sumTotVec;
+	vector< Eref > varMolVec;
+	vector< Eref > bufVec;
+	vector< Eref > sumTotVec;
 	int mode;
 	bool isOK;
 	unsigned int numRates = 0;
@@ -442,14 +397,14 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 			isOK = get< int >( ( *i )(), "mode", mode );
 			assert( isOK );
 			if ( mode == 0 ) {
-				varMolVec.push_back( ( *i )() );
+				varMolVec.push_back( i->eref() );
 			} else if ( mode == 4 ) {
-				bufVec.push_back( ( *i )() );
+				bufVec.push_back( i->eref() );
 			} else {
-				sumTotVec.push_back( ( *i )() );
+				sumTotVec.push_back( i->eref() );
 			}
 		} else {
-			numRates += countRates( ( *i )(), useOneWayReacs_ );
+			numRates += countRates( i->eref(), useOneWayReacs_ );
 		}
 	}
 	/*
@@ -468,11 +423,11 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 	int nEnz = 0;
 	int nMmEnz = 0;
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		if ( ( *i )()->className() == "Reaction" ) {
+		if ( i->eref().e->cinfo()->isA( initReactionCinfo() ) ) {
 			nReac++;
-		} else if ( ( *i )()->className() == "Enzyme" ) {
+		} else if ( i->eref().e->cinfo()->isA( initEnzymeCinfo() ) ) {
 			bool enzmode = 0;
-			isOK = get< bool >( ( *i )(), "mode", enzmode );
+			isOK = get< bool >( i->eref(), "mode", enzmode );
 			assert( isOK );
 			if ( enzmode == 0 )
 				nEnz++;
@@ -483,17 +438,17 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 	send3< unsigned int, unsigned int, unsigned int >(
 			stoich, rateSizeSlot, nReac, nEnz, nMmEnz );
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
-		const string& cn = ( *i )()->className();
+		const string& cn = i->eref().e->className();
 		if ( cn == "Reaction" ) {
-			addReac( stoich, ( *i )() );
+			addReac( stoich, i->eref() );
 		} else if ( cn == "Enzyme" ) {
 			bool enzmode = 0;
-			isOK = get< bool >( ( *i )(), "mode", enzmode );
+			isOK = get< bool >( i->eref(), "mode", enzmode );
 			assert( isOK );
 			if ( enzmode == 0 )
-				addEnz( stoich, ( *i )() );
+				addEnz( stoich, i->eref() );
 			else
-				addMmEnz( stoich, ( *i )() );
+				addMmEnz( stoich, i->eref() );
 		} else if ( cn == "Table" ) {
 			addTab( stoich, ( *i )() );
 		} else if ( cn == "Neutral" ) {
@@ -505,7 +460,7 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 		{
 			// Ignore this too.
 		} else if ( !( *i )()->cinfo()->isA( molCinfo ) ) {
-			addRate( stoich, ( *i )() );
+			addRate( stoich, i->eref() );
 		}
 	}
 	setupReacSystem( stoich );
@@ -514,16 +469,16 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 
 void Stoich::setupMols(
 	Eref e,
-	vector< Element* >& varMolVec,
-	vector< Element* >& bufVec,
-	vector< Element* >& sumTotVec
+	vector< Eref >& varMolVec,
+	vector< Eref >& bufVec,
+	vector< Eref >& sumTotVec
 	)
 {
 	const Finfo* nInitFinfo = Cinfo::find( "Molecule" )->
 		findFinfo( "nInit" );
 	// Field nInitField = Cinfo::find( "Molecule" )->field( "nInit" );
-	vector< Element* >::iterator i;
-	vector< Element* >elist;
+	vector< Eref >::iterator i;
+	vector< Eref >elist;
 	unsigned int j = 0;
 	double nInit;
 	nVarMols_ = varMolVec.size();
@@ -536,19 +491,19 @@ void Stoich::setupMols(
 	for ( i = varMolVec.begin(); i != varMolVec.end(); i++ ) {
 		get< double >( *i, nInitFinfo, nInit );
 		Sinit_[j] = nInit;
-		molMap_[ Eref( *i ) ] = j++;
+		molMap_[ *i ] = j++;
 		elist.push_back( *i );
 	}
 	for ( i = sumTotVec.begin(); i != sumTotVec.end(); i++ ) {
 		get< double >( *i, nInitFinfo, nInit );
 		Sinit_[j] = nInit;
-		molMap_[ Eref( *i ) ] = j++;
+		molMap_[ *i ] = j++;
 		elist.push_back( *i );
 	}
 	for ( i = bufVec.begin(); i != bufVec.end(); i++ ) {
 		get< double >( *i, nInitFinfo, nInit );
 		Sinit_[j] = nInit;
-		molMap_[ Eref( *i ) ] = j++;
+		molMap_[ *i ] = j++;
 		elist.push_back( *i );
 	}
 	for ( i = sumTotVec.begin(); i != sumTotVec.end(); i++ ) {
@@ -558,7 +513,7 @@ void Stoich::setupMols(
 		e, molSizeSlot, nVarMols_, nBuffered_, nSumTot_ );
 	// molSizesSrc_.send( nVarMols_, nBuffered_, nSumTot_ );
 	// molConnectionsSrc_.send( &S_, &Sinit_, &elist );
-	send3< vector< double >* , vector< double >* , vector< Element *>*  >(
+	send3< vector< double >* , vector< double >* , vector< Eref >*  >(
 		e, molConnectionSlot, &S_, &Sinit_, &elist );
 }
 
@@ -576,13 +531,9 @@ void Stoich::addSumTot( Eref e )
 
 // This replaces findIncoming and findReactants.
 bool Stoich::findTargets(
-	Element* e, const string& msgFieldName, vector< const double* >& ret )
+	Eref e, const string& msgFieldName, vector< const double* >& ret )
 {
-	//assuming that e is a simple element
-	//not a fool proof assert for this
-	assert(e->numEntries() == 1);
-	
-	Conn* c = e->targets( msgFieldName, 0 );
+	Conn* c = e.e->targets( msgFieldName, e.i );
 	map< Eref, unsigned int >::iterator j;
 	ret.resize( 0 );
 	while ( c->good() ) {
@@ -602,37 +553,6 @@ bool Stoich::findTargets(
 	delete c;
 	return ( ret.size() > 0 );
 }
-
-/**
- * Looks for all substrates of reaction or enzyme
- * Deprecated, merged into findTargets.
-unsigned int Stoich::findReactants( 
-	Element* e, const string& msgFieldName, 
-	vector< const double* >& ret )
-{
-	const Finfo* srcFinfo = e->findFinfo( msgFieldName );
-	assert( srcFinfo != 0 );
-	vector< Conn > srcList;
-	vector< Conn >::iterator i;
-	ret.resize( 0 );
-	map< Eref, unsigned int >::iterator j;
-	// Fill in the list of incoming messages.
-	srcFinfo->outgoingConns( e, srcList );
-	for (i = srcList.begin() ; i != srcList.end(); i++ ) {
-		Element* src = i->targetElement();
-		j = molMap_.find( src );
-		if ( j != molMap_.end() ) {
-			ret.push_back( & S_[ j->second ] );
-		} else {
-			cerr << "Error: Unable to locate " << 
-				src->name() <<
-				" as reactant for " << e->name();
-			return 0;
-		}
-	}
-	return ret.size();
-}
- */
 
 class ZeroOrder* makeHalfReaction( double k, vector< const double*> v )
 {
@@ -688,14 +608,21 @@ void Stoich::fillStoich(
 	vector< const double* >& sub, vector< const double* >& prd, 
 	int reacNum )
 {
-	fillHalfStoich( baseptr, sub, -1 , reacNum );
-	fillHalfStoich( baseptr, prd, 1 , reacNum );
+	if ( sub.size() > 0 && prd.size() > 0 ) {
+		fillHalfStoich( baseptr, sub, -1 , reacNum );
+		fillHalfStoich( baseptr, prd, 1 , reacNum );
+	} else {
+		if ( sub.size() == 0 )
+			cout << "Warning: Stoich::fillStoich: dangling substrate. Reaction ignored.\n";
+		else
+			cout << "Warning: Stoich::fillStoich: dangling product. Reaction ignored.\n";
+	}
 }
 
 /**
  * Adds the reaction-element e to the solved system.
  */
-void Stoich::addReac( Eref stoich, Element* e )
+void Stoich::addReac( Eref stoich, Eref e )
 {
 	vector< const double* > sub;
 	vector< const double* > prd;
@@ -718,7 +645,7 @@ void Stoich::addReac( Eref stoich, Element* e )
 #ifdef DO_UNIT_TESTS
 	reacMap_[e] = rates_.size();
 #endif
-	send2< unsigned int, Element* >( stoich, 
+	send2< unsigned int, Eref >( stoich, 
 			reacConnectionSlot, rates_.size(), e );
 	if ( useOneWayReacs_ ) {
 		if ( freac ) {
@@ -761,28 +688,28 @@ bool Stoich::checkEnz( Eref e,
 	ret = get< double >( e, "k3", k3 );
 	assert( ret );
 
-	if ( findTargets( e.e, "sub", sub ) < 1 ) {
+	if ( findTargets( e, "sub", sub ) < 1 ) {
 		cerr << "Error: Stoich::addEnz: Failed to find subs\n";
 		return 0;
 	}
-	if ( findTargets( e.e, "enz", enz ) != 1 ) {
+	if ( findTargets( e, "enz", enz ) != 1 ) {
 		cerr << "Error: Stoich::addEnz: Failed to find enzyme\n";
 		return 0;
 	}
 	if ( !isMM ) {
-		if ( findTargets( e.e, "cplx", cplx ) != 1 ) {  
+		if ( findTargets( e, "cplx", cplx ) != 1 ) {  
 			cerr << "Error: Stoich::addEnz: Failed to find cplx\n";
 			return 0;
 		}
 	}
-	if ( findTargets( e.e, "prd", prd ) < 1 ) {
+	if ( findTargets( e, "prd", prd ) < 1 ) {
 		cerr << "Error: Stoich::addEnz: Failed to find prds\n";
 		return 0;
 	}
 	return 1;
 }
 
-void Stoich::addEnz( Eref stoich, Element* e )
+void Stoich::addEnz( Eref stoich, Eref e )
 {
 	vector< const double* > sub;
 	vector< const double* > prd;
@@ -800,7 +727,7 @@ void Stoich::addEnz( Eref stoich, Element* e )
 		freac = makeHalfReaction( k1, sub );
 		breac = makeHalfReaction( k2, cplx );
 		catreac = makeHalfReaction( k3, cplx );
-		send2< unsigned int, Element* >(
+		send2< unsigned int, Eref >(
 			stoich, enzConnectionSlot,
 			rates_.size(), e );
 		if ( useOneWayReacs_ ) {
@@ -821,7 +748,7 @@ void Stoich::addEnz( Eref stoich, Element* e )
 	}
 }
 
-void Stoich::addMmEnz( Eref stoich, Element* e )
+void Stoich::addMmEnz( Eref stoich, Eref e )
 {
 	vector< const double* > sub;
 	vector< const double* > prd;
@@ -840,7 +767,7 @@ void Stoich::addMmEnz( Eref stoich, Element* e )
 			return;
 		}
 		fillStoich( &S_[0], sub, prd, rates_.size() );
-		send2< unsigned int, Element* >(
+		send2< unsigned int, Eref >(
 			stoich, mmEnzConnectionSlot,
 			rates_.size(), e );
 		if ( sub.size() == 1 ) {
@@ -855,14 +782,14 @@ void Stoich::addMmEnz( Eref stoich, Element* e )
 	}
 }
 
-void Stoich::addTab( Eref stoich, Element* e )
+void Stoich::addTab( Eref stoich, Eref e )
 {
 	// nothing to do here. It is handled by keeping the tab as an external,
 	// unmanaged object.
 	// cout << "Don't yet know how to addTab for " << e->name() << "\n";
 }
 
-void Stoich::addRate( Eref stoich, Element* e )
+void Stoich::addRate( Eref stoich, Eref e )
 {
 	cout << "Don't yet know how to addRate for " << e->name() << "\n";
 }
