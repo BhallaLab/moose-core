@@ -7287,3 +7287,48 @@ Now sigNeur2.g crashes.
 15 Sep 2008
 Looks like rates are getting to be more reasonable. Also not crashing, at
 least at setup time.
+However, seems like the kinetics object isn't able to load the model. Is it
+an issue with handling array elements? 
+- Need to assign the 'method' field to ee then back to rk5
+- Element handling fails, see Stoich::findTargets:583
+	Generally, there are plenty of functions in Stoich.cpp that need
+	fixing to handle arrays.
+
+==============================================================================
+16 Sep 2008
+
+Incrementally converting Stoich to use Erefs. Each time compile and test
+with the moose_kholodenko.g regression test.
+CountRates converted... OK
+Vectors of mols converted... Needed also to fix up everything in Stoich.cpp and
+KineticHub.cpp... OK.
+KineticManager.cpp... OK.
+But it still croaks in sigNeur2.g. Fixed, now it croaks because the 
+SparseMatrix is too big!
+Sundry further fixes later, we have a loaded model:
+
+ showfield solve/stoich *
+ [ /sig/kinetics/solve/stoich ]
+ name                     = stoich
+ index                    = 0
+ parent                   = /sig/kinetics/solve
+ class                    = Stoich
+ cpu                      = 0
+ dataMem                  = 232
+ msgMem                   = 2
+ nMols                    = 41349
+ nVarMols                 = 28174
+ nSumTot                  = 10490
+ nBuffered                = 2685
+ nReacs                   = 35979
+ nEnz                     = 13962
+ nMMenz                   = 0
+ nExternalRates           = 0
+ useOneWayReacs           = 0
+ path                     = /sig/kinetics/##
+ rateVectorSize           = 63903
+
+Unfortunately all mol concs and nInits are stuck at zero. Anyway, this is
+a big step forward.
+
+==============================================================================
