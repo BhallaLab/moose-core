@@ -17,6 +17,7 @@
 #include "../builtins/Table.h"
 #include "../maindir/init.h"
 #include "../connections/ConnTainer.h"
+#include "../randnum/randnum.h"
 #include <cstdio>
 
 using namespace std;
@@ -823,6 +824,13 @@ vector < Id > PyMooseContext::getChildren(string path)
     send1< Id >( myId_(), requestLeSlot, id );
     return elist_;
 }
+
+void PyMooseContext::srandom(long seed)
+{
+    mtseed(long seed);
+}
+
+
 /*
   A set of overloaded functions to step the clocks.
   The three versions are required to account for
