@@ -46,7 +46,14 @@ const Cinfo * initRandGeneratorCinfo()
             process,
             new SrcFinfo("output", Ftype1<double>::global()),
         };
-      
+
+    static SchedInfo schedInfo[] = 
+        {
+            {
+                process, 0, 0 
+            }
+        }
+    
     static Cinfo randGeneratorCinfo("RandGenerator",
                                     "Subhasis Ray",
                                     "Base class for random number generator.",
