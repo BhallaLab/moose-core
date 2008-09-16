@@ -50,31 +50,31 @@ class KineticHub
 		static void molConnectionFunc( const Conn* c,
 				vector< double >* S,
 				vector< double >* Sinit,
-				vector< Element* >* elist
+				vector< Eref >* elist
 		);
 		void molConnectionFuncLocal( Eref e,
 				vector< double >* S,
 				vector< double >* Sinit,
-				vector< Element* >* elist
+				vector< Eref >* elist
 		);
 		static void reacConnectionFunc( const Conn* c,
-				unsigned int index, Element* reac );
+				unsigned int index, Eref reac );
 		void reacConnectionFuncLocal( 
 				Eref e,
 				int rateTermIndex, 
-				Element* reac );
+				Eref reac );
 		static void enzConnectionFunc( const Conn* c,
-				unsigned int index, Element* enz );
+				unsigned int index, Eref enz );
 		void enzConnectionFuncLocal(
 				Eref e,
 				int enzTermIndex, 
-				Element* enz );
+				Eref enz );
 		static void mmEnzConnectionFunc( const Conn* c,
-				unsigned int index, Element* mmEnz );
+				unsigned int index, Eref mmEnz );
 		void mmEnzConnectionFuncLocal(
 				Eref e,
 				int enzTermIndex, 
-				Element* enz );
+				Eref enz );
 		static void childFunc( const Conn* c, int stage );
 
 		
