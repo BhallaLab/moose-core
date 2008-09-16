@@ -48,8 +48,6 @@ class Stoich
 			return nVarMols_;
 		}
 		void clear( Eref stoich );
-		// static void rebuild( const Conn* c );
-		// void localRebuild( Element* stoich );
 
 		///////////////////////////////////////////////////
 		// Functions used by the GslIntegrator
@@ -80,43 +78,34 @@ class Stoich
 
 		void setupMols(
 			Eref e,
-			vector< Element* >& varMolVec,
-			vector< Element* >& bufVec,
-			vector< Element* >& sumTotVec
+			vector< Eref >& varMolVec,
+			vector< Eref >& bufVec,
+			vector< Eref >& sumTotVec
 			);
 
 		void addSumTot( Eref e );
 
 		/**
 		 * Finds all target molecules of the specified msgField on 
-		 * Element e. Puts the points into the vector ret, which is 
+		 * Eref e. Puts the points into the vector ret, which is 
 		 * cleaned out first.
 		 * This function replaces findIncoming and findReactants.
 		 */
 		bool findTargets(
-			Element* e, const string& msgFieldName, 
+			Eref e, const string& msgFieldName, 
 			vector< const double* >& ret );
-
-		/*
-		unsigned int findReactants( 
-			Element* e, const string& msgFieldName, 
-			vector< const double* >& ret );
-
-		bool findIncoming( 
-			Element* e, const string& msgFieldName, 
-			vector< const double* >& ret );
-			*/
 
 		void fillHalfStoich( const double* baseptr, 
 			vector< const double* >& reactant,
 		       	int sign, int reacNum );
+
 		void fillStoich( 
 			const double* baseptr, 
 			vector< const double* >& sub,
 			vector< const double* >& prd, 
 			int reacNum );
 
-		void addReac( Eref stoich, Element* e );
+		void addReac( Eref stoich, Eref e );
 		bool checkEnz( Eref e,
 				vector< const double* >& sub,
 				vector< const double* >& prd,
@@ -125,10 +114,10 @@ class Stoich
 				double& k1, double& k2, double& k3,
 				bool isMM
 		);
-		void addEnz( Eref stoich, Element* e );
-		void addMmEnz( Eref stoich, Element* e );
-		void addTab( Eref stoich, Element* e );
-		void addRate( Eref stoich, Element* e );
+		void addEnz( Eref stoich, Eref e );
+		void addMmEnz( Eref stoich, Eref e );
+		void addTab( Eref stoich, Eref e );
+		void addRate( Eref stoich, Eref e );
 		void setupReacSystem( Eref stoich );
 
 		///////////////////////////////////////////////////

@@ -1,0 +1,75 @@
+5 Sep 2008
+
+More work on SigNeur.
+Working on a bug in copy, pertaining to globals. Here globals means objects
+that are not supposed to be copied, instead they get messages sent to them
+from the duplicates. Somewhat like pointers. Setting up to do unit tests for
+this. Due to accumulation of changes, checked in the beastly revision:
+Checked in as revision 666: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
+Well, that is odd. After a lot of work setting up 1st and 2nd generation
+global copy unit tests, and clearing all, the system still croaks with the
+copies in the real model.
+
+Checked in as revision 667: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
+Things tried and eliminated:
+- Unit tests cleared.
+- Doesn't matter if first cell is in /library or elsewhere
+- The system is OK with a couple of steps, dies as soon as reset is called
+- Showmsg shows the right messages.
+- gdb shows the right object names.
+
+Oddly enough, it works for a 3-compartment version of the model. Don't know
+what to make of it.
+
+Fiddling around with the model. Looks like branching is implicated in the
+crashes. A big unbranched model is fine, the tiny model with branching crashes.
+
+Is this dependent on globals? Yes. The crash goes away as soon as the last
+        HH channel does. Even on the full 299 compartment model. The Ca pool
+        and the ligand gated channels are still there.
+
+OK, not necessarily globals. It may simply be mix-ups with the 'next'
+in the msg when duplicating. Not sure where the branching comes in.
+
+See runstiny.p. This has globals, this has branching. What it does not have
+are multiple channel types (HH and synaptic) on any dend. Suggests that there
+is an issue with the 'next' handling in Msg.
+
+Redid SimpleElement::copyMessages to use safer code that takes care of next.
+        No luck. Possibly CopyGobals needs a fix up too.
+        That too did not work.
+==============================================================================
+6 Sep 2008
+Further fixes. Now the unit tests fail. Worked slowly through them.
+Currently I have had to comment out a test 'compareCopyMsgs' for the
+ArrayCopy, which I have not upgraded. Soon.
+
+Anyway, the problem still persists. Whenever there are two kinds of
+channels on a compartment, the model dies. To be a bit more precise: If
+a HHchan follows a synchan, then the model dies. I can get the same model
+to run if the channels are permuted. (origtiny.p and permute_runs_origtiny.p).
+I thought I had fixed this kind of issue in the copy, but evidently not.
+
+==============================================================================
+7 Sep 2008
+After fiddling around with SimpleElement::dumpMsgInfo, I finally was able
+to confirm the hunch about a misplaced target during copy, even after
+all the fixes to the copy function. In the tiny.p model,
+spine_head_10_1 is mis-copied so that an HHChannel::channel ends up being
+called as a SynChan::channel. Now I have the diagnostic I hope to be able
+to home in on the copy problem.
+
+OK, tracked it down. In Msg::copy I was obtaining funcId1 from the existing
+funcId in the original msg. But this was obtained by using the c->msg2()
+index, which always refers to the msg slot, and does not know about the
+next_ hack in msgs. Fixed by looking up the originating Finfo.
+
+Confirmed with tiny.g, and then with full.g
+
+This profoundly painful bug underlines the need to clean up and document
+the messaging API.
+Checked in as revision 673: unit test flags on, Smoldyn off, -g, no GSL, MPI off
+
+==============================================================================
