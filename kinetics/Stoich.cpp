@@ -521,7 +521,7 @@ void Stoich::addSumTot( Eref e )
 {
 	vector< const double* > mol;
 	// vector< Eref > tab;
-	if ( findTargets( e.e, "sumTotal", mol ) ) {
+	if ( findTargets( e, "sumTotal", mol ) ) {
 		map< Eref, unsigned int >::iterator j = molMap_.find( e );
 		assert( j != molMap_.end() );
 		SumTotal st( &S_[ j->second ], mol );
@@ -544,8 +544,7 @@ bool Stoich::findTargets(
 		} else { 
 			// Table or other object, not handled.
 			cerr << "Error: findTargets: Unable to locate " << 
-				src.e->name() << "[" << src.i << "]" <<
-				" as target for " << e->name();
+				src.name() << " as target for " << e.name() << endl;
 			return 0;
 		}
 		c->increment();
@@ -635,10 +634,10 @@ void Stoich::addReac( Eref stoich, Eref e )
 	isOK = get< double >( e, "kb", kb );
 	assert ( isOK );
 
-	if ( findTargets( e, "sub", sub ) > 0 ) {
+	if ( findTargets( e, "sub", sub ) ) {
 		freac = makeHalfReaction( kf, sub );
 	}
-	if ( findTargets( e, "prd", prd ) > 0 ) {
+	if ( findTargets( e, "prd", prd ) ) {
 		breac = makeHalfReaction( kb, prd );
 	}
 
@@ -688,21 +687,21 @@ bool Stoich::checkEnz( Eref e,
 	ret = get< double >( e, "k3", k3 );
 	assert( ret );
 
-	if ( findTargets( e, "sub", sub ) < 1 ) {
+	if ( !findTargets( e, "sub", sub ) ) {
 		cerr << "Error: Stoich::addEnz: Failed to find subs\n";
 		return 0;
 	}
-	if ( findTargets( e, "enz", enz ) != 1 ) {
+	if ( !findTargets( e, "enz", enz ) ) {
 		cerr << "Error: Stoich::addEnz: Failed to find enzyme\n";
 		return 0;
 	}
 	if ( !isMM ) {
-		if ( findTargets( e, "cplx", cplx ) != 1 ) {  
+		if ( !findTargets( e, "cplx", cplx )  ) {  
 			cerr << "Error: Stoich::addEnz: Failed to find cplx\n";
 			return 0;
 		}
 	}
-	if ( findTargets( e, "prd", prd ) < 1 ) {
+	if ( !findTargets( e, "prd", prd ) ) {
 		cerr << "Error: Stoich::addEnz: Failed to find prds\n";
 		return 0;
 	}

@@ -791,6 +791,7 @@ KineticHub* getHubFromZombie( Eref e, const Finfo* srcFinfo,
 		KineticHub* kh = static_cast< KineticHub* >( c->target().data() );
 		c->increment();
 		assert( !c->good() ); // Should only be one process incoming.
+		delete c;
 		return dynamic_cast< KineticHub* >( kh );
 	}
 	delete c;
@@ -1325,12 +1326,19 @@ void KineticHub::zombify(
 		 Eref hub, Eref e, const Finfo* hubFinfo,
 	       	Finfo* solveFinfo )
 {
+	if ( e.i != 0 ) // If it is an array, assume all entries get updated.
+		return;
 	// Replace the original procFinfo with one from the hub.
 	const Finfo* procFinfo = e->findFinfo( "process" );
+	// Note that this clears up everything including proc messages onto
+	// other indices than zero.
 	e.dropAll( procFinfo->msg() );
 	// procFinfo->dropAll( e );
-	bool ret = hub.add( hubFinfo->msg(), e, procFinfo->msg(), 
-		ConnTainer::Default );
+
+	if ( e.e->numEntries() > 1 )
+		e.i = Id::AnyIndex;
+	bool ret = hub.add( hubFinfo->msg(), e, 
+		procFinfo->msg(), ConnTainer::Default );
 	// ret = hubFinfo->add( hub.e, e, procFinfo );
 	assert( ret );
 
