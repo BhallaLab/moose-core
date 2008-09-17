@@ -13,6 +13,9 @@
 #include "Wildcard.h"
 #define NOINDEX (UINT_MAX - 2)
 
+// Defined in GenesisParserWrapper.cpp
+extern map< string, string >& sliClassNameConvert();
+
 static int wildcardRelativeFind( Id start, const vector< string >& path, 
 		unsigned int depth, vector< Id >& ret );
 
@@ -277,6 +280,9 @@ bool matchName( Id parent, Id id,
  */
 bool matchInsideBrace( Id id, const string& inside )
 {
+	/* Map from Genesis class names to Moose class names */
+	const map< string, string >& classNameMap = sliClassNameConvert();
+	
 	if ( inside.substr(0, 4 ) == "TYPE" ||
 		inside.substr(0, 5 ) == "CLASS" ||
 		inside.substr(0, 3 ) == "ISA" )
@@ -288,7 +294,15 @@ bool matchInsideBrace( Id id, const string& inside )
 		string typeName = inside.substr( pos + 1 );
 		if ( typeName == "membrane" )
 			typeName = "Compartment";
-		return ( ( typeName == id()->className() ) == isEquality );
+		
+		bool isEqual;
+		map< string, string >::const_iterator iter = classNameMap.find( typeName );
+		if ( iter != classNameMap.end() )
+			isEqual = ( iter->second == id()->className() );
+		else
+			isEqual = ( typeName == id()->className() );
+		
+		return ( isEqual == isEquality );
 	} else if ( inside.substr( 0, 6 ) == "FIELD(" ) {
 		return wildcardFieldComparison( id, inside.substr( 6 ) );
 	}
