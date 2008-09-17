@@ -382,6 +382,7 @@ class PyMooseContext(object):
     def getPath(*args): return _moose.PyMooseContext_getPath(*args)
     def getChildren(*args): return _moose.PyMooseContext_getChildren(*args)
     def pathToId(*args): return _moose.PyMooseContext_pathToId(*args)
+    srandom = staticmethod(_moose.PyMooseContext_srandom)
     def step(*args): return _moose.PyMooseContext_step(*args)
     def reset(*args): return _moose.PyMooseContext_reset(*args)
     def stop(*args): return _moose.PyMooseContext_stop(*args)
@@ -415,6 +416,7 @@ PyMooseContext_recvClocks = _moose.PyMooseContext_recvClocks
 PyMooseContext_recvMessageList = _moose.PyMooseContext_recvMessageList
 PyMooseContext_createPyMooseContext = _moose.PyMooseContext_createPyMooseContext
 PyMooseContext_destroyPyMooseContext = _moose.PyMooseContext_destroyPyMooseContext
+PyMooseContext_srandom = _moose.PyMooseContext_srandom
 PyMooseContext.separator = _moose.cvar.PyMooseContext_separator
 
 class PyMooseBase(object):

@@ -17,7 +17,8 @@
 #include "../builtins/Table.h"
 #include "../maindir/init.h"
 #include "../connections/ConnTainer.h"
-#include "../randnum/randnum.h"
+
+
 #include <cstdio>
 
 using namespace std;
@@ -26,6 +27,7 @@ extern int mooseInit();
 extern void setupDefaultSchedule(Element*, Element*, Element*);
 extern Element* makeGenesisParser();
 extern char* copyString(const string& s);
+extern void mtseed(long);
 
 extern const Cinfo* initShellCinfo();
 extern const Cinfo* initTickCinfo();
@@ -827,7 +829,7 @@ vector < Id > PyMooseContext::getChildren(string path)
 
 void PyMooseContext::srandom(long seed)
 {
-    mtseed(long seed);
+    mtseed(seed);
 }
 
 

@@ -19225,6 +19225,34 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PyMooseContext_srandom(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  long arg1 ;
+  long val1 ;
+  int ecode1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_srandom",1,1,&obj0)) SWIG_fail;
+  ecode1 = SWIG_AsVal_long(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "PyMooseContext_srandom" "', argument " "1"" of type '" "long""'");
+  } 
+  arg1 = static_cast< long >(val1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose::PyMooseContext::srandom(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PyMooseContext_step__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
@@ -89643,6 +89671,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"PyMooseContext_getPath", _wrap_PyMooseContext_getPath, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_getChildren", _wrap_PyMooseContext_getChildren, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_pathToId", _wrap_PyMooseContext_pathToId, METH_VARARGS, NULL},
+	 { (char *)"PyMooseContext_srandom", _wrap_PyMooseContext_srandom, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_step", _wrap_PyMooseContext_step, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_reset", _wrap_PyMooseContext_reset, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_stop", _wrap_PyMooseContext_stop, METH_VARARGS, NULL},
