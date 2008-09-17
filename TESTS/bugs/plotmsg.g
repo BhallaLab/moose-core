@@ -1,3 +1,11 @@
+echo "
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+DESCRIPTION:
+Messages from tables do not get added if MOOSE is compiled using compiler
+optimizations (-O3 in g++).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+"
+
 create compartment cc
 
 create table /plot
