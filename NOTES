@@ -7331,4 +7331,17 @@ Sundry further fixes later, we have a loaded model:
 Unfortunately all mol concs and nInits are stuck at zero. Anyway, this is
 a big step forward.
 
+Checked in as revision 708: unit test flags on, Smoldyn off, -g, MPI off
+
+Trying to track down why values are zeros.
+
+==============================================================================
+17 Sep 2008
+Set up a simple test model in robots to see what happens with solving arrays.
+There are two complementary tests: ksolveArrayOn.g and ksolveArrayOff.g.
+These helped identify issues with the zombify command. Having sorted that, 
+it looks like the simulation runs OK but users can only access the zero index
+element managed by the solver. This comes down to nasty stuff in the 
+connections.
+
 ==============================================================================

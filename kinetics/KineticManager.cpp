@@ -411,7 +411,7 @@ Id gslSetup( Eref e, const string& method )
 	Eref( ks ).add( "gsl", ki, "gsl" );
 
 	set< string >( ki, "method", method );
-	string simpath = e.id().path() + "/##";
+	string simpath = e.id().path() + "/##[]";
 	set< string >( ks, "path", simpath );
 	set< double >( ki, "relativeAccuracy", 1.0e-5 );
 	set< double >( ki, "absoluteAccuracy", 1.0e-5 );
@@ -465,7 +465,7 @@ Id smoldynSetup( Eref e, const string& method, double recommendedDt )
 	set< bool >( ks, "useOneWayReacs", 1 );
 	Eref( ks ).add( "hub", sh, "hub" );
 	// ks->findFinfo( "hub" )->add( ks, sh, sh->findFinfo( "hub" ) );
-	string simpath = e.id().path() + "/##";
+	string simpath = e.id().path() + "/##[]";
 	set< string >( ks, "path", simpath );
 
 	// This sets up additional things like the geometry information.
