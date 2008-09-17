@@ -186,10 +186,7 @@ moose.py moose_wrap.cxx: moose.i $(HEADERS)
 # .cpp.o:
 # 	$(CXX) $(CFLAGS) $< -c
 
+# Not deleting moose_wrap.cxx and moose.py because they are required for
+# windows compiles.
 clean:
 	-rm -f *.o *.so test_swig *.pyc
-	#~ Not deleting moose_wrap.cxx and moose.py because they are required for
-	#~ windows compiles.
-	#~ -rm -f *.o moose_wrap.cxx *.so moose.py test_swig *.pyc
-
-
