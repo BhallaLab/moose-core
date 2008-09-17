@@ -1,0 +1,12 @@
+# Benchmark results for rallpack1
+# (run time v/s number of cells, for cell size = 10)
+
+## NCell = 10
+# size time.genesis time.moose
+1    1         0.02       0.01
+2    2         0.02       0.03
+3    5         0.06       0.05
+4   10         0.09       0.10
+5   20         0.16       0.21
+6   50         0.41       0.58
+7  100         0.84       1.60
