@@ -1,0 +1,9 @@
+# Benchmark results for myelin (run time v/s no. of cells)
+# size time.genesis time.moose
+1    1         1.86       1.66
+2    2         3.99       3.81
+3    5         9.37      10.46
+4   10        17.78      21.67
+5   20        36.07      43.13
+6   50        89.24     108.42
+7  100       172.58     202.35
