@@ -593,6 +593,15 @@ void ArrayElement::copyGlobalMessages( Element* dup, bool isArray ) const
 	;
 }
 
+void* ArrayElement::data( unsigned int eIndex ) const
+{
+	if (eIndex >= numEntries_){
+		cout << "ArrayElement: Bad Index...Prepare to crash" << endl;
+		return 0;
+	}
+	return (void *)((char *)data_ + eIndex*objectSize_);
+}
+
 
 #ifdef DO_UNIT_TESTS
 
