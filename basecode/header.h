@@ -21,7 +21,7 @@
  */
 
 /// Here we set up an enhanced variant of assert, used in unit tests.
-#ifndef NDEBUG
+#ifdef DO_UNIT_TESTS
 # define ASSERT( isOK, message ) \
 	if ( !(isOK) ) { \
    cout << "\nERROR: Assert '" << #isOK << "' failed on line " << __LINE__ << "\nin file " << __FILE__ << ": " << message << endl; \

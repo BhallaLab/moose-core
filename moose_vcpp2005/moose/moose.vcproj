@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\robots;..\..\hsolve;..\..\utility;..\..\randnum;..\..\genesis_parser;..\..\shell;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;E:\Users\MOOSE\Compile\911moose\;&quot;C:\Program Files\GnuWin32\include&quot;"
+				AdditionalIncludeDirectories="..\..\robots;..\..\hsolve;..\..\utility;..\..\randnum;..\..\genesis_parser;..\..\shell;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;E:\Users\MOOSE\Compile\siji\sept18\;&quot;C:\Program Files\GnuWin32\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -121,11 +121,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="0"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\utility;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;&quot;E:\Users\MOOSE\Compile\py-Moose\&quot;;&quot;C:\Program Files\GnuWin32\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				AdditionalIncludeDirectories="..\..\utility;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;E:\Users\MOOSE\Compile\siji\sept18\;..\..\robots;..\..\hsolve;&quot;C:\Program Files\GnuWin32\include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL"
+				BasicRuntimeChecks="0"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -144,7 +145,6 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libgsl.a libgslcblas.a"
-				OutputFile="_moose.pyd"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;C:\Program Files\GnuWin32\lib&quot;"
 				GenerateDebugInformation="true"
@@ -1413,10 +1413,6 @@
 				>
 				<File
 					RelativePath="..\..\builtins\Interpol.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\builtins\ParTable.h"
 					>
 				</File>
 				<File
