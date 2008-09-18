@@ -234,6 +234,8 @@ void GslIntegrator::assignStoichFuncLocal( void* stoich )
 	nVarMols_ = s->nVarMols();
 	y_ = new double[ nVarMols_ ];
 	memcpy( y_, s->Sinit(), nVarMols_ * sizeof( double ) );
+	for ( unsigned int i = 0; i < nVarMols_; ++i )
+		assert( !isnan( y_[ i ] ) && y_[i] >= 0.0 );
 
 	isInitialized_ = 1;
         // Allocate GSL functions if not already allocated,

@@ -7355,3 +7355,33 @@ KinSparseMatrix.cpp:173: double KinSparseMatrix::computeRowRate(unsigned int, co
 Put in assertions all over the place. Same bug persists.
 
 ==============================================================================
+18 Sep 2008
+Checked in as revision 720: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+Note that this revision (like 719) fails unless GSL is on.
+
+Tracked down at least some of the problem: The zero substrate/product cases
+do bad things. We can't simply eliminate them, because in an array situation
+all objects are tied to the hub through a One2All message. One option is to
+define a dummy rate term for these bad cases. Hopefully there won't be
+too many of them, and we should encourage modelers to clean up their 
+simulations. Another option is to be a bit more intelligent about how we
+set up the zombie messages, so that even if index zero didn't come in, the
+messages are set up.
+
+Made a modified model without the dangling enzyme. The solver still runs 
+into a nan.
+
+Put in a dummy reac which does nothing, into the rates_ array instead of the
+halfReac it was using and which should have been OK. Now it no longer
+crashes, but the variables are all stuck at nInit.
+
+Now the test model crashes. I think it is because it has a dangling reacn.
+Fixed. 
+
+Back to the sigNeur calculation. The system has set all the rates 
+kf and kb to zero. Also all the rates for the enzymes.
+This is a puzzle. The sigNeur stuff works OK for the Exp Euler method, but
+not for rk5. Conversely, rk5 works OK for simple models including the 
+Kholodenko model.
+
+==============================================================================

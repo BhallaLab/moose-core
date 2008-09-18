@@ -38,6 +38,7 @@ class RateTerm
 		virtual unsigned int  getReactants( 
 			vector< unsigned int >& molIndex,
 			const vector< double >& S ) const = 0;
+		static const double EPSILON;
 };
 
 // Base class MMEnzme for the purposes of setting rates
@@ -100,7 +101,7 @@ class MMEnzyme1: public MMEnzymeBase
 		}
 
 		double operator() () const {
-			assert( *sub_ >= 0 );
+			assert( *sub_ >= -EPSILON );
 			return ( kcat_ * *sub_ * *enz_ ) / ( Km_ + *sub_ );
 		}
 
@@ -132,7 +133,7 @@ class MMEnzyme: public MMEnzymeBase
 			// the subtrates_() operator returns the negative of 
 			// the conc product.
 			// Here we the overall rate.
-			assert( sub >= 0 );
+			assert( sub >= -EPSILON );
 			return ( sub * kcat_ * *enz_ ) / ( Km_ + sub );
 		}
 
@@ -178,10 +179,12 @@ class ZeroOrder: public RateTerm
 		}
 
 		double operator() () const {
+			assert( !isnan( k_ ) );
 			return k_;
 		}
 
 		void setK( double k ) {
+			assert( !isnan( k ) );
 			if ( k >= 0.0 )
 				k_ = k;
 		}
@@ -223,6 +226,7 @@ class FirstOrder: public ZeroOrder
 		{;}
 
 		double operator() () const {
+			assert( !isnan( *y_ ) );
 			return k_ * *y_;
 		}
 
@@ -245,6 +249,8 @@ class SecondOrder: public ZeroOrder
 		{;}
 
 		double operator() () const {
+			assert( !isnan( *y1_ ) );
+			assert( !isnan( *y2_ ) );
 			return k_ * *y1_ * *y2_;
 		}
 
@@ -271,8 +277,10 @@ class NOrder: public ZeroOrder
 		double operator() () const {
 			double ret = k_;
 			vector< const double* >::const_iterator i;
-			for ( i = v_.begin(); i != v_.end(); i++)
+			for ( i = v_.begin(); i != v_.end(); i++) {
+				assert( !isnan( **i ) );
 				ret *= *( *i );
+			}
 			return ret;
 		}
 
@@ -364,6 +372,7 @@ class SumTotal
 				i != mol_.end(); i++ )
 				ret += **i;
 			*target_ = ret;
+			assert( !isnan( ret ) );
 		}
 	private:
 		double* target_;
