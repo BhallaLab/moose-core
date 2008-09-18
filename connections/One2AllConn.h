@@ -185,7 +185,7 @@ class ReverseOne2AllConn: public Conn
 			return s_->One2AllConnTainer::eI1();
 		}
 		unsigned int targetIndex() const {
-			return s_->One2AllConnTainer::i1();
+			return s_->One2AllConnTainer::i1() + index_;
 		}
 		int targetMsg() const {
 			return s_->One2AllConnTainer::msg1();

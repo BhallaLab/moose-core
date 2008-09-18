@@ -48,7 +48,7 @@ class MMEnzymeBase: public RateTerm
 		MMEnzymeBase( double Km, double kcat )
 			: Km_( Km ), kcat_( kcat )
 		{
-			;
+			assert( Km_ > 0.0 );
 		}
 
 		void setKm( double Km ) {
@@ -100,6 +100,7 @@ class MMEnzyme1: public MMEnzymeBase
 		}
 
 		double operator() () const {
+			assert( *sub_ >= 0 );
 			return ( kcat_ * *sub_ * *enz_ ) / ( Km_ + *sub_ );
 		}
 
@@ -131,6 +132,7 @@ class MMEnzyme: public MMEnzymeBase
 			// the subtrates_() operator returns the negative of 
 			// the conc product.
 			// Here we the overall rate.
+			assert( sub >= 0 );
 			return ( sub * kcat_ * *enz_ ) / ( Km_ + sub );
 		}
 
@@ -171,7 +173,9 @@ class ZeroOrder: public RateTerm
 	public:
 		ZeroOrder( double k )
 			: k_( k )
-		{;}
+		{
+			assert( !isnan( k_ ) );
+		}
 
 		double operator() () const {
 			return k_;
