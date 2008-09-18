@@ -57,12 +57,19 @@ class Plot {
 
 bool Plot::differs( const Plot* other, double epsilon ) const
 {
-	vector< double >::const_iterator i;
-	vector< double >::const_iterator j = other->y.begin();
+	unsigned int mysize = y.size();
+	unsigned int othersize = other->y.size();
 
-	for ( i = y.begin(); i != y.end(); i++ )
-		if ( fabs( *i - *j++ ) > epsilon )
+	if ( mysize != othersize )
+		cerr << "Warning: Number of points differ in " << parmname
+			<< ". Ignoring extra points in larger plot.\n";
+
+	unsigned int minsize = mysize < othersize ? mysize : othersize;
+
+	for ( unsigned int i = 0; i < minsize; i++ )
+		if ( fabs( y[ i ] - other->y[ i ] ) > epsilon )
 			return 1;
+
 	return 0;
 }
 

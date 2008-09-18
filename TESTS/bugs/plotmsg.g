@@ -15,6 +15,6 @@ call /plot TABCREATE 100 0.0 1.0
 addmsg /cc /plot INPUT Vm
 
 // And this too..
-addmsg /plot/msgInput /cc/Vm
+addmsg /plot/inputRequest /cc/Vm
 
-quit
+//quit
