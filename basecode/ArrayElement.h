@@ -150,16 +150,7 @@ class ArrayElement: public Element
 		/**
 		 * Returns data contents of ArrayElement
 		 */
-		void* data( unsigned int eIndex ) const {
-			if (eIndex >= numEntries_){
-				cout << "ArrayElement: Bad Index...Prepare to crash" << endl;
-				return 0;
-			}
-// 			if (eIndex > 0){
-// 				cout << (void *)((char *)data_ + eIndex*objectSize_) << "###" << eIndex * objectSize_ << " "<< objectSize_ << endl;
-// 			}
-			return (void *)((char *)data_ + eIndex*objectSize_);
-		}
+		void* data( unsigned int eIndex ) const;
 
 		/**
 		 * Returns size of data array. For ArrayElement it can be any
