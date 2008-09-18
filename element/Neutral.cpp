@@ -367,11 +367,11 @@ Id Neutral::getParent( Eref e )
 	assert( e.e != 0 );
 	if ( e.e == Element::root() )
 		return Id();
-
-	Conn* c = e.e->targets( "child", e.i );
+        Conn* c = e.e->targets( "child", e.i );
 	assert( c->good() );
-	return c->target().id();
+	Id parent = c->target().id();
 	delete c;
+        return parent;        
 }
 
 string str(int a){
