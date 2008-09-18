@@ -489,19 +489,25 @@ void Stoich::setupMols(
 	S_.resize( nMols_ );
 	Sinit_.resize( nMols_ );
 	for ( i = varMolVec.begin(); i != varMolVec.end(); i++ ) {
-		get< double >( *i, nInitFinfo, nInit );
+		bool ret = get< double >( *i, nInitFinfo, nInit );
+		assert( ret );
+		assert( !isnan( nInit ) );
 		Sinit_[j] = nInit;
 		molMap_[ *i ] = j++;
 		elist.push_back( *i );
 	}
 	for ( i = sumTotVec.begin(); i != sumTotVec.end(); i++ ) {
-		get< double >( *i, nInitFinfo, nInit );
+		bool ret = get< double >( *i, nInitFinfo, nInit );
+		assert( ret );
+		assert( !isnan( nInit ) );
 		Sinit_[j] = nInit;
 		molMap_[ *i ] = j++;
 		elist.push_back( *i );
 	}
 	for ( i = bufVec.begin(); i != bufVec.end(); i++ ) {
-		get< double >( *i, nInitFinfo, nInit );
+		bool ret = get< double >( *i, nInitFinfo, nInit );
+		assert( ret );
+		assert( !isnan( nInit ) );
 		Sinit_[j] = nInit;
 		molMap_[ *i ] = j++;
 		elist.push_back( *i );
@@ -630,8 +636,10 @@ void Stoich::addReac( Eref stoich, Eref e )
 	double kf;
 	double kb;
 	bool isOK = get< double >( e, "kf", kf );
+	assert( !isnan( kf ) );
 	assert ( isOK );
 	isOK = get< double >( e, "kb", kb );
+	assert( !isnan( kb ) );
 	assert ( isOK );
 
 	if ( findTargets( e, "sub", sub ) ) {
@@ -682,27 +690,30 @@ bool Stoich::checkEnz( Eref e,
 	bool ret;
 	ret = get< double >( e, "k1", k1 );
 	assert( ret );
+	assert( !isnan( k1 ) );
 	ret = get< double >( e, "k2", k2 );
 	assert( ret );
+	assert( !isnan( k2 ) );
 	ret = get< double >( e, "k3", k3 );
 	assert( ret );
+	assert( !isnan( k3 ) );
 
 	if ( !findTargets( e, "sub", sub ) ) {
-		cerr << "Error: Stoich::addEnz: Failed to find subs\n";
+		cerr << "Error: Stoich::addEnz( " << e.name() << " ) : Failed to find subs\n";
 		return 0;
 	}
 	if ( !findTargets( e, "enz", enz ) ) {
-		cerr << "Error: Stoich::addEnz: Failed to find enzyme\n";
+		cerr << "Error: Stoich::addEnz( " << e.name() << " ) : Failed to find enzyme\n";
 		return 0;
 	}
 	if ( !isMM ) {
 		if ( !findTargets( e, "cplx", cplx )  ) {  
-			cerr << "Error: Stoich::addEnz: Failed to find cplx\n";
+			cerr << "Error: Stoich::addEnz( " << e.name() << " ) : Failed to find cplx\n";
 			return 0;
 		}
 	}
 	if ( !findTargets( e, "prd", prd ) ) {
-		cerr << "Error: Stoich::addEnz: Failed to find prds\n";
+		cerr << "Error: Stoich::addEnz( " << e.name() << " ) : Failed to find prds\n";
 		return 0;
 	}
 	return 1;

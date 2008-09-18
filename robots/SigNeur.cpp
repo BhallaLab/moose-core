@@ -1022,6 +1022,8 @@ void SigNeur::makeSignalingModel( Eref me )
 	completeSomaDiffusion( somaMap, junctions );
 	completeDendDiffusion( somaMap, dendMap, junctions );
 	completeSpineDiffusion( dendMap, spineMap, junctions );
+
+	set< string >( kin, "method", dendMethod_ );
 }
 
 /**
@@ -1087,16 +1089,26 @@ void SigNeur::buildMoleculeNameMap( Element* e,
 {
 	static const Finfo* childSrcFinfo = 
 		initNeutralCinfo()->findFinfo( "childSrc" );
+	static const Finfo* parentFinfo = 
+		initNeutralCinfo()->findFinfo( "parent" );
 	if ( e == 0 )
 		return;
 	
 	if ( e->cinfo()->isA( initMoleculeCinfo() ) ) {
-		map< string, Element* >::iterator i = molMap.find( e->name() );
+		string ename = e->name();
+		if ( ename == "kenz_cplx" ) {
+			Id pa;
+			get< Id >( e, parentFinfo, pa );
+			Id grandpa;
+			get< Id >( pa(), parentFinfo, grandpa );
+			ename = grandpa()->name() + "__" + ename;
+		}
+		map< string, Element* >::iterator i = molMap.find( ename );
 		if ( i != molMap.end() ) {
 			cout << "buildMoleculeNameMap:: Warning: duplicate molecule: "
 				<< i->second->id().path() << ", " << e->id().path() << endl;
 		} else {
-			molMap[ e->name() ] = e;
+			molMap[ ename ] = e;
 		}
 	}
 	// Traverse children.
