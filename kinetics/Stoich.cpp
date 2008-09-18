@@ -22,6 +22,7 @@
 #include <gsl/gsl_errno.h>
 #endif
 
+const double RateTerm::EPSILON = 1.0e-6;
 const double Stoich::EPSILON = 1.0e-6;
 
 const Cinfo* initStoichCinfo()
@@ -348,7 +349,7 @@ void Stoich::clear( Eref stoich )
 	S_.resize( 0 );
 	Sinit_.resize( 0 );
 	v_.resize( 0 );
-	rates_.resize( 0 );
+	rates_.resize( 0, 0 );
 	sumTotals_.resize( 0 );
 	path2mol_.resize( 0 );
 	mol2path_.resize( 0 );
@@ -435,6 +436,7 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 				nMmEnz++;
 		}
 	}
+	// cout << "RebuildMatrix: Intermedate setup: " << nReac << ", " << nEnz << ", " << nMmEnz << endl;
 	send3< unsigned int, unsigned int, unsigned int >(
 			stoich, rateSizeSlot, nReac, nEnz, nMmEnz );
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
@@ -617,10 +619,12 @@ void Stoich::fillStoich(
 		fillHalfStoich( baseptr, sub, -1 , reacNum );
 		fillHalfStoich( baseptr, prd, 1 , reacNum );
 	} else {
+		/*
 		if ( sub.size() == 0 )
 			cout << "Warning: Stoich::fillStoich: dangling substrate. Reaction ignored.\n";
 		else
 			cout << "Warning: Stoich::fillStoich: dangling product. Reaction ignored.\n";
+			*/
 	}
 }
 
@@ -629,6 +633,7 @@ void Stoich::fillStoich(
  */
 void Stoich::addReac( Eref stoich, Eref e )
 {
+	static ZeroOrder* dummyReac = new ZeroOrder( 0.0 );
 	vector< const double* > sub;
 	vector< const double* > prd;
 	class ZeroOrder* freac = 0;
@@ -648,6 +653,18 @@ void Stoich::addReac( Eref stoich, Eref e )
 	if ( findTargets( e, "prd", prd ) ) {
 		breac = makeHalfReaction( kb, prd );
 	}
+	if ( freac == 0 && breac == 0 ) {
+		freac = dummyReac;
+	// 	assert( 0 );
+	// 	return;
+	}
+	if ( sub.size() == 0 || prd.size() == 0 ) {
+		if ( sub.size() == 0 )
+			cout << "Warning: Stoich::fillStoich: dangling substrate on " << e.id().path() << ". Reaction ignored.\n";
+		else
+			cout << "Warning: Stoich::fillStoich: dangling product on " << e.id().path() << ". Reaction ignored.\n";
+		// return;
+	}
 
 #ifdef DO_UNIT_TESTS
 	reacMap_[e] = rates_.size();
@@ -656,24 +673,31 @@ void Stoich::addReac( Eref stoich, Eref e )
 			reacConnectionSlot, rates_.size(), e );
 	if ( useOneWayReacs_ ) {
 		if ( freac ) {
-			fillStoich( &S_[0], sub, prd, rates_.size());
+			fillStoich( &S_[0], sub, prd, rates_.size() );
 			rates_.push_back( freac );
 		}
 		if ( breac ) {
-			fillStoich( &S_[0], prd, sub, rates_.size());
+			fillStoich( &S_[0], prd, sub, rates_.size() );
 			rates_.push_back( breac );
 		}
 	} else { 
 		fillStoich( &S_[0], sub, prd, rates_.size() );
-		if ( freac && breac ) {
-			rates_.push_back( 
-				new BidirectionalReaction(
-				       	freac, breac ) );
-		} else if ( freac )  {
-			rates_.push_back( freac );
-		} else if ( breac ) {
-			rates_.push_back( breac );
-		}
+			if ( freac && breac ) {
+				rates_.push_back( 
+					new BidirectionalReaction( freac, breac )
+				);
+			} else {
+				rates_.push_back( dummyReac );
+			}
+			/*
+			} else if ( freac )  {
+				rates_.push_back( freac );
+			} else if ( breac ) {
+				rates_.push_back( breac );
+			} else {
+				assert( 0 );
+			}
+			*/
 	}
 	++nReacs_;
 }
@@ -721,6 +745,7 @@ bool Stoich::checkEnz( Eref e,
 
 void Stoich::addEnz( Eref stoich, Eref e )
 {
+	static ZeroOrder* dummyReac = new ZeroOrder( 0.0 );
 	vector< const double* > sub;
 	vector< const double* > prd;
 	vector< const double* > enz;
@@ -755,6 +780,11 @@ void Stoich::addEnz( Eref stoich, Eref e )
 			rates_.push_back( catreac );
 		}
 		nEnz_++;
+	} else {
+		if ( useOneWayReacs_ )
+			rates_.push_back( dummyReac );
+		rates_.push_back( dummyReac );
+		rates_.push_back( dummyReac );
 	}
 }
 
@@ -824,10 +854,18 @@ void Stoich::updateV( )
 	vector< RateTerm* >::const_iterator i;
 	vector< double >::iterator j = v_.begin();
 
+	unsigned int q = 0;
 	for ( i = rates_.begin(); i != rates_.end(); i++)
 	{
 		*j++ = (**i)();
+		assert( !isnan( *( j-1 ) ) );
+		++q; // for debugging.
+		/*
+		if ( q < 4 )
+			cout << *(j - 1 ) << "	";
+			*/
 	}
+	// cout << endl;
 
 	// I should use foreach here.
 	vector< SumTotal >::const_iterator k;
@@ -889,6 +927,7 @@ int Stoich::innerGslFunc( double t, const double* y, double* yprime )
 	for (unsigned int i = 0; i < nVarMols_; i++) {
 		*yprime++ = N_.computeRowRate( i , v_ );
 	}
+	// cout << t << ": " << y[0] << ", " << y[1] << endl;
 	return GSL_SUCCESS;
 }
 

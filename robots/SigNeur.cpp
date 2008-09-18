@@ -444,7 +444,7 @@ void SigNeur::assignSignalingCompts()
 	// cout << endl;
 	// Now reposition the indices for the dends and spines, depending on
 	// the numerical methods.
-	if ( dendMethod_ == "rk5" && somaMethod_ == dendMethod_ ) {
+	// if ( dendMethod_ == "rk5" && somaMethod_ == dendMethod_ ) {
 		for ( vector< TreeNode >::iterator i = tree_.begin(); 
 				i != tree_.end(); ++i ) {
 			if ( i->category == DEND ) {
@@ -452,8 +452,8 @@ void SigNeur::assignSignalingCompts()
 				i->sigEnd += numSoma_;
 			}
 		}
-	}
-	if ( dendMethod_ == "rk5" && spineMethod_ == dendMethod_ ) {
+	// }
+	// if ( dendMethod_ == "rk5" && spineMethod_ == dendMethod_ ) {
 		unsigned int offset = numSoma_ + numDend_;
 		for ( vector< TreeNode >::iterator i = tree_.begin(); 
 				i != tree_.end(); ++i ) {
@@ -462,7 +462,7 @@ void SigNeur::assignSignalingCompts()
 				i->sigEnd += offset;
 			}
 		}
-	}
+	// }
 
 	cout << "SigNeur: Tree size = " << tree_.size() << 
 		", s=" << numSoma_ << 
