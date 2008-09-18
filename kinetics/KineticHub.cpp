@@ -1326,7 +1326,8 @@ void KineticHub::zombify(
 		 Eref hub, Eref e, const Finfo* hubFinfo,
 	       	Finfo* solveFinfo )
 {
-	if ( e.i != 0 ) // If it is an array, assume all entries get updated.
+	// Assume all solve stuff is done if the solveFinfo is assigned.
+	if ( e.e->getThisFinfo() == solveFinfo ) 
 		return;
 	// Replace the original procFinfo with one from the hub.
 	const Finfo* procFinfo = e->findFinfo( "process" );
