@@ -147,7 +147,7 @@ setfield /squid inject {INJECT}
 step 0.040 -t
 setfield /squid inject 0
 step 0.005 -t
-openfile "test.plot" a
+openfile "test.plot" w
 writefile "test.plot" "/newplot"
 writefile "test.plot" "/plotname Vm"
 closefile "test.plot"
