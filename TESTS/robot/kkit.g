@@ -16,7 +16,7 @@ end
 function initdump
 end
 
-// create KineticManager /kinetics
+//  create KineticManager /kinetics
 create neutral /kinetics
 // setfield /kinetics method ee
 
