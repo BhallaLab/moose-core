@@ -7343,5 +7343,15 @@ These helped identify issues with the zombify command. Having sorted that,
 it looks like the simulation runs OK but users can only access the zero index
 element managed by the solver. This comes down to nasty stuff in the 
 connections.
+Checked in as revision 715: unit test flags on, Smoldyn off, -g, MPI off
+
+Managed to track down the nasty stuff in connections. Now it works for the
+little test case. Time to try on a serious model.
+=> Loads up 140 ish meg, and returns reasonable values. But croaks as soon
+as I try to run, with a nan. Suspect the dangling reactions/enzymes:
+
+KinSparseMatrix.cpp:173: double KinSparseMatrix::computeRowRate(unsigned int, const std::vector<double, std::allocator<double> >&) const: Assertion `!( isnan( ret ) )' failed.
+
+Put in assertions all over the place. Same bug persists.
 
 ==============================================================================

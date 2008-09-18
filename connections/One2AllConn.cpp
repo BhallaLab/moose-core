@@ -25,7 +25,7 @@ Conn* One2AllConnTainer::conn( unsigned int eIndex, bool isReverse ) const
 {
 	//	numIter_++; // For reference counting. Do we need it?
 	if ( isReverse )
-		return new ReverseOne2AllConn( this, 0 );
+		return new ReverseOne2AllConn( this, eIndex );
 	else
 		return new One2AllConn( this, 0 );
 }
@@ -38,7 +38,7 @@ Conn* One2AllConnTainer::conn( unsigned int eIndex, bool isReverse,
 		return 0;
 
 	if ( isReverse )
-		return new ReverseOne2AllConn( this, 0 );
+		return new ReverseOne2AllConn( this, eIndex );
 	else
 		return new One2AllConn( this, 0 );
 }
