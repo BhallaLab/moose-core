@@ -7,15 +7,17 @@ import unittest
 from moose import *
 
 class MooseTestCase(unittest.TestCase):
-    testId = 0
+    __testId = 0
     def __init__(self, *args):
         unittest.TestCase.__init__(self, *args)
         self.testContainer = Neutral("/test")
         self.dataContainer = Neutral("/testData")
         self.testObj = None
         self.testData = None
-        MooseTestCase.testId += 1
-
+    
+    def newTestId(self):
+        MooseTestCase.__testId += 1
+        return MooseTestCase.__testId
 
     def recordField(self, fieldName, tableName=None, object=None):
         """Connect the data table to a particular field of object"""
