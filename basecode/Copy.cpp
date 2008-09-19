@@ -956,7 +956,6 @@ void copyTest()
 	// Check that the copy has a unique id (this was an actual bug!)
 	ASSERT( c10->id() != c0->id(), "unique copy id" );
 
-// 	kids.resize( 0 );	
 	vector< Id > kids;
 	get< vector< Id > >( n, "childList", kids );
 	ASSERT( kids.size() == 5 , "copy kids" );
@@ -969,7 +968,7 @@ void copyTest()
 // 	create Neutral m 
 // 	create CopyClass m/c_simple
 // 	createmap m/c_s
-/*
+
 	Element* cc = c0->copyIntoArray( n->id(), "cc", 10 );
 	ASSERT( cc != c0, "copying" );
 	ASSERT( cc != 0, "copying" );
@@ -1042,7 +1041,6 @@ void copyTest()
 	get <double> (c_simple, "x", x);
 	ASSERT(x == 100, "checking other index element");
 	set( m, "destroy" );
-	*/
 	set( n, "destroy" );
 }
 

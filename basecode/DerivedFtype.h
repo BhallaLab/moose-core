@@ -314,7 +314,7 @@ template < class T > class Ftype1: public Ftype
 				}
 			}
 			
-			void* copyIntoArray( const void* orig, const unsigned int num, unsigned int numCopies ) const
+			void* copyIntoArray( const void* orig, const unsigned int num, const unsigned int numCopies ) const
 			{
 				if ( num > 1 ) {
 					//not done....num*numCopies
