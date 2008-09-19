@@ -24,12 +24,12 @@ class NormalRngTestCase(MooseTestCase):
         MooseTestCase.__init__(self, *args)
 
     def setUp(self):
-        self.testObj = NormalRng("NormalRng_" + str(NormalRngTestCase.testId), self.testContainer)
-        self.testData = Table("NormalRngData_" + str(NormalRngTestCase.testId), self.dataContainer)
+        self.testObj = NormalRng("NormalRng_" + str(MooseTestCase.testId), self.testContainer)
+        self.testData = Table("NormalRngData_" + str(MooseTestCase.testId), self.dataContainer)
         self.testData.stepMode = 3
         self.testData.connect("inputRequest", self.testObj, "sample")
-        print NormalRngTestCase.testId
-        NormalRngTestCase.testId += 1
+        print MooseTestCase.testId
+        MooseTestCase.testId += 1
 
     def sampleMeanVariance(self, steps=1000):
         self.testObj.getContext().reset()
