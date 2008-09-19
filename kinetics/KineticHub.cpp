@@ -610,8 +610,13 @@ void KineticHub::reacConnectionFuncLocal(
 	// unsigned int connIndex = reacSolveFinfo->numOutgoing( hub );
 	assert( connIndex > 0 ); // Should have just created a message on it
 	assert( reacMap_.size() >= connIndex );
-
-	reacMap_[connIndex - 1] = rateTermIndex;
+	if ( reac.e->numEntries() > 1 ) {
+		reacMap_[ ( connIndex + reac.i ) - reac.e->numEntries() ] =
+			rateTermIndex;
+		// cout << "reacMap_[ " << ( connIndex + reac.i ) - reac.e->numEntries() << " ] = " << rateTermIndex << endl;
+	} else {
+		reacMap_[connIndex - 1] = rateTermIndex;
+	}
 }
 
 void KineticHub::enzConnectionFunc( const Conn* c,
@@ -676,7 +681,14 @@ void KineticHub::enzConnectionFuncLocal(
 	assert( connIndex > 0 ); // Should have just created a message on it
 	assert( enzMap_.size() >= connIndex );
 
-	enzMap_[connIndex - 1] = rateTermIndex;
+	// enzMap_[connIndex - 1] = rateTermIndex;
+
+	if ( enz.e->numEntries() > 1 ) {
+		enzMap_[ ( connIndex + enz.i ) - enz.e->numEntries() ] =
+			rateTermIndex;
+	} else {
+		enzMap_[connIndex - 1] = rateTermIndex;
+	}
 }
 
 void KineticHub::mmEnzConnectionFuncLocal(
@@ -725,7 +737,14 @@ void KineticHub::mmEnzConnectionFuncLocal(
 	assert( connIndex > 0 ); // Should have just created a message on it
 	assert( mmEnzMap_.size() >= connIndex );
 
-	mmEnzMap_[connIndex - 1] = rateTermIndex;
+	// mmEnzMap_[connIndex - 1] = rateTermIndex;
+
+	if ( mmEnz.e->numEntries() > 1 ) {
+		mmEnzMap_[ ( connIndex + mmEnz.i ) - mmEnz.e->numEntries() ] =
+			rateTermIndex;
+	} else {
+		mmEnzMap_[connIndex - 1] = rateTermIndex;
+	}
 }
 
 void unzombify( Eref e )
@@ -887,6 +906,7 @@ double KineticHub::getReacKf( Eref e )
 	KineticHub* kh = getHubFromZombie( e, reacSolveFinfo, index );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->reacMap_.size() );
+		// cout << "index = kh->reacMap_[ " << index << " ] = " << kh->reacMap_[ index ] << endl;
 		index = kh->reacMap_[ index ];
 		assert ( index < kh->rates_->size() );
 		return ( *kh->rates_ )[index]->getR1();
