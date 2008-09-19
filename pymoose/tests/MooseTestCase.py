@@ -12,4 +12,22 @@ class MooseTestCase(unittest.TestCase):
         unittest.TestCase.__init__(self, *args)
         self.testContainer = Neutral("/test")
         self.dataContainer = Neutral("/testData")
-        
+        self.testObj = None
+        self.testData = None
+        MooseTestCase.testId += 1
+
+
+    def recordField(self, fieldName, tableName=None, object=None):
+        """Connect the data table to a particular field of object"""
+        data = None
+        if tableName is None:
+            self.testData = Table(self.testObj.name, self.dataContainer)
+            data = self.testData
+        else:
+            data = Table(tableName, self.dataContainer)
+        if object is None:
+            object = self.testObj
+        data.stepMode = 3
+        data.connect("inputRequest", object, fieldName)
+        print "Connected", data.name, "to", object.name
+        return data
