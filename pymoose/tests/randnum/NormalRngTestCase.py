@@ -23,36 +23,27 @@ class NormalRngTestCase(RandNumTestCase):
         RandNumTestCase.__init__(self, *args)
 
     def setUp(self):
-        self.testId = MooseTestCase.testId
-        MooseTestCase.testId += 1
+        self.testId = self.newTestId()
         self.testObj = NormalRng("NormalRng_" + str(self.testId), self.testContainer)
         self.testData = self.recordField("sample")
-        print "Setup: testId:", self.testId
 
     def testAliasMethod(self):
         """Test Alias method"""
-        print "START: testAliasMethod"
         self.testObj.method = 0
         mean, variance, = self.sampleMeanVariance()
         self.failUnlessAlmostEqual(self.testObj.mean, mean, 1, "Sample mean is " + str(mean) + ", expected ~" + str(self.testObj.mean))
-        self.failUnlessAlmostEqual((self.testObj.variance - variance)/max(self.testObj.variance, variance), 0, 0, "Sample variance is " + str(variance) + ", expected ~" + str(self.testObj.variance))
-        print "END: testAliasMethod"
-
+        self.failUnlessAlmostEqual((self.testObj.variance - variance)/max(self.testObj.variance, variance), 0, 1, "Sample variance is " + str(variance) + ", expected ~" + str(self.testObj.variance))
+        
     def testMeanVariance(self):
         """Test if the sample mean and sample variance are sufficiently close to what was set in the generator."""
-        print "Test Id:", self.testId, self.testObj.path(), "testMeanVariance"
         self.testObj.mean = 10.0
         self.testObj.variance = 3.0
         mean, variance, = self.sampleMeanVariance()
-        print "mean: ", mean, "variance: ", variance
-#         self.failUnlessAlmostEqual(self.testObj.mean, mean, 1, "Sample mean is " + str(mean) + ", expected ~" + str(self.testObj.mean))
-#         self.failUnlessAlmostEqual((self.testObj.variance - variance)/max(self.testObj.variance, variance), 0, 0, "testId: " + str(self.testId) + " Sample variance is " + str(variance) + ", expected ~" + str(self.testObj.variance))
-        print "testMeanVariance: finished"
-        
+        self.failUnlessAlmostEqual((self.testObj.mean - mean)/max(self.testObj.mean, mean), 0.0, 1, "Sample mean is " + str(mean) + ", expected ~" + str(self.testObj.mean))
+        self.failUnlessAlmostEqual((self.testObj.variance - variance)/max(self.testObj.variance, variance), 0.0, 1, "testId: " + str(self.testId) + " Sample variance is " + str(variance) + ", expected ~" + str(self.testObj.variance))
 
     def testSetGet(self):
         """Test if we can set the fields correctly"""
-        print "START: testSetGet"
         mean = 0.0
         variance = 1.0
         self.failUnlessAlmostEqual(self.testObj.mean, mean, 2, "The default mean is not 0.0, but "+str(self.testObj.mean))
@@ -72,8 +63,6 @@ class NormalRngTestCase(RandNumTestCase):
         self.testObj.getContext().reset()
         self.failUnlessAlmostEqual(self.testObj.mean, mean, 2, "Mean changed after reset()")
         self.failUnlessAlmostEqual(self.testObj.variance, variance, 2, "Variance changed after reset()")
-        print self.testId, "Finished"
-        print "END: testSetGet"
 
 class NormalRngTestSuite(unittest.TestSuite):
     def __init__(self):
