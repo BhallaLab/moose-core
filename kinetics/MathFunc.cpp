@@ -268,8 +268,23 @@ void MathFunc::error(string errormsg){
 }
 
 void trim(string &s){
-  if (s[0] == ' ') {int i = 0; while (s[i++]==' ');  s.erase(0, i-1);}
-  if (s[s.size()-1] == ' ') {int i = 0; while (s[s.size() - 1 - i++]==' ');  s.erase(s.size() - i+1);}
+    if (s.size() > 0)
+    {
+        if (s[0] == ' ')
+        {
+            int i = 0;
+            while (s[i++]==' ')
+                ;
+            s.erase(0, i-1);
+        }
+        if (s[s.size()-1] == ' ')
+        {
+            int i = 0;
+            while (s[s.size() - 1 - i++]==' ')
+                ;
+            s.erase(s.size() - i+1);
+        }
+    }    
 }
 
 void getLine(string &mmlfile, string &s){
