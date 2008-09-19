@@ -30,7 +30,7 @@ class Normal : public Probability
 {
     
   public:
-    Normal(double mean=0.0, double variance=1.0, NormalGenerator algorithm=BOX_MUELLER);
+    Normal(double mean=0.0, double variance=1.0, NormalGenerator algorithm=ALIAS);
     double getMean()  const;
     void setMean(double value);
     double getVariance() const;
