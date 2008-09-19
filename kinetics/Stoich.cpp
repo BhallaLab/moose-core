@@ -638,14 +638,18 @@ void Stoich::addReac( Eref stoich, Eref e )
 	vector< const double* > prd;
 	class ZeroOrder* freac = 0;
 	class ZeroOrder* breac = 0;
+	double kf = Reaction::getKf( e ); // bypass the solver lookup stuff
+	double kb = Reaction::getKb( e );
+	/*
 	double kf;
 	double kb;
 	bool isOK = get< double >( e, "kf", kf );
-	assert( !isnan( kf ) );
 	assert ( isOK );
 	isOK = get< double >( e, "kb", kb );
-	assert( !isnan( kb ) );
 	assert ( isOK );
+	*/
+	assert( !isnan( kf ) );
+	assert( !isnan( kb ) );
 
 	if ( findTargets( e, "sub", sub ) ) {
 		freac = makeHalfReaction( kf, sub );
@@ -658,6 +662,8 @@ void Stoich::addReac( Eref stoich, Eref e )
 	// 	assert( 0 );
 	// 	return;
 	}
+	// cout << "addReac " << e.name() << " kf, kb=" << kf << ", " << kb << endl;
+	/*
 	if ( sub.size() == 0 || prd.size() == 0 ) {
 		if ( sub.size() == 0 )
 			cout << "Warning: Stoich::fillStoich: dangling substrate on " << e.id().path() << ". Reaction ignored.\n";
@@ -665,6 +671,7 @@ void Stoich::addReac( Eref stoich, Eref e )
 			cout << "Warning: Stoich::fillStoich: dangling product on " << e.id().path() << ". Reaction ignored.\n";
 		// return;
 	}
+	*/
 
 #ifdef DO_UNIT_TESTS
 	reacMap_[e] = rates_.size();
@@ -688,6 +695,7 @@ void Stoich::addReac( Eref stoich, Eref e )
 				);
 			} else {
 				rates_.push_back( dummyReac );
+				cout << "Stoich::addReac: dummy on " << e.id().path() << "\n";
 			}
 			/*
 			} else if ( freac )  {
@@ -711,6 +719,7 @@ bool Stoich::checkEnz( Eref e,
 		bool isMM
 	)
 {
+	/*
 	bool ret;
 	ret = get< double >( e, "k1", k1 );
 	assert( ret );
@@ -720,6 +729,13 @@ bool Stoich::checkEnz( Eref e,
 	assert( !isnan( k2 ) );
 	ret = get< double >( e, "k3", k3 );
 	assert( ret );
+	assert( !isnan( k3 ) );
+	*/
+	k1 = Enzyme::getK1( e );
+	k2 = Enzyme::getK2( e );
+	k3 = Enzyme::getK3( e );
+	assert( !isnan( k1 ) );
+	assert( !isnan( k2 ) );
 	assert( !isnan( k3 ) );
 
 	if ( !findTargets( e, "sub", sub ) ) {
