@@ -60,15 +60,12 @@ double dummy()
 
 double Normal::getNextSample() const
 {
-    static double sd = sqrt(variance_);
-    
+    double sd = sqrt(variance_);
     double sample = generator_();
-    
     if (!isStandard_)
     {
         sample = mean_ + sd*sample;
     }
-
     return sample;    
 }
 
@@ -155,16 +152,16 @@ double Normal::gslZiggurat()
 */
 double Normal::BoxMueller()
 {
-    static double result;    
-    double a, b, r = 0;
-    
-    while(( r == 0 ) || ( r >= 1 ))
-    {      
-        a = mtrand();
-        b = mtrand();
-        r = sqrt(-2*log(a));
-    }
-    result = r*cos(2*M_PI*b);        
+    double result;    
+    double a, b, r;
+    do
+    {
+        a = 2.0 * mtrand() - 1.0;
+        b = 2.0 * mtrand() - 1.0;
+        r = a * a + b * b;
+    } while ( r >= 1.0 );
+    r = sqrt( - 2.0 * log(r) / r );
+    result = r * a;        
     
     return result;    
 }
