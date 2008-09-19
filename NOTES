@@ -7404,5 +7404,6 @@ carry this through to include the enzymes.
 Done. Now I get reasonable looking changes in the big sigNeur3.g model.
 Need to compile on a serious machine with optimization to run for long enough
 to see if it is really working.
+Checked in as revision 726: unit test flags on, Smoldyn off, GSL on, -g, MPI off
 
 ==============================================================================
