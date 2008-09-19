@@ -7383,5 +7383,26 @@ kf and kb to zero. Also all the rates for the enzymes.
 This is a puzzle. The sigNeur stuff works OK for the Exp Euler method, but
 not for rk5. Conversely, rk5 works OK for simple models including the 
 Kholodenko model.
+Checked in as revision 723: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+OK, I've replicated the problem with the much simpler TEST/robot/
+ksolveArrayDanglingOn2.g, compared with ksolveArrayDanglingOn.g which works.
+The former has reaction 0 dangling, and the latter has reaction 1 dangling.
+Makes all the difference.
+
+I think I have figured out and fixed the indexing issue, but now it looks
+like the rates themselves are incorrectly set.
+==============================================================================
+19 Sep 2008
+I think the problem may be that the addReac is done reaction by reaction,
+but as soon as the first one is done then the entire lot are converted to
+use the lookup functions from the solver.
+
+That did it. I used the original Reaction class functions to look up the 
+values, and then the ksolveArrayDanglingOn2.g simulation worked. Need to
+carry this through to include the enzymes.
+Done. Now I get reasonable looking changes in the big sigNeur3.g model.
+Need to compile on a serious machine with optimization to run for long enough
+to see if it is really working.
 
 ==============================================================================
