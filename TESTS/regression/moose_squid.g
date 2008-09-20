@@ -151,5 +151,5 @@ openfile "test.plot" w
 writefile "test.plot" "/newplot"
 writefile "test.plot" "/plotname Vm"
 closefile "test.plot"
-setfield /Vm print "test.plot"
+setfield /Vm append "test.plot"
 quit
