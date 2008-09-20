@@ -24,16 +24,17 @@
 ############################################################################
 
 TARGET=pymoose
-CFLAGS+= -I/usr/include/python2.5 -I..
+#CFLAGS+= -I/usr/include/python2.5 -I..
+CFLAGS=-fPIC -I/Library/Frameworks/Python.framework/Versions/2.5/include/python2.5 -I..
 ifdef ($(USE_NUMPY))
 CFLAGS+=-I/usr/local/lib/python2.5/site-packages/numpy/core/include
 endif
 # The library location and flags for creating dll in Mac is different from Linux
-ifeq ($(OSTYPE),Darwin)
-	CFLAGS+=-bundle -flat_namespace -undefined suppress 
+ifeq ($(PLATFORM),mac)
+	CFLAGS+=-dynamic -bundle -flat_namespace -undefined suppress 
 endif
 CXXFLAGS=$(CFLAGS)
-LIBS+=-lpython2.5 
+LIBS+=-lpython2.5  -L/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/config/
 OBJFILES = ../basecode/basecode.o \
 	../element/element.o \
 	../shell/shell.o \
@@ -174,7 +175,8 @@ default: $(TARGET)
 pymoose: _moose.so moose.py #testPyMoose 
 
 _moose.so: moose_wrap.o $(OBJ) $(OBJFILES)
-	$(CXX) $(CFLAGS) -shared -o $@ $^ $(LIBS)
+	echo $(OSTYPE)
+	$(CXX) $(CFLAGS) -o $@ $^ $(LIBS)
 
 moose_wrap.o: moose_wrap.cxx
 	$(CXX) $(CFLAGS) -c $^ -o $@
