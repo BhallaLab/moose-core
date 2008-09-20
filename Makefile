@@ -61,7 +61,8 @@ endif
 
 # PLATFORM (= Linux, win32, Darwin)
 #If using mac uncomment the following line
-#PLATFORM = mac
+PLATFORM=mac
+export PLATFORM
 
 # Get the processor architecture - i686 or x86_64
 # All these should be taken care of in a script, not in the 
@@ -87,7 +88,7 @@ endif
 #
 # MAC OS X compilation, Debug mode:
 ifeq ($(PLATFORM),mac)
-CFLAGS += -Wno-deprecated -force_cpusubtype_ALL -mmacosx-version-min=10.4  -arch x86_64
+CFLAGS += -Wno-deprecated -force_cpusubtype_ALL -mmacosx-version-min=10.4
 endif
 # Use the options below for compiling on GCC4.1
 # GNU C++ 4.1 and newer might need -ffriend-injection
@@ -201,7 +202,7 @@ libmoose.so: libs
 	$(CXX) -G $(LIBS) -o libmoose.so
 	@echo "Created dynamic library"
 
-pymoose: CFLAGS += -fPIC
+pymoose: CFLAGS += -fPIC 
 pymoose: SUBDIR += pymoose
 pymoose: libs $(OBJLIBS) 
 	$(MAKE) -C $@
