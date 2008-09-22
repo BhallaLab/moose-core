@@ -232,8 +232,8 @@ int Molecule::localGetMode( Eref e )
 	static const Finfo* sumTotFinfo = 
 			Cinfo::find( "Molecule" )->findFinfo( "sumTotal" );
 
-	unsigned int n = e.e->numTargets( sumTotFinfo->msg() );
-	if ( mode_ == 0 && e.e->numTargets( n > 0 ) )
+	unsigned int n = e.e->numTargets( sumTotFinfo->msg(), e.i );
+	if ( mode_ == 0 && n > 0 )
 		mode_ = 1;
 	else if ( mode_ == 1 && n == 0 )
 		mode_ = 0;
