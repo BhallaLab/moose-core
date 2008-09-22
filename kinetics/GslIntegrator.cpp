@@ -30,12 +30,19 @@ const Cinfo* initGslIntegratorCinfo()
 	static Finfo* process = new SharedFinfo( "process", processShared,
 		sizeof( processShared ) / sizeof( Finfo* ) );
 
+	/**
+	 * This is connected to the Stoich object.
+	 */
 	static Finfo* gslShared[] =
 	{
 		new SrcFinfo( "reinitSrc", Ftype0::global() ),
 		new DestFinfo( "assignStoich",
 			Ftype1< void* >::global(),
 			RFCAST( &GslIntegrator::assignStoichFunc )
+			),
+		new DestFinfo( "assignY",
+			Ftype2< double, unsigned int >::global(),
+			RFCAST( &GslIntegrator::assignYfunc )
 			),
 	};
 
@@ -214,6 +221,22 @@ void GslIntegrator::setInternalDt( const Conn* c, double value )
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
+
+void GslIntegrator::assignYfunc( const Conn* c, double y, unsigned int i )
+{
+	static_cast< GslIntegrator* >( c->data() )->
+		assignYfuncLocal( y, i );
+}
+
+void GslIntegrator::assignYfuncLocal( double y, unsigned int i ) 
+{
+	if ( i >= nVarMols_ ) {
+		cout << "Error: GslIntegrator::assignYfuncLocal: i >=nVarMols: " <<
+			i << " >= " << nVarMols_ << endl;
+		return;
+	}
+	y_[i] = y;
+}
 
 void GslIntegrator::assignStoichFunc( const Conn* c, void* stoich )
 {

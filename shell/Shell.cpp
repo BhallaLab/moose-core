@@ -506,6 +506,9 @@ string Shell::eid2path( Id eid )
 {
 	if ( eid.zero() )
 		return string( "/" );
+	if ( !eid.good() )
+		return string( "bad" );
+
 	static const string slash = "/";
 	string n( "" );
 	while ( !eid.zero() ) {

@@ -49,6 +49,8 @@ class Stoich
 		}
 		void clear( Eref stoich );
 
+		static void assignYfunc( const Conn* c, double y, unsigned int i );
+
 		///////////////////////////////////////////////////
 		// Functions used by the GslIntegrator
 		///////////////////////////////////////////////////
