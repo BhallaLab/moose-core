@@ -103,6 +103,11 @@ class KineticHub
 		static double getMolN( Eref e );
 		static void setMolNinit( const Conn* c, double value );
 		static double getMolNinit( Eref e );
+		static void setMolConc( const Conn* c, double value );
+		static double getMolConc( Eref e );
+		static void setMolConcInit( const Conn* c, double value );
+		static double getMolConcInit( Eref e );
+
 		static void setReacKf( const Conn* c, double value );
 		static double getReacKf( Eref e );
 		static void setReacKb( const Conn* c, double value );
