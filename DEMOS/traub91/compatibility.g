@@ -42,3 +42,13 @@ function settab2const(gate, table, imin, imax, value)
 		setfield {gate} {table}->table[{i}] {value}
 	end
 end
+
+function setup_table( gate, table, xdivs, A, B, C, D, F )
+	setupgate {gate} {table} {A} {B} {C} {D} {F} -size {xdivs} \
+		-range -0.1 0.05
+end
+
+function setup_table3(gate, table, xdivs, xmin, xmax, A, B, C, D, F)
+	setupgate {gate} {table} {A} {B} {C} {D} {F} -size {xdivs} \
+		-range {xmin} {xmax}
+end

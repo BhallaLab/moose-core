@@ -4,24 +4,26 @@
 
 echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-A linear cell with with passive compartments, punctuated with excitable 'Nodes
-of Ranvier'.
+Model: 2 linear cells, with a synapse. 1st cell is excitable, 2nd is not.
+Plots: - Vm of last compartment of postsynaptic cell
+       - Gk of synaptic channel (embedded in first compartment of the same cell)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
 
 include compatibility.g
 int USE_SOLVER = 1
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // MODEL CONSTRUCTION
 ////////////////////////////////////////////////////////////////////////////////
 float SIMDT = 50e-6
-float IODT = 100e-6
-float SIMLENGTH = 0.25
-float INJECT = 1e-10
+float IODT = 50e-6
+float SIMLENGTH = 0.05
+float INJECT = 1.0e-10
 float EREST_ACT = -0.065
 
-include chan.g
+include simplechan.g
 
 ce /library
 	make_Na_mit_usb
@@ -32,6 +34,26 @@ ce /
 //  Create cells
 //=====================================
 readcell myelin2.p /axon
+readcell cable.p /cable
+
+//=====================================
+//  Create synapse
+//=====================================
+ce /axon/n99/i20
+create spikegen spike
+setfield spike thresh 0.0 \
+               abs_refract .02
+addmsg . spike INPUT Vm
+ce /
+
+ce /cable/c1
+create synchan syn
+setfield ^ Ek 0 gmax 1e-8 tau1 1e-3 tau2 2e-3
+addmsg . syn VOLTAGE Vm
+addmsg syn . CHANNEL Gk Ek
+ce /
+
+addmsg /axon/n99/i20/spike /cable/c1/syn SPIKE
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,15 +61,19 @@ readcell myelin2.p /axon
 ////////////////////////////////////////////////////////////////////////////////
 create neutral /plots
 
-create table /plots/Vm0
-call /plots/Vm0 TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
-setfield /plots/Vm0 step_mode 3
-addmsg /axon/soma /plots/Vm0 INPUT Vm
+create table /plots/Vm
+call /plots/Vm TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
+setfield /plots/Vm step_mode 3
 
-create table /plots/Vm1
-call /plots/Vm1 TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
-setfield /plots/Vm1 step_mode 3
-addmsg /axon/n99/i20 /plots/Vm1 INPUT Vm
+create table /plots/Gk
+call /plots/Gk TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
+setfield /plots/Gk step_mode 3
+
+//=====================================
+//  Record from compartment
+//=====================================
+addmsg /cable/c10 /plots/Vm INPUT Vm
+addmsg /cable/c1/syn /plots/Gk INPUT Gk
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -84,9 +110,17 @@ if ( USE_SOLVER )
 			chanmode 1
 		call /axon/solve SETUP
 		setmethod 11
+		
+		create hsolve /cable/solve
+		setfield /cable/solve \
+			path /cable/##[TYPE=symcompartment],/cable/##[TYPE=compartment] \
+			chanmode 1
+		call /cable/solve SETUP
+		setmethod 11
 	end
 else
 	if ( MOOSE )
+		setfield /cable method "ee"
 		setfield /axon method "ee"
 	end
 end
@@ -109,23 +143,25 @@ else
 	extension = ".genesis.plot"
 end
 
-filename = "axon-0" @ {extension}
+filename = "Vm" @ {extension}
 openfile {filename} w
 writefile {filename} "/newplot"
-writefile {filename} "/plotsname Vm(0)"
+writefile {filename} "/plotname Vm"
 closefile {filename}
-tab2file {filename} /plots/Vm0 table
+tab2file {filename} /plots/Vm table
 
-filename = "axon-x" @ {extension}
+filename = "Gk" @ {extension}
 openfile {filename} w
 writefile {filename} "/newplot"
-writefile {filename} "/plotsname Vm(100)"
+writefile {filename} "/plotname Gk"
 closefile {filename}
-tab2file {filename} /plots/Vm1 table
+tab2file {filename} /plots/Gk table
+
 
 echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Plots written to *.moose.plot. Reference plots in *.genesis.plot
+Plots written to *.moose.plot. Reference curves from GENESIS are in files named
+*.genesis.plot.
 
 If you have gnuplot, run 'gnuplot plot.gnuplot' to view the graphs.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

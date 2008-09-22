@@ -4,34 +4,54 @@
 
 echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-A linear cell with with passive compartments, punctuated with excitable 'Nodes
-of Ranvier'.
+Rallpack 3: Linear axon
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
 
 include compatibility.g
+include util.g
+include squidchan.g
 int USE_SOLVER = 1
 
 ////////////////////////////////////////////////////////////////////////////////
 // MODEL CONSTRUCTION
 ////////////////////////////////////////////////////////////////////////////////
-float SIMDT = 50e-6
-float IODT = 100e-6
-float SIMLENGTH = 0.25
-float INJECT = 1e-10
-float EREST_ACT = -0.065
-
-include chan.g
-
-ce /library
-	make_Na_mit_usb
-	make_K_mit_usb
-ce /
+float  SIMDT           = 50e-6
+float  IODT            = {SIMDT} * 1.0
+float  SIMLENGTH       = 0.25
+int    N_COMPARTMENT   = 1000
+float  CABLE_LENGTH    = 1e-3
+float  RA              = 1.0
+float  RM              = 4.0
+float  CM              = 0.01
+float  EM              = -0.065
+float  INJECT          = 1e-10
+float  DIAMETER        = 1e-6
+float  LENGTH          = {CABLE_LENGTH} / {N_COMPARTMENT}
+int    SYMMETRIC       = 1
 
 //=====================================
 //  Create cells
 //=====================================
-readcell myelin2.p /axon
+if ( MOOSE )
+	create Cell /axon
+else
+	create neutral /axon
+end
+
+make_compartment /proto/cc {RA} {RM} {CM} {EM} 0.0 {DIAMETER} {LENGTH} {SYMMETRIC}
+embed_Na /proto/cc
+embed_K /proto/cc
+
+copy /proto/cc axon/c1
+
+int i
+for ( i = 2; i <= {N_COMPARTMENT}; i = i + 1 )
+	copy /proto/cc axon/c{i}
+	link_compartment /axon/c{i - 1} /axon/c{i} {SYMMETRIC}
+end
+
+echo "Rallpack 3 model set up."
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,15 +59,15 @@ readcell myelin2.p /axon
 ////////////////////////////////////////////////////////////////////////////////
 create neutral /plots
 
-create table /plots/Vm0
-call /plots/Vm0 TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
-setfield /plots/Vm0 step_mode 3
-addmsg /axon/soma /plots/Vm0 INPUT Vm
+create table /plots/v1
+call /plots/v1 TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
+setfield /plots/v1 step_mode 3
+addmsg /axon/c1 /plots/v1 INPUT Vm
 
-create table /plots/Vm1
-call /plots/Vm1 TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
-setfield /plots/Vm1 step_mode 3
-addmsg /axon/n99/i20 /plots/Vm1 INPUT Vm
+create table /plots/vn
+call /plots/vn TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
+setfield /plots/vn step_mode 3
+addmsg /axon/c{N_COMPARTMENT} /plots/vn INPUT Vm
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,7 +86,7 @@ useclock /plots/#[TYPE=table] 2
 //=====================================
 //  Stimulus
 //=====================================
-setfield /axon/soma inject {INJECT}
+setfield /axon/c1 inject {INJECT}
 
 //=====================================
 //  Solvers
@@ -112,20 +132,20 @@ end
 filename = "axon-0" @ {extension}
 openfile {filename} w
 writefile {filename} "/newplot"
-writefile {filename} "/plotsname Vm(0)"
+writefile {filename} "/plotname Vm"
 closefile {filename}
-tab2file {filename} /plots/Vm0 table
+tab2file {filename} /plots/v1 table
 
 filename = "axon-x" @ {extension}
 openfile {filename} w
 writefile {filename} "/newplot"
-writefile {filename} "/plotsname Vm(100)"
+writefile {filename} "/plotname Vm"
 closefile {filename}
-tab2file {filename} /plots/Vm1 table
+tab2file {filename} /plots/vn table
 
 echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Plots written to *.moose.plot. Reference plots in *.genesis.plot
+Reference curves from GENESIS are in files named *.genesis.plot.
 
 If you have gnuplot, run 'gnuplot plot.gnuplot' to view the graphs.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
