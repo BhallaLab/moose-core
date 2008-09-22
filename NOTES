@@ -7457,3 +7457,18 @@ Skeleton of those done too. Some issues with messaging from zombies to be
 sorted.
 
 ==============================================================================
+22 Sep 2008
+
+Checked in as revision 735: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Looks like there is an issue with nInit rescaling.
+
+Solution to 1-D diffusion is
+n( x, t ) = (N/sqrt(4pi.Dt) ) * exp( -x^2/(4Dt ) )
+
+Implemented in the cylinder.g. It works well, getting better as the spatial
+discretization becomes finer.
+
+
+
+==============================================================================
