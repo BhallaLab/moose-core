@@ -27,6 +27,9 @@ const double Stoich::EPSILON = 1.0e-6;
 
 const Cinfo* initStoichCinfo()
 {
+	/**
+	 * Several messages that connect to the KineticHub
+	 */
 	static Finfo* hubShared[] =
 	{
 		new SrcFinfo( "rateTermInfoSrc", 
@@ -40,6 +43,10 @@ const Cinfo* initStoichCinfo()
 			Ftype3< unsigned int, unsigned int, unsigned int >::
 			global()
 		),
+		/**
+		 * This one is a bit ugly. It sends the entire S_ and Sinit_
+		 * arrays over
+		 */
 		new SrcFinfo( "molConnectionSrc",
 			Ftype3< vector< double >* , 
 				vector< double >* , 
@@ -61,8 +68,15 @@ const Cinfo* initStoichCinfo()
 		new SrcFinfo( "clearSrc",
 			Ftype0::global()
 		),
+		new DestFinfo( "assignY", 
+			Ftype2< double, unsigned int >::global(),
+			RFCAST( &Stoich::assignYfunc )
+		),
 	};
 
+	/**
+	 * Messages that connect to the KineticIntegrator
+	 */
 	static Finfo* integrateShared[] =
 	{
 		new DestFinfo( "reinit", Ftype0::global(),
@@ -74,14 +88,22 @@ const Cinfo* initStoichCinfo()
 			Ftype1< vector< double >* >::global() ),
 	};
 
+	/**
+	 * Messages that connect to the GslIntegrator object
+	 */
 	static Finfo* gslShared[] =
 	{
 		new DestFinfo( "reinit", Ftype0::global(),
 			&Stoich::reinitFunc ),
 		new SrcFinfo( "assignStoich",
 			Ftype1< void* >::global() ),
+		new SrcFinfo( "assignY",
+			Ftype2< double, unsigned int >::global() ),
 	};
 
+	/**
+	 * These are the fields of the stoich class
+	 */
 	static Finfo* stoichFinfos[] =
 	{
 		///////////////////////////////////////////////////////
@@ -205,6 +227,8 @@ static const Slot allocateSlot =
 	initStoichCinfo()->getSlot( "integrate.allocate" );
 static const Slot assignStoichSlot =
 	initStoichCinfo()->getSlot( "gsl.assignStoich" );
+static const Slot assignYslot =
+	initStoichCinfo()->getSlot( "gsl.assignY" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -301,6 +325,17 @@ void Stoich::integrateFunc( const Conn* c, vector< double >* v, double dt )
 {
 	Stoich* s = static_cast< Stoich* >( c->data() );
 	s->updateRates( v, dt );
+}
+
+
+/**
+ * Relays a 'y' assignment request to the GSL integrator, or whatever
+ * else is appropriate.
+ */
+void Stoich::assignYfunc( const Conn* c, double y, unsigned int i )
+{
+	// cout << "in Stoich::assignYfunc with " << y << ", " << i << endl;
+	send2< double, unsigned int>( c->target(), assignYslot, y, i );
 }
 
 ///////////////////////////////////////////////////
@@ -436,7 +471,7 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 				nMmEnz++;
 		}
 	}
-	// cout << "RebuildMatrix: Intermedate setup: " << nReac << ", " << nEnz << ", " << nMmEnz << endl;
+	// cout << "RebuildMatrix: Intermedate setup: " << nVarMols_ << "," << nReac << ", " << nEnz << ", " << nMmEnz << endl;
 	send3< unsigned int, unsigned int, unsigned int >(
 			stoich, rateSizeSlot, nReac, nEnz, nMmEnz );
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
@@ -466,6 +501,7 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 		}
 	}
 	setupReacSystem( stoich );
+	// cout << "RebuildMatrix: later setup: " << nVarMols_ << "," << nReac << ", " << nEnz << ", " << nMmEnz << endl;
 }
 
 

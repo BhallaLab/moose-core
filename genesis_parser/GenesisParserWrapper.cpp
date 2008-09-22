@@ -1414,7 +1414,8 @@ char* GenesisParserWrapper::doGet( int argc, const char** argv, Id s )
 	if ( argc == 3 ) {
 		// e = GenesisParserWrapper::path2eid( argv[1], s );
 		e = Id( argv[1] );
-		if ( e.bad() ) cout << "bad!!" << endl;
+		if ( e.bad() ) 
+			cout << "Element '" << argv[1] << "' not found\n";
 		if ( e.bad() )
 			return copyString( "" );
 		field = argv[2];

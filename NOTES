@@ -7406,4 +7406,54 @@ Need to compile on a serious machine with optimization to run for long enough
 to see if it is really working.
 Checked in as revision 726: unit test flags on, Smoldyn off, GSL on, -g, MPI off
 
+Put in some missing regression tests.
+Checked in as revision 727: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Compiled on pinni. Loaded the big sigNeur3 model, but crashed when I tried to
+run it.
+
+==============================================================================
+21 Sep 2008
+Implemented a new test case: cylinder.g. This makes a 240-compartment 
+uniform cylinder model with only Ca in it, to test for diffusion.
+Problem 1: Ksolver does not notice when I change n in the molecule. Confirmed
+this with ksolveArrayDanglingOn2.g as well as ksolveArrayDanglingOff2.g.
+Oddly, on reset n s visible as the new value, but as soon as the simulation
+steps it goes back.
+Also oddly, when I do an equivalent thing: setting n and nInit in the middle
+of a simulation, for a much bigger model, it works. Difference there is that
+the affected molecule was buffered.
+
+Worked through it. The y_ array in GslIntegrator was not being updated when
+Molecule::n was set. This overwrote the S_ array in Stoich. Some ugly
+messaging later, the standalone.g is now working, but cylinder.g is not.
+
+Now it transpires that there are problems in how many molecules are managed
+by the solver in the cylinder case.
+
+This turned out to be a really bizarre bug in the Molecule::getMode. The
+solver uses getMode to decide whether to build the molecule as a varMol or
+sumTot or buffered.
+Fixed. Cylinder.g now looks promising. Need to dig up solution.
+
+Now another random bug with 
+getfield /sig/kinetics/solve/hub nMol
+
+Oddly, showfield handles this with aplomb.
+There is something bad happening in Neutral::getChildByName. The obvious
+issue is that the Msg handling children has a nonzero next_, which a) should
+not happen, and b) is not being followed. Somehow related to this is the
+problem that there are only 2 children reported, neither of which is the 
+hub.
+
+Did a little test to at least ensure that mass conservation is obeyed in
+the reaction system. It is OK.
+
+On now to adaptors.
+Implemented skeleton for this. It scans through and identifies src and dest
+pairs and prints those out. The actual object creation and messaging to
+come next.
+Skeleton of those done too. Some issues with messaging from zombies to be
+sorted.
+
 ==============================================================================

@@ -15,6 +15,7 @@
 #include "../kinetics/Reaction.h"
 #include "../biophysics/Compartment.h"
 #include "SigNeur.h"
+#include "Adaptor.h"
 
 static const double PI = 3.1415926535;
 
@@ -480,6 +481,8 @@ void SigNeur::insertDiffusion( Element* base )
 		initMoleculeCinfo()->findFinfo( "reac" );
 	static const Finfo* dFinfo = 
 		initMoleculeCinfo()->findFinfo( "D" );
+	static const Finfo* modeFinfo = 
+		initMoleculeCinfo()->findFinfo( "mode" );
 	static const Finfo* subFinfo = 
 		initReactionCinfo()->findFinfo( "sub" );
 
@@ -505,6 +508,10 @@ void SigNeur::insertDiffusion( Element* base )
 	double D = 0.0;
 	bool ret = get< double >( base, dFinfo, D );
 	if ( D <= EPSILON )
+		return;
+	int mode = 0;
+	ret = get< int >( base, modeFinfo, mode );
+	if ( mode != 0 ) // Should neither be buffered nor sumtotalled.
 		return;
 
 	// Create array of diffusion reactions.
@@ -597,7 +604,6 @@ void diffCalc( double Dscale, Eref m0, Eref m1, Eref diff )
 
 
 void SigNeur::completeSomaDiffusion( 
-	map< string, Element* >& somaMap, // Never needs to go off-map.
 	vector< unsigned int >& junctions )
 {
 	static const Finfo* reacFinfo = 
@@ -605,8 +611,8 @@ void SigNeur::completeSomaDiffusion(
 	static const Finfo* prdFinfo = 
 		initReactionCinfo()->findFinfo( "prd" );
 	
-	for ( map< string, Element* >::iterator i = somaMap.begin(); 
-		i != somaMap.end(); ++i ) {
+	for ( map< string, Element* >::iterator i = somaMap_.begin(); 
+		i != somaMap_.end(); ++i ) {
 		Element* diff = findDiff( i->second );
 		if ( diff ) { // Connect up all diffn compts.
 			for ( unsigned int j = 0; j < numSoma_; ++j ) {
@@ -629,8 +635,6 @@ void SigNeur::completeSomaDiffusion(
 // void diffCalc( Eref m0, Eref m1, Eref diff )
 
 void SigNeur::completeDendDiffusion( 
-	map< string, Element* >& somaMap, // Some dends connect to soma.
-	map< string, Element* >& dendMap, 
 	vector< unsigned int >& junctions )
 {
 	static const Finfo* reacFinfo = 
@@ -638,16 +642,16 @@ void SigNeur::completeDendDiffusion(
 	static const Finfo* prdFinfo = 
 		initReactionCinfo()->findFinfo( "prd" );
 	
-	for ( map< string, Element* >::iterator i = dendMap.begin(); 
-		i != dendMap.end(); ++i ) {
+	for ( map< string, Element* >::iterator i = dendMap_.begin(); 
+		i != dendMap_.end(); ++i ) {
 		Element* diff = findDiff( i->second );
 		if ( diff ) { // Connect up all diffn compts.
 			for ( unsigned int j = 0; j < numDend_; ++j ) {
 				unsigned int tgt = junctions[ j + numSoma_ ];
 				if ( tgt < numSoma_ ) { // connect to soma, if mol present
 					map< string, Element* >::iterator mol = 
-						somaMap.find( i->first );
-					if ( mol != somaMap.end() ) {
+						somaMap_.find( i->first );
+					if ( mol != somaMap_.end() ) {
 						assert( tgt < mol->second->numEntries() );
 						Eref e2( diff, j );
 						Eref e1( i->second, tgt );
@@ -681,8 +685,6 @@ void SigNeur::completeDendDiffusion(
 }
 
 void SigNeur::completeSpineDiffusion( 
-	map< string, Element* >& dendMap, // All spines connect to a dend
-	map< string, Element* >& spineMap, 
 	vector< unsigned int >& junctions )
 {
 	static const Finfo* reacFinfo = 
@@ -690,8 +692,8 @@ void SigNeur::completeSpineDiffusion(
 	static const Finfo* prdFinfo = 
 		initReactionCinfo()->findFinfo( "prd" );
 	
-	for ( map< string, Element* >::iterator i = spineMap.begin(); 
-		i != spineMap.end(); ++i ) {
+	for ( map< string, Element* >::iterator i = spineMap_.begin(); 
+		i != spineMap_.end(); ++i ) {
 		Element* diff = findDiff( i->second );
 		if ( diff ) { // Connect up all diffn compts.
 			for ( unsigned int j = 0; j < numSpine_; ++j ) {
@@ -700,8 +702,8 @@ void SigNeur::completeSpineDiffusion(
 					tgt -= numSoma_; // Fix up offset into dend array.
 					// connect to dend, if mol present
 					map< string, Element* >::iterator mol = 
-						dendMap.find( i->first );
-					if ( mol != dendMap.end() ) {
+						dendMap_.find( i->first );
+					if ( mol != dendMap_.end() ) {
 						assert( tgt < mol->second->numEntries() );
 						Eref e0( i->second, j ); // Parent spine molecule
 						Eref e2( diff, j ); // Diffusion object
@@ -725,23 +727,20 @@ void SigNeur::completeSpineDiffusion(
  * This must be called before completeDiffusion because the vols
  * computed here are needed to compute diffusion rates.
  */
-void SigNeur::setAllVols( 
-	map< string, Element* >& somaMap,
-	map< string, Element* >& dendMap,
-	map< string, Element* >& spineMap )
+void SigNeur::setAllVols()
 {
 	for ( vector< TreeNode >::iterator i = tree_.begin();
 		i != tree_.end(); ++i ) {
 		for ( unsigned int j = i->sigStart; j < i->sigEnd; ++j ) {
 			if ( i->category == SOMA ) {
 				setComptVols( i->compt.eref(), 
-					somaMap, j, i->sigEnd - i->sigStart );
+					somaMap_, j, i->sigEnd - i->sigStart );
 			} else if ( i->category == DEND ) {
 				setComptVols( i->compt.eref(), 
-					dendMap, j - numSoma_, i->sigEnd - i->sigStart );
+					dendMap_, j - numSoma_, i->sigEnd - i->sigStart );
 			} else if ( i->category == SPINE ) {
 				setComptVols( i->compt.eref(), 
-					spineMap, j - ( numSoma_ + numDend_ ),
+					spineMap_, j - ( numSoma_ + numDend_ ),
 					i->sigEnd - i->sigStart );
 			}
 		}
@@ -1004,12 +1003,9 @@ void SigNeur::makeSignalingModel( Eref me )
 	vector< unsigned int > junctions( 
 		numSoma_ + numDend_ + numSpine_, UINT_MAX );
 	buildDiffusionJunctions( junctions );
-	map< string, Element* > somaMap;
-	map< string, Element* > dendMap;
-	map< string, Element* > spineMap;
-	buildMoleculeNameMap( soma, somaMap );
-	buildMoleculeNameMap( dend, dendMap );
-	buildMoleculeNameMap( spine, spineMap );
+	buildMoleculeNameMap( soma, somaMap_ );
+	buildMoleculeNameMap( dend, dendMap_ );
+	buildMoleculeNameMap( spine, spineMap_ );
 
 	/*
 	for ( unsigned int j = 0; j < junctions.size(); ++j )
@@ -1017,11 +1013,11 @@ void SigNeur::makeSignalingModel( Eref me )
 	cout << endl;
 	*/
 
-	setAllVols( somaMap, dendMap, spineMap );
+	setAllVols();
 
-	completeSomaDiffusion( somaMap, junctions );
-	completeDendDiffusion( somaMap, dendMap, junctions );
-	completeSpineDiffusion( dendMap, spineMap, junctions );
+	completeSomaDiffusion( junctions );
+	completeDendDiffusion( junctions );
+	completeSpineDiffusion( junctions );
 
 	set< string >( kin, "method", dendMethod_ );
 }
@@ -1146,6 +1142,10 @@ bool SigNeur::traverseCell( Eref me )
 	
 	// Set up the signaling models
 	makeSignalingModel( me );
+
+	makeCell2SigAdaptors( );
+
+	makeSig2CellAdaptors( );
 
 	return 1;
 }
@@ -1276,4 +1276,116 @@ CompartmentCategory SigNeur::guessCompartmentCategory( Eref e )
 		return SOMA;
 	}
 	return DEND;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void adaptCa2Sig( TreeNode& t, 
+	map< string, Element* >& m, Id caId, const string& mol )
+{
+	// Look up matching molecule
+	map< string, Element* >::iterator i = m.find( mol );
+	if ( i != m.end() ) {
+		cout << "Adding adaptor from " << caId.path() << " to " <<
+			i->second->name() << endl;
+	}
+}
+
+void SigNeur::makeCell2SigAdaptors()
+{
+	static const Finfo* lookupChildFinfo = 
+		initCompartmentCinfo()->findFinfo( "lookupChild" );
+	for ( map< string, string >::iterator i = calciumMap_.begin();
+		i != calciumMap_.end(); ++i ) {
+		for ( vector< TreeNode >::iterator j = tree_.begin();
+			j != tree_.end(); ++j ) {
+			Id caId;
+			bool ret = lookupGet< Id, string >( j->compt.eref(), lookupChildFinfo, caId, i->first );
+			if ( ret && caId.good() ) {
+				if ( j->category == SOMA ) {
+					adaptCa2Sig( *j, somaMap_, caId, i->second );
+				} else if ( j->category == DEND ) {
+					adaptCa2Sig( *j, dendMap_, caId, i->second );
+				} else if ( j->category == SPINE ) {
+					adaptCa2Sig( *j, spineMap_, caId, i->second );
+				}
+			}
+		}
+	}
+}
+
+void adaptSig2Chan( TreeNode& t, 
+	map< string, Element* >& m,
+	unsigned int offset,
+	const string& mol, Id chanId )
+{
+	static const Finfo* inputFinfo = 
+		initAdaptorCinfo()->findFinfo( "input" );
+	static const Finfo* outputFinfo = 
+		initAdaptorCinfo()->findFinfo( "outputSrc" );
+	
+	// Not sure if these update when solved
+	static const Finfo* molNumFinfo =  
+		initMoleculeCinfo()->findFinfo( "nSrc" );
+
+	// This isn't yet a separate destMsg. Again, issue with update.
+	static const Finfo* gbarFinfo =  
+		initMoleculeCinfo()->findFinfo( "Gbar" );
+
+	// Look up matching molecule
+	map< string, Element* >::iterator i = m.find( mol );
+	if ( i != m.end() ) {
+		Element* e = i->second;
+		cout << "Adding adaptor from " << e->name() << " to " << 
+			chanId.path() << endl;
+		assert( t.sigStart >= offset );
+		assert( t.sigEnd - offset <= e->numEntries() );
+
+		// Create the adaptor
+		Element* adaptor = Neutral::create( "Adaptor", "sig2chan",
+			t.compt, Id::childId( t.compt ) );
+		assert( adaptor != 0 );
+		Eref adaptorE( adaptor, 0 );
+
+		/*
+		for ( unsigned int j = t.sigStart; j < t.sigEnd; ++j ) {
+			// Connect up the adaptor.
+			Eref molE( e, j - offset );
+			bool ret = molE.add( molNumFinfo->msg(), adaptorE,
+				inputFinfo->msg(), ConnTainer::Default );
+			assert( ret );
+
+			// Here we set the parameters of the adaptor.
+		}
+		ret = adaptorE.add( outputFinfo->msg(), chanId.eref(), 
+			gbarFinfo->msg(), ConnTainer::Default );
+		assert( ret );
+		*/
+	}
+}
+
+
+void SigNeur::makeSig2CellAdaptors()
+{
+	static const Finfo* lookupChildFinfo = 
+		initCompartmentCinfo()->findFinfo( "lookupChild" );
+	for ( map< string, string >::iterator i = channelMap_.begin();
+		i != channelMap_.end(); ++i ) {
+		for ( vector< TreeNode >::iterator j = tree_.begin();
+			j != tree_.end(); ++j ) {
+			Id chanId;
+			bool ret = lookupGet< Id, string >( j->compt.eref(), lookupChildFinfo, chanId, i->second );
+			if ( ret && chanId.good() ) {
+				if ( j->category == SOMA ) {
+					adaptSig2Chan( *j, somaMap_, 0, i->first, chanId );
+				} else if ( j->category == DEND ) {
+					adaptSig2Chan( *j, dendMap_, numSoma_, 
+						i->first, chanId );
+				} else if ( j->category == SPINE ) {
+					adaptSig2Chan( *j, spineMap_, numDend_ + numSoma_,
+						i->first, chanId );
+				}
+			}
+		}
+	}
 }
