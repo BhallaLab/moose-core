@@ -295,6 +295,9 @@ bool matchInsideBrace( Id id, const string& inside )
 		if ( typeName == "membrane" )
 			typeName = "Compartment";
 		
+		if ( inside.substr( 0, 5 ) == "CLASS" && typeName == "channel" )
+			typeName = "HHChannel";
+		
 		bool isEqual;
 		map< string, string >::const_iterator iter = classNameMap.find( typeName );
 		if ( iter != classNameMap.end() )

@@ -227,6 +227,9 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "writefile",
 				Ftype2< string, string >::global(),
 				RFCAST( &Shell::writeFile ) ),
+		new DestFinfo( "flushfile",
+				Ftype1< string >::global(),
+				RFCAST( &Shell::flushFile ) ),
 		new DestFinfo( "listfiles",
 				Ftype0::global(),
 				RFCAST( &Shell::listFiles ) ),
@@ -2133,6 +2136,23 @@ void Shell::writeFile( const Conn* c, string filename, string text )
 			return;
 		}
 		fprintf(filehandles[i], "%s", text.c_str());
+	}
+	else {
+		cout << "Error:: File "<< filename << " not opened!!" << endl;
+		return;
+	}
+}
+
+void Shell::flushFile( const Conn* c, string filename )
+{
+	size_t i = 0;
+	while (filenames[i] != filename && ++i);
+	if ( i < filenames.size() ){
+		if ( !( modes[i] == "w" || modes[i] == "a" ) ) {
+			cout << "Error:: The file has not been opened in write mode" << endl;
+			return;
+		}
+		fflush(filehandles[i]);
 	}
 	else {
 		cout << "Error:: File "<< filename << " not opened!!" << endl;

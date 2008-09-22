@@ -191,6 +191,8 @@ const Cinfo* initGenesisParserCinfo()
 			Ftype2< string, string >::global() ),
 		new SrcFinfo( "writefile", 
 			Ftype2< string, string >::global() ),
+		new SrcFinfo( "flushfile", 
+			Ftype1< string >::global() ),
 		new SrcFinfo( "listfiles", 
 			Ftype0::global() ),
 		new SrcFinfo( "closefile", 
@@ -333,6 +335,8 @@ static const Slot openFileSlot =
 	initGenesisParserCinfo()->getSlot( "parser.openfile" );
 static const Slot writeFileSlot = 
 	initGenesisParserCinfo()->getSlot( "parser.writefile" );
+static const Slot flushFileSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.flushfile" );
 static const Slot listFilesSlot = 
 	initGenesisParserCinfo()->getSlot( "parser.listfiles" );
 static const Slot closeFileSlot = 
@@ -3550,9 +3554,17 @@ void do_writefile(int argc, const char** const argv, Id s){
 }
 
 
+void do_flushfile(int argc, const char** const argv, Id s){
+	if ( argc != 2 ){
+		cout << "usage:: flushfile <filename>" << endl;
+	}
+	string filename = argv[1];
+	send1< string > ( s(), flushFileSlot, filename );
+}
+
 void do_closefile(int argc, const char** const argv, Id s){
 	if ( argc != 2 ){
-		cout << "usage:: openfile <filename>" << endl;
+		cout << "usage:: closefile <filename>" << endl;
 	}
 	string filename = argv[1];
 	send1< string > ( s(), closeFileSlot, filename );
@@ -3834,6 +3846,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "getelementlist", reinterpret_cast< slifunc >(do_element_list ), "char*");
 	AddFunc( "openfile", do_openfile, "void" );
 	AddFunc( "writefile", do_writefile, "void" );
+	AddFunc( "flushfile", do_flushfile, "void" );
 	AddFunc( "readfile", reinterpret_cast< slifunc >( do_readfile ), "char*");
 	AddFunc( "listfiles", do_listfiles, "void" );
 	AddFunc( "closefile", do_closefile, "void" );
