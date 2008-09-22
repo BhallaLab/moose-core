@@ -234,13 +234,13 @@ Finfo* initMolZombieFinfo()
 		),
 		new ValueFinfo( "conc",
 			ValueFtype1< double >::global(),
-			GFCAST( &KineticHub::getMolN ),
-			RFCAST( &KineticHub::setMolN )
+			GFCAST( &KineticHub::getMolConc ),
+			RFCAST( &KineticHub::setMolConc )
 		),
 		new ValueFinfo( "concInit",
 			ValueFtype1< double >::global(),
-			GFCAST( &KineticHub::getMolNinit ),
-			RFCAST( &KineticHub::setMolNinit )
+			GFCAST( &KineticHub::getMolConcInit ),
+			RFCAST( &KineticHub::setMolConcInit )
 		),
 	};
 	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
@@ -886,6 +886,44 @@ double KineticHub::getMolNinit( Eref e )
 		return ( *kh->Sinit_ )[molIndex];
 	}
 	return 0.0;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// conc calculations
+/////////////////////////////////////////////////////////////////////////
+void KineticHub::setMolConc( const Conn* c, double value )
+{
+	double v = Molecule::getVolumeScale( c->target() );
+	if ( v > 0.0 )
+		value *= v;
+	
+	KineticHub::setMolN( c, value );
+}
+
+double KineticHub::getMolConc( Eref e )
+{
+	double v = Molecule::getVolumeScale( e );
+	double n = KineticHub::getMolN( e );
+	if ( v > 0.0 )
+		return n / v;
+	return n;
+}
+
+void KineticHub::setMolConcInit( const Conn* c, double value )
+{
+	double v = Molecule::getVolumeScale( c->target() );
+	if ( v > 0.0 )
+		value *= v;
+	KineticHub::setMolNinit( c, value );
+}
+
+double KineticHub::getMolConcInit( Eref e )
+{
+	double v = Molecule::getVolumeScale( e );
+	double n = KineticHub::getMolNinit( e );
+	if ( v > 0.0 )
+		return n / v;
+	return n;
 }
 
 ///////////////////////////////////////////////////
