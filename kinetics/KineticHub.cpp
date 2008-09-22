@@ -98,6 +98,10 @@ const Cinfo* initKineticHubCinfo()
 			Ftype0::global(),
 			RFCAST( &KineticHub::clearFunc )
 		),
+		// Forwards to the Stoich any requests to update mol n values.
+		new SrcFinfo( "assignYsrc",
+			Ftype2< double, unsigned int >::global()
+		),
 	};
 
 	/**
@@ -206,6 +210,9 @@ static const Slot molSumSlot =
 
 static const Slot fluxSlot =
 	initKineticHubCinfo()->getSlot( "flux.efflux" );
+
+static const Slot assignYslot =
+	initKineticHubCinfo()->getSlot( "hub.assignYsrc" );
 	
 /////////////////////////////////////////////////////////////////////////
 
@@ -802,12 +809,13 @@ void KineticHub::clearFunc( const Conn* c )
  * messages. This is NOT the absolute Conn index.
  */
 KineticHub* getHubFromZombie( Eref e, const Finfo* srcFinfo,
-		unsigned int& index )
+		unsigned int& index, Eref& hubE )
 {
 	Conn* c = e.e->targets( "process", e.i );
 	if ( c->good() ) {
+		hubE = c->target();
 		index = c->targetIndex();
-		KineticHub* kh = static_cast< KineticHub* >( c->target().data() );
+		KineticHub* kh = static_cast< KineticHub* >( hubE.data() );
 		c->increment();
 		assert( !c->good() ); // Should only be one process incoming.
 		delete c;
@@ -823,15 +831,22 @@ KineticHub* getHubFromZombie( Eref e, const Finfo* srcFinfo,
  * field, then the molecule itself.
  * For the molecule set/get operations, the lookup order is identical
  * to the message order. So we don't need an intermediate table.
+ *
+ * Warning: c here points to the molecule, not to the hub.
  */
 void KineticHub::setMolN( const Conn* c, double value )
 {
 	unsigned int molIndex;
-	KineticHub* kh = getHubFromZombie( 
-		c->target(), molSolveFinfo, molIndex );
+	Eref hubE;
+	KineticHub* kh = getHubFromZombie(
+		c->target(), molSolveFinfo, molIndex, hubE );
 	if ( kh && kh->S_ ) {
 		assert ( molIndex < kh->S_->size() );
 		( *kh->S_ )[molIndex] = value;
+		// cout << "in KineticHub::setMolN with " << value << ", " << molIndex << endl;
+		assert( hubE.e->numTargets( assignYslot.msg() ) == 1 );
+		send2< double, unsigned int >( hubE, assignYslot, 
+			value, molIndex );
 	}
 	Molecule::setN( c, value );
 }
@@ -839,7 +854,8 @@ void KineticHub::setMolN( const Conn* c, double value )
 double KineticHub::getMolN( Eref e )
 {
 	unsigned int molIndex;
-	KineticHub* kh = getHubFromZombie( e, molSolveFinfo, molIndex );
+	Eref hubE;
+	KineticHub* kh = getHubFromZombie( e, molSolveFinfo, molIndex, hubE );
 	if ( kh && kh->S_ ) {
 		assert ( molIndex < kh->S_->size() );
 		return ( *kh->S_ )[molIndex];
@@ -850,8 +866,9 @@ double KineticHub::getMolN( Eref e )
 void KineticHub::setMolNinit( const Conn* c, double value )
 {
 	unsigned int molIndex;
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), molSolveFinfo, molIndex );
+		c->target(), molSolveFinfo, molIndex, hubE );
 	if ( kh && kh->Sinit_ ) {
 		assert ( molIndex < kh->Sinit_->size() );
 		( *kh->Sinit_ )[molIndex] = value;
@@ -862,7 +879,8 @@ void KineticHub::setMolNinit( const Conn* c, double value )
 double KineticHub::getMolNinit( Eref e )
 {
 	unsigned int molIndex;
-	KineticHub* kh = getHubFromZombie( e, molSolveFinfo, molIndex );
+	Eref hubE;
+	KineticHub* kh = getHubFromZombie( e, molSolveFinfo, molIndex, hubE );
 	if ( kh && kh->Sinit_ ) {
 		assert ( molIndex < kh->Sinit_->size() );
 		return ( *kh->Sinit_ )[molIndex];
@@ -885,8 +903,9 @@ double KineticHub::getMolNinit( Eref e )
 void KineticHub::setReacKf( const Conn* c, double value )
 {
 	unsigned int index;
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), reacSolveFinfo, index );
+		c->target(), reacSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->reacMap_.size() );
 		index = kh->reacMap_[ index ];
@@ -903,7 +922,8 @@ void KineticHub::setReacKf( const Conn* c, double value )
 double KineticHub::getReacKf( Eref e )
 {
 	unsigned int index;
-	KineticHub* kh = getHubFromZombie( e, reacSolveFinfo, index );
+	Eref hubE;
+	KineticHub* kh = getHubFromZombie( e, reacSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->reacMap_.size() );
 		// cout << "index = kh->reacMap_[ " << index << " ] = " << kh->reacMap_[ index ] << endl;
@@ -917,8 +937,9 @@ double KineticHub::getReacKf( Eref e )
 void KineticHub::setReacKb( const Conn* c, double value )
 {
 	unsigned int index;
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), reacSolveFinfo, index );
+		c->target(), reacSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->reacMap_.size() );
 		index = kh->reacMap_[ index ];
@@ -931,7 +952,8 @@ void KineticHub::setReacKb( const Conn* c, double value )
 double KineticHub::getReacKb( Eref e )
 {
 	unsigned int index;
-	KineticHub* kh = getHubFromZombie( e, reacSolveFinfo, index );
+	Eref hubE;
+	KineticHub* kh = getHubFromZombie( e, reacSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->reacMap_.size() );
 		index = kh->reacMap_[ index ];
@@ -957,8 +979,9 @@ void KineticHub::setEnzK1( const Conn* c, double value )
 {
 	unsigned int index;
 	// cout << "in setEnzK1\n";
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), enzSolveFinfo, index );
+		c->target(), enzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
 		index = kh->enzMap_[ index ];
@@ -976,7 +999,8 @@ double KineticHub::getEnzK1( Eref e )
 {
 	unsigned int index;
 	// cout << "in getEnzK1\n";
-	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
+	Eref hubE;
+	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
 		index = kh->enzMap_[ index ];
@@ -990,8 +1014,9 @@ void KineticHub::setEnzK2( const Conn* c, double value )
 {
 	unsigned int index;
 	// cout << "in setEnzK2\n";
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), enzSolveFinfo, index );
+		c->target(), enzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
 		index = kh->enzMap_[ index ];
@@ -1005,7 +1030,8 @@ double KineticHub::getEnzK2( Eref e )
 {
 	unsigned int index;
 	// cout << "in getEnzK2\n";
-	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
+	Eref hubE;
+	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
 		index = kh->enzMap_[ index ];
@@ -1019,8 +1045,9 @@ void KineticHub::setEnzK3( const Conn* c, double value )
 {
 	unsigned int index;
 	// cout << "in setEnzK3\n";
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), enzSolveFinfo, index );
+		c->target(), enzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
 		index = kh->enzMap_[ index ];
@@ -1034,7 +1061,8 @@ double KineticHub::getEnzK3( Eref e )
 {
 	unsigned int index;
 	// cout << "in getEnzK3\n";
-	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
+	Eref hubE;
+	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
 		index = kh->enzMap_[ index ];
@@ -1050,8 +1078,9 @@ void KineticHub::setEnzKcat( const Conn* c, double value )
 {
 	unsigned int index;
 	// cout << "in setEnzKcat\n";
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), enzSolveFinfo, index );
+		c->target(), enzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
 		index = kh->enzMap_[ index ];
@@ -1078,8 +1107,9 @@ void KineticHub::setEnzKm( const Conn* c, double value )
 {
 	unsigned int index;
 	// cout << "in setEnzKm\n";
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), enzSolveFinfo, index );
+		c->target(), enzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
 		index = kh->enzMap_[ index ];
@@ -1099,7 +1129,8 @@ double KineticHub::getEnzKm( Eref e )
 {
 	unsigned int index;
 	// cout << "in getEnzKm\n";
-	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index );
+	Eref hubE;
+	KineticHub* kh = getHubFromZombie( e, enzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->enzMap_.size() );
 		index = kh->enzMap_[ index ];
@@ -1122,8 +1153,9 @@ void KineticHub::setMmEnzK1( const Conn* c, double value )
 {
 	unsigned int index;
 	// cout << "in setEnzK1\n";
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), enzSolveFinfo, index );
+		c->target(), enzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->mmEnzMap_.size() );
 		index = kh->mmEnzMap_[ index ];
@@ -1150,8 +1182,9 @@ void KineticHub::setMmEnzK2( const Conn* c, double value )
 {
 	unsigned int index;
 	// cout << "in setEnzK2\n";
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), enzSolveFinfo, index );
+		c->target(), enzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->mmEnzMap_.size() );
 		index = kh->mmEnzMap_[ index ];
@@ -1176,8 +1209,9 @@ void KineticHub::setMmEnzK3( const Conn* c, double value )
 {
 	unsigned int index;
 	// cout << "in setEnzK3\n";
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), enzSolveFinfo, index );
+		c->target(), enzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->mmEnzMap_.size() );
 		index = kh->mmEnzMap_[ index ];
@@ -1197,7 +1231,8 @@ double KineticHub::getMmEnzKcat( Eref e )
 {
 	unsigned int index;
 	// cout << "in getMmEnzKcat\n";
-	KineticHub* kh = getHubFromZombie( e, mmEnzSolveFinfo, index );
+	Eref hubE;
+	KineticHub* kh = getHubFromZombie( e, mmEnzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->mmEnzMap_.size() );
 		index = kh->mmEnzMap_[ index ];
@@ -1211,8 +1246,9 @@ void KineticHub::setMmEnzKcat( const Conn* c, double value )
 {
 	unsigned int index;
 	// cout << "in setEnzKcat\n";
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), mmEnzSolveFinfo, index );
+		c->target(), mmEnzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->mmEnzMap_.size() );
 		index = kh->mmEnzMap_[ index ];
@@ -1230,8 +1266,9 @@ void KineticHub::setMmEnzKm( const Conn* c, double value )
 {
 	unsigned int index;
 	// cout << "in setEnzKm\n";
+	Eref hubE;
 	KineticHub* kh = getHubFromZombie( 
-		c->target(), mmEnzSolveFinfo, index );
+		c->target(), mmEnzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->mmEnzMap_.size() );
 		index = kh->mmEnzMap_[ index ];
@@ -1246,7 +1283,8 @@ double KineticHub::getMmEnzKm( Eref e )
 {
 	unsigned int index;
 	// cout << "in getEnzKm\n";
-	KineticHub* kh = getHubFromZombie( e, mmEnzSolveFinfo, index );
+	Eref hubE;
+	KineticHub* kh = getHubFromZombie( e, mmEnzSolveFinfo, index, hubE );
 	if ( kh && kh->rates_ ) {
 		assert ( index < kh->mmEnzMap_.size() );
 		index = kh->mmEnzMap_[ index ];

@@ -42,6 +42,9 @@ class GslIntegrator
 		static void assignStoichFunc( const Conn* c, void* stoich );
 		void assignStoichFuncLocal( void* stoich );
 
+		static void assignYfunc( const Conn* c, double y, unsigned int i );
+		void assignYfuncLocal( double y, unsigned int i );
+
 	private:
 		bool isInitialized_;
 		string method_;
