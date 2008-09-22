@@ -60,9 +60,9 @@ BUILD=debug
 endif
 
 # PLATFORM (= Linux, win32, Darwin)
-#If using mac uncomment the following line
+#If using mac uncomment the following lines
 # PLATFORM=mac
-export PLATFORM
+#export PLATFORM
 
 # Get the processor architecture - i686 or x86_64
 # All these should be taken care of in a script, not in the 
