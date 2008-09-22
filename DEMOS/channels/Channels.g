@@ -2,11 +2,11 @@
 //moose
 
 echo "
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This test program works the same in GENESIS and MOOSE. Loads in a number of   %
-% channels and runs them with a square voltage pulse, plots out their           %
-% conductances. At this point 18 of the 21 channels work in MOOSE.              %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+This test program works the same in GENESIS and MOOSE. Loads in a number of
+channels and runs them with a square voltage pulse, plots out their
+conductances. At this point 18 of the 21 channels work in MOOSE.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
 
 float RUNTIME = 0.1
@@ -19,32 +19,7 @@ setclock 0 {DT}
 setclock 1 {DT}
 setclock 2 {PLOTDT}
 
-addalias setup_table2 setupgate
-addalias tweak_tabchan tweakalpha
-addalias tau_tweak_tabchan tweaktau
-addalias setup_tabchan setupalpha
-addalias setup_tabchan_tau setuptau
-
-function settab2const(gate, table, imin, imax, value)
-    str gate
-	str table
-	int i, imin, imax
-	float value
-	for (i = (imin); i <= (imax); i = i + 1)
-		setfield {gate} {table}->table[{i}] {value}
-	end
-end
-
-function setup_table( gate, table, xdivs, A, B, C, D, F )
-	setupgate {gate} {table} {A} {B} {C} {D} {F} -size {xdivs} \
-		-range -0.1 0.05
-end
-
-function setup_table3(gate, table, xdivs, xmin, xmax, A, B, C, D, F)
-	setupgate {gate} {table} {A} {B} {C} {D} {F} -size {xdivs} \
-		-range {xmin} {xmax}
-end
-
+include compatibility.g
 
 include bulbchan.g
 include traubchan.g
@@ -53,8 +28,6 @@ include hh_tchan.g
 // include FNTchan.g // doesn't even seem to work with GENESIS.
 include SMSNNchan.g
 include yamadachan.g
-
-create neutral /library
 
 ce /library
 // bulbchan here
@@ -130,7 +103,14 @@ setfield /plot step_mode 3
 str chan
 str chname
 str temp
-foreach chan ( { el /library/# } )
+str filename
+str extension
+if ( MOOSE )
+	extension = ".moose.plot"
+else
+	extension = ".genesis.plot"
+end
+foreach chan ( { el /library/#[CLASS=channel] } )
 	copy {chan} /compt
 
 	chname = { getpath {chan } -tail }
@@ -151,20 +131,21 @@ foreach chan ( { el /library/# } )
 	setfield /compt Vm -0.065 x 0
 	step {RUNTIME} -t
 
-	openfile "test_"{chname}".plot" a
-	writefile "test_"{chname}".plot" "/newplot"
-	writefile "test_"{chname}".plot" "/plotname "{chname}
-	closefile "test_"{chname}".plot"
+	filename = {chname} @ extension
+	openfile {filename} w
+	writefile {filename} "/newplot"
+	writefile {filename} "/plotname "{chname}
+	closefile {filename}
 
-	tab2file "test_"{chname}".plot" /plot table
+	tab2file {filename} /plot table
 
 	delete /compt/{chname}
 end
 
 echo "
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Plots written to test_***.plot.                                               %
-% The directory 'reference_plots' contains curves obtained using GENESIS.       %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Plots written to *.plot.
+The directory 'reference_plots' contains curves obtained using GENESIS.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
 quit
