@@ -165,9 +165,7 @@ class SigNeur
 		 * Connect up appropriate compartments in the soma. Note that
 		 * soma never needs to connect to any other compartment type.
 		 */
-		void completeSomaDiffusion( 
-			map< string, Element* >& somaMap, // Never needs to go off-map.
-			vector< unsigned int >& junctions );
+		void completeSomaDiffusion( vector< unsigned int >& junctions );
 
 		/**
 		 * Connect up diffusion for dendritic compartments. Most will
@@ -175,20 +173,21 @@ class SigNeur
 		 * connect to soma. So we need to check the somaMap for molecules
 		 * that diffuse.
 		 */
-		void completeDendDiffusion( 
-			map< string, Element* >& somaMap, // Some dends connect to soma.
-			map< string, Element* >& dendMap, 
-			vector< unsigned int >& junctions );
+		void completeDendDiffusion( vector< unsigned int >& junctions );
 
 		/**
 		 * Connect up diffusion to and from spines. All spines connect
 		 * to dend compartments.
 		 */
-		void completeSpineDiffusion( 
-			map< string, Element* >& dendMap,
-			map< string, Element* >& spineMap, 
-			vector< unsigned int >& junctions );
+		void completeSpineDiffusion( vector< unsigned int >& junctions );
 
+		/**
+		 * Traverses the cell tree to work out where the diffusion reactions
+		 * must connect to each other. junction[i] is the index of the 
+		 * compartment connected to compartment[i]. The indexing of 
+		 * compartments themselves is first the soma block, then the
+		 * dend block, then the spine block.
+		 */
 		void buildDiffusionJunctions( vector< unsigned int >& junctions );
 
 		/**
@@ -206,11 +205,25 @@ class SigNeur
  		* assigns volumes.
  		* This must be called before completeDiffusion because the vols
  		* computed here are needed to compute diffusion rates.
+		* It marches through the molecule name->ElementPointer maps to
+		* do this.
  		*/
-		void setAllVols( 
-			map< string, Element* >& somaMap,
-			map< string, Element* >& dendMap,
-			map< string, Element* >& spineMap );
+		void setAllVols();
+
+		/**
+		 * This traverses the map of cell to signalling info flow,
+		 * that is, calcium influx, to set up adaptors.
+		 */
+
+		void makeCell2SigAdaptors();
+
+		/**
+		 * This traverses the map of signalling to cell info flow to
+		 * set up adaptors. This would be for modulating channel
+		 * conductances based on molecular events.
+		 */
+		void makeSig2CellAdaptors();
+
 	private:
 		Id cellProto_; /// Prototype cell electrical model
 		Id spineProto_; /// Prototype spine signaling model
@@ -246,6 +259,13 @@ class SigNeur
 				// and the baseline for calciumMap is CaBasal and CoInit,
 				// and it uses calciumScale for scaling.
 		vector< TreeNode > tree_;
+
+		/// Name to Molecule map for soma compartment signaling models.
+		map< string, Element* > somaMap_;
+		/// Name to Molecule map for dend compartment signaling models.
+		map< string, Element* > dendMap_;
+		/// Name to Molecule map for spine compartment signaling models.
+		map< string, Element* > spineMap_;
 };
 
 #endif // _KINETIC_MANAGER_H
