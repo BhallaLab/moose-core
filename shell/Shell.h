@@ -200,6 +200,7 @@ class Shell
 		static void openFile( const Conn* c, string filename, string mode );
 		static void closeFile( const Conn* c, string filename );
 		static void writeFile( const Conn* c, string filename, string text );
+		static void flushFile( const Conn* c, string filename );
 		static void readFile( const Conn* c, string filename, bool linemode );
 		static void listFiles( const Conn* c );
 		static void loadtab( const Conn* c, string data );
