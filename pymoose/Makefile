@@ -35,7 +35,7 @@ ifeq ($(OSTYPE),Darwin)
 	CFLAGS+=-bundle -bundle_loader /usr/bin/python -flat_namespace -undefined suppress -I/Library/Frameworks/Python.framework/Versions/2.5/include/python2.5
 	LDFLAGS+=-dynamic -L/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/config/
 else # this is for unix like systems - change /usr/include/Python2.5 to the directory where Python.h is located
-	CFLAGS +=-I/usr/include/Python2.5
+	CFLAGS +=-I/usr/include/python2.5
 	LDFLAGS+=-shared
 endif
 
