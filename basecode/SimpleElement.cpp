@@ -226,7 +226,7 @@ Msg* SimpleElement::baseMsg( unsigned int msgNum )
 {
 	assert ( msgNum < msg_.size() );
 #ifdef DO_UNIT_TESTS
-	// if ( finfo_.size() == 0 )
+	// if ( finfo_.size() == 0 ) // Hack for unit test at 
 		return ( &( msg_[ msgNum ] ) );
 #else
 	unsigned int numSrc = cinfo()->numSrc();
