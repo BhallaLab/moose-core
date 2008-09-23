@@ -142,6 +142,7 @@ class SigNeur
 		// Setup function definitions
 		///////////////////////////////////////////////////
 		bool traverseCell( Eref me );
+		void schedule( Eref me );
 		Id findSoma( const vector< Id >& compts );
 		void buildTree( Id soma, const vector< Id >& compts );
 		// void innerBuildTree( unsigned int parent, Eref e, int msg );
