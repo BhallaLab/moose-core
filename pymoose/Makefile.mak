@@ -71,6 +71,7 @@ LOCAL_SRCS := \
 	PoissonRng.cpp	\
 	UniformRng.cpp	\
 
+
 LOCAL_HEADERS = PyMooseUtil.h \
 	PyMooseContext.h \
 	PyMooseBase.h \
@@ -161,12 +162,6 @@ $(LOCAL_DIR)$(/)moose_wrap.o: $(LOCAL_DIR)$(/)moose_wrap.cxx
 $(LOCAL_DIR)$(/)moose.py $(LOCAL_DIR)$(/)moose_wrap.cxx: $(LOCAL_DIR)$(/)moose.i $(HEADERS)
 	swig -modern -c++ -python -threads $(LOCAL_DIR)$(/)moose.i
 
-# This is not required - gnumake does it by implicit rule
-# .cpp.o:
-# 	$(CXX) $(CXXFLAGS) $(INCLUDES) $< -c
-
-clean:
-	-rm -f *.o moose_wrap.cxx *.so moose.py test_swig *.pyc
 
 
 
