@@ -10,6 +10,7 @@
 
 #include "moose.h"
 #include "SigNeur.h"
+#include "../shell/Shell.h"
 
 static const double PI = 3.1415926535;
 
@@ -81,6 +82,17 @@ const Cinfo* initSigNeurCinfo()
 			ValueFtype1< string >::global(),
 			GFCAST( &SigNeur::getSomaMethod ), 
 			RFCAST( &SigNeur::setSomaMethod )
+		),
+
+		new ValueFinfo( "sigDt", 
+			ValueFtype1< double >::global(),
+			GFCAST( &SigNeur::getSigDt ), 
+			RFCAST( &SigNeur::setSigDt )
+		),
+		new ValueFinfo( "cellDt", 
+			ValueFtype1< double >::global(),
+			GFCAST( &SigNeur::getCellDt ), 
+			RFCAST( &SigNeur::setCellDt )
 		),
 
 		new ValueFinfo( "Dscale", 
@@ -288,6 +300,28 @@ string SigNeur::getSomaMethod( Eref e )
 	return static_cast< SigNeur* >( e.data() )->somaMethod_;
 }
 
+void SigNeur::setSigDt( const Conn* c, double value )
+{
+	static_cast< SigNeur* >( c->data() )->sigDt_ = value;
+}
+
+double SigNeur::getSigDt( Eref e )
+{
+	return static_cast< SigNeur* >( e.data() )->sigDt_;
+}
+
+
+void SigNeur::setCellDt( const Conn* c, double value )
+{
+	static_cast< SigNeur* >( c->data() )->cellDt_ = value;
+}
+
+double SigNeur::getCellDt( Eref e )
+{
+	return static_cast< SigNeur* >( e.data() )->cellDt_;
+}
+
+
 void SigNeur::setDscale( const Conn* c, double value )
 {
 	static_cast< SigNeur* >( c->data() )->Dscale_ = value;
@@ -437,5 +471,30 @@ void SigNeur::schedule( Eref me )
 	Id kinId;
 	lookupGet< Id, string >( me, lookupChildFinfo, kinId, "kinetics" );
 	assert( kinId.good() );
+
+	Id cellId;
+	lookupGet< Id, string >( me, lookupChildFinfo, cellId, "cell" );
+	assert( cellId.good() );
+
+	SetConn c( Id::shellId().eref() );
+	Shell::setClock( &c, 0, cellDt_, 0 );
+	Shell::setClock( &c, 1, cellDt_, 1 );
+	Shell::setClock( &c, 2, sigDt_, 0 );
+	Shell::setClock( &c, 3, sigDt_, 1 );
+	Id t2( "/sched/cj/t2" );
+	assert( t2.good() );
+
+	set< string >( cellId.eref(), "method", cellMethod_ );
 	set< string >( kinId.eref(), "method", dendMethod_ );
+	vector< Id > kinSolvers;
+	Id hubId( "/sig/kinetics/solve/hub" );
+	Id integId( "/sig/kinetics/solve/integ" );
+	assert( hubId.good() );
+	assert( integId.good() );
+	assert( kinId.good() );
+	kinSolvers.push_back( hubId );
+	kinSolvers.push_back( integId );
+	kinSolvers.push_back( kinId );
+
+	Shell::useClock( &c, t2, kinSolvers, "process" );
 }
