@@ -123,7 +123,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\utility;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;E:\Users\MOOSE\Compile\siji\sept18\;..\..\robots;..\..\hsolve;&quot;C:\Program Files\GnuWin32\include&quot;"
+				AdditionalIncludeDirectories="..\..\utility;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;..\..\hsolve;&quot;C:\Program Files\GnuWin32\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="2"
@@ -1144,18 +1144,6 @@
 					>
 				</File>
 			</Filter>
-			<Filter
-				Name="robots"
-				>
-				<File
-					RelativePath="..\..\robots\Adaptor.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\robots\SigNeur.cpp"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -1815,18 +1803,6 @@
 				</File>
 				<File
 					RelativePath="..\..\hsolve\TestHSolve.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="robots"
-				>
-				<File
-					RelativePath="..\..\robots\Adaptor.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\robots\SigNeur.h"
 					>
 				</File>
 			</Filter>
