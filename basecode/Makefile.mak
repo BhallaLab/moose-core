@@ -12,7 +12,7 @@ LOCAL_SRCS := \
 	SimpleElement.cpp	\
 	ArrayElement.cpp	\
 	Copy.cpp \
-	send.cpp \
+	Send.cpp \
 	SrcFinfo.cpp \
 	DestFinfo.cpp \
 	ValueFinfo.cpp \

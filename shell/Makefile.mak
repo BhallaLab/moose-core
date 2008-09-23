@@ -23,10 +23,10 @@ LOCAL_SRCS := \
 
 
 $(LOCAL_DIR)$/Shell.o: $(LOCAL_DIR)$/Shell.h \
-    utility$/randnum$/Probability.h \
-    utility$/randnum$/Uniform.h \
-    utility$/randnum$/Exponential.h \
-    utility$/randnum$/Normal.h  \
+    randnum$/Probability.h \
+    randnum$/Uniform.h \
+    randnum$/Exponential.h \
+    randnum$/Normal.h  \
 
 $(LOCAL_DIR)$/ReadCell.o: $(LOCAL_DIR)$/ReadCell.h $(LOCAL_DIR)$/Shell.h
 
