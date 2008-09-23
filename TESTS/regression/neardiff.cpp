@@ -59,10 +59,11 @@ bool Plot::differs( const Plot* other, double epsilon ) const
 {
 	unsigned int mysize = y.size();
 	unsigned int othersize = other->y.size();
-
-	if ( mysize != othersize )
-		cerr << "Warning: Number of points differ in " << parmname
-			<< ". Ignoring extra points in larger plot.\n";
+	
+	// Number of points often differ, so leaving out this message.
+	//~ if ( mysize != othersize )
+		//~ cerr << "Warning: Number of points differ in " << parmname
+			//~ << ". Ignoring extra points in larger plot.\n";
 
 	unsigned int minsize = mysize < othersize ? mysize : othersize;
 

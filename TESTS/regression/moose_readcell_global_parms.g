@@ -26,7 +26,7 @@ ce /
 
 readcell globalParms.p /globalParms
 
-openfile "test.plot" a
+openfile "test.plot" w
 writefile "test.plot" "/newplot"
 writefile "test.plot" "/plotname Vm"
 writefile "test.plot" { getfield /globalParms/dend1 Rm }

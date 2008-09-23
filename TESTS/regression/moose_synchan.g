@@ -47,7 +47,7 @@ setfield /incompt Vm 0.0
 step {RUNTIME/2} -t
 
 
-openfile "test.plot" a
+openfile "test.plot" w
 writefile "test.plot" "/newplot"
 writefile "test.plot" "/plotname Gk"
 closefile "test.plot"
