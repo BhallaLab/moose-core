@@ -7511,5 +7511,20 @@ manageable.
 Begun implementation of scheduling.
 Fails in sigNeurTiny.g, cannot find the adaptor for Ca_input.
 
+==============================================================================
+23 Sep 2008
+
+Checked in as revision 742: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+After some messing around, fixed up the test for sumtotal input sources in
+Stoich.cpp. In this case the input source was the adaptors. I believe that
+external inputs will work OK, will have to test. This requires both the
+solvers and also the scheduling to work.
+
+Setting up scheduling. Currently fails, due to the pending issue of
+path2eid listed yesterday.
+
+Fixed an old irritant of 'call' not working. Should do now, but I need to 
+check for multiple args... Checked by hand, looks good.
 
 ==============================================================================

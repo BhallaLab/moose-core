@@ -101,6 +101,14 @@ class SigNeur
 		static void setSomaMethod( const Conn* c, string value );
 		static string getSomaMethod( Eref e );
 
+		/// Timestep for signaling model
+		static void setSigDt( const Conn* c, double value );
+		static double getSigDt( Eref e );
+
+		/// Timestep for Electrical model
+		static void setCellDt( const Conn* c, double value );
+		static double getCellDt( Eref e );
+
 		/// Diffusion constant scaling factor, to globally modify diffusion
 		static void setDscale( const Conn* c, double value );
 		static double getDscale( Eref e );
@@ -244,6 +252,24 @@ class SigNeur
 		string spineMethod_;
 		string dendMethod_;
 		string somaMethod_;
+
+		/**
+		 * sigDt_ is the timestep for signaling. This should be as long
+		 * as possible, because most signaling solvers use adaptive 
+		 * timesteps. The length of sigDt_ should be limited only by
+		 * how often you want to read out, and how often you want external
+		 * input to affect it.
+		 */
+		double sigDt_;	
+					
+		/**
+		 * cellDt_ is the timestep for the compartmental biophysics solver.
+		 * This is typically 50 to 100 usec. We currently do not have
+		 * variable dt solvers, but that may change. In that case we
+		 * may be able to stretch this time too.
+		 */
+		double cellDt_;
+
 		double Dscale_;	/// Diffusion scale factor.
 		double lambda_; /// Length constant for diffusion.
 		int parallelMode_; /// Later redo to something more friendly

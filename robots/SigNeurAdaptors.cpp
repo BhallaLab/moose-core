@@ -31,6 +31,8 @@ void adaptCa2Sig( TreeNode& t,
 	// Not sure if these update when solved
 	static const Finfo* sumTotalFinfo =  
 		initMoleculeCinfo()->findFinfo( "sumTotal" );
+	static const Finfo* modeFinfo =  
+		initMoleculeCinfo()->findFinfo( "mode" );
 
 	// This isn't yet a separate destMsg. Again, issue with update.
 	static const Finfo* concFinfo =  
@@ -56,6 +58,8 @@ void adaptCa2Sig( TreeNode& t,
 		for ( unsigned int j = t.sigStart; j < t.sigEnd; ++j ) {
 			// Connect up the adaptor.
 			Eref molE( e, j - offset );
+			// Put the molE into sumtotal mode.
+			set< int >( molE, modeFinfo, 1 );
 			bool ret = adaptorE.add( outputFinfo->msg(), molE, 
 				sumTotalFinfo->msg(), ConnTainer::Default );
 			assert( ret );
