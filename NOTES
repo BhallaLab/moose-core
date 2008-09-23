@@ -7469,6 +7469,47 @@ n( x, t ) = (N/sqrt(4pi.Dt) ) * exp( -x^2/(4Dt ) )
 Implemented in the cylinder.g. It works well, getting better as the spatial
 discretization becomes finer.
 
+Checked in as revision 741: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+In SynChan there is a modulator dest msg that scales conductance. However,
+changing Gbar will not do so until it is reset, since Gbar is not used
+directly during calculations.
+In HHChan there is no modulator but Gbar is used directly.
+
+Need to converge on a single common scaling, modulator seems most 
+straightforward. Concern is about how the solver deals with it.
+
+Looking at Hsolve code. See HsolveInterface.cpp line 124/125. The
+check on channel does not correspond to the lookup on current_.
+Also in many cases, the if statement is pointless if it is protected 
+by an assert.
+
+Another pending bug: SimpleElement.cpp:229 is commented out. Should not
+be. Various issues come up when it is put back in. 
+When it is removed though the function baseMsg doesn't work.
+
+Another bug: Cannot showmsg if the target goes beyond the numSrc. See
+Shell.cpp:listMessages around line 1935.
+
+
+These bugs aside, it looks like the adaptors are connected up OK. It is
+another question as to whether they are actually sending info as planned.
+
+Next step is to sort out the scheduling. I think that we will need to put
+t0 and t1 as before at the short dt around 50 usec, for the cell model,
+and t2 and t3 for the medium dt around 0.1, for the signaling model.
+Graphs etc will be on t4, but here again we may need two different plot dts.
+
+First let's get the simulation clocks sorted.
+Also need to ensure that the adaptors are connected up before the solvers are
+built.
+
+Did some cleanup first, separating the many parts of the SigNeur.cpp into
+functional units. I now have five SigNeur source files, all much more 
+manageable.
+
+Begun implementation of scheduling.
+Fails in sigNeurTiny.g, cannot find the adaptor for Ca_input.
 
 
 ==============================================================================

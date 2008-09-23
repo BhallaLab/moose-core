@@ -12,6 +12,10 @@ TARGET = robots.o
 
 OBJ = \
 	SigNeur.o	\
+	SigNeurNeuron.o	\
+	SigNeurSignaling.o	\
+	SigNeurDiffusion.o	\
+	SigNeurAdaptors.o	\
 	Adaptor.o	\
 
 HEADERS = \
@@ -23,6 +27,10 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 SigNeur.o:	SigNeur.h
+SigNeurNeuron.o:	SigNeur.h
+SigNeurSignaling.o:	SigNeur.h
+SigNeurDiffusion.o:	SigNeur.h
+SigNeurAdaptors.o:	SigNeur.h
 Adaptor.o:	Adaptor.h
 
 .cpp.o:
