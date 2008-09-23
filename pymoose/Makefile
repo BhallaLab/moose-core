@@ -24,18 +24,23 @@
 ############################################################################
 
 TARGET=pymoose
-CFLAGS+= -I/usr/include/python2.5 -I..
-#CFLAGS=-fPIC -I/Library/Frameworks/Python.framework/Versions/2.5/include/python2.5 -I..
-ifdef ($(USE_NUMPY))
+CFLAGS+=-I..
+LIBS +=-lpython2.5
+ifdef USE_NUMPY
 CFLAGS+=-I/usr/local/lib/python2.5/site-packages/numpy/core/include
 endif
 # The library location and flags for creating dll in Mac is different from Linux
-ifeq ($(PLATFORM),mac)
-	CFLAGS+=-dynamic -bundle -flat_namespace -undefined suppress 
+# Darwin may not have the OSTYPE environment variable defined in bash. Set OSTYPE=Darwin if required
+ifeq ($(OSTYPE),Darwin)
+	CFLAGS+=-bundle -bundle_loader /usr/bin/python -flat_namespace -undefined suppress -I/Library/Frameworks/Python.framework/Versions/2.5/include/python2.5
+	LDFLAGS+=-dynamic -L/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/config/
+else # this is for unix like systems - change /usr/include/Python2.5 to the directory where Python.h is located
+	CFLAGS +=-I/usr/include/Python2.5
+	LDFLAGS+=-shared
 endif
+
 CXXFLAGS=$(CFLAGS)
-LIBS+=-lpython2.5
-#LIBS+=-lpython2.5  -L/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/config/
+
 OBJFILES = ../basecode/basecode.o \
 	../element/element.o \
 	../shell/shell.o \
@@ -101,9 +106,8 @@ OBJ = PyMooseBase.o \
 	Surface.o \
 	Geometry.o	\
 	MathFunc.o
-
 	
-HEADERS = PyMooseUtil.h \
+HEADERS=PyMooseUtil.h \
 	PyMooseContext.h \
 	PyMooseBase.h \
 	Compartment.h \
@@ -176,9 +180,7 @@ default: $(TARGET)
 pymoose: _moose.so moose.py #testPyMoose 
 
 _moose.so: moose_wrap.o $(OBJ) $(OBJFILES)
-	echo $(OSTYPE)
-$(CXX) $(CFLAGS) -shared -o $@ $^ $(LIBS)	
-#$(CXX) $(CFLAGS) -o $@ $^ $(LIBS)
+	$(CXX) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 moose_wrap.o: moose_wrap.cxx
 	$(CXX) $(CFLAGS) -c $^ -o $@
@@ -190,7 +192,7 @@ moose.py moose_wrap.cxx: moose.i $(HEADERS)
 # .cpp.o:
 # 	$(CXX) $(CFLAGS) $< -c
 
-# Not deleting moose_wrap.cxx and moose.py because they are required for
-# windows compiles.
 clean:
-	-rm -f *.o *.so test_swig *.pyc
+	-rm -f *.o moose_wrap.cxx *.so moose.py test_swig *.pyc
+
+
