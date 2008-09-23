@@ -32,19 +32,13 @@ const vector< Id >& HSolveActive::getCaConcs( ) const
 double HSolveActive::getVm( unsigned int index ) const
 {
 	assert( index < V_.size() );
-	
-	if ( index < V_.size() )
-		return V_[ index ];
-	
-	return 0.0;
+	return V_[ index ];
 }
 
 void HSolveActive::setVm( unsigned int index, double value )
 {
 	assert( index < V_.size() );
-	
-	if ( index < V_.size() )
-		V_[ index ] = value;
+	V_[ index ] = value;
 }
 
 double HSolveActive::getInject( unsigned int index ) const
@@ -53,12 +47,9 @@ double HSolveActive::getInject( unsigned int index ) const
 	
 	map< unsigned int, InjectStruct >::const_iterator i;
 	
-	if ( index < nCompt_ ) {
-		i = inject_.find( index );
-		
-		if ( i != inject_.end() )
-			return i->second.injectBasal;
-	}
+	i = inject_.find( index );
+	if ( i != inject_.end() )
+		return i->second.injectBasal;
 	
 	return 0.0;
 }
@@ -66,17 +57,12 @@ double HSolveActive::getInject( unsigned int index ) const
 void HSolveActive::setInject( unsigned int index, double value )
 {
 	assert( index < nCompt_ );
-	
-	if ( index < nCompt_ )
-		inject_[ index ].injectBasal = value;
+	inject_[ index ].injectBasal = value;
 }
 
 double HSolveActive::getIm( unsigned int index ) const
 {
 	assert( index < nCompt_ );
-	
-	if ( index >= nCompt_ )
-		return 0.0;
 	
 	double Im =
 		compartment_[ index ].EmByRm - V_[ index ] / tree_[ index ].Rm;
@@ -102,204 +88,157 @@ void HSolveActive::addInject( unsigned int index, double value )
 double HSolveActive::getHHChannelGbar( unsigned int index ) const
 {
 	assert( index < channel_.size() );
-	
-	if ( index < channel_.size() )
-		return channel_[ index ].Gbar_;
-	
-	return 0.0;
+	return channel_[ index ].Gbar_;
 }
 
 void HSolveActive::setHHChannelGbar( unsigned int index, double value )
 {
 	assert( index < channel_.size() );
-	
-	if ( index < channel_.size() )
-		channel_[ index ].Gbar_ = value;
+	channel_[ index ].Gbar_ = value;
 }
 
 double HSolveActive::getEk( unsigned int index ) const
 {
-	assert( index < channel_.size() );
-	
-	if ( index < channel_.size() )
-		return current_[ index ].Ek;
-	
-	return 0.0;
+	assert( index < current_.size() );
+	return current_[ index ].Ek;
 }
 
 void HSolveActive::setEk( unsigned int index, double value )
 {
-	assert( index < channel_.size() );
-	
-	if ( index < channel_.size() )
-		current_[ index ].Ek = value;
+	assert( index < current_.size() );
+	current_[ index ].Ek = value;
 }
 
 double HSolveActive::getGk( unsigned int index ) const
 {
-	assert( index < channel_.size() );
-	
-	if ( index < channel_.size() )
-		return current_[ index ].Gk;
-	
-	return 0.0;
+	assert( index < current_.size() );
+	return current_[ index ].Gk;
 }
 
 void HSolveActive::setGk( unsigned int index, double value )
 {
-	assert( index < channel_.size() );
-	
-	if ( index < channel_.size() )
-		current_[ index ].Gk = value;
+	assert( index < current_.size() );
+	current_[ index ].Gk = value;
 }
 
 double HSolveActive::getIk( unsigned int index ) const
 {
-	assert( index < channel_.size() );
+	assert( index < current_.size() );
 	
-	if ( index < channel_.size() ) {
-		unsigned int comptIndex = chan2compt_[ index ];
-		assert( comptIndex < V_.size() );
-		
-		return 
-			( current_[ index ].Ek - V_[ comptIndex ] ) * current_[ index ].Gk;
-	}
+	unsigned int comptIndex = chan2compt_[ index ];
+	assert( comptIndex < V_.size() );
 	
-	return 0.0;
+	return ( current_[ index ].Ek - V_[ comptIndex ] ) * current_[ index ].Gk;
 }
 
 double HSolveActive::getX( unsigned int index ) const
 {
 	assert( index < channel_.size() );
 	
-	if ( index < channel_.size() ) {
-		if ( ! channel_[ index ].Xpower_ )
-			return 0.0;
-		
-		unsigned int stateIndex = chan2state_[ index ];
-		assert( stateIndex < state_.size() );
-		
-		return state_[ stateIndex ];
-	}
+	if ( ! channel_[ index ].Xpower_ )
+		return 0.0;
 	
-	return 0.0;
+	unsigned int stateIndex = chan2state_[ index ];
+	assert( stateIndex < state_.size() );
+	
+	return state_[ stateIndex ];
 }
 
 void HSolveActive::setX( unsigned int index, double value )
 {
 	assert( index < channel_.size() );
 	
-	if ( index < channel_.size() ) {
-		if ( ! channel_[ index ].Xpower_ )
-			return;
-		
-		unsigned int stateIndex = chan2state_[ index ];
-		assert( stateIndex < state_.size() );
-		
-		state_[ stateIndex ] = value;
-	}
+	if ( ! channel_[ index ].Xpower_ )
+		return;
+	
+	unsigned int stateIndex = chan2state_[ index ];
+	assert( stateIndex < state_.size() );
+	
+	state_[ stateIndex ] = value;
 }
 
 double HSolveActive::getY( unsigned int index ) const
 {
 	assert( index < channel_.size() );
 	
-	if ( index < channel_.size() ) {
-		if ( ! channel_[ index ].Ypower_ )
-			return 0.0;
-		
-		unsigned int stateIndex = chan2state_[ index ];
-		
-		if ( channel_[ index ].Xpower_ )
-			++stateIndex;
-		
-		assert( stateIndex < state_.size() );
-		
-		return state_[ stateIndex ];
-	}
+	if ( ! channel_[ index ].Ypower_ )
+		return 0.0;
 	
-	return 0.0;
+	unsigned int stateIndex = chan2state_[ index ];
+	
+	if ( channel_[ index ].Xpower_ )
+		++stateIndex;
+	
+	assert( stateIndex < state_.size() );
+	
+	return state_[ stateIndex ];
 }
 
 void HSolveActive::setY( unsigned int index, double value )
 {
 	assert( index < channel_.size() );
 	
-	if ( index < channel_.size() ) {
-		if ( ! channel_[ index ].Ypower_ )
-			return;
-		
-		unsigned int stateIndex = chan2state_[ index ];
-		
-		if ( channel_[ index ].Xpower_ )
-			++stateIndex;
-		
-		assert( stateIndex < state_.size() );
-		
-		state_[ stateIndex ] = value;
-	}
+	if ( ! channel_[ index ].Ypower_ )
+		return;
+	
+	unsigned int stateIndex = chan2state_[ index ];
+	
+	if ( channel_[ index ].Xpower_ )
+		++stateIndex;
+	
+	assert( stateIndex < state_.size() );
+	
+	state_[ stateIndex ] = value;
 }
 
 double HSolveActive::getZ( unsigned int index ) const
 {
 	assert( index < channel_.size() );
 	
-	if ( index < channel_.size() ) {
-		if ( ! channel_[ index ].Zpower_ )
-			return 0.0;
-		
-		unsigned int stateIndex = chan2state_[ index ];
-		
-		if ( channel_[ index ].Xpower_ )
-			++stateIndex;
-		if ( channel_[ index ].Ypower_ )
-			++stateIndex;
-		
-		assert( stateIndex < state_.size() );
-		
-		return state_[ stateIndex ];
-	}
+	if ( ! channel_[ index ].Zpower_ )
+		return 0.0;
 	
-	return 0.0;
+	unsigned int stateIndex = chan2state_[ index ];
+	
+	if ( channel_[ index ].Xpower_ )
+		++stateIndex;
+	if ( channel_[ index ].Ypower_ )
+		++stateIndex;
+	
+	assert( stateIndex < state_.size() );
+	
+	return state_[ stateIndex ];
 }
 
 void HSolveActive::setZ( unsigned int index, double value )
 {
 	assert( index < channel_.size() );
 	
-	if ( index < channel_.size() ) {
-		if ( ! channel_[ index ].Zpower_ )
-			return;
-		
-		unsigned int stateIndex = chan2state_[ index ];
-		
-		if ( channel_[ index ].Xpower_ )
-			++stateIndex;
-		if ( channel_[ index ].Ypower_ )
-			++stateIndex;
-		
-		assert( stateIndex < state_.size() );
-		
-		state_[ stateIndex ] = value;
-	}
+	if ( ! channel_[ index ].Zpower_ )
+		return;
+	
+	unsigned int stateIndex = chan2state_[ index ];
+	
+	if ( channel_[ index ].Xpower_ )
+		++stateIndex;
+	if ( channel_[ index ].Ypower_ )
+		++stateIndex;
+	
+	assert( stateIndex < state_.size() );
+	
+	state_[ stateIndex ] = value;
 }
 
 double HSolveActive::getCa( unsigned int index ) const
 {
 	assert( index < caConc_.size() );
-	
-	if ( index < caConc_.size() )
-		return ca_[ index ];
-	
-	return 0.0;
+	return ca_[ index ];
 }
 
 void HSolveActive::setCa( unsigned int index, double value )
 {
 	assert( index < caConc_.size() );
 	
-	if ( index < caConc_.size() ) {
-		ca_[ index ] = value;
-		caConc_[ index ].c_ = value - caConc_[ index ].CaBasal_;
-	}
+	ca_[ index ] = value;
+	caConc_[ index ].c_ = value - caConc_[ index ].CaBasal_;
 }
