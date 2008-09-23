@@ -1,22 +1,39 @@
-//moose
-float DT = 10e-6
-float PLOTDT = 100e-6
-float RUNTIME = 0.1
-
-setclock 0 {DT}
-setclock 1 {DT}
-setclock 2 {PLOTDT}
+// moose
+// genesis
 
 
-include hh_tchan.g
+echo "
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+10 input neurons (all single compartmental) synapse with 100% connectivity
+with 10 output neurons. The commands 'createmap' and 'planarconnect' are used
+to establish the network. Exponential euler method is utilized.
+This script runs on MOOSE as well as GENESIS.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+"
 
-if ({exists /library} == 0)
-	create neutral /library
-end
+include network-ee/compatibility.g
+
+////////////////////////////////////////////////////////////////////////////////
+// MODEL CONSTRUCTION
+////////////////////////////////////////////////////////////////////////////////
+float SIMDT = 10e-6
+float IODT = 100e-6
+float SIMLENGTH = 0.15
+float EREST_ACT = -0.065
+int N_INPUT = 10
+int N_OUTPUT = 10
+int i
+int j
+
+include network-ee/hh_tchan.g
 
 ce /library
 	make_Na_hh_tchan
 	make_K_hh_tchan
+	
+	//
+	//  Prototype compartment
+	//
 	create compartment compt
 	copy Na_hh_tchan compt
 	copy K_hh_tchan compt
@@ -26,62 +43,123 @@ ce /library
 	addmsg compt compt/K_hh_tchan VOLTAGE Vm
 	addmsg compt/K_hh_tchan compt CHANNEL Gk Ek
 	
-	copy compt incompt 
-	copy compt outcompt
-	 
-	create synchan outcompt/glu
-	setfield outcompt/glu tau1 0.001 tau2 0.002 gmax 1e-8 Ek 0.0
-	addmsg outcompt outcompt/glu VOLTAGE Vm
-	addmsg outcompt/glu outcompt CHANNEL Gk Ek
+	//
+	//  Input cell
+	//
+	copy compt in_compt
+	pushe in_compt
+		create spikegen spike
+		setfield spike thresh -0.04 abs_refract 0.001
+		addmsg . spike INPUT Vm
+	pope
 	
-	create spikegen incompt/axon
-	setfield incompt/axon thresh -0.04 abs_refract 0.01
-	addmsg incompt incompt/axon INPUT Vm
+	//
+	//  Output cell
+	//
+	copy compt out_compt
+	pushe out_compt
+		create synchan glu
+		setfield glu tau1 0.001 tau2 0.002 gmax 1e-8 Ek 0.0
+		addmsg . glu VOLTAGE Vm
+		addmsg glu . CHANNEL Gk Ek
+	pope
 ce /
 
-// copy /library/compt /cell1
-// copy /library/compt /cell2
+//=====================================
+//  Create synapse
+//=====================================
+createmap /library/in_compt /in_array 1 {N_INPUT}
+createmap /library/out_compt /out_array 1 {N_OUTPUT}
+planarconnect \
+	/in_array/in_compt[]/spike \
+	/out_array/out_compt[]/glu \
+	-sourcemask box -100 -100 100 100 \
+	-destmask box -100 -100 100 100 \
+	-probability 1                       // 100 % connectivity
 
-// addmsg /cell1/axon /cell2/glu SPIKE
+//planarweight /in_array/in_compt[]/spike /out_array/out_compt[]/glu -fixed 1
+//planardelay /in_array/in_compt[]/spike /out_array/out_compt[]/glu -fixed 0
 
-createmap /library/incompt inarray 1 10
-createmap /library/outcompt outarray 1 10
-planarconnect /inarray/incompt[]/axon /outarray/outcompt[]/glu -probability 1 -sourcemask box -100 -100 100 100 -destmask box -100 -100 100 100 // 100 % connectivity
-//planarweight /inarray/incompt[]/axon /outarray/outcompt[]/glu -fixed 1
-//planardelay /inarray/incompt[]/axon /outarray/outcompt[]/glu -fixed 0
-
-create table /plot
-createmap /plot /plots 1 10
-int i
-int j
-
-
-for ( i = 0; i < 10; i = i + 1 )
-	call /plots/plot[{i}] TABCREATE {RUNTIME / PLOTDT} 0 {RUNTIME}
-	useclock /plots/plot[{i}] 2
-	setfield /plots/plot[{i}] step_mode 3
-	addmsg /outarray/outcompt[{i}]/glu /plots/plot[{i}] INPUT Gk
-end
-
-reset
-
-for (i = 0; i < 10; i = i + 1)
-	for (j = 0; j < 10; j = j + 1)
-		setfield /outarray/outcompt[{i}]/glu synapse[{j}].weight {i + j} synapse[{j}].delay {(i*j*1e-4)}
+for ( i = 0; i < {N_OUTPUT}; i = i + 1 )
+	for ( j = 0; j < {N_INPUT}; j = j + 1 )
+		setfield /out_array/out_compt[{i}]/glu \
+			synapse[{j}].weight { i + j } \
+			synapse[{j}].delay { i * j * 1e-4 }
 	end
 end
 
 
-step {RUNTIME/2} -t
-setfield /inarray/incompt[] Vm 0.0
-step {RUNTIME/2} -t
+////////////////////////////////////////////////////////////////////////////////
+// PLOTTING
+////////////////////////////////////////////////////////////////////////////////
+createmap table /plots 1 {N_OUTPUT} -object
+for ( i = 0; i < N_OUTPUT; i = i + 1 )
+	call /plots/table[{i}] TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
+	setfield /plots/table[{i}] step_mode 3
+	addmsg /out_array/out_compt[{i}] /plots/table[{i}] INPUT Vm
+end
 
-openfile "test.plot" a
-writefile "test.plot" "/newplot"
-writefile "test.plot" "/plotname Vm"
-closefile "test.plot"
-for (i = 0; i < 10; i = i + 1)
-	str filename = "test.plot"
-	tab2file {filename} /plots/plot[{i}] table	
-end 
+
+////////////////////////////////////////////////////////////////////////////////
+// SIMULATION CONTROL
+////////////////////////////////////////////////////////////////////////////////
+
+//=====================================
+//  Clocks
+//=====================================
+setclock 0 {SIMDT}
+setclock 1 {SIMDT}
+setclock 2 {IODT}
+
+useclock /plots/table[] 2
+
+//=====================================
+//  Simulation
+//=====================================
+reset
+
+step {SIMLENGTH / 2} -t
+setfield /in_array/in_compt Vm 0.0
+step {SIMLENGTH / 2} -t
+
+
+////////////////////////////////////////////////////////////////////////////////
+//  Write Plots
+////////////////////////////////////////////////////////////////////////////////
+str filename
+str extension
+if ( MOOSE )
+	extension = ".moose.plot"
+else
+	extension = ".genesis.plot"
+end
+
+// filename = "network" @ {extension}
+filename = "test.plot"
+
+// Clear file contents
+openfile {filename} w
+closefile {filename}
+
+for (i = 0; i < N_OUTPUT; i = i + 1)
+	openfile {filename} a
+	writefile {filename} "/newplot"
+	writefile {filename} "/plotname Vm["{i}"]"
+	flushfile {filename}
+	tab2file {filename} /plots/table[{i}] table	
+	writefile {filename} " "
+	
+	// Force tab2file output to be flushed
+	closefile {filename}
+end
+
+
+echo "
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+'network.*.plot' written: contains membrane potential traces of the o/p 
+neurons. Compare against network.genesis.plot obtained using GENESIS.
+
+If you have gnuplot, run 'gnuplot plot.gnuplot' to view the graphs.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+"
 quit
