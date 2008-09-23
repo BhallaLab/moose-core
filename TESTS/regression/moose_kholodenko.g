@@ -51,6 +51,7 @@ end
 function do_save_all_plots( filename )
 	str filename
 	str name
+	
 	foreach name ( {el /graphs/##[TYPE=Table] } )
 		openfile {filename} a
 		writefile {filename} "/newplot"
