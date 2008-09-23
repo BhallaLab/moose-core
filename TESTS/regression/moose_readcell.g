@@ -63,7 +63,7 @@ setfield /mit method ee
 reset
 step {RUNTIME} -t
 
-openfile "test.plot" a
+openfile "test.plot" w
 writefile "test.plot" "/newplot"
 writefile "test.plot" "/plotname Vm"
 closefile "test.plot"

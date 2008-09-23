@@ -147,8 +147,8 @@ foreach chan ( { el /library/# } )
 	step {RUNTIME} -t
 	setfield /compt Vm -0.065 x 0
 	step {RUNTIME} -t
-
-	openfile "test_"{chname}".plot" a
+	
+	openfile "test_"{chname}".plot" w
 	writefile "test_"{chname}".plot" "/newplot"
 	writefile "test_"{chname}".plot" "/plotname "{chname}
 	closefile "test_"{chname}".plot"
