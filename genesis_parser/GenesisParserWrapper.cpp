@@ -1337,6 +1337,23 @@ void do_call( int argc, const char** const argv, Id s )
 		}
 		return;
 	}
+
+	// Fallback: generic setfield.
+	Id id( argv[1] );
+	if ( !id.good() ) {
+		cout << "Error: call: could not find object: " << argv[1] << endl;
+		return;
+	}
+
+	string field = argv[2];
+	string argstr = "";
+	if ( argc >= 4 ) {
+		argstr = argv[3];
+		for( int i = 4; i < argc; ++i ) {
+			argstr = argstr + "	" + argv[i];
+		}
+	}
+	send3< Id, string, string >( s(), setFieldSlot, id, field, argstr );
 }
 
 int do_isa( int argc, const char** const argv, Id s )
