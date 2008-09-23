@@ -587,9 +587,8 @@ bool Stoich::findTargets(
 			ret.push_back( &S_[ j->second ] );
 		} else { 
 			// Table or other object, not handled.
-			cerr << "Error: findTargets: Unable to locate " << 
-				src.name() << " as target for " << e.name() << endl;
-			return 0;
+			// cout << "Error: findTargets: Unable to handle " << src.name() << " as src/target for " << e.name() << "." << msgFieldName << endl;
+			;
 		}
 		c->increment();
 	}
