@@ -1255,6 +1255,7 @@ void do_call( int argc, const char** const argv, Id s )
 	if ( strcmp ( argv[2], "TABCREATE" ) == 0 ) {
 		if ( !gpw->tabCreate( argc, argv, s ) )
 				cout << "Error: TABCREATE failed\n";
+		return;
 	}
 
 	// Ugly hack to handle the TABFILL call, which need to be redirected
