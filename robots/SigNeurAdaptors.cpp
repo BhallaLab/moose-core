@@ -20,30 +20,43 @@
 //////////////////////////////////////////////////////////////////////////
 
 void adaptCa2Sig( TreeNode& t, 
-	map< string, Element* >& m, unsigned int offset,
+	map< string, Element* >& m, unsigned int offset, double calciumScale,
 	Id caId, const string& mol )
 {
 	static const Finfo* inputFinfo = 
 		initAdaptorCinfo()->findFinfo( "input" );
 	static const Finfo* outputFinfo = 
 		initAdaptorCinfo()->findFinfo( "outputSrc" );
+	static const Finfo* scaleFinfo = 
+		initAdaptorCinfo()->findFinfo( "scale" );
+	static const Finfo* inputOffsetFinfo = 
+		initAdaptorCinfo()->findFinfo( "inputOffset" );
+	static const Finfo* outputOffsetFinfo = 
+		initAdaptorCinfo()->findFinfo( "outputOffset" );
 	
 	// Not sure if these update when solved
 	static const Finfo* sumTotalFinfo =  
 		initMoleculeCinfo()->findFinfo( "sumTotal" );
 	static const Finfo* modeFinfo =  
 		initMoleculeCinfo()->findFinfo( "mode" );
+	static const Finfo* concInitFinfo =  
+		initMoleculeCinfo()->findFinfo( "nInit" );
+	static const Finfo* volumeScaleFinfo =  
+		initMoleculeCinfo()->findFinfo( "volumeScale" );
 
 	// This isn't yet a separate destMsg. Again, issue with update.
 	static const Finfo* concFinfo =  
 		initCaConcCinfo()->findFinfo( "concSrc" );
+	static const Finfo* caBasalFinfo =  
+		initCaConcCinfo()->findFinfo( "CaBasal" );
 	
+	if ( t.sigEnd <= t.sigStart ) // Nothing to do here, move along
+		return;
 	// Look up matching molecule
 	map< string, Element* >::iterator i = m.find( mol );
 	if ( i != m.end() ) {
 		Element* e = i->second;
-		cout << "Adding adaptor from " << caId.path() << " to " <<
-			i->second->name() << endl;
+		// cout << "Adding adaptor from " << caId.path() << " to " << i->second->name() << endl;
 
 		assert( t.sigStart >= offset );
 		assert( t.sigEnd - offset <= e->numEntries() );
@@ -54,19 +67,35 @@ void adaptCa2Sig( TreeNode& t,
 			t.compt, Id::childId( t.compt ) );
 		assert( adaptor != 0 );
 		Eref adaptorE( adaptor, 0 );
+		double caCell = 0.0;
+		bool ret = get< double >( caId.eref(), caBasalFinfo, caCell );
+		double caSig = 0.08;
+		double vs = 1.0; // Converts uM into # for this sig compartment
+		Eref MolE( e, t.sigStart - offset );
+		ret = get< double >( e, concInitFinfo, caSig );
+		assert( ret );
+		ret = get< double >( e, volumeScaleFinfo, vs );
+		assert( ret );
+		vs *= calciumScale;
+		ret = set< double >( adaptorE, inputOffsetFinfo, caCell );
+		assert( ret );
+		ret = set< double >( adaptorE, outputOffsetFinfo, caSig );
+		assert( ret );
+		ret = set< double >( adaptorE, scaleFinfo, vs );
+		assert( ret );
 
 		for ( unsigned int j = t.sigStart; j < t.sigEnd; ++j ) {
 			// Connect up the adaptor.
 			Eref molE( e, j - offset );
 			// Put the molE into sumtotal mode.
 			set< int >( molE, modeFinfo, 1 );
-			bool ret = adaptorE.add( outputFinfo->msg(), molE, 
+			ret = adaptorE.add( outputFinfo->msg(), molE, 
 				sumTotalFinfo->msg(), ConnTainer::Default );
 			assert( ret );
 
 			// Here we set the parameters of the adaptor.
 		}
-		bool ret = caId.eref().add( concFinfo->msg(), adaptorE,
+		ret = caId.eref().add( concFinfo->msg(), adaptorE,
 			inputFinfo->msg(), ConnTainer::Default );
 		assert( ret );
 	}
@@ -84,11 +113,14 @@ void SigNeur::makeCell2SigAdaptors()
 			bool ret = lookupGet< Id, string >( j->compt.eref(), lookupChildFinfo, caId, i->first );
 			if ( ret && caId.good() ) {
 				if ( j->category == SOMA ) {
-					adaptCa2Sig( *j, somaMap_, 0, caId, i->second );
+					adaptCa2Sig( *j, somaMap_, 0, calciumScale_, 
+						caId, i->second );
 				} else if ( j->category == DEND ) {
-					adaptCa2Sig( *j, dendMap_, numSoma_, caId, i->second );
+					adaptCa2Sig( *j, dendMap_, numSoma_, calciumScale_, 
+						caId, i->second );
 				} else if ( j->category == SPINE ) {
 					adaptCa2Sig( *j, spineMap_, numDend_ + numSoma_,
+						calciumScale_,
 						caId, i->second );
 				}
 			}
@@ -105,10 +137,18 @@ void adaptSig2Chan( TreeNode& t,
 		initAdaptorCinfo()->findFinfo( "input" );
 	static const Finfo* outputFinfo = 
 		initAdaptorCinfo()->findFinfo( "outputSrc" );
+	static const Finfo* scaleFinfo = 
+		initAdaptorCinfo()->findFinfo( "scale" );
+	static const Finfo* inputOffsetFinfo = 
+		initAdaptorCinfo()->findFinfo( "inputOffset" );
+	static const Finfo* outputOffsetFinfo = 
+		initAdaptorCinfo()->findFinfo( "outputOffset" );
 	
 	// Not sure if these update when solved
 	static const Finfo* molNumFinfo =  
 		initMoleculeCinfo()->findFinfo( "nSrc" );
+	static const Finfo* nInitFinfo =  
+		initMoleculeCinfo()->findFinfo( "nInit" );
 
 	// This isn't yet a separate destMsg. Again, issue with update.
 	static const Finfo* gbarFinfo =  
@@ -118,8 +158,7 @@ void adaptSig2Chan( TreeNode& t,
 	map< string, Element* >::iterator i = m.find( mol );
 	if ( i != m.end() ) {
 		Element* e = i->second;
-		cout << "Adding adaptor from " << e->name() << " to " << 
-			chanId.path() << endl;
+		// cout << "Adding adaptor from " << e->name() << " to " << chanId.path() << endl;
 		assert( t.sigStart >= offset );
 		assert( t.sigEnd - offset <= e->numEntries() );
 
@@ -129,16 +168,33 @@ void adaptSig2Chan( TreeNode& t,
 		assert( adaptor != 0 );
 		Eref adaptorE( adaptor, 0 );
 
+		double n = 0.00;
+		Eref MolE( e, t.sigStart - offset );
+		bool ret = get< double >( e, nInitFinfo, n );
+		assert( ret );
+		if ( n > 0.0 ) {
+			double gbar = 0.0;
+			ret = get< double >( chanId.eref(), gbarFinfo, gbar );
+			assert( ret );
+			double scale =  gbar / n;
+			ret = set< double >( adaptorE, scaleFinfo, scale );
+			assert( ret );
+		}
+		ret = set< double >( adaptorE, inputOffsetFinfo, 0.0 );
+		assert( ret );
+		ret = set< double >( adaptorE, outputOffsetFinfo, 0.0 );
+		assert( ret );
+
 		for ( unsigned int j = t.sigStart; j < t.sigEnd; ++j ) {
 			// Connect up the adaptor.
 			Eref molE( e, j - offset );
-			bool ret = molE.add( molNumFinfo->msg(), adaptorE,
+			ret = molE.add( molNumFinfo->msg(), adaptorE,
 				inputFinfo->msg(), ConnTainer::Default );
 			assert( ret );
 
 			// Here we set the parameters of the adaptor.
 		}
-		bool ret = adaptorE.add( outputFinfo->msg(), chanId.eref(), 
+		ret = adaptorE.add( outputFinfo->msg(), chanId.eref(), 
 			gbarFinfo->msg(), ConnTainer::Default );
 		assert( ret );
 	}
