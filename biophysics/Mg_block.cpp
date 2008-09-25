@@ -61,9 +61,19 @@ const Cinfo* initMg_blockCinfo()
 			GFCAST( &Mg_block::getZk ), 
 			RFCAST( &Mg_block::setZk )
 		),
+///////////////////////////////////////////////////////
+// MsgSrc definitions
+///////////////////////////////////////////////////////
+		new SrcFinfo( "IkSrc", Ftype1< double >::global() ),
+
+///////////////////////////////////////////////////////
+// Shared definitions
+///////////////////////////////////////////////////////
 		process,
+		/*
 		new SharedFinfo( "process", processShared, 
 			sizeof( processShared ) / sizeof( Finfo* ) ),
+			*/
 		new SharedFinfo( "channel", channelShared,
 			sizeof( channelShared ) / sizeof( Finfo* ) ),
 		new DestFinfo( "origChannel", Ftype2< double, double >::global(),
@@ -90,6 +100,8 @@ static const Cinfo* Mg_blockCinfo = initMg_blockCinfo();
 
 static const Slot channelSlot =
 	initMg_blockCinfo()->getSlot( "channel.channel" );
+static const Slot ikSlot =
+	initMg_blockCinfo()->getSlot( "IkSrc" );
 
 
 ///////////////////////////////////////////////////
@@ -183,6 +195,7 @@ void Mg_block::innerProcessFunc( Eref e, ProcInfo info )
 	Gk_ = Gk_ * KMg / (KMg + CMg_);
 	send2< double, double >( e, channelSlot, Gk_, Ek_ );
 	Ik_ = Gk_ * (Ek_ - Vm_);
+	send1< double >( e, ikSlot, Ik_ );
 }
 
 void Mg_block::reinitFunc( const Conn* c, ProcInfo p )
