@@ -226,9 +226,10 @@ Msg* SimpleElement::baseMsg( unsigned int msgNum )
 {
 	assert ( msgNum < msg_.size() );
 #ifdef DO_UNIT_TESTS
-	// if ( finfo_.size() == 0 ) // Hack for unit test at 
+	// Hack for unit test at UnitTests.cpp:36: Msg::add with bare elm
+	if ( finfo_.size() == 0 ) 
 		return ( &( msg_[ msgNum ] ) );
-#else
+#endif
 	unsigned int numSrc = cinfo()->numSrc();
 	if ( msgNum < numSrc )
 		return ( &( msg_[ msgNum ] ) );
@@ -236,8 +237,10 @@ Msg* SimpleElement::baseMsg( unsigned int msgNum )
 		if ( msg_[i].linksToNum( this, msgNum ) )
 			return &( msg_[i] );
 	}
-	return 0;
-#endif
+
+	// This leaves DynamicFinfos, since they can get inserted after
+	// NumSrc.
+	return &( msg_[ msgNum ] );
 }
 
 const vector< ConnTainer* >* SimpleElement::dest( int msgNum ) const

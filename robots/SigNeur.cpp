@@ -487,6 +487,7 @@ void SigNeur::schedule( Eref me )
 	set< string >( cellId.eref(), "method", cellMethod_ );
 	set< string >( kinId.eref(), "method", dendMethod_ );
 	vector< Id > kinSolvers;
+	/*
 	Id hubId( "/sig/kinetics/solve/hub" );
 	Id integId( "/sig/kinetics/solve/integ" );
 	assert( hubId.good() );
@@ -497,4 +498,5 @@ void SigNeur::schedule( Eref me )
 	kinSolvers.push_back( kinId );
 
 	Shell::useClock( &c, t2, kinSolvers, "process" );
+	*/
 }
