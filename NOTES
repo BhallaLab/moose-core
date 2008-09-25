@@ -7552,4 +7552,20 @@ handle DynamicFinfos, and was returning zero instead of the msg for that case.
 With this cleared, back to the path2eid issue. Still stuck
 
 ==============================================================================
+25 Sep 2008
+Fixed both baseMsg and problem with inability to access fields in hub. 
+Niraj had submitted a bug report #2116499 on this which helped because 
+he gave a clear test case: TESTS/bugs/missing-hub.g
 
+Checked in as revision 761: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Now that sigNeurTiny is loading, to fix up.
+- The kinetic stuff is still stuck on tick0.
+- The adaptors need to be put on tick 2 or 3.
+- Clock dts are all wrong.
+
+This part works, but the volume scaling of molecules seems to have hit a snag.
+Will also need to go through rescaling kf and kb according to volume and
+order of reactions.
+
+==============================================================================

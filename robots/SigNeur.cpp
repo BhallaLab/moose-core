@@ -11,6 +11,7 @@
 #include "moose.h"
 #include "SigNeur.h"
 #include "../shell/Shell.h"
+#include "../element/Wildcard.h"
 
 static const double PI = 3.1415926535;
 
@@ -184,6 +185,8 @@ SigNeur::SigNeur()
 		spineMethod_( "rk5" ), 
 		dendMethod_( "rk5" ), 
 		somaMethod_( "rk5" ), 
+		sigDt_( 10.0e-3 ),
+		cellDt_( 50.0e-6 ),
 		Dscale_( 1.0 ),
 		lambda_( 10.0e-6 ),
 		parallelMode_( 0 ),
@@ -487,7 +490,6 @@ void SigNeur::schedule( Eref me )
 	set< string >( cellId.eref(), "method", cellMethod_ );
 	set< string >( kinId.eref(), "method", dendMethod_ );
 	vector< Id > kinSolvers;
-	/*
 	Id hubId( "/sig/kinetics/solve/hub" );
 	Id integId( "/sig/kinetics/solve/integ" );
 	assert( hubId.good() );
@@ -498,5 +500,10 @@ void SigNeur::schedule( Eref me )
 	kinSolvers.push_back( kinId );
 
 	Shell::useClock( &c, t2, kinSolvers, "process" );
-	*/
+
+	vector< Id > adaptors;
+	Id t3( "/sched/cj/t3" );
+	assert( t3.good() );
+	simpleWildcardFind( "/sig/cell/##[][TYPE==Adaptor]", adaptors );
+		Shell::useClock( &c, t3, adaptors, "process" );
 }
