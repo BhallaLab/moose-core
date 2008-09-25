@@ -23,6 +23,9 @@ struct SchedInfo
  */
 class Cinfo
 {
+#ifdef DO_UNIT_TESTS
+	friend void connTest();
+#endif
     friend class Class;
     
 		public:
