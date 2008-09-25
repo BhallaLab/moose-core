@@ -7527,4 +7527,29 @@ path2eid listed yesterday.
 Fixed an old irritant of 'call' not working. Should do now, but I need to 
 check for multiple args... Checked by hand, looks good.
 
+Checked in as revision 753: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
 ==============================================================================
+24 Sep 2008
+Trying to clean things up with the inoccuous looking fix to the
+baseMsg function. This is an absolute can of worms.
+1. Getting cinfo out of an element is bad, because it refers to the baseFinfo
+	which doesn't exist in the base form.
+2. The Msg::add( connTainer, funcId1, funcId2) is bad, because it should
+	be a base-level function but uses the baseMsg function which has
+	all these assumptions about the setup of Neutrals.
+3. The handling of msg# in connTainers is bad because it brings up this
+	separation between baseMsg# and actual msg#.
+4. path2eid is bad because it gets stuck with the baseMsg function, leading
+	to the above mess.
+
+something else is also bad because when I bypass all the above it just croaks
+a bit further down in UnitTests.cpp
+
+Some progress with baseMsg. The unit test failed because my code failed to
+handle DynamicFinfos, and was returning zero instead of the msg for that case.
+
+With this cleared, back to the path2eid issue. Still stuck
+
+==============================================================================
+

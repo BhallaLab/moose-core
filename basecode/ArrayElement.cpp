@@ -254,7 +254,7 @@ Msg* ArrayElement::baseMsg( unsigned int msgNum )
 		if ( msg_[i].linksToNum( this, msgNum ) )
 			return &( msg_[i] );
 	}
-	return 0;
+	return &( msg_[ msgNum ] ); // for DynamicFinfos
 }
 
 const vector< ConnTainer* >* ArrayElement::dest( int msgNum ) const
