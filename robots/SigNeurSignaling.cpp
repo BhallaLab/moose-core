@@ -83,11 +83,7 @@ void SigNeur::setComptVols( Eref compt,
 	// Set all the volumes. 
 	for ( map< string, Element* >::iterator i = molMap.begin(); 
 		i != molMap.end(); ++i ) {
-		Element* de = findDiff( i->second );
-		if ( !de )
-			continue;
 		Eref mol( i->second, index );
-		Eref diff( de, index );
 		double oldvol;
 		double nInit;
 		ret = get< double >( mol, volFinfo, oldvol );
@@ -99,10 +95,15 @@ void SigNeur::setComptVols( Eref compt,
 		assert( ret );
 		ret = set< double >( mol, nInitFinfo, nInit * volscale / oldvol );
 		assert( ret );
-		ret = set< double >( diff, kfFinfo, xByL );
-		assert( ret );
-		ret = set< double >( diff, kbFinfo, xByL );
-		assert( ret );
+
+		Element* de = findDiff( i->second );
+		if ( de ) {
+			Eref diff( de, index );
+			ret = set< double >( diff, kfFinfo, xByL );
+			assert( ret );
+			ret = set< double >( diff, kbFinfo, xByL );
+			assert( ret );
+		}
 	}
 }
 
