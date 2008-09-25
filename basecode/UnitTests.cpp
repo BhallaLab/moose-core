@@ -12,6 +12,7 @@
 
 #include "moose.h"
 #include "SimpleConn.h"
+// #include "../element/Neutral.h"
 
 
 /**
@@ -19,7 +20,6 @@
  */
 void connTest()
 {
-	// SimpleElement( name, srcSize, destSize );
 	cout << "Testing connections basic stuff";
 	SimpleElement e1( Id::scratchId(), "e1", 0, 2 );
 	SimpleElement e2( Id::scratchId(), "e2", 0, 2 );
@@ -33,7 +33,6 @@ void connTest()
 	 */
 	SimpleConnTainer *ct = new SimpleConnTainer( &e1, &e2, 1, -2 );
 
-	// add( ConnTainer, funcId0, funcId1 )
 	bool ret = Msg::add( ct,  0, 1 );
 
 	ASSERT( ret, "connected srcElement" );
@@ -187,6 +186,7 @@ void msgFinfoTest()
 
 	ASSERT (sf1.add( &e1, &e2, &df1, ConnTainer::Default ) == 1,
 					"zero to zero ftype message" );
+	cout << "Two Deliberate failed DestFinfo::add tests follow: ";
 	ASSERT (sf1.add( &e1, &e2, &df2, ConnTainer::Default ) == 0,
 					"Zero to dbl message" );
 	ASSERT (sf2.add( &e1, &e2, &df1, ConnTainer::Default ) == 0,
