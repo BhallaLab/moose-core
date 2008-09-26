@@ -142,10 +142,29 @@ class Stoich
 		unsigned int nExternalRates_;
 		bool useOneWayReacs_;
 		string path_;
+
+		/**
+		 * S_ holds the state variables: n for all the molecules. This
+		 * includes the variable as well as the buffered and sumtotal
+		 * molecules.
+		 */
 		vector< double > S_; 	
+
+		/**
+		 * Sinit_ holds the initial values for all the molecules.
+		 */
 		vector< double > Sinit_; 	
+
+		/**
+		 * v is the velocity of each reaction. Its size is numRates. 
+		 */
 		vector< double > v_;	
+
+		/**
+		 * This is the vector of the actual rate calculations
+		 */
 		vector< RateTerm* > rates_; 
+
 		vector< SumTotal > sumTotals_;
 		KinSparseMatrix N_; 
 		vector< int > path2mol_;
