@@ -199,7 +199,8 @@ void Adaptor::innerProcess( Eref e, ProcInfo p )
 	if ( counter_ == 0 ) { 
 		output_ = outputOffset_;
 	} else {
-		output_ = outputOffset_ + ( ( sum_ / counter_ ) - inputOffset_ );
+		output_ = outputOffset_ + 
+			scale_ * ( ( sum_ / counter_ ) - inputOffset_ );
 	}
 	sum_ = 0.0;
 	counter_ = 0;

@@ -146,6 +146,8 @@ const Cinfo* initKineticHubCinfo()
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
+		// Almost always used as sendTo.
+		new SrcFinfo( "nSrc", Ftype1< double >::global() ),
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
@@ -204,9 +206,13 @@ static const Finfo* mmEnzSolveFinfo =
 	initKineticHubCinfo()->findFinfo( "mmEnzSolve" );
 static const Finfo* molSumFinfo = 
 	initKineticHubCinfo()->findFinfo( "molSum" );
+static const Finfo* nSrcHubFinfo = 
+	initKineticHubCinfo()->findFinfo( "nSrc" );
 
 static const Slot molSumSlot =
 	initKineticHubCinfo()->getSlot( "molSum" );
+static const Slot nSrcSlot =
+	initKineticHubCinfo()->getSlot( "nSrc" );
 
 static const Slot fluxSlot =
 	initKineticHubCinfo()->getSlot( "flux.efflux" );
@@ -277,6 +283,11 @@ void redirectDestMessages(
 	Eref hub, Eref e, const Finfo* hubFinfo, const Finfo* eFinfo,
 	unsigned int eIndex, vector< unsigned int >& map,
 	vector< Eref >* elist, bool retain = 0 );
+
+void redirectSrcMessages(
+	Eref hub, Eref e, const Finfo* hubFinfo, const Finfo* eFinfo,
+	unsigned int eIndex, vector< unsigned int >& map, 
+		vector< Eref >*  elist, bool retain = 0 );
 
 void redirectDynamicMessages( Eref e );
 
@@ -453,6 +464,12 @@ void KineticHub::processFuncLocal( Eref hub, ProcInfo info )
 		}
 		sendTo1< vector< double > >( hub, fluxSlot, j, efflux );
 	}
+
+	// Send out nSrc messages.
+	for ( j = 0; j < nSrcMap_.size(); ++j ) {
+		assert( nSrcMap_[ j ] < S_->size() );
+		sendTo1< double >( hub, nSrcSlot, j, (*S_)[ nSrcMap_[ j ] ] );
+	}
 }
 
 ///////////////////////////////////////////////////
@@ -487,9 +504,8 @@ void KineticHub::reinitFunc( const Conn* c, ProcInfo info )
 
 void KineticHub::processFunc( const Conn* c, ProcInfo info )
 {
-	// Element* e = c.targetElement();
-	// static_cast< KineticHub* >( e.data() )->processFuncLocal( e, info );
-	;
+	Eref e = c->target();
+	static_cast< KineticHub* >( e.data() )->processFuncLocal( e, info );
 }
 
 void KineticHub::rateTermFunc( const Conn* c,
@@ -532,6 +548,9 @@ void KineticHub::molConnectionFuncLocal( Eref hub,
 	       	vector< double >*  S, vector< double >*  Sinit, 
 		vector< Eref >*  elist )
 {
+	static const Finfo* sumTotFinfo = initMoleculeCinfo()->findFinfo( "sumTotal" );
+	const static Finfo* nSrcMolFinfo = initMoleculeCinfo()->findFinfo( "nSrc" );
+
 	assert( nMol_ + nBuf_ + nSumTot_ == elist->size() );
 
 	S_ = S;
@@ -543,7 +562,7 @@ void KineticHub::molConnectionFuncLocal( Eref hub,
 	// order of the S_ and Sinit_ vectors and the elist vector.
 	// This is used implicitly in the ordering of the process messages
 	// that get set up between the Hub and the objects.
-	const Finfo* sumTotFinfo = initMoleculeCinfo()->findFinfo( "sumTotal" );
+
 	for ( i = elist->begin(); i != elist->end(); i++ ) {
 		zombify( hub, *i, molSolveFinfo, initMolZombieFinfo() );
 		redirectDynamicMessages( *i );
@@ -551,12 +570,17 @@ void KineticHub::molConnectionFuncLocal( Eref hub,
 	// Here we should really set up a 'set' of mols to check if the
 	// sumTotMessage is coming from in or outside the tree.
 	// Since I'm hazy about the syntax, here I'm just using the elist.
+	nSrcMap_.resize( 0 );
+	molSumMap_.resize( 0 );
 	for ( i = elist->begin(); i != elist->end(); i++ ) {
 		// Here we replace the sumTotMessages from outside the tree.
 		// The 'retain' flag at the end is 1: we do not want to delete
 		// the original message to the molecule.
 		redirectDestMessages( hub, *i, molSumFinfo, sumTotFinfo, 
 		i - elist->begin(), molSumMap_, elist, 1 );
+
+		redirectSrcMessages( hub, *i, nSrcHubFinfo, nSrcMolFinfo, 
+		i - elist->begin(), nSrcMap_, elist, 1 );
 	}
 }
 
@@ -1440,10 +1464,52 @@ void KineticHub::zombify(
 	assert( ret );
 
 	// Redirect original messages from the zombie to the hub.
-	// Pending.
+	// Better: keep the original messages, provide an altered 'process'
+	// to send out the necessary data.
 
 	// Replace the 'ThisFinfo' on the solved element
 	e->setThisFinfo( solveFinfo );
+}
+
+/**
+ * This function redirects messages originating from zombie elements,
+ * and sets up duplicates to emanate from the hub.
+ * e is the zombie element whose messages are being redirected to the hub.
+ * eFinfo is the Finfo holding those messages.
+ * hubFinfo is the Finfo on the hub which will now handle the messages.
+ * eIndex is the index to look up for the element.
+*/
+void redirectSrcMessages(
+	Eref hub, Eref e, const Finfo* hubFinfo, const Finfo* eFinfo,
+	unsigned int eIndex, vector< unsigned int >& map, 
+		vector< Eref >*  elist, bool retain )
+{
+	Conn* i = e.e->targets( eFinfo->msg(), e.i );
+	vector< Eref > destElements;
+	vector< int > destMsg;
+	vector< const ConnTainer* > dropList;
+
+	while( i->good() ) {
+		Eref tgt = i->target();
+		// Handle messages going outside purview of solver.
+		if ( find( elist->begin(), elist->end(), tgt ) == elist->end() ) {
+			map.push_back( eIndex );
+			destElements.push_back( i->target() );
+			destMsg.push_back( i->targetMsg() );
+			if ( !retain )
+				dropList.push_back( i->connTainer() );
+		}
+		i->increment();
+	}
+	delete i;
+
+	e.dropVec( eFinfo->msg(), dropList );
+
+	for ( unsigned int j = 0; j != destElements.size(); j++ ) {
+		bool ret = hub.add( hubFinfo->msg(), destElements[j], destMsg[j],
+			ConnTainer::Default );
+		assert( ret );
+	}
 }
 
 /**
