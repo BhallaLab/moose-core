@@ -24,7 +24,7 @@ void adaptCa2Sig( TreeNode& t,
 	Id caId, const string& mol )
 {
 	static const Finfo* inputFinfo = 
-		initAdaptorCinfo()->findFinfo( "input" );
+		initAdaptorCinfo()->findFinfo( "inputRequest" );
 	static const Finfo* outputFinfo = 
 		initAdaptorCinfo()->findFinfo( "outputSrc" );
 	static const Finfo* scaleFinfo = 
@@ -46,7 +46,7 @@ void adaptCa2Sig( TreeNode& t,
 
 	// This isn't yet a separate destMsg. Again, issue with update.
 	static const Finfo* concFinfo =  
-		initCaConcCinfo()->findFinfo( "concSrc" );
+		initCaConcCinfo()->findFinfo( "Ca" );
 	static const Finfo* caBasalFinfo =  
 		initCaConcCinfo()->findFinfo( "CaBasal" );
 	
@@ -62,7 +62,7 @@ void adaptCa2Sig( TreeNode& t,
 		assert( t.sigEnd - offset <= e->numEntries() );
 
 		// Create the adaptor
-		string name = "ca2" + mol;
+		string name = "adapt_Ca_2_" + mol;
 		Element* adaptor = Neutral::create( "Adaptor", name,
 			t.compt, Id::childId( t.compt ) );
 		assert( adaptor != 0 );
@@ -92,11 +92,15 @@ void adaptCa2Sig( TreeNode& t,
 			ret = adaptorE.add( outputFinfo->msg(), molE, 
 				sumTotalFinfo->msg(), ConnTainer::Default );
 			assert( ret );
-
-			// Here we set the parameters of the adaptor.
 		}
+		// Here we need the adaptor to ask the object for the data,
+		// because the solver doesn't push out data at this point.
+		ret = adaptorE.add( inputFinfo->msg(), caId.eref(),
+			concFinfo->msg(), ConnTainer::Default );
+		/*
 		ret = caId.eref().add( concFinfo->msg(), adaptorE,
 			inputFinfo->msg(), ConnTainer::Default );
+			*/
 		assert( ret );
 	}
 }
@@ -163,7 +167,8 @@ void adaptSig2Chan( TreeNode& t,
 		assert( t.sigEnd - offset <= e->numEntries() );
 
 		// Create the adaptor
-		Element* adaptor = Neutral::create( "Adaptor", "sig2chan",
+		string name = "adapt_" + e->name() + "_2_" + mol;
+		Element* adaptor = Neutral::create( "Adaptor", name,
 			t.compt, Id::childId( t.compt ) );
 		assert( adaptor != 0 );
 		Eref adaptorE( adaptor, 0 );

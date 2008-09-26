@@ -7568,4 +7568,22 @@ This part works, but the volume scaling of molecules seems to have hit a snag.
 Will also need to go through rescaling kf and kb according to volume and
 order of reactions.
 
+Fixed up the adaptor scaling. They don't actually get the messages they need
+from the solvers, though.
+Also fixed an old irritation: the IkSrc message was missing from Mg_block.
+Needed by the cell reader. Added it.
+
+Checked in as revision 765: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Need something like a sendVectors function to deal with solvers sending
+stuff from multiple zombines out to multiple targets. Comes up when
+the kinetic solver has to send values out to the assorted adaptors.
+
+==============================================================================
+26 Sep 2008
+Finally the whole thing begins to take shape. I have a small test model,
+TESTS/robots/soma.g, which implements all the required bits. At present there
+is still a glitch going from the signaling to the cell model, but the other
+way the data looks like it is flowing properly.
+
 ==============================================================================
