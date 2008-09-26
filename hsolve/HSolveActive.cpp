@@ -369,7 +369,9 @@ void HSolveActive::cleanup( ) {
 void HSolveActive::calculateChannelCurrents( ) {
 	vector< ChannelStruct >::iterator ichan;
 	vector< CurrentStruct >::iterator icurrent = current_.begin();
-	double* istate = &state_[ 0 ];
+	
+	if ( state_.size() != 0 )
+		double* istate = &state_[ 0 ];
 	
 	for ( ichan = channel_.begin(); ichan != channel_.end(); ++ichan ) {
 		ichan->process( istate, *icurrent );
