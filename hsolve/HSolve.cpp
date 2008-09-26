@@ -94,7 +94,7 @@ const Cinfo* initHSolveCinfo()
 		process,
 	};
 	
-	static SchedInfo schedInfo[] = { { process, 0, 0 } };
+	static SchedInfo schedInfo[] = { { process, 0, 1 } };
 	
 	static Cinfo hsolveCinfo(
 		"HSolve",
