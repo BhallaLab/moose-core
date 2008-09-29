@@ -2,7 +2,7 @@
 // This version sets up the cell model, the signaling model and the
 // adaptors.
 
-float RUNTIME = 1.0
+float RUNTIME = 0.1
 float CELLDT = 50.0e-6
 float SIGDT = 1.0e-3
 float INJECT = 20e-12
@@ -136,4 +136,4 @@ showfield /sig/kinetics/soma[1]/Ca_input n nInit
 step {RUNTIME} -t
 
 dump_plots
-quit
+// quit
