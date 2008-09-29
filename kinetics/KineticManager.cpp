@@ -167,6 +167,14 @@ const Cinfo* initKineticManagerCinfo()
 			GFCAST( &KineticManager::getEulerError ), 
 			RFCAST( &KineticManager::setEulerError )
 		),
+		// Used to manage model volume in backward compatibility mode.
+		// In native MOOSE signaling models we expect that all chemical
+		// systems will be children of a KinCompt.
+		new ValueFinfo( "volume",
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticManager::getVolume ), 
+			RFCAST( &KineticManager::setVolume )
+		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -227,7 +235,8 @@ KineticManager::KineticManager()
 	multiscale_( 0 ),
 	singleParticle_( 0 ),
 	recommendedDt_( 0.001 ),
-	eulerError_( 0.01 )
+	eulerError_( 0.01 ),
+	volume_( 1.666667e-21 )
 {
 		;
 }
@@ -337,6 +346,16 @@ void KineticManager::setEulerError( const Conn* c, double value )
 double KineticManager::getEulerError( Eref e )
 {
 	return static_cast< KineticManager* >( e.data() )->eulerError_;
+}
+
+void KineticManager::setVolume( const Conn* c, double value )
+{
+	static_cast< KineticManager* >( c->data() )->volume_ = value;
+}
+
+double KineticManager::getVolume( Eref e )
+{
+	return static_cast< KineticManager* >( e.data() )->volume_;
 }
 
 //////////////////////////////////////////////////////////////////

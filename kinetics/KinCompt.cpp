@@ -11,6 +11,12 @@
 
 #include "moose.h"
 #include "KinCompt.h"
+#include "KineticManager.h"
+#include "Molecule.h"
+#include "Reaction.h"
+#include "Enzyme.h"
+
+void rescaleTree( Eref e, double ratio );
 
 /**
  * The KinCompt is a compartment for kinetic calculations. It doesn't
@@ -99,6 +105,13 @@ const Cinfo* initKinComptCinfo()
 		new DestFinfo( "interior", 
 			Ftype3< double, double, double >::global(),
 			RFCAST( &KinCompt::interiorFunction ) ),
+
+		/**
+	 	* Rescales the volume by the specified ratio. NewVol = ratio * old.
+	 	*/
+		new DestFinfo( "rescaleSize", 
+			Ftype1< double >::global(),
+			RFCAST( &KinCompt::rescaleFunction ) ),
 	///////////////////////////////////////////////////////
 	// Synapse definitions
 	///////////////////////////////////////////////////////
@@ -132,7 +145,7 @@ static const Slot extentSlot =
 ///////////////////////////////////////////////////
 
 KinCompt::KinCompt()
-	: size_( 1.0 ), volume_( 1.0 ), area_( 1.0 ), perimeter_( 1.0 ), numDimensions_( 3 )
+	: size_( 1.6666666667e-21 ), volume_( 1.666666667e-21 ), area_( 1.0 ), perimeter_( 1.0 ), numDimensions_( 3 )
 {
 		;
 }
@@ -143,16 +156,8 @@ KinCompt::KinCompt()
 		
 void KinCompt::setVolume( const Conn* c, double value )
 {
-	if ( value < 0.0 )
-		return;
-	static_cast< KinCompt* >( c->data() )->innerSetVolume( value );
-}
-
-void KinCompt::innerSetVolume( double value )
-{
-	volume_ = value;
-	if ( numDimensions_ == 3 )
-		size_ = value;
+	static_cast< KinCompt* >( c->data() )->innerSetSize( 
+		c->target(), value );
 }
 
 double KinCompt::getVolume( Eref e )
@@ -162,36 +167,19 @@ double KinCompt::getVolume( Eref e )
 
 void KinCompt::setArea( const Conn* c, double value )
 {
-	if ( value < 0.0 )
-		return;
-	static_cast< KinCompt* >( c->data() )->innerSetArea( value );
-}
-
-void KinCompt::innerSetArea( double value )
-{
-	area_ = value;
-	if ( numDimensions_ == 2 )
-		size_ = value;
+	static_cast< KinCompt* >( c->data() )->innerSetSize(
+		c->target(), value );
 }
 
 double KinCompt::getArea( Eref e )
 {
-	return static_cast< KinCompt* >( e.data() )->volume_;
+	return static_cast< KinCompt* >( e.data() )->area_;
 }
-
 
 void KinCompt::setPerimeter( const Conn* c, double value )
 {
-	if ( value < 0.0 )
-		return;
-	static_cast< KinCompt* >( c->data() )->innerSetPerimeter( value );
-}
-
-void KinCompt::innerSetPerimeter( double value )
-{
-	perimeter_ = value;
-	if ( numDimensions_ == 1 )
-		size_ = value;
+	static_cast< KinCompt* >( c->data() )->innerSetSize(
+		c->target(), value );
 }
 
 double KinCompt::getPerimeter( Eref e )
@@ -199,16 +187,16 @@ double KinCompt::getPerimeter( Eref e )
 	return static_cast< KinCompt* >( e.data() )->perimeter_;
 }
 
-
 void KinCompt::setSize( const Conn* c, double value )
 {
-	if ( value < 0.0 )
-		return;
-	static_cast< KinCompt* >( c->data() )->innerSetSize( value );
+	static_cast< KinCompt* >( c->data() )->innerSetSize( 
+		c->target(), value );
 }
 
-void KinCompt::innerSetSize( double value )
+void KinCompt::innerSetSize( Eref e, double value )
 {
+	assert( size_ > 0.0 );
+	double ratio = value/size_;
 	size_ = value;
 	if ( numDimensions_ == 3 )
 		volume_ = value;
@@ -216,6 +204,9 @@ void KinCompt::innerSetSize( double value )
 		area_ = value;
 	else if ( numDimensions_ == 1 )
 		perimeter_ = value;
+
+	// Here we scan through all children telling them to rescale.
+	rescaleTree( e, ratio );
 }
 
 double KinCompt::getSize( Eref e )
@@ -289,4 +280,100 @@ void KinCompt::interiorFunction(
 	const Conn* c, double v1, double v2, double v3 )
 {
 	static_cast< KinCompt* >( c->data() )->localInteriorFunction( v1, v2, v3 );
+}
+
+void KinCompt::rescaleFunction( 
+	const Conn* c, double ratio )
+{
+	double size = static_cast< KinCompt* >( c->data() )->size_;
+	assert( size > 0.0 );
+	static_cast< KinCompt* >( c->data() )->innerSetSize(
+		c->target(), size * ratio );
+}
+
+///////////////////////////////////////////////////
+// Utility functions for volume and size management.
+///////////////////////////////////////////////////
+
+/**
+ * This is an extern function used by molecules, enzymes and reacs.
+ * Traverses toward the root till it finds a KinCompt to get volScale.
+ * If it runs into / return 1
+ * If it runs into a KineticManager (happens with legacy kkit simulations)
+ * uses the volScale on the kinetic manager.
+ */
+double getVolScale( Eref e )
+{
+	static const Finfo* parentFinfo = 
+		initNeutralCinfo()->findFinfo( "parent" );
+	static const Finfo* sizeFinfo = 
+		initKinComptCinfo()->findFinfo( "size" );
+	static const Finfo* managerSizeFinfo = 
+		initKineticManagerCinfo()->findFinfo( "volume" );
+	Id pa;
+	bool ret = get< Id >( e, parentFinfo, pa );
+	assert( ret );
+	while( pa != Id() ) {
+		Eref e = pa.eref();
+		if ( e.e->cinfo()->isA( initKinComptCinfo() ) ) {
+			double size = 1.0;
+			ret = get< double >( e, sizeFinfo, size );
+			assert( ret );
+			assert( size > 0.0 );
+			// Here we need to put in units too.
+			return 6e20 * size;
+		}
+		if ( e.e->cinfo()->isA( initKineticManagerCinfo() ) ) {
+			double size = 1.0;
+			ret = get< double >( e, managerSizeFinfo, size );
+			assert( ret );
+			assert( size > 0.0 );
+			// Here we need to put in units too.
+			return 6e20 * size;
+		}
+		ret = get< Id >( e, parentFinfo, pa );
+		assert( ret );
+	}
+	cout << "KinCompt.cpp:getVolScale: Failed to find KinCompt for volume\n";
+	return 1.0;
+}
+
+/**
+ * Recursively goes through all children, rescaling volumes.
+ * Does NOT rescale current Eref.
+ */
+void rescaleTree( Eref e, double ratio )
+{
+	static const Finfo* childListFinfo = 
+		initNeutralCinfo()->findFinfo( "childList" );
+
+	static const Finfo* rescaleMolFinfo = 
+		initReactionCinfo()->findFinfo( "rescaleVolume" );
+
+	static const Finfo* rescaleReacFinfo = 
+		initReactionCinfo()->findFinfo( "rescaleRates" );
+
+	static const Finfo* rescaleEnzFinfo = 
+		initEnzymeCinfo()->findFinfo( "rescaleRates" );
+
+	static const Finfo* rescaleKinComptFinfo = 
+		initKinComptCinfo()->findFinfo( "rescaleSize" );
+
+	vector< Id > kids;
+	get< vector< Id > >( e, childListFinfo, kids );
+
+	for( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i ) {
+		if ( i->eref().e->cinfo()->isA( initReactionCinfo() ) )
+			set< double >( i->eref(), rescaleReacFinfo, ratio );
+		else if ( i->eref().e->cinfo()->isA( initEnzymeCinfo() ) )
+			set< double >( i->eref(), rescaleEnzFinfo, ratio );
+		else if ( i->eref().e->cinfo()->isA( initMoleculeCinfo() ) )
+			set< double >( i->eref(), rescaleMolFinfo, ratio );
+
+		// This sets off its own rescale recursive command.
+		if ( i->eref().e->cinfo()->isA( initKinComptCinfo() ) )
+			set< double >( i->eref(), rescaleKinComptFinfo, ratio );
+		else 
+			rescaleTree( i->eref(), ratio );
+	}
 }
