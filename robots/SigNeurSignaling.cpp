@@ -13,10 +13,34 @@
 #include "../biophysics/Compartment.h"
 #include "../kinetics/Molecule.h"
 #include "../kinetics/Reaction.h"
+#include "../kinetics/KinCompt.h"
 #include "SigNeur.h"
 
 static const double PI = 3.1415926535;
 extern Element* findDiff( Element* pa );
+
+void getSigComptSize( const Eref& compt, unsigned int numSeg,
+	double& volscale, double& xByL )
+{
+	static const Finfo* diaFinfo = 
+		initCompartmentCinfo()->findFinfo( "diameter" );
+	static const Finfo* lenFinfo = 
+		initCompartmentCinfo()->findFinfo( "length" );
+	assert( diaFinfo != 0 );
+	assert( lenFinfo != 0 );
+	double dia = 0.0;
+	double len = 0.0;
+	bool ret = get< double >( compt, diaFinfo, dia );
+	assert( ret && dia > 0.0 );
+	ret = get< double >( compt, lenFinfo, len );
+	assert( ret && len > 0.0 );
+
+	assert( numSeg > 0 );
+	len /= numSeg;
+	// Conversion factor from uM to #/m^3
+	volscale = len * dia * dia * ( PI / 4.0 ) * 6.0e20;
+	xByL = dia * dia * ( PI / 4.0 ) / len;
+}
 
 /**
  * setAllVols traverses all signaling compartments  in the model and
@@ -26,24 +50,52 @@ extern Element* findDiff( Element* pa );
  */
 void SigNeur::setAllVols()
 {
+	static const Finfo* volumeFinfo = 
+		initKinComptCinfo()->findFinfo( "size" );
 	for ( vector< TreeNode >::iterator i = tree_.begin();
 		i != tree_.end(); ++i ) {
+		double volume;
+		double xByL;
+		getSigComptSize( i->compt.eref(), i->sigEnd - i->sigStart, volume, xByL );
 		for ( unsigned int j = i->sigStart; j < i->sigEnd; ++j ) {
+			Eref e;
+			unsigned int offset = 0;
 			if ( i->category == SOMA ) {
-				setComptVols( i->compt.eref(), 
-					somaMap_, j, i->sigEnd - i->sigStart );
+				e = soma_.eref();
 			} else if ( i->category == DEND ) {
-				setComptVols( i->compt.eref(), 
-					dendMap_, j - numSoma_, i->sigEnd - i->sigStart );
+				e = dend_.eref();
+				offset = numSoma_;
 			} else if ( i->category == SPINE ) {
-				setComptVols( i->compt.eref(), 
-					spineMap_, j - ( numSoma_ + numDend_ ),
-					i->sigEnd - i->sigStart );
+				e = spine_.eref();
+				offset = numSoma_ + numDend_;
 			}
+			assert( e.e->cinfo()->isA( initKinComptCinfo() ) );
+			set< double >( e, volumeFinfo, volume );
 		}
 	}
 }
 
+/*
+void rescaleDiff( Element* e, double xByL, unsigned int begin, unsigned int end )
+{
+	static const Finfo* kfFinfo = 
+		initReactionCinfo()->findFinfo( "kf" );
+	static const Finfo* kbFinfo = 
+		initReactionCinfo()->findFinfo( "kb" );
+	for ( unsigned int i = begin; i != end; ++i ) {
+		Element* de = findDiff( e );
+		if ( de ) {
+			Eref diff( de, i );
+			ret = set< double >( diff, kfFinfo, xByL );
+			assert( ret );
+			ret = set< double >( diff, kbFinfo, xByL );
+			assert( ret );
+		}
+	}
+}
+*/
+
+#if 0
 /**
  * This figures out dendritic segment dimensions. It assigns the 
  * volumeScale for each signaling compt, and puts Xarea / len into
@@ -105,7 +157,18 @@ void SigNeur::setComptVols( Eref compt,
 			assert( ret );
 		}
 	}
+	// Scale all the reaction rates and enzyme rates.
+	foreach ( reacVec.begin(), reacVec.end(), rescaleReac );
+	foreach ( enzVec.begin(), enzVec.end(), rescaleEnz );
+	/*
+	for ( vector< Element* >::iterator i = reacVec.begin(); 
+		i != reacVec.end(); ++i ) {
+		rescaleReac( volscale / oldvol );
+		// Each reac knows how to scale kf and kb according to order.
+	}
+	*/
 }
+#endif
 
 /*
  * This function copies a signaling model. It first traverses the model and

@@ -7586,4 +7586,117 @@ TESTS/robots/soma.g, which implements all the required bits. At present there
 is still a glitch going from the signaling to the cell model, but the other
 way the data looks like it is flowing properly.
 
+Checked in as revision 767: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
 ==============================================================================
+27 Sep 2008
+Figured out issue with the soma model: Simply that the kinetics were wrong.
+I have not yet put in the  scaling of kf and kb by volume and reaction order.
+Also there is an issue with the diffusion rates at junctions.
+
+==============================================================================
+28 Sep 2008
+Need to formalize volume and geometry before I go further. A lot of the stuff
+I am doing in a difficult manner with the volumeScale should vanish, and
+many issues of rates of reactions should be fixed.
+
+Here is the relationship between the Smoldyn geometry concepts:
+Geometry is a superstructure and manages a bunch of surfaces. No volume term
+Surface manages a bunch of panels. Has a volume term
+Panels are parts of a surface. One or more to completely define it.
+	Multiple subclasses of panel: sphere, Hemisphere, cylinder, TriPanel, 
+	RectPanel.
+
+I had originally planned a flat tree for the object structure: See 18 Nov 2007.
+Note that this does not have KinCompt in it at all.
+	- /KineticManager|
+			 L/solve----------------|
+			 |			L/hub
+			 |			L/stoich
+			 |			L/solver
+			 |
+			 L/geometry-------------|
+			 |			L/surface-------|
+			 |			|		L/panels
+			 |			|		L/panels
+			 |			|
+			 |			L/surface-------|
+			 |			|		L/panels
+			 |			|		L/panels
+			 |			...
+			 |
+			 L/Other kinetic managers
+			 |
+			 L/model reacs.
+
+Note that KinCompt has no place in this scheme. However, it fits better
+with the SBML view of compts.
+
+Another option is to put KinCompt as the 'group' object, and to require that
+the volume of the group applies to all its children unless there is an
+intervening group.
+	- Straightforward, no additional messaging.
+		- Awkward field access: vol is not part of parent-child message.
+			- Access relatively rare (?).
+	- Incompatible with old kinetics hierarchy and solvers: at this
+		point solver wants to be /kinetics.
+		- Could hack with a fallback search, or use separate messages.
+	- Put geometry as optional child of KinCompt, and thus sibling of model
+		reacs.
+
+  /KineticManager|
+		 L/solve--------|
+		 |		L/hub
+		 |		L/stoich
+		 |		L/solver
+		 |
+		 L/KinCompt-----|
+		 |		L/model mols and reacs
+		 |		L/geometry------|
+		 |		|		L/surface-------|
+		 |		|		|		L/panels
+		 |		|		|		L/panels
+		 |		|		|
+		 |		|		L/surface-------|
+		 |		|		...
+		 |		|
+		 |		L/KinCompts----|
+		 |			...
+		 |
+		 L/Other kinetic managers, nested
+
+Couple of uncertain things here, though they don't have to be resolved till
+I begin to use 3D methods: 
+	- Do I use geometry at all or can it be folded into KinCompt?
+	- Can one model have multiple geometries?
+	- Can one geometry have multiple surfaces?
+
+What do I do about all the legacy genesis script that uses volscale?
+	- Clearly, I need to implement handler code in volscale, that refers
+		to the authoritative volume and complains if it doesn't match.
+	- Somewhat mitigated because almost all use of signaling objects in
+		GENESIS is through kkit, which is highly stereotyped.
+
+What does it mean for current SigNeur implementation?
+	- Replace neutrals for model holders with KinCompts
+	- A fair amount of work to do on percolating volume changes into reacs.
+	- A smaller bit of work for getting volume for molecules
+	- Rescaling becomes a piece of cake.
+	- Decide policy about moving molecules between compartments,
+		which often have different volumes. This has implications 
+		for modeling diffusion.
+			- Use reacs as now. The rates are all first order,
+				so no units issues. However, scaling issues.
+			- Subclass from reacs to make it legal to go between
+				compts, but otherwise reacs.
+			
+
+==============================================================================
+29 Sep 2008.
+Implemented the KinCompt and related stuff for scaling of molecules, reacs
+and enzymes. So far unit tests only done for molecule vol scaling. 
+Still to fully test the others out, but it clears the unit tests and
+the moose_kholodenko.g regression test.
+
+Bug at checkin in HsolveActive.cpp. Fixed.
+

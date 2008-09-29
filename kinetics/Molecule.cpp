@@ -14,6 +14,7 @@
 #include "Molecule.h"
 
 const double Molecule::EPSILON = 1.0e-15;
+extern double getVolScale( Eref e ); // defined in KinCompt.cpp
 
 const Cinfo* initMoleculeCinfo()
 {
@@ -61,7 +62,7 @@ const Cinfo* initMoleculeCinfo()
 			GFCAST( &Molecule::getNinit ), 
 			RFCAST( &Molecule::setNinit ) 
 		),
-		new ValueFinfo( "volumeScale", 
+		new ValueFinfo( "volumeScale",  // Deprecated. Used for BC only.
 			ValueFtype1< double >::global(),
 			GFCAST( &Molecule::getVolumeScale ), 
 			RFCAST( &Molecule::setVolumeScale )
@@ -117,6 +118,12 @@ const Cinfo* initMoleculeCinfo()
 		new DestFinfo( "sumTotal",
 			Ftype1< double >::global(),
 			RFCAST( &Molecule::sumTotalFunc )
+		),
+
+		// Takes the ratio of the new volume to the old one.
+		new DestFinfo( "rescaleVolume",
+			Ftype1< double >::global(),
+			RFCAST( &Molecule::rescaleFunc )
 		),
 	
 		/*
@@ -197,13 +204,19 @@ double Molecule::getNinit( Eref e )
 
 void Molecule::setVolumeScale( const Conn* c, double value )
 {
+/*
 	if ( value >= 0.0 )
 		static_cast< Molecule* >( c->data() )->volumeScale_ = value;
+		*/
+	double volScale = getVolScale( c->target() );
+	if ( fabs( value - volScale ) / (value + volScale ) > 1e-6 )
+		cout << "Warning: Molecule::setVolumeScale: Mismatch in deprecated assignment to\nvolScale: " << volScale << " != " << value << endl; 
 }
 
 double Molecule::getVolumeScale( Eref e )
 {
-	return static_cast< Molecule* >( e.data() )->volumeScale_;
+	return getVolScale( e );
+	// return static_cast< Molecule* >( e.data() )->volumeScale_;
 }
 
 void Molecule::setN( const Conn* c, double value )
@@ -241,6 +254,7 @@ int Molecule::localGetMode( Eref e )
 	return mode_;
 }
 
+/*
 double Molecule::localGetConc() const
 {
 			if ( volumeScale_ > 0.0 )
@@ -248,23 +262,33 @@ double Molecule::localGetConc() const
 			else
 				return n_;
 }
+*/
 double Molecule::getConc( Eref e )
 {
-	return static_cast< Molecule* >( e.data() )->localGetConc();
+	double volScale = getVolScale( e );
+	return static_cast< Molecule* >( e.data() )->n_ / volScale;
+	// return static_cast< Molecule* >( e.data() )->localGetConc();
 }
 
+/*
 void Molecule::localSetConc( double value ) {
 			if ( volumeScale_ > 0.0 )
 				n_ = value * volumeScale_ ;
 			else
 				n_ = value;
 }
+*/
+
 void Molecule::setConc( const Conn* c, double value )
 {
-	if ( value >= 0.0 )
-		static_cast< Molecule* >( c->data() )->localSetConc( value );
+	if ( value >= 0.0 ) {
+		double volScale = getVolScale( c->target() );
+		static_cast< Molecule* >( c->data() )->n_ = value * volScale;
+		// static_cast< Molecule* >( c->data() )->localSetConc( value );
+	}
 }
 
+/*
 double Molecule::localGetConcInit() const
 {
 			if ( volumeScale_ > 0.0 )
@@ -272,20 +296,29 @@ double Molecule::localGetConcInit() const
 			else
 				return nInit_;
 }
+*/
 double Molecule::getConcInit( Eref e )
 {
-	return static_cast< Molecule* >( e.data() )->localGetConcInit();
+	double volScale = getVolScale( e );
+	return static_cast< Molecule* >( e.data() )->nInit_ / volScale;
+	// return static_cast< Molecule* >( e.data() )->localGetConcInit();
 }
 
+/*
 void Molecule::localSetConcInit( double value ) {
 			if ( volumeScale_ > 0.0 )
 				nInit_ = value * volumeScale_ ;
 			else
 				nInit_ = value;
 }
+*/
 void Molecule::setConcInit( const Conn* c, double value )
 {
-	static_cast< Molecule* >( c->data() )->localSetConcInit( value );
+	if ( value >= 0.0 ) {
+		double volScale = getVolScale( c->target() );
+		static_cast< Molecule* >( c->data() )->nInit_ = value * volScale;
+	}
+	// static_cast< Molecule* >( c->data() )->localSetConcInit( value );
 }
 
 void Molecule::setD( const Conn* c, double value )
@@ -316,6 +349,13 @@ void Molecule::sumTotalFunc( const Conn* c, double n )
 {
 	Molecule* m = static_cast< Molecule* >( c->data() );
 	m->total_ += n;
+}
+
+void Molecule::rescaleFunc( const Conn* c, double ratio )
+{
+	Molecule* m = static_cast< Molecule* >( c->data() );
+	m->nInit_ *= ratio;
+	m->n_ *= ratio;
 }
 
 /*
@@ -416,7 +456,7 @@ void testMolecule()
 {
 	cout << "\nTesting Molecule" << flush;
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(),
+	Element* n = Neutral::create( "KinCompt", "n", Element::root()->id(),
 		Id::scratchId() );
 	Element* m0 = Neutral::create( "Molecule", "m0", n->id(),
 		Id::scratchId() );
@@ -435,7 +475,11 @@ void testMolecule()
 	SetConn cm1( m1, 0 );
 	SetConn cr0( r0, 0 );
 	p.dt_ = 0.001;
-	set< double >( m0, "concInit", 1.0 );
+	ret = set< double >( m0, "concInit", 1.0 );
+	ASSERT( ret, "mol conc assignment" );
+	double num = 0.0;
+	ret = get< double >( m0, "nInit", num );
+	ASSERT( fabs( num - 1.0 ) < 1.0e-6, "mol conc assignment" );
 	set< int >( m0, "mode", 0 );
 	set< double >( m1, "concInit", 0.0 );
 	set< int >( m1, "mode", 0 );
