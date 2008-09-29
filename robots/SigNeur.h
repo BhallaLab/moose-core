@@ -293,6 +293,8 @@ class SigNeur
 		map< string, Element* > dendMap_;
 		/// Name to Molecule map for spine compartment signaling models.
 		map< string, Element* > spineMap_;
+
+		// Vector of all reactions in soma models.
 };
 
 #endif // _KINETIC_MANAGER_H
