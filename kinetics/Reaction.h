@@ -24,6 +24,10 @@ class Reaction
 		///////////////////////////////////////////////////
 		// Field function definitions
 		///////////////////////////////////////////////////
+		static void setRawKf( const Conn* c, double value );
+		static double getRawKf( Eref e );
+		static void setRawKb( const Conn* c, double value );
+		static double getRawKb( Eref e );
 		static void setKf( const Conn* c, double value );
 		static double getKf( Eref e );
 		static void setKb( const Conn* c, double value );
@@ -45,6 +49,14 @@ class Reaction
 
 		static void scaleKfFunc( const Conn* c, double k );
 		static void scaleKbFunc( const Conn* c, double k );
+
+		/**
+ 		 * Ratio is ratio of new vol to old vol.
+ 		 * Kf, Kb have units of 1/(conc^(order-1) * sec )
+ 		 * new conc = old conc / ratio.
+ 		 * so kf = old_kf * ratio^(order-1)
+ 		 */
+		static void rescaleRates( const Conn* c, double ratio );
 
 	private:
 		double kf_;
