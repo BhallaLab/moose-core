@@ -29,16 +29,13 @@ class KinCompt
 		///////////////////////////////////////////////////
 		static double getVolume( Eref e );
 		static void setVolume( const Conn* c, double value );
-		void innerSetVolume( double value );
 		static double getArea( Eref e );
 		static void setArea( const Conn* c, double value );
-		void innerSetArea( double value );
 		static double getPerimeter( Eref e );
 		static void setPerimeter( const Conn* c, double value );
-		void innerSetPerimeter( double value );
 		static double getSize( Eref e );
 		static void setSize( const Conn* c, double value );
-		void innerSetSize( double value );
+		void innerSetSize( Eref e, double value );
 		static unsigned int getNumDimensions( Eref e );
 		static void setNumDimensions( const Conn* c, unsigned int value );
 
@@ -55,6 +52,8 @@ class KinCompt
 		static void interiorFunction( const Conn* c, 
 			double v1, double v2, double v3 );
 		void localInteriorFunction( double v1, double v2, double v3 );
+
+		static void rescaleFunction( const Conn* c, double ratio );
 
 	private:
 

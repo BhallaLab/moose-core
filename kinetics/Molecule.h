@@ -55,6 +55,7 @@ class Molecule
 		static void extentFunc( const Conn* c, 
 			double size, unsigned int dim );
 		void extentFuncLocal( Eref e, double size, unsigned int dim);
+		static void rescaleFunc( const Conn* c, double ratio );
 
 	private:
 		/// Initial number of molecules: t=0 boundary condition.
