@@ -372,11 +372,11 @@ void HSolveActive::calculateChannelCurrents( ) {
 	
 	if ( state_.size() != 0 ) {
 		double* istate = &state_[ 0 ];
-	
-	for ( ichan = channel_.begin(); ichan != channel_.end(); ++ichan ) {
-		ichan->process( istate, *icurrent );
-		++icurrent;
-	}
+			
+		for ( ichan = channel_.begin(); ichan != channel_.end(); ++ichan ) {
+			ichan->process( istate, *icurrent );
+			++icurrent;
+		}
 	}
 }
 
