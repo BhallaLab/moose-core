@@ -2,7 +2,7 @@
 // This version sets up the cell model, the signaling model and the
 // adaptors.
 
-float RUNTIME = 0.1
+float RUNTIME = 1.0
 float CELLDT = 50.0e-6
 float SIGDT = 1.0e-3
 float INJECT = 20e-12
@@ -10,7 +10,7 @@ float INJECT = 20e-12
 // Create a library of prototype elements to be used by the cell reader
 include proto16.g
 
-create neutral /kinetics
+create KinCompt /kinetics
 include soma_sig.g
 /*
 create Molecule /kinetics/Ca_input
@@ -72,6 +72,7 @@ setfield /sig calciumMap[Ca_conc] Ca_input
 setfield /sig channelMap[K_A] K_A
 setfield /sig sigDt {SIGDT}
 setfield /sig cellDt {CELLDT}
+setfield /sig calciumScale 0.1
 
 showfield /sig *
 le /sig
@@ -120,13 +121,13 @@ showfield /sig/cell/soma/K_A Gbar
 showfield /sig/kinetics/soma[1]/K_A n
 showfield /sig/cell/soma/Ca_conc Ca
 showfield /sig/kinetics/soma[1]/Ca_input n nInit
-step 0.1 -t
+step 0.01 -t
 showfield /sig/cell/soma/K_A Gbar
 showfield /sig/kinetics/soma[1]/K_A n
 setfield /sig/kinetics/soma[1]/K_A n 1e8 nInit 1e8
 showfield /sig/cell/soma/Ca_conc Ca
 showfield /sig/kinetics/soma[1]/Ca_input n nInit
-step 0.1 -t
+step 0.01 -t
 showfield /sig/cell/soma/K_A Gbar
 showfield /sig/kinetics/soma[1]/K_A n
 showfield /sig/cell/soma/Ca_conc Ca
