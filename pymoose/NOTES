@@ -3,5 +3,9 @@
 * TODO
 ** Fix PyMooseContext::readCell
    The format is just opposite GENESIS, should make GENESIS like to avoid ugly surprise.
+   Files to be affected:
+   PyMooseContext.h, PyMooseContext.cpp
+   examples/axon/axon.py
+   any python script using readCell
 
 
