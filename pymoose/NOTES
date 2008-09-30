@@ -8,4 +8,17 @@
    examples/axon/axon.py
    any python script using readCell
 
+* CODING JUSTIFICATIONS
+  The principle of least surprise requires PyMOOSE to stick closely to the
+  GENESIS commands. But we also want PyMOOSE to be more intuitive to the
+  new-comer than GENESIS was. When we deviate from the GENESIS conventions, or
+  do some coding whose reason is not obvious, here we put the justifications.
+
+** addmsg converted to connect
+   Because connect is a meaningful english word whereas addmsg is a
+   programmer's shortened word for "add message". The principle is to use
+   something meaningful, and a full word instead of abbreviation whenever
+   possible. This is a coding style guideline in many organizations.
+
+
 
