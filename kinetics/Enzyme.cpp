@@ -185,7 +185,7 @@ double Enzyme::getK3( Eref e )
 
 double Enzyme::getKm( Eref e )
 {
-	return static_cast< Enzyme* >( e.data() )->Km_;
+	return static_cast< Enzyme* >( e.data() )->innerGetKm( e );
 }
 void Enzyme::setKm( const Conn* c, double value )
 {
@@ -214,7 +214,7 @@ double Enzyme::innerGetKm( Eref e )
 		return Km_ / volScale;
 	} else {
 		double ns = numSub;
-		volScale = pow( ns, volScale );
+		volScale = pow( volScale, ns );
 		return Km_ / volScale;
 	}
 }
@@ -237,7 +237,7 @@ void Enzyme::innerSetKm( Eref e, double value )
 		return;
 	}
 	double volScale = getVolScale( e );
-	volScale = pow( static_cast< double >( numSub ), volScale );
+	volScale = pow( volScale, static_cast< double >( numSub ) );
 	Km_ = value * volScale;
 	k1_ = ( k2_ + k3_ ) / Km_;
 }
@@ -415,7 +415,7 @@ void Enzyme::innerRescaleRates( Eref e, double ratio )
 		cout << "Error: Cannot set enzyme Km: No substrate.";
 		return;
 	}
-	ratio = pow( static_cast< double >( numSub ), ratio );
+	ratio = pow( ratio, static_cast< double >( numSub ) );
 	Km_ = Km_ * ratio;
 	k1_ = ( k2_ + k3_ ) / Km_;
 }
@@ -612,6 +612,29 @@ void testEnzyme()
 		Molecule::processFunc( &cenzMol, &p );
 	}
 	ASSERT( delta < 5.0e-6, "Testing molecule and enzyme" );
+
+	// Check volume rescaling.
+	Eref enzE( enz, 0 );
+	double k1 = Enzyme::getK1( enzE );
+	double k2 = Enzyme::getK2( enzE );
+	double k3 = Enzyme::getK3( enzE );
+	double Km = Enzyme::getKm( enzE );
+	double nenz = Molecule::getN( enzMol );
+	set< double >( n, "volume", 1e-15 );
+
+	double num = Enzyme::getK1( enzE ); // Should be same as k1 * 6e5.
+	ASSERT( fabs( 1.0 - num * 6.0e5 / k1 ) < 1.0e-6, "enz vol rescaling" );
+	num = Enzyme::getK2( enzE ); // Should be same as k2
+	ASSERT( fabs( num - k2 ) < 1.0e-6, "enz vol rescaling" );
+	num = Enzyme::getK3( enzE ); // Should be same as k3
+	ASSERT( fabs( num - k3 ) < 1.0e-6, "enz vol rescaling" );
+	num = Enzyme::getKm( enzE ); // Should be same as Km.
+	ASSERT( fabs( num - Km ) < 1.0e-6, "enz vol rescaling" );
+
+	num = Molecule::getN( enzMol ); // Should be same as nenz scaled by vol.
+	ASSERT( fabs( num - nenz * 6e5 ) < 1.0e-2, "enzmol num rescaling" );
+	num = Molecule::getConc( enzMol ); // Should be same as nenz.
+	ASSERT( fabs( num - nenz ) < 1.0e-6, "enzmol conc rescaling" );
 
 	// Get rid of all the compartments.
 	set( n, "destroy" );

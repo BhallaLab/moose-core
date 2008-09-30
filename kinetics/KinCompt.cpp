@@ -346,18 +346,16 @@ void rescaleTree( Eref e, double ratio )
 {
 	static const Finfo* childListFinfo = 
 		initNeutralCinfo()->findFinfo( "childList" );
-
 	static const Finfo* rescaleMolFinfo = 
-		initReactionCinfo()->findFinfo( "rescaleVolume" );
-
+		initMoleculeCinfo()->findFinfo( "rescaleVolume" );
 	static const Finfo* rescaleReacFinfo = 
 		initReactionCinfo()->findFinfo( "rescaleRates" );
-
 	static const Finfo* rescaleEnzFinfo = 
 		initEnzymeCinfo()->findFinfo( "rescaleRates" );
-
 	static const Finfo* rescaleKinComptFinfo = 
 		initKinComptCinfo()->findFinfo( "rescaleSize" );
+
+	assert( childListFinfo != 0 && rescaleMolFinfo != 0 && rescaleReacFinfo != 0 && rescaleEnzFinfo != 0 && rescaleKinComptFinfo != 0 );
 
 	vector< Id > kids;
 	get< vector< Id > >( e, childListFinfo, kids );

@@ -20,6 +20,13 @@
 enum CompartmentCategory { SOMA, DEND, SPINE, SPINE_NECK };
 
 /**
+ * Utility function for getting dimensions of electrical compt when it
+ * is divided up into numSeg.
+ */
+void getSigComptSize( const Eref& compt, unsigned int numSeg,
+	double& volume, double& xByL );
+
+/**
  * Data structure that organizes the composite model.
  * Assumes arrays for each of the signaling models.
  */
@@ -200,6 +207,12 @@ class SigNeur
 		void buildDiffusionJunctions( vector< unsigned int >& junctions );
 
 		/**
+		 * Sets up rates for diffusion between m0 and m1 via diff.
+		 * diff is a child of m0.
+		 */
+		void diffCalc( Eref m0, Eref m1, Eref diff );
+
+		/**
  		* This figures out dendritic segment dimensions. It assigns the 
  		* volumeScale for each signaling compt, and puts Xarea / len into
  		* each diffusion element for future use in setting up diffusion
@@ -294,7 +307,10 @@ class SigNeur
 		/// Name to Molecule map for spine compartment signaling models.
 		map< string, Element* > spineMap_;
 
-		// Vector of all reactions in soma models.
+		// Vector of volumes of all segments
+		vector< double > volume_;
+		// vector of cross section area divided by length of segment.
+		vector< double > xByL_;
 };
 
 #endif // _KINETIC_MANAGER_H

@@ -524,6 +524,25 @@ void testMolecule()
 	}
 	ASSERT( delta < 5.0e-6, "Testing molecule and reacn" );
 
+	// Check volume rescaling.
+	n0 = Molecule::getN( m0 );
+	n1 = Molecule::getN( m1 );
+	set< double >( n, "volume", 1e-15 );
+	num = Molecule::getConc( m0 ); // Should be same as n0.
+	ASSERT( fabs( num - n0 ) < 1.0e-6, "mol num rescaling" );
+	num = Molecule::getConc( m1 ); // Should be same as n0.
+	ASSERT( fabs( num - n1 ) < 1.0e-6, "mol num rescaling" );
+	
+	num = Molecule::getN( m0 );
+	ASSERT( fabs( num - n0 * 6e5 ) < 1.0e-2, "mol num rescaling" );
+	num = Molecule::getN( m1 );
+	ASSERT( fabs( num - n1 * 6e5 ) < 1.0e-2, "mol num rescaling" );
+
+	num = Molecule::getNinit( m0 );
+	ASSERT( fabs( num - 6e5 ) < 1.0e-2, "mol num rescaling" );
+	num = Molecule::getConcInit( m0 );
+	ASSERT( fabs( num - 1.0 ) < 1.0e-6, "mol num rescaling" );
+
 	// Get rid of all the compartments.
 	set( n, "destroy" );
 }

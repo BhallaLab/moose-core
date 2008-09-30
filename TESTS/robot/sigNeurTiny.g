@@ -5,7 +5,7 @@
 // Create a library of prototype elements to be used by the cell reader
 include proto16.g
 
-create neutral /kinetics
+create KinCompt /kinetics
 create Molecule /kinetics/Ca_input
 setfield /kinetics/Ca_input concInit 0.08
 
