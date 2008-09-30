@@ -14,10 +14,10 @@ float D = 1e-12
 float length = 0.0001
 
 // Create a library of prototype elements to be used by the cell reader
-create neutral /library/soma
+create KinCompt /library/soma
 create Molecule /library/soma/Ca
 setfield /library/soma/Ca D 1
-create neutral /library/dend
+create KinCompt /library/dend
 create Molecule /library/dend/Ca
 setfield /library/dend/Ca D 1
 
@@ -76,9 +76,9 @@ float tot = 0
 float tot2 = 0
 float ret = 0
 
-openfile cyl.plot w
-writefile cyl.plot /newplot
-writefile cyl.plot /plotname theory
+openfile test.plot w
+writefile test.plot /newplot
+writefile test.plot /plotname theory
 int i
 for ( i = 0; i < nmol; i = i + 1 )
 	tot = tot + {getfield /sig/kinetics/soma[{i}]/Ca n}
@@ -86,14 +86,14 @@ for ( i = 0; i < nmol; i = i + 1 )
 	tot2 = tot2 + ret
 
 	// echo { ret } {getfield /sig/kinetics/soma[{i}]/Ca n}
-	writefile cyl.plot { ret }
+	writefile test.plot { ret }
 end
 
-writefile cyl.plot /newplot
-writefile cyl.plot /plotname simulation
+writefile test.plot /newplot
+writefile test.plot /plotname simulation
 for ( i = 0; i < nmol; i = i + 1 )
-	writefile cyl.plot {getfield /sig/kinetics/soma[{i}]/Ca n}
+	writefile test.plot {getfield /sig/kinetics/soma[{i}]/Ca n}
 end
-closefile cyl.plot
+closefile test.plot
 
 echo tot = {tot}, tot2 = {tot2}

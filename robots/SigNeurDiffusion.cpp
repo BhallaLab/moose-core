@@ -96,7 +96,7 @@ Element* findDiff( Element* pa )
  * diffusing molecules m0 and m1, and the reaction diff.
  * Should be called at the point where the diffusion messages are set up.
  */
-void diffCalc( double Dscale, Eref m0, Eref m1, Eref diff )
+void SigNeur::diffCalc( Eref m0, Eref m1, Eref diff )
 {
 	static const Finfo* kfFinfo = 
 		initReactionCinfo()->findFinfo( "kf" );
@@ -104,44 +104,30 @@ void diffCalc( double Dscale, Eref m0, Eref m1, Eref diff )
 		initReactionCinfo()->findFinfo( "kb" );
 	static const Finfo* dFinfo = 
 		initMoleculeCinfo()->findFinfo( "D" );
-	static const Finfo* volFinfo = 
-		initMoleculeCinfo()->findFinfo( "volumeScale" );
 
 	double v0;
 	double v1;
 	double D0;
 	double D1;
-	bool ret = get< double >( m0, volFinfo, v0 );
-	assert( ret && v0 > 0.0 );
-	ret = get< double >( m0, dFinfo, D0 );
+	assert( m0.i < volume_.size() );
+	v0 = volume_[ m0.i ];
+	assert( v0 > 0.0 );
+	bool ret = get< double >( m0, dFinfo, D0 );
 	assert( ret && D0 > 0.0 );
-	ret = get< double >( m1, volFinfo, v1 );
-	assert( ret && v1 > 0.0 );
+
+	assert( m1.i < volume_.size() );
+	v1 = volume_[ m1.i ];
+	assert( v1 > 0.0 );
 	ret = get< double >( m1, dFinfo, D1 );
 	assert( ret && D1 > 0.0 );
-	double D = Dscale * ( D0 + D1 ) / 2.0;
 
-	// volscale is conversion factor from # to uM: # / volscale = uM.
-	// We need concs in #/m^3 to be consistent in unit terms.
-	// #/( volscale) = 6e20 / m^3
-	//
-	// ( 1000 * # / 6e23 ) / vol(in m^3) = uM
-	// # / ( 6e20 * vol ) = uM so volscale = 6e20 * vol
-	// or vol = volscale / 6e20
-	v0 /= 6.0e20;
-	v1 /= 6.0e20;
-
-	double kf = 0.0; // kf already set to Xarea / len
-	ret = get< double >( diff, kfFinfo, kf );
-	assert( ret && kf > 0.0 );
-	kf *= D / v0;
+	double D = Dscale_ * ( D0 + D1 ) / 2.0;
+	double kf = D * xByL_[ m0.i ] / v0;
+	double kb = D * xByL_[ m0.i ] / v1; 
+	// Note that we the xByL for parent sig compt, but vol for target compt.
 	ret = set< double >( diff, kfFinfo, kf );
 	assert( ret );
 
-	double kb = 0.0; // kb already set to Xarea / len
-	ret = get< double >( diff, kbFinfo, kb );
-	assert( ret && kb > 0.0 );
-	kb *= D / v1;
 	ret = set< double >( diff, kbFinfo, kb );
 	assert( ret );
 }
@@ -187,7 +173,7 @@ void SigNeur::completeSomaDiffusion(
 						ConnTainer::Simple );
 					assert( ret );
 					Eref e0( i->second, j );
-					diffCalc( Dscale_, e0, e1, e2 );
+					diffCalc( e0, e1, e2 );
 				}
 			}
 		}
@@ -222,7 +208,7 @@ void SigNeur::completeDendDiffusion(
 							ConnTainer::Simple );
 						assert( ret );
 						Eref e0( i->second, j );
-						diffCalc( Dscale_, e0, e1, e2 );
+						diffCalc( e0, e1, e2 );
 					}
 				} else if 
 					( tgt >= numSoma_ && tgt < numDend_ + numSoma_ ) {
@@ -237,7 +223,7 @@ void SigNeur::completeDendDiffusion(
 						ConnTainer::Simple );
 					assert( ret );
 					Eref e0( i->second, j );
-					diffCalc( Dscale_, e0, e1, e2 );
+					diffCalc( e0, e1, e2 );
 				} else { // Should not connect into spine.
 					assert( 0 );
 				}
@@ -274,7 +260,7 @@ void SigNeur::completeSpineDiffusion(
 							e2, prdFinfo->msg(), 
 							ConnTainer::Simple );
 						assert( ret );
-						diffCalc( Dscale_, e0, e1, e2 );
+						diffCalc( e0, e1, e2 );
 					}
 				}
 			}
@@ -304,13 +290,27 @@ void SigNeur::buildDiffusionJunctions( vector< unsigned int >& junctions )
 	// Need to figure out how to put things at opposite ends of compt.
 	for ( vector< TreeNode >::iterator i = tree_.begin(); 
 		i != tree_.end(); ++i ) {
+		if ( i->category == SPINE_NECK )
+			continue;
 		// cout << i - tree_.begin() << "	" << i->compt.path() << ", p=" << i->parent << ", sig=" << i->sigStart << "," << i->sigEnd << endl;;
 
+		// Calculated xByL. Easy within the compt, at junction gets 
+		// a bit more subtle because we need to pull out both lengths.
+		double volume;
+		double areaByLen;
+		vector< double > xByL;
+		getSigComptSize( i->compt.eref(), i->sigEnd - i->sigStart, 
+			volume, areaByLen );
 		
 		// First we assign the links within the electrical compartment,
 		//  this is easy.
-		for ( unsigned int j = i->sigStart + 1; j < i->sigEnd; j++ )
+		for ( unsigned int j = i->sigStart + 1; j < i->sigEnd; j++ ) {
 			junctions[ j ] = j - 1;
+			xByL_[ j ] = areaByLen;
+			volume_[j] = volume;
+		}
+		xByL_[ i->sigStart ] = areaByLen;
+		volume_[ i->sigStart ] = volume;
 
 		//////////////// Now we assign sigSTart ///////////////
 		

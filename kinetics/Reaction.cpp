@@ -159,7 +159,7 @@ void Reaction::setKf( const Conn* c, double value )
 		static_cast< Reaction* >( c->data() )->kf_ = value;
 	} else {
 		double volScale = getVolScale( e );
-		volScale = pow( static_cast< double >( numSub - 1 ), volScale );
+		volScale = pow( volScale, static_cast< double >( numSub - 1 ) );
 		static_cast< Reaction* >( c->data() )->kf_ = value / volScale;
 	}
 }
@@ -171,7 +171,7 @@ double Reaction::getKf( Eref e )
 		return static_cast< Reaction* >( e.data() )->kf_;
 	} else {
 		double volScale = getVolScale( e );
-		volScale = pow( static_cast< double >( numSub - 1 ), volScale );
+		volScale = pow( volScale, static_cast< double >( numSub - 1 ) );
 		return static_cast< Reaction* >( e.data() )->kf_ * volScale;
 	}
 }
@@ -179,24 +179,24 @@ double Reaction::getKf( Eref e )
 void Reaction::setKb( const Conn* c, double value )
 {
 	Eref e = c->target();
-	unsigned int numSub = e.e->numTargets( substrateSlot.msg(), e.i );
-	if ( numSub <= 1 ) {
+	unsigned int numPrd = e.e->numTargets( productSlot.msg(), e.i );
+	if ( numPrd <= 1 ) {
 		static_cast< Reaction* >( c->data() )->kb_ = value;
 	} else {
 		double volScale = getVolScale( e );
-		volScale = pow( static_cast< double >( numSub - 1 ), volScale );
+		volScale = pow( volScale, static_cast< double >( numPrd - 1 ) );
 		static_cast< Reaction* >( c->data() )->kb_ = value / volScale;
 	}
 }
 
 double Reaction::getKb( Eref e )
 {
-	unsigned int numSub = e.e->numTargets( substrateSlot.msg(), e.i );
-	if ( numSub <= 1 ) {
+	unsigned int numPrd = e.e->numTargets( productSlot.msg(), e.i );
+	if ( numPrd <= 1 ) {
 		return static_cast< Reaction* >( e.data() )->kb_;
 	} else {
 		double volScale = getVolScale( e );
-		volScale = pow( static_cast< double >( numSub - 1 ), volScale );
+		volScale = pow( volScale, static_cast< double >( numPrd - 1 ) );
 		return static_cast< Reaction* >( e.data() )->kb_ * volScale;
 	}
 }
@@ -213,12 +213,12 @@ void Reaction::rescaleRates( const Conn* c, double ratio )
 	unsigned int numSub = e.e->numTargets( substrateSlot.msg(), e.i );
 	unsigned int numPrd = e.e->numTargets( productSlot.msg(), e.i );
 	if ( numSub > 1 ) {
-		double scale = pow( numSub - 1, ratio );
-		static_cast< Reaction* >( c->data() )->kf_ *= scale;
+		double scale = pow( ratio, static_cast< double >( numSub - 1 ) );
+		static_cast< Reaction* >( c->data() )->kf_ /= scale;
 	}
 	if ( numPrd > 1 ) {
-		double scale = pow( numPrd - 1, ratio );
-		static_cast< Reaction* >( c->data() )->kb_ *= scale;
+		double scale = pow( ratio, static_cast< double >( numPrd - 1 ) );
+		static_cast< Reaction* >( c->data() )->kb_ /= scale;
 	}
 }
 
