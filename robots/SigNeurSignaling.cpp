@@ -20,7 +20,7 @@ static const double PI = 3.1415926535;
 extern Element* findDiff( Element* pa );
 
 void getSigComptSize( const Eref& compt, unsigned int numSeg,
-	double& volscale, double& xByL )
+	double& volume, double& xByL )
 {
 	static const Finfo* diaFinfo = 
 		initCompartmentCinfo()->findFinfo( "diameter" );
@@ -35,10 +35,11 @@ void getSigComptSize( const Eref& compt, unsigned int numSeg,
 	ret = get< double >( compt, lenFinfo, len );
 	assert( ret && len > 0.0 );
 
-	assert( numSeg > 0 );
-	len /= numSeg;
+	if ( numSeg > 0 ) // Zero means there are no diffusion compts.
+		len /= numSeg;
+	
 	// Conversion factor from uM to #/m^3
-	volscale = len * dia * dia * ( PI / 4.0 ) * 6.0e20;
+	volume = len * dia * dia * ( PI / 4.0 );
 	xByL = dia * dia * ( PI / 4.0 ) / len;
 }
 
@@ -69,6 +70,9 @@ void SigNeur::setAllVols()
 				e = spine_.eref();
 				offset = numSoma_ + numDend_;
 			}
+			assert( e.e != Element::root() );
+			assert( e.e->numEntries() > ( j - offset ) );
+			e.i = j - offset;
 			assert( e.e->cinfo()->isA( initKinComptCinfo() ) );
 			set< double >( e, volumeFinfo, volume );
 		}
@@ -235,6 +239,8 @@ void SigNeur::makeSignalingModel( Eref me )
 	// first soma indices, then dend, then spines.
 	vector< unsigned int > junctions( 
 		numSoma_ + numDend_ + numSpine_, UINT_MAX );
+	xByL_.resize( numSoma_ + numDend_ + numSpine_, 0.0 );
+	volume_.resize( numSoma_ + numDend_ + numSpine_, 0.0 );
 	buildDiffusionJunctions( junctions );
 	buildMoleculeNameMap( soma, somaMap_ );
 	buildMoleculeNameMap( dend, dendMap_ );
