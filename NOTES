@@ -7678,10 +7678,10 @@ What do I do about all the legacy genesis script that uses volscale?
 		GENESIS is through kkit, which is highly stereotyped.
 
 What does it mean for current SigNeur implementation?
-	- Replace neutrals for model holders with KinCompts
-	- A fair amount of work to do on percolating volume changes into reacs.
-	- A smaller bit of work for getting volume for molecules
-	- Rescaling becomes a piece of cake.
+	* Replace neutrals for model holders with KinCompts
+	* A fair amount of work to do on percolating volume changes into reacs.
+	* A smaller bit of work for getting volume for molecules
+	* Rescaling becomes a piece of cake.
 	- Decide policy about moving molecules between compartments,
 		which often have different volumes. This has implications 
 		for modeling diffusion.
@@ -7699,4 +7699,19 @@ Still to fully test the others out, but it clears the unit tests and
 the moose_kholodenko.g regression test.
 
 Bug at checkin in HsolveActive.cpp. Fixed.
+
+Checked in as revision 774: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Now to return to the SigNeur stuff, which has been severely mauled.
+
+==============================================================================
+30 Sep 2008
+
+Various cleanups, more unit tests for the kinetic scaling.
+Worked on the test for SigNeur: soma.g: OK. 
+cylinder.g is now broken: diffusion rates messed up.
+
+Some fixes to diffusion. Now cylinder.g works, but these are patches, 
+and there is scope for much cleaning. sigNeurTiny.g now fails... fixed.
+
 
