@@ -27,6 +27,8 @@
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
+import moose
+
 # CONSTANTS
 # (I-current)
 ECa = 0.07
@@ -35,7 +37,7 @@ ENa = 0.045
 
 SOMA_A = 1e-9 # sq m
 # obtain the context element
-context = PyMooseBase.getContext()
+context = moose.PyMooseBase.getContext()
 
 #/* FILE INFORMATION
 #** Rat Na channel, cloned, in oocyte expression system.
@@ -48,7 +50,6 @@ context = PyMooseBase.getContext()
 #** Implemented in tabchan format by Upinder S. Bhalla March 1991
 #** This file depends on functions and constants defined in defaults.g
 #*/
-
 
 #========================================================================
 #                        Adjusted LCa channel
@@ -209,6 +210,314 @@ def make_Na2_rat_smsnn():
     yGate.A.ox = 0.01  
     yGate.B.ox = 0.01
     return Na2_rat_smsnn
+
+# /**********************************************************************
+# **                      Mitral K current
+# **  Heavily adapted from :
+# **	K current activation from Thompson, J. Physiol 265, 465 (1977)
+# **	(Tritonia (LPl	2 and LPl 3 cells)
+# ** Inactivation from RW Aldrich, PA Getting, and SH Thompson, 
+# ** J. Physiol, 291, 507 (1979)
+# **
+# **********************************************************************/
+def make_K_mit_usb(path="K_mit_usb"): 
+    """K-current"""
+    if context.exists(path):
+        return moose.HHChannel(path)
+
+    EK = -0.07
+    K_mit_usb = moose.HHChannel(path)
+    K_mit_usb.Ek = EK
+    K_mit_usb.Gbar = 1200*SOMA_A
+    K_mit_usb.Ik = 0.0 
+    K_mit_usb.Gk = 0.0 
+    K_mit_usb.Xpower = 2
+    K_mit_usb.Ypower = 1 
+    K_mit_usb.Zpower = 0
+
+    K_mit_usb.createTable("X", 30, -0.100, 0.050)
+    xGate = moose.HHGate(path + "/xGate")
+    for i in range(0, 13):
+        xGate.A[i] = 0.0        # -0.1 thru -0.045=>0.0
+
+#     // -0.100 Volts
+#     // -0.095 Volts
+#     // -0.090 Volts
+#     // -0.085 Volts
+#     // -0.080 Volts
+#     // -0.075 Volts
+#     // -0.070 Volts
+#     // -0.065 Volts
+#     // -0.060 Volts
+#     // -0.055 Volts
+#     // -0.050 Volts
+#     // -0.045 Volts
+#     // -0.040 Volts
+#     // -0.030
+#     // -0.020
+#     // -0.010
+#     // 0.0
+#     // 0.010
+#     // 0.020
+#     // 0.030
+#     // 0.040
+#     // 0.050
+
+    xGate.A[14] = 2.87
+    xGate.A[15] = 4.68 
+    xGate.A[16] = 7.46 
+    xGate.A[17] = 10.07 
+    xGate.A[18] = 14.27 
+    xGate.A[19] = 17.87 
+    xGate.A[20] = 22.9  
+    xGate.A[21] = 33.6 
+    xGate.A[22] = 49.3 
+    xGate.A[23] = 65.6  
+    xGate.A[24] = 82.0
+    xGate.A[25] = 110.0 
+    xGate.A[26] = 147.1  
+    xGate.A[27] = 147.1
+    xGate.A[28] = 147.1 
+    xGate.A[29] = 147.1  
+    xGate.A[30] = 147.1
+
+#     // -0.100 Volts
+#     // -0.095 Volts
+#     // -0.090 Volts
+#     // -0.085 Volts
+#     // -0.080 Volts
+#     // -0.075 Volts
+#     // -0.070 Volts
+#     // -0.065 Volts
+#     // -0.060 Volts
+#     // -0.055 Volts
+#     // -0.050 Volts
+#     // -0.045 Volts
+#     // -0.040 Volts
+#     // -0.030
+#     // -0.020
+#     // -0.010
+#     // 0.00
+#     // 0.010
+#     // 0.020
+#     // 0.030
+#     // 0.040
+#     // 0.050
+    
+    xGate.B[0] = 36.0
+    xGate.B[1] = 34.4  
+    xGate.B[2] = 32.8
+    xGate.B[3] = 31.2
+    xGate.B[4] = 29.6  
+    xGate.B[5] = 28.0 
+    xGate.B[6] = 26.3
+    xGate.B[7] = 24.7  
+    xGate.B[8] = 23.1 
+    xGate.B[9] = 21.5
+    xGate.B[10] = 19.9 
+    xGate.B[11] = 18.3
+    xGate.B[12] = 16.6 
+    xGate.B[13] = 15.4 
+    xGate.B[14] = 13.5
+    xGate.B[15] = 13.2 
+    xGate.B[16] = 11.9 
+    xGate.B[17] = 11.5
+    xGate.B[18] = 10.75
+    xGate.B[19] = 9.30 
+    xGate.B[20] = 8.30
+    xGate.B[21] = 6.00 
+    xGate.B[22] = 5.10 
+    xGate.B[23] = 4.80
+    xGate.B[24] = 3.20 
+    xGate.B[25] = 1.60 
+    xGate.B[26] = 0.00
+    xGate.B[27] = 0.00 
+    xGate.B[28] = 0.00 
+    xGate.B[29] = 0.00
+    xGate.B[30] = 0.00
+    
+    # Setting the calc_mode to NO_INTERP for speed 
+    xGate.A.calcMode = 0 
+    xGate.B.calcMode = 0
+
+    # tweaking the tables for the tabchan calculation
+    K_mit_usb.tweakAlpha("X")
+
+    # Filling the tables using B-SPLINE interpolation 
+    xGate.tabFill(3000, 0)
+    K_mit_usb.createTable("Y", 30, -0.100, 0.050)
+    yGate = moose.HHGate(path + "/yGate")
+    for i in range(0, 12):
+        yGate.A[i] = 1.0    #-0.1 thru -0.035 => 1.0
+
+#     // -0.040	Volts
+#     // 
+#     // -0.030	Volts
+#     // -0.020
+#     // -0.010
+#     // 0.00
+#     // 0.010
+#     // 0.020
+#     // 0.030
+#     // 0.040
+#     // 0.050
+    yGate.B[12] = 1.00 
+    yGate.B[13] = 0.97  
+    yGate.B[14] = 0.94 
+    yGate.B[15] = 0.88 
+    yGate.B[16] = 0.75  
+    yGate.B[17] = 0.61 
+    yGate.B[18] = 0.43 
+    yGate.B[19] = 0.305  
+    yGate.B[20] = 0.220 
+    yGate.B[21] = 0.175 
+    yGate.B[22] = 0.155  
+    yGate.B[23] = 0.143 
+    yGate.B[24] = 0.138 
+    yGate.B[25] = 0.137
+    yGate.B[26] = 0.136 
+    yGate.B[27] = 0.135 
+    yGate.B[28] = 0.135 
+    yGate.B[29] = 0.135 
+    yGate.B[30] = 0.135
+
+    for i in range(0, 12):
+        yGate.B[i] = 0.0   # -0.1 thru -0.045 => 0.0
+
+#     // -0.040	Volts
+#     //
+#     // -0.030	Volts
+#     // -0.020
+#     // -0.010
+#     // 0.00
+#     // 0.010
+#     // 0.020
+#     // 0.030
+#     // 0.040
+#     // 0.050
+    yGate.B[12] = 0.0
+    yGate.B[13] = 0.03  
+    yGate.B[14] = 0.06 
+    yGate.B[15] = 0.12 
+    yGate.B[16] = 0.25  
+    yGate.B[17] = 0.39 
+    yGate.B[18] = 0.57 
+    yGate.B[19] = 0.695  
+    yGate.B[20] = 0.78 
+    yGate.B[21] = 0.825 
+    yGate.B[22] = 0.845  
+    yGate.B[23] = 0.857 
+    yGate.B[24] = 0.862 
+    yGate.B[25] = 0.863  
+    yGate.B[26] = 0.864 
+    yGate.B[27] = 0.865 
+    yGate.B[28] = 0.865  
+    yGate.B[29] = 0.865 
+    yGate.B[30] = 0.865
+
+    # Setting the calc_mode to NO_INTERP for speed 
+    yGate.A.calcMode = 0 
+    yGate.B.calcMode = 0
+
+    # tweaking the tables for the tabchan calculation
+    K_mit_usb.tweakAlpha("Y")
+
+    # Filling the tables using B-SPLINE interpolation
+    yGate.tabFill(3000, 0)
+
+    xGate.A.sy = 5.0 
+    xGate.B.sy = 5.0 
+    yGate.A.sy = 5.0
+    yGate.B.sy = 5.0 
+    K_mit_usb.Ek = EK
+
+
+def make_K2_mit_usb(path="K2_mit_usb"):
+	if context.exists(path):
+            return moose.HHChannel(path)
+        
+        EK = -0.07
+        K2_mit_usb = make_K_mit_usb(path)
+        xGate = moose.HHGate(path + "/xGate")
+        yGate = moose.HHGate(path + "/yGate")
+
+        xGate.A.sy = 20.0 
+        xGate.B.sy = 20.0 
+        yGate.A.sy = 20.0  
+        yGate.B.sy = 20.0 
+        K2_mit_usb.Ek = EK
+        return K2_mit_usb
+
+def make_K_slow_usb(path="K_slow_usb"):
+	if context.exists(path):
+            return moose.HHChannel(path)
+
+        EK = -0.07
+
+	K_slow_usb = make_K_mit_usb(path)
+        xGate = moose.HHGate(path + "/xGate")
+        yGate = moose.HHGate(path + "/yGate")
+        xGate.A.sy = 1.0
+        xGate.B.sy = 1.0
+        yGate.A.sy = 1.0
+        yGate.B.sy = 1.0
+        return K_slow_usb
+
+# //========================================================================
+# //			Tabchan Na Mitral cell channel 
+# //========================================================================
+
+def make_Na_mit_usb(path="Na_mit_usb"):
+    global context
+    if context.exists(path):
+        return moose.HHChannel(path)
+
+
+    # offset both for erest and for thresh 
+    THRESH = -0.055
+    # Sodium reversal potl 
+    ENA = 0.045
+    Na_mit_usb = moose.HHChannel(path)
+    Na_mit_usb.Ek = ENA # V
+    Na_mit_usb.Gbar = 1.2e3*SOMA_A # S
+    Na_mit_usb.Ik = 0.0 # A
+    Na_mit_usb.Gk = 0.0 # S
+    Na_mit_usb.Xpower = 3
+    Na_mit_usb.Ypower = 1
+    Na_mit_usb.Zpower = 0
+    Na_mit_usb.setupAlpha("X", 320e3*(0.013 + THRESH), -320e3, -1.0,
+                          -1.0*(0.013 + THRESH), -0.004, -280e3*(0.040 + THRESH),
+                          280e3, -1.0, -1.0*(0.040 + THRESH), 5.0e-3)
+
+    Na_mit_usb.setupAlpha("Y", 128.0, 0.0, 0.0, -1.0*(0.017 + THRESH),
+	     0.018, 4.0e3, 0.0, 1.0, -1.0*(0.040 + THRESH), -5.0e-3)
+
+def make_Na2_mit_usb(path="Na2_mit_usb"):
+    global context
+    if context.exists(path):
+        return moose.HHChannel(path)
+
+    # offset both for erest and for thresh 
+    THRESH = -0.060
+    # Sodium reversal potl
+    ENA = 0.045
+    Na2_mit_usb = moose.HHChannel(path)
+    Na2_mit_usb.Ek = ENA
+    Na2_mit_usb.Gbar = 1.2e3*SOMA_A
+    Na2_mit_usb.Ik = 0.0 
+    Na2_mit_usb.Gk  = 0.0
+    Na2_mit_usb.Xpower = 3 
+    Na2_mit_usb.Ypower = 1 
+    Na2_mit_usb.Zpower = 0
+    Na2_mit_usb.setupAlpha("X", 320e3*(0.013 + THRESH), -320e3, -1.0,
+                           -1.0*(0.013 + THRESH), -0.004, -280e3*(0.040 + THRESH),
+                           280e3, -1.0, -1.0*(0.040 + THRESH), 5.0e-3)
+
+    Na2_mit_usb.setupAlpha("Y", 128.0, 0.0, 0.0,
+                           -1.0*(0.017 + THRESH), 0.018, 4.0e3, 0.0, 1.0,
+                           -1.0*(0.040 + THRESH), -5.0e-3)
+
+    return Na2_mit_usb
 
 # TODO: put the rest of the channels
 

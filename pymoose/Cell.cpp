@@ -36,4 +36,33 @@ Cell::Cell(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent
 }
 Cell::~Cell(){}
 const std::string& Cell::getType(){ return className; }
+string Cell::__get_method() const
+{
+    string method;
+    get < string > (id_(), "method",method);
+    return method;
+}
+void Cell::__set_method( string method )
+{
+    set < string > (id_(), "method", method);
+}
+bool Cell::__get_variableDt() const
+{
+    bool variableDt;
+    get < bool > (id_(), "variableDt",variableDt);
+    return variableDt;
+}
+bool Cell::__get_implicit() const
+{
+    bool implicit;
+    get < bool > (id_(), "implicit",implicit);
+    return implicit;
+}
+const string Cell::__get_description() const
+{
+    string description;
+    get < string > (id_(), "description",description);
+    return description;
+}
+
 #endif
