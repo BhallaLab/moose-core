@@ -16,7 +16,9 @@
 #** GNU General Public License version 2
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
-
+import sys
+sys.path.append("../channels")
+sys.path.append("../..")
 from bulbchan import *
 
 
@@ -45,8 +47,14 @@ context = moose.PyMooseBase.getContext()
 
 
 context.setCwe("/library")
+print "Making channels"
 make_Na_mit_usb()
+print "Making K_mit_usb"
 make_K_mit_usb()
+
+for child in moose.Neutral("/library").children():
+    print "Objects in library:", child.path()
+
 context.setCwe("/")
 
 #//=====================================
