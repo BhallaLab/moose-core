@@ -150,24 +150,5 @@ void Compartment::__set_z( double z )
 {
     set < double > (id_(), "z", z);
 }
-double Compartment::__get_VmSrc() const
-{
-    double VmSrc;
-    get < double > (id_(), "VmSrc",VmSrc);
-    return VmSrc;
-}
-void Compartment::__set_VmSrc( double VmSrc )
-{
-    set < double > (id_(), "VmSrc", VmSrc);
-}
-double Compartment::__get_injectMsg() const
-{
-    double injectMsg;
-    get < double > (id_(), "injectMsg",injectMsg);
-    return injectMsg;
-}
-void Compartment::__set_injectMsg( double injectMsg )
-{
-    set < double > (id_(), "injectMsg", injectMsg);
-}
+
 #endif
