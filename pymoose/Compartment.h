@@ -44,10 +44,6 @@ namespace pymoose
         void __set_y(double y);
         double __get_z() const;
         void __set_z(double z);
-        double __get_VmSrc() const;
-        void __set_VmSrc(double VmSrc);
-        double __get_injectMsg() const;
-        void __set_injectMsg(double injectMsg);
     };
 } // namespace
 

@@ -121,6 +121,11 @@
 %attribute(pymoose::Class, unsigned int, stage, __get_stage, __set_stage)
 
 %include "Cell.h"
+%attribute(pymoose::Cell, string, method, __get_method, __set_method)
+%attribute(pymoose::Cell, bool, variableDt, __get_variableDt)
+%attribute(pymoose::Cell, bool, implicit, __get_implicit)
+%attribute(pymoose::Cell, string, description, __get_description)
+
 %include "Tick.h"
 %attribute(pymoose::ClockTick, double, dt, __get_dt, __set_dt)
 %attribute(pymoose::ClockTick, int, stage, __get_stage, __set_stage)
@@ -310,8 +315,7 @@
 %attribute(pymoose::Compartment, double, x, __get_x, __set_x)
 %attribute(pymoose::Compartment, double, y, __get_y, __set_y)
 %attribute(pymoose::Compartment, double, z, __get_z, __set_z)
-%attribute(pymoose::Compartment, double, VmSrc, __get_VmSrc, __set_VmSrc)
-%attribute(pymoose::Compartment, double, injectMsg, __get_injectMsg, __set_injectMsg)
+
 %include "NeuroScan.h"
 %attribute(pymoose::NeuroScan, int, VDiv, __get_VDiv, __set_VDiv)
 %attribute(pymoose::NeuroScan, double, VMin, __get_VMin, __set_VMin)
