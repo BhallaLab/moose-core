@@ -35,6 +35,11 @@ namespace pymoose
         Cell(const Cell& src,std::string path);
         ~Cell();
         const std::string& getType();
+        void __set_method(std::string method);
+        std::string __get_method(void) const;
+        bool __get_variableDt(void) const;
+        bool __get_implicit(void) const;
+        const std::string __get_description(void) const;        
     };
 }// namepsace pymoose
     
