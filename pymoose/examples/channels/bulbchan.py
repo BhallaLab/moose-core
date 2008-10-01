@@ -222,6 +222,7 @@ def make_Na2_rat_smsnn():
 # **********************************************************************/
 def make_K_mit_usb(path="K_mit_usb"): 
     """K-current"""
+    print "########## IN make_K_mit_usb"
     if context.exists(path):
         return moose.HHChannel(path)
 
@@ -337,6 +338,7 @@ def make_K_mit_usb(path="K_mit_usb"):
     xGate.B[30] = 0.00
     
     # Setting the calc_mode to NO_INTERP for speed 
+    print "Calc modes:", xGate.A.calcMode, xGate.B.calcMode
     xGate.A.calcMode = 0 
     xGate.B.calcMode = 0
 
@@ -361,25 +363,25 @@ def make_K_mit_usb(path="K_mit_usb"):
 #     // 0.030
 #     // 0.040
 #     // 0.050
-    yGate.B[12] = 1.00 
-    yGate.B[13] = 0.97  
-    yGate.B[14] = 0.94 
-    yGate.B[15] = 0.88 
-    yGate.B[16] = 0.75  
-    yGate.B[17] = 0.61 
-    yGate.B[18] = 0.43 
-    yGate.B[19] = 0.305  
-    yGate.B[20] = 0.220 
-    yGate.B[21] = 0.175 
-    yGate.B[22] = 0.155  
-    yGate.B[23] = 0.143 
-    yGate.B[24] = 0.138 
-    yGate.B[25] = 0.137
-    yGate.B[26] = 0.136 
-    yGate.B[27] = 0.135 
-    yGate.B[28] = 0.135 
-    yGate.B[29] = 0.135 
-    yGate.B[30] = 0.135
+    yGate.A[12] = 1.00 
+    yGate.A[13] = 0.97  
+    yGate.A[14] = 0.94 
+    yGate.A[15] = 0.88 
+    yGate.A[16] = 0.75  
+    yGate.A[17] = 0.61 
+    yGate.A[18] = 0.43 
+    yGate.A[19] = 0.305  
+    yGate.A[20] = 0.220 
+    yGate.A[21] = 0.175 
+    yGate.A[22] = 0.155  
+    yGate.A[23] = 0.143 
+    yGate.A[24] = 0.138 
+    yGate.A[25] = 0.137
+    yGate.A[26] = 0.136 
+    yGate.A[27] = 0.135 
+    yGate.A[28] = 0.135 
+    yGate.A[29] = 0.135 
+    yGate.A[30] = 0.135
 
     for i in range(0, 12):
         yGate.B[i] = 0.0   # -0.1 thru -0.045 => 0.0
@@ -430,7 +432,10 @@ def make_K_mit_usb(path="K_mit_usb"):
     yGate.A.sy = 5.0
     yGate.B.sy = 5.0 
     K_mit_usb.Ek = EK
-
+    xGate.A.dumpFile("xgate_a.plot")
+    xGate.B.dumpFile("xgate_b.plot")
+    yGate.A.dumpFile("ygate_a.plot")
+    yGate.B.dumpFile("ygate_b.plot")
 
 def make_K2_mit_usb(path="K2_mit_usb"):
 	if context.exists(path):
