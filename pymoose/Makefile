@@ -32,8 +32,8 @@ endif
 # The library location and flags for creating dll in Mac is different from Linux
 # Darwin may not have the OSTYPE environment variable defined in bash. Set OSTYPE=Darwin if required
 ifeq ($(OSTYPE),Darwin)
-	CFLAGS+=-bundle -bundle_loader /usr/bin/python -flat_namespace -undefined suppress -I/Library/Frameworks/Python.framework/Versions/2.5/include/python2.5
-	LDFLAGS+=-dynamic -L/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/config/
+	CFLAGS+=-bundle -fno-common /usr/bin/python -flat_namespace -undefined suppress -I/Library/Frameworks/Python.framework/Versions/2.5/include/python2.5
+	LDFLAGS+=-bundle -fno-common -L/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/config/
 else # this is for unix like systems - change /usr/include/Python2.5 to the directory where Python.h is located
 	CFLAGS +=-I/usr/include/python2.5
 	LDFLAGS+=-shared
@@ -55,7 +55,7 @@ OBJFILES = ../basecode/basecode.o \
 	../connections/connections.o \
 	../genesis_parser/SLI.o	\
 	../kinetics/kinetics.o	\
-
+	../hsolve/hsolve.o
 
 OBJ = PyMooseBase.o \
 	PyMooseContext.o \
@@ -179,8 +179,15 @@ default: $(TARGET)
 
 pymoose: _moose.so moose.py #testPyMoose 
 
+ifeq ($(OSTYPE),Darwin)
+_moose.so: moose_wrap.o $(OBJFILES) $(OBJ) 
+	$(CXX) $(LDFLAGS) -o $@  $(LIBS) $^ 
+endif
+
+ifneq ($(OSTYPE),Darwin)
 _moose.so: moose_wrap.o $(OBJ) $(OBJFILES)
 	$(CXX) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
+endif
 
 moose_wrap.o: moose_wrap.cxx
 	$(CXX) $(CFLAGS) -c $^ -o $@
