@@ -52,11 +52,11 @@ void ChannelStruct::process( double*& state, CurrentStruct& current )
 {
 	double fraction = 1.0;
 	
-	if( Xpower_ )
+	if( Xpower_ > 0.0 )
 		fraction *= takeXpower_( *( state++ ), Xpower_ );
-	if( Ypower_ )
+	if( Ypower_ > 0.0 )
 		fraction *= takeYpower_( *( state++ ), Ypower_ );
-	if( Zpower_ )
+	if( Zpower_ > 0.0 )
 		fraction *= takeZpower_( *( state++ ), Zpower_ );
 	
 	current.Gk = Gbar_ * fraction;
