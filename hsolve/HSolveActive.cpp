@@ -121,11 +121,11 @@ void HSolveActive::readChannels( ) {
 			 */
 			chan2state_.push_back( state_.size() );
 			
-			if ( Xpower )
+			if ( Xpower > 0.0 )
 				state_.push_back( X );
-			if ( Ypower )
+			if ( Ypower > 0.0 )
 				state_.push_back( Y );
-			if ( Zpower )
+			if ( Zpower > 0.0 )
 				state_.push_back( Z );
 			
 			/*
@@ -509,7 +509,7 @@ void HSolveActive::advanceChannels( double dt ) {
 		ilookup->getKey( *iv, key );
 		chanBoundary = ichan + *ichannelcount;
 		for ( ; ichan < chanBoundary; ++ichan ) {
-			if ( ichan->Xpower_ ) {
+			if ( ichan->Xpower_ > 0.0 ) {
 				ilookup->rates( key, C1, C2 );
 				//~ *istate = *istate * C1 + C2;
 				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
@@ -523,7 +523,7 @@ void HSolveActive::advanceChannels( double dt ) {
 				++ilookup, ++istate;
 			}
 			
-			if ( ichan->Ypower_ ) {
+			if ( ichan->Ypower_ > 0.0 ) {
 				ilookup->rates( key, C1, C2 );
 				//~ *istate = *istate * C1 + C2;
 				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
@@ -537,7 +537,7 @@ void HSolveActive::advanceChannels( double dt ) {
 				++ilookup, ++istate;
 			}
 			
-			if ( ichan->Zpower_ ) {
+			if ( ichan->Zpower_ > 0.0 ) {
 				if ( *icadepend ) {
 					ilookup->getKey( **icadepend, keyCa );
 					ilookup->rates( keyCa, C1, C2 );
