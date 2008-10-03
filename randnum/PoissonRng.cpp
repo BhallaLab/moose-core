@@ -44,13 +44,15 @@ const Cinfo* initPoissonRngCinfo()
 
     
 static const Cinfo* poissonRngCinfo = initPoissonRngCinfo();
+PoissonRng::PoissonRng()
+{
+    //do nothing. should not try to get mean 
+}
 
 /**
    Sets the mean. Since poisson distribution is defined in terms of
    the rate parameter or the mean, it is mandatory to set this before
-   using the generator. This is stored as member variable even if the
-   actual generator object has not been instantiated. If the generator
-   object exists, this function call has no effect.
+   using the generator.
 */
 void PoissonRng::setMean(const Conn& c, double mean)
 {
@@ -59,10 +61,10 @@ void PoissonRng::setMean(const Conn& c, double mean)
     {
         generator->rng_ = new Poisson(mean);
     }
-    else 
+    else
     {
-        generator->mean_ = generator->rng_->getMean();
-    }
+        static_cast<Poisson*>(generator->rng_)->setMean(mean);
+    }    
 }
 /**
    reports error in case the parameter mean has not been set.
