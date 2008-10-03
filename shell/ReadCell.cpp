@@ -404,7 +404,7 @@ void ReadCell::readScript( const string& line, unsigned int lineNum )
 		return;
 	}
 
-	if ( argv[0] == "*set_global" ) {
+	if ( argv[0] == "*set_global" || argv[0] == "*set_compt_param" ) {
 		if ( argv.size() != 3 ) {
 			cout << "Error: readCell: Bad line: " << lineNum <<
 					": " << line << endl;
