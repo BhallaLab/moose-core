@@ -101,7 +101,7 @@ void AscFile::processFuncLocal(double time)
 {
   // Write data to file
 
-  cerr << "processFuncLocal" << endl;
+  //~ cerr << "processFuncLocal" << endl;
 
   vector< double >::iterator i;
 
