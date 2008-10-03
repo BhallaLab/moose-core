@@ -2497,75 +2497,76 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int argnum, int flags)
 #define SWIGTYPE_p_allocator_type swig_types[13]
 #define SWIGTYPE_p_char swig_types[14]
 #define SWIGTYPE_p_difference_type swig_types[15]
-#define SWIGTYPE_p_p_PyObject swig_types[16]
-#define SWIGTYPE_p_pymoose__BinSynchan swig_types[17]
-#define SWIGTYPE_p_pymoose__BinomialRng swig_types[18]
-#define SWIGTYPE_p_pymoose__CaConc swig_types[19]
-#define SWIGTYPE_p_pymoose__Cell swig_types[20]
-#define SWIGTYPE_p_pymoose__Class swig_types[21]
-#define SWIGTYPE_p_pymoose__ClockJob swig_types[22]
-#define SWIGTYPE_p_pymoose__ClockTick swig_types[23]
-#define SWIGTYPE_p_pymoose__Compartment swig_types[24]
-#define SWIGTYPE_p_pymoose__CylPanel swig_types[25]
-#define SWIGTYPE_p_pymoose__DiskPanel swig_types[26]
-#define SWIGTYPE_p_pymoose__Enzyme swig_types[27]
-#define SWIGTYPE_p_pymoose__ExponentialRng swig_types[28]
-#define SWIGTYPE_p_pymoose__GammaRng swig_types[29]
-#define SWIGTYPE_p_pymoose__Geometry swig_types[30]
-#define SWIGTYPE_p_pymoose__HHChannel swig_types[31]
-#define SWIGTYPE_p_pymoose__HHGate swig_types[32]
-#define SWIGTYPE_p_pymoose__HSolve swig_types[33]
-#define SWIGTYPE_p_pymoose__HemispherePanel swig_types[34]
-#define SWIGTYPE_p_pymoose__InterpolationTable swig_types[35]
-#define SWIGTYPE_p_pymoose__KinCompt swig_types[36]
-#define SWIGTYPE_p_pymoose__KineticHub swig_types[37]
-#define SWIGTYPE_p_pymoose__KineticManager swig_types[38]
-#define SWIGTYPE_p_pymoose__Kintegrator swig_types[39]
-#define SWIGTYPE_p_pymoose__MathFunc swig_types[40]
-#define SWIGTYPE_p_pymoose__Mg_block swig_types[41]
-#define SWIGTYPE_p_pymoose__Molecule swig_types[42]
-#define SWIGTYPE_p_pymoose__Nernst swig_types[43]
-#define SWIGTYPE_p_pymoose__NeuroScan swig_types[44]
-#define SWIGTYPE_p_pymoose__Neutral swig_types[45]
-#define SWIGTYPE_p_pymoose__NormalRng swig_types[46]
-#define SWIGTYPE_p_pymoose__Panel swig_types[47]
-#define SWIGTYPE_p_pymoose__PoissonRng swig_types[48]
-#define SWIGTYPE_p_pymoose__PulseGen swig_types[49]
-#define SWIGTYPE_p_pymoose__PyMooseBase swig_types[50]
-#define SWIGTYPE_p_pymoose__PyMooseContext swig_types[51]
-#define SWIGTYPE_p_pymoose__RandGenerator swig_types[52]
-#define SWIGTYPE_p_pymoose__RandomSpike swig_types[53]
-#define SWIGTYPE_p_pymoose__Reaction swig_types[54]
-#define SWIGTYPE_p_pymoose__RectPanel swig_types[55]
-#define SWIGTYPE_p_pymoose__SpherePanel swig_types[56]
-#define SWIGTYPE_p_pymoose__SpikeGen swig_types[57]
-#define SWIGTYPE_p_pymoose__StochSynchan swig_types[58]
-#define SWIGTYPE_p_pymoose__Stoich swig_types[59]
-#define SWIGTYPE_p_pymoose__Surface swig_types[60]
-#define SWIGTYPE_p_pymoose__SynChan swig_types[61]
-#define SWIGTYPE_p_pymoose__Table swig_types[62]
-#define SWIGTYPE_p_pymoose__TableIterator swig_types[63]
-#define SWIGTYPE_p_pymoose__TriPanel swig_types[64]
-#define SWIGTYPE_p_pymoose__UniformRng swig_types[65]
-#define SWIGTYPE_p_size_type swig_types[66]
-#define SWIGTYPE_p_std__invalid_argument swig_types[67]
-#define SWIGTYPE_p_std__vectorTElement_p_std__allocatorTElement_p_t_t swig_types[68]
-#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t swig_types[69]
-#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t__allocator_type swig_types[70]
-#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t__value_type swig_types[71]
-#define SWIGTYPE_p_std__vectorTdouble_std__allocatorTdouble_t_t swig_types[72]
-#define SWIGTYPE_p_std__vectorTdouble_std__allocatorTdouble_t_t__allocator_type swig_types[73]
-#define SWIGTYPE_p_std__vectorTint_std__allocatorTint_t_t swig_types[74]
-#define SWIGTYPE_p_std__vectorTint_std__allocatorTint_t_t__allocator_type swig_types[75]
-#define SWIGTYPE_p_std__vectorTstd__string_std__allocatorTstd__string_t_t swig_types[76]
-#define SWIGTYPE_p_std__vectorTstd__string_std__allocatorTstd__string_t_t__allocator_type swig_types[77]
-#define SWIGTYPE_p_std__vectorTunsigned_int_std__allocatorTunsigned_int_t_t swig_types[78]
-#define SWIGTYPE_p_std__vectorTunsigned_int_std__allocatorTunsigned_int_t_t__allocator_type swig_types[79]
-#define SWIGTYPE_p_swig__PySwigIterator swig_types[80]
-#define SWIGTYPE_p_value_type swig_types[81]
-#define SWIGTYPE_p_void swig_types[82]
-static swig_type_info *swig_types[84];
-static swig_module_info swig_module = {swig_types, 83, 0, 0, 0, 0};
+#define SWIGTYPE_p_m_Poisson__f___double swig_types[16]
+#define SWIGTYPE_p_p_PyObject swig_types[17]
+#define SWIGTYPE_p_pymoose__BinSynchan swig_types[18]
+#define SWIGTYPE_p_pymoose__BinomialRng swig_types[19]
+#define SWIGTYPE_p_pymoose__CaConc swig_types[20]
+#define SWIGTYPE_p_pymoose__Cell swig_types[21]
+#define SWIGTYPE_p_pymoose__Class swig_types[22]
+#define SWIGTYPE_p_pymoose__ClockJob swig_types[23]
+#define SWIGTYPE_p_pymoose__ClockTick swig_types[24]
+#define SWIGTYPE_p_pymoose__Compartment swig_types[25]
+#define SWIGTYPE_p_pymoose__CylPanel swig_types[26]
+#define SWIGTYPE_p_pymoose__DiskPanel swig_types[27]
+#define SWIGTYPE_p_pymoose__Enzyme swig_types[28]
+#define SWIGTYPE_p_pymoose__ExponentialRng swig_types[29]
+#define SWIGTYPE_p_pymoose__GammaRng swig_types[30]
+#define SWIGTYPE_p_pymoose__Geometry swig_types[31]
+#define SWIGTYPE_p_pymoose__HHChannel swig_types[32]
+#define SWIGTYPE_p_pymoose__HHGate swig_types[33]
+#define SWIGTYPE_p_pymoose__HSolve swig_types[34]
+#define SWIGTYPE_p_pymoose__HemispherePanel swig_types[35]
+#define SWIGTYPE_p_pymoose__InterpolationTable swig_types[36]
+#define SWIGTYPE_p_pymoose__KinCompt swig_types[37]
+#define SWIGTYPE_p_pymoose__KineticHub swig_types[38]
+#define SWIGTYPE_p_pymoose__KineticManager swig_types[39]
+#define SWIGTYPE_p_pymoose__Kintegrator swig_types[40]
+#define SWIGTYPE_p_pymoose__MathFunc swig_types[41]
+#define SWIGTYPE_p_pymoose__Mg_block swig_types[42]
+#define SWIGTYPE_p_pymoose__Molecule swig_types[43]
+#define SWIGTYPE_p_pymoose__Nernst swig_types[44]
+#define SWIGTYPE_p_pymoose__NeuroScan swig_types[45]
+#define SWIGTYPE_p_pymoose__Neutral swig_types[46]
+#define SWIGTYPE_p_pymoose__NormalRng swig_types[47]
+#define SWIGTYPE_p_pymoose__Panel swig_types[48]
+#define SWIGTYPE_p_pymoose__PoissonRng swig_types[49]
+#define SWIGTYPE_p_pymoose__PulseGen swig_types[50]
+#define SWIGTYPE_p_pymoose__PyMooseBase swig_types[51]
+#define SWIGTYPE_p_pymoose__PyMooseContext swig_types[52]
+#define SWIGTYPE_p_pymoose__RandGenerator swig_types[53]
+#define SWIGTYPE_p_pymoose__RandomSpike swig_types[54]
+#define SWIGTYPE_p_pymoose__Reaction swig_types[55]
+#define SWIGTYPE_p_pymoose__RectPanel swig_types[56]
+#define SWIGTYPE_p_pymoose__SpherePanel swig_types[57]
+#define SWIGTYPE_p_pymoose__SpikeGen swig_types[58]
+#define SWIGTYPE_p_pymoose__StochSynchan swig_types[59]
+#define SWIGTYPE_p_pymoose__Stoich swig_types[60]
+#define SWIGTYPE_p_pymoose__Surface swig_types[61]
+#define SWIGTYPE_p_pymoose__SynChan swig_types[62]
+#define SWIGTYPE_p_pymoose__Table swig_types[63]
+#define SWIGTYPE_p_pymoose__TableIterator swig_types[64]
+#define SWIGTYPE_p_pymoose__TriPanel swig_types[65]
+#define SWIGTYPE_p_pymoose__UniformRng swig_types[66]
+#define SWIGTYPE_p_size_type swig_types[67]
+#define SWIGTYPE_p_std__invalid_argument swig_types[68]
+#define SWIGTYPE_p_std__vectorTElement_p_std__allocatorTElement_p_t_t swig_types[69]
+#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t swig_types[70]
+#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t__allocator_type swig_types[71]
+#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t__value_type swig_types[72]
+#define SWIGTYPE_p_std__vectorTdouble_std__allocatorTdouble_t_t swig_types[73]
+#define SWIGTYPE_p_std__vectorTdouble_std__allocatorTdouble_t_t__allocator_type swig_types[74]
+#define SWIGTYPE_p_std__vectorTint_std__allocatorTint_t_t swig_types[75]
+#define SWIGTYPE_p_std__vectorTint_std__allocatorTint_t_t__allocator_type swig_types[76]
+#define SWIGTYPE_p_std__vectorTstd__string_std__allocatorTstd__string_t_t swig_types[77]
+#define SWIGTYPE_p_std__vectorTstd__string_std__allocatorTstd__string_t_t__allocator_type swig_types[78]
+#define SWIGTYPE_p_std__vectorTunsigned_int_std__allocatorTunsigned_int_t_t swig_types[79]
+#define SWIGTYPE_p_std__vectorTunsigned_int_std__allocatorTunsigned_int_t_t__allocator_type swig_types[80]
+#define SWIGTYPE_p_swig__PySwigIterator swig_types[81]
+#define SWIGTYPE_p_value_type swig_types[82]
+#define SWIGTYPE_p_void swig_types[83]
+static swig_type_info *swig_types[85];
+static swig_module_info swig_module = {swig_types, 84, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -4641,6 +4642,19 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
 #define pymoose_Class_stage_set(self_, val_) self_->__set_stage(val_)
   
 
+#define pymoose_Cell_method_get(self_) self_->__get_method()
+#define pymoose_Cell_method_set(self_, val_) self_->__set_method(val_)
+  
+
+#define pymoose_Cell_variableDt_get(self_) self_->__get_variableDt()
+  
+
+#define pymoose_Cell_implicit_get(self_) self_->__get_implicit()
+  
+
+#define pymoose_Cell_description_get(self_) self_->__get_description()
+  
+
 #define pymoose_ClockTick_dt_get(self_) self_->__get_dt()
 #define pymoose_ClockTick_dt_set(self_, val_) self_->__set_dt(val_)
   
@@ -4707,6 +4721,10 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
 
 #define pymoose_InterpolationTable_sy_get(self_) self_->__get_sy()
 #define pymoose_InterpolationTable_sy_set(self_, val_) self_->__set_sy(val_)
+  
+
+#define pymoose_InterpolationTable_calcMode_get(self_) self_->__get_calcMode()
+#define pymoose_InterpolationTable_calcMode_set(self_, val_) self_->__set_calcMode(val_)
   
 
 #define pymoose_Table_input_get(self_) self_->__get_input()
@@ -5139,14 +5157,6 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
 
 #define pymoose_Compartment_z_get(self_) self_->__get_z()
 #define pymoose_Compartment_z_set(self_, val_) self_->__set_z(val_)
-  
-
-#define pymoose_Compartment_VmSrc_get(self_) self_->__get_VmSrc()
-#define pymoose_Compartment_VmSrc_set(self_, val_) self_->__set_VmSrc(val_)
-  
-
-#define pymoose_Compartment_injectMsg_get(self_) self_->__get_injectMsg()
-#define pymoose_Compartment_injectMsg_set(self_, val_) self_->__set_injectMsg(val_)
   
 
 #define pymoose_NeuroScan_VDiv_get(self_) self_->__get_VDiv()
@@ -19225,6 +19235,34 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PyMooseContext_srandom(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  long arg1 ;
+  long val1 ;
+  int ecode1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_srandom",1,1,&obj0)) SWIG_fail;
+  ecode1 = SWIG_AsVal_long(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "PyMooseContext_srandom" "', argument " "1"" of type '" "long""'");
+  } 
+  arg1 = static_cast< long >(val1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose::PyMooseContext::srandom(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PyMooseContext_step__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
@@ -28010,6 +28048,328 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Cell___set_method(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Cell *arg1 = (pymoose::Cell *) 0 ;
+  std::string arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Cell___set_method",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Cell, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Cell___set_method" "', argument " "1"" of type '" "pymoose::Cell *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Cell * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "Cell___set_method" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_method(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Cell___get_method(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Cell *arg1 = (pymoose::Cell *) 0 ;
+  std::string result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Cell___get_method",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Cell, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Cell___get_method" "', argument " "1"" of type '" "pymoose::Cell const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Cell * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = ((pymoose::Cell const *)arg1)->__get_method();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Cell___get_variableDt(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Cell *arg1 = (pymoose::Cell *) 0 ;
+  bool result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Cell___get_variableDt",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Cell, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Cell___get_variableDt" "', argument " "1"" of type '" "pymoose::Cell const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Cell * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (bool)((pymoose::Cell const *)arg1)->__get_variableDt();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Cell___get_implicit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Cell *arg1 = (pymoose::Cell *) 0 ;
+  bool result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Cell___get_implicit",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Cell, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Cell___get_implicit" "', argument " "1"" of type '" "pymoose::Cell const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Cell * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (bool)((pymoose::Cell const *)arg1)->__get_implicit();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Cell___get_description(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Cell *arg1 = (pymoose::Cell *) 0 ;
+  std::string result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Cell___get_description",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Cell, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Cell___get_description" "', argument " "1"" of type '" "pymoose::Cell const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Cell * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = ((pymoose::Cell const *)arg1)->__get_description();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Cell_method_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Cell *arg1 = (pymoose::Cell *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Cell_method_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Cell, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Cell_method_set" "', argument " "1"" of type '" "pymoose::Cell *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Cell * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Cell_method_set" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Cell_method_set" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_Cell_method_set(arg1,(std::string const &)*arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Cell_method_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Cell *arg1 = (pymoose::Cell *) 0 ;
+  std::string *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Cell_method_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Cell, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Cell_method_get" "', argument " "1"" of type '" "pymoose::Cell *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Cell * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    {
+      std::string const &_result_ref = pymoose_Cell_method_get(arg1);
+      result = (std::string *) &_result_ref;
+    }
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(*result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Cell_variableDt_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Cell *arg1 = (pymoose::Cell *) 0 ;
+  bool result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Cell_variableDt_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Cell, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Cell_variableDt_get" "', argument " "1"" of type '" "pymoose::Cell *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Cell * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (bool)pymoose_Cell_variableDt_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Cell_implicit_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Cell *arg1 = (pymoose::Cell *) 0 ;
+  bool result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Cell_implicit_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Cell, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Cell_implicit_get" "', argument " "1"" of type '" "pymoose::Cell *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Cell * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (bool)pymoose_Cell_implicit_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Cell_description_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Cell *arg1 = (pymoose::Cell *) 0 ;
+  std::string *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Cell_description_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Cell, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Cell_description_get" "', argument " "1"" of type '" "pymoose::Cell *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Cell * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    {
+      std::string const &_result_ref = pymoose_Cell_description_get(arg1);
+      result = (std::string *) &_result_ref;
+    }
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(*result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *Cell_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *obj;
   if (!PyArg_UnpackTuple(args,(char*)"swigregister", 1, 1,&obj)) return NULL;
@@ -31926,6 +32286,72 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_InterpolationTable___get_calcMode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  int result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___get_calcMode",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___get_calcMode" "', argument " "1"" of type '" "pymoose::InterpolationTable const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int)((pymoose::InterpolationTable const *)arg1)->__get_calcMode();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_InterpolationTable___set_calcMode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___set_calcMode",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___set_calcMode" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable___set_calcMode" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_calcMode(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_InterpolationTable_dumpFile__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
@@ -32499,6 +32925,73 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_sy_get(PyObject *SWIGUNUSEDPARM(se
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_InterpolationTable_calcMode_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_calcMode_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_calcMode_set" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable_calcMode_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_InterpolationTable_calcMode_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_InterpolationTable_calcMode_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  int result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_calcMode_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_calcMode_get" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int)pymoose_InterpolationTable_calcMode_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -59573,138 +60066,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Compartment___get_VmSrc(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
-  double result;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Compartment___get_VmSrc",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment___get_VmSrc" "', argument " "1"" of type '" "pymoose::Compartment const *""'"); 
-  }
-  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)((pymoose::Compartment const *)arg1)->__get_VmSrc();
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Compartment___set_VmSrc(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
-  double arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Compartment___set_VmSrc",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment___set_VmSrc" "', argument " "1"" of type '" "pymoose::Compartment *""'"); 
-  }
-  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
-  ecode2 = SWIG_AsVal_double(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Compartment___set_VmSrc" "', argument " "2"" of type '" "double""'");
-  } 
-  arg2 = static_cast< double >(val2);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    (arg1)->__set_VmSrc(arg2);
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_Py_Void();
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Compartment___get_injectMsg(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
-  double result;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Compartment___get_injectMsg",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment___get_injectMsg" "', argument " "1"" of type '" "pymoose::Compartment const *""'"); 
-  }
-  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)((pymoose::Compartment const *)arg1)->__get_injectMsg();
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Compartment___set_injectMsg(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
-  double arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Compartment___set_injectMsg",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment___set_injectMsg" "', argument " "1"" of type '" "pymoose::Compartment *""'"); 
-  }
-  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
-  ecode2 = SWIG_AsVal_double(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Compartment___set_injectMsg" "', argument " "2"" of type '" "double""'");
-  } 
-  arg2 = static_cast< double >(val2);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    (arg1)->__set_injectMsg(arg2);
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_Py_Void();
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_Compartment_Vm_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
@@ -60565,140 +60926,6 @@ SWIGINTERN PyObject *_wrap_Compartment_z_get(PyObject *SWIGUNUSEDPARM(self), PyO
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     result = (double)pymoose_Compartment_z_get(arg1);
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Compartment_VmSrc_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
-  double arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Compartment_VmSrc_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment_VmSrc_set" "', argument " "1"" of type '" "pymoose::Compartment *""'"); 
-  }
-  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
-  ecode2 = SWIG_AsVal_double(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Compartment_VmSrc_set" "', argument " "2"" of type '" "double""'");
-  } 
-  arg2 = static_cast< double >(val2);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_Compartment_VmSrc_set(arg1,arg2);
-    
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_Py_Void();
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Compartment_VmSrc_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
-  double result;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Compartment_VmSrc_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment_VmSrc_get" "', argument " "1"" of type '" "pymoose::Compartment *""'"); 
-  }
-  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)pymoose_Compartment_VmSrc_get(arg1);
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Compartment_injectMsg_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
-  double arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Compartment_injectMsg_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment_injectMsg_set" "', argument " "1"" of type '" "pymoose::Compartment *""'"); 
-  }
-  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
-  ecode2 = SWIG_AsVal_double(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Compartment_injectMsg_set" "', argument " "2"" of type '" "double""'");
-  } 
-  arg2 = static_cast< double >(val2);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_Compartment_injectMsg_set(arg1,arg2);
-    
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_Py_Void();
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Compartment_injectMsg_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
-  double result;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Compartment_injectMsg_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment_injectMsg_get" "', argument " "1"" of type '" "pymoose::Compartment *""'"); 
-  }
-  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)pymoose_Compartment_injectMsg_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -74015,7 +74242,7 @@ SWIGINTERN PyObject *Normal_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObjec
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_new_Poisson(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Poisson__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   double arg1 ;
   Poisson *result = 0 ;
@@ -74036,6 +74263,126 @@ SWIGINTERN PyObject *_wrap_new_Poisson(PyObject *SWIGUNUSEDPARM(self), PyObject 
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Poisson, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_Poisson__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Poisson *result = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Poisson",0,0)) SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (Poisson *)new Poisson();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Poisson, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_Poisson(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[2];
+  int ii;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = (int)PyObject_Length(args);
+  for (ii = 0; (ii < argc) && (ii < 1); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 0) {
+    SWIG_PYTHON_THREAD_END_BLOCK;
+    return _wrap_new_Poisson__SWIG_1(self, args);
+  }
+  if (argc == 1) {
+    int _v;
+    {
+      int res = SWIG_AsVal_double(argv[0], NULL);
+      _v = SWIG_CheckState(res);
+    }
+    if (_v) {
+      SWIG_PYTHON_THREAD_END_BLOCK;
+      return _wrap_new_Poisson__SWIG_0(self, args);
+    }
+  }
+  
+  SWIG_PYTHON_THREAD_END_BLOCK;
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_Poisson'.\n  Possible C/C++ prototypes are:\n""    Poisson(double)\n""    Poisson()\n");
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_Poisson(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Poisson *arg1 = (Poisson *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"delete_Poisson",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Poisson, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Poisson" "', argument " "1"" of type '" "Poisson *""'"); 
+  }
+  arg1 = reinterpret_cast< Poisson * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Poisson_setMean(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Poisson *arg1 = (Poisson *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Poisson_setMean",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Poisson, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Poisson_setMean" "', argument " "1"" of type '" "Poisson *""'"); 
+  }
+  arg1 = reinterpret_cast< Poisson * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Poisson_setMean" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->setMean(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -74123,35 +74470,6 @@ SWIGINTERN PyObject *_wrap_Poisson_getNextSample(PyObject *SWIGUNUSEDPARM(self),
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_delete_Poisson(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Poisson *arg1 = (Poisson *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"delete_Poisson",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Poisson, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Poisson" "', argument " "1"" of type '" "Poisson *""'"); 
-  }
-  arg1 = reinterpret_cast< Poisson * >(argp1);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    delete arg1;
-    
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_Py_Void();
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -89643,6 +89961,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"PyMooseContext_getPath", _wrap_PyMooseContext_getPath, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_getChildren", _wrap_PyMooseContext_getChildren, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_pathToId", _wrap_PyMooseContext_pathToId, METH_VARARGS, NULL},
+	 { (char *)"PyMooseContext_srandom", _wrap_PyMooseContext_srandom, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_step", _wrap_PyMooseContext_step, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_reset", _wrap_PyMooseContext_reset, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_stop", _wrap_PyMooseContext_stop, METH_VARARGS, NULL},
@@ -89730,6 +90049,16 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_Cell", _wrap_new_Cell, METH_VARARGS, NULL},
 	 { (char *)"delete_Cell", _wrap_delete_Cell, METH_VARARGS, NULL},
 	 { (char *)"Cell_getType", _wrap_Cell_getType, METH_VARARGS, NULL},
+	 { (char *)"Cell___set_method", _wrap_Cell___set_method, METH_VARARGS, NULL},
+	 { (char *)"Cell___get_method", _wrap_Cell___get_method, METH_VARARGS, NULL},
+	 { (char *)"Cell___get_variableDt", _wrap_Cell___get_variableDt, METH_VARARGS, NULL},
+	 { (char *)"Cell___get_implicit", _wrap_Cell___get_implicit, METH_VARARGS, NULL},
+	 { (char *)"Cell___get_description", _wrap_Cell___get_description, METH_VARARGS, NULL},
+	 { (char *)"Cell_method_set", _wrap_Cell_method_set, METH_VARARGS, NULL},
+	 { (char *)"Cell_method_get", _wrap_Cell_method_get, METH_VARARGS, NULL},
+	 { (char *)"Cell_variableDt_get", _wrap_Cell_variableDt_get, METH_VARARGS, NULL},
+	 { (char *)"Cell_implicit_get", _wrap_Cell_implicit_get, METH_VARARGS, NULL},
+	 { (char *)"Cell_description_get", _wrap_Cell_description_get, METH_VARARGS, NULL},
 	 { (char *)"Cell_swigregister", Cell_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_ClockTick", _wrap_new_ClockTick, METH_VARARGS, NULL},
 	 { (char *)"delete_ClockTick", _wrap_delete_ClockTick, METH_VARARGS, NULL},
@@ -89808,6 +90137,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"InterpolationTable___setitem__", _wrap_InterpolationTable___setitem__, METH_VARARGS, NULL},
 	 { (char *)"InterpolationTable___iter__", _wrap_InterpolationTable___iter__, METH_VARARGS, NULL},
 	 { (char *)"InterpolationTable___len__", _wrap_InterpolationTable___len__, METH_VARARGS, NULL},
+	 { (char *)"InterpolationTable___get_calcMode", _wrap_InterpolationTable___get_calcMode, METH_VARARGS, NULL},
+	 { (char *)"InterpolationTable___set_calcMode", _wrap_InterpolationTable___set_calcMode, METH_VARARGS, NULL},
 	 { (char *)"InterpolationTable_dumpFile", _wrap_InterpolationTable_dumpFile, METH_VARARGS, NULL},
 	 { (char *)"InterpolationTable_xmin_set", _wrap_InterpolationTable_xmin_set, METH_VARARGS, NULL},
 	 { (char *)"InterpolationTable_xmin_get", _wrap_InterpolationTable_xmin_get, METH_VARARGS, NULL},
@@ -89821,6 +90152,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"InterpolationTable_dx_get", _wrap_InterpolationTable_dx_get, METH_VARARGS, NULL},
 	 { (char *)"InterpolationTable_sy_set", _wrap_InterpolationTable_sy_set, METH_VARARGS, NULL},
 	 { (char *)"InterpolationTable_sy_get", _wrap_InterpolationTable_sy_get, METH_VARARGS, NULL},
+	 { (char *)"InterpolationTable_calcMode_set", _wrap_InterpolationTable_calcMode_set, METH_VARARGS, NULL},
+	 { (char *)"InterpolationTable_calcMode_get", _wrap_InterpolationTable_calcMode_get, METH_VARARGS, NULL},
 	 { (char *)"InterpolationTable_swigregister", InterpolationTable_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_TableIterator", _wrap_new_TableIterator, METH_VARARGS, NULL},
 	 { (char *)"TableIterator___iter__", _wrap_TableIterator___iter__, METH_VARARGS, NULL},
@@ -90349,10 +90682,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Compartment___set_y", _wrap_Compartment___set_y, METH_VARARGS, NULL},
 	 { (char *)"Compartment___get_z", _wrap_Compartment___get_z, METH_VARARGS, NULL},
 	 { (char *)"Compartment___set_z", _wrap_Compartment___set_z, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_VmSrc", _wrap_Compartment___get_VmSrc, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_VmSrc", _wrap_Compartment___set_VmSrc, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_injectMsg", _wrap_Compartment___get_injectMsg, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_injectMsg", _wrap_Compartment___set_injectMsg, METH_VARARGS, NULL},
 	 { (char *)"Compartment_Vm_set", _wrap_Compartment_Vm_set, METH_VARARGS, NULL},
 	 { (char *)"Compartment_Vm_get", _wrap_Compartment_Vm_get, METH_VARARGS, NULL},
 	 { (char *)"Compartment_Cm_set", _wrap_Compartment_Cm_set, METH_VARARGS, NULL},
@@ -90379,10 +90708,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Compartment_y_get", _wrap_Compartment_y_get, METH_VARARGS, NULL},
 	 { (char *)"Compartment_z_set", _wrap_Compartment_z_set, METH_VARARGS, NULL},
 	 { (char *)"Compartment_z_get", _wrap_Compartment_z_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_VmSrc_set", _wrap_Compartment_VmSrc_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_VmSrc_get", _wrap_Compartment_VmSrc_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_injectMsg_set", _wrap_Compartment_injectMsg_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_injectMsg_get", _wrap_Compartment_injectMsg_get, METH_VARARGS, NULL},
 	 { (char *)"Compartment_swigregister", Compartment_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_NeuroScan", _wrap_new_NeuroScan, METH_VARARGS, NULL},
 	 { (char *)"delete_NeuroScan", _wrap_delete_NeuroScan, METH_VARARGS, NULL},
@@ -90657,10 +90982,11 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"delete_Normal", _wrap_delete_Normal, METH_VARARGS, NULL},
 	 { (char *)"Normal_swigregister", Normal_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_Poisson", _wrap_new_Poisson, METH_VARARGS, NULL},
+	 { (char *)"delete_Poisson", _wrap_delete_Poisson, METH_VARARGS, NULL},
+	 { (char *)"Poisson_setMean", _wrap_Poisson_setMean, METH_VARARGS, NULL},
 	 { (char *)"Poisson_getMean", _wrap_Poisson_getMean, METH_VARARGS, NULL},
 	 { (char *)"Poisson_getVariance", _wrap_Poisson_getVariance, METH_VARARGS, NULL},
 	 { (char *)"Poisson_getNextSample", _wrap_Poisson_getNextSample, METH_VARARGS, NULL},
-	 { (char *)"delete_Poisson", _wrap_delete_Poisson, METH_VARARGS, NULL},
 	 { (char *)"Poisson_swigregister", Poisson_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_Exponential", _wrap_new_Exponential, METH_VARARGS, NULL},
 	 { (char *)"Exponential_getMean", _wrap_Exponential_getMean, METH_VARARGS, NULL},
@@ -91086,6 +91412,7 @@ static swig_type_info _swigt__p_Probability = {"_p_Probability", "Probability *"
 static swig_type_info _swigt__p_allocator_type = {"_p_allocator_type", "allocator_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_difference_type = {"_p_difference_type", "difference_type *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_m_Poisson__f___double = {"_p_m_Poisson__f___double", "double (Poisson::**)()|PoissonGenerator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_PyObject = {"_p_p_PyObject", "PyObject **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__BinSynchan = {"_p_pymoose__BinSynchan", "pymoose::BinSynchan *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__BinomialRng = {"_p_pymoose__BinomialRng", "pymoose::BinomialRng *", 0, 0, (void*)0, 0};
@@ -91171,6 +91498,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_allocator_type,
   &_swigt__p_char,
   &_swigt__p_difference_type,
+  &_swigt__p_m_Poisson__f___double,
   &_swigt__p_p_PyObject,
   &_swigt__p_pymoose__BinSynchan,
   &_swigt__p_pymoose__BinomialRng,
@@ -91256,6 +91584,7 @@ static swig_cast_info _swigc__p_Probability[] = {  {&_swigt__p_Probability, 0, 0
 static swig_cast_info _swigc__p_allocator_type[] = {  {&_swigt__p_allocator_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_difference_type[] = {  {&_swigt__p_difference_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_m_Poisson__f___double[] = {  {&_swigt__p_m_Poisson__f___double, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_PyObject[] = {  {&_swigt__p_p_PyObject, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__BinSynchan[] = {  {&_swigt__p_pymoose__BinSynchan, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__BinomialRng[] = {  {&_swigt__p_pymoose__BinomialRng, 0, 0, 0},{0, 0, 0, 0}};
@@ -91341,6 +91670,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_allocator_type,
   _swigc__p_char,
   _swigc__p_difference_type,
+  _swigc__p_m_Poisson__f___double,
   _swigc__p_p_PyObject,
   _swigc__p_pymoose__BinSynchan,
   _swigc__p_pymoose__BinomialRng,
