@@ -160,6 +160,7 @@
 %attribute(pymoose::InterpolationTable, int, mode, __get_mode, __set_mode)
 %attribute(pymoose::InterpolationTable, double, dx, __get_dx, __set_dx)
 %attribute(pymoose::InterpolationTable, double, sy, __get_sy, __set_sy)
+%attribute(pymoose::InterpolationTable, int, calcMode, __get_calcMode, __set_calcMode)
 
 %include "TableIterator.h"
 %extend pymoose::TableIterator

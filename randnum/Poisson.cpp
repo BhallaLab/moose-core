@@ -31,11 +31,62 @@
 
 using namespace std;
 
-
-
-
-Poisson::Poisson(double mean):mean_(mean)
+Poisson::Poisson(double mean):mean_(mean), gammaGen_(NULL), binomialGen_(NULL), generator_(NULL)
 {
+    /* replicates setMean */
+    if (mean <= 0.0)
+    {
+        cerr << "ERROR: Poisson::setMean - mean must be positive. Setting to 1.0" << endl;
+        mean_ = 1.0;
+    }
+    if ( mean_ < 17)
+    {
+        generator_ = Poisson::poissonSmall;
+        mValue_ = exp(-mean_);
+    }
+    else
+    {
+        generator_ = Poisson::poissonLarge;
+        mValue_ = floor(0.875*mean_);
+        if (gammaGen_)
+        {
+            delete gammaGen_;
+        }
+        gammaGen_ = new Gamma(mValue_, 1.0);
+    }
+}
+
+Poisson::~Poisson()
+{
+    if (gammaGen_)
+    {
+        delete gammaGen_;
+    }    
+}
+
+
+void Poisson::setMean(double mean)
+{
+    if (mean <= 0.0)
+    {
+        cerr << "ERROR: Poisson::setMean - mean must be positive. Setting to 1.0" << endl;
+        mean_ = 1.0;
+    }
+    if ( mean_ < 17)
+    {
+        generator_ = Poisson::poissonSmall;
+        mValue_ = exp(-mean_);
+    }
+    else
+    {
+        generator_ = Poisson::poissonLarge;
+        mValue_ = floor(0.875*mean_);
+        if (gammaGen_)
+        {
+            delete gammaGen_;
+        }
+        gammaGen_ = new Gamma(mValue_, 1.0);
+    }
 }
 
 double Poisson::getMean() const
@@ -50,39 +101,37 @@ double Poisson::getVariance() const
 
 double Poisson::getNextSample() const
 {
-    if (mean_ < 17)
+    if (!generator_)
     {
-        return poissonSmall();
-     
+        cerr << "ERROR: Poisson::getNextSample() - generator function is NULL" << endl;
+        return 0.0;
     }
-    
-    return poissonLarge();    
+    return generator_(*this);
 }
 
 /**
    Poisson distributed random number generator when mean is small.
    See: TAOCP by Knuth, Volume 2, Section 3.4.1
  */
-double Poisson::poissonSmall() const
+double Poisson::poissonSmall(const Poisson& poisson)
 {
-    static double  limit = exp(-mean_);
-    
     double product = 1.0;
     
     int i = 0;
-    while ( product > limit )
+    while ( product > poisson.mValue_ )
     {
         product *= mtrand();
         ++i;        
     }
-    return i; 
+    return i;
 }
 
 /**
    Poisson distributed random number generator when mean is large.
    See: TAOCP by Knuth, Volume 2, Section 3.4.1
  */
-double Poisson::poissonLarge() const
+/* //replaced by cleaner version
+  double Poisson::poissonLarge() const
 {
 
     // generate X with the gamma distribution of order floor(alpha*mu)
@@ -106,8 +155,21 @@ double Poisson::poissonLarge() const
     
     return n_value;    
 }
+*/
+ // WATCH OUT: this is recursive. look for better alternative.
+double Poisson::poissonLarge(const Poisson& poisson)
+{
+    double xValue = poisson.gammaGen_->getNextSample();
+    if (xValue < poisson.mean_)
+    {
+        Poisson poissonGen(poisson.mean_ - xValue);
+        return poisson.mValue_ + poissonGen.getNextSample();
+    }
+    Binomial binomialGen((long)poisson.mValue_ - 1, poisson.mean_/xValue);
+    return binomialGen.getNextSample();
+}
 
-#if 0 // test main
+#ifdef TEST_MAIN
 
 #include <vector>
 #include <algorithm>

@@ -341,7 +341,7 @@ def make_K_mit_usb(path="K_mit_usb"):
     print "Calc modes:", xGate.A.calcMode, xGate.B.calcMode
     xGate.A.calcMode = 0 
     xGate.B.calcMode = 0
-
+    print "####### Calc modes:", xGate.A.calcMode, xGate.B.calcMode
     # tweaking the tables for the tabchan calculation
     K_mit_usb.tweakAlpha("X")
 
