@@ -42,6 +42,9 @@ namespace pymoose
         void __setitem__( unsigned int index, double value );
         TableIterator* __iter__();
         int __len__();
+        int __get_calcMode() const;
+        void __set_calcMode(int calc_mode);
+
         string dumpFile() const;
         void dumpFile(string fileName, bool append = false);
 #ifdef NUMPY // Only for NumPy support

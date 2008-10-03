@@ -17,20 +17,35 @@
 
 #ifndef _POISSON_H
 #define _POISSON_H
+
 #include "Probability.h"
+#include "Gamma.h"
+#include "Binomial.h"
+
+class Poisson;
+
+typedef  double (Poisson::*PoissonGenerator)() const;
+
+#define CALL_POSSON_GENERATOR(object,ptrToMember) ((object).*(ptrToMember))
+
 class Poisson:public Probability
 {
   public:
-    Poisson(double mean);
+    Poisson(double mean=1.0);
+    ~Poisson();
     
+    void setMean(double mean);
     double getMean() const;
     double getVariance() const;
     double getNextSample() const;
   private:
     double mean_;
-    double poissonSmall() const;
-    double poissonLarge() const;
+    static double poissonSmall(const Poisson&);
+    static double poissonLarge(const Poisson&);
+    Gamma* gammaGen_;
+    Binomial* binomialGen_;
+    double (*generator_)(const Poisson&);
+    double mValue_;
 };
-
     
 #endif
