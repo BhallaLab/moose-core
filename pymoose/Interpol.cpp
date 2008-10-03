@@ -186,6 +186,18 @@ PyObject* InterpolationTable::__array_struct__()
     return PyCObject_FromVoidPtr(array, 0);
 }
 #endif // NUMPY
+
+int InterpolationTable::__get_calcMode() const
+{
+    int calc_mode;
+    get < int > (id_(), "calc_mode",calc_mode);
+    return calc_mode;
+}
+void InterpolationTable::__set_calcMode( int calc_mode )
+{
+    set < int > (id_(), "calc_mode", calc_mode);
+}
+
 string InterpolationTable::dumpFile() const
 {
     string print;
