@@ -632,6 +632,8 @@ class InterpolationTable(PyMooseBase):
     def __setitem__(*args): return _moose.InterpolationTable___setitem__(*args)
     def __iter__(*args): return _moose.InterpolationTable___iter__(*args)
     def __len__(*args): return _moose.InterpolationTable___len__(*args)
+    def __get_calcMode(*args): return _moose.InterpolationTable___get_calcMode(*args)
+    def __set_calcMode(*args): return _moose.InterpolationTable___set_calcMode(*args)
     def dumpFile(*args): return _moose.InterpolationTable_dumpFile(*args)
     xmin = _swig_property(_moose.InterpolationTable_xmin_get, _moose.InterpolationTable_xmin_set)
     xmax = _swig_property(_moose.InterpolationTable_xmax_get, _moose.InterpolationTable_xmax_set)
@@ -639,6 +641,7 @@ class InterpolationTable(PyMooseBase):
     mode = _swig_property(_moose.InterpolationTable_mode_get, _moose.InterpolationTable_mode_set)
     dx = _swig_property(_moose.InterpolationTable_dx_get, _moose.InterpolationTable_dx_set)
     sy = _swig_property(_moose.InterpolationTable_sy_get, _moose.InterpolationTable_sy_set)
+    calcMode = _swig_property(_moose.InterpolationTable_calcMode_get, _moose.InterpolationTable_calcMode_set)
 InterpolationTable_swigregister = _moose.InterpolationTable_swigregister
 InterpolationTable_swigregister(InterpolationTable)
 InterpolationTable.className = _moose.cvar.InterpolationTable_className
