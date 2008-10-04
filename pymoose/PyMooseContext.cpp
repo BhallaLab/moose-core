@@ -1290,7 +1290,7 @@ void PyMooseContext::setupChanFunc(string channel, string gate, vector <double>&
     }
 
     Id gateId = findChanGateId(channel, gate );
-    if (gateId.bad() )
+    if (gateId.bad())
         return;
 
     
@@ -1441,12 +1441,10 @@ void PyMooseContext::tweakTau( const Id& gateId)
     tweakChanFunc( gateId, tweakTauSlot );
 }
 //========================
-
+// @deprecated in MOOSE - we chuck it altogether.
 void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
 {
-    // THIS IS BAD! 
-//     string argstr = string(xdivs) + "," + string(mode);
-//     send3< Id, string, string >( myId_(), setFieldSlot, table, "tabFill", argstr );
+    cerr << "PyMooseContext::tabFill - deprecated! Use setupAlpha/Tau instead.\n";
 }
 
 
@@ -1455,7 +1453,7 @@ void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
    CM, RM, RA, EREST_ACT, ELEAK
 
 */
-void PyMooseContext::readCell(std::string cellpath, std::string filename)
+void PyMooseContext::readCell(std::string filename, std::string cellpath)
 {
     vector <double> params;
     params.push_back(0.0);
@@ -1467,13 +1465,13 @@ void PyMooseContext::readCell(std::string cellpath, std::string filename)
                                                 readCellSlot, filename, cellpath , params);
 }
 
-void PyMooseContext::readCell(string cellpath, string filename, vector <double> params)
+void PyMooseContext::readCell(string filename, string cellpath, vector <double> params)
 {
     send3< string, string, vector < double > >( myId_(), 
                              readCellSlot, filename, cellpath , params);
 }
 
-void PyMooseContext::readCell(string cellpath, string filename, double cm, double rm, double ra, double erestAct, double eleak)
+void PyMooseContext::readCell(string filename, string cellpath, double cm, double rm, double ra, double erestAct, double eleak)
 {
     vector <double> params;
     params.push_back(cm);
