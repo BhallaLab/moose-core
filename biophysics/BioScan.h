@@ -13,6 +13,7 @@
 class BioScan
 {
 public:
+	static void initialize( Id object );
 	static int adjacent( Id compartment, vector< Id >& ret );
 	static int adjacent( Id compartment, Id exclude, vector< Id >& ret );
 	static int children( Id compartment, vector< Id >& ret );
