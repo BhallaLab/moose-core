@@ -2,7 +2,8 @@
 
 #/*******************************************************************
 # * File:            axon.py
-# * Description:      
+# * Description:     PyMOOSE version of DEMOS/axon/Axon.g
+# *                  usage: python axon.py
 # * Author:          Subhasis Ray
 # * E-mail:          ray dot subhasis at gmail dot com
 # * Created:         2008-09-30 17:53:34
@@ -60,7 +61,7 @@ context.setCwe("/")
 #//=====================================
 #//  Create cells
 #//=====================================
-context.readCell("/axon", "axon.p" )
+context.readCell("axon.p", "/axon")
 
 
 #////////////////////////////////////////////////////////////////////////////////
