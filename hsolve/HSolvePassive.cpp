@@ -46,6 +46,11 @@ void HSolvePassive::clear( ) {
 }
 
 void HSolvePassive::walkTree( Id seed ) {
+	// Dirty call to explicitly call the compartments reinitFunc.
+	// Should be removed eventually, and replaced with a cleaner way to
+	// initialize the model being read.
+	BioScan::initialize( seed );
+	
 	// Find leaf node
 	Id previous;
 	vector< Id > recent;
