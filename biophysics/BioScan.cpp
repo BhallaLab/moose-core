@@ -14,6 +14,18 @@
 #include "HHChannel.h"
 #include "CaConc.h"
 
+void BioScan::initialize( Id object )
+{
+	ProcInfoBase p;
+	SetConn c( object(), 0 );
+	if ( isType( object, "Compartment" ) )
+		Compartment::reinitFunc( &c, &p );
+	else if ( isType( object, "HHChannel" ) )
+		HHChannel::reinitFunc( &c, &p );
+	else if ( isType( object, "CaConc" ) )
+		CaConc::reinitFunc( &c, &p );
+}
+
 int BioScan::adjacent( Id compartment, Id exclude, vector< Id >& ret )
 {
 	int size = ret.size();
