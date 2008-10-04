@@ -114,9 +114,8 @@ namespace pymoose
         void setupTau( const Id& gateId, vector <double> parms );
         void tweakAlpha( const Id& gateId );
         void tweakTau( const Id& gateId);
-        /// This form deviates from GENESIS version: in GENESIS first arg is cellpath and second arg os filename. TODO - fix 
-        void readCell(string cellpath, string filename, double cm, double rm, double ra, double erestAct, double eleak);
-        void readCell(string cellpath, string filename, vector <double> params);        
+        void readCell(string filename, string cellpath, double cm, double rm, double ra, double erestAct, double eleak);
+        void readCell(string filename, string cellpath, vector <double> params);        
         void readCell(std::string fileName, std::string cellPath);    
         bool exists(const Id& id);
         bool exists(std::string path);
