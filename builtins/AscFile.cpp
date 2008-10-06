@@ -19,6 +19,16 @@ const Cinfo* initAscFileCinfo()
                      sizeof( processShared ) / sizeof( Finfo* ) );
 
 
+  static Finfo* inputRequestShared[] =
+    {
+      // Sends out the request. Issued from the process call.
+      new SrcFinfo( "requestInput", Ftype0::global() ),
+      // Handle the returned value.
+      new DestFinfo( "handleInput", Ftype1< double >::global(),
+                     RFCAST( &AscFile::input ) ),
+    };
+
+
   static Finfo* ascFileFinfos[] =
     {
       ///////////////////////////////////////////////////////
@@ -40,16 +50,20 @@ const Cinfo* initAscFileCinfo()
       ///////////////////////////////////////////////////////
       // MsgDest definitions
       ///////////////////////////////////////////////////////
-      new DestFinfo( "save",
-                     Ftype1< double >::global(),
-                     RFCAST( &AscFile::input )
-                     ),
+      // Replaced with SharedFinfo, to get hsolver to work.
+      //new DestFinfo( "save",
+      //               Ftype1< double >::global(),
+      //               RFCAST( &AscFile::input )
+      //               ),
       ///////////////////////////////////////////////////////
       // Synapse definitions
       ///////////////////////////////////////////////////////
       ///////////////////////////////////////////////////////
       // Shared definitions
       ///////////////////////////////////////////////////////
+      new SharedFinfo( "save", inputRequestShared, 
+                       sizeof( inputRequestShared ) / sizeof( Finfo* ) ),
+
       process,
     };
 
@@ -70,8 +84,10 @@ const Cinfo* initAscFileCinfo()
 
 }
 
-
 static const Cinfo* ascFileCinfo = initAscFileCinfo();
+
+static const Slot inputRequestSlot = 
+	initAscFileCinfo()->getSlot( "save.requestInput" );
 
 
 AscFile::AscFile()
@@ -94,16 +110,19 @@ AscFile::~AscFile() {
 void AscFile::processFunc( const Conn* c, ProcInfo p )
 {
   // The data arriving by message belongs to the previous timestep.
-  static_cast< AscFile* >( c->data() )->processFuncLocal(p->currTime_ - p->dt_);
+  static_cast< AscFile* >( c->data() )->processFuncLocal(c->target(), p->currTime_ - p->dt_);
 }
 
-void AscFile::processFuncLocal(double time)
+void AscFile::processFuncLocal(Eref e, double time)
 {
   // Write data to file
 
   //~ cerr << "processFuncLocal" << endl;
 
   vector< double >::iterator i;
+
+  send0(e, inputRequestSlot );
+
 
   if(fileOut_->good()) {
 
@@ -115,14 +134,14 @@ void AscFile::processFuncLocal(double time)
         *fileOut_ << *i << " ";
       }
 
-      *fileOut_ << endl;
+      *fileOut_ << "\n";
     }
 
     // Empty the old data
     // columnData_.clear();
   }
   else {
-    cout << "AscFile::processFuncLocal, unable to write to file" << endl;
+    cerr << "AscFile::processFuncLocal, unable to write to file" << endl;
   }
 
 }
@@ -157,7 +176,7 @@ void AscFile::reinitFuncLocal( const Conn* c )
   }
 
   if(!fileOut_->good()) {
-    cout << "AscFile::reinitFuncLocal: Unable to open " << fileName_ << endl;
+    cerr << "AscFile::reinitFuncLocal: Unable to open " << fileName_ << endl;
   }
 
   //bup = fileOut_;
@@ -203,7 +222,7 @@ void AscFile::input( const Conn* c, double value )
 
 void AscFile::inputLocal( unsigned int columnId, double value )
 {
-  cout << "columnId = " << columnId << ", size = " << columnData_.size() << endl;
+  // cerr << "columnId = " << columnId << ", size = " << columnData_.size() << endl;
 
   // assert(columnId < columnData_.size()); //  Temp. commented
 
