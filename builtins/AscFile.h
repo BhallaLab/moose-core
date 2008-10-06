@@ -5,7 +5,7 @@ class AscFile
   ~AscFile();
 
   static void processFunc( const Conn* c, ProcInfo p );
-  void processFuncLocal(double time);
+  void processFuncLocal(Eref e, double time);
 
   static void reinitFunc( const Conn* c, ProcInfo info );
   void reinitFuncLocal( const Conn* c );
