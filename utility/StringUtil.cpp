@@ -8,9 +8,9 @@
 #include <string>
 #include <iostream>
 #include <vector>
-using namespace std;
-
 #include "StringUtil.h"
+
+using namespace std;
 
 // Adapted from code available on oopweb.com
 void tokenize(
