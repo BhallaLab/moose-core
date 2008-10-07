@@ -7,9 +7,13 @@
  ********************************************************************/
 #ifndef _STRINGUTIL_H
 #define _STRINGUTIL_H
-#include <string>
 /** List of characters considered to be whitespace */
 static const std::string DELIMITERS=" \t\r\n";
+/** Splits given string into tokens */
+void tokenize(
+	const std::string& str,
+	vector< std::string >& tokens,
+	const std::string& delimiters = " \t" );
 /** trims the leading and trailing white spaces */
 std::string trim(const std::string& myString);
 // TODO: other std::string utilities to add

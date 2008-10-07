@@ -10,6 +10,8 @@
 #ifndef _FTYPE4_H
 #define _FTYPE4_H
 
+#include "../utility/StringUtil.h"	// for extracting string tokens in strSet
+
 template < class T1, class T2, class T3, class T4 > 
 	void send4( Eref e, Slot src, T1 v1, T2 v2, T3 v3, T4 v4 );
 
@@ -75,6 +77,40 @@ template < class T1, class T2, class T3, class T4 >
 				SetConn c( e );
 				set( &c, v1, v2, v3, v4 );
 				return 1;
+			}
+
+			/**
+			 * This is a virtual function that takes a string,
+			 * converts it to four values, and assigns it to a field.
+			 * Returns true on success.
+			 * It will run into trouble if the contents are strings
+			 * with spaces or commas.
+			 */
+			bool strSet( Eref e, const Finfo* f, const string& s ) const
+			{
+				vector< string > args;
+				
+				// Function tokenize defined in StringUtil.cpp
+				// Split string using whitespace and comma as delimiters
+				tokenize( s, args, ", \t" );
+				
+				if ( args.size() != 4 )
+					return 0;
+				
+				T1 val1;
+				T2 val2;
+				T3 val3;
+				T4 val4;
+				
+				if (
+					str2val( args[ 0 ], val1 ) &&
+					str2val( args[ 1 ], val2 ) &&
+					str2val( args[ 2 ], val3 ) &&
+					str2val( args[ 3 ], val4 ) ) {
+						return this->set( e, f, val1, val2, val3, val4 );
+				}
+				
+				return 0;
 			}
 
 			static const Ftype* global() {

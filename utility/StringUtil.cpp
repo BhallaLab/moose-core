@@ -7,9 +7,32 @@
  ********************************************************************/
 #include <string>
 #include <iostream>
+#include <vector>
+using namespace std;
+
 #include "StringUtil.h"
 
-using namespace std;
+// Adapted from code available on oopweb.com
+void tokenize(
+	const string& str,
+	vector< string >& tokens,
+	const string& delimiters )
+{
+	// Token boundaries
+	string::size_type begin = str.find_first_not_of( delimiters, 0 );
+	string::size_type end = str.find_first_of( delimiters, begin );
+
+	while ( string::npos != begin || string::npos != end )
+	{
+		// Found a token, add it to the vector.
+		tokens.push_back( str.substr( begin, end - begin ) );
+		
+		// Update boundaries
+		begin = str.find_first_not_of( delimiters, end );
+		end = str.find_first_of( delimiters, begin );
+	}
+}
+
 std::string trim(const std::string& myString)
 {
     if (myString.length() == 0 )
