@@ -10,6 +10,8 @@
 #ifndef _FTYPE3_H
 #define _FTYPE3_H
 
+#include "../utility/StringUtil.h"	// for extracting string tokens in strSet
+
 // Forward declaration of send3 needed for proxyFunc.
 template < class T1, class T2, class T3 > 
 	void send3( Eref e, Slot src, T1 v1, T2 v2, T3 v3);
@@ -73,6 +75,38 @@ template < class T1, class T2, class T3 > class Ftype3: public Ftype
 				SetConn c( e );
 				set( &c, v1, v2, v3 );
 				return 1;
+			}
+
+			/**
+			 * This is a virtual function that takes a string,
+			 * converts it to three values, and assigns it to a field.
+			 * Returns true on success.
+			 * It will run into trouble if the contents are strings
+			 * with spaces or commas.
+			 */
+			bool strSet( Eref e, const Finfo* f, const string& s ) const
+			{
+				vector< string > args;
+				
+				// Function tokenize defined in StringUtil.cpp
+				// Split string using whitespace and comma as delimiters
+				tokenize( s, args, ", \t" );
+				
+				if ( args.size() != 3 )
+					return 0;
+				
+				T1 val1;
+				T2 val2;
+				T3 val3;
+				
+				if (
+					str2val( args[ 0 ], val1 ) && 
+					str2val( args[ 1 ], val2 ) &&
+					str2val( args[ 2 ], val3 ) ) {
+						return this->set( e, f, val1, val2, val3 );
+				}
+				
+				return 0;
 			}
 
 			static const Ftype* global() {
