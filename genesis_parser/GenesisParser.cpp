@@ -19,6 +19,7 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include <cstring>
 
 // Upi Bhalla, 24 May 2004:
 // I did a little checking up about portability of the setjmp construct

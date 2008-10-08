@@ -18,6 +18,7 @@
 #ifndef _ARGPARSER_CPP
 #define _ARGPARSER_CPP
 
+#include <cstdlib> // Required for g++ 4.3.2
 #include "ArgParser.h"
 
 map <char, string > ArgParser::option_;
