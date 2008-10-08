@@ -1,47 +1,57 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+**             and Niraj Dudani and Johannes Hjorth, KTH, Stockholm
+**
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
 #ifndef _MOOSE_MUSIC_H
 #define _MOOSE_MUSIC_H
 
 class Music 
 {
+public:
+	Music():
+		setup_( 0 ),
+		runtime_( 0 )
+	{
+		;
+	}
+	
+//////////////////////////////////////////////////////////////////
+// Field access functions
+//////////////////////////////////////////////////////////////////
 
- public:
-  Music() 
-    {
+//////////////////////////////////////////////////////////////////
+// Message dest functions.
+//////////////////////////////////////////////////////////////////
+	void innerProcessFunc( const Conn* c, ProcInfo p );
+	static void processFunc( const Conn* c, ProcInfo p );
+	static void reinitFunc( const Conn* c, ProcInfo p );
+	static void setupFunc( const Conn* c, MUSIC::setup* setup );
+	static void finalizeFunc( const Conn* c );
+	
+	static void addPort(
+		const Conn* c,
+		string name,
+		string direction,
+		string type );
 
-    }
+protected:
 
-  //////////////////////////////////////////////////////////////////
-  // Message dest functions.
-  //////////////////////////////////////////////////////////////////
-  
-  // Call the MUSIC tick from here
-  void innerProcessFunc( const Conn* c, ProcInfo p );
-  static void processFunc( const Conn* c, ProcInfo p );
-  
-  static void reinitFunc( const Conn* c, ProcInfo p );
-
-  static void addInputPort( const Conn* c, string name, 
-                            string type, unsigned int width);
-
-  static void addOutputPort( const Conn* c, string name, 
-                             string type, unsigned int width);  
-
- protected:
-
- private:
-
-  void innerAddInputPort( Eref e,  string name, 
-                          string type, unsigned int width);
-  void innerAddOutputPort( Eref e,  string name, 
-                           string type, unsigned int width);
-
+private:
+	void innerAddPort(
+		Eref e,
+		string name,
+		string direction,
+		string type );
+	
+	MUSIC::setup* setup_;
+	MUSIC::runtime* runtime_;
 };
-
-
-
-
-
-
-
 
 #endif // MOOSE_MUSIC_H
