@@ -125,7 +125,10 @@ ifdef USE_MPI
 CFLAGS += -DUSE_MPI
 endif
 
-
+ifdef USE_MUSIC
+CFLAGS += -DUSE_MUSIC
+LIBS += -lmusic
+endif
 
 
 # The -DMPICH_IGNORE_CXX_SEEK flag is because of a bug in the
