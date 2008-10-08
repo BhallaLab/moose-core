@@ -11,13 +11,7 @@
 
 #ifdef USE_MPI
 #include <mpi.h>
-
-MPI::Intracomm MPI_INTRA_COMM;
-
-#ifdef USE_MUSIC
-#include <music.hh>
-
-#endif // USE_MUSIC
+#include "MMPI.h"	// Provides MUSIC-compatible MPI calls
 #endif // USE_MPI
 
 #include "../basecode/moose.h"
@@ -33,21 +27,10 @@ static const Finfo* stepFinfo;
 void initMPI( int argc, char** argv )
 {
 #ifdef USE_MPI
-#ifdef USE_MUSIC
-	MUSIC::setup* setup = new MUSIC::setup( argc, argv );
+	MMPI::Init( argc, argv );
 	
-	Element* music =
-		Neutral::create( "Music", "music", Element::root()->id(), Id::scratchId() );
-	set< MUSIC::setup* >( music, setup );
-	
-	MPI_INTRA_COMM = setup->communicator( );
-#else
-	MPI::Init( argc, argv );
-	MPI_INTRA_COMM = MPI::COMM_WORLD;
-#endif // USE_MUSIC
-	
-	unsigned int totalnodes = MPI_INTRA_COMM.Get_size();
-	unsigned int mynode = MPI_INTRA_COMM.Get_rank();
+	unsigned int totalnodes = MMPI::INTRA_COMM().Get_size();
+	unsigned int mynode = MMPI::INTRA_COMM().Get_rank();
 	bool ret;
 
 	Element* postmasters =
@@ -154,10 +137,10 @@ void initMPI( int argc, char** argv )
 	set( cj.eref(), "reinit" );
 	set( pj, "reinit" );
 #ifdef DO_UNIT_TESTS
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 	if ( mynode == 0 )
 		cout << "\nInitialized " << totalnodes << " nodes\n";
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 	testPostMaster();
 #endif // DO_UNIT_TESTS
 #endif // USE_MPI
@@ -171,12 +154,8 @@ void terminateMPI( unsigned int mynode )
 		bool ret = set( shell, "poll" );
 		assert( ret );
 	}
-#ifdef USE_MUSIC
-	Id music( "/music" );
-	set( music(), "finalize" );
-#else
-	MPI::Finalize();
-#endif // USE_MUSIC
+	
+	MMPI::Finalize();
 #endif // USE_MPI
 }
 
