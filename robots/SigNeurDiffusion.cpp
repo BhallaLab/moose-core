@@ -225,7 +225,8 @@ void SigNeur::completeDendDiffusion(
 					Eref e0( i->second, j );
 					diffCalc( e0, e1, e2 );
 				} else { // Should not connect into spine.
-					assert( 0 );
+					cout << "Check: completeDendDiffusion: Is it endcompt? " << Eref( i->second, j).name() << endl;
+					// assert( 0 );
 				}
 			}
 		}
@@ -290,7 +291,7 @@ void SigNeur::buildDiffusionJunctions( vector< unsigned int >& junctions )
 	// Need to figure out how to put things at opposite ends of compt.
 	for ( vector< TreeNode >::iterator i = tree_.begin(); 
 		i != tree_.end(); ++i ) {
-		if ( i->category == SPINE_NECK )
+		if ( i->category == SPINE_NECK || i->category == EMPTY )
 			continue;
 		// cout << i - tree_.begin() << "	" << i->compt.path() << ", p=" << i->parent << ", sig=" << i->sigStart << "," << i->sigEnd << endl;;
 
