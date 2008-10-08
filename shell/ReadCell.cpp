@@ -264,6 +264,7 @@ Element* ReadCell::buildCompartment(
 				double d, double& length,
 				vector< string >& argv )
 {
+// BUG: the comptCinfo raxial and axial are wrong from symcompartments.
 	static const Finfo* axial = comptCinfo->findFinfo( "axial" );
 	static const Finfo* raxial = comptCinfo->findFinfo( "raxial" );
 	static const Finfo* x0Finfo = comptCinfo->findFinfo( "x0" );

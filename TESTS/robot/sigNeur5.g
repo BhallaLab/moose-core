@@ -3,8 +3,16 @@
 // adaptors.
 
 // Create a library of prototype elements to be used by the cell reader
+float RUNTIME = 0.1
+float CELLDT = 50.0e-6
+float SIGDT = 1.0e-3
+float INJECT = 20e-12
+float DEFAULT_VOL = 1.257e-16
+
 include proto16.g
 
+create KinCompt /kinetics
+setfield /kinetics volume {DEFAULT_VOL}
 include fix79.g
 copy /kinetics /library/soma
 copy /kinetics /library/dend
@@ -55,11 +63,52 @@ setfield /sig lambda 5.0001e-6
 setfield /sig Dscale 1e-12
 setfield /sig calciumMap[Ca_conc] Ca_input
 setfield /sig channelMap[MAPK*] K_A
+setfield /sig sigDt {SIGDT}
+setfield /sig cellDt {CELLDT}
+setfield /sig calciumScale 0.1
 
 showfield /sig *
 le /sig
 
 setfield /sig build foo
-reset
-reset
 
+create neutral /plots
+function make_plot( name, path, field )
+	str name
+	str path
+	str field
+
+	create table /plots/{name}
+	setfield /plots/{name} xmin 0 xmax {RUNTIME} xdivs {RUNTIME / SIGDT}
+	setfield /plots/{name} dx {SIGDT}
+	setfield /plots/{name} step_mode 3
+	useclock /plots/{name} 3
+	addmsg {path}/{field} /plots/{name}/inputRequest
+end
+
+make_plot Vm /sig/cell/soma Vm
+// make_plot Ca_cell /sig/cell/soma/Ca_conc Ca
+make_plot KA_cell /sig/cell/soma/K_A Gbar
+make_plot Ca_sig /sig/kinetics/soma[1]/Ca_input conc
+make_plot MAPK_sig /sig/kinetics/soma[1]/MAPK* conc
+
+setfield /library/cell/soma inject {INJECT}
+
+reset
+showclocks
+
+function dump_plots
+	str plot
+	foreach plot ( {el /plots/#} )
+		echo {plot}
+		openfile "test.plot" a
+		writefile "test.plot" "/newplot"
+		writefile "test.plot" "/plotname "{plot}
+		closefile "test.plot"
+		tab2file "test.plot" {plot} table
+	end
+end
+
+step {RUNTIME} -t
+
+dump_plots
