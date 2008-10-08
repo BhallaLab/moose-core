@@ -185,6 +185,19 @@ void SigNeur::innerBuildTree( unsigned int parent, Eref paE, Eref e,
 }
 
 
+/**
+ * 	This function uses naming heuristics to decide which signaling model
+ * 	belongs in which compartment. By default, it puts spine signaling in all
+ * 	compartments which have 'spine' in the name, except for those which
+ * 	have 'neck' or 'shaft as well. It puts soma signaling in compartments
+ * 	with soma in the name, and dend signaling everywhere else.
+ * 	In addition, it has two optional
+ * 	fields to use: dendInclude and dendExclude. If dendInclude is set,
+ * 	then it only puts dends in the specified compartments.
+ * 	Whether or not dendInclude is set, dendExclude eliminates dends from
+ * 	the specified compartments.
+ */
+
 CompartmentCategory SigNeur::guessCompartmentCategory( Eref e )
 {
 	if ( e.e->name().find( "spine" ) != string::npos ||
@@ -208,6 +221,16 @@ CompartmentCategory SigNeur::guessCompartmentCategory( Eref e )
 	{
 		return SOMA;
 	}
-	return DEND;
+	CompartmentCategory ret = EMPTY;
+	if ( dendInclude_ == "" )
+		ret = DEND;
+	else if ( e.e->name().find( dendInclude_ ) != string::npos ) 
+		ret = DEND;
+
+	if ( ret == DEND && ( dendExclude_.length() > 0 ) && 
+		e.e->name().find( dendExclude_ ) != string::npos ) 
+		return EMPTY;
+
+	return ret;
 }
 
