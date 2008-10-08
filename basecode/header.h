@@ -38,6 +38,10 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <climits> // Required for g++ 4.3.2
+#include <cstring> // Required for g++ 4.3.2
+#include <cstdlib> // Required for g++ 4.3.2
+
 
 // Used for INT_MAX and UINT_MAX, but may be done within the compiler
 // #include <limits.h>
