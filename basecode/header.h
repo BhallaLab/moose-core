@@ -20,22 +20,6 @@
  * and then some file specific headers.
  */
 
-/**
- * Here we (forward-) declare the MPI communicator to use within MOOSE.
- * Its value is MPI::COMM_WORLD if MOOSE is running by itself. However, if MOOSE
- * is talking to another simulator, through the MUSIC API, then a different
- * (intra-) communicator is assigned by MUSIC.
- * 
- * The value is defined in maindir/mpiSetup.cpp.
- */
-#ifdef USE_MPI
-namespace MPI
-{
-	class Intracomm;
-};
-extern const MPI::Intracomm MPI_INTRA_COMM;	// Defined in maindir/mpiSetup.cpp
-#endif // USE_MPI
-
 /// Here we set up an enhanced variant of assert, used in unit tests.
 #ifdef DO_UNIT_TESTS
 # define ASSERT( isOK, message ) \

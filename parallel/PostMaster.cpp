@@ -10,6 +10,7 @@
 #ifdef USE_MPI
 #include "moose.h"
 #include <mpi.h>
+#include "MMPI.h"	// Provides MUSIC-compatible MPI calls
 #include "PostMaster.h"
 #include "ProxyElement.h"
 #include "AsyncDestFinfo.h"
@@ -114,9 +115,9 @@ PostMaster::PostMaster()
 	sendBuf_( 1000, 0 ), 
 	sendBufPos_( 0 ), 
 	recvBuf_( 1000, 0 ), 
-	donePoll_( 0 ), comm_( &MPI_INTRA_COMM )
+	donePoll_( 0 ), comm_( &MMPI::INTRA_COMM() )
 {
-	localNode_ = MPI_INTRA_COMM.Get_rank(); 
+	localNode_ = MMPI::INTRA_COMM().Get_rank(); 
 	request_ = 0;
 }
 
@@ -611,15 +612,15 @@ void testPostMaster()
 {
 	// First, ensure that all nodes are synced.
 	testParAsyncMessaging();
-	MPI_INTRA_COMM.Barrier();
-	unsigned int myNode = MPI_INTRA_COMM.Get_rank();
-	unsigned int numNodes = MPI_INTRA_COMM.Get_size();
+	MMPI::INTRA_COMM().Barrier();
+	unsigned int myNode = MMPI::INTRA_COMM().Get_rank();
+	unsigned int numNodes = MMPI::INTRA_COMM().Get_size();
 	Id* postId = new Id[numNodes];
 	Eref post;
 	unsigned int i;
 	if ( myNode == 0 )
 		cout << "\nTesting PostMaster: " << numNodes << " nodes";
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 	///////////////////////////////////////////////////////////////
 	// check that we have postmasters for each of the other nodes
 	// Print out a dot for each node.
@@ -645,7 +646,7 @@ void testPostMaster()
 		}
 		postId[i] = id;
 	}
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 	
 	///////////////////////////////////////////////////////////////
 	// This next test works on a single node too, for debugging.
@@ -671,7 +672,7 @@ void testPostMaster()
 							table, "table", 0.0, i );
 	}
 
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 
 	if ( myNode == 0 ) {
 		// Here we are being sneaky because we have the same id on all 
@@ -691,16 +692,16 @@ void testPostMaster()
 	Element* cj = cjId();
 	set< double >( cj, "start", 1.0 );
 
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 	set( table, "destroy" );
 	// unsigned int cjId = Shell::path2eid( "/sched/cj", "/" );
 
 	////////////////////////////////////////////////////////////////
 	// Now we fire up the scheduler on all nodes to keep info flowing.
 	////////////////////////////////////////////////////////////////
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 	// sleep( 5 );
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 	char sendstr[50];
 
 	for ( i = 0; i < numNodes; i++ ) {
@@ -717,13 +718,13 @@ void testPostMaster()
 		// char* buf = static_cast< char* >( pdata->innerGetAsyncParBuf( shellIndex, strlen( sendstr ) + 1 ));
 		// strcpy( buf, sendstr );
 	}
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 	bool glug = 0; // Breakpoint for parallel debugging
 	while ( glug ) ;
 	// cout << " starting string send\n" << flush;
 	set< double >( cj, "start", 1.0 );
 	// cout << " Done string send\n" << flush;
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 
 	////////////////////////////////////////////////////////////////
 	// Now we set up a fully connected network of tables. Each 
@@ -782,7 +783,7 @@ void testPostMaster()
 				ret = Eref( tables[i] ).add( "outputSrc", 
 					p, "data" );
 				ASSERT( ret, "Making input message to postmaster" );
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 			}
 		} else {
 			post = postId[i]();
@@ -799,7 +800,7 @@ void testPostMaster()
 		}
 	}
 	set< double >( cj, "start", 11.0 );
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 	// At this point the contents of the tables should be changed by the
 	// arrival of data.
 	double value;
@@ -818,7 +819,7 @@ void testPostMaster()
 		}
 	}
 	set( n, "destroy" );
-	MPI_INTRA_COMM.Barrier();
+	MMPI::INTRA_COMM().Barrier();
 
 	Id shellId( "/shell", "/" );
 	Element* shell = shellId();

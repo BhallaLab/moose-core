@@ -10,7 +10,9 @@
 **********************************************************************/
 
 #include "moose.h"
+#include <mpi.h>
 #include <music.hh>
+#include "MMPI.h"
 #include "Music.h"
 #include "element/Neutral.h"
 
