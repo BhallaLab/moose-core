@@ -110,7 +110,7 @@ class PostMaster
 		
 		MPI::Request request_;
 		MPI::Status status_;
-		MPI::Comm* comm_;
+		const MPI::Comm* comm_;
 };
 
 class AsyncStruct {
