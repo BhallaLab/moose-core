@@ -58,14 +58,14 @@ int mooseInit()
     
     Neutral::create( "Neutral", "library", Element::root()->id(), Id::scratchId() );
     Neutral::create( "Neutral", "proto", Element::root()->id(), Id::scratchId() );
-    Element* solvers = 
-            Neutral::create( "Neutral", "solvers", Element::root()->id(), Id::scratchId() );
+    // Element* solvers = 
+	//	Neutral::create( "Neutral", "solvers", Element::root()->id(), Id::scratchId() );
     // These two should really be solver managers because there are
     // a lot of decisions to be made about how the simulation is best
     // solved. For now let the Shell deal with it.
-    Neutral::create( "Neutral", "chem", solvers->id(), Id::scratchId() );
-    Neutral::create( "Neutral", "neuronal", solvers->id(), Id::scratchId() );
-
+    // Neutral::create( "Neutral", "chem", solvers->id(), Id::scratchId() );
+    // Neutral::create( "Neutral", "neuronal", solvers->id(), Id::scratchId() );
+	
     // Not really honouring AUTOSCHEDULE setting -
     // May need only t0 for AUTOSCHEDULE=false
     // But creating a few extra clock ticks does not hurt as much as

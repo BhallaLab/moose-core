@@ -10,125 +10,137 @@
 **********************************************************************/
 
 #include "moose.h"
+#include <music.hh>
 #include "Music.h"
 #include "element/Neutral.h"
 
 const Cinfo* initMusicCinfo()
 {
-
-  /**
-   * This is a shared message to receive Process messages from
-   * the scheduler objects.
-   */
-
-  static Finfo* processShared[] =
-    {
-      new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-                     RFCAST( &Music::processFunc ) ),
-      new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
-                     RFCAST( &Music::reinitFunc ) ),
-    };
-
-  static Finfo* process = 
-    new SharedFinfo( "process", processShared,
-                     sizeof( processShared ) / sizeof( Finfo* ) );
-
-
-  static Finfo* musicFinfos[] =
-    {
-      //////////////////////////////////////////////////////////////////
-      // SharedFinfos
-      //////////////////////////////////////////////////////////////////
-      process,
-
-      //////////////////////////////////////////////////////////////////
-      // Dest Finfos.
-      //////////////////////////////////////////////////////////////////
-      new DestFinfo( "addInputPort", 
-                     Ftype3< string, string, unsigned int >::global(),
-                     RFCAST( &Music::addInputPort ) ),
-      new DestFinfo( "addOutputPort", 
-                     Ftype3< string, string, unsigned int >::global(),
-                     RFCAST( &Music::addOutputPort ) ),
-
-
-
-    };
-
-  // CHECK WHEN THE TICK SHOULD BE CALLED
-  static SchedInfo schedInfo[] = { { process, 0, 1 } };
-  
-  static Cinfo musicCinfo("Music",
-                          "Niraj Dudani and Johannes Hjorth",
-                          "Moose Music object for communciation with the MUSIC API",
-                          initNeutralCinfo(),
-                          musicFinfos,
-                          sizeof( musicFinfos ) / sizeof( Finfo* ),
-                          ValueFtype1< Music >::global(),
-                          schedInfo, 1
-                          );
-  
-  
-  return &musicCinfo;
-
+	/**
+	 * This is a shared message to receive Process messages from
+	 * the scheduler objects.
+	 */
+	static Finfo* processShared[] =
+	{
+		new DestFinfo(
+			"process", Ftype1< ProcInfo >::global(),
+			RFCAST( &Music::processFunc ) ),
+		new DestFinfo(
+			"reinit", Ftype1< ProcInfo >::global(),
+			RFCAST( &Music::reinitFunc ) ),
+	};
+	
+	static Finfo* process = new SharedFinfo(
+		"process",
+		processShared,
+		sizeof( processShared ) / sizeof( Finfo* ) );
+	
+	static Finfo* musicFinfos[] =
+	{
+	//////////////////////////////////////////////////////////////////
+	// Field definitions
+	//////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////
+	// SharedFinfos
+	//////////////////////////////////////////////////////////////////
+		process,
+	//////////////////////////////////////////////////////////////////
+	// Dest Finfos.
+	//////////////////////////////////////////////////////////////////
+		new DestFinfo(
+			"setup",
+			Ftype1< MUSIC::setup* >::global(),
+			RFCAST( &Music::setupFunc ) ),
+		new DestFinfo(
+			"finalize",
+			Ftype0::global(),
+			RFCAST( &Music::finalizeFunc ) ),
+		new DestFinfo(
+			"addPort", 
+			Ftype3< string, string, string >::global(),
+			RFCAST( &Music::addPort ) ),
+	};
+	
+	static SchedInfo schedInfo[] = { { process, 0, 1 } };
+	
+	static Cinfo musicCinfo(
+		"Music",
+		"Niraj Dudani and Johannes Hjorth",
+		"Moose Music object for communciation with the MUSIC API",
+		initNeutralCinfo(),
+		musicFinfos,
+		sizeof( musicFinfos ) / sizeof( Finfo* ),
+		ValueFtype1< Music >::global(),
+		schedInfo, 1
+	);
+	
+	return &musicCinfo;
 }
 
 static const Cinfo* musicCinfo = initMusicCinfo();
 
+//////////////////////////////////////////////////////////////////
+// Field access functions
+//////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////
+// Message dest functions.
+//////////////////////////////////////////////////////////////////
 void Music::innerProcessFunc( const Conn* c, ProcInfo p ) 
 {
-  cerr << "Music::innerProcessFunc not implemented yet" << endl;
-
+	cerr << "Music::innerProcessFunc not implemented yet" << endl;
 }
 
 void Music::processFunc( const Conn* c, ProcInfo p ) 
 {
-  static_cast < Music* > (c->data() )->innerProcessFunc(c,p);
+	static_cast < Music* > (c->data() )->innerProcessFunc( c, p );
 }
   
 void Music::reinitFunc( const Conn* c, ProcInfo p ) 
 {
-
+	;
 }
 
-
-void Music::addInputPort( const Conn* c, string name, 
-                          string type, unsigned int width) 
+void setupFunc( const Conn* c, MUSIC::setup* setup )
 {
-
-  static_cast < Music* > ( c->data() )->innerAddInputPort(c->target(), 
-                                                          name, type, width);
-
+	static_cast< Music* >( c->data() )->
+		innerSetupFunc( c->target(), setup );
 }
 
-void Music::addOutputPort( const Conn* c, string name, 
-                           string type, unsigned int width) 
+void innerSetupFunc( Eref e, MUSIC::setup* setup )
 {
-  static_cast < Music* > ( c->data() )->innerAddOutputPort(c->target(), 
-                                                           name, type, width);
-
+	setup_ = setup;
 }
 
-void Music::innerAddInputPort( Eref e,  string name, 
-                               string type, unsigned int width) 
+void finalizeFunc( const Conn* c, MUSIC::setup* setup )
 {
-  Element* port = Neutral::create( "InputEventPort", name, 
-                                   e.id(), Id::scratchId() );
-
-  set<unsigned int>(port,"width", width);
+	static_cast< Music* >( c->data() )->setup_ = setup;
 }
- 
-void Music::innerAddOutputPort( Eref e,  string name, 
-                                string type, unsigned int width) 
+
+void innerFinalizeFunc( Eref e )
 {
-
-  cerr << "Music::innerAddOutputPort not implemented yet" << endl;
+	delete runtime_;
+	runtime = 0;
 }
 
+void Music::addPort (
+	const Conn* c,
+	string name,
+	string direction,
+	string type ) 
+{
+	static_cast < Music* > ( c->data() )->innerAddPort
+		c->target(), name, direction, type );
+}
 
-
-
-
-
-
+void Music::innerAddPort (
+	Eref e,
+	string name,
+	string direction,
+	string type ) 
+{
+//	Element* port = Neutral::create(
+//		"InputEventPort", name, e.id(), Id::scratchId() );
+	
+//	set< unsigned int >(port,"width", width);
+}
