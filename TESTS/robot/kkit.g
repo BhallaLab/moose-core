@@ -17,7 +17,10 @@ function initdump
 end
 
 //  create KineticManager /kinetics
-create neutral /kinetics
+// create neutral /kinetics
+if ( !{exists /kinetics} )
+	create KinCompt /kinetics
+end
 // setfield /kinetics method ee
 
 create neutral /graphs
