@@ -4072,10 +4072,14 @@ void GenesisParserWrapper::gpAssert(
 
 void GenesisParserWrapper::unitTest()
 {
+#ifdef USE_MUSIC
+	string lestr = "shell sched library proto music postmasters ";
+#else
 #ifdef USE_MPI
 	string lestr = "shell sched library proto postmasters ";
 #else
 	string lestr = "shell sched library proto ";
+#endif
 #endif
 	cout << "\nDoing GenesisParserWrapper tests";
 	gpAssert( "le", lestr );
