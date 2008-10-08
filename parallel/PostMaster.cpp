@@ -10,7 +10,7 @@
 #ifdef USE_MPI
 #include "moose.h"
 #include <mpi.h>
-#include "MMPI.h"	// Provides MUSIC-compatible MPI calls
+#include "../maindir/MMPI.h"	// Provides MUSIC-compatible MPI calls
 #include "PostMaster.h"
 #include "ProxyElement.h"
 #include "AsyncDestFinfo.h"
