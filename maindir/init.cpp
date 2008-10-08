@@ -58,6 +58,12 @@ int mooseInit()
     
     Neutral::create( "Neutral", "library", Element::root()->id(), Id::scratchId() );
     Neutral::create( "Neutral", "proto", Element::root()->id(), Id::scratchId() );
+	
+#ifdef USE_MUSIC
+	Element* music =
+		Neutral::create( "Music", "music", Element::root()->id(), Id::scratchId() );
+#endif // USE_MUSIC
+	
     // Element* solvers = 
 	//	Neutral::create( "Neutral", "solvers", Element::root()->id(), Id::scratchId() );
     // These two should really be solver managers because there are
@@ -72,7 +78,7 @@ int mooseInit()
     // not allowing user to change the clock settings
     Neutral::create( "Tick", "t0", cj->id(), Id::scratchId() );
     Neutral::create( "Tick", "t1", cj->id(), Id::scratchId() );
-    return 0;    
+    return 0;
 }
 
 void setupDefaultSchedule( 
