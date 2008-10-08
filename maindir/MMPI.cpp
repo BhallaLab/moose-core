@@ -12,9 +12,6 @@
 #include "MMPI.h"
 
 MPI::Intracomm MMPI::communicator_ = MPI::Intracomm();
-#endif
-
-
 
 void MMPI::Init( int argc, char** argv )
 {
@@ -51,3 +48,5 @@ const MPI::Intracomm& MMPI::INTRA_COMM( )
 {
 	return communicator_;
 }
+
+#endif
