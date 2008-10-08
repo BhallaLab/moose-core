@@ -131,6 +131,16 @@ const Cinfo* initSigNeurCinfo()
 			GFCAST( &SigNeur::getCalciumScale ), 
 			RFCAST( &SigNeur::setCalciumScale )
 		),
+		new ValueFinfo( "dendInclude",
+			ValueFtype1< string >::global(),
+			GFCAST( &SigNeur::getDendInclude ), 
+			RFCAST( &SigNeur::setDendInclude )
+		),
+		new ValueFinfo( "dendExclude",
+			ValueFtype1< string >::global(),
+			GFCAST( &SigNeur::getDendExclude ), 
+			RFCAST( &SigNeur::setDendExclude )
+		),
 	// Would be nice to have a way to include synaptic input into
 	// the mGluR input.
 	
@@ -191,7 +201,9 @@ SigNeur::SigNeur()
 		lambda_( 10.0e-6 ),
 		parallelMode_( 0 ),
 		updateStep_( 1.0 ),
-		calciumScale_( 1.0 )
+		calciumScale_( 1.0 ),
+		dendInclude_( "" ),
+		dendExclude_( "" )
 {
 		;
 }
@@ -387,6 +399,26 @@ void SigNeur::setCalciumScale( const Conn* c, double value )
 double SigNeur::getCalciumScale( Eref e )
 {
 	return static_cast< SigNeur* >( e.data() )->calciumScale_;
+}
+
+void SigNeur::setDendInclude( const Conn* c, string value )
+{
+	static_cast< SigNeur* >( c->data() )->dendInclude_ = value;
+}
+
+string SigNeur::getDendInclude( Eref e )
+{
+	return static_cast< SigNeur* >( e.data() )->dendInclude_;
+}
+
+void SigNeur::setDendExclude( const Conn* c, string value )
+{
+	static_cast< SigNeur* >( c->data() )->dendExclude_ = value;
+}
+
+string SigNeur::getDendExclude( Eref e )
+{
+	return static_cast< SigNeur* >( e.data() )->dendExclude_;
 }
 
 void SigNeur::setChannelMap( const Conn* c, string val, const string& i )

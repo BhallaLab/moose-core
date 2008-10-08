@@ -167,7 +167,7 @@ void adaptSig2Chan( TreeNode& t,
 		assert( t.sigEnd - offset <= e->numEntries() );
 
 		// Create the adaptor
-		string name = "adapt_" + e->name() + "_2_" + mol;
+		string name = "adapt_" + mol + "_2_" + chanId.eref().e->name();
 		Element* adaptor = Neutral::create( "Adaptor", name,
 			t.compt, Id::childId( t.compt ) );
 		assert( adaptor != 0 );
