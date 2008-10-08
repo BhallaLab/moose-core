@@ -28,7 +28,7 @@ InputEventChannel.o : InputEventChannel.h
 InputEventPort.o : InputEventPort.h InputEventChannel.h 
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -I../basecode -I../randnum -I.. $< -c
+	$(CXX) $(CFLAGS) -I../basecode -I../randnum -I.. -I/home/hjorth/music/LIB/include -I/usr/include/openmpi $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)
