@@ -10,10 +10,15 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #include "MMPI.h"
+
+MPI::Intracomm MMPI::communicator_ = MPI::Intracomm();
 #endif
+
+
 
 void MMPI::Init( int argc, char** argv )
 {
+
 #ifdef USE_MPI
 #ifdef USE_MUSIC
 	Id music( "/music" );
