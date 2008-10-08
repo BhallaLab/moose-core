@@ -10,6 +10,7 @@
 **********************************************************************/
 
 #include "moose.h"
+#include "music.hh"
 #include "Music.h"
 #include "InputEventPort.h"
 #include "InputEventChannel.h"
