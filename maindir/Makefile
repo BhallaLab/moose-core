@@ -18,13 +18,14 @@ OBJ = \
 	main.o	\
 	nonblock.o \
 	init.o \
-	mpiSetup.o
+	mpiSetup.o \
+	MMPI.o
 
 HEADERS = \
 	../basecode/header.h \
 	../connections/Conn.h \
 	../basecode/Element.h \
-	../basecode/Id.h
+	../basecode/Id.h 
 
 default: $(TARGET)
 
