@@ -8,7 +8,9 @@
 **********************************************************************/
 
 #ifdef USE_MPI
+#include "moose.h"
 #include <mpi.h>
+#include <music.hh>
 #include "MMPI.h"
 
 MPI::Intracomm MMPI::communicator_ = MPI::Intracomm();
@@ -22,8 +24,8 @@ void MMPI::Init( int argc, char** argv )
 	assert( music.good() );
 	
 	MUSIC::setup* setup = new MUSIC::setup( argc, argv );
-	set< MUSIC::setup* >( music(), "setup", setup_ );
-	communicator_ = setup_->communicator( );
+	set< MUSIC::setup* >( music(), "setup", setup );
+	communicator_ = setup->communicator( );
 #else
 	MPI::Init( argc, argv );
 	communicator_ = MPI::COMM_WORLD;
