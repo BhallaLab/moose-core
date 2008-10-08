@@ -27,6 +27,12 @@ Music.o : Music.h
 InputEventChannel.o : InputEventChannel.h 
 InputEventPort.o : InputEventPort.h InputEventChannel.h 
 
+ifdef USE_MPI
+    CXX = mpicxx
+else
+    CXX = g++
+endif
+
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode -I../randnum -I.. $< -c
 
