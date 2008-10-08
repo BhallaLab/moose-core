@@ -105,7 +105,7 @@ endif
 # Libraries are defined below. For now we do not use threads.
 SUBLIBS = 
 #LIBS =	-lm -lpthread
-LIBS = 	-lm  
+LIBS = 	-lm -lmusic 
 ##########################################################################
 #
 # Developer options (Don't try these unless you are writing new code!)
