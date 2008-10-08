@@ -22,6 +22,9 @@
 #include "func_externs.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
+#include <climits>
+
 	using namespace std;
 
 const Cinfo* initGenesisParserCinfo()
