@@ -7672,10 +7672,11 @@ I begin to use 3D methods:
 	- Can one geometry have multiple surfaces?
 
 What do I do about all the legacy genesis script that uses volscale?
-	- Clearly, I need to implement handler code in volscale, that refers
+	* Clearly, I need to implement handler code in volscale, that refers
 		to the authoritative volume and complains if it doesn't match.
 	- Somewhat mitigated because almost all use of signaling objects in
 		GENESIS is through kkit, which is highly stereotyped.
+		- Will need to modify kkit reader to deal with this
 
 What does it mean for current SigNeur implementation?
 	* Replace neutrals for model holders with KinCompts
@@ -7714,4 +7715,62 @@ cylinder.g is now broken: diffusion rates messed up.
 Some fixes to diffusion. Now cylinder.g works, but these are patches, 
 and there is scope for much cleaning. sigNeurTiny.g now fails... fixed.
 
+Checked in as revision 778: unit test flags on, Smoldyn off, GSL on, -g, MPI off
 
+Tried to do a small run with sigNeur5.g, but no sign of movement. Need to
+compile with optimization and run on a workstation, not an old laptop.
+
+==============================================================================
+2 Oct 2008.
+There is a discrepancy in the output of soma.g for different levels of
+optimization on different machines. I think it is the hsolver, next thing 
+to do is check output on a pure cell model.
+
+Did the check. I get 3 very distinct outputs for 32-bit debug version,
+32-bit O3 version, and 64-bit O3 version. Used soma_cellonly.g.
+
+Tried various things with scheduling: 2 resets, ensured method is hsolve,
+put stages in the clocks. No change. Next to go through each channel
+type in order and ensure all are identical at reset.
+
+==============================================================================
+3 Oct 2008.
+Last night I had tracked down differences in the channel values at reset. Sent
+this to Niraj, he says he has fixed it. Let's see...
+No, not fixed. The O3 compiles for 32 and 64 bit now coincide, but differ
+from the debug output. To check, I used GENESIS on the same model and confirmed
+that the debug mode was the correct one. I have sent Niraj the output and
+diagnostics: It looks like an initialization problem.
+
+Having done this, back to the SigNeur implementation. If I assume that the
+debug version does the right thing, I can proceed to design a production
+simulation.
+
+==============================================================================
+5 Oct 2008
+Doing a production model now with SigNeur. I clearly need a way to define
+electrical compartments that should remain empty, otherwise it is absurdly
+computationally wasteful. Implemented dendInclude and dendExclude fields in
+sigNeur, still buggy. Problem is when spines are attached to an EMPTY
+compartment: how to set up sigStart?
+
+==============================================================================
+6 Oct 2008
+Tracked down issue, fixed problems with EMPTY, but there remain further
+headaches. Currently the system for setting up junctions assumes that 
+all compartments are filled with signaling stuff. Now the goal is to
+allow only subsets of the model to do signaling.
+Options:
+	- Clean up management of numbering of junctions.
+		Start numbering of each array appropriately.
+	- EMPTY compartments have a dummy signaling model.
+		Won't work: need to define an array size.
+
+Fixed up first option. Seems OK so far, need to test thoroughly and with
+multiple disconnected segments. Likewise with isolated spine models.
+
+Put in Niraj's bugfix for the initialization of the channels in O3 mode. Now
+the output is consistent across compiler optimization levels and also
+against GENESIS in ee and chanmode 0.
+
+==============================================================================

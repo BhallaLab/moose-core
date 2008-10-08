@@ -50,7 +50,7 @@ setfield /somaplot step_mode 3
 addmsg /cell/soma /somaplot INPUT Vm
 
 setfield /cell/soma inject 5.0e-10
-setfield /cell method ee
+// setfield /cell method ee
 
 echo starting
 

@@ -17,7 +17,7 @@
  * cell model. Each of these will get assigned a distinct signaling model
  * and possibly different numberical method.
  */
-enum CompartmentCategory { SOMA, DEND, SPINE, SPINE_NECK };
+enum CompartmentCategory { SOMA, DEND, SPINE, SPINE_NECK, EMPTY };
 
 /**
  * Utility function for getting dimensions of electrical compt when it
@@ -145,6 +145,14 @@ class SigNeur
 		/// Scale factors for calcium conversion between models.
 		static void setCalciumScale( const Conn* c, double value );
 		static double getCalciumScale( Eref e );
+
+		/// Compartment names to include for dendrite signaling
+		static void setDendInclude( const Conn* c, string value );
+		static string getDendInclude( Eref e );
+
+		/// Compartment names to exclude for dendrite signaling
+		static void setDendExclude( const Conn* c, string value );
+		static string getDendExclude( Eref e );
 		
 		///////////////////////////////////////////////////
 		// Dest function definitions
@@ -166,7 +174,21 @@ class SigNeur
 		void assignSignalingCompts();
 		void makeSignalingModel( Eref e );
 		void insertDiffusion( Element* base );
-		static CompartmentCategory guessCompartmentCategory( Eref e );
+
+		/** 
+		 * This function uses naming heuristics to decide which signaling 
+		 * model belongs in which compartment. By default, it puts 
+		 * spine signaling in all compartments which have 'spine' in 
+		 * the name, except for those which have 'neck' or 'shaft as well.
+		 * It puts soma signaling in compartments with soma in the name,
+		 * and dend signaling everywhere else. In addition, it has two
+		 * optional fields to use: dendInclude and dendExclude. If
+		 * dendInclude is set, then it only puts dends in the specified
+		 * compartments. Whether or not dendInclude is set, dendExclude
+		 * eliminates dends from the specified compartments.
+ 		 */
+		CompartmentCategory guessCompartmentCategory( Eref e );
+
 		Element* copySig( Id kinId, Id proto, 
 			const string& name, unsigned int num );
 		/**
@@ -291,13 +313,25 @@ class SigNeur
 			// Scale factors are worked out from gmax and CoInit.
 			
 		map< string, string > calciumMap_; /// Calcium pool name mapping
-		double calciumScale_;	/// Scaling factor between elec and sig
-				// Note that for both the channel and calcium maps, we
-				// do the actual conversion through an array of interface
-				// objects which handle scaling and offsets. The
-				// scaling for the channelMap is from gmax and CoInit, 
-				// and the baseline for calciumMap is CaBasal and CoInit,
-				// and it uses calciumScale for scaling.
+
+		/**
+		 * Scaling factor between elec and sig. Note that for both the 
+		 * channel and calcium maps, we do the actual conversion through
+		 * an array of interface objects which handle scaling and offsets.
+		 * The scaling for the channelMap is from gmax and CoInit, and 
+		 * the baseline for calciumMap is CaBasal and CoInit, and it 
+		 * uses calciumScale for scaling.
+		 */
+		double calciumScale_;	
+
+		/** 
+		 * If dendInclude is set, then it only puts dends in the specified
+		 * compartments. Whether or not dendInclude is set, dendExclude
+		 * eliminates dends from the specified compartments.
+ 		 */
+		string dendInclude_;
+		string dendExclude_;
+
 		vector< TreeNode > tree_;
 
 		/// Name to Molecule map for soma compartment signaling models.
