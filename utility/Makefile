@@ -30,7 +30,7 @@ Property.o : Property.h
 SparseMatrix.o : SparseMatrix.h
 
 .cpp.o:
-	$(CXX) $(CFLAGS)  $< -c
+	$(CXX) $(CFLAGS) -I.. $< -c
 
 $(TARGET): $(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) 
