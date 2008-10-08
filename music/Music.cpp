@@ -12,7 +12,7 @@
 #include "moose.h"
 #include <mpi.h>
 #include <music.hh>
-#include "MMPI.h"
+#include "maindir/MMPI.h"
 #include "Music.h"
 #include "element/Neutral.h"
 
@@ -103,26 +103,26 @@ void Music::reinitFunc( const Conn* c, ProcInfo p )
 	;
 }
 
-void setupFunc( const Conn* c, MUSIC::setup* setup )
+void Music::setupFunc( const Conn* c, MUSIC::setup* setup )
 {
 	static_cast< Music* >( c->data() )->
 		innerSetupFunc( c->target(), setup );
 }
 
-void innerSetupFunc( Eref e, MUSIC::setup* setup )
+void Music::innerSetupFunc( Eref e, MUSIC::setup* setup )
 {
 	setup_ = setup;
 }
 
-void finalizeFunc( const Conn* c, MUSIC::setup* setup )
+void Music::finalizeFunc( const Conn* c )
 {
-	static_cast< Music* >( c->data() )->setup_ = setup;
+	static_cast< Music* >( c->data() )->innerFinalizeFunc(c->target());
 }
 
-void innerFinalizeFunc( Eref e )
+void Music::innerFinalizeFunc( Eref e )
 {
 	delete runtime_;
-	runtime = 0;
+	runtime_ = 0;
 }
 
 void Music::addPort (
@@ -131,8 +131,8 @@ void Music::addPort (
 	string direction,
 	string type ) 
 {
-	static_cast < Music* > ( c->data() )->innerAddPort
-		c->target(), name, direction, type );
+  static_cast < Music* > ( c->data() )->innerAddPort(c->target(), 
+                                                     name, direction, type );
 }
 
 void Music::innerAddPort (
