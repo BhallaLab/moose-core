@@ -7,17 +7,19 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-namespace MPI
-{
-	class Intracomm;
-};
-extern const MPI::Intracomm INTRA_COMM;
+/**
+ * This class provides overridden MPI calls which are compatible with MUSIC.
+ * Use these calls even if MUSIC is not linked.
+ */
 
 class MMPI
 {
 public:
-	void Init( int argc, char** argv );
-	void Finalize( int argc, char** argv );
-
+	static void setupMusic( );
+	static void Init( int argc, char** argv );
+	static void Finalize( );
+	static const MPI::Intracomm& INTRA_COMM( );
+	
 private:
+	static MPI::Intracomm communicator_;
 };
