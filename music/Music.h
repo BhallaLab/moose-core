@@ -29,10 +29,10 @@ public:
 //////////////////////////////////////////////////////////////////
 // Message dest functions.
 //////////////////////////////////////////////////////////////////
-	void innerProcessFunc( const Conn* c, ProcInfo p );
 	static void processFunc( const Conn* c, ProcInfo p );
 	static void reinitFunc( const Conn* c, ProcInfo p );
-	static void setupFunc( const Conn* c, MUSIC::setup* setup );
+        static void setupFunc( const Conn* c, MUSIC::setup* setup );
+
 	static void finalizeFunc( const Conn* c );
 	
 	static void addPort(
@@ -44,6 +44,11 @@ public:
 protected:
 
 private:
+
+	void innerProcessFunc( const Conn* c, ProcInfo p );
+        void innerSetupFunc( Eref e, MUSIC::setup* setup );
+        void innerFinalizeFunc( Eref e );
+
 	void innerAddPort(
 		Eref e,
 		string name,
