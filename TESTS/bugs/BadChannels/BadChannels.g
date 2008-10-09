@@ -3,9 +3,14 @@
 
 echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-This test program works the same in GENESIS and MOOSE. Loads in a number of
-channels and runs them with a square voltage/calcium pulse, plots out their
-conductances. At this point 19 of the 25 channels work in MOOSE.
+(bug-id: 2155915)
+
+Loads in a number of channels and runs them with a square voltage/calcium pulse,
+plots out their conductances.
+
+19 out of 25 channels work: see README for details.
+
+Pick one channel from script to run. Run in Genesis to obtain reference plot.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
 
@@ -24,73 +29,42 @@ setclock 2 {PLOTDT}
 
 include compatibility.g
 
-include bulbchan.g
-include traubchan.g
-include traub91chan.g
-include hh_tchan.g
-include SMSNNchan.g
-include yamadachan.g
-// include FNTchan.g // doesn't even seem to work with GENESIS.
+include channel-definitions.g
 
 ce /library
-//------------------------------------------------------------------------------
-// Bulbchan
-//------------------------------------------------------------------------------
-	echo "Creating Bulb channels."
-	make_LCa3_mit_usb
-	make_Na_rat_smsnn
-	make_KA_bsg_yka
-	make_KM_bsg_yka
-	make_K_mit_usb
-	make_K2_mit_usb
-	make_Na_mit_usb
-//	make_Kca_mit_usb            // Doesn't work in MOOSE yet
-
-//------------------------------------------------------------------------------
-// Traubchan
-//------------------------------------------------------------------------------
-	echo "Creating Traub channels."
+/////////////////////////////////
+//	These channels don't work.
+//	Pick one to run.
+/////////////////////////////////
+	make_Kca_mit_usb            // Doesn't work in MOOSE yet
 //	make_Ca_hip_traub           // Doesn't work in MOOSE yet
 //	make_K_hip_traub            // Doesn't work in MOOSE yet
 //	make_Kca_hip_traub          // Doesn't work in MOOSE yet
-
-	make_Ca_hip_traub91
 //	make_Kc_hip_traub91         // Doesn't work in MOOSE yet
-	make_Kahp_hip_traub91
-	make_Na_hip_traub91
-	make_Kdr_hip_traub91
-	make_Ka_hip_traub91
-
-//------------------------------------------------------------------------------
-// hh_tchan
-//------------------------------------------------------------------------------
-	echo "Creating hh_tchan."
-	make_Na_hh_tchan
-	make_K_hh_tchan
-
-//------------------------------------------------------------------------------
-// SMSNN channels here : 
-// Stuhmer, Methfessel, Sakmann, Noda and Numa, Eur Biophys J 1987.
-//------------------------------------------------------------------------------
-	echo "Creating SMSNN channels."
-	make_Na_rat_smsnn
-	
-//------------------------------------------------------------------------------
-// yamadachan here: Yamada, Koch, and Adams
-// Methods in Neuronal Modeling, MIT press, ed Koch and Segev.
-//------------------------------------------------------------------------------
-	echo "Creating YKA channels."
 //	make_Ca_bsg_yka             // Doesn't work in MOOSE yet
-	make_Na_bsg_yka
-	make_KA_bsg_yka
-	make_KM_bsg_yka
-	make_K_bsg_yka
 
-//------------------------------------------------------------------------------
-// FNTchan here (Disabled)
-//------------------------------------------------------------------------------
-// make_NCa_drg_fnt_tab
-// make_NCa_drg_fnt
+/////////////////////////////////
+//	These channels work well:
+/////////////////////////////////
+//	make_LCa3_mit_usb
+//	make_Na_rat_smsnn
+//	make_KA_bsg_yka
+//	make_KM_bsg_yka
+//	make_K_mit_usb
+//	make_K2_mit_usb
+//	make_Na_mit_usb
+//	make_Ca_hip_traub91
+//	make_Kahp_hip_traub91
+//	make_Na_hip_traub91
+//	make_Kdr_hip_traub91
+//	make_Ka_hip_traub91
+//	make_Na_hh_tchan
+//	make_K_hh_tchan
+//	make_Na_rat_smsnn
+//	make_Na_bsg_yka
+//	make_KA_bsg_yka
+//	make_KM_bsg_yka
+//	make_K_bsg_yka
 ce /
 
 echo "
@@ -181,7 +155,6 @@ end
 echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Plots written to *.plot.
-The directory 'reference_plots' contains curves obtained using GENESIS.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
 
