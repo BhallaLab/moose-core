@@ -135,7 +135,7 @@ double HSolveActive::getX( unsigned int index ) const
 {
 	assert( index < channel_.size() );
 	
-	if ( ! channel_[ index ].Xpower_ > 0.0 )
+	if ( channel_[ index ].Xpower_ == 0.0 )
 		return 0.0;
 	
 	unsigned int stateIndex = chan2state_[ index ];
@@ -148,7 +148,7 @@ void HSolveActive::setX( unsigned int index, double value )
 {
 	assert( index < channel_.size() );
 	
-	if ( ! channel_[ index ].Xpower_ > 0.0 )
+	if ( channel_[ index ].Xpower_ == 0.0 )
 		return;
 	
 	unsigned int stateIndex = chan2state_[ index ];
@@ -161,7 +161,7 @@ double HSolveActive::getY( unsigned int index ) const
 {
 	assert( index < channel_.size() );
 	
-	if ( ! channel_[ index ].Ypower_ > 0.0 )
+	if ( channel_[ index ].Ypower_ == 0.0 )
 		return 0.0;
 	
 	unsigned int stateIndex = chan2state_[ index ];
@@ -178,7 +178,7 @@ void HSolveActive::setY( unsigned int index, double value )
 {
 	assert( index < channel_.size() );
 	
-	if ( ! channel_[ index ].Ypower_ > 0.0 )
+	if ( channel_[ index ].Ypower_ == 0.0 )
 		return;
 	
 	unsigned int stateIndex = chan2state_[ index ];
@@ -195,7 +195,7 @@ double HSolveActive::getZ( unsigned int index ) const
 {
 	assert( index < channel_.size() );
 	
-	if ( ! channel_[ index ].Zpower_ > 0.0 )
+	if ( channel_[ index ].Zpower_ == 0.0 )
 		return 0.0;
 	
 	unsigned int stateIndex = chan2state_[ index ];
@@ -214,7 +214,7 @@ void HSolveActive::setZ( unsigned int index, double value )
 {
 	assert( index < channel_.size() );
 	
-	if ( ! channel_[ index ].Zpower_ > 0.0 )
+	if ( channel_[ index ].Zpower_ == 0.0 )
 		return;
 	
 	unsigned int stateIndex = chan2state_[ index ];
