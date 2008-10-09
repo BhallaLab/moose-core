@@ -80,6 +80,7 @@ void InputEventPort::reinitFunc( const Conn* c, ProcInfo p )
   
 }
 
+// Event handler
 void InputEventPort::operator () ( double t, int id ) 
 {
   send1 < double > ( channels_[id](), eventSlot, t );

@@ -21,6 +21,7 @@ const Cinfo* initInputEventChannelCinfo()
    * the scheduler objects.
    */
 
+  /*
   static Finfo* processShared[] =
     {
       new DestFinfo( "process", Ftype1< ProcInfo >::global(),
@@ -28,6 +29,7 @@ const Cinfo* initInputEventChannelCinfo()
       new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
                      RFCAST( &InputEventChannel::reinitFunc ) ),
     };
+  */
 
   static Finfo* process = 
     new SharedFinfo( "process", processShared,
@@ -39,7 +41,7 @@ const Cinfo* initInputEventChannelCinfo()
       //////////////////////////////////////////////////////////////////
       // SharedFinfos
       //////////////////////////////////////////////////////////////////
-      process,
+      // process,
 
       ///////////////////////////////////////////////////////
       // MsgSrc definitions
@@ -67,17 +69,3 @@ const Cinfo* initInputEventChannelCinfo()
 
 static const Cinfo* inputEventChannelCinfo = initInputEventChannelCinfo();
 
-void InputEventChannel::reinitFunc( const Conn* c, ProcInfo p ) 
-{
-  
-}
-
-void InputEventChannel::innerProcessFunc( const Conn* c, ProcInfo p )
-{
-
-}
-
-void InputEventChannel::processFunc( const Conn*, ProcInfo p )
-{
-
-}
