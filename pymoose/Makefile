@@ -200,6 +200,5 @@ moose.py moose_wrap.cxx: moose.i $(HEADERS)
 # 	$(CXX) $(CFLAGS) $< -c
 
 clean:
-	-rm -f *.o moose_wrap.cxx *.so moose.py test_swig *.pyc
-
-
+	-rm -f *.o *.so test_swig *.pyc
+#	-rm -f *.o moose_wrap.cxx *.so moose.py test_swig *.pyc
