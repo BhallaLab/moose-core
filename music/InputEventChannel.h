@@ -14,11 +14,6 @@ class InputEventChannel
   // Message dest functions.
   //////////////////////////////////////////////////////////////////
 
-  void innerProcessFunc( const Conn* c, ProcInfo p );
-  static void processFunc( const Conn* c, ProcInfo p );
-
-  static void reinitFunc( const Conn* c, ProcInfo p );
-
  protected:
 
  private:
