@@ -90,6 +90,7 @@ static const Cinfo* musicCinfo = initMusicCinfo();
 //////////////////////////////////////////////////////////////////
 void Music::innerProcessFunc( const Conn* c, ProcInfo p ) 
 {
+
 	cerr << "Music::innerProcessFunc not implemented yet" << endl;
 }
 
@@ -137,12 +138,24 @@ void Music::addPort (
 
 void Music::innerAddPort (
 	Eref e,
-	string name,
 	string direction,
-	string type ) 
+	string type,
+	string name ) 
 {
-//	Element* port = Neutral::create(
-//		"InputEventPort", name, e.id(), Id::scratchId() );
-	
-//	set< unsigned int >(port,"width", width);
+  if(direction == "in" && type == "event") {
+
+  Element* port = 
+    Neutral::create("InputEventPort", name, e.id(), Id::scratchId() );
+
+  MUSIC::cout_output_port* out = setup_->publish_event_input(name);
+  int width = out->width();
+    
+  set< unsigned int >(port,"width", width);
+
+  }
+  else {
+    cerr << "Music::innerAddPort: " << direction " " << type 
+         << " Not supported yet";
+
+  }
 }
