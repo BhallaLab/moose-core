@@ -1,0 +1,137 @@
+-------------------------
+List of working channels:
+-------------------------
+Ca_hip_traub91
+K2_mit_usb
+KA_bsg_yka
+Ka_hip_traub91
+Kahp_hip_traub91
+K_bsg_yka
+Kdr_hip_traub91
+K_hh_tchan
+KM_bsg_yka
+K_mit_usb
+LCa3_mit_usb
+Na_bsg_yka
+Na_hh_tchan
+Na_hip_traub91
+Na_mit_usb
+Na_rat_smsnn
+
+----------------------------------------
+List of disabled channels (not working):
+----------------------------------------
+Kca_mit_usb
+Ca_bsg_yka
+Ca_hip_traub
+Kca_hip_traub
+K_hip_traub
+Kc_hip_traub91
+
+These channels may not be working with Genesis either:
+NCa_drg_fnt_tab
+NCa_drg_fnt
+
+################################################################################
+Following is the list of commands that do not work. Many are related to tabgate.
+################################################################################
+
+================================================================================
+[ Ca_bsg_yka: yamadachan.g ]
+================================================================================
+create tabgate Ca_bsg_yka/mgate
+call Ca_bsg_yka/mgate TABCREATE alpha 100 -0.2 0.1
+
+(Error)
+Error: TABCREATE failed
+
+--------------------------------------------------------------------------------
+addmsg Ca_bsg_yka/nernst Ca_bsg_yka EK output
+
+(Error)
+Error:sliMessage: Unknown message EK
+
+--------------------------------------------------------------------------------
+addmsg Ca_bsg_yka/hgate Ca_bsg_yka MULTGATE output 1
+
+(Error)
+Eref::add: Error: Could not find element.srcFinfo hgate.gate
+
+================================================================================
+[ Ca_hip_traub: traubchan.g ]
+================================================================================
+create tabgate Ca_hip_traub/r
+
+(Error)
+Error: TABCREATE failed
+
+--------------------------------------------------------------------------------
+create tabgate Ca_hip_traub/s
+(Commenting this out leads to crash, at setup_table)
+
+================================================================================
+[ Kca_hip_traub: traubchan.g ]
+================================================================================
+create tabgate Kca_hip_traub/qca
+
+(Error)
+Error: TABCREATE failed
+
+--------------------------------------------------------------------------------
+addmsg Kca_hip_traub/qv Kca_hip_traub/qca PRD_ALPHA output
+
+(Error)
+Error:sliMessage: Unknown message PRD_ALPHA
+
+================================================================================
+[ Kc_hip_traub91: traub91chan.g ]
+================================================================================
+setfield Kc_hip_traub91/tab table->calc_mode 0
+
+(Error)
+setVecField: Error: cannot find field: /library/Kc_hip_traub91/tab.table->calc_mode
+
+--------------------------------------------------------------------------------
+call Kc_hip_traub91/tab TABFILL 3000 0
+
+(Error)
+usage: call element TABFILL gate divs mode
+
+--------------------------------------------------------------------------------
+call Kc_hip_traub91/X TABCREATE alpha {xdivs} {xmin} {xmax}
+
+(Error)
+Error: TABCREATE failed
+
+--------------------------------------------------------------------------------
+call Kc_hip_traub91/X TABFILL alpha 3000 0
+call Kc_hip_traub91/X TABFILL beta  3000 0
+
+(Error)
+Error: call unknown gate 'alpha'
+Error: call unknown gate 'beta'
+
+--------------------------------------------------------------------------------
+addmsg Kc_hip_traub91/tab  Kc_hip_traub91 MULTGATE output 1
+
+(Error)
+Eref::add: Error: Could not find element.srcFinfo tab.gate
+
+================================================================================
+[ K_hip_traub: traubchan.g ]
+================================================================================
+create table K_hip_traub/ya2
+call K_hip_traub/ya2 TABCREATE 100 -0.1 0.1
+setup_table3 K_hip_traub/ya2 table 100 -0.1 0.1 2000 0 1  \
+	{-1.0*(0.085 + EREST_ACT)} -0.010
+
+(Error)
+Warning: setupgate: Moose cannot yet handle tables: K_hip_traub/ya2.table
+
+--------------------------------------------------------------------------------
+addmsg K_hip_traub/ya2 K_hip_traub/y SUM_ALPHA output
+
+(Error)
+Error:sliMessage: Unknown message SUM_ALPHA
+
+================================================================================
