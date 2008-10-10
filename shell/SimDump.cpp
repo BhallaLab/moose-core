@@ -111,7 +111,7 @@ SimDump::SimDump()
 	"input output step_mode stepsize",
 	"input output stepmode stepsize" ) );
 
-	sid.push_back( new SimDumpInfo( "group", "Neutral", "", "" ) );
+	sid.push_back( new SimDumpInfo( "group", "KinCompt", "", "" ) );
 	sid.push_back( new SimDumpInfo( "xgraph", "Neutral", "", "" ) );
 	sid.push_back( new SimDumpInfo( "xplot", "Table", "", "" ) );
 

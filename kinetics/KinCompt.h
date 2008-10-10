@@ -35,7 +35,8 @@ class KinCompt
 		static void setPerimeter( const Conn* c, double value );
 		static double getSize( Eref e );
 		static void setSize( const Conn* c, double value );
-		void innerSetSize( Eref e, double value );
+		static void setSizeWithoutRescale( const Conn* c, double value );
+		void innerSetSize( Eref e, double value, bool ignoreRescale = 0 );
 		static unsigned int getNumDimensions( Eref e );
 		static void setNumDimensions( const Conn* c, unsigned int value );
 
