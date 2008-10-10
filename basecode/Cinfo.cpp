@@ -10,6 +10,7 @@
 #include <fstream>
 #include "moose.h"
 #include "ThisFinfo.h"
+#include "../shell/Shell.h"
 #ifdef GENERATE_WRAPPERS
 #include "filecheck.h"
 #endif
@@ -459,16 +460,21 @@ Element* Cinfo::createArray( Id id, const std::string& name,
  * Connect up new element to the clock ticks that will control its
  * runtime operations.
  */
-bool Cinfo::schedule( Element* e, unsigned int conTainerOption ) const
+bool Cinfo::schedule( Element* e, unsigned int connTainerOption ) const
 {
 	if ( scheduling_.size() == 0 ) 
 		return 1;
-	const Element* library = Id( "/library" )();
-	const Element* proto = Id( "/proto" )();
-	static const Cinfo* tickCinfo = find( "Tick" );
+
+	string tickClass = "Tick";
+	if ( Shell::numNodes() > 1 )
+		tickClass = "ParTick";
+	const Cinfo* tickCinfo = find( tickClass );
+	const Finfo* procFinfo = tickCinfo->findFinfo( "process" );
 	assert( tickCinfo != 0 ); // Not sure about execution order here.
-	static const Finfo* procFinfo = tickCinfo->findFinfo( "process" );
 	assert( procFinfo != 0 );
+
+	const Element* library = Id::localId( "/library" )();
+	const Element* proto = Id::localId( "/proto" )();
 
 	// Don't bother to schedule objects sitting on /library or /proto
 	if ( e->isDescendant( library ) || e->isDescendant( proto ) )
@@ -478,18 +484,19 @@ bool Cinfo::schedule( Element* e, unsigned int conTainerOption ) const
 	for ( i = scheduling_.begin(); i != scheduling_.end(); i++ ) {
 		char line[20];
 		sprintf( line, "/sched/cj/t%d", i->tick * 2 + i->stage );
-		Id tick( line );
+		Id tick = Id::localId( line );
 		if ( !tick.good() ) { // Make the clock tick
-			Id cjId( "/sched/cj" );
+			Id cjId = Id::localId( "/sched/cj" );
 			assert( cjId.good() );
 			sprintf( line, "t%d", i->tick * 2 + i->stage );
-			Element* t = Neutral::create( "Tick", line, cjId, Id::scratchId() );
+			Element* t = Neutral::create( tickClass, line, cjId, 
+				Id::scratchId() );
 			assert( t != 0 );
 			tick = t->id();
 		}
 		assert( tick.good() );
 		tick.eref().add( procFinfo->msg(), e, i->finfo->msg(),
-			conTainerOption );
+			connTainerOption );
 		// procFinfo->add( tick(), e, i->finfo );
 	}
 	
@@ -523,6 +530,7 @@ Slot Cinfo::getSlot( const string& name ) const
 //		if ( (*i)->name() == name )
 //			return (*i)->getSlotIndex();
 	}
+	cout << "Warning: Failed to find slot: " << name << endl;
 	return ret;
 }
 

@@ -8,6 +8,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include "moose.h"
+/*
 #include "header.h"
 #include <iostream>
 #include <map>
@@ -18,11 +20,11 @@
 #include "SetConn.h"
 #include "ProcInfo.h"
 #include "DestFinfo.h"
-#include "DerivedFtype.h"
 #include "SharedFtype.h"
 #include "LookupFinfo.h"
 #include "SimpleConn.h"
 // #include "LookupFtype.h"
+// */
 
 static DestFinfo trigFinfo( "trig", Ftype0::global(), &dummyFunc );
 

@@ -19,7 +19,7 @@ OBJ = \
 	nonblock.o \
 	init.o \
 	mpiSetup.o \
-	MMPI.o
+	MuMPI.o
 
 HEADERS = \
 	../basecode/header.h \
@@ -30,11 +30,10 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-
-#MyClassWrapper.o: MyClassWrapper.h
+MuMPI.o:	MuMPI.h
 
 ifneq (,$(findstring DUSE_MPI,$(CFLAGS)))
-    CXX = mpicxx
+    CXX = mpicxx -Wno-long-long
 else
     CXX = g++
 endif

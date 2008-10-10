@@ -84,58 +84,24 @@ ReadCell::ReadCell( const vector< double >& globalParms )
 			chanProtos_.push_back( ( *i )() );
 }
 
+// Lots of stuff here moved to shell, but maybe it should be a utility.
+Element* ReadCell::start( const string& cellPath )
+{
+	cout << "In empty func ReadCell::start( " << cellPath << " )\n";
+	return 0;
+}
+
+
 /**
  * The readcell function implements the old GENESIS cellreader
  * functionality. Although it is really a parser operation, I
- * put it here in biophysics because the cell format is indpendent
+ * put it here in Shell because the cell format is independent
  * of parser and is likely to remain a legacy for a while.
  */
-
-Element* ReadCell::start( const string& cellpath )
+void ReadCell::read( const string& filename, 
+	const string& cellname, Id pa, Id cellId )
 {
-	// Warning: here is a parser dependence in the separator.
-	Id cellId( cellpath, "/" );
-	// There should not be an existing object of this name.
-	// In the old GENESIS it deleted it. Here we will complain
-	
-	if ( !cellId.bad() ) {
-		cout << "Warning: cell '" << cellpath << "' already exists.\n";
-		return 0;
-	}
 
-	string cellname = "cell";
-
-	string::size_type pos = cellpath.find_last_of( "/" );
-	Element* cellpa;
-	if ( pos == string::npos ) {
-		cellpa = Element::root(); // actually should be cwe
-		cellname = cellpath;
-	} else if ( pos == 0 ) {
-		cellpa = Element::root();
-		cellname = cellpath.substr( 1 );
-	} else {
-		//cout << cellpath.substr( 0, pos ) << endl;
-		cellId = Id( cellpath.substr( 0, pos  ), "/" );
-		if ( cellId.bad() ) {
-			cout << "Warning: cell path '" << cellpath <<
-					"' not found.\n";
-			return 0;
-		}
-		cellpa = cellId();
-		cellname = cellpath.substr( pos + 1 );
-	}
-	
-	if ( graftFlag_ ) {
-		return Neutral::create( "Compartment",
-			cellname, cellpa->id(), Id::scratchId() );
-	} else {
-		return Neutral::create( "Cell",
-			cellname, cellpa->id(), Id::scratchId() );
-	}
-}
-
-void ReadCell::read( const string& filename, const string& cellpath )
-{
 	PathUtility pathUtil(Property::getProperty(Property::SIMPATH));
 
 	ifstream fin( filename.c_str() );
@@ -145,11 +111,24 @@ void ReadCell::read( const string& filename, const string& cellpath )
 		fin.open( path.c_str());
 	}
 
-	cell_ = start( cellpath );
-	if ( !cell_ )
+	if ( graftFlag_ ) {
+		cell_ = Neutral::create( "Compartment", cellname, pa, cellId );
+	} else {
+		cell_ = Neutral::create( "Cell", cellname, pa, cellId );
+	}
+	if ( !cell_ ) {
+		cout << "ReadCell::read: Error: unable to create cell " <<
+			cellname << " on " << pa << "." << pa.node() << endl;
 		return;
+	}
+
 	currCell_ = cell_;
 
+	innerRead( fin );
+}
+
+void ReadCell::innerRead( ifstream& fin )
+{
 	string line;
 	unsigned int lineNum = 0;
 	string::size_type pos;
@@ -192,7 +171,7 @@ void ReadCell::read( const string& filename, const string& cellpath )
 		}
 	}
 	
-	cout << filename << " read: " <<
+	cout << " innerRead: " <<
 			numCompartments_ << " compartments, " << 
 			numChannels_ << " channels, " << 
 			numOthers_ << " others\n";
@@ -288,7 +267,9 @@ Element* ReadCell::buildCompartment(
 	} else if ( parent == "none" || parent == "nil" ) {
 			pa = Element::root();
 	} else {
-		Id paId( currCell_->id().path() + "/" + parent );
+		string paPath = currCell_->id().path() + "/" + parent;
+		// Id paId = Id::localId( currCell_->id().path() + "/" + parent );
+		Id paId = Id::localId( paPath );
 		if ( paId.bad() ) {
 			cout << "Error: ReadCell: could not find parent compt '" <<
 					parent << "' for child '" << name << "'\n";
@@ -303,9 +284,24 @@ Element* ReadCell::buildCompartment(
 				currCell_, "lookupChild", childId, name );
 	assert( ret );
 	if ( !childId.bad() ) {
-		cout << "Error: ReadCell: duplicate child on parent compt '" <<
-				parent << "' for child '" << name << "'\n";
-		return 0;
+		if ( name[ name.length() - 1 ] == ']' ) {
+			string::size_type pos = name.rfind( '[' );
+			if ( pos == string::npos ) {
+				cout << "Error: ReadCell: bad child name:" << name << endl;
+				return 0;
+			}
+			unsigned int index = 
+				atoi( name.substr( pos + 1, name.length() - pos ).c_str() );
+			if ( childId.index() == index ) {
+				cout << "Error: ReadCell: duplicate child on parent compt '" <<
+						parent << "' for child '" << name << "'\n";
+				return 0;
+			}
+		} else {
+			cout << "Error: ReadCell: duplicate child on parent compt '" <<
+					parent << "' for child '" << name << "'\n";
+			return 0;
+		}
 	}
 
 	Element* compt;

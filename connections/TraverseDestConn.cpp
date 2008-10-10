@@ -16,17 +16,14 @@
 //  TraverseDestConn
 //////////////////////////////////////////////////////////////////////
 
-TraverseDestConn::TraverseDestConn( const vector< ConnTainer* >* ct,
-	unsigned int eIndex )
-	: ct_( ct ), 
-	c_( 0 ), 
-//	cti_( 0 ), 
-	eIndex_( eIndex )
+TraverseDestConn::TraverseDestConn(
+	const vector< ConnTainer* >* ct, Eref e )
+	: Conn( 0 ), ct_( ct ), c_( 0 ), cti_( 0 ), e_( e )
 {
 	assert( ct_ != 0 );
 	// Advance till we get to a 'good' conn, or to the end.
 	for ( cti_ = ct_->begin(); cti_ != ct_->end(); cti_++ ) {
-		c_ = ( *cti_ )->conn( eIndex, 1 ); 
+		c_ = ( *cti_ )->conn( e, 0 ); 
 		for ( ; c_->good(); c_->increment() )
 			return;
 	}
@@ -62,7 +59,7 @@ void TraverseDestConn::increment()
 	c_ = 0;
 	cti_++;
 	for ( ; cti_ != ct_->end(); cti_++ ) {
-		c_ = ( *cti_ )->conn( eIndex_, 1 ); 
+		c_ = ( *cti_ )->conn( e_, 0 ); 
 		for ( ; c_->good(); c_->increment() )
 				return;
 	}
@@ -91,7 +88,7 @@ void TraverseDestConn::nextElement()
 	c_ = 0;
 	cti_++;
 	for ( ; cti_ != ct_->end(); cti_++ ) {
-		c_ = ( *cti_ )->conn( eIndex_, 1 ); 
+		c_ = ( *cti_ )->conn( e_, 0 ); 
 		for ( ; c_->good(); c_->increment() )
 				return;
 	}
@@ -114,9 +111,9 @@ bool TraverseDestConn::good() const
 }
 
 // Doesn't really do anything.
-const Conn* TraverseDestConn::flip() const
+const Conn* TraverseDestConn::flip( unsigned int funcIndex ) const
 {
-	return new TraverseDestConn( ct_, eIndex_ );
+	return new TraverseDestConn( ct_, e_ );
 }
 
 const ConnTainer* TraverseDestConn::connTainer() const

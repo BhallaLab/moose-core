@@ -66,4 +66,13 @@ int wildcardFind(const string& n, vector<Id>& ret);
 int allChildren( Id start, const string& insideBrace, unsigned int index,
 	vector< Id >& ret );
 
+/**
+ * Not for general use, here because it is used for parallel wildcards.
+ * Extracts wildcard info for a single level,
+ * handling all issues of path parsing and name matching,
+ * starting from 'start'. Only goes recursive if it encounters a ##
+ * (doublehash is used for matches for all descendants).
+ * Returns number of matches.
+int singleLevelWildcard( Id start, const string& path, vector< Id >& ret );
+ */
 #endif // _WILDCARD_H

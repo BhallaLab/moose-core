@@ -92,6 +92,10 @@
 #include "moose.h"
 #include "../element/Neutral.h"
 #include "ClockJob.h"
+#include "../shell/Shell.h"
+
+const int ClockJob::emptyCallback = 0;
+const int ClockJob::doReschedCallback = 1;
 
 const Cinfo* initClockJobCinfo()
 {
@@ -117,10 +121,19 @@ const Cinfo* initClockJobCinfo()
 		// from the following tick.
 		new DestFinfo( "recvNextTime", Ftype1< double >::global(), 
 			RFCAST( &ClockJob::receiveNextTime ) ),
-		// The third one is for propagating resched forward.
+		// propagating resched forward.
 		new SrcFinfo( "resched", Ftype0::global() ),
-		// The fourth one is for propagating reinit forward.
+		// propagating reinit forward.
 		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
+		// invoke clean termination with a callback flag
+		new SrcFinfo( "stopSrc", Ftype1< int >::global() ),
+		// callback from termination
+		new DestFinfo( "stopCallback", Ftype1< int >::global(),
+			RFCAST( &ClockJob::handleStopCallback ) ),
+		new SrcFinfo( "checkRunning", Ftype0::global() ),
+		// callback from termination
+		new DestFinfo( "runningCallback", Ftype1< bool >::global(),
+			RFCAST( &ClockJob::handleRunningCallback ) ),
 	};
 
 	static Finfo* clockFinfos[] =
@@ -207,7 +220,25 @@ static const Slot reschedSlot =
 	initClockJobCinfo()->getSlot( "tick.resched" );
 static const Slot reinitSlot = 
 	initClockJobCinfo()->getSlot( "tick.reinit" );
+static const Slot stopSlot = 
+	initClockJobCinfo()->getSlot( "tick.stopSrc" );
+static const Slot checkRunningSlot = 
+	initClockJobCinfo()->getSlot( "tick.checkRunning" );
 
+///////////////////////////////////////////////////
+// Constructor
+///////////////////////////////////////////////////
+ClockJob::ClockJob()
+	: runTime_( 0.0 ), 
+	  currentTime_( 0.0 ), 
+	  nextTime_( 0.0 ),
+	  nSteps_( 0 ), 
+	  currentStep_( 0 ), 
+	  dt_( 1.0 ), 
+	  isRunning_( 0 ),
+	  info_(),
+	  callback_( emptyCallback )
+{;}
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
@@ -268,10 +299,12 @@ void ClockJob::startFunc( const Conn* c, double runtime)
 
 void ClockJob::startFuncLocal( Eref e, double runTime )
 {
-	// cout << "starting run for " << runTime << " sec.\n";
+	// cout << "starting run on " << Shell::myNode() << " for " << runTime << " sec.\n";
 
+	isRunning_ = 1;
 	send2< ProcInfo, double >( e, startSlot, &info_, 
 					info_.currTime_ + runTime );
+	isRunning_ = 0;
 	/*
 	info_.currTime_ = currentTime_;
 	if ( tick_ )
@@ -279,6 +312,10 @@ void ClockJob::startFuncLocal( Eref e, double runTime )
 			processSrc_ );
 	currentTime_ = info_.currTime_;
 	*/
+	// Finally we are out of all the loops. Do the resched if needed.
+	if ( callback_ == doReschedCallback )
+		reschedFuncLocal( e );
+	callback_ = emptyCallback;
 }
 
 void ClockJob::stepFunc( const Conn* c, int nsteps )
@@ -315,8 +352,24 @@ void ClockJob::reinitFuncLocal( Eref e )
  */
 void ClockJob::reschedFunc( const Conn* c )
 {
-	static_cast< ClockJob* >( c->data() )->reschedFuncLocal(
-					c->target() );
+	ClockJob* cj = static_cast< ClockJob* >( c->data() );
+	// cj->isRunning_ = 0;
+	// send0( c->target(), checkRunningSlot );
+	if ( cj->isRunning_ ) {
+		send1< int >( c->target(), stopSlot, doReschedCallback );
+	} else {
+		static_cast< ClockJob* >( c->data() )->reschedFuncLocal( 
+			c->target() );
+	}
+
+	/*
+	static const int tickMsg = clockJobCinfo->findFinfo( "tick" )->msg();
+	if ( c->target()->numTargets( tickMsg ) > 0 )
+		send1< int >( c->target(), stopSlot, doReschedCallback );
+	else 
+		static_cast< ClockJob* >( c->data() )->reschedFuncLocal( 
+			c->target() );
+	*/
 }
 
 class TickSeq {
@@ -348,6 +401,10 @@ class TickSeq {
 			int stage_;
 };
 
+/**
+ * Builds up and sorts a list of clock Ticks. Ignores ones which have
+ * no targets.
+ */
 void ClockJob::reschedFuncLocal( Eref er )
 {
 	vector< Id > childList = Neutral::getChildList( er.e );
@@ -370,33 +427,58 @@ void ClockJob::reschedFuncLocal( Eref er )
 	}
 	tickList.resize( 0 );
 
+	unsigned int totTargets = 0;
 	for ( i = childList.begin(); i != childList.end(); i++ ) {
 		const Finfo* procFinfo = (*i)()->findFinfo( "process" );
 		assert ( procFinfo != 0 );
 		unsigned int numTargets = ( *i )()->numTargets( procFinfo->msg() );
-		// unsigned int numTargets = ( *i )()->msg( procFinfo->msg() )->size();
-		if ( numTargets > 0 )
+		// numTargets += ( *i )()->numTargets( "parTick" );
+
+		procFinfo = (*i)()->findFinfo( "outgoingProcess" );
+		if ( procFinfo != 0 )
+			numTargets += ( *i )()->numTargets( procFinfo->msg() );
+		// numTargets += ( *i )()->numTargets( "parTick" );
+
+		// if ( numTargets > 0 )
 			tickList.push_back( TickSeq( *i ) );
+		totTargets += numTargets;
 	}
 
 	if ( tickList.size() == 0 )
 		return;
 
 	sort( tickList.begin(), tickList.end() );
+	// cout << "Sorted ticklist with " << tickList.size() << " ticks and " << totTargets << " targets on node " << Shell::myNode() << endl;
 
 	Eref last = tickList.front().element();
 	bool ret = er.add( "tick", last, "prev" );
 	assert( ret );
 	ret = er.add( "startSrc", last, "start" );
 	assert( ret );
+	// cout << "Ticklist: " << last->name() << "	";
 	for ( j = tickList.begin() + 1; j != tickList.end(); j++ ) {
 		bool ret = last.add( "next", j->element(), "prev" );
 		assert( ret );
 			// buildMessages( last, j->element() );
 		last = j->element();
+		// cout << last->name() << "	";
 	}
+	// cout << endl << flush;
 	send0( er, reschedSlot );
 }
+
+void ClockJob::handleStopCallback( const Conn* c, int flag )
+{
+	ClockJob* cj = static_cast< ClockJob* >( c->data() );
+	cout << "Handling stop callback = " << flag << " on node " << Shell::myNode() << " at time = " << cj->info_.currTime_ << endl << flush;
+	cj->callback_ = flag;
+}
+
+void ClockJob::handleRunningCallback( const Conn* c, bool flag )
+{
+	static_cast< ClockJob* >( c->data() )->isRunning_ = flag;
+}
+
 
 /**
  * ClearMessages removes the next/prev messages from each Tick.

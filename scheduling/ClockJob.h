@@ -13,10 +13,7 @@
 class ClockJob
 {
 	public:
-		ClockJob()
-			: runTime_( 0.0 ), currentTime_( 0.0 ), nextTime_( 0.0 ),
-			nSteps_( 0 ), currentStep_( 0 ), dt_( 1.0 ), info_()
-		{;}
+		ClockJob();
 
 		//////////////////////////////////////////////////////////
 		//  Field assignment functions
@@ -35,6 +32,8 @@ class ClockJob
 		static void startFunc( const Conn* c, double runTime );
 		void startFuncLocal( Eref e, double runTime );
 		static void stepFunc( const Conn* c, int nsteps );
+		static void handleStopCallback( const Conn* c, int flag );
+		static void handleRunningCallback( const Conn* c, bool isRunning );
 		static void reinitFunc( const Conn* c );
 		void reinitFuncLocal( Eref e );
 		static void reschedFunc( const Conn* c );
@@ -47,6 +46,11 @@ class ClockJob
 		//////////////////////////////////////////////////////////
 		void clearMessages( Eref e );
 		// void buildMessages( Element* last, Element* e );
+		//////////////////////////////////////////////////////////
+		//  static Globals
+		//////////////////////////////////////////////////////////
+		static const int emptyCallback;
+		static const int doReschedCallback;
 
 	private:
 		double runTime_;
@@ -55,7 +59,9 @@ class ClockJob
 		int nSteps_;
 		int currentStep_;
 		double dt_;
+		bool isRunning_;
 		ProcInfoBase info_;
+		int callback_;
 };
 
 #endif // _CLOCKJOB_H

@@ -134,28 +134,13 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			 * target Conn. It returns the data pointer set to the
 			 * next field.
 			 */
-			/*
-			static const void* incomingFunc(
-				const Conn* c, const void* data, RecvFunc rf )
-			{
-				T1 v1;
-				T2 v2;
-				data = unserialize< T1 >( v1, data );
-				data = unserialize< T2 >( v2, data );
-				( reinterpret_cast< 
-					void (*)( const Conn* c, T1, T2 ) 
-				> ( rf ) )( c, v1, v2 );
-				return data;
-			}
-			*/
-
 			static void proxyFunc(
 				const Conn* c, const void* data, Slot slot )
 			{
 				T1 v1;
 				T2 v2;
-				data = unserialize< T1 >( v1, data );
-				data = unserialize< T2 >( v2, data );
+				data = Serializer< T1 >::unserialize( v1, data );
+				data = Serializer< T2 >::unserialize( v2, data );
 				send2< T1, T2 >( c->target(), slot , v1, v2 );
 			}
 
@@ -165,11 +150,11 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			 * every clock step, so that the sequence is fixed.
 			 */
 			static void syncFunc( const Conn* c, T1 v1, T2 v2 ) {
-				unsigned int size1 = serialSize< T1 >( v1 );
-				unsigned int size2 = serialSize< T2 >( v2 );
+				unsigned int size1 = Serializer< T1 >::serialSize( v1 );
+				unsigned int size2 = Serializer< T2 >::serialSize( v2 );
 				void* data = getParBuf( c, size1 + size2 ); 
-				data = serialize< T1 >( data, v1 );
-				serialize< T2 >( data, v2 );
+				data = Serializer< T1 >::serialize( data, v1 );
+				Serializer< T2 >::serialize( data, v2 );
 			}
 
 			/**
@@ -179,11 +164,12 @@ template < class T1, class T2 > class Ftype2: public Ftype
 			 * source
 			 */
 			static void asyncFunc( const Conn* c, T1 v1, T2 v2 ) {
-				unsigned int size1 = serialSize< T1 >( v1 );
-				unsigned int size2 = serialSize< T2 >( v2 );
+				unsigned int size1 = Serializer< T1 >::serialSize( v1 );
+				unsigned int size2 = Serializer< T2 >::serialSize( v2 );
+				// unsigned int size2 = serialSize< T2 >( v2 );
 				void* data = getAsyncParBuf( c, size1 + size2 ); 
-				data = serialize< T1 >( data, v1 );
-				serialize< T2 >( data, v2 );
+				data = Serializer< T1 >::serialize( data, v1 );
+				Serializer< T2 >::serialize( data, v2 );
 			}
 
 			

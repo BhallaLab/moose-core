@@ -111,6 +111,27 @@ class SharedFinfo: public Finfo
 				return fv_->id();
 			}
 
+			/// Looks at the ftype. Assumes that this is acting as src
+			unsigned int syncFuncId() const {
+				return ftype()->syncFuncId();
+			}
+
+			/// Looks at the ftype. Assumes that this is acting as src
+			unsigned int asyncFuncId() const {
+				return ftype()->asyncFuncId();
+			}
+
+			/**
+			 * There is a bit of subtlety here. Although SharedFinfos
+			 * can be src, or dest, or even symmetric, the proxyFuncs
+			 * refer only to the conversion of received PostMaster data
+			 * into function calls into the RecvFuncs on the SharedFinfo.
+			 * So the only sub-Finfos that matter are the Dest ones.
+			 */
+			unsigned int proxyFuncId() const {
+				return ftype()->proxyFuncId();
+			}
+
 			bool isDestOnly() const;
 
 		private:
