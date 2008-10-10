@@ -533,6 +533,7 @@ void Compartment::innerReinitFunc(  Eref e, ProcInfo p )
 
 void Compartment::reinitFunc( const Conn* c, ProcInfo p )
 {
+	// cout << "Compt reinit: " << c->target().name() << endl << flush;
 	static_cast< Compartment* >( c->data() )->
 		innerReinitFunc( c->target(), p );
 }

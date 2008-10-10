@@ -26,7 +26,10 @@ class ReadCell
 	public:
 		ReadCell( const vector< double >& globalParms );
 		Element* start( const string& cellpath );
-		void read( const string& filename, const string& cellpath );
+		// void read( const string& filename, const string& cellpath );
+		void read( const string& filename, 
+			const string& cellname, Id pa, Id cellId );
+		void innerRead( ifstream& fin );
 		void readData( const string& line, unsigned int lineNum );
 		void readScript( const string& line, unsigned int lineNum );
 		Element*  buildCompartment( 

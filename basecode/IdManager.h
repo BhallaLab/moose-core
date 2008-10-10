@@ -29,7 +29,7 @@ class NodeLoad
 /**
  * Handy structure to sit in the data field of the wrapper element
  * used to convey info about off node objects.
- */
+ * Deprecated.
 class OffNodeInfo
 {
 	public:
@@ -39,6 +39,45 @@ class OffNodeInfo
 
 		Element* post;
 		Id id;
+};
+ */
+
+/**
+ * Wrapper class for element and node, used in ElementList.
+ */
+class Enode
+{
+	public:
+		Enode()
+			: e_( 0 ), node_( 0 )
+		{;}
+
+		Enode( Element* e, unsigned int node )
+			: e_( e ), node_( node )
+		{;}
+
+		Element* e() const {
+			return e_;
+		}
+
+		unsigned int node() const {
+			return node_;
+		}
+
+		void setGlobal() {
+			node_ = Id::GlobalNode;
+		}
+
+		void setNode( unsigned int node ) {
+			node_ = node;
+		}
+
+		void setElement( Element* e ) {
+			e_ = e;
+		}
+	private:
+		Element* e_;
+		unsigned int node_;
 };
 
 /**
@@ -52,10 +91,7 @@ class IdManager
 	public:
 		IdManager();
 
-		void setNodes( unsigned int myNode, unsigned int numNodes,
-			vector< Element* >& post );
-
-                void setPostMasters( std::vector< Element* >& post );
+		void setNodes( unsigned int myNode, unsigned int numNodes );
 
 		//////////////////////////////////////////////////////////////////
 		// Id creation
@@ -64,7 +100,13 @@ class IdManager
 		 * Allocates a new scratch id on the current node and returns it.
 		 */
 		unsigned int scratchId();
+		unsigned int myNode();
+		unsigned int numNodes();
 
+		/**
+		 * Returns the upcoming scratch index. No allocation is done.
+		 */
+		unsigned int scratchIndex() const;
 
 		/**
 		 * Generates an id for a child object, using parent id
@@ -88,6 +130,13 @@ class IdManager
 		* scratchId and childId ops.
  		*/
 		unsigned int makeIdOnNode( unsigned int childNode );
+
+		/**
+		 * Moves a set of scratchIds starting at last, to regular Ids
+		 * starting at base, on node 'node'
+		 */
+		bool redefineScratchIds( unsigned int last, 
+			unsigned int base, unsigned int node );
 		
 		//////////////////////////////////////////////////////////////////
 		// Id info
@@ -120,6 +169,21 @@ class IdManager
 		 * Checks which node specified element is on.
 		 */
 		unsigned int findNode( unsigned int index ) const;
+
+		/**
+		 * True if object is a global one
+		 */
+		bool isGlobal( unsigned int index ) const;
+
+		/**
+		 * Turns object into a global.
+		 */
+		void setGlobal( unsigned int index );
+
+		/**
+		 * Assigns node # to an id. Used in setting up proxies.
+		 */
+		void setNode( unsigned int index, unsigned int node );
 		
 		/**
 		 * Returns the most recently created id on current node
@@ -137,7 +201,6 @@ class IdManager
 		 */
 		bool isScratch( unsigned int index ) const;
 
-
 		/**
 		 * Returns local node
 		 */
@@ -153,9 +216,10 @@ class IdManager
 
 		/**
 		 * These keep track of size of cluster
-		 */
+		 * Deprecated. Now in shell.
 		unsigned int myNode_;
 		unsigned int numNodes_;
+		 */
 
 		/**
 		 * This specifies the load at which the system looks for another
@@ -167,9 +231,18 @@ class IdManager
 		 * Keep track of assigned load on each node
 		 * This is the job only of the master node.
 		 */
-                std::vector< NodeLoad > nodeLoad;
-                std::vector< Element* > elementList_;
-                std::vector< Element* > post_;
+		std::vector< NodeLoad > nodeLoad;
+
+		/**
+		 * Look up element pointers and element node# based on Id.
+		 * This could in principle
+		 * be folded into a union, because any
+		 * off-node element doesn't have a local pointer. For now do
+		 * it the simple unoptimized way.
+		 */
+		std::vector< Enode > elementList_;
+
+		//std::vector< Element* > post_;
 
 		/**
 		 * This keeps track of the # of scratch ids. Only on slave nodes.

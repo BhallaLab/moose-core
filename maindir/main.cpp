@@ -24,16 +24,21 @@
 #include <element/Neutral.h>
 #include <basecode/IdManager.h>
 #include <utility/utility.h>
+#include "shell/Shell.h"
 
 #ifdef USE_READLINE
 #include <readline/readline.h>
 #include <readline/history.h>
 #endif //USE_READLINE
 
-extern int mooseInit();
-extern void initMPI( int argc, char** argv); // Defined in mpiSetup.cpp
-extern void terminateMPI( unsigned int mynode );
-extern void pollPostmaster(); 
+extern void initMoose();
+extern void initSched();
+
+// Defined in mpiSetup.cpp
+extern unsigned int initMPI( int argc, char** argv );
+extern void initParSched();
+extern void terminateMPI( unsigned int myNode );
+extern void pollPostmaster();  // Defined in mpiSetup.cpp
 extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 
 #ifdef DO_UNIT_TESTS
@@ -50,9 +55,8 @@ extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 	extern void testHSolve();
 	extern void testKinetics();
 //	extern void testAverage();
-#ifdef USE_MPI
+	extern void testParMsgOnSingleNode();
 	extern void testPostMaster();
-#endif
 #endif
 
 #ifdef USE_GENESIS_PARSER
@@ -64,22 +68,28 @@ extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 
 int main(int argc, char** argv)
 {
-	unsigned int mynode = 0;
-        // TODO : check the repurcussions of MPI command line
-        ArgParser::parseArguments(argc, argv);
+	// TODO : check the repurcussions of MPI command line
+	ArgParser::parseArguments(argc, argv);
+
+	Property::initialize(ArgParser::getConfigFile(),Property::PROP_FORMAT);
+	PathUtility simpathHandler(ArgParser::getSimPath());
+	simpathHandler.addPath(Property::getProperty(Property::SIMPATH)); // merge the SIMPATH from command line and property file
+	Property::setProperty(Property::SIMPATH, simpathHandler.getAllPaths()); // put the updated path list in Property
+	cout << "SIMPATH = " << Property::getProperty(Property::SIMPATH) << endl;
         
-        Property::initialize(ArgParser::getConfigFile(),Property::PROP_FORMAT);
-        PathUtility simpathHandler(ArgParser::getSimPath());
-        simpathHandler.addPath(Property::getProperty(Property::SIMPATH)); // merge the SIMPATH from command line and property file
-        Property::setProperty(Property::SIMPATH, simpathHandler.getAllPaths()); // put the updated path list in Property
-        cout << "SIMPATH = " << Property::getProperty(Property::SIMPATH) << endl;
-        
-        mooseInit();
+	///////////////////////////////////////////////////////////////////
+	//	Initialization functions. Must be in this order.
+	///////////////////////////////////////////////////////////////////
+	unsigned int myNode = initMPI( argc, argv );
+	initMoose();
+	initSched();
+	initParSched();
         
 #ifdef DO_UNIT_TESTS
-	// if ( mynode == 0 )
-	if ( 1 )
+	if ( myNode == 0 )
 	{
+		/*
+		*/
 		testBasecode();
 		testNeutral();
 		testSparseMatrix();
@@ -93,31 +103,15 @@ int main(int argc, char** argv)
 		testHSolve();
 		testKinetics();
 //		testAverage();
+		testParMsgOnSingleNode();
 	}
+	// This is a special unit test: it MUST run on all nodes.
+	testPostMaster(); // This is a dummy if no postMaster exists.
 #endif
 
-#ifdef CRL_MPI
-	int iMyRank;
-	int iProvidedThreadSupport;
-	int iRequiredThreadSupport = MPI_THREAD_SINGLE;
-
-	MPI_Init_thread(&argc, &argv, iRequiredThreadSupport, &iProvidedThreadSupport);
-	if(iProvidedThreadSupport != iRequiredThreadSupport)
-	{
-		cout<<endl<<"Error: Expected thread support not provided"<<endl<<flush;
-		MPI_Finalize();
-		exit(1);
-	}
-	MPI_Comm_rank(MPI_COMM_WORLD, &iMyRank);
-#endif
-
-	///////////////////////////////////////////////////////////////////
-	//	Here we connect up the postmasters to the shell and the ParTick.
-	///////////////////////////////////////////////////////////////////
-	initMPI( argc, argv );
 
 #ifdef USE_GENESIS_PARSER
-	if ( mynode == 0 ) {
+	if ( myNode == 0 ) {
 		string line = "";
                 vector<string> scriptArgs = ArgParser::getScriptArgs();
                 
@@ -139,7 +133,9 @@ int main(int argc, char** argv)
                 Id t0("/sched/cj/t0");
                 Id t1("/sched/cj/t1");
                 
-		setupDefaultSchedule( t0(), t1(), cj() );
+		// Doesn't do much. Just sets dt and stage, and cals reset.
+		if ( Shell::numNodes() == 1 )
+			setupDefaultSchedule( t0(), t1(), cj() );
 
 		const Finfo* parseFinfo = sli->findFinfo( "parse" );
 		assert ( parseFinfo != 0 );
@@ -157,7 +153,7 @@ int main(int argc, char** argv)
 		#ifndef USE_READLINE
 		cout << "moose #" << lineNum << " > " << flush;
 		#endif //n USE_READLINE
-		while( 1 ) {
+		while( Shell::running() ) {
 			#ifdef USE_READLINE
 			char cname[10];
 			sprintf(cname, "moose #%d > ", lineNum);
@@ -182,9 +178,13 @@ int main(int argc, char** argv)
 			
 			// gui stuff here maybe.
 		}
+	} else { // All but master node.
+		while( Shell::running() ) {
+			pollPostmaster();
+		}
 	}
 #endif
-	terminateMPI( mynode );
-
-	cout << "done" << endl;
+	terminateMPI( myNode );
+	if ( myNode == 0 )
+		cout << ".. bye\n" << flush;
 }

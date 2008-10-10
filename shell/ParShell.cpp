@@ -8,6 +8,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifdef USE_MPI
+
 #include "moose.h"
 #include "IdManager.h"
 #include "../element/Neutral.h"
@@ -15,345 +17,940 @@
 #include "Shell.h"
 #include "ReadCell.h"
 #include "SimDump.h"
-#include "ParShell.h"
 
-//////////////////////////////////////////////////////////////////////
-// Shell MOOSE object creation stuff
-//////////////////////////////////////////////////////////////////////
+extern void pollPostmaster(); // Defined in maindir/mpiSetup.cpp
 
-const Cinfo* initParShellCinfo()
+static const Slot getSlot = 
+	initShellCinfo()->getSlot( "parallel.getSrc" );
+static const Slot returnGetSlot = 
+	initShellCinfo()->getSlot( "parallel.returnGetSrc" );
+static const Slot setSlot = 
+	initShellCinfo()->getSlot( "parallel.setSrc" );
+static const Slot pCreateSlot =
+	initShellCinfo()->getSlot( "parallel.createSrc" );
+
+static const Slot addLocalSlot = 
+	initShellCinfo()->getSlot( "parallel.addLocalSrc" );
+static const Slot addParallelSrcSlot = 
+	initShellCinfo()->getSlot( "parallel.addParallelSrcSrc" );
+static const Slot addParallelDestSlot = 
+	initShellCinfo()->getSlot( "parallel.addParallelDestSrc" );
+
+static const Slot parMsgErrorSlot = 
+	initShellCinfo()->getSlot( "parallel.parMsgErrorSrc" );
+static const Slot parMsgOkSlot = 
+	initShellCinfo()->getSlot( "parallel.parMsgOkSrc" );
+
+static const Slot parTraversePathSlot = 
+	initShellCinfo()->getSlot( "parallel.parTraversePathSrc" );
+static const Slot returnParTraverseSlot = 
+	initShellCinfo()->getSlot( "parallel.parTraversePathReturnSrc" );
+
+static const Slot requestLeSlot = 
+	initShellCinfo()->getSlot( "parallel.requestLeSrc" );
+static const Slot returnLeSlot = 
+	initShellCinfo()->getSlot( "parallel.returnLeSrc" );
+
+static const Slot requestPathSlot = 
+	initShellCinfo()->getSlot( "parallel.requestPathSrc" );
+static const Slot returnPathSlot = 
+	initShellCinfo()->getSlot( "parallel.returnPathSrc" );
+
+static const Slot createSlot =
+	initShellCinfo()->getSlot( "parser.createSrc" );
+static const Slot parCopySlot = 
+	initShellCinfo()->getSlot( "parallel.copySrc" );
+static const Slot parCopyIntoArraySlot = 
+	initShellCinfo()->getSlot( "parallel.copyIntoArraySrc" );
+static const Slot parUseClockSlot = 
+	initShellCinfo()->getSlot( "parallel.useClockSrc" );
+
+
+
+/**
+ * Manages the setup of a message emanating from this postmaster to 
+ * one or more targets. This is a PostMaster operation because we need to
+ * set up assorted proxies.
+ *
+ * This rather nasty function does a bit both of SrcFinfo::add and
+ * DestFinfo::respondToAdd, since it has to bypass much of the logic of
+ * both.
+ */
+extern bool setupProxyMsg( 
+	unsigned int srcNode, Id proxy, unsigned int srcFuncId, 
+	unsigned int proxySize,
+	Id dest, int destMsg );
+
+
+void printNodeInfo( const Conn* c )
 {
-	/**
-	 * This is a shared message to talk to the GenesisParser and
-	 * perhaps to other parsers like the one for SWIG and Python
-	 */
-	static Finfo* parserShared[] =
-	{
-		// Setting cwe
-		new DestFinfo( "cwe", Ftype1< Id >::global(),
-						RFCAST( &Shell::setCwe ) ),
-		// Getting cwe back: First handle a request
-		new DestFinfo( "trigCwe", Ftype0::global(), 
-						RFCAST( &Shell::trigCwe ) ),
-		// Then send out the cwe info
-		new SrcFinfo( "cweSrc", Ftype1< Id >::global() ),
+	Element* post = c->source().e;
+	assert( post->className() == "proxy" );
+	unsigned int mynode = Shell::myNode();
+	// unsigned int remotenode;
+	// get< unsigned int >( post, "localNode", mynode );
+	// get< unsigned int >( post, "remoteNode", remotenode );
 
-		// doing pushe: pushing current element onto stack and using
-		// argument for new cwe. It sends back the cweSrc.
-		new DestFinfo( "pushe", Ftype1< Id >::global(),
-						RFCAST( &Shell::pushe ) ),
-		// Doing pope: popping element off stack onto cwe. 
-		// It sends back the cweSrc.
-		new DestFinfo( "pope", Ftype0::global(), 
-						RFCAST( &Shell::pope ) ),
-
-		// Getting a list of child ids: First handle a request with
-		// the requested parent elm id.
-		new DestFinfo( "trigLe", Ftype1< Id >::global(), 
-						RFCAST( &Shell::trigLe ) ),
-		// Then send out the vector of child ids.
-		new SrcFinfo( "leSrc", Ftype1< vector< Id > >::global() ),
-		
-		// Creating an object
-		new DestFinfo( "create",
-				Ftype3< string, string, Id >::global(),
-				RFCAST( &Shell::staticCreate ) ),
-		// Creating an array of objects
-		new DestFinfo( "createArray",
-				Ftype4< string, string, Id, vector<double> >::global(),
-				RFCAST( &Shell::staticCreateArray ) ),
-		new DestFinfo( "planarconnect",
-				Ftype3< string, string, double >::global(),
-				RFCAST( &ParShell::planarconnect ) ),
-		new DestFinfo( "planardelay",
-				Ftype2< string, double >::global(),
-				RFCAST( &ParShell::planardelay ) ),
-		new DestFinfo( "planarweight",
-				Ftype2< string, double >::global(),
-				RFCAST( &ParShell::planarweight ) ),
-		new DestFinfo( "getSynCount",
-				Ftype1< Id >::global(),
-				RFCAST( &Shell::getSynCount2 ) ),
-		// The create func returns the id of the created object.
-		new SrcFinfo( "createSrc", Ftype1< Id >::global() ),
-		// Deleting an object
-		new DestFinfo( "delete", Ftype1< Id >::global(), 
-				RFCAST( &Shell::staticDestroy ) ),
-
-		new DestFinfo( "add",
-				Ftype2< Id, string >::global(),
-				RFCAST( &Shell::addField ) ),
-		// Getting a field value as a string: handling request
-		new DestFinfo( "get",
-				Ftype2< Id, string >::global(),
-				RFCAST( &Shell::getField ) ),
-		// Getting a field value as a string: Sending value back.
-		new SrcFinfo( "getSrc", Ftype1< string >::global(), 0 ),
-
-		// Setting a field value as a string: handling request
-		new DestFinfo( "set",
-				Ftype3< Id, string, string >::global(),
-				RFCAST( &Shell::setField ) ),
-
-		// Handle requests for setting values for a clock tick.
-		// args are clockNo, dt, stage
-		new DestFinfo( "setClock",
-				Ftype3< int, double, int >::global(),
-				RFCAST( &Shell::setClock ) ),
-
-		// Handle requests to assign a path to a given clock tick.
-		// args are tick id, path, function
-		new DestFinfo( "useClock",
-				Ftype3< Id, vector< Id >, string >::global(),
-				RFCAST( &Shell::useClock ) ),
-		
-		// Getting a wildcard path of elements: handling request
-		new DestFinfo( // args are path, flag true for breadth-first list
-				"el",
-				Ftype2< string, bool >::global(),
-				RFCAST( &Shell::getWildcardList ) ),
-		// Getting a wildcard path of elements: Sending list back.
-		// This goes through the exiting list for elists set up in le.
-		//TypeFuncPair( Ftype1< vector< Id > >::global(), 0 ),
-
-		////////////////////////////////////////////////////////////
-		// Running simulation set
-		////////////////////////////////////////////////////////////
-		new DestFinfo( "resched",
-				Ftype0::global(), RFCAST( &Shell::resched ) ),
-		new DestFinfo( "reinit",
-				Ftype0::global(), RFCAST( &Shell::reinit ) ),
-		new DestFinfo( "stop",
-				Ftype0::global(), RFCAST( &Shell::stop ) ),
-		new DestFinfo( "step",
-				Ftype1< double >::global(), // Arg is runtime
-				RFCAST( &Shell::step ) ),
-		new DestFinfo( "requestClocks",
-				Ftype0::global(), &Shell::requestClocks ),
-		// Sending back the list of clocks times
-		new SrcFinfo( "returnClocksSrc",
-			Ftype1< vector< double > >::global() ),
-		new DestFinfo( "requestCurrTime",
-				Ftype0::global(), RFCAST( &Shell::requestCurrTime ) ),
-				// Returns it in the default string return value.
-
-		////////////////////////////////////////////////////////////
-		// Message info functions
-		////////////////////////////////////////////////////////////
-		// Handle request for message list:
-		// id elm, string field, bool isIncoming
-		new DestFinfo( "listMessages",
-				Ftype3< Id, string, bool >::global(),
-				RFCAST( &Shell::listMessages ) ),
-		// Return message list and string with remote fields for msgs
-		new SrcFinfo( "listMessagesSrc",
-			Ftype2< vector < Id >, string >::global() ),
-
-		////////////////////////////////////////////////////////////
-		// Object heirarchy manipulation functions
-		////////////////////////////////////////////////////////////
-		new DestFinfo( "copy",
-			Ftype3< Id, Id, string >::global(), RFCAST( &Shell::copy ) ),
-		new DestFinfo( "copyIntoArray",
-			Ftype4< Id, Id, string, vector <double> >::global(), RFCAST( &Shell::copyIntoArray ) ),
-		new DestFinfo( "move",
-			Ftype3< Id, Id, string >::global(), RFCAST( &Shell::move ) ),
-		////////////////////////////////////////////////////////////
-		// Cell reader
-		////////////////////////////////////////////////////////////
-		// Args are: file cellpath globalParms
-		new DestFinfo( "readcell",
-			Ftype3< string, string, vector< double > >::global(), 
-					RFCAST( &Shell::readCell ) ),
-		////////////////////////////////////////////////////////////
-		// Channel setup functions
-		////////////////////////////////////////////////////////////
-		new DestFinfo( "setupAlpha",
-			Ftype2< Id, vector< double > >::global(), 
-					RFCAST( &Shell::setupAlpha ) ),
-		new DestFinfo( "setupTau",
-			Ftype2< Id, vector< double > >::global(), 
-					RFCAST( &Shell::setupTau ) ),
-		new DestFinfo( "tweakAlpha",
-			Ftype1< Id >::global(), RFCAST( &Shell::tweakAlpha ) ),
-		new DestFinfo( "tweakTau",
-			Ftype1< Id >::global(), RFCAST( &Shell::tweakTau ) ),
-		new DestFinfo( "setupGate",
-			Ftype2< Id, vector< double > >::global(), 
-					RFCAST( &Shell::setupGate ) ),
-		////////////////////////////////////////////////////////////
-		// SimDump facility
-		////////////////////////////////////////////////////////////
-		new DestFinfo(	"readDumpFile",
-			Ftype1< string >::global(), // arg is filename
-					RFCAST( &Shell::readDumpFile ) ),
-		new DestFinfo(	"writeDumpFile",
-			// args are filename, path to dump
-			Ftype2< string, string >::global(), 
-					RFCAST( &Shell::writeDumpFile ) ),
-		new DestFinfo(	"simObjDump",
-			// arg is a set of fields for the desired class
-			// The list of fields is a space-delimited list and 
-			// can be extracted using separateString.
-			Ftype1< string >::global(), RFCAST( &Shell::simObjDump ) ),
-		new DestFinfo(	"simUndump",
-					// args is sequence of args for simundump command.
-			Ftype1< string >::global(), RFCAST( &Shell::simUndump ) ),
-		new DestFinfo( "openfile",
-				Ftype2< string, string >::global(),
-				RFCAST( &Shell::openFile ) ),
-		new DestFinfo( "writefile",
-				Ftype2< string, string >::global(),
-				RFCAST( &Shell::writeFile ) ),
-		new DestFinfo( "listfiles",
-				Ftype0::global(),
-				RFCAST( &Shell::listFiles ) ),
-		new DestFinfo( "closefile",
-				Ftype1< string >::global(),
-				RFCAST( &Shell::closeFile ) ),	
-		new DestFinfo( "readfile",
-				Ftype2< string, bool >::global(),
-				RFCAST( &Shell::readFile) ),	
-		////////////////////////////////////////////////////////////
-		// field assignment for a vector of objects
-		////////////////////////////////////////////////////////////
-		// Setting a field value as a string: handling request
-		new DestFinfo( "setVecField",
-				Ftype3< vector< Id >, string, string >::global(),
-				RFCAST( &Shell::setVecField ) ),
-		new DestFinfo( "loadtab",
-				Ftype1< string >::global(),
-				RFCAST( &Shell::loadtab ) ),	
-		new DestFinfo( "tabop",
-				Ftype4< Id, char, double, double >::global(),
-				RFCAST( &Shell::tabop ) ),	
-	};
-
-	/**
-	 * This handles serialized data, typically between nodes. The
-	 * arguments are a single long string. Takes care of low-level
-	 * operations such as message set up or the gory details of copies
-	 * across nodes.
-	 */
-	static Finfo* serialShared[] =
-	{
-		new DestFinfo( "rawAdd", // Addmsg as a raw string.
-			Ftype1< string >::global(),
-			RFCAST( &Shell::rawAddFunc )
-		),
-		new DestFinfo( "rawCopy", // Copy an entire object sent as a string
-			Ftype1< string >::global(),
-			RFCAST( &Shell::rawCopyFunc )
-		),
-		new DestFinfo( "rawTest", // Test function
-			Ftype1< string >::global(),
-			RFCAST( &Shell::rawTestFunc )
-		),
-	};
-
-	static Finfo* masterShared[] = 
-	{
-		new SrcFinfo( "get",
-			// objId, field
-			Ftype2< Id, string >::global() ),
-		new DestFinfo( "recvGet",
-			Ftype1< string >::global(),
-			RFCAST( &Shell::recvGetFunc )
-		),
-		new SrcFinfo( "set",
-			// objId, field, value
-			Ftype3< Id, string, string >::global() ),
-		new SrcFinfo( "add",
-				// srcObjId, srcFiekd, destObjId, destField
-			Ftype4< Id, string, Id, string >::global()
-		),
-		new SrcFinfo( "create", 
-			// type, name, parentId, newObjId.
-			Ftype4< string, string, Id, Id >::global()
-		),
-	};
-
-	static Finfo* slaveShared[] = 
-	{
-		new DestFinfo( "get",
-			// objId, field
-			Ftype2< Id, string >::global(),
-			RFCAST( &Shell::slaveGetField )
-			),
-		new SrcFinfo( "recvGet",
-			Ftype1< string >::global()
-		),
-		new DestFinfo( "set",
-			// objId, field, value
-			Ftype3< Id, string, string >::global(),
-			RFCAST( &Shell::setField )
-		),
-		new DestFinfo( "add",
-				// srcObjId, srcFiekd, destObjId, destField
-			Ftype4< Id, string, Id, string >::global(),
-			RFCAST( &Shell::addFunc )
-		),
-		new DestFinfo( "create", 
-			// type, name, parentId, newObjId.
-			Ftype4< string, string, Id, Id >::global(),
-			RFCAST( &Shell::slaveCreateFunc )
-		),
-	};
-
-	static Finfo* shellFinfos[] =
-	{
-		new ValueFinfo( "cwe", ValueFtype1< Id >::global(),
-				reinterpret_cast< GetFunc >( &Shell::getCwe ),
-				RFCAST( &Shell::setCwe ) ),
-
-		new DestFinfo( "xrawAdd", // Addmsg as a raw string.
-			Ftype1< string >::global(),
-			RFCAST( &Shell::rawAddFunc )
-		),
-		new DestFinfo( "poll", // Infinite loop, meant for slave nodes
-			Ftype0::global(),
-			RFCAST( &Shell::pollFunc )
-		),
-		new SrcFinfo( "pollSrc", 
-			// # of steps. 
-			// This talks to /sched/pj:step to poll the postmasters
-			Ftype1< int >::global()
-		),
-
-		new SharedFinfo( "parser", parserShared, 
-				sizeof( parserShared ) / sizeof( Finfo* ) ), 
-		new SharedFinfo( "serial", serialShared,
-				sizeof( serialShared ) / sizeof( Finfo* ) ), 
-		new SharedFinfo( "master", masterShared,
-				sizeof( masterShared ) / sizeof( Finfo* ) ), 
-		new SharedFinfo( "slave", slaveShared,
-				sizeof( slaveShared ) / sizeof( Finfo* ) ), 
-	};
-
-
-
-	static Cinfo shellCinfo(
-		"ParShell",
-		"Mayuresh Kulkarni, CRL",
-		"Parallel version of Shell object",
-		initNeutralCinfo(),
-		shellFinfos,
-		sizeof( shellFinfos ) / sizeof( Finfo* ),
-		ValueFtype1< ParShell >::global()
-	);
-
-	return &shellCinfo;
+	// cout << "on " << mynode << " from " << remotenode << ":";
+	cout << "on " << mynode << ":";
 }
 
-
-
-static const Cinfo* shellCinfo = initParShellCinfo();
-
-ParShell::ParShell()
+void Shell::parGetField( const Conn* c, Id id, string field, 
+	unsigned int requestId )
 {
+	// printNodeInfo( c );
+	// cout << "in slaveGetFunc on " << id << " with field :" << field << "\n";
+	if ( id.bad() )
+		return;
+	string ret = "";
+	Element* e = id();
+	if ( e == 0 )
+		return;
+
+	const Finfo* f = e->findFinfo( field );
+	if ( f ) {
+		if ( f->strGet( id.eref(), ret ) ) {
+			sendBack2< string, unsigned int >( c, returnGetSlot, ret,
+				requestId );
+			return;
+		}
+	} else {
+		cout << "Shell::parGetField: Failed to find field " << field << 
+			" on object " << id.path() << endl;
+	}	
+	// Have to respond anyway.
+	sendBack2< string, unsigned int >( c, returnGetSlot, ret,
+		requestId );
 }
 
+// was recvGetFunc.
+// Takes the value and stuffs it into the appropriate place on the 
+// offNode data manager. Tells the system that the job is done.
+void Shell::handleReturnGet( const Conn* c,
+	string value, unsigned int requestId )
+{
+	// printNodeInfo( c );
+	// cout << "in recvGetFunc with field value :'" << value << endl << flush;
+	// send off to parser maybe.
+	// Problem if multiple parsers.
+	// Bigger problem that this is asynchronous now.
+	// Maybe it is OK if only one parser.
+	// sendTo1< string >( c.targetElement(), getFieldSlot, 0, value );
+	Shell* sh = static_cast< Shell* >( c->data() );
+	*( getOffNodeValuePtr< string >( sh, requestId ) ) = value;
+	sh->zeroOffNodePending( requestId );
+}
 
+/**
+ * Creates a new object. Must be called on the same node as the
+ * parent object.
+ */
+void Shell::parCreateFunc ( const Conn* c, 
+				string objtype, string objname, 
+				Nid parent, Nid newobj )
+{
+	Shell* s = static_cast< Shell* >( c->data() );
+	assert ( s->myNode_ == parent.node() || parent.isGlobal() );
+	// printNodeInfo( c );
+	// cout << "in slaveCreateFunc :" << objtype << " " << objname << " " << parent << "." << parent.node() << " " << newobj << "." << newobj.node() << "\n";
+
+	// both parent and child are here. Straightforward.
+	bool ret = 1;
+	if ( parent.node() == newobj.node() || // both local or both global
+		( parent == Id() && newobj.node() == s->myNode_ ) )
+	{
+		ret = s->create( objtype, objname, parent, newobj );
+	} else {
+		cout << "Shell::parCreateFunc: Currently cannot put child on different node than parent\n";
+		// send message to create child on remote node. This includes
+		// 	messaging from proxy to child.
+		// set up local messaging to connect to child.
+	}
+
+	if ( ret ) { // Tell the master node it was created happily.
+		// sendTo2< Id, bool >( e, createCheckSlot, c.targetIndex(), newobj, 1 );
+	} else { // Tell master node that the create failed.
+		// sendTo2< Id, bool >( e, createCheckSlot, c.targetIndex(), newobj, 0 );
+	}
+}
+
+/**
+ * Creates a new array object. For now must be called on the same node as 
+ * the parent object.
+ */
+void Shell::parCreateArrayFunc ( const Conn* c, 
+				string objtype, string objname, 
+				pair< Nid, Nid > nids, vector< double > parameter )
+{
+	Shell* s = static_cast< Shell* >( c->data() );
+	Nid parent = nids.first;
+	Nid newobj = nids.second;
+	assert( newobj.node() == myNode_ );
+	assert( parameter.size() == 6 );
+
+	if ( parent == Id() || parent == Id::shellId() ) {
+		parent.setNode( s->myNode_ );
+	}
+
+	assert ( s->myNode_ == parent.node() || parent.isGlobal() );
+	bool ret = 0;
+	// both parent and child are here. Straightforward.
+	if ( parent.node() == newobj.node() ) {
+		int nx = static_cast< int >( parameter[0] );
+		int ny = static_cast< int >( parameter[1] );
+		assert( nx > 0 && ny > 0 );
+		ret = s->createArray( objtype, objname, parent, newobj, nx * ny );
+		Element* child = newobj();
+		ArrayElement* f = static_cast< ArrayElement *>( child );
+		f->setNoOfElements( nx, ny );
+		f->setDistances( parameter[2], parameter[3] );
+		f->setOrigin( parameter[4], parameter[5] );
+		// Should really send back successful creation info here.
+	} else {
+		cout << "Shell::parCreateFunc: Currently cannot put child on different node than parent\n";
+	}
+
+	if ( ret ) { // Tell the master node it was created happily.
+		// sendTo2< Id, bool >( e, createCheckSlot, c.targetIndex(), newobj, 1 );
+	} else { // Tell master node that the create failed.
+		// sendTo2< Id, bool >( e, createCheckSlot, c.targetIndex(), newobj, 0 );
+	}
+}
+
+/**
+ * This is called on the master node. For now we can get by with the
+ * implicit node info
+ */
+bool Shell::addSingleMessage( const Conn* c, Id src, string srcField, 
+	Id dest, string destField )
+{
+	assert( myNode() == 0 );
+	Shell* sh = static_cast< Shell* >( c->data() );
+	unsigned int srcNode = src.node();
+	unsigned int destNode = dest.node();
+	// cout << "in Shell::addSingleMessage, src=" << src << "." << srcNode << ", srcField = " << srcField << ", dest = " << dest << "." << dest.node() << ", destField = " << destField << endl << flush;
+	if ( srcNode == myNode() ) {
+		if ( destNode == myNode()  || destNode == Id::GlobalNode) {
+			return innerAddLocal( src, srcField, dest, destField );
+		} else { // off-node dest.
+			addParallelSrc( c, src, srcField, dest, destField );
+			return 1;
+		}
+	} else if ( srcNode == Id::GlobalNode ) {
+		if ( destNode == myNode()  ) { // local target.
+			return innerAddLocal( src, srcField, dest, destField );
+		} else if ( destNode == Id::GlobalNode) { // global src and tgt
+			// First, tell all other nodes to add msg too.
+			send4< Id, string, Id, string >( 
+				c->target(), addLocalSlot,
+				src, srcField, dest, destField );
+			// Then do msg here.
+			return innerAddLocal( src, srcField, dest, destField );
+		} else { // Go to dest node to do msg from its own instance of src.
+			unsigned int tgtMsg = 
+				( destNode <= myNode() ) ? destNode: destNode - 1;
+			sendTo4< Id, string, Id, string >( 
+				c->target(), addLocalSlot, tgtMsg,
+				src, srcField, dest, destField );
+			return 1;
+		}
+	} else { // Off-node source. Deal with it remotely.
+		unsigned int tgtMsg = 
+			( srcNode <= sh->myNode_ ) ? srcNode: srcNode - 1;
+		if ( destNode != srcNode ) {
+			sendTo4< Nid, string, Nid, string >( 
+				c->target(), addParallelSrcSlot, tgtMsg,
+				src, srcField, dest, destField );
+		} else {
+			// cout << "adding " << src << "." << srcNode << " to " << dest << "." << destNode << " on " << sh->myNode() << endl << flush;
+			sendTo4< Id, string, Id, string >( 
+				c->target(),
+				addLocalSlot, tgtMsg,
+				src, srcField, dest, destField );
+		}
+		return 1;
+	}
+	return 0;
+}
+
+/**
+ * Return the number of entries (the size of the array) of a remote
+ * object.
+ */
+unsigned int Shell::getNumDestEntries( Nid dest )
+{
+	return 1; // Dummy function for now.
+}
+
+/**
+ * This is called from the same node that the src is on, to send a message
+ * to a dest on a remote node. 
+ * Note that an Id does not carry node info within itself. So we use an
+ * Nid for the dest, as we need to retain node info.
+ *
+ * We always need to tell the postmaster to increment the number of
+ * outgoing async msgs. If the msg is bidirectional, we increment both
+ * sync and async. Actually the # of async msgs doesn't matter, it is
+ * that they are nonzero. 
+ * \todo: Later we may need to set up more info to handle traversal.
+ */
+void Shell::addParallelSrc( const Conn* c,
+	Nid src, string srcField, Nid dest, string destField )
+{
+	Shell* sh = static_cast< Shell* >( c->data() );
+	//unsigned int srcNode = sh->myNode_;
+	unsigned int destNode = dest.node();
+	Eref se = src.eref();
+
+	// cout << "in Shell::addParallelSrc on node=" << sh->myNode_ << ", src=" << src << "." << src.node() << ", srcField = " << srcField << ", dest = " << dest << "." << dest.node() << ", destField = " << destField << endl << flush;
+
+#ifdef DO_UNIT_TESTS
+	Eref de = sh->getPostForUnitTests( destNode );
+	if ( de.e == 0 )
+		de = Id::postId( destNode ).eref();
+#else
+	// One of the unit tests puts them on the same node.
+	assert( destNode != srcNode );
+	assert( Id::postId( destNode ).good() );
+	assert( Id::postId( destNode ).eref().e != 0 );
+	Eref de = Id::postId( destNode ).eref();
+#endif
+
+	const Finfo* sf = se->findFinfo( srcField );
+	bool ret = 0;
+	if ( sf->funcId() != 0 ) { 
+		// If the src handles any funcs at all this will be nonzero.
+		// In this case it must be a SharedFinfo
+		// with some info coming back. So we set up a local proxy too.
+		int srcMsg = sf->msg();
+		unsigned int numDestEntries = getNumDestEntries( dest );
+		ret = setupProxyMsg( destNode, 
+			dest, sf->asyncFuncId(), numDestEntries,
+			src, srcMsg );
+		if ( ret )
+			set( de, "incrementNumAsyncIn" );
+	} else {
+		ret = se.add( srcField, de, "async" );
+		// bool ret = add2Post( destNode, se, srcField );
+		// Need srcId to set up remote proxy
+		// Need src Finfo type to do type checking across nodes.
+		// Need destId to connect to target
+		// Need destField to look up data types. Better check types first.
+	}
+	string srcFinfoStr = se->className() + "." + sf->name();
+	if ( ret ) {
+		unsigned int tgtMsg = 
+			( destNode <= sh->myNode_ ) ? destNode : destNode - 1;
+		sendTo5< Nid, unsigned int, string, Nid, string >( 
+			c->target(), addParallelDestSlot, tgtMsg, 
+			src, se->numEntries(), srcFinfoStr, dest, destField );
+			
+		// Set up an entry to check for completion. 
+		sh->parMessagePending_[dest] = src; 
+		// Check somehow that it is an async message.
+		set( de, "incrementNumAsyncOut" );
+	} else {
+		cout << "Error: Shell::addParallelSrc failed to set up msg from\n" <<
+			src.path() << " to " << dest.path() << endl;
+	}
+}
+
+const Finfo* findFinfoOnCinfo( const string& name )
+{
+	string::size_type pos = name.find( "." );
+	if ( pos == string::npos )
+		return 0;
+	const Cinfo* c = Cinfo::find( name.substr( 0, pos ) );
+	if ( c == 0 )
+		return 0;
+	return c->findFinfo( name.substr( pos + 1 ) );
+}
+
+void Shell::addParallelDest( const Conn* c,
+	Nid src, unsigned int srcSize, string srcField, 
+	Nid dest, string destField )
+{ 
+	Shell* sh = static_cast< Shell* >( c->data() );
+	// cout << "in Shell::addParallelDest on node=" << sh->myNode_ << ", src=" << src << "." << src.node() << ", srcField = " << srcField << ", dest = " << dest << "." << dest.node() << ", destField = " << destField << endl << flush;
+
+	const Finfo* srcFinfo = findFinfoOnCinfo( srcField );
+	const Finfo* tgtFinfo;
+	unsigned int asyncFuncId = 0;
+
+	string errMsg = "";
+
+	if ( !srcFinfo )
+		errMsg = "Src Field: '" + srcField + "' not found on remote node";
+
+	if ( !( dest.good() && dest.node() == sh->myNode_ ) ) {
+		errMsg = "Destination object not found on remote node ";
+	} else {
+		tgtFinfo = dest.eref()->findFinfo( destField );
+		if ( tgtFinfo == 0 ) {
+			errMsg = "Dest field: '" + destField + "' not found on remote node";
+		} else {
+			asyncFuncId = tgtFinfo->asyncFuncId();
+			// Actually I should tap into respondToAdd here because it does
+			// all the tests systematically and also handles messages to
+			// fields. Only problem is that it needs the proxy element
+			// to already be made.
+			if ( !tgtFinfo->ftype()->isSameType( srcFinfo->ftype() ) )
+				errMsg = "Type mismatch between srcField '" + srcField + 
+				"' and destField '" + destField + "'";
+		}
+	}
+
+	/*
+	// Check for match of srcFinfo and tgtFinfo
+	bool ret = tgtFinfo->respondToAdd( dest.eref(), src.eref(),
+		srcFinfo->ftype(), srcFinfo->ftype()->asyncFuncId(), 
+		destFid, destMsg, destIndex );
+		*/
+	
+	if ( errMsg != "" ) {
+		cout << "addParallelDest" << errMsg << endl << flush;
+		/*
+		sendBack3< string, Id, Id > ( c, parMsgErrorSlot, 
+			errMsg, src, dest );
+			return;
+			*/
+	}
+
+	unsigned int srcNode = src.node();
+	int tgtMsg = tgtFinfo->msg();
+	bool ret = setupProxyMsg( srcNode, src, asyncFuncId, srcSize,
+		dest, tgtMsg );
+	if ( ret ) {
+#ifdef DO_UNIT_TESTS
+		Eref se = sh->getPostForUnitTests( srcNode );
+		if ( se.e == 0 )
+			se = Id::postId( srcNode ).eref();
+#else
+		// One of the unit tests puts them on the same node.
+		assert( destNode != srcNode );
+		assert( Id::postId( srcNode ).good() );
+		assert( Id::postId( srcNode ).eref().e != 0 );
+		Eref se = Id::postId( srcNode ).eref();
+#endif
+		set( se, "incrementNumAsyncIn" );
+		if ( !tgtFinfo->isDestOnly() ) // Shared msg, handling srcs too.
+			set( se, "incrementNumAsyncOut" );
+	}
+	assert( ret );
+}
+
+#ifdef DO_UNIT_TESTS
+Eref Shell::getPostForUnitTests( unsigned int node ) const
+{
+	return Eref( post_, node );
+}
+#endif
+
+
+/**
+ * Sets off request for children on all remote nodes, starting at 
+ * either root or shellId. Polls till all nodes return. Note that this
+ * must be thread-safe, because during the polling there may be nested
+ * calls.
+ */
+Id Shell::parallelTraversePath( Id start, vector< string >& names )
+{
+	assert( Id::shellId().good() );
+	Shell* sh = static_cast< Shell* >( Id::shellId().eref().data() );
+
+	// returns a thread-safe unique id
+	// for the request, so that we can examine the return values for ones
+	// we are interested in. This rid is an index to a vector of ints
+	// that counts pending returns on this id. When we call for the
+	// rid it sets up the pending returns to numNodes - 1.
+	Nid ret( Id::badId() ); // Must pass in an initialized memory location
+	unsigned int requestId = 
+		openOffNodeValueRequest< Nid > ( sh, &ret, sh->numNodes() - 1 ); 
+
+	// Send request to all nodes.
+	send3< Id, vector< string >, unsigned int >( 
+		Id::shellId().eref(), parTraversePathSlot,
+		start, names, requestId );
+	
+	// Get the value back.
+	Nid* temp = closeOffNodeValueRequest< Nid >( sh, requestId );
+	assert ( &ret == temp );
+	return ret;
+}
+
+void Shell::handleParTraversePathRequest( const Conn* c, 
+	Id start, vector< string > names, unsigned int requestId )
+{
+	assert( start == Id() || start == Id::shellId() );
+	Id ret = localTraversePath( start, names );
+	sendBack2< Nid, unsigned int >( c, returnParTraverseSlot,
+		ret, requestId );
+}
+
+/**
+ * Undefined effects if more than one node has a matching target.
+ */
+void Shell::handleParTraversePathReturn( const Conn* c,
+	Nid found, unsigned int requestId )
+{
+	Shell* sh = static_cast< Shell* >( c->data() );
+	if ( !found.bad() ) { 
+		// Got it!! But we need to hold on till everyone is back.
+		*( getOffNodeValuePtr< Nid >( sh, requestId ) ) = found;
+	}
+	sh->decrementOffNodePending( requestId );
+}
+
+///////////////////////////////////////////////////////////////////////
+// Here we handle 'le' requests.
+///////////////////////////////////////////////////////////////////////
+
+void Shell::handleRequestLe( const Conn* c, 
+	Nid parent, unsigned int requestId )
+{
+	vector< Id > ret;
+	bool flag = get< vector< Id > >( parent.eref(), "childList", ret );
+	assert( flag );
+	vector< Id >::iterator i;
+	vector< Nid > temp;
+	for ( i = ret.begin(); i != ret.end(); i++ )
+		if ( i->node() != Id::GlobalNode && *i != Id::shellId() )
+			temp.push_back( *i );
+
+	sendBack2< vector< Nid >, unsigned int >( c, returnLeSlot,
+		temp, requestId );
+}
+
+/**
+ * Undefined effects if more than one node has a matching target.
+ */
+void Shell::handleReturnLe( const Conn* c,
+	vector< Nid > found, unsigned int requestId )
+{
+	Shell* sh = static_cast< Shell* >( c->data() );
+	if ( found.size() > 0 ) {
+		vector< Nid >* temp = 
+			getOffNodeValuePtr< vector< Nid > >( sh, requestId );
+		temp->insert( temp->end(), found.begin(), found.end() );
+	}
+	sh->decrementOffNodePending( requestId );
+}
+
+///////////////////////////////////////////////////////////////////////
+// Here we handle wildcard building requests.
+// Very similar to Le, and in fact we reuse the return handler.
+///////////////////////////////////////////////////////////////////////
+
+void Shell::handleParWildcardList( const Conn* c, 
+	string path, bool ordered, unsigned int requestId )
+{
+	vector< Id > ret;
+	vector< Nid > temp;
+	localGetWildcardList( c, path, ordered, ret );
+	for ( vector< Id >::iterator i = ret.begin(); i != ret.end(); i++ ) {
+		if ( i->node() != Id::GlobalNode ) {
+			temp.push_back( *i );
+		}
+	}
+
+	// Turns out to be identical return operations as handleReturnLe,
+	// and the requestId
+	// keeps things straight between calling functions.
+	sendBack2< vector< Nid >, unsigned int >( c, returnLeSlot,
+		temp, requestId );
+}
+
+////////////////////////////////////////////////////////////////////
+// Here we put in stuff to deal with eid2path
+////////////////////////////////////////////////////////////////////
+
+string Shell::eid2path( Id eid )
+{
+	if ( !eid.isGlobal() && eid.node() != Shell::myNode() ) {
+		//Shell *sh = static_cast< Shell* >( Id::shellId().eref().data() );
+		// unsigned int tgt = ( eid.node() < Shell::myNode() ) ?  eid.node() : eid.node() - 1;
+		string ret = "";
+		getOffNodeValue< string, Nid >( Id::shellId().eref(),
+			requestPathSlot, eid.node(),
+			&ret, eid );
+		/*
+		unsigned int requestId = 
+			openOffNodeValueRequest< string > ( sh, &ret, 1 ); 
+		// Send request to target node.
+		sendTo2< Nid, unsigned int >( 
+			Id::shellId().eref(), requestPathSlot, tgt, 
+				eid, requestId );
+		// Get the value back.
+		string* temp = closeOffNodeValueRequest< string >( sh, requestId );
+		assert ( &ret == temp );
+		*/
+		return ret;
+	} else {
+		return localEid2Path( eid );
+	}
+}
+
+void Shell::handlePathRequest( const Conn* c, 
+	Nid eid, unsigned int requestId )
+{
+	assert( eid.node() == myNode() );
+	string ret = localEid2Path( eid );
+	sendBack2< string, unsigned int >( c, returnPathSlot,
+		ret, requestId );
+}
+
+void Shell::handlePathReturn( const Conn* c,
+	string ret, unsigned int requestId )
+{
+	Shell* sh = static_cast< Shell* >( c->data() );
+	string* temp = getOffNodeValuePtr< string >( sh, requestId );
+	*temp = ret;
+	sh->zeroOffNodePending( requestId );
+}
+
+/*
+///////////////////////////////////////////////////////////////////////
+// Here we put in a first pass at handling wildcards.
+// Note that this may be redundant given the existing handling of
+// wildcard lists above.
+///////////////////////////////////////////////////////////////////////
+
+void Shell::handleSingleLevelWildcard( const Conn* c, 
+	Nid eid, string path, unsigned int requestId )
+{
+	assert( eid.node() == myNode() );
+	vector< Nid > ret;
+	vector< Id > temp;
+	singleLevelWildcard( start, path, temp );
+	for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
+		ret.push_back( temp );
+	sendBack2< vector< Nid >, unsigned int >( 
+		c, returnSingleLevelWildcardSlot,
+		ret, requestId );
+}
+
+void Shell::handleSingleLevelWildcardReturn( const Conn* c,
+	vector< Nid > ret, unsigned int requestId )
+{
+	Shell* sh = static_cast< Shell* >( c->data() );
+	vector< Nid >* temp = getOffNodeValuePtr< vector< Nid > >( 
+		sh, requestId );
+	*temp = ret;
+	sh->zeroOffNodePending( requestId );
+}
+*/
+/////////////////////////////////////////////////////////////////////////
+// Here we put in multinode versions of the copy operations.
+/////////////////////////////////////////////////////////////////////////
+
+// Static function
+/**
+ * This is the multinode version of copy. 
+ *
+ * It is still a bit skeletal. It doesn't handle any cases of copying
+ * between nodes, including cases where the target is a global. 
+ * On the other hand it is OK with copying globals to globals,
+ * and copying on remote nodes provided src and dest are on the same node.
+ *
+ * Another current limitation is that it does not return the new object
+ * Id in cases where the object creation is off-node.
+ */
+void Shell::copy( const Conn* c, Id src, Id parent, string name )
+{
+	assert( myNode() == 0 );
+	if( src == Id() ) {
+		cout << "Shell::copy( root, " << parent << 
+			") Error, cannot copy the root element\n";
+		
+		return;
+	}
+	Element* e = 0;
+	if ( src.isGlobal() ) {
+		if ( parent == Id() ) { // Do copy on node0
+			e = src()->copy( parent(), name );
+		} else if ( parent.node() == 0 ) { // Local copy
+			e = src()->copy( parent(), name );
+		} else if ( parent.isGlobal() ) { // All-node copy of globals
+			e = src()->copy( parent(), name );
+			// cout << "in Shell::copy, e->id() = " << e->id() << ", node = " << e->id().node() << endl << flush;
+			send4< Nid, Nid, string, Nid >( c->target(), parCopySlot,
+				src, parent, name, e->id() ); 
+				// Ensure all nodes use same id.
+		} else if ( parent.node() < numNodes() ) {	// Off-node copy 
+			unsigned int tgtNode = parent.node();
+			// Id id = Id::makeIdOnNode( tgtNode );
+			if ( tgtNode > myNode() )
+				--tgtNode;
+			sendTo4< Nid, Nid, string, Nid >( 
+				c->target(), parCopySlot, tgtNode,
+				src, parent, name, Id() ); // Tell node to use scratchIds.
+			// Later will need a way to get the new id back.
+		} else {
+			assert( 0 );
+		}
+	} else if ( src.node() == 0 ) {
+		if ( parent == Id() || parent.node() == 0 ) { // local copy
+			e = src()->copy( parent(), name );
+		} else if ( parent.isGlobal() ) { // Can't handle yet.
+			cout << "Shell::copy( " << src << ", " << parent << 
+			"): Sorry, cannot yet copy object into global\n";
+		} else if ( parent.node() < numNodes() ) {	// Off-node copy
+			cout << "Shell::copy( " << src << ", " << parent << 
+			"): Sorry, cannot yet copy object across nodes\n";
+		} else {
+			assert( 0 );
+		}
+	} else if ( src.node() < numNodes() ) { // off-node src.
+		if ( parent == Id() || parent.node() == src.node() ) {
+			// local copy on target node.
+			unsigned int tgtNode = src.node();
+			if ( tgtNode > myNode() )
+				--tgtNode;
+			sendTo4< Nid, Nid, string, Nid >( 
+				c->target(), parCopySlot, tgtNode,
+				src, parent, name, Id() ); 
+		} else if ( parent.isGlobal() ) { // Can't handle yet.
+			cout << "Shell::copy( " << src << ", " << parent << 
+			"): Sorry, cannot yet copy object into global\n";
+		} else if ( parent.node() < numNodes() ) {	// Off-node copy
+			cout << "Shell::copy( " << src << ", " << parent << 
+			"): Sorry, cannot yet copy object across nodes\n";
+		} else {
+			assert( 0 );
+		}
+	}
+	Id retId; // Default is empty
+	// Later need a way of getting the new id from the target node.
+	if ( e ) // Send back the id of the new element base
+		retId = e->id();
+#ifdef DO_UNIT_TESTS
+	// Nasty issue of callback to a SetConn here.
+	if ( dynamic_cast< const SetConn* >( c ) == 0 )
+		sendBack1< Id >( c, createSlot, retId );
+#else
+	sendBack1< Id >( c, createSlot, retid );
+#endif
+}
+
+/**
+ * Handles a copy on a local node. If the Id is defined, then it redefines
+ * the entire list. Otherwise, it leaves things on the scratchIds as default
+ * At some point this needs to be upgraded to return the created id to
+ * the master node.
+ */
+void Shell::parCopy( const Conn* c, Nid src, Nid parent, 
+	string name, Nid kid )
+{
+	Id last = Id::nextScratchId();
+	Element* e = src()->copy( parent(), name );
+	assert ( e->id() == last );
+	if ( kid != Id() ) { // redefine the new scratch Ids, up to the latest.
+		Id::redefineScratchIds( last, kid );
+	}
+}
+
+/**
+ * This function copies the prototype element in form of an array.
+ * It is similar to copy() only that it creates an array of copies 
+ * elements
+*/
+
+void Shell::copyIntoArray( const Conn* c, 
+				Id src, Id parent, string name, vector <double> parameter )
+{
+	assert( myNode() == 0 );
+	if( src == Id() ) {
+		cout << "Shell::copyIntoArray( root, " << parent << 
+			") Error, cannot copy the root object\n";
+		return;
+	}
+	// cout << "in Shell::copyIntoArray on node=" << myNode() << ", src=" << src << "." << src.node() << ", dest = " << parent << "." << parent.node() <<  " name= " << name << endl << flush;
+	Element* ret = 0;
+	vector< Nid > temp; // Used to pass Nid args to remote nodes.
+	temp.push_back( src );
+	temp.push_back( parent );
+	if ( src.isGlobal() ) {
+		if ( parent == Id() ) { // Do copy on node0
+			ret = localCopyIntoArray( c, src, parent, name, parameter );
+		} else if ( parent.node() == 0 ) { // Local copy
+			ret = localCopyIntoArray( c, src, parent, name, parameter );
+		} else if ( parent.isGlobal() ) { // All-node copy of globals
+			ret = localCopyIntoArray( c, src, parent, name, parameter );
+			// cout << "in Shell::copy, e->id() = " << e->id() << ", node = " << e->id().node() << endl << flush;
+			temp.push_back( ret->id() ); // Want to assign Id of new object.
+			send3< vector< Nid >, string, vector< double > >( 
+				c->target(), parCopyIntoArraySlot,
+				temp, name, parameter ); 
+		} else if ( parent.node() < numNodes() ) {	// Off-node copy 
+			unsigned int tgtNode = parent.node();
+			// Id id = Id::makeIdOnNode( tgtNode );
+			if ( tgtNode > myNode() )
+				--tgtNode;
+			// Later will need a way to get the new id back.
+			temp.push_back( Id() ); // Tell node to use scratchIds.
+			sendTo3< vector< Nid >, string, vector< double > >( 
+				c->target(), parCopyIntoArraySlot, tgtNode,
+				temp, name, parameter ); 
+		} else {
+			assert( 0 );
+		}
+	} else if ( src.node() == 0 ) {
+		if ( parent == Id() || parent.node() == 0 ) { // local copy
+			ret = localCopyIntoArray( c, src, parent, name, parameter );
+		} else if ( parent.isGlobal() ) { // Can't handle yet.
+			cout << "Shell::copy( " << src << ", " << parent << 
+			"): Sorry, cannot yet copy object into global\n";
+		} else if ( parent.node() < numNodes() ) {	// Off-node copy
+			cout << "Shell::copy( " << src << ", " << parent << 
+			"): Sorry, cannot yet copy object across nodes\n";
+		} else {
+			assert( 0 );
+		}
+	} else if ( src.node() < numNodes() ) { // off-node src.
+		if ( parent == Id() || parent.node() == src.node() ) {
+			// local copy on target node.
+			unsigned int tgtNode = src.node();
+			if ( tgtNode > myNode() )
+				--tgtNode;
+			// Later will need a way to get the new id back.
+			temp.push_back( Id() ); // Tell node to use scratchIds.
+			sendTo3< vector< Nid >, string, vector< double > >( 
+				c->target(), parCopyIntoArraySlot, tgtNode,
+				temp, name, parameter ); 
+		} else if ( parent.isGlobal() ) { // Can't handle yet.
+			cout << "Shell::copy( " << src << ", " << parent << 
+			"): Sorry, cannot yet copy object into global\n";
+		} else if ( parent.node() < numNodes() ) {	// Off-node copy
+			cout << "Shell::copy( " << src << ", " << parent << 
+			"): Sorry, cannot yet copy object across nodes\n";
+		} else {
+			assert( 0 );
+		}
+	}
+	Id retId; // Default is empty
+	// Later need a way of getting the new id from the target node.
+	if ( ret ) // Send back the id of the new element base
+		retId = ret->id();
+#ifdef DO_UNIT_TESTS
+	// Nasty issue of callback to a SetConn here.
+	if ( dynamic_cast< const SetConn* >( c ) == 0 )
+		sendBack1< Id >( c, createSlot, retId );
+#else
+	sendBack1< Id >( c, createSlot, retid );
+#endif
+}
+
+/**
+ * Handles a copy into an array on a local node. 
+ * At some point this needs to be upgraded to return the created id to
+ * the master node.
+ * The nids vector is src, parent, child.
+ * If the child nid == Id(), it tells the remote node to make the usual
+ * scratchId.
+ */
+void Shell::parCopyIntoArray( const Conn* c, vector< Nid > nids,
+	string name, vector< double > parameter )
+{
+	assert( nids.size() == 3 );
+	Id last = Id::nextScratchId();
+	Element* e = localCopyIntoArray( c, nids[0], nids[1], name, parameter );
+	// cout << "in Shell::parCopyIntoArray on node=" << myNode() << ", src=" << nids[0] << "." << nids[0].node() << ", dest = " << nids[1] << "." << nids[1].node() << ", child = " << nids[2] << "." << nids[2].node() << " name= " << name << ", last= " << last << ", e->name() = " << e->name() << ", e->id = " << e->id() << endl << flush;
+	assert ( e->id().id() == last.id() ); // Index will differ.
+	if ( nids[2] != Id() ) { // redefine the new scratch Ids, up to latest.
+		Id::redefineScratchIds( last, nids[2] );
+	}
+}
+
+////////////////////////////////////////////////////////////////////
+// Some scheduling stuff.
+////////////////////////////////////////////////////////////////////
+// static function
+void Shell::useClock( const Conn* c, string tickName, string path,
+	string function )
+{
+	localUseClock( c, tickName, path, function );
+	send3< string, string, string >( c->target(), parUseClockSlot,
+		tickName, path, function );
+}
+
+////////////////////////////////////////////////////////////////////
+// Here we put in the offNodeValueRequest stuff.
+////////////////////////////////////////////////////////////////////
+
+/**
+ * The next two functions should always be called in pairs and should
+ * be called within the same function, so that local variables do not
+ * get lost.
+ *
+ * openOffNodeValueRequest:
+ * Inner function to handle requests for off-node operations returning
+ * values.
+ * Returns a thread-safe unique id for the request, so that 
+ * we can examine the return values for ones we are interested in. 
+ * This rid is an index to a vector of ints that counts pending 
+ * returns on this id.
+ * Returns the next free Rid and initializes offNodeData_ entry.
+ *
+ * The init argument is typically a local variable whose value will
+ * be read out in the succeeding extractOffNodeValue call. If these
+ * are not in the same function, then the user has to use allocated
+ * memory.
+ */
+unsigned int Shell::openOffNodeValueRequestInner( 
+	void* init, unsigned int numPending )
+{
+	unsigned int ret = freeRidStack_.back();
+	freeRidStack_.pop_back();
+	if ( freeRidStack_.size() == 0 )
+		cout << "Error: Shell::openOffNodeValueRequestInner(): Empty Rid stack\n";
+	offNodeData_[ ret ].numPending = numPending;
+	offNodeData_[ ret ].data = init;
+	return ret;
+}
+
+/**
+ * closeOffNodeValueRequest:
+ * Polls postmaster, converts and returns data stored at rid
+ */
+void* Shell::closeOffNodeValueRequestInner( unsigned int rid )
+{
+	assert( rid < offNodeData_.size() );
+	void* ret = offNodeData_[ rid ].data;
+	assert( ret != 0 );
+	while ( offNodeData_[rid].numPending > 0 )
+		pollPostmaster();
+	freeRidStack_.push_back( rid );
+	offNodeData_[ rid ].data = 0;
+	return ret;
+}
+
+void* Shell::getOffNodeValuePtrInner( unsigned int rid )
+{
+	assert( offNodeData_.size() > rid );
+	assert( offNodeData_[ rid ].data != 0 ); 
+	return offNodeData_[ rid ].data;
+}
+
+void Shell::decrementOffNodePending( unsigned int rid )
+{
+	assert( rid < offNodeData_.size() );
+	assert( offNodeData_[ rid ].numPending > 0 );
+	offNodeData_[rid].numPending--;
+}
+
+void Shell::zeroOffNodePending( unsigned int rid )
+{
+	assert( rid < offNodeData_.size() );
+	offNodeData_[rid].numPending = 0;
+}
+
+unsigned int Shell::numPendingOffNode( unsigned int rid )
+{
+	assert( rid < offNodeData_.size() );
+	return offNodeData_[rid].numPending;
+}
+
+/*
 void ParShell::planarconnect(const Conn* c, string source, string dest, string spikegenRank, string synchanRank)
 {
         int next, previous;
@@ -414,10 +1011,12 @@ void ParShell::planarweight(const Conn* c, string source, double weight){
 		unsigned int numSynapses;
 		bool ret;
 		ret = get< unsigned int >( src_list[i], "numSynapses", numSynapses );
-		if (!ret) {/*error!*/}
+		if (!ret) {}
 		for (size_t j = 0 ; j < numSynapses; j++){
 			lookupSet< double, unsigned int >( src_list[i], "weight", weight, j );
 		}
 	}
 }
 
+*/
+#endif // USE_MPI

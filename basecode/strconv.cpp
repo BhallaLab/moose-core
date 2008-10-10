@@ -88,7 +88,6 @@ template<> bool val2str< Id >( Id v, string& ret)
 
 template<> bool str2val< Id >( const string& s, Id& ret )
 {
-	// cerr << "in str2val< double >\n";
 	ret = Id::str2Id( s );
 	return 1;
 }

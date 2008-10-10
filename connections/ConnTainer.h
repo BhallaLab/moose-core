@@ -25,24 +25,12 @@ class ConnTainer
 		{;}
 
 		/**
-		 * Generates an iterator for this ConnTainer. The eIndex
-		 * specifies the index of the originating element.
-		 * The isReverse flag is passed in from the Msg and specifies
-		 * if we are going forward or back along the direction of the Msg.
+		 * Generates an iterator for this ConnTainer. Eref
+		 * specifies two things: the direction of the msg is worked
+		 * out by comparing e.e with the internal e1 and e2 element ptrs,
+		 * and the e.eIndex specifies the index of the originating element.
 		 */
-		virtual Conn* conn( unsigned int eIndex, bool isReverse ) const = 0;
-
-		/**
-		 * Generates an iterator for this ConnTainer. The eIndex
-		 * specifies the index of the originating element.
-		 * The isReverse flag is passed in from the Msg and specifies
-		 * if we are going forward or back along the direction of the Msg.
-		 * The connIndex specifies a conn within this ConnTainer.
-		 */
-		virtual Conn* conn( unsigned int eIndex, bool isReverse, 
-			unsigned int connIndex ) const = 0;
-
-		// virtual bool add( Element* e1, Element* e2 ) = 0;
+		virtual Conn* conn( Eref e, unsigned int funcIndex ) const = 0;
 
 		Element* e1() const {
 			return e1_;
@@ -133,8 +121,22 @@ class ConnTainer
  * Currently most of the options revert to SimpleConnTainer.
  */
 extern ConnTainer* selectConnTainer( Eref src, Eref dest, 
-	unsigned int srcMsg, unsigned int destMsg,
+	int srcMsg, int destMsg,
 	unsigned int srcIndex, unsigned int destIndex,
 	unsigned int connTainerOption = ConnTainer::Default );
+
+/**
+ * This function picks a suitable container depending on the
+ * properties of the src and dest, and the status of the incoming option.
+ * It is flawed in various ways:
+ * - Uses string comparisons to find element type, rather than a 
+ *   virtual func
+ * - Doesn't handle proxies
+ * - Can't handle conversion of a SimpleElement to ArrayElement.
+ *
+ * Also not clear how to deal with conversion of a Many2Many to an
+ * All2All if needed.
+ */
+extern unsigned int connOption( Eref src, Eref dest, unsigned int option );
 
 #endif // _CONN_TAINER_H

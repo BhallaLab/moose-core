@@ -21,26 +21,16 @@ All2OneConnTainer::All2OneConnTainer( Eref e1, Eref e2,
 		i1_( i1 ), i2_( i2 )
 {;}
 
-Conn* All2OneConnTainer::conn( unsigned int eIndex, bool isReverse ) const
+/**
+ * Initiates an All2OneConn
+ * Eref e is the originating element.
+*/
+Conn* All2OneConnTainer::conn( Eref e, unsigned int funcIndex ) const
 {
-	//	numIter_++; // For reference counting. Do we need it?
-	if ( isReverse )
-		return new ReverseAll2OneConn( this, eIndex );
+	if ( e.e == e1() )
+		return new All2OneConn( funcIndex, this, e.i );
 	else
-		return new All2OneConn( this, eIndex );
-}
-
-Conn* All2OneConnTainer::conn( unsigned int eIndex, bool isReverse,
-	unsigned int connIndex ) const
-{
-	//	numIter_++; // For reference counting. Do we need it?
-	if ( connIndex != 0 )
-		return 0;
-
-	if ( isReverse )
-		return new ReverseAll2OneConn( this, 0 );
-	else
-		return new All2OneConn( this, 0 );
+		return new ReverseAll2OneConn( funcIndex, this, e.i, e1numEntries_ );
 }
 
 /**
@@ -63,7 +53,7 @@ ConnTainer* All2OneConnTainer::copy( Element* e1, Element* e2, bool isArray ) co
 //  All2OneConn
 //////////////////////////////////////////////////////////////////////
 
-const Conn* All2OneConn::flip() const
+const Conn* All2OneConn::flip( unsigned int funcIndex ) const
 {
-	return new ReverseAll2OneConn( s_, index_ );
+	return new ReverseAll2OneConn( funcIndex, s_, index_, s_->numSrc( target().i ) );
 }

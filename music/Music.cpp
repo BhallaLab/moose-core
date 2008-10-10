@@ -12,7 +12,7 @@
 #include "moose.h"
 #include <mpi.h>
 #include <music.hh>
-#include "maindir/MMPI.h"
+#include "maindir/MuMPI.h"
 #include "Music.h"
 #include "element/Neutral.h"
 

@@ -24,26 +24,13 @@ One2OneMapConnTainer::One2OneMapConnTainer( Eref e1, Eref e2,
 	}
 }
 
-Conn* One2OneMapConnTainer::conn( unsigned int eIndex, bool isReverse ) const
+Conn* One2OneMapConnTainer::conn( Eref e, unsigned int funcIndex ) const
 {
 	//	numIter_++; // For reference counting. Do we need it?
-	if ( isReverse )
-		return new ReverseOne2OneMapConn( this, eIndex );
+	if ( e.e == e1() )
+		return new One2OneMapConn( funcIndex, this, e.i );
 	else
-		return new One2OneMapConn( this, eIndex );
-}
-
-Conn* One2OneMapConnTainer::conn( unsigned int eIndex, bool isReverse,
-	unsigned int connIndex ) const
-{
-	//	numIter_++; // For reference counting. Do we need it?
-	if ( connIndex != 0 )
-		return 0;
-
-	if ( isReverse )
-		return new ReverseOne2OneMapConn( this, eIndex );
-	else
-		return new One2OneMapConn( this, eIndex );
+		return new ReverseOne2OneMapConn( funcIndex, this, e.i );
 }
 
 /**
@@ -66,7 +53,7 @@ ConnTainer* One2OneMapConnTainer::copy( Element* e1, Element* e2, bool isArray )
 //  One2OneMapConn
 //////////////////////////////////////////////////////////////////////
 
-const Conn* One2OneMapConn::flip() const
+const Conn* One2OneMapConn::flip( unsigned int funcIndex ) const
 {
-	return new ReverseOne2OneMapConn( s_, index_ );
+	return new ReverseOne2OneMapConn( funcIndex, s_, index_ );
 }

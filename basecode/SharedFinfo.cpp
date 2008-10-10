@@ -56,6 +56,11 @@ SharedFinfo::SharedFinfo( const string& name, Finfo** finfos,
  * independent of the originator of the message add call. In most
  * cases we have MsgSrcs on both sides.
  *
+ * There is a special case where we want to send a shared message between
+ * two identical objects, using the same Finfo. This would happen if
+ * we had a completely symmetrical message and we did not want to bring
+ * in artificial source and dests.
+ *
  */
 bool SharedFinfo::add(
 	Eref e, Eref destElm, const Finfo* destFinfo,
@@ -76,6 +81,14 @@ bool SharedFinfo::add(
 		assert ( names_.size() > 0 );
 
 		unsigned int srcIndex = e.e->numTargets( msg_, e.i );
+
+		if ( srcFuncId == destFuncId ) { // special case of matching msgs.
+			return Msg::add(
+				e, destElm, msg_, destMsg,
+				srcIndex, destIndex, 
+				srcFuncId, destFuncId,
+				connTainerOption );
+		}
 
 		if ( isDest_ ) {
 			if ( FuncVec::getFuncVec( destFuncId )->isDest() ) {

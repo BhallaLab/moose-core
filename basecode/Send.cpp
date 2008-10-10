@@ -22,7 +22,7 @@ void send0( Eref e, Slot src )
 		vector< ConnTainer* >::const_iterator i;
 		// Going through the MsgSrc vector of ConnTainers
 		for ( i = m->begin( ); i != m->end( ); i++ ) {
-			Conn* j = ( *i )->conn( e.i, m->isDest() ); 
+			Conn* j = ( *i )->conn( e, src.func() ); 
 			for ( ; j->good(); j->increment() )
 				rf( j );
 			delete j;
@@ -30,22 +30,23 @@ void send0( Eref e, Slot src )
 	} while ( ( m = m->next( e.e ) ) ); // An assignment, not a comparison.
 }
 
-void sendTo0( Eref e, Slot src,
-	unsigned int tgt )
+void sendTo0( Eref e, Slot src, unsigned int tgt )
 {
 	// This will traverse through next() if needed, to get to the msg.
 	const Msg* m = e.e->msg( src.msg() ); 
-	RecvFunc rf = m->func( src.func() );
-	Conn* j = m->findConn( e.i, tgt );
-	rf( j );
-	delete j;
+	Conn* j = m->findConn( e, tgt, src.func() );
+	if ( j ) {
+		RecvFunc rf = m->func( src.func() );
+		rf( j );
+		delete j;
+	}
 }
 
 void sendBack0( const Conn* c, Slot src )
 {
 	const Msg* m = c->target().e->msg( src.msg() );
 	RecvFunc rf = m->func( src.func() );
-	const Conn* flip = c->flip(); /// \todo Could be optimized.
+	const Conn* flip = c->flip( src.func() ); /// \todo Could be optimized.
 	rf( flip );
 	delete flip;
 }

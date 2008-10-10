@@ -226,6 +226,37 @@ class Finfo
 			 */
 			virtual void countMessages( unsigned int& num ) = 0;
 
+			/**
+			 * Returns the funcId for sending synchronous messages from 
+			 * this Finfo via the postmaster. If this Finfo does not
+			 * send out any messages (e.g., it is a DestFinfo or a 
+			 * SharedFinfo with only DestFinfos in it) 
+			 * this should return 0.
+			 * We cannot do this on the Ftype because a Dest and a Src
+			 * Finfo might have identical Ftypes.
+			 */
+			virtual unsigned int syncFuncId() const = 0;
+
+			/**
+			 * Returns the funcId for sending asynchronous messages from 
+			 * this Finfo via the postmaster. Again, if this Finfo does not
+			 * send out any messages (e.g., it is a DestFinfo or a 
+			 * SharedFinfo with only DestFinfos in it) 
+			 * this should return 0.
+			 */
+			virtual unsigned int asyncFuncId() const = 0;
+
+			/**
+			 * Returns the funcId for ProxyFunc.
+			 * If this Finfo has one or more Dests, then this FuncId
+			 * is non-zero.
+			 * It takes an incoming data stream from the PostMaster,
+			 * parses it into typed arguments, and calls the correct 
+			 * Send function to pass data into the RecvFunc of this
+			 * Finfo.
+			 */
+			virtual unsigned int proxyFuncId() const = 0;
+
 		protected:
 			/**
 			 * setName is used by the DynamicFinfo when it renames

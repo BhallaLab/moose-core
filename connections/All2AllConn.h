@@ -14,8 +14,11 @@
 class All2AllConn: public Conn
 {
 	public:
-		All2AllConn( All2AllConnTainer* a, unsigned int eIndex )
-			: a_( a ), 
+		All2AllConn( unsigned int funcIndex,
+			All2AllConnTainer* a, unsigned int eIndex )
+			: 
+				Conn( funcIndex ), 
+				a_( a ), 
 				srcPos_( eIndex ), tgtPos_( 0 ), 
 				end_( a->e2().size() )
 		{;}
@@ -66,8 +69,8 @@ class All2AllConn: public Conn
 		 * Returns a Conn with e1 and e2 flipped so that return messages
 		 * traverse back with the correct args.
 		 */
-		const Conn* flip() const {
-			return new ReverseAll2AllConn( a_, tgtPos_ );
+		const Conn* flip( unsigned int funcIndex ) const {
+			return new ReverseAll2AllConn( funcIndex, a_, tgtPos_ );
 		}
 
 	private:
@@ -80,8 +83,10 @@ class All2AllConn: public Conn
 class ReverseAll2AllConn: public Conn
 {
 	public:
-		ReverseAll2AllConn( All2AllConnTainer* a, unsigned int eIndex )
-			: a_( a ), 
+		ReverseAll2AllConn( unsigned int funcIndex, 
+			All2AllConnTainer* a, unsigned int eIndex )
+			: 	Conn( funcIndex ),
+				a_( a ), 
 				srcPos_( eIndex ), tgtPos_( 0 ), 
 				end_( a->e1().size() )
 		{;}
@@ -131,8 +136,8 @@ class ReverseAll2AllConn: public Conn
 		 * Returns a Conn with e1 and e2 flipped so that return messages
 		 * traverse back with the correct args.
 		 */
-		const Conn* flip() const {
-			return new All2AllConn( a_, tgtPos_ );
+		const Conn* flip( unsigned int funcIndex ) const {
+			return new All2AllConn( funcIndex, a_, tgtPos_ );
 		}
 
 	private:
@@ -152,12 +157,12 @@ class All2AllConnTainer: public ConnTainer
 			ConnTainer( e1, e2, msg1, msg2 )
 		{;}
 
-		Conn* conn( unsigned int eIndex, bool isReverse ) const {
+		Conn* conn( Eref e, unsigned int funcIndex ) const {
 			numIter_++; // For reference counting. Do we need it?
-			if ( isReverse )
-				return new ReverseAll2AllConn( this, eIndex );
+			if ( e.e == e1() )
+				return new All2AllConn( funcIndex, this, e.i );
 			else
-				return new All2AllConn( this, eIndex );
+				return new ReverseAll2AllConn( funcIndex, this, e.i );
 		}
 
 		bool add( Element* e1, Element* e2 ) {
