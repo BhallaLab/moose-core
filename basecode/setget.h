@@ -112,7 +112,7 @@ template < class T1, class T2 > bool set(
 	e.e->listFinfos( flist );
 	if ( find( flist.begin(), flist.end(), f ) == flist.end() ) {
 		cout << "Error: set( " << e.e->name() << "." << e.i << 
-			", " << f->name() << " T ): Finfo not found\n";
+			", " << f->name() << " T1, T2 ): Finfo not found\n";
 		return 0;
 	}
 

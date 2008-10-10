@@ -28,7 +28,9 @@ class Neutral
 			static void childFunc( const Conn* c, int stage );
 			static const string getName( Eref e );
 			static const int getIndex( Eref e );
+			static const int getId( Eref e );
 			static const string getClass( Eref e );
+			static const int getNode( Eref e );
 
 			/**
 			 * getParent is a static utility function to return the
@@ -45,6 +47,9 @@ class Neutral
 			 * Gets list of children, but puts into a supplied vector.
 			 * This is more efficient than getChildList.
 			 * Mostly used in wildcarding.
+			 * Note that the Ids of the children do not have node info
+			 * internally. So we will have to convert if we want to
+			 * send this off-node
 			 */
 			static void getChildren( const Eref e, vector< Id >& kids);
 

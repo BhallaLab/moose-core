@@ -8,17 +8,22 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "moose.h"
 #include "IdManager.h"
 #include "Fid.h"
 
 #include "../shell/Shell.h"
+#include "../parallel/ProxyElement.h"
 
 const unsigned int Id::BadIndex = UINT_MAX;
 const unsigned int Id::AnyIndex = UINT_MAX - 1;
+const unsigned int Id::GlobalNode = UINT_MAX - 1;
+
 // using UINT_MAX-2 locally for no index in wildcard. 
 const unsigned int BAD_ID = ~0;
 const unsigned int MAX_ID = 1000000;
+
+
 
 //////////////////////////////////////////////////////////////
 //	Id creation
@@ -28,14 +33,25 @@ Id::Id()
 	: id_( 0 ), index_( 0 )
 {;}
 
-Id::Id( unsigned int i )
-	: id_( i ), index_( 0 )
+Id::Id( Nid nid )
+	: id_( nid.id() ), index_( nid.index() )
+{ 
+	if ( id_ != BAD_ID )
+		this->setNode( nid.node() );
+}
+
+Id::Id( unsigned int i, unsigned int index )
+	: id_( i ), index_( index )
 {;}
 
-///\todo Lots of stuff to do here, mostly to refer to Shell's operations.
 Id::Id( const string& path, const string& separator )
 {
-	*this = Shell::path2eid( path, separator );
+	*this = Shell::path2eid( path, separator, 0 ); // flag says parallel
+}
+
+Id Id::localId( const string& path, const string& separator )
+{
+	return Shell::path2eid( path, separator, 1 ); // flag says local only
 }
 
 // static func
@@ -62,6 +78,12 @@ Id Id::shellId()
 	return Id( 1 );
 }
 
+// static func
+Id Id::postId( unsigned int node )
+{
+	return Id( 2, node );
+}
+
 /**
  * Static func to extract an id from a string. We need to accept ids
  * out of the existing range, but it would be nice to have a heuristic
@@ -80,13 +102,18 @@ Id Id::assignIndex( unsigned int index ) const
 	return i;
 }
 
-/**
- *
- * Deprecated
-void Id::setIndex(unsigned int index){
-	id_ = index;
+// Static function
+Id Id::nextScratchId() 
+{
+	return Id( manager().scratchIndex() );
 }
-*/
+
+// static function
+bool Id::redefineScratchIds( Id last, Nid base )
+{
+	return manager().redefineScratchIds( last.id(), base.id(), 
+		base.node() );
+}
 
 //////////////////////////////////////////////////////////////
 //	Id manager static access function. Private.
@@ -148,6 +175,21 @@ unsigned int Id::node() const
 	return manager().findNode( id_ );
 }
 
+bool Id::isGlobal() const 
+{
+	return manager().isGlobal( id_ );
+}
+
+void Id::setGlobal()
+{
+	manager().setGlobal( id_ );
+}
+
+void Id::setNode( unsigned int node )
+{
+	manager().setNode( id_, node );
+}
+
 Id Id::lastId()
 {
 	return manager().lastId();
@@ -189,6 +231,27 @@ bool Id::isScratch() const
 	return manager().isScratch( id_ );
 }
 
+bool Id::isProxy() const
+{
+#ifdef USE_MPI
+	if ( good() ) {
+		Element* e = manager().getElement( *this );
+		if ( e ) {
+			if ( dynamic_cast< ProxyElement* >( e ) ) {
+				return 1;
+			} else {
+				cout << "Error: Id::isProxy(): Found a regular element when looking for a proxy\n";
+				assert( 0 ); // Should never look for a proxy and find
+				// a regular element.
+			}
+		}
+	}
+	return 0;
+#else // USE_MPI
+	return 0;
+#endif // USE_MPI
+}
+
 //////////////////////////////////////////////////////////////
 //	Id utility
 //////////////////////////////////////////////////////////////
@@ -217,9 +280,25 @@ bool Id::setElement( Element* e )
 	return manager().setElement( id_, e );
 }
 
-
-void Id::setNodes(  unsigned int myNode, unsigned int numNodes,
-			vector< Element* >& post )
+/**
+ * Deprecated
+void Id::setNodes(  unsigned int myNode, unsigned int numNodes )
 {
-	manager().setNodes( myNode, numNodes, post );
+	manager().setNodes( myNode, numNodes );
 }
+*/
+
+//////////////////////////////////////////////////////////////
+//	Nid stuff
+//////////////////////////////////////////////////////////////
+Nid::Nid()
+	: Id(), node_( 0 )
+{;}
+
+Nid::Nid( Id id )
+	: Id( id ), node_( id.node() )
+{;}
+
+Nid::Nid( Id id, unsigned int node ) 
+	: Id( id ), node_( node )
+{;}

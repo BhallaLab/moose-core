@@ -58,16 +58,16 @@ void create( const string& type, const string& path )
 	} else {
 		string head = path.substr( 0, pos );
 		string tail = path.substr( pos + separator.length() );
-		sh()->create( type, tail, sh()->path2eid( head, separator ) );
+		sh()->create( type, tail, sh()->path2eid( head, separator, 0 ) );
 		cout << "creating " << type << " on " << 
-			head << "(" << sh()->path2eid( head, separator ) <<
+			head << "(" << sh()->path2eid( head, separator, 0 ) <<
 			") named " << tail << endl;
 	}
 }
 
 void destroy( const string& path )
 {
-		sh()->destroy( sh()->path2eid( path, separator ) );
+		sh()->destroy( sh()->path2eid( path, separator, 0 ) );
 }
 
 void le ( const string& path ) 

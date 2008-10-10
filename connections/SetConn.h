@@ -19,11 +19,11 @@ class SetConn: public Conn
 {
 	public:
 		SetConn( Element* e, unsigned int eIndex )
-			: e_( e, eIndex )
+			: Conn( 0 ), e_( e, eIndex )
 		{;}
 
 		SetConn( Eref e )
-			: e_( e )
+			: Conn( 0 ), e_( e )
 		{;}
 
 		~SetConn()
@@ -67,7 +67,7 @@ class SetConn: public Conn
 		 * Returns a Conn with e1 and e2 flipped so that return messages
 		 * traverse back with the correct args.
 		 */
-		const Conn* flip() const {
+		const Conn* flip( unsigned int funcIndex ) const {
 			return new SetConn( *this );
 		}
 

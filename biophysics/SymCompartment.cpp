@@ -139,14 +139,14 @@ const Cinfo* initSymCompartmentCinfo()
 static const Cinfo* symCompartmentCinfo = initSymCompartmentCinfo();
 
 static const Slot raxialSlot =
-	initSymCompartmentCinfo()->getSlot( "raxial1.raxialSrc" );
+	initSymCompartmentCinfo()->getSlot( "raxial1.RaxialSrc" );
 static const Slot sumRaxialSlot =
 	initSymCompartmentCinfo()->getSlot( "raxial1.sumRaxialSrc" );
 static const Slot sumRaxialSlotRequest =
 	initSymCompartmentCinfo()->getSlot( "raxial1.sumRaxialRequestSrc");
 
 static const Slot raxial2Slot =
-	initSymCompartmentCinfo()->getSlot( "raxial2.raxial2Src" );
+	initSymCompartmentCinfo()->getSlot( "raxial2.Raxial2Src" );
 static const Slot sumRaxial2Slot =
 	initSymCompartmentCinfo()->getSlot( "raxial2.sumRaxial2Src" );
 static const Slot sumRaxial2SlotRequest =

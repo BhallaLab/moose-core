@@ -66,6 +66,18 @@ class DeletionMarkerFinfo: public Finfo
 			void countMessages( unsigned int& num )
 			{ ; }
 
+			unsigned int syncFuncId() const {
+				return 0;
+			}
+
+			unsigned int asyncFuncId() const {
+				return 0;
+			}
+
+			unsigned int proxyFuncId() const {
+				return 0;
+			}
+
 			bool isTransient() const {
 					return 0;
 			}

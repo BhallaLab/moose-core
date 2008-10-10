@@ -33,9 +33,7 @@ class One2OneMapConnTainer: public ConnTainer
 			int msg1, int msg2,
 			unsigned int i1 = 0 );
 
-		Conn* conn( unsigned int eIndex, bool isReverse ) const;
-		Conn* conn( unsigned int eIndex, bool isReverse,
-			unsigned int connIndex ) const;
+		Conn* conn( Eref e, unsigned int funcIndex ) const;
 
 		bool add( Element* e1, Element* e2 );
 
@@ -123,8 +121,9 @@ class One2OneMapConnTainer: public ConnTainer
 class One2OneMapConn: public Conn
 {
 	public:
-		One2OneMapConn( const One2OneMapConnTainer* s, unsigned int index )
-			: s_( s ), index_( index )
+		One2OneMapConn( unsigned int funcIndex, 
+			const One2OneMapConnTainer* s, unsigned int index )
+			: Conn( funcIndex ), s_( s ), index_( index )
 		{
 			assert ( index < s->size() );
 		}
@@ -176,7 +175,7 @@ class One2OneMapConn: public Conn
 		 * Returns a Conn with e1 and e2 flipped so that return messages
 		 * traverse back with the correct args.
 		 */
-		const Conn* flip() const;
+		const Conn* flip( unsigned int funcIndex ) const;
 
 		const ConnTainer* connTainer() const {
 			return s_;
@@ -194,8 +193,9 @@ class One2OneMapConn: public Conn
 class ReverseOne2OneMapConn: public Conn
 {
 	public:
-		ReverseOne2OneMapConn( const One2OneMapConnTainer* s, unsigned int index )
-			: s_( s ), index_( index ) 
+		ReverseOne2OneMapConn( unsigned int funcIndex, 
+			const One2OneMapConnTainer* s, unsigned int index )
+			: Conn( funcIndex ), s_( s ), index_( index ) 
 		{;}
 
 		~ReverseOne2OneMapConn()
@@ -246,8 +246,8 @@ class ReverseOne2OneMapConn: public Conn
 		 * Returns a Conn with e1 and e2 flipped so that return messages
 		 * traverse back with the correct args.
 		 */
-		const Conn* flip() const {
-			return new One2OneMapConn( s_, index_ );
+		const Conn* flip( unsigned int funcIndex ) const {
+			return new One2OneMapConn( funcIndex, s_, index_ );
 		}
 
 		const ConnTainer* connTainer() const {

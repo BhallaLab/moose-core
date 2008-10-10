@@ -149,6 +149,21 @@ class LookupFinfo: public Finfo
 				return fv_->id();
 			}
 
+			/// Looks at the ftype.
+			unsigned int syncFuncId() const {
+				return ftype()->syncFuncId();
+			}
+
+			/// Looks at the ftype.
+			unsigned int asyncFuncId() const {
+				return ftype()->asyncFuncId();
+			}
+
+			/// Looks at the ftype.
+			unsigned int proxyFuncId() const {
+				return ftype()->proxyFuncId();
+			}
+
 			/**
 			 * The LookupFinfo does not handle any messages itself, so
 			 * does not need to allocate any on the parent object.
