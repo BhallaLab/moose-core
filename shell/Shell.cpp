@@ -980,9 +980,9 @@ void Shell::pollFunc( const Conn* c )
 	}
 }
 
-bool Shell::serial( )
+bool Shell::isSerial( )
 {
-	return ( Shell::numNodes( ) > 1 );
+	return ( Shell::numNodes( ) == 1 );
 }
 
 int Shell::getMyNode( Eref e )
@@ -1101,7 +1101,7 @@ void Shell::trigLe( const Conn* c, Id parent )
 			parent.eref(), "childList", ret );
 		assert( flag );
 		
-		if ( Shell::serial( ) )
+		if ( ! Shell::isSerial( ) )
 			getOffNodeValue< vector< Nid >, Nid >( c->target(), 
 				requestLeSlot, sh->numNodes(),
 				&nret, parent );
@@ -2136,7 +2136,7 @@ void Shell::innerGetWildcardList( const Conn* c, string path,
 	localGetWildcardList( c, path, ordered, list );
 
 	// We are done if running in serial
-	if ( Shell::serial( ) )
+	if ( Shell::isSerial( ) )
 		return;
 	
 	vector< Nid > ret;
