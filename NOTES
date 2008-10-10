@@ -7774,3 +7774,17 @@ the output is consistent across compiler optimization levels and also
 against GENESIS in ee and chanmode 0.
 
 ==============================================================================
+8 Oct 2008
+Checked in as revision 811: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+=============================================================================
+10 Oct 2008.
+Peculiar bug in SigNeur/KinCompt: when I build a model, the volume of the
+/library/dend and /library/soma KinCompts becomes a big negative number.
+
+This bug remains, but doesn't seem to affect the copies made of the 
+library models. 
+
+I have changed the simUndump command so it now creates KinCompts for groups
+when reading in a kkit model. After some work fixing how this percolates
+down to the child groups, it looks OK.
