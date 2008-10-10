@@ -1,0 +1,1468 @@
+==============================================================================
+13 June.
+Working on modification of serials conversion code and integrating it with
+
+==============================================================================
+3 July 2008.
+Resuming after a long hiatus and trip. Trying to compile.
+
+Got it to compile. This includes exotic stuff like partial specialization of
+templates needed for serialization of vectors.
+Now going through the PostMaster unit tests for serialization. Got
+the object->postmaster buffer tests to work, which means that both the
+serialize and the unserialize code is working. I have tested ints, doubles,
+strings, vectors of Ids and vectors of strings.
+
+Next: send postmaster->object messages. Working on PostMaster::setupProxyMsg
+Well, it went so far as to set up the message. Still no data transfer.
+
+Checked in as revision 531 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Data transfer step revealed a mess. Need some rethinking about the
+proxyFunc formulation. Hacked it for now by storing the ProxyFunc in the
+proxyElement, but there must be a cleaner way to do things.
+Anyway, data has been transferred.
+Checked in as revision 532 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+Problems with current design:
+- How to deal with different funcs in a funcVec?
+	Pass func# in AsyncData: Would need to look up operation each
+	time. Bad for syn data.
+- How to deal with multiple target types even for simple proxies? Consider
+	synapses: may have multiple receptor types.
+- Generally, how to handle SharedFinfos esp if bidirectional?
+- Messy interface for proxyFunc
+- How to do proxies into arrays?
+	Make a variant that has array of Msgs, but has no data. Advantage is
+	common proxyFunc.
+
+==============================================================================
+5 July 2008.
+Added a few more tests to the data transfer through two postmasters. Clears
+all including vector of strings.
+
+Checked in as revision 533 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+==============================================================================
+6 July 2008.
+Shall we stage the messaging into more categories:
+- Async, single function, high volume (like synapses)
+	- Array subtype
+- Async, general, low volume (inter-shell messages)
+- Most of the Sync calls are shared messages (reac, robot)
+
+
+First step: Get the postmasters to talk to each other. This needs general
+Async messages, preferably done through an all2all message.
+
+Issue for shared messages: The Send command loses info about which function
+was called. The Slot argument to Send contains this info, but once we use it
+to extract the AsyncFunc we don't retain it. And the Async func is designed
+to be general for any given set of args, so it has no uniqueness either.
+Options:
+	- Template in the func# into the AsyncFunc. 
+		- Non-trivial since we use the Ftype to build AsyncFuncs. 
+			- If we don't use Ftype, we need another clever way
+			to access them.
+		- But once we're in AsyncFunc we can easily pass the
+			func# to getAsyncParBuf
+		Problem is, the msg numbers get set at static init. Not easy
+		to map onto templates.
+	- Modify Send, RecvFunc to take extra arg to identify func. Silly.
+	- Modify Conn to know what function to pass.
+		I don't want to add more stuff to Conn at this point. It is
+		due for overhaul into a fixed type rather than a virtual,
+		and will need simplifying rather than expanding.
+	- Use functors to replace RecvFuncs.
+		- This could be done, but would need care to ensure thread
+		safety. We need to pass the functor ptrs around and if we do
+		so with static functors, then threads are an issue. If we
+		generate a new functor for each msg with a factory, we 
+		have thread safety but memory is used in very different
+		ways from current messaging. It would need a close look and
+		I am not going to refactor this now.
+
+
+None of the options is nice. I am trying the easiest, which is to modify Conn.
+To do this I looked around for Conn constructors from the ConnTainers.
+One of them had an extra index, for a ConnIndex, but on examination it
+was never used as designed. So I eliminated that. Probably have to 
+reexamine at some point when I do refactoring of the Conn stuff. Clears
+unit tests.
+
+Checked in as revision 534 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Implemented some ugly code changes in Conn, to handle the funcIndex. Lots
+of stuff to fix. Now compiles and clears unit tests.
+
+Checked in as revision 535 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Fixed up AsyncStruct fields. Compiled, clears unit tests. At this point I
+should be able to send different async calls over the same shared message,
+since the AsyncStruct tells us which function to use. However, still cannot
+handle return messages or bidirectional shared messages, which should also 
+go through the proxy.
+
+Checked in as revision 536 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+==============================================================================
+7 July 2008.
+Implemented code changes to pass multiple function calls through the same
+message.
+==============================================================================
+8 July 2008.
+Implemented unidirectional shared message passing through postmasters, 
+including unit tests.
+Checked in as revision 537 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+For bidirectional shared messaging, we need proxies at both ends.
+	- The construction of proxies is easy: check things in 
+		AsyncDestFinfo::respondToAdd or in the Shell command.
+		Will have to be the Shell command, because it is messy to
+		backtrack once we're in respondToAdd of the postmaster.
+	- Proxies now have to handle AsyncDestFinfo equivalents too,
+		though they are routed through the msg_ data structure
+		of the proxy.
+	- Key thing is that the proxy->data() must return the data of the
+		associated postmaster. Then the same asyncFunc will work.
+
+For now, working on Shell commands to set up the internode connections,
+as the above juggling depends on these commands.
+
+Setting up now to compile a big mess of stuff.
+
+==============================================================================
+9 July 2008
+Shell commands set up. Compiles, clears old unit tests but doesn't have new
+ondes to test new shell commands. That's next.
+
+Checked in as revision 538 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Now I'm able to connect to shells together with master/slave msgs.
+
+Checked in as revision 540 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+==============================================================================
+10 July 2008
+There is a bit of an issue with the master/slave messaging. The ideal way
+to set this up would be to use an all-to-all message mediated through the
+postmaster. However, we now have two kinds of messages, master and slave. So
+a uniform message fabric won't work.
+
+Fixed this. Proceeded with the shell-to-shell connections. Used this to
+build a message using the parallel infrastructure, but on the same node
+for testing purposes. After some fiddling around to get round the issue of
+proxyElements on the same node, I got the messages set up and confirmed
+that data was transferred.
+
+Now we're getting close to actually testing this on MPI. Remaining: 
+	+ I need to get bidirectional shared messaging to work
+	- I need to do some sensible initialization for the shell-shell
+		messages across nodes. 
+	+ Initialize postmasters on each node.
+	- Revisit the parallel scheduling
+	- Complete implementation of basic internode object handling commands
+	- Set up unit tests for all of the above. For simplicity I will
+		have all unit tests run from the master node.
+	+ Scale up using array postmasters
+	- Regression tests using spiking neurons.
+	- Get sync messages going
+	- Regression tests using diffusion
+
+==============================================================================
+11 July 2008
+Another mess up with the subversion server at SourceForge. Fixed. 
+
+Checked in as revision 542 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Overhaul to node identification for Ids. For now I've created a separate
+class for the IdManager::elementList_ vector, which stores both the
+element pointer and its node. This cleans up a lot of node lookup. Could
+in principle convert the class to a union. Also postmasters are now all
+set up as an arrayElement.
+
+Checked in as revision 547 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+==============================================================================
+12 July 2008
+Setting up bidirectional messages. First pass at function setupSharedProxyMsg.
+May be able to replace original one with this.
+
+==============================================================================
+13 July 2008
+Implemented the setupSharedProxyMsg, and indeed it is general enough to
+deal with the regular cases. Along the way ran into an issue of how to
+obtain AsyncFuncId, and it turns out this should be done through the Finfo
+rather than the Ftype, because only the Finfo knows if it is actually dest or
+src. So of course many files updated. Clears old set of unit tests.
+
+Checked in as revision 548 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Much struggling later, turns out that we have run into a problem with
+specifying direction of message. For convenience, I used the same 
+setupProxyMsg function for bidirectional messages, at both ends of the
+message. In both cases, the src was the proxy and the dest was the local
+object. When the local object tried to send data, the send function generated
+a backwards conn. This is also going to be a problem with any attempt
+at symmetric messages, such as the shell-shell messages.
+
+One possible solution is to set the direction of the message by passing in
+the eref of the calling object when the conn is created from the ConnTainer.
+We can use the element ptr on the eref to decide if to go forwards or
+backwards wrt the elements in the ConnTainer. This is completely independent
+of how the ConnTainer was set up. Currently we pass in Msg::isDest(),
+which means we need to keep track of ordering everywhere.
+This will mean an awful lot of changes. Since I have already modified quite
+a bit of stuff, I will first check things in even though the unit
+tests die at the parallel bidirectional message tests.
+
+Checked in as revision 549 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Implemented the many tedious changes. Clears all the old unit tests,
+stuck at the same place. Still pegging away at it.
+
+Checked in as revision 550 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+==============================================================================
+14 July 2008
+Managed to get data reach its target through a bidirectional message. Still
+to test data going back.
+
+Checked in as revision 551 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Pretty clear sailing for the test data return. All unit tests now cleared.
+
+Checked in as revision 552 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+- Messaging between postmasters: None
+- Messaging between shells: Set up a one-to-all bidirectional message from the 
+shell to the array of postmasters on each node. Will need to do this
+explicitly using low-level calls at init time, independently on each node.
+- Scheduling: 
+	- set up a pollJob pj that manages a ParTick that sends a 
+	one-to-all local parTick message to the PostMasters.
+	(Additionally it looks like the regular clockJob does the same. Why?)
+	- Shell sends a step msg to the pj.
+	Actually the polling happens in using the pollPostmaster() 
+	function in the infinite loop at the end of main. This is 
+	currently flawed as it runs only on the master node.
+
+==============================================================================
+19 July 2008
+In the process of setting up initialized messages between shells on each
+node. Should simply send a one2All message. But we need an arrayProxyElement
+to match.
+
+Shell->proxy->postmaster[]->postmaster[originating_node]->proxy->shell
+
+Otherwise it will be an array of proxies, one for each shell on a remote node
+
+Well, for now we'll manage with an array of proxies. Other innovations can
+wait.
+
+Here we have another issue. The Id of the other shells is obviously the same
+as that of the local one. Shall we have a virtual array of shells indexed by
+node?
+
+A possible solution: Have the shells act as their own proxy, that is,
+send a message to themselves that duplicates what the proxy would otherwise do.
+Issues: 
+	- proxy2tgt function checks that tgt is a proxy.
+	- proxy2tgt function then calls ProxyElement::sendData, which
+		uses msg 0.
+If it weren't for these, this should work. But these are pretty fundamental.
+
+Possible hack: the IdManager does a special check when returning ShellId and
+	returns a proxy if it is off-node. Too ugly.
+
+Another possible hack: When sending off-node commands to other shells,
+the Shell does not use itself as the src element. Instead it uses a special id
+for the shell proxies. However, the Send command needs to look up msg on the
+src eref, which will fail unless I invent a new Element class.
+
+A generalized solution (?): Invent an array proxy that can have both real
+objects and proxies, so as to set up an array across nodes. This may be
+useful for big simulations too. But a big job.
+
+Last resort solution: Use special message types between shell and postmaster.
+Bypass the whole proxy system. 
+
+==============================================================================
+23 July 2008
+Some notes from meeting with Jeanette Hellgren-Kotaleski and Johannes Hjorth
+about the MUSIC project:
+- the NEST simulator people may have some thoughts on ID management across
+	nodes and about the issue of the master node managing everything.
+- They also have an event-driven model
+- They also have a 2-stage simulation setup process: stage 1 for definition
+	of connectivity, and stage 2 for runtime.
+- They also have the option of queueing many cycles of spike events within the
+	propagation delay, so as to lump data transmission.
+- Not clear if they stipulate node synchronization, which MOOSE assumes.
+
+General plan:
+	- Get a MOOSE regression test network model working in multiple phases
+		* single node
+		- across nodes with MOOSE internode messaging
+		- Across nodes using MUSIC interface
+	- Get a mixed MOOSE/NEST simulation going using MUSIC interface
+
+
+Regarding inter-Shell communication. Options:
+	- provide the PostMaster with a MsgDest that takes char*, and size. 
+		It puts this into the SendBuffer in the usual way, but with
+		a special Proxy stamp so that the data gets handled differently.
+		(Note that the Sync messages will also need a separate section
+		in the SendBuf)
+	- Proxy-free version: Here we need to pass additional info to specify
+		index of target, or to assume a single target.
+	- Dummy proxy version: Here we need a way to remap src Id to dummy 
+		proxy. Relatively clean but again we need an extra bit of
+		info for this section to activate remapping mode.
+
+==============================================================================
+24 July.
+The dummy proxy version seems most do-able. To flesh it out:
+- PostMaster::innerPoll must handle 3 groupings of data:
+	- Sync data
+	- dummy proxies for async data (typically postmaster messages)
+	- Async data
+- The dummy proxies use the proxyId to look up a map for the actual proxy.
+- Pass in an extra arg into ParShell::addParallelSrc to define which
+	variant of msg is used.
+	- Or, if the dest id exists (like a shell) then automatically set up
+	a dummy proxy and insert the msg on the proxy map, and then tell
+	originating node that it has to be sent on a separate band. Ugh.
+	- Sync messages are set up if the target Finfo says so.
+	- Or, at setup time, check if the src Id and dest id are both the Shell,
+	and hard code the lookup so we don't have separate async types.
+		- How many likely cases of this kind?
+			- any time there is a cross-node array.
+			- Wait till we implement it, then we can get rid of
+			the Shell hard coding.
+
+Can we lessen background polling, and also make the system less fragile?
+- Fragile but minimal approach:
+	- Single (non-polling, non-blocking) pass for async msgs
+	- Polling only for sync msgs, if any.
+	- Barrier after these passes. 
+		- Barrier optionally on slower tick so as to permit some slop 
+		if we never have sync msgs.
+		- Need to separate barrier from Poll pass?
+		- Need to also have option for whether a given ParTick does 
+			MPI traffic checking at all
+	This will fail if any node fails.		
+
+- More robust approach:
+	- Single (non-polling, non-blocking) pass for async msgs
+	- Slaves: 
+		- Polling for sync msgs (on other slaves) + master node check.
+		- Immediate send back when node check arrives
+		- Any nodes listed in node check have their polling disabled.
+	- Master:
+		- Polling with timeout for node check from each slave
+			- Start timeout clock when all nodes but 1 have 
+				responded. MPI_Wtime, in units of MPI_Wtick
+		- Upon poll completion, check for timeout nodes. 
+			- Add to list
+			- Error report
+			- Cannot use MPI_Gather because we may lose nodes.
+		- Immediately send out node check msg (which has list of nodes
+			to drop) for next clock tick.
+			- Could use MPI_Bcast or MPI_Scatter
+
+In either case, we need more control of the polling by the ParTick
+- Separate Barrier function on the parShared msg.
+	- Flag in the ParTick to indicate if Barrier is to be called.
+- Node check function, in due course.
+- ParSched or equivalent to set these things up in a variety of modes:
+
+
+Implemented and compiled the minimal approach using a barrier. Clears 
+single-node unit tests. Crashes when we try to run on > 1 node. Issue
+looks like with IdManager::scratchId().
+
+==============================================================================
+25 July 2008
+
+Checked in as revision 553 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+General cleanup of Id management stuff, but it still crashes on > 1 node.
+Checked in as revision 554 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Steady progress on cleanup, now we advance further into the execution on 2
+nodes before there is a crash. Seems to be dying during the node polling.
+Checked in as revision 555 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Minor changes in init.
+Looks like it now runs through and blocks at the poll.
+==============================================================================
+26 July 2008
+Slowly inching through fixes. Very tedious because it is multinode. 
+Current issue is that the Parallel Clock Job pj does not schedule its ParTicks
+for execution, because they do not have any process messages emanating
+from them. Never mind that they do have parTick messages going out to the
+postMasters. See mpiSetup.cpp and ClockJob.cpp
+
+Need to fix Conn::flip to take funcId if I want to be serious about it. Later.
+
+Recompiled whole mess, put in funcId in sendTo. That did the last bit,
+as far as I can see. Seems to have cleared the tests for 1 and 2 nodes, 
+possibly 4 as well. Loads of cout diagnostics obscure everything. But
+defintely time to check it in.
+
+Checked in as revision 556 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Finxing up Conn::flip. I need to use it to handle messages which send back a
+value, which I will now use in the next round of unit tests.
+
+Checked in as revision 556 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Next stuff:
+* set and get values across nodes
+- quit cleanly
+- Don't busy loop
+- Show values on remote objects.
+- list elements, in a node-independent way (starting from /, for example)
+* set up messages across nodes
+* Transfer data across nodes.
+
+==============================================================================
+27 July 2008
+
+Test to 'get' values across nodes works. Quite painlessly. It is going to be
+much trickier, though, to get it to work through the parser.
+
+Checked in as revision 558 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Test to 'set' values across nodes works, also painless. Easy to make it a
+unit test. But I now have issues when I run the MPI on 3, 5, 6 or 7 nodes.
+The 7 node variant crashes. The others miss out one or more of the 'get'
+operations.
+2, 4, 8, 16 are OK. Wonder if it is an MPI issue or MOOSE?
+
+Checked in as revision 559 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+To test messaging, working on a Fibonacci series arrangement where each
+table takes the sum of the two previous ones. No lookup or anything.
+
+Extremely unpleasant. Messages were not being formed.
+There was an issue with the passing of Ids. Ids don't actually carry node
+info, they look it up instead. But when setting up msgs we need to pass
+this node info as well. So I had to implement a Nid class which has
+the Node info plus the usual Id.
+Finally worked through it using debugging on 4 'nodes'. In this case the
+messages were formed. So there is some issue with data transfer synchronization
+with the tests.
+
+Checked in as revision 560 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Added a section to transfer a whole lot of data in one go. This worked without
+any problems.
+
+Looked more closely at data transfer issues. I get partial message formation.
+2 and 3 node cases are OK, 4 and higher croak. Seems like all the requests
+for messages are sent out (addSingleMessage is OK), but the addParallelSrc 
+misses some cases, and the addParallelDest misses even more. I wonder if it
+is an MPI issue.
+
+Spent enough time on this, will now check on a serious machine to see if it
+might be an MPI issue. The MPI version on my laptop is really old but I
+won't mess with it till I've upgraded the whole OS.
+
+Checked in as revision 561 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Then the next step is to actually run the Fibonacci calculation.
+
+==============================================================================
+28 July 2008
+One possible reason for the issues with the Fibonacci test is that I
+keep generating MPI::requests from successive irecvs, but I don't kill the old
+ones. Looked at the documentation on this: it is murky at best. I tried simply
+setting request_ to zero, but this may not work as expected, and it doesn't
+help the problem.
+some options:
+- Use a second boolean flag to keep track of request status
+- Figure out how request works
+- Enforce receipt of info from every node to every other node, every timestep
+	(clearly stupid)
+
+OK, used first option. Fixed sends to occur only if there was nonzero data.
+This should not have affected operation, but it did. The system is not totally
+stable yet. Works for 2, 4, 8 and sometimes 16 nodes, but reliably fails for
+7 nodes. Time now to test completion of data transfer in Fibonacci test.
+
+Checked in as revision 562 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Finally, the test itself. It sort of works, but is temperamental. Most relevant,
+it demands a certain buffer of extra clock ticks in order to complete the
+data transfer. It should need exactly numNodes ticks, but actually comes to
+more than 2x that. I have had it work for up to 12 nodes.
+
+Anyway, this qualified success is still a big step forward: parallel set up
+and execution of messages.
+
+Checked in as revision 563 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+The issue with number of ticks may explain why things go bad with more nodes.
+Since we do a single scan for arriving data, we may simply miss data transfers
+that have yet to arrive. The barrier doesn't help with this as it is an 
+independent signal. Let's see if this interpretation pans out by increasing
+the number of polling cycles for the sequence test, which fails for many nodes.
+
+This works. Went up to 32 nodes (poor little laptop!) and also did 7 and 19
+as examples of peculiar node numbers.
+
+Next steps:
+- Make it usable for running multinode simulations
+	* Shell/parser commands for node-specific object creation
+	- Sync messages
+	- Modify shell commands to operate node-independently
+		Currently only message setup works this way. Need:
+		* get
+		* set
+		* showfield
+		* addmsg
+		* le
+		- ce
+		- pwe
+		* create (so it creates on node of parent)
+		- createmap (ditto)
+		- step
+		- reset
+		- setclock
+		* delete
+		* quit
+	- Fix up what happens when we operate on existing proxies.
+	- Set up a regression test for all of these.
+- Upgrade array operations to work across nodes
+	- Createmap etc
+	- Multinode array proxies
+	- Multinode messaging
+- Design decisions on 
+	- limiting Async node drift
+		- Use the barrier for now.
+		- Later a scatter/gather kind of check using the asyncs?
+		Still does not guarantee arbitrary pair message completion.
+	- Managing synchronization on sync models.
+		Already did this. Force polling till all irecvs are in.
+
+For now, the goal is to be able to use scripts to set up nice big multinode
+spiking models. So start with the first set of goals.
+
+==============================================================================
+29 July 2009
+Working on 'create'. In the GENESIS SLI script, the node number is 
+optionally specified on the create command using the @ symbol
+create /foo/bar/zod@15
+
+Two issues here:
+- Id( string path ) constructor needs to be able to go off node to find object.
+- Need to be able to connect parent to child across nodes.
+
+I can get partial functioning once I get the first to work.
+
+Sort of set up the front end of the parallelTraversePath in ParShell.cpp.
+It has a requestId and associated storage to handle multiple returns in
+a thread-safe way. Still need to implement the back end of the call.
+
+Implemented, compiles, breaks.
+
+Fixed some breaks, patched over others: Basically the new code doesn't work
+and any calls to it die. So I had to comment out a few parser unit tests
+that fail to find objects, and therefore try to go off-node. 
+But since the changes are extensive I'll check it
+in before putting in specific unit tests, and reinstating the commented
+out bits.
+Checked in as revision 564 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Implemented a first test function for this: testParTraversePath. Fails.
+
+==============================================================================
+30 July 2008
+Working on it, ran into infinite loop. Tracked down to my calling traversePath
+within the handleParTraversePathRequest. I need to have a scrictly local 
+traversePath.
+That fixed it and surprisingly cleared unit tests with up to 16 nodes
+right away. So we have a functioning path2eid that works across nodes.
+At this point I can do the create on the command line but cannot see the
+results of it.
+
+Now working on le. This is messy:
+- Global elements like /root: le indicates all children
+- the 'childList of elements will be problematic if they have children
+	on multiple nodes. 
+	(I had the idea of proxies for all children at one point).
+- The vector< Nid > has to go back to the parser, which then invokes a whole
+	series of conversions to strings using eid2path. Any of these may 
+	involve off-node requests. Spectacularly ugly!
+One option is to return a vector< string > here. This doesn't really cure
+	any of these issues, it just decouples the eid2path conversion from
+	the process. Not worth it then.
+
+==============================================================================
+31 July 2008
+I think I have the trigLe code working to get ids of all object children,
+on any node. However, I am running into a recurring pattern now where 
+simple element operations have to be replaced with much more complicated
+wrappers involving the nodes. In particular, I will need a generic
+off-node 'getField' equivalent and that would address many of these issues.
+
+==============================================================================
+1 Aug 2008
+Implementing parallel Get as a step in doing parallel le. The 
+TestPostMaster.cpp:testParGet needs updating with the new args.
+
+==============================================================================
+2 Aug 2008
+Parallel Get now works. Too well. Now the 'le' picks up all the objects on 
+child nodes, so the unit tests of the parser fail because of test objects
+littered around on the other nodes.
+
+Much cleaning up later. Along the way implemented parDeleteTest for doing
+unit tests on remote deletes.
+Also need to make 'le' not report global objects except on node 0.
+
+OK, a lot of things now work. I can create objects on different nodes using
+the shell and do an 'le' on them, though getfield croaks. Should add a 'node'
+field to Neutral, and fix the getfield. Along the way I've implemented delete
+on remote nodes, with unit tests for that too. 
+Should implement a proper 'quit' call that cleans up MPI.
+
+Checked in as revision 565 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Trying to do 'set' across nodes.
+Dies in sliFieldNameConvert, because it uses an element ptr directly and
+that element is off-node. Bad.
+
+Major change to wildcards, now set up to work at least partly in parallel.
+This is needed to get 'set' and showfield and other wildcard-arg commands
+to work.
+Got it compiled and clears current unit tests, but need to add new ones
+for the remote node set from script.
+
+==============================================================================
+3 Aug 2008
+The remote set from script turns out to use a different function, one that
+handles wildcards. This may actually be an opportunity to optimize, by 
+separating out the calls to go to different nodes. For now I'll do the
+simple, stupid thing and individually call set commands.
+
+Done.
+
+Need to set up a proper regression test suite now for the parallel commands.
+Several (like set and get) were tested using the Shell commands, but not 
+through the parser.
+
+Checked in as revision 568 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Implemented quit. Wanted to do it cleanly using a flag to get out of the
+main loop, but the current polling arrangement uses Barrier calls and these
+get out of sync, so one cannot terminate MPI properly. So I've just added a 
+brute-force exit( 0 ) call.
+
+Checked in as revision 569 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Implemented first set of parallel regression tests. But I need to figure out
+how to analyze the working of the tests, rather than just dumping diagnostics
+to the screen.
+
+Showfield in progress. At this point it does showfield * OK, but dies on 
+specific field showfields.. Now fixed.
+
+Checked in as revision 570 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Working on addMsg in parallel, and associated regression tests. Uncovered and
+fixed a bug in the parallel addMsg that the ealier unit tests had missed. 
+Also set up fixes so that proxies have their node number properly assigned.
+Looks like the messages are now set up properly, but we don't have the
+scheduling stuff working across nodes as yet.
+
+Checked in as revision 571 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Now setting up to test scheduling and running code. For now it dies on the
+msg.g parallel regression test.
+
+==============================================================================
+4 Aug 2008
+Stuck. I think that a garbage packet is being picked up or sent and that
+is causing the problems.
+
+mpirun -np 2 moose TESTS/parallel/msg.g 2
+
+I wonder if the issue is that the resched commands deletes the messages that
+control the postmaster. If this happened there could be debris from an
+incomplete process operation.
+
+Possible approach:
+	Have a 'running' flag or a 'reschedPending' flag that gets set from
+	the external 'resched' call if something is already going. As soon 
+	as the event loops gets to a safe place (no more messages in process)
+	the call is completed.
+
+Trying to set this up. No luck yet. Compiles but still doesn't handle it.
+Checked in as revision 574 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+==============================================================================
+5 Aug 2008
+Still struggling with this bug. 
+I have implemented a cleaner version of stop and resched,
+that waits till the current tick operations are over and then executes the
+stop/resched function as a callback. Even with this the problem persists
+with running the simulation in parallel.
+
+Checked in as revision 575 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+A clue. Seems like the nested polling has led to overwrite of the recv buffer.
+Where does this happen? Func 17 is resched. Func 10 is parTraversePathSrc
+Func 11 is parTraversePathReturnSrc.
+And guess what, the Shell::resched calls Id( "/kinetics" ) to see if it is
+there. It is not in this run, so it goes to look off-node.
+Should use a local version for such commands.
+
+Anyway, the issue remains: what to do if we have nesting of polling? Clearly,
+need to set up distinct recv buffers to handle this.
+
+For now, implemented Id::localId( const string& path ) which looks only on the
+local node for the path. This gets round the crash, but the model still does
+not run correctly.
+
+Confirmed that messaging at least is working, as follows:
+- Ran msg.g on 2 nodes.
+- Did reset within msg.g
+- Did individual step calls by hand
+- Showed the output values. They were OK.
+
+Cases where it fails:
+- If I run step 10, the values all go wrong. Even after they have been running
+	OK with individual step calls.
+	Try echoing on each step to check sequencing.
+- If I run it on 4 nodes, it hangs on reset.
+
+
+==============================================================================
+6 Aug.
+Some additional analysis: If I run for a large number of steps then the node-1
+values are OK, even though the node0 values don't show up properly.
+I think we have some fundamental flaws with the message sequencing here.
+
+- Async messages are completely unconstrained. This won't do for any big
+model, like a network model.
+- Need sync messages for the specific test here
+- Need to separate the buffers for different clocks, since the pj calls
+	a whole sequence of operations with the cj, leading to nesting.
+- Need a general nesting facility even within one clock, cf the example
+	with resched and parTraversePath.
+
+Things have sort of ground to a halt because there are so many issues.
+Let's start with the problem of node coordination in a completely async model.
+- Each node keeps track of its tick# (of course). Use this to coordinate.
+- Base requirements:
+	- Each node must complete N internal ticks within a block.
+	- Within a block, messages can arrive at any time.
+	- Messages from A to B must arrive in order.
+	- No order is specified for arrival of messages from different nodes.
+	- All messages within a block must be handled within the block.
+- Implementations:
+	- Set a number of ticks between barriers
+		- On each node:
+		- Every time the ticks are done, send a message to node0. 
+		- Then poll. This mops up messages pending from other nodes.
+		- Node0 polls for these barrier messages and sends out an 'OK'
+			message when all ticks are in.
+	  I can envision this failing as follows:
+	  Suppose node B has finished and A is the last to go.
+	  Suppose A sends a msg to B and then the terminal msg to Node0
+	  Suppose Node0 gets A's message and gets back to B _before_ the
+	  	message from A reaches B (This is easily possible)
+	  THEN: we could complete the block before all messages within the
+	  block are done.
+	- Set a number of ticks between barriers
+		- When the ticks are done, execute a barrier.
+			- Issue is that we may need to mop up pending stuff,
+			which will need polling.
+	- Mixed async/sync messaging
+		- Do the regular async stuff until we need to set a sync point.
+		- On the last tick, all connected nodes send out n sync msg too.
+		- All nodes know this sync info is coming, and it comes in the
+		same packet as the async message. 
+		- All nodes poll incoming.
+		- Since MPI guarantees arrival order, the final sync message
+		will arrive only after all the other msgs hvea been polled.
+		This should do it.
+	- Compromise on base requirements: say that messages must wait
+		at most as long as one inter-barrier period, but may fall
+		on either side of the barrier.
+		- Use a periodic Barrier. Here is a scenario:
+		- A takes over, sends all data out before B starts. A on barrier
+		- B executes, sends all data out. But A is on barrier, so it
+			won't see it this cycle. 
+		- But it is guaranteed to get into A's buffer before the barrier
+			as I understand it. So A will see it as soon as the
+			ticks resume.
+
+
+The sync model, on the other hand, seems well capable of coordination. All
+the input from every connected node must arrive before the next step.
+
+
+==============================================================================
+7 Aug 2008
+Tracked down the reset problem for 4-node operation. The donePoll_ flag on
+all postmasters was true, so they never were getting to send back the
+acknowledgement of the poll command. So the calling ParTick never had
+completion in the pendingCalls() function, and so was in
+an infinite loop polling them.
+
+Issues:
+- Did the RESET mess up the return of the poll ack?
+- Why is ParTick polling for acks at all?
+- We'll get stuck if we have any infinite polling loops in a big 
+	simulation. How to eliminate dead nodes?
+
+Some major redesign later:
+We need to consider three kinds of data transmission: async setup,
+	async runtime, and sync (possibly plus async) runtime.
+
+Async setup. Basically two options:
+	- Use separate RecvBuf for WAIT_ALL, with blocking.
+		- Node 0 adds events from GUI and command line into the
+		  mix, or possibly polls with a timer.
+		- Tight event loop without busy looping on other nodes.
+		- Distinct tag needed to avoid clash with regular
+		  data transfers
+		- Can set up special stuff on shell proxies at startup.
+		- Works best for threaded systems.
+	- Use current system, but harvest all incoming Shell msgs into a stack.
+		- Command execution order has to be maintained.
+		- Pop-back commands at end of loop, to execute.
+			- At this stage may need to nest back into clock loop.
+		- A single parser command may occur over many clock ticks.
+		- Return from poll when stack is empty.
+		- Note that nesting will play havoc with polling. We need
+		  to postpone the stack ops till after polling completes.
+		  Then we do a single pass through each of the postmasters
+		  to execute their pending stack ops. At this point nested
+		  polling may occur, safely.
+  Summary:
+  	For now use the polling method with Shell msgs harvested to stack.
+
+Async runtime (where there are no sync messages at all)
+	- Actually boils down to sync data transmission, because we cannot
+		permit nodes to diverge too far.
+		- Allow data accumulation in send buffers for X timesteps.
+		- Must send message, even if empty.
+		- The target node blocks for data arrival on the Xth step.
+		- Need to look at interleaving sends/recvs for different nodes
+		  at different phases of the X timesteps. Later optimization.
+Sync
+	- The same as before. Blocking poll loop to ensure arrival of data
+	  from all connected nodes, at each timestep. Note that async data
+	  can also come along.
+  Summary: Async and Sync now converge in polling structure. Setup does 
+  	a non-blocking poll loop with a small wait period to avoid CPU bashing.
+
+Possible buffer redesign:
+	- Current: unique send and recv buffers for each postmaster, ie, for
+	  each of the other N-1 nodes.
+	- Proposed: Singe recv buffer, using MPI-any-source.
+		- Sync data is known size, so precise buffer allocation is easy.
+		- Advantage only for async data flow, where a single big
+		  buffer is much less likely to overflow.
+		- Will there be a hidden cost of managing messages from multiple
+		  sources? Now off-node sends won't have a unique target 
+		  buffer for their data.
+	- For sync messaging, it is probably better to use a composite 
+	  sync/async buffer for both send and recv, so that only one packet
+	  goes out from any given node at a time.
+  Summary: Don't optimize on this yet if at all. First get things to work with
+  	the original, distinct buffer approach.
+
+Relationship between setup and data messaging
+	- Common data option (current): Single send and single recv buffer
+  	  per postmaster.
+		- To handle nested calls, need to extract all data from 
+		  recv buffer before executing operations.
+		- Push requests onto a stack?
+		- Needed only if there are > 1 operations in the message.
+		  Subsequent ops get pushed.
+	- Separate data option: Separate buffers for setup operations.
+		- Nested calls use a function-local buffer on the heap.
+		- Not sure how to deal with nested calls at runtime.
+		- Issues with separating how we put data into the buffers.
+		  Could use distinct proxy types, but it is messy.
+  Summary: Stick with single send and single recv buffer per postmaster.
+
+==============================================================================
+8 Aug 2008.
+Consolidated the blocking off-node calls into a single templated call: 
+getOffNodeValue. This will make it easier to split into multithread versions
+as needed.
+
+Checked in as revision 583 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Implemented the setup stack. Without stressing it yet, it works with the
+old unit tests up to 4 nodes. Need to fix the tests to scale better.
+But it still doesn't clear the reset on the parallel regression test msg.g.
+
+Checked in as revision 584 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+==============================================================================
+10 Aug 2008
+After much fine-tuning of polling loops, the updated changes on the
+setup stack work through unit tests on 16 nodes. 
+
+Checked in as revision 589 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Next step is to 
+reconfigure the runtime scheduling in two respects:
+- Make it blocking through monitoring completions of data transfer on every dt
+- Make it handle polling loop insertions for shell command completion.
+
+Working through monitoring the addParallelSrc and addParallelDest so that 
+we can save the asyncNum value 
+
+==============================================================================
+11 Aug 2008
+Fixed up the scheduling for doing blocking transfer when messages are set up
+between two nodes. Clears unit tests, still messes up the ordering in the
+regression test msg.g. As before, it is OK when I do individual steps, giving
+it time to sync nodes. This also works for 4 nodes.
+
+Checked in as revision 590 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Further fixes in the scheduling. There is now a doSync flag which should be
+1 for runtime and 0 for setup.  I think I just need to fix this.
+Also put in a small delay in the polling, which seems to lessen the
+CPU grinding substantially. But there should be a different polling call for
+the generic outer loop, and for cases where we expect data back quickly.
+
+==============================================================================
+12 Aug 2008
+
+The objects with outgoing messages were not being scheduled on outgoingProcess.
+Fixed this, somewhat brute-force, by putting them all on it. That works.
+Reset works. Step seems not to. I think that node0 starts off right away
+with doSync=1, but the other nodes aren't yet ready for this. Perhaps separate
+out the step call to operate in setup mode, and switch into step mode only 
+after this goes out.
+
+send out -> start. May end up sending info from the first timestep before
+targets can change gears.
+
+getOffNodeValue: send out, off node sends back... off node needs to complete
+send in setup mode, then switch to sim mode.
+
+Beyond these issues, there is nothing to stop node0 from going ahead and doing
+all its steps without waiting for any of the other nodes. This is because node0
+only sends output, does not recieve it. Target nodes would then have
+a series of pending inputs all at once, that will sum onto each other.
+Checking if we can enforce that any two connected nodes are in sync with
+each other.
+
+==============================================================================
+13 Aug 2008
+
+Inter-node scheduling still messed up. Need to re-examine from scratch.
+Cases:
+- Setup time: No synchrony, but a pause between ticks to lessen thrashing.
+- Regular ticking along: Must have synchrony.
+- Stop request: Individual scheds must stop at the end of an outer step.
+	All nodes must stop at same time.
+- Start request: All nodes must begin in lockstep
+- Restart request: All nodes must carry on from where they stopped
+- Resched call: All nodes must halt at same time, cj must be rebuilt 
+	on all nodes, and the whole mess carries on without a break.
+	- Consider doing resched without rebuilding, just well-timed 
+ 	  addition/removal of messages.
+- Reinit call: Stop, then all nodes must reinit their schedule.
+- Blocking call from any node during runtime: Remote nodes just handle it
+	along with other message traffic. Calling function must tap into the
+	running ticks and keep them going till returns arrive, then seamlessly
+	return control to the original context.
+
+
+Runtime blocking calls: 
+	1. A shell command comes in that needs blocking.
+	2. Because it is a shell command it is executed after the last 
+	irecv poll, but before any new irecvs are posted.
+	3. It sends data. This goes into the outbound buffer.
+	4. It blocks. This must call the process loop at least twice:
+		- First to work through to the buffer send. (t + 1)
+		- Then the target nodes must recv it and handle it (t + 1 )
+		- Then the target nodes must send their buffer back. (t + 2)
+		- Then the 
+
+Loop is: irecv, outgoing Proc, send, local Proc, poll, exec setup.
+
+Suppose node0 likes to be ahead.
+Node 0			Node 1		Notes
+----t=0 on 0------------t=0 on 1----
+irecv			
+oproc
+send					Often send will block till irecv posts.
+lproc							
+poll					Blocks till node 1 wakes up.
+			irecv	
+			oproc
+			send		Suppose we switch over to node0 again.
+exec
+----t=1 on 0-------
+irecv
+oproc
+send
+lproc
+poll					Blocks till node 1 handles next cycle
+			lproc
+			poll		This may now pick up stuff from 2 sends!
+			exec
+
+Hm. My long-standing basic synchronization model is bad.
+Options:
+	- Multiple data tags? Implying multiple recv buffers, ugh.
+	  Would need 2, probably no more. Alternate between them.
+	  Then the 'sends' never pile up in same irecv buffer.
+	- Barrier after end of poll when in sim mode.
+	  Will need to benchmark, later.
+	  Familiar issues of barrier mismatch and blocking poll loops. 
+	- Master node 'tick' message, perhaps using scatter/gather.
+	  Local nodes poll till they get the 'tick', then do exactly one
+	  process cycle (or N, if we permit that much slop).
+	  Local nodes send back (gather phase) info only when their local 
+	  poll is done.
+
+Suppose node0 likes to be ahead.
+Node 0			Node 1		Notes
+----t=0 on 0------------t=0 on 1----
+irecv			
+oproc
+send					Often send will block till irecv posts.
+lproc							
+poll					Blocks till node 1 completes send
+			irecv	
+			oproc
+			send		Now we switch over to node0 again as 
+					soon as this send lets its poll complete
+barrier					Now we have to switch right back.
+			lproc
+			poll		OK, we have cleared the node0 send.
+			barrier		All matched up now.
+exec
+----t=1 on 0-------
+irecv
+oproc
+send
+lproc
+poll					Blocks till node1 completes send.
+			exec
+		    ----t=1 on 1-------
+			irecv
+			oproc
+			send
+barrier					Blocks till node 1 handles next cycle
+
+
+Despite the barrier being reinstated, I still have a backlog of 4 msgs 
+from node0 to 1.
+==============================================================================
+14 Aug 2008
+Finally got the msg.g regression test to work, on 2, 4 and 8 nodes. The key
+to the debugging was a simple function that printed debug statements in
+separate columns depending on the node#. With this it became much easier to
+see where things were stuck. I now have a barrier in the main async data
+transfer loop, will see now how to ease this requirement. I also had to fix
+a difference in dt between nodes that had been lurking in the main function.
+
+Checked in as revision 599 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Going back to yesterday's concern about the barrier-free synchronization:
+Actually a single irecv will only clear a single send. So it ought to be OK.
+Tried it. Works. Good.
+
+Now let's see if we can terminate the program (quit) more cleanly. OK, done.
+
+
+Way back from 28 July, these were the goals:
+...........................................................................
+Next steps:
+- Make it usable for running multinode simulations
+	* Shell/parser commands for node-specific object creation
+	- Sync messages
+	- Modify shell commands to operate node-independently
+		Currently only message setup works this way. Need:
+		* get
+		* set
+		* showfield
+		* addmsg
+		- deletemsg
+		* le
+		- ce
+		- pwe
+		* create (so it creates on node of parent)
+		+ createmap (ditto) (need to check on a proto)
+		- readcell (ditto)
+		* step
+		* reset: Find which msgs are going off-node to do scheduling.
+		* setclock
+		+ delete: Still doesn't handle clearing up msgs/proxies.
+		* quit
+		- Handle create, createmap, copy, set, get, addmsg 
+			on library objects.
+	- Fix up what happens when we operate on existing proxies.
+	+ Set up a regression test for all of these.
+- Upgrade array operations to work across nodes
+	+ Createmap etc: This now can create a remote array, but not a 
+		cross-node array.
+	- Multinode array proxies
+	- Multinode messaging
+* Design decisions on 
+	* limiting Async node drift
+		- Fixed, now we use non-barrier sync equivalent.
+		Still does not guarantee arbitrary pair message completion.
+	* Managing synchronization on sync models.
+		Already did this. Force polling till all irecvs are in.
+
+For now, the goal is to be able to use scripts to set up nice big multinode
+spiking models. So start with the first set of goals.
+...........................................................................
+I have now updated them.
+
+Spiking model: Let's set up the equivalent of my hippocampal spiking neuron
+model, except use stochastic target synapses.
+
+==============================================================================
+15 Aug 2008
+Fixed the 'quit' command so it works cleanly.
+Checked the management of current working element. This is not clean and I
+have a test, parallel/ce.g, which causes it to dump.
+
+Checked in as revision 600 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Implemented a new parallel regression test, arrayElement.g, which tests
+creation and field access for array elements. This uncovered a bug with
+field access that had been fixed in the main code branch. This needed
+fixes both with local and with parallel field access.
+
+Checked in as revision 602 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+This should give the capability of testing a cross-node network model.
+- readcell
+- createmap from proto
+- scheduling different dt.
+- Scheduling transmission only for some dt, esp at > main dt.
+- Separating local and outgoing calculations.
+
+Stage 1: try moose_synchan.g in parallel. This tests 3
+Stage 2: try moose_synapse_solve.g in parallel. Tests all.
+
+Working on step 1, using genesis/SFmus/pmoose/TESTS/parallel/synchan.g
+Still croaks.
+==============================================================================
+16 Aug 2008
+Fixed the crash: It was another case of the parser referring to the element
+pointer, to get the class name. Went through and fixed up a few more of them,
+pre-emptively. Now to the real heart of the matter, handling the clocks.
+
+==============================================================================
+17 Aug 2008
+Trying still to get the scheduling to work across nodes. I have implemented
+a check for the presence of outgoing messages and use that to decide when to
+do the reinits and whether to go off-node with them.
+The check function is Element::isTarget(), and it clears unit tests. However,
+it fails to identify messages to the postmaster.
+Tried to clean up showmsg. Got it so it doesn't crash, but going off-node
+with showmsg is nasty. For now just a placeholder.
+
+
+==============================================================================
+18 Aug 2008
+Looking more closely at the parallel scheduling. For 1 tick it is OK,
+but otherwise quite a mess. Let's set some rules:
+- ParTicks always used when MPI is on. In fact, the original Tick object
+	simply gets redefined.
+- Resched never needed. Make it a dummy function. This requires that all
+	scheduling operations like object creation and changing clocks,
+	happen on-line.
+- Initially, t0 and t1 handle different phases of clock 0. They are
+	created by default on all nodes.
+- Whenever 'setclock' is called a new tick is made if needed, again on 
+	all nodes. 
+- Setclock may rearrange ticks in the schedule. Done right away, no resched.
+- All scheduled objects are tied to their appropriate tick on creation.
+- As soon as an object acquires an off-node outgoing messge, it is shifted 
+	to the outgoingProcess of the same tick. No resched needed.
+	- Count of outgoing messages on tick is incremented.
+	- Shell, or perhaps postmaster, handles this.
+- As soon as an object acquires an off-node incoming message,
+	count of incoming messages on tick is incremented. 
+	Shell handles this. Or should postmaster?
+- ParTicks block if there is either an incoming or an outgoing message
+	on that tick.
+- Alteration of scheduled ticks is done on pollJob and is barrier-protected.
+	- Poll Job is never altered.
+
+
+Current scheduling is a horrible mess. I am simply trying to pull it back
+to where it was, let alone do the above. It now crashes even on single node.
+==============================================================================
+19 Aug 2008
+Salvage operation. Managed to get unit tests working till at least 8 nodes,
+and the msg.g works for 2 nodes but not more. Key thing was to connect t1
+to the postmaster, which had not been done earlier.
+Checked in as revision 605 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Looking at hanging run in msg.g with 4 nodes. 
+The sequence of calls is resched, reinit (clears these, and is in the reinit
+poll sequece.) Then a step call comes and it hangs. Node zero sends out call
+and goes to barrier. One node gets the call and reaches barrier, the other
+two are still polling for the reinit.
+Tried to enforce polling between all nodes. Does not help.
+Tried to put in an intermediate call without the barrier. Still does not help.
+Clearly there is a message that does not reach the expectant nodes.
+Additionally, there is always one node (plus node0) which does clear the
+poll.
+Also, the order of execution in the preceding reinit is always: node0,
+cleared node, other 2 nodes.
+
+==============================================================================
+20 Aug 2008
+Finally cleared the synchan.g test, along with the msg.g tests and the unit
+tests for parallel functioning. Took about 3 min to run synchan.g on my
+laptop, which goes for only 10K timesteps.
+
+The problem boiled down to synchronization between clocks doing reinit, which
+was solved by putting in a barrier like for the step functions. And like for
+the step functions, it was necessary to add a polling cycle on the master
+node to send out the request to all others.
+
+Checked in as revision 606 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Working toward getting the network.g simulation to run. 
+Did some work on getting planarconnect to work in parallel. Havent tested
+yet because the network.g fails even in single-node mode.
+
+Turns out that
+this regression test fails even with just one node, as do several others.
+At least one of those failures has to do with the reset function. Two
+resets fix it in some cases, but not in network.g
+
+Also fixed a bug in le: It did not see children of global objects like 
+/library.
+Checked in as revision 607 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+==============================================================================
+22 Aug 2008
+Some progress on getting network.g to run. Now moose does not even clear
+this unit tests, serially or parallely. Fixed up an issue with useClock.
+Still bugs remain.
+
+==============================================================================
+23 Aug 2008
+Fixed an infinite recurse in the wildcards, that occurred whenever multinode
+wildcards were being done.
+Still crashes on single node when regression testing network.g
+
+Analyzed this further. It is because the system now implements the t1 at
+setup time. Several objects that are handled by t1 are now being reinited,
+where they weren't in network.g. This causes things to barf. Shouldn't,
+but it isn't quite the same as the older version.
+
+I think we have a messaging issue, specifically that One2OneMap is sending
+all stuff from the compt to the tchan[0] only.
+Nope, checked that using printf, and it all seems to be OK.
+Oddly, glu is also listed in the HHChannel.
+==============================================================================
+24 Aug 2008
+Much messing around later, fixed it. The All2One connector needed quite a bit
+of fixing up. Also issues with the scheduling. Now clears the network.g
+regression test.
+Checked in as revision 620 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Now, finally, get back to doing this in parallel. I anticipate fun and
+games with the global objects.
+
+Implemented creates on globals, also the corresponding unit test. This 
+involved updates to IdManager and Id, as well as TestPostMaster. It clears
+the unit tests but at exit there is a free of an invalid pointer,
+so it croaks then.
+Checked in as revision 621 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Looks like we have overlap between scratchIndex and mainIndex.
+Fixed it. This still doesn't fix the problem of things barfing when I quit.
+
+Checked in as revision 623 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+Tried recompiling the whole thing. Still doesn't work. Move on to set for
+globals.
+
+For global objects we need to handle:
+	*create, 
+	*copy, 
+	*createmap/copyIntoArray 
+	-move
+	*set,
+	-get, 
+	*addmsg 
+	-readcell
+
+Now implemented the set and addmsg, both pretty painless. Did unit tests
+for global set.
+Checked in as revision 624 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+Steps remaining to test a big network:
+	- get global stuff up to readcell to work.
+		Can hack together within-global copy and createmap and readcell
+		Basically issue the commands to all nodes.
+	- Regression tests
+	- Do a bit of cleaning up of scheduling into outgoing and regular procs
+	- Compile and test on cluster
+	- Scale up and profile.
+
+==============================================================================
+25 Aug 2008
+Working on copy. Initially thought it would be a piece of cake, but there
+is a serious issue with copies within globals: the 'copy' function uses
+scratchIds and I will have to have a way to align the ids. If we guarantee
+element creation order (within copy) being the same on all nodes I can pass
+in the starting Id of the created set on the master node, and then reposition
+all the scratch ids to start with this one.
+
+Testing parCopy now with unit tests.
+
+Things have gone downhill. Now even parCreate fails.
+
+==============================================================================
+26 Aug 2008
+After much struggling, I have pinpointed the problem to an apparently minor
+one-line change: in init.cpp I had commented out the line that makes the 
+ShellId a global.
+
+OK, the issue was that the shellId did not have a node specified at all. When I
+set it to Shell::myNode() it clears the first tests but now 'le' on / 
+gives a separate instance for each shell, and this too is wrong.
+Fixed this too. Now we're back to where we were earlier. Uncommented out the
+parCopy tests: Croaks there.
+Fixed it up. It was due to a send command without full type specification.
+Now global copies seem to work.
+
+Checked in as revision 628 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Tested if the new global operations are the direct cause of the ugly error
+messages on exit from MOOSE. Removed them. Still get the error messages.
+
+Moving on, despite these errors: going through the network simulation.
+Seems like the system is confused about sending messages, possibly because
+it doesn't know how to handle ce across multiple nodes. Or possibly 
+because I try to send two messages between the same objects and the system
+doesn't recognize how to deal with proxies for this shared message.
+
+==============================================================================
+27 Aug 2008
+Omitted TestParOps.cpp file from last checkin.
+Checked in as revision 629 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Fixed many of the issues with object setup on global (/library). There
+were several bugs in the message setup code, all to do with cases where a
+local message had to be set up on a remote node, but instead the remote node
+was being asked to set up a parallel message.
+Now it crashes when I try to do an off-node createmap.
+
+Got createmap to work across nodes. Just like the changes needed for copy,
+the copyIntoArray command needed to be updated. Now it successfully 
+uses the library to create remote arrays OK. It crashes now on the 
+planarconnect between nodes in the network.g script.
+
+Checked in as revision 631 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+The addmsg in planarconnect is failing, seems to lose the node info of 
+wildcard list. Fixed.
+
+Then it ran out of space in the send buf. Fixed.
+
+Now it is unhappy about sparse matrix, which is called by Many2ManyConn.cpp.
+
+==============================================================================
+28 Aug 2008.
+Tracked down the problem: Array elements conflicting with simple Proxy 
+elements: The proxy element is looked up by Id. When we have
+an array element on the originating node, the same Id is used, but with a
+different index. On the destination node, this retrieves the same proxy 
+element even if the index differs. Messages are set up, incorrectly, 
+originating from the same proxy element. The eventual mapping of incoming
+data to targets will also be lost, but it crashes before it gets there.
+
+Furthermore, it seems that the selectConnTainer function will always give
+an array msg type to the proxy. This happens because the function tests if
+the Element is a SimpleElement, and if not, adopts the array option. It
+doesn't distinguish between Proxy and Array element types.
+
+Yet more insights: The Many2ManyConn is formed both at src and dest. At src
+it is because the system sees an array as the src, and the postmasters are in
+an array at the dest. At dest it sees an array at dest and a single proxy at
+src: not sure why it goes for Many2Many. In both cases the thing initializes
+a SparseMatrix incorrectly, because neither the postmaster nor the proxy
+have the same dimensions as the corresponding message target.
+
+For now: Put in a few lines so that the Proxy correctly handles indexing of
+message source, doesn't even extra storage.
+Pending: Resolve issue of initialization of the Proxy so it knows how big
+an array it represents. I think the best thing is to send a separate request
+to initialize a proxy, rather than lumping it in with the message creation.
+This may eventually be extended for multi-node arrays.
+
+For now, check in the assorted fix-ups so far.
+
+Implemented Ftype5, send5, and an extra field to pass to the 
+setupProxyMsg function, to indicate size of proxy object. 
+Much to my surprise, this clears the network.g test with a bunch of tweaks
+to set it up on 2 nodes. The remaining issue is the useclock command which
+causes things to crash. I bypassed this, it only changes # of plotted points.
+Surprisingly, the output matches except that it is 10x too big, and of course,
+the # of plotted points is too big. This file is now checked in as 
+TESTS/parallel/network.g. 
+
+Checked in as revision 642 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+==============================================================================
+29 Aug 2008
+Why is there 10x response?
+- 10x proxies
+- Each proxy makes 10x Many2Many projections 
+	(should only make 1 proxy with 1 Many2Many)
+
+Fixed. Turned out that the test for existing projections was not working.
+So new Many2Many projections got set up for each input. Not quite clear to me
+why these resulted in a 10x change, though. Each should have worked 
+independently.
+Checked in as revision 644 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Next, fix useclock.
+Fixed, works correctly in the test. Updated network.g to reflect it.
+Also put in a minor fix to Shell::staticCreate so it does the sensible
+fallback thing when the script asks for a non-existent node. It now makes the
+object on node 0. Now network.g works with 1 and 2 nodes.
+
+One nagging issue is that of tab2file from off-node. The command goes to
+the appropriate object, but if it is off-node then it has to wait till the
+remote node polls for input. This is not an issue with the network.g script,
+since it just piles all the plots up sequentially. However, if one 
+interleaves local node calls to writefile to put in breaks between plots,
+and the off-node calls for tab2file, the interleaving goes awry. 
+One option is to put a blocking call in for tab2file and other output 
+operations.
+
+Checked in as revision 648 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+Next: readcell. This should be nearly the last key module for getting basic 
+models to run in parallel. After that the fun begins with lots of stuff for
+integrating chem and biophys models.
+
+Implemented, clears unit tests, but the readcell itself is pretty buggy so
+the test program moose_readcell.g ran fails too.
+
+Checked in as revision 651 with unit test flags on, Smoldyn off, -g, GSL, MPI on
+
+==============================================================================
+31 Aug 2008
+Finally tracked down problem with readcell. Issue with simple elements with
+indices, and finding them in the child list. Now the readcell test works
+for reading all compartments, but does not load the channel Kca_mit_usb.
+
+==============================================================================
