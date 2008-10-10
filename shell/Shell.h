@@ -158,7 +158,7 @@ class Shell
 // Parallel information
 //////////////////////////////////////////////////////////
 		/// Reports if we are running in serial / parallel mode
-		static bool serial( );
+		static bool isSerial( );
 		
 		/// returns node # of shell.
 		static unsigned int myNode(); 
