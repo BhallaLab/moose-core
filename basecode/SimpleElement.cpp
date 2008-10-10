@@ -140,13 +140,14 @@ const Cinfo* SimpleElement::cinfo( ) const
 Conn* SimpleElement::targets( int msgNum, unsigned int eIndex ) const
 {
 	assert (eIndex == 0);
+	Eref e( const_cast< SimpleElement* >( this ), 0 );
 	if ( msgNum >= 0 && 
 		static_cast< unsigned int >( msgNum ) < msg_.size() )
-		return new TraverseMsgConn( &msg_[ msgNum ], this, eIndex );
+		return new TraverseMsgConn( &msg_[ msgNum ], e );
 	else if ( msgNum < 0 ) {
 		const vector< ConnTainer* >* d = dest( msgNum );
 		if ( d )
-			return new TraverseDestConn( d, eIndex );
+			return new TraverseDestConn( d, e );
 	}
 	return new SetConn( root(), eIndex ); // SetConn always has good() == 0
 }

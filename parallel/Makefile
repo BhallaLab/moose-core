@@ -14,6 +14,8 @@ OBJ = \
 	PostMaster.o	\
 	ProxyElement.o	\
 	AsyncDestFinfo.o	\
+	TestPostMaster.o	\
+	TestParOps.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -24,6 +26,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 PostMaster.o:	PostMaster.h
+TestPostMaster.o:	PostMaster.h
 
 ifneq (,$(findstring DUSE_MPI,$(CFLAGS)))
     CXX = mpicxx
@@ -31,11 +34,14 @@ else
     CXX = g++
 endif
 
+# This Wno-long-long flag is needed to compile mpich_shmem on Ubuntu 8.04
+# It is a problem with all recent versions of mpich, which define MPI_Offset
+# as a long long, which is illegal in ISO C++.
 .cpp.o:
-	$(CXX) $(CFLAGS) -I../basecode -I.. $< -c
+	$(CXX) $(CFLAGS) -Wno-long-long -I.. -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) 
+	$(LD) -r -o $(TARGET) $(OBJ)
 
 clean:
 	-rm -f *.o $(TARGET) core core.*

@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 /**
+ *
  * This class is a parallel version of Moose shell.
  * This file is compiled only when the parallelizatin flag is enabled.
  * This class derives from "Shell" class, the shell class for serial Moose. 

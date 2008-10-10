@@ -168,6 +168,10 @@ void testSched()
 				*/
 
 	ASSERT( tt->numTargets( "process" ) == 4, "sched num ticks" );
+	ASSERT( t1a->isTarget( tt ), "isTarget" );
+	ASSERT( t1b->isTarget( tt ), "isTarget" );
+	ASSERT( t2->isTarget( tt ), "isTarget" );
+	ASSERT( t5->isTarget( tt ), "isTarget" );
 
 	ASSERT( set( cj, "resched" ), "resched" );
 
@@ -324,6 +328,10 @@ void testSchedProcess()
 
 	FuncVec::sortFuncVec();
 /////////////////////////////////////////////////////////////////
+	if ( Shell::numNodes() > 1 ) {
+		cout << "\nSched process sequencing test not done because of multi-node complications";
+		return;
+	}
 	cout << "\nTesting sched process sequencing";
 	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(),
 		Id::scratchId() );
@@ -367,7 +375,7 @@ void testSchedProcess()
 	s2 = Neutral::create( "Sched2", "s2", n->id(),
 		Id::scratchId() );
 
-	Element* shell = Neutral::create( "Shell", "tshell", Element::root()->id(),
+	Element* shell = Neutral::create( "Shell", "tshell", Id(),
 		Id::scratchId() );
 	// Element* shell = Id( "/shell" )();
 	ASSERT( shell != 0 , "shell creation");
@@ -385,7 +393,7 @@ void testSchedProcess()
 	Id t0Id = Neutral::getChildByName( cjId(), "t0" );
 	ASSERT( !t0Id.zero() && !t0Id.bad(), "find t0Id" );
 
-	Shell::useClock( &c, t0Id, path, string( "process" ) );
+	Shell::innerUseClock( t0Id, path, string( "process" ) );
 	ASSERT( t0Id()->numTargets( proc->msg() ) == 4, "useClock" );
 	Shell::resched( &c );
 	ASSERT( t0Id()->numTargets( proc->msg() ) == 4, "useClock" );

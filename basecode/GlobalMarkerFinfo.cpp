@@ -9,7 +9,6 @@
 **********************************************************************/
 
 #include "moose.h"
-#include "DerivedFtype.h"
 #include "DeletionMarkerFinfo.h"
 #include "GlobalMarkerFinfo.h"
 

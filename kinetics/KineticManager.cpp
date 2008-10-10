@@ -217,8 +217,8 @@ static map< string, KMethodInfo >& extMethodMap = fillMethodMap();
 
 static const Cinfo* kineticManagerCinfo = initKineticManagerCinfo();
 
-static const Slot reacSlot = initKineticManagerCinfo()->getSlot( "reac.n" );
-static const Slot nSlot = initKineticManagerCinfo()->getSlot( "nSrc" );
+// static const Slot reacSlot = initKineticManagerCinfo()->getSlot( "reac.n" );
+// static const Slot nSlot = initKineticManagerCinfo()->getSlot( "nSrc" );
 
 ///////////////////////////////////////////////////
 // Class function definitions

@@ -1,4 +1,4 @@
-01 June 2008
+06 July 2008
 
 This document deals with the parallel organization of MOOSE. There are
 several aspects to this:
@@ -62,44 +62,44 @@ Async messages: Use a synapse as a prototype as it is the most exacting
 and common situation.
 
 At src:
-Conn provides 4 pieces of info: to the destination RecvFunc on the PostMaster:
-- data: e.g., the time stamp. This is passed in as the arg of the RecvFunc.
-- Id of tgt: Passed in from Conn.
-- Target message#: This identifies the target synapse Finfo. Passed from Conn.
-- Source Message#: The Message# is a way to look up Ftype. Passed in from Conn.
-
-This goes into a send buffer on the originating node PostMaster. This is just
-filled up sequentially as the send requests come in. As we know the data
-size, we can keep track of location in buffer.
-Q: Would it speed up matters significantly to store size separately? Or send
-it along with the data? Actually we need to be smarter here. How do we
-send arrays and strings?
-A: Use instead the recvFunc provided by the Ftype of the src message. This
-templated operation fills the buffer and adds whatever other info is needed,
-such as vector size.
+As far as the sending element is concerned, nothing changes. It uses the same
+Send function as always. 
+- The RecvFunc now is a templated variant of 
+srcType->asyncFuncId(), and is provided by the AsyncDestFinfo on the
+PostMaster in respondToAdd(). The asyncFunc takes the arguments, serializes 
+them, and
+stuffs them into the buffer location provided by PostMaster::getAsyncParBuf.
+- getAsyncParBuf manages data buffer positioning, and stuffs additional info 
+from the Conn into the AsyncStruct which is placed at the start of each 
+async data packet.
+This additional info is
+	- Id of the source element: Used to look up destination proxy
+	- Message size.
 
 Once send buffer is full, the postmaster does its send. Usual juggling of
 sends, irecvs and scheduling so that local operations are done while waiting.
 Note that we can schedule certain categories of message to go less often,
 such as spike activity and possibly script calls.
 
-At dest: March through recv buffer.
-	- Look up proxy element from Id
-	- Identify Ftype from tgt Message#
-	- Ftype provides a func to call outgoing message from proxy, using
-		data in buffer. Id::eIndex used to identify specific tgts.
-	- Ftype provides increment to go on to next message in buffer.
-	- For now, slot is always zero: there is only one outgoing msg.
+At dest: 
+- On Postmaster: March through recv buffer. This is done 'blind', not knowing
+	contents of data, but using the AsyncStruct info for size of data
+	packet to advance buffer.
+	- Call proxy2tgt( AsyncStruct&, char* data );
+		- Looks up proxy element from Id stored in AsyncStruct.
+		- Calls ProxyElement::sendData( data )
+			- Uses ProxyFunc stored on the ProxyElement to 
+			convert data and send out message to final targets.
 
 Proxy: Looked up by Id of src. This has to come through buffer. This is just
 	a subclass of Element. I will need a default simple version that
 	handles just a single Msg. This should do for almost all cases.
 	Later I'll need a more expensive/complete version for cases
 	where there are multiple messages. Fields of ProxyElement class:
-	Msg entry
-	Single Finfo ptr.
-	Id (from base class)
-	postmaster for node where src actually lives.
+	- Id (from base class)
+	- Msg entry
+	- unsigned int node_: Place where original of Proxy really lives.
+	- ProxyFunc: Function that converts and sends out data.
 	
 Handling array msgs
 	- Single proxy Element for entire array, as usual.
@@ -162,8 +162,10 @@ This should be known to the SrcFinfo. By default msgs should be sync.
 		dest/src funcIndex so we can figure out type info.
 		dest msgIndex
 - At dest:
+	This is done by PostMaster::setupProxyMsg( srcNode, proxyId, destId, 			destMsg, post )
 	- Create proxy element with specified msg type. If proxy exists, use it.
 		Should be easy to using lookup of ElementList by Id.
+	- Figure out ProxyFunc from destMsg.
 	- Send message from proxy to true target[s]
 
 3. Setting up sync messages.

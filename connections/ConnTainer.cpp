@@ -23,6 +23,35 @@ const unsigned int ConnTainer::All2One = 6;
 const unsigned int ConnTainer::One2OneMap = 8;
 
 /**
+ * This function picks a suitable container depending on the
+ * properties of the src and dest, and the status of the incoming option.
+ * It is flawed in various ways:
+ * - Uses string comparisons to find element type, rather than a 
+ *   virtual func
+ * - Doesn't handle proxies
+ * - Can't handle conversion of a SimpleElement to ArrayElement.
+ *
+ * Also not clear how to deal with conversion of a Many2Many to an
+ * All2All if needed.
+ */
+unsigned int connOption( Eref src, Eref dest, unsigned int option )
+{
+	if ( option == ConnTainer::Default ) {
+		int srcNum;
+		if ( src.e->elementType() == "Simple" ) srcNum = 0;
+		else if ( src.i == Id::AnyIndex ) srcNum = 2;
+		else srcNum = 1;
+	
+		int destNum;
+		if ( dest.e->elementType() == "Simple" ) destNum = 0;
+		else if ( dest.i == Id::AnyIndex ) destNum = 2;
+		else destNum = 1;
+		option = srcNum * 3 + destNum;
+	}
+	return option;
+}
+
+/**
  * Add a new message with a container decided by the optional final 
  * argument. It defaults to a sensible guess based on the indices of the
  * src and dest Erefs.
@@ -40,29 +69,14 @@ const unsigned int ConnTainer::One2OneMap = 8;
  * 	How do I set up a fully connected matrix? Override the default.
  */
 ConnTainer* selectConnTainer( Eref src, Eref dest, 
-	unsigned int srcMsg, unsigned int destMsg,
+	int srcMsg, int destMsg,
 	unsigned int srcIndex, unsigned int destIndex,
 	unsigned int connTainerOption )
 {
-	// This is flawed: We could have a single-entry ArrayElement that
-	// later gets expanded.
-	// RD: flaw corrected by using elementType function
-	
-	if ( connTainerOption == ConnTainer::Default ) {
-		int srcNum;
-		if ( src.e->elementType() == "Simple" ) srcNum = 0;
-		else if ( src.i == Id::AnyIndex ) srcNum = 2;
-		else srcNum = 1;
-	
-		int destNum;
-		if ( dest.e->elementType() == "Simple" ) destNum = 0;
-		else if ( dest.i == Id::AnyIndex ) destNum = 2;
-		else destNum = 1;
-		connTainerOption = srcNum * 3 + destNum;
-	}
+	connTainerOption = connOption( src, dest, connTainerOption );
 
 	ConnTainer* ct = 0;
-	 // cout << "selectContainer: option " << connTainerOption << " from " << src->name() << "." << src.i << " to " << dest->name() << "." << dest.i << endl;
+	// cout << "selectContainer: option " << connTainerOption << " from " << src->name() << "." << src.i << " to " << dest->name() << "." << dest.i << endl;
 	switch ( connTainerOption )
 	{
 		case 0:

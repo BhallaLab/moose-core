@@ -8,6 +8,8 @@
 **********************************************************************/
 #include "moose.h"
 #include "Tick.h"
+#include "ClockJob.h"
+#include "../shell/Shell.h"
 
 /**
  * The Tick handles the nuts and bolts of scheduling. It sends the
@@ -42,10 +44,19 @@ const Cinfo* initTickCinfo()
 		// from the following tick.
 		new DestFinfo( "nextTime", Ftype1< double >::global(), 
 			RFCAST( &Tick::receiveNextTime ) ),
-		// The third one is for propagating resched forward.
+		// propagating resched forward.
 		new SrcFinfo( "resched", Ftype0::global() ),
-		// The fourth one is for propagating reinit forward.
+		// propagating reinit forward.
 		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
+		// Calling for clean termination including a callback identifier
+		new SrcFinfo( "stopSrc", Ftype1< int >::global() ),
+		// Executing the stop callback.
+		new DestFinfo( "stopCallback", Ftype1< int >::global(), 
+			RFCAST( &Tick::handleStopCallback ) ),
+		new SrcFinfo( "checkRunning", Ftype0::global() ),
+		// Executing the stop callback.
+		new DestFinfo( "runningCallback", Ftype1< bool >::global(), 
+			RFCAST( &Tick::handleRunningCallback ) ),
 	};
 
 	/**
@@ -71,6 +82,16 @@ const Cinfo* initTickCinfo()
 		// The fifth one is for receiving the reinit call.
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(), 
 			RFCAST( &Tick::reinit ) ),
+		// The sixth entry is for receiving the stop call.
+		new DestFinfo( "stop", Ftype1< int >::global(), 
+			RFCAST( &Tick::handleStop ) ),
+		// The seventh entry is for sending back the callback from the stop.
+		new SrcFinfo( "stopCallbackSrc", Ftype1< int >::global() ),
+		// The eightth entry is for receiving the checkRunning call.
+		new DestFinfo( "checkRunning", Ftype0::global(), 
+			RFCAST( &Tick::handleCheckRunning ) ),
+		// The seventh entry is for sending back the callback from the stop.
+		new SrcFinfo( "runningCallback", Ftype1< bool >::global() ),
 	};
 
 	/**
@@ -180,10 +201,17 @@ static const Slot reinitNextSlot =
 static const Slot returnNextTimeSlot = 
 	initTickCinfo()->getSlot( "prev.nextTimeSrc" );
 	
-static const Slot updateDtSlot = initTickCinfo()->getSlot( "updateDt" );
+static const Slot updateDtSlot = initTickCinfo()->getSlot( "updateDtSrc" );
 static const Slot processSlot = 
 	initTickCinfo()->getSlot( "process.process" );
 static const Slot reinitSlot = initTickCinfo()->getSlot( "process.reinit" );
+
+static const Slot stopCallbackSlot = 
+	initTickCinfo()->getSlot( "prev.stopCallbackSrc" );
+static const Slot runningCallbackSlot = 
+	initTickCinfo()->getSlot( "prev.runningCallback" );
+static const Slot stopSlot = 
+	initTickCinfo()->getSlot( "next.stopSrc" );
 
 ///////////////////////////////////////////////////
 // Tick class definition functions
@@ -345,11 +373,24 @@ void Tick::innerIncrementTick(
  * Resched is used to rebuild the scheduling. It does NOT mean that
  * the timings have to be updated: we may need to resched during a
  * run without missing a beat.
+ *
+ * The function does two things: It sorts out the ordering of the tick
+ * sequencing between ticks, and it may juggle around the ordering of
+ * calls to scheduled objects. For example, parTicks use this to 
+ * decide which objects get scheduled for outgoingProcess and which
+ * remain on the local node. Yet more gory things may happen for
+ * multithreading. The base Tick class does not worry about
+ * such details.
  */
 void Tick::resched( const Conn* c )
 {
-	static_cast< Tick* >( c->data() )->
-			updateNextTickTime( c->target() );
+	static_cast< Tick* >( c->data() )->innerResched( c );
+}
+
+void Tick::innerResched( const Conn* c )
+{
+	// cout << "Oops, this is Tick::innerResched on " << c->target()->name() << "\n";
+	updateNextTickTime( c->target() );
 }
 
 /**
@@ -425,8 +466,11 @@ void Tick::innerStart( Eref e, ProcInfo info, double maxTime )
 	static double JUST_OVER_ONE = 1.000000000001;
 	double endTime;
 	maxTime = maxTime * NEARLY_ONE;
+	running_ = 1;
 
-	while ( info->currTime_ < maxTime ) {
+	// cout << "Inner Start on node " << Shell::myNode() << endl;
+
+	while ( running_ && info->currTime_ < maxTime ) {
 		endTime = maxTime + dt_;
 		if ( next_ && endTime > nextTickTime_ )
 			endTime = nextTickTime_ * JUST_OVER_ONE;
@@ -453,6 +497,10 @@ void Tick::innerStart( Eref e, ProcInfo info, double maxTime )
 				send2< ProcInfo, double >( 
 								e, nextSlot, info, nextTime_ );
 		}
+	}
+	if ( callback_ == ClockJob::doReschedCallback ) {
+		callback_ = 0;
+		send1< int >( e, stopCallbackSlot, ClockJob::doReschedCallback );
 	}
 }
 
@@ -485,5 +533,43 @@ void Tick::innerReinitFunc( Eref e, ProcInfo info )
 ///////////////////////////////////////////////////
 // Other function definitions
 ///////////////////////////////////////////////////
+//
+/**
+ * Handle a request to stop.
+ */
+void Tick::handleStop( const Conn* c, int v )
+{
+	Tick* t = static_cast< Tick* >( c->data() );
+	t->running_ = 0;
+	t->callback_ = v;
+}
+
+/**
+ * The next stage has stopped. What now?
+ */
+void Tick::handleStopCallback( const Conn* c, int v )
+{
+	;
+}
+
+/**
+ * Handle a request for the 'running' flag
+ */
+void Tick::handleCheckRunning( const Conn* c )
+{
+	Tick* t = static_cast< Tick* >( c->data() );
+	sendBack1< bool >( c, runningCallbackSlot, t->running_ );
+}
+
+/**
+ * Dummy function for handling the callback from CheckRunning. The real
+ * purpose of the routine is for the ClockJob to query the Tick.
+ */
+void Tick::handleRunningCallback( const Conn* c, bool v )
+{
+	;
+}
+
+
 int Tick::ordinalCounter_ = 0;
 

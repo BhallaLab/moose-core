@@ -94,6 +94,21 @@ class DestFinfo: public Finfo
 				return fv_->id();
 			}
 
+			/// This is a dest, so it does not send out any info.
+			unsigned int syncFuncId() const {
+				return 0;
+			}
+
+			/// This is a dest, so it does not send out any info.
+			unsigned int asyncFuncId() const {
+				return 0;
+			}
+
+			/// This is a dest, so we do have to define proxyFuncs.
+			unsigned int proxyFuncId() const {
+				return ftype()->proxyFuncId();
+			}
+
 		private:
 			/**
 			 * This is the function executed when a message arrives at this

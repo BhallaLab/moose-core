@@ -10,6 +10,7 @@
 #include "moose.h"
 #include "ThisFinfo.h"
 #include "../element/Neutral.h"
+#include "../shell/Shell.h"
 
 /*
  * This file handles copy operations for the SimpleElement class.
@@ -346,6 +347,10 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 	// First is original, second is copy
 	// However, if orig is a Global, copy is not done, unless this
 	// originating element is itself a global.
+	// Note that here we use Global in a different sense than in the
+	// objects that are children of /library and are therefore common on
+	// all nodes. Here Global just means that they should not be copied.
+	// I don't think this situation really comes up.
 	map< const Element*, Element* > origDup;
 	map< const Element*, Element* >::iterator i;
 
@@ -386,18 +391,20 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 		parent->isDescendant( library ) || parent->isDescendant( proto )
 	) ) {
 		for ( i = origDup.begin(); i != origDup.end(); i++ ) {
-			i->second->cinfo()->schedule( i->second, ConnTainer::Default );
+			if ( i->first != i->second ) // a global
+				i->second->cinfo()->schedule( i->second,
+					ConnTainer::Default );
 		}
 	}
 
-	/*
+	// Phase 6: Set to globals or local node, as the case may be.
+	unsigned int node = Shell::myNode();
+	if ( parent != Element::root() && parent->id().isGlobal() )
+		node = Id::GlobalNode;
 	for ( i = origDup.begin(); i != origDup.end(); i++ ) {
-		i->first->dumpMsgInfo();
-		i->second->dumpMsgInfo();
+		if ( i->first != i->second )
+			i->second->id().setNode( node );
 	}
-	*/
-	// dumpMsgInfo();
-	// child->dumpMsgInfo();
 
 	return child;
 }
@@ -471,7 +478,6 @@ Element* SimpleElement::copyIntoArray( Id parent, const string& newName, int n )
 		}
 	}
 	return child;
-
 }
 
 #ifdef DO_UNIT_TESTS

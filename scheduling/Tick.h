@@ -13,7 +13,7 @@ class Tick
 {
 	public:
 		Tick()
-			: dt_( 1.0 ), stage_( 0 ), nextTime_( 0.0 ),
+			: callback_( 0 ), dt_( 1.0 ), stage_( 0 ), nextTime_( 0.0 ),
 				nextTickTime_( 0.0 ), next_( 0 )
 		{
 			;
@@ -46,14 +46,52 @@ class Tick
 		static void receiveNextTime( const Conn* c, double v );
 		static void incrementTick( const Conn* c, ProcInfo p, double v);
 		void innerIncrementTick( Eref e, ProcInfo p, double v );
+
+		/**
+ 		 * Resched is used to rebuild the scheduling. It does NOT mean that
+ 		 * the timings have to be updated: we may need to resched during a
+ 		 * run without missing a beat.
+		 */
 		static void resched( const Conn* c);
+
+		/**
+ 		 * The innerResched function does two things: It sorts out the 
+		 * ordering of the sequencing between ticks, and it may juggle
+		 * around the ordering of calls to scheduled objects. The first
+		 * task is handled by updateNextTickTime. The second task is
+		 * tick class specific.
+		 * For example, parTicks use this
+		 * to decide which objects get scheduled for outgoingProcess and
+		 * which remain on the local node. Yet more gory things may happen
+		 * for multithreading. The base Tick class does not worry about
+ 		 * such details.
+ 		 */
+		virtual void innerResched( const Conn* c);
+
+		/**
+ 		 * updateNextTickTime cascades down the ticks to initialize their
+ 		 * nextTime_ field by querying the next one.
+ 		 * Invoked whenever there is a rescheduling.
+ 		 */
 		void updateNextTickTime( Eref e );
+
+		/**
+		 * Reinit is used to set the simulation time back to zero for
+		 * itself, and to trigger reinit in all targets, and to go on
+		 * to the next tick
+		 */
 		static void reinit( const Conn* c, ProcInfo p );
 
 		static void handleNextTimeRequest( const Conn* c );
 
 		static void start( const Conn* c, ProcInfo p, double maxTime );
-		void innerStart( Eref e, ProcInfo p, double maxTime );
+		virtual void innerStart( Eref e, ProcInfo p, double maxTime );
+
+		static void handleStop( const Conn* c, int callbackFlag );
+		static void handleStopCallback( const Conn* c, int callbackFlag );
+
+		static void handleCheckRunning( const Conn* c );
+		static void handleRunningCallback( const Conn* c, bool isRunning );
 		///////////////////////////////////////////////////////
 		// Utility function
 		///////////////////////////////////////////////////////
@@ -68,6 +106,8 @@ class Tick
 		virtual void innerReinitFunc( Eref e, ProcInfo info );
 
 	private:
+		bool running_;
+		int callback_;
 		double dt_;
 		int stage_;
 		double nextTime_;

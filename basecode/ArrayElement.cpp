@@ -158,13 +158,14 @@ const Cinfo* ArrayElement::cinfo( ) const
  */
 Conn* ArrayElement::targets( int msgNum, unsigned int eIndex ) const
 {
+	Eref e( const_cast< ArrayElement* >( this ), eIndex );
 	if ( msgNum >= 0 && 
 		static_cast< unsigned int >( msgNum ) < msg_.size() )
-		return new TraverseMsgConn( &msg_[ msgNum ], this, eIndex );
+		return new TraverseMsgConn( &msg_[ msgNum ], e );
 	else if ( msgNum < 0 ) {
 		const vector< ConnTainer* >* d = dest( msgNum );
 		if ( d )
-			return new TraverseDestConn( d, eIndex );
+			return new TraverseDestConn( d, e );
 	}
 	return new SetConn( root(), eIndex );
 }

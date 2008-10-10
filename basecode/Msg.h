@@ -70,7 +70,7 @@ class Msg
 		/**
 		 * Iterator to the conn selected by the 'tgt' index.
 		 */
-		Conn* findConn( unsigned int eIndex, unsigned int tgt ) const;
+		Conn* findConn( Eref e, unsigned int tgt, unsigned int funcId ) const;
 
 		/**
 		 * Follows through the link list of msgs to find one that matches
@@ -259,6 +259,13 @@ class Msg
 		 */
 		bool copy( const ConnTainer* c, Element* e1, Element* e2, bool isArray) const;
 
+		/**
+		 *  Returns True if tgt is a target of Element src.
+		 *  Handles bidirectional messages too. Does not worry about
+		 *  indices, on either src or dest
+		 */
+		bool isTarget( const Element* src, const Element* tgt ) const;
+
 	private:
 		/**
 		 * This manages the ConnTainers.
@@ -272,7 +279,8 @@ class Msg
 		const FuncVec *fv_; 
 
 		/**
-		 * Could use index or ptr here. need to sort it out.
+		 * Index to next Msg in Msg vector, somewhat like a linked list.
+		 * Prefer index to ptr because Msg vector might be resized.
 		 */
 		unsigned int next_; 
 };
