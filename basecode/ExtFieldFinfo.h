@@ -137,6 +137,21 @@ class ExtFieldFinfo: public Finfo
 			void countMessages( unsigned int& num ) {
 				;
 			}
+			
+			/// Looks at the original.
+			unsigned int syncFuncId() const {
+				return origFinfo_->syncFuncId();
+			}
+
+			/// Looks at the original.
+			unsigned int asyncFuncId() const {
+				return origFinfo_->asyncFuncId();
+			}
+
+			/// Looks at the original.
+			unsigned int proxyFuncId() const {
+				return origFinfo_->proxyFuncId();
+			}
 
 			/**
 			 * The ExtFieldFinfo is one of the few Finfos that has

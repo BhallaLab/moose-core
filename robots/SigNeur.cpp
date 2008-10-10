@@ -516,26 +516,13 @@ void SigNeur::schedule( Eref me )
 	Shell::setClock( &c, 1, cellDt_, 1 );
 	Shell::setClock( &c, 2, sigDt_, 0 );
 	Shell::setClock( &c, 3, sigDt_, 1 );
-	Id t2( "/sched/cj/t2" );
-	assert( t2.good() );
 
 	set< string >( cellId.eref(), "method", cellMethod_ );
 	set< string >( kinId.eref(), "method", dendMethod_ );
-	vector< Id > kinSolvers;
-	Id hubId( "/sig/kinetics/solve/hub" );
-	Id integId( "/sig/kinetics/solve/integ" );
-	assert( hubId.good() );
-	assert( integId.good() );
-	assert( kinId.good() );
-	kinSolvers.push_back( hubId );
-	kinSolvers.push_back( integId );
-	kinSolvers.push_back( kinId );
 
-	Shell::useClock( &c, t2, kinSolvers, "process" );
+	Shell::useClock( &c, "t2", "/sig/kinetics", "process" );
+	Shell::useClock( &c, "t2", "/sig/kinetics/solve/hub", "process" );
+	Shell::useClock( &c, "t2", "/sig/kinetics/solve/integ", "process" );
 
-	vector< Id > adaptors;
-	Id t3( "/sched/cj/t3" );
-	assert( t3.good() );
-	simpleWildcardFind( "/sig/cell/##[][TYPE==Adaptor]", adaptors );
-		Shell::useClock( &c, t3, adaptors, "process" );
+	Shell::useClock( &c, "t3", "/sig/cell/##[][TYPE==Adaptor]", "process" );
 }

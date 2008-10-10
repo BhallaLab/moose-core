@@ -93,7 +93,7 @@ const Cinfo* initRandomSpikeCinfo()
 
 static const Cinfo* randomSpikeCinfo = initRandomSpikeCinfo();
 
-static const Slot eventSlot = initRandomSpikeCinfo()->getSlot( "eventSrc");
+static const Slot eventSlot = initRandomSpikeCinfo()->getSlot( "event");
 
 
 RandomSpike::RandomSpike()

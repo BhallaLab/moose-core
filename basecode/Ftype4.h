@@ -152,10 +152,10 @@ virtual std::string getTemplateParameters() const
 				T2 v2;
 				T3 v3;
 				T4 v4;
-				data = unserialize< T1 >( v1, data );
-				data = unserialize< T2 >( v2, data );
-				data = unserialize< T3 >( v3, data );
-				data = unserialize< T4 >( v4, data );
+				data = Serializer< T1 >::unserialize( v1, data );
+				data = Serializer< T2 >::unserialize( v2, data );
+				data = Serializer< T3 >::unserialize( v3, data );
+				data = Serializer< T4 >::unserialize( v4, data );
 				send4< T1, T2, T3, T4 >( c->target(), slot, v1, v2, v3, v4);
 			}
 
@@ -166,15 +166,15 @@ virtual std::string getTemplateParameters() const
 			 */
 			static void syncFunc( const Conn* c, T1 v1, T2 v2, T3 v3,
 				T4 v4 ) {
-				unsigned int size1 = serialSize< T1 >( v1 );
-				unsigned int size2 = serialSize< T2 >( v2 );
-				unsigned int size3 = serialSize< T3 >( v3 );
-				unsigned int size4 = serialSize< T4 >( v4 );
+				unsigned int size1 = Serializer< T1 >::serialSize( v1 );
+				unsigned int size2 = Serializer< T2 >::serialSize( v2 );
+				unsigned int size3 = Serializer< T3 >::serialSize( v3 );
+				unsigned int size4 = Serializer< T4 >::serialSize( v4 );
 				void* data = getParBuf( c, size1 + size2 + size3 + size4 ); 
-				data = serialize< T1 >( data, v1 );
-				data = serialize< T2 >( data, v2 );
-				data = serialize< T3 >( data, v3 );
-				serialize< T4 >( data, v4 );
+				data = Serializer< T1 >::serialize( data, v1 );
+				data = Serializer< T2 >::serialize( data, v2 );
+				data = Serializer< T3 >::serialize( data, v3 );
+				Serializer< T4 >::serialize( data, v4 );
 			}
 
 			/**
@@ -184,15 +184,15 @@ virtual std::string getTemplateParameters() const
 			 * source
 			 */
 			static void asyncFunc( const Conn* c, T1 v1, T2 v2, T3 v3, T4 v4 ){
-				unsigned int size1 = serialSize< T1 >( v1 );
-				unsigned int size2 = serialSize< T2 >( v2 );
-				unsigned int size3 = serialSize< T3 >( v3 );
-				unsigned int size4 = serialSize< T4 >( v4 );
+				unsigned int size1 = Serializer< T1 >::serialSize( v1 );
+				unsigned int size2 = Serializer< T2 >::serialSize( v2 );
+				unsigned int size3 = Serializer< T3 >::serialSize( v3 );
+				unsigned int size4 = Serializer< T4 >::serialSize( v4 );
 				void* data = getAsyncParBuf( c, size1 + size2 + size3 + size4 ); 
-				data = serialize< T1 >( data, v1 );
-				data = serialize< T2 >( data, v2 );
-				data = serialize< T3 >( data, v3 );
-				serialize< T4 >( data, v4 );
+				data = Serializer< T1 >::serialize( data, v1 );
+				data = Serializer< T2 >::serialize( data, v2 );
+				data = Serializer< T3 >::serialize( data, v3 );
+				Serializer< T4 >::serialize( data, v4 );
 			}
 };
 

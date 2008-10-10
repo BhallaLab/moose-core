@@ -198,6 +198,21 @@ class DynamicFinfo: public Finfo
 				return origFinfo_->funcId();
 			}
 
+			/// Looks at the original.
+			unsigned int syncFuncId() const {
+				return origFinfo_->syncFuncId();
+			}
+
+			/// Looks at the original.
+			unsigned int asyncFuncId() const {
+				return origFinfo_->asyncFuncId();
+			}
+
+			/// Looks at the original.
+			unsigned int proxyFuncId() const {
+				return origFinfo_->proxyFuncId();
+			}
+
 			/**
 			 * This should be true if the Finfo never acts as a 
 			 * message Source, but it is tricky here in the case of

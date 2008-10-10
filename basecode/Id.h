@@ -19,35 +19,34 @@ using namespace std;
 class Eref;
 class Element;
 class IdManager;
+class Nid;
 namespace pymoose{
 	class PyMooseContext;
 }
+
 /**
  * This class manages id lookups for elements. Ids provide a uniform
  * handle for every object, independent of which node they are located on.
  */
 class Id
 {
-	// This access is needed so that main can assign the nodes to
-	// the manager.
-	friend int main( int argc, char** argv );
-        friend int mooseInit();
-        
+	friend class pymoose::PyMooseContext; ///\todo: deprecate this friend.
     
-    
-	friend class IdManager;
-	friend class pymoose::PyMooseContext;
-    
-#ifdef DO_UNIT_TESTS
-	friend void testShell();
-#endif
-	
 	public:
 
 		//////////////////////////////////////////////////////////////
 		//	Id creation
 		//////////////////////////////////////////////////////////////
+		/**
+		 * Returns the root Id
+		 */
 		Id();
+
+		/**
+		 * Sets up the Id with the Nid info. Would be automatic except
+		 * that the node info also has to be transferred.
+		 */
+		Id( Nid nid );
 
 		/**
 		 * Returns an id found by traversing the specified path
@@ -55,8 +54,16 @@ class Id
 		 */
 		Id( const std::string& path, const std::string& separator = "/" );
 
-                ~Id(){}
+		/**
+		 * Destroys an Id. Doesn't do anything much.
+		 */
+		~Id(){}
     
+		/**
+		 * Returns an Id found by traversing the specified path on the
+		 * local node only
+		 */
+		static Id localId( const std::string& path, const std::string& separator = "/" );
 
 		/**
 		 * Creates a new childId based on location of parent node and
@@ -91,6 +98,13 @@ class Id
 		static Id shellId();
 
 		/**
+		 * This returns Id( 2, node ), which is the postmaster of the
+		 * specified node. 
+		 * On a serial version this returns a neutral.
+		 */
+		static Id postId( unsigned int node );
+
+		/**
 		 * This creates a new Id with the same element id but a new index
 		 */
 		Id assignIndex( unsigned int index ) const;
@@ -99,6 +113,25 @@ class Id
 		 * Deprecated
 		// void setIndex( unsigned int index );
 		 */
+
+		//////////////////////////////////////////////////////////////
+		//	Id management for updating values
+		//////////////////////////////////////////////////////////////
+
+		/**
+		 * Returns the most recently created ScratchId + 1. Used as a
+		 * starting point for the redefinition of scratch Ids. Does
+		 * not allocate any new Ids.
+		 */
+		static Id nextScratchId();
+
+		/**
+		 * Shifts a block of scratchIds, from 'last' to the most recent,
+		 * to a set of regular Ids beginning at base. 
+		 * The base must be an Nid because we don't yet have its node#
+		 * recorded on this node. Node might be global.
+		 */
+		static bool redefineScratchIds( Id last, Nid base );
 
 		//////////////////////////////////////////////////////////////
 		//	Id info
@@ -122,7 +155,13 @@ class Id
 		Element* operator()() const;
 
 		/**
-		 * Returns the Element index/
+		 * Returns the Element id
+		 */
+		unsigned int id() const {
+			return id_;
+		}
+		/**
+		 * Returns the Element index
 		 */
 		unsigned int index() const {
 			return index_;
@@ -137,6 +176,22 @@ class Id
 		 * Returns node on which id is located.
 		 */
 		unsigned int node() const;
+
+		/**
+		 * True if node is global
+		 */
+		bool isGlobal() const;
+
+		/**
+		 * Tells object it is a global. Used only by constructors.
+		 */
+		void setGlobal();
+
+		/**
+		 * Assignes node# to id. Used when creating proxy elements
+		 * and Global objects.
+		 */
+		void setNode( unsigned int node );
 
 		/**
 		 * The most recently created id on this node
@@ -157,7 +212,7 @@ class Id
 		/**
 		 * Returns a string holding the ascii value of the id_ .
 		 */
-                static std::string id2str( Id id );
+		static std::string id2str( Id id );
 
 		//////////////////////////////////////////////////////////////
 		//	Here we have a set of status check functions for ids.
@@ -189,6 +244,14 @@ class Id
 		 */
 		bool isScratch() const;
 
+		/**
+		 * True if it is a proxy element. This is a minimal holder
+		 * element on a remote node that does message redirection but
+		 * for everything else refers back to the authoritative
+		 * element on its node.
+		 */
+		bool isProxy() const;
+
 		//////////////////////////////////////////////////////////////
 		//	Comparisons between ids
 		//////////////////////////////////////////////////////////////
@@ -205,9 +268,6 @@ class Id
 				( id_ == other.id_ && index_ < other.index_ );
 		}
 
-		static void setNodes( unsigned int myNode, unsigned int numNodes,
-			vector< Element* >& post );
-
 		friend ostream& operator <<( ostream& s, const Id& i );
 		friend istream& operator >>( istream& s, Id& i );
 
@@ -217,20 +277,48 @@ class Id
 		bool setElement( Element* e );
 		static const unsigned int AnyIndex;
 		static const unsigned int BadIndex;
-	private:
-		// static void setManager( Manager* m );
+		static const unsigned int GlobalNode;
 
 		/**
-		 * Assignment of id to specific index. Only done internally.
+		 * Assignment of id to specific index. This was originally
+		 * a private function, but then there turned out to be so
+		 * many 'friends' it was defeating the purpose.
 		 * This is a handy function, but it is very likely to be
 		 * misused through creation of unchecked and invalid Ids.
 		 * The str2Id can be used for most test scenarios,
 		 * and the rest of the time you should not be using this.
 		 */
-		Id( unsigned int id );
+		Id( unsigned int i, unsigned int index = 0 );
+	private:
+		// static void setManager( Manager* m );
 		unsigned int id_; // Unique identifier for Element*
 		unsigned int index_; // Index of array entry within element.
 		static IdManager& manager();
+};
+
+/**
+ * Extension of Id class, used in passing ids around between nodes, so
+ * that their node info is retained. See Shell::addParallelSrc
+ */
+class Nid: public Id
+{
+	public:
+		Nid();
+
+		Nid( Id id );
+
+		Nid( Id id, unsigned int node );
+
+		unsigned int node() const {
+			return node_;
+		}
+
+		void setNode( unsigned int node ) {
+			node_ = node;
+		}
+		
+	private:
+		unsigned int node_;
 };
 
 #endif // _ID_H

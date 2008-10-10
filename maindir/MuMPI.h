@@ -7,12 +7,15 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifndef _Mu_MPI_H
+#define _Mu_MPI_H
+
 /**
  * This class provides overridden MPI calls which are compatible with MUSIC.
  * Use these calls even if MUSIC is not linked.
  */
 
-class MMPI
+class MuMPI
 {
 public:
 	static void setupMusic( );
@@ -23,3 +26,5 @@ public:
 private:
 	static MPI::Intracomm communicator_;
 };
+
+#endif // _Mu_MPI_H

@@ -85,6 +85,13 @@ class Element
 		 */
 		virtual unsigned int numTargets( const string& finfoName ) const = 0;
 
+		/**
+		 * Returns true if the specified Element is a target of any
+		 * of the messages emanating from this Element.
+		 * Ignores indices.
+		 */
+		virtual bool isTarget( const Element* tgt ) const;
+
 		///////////////////////////////////////////////////////////////
 		// Information functions
 		///////////////////////////////////////////////////////////////
@@ -214,6 +221,13 @@ class Element
 		 * root Element.
 		 */
 		static Element* root();
+
+		/**
+		 * Redefines the id associated with this element. Should only
+		 * be accessed by the IdManager, which may need to do this in
+		 * the redefineScratchIds function.
+		 */
+		void setId( Id id );
 
 		virtual Id id() const {
 			return id_;

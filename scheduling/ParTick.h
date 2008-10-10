@@ -13,13 +13,21 @@ class ParTick: public Tick
 {
 	public:
 		ParTick()
-			: Tick(), pendingCount_( 0 )
+			: Tick(), pendingCount_( 0 ), barrier_( 0 ), doSync_( 0 )
 		{
 			;
 		}
 
 		virtual ~ParTick( )
 		{ ; }
+
+		///////////////////////////////////////////////////////
+		// Functions for Fields
+		///////////////////////////////////////////////////////
+		static void setBarrier( const Conn* c, int v );
+		static int getBarrier( Eref e );
+		static void setSync( const Conn* c, bool v );
+		static bool getSync( Eref e );
 
 		///////////////////////////////////////////////////////
 		// Functions for DestMessages
@@ -32,6 +40,8 @@ class ParTick: public Tick
 		///////////////////////////////////////////////////////
 		void innerProcessFunc( Eref e, ProcInfo info );
 		void innerReinitFunc( Eref e, ProcInfo info );
+		void innerResched( const Conn* c);
+		void innerStart( Eref e, ProcInfo p, double maxTime );
 
 		///////////////////////////////////////////////////////
 		// Utility function to set up the pending list.
@@ -40,9 +50,24 @@ class ParTick: public Tick
 		void innerPollFunc( unsigned int node );
 		bool pendingData() const;
 
+		///////////////////////////////////////////////////////
+		// Utility function for debugging.
+		///////////////////////////////////////////////////////
+		void printPos( const string& s );
+
 	private:
-		vector< bool > pendingNodes_;
-		unsigned int pendingCount_;
+		vector< bool > pendingNodes_; // Entries are true if node is pending
+		unsigned int pendingCount_; // How many nodes remain to finish poll
+		unsigned int numOutgoing_; // How many outgoing messages?
+		bool barrier_; // True if this Tick should end with a barrier.
+
+		/**
+		 * True if this Tick should enforce synchronization of all nodes
+		 * connected to this one, via the dest postmasters. 
+		 * This should be true for Ticks mediating simulations.
+		 * This should be false for Ticks handling setup.
+		 */
+		bool doSync_; 
 };
 
 #endif // _ParTick_h

@@ -548,10 +548,12 @@ void Interpol::innerPrint( const string& fname, bool appendFlag )
 		std::ofstream fout( fname.c_str(), std::ios::app );
 		for ( i = table_.begin(); i != table_.end(); i++ )
 			fout << *i << endl;
+		fout << flush;
 	} else {
 		std::ofstream fout( fname.c_str(), std::ios::trunc );
 		for ( i = table_.begin(); i != table_.end(); i++ )
 			fout << *i << endl;
+		fout << flush;
 	}
 }
 

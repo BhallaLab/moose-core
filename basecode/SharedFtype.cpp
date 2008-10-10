@@ -43,12 +43,12 @@ SharedFtype::SharedFtype( Finfo** finfos, unsigned int n )
 	vector< const Ftype* >::iterator i;
 	for ( i = destTypes_.begin(); i != destTypes_.end(); i++ ) {
 		// match_->srcTypes_.push_back( ( *i )->makeMatchingType() );
-		addSyncFunc( *i );
-		addAsyncFunc( *i );
+		addProxyFunc( *i );
 	}
 	for ( i = srcTypes_.begin(); i != srcTypes_.end(); i++ ) {
 		// match_->destTypes_.push_back( ( *i )->makeMatchingType() );
-		addProxyFunc( *i );
+		addSyncFunc( *i );
+		addAsyncFunc( *i );
 	}
 }
 

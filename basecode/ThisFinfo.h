@@ -106,6 +106,21 @@ class ThisFinfo: public Finfo
 			void addFuncVec( const string& cname )
 			{;}
 
+			/// Always zero
+			unsigned int syncFuncId() const {
+				return 0;
+			}
+
+			/// Always zero
+			unsigned int asyncFuncId() const {
+				return 0;
+			}
+
+			/// Always zero. This cannot be a dest.
+			unsigned int proxyFuncId() const {
+				return 0;
+			}
+
 		private:
 			const Cinfo* cinfo_;
 			bool noDeleteFlag_;

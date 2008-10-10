@@ -11,6 +11,7 @@
 #include "moose.h"
 #include "Neutral.h"
 #include "Wildcard.h"
+// #include "../shell/Shell.h"
 #define NOINDEX (UINT_MAX - 2)
 
 // Defined in GenesisParserWrapper.cpp
@@ -173,8 +174,35 @@ int singleLevelWildcard( Id start, const string& path, vector< Id >& ret )
 {
 	if ( path.length() == 0 )
 		return 0;
-
 	unsigned int nret = ret.size();
+
+/*
+#ifdef USE_MPI
+	// Won't work for global nodes
+	if ( start.node() != Shell::myNode() ) {
+		Eref shellE = Id::shellId().eref();
+		Shell* sh = static_cast< Shell* >( shellE.data() );
+		assert( shellE.e != 0 );
+		vector< Nid > kids;
+		unsigned int requestId = openOffNodeValueRequest< vector< Nid > >( 
+			sh, &kids, 1 );
+		unsigned int tgtNode = start.node();
+		if ( tgtNode > Shell::myNode() )
+			--tgtNode;
+		sendTo3< Nid, string, unsigned int >( 
+			shellE, singleLevelWildcardSlot, tgtNode,
+			start, path, requestId );
+		vector< Nid >* temp = 
+			closeOffNodeValueRequest< vector< Nid > >( sh, requestId );
+		assert( temp == &kids );
+		for ( size_t i = 0; i < kids.size(); ++i ) {
+			ret.push_back( kids[i] );
+		}
+		return ret.size() - nret;
+	}
+#endif
+*/
+
 	string beforeBrace;
 	string insideBrace;
 	unsigned int index;
@@ -182,6 +210,28 @@ int singleLevelWildcard( Id start, const string& path, vector< Id >& ret )
 	findBraceContent( path, beforeBrace, insideBrace, index );
 	if ( beforeBrace == "##" )
 		return allChildren( start, insideBrace, index, ret ); // recursive.
+
+	/*
+	 * Future off-node stuff. But this really needs to be delegated
+	 * to a separate routine, which does nothing but get the wildcard
+	 * list off node. Also should bring back the names and indices.
+	 *
+	vector< Nid > kids;
+	unsigned int requestId = openOffNodeValueRequest< vector< Nid > >( 
+		sh, &kids, sh->numNodes() - 1 );
+	send2< Nid, unsigned int >( shellE, requestLeSlot, start, requestId );
+	vector< Nid >* temp = 
+		closeOffNodeValueRequest< vector< Nid > >( sh, requestId );
+	assert( temp == &kids );
+		
+	vector< Nid >::iterator i;
+	for ( i = kids.begin(); i != kids.end(); i++ ) {
+		if ( matchName( start, *i, beforeBrace, insideBrace, index ) )
+			ret.push_back( *i );
+	}
+	return ret.size() - nret;
+	*/
+
 	vector< Id > kids; 
 	Neutral::getChildren( start.eref(), kids );
 // 	cout << start.eref().name() << endl;

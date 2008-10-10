@@ -11,7 +11,8 @@
 #include "header.h"
 #include "ProcInfo.h"
 #include "SetConn.h"
-#include "DerivedFtype.h"
+#include "Ftype.h"
+#include "Ftype0.h"
 /*
 #include <string>
 #include <vector>

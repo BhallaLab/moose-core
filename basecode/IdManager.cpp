@@ -11,54 +11,50 @@
 #include "moose.h"
 #include "IdManager.h"
 #include "ThisFinfo.h"
+#include "shell/Shell.h"
 // #include "ArrayWrapperElement.h"
 #ifdef USE_MPI
 const Cinfo* initPostMasterCinfo();
 #endif
 
-static Element* UNKNOWN_NODE = reinterpret_cast< Element* >( 1L );
+const unsigned int UNKNOWN_NODE = UINT_MAX;
 // const unsigned int MIN_NODE = 1;
 // const unsigned int MAX_NODE = 65536; // Dream on.
 const unsigned int IdManager::numScratch = 1000;
 const unsigned int IdManager::blockSize = 1000;
-const unsigned int BAD_NODE = ~0;
+const unsigned int BAD_NODE = UINT_MAX;
 
 IdManager::IdManager()
-	: myNode_( 0 ), numNodes_( 1 ), 
-	loadThresh_( 2000.0 ),
-	scratchIndex_( 2 ), mainIndex_( 2 )
-	// Start at 2 because root is 0 and shell is 1.
+	: loadThresh_( 2000.0 ),
+	scratchIndex_( 3 ), mainIndex_( numScratch )
+	// Start at 2 because root is 0 and shell is 1 and postmaster is 2.
 {
-	elementList_.resize( blockSize );
-	post_.resize( 1 );
+	elementList_.resize( blockSize + numScratch );
 }
 
-void IdManager::setNodes( unsigned int myNode, unsigned int numNodes,
-	vector< Element* >& post )
+/*
+void IdManager::setNodes( unsigned int myNode, unsigned int numNodes )
 {
 	myNode_ = myNode;
 	numNodes_ = numNodes;
-	elementList_[0] = Element::root();
+	elementList_[0] = Enode( Element::root(), Shell::myNode() );
 	if ( numNodes > 1 ) {
 		if ( myNode == 0 )
 			nodeLoad.resize( numNodes );
 		elementList_.resize( numScratch + blockSize );
 		mainIndex_ = numScratch;
-		post_ = post;
-	} else {
-		post_.resize( 1 );
-		post_[0] = 0;
 	}
 }
+*/
 
 /**
  * Returns the next available id and allocates space for it.
  * Later can be refined to mop up freed ids. 
- * Don't bother with the scratch space if we are on master node.
+ * Don't bother with the scratch space if we are on a single node.
  */
 unsigned int IdManager::scratchId()
 {
-	if ( numNodes_ <= 1 ) {
+	if ( Shell::numNodes() <= 1 ) {
 		lastId_ = mainIndex_;
 		mainIndex_++;
 		if ( mainIndex_ >= elementList_.size() )
@@ -67,10 +63,14 @@ unsigned int IdManager::scratchId()
 	} else {
 		if ( scratchIndex_ < numScratch ) {
 			lastId_ = scratchIndex_;
+			elementList_[ lastId_ ].setNode( Shell::myNode() );
 			++scratchIndex_;
 			return lastId_;
 		} else {
+			cout << "Ran out of scratch Ids on node " << 
+				Shell::myNode() << "\n";
 			regularizeScratch();
+			elementList_[ scratchIndex_ ].setNode( Shell::myNode() );
 			return ( lastId_ = scratchIndex_ );
 		}
 	} 
@@ -81,26 +81,28 @@ unsigned int IdManager::scratchId()
 unsigned int IdManager::childId( unsigned int parent )
 {
 #ifdef USE_MPI
-	assert( myNode_ == 0 );
+	assert( Shell::myNode() == 0 );
 	if ( parent < mainIndex_ ) {
-		Element* pa = elementList_[ parent ];
-		if ( pa->cinfo() == initPostMasterCinfo() ) {
-			lastId_ = mainIndex_;
-			elementList_[ lastId_ ] = pa;
-			// This assignment tells the system to put the object on
-			// the specified node.
-			mainIndex_++;
-		} else { // parent is on master node.
-			// Do some fancy load balancing calculation here
+		Enode& pa = elementList_[ parent ];
+		if ( mainIndex_ >= elementList_.size() )
+			elementList_.resize( elementList_.size() * 2 );
+		lastId_ = mainIndex_;
+		mainIndex_++;
+
+		if ( parent == 0 || pa.node() == 0 ) { // Do load balancing.
 			unsigned int targetNode = 
 				static_cast< unsigned int >( mainIndex_ / loadThresh_ ) %
-				numNodes_;
-			lastId_ = mainIndex_;
-			elementList_[ lastId_ ] = post_[ targetNode ];
-			mainIndex_++;
+				Shell::numNodes();
+			elementList_[ lastId_ ] = Enode( 0, targetNode );
+		} else if ( pa.node() == Id::GlobalNode ) {
+			// Child is also global
+			elementList_[ lastId_ ] = Enode( 0, Id::GlobalNode );
+		} else if ( pa.node() != Shell::myNode() ) {
+			// Put object on parent node.
+			elementList_[ lastId_ ] = Enode( 0, pa.node() );
+		} else {
+			assert( 0 );
 		}
-		if ( mainIndex_ >= elementList_.size() )
-			elementList_.resize( mainIndex_ * 2, 0 );
 		return lastId_;
 	}
 	assert( 0 );
@@ -108,7 +110,7 @@ unsigned int IdManager::childId( unsigned int parent )
 	lastId_ = mainIndex_;
 	mainIndex_++;
 	if ( mainIndex_ >= elementList_.size() )
-		elementList_.resize( mainIndex_ * 2, 0 );
+		elementList_.resize( mainIndex_ * 2 );
 	return lastId_;
 #endif
 }
@@ -119,61 +121,67 @@ unsigned int IdManager::childId( unsigned int parent )
  * specification.  
  * Should only be called on master node, and parent should have been checked
  * In single-node mode it is equivalent to the scratchId and childId ops.
+ * \todo Need to add facility to create object globally.
+ *
  */
 unsigned int IdManager::makeIdOnNode( unsigned int childNode )
 {
 	lastId_ = mainIndex_;
 	mainIndex_++;
 #ifdef USE_MPI
-	assert( myNode_ == 0 );
-	assert( childNode < numNodes_ );
-	if ( childNode > 0 ) { // Off-node element
-		elementList_[ lastId_ ] = post_[ childNode ];
-	}
+	assert( Shell::myNode() == 0 );
+	assert( childNode < Shell::numNodes() );
+	elementList_[ lastId_ ] = Enode( 0, childNode );
 #endif
 	if ( mainIndex_ >= elementList_.size() )
-		elementList_.resize( mainIndex_ * 2, 0 );
+		elementList_.resize( mainIndex_ * 2 );
 	return lastId_;
 }
 
 Element* IdManager::getElement( const Id& id ) const
 {
-	static ThisFinfo dummyFinfo( initNeutralCinfo(), 1 );
-	if ( id.id_ < mainIndex_ ) {
-		Element* ret = elementList_[ id.id_ ];
-		if ( ret == 0 )
-			return 0;
+	if ( id.id() < mainIndex_ ) {
+		const Enode& ret = elementList_[ id.id() ];
 #ifdef USE_MPI
-			if ( ret == UNKNOWN_NODE )
-				// don't know how to handle this yet. It should trigger
-				// a request to the master node to update the elist.
-				// We then get into managing how many entries are unknown...
-				assert( 0 );
-			if ( ret->cinfo() != initPostMasterCinfo() ) {
-				return ret;
-			} else if ( ret->id().id_ == id.id_ ) {
-				// This is the postmaster itself
-				return ret;
-			} else {
-				return 0;
-			}
-#else
-		return ret;
+		if ( ret.node() == UNKNOWN_NODE ) {
+			// don't know how to handle this yet. It should trigger
+			// a request to the master node to update the elist.
+			// We then get into managing how many entries are unknown...
+			assert( 0 );
+			return 0;
+		}
+		/*
+		} else if ( ret.node() == Shell::myNode() || 
+			ret.node() == Id::GlobalNode ) {
+			return ret.e();
+		} else {
+			return 0;
+		}
+		*/
 #endif
+		return ret.e();
 	}
 	return 0;
 }
 
+/**
+ * All this does is assign the element. The node must be assigned at
+ * the time the id is created.
+ */
 bool IdManager::setElement( unsigned int index, Element* e )
 {
+	if ( index >= elementList_.size() )
+		elementList_.resize( ( 1 + index / blockSize ) * blockSize );
+
 	if ( index < mainIndex_ ) {
-		Element* old = elementList_[ index ];
-		if ( old == 0 || old == UNKNOWN_NODE ) {
-			elementList_[ index ] = e;
+		Enode& old = elementList_[ index ];
+		if ( old.node() == UNKNOWN_NODE || old.e() == 0 ) {
+			elementList_[ index ].setElement( e );
+			// = Enode( e, Shell::myNode() );
 			return 1;
 		} else if ( e == 0 ) {
 			// Here we are presumably clearing out an element. Permit it.
-			elementList_[ index ] = 0;
+			elementList_[ index ] = Enode( 0, Shell::myNode() );
 			/// \todo: We could add this element to a list for reuse here.
 			return 1;
 		} else if ( index == 0 ) {
@@ -184,40 +192,102 @@ bool IdManager::setElement( unsigned int index, Element* e )
 			return 1;
 		}
 	} else {
-		if ( myNode_ > 0 ) {
-			// Here we have been told by the master node to make a child 
-			// at a specific index before the elementList has been
-			// expanded to that index. Just expand it to fit.
-			elementList_.resize( ( 1 + index / blockSize ) * blockSize, 
-				UNKNOWN_NODE );
-			elementList_[ index ] = e;
-			mainIndex_ = index + 1;
-			return 1;
-		} else {
-			assert( 0 );
-			return 0;
-		}
+		// Here we have been told by the master node to make a child 
+		// at a specific index before the elementList has been
+		// expanded to that index. Just expand it to fit.
+		elementList_[ index ].setElement( e );
+		// = Enode( e, Shell::myNode() );
+		mainIndex_ = index + 1;
+		return 1;
 	}
 }
 
+unsigned int IdManager::scratchIndex() const
+{
+	return scratchIndex_;
+}
+
+bool IdManager::redefineScratchIds( unsigned int last,
+	unsigned int base, unsigned int node )
+{
+	// Problem here, if we spill over the scratchIndex size.
+	// May well happen for big cells. Need to resolve.
+	assert( last < scratchIndex_ );
+	unsigned int num = scratchIndex_ - last;
+	if ( num + base >= elementList_.size() )
+		elementList_.resize( ( 1 + (num + base) / blockSize ) * blockSize );
+	for ( unsigned int i = last; i < scratchIndex_; ++i ) {
+		Enode& en = elementList_[ i ];
+		elementList_[ base ] = Enode( en.e(), node );
+		en.e()->setId( Id( base, 0 ) );
+		++base;
+		en = Enode();
+	}
+	return 1;
+}
+
+
+#ifdef USE_MPI
 unsigned int IdManager::findNode( unsigned int index ) const 
 {
-#ifdef USE_MPI
-	Element* e = elementList_[ index ];
-	if ( e == 0 || e == UNKNOWN_NODE )
+	if ( index == Id::badId().id() )
 		return BAD_NODE;
-	if ( e->cinfo() != initPostMasterCinfo() ) {
-		return myNode_;
-	} else {
-		unsigned int node;
-		get< unsigned int >( e, "remoteNode", node );
-		return node;
-	}
-#else
-	return 0;
-#endif
 	
+	assert( index < elementList_.size() );
+	const Enode& e = elementList_[ index ];
+	if ( e.node() == UNKNOWN_NODE )
+		return BAD_NODE;
+	
+	return e.node();
 }
+
+// Do not permit op if parent is not global
+void IdManager::setGlobal( unsigned int index )
+{
+	assert( index < elementList_.size() );
+	Enode& e = elementList_[ index ];
+	e.setGlobal();
+}
+
+bool IdManager::isGlobal( unsigned int index ) const 
+{
+	assert( index < elementList_.size() );
+	const Enode& e = elementList_[ index ];
+	return ( e.node() == Id::GlobalNode );
+}
+
+void IdManager::setNode( unsigned int index, unsigned int node )
+{
+	assert( node < Shell::numNodes() || node == Id::GlobalNode );
+	assert( index < elementList_.size() );
+	
+	Enode& e = elementList_[ index ];
+	// cout << "Setting node for " << index << " to " << node << endl;
+	e.setNode( node );
+}
+
+#else
+unsigned int IdManager::findNode( unsigned int index ) const 
+{
+	return 0;
+}
+
+bool IdManager::isGlobal( unsigned int index ) const 
+{
+	return 0;
+}
+
+void IdManager::setGlobal( unsigned int index )
+{
+	;
+}
+
+void IdManager::setNode( unsigned int index, unsigned int node )
+{
+	;
+}
+#endif
+
 
 /**
  * Returns the most recently created object.
@@ -235,7 +305,7 @@ bool IdManager::outOfRange( unsigned int index ) const
 bool IdManager::isScratch( unsigned int index ) const
 {
 #ifdef USE_MPI
-	return ( myNode_ > 0 && index > 0 && index < scratchIndex_ );
+	return ( Shell::myNode() > 0 && index > 0 && index < scratchIndex_ );
 #else
 	return 0;
 #endif

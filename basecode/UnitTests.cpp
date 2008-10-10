@@ -54,9 +54,10 @@ void connTest()
 
 	ASSERT( ct1->size() == 1, "ConnTainer size" );
 
-	// ct1->conn( eIndex, isDest );
-	Conn* c1 = ct1->conn( 0, 0 );
-	Conn* c2 = ct2->conn( 0, 1 );
+	// ct1->conn( eIndex, funcIndex, isDest );
+	// ct1->conn( Eref, funcIndex );
+	Conn* c1 = ct1->conn( &e1, 0 );
+	Conn* c2 = ct2->conn( &e2, 0 );
 
 	ASSERT( c1->target().e == &e2, "Conn: targetElement" );
 	ASSERT( c2->target().e == &e1, "Conn: targetElement" );
@@ -143,10 +144,6 @@ void msgSrcTest()
 	cout << "\nCompleted msgSrcTest()\n";
 }
 
-
-#include "DerivedFtype.h"
-#include "SrcFinfo.h"
-#include "DestFinfo.h"
 /*
  * Here we set up a message structure where the first src on e1 has
  * a single dest, and the second src is shared with 3 dests.
@@ -209,6 +206,9 @@ void msgFinfoTest()
 
 	ASSERT( ( *e1.msg_[ 0 ].begin() )->size() == 1, "Finfo Msg" );
 	ASSERT( ( *e1.msg_[ 1 ].begin() )->size() == 1, "Finfo Msg" );
+
+	ASSERT( e1.isTarget( &e2 ), "isTarget" );
+	ASSERT( !e2.isTarget( &e1 ), "isTarget" );
 
 	targetIndex.resize( 2 );
 	targetIndex[0] = 0;
