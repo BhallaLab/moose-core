@@ -663,8 +663,10 @@ bool ReadCell::addCaConc(
 	if ( chan->className() == "CaConc" ) {
 		// assert( vmSrcFinfo->add( compt, chan, vmDestFinfo  ) );
 
-		if ( value > 0 ) {
-			value *= 1.0;		// Put appropriate scaling factor
+		if ( value > 0.0 ) {
+			double vol = dia * dia * M_PI * length / 4.0;
+			if ( vol > 0.0 ) // Scale by volume.
+				value /= dia * dia * M_PI * length / 4.0;
 		} else {
 			value = - value;
 		}
