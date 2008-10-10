@@ -50,6 +50,8 @@ const Cinfo* initKinComptCinfo()
 		// messages to surfaces this returns the local value.
 		// The setVolume only works if there are no surfaces anywhere.
 		// Otherwise the surfaces override it
+		// Assigning any of the following four parameters causes automatic
+		// rescaling of rates throughout the model.
 		new ValueFinfo( "volume", 
 			ValueFtype1< double >::global(),
 			GFCAST( &KinCompt::getVolume ), 
@@ -73,6 +75,7 @@ const Cinfo* initKinComptCinfo()
 			GFCAST( &KinCompt::getSize ), 
 			RFCAST( &KinCompt::setSize )
 		),
+
 
 		new ValueFinfo( "numDimensions", 
 			ValueFtype1< unsigned int >::global(),
@@ -112,6 +115,11 @@ const Cinfo* initKinComptCinfo()
 		new DestFinfo( "rescaleSize", 
 			Ftype1< double >::global(),
 			RFCAST( &KinCompt::rescaleFunction ) ),
+
+		// Assigns size without rescaling the entire model.
+		new DestFinfo( "sizeWithoutRescale", 
+			Ftype1< double >::global(),
+			RFCAST( &KinCompt::setSizeWithoutRescale ) ),
 	///////////////////////////////////////////////////////
 	// Synapse definitions
 	///////////////////////////////////////////////////////
@@ -145,7 +153,11 @@ static const Slot extentSlot =
 ///////////////////////////////////////////////////
 
 KinCompt::KinCompt()
-	: size_( 1.6666666667e-21 ), volume_( 1.666666667e-21 ), area_( 1.0 ), perimeter_( 1.0 ), numDimensions_( 3 )
+	: 	size_( 1.6666666667e-21 ), 
+		volume_( 1.666666667e-21 ), 
+		area_( 1.0 ), 
+		perimeter_( 1.0 ), 
+		numDimensions_( 3 )
 {
 		;
 }
@@ -193,7 +205,13 @@ void KinCompt::setSize( const Conn* c, double value )
 		c->target(), value );
 }
 
-void KinCompt::innerSetSize( Eref e, double value )
+void KinCompt::setSizeWithoutRescale( const Conn* c, double value )
+{
+	static_cast< KinCompt* >( c->data() )->innerSetSize( 
+		c->target(), value, 1 );
+}
+
+void KinCompt::innerSetSize( Eref e, double value, bool ignoreRescale )
 {
 	assert( size_ > 0.0 );
 	double ratio = value/size_;
@@ -206,7 +224,8 @@ void KinCompt::innerSetSize( Eref e, double value )
 		perimeter_ = value;
 
 	// Here we scan through all children telling them to rescale.
-	rescaleTree( e, ratio );
+	if ( !ignoreRescale )
+		rescaleTree( e, ratio );
 }
 
 double KinCompt::getSize( Eref e )
