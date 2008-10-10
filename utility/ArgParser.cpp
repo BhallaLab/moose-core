@@ -57,11 +57,14 @@ int ArgParser::parseArguments(int argc, char **argv)
             + string("\t-d, --docpath <doc_dir>          Search doc_dir for documentation\n")
             + string("\t-h, --help                       Show this help message and exit\n")
             + string("\t-p, --simpath <sim_path>         Search sim_path for include files.\n")
+            + string("\t-m, --mpi_debug                  Halt in busy loop for MPI debugging.\n")
             + string("See MOOSE Documentation for further information (http://moose.sourceforge.net or http://moose.ncbs.res.in)");
         longShortMap_["help"] = 'h';
         
         option_['p'] = ""; // SIMPATH
         longShortMap_["simpath"] = 'p';
+        option_['m'] = ""; // MPI_DEBUG
+        longShortMap_["mpi_debug"] = 'm';
     }
     if (( argc == 0 ) || ( argv == NULL ) )
     {
@@ -118,6 +121,11 @@ int ArgParser::parseArguments(int argc, char **argv)
                 cout << option_['h'] << endl;
                 exit( 0 );
             }
+
+            if (opt == 'm')
+            {
+				return 0;
+			}
             
             ++i;
             if ( i >= argc ) {

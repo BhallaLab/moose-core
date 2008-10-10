@@ -16,18 +16,13 @@
 //  TraverseMsgConn
 //////////////////////////////////////////////////////////////////////
 
-TraverseMsgConn::TraverseMsgConn( const Msg* m, const Element* e,
-	unsigned int eIndex )
-	: msg_( m ), 
-	e_( e ), 
-	eIndex_( eIndex ), 
-	c_( 0 )
-	//, cti_( 0 )
+TraverseMsgConn::TraverseMsgConn( const Msg* m, Eref e )
+	: Conn( 0 ), msg_( m ), e_( e ), c_( 0 ), cti_( 0 )
 {
 	// Advance till we get to a 'good' conn, or to the end.
-	for ( mi_ = msg_; mi_; mi_ = mi_->next( e ) ) {
+	for ( mi_ = msg_; mi_; mi_ = mi_->next( e.e ) ) {
 		for ( cti_ = mi_->begin(); cti_ != mi_->end(); cti_++ ) {
-			c_ = ( *cti_ )->conn( eIndex, mi_->isDest() ); 
+			c_ = ( *cti_ )->conn( e, 0 ); 
 			for ( ; c_->good(); c_->increment() )
 					return;
 		}
@@ -63,7 +58,7 @@ void TraverseMsgConn::increment()
 	c_ = 0;
 	cti_++;
 	for ( ; cti_ != mi_->end(); cti_++ ) {
-		c_ = ( *cti_ )->conn( eIndex_, mi_->isDest() ); 
+		c_ = ( *cti_ )->conn( e_, 0 ); 
 		for ( ; c_->good(); c_->increment() )
 				return;
 	}
@@ -74,9 +69,9 @@ void TraverseMsgConn::increment()
 	if ( c_ )
 		delete c_;
 	c_ = 0;
-	for ( mi_ = mi_->next( e_ ); mi_; mi_ = mi_->next( e_ ) ) {
+	for ( mi_ = mi_->next( e_.e ); mi_; mi_ = mi_->next( e_.e ) ) {
 		for ( cti_ = mi_->begin(); cti_ != mi_->end(); cti_++ ) {
-			c_ = ( *cti_ )->conn( eIndex_, mi_->isDest() ); 
+			c_ = ( *cti_ )->conn( e_, 0 ); 
 			for ( ; c_->good(); c_->increment() )
 					return;
 		}
@@ -106,7 +101,7 @@ void TraverseMsgConn::nextElement()
 	c_ = 0;
 	cti_++;
 	for ( ; cti_ != mi_->end(); cti_++ ) {
-		c_ = ( *cti_ )->conn( eIndex_, mi_->isDest() ); 
+		c_ = ( *cti_ )->conn( e_, 0 ); 
 		for ( ; c_->good(); c_->increment() )
 				return;
 	}
@@ -117,9 +112,9 @@ void TraverseMsgConn::nextElement()
 	if ( c_ )
 		delete c_;
 	c_ = 0;
-	for ( mi_ = mi_->next( e_ ); mi_; mi_ = mi_->next( e_ ) ) {
+	for ( mi_ = mi_->next( e_.e ); mi_; mi_ = mi_->next( e_.e ) ) {
 		for ( cti_ = mi_->begin(); cti_ != mi_->end(); cti_++ ) {
-			c_ = ( *cti_ )->conn( eIndex_, mi_->isDest() ); 
+			c_ = ( *cti_ )->conn( e_, 0 ); 
 			for ( ; c_->good(); c_->increment() )
 					return;
 		}
@@ -143,9 +138,9 @@ bool TraverseMsgConn::good() const
 	return c_->good();
 }
 
-const Conn* TraverseMsgConn::flip() const
+const Conn* TraverseMsgConn::flip( unsigned int funcIndex ) const
 {
-	return new TraverseMsgConn( msg_, e_, eIndex_ );
+	return new TraverseMsgConn( msg_, e_ );
 }
 
 const ConnTainer* TraverseMsgConn::connTainer() const

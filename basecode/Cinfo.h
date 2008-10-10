@@ -116,7 +116,7 @@ class Cinfo
 					void* data, unsigned numEntries, size_t objectSize,
 					bool noDelFlag = 0 ) const;
 
-			bool schedule( Element* e, unsigned int conTainerOption ) const;
+			bool schedule( Element* e, unsigned int connTainerOption ) const;
 			// void destroy( void* ) const ;
 
 			const Ftype* ftype() const {

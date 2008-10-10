@@ -65,16 +65,19 @@ void Ftype::addProxyFunc( RecvFunc r ) {
 void Ftype::addSyncFunc( const Ftype* ft ) {
 	assert( ft->syncFuncs_->size() == 1 );
 	syncFuncs_->addFunc( ft->syncFuncs_->func( 0 ), ft );
+	syncFuncs_->setDest();
 }
 
 void Ftype::addAsyncFunc( const Ftype* ft ) {
 	assert( ft->asyncFuncs_->size() == 1 );
 	asyncFuncs_->addFunc( ft->asyncFuncs_->func( 0 ), ft );
+	asyncFuncs_->setDest();
 }
 
 void Ftype::addProxyFunc( const Ftype* ft ) {
 	assert( ft->proxyFuncs_->size() == 1 );
 	proxyFuncs_->addFunc( ft->proxyFuncs_->func( 0 ), ft );
+	proxyFuncs_->setDest();
 }
 
 

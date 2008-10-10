@@ -11,11 +11,11 @@
 #include "moose.h"
 #include <mpi.h>
 #include <music.hh>
-#include "MMPI.h"
+#include "MuMPI.h"
 
-MPI::Intracomm MMPI::communicator_ = MPI::Intracomm();
+MPI::Intracomm MuMPI::communicator_ = MPI::Intracomm();
 
-void MMPI::Init( int argc, char** argv )
+void MuMPI::Init( int argc, char** argv )
 {
 
 #ifdef USE_MPI
@@ -33,7 +33,7 @@ void MMPI::Init( int argc, char** argv )
 #endif // USE_MPI
 }
 
-void MMPI::Finalize( )
+void MuMPI::Finalize( )
 {
 #ifdef USE_MPI
 #ifdef USE_MUSIC
@@ -46,7 +46,7 @@ void MMPI::Finalize( )
 #endif // USE_MPI
 }
 
-const MPI::Intracomm& MMPI::INTRA_COMM( )
+const MPI::Intracomm& MuMPI::INTRA_COMM( )
 {
 	return communicator_;
 }

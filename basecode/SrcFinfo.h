@@ -91,6 +91,21 @@ class SrcFinfo: public Finfo
 				return 0;
 			}
 
+			/// Looks at the ftype.
+			unsigned int syncFuncId() const {
+				return ftype()->syncFuncId();
+			}
+
+			/// Looks at the ftype.
+			unsigned int asyncFuncId() const {
+				return ftype()->asyncFuncId();
+			}
+
+			/// Always zero. This cannot be a dest.
+			unsigned int proxyFuncId() const {
+				return 0;
+			}
+
 		private:
 			int msg_;
 };

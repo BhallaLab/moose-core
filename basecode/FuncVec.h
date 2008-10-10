@@ -64,7 +64,7 @@ class FuncVec
 		 * parFuncAsync returns a destination function that will handle
 		 * the identical arguments and package them for sending to a
 		 * remote node on a parallel message call.
-		 * The Async means that this func is for synchronous data.
+		 * The Async means that this func is for asynchronous data.
 		 */
 		RecvFunc parFuncAsync( unsigned int funcNum ) const;
 
@@ -85,6 +85,11 @@ class FuncVec
 		 */
 		unsigned int lookupId() const;
 
+		/**
+		 * True if this funcVec handles any destination functions,
+		 * or if the SharedFinfo that manages this funcVec
+		 * has been set up as a destination.
+		 */
 		bool isDest() const {
 			return isDest_;
 		}

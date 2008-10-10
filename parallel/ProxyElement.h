@@ -11,6 +11,8 @@
 #ifndef _PROXY_ELEMENT_H
 #define _PROXY_ELEMENT_H
 
+typedef void( *ProxyFunc )( const Conn*, const void*, Slot );
+
 /**
  * The ProxyElement class is a minimalist stand-in for an off-node
  * Element. It manages only one Msg and knows its PostMaster, 
@@ -20,7 +22,8 @@
 class ProxyElement: public Element
 {
 	public:
-		ProxyElement( Id id, unsigned int node);
+		ProxyElement( Id id, unsigned int node, 
+			unsigned int proxyFuncId, unsigned int numEntries );
 
 		/// Nothing much to do here.
 		~ProxyElement() {
@@ -47,6 +50,12 @@ class ProxyElement: public Element
 		const Cinfo* cinfo() const {
 			return 0;
 		}
+
+		/////////////////////////////////////////////////////////////
+		// Hack here to deal with proxy msgs
+		/////////////////////////////////////////////////////////////
+		void sendData( unsigned int funcIndex, const char* data,
+			unsigned int eIndex );
 
 		/////////////////////////////////////////////////////////////
 		// Msg traversal functions, part of API
@@ -80,9 +89,7 @@ class ProxyElement: public Element
 		 * Finds the number of targets to this Msg, either src or dest.
 		 * Faster than iterating through the whole lot.
 		 */
-		unsigned int numTargets( int msgNum ) const {
-			return 0;
-		}
+		unsigned int numTargets( int msgNum ) const;
 
 		/**
 		 * Finds the number of targets to this Msg, either src or dest,
@@ -103,7 +110,8 @@ class ProxyElement: public Element
 		}
 		
 		/**
-		  * Returns the element is of type Array
+		  * Returns the type of the element. Should ideally be an enum,
+		  * or just do a dynamic_cast.
 		  */
 		virtual string elementType() const
 		{
@@ -147,17 +155,17 @@ class ProxyElement: public Element
 
 
 		/**
-		 * Returns data contents of ProxyElement
+		 * Returns data contents of ProxyElement. 
+		 * This simply refers to the postmaster data for the original
+		 * node for the proxy.
 		 */
-		void* data( unsigned int eIndex ) const {
-			return 0;
-		}
+		void* data( unsigned int eIndex ) const;
 
 		/**
 		 * Returns size of data array. For ProxyElement it is always 1.
 		 */
 		unsigned int numEntries() const {
-			return 1;
+			return numEntries_;
 		}
 
 		/////////////////////////////////////////////////////////////
@@ -254,6 +262,10 @@ class ProxyElement: public Element
 			return &msg_;
 		}
 
+		Msg* baseMsg( unsigned int msgNum ) {
+			return &msg_;
+		}
+
 		const vector< ConnTainer* >* dest( int msgNum ) const {
 			return 0;
 		}
@@ -317,6 +329,10 @@ class ProxyElement: public Element
 			;
 		}
 
+		void copyGlobalMessages( Element* dup, bool isArray ) const {
+			;
+		}
+		
 		///////////////////////////////////////////////////////////////
 		// Debugging function
 		///////////////////////////////////////////////////////////////
@@ -333,8 +349,22 @@ class ProxyElement: public Element
 		}
 
 	private:
-		Msg msg_;
-		unsigned int node_;
+		Msg msg_;			/// Handles messages to actual targets.
+		unsigned int node_;	/// Node of original Element.
+
+		/**
+		 * Vector of ProxyFuncs, aligned with the recvFuncs of the
+		 * target object. Each ProxyFunc converts the serialized
+		 * stream from the postMaster to arguments and issues it to the
+		 * appropriate Send command for the message. Needs the funcIndex
+		 * to identify the correct funcs.
+		 */
+		const FuncVec* proxyVec_; /// Vector of proxy Funcs
+
+		/**
+		 * Size of element array handled by original.
+		 */
+		unsigned int numEntries_;
 };
 
 #endif // _PROXY_ELEMENT_H

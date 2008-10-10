@@ -110,6 +110,7 @@ bool Msg::add( Eref src, Eref dest,
 	// Start out by looking for matches among existing Msgs.
 	// This is relevant only if there are possible 'fat' edges, that is,
 	// array messages.
+	connTainerOption = connOption( src, dest, connTainerOption );
 	ConnTainer* ct = findExistingConnTainer( src, dest, srcMsg, destMsg,
 		srcFuncId, destFuncId, connTainerOption );
 	// Also it only applies if the connTainerOption is a 'Many', since
@@ -464,14 +465,16 @@ unsigned int Msg::size() const
 /**
  * Some issues with this implementation for arrays
  */
-Conn* Msg::findConn( unsigned int eIndex, unsigned int tgt ) const
+Conn* Msg::findConn( Eref e, unsigned int tgt, unsigned int funcId ) const
 {
 	vector< ConnTainer* >::const_iterator i;
 	for ( i = c_.begin(); i != c_.end(); i++ ) {
 		if ( tgt >= ( *i )->size() ) {
 			tgt -= ( *i )->size();
 		} else {
-			return ( *i )->conn( eIndex, !( fv_->isDest() ), tgt );
+			return ( *i )->conn( e, funcId );
+			/// We don't actually use the tgt index anywhere.
+			// return ( *i )->conn( eIndex, !( fv_->isDest() ), tgt );
 		}
 	}
 	return 0;
@@ -585,14 +588,31 @@ ConnTainer* findExistingConnTainer( Eref src, Eref dest,
 	if ( srcMsg >= 0 ) {
 		Msg* m = src->varMsg( static_cast< unsigned int >( srcMsg ) );
 		m = m->matchByFuncId( src.e, destFuncId );
+		// cout << "findExistingConnTainer: src=" << src.name() << ", dest=" << dest.name() << ", destFuncId=" << destFuncId << ", match=" << m << endl << flush;
 		if ( !m )
 			return 0;
 		vector< ConnTainer* >::iterator i;
 		for ( i = m->varBegin(); i != m->varEnd(); i++ ) {
-			if ( (*i)->e2() == dest.e && (*i)->msg2() == destMsg &&
+				// cout << "e2=" << (*i)->e2()->name() << ", =" << dest.name() << ", msg2=" << (*i)->msg2() << ", =" << destMsg << ", option=" << (*i)->option() << ", =" << connTainerOption << endl << flush;
+			if ( (*i)->e2() == dest.e && (*i)->msg2() == destMsg && 
 				(*i)->option() == connTainerOption )
 				return *i;
 		}
 	}
+	return 0;
+}
+
+/**
+ * Returns True if tgt is a target of Element src.
+ * Handles bidirectional messages too. Does not worry about indices,
+ * on either src or dest. 
+ */
+bool Msg::isTarget( const Element* src, const Element* tgt ) const
+{
+	for( vector< ConnTainer* >::const_iterator i = c_.begin(); 
+		i != c_.end(); ++i )
+		if ( ( (*i)->e1() == src && (*i)->e2() == tgt ) ||
+			( (*i)->e2() == src && (*i)->e1() == tgt ) )
+			return 1;
 	return 0;
 }
