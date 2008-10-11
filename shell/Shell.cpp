@@ -1929,7 +1929,7 @@ void Shell::setClock( const Conn* c, int clockNo, double dt,
 				int stage )
 {
 	Shell* sh = static_cast< Shell* >( c->data() );
-	if ( sh->myNode() == 0 ) {
+	if ( ! isSerial( ) && sh->myNode() == 0 ) {
 		send3< int, double, int >( c->target(), parSetClockSlot,
 			clockNo, dt, stage );
 	}
