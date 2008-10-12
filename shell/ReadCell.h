@@ -25,13 +25,12 @@ class ReadCell
 {
 	public:
 		ReadCell( const vector< double >& globalParms );
-		Element* start( const string& cellpath );
 		// void read( const string& filename, const string& cellpath );
 		void read( const string& filename, 
 			const string& cellname, Id pa, Id cellId );
 		void innerRead( ifstream& fin );
-		void readData( const string& line, unsigned int lineNum );
-		void readScript( const string& line, unsigned int lineNum );
+		void readData( const string& line );
+		void readScript( const string& line );
 		Element*  buildCompartment( 
 				const string& name, const string& parent,
 				double x0, double y0, double z0,
@@ -41,6 +40,7 @@ class ReadCell
 		bool buildChannels( 
 				Element* compt, vector< string >& argv,
 				double diameter, double length);
+		Element* startGraftCell( const string& cellpath );
 		Element* findChannel( const string& name );
 		Element* addChannel( Element* compt, Element* chan, 
 				double value, double dia, double length );
@@ -57,6 +57,10 @@ class ReadCell
 
 	private:
 		void countProtos( );
+		
+		// For error messages
+		string filename_;
+		unsigned int lineNum_;
 		
 		double RM_;
 		double CM_;
