@@ -58,7 +58,8 @@ ReadCell::ReadCell( const vector< double >& globalParms )
 					Element::root(), "lookupChild", libId, "library" );
 
 		if ( !ret || libId.bad() ) {
-			cout << "Warning: ReadCell: No library for channels\n";
+			cerr << "Warning: ReadCell: No library for channels\n";
+			cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
 			return;
 		}
 
@@ -84,14 +85,6 @@ ReadCell::ReadCell( const vector< double >& globalParms )
 			chanProtos_.push_back( ( *i )() );
 }
 
-// Lots of stuff here moved to shell, but maybe it should be a utility.
-Element* ReadCell::start( const string& cellPath )
-{
-	cout << "In empty func ReadCell::start( " << cellPath << " )\n";
-	return 0;
-}
-
-
 /**
  * The readcell function implements the old GENESIS cellreader
  * functionality. Although it is really a parser operation, I
@@ -101,7 +94,8 @@ Element* ReadCell::start( const string& cellPath )
 void ReadCell::read( const string& filename, 
 	const string& cellname, Id pa, Id cellId )
 {
-
+	filename_ = filename;
+	
 	PathUtility pathUtil(Property::getProperty(Property::SIMPATH));
 
 	ifstream fin( filename.c_str() );
@@ -111,14 +105,12 @@ void ReadCell::read( const string& filename,
 		fin.open( path.c_str());
 	}
 
-	if ( graftFlag_ ) {
-		cell_ = Neutral::create( "Compartment", cellname, pa, cellId );
-	} else {
-		cell_ = Neutral::create( "Cell", cellname, pa, cellId );
-	}
+	cell_ = Neutral::create( "Cell", cellname, pa, cellId );
+	
 	if ( !cell_ ) {
-		cout << "ReadCell::read: Error: unable to create cell " <<
+		cerr << "Error: ReadCell::read: unable to create cell " <<
 			cellname << " on " << pa << "." << pa.node() << endl;
+		cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
 		return;
 	}
 
@@ -130,11 +122,11 @@ void ReadCell::read( const string& filename,
 void ReadCell::innerRead( ifstream& fin )
 {
 	string line;
-	unsigned int lineNum = 0;
+	lineNum_ = 0;
 	string::size_type pos;
 	ParseStage parseMode = DATA;
 	while ( getline( fin, line ) ) {
-		lineNum++;
+		lineNum_++;
 		if ( line.length() == 0 )
 				continue;
 		pos = line.find_first_not_of( "\t " );
@@ -164,9 +156,9 @@ void ReadCell::innerRead( ifstream& fin )
 			}
 		}
 		if ( parseMode == DATA )
-				readData( line, lineNum );
+				readData( line );
 		else if ( parseMode == SCRIPT ) {
-				readScript( line, lineNum );
+				readScript( line );
 				parseMode = DATA;
 		}
 	}
@@ -177,14 +169,14 @@ void ReadCell::innerRead( ifstream& fin )
 			numOthers_ << " others\n";
 }
 
-void ReadCell::readData( const string& line, unsigned int lineNum )
+void ReadCell::readData( const string& line )
 {
 	vector< string > argv;
 	parseString( line, argv, "\t " ); 
 	if ( argv.size() < 6 ) {
-			cout << "Readfile: Error on line " << lineNum << endl;
-			cout << "Too few arguments in line: " << argv.size() <<
-					", should be > 6\n";
+			cerr << "Error: ReadCell: Too few arguments in line: " << argv.size()
+				<<	", should be > 6\n";
+			cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
 			return;
 	}
 	
@@ -271,8 +263,9 @@ Element* ReadCell::buildCompartment(
 		// Id paId = Id::localId( currCell_->id().path() + "/" + parent );
 		Id paId = Id::localId( paPath );
 		if ( paId.bad() ) {
-			cout << "Error: ReadCell: could not find parent compt '" <<
+			cerr << "Error: ReadCell: could not find parent compt '" <<
 					parent << "' for child '" << name << "'\n";
+			cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
 			return 0;
 		}
 		pa = paId();
@@ -287,19 +280,22 @@ Element* ReadCell::buildCompartment(
 		if ( name[ name.length() - 1 ] == ']' ) {
 			string::size_type pos = name.rfind( '[' );
 			if ( pos == string::npos ) {
-				cout << "Error: ReadCell: bad child name:" << name << endl;
+				cerr << "Error: ReadCell: bad child name:" << name << endl;
+				cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
 				return 0;
 			}
 			unsigned int index = 
 				atoi( name.substr( pos + 1, name.length() - pos ).c_str() );
 			if ( childId.index() == index ) {
-				cout << "Error: ReadCell: duplicate child on parent compt '" <<
+				cerr << "Error: ReadCell: duplicate child on parent compt '" <<
 						parent << "' for child '" << name << "'\n";
+				cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
 				return 0;
 			}
 		} else {
-			cout << "Error: ReadCell: duplicate child on parent compt '" <<
+			cerr << "Error: ReadCell: duplicate child on parent compt '" <<
 					parent << "' for child '" << name << "'\n";
+			cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
 			return 0;
 		}
 	}
@@ -379,7 +375,7 @@ Element* ReadCell::buildCompartment(
 	return compt;
 }
 
-void ReadCell::readScript( const string& line, unsigned int lineNum )
+void ReadCell::readScript( const string& line )
 {
 	vector< string > argv;
 	parseString( line, argv, "\t " ); 
@@ -403,7 +399,7 @@ void ReadCell::readScript( const string& line, unsigned int lineNum )
 
 	if ( argv[0] == "*set_global" || argv[0] == "*set_compt_param" ) {
 		if ( argv.size() != 3 ) {
-			cout << "Error: readCell: Bad line: " << lineNum <<
+			cerr << "Error: readCell: Bad line: " << lineNum_ <<
 					": " << line << endl;
 			return;
 		}
@@ -423,9 +419,9 @@ void ReadCell::readScript( const string& line, unsigned int lineNum )
 			currCell_ = cell_;
 		} else if ( argv.size() == 2 ) {
 			graftFlag_ = 1;
-			currCell_ = start( argv[1] );
+			currCell_ = startGraftCell( argv[1] );
 		} else {
-			cout << "Error: readCell: Bad line: " << lineNum <<
+			cerr << "Error: readCell: Bad line: " << lineNum_ <<
 					": " << line << endl;
 			return;
 		}
@@ -433,14 +429,14 @@ void ReadCell::readScript( const string& line, unsigned int lineNum )
 
 	if ( argv[0] == "*compt" ) {
 		if ( argv.size() != 2 ) {
-			cout << "Error: readCell: Bad line: " << lineNum <<
+			cerr << "Error: readCell: Bad line: " << lineNum_ <<
 					": " << line << endl;
 			return;
 		}
 
 		Id protoId( argv[1] );
 		if ( protoId.bad() ) {
-			cout << "Error: readCell: Bad path: " << lineNum <<
+			cerr << "Error: readCell: Bad path: " << lineNum_ <<
 					": " << line << endl;
 			return;
 		}
@@ -461,6 +457,46 @@ void ReadCell::readScript( const string& line, unsigned int lineNum )
 	if ( argv[0] == "*makeproto" ) {
 		return; // Should traverse tree below and drop process messages.
 	}
+}
+
+
+Element* ReadCell::startGraftCell( const string& cellpath )
+{
+	// Warning: here is a parser dependence in the separator.
+	Id cellId( cellpath, "/" );
+	
+	if ( !cellId.bad() ) {
+		cerr << "Warning: ReadCell: cell '" << cellpath << "' already exists.\n";
+		cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
+		return 0;
+	}
+	
+	string cellname;
+	
+	string::size_type pos = cellpath.find_last_of( "/" );
+	Element* cellparent;
+	if ( pos == string::npos ) {
+		cerr << "Error: ReadCell: *start_cell should be given absolute path.\n";
+		cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
+		return 0;
+	} else if ( pos == 0 ) {
+		cellparent = Element::root();
+		cellname = cellpath.substr( 1 );
+	} else {
+		Id parentId = Id( cellpath.substr( 0, pos  ), "/" );
+		if ( parentId.bad() ) {
+			cerr << "Error: ReadCell: cell path '" << cellpath
+				<< "' not found.\n";
+			cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
+			return 0;
+		}
+		
+		cellparent = parentId();
+		cellname = cellpath.substr( pos + 1 );
+	}
+	
+	return Neutral::create(
+		"Compartment", cellname, cellparent->id(), Id::scratchId() );
 }
 
 Element* ReadCell::findChannel( const string& name )
@@ -499,7 +535,8 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 	}
 	
 	if ( !isArgOK ) {
-		cout << "Error: readCell: Bad number of arguments in channel list\n";
+		cerr << "Error: readCell: Bad number of arguments in channel list\n";
+		cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
 		return 0;
 	}
 	for ( unsigned int j = argStart; j < argv.size(); j++ ) {
@@ -528,8 +565,9 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 		} else {
 			Element* chanElm = findChannel( chan );
 			if ( chanElm == 0 ) {
-				cout << "Error: readCell: Channel '" << chan <<
+				cerr << "Error: readCell: Channel '" << chan <<
 						"' not found\n";
+				cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
 				continue;
 			}
 			
@@ -537,8 +575,9 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 			if ( copy != 0 ) {
 				goodChannels.push_back( copy );
 			} else {
-				cout << "Error: readCell: Could not add " << chan
+				cerr << "Error: readCell: Could not add " << chan
 					<< " in " << compt->name() << ".";
+				cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
 			}
 		}
 	}
