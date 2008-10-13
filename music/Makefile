@@ -13,6 +13,8 @@ TARGET = music.o
 OBJ = \
 	InputEventPort.o	\
 	InputEventChannel.o	\
+	OutputEventPort.o	\
+	OutputEventChannel.o	\
 	Music.o	
 
 HEADERS = \
@@ -26,6 +28,8 @@ $(OBJ)	: $(HEADERS)
 Music.o : Music.h 
 InputEventChannel.o : InputEventChannel.h 
 InputEventPort.o : InputEventPort.h InputEventChannel.h 
+OutputEventChannel.o : OutputEventChannel.h 
+OutputEventPort.o : OutputEventPort.h OutputEventChannel.h 
 
 CXX = mpicxx
 
