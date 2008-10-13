@@ -180,7 +180,7 @@ void Neutral::childFunc( const Conn* c , int stage )
 
 const string Neutral::getName( Eref e )
 {
-		return e.e->name();
+		return e.saneName( getParent( e ));
 }
 
 void Neutral::setName( const Conn* c, const string s )
