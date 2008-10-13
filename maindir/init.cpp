@@ -79,6 +79,8 @@ void initMoose()
  */
 void initSched()
 {
+  cerr << "Running initSched()" << endl;
+
     /**
      * Here we set up a bunch of predefined objects for scheduling, that
      * exist simultaneously on each node.
@@ -105,11 +107,6 @@ void initSched()
 		Neutral::create( "Neutral", "proto", Id(), Id::scratchId() );
 	proto->id().setGlobal();
 
-#ifdef USE_MUSIC
-	Element* music =
-		Neutral::create( "Music", "music", Element::root()->id(), Id::scratchId() );
-#endif // USE_MUSIC
-
 	/*
     Element* solvers = 
             Neutral::create( "Neutral", "solvers", Id(), Id::scratchId() );
@@ -126,11 +123,18 @@ void initSched()
     // not allowing user to change the clock settings
 #ifdef USE_MPI
    	Neutral::create( "ParTick", "t1", cj->id(), Id::scratchId() );
-  	Neutral::create( "ParTick", "t0", cj->id(), Id::scratchId() );
+   	Neutral::create( "ParTick", "t0", cj->id(), Id::scratchId() );
 #else
+        cerr << "Creating Tick" << endl;
    	Neutral::create( "Tick", "t1", cj->id(), Id::scratchId() );
    	Neutral::create( "Tick", "t0", cj->id(), Id::scratchId() );
 #endif // USE_MPI
+
+#ifdef USE_MUSIC
+	Element* music =
+		Neutral::create( "Music", "music", Element::root()->id(), Id::scratchId() );
+#endif // USE_MUSIC
+
 }
 
 void setupDefaultSchedule( 

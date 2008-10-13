@@ -81,6 +81,7 @@ int main(int argc, char** argv)
 	//	Initialization functions. Must be in this order.
 	///////////////////////////////////////////////////////////////////
 	unsigned int myNode = initMPI( argc, argv );
+
 	initMoose();
 	initSched();
 	initParSched();
