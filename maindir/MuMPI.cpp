@@ -12,6 +12,7 @@
 #include <mpi.h>
 #include <music.hh>
 #include "MuMPI.h"
+#include "music/Music.h"
 
 MPI::Intracomm MuMPI::communicator_ = MPI::Intracomm();
 
@@ -20,12 +21,7 @@ void MuMPI::Init( int argc, char** argv )
 
 #ifdef USE_MPI
 #ifdef USE_MUSIC
-	Id music( "/music" );
-	assert( music.good() );
-	
-	MUSIC::setup* setup = new MUSIC::setup( argc, argv );
-	set< MUSIC::setup* >( music(), "setup", setup );
-	communicator_ = setup->communicator( );
+	communicator_ = Music::setup( argc, argv );
 #else
 	MPI::Init( argc, argv );
 	communicator_ = MPI::COMM_WORLD;
