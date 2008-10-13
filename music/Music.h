@@ -48,6 +48,7 @@ private:
 	void innerProcessFunc( const Conn* c, ProcInfo p );
         void innerSetupFunc( Eref e, MUSIC::setup* setup );
         void innerFinalizeFunc( Eref e );
+        void innerReinitFunc( Eref e, ProcInfo p );
 
 	void innerAddPort(
 		Eref e,
