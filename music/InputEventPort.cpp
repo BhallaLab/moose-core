@@ -11,7 +11,7 @@
 
 #include "moose.h"
 #include <mpi.h>
-#include "music.hh"
+#include <music.hh>
 #include "Music.h"
 #include "InputEventPort.h"
 #include "InputEventChannel.h"
@@ -43,9 +43,21 @@ const Cinfo* initInputEventPortCinfo()
     {
       new ValueFinfo( "width", ValueFtype1< unsigned int >::global(),
                       GFCAST( &InputEventPort::getWidth ),
-                      RFCAST( &InputEventPort::setWidth )
+                      &dummyFunc
                       ),
-
+      new ValueFinfo( "accLatency", ValueFtype1< double >::global(),
+                      GFCAST( &InputEventPort::getAccLatency ),
+                      RFCAST( &InputEventPort::setAccLatency )
+                      ),
+      new ValueFinfo( "maxBuffered", ValueFtype1< int >::global(),
+                      GFCAST( &InputEventPort::getMaxBuffered ),
+                      RFCAST( &InputEventPort::setMaxBuffered )
+                      ),
+      new DestFinfo( "initialise", 
+                     Ftype3< unsigned int, unsigned int, 
+                             MUSIC::event_input_port* >::global(),
+                     RFCAST( &InputEventPort::initialiseFunc )
+                     ),
       //////////////////////////////////////////////////////////////////
       // SharedFinfos
       //////////////////////////////////////////////////////////////////
@@ -77,37 +89,52 @@ static const Slot eventSlot =
 
 void InputEventPort::reinitFunc( const Conn* c, ProcInfo p ) 
 {
-  
+  static_cast < InputEventPort* > (c->data())->innerReinitFunc();
+}
+
+void InputEventPort::innerReinitFunc() 
+{
+  // Map the input from MUSIC to data channels local to this process
+  MUSIC::linear_index iMap(myOffset_, myWidth_);
+  mPort_->map(&iMap, this, accLatency_, maxBuffered_);
+
+
 }
 
 // Event handler
-void InputEventPort::operator () ( double t, int id ) 
+void InputEventPort::operator () ( double t, MUSIC::local_index id ) 
 {
-  send1 < double > ( channels_[id](), eventSlot, t );
+  int localId = id;
+  send1 < double > ( channels_[localId](), eventSlot, t );
 
 }
 
 
-void InputEventPort::setWidth( const Conn* c, unsigned int width)
+void InputEventPort::initialiseFunc( const Conn* c, 
+                                     unsigned int width,
+                                     unsigned int offset,
+                                     MUSIC::event_input_port* mPort)
 {
-  static_cast < InputEventPort* > (c->data())->innerSetWidth(c->target(),
-                                                             width);
+  static_cast < InputEventPort* > 
+    (c->data())->innerInitialiseFunc(c->target(), width, offset, mPort);
 }
 
-void InputEventPort::innerSetWidth( Eref e, unsigned int width) 
+void InputEventPort::innerInitialiseFunc( Eref e, 
+                                          unsigned int width, 
+                                          unsigned int offset,
+                                          MUSIC::event_input_port* mPort
+) 
 {
-  if(channels_.size() > width)
-    {
-      cerr << "InputEventPort::setWidth can not reduce number of channels"
-           << " from " << channels_.size() << " to " << width << endl;
-      return;
-    }
+
+  mPort_ = mPort;
+  myWidth_ = width;
+  myOffset_ = offset;
 
   for(unsigned int i = channels_.size(); i < width; i++)
     {
       ostringstream name;
-
-      name << "channel[" << i << "]";
+      
+      name << "channel[" << i + offset << "]";
 
       Element* channel = Neutral::create( "InputEventChannel", name.str(),
                                           e.id(), Id::scratchId() );
@@ -116,7 +143,28 @@ void InputEventPort::innerSetWidth( Eref e, unsigned int width)
 
 }
 
-unsigned int InputEventPort::getWidth( const Conn* c) 
+unsigned int InputEventPort::getWidth( Eref e ) 
 {
-  return static_cast < InputEventPort* > (c->data())->channels_.size();
+  return static_cast < InputEventPort* > (e.data())->channels_.size();
 }
+
+double InputEventPort::getAccLatency( Eref e )
+{
+  return static_cast < InputEventPort* > (e.data())->accLatency_;
+}
+
+void InputEventPort::setAccLatency( const Conn* c, double accLatency )
+{
+  static_cast < InputEventPort* > (c->data())->accLatency_ = accLatency;
+}
+
+int InputEventPort::getMaxBuffered( Eref e )
+{
+  return static_cast < InputEventPort* > (e.data())->maxBuffered_;
+}
+
+void InputEventPort::setMaxBuffered( const Conn* c, int maxBuffered )
+{
+  static_cast < InputEventPort* > (c->data())->maxBuffered_ = maxBuffered;
+}
+
