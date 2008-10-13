@@ -7788,3 +7788,6 @@ library models.
 I have changed the simUndump command so it now creates KinCompts for groups
 when reading in a kkit model. After some work fixing how this percolates
 down to the child groups, it looks OK.
+
+Checked in as revision 834: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+Confirmed that this is handled properly by SigNeur too.
