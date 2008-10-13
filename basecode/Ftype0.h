@@ -10,6 +10,8 @@
 #ifndef _FTYPE0_H
 #define _FTYPE0_H
 
+extern bool set( Eref e, const Finfo* f );
+
 class Ftype0: public Ftype
 {
 		public:
@@ -54,6 +56,17 @@ class Ftype0: public Ftype
 			virtual std::string getTemplateParameters() const
 			{
 				return "none";
+			}
+
+			/**
+			 * This is a virtual function that calls the function.
+			 * It takes a string, but ignores its value.
+			 * Returns true on success.
+			 */
+			bool strSet( Eref e, const Finfo* f, const string& s )
+					const
+			{
+				return set( e, f );
 			}
 			
 			///////////////////////////////////////////////////////
