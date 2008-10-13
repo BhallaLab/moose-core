@@ -121,15 +121,15 @@ CFLAGS += -DGENERATE_WRAPPERS
 endif
 
 # For parallel (MPI) version:
-ifdef USE_MPI
-CFLAGS += -DUSE_MPI
-endif
-
 ifdef USE_MUSIC
+USE_MPI = 1		# Automatically enable MPI if USE_MUSIC is on
 CFLAGS += -DUSE_MUSIC
 LIBS += -lmusic
 endif
 
+ifdef USE_MPI
+CFLAGS += -DUSE_MPI
+endif
 
 # The -DMPICH_IGNORE_CXX_SEEK flag is because of a bug in the
 # MPI-2 standard. Hopefully it won't affect you, but if it does use
@@ -161,22 +161,28 @@ LIBS=-L/lib64 -L/usr/lib64 $(LIBS)
 endif
 endif
 
+ifdef USE_MUSIC
+	MUSIC_DIR = music
+	MUSIC_LIB = music/music.o
+endif
+
 # Here we automagically change compilers to deal with MPI.
-ifneq (,$(findstring DUSE_MPI,$(CFLAGS)))
-       CXX = mpicxx
-       PARALLEL_DIR = parallel
-       PARALLEL_LIB = parallel/parallel.o
+ifdef USE_MPI
+	CXX = mpicxx
+	PARALLEL_DIR = parallel
+	PARALLEL_LIB = parallel/parallel.o
 else
-       CXX = g++
+	CXX = g++
 endif
 
 LD = ld
 
-SUBDIR = genesis_parser basecode connections shell element maindir scheduling biophysics hsolve kinetics builtins $(PARALLEL_DIR) utility randnum robots
-ifdef USE_MUSIC
-	SUBDIR += music
-endif
+SUBDIR = basecode connections maindir genesis_parser shell element scheduling \
+	biophysics hsolve kinetics builtins utility \
+	randnum robots $(PARALLEL_DIR) $(MUSIC_DIR) 
 
+# Used for 'make clean'
+CLEANSUBDIR = $(SUBDIR) parallel music pymoose
 
 OBJLIBS =	\
 	basecode/basecode.o \
@@ -192,17 +198,16 @@ OBJLIBS =	\
 	hsolve/hsolve.o \
 	kinetics/kinetics.o \
 	builtins/builtins.o \
-	robots/robots.o
-ifdef USE_MUSIC
-	OBJLIBS += music/music.o
-endif
+	robots/robots.o \
+	$(PARALLEL_LIB) \
+	$(MUSIC_LIB)
 
 export CFLAGS
 export LD
 export LIBS
 
 moose: libs $(OBJLIBS) $(PARALLEL_LIB)
-	$(CXX) $(CFLAGS) $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o moose
+	$(CXX) $(CFLAGS) $(OBJLIBS) $(LIBS) -o moose
 	@echo "Moose compilation finished"
 
 libmoose.so: libs
@@ -222,7 +227,7 @@ mpp: preprocessor/*.cpp preprocessor/*.h
 	@( rm -f mpp; cd preprocessor; make CXX="$(CXX)" CFLAGS="$(CFLAGS)"; ln mpp ..; cd ..)
 
 default: moose mpp
-clean: SUBDIR += pymoose
+
 clean:
-	@(for i in $(SUBDIR) ; do $(MAKE) -C $$i clean;  done)
+	@(for i in $(CLEANSUBDIR) ; do $(MAKE) -C $$i clean;  done)
 	-rm -rf moose mpp core.* DOCS/html *.so *.py *.pyc
