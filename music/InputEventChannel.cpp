@@ -16,33 +16,9 @@
 const Cinfo* initInputEventChannelCinfo()
 {
 
-  /**
-   * This is a shared message to receive Process messages from
-   * the scheduler objects.
-   */
-
-  /*
-  static Finfo* processShared[] =
-    {
-      new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-                     RFCAST( &InputEventChannel::processFunc ) ),
-      new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
-                     RFCAST( &InputEventChannel::reinitFunc ) ),
-    };
-  */
-
-  static Finfo* process = 
-    new SharedFinfo( "process", processShared,
-                     sizeof( processShared ) / sizeof( Finfo* ) );
-
 
   static Finfo* inputEventChannelFinfos[] =
     {
-      //////////////////////////////////////////////////////////////////
-      // SharedFinfos
-      //////////////////////////////////////////////////////////////////
-      // process,
-
       ///////////////////////////////////////////////////////
       // MsgSrc definitions
       ///////////////////////////////////////////////////////
