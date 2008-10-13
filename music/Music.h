@@ -15,12 +15,6 @@
 class Music 
 {
 public:
-	Music():
-		setup_( 0 ),
-		runtime_( 0 )
-	{
-		;
-	}
 	
 //////////////////////////////////////////////////////////////////
 // Field access functions
@@ -31,7 +25,7 @@ public:
 //////////////////////////////////////////////////////////////////
 	static void processFunc( const Conn* c, ProcInfo p );
 	static void reinitFunc( const Conn* c, ProcInfo p );
-        static void setupFunc( const Conn* c, MUSIC::setup* setup );
+        static MPI::Intracomm setup( int argc, char **argv );
 
 	static void finalizeFunc( const Conn* c );
 	
@@ -46,7 +40,6 @@ protected:
 private:
 
 	void innerProcessFunc( const Conn* c, ProcInfo p );
-        void innerSetupFunc( Eref e, MUSIC::setup* setup );
         void innerFinalizeFunc( Eref e );
         void innerReinitFunc( Eref e, ProcInfo p );
 
@@ -56,8 +49,8 @@ private:
 		string direction,
 		string type );
 	
-	MUSIC::setup* setup_;
-	MUSIC::runtime* runtime_;
+	static MUSIC::setup* setup_;
+	static MUSIC::runtime* runtime_;
 };
 
 #endif // MOOSE_MUSIC_H

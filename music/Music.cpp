@@ -16,6 +16,9 @@
 #include "Music.h"
 #include "element/Neutral.h"
 
+MUSIC::setup* Music::setup_ = 0;
+MUSIC::runtime* Music::runtime_ = 0;
+
 const Cinfo* initMusicCinfo()
 {
 	/**
@@ -49,10 +52,6 @@ const Cinfo* initMusicCinfo()
 	//////////////////////////////////////////////////////////////////
 	// Dest Finfos.
 	//////////////////////////////////////////////////////////////////
-		new DestFinfo(
-			"setup",
-			Ftype1< MUSIC::setup* >::global(),
-			RFCAST( &Music::setupFunc ) ),
 		new DestFinfo(
 			"finalize",
 			Ftype0::global(),
@@ -114,15 +113,11 @@ void Music::innerReinitFunc( Eref e, ProcInfo p )
 
 }
 
-void Music::setupFunc( const Conn* c, MUSIC::setup* setup )
+MPI::Intracomm Music::setup( int argc, char **argv )
 {
-	static_cast< Music* >( c->data() )->
-		innerSetupFunc( c->target(), setup );
-}
+  setup_ = new MUSIC::setup( argc, argv );
 
-void Music::innerSetupFunc( Eref e, MUSIC::setup* setup )
-{
-	setup_ = setup;
+  return setup_->communicator();
 }
 
 void Music::finalizeFunc( const Conn* c )
