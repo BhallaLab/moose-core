@@ -90,8 +90,7 @@ static const Cinfo* musicCinfo = initMusicCinfo();
 //////////////////////////////////////////////////////////////////
 void Music::innerProcessFunc( const Conn* c, ProcInfo p ) 
 {
-
-	cerr << "Music::innerProcessFunc not implemented yet" << endl;
+  runtime_->tick();
 }
 
 void Music::processFunc( const Conn* c, ProcInfo p ) 
@@ -101,7 +100,18 @@ void Music::processFunc( const Conn* c, ProcInfo p )
   
 void Music::reinitFunc( const Conn* c, ProcInfo p ) 
 {
-	;
+  static_cast < Music* > (c->data() )->innerReinitFunc(c->target(),p);
+}
+
+void Music::innerReinitFunc( Eref e, ProcInfo p ) 
+{
+  if(setup_) {
+    
+
+    runtime_ = new MUSIC::runtime(setup_, p->dt_ );
+    setup_ = 0;
+  }
+
 }
 
 void Music::setupFunc( const Conn* c, MUSIC::setup* setup )
@@ -144,17 +154,59 @@ void Music::innerAddPort (
 {
   if(direction == "in" && type == "event") {
 
-  Element* port = 
-    Neutral::create("InputEventPort", name, e.id(), Id::scratchId() );
+    // Create the event input port
+    Element* port = 
+      Neutral::create("InputEventPort", name, e.id(), Id::scratchId() );
 
-  MUSIC::cout_output_port* out = setup_->publish_event_input(name);
-  int width = out->width();
+    // Publish the event input port to music
+    MUSIC::event_input_port* mPort = setup_->publish_event_input(name);
+    int width = mPort->width();
     
-  set< unsigned int >(port,"width", width);
+    int numNodes = MuMPI::INTRA_COMM().Get_size();
+    int myRank = MuMPI::INTRA_COMM().Get_rank();
+
+    // Calculate base offset and width for our process
+    // last node gets any extra channels left.
+    int avgWidth = width / numNodes;
+    int myWidth = (myRank < numNodes-1) ? 
+      avgWidth : width - avgWidth*(numNodes-1);
+
+    int myOffset = myRank * avgWidth;
+
+    set< unsigned int >(port,"initialise", myWidth, myOffset, mPort);
+    
+    // Map the input from MUSIC to data channels local to this process
+    // is done in InputEventPort
+
+  }
+  else if(direction == "out" && type == "event"){
+     // Create the event output port
+    Element* port = 
+      Neutral::create("OutputEventPort", name, e.id(), Id::scratchId() );
+
+    // Publish the event output port to music
+    MUSIC::event_output_port* mPort = setup_->publish_event_output(name);
+    int width = mPort->width();
+    
+    int numNodes = MuMPI::INTRA_COMM().Get_size();
+    int myRank = MuMPI::INTRA_COMM().Get_rank();
+
+    // Calculate base offset and width for our process
+    // last node gets any extra channels left.
+    int avgWidth = width / numNodes;
+    int myWidth = (myRank < numNodes-1) ? 
+      avgWidth : width - avgWidth*(numNodes-1);
+
+    int myOffset = myRank * avgWidth;
+
+    set< unsigned int >(port,"initialise", myWidth, myOffset, mPort);
+    
+    // Map the output from MUSIC to data channels local to this process
+    // is done in OutputEventPort
 
   }
   else {
-    cerr << "Music::innerAddPort: " << direction " " << type 
+    cerr << "Music::innerAddPort: " << direction << " " << type 
          << " Not supported yet";
 
   }
