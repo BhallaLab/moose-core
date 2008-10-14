@@ -51,17 +51,17 @@ const Cinfo* initAscFileCinfo()
       // MsgDest definitions
       ///////////////////////////////////////////////////////
       // Replaced with SharedFinfo, to get hsolver to work.
-      //new DestFinfo( "save",
-      //               Ftype1< double >::global(),
-      //               RFCAST( &AscFile::input )
-      //               ),
+      new DestFinfo( "save",
+                     Ftype1< double >::global(),
+                     RFCAST( &AscFile::input )
+                     ),
       ///////////////////////////////////////////////////////
       // Synapse definitions
       ///////////////////////////////////////////////////////
       ///////////////////////////////////////////////////////
       // Shared definitions
       ///////////////////////////////////////////////////////
-      new SharedFinfo( "save", inputRequestShared, 
+      new SharedFinfo( "save1", inputRequestShared, 
                        sizeof( inputRequestShared ) / sizeof( Finfo* ) ),
 
       process,
