@@ -18,6 +18,8 @@
 
 MUSIC::setup* Music::setup_ = 0;
 MUSIC::runtime* Music::runtime_ = 0;
+//!!!
+double Music::dt_;
 
 const Cinfo* initMusicCinfo()
 {
@@ -53,6 +55,10 @@ const Cinfo* initMusicCinfo()
 	// Dest Finfos.
 	//////////////////////////////////////////////////////////////////
 		new DestFinfo(
+			"reinitialize",
+			Ftype0::global(),
+			RFCAST( &Music::reinitializeFunc ) ),
+		new DestFinfo(
 			"finalize",
 			Ftype0::global(),
 			RFCAST( &Music::finalizeFunc ) ),
@@ -62,7 +68,7 @@ const Cinfo* initMusicCinfo()
 			RFCAST( &Music::addPort ) ),
 	};
 	
-	static SchedInfo schedInfo[] = { { process, 0, 1 } };
+//	static SchedInfo schedInfo[] = { { process, 0, 1 } };
 	
 	static Cinfo musicCinfo(
 		"Music",
@@ -71,8 +77,8 @@ const Cinfo* initMusicCinfo()
 		initNeutralCinfo(),
 		musicFinfos,
 		sizeof( musicFinfos ) / sizeof( Finfo* ),
-		ValueFtype1< Music >::global(),
-		schedInfo, 1
+		ValueFtype1< Music >::global()
+		//~ schedInfo, 1
 	);
 	
 	return &musicCinfo;
@@ -90,6 +96,8 @@ static const Cinfo* musicCinfo = initMusicCinfo();
 void Music::innerProcessFunc( const Conn* c, ProcInfo p ) 
 {
   runtime_->tick();
+  //~ cerr << "TICK! " << p->currTime_ << endl;
+  //~ cerr << "Music time: " << runtime_->time() << endl;
 }
 
 void Music::processFunc( const Conn* c, ProcInfo p ) 
@@ -106,11 +114,27 @@ void Music::innerReinitFunc( Eref e, ProcInfo p )
 {
   if(setup_) {
     
-
-    runtime_ = new MUSIC::runtime(setup_, p->dt_ );
-    setup_ = 0;
+	dt_ = p->dt_;
+//    runtime_ = new MUSIC::runtime(setup_, p->dt_ );
+   // setup_ = 0;
   }
 
+}
+
+void Music::reinitializeFunc( const Conn* c ) 
+{
+  static_cast < Music* > (c->data() )->innerReinitializeFunc();
+}
+
+void Music::innerReinitializeFunc( ) 
+{
+  if(setup_) {
+    runtime_ = new MUSIC::runtime(setup_, 0.01 );
+    //~ runtime_ = new MUSIC::runtime(setup_, dt_ );
+    setup_ = 0;
+	// !!!
+	cerr << "dt_ hardcoded" << endl;
+  }
 }
 
 MPI::Intracomm Music::setup( int& argc, char**& argv )
@@ -155,18 +179,18 @@ void Music::innerAddPort (
 
     // Publish the event input port to music
     MUSIC::event_input_port* mPort = setup_->publish_event_input(name);
-    int width = mPort->width();
+    unsigned int width = mPort->width();
     
-    int numNodes = MuMPI::INTRA_COMM().Get_size();
-    int myRank = MuMPI::INTRA_COMM().Get_rank();
+    unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
+    unsigned int myRank = MuMPI::INTRA_COMM().Get_rank();
 
     // Calculate base offset and width for our process
     // last node gets any extra channels left.
-    int avgWidth = width / numNodes;
-    int myWidth = (myRank < numNodes-1) ? 
+    unsigned int avgWidth = width / numNodes;
+    unsigned int myWidth = (myRank < numNodes-1) ? 
       avgWidth : width - avgWidth*(numNodes-1);
 
-    int myOffset = myRank * avgWidth;
+    unsigned int myOffset = myRank * avgWidth;
 
     set< unsigned int >(port,"initialise", myWidth, myOffset, mPort);
     

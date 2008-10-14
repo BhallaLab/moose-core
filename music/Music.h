@@ -25,6 +25,7 @@ public:
 //////////////////////////////////////////////////////////////////
 	static void processFunc( const Conn* c, ProcInfo p );
 	static void reinitFunc( const Conn* c, ProcInfo p );
+	static void reinitializeFunc( const Conn* c );
         static MPI::Intracomm setup( int& argc, char**& argv );
 
 	static void finalizeFunc( const Conn* c );
@@ -42,6 +43,7 @@ private:
 	void innerProcessFunc( const Conn* c, ProcInfo p );
         void innerFinalizeFunc( Eref e );
         void innerReinitFunc( Eref e, ProcInfo p );
+        void innerReinitializeFunc( );
 
 	void innerAddPort(
 		Eref e,
@@ -51,6 +53,8 @@ private:
 	
 	static MUSIC::setup* setup_;
 	static MUSIC::runtime* runtime_;
+	
+	static double dt_;
 };
 
 #endif // MOOSE_MUSIC_H
