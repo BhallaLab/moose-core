@@ -63,6 +63,8 @@ void OutputEventChannel::insertEvent(const Conn* c, double time)
 void OutputEventChannel::innerInsertEvent(double time)
 {
   mPort_->insert_event(time, localId_);
+  cerr << "event sent @ " << time << endl;
+  cerr << "id: " << localId_ << endl;
 }
 
 void OutputEventChannel::initialise(const Conn* c, unsigned int id, 
