@@ -695,6 +695,12 @@ void printNodeInfo( const Conn* c );
 Shell::Shell()
 	: cwe_( Id() ), recentElement_( Id() )
 {
+
+#ifdef DO_UNIT_TESTS
+        post_ = 0;
+#endif // DO_UNIT_TESTS
+
+
 	simDump_ = new SimDump;
 	// At this point the initMPI should have initialized numNodes
 	offNodeData_.resize( maxNumOffNodeRequests );

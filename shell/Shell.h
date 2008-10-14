@@ -30,7 +30,7 @@ class Shell
 #endif // USE_MPI
 #endif // DO_UNIT_TESTS
 	public:
-		Shell();
+        Shell();
 	
 ////////////////////////////////////////////////////////////////////
 // Some utility functions for path management.
