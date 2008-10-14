@@ -58,18 +58,20 @@ void SigNeur::setAllVols()
 		double volume;
 		double xByL;
 		getSigComptSize( i->compt.eref(), i->sigEnd - i->sigStart, volume, xByL );
+		Eref e;
+		unsigned int offset = 0;
+		if ( i->category == SOMA ) {
+			e = soma_.eref();
+		} else if ( i->category == DEND ) {
+			e = dend_.eref();
+			offset = numSoma_;
+		} else if ( i->category == SPINE ) {
+			e = spine_.eref();
+			offset = numSoma_ + numDend_;
+		} else {
+			continue;
+		}
 		for ( unsigned int j = i->sigStart; j < i->sigEnd; ++j ) {
-			Eref e;
-			unsigned int offset = 0;
-			if ( i->category == SOMA ) {
-				e = soma_.eref();
-			} else if ( i->category == DEND ) {
-				e = dend_.eref();
-				offset = numSoma_;
-			} else if ( i->category == SPINE ) {
-				e = spine_.eref();
-				offset = numSoma_ + numDend_;
-			}
 			assert( e.e != Element::root() );
 			assert( e.e->numEntries() > ( j - offset ) );
 			e.i = j - offset;
