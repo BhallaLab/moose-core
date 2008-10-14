@@ -12,6 +12,7 @@
 #include "moose.h"
 #include <math.h>
 #include <mpi.h>
+#include "maindir/MuMPI.h"
 #include <unistd.h> // Will need to replace for other OSs
 				// Used for the usleep definition
 #include "PostMaster.h"
@@ -861,13 +862,13 @@ void testParMsgOnSingleNode()
 void testNodeSetup()
 {
 	// First, ensure that all nodes are synced.
-	MPI::COMM_WORLD.Barrier();
-	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
-	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
+	MuMPI::INTRA_COMM().Barrier();
+	unsigned int myNode = MuMPI::INTRA_COMM().Get_rank();
+	unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
 	unsigned int i;
 	if ( myNode == 0 )
 		cout << "\nTesting PostMaster: " << numNodes << " nodes" << flush;
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	///////////////////////////////////////////////////////////////
 	// check that we have postmasters for each of the other nodes
 	// Print out a dot for each node.
@@ -956,9 +957,9 @@ void testPostMaster()
 							table, "table", 0.0, i );
 	}
 
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	cout << "b" << myNode;
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 
 	if ( myNode == 0 ) {
 		// Here we are being sneaky because we have the same id on all 
@@ -978,16 +979,16 @@ void testPostMaster()
 	Element* cj = cjId();
 	set< double >( cj, "start", 1.0 );
 
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	set( table, "destroy" );
 	// unsigned int cjId = Shell::path2eid( "/sched/cj", "/" );
 
 	////////////////////////////////////////////////////////////////
 	// Now we fire up the scheduler on all nodes to keep info flowing.
 	////////////////////////////////////////////////////////////////
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	// sleep( 5 );
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	char sendstr[50];
 
 	for ( i = 0; i < numNodes; i++ ) {
@@ -1004,13 +1005,13 @@ void testPostMaster()
 		// char* buf = static_cast< char* >( pdata->innerGetAsyncParBuf( shellIndex, strlen( sendstr ) + 1 ));
 		// strcpy( buf, sendstr );
 	}
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	bool glug = 0; // Breakpoint for parallel debugging
 	while ( glug ) ;
 	// cout << " starting string send\n" << flush;
 	set< double >( cj, "start", 1.0 );
 	// cout << " Done string send\n" << flush;
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 
 	////////////////////////////////////////////////////////////////
 	// Now we set up a fully connected network of tables. Each 
@@ -1069,7 +1070,7 @@ void testPostMaster()
 				ret = Eref( tables[i] ).add( "outputSrc", 
 					p, "data" );
 				ASSERT( ret, "Making input message to postmaster" );
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 			}
 		} else {
 			post = postId[i]();
@@ -1086,7 +1087,7 @@ void testPostMaster()
 		}
 	}
 	set< double >( cj, "start", 11.0 );
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	// At this point the contents of the tables should be changed by the
 	// arrival of data.
 	double value;
@@ -1105,7 +1106,7 @@ void testPostMaster()
 		}
 	}
 #endif // TABLE_DATA
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	cout << flush;
 }
 #endif
