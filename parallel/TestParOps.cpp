@@ -12,6 +12,7 @@
 #include "moose.h"
 #include <math.h>
 #include <mpi.h>
+#include "maindir/MuMPI.h"
 #include <unistd.h> // Will need to replace for other OSs
 				// Used for the usleep definition
 #include "PostMaster.h"
@@ -35,13 +36,13 @@ extern void pollPostmaster(); // Defined in maindir/mpiSetup.cpp
  */
 Id testParCreate( vector< Id >& testIds )
 {
-	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
-	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
+	unsigned int myNode = MuMPI::INTRA_COMM().Get_rank();
+	unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
 	if ( myNode == 0 )
 		cout << flush << "\nTest ParCreate";
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	cout << "b" << myNode << flush;
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	Eref shellE = Id::shellId().eref();
 	assert( shellE.e != 0 );
 	if ( myNode == 0 ) {
@@ -67,13 +68,13 @@ Id testParCreate( vector< Id >& testIds )
 		SetConn c( shellE );
 		Shell::staticCreate( &c, "Neutral", "foo", -1, libid );
 	}
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	pollPostmaster(); // There is a barrier in the polling operation itself
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	pollPostmaster();
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	pollPostmaster();
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	char name[20];
 	sprintf( name, "/tn%d", myNode );
 	string sname = name;
@@ -104,11 +105,11 @@ Id testParCreate( vector< Id >& testIds )
  */
 void testParCopy()
 {
-	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
-	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
+	unsigned int myNode = MuMPI::INTRA_COMM().Get_rank();
+	unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
 	if ( myNode == 0 )
 		cout << flush << "\nTest ParCopy";
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	Eref shellE = Id::shellId().eref();
 	assert( shellE.e != 0 );
 	if ( myNode == 0 ) {
@@ -145,13 +146,13 @@ void testParCopy()
 			Shell::copy( &c, origId, targets[i], "dup" );
 		}
 	}
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	pollPostmaster(); // There is a barrier in the polling operation itself
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	pollPostmaster();
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	pollPostmaster();
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	char name[20];
 	sprintf( name, "/tn%d", myNode );
 	string sname = name;
@@ -189,8 +190,8 @@ void testParCopy()
 /////////////////////////////////////////////////////////////////
 void testParGet( Id tnId, vector< Id >& testIds )
 {
-	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
-	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
+	unsigned int myNode = MuMPI::INTRA_COMM().Get_rank();
+	unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
 	Slot parGetSlot = initShellCinfo()->getSlot( "parallel.getSrc" );
 	char name[20];
 	string sname;
@@ -201,7 +202,7 @@ void testParGet( Id tnId, vector< Id >& testIds )
 		sname = name;
 		set< string >( tnId.eref(), "name", sname );
 	}
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	Eref e = Id::shellId().eref();
 	Shell* sh = static_cast< Shell* >( e.data() );
 	vector< unsigned int > rids( numNodes, 0 );
@@ -220,11 +221,11 @@ void testParGet( Id tnId, vector< Id >& testIds )
 		}
 	}
 	// Here we explicitly do what the closeOffNodeValueRequest handles.
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	// Cycle a few times to make sure all data gets back to node 0
 	for ( unsigned int i = 0; i < 5; i++ ) {
 		pollPostmaster();
-		MPI::COMM_WORLD.Barrier();
+		MuMPI::INTRA_COMM().Barrier();
 	}
 	
 	// Now go through to check all values have come back.
@@ -253,11 +254,11 @@ void testParSet( vector< Id >& testIds )
 	//////////////////////////////////////////////////////////////////
 	char name[20];
 	string sname;
-	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
-	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
+	unsigned int myNode = MuMPI::INTRA_COMM().Get_rank();
+	unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
 	Eref shellE = Id::shellId().eref();
 	assert( shellE.e != 0 );
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	if ( myNode == 0 ) {
 		cout << "\ntesting parallel set" << flush;
 		Slot parSetSlot = 
@@ -279,9 +280,9 @@ void testParSet( vector< Id >& testIds )
 		Shell::staticCreate( &c, "Neutral", "foo", -1, libid );
 	}
 	
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	pollPostmaster();
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	pollPostmaster();
 
 	if ( myNode != 0 ) {
@@ -299,15 +300,15 @@ void testParSet( vector< Id >& testIds )
 	Id kidid = Id::localId( "/library/foo" );
 	ASSERT( kidid.good(), "setting libkids" );
 	ASSERT( kidid.isGlobal(), "setting libkids" );
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	if ( myNode == 0 ) {
 		cout << "\ntesting global set" << flush;
 		SetConn c( shellE );
 		Shell::setField( &c, kidid, "name", "bar" );
 	}
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	pollPostmaster();
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 	pollPostmaster();
 	
 	Id newKidid = Id::localId( "/library/bar" );
@@ -318,7 +319,7 @@ void testParSet( vector< Id >& testIds )
 	bool ret = set( kidid.eref(), "destroy" );
 	ASSERT( ret, "destroy libkids" );
 	cout << flush;
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 }
 
 void testParDelete( vector< Id >& testIds )
@@ -330,8 +331,8 @@ void testParDelete( vector< Id >& testIds )
 	string sname;
 	vector< Id > kids;
 	Id victim;
-	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
-	MPI::COMM_WORLD.Barrier();
+	unsigned int myNode = MuMPI::INTRA_COMM().Get_rank();
+	MuMPI::INTRA_COMM().Barrier();
 	// First check the list of children, using node-local commands.
 	// If we later alter childList, must fix.
 	if ( myNode != 0 ) {
@@ -360,7 +361,7 @@ void testParDelete( vector< Id >& testIds )
 	}
 	for ( unsigned int i = 0; i < 5; i++ ) {
 		pollPostmaster();
-		MPI::COMM_WORLD.Barrier();
+		MuMPI::INTRA_COMM().Barrier();
 	}
 	// Now check on the carnage. Must use local-node commands here.
 	if ( myNode != 0 ) {
@@ -383,8 +384,8 @@ void testParDelete( vector< Id >& testIds )
 void testParCommandSequence()
 {
 	const unsigned int numSeq = 10;
-	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
-	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
+	unsigned int myNode = MuMPI::INTRA_COMM().Get_rank();
+	unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
 	Eref shellE = Id::shellId().eref();
 	char name[20];
 	string sname;
@@ -419,7 +420,7 @@ void testParCommandSequence()
 	}
 	for ( unsigned int i = 0 ; i < 5; i++ ) {
 		pollPostmaster();
-		MPI::COMM_WORLD.Barrier();
+		MuMPI::INTRA_COMM().Barrier();
 	}
 	if ( myNode != 0 ) {
 		for ( unsigned int j = 0; j < numSeq; j++ ) {
@@ -451,8 +452,8 @@ void testParCommandSequence()
 **/
 void testParMsg()
 {
-	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
-	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
+	unsigned int myNode = MuMPI::INTRA_COMM().Get_rank();
+	unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
 	Eref shellE = Id::shellId().eref();
 	vector< Id > tabIds;
 	char name[20];
@@ -500,7 +501,7 @@ void testParMsg()
 	}
 	for ( unsigned int i = 0; i < 5; i++ ) {
 		pollPostmaster();
-		MPI::COMM_WORLD.Barrier();
+		MuMPI::INTRA_COMM().Barrier();
 	}
 	sprintf( name, "/tab%d", myNode );
 	sname = name;
@@ -523,7 +524,7 @@ void testParMsg()
 	}
 	for ( unsigned int i = 0; i < 5; i++ ) {
 		pollPostmaster();
-		MPI::COMM_WORLD.Barrier();
+		MuMPI::INTRA_COMM().Barrier();
 	}
 	cout << flush;
 
@@ -539,7 +540,7 @@ void testParMsg()
 
 	// cout << "numSum: " << checkId.eref()->numTargets( "sum" ) << ", " << numSum << endl << flush;
 	ASSERT( checkId.eref()->numTargets( "sum" ) == numSum, "par msg" );
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 
 	// True for all but the last node
 	if ( myNode < numNodes - 1 )
@@ -569,7 +570,7 @@ void testParMsg()
 		// set< int >( cjId.eref(), "step", numNodes * 2 + 3 );
 		set< int >( cjId.eref(), "step", 1 );
 		usleep( 10000 );
-		MPI::COMM_WORLD.Barrier();
+		MuMPI::INTRA_COMM().Barrier();
 	}
 	double f1 = 0.0;
 	double f2 = 1.0;
@@ -607,8 +608,8 @@ void testParMsg()
 void testParTraversePath()
 {
 	const unsigned int numPoll = 20;
-	unsigned int myNode = MPI::COMM_WORLD.Get_rank();
-	unsigned int numNodes = MPI::COMM_WORLD.Get_size();
+	unsigned int myNode = MuMPI::INTRA_COMM().Get_rank();
+	unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
 	vector< Id > parents;
 	vector< Id > children;
 	if ( myNode == 0 ) {
@@ -645,7 +646,7 @@ void testParTraversePath()
 	for ( unsigned int i = 0; i < numPoll; i++ ) {
 		pollPostmaster();
 		usleep( 10000 );
-		MPI::COMM_WORLD.Barrier();
+		MuMPI::INTRA_COMM().Barrier();
 	}
 
 	if ( myNode == 0 ) {
@@ -673,7 +674,7 @@ void testParTraversePath()
 		usleep( 10000 );
 	}
 	// cout << "Past Id check loop on " << myNode << flush;
-	MPI::COMM_WORLD.Barrier();
+	MuMPI::INTRA_COMM().Barrier();
 
 	if ( myNode != 0 ) {
 		char name[20];
