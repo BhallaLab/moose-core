@@ -7797,4 +7797,13 @@ Serious bug involving array indexing has cropped up since version 834.
 In the meantime, implemented strSet for Ftype0.
 
 Checked in as revision 841: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Fixed cosmetic bug for doing le on array elements.
+Checked in as revision 842: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
 =============================================================================
+14 Oct 2008
+Fixed serious bug in SigNeur where an uninitialized eref was being used
+to set volumes
+Also minor fixes to PulseGen for uninitialized variables.
+Pending important fix to Eref, to give default initializer to Element::root().
