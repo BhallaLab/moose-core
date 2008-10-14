@@ -25,7 +25,7 @@ public:
 //////////////////////////////////////////////////////////////////
 	static void processFunc( const Conn* c, ProcInfo p );
 	static void reinitFunc( const Conn* c, ProcInfo p );
-        static MPI::Intracomm setup( int argc, char **argv );
+        static MPI::Intracomm setup( int& argc, char**& argv );
 
 	static void finalizeFunc( const Conn* c );
 	

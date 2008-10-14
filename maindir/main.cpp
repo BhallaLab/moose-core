@@ -35,7 +35,7 @@ extern void initMoose();
 extern void initSched();
 
 // Defined in mpiSetup.cpp
-extern unsigned int initMPI( int argc, char** argv );
+extern unsigned int initMPI( int& argc, char**& argv );
 extern void initParSched();
 extern void terminateMPI( unsigned int myNode );
 extern void pollPostmaster();  // Defined in mpiSetup.cpp
@@ -68,6 +68,8 @@ extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 
 int main(int argc, char** argv)
 {
+	unsigned int myNode = initMPI( argc, argv );
+
 	// TODO : check the repurcussions of MPI command line
 	ArgParser::parseArguments(argc, argv);
 
@@ -80,7 +82,6 @@ int main(int argc, char** argv)
 	///////////////////////////////////////////////////////////////////
 	//	Initialization functions. Must be in this order.
 	///////////////////////////////////////////////////////////////////
-	unsigned int myNode = initMPI( argc, argv );
 
 	initMoose();
 	initSched();
