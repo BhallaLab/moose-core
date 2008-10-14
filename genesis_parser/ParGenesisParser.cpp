@@ -17,6 +17,7 @@
 
 
 #include <mpi.h>
+#include "maindir/MuMPI.h"
 #include <pthread.h>
 
 using namespace std;
@@ -354,7 +355,7 @@ void do_parplanarconnect( int argc, const char** const argv, Id s )
 	string spikegenrank, synchanrank;
 	char arrTemp[10];
 
-	MPI_Comm_rank(MPI_COMM_WORLD, &iMyRank);
+	MPI_Comm_rank(MuMPI::INTRA_COMM(), &iMyRank);
 
 	source = argv[1];
 	dest = argv[2];
@@ -406,8 +407,8 @@ void ParGenesisParserWrapper::parseFunc( const Conn& c, string s )
 	int i;
 	char **pArgs;
 
-        MPI_Comm_rank(MPI_COMM_WORLD, &objParParser.processrank_);
-        MPI_Comm_size(MPI_COMM_WORLD, &objParParser.processcount_);
+        MPI_Comm_rank(MuMPI::INTRA_COMM(), &objParParser.processrank_);
+        MPI_Comm_size(MuMPI::INTRA_COMM(), &objParParser.processcount_);
 
 	if(objParParser.processrank_ == 0)
 	{
@@ -419,7 +420,7 @@ void ParGenesisParserWrapper::parseFunc( const Conn& c, string s )
 		
 		while(1)
 		{
-			MPI_Bcast(&objCommand, sizeof(int) + MAX_COMMAND_SIZE * MAX_COMMAND_ARGS * sizeof(char), MPI_CHAR, 0, MPI_COMM_WORLD);
+			MPI_Bcast(&objCommand, sizeof(int) + MAX_COMMAND_SIZE * MAX_COMMAND_ARGS * sizeof(char), MPI_CHAR, 0, MuMPI::INTRA_COMM());
 
 			if(objCommand.iRank != 0 && objCommand.iRank != objParParser.processrank_)
 			{
@@ -445,7 +446,7 @@ void ParGenesisParserWrapper::parseFunc( const Conn& c, string s )
 			{
 				// Execute Barrier before executing step command
 				//cout<<endl<<"Executing barrier at rank: "<<objParParser.processrank_<<endl<<flush;
-				MPI_Barrier(MPI_COMM_WORLD);		
+				MPI_Barrier(MuMPI::INTRA_COMM());		
 			}
 
 
@@ -454,7 +455,7 @@ void ParGenesisParserWrapper::parseFunc( const Conn& c, string s )
 			if(!strcmp(objCommand.arrCommand[0], "step"))
 			{
 				int j = 1;
-				MPI_Send(&j, 1, MPI_INT, 0, STEP_ACK_TAG, MPI_COMM_WORLD);
+				MPI_Send(&j, 1, MPI_INT, 0, STEP_ACK_TAG, MuMPI::INTRA_COMM());
 				//cout<<endl<<"Process "<<objParParser.processrank_<<" sending ACK"<<endl<<flush; 
 			}
 
@@ -796,7 +797,7 @@ Result ParGenesisParserWrapper::ExecuteCommand(int argc, char** argv)
 
 int ParGenesisParserWrapper::SendCommand(int argc)
 {
-	MPI_Bcast(&objCommand_, sizeof(int) + MAX_COMMAND_SIZE * MAX_COMMAND_ARGS * sizeof(char), MPI_CHAR, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&objCommand_, sizeof(int) + MAX_COMMAND_SIZE * MAX_COMMAND_ARGS * sizeof(char), MPI_CHAR, 0, MuMPI::INTRA_COMM());
 	return 0;
 }
 
@@ -804,8 +805,8 @@ void ParGenesisParserWrapper::BCastConnections()
 {
 	//int i,j;
 
-	MPI_Bcast(arrSpikegenConnections, MAX_MPI_PROCESSES * MAX_MPI_PROCESSES , MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(arrSynchanConnections, MAX_MPI_PROCESSES * MAX_MPI_PROCESSES, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(arrSpikegenConnections, MAX_MPI_PROCESSES * MAX_MPI_PROCESSES , MPI_INT, 0, MuMPI::INTRA_COMM());
+	MPI_Bcast(arrSynchanConnections, MAX_MPI_PROCESSES * MAX_MPI_PROCESSES, MPI_INT, 0, MuMPI::INTRA_COMM());
 
         /*for(i=1; i < processcount_; i++)
         {
@@ -837,7 +838,7 @@ void ParGenesisParserWrapper::PostStepCommand()
 
 	//Execute Barrier at step command
 	//cout<<endl<<"Executing barrier at rank: "<<processrank_<<endl<<flush;
-	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Barrier(MuMPI::INTRA_COMM());
 
          //cout <<endl<<"moose "<<processrank_<<" Waiting for Step ACK# > "<< flush;
 	stUserInput objUserInput(processcount_-1);
@@ -856,7 +857,7 @@ void ParGenesisParserWrapper::PostStepCommand()
                MPI_Status status;
 
                iReceivedACK = false;
-               MPI_Irecv (&iACK, 1, MPI_INT, MPI_ANY_SOURCE, STEP_ACK_TAG, MPI_COMM_WORLD, &req);
+               MPI_Irecv (&iACK, 1, MPI_INT, MPI_ANY_SOURCE, STEP_ACK_TAG, MuMPI::INTRA_COMM(), &req);
 
                while(iReceivedACK == false)
                {
@@ -869,7 +870,7 @@ void ParGenesisParserWrapper::PostStepCommand()
 				{
 					lRequest = 0;
 					//cout<<endl<<"Sending STOP to: "<<objUserInput.iPrevNeuron<<" Index: "<<objUserInput.iPrevIndex<<flush;
-	                        	MPI_Isend(&lRequest, 1, MPI_DOUBLE, objUserInput.iPrevNeuron,objUserInput.iPrevIndex, MPI_COMM_WORLD, &request);
+	                        	MPI_Isend(&lRequest, 1, MPI_DOUBLE, objUserInput.iPrevNeuron,objUserInput.iPrevIndex, MuMPI::INTRA_COMM(), &request);
 	                        	MPI_Wait(&request, MPI_STATUS_IGNORE);
 				}
 				
@@ -879,7 +880,7 @@ void ParGenesisParserWrapper::PostStepCommand()
 				objUserInput.bNeuronSelected = false;
 				lRequest = 1;
 				//cout<<endl<<"Sending START to: "<<objUserInput.iNeuron<<" Index: "<<objUserInput.iIndex<<flush;
-                        	MPI_Isend(&lRequest, 1, MPI_DOUBLE, objUserInput.iNeuron,objUserInput.iIndex, MPI_COMM_WORLD, &request);
+                        	MPI_Isend(&lRequest, 1, MPI_DOUBLE, objUserInput.iNeuron,objUserInput.iIndex, MuMPI::INTRA_COMM(), &request);
 	                        MPI_Wait(&request, MPI_STATUS_IGNORE);
 			}
                         	DisplayData(&objUserInput);
@@ -923,7 +924,7 @@ void ParGenesisParserWrapper::DisplayData(void *pArgs)
 				MPI_DOUBLE, 
 				objUserInput.iNeuron, 
 				objUserInput.iNeuron*10+objUserInput.iIndex, 
-				MPI_COMM_WORLD, 
+				MuMPI::INTRA_COMM(), 
 				&request
 			  );
 
