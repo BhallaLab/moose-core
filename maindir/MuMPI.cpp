@@ -16,7 +16,7 @@
 
 MPI::Intracomm MuMPI::communicator_ = MPI::Intracomm();
 
-void MuMPI::Init( int argc, char** argv )
+void MuMPI::Init( int& argc, char**& argv )
 {
 
 #ifdef USE_MPI

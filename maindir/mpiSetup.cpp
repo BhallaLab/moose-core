@@ -35,7 +35,7 @@ static const Finfo* stepFinfo;
  * Initializes MPI as well as scheduling and cross-node shell messaging.
  * Returns node number.
  */
-unsigned int initMPI( int argc, char** argv )
+unsigned int initMPI( int& argc, char**& argv )
 {
 #ifdef USE_MPI
 	MuMPI::Init( argc, argv );
