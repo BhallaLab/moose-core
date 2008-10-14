@@ -71,8 +71,10 @@ void SigNeur::setAllVols()
 		} else {
 			continue;
 		}
+		if ( e.e == Element::root() ) 
+			continue; // Tihs is when there is no signalling in that compt.
+
 		for ( unsigned int j = i->sigStart; j < i->sigEnd; ++j ) {
-			assert( e.e != Element::root() );
 			assert( e.e->numEntries() > ( j - offset ) );
 			e.i = j - offset;
 			assert( e.e->cinfo()->isA( initKinComptCinfo() ) );

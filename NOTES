@@ -7807,3 +7807,13 @@ Fixed serious bug in SigNeur where an uninitialized eref was being used
 to set volumes
 Also minor fixes to PulseGen for uninitialized variables.
 Pending important fix to Eref, to give default initializer to Element::root().
+
+Checked in as revision 847: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Continuing issues with the SigNeur, has been fixed on pinni, but
+another surfaced. I will have to recompile in debug mode to catch many
+of these issues, since the release mode has been happily skipping assertions
+that otherwise would have cropped up.
+
+Lots of fixes to Shell.cpp, needed because of unresolved parallel slots
+all over the place, that caused havoc in serial mode.
