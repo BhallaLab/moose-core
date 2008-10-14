@@ -1,0 +1,8 @@
+np=1
+stoptime=1.0
+[source]
+  binary=/usr/local/bin/eventsource
+  args=60 contiguous spikes
+[moose]
+  binary=../../moose
+  args=testMusicDest.g
