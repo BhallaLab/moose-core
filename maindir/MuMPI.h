@@ -19,7 +19,7 @@ class MuMPI
 {
 public:
 	static void setupMusic( );
-	static void Init( int argc, char** argv );
+	static void Init( int& argc, char**& argv );
 	static void Finalize( );
 	static const MPI::Intracomm& INTRA_COMM( );
 	
