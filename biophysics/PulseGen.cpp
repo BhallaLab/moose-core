@@ -298,6 +298,8 @@ void PulseGen::inputFunc(const Conn& c, double value)
 {
     PulseGen* obj = static_cast<PulseGen*> (c.data());
     ASSERT( obj != NULL, "PulseGen::inputFunc(const Conn&, int) - target data pointer is NULL.");
+	// Why are we setting value as a double? Should this be a protected
+	// comparison?
     obj->input_ = (value == 0.0)? 0: 1;
 }
 
@@ -320,7 +322,7 @@ void PulseGen::reinitFunc( const Conn& c, ProcInfo p )
     obj->trigTime_ = -1;
     obj->prevInput_ = 0;
     obj->output_ = obj->baseLevel_;
-    obj->input_ = 0.0;    
+    obj->input_ = 0;    
 }
 /**
    This has been adapted from the original genesis code written by
@@ -329,8 +331,8 @@ void PulseGen::reinitFunc( const Conn& c, ProcInfo p )
 void PulseGen::innerProcessFunc(const Conn& c, ProcInfo p)
 {
     double currentTime = p->currTime_;
-    double period;
-    double phase;
+    double period = 0.0;
+    double phase = 0.0;
     
     if ( firstWidth_ > secondDelay_ + secondWidth_ )
     {
@@ -346,7 +348,7 @@ void PulseGen::innerProcessFunc(const Conn& c, ProcInfo p)
             phase = fmod(currentTime,period);
             break;
         case PulseGen::EXT_TRIG :
-            if ( input_ == 0.0 )
+            if ( input_ == 0 )
             {
                 if ( trigTime_ < 0 )
                 {
