@@ -205,18 +205,18 @@ void Music::innerAddPort (
 
     // Publish the event output port to music
     MUSIC::event_output_port* mPort = setup_->publish_event_output(name);
-    int width = mPort->width();
+    unsigned int width = mPort->width();
     
-    int numNodes = MuMPI::INTRA_COMM().Get_size();
-    int myRank = MuMPI::INTRA_COMM().Get_rank();
+    unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
+    unsigned int myRank = MuMPI::INTRA_COMM().Get_rank();
 
     // Calculate base offset and width for our process
     // last node gets any extra channels left.
-    int avgWidth = width / numNodes;
-    int myWidth = (myRank < numNodes-1) ? 
+    unsigned int avgWidth = width / numNodes;
+    unsigned int myWidth = (myRank < numNodes-1) ? 
       avgWidth : width - avgWidth*(numNodes-1);
 
-    int myOffset = myRank * avgWidth;
+    unsigned int myOffset = myRank * avgWidth;
 
     set< unsigned int >(port,"initialise", myWidth, myOffset, mPort);
     
