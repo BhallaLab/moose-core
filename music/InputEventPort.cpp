@@ -98,7 +98,6 @@ void InputEventPort::innerReinitFunc()
   MUSIC::linear_index iMap(myOffset_, myWidth_);
   mPort_->map(&iMap, this, accLatency_, maxBuffered_);
 
-
 }
 
 // Event handler
@@ -106,7 +105,6 @@ void InputEventPort::operator () ( double t, MUSIC::local_index id )
 {
   int localId = id;
   send1 < double > ( channels_[localId](), eventSlot, t );
-
 }
 
 
@@ -125,7 +123,6 @@ void InputEventPort::innerInitialiseFunc( Eref e,
                                           MUSIC::event_input_port* mPort
 ) 
 {
-
   mPort_ = mPort;
   myWidth_ = width;
   myOffset_ = offset;
