@@ -113,7 +113,7 @@ void Music::innerReinitFunc( Eref e, ProcInfo p )
 
 }
 
-MPI::Intracomm Music::setup( int argc, char **argv )
+MPI::Intracomm Music::setup( int& argc, char**& argv )
 {
   setup_ = new MUSIC::setup( argc, argv );
 
