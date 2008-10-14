@@ -104,6 +104,7 @@ void InputEventPort::innerReinitFunc()
 void InputEventPort::operator () ( double t, MUSIC::local_index id ) 
 {
   int localId = id;
+cerr << " Event received: time: " << t << " id: " << localId << endl;
   send1 < double > ( channels_[localId](), eventSlot, t );
 }
 

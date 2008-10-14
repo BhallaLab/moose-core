@@ -81,6 +81,7 @@ void OutputEventPort::reinitFunc( const Conn* c, ProcInfo p )
 void OutputEventPort::innerReinitFunc() 
 {
   // Map the output from MUSIC to data channels local to this process
+cerr << "Port connected? " << mPort_->is_connected() << endl;
   MUSIC::linear_index iMap(myOffset_, myWidth_);
   mPort_->map(&iMap, maxBuffered_);
 
