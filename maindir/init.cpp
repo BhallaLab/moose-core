@@ -133,6 +133,7 @@ void initSched()
 #ifdef USE_MUSIC
 	Element* music =
 		Neutral::create( "Music", "music", Element::root()->id(), Id::scratchId() );
+	music->id().setGlobal();
 #endif // USE_MUSIC
 
 }
