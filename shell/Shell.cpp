@@ -638,7 +638,10 @@ static const Slot clockSlot =
 	initShellCinfo()->getSlot( "parser.returnClocksSrc" );
 static const Slot listMessageSlot =
 	initShellCinfo()->getSlot( "parser.listMessagesSrc" );
+static const Slot pollSlot =
+	initShellCinfo()->getSlot( "pollSrc" );
 
+#ifdef USE_MPI
 static const Slot rCreateSlot =
 	initShellCinfo()->getSlot( "parallel.createSrc" );
 static const Slot rCreateArraySlot =
@@ -649,9 +652,6 @@ static const Slot rAddSlot = initShellCinfo()->getSlot( "parallel.addLocalSrc" )
 
 static const Slot parReadCellSlot =
 	initShellCinfo()->getSlot( "parallel.readcellSrc" );
-
-static const Slot pollSlot =
-	initShellCinfo()->getSlot( "pollSrc" );
 
 static const Slot requestLeSlot =
 	initShellCinfo()->getSlot( "parallel.requestLeSrc" );
@@ -685,6 +685,7 @@ static const Slot parSetClockSlot =
 
 static const Slot parQuitSlot =
 	initShellCinfo()->getSlot( "parallel.quitSrc" );
+#endif
 
 void printNodeInfo( const Conn* c );
 
@@ -1085,6 +1086,7 @@ void Shell::pope( const Conn* c )
 // interface we'll keep it in case it gets used there.
 //////////////////////////////////////////////////////////////////////
 
+// This whole function should be split into parallel and serial versions.
 void Shell::trigLe( const Conn* c, Id parent )
 {
 	// In principle we should use a messaging approach to doing the 'get'
@@ -1107,38 +1109,21 @@ void Shell::trigLe( const Conn* c, Id parent )
 			parent.eref(), "childList", ret );
 		assert( flag );
 		
+#ifdef USE_MPI
 		if ( ! Shell::isSerial( ) )
 			getOffNodeValue< vector< Nid >, Nid >( c->target(), 
 				requestLeSlot, sh->numNodes(),
 				&nret, parent );
-/*
-		unsigned int requestId = 
-			openOffNodeValueRequest< vector< Nid > >( sh, &nret, 
-			sh->numNodes() - 1 ); // ask all nodes for values.
-		send2< Nid, unsigned int >( c->target(), requestLeSlot, 
-			parent, requestId );
-		vector< Nid >* temp = 
-			closeOffNodeValueRequest< vector< Nid > > ( sh, requestId );
-		assert( temp == &nret );
-*/
+#endif
 	} else if ( parent.node() == 0 || parent.isGlobal() ) {
 		bool flag = get< vector< Id > >( parent.eref(), "childList", ret );
 		assert( flag );
 	} else { // Off-node to single node.
+#ifdef USE_MPI
 		getOffNodeValue< vector< Nid >, Nid >( c->target(), 
 			requestLeSlot, parent.node(),
 			&nret, parent );
-/*
-		unsigned int node = parent.node();
-		unsigned int tgt = ( node < sh->myNode() ) ? node : node - 1;
-		unsigned int requestId = 
-			openOffNodeValueRequest< vector< Nid > >( sh, &nret, 1 );
-		sendTo2< Nid, unsigned int >( c->target(), requestLeSlot, tgt,
-			parent, requestId );
-		vector< Nid >* temp = 
-			closeOffNodeValueRequest< vector< Nid > > ( sh, requestId );
-		assert( temp == &nret );
-*/
+#endif
 	}
 	ret.insert( ret.end(), nret.begin(), nret.end() );
 	sendBack1< vector< Id > >( c, elistSlot, ret );
@@ -1207,6 +1192,7 @@ void Shell::staticCreate( const Conn* c, string type,
 			cout << "Error: Shell::staticCreate: unable to create '" <<
 				name << "' on parent " << parent.path() << endl;
 		}
+#ifdef USE_MPI
 		if ( id.isGlobal() ) { // also make it on all other nodes
 			send4< string, string, Nid, Nid >( 
 				c->target(), rCreateSlot,
@@ -1224,6 +1210,7 @@ void Shell::staticCreate( const Conn* c, string type,
 			c->target(), rCreateSlot, targetNode - 1,
 			type, name, 
 			paNid, id );
+#endif
 	}
 }
 
@@ -1251,6 +1238,7 @@ void Shell::staticCreateArray( const Conn* c, string type,
 		f->setNoOfElements((int)(parameter[0]), (int)(parameter[1]));
 		f->setDistances(parameter[2], parameter[3]);
 		f->setOrigin(parameter[4], parameter[5]);
+#ifdef USE_MPI
 		if ( ret ) { // Tell the parser it was created happily.
 			if ( id.isGlobal() ) { // Also make child on all remote nodes.
 				pair< Nid, Nid > temp( paNid, id );
@@ -1274,6 +1262,11 @@ void Shell::staticCreateArray( const Conn* c, string type,
 			type, name, temp, parameter );
 		// delete oni;
 		// delete child;
+#else
+		if ( ret ) { // Tell the parser it was created happily.
+			sendBack1< Id >( c, createSlot, id);
+		}
+#endif
 	}
 }
 
@@ -1635,11 +1628,13 @@ void Shell::staticDestroy( const Conn* c, Id victim )
 	Shell* s = static_cast< Shell* >( c->data() );
 	if ( victim.node() == s->myNode() ) {
 		s->destroy( victim );
+#ifdef USE_MPI
 	} else { // Ask another node to do the dirty work.
 		unsigned int tgt = victim.node();
 		if ( tgt > s->myNode() )
 			tgt--;
 		sendTo1< Id >( Id::shellId().eref(), parDeleteSlot, tgt, victim );
+#endif
 	}
 }
 
@@ -1669,7 +1664,6 @@ void Shell::getField( const Conn* c, Id id, string field )
 {
 	if ( id.bad() )
 		return;
-	Shell* sh = static_cast< Shell* >( c->data() );
 
 	string ret;
 	Eref eref = id.eref();
@@ -1686,7 +1680,9 @@ void Shell::getField( const Conn* c, Id id, string field )
 			cout << "Shell::getField: Failed to find field " << field << 
 				" on object " << id.path() << endl;
 		}
+#ifdef USE_MPI
 	} else {
+		Shell* sh = static_cast< Shell* >( c->data() );
 		unsigned int requestId = 
 			openOffNodeValueRequest< string >( sh, &ret, 1 );
 		unsigned int tgt = ( node < myNode() ) ? node : node - 1;
@@ -1697,6 +1693,7 @@ void Shell::getField( const Conn* c, Id id, string field )
 		string* temp = closeOffNodeValueRequest< string >( sh, requestId );
 		assert( &ret == temp );
 		sendBack1< string >( c, getFieldSlot, ret );
+#endif
 	}
 }
 
@@ -1826,6 +1823,7 @@ void Shell::move( const Conn* c, Id src, Id parent, string name )
 void Shell::setField( const Conn* c, Id id, string field, string value )
 {
 	assert( id.good() );
+#ifdef USE_MPI
 	if ( id.isGlobal() ) { // do the set on all nodes
 		send3< Id, string, string >( c->target(), parSetFieldSlot,
 			id, field, value );
@@ -1838,6 +1836,9 @@ void Shell::setField( const Conn* c, Id id, string field, string value )
 		sendTo3< Id, string, string >( c->target(), parSetFieldSlot, tgt,
 			id, field, value );
 	}
+#else
+	localSetField( c, id, field, value );
+#endif
 }
 
 /**
@@ -1934,11 +1935,13 @@ void Shell::file2tab( const Conn& c,
 void Shell::setClock( const Conn* c, int clockNo, double dt,
 				int stage )
 {
+#ifdef USE_MPI
 	Shell* sh = static_cast< Shell* >( c->data() );
 	if ( ! isSerial( ) && sh->myNode() == 0 ) {
 		send3< int, double, int >( c->target(), parSetClockSlot,
 			clockNo, dt, stage );
 	}
+#endif
 	char line[20];
 	sprintf( line, "t%d", clockNo );
 	string TickName = line;
@@ -2137,7 +2140,6 @@ void Shell::innerGetWildcardList( const Conn* c, string path,
 	bool ordered, vector<Id>& list )
 {
 	//vector< Id > ret;
-	Shell* sh = static_cast< Shell* >( c->data() );
 
 	localGetWildcardList( c, path, ordered, list );
 
@@ -2145,6 +2147,8 @@ void Shell::innerGetWildcardList( const Conn* c, string path,
 	if ( Shell::isSerial( ) )
 		return;
 	
+#ifdef USE_MPI
+	Shell* sh = static_cast< Shell* >( c->data() );
 	vector< Nid > ret;
 	unsigned int requestId = openOffNodeValueRequest< vector< Nid > >(
 		sh, &ret, sh->numNodes() - 1 );
@@ -2167,6 +2171,7 @@ void Shell::innerGetWildcardList( const Conn* c, string path,
 		// cout << list.back() << "." << list.back().node() << "       ";
 	}
 	// cout << endl << flush;
+#endif
 }
 
 /**
@@ -2212,24 +2217,29 @@ Element* findCj()
 
 void Shell::resched( const Conn* c )
 {
+#ifdef USE_MPI
 	if ( myNode() == 0 ) {
 		send0( c->target(), parReschedSlot );
 		// getOffNodeValue< vector< Nid >, Nid >( c->target(), requestLeSlot, sh->numNodes(), &nret, parent );
 	}
+#endif
 	// Should be a msg
 	Element* cj = findCj();
 	set( cj, "resched" );
 	Id kinetics = Id::localId( "/kinetics" );
-	if ( kinetics.good() )
+	if ( kinetics.good() && 
+		kinetics.eref().e->className() == "KineticManager" )
 		set( kinetics(), "resched" );
 }
 
 void Shell::reinit( const Conn* c )
 {
+#ifdef USE_MPI
 	if ( myNode() == 0 ) {
 		send0( c->target(), parReinitSlot );
 		pollPostmaster(); // Needed so info goes out to other nodes.
 	}
+#endif
 	// Should be a msg
 	Element* cj = findCj();
 	set( cj, "reinit" );
@@ -2243,11 +2253,13 @@ void Shell::stop( const Conn* c )
 
 void Shell::step( const Conn* c, double time )
 {
+#ifdef USE_MPI
 	if ( myNode() == 0 ) {
 		send1< double >( c->target(), parStepSlot, time );
 		// The send only goes out after at least one poll cycle.
 		pollPostmaster();
 	}
+#endif
 	// Should be a msg
 	Element* cj = findCj();
 	set< double >( cj, "start", time );
@@ -2524,6 +2536,7 @@ void Shell::readCell( const Conn* c, string filename, string cellpath,
 		localReadCell( c, filename, cellname, pa, cellId, globalParms );
 	} else if ( cellId.isGlobal() ) {
 		localReadCell( c, filename, cellname, pa, cellId, globalParms );
+#ifdef USE_MPI
 		send5< string, string, Nid, Nid, vector< double > >( 
 			c->target(), parReadCellSlot,
 			filename, cellname, Nid( pa ), Nid( cellId ), globalParms );
@@ -2531,6 +2544,7 @@ void Shell::readCell( const Conn* c, string filename, string cellpath,
 		sendTo5< string, string, Nid, Nid, vector< double > >( 
 			c->target(), parReadCellSlot, cellId.node() - 1,
 			filename, cellname, Nid( pa ), Nid( cellId ), globalParms );
+#endif
 	}
 }
 
@@ -2893,8 +2907,10 @@ bool Shell::running()
  */
 void Shell::quit( const Conn* c )
 {
+#ifdef USE_MPI
 	send0( c->target(), parQuitSlot );
 	pollPostmaster(); // needed to send the message out.
+#endif
 	running_ = 0;
 	// exit( 0 );
 }
