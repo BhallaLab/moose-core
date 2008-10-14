@@ -123,18 +123,19 @@ void AscFile::processFuncLocal(Eref e, double time)
 
   send0(e, inputRequestSlot );
 
+// !!! Flushing into stream here (slowww)
 
   if(fileOut_->good()) {
 
     if(time >= 0) {
       // First column should contain the time
-      *fileOut_ << time << " ";
+      *fileOut_ << time << " " << flush;
 
       for( i = columnData_.begin(); i != columnData_.end(); i++) {
-        *fileOut_ << *i << " ";
+        *fileOut_ << *i << " " << flush;
       }
 
-      *fileOut_ << "\n";
+      *fileOut_ << "\n" << flush;
     }
 
     // Empty the old data
