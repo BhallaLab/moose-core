@@ -7833,4 +7833,11 @@ ksolveArrayOn.g (vs ksolveArrayOff.g)
 cylinder.g
 ksolveArrayDanglingOn2.g (vs ksolveArrayDanglingOff2.g)
 
+Checked in as revision 856: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Tracked down the issue with timing and dt of the SigNeur signalling 
+calculations. The Shell::useClock was trying to find the specified clock tick
+as a path, rather than as a name. Fixed. There is still an issue because t0
+and t1 are trying to drive the sig model in the library.
+
 =============================================================================

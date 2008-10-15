@@ -1998,6 +1998,8 @@ void Shell::setClock( const Conn* c, int clockNo, double dt,
 void Shell::localUseClock( const Conn* c, 
 	string tickName, string pathStr, string function )
 {
+	if ( tickName.length() < 3 )
+		tickName = "/sched/cj/" + tickName;
 	Id tickId = Id::localId( tickName );
 	vector< Id > path;
 	localGetWildcardList( c, pathStr, 1, path );
