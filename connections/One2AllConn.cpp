@@ -27,7 +27,7 @@ Conn* One2AllConnTainer::conn( Eref e, unsigned int funcIndex ) const
 	if ( e.e == e1() )
 		return new One2AllConn( funcIndex, this, 0 );
 	else
-		return new ReverseOne2AllConn( funcIndex, this, 0 );
+		return new ReverseOne2AllConn( funcIndex, this, e.i );
 }
 
 /**
