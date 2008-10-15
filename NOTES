@@ -7817,3 +7817,20 @@ that otherwise would have cropped up.
 
 Lots of fixes to Shell.cpp, needed because of unresolved parallel slots
 all over the place, that caused havoc in serial mode.
+Checked in as revision 850: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+=============================================================================
+15 Oct 2008
+
+Back to some of the old tests for SigNeur. This caught a bug at once:
+compare the output of TESTS/robot/ksolveArrayOn.g and ksolveArrayOff.g
+Turns out that the output of the array case is wrong.
+
+Tracked down to the messaging, fixed. It now clears the following tests
+in the robots directory:
+
+ksolveArrayOn.g (vs ksolveArrayOff.g)
+cylinder.g
+ksolveArrayDanglingOn2.g (vs ksolveArrayDanglingOff2.g)
+
+=============================================================================
