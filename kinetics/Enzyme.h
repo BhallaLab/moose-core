@@ -35,6 +35,10 @@ class Enzyme
 		bool innerGetMode() const;
 		static void setMode( const Conn* c, bool value );
 		void innerSetMode( Eref e, bool mode );
+		static double getNinitComplex( Eref e );
+		static void setNinitComplex( const Conn* c, double value );
+		static double getConcInitComplex( Eref e );
+		static void setConcInitComplex( const Conn* c, double value );
 
 		///////////////////////////////////////////////////
 		// Shared message function definitions
