@@ -2718,7 +2718,7 @@ void Shell::openFile( const Conn* c, string filename, string mode )
 {
 	FILE* o = fopen( filename.c_str(), mode.c_str() );
 	if (o == NULL){
-		cout << "Error: Shell::openFile Cannot openfile " << filename << endl;
+		cout << "Error: Shell::openFile: Cannot openfile " << filename << endl;
 		return;
 	}
 	map<string, FILE*>::iterator iter = filehandler.find(filename);
@@ -2737,16 +2737,18 @@ void Shell::openFile( const Conn* c, string filename, string mode )
 void Shell::writeFile( const Conn* c, string filename, string text )
 {
 	size_t i = 0;
-	while (filenames[i] != filename && ++i);
+	if ( filenames.size() )
+		while (filenames[i] != filename && ++i);
+	
 	if ( i < filenames.size() ){
 		if ( !( modes[i] == "w" || modes[i] == "a" ) ) {
-			cout << "Error:: The file has not been opened in write mode" << endl;
+			cout << "Error: Shell::writeFile: The file has not been opened in write mode" << endl;
 			return;
 		}
 		fprintf(filehandles[i], "%s", text.c_str());
 	}
 	else {
-		cout << "Error:: File "<< filename << " not opened!!" << endl;
+		cout << "Error: Shell::writeFile: File "<< filename << " not opened!!" << endl;
 		return;
 	}
 }
@@ -2754,26 +2756,30 @@ void Shell::writeFile( const Conn* c, string filename, string text )
 void Shell::flushFile( const Conn* c, string filename )
 {
 	size_t i = 0;
-	while (filenames[i] != filename && ++i);
+	if ( filenames.size() )
+		while (filenames[i] != filename && ++i);
+	
 	if ( i < filenames.size() ){
 		if ( !( modes[i] == "w" || modes[i] == "a" ) ) {
-			cout << "Error:: The file has not been opened in write mode" << endl;
+			cout << "Error: Shell::flushFile: The file has not been opened in write mode" << endl;
 			return;
 		}
 		fflush(filehandles[i]);
 	}
 	else {
-		cout << "Error:: File "<< filename << " not opened!!" << endl;
+		cout << "Error: Shell::flushFile: File "<< filename << " not opened!!" << endl;
 		return;
 	}
 }
 
 void Shell::closeFile( const Conn* c, string filename ){
 	size_t i = 0;
-	while (filenames[i] != filename && ++i);
+	if ( filenames.size() )
+		while (filenames[i] != filename && ++i);
+	
 	if ( i < filenames.size() ){
 		if ( fclose(filehandles[i]) != 0 ) {
-			cout << "Error:: Could not close the file." << endl;
+			cout << "Error: Shell::closeFile: Could not close the file." << endl;
 			return;
 		}
 		filenames.erase( filenames.begin() + i );
@@ -2781,7 +2787,7 @@ void Shell::closeFile( const Conn* c, string filename ){
 		filehandles.erase( filehandles.begin() + i );
 	}
 	else {
-		cout << "Error:: File "<< filename << " not opened!!" << endl;
+		cout << "Error: Shell::closeFile: File "<< filename << " not opened!!" << endl;
 		return;
 	}
 }
@@ -2799,7 +2805,9 @@ Limitation: lines should be shorter than 1000 chars
 */
 void Shell::readFile( const Conn* c, string filename, bool linemode ){
 	size_t i = 0;
-	while (filenames[i] != filename && ++i);
+	if ( filenames.size() )
+		while (filenames[i] != filename && ++i);
+	
 	if ( i < filenames.size() ){
 		char str[1000];
 		if (linemode){
