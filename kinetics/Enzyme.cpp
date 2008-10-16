@@ -11,6 +11,7 @@
 #include "moose.h"
 #include "Enzyme.h"
 #include "../element/Neutral.h"
+#include "Molecule.h"
 
 extern double getVolScale( Eref e ); // defined in KinCompt.cpp
 
@@ -79,6 +80,21 @@ const Cinfo* initEnzymeCinfo()
 			ValueFtype1< bool >::global(),
 			GFCAST( &Enzyme::getMode ), 
 			RFCAST( &Enzyme::setMode ) 
+		),
+		/**
+		 * This actually looks up the child molecule for the enz-substrate
+		 * complex, if it exists.
+		 * Only expected to be used for initial conditions in a model.
+		 */
+		new ValueFinfo( "nInitComplex", 
+			ValueFtype1< double >::global(),
+			GFCAST( &Enzyme::getNinitComplex ), 
+			RFCAST( &Enzyme::setNinitComplex )
+		),
+		new ValueFinfo( "concInitComplex", 
+			ValueFtype1< double >::global(),
+			GFCAST( &Enzyme::getConcInitComplex ), 
+			RFCAST( &Enzyme::setConcInitComplex )
 		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -296,6 +312,54 @@ void Enzyme::innerSetMode( Eref e, bool mode )
 		procFunc_ = &Enzyme::explicitProcFunc;
 		makeComplex( e );
 	}
+}
+
+double Enzyme::getNinitComplex( Eref e )
+{
+	if ( getMode( e ) ) // No complex in implicit mm mode.
+		return 0.0;
+
+	Id cplxId = Neutral::getChildByName( e.e, e.e->name() + "_cplx" );
+	assert( cplxId.good() );
+	return Molecule::getNinit( cplxId.eref() );
+}
+
+void Enzyme::setNinitComplex( const Conn* c, double value )
+{
+	Eref e = c->target();
+	if ( getMode( e ) ) {
+		if ( value == 0.0 ) // No complex in implicit mm mode.
+			return;
+		// A bit of a hack here: we need to create a complex.
+		setMode( c, 0 );
+	}
+	Id cplxId = Neutral::getChildByName( e.e, e.e->name() + "_cplx" );
+	assert( cplxId.good() );
+	set< double >( cplxId.eref(), "nInit", value );
+}
+
+double Enzyme::getConcInitComplex( Eref e )
+{
+	if ( getMode( e ) ) // No complex in implicit mm mode.
+		return 0.0;
+
+	Id cplxId = Neutral::getChildByName( e.e, e.e->name() + "_cplx" );
+	assert( cplxId.good() );
+	return Molecule::getConcInit( cplxId.eref() );
+}
+
+void Enzyme::setConcInitComplex( const Conn* c, double value )
+{
+	Eref e = c->target();
+	if ( getMode( e ) ) {
+		if ( value == 0.0 ) // No complex in implicit mm mode.
+			return;
+		// A bit of a hack here: we need to create a complex.
+		setMode( c, 0 );
+	}
+	Id cplxId = Neutral::getChildByName( e.e, e.e->name() + "_cplx" );
+	assert( cplxId.good() );
+	set< double >( cplxId.eref(), "concInit", value );
 }
 
 ///////////////////////////////////////////////////
@@ -567,6 +631,18 @@ void testEnzyme()
 		Molecule::processFunc( &cenzMol, &p );
 	}
 	ASSERT( delta < 5.0e-6, "Testing molecule and enzyme" );
+
+	// Check set and get of nInitComplex
+	ret = set< double >( Eref( enz ), "nInitComplex", 1234.5 );
+	ASSERT( ret, "Setting nInitComplex" );
+	double ncplx = 0.0;
+	ret = get< double >( Eref( cplx ), "nInit", ncplx );
+	ASSERT( fabs( ncplx - 1234.5 ) < 1e-9, "setting nInitComplex" );
+
+	ret = set< double >( Eref( cplx ), "nInit", 3.1415 );
+	ASSERT( ret, "Getting nInitComplex" );
+	ret = get< double >( Eref( enz ), "nInitComplex", ncplx );
+	ASSERT( fabs( ncplx - 3.1415 ) < 1e-9, "getting nInitComplex" );
 
 	////////////////////////////////////////////////////////////////////
 	// Testing implicit mode.

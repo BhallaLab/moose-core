@@ -7840,4 +7840,10 @@ calculations. The Shell::useClock was trying to find the specified clock tick
 as a path, rather than as a name. Fixed. There is still an issue because t0
 and t1 are trying to drive the sig model in the library.
 
+Checked in as revision 857: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Another issue cropped up: The simundump was not able to read nComplexInit for
+enzyme-substrate complexes. After some messing around with enzyme code it is
+fixed. Also has a unit test.
+
 =============================================================================
