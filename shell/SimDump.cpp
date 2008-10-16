@@ -105,8 +105,8 @@ SimDump::SimDump()
 	sid.push_back( new SimDumpInfo(
 		"kreac", "Reaction", "kf kb", "kf kb") );
 	sid.push_back( new SimDumpInfo( "kenz", "Enzyme",
-		"k1 k2 k3 usecomplex",
-		"k1 k2 k3 mode") );
+		"k1 k2 k3 usecomplex nComplexInit",
+		"k1 k2 k3 mode nInitComplex") );
 	sid.push_back( new SimDumpInfo( "xtab", "Table",
 	"input output step_mode stepsize",
 	"input output stepmode stepsize" ) );
