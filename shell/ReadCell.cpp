@@ -99,10 +99,11 @@ void ReadCell::read( const string& filename,
 	PathUtility pathUtil(Property::getProperty(Property::SIMPATH));
 
 	ifstream fin( filename.c_str() );
-	for (unsigned int i = 0; i < pathUtil.size() && !fin.is_open(); ++i )
+	for (unsigned int i = 0; i < pathUtil.size() && !fin; ++i )
 	{
-		string path = pathUtil.makeFilePath(filename, i);            
-		fin.open( path.c_str());
+		string path = pathUtil.makeFilePath(filename, i);
+		fin.clear( );
+		fin.open( path.c_str() );
 	}
 
 	cell_ = Neutral::create( "Cell", cellname, pa, cellId );
