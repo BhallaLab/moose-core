@@ -178,7 +178,7 @@ endif
 LD = ld
 
 SUBDIR = basecode connections maindir genesis_parser shell element scheduling \
-	biophysics hsolve kinetics builtins utility \
+	biophysics hsolve kinetics ksolve builtins utility \
 	randnum robots $(PARALLEL_DIR) $(MUSIC_DIR) 
 
 # Used for 'make clean'
@@ -197,6 +197,7 @@ OBJLIBS =	\
 	biophysics/biophysics.o \
 	hsolve/hsolve.o \
 	kinetics/kinetics.o \
+	ksolve/ksolve.o \
 	builtins/builtins.o \
 	robots/robots.o \
 	$(PARALLEL_LIB) \
