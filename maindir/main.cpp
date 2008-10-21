@@ -54,6 +54,7 @@ extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 	extern void testBiophysics();
 	extern void testHSolve();
 	extern void testKinetics();
+	extern void testKsolve();
 //	extern void testAverage();
 	extern void testParMsgOnSingleNode();
 	extern void testPostMaster();
@@ -104,6 +105,7 @@ int main(int argc, char** argv)
 		testBiophysics();
 		testHSolve();
 		testKinetics();
+		testKsolve();
 //		testAverage();
 		testParMsgOnSingleNode();
 	}
