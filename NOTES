@@ -7846,4 +7846,12 @@ Another issue cropped up: The simundump was not able to read nComplexInit for
 enzyme-substrate complexes. After some messing around with enzyme code it is
 fixed. Also has a unit test.
 
+Checked in as revision 858: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Need to set up a 5th clock, to handle graphics.
+
+=============================================================================
+21 Oct 2008
+Created separate ksolve directory for kinetic solver, moved over files, tested.
+
 =============================================================================
