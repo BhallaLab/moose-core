@@ -10,9 +10,11 @@
 #ifdef USE_MPI
 #include "moose.h"
 #include <mpi.h>
+#ifdef USE_MUSIC
 #include <music.hh>
-#include "MuMPI.h"
 #include "music/Music.h"
+#endif // USE_MUSIC
+#include "MuMPI.h"
 
 MPI::Intracomm MuMPI::communicator_ = MPI::Intracomm();
 
