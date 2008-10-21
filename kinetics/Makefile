@@ -13,10 +13,6 @@ OBJ = \
 	Molecule.o	\
 	Reaction.o	\
 	Enzyme.o	\
-	KinSparseMatrix.o	\
-	KineticHub.o	\
-	Stoich.o	\
-	Kintegrator.o	\
 	MathFunc.o	\
 	Geometry.o	\
 	Surface.o	\
@@ -29,25 +25,12 @@ OBJ = \
 	DiskPanel.o	\
 	KinCompt.o	\
 	TestKinetics.o	\
-	KineticManager.o	\
 
 HEADERS = \
 	../basecode/header.h \
 	../connections/Conn.h \
 	../basecode/Element.h \
 
-
-# The GSL library (GNU Scientific Library) provides a range of
-# numerical functions, which allow us to use various advanced integration
-# methods. The GslIntegrator accesses these. This library is licenced
-# under the GPL, so only GPL-compliant uses of MOOSE will be able to
-# use it. Should be fine for academic use.
-# Optional: Comment out the following three items if not using GSL
-ifdef USE_GSL
-GSL_OBJ = GslIntegrator.o
-GSL_LIBS = -lgsl -lgslcblas
-GSL_FLAGS = -DUSE_GSL
-endif
 
 # Smoldyn, written by Steven Andrews, provides a numerical engine for
 # 3-D single-particle simulations using Smoluchowsky dynamics. It is
@@ -82,28 +65,18 @@ HemispherePanel.o:	Panel.h HemispherePanel.h
 CylPanel.o:	Panel.h CylPanel.h
 DiskPanel.o:	Panel.h DiskPanel.h
 KinCompt.o:	KinCompt.h
-KinSparseMatrix.o:	KinSparseMatrix.h
-KineticHub.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h
-Stoich.o:	RateTerm.h Stoich.h KinSparseMatrix.h Makefile
-Kintegrator.o:	Kintegrator.h
-KineticManager.o:	KineticManager.h
-TestKinetics.o:	RateTerm.h Molecule.h Reaction.h Enzyme.h KineticHub.h Stoich.h KinSparseMatrix.h Makefile
+TestKinetics.o:	Molecule.h Reaction.h Enzyme.h Makefile
 
-ifdef ($(USE_GSL))
-#Optional: Comment out the following two items if not using GSL.
-$(GSL_OBJ) : $(HEADERS)
-GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h KinSparseMatrix.h 
-endif # !USE_GSL
 ifdef ($(USE_SMOLDYN)
 $(SMOLDYN_OBJ) : $(HEADERS)
 Particle.o:		SmoldynHub.h Particle.h Molecule.h
 SmoldynHub.o:	KinSparseMatrix.h SmoldynHub.h Smoldyn/source/smolrun.h
 endif # !USE_SMOLDYN
 .cpp.o:
-	$(CXX) $(CFLAGS) $(GSL_FLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c
+	$(CXX) $(CFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c
 
-$(TARGET):		$(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ)  $(GSL_LIBS) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 
+$(TARGET):		$(OBJ) $(SMOLDYN_OBJ) $(HEADERS)
+	$(LD) -r -o $(TARGET) $(OBJ) $(SMOLDYN_OBJ) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 
 
 clean:
 	-rm -f *.o $(TARGET) core core.*

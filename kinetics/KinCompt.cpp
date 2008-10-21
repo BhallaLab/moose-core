@@ -11,7 +11,7 @@
 
 #include "moose.h"
 #include "KinCompt.h"
-#include "KineticManager.h"
+#include "../ksolve/KineticManager.h"
 #include "Molecule.h"
 #include "Reaction.h"
 #include "Enzyme.h"
