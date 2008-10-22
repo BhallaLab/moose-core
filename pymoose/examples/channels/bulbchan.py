@@ -347,6 +347,7 @@ def make_K_mit_usb(path="K_mit_usb"):
 
     # Filling the tables using B-SPLINE interpolation 
     xGate.tabFill(3000, 0)
+
     K_mit_usb.createTable("Y", 30, -0.100, 0.050)
     yGate = moose.HHGate(path + "/yGate")
     for i in range(0, 12):
@@ -416,26 +417,33 @@ def make_K_mit_usb(path="K_mit_usb"):
     yGate.B[28] = 0.865  
     yGate.B[29] = 0.865 
     yGate.B[30] = 0.865
+    yGate.A.dumpFile("k_ya0.plot")
+    yGate.B.dumpFile("k_yb0.plot")
 
     # Setting the calc_mode to NO_INTERP for speed 
     yGate.A.calcMode = 0 
     yGate.B.calcMode = 0
 
     # tweaking the tables for the tabchan calculation
-    K_mit_usb.tweakAlpha("Y")
+#     K_mit_usb.tweakAlpha("Y")
+    yGate.tweakAlpha()
+    yGate.A.dumpFile("k_ya1.plot")
+    yGate.B.dumpFile("k_yb1.plot")
 
     # Filling the tables using B-SPLINE interpolation
     yGate.tabFill(3000, 0)
+    yGate.B.dumpFile("k_yb2.plot")
 
     xGate.A.sy = 5.0 
     xGate.B.sy = 5.0 
     yGate.A.sy = 5.0
     yGate.B.sy = 5.0 
     K_mit_usb.Ek = EK
-    xGate.A.dumpFile("xgate_a.plot")
-    xGate.B.dumpFile("xgate_b.plot")
-    yGate.A.dumpFile("ygate_a.plot")
-    yGate.B.dumpFile("ygate_b.plot")
+    xGate.A.dumpFile("k_xa.plot")
+    xGate.B.dumpFile("k_xb.plot")
+    yGate.A.dumpFile("k_ya.plot")
+    yGate.B.dumpFile("k_yb.plot")
+    return K_mit_usb
 
 def make_K2_mit_usb(path="K2_mit_usb"):
 	if context.exists(path):
@@ -496,6 +504,15 @@ def make_Na_mit_usb(path="Na_mit_usb"):
 
     Na_mit_usb.setupAlpha("Y", 128.0, 0.0, 0.0, -1.0*(0.017 + THRESH),
 	     0.018, 4.0e3, 0.0, 1.0, -1.0*(0.040 + THRESH), -5.0e-3)
+
+    xGate = moose.HHGate(Na_mit_usb.path() + "/xGate")
+    xGate.A.dumpFile("na_xa.plot")
+    xGate.B.dumpFile("na_xb.plot")
+    yGate = moose.HHGate(Na_mit_usb.path() + "/yGate")
+    yGate.A.dumpFile("na_ya.plot")
+    yGate.B.dumpFile("na_yb.plot")
+    return Na_mit_usb
+
 
 def make_Na2_mit_usb(path="Na2_mit_usb"):
     global context

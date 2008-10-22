@@ -80,46 +80,46 @@ void Table::__set_threshold( double threshold )
 // {
 //     set < double > (id_(), "tableLookup", tableLookup, index);
 // }
-double Table::__get_outputSrc() const
-{
-    double outputSrc;
-    get < double > (id_(), "outputSrc",outputSrc);
-    return outputSrc;
-}
-void Table::__set_outputSrc( double outputSrc )
-{
-    set < double > (id_(), "outputSrc", outputSrc);
-}
-double Table::__get_msgInput() const
-{
-    double msgInput;
-    get < double > (id_(), "msgInput",msgInput);
-    return msgInput;
-}
-void Table::__set_msgInput( double msgInput )
-{
-    set < double > (id_(), "msgInput", msgInput);
-}
-double Table::__get_sum() const
-{
-    double sum;
-    get < double > (id_(), "sum",sum);
-    return sum;
-}
-void Table::__set_sum( double sum )
-{
-    set < double > (id_(), "sum", sum);
-}
-double Table::__get_prd() const
-{
-    double prd;
-    get < double > (id_(), "prd",prd);
-    return prd;
-}
-void Table::__set_prd( double prd )
-{
-    set < double > (id_(), "prd", prd);
-}
+// double Table::__get_outputSrc() const
+// {
+//     double outputSrc;
+//     get < double > (id_(), "outputSrc",outputSrc);
+//     return outputSrc;
+// }
+// void Table::__set_outputSrc( double outputSrc )
+// {
+//     set < double > (id_(), "outputSrc", outputSrc);
+// }
+// double Table::__get_msgInput() const
+// {
+//     double msgInput;
+//     get < double > (id_(), "msgInput",msgInput);
+//     return msgInput;
+// }
+// void Table::__set_msgInput( double msgInput )
+// {
+//     set < double > (id_(), "msgInput", msgInput);
+// }
+// double Table::__get_sum() const
+// {
+//     double sum;
+//     get < double > (id_(), "sum",sum);
+//     return sum;
+// }
+// void Table::__set_sum( double sum )
+// {
+//     set < double > (id_(), "sum", sum);
+// }
+// double Table::__get_prd() const
+// {
+//     double prd;
+//     get < double > (id_(), "prd",prd);
+//     return prd;
+// }
+// void Table::__set_prd( double prd )
+// {
+//     set < double > (id_(), "prd", prd);
+// }
 void Table::createTable( int xdivs, double xmin, double xmax)
 {
     __set_xmin(xmin);
