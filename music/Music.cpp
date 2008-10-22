@@ -47,6 +47,18 @@ const Cinfo* initMusicCinfo()
 	//////////////////////////////////////////////////////////////////
 	// Field definitions
 	//////////////////////////////////////////////////////////////////
+        new ValueFinfo( "rank",
+                        ValueFtype1< int >::global(),
+                        GFCAST( &Music::getRank ),
+                        &dummyFunc 
+                        ),
+        new ValueFinfo( "size",
+                        ValueFtype1< int >::global(),
+                        GFCAST( &Music::getSize ),
+                        &dummyFunc 
+                        ),
+
+
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfos
 	//////////////////////////////////////////////////////////////////
@@ -229,4 +241,13 @@ void Music::innerAddPort (
          << " Not supported yet";
 
   }
+}
+
+
+int Music::getRank( Eref e ) {
+  return MuMPI::INTRA_COMM().Get_rank();
+}
+
+int Music::getSize( Eref e) {
+  return MuMPI::INTRA_COMM().Get_size();
 }
