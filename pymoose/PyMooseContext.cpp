@@ -1444,7 +1444,13 @@ void PyMooseContext::tweakTau( const Id& gateId)
 // @deprecated in MOOSE - we chuck it altogether.
 void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
 {
-    cerr << "PyMooseContext::tabFill - deprecated! Use setupAlpha/Tau instead.\n";
+    char argstr[32];
+    snprintf(argstr, 32, "%d,%d", xdivs, mode);
+    
+    send3< Id, string, string >( myId_(),
+                                 setFieldSlot, table, "tabFill", argstr );
+
+//     cerr << "PyMooseContext::tabFill - deprecated! Use setupAlpha/Tau instead.\n";
 }
 
 
