@@ -294,13 +294,11 @@ void PulseGen::setPulseDelay(const Conn& c, int index, double delay)
     index == 0? obj->firstDelay_ = delay: obj->secondDelay_ = delay;
 }
 
-void PulseGen::inputFunc(const Conn& c, double value)
+void PulseGen::inputFunc(const Conn& c, int value)
 {
     PulseGen* obj = static_cast<PulseGen*> (c.data());
     ASSERT( obj != NULL, "PulseGen::inputFunc(const Conn&, int) - target data pointer is NULL.");
-	// Why are we setting value as a double? Should this be a protected
-	// comparison?
-    obj->input_ = (value == 0.0)? 0: 1;
+    obj->input_ = value;
 }
 
 //////////////////////////////////////////////////////////////////
