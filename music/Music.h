@@ -36,6 +36,11 @@ public:
 		string direction,
 		string type );
 
+
+        static int getRank( Eref e );
+        static int getSize( Eref e);
+
+
 protected:
 
 private:
