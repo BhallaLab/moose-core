@@ -34,7 +34,7 @@ const Cinfo* initCellCinfo()
 		/* Cell does not process at simulation time--it only sets up
 		   the solver at reset */
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-			dummyFunc ),
+			&dummyFunc ),
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			RFCAST( &Cell::reinitFunc ) ),
 	};
@@ -46,7 +46,7 @@ const Cinfo* initCellCinfo()
 		// Placeholder for receiving list of compartments from solver.
 		new DestFinfo( "comptList",
 			Ftype1< const vector< Id >* >::global(),
-			RFCAST( &dummyFunc ) ),
+			&dummyFunc ),
 	};
 	
 	static Finfo* process = new SharedFinfo( "process", processShared,
@@ -65,17 +65,17 @@ const Cinfo* initCellCinfo()
 		new ValueFinfo( "variableDt", 
 			ValueFtype1< bool >::global(),
 			GFCAST( &Cell::getVariableDt ), 
-			dummyFunc
+			&dummyFunc
 		),
 		new ValueFinfo( "implicit", 
 			ValueFtype1< bool >::global(),
 			GFCAST( &Cell::getImplicit ), 
-			dummyFunc
+			&dummyFunc
 		),
 		new ValueFinfo( "description", 
 			ValueFtype1< string >::global(),
 			GFCAST( &Cell::getDescription ), 
-			dummyFunc
+			&dummyFunc
 		),
 	//////////////////////////////////////////////////////////////////
 	// MsgSrc definitions
