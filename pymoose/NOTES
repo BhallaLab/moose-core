@@ -22,3 +22,12 @@
 
 
 
+
+* INCONSISTENCIES
+  There are places where MOOSE and/or PyMOOSE are inconsistent in coding
+  conventions or naming conventions. We need to weed them out before going to
+  production.
+
+** Table::step_mode/stepmode in MOOSE, stepMode in PyMOOSE. 
+   We should decide on underscore vs camel-case and follow on way or the
+   other.
