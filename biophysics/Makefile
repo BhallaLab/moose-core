@@ -28,7 +28,8 @@ OBJ = \
 	BioScan.o	\
 	TestBiophysics.o \
 	script_out.o \
-	TauPump.o \
+	DifShell.o	\
+	TauPump.o	\
 
 
 HEADERS = \
@@ -53,6 +54,7 @@ Cell.o:	Cell.h ../element/Neutral.h
 BioScan.o:		BioScan.h
 StochSynchan.o:	StochSynchan.h StochSynInfo.h
 BinSynchan.o:	BinSynchan.h BinSynInfo.h ../randnum/BinomialRng.h
+DifShell.o: DifShell.h
 TauPump.o: TauPump.h
 .cpp.o:
 	$(CXX) $(CFLAGS) -I../basecode -I../randnum -I.. $< -c
