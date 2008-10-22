@@ -190,8 +190,8 @@
 //%attribute(pymoose::Table, double, tableLookup, __get_tableLookup, __set_tableLookup)
 //%attribute(pymoose::Table, double, outputSrc, __get_outputSrc, __set_outputSrc)
 //%attribute(pymoose::Table, double, msgInput, __get_msgInput, __set_msgInput)
-%attribute(pymoose::Table, double, sum, __get_sum, __set_sum)
-%attribute(pymoose::Table, double, prd, __get_prd, __set_prd)
+// %attribute(pymoose::Table, double, sum, __get_sum, __set_sum)
+// %attribute(pymoose::Table, double, prd, __get_prd, __set_prd)
 %include "SynChan.h"
 %attribute(pymoose::SynChan, double, Gbar, __get_Gbar, __set_Gbar)
 %attribute(pymoose::SynChan, double, Ek, __get_Ek, __set_Ek)
@@ -287,12 +287,15 @@
 %attribute(pymoose::HHChannel, double, Xpower, __get_Xpower, __set_Xpower)
 %attribute(pymoose::HHChannel, double, Ypower, __get_Ypower, __set_Ypower)
 %attribute(pymoose::HHChannel, double, Zpower, __get_Zpower, __set_Zpower)
+%attribute(pymoose::HHChannel, double, X, __get_X, __set_X)
+%attribute(pymoose::HHChannel, double, Y, __get_Y, __set_Y)
+%attribute(pymoose::HHChannel, double, Z, __get_Z, __set_Z)
 %attribute(pymoose::HHChannel, int, instant, __get_instant, __set_instant)
 %attribute(pymoose::HHChannel, double, Gk, __get_Gk, __set_Gk)
 %attribute(pymoose::HHChannel, double, Ik, __get_Ik, __set_Ik)
 %attribute(pymoose::HHChannel, int, useConcentration, __get_useConcentration, __set_useConcentration)
-%attribute(pymoose::HHChannel, double, IkSrc, __get_IkSrc, __set_IkSrc)
 %attribute(pymoose::HHChannel, double, concen, __get_concen, __set_concen)
+
 %include "Mg_block.h"
 %attribute(pymoose::Mg_block, double, KMg_A, __get_KMg_A, __set_KMg_A)
 %attribute(pymoose::Mg_block, double, K_MgB, __get_KMg_B, __set_KMg_B)

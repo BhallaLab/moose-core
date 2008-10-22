@@ -47,6 +47,8 @@ namespace pymoose
 
         string dumpFile() const;
         void dumpFile(string fileName, bool append = false);
+        void tabFill(int xdivs, int mode);
+        
 #ifdef NUMPY // Only for NumPy support
         PyObject* __array_struct__();
         // TODO: work in progress

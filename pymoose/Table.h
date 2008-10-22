@@ -30,14 +30,14 @@ namespace pymoose
         // todo: tackle these two functiosn properly
 //        double __get_tableLookup() const;
 //        void __set_tableLookup(double tableLookup);
-        double __get_outputSrc() const;
-        void __set_outputSrc(double outputSrc);
-        double __get_msgInput() const;
-        void __set_msgInput(double msgInput);
-        double __get_sum() const;
-        void __set_sum(double sum);
-        double __get_prd() const;
-        void __set_prd(double prd);
+//         double __get_outputSrc() const;
+//         void __set_outputSrc(double outputSrc);
+//         double __get_msgInput() const;
+//         void __set_msgInput(double msgInput);
+//         double __get_sum() const;
+//         void __set_sum(double sum);
+//         double __get_prd() const;
+//         void __set_prd(double prd);
 
         void createTable(int xdiv, double xmin, double xmax );
     

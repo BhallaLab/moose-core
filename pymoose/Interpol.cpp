@@ -217,6 +217,11 @@ void InterpolationTable::dumpFile( string fileName, bool append )
     }    
 }
 
+void InterpolationTable::tabFill(int xdivs, int mode)
+{
+    set <int, int> (id_(), "tabFill", xdivs, mode);    
+}
+
 #ifdef DO_UNIT_TESTS
 #include <cmath>
 using namespace std;

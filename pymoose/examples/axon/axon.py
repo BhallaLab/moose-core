@@ -190,7 +190,7 @@ context.useClock(2, "/plots/#[TYPE=table]")
 # 	end
 # end
 axon = moose.Cell("/axon")
-if USE_SOLVER:
+if not USE_SOLVER:
     axon.method = "ee"
 # //=====================================
 # //  Simulation
