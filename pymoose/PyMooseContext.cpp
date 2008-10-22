@@ -23,7 +23,10 @@
 
 using namespace std;
 using namespace pymoose;
-extern int mooseInit();
+
+extern void initMoose();
+extern void initSched();
+
 extern void setupDefaultSchedule(Element*, Element*, Element*);
 extern Element* makeGenesisParser();
 extern char* copyString(const string& s);
@@ -40,24 +43,24 @@ const Cinfo* initPyMooseContextCinfo()
 	/**
 	 * This is a shared message to talk to the Shell.
 	 */
-	static Finfo* contextShared[] =
+	static Finfo* parserShared[] =
 	{
-		// 1. Setting cwe
+		// Setting cwe
 		new SrcFinfo( "cwe", Ftype1< Id >::global() ),
-		// 2. Getting cwe back: First trigger a request
+		// Getting cwe back: First trigger a request
 		new SrcFinfo( "trigCwe", Ftype0::global() ),
-		// 3. Then receive the cwe info
+		// Then receive the cwe info
 		new DestFinfo( "recvCwe", Ftype1< Id >::global(),
 					RFCAST( &PyMooseContext::recvCwe ) ),
-		// 4. Setting pushe. This returns with the new cwe.
+		// Setting pushe. This returns with the new cwe.
 		new SrcFinfo( "pushe", Ftype1< Id >::global() ),
-		// 5. Doing pope. This returns with the new cwe.
+		// Doing pope. This returns with the new cwe.
 		new SrcFinfo( "pope", Ftype0::global() ),
 
-		// 6. Getting a list of child ids: First send a request with
+		// Getting a list of child ids: First send a request with
 		// the requested parent elm id.
 		new SrcFinfo( "trigLe", Ftype1< Id >::global() ),
-		// 7. Then recv the vector of child ids. This function is
+		// Then recv the vector of child ids. This function is
 		// shared by several other messages as all it does is dump
 		// the elist into a temporary local buffer.
 		new DestFinfo( "recvElist", 
@@ -67,166 +70,150 @@ const Cinfo* initPyMooseContextCinfo()
 		///////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions.
 		///////////////////////////////////////////////////////////////
-		// 8. Creating an object: Send out the request.
+		// Creating an object: Send out the request.
+		// args: type, name, node, parent
 		new SrcFinfo( "create",
-				Ftype3< string, string, Id >::global() ),
-		// 9. Creating an object: Recv the returned object id.
+				Ftype4< string, string, int, Id >::global() ),
+		// Creating an object: Recv the returned object id.
 		new SrcFinfo( "createArray",
 				Ftype4< string, string, Id, vector <double> >::global() ),
-                // 10.
 		new SrcFinfo( "planarconnect", Ftype3< string, string, double >::global() ),
-                // 11.
 		new SrcFinfo( "planardelay", Ftype3< string, string, vector <double> >::global() ),
-                // 12.
 		new SrcFinfo( "planarweight", Ftype3< string, string, vector<double> >::global() ),
-                // 13.
 		new SrcFinfo( "getSynCount", Ftype1< Id >::global() ),
-                // 14.
 		new DestFinfo( "recvCreate",
 					Ftype1< Id >::global(),
 					RFCAST( &PyMooseContext::recvCreate ) ),
-		// 15. Deleting an object: Send out the request.
+		// Deleting an object: Send out the request.
 		new SrcFinfo( "delete", Ftype1< Id >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// Value assignment: set and get.
 		///////////////////////////////////////////////////////////////
-		// 16. Create a dynamic field on the specified object
+		// Create a dynamic field on the specified object
 		new SrcFinfo( "addField", Ftype2<Id, string>::global() ),
-		// 17. Getting a field value as a string: send out request:
+		// Getting a field value as a string: send out request:
 		new SrcFinfo( "get", Ftype2< Id, string >::global() ),
-		// 18. Getting a field value as a string: Recv the value.
+		// Getting a field value as a string: Recv the value.
 		new DestFinfo( "recvField",
 					Ftype1< string >::global(),
 					RFCAST( &PyMooseContext::recvField ) ),
-		// 19. Setting a field value as a string: send out request:
+		// Setting a field value as a string: send out request:
 		new SrcFinfo( "set", // object, field, value 
 				Ftype3< Id, string, string >::global() ),
-                // 20.
+
 		new SrcFinfo( "file2tab", // object, filename, skiplines 
 				Ftype3< Id, string, unsigned int >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// Clock control and scheduling
 		///////////////////////////////////////////////////////////////
-		// 21. Setting values for a clock tick: setClock
+		// Setting values for a clock tick: setClock
 		new SrcFinfo( "setClock", // clockNo, dt, stage
 				Ftype3< int, double, int >::global() ),
-		// 22. Assigning path and function to a clock tick: useClock
-		new SrcFinfo( "useClock", // tick id, path, function
-				Ftype3< Id, vector< Id >, string >::global() ),
+		// Assigning path and function to a clock tick: useClock
+		new SrcFinfo( "useClock", // tickname, path, function
+				Ftype3< string, string, string >::global() ),
 
-		// 23. Getting a wildcard path of elements: send out request
+		// Getting a wildcard path of elements: send out request
 		// args are path, flag true for breadth-first list.
 		new SrcFinfo( "el", Ftype2< string, bool >::global() ),
-		// 24. The return function for the wildcard past is the shared
+		// The return function for the wildcard past is the shared
 		// function recvElist
 
 		new SrcFinfo( "resched", Ftype0::global() ), // resched
-                // 25.
 		new SrcFinfo( "reinit", Ftype0::global() ), // reinit
-                // 26.
 		new SrcFinfo( "stop", Ftype0::global() ), // stop
-                // 27.
 		new SrcFinfo( "step", Ftype1< double >::global() ),
 				// step, arg is time
-                // 28.
 		new SrcFinfo( "requestClocks", 
 					Ftype0::global() ), //request clocks
-                // 29.
 		new DestFinfo( "recvClocks", 
 					Ftype1< vector< double > >::global(), 
 					RFCAST( &PyMooseContext::recvClocks ) ),
-                // 30.
 		new SrcFinfo( "requestCurrentTime", Ftype0::global() ),
 		// Returns time in the default return value.
+		new SrcFinfo( "quit", Ftype0::global() ),
 		
 		///////////////////////////////////////////////////////////////
 		// Message functions
 		///////////////////////////////////////////////////////////////
-		// 31. Create a message. srcId, srcField, destId, destField
+		// Create a message. srcId, srcField, destId, destField
 		new SrcFinfo( "addMsg", 
 		Ftype4< vector< Id >, string, vector< Id >, string >::global() ),
-		// 32. Delete a message based on number 
+		// Delete a message based on number 
 		new SrcFinfo( "deleteMsg", Ftype2< Fid, int >::global() ),
-		// 33. Delete a message based on src id.field and dest id.field
+		// Delete a message based on src id.field and dest id.field
 		// This is how to specify an edge, so call it deleteEdge
 		new SrcFinfo( "deleteEdge", 
 					Ftype4< Id, string, Id, string >::global() ),
-		// 34. Request message list: id elm, string field, bool isIncoming
+		// Request message list: id elm, string field, bool isIncoming
 		new SrcFinfo( "listMessages", 
 					Ftype3< Id, string, bool >::global() ),
-		// 35. Receive message list and string with remote fields for msgs
+		// Receive message list and string with remote fields for msgs
 		new DestFinfo( "recvMessageList",
 					Ftype2< vector < Id >, string >::global(), 
-					RFCAST(&pymoose::PyMooseContext::recvMessageList ) ),
+					RFCAST( &PyMooseContext::recvMessageList ) ),
 
 		///////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions.
 		///////////////////////////////////////////////////////////////
-		// 36. This function is for copying an element tree, complete with
+		// This function is for copying an element tree, complete with
 		// messages, onto another.
 		new SrcFinfo( "copy", Ftype3< Id, Id, string >::global() ),
-                // 37.
 		new SrcFinfo( "copyIntoArray", Ftype4< Id, Id, string, vector <double> >::global() ),
-		// 38. This function is for moving element trees.
+		// This function is for moving element trees.
 		new SrcFinfo( "move", Ftype3< Id, Id, string >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// Cell reader: filename cellpath
 		///////////////////////////////////////////////////////////////
-                // 39.
-		new SrcFinfo( "readcell", Ftype3< string, string, 
-			vector< double > >::global() ),
+		// parent, cell, parms, node
+		new SrcFinfo( "readcell", 
+			Ftype4< string, string, vector< double >, int >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// Channel setup functions
 		///////////////////////////////////////////////////////////////
-		// 40. setupalpha
+		// setupalpha
 		new SrcFinfo( "setupAlpha", 
 					Ftype2< Id, vector< double > >::global() ),
-		// 41. setuptau
+		// setuptau
 		new SrcFinfo( "setupTau", 
 					Ftype2< Id, vector< double > >::global() ),
-		// 42. tweakalpha
+		// tweakalpha
 		new SrcFinfo( "tweakAlpha", Ftype1< Id >::global() ),
-		// 43. tweaktau
+		// tweaktau
 		new SrcFinfo( "tweakTau", Ftype1< Id >::global() ),
-                // 44.
+
 		new SrcFinfo( "setupGate", 
 					Ftype2< Id, vector< double > >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// SimDump facilities
 		///////////////////////////////////////////////////////////////
-		// 45. readDumpFile
+		// readDumpFile
 		new SrcFinfo( "readDumpFile", 
 					Ftype1< string >::global() ),
-		// 46. writeDumpFile
+		// writeDumpFile
 		new SrcFinfo( "writeDumpFile", 
 					Ftype2< string, string >::global() ),
-		// 47. simObjDump
+		// simObjDump
 		new SrcFinfo( "simObjDump",
 					Ftype1< string >::global() ),
-		// 48. simundump
+		// simundump
 		new SrcFinfo( "simUndump",
 					Ftype1< string >::global() ),
-                // 49.
 		new SrcFinfo( "openfile", 
 			Ftype2< string, string >::global() ),
-                // 50.
 		new SrcFinfo( "writefile", 
 			Ftype2< string, string >::global() ),
-                // 51.
 		new SrcFinfo( "flushfile", 
 			Ftype1< string >::global() ),
-                // 52.
 		new SrcFinfo( "listfiles", 
 			Ftype0::global() ),
-                // 53.
 		new SrcFinfo( "closefile", 
 			Ftype1< string >::global() ),
-                // 54.
 		new SrcFinfo( "readfile", 
 			Ftype2< string, bool >::global() ),
 		///////////////////////////////////////////////////////////////
@@ -243,8 +230,8 @@ const Cinfo* initPyMooseContextCinfo()
 	
 	static Finfo* pyMooseContextFinfos[] =
 	{
-		new SharedFinfo( "parser", contextShared,
-				sizeof( contextShared ) / sizeof( Finfo* ) ),
+		new SharedFinfo( "parser", parserShared,
+				sizeof( parserShared ) / sizeof( Finfo* ) ),
 		new DestFinfo( "readline",
 			Ftype1< string >::global(),
 			RFCAST( &dummyFunc ) ),
@@ -261,11 +248,11 @@ const Cinfo* initPyMooseContextCinfo()
 	static Cinfo pyMooseContextCinfo(
 		"PyMooseContext",
 		"Subhasis Ray, NCBS",
-		"Object to interact with MOOSE shell object",
+                "Object to interact with MOOSE shell object",
 		initNeutralCinfo(),
 		pyMooseContextFinfos,
 		sizeof(pyMooseContextFinfos) / sizeof( Finfo* ),
-		ValueFtype1< pymoose::PyMooseContext >::global()
+		ValueFtype1< PyMooseContext >::global()
 	);
 
 	return &pyMooseContextCinfo;
@@ -322,6 +309,8 @@ static const Slot requestClocksSlot =
 	initPyMooseContextCinfo()->getSlot( "parser.requestClocks" );
 static const Slot requestCurrentTimeSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.requestCurrentTime" );
+static const Slot quitSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.quit" );
 
 static const Slot addMessageSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.addMsg" );
@@ -379,6 +368,7 @@ static const Slot loadtabSlot =
 	initPyMooseContextCinfo()->getSlot( "parser.loadtab" );
 static const Slot tabopSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.tabop" );
+
 
 
 
@@ -635,14 +625,12 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
 {
     static PyMooseContext* context = 0;
     
-    
     if (context)
     {
         return context;
     }
     
     Property::initialize("",0); // create default Property map
-   // mooseInit();
     
     static const Cinfo* shellCinfo = initShellCinfo();
     static const Cinfo* tickCinfo = initTickCinfo();
@@ -654,7 +642,9 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     Element* shell;
     bool ret;
     // Call the global initialization function
-    mooseInit();
+    initMoose();
+    initSched();
+    
 #ifdef DO_UNIT_TESTS
 	// if ( mynode == 0 )
 	if ( 1 )
@@ -669,7 +659,7 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
 		testSched();
 		testSchedProcess();
 		testBiophysics();
-		//	testHSolve();
+		testHSolve();
 		testKinetics();
 //		testAverage();
 	}
@@ -681,6 +671,12 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     Element * genesisSli = makeGenesisParser();
 
     Id shellId = Id::shellId();
+    
+    ret = genesisSli->id().eref().dropAll("parser");
+    assert(ret);
+    ret = shellId.eref().dropAll("parser"); // disconnect genesis parser
+    assert(ret);
+
     Element* contextElement = Neutral::create( "PyMooseContext",contextName, shellId, Id::scratchId());
     context = static_cast<PyMooseContext*> (contextElement->data(0) );
     context->shell_ = shellId;    
@@ -693,11 +689,6 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
         cerr << "Scheduler not found" << endl;
     }
     
-    
-    ret = shellId.eref().dropAll("parser"); // disconnect genesis parser
-    assert(ret);
-    ret = context->genesisSli_->id().eref().dropAll("parser");
-    assert(ret);
     Eref ref = shellId.eref();
     ret = ref.add( "parser", contextElement, "parser", ConnTainer::Default);// reconnect context
     assert(ret);
@@ -776,9 +767,9 @@ Id PyMooseContext::create(string className, string name, Id parent)
         cerr << "Error: could not find any class of name " << className << endl;
         return Id();
     }    
-        
-    send3 < string, string, Id > (
-        myId_(), createSlot, className, name, parent );
+    int childNode = 0; // TODO: PyMOOSE does not yet have the parallel computing facilities.
+    send4 < string, string, int, Id > (
+        myId_(), createSlot, className, name, childNode, parent );
 //    cerr << "PyMooseContext::create - Created Id = " << createdElm_ << " " << className << "::" << name << endl;
     
     return createdElm_;
