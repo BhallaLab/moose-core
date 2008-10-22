@@ -305,20 +305,24 @@ parseString = _moose.parseString
 class Id(object):
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
-    def __init__(self, *args): 
-        this = _moose.new_Id(*args)
-        try: self.this.append(this)
-        except: self.this = this
     __swig_destroy__ = _moose.delete_Id
     __del__ = lambda self : None;
+    localId = staticmethod(_moose.Id_localId)
     childId = staticmethod(_moose.Id_childId)
     scratchId = staticmethod(_moose.Id_scratchId)
     makeIdOnNode = staticmethod(_moose.Id_makeIdOnNode)
     shellId = staticmethod(_moose.Id_shellId)
+    postId = staticmethod(_moose.Id_postId)
     def assignIndex(*args): return _moose.Id_assignIndex(*args)
+    nextScratchId = staticmethod(_moose.Id_nextScratchId)
+    redefineScratchIds = staticmethod(_moose.Id_redefineScratchIds)
     def path(*args): return _moose.Id_path(*args)
+    def id(*args): return _moose.Id_id(*args)
     def index(*args): return _moose.Id_index(*args)
     def node(*args): return _moose.Id_node(*args)
+    def isGlobal(*args): return _moose.Id_isGlobal(*args)
+    def setGlobal(*args): return _moose.Id_setGlobal(*args)
+    def setNode(*args): return _moose.Id_setNode(*args)
     lastId = staticmethod(_moose.Id_lastId)
     badId = staticmethod(_moose.Id_badId)
     str2Id = staticmethod(_moose.Id_str2Id)
@@ -328,25 +332,47 @@ class Id(object):
     def zero(*args): return _moose.Id_zero(*args)
     def outOfRange(*args): return _moose.Id_outOfRange(*args)
     def isScratch(*args): return _moose.Id_isScratch(*args)
+    def isProxy(*args): return _moose.Id_isProxy(*args)
     def __eq__(*args): return _moose.Id___eq__(*args)
     def __ne__(*args): return _moose.Id___ne__(*args)
     def __lt__(*args): return _moose.Id___lt__(*args)
-    setNodes = staticmethod(_moose.Id_setNodes)
     def setElement(*args): return _moose.Id_setElement(*args)
+    def __init__(self, *args): 
+        this = _moose.new_Id(*args)
+        try: self.this.append(this)
+        except: self.this = this
 Id_swigregister = _moose.Id_swigregister
 Id_swigregister(Id)
+Id_localId = _moose.Id_localId
 Id_childId = _moose.Id_childId
 Id_scratchId = _moose.Id_scratchId
 Id_makeIdOnNode = _moose.Id_makeIdOnNode
 Id_shellId = _moose.Id_shellId
+Id_postId = _moose.Id_postId
+Id_nextScratchId = _moose.Id_nextScratchId
+Id_redefineScratchIds = _moose.Id_redefineScratchIds
 Id_lastId = _moose.Id_lastId
 Id_badId = _moose.Id_badId
 Id_str2Id = _moose.Id_str2Id
 Id_id2str = _moose.Id_id2str
-Id_setNodes = _moose.Id_setNodes
 cvar = _moose.cvar
 Id.AnyIndex = _moose.cvar.Id_AnyIndex
 Id.BadIndex = _moose.cvar.Id_BadIndex
+Id.GlobalNode = _moose.cvar.Id_GlobalNode
+
+class Nid(Id):
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _moose.new_Nid(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def node(*args): return _moose.Nid_node(*args)
+    def setNode(*args): return _moose.Nid_setNode(*args)
+    __swig_destroy__ = _moose.delete_Nid
+    __del__ = lambda self : None;
+Nid_swigregister = _moose.Nid_swigregister
+Nid_swigregister(Nid)
 
 class PyMooseContext(object):
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
@@ -635,6 +661,7 @@ class InterpolationTable(PyMooseBase):
     def __get_calcMode(*args): return _moose.InterpolationTable___get_calcMode(*args)
     def __set_calcMode(*args): return _moose.InterpolationTable___set_calcMode(*args)
     def dumpFile(*args): return _moose.InterpolationTable_dumpFile(*args)
+    def tabFill(*args): return _moose.InterpolationTable_tabFill(*args)
     xmin = _swig_property(_moose.InterpolationTable_xmin_get, _moose.InterpolationTable_xmin_set)
     xmax = _swig_property(_moose.InterpolationTable_xmax_get, _moose.InterpolationTable_xmax_set)
     xdivs = _swig_property(_moose.InterpolationTable_xdivs_get, _moose.InterpolationTable_xdivs_set)
@@ -689,22 +716,12 @@ class Table(InterpolationTable):
     def __set_stepSize(*args): return _moose.Table___set_stepSize(*args)
     def __get_threshold(*args): return _moose.Table___get_threshold(*args)
     def __set_threshold(*args): return _moose.Table___set_threshold(*args)
-    def __get_outputSrc(*args): return _moose.Table___get_outputSrc(*args)
-    def __set_outputSrc(*args): return _moose.Table___set_outputSrc(*args)
-    def __get_msgInput(*args): return _moose.Table___get_msgInput(*args)
-    def __set_msgInput(*args): return _moose.Table___set_msgInput(*args)
-    def __get_sum(*args): return _moose.Table___get_sum(*args)
-    def __set_sum(*args): return _moose.Table___set_sum(*args)
-    def __get_prd(*args): return _moose.Table___get_prd(*args)
-    def __set_prd(*args): return _moose.Table___set_prd(*args)
     def createTable(*args): return _moose.Table_createTable(*args)
     input = _swig_property(_moose.Table_input_get, _moose.Table_input_set)
     output = _swig_property(_moose.Table_output_get, _moose.Table_output_set)
     stepMode = _swig_property(_moose.Table_stepMode_get, _moose.Table_stepMode_set)
     stepSize = _swig_property(_moose.Table_stepSize_get, _moose.Table_stepSize_set)
     threshold = _swig_property(_moose.Table_threshold_get, _moose.Table_threshold_set)
-    sum = _swig_property(_moose.Table_sum_get, _moose.Table_sum_set)
-    prd = _swig_property(_moose.Table_prd_get, _moose.Table_prd_set)
 Table_swigregister = _moose.Table_swigregister
 Table_swigregister(Table)
 Table.className = _moose.cvar.Table_className
@@ -1138,11 +1155,13 @@ class HHChannel(PyMooseBase):
     Xpower = _swig_property(_moose.HHChannel_Xpower_get, _moose.HHChannel_Xpower_set)
     Ypower = _swig_property(_moose.HHChannel_Ypower_get, _moose.HHChannel_Ypower_set)
     Zpower = _swig_property(_moose.HHChannel_Zpower_get, _moose.HHChannel_Zpower_set)
+    X = _swig_property(_moose.HHChannel_X_get, _moose.HHChannel_X_set)
+    Y = _swig_property(_moose.HHChannel_Y_get, _moose.HHChannel_Y_set)
+    Z = _swig_property(_moose.HHChannel_Z_get, _moose.HHChannel_Z_set)
     instant = _swig_property(_moose.HHChannel_instant_get, _moose.HHChannel_instant_set)
     Gk = _swig_property(_moose.HHChannel_Gk_get, _moose.HHChannel_Gk_set)
     Ik = _swig_property(_moose.HHChannel_Ik_get, _moose.HHChannel_Ik_set)
     useConcentration = _swig_property(_moose.HHChannel_useConcentration_get, _moose.HHChannel_useConcentration_set)
-    IkSrc = _swig_property(_moose.HHChannel_IkSrc_get, _moose.HHChannel_IkSrc_set)
     concen = _swig_property(_moose.HHChannel_concen_get, _moose.HHChannel_concen_set)
 HHChannel_swigregister = _moose.HHChannel_swigregister
 HHChannel_swigregister(HHChannel)

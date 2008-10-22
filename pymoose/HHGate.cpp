@@ -32,9 +32,10 @@ InterpolationTable* HHGate::__get_B() const
 
 void HHGate::tabFill(int xdivs, int mode)
 {
-    // this->__get_A()->tabFill(xdivs, mode);
-//     this->__get_B()->tabFill(xdivs, mode);
+    this->__get_A()->tabFill(xdivs, mode);
+    this->__get_B()->tabFill(xdivs, mode);
 }
+
 void HHGate::setupAlpha(double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max)
 {
     vector<double> params;
