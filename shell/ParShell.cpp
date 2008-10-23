@@ -310,10 +310,10 @@ void Shell::addParallelSrc( const Conn* c,
 		de = Id::postId( destNode ).eref();
 #else
 	// One of the unit tests puts them on the same node.
-	assert( destNode != srcNode );
-	assert( Id::postId( destNode ).good() );
-	assert( Id::postId( destNode ).eref().e != 0 );
-	Eref de = Id::postId( destNode ).eref();
+	assert( dest.node() != src.node() );
+	assert( Id::postId( dest.node() ).good() );
+	assert( Id::postId( dest.node() ).eref().e != 0 );
+	Eref de = Id::postId( dest.node() ).eref();
 #endif
 
 	const Finfo* sf = se->findFinfo( srcField );
@@ -427,10 +427,10 @@ void Shell::addParallelDest( const Conn* c,
 			se = Id::postId( srcNode ).eref();
 #else
 		// One of the unit tests puts them on the same node.
-		assert( destNode != srcNode );
-		assert( Id::postId( srcNode ).good() );
-		assert( Id::postId( srcNode ).eref().e != 0 );
-		Eref se = Id::postId( srcNode ).eref();
+		assert( dest.node() != src.node() );
+		assert( Id::postId( src.node() ).good() );
+		assert( Id::postId( src.node() ).eref().e != 0 );
+		Eref se = Id::postId( src.node() ).eref();
 #endif
 		set( se, "incrementNumAsyncIn" );
 		if ( !tgtFinfo->isDestOnly() ) // Shared msg, handling srcs too.
@@ -728,7 +728,7 @@ void Shell::copy( const Conn* c, Id src, Id parent, string name )
 	if ( dynamic_cast< const SetConn* >( c ) == 0 )
 		sendBack1< Id >( c, createSlot, retId );
 #else
-	sendBack1< Id >( c, createSlot, retid );
+	sendBack1< Id >( c, createSlot, retId );
 #endif
 }
 
@@ -836,7 +836,7 @@ void Shell::copyIntoArray( const Conn* c,
 	if ( dynamic_cast< const SetConn* >( c ) == 0 )
 		sendBack1< Id >( c, createSlot, retId );
 #else
-	sendBack1< Id >( c, createSlot, retid );
+	sendBack1< Id >( c, createSlot, retId );
 #endif
 }
 
