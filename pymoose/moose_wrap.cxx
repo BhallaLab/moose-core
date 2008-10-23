@@ -20429,13 +20429,14 @@ fail:
 SWIGINTERN PyObject *_wrap_PyMooseContext_useClock__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
-  Id *arg2 = 0 ;
-  std::string arg3 ;
-  std::string arg4 ;
+  std::string *arg2 = 0 ;
+  std::string *arg3 = 0 ;
+  std::string *arg4 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  int res3 = SWIG_OLDOBJ ;
+  int res4 = SWIG_OLDOBJ ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -20448,41 +20449,54 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_useClock__SWIG_0(PyObject *SWIGUNUSEDP
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_useClock" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
   }
   arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Id,  0  | 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PyMooseContext_useClock" "', argument " "2"" of type '" "Id const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_useClock" "', argument " "2"" of type '" "Id const &""'"); 
-  }
-  arg2 = reinterpret_cast< Id * >(argp2);
   {
     std::string *ptr = (std::string *)0;
-    int res = SWIG_AsPtr_std_string(obj2, &ptr);
-    if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_useClock" "', argument " "3"" of type '" "std::string""'"); 
+    res2 = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PyMooseContext_useClock" "', argument " "2"" of type '" "std::string const &""'"); 
     }
-    arg3 = *ptr;
-    if (SWIG_IsNewObj(res)) delete ptr;
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_useClock" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
   }
   {
     std::string *ptr = (std::string *)0;
-    int res = SWIG_AsPtr_std_string(obj3, &ptr);
-    if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_useClock" "', argument " "4"" of type '" "std::string""'"); 
+    res3 = SWIG_AsPtr_std_string(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PyMooseContext_useClock" "', argument " "3"" of type '" "std::string const &""'"); 
     }
-    arg4 = *ptr;
-    if (SWIG_IsNewObj(res)) delete ptr;
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_useClock" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    std::string *ptr = (std::string *)0;
+    res4 = SWIG_AsPtr_std_string(obj3, &ptr);
+    if (!SWIG_IsOK(res4)) {
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "PyMooseContext_useClock" "', argument " "4"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_useClock" "', argument " "4"" of type '" "std::string const &""'"); 
+    }
+    arg4 = ptr;
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    (arg1)->useClock((Id const &)*arg2,arg3,arg4);
+    (arg1)->useClock((std::string const &)*arg2,(std::string const &)*arg3,(std::string const &)*arg4);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  if (SWIG_IsNewObj(res4)) delete arg4;
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  if (SWIG_IsNewObj(res4)) delete arg4;
   SWIG_PYTHON_THREAD_END_BLOCK;
   return NULL;
 }
@@ -20491,12 +20505,12 @@ fail:
 SWIGINTERN PyObject *_wrap_PyMooseContext_useClock__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
-  Id *arg2 = 0 ;
-  std::string arg3 ;
+  std::string *arg2 = 0 ;
+  std::string *arg3 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  int res3 = SWIG_OLDOBJ ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -20508,32 +20522,41 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_useClock__SWIG_1(PyObject *SWIGUNUSEDP
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_useClock" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
   }
   arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Id,  0  | 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PyMooseContext_useClock" "', argument " "2"" of type '" "Id const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_useClock" "', argument " "2"" of type '" "Id const &""'"); 
-  }
-  arg2 = reinterpret_cast< Id * >(argp2);
   {
     std::string *ptr = (std::string *)0;
-    int res = SWIG_AsPtr_std_string(obj2, &ptr);
-    if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_useClock" "', argument " "3"" of type '" "std::string""'"); 
+    res2 = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PyMooseContext_useClock" "', argument " "2"" of type '" "std::string const &""'"); 
     }
-    arg3 = *ptr;
-    if (SWIG_IsNewObj(res)) delete ptr;
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_useClock" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    std::string *ptr = (std::string *)0;
+    res3 = SWIG_AsPtr_std_string(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PyMooseContext_useClock" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_useClock" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    arg3 = ptr;
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    (arg1)->useClock((Id const &)*arg2,arg3);
+    (arg1)->useClock((std::string const &)*arg2,(std::string const &)*arg3);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
   SWIG_PYTHON_THREAD_END_BLOCK;
   return NULL;
 }
@@ -20543,12 +20566,14 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_useClock__SWIG_2(PyObject *SWIGUNUSEDP
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
   int arg2 ;
-  std::string arg3 ;
-  std::string arg4 ;
+  std::string *arg3 = 0 ;
+  std::string *arg4 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  int res4 = SWIG_OLDOBJ ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -20568,31 +20593,39 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_useClock__SWIG_2(PyObject *SWIGUNUSEDP
   arg2 = static_cast< int >(val2);
   {
     std::string *ptr = (std::string *)0;
-    int res = SWIG_AsPtr_std_string(obj2, &ptr);
-    if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_useClock" "', argument " "3"" of type '" "std::string""'"); 
+    res3 = SWIG_AsPtr_std_string(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PyMooseContext_useClock" "', argument " "3"" of type '" "std::string const &""'"); 
     }
-    arg3 = *ptr;
-    if (SWIG_IsNewObj(res)) delete ptr;
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_useClock" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    arg3 = ptr;
   }
   {
     std::string *ptr = (std::string *)0;
-    int res = SWIG_AsPtr_std_string(obj3, &ptr);
-    if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_useClock" "', argument " "4"" of type '" "std::string""'"); 
+    res4 = SWIG_AsPtr_std_string(obj3, &ptr);
+    if (!SWIG_IsOK(res4)) {
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "PyMooseContext_useClock" "', argument " "4"" of type '" "std::string const &""'"); 
     }
-    arg4 = *ptr;
-    if (SWIG_IsNewObj(res)) delete ptr;
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_useClock" "', argument " "4"" of type '" "std::string const &""'"); 
+    }
+    arg4 = ptr;
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    (arg1)->useClock(arg2,arg3,arg4);
+    (arg1)->useClock(arg2,(std::string const &)*arg3,(std::string const &)*arg4);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  if (SWIG_IsNewObj(res4)) delete arg4;
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  if (SWIG_IsNewObj(res4)) delete arg4;
   SWIG_PYTHON_THREAD_END_BLOCK;
   return NULL;
 }
@@ -20602,11 +20635,12 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_useClock__SWIG_3(PyObject *SWIGUNUSEDP
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
   int arg2 ;
-  std::string arg3 ;
+  std::string *arg3 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -20625,22 +20659,26 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_useClock__SWIG_3(PyObject *SWIGUNUSEDP
   arg2 = static_cast< int >(val2);
   {
     std::string *ptr = (std::string *)0;
-    int res = SWIG_AsPtr_std_string(obj2, &ptr);
-    if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_useClock" "', argument " "3"" of type '" "std::string""'"); 
+    res3 = SWIG_AsPtr_std_string(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PyMooseContext_useClock" "', argument " "3"" of type '" "std::string const &""'"); 
     }
-    arg3 = *ptr;
-    if (SWIG_IsNewObj(res)) delete ptr;
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_useClock" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    arg3 = ptr;
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    (arg1)->useClock(arg2,arg3);
+    (arg1)->useClock(arg2,(std::string const &)*arg3);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res3)) delete arg3;
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
   SWIG_PYTHON_THREAD_END_BLOCK;
   return NULL;
 }
@@ -20663,24 +20701,6 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_useClock(PyObject *self, PyObject *arg
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_pymoose__PyMooseContext, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Id, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = SWIG_AsPtr_std_string(argv[2], (std::string**)(0));
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          SWIG_PYTHON_THREAD_END_BLOCK;
-          return _wrap_PyMooseContext_useClock__SWIG_1(self, args);
-        }
-      }
-    }
-  }
-  if (argc == 3) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_pymoose__PyMooseContext, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
       {
         int res = SWIG_AsVal_int(argv[1], NULL);
         _v = SWIG_CheckState(res);
@@ -20695,24 +20715,20 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_useClock(PyObject *self, PyObject *arg
       }
     }
   }
-  if (argc == 4) {
+  if (argc == 3) {
     int _v;
     void *vptr = 0;
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_pymoose__PyMooseContext, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Id, 0);
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
         int res = SWIG_AsPtr_std_string(argv[2], (std::string**)(0));
         _v = SWIG_CheckState(res);
         if (_v) {
-          int res = SWIG_AsPtr_std_string(argv[3], (std::string**)(0));
-          _v = SWIG_CheckState(res);
-          if (_v) {
-            SWIG_PYTHON_THREAD_END_BLOCK;
-            return _wrap_PyMooseContext_useClock__SWIG_0(self, args);
-          }
+          SWIG_PYTHON_THREAD_END_BLOCK;
+          return _wrap_PyMooseContext_useClock__SWIG_1(self, args);
         }
       }
     }
@@ -20741,10 +20757,32 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_useClock(PyObject *self, PyObject *arg
       }
     }
   }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_pymoose__PyMooseContext, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = SWIG_AsPtr_std_string(argv[2], (std::string**)(0));
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          int res = SWIG_AsPtr_std_string(argv[3], (std::string**)(0));
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            SWIG_PYTHON_THREAD_END_BLOCK;
+            return _wrap_PyMooseContext_useClock__SWIG_0(self, args);
+          }
+        }
+      }
+    }
+  }
   
   SWIG_PYTHON_THREAD_END_BLOCK;
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'PyMooseContext_useClock'.\n  Possible C/C++ prototypes are:\n""    useClock(pymoose::PyMooseContext *,Id const &,std::string,std::string)\n""    useClock(pymoose::PyMooseContext *,Id const &,std::string)\n""    useClock(pymoose::PyMooseContext *,int,std::string,std::string)\n""    useClock(pymoose::PyMooseContext *,int,std::string)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'PyMooseContext_useClock'.\n  Possible C/C++ prototypes are:\n""    useClock(pymoose::PyMooseContext *,std::string const &,std::string const &,std::string const &)\n""    useClock(pymoose::PyMooseContext *,std::string const &,std::string const &)\n""    useClock(pymoose::PyMooseContext *,int,std::string const &,std::string const &)\n""    useClock(pymoose::PyMooseContext *,int,std::string const &)\n");
   return NULL;
 }
 
