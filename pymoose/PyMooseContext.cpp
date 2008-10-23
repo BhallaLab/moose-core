@@ -954,27 +954,17 @@ vector <double> & PyMooseContext::getClocks()
     return dbls_;        
 }
 
-void PyMooseContext::useClock(const Id& tickId, string path, string func)
+void PyMooseContext::useClock(const std::string& tickName, const std::string& path, const std::string& func)
 {
-    Element * e = myId_();
-    send2< string, bool >( e, requestWildcardListSlot, path, 0 );
-    send3< Id, vector< Id >, string >(
-        myId_(),
-        useClockSlot, 
-        tickId, elist_,  func );
+    send3< string, string, string>(myId_(), useClockSlot, tickName, path, func);
 }
 
-void PyMooseContext::useClock(int tickNo, std::string path, std::string func)
+void PyMooseContext::useClock(int tickNo, const std::string& path, const std::string& func)
 {
-    char tickName[40];
-	snprintf(tickName, (size_t)(39), "/sched/cj/t%d",tickNo);
-    Id tickId(tickName);
-    if (tickId.bad())
-    {
-        cerr << "useClock: Invalid clock number " << tickNo << endl;
-        return;        
-    }
-    this->useClock( tickId, path, func);    
+    static const int tickNameLen = 63;
+    char tickName[tickNameLen+1];
+    snprintf(tickName, (size_t)(tickNameLen), "t%d",tickNo);
+    this->useClock( tickName, path, func);
 }
 
 void PyMooseContext::reset()
@@ -990,7 +980,8 @@ void PyMooseContext::stop()
 
 void PyMooseContext::addTask(string arg)
 {
-    //Do nothing
+    //Do nothing - but give a message to inform that
+    cerr << "void PyMooseContext::addTask(string arg) - empty function.\n";
 }
 /**
    This just does the copying without returning anything.

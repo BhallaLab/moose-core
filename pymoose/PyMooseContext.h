@@ -95,8 +95,8 @@ namespace pymoose
         void stop();
         void setClock(int clockNo, double dt, int stage = 0);    
         vector <double>& getClocks();
-        void useClock(const Id& tickId, std::string path, std::string func = "process");
-        void useClock(int tickNo, std::string path, std::string func = "process");
+        void useClock(const std::string& tickName, const std::string& path, const std::string& func = "process");
+        void useClock(int tickNo, const std::string& path, const std::string& func = "process");
         void addTask(std::string arg);
         void do_deep_copy( const Id& object, std::string new_name, const Id& dest);
         Id deepCopy( const Id& object, std::string new_name, const Id& dest);    
