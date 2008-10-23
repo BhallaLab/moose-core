@@ -98,13 +98,17 @@ const Cinfo* initPulseGenCinfo()
             new DestFinfo("delay", Ftype2<int, double>::global(),
                           RFCAST( & PulseGen::setPulseDelay)),
         };
+
+    static SchedInfo schedInfo[] = { { process, 0, 0 } };
+
     static Cinfo pulseGenCinfo("PulseGen",
                                "Subhasis Ray, 2007, NCBS",
                                "PulseGen: general purpose pulse generator",
                                initNeutralCinfo(),
                                pulseGenFinfos,
                                sizeof(pulseGenFinfos)/sizeof(Finfo*),
-                               ValueFtype1<PulseGen>::global());
+                               ValueFtype1<PulseGen>::global(),
+                               schedInfo, 1);
     return &pulseGenCinfo;
 }
 
