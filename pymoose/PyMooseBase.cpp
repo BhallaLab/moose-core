@@ -340,7 +340,10 @@ void PyMooseBase::useClock(int clockNo, string func)
 }
 void PyMooseBase::useClock(Id clock, string func)
 {
-    context_->useClock(clock, id_.path(), func);
+    // This maintains compatibility with version prior to merging with parallel branch.
+    // Using clock Id in useClock was replaced by use of the tickName in Shell::useClock.
+    // We assume PyMOOSE runs on single node only.
+    context_->useClock(clock.path(), id_.path(), func);
 }
 
 bool PyMooseBase::connect(std::string srcField, PyMooseBase* dest, std::string destField)
