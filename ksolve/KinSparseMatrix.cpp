@@ -174,15 +174,110 @@ double KinSparseMatrix::computeRowRate(
 	return ret;
 }
 
+/**
+ * Puts a transpose of current matrix into ret.
+ */
+void KinSparseMatrix::transpose( KinSparseMatrix& ret ) const
+{
+	ret.N_.resize( 0 );
+	ret.colIndex_.resize( 0 );
+	ret.rowStart_.resize( 0 );
+	ret.nrows_ = ncolumns_;
+	ret.ncolumns_ = nrows_;
+	// vector< unsigned int > currentColumn( nrows_ + 1, 0 );
+	vector< unsigned int > currentRowStart( rowStart_ );
+
+	ret.rowStart_.push_back( 0 );
+	for ( unsigned int col = 0; col < ncolumns_; ++col ) {
+		for ( unsigned int i = 0; i < nrows_; ++i ) {
+			unsigned int j = currentRowStart[ i ];
+			if ( j >= rowStart_[ i + 1 ] )
+				continue; // This row has been completed.
+			if ( colIndex_[ j ] == col ) {
+				ret.N_.push_back( N_[ j ] );
+				ret.colIndex_.push_back( i );
+				++currentRowStart[ i ];
+			} else {
+				// nothing to do here.
+			}
+		}
+		ret.rowStart_.push_back( ret.N_.size() );
+	}
+}
+
+/**
+ * Has to operate on transposed matrix
+ * row argument refers to reac# in this transformed situation.
+ * Fills up 'deps' with reac#s that depend on the row argument.
+ */
+void KinSparseMatrix::getGillespieDependence( 
+	unsigned int row, vector< unsigned int >& ret
+) const
+{
+	ret.resize( 0 );
+	vector< unsigned int > deps;
+	for ( unsigned int i = 0; i < nrows_; ++i ) {
+		// i is index for reac # here. Note that matrix is transposed.
+		unsigned int j = rowStart_[ row ];
+		unsigned int jend = rowStart_[ row + 1 ];
+		unsigned int k = rowStart_[ i ];
+		unsigned int kend = rowStart_[ i + 1 ];
+		
+		while ( j < jend && k < kend ) {
+			if ( colIndex_[ j ] == colIndex_[ k ] ) {
+				if ( N_[ k ] < 0 ) {
+					deps.push_back( i );
+				}
+				++j;
+				++k;
+			} else if ( colIndex_[ j ] < colIndex_[ k ] ) {
+				++j;
+			} else if ( colIndex_[ j ] > colIndex_[ k ] ) {
+				++k;
+			} else {
+				assert( 0 );
+			}
+		}
+	}
+
+	/// STL stuff follows, with the usual weirdness.
+	vector< unsigned int >::iterator pos = 
+		unique( deps.begin(), deps.end() );
+	ret.resize( pos - deps.begin() );
+	copy( deps.begin(), pos, ret.begin() );
+}
+
 
 #ifdef DO_UNIT_TESTS
 #include "header.h"
 
 void testKinSparseMatrix()
 {
+	// This is the stoichiometry matrix for the unidirectional reacns
+	// coming out of the following system:
+	// a + b <===> c
+	// c + d <===> e
+	// a + f <===> g
+	// a + e <===> 2g
+	//
+	// When halfreac 0 fires, it affects 0, 1, 2, 4, 6.
+	// and so on.
+	static int transposon[][ 8 ] = { 
+		{ -1,  1,  0,  0, -1,  1, -1,  1 },
+		{ -1,  1,  0,  0,  0,  0,  0,  0 },
+		{  1, -1, -1,  1,  0,  0,  0,  0 },
+		{  0,  0, -1,  1,  0,  0,  0,  0 },
+		{  0,  0,  1, -1,  0,  0, -1,  1 },
+		{  0,  0,  0,  0, -1,  1,  0,  0 },
+		{  0,  0,  0,  0,  1, -1,  2, -2 }
+	};
+
 	cout << "\nTesting KinSparseMatrix" << flush;
 	const unsigned int NR = 4;
 	const unsigned int NC = 5;
+
+	const unsigned int NTR = 7; // for transposon
+	const unsigned int NTC = 8;
 
 	KinSparseMatrix sm( NR, NC);
 
@@ -205,6 +300,127 @@ void testKinSparseMatrix()
 	ASSERT( dret == 110.0, "computeRowRate" );
 	dret = sm.computeRowRate( 3, v );
 	ASSERT( dret == 160.0, "computeRowRate" );
+
+	////////////////////////////////////////////////////////////////
+	// Checking transposition operation
+	////////////////////////////////////////////////////////////////
+	KinSparseMatrix orig( NTR, NTC );
+	for ( unsigned int i = 0; i < NTR; i++ )
+		for ( unsigned int j = 0; j < NTC; j++ )
+			orig.set( i, j, transposon[ i ][ j ] );
+
+	ASSERT( orig.rowStart_.size() == 8, "transposed: rowStart" );
+	ASSERT( orig.rowStart_[0] == 0, "transposon: rowStart" );
+	ASSERT( orig.rowStart_[1] == 6, "transposon: rowStart" );
+	ASSERT( orig.rowStart_[2] == 8, "transposon: rowStart" );
+	ASSERT( orig.rowStart_[3] == 12, "transposon: rowStart" );
+	ASSERT( orig.rowStart_[4] == 14, "transposon: rowStart" );
+	ASSERT( orig.rowStart_[5] == 18, "transposon: rowStart" );
+	ASSERT( orig.rowStart_[6] == 20, "transposon: rowStart" );
+	ASSERT( orig.rowStart_[7] == 24, "transposon: rowStart" );
+
+	ASSERT( orig.colIndex_[0] == 0, "transposon: colIndex" );
+	ASSERT( orig.colIndex_[1] == 1, "transposon: colIndex" );
+	ASSERT( orig.colIndex_[2] == 4, "transposon: colIndex" );
+	ASSERT( orig.colIndex_[3] == 5, "transposon: colIndex" );
+	ASSERT( orig.colIndex_[4] == 6, "transposon: colIndex" );
+	ASSERT( orig.colIndex_[5] == 7, "transposon: colIndex" );
+	ASSERT( orig.colIndex_[6] == 0, "transposon: colIndex" );
+	ASSERT( orig.colIndex_[7] == 1, "transposon: colIndex" );
+
+	ASSERT( orig.N_[0] == -1, "transposon: N" );
+	ASSERT( orig.N_[1] == 1, "transposon: N" );
+	ASSERT( orig.N_[2] == -1, "transposon: N" );
+	ASSERT( orig.N_[3] == 1, "transposon: N" );
+	ASSERT( orig.N_[4] == -1, "transposon: N" );
+	ASSERT( orig.N_[5] == 1, "transposon: N" );
+	ASSERT( orig.N_[6] == -1, "transposon: N" );
+	ASSERT( orig.N_[7] == 1, "transposon: N" );
+
+	KinSparseMatrix trans( NTC, NTR );
+	orig.transpose( trans );
+
+	ASSERT( trans.rowStart_.size() == 9, "transposed: rowStart" );
+	ASSERT( trans.rowStart_[0] == 0, "transposed: rowStart" );
+	ASSERT( trans.rowStart_[1] == 3, "transposed: rowStart" );
+	ASSERT( trans.rowStart_[2] == 6, "transposed: rowStart" );
+	ASSERT( trans.rowStart_[3] == 9, "transposed: rowStart" );
+	ASSERT( trans.rowStart_[4] == 12, "transposed: rowStart" );
+	ASSERT( trans.rowStart_[5] == 15, "transposed: rowStart" );
+	ASSERT( trans.rowStart_[6] == 18, "transposed: rowStart" );
+	ASSERT( trans.rowStart_[7] == 21, "transposed: rowStart" );
+	ASSERT( trans.rowStart_[8] == 24, "transposed: rowStart" );
+
+	ASSERT( trans.colIndex_[0] == 0, "transposed: colIndex" );
+	ASSERT( trans.colIndex_[1] == 1, "transposed: colIndex" );
+	ASSERT( trans.colIndex_[2] == 2, "transposed: colIndex" );
+	ASSERT( trans.colIndex_[3] == 0, "transposed: colIndex" );
+	ASSERT( trans.colIndex_[4] == 1, "transposed: colIndex" );
+	ASSERT( trans.colIndex_[5] == 2, "transposed: colIndex" );
+	ASSERT( trans.colIndex_[6] == 2, "transposed: colIndex" );
+	ASSERT( trans.colIndex_[7] == 3, "transposed: colIndex" );
+
+	ASSERT( trans.N_[0] == -1, "transposed: N" );
+	ASSERT( trans.N_[1] == -1, "transposed: N" );
+	ASSERT( trans.N_[2] == 1, "transposed: N" );
+	ASSERT( trans.N_[3] == 1, "transposed: N" );
+	ASSERT( trans.N_[4] == 1, "transposed: N" );
+	ASSERT( trans.N_[5] == -1, "transposed: N" );
+	ASSERT( trans.N_[6] == -1, "transposed: N" );
+	ASSERT( trans.N_[7] == -1, "transposed: N" );
+
+	for ( unsigned int i = 0; i < NTR; i++ ) {
+		for ( unsigned int j = 0; j < NTC; j++ ) {
+			int ret = trans.get( j, i );
+			if ( transposon[ i ][ j ] != ret )
+				ASSERT( 0, "transposed: N" );
+		}
+	}
+
+	////////////////////////////////////////////////////////////////
+	// Checking generation of dependency graphs.
+	////////////////////////////////////////////////////////////////
+	
+	vector< unsigned int > deps;
+	trans.getGillespieDependence( 0, deps );
+	ASSERT( deps.size() == 5, "Gillespie dependence" );
+	ASSERT( deps[0] == 0, "Gillespie dependence" );
+	ASSERT( deps[1] == 1, "Gillespie dependence" );
+	ASSERT( deps[2] == 2, "Gillespie dependence" );
+	ASSERT( deps[3] == 4, "Gillespie dependence" );
+	ASSERT( deps[4] == 6, "Gillespie dependence" );
+
+	trans.getGillespieDependence( 1, deps );
+	ASSERT( deps.size() == 5, "Gillespie dependence" );
+	ASSERT( deps[0] == 0, "Gillespie dependence" );
+	ASSERT( deps[1] == 1, "Gillespie dependence" );
+	ASSERT( deps[2] == 2, "Gillespie dependence" );
+	ASSERT( deps[3] == 4, "Gillespie dependence" );
+	ASSERT( deps[4] == 6, "Gillespie dependence" );
+
+	trans.getGillespieDependence( 2, deps );
+	ASSERT( deps.size() == 4, "Gillespie dependence" );
+	ASSERT( deps[0] == 1, "Gillespie dependence" );
+	ASSERT( deps[1] == 2, "Gillespie dependence" );
+	ASSERT( deps[2] == 3, "Gillespie dependence" );
+	ASSERT( deps[3] == 6, "Gillespie dependence" );
+
+	trans.getGillespieDependence( 4, deps );
+	ASSERT( deps.size() == 5, "Gillespie dependence" );
+	ASSERT( deps[0] == 0, "Gillespie dependence" );
+	ASSERT( deps[1] == 4, "Gillespie dependence" );
+	ASSERT( deps[2] == 5, "Gillespie dependence" );
+	ASSERT( deps[3] == 6, "Gillespie dependence" );
+	ASSERT( deps[4] == 7, "Gillespie dependence" );
+
+	trans.getGillespieDependence( 6, deps );
+	ASSERT( deps.size() == 6, "Gillespie dependence" );
+	ASSERT( deps[0] == 0, "Gillespie dependence" );
+	ASSERT( deps[1] == 3, "Gillespie dependence" );
+	ASSERT( deps[2] == 4, "Gillespie dependence" );
+	ASSERT( deps[3] == 5, "Gillespie dependence" );
+	ASSERT( deps[4] == 6, "Gillespie dependence" );
+	ASSERT( deps[5] == 7, "Gillespie dependence" );
 }
 
 #endif
