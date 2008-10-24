@@ -7854,4 +7854,81 @@ Need to set up a 5th clock, to handle graphics.
 21 Oct 2008
 Created separate ksolve directory for kinetic solver, moved over files, tested.
 
+Checked in as revision 867: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+=============================================================================
+22 Oct 2008
+Can I use stoich matrix to build up dependency tree?
+
+Stoich matrix		Rates		Conc change
+[ N11  N12  N13 ... ] 	[ v1 ]	= 	[ D1 ]
+[ N21  N22  N23 ... ]	[ v2 ]	 	[ D2 ]
+[ N31  N32  N33 ... ]	[ v3 ]	 	[ D3 ]
+[ N41  N42  N43 ... ]	[ ...]	 	[ D4 ]
+[ ...  ...  ...     ]		 	[ .. ]
+
+
+- Si = Subset of molecules affected by vi are given by Stoich matrix.
+- vi affected by Si are give by checking reactions depending on Si
+
+Looked at algorithm and cost to get dependence vi->vj:
+Stoich matrix approach: Total: O( N^2 )
+foreach vi (size N)
+	Si = Nji such that Nji != 0 // Make mol dep vector
+foreach vi (size N)
+	foreach Sj (all vectors of mol deps of vi: size N)
+		if ( vi has reactant on Sj ) add vj to depvi.
+
+Direct messaging approach:
+foreach vi (size N) : Total O( N )
+	Traverse to each product mol Pi (size O(1) )
+		Traverse from Pi to each target reac vj (size O(1) )
+			Add vj to vi dep list.
+
+So the direct messaging approach, though painful, is more efficient.
+
+				-----
+
+Speeding up lookup of selected reactions:
+Basic Gillespie: 
+	- Pick reac with probability proportionate to its propensity.
+	- Step for time drawn from lambda distribution for this propensity.
+
+Basic approach is to fill a vector a1, a2... a_n with propensities for v_i
+Find the total propensity. Scale the vector so total is 1.
+Pick a random number R from 0 to 1.
+March through propensity vector a_i till Sum( a_i ) > R
+Use reaction i-1.
+
+This is an O(N) search per time-step, can get nasty if we have 1e6 reacns,
+e.g., in a diffn system.
+
+Things to do to speed up:
+Exact, serial: 
+	- Approach of Mukund's visitor: Order propensities in diminishing order.
+		The more likely reacns will be hit quickly.
+	- Subdivide reacn set into groups with tot propensity maintained
+		in each. Find target group, then nest down into reacns within
+		group.
+		- This can be done with many levels L of nesting.
+		- Cost: # of updates to tot propensity per reacn step goes
+			rapidly up with L, till all parent groups need 
+			updating.
+
+Approx, parallel:
+	- Partition reacn subsets among nodes.
+	- Advance each subset independently, then merge.
+		- Probably similar approxes to tau-leap method. Check.
+	- Grid update scheme for linear diffusion: 
+		- Advance each grid point indept till checkpoint.
+		- Transfer diffusing molecules. 
+		- Select checkpoint so that
+			# diffusing is a small fraction of total. Currently
+			tau_diff ~25 sec, and dt is 5 msec, so this is a
+			good assumption.
+		- This works particularly well because we know ahead of time
+			what the tau is.
+
+In both cases, we need a 1-step backtrack capability so we can halt at
+defined times.
 =============================================================================
