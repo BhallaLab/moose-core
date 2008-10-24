@@ -13,6 +13,9 @@
 class KinSparseMatrix
 {
 	friend ostream& operator <<( ostream& s, KinSparseMatrix& sm );
+#ifdef DO_UNIT_TESTS
+	friend void testKinSparseMatrix();
+#endif
 
 	public:
 		KinSparseMatrix();
@@ -40,6 +43,22 @@ class KinSparseMatrix
 			unsigned int row, const vector< double >& v
 		) const;
 
+		/**
+		 * Does a special self-product of the specified row. Output
+		 * is the set of nonzero indices in the product
+		 * abs( Rij ) * neg( Rjk ) for the specified index i, where
+		 * neg( val ) is true only if val < 0.
+		 */
+		void getGillespieDependence( 
+			unsigned int row, vector< unsigned int >& cols
+		) const;
+
+		/**
+		 * Transposes the matrix, which requires a fair amount of juggling
+		 * because of the way it is stored internally.
+		 */
+		void transpose( KinSparseMatrix& ret ) const;
+
 	private:
 		unsigned int nrows_;
 		unsigned int ncolumns_;
@@ -51,7 +70,11 @@ class KinSparseMatrix
 		 */
 		vector< unsigned int > colIndex_;	
 
-		/// Start index in the N_ and colIndex_ vectors, of each row.
+		/*
+		 * Start index in the N_ and colIndex_ vectors, of each row.
+		 * Additionally stores one last entry in nRows_ + 1, for the end
+		 * of the N_ vector.
+		 */
 		vector< unsigned int > rowStart_;
 		static const unsigned int MAX_ROWS;
 		static const unsigned int MAX_COLUMNS;

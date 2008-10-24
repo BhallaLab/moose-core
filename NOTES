@@ -7932,3 +7932,30 @@ Approx, parallel:
 In both cases, we need a 1-step backtrack capability so we can halt at
 defined times.
 =============================================================================
+24 Oct 2008.
+Had a closer look at ways to get dependency from stoichiometry matrix. This
+is how to do it:
+
+Dep matrix = abs(N(Transpose)).abs(N(neg))
+
+where abs(N) is the absolute value of entries in N and 
+N(neg) is the subset of negative entries in N. The logic is like this:
+
+nonzero entries in each column (reaction) in N is the list of 
+substrates (-ve) and products (+ve ) for that reaction. 
+All of these will be affected when the reaction fires.
+
+Negative entries in each column are the substrates for the reaction. If any
+of these change, then the reaction rate is affected. Note that the positive
+entries do NOT matter.
+
+So, to get the intersection of dependencies, we multiply out the molecule
+terms as above. This gives a matrix where the nonzero entries in each column
+are the reactions depending on that column, i.e, the dependency graph.
+
+This is nice and clean. Unfortunately the structure of our sparse
+matrix makes it much easier to get rows than to get columns, but here
+we need it the other way round. Implemented a transpose operation, and
+then the getGillespieDependence operation in KinSparseMatrix to deal with
+all this. Also did unit tests.
+
