@@ -72,7 +72,7 @@ class Stoich
 #endif // USE_GSL
 		void rebuildMatrix( Eref stoich, vector< Id >& ret );
 		void localScanTicks( Eref stoich );
-	private:
+	protected:
 		///////////////////////////////////////////////////
 		// Setup function definitions
 		///////////////////////////////////////////////////
