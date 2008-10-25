@@ -32,9 +32,9 @@ public:
 	
 	static void addPort(
 		const Conn* c,
-		string name,
 		string direction,
-		string type );
+		string type,
+		string name );
 
 
         static int getRank( Eref e );
@@ -52,9 +52,9 @@ private:
 
 	void innerAddPort(
 		Eref e,
-		string name,
 		string direction,
-		string type );
+		string type,
+		string name );
 	
 	static MUSIC::setup* setup_;
 	static MUSIC::runtime* runtime_;
