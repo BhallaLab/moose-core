@@ -127,8 +127,8 @@ void Music::innerReinitFunc( Eref e, ProcInfo p )
   if(setup_) {
     
 	dt_ = p->dt_;
-//    runtime_ = new MUSIC::runtime(setup_, p->dt_ );
-   // setup_ = 0;
+    runtime_ = new MUSIC::runtime(setup_, p->dt_ );
+    setup_ = 0;
   }
 
 }
@@ -141,11 +141,11 @@ void Music::reinitializeFunc( const Conn* c )
 void Music::innerReinitializeFunc( ) 
 {
   if(setup_) {
-    runtime_ = new MUSIC::runtime(setup_, 0.01 );
+    //~ runtime_ = new MUSIC::runtime(setup_, 0.01 );
     //~ runtime_ = new MUSIC::runtime(setup_, dt_ );
-    setup_ = 0;
+    //~ setup_ = 0;
 	// !!!
-	cerr << "dt_ hardcoded" << endl;
+	//~ cerr << "dt_ hardcoded" << endl;
   }
 }
 
@@ -169,12 +169,12 @@ void Music::innerFinalizeFunc( Eref e )
 
 void Music::addPort (
 	const Conn* c,
-	string name,
 	string direction,
-	string type ) 
+	string type,
+	string name )
 {
   static_cast < Music* > ( c->data() )->innerAddPort(c->target(), 
-                                                     name, direction, type );
+                                                     direction, type, name );
 }
 
 void Music::innerAddPort (

@@ -47,20 +47,28 @@ unsigned int initMPI( int& argc, char**& argv )
 	Shell::setNodes( myNode, totalNodes );
 
 #ifdef USE_MUSIC
-	char hostname[ 256 ];
-	gethostname( hostname, sizeof( hostname ) );
-	for ( unsigned int i = 0; i < totalNodes; i++ ) {
-		if ( i == myNode ) {
-			if ( argc >= 2 )
-				cout << "Script argument: " << argv[ 1 ] << "\t: ";
+	if ( strncmp( argv[ argc - 1 ], "-m", 2 ) == 0 ) {
+		char hostname[ 256 ];
+		gethostname( hostname, sizeof( hostname ) );
+		for ( unsigned int i = 0; i < totalNodes; i++ ) {
+			if ( i == myNode ) {
+				if ( argc >= 2 )
+					cout << "Script argument: " << argv[ 1 ] << "\t: ";
 
-			cout << "Rank " << myNode << " : PID " << getpid()
-			     << " on " << hostname << " ready for attach" << endl;
+				cout << "Rank " << myNode << " : PID " << getpid()
+					 << " on " << hostname << " ready for attach" << endl;
+			}
+			MuMPI::INTRA_COMM().Barrier();
+		}
+		
+		if ( myNode == 0 ) {
+			int i = 0;
+			while ( i == 0 );
+				sleep( 5 );
 		}
 		MuMPI::INTRA_COMM().Barrier();
 	}
-#endif // USE_MUSIC
-
+#else // USE_MUSIC
 	if ( argc >= 2 && strncmp( argv[1], "-m", 2 ) == 0 ) {
 
 		char hostname[ 256 ];
@@ -79,6 +87,7 @@ unsigned int initMPI( int& argc, char**& argv )
 		}
 		MuMPI::INTRA_COMM().Barrier();
 	}
+#endif // USE_MUSIC
 
 	return myNode;
 #else // USE_MPI
