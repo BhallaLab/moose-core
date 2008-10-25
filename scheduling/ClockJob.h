@@ -8,7 +8,7 @@
 **********************************************************************/
 
 #ifndef _CLOCKJOB_H
-#define _CLOCKjOB_H
+#define _CLOCKJOB_H
 
 class ClockJob
 {
