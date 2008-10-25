@@ -13,6 +13,7 @@ OBJ = \
 	KinSparseMatrix.o	\
 	KineticHub.o	\
 	Stoich.o	\
+	GssaStoich.o	\
 	Kintegrator.o	\
 	KineticManager.o	\
 	TestKsolve.o	\
@@ -24,6 +25,7 @@ HEADERS = \
 	../kinetics/Molecule.h \
 	../kinetics/Reaction.h \
 	../kinetics/Enzyme.h \
+	../randnum/randnum.h \
 
 
 # The GSL library (GNU Scientific Library) provides a range of
@@ -44,6 +46,7 @@ $(OBJ)	: $(HEADERS)
 KinSparseMatrix.o:	KinSparseMatrix.h
 KineticHub.o:	RateTerm.h KineticHub.h
 Stoich.o:	RateTerm.h Stoich.h KinSparseMatrix.h Makefile
+GssaStoich.o:	RateTerm.h Stoich.h KinSparseMatrix.h GssaStoich.h Makefile
 Kintegrator.o:	Kintegrator.h
 KineticManager.o:	KineticManager.h
 TestKsolve.o:	KineticManager.h RateTerm.h Stoich.h KinSparseMatrix.h KineticHub.h Makefile
@@ -55,7 +58,7 @@ GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h KinSparseMatrix.h
 endif # !USE_GSL
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $(GSL_FLAGS) -I.. -I../basecode -I../kinetics $< -c
+	$(CXX) $(CFLAGS) $(GSL_FLAGS) -I.. -I../basecode -I../kinetics -I../randnum $< -c
 
 $(TARGET):		$(OBJ) $(GSL_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(GSL_LIBS) 
