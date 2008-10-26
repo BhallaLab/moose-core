@@ -587,9 +587,11 @@ void KineticManager::setupDt( Eref e, double dt )
 		}
 	}
 
-	Id integ( e.id().path() + "/solve/integ" );
-	assert( integ.good() );
-	set< double >( integ(), "internalDt", dt );
+	if ( !stochastic_ ) {
+		Id integ( e.id().path() + "/solve/integ" );
+		assert( integ.good() );
+		set< double >( integ(), "internalDt", dt );
+	}
 
 	double plotDt = 1.0;
 	if ( t2.good() ) {
