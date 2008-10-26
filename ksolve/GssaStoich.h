@@ -32,6 +32,9 @@ class GssaStoich: public Stoich
 		// Functions used by the GillespieIntegrator
 		///////////////////////////////////////////////////
 		void rebuildMatrix( Eref stoich, vector< Id >& ret );
+		void updateDependentRates( const vector< RateTerm* >& deps );
+		unsigned int pickReac();
+		void innerProcessFunc( Eref e, ProcInfo info );
 	private:
 
 		///////////////////////////////////////////////////
@@ -53,9 +56,29 @@ class GssaStoich: public Stoich
 		vector< vector< RateTerm* > > dependency_; 
 
 		/**
+		 * atot is the total propensity of all the reacns in the system
+		 */
+		double atot_;
+
+		/**
 		 * Here we make a nested structure to handle quick lookup
 		 * for which reaction to pick on a given timestep.
 		 */
 		// PropensityTree propensity_;
+
+		/**
+		 * This field is used to avoid recalculation of next time
+		 * when the current calculation has been interrupted by a 
+		 * checkpoint before time t is reached.
+		 */
+		double continuationT_;
+		// unsigned int continuationReac_;
+
+		/**
+		 * transN_ is the transpose of the N_ (stoichiometry) matrix. 
+		 * It is expensive to compute, but once set up gives fast
+		 * operations for a number of steps in the algorithm.
+		 */
+		KinSparseMatrix transN_; 
 };
 #endif // _Stoich_h
