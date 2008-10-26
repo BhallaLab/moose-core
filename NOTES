@@ -7959,3 +7959,9 @@ we need it the other way round. Implemented a transpose operation, and
 then the getGillespieDependence operation in KinSparseMatrix to deal with
 all this. Also did unit tests.
 
+=============================================================================
+26 Oct 2008.
+
+Doing core numerics part of Gillespie SSA implementation. Note that
+Slepoy et al have reported a linear time version in 2008, that would be
+great to use.
