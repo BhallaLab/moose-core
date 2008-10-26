@@ -182,4 +182,6 @@ class Stoich
 		unsigned int nCopy_;
 		unsigned int nCall_;
 };
+
+extern const Cinfo* initStoichCinfo();
 #endif // _Stoich_h
