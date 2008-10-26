@@ -193,7 +193,7 @@ void GssaStoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 	Stoich::rebuildMatrix( stoich, ret );
 	// Stuff here to set up the dependencies.
 	unsigned int numRates = N_.nColumns();
-	assert ( numRates = rates_.size() );
+	assert ( numRates == rates_.size() );
 	transN_.setSize( numRates, N_.nRows() );
 	N_.transpose( transN_ );
 	dependency_.resize( numRates );

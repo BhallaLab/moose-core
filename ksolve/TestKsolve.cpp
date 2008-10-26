@@ -27,6 +27,7 @@ void testKintegrator();
 void testGslIntegrator();
 #endif // USE_GSL
 void testGssa();
+void testKineticManagerGssa();
 
 void testKsolve()
 {
@@ -37,6 +38,7 @@ void testKsolve()
 	testGslIntegrator();
 #endif // USE_GSL
 	testGssa();
+	testKineticManagerGssa();
 }
 
 //////////////////////////////////////////////////////////////////
@@ -747,7 +749,7 @@ void doGslRun( const string& method, Element* integ, Element* stoich,
  * Creates a simple bidirectional reaction a <==> b with rate 1
  * Returns n, the neutral at the base of the reac sys.
  */
-Element* buildReacSys( Eref& aret, Eref& tabret )
+Element* buildReacSys( Eref& aret )
 {
 	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(),
 		Id::scratchId() );
@@ -767,17 +769,6 @@ Element* buildReacSys( Eref& aret, Eref& tabret )
 	ret = Eref( b ).add( "reac", r, "prd" );
 	ASSERT( ret, "adding msg 1" );
 
-	Element* table = Neutral::create( "Table", "table", n->id(),
-		Id::scratchId() );
-
-	ret = Eref( table ).add( "inputRequest", b, "n" );
-	ASSERT( ret, "Making test message" );
-	set< int >( table, "stepmode", 3 );
-	set< int >( table, "xdivs", 1 );
-	set< double >( table, "xmin", 0.0 );
-	set< double >( table, "xmax", 10.0 );
-	set< double >( table, "output", 0.0 );
-	tabret = Eref( table );
 	aret = Eref( a );
 	return n;
 }
@@ -786,11 +777,11 @@ void testGssa()
 {
 	const double RUNTIME = 10.0;
 	const double DT = 0.01;
+	const double NUM_MOLS = 1000;
 	cout << "\nTesting Gssa" << flush;
 	Eref a;
-	Eref tab;
 
-	Element* n = buildReacSys( a, tab );
+	Element* n = buildReacSys( a );
 	
 	///////////////////////////////////////////////////////////
 	// Assign reaction system to a GssaStoich object
@@ -807,24 +798,86 @@ void testGssa()
 	ret = set< string >( stoich, "path", "/n/##" );
 	ASSERT( ret, "Setting path" );
 	SetConn cs( stoich, 0 );
-	SetConn ct( tab );
 	ProcInfoBase p;
 	p.dt_ = DT;
 	p.currTime_ = 0.0;
 
-	set< double >( a, "nInit", 1000.0 );
+	set< double >( a, "nInit", NUM_MOLS );
 	GssaStoich::reinitFunc( &cs );
 
 	double v;
+	double expected;
+	double meandiff = 0.0;
+	double rmsdiff = 0.0;
 	for ( p.currTime_ = 0.0; p.currTime_ < RUNTIME; p.currTime_ += p.dt_ ) {
 		GssaStoich::processFunc( &cs, &p );
-		Table::process( &ct, &p );
+		// Table::process( &ct, &p );
 		get< double >( a, "n", v );
-		cout << p.currTime_ << "	" << v << endl;
+		expected = NUM_MOLS * 0.5 * ( 1.0 + exp( -2 * ( p.currTime_ + p.dt_ ) ) ); 
+		meandiff += expected - v;
+		rmsdiff += ( expected - v ) * ( expected - v );
 	}
+	double numSamples = RUNTIME / DT;
+	// ASSERT( fabs( meandiff / numSamples ) < NUM_MOLS / sqrt( numSamples ), "Testing Gssa" );
+	// I am sure I can put tighter constraints than this,
+	// and also set up something for higher moments of the distrib.
+	ASSERT( sqrt( rmsdiff / NUM_MOLS ) < NUM_MOLS / sqrt( numSamples ), "Testing Gssa" );
 	set( hub, "destroy" );
 	set( stoich, "destroy" );
 	set( n, "destroy" );
+}
+
+/**
+ * Tests how the kinetic manager sets up the GSSA
+ */
+void testKineticManagerGssa()
+{
+	const double RUNTIME = 10.0;
+	const double DT = 0.01;
+	const double NUM_MOLS = 1000;
+	cout << "\nTesting Kinetic manager with Gssa" << flush;
+	Eref a;
+
+	Element* n = buildReacSys( a );
+	
+	///////////////////////////////////////////////////////////
+	// Assign reaction system to a GssaStoich object
+	///////////////////////////////////////////////////////////
+
+	Element* km = Neutral::create( "KineticManager", "km", 
+		Element::root()->id(), Id::scratchId() );
+	// Move the element n onto km.
+	Eref( n ).dropAll( "child" );
+	bool ret = Eref( km ).add( "childSrc", n, "child" );
+	ASSERT( ret, "Kinetic Manager with Gssa: moving model" );
+	set< string >( km, "method", "Gillespie1" );
+	set( km, "resched" );
+	Id stoichId( "/km/solve/stoich" );
+	ASSERT( stoichId.good(), "Testing Kinetic Manager Gssa" );
+	SetConn cs( stoichId.eref() );
+	ProcInfoBase p;
+	p.dt_ = DT;
+	p.currTime_ = 0.0;
+
+	set< double >( a, "nInit", NUM_MOLS );
+	GssaStoich::reinitFunc( &cs );
+
+	double v;
+	double expected;
+	double rmsdiff = 0.0;
+	for ( p.currTime_ = 0.0; p.currTime_ < RUNTIME; p.currTime_ += p.dt_ ) {
+		GssaStoich::processFunc( &cs, &p );
+		// Table::process( &ct, &p );
+		get< double >( a, "n", v );
+		expected = NUM_MOLS * 0.5 * ( 1.0 + exp( -2 * ( p.currTime_ + p.dt_ ) ) ); 
+		rmsdiff += ( expected - v ) * ( expected - v );
+	}
+	double numSamples = RUNTIME / DT;
+	// I am sure I can put tighter constraints than this,
+	// and also set up something for higher moments of the distrib.
+	ASSERT( sqrt( rmsdiff / NUM_MOLS ) < NUM_MOLS / sqrt( numSamples ), "Testing Kinetic Manager with Gssa" );
+	set( n, "destroy" ); /// BUG: Should not have to delete this at all.
+	set( km, "destroy" );
 }
 
 #endif // DO_UNIT_TESTS
