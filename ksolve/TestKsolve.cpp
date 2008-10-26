@@ -18,6 +18,7 @@
 #include "RateTerm.h"
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
+#include "GssaStoich.h"
 
 extern void testKinSparseMatrix(); // Defined in KinSparseMatrix.cpp
 void testStoich();
@@ -25,6 +26,7 @@ void testKintegrator();
 #ifdef USE_GSL
 void testGslIntegrator();
 #endif // USE_GSL
+void testGssa();
 
 void testKsolve()
 {
@@ -34,6 +36,7 @@ void testKsolve()
 #ifdef USE_GSL
 	testGslIntegrator();
 #endif // USE_GSL
+	testGssa();
 }
 
 //////////////////////////////////////////////////////////////////
@@ -690,7 +693,7 @@ void testGslIntegrator()
 	set( hub, "destroy" );
 	set( stoich, "destroy" );
 	set( n, "destroy" );
-#endif
+#endif // ndef WIN32
 }
 
 void doGslRun( const string& method, Element* integ, Element* stoich,
@@ -735,9 +738,93 @@ void doGslRun( const string& method, Element* integ, Element* stoich,
 	// static_cast< Stoich* >( stoich->data() )->runStats();
 	// set< string >( table, "print", "kinteg.plot" );
 	ASSERT ( tot < EPSILON, "Diffusion between source and sink by GslIntegrator");
-#endif
+#endif // ndef WIN32
 }
 
-#endif // USE_GSL
+#endif USE_GSL
 
-#endif
+/**
+ * Creates a simple bidirectional reaction a <==> b with rate 1
+ * Returns n, the neutral at the base of the reac sys.
+ */
+Element* buildReacSys( Eref& aret, Eref& tabret )
+{
+	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(),
+		Id::scratchId() );
+	assert( n != 0 );
+	Element* a = Neutral::create( "Molecule", "a", n->id(), Id::scratchId() );
+	assert( a != 0 );
+	set< double >( a, "nInit", 1.0 );
+	Element* b = Neutral::create( "Molecule", "b", n->id(), Id::scratchId() );
+	assert( b != 0 );
+	set< double >( b, "nInit", 0.0 );
+	Element* r = Neutral::create( "Reaction", "r", n->id(), Id::scratchId() );
+	assert( r != 0 );
+	set< double >( r, "kf", 1.0 );
+	set< double >( r, "kb", 1.0 );
+	bool ret = Eref( a ).add( "reac", r, "sub" );
+	ASSERT( ret, "adding msg 0" );
+	ret = Eref( b ).add( "reac", r, "prd" );
+	ASSERT( ret, "adding msg 1" );
+
+	Element* table = Neutral::create( "Table", "table", n->id(),
+		Id::scratchId() );
+
+	ret = Eref( table ).add( "inputRequest", b, "n" );
+	ASSERT( ret, "Making test message" );
+	set< int >( table, "stepmode", 3 );
+	set< int >( table, "xdivs", 1 );
+	set< double >( table, "xmin", 0.0 );
+	set< double >( table, "xmax", 10.0 );
+	set< double >( table, "output", 0.0 );
+	tabret = Eref( table );
+	aret = Eref( a );
+	return n;
+}
+
+void testGssa()
+{
+	const double RUNTIME = 10.0;
+	const double DT = 0.01;
+	cout << "\nTesting Gssa" << flush;
+	Eref a;
+	Eref tab;
+
+	Element* n = buildReacSys( a, tab );
+	
+	///////////////////////////////////////////////////////////
+	// Assign reaction system to a GssaStoich object
+	///////////////////////////////////////////////////////////
+
+	Element* stoich = Neutral::create( "GssaStoich", "s", Element::root()->id(),
+		Id::scratchId() );
+	Element* hub = Neutral::create( "KineticHub", "hub", Element::root()->id(),
+		Id::scratchId() );
+
+	bool ret = Eref( stoich ).add( "hub", hub, "hub" );
+	ASSERT( ret, "connecting stoich to hub" );
+
+	ret = set< string >( stoich, "path", "/n/##" );
+	ASSERT( ret, "Setting path" );
+	SetConn cs( stoich, 0 );
+	SetConn ct( tab );
+	ProcInfoBase p;
+	p.dt_ = DT;
+	p.currTime_ = 0.0;
+
+	set< double >( a, "nInit", 1000.0 );
+	GssaStoich::reinitFunc( &cs );
+
+	double v;
+	for ( p.currTime_ = 0.0; p.currTime_ < RUNTIME; p.currTime_ += p.dt_ ) {
+		GssaStoich::processFunc( &cs, &p );
+		Table::process( &ct, &p );
+		get< double >( a, "n", v );
+		cout << p.currTime_ << "	" << v << endl;
+	}
+	set( hub, "destroy" );
+	set( stoich, "destroy" );
+	set( n, "destroy" );
+}
+
+#endif // DO_UNIT_TESTS
