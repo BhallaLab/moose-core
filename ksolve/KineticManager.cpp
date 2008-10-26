@@ -445,10 +445,42 @@ void eeSetup( Eref e )
 Id gillespieSetup( Eref e, const string& method )
 {
 	cout << "doing Gillespie setup\n";
-	return Id();
+	Id solveId;
+	if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" ) ) {
+		if ( solveId.good() ) {
+			Id gslId;
+			if ( lookupGet< Id, string >( 
+				solveId(), "lookupChild", gslId, "GslIntegrator" ) ) {
+				if ( gslId.good() )
+					return solveId;
+				else
+					set( solveId(), "destroy" );
+			} else {
+				// have to clear out the old solver and make a new one.
+				set( solveId(), "destroy" );
+			}
+		}
+	}
+	Element* solve = Neutral::create( "Neutral", "solve", e.id(),
+		Id::scratchId() );
+	solveId = solve->id();
+	assert( solveId.good() );
+
+	Element* ks = Neutral::create( "GssaStoich", "stoich", solve->id(),
+		Id::scratchId() );
+	assert( ks != 0 );
+	Element* kh = Neutral::create( "KineticHub", "hub", solve->id(),
+		Id::scratchId() );
+	assert( kh != 0 );
+
+	Eref( ks ).add( "hub", kh, "hub" );
+
+	set< string >( ks, "method", method );
+	string simpath = e.id().path() + "/##[]";
+	set< string >( ks, "path", simpath );
+	return solveId;
 }
 
-// Returns the solver set up for GSL integration, on the element e
 Id smoldynSetup( Eref e, const string& method, double recommendedDt )
 {
 	if ( Cinfo::find( "SmoldynHub" ) == 0 ) // No Smoldyn defined

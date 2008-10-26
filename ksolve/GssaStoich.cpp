@@ -18,23 +18,21 @@
 
 const Cinfo* initGssaStoichCinfo()
 {
-	/**
-	 * Messages that connect to the KineticIntegrator
-	 */
-	static Finfo* integrateShared[] =
+	static Finfo* processShared[] =
 	{
-		new DestFinfo( "reinit", Ftype0::global(),
-			&Stoich::reinitFunc ),
-		new DestFinfo( "integrate",
-			Ftype2< vector< double >* , double >::global(),
-			RFCAST( &Stoich::integrateFunc ) ),
-		new SrcFinfo( "allocate",
-			Ftype1< vector< double >* >::global() ),
+		new DestFinfo( "process",
+			Ftype1< ProcInfo >::global(),
+			RFCAST( &GssaStoich::processFunc )),
+		new DestFinfo( "reinit",
+			Ftype1< ProcInfo >::global(),
+			RFCAST( &GssaStoich::reinitFunc )),
 	};
+
+	static Finfo* process = new SharedFinfo( "process", processShared,
+		sizeof( processShared ) / sizeof( Finfo* ) );
 
 	/**
 	 * Messages that connect to the GssaIntegrator object
-	 */
 	static Finfo* gssaShared[] =
 	{
 		new DestFinfo( "reinit", Ftype0::global(),
@@ -44,6 +42,7 @@ const Cinfo* initGssaStoichCinfo()
 		new SrcFinfo( "assignY",
 			Ftype2< double, unsigned int >::global() ),
 	};
+	 */
 
 	/**
 	 * These are the fields of the stoich class
@@ -53,6 +52,11 @@ const Cinfo* initGssaStoichCinfo()
 		///////////////////////////////////////////////////////
 		// Field definitions
 		///////////////////////////////////////////////////////
+		new ValueFinfo( "method", 
+			ValueFtype1< string >::global(),
+			GFCAST( &GssaStoich::getMethod ), 
+			RFCAST( &GssaStoich::setMethod )
+		),
 		///////////////////////////////////////////////////////
 		// MsgSrc definitions
 		///////////////////////////////////////////////////////
@@ -62,11 +66,15 @@ const Cinfo* initGssaStoichCinfo()
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
+/*
 		new SharedFinfo( "integrate", integrateShared, 
 				sizeof( integrateShared )/ sizeof( Finfo* ) ),
 		new SharedFinfo( "gssa", gssaShared, 
 				sizeof( gssaShared )/ sizeof( Finfo* ) ),
+*/
+		process,
 	};
+	static SchedInfo schedInfo[] = { { process, 0, 0 } };
 
 	static Cinfo gssaStoichCinfo(
 		"GssaStoich",
@@ -75,7 +83,8 @@ const Cinfo* initGssaStoichCinfo()
 		initNeutralCinfo(),
 		stoichFinfos,
 		sizeof( stoichFinfos )/sizeof(Finfo *),
-		ValueFtype1< Stoich >::global()
+		ValueFtype1< GssaStoich >::global(),
+			schedInfo, 1
 	);
 
 	return &gssaStoichCinfo;
@@ -90,12 +99,33 @@ static const Cinfo* gssaStoichCinfo = initGssaStoichCinfo();
 GssaStoich::GssaStoich()
 	: Stoich()
 {
-	;
+	useOneWayReacs_ = 1;
 }
 		
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
+
+string GssaStoich::getMethod( Eref e )
+{
+	return static_cast< const GssaStoich* >( e.data() )->method_;
+}
+void GssaStoich::setMethod( const Conn* c, string method )
+{
+	static_cast< GssaStoich* >( c->data() )->innerSetMethod( method );
+}
+
+void GssaStoich::innerSetMethod( const string& method )
+{
+	method_ = method;
+	cout << "in void GssaStoich::innerSetMethod( " << method << ") \n";
+/*
+	gssaMethod = G1;
+	if ( method == "tauLeap" ) {
+		gssaMethod = TauLeap;
+	}
+*/
+}
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
@@ -118,12 +148,14 @@ void GssaStoich::reinitFunc( const Conn* c )
 	}
 }
 
+/*
 // static func
 void GssaStoich::integrateFunc( const Conn* c, vector< double >* v, double dt )
 {
 	// GssaStoich* s = static_cast< GssaStoich* >( c->data() );
 	// s->updateRates( v, dt );
 }
+*/
 
 void GssaStoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 {
@@ -136,18 +168,6 @@ void GssaStoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 	dependency_.resize( numRates );
 	for ( unsigned int i = 0; i < numRates; ++i ) {
 		transN_.getGillespieDependence( i, dependency_[ i ] );
-/*
-
-		vector< unsigned int > depIndex;
-		vector< RateTerm* > deps;
-		transN_.getGillespieDependence( i, depIndex );
-		for ( vector< unsigned int >::iterator j = depIndex.begin();
-			j != depIndex.end(); ++j ) {
-			assert( *j < numRates );
-			deps.push_back( rates_[ *j ] );
-		}
-		dependency_.push_back( deps );
-*/
 	}
 }
 
@@ -163,6 +183,12 @@ unsigned int GssaStoich::pickReac()
 		if ( r < ( sum += *i ) )
 			return static_cast< unsigned int >( i - v_.begin() );
 	return v_.size();
+}
+
+void GssaStoich::processFunc( const Conn* c, ProcInfo info )
+{
+	static_cast< GssaStoich* >( c->data() )->
+		innerProcessFunc( c->target(), info );
 }
 
 void GssaStoich::innerProcessFunc( Eref e, ProcInfo info )
