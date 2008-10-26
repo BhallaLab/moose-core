@@ -7981,3 +7981,13 @@ Implemented a unit test. Much to my astonishment, after it cleared assorted
 assertion failures while setting things up, the actual run seemed to give the
 right sort of answer the first time it ran. The unit test needs further
  cleaning (for example, to do stats on the output rather than print it out).
+
+Checked in as revision 884: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Implemented a unit test for setting up of solver through KineticManager.
+This was remarkably unpleasant, worked through numerous bugs. Remaining
+fairly major issue is that the deletion of the children of KineticManager is 
+unclean, and as far as I can tell it leaves dangling half-messages on the 
+clock ticks. Hacked around it by first deleting the children of the 
+KineticManager and then the manager itself, so as to clear unit tests.
+
