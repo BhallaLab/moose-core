@@ -7972,5 +7972,12 @@ Fixed up what should be last part of core numerics, the update of the dependent
 rates. This will need to be rethought if we do a tree search for propensity
 to speed up the calculations, since the entries in the tree will then need
 updating as well. No testing yet.
-
 Checked in as revision 882: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Added code for solver setup. Yet to test.
+Checked in as revision 883: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Implemented a unit test. Much to my astonishment, after it cleared assorted
+assertion failures while setting things up, the actual run seemed to give the
+right sort of answer the first time it ran. The unit test needs further
+ cleaning (for example, to do stats on the output rather than print it out).
