@@ -32,7 +32,7 @@ class GssaStoich: public Stoich
 		// Functions used by the GillespieIntegrator
 		///////////////////////////////////////////////////
 		void rebuildMatrix( Eref stoich, vector< Id >& ret );
-		void updateDependentRates( const vector< RateTerm* >& deps );
+		void updateDependentRates( const vector< unsigned int >& deps );
 		unsigned int pickReac();
 		void innerProcessFunc( Eref e, ProcInfo info );
 	private:
@@ -52,8 +52,11 @@ class GssaStoich: public Stoich
 		 * This vector has one entry for each RateTerm. The entry
 		 * points to a list of RateTerms that must be updated
 		 * whenever the original RateTerm fires.
+		 * We use indexing rather than direct pointers to look up the
+		 * RateTerms because we also need to look up v_ entries, and
+		 * possibly additional entries for the propensity tree.
 		 */
-		vector< vector< RateTerm* > > dependency_; 
+		vector< vector< unsigned int > > dependency_; 
 
 		/**
 		 * atot is the total propensity of all the reacns in the system
