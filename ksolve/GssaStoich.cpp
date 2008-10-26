@@ -10,6 +10,7 @@
 #include <map>
 #include <algorithm>
 #include "moose.h"
+#include "../element/Wildcard.h"
 #include "RateTerm.h"
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
@@ -47,7 +48,7 @@ const Cinfo* initGssaStoichCinfo()
 	/**
 	 * These are the fields of the stoich class
 	 */
-	static Finfo* stoichFinfos[] =
+	static Finfo* gssaStoichFinfos[] =
 	{
 		///////////////////////////////////////////////////////
 		// Field definitions
@@ -56,6 +57,11 @@ const Cinfo* initGssaStoichCinfo()
 			ValueFtype1< string >::global(),
 			GFCAST( &GssaStoich::getMethod ), 
 			RFCAST( &GssaStoich::setMethod )
+		),
+		new ValueFinfo( "path", 
+			ValueFtype1< string >::global(),
+			GFCAST( &GssaStoich::getPath ), 
+			RFCAST( &GssaStoich::setPath )
 		),
 		///////////////////////////////////////////////////////
 		// MsgSrc definitions
@@ -80,9 +86,9 @@ const Cinfo* initGssaStoichCinfo()
 		"GssaStoich",
 		"Upinder S. Bhalla, 2008, NCBS",
 		"GssaStoich: Gillespie Stochastic Simulation Algorithm object.\nClosely based on the Stoich object and inherits its \nhandling functions for constructing the matrix. Sets up stoichiometry matrix based calculations from a\nwildcard path for the reaction system.\nKnows how to compute derivatives for most common\nthings, also knows how to handle special cases where the\nobject will have to do its own computation. Generates a\nstoichiometry matrix, which is useful for lots of other\noperations as well.",
-		initNeutralCinfo(),
-		stoichFinfos,
-		sizeof( stoichFinfos )/sizeof(Finfo *),
+		initStoichCinfo(),
+		gssaStoichFinfos,
+		sizeof( gssaStoichFinfos )/sizeof(Finfo *),
 		ValueFtype1< GssaStoich >::global(),
 			schedInfo, 1
 	);
@@ -97,7 +103,7 @@ static const Cinfo* gssaStoichCinfo = initGssaStoichCinfo();
 ///////////////////////////////////////////////////
 
 GssaStoich::GssaStoich()
-	: Stoich()
+	: Stoich(), atot_( 0.0 ), t_( 0.0 )
 {
 	useOneWayReacs_ = 1;
 }
@@ -126,6 +132,29 @@ void GssaStoich::innerSetMethod( const string& method )
 	}
 */
 }
+
+string GssaStoich::getPath( Eref e ) {
+	return static_cast< const GssaStoich* >( e.data() )->path_;
+}
+
+void GssaStoich::setPath( const Conn* c, string value ) {
+	static_cast< GssaStoich* >( c->data() )->
+	localSetPath( c->target(), value );
+}
+
+void GssaStoich::localSetPath( Eref stoich, const string& value )
+{
+	path_ = value;
+	vector< Id > ret;
+	wildcardFind( path_, ret );
+	clear( stoich );
+	if ( ret.size() > 0 ) {
+		rebuildMatrix( stoich, ret );
+	} else {
+		cout << "No objects to simulate in path '" << value << "'\n";
+	}
+}
+
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
@@ -146,6 +175,8 @@ void GssaStoich::reinitFunc( const Conn* c )
 		else
 			*i = base + 1.0;
 	}
+	s->t_ = 0.0;
+	s->updateAllRates();
 }
 
 /*
@@ -193,31 +224,30 @@ void GssaStoich::processFunc( const Conn* c, ProcInfo info )
 
 void GssaStoich::innerProcessFunc( Eref e, ProcInfo info )
 {
-	double t = info->currTime_;
-	double nextt = t + info->dt_;
-	while ( t < nextt ) {
+	double nextt = info->currTime_ + info->dt_;
+	while ( t_ < nextt ) {
 		// Figure out when the reaction will occur. The atot_
 		// calculation actually estimates time for which reaction will
 		// NOT occur, as atot_ sums all propensities.
 		if ( atot_ <= 0.0 ) // Nothing is going to happen.
 			break;
+		if ( t_ > 0.0 ) {
+			unsigned int rindex = pickReac(); // Does a randnum call
+			if ( rindex == rates_.size() ) 
+				break;
+			transN_.fireReac( rindex, S_ );
+			updateDependentRates( dependency_[ rindex ] );
+		}
 		double dt = ( 1.0 / atot_ ) * log( 1.0 / mtrand() );
-		t += dt;
-		if ( t >= nextt ) { // bail out if we run out of time.
-			// We save the t and rindex past the checkpoint, so
+		t_ += dt;
+		if ( t_ >= nextt ) { // bail out if we run out of time.
+			// We save the t past the checkpoint, so
 			// as to continue if needed. However, checkpoint
 			// may also involve changes to rates, in which
 			// case these values may be invalidated. I worry
 			// about an error here.
-			continuationT_ = t;
-			// continuationReac_ = rindex;
 			break;
 		}
-		unsigned int rindex = pickReac(); // Does the first randnum call
-		if ( rindex == rates_.size() ) 
-			break;
-		transN_.fireReac( rindex, S_ );
-		updateDependentRates( dependency_[ rindex ] );
 	}
 }
 
@@ -227,5 +257,13 @@ void GssaStoich::updateDependentRates( const vector< unsigned int >& deps )
 		i != deps.end(); ++i ) {
 		atot_ -= v_[ *i ];
 		atot_ += ( v_[ *i ] = ( *rates_[ *i ] )() );
+	}
+}
+
+void GssaStoich::updateAllRates()
+{
+	atot_ = 0.0;
+	for( unsigned int i = 0; i < rates_.size(); ++i ) {
+		atot_ += ( v_[ i ] = ( *rates_[ i ] )() );
 	}
 }
