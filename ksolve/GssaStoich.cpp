@@ -133,9 +133,11 @@ void GssaStoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 	assert ( numRates = rates_.size() );
 	transN_.setSize( numRates, N_.nRows() );
 	N_.transpose( transN_ );
-	dependency_.resize( 0 );
-	dependency_.reserve( numRates );
+	dependency_.resize( numRates );
 	for ( unsigned int i = 0; i < numRates; ++i ) {
+		transN_.getGillespieDependence( i, dependency_[ i ] );
+/*
+
 		vector< unsigned int > depIndex;
 		vector< RateTerm* > deps;
 		transN_.getGillespieDependence( i, depIndex );
@@ -145,6 +147,7 @@ void GssaStoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 			deps.push_back( rates_[ *j ] );
 		}
 		dependency_.push_back( deps );
+*/
 	}
 }
 
@@ -192,9 +195,11 @@ void GssaStoich::innerProcessFunc( Eref e, ProcInfo info )
 	}
 }
 
-void GssaStoich::updateDependentRates( const vector< RateTerm* >& deps )
+void GssaStoich::updateDependentRates( const vector< unsigned int >& deps )
 {
-	for( vector< RateTerm* >::const_iterator i = deps.begin(); 
+	for( vector< unsigned int >::const_iterator i = deps.begin(); 
 		i != deps.end(); ++i ) {
+		atot_ -= v_[ *i ];
+		atot_ += ( v_[ *i ] = ( *rates_[ *i ] )() );
 	}
 }
