@@ -59,9 +59,16 @@ class KinSparseMatrix
 		 */
 		void transpose( KinSparseMatrix& ret ) const;
 
+		/**
+		 * Fires a stochastic reaction: It undergoes a single transition
+		 * This operation updates the mol concs due to the reacn.
+		 */
+		void fireReac( unsigned int reacIndex, vector< double >& S ) const;
+		
+
 	private:
-		unsigned int nrows_;
-		unsigned int ncolumns_;
+		unsigned int nrows_; /// Number of molecules in a kinetc system.
+		unsigned int ncolumns_; /// Number of reactions.
 		vector< int > N_;	/// Non-zero entries in the KinSparseMatrix.
 
 		/* 
