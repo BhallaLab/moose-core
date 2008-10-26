@@ -24,10 +24,19 @@ class GssaStoich: public Stoich
 		// Msg Dest function definitions
 		///////////////////////////////////////////////////
 		static void reinitFunc( const Conn* c );
+		static void processFunc( const Conn* c, ProcInfo info );
+/*
 		static void integrateFunc( 
 			const Conn* c, vector< double >* v, double dt );
-		void clear( Eref stoich );
+*/
+		//void clear( Eref stoich );
 
+		///////////////////////////////////////////////////
+		// Field access functions.
+		///////////////////////////////////////////////////
+		static string getMethod( Eref e );
+		static void setMethod( const Conn* c, string method );
+		void innerSetMethod( const string& method );
 		///////////////////////////////////////////////////
 		// Functions used by the GillespieIntegrator
 		///////////////////////////////////////////////////
@@ -47,6 +56,13 @@ class GssaStoich: public Stoich
 		///////////////////////////////////////////////////
 		// Internal fields.
 		///////////////////////////////////////////////////
+
+		/**
+		 * Specifies method to use for calculation. Currently
+		 * only G1, but also plan tau-leap and an adaptive
+		 * one.
+		 */
+		 string method_;
 
 		/**
 		 * This vector has one entry for each RateTerm. The entry
