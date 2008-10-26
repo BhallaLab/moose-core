@@ -37,11 +37,15 @@ class GssaStoich: public Stoich
 		static string getMethod( Eref e );
 		static void setMethod( const Conn* c, string method );
 		void innerSetMethod( const string& method );
+		static string getPath( Eref e );
+		static void setPath( const Conn* c, string value );
+		void localSetPath( Eref stoich, const string& value );
 		///////////////////////////////////////////////////
 		// Functions used by the GillespieIntegrator
 		///////////////////////////////////////////////////
 		void rebuildMatrix( Eref stoich, vector< Id >& ret );
 		void updateDependentRates( const vector< unsigned int >& deps );
+		void updateAllRates();
 		unsigned int pickReac();
 		void innerProcessFunc( Eref e, ProcInfo info );
 	private:
@@ -90,8 +94,15 @@ class GssaStoich: public Stoich
 		 * when the current calculation has been interrupted by a 
 		 * checkpoint before time t is reached.
 		 */
-		double continuationT_;
-		// unsigned int continuationReac_;
+		double t_;
+
+		/**
+		 * Whenever an external input has invalidated the
+		 * stored t_ value and the rates, we need to redo the whole
+		 * lot, rather than rely on the stored value.
+		 * Not activated yet.
+		 */
+		bool redoStep_;
 
 		/**
 		 * transN_ is the transpose of the N_ (stoichiometry) matrix. 
@@ -99,5 +110,6 @@ class GssaStoich: public Stoich
 		 * operations for a number of steps in the algorithm.
 		 */
 		KinSparseMatrix transN_; 
+
 };
 #endif // _Stoich_h
