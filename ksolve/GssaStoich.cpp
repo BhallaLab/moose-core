@@ -121,13 +121,80 @@ void GssaStoich::reinitFunc( const Conn* c )
 // static func
 void GssaStoich::integrateFunc( const Conn* c, vector< double >* v, double dt )
 {
-	GssaStoich* s = static_cast< GssaStoich* >( c->data() );
+	// GssaStoich* s = static_cast< GssaStoich* >( c->data() );
 	// s->updateRates( v, dt );
 }
 
-// Need to clean out existing stuff first.
 void GssaStoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 {
 	Stoich::rebuildMatrix( stoich, ret );
 	// Stuff here to set up the dependencies.
+	unsigned int numRates = N_.nColumns();
+	assert ( numRates = rates_.size() );
+	transN_.setSize( numRates, N_.nRows() );
+	N_.transpose( transN_ );
+	dependency_.resize( 0 );
+	dependency_.reserve( numRates );
+	for ( unsigned int i = 0; i < numRates; ++i ) {
+		vector< unsigned int > depIndex;
+		vector< RateTerm* > deps;
+		transN_.getGillespieDependence( i, depIndex );
+		for ( vector< unsigned int >::iterator j = depIndex.begin();
+			j != depIndex.end(); ++j ) {
+			assert( *j < numRates );
+			deps.push_back( rates_[ *j ] );
+		}
+		dependency_.push_back( deps );
+	}
+}
+
+unsigned int GssaStoich::pickReac()
+{
+	double r = mtrand() * atot_;
+	double sum = 0.0;
+	// This is an inefficient way to do it. Can easily get to 
+	// log time or thereabouts by doing one or two levels of 
+	// subsidiary tables. Slepoy, Thompson and Plimpton 2008
+	// report a linear time version.
+	for ( vector< double >::iterator i = v_.begin(); i != v_.end(); ++i )
+		if ( r < ( sum += *i ) )
+			return static_cast< unsigned int >( i - v_.begin() );
+	return v_.size();
+}
+
+void GssaStoich::innerProcessFunc( Eref e, ProcInfo info )
+{
+	double t = info->currTime_;
+	double nextt = t + info->dt_;
+	while ( t < nextt ) {
+		// Figure out when the reaction will occur. The atot_
+		// calculation actually estimates time for which reaction will
+		// NOT occur, as atot_ sums all propensities.
+		if ( atot_ <= 0.0 ) // Nothing is going to happen.
+			break;
+		double dt = ( 1.0 / atot_ ) * log( 1.0 / mtrand() );
+		t += dt;
+		if ( t >= nextt ) { // bail out if we run out of time.
+			// We save the t and rindex past the checkpoint, so
+			// as to continue if needed. However, checkpoint
+			// may also involve changes to rates, in which
+			// case these values may be invalidated. I worry
+			// about an error here.
+			continuationT_ = t;
+			// continuationReac_ = rindex;
+			break;
+		}
+		unsigned int rindex = pickReac(); // Does the first randnum call
+		if ( rindex == rates_.size() ) 
+			break;
+		transN_.fireReac( rindex, S_ );
+		updateDependentRates( dependency_[ rindex ] );
+	}
+}
+
+void GssaStoich::updateDependentRates( const vector< RateTerm* >& deps )
+{
+	for( vector< RateTerm* >::const_iterator i = deps.begin(); 
+		i != deps.end(); ++i ) {
+	}
 }
