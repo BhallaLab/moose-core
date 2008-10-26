@@ -7965,3 +7965,10 @@ all this. Also did unit tests.
 Doing core numerics part of Gillespie SSA implementation. Note that
 Slepoy et al have reported a linear time version in 2008, that would be
 great to use.
+
+Checked in as revision 881: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Fixed up what should be last part of core numerics, the update of the dependent
+rates. This will need to be rethought if we do a tree search for propensity
+to speed up the calculations, since the entries in the tree will then need
+updating as well. No testing yet.
