@@ -21,6 +21,7 @@
 #include "Enzyme.h"
 #include "ThisFinfo.h"
 #include "SolveFinfo.h"
+#include "DeletionMarkerFinfo.h"
 #include "../utility/utility.h"
 
 void dummyStringFunc( const Conn* c, string s )
@@ -1577,7 +1578,12 @@ void redirectDynamicMessages( Eref e )
 	for( i = flist.begin(); i != flist.end(); ++i )
 	{
 		const DynamicFinfo *df = dynamic_cast< const DynamicFinfo* >( *i );
-		assert( df != 0 );
+		if ( df == 0 ) {
+			const DeletionMarkerFinfo *delf = dynamic_cast< const DeletionMarkerFinfo* >( *i );
+			assert( delf != 0 );
+			// Don't need to do any messaging cleanup here.
+			continue;
+		}
 		vector< Eref > srcElements;
 		vector< const Finfo* > srcFinfos;
 		for ( unsigned int j = 0; j < e.e->numEntries(); ++j ) {
