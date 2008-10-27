@@ -22,7 +22,6 @@ useclock /music/INDATA 0
 useclock /music 1
 
 reset
-call /music reinitialize
 
 step 0.8 -t
 quit
