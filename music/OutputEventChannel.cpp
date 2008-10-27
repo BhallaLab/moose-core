@@ -28,13 +28,15 @@ const Cinfo* initOutputEventChannelCinfo()
       ///////////////////////////////////////////////////////
       // MsgSrc definitions
       ///////////////////////////////////////////////////////
-      // Sends out a trigger for an event. The time is not
-      // sent - everyone knows the time.
-      new DestFinfo( "event", Ftype1< double >::global() ,
+	  /**
+	   * This field receives event messages in the form of time of an action
+	   * potential. It is called 'synapse' because a similar field on SynChan
+	   * objects is also called synapse.
+	   */
+      new DestFinfo( "synapse", Ftype1< double >::global() ,
                      RFCAST( &OutputEventChannel::insertEvent)),      
       new DestFinfo("initialise", 
-                    Ftype2< unsigned int, 
-                    MUSIC::event_output_port* >::global(),
+                    Ftype2< unsigned int, MUSIC::event_output_port* >::global(),
                     RFCAST( &OutputEventChannel::initialise))
 
     };
@@ -63,8 +65,8 @@ void OutputEventChannel::insertEvent(const Conn* c, double time)
 void OutputEventChannel::innerInsertEvent(double time)
 {
   mPort_->insert_event(time, localId_);
-  cerr << "event sent @ " << time << endl;
-  cerr << "id: " << localId_ << endl;
+  //~ cerr << "event sent @ " << time << endl;
+  //~ cerr << "id: " << localId_ << endl;
 }
 
 void OutputEventChannel::initialise(const Conn* c, unsigned int id, 
