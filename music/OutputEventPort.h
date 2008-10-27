@@ -23,6 +23,7 @@ class OutputEventPort
                               MUSIC::event_output_port* mPort);
 
   static unsigned int getWidth( Eref e );
+  static unsigned int getIsConnected( Eref e);
 
   static int getMaxBuffered(Eref e);
   static void setMaxBuffered(const Conn* c, int maxBuffered);
