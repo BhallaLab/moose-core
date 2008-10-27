@@ -38,6 +38,10 @@ const Cinfo* initOutputEventPortCinfo()
 
   static Finfo* outputEventPortFinfos[] =
     {
+      new ValueFinfo( "isConnected", ValueFtype1< unsigned int >::global(),
+                      GFCAST( &OutputEventPort::getIsConnected ),
+                      &dummyFunc
+                      ),
       new ValueFinfo( "width", ValueFtype1< unsigned int >::global(),
                       GFCAST( &OutputEventPort::getWidth ),
                       &dummyFunc
@@ -53,7 +57,15 @@ const Cinfo* initOutputEventPortCinfo()
                      ),
       process
     };
-
+  
+  /**
+   * Music ports should be initialized before the MusicManager gets initialized.
+   * In the default autoschedule,
+   * 
+   * By default, /music is connected to clock 0, stage 1. In some cases it is
+   * possible to attach /music to a slow clock.
+   */
+  static SchedInfo schedInfo[] = { { process, 0, 0 } };
   
   static Cinfo outputEventPortCinfo("OutputEventPort",
                                     "Niraj Dudani and Johannes Hjorth",
@@ -61,8 +73,9 @@ const Cinfo* initOutputEventPortCinfo()
                                     initNeutralCinfo(),
                                     outputEventPortFinfos,
                                     sizeof( outputEventPortFinfos ) / sizeof( Finfo* ),
-                                    ValueFtype1< OutputEventPort >::global() );
-  
+                                    ValueFtype1< OutputEventPort >::global(),
+                                    schedInfo, 1 );
+
   
   return &outputEventPortCinfo;
 
@@ -81,7 +94,7 @@ void OutputEventPort::reinitFunc( const Conn* c, ProcInfo p )
 void OutputEventPort::innerReinitFunc() 
 {
   // Map the output from MUSIC to data channels local to this process
-cerr << "Port connected? " << mPort_->is_connected() << endl;
+//~ cerr << "Port connected? " << mPort_->is_connected() << endl;
   MUSIC::linear_index iMap(myOffset_, myWidth_);
   mPort_->map(&iMap, maxBuffered_);
 
@@ -124,6 +137,12 @@ void OutputEventPort::innerInitialiseFunc( Eref e,
         (channel, "initialise", i, mPort);
     }
 
+}
+
+unsigned int OutputEventPort::getIsConnected( Eref e ) 
+{
+	return static_cast < OutputEventPort* > (e.data())->
+		mPort_->is_connected();
 }
 
 unsigned int OutputEventPort::getWidth( Eref e ) 
