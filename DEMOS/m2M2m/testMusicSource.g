@@ -9,7 +9,7 @@ call /music addPort out event UTDATA
 create TimeTable /tt
 call /tt load "testtider.txt" 0
 
-addmsg /tt/event /music/UTDATA/channel[0]/event
+addmsg /tt/event /music/UTDATA/channel[0]/synapse
 
 setclock 0 0.01 0
 setclock 1 0.01 1
@@ -17,7 +17,6 @@ useclock /music/UTDATA 0
 useclock /music 1
 
 reset
-call /music reinitialize
 
 step 1 -t 
 
