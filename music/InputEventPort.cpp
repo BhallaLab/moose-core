@@ -41,6 +41,10 @@ const Cinfo* initInputEventPortCinfo()
 
   static Finfo* inputEventPortFinfos[] =
     {
+      new ValueFinfo( "isConnected", ValueFtype1< unsigned int >::global(),
+                      GFCAST( &InputEventPort::getIsConnected ),
+                      &dummyFunc
+                      ),
       new ValueFinfo( "width", ValueFtype1< unsigned int >::global(),
                       GFCAST( &InputEventPort::getWidth ),
                       &dummyFunc
@@ -54,8 +58,7 @@ const Cinfo* initInputEventPortCinfo()
                       RFCAST( &InputEventPort::setMaxBuffered )
                       ),
       new DestFinfo( "initialise", 
-                     Ftype3< unsigned int, unsigned int, 
-                             MUSIC::event_input_port* >::global(),
+                     Ftype3< unsigned int, unsigned int, MUSIC::event_input_port* >::global(),
                      RFCAST( &InputEventPort::initialiseFunc )
                      ),
       //////////////////////////////////////////////////////////////////
@@ -65,6 +68,7 @@ const Cinfo* initInputEventPortCinfo()
 
     };
 
+  static SchedInfo schedInfo[] = { { process, 0, 0 } };
   
   static Cinfo inputEventPortCinfo("InputEventPort",
                              "Niraj Dudani and Johannes Hjorth",
@@ -72,8 +76,9 @@ const Cinfo* initInputEventPortCinfo()
                              initNeutralCinfo(),
                              inputEventPortFinfos,
                              sizeof( inputEventPortFinfos ) / sizeof( Finfo* ),
-                             ValueFtype1< InputEventPort >::global() );
-  
+                             ValueFtype1< InputEventPort >::global(),
+                             schedInfo, 1 );
+
   
   return &inputEventPortCinfo;
 
@@ -104,7 +109,7 @@ void InputEventPort::innerReinitFunc()
 void InputEventPort::operator () ( double t, MUSIC::local_index id ) 
 {
   int localId = id;
-cerr << " Event received: time: " << t << " id: " << localId << endl;
+//~ cerr << " Event received: time: " << t << " id: " << localId << endl;
   send1 < double > ( channels_[localId](), eventSlot, t );
 }
 
@@ -139,6 +144,12 @@ void InputEventPort::innerInitialiseFunc( Eref e,
       channels_.push_back(channel->id());
     }
 
+}
+
+unsigned int InputEventPort::getIsConnected( Eref e ) 
+{
+	return static_cast < InputEventPort* > (e.data())->
+		mPort_->is_connected();
 }
 
 unsigned int InputEventPort::getWidth( Eref e ) 
