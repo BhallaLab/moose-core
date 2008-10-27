@@ -25,6 +25,7 @@ class InputEventPort : public MUSIC::event_handler_local_index
                               MUSIC::event_input_port* mPort);
 
   static unsigned int getWidth( Eref e);
+  static unsigned int getIsConnected( Eref e);
 
   static double getAccLatency(Eref e);
   static void setAccLatency(const Conn* c, double accLatency);

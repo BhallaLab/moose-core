@@ -80,7 +80,7 @@ const Cinfo* initMusicCinfo()
 			RFCAST( &Music::addPort ) ),
 	};
 	
-//	static SchedInfo schedInfo[] = { { process, 0, 1 } };
+	//~ static SchedInfo schedInfo[] = { { process, 0, 1 } };
 	
 	static Cinfo musicCinfo(
 		"Music",
@@ -204,7 +204,8 @@ void Music::innerAddPort (
 
     unsigned int myOffset = myRank * avgWidth;
 
-    set< unsigned int >(port,"initialise", myWidth, myOffset, mPort);
+    set< unsigned int, unsigned int, MUSIC::event_input_port* >(
+		port,"initialise", myWidth, myOffset, mPort );
     
     // Map the input from MUSIC to data channels local to this process
     // is done in InputEventPort
@@ -230,7 +231,8 @@ void Music::innerAddPort (
 
     unsigned int myOffset = myRank * avgWidth;
 
-    set< unsigned int >(port,"initialise", myWidth, myOffset, mPort);
+    set< unsigned int, unsigned int, MUSIC::event_output_port* >(
+    	port,"initialise", myWidth, myOffset, mPort );
     
     // Map the output from MUSIC to data channels local to this process
     // is done in OutputEventPort

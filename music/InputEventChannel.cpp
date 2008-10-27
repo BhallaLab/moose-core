@@ -22,8 +22,6 @@ const Cinfo* initInputEventChannelCinfo()
       ///////////////////////////////////////////////////////
       // MsgSrc definitions
       ///////////////////////////////////////////////////////
-      // Sends out a trigger for an event. The time is not
-      // sent - everyone knows the time.
       new SrcFinfo( "event", Ftype1< double >::global() ),
       
 
