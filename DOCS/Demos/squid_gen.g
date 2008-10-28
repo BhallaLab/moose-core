@@ -151,23 +151,28 @@ for ( i = 0 ; i <= NDIVS; i = i + 1 )
 //	echo {v}
 end
 
+// Use a pulsegen object to apply current injection
+create pulsegen /pulse
+setfield /pulse level1 {INJECT} delay1 0.005 width1 0.04
+addmsg /pulse /squid INJECT output
 setclock 0 {SIMDT}
 setclock 1 {PLOTDT}
 
-useclock /squid,/squid/# 0
+useclock /squid,/squid/#,/pulse 0
 // useclock /##[TYPE=table] 1
 useclock /Vm 1
 
-// Crazy hack, but the squid demo does it and we need to match.
+
 setfield /squid initVm {EREST}
 reset
-setfield /squid inject 0
-step 0.005 -t
-setfield /squid inject {INJECT}
-step 0.040 -t
-setfield /squid inject 0
-step 0.005 -t
-
+// Setting the injection current explicitly is replaced by pulsegen object
+// setfield /squid inject 0
+// step 0.005 -t
+// setfield /squid inject {INJECT}
+// step 0.040 -t
+// setfield /squid inject 0
+// step 0.005 -t
+step 0.05 -t
 int nsteps = RUNTIME / PLOTDT - 1
 tab2file squid_gen.plot /Vm table -nentries {nsteps} -overwrite
 // setfield /Vm print "squid.plot"
