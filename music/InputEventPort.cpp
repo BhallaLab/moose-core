@@ -45,8 +45,12 @@ const Cinfo* initInputEventPortCinfo()
                       GFCAST( &InputEventPort::getIsConnected ),
                       &dummyFunc
                       ),
-      new ValueFinfo( "width", ValueFtype1< unsigned int >::global(),
+      new ValueFinfo( "localWidth", ValueFtype1< unsigned int >::global(),
                       GFCAST( &InputEventPort::getWidth ),
+                      &dummyFunc
+                      ),
+      new ValueFinfo( "totalWidth", ValueFtype1< unsigned int >::global(),
+                      GFCAST( &InputEventPort::getTotalWidth ),
                       &dummyFunc
                       ),
       new ValueFinfo( "accLatency", ValueFtype1< double >::global(),
@@ -156,6 +160,12 @@ unsigned int InputEventPort::getWidth( Eref e )
 {
   return static_cast < InputEventPort* > (e.data())->channels_.size();
 }
+
+unsigned int InputEventPort::getTotalWidth( Eref e ) 
+{
+  return static_cast < InputEventPort* > (e.data())->mPort_->width();
+}
+
 
 double InputEventPort::getAccLatency( Eref e )
 {
