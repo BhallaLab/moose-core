@@ -39,46 +39,39 @@ const unsigned int Shell::maxNumOffNodeRequests = 100;
 
 const Cinfo* initShellCinfo()
 {
-	/**
-	 * This is a shared message to talk to the GenesisParser and
-	 * perhaps to other parsers like the one for SWIG and Python
-	 */
 	static Finfo* parserShared[] =
 	{
-		// Setting cwe
 		new DestFinfo( "cwe", Ftype1< Id >::global(),
-						RFCAST( &Shell::setCwe ) ),
-		// Getting cwe back: First handle a request
+						RFCAST( &Shell::setCwe ),
+						"Setting cwe" ),
 		new DestFinfo( "trigCwe", Ftype0::global(), 
-						RFCAST( &Shell::trigCwe ) ),
-		// Then send out the cwe info
-		new SrcFinfo( "cweSrc", Ftype1< Id >::global() ),
+						RFCAST( &Shell::trigCwe ),
+						"Getting cwe back: First handle a request" ),
+		new SrcFinfo( "cweSrc", Ftype1< Id >::global(),
+						" Then send out the cwe info" ),
 
-		// doing pushe: pushing current element onto stack and using
-		// argument for new cwe. It sends back the cweSrc.
 		new DestFinfo( "pushe", Ftype1< Id >::global(),
-						RFCAST( &Shell::pushe ) ),
-		// Doing pope: popping element off stack onto cwe. 
-		// It sends back the cweSrc.
+						RFCAST( &Shell::pushe ),
+						"doing pushe: pushing current element onto stack and using argument for new cwe. \n"
+						"It sends back the cweSrc." ),
 		new DestFinfo( "pope", Ftype0::global(), 
-						RFCAST( &Shell::pope ) ),
+						RFCAST( &Shell::pope ),
+						" Doing pope: popping element off stack onto cwe. It sends back the cweSrc." ),
 
-		// Getting a list of child ids: First handle a request with
-		// the requested parent elm id.
 		new DestFinfo( "trigLe", Ftype1< Id >::global(), 
-						RFCAST( &Shell::trigLe ) ),
-		// Then send out the vector of child ids.
-		new SrcFinfo( "leSrc", Ftype1< vector< Id > >::global() ),
+						RFCAST( &Shell::trigLe ),
+						"Getting a list of child ids: First handle a request with the requested parent elm id." ),
+		new SrcFinfo( "leSrc", Ftype1< vector< Id > >::global(),
+						"Then send out the vector of child ids." ),
 		
-		// Creating an object
-		// type, name, node, parent.
 		new DestFinfo( "create",
 				Ftype4< string, string, int, Id >::global(),
-				RFCAST( &Shell::staticCreate ) ),
-		// Creating an array of objects
+				RFCAST( &Shell::staticCreate ),
+				"Creating an object type, name, node, parent." ),
 		new DestFinfo( "createArray",
 				Ftype4< string, string, Id, vector<double> >::global(),
-				RFCAST( &Shell::staticCreateArray ) ),
+				RFCAST( &Shell::staticCreateArray ),
+				"Creating an array of objects" ),
 		new DestFinfo( "planarconnect",
 				Ftype3< string, string, double >::global(),
 				RFCAST( &Shell::planarconnect ) ),
@@ -91,50 +84,46 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "getSynCount",
 				Ftype1< Id >::global(),
 				RFCAST( &Shell::getSynCount2 ) ),
-		// The create func returns the id of the created object.
-		new SrcFinfo( "createSrc", Ftype1< Id >::global() ),
-		// Deleting an object
+		new SrcFinfo( "createSrc", Ftype1< Id >::global(),
+				"The create func returns the id of the created object." ),
 		new DestFinfo( "delete", Ftype1< Id >::global(), 
-				RFCAST( &Shell::staticDestroy ) ),
-
-		// Create a dynamic field on specified object.
+				RFCAST( &Shell::staticDestroy ),
+				"Deleting an object" ),
 		new DestFinfo( "addField",
 				Ftype2< Id, string >::global(),
-				RFCAST( &Shell::addField ) ),
-		// Getting a field value as a string: handling request
+				RFCAST( &Shell::addField ),
+				"Create a dynamic field on specified object." ),
 		new DestFinfo( "get",
 				Ftype2< Id, string >::global(),
-				RFCAST( &Shell::getField ) ),
-		// Getting a field value as a string: Sending value back.
-		new SrcFinfo( "getSrc", Ftype1< string >::global() ),
+				RFCAST( &Shell::getField ),
+				"Getting a field value as a string: handling request" ),
+		new SrcFinfo( "getSrc", Ftype1< string >::global(),
+				"Getting a field value as a string: Sending value back." ),
 
-		// Setting a field value as a string: handling request
 		new DestFinfo( "set",
 				Ftype3< Id, string, string >::global(),
-				RFCAST( &Shell::setField ) ),
-		// Assigning a file into a table.
-		// ElementId, filename, skiplines
+				RFCAST( &Shell::setField ),
+				"Setting a field value as a string: handling request" ),
 		new DestFinfo( "file2tab",
 				Ftype3< Id, string, unsigned int >::global(),
-				RFCAST( &Shell::file2tab ) ),
+				RFCAST( &Shell::file2tab ),
+				"Assigning a file into a table. ElementId, filename, skiplines" ),
 
-		// Handle requests for setting values for a clock tick.
-		// args are clockNo, dt, stage
 		new DestFinfo( "setClock",
 				Ftype3< int, double, int >::global(),
-				RFCAST( &Shell::setClock ) ),
+				RFCAST( &Shell::setClock ),
+				" Handle requests for setting values for a clock tick.args are clockNo, dt, stage" ),
 
-		// Handle requests to assign a path to a given clock tick.
-		// args are tickname, path, function
 		new DestFinfo( "useClock",
 				Ftype3< string, string, string >::global(),
-				RFCAST( &Shell::useClock ) ),
+				RFCAST( &Shell::useClock ),
+				"Handle requests to assign a path to a given clock tick.args are tickname, path, function" ),
 		
-		// Getting a wildcard path of elements: handling request
 		new DestFinfo( // args are path, flag true for breadth-first list
 				"el",
 				Ftype2< string, bool >::global(),
-				RFCAST( &Shell::getWildcardList ) ),
+				RFCAST( &Shell::getWildcardList ),
+				"Getting a wildcard path of elements: handling request" ),
 		// Getting a wildcard path of elements: Sending list back.
 		// This goes through the exiting list for elists set up in le.
 		//TypeFuncPair( Ftype1< vector< Id > >::global(), 0 ),
@@ -153,14 +142,13 @@ const Cinfo* initShellCinfo()
 				RFCAST( &Shell::step ) ),
 		new DestFinfo( "requestClocks",
 				Ftype0::global(), &Shell::requestClocks ),
-		// Sending back the list of clocks times
 		new SrcFinfo( "returnClocksSrc",
-			Ftype1< vector< double > >::global() ),
+			Ftype1< vector< double > >::global(),
+			"Sending back the list of clocks times" ),
 		new DestFinfo( "requestCurrTime",
 				Ftype0::global(), RFCAST( &Shell::requestCurrTime ) ),
-				// Returns it in the default string return value.
-		// Call this to end the simulation.
-		new DestFinfo( "quit", Ftype0::global(), RFCAST( &Shell::quit ) ),	
+		new DestFinfo( "quit", Ftype0::global(), RFCAST( &Shell::quit ),
+			"Returns it in the default string return value.Call this to end the simulation." ),	
 		////////////////////////////////////////////////////////////
 		// Message functions
 		////////////////////////////////////////////////////////////
@@ -175,14 +163,13 @@ const Cinfo* initShellCinfo()
 				Ftype4< Id, string, Id, string >::global(),
 				RFCAST( &Shell::deleteEdge ) ),
 
-		// Handle request for message list:
-		// id elm, string field, bool isIncoming
 		new DestFinfo( "listMessages",
 				Ftype3< Id, string, bool >::global(),
-				RFCAST( &Shell::listMessages ) ),
-		// Return message list and string with remote fields for msgs
+				RFCAST( &Shell::listMessages ),
+				"Handle request for message list: id elm, string field, bool isIncoming" ),
 		new SrcFinfo( "listMessagesSrc",
-			Ftype2< vector < Id >, string >::global() ),
+			Ftype2< vector < Id >, string >::global(),
+			"Return message list and string with remote fields for msgs" ),
 
 		////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions
@@ -196,10 +183,11 @@ const Cinfo* initShellCinfo()
 		////////////////////////////////////////////////////////////
 		// Cell reader
 		////////////////////////////////////////////////////////////
-		// Args are: file cellpath globalParms
+		
 		new DestFinfo( "readcell",
 			Ftype4< string, string, vector< double >, int >::global(),
-					RFCAST( &Shell::readCell ) ),
+					RFCAST( &Shell::readCell ),
+					"Args are: file cellpath globalParms" ),
 		////////////////////////////////////////////////////////////
 		// Channel setup functions
 		////////////////////////////////////////////////////////////
@@ -255,10 +243,10 @@ const Cinfo* initShellCinfo()
 		////////////////////////////////////////////////////////////
 		// field assignment for a vector of objects
 		////////////////////////////////////////////////////////////
-		// Setting a field value as a string: handling request
 		new DestFinfo( "setVecField",
 				Ftype3< vector< Id >, string, string >::global(),
-				RFCAST( &Shell::setVecField ) ),
+				RFCAST( &Shell::setVecField ),
+				"Setting a field value as a string: handling request" ),
 		new DestFinfo( "loadtab",
 				Ftype1< string >::global(),
 				RFCAST( &Shell::loadtab ) ),	
@@ -266,13 +254,6 @@ const Cinfo* initShellCinfo()
 				Ftype4< Id, char, double, double >::global(),
 				RFCAST( &Shell::tabop ) ),	
 	};
-
-	/**
-	 * This handles serialized data, typically between nodes. The
-	 * arguments are a single long string. Takes care of low-level
-	 * operations such as message set up or the gory details of copies
-	 * across nodes.
-	 */
 	static Finfo* serialShared[] =
 	{
 		new DestFinfo( "rawAdd", // Addmsg as a raw string.
@@ -290,11 +271,6 @@ const Cinfo* initShellCinfo()
 	};
 
 #ifdef USE_MPI
-	/**
-	 * This handles parallelization: communication between shells on
-	 * different nodes, which is the major mechanism for setting up
-	 * multinode simulations
-	 */
 	static Finfo* parallelShared[] = 
 	{
 		/////////////////////////////////////////////////////
@@ -338,52 +314,52 @@ const Cinfo* initShellCinfo()
 			// type, name, parentId, newObjId.
 			Ftype4< string, string, Nid, Nid >::global()
 		),
-		// Creating an object
 		new DestFinfo( "create",
 				Ftype4< string, string, Nid, Nid >::global(),
-				RFCAST( &Shell::parCreateFunc ) ),
+				RFCAST( &Shell::parCreateFunc ),
+				"Creating an object" ),
 		new SrcFinfo( "createArraySrc", 
 			// type, name, parentId, newObjId.
 			Ftype4< string, string, pair< Nid, Nid >, 
 				vector< double > >::global()
 		),
-		// Creating an object
 		new DestFinfo( "createArray",
 				Ftype4< string, string, pair< Nid, Nid >, 
 					vector< double > >::global(),
-				RFCAST( &Shell::parCreateArrayFunc ) ),
+				RFCAST( &Shell::parCreateArrayFunc ),
+				" Creating an object" ),
 		new SrcFinfo( "deleteSrc", 
 			// type, name, parentId, newObjId.
 			Ftype1< Id >::global()
 		),
-		// Creating an object
 		new DestFinfo( "delete",
 				Ftype1< Id >::global(),
-				RFCAST( &Shell::staticDestroy ) ),
+				RFCAST( &Shell::staticDestroy ),
+				" Creating an object" ),
 
-		// Send copy request to remote (src) node
 		new SrcFinfo( "copySrc", 
 			// srcId, parentId, name, Id to give kid.
-			Ftype4< Nid, Nid, string, Nid >::global()
+			Ftype4< Nid, Nid, string, Nid >::global(),
+			"Send copy request to remote (src) node" 
 		),
-		// Copying an object
 		new DestFinfo( "copy",
 				Ftype4< Nid, Nid, string, Nid >::global(),
-				RFCAST( &Shell::parCopy ) ),
+				RFCAST( &Shell::parCopy ),
+				"Copying an object" ),
 
-		// Send array copy request to remote (src) node
 		new SrcFinfo( "copyIntoArraySrc", 
 			// srcId, parentId, name, Id to give kid.
-			Ftype3< vector< Nid >, string, vector< double > >::global()
+			Ftype3< vector< Nid >, string, vector< double > >::global(),
+			"Send array copy request to remote (src) node"
 		),
-		// Copying into an array
 		new DestFinfo( "copyIntoArray",
 				Ftype3< vector< Nid >, string, vector< double > >::global(),
-				RFCAST( &Shell::parCopyIntoArray ) ),
+				RFCAST( &Shell::parCopyIntoArray ),
+				"Copying into an array" ),
 
-		// Args are: file cellpath parentId, childId, globalParms
 		new SrcFinfo( "readcellSrc",
-			Ftype5< string, string, Nid, Nid, vector< double > >::global() 
+			Ftype5< string, string, Nid, Nid, vector< double > >::global(),
+			" Args are: file cellpath parentId, childId, globalParms" 
 		),
 		new DestFinfo( "readcell",
 			Ftype5< string, string, Nid, Nid, vector< double > >::global(),
@@ -442,13 +418,13 @@ const Cinfo* initShellCinfo()
 		// This little section deals with requests to traverse the
 		// path string looking for an Id on a remote node.
 		///////////////////////////////////////////////////////////
-		// Args are: Start, names, requestId
 		new SrcFinfo( "parTraversePathSrc",
-			Ftype3< Id, vector< string >, unsigned int >::global()
+			Ftype3< Id, vector< string >, unsigned int >::global(),
+			"Args are: Start, names, requestId"
 		),
-		// args are: foundId, requestId
 		new SrcFinfo( "parTraversePathReturnSrc",
-			Ftype2< Nid, unsigned int >::global()
+			Ftype2< Nid, unsigned int >::global(),
+			"args are: foundId, requestId"
 		),
 		new DestFinfo( "parTraversePath",
 			Ftype3< Id, vector< string >, unsigned int >::global(),
@@ -482,27 +458,27 @@ const Cinfo* initShellCinfo()
 		// This section deals with requests for le and wildcards 
 		///////////////////////////////////////////////////////////
 		
-		// args are: parent, requestId
 		new SrcFinfo( "requestLeSrc",
-			Ftype2< Nid, unsigned int >::global()
+			Ftype2< Nid, unsigned int >::global(),
+			"args are: parent, requestId"
 		),
 		new DestFinfo( "requestLe",
 			Ftype2< Nid, unsigned int >::global(),
 			RFCAST( &Shell::handleRequestLe )
 		),
 
-		// args are: elist, requestId
 		new SrcFinfo( "returnLeSrc",
-			Ftype2< vector< Nid >, unsigned int >::global()
+			Ftype2< vector< Nid >, unsigned int >::global(),
+			"args are: elist, requestId"
 		),
 		new DestFinfo( "returnLe",
 			Ftype2< vector< Nid >, unsigned int >::global(),
 			RFCAST( &Shell::handleReturnLe )
 		),
 
-		// args are: path, ordered, requestId
 		new SrcFinfo( "requestParWildcardSrc",
-			Ftype3< string, bool, unsigned int >::global()
+			Ftype3< string, bool, unsigned int >::global(),
+			" args are: path, ordered, requestId"
 		),
 		new DestFinfo( "requestParWildcard",
 			Ftype3< string, bool, unsigned int >::global(),
@@ -515,8 +491,8 @@ const Cinfo* initShellCinfo()
 		new SrcFinfo( "reschedSrc", Ftype0::global() ),
 		new SrcFinfo( "reinitSrc", Ftype0::global() ),
 		new SrcFinfo( "stopSrc", Ftype0::global() ),
-		// Arg is runtime
-		new SrcFinfo( "stepSrc", Ftype1< double >::global() ),
+		new SrcFinfo( "stepSrc", Ftype1< double >::global(),
+			"Arg is runtime" ),
 		new DestFinfo( "resched",
 				Ftype0::global(), RFCAST( &Shell::resched ) ),
 		new DestFinfo( "reinit",
@@ -526,22 +502,20 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "step",
 				Ftype1< double >::global(), // Arg is runtime
 				RFCAST( &Shell::step ) ),
-		// Handle requests for setting values for a clock tick.
-		// args are clockNo, dt, stage
 		new SrcFinfo( "setClockSrc",
-				Ftype3< int, double, int >::global() ),
+				Ftype3< int, double, int >::global(),
+				"Handle requests for setting values for a clock tick.args are clockNo, dt, stage" ),
 		new DestFinfo( "setClock",
 				Ftype3< int, double, int >::global(),
 				RFCAST( &Shell::setClock ) ),
-		// Handle requests to assign a path to a given clock tick.
-		// args are tickname, path, function
 		new SrcFinfo( "useClockSrc",
-				Ftype3< string, string, string >::global() ),
+				Ftype3< string, string, string >::global(),
+				"Handle requests to assign a path to a given clock tick.args are tickname, path, function" ),
 		new DestFinfo( "useClock",
 				Ftype3< string, string, string >::global(),
 				RFCAST( &Shell::localUseClock ) ),
-		// Called to terminate simulation.
-		new SrcFinfo( "quitSrc", Ftype0::global() ),
+		new SrcFinfo( "quitSrc", Ftype0::global(),
+				"Called to terminate simulation." ),
 		new DestFinfo( "quit", Ftype0::global(), 
 			RFCAST( &Shell::innerQuit ) ),
 	};
@@ -597,12 +571,18 @@ const Cinfo* initShellCinfo()
 		),
 
 		new SharedFinfo( "parser", parserShared, 
-				sizeof( parserShared ) / sizeof( Finfo* ) ), 
+				sizeof( parserShared ) / sizeof( Finfo* ),
+				" This is a shared message to talk to the GenesisParser and perhaps to other parsers like \n"
+				"the one for SWIG and Python" ), 
 		new SharedFinfo( "serial", serialShared,
-				sizeof( serialShared ) / sizeof( Finfo* ) ), 
+				sizeof( serialShared ) / sizeof( Finfo* ),
+				"This handles serialized data, typically between nodes. The arguments are a single long string.\n"
+				"Takes care of low-level operations such as message set up or the gory details of copies across nodes." ), 
 #ifdef USE_MPI
 		new SharedFinfo( "parallel", parallelShared,
-				sizeof( parallelShared ) / sizeof( Finfo* ) ), 
+				sizeof( parallelShared ) / sizeof( Finfo* ),
+				"This handles parallelization: communication between shells on different nodes, which is the major\n"
+				"mechanism for setting up multinode simulations" ),  
 #endif // USE_MPI
 		/*
 		new SharedFinfo( "slave", slaveShared,

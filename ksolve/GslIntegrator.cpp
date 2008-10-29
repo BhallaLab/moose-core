@@ -30,9 +30,6 @@ const Cinfo* initGslIntegratorCinfo()
 	static Finfo* process = new SharedFinfo( "process", processShared,
 		sizeof( processShared ) / sizeof( Finfo* ) );
 
-	/**
-	 * This is connected to the Stoich object.
-	 */
 	static Finfo* gslShared[] =
 	{
 		new SrcFinfo( "reinitSrc", Ftype0::global() ),
@@ -88,7 +85,8 @@ const Cinfo* initGslIntegratorCinfo()
 		// Shared definitions
 		///////////////////////////////////////////////////////
 		new SharedFinfo( "gsl", gslShared, 
-				sizeof( gslShared )/ sizeof( Finfo* ) ),
+				sizeof( gslShared )/ sizeof( Finfo* ),
+					"This is connected to the Stoich object." ),
 		process,
 	};
 

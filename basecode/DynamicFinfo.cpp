@@ -95,12 +95,9 @@ bool DynamicFinfo::add(
 	unsigned int destFuncId = 0;
 	int destMsg = 0;
 	unsigned int destIndex = 0;
-
-	// How do we know what the target expects: a simple message
-	// or a shared one? Here we use the respondToAdd to query it.
-	
-	// Here we make a SharedFtype on the fly for passing in the
-	// respondToAdd.
+	//How do we know what the target expects: a simple message or a shared one? 
+	//Here we use the respondToAdd to query it.
+	//Here we make a SharedFtype on the fly for passing in the respondToAdd.
 	Finfo* shared[] = { 
 		&trigFinfo, const_cast< Finfo* >( origFinfo_ )
 	};

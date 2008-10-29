@@ -34,7 +34,7 @@ class SharedFinfo: public Finfo
 			 * DestFinfos.
 			 */
 			SharedFinfo( const string& name, Finfo** finfos,
-				 unsigned int nFinfos );
+				 unsigned int nFinfos, const string& doc="" );
 
 			~SharedFinfo()
 			{;}

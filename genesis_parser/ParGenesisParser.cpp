@@ -24,42 +24,36 @@ using namespace std;
 
 const Cinfo* initParGenesisParserCinfo()
 {
-	/**
-	 * This is a shared message to talk to the Shell.
-	 */
 	static Finfo* parserShared[] =
 	{
-		// Setting cwe
-		new SrcFinfo( "cwe", Ftype1< Id >::global() ),
-		// Getting cwe back: First trigger a request
-		new SrcFinfo( "trigCwe", Ftype0::global() ),
-		// Then receive the cwe info
+		new SrcFinfo( "cwe", Ftype1< Id >::global(),
+			"Setting cwe" ),
+		new SrcFinfo( "trigCwe", Ftype0::global(),
+			"Getting cwe back: First trigger a request" ),
 		new DestFinfo( "recvCwe", Ftype1< Id >::global(),
-					RFCAST( &GenesisParserWrapper::recvCwe ) ),
-		// Setting pushe. This returns with the new cwe.
-		new SrcFinfo( "pushe", Ftype1< Id >::global() ),
-		// Doing pope. This returns with the new cwe.
-		new SrcFinfo( "pope", Ftype0::global() ),
-
-		// Getting a list of child ids: First send a request with
-		// the requested parent elm id.
-		new SrcFinfo( "trigLe", Ftype1< Id >::global() ),
-		// Then recv the vector of child ids. This function is
-		// shared by several other messages as all it does is dump
-		// the elist into a temporary local buffer.
+					RFCAST( &GenesisParserWrapper::recvCwe ),
+					"Then receive the cwe info" ),
+		new SrcFinfo( "pushe", Ftype1< Id >::global(),
+			"Setting pushe. This returns with the new cwe." ),
+		new SrcFinfo( "pope", Ftype0::global(),
+			"Doing pope. This returns with the new cwe." ),
+		new SrcFinfo( "trigLe", Ftype1< Id >::global(),
+			"Getting a list of child ids: First send a request with the requested parent elm id." ),
 		new DestFinfo( "recvElist", 
 					Ftype1< vector< Id > >::global(), 
-					RFCAST( &GenesisParserWrapper::recvElist ) ),
+					RFCAST( &GenesisParserWrapper::recvElist ),
+					"Then recv the vector of child ids. This function is shared by several other messages as all \n"
+					"it does is dump the elist into a temporary local buffer." ),
 
 		///////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions.
 		///////////////////////////////////////////////////////////////
-		// Creating an object: Send out the request.
 		new SrcFinfo( "create",
-				Ftype3< string, string, Id >::global() ),
-		// Creating an object: Recv the returned object id.
+				Ftype3< string, string, Id >::global(),
+				"Creating an object: Send out the request." ),
 		new SrcFinfo( "createArray",
-				Ftype4< string, string, Id, vector <double> >::global() ),
+				Ftype4< string, string, Id, vector <double> >::global(),
+				"Creating an object: Recv the returned object id." ),
 		new SrcFinfo( "planarconnect", Ftype3< string, string, double >::global() ),
 		new SrcFinfo( "planardelay", Ftype2< string, double >::global() ),
 		new SrcFinfo( "planarweight", Ftype2< string, double >::global() ),
@@ -67,47 +61,40 @@ const Cinfo* initParGenesisParserCinfo()
 		new DestFinfo( "recvCreate",
 					Ftype1< Id >::global(),
 					RFCAST( &GenesisParserWrapper::recvCreate ) ),
-		// Deleting an object: Send out the request.
-		new SrcFinfo( "delete", Ftype1< Id >::global() ),
-
+		new SrcFinfo( "delete", Ftype1< Id >::global(),
+				"Deleting an object: Send out the request." ),
 		///////////////////////////////////////////////////////////////
 		// Value assignment: set and get.
 		///////////////////////////////////////////////////////////////
-		// Getting a field value as a string: send out request:
-		new SrcFinfo( "add", Ftype2<Id, string>::global() ),
+		new SrcFinfo( "add", Ftype2<Id, string>::global(),
+				"Getting a field value as a string: send out request:" ),
 		new SrcFinfo( "get", Ftype2< Id, string >::global() ),
-		// Getting a field value as a string: Recv the value.
 		new DestFinfo( "recvField",
 					Ftype1< string >::global(),
-					RFCAST( &GenesisParserWrapper::recvField ) ),
-		// Setting a field value as a string: send out request:
+					RFCAST( &GenesisParserWrapper::recvField ),
+					"Getting a field value as a string: Recv the value." ),
 		new SrcFinfo( "set", // object, field, value 
-				Ftype3< Id, string, string >::global() ),
-
-
+				Ftype3< Id, string, string >::global(),
+				"Setting a field value as a string: send out request:" ),
 		///////////////////////////////////////////////////////////////
 		// Clock control and scheduling
 		///////////////////////////////////////////////////////////////
-		// Setting values for a clock tick: setClock
 		new SrcFinfo( "setClock", // clockNo, dt, stage
-				Ftype3< int, double, int >::global() ),
-		// Assigning path and function to a clock tick: useClock
+				Ftype3< int, double, int >::global(),
+				"Setting values for a clock tick: setClock" ),
 		new SrcFinfo( "useClock", // tick id, path, function
-				Ftype3< Id, vector< Id >, string >::global() ),
-
-		// Getting a wildcard path of elements: send out request
-		// args are path, flag true for breadth-first list.
-		new SrcFinfo( "el", Ftype2< string, bool >::global() ),
-		// The return function for the wildcard past is the shared
-		// function recvElist
-
-		new SrcFinfo( "resched", Ftype0::global() ), // resched
+				Ftype3< Id, vector< Id >, string >::global(),
+				"Assigning path and function to a clock tick: useClock" ),
+		new SrcFinfo( "el", Ftype2< string, bool >::global(),
+				"Getting a wildcard path of elements: send out request args are path, flag true for breadth-first list." ),
+		new SrcFinfo( "resched", Ftype0::global(),
+				"The return function for the wildcard past is the shared function recvElist" ), // resched
 		new SrcFinfo( "reinit", Ftype0::global() ), // reinit
 		new SrcFinfo( "stop", Ftype0::global() ), // stop
 		new SrcFinfo( "step", Ftype1< double >::global() ),
-				// step, arg is time
 		new SrcFinfo( "requestClocks", 
-					Ftype0::global() ), //request clocks
+					Ftype0::global(),
+					"step, arg is time" ), //request clocks
 		new DestFinfo( "recvClocks", 
 					Ftype1< vector< double > >::global(), 
 					RFCAST( &GenesisParserWrapper::recvClocks ) ),
@@ -117,23 +104,22 @@ const Cinfo* initParGenesisParserCinfo()
 		///////////////////////////////////////////////////////////////
 		// Message info functions
 		///////////////////////////////////////////////////////////////
-		// Request message list: id elm, string field, bool isIncoming
 		new SrcFinfo( "listMessages", 
-					Ftype3< Id, string, bool >::global() ),
-		// Receive message list and string with remote fields for msgs
+					Ftype3< Id, string, bool >::global(),
+					"Request message list: id elm, string field, bool isIncoming" ),
 		new DestFinfo( "recvMessageList",
 					Ftype2< vector < Id >, string >::global(), 
-					RFCAST( &GenesisParserWrapper::recvMessageList ) ),
+					RFCAST( &GenesisParserWrapper::recvMessageList ),
+					"Receive message list and string with remote fields for msgs" ),
 
 		///////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions.
 		///////////////////////////////////////////////////////////////
-		// This function is for copying an element tree, complete with
-		// messages, onto another.
-		new SrcFinfo( "copy", Ftype3< Id, Id, string >::global() ),
+		new SrcFinfo( "copy", Ftype3< Id, Id, string >::global(),
+			"This function is for copying an element tree, complete with messages, onto another." ),
 		new SrcFinfo( "copyIntoArray", Ftype4< Id, Id, string, vector <double> >::global() ),
-		// This function is for moving element trees.
-		new SrcFinfo( "move", Ftype3< Id, Id, string >::global() ),
+		new SrcFinfo( "move", Ftype3< Id, Id, string >::global(),
+			"This function is for moving element trees." ),
 
 		///////////////////////////////////////////////////////////////
 		// Cell reader: filename cellpath
@@ -144,35 +130,34 @@ const Cinfo* initParGenesisParserCinfo()
 		///////////////////////////////////////////////////////////////
 		// Channel setup functions
 		///////////////////////////////////////////////////////////////
-		// setupalpha
 		new SrcFinfo( "setupAlpha", 
-					Ftype2< Id, vector< double > >::global() ),
-		// setuptau
+					Ftype2< Id, vector< double > >::global(),
+					"setupalpha" ),
 		new SrcFinfo( "setupTau", 
-					Ftype2< Id, vector< double > >::global() ),
-		// tweakalpha
-		new SrcFinfo( "tweakAlpha", Ftype1< Id >::global() ),
-		// tweaktau
-		new SrcFinfo( "tweakTau", Ftype1< Id >::global() ),
-
+					Ftype2< Id, vector< double > >::global(),
+					"setuptau" ),
+		new SrcFinfo( "tweakAlpha", Ftype1< Id >::global(),
+					"tweakalpha" ),
+		new SrcFinfo( "tweakTau", Ftype1< Id >::global(),
+					"tweaktau" ),
 		new SrcFinfo( "setupGate", 
 					Ftype2< Id, vector< double > >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// SimDump facilities
 		///////////////////////////////////////////////////////////////
-		// readDumpFile
 		new SrcFinfo( "readDumpFile", 
-					Ftype1< string >::global() ),
-		// writeDumpFile
+					Ftype1< string >::global(),
+					"readDumpFile" ),
 		new SrcFinfo( "writeDumpFile", 
-					Ftype2< string, string >::global() ),
-		// simObjDump
+					Ftype2< string, string >::global(),
+					"writeDumpFile" ),
 		new SrcFinfo( "simObjDump",
-					Ftype1< string >::global() ),
-		// simundump
+					Ftype1< string >::global(),
+					"simObjDump" ),
 		new SrcFinfo( "simUndump",
-					Ftype1< string >::global() ),
+					Ftype1< string >::global(),
+					"simundump" ),
 		new SrcFinfo( "openfile", 
 			Ftype2< string, string >::global() ),
 		new SrcFinfo( "writefile", 
@@ -186,9 +171,9 @@ const Cinfo* initParGenesisParserCinfo()
 		///////////////////////////////////////////////////////////////
 		// Setting field values for a vector of objects
 		///////////////////////////////////////////////////////////////
-		// Setting a vec of field values as a string: send out request:
 		new SrcFinfo( "setVecField", // object, field, value 
-			Ftype3< vector< Id >, string, string >::global() ),
+			Ftype3< vector< Id >, string, string >::global(),
+			"Setting a vec of field values as a string: send out request:" ),
 		new SrcFinfo( "loadtab", 
 			Ftype1< string >::global() ),
 		new SrcFinfo( "tabop", 
@@ -198,7 +183,8 @@ const Cinfo* initParGenesisParserCinfo()
 	static Finfo* genesisParserFinfos[] =
 	{
 		new SharedFinfo( "parser", parserShared,
-				sizeof( parserShared ) / sizeof( Finfo* ) ),
+				sizeof( parserShared ) / sizeof( Finfo* ),
+				"This is a shared message to talk to the Shell." ),
 		new DestFinfo( "readline",
 			Ftype1< string >::global(),
 			RFCAST( &GenesisParserWrapper::readlineFunc ) ),

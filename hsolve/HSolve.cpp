@@ -25,11 +25,9 @@ const Cinfo* initHSolveCinfo()
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			dummyFunc ),
 	};
-	
 	static Finfo* process = new SharedFinfo( "process", processShared,
 		sizeof( processShared ) / sizeof( Finfo* ) );
 	
-	// Shared message from Cell
 	static Finfo* cellShared[] =
 	{
 		new DestFinfo( "integSetup",
@@ -90,7 +88,8 @@ const Cinfo* initHSolveCinfo()
 	// Shared definitions
 	//////////////////////////////////////////////////////////////////
 		new SharedFinfo( "cell-integ", cellShared,
-			sizeof( cellShared ) / sizeof( Finfo* ) ),
+			sizeof( cellShared ) / sizeof( Finfo* ),
+			"Shared message from Cell" ),
 		process,
 	};
 	

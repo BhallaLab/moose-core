@@ -24,7 +24,7 @@ class SolveFinfo: public ThisFinfo
 		 * existing ThisFinfo.
 		 */
 		SolveFinfo( Finfo** finfos, unsigned int nFinfos,
-		       	const ThisFinfo* tf );
+		       	const ThisFinfo* tf, const string& doc="" );
 
 		~SolveFinfo()
 		{;}

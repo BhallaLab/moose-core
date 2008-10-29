@@ -18,11 +18,6 @@ const unsigned int Interpol::MAX_DIVS = 10000000;
 
 const Cinfo* initInterpolCinfo()
 {
-	/**
-	 * This is a shared message for doing lookups on the table.
-	 * Receives a double with the x value
-	 * Sends back a double with the looked-up y value.
-	 */
 	static Finfo* lookupReturnShared[] =
 	{
 		new DestFinfo( "lookup", Ftype1< double >::global(),
@@ -74,7 +69,9 @@ const Cinfo* initInterpolCinfo()
 	///////////////////////////////////////////////////////
 	// Shared message definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "lookupReturn", lookupReturnShared, 2 ),
+		new SharedFinfo( "lookupReturn", lookupReturnShared, 2,
+						"This is a shared message for doing lookups on the table.\n"
+						"Receives a double with the x value.  Sends back a double with the looked-up y value." ),
 		
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -84,32 +81,30 @@ const Cinfo* initInterpolCinfo()
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
-		/// Look up and interpolate value from table using x value.
 		new DestFinfo( "lookup", Ftype1< double >::global(), 
-			RFCAST( &Interpol::lookup )
+			RFCAST( &Interpol::lookup ),
+			"Look up and interpolate value from table using x value."
 		),
-
-		/// Expand table. First arg is xdivs, second is mode.
 		new DestFinfo( "tabFill", Ftype2< int, int >::global(), 
-			RFCAST( &Interpol::tabFill )
+			RFCAST( &Interpol::tabFill ),
+			"Expand table. First arg is xdivs, second is mode."
 		),
-		/// Print contents to file.
 		new DestFinfo( "print", Ftype1< string >::global(), 
-			RFCAST( &Interpol::print )
+			RFCAST( &Interpol::print ),
+			"Print contents to file."
 		),
-		/// Append contents to file.
 		new DestFinfo( "append", Ftype1< string >::global(), 
-			RFCAST( &Interpol::append )
+			RFCAST( &Interpol::append ),
+			"Append contents to file."
 		),
-		/// Load contents from file.
-		//  load filename skiplines
 		new DestFinfo( "load", Ftype2< string, unsigned int >::global(), 
-			RFCAST( &Interpol::load )
+			RFCAST( &Interpol::load ),
+			"Load contents from file. load filename skiplines"
 		),
-		/// Append to existing table. Used in loadtab -continue.
 		new DestFinfo( "appendTableVector", 
 			Ftype1< vector< double > >::global(), 
-			RFCAST( &Interpol::appendTableVector )
+			RFCAST( &Interpol::appendTableVector ),
+			"Append to existing table. Used in loadtab -continue."
 		),
 	};
 

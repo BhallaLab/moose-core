@@ -41,20 +41,11 @@ const Cinfo* initSmoldynHubCinfo()
 	static Finfo* process = new SharedFinfo( "process", processShared,
 		sizeof( processShared ) / sizeof( Finfo* ) );
 
-	/**
-	 * Takes over the process message to each of the kinetic objects.
-	 * Replaces the original message usually sent by the clock Ticks.
-	 */
 	static Finfo* zombieShared[] =
 	{
 		new SrcFinfo( "process", Ftype1< ProcInfo >::global() ),
 		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
 	};
-
-	
-	/**
-	 * Handles reaction structure info from the Stoich object
-	 */
 	static Finfo* hubShared[] =
 	{
 		new DestFinfo( "rateTermInfo",
@@ -100,17 +91,6 @@ const Cinfo* initSmoldynHubCinfo()
 		),
 	};
 
-	/**
-	 * This is used to handle fluxes between sets of molecules
-	 * solved in this SmoldynHub and solved by other Hubs. It is
-	 * implemented as a reciprocal vector of influx and efflux.
-	 * The influx during each timestep is added directly to the 
-	 * molecule number in S_. The efflux is computed by the
-	 * Hub, and subtracted from S_, and sent on to the target Hub.
-	 * Its main purpose, as the name implies, is for diffusive flux
-	 * across an interface. Typically used for mixed simulations where
-	 * the molecules in different spatial domains are solved differently.
-	 */
 	static Finfo* fluxShared[] =
 	{
 		new SrcFinfo( "efflux", Ftype1< vector < double > >::global() ),
@@ -164,11 +144,9 @@ const Cinfo* initSmoldynHubCinfo()
 			&SmoldynHub::destroy ),
 		new DestFinfo( "molSum", Ftype1< double >::global(),
 			RFCAST( &SmoldynHub::molSum ) ),
-		// override the Neutral::childFunc here, so that when this
-		// is deleted all the zombies are reanimated.
 		new DestFinfo( "child", Ftype1< int >::global(),
-			RFCAST( &SmoldynHub::childFunc ) ),
-
+			RFCAST( &SmoldynHub::childFunc ),
+			"override the Neutral::childFunc here, so that when this is deleted all the zombies are reanimated." ),
 	///////////////////////////////////////////////////////
 	// Synapse definitions
 	///////////////////////////////////////////////////////
@@ -177,17 +155,33 @@ const Cinfo* initSmoldynHubCinfo()
 	///////////////////////////////////////////////////////
 		process,
 		new SharedFinfo( "hub", hubShared, 
-			      sizeof( hubShared ) / sizeof( Finfo* ) ),
+			      sizeof( hubShared ) / sizeof( Finfo* ),
+					"Handles reaction structure info from the Stoich object" ),
 		new SharedFinfo( "molSolve", zombieShared, 
-			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
+			      sizeof( zombieShared ) / sizeof( Finfo* ),
+					"Takes over the process message to each of the kinetic objects.Replaces the original message \n"
+					"usually sent by the clock Ticks." ),
 		new SharedFinfo( "reacSolve", zombieShared, 
-			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
+			      sizeof( zombieShared ) / sizeof( Finfo* ),
+					"Takes over the process message to each of the kinetic objects.Replaces the original message \n"
+					"usually sent by the clock Ticks." ),
 		new SharedFinfo( "enzSolve", zombieShared, 
-			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
+			      sizeof( zombieShared ) / sizeof( Finfo* ),
+					"Takes over the process message to each of the kinetic objects.Replaces the original message \n"
+					"usually sent by the clock Ticks." ),
 		new SharedFinfo( "mmEnzSolve", zombieShared, 
-			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
+			      sizeof( zombieShared ) / sizeof( Finfo* ),
+					"Takes over the process message to each of the kinetic objects.Replaces the original message \n"
+					"usually sent by the clock Ticks." ),
 		new SharedFinfo( "flux", fluxShared, 
-			      sizeof( fluxShared ) / sizeof( Finfo* ) ),
+			      sizeof( fluxShared ) / sizeof( Finfo* ),
+					"This is used to handle fluxes between sets of molecules solved in this SmoldynHub and solved \n"
+					"by other Hubs. It is implemented as a reciprocal vector of influx and efflux.\n"
+					"The influx during each timestep is added directly to the molecule number in S_. The efflux is\n"
+					"computed by the Hub, and subtracted from S_, and sent on to the target Hub.\n"
+					"Its main purpose, as the name implies, is for diffusive flux across an interface. \n"
+					"Typically used for mixed simulations where the molecules in different spatial domains are \n"
+					"solved differently." ),
 	};
 
 	// Schedule smoldynHubs for the slower clock, stage 0.
