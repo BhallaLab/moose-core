@@ -25,8 +25,8 @@
  * at this time.
  */
 SharedFinfo::SharedFinfo( const string& name, Finfo** finfos,
-				 unsigned int nFinfos )
-	: Finfo( name, new SharedFtype( finfos, nFinfos ) )
+				 unsigned int nFinfos, const string& doc )
+	: Finfo( name, new SharedFtype( finfos, nFinfos ), doc )
 {
 	assert( nFinfos > 0 );
 	isDest_ = ( dynamic_cast< DestFinfo* >( finfos[0] ) );
@@ -328,16 +328,18 @@ void sharedFinfoTest()
 	};
 
 	static Finfo* pingPongSrcShared[] = 
-	{ 	// Send trigger, receive double
-			new SrcFinfo( "trig", Ftype0::global() ),
+	{ 	
+			new SrcFinfo( "trig", Ftype0::global(),
+			"Send trigger, receive double" ),
 			new DestFinfo( "recv", Ftype1< double >::global(), 
 							RFCAST( &SharedTest::twoXdval ) ),
 	};
 
 	static Finfo* pingPongDestShared[] = 
-	{ 	// Receive trigger, send double.
+	{ 	
 			new DestFinfo( "trig", 
-							Ftype0::global(), &SharedTest::pingPong ),
+							Ftype0::global(), &SharedTest::pingPong,
+							"Receive trigger, send double." ),
 			new SrcFinfo( "send", Ftype1< double >::global() ),
 	};
 

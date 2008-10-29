@@ -27,9 +27,6 @@ const double Stoich::EPSILON = 1.0e-6;
 
 const Cinfo* initStoichCinfo()
 {
-	/**
-	 * Several messages that connect to the KineticHub
-	 */
 	static Finfo* hubShared[] =
 	{
 		new SrcFinfo( "rateTermInfoSrc", 
@@ -43,15 +40,12 @@ const Cinfo* initStoichCinfo()
 			Ftype3< unsigned int, unsigned int, unsigned int >::
 			global()
 		),
-		/**
-		 * This one is a bit ugly. It sends the entire S_ and Sinit_
-		 * arrays over
-		 */
 		new SrcFinfo( "molConnectionSrc",
 			Ftype3< vector< double >* , 
 				vector< double >* , 
 				vector< Eref >*  
-				>::global() 
+				>::global(),
+				"This one is a bit ugly. It sends the entire S_ and Sinit_  arrays over"
 		),
 		new SrcFinfo( "reacConnectionSrc",
 			Ftype2< unsigned int, Eref >::global()
@@ -73,10 +67,6 @@ const Cinfo* initStoichCinfo()
 			RFCAST( &Stoich::assignYfunc )
 		),
 	};
-
-	/**
-	 * Messages that connect to the KineticIntegrator
-	 */
 	static Finfo* integrateShared[] =
 	{
 		new DestFinfo( "reinit", Ftype0::global(),
@@ -87,10 +77,6 @@ const Cinfo* initStoichCinfo()
 		new SrcFinfo( "allocate",
 			Ftype1< vector< double >* >::global() ),
 	};
-
-	/**
-	 * Messages that connect to the GslIntegrator object
-	 */
 	static Finfo* gslShared[] =
 	{
 		new DestFinfo( "reinit", Ftype0::global(),
@@ -182,11 +168,14 @@ const Cinfo* initStoichCinfo()
 		// Shared definitions
 		///////////////////////////////////////////////////////
 		new SharedFinfo( "hub", hubShared, 
-				sizeof( hubShared )/ sizeof( Finfo* ) ),
+				sizeof( hubShared )/ sizeof( Finfo* ),
+					"Several messages that connect to the KineticHub" ),
 		new SharedFinfo( "integrate", integrateShared, 
-				sizeof( integrateShared )/ sizeof( Finfo* ) ),
+				sizeof( integrateShared )/ sizeof( Finfo* ),
+					"Messages that connect to the KineticIntegrator" ),
 		new SharedFinfo( "gsl", gslShared, 
-				sizeof( gslShared )/ sizeof( Finfo* ) ),
+				sizeof( gslShared )/ sizeof( Finfo* ),
+					"Messages that connect to the GslIntegrator object" ),
 
 	};
 

@@ -18,8 +18,8 @@
 class ThisFinfo: public Finfo
 {
 		public:
-			ThisFinfo( const Cinfo* c, bool noDeleteFlag = 0 )
-					: Finfo( "this", c->ftype() ), cinfo_( c ),
+			ThisFinfo( const Cinfo* c, bool noDeleteFlag = 0, const string& doc="" )
+					: Finfo( "this", c->ftype(), doc ), cinfo_( c ),
 						noDeleteFlag_( noDeleteFlag )
 			{;}
 

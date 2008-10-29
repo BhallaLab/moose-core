@@ -16,8 +16,8 @@
 class Finfo
 {
 		public:
-			Finfo( const string& name, const Ftype *f )
-					: name_( name ), ftype_( f )
+			Finfo( const string& name, const Ftype *f, const string& doc = "" )
+					: name_( name ), ftype_( f ), doc_( doc )
 			{;}
 
 			virtual ~Finfo()
@@ -268,6 +268,7 @@ class Finfo
 		private:
 			string name_;
 			const Ftype* ftype_;
+			const string doc_;
 };
 
 #endif // _FINFO_H

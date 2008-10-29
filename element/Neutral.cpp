@@ -60,23 +60,23 @@ const Cinfo* initNeutralCinfo()
 				reinterpret_cast< GetFunc>( &Neutral::getChildList ),
 				&dummyFunc
 		),
-		/// Reports the cost of one clock tick, very roughly # of FLOPs.
 		new ValueFinfo( "cpu",
 				ValueFtype1< double >::global(), 
 				reinterpret_cast< GetFunc>( &Neutral::getCpu ),
-				&dummyFunc
+				&dummyFunc,
+				"Reports the cost of one clock tick, very roughly # of FLOPs."
 		),
-		/// Returns memory used by data part of object
 		new ValueFinfo( "dataMem",
 				ValueFtype1< unsigned int >::global(), 
 				reinterpret_cast< GetFunc>( &Neutral::getDataMem ),
-				&dummyFunc
+				&dummyFunc,
+				"Returns memory used by data part of object"
 		),
-		/// Returns memory used by messaging (Element) part of object.
 		new ValueFinfo( "msgMem",
 				ValueFtype1< unsigned int >::global(), 
 				reinterpret_cast< GetFunc>( &Neutral::getMsgMem ),
-				&dummyFunc
+				&dummyFunc,
+				"Returns memory used by messaging (Element) part of object."
 		),
 		new LookupFinfo(
 				"lookupChild",
@@ -99,14 +99,10 @@ const Cinfo* initNeutralCinfo()
 		new DestFinfo( "destroy", Ftype0::global(),
 			&Neutral::destroy ),
 
-		/**
-		 * This function allows objects to do additional initialization
-		 * at the MOOSE level after they are created. For example, we
-		 * may want to nest some fields in the object, which requires
-		 * the creation of child objects to hold the nested fields.
-		 * This would be done by overriding the postCreate function.
-		 */
-		new DestFinfo( "postCreate", Ftype0::global(), &dummyFunc ),
+		new DestFinfo( "postCreate", Ftype0::global(), &dummyFunc, 
+			"This function allows objects to do additional initialization at the MOOSE level after they are created.\n"
+			"For example, we may want to nest some fields in the object, which requires the creation of child \n"
+			"objects to hold the nested fields. This would be done by overriding the postCreate function." ),
 	};
 
 	static Cinfo neutralCinfo(

@@ -19,8 +19,8 @@ class SrcFinfo: public Finfo
 #ifdef DO_UNIT_TESTS
 			friend void cinfoTest(); // wants to look at msg_
 #endif
-			SrcFinfo( const string& name, const Ftype *f )
-					: Finfo( name, f ), msg_( 0 )
+			SrcFinfo( const string& name, const Ftype *f, const string& doc="" )
+					: Finfo( name, f, doc ), msg_( 0 )
 			{;}
 
 			~SrcFinfo()

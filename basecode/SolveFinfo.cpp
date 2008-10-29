@@ -14,7 +14,7 @@
 #include "SolveFinfo.h"
 
 SolveFinfo::SolveFinfo( 
-	Finfo** finfos, unsigned int nFinfos, const ThisFinfo* tf )
+	Finfo** finfos, unsigned int nFinfos, const ThisFinfo* tf, const string& doc )
 	: ThisFinfo( *tf )
 {
 	for ( unsigned int i = 0; i < nFinfos; i++ ) {

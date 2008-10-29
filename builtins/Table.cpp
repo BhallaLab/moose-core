@@ -20,10 +20,6 @@
 
 const Cinfo* initTableCinfo()
 {
-	/** 
-	 * This is a shared message to receive Process message from
-	 * the scheduler. 
-	 */
 	static Finfo* processShared[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
@@ -32,7 +28,8 @@ const Cinfo* initTableCinfo()
 		RFCAST( &Table::reinit ) ),
 	};
 	static Finfo* process = new SharedFinfo( "process", processShared,
-		sizeof( processShared ) / sizeof( Finfo* ) );
+		sizeof( processShared ) / sizeof( Finfo* ),
+		"This is a shared message to receive Process message from the scheduler.");
 
 	/*
 	static TypeFuncPair processTypes[] =
@@ -43,11 +40,6 @@ const Cinfo* initTableCinfo()
 				RFCAST( &Table::reinit ) ),
 	};
 	*/
-
-	/** 
-	 * This is a shared message to request and handle value
-	 * messages from fields.
-	 */
 	static Finfo* inputRequestShared[] =
 	{
 			// Sends out the request. Issued from the process call.
@@ -108,7 +100,8 @@ const Cinfo* initTableCinfo()
 	///////////////////////////////////////////////////////
 		process,
 		new SharedFinfo( "inputRequest", inputRequestShared, 
-			sizeof( inputRequestShared ) / sizeof( Finfo* ) ),
+			sizeof( inputRequestShared ) / sizeof( Finfo* ),
+			"This is a shared message to request and handle value  messages from fields." ),
 		/*
 		new SharedFinfo( "process", processTypes, 2 ),
 		new SharedFinfo( "inputRequest", inputRequestTypes, 2 ),
@@ -117,52 +110,36 @@ const Cinfo* initTableCinfo()
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-		/// Sends the output value every timestep.
-		new SrcFinfo( "outputSrc", Ftype1< double >::global() ),
+		new SrcFinfo( "outputSrc", Ftype1< double >::global(),
+			"Sends the output value every timestep." ),
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
-		
-		/**
-		 * Look up and interpolate value from table using x value.
-		 * Put result in output, and also send out on outputSrc.
-		 */
 		new DestFinfo( "msgInput", Ftype1< double >::global(), 
-			RFCAST( &Table::setInput )
+			RFCAST( &Table::setInput ),
+			"Look up and interpolate value from table using x value.\n"
+			"Put result in output, and also send out on outputSrc."
 		),
-
-		/**
-		 * Sum this value onto the output field.
-		 */
 		new DestFinfo( "sum", Ftype1< double >::global(), 
-			RFCAST( &Table::sum )
+			RFCAST( &Table::sum ),
+			"Sum this value onto the output field."
 		),
-
-		/**
-		 * Multipy this value into the output field.
-		 */
 		new DestFinfo( "prd", Ftype1< double >::global(), 
-			RFCAST( &Table::prd )
+			RFCAST( &Table::prd ),
+			"Multipy this value into the output field."
 		),
-
-		/**
-		 * Put value into table index specifiey by second arg.
-		 */
 		new DestFinfo( "input2", Ftype2< double, unsigned int >::global(), 
-			RFCAST( &Table::input2 )
+			RFCAST( &Table::input2 ),
+			"Put value into table index specifiey by second arg."
 		),
 
-		/**
-		 * Handle calls to perform operations on table entries.
-		 * This is a backward compatibility feature.
-		 * call table TABOP op [min max] was old syntax
-		 * Here we always require min and max. If both zero we assume
-		 * that it is the same as the range of the table.
-		 * The result of the TABOP is put into 'output' field of table.
-		 */
 		new DestFinfo( "tabop", Ftype3< char, double, double >::global(), 
-			RFCAST( &Table::tabop )
+			RFCAST( &Table::tabop ),
+			"Handle calls to perform operations on table entries.This is a backward compatibility feature.\n"
+			"call table TABOP op [min max] was old syntax .Here we always require min and max. \n"
+			"If both zero we assume that it is the same as the range of the table.\n"
+			"The result of the TABOP is put into 'output' field of table."
 		),
 
 	};

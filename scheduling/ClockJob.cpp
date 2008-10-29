@@ -99,41 +99,29 @@ const int ClockJob::doReschedCallback = 1;
 
 const Cinfo* initClockJobCinfo()
 {
-
-	/**
-	 * This is a shared message that connects up to the 'prev'
-	 * message of the first 
-	 * Tick in the sequence. It is equivalent to the Tick::next
-	 * shared message. It invokes its incrementTick
-	 * function and also manages various functions for reset
-	 * and return values. It is meant to handle only a
-	 * single target.
-	 */
 	static Finfo* tickShared[] = 
 	{
-		// This first entry is for the incrementTick function
 		new SrcFinfo( "incrementTick", 
-			Ftype2< ProcInfo, double >::global() ),
-		// The second entry is a request to send nextTime_ from the next
-		// tick to the current one. 
-		new SrcFinfo( "nextTime", Ftype0::global() ),
-		// The third entry is for receiving the nextTime_ value
-		// from the following tick.
+			Ftype2< ProcInfo, double >::global(),
+			"This first entry is for the incrementTick function" ),
+		new SrcFinfo( "nextTime", Ftype0::global(),
+			"The second entry is a request to send nextTime_ from the next tick to the current one. " ),
 		new DestFinfo( "recvNextTime", Ftype1< double >::global(), 
-			RFCAST( &ClockJob::receiveNextTime ) ),
-		// propagating resched forward.
-		new SrcFinfo( "resched", Ftype0::global() ),
-		// propagating reinit forward.
-		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
-		// invoke clean termination with a callback flag
-		new SrcFinfo( "stopSrc", Ftype1< int >::global() ),
-		// callback from termination
+			RFCAST( &ClockJob::receiveNextTime ),
+			"The third entry is for receiving the nextTime_ value from the following tick." ),
+		new SrcFinfo( "resched", Ftype0::global(),
+			"propagating resched forward." ),
+		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global(),
+			"propagating reinit forward." ),
+		new SrcFinfo( "stopSrc", Ftype1< int >::global(),
+			"invoke clean termination with a callback flag" ),
 		new DestFinfo( "stopCallback", Ftype1< int >::global(),
-			RFCAST( &ClockJob::handleStopCallback ) ),
+			RFCAST( &ClockJob::handleStopCallback ),
+			"callback from termination" ),
 		new SrcFinfo( "checkRunning", Ftype0::global() ),
-		// callback from termination
 		new DestFinfo( "runningCallback", Ftype1< bool >::global(),
-			RFCAST( &ClockJob::handleRunningCallback ) ),
+			RFCAST( &ClockJob::handleRunningCallback ),
+			"callback from termination" ),
 	};
 
 	static Finfo* clockFinfos[] =
@@ -163,7 +151,10 @@ const Cinfo* initClockJobCinfo()
 		// Connects up to the 'prev' shared message of the first
 		// Tick in the sequence.
 		new SharedFinfo( "tick", tickShared, 
-			sizeof( tickShared ) / sizeof( Finfo* ) ),
+			sizeof( tickShared ) / sizeof( Finfo* ),
+			"This is a shared message that connects up to the 'prev' message of the first Tick in the sequence. \n"
+			"It is equivalent to the Tick::next shared message. It invokes its incrementTick  function and also \n"
+			"manages various functions for reset and return values. It is meant to handle only a  single target." ),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -176,15 +167,12 @@ const Cinfo* initClockJobCinfo()
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
-		/**
-		 * This function sets off the simulation for the specified
-		 * duration
-		 */
 		new DestFinfo( "start", Ftype1< double >::global(),
-					RFCAST( &ClockJob::startFunc ) ),
-		/// This sets of the simulation for the specified # of steps
+					RFCAST( &ClockJob::startFunc ),
+					"This function sets off the simulation for the specified duration" ),
 		new DestFinfo( "step", Ftype1< int >::global(),
-					RFCAST( &ClockJob::stepFunc ) ),
+					RFCAST( &ClockJob::stepFunc ),
+					"This sets of the simulation for the specified # of steps" ),
 		new DestFinfo( "reinit", Ftype0::global(),
 					RFCAST( &ClockJob::reinitFunc ) ),
 		new DestFinfo( "resched", Ftype0::global(),
