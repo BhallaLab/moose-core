@@ -20,12 +20,6 @@
 
 const Cinfo* initInputEventPortCinfo()
 {
-
-  /**
-   * This is a shared message to receive Process messages from
-   * the scheduler objects.
-   */
-
   static Finfo* processShared[] =
     {
       new DestFinfo( "process", Ftype1< ProcInfo >::global(),
@@ -36,8 +30,8 @@ const Cinfo* initInputEventPortCinfo()
 
   static Finfo* process = 
     new SharedFinfo( "process", processShared,
-                     sizeof( processShared ) / sizeof( Finfo* ) );
-
+                     sizeof( processShared ) / sizeof( Finfo* ),
+					"This is a shared message to receive Process messages from the scheduler objects." );
 
   static Finfo* inputEventPortFinfos[] =
     {

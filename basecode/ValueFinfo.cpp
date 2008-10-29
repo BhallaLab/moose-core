@@ -15,9 +15,10 @@
 ValueFinfo::ValueFinfo(
 				const string& name,
 				const Ftype* f,
-				GetFunc get, RecvFunc set
+				GetFunc get, RecvFunc set,
+				const string& doc
 )
-	: Finfo( name, f ), get_( get ), set_( set ), msg_( INT_MAX )
+	: Finfo( name, f, doc ), get_( get ), set_( set ), msg_( INT_MAX )
 {
 	;
 }

@@ -73,13 +73,10 @@ const Cinfo* initReactionCinfo()
 		new DestFinfo( "scaleKb", 
 			Ftype1< double >::global(),
 			RFCAST( &Reaction::scaleKbFunc ) ),
-		/**
-		 * This handles volume changes of compartment. Argument is ratio
-		 * of new to old volume.
-		 */
 		new DestFinfo( "rescaleRates", 
 			Ftype1< double >::global(),
-			RFCAST( &Reaction::rescaleRates ) ),
+			RFCAST( &Reaction::rescaleRates ),
+			"This handles volume changes of compartment. Argument is ratio of new to old volume." ),
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////

@@ -22,7 +22,7 @@ class DestFinfo: public Finfo
 			friend void cinfoTest(); // wants to look at destIndex_
 #endif
 			DestFinfo( const string& name, const Ftype *f, 
-							RecvFunc rfunc, unsigned int destIndex = 0 );
+							RecvFunc rfunc, const string& doc="", unsigned int destIndex = 0 );
 
 			~DestFinfo()
 			{;}

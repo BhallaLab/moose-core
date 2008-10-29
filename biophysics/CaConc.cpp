@@ -14,15 +14,6 @@
 
 const Cinfo* initCaConcCinfo()
 {
-	/** 
-	 * This is a shared message to receive Process message from
-	 * the scheduler.
-	 * The first entry is a MsgDest for the Process operation. It
-	 * has a single argument, ProcInfo, which holds
-	 * lots of information about current time, thread, dt and so on.
-	 * The second entry is a MsgDest for the Reinit operation. It
-	 * also uses ProcInfo.
-	 */
 	static Finfo* processShared[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
@@ -31,7 +22,11 @@ const Cinfo* initCaConcCinfo()
 				RFCAST( &CaConc::reinitFunc ) ),
 	};
 	static Finfo* process =	new SharedFinfo( "process", processShared, 
-			sizeof( processShared ) / sizeof( Finfo* ) );
+			sizeof( processShared ) / sizeof( Finfo* ),
+			"This is a shared message to receive Process message from the scheduler.The first entry is a MsgDest \n"
+			"for the Process operation. It has a single argument, ProcInfo, which holds lots of information about\n"
+			"current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. \n"
+			"It also uses ProcInfo.");
 
 ///////////////////////////////////////////////////////
 // Field definitions

@@ -40,8 +40,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\hsolve;..\..\utility;..\..\randnum;..\..\genesis_parser;..\..\shell;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;C:\Program Files\GnuWin32\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL"
+				AdditionalIncludeDirectories="..\..\ksolve;..\..\robots;..\..\hsolve;..\..\utility;..\..\randnum;..\..\genesis_parser;..\..\shell;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\GnuWin32\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;USE_READLINE;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -61,9 +61,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libgsl.a libgslcblas.a"
+				AdditionalDependencies="libgsl.a libgslcblas.a libreadline.a libhistory.a"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\GnuWin32\lib&quot;"
+				AdditionalLibraryDirectories="&quot;D:\Program Files\GnuWin32\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -214,6 +214,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\biophysics\DifShell.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\biophysics\HHChannel.cpp"
 					>
 				</File>
@@ -255,6 +259,10 @@
 				</File>
 				<File
 					RelativePath="..\..\biophysics\SynChan.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\TauPump.cpp"
 					>
 				</File>
 				<File
@@ -406,11 +414,19 @@
 				Name="builtins"
 				>
 				<File
+					RelativePath="..\..\builtins\AscFile.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\builtins\Interpol.cpp"
 					>
 				</File>
 				<File
 					RelativePath="..\..\builtins\Table.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\builtins\TimeTable.cpp"
 					>
 				</File>
 			</Filter>
@@ -538,31 +554,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\kinetics\GslIntegrator.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\kinetics\HemispherePanel.cpp"
 					>
 				</File>
 				<File
 					RelativePath="..\..\kinetics\KinCompt.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\kinetics\KineticHub.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\kinetics\KineticManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\kinetics\KinSparseMatrix.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\kinetics\Kintegrator.cpp"
 					>
 				</File>
 				<File
@@ -578,6 +574,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\kinetics\Particle.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\kinetics\Reaction.cpp"
 					>
 				</File>
@@ -586,11 +586,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\kinetics\SpherePanel.cpp"
+					RelativePath="..\..\kinetics\SmoldynHub.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\kinetics\Stoich.cpp"
+					RelativePath="..\..\kinetics\SpherePanel.cpp"
 					>
 				</File>
 				<File
@@ -1144,6 +1144,178 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="robots"
+				>
+				<File
+					RelativePath="..\..\robots\Adaptor.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeur.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeurAdaptors.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeurDiffusion.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeurNeuron.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeurSignaling.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="ksolve"
+				>
+				<File
+					RelativePath="..\..\ksolve\GslIntegrator.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\GssaStoich.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\KineticHub.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\KineticManager.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\KinSparseMatrix.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\Kintegrator.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\Stoich.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\TestKsolve.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -1175,6 +1347,10 @@
 				</File>
 				<File
 					RelativePath="..\..\biophysics\Compartment.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\DifShell.h"
 					>
 				</File>
 				<File
@@ -1227,6 +1403,10 @@
 				</File>
 				<File
 					RelativePath="..\..\biophysics\SynInfo.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\TauPump.h"
 					>
 				</File>
 			</Filter>
@@ -1402,11 +1582,19 @@
 				Name="builtins"
 				>
 				<File
+					RelativePath="..\..\builtins\AscFile.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\builtins\Interpol.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\builtins\Table.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\builtins\TimeTable.h"
 					>
 				</File>
 			</Filter>
@@ -1546,10 +1734,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\kinetics\GslIntegrator.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\kinetics\HemispherePanel.h"
 					>
 				</File>
@@ -1559,22 +1743,6 @@
 				</File>
 				<File
 					RelativePath="..\..\kinetics\KinCompt.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\kinetics\KineticHub.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\kinetics\KineticManager.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\kinetics\KinSparseMatrix.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\kinetics\Kintegrator.h"
 					>
 				</File>
 				<File
@@ -1594,10 +1762,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\kinetics\RateTerm.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\kinetics\Reaction.h"
 					>
 				</File>
@@ -1606,11 +1770,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\kinetics\SpherePanel.h"
+					RelativePath="..\..\kinetics\SmoldynHub.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\kinetics\Stoich.h"
+					RelativePath="..\..\kinetics\SpherePanel.h"
 					>
 				</File>
 				<File
@@ -1803,6 +1967,54 @@
 				</File>
 				<File
 					RelativePath="..\..\hsolve\TestHSolve.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="robots"
+				>
+				<File
+					RelativePath="..\..\robots\Adaptor.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeur.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="ksolve"
+				>
+				<File
+					RelativePath="..\..\ksolve\GslIntegrator.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\GssaStoich.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\KineticHub.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\KineticManager.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\KinSparseMatrix.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\Kintegrator.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\RateTerm.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\Stoich.h"
 					>
 				</File>
 			</Filter>

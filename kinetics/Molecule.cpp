@@ -18,9 +18,6 @@ extern double getVolScale( Eref e ); // defined in KinCompt.cpp
 
 const Cinfo* initMoleculeCinfo()
 {
-	/**
-	 * Manages scheduling control
-	 */
 	static Finfo* processShared[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
@@ -29,29 +26,20 @@ const Cinfo* initMoleculeCinfo()
 			RFCAST( &Molecule::reinitFunc ) ),
 	};
 	static Finfo* process = new SharedFinfo( "process", processShared,
-		sizeof( processShared ) / sizeof( Finfo* ) );
-
-	/**
-	 * Manages interactions with reactions
-	 */
+		sizeof( processShared ) / sizeof( Finfo* ),
+		"Manages scheduling control" );
 	static Finfo* reacShared[] =
 	{
 		new DestFinfo( "reac", Ftype2< double, double >::global(),
 			RFCAST( &Molecule::reacFunc ) ),
 		new SrcFinfo( "n", Ftype1< double >::global() )
 	};
-
-	/**
-	 * Manages volume control through interacting with KinCompt: the
-	 * kinetic compartment object, which in turn interfaces with surfaces
-	 */
 	static Finfo* extentShared[] =
 	{
 		new DestFinfo( "returnExtent", Ftype2< double, unsigned int >::global(),
 			RFCAST( &Molecule::extentFunc ) ),
 		new SrcFinfo( "requestExtent", Ftype0::global() )
 	};
-
 	static Finfo* moleculeFinfos[] =
 	{
 	///////////////////////////////////////////////////////
@@ -104,15 +92,11 @@ const Cinfo* initMoleculeCinfo()
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
-	
-		/**
-		 * This is a backward compat feature to handle
-		 * one-ended input from enzymes, but using the same reacFunc
-		 * as the shared message for reac.
-		 */
 		new DestFinfo( "prd",
 			Ftype2< double, double >::global(),
-			RFCAST( &Molecule::reacFunc )
+			RFCAST( &Molecule::reacFunc ),
+			"This is a backward compat feature to handle one-ended input from enzymes, but using the same \n"
+			"reacFunc as the shared message for reac."
 		),
 	
 		new DestFinfo( "sumTotal",
@@ -120,10 +104,10 @@ const Cinfo* initMoleculeCinfo()
 			RFCAST( &Molecule::sumTotalFunc )
 		),
 
-		// Takes the ratio of the new volume to the old one.
 		new DestFinfo( "rescaleVolume",
 			Ftype1< double >::global(),
-			RFCAST( &Molecule::rescaleFunc )
+			RFCAST( &Molecule::rescaleFunc ),
+			"Takes the ratio of the new volume to the old one."
 		),
 	
 		/*
@@ -140,9 +124,12 @@ const Cinfo* initMoleculeCinfo()
 	///////////////////////////////////////////////////////
 		process,
 		new SharedFinfo( "reac", reacShared,
-			sizeof( reacShared ) / sizeof( Finfo* ) ),
+			sizeof( reacShared ) / sizeof( Finfo* ),
+			"Manages interactions with reactions" ),
 		new SharedFinfo( "extent", extentShared,
-			sizeof( extentShared ) / sizeof( Finfo* ) ),
+			sizeof( extentShared ) / sizeof( Finfo* ),
+			"Manages volume control through interacting with KinCompt: the kinetic compartment object, \n"
+			"which in turn interfaces with surfaces" ),
 	};
 
 	// Schedule molecules for the slower clock, stage 0.

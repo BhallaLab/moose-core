@@ -24,8 +24,7 @@ double Music::dt_;
 const Cinfo* initMusicCinfo()
 {
 	/**
-	 * This is a shared message to receive Process messages from
-	 * the scheduler objects.
+	 *
 	 */
 	static Finfo* processShared[] =
 	{
@@ -40,7 +39,8 @@ const Cinfo* initMusicCinfo()
 	static Finfo* process = new SharedFinfo(
 		"process",
 		processShared,
-		sizeof( processShared ) / sizeof( Finfo* ) );
+		sizeof( processShared ) / sizeof( Finfo* ),
+		" This is a shared message to receive Process messages from the scheduler objects." );
 	
 	static Finfo* musicFinfos[] =
 	{

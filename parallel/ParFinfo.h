@@ -24,7 +24,7 @@ class ParFinfo: public Finfo
 			 * also make a vector of RecvFuncs that will be used
 			 * when adding messages.
 			 */
-			ParFinfo( const string& name );
+			ParFinfo( const string& name, const string& doc="" );
 
 			~ParFinfo()
 			{;}

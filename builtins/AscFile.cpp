@@ -21,11 +21,12 @@ const Cinfo* initAscFileCinfo()
 
   static Finfo* inputRequestShared[] =
     {
-      // Sends out the request. Issued from the process call.
-      new SrcFinfo( "requestInput", Ftype0::global() ),
-      // Handle the returned value.
+      
+      new SrcFinfo( "requestInput", Ftype0::global(),
+					"Sends out the request. Issued from the process call." ),
       new DestFinfo( "handleInput", Ftype1< double >::global(),
-                     RFCAST( &AscFile::input ) ),
+                     RFCAST( &AscFile::input ),
+						"Handle the returned value." ),
     };
 
 

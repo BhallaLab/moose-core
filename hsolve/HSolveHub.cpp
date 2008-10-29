@@ -23,11 +23,6 @@
 
 const Cinfo* initHSolveHubCinfo()
 {
-	/**
-	 * This is identical to the message sent from clock Ticks to
-	 * objects. Here it is used to take over the Process message,
-	 * usually only as a handle from the solver to the object.
-	 */
 	static Finfo* zombieShared[] =
 	{
 		new SrcFinfo( "process", Ftype1< ProcInfo >::global() ),
@@ -52,17 +47,18 @@ const Cinfo* initHSolveHubCinfo()
 			RFCAST( &HSolveHub::hubFunc ) ),
 		new DestFinfo( "destroy", Ftype0::global(),
 			&HSolveHub::destroy ),
-		// override the Neutral::childFunc here, so that when this
-		// is deleted all the zombies are reanimated.
 		new DestFinfo( "child", Ftype1< int >::global(),
-			RFCAST( &HSolveHub::childFunc ) ),
+			RFCAST( &HSolveHub::childFunc ),
+			"override the Neutral::childFunc here, so that when this is deleted all the zombies are reanimated." ),
 		new DestFinfo( "injectMsg", Ftype1< double >::global(),
 			RFCAST( &HSolveHub::comptInjectMsgFunc ) ),
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "compartmentSolve", zombieShared, 
-			sizeof( zombieShared ) / sizeof( Finfo* ) ),
+			sizeof( zombieShared ) / sizeof( Finfo* ),
+			"This is identical to the message sent from clock Ticks to objects. Here it is used to take over \n"
+			"the Process message, usually only as a handle from the solver to the object." ),
 		new SharedFinfo( "hhchannelSolve", zombieShared, 
 			sizeof( zombieShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "caconcSolve", zombieShared, 
@@ -101,10 +97,6 @@ const Finfo* comptInjectFinfo =
 
 Finfo* initCompartmentZombieFinfo()
 {
-	/* 
-	 * These fields will replace the original compartment fields so that
-	 * the lookups refer to the solver rather than the compartment.
-	 */
 	static Finfo* compartmentFields[] =
 	{
 		new ValueFinfo( "Vm",
@@ -131,7 +123,9 @@ Finfo* initCompartmentZombieFinfo()
 	static SolveFinfo compartmentZombieFinfo( 
 		compartmentFields, 
 		sizeof( compartmentFields ) / sizeof( Finfo* ),
-		tf
+		tf,
+		"These fields will replace the original compartment fields so that the lookups refer to the solver rather \n"
+		"than the compartment."
 	);
 
 	return &compartmentZombieFinfo;

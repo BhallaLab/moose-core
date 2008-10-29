@@ -14,10 +14,6 @@
 
 const Cinfo* initSpikeGenCinfo()
 {
-	/**
-	 * This is a shared message to receive Process messages from
-	 * the scheduler objects.
-	 */
 	static Finfo* processShared[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
@@ -26,7 +22,8 @@ const Cinfo* initSpikeGenCinfo()
 				RFCAST( &SpikeGen::reinitFunc ) ),
 	};
 	static Finfo* process =	new SharedFinfo( "process", processShared, 
-			sizeof( processShared ) / sizeof( Finfo* ) );
+			sizeof( processShared ) / sizeof( Finfo* ),
+			"This is a shared message to receive Process messages from the scheduler objects." );
 	
 	static Finfo* spikeGenFinfos[] = 
 	{
@@ -43,13 +40,11 @@ const Cinfo* initSpikeGenCinfo()
 			RFCAST( &SpikeGen::setRefractT )
 		),
 
-		/**
-		 * The amplitude field of the spikeGen is never used.
-		 * \todo: perhaps should deprecate this.
-		 */
 		new ValueFinfo( "amplitude", ValueFtype1< double >::global(),
 			GFCAST( &SpikeGen::getAmplitude ),
-			RFCAST( &SpikeGen::setAmplitude )
+			RFCAST( &SpikeGen::setAmplitude ),
+			"The amplitude field of the spikeGen is never used.\n"
+			" \todo: perhaps should deprecate this."
 		),
 		new ValueFinfo( "state", ValueFtype1< double >::global(),
 			GFCAST( &SpikeGen::getState ),
@@ -68,9 +63,8 @@ const Cinfo* initSpikeGenCinfo()
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-		// Sends out a trigger for an event. The time is not 
-		// sent - everyone knows the time.
-		new SrcFinfo( "event", Ftype1< double >::global() ),
+		new SrcFinfo( "event", Ftype1< double >::global(), 
+			"Sends out a trigger for an event. The time is not sent - everyone knows the time." ),
 
 	//////////////////////////////////////////////////////////////////
 	// Dest Finfos.

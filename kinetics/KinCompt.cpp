@@ -30,13 +30,11 @@ void rescaleTree( Eref e, double ratio );
  */
 const Cinfo* initKinComptCinfo()
 {
-	// Connects to molecules, which trigger a request for volume info.
-	// Volume here may be size?
 	static Finfo* extentShared[] =
 	{
-		// args are size, nDimensions
 		new SrcFinfo( "returnExtent", 
-			Ftype2< double, unsigned int >::global() ),
+			Ftype2< double, unsigned int >::global(),
+			"args are size, nDimensions" ),
 		new DestFinfo( "requestExtent", Ftype0::global(),
 			RFCAST( &KinCompt::requestExtent ) ),
 	};
@@ -46,16 +44,13 @@ const Cinfo* initKinComptCinfo()
 	///////////////////////////////////////////////////////
 	// Field definitions
 	///////////////////////////////////////////////////////
-		// Volume is the compartment volume. If there are no
-		// messages to surfaces this returns the local value.
-		// The setVolume only works if there are no surfaces anywhere.
-		// Otherwise the surfaces override it
-		// Assigning any of the following four parameters causes automatic
-		// rescaling of rates throughout the model.
 		new ValueFinfo( "volume", 
 			ValueFtype1< double >::global(),
 			GFCAST( &KinCompt::getVolume ), 
-			RFCAST( &KinCompt::setVolume )
+			RFCAST( &KinCompt::setVolume ),
+			"Volume is the compartment volume. If there are no messages to surfaces this returns the local value.\n"
+			"The setVolume only works if there are no surfaces anywhere.Otherwise the surfaces override it \n"
+			"Assigning any of the following four parameters causes automatic rescaling of rates throughout the model."
 		),
 		new ValueFinfo( "area", 
 			ValueFtype1< double >::global(),
@@ -67,16 +62,13 @@ const Cinfo* initKinComptCinfo()
 			GFCAST( &KinCompt::getPerimeter ), 
 			RFCAST( &KinCompt::setPerimeter )
 		),
-
-		// This takes whichever of the above is appropriate for the # of
-		// dimensions. Means the same thing as the SBML size.
 		new ValueFinfo( "size", 
 			ValueFtype1< double >::global(),
 			GFCAST( &KinCompt::getSize ), 
-			RFCAST( &KinCompt::setSize )
+			RFCAST( &KinCompt::setSize ),
+			"This takes whichever of the above is appropriate for the # of dimensions. Means the same thing as the\n"
+			"SBML size."
 		),
-
-
 		new ValueFinfo( "numDimensions", 
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &KinCompt::getNumDimensions ), 
@@ -85,41 +77,30 @@ const Cinfo* initKinComptCinfo()
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-		// This goes to the compartment that encloses the current one.
-		// Appropriate even for 2d enclosed by 3d and so on.
-		new SrcFinfo( "outside", Ftype0::global() ),
+		new SrcFinfo( "outside", Ftype0::global(),
+			"This goes to the compartment that encloses the current one.Appropriate even for 2d enclosed by 3d and so on." ),
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
-		// This handles the 'outside' message from interior compartments.
 		new DestFinfo( "inside", Ftype0::global(),
-			&dummyFunc ),
-
-		/**
-	 	* Gets input from a single exterior surface
-	 	*/
+			&dummyFunc,
+			"This handles the 'outside' message from interior compartments." ),
 		new DestFinfo( "exterior", 
 			Ftype3< double, double, double >::global(),
-			RFCAST( &KinCompt::exteriorFunction ) ),
-			
-		/**
-	 	* Gets input from possibly many interior surfaces
-	 	*/
+			RFCAST( &KinCompt::exteriorFunction ),
+			"Gets input from a single exterior surface" ),
 		new DestFinfo( "interior", 
 			Ftype3< double, double, double >::global(),
-			RFCAST( &KinCompt::interiorFunction ) ),
-
-		/**
-	 	* Rescales the volume by the specified ratio. NewVol = ratio * old.
-	 	*/
+			RFCAST( &KinCompt::interiorFunction ),
+			"Gets input from possibly many interior surfaces" ),
 		new DestFinfo( "rescaleSize", 
 			Ftype1< double >::global(),
-			RFCAST( &KinCompt::rescaleFunction ) ),
-
-		// Assigns size without rescaling the entire model.
+			RFCAST( &KinCompt::rescaleFunction ),
+			"Rescales the volume by the specified ratio. NewVol = ratio * old." ),
 		new DestFinfo( "sizeWithoutRescale", 
 			Ftype1< double >::global(),
-			RFCAST( &KinCompt::setSizeWithoutRescale ) ),
+			RFCAST( &KinCompt::setSizeWithoutRescale ),
+			"Assigns size without rescaling the entire model." ),
 	///////////////////////////////////////////////////////
 	// Synapse definitions
 	///////////////////////////////////////////////////////
@@ -127,7 +108,8 @@ const Cinfo* initKinComptCinfo()
 	// Shared definitions
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "extent", extentShared,
-			sizeof( extentShared ) / sizeof( Finfo* ) ),
+			sizeof( extentShared ) / sizeof( Finfo* ),
+			"Connects to molecules, which trigger a request for volume info. Volume here may be size?" ),
 	};
 
 	static Cinfo kinComptCinfo(

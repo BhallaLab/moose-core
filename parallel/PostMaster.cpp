@@ -27,35 +27,26 @@ const unsigned int BUFFER_SIZE = 10000;
 
 const Cinfo* initPostMasterCinfo()
 {
-	/**
-	 * This shared message communicates between the ParTick and 
-	 * the PostMaster
-	 */
 	static Finfo* parShared[] = 
 	{
-		// This first entry is to tell the PostMaster to post iRecvs
 		new DestFinfo( "postIrecv", Ftype0::global(), 
-			RFCAST( &PostMaster::postIrecv ) ),
-		// The second entry is to tell the PostMaster to post 'send'
+			RFCAST( &PostMaster::postIrecv ),
+			"This first entry is to tell the PostMaster to post iRecvs" ),
 		new DestFinfo( "postSend", Ftype1< bool >::global(), 
-			RFCAST( &PostMaster::postSend ) ),
-		// The third entry is for polling the receipt of incoming data.
-		// Each PostMaster does an MPI_Test on the earlier posted iRecv.
+			RFCAST( &PostMaster::postSend ),
+			"The second entry is to tell the PostMaster to post 'send'" ),
 		new DestFinfo( "poll", Ftype1< bool >::global(), 
-			RFCAST( &PostMaster::poll ) ),
-		// The fourth entry is for harvesting the poll request.
-		// The argument is the node number handled by the postmaster.
-		// It comes back when the polling on that postmaster is done.
-		new SrcFinfo( "harvestPoll", Ftype1< unsigned int >::global() ),
-
+			RFCAST( &PostMaster::poll ),
+			"The third entry is for polling the receipt of incoming data.Each PostMaster does an MPI_Test on the \n"
+			"earlier posted iRecv." ),
+		new SrcFinfo( "harvestPoll", Ftype1< unsigned int >::global(),
+			"The fourth entry is for harvesting the poll request.The argument is the node number handled by \n"
+			"the postmaster.It comes back when the polling on that postmaster is done." ),
 		new DestFinfo( "clearSetupStack", Ftype0::global(), 
 			RFCAST( &PostMaster::clearSetupStack ) ),
-		
-		// 
-		// Removed. We want barrier-free synchronization where needed.
-		// The last entry tells targets to execute a Barrier command,
-		// in order to synchronize all nodes.
-		new DestFinfo( "barrier", Ftype0::global(), RFCAST( &PostMaster::barrier ) ),
+		new DestFinfo( "barrier", Ftype0::global(), RFCAST( &PostMaster::barrier ),
+			"Removed. We want barrier-free synchronization where needed.\n"
+			"The last entry tells targets to execute a Barrier command,in order to synchronize all nodes." ),
 	};
 
 	static Finfo* serialShared[] =
@@ -85,27 +76,24 @@ const Cinfo* initPostMasterCinfo()
 					GFCAST( &PostMaster::getShellProxy ),
 					RFCAST( &PostMaster::setShellProxy )
 		),
-
-		/**
-		 * A bit of a hack to keep track of # of async msgs coming in 
-		 * and leaving.
-		 */
 		new DestFinfo( "incrementNumAsyncIn", Ftype0::global(), 
-			RFCAST( &PostMaster::incrementNumAsyncIn ) ),
+			RFCAST( &PostMaster::incrementNumAsyncIn ),
+			"A bit of a hack to keep track of # of async msgs coming in and leaving." ),
 		new DestFinfo( "incrementNumAsyncOut", Ftype0::global(), 
 			RFCAST( &PostMaster::incrementNumAsyncOut ) ),
 
-		// derived from DestFinfo, main difference is it accepts all
-		// kinds of incoming data.
 		new AsyncDestFinfo( "async", 
-			Ftype2< char*, unsigned int >::global(), 
-			RFCAST( &PostMaster::async ) ),
+			Ftype2< char*, unsigned int >::global(),
+			RFCAST( &PostMaster::async),
+			"derived from DestFinfo, main difference is it accepts all kinds of incoming data."
+			),
 
 		////////////////////////////////////////////////////////////////
 		//	Shared messages.
 		////////////////////////////////////////////////////////////////
 		new SharedFinfo( "parTick", parShared, 
-			sizeof( parShared ) / sizeof( Finfo* ) ),
+			sizeof( parShared ) / sizeof( Finfo* ),
+			"This shared message communicates between the ParTick and the PostMaster" ),
 		new SharedFinfo( "serial", serialShared, 
 			sizeof( serialShared ) / sizeof( Finfo* ) ),
 	};

@@ -13,9 +13,9 @@
 
 
 AsyncDestFinfo::AsyncDestFinfo( const string& name, 
-	const Ftype *f, RecvFunc rfunc, unsigned int destIndex ) 
+	const Ftype *f, RecvFunc rfunc, const string& doc, unsigned int destIndex ) 
 	: DestFinfo( name, Ftype2< char*, unsigned int >::global(), 
-		rfunc, destIndex )
+		rfunc, doc, destIndex )
 { ; }
 
 
