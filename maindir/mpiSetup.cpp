@@ -9,7 +9,8 @@
 
 #include <utility/utility.h>
 #include <time.h> // for nanosleep. This is POSIX, so should be available
-				// even from Windows.
+              // even from Windows.
+int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -242,6 +243,11 @@ void terminateMPI( unsigned int myNode )
 
 void pollPostmaster()
 {
+	
+  
+	//static struct timespec ts( 0, 10000000L );
+    //static struct timespec ts=static struct timespec( 0, 10000000L );
+//timespec ts1= timespec( 0, 10000000L );
 	static struct timespec ts = { 0, 10000000L }; // 10000000 nsec, 10 msec.
 	if ( pj != 0 ) {
 		/*

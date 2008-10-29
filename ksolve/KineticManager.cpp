@@ -167,13 +167,12 @@ const Cinfo* initKineticManagerCinfo()
 			GFCAST( &KineticManager::getEulerError ), 
 			RFCAST( &KineticManager::setEulerError )
 		),
-		// Used to manage model volume in backward compatibility mode.
-		// In native MOOSE signaling models we expect that all chemical
-		// systems will be children of a KinCompt.
 		new ValueFinfo( "volume",
 			ValueFtype1< double >::global(),
 			GFCAST( &KineticManager::getVolume ), 
-			RFCAST( &KineticManager::setVolume )
+			RFCAST( &KineticManager::setVolume ),
+			"Used to manage model volume in backward compatibility mode.In native MOOSE signaling models we expect\n"
+			"that all chemical systems will be children of a KinCompt."
 		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions

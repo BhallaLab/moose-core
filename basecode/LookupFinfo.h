@@ -64,8 +64,9 @@ class LookupFinfo: public Finfo
 			LookupFinfo( const string& name,
 						const Ftype* f,
 						GetFunc get,
-						RecvFunc set )
-					: Finfo( name, f ), get_( get ), set_( set )
+						RecvFunc set, 
+						const string& doc="" )
+					: Finfo( name, f, doc ), get_( get ), set_( set )
 			{;}
 
 			~LookupFinfo()

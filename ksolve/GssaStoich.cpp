@@ -44,10 +44,7 @@ const Cinfo* initGssaStoichCinfo()
 			Ftype2< double, unsigned int >::global() ),
 	};
 	 */
-
-	/**
-	 * These are the fields of the stoich class
-	 */
+	//These are the fields of the stoich class
 	static Finfo* gssaStoichFinfos[] =
 	{
 		///////////////////////////////////////////////////////
@@ -91,7 +88,7 @@ const Cinfo* initGssaStoichCinfo()
 		sizeof( gssaStoichFinfos )/sizeof(Finfo *),
 		ValueFtype1< GssaStoich >::global(),
 			schedInfo, 1
-	);
+		);
 
 	return &gssaStoichCinfo;
 }

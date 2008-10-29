@@ -35,8 +35,8 @@ class DynamicFinfo: public Finfo
 {
 		public:
 			DynamicFinfo( const string& name, const Finfo* origFinfo,
-							GetFunc getFunc, void* index = 0 )
-					: Finfo( name, origFinfo->ftype() ),
+							GetFunc getFunc, void* index = 0, const string& doc="" )
+					: Finfo( name, origFinfo->ftype(), doc ),
 					origFinfo_( origFinfo ), 
 					getFunc_( getFunc ),
 					generalIndex_( index ),

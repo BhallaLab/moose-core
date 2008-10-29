@@ -18,10 +18,6 @@
 
 const Cinfo* initAdaptorCinfo()
 {
-	/** 
-	 * This is a shared message to receive Process message from
-	 * the scheduler. 
-	 */
 	static Finfo* processShared[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
@@ -30,20 +26,16 @@ const Cinfo* initAdaptorCinfo()
 		RFCAST( &Adaptor::reinit ) ),
 	};
 	static Finfo* process = new SharedFinfo( "process", processShared,
-		sizeof( processShared ) / sizeof( Finfo* ) );
+		sizeof( processShared ) / sizeof( Finfo* ),
+		"This is a shared message to receive Process message from the scheduler. " );
 
-
-	/** 
-	 * This is a shared message to request and handle value
-	 * messages from fields.
-	 */
 	static Finfo* inputRequestShared[] =
 	{
-			// Sends out the request. Issued from the process call.
-		new SrcFinfo( "requestInput", Ftype0::global() ),
-			// Handle the returned value.
-	    new DestFinfo( "handleInput", Ftype1< double >::global(),
-				RFCAST( &Adaptor::input ) ),
+		new SrcFinfo( "requestInput", Ftype0::global(),
+			" Sends out the request. Issued from the process call." ),
+		new DestFinfo( "handleInput", Ftype1< double >::global(),
+				RFCAST( &Adaptor::input ),
+				"Handle the returned value." ),
 	};
 
 	static Finfo* adaptorFinfos[] =
@@ -72,23 +64,21 @@ const Cinfo* initAdaptorCinfo()
 	///////////////////////////////////////////////////////
 		process,
 		new SharedFinfo( "inputRequest", inputRequestShared, 
-			sizeof( inputRequestShared ) / sizeof( Finfo* ) ),
+			sizeof( inputRequestShared ) / sizeof( Finfo* ),
+			"This is a shared message to request and handle value  messages from fields." ),
 		
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-		/// Sends the output value every timestep.
-		new SrcFinfo( "outputSrc", Ftype1< double >::global() ),
+		new SrcFinfo( "outputSrc", Ftype1< double >::global(),
+			"Sends the output value every timestep." ),
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
-		
-		/**
-		 * Averages inputs.
-		 */
 		new DestFinfo( "input", Ftype1< double >::global(), 
-			RFCAST( &Adaptor::input )
+			RFCAST( &Adaptor::input ),
+			"Averages inputs."
 		),
 	};
 

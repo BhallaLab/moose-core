@@ -31,7 +31,8 @@ class AsyncDestFinfo: public DestFinfo
 			AsyncDestFinfo( const string& name, 
 				const Ftype *f,
 				RecvFunc rfunc,
-				unsigned int destIndex = 0);
+				const string& doc="",
+				unsigned int destIndex = 0 );
 
 			~AsyncDestFinfo()
 			{;}

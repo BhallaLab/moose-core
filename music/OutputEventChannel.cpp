@@ -28,13 +28,10 @@ const Cinfo* initOutputEventChannelCinfo()
       ///////////////////////////////////////////////////////
       // MsgSrc definitions
       ///////////////////////////////////////////////////////
-	  /**
-	   * This field receives event messages in the form of time of an action
-	   * potential. It is called 'synapse' because a similar field on SynChan
-	   * objects is also called synapse.
-	   */
-      new DestFinfo( "synapse", Ftype1< double >::global() ,
-                     RFCAST( &OutputEventChannel::insertEvent)),      
+	  new DestFinfo( "synapse", Ftype1< double >::global() ,
+                     RFCAST( &OutputEventChannel::insertEvent),
+					 "This field receives event messages in the form of time of an action potential. \n"
+					 "It is called 'synapse' because a similar field on SynChan objects is also called synapse." ),      
       new DestFinfo("initialise", 
                     Ftype2< unsigned int, MUSIC::event_output_port* >::global(),
                     RFCAST( &OutputEventChannel::initialise))
