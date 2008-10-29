@@ -59,23 +59,17 @@ const Cinfo* initPanelCinfo()
 			GFCAST( &Panel::getNneighbors ), 
 			&dummyFunc
 		),
-
 		new ValueFinfo( "shapeId", 
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &Panel::getShapeId ), 
 			&dummyFunc
 		),
-
-		/**
-		 * Coords is used for getting all the shape position info in one
-		 * vector. The # and meaning of each coord 
-		 * depends on the shape subtype. The coord vector is accessed as
-		 * coord[index * nDim + dim]
-		 */
 		new ValueFinfo( "coords", 
 			ValueFtype1< vector< double > >::global(),
 			GFCAST( &Panel::getCoords ), 
-			&dummyFunc
+			&dummyFunc,
+			"Coords is used for getting all the shape position info in one vector. The # and meaning of each coord\n" 
+			"depends on the shape subtype. The coord vector is accessed as coord[index * nDim + dim]"
 		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions

@@ -19,10 +19,6 @@ static const double SynE = 2.7182818284590452354;
 
 const Cinfo* initSynChanCinfo()
 {
-	/** 
-	 * This is a shared message to receive Process message from
-	 * the scheduler.
-	 */
 	static Finfo* processShared[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
@@ -31,12 +27,8 @@ const Cinfo* initSynChanCinfo()
 				RFCAST( &SynChan::reinitFunc ) ),
 	};
 	static Finfo* process =	new SharedFinfo( "process", processShared, 
-			sizeof( processShared ) / sizeof( Finfo* ) );
-	/**
-	 * This is a shared message to couple channel to compartment.
-	 * The first entry is a MsgSrc to send Gk and Ek to the compartment
-	 * The second entry is a MsgDest for Vm from the compartment.
-	 */
+			sizeof( processShared ) / sizeof( Finfo* ),
+			"This is a shared message to receive Process message from the scheduler." );
 	static Finfo* channelShared[] =
 	{
 		new SrcFinfo( "channel", Ftype2< double, double >::global() ),
@@ -102,9 +94,13 @@ const Cinfo* initSynChanCinfo()
 ///////////////////////////////////////////////////////
 		process,
 		new SharedFinfo( "process", processShared,
-			sizeof( processShared ) / sizeof( Finfo* ) ), 
+			sizeof( processShared ) / sizeof( Finfo* ),
+			"This is a shared message to receive Process message from the scheduler." ), 
 		new SharedFinfo( "channel", channelShared,
-			sizeof( channelShared ) / sizeof( Finfo* ) ),
+			sizeof( channelShared ) / sizeof( Finfo* ),
+			"This is a shared message to couple channel to compartment.\n"
+			"The first entry is a MsgSrc to send Gk and Ek to the compartment \n"
+			"The second entry is a MsgDest for Vm from the compartment." ),
 
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
@@ -116,17 +112,15 @@ const Cinfo* initSynChanCinfo()
 ///////////////////////////////////////////////////////
 // MsgDest definitions
 ///////////////////////////////////////////////////////
-		// Arrival of a spike. Arg is time of sending of spike.
 		new DestFinfo( "synapse", Ftype1< double >::global(),
-				RFCAST( &SynChan::synapseFunc ) ),
-
-		// Sometimes we want to continuously activate the channel
+				RFCAST( &SynChan::synapseFunc ) ,
+				"Arrival of a spike. Arg is time of sending of spike." ),
 		new DestFinfo( "activation", Ftype1< double >::global(),
-				RFCAST( &SynChan::activationFunc ) ),
-
-		// Modulate channel response
+				RFCAST( &SynChan::activationFunc ),
+				"Sometimes we want to continuously activate the channel" ),
 		new DestFinfo( "modulator", Ftype1< double >::global(),
-				RFCAST( &SynChan::modulatorFunc ) ),
+				RFCAST( &SynChan::modulatorFunc ),
+				"Modulate channel response" ),
 	};
 
 	// SynChan is scheduled after the compartment calculations.

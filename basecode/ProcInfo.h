@@ -18,7 +18,7 @@ class ProcInfoBase
 {
 	public:
 		ProcInfoBase( unsigned int shell = 0,
-			double dt = 1.0, double currTime = 0.0 )
+			double dt = 1.0, double currTime = 0.0, const string& doc="" )
 			: dt_( dt ), currTime_( currTime ), shell_( shell )
 		{
 			;

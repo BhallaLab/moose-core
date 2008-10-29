@@ -12,7 +12,7 @@
 #include "DeletionMarkerFinfo.h"
 
 DeletionMarkerFinfo::DeletionMarkerFinfo()
-		: Finfo( "deletion", Ftype0::global() )
+		: Finfo( "deletion", Ftype0::global(), "Mark objects for deletion" )
 {
 		;
 }

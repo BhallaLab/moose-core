@@ -68,51 +68,33 @@ const Cinfo* initParTickCinfo()
 	 *	SrcFinfo "processSrc"
 	 *	SrcFinfo "updateDtSrc"
 	 */
-
-	/**
-	 * This goes to all scheduled objects to call their process events.
-	 * Although it is identical to the one in Tick.cpp, we redo it
-	 * because of scope issues.
-	 */
 	static Finfo* processShared[] =
 	{
-		// The process function call
-		new SrcFinfo( "process", Ftype1< ProcInfo >::global() ),
-		// The reinit function call
-		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
+		new SrcFinfo( "process", Ftype1< ProcInfo >::global(),
+			"The process function call" ),
+		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global(),
+			"The reinit function call" ),
 	};
-
-	/**
-	 * This shared message communicates with the postmaster
-	 */
 	static Finfo* parShared[] =
 	{
-		// This first entry is to tell the PostMaster to post iRecvs
-		new SrcFinfo( "postIrecv", Ftype0::global() ),
-		// The second entry is to tell the PostMaster to post 'send'
-		new SrcFinfo( "postSend",  Ftype1< bool >::global() ),
-		// The third entry is for polling the receipt of incoming data.
-		// Each PostMaster does an MPI_Test on the earlier posted iRecv.
-		new SrcFinfo( "poll", Ftype1< bool >::global() ),
-		// The fourth entry is for harvesting the poll request.
-		// The argument is the node number handled by the postmaster.
-		// It comes back when the polling on that postmaster is done.
+		new SrcFinfo( "postIrecv", Ftype0::global(),
+			"This first entry is to tell the PostMaster to post iRecvs" ),
+		new SrcFinfo( "postSend",  Ftype1< bool >::global(),
+			"The second entry is to tell the PostMaster to post 'send'" ),
+		new SrcFinfo( "poll", Ftype1< bool >::global(), 
+			"The third entry is for polling the receipt of incoming data.\n"
+			"Each PostMaster does an MPI_Test on the earlier posted iRecv." ),
 		new DestFinfo( "harvestPoll", Ftype1< unsigned int >::global(),
-						RFCAST( &ParTick::pollFunc ) ),
-
-		
-		// This entry tells the postMaster to execute pending setup ops.
-		// These are blocking calls, but they may invoke nested polling
-		// calls.
-		new SrcFinfo( "clearSetupStack", Ftype0::global() ),
-
-		// The last entry is to tell targets to execute a Barrier
-		// command, used to synchronize all nodes.
-		// Warning: this message should only be called on a single
-		// target postmaster using sendTo. Otherwise each target postmaster
-		// will try to set a barrier.
-		//
-		new SrcFinfo( "barrier", Ftype0::global() ),
+						RFCAST( &ParTick::pollFunc ),
+						"The fourth entry is for harvesting the poll request.The argument is the node number \n"
+						"handled by the postmaster.It comes back when the polling on that postmaster is done." ),
+		new SrcFinfo( "clearSetupStack", Ftype0::global(),
+			"This entry tells the postMaster to execute pending setup ops.These are blocking calls, \n"
+			"but they may invoke nested polling calls." ),
+		new SrcFinfo( "barrier", Ftype0::global(),
+			"The last entry is to tell targets to execute a Barrier command, used to synchronize all nodes.\n"
+			"Warning: this message should only be called on a single target postmaster using sendTo.\n"
+			"Otherwise each target postmaster will try to set a barrier." ),
 	};
 
 
@@ -133,9 +115,12 @@ const Cinfo* initParTickCinfo()
 	// Shared message definitions
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "outgoingProcess", processShared,
-			sizeof( processShared ) / sizeof( Finfo* ) ),
+			sizeof( processShared ) / sizeof( Finfo* ),
+			"This goes to all scheduled objects to call their process events.Although it is identical to the one \n"
+			"in Tick.cpp, we redo it  because of scope issues." ),
 		new SharedFinfo( "parTick", parShared, 
-			sizeof( parShared ) / sizeof( Finfo* ) ),
+			sizeof( parShared ) / sizeof( Finfo* ),
+			"This shared message communicates with the postmaster" ),
 	
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions

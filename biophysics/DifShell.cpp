@@ -14,84 +14,44 @@
 
 const Cinfo* initDifShellCinfo()
 {
-	/**
-	 * Here we create 2 shared finfos to attach with the Ticks. This is because
-	 * we want to perform DifShell computations in 2 stages, much as in the
-	 * Compartment object.
-	 * 
-	 * In the first stage we send out the concentration value to other DifShells
-	 * and Buffer elements. We also receive fluxes and currents and sum them up
-	 * to compute ( dC / dt ).
-	 * 
-	 * In the second stage we find the new C value using an explicit integration
-	 * method.
-	 * 
-	 * This 2-stage procedure eliminates the need to store and send prev_C
-	 * values, as was common in GENESIS.
-	 */
 	static Finfo* processShared_0[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
 			RFCAST( &DifShell::process_0 ) ),
-		/**
-		 * Reinit happens only in stage 0
-		 */
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
-			RFCAST( &DifShell::reinit_0 ) ),
+			RFCAST( &DifShell::reinit_0 ),
+			"Reinit happens only in stage 0" ),
 	};
 	static Finfo* process_0 = new SharedFinfo( "process_0", processShared_0,
-		sizeof( processShared_0 ) / sizeof( Finfo* ) );
+		sizeof( processShared_0 ) / sizeof( Finfo* ),
+		"Here we create 2 shared finfos to attach with the Ticks. This is because we want to perform DifShell \n"
+		"computations in 2 stages, much as in the Compartment object.\n"
+		"In the first stage we send out the concentration value to other DifShells and Buffer elements. We also \n"
+		"receive fluxes and currents and sum them up to compute ( dC / dt ).\n"
+		"In the second stage we find the new C value using an explicit integration method.\n"
+		"This 2-stage procedure eliminates the need to store and send prev_C values, as was common in GENESIS."	);
 	
 	static Finfo* processShared_1[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
 			RFCAST( &DifShell::process_1 ) ),
-		/**
-		 * Reinit happens only in stage 0
-		 */
 		new DestFinfo( "reinit", Ftype0::global(),
-			&dummyFunc ),
+			&dummyFunc, 
+			"Reinit happens only in stage 0" ),
 	};
 	static Finfo* process_1 = new SharedFinfo( "process_1", processShared_1,
 		sizeof( processShared_1 ) / sizeof( Finfo* ) );
 	
-	/**
-	 * This is a shared message from a DifShell to a Buffer (FixBuffer or
-	 * DifBuffer).
-	 * 
-	 * During stage 0:
-	 *   - DifShell sends ion concentration
-	 *   - Buffer updates buffer concentration and sends it back immediately
-	 *     using a call-back.
-	 *   - DifShell updates the time-derivative ( dC / dt )
-	 * 
-	 * During stage 1:
-	 *   - DifShell advances concentration C
-	 * 
-	 * This scheme means that the Buffer does not need to be scheduled, and
-	 * it does its computations when it receives a cue from the DifShell. May
-	 * not be the best idea, but it saves us from doing the above computations
-	 * in 3 stages instead of 2.
-	 */
 	static Finfo* bufferShared[] =
 	{
 		new SrcFinfo( "concentration", Ftype1< double >::global() ),
-		/**
-		 * Here the DifShell receives reaction rates (forward and backward),
-		 * and concentrations for the free-buffer and bound-buffer molecules.
-		 */
 		new DestFinfo( "reaction",
 			Ftype4< double, double, double, double >::global(),
-			RFCAST( &DifShell::buffer ) ),
+			RFCAST( &DifShell::buffer ),
+			"Here the DifShell receives reaction rates (forward and backward), and concentrations for the \n"
+			"free-buffer and bound-buffer molecules."	),
 	};
 
-	/**
-	 * This shared message (and the next) is between DifShells: adjoining shells
-	 * exchange information to find out the flux between them.
-	 * 
-	 * Using this message, an inner shell sends to, and receives from its
-	 * outer shell.
-	 */
 	static Finfo* innerDifShared[] =
 	{
 		new SrcFinfo( "source", Ftype2< double, double >::global() ),
@@ -99,10 +59,6 @@ const Cinfo* initDifShellCinfo()
 			RFCAST( &DifShell::fluxFromOut ) ),
 	};
 
-	/**
-	 * Using this message, an outer shell sends to, and receives from its
-	 * inner shell.
-	 */
 	static Finfo* outerDifShared[] =
 	{
 		new DestFinfo( "dest", Ftype2< double, double >::global(),
@@ -115,12 +71,10 @@ const Cinfo* initDifShellCinfo()
 	//////////////////////////////////////////////////////////////////
 	// Field definitions
 	//////////////////////////////////////////////////////////////////
-		/**
-		 * Concentration C is computed by the DifShell and is read-only
-		 */
 		new ValueFinfo( "C", ValueFtype1< double >::global(),
 			GFCAST( &DifShell::getC ),
-			&dummyFunc
+			&dummyFunc,
+			"Concentration C is computed by the DifShell and is read-only"
 		),
 		new ValueFinfo( "Ceq", ValueFtype1< double >::global(),
 			GFCAST( &DifShell::getCeq ),
@@ -176,11 +130,25 @@ const Cinfo* initDifShellCinfo()
 		process_0,
 		process_1,
 		new SharedFinfo( "buffer", bufferShared,
-			sizeof( bufferShared ) / sizeof( Finfo* ) ),
+			sizeof( bufferShared ) / sizeof( Finfo* ),
+			"This is a shared message from a DifShell to a Buffer (FixBuffer or DifBuffer).\n"
+			"During stage 0:\n"
+			"- DifShell sends ion concentration \n"
+			"- Buffer updates buffer concentration and sends it back immediately using a call-back.\n"
+			"- DifShell updates the time-derivative ( dC / dt ) \n"
+	 		"During stage 1: \n"
+			"- DifShell advances concentration C \n"
+			"This scheme means that the Buffer does not need to be scheduled, and it does its computations when \n"
+			"it receives a cue from the DifShell. May not be the best idea, but it saves us from doing the above \n"
+			"computations in 3 stages instead of 2." ),
 		new SharedFinfo( "innerDif", innerDifShared,
-			sizeof( innerDifShared ) / sizeof( Finfo* ) ),
+			sizeof( innerDifShared ) / sizeof( Finfo* ),
+			"This shared message (and the next) is between DifShells: adjoining shells exchange information to \n"
+			"find out the flux between them. \n"
+			"Using this message, an inner shell sends to, and receives from its outer shell." ),
 		new SharedFinfo( "outerDif", outerDifShared,
-			sizeof( outerDifShared ) / sizeof( Finfo* ) ),
+			sizeof( outerDifShared ) / sizeof( Finfo* ),
+			"Using this message, an outer shell sends to, and receives from its inner shell." ),
 
 	//////////////////////////////////////////////////////////////////
 	// DestFinfo definitions

@@ -31,10 +31,9 @@ const Cinfo* initCellCinfo()
 {
 	static Finfo* processShared[] =
 	{
-		/* Cell does not process at simulation time--it only sets up
-		   the solver at reset */
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-			&dummyFunc ),
+			&dummyFunc,
+			"Cell does not process at simulation time--it only sets up the solver at reset "),
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			RFCAST( &Cell::reinitFunc ) ),
 	};
@@ -43,10 +42,10 @@ const Cinfo* initCellCinfo()
 	{
 		new SrcFinfo( "integSetup",
 			Ftype2< Id, double >::global() ),
-		// Placeholder for receiving list of compartments from solver.
 		new DestFinfo( "comptList",
 			Ftype1< const vector< Id >* >::global(),
-			&dummyFunc ),
+			&dummyFunc,
+			"Placeholder for receiving list of compartments from solver." ),
 	};
 	
 	static Finfo* process = new SharedFinfo( "process", processShared,

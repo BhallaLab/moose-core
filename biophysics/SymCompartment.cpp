@@ -45,48 +45,43 @@ const Cinfo* initSymCompartmentCinfo()
 			sizeof( initShared ) / sizeof( Finfo* ) );
 	 */
 
-	/**
-	 * This is a raxial shared message between symmetric compartments.
-	 */
 	static Finfo* raxialShared[] =
 	{
-		// Expects Ra and Vm from other compartment.
 		new DestFinfo( "Raxial", Ftype2< double, double >::global(),
-			RFCAST( &SymCompartment::raxialFunc ) ),
-		// Expects Ra from other compartment.
+			RFCAST( &SymCompartment::raxialFunc ),
+			"Expects Ra and Vm from other compartment." ),
 		new DestFinfo( "sumRaxial", Ftype1< double >::global(),
-			RFCAST( &SymCompartment::sumRaxial ) ),
-		// Handles a request to send back Ra to originating compartment.
+			RFCAST( &SymCompartment::sumRaxial ),
+			"Expects Ra from other compartment." ),
 		new DestFinfo( "sumRaxialRequest", Ftype0::global(),
-			RFCAST( &SymCompartment::sumRaxialRequest ) ),
-		// Sends out Ra and Vm
-		new SrcFinfo( "RaxialSrc", Ftype2< double, double >::global() ),
-		// Sends out Ra
-		new SrcFinfo( "sumRaxialSrc", Ftype1< double >::global() ),
-		// Sends out request for Ra.
-		new SrcFinfo( "sumRaxialRequestSrc", Ftype0::global() ),
+			RFCAST( &SymCompartment::sumRaxialRequest ),
+			"Handles a request to send back Ra to originating compartment." ),
+		new SrcFinfo( "RaxialSrc", Ftype2< double, double >::global(),
+			"Sends out Ra and Vm" ),
+		new SrcFinfo( "sumRaxialSrc", Ftype1< double >::global(), 
+			"Sends out Ra" ),
+		new SrcFinfo( "sumRaxialRequestSrc", Ftype0::global(), 
+			"Sends out request for Ra." ),
 	};
 
-	/**
-	 * This is a raxial2 shared message between symmetric compartments.
-	 */
 	static Finfo* raxial2Shared[] =
 	{
-		// Expects Ra and Vm from other compartment.
+		
 		new DestFinfo( "Raxial2", Ftype2< double, double >::global(),
-			RFCAST( &SymCompartment::raxial2Func ) ),
-		// Expects Ra from other compartment.
+			RFCAST( &SymCompartment::raxial2Func ),
+			"Expects Ra and Vm from other compartment." ),
 		new DestFinfo( "sumRaxial2", Ftype1< double >::global(),
-			RFCAST( &SymCompartment::sumRaxial2 ) ),
-		// Handles a request to send back Ra to originating compartment.
+			RFCAST( &SymCompartment::sumRaxial2 ),
+			"Expects Ra from other compartment." ),
 		new DestFinfo( "sumRaxial2Request", Ftype0::global(),
-			RFCAST( &SymCompartment::sumRaxial2Request ) ),
-		// Sends out Ra and Vm
-		new SrcFinfo( "Raxial2Src", Ftype2< double, double >::global() ),
-		// Sends out Ra
-		new SrcFinfo( "sumRaxial2Src", Ftype1< double >::global() ),
-		// Sends out request for Ra.
-		new SrcFinfo( "sumRaxial2RequestSrc", Ftype0::global() ),
+			RFCAST( &SymCompartment::sumRaxial2Request ),
+			"Handles a request to send back Ra to originating compartment." ),
+		new SrcFinfo( "Raxial2Src", Ftype2< double, double >::global(),
+			"Sends out Ra and Vm"),
+		new SrcFinfo( "sumRaxial2Src", Ftype1< double >::global(),
+			"Sends out Ra" ),
+		new SrcFinfo( "sumRaxial2RequestSrc", Ftype0::global(),
+			"Sends out request for Ra." ),
 	};
 
 	static Finfo* symCompartmentFinfos[] = 
@@ -100,11 +95,14 @@ const Cinfo* initSymCompartmentCinfo()
 		
 		// Lots of aliases for raxial and raxial2.
 		new SharedFinfo( "raxial1", raxialShared,
-			sizeof( raxialShared ) / sizeof( Finfo* ) ),
+			sizeof( raxialShared ) / sizeof( Finfo* ),
+			"This is a raxial shared message between symmetric compartments." ),
 		new SharedFinfo( "CONNECTTAIL", raxialShared,
-			sizeof( raxialShared ) / sizeof( Finfo* ) ),
+			sizeof( raxialShared ) / sizeof( Finfo* ),
+			"This is a raxial shared message between symmetric compartments." ),
 		new SharedFinfo( "raxial2", raxial2Shared,
-			sizeof( raxial2Shared ) / sizeof( Finfo* ) ),
+			sizeof( raxial2Shared ) / sizeof( Finfo* ),
+			"This is a raxial2 shared message between symmetric compartments." ),
 		new SharedFinfo( "CONNECTHEAD", raxial2Shared,
 			sizeof( raxial2Shared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "CONNECTCROSS", raxial2Shared,

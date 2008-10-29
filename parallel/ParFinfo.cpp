@@ -18,8 +18,8 @@
 static const unsigned int dataSlot = 
 	initPostMasterCinfo()->getSlotIndex( "data" );
 
-ParFinfo::ParFinfo( const string& name ) 
-	: Finfo( name, Ftype0::global() )
+ParFinfo::ParFinfo( const string& name, const string& doc ) 
+	: Finfo( name, Ftype0::global(), doc )
 {
 	;
 }

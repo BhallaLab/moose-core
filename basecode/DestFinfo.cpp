@@ -12,8 +12,8 @@
 #include "DestFinfo.h"
 
 DestFinfo::DestFinfo( const string& name, const Ftype *f, 
-							RecvFunc rfunc, unsigned int msg )
-	: Finfo( name, f ), 
+							RecvFunc rfunc, const string& doc, unsigned int msg  )
+	: Finfo( name, f, doc ), 
 	rfunc_( rfunc ), 
 	msg_( msg )
 {

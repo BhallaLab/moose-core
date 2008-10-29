@@ -56,10 +56,10 @@ const Cinfo* initClassCinfo()
                             GFCAST ( &Class::getStage ),
                             RFCAST ( &Class::setStage )
                 ),
-            // Schedule function (string) on clock tick ( Id )
             new DestFinfo( "clock",
                            Ftype2 < string, Id >::global(),
-                           RFCAST(Class::setClock)
+                           RFCAST(Class::setClock),
+						   "Schedule function (string) on clock tick ( Id )"
                 ),
 //             new ValueFinfo( "base", ValueFtype1 <string>::global(),
 //                             reinterpret_cast < GetFunc > ( &Class::getBase ),

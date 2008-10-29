@@ -21,15 +21,6 @@ const int HHChannel::INSTANT_Z = 4;
 
 const Cinfo* initHHChannelCinfo()
 {
-	/** 
-	 * This is a shared message to receive Process message from
-	 * the scheduler.
-	 * The first entry is a MsgDest for the Process operation. It
-	 * has a single argument, ProcInfo, which holds
-	 * lots of information about current time, thread, dt and so on.
-	 * The second entry is a MsgDest for the Reinit operation. It
-	 * also uses ProcInfo.
-	 */
 	static Finfo* processShared[] =
 	{
 		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
@@ -38,13 +29,12 @@ const Cinfo* initHHChannelCinfo()
 				RFCAST( &HHChannel::reinitFunc ) ),
 	};
 	static Finfo* process =	new SharedFinfo( "process", processShared, 
-			sizeof( processShared ) / sizeof( Finfo* ) );
+			sizeof( processShared ) / sizeof( Finfo* ),
+			"This is a shared message to receive Process message from the scheduler. \n"
+			"The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which \n"
+			"holds lots of information about current time, thread, dt and so on.\n"
+			"The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo." );
 
-	/**
-	 * This is a shared message to couple channel to compartment.
-	 * The first entry is a MsgSrc to send Gk and Ek to the compartment
-	 * The second entry is a MsgDest for Vm from the compartment.
-	 */
 	static Finfo* channelShared[] =
 	{
 		new SrcFinfo( "channel", Ftype2< double, double >::global() ),
@@ -52,13 +42,6 @@ const Cinfo* initHHChannelCinfo()
 				RFCAST( &HHChannel::channelFunc ) ),
 	};
 
-	/**
-	 * This is a shared message to communicate with the X gate.
-	 * Sends out Vm.
-	 * Receives lookedup up values A and B for the Vm.
-	 * The A term is the alpha term from HH equations.
-	 * The B term is actually alpha + beta, precalculated.
-	 */
 	static Finfo* xGateShared[] =
 	{
 		new SrcFinfo( "Vm", Ftype1< double >::global() ),
@@ -66,9 +49,6 @@ const Cinfo* initHHChannelCinfo()
 				RFCAST( &HHChannel::xGateFunc ) ),
 	};
 
-	/**
-	 * Shared message for Y gate. Fields as in X gate.
-	 */
 	static Finfo* yGateShared[] =
 	{
 		new SrcFinfo( "Vm", Ftype1< double >::global() ),
@@ -76,9 +56,6 @@ const Cinfo* initHHChannelCinfo()
 				RFCAST( &HHChannel::yGateFunc ) ),
 	};
 
-	/**
-	 * Shared message for Z gate. Fields as in X gate.
-	 */
 	static Finfo* zGateShared[] =
 	{
 		new SrcFinfo( "Vm", Ftype1< double >::global() ),
@@ -150,13 +127,23 @@ const Cinfo* initHHChannelCinfo()
 			sizeof( processShared ) / sizeof( Finfo* ) ),
 		*/
 		new SharedFinfo( "channel", channelShared,
-			sizeof( channelShared ) / sizeof( Finfo* ) ),
+			sizeof( channelShared ) / sizeof( Finfo* ),
+			"This is a shared message to couple channel to compartment.\n"
+			"The first entry is a MsgSrc to send Gk and Ek to the compartment \n"
+			"The second entry is a MsgDest for Vm from the compartment." ),
 		new SharedFinfo( "xGate", xGateShared,
-			sizeof( xGateShared ) / sizeof( Finfo* ) ),
+			sizeof( xGateShared ) / sizeof( Finfo* ),
+			"This is a shared message to communicate with the X gate. \n"
+			"Sends out Vm.\n"
+			"Receives lookedup up values A and B for the Vm. \n"
+			"The A term is the alpha term from HH equations. \n"
+			"The B term is actually alpha + beta, precalculated." ),
 		new SharedFinfo( "yGate", yGateShared,
-			sizeof( yGateShared ) / sizeof( Finfo* ) ),
+			sizeof( yGateShared ) / sizeof( Finfo* ),
+			"Shared message for Y gate. Fields as in X gate."),
 		new SharedFinfo( "zGate", zGateShared,
-			sizeof( zGateShared ) / sizeof( Finfo* ) ),
+			sizeof( zGateShared ) / sizeof( Finfo* ),
+			"Shared message for Z gate. Fields as in X gate."),
 
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
