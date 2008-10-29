@@ -51,10 +51,10 @@ const Cinfo* initTimeTableCinfo()
                        RFCAST( &TimeTable::setTable )
                        ),
 
-      /// Load contents from file.
-      //  load filename skiplines
+      
       new DestFinfo( "load", Ftype2< string, unsigned int >::global(),
-                     RFCAST( &TimeTable::load )
+                     RFCAST( &TimeTable::load ),
+					 "Load contents from file.load filename skiplines"
                      ),
       ///////////////////////////////////////////////////////
       // MsgSrc definitions

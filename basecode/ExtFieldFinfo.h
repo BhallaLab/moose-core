@@ -17,8 +17,8 @@
 class ExtFieldFinfo: public Finfo
 {
 		public:
-			ExtFieldFinfo( const string& name, const Ftype* type )
-					: Finfo( name, type )
+			ExtFieldFinfo( const string& name, const Ftype* type, const string& doc="" )
+					: Finfo( name, type, doc )
 			{
 				val_ = "";
 			}

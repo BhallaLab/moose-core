@@ -26,83 +26,63 @@
 
 const Cinfo* initTickCinfo()
 {
-	/**
-	 * This is a shared message that connects up to the next 
-	 * Tick in the sequence. It invokes its incrementTick
-	 * function and also manages various functions for reset
-	 * and return values. It is meant to handle only a
-	 * single target.
-	 */
 	static Finfo* nextShared[] = 
 	{
-		// This first entry is for the incrementTick function
-		new SrcFinfo( "increment", Ftype2< ProcInfo, double >::global() ),
-		// The second entry is a request to send nextTime_ from the next
-		// tick to the current one. 
-		new SrcFinfo( "nextTimeSrc", Ftype0::global() ),
-		// The third entry is for receiving the nextTime_ value
-		// from the following tick.
+		new SrcFinfo( "increment", Ftype2< ProcInfo, double >::global(),
+			"This first entry is for the incrementTick function" ),
+		new SrcFinfo( "nextTimeSrc", Ftype0::global(),
+			"The second entry is a request to send nextTime_ from the next tick to the current one. " ),
 		new DestFinfo( "nextTime", Ftype1< double >::global(), 
-			RFCAST( &Tick::receiveNextTime ) ),
-		// propagating resched forward.
-		new SrcFinfo( "resched", Ftype0::global() ),
-		// propagating reinit forward.
-		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
-		// Calling for clean termination including a callback identifier
-		new SrcFinfo( "stopSrc", Ftype1< int >::global() ),
-		// Executing the stop callback.
+			RFCAST( &Tick::receiveNextTime ),
+			"The third entry is for receiving the nextTime_ value from the following tick." ),
+		new SrcFinfo( "resched", Ftype0::global(),
+			"propagating resched forward." ),
+		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global(),
+			"propagating reinit forward." ),
+		new SrcFinfo( "stopSrc", Ftype1< int >::global(),
+			"Calling for clean termination including a callback identifier" ),
 		new DestFinfo( "stopCallback", Ftype1< int >::global(), 
-			RFCAST( &Tick::handleStopCallback ) ),
+			RFCAST( &Tick::handleStopCallback ),
+			"Executing the stop callback." ),
 		new SrcFinfo( "checkRunning", Ftype0::global() ),
-		// Executing the stop callback.
 		new DestFinfo( "runningCallback", Ftype1< bool >::global(), 
-			RFCAST( &Tick::handleRunningCallback ) ),
+			RFCAST( &Tick::handleRunningCallback ),
+			"Executing the stop callback." ),
 	};
 
-	/**
-	 * This is the mirror of the previous shared message, it receives
-	 * this message from the preceding tick. Again, should only have
-	 * a singe target.
-	 */
 	static Finfo* prevShared[] = 
 	{
-		// This first entry is for the incrementTick function
 		new DestFinfo( "increment", Ftype2< ProcInfo, double >::global(), 
-			RFCAST( &Tick::incrementTick ) ),
-		// The second entry handles requests to send nextTime_ back
-		// to the previous tick.
+			RFCAST( &Tick::incrementTick ),
+			"This first entry is for the incrementTick function" ),
 		new DestFinfo( "nextTime", Ftype0::global(), 
-			RFCAST( &Tick::handleNextTimeRequest ) ),
-		// The third entry sends nextTime_ value
-		// to the previous tick.
-		new SrcFinfo( "nextTimeSrc", Ftype1< double >::global() ),
-		// The fourth entry is for receiving the resched call
+			RFCAST( &Tick::handleNextTimeRequest ),
+			"The second entry handles requests to send nextTime_ back to the previous tick." ),
+		new SrcFinfo( "nextTimeSrc", Ftype1< double >::global(),
+			"The third entry sends nextTime_ value to the previous tick." ),
 		new DestFinfo( "resched", Ftype0::global(), 
-			RFCAST( &Tick::resched ) ),
-		// The fifth one is for receiving the reinit call.
+			RFCAST( &Tick::resched ),
+			"The fourth entry is for receiving the resched call" ),
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(), 
-			RFCAST( &Tick::reinit ) ),
-		// The sixth entry is for receiving the stop call.
+			RFCAST( &Tick::reinit ),
+			"The fifth one is for receiving the reinit call." ),
 		new DestFinfo( "stop", Ftype1< int >::global(), 
-			RFCAST( &Tick::handleStop ) ),
-		// The seventh entry is for sending back the callback from the stop.
-		new SrcFinfo( "stopCallbackSrc", Ftype1< int >::global() ),
-		// The eightth entry is for receiving the checkRunning call.
+			RFCAST( &Tick::handleStop ),
+			"The sixth entry is for receiving the stop call." ),
+		new SrcFinfo( "stopCallbackSrc", Ftype1< int >::global(),
+			"The seventh entry is for sending back the callback from the stop." ),
 		new DestFinfo( "checkRunning", Ftype0::global(), 
-			RFCAST( &Tick::handleCheckRunning ) ),
-		// The seventh entry is for sending back the callback from the stop.
-		new SrcFinfo( "runningCallback", Ftype1< bool >::global() ),
+			RFCAST( &Tick::handleCheckRunning ),
+			"The eightth entry is for receiving the checkRunning call." ),
+		new SrcFinfo( "runningCallback", Ftype1< bool >::global(),
+			"The seventh entry is for sending back the callback from the stop." ),
 	};
-
-	/**
-	 * This goes to all scheduled objects to call their process events.
-	 */
 	static Finfo* processShared[] = 
 	{
-		// The process function call
-		new SrcFinfo( "process", Ftype1< ProcInfo >::global() ),
-		// The reinit function call
-		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
+		new SrcFinfo( "process", Ftype1< ProcInfo >::global(),
+			"The process function call" ),
+		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global(),
+			"The reinit function call" ),
 	};
 
 	static Finfo* tickFinfos[] =
@@ -134,27 +114,27 @@ const Cinfo* initTickCinfo()
 	// Shared message definitions
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "next", nextShared, 
-			sizeof( nextShared ) / sizeof( Finfo* ) ),
+			sizeof( nextShared ) / sizeof( Finfo* ),
+			"This is a shared message that connects up to the next Tick in the sequence.\n"
+			"It invokes its incrementTick function and also manages various functions for reset and return values.\n"
+			"It is meant to handle only a single target." ),
 		new SharedFinfo( "prev", prevShared, 
-			sizeof( prevShared ) / sizeof( Finfo* ) ),
+			sizeof( prevShared ) / sizeof( Finfo* ),
+			"This is the mirror of the previous shared message, it receives this message from the preceding tick.\n"
+			"Again, should only have a singe target." ),
 		new SharedFinfo( "process", processShared, 
-			sizeof( processShared ) / sizeof( Finfo* ) ),
+			sizeof( processShared ) / sizeof( Finfo* ),
+				"This goes to all scheduled objects to call their process events." ),
 	
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-		/**
-		 * The process message does the main business of the Tick:
-		 * Sends out the Process call to all objects scheduled at
-		 * this tick.
-		 */
-		new SrcFinfo( "processSrc", Ftype1< ProcInfo >::global() ),
-		/**
-		 * The updateDt message goes to the parent ClockJob and
-		 * initiates a resched, because when dt changes the order
-		 * of the ticks needs to be updated.
-		 */
-		new SrcFinfo( "updateDtSrc", Ftype1< double >::global() ),
+		new SrcFinfo( "processSrc", Ftype1< ProcInfo >::global(),
+			"The process message does the main business of the Tick: \n"
+			"Sends out the Process call to all objects scheduled at this tick." ),
+		new SrcFinfo( "updateDtSrc", Ftype1< double >::global(),
+			"The updateDt message goes to the parent ClockJob and initiates a resched, because when dt changes \n"
+			"the order of the ticks needs to be updated." ),
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
@@ -167,13 +147,11 @@ const Cinfo* initTickCinfo()
 			Ftype2< unsigned int, string >::global(),
 			RFCAST( &Tick::schedNewObject ) ),
 		 */
-		/**
-		 * The start function sets of a simulation to run for 
-		 * the specified runtime.
-		 */
+		
 		new DestFinfo( "start",
 			Ftype2< ProcInfo, double >::global(),
-			RFCAST( &Tick::start ) ),
+			RFCAST( &Tick::start ),
+			"The start function sets of a simulation to run for the specified runtime." ),
 	};
 	
 	static Cinfo tickCinfo(

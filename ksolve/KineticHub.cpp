@@ -38,23 +38,11 @@ const Cinfo* initKineticHubCinfo()
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			RFCAST( &KineticHub::reinitFunc ) ),
 	};
-
-	/**
-	 * This is identical to the message sent from clock Ticks to
-	 * objects. Here it is used to take over the Process message,
-	 * usually only as a handle from the solver to the object.
-	 * Here we are using the non-deprecated form.
-	 */
 	static Finfo* zombieShared[] =
 	{
 		new SrcFinfo( "process", Ftype1< ProcInfo >::global() ),
 		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
 	};
-
-	/**
-	 * This is the destination of the several messages from the 
-	 * Stoich object.
-	 */
 	static Finfo* hubShared[] =
 	{
 		new DestFinfo( "rateTermInfo", 
@@ -94,28 +82,16 @@ const Cinfo* initKineticHubCinfo()
 			Ftype1< string >::global(),
 			RFCAST( &dummyStringFunc )
 		), 
-			// The Kinetic hub doesn't need this call.
 		new DestFinfo( "clear",
 			Ftype0::global(),
-			RFCAST( &KineticHub::clearFunc )
+			RFCAST( &KineticHub::clearFunc ),
+			"The Kinetic hub doesn't need this call."
 		),
-		// Forwards to the Stoich any requests to update mol n values.
 		new SrcFinfo( "assignYsrc",
-			Ftype2< double, unsigned int >::global()
+			Ftype2< double, unsigned int >::global(),
+			"Forwards to the Stoich any requests to update mol n values."
 		),
 	};
-
-	/**
-	 * This is used to handle fluxes between sets of molecules
-	 * solved in this KineticHub and solved by other Hubs. It is
-	 * implemented as a reciprocal vector of influx and efflux.
-	 * The influx during each timestep is added directly to the 
-	 * molecule number in S_. The efflux is computed by the
-	 * Hub, and subtracted from S_, and sent on to the target Hub.
-	 * Its main purpose, as the name implies, is for diffusive flux
-	 * across an interface. Typically used for mixed simulations where
-	 * the molecules in different spatial domains are solved differently.
-	 */
 	static Finfo* fluxShared[] =
 	{
 		new SrcFinfo( "efflux", Ftype1< vector < double > >::global() ),
@@ -147,8 +123,8 @@ const Cinfo* initKineticHubCinfo()
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-		// Almost always used as sendTo.
-		new SrcFinfo( "nSrc", Ftype1< double >::global() ),
+		new SrcFinfo( "nSrc", Ftype1< double >::global(),
+			"Almost always used as sendTo." ),
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
@@ -156,27 +132,46 @@ const Cinfo* initKineticHubCinfo()
 			&KineticHub::destroy ),
 		new DestFinfo( "molSum", Ftype1< double >::global(),
 			RFCAST( &KineticHub::molSum ) ),
-		// override the Neutral::childFunc here, so that when this
-		// is deleted all the zombies are reanimated.
 		new DestFinfo( "child", Ftype1< int >::global(),
-			RFCAST( &KineticHub::childFunc ) ),
+			RFCAST( &KineticHub::childFunc ),
+			"override the Neutral::childFunc here, so that when this is deleted all the zombies are reanimated." ),
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "process", processShared,
 			      sizeof( processShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "hub", hubShared, 
-			      sizeof( hubShared ) / sizeof( Finfo* ) ),
+			      sizeof( hubShared ) / sizeof( Finfo* ),
+					"This is the destination of the several messages from the Stoich object." ),
 		new SharedFinfo( "molSolve", zombieShared, 
-			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
+			      sizeof( zombieShared ) / sizeof( Finfo* ),
+					"This is identical to the message sent from clock Ticks to objects. Here it is used to take \n"
+					"over the Process message,usually only as a handle from the solver to the object.\n"
+					"Here we are using the non-deprecated form." ),
 		new SharedFinfo( "reacSolve", zombieShared, 
-			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
+			      sizeof( zombieShared ) / sizeof( Finfo* ),
+					"This is identical to the message sent from clock Ticks to objects. Here it is used to take \n"
+					"over the Process message,usually only as a handle from the solver to the object.\n"
+					"Here we are using the non-deprecated form." ),
 		new SharedFinfo( "enzSolve", zombieShared, 
-			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
+			      sizeof( zombieShared ) / sizeof( Finfo* ),
+					"This is identical to the message sent from clock Ticks to objects. Here it is used to take \n"
+					"over the Process message,usually only as a handle from the solver to the object.\n"
+					"Here we are using the non-deprecated form." ),
 		new SharedFinfo( "mmEnzSolve", zombieShared, 
-			      sizeof( zombieShared ) / sizeof( Finfo* ) ),
+			      sizeof( zombieShared ) / sizeof( Finfo* ),
+					"This is identical to the message sent from clock Ticks to objects. Here it is used to take \n"
+					"over the Process message,usually only as a handle from the solver to the object.\n"
+					"Here we are using the non-deprecated form." ),
 		new SharedFinfo( "flux", fluxShared, 
-			      sizeof( fluxShared ) / sizeof( Finfo* ) ),
+			      sizeof( fluxShared ) / sizeof( Finfo* ),
+					"This is used to handle fluxes between sets of molecules solved in this KineticHub and solved \n"
+					"by other Hubs. It is implemented as a reciprocal vector of influx and efflux.\n"
+					"The influx during each timestep is added directly to the molecule number in S_. The efflux is\n"
+					"computed by the Hub, and subtracted from S_, and sent on to the target Hub.\n"
+					"Its main purpose, as the name implies, is for diffusive flux across an interface. \n"
+					"Typically used for mixed simulations where the molecules in different spatial domains are\n"
+					"solved differently." ),
 		/*
 		new SolveFinfo( "molSolve", molFields, 
 			sizeof( molFields ) / sizeof( const Finfo* ) );
@@ -225,8 +220,6 @@ static const Slot assignYslot =
 
 Finfo* initMolZombieFinfo()
 {
-	// These fields will replace the original molecule fields so that
-	// the lookups refer to the solver rather than the molecule.
 	static Finfo* molFields[] =
 	{
 		new ValueFinfo( "n",
@@ -256,7 +249,9 @@ Finfo* initMolZombieFinfo()
 	static SolveFinfo molZombieFinfo( 
 		molFields, 
 		sizeof( molFields ) / sizeof( Finfo* ),
-		tf
+		tf,
+		"These fields will replace the original molecule fields so that the lookups refer to the solver rather \n"
+		"than the molecule."
 	);
 
 	/*

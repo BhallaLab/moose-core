@@ -17,10 +17,7 @@ const Cinfo* initTauPumpCinfo()
     new SharedFinfo( "process", processShared,
                      sizeof( processShared ) / sizeof( Finfo* ) );
 
-  // We receive Vm from the compartment, and we send pump rate (kP) 
-  // and equilibrium concentration to diffshell
-
-
+	//We receive Vm from the compartment, and we send pump rate (kP) and equilibrium concentration to diffshell
   static Finfo* TauPumpFinfos[] =
     {
       new ValueFinfo( "pumpRate", ValueFtype1< double >::global(),
@@ -67,7 +64,7 @@ const Cinfo* initTauPumpCinfo()
                 TauPumpFinfos,
                 sizeof( TauPumpFinfos )/sizeof(Finfo *),
                 ValueFtype1< TauPump >::global(),
-                schedInfo, 1
+                schedInfo, 1				
         );
 
   return &TauPumpCinfo;

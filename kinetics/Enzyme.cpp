@@ -81,15 +81,12 @@ const Cinfo* initEnzymeCinfo()
 			GFCAST( &Enzyme::getMode ), 
 			RFCAST( &Enzyme::setMode ) 
 		),
-		/**
-		 * This actually looks up the child molecule for the enz-substrate
-		 * complex, if it exists.
-		 * Only expected to be used for initial conditions in a model.
-		 */
 		new ValueFinfo( "nInitComplex", 
 			ValueFtype1< double >::global(),
 			GFCAST( &Enzyme::getNinitComplex ), 
-			RFCAST( &Enzyme::setNinitComplex )
+			RFCAST( &Enzyme::setNinitComplex ),
+			"This actually looks up the child molecule for the enz-substrate complex, if it exists.\n"
+		    "Only expected to be used for initial conditions in a model."
 		),
 		new ValueFinfo( "concInitComplex", 
 			ValueFtype1< double >::global(),

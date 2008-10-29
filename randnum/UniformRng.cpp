@@ -28,14 +28,14 @@ const Cinfo* initUniformRngCinfo()
 {
     static Finfo* uniformRngFinfos[] =
         {
-            /// The lower bound on the numbers generated 
             new ValueFinfo("min", ValueFtype1 <double>::global(),
                            GFCAST( &UniformRng::getMin),
-                           RFCAST( &UniformRng::setMin)),
-            /// The upper bound on the numbers generated
+                           RFCAST( &UniformRng::setMin),
+						   "The lower bound on the numbers generated " ),
             new ValueFinfo("max", ValueFtype1 <double>::global(),
                            GFCAST( &UniformRng::getMax),
-                           RFCAST( &UniformRng::setMax)),
+                           RFCAST( &UniformRng::setMax),
+						   "The upper bound on the numbers generated" ),
                            
         };
     

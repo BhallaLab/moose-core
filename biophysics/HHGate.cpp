@@ -16,11 +16,6 @@ static const double SINGULARITY = 1.0e-6;
 
 const Cinfo* initHHGateCinfo()
 {
-	/**
-	 * This is a shared message to communicate with the channel.
-	 * Receives Vm
-	 * Sends A and B from the respective table lookups based on Vm.
-	 */
 	static Finfo* gateShared[] =
 	{
 		new DestFinfo( "Vm", Ftype1< double >::global(),
@@ -46,7 +41,10 @@ const Cinfo* initHHGateCinfo()
 	// Shared definitions
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "gate", gateShared, 
-			sizeof( gateShared ) / sizeof( Finfo* ) ),
+			sizeof( gateShared ) / sizeof( Finfo* ),
+			"This is a shared message to communicate with the channel.\n"
+			"Receives Vm \n"
+			"Sends A and B from the respective table lookups based on Vm." ),
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions

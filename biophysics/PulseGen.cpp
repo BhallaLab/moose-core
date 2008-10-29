@@ -64,14 +64,13 @@ const Cinfo* initPulseGenCinfo()
                            GFCAST( &PulseGen::getTrigTime),
                            RFCAST( &PulseGen::setTrigTime)),
             
-            /** TRIGGER MODES: 	
-             **         trig_mode = 0	free run
-             **         trig_mode = 1	ext. trig
-             **         trig_mode = 2	ext. gate
-             **/
             new ValueFinfo("trigMode", ValueFtype1<int>::global(),
                            GFCAST( &PulseGen::getTrigMode),
-                           RFCAST( &PulseGen::setTrigMode)),                                       
+                           RFCAST( &PulseGen::setTrigMode),
+						   "TRIGGER MODES: \n"	
+							"trig_mode = 0	free run \n"
+							"trig_mode = 1	ext. trig \n"
+							"trig_mode = 2	ext. gate" ),                                       
             new ValueFinfo("prevInput", ValueFtype1<int>::global(),
                            GFCAST( &PulseGen::getPreviousInput),
                            &dummyFunc),
