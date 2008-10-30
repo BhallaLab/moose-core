@@ -188,6 +188,7 @@ void Music::innerAddPort (
     // Create the event input port
     Element* port = 
       Neutral::create("InputEventPort", name, e.id(), Id::scratchId() );
+	port->id().setGlobal();
 
     // Publish the event input port to music
     MUSIC::event_input_port* mPort = setup_->publish_event_input(name);
@@ -215,6 +216,7 @@ void Music::innerAddPort (
      // Create the event output port
     Element* port = 
       Neutral::create("OutputEventPort", name, e.id(), Id::scratchId() );
+	port->id().setGlobal();
 
     // Publish the event output port to music
     MUSIC::event_output_port* mPort = setup_->publish_event_output(name);
