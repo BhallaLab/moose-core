@@ -12,6 +12,13 @@
               // even from Windows.
 int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
 
+#ifdef _MSC_VER       // If MS VC++ compiler
+#include <process.h>  // for getpid
+#include <Winsock2.h> // for gethostname
+#else                 // Else assume POSIX
+#include <unistd.h>   // for gethostname, getpid.
+#endif
+
 #ifdef USE_MPI
 #include <mpi.h>
 #include "MuMPI.h"	// Provides MUSIC-compatible MPI calls
