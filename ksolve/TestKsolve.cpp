@@ -38,7 +38,9 @@ void testKsolve()
 	testGslIntegrator();
 #endif // USE_GSL
 	testGssa();
+#ifndef USE_MPI // As of r896, this unit test is not compatible with the parallel code
 	testKineticManagerGssa();
+#endif
 }
 
 //////////////////////////////////////////////////////////////////
@@ -743,7 +745,7 @@ void doGslRun( const string& method, Element* integ, Element* stoich,
 #endif // ndef WIN32
 }
 
-#endif USE_GSL
+#endif // USE_GSL
 
 /**
  * Creates a simple bidirectional reaction a <==> b with rate 1
