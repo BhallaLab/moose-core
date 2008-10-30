@@ -164,9 +164,9 @@ void msgFinfoTest()
 	SrcFinfo sf2( "sf2", &dft );
 
 
-	DestFinfo df1( "df1", &zft, msgSrcTestFunc1, 0 );
+	DestFinfo df1( "df1", &zft, msgSrcTestFunc1, "doc string", 0 );
 	DestFinfo df2( "df2", &dft, 
-		reinterpret_cast< RecvFunc >( msgSrcTestFuncDbl ), 0 );
+		reinterpret_cast< RecvFunc >( msgSrcTestFuncDbl ), "doc string", 0 );
 
 	unsigned int nMsgs = 0;
 	sf1.countMessages( nMsgs );
@@ -1303,7 +1303,7 @@ void transientFinfoDeletionTest()
 {
 	SimpleElement *e1 = new SimpleElement(  Id::scratchId(), "e1", 0, 1 );
 	Finfo* temp = new DestFinfo( "temp", Ftype1< double >::global(), 
-					0, 0 );
+					0, "doc string", 0 );
 
 
 	cout << "\nTesting transientFinfo and element deletion";
