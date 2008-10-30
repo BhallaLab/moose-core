@@ -208,7 +208,7 @@ export LD
 export LIBS
 
 moose: libs $(OBJLIBS) $(PARALLEL_LIB)
-	$(CXX) $(CFLAGS) $(OBJLIBS) $(LIBS) -o moose
+	$(CXX) $(OBJLIBS) $(LIBS) -o moose
 	@echo "Moose compilation finished"
 
 libmoose.so: libs
