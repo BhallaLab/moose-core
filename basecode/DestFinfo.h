@@ -21,8 +21,10 @@ class DestFinfo: public Finfo
 #ifdef DO_UNIT_TESTS
 			friend void cinfoTest(); // wants to look at destIndex_
 #endif
-			DestFinfo( const string& name, const Ftype *f, 
-							RecvFunc rfunc, const string& doc="", unsigned int destIndex = 0 );
+			DestFinfo( const string& name, const Ftype *f,
+							RecvFunc rfunc,
+					 		const string& doc="",
+							unsigned int destIndex = 0 );
 
 			~DestFinfo()
 			{;}
