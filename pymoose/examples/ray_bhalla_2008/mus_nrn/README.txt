@@ -19,6 +19,8 @@ simulations of morphologically reconstructed CA3 hippocampal neurons, J.
 Neurophysiol. 73, 1157-1168 (1995). 
 
 Running:
+You need PyMOOSE compiled with GSL support in order to run this demo. 
+
 1. Compile the mod files for the NEURON model.
 Under unix systems:
 to compile the mod files use the command 
