@@ -123,7 +123,7 @@ void OutputEventPort::innerInitialiseFunc( Eref e,
 
   mPort_ = mPort;
 
-  for(unsigned int i = channels_.size(); i < width; i++)
+  for(unsigned int i = 0; i < width; i++)
     {
       ostringstream name;
 
