@@ -9,7 +9,7 @@ class InputEventPort : public MUSIC::event_handler_local_index
   InputEventPort() 
     {
       maxBuffered_ = 100;
-	  accLatency_ = 1e-3;
+      accLatency_ = 1e-3;
     }
 
   void operator () ( double t, MUSIC::local_index id );
