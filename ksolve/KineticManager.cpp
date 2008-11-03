@@ -13,9 +13,9 @@
 #include "../element/Neutral.h"
 #include "../element/Wildcard.h"
 #include <math.h>
-#include "KinCompt.h" // Used for the rescaleTree function, base class of KineticManager.
+#include "../kinetics/KinCompt.h" // Used for the rescaleTree function, base class of KineticManager.
 #include "KineticManager.h"
-#include "Molecule.h"
+#include "kinetics/Molecule.h"
 #include "../utility/utility.h"
 
 static map< string, KMethodInfo >& methodMap()
