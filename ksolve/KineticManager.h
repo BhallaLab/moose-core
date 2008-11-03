@@ -37,10 +37,12 @@ class KMethodInfo
 	// May need other info here as well
 };
 
-class KineticManager
+class KineticManager: public KinCompt
 {
 	public:
 		KineticManager();
+		virtual ~KineticManager()
+		{ ; }
 		
 		///////////////////////////////////////////////////
 		// Field assignment functions
@@ -64,8 +66,10 @@ class KineticManager
 		static double getRecommendedDt( Eref e );
 		static void setEulerError( const Conn* c, double value );
 		static double getEulerError( Eref e );
+		/*
 		static void setVolume( const Conn* c, double value );
 		static double getVolume( Eref e );
+		*/
 
 		// static string getMethodList( Eref e );
 		//
@@ -86,6 +90,9 @@ class KineticManager
 		static void processFunc( const Conn* c, ProcInfo info );
 		static void reschedFunc( const Conn* c );
 		void reschedFuncLocal( Eref e );
+
+		/// Specialized from KinCompt
+		void innerSetSize( Eref e, double value, bool ignoreRescale );
 
  // static void addMethod( name, description,
  // 					isStochastic,isSpatial, 

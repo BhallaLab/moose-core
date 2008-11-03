@@ -23,6 +23,8 @@ class KinCompt
 {
 	public:
 		KinCompt();
+		virtual ~KinCompt()
+		{ ; }
 		
 		///////////////////////////////////////////////////
 		// Field assignment functions
@@ -36,7 +38,8 @@ class KinCompt
 		static double getSize( Eref e );
 		static void setSize( const Conn* c, double value );
 		static void setSizeWithoutRescale( const Conn* c, double value );
-		void innerSetSize( Eref e, double value, bool ignoreRescale = 0 );
+		// This is specialized in the derived class KineticManager.
+		virtual void innerSetSize( Eref e, double value, bool ignoreRescale = 0 );
 		static unsigned int getNumDimensions( Eref e );
 		static void setNumDimensions( const Conn* c, unsigned int value );
 
@@ -56,6 +59,10 @@ class KinCompt
 
 		static void rescaleFunction( const Conn* c, double ratio );
 
+	protected:
+		double size() const {
+			return size_;
+		}
 	private:
 
 		/**
@@ -96,5 +103,11 @@ class KinCompt
 
 // Used by the Smoldyn solver
 extern const Cinfo* initKinComptCinfo();
+
+// Used by the KineticManager to handle rescaling.
+extern void rescaleTree( Eref e, double ratio );
+
+/// Used by KineticHub, Molecule, Reaction, and enzyme.
+extern double getVolScale( Eref e );
 
 #endif // _KinCompt_h
