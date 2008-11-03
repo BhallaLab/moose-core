@@ -8,7 +8,7 @@ class OutputEventPort
  public:
   OutputEventPort() 
     {
-      
+      maxBuffered_ = 1;
     }
 
   //////////////////////////////////////////////////////////////////
