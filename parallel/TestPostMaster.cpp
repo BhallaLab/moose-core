@@ -13,7 +13,7 @@
 #include <math.h>
 #include <mpi.h>
 #include "maindir/MuMPI.h"
-#include <unistd.h> // Will need to replace for other OSs
+//#include <unistd.h> // Will need to replace for other OSs
 				// Used for the usleep definition
 #include "PostMaster.h"
 #include "ProxyElement.h"

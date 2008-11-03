@@ -13,8 +13,6 @@
 #include <math.h>
 #include <mpi.h>
 #include "maindir/MuMPI.h"
-#include <unistd.h> // Will need to replace for other OSs
-				// Used for the usleep definition
 #include "PostMaster.h"
 #include "ProxyElement.h"
 #include "AsyncDestFinfo.h"
@@ -25,6 +23,13 @@
 #include "../builtins/Interpol.h"
 #include "../builtins/Table.h"
 #include "../shell/Shell.h"
+
+#ifdef _MSC_VER       // True for MS VC++ compilers
+#include <Windows.h>  // The Windows Sleep function has a granularity of 1 ms.
+#define usleep( x ) Sleep( ( x ) / 1000.0 )
+#else
+#include <unistd.h>   // Used for the usleep definition
+#endif
 
 extern void pollPostmaster(); // Defined in maindir/mpiSetup.cpp
 
