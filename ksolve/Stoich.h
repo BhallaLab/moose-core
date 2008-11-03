@@ -50,6 +50,8 @@ class Stoich
 		void clear( Eref stoich );
 
 		static void assignYfunc( const Conn* c, double y, unsigned int i );
+		static void rescaleVolume( const Conn* c, double ratio );
+		void innerRescaleVolume( double ratio );
 
 		///////////////////////////////////////////////////
 		// Functions used by the GslIntegrator
