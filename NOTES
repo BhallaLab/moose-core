@@ -7991,3 +7991,30 @@ unclean, and as far as I can tell it leaves dangling half-messages on the
 clock ticks. Hacked around it by first deleting the children of the 
 KineticManager and then the manager itself, so as to clear unit tests.
 
+Checked in as revision 885: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+=============================================================================
+30 Oct 2008
+Tried to get KineticManager to be subclassed of KinCompt. Seems to work
+to compile, but it isn't doing what I expect.
+=============================================================================
+2 Nov 2008.
+Identified issue with volume scaling and mol concs. The volume change in
+molecules causes a scaling of the n, keeping conc the same. The solver does
+not know what to do with the volume change. Since the Kinetic manager now
+is derived from KinCompt, it can send a message out to the solver. The rule
+is simply to scale all the volumes and rates as done with the
+molecules and reacs. Possible alternative is to request an assignment to all
+zombies and then use their conversion routine. Inefficient. Problem
+is the kinetic manager knows the hub etc only as children. We could do this
+implicitly to set a volumescale DestFinfo in Stoich, which manages all the
+data for all except the Smoldyn solver.
+Q: How often do we do a volume scale _after_ the solver creation?
+For the purposes of SigNeur, seems like we do this after. Even so, a loose
+end.
+Actually went ahead and fixed it. Now things scale properly in various
+solvers. I still have the problem with kb reported as 0 in GSSA solver, 
+which is presumably due to the separate forward and back reacs.
+
+
+=============================================================================

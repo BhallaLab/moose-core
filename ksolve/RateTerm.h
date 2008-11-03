@@ -39,6 +39,7 @@ class RateTerm
 			vector< unsigned int >& molIndex,
 			const vector< double >& S ) const = 0;
 		static const double EPSILON;
+		virtual void rescaleVolume( double ratio ) = 0;
 };
 
 // Base class MMEnzme for the purposes of setting rates
@@ -83,6 +84,9 @@ class MMEnzymeBase: public RateTerm
 			return kcat_;
 		}
 
+		void rescaleVolume( double ratio ) {
+			return; // Rates are already in conc units, no change needed
+		}
 
 	protected:
 		double Km_;
@@ -166,6 +170,11 @@ class ExternReac: public RateTerm
 			molIndex.resize( 0 );
 			return 0;
 		}
+
+		void rescaleVolume( double ratio ) {
+			return; // Need to figure out what to do here.
+		}
+
 	private:
 };
 
@@ -214,6 +223,10 @@ class ZeroOrder: public RateTerm
 			molIndex.resize( 0 );
 			return 0;
 		}
+
+		void rescaleVolume( double ratio ) {
+			return; // Nothing needs to be scaled.
+		}
 	protected:
 		double k_;
 };
@@ -235,6 +248,10 @@ class FirstOrder: public ZeroOrder
 			molIndex.resize( 1 );
 			molIndex[0] = y_ - &S[0];
 			return 1;
+		}
+
+		void rescaleVolume( double ratio ) {
+			return; // Nothing needs to be scaled.
 		}
 
 	private:
@@ -260,6 +277,10 @@ class SecondOrder: public ZeroOrder
 			molIndex[0] = y1_ - &S[0];
 			molIndex[1] = y2_ - &S[0];
 			return 2;
+		}
+
+		void rescaleVolume( double ratio ) {
+			k_ /= ratio;
 		}
 
 	private:
@@ -290,6 +311,13 @@ class NOrder: public ZeroOrder
 			for ( unsigned int i = 0; i < sizeof( v_ ); i++ )
 				molIndex[i] = v_[i] - &S[0];
 			return sizeof( v_ );
+		}
+
+		void rescaleVolume( double ratio ) {
+			unsigned int numSub = v_.size();
+			if ( numSub > 1 ) {
+				k_ /= pow( ratio, static_cast< double  >( numSub - 1 ));
+			}
 		}
 
 	private:
@@ -350,10 +378,14 @@ class BidirectionalReaction: public RateTerm
 			return ret;
 		}
 
+		void rescaleVolume( double ratio ) {
+			forward_->rescaleVolume( ratio );
+			backward_->rescaleVolume( ratio );
+		}
+
 	private:
 		ZeroOrder* forward_;
 		ZeroOrder* backward_;
-
 };
 
 class SumTotal

@@ -163,6 +163,11 @@ const Cinfo* initStoichCinfo()
 			RFCAST( &Stoich::rebuild )
 		),
 		*/
+		new DestFinfo( "rescaleVolume", 
+			Ftype1< double >::global(),
+			RFCAST( &Stoich::rescaleVolume ),
+			"Scales the volume of the model by the specified ratio."
+		),
 		
 		///////////////////////////////////////////////////////
 		// Shared definitions
@@ -325,6 +330,20 @@ void Stoich::assignYfunc( const Conn* c, double y, unsigned int i )
 {
 	// cout << "in Stoich::assignYfunc with " << y << ", " << i << endl;
 	send2< double, unsigned int>( c->target(), assignYslot, y, i );
+}
+
+void Stoich::rescaleVolume( const Conn* c, double ratio ) {
+	static_cast< Stoich* >( c->data() )->innerRescaleVolume( ratio );
+}
+
+void Stoich::innerRescaleVolume( double ratio )
+{
+	for ( vector< double >::iterator i = S_.begin(); i != S_.end(); ++i)
+		*i *= ratio;
+	for ( vector< double >::iterator i = Sinit_.begin(); i != Sinit_.end(); ++i)
+		*i *= ratio;
+	for ( vector< RateTerm* >::iterator i = rates_.begin(); i != rates_.end(); ++i)
+		( *i )->rescaleVolume( ratio );
 }
 
 ///////////////////////////////////////////////////
