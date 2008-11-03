@@ -13,6 +13,7 @@
 #include "../element/Neutral.h"
 #include "../element/Wildcard.h"
 #include <math.h>
+#include "KinCompt.h" // Used for the rescaleTree function, base class of KineticManager.
 #include "KineticManager.h"
 #include "Molecule.h"
 #include "../utility/utility.h"
@@ -167,6 +168,7 @@ const Cinfo* initKineticManagerCinfo()
 			GFCAST( &KineticManager::getEulerError ), 
 			RFCAST( &KineticManager::setEulerError )
 		),
+		/*
 		new ValueFinfo( "volume",
 			ValueFtype1< double >::global(),
 			GFCAST( &KineticManager::getVolume ), 
@@ -174,6 +176,7 @@ const Cinfo* initKineticManagerCinfo()
 			"Used to manage model volume in backward compatibility mode.In native MOOSE signaling models we expect\n"
 			"that all chemical systems will be children of a KinCompt."
 		),
+		*/
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -183,7 +186,6 @@ const Cinfo* initKineticManagerCinfo()
 		new DestFinfo( "resched", Ftype0::global(),
 			RFCAST( &KineticManager::reschedFunc )
 		),
-	
 	///////////////////////////////////////////////////////
 	// Synapse definitions
 	///////////////////////////////////////////////////////
@@ -200,7 +202,7 @@ const Cinfo* initKineticManagerCinfo()
 		"KineticManager",
 		"Upinder S. Bhalla, 2007, NCBS",
 		"Kinetic Manager: Handles integration methods for kinetic simulations. If in 'auto' mode then it picks a method depending on the stochastic and spatial flags. If you set a method, then the 'auto' flag goes off and all the other options are set directly by your choice.",
-		initNeutralCinfo(),
+		initKinComptCinfo(),
 		kineticManagerFinfos,
 		sizeof( kineticManagerFinfos )/sizeof(Finfo *),
 		ValueFtype1< KineticManager >::global(),
@@ -347,15 +349,19 @@ double KineticManager::getEulerError( Eref e )
 	return static_cast< KineticManager* >( e.data() )->eulerError_;
 }
 
+/*
 void KineticManager::setVolume( const Conn* c, double value )
 {
 	static_cast< KineticManager* >( c->data() )->volume_ = value;
 }
 
+// void KineticManager::innerSetVolume( Eref e, double value, bool ignoreRescale )
+
 double KineticManager::getVolume( Eref e )
 {
 	return static_cast< KineticManager* >( e.data() )->volume_;
 }
+*/
 
 //////////////////////////////////////////////////////////////////
 // Here we set up some of the messier inner functions.
@@ -650,6 +656,29 @@ void KineticManager::processFunc( const Conn* c, ProcInfo info )
 //	Element* e = c.targetElement();
 //static_cast< KineticManager* >( e.data() )->processFuncLocal( e, info );
 
+}
+
+void KineticManager::innerSetSize( 
+	Eref e, double value, bool ignoreRescale )
+{
+	double oldSize = size();
+	KinCompt::innerSetSize( e, value, ignoreRescale );
+	if ( ignoreRescale ) 
+		return;
+	Id solveId;
+	double scale = value / oldSize;
+	if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" ) )
+	{
+		if ( solveId.good() ) {
+			Id stoichId;
+			if ( lookupGet< Id, string >( 
+				solveId(), "lookupChild", stoichId, "stoich" ) ) {
+				if ( stoichId.good() )
+					set< double >( 
+						stoichId.eref(), "rescaleVolume", scale );
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////
