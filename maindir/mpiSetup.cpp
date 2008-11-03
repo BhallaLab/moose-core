@@ -8,16 +8,15 @@
 **********************************************************************/
 
 #include <utility/utility.h>
-#include <time.h> // for nanosleep. This is POSIX, so should be available
-              // even from Windows.
-int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
 
-#ifdef _MSC_VER       // If MS VC++ compiler
+#ifdef _MSC_VER	      // True for Visual C++ compilers
+#include <Windows.h>  // for Win32 Sleep function
 #include <process.h>  // for getpid
-#include <Winsock2.h> // for gethostname
 #else                 // Else assume POSIX
+#include <ctime>      // for the POSIX nanosleep function.
+                      // (could not find nanosleep implementation for Windows)
 #include <unistd.h>   // for gethostname, getpid.
-#endif
+#endif // _MSC_VER
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -248,22 +247,30 @@ void terminateMPI( unsigned int myNode )
 #endif // USE_MPI
 }
 
+/// Portable sleep: Uses nanosleep for POSIX systems, and the Win32 Sleep function for MSVC++ compilers
+void psleep( unsigned int nanoseconds )
+{
+#ifdef _MSC_VER // If this is an MS VC++ compiler..
+	unsigned int milliseconds = nanoseconds / 1000000;
+	Sleep( milliseconds );
+#else           // else assume POSIX compliant..
+	struct timespec ts = { 0, nanoseconds };
+	nanosleep( &ts, 0 );
+#endif // _MSC_VER
+}
+
 void pollPostmaster()
 {
+	unsigned int duration = 10000000; // 10000000 nsec, 10 msec.
 	
-  
-	//static struct timespec ts( 0, 10000000L );
-    //static struct timespec ts=static struct timespec( 0, 10000000L );
-//timespec ts1= timespec( 0, 10000000L );
-	static struct timespec ts = { 0, 10000000L }; // 10000000 nsec, 10 msec.
 	if ( pj != 0 ) {
 		/*
 		if ( Shell::numNodes() > 1 )
 			cout << "Polling postmaster on node " << Shell::myNode() << endl;
-			*/
+		*/
 		bool ret = set< int >( pj, stepFinfo, 1 );
 		assert( ret );
-		nanosleep( &ts, 0 );
+		psleep( duration );
 	}
 }
 
