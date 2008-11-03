@@ -40,8 +40,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\ksolve;..\..\robots;..\..\hsolve;..\..\utility;..\..\randnum;..\..\genesis_parser;..\..\shell;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\GnuWin32\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;USE_READLINE;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0"
+				AdditionalIncludeDirectories="..\..\parallel;..\..\ksolve;..\..\robots;..\..\hsolve;..\..\utility;..\..\randnum;..\..\genesis_parser;..\..\shell;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_MPI"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -61,9 +61,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libgsl.a libgslcblas.a libreadline.a libhistory.a"
+				UseLibraryDependencyInputs="true"
+				AdditionalDependencies="libgsl.a libgslcblas.a mpi.lib Ws2_32.lib cxx.lib"
+				ShowProgress="2"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;D:\Program Files\GnuWin32\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
+				AdditionalLibraryDirectories="&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -574,19 +576,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\kinetics\Particle.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\kinetics\Reaction.cpp"
 					>
 				</File>
 				<File
 					RelativePath="..\..\kinetics\RectPanel.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\kinetics\SmoldynHub.cpp"
 					>
 				</File>
 				<File
@@ -622,6 +616,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\maindir\MuMPI.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\maindir\nonblock.cpp"
 					>
 				</File>
@@ -631,6 +629,10 @@
 				>
 				<File
 					RelativePath="..\..\scheduling\ClockJob.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\scheduling\ParTick.cpp"
 					>
 				</File>
 				<File
@@ -650,6 +652,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\shell\ParShell.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\shell\ReadCell.cpp"
 					>
 				</File>
@@ -659,6 +665,10 @@
 				</File>
 				<File
 					RelativePath="..\..\shell\SimDump.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\shell\TestShell.cpp"
 					>
 				</File>
 			</Filter>
@@ -1316,6 +1326,30 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="parallel"
+				>
+				<File
+					RelativePath="..\..\parallel\AsyncDestFinfo.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\parallel\PostMaster.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\parallel\ProxyElement.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\parallel\TestParOps.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\parallel\TestPostMaster.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -1474,6 +1508,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\basecode\Ftype0.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\basecode\Ftype2.h"
 					>
 				</File>
@@ -1483,6 +1521,10 @@
 				</File>
 				<File
 					RelativePath="..\..\basecode\Ftype4.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\basecode\Ftype5.h"
 					>
 				</File>
 				<File
@@ -1758,19 +1800,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\kinetics\Particle.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\kinetics\Reaction.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\kinetics\RectPanel.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\kinetics\SmoldynHub.h"
 					>
 				</File>
 				<File
@@ -1793,12 +1827,20 @@
 					RelativePath="..\..\maindir\init.h"
 					>
 				</File>
+				<File
+					RelativePath="..\..\maindir\MuMPI.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="scheduling"
 				>
 				<File
 					RelativePath="..\..\scheduling\ClockJob.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\scheduling\ParTick.h"
 					>
 				</File>
 				<File
@@ -1814,15 +1856,15 @@
 				Name="shell"
 				>
 				<File
+					RelativePath="..\..\shell\ParShell.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\shell\ReadCell.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\shell\Shell.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\shell\SimDump.h"
 					>
 				</File>
 				<File
@@ -2015,6 +2057,22 @@
 				</File>
 				<File
 					RelativePath="..\..\ksolve\Stoich.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="parallel"
+				>
+				<File
+					RelativePath="..\..\parallel\AsyncDestFinfo.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\parallel\PostMaster.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\parallel\ProxyElement.h"
 					>
 				</File>
 			</Filter>

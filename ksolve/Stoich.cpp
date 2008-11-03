@@ -15,8 +15,8 @@
 #include "RateTerm.h"
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
-#include "Reaction.h"
-#include "Enzyme.h"
+#include "kinetics/Reaction.h"
+#include "kinetics/Enzyme.h"
 
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
