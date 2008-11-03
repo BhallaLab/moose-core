@@ -16,7 +16,7 @@
 #include "Reaction.h"
 #include "Enzyme.h"
 
-void rescaleTree( Eref e, double ratio );
+// void rescaleTree( Eref e, double ratio );
 
 /**
  * The KinCompt is a compartment for kinetic calculations. It doesn't
@@ -183,6 +183,11 @@ double KinCompt::getPerimeter( Eref e )
 
 void KinCompt::setSize( const Conn* c, double value )
 {
+	if ( value <= 0.0 ) {
+		cout << "Error: KinCompt::setSize: value = " << value << 
+			", must be positive\n";
+		return;
+	}
 	static_cast< KinCompt* >( c->data() )->innerSetSize( 
 		c->target(), value );
 }
