@@ -115,6 +115,16 @@ bool Id::redefineScratchIds( Id last, Nid base )
 		base.node() );
 }
 
+void Id::regularizeScratch()
+{
+	manager().regularizeScratch();
+}
+
+unsigned int Id::allotMainIdBlock( unsigned int size, unsigned int node )
+{
+	return manager().allotMainIdBlock( size, node );
+}
+
 //////////////////////////////////////////////////////////////
 //	Id manager static access function. Private.
 //////////////////////////////////////////////////////////////

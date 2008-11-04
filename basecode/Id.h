@@ -133,6 +133,10 @@ class Id
 		 */
 		static bool redefineScratchIds( Id last, Nid base );
 
+		static void regularizeScratch();
+
+		static unsigned int allotMainIdBlock( unsigned int size, unsigned int node );
+
 		//////////////////////////////////////////////////////////////
 		//	Id info
 		//////////////////////////////////////////////////////////////
