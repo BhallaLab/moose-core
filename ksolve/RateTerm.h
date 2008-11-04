@@ -288,6 +288,42 @@ class SecondOrder: public ZeroOrder
 		const double *y2_;
 };
 
+/**
+ * The reason for this class is that if we have a single substrate
+ * acting in 2nd order, we must account for the removal of one molecule
+ * halfway through the reaction. This has a major effect when there
+ * is only one molecule to start with: the eventual # would become
+ * negative if we didn't do this correction!
+ */
+class StochSecondOrderSingleSubstrate: public ZeroOrder
+{
+	public:
+		StochSecondOrderSingleSubstrate( double k, const double* y )
+			: ZeroOrder( k ), y_( y )
+		{;}
+
+		double operator() () const {
+			double y = *y_;
+			assert( !isnan( y ) );
+			return k_ * ( y - 1 ) * y;
+		}
+
+		unsigned int getReactants( vector< unsigned int >& molIndex,
+			const vector< double >& S ) const {
+			molIndex.resize( 2 );
+			molIndex[0] = y_ - &S[0];
+			molIndex[1] = y_ - &S[0];
+			return 2;
+		}
+
+		void rescaleVolume( double ratio ) {
+			k_ /= ratio;
+		}
+
+	private:
+		const double *y_;
+};
+
 class NOrder: public ZeroOrder
 {
 	public:
@@ -320,8 +356,44 @@ class NOrder: public ZeroOrder
 			}
 		}
 
-	private:
+	protected:
 		vector< const double* > v_;
+};
+
+/**
+ * This is an unpleasant case, like the StochSecondOrderSingleSubstrate.
+ * Here we deal with the possibility that one or more of the substrates
+ * may be of order greater than one. If so, we need to diminish the N
+ * of each substrate by one for each time the substrate is factored 
+ * into the rate.
+ */
+class StochNOrder: public NOrder
+{
+	public:
+		StochNOrder( double k, vector< const double* > v )
+			: NOrder( k, v )
+		{
+			// Here we sort the y vector so that if there are repeated
+			// substrates, they are put consecutively. This lets us use
+			// the algorithm below to deal with repeats.
+			sort( v_.begin(), v_.end() );
+		}
+
+		double operator() () const {
+			double ret = k_;
+			vector< const double* >::const_iterator i;
+			double* lasty = 0;
+			double y;
+			for ( i = v_.begin(); i != v_.end(); i++) {
+				assert( !isnan( **i ) );
+				if ( lasty == *i )
+					y -= 1.0;
+				else
+					y = **i;
+				ret *= y;
+			}
+			return ret;
+		}
 };
 
 extern class ZeroOrder* 

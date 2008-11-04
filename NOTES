@@ -8016,5 +8016,18 @@ Actually went ahead and fixed it. Now things scale properly in various
 solvers. I still have the problem with kb reported as 0 in GSSA solver, 
 which is presumably due to the separate forward and back reacs.
 
+=============================================================================
+3 Nov 2008.
+Checked in as revision 903: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Analyzing Gillespie solver for correctness. Has issue with numbers in small
+vols, I think becauses for 2A---> B we might get a forward reaction even if
+N[A] == 1.
+
+=============================================================================
+4 Nov 2008
+Fixed Gillespie solver. Two problems: the above small volume issue, and 
+an error in the initialization that rounded things the wrong way for 
+non-integral initial values of n.
 
 =============================================================================
