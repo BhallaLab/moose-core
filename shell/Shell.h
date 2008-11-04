@@ -170,6 +170,15 @@ class Shell
 		static void setNodes( unsigned int myNode, unsigned int numNodes );
 
 ////////////////////////////////////////////////////////////////////
+// Id management
+////////////////////////////////////////////////////////////////////
+	static unsigned int regularizeScratch( unsigned int size );
+	static void handleRequestMainId( const Conn* c,
+		unsigned int size, unsigned int node, unsigned int requestId );
+	static void handleReturnMainId( const Conn* c,
+		unsigned int value, unsigned int requestId );
+
+////////////////////////////////////////////////////////////////////
 // Local functions for implementing basic GENESIS/MOOSE command set.
 ////////////////////////////////////////////////////////////////////
 

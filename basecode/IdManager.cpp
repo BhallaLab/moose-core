@@ -26,8 +26,9 @@ const unsigned int BAD_NODE = UINT_MAX;
 
 IdManager::IdManager()
 	: loadThresh_( 2000.0 ),
-	scratchIndex_( 3 ), mainIndex_( numScratch )
-	// Start at 2 because root is 0 and shell is 1 and postmaster is 2.
+	scratchBegin_( 3 ), // Start at 3 because root is 0 and shell is 1 and postmaster is 2.
+	scratchIndex_( 3 ),
+	mainIndex_( numScratch )
 {
 	elementList_.resize( blockSize + numScratch );
 }
@@ -173,6 +174,11 @@ bool IdManager::setElement( unsigned int index, Element* e )
 	if ( index >= elementList_.size() )
 		elementList_.resize( ( 1 + index / blockSize ) * blockSize );
 
+	if ( index < numScratch ) {
+		elementList_[ index ].setElement( e );
+		return 1;
+	}
+
 	if ( index < mainIndex_ ) {
 		Enode& old = elementList_[ index ];
 		if ( old.node() == UNKNOWN_NODE || old.e() == 0 ) {
@@ -315,5 +321,53 @@ bool IdManager::isScratch( unsigned int index ) const
 /// \todo: Need to put in some grungy code to deal with this.
 void IdManager::regularizeScratch()
 {
-	;
+scratchBegin_ = 40;
+	unsigned int numPromote = scratchIndex_ - scratchBegin_;
+	if ( scratchIndex_ == numScratch )
+		numPromote--;
+	scratchIndex_ = scratchBegin_;
+
+	unsigned int baseId;
+	if ( Shell::myNode() == 0 )
+		baseId = mainIndex_;
+	else
+		baseId = Shell::regularizeScratch( numPromote );
+	assert( baseId >= numScratch );
+
+	unsigned int id = baseId;
+	vector< Enode >::iterator scratch =
+		elementList_.begin() + scratchBegin_;
+	for ( unsigned int i = 0; i < numPromote; i++ ) {
+		scratch->e()->setId( Id( id ) );
+		
+		setElement( id, scratch->e() );
+		elementList_[ id ].setNode( Shell::myNode() );
+		
+		if( isGlobal( id ) ) {
+			// inform other nodes
+		}
+		
+		*scratch = Enode( 0, 0 );
+		
+		id++, scratch++;
+	}
+}
+
+unsigned int IdManager::allotMainIdBlock( unsigned int size, unsigned int node )
+{
+	assert( Shell::myNode() == 0 );
+
+	lastId_ = mainIndex_;
+	mainIndex_ += size;
+	if ( mainIndex_ >= elementList_.size() )
+		elementList_.resize( mainIndex_ * 2 );
+
+	Enode e( Id::postId( node )(), node );
+	fill(
+		elementList_.begin() + lastId_,
+		elementList_.begin() + lastId_ + size,
+		e
+	);
+
+	return lastId_;
 }
