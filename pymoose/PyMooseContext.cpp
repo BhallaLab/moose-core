@@ -377,7 +377,7 @@ const string pymoose::PyMooseContext::separator = "/";
 	extern void testSched();
 	extern void testSchedProcess();
 	extern void testBiophysics();
-//	extern void testHSolve();
+	extern void testHSolve();
 	extern void testKinetics();
 //	extern void testAverage();
 #ifdef USE_MPI
