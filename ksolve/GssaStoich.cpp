@@ -167,7 +167,7 @@ void GssaStoich::reinitFunc( const Conn* c )
 		i != s->S_.end(); ++i ) {
 		double base = floor( *i );
 		double frac = *i - base;
-		if ( mtrand() < frac )
+		if ( mtrand() > frac )
 			*i = base;
 		else
 			*i = base + 1.0;
@@ -176,21 +176,38 @@ void GssaStoich::reinitFunc( const Conn* c )
 	s->updateAllRates();
 }
 
-/*
-// static func
-void GssaStoich::integrateFunc( const Conn* c, vector< double >* v, double dt )
-{
-	// GssaStoich* s = static_cast< GssaStoich* >( c->data() );
-	// s->updateRates( v, dt );
-}
-*/
-
 void GssaStoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 {
 	Stoich::rebuildMatrix( stoich, ret );
 	// Stuff here to set up the dependencies.
 	unsigned int numRates = N_.nColumns();
 	assert ( numRates == rates_.size() );
+
+	// Here we fix the issue of having a single substrate at
+	// more than first order. Its rate must be computed differently
+	// for stoch calculations, since one molecule is consumed for
+	// each order.
+	for ( unsigned int i = 0; i < numRates; ++i ) {
+		vector< unsigned int > molIndex;
+		if ( rates_[i]->getReactants( molIndex, S_ ) > 1 ) {
+			if ( molIndex.size() == 2 && molIndex[0] == molIndex[1] ) {
+				RateTerm* oldRate = rates_[i];
+				rates_[ i ] = new StochSecondOrderSingleSubstrate(
+					oldRate->getR1(), &S_[ molIndex[ 0 ] ]
+				);
+				delete oldRate;
+			} else if ( molIndex.size() > 2 ) {
+				RateTerm* oldRate = rates_[ i ];
+				vector< const double* > v;
+				for ( vector< unsigned int >::iterator j = 
+					molIndex.begin(); j != molIndex.end(); ++j )
+					v.push_back( &S_[ *j ] );
+				rates_[ i ] = new StochNOrder( oldRate->getR1(), v);
+				delete oldRate;
+			}
+		}
+	}
+
 	transN_.setSize( numRates, N_.nRows() );
 	N_.transpose( transN_ );
 	dependency_.resize( numRates );
@@ -205,7 +222,9 @@ unsigned int GssaStoich::pickReac()
 	double sum = 0.0;
 	// This is an inefficient way to do it. Can easily get to 
 	// log time or thereabouts by doing one or two levels of 
-	// subsidiary tables. Slepoy, Thompson and Plimpton 2008
+	// subsidiary tables. Too many levels causes slow-down because
+	// of overhead in managing the tree. 
+	// Slepoy, Thompson and Plimpton 2008
 	// report a linear time version.
 	for ( vector< double >::iterator i = v_.begin(); i != v_.end(); ++i )
 		if ( r < ( sum += *i ) )
