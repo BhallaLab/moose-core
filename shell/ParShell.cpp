@@ -483,6 +483,12 @@ void Shell::handleParTraversePathRequest( const Conn* c,
 {
 	assert( start == Id() || start == Id::shellId() );
 	Id ret = localTraversePath( start, names );
+	if( ret.isScratch() ) {
+		Element* e = ret();
+		Id::regularizeScratch();
+		ret = e->id();
+	}
+	
 	sendBack2< Nid, unsigned int >( c, returnParTraverseSlot,
 		ret, requestId );
 }
