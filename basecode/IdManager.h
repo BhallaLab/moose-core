@@ -206,14 +206,15 @@ class IdManager
 		 */
 		// unsigned int myNode() const;
 
-	private:
-
 		/**
 		 * This function moves all the scratch ids on this node onto
 		 * regular Ids, after consulting with the master node.
 		 */
 		void regularizeScratch();
 
+		unsigned int allotMainIdBlock( unsigned int size, unsigned int node );
+
+	private:
 		/**
 		 * These keep track of size of cluster
 		 * Deprecated. Now in shell.
@@ -243,6 +244,12 @@ class IdManager
 		std::vector< Enode > elementList_;
 
 		//std::vector< Element* > post_;
+
+		/**
+		 * Starting value for scratchIndex_. Values lesser than this are kept
+		 * for globals like root, shell and postmaster.
+		 */
+		unsigned int scratchBegin_;
 
 		/**
 		 * This keeps track of the # of scratch ids. Only on slave nodes.
