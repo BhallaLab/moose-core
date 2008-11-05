@@ -362,12 +362,13 @@ unsigned int IdManager::allotMainIdBlock( unsigned int size, unsigned int node )
 	if ( mainIndex_ >= elementList_.size() )
 		elementList_.resize( mainIndex_ * 2 );
 
-	Enode e( Id::postId( node )(), node );
-	fill(
-		elementList_.begin() + lastId_,
-		elementList_.begin() + lastId_ + size,
-		e
-	);
+	//~ If the alloted space needs to be filled with something.
+	//~ Enode e( Id::postId( node )(), node );
+	//~ fill(
+		//~ elementList_.begin() + lastId_,
+		//~ elementList_.begin() + lastId_ + size,
+		//~ e
+	//~ );
 
 	return lastId_;
 }
