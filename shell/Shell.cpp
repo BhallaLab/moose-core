@@ -690,11 +690,6 @@ static const Slot parSetClockSlot =
 static const Slot parQuitSlot =
 	initShellCinfo()->getSlot( "parallel.quitSrc" );
 
-static const Slot requestMainIdSlot =
-	initShellCinfo()->getSlot( "parallel.requestMainIdSrc" );
-
-static const Slot returnMainIdSlot =
-	initShellCinfo()->getSlot( "parallel.returnMainIdSrc" );
 #endif
 
 void printNodeInfo( const Conn* c );
@@ -1026,46 +1021,6 @@ void Shell::setNodes( unsigned int myNode, unsigned int numNodes )
 {
 	myNode_ = myNode;
 	numNodes_ = numNodes;
-}
-
-//////////////////////////////////////////////////////////////////////
-// Id management
-//////////////////////////////////////////////////////////////////////
-unsigned int Shell::regularizeScratch( unsigned int size )
-{
-	assert( myNode() != 0 );
-	Eref ShellE = Id::shellId().eref();
-	assert( ShellE.e != 0 );
-	Shell* sh = static_cast< Shell* >( ShellE.data() );
-	assert( sh != 0 );
-	
-	unsigned int base;
-	unsigned int requestId = 
-		openOffNodeValueRequest< unsigned int >( sh, &base, 1 );
-	sendTo3< unsigned int, unsigned int, unsigned int >(
-		ShellE, requestMainIdSlot, 0, size, myNode(), requestId
-	);
-	unsigned int* temp = closeOffNodeValueRequest< unsigned int >( sh, requestId );
-	assert( &base == temp );
-	return base;
-}
-
-void Shell::handleRequestMainId( const Conn* c,
-	unsigned int size, unsigned int node, unsigned int requestId )
-{
-	assert( myNode() == 0 );
-	unsigned int base = Id::allotMainIdBlock( size, node );
-	sendBack2< unsigned int, unsigned int >(
-		c, returnMainIdSlot,
-		base, requestId );
-}
-
-void Shell::handleReturnMainId( const Conn* c,
-	unsigned int value, unsigned int requestId )
-{
-	Shell* sh = static_cast< Shell* >( c->data() );
-	*( getOffNodeValuePtr< unsigned int >( sh, requestId ) ) = value;
-	sh->zeroOffNodePending( requestId );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2463,6 +2418,19 @@ void Shell::useClock( const Conn* c, string tickName, string path,
 {
 	localUseClock( c, tickName, path, function );
 }
+
+unsigned int Shell::regularizeScratch( unsigned int size )
+{
+	return 0;
+}
+
+void Shell::handleRequestMainId( const Conn* c,
+	unsigned int size, unsigned int node, unsigned int requestId )
+{ ; }
+
+void Shell::handleReturnMainId( const Conn* c,
+	unsigned int value, unsigned int requestId )
+{ ; }
 
 #endif // ndef USE_MPI
 
