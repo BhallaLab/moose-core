@@ -81,6 +81,12 @@ class Tick
 		 * to the next tick
 		 */
 		static void reinit( const Conn* c, ProcInfo p );
+		
+		/**
+		 * ReinitClock is used to reinit the state of the scheduling system.
+		 * This does not send out reinit calls to objects connected to ticks.
+		 */
+		static void reinitClock( const Conn* c );
 
 		static void handleNextTimeRequest( const Conn* c );
 

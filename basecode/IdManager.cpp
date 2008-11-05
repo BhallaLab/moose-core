@@ -321,7 +321,7 @@ bool IdManager::isScratch( unsigned int index ) const
 /// \todo: Need to put in some grungy code to deal with this.
 void IdManager::regularizeScratch()
 {
-scratchBegin_ = 40;
+scratchBegin_ = 13;
 	unsigned int numPromote = scratchIndex_ - scratchBegin_;
 	if ( scratchIndex_ == numScratch )
 		numPromote--;

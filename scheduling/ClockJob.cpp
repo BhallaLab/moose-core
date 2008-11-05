@@ -113,6 +113,8 @@ const Cinfo* initClockJobCinfo()
 			"propagating resched forward." ),
 		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			"propagating reinit forward." ),
+		new SrcFinfo( "reinitClock", Ftype0::global(),
+			"propagating reinit forward." ),
 		new SrcFinfo( "stopSrc", Ftype1< int >::global(),
 			"invoke clean termination with a callback flag" ),
 		new DestFinfo( "stopCallback", Ftype1< int >::global(),
@@ -173,6 +175,8 @@ const Cinfo* initClockJobCinfo()
 		new DestFinfo( "step", Ftype1< int >::global(),
 					RFCAST( &ClockJob::stepFunc ),
 					"This sets of the simulation for the specified # of steps" ),
+		new DestFinfo( "reinitClock", Ftype0::global(),
+					RFCAST( &ClockJob::reinitClockFunc ) ),
 		new DestFinfo( "reinit", Ftype0::global(),
 					RFCAST( &ClockJob::reinitFunc ) ),
 		new DestFinfo( "resched", Ftype0::global(),
@@ -208,6 +212,8 @@ static const Slot reschedSlot =
 	initClockJobCinfo()->getSlot( "tick.resched" );
 static const Slot reinitSlot = 
 	initClockJobCinfo()->getSlot( "tick.reinit" );
+static const Slot reinitClockSlot = 
+	initClockJobCinfo()->getSlot( "tick.reinitClock" );
 static const Slot stopSlot = 
 	initClockJobCinfo()->getSlot( "tick.stopSrc" );
 static const Slot checkRunningSlot = 
@@ -310,6 +316,27 @@ void ClockJob::stepFunc( const Conn* c, int nsteps )
 {
 	ClockJob* cj = static_cast< ClockJob* >( c->data() );
 	cj->startFuncLocal( c->target(), nsteps * cj->dt_ );
+}
+
+/**
+ * ReinitClock is used to reinit the state of the scheduling system.
+ * This does not send out reinit calls to objects connected to ticks.
+ */
+void ClockJob::reinitClockFunc( const Conn* c )
+{
+	static_cast< ClockJob* >( c->data() )->
+		reinitClockFuncLocal( c->target() );
+}
+
+void ClockJob::reinitClockFuncLocal( Eref e )
+{
+	info_.currTime_ = 0.0;
+	runTime_ = 0.0;
+	currentTime_ = 0.0;
+	nextTime_ = 0.0;
+	nSteps_ = 0;
+	currentStep_ = 0;
+	send0( e, reinitClockSlot );
 }
 
 /**
