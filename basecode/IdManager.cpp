@@ -90,7 +90,7 @@ unsigned int IdManager::childId( unsigned int parent )
 		lastId_ = mainIndex_;
 		mainIndex_++;
 
-		if ( parent == 0 || pa.node() == 0 ) { // Do load balancing.
+		if ( parent == 0 ) { // Do load balancing.
 			unsigned int targetNode = 
 				static_cast< unsigned int >( mainIndex_ / loadThresh_ ) %
 				Shell::numNodes();
@@ -98,12 +98,31 @@ unsigned int IdManager::childId( unsigned int parent )
 		} else if ( pa.node() == Id::GlobalNode ) {
 			// Child is also global
 			elementList_[ lastId_ ] = Enode( 0, Id::GlobalNode );
-		} else if ( pa.node() != Shell::myNode() ) {
+		} else {
 			// Put object on parent node.
 			elementList_[ lastId_ ] = Enode( 0, pa.node() );
-		} else {
-			assert( 0 );
 		}
+
+		/*
+		 * This part does round-robin distribution if the parent element is root,
+		 * or if it is on node 0. The above if-else ladder uses round robin only
+		 * for the root element's children.
+		 */
+		//~ if ( parent == 0 || pa.node() == 0 ) { // Do load balancing.
+			//~ unsigned int targetNode = 
+				//~ static_cast< unsigned int >( mainIndex_ / loadThresh_ ) %
+				//~ Shell::numNodes();
+			//~ elementList_[ lastId_ ] = Enode( 0, targetNode );
+		//~ } else if ( pa.node() == Id::GlobalNode ) {
+			//~ // Child is also global
+			//~ elementList_[ lastId_ ] = Enode( 0, Id::GlobalNode );
+		//~ } else if ( pa.node() != Shell::myNode() ) {
+			//~ // Put object on parent node.
+			//~ elementList_[ lastId_ ] = Enode( 0, pa.node() );
+		//~ } else {
+			//~ assert( 0 );
+		//~ }
+		
 		return lastId_;
 	}
 	assert( 0 );
@@ -321,7 +340,7 @@ bool IdManager::isScratch( unsigned int index ) const
 /// \todo: Need to put in some grungy code to deal with this.
 void IdManager::regularizeScratch()
 {
-scratchBegin_ = 13;
+scratchBegin_ = 14;
 	unsigned int numPromote = scratchIndex_ - scratchBegin_;
 	if ( scratchIndex_ == numScratch )
 		numPromote--;
