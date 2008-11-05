@@ -39,6 +39,8 @@ const Cinfo* initTickCinfo()
 			"propagating resched forward." ),
 		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global(),
 			"propagating reinit forward." ),
+		new SrcFinfo( "reinitClock", Ftype0::global(),
+			"propagating reinitClock forward." ),
 		new SrcFinfo( "stopSrc", Ftype1< int >::global(),
 			"Calling for clean termination including a callback identifier" ),
 		new DestFinfo( "stopCallback", Ftype1< int >::global(), 
@@ -66,16 +68,21 @@ const Cinfo* initTickCinfo()
 		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(), 
 			RFCAST( &Tick::reinit ),
 			"The fifth one is for receiving the reinit call." ),
+		new DestFinfo( "reinitClock", Ftype0::global(), 
+			RFCAST( &Tick::reinitClock ),
+			"The sixth one is for receiving the reinitClock call. This call"
+			"reinitializes all ticks, but does not send out reinit calls to"
+			"objects connected to ticks." ),
 		new DestFinfo( "stop", Ftype1< int >::global(), 
 			RFCAST( &Tick::handleStop ),
-			"The sixth entry is for receiving the stop call." ),
+			"The seventh entry is for receiving the stop call." ),
 		new SrcFinfo( "stopCallbackSrc", Ftype1< int >::global(),
-			"The seventh entry is for sending back the callback from the stop." ),
+			"The eighth entry is for sending back the callback from the stop." ),
 		new DestFinfo( "checkRunning", Ftype0::global(), 
 			RFCAST( &Tick::handleCheckRunning ),
-			"The eightth entry is for receiving the checkRunning call." ),
+			"The ninth entry is for receiving the checkRunning call." ),
 		new SrcFinfo( "runningCallback", Ftype1< bool >::global(),
-			"The seventh entry is for sending back the callback from the stop." ),
+			"The tenth entry is for sending back the callback from the stop." ),
 	};
 	static Finfo* processShared[] = 
 	{
@@ -175,6 +182,8 @@ static const Slot requestNextTimeSlot =
 static const Slot reschedSlot = initTickCinfo()->getSlot( "next.resched" );
 static const Slot reinitNextSlot = 
 	initTickCinfo()->getSlot( "next.reinit" );
+static const Slot reinitClockNextSlot = 
+	initTickCinfo()->getSlot( "next.reinitClock" );
 
 static const Slot returnNextTimeSlot = 
 	initTickCinfo()->getSlot( "prev.nextTimeSrc" );
@@ -396,6 +405,15 @@ void Tick::updateNextTickTime( Eref e )
 	} else {
 		nextTickTime_ = 0;
 	}
+}
+
+void Tick::reinitClock( const Conn* c )
+{
+	Tick* t = static_cast< Tick* >( c->data() );
+	t->nextTime_ = 0.0;
+	t->nextTickTime_ = 0.0;
+	if ( t->next_ )
+		send0( c->target(), reinitClockNextSlot );
 }
 
 /**
