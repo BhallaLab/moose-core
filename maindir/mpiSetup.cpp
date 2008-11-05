@@ -37,6 +37,7 @@ using namespace std;
 
 static Element* pj = 0;
 static const Finfo* stepFinfo;
+static const Finfo* reinitClockFinfo;
 
 /**
  * Initializes MPI as well as scheduling and cross-node shell messaging.
@@ -178,6 +179,7 @@ void initParSched()
 	assert( tickFinfo != 0 );
 
 	stepFinfo = pj->findFinfo( "step" );
+	reinitClockFinfo = pj->findFinfo( "reinitClock" );
 	assert( stepFinfo != 0 );
 
 	SetConn c( shellE );
@@ -268,8 +270,16 @@ void pollPostmaster()
 		if ( Shell::numNodes() > 1 )
 			cout << "Polling postmaster on node " << Shell::myNode() << endl;
 		*/
-		bool ret = set< int >( pj, stepFinfo, 1 );
+		bool ret;
+		
+		// Reinit clockjob and ticks to their initial state
+		ret = set( pj, reinitClockFinfo );
 		assert( ret );
+		
+		// Take one step
+		ret = set< int >( pj, stepFinfo, 1 );
+		assert( ret );
+		
 		psleep( duration );
 	}
 }
