@@ -131,7 +131,7 @@ void OutputEventPort::innerInitialiseFunc( Eref e,
 
       Element* channel = Neutral::create( "OutputEventChannel", name.str(),
                                           e.id(), Id::scratchId() );
-      channels_.push_back(channel->id());
+      channels_.push_back(channel);
 
       set< unsigned int, MUSIC::event_output_port* > 
         (channel, "initialise", i, mPort);
