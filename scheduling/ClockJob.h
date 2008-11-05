@@ -34,6 +34,12 @@ class ClockJob
 		static void stepFunc( const Conn* c, int nsteps );
 		static void handleStopCallback( const Conn* c, int flag );
 		static void handleRunningCallback( const Conn* c, bool isRunning );
+		/**
+		 * ReinitClock is used to reinit the state of the scheduling system.
+		 * This does not send out reinit calls to objects connected to ticks.
+		 */
+		static void reinitClockFunc( const Conn* c );
+		void reinitClockFuncLocal( Eref e );
 		static void reinitFunc( const Conn* c );
 		void reinitFuncLocal( Eref e );
 		static void reschedFunc( const Conn* c );
