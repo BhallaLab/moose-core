@@ -38,7 +38,7 @@ class OutputEventPort
   int maxBuffered_;
   unsigned int myOffset_, myWidth_;
 
-  vector < Id > channels_;
+  vector < Eref > channels_;
 
   void innerReinitFunc();
 

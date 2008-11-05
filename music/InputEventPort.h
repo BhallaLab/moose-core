@@ -38,7 +38,7 @@ class InputEventPort : public MUSIC::event_handler_local_index
  private:
 
   MUSIC::event_input_port* mPort_;
-  vector < Id > channels_;
+  vector < Eref > channels_;
 
   unsigned int myOffset_, myWidth_;
   double accLatency_;

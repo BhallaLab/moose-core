@@ -104,7 +104,7 @@ void InputEventPort::operator () ( double t, MUSIC::local_index id )
 {
   int localId = id;
 //~ cerr << " Event received: time: " << t << " id: " << localId << endl;
-  send1 < double > ( channels_[localId](), eventSlot, t );
+  send1 < double > ( channels_[localId], eventSlot, t );
 }
 
 
@@ -135,7 +135,7 @@ void InputEventPort::innerInitialiseFunc( Eref e,
 
       Element* channel = Neutral::create( "InputEventChannel", name.str(),
                                           e.id(), Id::scratchId() );
-      channels_.push_back(channel->id());
+      channels_.push_back(channel);
     }
 
 }
