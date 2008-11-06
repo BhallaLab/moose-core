@@ -153,6 +153,21 @@ int KinSparseMatrix::get( unsigned int row, unsigned int column )
 	}
 }
 
+/**
+ * Returns all non-zero column indices, for the specified row.  
+ * This gives reac #s in orig matrix, and molecule #s in the 
+ * transposed matrix
+ */
+int KinSparseMatrix::getRowIndices( unsigned int row, 
+	vector< unsigned int >& indices )
+{
+	indices.resize( 0 );
+	indices.insert( indices.end(), 
+		N_.begin() + rowStart_[ row ],
+		N_.begin() + rowStart_[ row + 1 ] );
+	return ( indices.size() );
+}
+
 double KinSparseMatrix::computeRowRate( 
 	unsigned int row, const vector< double >& v
 ) const
@@ -209,13 +224,14 @@ void KinSparseMatrix::transpose( KinSparseMatrix& ret ) const
  * Has to operate on transposed matrix
  * row argument refers to reac# in this transformed situation.
  * Fills up 'deps' with reac#s that depend on the row argument.
+ * Does NOT ensure that list is unique.
  */
 void KinSparseMatrix::getGillespieDependence( 
-	unsigned int row, vector< unsigned int >& ret
+	unsigned int row, vector< unsigned int >& deps
 ) const
 {
-	ret.resize( 0 );
-	vector< unsigned int > deps;
+	deps.resize( 0 );
+	// vector< unsigned int > deps;
 	for ( unsigned int i = 0; i < nrows_; ++i ) {
 		// i is index for reac # here. Note that matrix is transposed.
 		unsigned int j = rowStart_[ row ];
@@ -239,12 +255,6 @@ void KinSparseMatrix::getGillespieDependence(
 			}
 		}
 	}
-
-	/// STL stuff follows, with the usual weirdness.
-	vector< unsigned int >::iterator pos = 
-		unique( deps.begin(), deps.end() );
-	ret.resize( pos - deps.begin() );
-	copy( deps.begin(), pos, ret.begin() );
 }
 
 /**
@@ -263,6 +273,12 @@ void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S )
 	for ( vector< int >::const_iterator i = N_.begin() + rowBeginIndex;
 		i != rowEnd; ++i )
 		S[ *molIndex++ ] += *i;
+}
+
+void makeVecUnique( vector< unsigned int >& v )
+{
+	vector< unsigned int >::iterator pos = unique( v.begin(), v.end() );
+	v.resize( pos - v.begin() );
 }
 
 #ifdef DO_UNIT_TESTS
@@ -400,6 +416,7 @@ void testKinSparseMatrix()
 	
 	vector< unsigned int > deps;
 	trans.getGillespieDependence( 0, deps );
+	makeVecUnique( deps );
 	ASSERT( deps.size() == 5, "Gillespie dependence" );
 	ASSERT( deps[0] == 0, "Gillespie dependence" );
 	ASSERT( deps[1] == 1, "Gillespie dependence" );
@@ -408,6 +425,7 @@ void testKinSparseMatrix()
 	ASSERT( deps[4] == 6, "Gillespie dependence" );
 
 	trans.getGillespieDependence( 1, deps );
+	makeVecUnique( deps );
 	ASSERT( deps.size() == 5, "Gillespie dependence" );
 	ASSERT( deps[0] == 0, "Gillespie dependence" );
 	ASSERT( deps[1] == 1, "Gillespie dependence" );
@@ -416,6 +434,7 @@ void testKinSparseMatrix()
 	ASSERT( deps[4] == 6, "Gillespie dependence" );
 
 	trans.getGillespieDependence( 2, deps );
+	makeVecUnique( deps );
 	ASSERT( deps.size() == 4, "Gillespie dependence" );
 	ASSERT( deps[0] == 1, "Gillespie dependence" );
 	ASSERT( deps[1] == 2, "Gillespie dependence" );
@@ -423,6 +442,7 @@ void testKinSparseMatrix()
 	ASSERT( deps[3] == 6, "Gillespie dependence" );
 
 	trans.getGillespieDependence( 4, deps );
+	makeVecUnique( deps );
 	ASSERT( deps.size() == 5, "Gillespie dependence" );
 	ASSERT( deps[0] == 0, "Gillespie dependence" );
 	ASSERT( deps[1] == 4, "Gillespie dependence" );
@@ -431,6 +451,7 @@ void testKinSparseMatrix()
 	ASSERT( deps[4] == 7, "Gillespie dependence" );
 
 	trans.getGillespieDependence( 6, deps );
+	makeVecUnique( deps );
 	ASSERT( deps.size() == 6, "Gillespie dependence" );
 	ASSERT( deps[0] == 0, "Gillespie dependence" );
 	ASSERT( deps[1] == 3, "Gillespie dependence" );

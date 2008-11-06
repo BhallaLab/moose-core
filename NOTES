@@ -8029,5 +8029,22 @@ N[A] == 1.
 Fixed Gillespie solver. Two problems: the above small volume issue, and 
 an error in the initialization that rounded things the wrong way for 
 non-integral initial values of n.
+Checked in as revision 907: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Various stumbling blocks:
+- Doesn't even complete the run on the acc4_1e-18 model.
+	For some reason this has concs 1000x too high. Perhaps the
+	reading is faulty.
+- Runs with a rescaled acc4_1e-21, but the output shows no time-changes
+	The sumtot isn't working. Works with rk5 though.
+	Need to set up a dependency arrangement.
+	Also need to add dependencies for changing any mol conc.
+* Crashes on looking up a zero pointer when run with the dend.g model. This
+	is in the NOrder reaction, perhaps it has never been exercised before.
+	Fixed. I was using sizeof( vec ) rather than vec.size().
 
 =============================================================================
+6 Nov
+First pass at implementing sumtot dependencies. Sort of works but in one
+test the sumtots fail to initialize. Fixed that too.
+
