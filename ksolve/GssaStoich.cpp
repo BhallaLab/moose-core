@@ -208,11 +208,78 @@ void GssaStoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 		}
 	}
 
+	// Here we set up dependency stuff. First the basic reac deps.
 	transN_.setSize( numRates, N_.nRows() );
 	N_.transpose( transN_ );
 	dependency_.resize( numRates );
 	for ( unsigned int i = 0; i < numRates; ++i ) {
 		transN_.getGillespieDependence( i, dependency_[ i ] );
+	}
+
+	// Fill in dependency list for SumTots on reactions
+	fillMathDep();
+
+	makeReacDepsUnique();
+}
+
+/**
+ * Fill in dependency list for all MathExpns on reactions.
+ * Note that when a MathExpn updates, it alters a further
+ * molecule, that may be a substrate for another reaction.
+ * So we need to also add further dependent reactions.
+ * In principle we might also cascade to deeper MathExpns. Later.
+ */
+void GssaStoich::fillMathDep()
+{
+	unsigned int numRates = N_.nColumns();
+	dependentMathExpn_.resize( numRates );
+	vector< unsigned int > indices;
+	for ( unsigned int i = 0; i < numRates; ++i ) {
+		vector< unsigned int >& dep = dependentMathExpn_[ i ];
+		dep.resize( 0 );
+		// Extract the row of all molecules that depend on the reac.
+		transN_.getRowIndices( i, indices );
+		// This looks like N^2, but usually there will be very few
+		// SumTots, so a simple linear scan should do.
+		for ( unsigned int j = 0; j < sumTotals_.size(); ++j ) {
+			if ( sumTotals_[ j ].hasInput( indices, S_ ) ) {
+				insertMathDepReacs( j, i );
+				dep.push_back( j );
+			}
+		}
+	}
+}
+
+/**
+ * Inserts reactions that depend on molecules modified by the
+ * specified MathExpn, into the dependency list.
+ */
+void GssaStoich::insertMathDepReacs( unsigned int mathDepIndex,
+	unsigned int firedReac )
+{
+	unsigned int molIndex = sumTotals_[mathDepIndex].target( S_ );
+	vector< unsigned int > reacIndices;
+
+	if ( N_.getRowIndices( molIndex, reacIndices ) > 0 ) {
+		vector< unsigned int >& dep = dependency_[ firedReac ];
+		dep.insert( dep.end(), reacIndices.begin(), reacIndices.end() );
+	}
+}
+
+// Clean up dependency lists: Ensure only unique entries.
+void GssaStoich::makeReacDepsUnique()
+{
+	unsigned int numRates = N_.nColumns();
+	for ( unsigned int i = 0; i < numRates; ++i ) {
+		makeVecUnique( dependency_[ i ] );
+		/*
+		vector< unsigned int >& dep = dependency_[ i ];
+		/// STL stuff follows, with the usual weirdness.
+		vector< unsigned int >::iterator pos = 
+			unique( dep.begin(), dep.end() );
+		dep.resize( pos - dep.begin() );
+		// copy( dep.begin(), pos, ret.begin() );
+		*/
 	}
 }
 
@@ -252,6 +319,11 @@ void GssaStoich::innerProcessFunc( Eref e, ProcInfo info )
 			if ( rindex == rates_.size() ) 
 				break;
 			transN_.fireReac( rindex, S_ );
+			// Math expns must be first, because they may alter 
+			// substrate mol #.
+			updateDependentMathExpn( dependentMathExpn_[ rindex ] );
+			// The rates list includes rates dependent on mols changed
+			// by the MathExpns.
 			updateDependentRates( dependency_[ rindex ] );
 		}
 		double dt = ( 1.0 / atot_ ) * log( 1.0 / mtrand() );
@@ -276,8 +348,26 @@ void GssaStoich::updateDependentRates( const vector< unsigned int >& deps )
 	}
 }
 
+/**
+ * For now this just handles SumTots, but I think the formalism
+ * will extend to general math expressions.
+ * Will need to cascade to dependent rates
+ */
+void GssaStoich::updateDependentMathExpn( const vector< unsigned int >& deps )
+{
+	for( vector< unsigned int >::const_iterator i = deps.begin(); 
+		i != deps.end(); ++i ) {
+		sumTotals_[ *i ].sum();
+	}
+}
+
 void GssaStoich::updateAllRates()
 {
+	// SumTots must go first because rates depend on them.
+	vector< SumTotal >::const_iterator k;
+	for ( k = sumTotals_.begin(); k != sumTotals_.end(); k++ )
+		k->sum();
+
 	atot_ = 0.0;
 	for( unsigned int i = 0; i < rates_.size(); ++i ) {
 		atot_ += ( v_[ i ] = ( *rates_[ i ] )() );
