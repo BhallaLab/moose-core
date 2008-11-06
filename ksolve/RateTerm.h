@@ -343,10 +343,10 @@ class NOrder: public ZeroOrder
 
 		unsigned int getReactants( vector< unsigned int >& molIndex,
 			const vector< double >& S ) const {
-			molIndex.resize( sizeof( v_ ) );
-			for ( unsigned int i = 0; i < sizeof( v_ ); i++ )
+			molIndex.resize( v_.size() );
+			for ( unsigned int i = 0; i < v_.size(); i++ )
 				molIndex[i] = v_[i] - &S[0];
-			return sizeof( v_ );
+			return v_.size();
 		}
 
 		void rescaleVolume( double ratio ) {
@@ -382,7 +382,7 @@ class StochNOrder: public NOrder
 		double operator() () const {
 			double ret = k_;
 			vector< const double* >::const_iterator i;
-			double* lasty = 0;
+			const double* lasty = 0;
 			double y;
 			for ( i = v_.begin(); i != v_.end(); i++) {
 				assert( !isnan( **i ) );
@@ -391,6 +391,7 @@ class StochNOrder: public NOrder
 				else
 					y = **i;
 				ret *= y;
+				lasty = *i;
 			}
 			return ret;
 		}
@@ -477,6 +478,25 @@ class SumTotal
 				ret += **i;
 			*target_ = ret;
 			assert( !isnan( ret ) );
+		}
+
+		bool hasInput( vector< unsigned int >& molIndex, 
+			vector< double >& s ) const {
+			for( vector< unsigned int >::const_iterator i = 
+				molIndex.begin(); i != molIndex.end(); ++i )
+			{
+				double* tgt = &( s[ *i ] );
+				if ( find( mol_.begin(), mol_.end(), tgt ) != 
+					mol_.end() )
+				return 1;
+			}
+			return 0;
+		}
+
+		unsigned int target( vector< double >& s ) {
+			unsigned int ret = target_ - &s[0];
+			assert( ret < s.size() );
+			return ret;
 		}
 	private:
 		double* target_;

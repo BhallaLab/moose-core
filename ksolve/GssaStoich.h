@@ -45,10 +45,31 @@ class GssaStoich: public Stoich
 		///////////////////////////////////////////////////
 		void rebuildMatrix( Eref stoich, vector< Id >& ret );
 		void updateDependentRates( const vector< unsigned int >& deps );
+		void updateDependentMathExpn( 
+			const vector< unsigned int >& deps );
 		void updateAllRates();
 		unsigned int pickReac();
 		void innerProcessFunc( Eref e, ProcInfo info );
 	private:
+
+		/**
+ 		* Inserts reactions that depend on molecules modified by the
+ 		* specified MathExpn, into the dependency list for the
+		* firedReac
+ 		*/
+		void insertMathDepReacs( unsigned int mathDepIndex,
+			unsigned int firedReac );
+		/**
+ 		* Fill in dependency list for all MathExpns on reactions.
+ 		* Note that when a MathExpn updates, it alters a further
+ 		* molecule, that may be a substrate for another reaction.
+ 		* So we need to also add further dependent reactions.
+ 		* In principle we might also cascade to deeper MathExpns. Later.
+ 		*/
+		void fillMathDep();
+
+		/// Clean up reac dependency lists: Ensure only unique entries.
+		void makeReacDepsUnique();
 
 		///////////////////////////////////////////////////
 		// These functions control the updates of state
@@ -77,6 +98,14 @@ class GssaStoich: public Stoich
 		 * possibly additional entries for the propensity tree.
 		 */
 		vector< vector< unsigned int > > dependency_; 
+
+		/**
+		 * Similar vector, points to SumTots that must be updated
+		 * whenever the original RateTerm fires.
+		 * Here we're being ambitious: someday it will be a full
+		 * Math Expression. For now just SumTot.
+		 */
+		vector< vector< unsigned int > > dependentMathExpn_; 
 
 		/**
 		 * atot is the total propensity of all the reacns in the system
