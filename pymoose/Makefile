@@ -57,6 +57,7 @@ OBJFILES = ../basecode/basecode.o \
 	../kinetics/kinetics.o	\
 	../hsolve/hsolve.o	\
 	../ksolve/ksolve.o	\
+	../robots/robots.o	\
 
 
 OBJ = PyMooseBase.o \
@@ -107,7 +108,15 @@ OBJ = PyMooseBase.o \
 	TriPanel.o \
 	Surface.o \
 	Geometry.o	\
-	MathFunc.o
+	MathFunc.o	\
+	Adaptor.o	\
+	SigNeur.o	\
+	AscFile.o	\
+	DifShell.o	\
+	GssaStoich.o	\
+	TauPump.o	\
+	TimeTable.o	\
+
 	
 HEADERS=PyMooseUtil.h \
 	PyMooseContext.h \
@@ -159,6 +168,13 @@ HEADERS=PyMooseUtil.h \
 	Surface.h	\
 	Geometry.h	\
 	MathFunc.h	\
+ 	Adaptor.h	\
+ 	SigNeur.h	\
+	AscFile.h	\
+	DifShell.h	\
+	GssaStoich.h	\
+	TauPump.h	\
+	TimeTable.h	\
 	../randnum/randnum.h	\
 	../randnum/Probability.h	\
 	../randnum/Binomial.h	\
@@ -167,6 +183,7 @@ HEADERS=PyMooseUtil.h \
 	../randnum/Normal.h	\
 	../randnum/Poisson.h	\
 	../maindir/init.h		\
+
 
 #TEST_MAIN = TestPyMoose.o
 
