@@ -150,7 +150,7 @@ int InterpolationTable::__len__()
 {
     return __get_xdivs()+1;    
 }
-
+#if 0
 #ifdef NUMPY // Only for NumPy support
 // TODO: work in progress
 #include "numpy/noprefix.h"
@@ -186,7 +186,7 @@ PyObject* InterpolationTable::__array_struct__()
     return PyCObject_FromVoidPtr(array, 0);
 }
 #endif // NUMPY
-
+#endif // !commented out
 int InterpolationTable::__get_calcMode() const
 {
     int calc_mode;
