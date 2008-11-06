@@ -3,6 +3,7 @@
 %include "std_string.i"
 %include "std_vector.i"
 %{
+	#define SWIG_FILE_WITH_INIT
 	#include "../basecode/header.h"
 	#include "../basecode/moose.h"
 	#include "PyMooseContext.h"
@@ -75,6 +76,15 @@
 	#include "ExponentialRng.h"
 	#include "UniformRng.h"
 %}
+
+#ifdef NUMPY
+%{
+#include <numpy/arrayobject.h>
+%init %{
+      import_array();
+%}
+#endif
+
 //%feature("autodoc", "1");
 %template(uint_vector) std::vector<unsigned int>;
 %template(int_vector) std::vector<int>;
@@ -149,6 +159,18 @@
 /* Numpy interface for InterpolationTable */
 #ifdef NUMPY
 %extend pymoose::InterpolationTable{
+	PyObject* __array_struct__(){
+		  PyObject * result = NULL;
+		  int dimensions[1] = this->__get_xdivs() + 1;
+		  static vector <double> data;
+		  data = static_cast<Interpol*> (this->id_()->data())->getTableVector(this->id_());
+/* the prototype function to create an array from existing data -
+PyObject * PyArray_FromDimsAndData(int n_dimensions,int dimensions[n_dimensions], int item_type, char *data);
+*/
+	
+		  result = PyArrayFromDimsAndData(1, dimensions, PyArray_DOUBLE, (char*)(&data));
+		  return result;
+} 
   %pythoncode {
   __array_struct__ = property(__array_struct__,
                                                  doc='Array protocol')
