@@ -210,7 +210,9 @@ void GssaStoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 
 	// Here we set up dependency stuff. First the basic reac deps.
 	transN_.setSize( numRates, N_.nRows() );
+	assert( N_.nRows() == nMols_ );
 	N_.transpose( transN_ );
+	transN_.truncateRow( nVarMols_ );
 	dependency_.resize( numRates );
 	for ( unsigned int i = 0; i < numRates; ++i ) {
 		transN_.getGillespieDependence( i, dependency_[ i ] );
@@ -257,9 +259,10 @@ void GssaStoich::fillMathDep()
 void GssaStoich::insertMathDepReacs( unsigned int mathDepIndex,
 	unsigned int firedReac )
 {
-	unsigned int molIndex = sumTotals_[mathDepIndex].target( S_ );
+	unsigned int molIndex = sumTotals_[ mathDepIndex ].target( S_ );
 	vector< unsigned int > reacIndices;
 
+	// Extract the row of all reacs that depend on the target molecule
 	if ( N_.getRowIndices( molIndex, reacIndices ) > 0 ) {
 		vector< unsigned int >& dep = dependency_[ firedReac ];
 		dep.insert( dep.end(), reacIndices.begin(), reacIndices.end() );
