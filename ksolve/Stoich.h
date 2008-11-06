@@ -101,13 +101,13 @@ class Stoich
 
 		void fillHalfStoich( const double* baseptr, 
 			vector< const double* >& reactant,
-		       	int sign, int reacNum );
+		       	int sign, unsigned int reacNum );
 
 		void fillStoich( 
 			const double* baseptr, 
 			vector< const double* >& sub,
 			vector< const double* >& prd, 
-			int reacNum );
+			unsigned int reacNum );
 
 		void addReac( Eref stoich, Eref e );
 		bool checkEnz( Eref e,

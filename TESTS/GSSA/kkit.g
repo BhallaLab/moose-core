@@ -7,7 +7,7 @@ float CONTROLDT = 1
 float MAXTIME = 100
 float TRANSIENT_TIME = 2
 float VARIABLE_DT_FLAG = 0
-float DEFAULT_VOL = 1
+float DEFAULT_VOL = 1e-15
 float VERSION = 11.0
 
 int METHOD = 2
