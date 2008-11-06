@@ -8049,3 +8049,44 @@ First pass at implementing sumtot dependencies. Sort of works but in one
 test the sumtots fail to initialize. Fixed that too.
 
 Checked in as revision 917: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Put the tests from TESTS/GSSA into the subversion repository.
+Checked in as revision 918: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Still stuck with the acc4 run. PKC_active still not right.
+
+There may be an issue with the volume rescaling. The rk5 runs also differ
+between vols. Is it that the nuclear compt isn't getting set to the
+correct vol?
+
+Got the PKC model from the database: acc48.g. The volume scaling is quite
+messed up for the MOOSE reads. If I rescale it to 1.666e-21 
+(where conc == # of molecules) using GENESIS, and then run the PKC model using
+MOOSE/Gillespie, it matches the rk5 and GENESIS output.
+If all this is true, why does the acc4 model not give matching results?
+
+Did a specific extension of the enztot to see what happens downstream of the
+tot. This is incorrect.
+
+Tracked it down. The sparse matrix N_ does not keep track of sumtotals,
+even though it is sized to do so. Should be OK without overhead, as the
+function that updates values only does so for varMols.
+
+Now it handles the enztot runs correctly. Time to try the bigger models.
+The acc4 model now shows fluctuations in PKC-active, but the value is
+still wrong. An inspection of values shows that the supposedly buffered
+Ca is not. It has a 'mode' of 6. Perhaps it isn't doing the AND with the 
+slave_enable bit at 0x04.
+
+The original Stoich version handles it correctly. So it is something to do
+with the Gillespie solver. Got it. Now that we have all mols in the
+matrix, the KinSparseMatrix::fireReac() also updates the buffered mols.
+
+Setting up a further vector within the KinSparseMatrix, this one to keep
+track of the truncated row endings suitable for the variable molecules.
+This seems to have dealt with it. Now MOOSE seems to handle acc4 properly at a
+range of volumes.
+
+Next step is to fix up the volume scaling problems during file loading.
+
+=============================================================================

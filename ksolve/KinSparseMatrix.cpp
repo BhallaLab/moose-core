@@ -163,8 +163,8 @@ int KinSparseMatrix::getRowIndices( unsigned int row,
 {
 	indices.resize( 0 );
 	indices.insert( indices.end(), 
-		N_.begin() + rowStart_[ row ],
-		N_.begin() + rowStart_[ row + 1 ] );
+		colIndex_.begin() + rowStart_[ row ],
+		colIndex_.begin() + rowStart_[ row + 1 ] );
 	return ( indices.size() );
 }
 
@@ -266,14 +266,43 @@ void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S )
 {
 	assert( ncolumns_ == S.size() && reacIndex < nrows_ );
 	unsigned int rowBeginIndex = rowStart_[ reacIndex ];
-	vector< int >::const_iterator rowEnd = N_.begin() + rowStart_[ reacIndex + 1];
+	// vector< int >::const_iterator rowEnd = N_.begin() + rowStart_[ reacIndex + 1];
+	vector< int >::const_iterator rowBegin = 
+		N_.begin() + rowBeginIndex;
+	vector< int >::const_iterator rowEnd = 
+		N_.begin() + rowTruncated_[ reacIndex ];
 	vector< unsigned int >::const_iterator molIndex = 
 		colIndex_.begin() + rowBeginIndex;
 
-	for ( vector< int >::const_iterator i = N_.begin() + rowBeginIndex;
-		i != rowEnd; ++i )
+	for ( vector< int >::const_iterator i = rowBegin; i != rowEnd; ++i )
 		S[ *molIndex++ ] += *i;
 }
+
+/**
+ * This function generates a new internal list of rowEnds, such that
+ * they are all less than the maxColumnIndex.
+ * It is used because in fireReac we don't want to update all the 
+ * molecules, only those that are variable.
+ */
+void KinSparseMatrix::truncateRow( unsigned int maxColumnIndex )
+{
+	rowTruncated_.resize( nrows_, 0 );
+	if ( colIndex_.size() == 0 )
+		return;
+	for ( unsigned int i = 0; i < nrows_; ++i ) {
+		unsigned int endCol = rowStart_[ i ];
+		for ( unsigned int j = rowStart_[ i ]; 
+			j < rowStart_[ i + 1 ]; ++j ) {
+			if ( colIndex_[ j ] < maxColumnIndex ) {
+				endCol = j + 1;
+			} else {
+				break;
+			}
+		}
+		rowTruncated_[ i ] = endCol;
+	}
+}
+
 
 void makeVecUnique( vector< unsigned int >& v )
 {
