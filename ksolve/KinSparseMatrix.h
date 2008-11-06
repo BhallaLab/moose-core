@@ -31,6 +31,13 @@ class KinSparseMatrix
 
 		int get( unsigned int row, unsigned int column );
 
+		/**
+		 * Returns all non-zero column indices, ie., molecule#s,
+		 * for the specified row.
+		 */
+		int getRowIndices( 
+			unsigned int row, vector< unsigned int >& indices );
+
 		unsigned int nRows() {
 			return nrows_;
 		}
@@ -39,6 +46,11 @@ class KinSparseMatrix
 			return ncolumns_;
 		}
 
+		/**
+		 * Returns the dot product of the specified row with the
+		 * vector v. v corresponds to the vector of reaction rates.
+		 * v must have nColumns entries.
+		 */
 		double computeRowRate( 
 			unsigned int row, const vector< double >& v
 		) const;
@@ -86,5 +98,18 @@ class KinSparseMatrix
 		static const unsigned int MAX_ROWS;
 		static const unsigned int MAX_COLUMNS;
 };
+
+/**
+ * Utility function to wrap the ugly STL code for doing the unique
+ * operation on a vector
+ */
+/*
+template< class T > void makeVecUnique( vector< T >& v )
+{
+	vector< T >::iterator pos = unique( v.begin(), v.end() );
+	v.resize( pos - v.begin() );
+}
+*/
+void makeVecUnique( vector< unsigned int >& v );
 
 #endif // _KIN_SPARSE_MATRIX_H
