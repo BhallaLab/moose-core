@@ -316,6 +316,8 @@ class Id(object):
     def assignIndex(*args): return _moose.Id_assignIndex(*args)
     nextScratchId = staticmethod(_moose.Id_nextScratchId)
     redefineScratchIds = staticmethod(_moose.Id_redefineScratchIds)
+    regularizeScratch = staticmethod(_moose.Id_regularizeScratch)
+    allotMainIdBlock = staticmethod(_moose.Id_allotMainIdBlock)
     def path(*args): return _moose.Id_path(*args)
     def id(*args): return _moose.Id_id(*args)
     def index(*args): return _moose.Id_index(*args)
@@ -351,6 +353,8 @@ Id_shellId = _moose.Id_shellId
 Id_postId = _moose.Id_postId
 Id_nextScratchId = _moose.Id_nextScratchId
 Id_redefineScratchIds = _moose.Id_redefineScratchIds
+Id_regularizeScratch = _moose.Id_regularizeScratch
+Id_allotMainIdBlock = _moose.Id_allotMainIdBlock
 Id_lastId = _moose.Id_lastId
 Id_badId = _moose.Id_badId
 Id_str2Id = _moose.Id_str2Id
@@ -1990,6 +1994,247 @@ class Geometry(PyMooseBase):
 Geometry_swigregister = _moose.Geometry_swigregister
 Geometry_swigregister(Geometry)
 Geometry.className = _moose.cvar.Geometry_className
+
+class Adaptor(PyMooseBase):
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _moose.new_Adaptor(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_Adaptor
+    __del__ = lambda self : None;
+    def getType(*args): return _moose.Adaptor_getType(*args)
+    def __get_inputOffset(*args): return _moose.Adaptor___get_inputOffset(*args)
+    def __set_inputOffset(*args): return _moose.Adaptor___set_inputOffset(*args)
+    def __get_outputOffset(*args): return _moose.Adaptor___get_outputOffset(*args)
+    def __set_outputOffset(*args): return _moose.Adaptor___set_outputOffset(*args)
+    def __get_scale(*args): return _moose.Adaptor___get_scale(*args)
+    def __set_scale(*args): return _moose.Adaptor___set_scale(*args)
+    def __get_output(*args): return _moose.Adaptor___get_output(*args)
+    inputOffset = _swig_property(_moose.Adaptor_inputOffset_get, _moose.Adaptor_inputOffset_set)
+    outputOffset = _swig_property(_moose.Adaptor_outputOffset_get, _moose.Adaptor_outputOffset_set)
+    scale = _swig_property(_moose.Adaptor_scale_get, _moose.Adaptor_scale_set)
+    output = _swig_property(_moose.Adaptor_output_get)
+Adaptor_swigregister = _moose.Adaptor_swigregister
+Adaptor_swigregister(Adaptor)
+Adaptor.className = _moose.cvar.Adaptor_className
+
+class SigNeur(PyMooseBase):
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _moose.new_SigNeur(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_SigNeur
+    __del__ = lambda self : None;
+    def getType(*args): return _moose.SigNeur_getType(*args)
+    def __get_cellProto(*args): return _moose.SigNeur___get_cellProto(*args)
+    def __set_cellProto(*args): return _moose.SigNeur___set_cellProto(*args)
+    def __get_spineProto(*args): return _moose.SigNeur___get_spineProto(*args)
+    def __set_spineProto(*args): return _moose.SigNeur___set_spineProto(*args)
+    def __get_dendProto(*args): return _moose.SigNeur___get_dendProto(*args)
+    def __set_dendProto(*args): return _moose.SigNeur___set_dendProto(*args)
+    def __get_somaProto(*args): return _moose.SigNeur___get_somaProto(*args)
+    def __set_somaProto(*args): return _moose.SigNeur___set_somaProto(*args)
+    def __get_cell(*args): return _moose.SigNeur___get_cell(*args)
+    def __get_spine(*args): return _moose.SigNeur___get_spine(*args)
+    def __get_dend(*args): return _moose.SigNeur___get_dend(*args)
+    def __get_soma(*args): return _moose.SigNeur___get_soma(*args)
+    def __get_cellMethod(*args): return _moose.SigNeur___get_cellMethod(*args)
+    def __set_cellMethod(*args): return _moose.SigNeur___set_cellMethod(*args)
+    def __get_spineMethod(*args): return _moose.SigNeur___get_spineMethod(*args)
+    def __set_spineMethod(*args): return _moose.SigNeur___set_spineMethod(*args)
+    def __get_dendMethod(*args): return _moose.SigNeur___get_dendMethod(*args)
+    def __set_dendMethod(*args): return _moose.SigNeur___set_dendMethod(*args)
+    def __get_somaMethod(*args): return _moose.SigNeur___get_somaMethod(*args)
+    def __set_somaMethod(*args): return _moose.SigNeur___set_somaMethod(*args)
+    def __get_sigDt(*args): return _moose.SigNeur___get_sigDt(*args)
+    def __set_sigDt(*args): return _moose.SigNeur___set_sigDt(*args)
+    def __get_cellDt(*args): return _moose.SigNeur___get_cellDt(*args)
+    def __set_cellDt(*args): return _moose.SigNeur___set_cellDt(*args)
+    def __get_Dscale(*args): return _moose.SigNeur___get_Dscale(*args)
+    def __set_Dscale(*args): return _moose.SigNeur___set_Dscale(*args)
+    def __get_lambda(*args): return _moose.SigNeur___get_lambda(*args)
+    def __set_lambda(*args): return _moose.SigNeur___set_lambda(*args)
+    def __get_parallelMode(*args): return _moose.SigNeur___get_parallelMode(*args)
+    def __set_parallelMode(*args): return _moose.SigNeur___set_parallelMode(*args)
+    def __get_updateStep(*args): return _moose.SigNeur___get_updateStep(*args)
+    def __set_updateStep(*args): return _moose.SigNeur___set_updateStep(*args)
+    def __get_calciumScale(*args): return _moose.SigNeur___get_calciumScale(*args)
+    def __set_calciumScale(*args): return _moose.SigNeur___set_calciumScale(*args)
+    def __get_dendInclude(*args): return _moose.SigNeur___get_dendInclude(*args)
+    def __set_dendInclude(*args): return _moose.SigNeur___set_dendInclude(*args)
+    def __get_dendExclude(*args): return _moose.SigNeur___get_dendExclude(*args)
+    def __set_dendExclude(*args): return _moose.SigNeur___set_dendExclude(*args)
+    cellProto = _swig_property(_moose.SigNeur_cellProto_get, _moose.SigNeur_cellProto_set)
+    spineProto = _swig_property(_moose.SigNeur_spineProto_get, _moose.SigNeur_spineProto_set)
+    dendProto = _swig_property(_moose.SigNeur_dendProto_get, _moose.SigNeur_dendProto_set)
+    somaProto = _swig_property(_moose.SigNeur_somaProto_get, _moose.SigNeur_somaProto_set)
+    cell = _swig_property(_moose.SigNeur_cell_get)
+    spine = _swig_property(_moose.SigNeur_spine_get)
+    dend = _swig_property(_moose.SigNeur_dend_get)
+    soma = _swig_property(_moose.SigNeur_soma_get)
+    cellMethod = _swig_property(_moose.SigNeur_cellMethod_get, _moose.SigNeur_cellMethod_set)
+    spineMethod = _swig_property(_moose.SigNeur_spineMethod_get, _moose.SigNeur_spineMethod_set)
+    dendMethod = _swig_property(_moose.SigNeur_dendMethod_get, _moose.SigNeur_dendMethod_set)
+    somaMethod = _swig_property(_moose.SigNeur_somaMethod_get, _moose.SigNeur_somaMethod_set)
+    sigDt = _swig_property(_moose.SigNeur_sigDt_get, _moose.SigNeur_sigDt_set)
+    cellDt = _swig_property(_moose.SigNeur_cellDt_get, _moose.SigNeur_cellDt_set)
+    Dscale = _swig_property(_moose.SigNeur_Dscale_get, _moose.SigNeur_Dscale_set)
+    _lambda = _swig_property(_moose.SigNeur__lambda_get, _moose.SigNeur__lambda_set)
+    parallelMode = _swig_property(_moose.SigNeur_parallelMode_get, _moose.SigNeur_parallelMode_set)
+    updateStep = _swig_property(_moose.SigNeur_updateStep_get, _moose.SigNeur_updateStep_set)
+    calciumScale = _swig_property(_moose.SigNeur_calciumScale_get, _moose.SigNeur_calciumScale_set)
+    dendInclude = _swig_property(_moose.SigNeur_dendInclude_get, _moose.SigNeur_dendInclude_set)
+    dendExclude = _swig_property(_moose.SigNeur_dendExclude_get, _moose.SigNeur_dendExclude_set)
+SigNeur_swigregister = _moose.SigNeur_swigregister
+SigNeur_swigregister(SigNeur)
+SigNeur.className = _moose.cvar.SigNeur_className
+
+class AscFile(PyMooseBase):
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _moose.new_AscFile(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_AscFile
+    __del__ = lambda self : None;
+    def getType(*args): return _moose.AscFile_getType(*args)
+    def __get_fileName(*args): return _moose.AscFile___get_fileName(*args)
+    def __set_fileName(*args): return _moose.AscFile___set_fileName(*args)
+    def __get_appendFlag(*args): return _moose.AscFile___get_appendFlag(*args)
+    def __set_appendFlag(*args): return _moose.AscFile___set_appendFlag(*args)
+    fileName = _swig_property(_moose.AscFile_fileName_get, _moose.AscFile_fileName_set)
+    appendFlag = _swig_property(_moose.AscFile_appendFlag_get, _moose.AscFile_appendFlag_set)
+AscFile_swigregister = _moose.AscFile_swigregister
+AscFile_swigregister(AscFile)
+AscFile.className = _moose.cvar.AscFile_className
+
+class DifShell(PyMooseBase):
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _moose.new_DifShell(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_DifShell
+    __del__ = lambda self : None;
+    def getType(*args): return _moose.DifShell_getType(*args)
+    def __get_C(*args): return _moose.DifShell___get_C(*args)
+    def __get_Ceq(*args): return _moose.DifShell___get_Ceq(*args)
+    def __set_Ceq(*args): return _moose.DifShell___set_Ceq(*args)
+    def __get_D(*args): return _moose.DifShell___get_D(*args)
+    def __set_D(*args): return _moose.DifShell___set_D(*args)
+    def __get_valence(*args): return _moose.DifShell___get_valence(*args)
+    def __set_valence(*args): return _moose.DifShell___set_valence(*args)
+    def __get_leak(*args): return _moose.DifShell___get_leak(*args)
+    def __set_leak(*args): return _moose.DifShell___set_leak(*args)
+    def __get_shapeMode(*args): return _moose.DifShell___get_shapeMode(*args)
+    def __set_shapeMode(*args): return _moose.DifShell___set_shapeMode(*args)
+    def __get_length(*args): return _moose.DifShell___get_length(*args)
+    def __set_length(*args): return _moose.DifShell___set_length(*args)
+    def __get_diameter(*args): return _moose.DifShell___get_diameter(*args)
+    def __set_diameter(*args): return _moose.DifShell___set_diameter(*args)
+    def __get_thickness(*args): return _moose.DifShell___get_thickness(*args)
+    def __set_thickness(*args): return _moose.DifShell___set_thickness(*args)
+    def __get_volume(*args): return _moose.DifShell___get_volume(*args)
+    def __set_volume(*args): return _moose.DifShell___set_volume(*args)
+    def __get_outerArea(*args): return _moose.DifShell___get_outerArea(*args)
+    def __set_outerArea(*args): return _moose.DifShell___set_outerArea(*args)
+    def __get_innerArea(*args): return _moose.DifShell___get_innerArea(*args)
+    def __set_innerArea(*args): return _moose.DifShell___set_innerArea(*args)
+    C = _swig_property(_moose.DifShell_C_get)
+    Ceq = _swig_property(_moose.DifShell_Ceq_get, _moose.DifShell_Ceq_set)
+    D = _swig_property(_moose.DifShell_D_get, _moose.DifShell_D_set)
+    valence = _swig_property(_moose.DifShell_valence_get, _moose.DifShell_valence_set)
+    leak = _swig_property(_moose.DifShell_leak_get, _moose.DifShell_leak_set)
+    shapeMode = _swig_property(_moose.DifShell_shapeMode_get, _moose.DifShell_shapeMode_set)
+    length = _swig_property(_moose.DifShell_length_get, _moose.DifShell_length_set)
+    diameter = _swig_property(_moose.DifShell_diameter_get, _moose.DifShell_diameter_set)
+    thickness = _swig_property(_moose.DifShell_thickness_get, _moose.DifShell_thickness_set)
+    volume = _swig_property(_moose.DifShell_volume_get, _moose.DifShell_volume_set)
+    outerArea = _swig_property(_moose.DifShell_outerArea_get, _moose.DifShell_outerArea_set)
+    innerArea = _swig_property(_moose.DifShell_innerArea_get, _moose.DifShell_innerArea_set)
+DifShell_swigregister = _moose.DifShell_swigregister
+DifShell_swigregister(DifShell)
+DifShell.className = _moose.cvar.DifShell_className
+
+class GssaStoich(PyMooseBase):
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _moose.new_GssaStoich(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_GssaStoich
+    __del__ = lambda self : None;
+    def getType(*args): return _moose.GssaStoich_getType(*args)
+    def __get_method(*args): return _moose.GssaStoich___get_method(*args)
+    def __set_method(*args): return _moose.GssaStoich___set_method(*args)
+    def __get_path(*args): return _moose.GssaStoich___get_path(*args)
+    def __set_path(*args): return _moose.GssaStoich___set_path(*args)
+    method = _swig_property(_moose.GssaStoich_method_get, _moose.GssaStoich_method_set)
+    path = _swig_property(_moose.GssaStoich_path_get, _moose.GssaStoich_path_set)
+GssaStoich_swigregister = _moose.GssaStoich_swigregister
+GssaStoich_swigregister(GssaStoich)
+GssaStoich.className = _moose.cvar.GssaStoich_className
+
+class TauPump(PyMooseBase):
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _moose.new_TauPump(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_TauPump
+    __del__ = lambda self : None;
+    def getType(*args): return _moose.TauPump_getType(*args)
+    def __get_pumpRate(*args): return _moose.TauPump___get_pumpRate(*args)
+    def __set_pumpRate(*args): return _moose.TauPump___set_pumpRate(*args)
+    def __get_eqConc(*args): return _moose.TauPump___get_eqConc(*args)
+    def __set_eqConc(*args): return _moose.TauPump___set_eqConc(*args)
+    def __get_TA(*args): return _moose.TauPump___get_TA(*args)
+    def __set_TA(*args): return _moose.TauPump___set_TA(*args)
+    def __get_TB(*args): return _moose.TauPump___get_TB(*args)
+    def __set_TB(*args): return _moose.TauPump___set_TB(*args)
+    def __get_TC(*args): return _moose.TauPump___get_TC(*args)
+    def __set_TC(*args): return _moose.TauPump___set_TC(*args)
+    def __get_TV(*args): return _moose.TauPump___get_TV(*args)
+    def __set_TV(*args): return _moose.TauPump___set_TV(*args)
+    pumpRate = _swig_property(_moose.TauPump_pumpRate_get, _moose.TauPump_pumpRate_set)
+    eqConc = _swig_property(_moose.TauPump_eqConc_get, _moose.TauPump_eqConc_set)
+    TA = _swig_property(_moose.TauPump_TA_get, _moose.TauPump_TA_set)
+    TB = _swig_property(_moose.TauPump_TB_get, _moose.TauPump_TB_set)
+    TC = _swig_property(_moose.TauPump_TC_get, _moose.TauPump_TC_set)
+    TV = _swig_property(_moose.TauPump_TV_get, _moose.TauPump_TV_set)
+TauPump_swigregister = _moose.TauPump_swigregister
+TauPump_swigregister(TauPump)
+TauPump.className = _moose.cvar.TauPump_className
+
+class TimeTable(PyMooseBase):
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _moose.new_TimeTable(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_TimeTable
+    __del__ = lambda self : None;
+    def getType(*args): return _moose.TimeTable_getType(*args)
+    def __get_maxTime(*args): return _moose.TimeTable___get_maxTime(*args)
+    def __set_maxTime(*args): return _moose.TimeTable___set_maxTime(*args)
+    def __get_tableVector(*args): return _moose.TimeTable___get_tableVector(*args)
+    def __set_tableVector(*args): return _moose.TimeTable___set_tableVector(*args)
+    def __get_tableSize(*args): return _moose.TimeTable___get_tableSize(*args)
+    maxTime = _swig_property(_moose.TimeTable_maxTime_get, _moose.TimeTable_maxTime_set)
+    tableVector = _swig_property(_moose.TimeTable_tableVector_get)
+    tableSize = _swig_property(_moose.TimeTable_tableSize_get)
+TimeTable_swigregister = _moose.TimeTable_swigregister
+TimeTable_swigregister(TimeTable)
+TimeTable.className = _moose.cvar.TimeTable_className
 
 
 
