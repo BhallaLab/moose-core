@@ -1,0 +1,76 @@
+#ifndef _pymoose_TauPump_cpp
+#define _pymoose_TauPump_cpp
+#include "TauPump.h"
+using namespace pymoose;
+const std::string TauPump::className = "TauPump";
+TauPump::TauPump(Id id):PyMooseBase(id){}
+TauPump::TauPump(std::string path):PyMooseBase(className, path){}
+TauPump::TauPump(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
+TauPump::TauPump(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+TauPump::TauPump(const TauPump& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+TauPump::TauPump(const TauPump& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+TauPump::TauPump(const TauPump& src, std::string path):PyMooseBase(src, path){}
+TauPump::TauPump(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+TauPump::~TauPump(){}
+const std::string& TauPump::getType(){ return className; }
+double TauPump::__get_pumpRate() const
+{
+    double pumpRate;
+    get < double > (id_(), "pumpRate",pumpRate);
+    return pumpRate;
+}
+void TauPump::__set_pumpRate( double pumpRate )
+{
+    set < double > (id_(), "pumpRate", pumpRate);
+}
+double TauPump::__get_eqConc() const
+{
+    double eqConc;
+    get < double > (id_(), "eqConc",eqConc);
+    return eqConc;
+}
+void TauPump::__set_eqConc( double eqConc )
+{
+    set < double > (id_(), "eqConc", eqConc);
+}
+double TauPump::__get_TA() const
+{
+    double TA;
+    get < double > (id_(), "TA",TA);
+    return TA;
+}
+void TauPump::__set_TA( double TA )
+{
+    set < double > (id_(), "TA", TA);
+}
+double TauPump::__get_TB() const
+{
+    double TB;
+    get < double > (id_(), "TB",TB);
+    return TB;
+}
+void TauPump::__set_TB( double TB )
+{
+    set < double > (id_(), "TB", TB);
+}
+double TauPump::__get_TC() const
+{
+    double TC;
+    get < double > (id_(), "TC",TC);
+    return TC;
+}
+void TauPump::__set_TC( double TC )
+{
+    set < double > (id_(), "TC", TC);
+}
+double TauPump::__get_TV() const
+{
+    double TV;
+    get < double > (id_(), "TV",TV);
+    return TV;
+}
+void TauPump::__set_TV( double TV )
+{
+    set < double > (id_(), "TV", TV);
+}
+#endif

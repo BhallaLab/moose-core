@@ -48,8 +48,13 @@
 	#include "RectPanel.h"
 	#include "Surface.h"
 	#include "Geometry.h"
-// 	#include "Adaptor.h"
-// 	#include "SigNeur.h"
+ 	#include "Adaptor.h"
+ 	#include "SigNeur.h"
+	#include "AscFile.h"
+	#include "DifShell.h"
+	#include "GssaStoich.h"
+	#include "TauPump.h"
+	#include "TimeTable.h"
 //	#include "../kinetics/SparseMatrix.h"
 	#include "../utility/utility.h"
 	/* Random number related utilities */
@@ -477,21 +482,60 @@
 %include "Geometry.h"
 %attribute(pymoose::Geometry, double, epsilon, __get_epsilon, __set_epsilon)
 %attribute(pymoose::Geometry, double, neighdist, __get_neighdist, __set_neighdist)
-// %include "Adaptor.h"
-// %attribute(pymoose::Adaptor, double, inputOffset, __get_inputOffset, __set_inputOffset)
-// %attribute(pymoose::Adaptor, double, outputOffset, __get_outputOffset, __set_outputOffset)
-// %attribute(pymoose::Adaptor, double, scale, __get_scale, __set_scale)
-// %attribute(pymoose::Adaptor, double, output, __get_output)
-// %include "SigNeur.h"
-// %attribute(pymoose::SigNeur, none, cell, __get_cell, __set_cell)
-// %attribute(pymoose::SigNeur, none, spine, __get_spine, __set_spine)
-// %attribute(pymoose::SigNeur, none, dend, __get_dend, __set_dend)
-// %attribute(pymoose::SigNeur, none, soma, __get_soma, __set_soma)
-// %attribute(pymoose::SigNeur, string, cellMethod, __get_cellMethod, __set_cellMethod)
-// %attribute(pymoose::SigNeur, string, spineMethod, __get_spineMethod, __set_spineMethod)
-// %attribute(pymoose::SigNeur, string, dendMethod, __get_dendMethod, __set_dendMethod)
-// %attribute(pymoose::SigNeur, string, somaMethod, __get_somaMethod, __set_somaMethod)
-// %attribute(pymoose::SigNeur, double, Dscale, __get_Dscale, __set_Dscale)
-// %attribute(pymoose::SigNeur, int, parallelMode, __get_parallelMode, __set_parallelMode)
-// %attribute(pymoose::SigNeur, double, updateStep, __get_updateStep, __set_updateStep)
-// %attribute(pymoose::SigNeur, double, calciumScale, __get_calciumScale, __set_calciumScale)
+%include "Adaptor.h"
+%attribute(pymoose::Adaptor, double, inputOffset, __get_inputOffset, __set_inputOffset)
+%attribute(pymoose::Adaptor, double, outputOffset, __get_outputOffset, __set_outputOffset)
+%attribute(pymoose::Adaptor, double, scale, __get_scale, __set_scale)
+%attribute(pymoose::Adaptor, double, output, __get_output)
+%include "SigNeur.h"
+%attribute(pymoose::SigNeur, Id&, cellProto, __get_cellProto, __set_cellProto)
+%attribute(pymoose::SigNeur, Id&, spineProto, __get_spineProto, __set_spineProto)
+%attribute(pymoose::SigNeur, Id&, dendProto, __get_dendProto, __set_dendProto)
+%attribute(pymoose::SigNeur, Id&, somaProto, __get_somaProto, __set_somaProto)
+%attribute(pymoose::SigNeur, Id&, cell, __get_cell)
+%attribute(pymoose::SigNeur, Id&, spine, __get_spine)
+%attribute(pymoose::SigNeur, Id&, dend, __get_dend)
+%attribute(pymoose::SigNeur, Id&, soma, __get_soma)
+%attribute(pymoose::SigNeur, string, cellMethod, __get_cellMethod, __set_cellMethod)
+%attribute(pymoose::SigNeur, string, spineMethod, __get_spineMethod, __set_spineMethod)
+%attribute(pymoose::SigNeur, string, dendMethod, __get_dendMethod, __set_dendMethod)
+%attribute(pymoose::SigNeur, string, somaMethod, __get_somaMethod, __set_somaMethod)
+%attribute(pymoose::SigNeur, double, sigDt, __get_sigDt, __set_sigDt)
+%attribute(pymoose::SigNeur, double, cellDt, __get_cellDt, __set_cellDt)
+%attribute(pymoose::SigNeur, double, Dscale, __get_Dscale, __set_Dscale)
+%attribute(pymoose::SigNeur, double, lambda, __get_lambda, __set_lambda)
+%attribute(pymoose::SigNeur, int, parallelMode, __get_parallelMode, __set_parallelMode)
+%attribute(pymoose::SigNeur, double, updateStep, __get_updateStep, __set_updateStep)
+%attribute(pymoose::SigNeur, double, calciumScale, __get_calciumScale, __set_calciumScale)
+%attribute(pymoose::SigNeur, string, dendInclude, __get_dendInclude, __set_dendInclude)
+%attribute(pymoose::SigNeur, string, dendExclude, __get_dendExclude, __set_dendExclude)
+%include "AscFile.h"
+%attribute(pymoose::AscFile, string, fileName, __get_fileName, __set_fileName)
+%attribute(pymoose::AscFile, int, appendFlag, __get_appendFlag, __set_appendFlag)
+%include "DifShell.h"
+%attribute(pymoose::DifShell, double, C, __get_C)
+%attribute(pymoose::DifShell, double, Ceq, __get_Ceq, __set_Ceq)
+%attribute(pymoose::DifShell, double, D, __get_D, __set_D)
+%attribute(pymoose::DifShell, double, valence, __get_valence, __set_valence)
+%attribute(pymoose::DifShell, double, leak, __get_leak, __set_leak)
+%attribute(pymoose::DifShell, unsigned int, shapeMode, __get_shapeMode, __set_shapeMode)
+%attribute(pymoose::DifShell, double, length, __get_length, __set_length)
+%attribute(pymoose::DifShell, double, diameter, __get_diameter, __set_diameter)
+%attribute(pymoose::DifShell, double, thickness, __get_thickness, __set_thickness)
+%attribute(pymoose::DifShell, double, volume, __get_volume, __set_volume)
+%attribute(pymoose::DifShell, double, outerArea, __get_outerArea, __set_outerArea)
+%attribute(pymoose::DifShell, double, innerArea, __get_innerArea, __set_innerArea)
+%include "GssaStoich.h"
+%attribute(pymoose::GssaStoich, string, method, __get_method, __set_method)
+%attribute(pymoose::GssaStoich, string, path, __get_path, __set_path)
+%include "TauPump.h"
+%attribute(pymoose::TauPump, double, pumpRate, __get_pumpRate, __set_pumpRate)
+%attribute(pymoose::TauPump, double, eqConc, __get_eqConc, __set_eqConc)
+%attribute(pymoose::TauPump, double, TA, __get_TA, __set_TA)
+%attribute(pymoose::TauPump, double, TB, __get_TB, __set_TB)
+%attribute(pymoose::TauPump, double, TC, __get_TC, __set_TC)
+%attribute(pymoose::TauPump, double, TV, __get_TV, __set_TV)
+%include "TimeTable.h"
+%attribute(pymoose::TimeTable, double, maxTime, __get_maxTime, __set_maxTime)
+%attribute(pymoose::TimeTable, const vector < double >&, tableVector, __get_tableVector, __set_tableVector)
+%attribute(pymoose::TimeTable, unsigned int, tableSize, __get_tableSize)
