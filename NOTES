@@ -8048,3 +8048,4 @@ Various stumbling blocks:
 First pass at implementing sumtot dependencies. Sort of works but in one
 test the sumtots fail to initialize. Fixed that too.
 
+Checked in as revision 917: unit test flags on, Smoldyn off, GSL on, -g, MPI off
