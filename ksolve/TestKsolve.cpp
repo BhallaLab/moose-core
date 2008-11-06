@@ -21,6 +21,7 @@
 #include "GssaStoich.h"
 
 extern void testKinSparseMatrix(); // Defined in KinSparseMatrix.cpp
+void testMathExpn();
 void testStoich();
 void testKintegrator();
 #ifdef USE_GSL
@@ -32,6 +33,7 @@ void testKineticManagerGssa();
 void testKsolve()
 {
 	testKinSparseMatrix();
+	testMathExpn();
 	testStoich();
 	testKintegrator();
 #ifdef USE_GSL
@@ -41,6 +43,41 @@ void testKsolve()
 #ifndef USE_MPI // As of r896, this unit test is not compatible with the parallel code
 	testKineticManagerGssa();
 #endif
+}
+
+void testMathExpn()
+{
+	cout << "\nTesting MathExpression" << flush;
+	vector< double > s( 10, 0.0 );
+	vector< const double* > mol;
+	mol.push_back( &s[3] );
+	mol.push_back( &s[7] );
+	mol.push_back( &s[9] );
+	SumTotal stot( &s[0], mol );
+
+	vector< unsigned int > molIndex;
+	molIndex.push_back( 0 );
+	molIndex.push_back( 1 );
+	molIndex.push_back( 2 );
+
+	bool ret = stot.hasInput( molIndex, s );
+	ASSERT( ret == 0 , "SumTot::hasInput" );
+
+	molIndex[0] = 3;
+	ret = stot.hasInput( molIndex, s );
+	ASSERT( ret, "SumTot::hasInput" );
+
+	molIndex[0] = 0;
+	molIndex[1] = 7;
+	ret = stot.hasInput( molIndex, s );
+	ASSERT( ret, "SumTot::hasInput" );
+
+	molIndex[1] = 1;
+	molIndex[2] = 9;
+	ret = stot.hasInput( molIndex, s );
+	ASSERT( ret, "SumTot::hasInput" );
+
+	ASSERT( stot.target( s ) == 0, "SumTot::target" );
 }
 
 //////////////////////////////////////////////////////////////////

@@ -627,13 +627,14 @@ class ZeroOrder* makeHalfReaction( double k, vector< const double*> v )
 }
 
 void Stoich::fillHalfStoich( const double* baseptr, 
-	vector< const double* >& reactant, int sign, int reacNum )
+	vector< const double* >& reactant, int sign, unsigned int reacNum )
 {
 	vector< const double* >::iterator i;
 	const double* lastptr = 0;
 	int n = 1;
 	unsigned int molNum = 0;
 
+	assert( reacNum < v_.size() );
 	sort( reactant.begin(), reactant.end() );
 	lastptr = reactant.front();
 	for (i = reactant.begin() + 1; i != reactant.end(); i++) {
@@ -642,7 +643,8 @@ void Stoich::fillHalfStoich( const double* baseptr,
 		}
 		if ( *i != lastptr ) {
 			molNum = static_cast< unsigned int >(lastptr - baseptr);
-			if ( molNum < nVarMols_ ) {
+			assert( molNum < nMols_ );
+			if ( molNum < nMols_ ) { // If should be redundant here.
 				N_.set( molNum, reacNum, sign * n );
 				n = 1;
 			}
@@ -650,7 +652,8 @@ void Stoich::fillHalfStoich( const double* baseptr,
 		lastptr = *i;
 	}
 	molNum = static_cast< unsigned int >(lastptr - baseptr);
-	if ( molNum < nVarMols_ ) {
+	assert( molNum < nMols_ );
+	if ( molNum < nMols_ ) { // Should be redundant.
 		N_.set( molNum, reacNum, sign * n );
 	}
 }
@@ -658,7 +661,7 @@ void Stoich::fillHalfStoich( const double* baseptr,
 void Stoich::fillStoich( 
 	const double* baseptr, 
 	vector< const double* >& sub, vector< const double* >& prd, 
-	int reacNum )
+	unsigned int reacNum )
 {
 	if ( sub.size() > 0 && prd.size() > 0 ) {
 		fillHalfStoich( baseptr, sub, -1 , reacNum );

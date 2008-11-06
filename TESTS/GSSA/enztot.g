@@ -1,7 +1,7 @@
 //genesis
 // kkit Version 11 flat dumpfile
  
-// Saved on Tue Nov  4 21:59:58 2008
+// Saved on Thu Nov  6 16:15:05 2008
  
 include kkit {argv 1}
  
@@ -59,6 +59,9 @@ simundump kenz /kinetics/E/kenz 0 0 0 0 0 1 0.1 0.4 0.1 0 0 "" red 1 "" -1 3 \
   0
 simundump kpool /kinetics/tot 0 0 0 1 1 0 0 0 1 0 /kinetics/geometry 24 black \
   -1 -2 0
+simundump kreac /kinetics/kreac 0 0.1 0.1 "" white black 1 -3 0
+simundump kpool /kinetics/convTot 0 0 0 0 0 0 0 0 1 0 /kinetics/geometry 46 \
+  black 3 -2 0
 simundump xgraph /graphs/conc1 0 0 100 0 1 0
 simundump xgraph /graphs/conc2 0 0 100 0 1 0
 simundump xplot /graphs/conc1/A.Co 3 524288 \
@@ -69,6 +72,8 @@ simundump xplot /graphs/conc1/E.Co 3 524288 \
   "delete_plot.w <s> <d>; edit_plot.D <w>" 1 0 0 1
 simundump xplot /graphs/conc2/tot.Co 3 524288 \
   "delete_plot.w <s> <d>; edit_plot.D <w>" 24 0 0 1
+simundump xplot /graphs/conc2/convTot.Co 3 524288 \
+  "delete_plot.w <s> <d>; edit_plot.D <w>" 46 0 0 1
 simundump xgraph /moregraphs/conc3 0 0 100 0 1 0
 simundump xgraph /moregraphs/conc4 0 0 100 0 1 0
 simundump xcoredraw /edit/draw 0 -5 6 -6 6
@@ -83,10 +88,15 @@ addmsg /kinetics/E /kinetics/E/kenz ENZYME n
 addmsg /kinetics/A /kinetics/E/kenz SUBSTRATE n 
 addmsg /kinetics/B /kinetics/tot SUMTOTAL n nInit 
 addmsg /kinetics/A /kinetics/tot SUMTOTAL n nInit 
+addmsg /kinetics/kreac /kinetics/tot REAC A B 
+addmsg /kinetics/tot /kinetics/kreac SUBSTRATE n 
+addmsg /kinetics/convTot /kinetics/kreac PRODUCT n 
+addmsg /kinetics/kreac /kinetics/convTot REAC B A 
 addmsg /kinetics/A /graphs/conc1/A.Co PLOT Co *A.Co *blue 
 addmsg /kinetics/B /graphs/conc1/B.Co PLOT Co *B.Co *61 
 addmsg /kinetics/E /graphs/conc1/E.Co PLOT Co *E.Co *1 
 addmsg /kinetics/tot /graphs/conc2/tot.Co PLOT Co *tot.Co *24 
+addmsg /kinetics/convTot /graphs/conc2/convTot.Co PLOT Co *convTot.Co *46 
 enddump
 // End of dump
 
