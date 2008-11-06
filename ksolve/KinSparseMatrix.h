@@ -32,9 +32,10 @@ class KinSparseMatrix
 		int get( unsigned int row, unsigned int column );
 
 		/**
-		 * Returns all non-zero column indices, ie., molecule#s,
-		 * for the specified row.
-		 */
+ 		* Returns all non-zero column indices, for the specified row.  
+ 		* This gives reac #s in orig matrix, and molecule #s in the 
+ 		* transposed matrix
+ 		*/
 		int getRowIndices( 
 			unsigned int row, vector< unsigned int >& indices );
 
@@ -77,24 +78,38 @@ class KinSparseMatrix
 		 */
 		void fireReac( unsigned int reacIndex, vector< double >& S ) const;
 		
+		/**
+ 		* This function generates a new internal list of rowEnds, such
+ 		* that they are all less than the maxColumnIndex.
+ 		* It is used because in fireReac we don't want to update all the
+ 		* molecules, only those that are variable.
+ 		*/
+		void truncateRow( unsigned int maxColumnIndex );
 
 	private:
 		unsigned int nrows_; /// Number of molecules in a kinetc system.
 		unsigned int ncolumns_; /// Number of reactions.
 		vector< int > N_;	/// Non-zero entries in the KinSparseMatrix.
 
-		/* 
+		/** 
 		 * Column index of each non-zero entry. 
 		 * This matches up entry-by entry with the N_ vector.
 		 */
 		vector< unsigned int > colIndex_;	
 
-		/*
+		/**
 		 * Start index in the N_ and colIndex_ vectors, of each row.
 		 * Additionally stores one last entry in nRows_ + 1, for the end
 		 * of the N_ vector.
 		 */
 		vector< unsigned int > rowStart_;
+
+		/**
+		 * End colIndex for rows (molecules in the transposed matrix)
+		 * so that only variable molecules are below the colIndex.
+		 */
+		vector< unsigned int > rowTruncated_;
+
 		static const unsigned int MAX_ROWS;
 		static const unsigned int MAX_COLUMNS;
 };
