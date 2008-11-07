@@ -284,7 +284,9 @@ bool IdManager::isGlobal( unsigned int index ) const
 void IdManager::setNode( unsigned int index, unsigned int node )
 {
 	assert( node < Shell::numNodes() || node == Id::GlobalNode );
-	assert( index < elementList_.size() );
+	
+	if ( index >= elementList_.size() )
+		elementList_.resize( index * 2 );
 	
 	Enode& e = elementList_[ index ];
 	// cout << "Setting node for " << index << " to " << node << endl;
