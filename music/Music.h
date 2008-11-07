@@ -38,7 +38,8 @@ public:
 
 
         static int getRank( Eref e );
-        static int getSize( Eref e);
+        static int getSize( Eref e );
+        static double getStopTime( Eref e );
 
 
 protected:
@@ -60,6 +61,9 @@ private:
 	static MUSIC::runtime* runtime_;
 	
 	static double dt_;
+        static double stopTime_;
+
+
 };
 
 #endif // MOOSE_MUSIC_H
