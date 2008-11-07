@@ -20,6 +20,7 @@ MUSIC::setup* Music::setup_ = 0;
 MUSIC::runtime* Music::runtime_ = 0;
 //!!!
 double Music::dt_;
+double Music::stopTime_; 
 
 const Cinfo* initMusicCinfo()
 {
@@ -57,7 +58,11 @@ const Cinfo* initMusicCinfo()
                         GFCAST( &Music::getSize ),
                         &dummyFunc 
                         ),
-
+        new ValueFinfo( "stoptime",
+                        ValueFtype1< double >::global(),
+                        GFCAST( &Music::getStopTime ),
+                        &dummyFunc 
+                        ),
 
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfos
@@ -152,6 +157,9 @@ void Music::innerReinitializeFunc( )
 MPI::Intracomm Music::setup( int& argc, char**& argv )
 {
   setup_ = new MUSIC::setup( argc, argv );
+
+  // Store the MUSIC stop time
+  setup_->config ("stoptime", &stopTime_);
 
   return setup_->communicator();
 }
@@ -254,4 +262,8 @@ int Music::getRank( Eref e ) {
 
 int Music::getSize( Eref e) {
   return MuMPI::INTRA_COMM().Get_size();
+}
+
+double Music::getStopTime( Eref e) {
+  return stopTime_;
 }
