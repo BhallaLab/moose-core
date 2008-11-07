@@ -59,6 +59,19 @@ class KinCompt
 
 		static void rescaleFunction( const Conn* c, double ratio );
 
+		/**
+		 * Special MsgDest used by Molecules reading from kkit.
+		 * Molecules try to set their volumes by referring to this
+		 * KinCompt, which has to decide what to do about it depending
+		 * on history of such assignments.
+		 * If it is the first: Assign without rescaling
+		 * If it is a later one, same vol: Just keep tally, silently.
+		 * If it is a later one, new vol: Complain, tally
+		 * If the later new vols outnumber original vol: Complain louder
+		 */
+		static void setVolumeFromChild( const Conn* c, double v );
+		void innerSetVolumeFromChild( double v );
+
 	protected:
 		double size() const {
 			return size_;
@@ -99,6 +112,14 @@ class KinCompt
 		 * 3 for normal compartments, 2 for membrane surfaces.
 		 */
 		unsigned int numDimensions_;
+
+		/**
+		 * Backward compat hack: Keeps track of number of molecules
+		 * assigned to this KinCompt, and number whose volumes match up.
+		 * The remainder would like some other volume.
+		 */
+		 unsigned int numAssigned_;
+		 unsigned int numMatching_;
 };
 
 // Used by the Smoldyn solver
@@ -109,5 +130,6 @@ extern void rescaleTree( Eref e, double ratio );
 
 /// Used by KineticHub, Molecule, Reaction, and enzyme.
 extern double getVolScale( Eref e );
+extern void setParentalVolScale( Eref e, double volScale );
 
 #endif // _KinCompt_h

@@ -101,6 +101,10 @@ const Cinfo* initKinComptCinfo()
 			Ftype1< double >::global(),
 			RFCAST( &KinCompt::setSizeWithoutRescale ),
 			"Assigns size without rescaling the entire model." ),
+		new DestFinfo( "volumeFromChild", 
+			Ftype1< double >::global(),
+			RFCAST( &KinCompt::setSizeWithoutRescale ),
+			"Assigns volume based on request from child Molecule.\nApplies the following logic:\n	- If first assignment: Assign without rescaling\n	- If later assignment, same vol: Keep tally, silently\n	- If laster assignment, new vol: Complain, tally\n	- If later new vols outnumber original vol: Complain louder." ),
 	///////////////////////////////////////////////////////
 	// Synapse definitions
 	///////////////////////////////////////////////////////
@@ -139,7 +143,9 @@ KinCompt::KinCompt()
 		volume_( 1.666666667e-21 ), 
 		area_( 1.0 ), 
 		perimeter_( 1.0 ), 
-		numDimensions_( 3 )
+		numDimensions_( 3 ),
+		numAssigned_( 0 ),
+		numMatching_( 0 )
 {
 		;
 }
@@ -288,8 +294,7 @@ void KinCompt::interiorFunction(
 	static_cast< KinCompt* >( c->data() )->localInteriorFunction( v1, v2, v3 );
 }
 
-void KinCompt::rescaleFunction( 
-	const Conn* c, double ratio )
+void KinCompt::rescaleFunction( const Conn* c, double ratio )
 {
 	double size = static_cast< KinCompt* >( c->data() )->size_;
 	assert( size > 0.0 );
@@ -297,9 +302,52 @@ void KinCompt::rescaleFunction(
 		c->target(), size * ratio );
 }
 
+void KinCompt::setVolumeFromChild( const Conn* c, double v )
+{
+	static_cast< KinCompt* >( c->data() )->innerSetVolumeFromChild( v );
+}
+
+void KinCompt::innerSetVolumeFromChild( double v )
+{
+	if ( numAssigned_ == 0 ) {
+		size_ = v;
+		++numMatching_;
+	} else if ( fabs( 1.0 - size_ / v ) < 1.0e-3 ) {
+		++numMatching_;
+	} else {
+		if ( numMatching_ * 2 > numAssigned_ ) {
+			cout << "Warning: KinCompt::innerSetVolumeFromChild: " <<
+			"\nCurrent volume " << size_ << 
+			" is used by less than half the children\n";
+		} else {
+			cout << "Warning: KinCompt::innerSetVolumeFromChild: " <<
+			"\nCurrent volume " << size_ << 
+			" dous not match assigned volume " << v << endl;
+		}
+	}
+	++numAssigned_;
+}
+
 ///////////////////////////////////////////////////
 // Utility functions for volume and size management.
 ///////////////////////////////////////////////////
+
+Eref getNearestKinCompt( Eref e )
+{
+	static const Finfo* parentFinfo = 
+		initNeutralCinfo()->findFinfo( "parent" );
+	Id pa;
+	bool ret = get< Id >( e, parentFinfo, pa );
+	assert( ret );
+	while( pa != Id() ) {
+		Eref e = pa.eref();
+		if ( e.e->cinfo()->isA( initKinComptCinfo() ) )
+			return e;
+		ret = get< Id >( e, parentFinfo, pa );
+		assert( ret );
+	}
+	return Eref::root(); // Failed
+}
 
 /**
  * This is an extern function used by molecules, enzymes and reacs.
@@ -308,40 +356,44 @@ void KinCompt::rescaleFunction(
  * If it runs into a KineticManager (happens with legacy kkit simulations)
  * uses the volScale on the kinetic manager.
  */
+
 double getVolScale( Eref e )
 {
-	static const Finfo* parentFinfo = 
-		initNeutralCinfo()->findFinfo( "parent" );
 	static const Finfo* sizeFinfo = 
 		initKinComptCinfo()->findFinfo( "size" );
-	static const Finfo* managerSizeFinfo = 
-		initKineticManagerCinfo()->findFinfo( "volume" );
-	Id pa;
-	bool ret = get< Id >( e, parentFinfo, pa );
-	assert( ret );
-	while( pa != Id() ) {
-		Eref e = pa.eref();
-		if ( e.e->cinfo()->isA( initKinComptCinfo() ) ) {
-			double size = 1.0;
-			ret = get< double >( e, sizeFinfo, size );
-			assert( ret );
-			assert( size > 0.0 );
-			// Here we need to put in units too.
-			return 6e20 * size;
-		}
-		if ( e.e->cinfo()->isA( initKineticManagerCinfo() ) ) {
-			double size = 1.0;
-			ret = get< double >( e, managerSizeFinfo, size );
-			assert( ret );
-			assert( size > 0.0 );
-			// Here we need to put in units too.
-			return 6e20 * size;
-		}
-		ret = get< Id >( e, parentFinfo, pa );
+
+	Eref kc = getNearestKinCompt( e );
+	if ( !( kc == Eref::root() ) ) {
+		assert( kc.e->cinfo()->isA( initKinComptCinfo() ) );
+		double size = 1.0;
+		bool ret = get< double >( kc, sizeFinfo, size );
 		assert( ret );
+		assert( size > 0.0 );
+		// Here we need to put in units too.
+		return 6e20 * size;
 	}
 	cout << "KinCompt.cpp:getVolScale: Failed to find KinCompt for volume\n";
 	return 1.0;
+}
+
+void setParentalVolScale( Eref e, double volScale )
+{
+	static const Finfo* sizeFinfo = 
+		initKinComptCinfo()->findFinfo( "volumeFromChild" );
+
+	Eref kc = getNearestKinCompt( e );
+	if ( !( kc == Eref::root() ) ) {
+		if ( volScale <= 0.0 ) {
+			cout << "Error: setParentalVolScale: Should be > 0: " <<
+				volScale << endl;
+			return;
+		}
+		double vol = volScale / 6e20;
+		bool ret = set< double >( kc, sizeFinfo, vol );
+		assert( ret );
+		return;
+	}
+	cout << "KinCompt.cpp:setParentalVolScale: Failed to find KinCompt for volume\n";
 }
 
 /**
