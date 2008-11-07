@@ -12,9 +12,9 @@
 #include "moose.h"
 #include <math.h>
 #include "Molecule.h"
+#include "KinCompt.h" // for getVolScale and setParentalVolScale
 
 const double Molecule::EPSILON = 1.0e-15;
-extern double getVolScale( Eref e ); // defined in KinCompt.cpp
 
 const Cinfo* initMoleculeCinfo()
 {
@@ -191,13 +191,14 @@ double Molecule::getNinit( Eref e )
 
 void Molecule::setVolumeScale( const Conn* c, double value )
 {
+	setParentalVolScale( c->target(), value );
 /*
 	if ( value >= 0.0 )
 		static_cast< Molecule* >( c->data() )->volumeScale_ = value;
-		*/
 	double volScale = getVolScale( c->target() );
 	if ( fabs( value - volScale ) / (value + volScale ) > 1e-6 )
 		cout << "Warning: Molecule::setVolumeScale: Mismatch in deprecated assignment to\nvolScale: " << volScale << " != " << value << endl; 
+		*/
 }
 
 double Molecule::getVolumeScale( Eref e )

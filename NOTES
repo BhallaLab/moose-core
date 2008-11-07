@@ -8087,6 +8087,12 @@ track of the truncated row endings suitable for the variable molecules.
 This seems to have dealt with it. Now MOOSE seems to handle acc4 properly at a
 range of volumes.
 
+Checked in as revision 919: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
 Next step is to fix up the volume scaling problems during file loading.
+
+=============================================================================
+7 Nov 2008
+Dealt with volume scaling. Seems to work.
 
 =============================================================================
