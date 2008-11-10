@@ -75,15 +75,23 @@
 	#include "PoissonRng.h"
 	#include "ExponentialRng.h"
 	#include "UniformRng.h"
+#ifdef USE_NUMPY
+#include <algorithm>
+#ifndef PY_ARRAY_UNIQUE_SYMBOL
+#define PY_ARRAY_UNIQUE_SYMBOL Py_Array_API_pymoose_
+#endif
+#include <numpy/arrayobject.h>
+#endif //!USE_NUMPY
+#include "../builtins/Interpol.h"
+
 %}
 
-#ifdef NUMPY
-%{
-#include <numpy/arrayobject.h>
+
 %init %{
+#ifdef USE_NUMPY
       import_array();
-%}
 #endif
+%}
 
 //%feature("autodoc", "1");
 %template(uint_vector) std::vector<unsigned int>;
@@ -156,31 +164,58 @@
 %attribute(pymoose::ClockJob, int, currentStep, __get_currentStep, __set_currentStep)
 %attribute(pymoose::ClockJob, double, start, __get_start, __set_start)
 %attribute(pymoose::ClockJob, int, step, __get_step, __set_step)
-/* Numpy interface for InterpolationTable */
-#ifdef NUMPY
-%extend pymoose::InterpolationTable{
-	PyObject* __array_struct__(){
-		  PyObject * result = NULL;
-		  int dimensions[1] = this->__get_xdivs() + 1;
-		  static vector <double> data;
-		  data = static_cast<Interpol*> (this->id_()->data())->getTableVector(this->id_());
-/* the prototype function to create an array from existing data -
-PyObject * PyArray_FromDimsAndData(int n_dimensions,int dimensions[n_dimensions], int item_type, char *data);
-*/
-	
-		  result = PyArrayFromDimsAndData(1, dimensions, PyArray_DOUBLE, (char*)(&data));
-		  return result;
-} 
-  %pythoncode {
-  __array_struct__ = property(__array_struct__,
-                                                 doc='Array protocol')
-  }
-} // end of extend
-	
-#endif
-// WORK IN PROGRESS
-/**/
+
 %include "Interpol.h"
+/* Numpy interface for InterpolationTable */
+%extend pymoose::InterpolationTable{
+#ifdef USE_NUMPY
+PyObject* get__array_struct__()
+{
+    PyArrayObject* result;
+    int dimensions[1];
+    static vector <double> data;
+    printf("In __array_struct__\n");
+    data = Interpol::getTableVector((*($self->__get_id()))());
+    dimensions[0] = data.size();
+    // avoiding shared data copy - dangerous and the vector returned by getTableVector is a temporary copy 
+    // result = (PyArrayObject*)PyArray_FromDimsAndData(1, dimensions, NPY_DOUBLE, (char*)(&data[0]));
+    // instead create a PyArrayObject initialized with zero and then copy data
+    result = (PyArrayObject*)PyArray_FromDims(1, dimensions, NPY_DOUBLE);
+    memcpy(result->data, &data[0], dimensions[0]*sizeof(double));
+    return PyArray_Return(result);
+} // !get__array_struct__
+
+/**
+   This function fills a table object using a Python sequence type object
+*/
+#if 0
+void fillData(PyObject* args)
+{
+    PyObject* input_seq;
+    PyArrayObject* array;
+    if (!PyArg_ParseTuple(args, "O", &input_seq))
+        return;
+    array = (PyArrayObject *) PyArray_ContiguousFromObject(input_seq, PyArray_DOUBLE, 1, 1);
+    if (array == NULL)
+        return;
+    this->__set_xdivs(array->dimensions[0] - 1);
+    std::vector <double> data(array->dimensions[0], 0.0);
+    double min = *std::min_element(data.begin(), data.end());
+    this->__set_xmin(min);
+    double max = *std::max_element(data.begin(), data.end());
+    this->__set_xmax(max);
+    // todo: should use stl copy
+    memcpy(&data[0], array->data, sizeof(double)*(array->dimensions[0]));
+    set <vector <double> > (id_(), "tableVector", data);
+}
+#endif
+  %pythoncode %{
+  __array_struct__ = property(get__array_struct__,
+                                                 doc='Array protocol')
+  %} // end pythoncode
+#endif // !USE_NUMPY	     
+}; // end of extend
+
 %attribute(pymoose::InterpolationTable, double, xmin, __get_xmin, __set_xmin)
 %attribute(pymoose::InterpolationTable, double, xmax, __get_xmax, __set_xmax)
 %attribute(pymoose::InterpolationTable, int, xdivs, __get_xdivs, __set_xdivs)
@@ -525,7 +560,7 @@ PyObject * PyArray_FromDimsAndData(int n_dimensions,int dimensions[n_dimensions]
 %attribute(pymoose::SigNeur, double, sigDt, __get_sigDt, __set_sigDt)
 %attribute(pymoose::SigNeur, double, cellDt, __get_cellDt, __set_cellDt)
 %attribute(pymoose::SigNeur, double, Dscale, __get_Dscale, __set_Dscale)
-%attribute(pymoose::SigNeur, double, lambda, __get_lambda, __set_lambda)
+%attribute(pymoose::SigNeur, double, lambda_, __get_lambda, __set_lambda)
 %attribute(pymoose::SigNeur, int, parallelMode, __get_parallelMode, __set_parallelMode)
 %attribute(pymoose::SigNeur, double, updateStep, __get_updateStep, __set_updateStep)
 %attribute(pymoose::SigNeur, double, calciumScale, __get_calciumScale, __set_calciumScale)

@@ -2,10 +2,6 @@
 #define _pymoose_Interpol_h
 #include "PyMooseBase.h"
 
-#ifdef NUMPY // Required only if compiling with NumPy support
-#include "Python.h"
-#include "numpy/arrayobject.h"
-#endif // ifdef NUMPY
 namespace pymoose
 {
 
@@ -48,12 +44,7 @@ namespace pymoose
         string dumpFile() const;
         void dumpFile(string fileName, bool append = false);
         void tabFill(int xdivs, int mode);
-        
-#ifdef NUMPY // Only for NumPy support
-        PyObject* __array_struct__();
-        // TODO: work in progress
-#endif // NUMPY
-    
+
       protected:
         // This constructor is for allowing derived type (Table) to
         // have constructors exactly as if it was directly derived from PyMooseBase.

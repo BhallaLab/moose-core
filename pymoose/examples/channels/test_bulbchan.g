@@ -40,7 +40,6 @@ function test_K_mit_usb
         initVm {EREST_ACT} \
         inject 0.0
 
-
     ce /test_K_mit_usb/comp
     make_K_mit_usb
    
@@ -69,22 +68,22 @@ function test_K_mit_usb
     setfield ^ step_mode 3
     addmsg /test_K_mit_usb/comp /test_K_mit_usb/data/vm INPUT Vm
 
-
     // setup the scheduling
     setclock 0 {SIMDT}
     setclock 1 {SIMDT}
     setclock 2 {IODT}
 
     useclock /test_K_mit_usb/data/# 2
-    useclock /test_K_mit_usb/comp,/test_K_mit_usb/comp/## 0
-    useclock /test_K_mit_usb/pulse 0
+//  the following useclock calls are unnecessary as default scheduling takes care of them
+//     useclock /test_K_mit_usb/comp,/test_K_mit_usb/comp/## 0
+//     useclock /test_K_mit_usb/pulse 0
 
     reset
 
     step {SIMLENGTH} -time
     setfield /test_K_mit_usb/data/K_mit_usb_Ik print "K_mit_usb_Ik.moose.plot" 
     setfield /test_K_mit_usb/data/inject print "K_mit_usb_inject.moose.plot"
-    setfield /test_K_mit_usb/data/vm print "K_mit_usb_Vm.moose.plot" 
+    setfield /test_K_mit_usb/data/vm print "K_mit_usb_Vm.moose.plot"
 
     //-----------------------------
     // These are for diagonostics
@@ -93,8 +92,6 @@ function test_K_mit_usb
     setfield /test_K_mit_usb/comp/K_mit_usb/xGate/B print "K_XB.moose.plot"
     setfield /test_K_mit_usb/comp/K_mit_usb/yGate/A print "K_YA.moose.plot"
     setfield /test_K_mit_usb/comp/K_mit_usb/yGate/B print "K_YB.moose.plot"
-
-
 end
 
 ///////////////
