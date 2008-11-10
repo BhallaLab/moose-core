@@ -79,11 +79,21 @@ class TestKMitralUSB(unittest.TestCase):
         inject_plot.connect("inputRequest", pulse, "output")
         inject_plot.stepMode = 3
         inject_plot.useClock(2)
+        
+        vm_plot = moose.Table("KMitralUSB_Vm", self.data)
+        vm_plot.connect("inputRequest", compartment, "Vm")
+        vm_plot.stepMode = 3
+        vm_plot.useClock(2)
 
         moose.PyMooseBase.getContext().reset()
+        moose.PyMooseBase.getContext().reset()
+
         moose.PyMooseBase.getContext().step(self.sim_length)
         channel_plot.dumpFile(channel_plot.name + ".pymoose.plot")
         inject_plot.dumpFile(inject_plot.name + ".pymoose.plot")
+        vm_plot.dumpFile(vm_plot.name + ".pymoose.plot")
+# ! testChannelCurrent
+# ! TestKMitralUSB
 
 class TestNaMitralUSB(unittest.TestCase):
     """Create a compartment with one KMitralUSB channel and test with a current pulse."""

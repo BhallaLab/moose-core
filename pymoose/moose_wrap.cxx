@@ -3015,6 +3015,7 @@ SWIG_AsVal_ptrdiff_t (PyObject * obj, ptrdiff_t *val)
 #include <vector>
 
 
+	#define SWIG_FILE_WITH_INIT
 	#include "../basecode/header.h"
 	#include "../basecode/moose.h"
 	#include "PyMooseContext.h"
@@ -3086,6 +3087,15 @@ SWIG_AsVal_ptrdiff_t (PyObject * obj, ptrdiff_t *val)
 	#include "PoissonRng.h"
 	#include "ExponentialRng.h"
 	#include "UniformRng.h"
+#ifdef USE_NUMPY
+#include <algorithm>
+#ifndef PY_ARRAY_UNIQUE_SYMBOL
+#define PY_ARRAY_UNIQUE_SYMBOL Py_Array_API_pymoose_
+#endif
+#include <numpy/arrayobject.h>
+#endif //!USE_NUMPY
+#include "../builtins/Interpol.h"
+
 
 
 namespace swig {  
@@ -5598,8 +5608,8 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
 #define pymoose_SigNeur_Dscale_set(self_, val_) self_->__set_Dscale(val_)
   
 
-#define pymoose_SigNeur_lambda_get(self_) self_->__get_lambda()
-#define pymoose_SigNeur_lambda_set(self_, val_) self_->__set_lambda(val_)
+#define pymoose_SigNeur_lambda__get(self_) self_->__get_lambda()
+#define pymoose_SigNeur_lambda__set(self_, val_) self_->__set_lambda(val_)
   
 
 #define pymoose_SigNeur_parallelMode_get(self_) self_->__get_parallelMode()
@@ -94370,7 +94380,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SigNeur__lambda_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SigNeur_lambda__set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::SigNeur *arg1 = (pymoose::SigNeur *) 0 ;
   double arg2 ;
@@ -94382,20 +94392,20 @@ SWIGINTERN PyObject *_wrap_SigNeur__lambda_set(PyObject *SWIGUNUSEDPARM(self), P
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"SigNeur__lambda_set",2,2,&obj0,&obj1)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"SigNeur_lambda__set",2,2,&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__SigNeur, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SigNeur__lambda_set" "', argument " "1"" of type '" "pymoose::SigNeur *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SigNeur_lambda__set" "', argument " "1"" of type '" "pymoose::SigNeur *""'"); 
   }
   arg1 = reinterpret_cast< pymoose::SigNeur * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SigNeur__lambda_set" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SigNeur_lambda__set" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_SigNeur_lambda_set(arg1,arg2);
+    pymoose_SigNeur_lambda__set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -94408,7 +94418,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SigNeur__lambda_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SigNeur_lambda__get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::SigNeur *arg1 = (pymoose::SigNeur *) 0 ;
   double result;
@@ -94417,15 +94427,15 @@ SWIGINTERN PyObject *_wrap_SigNeur__lambda_get(PyObject *SWIGUNUSEDPARM(self), P
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"SigNeur__lambda_get",1,1,&obj0)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"SigNeur_lambda__get",1,1,&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__SigNeur, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SigNeur__lambda_get" "', argument " "1"" of type '" "pymoose::SigNeur *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SigNeur_lambda__get" "', argument " "1"" of type '" "pymoose::SigNeur *""'"); 
   }
   arg1 = reinterpret_cast< pymoose::SigNeur * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)pymoose_SigNeur_lambda_get(arg1);
+    result = (double)pymoose_SigNeur_lambda__get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -102447,8 +102457,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SigNeur_cellDt_get", _wrap_SigNeur_cellDt_get, METH_VARARGS, NULL},
 	 { (char *)"SigNeur_Dscale_set", _wrap_SigNeur_Dscale_set, METH_VARARGS, NULL},
 	 { (char *)"SigNeur_Dscale_get", _wrap_SigNeur_Dscale_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur__lambda_set", _wrap_SigNeur__lambda_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur__lambda_get", _wrap_SigNeur__lambda_get, METH_VARARGS, NULL},
+	 { (char *)"SigNeur_lambda__set", _wrap_SigNeur_lambda__set, METH_VARARGS, NULL},
+	 { (char *)"SigNeur_lambda__get", _wrap_SigNeur_lambda__get, METH_VARARGS, NULL},
 	 { (char *)"SigNeur_parallelMode_set", _wrap_SigNeur_parallelMode_set, METH_VARARGS, NULL},
 	 { (char *)"SigNeur_parallelMode_get", _wrap_SigNeur_parallelMode_get, METH_VARARGS, NULL},
 	 { (char *)"SigNeur_updateStep_set", _wrap_SigNeur_updateStep_set, METH_VARARGS, NULL},
@@ -103686,6 +103696,11 @@ SWIGEXPORT void SWIG_init(void) {
   SWIG_InitializeModule(0);
   SWIG_InstallConstants(d,swig_const_table);
   
+  
+  
+#ifdef USE_NUMPY
+  import_array();
+#endif
   
   PyDict_SetItemString(d,(char*)"cvar", SWIG_globals());
   SWIG_addvarlink(SWIG_globals(),(char*)"Id_AnyIndex",Swig_var_Id_AnyIndex_get, Swig_var_Id_AnyIndex_set);
