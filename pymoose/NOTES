@@ -1,12 +1,20 @@
 -*- mode: org; fill-column: 78 -*-
 
-* TODO
-** Fix PyMooseContext::readCell
+
+* TODO Improve NumPy SUPPORT
+  This is deferred until we have pressing need to do so.
+  
+** NumPy version 1.1.1 required. 
+   In older versions, the enums in numpy/ndarrayobject.h have a trailing comma
+   which gives compilation error. This has been fixed in numpy 1.1.1
+
+* DONE Fix PyMooseContext::readCell
    The format is just opposite GENESIS, should make GENESIS like to avoid ugly surprise.
    Files to be affected:
    PyMooseContext.h, PyMooseContext.cpp
    examples/axon/axon.py
    any python script using readCell
+   
 
 * CODING JUSTIFICATIONS
   The principle of least surprise requires PyMOOSE to stick closely to the
@@ -31,3 +39,5 @@
 ** Table::step_mode/stepmode in MOOSE, stepMode in PyMOOSE. 
    We should decide on underscore vs camel-case and follow on way or the
    other.
+
+** SigNeur::lambda has been renamed to lambda_ as lambda is a python keyword.
