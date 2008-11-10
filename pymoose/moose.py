@@ -2083,7 +2083,7 @@ class SigNeur(PyMooseBase):
     sigDt = _swig_property(_moose.SigNeur_sigDt_get, _moose.SigNeur_sigDt_set)
     cellDt = _swig_property(_moose.SigNeur_cellDt_get, _moose.SigNeur_cellDt_set)
     Dscale = _swig_property(_moose.SigNeur_Dscale_get, _moose.SigNeur_Dscale_set)
-    _lambda = _swig_property(_moose.SigNeur__lambda_get, _moose.SigNeur__lambda_set)
+    lambda_ = _swig_property(_moose.SigNeur_lambda__get, _moose.SigNeur_lambda__set)
     parallelMode = _swig_property(_moose.SigNeur_parallelMode_get, _moose.SigNeur_parallelMode_set)
     updateStep = _swig_property(_moose.SigNeur_updateStep_get, _moose.SigNeur_updateStep_set)
     calciumScale = _swig_property(_moose.SigNeur_calciumScale_get, _moose.SigNeur_calciumScale_set)

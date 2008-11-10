@@ -1,8 +1,15 @@
 #ifndef _pymoose_Interpol_cpp
 #define _pymoose_Interpol_cpp
-#include "Interpol.h"
-#include "TableIterator.h"
-#include "../builtins/Interpol.h"
+#include "pymoose/Interpol.h"
+#include "pymoose/TableIterator.h"
+#include "builtins/Interpol.h"
+
+#ifdef _USE_NUMPY // this was experimental and the relevant  functions should be either here or in moose.i in the xtend block. not both.
+#include <algorithm>
+#include <Python.h>
+#include <numpy/arrayobject.h>
+#endif //! USE_NUMPY
+
 using namespace pymoose;
 // We had to change the class name in order to avoid conflict with included moose class Interpol
 // But Interpol is the class name to be passed to base constructor
@@ -150,43 +157,7 @@ int InterpolationTable::__len__()
 {
     return __get_xdivs()+1;    
 }
-#if 0
-#ifdef NUMPY // Only for NumPy support
-// TODO: work in progress
-#include "numpy/noprefix.h"
-PyObject* InterpolationTable::__array_struct__()
-{
-    PyArrayInterface* array = NULL;
-    int dim = this->__get_xdivs() + 1;
-    if ( dim > 1 )
-    {  
-        array = (PyArrayInterface*)PyArray_malloc(sizeof(PyArrayInterface));
-        array->two = 2;
-        array->nd = 1;
-        array->typekind = 'f';
-        array->itemsize = sizeof(double);
-        array->flags = (NPY_CONTIGUOUS | NPY_OWNDATA | NPY_ALIGNED | NPY_NOTSWAPPED); 
-        array->shape = (intp *)_pya_malloc(2*sizeof(intp));        
-        array->strides = array->shape + 1;
-        *(array->shape) = dim;
-        *(array->strides) = 1;
-        array->data = (char *)calloc(dim,sizeof(double));
-        vector <double> data = static_cast < Interpol*> (id_()->data())->getTableVector(id_());
-//        get < vector <double> > (this->id_(), "tableVector", data); // obtain the vector of data from InterpolTable
-        
-        memcpy(&data[0], array->data, sizeof(double)*(data.size())); // copy data from table to array obj
-        for ( int i = 0; i < data.size(); ++i )
-        {
-            cout << data[i] << "\t" << (double)((double*)(array->data))[i] << endl;
-        }
-        
-        array->descr = 0;
-       
-    }
-    return PyCObject_FromVoidPtr(array, 0);
-}
-#endif // NUMPY
-#endif // !commented out
+
 int InterpolationTable::__get_calcMode() const
 {
     int calc_mode;
@@ -221,6 +192,49 @@ void InterpolationTable::tabFill(int xdivs, int mode)
 {
     set <int, int> (id_(), "tabFill", xdivs, mode);    
 }
+
+#ifdef _USE_NUMPY// this was experimental and the relevant  functions should be either here or in moose.i in the xtend block. not both.
+PyObject* InterpolationTable::__array_struct__()
+{
+    PyArrayObject* result;
+    int dimensions[1];
+    static vector <double> data;
+    printf("In __array_struct__\n");
+    data = Interpol::getTableVector(id_());
+    dimensions[0] = data.size();
+    // avoiding shared data copy - dangerous and the vector returned by getTableVector is a temporary copy 
+    // result = (PyArrayObject*)PyArray_FromDimsAndData(1, dimensions, NPY_DOUBLE, (char*)(&data[0]));
+    // instead create a PyArrayObject initialized with zero and then copy data
+    result = (PyArrayObject*)PyArray_FromDims(1, dimensions, NPY_DOUBLE);
+    memcpy(result->data, &data[0], dimensions[0]*sizeof(double));
+    return PyArray_Return(result);
+} // !__array_struct__
+
+/**
+   This function fills a table object using a Python sequence type object
+*/
+
+void InterpolationTable::fillData(PyObject* args)
+{
+    PyObject* input_seq;
+    PyArrayObject* array;
+    if (!PyArg_ParseTuple(args, "O", &input_seq))
+        return;
+    array = (PyArrayObject *) PyArray_ContiguousFromObject(input_seq, PyArray_DOUBLE, 1, 1);
+    if (array == NULL)
+        return;
+    this->__set_xdivs(array->dimensions[0] - 1);
+    vector <double> data(array->dimensions[0], 0.0);
+    double min = *std::min_element(data.begin(), data.end());
+    this->__set_xmin(min);
+    double max = *std::max_element(data.begin(), data.end());
+    this->__set_xmax(max);
+    // todo: should use stl copy
+    memcpy(&data[0], array->data, sizeof(double)*(array->dimensions[0]));
+    set <vector <double> > (id_(), "tableVector", data);
+}
+
+#endif //! USE_NUMPY
 
 #ifdef DO_UNIT_TESTS
 #include <cmath>
