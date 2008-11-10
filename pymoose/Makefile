@@ -27,7 +27,8 @@ TARGET=pymoose
 CFLAGS+=-I..
 LIBS +=-lpython2.5
 ifdef USE_NUMPY
-CFLAGS+=-I/usr/local/lib/python2.5/site-packages/numpy/core/include
+CFLAGS+=-I/usr/lib/python2.5/site-packages/numpy/core/include -DUSE_NUMPY
+SWIGOPTS=-DUSE_NUMPY
 endif
 # The library location and flags for creating dll in Mac is different from Linux
 # Darwin may not have the OSTYPE environment variable defined in bash. Set OSTYPE=Darwin if required
@@ -212,7 +213,7 @@ moose_wrap.o: moose_wrap.cxx
 	$(CXX) $(CFLAGS) -c $^ -o $@
 
 moose.py moose_wrap.cxx: moose.i $(HEADERS)
-	swig -modern -c++ -python -threads moose.i
+	swig -modern -c++ -python -threads $(SWIGOPTS) moose.i
 
 # This is not required - gnumake does it by implicit rule
 # .cpp.o:
