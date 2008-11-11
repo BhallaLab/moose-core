@@ -30,7 +30,7 @@ class Neutral
 			static const int getIndex( Eref e );
 			static const int getId( Eref e );
 			static const string getClass( Eref e );
-			static const int getNode( Eref e );
+			static unsigned int getNode( Eref e );
 
 			/**
 			 * getParent is a static utility function to return the

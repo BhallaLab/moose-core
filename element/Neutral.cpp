@@ -9,6 +9,7 @@
 
 #include "moose.h"
 #include "Neutral.h"
+#include "shell/Shell.h"
 
 
 /**
@@ -58,6 +59,11 @@ const Cinfo* initNeutralCinfo()
 		new ValueFinfo( "childList",
 				ValueFtype1< vector< Id > >::global(), 
 				reinterpret_cast< GetFunc>( &Neutral::getChildList ),
+				&dummyFunc
+		),
+		new ValueFinfo( "node",
+				ValueFtype1< unsigned int >::global(),
+				reinterpret_cast< GetFunc>( &Neutral::getNode ),
 				&dummyFunc
 		),
 		new ValueFinfo( "cpu",
@@ -481,6 +487,11 @@ vector< string > Neutral::getFieldList( Eref elm )
 		ret.push_back( (*i)->name() );
 
 	return ret;
+}
+
+unsigned int Neutral::getNode( Eref e )
+{
+	return e->id().node();
 }
 
 double Neutral::getCpu( Eref e )
