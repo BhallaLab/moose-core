@@ -8124,4 +8124,11 @@ lower than its peers. Nothing obvious in the .p file.
 11 Nov 2008
 Fixed a divide-by-zero bug in Mg_block, of the form (x / (x+y) ). Both x and y
 were zero.
+
+Checked in as revision 928: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+More fixes to Mg_block. The badly named KMg_A_ and B_ were misunderstood as
+state variables and were being reinited to zero. They are actually parameters.
+This seems to have helped a bug in the SigNeur tests.
+
 =============================================================================
