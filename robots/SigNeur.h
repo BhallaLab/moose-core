@@ -268,6 +268,10 @@ class SigNeur
 		 */
 		void makeSig2CellAdaptors();
 
+		/**
+ 		* Print out some diagnostics about the tree subdivisions.
+ 		*/
+		void reportTree();
 	private:
 		Id cellProto_; /// Prototype cell electrical model
 		Id spineProto_; /// Prototype spine signaling model

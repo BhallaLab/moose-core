@@ -8094,5 +8094,34 @@ Next step is to fix up the volume scaling problems during file loading.
 =============================================================================
 7 Nov 2008
 Dealt with volume scaling. Seems to work.
+Checked in as revision 921: unit test flags on, Smoldyn off, GSL on, -g, MPI off
 
+=============================================================================
+10 Nov 2008
+Some analysis on simulations indicated that there is something funny
+happening with relative ordering of compartments, spines, and signaling
+compartments. From notes from BISTAB_CASCADE simulations on 9 Nov:
+"Plotted out the original output file directly in xplot. Turns
+out that spinehead3 and dend16 and dend17 are the problems. So there is
+something backward in the dendrite numbering."
+
+Looking at SigNeur to understand why. Turns out that the
+order of the spines on the compartment tree (a vector) is backwards. 
+Since this vector is used for ordering the construction of signaling
+compartments, it explains why things go backwards.
+It does not explain why spinehead3 and dend 16/17 have low Ca levels, though.
+
+The adaptors from spineheads cell to sig seem not be be created. The others,
+from the dend, do work.
+
+Next to check: run it, see if the printed value of conc in Ca_input tallies.
+Yes, it does. dend[16] and dend[17], and spine[3] are much below their peers. 
+How about the conc in the cell compts?
+spine_head values are all OK, but /sig/cell/lat_14_9/Ca_conc is 77644x 
+lower than its peers. Nothing obvious in the .p file.
+
+=============================================================================
+11 Nov 2008
+Fixed a divide-by-zero bug in Mg_block, of the form (x / (x+y) ). Both x and y
+were zero.
 =============================================================================
