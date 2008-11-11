@@ -300,7 +300,7 @@ const Cinfo* initShellCinfo()
 			"Args: Id, fieldname"
 		),
 		new DestFinfo( "addfield",
-			Ftype3< Id, string, string >::global(),
+			Ftype2< Id, string >::global(),
 			RFCAST( &Shell::localAddField ),
 			"Args: Id, fieldname"
 		),
