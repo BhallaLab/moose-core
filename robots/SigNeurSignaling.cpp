@@ -62,12 +62,15 @@ void SigNeur::setAllVols()
 		unsigned int offset = 0;
 		if ( i->category == SOMA ) {
 			e = soma_.eref();
+			i->sigModel = soma_;
 		} else if ( i->category == DEND ) {
 			e = dend_.eref();
 			offset = numSoma_;
+			i->sigModel = dend_;
 		} else if ( i->category == SPINE ) {
 			e = spine_.eref();
 			offset = numSoma_ + numDend_;
+			i->sigModel = spine_;
 		} else {
 			continue;
 		}
