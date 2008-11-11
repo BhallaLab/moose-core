@@ -190,9 +190,13 @@ void Mg_block::processFunc( const Conn* c, ProcInfo p )
 
 void Mg_block::innerProcessFunc( Eref e, ProcInfo info )
 {
+	const double EPSILON = 1.0e-12;
 	
 	double KMg = KMg_A_ * exp(Vm_/KMg_B_);
-	Gk_ = Gk_ * KMg / (KMg + CMg_);
+	if ( KMg < EPSILON )
+		Gk_ = 0.0;
+	else
+		Gk_ = Gk_ * KMg / (KMg + CMg_);
 	send2< double, double >( e, channelSlot, Gk_, Ek_ );
 	Ik_ = Gk_ * (Ek_ - Vm_);
 	send1< double >( e, ikSlot, Ik_ );
