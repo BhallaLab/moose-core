@@ -367,7 +367,8 @@ static const Slot tabopSlot =
  */
 GenesisParserWrapper::GenesisParserWrapper()
 		: returnCommandValue_( "" ), returnId_(),
-		cwe_(), createdElm_()
+		cwe_(), createdElm_(),
+		testFlag_( 0 )
 {
 		loadBuiltinCommands();
 }
