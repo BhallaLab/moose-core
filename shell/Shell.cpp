@@ -2552,10 +2552,10 @@ void Shell::innerListMessages( const Conn* c,
 void Shell::readCell( const Conn* c, string filename, string cellpath,
 	vector< double > globalParms, int node )
 {
-	if ( static_cast< unsigned int >( node ) >= numNodes() ) {
+	if ( node > 0 && static_cast< unsigned int >( node ) >= numNodes() ) {
 		cout << "readcell: warning: requested node " << node << " > numNodes(" << numNodes() << "), using 0\n";
 		node = 0;
-	} 
+	}
 
 	string::size_type pos = cellpath.find_last_of( "/" );
 	Id pa;
@@ -2576,8 +2576,8 @@ void Shell::readCell( const Conn* c, string filename, string cellpath,
 	}
 	
 	Id cellId;
-	if ( node < 0 ) { // Use default. Find parent, and put there.
-		cellId = Id::makeIdOnNode( pa.node() );
+	if ( node < 0 ) { // Let load-balancer decide
+		cellId = Id::childId( pa );
 	} else { // Legal node # request
 		unsigned int unode = static_cast< unsigned int >( node );
 		if ( pa.node() == unode || pa == Id() ) { // make on unode.

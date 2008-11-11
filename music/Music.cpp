@@ -112,9 +112,11 @@ static const Cinfo* musicCinfo = initMusicCinfo();
 //////////////////////////////////////////////////////////////////
 void Music::innerProcessFunc( const Conn* c, ProcInfo p ) 
 {
-  runtime_->tick();
   //~ cerr << "TICK! " << p->currTime_ << endl;
   //~ cerr << "Music time: " << runtime_->time() << endl;
+  
+  if ( p->currTime_ <= stopTime_ )
+  	runtime_->tick();
 }
 
 void Music::processFunc( const Conn* c, ProcInfo p ) 
