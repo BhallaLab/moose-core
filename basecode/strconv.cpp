@@ -49,7 +49,7 @@ template<> bool str2val< int >( const string& s, int& ret )
 template<> bool val2str< unsigned int >( unsigned int v, string& ret)
 {
 	char temp[40];
-	sprintf(temp, "%d", v);
+	sprintf(temp, "%u", v);
 	ret = temp;
 	return 1;
 }
