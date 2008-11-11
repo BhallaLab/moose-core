@@ -2470,10 +2470,6 @@ void do_readcell( int argc, const char** const argv, Id s )
 	string cellpath = argv[2];
 	int childNode = parseNodeNum( cellpath );
 
-	// If node was not specified, use 0.
-	if ( childNode == -1 )
-		childNode = 0;
-
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
 			( s()->data( 0 ) );
 	vector< double > globalParms;
