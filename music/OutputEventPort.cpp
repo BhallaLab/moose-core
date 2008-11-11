@@ -147,7 +147,8 @@ unsigned int OutputEventPort::getIsConnected( Eref e )
 
 unsigned int OutputEventPort::getWidth( Eref e ) 
 {
-  return static_cast < OutputEventPort* > (e.data())->channels_.size();
+	return static_cast < OutputEventPort* > (e.data())->
+		mPort_->width();
 }
 
 int OutputEventPort::getMaxBuffered( Eref e )

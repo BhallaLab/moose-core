@@ -62,19 +62,14 @@ unsigned int IdManager::scratchId()
 			elementList_.resize( mainIndex_ * 2 );
 		return lastId_;
 	} else {
-		if ( scratchIndex_ < numScratch ) {
-			lastId_ = scratchIndex_;
-			elementList_[ lastId_ ].setNode( Shell::myNode() );
-			++scratchIndex_;
-			return lastId_;
-		} else {
-			cout << "Ran out of scratch Ids on node " << 
-				Shell::myNode() << "\n";
+		if ( scratchIndex_ >= numScratch )
 			regularizeScratch();
-			elementList_[ scratchIndex_ ].setNode( Shell::myNode() );
-			return ( lastId_ = scratchIndex_ );
-		}
-	} 
+		
+		lastId_ = scratchIndex_;
+		elementList_[ lastId_ ].setNode( Shell::myNode() );
+		++scratchIndex_;
+		return lastId_;
+	}
 	return lastId_;
 }
 
@@ -146,6 +141,9 @@ unsigned int IdManager::childId( unsigned int parent )
  */
 unsigned int IdManager::makeIdOnNode( unsigned int childNode )
 {
+	if ( mainIndex_ >= elementList_.size() )
+		elementList_.resize( mainIndex_ * 2 );
+
 	lastId_ = mainIndex_;
 	mainIndex_++;
 #ifdef USE_MPI
@@ -153,8 +151,6 @@ unsigned int IdManager::makeIdOnNode( unsigned int childNode )
 	assert( childNode < Shell::numNodes() );
 	elementList_[ lastId_ ] = Enode( 0, childNode );
 #endif
-	if ( mainIndex_ >= elementList_.size() )
-		elementList_.resize( mainIndex_ * 2 );
 	return lastId_;
 }
 
@@ -339,36 +335,47 @@ bool IdManager::isScratch( unsigned int index ) const
 	
 }
 
-/// \todo: Need to put in some grungy code to deal with this.
 void IdManager::regularizeScratch()
 {
-scratchBegin_ = 14;
+	/**
+	 * \todo Scratch Ids are promoted beginning after the /shell/sli object.
+	 * This is because the GenesisParser stores the sli object as an Id, instead
+	 * of an Eref.
+	 * 
+	 * This is a hack.. should do away with it.
+	 */
+	scratchBegin_ = Id( "/shell/sli" ).id() + 1;
+	
 	unsigned int numPromote = scratchIndex_ - scratchBegin_;
-	if ( scratchIndex_ == numScratch )
-		numPromote--;
-	scratchIndex_ = scratchBegin_;
-
+	
 	unsigned int baseId;
 	if ( Shell::myNode() == 0 )
 		baseId = mainIndex_;
 	else
 		baseId = Shell::regularizeScratch( numPromote );
 	assert( baseId >= numScratch );
-
+	
+	scratchIndex_ = scratchBegin_;
+	mainIndex_ += numPromote;
+	if ( mainIndex_ > elementList_.size() )
+		elementList_.resize( 2 * mainIndex_ );
+	
 	unsigned int id = baseId;
 	vector< Enode >::iterator scratch =
 		elementList_.begin() + scratchBegin_;
 	for ( unsigned int i = 0; i < numPromote; i++ ) {
-		scratch->e()->setId( Id( id ) );
+		elementList_[ id ] = *scratch;
 		
-		setElement( id, scratch->e() );
-		elementList_[ id ].setNode( Shell::myNode() );
+		// Update the Element's id. The Element* can be 0 if the object was
+		// created on a worker node.
+		if ( elementList_[ id ].e() != 0 )
+			elementList_[ id ].e()->setId( Id( id ) );
+		
+		*scratch = Enode( 0, 0 );
 		
 		if( isGlobal( id ) ) {
 			// inform other nodes
 		}
-		
-		*scratch = Enode( 0, 0 );
 		
 		id++, scratch++;
 	}

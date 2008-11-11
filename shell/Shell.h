@@ -244,10 +244,16 @@ class Shell
 		static void getField( const Conn* c, Id id, string field );
 
 		/**
-		 * Add a temporary field
+		 * Invoked by addField on appropriate nodes, and does the actual adding
+		 * of the ExtFieldFinfo.
+		 */
+		static void localAddField( const Conn* c, Id id, string fieldname );
+
+		/**
+		 * Calls localAddField on target nodes, to add new fields on objects.
 		 */
 		static void addField( const Conn* c, Id id, string fieldname );
-
+		
 		/**
 		 * Assign a field value to the id on the local node.
 		 */

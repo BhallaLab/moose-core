@@ -100,6 +100,10 @@ class GenesisParserWrapper: public myFlexLexer
     private:
 		void loadBuiltinCommands();
 		string returnCommandValue_;
+
+		/**
+		 * \todo Should use Erefs instead of Ids.
+		 */
 		Id returnId_;
 		Id cwe_;
 		Id createdElm_;

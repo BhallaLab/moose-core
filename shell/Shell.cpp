@@ -293,6 +293,18 @@ const Cinfo* initShellCinfo()
 			RFCAST( &Shell::handleReturnGet )
 		),
 		/////////////////////////////////////////////////////
+		// addfield
+		/////////////////////////////////////////////////////
+		new SrcFinfo( "addfieldSrc",
+			Ftype2< Id, string >::global(),
+			"Args: Id, fieldname"
+		),
+		new DestFinfo( "addfield",
+			Ftype3< Id, string, string >::global(),
+			RFCAST( &Shell::localAddField ),
+			"Args: Id, fieldname"
+		),
+		/////////////////////////////////////////////////////
 		// set stuff
 		/////////////////////////////////////////////////////
 		new SrcFinfo( "setSrc",
@@ -665,6 +677,9 @@ static const Slot requestWildcardSlot =
 
 static const Slot parGetFieldSlot =
 	initShellCinfo()->getSlot( "parallel.getSrc" );
+
+static const Slot parAddFieldSlot =
+	initShellCinfo()->getSlot( "parallel.addfieldSrc" );
 
 static const Slot parSetFieldSlot =
 	initShellCinfo()->getSlot( "parallel.setSrc" );
@@ -1644,18 +1659,37 @@ void Shell::staticDestroy( const Conn* c, Id victim )
 }
 
 /**
- * This function adds a ExtFieldFinfo
+ * This function invokes localAddField on the target nodes.
  */
-
 void Shell::addField( const Conn* c, Id id, string fieldname )
 {
-	if ( id.bad() )
-		return;
-	string ret;
+	assert( id.good() );
+#ifdef USE_MPI
+	if ( id.isGlobal() ) { // do the addfield on all nodes
+		send2< Id, string >( c->target(), parAddFieldSlot,
+			id, fieldname );
+		localAddField( c, id, fieldname );
+	} else if ( id.node() == Shell::myNode() ) { // do a local addfield
+		localAddField( c, id, fieldname );
+	} else {	// do a remote addfield on selected node
+		unsigned int tgt = ( id.node() < myNode() ) ? 
+			id.node() : id.node() - 1;
+		sendTo2< Id, string >( c->target(), parAddFieldSlot, tgt,
+			id, fieldname );
+	}
+#else
+	localAddField( c, id, fieldname );
+#endif
+}
+
+/**
+ * This function adds an ExtFieldFinfo locally. Invoked by the parAddFieldSlot.
+ */
+void Shell::localAddField( const Conn* c, Id id, string fieldname )
+{
+	assert( id.good() );
 	Element* e = id();
-	//cout << e->name() << endl;
-	
-	// Appropriate off-node stuff here.
+	assert( e != 0);
 	Finfo* f = new ExtFieldFinfo(fieldname, Ftype1<string>::global());
 	e->addExtFinfo( f );
 }
