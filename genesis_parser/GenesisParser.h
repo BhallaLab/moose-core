@@ -248,6 +248,9 @@ class myFlexLexer: public yyFlexLexer
 			return element_;
 		}
 
+		/**
+		 * \todo Should use Eref instead of Id
+		 */
 		Id element_;
 
 		Symtab* getGlobalSymbols() {
