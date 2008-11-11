@@ -14,6 +14,8 @@
 // #include "DeletionMarkerFinfo.h"
 // #include "GlobalMarkerFinfo.h"
 
+const double EPSILON = 1.0e-12;
+
 const Cinfo* initMg_blockCinfo()
 {
 	static Finfo* processShared[] =
@@ -109,9 +111,9 @@ static const Slot ikSlot =
 ///////////////////////////////////////////////////
 Mg_block::Mg_block()
 	:	Zk_( 0.0 ), 
-		KMg_A_( 0.0 ),
-		KMg_B_( 0.0 ),
-		CMg_( 0.0 ), 
+		KMg_A_( 1.0 ), // These are NOT the same as the A, B state
+		KMg_B_( 1.0 ), // variables used for Exp Euler integration.
+		CMg_( 1.0 ), 	// Conc of Mg in mM
 		Ik_( 0.0 ),
 		Gk_( 0.0 ),
 		Ek_( 0.0 ),
@@ -126,7 +128,11 @@ Mg_block::Mg_block()
 
 void Mg_block::setKMg_A( const Conn* c, double KMg_A )
 {
-	static_cast< Mg_block* >( c->data() )->KMg_A_ = KMg_A;
+	if ( KMg_A < EPSILON ) {
+		cout << "Error: KMg_A=" << KMg_A << " must be > 0. Not set.\n";
+	} else {
+		static_cast< Mg_block* >( c->data() )->KMg_A_ = KMg_A;
+	}
 }
 double Mg_block::getKMg_A( Eref e )
 {
@@ -134,7 +140,11 @@ double Mg_block::getKMg_A( Eref e )
 }
 void Mg_block::setKMg_B( const Conn* c, double KMg_B )
 {
-	static_cast< Mg_block* >( c->data() )->KMg_B_ = KMg_B;
+	if ( KMg_B < EPSILON ) {
+		cout << "Error: KMg_B=" << KMg_B << " must be > 0. Not set.\n";
+	} else {
+		static_cast< Mg_block* >( c->data() )->KMg_B_ = KMg_B;
+	}
 }
 double Mg_block::getKMg_B( Eref e )
 {
@@ -142,7 +152,11 @@ double Mg_block::getKMg_B( Eref e )
 }
 void Mg_block::setCMg( const Conn* c, double CMg )
 {
-	static_cast< Mg_block* >( c->data() )->CMg_ = CMg;
+	if ( CMg < EPSILON ) {
+		cout << "Error: CMg = " << CMg << " must be > 0. Not set.\n";
+	} else {
+		static_cast< Mg_block* >( c->data() )->CMg_ = CMg;
+	}
 }
 double Mg_block::getCMg( Eref e )
 {
@@ -190,13 +204,8 @@ void Mg_block::processFunc( const Conn* c, ProcInfo p )
 
 void Mg_block::innerProcessFunc( Eref e, ProcInfo info )
 {
-	const double EPSILON = 1.0e-12;
-	
 	double KMg = KMg_A_ * exp(Vm_/KMg_B_);
-	if ( KMg < EPSILON )
-		Gk_ = 0.0;
-	else
-		Gk_ = Gk_ * KMg / (KMg + CMg_);
+	Gk_ = Gk_ * KMg / (KMg + CMg_);
 	send2< double, double >( e, channelSlot, Gk_, Ek_ );
 	Ik_ = Gk_ * (Ek_ - Vm_);
 	send1< double >( e, ikSlot, Ik_ );
@@ -211,9 +220,12 @@ void Mg_block::reinitFunc( const Conn* c, ProcInfo p )
 void Mg_block::innerReinitFunc( Eref e, ProcInfo info )
 {
 	Zk_ = 0;
-	CMg_ = 0;
-	KMg_A_ = 0;
-	KMg_B_ = 0;
+	if ( CMg_ < EPSILON || KMg_B_ < EPSILON || KMg_A_ < EPSILON ) {
+		cout << "Error: Mg_block::innerReinitFunc: fields KMg_A, KMg_B, CMg\nmust be greater than zero. Resetting to 1 to avoid numerical errors\n";
+		if ( CMg_ < EPSILON ) CMg_ = 1.0;
+		if ( KMg_B_ < EPSILON ) KMg_B_ = 1.0;
+		if ( KMg_A_ < EPSILON ) KMg_A_ = 1.0;
+	}
 }
 
 void Mg_block::channelFunc( const Conn* c, double Vm )
