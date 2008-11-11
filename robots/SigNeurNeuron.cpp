@@ -79,12 +79,28 @@ void SigNeur::assignSignalingCompts()
 			}
 		}
 	// }
+//	reportTree();
+}
 
+/**
+ * Print out some diagnostics about the tree subdivisions.
+ */
+void SigNeur::reportTree()
+{
 	cout << "SigNeur: Tree size = " << tree_.size() << 
 		", s=" << numSoma_ << 
 		", d=" << numDend_ << 
 		", sp=" << numSpine_ <<
 		", neck=" << numNeck_ << endl;
+
+	for ( vector< TreeNode >::iterator i = tree_.begin(); 
+		i != tree_.end(); ++i ) {
+		assert( i->parent < tree_.size() );
+		cout << "pa: " << tree_[ i->parent ].compt.path() << 
+			", el: " << i->compt.path() << 
+			", sig: " << i->sigModel.path() << "[" <<
+			i->sigStart << ".." << i->sigEnd << "]\n";
+	}
 }
 
 Id SigNeur::findSoma( const vector< Id >& compts )
