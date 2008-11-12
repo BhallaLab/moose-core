@@ -1,6 +1,6 @@
-CFLAGS += -I..
+CXXFLAGS += -I..
 # the line below are for easy inclusion of libxml++
-#CFLAGS += $(shell pkg-config libxml++-2.6 --cflags) 
+#CXXFLAGS += $(shell pkg-config libxml++-2.6 --cflags) 
 
 TARGET = utility.o
 
@@ -30,7 +30,7 @@ Property.o : Property.h
 SparseMatrix.o : SparseMatrix.h
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -I.. $< -c
+	$(CXX) $(CXXFLAGS) -I.. $< -c
 
 $(TARGET): $(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) 

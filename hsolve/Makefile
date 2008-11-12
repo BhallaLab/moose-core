@@ -38,7 +38,7 @@ HSolveInterface.o:	HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSo
 HSolve.o:	HSolve.h HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../element/Neutral.h
 HSolveHub.o:	HSolveHub.h ../basecode/SolveFinfo.h ../basecode/ThisFinfo.h HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../biophysics/Compartment.h ../biophysics/HHChannel.h ../biophysics/CaConc.h ../element/Neutral.h
 .cpp.o:
-	$(CXX) $(CFLAGS) -I../basecode -I../utility/randnum -I.. $< -c
+	$(CXX) $(CXXFLAGS) -I../basecode -I../utility/randnum -I.. $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)

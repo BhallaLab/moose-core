@@ -17,7 +17,7 @@
 
 #ifndef _NUMUTIL_CPP
 #define _NUMUTIL_CPP
-#include <cmath>
+#include <math.h>	// Solaris CC compiler did not like <cmath>
 bool isEqual(float x, float y, float epsilon)
 {
     if (x == 0.0 && y == 0.0)
