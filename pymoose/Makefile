@@ -40,8 +40,6 @@ else # this is for unix like systems - change /usr/include/Python2.5 to the dire
 	LDFLAGS+=-shared
 endif
 
-CXXFLAGS=$(CXXFLAGS)
-
 OBJFILES = ../basecode/basecode.o \
 	../element/element.o \
 	../shell/shell.o \
