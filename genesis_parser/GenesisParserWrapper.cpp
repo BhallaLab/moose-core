@@ -27,6 +27,8 @@
 
 	using namespace std;
 
+extern string trim(const string&);
+
 /*
 static const char nullChar( '\0' );
 static const char* nullCharPtr = &nullChar;
@@ -3853,6 +3855,29 @@ void do_help(int argc, const char** const argv, Id s ){
 	}
 }
 
+char** do_arglist(int argc, const char** const argv, Id s)
+{
+    if (argc == 1)
+    {
+        cout << "usage:: arglist <string>" << endl;
+        return NULL;
+    }
+    string args(argv[1]);
+    vector <string> argList;
+    separateString(args, argList, " ");
+    char **output = (char**)calloc(argList.size() + 1, sizeof(char*));
+    char **ptr = output;
+    for (vector <string>::iterator ii = argList.begin(); ii != argList.end(); ++ii)
+    {
+        if (trim(*ii).length() > 0)
+        {
+            *ptr = copyString(ii->c_str());
+            ++ptr;
+        }        
+    }
+    return output;
+}
+
 
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper load command
@@ -3975,6 +4000,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "getstat", reinterpret_cast< slifunc > ( do_getstat ), "float" );
 	AddFunc( "showstat", do_showstat, "void" );
 	AddFunc( "help", do_help, "void" );
+        AddFunc( "arglist", reinterpret_cast< slifunc > ( do_arglist ), "char**");
 }
 
 //////////////////////////////////////////////////////////////////
