@@ -58,7 +58,7 @@ GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h KinSparseMatrix.h
 endif # !USE_GSL
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $(GSL_FLAGS) -I.. -I../basecode -I../kinetics -I../randnum $< -c
+	$(CXX) $(CXXFLAGS) $(GSL_FLAGS) -I.. -I../basecode -I../kinetics -I../randnum $< -c
 
 $(TARGET):		$(OBJ) $(GSL_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(GSL_LIBS) 

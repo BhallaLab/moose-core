@@ -34,7 +34,7 @@ SigNeurAdaptors.o:	SigNeur.h
 Adaptor.o:	Adaptor.h
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -I.. -I../basecode $< -c
+	$(CXX) $(CXXFLAGS) -I.. -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)

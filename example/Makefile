@@ -24,7 +24,7 @@ $(OBJ)	: $(HEADERS)
 Average.o:	Average.h
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $(GSL_FLAGS) -I../basecode $< -c
+	$(CXX) $(CXXFLAGS) $(GSL_FLAGS) -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(GSL_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ)  $(GSL_LIBS)

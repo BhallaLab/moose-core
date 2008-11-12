@@ -31,10 +31,8 @@ InputEventPort.o : InputEventPort.h InputEventChannel.h
 OutputEventChannel.o : OutputEventChannel.h 
 OutputEventPort.o : OutputEventPort.h OutputEventChannel.h 
 
-CXX = mpicxx
-
 .cpp.o:
-	$(CXX) $(CFLAGS) -I../basecode -I../randnum -I.. $< -c
+	$(CXX) $(CXXFLAGS) -I../basecode -I../randnum -I.. $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)

@@ -78,22 +78,22 @@ endif
 
 # Debug mode:
 ifeq ($(BUILD),debug)
-CFLAGS = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CXXFLAGS = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
-CFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
 endif
 ##########################################################################
 #
 # MAC OS X compilation, Debug mode:
 ifeq ($(PLATFORM),mac)
-CFLAGS += -Wno-deprecated -force_cpusubtype_ALL -mmacosx-version-min=10.4
+CXXFLAGS += -Wno-deprecated -force_cpusubtype_ALL -mmacosx-version-min=10.4
 endif
 # Use the options below for compiling on GCC4.1
 # GNU C++ 4.1 and newer might need -ffriend-injection
 #
-#CFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -ffriend-injection -DUSE_GENESIS_PARSER
+#CXXFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -ffriend-injection -DUSE_GENESIS_PARSER
 
 ##########################################################################
 #
@@ -117,40 +117,40 @@ LIBS = 	-lm
 # Although this binary of MOOSE is verbose in its complaints, is completely harmless 
 # except for the overhead of  checks for the existence of a few files at startup.
 ifdef GENERATE_WRAPPERS
-CFLAGS += -DGENERATE_WRAPPERS
+CXXFLAGS += -DGENERATE_WRAPPERS
 endif
 
 # For parallel (MPI) version:
 ifdef USE_MUSIC
 USE_MPI = 1		# Automatically enable MPI if USE_MUSIC is on
-CFLAGS += -DUSE_MUSIC
+CXXFLAGS += -DUSE_MUSIC
 LIBS += -lmusic
 endif
 
 ifdef USE_MPI
-CFLAGS += -DUSE_MPI
+CXXFLAGS += -DUSE_MPI
 endif
 
 # The -DMPICH_IGNORE_CXX_SEEK flag is because of a bug in the
 # MPI-2 standard. Hopefully it won't affect you, but if it does use
-# the version of CFLAGS that defines this flag:
-#CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK
+# the version of CXXFLAGS that defines this flag:
+#CXXFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK
 
 
 #use this for readline library
-#CFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DUSE_READLINE
+#CXXFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DUSE_READLINE
 
 
 # To use GSL, pass USE_GSL=true ( anything on the right will do) in make command line
 ifdef USE_GSL
 LIBS+= -lgsl -lgslcblas
-CFLAGS+= -DUSE_GSL
+CXXFLAGS+= -DUSE_GSL
 endif
 
 # To compile with readline support pass USE_READLINE=true in make command line
 ifdef USE_READLINE
 LIBS+= -lreadline
-CFLAGS+= -DUSE_READLINE
+CXXFLAGS+= -DUSE_READLINE
 endif
 
 
@@ -173,6 +173,7 @@ ifdef USE_MPI
 	PARALLEL_LIB = parallel/parallel.o
 else
 	CXX = g++
+#	CXX = CC	# Choose between Solaris CC and g++ on a Solaris machine
 endif
 
 LD = ld
@@ -203,7 +204,8 @@ OBJLIBS =	\
 	$(PARALLEL_LIB) \
 	$(MUSIC_LIB)
 
-export CFLAGS
+export CXX
+export CXXFLAGS
 export LD
 export LIBS
 
@@ -215,7 +217,7 @@ libmoose.so: libs
 	$(CXX) -G $(LIBS) -o libmoose.so
 	@echo "Created dynamic library"
 
-pymoose: CFLAGS += -fPIC 
+pymoose: CXXFLAGS += -fPIC 
 pymoose: SUBDIR += pymoose
 pymoose: libs $(OBJLIBS) 
 	$(MAKE) -C $@
@@ -225,7 +227,7 @@ libs:
 	@echo "All Libs compiled"
 
 mpp: preprocessor/*.cpp preprocessor/*.h
-	@( rm -f mpp; cd preprocessor; make CXX="$(CXX)" CFLAGS="$(CFLAGS)"; ln mpp ..; cd ..)
+	@( rm -f mpp; cd preprocessor; make CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"; ln mpp ..; cd ..)
 
 default: moose mpp
 
