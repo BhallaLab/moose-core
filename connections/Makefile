@@ -14,7 +14,7 @@
 
 TARGET = connections.o
 
-#CFLAGS += -I.. -I../basecode
+#CXXFLAGS += -I.. -I../basecode
 
 OBJ = \
 	ConnTainer.o	\
@@ -58,7 +58,7 @@ TraverseDestConn.o: TraverseDestConn.h
 One2OneMapConn.o: One2OneMapConn.h
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $(INCLUDE) $< -c
+	$(CXX) $(CXXFLAGS) $(INCLUDE) $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)
