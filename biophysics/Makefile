@@ -57,7 +57,7 @@ BinSynchan.o:	BinSynchan.h BinSynInfo.h ../randnum/BinomialRng.h
 DifShell.o: DifShell.h
 TauPump.o: TauPump.h
 .cpp.o:
-	$(CXX) $(CFLAGS) -I../basecode -I../randnum -I.. $< -c
+	$(CXX) $(CXXFLAGS) -I../basecode -I../randnum -I.. $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)
