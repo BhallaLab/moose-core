@@ -13,7 +13,7 @@
 #
 
 TARGET = basecode.o
-CFLAGS += -I.. -I../connections
+CXXFLAGS += -I.. -I../connections
 OBJ = \
 	Element.o	\
 	Eref.o	\
@@ -107,7 +107,7 @@ FuncVec.o: RecvFunc.h Ftype.h FuncVec.h
 Ftype.o: Ftype.h
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $< -c
+	$(CXX) $(CXXFLAGS) $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)
