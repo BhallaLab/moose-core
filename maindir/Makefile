@@ -32,14 +32,15 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 MuMPI.o:	MuMPI.h
 
-ifneq (,$(findstring DUSE_MPI,$(CFLAGS)))
-    CXX = mpicxx -Wno-long-long
-else
-    CXX = g++
-endif
+# Now CXX value is decided in top-level Makefile
+#ifneq (,$(findstring DUSE_MPI,$(CXXFLAGS)))
+#    CXX = mpicxx
+#else
+#    CXX = g++
+#endif
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -I.. -I../basecode $< -c
+	$(CXX) $(CXXFLAGS) -I.. -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)

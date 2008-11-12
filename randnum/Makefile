@@ -1,6 +1,6 @@
-CFLAGS += -I..
+CXXFLAGS += -I..
 # the line below are for easy inclusion of libxml++
-#CFLAGS += $(shell pkg-config libxml++-2.6 --cflags) 
+#CXXFLAGS += $(shell pkg-config libxml++-2.6 --CXXFLAGS) 
 
 TARGET = randnum.o
 
@@ -45,8 +45,8 @@ HEADERS = \
 default: $(TARGET)
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $< -c
-#	$(CXX) $(CFLAGS) $(shell pkg-config libxml++-2.6 --cflags) $< -c
+	$(CXX) $(CXXFLAGS) $< -c
+#	$(CXX) $(CXXFLAGS) $(shell pkg-config libxml++-2.6 --CXXFLAGS) $< -c
 
 $(TARGET): $(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)

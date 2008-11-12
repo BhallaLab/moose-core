@@ -26,7 +26,7 @@ Neutral.o:	Neutral.h ../basecode/Ftype2.h
 Wildcard.o:	Neutral.h Wildcard.h
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -I.. -I../basecode $< -c
+	$(CXX) $(CXXFLAGS) -I.. -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)

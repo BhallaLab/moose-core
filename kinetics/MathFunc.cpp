@@ -1128,10 +1128,12 @@ void MathFunc::clear(){
 
 #ifdef DO_UNIT_TESTS
 #include "../element/Neutral.h"
+#include "../utility/utility.h"
 #include "Reaction.h"
 
 void testMathFunc(){
 	cout << "\nTesting MathFunc" << flush ;
+	double tolerance = 1.0;
 	
 	/*infix function*/
 	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(),
@@ -1148,7 +1150,10 @@ void testMathFunc(){
 	set< double >( m, "arg3", 3 );
 	MathFunc::processFunc( &c, &p);
 	ASSERT(get<double>(m, "result", d), "Getting result");
-	ASSERT(d == 7.0, "Testing f(x, y, z) = x + y*z");
+	ASSERT (
+		isClose< double >( d, 7.0, tolerance ),
+		"Testing f(x, y, z) = x + y*z"
+	);
 	
 	/*mml function*/
 	
@@ -1157,7 +1162,10 @@ void testMathFunc(){
 	set< double >( m, "arg2", 2 );
 	MathFunc::processFunc( &c, &p);
 	ASSERT(get<double>(m, "result", d), "Getting result");
-	ASSERT(d == 115, "Testing mmlstring");
+	ASSERT (
+		isClose< double >( d, 115.0, tolerance ),
+		"Testing mmlstring"
+	);
 	
 	/*A formula from Tyson paper*/
 	set< string >( m, "function", "f(PP1T, CycE, CycA, CycB) = PP1T/(1 + 0.02*(2.33*(CycE+ CycA) + 1.2E1*CycB))");
@@ -1167,7 +1175,10 @@ void testMathFunc(){
 	set< double >( m, "arg4", 4);
 	MathFunc::processFunc( &c, &p);
 	ASSERT(get<double>(m, "result", d), "Getting result");
-	ASSERT(d ==  1/(1+0.02*(2.33*(2 + 3)+1.2E1*4)), "Testing Tyson infix function");
+	ASSERT (
+		isClose< double >( d, 1/(1+0.02*(2.33*(2 + 3)+1.2E1*4)), tolerance ),
+		"Testing Tyson infix function"
+	);
 	
 	
 	set< string >( m, "function", "f(ERG, DRG) = 0.5*(0.1*ERG + ((0.2*(DRG/0.3)^2)/(1 + (DRG/0.3)^2)))");
@@ -1175,7 +1186,10 @@ void testMathFunc(){
 	set< double >( m, "arg2", 2);
 	MathFunc::processFunc( &c, &p);
 	ASSERT(get<double>(m, "result", d), "Getting result");
-	ASSERT(d ==  0.5*(0.1*1 + (0.2*(2/0.3)*(2/0.3))/(1 + (2/0.3)*(2/0.3))), "Testing Tyson infix function");
+	ASSERT (
+		isClose< double >( d, 0.5*(0.1*1 + (0.2*(2/0.3)*(2/0.3))/(1 + (2/0.3)*(2/0.3))), tolerance ),
+		"Testing Tyson infix function"
+	);
 	
 	/*Another formula form Tyson paper*/
 	/*f(ERG, DRG) = 0.5(0.1*ERG + (0.2*(DRG/0.3)^2)/(1 + (DRG/0.3)^2))*/
@@ -1186,7 +1200,10 @@ void testMathFunc(){
 	ASSERT(get<double>(m, "result", d), "Getting result");
 	//cout << d << endl;
 	//cout << 0.5*(0.1*1 + (0.2*(2/0.3)*(2/0.3))/(1 + (2/0.3)*(2/0.3))) << endl;
-	ASSERT(d ==  0.5*(0.1*1 + (0.2*(2/0.3)*(2/0.3))/(1 + (2/0.3)*(2/0.3))), "Testing Tyson mml function");
+	ASSERT (
+		isClose< double >( d, 0.5*(0.1*1 + (0.2*(2/0.3)*(2/0.3))/(1 + (2/0.3)*(2/0.3))), tolerance ),
+		"Testing Tyson mml function"
+	);
 	
 	set( n, "destroy" );
 }
