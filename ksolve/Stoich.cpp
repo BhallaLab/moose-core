@@ -27,6 +27,7 @@ const double Stoich::EPSILON = 1.0e-6;
 
 const Cinfo* initStoichCinfo()
 {
+	// connects to the KineticHub object
 	static Finfo* hubShared[] =
 	{
 		new SrcFinfo( "rateTermInfoSrc", 
@@ -65,6 +66,11 @@ const Cinfo* initStoichCinfo()
 		new DestFinfo( "assignY", 
 			Ftype2< double, unsigned int >::global(),
 			RFCAST( &Stoich::assignYfunc )
+		),
+		new DestFinfo( "setBuffer", 
+			Ftype2< int, unsigned int >::global(),
+			RFCAST( &Stoich::setBuffer ),
+			"Assigns dynamic buffers. First arg is mode and second is the molecule index."
 		),
 	};
 	static Finfo* integrateShared[] =
@@ -344,6 +350,31 @@ void Stoich::innerRescaleVolume( double ratio )
 		*i *= ratio;
 	for ( vector< RateTerm* >::iterator i = rates_.begin(); i != rates_.end(); ++i)
 		( *i )->rescaleVolume( ratio );
+}
+
+void Stoich::setBuffer( const Conn* c, int mode, unsigned int mol )
+{
+	static_cast< Stoich* >( c->data() )->innerSetBuffer( mode, mol );
+}
+
+void Stoich::innerSetBuffer( int mode, unsigned int mol )
+{
+	if ( mol >= ( nVarMols_ + nSumTot_ ) ) {
+		if ( mode != 4 ) {
+			cout << "Stoich::innerSetBuffer: Warning: Cannot change buffer state of predefined buffer molecule\n";
+		}
+		// In either case, just return at this point.
+		return;
+	}
+	vector< unsigned int >::iterator pos = 
+		find( dynamicBuffers_.begin(), dynamicBuffers_.end(), mol );
+	if ( mode == 4 ) { // Buffering on. 
+		if ( pos == dynamicBuffers_.end() )
+			dynamicBuffers_.push_back( mol );
+	} else { // buffering off
+		if ( pos != dynamicBuffers_.end() )
+			dynamicBuffers_.erase( pos );
+	}
 }
 
 ///////////////////////////////////////////////////
@@ -918,18 +949,11 @@ void Stoich::updateV( )
 	vector< RateTerm* >::const_iterator i;
 	vector< double >::iterator j = v_.begin();
 
-	unsigned int q = 0;
 	for ( i = rates_.begin(); i != rates_.end(); i++)
 	{
 		*j++ = (**i)();
 		assert( !isnan( *( j-1 ) ) );
-		++q; // for debugging.
-		/*
-		if ( q < 4 )
-			cout << *(j - 1 ) << "	";
-			*/
 	}
-	// cout << endl;
 
 	// I should use foreach here.
 	vector< SumTotal >::const_iterator k;
@@ -985,6 +1009,15 @@ int Stoich::innerGslFunc( double t, const double* y, double* yprime )
 		lasty_ = y;
 		nCopy_++;
 //	}
+
+	// Here we handle dynamic buffering by simply writing over S_.
+	// We never see y_ in the rest of the simulation, so can ignore.
+	// Main concern is that y_ will go wandering off into nans, or
+	// become numerically unhappy and slow things down.
+	for ( vector< unsigned int >::const_iterator 
+		i = dynamicBuffers_.begin(); i != dynamicBuffers_.end(); ++i )
+		S_[ *i ] = Sinit_[ *i ];
+
 	updateV();
 
 	// Much scope for optimization here.
