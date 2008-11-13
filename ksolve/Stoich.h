@@ -53,9 +53,14 @@ class Stoich
 		static void rescaleVolume( const Conn* c, double ratio );
 		void innerRescaleVolume( double ratio );
 
+		static void setBuffer( const Conn* c, 
+			int mode, unsigned int mol );
+		void innerSetBuffer( int mode, unsigned int mol );
+
 		///////////////////////////////////////////////////
 		// Functions used by the GslIntegrator
 		///////////////////////////////////////////////////
+
 #ifdef USE_GSL
 		static int gslFunc( double t, const double* y, 
 			double* yprime, void* params);
@@ -74,6 +79,15 @@ class Stoich
 #endif // USE_GSL
 		void rebuildMatrix( Eref stoich, vector< Id >& ret );
 		void localScanTicks( Eref stoich );
+
+		/**
+		 * Nasty function to return ptr to dynamicBuffers, used in 
+		 * GslIntegrator.
+		 */
+		const vector< unsigned int >* dynamicBuffers() const {
+			return &dynamicBuffers_;
+		}
+
 	protected:
 		///////////////////////////////////////////////////
 		// Setup function definitions
@@ -168,6 +182,15 @@ class Stoich
 		vector< RateTerm* > rates_; 
 
 		vector< SumTotal > sumTotals_;
+
+		/**
+		 * Indices of molecules whose buffer state changes during
+		 * the simulation. The system goes through this list and
+		 * assigns any entries to their Sinit_. Only works if the
+		 * molecule starts out as non-buffered.
+		 */
+		vector< unsigned int > dynamicBuffers_;
+
 		KinSparseMatrix N_; 
 		vector< int > path2mol_;
 		vector< int > mol2path_;

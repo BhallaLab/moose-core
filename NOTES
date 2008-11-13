@@ -8137,5 +8137,9 @@ Checked in as revision 930: unit test flags on, Smoldyn off, GSL on, -g, MPI off
 13 Nov 2008
 Fixed a bug in assignment of nInit and coInit of a buffered molecule, when
 the kinetic solver is operational. Now assignment happens.
+Checked in as revision 935: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Implemented a rather nasty hack in the solver to handle midstream turnon/off
+of buffering of molecules. Only works for molecules that start out unbuffered.
 
 =============================================================================
