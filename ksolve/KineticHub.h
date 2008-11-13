@@ -42,10 +42,10 @@ class KineticHub
 			unsigned int nReac, unsigned int nEnz, 
 			unsigned int nMmEnz );
 		static void molSizeFunc( const Conn* c,
-			unsigned int nMol, unsigned int nBuf,
+			unsigned int nVarMol, unsigned int nBuf,
 			unsigned int nSumTot );
 		void molSizeFuncLocal(
-			unsigned int nMol, unsigned int nBuf,
+			unsigned int nVarMol, unsigned int nBuf,
 			unsigned int nSumTot );
 		static void molConnectionFunc( const Conn* c,
 				vector< double >* S,
@@ -143,7 +143,7 @@ class KineticHub
 		vector< RateTerm* >* rates_;
 		bool useHalfReacs_;
 		bool rebuildFlag_;
-		unsigned long nMol_;
+		unsigned long nVarMol_;
 		unsigned long nBuf_;
 		unsigned long nSumTot_;
 		vector< unsigned int > reacMap_;
