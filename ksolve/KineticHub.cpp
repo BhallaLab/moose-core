@@ -104,7 +104,7 @@ const Cinfo* initKineticHubCinfo()
 	///////////////////////////////////////////////////////
 	// Field definitions
 	///////////////////////////////////////////////////////
-		new ValueFinfo( "nMol", 
+		new ValueFinfo( "nVarMol", 
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &KineticHub::getNmol ), 
 			&dummyFunc
@@ -294,7 +294,7 @@ void redirectDynamicMessages( Eref e );
 KineticHub::KineticHub()
 	: S_( 0 ), Sinit_( 0 ), rates_( 0 ), 
 	useHalfReacs_( 0 ), rebuildFlag_( 0 ),
-	nMol_( 0 ), nBuf_( 0 ), nSumTot_( 0 )
+	nVarMol_( 0 ), nBuf_( 0 ), nSumTot_( 0 )
 {
 	;
 }
@@ -474,7 +474,7 @@ void KineticHub::processFuncLocal( Eref hub, ProcInfo info )
 
 unsigned int KineticHub::getNmol( Eref e )
 {
-	return static_cast< KineticHub* >( e.data() )->nMol_;
+	return static_cast< KineticHub* >( e.data() )->nVarMol_;
 }
 
 unsigned int KineticHub::getNreac( Eref e )
@@ -519,15 +519,16 @@ void KineticHub::rateTermFunc( const Conn* c,
  * molConnectionFunc which will provide the actual vectors.
  */
 void KineticHub::molSizeFunc(  const Conn* c,
-	unsigned int nMol, unsigned int nBuf, unsigned int nSumTot )
+	unsigned int nVarMol, unsigned int nBuf, unsigned int nSumTot )
 {
 	static_cast< KineticHub* >( c->data() )->molSizeFuncLocal(
-			nMol, nBuf, nSumTot );
+			nVarMol, nBuf, nSumTot );
 }
+
 void KineticHub::molSizeFuncLocal( 
-		unsigned int nMol, unsigned int nBuf, unsigned int nSumTot )
+		unsigned int nVarMol, unsigned int nBuf, unsigned int nSumTot )
 {
-	nMol_ = nMol;
+	nVarMol_ = nVarMol;
 	nBuf_ = nBuf;
 	nSumTot_ = nSumTot;
 }
@@ -547,7 +548,9 @@ void KineticHub::molConnectionFuncLocal( Eref hub,
 	static const Finfo* sumTotFinfo = initMoleculeCinfo()->findFinfo( "sumTotal" );
 	const static Finfo* nSrcMolFinfo = initMoleculeCinfo()->findFinfo( "nSrc" );
 
-	assert( nMol_ + nBuf_ + nSumTot_ == elist->size() );
+	assert( nVarMol_ + nBuf_ + nSumTot_ == elist->size() );
+	assert( nVarMol_ + nBuf_ + nSumTot_ == S->size() );
+	assert( nVarMol_ + nBuf_ + nSumTot_ == Sinit->size() );
 
 	S_ = S;
 	Sinit_ = Sinit;
@@ -865,8 +868,11 @@ void KineticHub::setMolN( const Conn* c, double value )
 		( *kh->S_ )[molIndex] = value;
 		// cout << "in KineticHub::setMolN with " << value << ", " << molIndex << endl;
 		assert( hubE.e->numTargets( assignYslot.msg() ) == 1 );
-		send2< double, unsigned int >( hubE, assignYslot, 
-			value, molIndex );
+
+		// the y array only has variable mols, so we limit assignment
+		if ( molIndex < kh->nVarMol_ ) 
+			send2< double, unsigned int >( hubE, assignYslot, 
+				value, molIndex );
 	}
 	Molecule::setN( c, value );
 }
@@ -892,6 +898,11 @@ void KineticHub::setMolNinit( const Conn* c, double value )
 	if ( kh && kh->Sinit_ ) {
 		assert ( molIndex < kh->Sinit_->size() );
 		( *kh->Sinit_ )[molIndex] = value;
+		// Here we assign n as well, for buffered molecules.
+		// They are after the variable and sumtot molecules in S_
+		unsigned int bufStart = kh->nVarMol_ + kh->nSumTot_;
+		if ( molIndex >= bufStart && molIndex < kh->S_->size() )
+			( *kh->S_ )[molIndex] = value;
 	}
 	Molecule::setNinit( c, value );
 }
@@ -1385,14 +1396,14 @@ void KineticHubWrapper::bufFuncLocal( double n, double nInit, int mode, long ind
 {
 			if ( mode == SOLVER_GET ) {
 			} else if ( mode == SOLVER_SET ) {
-				(*S_)[ index + nMol_ + nSumTot_ ] = 
-					(*Sinit_)[ index + nMol_ + nSumTot_ ] = nInit;
+				(*S_)[ index + nVarMol_ + nSumTot_ ] = 
+					(*Sinit_)[ index + nVarMol_ + nSumTot_ ] = nInit;
 			}
 }
 void KineticHubWrapper::sumTotFuncLocal( double n, double nInit, int mode, long index )
 {
 			if ( mode == SOLVER_GET ) {
-				sumTotSrc_.sendTo( index, (*S_)[index + nMol_ ] );
+				sumTotSrc_.sendTo( index, (*S_)[index + nVarMol_ ] );
 			}
 }
 void KineticHubWrapper::reacFuncLocal( double kf, double kb, long index )
@@ -1574,8 +1585,7 @@ void redirectDynamicMessages( Eref e )
 	{
 		const DynamicFinfo *df = dynamic_cast< const DynamicFinfo* >( *i );
 		if ( df == 0 ) {
-			const DeletionMarkerFinfo *delf = dynamic_cast< const DeletionMarkerFinfo* >( *i );
-			assert( delf != 0 );
+			assert( dynamic_cast< const DeletionMarkerFinfo* >( *i ) != 0 );
 			// Don't need to do any messaging cleanup here.
 			continue;
 		}
@@ -1595,8 +1605,7 @@ void redirectDynamicMessages( Eref e )
 		string name = df->name();
 		bool ret = e.e->dropFinfo( df );
 		assert( ret );
-		const Finfo* origFinfo = e.e->findFinfo( name );
-		assert( origFinfo );
+		assert( e.e->findFinfo( name ) != 0 ); 
 
 		unsigned int max = srcFinfos.size();
 		for ( unsigned int i =  0; i < max; i++ ) {
