@@ -107,6 +107,8 @@ class KineticHub
 		static double getMolConc( Eref e );
 		static void setMolConcInit( const Conn* c, double value );
 		static double getMolConcInit( Eref e );
+		static void setMolMode( const Conn* c, int value );
+		static int getMolMode( Eref e );
 
 		static void setReacKf( const Conn* c, double value );
 		static double getReacKf( Eref e );
@@ -152,6 +154,7 @@ class KineticHub
 		vector< unsigned int > molSumMap_;
 		vector< unsigned int > nSrcMap_;
 
+		vector< unsigned int > dynamicBuffers_; // vec of buffered mols
 		/**
 		 * The next field manages exchange of molecules with other
 		 * solvers, typically diffusive exchange at specified junctions

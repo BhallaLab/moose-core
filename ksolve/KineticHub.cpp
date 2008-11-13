@@ -43,6 +43,8 @@ const Cinfo* initKineticHubCinfo()
 		new SrcFinfo( "process", Ftype1< ProcInfo >::global() ),
 		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
 	};
+
+	// connects to the stoich object.
 	static Finfo* hubShared[] =
 	{
 		new DestFinfo( "rateTermInfo", 
@@ -90,6 +92,10 @@ const Cinfo* initKineticHubCinfo()
 		new SrcFinfo( "assignYsrc",
 			Ftype2< double, unsigned int >::global(),
 			"Forwards to the Stoich any requests to update mol n values."
+		),
+		new SrcFinfo( "setBufferSrc",
+			Ftype2< int, unsigned int >::global(),
+			"Assigns dynamic buffers. Forwards to Stoich. First arg is mode and second is the molecule index."
 		),
 	};
 	static Finfo* fluxShared[] =
@@ -215,6 +221,8 @@ static const Slot fluxSlot =
 
 static const Slot assignYslot =
 	initKineticHubCinfo()->getSlot( "hub.assignYsrc" );
+static const Slot setBufferSlot =
+	initKineticHubCinfo()->getSlot( "hub.setBufferSrc" );
 	
 /////////////////////////////////////////////////////////////////////////
 
@@ -241,6 +249,16 @@ Finfo* initMolZombieFinfo()
 			ValueFtype1< double >::global(),
 			GFCAST( &KineticHub::getMolConcInit ),
 			RFCAST( &KineticHub::setMolConcInit )
+		),
+		new ValueFinfo( "mode",
+			ValueFtype1< int >::global(),
+			GFCAST( &KineticHub::getMolMode ),
+			RFCAST( &KineticHub::setMolMode )
+		),
+		new ValueFinfo( "slave_enable",
+			ValueFtype1< int >::global(),
+			GFCAST( &KineticHub::getMolMode ),
+			RFCAST( &KineticHub::setMolMode )
 		),
 	};
 	static const ThisFinfo* tf = dynamic_cast< const ThisFinfo* >( 
@@ -955,6 +973,28 @@ double KineticHub::getMolConcInit( Eref e )
 	if ( v > 0.0 )
 		return n / v;
 	return n;
+}
+
+/**
+ * Here we provide the zombie function to set the 'mode' field of the 
+ * molecule. It first sets the solver location handling this
+ * field, then the molecule itself.
+ *
+ * Warning: c here points to the molecule, not to the hub.
+ */
+void KineticHub::setMolMode( const Conn* c, int value )
+{
+	unsigned int molIndex;
+	Eref hubE;
+	KineticHub* kh = getHubFromZombie(
+		c->target(), molSolveFinfo, molIndex, hubE );
+	send2< int, unsigned int >( hubE, setBufferSlot, value, molIndex );
+	Molecule::setMode( c, value );
+}
+
+int KineticHub::getMolMode( Eref e )
+{
+	return Molecule::getMode( e );
 }
 
 ///////////////////////////////////////////////////
