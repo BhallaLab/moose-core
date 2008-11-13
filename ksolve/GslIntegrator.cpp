@@ -254,6 +254,8 @@ void GslIntegrator::assignStoichFuncLocal( void* stoich )
 	
 	nVarMols_ = s->nVarMols();
 	y_ = new double[ nVarMols_ ];
+	dynamicBuffers_ = s->dynamicBuffers(); // filthy, just a ptr copy
+
 	memcpy( y_, s->Sinit(), nVarMols_ * sizeof( double ) );
 	for ( unsigned int i = 0; i < nVarMols_; ++i )
 		assert( !isnan( y_[ i ] ) && y_[i] >= 0.0 );
@@ -321,13 +323,13 @@ void GslIntegrator::innerProcessFunc( Eref e, ProcInfo info )
 			&internalStepSize_, y_);
 		if ( status != GSL_SUCCESS )
 			break;
-		// Heuristic: We often get stuck in stupid cycles where the
-		// internal step size oscillates between above and below dt.
-		// This situation doubles the number of steps we need to take.
-		// This tries to fix it.
-//		if ( internalStepSize_ > info->dt_ * 0.6 )
-//			internalStepSize_ = info->dt_;
-	}        
+
+		// Zero out buffered molecules. Perhaps this can be ignored
+		for( vector< unsigned int >::const_iterator 
+			i = dynamicBuffers_->begin(); 
+			i != dynamicBuffers_->end(); ++i )
+			y_[ *i ] = 0.0;
+	}
 }
 
 void GslIntegrator::reinitFunc( const Conn* c, ProcInfo info )
