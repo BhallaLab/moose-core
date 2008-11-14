@@ -236,8 +236,7 @@ KineticManager::KineticManager()
 	multiscale_( 0 ),
 	singleParticle_( 0 ),
 	recommendedDt_( 0.001 ),
-	eulerError_( 0.01 ),
-	volume_( 1.666667e-21 )
+	eulerError_( 0.01 )
 {
 		;
 }
@@ -348,20 +347,6 @@ double KineticManager::getEulerError( Eref e )
 {
 	return static_cast< KineticManager* >( e.data() )->eulerError_;
 }
-
-/*
-void KineticManager::setVolume( const Conn* c, double value )
-{
-	static_cast< KineticManager* >( c->data() )->volume_ = value;
-}
-
-// void KineticManager::innerSetVolume( Eref e, double value, bool ignoreRescale )
-
-double KineticManager::getVolume( Eref e )
-{
-	return static_cast< KineticManager* >( e.data() )->volume_;
-}
-*/
 
 //////////////////////////////////////////////////////////////////
 // Here we set up some of the messier inner functions.
@@ -658,6 +643,10 @@ void KineticManager::processFunc( const Conn* c, ProcInfo info )
 
 }
 
+/**
+ * This is specialized because when rescaling is done, the 
+ * stoich must modify rates, n and nInit.
+ */
 void KineticManager::innerSetSize( 
 	Eref e, double value, bool ignoreRescale )
 {
