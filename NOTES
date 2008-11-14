@@ -8141,5 +8141,6 @@ Checked in as revision 935: unit test flags on, Smoldyn off, GSL on, -g, MPI off
 
 Implemented a rather nasty hack in the solver to handle midstream turnon/off
 of buffering of molecules. Only works for molecules that start out unbuffered.
+Checked in as revision 937: unit test flags on, Smoldyn off, GSL on, -g, MPI off
 
 =============================================================================
