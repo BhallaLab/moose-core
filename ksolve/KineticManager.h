@@ -66,10 +66,6 @@ class KineticManager: public KinCompt
 		static double getRecommendedDt( Eref e );
 		static void setEulerError( const Conn* c, double value );
 		static double getEulerError( Eref e );
-		/*
-		static void setVolume( const Conn* c, double value );
-		static double getVolume( Eref e );
-		*/
 
 		// static string getMethodList( Eref e );
 		//
@@ -91,7 +87,11 @@ class KineticManager: public KinCompt
 		static void reschedFunc( const Conn* c );
 		void reschedFuncLocal( Eref e );
 
-		/// Specialized from KinCompt
+		/**
+ 		* innerSetSize is specialized from KinCompt because when 
+		* rescaling is done, the stoich must modify rates, n and nInit,
+		* in addition to the modifications on the original objects.
+ 		*/
 		void innerSetSize( Eref e, double value, bool ignoreRescale );
 
  // static void addMethod( name, description,
@@ -120,7 +120,6 @@ class KineticManager: public KinCompt
 		string description_;
 		double recommendedDt_;
 		double eulerError_;
-		double volume_;
 };
 
 const Cinfo* initKineticManagerCinfo();
