@@ -103,7 +103,7 @@ const Cinfo* initKinComptCinfo()
 			"Assigns size without rescaling the entire model." ),
 		new DestFinfo( "volumeFromChild", 
 			Ftype1< double >::global(),
-			RFCAST( &KinCompt::setSizeWithoutRescale ),
+			RFCAST( &KinCompt::setVolumeFromChild ),
 			"Assigns volume based on request from child Molecule.\nApplies the following logic:\n	- If first assignment: Assign without rescaling\n	- If later assignment, same vol: Keep tally, silently\n	- If laster assignment, new vol: Complain, tally\n	- If later new vols outnumber original vol: Complain louder." ),
 	///////////////////////////////////////////////////////
 	// Synapse definitions
@@ -315,14 +315,14 @@ void KinCompt::innerSetVolumeFromChild( double v )
 	} else if ( fabs( 1.0 - size_ / v ) < 1.0e-3 ) {
 		++numMatching_;
 	} else {
-		if ( numMatching_ * 2 > numAssigned_ ) {
+		if (  numMatching_ * 2 < numAssigned_ ) {
 			cout << "Warning: KinCompt::innerSetVolumeFromChild: " <<
 			"\nCurrent volume " << size_ << 
 			" is used by less than half the children\n";
 		} else {
 			cout << "Warning: KinCompt::innerSetVolumeFromChild: " <<
 			"\nCurrent volume " << size_ << 
-			" dous not match assigned volume " << v << endl;
+			" does not match assigned volume " << v << endl;
 		}
 	}
 	++numAssigned_;
