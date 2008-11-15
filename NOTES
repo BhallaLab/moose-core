@@ -8144,3 +8144,7 @@ of buffering of molecules. Only works for molecules that start out unbuffered.
 Checked in as revision 937: unit test flags on, Smoldyn off, GSL on, -g, MPI off
 
 =============================================================================
+14 Nov 2008
+Fixed a problem with volScale assignments to molecules. These were not 
+percolating back to the parent KinCompt. 
+Checked in as revision 938: unit test flags on, Smoldyn off, GSL on, -g, MPI off

@@ -69,8 +69,9 @@ class KinCompt
 		 * If it is a later one, new vol: Complain, tally
 		 * If the later new vols outnumber original vol: Complain louder
 		 */
-		static void setVolumeFromChild( const Conn* c, double v );
-		void innerSetVolumeFromChild( double v );
+		static void setVolumeFromChild( 
+			const Conn* c, string ch, double v );
+		void innerSetVolumeFromChild( Eref pa, string ch, double v );
 
 	protected:
 		double size() const {
