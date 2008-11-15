@@ -102,7 +102,7 @@ const Cinfo* initKinComptCinfo()
 			RFCAST( &KinCompt::setSizeWithoutRescale ),
 			"Assigns size without rescaling the entire model." ),
 		new DestFinfo( "volumeFromChild", 
-			Ftype1< double >::global(),
+			Ftype2< string, double >::global(),
 			RFCAST( &KinCompt::setVolumeFromChild ),
 			"Assigns volume based on request from child Molecule.\nApplies the following logic:\n	- If first assignment: Assign without rescaling\n	- If later assignment, same vol: Keep tally, silently\n	- If laster assignment, new vol: Complain, tally\n	- If later new vols outnumber original vol: Complain louder." ),
 	///////////////////////////////////////////////////////
@@ -302,12 +302,13 @@ void KinCompt::rescaleFunction( const Conn* c, double ratio )
 		c->target(), size * ratio );
 }
 
-void KinCompt::setVolumeFromChild( const Conn* c, double v )
+void KinCompt::setVolumeFromChild( const Conn* c, string ch, double v )
 {
-	static_cast< KinCompt* >( c->data() )->innerSetVolumeFromChild( v );
+	static_cast< KinCompt* >( c->data() )->innerSetVolumeFromChild( 
+		c->target(), ch, v );
 }
 
-void KinCompt::innerSetVolumeFromChild( double v )
+void KinCompt::innerSetVolumeFromChild( Eref pa, string ch, double v )
 {
 	if ( numAssigned_ == 0 ) {
 		size_ = v;
@@ -315,14 +316,11 @@ void KinCompt::innerSetVolumeFromChild( double v )
 	} else if ( fabs( 1.0 - size_ / v ) < 1.0e-3 ) {
 		++numMatching_;
 	} else {
+		cout << "Warning: KinCompt::innerSetVolumeFromChild: on" <<
+		pa.id().path() << "\nOrig vol != new vol: ( " << size_ << 
+		" != " << v << " ) on child " << ch << endl;
 		if (  numMatching_ * 2 < numAssigned_ ) {
-			cout << "Warning: KinCompt::innerSetVolumeFromChild: " <<
-			"\nCurrent volume " << size_ << 
-			" is used by less than half the children\n";
-		} else {
-			cout << "Warning: KinCompt::innerSetVolumeFromChild: " <<
-			"\nCurrent volume " << size_ << 
-			" does not match assigned volume " << v << endl;
+			cout << "\nNote: new vol is used by less than half the children\n";
 		}
 	}
 	++numAssigned_;
@@ -378,18 +376,23 @@ double getVolScale( Eref e )
 
 void setParentalVolScale( Eref e, double volScale )
 {
-	static const Finfo* sizeFinfo = 
+	/*
+	static const Finfo* volFromChildFinfo = 
 		initKinComptCinfo()->findFinfo( "volumeFromChild" );
+		*/
 
 	Eref kc = getNearestKinCompt( e );
 	if ( !( kc == Eref::root() ) ) {
 		if ( volScale <= 0.0 ) {
-			cout << "Error: setParentalVolScale: Should be > 0: " <<
-				volScale << endl;
+			cout << "Error: setParentalVolScale on " << 
+				e.id().path() << 
+				": volScale should be > 0: " << volScale << endl;
 			return;
 		}
 		double vol = volScale / 6e20;
-		bool ret = set< double >( kc, sizeFinfo, vol );
+		//assert( volFromChildFinfo != 0 );
+		bool ret = set< string, double >( 
+			kc, "volumeFromChild", e.id().path(), vol);
 		assert( ret );
 		return;
 	}
