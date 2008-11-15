@@ -8148,3 +8148,29 @@ Checked in as revision 937: unit test flags on, Smoldyn off, GSL on, -g, MPI off
 Fixed a problem with volScale assignments to molecules. These were not 
 percolating back to the parent KinCompt. 
 Checked in as revision 938: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+=============================================================================
+15 Nov 2008
+Cleaned up volume mismatch reporting for kkit model loads.
+Checked in as revision 939: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Trying to figure out why the gsolve has a problem with big models. Checked
+that it correctly handles enzymes whose parents are sumtotalled. See
+totenz.g and manyvolstotenz.g in the TESTS/GSSA dir. It works fine.
+
+Another possible problem: does the GSSA handle MMenz properly? See
+MMenz.g and manyvolsMMenz.g in the TESTS/GSSA dir. Dies.
+MMenz on its own seems OK. 
+I can reproduce the error if I first set the volume to 1e-15 or bigger. 
+1e-16 or smaller doesn't crash. How odd. Tracked it down to a problem
+with EPSILON comparing against k1 for MM enzymes. k1 depends on volume,
+so big volumes caused it to fail to make the rate term. Fixed by making the
+EPSILON a million times smaller, but still not an ideal situation.
+
+Designing flux for volume transfer between different solvers.
+- Simple method: have halfreacs with appropriate flux rates, pipe the
+	molecules into the flux vector which can be a contiguous set of
+	entries in S_.
+	- Known drawback: Guaranteed to always lower the conc of molecules
+	below correct value. This fraction will be reduced for smaller dt.
+
+=============================================================================
