@@ -23,7 +23,10 @@
 #endif
 
 const double RateTerm::EPSILON = 1.0e-6;
-const double Stoich::EPSILON = 1.0e-6;
+
+	// Limits the k1, but unfortunately there is a volume scaling here.
+	// for reference, if vol = 1e-15, k1 ~ 1e-6 for a Km of 1.
+const double Stoich::EPSILON = 1.0e-12; 
 
 const Cinfo* initStoichCinfo()
 {
@@ -926,7 +929,7 @@ void Stoich::addTab( Eref stoich, Eref e )
 
 void Stoich::addRate( Eref stoich, Eref e )
 {
-	cout << "Don't yet know how to addRate for " << e->name() << "\n";
+	// cout << "Don't yet know how to addRate for " << e->name() << "\n";
 }
 
 void Stoich::setupReacSystem( Eref stoich )
@@ -935,7 +938,6 @@ void Stoich::setupReacSystem( Eref stoich )
 	// objects and the Hubs. It now requests them to do something with it.
 	// Since these objects may have to do stuff the stoich doesn't know
 	// about, it also sends them the path to work on.
-	// cout << "Don't yet know how to setupReacSystem\n";
 	send1< string >( stoich, completeSetupSlot, path_ );
 }
 
