@@ -48,7 +48,7 @@ KineticHub.o:	RateTerm.h KineticHub.h
 Stoich.o:	RateTerm.h Stoich.h KinSparseMatrix.h Makefile
 GssaStoich.o:	RateTerm.h Stoich.h KinSparseMatrix.h GssaStoich.h Makefile
 Kintegrator.o:	Kintegrator.h
-KineticManager.o:	KineticManager.h
+KineticManager.o:	KineticManager.h ../kinetics/KinCompt.h
 TestKsolve.o:	KineticManager.h RateTerm.h Stoich.h KinSparseMatrix.h KineticHub.h Makefile
 
 ifdef ($(USE_GSL))
