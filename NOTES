@@ -8166,6 +8166,11 @@ with EPSILON comparing against k1 for MM enzymes. k1 depends on volume,
 so big volumes caused it to fail to make the rate term. Fixed by making the
 EPSILON a million times smaller, but still not an ideal situation.
 
+Checked in as revision 940: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+This is fine, but I still don't see how it would affect the running of the
+big models, as they are all small volume.
+
 Designing flux for volume transfer between different solvers.
 - Simple method: have halfreacs with appropriate flux rates, pipe the
 	molecules into the flux vector which can be a contiguous set of
@@ -8174,3 +8179,10 @@ Designing flux for volume transfer between different solvers.
 	below correct value. This fraction will be reduced for smaller dt.
 
 =============================================================================
+16 Nov 2008
+Still working on problem with cAMP. New test shows that problem is with 
+enzyme E not being in the dependency tree for MMenz. 
+See rMMenz.g and manyvolsrMMenz.g.
+Also checked if intermediate assignments of values cause suitable updates
+in the dependency tree. They do not. See assignReac.g and manyvolsAssignReac.g.
+So there are two reasons that the Gsolver method might fail.
