@@ -66,9 +66,9 @@ const Cinfo* initStoichCinfo()
 		new SrcFinfo( "clearSrc",
 			Ftype0::global()
 		),
-		new DestFinfo( "assignY", 
+		new DestFinfo( "setMolN", 
 			Ftype2< double, unsigned int >::global(),
-			RFCAST( &Stoich::assignYfunc )
+			RFCAST( &Stoich::setMolN )
 		),
 		new DestFinfo( "setBuffer", 
 			Ftype2< int, unsigned int >::global(),
@@ -92,7 +92,7 @@ const Cinfo* initStoichCinfo()
 			&Stoich::reinitFunc ),
 		new SrcFinfo( "assignStoich",
 			Ftype1< void* >::global() ),
-		new SrcFinfo( "assignY",
+		new SrcFinfo( "setMolNsrc",
 			Ftype2< double, unsigned int >::global() ),
 	};
 
@@ -230,8 +230,8 @@ static const Slot allocateSlot =
 	initStoichCinfo()->getSlot( "integrate.allocate" );
 static const Slot assignStoichSlot =
 	initStoichCinfo()->getSlot( "gsl.assignStoich" );
-static const Slot assignYslot =
-	initStoichCinfo()->getSlot( "gsl.assignY" );
+static const Slot setMolNslot =
+	initStoichCinfo()->getSlot( "gsl.setMolNsrc" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -335,10 +335,18 @@ void Stoich::integrateFunc( const Conn* c, vector< double >* v, double dt )
  * Relays a 'y' assignment request to the GSL integrator, or whatever
  * else is appropriate.
  */
-void Stoich::assignYfunc( const Conn* c, double y, unsigned int i )
+void Stoich::setMolN( const Conn* c, double y, unsigned int i )
 {
-	// cout << "in Stoich::assignYfunc with " << y << ", " << i << endl;
-	send2< double, unsigned int>( c->target(), assignYslot, y, i );
+	static_cast< Stoich* >( c->data() )->innerSetMolN( c, y, i );
+}
+
+/**
+ * virtual function, for the GssaStoich we have to do much more.
+ */
+void Stoich::innerSetMolN( const Conn* c, double y, unsigned int i )
+{
+	if ( i < nVarMols_ )
+		send2< double, unsigned int>( c->target(), setMolNslot, y, i );
 }
 
 void Stoich::rescaleVolume( const Conn* c, double ratio ) {
