@@ -8186,3 +8186,13 @@ See rMMenz.g and manyvolsrMMenz.g.
 Also checked if intermediate assignments of values cause suitable updates
 in the dependency tree. They do not. See assignReac.g and manyvolsAssignReac.g.
 So there are two reasons that the Gsolver method might fail.
+Checked in as revision 941: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Worked on the two problems. The rMMenz still does not work at all. There
+is some progress on the assignReac, but it is still not right.
+AssignReac issue: the 'step' call in gsolve mode starts the simulation off
+again from t = 0 but displays only the latest stuff. Fixed.
+
+Also got rMMenz.g to work: I had been using the wrong molecule from the
+substrate list as the 'enzyme'. Both assignReac.g and rMMenz.g now work.
+

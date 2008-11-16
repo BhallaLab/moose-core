@@ -89,7 +89,7 @@ const Cinfo* initKineticHubCinfo()
 			RFCAST( &KineticHub::clearFunc ),
 			"The Kinetic hub doesn't need this call."
 		),
-		new SrcFinfo( "assignYsrc",
+		new SrcFinfo( "setMolNsrc",
 			Ftype2< double, unsigned int >::global(),
 			"Forwards to the Stoich any requests to update mol n values."
 		),
@@ -219,8 +219,8 @@ static const Slot nSrcSlot =
 static const Slot fluxSlot =
 	initKineticHubCinfo()->getSlot( "flux.efflux" );
 
-static const Slot assignYslot =
-	initKineticHubCinfo()->getSlot( "hub.assignYsrc" );
+static const Slot setMolNslot =
+	initKineticHubCinfo()->getSlot( "hub.setMolNsrc" );
 static const Slot setBufferSlot =
 	initKineticHubCinfo()->getSlot( "hub.setBufferSrc" );
 	
@@ -885,11 +885,10 @@ void KineticHub::setMolN( const Conn* c, double value )
 		assert ( molIndex < kh->S_->size() );
 		( *kh->S_ )[molIndex] = value;
 		// cout << "in KineticHub::setMolN with " << value << ", " << molIndex << endl;
-		assert( hubE.e->numTargets( assignYslot.msg() ) == 1 );
+		assert( hubE.e->numTargets( setMolNslot.msg() ) == 1 );
 
-		// the y array only has variable mols, so we limit assignment
-		if ( molIndex < kh->nVarMol_ ) 
-			send2< double, unsigned int >( hubE, assignYslot, 
+		// Send out for further updates in the solver system
+		send2< double, unsigned int >( hubE, setMolNslot, 
 				value, molIndex );
 	}
 	Molecule::setN( c, value );
@@ -921,6 +920,10 @@ void KineticHub::setMolNinit( const Conn* c, double value )
 		unsigned int bufStart = kh->nVarMol_ + kh->nSumTot_;
 		if ( molIndex >= bufStart && molIndex < kh->S_->size() )
 			( *kh->S_ )[molIndex] = value;
+
+		// Send out for further updates in the solver system
+		send2< double, unsigned int >( hubE, setMolNslot, 
+				value, molIndex );
 	}
 	Molecule::setNinit( c, value );
 }

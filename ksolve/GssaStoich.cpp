@@ -32,18 +32,6 @@ const Cinfo* initGssaStoichCinfo()
 	static Finfo* process = new SharedFinfo( "process", processShared,
 		sizeof( processShared ) / sizeof( Finfo* ) );
 
-	/**
-	 * Messages that connect to the GssaIntegrator object
-	static Finfo* gssaShared[] =
-	{
-		new DestFinfo( "reinit", Ftype0::global(),
-			&Stoich::reinitFunc ),
-		new SrcFinfo( "assignStoich",
-			Ftype1< void* >::global() ),
-		new SrcFinfo( "assignY",
-			Ftype2< double, unsigned int >::global() ),
-	};
-	 */
 	//These are the fields of the stoich class
 	static Finfo* gssaStoichFinfos[] =
 	{
@@ -176,6 +164,19 @@ void GssaStoich::reinitFunc( const Conn* c )
 	s->updateAllRates();
 }
 
+/*
+ * This function could be much tighter if I maintain a dependency list
+ * from molecules to reactions. If so I would only have to update the
+ * affected reaction rates. But I don't expect to have
+ * to assign molecules very often. So I just update the whole lot.
+ */
+void GssaStoich::innerSetMolN( const Conn* c, double y, unsigned int i )
+{
+	Stoich::innerSetMolN( c, y, i );
+	GssaStoich* s = static_cast< GssaStoich* >( c->data() );
+	s->updateAllRates();
+}
+
 void GssaStoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 {
 	Stoich::rebuildMatrix( stoich, ret );
@@ -218,10 +219,53 @@ void GssaStoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 		transN_.getGillespieDependence( i, dependency_[ i ] );
 	}
 
+	// Fill in dependency list for MMEnzs: they depend on their enzymes.
+	fillMmEnzDep();
+
 	// Fill in dependency list for SumTots on reactions
 	fillMathDep();
 
 	makeReacDepsUnique();
+}
+
+/**
+ * Fill in dependency list for all MMEnzs on reactions.
+ * The dependencies of MMenz products are already in the system,
+ * so here we just need to add cases where any reaction product
+ * is the Enz of an MMEnz.
+ */
+void GssaStoich::fillMmEnzDep()
+{
+	unsigned int numRates = N_.nColumns();
+	vector< unsigned int > indices;
+
+	// Make a map to look up enzyme RateTerm using 
+	// the key of the enzyme molecule.
+	map< unsigned int, unsigned int > enzMolMap;
+	for ( unsigned int i = 0; i < numRates; ++i ) {
+		const MMEnzymeBase* mme = dynamic_cast< const MMEnzymeBase* >(
+			rates_[ i ] );
+		if ( mme ) {
+			vector< unsigned int > reactants;
+			mme->getReactants( reactants, S_ );
+			if ( reactants.size() > 1 )
+				enzMolMap[ reactants.front() ] = i; // front is enzyme.
+		}
+	}
+
+	// Use the map to fill in deps.
+	for ( unsigned int i = 0; i < numRates; ++i ) {
+		// Extract the row of all molecules that depend on the reac.
+		transN_.getRowIndices( i, indices );
+		for ( vector< unsigned int >::iterator 
+			j = indices.begin(); j != indices.end(); ++j )
+		{
+			map< unsigned int, unsigned int >::iterator pos = 
+				enzMolMap.find( *j );
+			if ( pos != enzMolMap.end() )
+				dependency_[i].push_back( pos->second );
+		}
+	}
 }
 
 /**
@@ -315,8 +359,12 @@ void GssaStoich::innerProcessFunc( Eref e, ProcInfo info )
 		// Figure out when the reaction will occur. The atot_
 		// calculation actually estimates time for which reaction will
 		// NOT occur, as atot_ sums all propensities.
-		if ( atot_ <= 0.0 ) // Nothing is going to happen.
+		if ( atot_ <= 0.0 ) { // Nothing is going to happen.
+			// We have to advance t_ because we may resume calculations
+			// with a different atot at a later time.
+			t_ = nextt;
 			break;
+		}
 		if ( t_ > 0.0 ) {
 			unsigned int rindex = pickReac(); // Does a randnum call
 			if ( rindex == rates_.size() ) 
