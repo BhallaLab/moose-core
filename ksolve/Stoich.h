@@ -18,6 +18,8 @@ class Stoich
 #endif
 	public:
 		Stoich();
+		virtual ~Stoich()
+		{;}
 		
 		///////////////////////////////////////////////////
 		// Field function definitions
@@ -49,7 +51,13 @@ class Stoich
 		}
 		void clear( Eref stoich );
 
-		static void assignYfunc( const Conn* c, double y, unsigned int i );
+		// funcs to handle externally imposed changes in mol N
+		static void setMolN( const Conn* c, double y, unsigned int i );
+		// Virtual so that derived classes handle things like
+		// molecule dependencies.
+		virtual void innerSetMolN( 
+			const Conn* c, double y, unsigned int i );
+
 		static void rescaleVolume( const Conn* c, double ratio );
 		void innerRescaleVolume( double ratio );
 

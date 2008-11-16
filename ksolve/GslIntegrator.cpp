@@ -37,9 +37,9 @@ const Cinfo* initGslIntegratorCinfo()
 			Ftype1< void* >::global(),
 			RFCAST( &GslIntegrator::assignStoichFunc )
 			),
-		new DestFinfo( "assignY",
+		new DestFinfo( "setMolN",
 			Ftype2< double, unsigned int >::global(),
-			RFCAST( &GslIntegrator::assignYfunc )
+			RFCAST( &GslIntegrator::setMolN )
 			),
 	};
 
@@ -220,16 +220,16 @@ void GslIntegrator::setInternalDt( const Conn* c, double value )
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void GslIntegrator::assignYfunc( const Conn* c, double y, unsigned int i )
+void GslIntegrator::setMolN( const Conn* c, double y, unsigned int i )
 {
 	static_cast< GslIntegrator* >( c->data() )->
-		assignYfuncLocal( y, i );
+		innerSetMolN( y, i );
 }
 
-void GslIntegrator::assignYfuncLocal( double y, unsigned int i ) 
+void GslIntegrator::innerSetMolN( double y, unsigned int i ) 
 {
 	if ( i >= nVarMols_ ) {
-		cout << "Error: GslIntegrator::assignYfuncLocal: i >=nVarMols: " <<
+		cout << "Error: GslIntegrator::innerSetMolN: i >=nVarMols: " <<
 			i << " >= " << nVarMols_ << endl;
 		return;
 	}
