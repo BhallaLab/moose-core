@@ -68,6 +68,14 @@ class GssaStoich: public Stoich
  		*/
 		void fillMathDep();
 
+		/**
+ 		* Fill in dependency list for all MMEnzs on reactions.
+ 		* The dependencies of MMenz products are already in the system,
+ 		* so here we just need to add cases where any reaction product
+ 		* is the Enz of an MMEnz.
+ 		*/
+		void fillMmEnzDep();
+
 		/// Clean up reac dependency lists: Ensure only unique entries.
 		void makeReacDepsUnique();
 
@@ -77,6 +85,9 @@ class GssaStoich: public Stoich
 		///////////////////////////////////////////////////
 		void updateV( );
 		void updateRates( vector< double>* yprime, double dt  );
+
+		// virtual func to handle externally imposed changes in mol N
+		void innerSetMolN( const Conn* c, double y, unsigned int i );
 		
 		///////////////////////////////////////////////////
 		// Internal fields.
@@ -137,6 +148,8 @@ class GssaStoich: public Stoich
 		 * transN_ is the transpose of the N_ (stoichiometry) matrix. 
 		 * It is expensive to compute, but once set up gives fast
 		 * operations for a number of steps in the algorithm.
+		 * Specifically, a row of transN_ has all the molecules
+		 * that depend on the specified reacn ( row# ).
 		 */
 		KinSparseMatrix transN_; 
 
