@@ -123,7 +123,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\hsolve;..\..\utility;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;C:\Program Files\GnuWin32\include&quot;;C:\Python25\include"
+				AdditionalIncludeDirectories="..\..\scheduling;..\..\robots;..\..\maindir;..\..\hsolve;..\..\utility;..\..\kinetics;..\..\ksolve;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..\pymoose;..\..;&quot;C:\Program Files\GnuWin32\include&quot;;C:\Python25\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;snprintf=_snprintf_s;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -704,6 +704,32 @@
 				Name="pymoose"
 				>
 				<File
+					RelativePath="..\..\pymoose\Adaptor.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\AscFile.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\BinomialRng.cpp"
 					>
 					<FileConfiguration
@@ -880,6 +906,28 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\DifShell.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\DiskPanel.cpp"
 					>
 					<FileConfiguration
@@ -969,6 +1017,28 @@
 				</File>
 				<File
 					RelativePath="..\..\pymoose\Geometry.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\GssaStoich.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -1512,6 +1582,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\SigNeur.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\SpherePanel.cpp"
 					>
 					<FileConfiguration
@@ -1666,7 +1740,51 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\TauPump.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\Tick.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\TimeTable.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -2164,6 +2282,70 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="robots"
+				>
+				<File
+					RelativePath="..\..\robots\Adaptor.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeur.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeurAdaptors.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeurDiffusion.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeurNeuron.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeurSignaling.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -2567,14 +2749,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="gnuplot"
-				>
-				<File
-					RelativePath="..\..\gnuplot\gnuplot_i.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="kinetics"
 				>
 				<File
@@ -2738,6 +2912,14 @@
 				Name="pymoose"
 				>
 				<File
+					RelativePath="..\..\pymoose\Adaptor.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\AscFile.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\BinomialRng.h"
 					>
 				</File>
@@ -2770,6 +2952,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\DifShell.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\DiskPanel.h"
 					>
 				</File>
@@ -2787,6 +2973,10 @@
 				</File>
 				<File
 					RelativePath="..\..\pymoose\Geometry.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\GssaStoich.h"
 					>
 				</File>
 				<File
@@ -2902,6 +3092,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\SigNeur.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\SpherePanel.h"
 					>
 				</File>
@@ -2934,11 +3128,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\TauPump.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\Tick.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\pymoose\TickTest.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\TimeTable.h"
 					>
 				</File>
 				<File
@@ -3087,6 +3289,18 @@
 				</File>
 				<File
 					RelativePath="..\..\ksolve\Stoich.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="robots"
+				>
+				<File
+					RelativePath="..\..\robots\Adaptor.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\robots\SigNeur.h"
 					>
 				</File>
 			</Filter>
