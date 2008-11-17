@@ -2294,6 +2294,34 @@ void do_tab2file( int argc, const char** const argv, Id s )
 	// Also lots of options remain.
 	// For now we just call the print command on the interpol
 	// Id e = GenesisParserWrapper::path2eid( elmname, s );
+        
+        switch (tabname[0])
+        {
+            case 'X':
+                elmname += "/xGate";
+                break;
+                
+            case 'Y':
+                elmname += "/yGate";
+                break;
+                
+            case 'Z':
+                elmname += "/zGate";
+                break;                    
+        }
+        if ('X' == tabname[0] || 'Y' == tabname[0] || 'Z' == tabname[0])
+        {
+            switch (tabname[2])
+            {
+                case 'A':
+                    elmname += "/A";
+                    break;
+                case 'B':
+                    elmname += "/B";
+                    break;
+            }
+        }
+        
 	Id e( elmname );
 	if ( !e.zero() && !e.bad() )
 		send3< Id, string, string >( s(),
