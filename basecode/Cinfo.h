@@ -40,6 +40,19 @@ class Cinfo
 			 * initialization sequence, despite the somewhat loose
 			 * semantics for this sequence in most C++ compilers.
 			 */
+			Cinfo( const std::string* doc,
+					unsigned int nDoc,
+					const Cinfo* baseCinfo,
+					Finfo** finfoArray,
+					unsigned int nFinfos,
+					const Ftype* ftype,
+					struct SchedInfo* schedInfo = 0,
+					unsigned int nSched = 0
+			);
+			
+			/**
+			 * Old-style constructor
+			 */
 			Cinfo( const std::string& name,
 					const std::string& author,
 					const std::string& description,
@@ -53,9 +66,9 @@ class Cinfo
 
 			~Cinfo();
 
-			const std::string& name() const {
-					return name_;
-			}
+			const std::string& name() const;
+			const std::string& author() const;
+			const std::string& description() const;
 
 			/**
 			 * Finds the Cinfo with the specified name.
@@ -143,9 +156,23 @@ class Cinfo
 			}
 
 		private:
-			const std::string name_;
-			const std::string author_;
-			const std::string description_;
+			/**
+			 * Helper function used by constructors. Required because in C++ we
+			 * cannot call one constructor from another to achieve the intended
+			 * effect.
+			 */
+			void init( const std::string* doc,
+					unsigned int nDoc,
+					Finfo** finfoArray,
+					unsigned int nFinfos,
+					struct SchedInfo* schedInfo,
+					unsigned int nSched
+			);
+
+			std::map< std::string, std::string > doc_;
+			//~ const std::string name_;
+			//~ const std::string author_;
+			//~ const std::string description_;
 			const Cinfo* baseCinfo_;
 			vector< Finfo* > finfos_;
 			const Ftype* ftype_;
