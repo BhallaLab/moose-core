@@ -8196,3 +8196,19 @@ again from t = 0 but displays only the latest stuff. Fixed.
 Also got rMMenz.g to work: I had been using the wrong molecule from the
 substrate list as the 'enzyme'. Both assignReac.g and rMMenz.g now work.
 
+Checked in as revision 942: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Tried putting in a safety factor to prevent flatlines. Didn't work.
+
+Various cleanups in GssaStoich::innerProcessFunc. Checked, looks OK.
+Next protect mtrand against 0.0 for getting tau. Seems unlikely, but it
+could give a bizarre logarithm. Maybe just print out and see if it correlates
+with flatline.
+
+=============================================================================
+18 Nov 2008
+Confirmed that mtrand was giving 0.0. Confirmed that fixing this fixed
+flatline. Checked mtrand code: it actually uses 32 bits, so 0.0 is not
+so unlikely after all. Very probable, in fact.
+
+=============================================================================

@@ -17,6 +17,20 @@
 #include "GssaStoich.h"
 #include "randnum.h"
 
+// Protects against the total propensity exceeding the cumulative
+// sum of propensities, atot. We do a lot of adding and subtracting of
+// dependency terms from atot. Roundoff error will eventually cause
+// this to drift from the true sum. To guarantee that we never lose
+// the propensity of the last reaction, this safety factor scales the
+// first calculation of atot to be slightly larger. Periodically this
+// will cause the reaction picking step to exceed the last reaction 
+// index. This is safe, we just pick another random number.  
+// This will happen rather infrequently.
+// That is also a good time to update the cumulative sum.
+// A double should have >15 digits, so cumulative error will be much
+// smaller than this.
+const double SAFETY_FACTOR = 1.0 + 1.0e-9;
+
 const Cinfo* initGssaStoichCinfo()
 {
 	static Finfo* processShared[] =
@@ -365,10 +379,14 @@ void GssaStoich::innerProcessFunc( Eref e, ProcInfo info )
 			t_ = nextt;
 			break;
 		}
-		if ( t_ > 0.0 ) {
+		// if ( t_ > 0.0 ) {
 			unsigned int rindex = pickReac(); // Does a randnum call
-			if ( rindex == rates_.size() ) 
-				break;
+			if ( rindex >= rates_.size() ) {
+				// Probably cumulative roundoff error here. Simply
+				// recalculate atot to avoid, and redo.
+				updateAllRates();
+				continue;
+			}
 			transN_.fireReac( rindex, S_ );
 			// Math expns must be first, because they may alter 
 			// substrate mol #.
@@ -376,9 +394,13 @@ void GssaStoich::innerProcessFunc( Eref e, ProcInfo info )
 			// The rates list includes rates dependent on mols changed
 			// by the MathExpns.
 			updateDependentRates( dependency_[ rindex ] );
-		}
-		double dt = ( 1.0 / atot_ ) * log( 1.0 / mtrand() );
-		t_ += dt;
+		// }
+		double r = mtrand();
+		while ( r <= 0.0 )
+			r = mtrand();
+		t_ -= ( 1.0 / atot_ ) * log( r );
+		// double dt = ( 1.0 / atot_ ) * log( 1.0 / mtrand() );
+		/*
 		if ( t_ >= nextt ) { // bail out if we run out of time.
 			// We save the t past the checkpoint, so
 			// as to continue if needed. However, checkpoint
@@ -387,6 +409,7 @@ void GssaStoich::innerProcessFunc( Eref e, ProcInfo info )
 			// about an error here.
 			break;
 		}
+		*/
 	}
 }
 
@@ -423,4 +446,11 @@ void GssaStoich::updateAllRates()
 	for( unsigned int i = 0; i < rates_.size(); ++i ) {
 		atot_ += ( v_[ i ] = ( *rates_[ i ] )() );
 	}
+	// Here we put in a safety factor into atot to ensure that
+	// cumulative roundoff errors from the dependency 
+	// addition/subtraction
+	// steps do not make it smaller than the actual total of 
+	// all the reactions. If that were to occur, we would begin
+	// to lose calls to the last reaction.
+	atot_ *= SAFETY_FACTOR;
 }
