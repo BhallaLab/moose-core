@@ -159,11 +159,17 @@ const Cinfo* initHHChannelCinfo()
 
 	// We want the channel updates after the compartments are done.
 	static SchedInfo schedInfo[] = { { process, 0, 1 } };
+	
+	static string doc[] =
+	{
+		"Name", "HHChannel",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "HHChannel: Hodgkin-Huxley type voltage-gated Ion channel. Something\nlike the old tabchannel from GENESIS, but also presents\na similar interface as hhchan from GENESIS. ",
+	};
 
 	static Cinfo HHChannelCinfo(
-		"HHChannel",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"HHChannel: Hodgkin-Huxley type voltage-gated Ion channel. Something\nlike the old tabchannel from GENESIS, but also presents\na similar interface as hhchan from GENESIS. ",
+		doc,
+		sizeof( doc ) / sizeof( string ),
 		initNeutralCinfo(),
 		HHChannelFinfos,
 		sizeof( HHChannelFinfos )/sizeof(Finfo *),

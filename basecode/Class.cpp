@@ -287,7 +287,7 @@ const string Class::getAuthor(const Element* e)
         cerr << "Error: Class object not initialized." << endl;
         return "";
     }
-    return obj->classInfo_->author_;    
+    return obj->classInfo_->author();    
 }
 
 /// Returns the description of the Class as passed to the Cinfo constructor
@@ -300,7 +300,7 @@ const string Class::getDescription(const Element* e)
         cerr << "Error: Class object not initialized." << endl;
         return "";
     }
-    return obj->classInfo_->description_;
+    return obj->classInfo_->description();
 }
 // TODO: baseCinfo_ is not a member of Cinfo, it does not hold any info about base
 // string Called::getBase()
