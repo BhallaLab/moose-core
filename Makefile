@@ -127,15 +127,14 @@ CXXFLAGS += -DUSE_MUSIC
 LIBS += -lmusic
 endif
 
-ifdef USE_MPI
-CXXFLAGS += -DUSE_MPI
-endif
-
 # The -DMPICH_IGNORE_CXX_SEEK flag is because of a bug in the
-# MPI-2 standard. Hopefully it won't affect you, but if it does use
-# the version of CXXFLAGS that defines this flag:
-#CXXFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK
-
+# MPI-2 standard. Enabled by default because it use crops up
+# often enough. You won't need if if you are not using MPICH, or
+# if your version of MPICH has fixed the issue.
+ifdef USE_MPI
+# CXXFLAGS += -DUSE_MPI
+CXXFLAGS += -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK
+endif
 
 #use this for readline library
 #CXXFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DUSE_READLINE
