@@ -65,10 +65,15 @@ const Cinfo* initHSolveHubCinfo()
 			sizeof( zombieShared ) / sizeof( Finfo* ) ),
 	};
 	
+	static string doc[] =
+	{
+		"Name", "HSolveHub",
+		"Author", "Niraj Dudani, 2007, NCBS",
+		"Description", "HSolveHub: ",
+	};
 	static Cinfo HSolveHubCinfo(
-		"HSolveHub",
-		"Niraj Dudani, 2007, NCBS",
-		"HSolveHub: ",
+		doc,
+		sizeof( doc ) / sizeof( string ),
 		initNeutralCinfo(),
 		HSolveHubFinfos,
 		sizeof( HSolveHubFinfos ) / sizeof( Finfo* ),

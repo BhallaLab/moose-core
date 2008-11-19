@@ -213,10 +213,15 @@ const Cinfo* initCompartmentCinfo()
 	// then an init clock at stage 0, tick 1.
 	static SchedInfo schedInfo[] = { { process, 0, 0 }, { init, 0, 1 } };
 
+	static string doc[] =
+	{
+		"Name", "Compartment",
+		"Author", "Upi Bhalla",
+		"Description", "Compartment object, for branching neuron models.",
+	};	
 	static Cinfo compartmentCinfo(
-				"Compartment",
-				"Upi Bhalla",
-				"Compartment object, for branching neuron models.",
+				doc,
+				sizeof( doc ) / sizeof( string ),
 				initNeutralCinfo(),
 				compartmentFinfos,
 				sizeof( compartmentFinfos ) / sizeof( Finfo* ),

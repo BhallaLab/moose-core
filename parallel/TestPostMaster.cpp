@@ -203,10 +203,15 @@ const Cinfo* initTestParClass()
 			sizeof( logDest ) / sizeof( Finfo* ) ),
 	};
 
+	static string doc[] =
+	{
+		"Name", "TestPar",
+		"Author", "Upi Bhalla, 2008, NCBS",
+		"Description", "Test class for parallel messaging",
+	};
 	static Cinfo testParClassCinfo(
-		"TestPar",
-		"Upi Bhalla, 2008, NCBS",
-		"Test class for parallel messaging",
+		doc,
+		sizeof( doc ) / sizeof( string ),
 		initNeutralCinfo(),
 		testParClassFinfos,
 		sizeof( testParClassFinfos ) / sizeof( Finfo* ),

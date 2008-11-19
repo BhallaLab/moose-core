@@ -27,11 +27,16 @@ const Cinfo* initInputEventChannelCinfo()
 
     };
 
-  
-  static Cinfo inputEventChannelCinfo("InputEventChannel",
-                                      "Niraj Dudani and Johannes Hjorth",
-                                      "InputEventChannel for communciation with the MUSIC API",
-                                      initNeutralCinfo(),
+  static string doc[] =
+	{
+		"Name", "InputEventChannel",
+		"Author", "Niraj Dudani and Johannes Hjorth",
+		"Description", "InputEventChannel for communciation with the MUSIC API",
+	};
+  static Cinfo inputEventChannelCinfo(                                  
+                                      doc,
+				      sizeof( doc ) / sizeof( string ),                                      
+				      initNeutralCinfo(),
                                       inputEventChannelFinfos,
                                       sizeof( inputEventChannelFinfos ) / sizeof( Finfo* ),
                                       ValueFtype1< InputEventChannel >::global() );

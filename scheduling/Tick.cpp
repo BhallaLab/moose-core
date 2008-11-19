@@ -161,10 +161,15 @@ const Cinfo* initTickCinfo()
 			"The start function sets of a simulation to run for the specified runtime." ),
 	};
 	
+	static string doc[] =
+	{
+		"Name", "Tick",
+		"Author", "Upinder S. Bhalla, Mar 2007, NCBS",
+		"Description", "Tick: Tick class. Controls execution of objects on a given dt.",
+	};
 	static Cinfo tickCinfo(
-		"Tick",
-		"Upinder S. Bhalla, Mar 2007, NCBS",
-		"Tick: Tick class. Controls execution of objects on a given dt.",
+		doc,
+		sizeof( doc ) / sizeof( string ),
 		initNeutralCinfo(),
 		tickFinfos,
 		sizeof(tickFinfos)/sizeof(Finfo *),

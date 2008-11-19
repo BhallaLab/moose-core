@@ -61,11 +61,16 @@ const Cinfo* initGeometryCinfo()
 		new SharedFinfo( "geom", geomShared,
 			sizeof( geomShared ) / sizeof( Finfo* ) ),
 	};
+	static string doc[] =
+	{
+		"Name", "Geometry",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Geometry: Interface object between Smoldyn (by Steven Andrews) and MOOSE, corresponding to the Smoldyn surfacesuperstruct",
+	};
 
 	static Cinfo geometryCinfo(
-		"Geometry",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"Geometry: Interface object between Smoldyn (by Steven Andrews) and MOOSE, corresponding to the Smoldyn surfacesuperstruct",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		geometryFinfos,
 		sizeof( geometryFinfos )/sizeof(Finfo *),

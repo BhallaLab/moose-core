@@ -19,10 +19,15 @@
  */
 const Cinfo* initDiskPanelCinfo()
 {
+	static string doc[] =
+	{
+		"Name", "DiskPanel",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "DiskPanel: Disk panel shape for portion of compartmental surface.",
+	};	
 	static Cinfo diskPanelCinfo(
-		"DiskPanel",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"DiskPanel: Disk panel shape for portion of compartmental surface.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initPanelCinfo(),
 		0,
 		0,

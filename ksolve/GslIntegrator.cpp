@@ -92,10 +92,19 @@ const Cinfo* initGslIntegratorCinfo()
 
 	static SchedInfo schedInfo[] = { { process, 0, 0 } };
 
+	static string doc[] =
+	{
+		"Name", "GslIntegrator",
+		"Author", "Upinder S. Bhalla, June 2006, NCBS",
+		"Description", "GslIntegrator: Integrator class for using the GSL ODE functions to do numerical\n"
+				"integration in the Kinetic Solver set.This is currently set up to work only with\n"
+				"the Stoich class,\nwhich represents biochemical networks.The goal is to have a \n"
+				"standard interface so different solvers can work with different kinds of calculation.",
+	};	
+	
 	static  Cinfo gslIntegratorCinfo(
-		"GslIntegrator",
-		"Upinder S. Bhalla, June 2006, NCBS",
-		"GslIntegrator: Integrator class for using the GSL ODE functions to do numerical integration in the Kinetic Solver set.\nThis is currently set up to work only with the Stoich class,\nwhich represents biochemical networks.\nThe goal is to have a standard interface so different\nsolvers can work with different kinds of calculation.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		gslIntegratorFinfos,
 		sizeof(gslIntegratorFinfos)/sizeof(Finfo *),

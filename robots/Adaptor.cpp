@@ -83,11 +83,17 @@ const Cinfo* initAdaptorCinfo()
 	};
 
 	static SchedInfo schedInfo[] = { { process, 0, 0 } };
+	
+	static string doc[] =
+	{
+		"Name", "Adaptor",
+		"Author", "Upinder S. Bhalla, 2008, NCBS",
+		"Description", "Averages and rescales values to couple different kinds of simulation",
+	};
 
 	static Cinfo adaptorCinfo(
-	"Adaptor",
-	"Upinder S. Bhalla, 2008, NCBS",
-	"Averages and rescales values to couple different kinds of simulation",
+	doc,
+	sizeof( doc ) / sizeof( string ),
 	initNeutralCinfo(),
 	adaptorFinfos,
 	sizeof( adaptorFinfos ) / sizeof( Finfo * ),

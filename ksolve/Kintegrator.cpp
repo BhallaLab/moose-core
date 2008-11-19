@@ -57,10 +57,18 @@ const Cinfo* initKintegratorCinfo()
 				sizeof( processShared )/ sizeof( Finfo* ) ),
 	};
 
+	static string doc[] =
+	{
+		"Name", "Kintegrator",
+		"Author", "Upinder S. Bhalla, June 2006, NCBS",
+		"Description","Kintegrator: Kinetic Integrator base class for setting up numerical solvers.\n"
+			       "This is currently set up to work only with the Stoich class, which represents \n"
+			       "biochemical networks.The goal is to have a standard interface so different\n"
+			       "solvers can work with different kinds of calculation.",
+	};	
 	static  Cinfo kintegratorCinfo(
-		"Kintegrator",
-		"Upinder S. Bhalla, June 2006, NCBS",
-		"Kintegrator: Kinetic Integrator base class for setting up numerical solvers.\nThis is currently set up to work only with the Stoich class,\nwhich represents biochemical networks.\nThe goal is to have a standard interface so different\nsolvers can work with different kinds of calculation.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		kintegratorFinfos,
 		sizeof(kintegratorFinfos)/sizeof(Finfo *),
