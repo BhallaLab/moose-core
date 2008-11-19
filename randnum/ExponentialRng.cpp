@@ -33,9 +33,15 @@ const Cinfo* initExponentialRngCinfo()
                             RFCAST(&ExponentialRng::setMethod)),
         };
     
-    static Cinfo exponentialRngCinfo("ExponentialRng",
-                                "Subhasis Ray",
-                                "Exponentially distributed random number generator.",
+    static string doc[] =
+	{
+		"Name", "ExponentialRng",
+		"Author", "Subhasis Ray",
+		"Description", "Exponentially distributed random number generator.",
+	};
+    static Cinfo exponentialRngCinfo(
+                                doc,
+				sizeof( doc ) / sizeof( string ),
                                 initRandGeneratorCinfo(),
                                 exponentialRngFinfos,
                                 sizeof(exponentialRngFinfos)/sizeof(Finfo*),

@@ -56,11 +56,19 @@ const Cinfo* initTauPumpCinfo()
   // !!! Is this the right place in the scheduling?
   static SchedInfo schedInfo[] = { { process, 0, 1 } };
 
+  static string doc[] =
+	{
+		"Name", "TauPump",
+		"Author", "Johannes Hjorth, 2008, Stockholm Brain Institute, KTH",
+		"Description", "TauPump:: Implementation of a simple pump with a variable time\n"
+				"constant of removal. Should be coupled to a difshell, where \n"
+				"the change in concentration is computed.",
+	};
+
   static Cinfo TauPumpCinfo(
-                "TauPump",
-                "Johannes Hjorth, 2008, Stockholm Brain Institute, KTH",
-                "TauPump:: Implementation of a simple pump with a variable time constant of removal. Should be coupled to a difshell, where the change in concentration is computed.",
-                initNeutralCinfo(),
+                doc,
+		sizeof( doc ) / sizeof( string ),                
+		initNeutralCinfo(),
                 TauPumpFinfos,
                 sizeof( TauPumpFinfos )/sizeof(Finfo *),
                 ValueFtype1< TauPump >::global(),

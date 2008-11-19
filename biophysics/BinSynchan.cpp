@@ -153,10 +153,17 @@ const Cinfo* initBinSynchanCinfo()
 	// BinSynchan is scheduled after the compartment calculations.
 	static SchedInfo schedInfo[] = { { process, 0, 1 } };
 
+	static string doc[] =
+	{
+		"Name", "BinSynchan",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "BinSynchan: Synaptic channel incorporating weight and delay. Does not\n"
+				"handle activity-dependent modification, see HebbBinSynchan for that.\n"
+				"Very similiar to the old synchan from GENESIS.", 
+	};	
 	static Cinfo binSynchanCinfo(
-		"BinSynchan",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"BinSynchan: Synaptic channel incorporating weight and delay. Does not\nhandle activity-dependent modification, see HebbBinSynchan for \nthat. Very similiar to the old synchan from GENESIS.", 
+		doc,
+		sizeof( doc ) / sizeof( string ),
 		initNeutralCinfo(),
 		binSynchanFinfos,
 		sizeof( binSynchanFinfos )/sizeof(Finfo *),

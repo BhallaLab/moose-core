@@ -109,10 +109,16 @@ const Cinfo* initParticleCinfo()
 	// Schedule particles for the slower clock, stage 0.
 	// static SchedInfo schedInfo[] = { { Molecule::process, 0, 0 } };
 	
+	static string doc[] =
+	{
+		"Name", "Particle",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Particle: Interface to Smoldyn pool of molecules.",
+	};
+	
 	static Cinfo particleCinfo(
-		"Particle",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"Particle: Interface to Smoldyn pool of molecules.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initMoleculeCinfo(),
 		particleFinfos,
 		sizeof( particleFinfos )/sizeof(Finfo *),

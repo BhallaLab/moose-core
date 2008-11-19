@@ -184,10 +184,19 @@ const Cinfo* initKineticHubCinfo()
 			*/
 	};
 
+	static string doc[] =
+	{
+		"Name", "KineticHub",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "KineticHub: Object for controlling reaction systems on behalf of the Stoich object.\n"
+				"Interfaces both with the reaction system (molecules, reactions, enzymes and user \n"
+				"defined rate terms) and also with the Stoich class which generates the stoichiometry \n"
+				"matrix and handles the derivative calculations.",
+	};
+	
 	static Cinfo kineticHubCinfo(
-		"KineticHub",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"KineticHub: Object for controlling reaction systems on behalf of the\nStoich object. Interfaces both with the reaction system\n(molecules, reactions, enzymes\nand user defined rate terms) and also with the Stoich\nclass which generates the stoichiometry matrix and \nhandles the derivative calculations.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		kineticHubFinfos,
 		sizeof(kineticHubFinfos )/sizeof(Finfo *),

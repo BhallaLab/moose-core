@@ -164,7 +164,9 @@ const Cinfo* initHHChannelCinfo()
 	{
 		"Name", "HHChannel",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "HHChannel: Hodgkin-Huxley type voltage-gated Ion channel. Something\nlike the old tabchannel from GENESIS, but also presents\na similar interface as hhchan from GENESIS. ",
+		"Description", "HHChannel: Hodgkin-Huxley type voltage-gated Ion channel. Something\n"
+				"like the old tabchannel from GENESIS, but also presents\n"
+				"a similar interface as hhchan from GENESIS. ",
 	};
 
 	static Cinfo HHChannelCinfo(

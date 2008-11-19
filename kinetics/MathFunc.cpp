@@ -80,10 +80,15 @@ const Cinfo* initMathFuncCinfo()
 			sizeof( processShared ) / sizeof( Finfo* ) ),
 	};
 
+	static string doc[] =
+	{
+		"Name", "MathFunc",
+		"Author", "Raamesh Deshpande, 2007, NCBS",
+		"Description", "MathFunc: Object for parsing function definitions and executing them in a simulation.",
+	};	
 	static Cinfo mathFuncCinfo(
-		"MathFunc",
-		"Raamesh Deshpande, 2007, NCBS",
-		"MathFunc: Object for parsing function definitions and executing them in a simulation.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		mathFuncFinfos,
 		sizeof( mathFuncFinfos )/sizeof(Finfo *),

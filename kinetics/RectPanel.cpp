@@ -19,10 +19,16 @@
  */
 const Cinfo* initRectPanelCinfo()
 {
+	static string doc[] =
+	{
+		"Name", "RectPanel",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "RectPanel: Rectangular panel shape for portion of compartmental surface.",
+	};
+	
 	static Cinfo rectPanelCinfo(
-		"RectPanel",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"RectPanel: Rectangular panel shape for portion of compartmental surface.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initPanelCinfo(),
 		0,
 		0,
