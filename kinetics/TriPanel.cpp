@@ -19,10 +19,16 @@
  */
 const Cinfo* initTriPanelCinfo()
 {
+	static string doc[] =
+	{
+		"Name","TriPanel",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "TriPanel: Triangular panel shape for portion of compartmental surface.",
+	};
+	
 	static Cinfo triPanelCinfo(
-		"TriPanel",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"TriPanel: Triangular panel shape for portion of compartmental surface.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initPanelCinfo(),
 		0,
 		0,

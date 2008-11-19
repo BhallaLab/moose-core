@@ -40,9 +40,15 @@ const Cinfo* initUniformRngCinfo()
         };
     
     
-    static Cinfo uniformRngCinfo("UniformRng",
-                                "Subhasis Ray",
-                                "Uniformly distributed random number generator.",
+    static string doc[] =
+	{
+		"Name", "UniformRng",
+		"Author", "Subhasis Ray",
+		"Description", "Uniformly distributed random number generator.",
+	};
+    static Cinfo uniformRngCinfo(
+				doc,
+				sizeof( doc ) / sizeof( string ),
                                 initRandGeneratorCinfo(),
                                 uniformRngFinfos,
                                 sizeof(uniformRngFinfos)/sizeof(Finfo*),

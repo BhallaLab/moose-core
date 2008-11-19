@@ -73,10 +73,16 @@ const Cinfo* initAverageCinfo()
 	// Schedule molecules for the slower clock, stage 0.
 	static SchedInfo schedInfo[] = { { process, 0, 0 } };
 
+	static string doc[] =
+	{
+		"Name", "Average",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Average: Example MOOSE class.",
+	};
+
 	static Cinfo averageCinfo(
-		"Average",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"Average: Example MOOSE class.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		averageFinfos,
 		sizeof( averageFinfos )/sizeof(Finfo *),

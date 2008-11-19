@@ -230,11 +230,16 @@ const Cinfo* initGenesisParserCinfo()
 		new SrcFinfo( "echo", Ftype1< string>::global() ),
 
 	};
+	static string doc[] =
+	{
+		"Name", "GenesisParser",
+		"Author", "Upinder S. Bhalla, NCBS, 2004-2007",
+		"Description", "Object to handle the old Genesis parser",
+	};
 
 	static Cinfo genesisParserCinfo(
-		"GenesisParser",
-		"Upinder S. Bhalla, NCBS, 2004-2007",
-		"Object to handle the old Genesis parser",
+		doc,
+		sizeof( doc ) / sizeof( string ),
 		initNeutralCinfo(),
 		genesisParserFinfos,
 		sizeof(genesisParserFinfos) / sizeof( Finfo* ),

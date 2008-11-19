@@ -19,10 +19,15 @@
  */
 const Cinfo* initCylPanelCinfo()
 {
+	static string doc[] =
+	{
+		"Name", "CylPanel",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "CylPanel: Cylindrical panel shape for portion of compartmental surface.",
+	};
 	static Cinfo cylPanelCinfo(
-		"CylPanel",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"CylPanel: Cylindrical panel shape for portion of compartmental surface.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initPanelCinfo(),
 		0,
 		0,

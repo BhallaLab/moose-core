@@ -83,11 +83,16 @@ const Cinfo* initTimeTableCinfo()
   // Schedule molecules for the slower clock, stage 0.
   static SchedInfo schedInfo[] = { { process, 0, 0 } };
 
+  static string doc[] =
+	{
+		"Name", "TimeTable",
+		"Author", "Johannes Hjorth, 2008, KTH, Stockholm",
+		"Description", "TimeTable: Read in spike times from file.",
+	};
   static Cinfo timeTableCinfo(
-                            "TimeTable",
-                            "Johannes Hjorth, 2008, KTH, Stockholm",
-                            "TimeTable: Read in spike times from file.",
-                            initNeutralCinfo(),
+                            doc,
+		            sizeof( doc ) / sizeof( string ),
+			    initNeutralCinfo(),
                             timeTableFinfos,
                             sizeof( timeTableFinfos )/sizeof(Finfo *),
                             ValueFtype1< TimeTable >::global(),

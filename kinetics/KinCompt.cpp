@@ -116,10 +116,16 @@ const Cinfo* initKinComptCinfo()
 			"Connects to molecules, which trigger a request for volume info. Volume here may be size?" ),
 	};
 
+	static string doc[] =
+	{
+		"Name", "KinCompt",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "KinCompt: Kinetic compartment. Has its on volume, or gets +ve or negative contributions from varous surface objects",
+	};
+
 	static Cinfo kinComptCinfo(
-		"KinCompt",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"KinCompt: Kinetic compartment. Has its on volume, or gets +ve or negative contributions from varous surface objects",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		kinComptFinfos,
 		sizeof( kinComptFinfos )/sizeof(Finfo *),

@@ -100,10 +100,17 @@ const Cinfo* initPulseGenCinfo()
 
     static SchedInfo schedInfo[] = { { process, 0, 0 } };
 
-    static Cinfo pulseGenCinfo("PulseGen",
-                               "Subhasis Ray, 2007, NCBS",
-                               "PulseGen: general purpose pulse generator",
-                               initNeutralCinfo(),
+
+	static string doc[] =
+	{
+		"Name", "PulseGen",
+		"Author", "Subhasis Ray, 2007, NCBS",
+		"Description", "PulseGen: general purpose pulse generator",
+	};
+    static Cinfo pulseGenCinfo(
+                               doc,
+			       sizeof( doc ) / sizeof( string ),                               
+			       initNeutralCinfo(),
                                pulseGenFinfos,
                                sizeof(pulseGenFinfos)/sizeof(Finfo*),
                                ValueFtype1<PulseGen>::global(),

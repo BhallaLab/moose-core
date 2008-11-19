@@ -146,11 +146,18 @@ const Cinfo* initStochSynchanCinfo()
 
 	// StochSynchan is scheduled after the compartment calculations.
 	static SchedInfo schedInfo[] = { { process, 0, 1 } };
-
+	
+	static string doc[] =
+	{
+		"Name", "StochSynchan",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "StochSynchan: Synaptic channel incorporating weight and delay. Does not\n"
+				"handle activity-dependent modification, see HebbStochSynchan for that.\n"
+				"Very similiar to the old synchan from GENESIS.", 
+	};
 	static Cinfo stochSynchanCinfo(
-		"StochSynchan",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"StochSynchan: Synaptic channel incorporating weight and delay. Does not\nhandle activity-dependent modification, see HebbStochSynchan for \nthat. Very similiar to the old synchan from GENESIS.", 
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		stochSynchanFinfos,
 		sizeof( stochSynchanFinfos )/sizeof(Finfo *),

@@ -40,9 +40,15 @@ const Cinfo* initNormalRngCinfo()
             
         };
     
-    static Cinfo normalRngCinfo("NormalRng",
-                                "Subhasis Ray",
-                                "Normally distributed random number generator.",
+	static string doc[] =
+	{
+		"Name", "NormalRng",
+		"Author", "Subhasis Ray",
+		"Description", "Normally distributed random number generator.",
+	};    
+	static Cinfo normalRngCinfo(
+                                doc,
+				sizeof( doc ) / sizeof( string ),
                                 initRandGeneratorCinfo(),
                                 normalRngFinfos,
                                 sizeof(normalRngFinfos)/sizeof(Finfo*),

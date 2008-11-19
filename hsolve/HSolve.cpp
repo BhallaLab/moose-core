@@ -95,10 +95,15 @@ const Cinfo* initHSolveCinfo()
 	
 	static SchedInfo schedInfo[] = { { process, 0, 1 } };
 	
+	static string doc[] =
+	{
+		"Name", "HSolve",
+		"Author", "Niraj Dudani, 2007, NCBS",
+		"Description", "HSolve: Hines solver, for solving branching neuron models.",
+	};
 	static Cinfo hsolveCinfo(
-		"HSolve",
-		"Niraj Dudani, 2007, NCBS",
-		"HSolve: Hines solver, for solving branching neuron models.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		hsolveFinfos,
 		sizeof( hsolveFinfos ) / sizeof( Finfo* ),

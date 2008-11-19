@@ -187,10 +187,16 @@ const Cinfo* initSmoldynHubCinfo()
 	// Schedule smoldynHubs for the slower clock, stage 0.
 	static SchedInfo schedInfo[] = { { process, 0, 0 } };
 	
+	static string doc[] =
+	{
+		"Name", "SmoldynHub",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "SmoldynHub: Interface object between Smoldyn (by Steven Andrews) and MOOSE.",
+	};
+
 	static Cinfo smoldynHubCinfo(
-		"SmoldynHub",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"SmoldynHub: Interface object between Smoldyn (by Steven Andrews) and MOOSE.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		smoldynHubFinfos,
 		sizeof( smoldynHubFinfos )/sizeof(Finfo *),

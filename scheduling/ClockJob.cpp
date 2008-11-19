@@ -187,10 +187,16 @@ const Cinfo* initClockJobCinfo()
 	///////////////////////////////////////////////////////
 	};
 	
+	static string doc[] =
+	{
+		"Name", "ClockJob",
+		"Author", "Upinder S. Bhalla, Mar 2007, NCBS",
+		"Description", "ClockJob: ClockJob class. Handles sequencing of operations in simulations",
+	};
+
 	static Cinfo clockJobCinfo(
-		"ClockJob",
-		"Upinder S. Bhalla, Mar 2007, NCBS",
-		"ClockJob: ClockJob class. Handles sequencing of operations in simulations",
+		doc,
+		sizeof( doc ) / sizeof( string ),
 		initNeutralCinfo(),
 		clockFinfos,
 		sizeof(clockFinfos)/sizeof(Finfo *),
