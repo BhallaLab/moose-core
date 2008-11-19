@@ -38,9 +38,16 @@ const Cinfo* initBinomialRngCinfo()
                           RFCAST(&BinomialRng::setP)),
         };
     
-    static Cinfo binomialRngCinfo("BinomialRng",
-                                  "Subhasis Ray",
-                                  "Binomially distributed random number generator.",
+    static string doc[] =
+	{
+		"Name", "BinomialRng",
+		"Author", "Subhasis Ray",
+		"Description", "Binomially distributed random number generator.",
+	};
+
+    static Cinfo binomialRngCinfo(
+                                  doc,
+				  sizeof( doc ) / sizeof( string ),
                                   initRandGeneratorCinfo(),
                                   binomialRngFinfos,
                                   sizeof(binomialRngFinfos)/sizeof(Finfo*),

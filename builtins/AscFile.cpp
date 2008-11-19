@@ -70,11 +70,17 @@ const Cinfo* initAscFileCinfo()
 
   static SchedInfo schedInfo[] = { { process, 0, 0 } };
 
+  static string doc[] =
+	{
+		"Name", "AscFile",
+		"Author", "Johannes Hjorth, 2008, KTH, Stockholm",
+		"Description", "AscFile: Multi-column output to file.",
+	};
+
   static Cinfo ascFileCinfo(
-                "AscFile",
-                "Johannes Hjorth, 2008, KTH, Stockholm",
-                "AscFile: Multi-column output to file.",
-                initNeutralCinfo(),
+               	doc,
+		sizeof( doc ) / sizeof( string ),                
+		initNeutralCinfo(),
                 ascFileFinfos,
                 sizeof( ascFileFinfos )/sizeof(Finfo *),
                 ValueFtype1< AscFile >::global(),

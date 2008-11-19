@@ -19,10 +19,15 @@
  */
 const Cinfo* initHemispherePanelCinfo()
 {
+	static string doc[] =
+	{
+		"Name", "HemispherePanel",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "HemispherePanel: Hemispherical panel shape for portion of compartmental surface.",
+	};	
 	static Cinfo hemispherePanelCinfo(
-		"HemispherePanel",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"HemispherePanel: Hemispherical panel shape for portion of compartmental surface.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initPanelCinfo(),
 		0,
 		0,

@@ -118,11 +118,16 @@ const Cinfo* initSymCompartmentCinfo()
 	};
 
 	// static SchedInfo schedInfo[] = { { process, 0, 0 }, { init, 0, 1 } };
-
+	
+	static string doc[] =
+	{
+		"Name", "SymCompartment",
+		"Author", "Upi Bhalla",
+		"Description", "SymCompartment object, for branching neuron models.",
+	};
 	static Cinfo symCompartmentCinfo(
-				"SymCompartment",
-				"Upi Bhalla",
-				"SymCompartment object, for branching neuron models.",
+				doc,
+				sizeof( doc ) / sizeof( string ),
 				initCompartmentCinfo(),
 				symCompartmentFinfos,
 				sizeof( symCompartmentFinfos ) / sizeof( Finfo* ),

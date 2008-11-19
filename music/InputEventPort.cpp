@@ -63,11 +63,17 @@ const Cinfo* initInputEventPortCinfo()
     };
 
   static SchedInfo schedInfo[] = { { process, 0, 0 } };
-  
-  static Cinfo inputEventPortCinfo("InputEventPort",
-                             "Niraj Dudani and Johannes Hjorth",
-                             "InputEventPort for communciation with the MUSIC API",
-                             initNeutralCinfo(),
+ 
+  static string doc[] =
+	{
+		"Name", "InputEventPort",
+		"Author", "Niraj Dudani and Johannes Hjorth",
+		"Description", "InputEventPort for communciation with the MUSIC API",
+	};
+  static Cinfo inputEventPortCinfo(
+                             doc,
+			     sizeof( doc ) / sizeof( string ),                             
+			     initNeutralCinfo(),
                              inputEventPortFinfos,
                              sizeof( inputEventPortFinfos ) / sizeof( Finfo* ),
                              ValueFtype1< InputEventPort >::global(),

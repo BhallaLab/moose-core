@@ -75,11 +75,15 @@ const Cinfo* initSpikeGenCinfo()
 
 	// We want the spikeGen to update after the compartments have done so
 	static SchedInfo schedInfo[] = { { process, 0, 1 } };
-
+	static string doc[] =
+	{
+		"Name", "SpikeGen",
+		"Author", "Upi Bhalla",
+		"Description", "SpikeGen object, for detecting threshold crossings.",
+	};
 	static Cinfo spikeGenCinfo(
-				"SpikeGen",
-				"Upi Bhalla",
-				"SpikeGen object, for detecting threshold crossings.",
+				doc,
+				sizeof( doc ) / sizeof( string ),				
 				initNeutralCinfo(),
 				spikeGenFinfos,
 				sizeof( spikeGenFinfos ) / sizeof( Finfo* ),

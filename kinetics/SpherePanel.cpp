@@ -19,10 +19,16 @@
  */
 const Cinfo* initSpherePanelCinfo()
 {
+	static string doc[] =
+	{
+		"Name", "SpherePanel",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "SpherePanel: Spherical panel shape for portion of compartmental surface.",
+	};
+	
 	static Cinfo spherePanelCinfo(
-		"SpherePanel",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"SpherePanel: Spherical panel shape for portion of compartmental surface.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initPanelCinfo(),
 		0,
 		0,

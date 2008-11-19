@@ -95,10 +95,15 @@ const Cinfo* initCellCinfo()
 	// Clock 0 will do for reset.
 	static SchedInfo schedInfo[] = { { process, 0, 0 } };
 	
+	static string doc[] =
+	{
+		"Name", "Cell",
+		"Author", "Subhasis Ray, Niraj Dudani, 2007, NCBS",
+		"Description", "Cell: Container for a neuron's components. Also manages automatic solver setup.",
+	};	
 	static Cinfo cellCinfo(
-		"Cell",
-		"Subhasis Ray, Niraj Dudani, 2007, NCBS",
-		"Cell: Container for a neuron's components. Also manages automatic solver setup.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		cellFinfos,
 		sizeof( cellFinfos ) / sizeof( Finfo* ),

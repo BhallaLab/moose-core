@@ -65,10 +65,18 @@ const Cinfo* initNernstCinfo()
 
 	};
 
+	static string doc[] =
+	{
+		"Name", "Nernst",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Nernst: Calculates Nernst potential for a given ion based on \n"
+				"Cin and Cout, the inside and outside concentrations.\n"
+				"Immediately sends out the potential to all targets.",
+	};
+	
 	static const Cinfo NernstCinfo(
-		"Nernst",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"Nernst: Calculates Nernst potential for a given ion based on \nCin and Cout, the inside and outside concentrations.\nImmediately sends out the potential to all targets.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		NernstFinfos,
 		sizeof( NernstFinfos ) / sizeof(Finfo *),

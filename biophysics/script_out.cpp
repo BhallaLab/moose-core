@@ -92,10 +92,15 @@ const Cinfo* initscript_outCinfo()
 	// then an init clock at stage 0, tick 1.
 	static SchedInfo schedInfo[] = { { process, 0, 0 }/*, { init, 0, 1 }*/ };
 
+	static string doc[] =
+	{
+		"Name", "script_out",
+		"Author", "Raamesh Deshpande",
+		"Description", "script_out object, for making orient_tut work",
+	};	
 	static Cinfo script_outCinfo(
-				"script_out",
-				"Raamesh Deshpande",
-				"script_out object, for making orient_tut work",
+				doc,
+				sizeof( doc ) / sizeof( string ),				
 				initNeutralCinfo(),
 				script_outFinfos,
 				sizeof( script_outFinfos ) / sizeof( Finfo* ),

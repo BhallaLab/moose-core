@@ -106,10 +106,15 @@ void testSched()
 		new SharedFinfo( "process", processShared, 2 ),
 	};
 
+	static string doc[] =
+	{
+		"Name", "TickTest",
+		"Author", "Upinder S. Bhalla, Mar 2007, NCBS",
+		"Description", "TickTest: Checks scheduling",
+	};
 	static Cinfo tickTestCinfo(
-		"TickTest",
-		"Upinder S. Bhalla, Mar 2007, NCBS",
-		"TickTest: Checks scheduling",
+		doc,
+		sizeof( doc ) / sizeof( string ),
 		initNeutralCinfo(),
 		tickTestFinfos,
 		sizeof(tickTestFinfos)/sizeof(Finfo *),
