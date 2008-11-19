@@ -80,11 +80,22 @@ const Cinfo* initGssaStoichCinfo()
 		process,
 	};
 	static SchedInfo schedInfo[] = { { process, 0, 0 } };
+	static string doc[] =
+	{
+		"Name", "GssaStoich",
+		"Author", "Upinder S. Bhalla, 2008, NCBS",
+		"Description", "GssaStoich: Gillespie Stochastic Simulation Algorithm object.\n"
+				"Closely based on the Stoich object and inherits its handling \n"
+				"functions for constructing the matrix. Sets up stoichiometry matrix \n"
+				"based calculations from a\nwildcard path for the reaction system.\n"
+				"Knows how to compute derivatives for most common things, also knows how to\n"
+				"handle special cases where the object will have to do its own computation.\n"
+				"Generates a stoichiometry matrix, which is useful for lots of other operations as well.",
+	};
 
 	static Cinfo gssaStoichCinfo(
-		"GssaStoich",
-		"Upinder S. Bhalla, 2008, NCBS",
-		"GssaStoich: Gillespie Stochastic Simulation Algorithm object.\nClosely based on the Stoich object and inherits its \nhandling functions for constructing the matrix. Sets up stoichiometry matrix based calculations from a\nwildcard path for the reaction system.\nKnows how to compute derivatives for most common\nthings, also knows how to handle special cases where the\nobject will have to do its own computation. Generates a\nstoichiometry matrix, which is useful for lots of other\noperations as well.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initStoichCinfo(),
 		gssaStoichFinfos,
 		sizeof( gssaStoichFinfos )/sizeof(Finfo *),

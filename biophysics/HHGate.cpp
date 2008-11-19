@@ -66,10 +66,20 @@ const Cinfo* initHHGateCinfo()
 			RFCAST( &HHGate::setupGate ) ),
 	};
 
+	static string doc[] =
+	{
+		"Name", "HHGate",
+		"Author", "Upinder S. Bhalla, 2005, NCBS",
+		"Description", "HHGate: Gate for Hodkgin-Huxley type channels, equivalent to the\n"
+				"m and h terms on the Na squid channel and the n term on K.\n"
+				"This takes the voltage and state variable from the channel,\n"
+				"computes the new value of the state variable and a scaling,\n"
+				"depending on gate power, for the conductance. These two\n"
+				"terms are sent right back in a message to the channel.",
+	};	
 	static Cinfo HHGateCinfo(
-		"HHGate",
-		"Upinder S. Bhalla, 2005, NCBS",
-		"HHGate: Gate for Hodkgin-Huxley type channels, equivalent to the\nm and h terms on the Na squid channel and the n term on K.\nThis takes the voltage and state variable from the channel,\ncomputes the new value of the state variable and a scaling,\ndepending on gate power, for the conductance. These two\nterms are sent right back in a message to the channel.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		HHGateFinfos,
 		sizeof(HHGateFinfos)/sizeof(Finfo *),

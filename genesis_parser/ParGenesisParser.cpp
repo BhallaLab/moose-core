@@ -199,10 +199,16 @@ const Cinfo* initParGenesisParserCinfo()
 	};
 
 
+	static string doc[] =
+	{
+		"Name", "ParGenesisParser",
+		"Author", "Mayuresh Kulkarni, CRL, 2007",
+		"Description", "Parallel version of Genesis Parser",
+	};
+
 	static Cinfo genesisParserCinfo(
-		"ParGenesisParser",
-		"Mayuresh Kulkarni, CRL, 2007",
-		"Parallel version of Genesis Parser",
+		doc,
+		sizeof( doc ) / sizeof( string ),
 		initNeutralCinfo(),
 		genesisParserFinfos,
 		sizeof(genesisParserFinfos) / sizeof( Finfo* ),

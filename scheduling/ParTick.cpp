@@ -142,10 +142,16 @@ const Cinfo* initParTickCinfo()
 		 */
 	};
 	
+	static string doc[] =
+	{
+		"Name", "ParTick",
+		"Author", "Upinder S. Bhalla, April 2007, NCBS",
+		"Description", "ParTick: Sequences execution of objects on a given dt for working with\n"
+				"parallel messaging. Interleaves computation and communication for efficiency.",
+	};
 	static Cinfo parTickCinfo(
-		"ParTick",
-		"Upinder S. Bhalla, April 2007, NCBS",
-		"ParTick: Sequences execution of objects on a given dt for working with parallel messaging. Interleaves computation and communication for efficiency.",
+		doc,
+		sizeof( doc ) / sizeof( string ),
 		initTickCinfo(),
 		parTickFinfos,
 		sizeof(parTickFinfos)/sizeof(Finfo *),

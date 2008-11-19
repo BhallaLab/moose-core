@@ -187,10 +187,19 @@ const Cinfo* initDifShellCinfo()
 
 	static SchedInfo schedInfo[] = { { process_0, 0, 0 }, { process_1, 0, 1 } };
 
+	static string doc[] =
+	{
+		"Name", "DifShell",
+		"Author", "Niraj Dudani",
+		"Description", "DifShell object: Models diffusion of an ion (typically calcium) within an\n"
+				"electric compartment. A DifShell is an iso-concentration region with respect to\n"
+				"the ion. Adjoining DifShells exchange flux of this ion, and also keep track of\n"
+				"changes in concentration due to pumping, buffering and channel currents, by\n"
+				"talking to the appropriate objects.",
+	};	
 	static Cinfo difShellCinfo(
-		"DifShell",
-		"Niraj Dudani",
-		"DifShell object: Models diffusion of an ion (typically calcium) within an\nelectric compartment. A DifShell is an iso-concentration region with respect to\nthe ion. Adjoining DifShells exchange flux of this ion, and also keep track of\nchanges in concentration due to pumping, buffering and channel currents, by\ntalking to the appropriate objects.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		difShellFinfos,
 		sizeof( difShellFinfos ) / sizeof( Finfo* ),

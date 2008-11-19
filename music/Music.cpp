@@ -24,9 +24,6 @@ double Music::stopTime_;
 
 const Cinfo* initMusicCinfo()
 {
-	/**
-	 *
-	 */
 	static Finfo* processShared[] =
 	{
 		new DestFinfo(
@@ -87,10 +84,16 @@ const Cinfo* initMusicCinfo()
 	
 	//~ static SchedInfo schedInfo[] = { { process, 0, 1 } };
 	
+	static string doc[] =
+	{
+		"Name", "Music",
+		"Author", "Niraj Dudani and Johannes Hjorth",
+		"Description", "Moose Music object for communciation with the MUSIC API",
+	};
+
 	static Cinfo musicCinfo(
-		"Music",
-		"Niraj Dudani and Johannes Hjorth",
-		"Moose Music object for communciation with the MUSIC API",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		musicFinfos,
 		sizeof( musicFinfos ) / sizeof( Finfo* ),

@@ -192,11 +192,21 @@ const Cinfo* initStoichCinfo()
 					"Messages that connect to the GslIntegrator object" ),
 
 	};
-
+	
+	static string doc[] =
+	{
+		"Name", "Stoich",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Stoich: Sets up stoichiometry matrix based calculations from a\n"
+				"wildcard path for the reaction system.Knows how to compute derivatives\n"
+				"for most common\nthings, also knows how to handle special cases where the\n"
+				"object will have to do its own computation. Generates a stoichiometry matrix,\n"
+				"which is useful for lots of other\noperations as well.",
+	};
+	
 	static Cinfo stoichCinfo(
-		"Stoich",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"Stoich: Sets up stoichiometry matrix based calculations from a\nwildcard path for the reaction system.\nKnows how to compute derivatives for most common\nthings, also knows how to handle special cases where the\nobject will have to do its own computation. Generates a\nstoichiometry matrix, which is useful for lots of other\noperations as well.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		stoichFinfos,
 		sizeof( stoichFinfos )/sizeof(Finfo *),

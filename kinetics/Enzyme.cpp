@@ -127,10 +127,41 @@ const Cinfo* initEnzymeCinfo()
 	// Schedule enzymes for slower clock, stage 1.
 	static SchedInfo schedInfo[] = { { process, 0, 1 } };
 
+	static string doc[] =
+	{
+		"Name", "Enzyme",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Enzyme: Irreversible enzymatic reaction that supports two forms of the \n"
+				"Michaelis-Menten formulation for enzyme catalysis:\n"
+				"E + S <======> E.S ------> E + P\n"
+				"In this enzyme, the forward rate for the complex formation is\n"
+				"k1, the backward rate is k2, and the final rate for product\n"
+				"formation is k3. In terms of Michaelis-Menten parameters,\n"
+				"k3 = kcat, and\n(k3 + k2)/k1 = Km.\n"
+				"In all forms, the enzyme object should be considered as an\n"
+				"enzymatic activity. It must be created in association with\n"
+				"an enzyme molecule. The same enzyme molecule may have multiple\n"
+				"activities, for example, on a range of substrates.\n"
+				"In the explicit form (default) the enzyme substrate complex E.S\n"
+				"is explictly created as a distinct molecular pool. This is\n"
+				"perhaps more realistic in complex models where there are likely\n"
+				"to be other substrates for this enzyme, and so enzyme \n"
+				"saturation effects must be accounted for. However the complex\n"
+				"molecule does not participate in any other reactions, which\n"
+				"may itself be a poor assumption. If this is a serious concern \n"
+				"then it is best to do the entire enzymatic process using elementary \n"
+				"reactions.\nIn the implicit form there is no actual enzyme-complex molecule.\n"
+				"In this form the rate term is\ncomputed using the Michaelis-Menten form\n"
+				"rate = kcat * [E] * [S] / ( Km + [S] )\n"
+				"Here the opposite problem from above applies: There is no\n"
+				"explicit complex, which means that the level of the free enzyme\n"
+				"molecule is unaffected even near saturation. However, other\n"
+				"reactions involving the enzyme do see the entire enzyme concentration. \n"
+				"For the record, I regard the explicit formulation as more\naccurate for complex simulations.",
+	};
 	static  Cinfo enzymeCinfo(
-		"Enzyme",
-		"Upinder S. Bhalla, 2007, NCBS",
-	"Enzyme: Irreversible enzymatic reaction that supports two forms of the \nMichaelis-Menten formulation for enzyme catalysis:\nE + S <======> E.S ------> E + P\nIn this enzyme, the forward rate for the complex formation is\nk1, the backward rate is k2, and the final rate for product\nformation is k3. In terms of Michaelis-Menten parameters,\nk3 = kcat, and\n(k3 + k2)/k1 = Km.\nIn all forms, the enzyme object should be considered as an\nenzymatic activity. It must be created in association with\nan enzyme molecule. The same enzyme molecule may have multiple\nactivities, for example, on a range of substrates.\nIn the explicit form (default) the enzyme substrate complex E.S\nis explictly created as a distinct molecular pool. This is\nperhaps more realistic in complex models where there are likely\nto be other substrates for this enzyme, and so enzyme \nsaturation effects must be accounted for. However the complex\nmolecule does not participate in any other reactions, which\nmay itself be a poor assumption. If this is a serious concern\nthen it is best to do the entire enzymatic process\nusing elementary reactions.\nIn the implicit form there is no actual enzyme-complex molecule.\nIn this form the rate term is\ncomputed using the Michaelis-Menten form\nrate = kcat * [E] * [S] / ( Km + [S] )\nHere the opposite problem from above applies: There is no\nexplicit complex, which means that the level of the free enzyme\nmolecule is unaffected even near saturation. However, other\nreactions involving the enzyme do see the entire enzyme\nconcentration. \nFor the record, I regard the explicit formulation as more\naccurate for complex simulations.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		enzymeFinfos,
 		sizeof(enzymeFinfos)/sizeof(Finfo *),

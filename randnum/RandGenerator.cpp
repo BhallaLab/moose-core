@@ -54,9 +54,15 @@ const Cinfo * initRandGeneratorCinfo()
             }
         };
     
-    static Cinfo randGeneratorCinfo("RandGenerator",
-                                    "Subhasis Ray",
-                                    "Base class for random number generator.",
+    static string doc[] =
+	{
+		"Name", "RandGenerator",
+		"Author", "Subhasis Ray",
+		"Description", "Base class for random number generator.",
+	};
+    static Cinfo randGeneratorCinfo(
+                                    doc,
+				    sizeof( doc ) / sizeof( string ),
                                     initNeutralCinfo(),
                                     randGeneratorFinfos,
                                     sizeof(randGeneratorFinfos)/sizeof(Finfo*),

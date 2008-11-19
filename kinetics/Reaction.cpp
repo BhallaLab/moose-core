@@ -89,11 +89,20 @@ const Cinfo* initReactionCinfo()
 
 	// Schedule reactions for slower clock, stage 1.
 	static SchedInfo schedInfo[] = { { process, 0, 1 } };
+	
+	static string doc[] =
+	{
+		"Name", "Reaction",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Reaction: Reaction class, handles binding and conversion reactions\n"
+				"not involving enzymatic steps. Computes reversible reactions\n"
+				"but the rates can be set to zero to give irreversibility.\n"
+				"Order of substrates and products set by the number of messages between them.",
+	};
 
 	static  Cinfo reactionCinfo(
-		"Reaction",
-		"Upinder S. Bhalla, 2005, NCBS",
-		"Reaction: Reaction class, handles binding and conversion reactions\nnot involving enzymatic steps. Computes reversible reactions\nbut the rates can be set to zero to give irreversibility.\nOrder of substrates and products set by the number of \nmessages between them.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		reactionFinfos,
 		sizeof(reactionFinfos)/sizeof(Finfo *),

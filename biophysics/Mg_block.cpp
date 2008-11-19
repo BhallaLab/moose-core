@@ -84,10 +84,17 @@ const Cinfo* initMg_blockCinfo()
 
 	static SchedInfo schedInfo[] = { { process, 0, 1 } };
 
+	static string doc[] =
+	{
+		"Name", "Mg_block",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Mg_block: Hodgkin-Huxley type voltage-gated Ion channel. Something\n"
+				"like the old tabchannel from GENESIS, but also presents\n"
+				"a similar interface as hhchan from GENESIS. ",
+	};	
 	static Cinfo Mg_blockCinfo(
-		"Mg_block",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"Mg_block: Hodgkin-Huxley type voltage-gated Ion channel. Something\nlike the old tabchannel from GENESIS, but also presents\na similar interface as hhchan from GENESIS. ",
+		doc,
+		sizeof( doc ) / sizeof( string ),
 		initNeutralCinfo(),
 		Mg_blockFinfos,
 		sizeof( Mg_blockFinfos )/sizeof(Finfo *),

@@ -87,10 +87,17 @@ const Cinfo* initCaConcCinfo()
 	// We want the Ca updates before channel updates, so along with compts.
 	static SchedInfo schedInfo[] = { { process, 0, 0 } };
 
+	static string doc[] =
+	{
+		"Name", "CaConc",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "CaConc: Calcium concentration pool. Takes current from a \n"
+				"channel and keeps track of calcium buildup and depletion by a \n"
+				"single exponential process.",
+	};	
 	static Cinfo CaConcCinfo(
-		"CaConc",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"CaConc: Calcium concentration pool. Takes current from a \nchannel and keeps track of calcium buildup and depletion by a \nsingle exponential process.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		CaConcFinfos,
 		sizeof( CaConcFinfos )/sizeof(Finfo *),

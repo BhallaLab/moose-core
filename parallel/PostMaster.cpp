@@ -98,10 +98,16 @@ const Cinfo* initPostMasterCinfo()
 			sizeof( serialShared ) / sizeof( Finfo* ) ),
 	};
 
+	static string doc[] =
+	{
+		"Name", "PostMaster",
+		"Author", "Upi Bhalla",
+		"Description", "PostMaster object. Manages parallel communications.",
+	};
+	
 	static Cinfo postMasterCinfo(
-				"PostMaster",
-				"Upi Bhalla",
-				"PostMaster object. Manages parallel communications.",
+				doc,
+				sizeof( doc ) / sizeof( string ),
 				initNeutralCinfo(),
 				postMasterFinfos,
 				sizeof( postMasterFinfos ) / sizeof( Finfo* ),
