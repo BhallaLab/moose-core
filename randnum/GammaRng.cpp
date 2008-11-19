@@ -33,9 +33,16 @@ const Cinfo* initGammaRngCinfo()
                             RFCAST(&GammaRng::setTheta)),
         };
     
-    static Cinfo gammaRngCinfo("GammaRng",
-                                "Subhasis Ray",
-                                "Gamma distributed random number generator.",
+	static string doc[] =
+	{
+		"Name", "GammaRng",
+		"Author", "Subhasis Ray",
+		"Description", "Gamma distributed random number generator.",
+	};
+    
+	static Cinfo gammaRngCinfo(
+                                doc,
+				sizeof( doc ) / sizeof( string ),
                                 initRandGeneratorCinfo(),
                                 gammaRngFinfos,
                                 sizeof(gammaRngFinfos)/sizeof(Finfo*),

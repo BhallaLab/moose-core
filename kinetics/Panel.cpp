@@ -85,10 +85,15 @@ const Cinfo* initPanelCinfo()
 	///////////////////////////////////////////////////////
 	};
 
+	static string doc[] =
+	{
+		"Name", "Panel",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Panel: Base class for shapes. Also serves as interface to Smoldyn panel data struct.",
+	};	
 	static Cinfo panelCinfo(
-		"Panel",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"Panel: Base class for shapes. Also serves as interface to Smoldyn panel data struct.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		panelFinfos,
 		sizeof( panelFinfos )/sizeof(Finfo *),

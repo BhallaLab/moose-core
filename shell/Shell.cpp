@@ -626,10 +626,15 @@ const Cinfo* initShellCinfo()
 		*/
 	};
 
+	static string doc[] =
+	{
+		"Name", "Shell",
+		"Author","Upi Bhalla, NCBS",
+		"Description", "Shell object. Manages general simulator commands.",
+	};
 	static Cinfo shellCinfo(
-		"Shell",
-		"Upi Bhalla, NCBS",
-		"Shell object. Manages general simulator commands.",
+		doc,
+		sizeof( doc ) / sizeof( string ),
 		initNeutralCinfo(),
 		shellFinfos,
 		sizeof( shellFinfos ) / sizeof( Finfo* ),

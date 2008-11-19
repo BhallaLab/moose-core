@@ -110,11 +110,16 @@ const Cinfo* initNeutralCinfo()
 			"For example, we may want to nest some fields in the object, which requires the creation of child \n"
 			"objects to hold the nested fields. This would be done by overriding the postCreate function." ),
 	};
-
+	
+	static string doc[] =
+	{
+		"Name", "Neutral",
+		"Author", "Upi Bhalla",
+		"Description", "Neutral object. Manages Element heirarchy.",
+	};
 	static Cinfo neutralCinfo(
-				"Neutral",
-				"Upi Bhalla",
-				"Neutral object. Manages Element heirarchy.",
+				doc,
+				sizeof( doc ) / sizeof( string ),				
 				0,
 				neutralFinfos,
 				sizeof( neutralFinfos ) / sizeof( Finfo* ),

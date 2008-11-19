@@ -198,10 +198,18 @@ const Cinfo* initKineticManagerCinfo()
 	// Schedule it to tick 1 stage 0
 	static SchedInfo schedInfo[] = { { process, 0, 0 } };
 	
+	static string doc[] =
+	{
+		"Name", "KineticManager",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Kinetic Manager: Handles integration methods for kinetic simulations. If in 'auto' mode \n"
+				"then it picks a method depending on the stochastic and spatial flags. If you set a method,\n"
+				"then the 'auto' flag goes off and all the other options are set directly by your choice.",
+	};
+	
 	static Cinfo kineticManagerCinfo(
-		"KineticManager",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"Kinetic Manager: Handles integration methods for kinetic simulations. If in 'auto' mode then it picks a method depending on the stochastic and spatial flags. If you set a method, then the 'auto' flag goes off and all the other options are set directly by your choice.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initKinComptCinfo(),
 		kineticManagerFinfos,
 		sizeof( kineticManagerFinfos )/sizeof(Finfo *),

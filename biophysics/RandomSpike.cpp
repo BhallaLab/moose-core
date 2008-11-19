@@ -81,10 +81,16 @@ const Cinfo* initRandomSpikeCinfo()
             new DestFinfo("minmaxDest", Ftype2<double, double>::global(),
                           RFCAST( & RandomSpike::setMinMaxAmp)),
         };
-    static Cinfo randomSpikeCinfo("RandomSpike",
-                               "Subhasis Ray, 2008, NCBS",
-                                  "RandomSpike: generates random events",
-                               initNeutralCinfo(),
+	static string doc[] =
+	{
+		"Name", "RandomSpike",
+		"Author", "Subhasis Ray, 2008, NCBS",
+		"Description", "RandomSpike: generates random events",
+	};
+    static Cinfo randomSpikeCinfo(
+                               doc,
+			       sizeof( doc ) / sizeof( string ),                               
+			       initNeutralCinfo(),
                                randomspikeFinfos,
                                sizeof(randomspikeFinfos)/sizeof(Finfo*),
                                ValueFtype1<RandomSpike>::global());

@@ -67,9 +67,16 @@ const Cinfo* initOutputEventPortCinfo()
    */
   static SchedInfo schedInfo[] = { { process, 0, 0 } };
   
-  static Cinfo outputEventPortCinfo("OutputEventPort",
-                                    "Niraj Dudani and Johannes Hjorth",
-                                    "OutputEventPort for communciation with the MUSIC API",
+  static string doc[] =
+	{
+		"Name", "OutputEventPort",
+		"Author", "Niraj Dudani and Johannes Hjorth",
+		"Description", "OutputEventPort for communciation with the MUSIC API",
+	};
+
+  static Cinfo outputEventPortCinfo(
+                                    doc,
+		 		    sizeof( doc ) / sizeof( string ),
                                     initNeutralCinfo(),
                                     outputEventPortFinfos,
                                     sizeof( outputEventPortFinfos ) / sizeof( Finfo* ),

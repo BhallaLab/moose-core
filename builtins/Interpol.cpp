@@ -108,10 +108,17 @@ const Cinfo* initInterpolCinfo()
 		),
 	};
 
+	static string doc[] =
+	{
+		"Name", "Interpol",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Interpol: Interpolation class. Handles lookup of a y value from an\n"
+				"x value, where the x value is a double. Can either use\n"
+				"interpolation or roundoff to the nearest index.",
+	};	
 	static Cinfo interpolCinfo(
-	"Interpol",
-	"Upinder S. Bhalla, 2007, NCBS",
-	"Interpol: Interpolation class. Handles lookup of a y value from an\nx value, where the x value is a double. Can either use\ninterpolation or roundoff to the nearest index.",
+	doc,
+	sizeof( doc ) / sizeof( string ),	
 	initNeutralCinfo(),
 	interpolFinfos,
 	sizeof( interpolFinfos ) / sizeof( Finfo * ),

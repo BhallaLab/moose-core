@@ -126,10 +126,18 @@ const Cinfo* initSynChanCinfo()
 	// SynChan is scheduled after the compartment calculations.
 	static SchedInfo schedInfo[] = { { process, 0, 1 } };
 
+	static string doc[] =
+	{
+		"Name", "SynChan",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "SynChan: Synaptic channel incorporating weight and delay. Does not\n"
+				"handle activity-dependent modification, see HebbSynChan for that.\n"
+				"Very similiar to the old synchan from GENESIS.", 
+	};
+
 	static Cinfo SynChanCinfo(
-		"SynChan",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"SynChan: Synaptic channel incorporating weight and delay. Does not\nhandle activity-dependent modification, see HebbSynChan for \nthat. Very similiar to the old synchan from GENESIS.", 
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		SynChanFinfos,
 		sizeof( SynChanFinfos )/sizeof(Finfo *),

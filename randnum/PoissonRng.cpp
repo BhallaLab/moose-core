@@ -30,10 +30,16 @@ const Cinfo* initPoissonRngCinfo()
                            GFCAST( &PoissonRng::getMean),
                            RFCAST( &PoissonRng::setMean)),
         };
-    
-    static Cinfo poissonRngCinfo("PoissonRng",
-                                "Subhasis Ray",
-                                "Poisson distributed random number generator.",
+    static string doc[] =
+	{
+		"Name", "PoissonRng",
+		"Author", "Subhasis Ray",
+		"Description", "Poisson distributed random number generator.",
+	};
+
+    static Cinfo poissonRngCinfo(
+                                doc,
+				sizeof( doc ) / sizeof( string ),
                                 initRandGeneratorCinfo(),
                                 poissonRngFinfos,
                                 sizeof(poissonRngFinfos)/sizeof(Finfo*),

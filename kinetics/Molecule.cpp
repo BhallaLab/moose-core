@@ -135,10 +135,15 @@ const Cinfo* initMoleculeCinfo()
 	// Schedule molecules for the slower clock, stage 0.
 	static SchedInfo schedInfo[] = { { process, 0, 0 } };
 	
+	static string doc[] =
+	{
+		"Name", "Molecule",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Molecule: Pool of molecules.",
+	};
 	static Cinfo moleculeCinfo(
-		"Molecule",
-		"Upinder S. Bhalla, 2007, NCBS",
-		"Molecule: Pool of molecules.",
+		doc,
+		sizeof( doc ) / sizeof( string ),		
 		initNeutralCinfo(),
 		moleculeFinfos,
 		sizeof( moleculeFinfos )/sizeof(Finfo *),
