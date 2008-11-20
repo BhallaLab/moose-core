@@ -18,7 +18,7 @@
 #include "../maindir/init.h"
 #include "../connections/ConnTainer.h"
 
-
+#include <string>
 #include <cstdio>
 
 using namespace std;
@@ -815,7 +815,8 @@ const Id& PyMooseContext::getParent( Id e ) const
 
 const string PyMooseContext::getPath(Id id) const
 {
-    return id.path();
+    fieldValue_ = id.path().c_str();
+    return fieldValue_;
 }
 
 Id PyMooseContext::pathToId(string path, bool echo)
@@ -1462,7 +1463,14 @@ void PyMooseContext::readCell(string filename, string cellpath, double cm, doubl
 
 const std::string PyMooseContext::className(const Id& objId) const
 {
-    return objId()->className();
+    fieldValue_ =  objId()->className();
+    return fieldValue_;
+}
+
+const std::string PyMooseContext::getName(const Id objId) const
+{
+    fieldValue_ = objId()->name();
+    return fieldValue_;
 }
 
 #ifdef DO_UNIT_TESTS
