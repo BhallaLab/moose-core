@@ -82,6 +82,7 @@ namespace pymoose
         
         const Id& getParent(Id id) const;
         const std::string getPath(Id id) const;
+        const std::string getName(Id id) const;
         std::vector <Id> getChildren(Id id);
         std::vector <Id> getChildren(std::string path);    
         Id pathToId(std::string path, bool echo = true);
@@ -159,7 +160,7 @@ namespace pymoose
         // We should avoid this - as it gets field values as std::std::string
         // for easier printing, whereas we can allow python to handle the
         // display
-        std::string fieldValue_;
+        mutable std::string fieldValue_;
         std::vector< double > dbls_;
         // We may need the shell
         Id shell_;
