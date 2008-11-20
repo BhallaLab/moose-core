@@ -207,19 +207,19 @@ void Cinfo::init( const string* doc,
                     /* Insert the getters and setters */                  
                     header << "            " << fieldType << " __get_" << fieldName << "() const;\n";
                 
-                    cpp << fieldType <<" " <<  name << "::__get_" <<  fieldName << "() const\n"
+                    cpp << fieldType <<" " <<  name() << "::__get_" <<  fieldName << "() const\n"
                         << "{\n"
                         << "    " <<  fieldType << " " << fieldName << ";\n"
                         << "    get < " << fieldType << " > (id_(), \""<< fieldName << "\"," << fieldName << ");\n"
                         << "    return " << fieldName << ";\n"
                         << "}" << endl;
-                    swig << "%attribute(pymoose::" << name << ", " << fieldType << ", " << fieldName << ", __get_" << fieldName;
+                    swig << "%attribute(pymoose::" << name() << ", " << fieldType << ", " << fieldName << ", __get_" << fieldName;
                     
                     if ( finfoArray[i]->recvFunc() != &dummyFunc) // read-write field - put setter
                     {
                         header << "            void" << " __set_" << fieldName << "(" << fieldType << " " << fieldName << ");\n";
                     
-                        cpp << "void " << name << "::__set_" << fieldName <<"( " << fieldType << " " << fieldName << " )\n"
+                        cpp << "void " << name() << "::__set_" << fieldName <<"( " << fieldType << " " << fieldName << " )\n"
                             << "{\n"
                             << "    set < " << fieldType << " > (id_(), \"" << fieldName << "\", "<< fieldName << ");\n"
                             << "}" << endl;

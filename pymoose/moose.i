@@ -117,6 +117,7 @@
 %include "PyMooseBase.h"
 %attribute(pymoose::PyMooseBase, Id*, id, __get_id)
 %attribute(pymoose::PyMooseBase, Id*, parent, __get_parent)
+%attribute(pymoose::PyMooseBase, const std::string, className, __get_className)
 
 // The following attributes, when traversed without assigning to a
 // variable, give segmentation fault. May be some problem with the
@@ -131,9 +132,8 @@
 // so when using pointers, the memory may already have been deallocated
 // better try writing to a string stream and returb stream.str()
 //%ignore PyMooseBase::getPath;
-//%attribute(pymoose::PyMooseBase, string, path, getPath)
+%attribute(pymoose::PyMooseBase, const std::string, path, __get_path)
 %include "Neutral.h"
-%attribute(pymoose::Neutral, int, childSrc, __get_childSrc, __set_childSrc)
 %attribute(pymoose::Neutral, int, child, __get_child, __set_child)
 
 %include "Class.h"
@@ -325,24 +325,24 @@ void fillData(PyObject* args)
 %attribute(pymoose::PulseGen, int, prevInput, __get_prevInput)
 
 %include "Nernst.h"
-%attribute(pymoose::Nernst, double, E, __get_E, __set_E)
+%attribute(pymoose::Nernst, double, E, __get_E)
 %attribute(pymoose::Nernst, double, Temperature, __get_Temperature, __set_Temperature)
 %attribute(pymoose::Nernst, int, valence, __get_valence, __set_valence)
 %attribute(pymoose::Nernst, double, Cin, __get_Cin, __set_Cin)
 %attribute(pymoose::Nernst, double, Cout, __get_Cout, __set_Cout)
 %attribute(pymoose::Nernst, double, scale, __get_scale, __set_scale)
-%attribute(pymoose::Nernst, double, ESrc, __get_ESrc, __set_ESrc)
-%attribute(pymoose::Nernst, double, CinMsg, __get_CinMsg, __set_CinMsg)
-%attribute(pymoose::Nernst, double, CoutMsg, __get_CoutMsg, __set_CoutMsg)
+
 %include "CaConc.h"
 %attribute(pymoose::CaConc, double, Ca, __get_Ca, __set_Ca)
 %attribute(pymoose::CaConc, double, CaBasal, __get_CaBasal, __set_CaBasal)
 %attribute(pymoose::CaConc, double, Ca_base, __get_Ca_base, __set_Ca_base)
 %attribute(pymoose::CaConc, double, tau, __get_tau, __set_tau)
 %attribute(pymoose::CaConc, double, B, __get_B, __set_B)
+
 %include "HHGate.h"
 %attribute(pymoose::HHGate, InterpolationTable*, A, __get_A)
 %attribute(pymoose::HHGate, InterpolationTable*, B, __get_B)
+
 %include "HHChannel.h"
 %attribute(pymoose::HHChannel, double, Gbar, __get_Gbar, __set_Gbar)
 %attribute(pymoose::HHChannel, double, Ek, __get_Ek, __set_Ek)
@@ -354,7 +354,7 @@ void fillData(PyObject* args)
 %attribute(pymoose::HHChannel, double, Z, __get_Z, __set_Z)
 %attribute(pymoose::HHChannel, int, instant, __get_instant, __set_instant)
 %attribute(pymoose::HHChannel, double, Gk, __get_Gk, __set_Gk)
-%attribute(pymoose::HHChannel, double, Ik, __get_Ik, __set_Ik)
+%attribute(pymoose::HHChannel, double, Ik, __get_Ik)
 %attribute(pymoose::HHChannel, int, useConcentration, __get_useConcentration, __set_useConcentration)
 %attribute(pymoose::HHChannel, double, concen, __get_concen, __set_concen)
 
@@ -407,17 +407,17 @@ void fillData(PyObject* args)
 %attribute(pymoose::MathFunc, double, result, __get_result, __set_result)
 
 %include "Stoich.h"
-%attribute(pymoose::Stoich, unsigned int, nMols, __get_nMols, __set_nMols)
-%attribute(pymoose::Stoich, unsigned int, nVarMols, __get_nVarMols, __set_nVarMols)
-%attribute(pymoose::Stoich, unsigned int, nSumTot, __get_nSumTot, __set_nSumTot)
-%attribute(pymoose::Stoich, unsigned int, nBuffered, __get_nBuffered, __set_nBuffered)
-%attribute(pymoose::Stoich, unsigned int, nReacs, __get_nReacs, __set_nReacs)
-%attribute(pymoose::Stoich, unsigned int, nEnz, __get_nEnz, __set_nEnz)
-%attribute(pymoose::Stoich, unsigned int, nMMenz, __get_nMMenz, __set_nMMenz)
-%attribute(pymoose::Stoich, unsigned int, nExternalRates, __get_nExternalRates, __set_nExternalRates)
+%attribute(pymoose::Stoich, unsigned int, nMols, __get_nMols)
+%attribute(pymoose::Stoich, unsigned int, nVarMols, __get_nVarMols)
+%attribute(pymoose::Stoich, unsigned int, nSumTot, __get_nSumTot)
+%attribute(pymoose::Stoich, unsigned int, nBuffered, __get_nBuffered)
+%attribute(pymoose::Stoich, unsigned int, nReacs, __get_nReacs)
+%attribute(pymoose::Stoich, unsigned int, nEnz, __get_nEnz)
+%attribute(pymoose::Stoich, unsigned int, nMMenz, __get_nMMenz)
+%attribute(pymoose::Stoich, unsigned int, nExternalRates, __get_nExternalRates)
 %attribute(pymoose::Stoich, bool, useOneWayReacs, __get_useOneWayReacs, __set_useOneWayReacs)
-//%attribute(pymoose::Stoich, string, path, __get_path, __set_path)
-%attribute(pymoose::Stoich, unsigned int, rateVectorSize, __get_rateVectorSize, __set_rateVectorSize)
+//%attribute(pymoose::Stoich, string, path, __get_path, __set_path) -- path here is something different from element path
+%attribute(pymoose::Stoich, unsigned int, rateVectorSize, __get_rateVectorSize)
 %include "KineticHub.h"
 %attribute(pymoose::KineticHub, unsigned int, nMol, __get_nMol, __set_nMol)
 %attribute(pymoose::KineticHub, unsigned int, nReac, __get_nReac, __set_nReac)
@@ -431,9 +431,7 @@ void fillData(PyObject* args)
 %attribute(pymoose::Enzyme, double, kcat, __get_kcat, __set_kcat)
 %attribute(pymoose::Enzyme, bool, mode, __get_mode, __set_mode)
 //%attribute(pymoose::Enzyme, double,double, prd, __get_prd, __set_prd)
-%attribute(pymoose::Enzyme, double, scaleKm, __get_scaleKm, __set_scaleKm)
-%attribute(pymoose::Enzyme, double, scaleKcat, __get_scaleKcat, __set_scaleKcat)
-%attribute(pymoose::Enzyme, double, intramol, __get_intramol, __set_intramol)
+
 %include "Reaction.h"
 %attribute(pymoose::Reaction, double, kf, __get_kf, __set_kf)
 %attribute(pymoose::Reaction, double, kb, __get_kb, __set_kb)
@@ -480,13 +478,13 @@ void fillData(PyObject* args)
 /* The following are moose classes */
 
 %include "RandGenerator.h"
-%attribute(pymoose::RandGenerator, double, sample, __get_sample, __set_sample)
-%attribute(pymoose::RandGenerator, double, mean, __get_mean, __set_mean)
-%attribute(pymoose::RandGenerator, double, variance, __get_variance, __set_variance)
-%attribute(pymoose::RandGenerator, double, output, __get_output, __set_output)
+%attribute(pymoose::RandGenerator, double, sample, __get_sample)
+%attribute(pymoose::RandGenerator, double, mean, __get_mean)
+%attribute(pymoose::RandGenerator, double, variance, __get_variance)
+
 %include "UniformRng.h"
-%attribute(pymoose::UniformRng, double, mean, __get_mean, __set_mean)
-%attribute(pymoose::UniformRng, double, variance, __get_variance, __set_variance)
+%attribute(pymoose::UniformRng, double, mean, __get_mean)
+%attribute(pymoose::UniformRng, double, variance, __get_variance)
 %attribute(pymoose::UniformRng, double, min, __get_min, __set_min)
 %attribute(pymoose::UniformRng, double, max, __get_max, __set_max)
 %include "GammaRng.h"
