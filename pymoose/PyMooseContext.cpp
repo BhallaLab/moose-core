@@ -1460,6 +1460,11 @@ void PyMooseContext::readCell(string filename, string cellpath, double cm, doubl
                              readCellSlot, filename, cellpath , params);
 }
 
+const std::string PyMooseContext::className(const Id& objId) const
+{
+    return objId()->className();
+}
+
 #ifdef DO_UNIT_TESTS
 /**
    These are the unit tests

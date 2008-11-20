@@ -435,6 +435,7 @@ class PyMooseContext(object):
     def planarConnect(*args): return _moose.PyMooseContext_planarConnect(*args)
     def plannarDelay(*args): return _moose.PyMooseContext_plannarDelay(*args)
     def planarWeight(*args): return _moose.PyMooseContext_planarWeight(*args)
+    def className(*args): return _moose.PyMooseContext_className(*args)
 PyMooseContext_swigregister = _moose.PyMooseContext_swigregister
 PyMooseContext_swigregister(PyMooseContext)
 PyMooseContext_recvCwe = _moose.PyMooseContext_recvCwe
@@ -460,9 +461,10 @@ class PyMooseBase(object):
     def getType(*args): return _moose.PyMooseBase_getType(*args)
     def getSeparator(*args): return _moose.PyMooseBase_getSeparator(*args)
     getContext = staticmethod(_moose.PyMooseBase_getContext)
+    def __get_className(*args): return _moose.PyMooseBase___get_className(*args)
     def children(*args): return _moose.PyMooseBase_children(*args)
     def __get_parent(*args): return _moose.PyMooseBase___get_parent(*args)
-    def path(*args): return _moose.PyMooseBase_path(*args)
+    def __get_path(*args): return _moose.PyMooseBase___get_path(*args)
     def __get_id(*args): return _moose.PyMooseBase___get_id(*args)
     def __get_name(*args): return _moose.PyMooseBase___get_name(*args)
     def useClock(*args): return _moose.PyMooseBase_useClock(*args)
@@ -481,7 +483,9 @@ class PyMooseBase(object):
     initSimulation = staticmethod(_moose.PyMooseBase_initSimulation)
     id = _swig_property(_moose.PyMooseBase_id_get)
     parent = _swig_property(_moose.PyMooseBase_parent_get)
+    className = _swig_property(_moose.PyMooseBase_className_get)
     name = _swig_property(_moose.PyMooseBase_name_get)
+    path = _swig_property(_moose.PyMooseBase_path_get)
 PyMooseBase_swigregister = _moose.PyMooseBase_swigregister
 PyMooseBase_swigregister(PyMooseBase)
 PyMooseBase_destroy = _moose.PyMooseBase_destroy
@@ -511,7 +515,6 @@ class Neutral(PyMooseBase):
     def __set_childSrc(*args): return _moose.Neutral___set_childSrc(*args)
     def __get_child(*args): return _moose.Neutral___get_child(*args)
     def __set_child(*args): return _moose.Neutral___set_child(*args)
-    childSrc = _swig_property(_moose.Neutral_childSrc_get, _moose.Neutral_childSrc_set)
     child = _swig_property(_moose.Neutral_child_get, _moose.Neutral_child_set)
 Neutral_swigregister = _moose.Neutral_swigregister
 Neutral_swigregister(Neutral)
@@ -586,7 +589,6 @@ class ClockTick(PyMooseBase):
     def __set_ordinal(*args): return _moose.ClockTick___set_ordinal(*args)
     def __get_nextTime(*args): return _moose.ClockTick___get_nextTime(*args)
     def __set_nextTime(*args): return _moose.ClockTick___set_nextTime(*args)
-    def __get_path(*args): return _moose.ClockTick___get_path(*args)
     def __set_path(*args): return _moose.ClockTick___set_path(*args)
     def __get_updateDtSrc(*args): return _moose.ClockTick___get_updateDtSrc(*args)
     def __set_updateDtSrc(*args): return _moose.ClockTick___set_updateDtSrc(*args)
@@ -1046,15 +1048,12 @@ class Nernst(PyMooseBase):
     def __set_CinMsg(*args): return _moose.Nernst___set_CinMsg(*args)
     def __get_CoutMsg(*args): return _moose.Nernst___get_CoutMsg(*args)
     def __set_CoutMsg(*args): return _moose.Nernst___set_CoutMsg(*args)
-    E = _swig_property(_moose.Nernst_E_get, _moose.Nernst_E_set)
+    E = _swig_property(_moose.Nernst_E_get)
     Temperature = _swig_property(_moose.Nernst_Temperature_get, _moose.Nernst_Temperature_set)
     valence = _swig_property(_moose.Nernst_valence_get, _moose.Nernst_valence_set)
     Cin = _swig_property(_moose.Nernst_Cin_get, _moose.Nernst_Cin_set)
     Cout = _swig_property(_moose.Nernst_Cout_get, _moose.Nernst_Cout_set)
     scale = _swig_property(_moose.Nernst_scale_get, _moose.Nernst_scale_set)
-    ESrc = _swig_property(_moose.Nernst_ESrc_get, _moose.Nernst_ESrc_set)
-    CinMsg = _swig_property(_moose.Nernst_CinMsg_get, _moose.Nernst_CinMsg_set)
-    CoutMsg = _swig_property(_moose.Nernst_CoutMsg_get, _moose.Nernst_CoutMsg_set)
 Nernst_swigregister = _moose.Nernst_swigregister
 Nernst_swigregister(Nernst)
 Nernst.className = _moose.cvar.Nernst_className
@@ -1164,7 +1163,7 @@ class HHChannel(PyMooseBase):
     Z = _swig_property(_moose.HHChannel_Z_get, _moose.HHChannel_Z_set)
     instant = _swig_property(_moose.HHChannel_instant_get, _moose.HHChannel_instant_set)
     Gk = _swig_property(_moose.HHChannel_Gk_get, _moose.HHChannel_Gk_set)
-    Ik = _swig_property(_moose.HHChannel_Ik_get, _moose.HHChannel_Ik_set)
+    Ik = _swig_property(_moose.HHChannel_Ik_get)
     useConcentration = _swig_property(_moose.HHChannel_useConcentration_get, _moose.HHChannel_useConcentration_set)
     concen = _swig_property(_moose.HHChannel_concen_get, _moose.HHChannel_concen_set)
 HHChannel_swigregister = _moose.HHChannel_swigregister
@@ -1389,16 +1388,16 @@ class Stoich(PyMooseBase):
     def path(*args): return _moose.Stoich_path(*args)
     def __get_rateVectorSize(*args): return _moose.Stoich___get_rateVectorSize(*args)
     def __set_rateVectorSize(*args): return _moose.Stoich___set_rateVectorSize(*args)
-    nMols = _swig_property(_moose.Stoich_nMols_get, _moose.Stoich_nMols_set)
-    nVarMols = _swig_property(_moose.Stoich_nVarMols_get, _moose.Stoich_nVarMols_set)
-    nSumTot = _swig_property(_moose.Stoich_nSumTot_get, _moose.Stoich_nSumTot_set)
-    nBuffered = _swig_property(_moose.Stoich_nBuffered_get, _moose.Stoich_nBuffered_set)
-    nReacs = _swig_property(_moose.Stoich_nReacs_get, _moose.Stoich_nReacs_set)
-    nEnz = _swig_property(_moose.Stoich_nEnz_get, _moose.Stoich_nEnz_set)
-    nMMenz = _swig_property(_moose.Stoich_nMMenz_get, _moose.Stoich_nMMenz_set)
-    nExternalRates = _swig_property(_moose.Stoich_nExternalRates_get, _moose.Stoich_nExternalRates_set)
+    nMols = _swig_property(_moose.Stoich_nMols_get)
+    nVarMols = _swig_property(_moose.Stoich_nVarMols_get)
+    nSumTot = _swig_property(_moose.Stoich_nSumTot_get)
+    nBuffered = _swig_property(_moose.Stoich_nBuffered_get)
+    nReacs = _swig_property(_moose.Stoich_nReacs_get)
+    nEnz = _swig_property(_moose.Stoich_nEnz_get)
+    nMMenz = _swig_property(_moose.Stoich_nMMenz_get)
+    nExternalRates = _swig_property(_moose.Stoich_nExternalRates_get)
     useOneWayReacs = _swig_property(_moose.Stoich_useOneWayReacs_get, _moose.Stoich_useOneWayReacs_set)
-    rateVectorSize = _swig_property(_moose.Stoich_rateVectorSize_get, _moose.Stoich_rateVectorSize_set)
+    rateVectorSize = _swig_property(_moose.Stoich_rateVectorSize_get)
 Stoich_swigregister = _moose.Stoich_swigregister
 Stoich_swigregister(Stoich)
 Stoich.className = _moose.cvar.Stoich_className
@@ -1464,9 +1463,6 @@ class Enzyme(PyMooseBase):
     Km = _swig_property(_moose.Enzyme_Km_get, _moose.Enzyme_Km_set)
     kcat = _swig_property(_moose.Enzyme_kcat_get, _moose.Enzyme_kcat_set)
     mode = _swig_property(_moose.Enzyme_mode_get, _moose.Enzyme_mode_set)
-    scaleKm = _swig_property(_moose.Enzyme_scaleKm_get, _moose.Enzyme_scaleKm_set)
-    scaleKcat = _swig_property(_moose.Enzyme_scaleKcat_get, _moose.Enzyme_scaleKcat_set)
-    intramol = _swig_property(_moose.Enzyme_intramol_get, _moose.Enzyme_intramol_set)
 Enzyme_swigregister = _moose.Enzyme_swigregister
 Enzyme_swigregister(Enzyme)
 Enzyme.className = _moose.cvar.Enzyme_className
@@ -1657,10 +1653,9 @@ class RandGenerator(PyMooseBase):
     def __set_variance(*args): return _moose.RandGenerator___set_variance(*args)
     def __get_output(*args): return _moose.RandGenerator___get_output(*args)
     def __set_output(*args): return _moose.RandGenerator___set_output(*args)
-    sample = _swig_property(_moose.RandGenerator_sample_get, _moose.RandGenerator_sample_set)
-    mean = _swig_property(_moose.RandGenerator_mean_get, _moose.RandGenerator_mean_set)
-    variance = _swig_property(_moose.RandGenerator_variance_get, _moose.RandGenerator_variance_set)
-    output = _swig_property(_moose.RandGenerator_output_get, _moose.RandGenerator_output_set)
+    sample = _swig_property(_moose.RandGenerator_sample_get)
+    mean = _swig_property(_moose.RandGenerator_mean_get)
+    variance = _swig_property(_moose.RandGenerator_variance_get)
     __swig_destroy__ = _moose.delete_RandGenerator
     __del__ = lambda self : None;
 RandGenerator_swigregister = _moose.RandGenerator_swigregister
@@ -1681,8 +1676,8 @@ class UniformRng(RandGenerator):
     def __set_min(*args): return _moose.UniformRng___set_min(*args)
     def __get_max(*args): return _moose.UniformRng___get_max(*args)
     def __set_max(*args): return _moose.UniformRng___set_max(*args)
-    mean = _swig_property(_moose.UniformRng_mean_get, _moose.UniformRng_mean_set)
-    variance = _swig_property(_moose.UniformRng_variance_get, _moose.UniformRng_variance_set)
+    mean = _swig_property(_moose.UniformRng_mean_get)
+    variance = _swig_property(_moose.UniformRng_variance_get)
     min = _swig_property(_moose.UniformRng_min_get, _moose.UniformRng_min_set)
     max = _swig_property(_moose.UniformRng_max_get, _moose.UniformRng_max_set)
 UniformRng_swigregister = _moose.UniformRng_swigregister
@@ -1719,9 +1714,10 @@ class ExponentialRng(RandGenerator):
     __swig_destroy__ = _moose.delete_ExponentialRng
     __del__ = lambda self : None;
     def getType(*args): return _moose.ExponentialRng_getType(*args)
+    def __set_mean(*args): return _moose.ExponentialRng___set_mean(*args)
     def __get_method(*args): return _moose.ExponentialRng___get_method(*args)
     def __set_method(*args): return _moose.ExponentialRng___set_method(*args)
-    mean = _swig_property(_moose.ExponentialRng_mean_get, _moose.ExponentialRng_mean_set)
+    mean = _swig_property(_moose.ExponentialRng_mean_get)
     method = _swig_property(_moose.ExponentialRng_method_get, _moose.ExponentialRng_method_set)
 ExponentialRng_swigregister = _moose.ExponentialRng_swigregister
 ExponentialRng_swigregister(ExponentialRng)
@@ -1757,7 +1753,8 @@ class PoissonRng(RandGenerator):
     __swig_destroy__ = _moose.delete_PoissonRng
     __del__ = lambda self : None;
     def getType(*args): return _moose.PoissonRng_getType(*args)
-    mean = _swig_property(_moose.PoissonRng_mean_get, _moose.PoissonRng_mean_set)
+    def __set_mean(*args): return _moose.PoissonRng___set_mean(*args)
+    mean = _swig_property(_moose.PoissonRng_mean_get)
 PoissonRng_swigregister = _moose.PoissonRng_swigregister
 PoissonRng_swigregister(PoissonRng)
 PoissonRng.className = _moose.cvar.PoissonRng_className
@@ -1772,10 +1769,12 @@ class NormalRng(RandGenerator):
     __swig_destroy__ = _moose.delete_NormalRng
     __del__ = lambda self : None;
     def getType(*args): return _moose.NormalRng_getType(*args)
+    def __set_mean(*args): return _moose.NormalRng___set_mean(*args)
+    def __set_variance(*args): return _moose.NormalRng___set_variance(*args)
     def __get_method(*args): return _moose.NormalRng___get_method(*args)
     def __set_method(*args): return _moose.NormalRng___set_method(*args)
-    mean = _swig_property(_moose.NormalRng_mean_get, _moose.NormalRng_mean_set)
-    variance = _swig_property(_moose.NormalRng_variance_get, _moose.NormalRng_variance_set)
+    mean = _swig_property(_moose.NormalRng_mean_get)
+    variance = _swig_property(_moose.NormalRng_variance_get)
     method = _swig_property(_moose.NormalRng_method_get, _moose.NormalRng_method_set)
 NormalRng_swigregister = _moose.NormalRng_swigregister
 NormalRng_swigregister(NormalRng)
@@ -2174,10 +2173,9 @@ class GssaStoich(PyMooseBase):
     def getType(*args): return _moose.GssaStoich_getType(*args)
     def __get_method(*args): return _moose.GssaStoich___get_method(*args)
     def __set_method(*args): return _moose.GssaStoich___set_method(*args)
-    def __get_path(*args): return _moose.GssaStoich___get_path(*args)
     def __set_path(*args): return _moose.GssaStoich___set_path(*args)
     method = _swig_property(_moose.GssaStoich_method_get, _moose.GssaStoich_method_set)
-    path = _swig_property(_moose.GssaStoich_path_get, _moose.GssaStoich_path_set)
+    path = _swig_property(_moose.GssaStoich_path_get)
 GssaStoich_swigregister = _moose.GssaStoich_swigregister
 GssaStoich_swigregister(GssaStoich)
 GssaStoich.className = _moose.cvar.GssaStoich_className
