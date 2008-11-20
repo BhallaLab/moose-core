@@ -169,7 +169,7 @@ int main(int argc, char** argv)
 		#endif //n USE_READLINE
 		while( Shell::running() ) {
 			#ifdef USE_READLINE
-			char cname[10];
+			char cname[25];
 			sprintf(cname, "moose #%d > ", lineNum);
 			char * foo  = readline(cname);
                         if (NULL == foo) // EOF (Ctrl-D) in stdin
@@ -183,12 +183,13 @@ int main(int argc, char** argv)
                         else 
                         {
                             s = string (foo);
+                            free( foo );
                         }
                         
 			set< string >( sli, parseFinfo, s );
 			if ( s.find_first_not_of( " \t\n" ) != s.npos ){
 				lineNum++;
-				add_history(foo);
+				add_history( s.c_str() );
 			}
 			s = "";
 			#else
