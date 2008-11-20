@@ -311,7 +311,7 @@ const std::string& PyMooseBase::getSeparator() const
 }
 const std::string  PyMooseBase::__get_path() const 
 {
-    return context_->getPath(id_);    
+    return context_->getPath(id_);
 }
 
 const Id* PyMooseBase::__get_id() const
@@ -336,7 +336,7 @@ const vector <Id> PyMooseBase::children() const
 
 const std::string PyMooseBase::__get_name() const
 {
-    return id_()->name();
+    return context_->getName(id_);
 }
 
 void PyMooseBase::useClock(int clockNo, string func)
