@@ -19932,6 +19932,52 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PyMooseContext_getName(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  Id arg2 ;
+  std::string result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_getName",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_getName" "', argument " "1"" of type '" "pymoose::PyMooseContext const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
+  {
+    res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Id,  0  | 0);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PyMooseContext_getName" "', argument " "2"" of type '" "Id""'"); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_getName" "', argument " "2"" of type '" "Id""'");
+    } else {
+      Id * temp = reinterpret_cast< Id * >(argp2);
+      arg2 = *temp;
+      if (SWIG_IsNewObj(res2)) delete temp;
+    }
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = ((pymoose::PyMooseContext const *)arg1)->getName(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PyMooseContext_getChildren__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
@@ -99981,6 +100027,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"PyMooseContext_getMessageList", _wrap_PyMooseContext_getMessageList, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_getParent", _wrap_PyMooseContext_getParent, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_getPath", _wrap_PyMooseContext_getPath, METH_VARARGS, NULL},
+	 { (char *)"PyMooseContext_getName", _wrap_PyMooseContext_getName, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_getChildren", _wrap_PyMooseContext_getChildren, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_pathToId", _wrap_PyMooseContext_pathToId, METH_VARARGS, NULL},
 	 { (char *)"PyMooseContext_srandom", _wrap_PyMooseContext_srandom, METH_VARARGS, NULL},
