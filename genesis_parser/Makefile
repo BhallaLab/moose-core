@@ -19,9 +19,9 @@
 #
 
 TARGET = SLI.o
-CFLAGS += -I..
+CXXFLAGS += -I..
 
-ifneq (,$(findstring -DCRL_MPI,$(CFLAGS)))
+ifneq (,$(findstring -DCRL_MPI,$(CXXFLAGS)))
 OBJ = \
 	GenesisParser.o \
 	GenesisParserWrapper.o \
@@ -95,7 +95,7 @@ GenesisParser.tab.o GenesisParser.yy.o GenesisParser.o: GenesisParser.yy.cpp Gen
 # 	sed -e "s/^extern \"C\" int isatty (int );/\/\/ Deleted extern C int isatty/" temp > GenesisParser.yy.cpp
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -DYYMALLOC -DYYFREE -DYYSTYPE_IS_DECLARED -I../basecode -I../external/include $< -c
+	$(CXX) $(CXXFLAGS) -DYYMALLOC -DYYFREE -DYYSTYPE_IS_DECLARED -I../basecode -I../external/include $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 		$(LD) -r -o $(TARGET) $(OBJ) 
