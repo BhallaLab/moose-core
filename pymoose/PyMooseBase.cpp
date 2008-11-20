@@ -8,7 +8,7 @@
 #define _PYMOOSE_BASE_CPP
 
 #include "PyMooseBase.h"
-#include "../shell/ReadCell.h"
+#include "shell/ReadCell.h"
 #include <iostream>
 #include <sstream>
 using namespace std;
