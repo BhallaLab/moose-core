@@ -30,10 +30,10 @@ namespace pymoose
         virtual const std::string& getType() = 0;
         const std::string& getSeparator() const;
         static pymoose::PyMooseContext* getContext();
-        
+        const std::string __get_className() const;
         const vector< Id > children() const;
         const Id* __get_parent() const;
-        const std::string path() const;   
+        const std::string __get_path() const;   
         const Id* __get_id() const;
         const std::string __get_name() const;
         void useClock(int clockNo, string func="process");
