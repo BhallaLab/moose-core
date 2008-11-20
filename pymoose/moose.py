@@ -410,6 +410,7 @@ class PyMooseContext(object):
     def getMessageList(*args): return _moose.PyMooseContext_getMessageList(*args)
     def getParent(*args): return _moose.PyMooseContext_getParent(*args)
     def getPath(*args): return _moose.PyMooseContext_getPath(*args)
+    def getName(*args): return _moose.PyMooseContext_getName(*args)
     def getChildren(*args): return _moose.PyMooseContext_getChildren(*args)
     def pathToId(*args): return _moose.PyMooseContext_pathToId(*args)
     srandom = staticmethod(_moose.PyMooseContext_srandom)
