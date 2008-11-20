@@ -412,6 +412,11 @@ function make_K_mit_usb// K-current
 		setfield K_mit_usb X_A->sy 5.0 X_B->sy 5.0 Y_A->sy 5.0  \
 		    Y_B->sy 5.0 Ek {EK}
 
+        setfield K_mit_usb/xGate/A print "k_xa.plot"
+        setfield K_mit_usb/xGate/B print "k_xb.plot"
+
+        setfield K_mit_usb/yGate/A print "k_ya.plot"
+        setfield K_mit_usb/yGate/B print "k_yb.plot"
 end
 
 function make_K2_mit_usb
@@ -477,6 +482,12 @@ function make_Na_mit_usb
 
 	setup_tabchan Na_mit_usb Y 128.0 0.0 0.0 {-1.0*(0.017 + THRESH)} \
 	     0.018 4.0e3 0.0 1.0 {-1.0*(0.040 + THRESH)} -5.0e-3
+
+        setfield Na_mit_usb/xGate/A print "na_xa.plot"
+        setfield Na_mit_usb/xGate/B print "na_xb.plot"
+        setfield Na_mit_usb/yGate/A print "na_ya.plot"
+        setfield Na_mit_usb/yGate/B print "na_yb.plot"
+
 end
 
 //========================================================================

@@ -164,32 +164,32 @@ void HHChannel::__set_concen( double concen )
 
 void HHChannel::tweakAlpha(std::string gate)
 {
-    this->getContext()->tweakAlpha(this->path(),gate);    
+    this->getContext()->tweakAlpha(this->__get_path(),gate);    
 }
 
 void HHChannel::tweakTau(std::string gate)
 {
-    this->getContext()->tweakTau(this->path(),gate);    
+    this->getContext()->tweakTau(this->__get_path(),gate);    
 }
 
 void HHChannel::setupAlpha(std::string gate, vector <double> params)
 {
-    this->getContext()->setupAlpha(this->path(),gate, params);    
+    this->getContext()->setupAlpha(this->__get_path(),gate, params);    
 }
 
 void HHChannel::setupAlpha(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max )
 {
-    this->getContext()->setupAlpha(this->path(),gate, AA, AB, AC,AD,AF, BA, BB, BC, BD, BF, size, min, max );    
+    this->getContext()->setupAlpha(this->__get_path(),gate, AA, AB, AC,AD,AF, BA, BB, BC, BD, BF, size, min, max );    
 }
 
 
 void HHChannel::setupTau(std::string gate, vector <double> params)
 {
-    this->getContext()->setupTau(this->path(),gate, params);    
+    this->getContext()->setupTau(this->__get_path(),gate, params);    
 }
 void HHChannel::setupTau(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max)
 {
-    this->getContext()->setupTau(this->path(),gate, AA, AB, AC,AD,AF, BA, BB, BC, BD, BF, size, min, max );    
+    this->getContext()->setupTau(this->__get_path(),gate, AA, AB, AC,AD,AF, BA, BB, BC, BD, BF, size, min, max );    
 }
 /**
    This function creates A and B interpolation tables inside a
@@ -230,7 +230,7 @@ void HHChannel::createTable(std::string gate, unsigned int divs, double min, dou
         cerr << "Error: Gate must be one of X, Y or Z" << endl;
         return;        
     }
-    std::string path = this->path()+"/"+gate + "/" +"A";
+    std::string path = this->__get_path()+"/"+gate + "/" +"A";
 
     Id id = PyMooseBase::pathToId(path);
     if ( id.bad() )
@@ -242,7 +242,7 @@ void HHChannel::createTable(std::string gate, unsigned int divs, double min, dou
     tableA.__set_xmin(min);
     tableA.__set_xmax(max);
     tableA.__set_xdivs(divs);
-    path = this->path()+"/"+gate + "/" +"B";
+    path = this->__get_path() + "/" + gate + "/" + "B";
     id = PyMooseBase::pathToId(path);
     if ( id.bad() )
     {
