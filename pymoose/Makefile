@@ -24,19 +24,19 @@
 ############################################################################
 
 TARGET=pymoose
-CFLAGS+=-I..
+CXXFLAGS+=-I..
 LIBS +=-lpython2.5
 ifdef USE_NUMPY
-CFLAGS+=-I/usr/lib/python2.5/site-packages/numpy/core/include -DUSE_NUMPY
+CXXFLAGS+=-I/usr/lib/python2.5/site-packages/numpy/core/include -DUSE_NUMPY
 SWIGOPTS=-DUSE_NUMPY
 endif
 # The library location and flags for creating dll in Mac is different from Linux
 # Darwin may not have the OSTYPE environment variable defined in bash. Set OSTYPE=Darwin if required
 ifeq ($(OSTYPE),Darwin)
-	CFLAGS+=-bundle -fno-common /usr/bin/python -flat_namespace -undefined suppress -I/Library/Frameworks/Python.framework/Versions/2.5/include/python2.5
+	CXXFLAGS+=-bundle -fno-common /usr/bin/python -flat_namespace -undefined suppress -I/Library/Frameworks/Python.framework/Versions/2.5/include/python2.5
 	LDFLAGS+=-bundle -fno-common -L/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/config/
 else # this is for unix like systems - change /usr/include/Python2.5 to the directory where Python.h is located
-	CFLAGS +=-I/usr/include/python2.5
+	CXXFLAGS +=-I/usr/include/python2.5
 	LDFLAGS+=-shared
 endif
 
@@ -187,7 +187,7 @@ HEADERS=PyMooseUtil.h \
 #TEST_MAIN = TestPyMoose.o
 
 #testPyMoose: $(OBJ) $(OBJFILES) $(HEADERS) $(TEST_MAIN)
-#	$(CXX) $(CFLAGS) -o $@ $^
+#	$(CXX) $(CXXFLAGS) -o $@ $^
 
 
 default: $(TARGET)
@@ -204,19 +204,18 @@ endif
 
 ifneq ($(OSTYPE),Darwin)
 _moose.so: moose_wrap.o $(OBJ) $(OBJFILES)
-	$(CXX) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
 endif
 
 moose_wrap.o: moose_wrap.cxx
-	$(CXX) $(CFLAGS) -c $^ -o $@
+	$(CXX) $(CXXFLAGS) -c $^ -o $@
 
 moose.py moose_wrap.cxx: moose.i $(HEADERS)
 	swig -modern -c++ -python -threads $(SWIGOPTS) moose.i
 
 # This is not required - gnumake does it by implicit rule
-# But it uses CXXFLAGS instead of CFLAGS - so we explicitly put down this rule with CFLAGS
-.cpp.o:
-	$(CXX) $(CFLAGS) $< -c
+# .cpp.o:
+# 	$(CXX) $(CXXFLAGS) $< -c
 
 clean:
 	-rm -f *.o *.so test_swig *.pyc
