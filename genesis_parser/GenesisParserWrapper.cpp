@@ -3865,27 +3865,85 @@ void do_showstat(int argc, const char** const argv, Id s )
 	float time = do_getstat( argc, argv, s );
 	cout << "current simulation time = " << time << endl;
 }
+/**
+   Print class documentation.
+   TODO: don't know how the field level docstring will be available.
+   May need to create an access function to the doc_ map in Cinfo.
+*/
+void printCinfoDoc(const Cinfo* classInfo, string field)
+{
+    cout << "Name  :      " << classInfo->name() << "\n"
+         << "Author:      " << classInfo->author() << "\n"
+         << "Description: " << classInfo->description()
+         << endl;    
+}
+
+/**
+   Print documentation for builtin commands.
+   Currently does not do much.
+*/
+void printCommandDoc(string command)
+{
+    string filename = "../DOCS/documentation/";
+    filename.append(command);
+    cout << filename << endl;
+    string line;
+    ifstream docfile(filename.c_str());
+    if (docfile.is_open()){
+        while (! docfile.eof() ){
+            getline (docfile,line);
+            cout << line << endl;
+        }
+        docfile.close();
+    }
+    else {
+        cout << "Help not present for this command." << endl;
+    }
+}
 
 void do_help(int argc, const char** const argv, Id s ){
-	if (argc == 1){
-		cout << "For info on a particular command, type help <commandname>" << endl;
-		return;
-	}
-	char filename[40];
-	sprintf(filename, "../DOCS/documentation/%s.txt", argv[1]);
-	cout << filename << endl;
-	string line;
-	ifstream docfile("eval.cpp");
-	if (docfile.is_open()){
-		while (! docfile.eof() ){
-			getline (docfile,line);
-			cout << line << endl;
-		}
-    		docfile.close();
-	}
-	else {
-		cout << "Help not present for this command." << endl;
-	}
+    if (argc == 1){
+        cout << "For info on a particular command, type help <commandname>\n"
+             << "For info on a particular class, type help <classname>\n"
+             << "For info on a particular field, type help <classname>.<fieldname>"
+             << endl;
+
+        return;
+    }
+    string target = string(argv[1]);
+    string field = "";
+    string::size_type field_start = target.find_first_of(".");
+    if ( field_start != string::npos)
+    {
+        // May we need to go recursively?
+        // Assume for the time being that only one level of field
+        // documentation is displayed. No help for channel.xGate.A
+        // kind of stuff.
+        field = target.substr(field_start); 
+        target = target.substr(0, field_start);
+    }
+    // Don't know what to do about the field documentation - need some sample
+    const Cinfo * classInfo = Cinfo::find(target);
+    if (classInfo)
+    {
+        printCinfoDoc(classInfo, field);
+        return;
+    }
+        
+    // see if the target is old-style classname
+    map <string, string>::iterator sli_iter = sliClassNameConvert().find(target);
+        
+    if (sli_iter != sliClassNameConvert().end())
+    {
+        classInfo = Cinfo::find(sli_iter->second);
+        if(classInfo)
+        {
+            printCinfoDoc(classInfo, field);
+            return;
+        }            
+    }
+        
+    printCommandDoc(target);
 }
 
 char** do_arglist(int argc, const char** const argv, Id s)
