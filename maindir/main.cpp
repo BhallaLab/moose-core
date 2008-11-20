@@ -172,7 +172,19 @@ int main(int argc, char** argv)
 			char cname[10];
 			sprintf(cname, "moose #%d > ", lineNum);
 			char * foo  = readline(cname);
-			s = string (foo);
+                        if (NULL == foo) // EOF (Ctrl-D) in stdin
+                        {
+                            // rather than exiting abruptly, take it
+                            // as quit command hoping that all
+                            // cleanups will be done by the shell
+                            // before quitting
+                            s = "quit"; 
+                        }
+                        else 
+                        {
+                            s = string (foo);
+                        }
+                        
 			set< string >( sli, parseFinfo, s );
 			if ( s.find_first_not_of( " \t\n" ) != s.npos ){
 				lineNum++;
