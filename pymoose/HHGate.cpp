@@ -23,11 +23,11 @@ const std::string& HHGate::getType(){ return className; }
 // Manually edited part
 InterpolationTable* HHGate::__get_A() const
 {
-    return new InterpolationTable(PyMooseBase::pathToId(this->path()+"/A"));    
+    return new InterpolationTable(PyMooseBase::pathToId(this->__get_path()+"/A"));    
 }
 InterpolationTable* HHGate::__get_B() const
 {
-    return new InterpolationTable(PyMooseBase::pathToId(this->path()+"/B"));
+    return new InterpolationTable(PyMooseBase::pathToId(this->__get_path()+"/B"));
 }
 
 void HHGate::tabFill(int xdivs, int mode)

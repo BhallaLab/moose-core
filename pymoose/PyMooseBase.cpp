@@ -175,7 +175,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseB
         return;
     }
     
-    string path = parent.path();
+    string path = parent.__get_path();
     if ( path == getSeparator() )
     {
         path += objectName;
@@ -309,7 +309,7 @@ const std::string& PyMooseBase::getSeparator() const
 {
     return context_->separator;    
 }
-const std::string  PyMooseBase::path() const 
+const std::string  PyMooseBase::__get_path() const 
 {
     return context_->getPath(id_);    
 }
@@ -317,6 +317,11 @@ const std::string  PyMooseBase::path() const
 const Id* PyMooseBase::__get_id() const
 {
     return &id_;
+}
+
+const std::string PyMooseBase::__get_className() const
+{
+    return context_->className(id_);
 }
 
 const Id* PyMooseBase::__get_parent() const 
