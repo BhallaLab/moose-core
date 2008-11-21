@@ -93,7 +93,7 @@ const Cinfo* initMoleculeCinfo()
 		new ValueFinfo( "D", 
 			ValueFtype1< double >::global(),
 			GFCAST( &Molecule::getD ), 
-			RFCAST( &Molecule::setD )
+			RFCAST( &Molecule::setD ),
 			"Diffusion constant of molecule."
 		),
 	///////////////////////////////////////////////////////
