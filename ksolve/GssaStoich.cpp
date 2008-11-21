@@ -390,37 +390,36 @@ void GssaStoich::innerProcessFunc( Eref e, ProcInfo info )
 			t_ = nextt;
 			break;
 		}
-		// if ( t_ > 0.0 ) {
-			unsigned int rindex = pickReac(); // Does a randnum call
-			if ( rindex >= rates_.size() ) {
-				// Probably cumulative roundoff error here. Simply
-				// recalculate atot to avoid, and redo.
-				updateAllRates();
-				continue;
-			}
-			transN_.fireReac( rindex, S_ );
-			// Math expns must be first, because they may alter 
-			// substrate mol #.
-			updateDependentMathExpn( dependentMathExpn_[ rindex ] );
-			// The rates list includes rates dependent on mols changed
-			// by the MathExpns.
-			updateDependentRates( dependency_[ rindex ] );
-		// }
+		unsigned int rindex = pickReac(); // Does a randnum call
+		if ( rindex >= rates_.size() ) {
+			// Probably cumulative roundoff error here. Simply
+			// recalculate atot to avoid, and redo.
+			updateAllRates();
+			continue;
+		}
+		transN_.fireReac( rindex, S_ );
+
+		// Ugly stuff for molecules buffered after run started.
+		// Inherited from Stoich. Here we just need to restore the
+		// n's in the dynamic buf list to their nInit. Note that
+		// any updates of nInit will percolate through the
+		// kineticHub to GssaStoich::setMolN, which will update
+		// all rates, so things should keep track.
+		// Only issue is that the changing of the mode itself should
+		// trigger the update of all rates.
+		updateDynamicBuffers();
+		// Math expns must be first, because they may alter 
+		// substrate mol #.
+		updateDependentMathExpn( dependentMathExpn_[ rindex ] );
+		// The rates list includes rates dependent on mols changed
+		// by the MathExpns.
+		updateDependentRates( dependency_[ rindex ] );
+
 		double r = mtrand();
 		while ( r <= 0.0 )
 			r = mtrand();
 		t_ -= ( 1.0 / atot_ ) * log( r );
 		// double dt = ( 1.0 / atot_ ) * log( 1.0 / mtrand() );
-		/*
-		if ( t_ >= nextt ) { // bail out if we run out of time.
-			// We save the t past the checkpoint, so
-			// as to continue if needed. However, checkpoint
-			// may also involve changes to rates, in which
-			// case these values may be invalidated. I worry
-			// about an error here.
-			break;
-		}
-		*/
 	}
 }
 
