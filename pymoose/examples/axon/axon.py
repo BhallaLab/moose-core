@@ -54,7 +54,7 @@ print "Making K_mit_usb"
 make_K_mit_usb()
 
 for child in moose.Neutral("/library").children():
-    print "Objects in library:", child.path()
+    print "Objects in library:", child.path
 
 context.setCwe("/")
 
