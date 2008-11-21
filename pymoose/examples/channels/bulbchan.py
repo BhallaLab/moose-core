@@ -47,7 +47,7 @@ class KMitralUSB(moose.HHChannel):
         self.Xpower = 2
         self.Ypower = 1 
         self.createTable("X", 30, -0.1, 0.05)
-        xGate = moose.HHGate(self.path() + "/xGate")
+        xGate = moose.HHGate(self.path + "/xGate")
         for ii in range(0, 13):
             xGate.A[ii] = 0.0
         xGate.A[14] = 2.87
@@ -107,7 +107,7 @@ class KMitralUSB(moose.HHChannel):
         xGate.tabFill(3000, 0)
 
         self.createTable("Y", 30, -0.1, 0.05)
-        yGate = moose.HHGate(self.path() + "/yGate")
+        yGate = moose.HHGate(self.path + "/yGate")
         for ii in range(0, 12):
             yGate.A[ii] = 1.0
         
@@ -224,10 +224,10 @@ class NaMitralUSB(moose.HHChannel):
                         -1.0 * (0.040 + NaMitralUSB.threshold), 
                         -5.0e-3)
         
-        xGate = moose.HHGate(self.path() + "/xGate")
+        xGate = moose.HHGate(self.path + "/xGate")
         xGate.A.dumpFile("na_xa.pymoose.plot")
         xGate.B.dumpFile("na_xb.pymoose.plot")
-        yGate = moose.HHGate(self.path() + "/yGate")
+        yGate = moose.HHGate(self.path + "/yGate")
         yGate.A.dumpFile("na_ya.pymoose.plot")
         yGate.B.dumpFile("na_yb.pymoose.plot")
 
