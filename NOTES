@@ -8210,5 +8210,9 @@ with flatline.
 Confirmed that mtrand was giving 0.0. Confirmed that fixing this fixed
 flatline. Checked mtrand code: it actually uses 32 bits, so 0.0 is not
 so unlikely after all. Very probable, in fact.
+Checked in as revision 945: unit test flags on, Smoldyn off, GSL on, -g, MPI off
 
+=============================================================================
+21 Nov 2008
+Updated some field information for Molecule.
 =============================================================================
