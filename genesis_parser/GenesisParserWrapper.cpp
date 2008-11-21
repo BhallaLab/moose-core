@@ -3872,10 +3872,26 @@ void do_showstat(int argc, const char** const argv, Id s )
 */
 void printCinfoDoc(const Cinfo* classInfo, string field)
 {
-    cout << "Name  :      " << classInfo->name() << "\n"
-         << "Author:      " << classInfo->author() << "\n"
-         << "Description: " << classInfo->description()
-         << endl;    
+    cout << "\nName  :      " << classInfo->name() << "\n"
+         << "\nAuthor:      " << classInfo->author() << "\n"
+         << "\nDescription: " << classInfo->description() << "\n"
+         << "\nFields:      \n" 
+         << endl;
+    // go through the finfos and print their names and documentation strings.
+    vector <const Finfo* > finfoList;
+    classInfo->listFinfos(finfoList);
+    for ( vector <const Finfo* >::iterator iter = finfoList.begin();
+          iter != finfoList.end();
+          ++iter)
+    {
+        // TODO: it would have been nicer if we could print the data
+        // type also - Ftype::fulle_type, Ftype::getTemplateParameters
+        // are sued in pymoose code generator. But my experience
+        // is that C++ RTTI is unreliable - in particular GCC produces
+        // human-unreadable typename
+        cout << "\n\t" << (*iter)->name() << ": " << (*iter)->doc() << "\n";
+    }
+    cout << endl;    
 }
 
 /**
