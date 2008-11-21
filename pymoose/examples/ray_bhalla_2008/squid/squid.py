@@ -90,10 +90,10 @@ class Squid(moose.Compartment):
         self.connect("channel", self._K, "channel")
         # These gates get created only after Xpower or Ypower are set to nonzero values
         # So we have to explicitly insert these fields in the class
-        self._Na.xGate = moose.HHGate(self._Na.path() + "/xGate")
-        self._Na.yGate = moose.HHGate(self._Na.path() + "/yGate")
-        self._K.xGate = moose.HHGate(self._K.path() + "/xGate")
-        self._K.yGate = moose.HHGate(self._K.path() + "/yGate")
+        self._Na.xGate = moose.HHGate(self._Na.path + "/xGate")
+        self._Na.yGate = moose.HHGate(self._Na.path + "/yGate")
+        self._K.xGate = moose.HHGate(self._K.path + "/xGate")
+        self._K.yGate = moose.HHGate(self._K.path + "/yGate")
         self._Na.xGate.A.xmin = VMIN
         self._Na.xGate.A.xmax = VMAX
         self._Na.xGate.A.xdivs = NDIVS
