@@ -150,6 +150,14 @@ class Finfo
 					return name_;
 			}
 
+                        /**
+                         *  return the documentation string attached to this finfo
+                         */
+                         const std::string& doc() const
+                         {
+                             return doc_;
+                         }
+    
 			/**
 			 * Returns true if the name matches and if the
 			 * Finfo has a suitable srcIndex or destIndex
