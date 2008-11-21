@@ -152,6 +152,7 @@ class Stoich
 		///////////////////////////////////////////////////
 		void updateV( );
 		void updateRates( vector< double>* yprime, double dt  );
+		void updateDynamicBuffers();
 		
 		///////////////////////////////////////////////////
 		// Internal fields.

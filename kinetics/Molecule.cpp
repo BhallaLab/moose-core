@@ -64,7 +64,7 @@ const Cinfo* initMoleculeCinfo()
 			ValueFtype1< double >::global(),
 			GFCAST( &Molecule::getVolumeScale ), 
 			RFCAST( &Molecule::setVolumeScale ),
-			"Deprecated field. Used for backward compatibility for legacy kkit models.\nDefines the ratio of 'n' to 'conc'. When volumeScale is assigned a value,\nit looks up the nearest ancestor KinCompt to see if it can change the\nvolume of the compartment in which the molecule is embedded.\nObviously lots of scope for conflicting assignments here, hence DO NOT USE."
+			"Deprecated field. Used for backward compatibility for legacy kkit models.\nDefines the ratio of 'n' to 'conc'. When volumeScale is assigned a value,\nit looks up the nearest ancestor KinCompt to see if it can change the\nvolume of the compartment in which the molecule is embedded.\nObviously lots of scope for conflicting assignments here, hence DO NOT USE.\nInstead assign volume of the parent KinCompt."
 		),
 		new ValueFinfo( "mode", 
 			ValueFtype1< int >::global(),
@@ -143,6 +143,7 @@ const Cinfo* initMoleculeCinfo()
 		"Name", "Molecule",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
 		"Description", "Molecule: Pool of molecules.",
+		"Details", "Internally manages number of molecules, n. Initial condition set by nInit.\nThe molecule can be buffered, in which case n is always = nInit.\nDoes NOT handle volumes: this is managed by the nearest ancestral\nKinCompt (Kinetic compartment) object. Calculates concentration (conc)\non the fly from compartmental volume when needed. Has a default explicit\nExponential Euler integration method, but is normally solved by a special\nsolver such as ksolve (ODEs, uses GSL), or\ngsolve (Gillespie Stochastic Simulation Algorithm) or\nSmoldyn (Steven Andrews' Smoluchowski dynamics Monte Carlo simulator)"
 	};
 	static Cinfo moleculeCinfo(
 		doc,

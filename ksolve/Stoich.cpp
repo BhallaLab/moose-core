@@ -198,7 +198,7 @@ const Cinfo* initStoichCinfo()
 		"Name", "Stoich",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
 		"Description", "Stoich: Sets up stoichiometry matrix based calculations from a\n"
-				"wildcard path for the reaction system.Knows how to compute derivatives\n"
+				"wildcard path for the reaction system. Knows how to compute derivatives\n"
 				"for most common\nthings, also knows how to handle special cases where the\n"
 				"object will have to do its own computation. Generates a stoichiometry matrix,\n"
 				"which is useful for lots of other\noperations as well.",
@@ -993,6 +993,22 @@ void Stoich::updateRates( vector< double>* yprime, double dt  )
 	}
 }
 
+/**
+ * Assigns n values for all molecules that have had their slave-enable
+ * flag set _after_ the run started. Ugly hack, but convenient for 
+ * simulations. Likely to be very few, if any.
+ */
+void Stoich::updateDynamicBuffers()
+{
+	// Here we handle dynamic buffering by simply writing over S_.
+	// We never see y_ in the rest of the simulation, so can ignore.
+	// Main concern is that y_ will go wandering off into nans, or
+	// become numerically unhappy and slow things down.
+	for ( vector< unsigned int >::const_iterator 
+		i = dynamicBuffers_.begin(); i != dynamicBuffers_.end(); ++i )
+		S_[ *i ] = Sinit_[ *i ];
+}
+
 #ifdef USE_GSL
 ///////////////////////////////////////////////////
 // GSL interface stuff
@@ -1020,6 +1036,7 @@ int Stoich::gslFunc( double t, const double* y, double* yprime, void* s )
 	return static_cast< Stoich* >( s )->innerGslFunc( t, y, yprime );
 }
 
+
 int Stoich::innerGslFunc( double t, const double* y, double* yprime )
 {
 	nCall_++;
@@ -1030,13 +1047,7 @@ int Stoich::innerGslFunc( double t, const double* y, double* yprime )
 		nCopy_++;
 //	}
 
-	// Here we handle dynamic buffering by simply writing over S_.
-	// We never see y_ in the rest of the simulation, so can ignore.
-	// Main concern is that y_ will go wandering off into nans, or
-	// become numerically unhappy and slow things down.
-	for ( vector< unsigned int >::const_iterator 
-		i = dynamicBuffers_.begin(); i != dynamicBuffers_.end(); ++i )
-		S_[ *i ] = Sinit_[ *i ];
+	updateDynamicBuffers();
 
 	updateV();
 
@@ -1052,4 +1063,6 @@ void Stoich::runStats()
 {
 	cout << "Copy:Call=	" << nCopy_ << ":" << nCall_ << endl;
 }
+
+
 #endif // USE_GSL
