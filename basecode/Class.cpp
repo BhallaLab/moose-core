@@ -263,14 +263,14 @@ vector <string> Class::getFieldList(const Element* e)
     if (!obj->classInfo_)
     {
         cerr << "Error: Class object not initialized." << endl;
-    } else 
-    {
-        
-    for (unsigned int i = 0; i < obj->classInfo_->finfos_.size() ; ++i )
-    {
-        Finfo *f = obj->classInfo_->finfos_[i];
-        fieldList.push_back(f->name());
     }
+    else 
+    {
+        for (unsigned int i = 0; i < obj->classInfo_->finfos_.size() ; ++i )
+        {
+            Finfo *f = obj->classInfo_->finfos_[i];
+            fieldList.push_back(f->name());
+        }
     }
     
     return fieldList;
