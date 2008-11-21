@@ -8215,4 +8215,11 @@ Checked in as revision 945: unit test flags on, Smoldyn off, GSL on, -g, MPI off
 =============================================================================
 21 Nov 2008
 Updated some field information for Molecule.
+Checked in as revision 958: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Fixed missing capability in GssaStoich: It was unable to handle dynamic
+buffering, that is molecules that start out unbuffered but then get switched
+to buffered and assigned to assorted new values. Test is in 
+TESTS/GSSA/testDynamicBuffering.g
+
 =============================================================================
