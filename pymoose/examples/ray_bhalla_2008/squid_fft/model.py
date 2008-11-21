@@ -48,10 +48,10 @@ current injection that is white noise"""
         self.iInjectTable.stepMode = 3
         self.iInjectTable.connect("inputRequest", self.squidCompartment, "inject") # read what is received by compartment
         self._setupClocks()
-        self.getContext().useClock(0, self.squidCompartment.path()+","+self.squidCompartment.path()+"##")
+        self.getContext().useClock(0, self.squidCompartment.path+","+self.squidCompartment.path+"##")
         self.squidCompartment.useClock(1, "init")
-        self.getContext().useClock(2,self.data.path()+"/#")
-        self.getContext().useClock(3, self.currentInjection.path())
+        self.getContext().useClock(2,self.data.path+"/#")
+        self.getContext().useClock(3, self.currentInjection.path)
         self._runTime = 0.050
         
     def _setupClocks(self, simDt=None, plotDt=None):

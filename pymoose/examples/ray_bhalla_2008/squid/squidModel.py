@@ -66,9 +66,9 @@ class SquidModel(moose.Neutral):
         self._iInjectTable.stepMode = 3
         self._iInjectTable.connect("inputRequest", self._pulseGen, "output")
         # Assign clock ticks
-        self.getContext().useClock(0, self._model.path()+"/##")
+        self.getContext().useClock(0, self._model.path+"/##")
         self._squidAxon.useClock(1, "init")
-        self.getContext().useClock(2,self._data.path()+"/#")
+        self.getContext().useClock(2,self._data.path+"/#")
         self._runTime = 0.050
 
     def _setupPulseGen(self, paramDict=None):
