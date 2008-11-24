@@ -84,13 +84,12 @@ const Cinfo* initGssaStoichCinfo()
 	{
 		"Name", "GssaStoich",
 		"Author", "Upinder S. Bhalla, 2008, NCBS",
-		"Description", "GssaStoich: Gillespie Stochastic Simulation Algorithm object.\n"
-				"Closely based on the Stoich object and inherits its handling \n"
-				"functions for constructing the matrix. Sets up stoichiometry matrix \n"
-				"based calculations from a\nwildcard path for the reaction system.\n"
-				"Knows how to compute derivatives for most common things, also knows how to\n"
-				"handle special cases where the object will have to do its own computation.\n"
-				"Generates a stoichiometry matrix, which is useful for lots of other operations as well.",
+		"Description", "GssaStoich: Gillespie Stochastic Simulation Algorithm object.Closely based on the "
+		"Stoich object and inherits its handling functions for constructing the matrix. Sets up "
+		"stoichiometry matrix based calculations from a\nwildcard path for the reaction system.Knows how to "
+		"compute derivatives for most common things, also knows how to handle special cases where the object "
+		"will have to do its own computation.Generates a stoichiometry matrix, which is useful for lots of "
+		"other operations as well.",
 	};
 
 	static Cinfo gssaStoichCinfo(

@@ -23,10 +23,10 @@ const Cinfo* initCaConcCinfo()
 	};
 	static Finfo* process =	new SharedFinfo( "process", processShared, 
 			sizeof( processShared ) / sizeof( Finfo* ),
-			"This is a shared message to receive Process message from the scheduler.The first entry is a MsgDest \n"
-			"for the Process operation. It has a single argument, ProcInfo, which holds lots of information about\n"
-			"current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. \n"
-			"It also uses ProcInfo.");
+			"This is a shared message to receive Process message from the scheduler.The first entry is a MsgDest "
+			"for the Process operation. It has a single argument, ProcInfo, which holds lots of information about "
+			"current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. "
+			"It also uses ProcInfo. ");
 
 ///////////////////////////////////////////////////////
 // Field definitions
@@ -91,9 +91,9 @@ const Cinfo* initCaConcCinfo()
 	{
 		"Name", "CaConc",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "CaConc: Calcium concentration pool. Takes current from a \n"
-				"channel and keeps track of calcium buildup and depletion by a \n"
-				"single exponential process.",
+		"Description", "CaConc: Calcium concentration pool. Takes current from a "
+				"channel and keeps track of calcium buildup and depletion by a "
+				"single exponential process. ",
 	};	
 	static Cinfo CaConcCinfo(
 		doc,

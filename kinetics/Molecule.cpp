@@ -27,7 +27,8 @@ const Cinfo* initMoleculeCinfo()
 	};
 	static Finfo* process = new SharedFinfo( "process", processShared,
 		sizeof( processShared ) / sizeof( Finfo* ),
-		"Shared message to handle scheduling. 'process' calls the update\noperation on the molecule. 'reinit' reinitializes the molecule concentration\nand updates attached reactions." );
+		"Shared message to handle scheduling. 'process' calls the update operation on the molecule. "
+		"'reinit' reinitializes the molecule concentration and updates attached reactions." );
 	static Finfo* reacShared[] =
 	{
 		new DestFinfo( "reac", Ftype2< double, double >::global(),
@@ -58,37 +59,48 @@ const Cinfo* initMoleculeCinfo()
 			ValueFtype1< double >::global(),
 			GFCAST( &Molecule::getNinit ), 
 			RFCAST( &Molecule::setNinit ),
-			"Initial number of molecules in this pool. Assigned to n every time \nthe reInit function is called. Also sets the value of n the entire time\n the molecule is in buffered mode (mode 4)"
+			"Initial number of molecules in this pool. Assigned to n every time the reInit function is "
+			"called. Also sets the value of n the entire time the molecule is in buffered mode (mode 4)"
 		),
 		new ValueFinfo( "volumeScale",  // Deprecated. Used for BC only.
 			ValueFtype1< double >::global(),
 			GFCAST( &Molecule::getVolumeScale ), 
 			RFCAST( &Molecule::setVolumeScale ),
-			"Deprecated field. Used for backward compatibility for legacy kkit models.\nDefines the ratio of 'n' to 'conc'. When volumeScale is assigned a value,\nit looks up the nearest ancestor KinCompt to see if it can change the\nvolume of the compartment in which the molecule is embedded.\nObviously lots of scope for conflicting assignments here, hence DO NOT USE.\nInstead assign volume of the parent KinCompt."
+			"Deprecated field. Used for backward compatibility for legacy kkit models. Defines the "
+			"ratio of 'n' to 'conc'. When volumeScale is assigned a value, it looks up the nearest "
+			"ancestor KinCompt to see if it can change the volume of the compartment in which the "
+			"molecule is embedded.Obviously lots of scope for conflicting assignments here, hence "
+			"DO NOT USE. Instead assign volume of the parent KinCompt."
 		),
 		new ValueFinfo( "mode", 
 			ValueFtype1< int >::global(),
 			GFCAST( &Molecule::getMode ), 
 			RFCAST( &Molecule::setMode ),
-			"Mode of functioning of molecule object.\n0: normal calculation mode.\n 1, 2: deprecated.\n4: buffered mode. In buffered mode the value of n is always set to nInit."
+			"Mode of functioning of molecule object.\n"
+			"0: normal calculation mode.\n1, 2: deprecated.\n4: buffered mode. "
+			"In buffered mode the value of n is always set to nInit."
 		),
 		new ValueFinfo( "slave_enable", 
 			ValueFtype1< int >::global(),
 			GFCAST( &Molecule::getMode ), 
 			RFCAST( &Molecule::setMode ),
-			"Alias for 'mode' field, used for backward compatibility with kkit.\nDeprecated. Mode of functioning of molecule object.\n0: normal calculation mode.\n 1, 2: deprecated.\n4: buffered mode. In buffered mode the value of n is always set to nInit."
+			"Alias for 'mode' field, used for backward compatibility with kkit. Deprecated. "
+			"Mode of functioning of molecule object.\n0: normal calculation mode.\n1, 2: deprecated.\n"
+			"4: buffered mode. In buffered mode the value of n is always set to nInit."
 		),
 		new ValueFinfo( "conc", 
 			ValueFtype1< double >::global(),
 			GFCAST( &Molecule::getConc ), 
 			RFCAST( &Molecule::setConc ),
-			"Concentration of molecule. Derived on the fly from n and from looking\nup parental KinCompt to obtain volume."
+			"Concentration of molecule. Derived on the fly from n and from looking up parental KinCompt "
+			"to obtain volume."
 		),
 		new ValueFinfo( "concInit", 
 			ValueFtype1< double >::global(),
 			GFCAST( &Molecule::getConcInit ), 
 			RFCAST( &Molecule::setConcInit ),
-			"Initial concentration of molecules in this pool. Derived on the fly\nfrom nInit and requires a lookup of parental KinCompt to obtain volume."
+			"Initial concentration of molecules in this pool. Derived on the fly from nInit and requires "
+			"a lookup of parental KinCompt to obtain volume."
 		),
 		new ValueFinfo( "D", 
 			ValueFtype1< double >::global(),
@@ -107,8 +119,8 @@ const Cinfo* initMoleculeCinfo()
 		new DestFinfo( "prd",
 			Ftype2< double, double >::global(),
 			RFCAST( &Molecule::reacFunc ),
-			"This is a backward compat feature to handle one-ended input from enzymes, but using the same \n"
-			"reacFunc as the shared message for reac."
+			"This is a backward compat feature to handle one-ended input from enzymes, but using the "
+			"same reacFunc as the shared message for reac."
 		),
 	
 		new DestFinfo( "sumTotal",
@@ -120,7 +132,8 @@ const Cinfo* initMoleculeCinfo()
 		new DestFinfo( "rescaleVolume",
 			Ftype1< double >::global(),
 			RFCAST( &Molecule::rescaleFunc ),
-			"Increases volume by specified factor, so it scales up n and nInit.\nShould be called primarily by KinCompt to manage system volumes"
+			"Increases volume by specified factor, so it scales up n and nInit. Should be called "
+			"primarily by KinCompt to manage system volumes"
 		),
 	///////////////////////////////////////////////////////
 	// Shared definitions
@@ -128,11 +141,12 @@ const Cinfo* initMoleculeCinfo()
 		process,
 		new SharedFinfo( "reac", reacShared,
 			sizeof( reacShared ) / sizeof( Finfo* ),
-			"Shared message to a Reaction or Enzyme object. Receives A and B terms,\nwhich are increments and decrements to # of molecules.\nSends n, the number of molecules"),
+			"Shared message to a Reaction or Enzyme object. Receives A and B terms,which are "
+			"increments and decrements to # of molecules.Sends n, the number of molecules"),
 		new SharedFinfo( "extent", extentShared,
 			sizeof( extentShared ) / sizeof( Finfo* ),
-			"Deprecated. Manages volume control through interacting with KinCompt: the kinetic compartment object, \n"
-			"which in turn interfaces with surfaces" ),
+			"Deprecated. Manages volume control through interacting with KinCompt: the kinetic "
+			"compartment object, which in turn interfaces with surfaces" ),
 	};
 
 	// Schedule molecules for the slower clock, stage 0.
@@ -143,7 +157,13 @@ const Cinfo* initMoleculeCinfo()
 		"Name", "Molecule",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
 		"Description", "Molecule: Pool of molecules.",
-		"Details", "Internally manages number of molecules, n. Initial condition set by nInit.\nThe molecule can be buffered, in which case n is always = nInit.\nDoes NOT handle volumes: this is managed by the nearest ancestral\nKinCompt (Kinetic compartment) object. Calculates concentration (conc)\non the fly from compartmental volume when needed. Has a default explicit\nExponential Euler integration method, but is normally solved by a special\nsolver such as ksolve (ODEs, uses GSL), or\ngsolve (Gillespie Stochastic Simulation Algorithm) or\nSmoldyn (Steven Andrews' Smoluchowski dynamics Monte Carlo simulator)"
+		"Details", "Internally manages number of molecules, n. Initial condition set by nInit.The molecule "
+		"can be buffered, in which case n is always = nInit.Does NOT handle volumes: this is managed by the "
+		"nearest ancestral KinCompt (Kinetic compartment) object. Calculates concentration (conc) on the "
+		"fly from compartmental volume when needed. Has a default explicit Exponential Euler integration "
+		"method, but is normally solved by a special solver such as ksolve (ODEs, uses GSL), or gsolve "
+		"(Gillespie Stochastic Simulation Algorithm) or Smoldyn (Steven Andrews' Smoluchowski dynamics "
+		"Monte Carlo simulator)"
 	};
 	static Cinfo moleculeCinfo(
 		doc,

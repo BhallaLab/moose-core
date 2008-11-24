@@ -48,8 +48,8 @@ const Cinfo* initKinComptCinfo()
 			ValueFtype1< double >::global(),
 			GFCAST( &KinCompt::getVolume ), 
 			RFCAST( &KinCompt::setVolume ),
-			"Volume is the compartment volume. If there are no messages to surfaces this returns the local value.\n"
-			"The setVolume only works if there are no surfaces anywhere.Otherwise the surfaces override it \n"
+			"Volume is the compartment volume. If there are no messages to surfaces this returns the local value. "
+			"The setVolume only works if there are no surfaces anywhere.Otherwise the surfaces override it. "
 			"Assigning any of the following four parameters causes automatic rescaling of rates throughout the model."
 		),
 		new ValueFinfo( "area", 
@@ -66,7 +66,7 @@ const Cinfo* initKinComptCinfo()
 			ValueFtype1< double >::global(),
 			GFCAST( &KinCompt::getSize ), 
 			RFCAST( &KinCompt::setSize ),
-			"This takes whichever of the above is appropriate for the # of dimensions. Means the same thing as the\n"
+			"This takes whichever of the above is appropriate for the # of dimensions. Means the same thing as the "
 			"SBML size."
 		),
 		new ValueFinfo( "numDimensions", 
@@ -104,7 +104,11 @@ const Cinfo* initKinComptCinfo()
 		new DestFinfo( "volumeFromChild", 
 			Ftype2< string, double >::global(),
 			RFCAST( &KinCompt::setVolumeFromChild ),
-			"Assigns volume based on request from child Molecule.\nApplies the following logic:\n	- If first assignment: Assign without rescaling\n	- If later assignment, same vol: Keep tally, silently\n	- If laster assignment, new vol: Complain, tally\n	- If later new vols outnumber original vol: Complain louder." ),
+			"Assigns volume based on request from child Molecule. Applies the following logic:\n"
+			"- If first assignment: Assign without rescaling\n"
+			"- If later assignment, same vol: Keep tally, silently\n"
+			"- If laster assignment, new vol: Complain, tally\n"
+			"- If later new vols outnumber original vol: Complain louder." ),
 	///////////////////////////////////////////////////////
 	// Synapse definitions
 	///////////////////////////////////////////////////////

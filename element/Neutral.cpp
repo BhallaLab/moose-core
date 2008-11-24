@@ -106,8 +106,8 @@ const Cinfo* initNeutralCinfo()
 			&Neutral::destroy ),
 
 		new DestFinfo( "postCreate", Ftype0::global(), &dummyFunc, 
-			"This function allows objects to do additional initialization at the MOOSE level after they are created.\n"
-			"For example, we may want to nest some fields in the object, which requires the creation of child \n"
+			"This function allows objects to do additional initialization at the MOOSE level after they are created. "
+			"For example, we may want to nest some fields in the object, which requires the creation of child "
 			"objects to hold the nested fields. This would be done by overriding the postCreate function." ),
 	};
 	

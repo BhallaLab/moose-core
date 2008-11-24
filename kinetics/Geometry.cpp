@@ -36,14 +36,14 @@ const Cinfo* initGeometryCinfo()
 			ValueFtype1< double >::global(),
 			GFCAST( &Geometry::getEpsilon ), 
 			RFCAST( &Geometry::setEpsilon ),
-			"epsilon is the max deviation of surface-point from surface I think it refers to when the molecule is \n"
+			"epsilon is the max deviation of surface-point from surface I think it refers to when the molecule is "
 			"stuck to the surface. Need to check with Steven."
 		),
 		new ValueFinfo( "neighdist", 
 			ValueFtype1< double >::global(),
 			GFCAST( &Geometry::getNeighDist ), 
 			RFCAST( &Geometry::setNeighDist ),
-			"neighdist is capture distance from one panel to another.When a molecule diffuses off one panel and \n"
+			"neighdist is capture distance from one panel to another.When a molecule diffuses off one panel and "
 			"is within neighdist of the other, it is captured by the second."
 		),
 	///////////////////////////////////////////////////////

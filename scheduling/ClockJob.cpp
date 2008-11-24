@@ -154,9 +154,10 @@ const Cinfo* initClockJobCinfo()
 		// Tick in the sequence.
 		new SharedFinfo( "tick", tickShared, 
 			sizeof( tickShared ) / sizeof( Finfo* ),
-			"This is a shared message that connects up to the 'prev' message of the first Tick in the sequence. \n"
-			"It is equivalent to the Tick::next shared message. It invokes its incrementTick  function and also \n"
-			"manages various functions for reset and return values. It is meant to handle only a  single target." ),
+			"This is a shared message that connects up to the 'prev' message of the first Tick in the "
+			"sequence.It is equivalent to the Tick::next shared message. It invokes its incrementTick  "
+			"function and also manages various functions for reset and return values. It is meant to  "
+			"handle only a  single target." ),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////

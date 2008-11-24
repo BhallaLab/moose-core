@@ -86,15 +86,16 @@ const Cinfo* initParTickCinfo()
 			"Each PostMaster does an MPI_Test on the earlier posted iRecv." ),
 		new DestFinfo( "harvestPoll", Ftype1< unsigned int >::global(),
 						RFCAST( &ParTick::pollFunc ),
-						"The fourth entry is for harvesting the poll request.The argument is the node number \n"
-						"handled by the postmaster.It comes back when the polling on that postmaster is done." ),
+						"The fourth entry is for harvesting the poll request.The argument "
+						"is the node number handled by the postmaster.It comes back when the "
+						"polling on that postmaster is done." ),
 		new SrcFinfo( "clearSetupStack", Ftype0::global(),
-			"This entry tells the postMaster to execute pending setup ops.These are blocking calls, \n"
+			"This entry tells the postMaster to execute pending setup ops.These are blocking calls, "
 			"but they may invoke nested polling calls." ),
 		new SrcFinfo( "barrier", Ftype0::global(),
-			"The last entry is to tell targets to execute a Barrier command, used to synchronize all nodes.\n"
-			"Warning: this message should only be called on a single target postmaster using sendTo.\n"
-			"Otherwise each target postmaster will try to set a barrier." ),
+			"The last entry is to tell targets to execute a Barrier command, used to synchronize all "
+			"nodes. Warning: this message should only be called on a single target postmaster using "
+			"sendTo.Otherwise each target postmaster will try to set a barrier." ),
 	};
 
 
@@ -116,8 +117,8 @@ const Cinfo* initParTickCinfo()
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "outgoingProcess", processShared,
 			sizeof( processShared ) / sizeof( Finfo* ),
-			"This goes to all scheduled objects to call their process events.Although it is identical to the one \n"
-			"in Tick.cpp, we redo it  because of scope issues." ),
+			"This goes to all scheduled objects to call their process events.Although it is identical "
+			"to the one in Tick.cpp, we redo it  because of scope issues." ),
 		new SharedFinfo( "parTick", parShared, 
 			sizeof( parShared ) / sizeof( Finfo* ),
 			"This shared message communicates with the postmaster" ),
@@ -146,7 +147,7 @@ const Cinfo* initParTickCinfo()
 	{
 		"Name", "ParTick",
 		"Author", "Upinder S. Bhalla, April 2007, NCBS",
-		"Description", "ParTick: Sequences execution of objects on a given dt for working with\n"
+		"Description", "ParTick: Sequences execution of objects on a given dt for working with "
 				"parallel messaging. Interleaves computation and communication for efficiency.",
 	};
 	static Cinfo parTickCinfo(

@@ -197,11 +197,11 @@ const Cinfo* initStoichCinfo()
 	{
 		"Name", "Stoich",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "Stoich: Sets up stoichiometry matrix based calculations from a\n"
-				"wildcard path for the reaction system. Knows how to compute derivatives\n"
-				"for most common\nthings, also knows how to handle special cases where the\n"
-				"object will have to do its own computation. Generates a stoichiometry matrix,\n"
-				"which is useful for lots of other\noperations as well.",
+		"Description", "Stoich: Sets up stoichiometry matrix based calculations from a wildcard path for "
+				"the reaction system. Knows how to compute derivatives for most common things, also "
+				"knows how to handle special cases where the object will have to do its own "
+				"computation. Generates a stoichiometry matrix,which is useful for lots of other "
+				"operations as well.",
 	};
 	
 	static Cinfo stoichCinfo(
