@@ -26,6 +26,7 @@ using namespace pymoose;
 
 extern void initMoose();
 extern void initSched();
+extern const std::string& helpless();
 
 extern void setupDefaultSchedule(Element*, Element*, Element*);
 extern Element* makeGenesisParser();
@@ -1473,23 +1474,57 @@ const std::string PyMooseContext::getName(const Id objId) const
     return fieldValue_;
 }
 
-const std::string PyMooseContext::doc(const std::string& className) const
+const std::string PyMooseContext::doc(const std::string& target) const
 {
+  std::string field = "";
+  std::string className = "";
+  string::size_type field_start = target.find_first_of(".");
+  if ( field_start != string::npos)
+    {
+        // May we need to go recursively?
+        // Assume for the time being that only one level of field
+        // documentation is displayed. No help for channel.xGate.A
+        // kind of stuff.
+      field = trim(target.substr(field_start+1)); 
+    }
+  className = trim(target.substr(0, field_start));
+
     const Cinfo* classInfo = Cinfo::find(className);
     if (!classInfo)
         return "No such MOOSE class";
+    if (field.empty())
+    {
+
     fieldValue_ = "";
-    fieldValue_.append("Name:        ").append(classInfo->name()).append("\n");
-    fieldValue_.append("Author:      ").append(classInfo->author()).append("\n");
-    fieldValue_.append("Description: ").append(classInfo->description()).append("\n\n");
+    fieldValue_.append("\nName:        ").append(classInfo->name()).append("\n");
+    fieldValue_.append("\nAuthor:      ").append(classInfo->author()).append("\n");
+    fieldValue_.append("\nDescription: ").append(classInfo->description()).append("\n");
+    fieldValue_.append("\nFields:\n");
     vector <const Finfo*> fieldList;
     classInfo->listFinfos(fieldList);
     for (vector <const Finfo*>::iterator iter = fieldList.begin();
          iter != fieldList.end();
          ++iter)
-    {
-        fieldValue_.append("\n\t").append((*iter)->name()).append(": ").append((*iter)->doc()).append("\n");
+      {
+	fieldValue_.append("\n").append((*iter)->name()).append(":\n");
+	std::string doc = (*iter)->doc();
+	if (trim(doc).empty()){
+	  doc = helpless();
+	}
+	fieldValue_.append(doc).append("\n");
+      }
     }
+    else
+    {
+      const Finfo* finfo = classInfo->findFinfo(field);
+      std::string doc = finfo->doc();
+      if (trim(doc).empty())
+        {
+            doc = helpless();
+        }
+      fieldValue_.append("\n").append(field).append(": \n").append(doc).append("\n");
+    }
+
     return fieldValue_;
 }
 

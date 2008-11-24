@@ -3800,6 +3800,14 @@ float do_rand( int argc, const char** const argv, Id s ){
 	return lo + mtrand()*(hi - lo);
 }
 
+int do_random(int argc, const char** const argv, Id s){
+	if (argc != 1){
+		cout << "usage:: random\n\treturns a random integer uniformly distributed in the range 0, 0x7fffffff." << endl;
+		return 0;
+	}
+	return (long)(genrand_int32()>>1);
+} 
+
 void do_disable( int argc, const char** const argv, Id s ){
 	cout << "disable not yet implemented!!" << endl;
 }
@@ -3960,7 +3968,7 @@ void do_help(int argc, const char** const argv, Id s ){
         field = target.substr(field_start+1); 
         target = target.substr(0, field_start);
     }
-    // Don't know what to do about the field documentation - need some sample
+
     const Cinfo * classInfo = Cinfo::find(target);
     if (classInfo)
     {
@@ -4119,6 +4127,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "getarg", reinterpret_cast< slifunc >( do_getarg ), "char*" );
 	AddFunc( "randseed", reinterpret_cast< slifunc >( do_randseed ), "int" );
 	AddFunc( "rand", reinterpret_cast< slifunc >( do_rand ), "float" );
+	AddFunc( "random", reinterpret_cast< slifunc >( do_random ), "int" );
 	AddFunc( "xps", do_xps, "void" );
 	AddFunc( "disable", do_disable, "void" );
 	AddFunc( "setup_table2", do_setup_table2, "void" );
