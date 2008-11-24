@@ -57,7 +57,7 @@ const Cinfo* initHSolveHubCinfo()
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "compartmentSolve", zombieShared, 
 			sizeof( zombieShared ) / sizeof( Finfo* ),
-			"This is identical to the message sent from clock Ticks to objects. Here it is used to take over \n"
+			"This is identical to the message sent from clock Ticks to objects. Here it is used to take over "
 			"the Process message, usually only as a handle from the solver to the object." ),
 		new SharedFinfo( "hhchannelSolve", zombieShared, 
 			sizeof( zombieShared ) / sizeof( Finfo* ) ),
@@ -129,7 +129,7 @@ Finfo* initCompartmentZombieFinfo()
 		compartmentFields, 
 		sizeof( compartmentFields ) / sizeof( Finfo* ),
 		tf,
-		"These fields will replace the original compartment fields so that the lookups refer to the solver rather \n"
+		"These fields will replace the original compartment fields so that the lookups refer to the solver rather "
 		"than the compartment."
 	);
 

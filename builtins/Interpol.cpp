@@ -70,7 +70,7 @@ const Cinfo* initInterpolCinfo()
 	// Shared message definitions
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "lookupReturn", lookupReturnShared, 2,
-						"This is a shared message for doing lookups on the table.\n"
+						"This is a shared message for doing lookups on the table. "
 						"Receives a double with the x value.  Sends back a double with the looked-up y value." ),
 		
 	///////////////////////////////////////////////////////
@@ -112,8 +112,8 @@ const Cinfo* initInterpolCinfo()
 	{
 		"Name", "Interpol",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "Interpol: Interpolation class. Handles lookup of a y value from an\n"
-				"x value, where the x value is a double. Can either use\n"
+		"Description", "Interpol: Interpolation class. Handles lookup of a y value from an "
+				"x value, where the x value is a double. Can either use "
 				"interpolation or roundoff to the nearest index.",
 	};	
 	static Cinfo interpolCinfo(

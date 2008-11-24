@@ -122,13 +122,13 @@ const Cinfo* initTickCinfo()
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "next", nextShared, 
 			sizeof( nextShared ) / sizeof( Finfo* ),
-			"This is a shared message that connects up to the next Tick in the sequence.\n"
-			"It invokes its incrementTick function and also manages various functions for reset and return values.\n"
-			"It is meant to handle only a single target." ),
+			"This is a shared message that connects up to the next Tick in the sequence.It invokes its "
+			"incrementTick function and also manages various functions for reset and return values. It "
+			"is meant to handle only a single target." ),
 		new SharedFinfo( "prev", prevShared, 
 			sizeof( prevShared ) / sizeof( Finfo* ),
-			"This is the mirror of the previous shared message, it receives this message from the preceding tick.\n"
-			"Again, should only have a singe target." ),
+			"This is the mirror of the previous shared message, it receives this message from the "
+			"preceding tick.Again, should only have a singe target." ),
 		new SharedFinfo( "process", processShared, 
 			sizeof( processShared ) / sizeof( Finfo* ),
 				"This goes to all scheduled objects to call their process events." ),
@@ -137,10 +137,10 @@ const Cinfo* initTickCinfo()
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
 		new SrcFinfo( "processSrc", Ftype1< ProcInfo >::global(),
-			"The process message does the main business of the Tick: \n"
+			"The process message does the main business of the Tick: "
 			"Sends out the Process call to all objects scheduled at this tick." ),
 		new SrcFinfo( "updateDtSrc", Ftype1< double >::global(),
-			"The updateDt message goes to the parent ClockJob and initiates a resched, because when dt changes \n"
+			"The updateDt message goes to the parent ClockJob and initiates a resched, because when dt changes "
 			"the order of the ticks needs to be updated." ),
 
 	///////////////////////////////////////////////////////

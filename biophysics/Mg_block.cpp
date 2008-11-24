@@ -88,8 +88,8 @@ const Cinfo* initMg_blockCinfo()
 	{
 		"Name", "Mg_block",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "Mg_block: Hodgkin-Huxley type voltage-gated Ion channel. Something\n"
-				"like the old tabchannel from GENESIS, but also presents\n"
+		"Description", "Mg_block: Hodgkin-Huxley type voltage-gated Ion channel. Something "
+				"like the old tabchannel from GENESIS, but also presents "
 				"a similar interface as hhchan from GENESIS. ",
 	};	
 	static Cinfo Mg_blockCinfo(

@@ -34,7 +34,7 @@ const Cinfo* initSched()
 const Cinfo SchedWrapper::cinfo_(
 	"Sched",
 	"Upinder S. Bhalla, Nov 2005, NCBS",
-	"Sched: Scheduler root class. Controls multiple jobs for I/O and \nprocessing.",
+	"Sched: Scheduler root class. Controls multiple jobs for I/O and processing.",
 	"Neutral",
 	SchedWrapper::fieldArray_,
 	sizeof(SchedWrapper::fieldArray_)/sizeof(Finfo *),
