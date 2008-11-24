@@ -25,6 +25,7 @@ namespace pymoose
         PyMooseBase(const Id& src, string name, Id& parent);
         
         virtual ~PyMooseBase();
+        
         static bool destroy(Id id);    
         static void endSimulation();    
         virtual const std::string& getType() = 0;
@@ -36,6 +37,7 @@ namespace pymoose
         const std::string __get_path() const;   
         const Id* __get_id() const;
         const std::string __get_name() const;
+//        static const std::string __get_docString() const;
         void useClock(int clockNo, string func="process");
         void useClock(Id clock, string func="process");        
         bool connect(std::string field, PyMooseBase* dest, std::string destField);
