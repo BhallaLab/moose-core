@@ -69,6 +69,14 @@
 
 
 
+** New help() function introduced for retrieving pymoose objects/classes
+   The Python functions and fields do not match MOOSE exactly (sometimes names
+   change, additional functions are introduced in PyMOOSE, etc. Swig autodoc
+   option automatically inserts quite a bit of documentation (at least
+   function parameter names and data types) which returned by python built-in
+   help function. So I prefer to maintain both MOOSE built-in help and python
+   help system as complementary documentation.
+
 * INCONSISTENCIES
   There are places where MOOSE and/or PyMOOSE are inconsistent in coding
   conventions or naming conventions. We need to weed them out before going to

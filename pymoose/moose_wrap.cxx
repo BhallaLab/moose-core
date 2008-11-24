@@ -25040,6 +25040,51 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PyMooseContext_doc(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  std::string *arg2 = 0 ;
+  std::string result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_doc",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_doc" "', argument " "1"" of type '" "pymoose::PyMooseContext const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PyMooseContext_doc" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_doc" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = ((pymoose::PyMooseContext const *)arg1)->doc((std::string const &)*arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN int Swig_var_PyMooseContext_separator_set(PyObject *) {
   SWIG_Error(SWIG_AttributeError,"Variable PyMooseContext_separator is read-only.");
   return 1;
@@ -99792,1655 +99837,2490 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"PySwigIterator___add__", _wrap_PySwigIterator___add__, METH_VARARGS, NULL},
 	 { (char *)"PySwigIterator___sub__", _wrap_PySwigIterator___sub__, METH_VARARGS, NULL},
 	 { (char *)"PySwigIterator_swigregister", PySwigIterator_swigregister, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_iterator", _wrap_uint_vector_iterator, METH_VARARGS, NULL},
-	 { (char *)"uint_vector___nonzero__", _wrap_uint_vector___nonzero__, METH_VARARGS, NULL},
-	 { (char *)"uint_vector___len__", _wrap_uint_vector___len__, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_pop", _wrap_uint_vector_pop, METH_VARARGS, NULL},
-	 { (char *)"uint_vector___getslice__", _wrap_uint_vector___getslice__, METH_VARARGS, NULL},
-	 { (char *)"uint_vector___setslice__", _wrap_uint_vector___setslice__, METH_VARARGS, NULL},
-	 { (char *)"uint_vector___delslice__", _wrap_uint_vector___delslice__, METH_VARARGS, NULL},
-	 { (char *)"uint_vector___delitem__", _wrap_uint_vector___delitem__, METH_VARARGS, NULL},
-	 { (char *)"uint_vector___getitem__", _wrap_uint_vector___getitem__, METH_VARARGS, NULL},
-	 { (char *)"uint_vector___setitem__", _wrap_uint_vector___setitem__, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_append", _wrap_uint_vector_append, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_empty", _wrap_uint_vector_empty, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_size", _wrap_uint_vector_size, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_clear", _wrap_uint_vector_clear, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_swap", _wrap_uint_vector_swap, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_get_allocator", _wrap_uint_vector_get_allocator, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_begin", _wrap_uint_vector_begin, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_end", _wrap_uint_vector_end, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_rbegin", _wrap_uint_vector_rbegin, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_rend", _wrap_uint_vector_rend, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_pop_back", _wrap_uint_vector_pop_back, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_erase", _wrap_uint_vector_erase, METH_VARARGS, NULL},
-	 { (char *)"new_uint_vector", _wrap_new_uint_vector, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_push_back", _wrap_uint_vector_push_back, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_front", _wrap_uint_vector_front, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_back", _wrap_uint_vector_back, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_assign", _wrap_uint_vector_assign, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_resize", _wrap_uint_vector_resize, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_insert", _wrap_uint_vector_insert, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_reserve", _wrap_uint_vector_reserve, METH_VARARGS, NULL},
-	 { (char *)"uint_vector_capacity", _wrap_uint_vector_capacity, METH_VARARGS, NULL},
-	 { (char *)"delete_uint_vector", _wrap_delete_uint_vector, METH_VARARGS, NULL},
+	 { (char *)"uint_vector_iterator", _wrap_uint_vector_iterator, METH_VARARGS, (char *)"uint_vector_iterator(uint_vector self, PyObject PYTHON_SELF) -> PySwigIterator"},
+	 { (char *)"uint_vector___nonzero__", _wrap_uint_vector___nonzero__, METH_VARARGS, (char *)"uint_vector___nonzero__(uint_vector self) -> bool"},
+	 { (char *)"uint_vector___len__", _wrap_uint_vector___len__, METH_VARARGS, (char *)"uint_vector___len__(uint_vector self) -> size_type"},
+	 { (char *)"uint_vector_pop", _wrap_uint_vector_pop, METH_VARARGS, (char *)"uint_vector_pop(uint_vector self) -> value_type"},
+	 { (char *)"uint_vector___getslice__", _wrap_uint_vector___getslice__, METH_VARARGS, (char *)"uint_vector___getslice__(uint_vector self, difference_type i, difference_type j) -> uint_vector"},
+	 { (char *)"uint_vector___setslice__", _wrap_uint_vector___setslice__, METH_VARARGS, (char *)"\n"
+		"uint_vector___setslice__(uint_vector self, difference_type i, difference_type j, \n"
+		"    uint_vector v)\n"
+		""},
+	 { (char *)"uint_vector___delslice__", _wrap_uint_vector___delslice__, METH_VARARGS, (char *)"uint_vector___delslice__(uint_vector self, difference_type i, difference_type j)"},
+	 { (char *)"uint_vector___delitem__", _wrap_uint_vector___delitem__, METH_VARARGS, (char *)"uint_vector___delitem__(uint_vector self, difference_type i)"},
+	 { (char *)"uint_vector___getitem__", _wrap_uint_vector___getitem__, METH_VARARGS, (char *)"uint_vector___getitem__(uint_vector self, difference_type i) -> value_type"},
+	 { (char *)"uint_vector___setitem__", _wrap_uint_vector___setitem__, METH_VARARGS, (char *)"uint_vector___setitem__(uint_vector self, difference_type i, value_type x)"},
+	 { (char *)"uint_vector_append", _wrap_uint_vector_append, METH_VARARGS, (char *)"uint_vector_append(uint_vector self, value_type x)"},
+	 { (char *)"uint_vector_empty", _wrap_uint_vector_empty, METH_VARARGS, (char *)"uint_vector_empty(uint_vector self) -> bool"},
+	 { (char *)"uint_vector_size", _wrap_uint_vector_size, METH_VARARGS, (char *)"uint_vector_size(uint_vector self) -> size_type"},
+	 { (char *)"uint_vector_clear", _wrap_uint_vector_clear, METH_VARARGS, (char *)"uint_vector_clear(uint_vector self)"},
+	 { (char *)"uint_vector_swap", _wrap_uint_vector_swap, METH_VARARGS, (char *)"uint_vector_swap(uint_vector self, uint_vector v)"},
+	 { (char *)"uint_vector_get_allocator", _wrap_uint_vector_get_allocator, METH_VARARGS, (char *)"uint_vector_get_allocator(uint_vector self) -> allocator_type"},
+	 { (char *)"uint_vector_begin", _wrap_uint_vector_begin, METH_VARARGS, (char *)"\n"
+		"begin() -> iterator\n"
+		"uint_vector_begin(uint_vector self) -> const_iterator\n"
+		""},
+	 { (char *)"uint_vector_end", _wrap_uint_vector_end, METH_VARARGS, (char *)"\n"
+		"end() -> iterator\n"
+		"uint_vector_end(uint_vector self) -> const_iterator\n"
+		""},
+	 { (char *)"uint_vector_rbegin", _wrap_uint_vector_rbegin, METH_VARARGS, (char *)"\n"
+		"rbegin() -> reverse_iterator\n"
+		"uint_vector_rbegin(uint_vector self) -> const_reverse_iterator\n"
+		""},
+	 { (char *)"uint_vector_rend", _wrap_uint_vector_rend, METH_VARARGS, (char *)"\n"
+		"rend() -> reverse_iterator\n"
+		"uint_vector_rend(uint_vector self) -> const_reverse_iterator\n"
+		""},
+	 { (char *)"uint_vector_pop_back", _wrap_uint_vector_pop_back, METH_VARARGS, (char *)"uint_vector_pop_back(uint_vector self)"},
+	 { (char *)"uint_vector_erase", _wrap_uint_vector_erase, METH_VARARGS, (char *)"\n"
+		"erase(iterator pos) -> iterator\n"
+		"uint_vector_erase(uint_vector self, iterator first, iterator last) -> iterator\n"
+		""},
+	 { (char *)"new_uint_vector", _wrap_new_uint_vector, METH_VARARGS, (char *)"\n"
+		"uint_vector()\n"
+		"uint_vector(uint_vector ?)\n"
+		"uint_vector(size_type size)\n"
+		"new_uint_vector(size_type size, value_type value) -> uint_vector\n"
+		""},
+	 { (char *)"uint_vector_push_back", _wrap_uint_vector_push_back, METH_VARARGS, (char *)"uint_vector_push_back(uint_vector self, value_type x)"},
+	 { (char *)"uint_vector_front", _wrap_uint_vector_front, METH_VARARGS, (char *)"uint_vector_front(uint_vector self) -> value_type"},
+	 { (char *)"uint_vector_back", _wrap_uint_vector_back, METH_VARARGS, (char *)"uint_vector_back(uint_vector self) -> value_type"},
+	 { (char *)"uint_vector_assign", _wrap_uint_vector_assign, METH_VARARGS, (char *)"uint_vector_assign(uint_vector self, size_type n, value_type x)"},
+	 { (char *)"uint_vector_resize", _wrap_uint_vector_resize, METH_VARARGS, (char *)"\n"
+		"resize(size_type new_size)\n"
+		"uint_vector_resize(uint_vector self, size_type new_size, value_type x)\n"
+		""},
+	 { (char *)"uint_vector_insert", _wrap_uint_vector_insert, METH_VARARGS, (char *)"\n"
+		"insert(iterator pos, value_type x) -> iterator\n"
+		"uint_vector_insert(uint_vector self, iterator pos, size_type n, value_type x)\n"
+		""},
+	 { (char *)"uint_vector_reserve", _wrap_uint_vector_reserve, METH_VARARGS, (char *)"uint_vector_reserve(uint_vector self, size_type n)"},
+	 { (char *)"uint_vector_capacity", _wrap_uint_vector_capacity, METH_VARARGS, (char *)"uint_vector_capacity(uint_vector self) -> size_type"},
+	 { (char *)"delete_uint_vector", _wrap_delete_uint_vector, METH_VARARGS, (char *)"delete_uint_vector(uint_vector self)"},
 	 { (char *)"uint_vector_swigregister", uint_vector_swigregister, METH_VARARGS, NULL},
-	 { (char *)"int_vector_iterator", _wrap_int_vector_iterator, METH_VARARGS, NULL},
-	 { (char *)"int_vector___nonzero__", _wrap_int_vector___nonzero__, METH_VARARGS, NULL},
-	 { (char *)"int_vector___len__", _wrap_int_vector___len__, METH_VARARGS, NULL},
-	 { (char *)"int_vector_pop", _wrap_int_vector_pop, METH_VARARGS, NULL},
-	 { (char *)"int_vector___getslice__", _wrap_int_vector___getslice__, METH_VARARGS, NULL},
-	 { (char *)"int_vector___setslice__", _wrap_int_vector___setslice__, METH_VARARGS, NULL},
-	 { (char *)"int_vector___delslice__", _wrap_int_vector___delslice__, METH_VARARGS, NULL},
-	 { (char *)"int_vector___delitem__", _wrap_int_vector___delitem__, METH_VARARGS, NULL},
-	 { (char *)"int_vector___getitem__", _wrap_int_vector___getitem__, METH_VARARGS, NULL},
-	 { (char *)"int_vector___setitem__", _wrap_int_vector___setitem__, METH_VARARGS, NULL},
-	 { (char *)"int_vector_append", _wrap_int_vector_append, METH_VARARGS, NULL},
-	 { (char *)"int_vector_empty", _wrap_int_vector_empty, METH_VARARGS, NULL},
-	 { (char *)"int_vector_size", _wrap_int_vector_size, METH_VARARGS, NULL},
-	 { (char *)"int_vector_clear", _wrap_int_vector_clear, METH_VARARGS, NULL},
-	 { (char *)"int_vector_swap", _wrap_int_vector_swap, METH_VARARGS, NULL},
-	 { (char *)"int_vector_get_allocator", _wrap_int_vector_get_allocator, METH_VARARGS, NULL},
-	 { (char *)"int_vector_begin", _wrap_int_vector_begin, METH_VARARGS, NULL},
-	 { (char *)"int_vector_end", _wrap_int_vector_end, METH_VARARGS, NULL},
-	 { (char *)"int_vector_rbegin", _wrap_int_vector_rbegin, METH_VARARGS, NULL},
-	 { (char *)"int_vector_rend", _wrap_int_vector_rend, METH_VARARGS, NULL},
-	 { (char *)"int_vector_pop_back", _wrap_int_vector_pop_back, METH_VARARGS, NULL},
-	 { (char *)"int_vector_erase", _wrap_int_vector_erase, METH_VARARGS, NULL},
-	 { (char *)"new_int_vector", _wrap_new_int_vector, METH_VARARGS, NULL},
-	 { (char *)"int_vector_push_back", _wrap_int_vector_push_back, METH_VARARGS, NULL},
-	 { (char *)"int_vector_front", _wrap_int_vector_front, METH_VARARGS, NULL},
-	 { (char *)"int_vector_back", _wrap_int_vector_back, METH_VARARGS, NULL},
-	 { (char *)"int_vector_assign", _wrap_int_vector_assign, METH_VARARGS, NULL},
-	 { (char *)"int_vector_resize", _wrap_int_vector_resize, METH_VARARGS, NULL},
-	 { (char *)"int_vector_insert", _wrap_int_vector_insert, METH_VARARGS, NULL},
-	 { (char *)"int_vector_reserve", _wrap_int_vector_reserve, METH_VARARGS, NULL},
-	 { (char *)"int_vector_capacity", _wrap_int_vector_capacity, METH_VARARGS, NULL},
-	 { (char *)"delete_int_vector", _wrap_delete_int_vector, METH_VARARGS, NULL},
+	 { (char *)"int_vector_iterator", _wrap_int_vector_iterator, METH_VARARGS, (char *)"int_vector_iterator(int_vector self, PyObject PYTHON_SELF) -> PySwigIterator"},
+	 { (char *)"int_vector___nonzero__", _wrap_int_vector___nonzero__, METH_VARARGS, (char *)"int_vector___nonzero__(int_vector self) -> bool"},
+	 { (char *)"int_vector___len__", _wrap_int_vector___len__, METH_VARARGS, (char *)"int_vector___len__(int_vector self) -> size_type"},
+	 { (char *)"int_vector_pop", _wrap_int_vector_pop, METH_VARARGS, (char *)"int_vector_pop(int_vector self) -> value_type"},
+	 { (char *)"int_vector___getslice__", _wrap_int_vector___getslice__, METH_VARARGS, (char *)"int_vector___getslice__(int_vector self, difference_type i, difference_type j) -> int_vector"},
+	 { (char *)"int_vector___setslice__", _wrap_int_vector___setslice__, METH_VARARGS, (char *)"\n"
+		"int_vector___setslice__(int_vector self, difference_type i, difference_type j, \n"
+		"    int_vector v)\n"
+		""},
+	 { (char *)"int_vector___delslice__", _wrap_int_vector___delslice__, METH_VARARGS, (char *)"int_vector___delslice__(int_vector self, difference_type i, difference_type j)"},
+	 { (char *)"int_vector___delitem__", _wrap_int_vector___delitem__, METH_VARARGS, (char *)"int_vector___delitem__(int_vector self, difference_type i)"},
+	 { (char *)"int_vector___getitem__", _wrap_int_vector___getitem__, METH_VARARGS, (char *)"int_vector___getitem__(int_vector self, difference_type i) -> value_type"},
+	 { (char *)"int_vector___setitem__", _wrap_int_vector___setitem__, METH_VARARGS, (char *)"int_vector___setitem__(int_vector self, difference_type i, value_type x)"},
+	 { (char *)"int_vector_append", _wrap_int_vector_append, METH_VARARGS, (char *)"int_vector_append(int_vector self, value_type x)"},
+	 { (char *)"int_vector_empty", _wrap_int_vector_empty, METH_VARARGS, (char *)"int_vector_empty(int_vector self) -> bool"},
+	 { (char *)"int_vector_size", _wrap_int_vector_size, METH_VARARGS, (char *)"int_vector_size(int_vector self) -> size_type"},
+	 { (char *)"int_vector_clear", _wrap_int_vector_clear, METH_VARARGS, (char *)"int_vector_clear(int_vector self)"},
+	 { (char *)"int_vector_swap", _wrap_int_vector_swap, METH_VARARGS, (char *)"int_vector_swap(int_vector self, int_vector v)"},
+	 { (char *)"int_vector_get_allocator", _wrap_int_vector_get_allocator, METH_VARARGS, (char *)"int_vector_get_allocator(int_vector self) -> allocator_type"},
+	 { (char *)"int_vector_begin", _wrap_int_vector_begin, METH_VARARGS, (char *)"\n"
+		"begin() -> iterator\n"
+		"int_vector_begin(int_vector self) -> const_iterator\n"
+		""},
+	 { (char *)"int_vector_end", _wrap_int_vector_end, METH_VARARGS, (char *)"\n"
+		"end() -> iterator\n"
+		"int_vector_end(int_vector self) -> const_iterator\n"
+		""},
+	 { (char *)"int_vector_rbegin", _wrap_int_vector_rbegin, METH_VARARGS, (char *)"\n"
+		"rbegin() -> reverse_iterator\n"
+		"int_vector_rbegin(int_vector self) -> const_reverse_iterator\n"
+		""},
+	 { (char *)"int_vector_rend", _wrap_int_vector_rend, METH_VARARGS, (char *)"\n"
+		"rend() -> reverse_iterator\n"
+		"int_vector_rend(int_vector self) -> const_reverse_iterator\n"
+		""},
+	 { (char *)"int_vector_pop_back", _wrap_int_vector_pop_back, METH_VARARGS, (char *)"int_vector_pop_back(int_vector self)"},
+	 { (char *)"int_vector_erase", _wrap_int_vector_erase, METH_VARARGS, (char *)"\n"
+		"erase(iterator pos) -> iterator\n"
+		"int_vector_erase(int_vector self, iterator first, iterator last) -> iterator\n"
+		""},
+	 { (char *)"new_int_vector", _wrap_new_int_vector, METH_VARARGS, (char *)"\n"
+		"int_vector()\n"
+		"int_vector(int_vector ?)\n"
+		"int_vector(size_type size)\n"
+		"new_int_vector(size_type size, value_type value) -> int_vector\n"
+		""},
+	 { (char *)"int_vector_push_back", _wrap_int_vector_push_back, METH_VARARGS, (char *)"int_vector_push_back(int_vector self, value_type x)"},
+	 { (char *)"int_vector_front", _wrap_int_vector_front, METH_VARARGS, (char *)"int_vector_front(int_vector self) -> value_type"},
+	 { (char *)"int_vector_back", _wrap_int_vector_back, METH_VARARGS, (char *)"int_vector_back(int_vector self) -> value_type"},
+	 { (char *)"int_vector_assign", _wrap_int_vector_assign, METH_VARARGS, (char *)"int_vector_assign(int_vector self, size_type n, value_type x)"},
+	 { (char *)"int_vector_resize", _wrap_int_vector_resize, METH_VARARGS, (char *)"\n"
+		"resize(size_type new_size)\n"
+		"int_vector_resize(int_vector self, size_type new_size, value_type x)\n"
+		""},
+	 { (char *)"int_vector_insert", _wrap_int_vector_insert, METH_VARARGS, (char *)"\n"
+		"insert(iterator pos, value_type x) -> iterator\n"
+		"int_vector_insert(int_vector self, iterator pos, size_type n, value_type x)\n"
+		""},
+	 { (char *)"int_vector_reserve", _wrap_int_vector_reserve, METH_VARARGS, (char *)"int_vector_reserve(int_vector self, size_type n)"},
+	 { (char *)"int_vector_capacity", _wrap_int_vector_capacity, METH_VARARGS, (char *)"int_vector_capacity(int_vector self) -> size_type"},
+	 { (char *)"delete_int_vector", _wrap_delete_int_vector, METH_VARARGS, (char *)"delete_int_vector(int_vector self)"},
 	 { (char *)"int_vector_swigregister", int_vector_swigregister, METH_VARARGS, NULL},
-	 { (char *)"double_vector_iterator", _wrap_double_vector_iterator, METH_VARARGS, NULL},
-	 { (char *)"double_vector___nonzero__", _wrap_double_vector___nonzero__, METH_VARARGS, NULL},
-	 { (char *)"double_vector___len__", _wrap_double_vector___len__, METH_VARARGS, NULL},
-	 { (char *)"double_vector_pop", _wrap_double_vector_pop, METH_VARARGS, NULL},
-	 { (char *)"double_vector___getslice__", _wrap_double_vector___getslice__, METH_VARARGS, NULL},
-	 { (char *)"double_vector___setslice__", _wrap_double_vector___setslice__, METH_VARARGS, NULL},
-	 { (char *)"double_vector___delslice__", _wrap_double_vector___delslice__, METH_VARARGS, NULL},
-	 { (char *)"double_vector___delitem__", _wrap_double_vector___delitem__, METH_VARARGS, NULL},
-	 { (char *)"double_vector___getitem__", _wrap_double_vector___getitem__, METH_VARARGS, NULL},
-	 { (char *)"double_vector___setitem__", _wrap_double_vector___setitem__, METH_VARARGS, NULL},
-	 { (char *)"double_vector_append", _wrap_double_vector_append, METH_VARARGS, NULL},
-	 { (char *)"double_vector_empty", _wrap_double_vector_empty, METH_VARARGS, NULL},
-	 { (char *)"double_vector_size", _wrap_double_vector_size, METH_VARARGS, NULL},
-	 { (char *)"double_vector_clear", _wrap_double_vector_clear, METH_VARARGS, NULL},
-	 { (char *)"double_vector_swap", _wrap_double_vector_swap, METH_VARARGS, NULL},
-	 { (char *)"double_vector_get_allocator", _wrap_double_vector_get_allocator, METH_VARARGS, NULL},
-	 { (char *)"double_vector_begin", _wrap_double_vector_begin, METH_VARARGS, NULL},
-	 { (char *)"double_vector_end", _wrap_double_vector_end, METH_VARARGS, NULL},
-	 { (char *)"double_vector_rbegin", _wrap_double_vector_rbegin, METH_VARARGS, NULL},
-	 { (char *)"double_vector_rend", _wrap_double_vector_rend, METH_VARARGS, NULL},
-	 { (char *)"double_vector_pop_back", _wrap_double_vector_pop_back, METH_VARARGS, NULL},
-	 { (char *)"double_vector_erase", _wrap_double_vector_erase, METH_VARARGS, NULL},
-	 { (char *)"new_double_vector", _wrap_new_double_vector, METH_VARARGS, NULL},
-	 { (char *)"double_vector_push_back", _wrap_double_vector_push_back, METH_VARARGS, NULL},
-	 { (char *)"double_vector_front", _wrap_double_vector_front, METH_VARARGS, NULL},
-	 { (char *)"double_vector_back", _wrap_double_vector_back, METH_VARARGS, NULL},
-	 { (char *)"double_vector_assign", _wrap_double_vector_assign, METH_VARARGS, NULL},
-	 { (char *)"double_vector_resize", _wrap_double_vector_resize, METH_VARARGS, NULL},
-	 { (char *)"double_vector_insert", _wrap_double_vector_insert, METH_VARARGS, NULL},
-	 { (char *)"double_vector_reserve", _wrap_double_vector_reserve, METH_VARARGS, NULL},
-	 { (char *)"double_vector_capacity", _wrap_double_vector_capacity, METH_VARARGS, NULL},
-	 { (char *)"delete_double_vector", _wrap_delete_double_vector, METH_VARARGS, NULL},
+	 { (char *)"double_vector_iterator", _wrap_double_vector_iterator, METH_VARARGS, (char *)"double_vector_iterator(double_vector self, PyObject PYTHON_SELF) -> PySwigIterator"},
+	 { (char *)"double_vector___nonzero__", _wrap_double_vector___nonzero__, METH_VARARGS, (char *)"double_vector___nonzero__(double_vector self) -> bool"},
+	 { (char *)"double_vector___len__", _wrap_double_vector___len__, METH_VARARGS, (char *)"double_vector___len__(double_vector self) -> size_type"},
+	 { (char *)"double_vector_pop", _wrap_double_vector_pop, METH_VARARGS, (char *)"double_vector_pop(double_vector self) -> value_type"},
+	 { (char *)"double_vector___getslice__", _wrap_double_vector___getslice__, METH_VARARGS, (char *)"double_vector___getslice__(double_vector self, difference_type i, difference_type j) -> double_vector"},
+	 { (char *)"double_vector___setslice__", _wrap_double_vector___setslice__, METH_VARARGS, (char *)"\n"
+		"double_vector___setslice__(double_vector self, difference_type i, difference_type j, \n"
+		"    double_vector v)\n"
+		""},
+	 { (char *)"double_vector___delslice__", _wrap_double_vector___delslice__, METH_VARARGS, (char *)"double_vector___delslice__(double_vector self, difference_type i, difference_type j)"},
+	 { (char *)"double_vector___delitem__", _wrap_double_vector___delitem__, METH_VARARGS, (char *)"double_vector___delitem__(double_vector self, difference_type i)"},
+	 { (char *)"double_vector___getitem__", _wrap_double_vector___getitem__, METH_VARARGS, (char *)"double_vector___getitem__(double_vector self, difference_type i) -> value_type"},
+	 { (char *)"double_vector___setitem__", _wrap_double_vector___setitem__, METH_VARARGS, (char *)"double_vector___setitem__(double_vector self, difference_type i, value_type x)"},
+	 { (char *)"double_vector_append", _wrap_double_vector_append, METH_VARARGS, (char *)"double_vector_append(double_vector self, value_type x)"},
+	 { (char *)"double_vector_empty", _wrap_double_vector_empty, METH_VARARGS, (char *)"double_vector_empty(double_vector self) -> bool"},
+	 { (char *)"double_vector_size", _wrap_double_vector_size, METH_VARARGS, (char *)"double_vector_size(double_vector self) -> size_type"},
+	 { (char *)"double_vector_clear", _wrap_double_vector_clear, METH_VARARGS, (char *)"double_vector_clear(double_vector self)"},
+	 { (char *)"double_vector_swap", _wrap_double_vector_swap, METH_VARARGS, (char *)"double_vector_swap(double_vector self, double_vector v)"},
+	 { (char *)"double_vector_get_allocator", _wrap_double_vector_get_allocator, METH_VARARGS, (char *)"double_vector_get_allocator(double_vector self) -> allocator_type"},
+	 { (char *)"double_vector_begin", _wrap_double_vector_begin, METH_VARARGS, (char *)"\n"
+		"begin() -> iterator\n"
+		"double_vector_begin(double_vector self) -> const_iterator\n"
+		""},
+	 { (char *)"double_vector_end", _wrap_double_vector_end, METH_VARARGS, (char *)"\n"
+		"end() -> iterator\n"
+		"double_vector_end(double_vector self) -> const_iterator\n"
+		""},
+	 { (char *)"double_vector_rbegin", _wrap_double_vector_rbegin, METH_VARARGS, (char *)"\n"
+		"rbegin() -> reverse_iterator\n"
+		"double_vector_rbegin(double_vector self) -> const_reverse_iterator\n"
+		""},
+	 { (char *)"double_vector_rend", _wrap_double_vector_rend, METH_VARARGS, (char *)"\n"
+		"rend() -> reverse_iterator\n"
+		"double_vector_rend(double_vector self) -> const_reverse_iterator\n"
+		""},
+	 { (char *)"double_vector_pop_back", _wrap_double_vector_pop_back, METH_VARARGS, (char *)"double_vector_pop_back(double_vector self)"},
+	 { (char *)"double_vector_erase", _wrap_double_vector_erase, METH_VARARGS, (char *)"\n"
+		"erase(iterator pos) -> iterator\n"
+		"double_vector_erase(double_vector self, iterator first, iterator last) -> iterator\n"
+		""},
+	 { (char *)"new_double_vector", _wrap_new_double_vector, METH_VARARGS, (char *)"\n"
+		"double_vector()\n"
+		"double_vector(double_vector ?)\n"
+		"double_vector(size_type size)\n"
+		"new_double_vector(size_type size, value_type value) -> double_vector\n"
+		""},
+	 { (char *)"double_vector_push_back", _wrap_double_vector_push_back, METH_VARARGS, (char *)"double_vector_push_back(double_vector self, value_type x)"},
+	 { (char *)"double_vector_front", _wrap_double_vector_front, METH_VARARGS, (char *)"double_vector_front(double_vector self) -> value_type"},
+	 { (char *)"double_vector_back", _wrap_double_vector_back, METH_VARARGS, (char *)"double_vector_back(double_vector self) -> value_type"},
+	 { (char *)"double_vector_assign", _wrap_double_vector_assign, METH_VARARGS, (char *)"double_vector_assign(double_vector self, size_type n, value_type x)"},
+	 { (char *)"double_vector_resize", _wrap_double_vector_resize, METH_VARARGS, (char *)"\n"
+		"resize(size_type new_size)\n"
+		"double_vector_resize(double_vector self, size_type new_size, value_type x)\n"
+		""},
+	 { (char *)"double_vector_insert", _wrap_double_vector_insert, METH_VARARGS, (char *)"\n"
+		"insert(iterator pos, value_type x) -> iterator\n"
+		"double_vector_insert(double_vector self, iterator pos, size_type n, value_type x)\n"
+		""},
+	 { (char *)"double_vector_reserve", _wrap_double_vector_reserve, METH_VARARGS, (char *)"double_vector_reserve(double_vector self, size_type n)"},
+	 { (char *)"double_vector_capacity", _wrap_double_vector_capacity, METH_VARARGS, (char *)"double_vector_capacity(double_vector self) -> size_type"},
+	 { (char *)"delete_double_vector", _wrap_delete_double_vector, METH_VARARGS, (char *)"delete_double_vector(double_vector self)"},
 	 { (char *)"double_vector_swigregister", double_vector_swigregister, METH_VARARGS, NULL},
-	 { (char *)"string_vector_iterator", _wrap_string_vector_iterator, METH_VARARGS, NULL},
-	 { (char *)"string_vector___nonzero__", _wrap_string_vector___nonzero__, METH_VARARGS, NULL},
-	 { (char *)"string_vector___len__", _wrap_string_vector___len__, METH_VARARGS, NULL},
-	 { (char *)"string_vector_pop", _wrap_string_vector_pop, METH_VARARGS, NULL},
-	 { (char *)"string_vector___getslice__", _wrap_string_vector___getslice__, METH_VARARGS, NULL},
-	 { (char *)"string_vector___setslice__", _wrap_string_vector___setslice__, METH_VARARGS, NULL},
-	 { (char *)"string_vector___delslice__", _wrap_string_vector___delslice__, METH_VARARGS, NULL},
-	 { (char *)"string_vector___delitem__", _wrap_string_vector___delitem__, METH_VARARGS, NULL},
-	 { (char *)"string_vector___getitem__", _wrap_string_vector___getitem__, METH_VARARGS, NULL},
-	 { (char *)"string_vector___setitem__", _wrap_string_vector___setitem__, METH_VARARGS, NULL},
-	 { (char *)"string_vector_append", _wrap_string_vector_append, METH_VARARGS, NULL},
-	 { (char *)"string_vector_empty", _wrap_string_vector_empty, METH_VARARGS, NULL},
-	 { (char *)"string_vector_size", _wrap_string_vector_size, METH_VARARGS, NULL},
-	 { (char *)"string_vector_clear", _wrap_string_vector_clear, METH_VARARGS, NULL},
-	 { (char *)"string_vector_swap", _wrap_string_vector_swap, METH_VARARGS, NULL},
-	 { (char *)"string_vector_get_allocator", _wrap_string_vector_get_allocator, METH_VARARGS, NULL},
-	 { (char *)"string_vector_begin", _wrap_string_vector_begin, METH_VARARGS, NULL},
-	 { (char *)"string_vector_end", _wrap_string_vector_end, METH_VARARGS, NULL},
-	 { (char *)"string_vector_rbegin", _wrap_string_vector_rbegin, METH_VARARGS, NULL},
-	 { (char *)"string_vector_rend", _wrap_string_vector_rend, METH_VARARGS, NULL},
-	 { (char *)"string_vector_pop_back", _wrap_string_vector_pop_back, METH_VARARGS, NULL},
-	 { (char *)"string_vector_erase", _wrap_string_vector_erase, METH_VARARGS, NULL},
-	 { (char *)"new_string_vector", _wrap_new_string_vector, METH_VARARGS, NULL},
-	 { (char *)"string_vector_push_back", _wrap_string_vector_push_back, METH_VARARGS, NULL},
-	 { (char *)"string_vector_front", _wrap_string_vector_front, METH_VARARGS, NULL},
-	 { (char *)"string_vector_back", _wrap_string_vector_back, METH_VARARGS, NULL},
-	 { (char *)"string_vector_assign", _wrap_string_vector_assign, METH_VARARGS, NULL},
-	 { (char *)"string_vector_resize", _wrap_string_vector_resize, METH_VARARGS, NULL},
-	 { (char *)"string_vector_insert", _wrap_string_vector_insert, METH_VARARGS, NULL},
-	 { (char *)"string_vector_reserve", _wrap_string_vector_reserve, METH_VARARGS, NULL},
-	 { (char *)"string_vector_capacity", _wrap_string_vector_capacity, METH_VARARGS, NULL},
-	 { (char *)"delete_string_vector", _wrap_delete_string_vector, METH_VARARGS, NULL},
+	 { (char *)"string_vector_iterator", _wrap_string_vector_iterator, METH_VARARGS, (char *)"string_vector_iterator(string_vector self, PyObject PYTHON_SELF) -> PySwigIterator"},
+	 { (char *)"string_vector___nonzero__", _wrap_string_vector___nonzero__, METH_VARARGS, (char *)"string_vector___nonzero__(string_vector self) -> bool"},
+	 { (char *)"string_vector___len__", _wrap_string_vector___len__, METH_VARARGS, (char *)"string_vector___len__(string_vector self) -> size_type"},
+	 { (char *)"string_vector_pop", _wrap_string_vector_pop, METH_VARARGS, (char *)"string_vector_pop(string_vector self) -> value_type"},
+	 { (char *)"string_vector___getslice__", _wrap_string_vector___getslice__, METH_VARARGS, (char *)"string_vector___getslice__(string_vector self, difference_type i, difference_type j) -> string_vector"},
+	 { (char *)"string_vector___setslice__", _wrap_string_vector___setslice__, METH_VARARGS, (char *)"\n"
+		"string_vector___setslice__(string_vector self, difference_type i, difference_type j, \n"
+		"    string_vector v)\n"
+		""},
+	 { (char *)"string_vector___delslice__", _wrap_string_vector___delslice__, METH_VARARGS, (char *)"string_vector___delslice__(string_vector self, difference_type i, difference_type j)"},
+	 { (char *)"string_vector___delitem__", _wrap_string_vector___delitem__, METH_VARARGS, (char *)"string_vector___delitem__(string_vector self, difference_type i)"},
+	 { (char *)"string_vector___getitem__", _wrap_string_vector___getitem__, METH_VARARGS, (char *)"string_vector___getitem__(string_vector self, difference_type i) -> value_type"},
+	 { (char *)"string_vector___setitem__", _wrap_string_vector___setitem__, METH_VARARGS, (char *)"string_vector___setitem__(string_vector self, difference_type i, value_type x)"},
+	 { (char *)"string_vector_append", _wrap_string_vector_append, METH_VARARGS, (char *)"string_vector_append(string_vector self, value_type x)"},
+	 { (char *)"string_vector_empty", _wrap_string_vector_empty, METH_VARARGS, (char *)"string_vector_empty(string_vector self) -> bool"},
+	 { (char *)"string_vector_size", _wrap_string_vector_size, METH_VARARGS, (char *)"string_vector_size(string_vector self) -> size_type"},
+	 { (char *)"string_vector_clear", _wrap_string_vector_clear, METH_VARARGS, (char *)"string_vector_clear(string_vector self)"},
+	 { (char *)"string_vector_swap", _wrap_string_vector_swap, METH_VARARGS, (char *)"string_vector_swap(string_vector self, string_vector v)"},
+	 { (char *)"string_vector_get_allocator", _wrap_string_vector_get_allocator, METH_VARARGS, (char *)"string_vector_get_allocator(string_vector self) -> allocator_type"},
+	 { (char *)"string_vector_begin", _wrap_string_vector_begin, METH_VARARGS, (char *)"\n"
+		"begin() -> iterator\n"
+		"string_vector_begin(string_vector self) -> const_iterator\n"
+		""},
+	 { (char *)"string_vector_end", _wrap_string_vector_end, METH_VARARGS, (char *)"\n"
+		"end() -> iterator\n"
+		"string_vector_end(string_vector self) -> const_iterator\n"
+		""},
+	 { (char *)"string_vector_rbegin", _wrap_string_vector_rbegin, METH_VARARGS, (char *)"\n"
+		"rbegin() -> reverse_iterator\n"
+		"string_vector_rbegin(string_vector self) -> const_reverse_iterator\n"
+		""},
+	 { (char *)"string_vector_rend", _wrap_string_vector_rend, METH_VARARGS, (char *)"\n"
+		"rend() -> reverse_iterator\n"
+		"string_vector_rend(string_vector self) -> const_reverse_iterator\n"
+		""},
+	 { (char *)"string_vector_pop_back", _wrap_string_vector_pop_back, METH_VARARGS, (char *)"string_vector_pop_back(string_vector self)"},
+	 { (char *)"string_vector_erase", _wrap_string_vector_erase, METH_VARARGS, (char *)"\n"
+		"erase(iterator pos) -> iterator\n"
+		"string_vector_erase(string_vector self, iterator first, iterator last) -> iterator\n"
+		""},
+	 { (char *)"new_string_vector", _wrap_new_string_vector, METH_VARARGS, (char *)"\n"
+		"string_vector()\n"
+		"string_vector(string_vector ?)\n"
+		"string_vector(size_type size)\n"
+		"new_string_vector(size_type size, value_type value) -> string_vector\n"
+		""},
+	 { (char *)"string_vector_push_back", _wrap_string_vector_push_back, METH_VARARGS, (char *)"string_vector_push_back(string_vector self, value_type x)"},
+	 { (char *)"string_vector_front", _wrap_string_vector_front, METH_VARARGS, (char *)"string_vector_front(string_vector self) -> value_type"},
+	 { (char *)"string_vector_back", _wrap_string_vector_back, METH_VARARGS, (char *)"string_vector_back(string_vector self) -> value_type"},
+	 { (char *)"string_vector_assign", _wrap_string_vector_assign, METH_VARARGS, (char *)"string_vector_assign(string_vector self, size_type n, value_type x)"},
+	 { (char *)"string_vector_resize", _wrap_string_vector_resize, METH_VARARGS, (char *)"\n"
+		"resize(size_type new_size)\n"
+		"string_vector_resize(string_vector self, size_type new_size, value_type x)\n"
+		""},
+	 { (char *)"string_vector_insert", _wrap_string_vector_insert, METH_VARARGS, (char *)"\n"
+		"insert(iterator pos, value_type x) -> iterator\n"
+		"string_vector_insert(string_vector self, iterator pos, size_type n, value_type x)\n"
+		""},
+	 { (char *)"string_vector_reserve", _wrap_string_vector_reserve, METH_VARARGS, (char *)"string_vector_reserve(string_vector self, size_type n)"},
+	 { (char *)"string_vector_capacity", _wrap_string_vector_capacity, METH_VARARGS, (char *)"string_vector_capacity(string_vector self) -> size_type"},
+	 { (char *)"delete_string_vector", _wrap_delete_string_vector, METH_VARARGS, (char *)"delete_string_vector(string_vector self)"},
 	 { (char *)"string_vector_swigregister", string_vector_swigregister, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_iterator", _wrap_Id_vector_iterator, METH_VARARGS, NULL},
-	 { (char *)"Id_vector___nonzero__", _wrap_Id_vector___nonzero__, METH_VARARGS, NULL},
-	 { (char *)"Id_vector___len__", _wrap_Id_vector___len__, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_pop", _wrap_Id_vector_pop, METH_VARARGS, NULL},
-	 { (char *)"Id_vector___getslice__", _wrap_Id_vector___getslice__, METH_VARARGS, NULL},
-	 { (char *)"Id_vector___setslice__", _wrap_Id_vector___setslice__, METH_VARARGS, NULL},
-	 { (char *)"Id_vector___delslice__", _wrap_Id_vector___delslice__, METH_VARARGS, NULL},
-	 { (char *)"Id_vector___delitem__", _wrap_Id_vector___delitem__, METH_VARARGS, NULL},
-	 { (char *)"Id_vector___getitem__", _wrap_Id_vector___getitem__, METH_VARARGS, NULL},
-	 { (char *)"Id_vector___setitem__", _wrap_Id_vector___setitem__, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_append", _wrap_Id_vector_append, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_empty", _wrap_Id_vector_empty, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_size", _wrap_Id_vector_size, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_clear", _wrap_Id_vector_clear, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_swap", _wrap_Id_vector_swap, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_get_allocator", _wrap_Id_vector_get_allocator, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_begin", _wrap_Id_vector_begin, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_end", _wrap_Id_vector_end, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_rbegin", _wrap_Id_vector_rbegin, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_rend", _wrap_Id_vector_rend, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_pop_back", _wrap_Id_vector_pop_back, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_erase", _wrap_Id_vector_erase, METH_VARARGS, NULL},
-	 { (char *)"new_Id_vector", _wrap_new_Id_vector, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_push_back", _wrap_Id_vector_push_back, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_front", _wrap_Id_vector_front, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_back", _wrap_Id_vector_back, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_assign", _wrap_Id_vector_assign, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_resize", _wrap_Id_vector_resize, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_insert", _wrap_Id_vector_insert, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_reserve", _wrap_Id_vector_reserve, METH_VARARGS, NULL},
-	 { (char *)"Id_vector_capacity", _wrap_Id_vector_capacity, METH_VARARGS, NULL},
-	 { (char *)"delete_Id_vector", _wrap_delete_Id_vector, METH_VARARGS, NULL},
+	 { (char *)"Id_vector_iterator", _wrap_Id_vector_iterator, METH_VARARGS, (char *)"Id_vector_iterator(Id_vector self, PyObject PYTHON_SELF) -> PySwigIterator"},
+	 { (char *)"Id_vector___nonzero__", _wrap_Id_vector___nonzero__, METH_VARARGS, (char *)"Id_vector___nonzero__(Id_vector self) -> bool"},
+	 { (char *)"Id_vector___len__", _wrap_Id_vector___len__, METH_VARARGS, (char *)"Id_vector___len__(Id_vector self) -> size_type"},
+	 { (char *)"Id_vector_pop", _wrap_Id_vector_pop, METH_VARARGS, (char *)"Id_vector_pop(Id_vector self) -> value_type"},
+	 { (char *)"Id_vector___getslice__", _wrap_Id_vector___getslice__, METH_VARARGS, (char *)"Id_vector___getslice__(Id_vector self, difference_type i, difference_type j) -> Id_vector"},
+	 { (char *)"Id_vector___setslice__", _wrap_Id_vector___setslice__, METH_VARARGS, (char *)"\n"
+		"Id_vector___setslice__(Id_vector self, difference_type i, difference_type j, \n"
+		"    Id_vector v)\n"
+		""},
+	 { (char *)"Id_vector___delslice__", _wrap_Id_vector___delslice__, METH_VARARGS, (char *)"Id_vector___delslice__(Id_vector self, difference_type i, difference_type j)"},
+	 { (char *)"Id_vector___delitem__", _wrap_Id_vector___delitem__, METH_VARARGS, (char *)"Id_vector___delitem__(Id_vector self, difference_type i)"},
+	 { (char *)"Id_vector___getitem__", _wrap_Id_vector___getitem__, METH_VARARGS, (char *)"Id_vector___getitem__(Id_vector self, difference_type i) -> value_type"},
+	 { (char *)"Id_vector___setitem__", _wrap_Id_vector___setitem__, METH_VARARGS, (char *)"Id_vector___setitem__(Id_vector self, difference_type i, value_type x)"},
+	 { (char *)"Id_vector_append", _wrap_Id_vector_append, METH_VARARGS, (char *)"Id_vector_append(Id_vector self, value_type x)"},
+	 { (char *)"Id_vector_empty", _wrap_Id_vector_empty, METH_VARARGS, (char *)"Id_vector_empty(Id_vector self) -> bool"},
+	 { (char *)"Id_vector_size", _wrap_Id_vector_size, METH_VARARGS, (char *)"Id_vector_size(Id_vector self) -> size_type"},
+	 { (char *)"Id_vector_clear", _wrap_Id_vector_clear, METH_VARARGS, (char *)"Id_vector_clear(Id_vector self)"},
+	 { (char *)"Id_vector_swap", _wrap_Id_vector_swap, METH_VARARGS, (char *)"Id_vector_swap(Id_vector self, Id_vector v)"},
+	 { (char *)"Id_vector_get_allocator", _wrap_Id_vector_get_allocator, METH_VARARGS, (char *)"Id_vector_get_allocator(Id_vector self) -> allocator_type"},
+	 { (char *)"Id_vector_begin", _wrap_Id_vector_begin, METH_VARARGS, (char *)"\n"
+		"begin() -> iterator\n"
+		"Id_vector_begin(Id_vector self) -> const_iterator\n"
+		""},
+	 { (char *)"Id_vector_end", _wrap_Id_vector_end, METH_VARARGS, (char *)"\n"
+		"end() -> iterator\n"
+		"Id_vector_end(Id_vector self) -> const_iterator\n"
+		""},
+	 { (char *)"Id_vector_rbegin", _wrap_Id_vector_rbegin, METH_VARARGS, (char *)"\n"
+		"rbegin() -> reverse_iterator\n"
+		"Id_vector_rbegin(Id_vector self) -> const_reverse_iterator\n"
+		""},
+	 { (char *)"Id_vector_rend", _wrap_Id_vector_rend, METH_VARARGS, (char *)"\n"
+		"rend() -> reverse_iterator\n"
+		"Id_vector_rend(Id_vector self) -> const_reverse_iterator\n"
+		""},
+	 { (char *)"Id_vector_pop_back", _wrap_Id_vector_pop_back, METH_VARARGS, (char *)"Id_vector_pop_back(Id_vector self)"},
+	 { (char *)"Id_vector_erase", _wrap_Id_vector_erase, METH_VARARGS, (char *)"\n"
+		"erase(iterator pos) -> iterator\n"
+		"Id_vector_erase(Id_vector self, iterator first, iterator last) -> iterator\n"
+		""},
+	 { (char *)"new_Id_vector", _wrap_new_Id_vector, METH_VARARGS, (char *)"\n"
+		"Id_vector()\n"
+		"Id_vector(Id_vector ?)\n"
+		"Id_vector(size_type size)\n"
+		"new_Id_vector(size_type size, value_type value) -> Id_vector\n"
+		""},
+	 { (char *)"Id_vector_push_back", _wrap_Id_vector_push_back, METH_VARARGS, (char *)"Id_vector_push_back(Id_vector self, value_type x)"},
+	 { (char *)"Id_vector_front", _wrap_Id_vector_front, METH_VARARGS, (char *)"Id_vector_front(Id_vector self) -> value_type"},
+	 { (char *)"Id_vector_back", _wrap_Id_vector_back, METH_VARARGS, (char *)"Id_vector_back(Id_vector self) -> value_type"},
+	 { (char *)"Id_vector_assign", _wrap_Id_vector_assign, METH_VARARGS, (char *)"Id_vector_assign(Id_vector self, size_type n, value_type x)"},
+	 { (char *)"Id_vector_resize", _wrap_Id_vector_resize, METH_VARARGS, (char *)"\n"
+		"resize(size_type new_size)\n"
+		"Id_vector_resize(Id_vector self, size_type new_size, value_type x)\n"
+		""},
+	 { (char *)"Id_vector_insert", _wrap_Id_vector_insert, METH_VARARGS, (char *)"\n"
+		"insert(iterator pos, value_type x) -> iterator\n"
+		"Id_vector_insert(Id_vector self, iterator pos, size_type n, value_type x)\n"
+		""},
+	 { (char *)"Id_vector_reserve", _wrap_Id_vector_reserve, METH_VARARGS, (char *)"Id_vector_reserve(Id_vector self, size_type n)"},
+	 { (char *)"Id_vector_capacity", _wrap_Id_vector_capacity, METH_VARARGS, (char *)"Id_vector_capacity(Id_vector self) -> size_type"},
+	 { (char *)"delete_Id_vector", _wrap_delete_Id_vector, METH_VARARGS, (char *)"delete_Id_vector(Id_vector self)"},
 	 { (char *)"Id_vector_swigregister", Id_vector_swigregister, METH_VARARGS, NULL},
-	 { (char *)"getParBuf", _wrap_getParBuf, METH_VARARGS, NULL},
-	 { (char *)"getAsyncParBuf", _wrap_getAsyncParBuf, METH_VARARGS, NULL},
-	 { (char *)"initNeutralCinfo", _wrap_initNeutralCinfo, METH_VARARGS, NULL},
-	 { (char *)"separateString", _wrap_separateString, METH_VARARGS, NULL},
-	 { (char *)"parseString", _wrap_parseString, METH_VARARGS, NULL},
-	 { (char *)"delete_Id", _wrap_delete_Id, METH_VARARGS, NULL},
-	 { (char *)"Id_localId", _wrap_Id_localId, METH_VARARGS, NULL},
-	 { (char *)"Id_childId", _wrap_Id_childId, METH_VARARGS, NULL},
-	 { (char *)"Id_scratchId", _wrap_Id_scratchId, METH_VARARGS, NULL},
-	 { (char *)"Id_makeIdOnNode", _wrap_Id_makeIdOnNode, METH_VARARGS, NULL},
-	 { (char *)"Id_shellId", _wrap_Id_shellId, METH_VARARGS, NULL},
-	 { (char *)"Id_postId", _wrap_Id_postId, METH_VARARGS, NULL},
-	 { (char *)"Id_assignIndex", _wrap_Id_assignIndex, METH_VARARGS, NULL},
-	 { (char *)"Id_nextScratchId", _wrap_Id_nextScratchId, METH_VARARGS, NULL},
-	 { (char *)"Id_redefineScratchIds", _wrap_Id_redefineScratchIds, METH_VARARGS, NULL},
-	 { (char *)"Id_regularizeScratch", _wrap_Id_regularizeScratch, METH_VARARGS, NULL},
-	 { (char *)"Id_allotMainIdBlock", _wrap_Id_allotMainIdBlock, METH_VARARGS, NULL},
-	 { (char *)"Id_path", _wrap_Id_path, METH_VARARGS, NULL},
-	 { (char *)"Id_id", _wrap_Id_id, METH_VARARGS, NULL},
-	 { (char *)"Id_index", _wrap_Id_index, METH_VARARGS, NULL},
-	 { (char *)"Id_node", _wrap_Id_node, METH_VARARGS, NULL},
-	 { (char *)"Id_isGlobal", _wrap_Id_isGlobal, METH_VARARGS, NULL},
-	 { (char *)"Id_setGlobal", _wrap_Id_setGlobal, METH_VARARGS, NULL},
-	 { (char *)"Id_setNode", _wrap_Id_setNode, METH_VARARGS, NULL},
-	 { (char *)"Id_lastId", _wrap_Id_lastId, METH_VARARGS, NULL},
-	 { (char *)"Id_badId", _wrap_Id_badId, METH_VARARGS, NULL},
-	 { (char *)"Id_str2Id", _wrap_Id_str2Id, METH_VARARGS, NULL},
-	 { (char *)"Id_id2str", _wrap_Id_id2str, METH_VARARGS, NULL},
-	 { (char *)"Id_bad", _wrap_Id_bad, METH_VARARGS, NULL},
-	 { (char *)"Id_good", _wrap_Id_good, METH_VARARGS, NULL},
-	 { (char *)"Id_zero", _wrap_Id_zero, METH_VARARGS, NULL},
-	 { (char *)"Id_outOfRange", _wrap_Id_outOfRange, METH_VARARGS, NULL},
-	 { (char *)"Id_isScratch", _wrap_Id_isScratch, METH_VARARGS, NULL},
-	 { (char *)"Id_isProxy", _wrap_Id_isProxy, METH_VARARGS, NULL},
-	 { (char *)"Id___eq__", _wrap_Id___eq__, METH_VARARGS, NULL},
-	 { (char *)"Id___ne__", _wrap_Id___ne__, METH_VARARGS, NULL},
-	 { (char *)"Id___lt__", _wrap_Id___lt__, METH_VARARGS, NULL},
-	 { (char *)"Id_setElement", _wrap_Id_setElement, METH_VARARGS, NULL},
-	 { (char *)"new_Id", _wrap_new_Id, METH_VARARGS, NULL},
+	 { (char *)"getParBuf", _wrap_getParBuf, METH_VARARGS, (char *)"getParBuf(Conn c, unsigned int size) -> void"},
+	 { (char *)"getAsyncParBuf", _wrap_getAsyncParBuf, METH_VARARGS, (char *)"getAsyncParBuf(Conn c, unsigned int size) -> void"},
+	 { (char *)"initNeutralCinfo", _wrap_initNeutralCinfo, METH_VARARGS, (char *)"initNeutralCinfo() -> Cinfo"},
+	 { (char *)"separateString", _wrap_separateString, METH_VARARGS, (char *)"separateString(string s, string_vector v, string separator)"},
+	 { (char *)"parseString", _wrap_parseString, METH_VARARGS, (char *)"parseString(string s, string_vector v, char separators)"},
+	 { (char *)"delete_Id", _wrap_delete_Id, METH_VARARGS, (char *)"delete_Id(Id self)"},
+	 { (char *)"Id_localId", _wrap_Id_localId, METH_VARARGS, (char *)"\n"
+		"localId(string path, string separator=\"/\") -> Id\n"
+		"Id_localId(string path) -> Id\n"
+		""},
+	 { (char *)"Id_childId", _wrap_Id_childId, METH_VARARGS, (char *)"Id_childId(Id parent) -> Id"},
+	 { (char *)"Id_scratchId", _wrap_Id_scratchId, METH_VARARGS, (char *)"Id_scratchId() -> Id"},
+	 { (char *)"Id_makeIdOnNode", _wrap_Id_makeIdOnNode, METH_VARARGS, (char *)"Id_makeIdOnNode(unsigned int childNode) -> Id"},
+	 { (char *)"Id_shellId", _wrap_Id_shellId, METH_VARARGS, (char *)"Id_shellId() -> Id"},
+	 { (char *)"Id_postId", _wrap_Id_postId, METH_VARARGS, (char *)"Id_postId(unsigned int node) -> Id"},
+	 { (char *)"Id_assignIndex", _wrap_Id_assignIndex, METH_VARARGS, (char *)"Id_assignIndex(Id self, unsigned int index) -> Id"},
+	 { (char *)"Id_nextScratchId", _wrap_Id_nextScratchId, METH_VARARGS, (char *)"Id_nextScratchId() -> Id"},
+	 { (char *)"Id_redefineScratchIds", _wrap_Id_redefineScratchIds, METH_VARARGS, (char *)"Id_redefineScratchIds(Id last, Nid base) -> bool"},
+	 { (char *)"Id_regularizeScratch", _wrap_Id_regularizeScratch, METH_VARARGS, (char *)"Id_regularizeScratch()"},
+	 { (char *)"Id_allotMainIdBlock", _wrap_Id_allotMainIdBlock, METH_VARARGS, (char *)"Id_allotMainIdBlock(unsigned int size, unsigned int node) -> unsigned int"},
+	 { (char *)"Id_path", _wrap_Id_path, METH_VARARGS, (char *)"\n"
+		"path(string separator=\"/\") -> string\n"
+		"Id_path(Id self) -> string\n"
+		""},
+	 { (char *)"Id_id", _wrap_Id_id, METH_VARARGS, (char *)"Id_id(Id self) -> unsigned int"},
+	 { (char *)"Id_index", _wrap_Id_index, METH_VARARGS, (char *)"Id_index(Id self) -> unsigned int"},
+	 { (char *)"Id_node", _wrap_Id_node, METH_VARARGS, (char *)"Id_node(Id self) -> unsigned int"},
+	 { (char *)"Id_isGlobal", _wrap_Id_isGlobal, METH_VARARGS, (char *)"Id_isGlobal(Id self) -> bool"},
+	 { (char *)"Id_setGlobal", _wrap_Id_setGlobal, METH_VARARGS, (char *)"Id_setGlobal(Id self)"},
+	 { (char *)"Id_setNode", _wrap_Id_setNode, METH_VARARGS, (char *)"Id_setNode(Id self, unsigned int node)"},
+	 { (char *)"Id_lastId", _wrap_Id_lastId, METH_VARARGS, (char *)"Id_lastId() -> Id"},
+	 { (char *)"Id_badId", _wrap_Id_badId, METH_VARARGS, (char *)"Id_badId() -> Id"},
+	 { (char *)"Id_str2Id", _wrap_Id_str2Id, METH_VARARGS, (char *)"Id_str2Id(string s) -> Id"},
+	 { (char *)"Id_id2str", _wrap_Id_id2str, METH_VARARGS, (char *)"Id_id2str(Id id) -> string"},
+	 { (char *)"Id_bad", _wrap_Id_bad, METH_VARARGS, (char *)"Id_bad(Id self) -> bool"},
+	 { (char *)"Id_good", _wrap_Id_good, METH_VARARGS, (char *)"Id_good(Id self) -> bool"},
+	 { (char *)"Id_zero", _wrap_Id_zero, METH_VARARGS, (char *)"Id_zero(Id self) -> bool"},
+	 { (char *)"Id_outOfRange", _wrap_Id_outOfRange, METH_VARARGS, (char *)"Id_outOfRange(Id self) -> bool"},
+	 { (char *)"Id_isScratch", _wrap_Id_isScratch, METH_VARARGS, (char *)"Id_isScratch(Id self) -> bool"},
+	 { (char *)"Id_isProxy", _wrap_Id_isProxy, METH_VARARGS, (char *)"Id_isProxy(Id self) -> bool"},
+	 { (char *)"Id___eq__", _wrap_Id___eq__, METH_VARARGS, (char *)"Id___eq__(Id self, Id other) -> bool"},
+	 { (char *)"Id___ne__", _wrap_Id___ne__, METH_VARARGS, (char *)"Id___ne__(Id self, Id other) -> bool"},
+	 { (char *)"Id___lt__", _wrap_Id___lt__, METH_VARARGS, (char *)"Id___lt__(Id self, Id other) -> bool"},
+	 { (char *)"Id_setElement", _wrap_Id_setElement, METH_VARARGS, (char *)"Id_setElement(Id self, Element e) -> bool"},
+	 { (char *)"new_Id", _wrap_new_Id, METH_VARARGS, (char *)"\n"
+		"Id()\n"
+		"Id(Nid nid)\n"
+		"Id(string path, string separator=\"/\")\n"
+		"Id(string path)\n"
+		"Id(unsigned int i, unsigned int index=0)\n"
+		"new_Id(unsigned int i) -> Id\n"
+		""},
 	 { (char *)"Id_swigregister", Id_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Nid", _wrap_new_Nid, METH_VARARGS, NULL},
-	 { (char *)"Nid_node", _wrap_Nid_node, METH_VARARGS, NULL},
-	 { (char *)"Nid_setNode", _wrap_Nid_setNode, METH_VARARGS, NULL},
-	 { (char *)"delete_Nid", _wrap_delete_Nid, METH_VARARGS, NULL},
+	 { (char *)"new_Nid", _wrap_new_Nid, METH_VARARGS, (char *)"\n"
+		"Nid()\n"
+		"Nid(Id id)\n"
+		"new_Nid(Id id, unsigned int node) -> Nid\n"
+		""},
+	 { (char *)"Nid_node", _wrap_Nid_node, METH_VARARGS, (char *)"Nid_node(Nid self) -> unsigned int"},
+	 { (char *)"Nid_setNode", _wrap_Nid_setNode, METH_VARARGS, (char *)"Nid_setNode(Nid self, unsigned int node)"},
+	 { (char *)"delete_Nid", _wrap_delete_Nid, METH_VARARGS, (char *)"delete_Nid(Nid self)"},
 	 { (char *)"Nid_swigregister", Nid_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_PyMooseContext", _wrap_new_PyMooseContext, METH_VARARGS, NULL},
-	 { (char *)"delete_PyMooseContext", _wrap_delete_PyMooseContext, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_getCwe", _wrap_PyMooseContext_getCwe, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_setCwe", _wrap_PyMooseContext_setCwe, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_getShell", _wrap_PyMooseContext_getShell, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_id", _wrap_PyMooseContext_id, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_create", _wrap_PyMooseContext_create, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_destroy", _wrap_PyMooseContext_destroy, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_end", _wrap_PyMooseContext_end, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_recvCwe", _wrap_PyMooseContext_recvCwe, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_recvElist", _wrap_PyMooseContext_recvElist, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_recvCreate", _wrap_PyMooseContext_recvCreate, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_recvField", _wrap_PyMooseContext_recvField, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_recvWildcardList", _wrap_PyMooseContext_recvWildcardList, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_recvClocks", _wrap_PyMooseContext_recvClocks, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_recvMessageList", _wrap_PyMooseContext_recvMessageList, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_createPyMooseContext", _wrap_PyMooseContext_createPyMooseContext, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_destroyPyMooseContext", _wrap_PyMooseContext_destroyPyMooseContext, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_loadG", _wrap_PyMooseContext_loadG, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_runG", _wrap_PyMooseContext_runG, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_getField", _wrap_PyMooseContext_getField, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_setField", _wrap_PyMooseContext_setField, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_getMessageList", _wrap_PyMooseContext_getMessageList, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_getParent", _wrap_PyMooseContext_getParent, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_getPath", _wrap_PyMooseContext_getPath, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_getName", _wrap_PyMooseContext_getName, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_getChildren", _wrap_PyMooseContext_getChildren, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_pathToId", _wrap_PyMooseContext_pathToId, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_srandom", _wrap_PyMooseContext_srandom, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_step", _wrap_PyMooseContext_step, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_reset", _wrap_PyMooseContext_reset, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_stop", _wrap_PyMooseContext_stop, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_setClock", _wrap_PyMooseContext_setClock, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_getClocks", _wrap_PyMooseContext_getClocks, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_useClock", _wrap_PyMooseContext_useClock, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_addTask", _wrap_PyMooseContext_addTask, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_do_deep_copy", _wrap_PyMooseContext_do_deep_copy, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_deepCopy", _wrap_PyMooseContext_deepCopy, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_move", _wrap_PyMooseContext_move, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_connect", _wrap_PyMooseContext_connect, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_tabFill", _wrap_PyMooseContext_tabFill, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_setupAlpha", _wrap_PyMooseContext_setupAlpha, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_setupTau", _wrap_PyMooseContext_setupTau, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_tweakAlpha", _wrap_PyMooseContext_tweakAlpha, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_tweakTau", _wrap_PyMooseContext_tweakTau, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_readCell", _wrap_PyMooseContext_readCell, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_exists", _wrap_PyMooseContext_exists, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_createMap", _wrap_PyMooseContext_createMap, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_planarConnect", _wrap_PyMooseContext_planarConnect, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_plannarDelay", _wrap_PyMooseContext_plannarDelay, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_planarWeight", _wrap_PyMooseContext_planarWeight, METH_VARARGS, NULL},
-	 { (char *)"PyMooseContext_className", _wrap_PyMooseContext_className, METH_VARARGS, NULL},
+	 { (char *)"new_PyMooseContext", _wrap_new_PyMooseContext, METH_VARARGS, (char *)"new_PyMooseContext() -> PyMooseContext"},
+	 { (char *)"delete_PyMooseContext", _wrap_delete_PyMooseContext, METH_VARARGS, (char *)"delete_PyMooseContext(PyMooseContext self)"},
+	 { (char *)"PyMooseContext_getCwe", _wrap_PyMooseContext_getCwe, METH_VARARGS, (char *)"PyMooseContext_getCwe(PyMooseContext self) -> Id"},
+	 { (char *)"PyMooseContext_setCwe", _wrap_PyMooseContext_setCwe, METH_VARARGS, (char *)"\n"
+		"setCwe(Id elementId)\n"
+		"PyMooseContext_setCwe(PyMooseContext self, string path)\n"
+		""},
+	 { (char *)"PyMooseContext_getShell", _wrap_PyMooseContext_getShell, METH_VARARGS, (char *)"PyMooseContext_getShell(PyMooseContext self) -> Id"},
+	 { (char *)"PyMooseContext_id", _wrap_PyMooseContext_id, METH_VARARGS, (char *)"PyMooseContext_id(PyMooseContext self) -> Id"},
+	 { (char *)"PyMooseContext_create", _wrap_PyMooseContext_create, METH_VARARGS, (char *)"\n"
+		"create(string type, string name, Id parent=Id::badId()) -> Id\n"
+		"PyMooseContext_create(PyMooseContext self, string type, string name) -> Id\n"
+		""},
+	 { (char *)"PyMooseContext_destroy", _wrap_PyMooseContext_destroy, METH_VARARGS, (char *)"PyMooseContext_destroy(PyMooseContext self, Id victim) -> bool"},
+	 { (char *)"PyMooseContext_end", _wrap_PyMooseContext_end, METH_VARARGS, (char *)"PyMooseContext_end(PyMooseContext self)"},
+	 { (char *)"PyMooseContext_recvCwe", _wrap_PyMooseContext_recvCwe, METH_VARARGS, (char *)"PyMooseContext_recvCwe(Conn c, Id i)"},
+	 { (char *)"PyMooseContext_recvElist", _wrap_PyMooseContext_recvElist, METH_VARARGS, (char *)"PyMooseContext_recvElist(Conn c, Id_vector elist)"},
+	 { (char *)"PyMooseContext_recvCreate", _wrap_PyMooseContext_recvCreate, METH_VARARGS, (char *)"PyMooseContext_recvCreate(Conn c, Id i)"},
+	 { (char *)"PyMooseContext_recvField", _wrap_PyMooseContext_recvField, METH_VARARGS, (char *)"PyMooseContext_recvField(Conn c, string value)"},
+	 { (char *)"PyMooseContext_recvWildcardList", _wrap_PyMooseContext_recvWildcardList, METH_VARARGS, (char *)"PyMooseContext_recvWildcardList(Conn c, Id_vector value)"},
+	 { (char *)"PyMooseContext_recvClocks", _wrap_PyMooseContext_recvClocks, METH_VARARGS, (char *)"PyMooseContext_recvClocks(Conn c, double_vector dbls)"},
+	 { (char *)"PyMooseContext_recvMessageList", _wrap_PyMooseContext_recvMessageList, METH_VARARGS, (char *)"PyMooseContext_recvMessageList(Conn c, Id_vector elist, string s)"},
+	 { (char *)"PyMooseContext_createPyMooseContext", _wrap_PyMooseContext_createPyMooseContext, METH_VARARGS, (char *)"PyMooseContext_createPyMooseContext(string contextName, string shellName) -> PyMooseContext"},
+	 { (char *)"PyMooseContext_destroyPyMooseContext", _wrap_PyMooseContext_destroyPyMooseContext, METH_VARARGS, (char *)"PyMooseContext_destroyPyMooseContext(PyMooseContext context)"},
+	 { (char *)"PyMooseContext_loadG", _wrap_PyMooseContext_loadG, METH_VARARGS, (char *)"PyMooseContext_loadG(PyMooseContext self, string script)"},
+	 { (char *)"PyMooseContext_runG", _wrap_PyMooseContext_runG, METH_VARARGS, (char *)"PyMooseContext_runG(PyMooseContext self, string statement)"},
+	 { (char *)"PyMooseContext_getField", _wrap_PyMooseContext_getField, METH_VARARGS, (char *)"PyMooseContext_getField(PyMooseContext self, Id ?, string ?) -> string"},
+	 { (char *)"PyMooseContext_setField", _wrap_PyMooseContext_setField, METH_VARARGS, (char *)"PyMooseContext_setField(PyMooseContext self, Id ?, string ?, string ?)"},
+	 { (char *)"PyMooseContext_getMessageList", _wrap_PyMooseContext_getMessageList, METH_VARARGS, (char *)"\n"
+		"getMessageList(Id obj, string field, bool incoming) -> string_vector\n"
+		"PyMooseContext_getMessageList(PyMooseContext self, Id obj, bool incoming) -> string_vector\n"
+		""},
+	 { (char *)"PyMooseContext_getParent", _wrap_PyMooseContext_getParent, METH_VARARGS, (char *)"PyMooseContext_getParent(PyMooseContext self, Id id) -> Id"},
+	 { (char *)"PyMooseContext_getPath", _wrap_PyMooseContext_getPath, METH_VARARGS, (char *)"PyMooseContext_getPath(PyMooseContext self, Id id) -> string"},
+	 { (char *)"PyMooseContext_getName", _wrap_PyMooseContext_getName, METH_VARARGS, (char *)"PyMooseContext_getName(PyMooseContext self, Id id) -> string"},
+	 { (char *)"PyMooseContext_getChildren", _wrap_PyMooseContext_getChildren, METH_VARARGS, (char *)"\n"
+		"getChildren(Id id) -> Id_vector\n"
+		"PyMooseContext_getChildren(PyMooseContext self, string path) -> Id_vector\n"
+		""},
+	 { (char *)"PyMooseContext_pathToId", _wrap_PyMooseContext_pathToId, METH_VARARGS, (char *)"\n"
+		"pathToId(string path, bool echo=True) -> Id\n"
+		"PyMooseContext_pathToId(PyMooseContext self, string path) -> Id\n"
+		""},
+	 { (char *)"PyMooseContext_srandom", _wrap_PyMooseContext_srandom, METH_VARARGS, (char *)"PyMooseContext_srandom(long seed)"},
+	 { (char *)"PyMooseContext_step", _wrap_PyMooseContext_step, METH_VARARGS, (char *)"\n"
+		"step(double runTime)\n"
+		"step(long multiple)\n"
+		"PyMooseContext_step(PyMooseContext self)\n"
+		""},
+	 { (char *)"PyMooseContext_reset", _wrap_PyMooseContext_reset, METH_VARARGS, (char *)"PyMooseContext_reset(PyMooseContext self)"},
+	 { (char *)"PyMooseContext_stop", _wrap_PyMooseContext_stop, METH_VARARGS, (char *)"PyMooseContext_stop(PyMooseContext self)"},
+	 { (char *)"PyMooseContext_setClock", _wrap_PyMooseContext_setClock, METH_VARARGS, (char *)"\n"
+		"setClock(int clockNo, double dt, int stage=0)\n"
+		"PyMooseContext_setClock(PyMooseContext self, int clockNo, double dt)\n"
+		""},
+	 { (char *)"PyMooseContext_getClocks", _wrap_PyMooseContext_getClocks, METH_VARARGS, (char *)"PyMooseContext_getClocks(PyMooseContext self) -> double_vector"},
+	 { (char *)"PyMooseContext_useClock", _wrap_PyMooseContext_useClock, METH_VARARGS, (char *)"\n"
+		"useClock(string tickName, string path, string func=\"process\")\n"
+		"useClock(string tickName, string path)\n"
+		"useClock(int tickNo, string path, string func=\"process\")\n"
+		"PyMooseContext_useClock(PyMooseContext self, int tickNo, string path)\n"
+		""},
+	 { (char *)"PyMooseContext_addTask", _wrap_PyMooseContext_addTask, METH_VARARGS, (char *)"PyMooseContext_addTask(PyMooseContext self, string arg)"},
+	 { (char *)"PyMooseContext_do_deep_copy", _wrap_PyMooseContext_do_deep_copy, METH_VARARGS, (char *)"PyMooseContext_do_deep_copy(PyMooseContext self, Id object, string new_name, Id dest)"},
+	 { (char *)"PyMooseContext_deepCopy", _wrap_PyMooseContext_deepCopy, METH_VARARGS, (char *)"PyMooseContext_deepCopy(PyMooseContext self, Id object, string new_name, Id dest) -> Id"},
+	 { (char *)"PyMooseContext_move", _wrap_PyMooseContext_move, METH_VARARGS, (char *)"PyMooseContext_move(PyMooseContext self, Id object, string new_name, Id dest)"},
+	 { (char *)"PyMooseContext_connect", _wrap_PyMooseContext_connect, METH_VARARGS, (char *)"\n"
+		"PyMooseContext_connect(PyMooseContext self, Id src, string srcField, Id dest, \n"
+		"    string destField) -> bool\n"
+		""},
+	 { (char *)"PyMooseContext_tabFill", _wrap_PyMooseContext_tabFill, METH_VARARGS, (char *)"PyMooseContext_tabFill(PyMooseContext self, Id table, int xdivs, int mode)"},
+	 { (char *)"PyMooseContext_setupAlpha", _wrap_PyMooseContext_setupAlpha, METH_VARARGS, (char *)"\n"
+		"setupAlpha(string channel, string gate, double_vector parms)\n"
+		"setupAlpha(string channel, string gate, double AA, double AB, \n"
+		"    double AC, double AD, double AF, double BA, double BB, \n"
+		"    double BC, double BD, double BF, double size, \n"
+		"    double min, double max)\n"
+		"PyMooseContext_setupAlpha(PyMooseContext self, Id gateId, double_vector parms)\n"
+		""},
+	 { (char *)"PyMooseContext_setupTau", _wrap_PyMooseContext_setupTau, METH_VARARGS, (char *)"\n"
+		"setupTau(string channel, string gate, double_vector parms)\n"
+		"setupTau(string channel, string gate, double AA, double AB, \n"
+		"    double AC, double AD, double AF, double BA, double BB, \n"
+		"    double BC, double BD, double BF, double size, \n"
+		"    double min, double max)\n"
+		"PyMooseContext_setupTau(PyMooseContext self, Id gateId, double_vector parms)\n"
+		""},
+	 { (char *)"PyMooseContext_tweakAlpha", _wrap_PyMooseContext_tweakAlpha, METH_VARARGS, (char *)"\n"
+		"tweakAlpha(string channel, string gate)\n"
+		"PyMooseContext_tweakAlpha(PyMooseContext self, Id gateId)\n"
+		""},
+	 { (char *)"PyMooseContext_tweakTau", _wrap_PyMooseContext_tweakTau, METH_VARARGS, (char *)"\n"
+		"tweakTau(string channel, string gate)\n"
+		"PyMooseContext_tweakTau(PyMooseContext self, Id gateId)\n"
+		""},
+	 { (char *)"PyMooseContext_readCell", _wrap_PyMooseContext_readCell, METH_VARARGS, (char *)"\n"
+		"readCell(string filename, string cellpath, double cm, double rm, \n"
+		"    double ra, double erestAct, double eleak)\n"
+		"readCell(string filename, string cellpath, double_vector params)\n"
+		"PyMooseContext_readCell(PyMooseContext self, string fileName, string cellPath)\n"
+		""},
+	 { (char *)"PyMooseContext_exists", _wrap_PyMooseContext_exists, METH_VARARGS, (char *)"\n"
+		"exists(Id id) -> bool\n"
+		"PyMooseContext_exists(PyMooseContext self, string path) -> bool\n"
+		""},
+	 { (char *)"PyMooseContext_createMap", _wrap_PyMooseContext_createMap, METH_VARARGS, (char *)"\n"
+		"createMap(string src, string dest, unsigned int nx, unsigned int ny, \n"
+		"    double dx=1.0, double dy=1.0, double xo=0.0, \n"
+		"    double yo=0.0, bool isObject=True)\n"
+		"createMap(string src, string dest, unsigned int nx, unsigned int ny, \n"
+		"    double dx=1.0, double dy=1.0, double xo=0.0, \n"
+		"    double yo=0.0)\n"
+		"createMap(string src, string dest, unsigned int nx, unsigned int ny, \n"
+		"    double dx=1.0, double dy=1.0, double xo=0.0)\n"
+		"createMap(string src, string dest, unsigned int nx, unsigned int ny, \n"
+		"    double dx=1.0, double dy=1.0)\n"
+		"createMap(string src, string dest, unsigned int nx, unsigned int ny, \n"
+		"    double dx=1.0)\n"
+		"createMap(string src, string dest, unsigned int nx, unsigned int ny)\n"
+		"createMap(Id src, Id dest, string name, unsigned int nx, unsigned int ny, \n"
+		"    double dx=1.0, double dy=1.0, double xo=0.0, \n"
+		"    double yo=0.0)\n"
+		"createMap(Id src, Id dest, string name, unsigned int nx, unsigned int ny, \n"
+		"    double dx=1.0, double dy=1.0, double xo=0.0)\n"
+		"createMap(Id src, Id dest, string name, unsigned int nx, unsigned int ny, \n"
+		"    double dx=1.0, double dy=1.0)\n"
+		"createMap(Id src, Id dest, string name, unsigned int nx, unsigned int ny, \n"
+		"    double dx=1.0)\n"
+		"createMap(Id src, Id dest, string name, unsigned int nx, unsigned int ny)\n"
+		"PyMooseContext_createMap(PyMooseContext self, Id src, Id dest, string name, \n"
+		"    double_vector param)\n"
+		""},
+	 { (char *)"PyMooseContext_planarConnect", _wrap_PyMooseContext_planarConnect, METH_VARARGS, (char *)"\n"
+		"planarConnect(string src, string dst, double probability=1.0)\n"
+		"PyMooseContext_planarConnect(PyMooseContext self, string src, string dst)\n"
+		""},
+	 { (char *)"PyMooseContext_plannarDelay", _wrap_PyMooseContext_plannarDelay, METH_VARARGS, (char *)"PyMooseContext_plannarDelay(PyMooseContext self, string src, double delay)"},
+	 { (char *)"PyMooseContext_planarWeight", _wrap_PyMooseContext_planarWeight, METH_VARARGS, (char *)"PyMooseContext_planarWeight(PyMooseContext self, string src, double weight)"},
+	 { (char *)"PyMooseContext_className", _wrap_PyMooseContext_className, METH_VARARGS, (char *)"PyMooseContext_className(PyMooseContext self, Id objId) -> string"},
+	 { (char *)"PyMooseContext_doc", _wrap_PyMooseContext_doc, METH_VARARGS, (char *)"PyMooseContext_doc(PyMooseContext self, string className) -> string"},
 	 { (char *)"PyMooseContext_swigregister", PyMooseContext_swigregister, METH_VARARGS, NULL},
-	 { (char *)"delete_PyMooseBase", _wrap_delete_PyMooseBase, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_destroy", _wrap_PyMooseBase_destroy, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_endSimulation", _wrap_PyMooseBase_endSimulation, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_getType", _wrap_PyMooseBase_getType, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_getSeparator", _wrap_PyMooseBase_getSeparator, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_getContext", _wrap_PyMooseBase_getContext, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase___get_className", _wrap_PyMooseBase___get_className, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_children", _wrap_PyMooseBase_children, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase___get_parent", _wrap_PyMooseBase___get_parent, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase___get_path", _wrap_PyMooseBase___get_path, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase___get_id", _wrap_PyMooseBase___get_id, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase___get_name", _wrap_PyMooseBase___get_name, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_useClock", _wrap_PyMooseBase_useClock, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_connect", _wrap_PyMooseBase_connect, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_getMessageList", _wrap_PyMooseBase_getMessageList, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_inMessages", _wrap_PyMooseBase_inMessages, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_outMessages", _wrap_PyMooseBase_outMessages, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_exists", _wrap_PyMooseBase_exists, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_le", _wrap_PyMooseBase_le, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_pwe", _wrap_PyMooseBase_pwe, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_ce", _wrap_PyMooseBase_ce, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_pathToId", _wrap_PyMooseBase_pathToId, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_idToPath", _wrap_PyMooseBase_idToPath, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_getParent", _wrap_PyMooseBase_getParent, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_getChildren", _wrap_PyMooseBase_getChildren, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_initSimulation", _wrap_PyMooseBase_initSimulation, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_id_get", _wrap_PyMooseBase_id_get, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_parent_get", _wrap_PyMooseBase_parent_get, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_className_get", _wrap_PyMooseBase_className_get, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_name_get", _wrap_PyMooseBase_name_get, METH_VARARGS, NULL},
-	 { (char *)"PyMooseBase_path_get", _wrap_PyMooseBase_path_get, METH_VARARGS, NULL},
+	 { (char *)"delete_PyMooseBase", _wrap_delete_PyMooseBase, METH_VARARGS, (char *)"delete_PyMooseBase(PyMooseBase self)"},
+	 { (char *)"PyMooseBase_destroy", _wrap_PyMooseBase_destroy, METH_VARARGS, (char *)"PyMooseBase_destroy(Id id) -> bool"},
+	 { (char *)"PyMooseBase_endSimulation", _wrap_PyMooseBase_endSimulation, METH_VARARGS, (char *)"PyMooseBase_endSimulation()"},
+	 { (char *)"PyMooseBase_getType", _wrap_PyMooseBase_getType, METH_VARARGS, (char *)"PyMooseBase_getType(PyMooseBase self) -> string"},
+	 { (char *)"PyMooseBase_getSeparator", _wrap_PyMooseBase_getSeparator, METH_VARARGS, (char *)"PyMooseBase_getSeparator(PyMooseBase self) -> string"},
+	 { (char *)"PyMooseBase_getContext", _wrap_PyMooseBase_getContext, METH_VARARGS, (char *)"PyMooseBase_getContext() -> PyMooseContext"},
+	 { (char *)"PyMooseBase___get_className", _wrap_PyMooseBase___get_className, METH_VARARGS, (char *)"PyMooseBase___get_className(PyMooseBase self) -> string"},
+	 { (char *)"PyMooseBase_children", _wrap_PyMooseBase_children, METH_VARARGS, (char *)"PyMooseBase_children(PyMooseBase self) -> Id_vector"},
+	 { (char *)"PyMooseBase___get_parent", _wrap_PyMooseBase___get_parent, METH_VARARGS, (char *)"PyMooseBase___get_parent(PyMooseBase self) -> Id"},
+	 { (char *)"PyMooseBase___get_path", _wrap_PyMooseBase___get_path, METH_VARARGS, (char *)"PyMooseBase___get_path(PyMooseBase self) -> string"},
+	 { (char *)"PyMooseBase___get_id", _wrap_PyMooseBase___get_id, METH_VARARGS, (char *)"PyMooseBase___get_id(PyMooseBase self) -> Id"},
+	 { (char *)"PyMooseBase___get_name", _wrap_PyMooseBase___get_name, METH_VARARGS, (char *)"PyMooseBase___get_name(PyMooseBase self) -> string"},
+	 { (char *)"PyMooseBase_useClock", _wrap_PyMooseBase_useClock, METH_VARARGS, (char *)"\n"
+		"useClock(int clockNo, string func=\"process\")\n"
+		"useClock(int clockNo)\n"
+		"useClock(Id clock, string func=\"process\")\n"
+		"PyMooseBase_useClock(PyMooseBase self, Id clock)\n"
+		""},
+	 { (char *)"PyMooseBase_connect", _wrap_PyMooseBase_connect, METH_VARARGS, (char *)"\n"
+		"connect(string field, PyMooseBase dest, string destField) -> bool\n"
+		"PyMooseBase_connect(PyMooseBase self, string field, Id dest, string destField) -> bool\n"
+		""},
+	 { (char *)"PyMooseBase_getMessageList", _wrap_PyMooseBase_getMessageList, METH_VARARGS, (char *)"PyMooseBase_getMessageList(PyMooseBase self, string field, bool isIncoming) -> string_vector"},
+	 { (char *)"PyMooseBase_inMessages", _wrap_PyMooseBase_inMessages, METH_VARARGS, (char *)"PyMooseBase_inMessages(PyMooseBase self) -> string_vector"},
+	 { (char *)"PyMooseBase_outMessages", _wrap_PyMooseBase_outMessages, METH_VARARGS, (char *)"PyMooseBase_outMessages(PyMooseBase self) -> string_vector"},
+	 { (char *)"PyMooseBase_exists", _wrap_PyMooseBase_exists, METH_VARARGS, (char *)"\n"
+		"exists(Id id) -> bool\n"
+		"PyMooseBase_exists(string path) -> bool\n"
+		""},
+	 { (char *)"PyMooseBase_le", _wrap_PyMooseBase_le, METH_VARARGS, (char *)"PyMooseBase_le() -> Id_vector"},
+	 { (char *)"PyMooseBase_pwe", _wrap_PyMooseBase_pwe, METH_VARARGS, (char *)"PyMooseBase_pwe() -> Id"},
+	 { (char *)"PyMooseBase_ce", _wrap_PyMooseBase_ce, METH_VARARGS, (char *)"\n"
+		"ce(Id newElement) -> Id\n"
+		"PyMooseBase_ce(string path) -> Id\n"
+		""},
+	 { (char *)"PyMooseBase_pathToId", _wrap_PyMooseBase_pathToId, METH_VARARGS, (char *)"\n"
+		"pathToId(string path, bool echo=True) -> Id\n"
+		"PyMooseBase_pathToId(string path) -> Id\n"
+		""},
+	 { (char *)"PyMooseBase_idToPath", _wrap_PyMooseBase_idToPath, METH_VARARGS, (char *)"PyMooseBase_idToPath(Id id) -> string"},
+	 { (char *)"PyMooseBase_getParent", _wrap_PyMooseBase_getParent, METH_VARARGS, (char *)"PyMooseBase_getParent(Id id) -> Id"},
+	 { (char *)"PyMooseBase_getChildren", _wrap_PyMooseBase_getChildren, METH_VARARGS, (char *)"PyMooseBase_getChildren(Id id) -> Id_vector"},
+	 { (char *)"PyMooseBase_initSimulation", _wrap_PyMooseBase_initSimulation, METH_VARARGS, (char *)"PyMooseBase_initSimulation()"},
+	 { (char *)"PyMooseBase_id_get", _wrap_PyMooseBase_id_get, METH_VARARGS, (char *)"PyMooseBase_id_get(PyMooseBase self) -> Id"},
+	 { (char *)"PyMooseBase_parent_get", _wrap_PyMooseBase_parent_get, METH_VARARGS, (char *)"PyMooseBase_parent_get(PyMooseBase self) -> Id"},
+	 { (char *)"PyMooseBase_className_get", _wrap_PyMooseBase_className_get, METH_VARARGS, (char *)"PyMooseBase_className_get(PyMooseBase self) -> string"},
+	 { (char *)"PyMooseBase_name_get", _wrap_PyMooseBase_name_get, METH_VARARGS, (char *)"PyMooseBase_name_get(PyMooseBase self) -> string"},
+	 { (char *)"PyMooseBase_path_get", _wrap_PyMooseBase_path_get, METH_VARARGS, (char *)"PyMooseBase_path_get(PyMooseBase self) -> string"},
 	 { (char *)"PyMooseBase_swigregister", PyMooseBase_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Neutral", _wrap_new_Neutral, METH_VARARGS, NULL},
-	 { (char *)"delete_Neutral", _wrap_delete_Neutral, METH_VARARGS, NULL},
-	 { (char *)"Neutral_getType", _wrap_Neutral_getType, METH_VARARGS, NULL},
-	 { (char *)"Neutral___get_childSrc", _wrap_Neutral___get_childSrc, METH_VARARGS, NULL},
-	 { (char *)"Neutral___set_childSrc", _wrap_Neutral___set_childSrc, METH_VARARGS, NULL},
-	 { (char *)"Neutral___get_child", _wrap_Neutral___get_child, METH_VARARGS, NULL},
-	 { (char *)"Neutral___set_child", _wrap_Neutral___set_child, METH_VARARGS, NULL},
-	 { (char *)"Neutral_child_set", _wrap_Neutral_child_set, METH_VARARGS, NULL},
-	 { (char *)"Neutral_child_get", _wrap_Neutral_child_get, METH_VARARGS, NULL},
+	 { (char *)"new_Neutral", _wrap_new_Neutral, METH_VARARGS, (char *)"\n"
+		"Neutral(Id id)\n"
+		"Neutral(string path)\n"
+		"Neutral(string name, Id parentId)\n"
+		"Neutral(string name, PyMooseBase parent)\n"
+		"Neutral(string path, string fileName)\n"
+		"Neutral(Neutral src, string name, PyMooseBase parent)\n"
+		"Neutral(Neutral src, string name, Id parent)\n"
+		"Neutral(Id src, string name, Id parent)\n"
+		"new_Neutral(Neutral src, string path) -> Neutral\n"
+		""},
+	 { (char *)"delete_Neutral", _wrap_delete_Neutral, METH_VARARGS, (char *)"delete_Neutral(Neutral self)"},
+	 { (char *)"Neutral_getType", _wrap_Neutral_getType, METH_VARARGS, (char *)"Neutral_getType(Neutral self) -> string"},
+	 { (char *)"Neutral___get_childSrc", _wrap_Neutral___get_childSrc, METH_VARARGS, (char *)"Neutral___get_childSrc(Neutral self) -> int"},
+	 { (char *)"Neutral___set_childSrc", _wrap_Neutral___set_childSrc, METH_VARARGS, (char *)"Neutral___set_childSrc(Neutral self, int childSrc)"},
+	 { (char *)"Neutral___get_child", _wrap_Neutral___get_child, METH_VARARGS, (char *)"Neutral___get_child(Neutral self) -> int"},
+	 { (char *)"Neutral___set_child", _wrap_Neutral___set_child, METH_VARARGS, (char *)"Neutral___set_child(Neutral self, int child)"},
+	 { (char *)"Neutral_child_set", _wrap_Neutral_child_set, METH_VARARGS, (char *)"Neutral_child_set(Neutral self, int child)"},
+	 { (char *)"Neutral_child_get", _wrap_Neutral_child_get, METH_VARARGS, (char *)"Neutral_child_get(Neutral self) -> int"},
 	 { (char *)"Neutral_swigregister", Neutral_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Class", _wrap_new_Class, METH_VARARGS, NULL},
-	 { (char *)"delete_Class", _wrap_delete_Class, METH_VARARGS, NULL},
-	 { (char *)"Class_getType", _wrap_Class_getType, METH_VARARGS, NULL},
-	 { (char *)"Class___set_name", _wrap_Class___set_name, METH_VARARGS, NULL},
-	 { (char *)"Class___get_author", _wrap_Class___get_author, METH_VARARGS, NULL},
-	 { (char *)"Class___get_description", _wrap_Class___get_description, METH_VARARGS, NULL},
-	 { (char *)"Class___get_tick", _wrap_Class___get_tick, METH_VARARGS, NULL},
-	 { (char *)"Class___set_tick", _wrap_Class___set_tick, METH_VARARGS, NULL},
-	 { (char *)"Class___get_stage", _wrap_Class___get_stage, METH_VARARGS, NULL},
-	 { (char *)"Class___set_stage", _wrap_Class___set_stage, METH_VARARGS, NULL},
-	 { (char *)"Class___get_clock", _wrap_Class___get_clock, METH_VARARGS, NULL},
-	 { (char *)"Class_setClock", _wrap_Class_setClock, METH_VARARGS, NULL},
-	 { (char *)"Class_name_get", _wrap_Class_name_get, METH_VARARGS, NULL},
-	 { (char *)"Class_author_get", _wrap_Class_author_get, METH_VARARGS, NULL},
-	 { (char *)"Class_description_get", _wrap_Class_description_get, METH_VARARGS, NULL},
-	 { (char *)"Class_tick_set", _wrap_Class_tick_set, METH_VARARGS, NULL},
-	 { (char *)"Class_tick_get", _wrap_Class_tick_get, METH_VARARGS, NULL},
-	 { (char *)"Class_stage_set", _wrap_Class_stage_set, METH_VARARGS, NULL},
-	 { (char *)"Class_stage_get", _wrap_Class_stage_get, METH_VARARGS, NULL},
+	 { (char *)"new_Class", _wrap_new_Class, METH_VARARGS, (char *)"\n"
+		"Class(Id id)\n"
+		"Class(string path, string name)\n"
+		"Class(string name, Id parentId)\n"
+		"Class(string name, PyMooseBase parent)\n"
+		"Class(Class src, string name, PyMooseBase parent)\n"
+		"Class(Class src, string name, Id parent)\n"
+		"Class(Id src, string name, Id parent)\n"
+		"new_Class(Class src, string path) -> Class\n"
+		""},
+	 { (char *)"delete_Class", _wrap_delete_Class, METH_VARARGS, (char *)"delete_Class(Class self)"},
+	 { (char *)"Class_getType", _wrap_Class_getType, METH_VARARGS, (char *)"Class_getType(Class self) -> string"},
+	 { (char *)"Class___set_name", _wrap_Class___set_name, METH_VARARGS, (char *)"Class___set_name(Class self, string name)"},
+	 { (char *)"Class___get_author", _wrap_Class___get_author, METH_VARARGS, (char *)"Class___get_author(Class self) -> string"},
+	 { (char *)"Class___get_description", _wrap_Class___get_description, METH_VARARGS, (char *)"Class___get_description(Class self) -> string"},
+	 { (char *)"Class___get_tick", _wrap_Class___get_tick, METH_VARARGS, (char *)"Class___get_tick(Class self) -> unsigned int"},
+	 { (char *)"Class___set_tick", _wrap_Class___set_tick, METH_VARARGS, (char *)"Class___set_tick(Class self, unsigned int ?)"},
+	 { (char *)"Class___get_stage", _wrap_Class___get_stage, METH_VARARGS, (char *)"Class___get_stage(Class self) -> unsigned int"},
+	 { (char *)"Class___set_stage", _wrap_Class___set_stage, METH_VARARGS, (char *)"Class___set_stage(Class self, unsigned int ?)"},
+	 { (char *)"Class___get_clock", _wrap_Class___get_clock, METH_VARARGS, (char *)"Class___get_clock(Class self) -> string"},
+	 { (char *)"Class_setClock", _wrap_Class_setClock, METH_VARARGS, (char *)"Class_setClock(Class self, string function, string clock)"},
+	 { (char *)"Class_name_get", _wrap_Class_name_get, METH_VARARGS, (char *)"Class_name_get(Class self) -> string"},
+	 { (char *)"Class_author_get", _wrap_Class_author_get, METH_VARARGS, (char *)"Class_author_get(Class self) -> string"},
+	 { (char *)"Class_description_get", _wrap_Class_description_get, METH_VARARGS, (char *)"Class_description_get(Class self) -> string"},
+	 { (char *)"Class_tick_set", _wrap_Class_tick_set, METH_VARARGS, (char *)"Class_tick_set(Class self, unsigned int tick)"},
+	 { (char *)"Class_tick_get", _wrap_Class_tick_get, METH_VARARGS, (char *)"Class_tick_get(Class self) -> unsigned int"},
+	 { (char *)"Class_stage_set", _wrap_Class_stage_set, METH_VARARGS, (char *)"Class_stage_set(Class self, unsigned int stage)"},
+	 { (char *)"Class_stage_get", _wrap_Class_stage_get, METH_VARARGS, (char *)"Class_stage_get(Class self) -> unsigned int"},
 	 { (char *)"Class_swigregister", Class_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Cell", _wrap_new_Cell, METH_VARARGS, NULL},
-	 { (char *)"delete_Cell", _wrap_delete_Cell, METH_VARARGS, NULL},
-	 { (char *)"Cell_getType", _wrap_Cell_getType, METH_VARARGS, NULL},
-	 { (char *)"Cell___set_method", _wrap_Cell___set_method, METH_VARARGS, NULL},
-	 { (char *)"Cell___get_method", _wrap_Cell___get_method, METH_VARARGS, NULL},
-	 { (char *)"Cell___get_variableDt", _wrap_Cell___get_variableDt, METH_VARARGS, NULL},
-	 { (char *)"Cell___get_implicit", _wrap_Cell___get_implicit, METH_VARARGS, NULL},
-	 { (char *)"Cell___get_description", _wrap_Cell___get_description, METH_VARARGS, NULL},
-	 { (char *)"Cell_method_set", _wrap_Cell_method_set, METH_VARARGS, NULL},
-	 { (char *)"Cell_method_get", _wrap_Cell_method_get, METH_VARARGS, NULL},
-	 { (char *)"Cell_variableDt_get", _wrap_Cell_variableDt_get, METH_VARARGS, NULL},
-	 { (char *)"Cell_implicit_get", _wrap_Cell_implicit_get, METH_VARARGS, NULL},
-	 { (char *)"Cell_description_get", _wrap_Cell_description_get, METH_VARARGS, NULL},
+	 { (char *)"new_Cell", _wrap_new_Cell, METH_VARARGS, (char *)"\n"
+		"Cell(Id id)\n"
+		"Cell(string path)\n"
+		"Cell(string name, Id parentId)\n"
+		"Cell(string name, PyMooseBase parent)\n"
+		"Cell(Cell src, string name, PyMooseBase parent)\n"
+		"Cell(Cell src, string name, Id parent)\n"
+		"Cell(Id src, string name, Id parent)\n"
+		"new_Cell(Cell src, string path) -> Cell\n"
+		""},
+	 { (char *)"delete_Cell", _wrap_delete_Cell, METH_VARARGS, (char *)"delete_Cell(Cell self)"},
+	 { (char *)"Cell_getType", _wrap_Cell_getType, METH_VARARGS, (char *)"Cell_getType(Cell self) -> string"},
+	 { (char *)"Cell___set_method", _wrap_Cell___set_method, METH_VARARGS, (char *)"Cell___set_method(Cell self, string method)"},
+	 { (char *)"Cell___get_method", _wrap_Cell___get_method, METH_VARARGS, (char *)"Cell___get_method(Cell self) -> string"},
+	 { (char *)"Cell___get_variableDt", _wrap_Cell___get_variableDt, METH_VARARGS, (char *)"Cell___get_variableDt(Cell self) -> bool"},
+	 { (char *)"Cell___get_implicit", _wrap_Cell___get_implicit, METH_VARARGS, (char *)"Cell___get_implicit(Cell self) -> bool"},
+	 { (char *)"Cell___get_description", _wrap_Cell___get_description, METH_VARARGS, (char *)"Cell___get_description(Cell self) -> string"},
+	 { (char *)"Cell_method_set", _wrap_Cell_method_set, METH_VARARGS, (char *)"Cell_method_set(Cell self, string method)"},
+	 { (char *)"Cell_method_get", _wrap_Cell_method_get, METH_VARARGS, (char *)"Cell_method_get(Cell self) -> string"},
+	 { (char *)"Cell_variableDt_get", _wrap_Cell_variableDt_get, METH_VARARGS, (char *)"Cell_variableDt_get(Cell self) -> bool"},
+	 { (char *)"Cell_implicit_get", _wrap_Cell_implicit_get, METH_VARARGS, (char *)"Cell_implicit_get(Cell self) -> bool"},
+	 { (char *)"Cell_description_get", _wrap_Cell_description_get, METH_VARARGS, (char *)"Cell_description_get(Cell self) -> string"},
 	 { (char *)"Cell_swigregister", Cell_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_ClockTick", _wrap_new_ClockTick, METH_VARARGS, NULL},
-	 { (char *)"delete_ClockTick", _wrap_delete_ClockTick, METH_VARARGS, NULL},
-	 { (char *)"ClockTick_getType", _wrap_ClockTick_getType, METH_VARARGS, NULL},
-	 { (char *)"ClockTick___get_dt", _wrap_ClockTick___get_dt, METH_VARARGS, NULL},
-	 { (char *)"ClockTick___set_dt", _wrap_ClockTick___set_dt, METH_VARARGS, NULL},
-	 { (char *)"ClockTick___get_stage", _wrap_ClockTick___get_stage, METH_VARARGS, NULL},
-	 { (char *)"ClockTick___set_stage", _wrap_ClockTick___set_stage, METH_VARARGS, NULL},
-	 { (char *)"ClockTick___get_ordinal", _wrap_ClockTick___get_ordinal, METH_VARARGS, NULL},
-	 { (char *)"ClockTick___set_ordinal", _wrap_ClockTick___set_ordinal, METH_VARARGS, NULL},
-	 { (char *)"ClockTick___get_nextTime", _wrap_ClockTick___get_nextTime, METH_VARARGS, NULL},
-	 { (char *)"ClockTick___set_nextTime", _wrap_ClockTick___set_nextTime, METH_VARARGS, NULL},
-	 { (char *)"ClockTick___set_path", _wrap_ClockTick___set_path, METH_VARARGS, NULL},
-	 { (char *)"ClockTick___get_updateDtSrc", _wrap_ClockTick___get_updateDtSrc, METH_VARARGS, NULL},
-	 { (char *)"ClockTick___set_updateDtSrc", _wrap_ClockTick___set_updateDtSrc, METH_VARARGS, NULL},
-	 { (char *)"ClockTick_dt_set", _wrap_ClockTick_dt_set, METH_VARARGS, NULL},
-	 { (char *)"ClockTick_dt_get", _wrap_ClockTick_dt_get, METH_VARARGS, NULL},
-	 { (char *)"ClockTick_stage_set", _wrap_ClockTick_stage_set, METH_VARARGS, NULL},
-	 { (char *)"ClockTick_stage_get", _wrap_ClockTick_stage_get, METH_VARARGS, NULL},
-	 { (char *)"ClockTick_ordinal_set", _wrap_ClockTick_ordinal_set, METH_VARARGS, NULL},
-	 { (char *)"ClockTick_ordinal_get", _wrap_ClockTick_ordinal_get, METH_VARARGS, NULL},
-	 { (char *)"ClockTick_nextTime_set", _wrap_ClockTick_nextTime_set, METH_VARARGS, NULL},
-	 { (char *)"ClockTick_nextTime_get", _wrap_ClockTick_nextTime_get, METH_VARARGS, NULL},
-	 { (char *)"ClockTick_updateDtSrc_set", _wrap_ClockTick_updateDtSrc_set, METH_VARARGS, NULL},
-	 { (char *)"ClockTick_updateDtSrc_get", _wrap_ClockTick_updateDtSrc_get, METH_VARARGS, NULL},
+	 { (char *)"new_ClockTick", _wrap_new_ClockTick, METH_VARARGS, (char *)"\n"
+		"ClockTick(Id id)\n"
+		"ClockTick(string path)\n"
+		"ClockTick(string name, Id parentId)\n"
+		"ClockTick(string name, PyMooseBase parent)\n"
+		"ClockTick(ClockTick src, string name, PyMooseBase parent)\n"
+		"ClockTick(ClockTick src, string name, Id parent)\n"
+		"ClockTick(Id src, string name, Id parent)\n"
+		"new_ClockTick(ClockTick src, string path) -> ClockTick\n"
+		""},
+	 { (char *)"delete_ClockTick", _wrap_delete_ClockTick, METH_VARARGS, (char *)"delete_ClockTick(ClockTick self)"},
+	 { (char *)"ClockTick_getType", _wrap_ClockTick_getType, METH_VARARGS, (char *)"ClockTick_getType(ClockTick self) -> string"},
+	 { (char *)"ClockTick___get_dt", _wrap_ClockTick___get_dt, METH_VARARGS, (char *)"ClockTick___get_dt(ClockTick self) -> double"},
+	 { (char *)"ClockTick___set_dt", _wrap_ClockTick___set_dt, METH_VARARGS, (char *)"ClockTick___set_dt(ClockTick self, double dt)"},
+	 { (char *)"ClockTick___get_stage", _wrap_ClockTick___get_stage, METH_VARARGS, (char *)"ClockTick___get_stage(ClockTick self) -> int"},
+	 { (char *)"ClockTick___set_stage", _wrap_ClockTick___set_stage, METH_VARARGS, (char *)"ClockTick___set_stage(ClockTick self, int stage)"},
+	 { (char *)"ClockTick___get_ordinal", _wrap_ClockTick___get_ordinal, METH_VARARGS, (char *)"ClockTick___get_ordinal(ClockTick self) -> int"},
+	 { (char *)"ClockTick___set_ordinal", _wrap_ClockTick___set_ordinal, METH_VARARGS, (char *)"ClockTick___set_ordinal(ClockTick self, int ordinal)"},
+	 { (char *)"ClockTick___get_nextTime", _wrap_ClockTick___get_nextTime, METH_VARARGS, (char *)"ClockTick___get_nextTime(ClockTick self) -> double"},
+	 { (char *)"ClockTick___set_nextTime", _wrap_ClockTick___set_nextTime, METH_VARARGS, (char *)"ClockTick___set_nextTime(ClockTick self, double nextTime)"},
+	 { (char *)"ClockTick___set_path", _wrap_ClockTick___set_path, METH_VARARGS, (char *)"ClockTick___set_path(ClockTick self, string path)"},
+	 { (char *)"ClockTick___get_updateDtSrc", _wrap_ClockTick___get_updateDtSrc, METH_VARARGS, (char *)"ClockTick___get_updateDtSrc(ClockTick self) -> double"},
+	 { (char *)"ClockTick___set_updateDtSrc", _wrap_ClockTick___set_updateDtSrc, METH_VARARGS, (char *)"ClockTick___set_updateDtSrc(ClockTick self, double updateDtSrc)"},
+	 { (char *)"ClockTick_dt_set", _wrap_ClockTick_dt_set, METH_VARARGS, (char *)"ClockTick_dt_set(ClockTick self, double dt)"},
+	 { (char *)"ClockTick_dt_get", _wrap_ClockTick_dt_get, METH_VARARGS, (char *)"ClockTick_dt_get(ClockTick self) -> double"},
+	 { (char *)"ClockTick_stage_set", _wrap_ClockTick_stage_set, METH_VARARGS, (char *)"ClockTick_stage_set(ClockTick self, int stage)"},
+	 { (char *)"ClockTick_stage_get", _wrap_ClockTick_stage_get, METH_VARARGS, (char *)"ClockTick_stage_get(ClockTick self) -> int"},
+	 { (char *)"ClockTick_ordinal_set", _wrap_ClockTick_ordinal_set, METH_VARARGS, (char *)"ClockTick_ordinal_set(ClockTick self, int ordinal)"},
+	 { (char *)"ClockTick_ordinal_get", _wrap_ClockTick_ordinal_get, METH_VARARGS, (char *)"ClockTick_ordinal_get(ClockTick self) -> int"},
+	 { (char *)"ClockTick_nextTime_set", _wrap_ClockTick_nextTime_set, METH_VARARGS, (char *)"ClockTick_nextTime_set(ClockTick self, double nextTime)"},
+	 { (char *)"ClockTick_nextTime_get", _wrap_ClockTick_nextTime_get, METH_VARARGS, (char *)"ClockTick_nextTime_get(ClockTick self) -> double"},
+	 { (char *)"ClockTick_updateDtSrc_set", _wrap_ClockTick_updateDtSrc_set, METH_VARARGS, (char *)"ClockTick_updateDtSrc_set(ClockTick self, double updateDtSrc)"},
+	 { (char *)"ClockTick_updateDtSrc_get", _wrap_ClockTick_updateDtSrc_get, METH_VARARGS, (char *)"ClockTick_updateDtSrc_get(ClockTick self) -> double"},
 	 { (char *)"ClockTick_swigregister", ClockTick_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_ClockJob", _wrap_new_ClockJob, METH_VARARGS, NULL},
-	 { (char *)"delete_ClockJob", _wrap_delete_ClockJob, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_getType", _wrap_ClockJob_getType, METH_VARARGS, NULL},
-	 { (char *)"ClockJob___get_runTime", _wrap_ClockJob___get_runTime, METH_VARARGS, NULL},
-	 { (char *)"ClockJob___set_runTime", _wrap_ClockJob___set_runTime, METH_VARARGS, NULL},
-	 { (char *)"ClockJob___get_currentTime", _wrap_ClockJob___get_currentTime, METH_VARARGS, NULL},
-	 { (char *)"ClockJob___set_currentTime", _wrap_ClockJob___set_currentTime, METH_VARARGS, NULL},
-	 { (char *)"ClockJob___get_nsteps", _wrap_ClockJob___get_nsteps, METH_VARARGS, NULL},
-	 { (char *)"ClockJob___set_nsteps", _wrap_ClockJob___set_nsteps, METH_VARARGS, NULL},
-	 { (char *)"ClockJob___get_currentStep", _wrap_ClockJob___get_currentStep, METH_VARARGS, NULL},
-	 { (char *)"ClockJob___set_currentStep", _wrap_ClockJob___set_currentStep, METH_VARARGS, NULL},
-	 { (char *)"ClockJob___get_start", _wrap_ClockJob___get_start, METH_VARARGS, NULL},
-	 { (char *)"ClockJob___set_start", _wrap_ClockJob___set_start, METH_VARARGS, NULL},
-	 { (char *)"ClockJob___get_step", _wrap_ClockJob___get_step, METH_VARARGS, NULL},
-	 { (char *)"ClockJob___set_step", _wrap_ClockJob___set_step, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_resched", _wrap_ClockJob_resched, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_reinit", _wrap_ClockJob_reinit, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_stop", _wrap_ClockJob_stop, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_getClocks", _wrap_ClockJob_getClocks, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_runTime_set", _wrap_ClockJob_runTime_set, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_runTime_get", _wrap_ClockJob_runTime_get, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_currentTime_set", _wrap_ClockJob_currentTime_set, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_currentTime_get", _wrap_ClockJob_currentTime_get, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_nsteps_set", _wrap_ClockJob_nsteps_set, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_nsteps_get", _wrap_ClockJob_nsteps_get, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_currentStep_set", _wrap_ClockJob_currentStep_set, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_currentStep_get", _wrap_ClockJob_currentStep_get, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_start_set", _wrap_ClockJob_start_set, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_start_get", _wrap_ClockJob_start_get, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_step_set", _wrap_ClockJob_step_set, METH_VARARGS, NULL},
-	 { (char *)"ClockJob_step_get", _wrap_ClockJob_step_get, METH_VARARGS, NULL},
+	 { (char *)"new_ClockJob", _wrap_new_ClockJob, METH_VARARGS, (char *)"\n"
+		"ClockJob(Id id)\n"
+		"ClockJob(string path)\n"
+		"ClockJob(string name, Id parentId)\n"
+		"ClockJob(string name, PyMooseBase parent)\n"
+		"ClockJob(ClockJob src, string name, PyMooseBase parent)\n"
+		"ClockJob(ClockJob src, string name, Id parent)\n"
+		"ClockJob(Id src, string name, Id parent)\n"
+		"new_ClockJob(ClockJob src, string path) -> ClockJob\n"
+		""},
+	 { (char *)"delete_ClockJob", _wrap_delete_ClockJob, METH_VARARGS, (char *)"delete_ClockJob(ClockJob self)"},
+	 { (char *)"ClockJob_getType", _wrap_ClockJob_getType, METH_VARARGS, (char *)"ClockJob_getType(ClockJob self) -> string"},
+	 { (char *)"ClockJob___get_runTime", _wrap_ClockJob___get_runTime, METH_VARARGS, (char *)"ClockJob___get_runTime(ClockJob self) -> double"},
+	 { (char *)"ClockJob___set_runTime", _wrap_ClockJob___set_runTime, METH_VARARGS, (char *)"ClockJob___set_runTime(ClockJob self, double runTime)"},
+	 { (char *)"ClockJob___get_currentTime", _wrap_ClockJob___get_currentTime, METH_VARARGS, (char *)"ClockJob___get_currentTime(ClockJob self) -> double"},
+	 { (char *)"ClockJob___set_currentTime", _wrap_ClockJob___set_currentTime, METH_VARARGS, (char *)"ClockJob___set_currentTime(ClockJob self, double currentTime)"},
+	 { (char *)"ClockJob___get_nsteps", _wrap_ClockJob___get_nsteps, METH_VARARGS, (char *)"ClockJob___get_nsteps(ClockJob self) -> int"},
+	 { (char *)"ClockJob___set_nsteps", _wrap_ClockJob___set_nsteps, METH_VARARGS, (char *)"ClockJob___set_nsteps(ClockJob self, int nsteps)"},
+	 { (char *)"ClockJob___get_currentStep", _wrap_ClockJob___get_currentStep, METH_VARARGS, (char *)"ClockJob___get_currentStep(ClockJob self) -> int"},
+	 { (char *)"ClockJob___set_currentStep", _wrap_ClockJob___set_currentStep, METH_VARARGS, (char *)"ClockJob___set_currentStep(ClockJob self, int currentStep)"},
+	 { (char *)"ClockJob___get_start", _wrap_ClockJob___get_start, METH_VARARGS, (char *)"ClockJob___get_start(ClockJob self) -> double"},
+	 { (char *)"ClockJob___set_start", _wrap_ClockJob___set_start, METH_VARARGS, (char *)"ClockJob___set_start(ClockJob self, double start)"},
+	 { (char *)"ClockJob___get_step", _wrap_ClockJob___get_step, METH_VARARGS, (char *)"ClockJob___get_step(ClockJob self) -> int"},
+	 { (char *)"ClockJob___set_step", _wrap_ClockJob___set_step, METH_VARARGS, (char *)"ClockJob___set_step(ClockJob self, int step)"},
+	 { (char *)"ClockJob_resched", _wrap_ClockJob_resched, METH_VARARGS, (char *)"ClockJob_resched(ClockJob self)"},
+	 { (char *)"ClockJob_reinit", _wrap_ClockJob_reinit, METH_VARARGS, (char *)"ClockJob_reinit(ClockJob self)"},
+	 { (char *)"ClockJob_stop", _wrap_ClockJob_stop, METH_VARARGS, (char *)"ClockJob_stop(ClockJob self)"},
+	 { (char *)"ClockJob_getClocks", _wrap_ClockJob_getClocks, METH_VARARGS, (char *)"ClockJob_getClocks() -> double_vector"},
+	 { (char *)"ClockJob_runTime_set", _wrap_ClockJob_runTime_set, METH_VARARGS, (char *)"ClockJob_runTime_set(ClockJob self, double runTime)"},
+	 { (char *)"ClockJob_runTime_get", _wrap_ClockJob_runTime_get, METH_VARARGS, (char *)"ClockJob_runTime_get(ClockJob self) -> double"},
+	 { (char *)"ClockJob_currentTime_set", _wrap_ClockJob_currentTime_set, METH_VARARGS, (char *)"ClockJob_currentTime_set(ClockJob self, double currentTime)"},
+	 { (char *)"ClockJob_currentTime_get", _wrap_ClockJob_currentTime_get, METH_VARARGS, (char *)"ClockJob_currentTime_get(ClockJob self) -> double"},
+	 { (char *)"ClockJob_nsteps_set", _wrap_ClockJob_nsteps_set, METH_VARARGS, (char *)"ClockJob_nsteps_set(ClockJob self, int nsteps)"},
+	 { (char *)"ClockJob_nsteps_get", _wrap_ClockJob_nsteps_get, METH_VARARGS, (char *)"ClockJob_nsteps_get(ClockJob self) -> int"},
+	 { (char *)"ClockJob_currentStep_set", _wrap_ClockJob_currentStep_set, METH_VARARGS, (char *)"ClockJob_currentStep_set(ClockJob self, int currentStep)"},
+	 { (char *)"ClockJob_currentStep_get", _wrap_ClockJob_currentStep_get, METH_VARARGS, (char *)"ClockJob_currentStep_get(ClockJob self) -> int"},
+	 { (char *)"ClockJob_start_set", _wrap_ClockJob_start_set, METH_VARARGS, (char *)"ClockJob_start_set(ClockJob self, double start)"},
+	 { (char *)"ClockJob_start_get", _wrap_ClockJob_start_get, METH_VARARGS, (char *)"ClockJob_start_get(ClockJob self) -> double"},
+	 { (char *)"ClockJob_step_set", _wrap_ClockJob_step_set, METH_VARARGS, (char *)"ClockJob_step_set(ClockJob self, int step)"},
+	 { (char *)"ClockJob_step_get", _wrap_ClockJob_step_get, METH_VARARGS, (char *)"ClockJob_step_get(ClockJob self) -> int"},
 	 { (char *)"ClockJob_swigregister", ClockJob_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_InterpolationTable", _wrap_new_InterpolationTable, METH_VARARGS, NULL},
-	 { (char *)"delete_InterpolationTable", _wrap_delete_InterpolationTable, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_getType", _wrap_InterpolationTable_getType, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___get_xmin", _wrap_InterpolationTable___get_xmin, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___set_xmin", _wrap_InterpolationTable___set_xmin, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___get_xmax", _wrap_InterpolationTable___get_xmax, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___set_xmax", _wrap_InterpolationTable___set_xmax, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___get_xdivs", _wrap_InterpolationTable___get_xdivs, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___set_xdivs", _wrap_InterpolationTable___set_xdivs, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___get_mode", _wrap_InterpolationTable___get_mode, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___set_mode", _wrap_InterpolationTable___set_mode, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___get_dx", _wrap_InterpolationTable___get_dx, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___set_dx", _wrap_InterpolationTable___set_dx, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___get_sy", _wrap_InterpolationTable___get_sy, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___set_sy", _wrap_InterpolationTable___set_sy, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___getitem__", _wrap_InterpolationTable___getitem__, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___setitem__", _wrap_InterpolationTable___setitem__, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___iter__", _wrap_InterpolationTable___iter__, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___len__", _wrap_InterpolationTable___len__, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___get_calcMode", _wrap_InterpolationTable___get_calcMode, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable___set_calcMode", _wrap_InterpolationTable___set_calcMode, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_dumpFile", _wrap_InterpolationTable_dumpFile, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_tabFill", _wrap_InterpolationTable_tabFill, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_xmin_set", _wrap_InterpolationTable_xmin_set, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_xmin_get", _wrap_InterpolationTable_xmin_get, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_xmax_set", _wrap_InterpolationTable_xmax_set, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_xmax_get", _wrap_InterpolationTable_xmax_get, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_xdivs_set", _wrap_InterpolationTable_xdivs_set, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_xdivs_get", _wrap_InterpolationTable_xdivs_get, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_mode_set", _wrap_InterpolationTable_mode_set, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_mode_get", _wrap_InterpolationTable_mode_get, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_dx_set", _wrap_InterpolationTable_dx_set, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_dx_get", _wrap_InterpolationTable_dx_get, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_sy_set", _wrap_InterpolationTable_sy_set, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_sy_get", _wrap_InterpolationTable_sy_get, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_calcMode_set", _wrap_InterpolationTable_calcMode_set, METH_VARARGS, NULL},
-	 { (char *)"InterpolationTable_calcMode_get", _wrap_InterpolationTable_calcMode_get, METH_VARARGS, NULL},
+	 { (char *)"new_InterpolationTable", _wrap_new_InterpolationTable, METH_VARARGS, (char *)"\n"
+		"InterpolationTable(Id id)\n"
+		"InterpolationTable(string path)\n"
+		"InterpolationTable(string name, Id parentId)\n"
+		"InterpolationTable(string name, PyMooseBase parent)\n"
+		"InterpolationTable(InterpolationTable src, string name, PyMooseBase parent)\n"
+		"InterpolationTable(InterpolationTable src, string name, Id parent)\n"
+		"InterpolationTable(Id src, string name, Id parent)\n"
+		"new_InterpolationTable(InterpolationTable src, string path) -> InterpolationTable\n"
+		""},
+	 { (char *)"delete_InterpolationTable", _wrap_delete_InterpolationTable, METH_VARARGS, (char *)"delete_InterpolationTable(InterpolationTable self)"},
+	 { (char *)"InterpolationTable_getType", _wrap_InterpolationTable_getType, METH_VARARGS, (char *)"InterpolationTable_getType(InterpolationTable self) -> string"},
+	 { (char *)"InterpolationTable___get_xmin", _wrap_InterpolationTable___get_xmin, METH_VARARGS, (char *)"InterpolationTable___get_xmin(InterpolationTable self) -> double"},
+	 { (char *)"InterpolationTable___set_xmin", _wrap_InterpolationTable___set_xmin, METH_VARARGS, (char *)"InterpolationTable___set_xmin(InterpolationTable self, double xmin)"},
+	 { (char *)"InterpolationTable___get_xmax", _wrap_InterpolationTable___get_xmax, METH_VARARGS, (char *)"InterpolationTable___get_xmax(InterpolationTable self) -> double"},
+	 { (char *)"InterpolationTable___set_xmax", _wrap_InterpolationTable___set_xmax, METH_VARARGS, (char *)"InterpolationTable___set_xmax(InterpolationTable self, double xmax)"},
+	 { (char *)"InterpolationTable___get_xdivs", _wrap_InterpolationTable___get_xdivs, METH_VARARGS, (char *)"InterpolationTable___get_xdivs(InterpolationTable self) -> int"},
+	 { (char *)"InterpolationTable___set_xdivs", _wrap_InterpolationTable___set_xdivs, METH_VARARGS, (char *)"InterpolationTable___set_xdivs(InterpolationTable self, int xdivs)"},
+	 { (char *)"InterpolationTable___get_mode", _wrap_InterpolationTable___get_mode, METH_VARARGS, (char *)"InterpolationTable___get_mode(InterpolationTable self) -> int"},
+	 { (char *)"InterpolationTable___set_mode", _wrap_InterpolationTable___set_mode, METH_VARARGS, (char *)"InterpolationTable___set_mode(InterpolationTable self, int mode)"},
+	 { (char *)"InterpolationTable___get_dx", _wrap_InterpolationTable___get_dx, METH_VARARGS, (char *)"InterpolationTable___get_dx(InterpolationTable self) -> double"},
+	 { (char *)"InterpolationTable___set_dx", _wrap_InterpolationTable___set_dx, METH_VARARGS, (char *)"InterpolationTable___set_dx(InterpolationTable self, double dx)"},
+	 { (char *)"InterpolationTable___get_sy", _wrap_InterpolationTable___get_sy, METH_VARARGS, (char *)"InterpolationTable___get_sy(InterpolationTable self) -> double"},
+	 { (char *)"InterpolationTable___set_sy", _wrap_InterpolationTable___set_sy, METH_VARARGS, (char *)"InterpolationTable___set_sy(InterpolationTable self, double sy)"},
+	 { (char *)"InterpolationTable___getitem__", _wrap_InterpolationTable___getitem__, METH_VARARGS, (char *)"InterpolationTable___getitem__(InterpolationTable self, unsigned int index) -> double"},
+	 { (char *)"InterpolationTable___setitem__", _wrap_InterpolationTable___setitem__, METH_VARARGS, (char *)"InterpolationTable___setitem__(InterpolationTable self, unsigned int index, double value)"},
+	 { (char *)"InterpolationTable___iter__", _wrap_InterpolationTable___iter__, METH_VARARGS, (char *)"InterpolationTable___iter__(InterpolationTable self) -> TableIterator"},
+	 { (char *)"InterpolationTable___len__", _wrap_InterpolationTable___len__, METH_VARARGS, (char *)"InterpolationTable___len__(InterpolationTable self) -> int"},
+	 { (char *)"InterpolationTable___get_calcMode", _wrap_InterpolationTable___get_calcMode, METH_VARARGS, (char *)"InterpolationTable___get_calcMode(InterpolationTable self) -> int"},
+	 { (char *)"InterpolationTable___set_calcMode", _wrap_InterpolationTable___set_calcMode, METH_VARARGS, (char *)"InterpolationTable___set_calcMode(InterpolationTable self, int calc_mode)"},
+	 { (char *)"InterpolationTable_dumpFile", _wrap_InterpolationTable_dumpFile, METH_VARARGS, (char *)"\n"
+		"dumpFile() -> string\n"
+		"dumpFile(string fileName, bool append=False)\n"
+		"InterpolationTable_dumpFile(InterpolationTable self, string fileName)\n"
+		""},
+	 { (char *)"InterpolationTable_tabFill", _wrap_InterpolationTable_tabFill, METH_VARARGS, (char *)"InterpolationTable_tabFill(InterpolationTable self, int xdivs, int mode)"},
+	 { (char *)"InterpolationTable_xmin_set", _wrap_InterpolationTable_xmin_set, METH_VARARGS, (char *)"InterpolationTable_xmin_set(InterpolationTable self, double xmin)"},
+	 { (char *)"InterpolationTable_xmin_get", _wrap_InterpolationTable_xmin_get, METH_VARARGS, (char *)"InterpolationTable_xmin_get(InterpolationTable self) -> double"},
+	 { (char *)"InterpolationTable_xmax_set", _wrap_InterpolationTable_xmax_set, METH_VARARGS, (char *)"InterpolationTable_xmax_set(InterpolationTable self, double xmax)"},
+	 { (char *)"InterpolationTable_xmax_get", _wrap_InterpolationTable_xmax_get, METH_VARARGS, (char *)"InterpolationTable_xmax_get(InterpolationTable self) -> double"},
+	 { (char *)"InterpolationTable_xdivs_set", _wrap_InterpolationTable_xdivs_set, METH_VARARGS, (char *)"InterpolationTable_xdivs_set(InterpolationTable self, int xdivs)"},
+	 { (char *)"InterpolationTable_xdivs_get", _wrap_InterpolationTable_xdivs_get, METH_VARARGS, (char *)"InterpolationTable_xdivs_get(InterpolationTable self) -> int"},
+	 { (char *)"InterpolationTable_mode_set", _wrap_InterpolationTable_mode_set, METH_VARARGS, (char *)"InterpolationTable_mode_set(InterpolationTable self, int mode)"},
+	 { (char *)"InterpolationTable_mode_get", _wrap_InterpolationTable_mode_get, METH_VARARGS, (char *)"InterpolationTable_mode_get(InterpolationTable self) -> int"},
+	 { (char *)"InterpolationTable_dx_set", _wrap_InterpolationTable_dx_set, METH_VARARGS, (char *)"InterpolationTable_dx_set(InterpolationTable self, double dx)"},
+	 { (char *)"InterpolationTable_dx_get", _wrap_InterpolationTable_dx_get, METH_VARARGS, (char *)"InterpolationTable_dx_get(InterpolationTable self) -> double"},
+	 { (char *)"InterpolationTable_sy_set", _wrap_InterpolationTable_sy_set, METH_VARARGS, (char *)"InterpolationTable_sy_set(InterpolationTable self, double sy)"},
+	 { (char *)"InterpolationTable_sy_get", _wrap_InterpolationTable_sy_get, METH_VARARGS, (char *)"InterpolationTable_sy_get(InterpolationTable self) -> double"},
+	 { (char *)"InterpolationTable_calcMode_set", _wrap_InterpolationTable_calcMode_set, METH_VARARGS, (char *)"InterpolationTable_calcMode_set(InterpolationTable self, int calcMode)"},
+	 { (char *)"InterpolationTable_calcMode_get", _wrap_InterpolationTable_calcMode_get, METH_VARARGS, (char *)"InterpolationTable_calcMode_get(InterpolationTable self) -> int"},
 	 { (char *)"InterpolationTable_swigregister", InterpolationTable_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_TableIterator", _wrap_new_TableIterator, METH_VARARGS, NULL},
-	 { (char *)"TableIterator___iter__", _wrap_TableIterator___iter__, METH_VARARGS, NULL},
-	 { (char *)"TableIterator___hasNext__", _wrap_TableIterator___hasNext__, METH_VARARGS, NULL},
-	 { (char *)"TableIterator___next__", _wrap_TableIterator___next__, METH_VARARGS, NULL},
-	 { (char *)"delete_TableIterator", _wrap_delete_TableIterator, METH_VARARGS, NULL},
+	 { (char *)"new_TableIterator", _wrap_new_TableIterator, METH_VARARGS, (char *)"new_TableIterator(InterpolationTable table) -> TableIterator"},
+	 { (char *)"TableIterator___iter__", _wrap_TableIterator___iter__, METH_VARARGS, (char *)"TableIterator___iter__(TableIterator self) -> TableIterator"},
+	 { (char *)"TableIterator___hasNext__", _wrap_TableIterator___hasNext__, METH_VARARGS, (char *)"TableIterator___hasNext__(TableIterator self) -> bool"},
+	 { (char *)"TableIterator___next__", _wrap_TableIterator___next__, METH_VARARGS, (char *)"TableIterator___next__(TableIterator self) -> double"},
+	 { (char *)"delete_TableIterator", _wrap_delete_TableIterator, METH_VARARGS, (char *)"delete_TableIterator(TableIterator self)"},
 	 { (char *)"TableIterator_swigregister", TableIterator_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Table", _wrap_new_Table, METH_VARARGS, NULL},
-	 { (char *)"delete_Table", _wrap_delete_Table, METH_VARARGS, NULL},
-	 { (char *)"Table_getType", _wrap_Table_getType, METH_VARARGS, NULL},
-	 { (char *)"Table___get_input", _wrap_Table___get_input, METH_VARARGS, NULL},
-	 { (char *)"Table___set_input", _wrap_Table___set_input, METH_VARARGS, NULL},
-	 { (char *)"Table___get_output", _wrap_Table___get_output, METH_VARARGS, NULL},
-	 { (char *)"Table___set_output", _wrap_Table___set_output, METH_VARARGS, NULL},
-	 { (char *)"Table___get_stepMode", _wrap_Table___get_stepMode, METH_VARARGS, NULL},
-	 { (char *)"Table___set_stepMode", _wrap_Table___set_stepMode, METH_VARARGS, NULL},
-	 { (char *)"Table___get_stepSize", _wrap_Table___get_stepSize, METH_VARARGS, NULL},
-	 { (char *)"Table___set_stepSize", _wrap_Table___set_stepSize, METH_VARARGS, NULL},
-	 { (char *)"Table___get_threshold", _wrap_Table___get_threshold, METH_VARARGS, NULL},
-	 { (char *)"Table___set_threshold", _wrap_Table___set_threshold, METH_VARARGS, NULL},
-	 { (char *)"Table_createTable", _wrap_Table_createTable, METH_VARARGS, NULL},
-	 { (char *)"Table_input_set", _wrap_Table_input_set, METH_VARARGS, NULL},
-	 { (char *)"Table_input_get", _wrap_Table_input_get, METH_VARARGS, NULL},
-	 { (char *)"Table_output_set", _wrap_Table_output_set, METH_VARARGS, NULL},
-	 { (char *)"Table_output_get", _wrap_Table_output_get, METH_VARARGS, NULL},
-	 { (char *)"Table_stepMode_set", _wrap_Table_stepMode_set, METH_VARARGS, NULL},
-	 { (char *)"Table_stepMode_get", _wrap_Table_stepMode_get, METH_VARARGS, NULL},
-	 { (char *)"Table_stepSize_set", _wrap_Table_stepSize_set, METH_VARARGS, NULL},
-	 { (char *)"Table_stepSize_get", _wrap_Table_stepSize_get, METH_VARARGS, NULL},
-	 { (char *)"Table_threshold_set", _wrap_Table_threshold_set, METH_VARARGS, NULL},
-	 { (char *)"Table_threshold_get", _wrap_Table_threshold_get, METH_VARARGS, NULL},
+	 { (char *)"new_Table", _wrap_new_Table, METH_VARARGS, (char *)"\n"
+		"Table(Id id)\n"
+		"Table(string path)\n"
+		"Table(string name, Id parentId)\n"
+		"Table(string name, PyMooseBase parent)\n"
+		"Table(Table src, string name, PyMooseBase parent)\n"
+		"Table(Table src, string name, Id parent)\n"
+		"Table(Id src, string name, Id parent)\n"
+		"new_Table(Table src, string path) -> Table\n"
+		""},
+	 { (char *)"delete_Table", _wrap_delete_Table, METH_VARARGS, (char *)"delete_Table(Table self)"},
+	 { (char *)"Table_getType", _wrap_Table_getType, METH_VARARGS, (char *)"Table_getType(Table self) -> string"},
+	 { (char *)"Table___get_input", _wrap_Table___get_input, METH_VARARGS, (char *)"Table___get_input(Table self) -> double"},
+	 { (char *)"Table___set_input", _wrap_Table___set_input, METH_VARARGS, (char *)"Table___set_input(Table self, double input)"},
+	 { (char *)"Table___get_output", _wrap_Table___get_output, METH_VARARGS, (char *)"Table___get_output(Table self) -> double"},
+	 { (char *)"Table___set_output", _wrap_Table___set_output, METH_VARARGS, (char *)"Table___set_output(Table self, double output)"},
+	 { (char *)"Table___get_stepMode", _wrap_Table___get_stepMode, METH_VARARGS, (char *)"Table___get_stepMode(Table self) -> int"},
+	 { (char *)"Table___set_stepMode", _wrap_Table___set_stepMode, METH_VARARGS, (char *)"Table___set_stepMode(Table self, int stepMode)"},
+	 { (char *)"Table___get_stepSize", _wrap_Table___get_stepSize, METH_VARARGS, (char *)"Table___get_stepSize(Table self) -> double"},
+	 { (char *)"Table___set_stepSize", _wrap_Table___set_stepSize, METH_VARARGS, (char *)"Table___set_stepSize(Table self, double stepSize)"},
+	 { (char *)"Table___get_threshold", _wrap_Table___get_threshold, METH_VARARGS, (char *)"Table___get_threshold(Table self) -> double"},
+	 { (char *)"Table___set_threshold", _wrap_Table___set_threshold, METH_VARARGS, (char *)"Table___set_threshold(Table self, double threshold)"},
+	 { (char *)"Table_createTable", _wrap_Table_createTable, METH_VARARGS, (char *)"Table_createTable(Table self, int xdiv, double xmin, double xmax)"},
+	 { (char *)"Table_input_set", _wrap_Table_input_set, METH_VARARGS, (char *)"Table_input_set(Table self, double input)"},
+	 { (char *)"Table_input_get", _wrap_Table_input_get, METH_VARARGS, (char *)"Table_input_get(Table self) -> double"},
+	 { (char *)"Table_output_set", _wrap_Table_output_set, METH_VARARGS, (char *)"Table_output_set(Table self, double output)"},
+	 { (char *)"Table_output_get", _wrap_Table_output_get, METH_VARARGS, (char *)"Table_output_get(Table self) -> double"},
+	 { (char *)"Table_stepMode_set", _wrap_Table_stepMode_set, METH_VARARGS, (char *)"Table_stepMode_set(Table self, int stepMode)"},
+	 { (char *)"Table_stepMode_get", _wrap_Table_stepMode_get, METH_VARARGS, (char *)"Table_stepMode_get(Table self) -> int"},
+	 { (char *)"Table_stepSize_set", _wrap_Table_stepSize_set, METH_VARARGS, (char *)"Table_stepSize_set(Table self, double stepSize)"},
+	 { (char *)"Table_stepSize_get", _wrap_Table_stepSize_get, METH_VARARGS, (char *)"Table_stepSize_get(Table self) -> double"},
+	 { (char *)"Table_threshold_set", _wrap_Table_threshold_set, METH_VARARGS, (char *)"Table_threshold_set(Table self, double threshold)"},
+	 { (char *)"Table_threshold_get", _wrap_Table_threshold_get, METH_VARARGS, (char *)"Table_threshold_get(Table self) -> double"},
 	 { (char *)"Table_swigregister", Table_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_SynChan", _wrap_new_SynChan, METH_VARARGS, NULL},
-	 { (char *)"delete_SynChan", _wrap_delete_SynChan, METH_VARARGS, NULL},
-	 { (char *)"SynChan_getType", _wrap_SynChan_getType, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_Gbar", _wrap_SynChan___get_Gbar, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_Gbar", _wrap_SynChan___set_Gbar, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_Ek", _wrap_SynChan___get_Ek, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_Ek", _wrap_SynChan___set_Ek, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_tau1", _wrap_SynChan___get_tau1, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_tau1", _wrap_SynChan___set_tau1, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_tau2", _wrap_SynChan___get_tau2, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_tau2", _wrap_SynChan___set_tau2, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_normalizeWeights", _wrap_SynChan___get_normalizeWeights, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_normalizeWeights", _wrap_SynChan___set_normalizeWeights, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_Gk", _wrap_SynChan___get_Gk, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_Gk", _wrap_SynChan___set_Gk, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_Ik", _wrap_SynChan___get_Ik, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_Ik", _wrap_SynChan___set_Ik, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_numSynapses", _wrap_SynChan___get_numSynapses, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_numSynapses", _wrap_SynChan___set_numSynapses, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_weight", _wrap_SynChan___get_weight, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_weight", _wrap_SynChan___set_weight, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_delay", _wrap_SynChan___get_delay, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_delay", _wrap_SynChan___set_delay, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_IkSrc", _wrap_SynChan___get_IkSrc, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_IkSrc", _wrap_SynChan___set_IkSrc, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_synapse", _wrap_SynChan___get_synapse, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_synapse", _wrap_SynChan___set_synapse, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_activation", _wrap_SynChan___get_activation, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_activation", _wrap_SynChan___set_activation, METH_VARARGS, NULL},
-	 { (char *)"SynChan___get_modulator", _wrap_SynChan___get_modulator, METH_VARARGS, NULL},
-	 { (char *)"SynChan___set_modulator", _wrap_SynChan___set_modulator, METH_VARARGS, NULL},
-	 { (char *)"SynChan_Gbar_set", _wrap_SynChan_Gbar_set, METH_VARARGS, NULL},
-	 { (char *)"SynChan_Gbar_get", _wrap_SynChan_Gbar_get, METH_VARARGS, NULL},
-	 { (char *)"SynChan_Ek_set", _wrap_SynChan_Ek_set, METH_VARARGS, NULL},
-	 { (char *)"SynChan_Ek_get", _wrap_SynChan_Ek_get, METH_VARARGS, NULL},
-	 { (char *)"SynChan_tau1_set", _wrap_SynChan_tau1_set, METH_VARARGS, NULL},
-	 { (char *)"SynChan_tau1_get", _wrap_SynChan_tau1_get, METH_VARARGS, NULL},
-	 { (char *)"SynChan_tau2_set", _wrap_SynChan_tau2_set, METH_VARARGS, NULL},
-	 { (char *)"SynChan_tau2_get", _wrap_SynChan_tau2_get, METH_VARARGS, NULL},
-	 { (char *)"SynChan_normalizeWeights_set", _wrap_SynChan_normalizeWeights_set, METH_VARARGS, NULL},
-	 { (char *)"SynChan_normalizeWeights_get", _wrap_SynChan_normalizeWeights_get, METH_VARARGS, NULL},
-	 { (char *)"SynChan_Gk_set", _wrap_SynChan_Gk_set, METH_VARARGS, NULL},
-	 { (char *)"SynChan_Gk_get", _wrap_SynChan_Gk_get, METH_VARARGS, NULL},
-	 { (char *)"SynChan_Ik_set", _wrap_SynChan_Ik_set, METH_VARARGS, NULL},
-	 { (char *)"SynChan_Ik_get", _wrap_SynChan_Ik_get, METH_VARARGS, NULL},
-	 { (char *)"SynChan_numSynapses_get", _wrap_SynChan_numSynapses_get, METH_VARARGS, NULL},
-	 { (char *)"SynChan_activation_set", _wrap_SynChan_activation_set, METH_VARARGS, NULL},
-	 { (char *)"SynChan_activation_get", _wrap_SynChan_activation_get, METH_VARARGS, NULL},
-	 { (char *)"SynChan_modulator_set", _wrap_SynChan_modulator_set, METH_VARARGS, NULL},
-	 { (char *)"SynChan_modulator_get", _wrap_SynChan_modulator_get, METH_VARARGS, NULL},
+	 { (char *)"new_SynChan", _wrap_new_SynChan, METH_VARARGS, (char *)"\n"
+		"SynChan(Id id)\n"
+		"SynChan(string path)\n"
+		"SynChan(string name, Id parentId)\n"
+		"SynChan(string name, PyMooseBase parent)\n"
+		"SynChan(SynChan src, string name, PyMooseBase parent)\n"
+		"SynChan(SynChan src, string name, Id parent)\n"
+		"SynChan(Id src, string name, Id parent)\n"
+		"new_SynChan(SynChan src, string path) -> SynChan\n"
+		""},
+	 { (char *)"delete_SynChan", _wrap_delete_SynChan, METH_VARARGS, (char *)"delete_SynChan(SynChan self)"},
+	 { (char *)"SynChan_getType", _wrap_SynChan_getType, METH_VARARGS, (char *)"SynChan_getType(SynChan self) -> string"},
+	 { (char *)"SynChan___get_Gbar", _wrap_SynChan___get_Gbar, METH_VARARGS, (char *)"SynChan___get_Gbar(SynChan self) -> double"},
+	 { (char *)"SynChan___set_Gbar", _wrap_SynChan___set_Gbar, METH_VARARGS, (char *)"SynChan___set_Gbar(SynChan self, double Gbar)"},
+	 { (char *)"SynChan___get_Ek", _wrap_SynChan___get_Ek, METH_VARARGS, (char *)"SynChan___get_Ek(SynChan self) -> double"},
+	 { (char *)"SynChan___set_Ek", _wrap_SynChan___set_Ek, METH_VARARGS, (char *)"SynChan___set_Ek(SynChan self, double Ek)"},
+	 { (char *)"SynChan___get_tau1", _wrap_SynChan___get_tau1, METH_VARARGS, (char *)"SynChan___get_tau1(SynChan self) -> double"},
+	 { (char *)"SynChan___set_tau1", _wrap_SynChan___set_tau1, METH_VARARGS, (char *)"SynChan___set_tau1(SynChan self, double tau1)"},
+	 { (char *)"SynChan___get_tau2", _wrap_SynChan___get_tau2, METH_VARARGS, (char *)"SynChan___get_tau2(SynChan self) -> double"},
+	 { (char *)"SynChan___set_tau2", _wrap_SynChan___set_tau2, METH_VARARGS, (char *)"SynChan___set_tau2(SynChan self, double tau2)"},
+	 { (char *)"SynChan___get_normalizeWeights", _wrap_SynChan___get_normalizeWeights, METH_VARARGS, (char *)"SynChan___get_normalizeWeights(SynChan self) -> bool"},
+	 { (char *)"SynChan___set_normalizeWeights", _wrap_SynChan___set_normalizeWeights, METH_VARARGS, (char *)"SynChan___set_normalizeWeights(SynChan self, bool normalizeWeights)"},
+	 { (char *)"SynChan___get_Gk", _wrap_SynChan___get_Gk, METH_VARARGS, (char *)"SynChan___get_Gk(SynChan self) -> double"},
+	 { (char *)"SynChan___set_Gk", _wrap_SynChan___set_Gk, METH_VARARGS, (char *)"SynChan___set_Gk(SynChan self, double Gk)"},
+	 { (char *)"SynChan___get_Ik", _wrap_SynChan___get_Ik, METH_VARARGS, (char *)"SynChan___get_Ik(SynChan self) -> double"},
+	 { (char *)"SynChan___set_Ik", _wrap_SynChan___set_Ik, METH_VARARGS, (char *)"SynChan___set_Ik(SynChan self, double Ik)"},
+	 { (char *)"SynChan___get_numSynapses", _wrap_SynChan___get_numSynapses, METH_VARARGS, (char *)"SynChan___get_numSynapses(SynChan self) -> unsigned int"},
+	 { (char *)"SynChan___set_numSynapses", _wrap_SynChan___set_numSynapses, METH_VARARGS, (char *)"SynChan___set_numSynapses(SynChan self, unsigned int numSynapses)"},
+	 { (char *)"SynChan___get_weight", _wrap_SynChan___get_weight, METH_VARARGS, (char *)"SynChan___get_weight(SynChan self) -> double"},
+	 { (char *)"SynChan___set_weight", _wrap_SynChan___set_weight, METH_VARARGS, (char *)"SynChan___set_weight(SynChan self, double weight)"},
+	 { (char *)"SynChan___get_delay", _wrap_SynChan___get_delay, METH_VARARGS, (char *)"SynChan___get_delay(SynChan self) -> double"},
+	 { (char *)"SynChan___set_delay", _wrap_SynChan___set_delay, METH_VARARGS, (char *)"SynChan___set_delay(SynChan self, double delay)"},
+	 { (char *)"SynChan___get_IkSrc", _wrap_SynChan___get_IkSrc, METH_VARARGS, (char *)"SynChan___get_IkSrc(SynChan self) -> double"},
+	 { (char *)"SynChan___set_IkSrc", _wrap_SynChan___set_IkSrc, METH_VARARGS, (char *)"SynChan___set_IkSrc(SynChan self, double IkSrc)"},
+	 { (char *)"SynChan___get_synapse", _wrap_SynChan___get_synapse, METH_VARARGS, (char *)"SynChan___get_synapse(SynChan self) -> double"},
+	 { (char *)"SynChan___set_synapse", _wrap_SynChan___set_synapse, METH_VARARGS, (char *)"SynChan___set_synapse(SynChan self, double synapse)"},
+	 { (char *)"SynChan___get_activation", _wrap_SynChan___get_activation, METH_VARARGS, (char *)"SynChan___get_activation(SynChan self) -> double"},
+	 { (char *)"SynChan___set_activation", _wrap_SynChan___set_activation, METH_VARARGS, (char *)"SynChan___set_activation(SynChan self, double activation)"},
+	 { (char *)"SynChan___get_modulator", _wrap_SynChan___get_modulator, METH_VARARGS, (char *)"SynChan___get_modulator(SynChan self) -> double"},
+	 { (char *)"SynChan___set_modulator", _wrap_SynChan___set_modulator, METH_VARARGS, (char *)"SynChan___set_modulator(SynChan self, double modulator)"},
+	 { (char *)"SynChan_Gbar_set", _wrap_SynChan_Gbar_set, METH_VARARGS, (char *)"SynChan_Gbar_set(SynChan self, double Gbar)"},
+	 { (char *)"SynChan_Gbar_get", _wrap_SynChan_Gbar_get, METH_VARARGS, (char *)"SynChan_Gbar_get(SynChan self) -> double"},
+	 { (char *)"SynChan_Ek_set", _wrap_SynChan_Ek_set, METH_VARARGS, (char *)"SynChan_Ek_set(SynChan self, double Ek)"},
+	 { (char *)"SynChan_Ek_get", _wrap_SynChan_Ek_get, METH_VARARGS, (char *)"SynChan_Ek_get(SynChan self) -> double"},
+	 { (char *)"SynChan_tau1_set", _wrap_SynChan_tau1_set, METH_VARARGS, (char *)"SynChan_tau1_set(SynChan self, double tau1)"},
+	 { (char *)"SynChan_tau1_get", _wrap_SynChan_tau1_get, METH_VARARGS, (char *)"SynChan_tau1_get(SynChan self) -> double"},
+	 { (char *)"SynChan_tau2_set", _wrap_SynChan_tau2_set, METH_VARARGS, (char *)"SynChan_tau2_set(SynChan self, double tau2)"},
+	 { (char *)"SynChan_tau2_get", _wrap_SynChan_tau2_get, METH_VARARGS, (char *)"SynChan_tau2_get(SynChan self) -> double"},
+	 { (char *)"SynChan_normalizeWeights_set", _wrap_SynChan_normalizeWeights_set, METH_VARARGS, (char *)"SynChan_normalizeWeights_set(SynChan self, bool normalizeWeights)"},
+	 { (char *)"SynChan_normalizeWeights_get", _wrap_SynChan_normalizeWeights_get, METH_VARARGS, (char *)"SynChan_normalizeWeights_get(SynChan self) -> bool"},
+	 { (char *)"SynChan_Gk_set", _wrap_SynChan_Gk_set, METH_VARARGS, (char *)"SynChan_Gk_set(SynChan self, double Gk)"},
+	 { (char *)"SynChan_Gk_get", _wrap_SynChan_Gk_get, METH_VARARGS, (char *)"SynChan_Gk_get(SynChan self) -> double"},
+	 { (char *)"SynChan_Ik_set", _wrap_SynChan_Ik_set, METH_VARARGS, (char *)"SynChan_Ik_set(SynChan self, double Ik)"},
+	 { (char *)"SynChan_Ik_get", _wrap_SynChan_Ik_get, METH_VARARGS, (char *)"SynChan_Ik_get(SynChan self) -> double"},
+	 { (char *)"SynChan_numSynapses_get", _wrap_SynChan_numSynapses_get, METH_VARARGS, (char *)"SynChan_numSynapses_get(SynChan self) -> unsigned int"},
+	 { (char *)"SynChan_activation_set", _wrap_SynChan_activation_set, METH_VARARGS, (char *)"SynChan_activation_set(SynChan self, double activation)"},
+	 { (char *)"SynChan_activation_get", _wrap_SynChan_activation_get, METH_VARARGS, (char *)"SynChan_activation_get(SynChan self) -> double"},
+	 { (char *)"SynChan_modulator_set", _wrap_SynChan_modulator_set, METH_VARARGS, (char *)"SynChan_modulator_set(SynChan self, double modulator)"},
+	 { (char *)"SynChan_modulator_get", _wrap_SynChan_modulator_get, METH_VARARGS, (char *)"SynChan_modulator_get(SynChan self) -> double"},
 	 { (char *)"SynChan_swigregister", SynChan_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_BinSynchan", _wrap_new_BinSynchan, METH_VARARGS, NULL},
-	 { (char *)"delete_BinSynchan", _wrap_delete_BinSynchan, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_getType", _wrap_BinSynchan_getType, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_Gbar", _wrap_BinSynchan___get_Gbar, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_Gbar", _wrap_BinSynchan___set_Gbar, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_Ek", _wrap_BinSynchan___get_Ek, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_Ek", _wrap_BinSynchan___set_Ek, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_tau1", _wrap_BinSynchan___get_tau1, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_tau1", _wrap_BinSynchan___set_tau1, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_tau2", _wrap_BinSynchan___get_tau2, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_tau2", _wrap_BinSynchan___set_tau2, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_normalizeWeights", _wrap_BinSynchan___get_normalizeWeights, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_normalizeWeights", _wrap_BinSynchan___set_normalizeWeights, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_Gk", _wrap_BinSynchan___get_Gk, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_Gk", _wrap_BinSynchan___set_Gk, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_Ik", _wrap_BinSynchan___get_Ik, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_Ik", _wrap_BinSynchan___set_Ik, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_numSynapses", _wrap_BinSynchan___get_numSynapses, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_numSynapses", _wrap_BinSynchan___set_numSynapses, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_weight", _wrap_BinSynchan___get_weight, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_weight", _wrap_BinSynchan___set_weight, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_delay", _wrap_BinSynchan___get_delay, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_delay", _wrap_BinSynchan___set_delay, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_poolSize", _wrap_BinSynchan___get_poolSize, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_poolSize", _wrap_BinSynchan___set_poolSize, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_releaseP", _wrap_BinSynchan___get_releaseP, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_releaseP", _wrap_BinSynchan___set_releaseP, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_releaseCount", _wrap_BinSynchan___get_releaseCount, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_releaseCount", _wrap_BinSynchan___set_releaseCount, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_synapse", _wrap_BinSynchan___get_synapse, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_synapse", _wrap_BinSynchan___set_synapse, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_activation", _wrap_BinSynchan___get_activation, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_activation", _wrap_BinSynchan___set_activation, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___get_modulator", _wrap_BinSynchan___get_modulator, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan___set_modulator", _wrap_BinSynchan___set_modulator, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_weight_set", _wrap_BinSynchan_weight_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_weight_get", _wrap_BinSynchan_weight_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_delay_set", _wrap_BinSynchan_delay_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_delay_get", _wrap_BinSynchan_delay_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_releaseP_set", _wrap_BinSynchan_releaseP_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_releaseP_get", _wrap_BinSynchan_releaseP_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_poolSize_set", _wrap_BinSynchan_poolSize_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_poolSize_get", _wrap_BinSynchan_poolSize_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_releaseCount_set", _wrap_BinSynchan_releaseCount_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_releaseCount_get", _wrap_BinSynchan_releaseCount_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_Gbar_set", _wrap_BinSynchan_Gbar_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_Gbar_get", _wrap_BinSynchan_Gbar_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_Ek_set", _wrap_BinSynchan_Ek_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_Ek_get", _wrap_BinSynchan_Ek_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_tau1_set", _wrap_BinSynchan_tau1_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_tau1_get", _wrap_BinSynchan_tau1_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_tau2_set", _wrap_BinSynchan_tau2_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_tau2_get", _wrap_BinSynchan_tau2_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_normalizeWeights_set", _wrap_BinSynchan_normalizeWeights_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_normalizeWeights_get", _wrap_BinSynchan_normalizeWeights_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_Gk_set", _wrap_BinSynchan_Gk_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_Gk_get", _wrap_BinSynchan_Gk_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_Ik_set", _wrap_BinSynchan_Ik_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_Ik_get", _wrap_BinSynchan_Ik_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_numSynapses_get", _wrap_BinSynchan_numSynapses_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_activation_set", _wrap_BinSynchan_activation_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_activation_get", _wrap_BinSynchan_activation_get, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_modulator_set", _wrap_BinSynchan_modulator_set, METH_VARARGS, NULL},
-	 { (char *)"BinSynchan_modulator_get", _wrap_BinSynchan_modulator_get, METH_VARARGS, NULL},
+	 { (char *)"new_BinSynchan", _wrap_new_BinSynchan, METH_VARARGS, (char *)"\n"
+		"BinSynchan(::Id id)\n"
+		"BinSynchan(string path)\n"
+		"BinSynchan(string name, ::Id parentId)\n"
+		"BinSynchan(string name, PyMooseBase parent)\n"
+		"BinSynchan(BinSynchan src, string name, PyMooseBase parent)\n"
+		"BinSynchan(BinSynchan src, string name, Id parent)\n"
+		"BinSynchan(Id src, string name, Id parent)\n"
+		"new_BinSynchan(BinSynchan src, string path) -> BinSynchan\n"
+		""},
+	 { (char *)"delete_BinSynchan", _wrap_delete_BinSynchan, METH_VARARGS, (char *)"delete_BinSynchan(BinSynchan self)"},
+	 { (char *)"BinSynchan_getType", _wrap_BinSynchan_getType, METH_VARARGS, (char *)"BinSynchan_getType(BinSynchan self) -> string"},
+	 { (char *)"BinSynchan___get_Gbar", _wrap_BinSynchan___get_Gbar, METH_VARARGS, (char *)"BinSynchan___get_Gbar(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan___set_Gbar", _wrap_BinSynchan___set_Gbar, METH_VARARGS, (char *)"BinSynchan___set_Gbar(BinSynchan self, double Gbar)"},
+	 { (char *)"BinSynchan___get_Ek", _wrap_BinSynchan___get_Ek, METH_VARARGS, (char *)"BinSynchan___get_Ek(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan___set_Ek", _wrap_BinSynchan___set_Ek, METH_VARARGS, (char *)"BinSynchan___set_Ek(BinSynchan self, double Ek)"},
+	 { (char *)"BinSynchan___get_tau1", _wrap_BinSynchan___get_tau1, METH_VARARGS, (char *)"BinSynchan___get_tau1(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan___set_tau1", _wrap_BinSynchan___set_tau1, METH_VARARGS, (char *)"BinSynchan___set_tau1(BinSynchan self, double tau1)"},
+	 { (char *)"BinSynchan___get_tau2", _wrap_BinSynchan___get_tau2, METH_VARARGS, (char *)"BinSynchan___get_tau2(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan___set_tau2", _wrap_BinSynchan___set_tau2, METH_VARARGS, (char *)"BinSynchan___set_tau2(BinSynchan self, double tau2)"},
+	 { (char *)"BinSynchan___get_normalizeWeights", _wrap_BinSynchan___get_normalizeWeights, METH_VARARGS, (char *)"BinSynchan___get_normalizeWeights(BinSynchan self) -> bool"},
+	 { (char *)"BinSynchan___set_normalizeWeights", _wrap_BinSynchan___set_normalizeWeights, METH_VARARGS, (char *)"BinSynchan___set_normalizeWeights(BinSynchan self, bool normalizeWeights)"},
+	 { (char *)"BinSynchan___get_Gk", _wrap_BinSynchan___get_Gk, METH_VARARGS, (char *)"BinSynchan___get_Gk(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan___set_Gk", _wrap_BinSynchan___set_Gk, METH_VARARGS, (char *)"BinSynchan___set_Gk(BinSynchan self, double Gk)"},
+	 { (char *)"BinSynchan___get_Ik", _wrap_BinSynchan___get_Ik, METH_VARARGS, (char *)"BinSynchan___get_Ik(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan___set_Ik", _wrap_BinSynchan___set_Ik, METH_VARARGS, (char *)"BinSynchan___set_Ik(BinSynchan self, double Ik)"},
+	 { (char *)"BinSynchan___get_numSynapses", _wrap_BinSynchan___get_numSynapses, METH_VARARGS, (char *)"BinSynchan___get_numSynapses(BinSynchan self) -> unsigned int"},
+	 { (char *)"BinSynchan___set_numSynapses", _wrap_BinSynchan___set_numSynapses, METH_VARARGS, (char *)"BinSynchan___set_numSynapses(BinSynchan self, unsigned int index, unsigned int num)"},
+	 { (char *)"BinSynchan___get_weight", _wrap_BinSynchan___get_weight, METH_VARARGS, (char *)"BinSynchan___get_weight(BinSynchan self, unsigned int index) -> double"},
+	 { (char *)"BinSynchan___set_weight", _wrap_BinSynchan___set_weight, METH_VARARGS, (char *)"BinSynchan___set_weight(BinSynchan self, unsigned int index, double weight)"},
+	 { (char *)"BinSynchan___get_delay", _wrap_BinSynchan___get_delay, METH_VARARGS, (char *)"BinSynchan___get_delay(BinSynchan self, unsigned int index) -> double"},
+	 { (char *)"BinSynchan___set_delay", _wrap_BinSynchan___set_delay, METH_VARARGS, (char *)"BinSynchan___set_delay(BinSynchan self, unsigned int index, double delay)"},
+	 { (char *)"BinSynchan___get_poolSize", _wrap_BinSynchan___get_poolSize, METH_VARARGS, (char *)"BinSynchan___get_poolSize(BinSynchan self, unsigned int index) -> int"},
+	 { (char *)"BinSynchan___set_poolSize", _wrap_BinSynchan___set_poolSize, METH_VARARGS, (char *)"BinSynchan___set_poolSize(BinSynchan self, unsigned int index, int size)"},
+	 { (char *)"BinSynchan___get_releaseP", _wrap_BinSynchan___get_releaseP, METH_VARARGS, (char *)"BinSynchan___get_releaseP(BinSynchan self, unsigned int index) -> double"},
+	 { (char *)"BinSynchan___set_releaseP", _wrap_BinSynchan___set_releaseP, METH_VARARGS, (char *)"BinSynchan___set_releaseP(BinSynchan self, unsigned int index, double releaseP)"},
+	 { (char *)"BinSynchan___get_releaseCount", _wrap_BinSynchan___get_releaseCount, METH_VARARGS, (char *)"BinSynchan___get_releaseCount(BinSynchan self, unsigned int index) -> double"},
+	 { (char *)"BinSynchan___set_releaseCount", _wrap_BinSynchan___set_releaseCount, METH_VARARGS, (char *)"BinSynchan___set_releaseCount(BinSynchan self, unsigned int index, double releaseCount)"},
+	 { (char *)"BinSynchan___get_synapse", _wrap_BinSynchan___get_synapse, METH_VARARGS, (char *)"BinSynchan___get_synapse(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan___set_synapse", _wrap_BinSynchan___set_synapse, METH_VARARGS, (char *)"BinSynchan___set_synapse(BinSynchan self, double synapse)"},
+	 { (char *)"BinSynchan___get_activation", _wrap_BinSynchan___get_activation, METH_VARARGS, (char *)"BinSynchan___get_activation(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan___set_activation", _wrap_BinSynchan___set_activation, METH_VARARGS, (char *)"BinSynchan___set_activation(BinSynchan self, double activation)"},
+	 { (char *)"BinSynchan___get_modulator", _wrap_BinSynchan___get_modulator, METH_VARARGS, (char *)"BinSynchan___get_modulator(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan___set_modulator", _wrap_BinSynchan___set_modulator, METH_VARARGS, (char *)"BinSynchan___set_modulator(BinSynchan self, double modulator)"},
+	 { (char *)"BinSynchan_weight_set", _wrap_BinSynchan_weight_set, METH_VARARGS, (char *)"BinSynchan_weight_set(BinSynchan self, BinSynchanDoubleArray weight)"},
+	 { (char *)"BinSynchan_weight_get", _wrap_BinSynchan_weight_get, METH_VARARGS, (char *)"BinSynchan_weight_get(BinSynchan self) -> BinSynchanDoubleArray"},
+	 { (char *)"BinSynchan_delay_set", _wrap_BinSynchan_delay_set, METH_VARARGS, (char *)"BinSynchan_delay_set(BinSynchan self, BinSynchanDoubleArray delay)"},
+	 { (char *)"BinSynchan_delay_get", _wrap_BinSynchan_delay_get, METH_VARARGS, (char *)"BinSynchan_delay_get(BinSynchan self) -> BinSynchanDoubleArray"},
+	 { (char *)"BinSynchan_releaseP_set", _wrap_BinSynchan_releaseP_set, METH_VARARGS, (char *)"BinSynchan_releaseP_set(BinSynchan self, BinSynchanDoubleArray releaseP)"},
+	 { (char *)"BinSynchan_releaseP_get", _wrap_BinSynchan_releaseP_get, METH_VARARGS, (char *)"BinSynchan_releaseP_get(BinSynchan self) -> BinSynchanDoubleArray"},
+	 { (char *)"BinSynchan_poolSize_set", _wrap_BinSynchan_poolSize_set, METH_VARARGS, (char *)"BinSynchan_poolSize_set(BinSynchan self, BinSynchanIntArray poolSize)"},
+	 { (char *)"BinSynchan_poolSize_get", _wrap_BinSynchan_poolSize_get, METH_VARARGS, (char *)"BinSynchan_poolSize_get(BinSynchan self) -> BinSynchanIntArray"},
+	 { (char *)"BinSynchan_releaseCount_set", _wrap_BinSynchan_releaseCount_set, METH_VARARGS, (char *)"BinSynchan_releaseCount_set(BinSynchan self, BinSynchanDoubleArray releaseCount)"},
+	 { (char *)"BinSynchan_releaseCount_get", _wrap_BinSynchan_releaseCount_get, METH_VARARGS, (char *)"BinSynchan_releaseCount_get(BinSynchan self) -> BinSynchanDoubleArray"},
+	 { (char *)"BinSynchan_Gbar_set", _wrap_BinSynchan_Gbar_set, METH_VARARGS, (char *)"BinSynchan_Gbar_set(BinSynchan self, double Gbar)"},
+	 { (char *)"BinSynchan_Gbar_get", _wrap_BinSynchan_Gbar_get, METH_VARARGS, (char *)"BinSynchan_Gbar_get(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan_Ek_set", _wrap_BinSynchan_Ek_set, METH_VARARGS, (char *)"BinSynchan_Ek_set(BinSynchan self, double Ek)"},
+	 { (char *)"BinSynchan_Ek_get", _wrap_BinSynchan_Ek_get, METH_VARARGS, (char *)"BinSynchan_Ek_get(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan_tau1_set", _wrap_BinSynchan_tau1_set, METH_VARARGS, (char *)"BinSynchan_tau1_set(BinSynchan self, double tau1)"},
+	 { (char *)"BinSynchan_tau1_get", _wrap_BinSynchan_tau1_get, METH_VARARGS, (char *)"BinSynchan_tau1_get(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan_tau2_set", _wrap_BinSynchan_tau2_set, METH_VARARGS, (char *)"BinSynchan_tau2_set(BinSynchan self, double tau2)"},
+	 { (char *)"BinSynchan_tau2_get", _wrap_BinSynchan_tau2_get, METH_VARARGS, (char *)"BinSynchan_tau2_get(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan_normalizeWeights_set", _wrap_BinSynchan_normalizeWeights_set, METH_VARARGS, (char *)"BinSynchan_normalizeWeights_set(BinSynchan self, bool normalizeWeights)"},
+	 { (char *)"BinSynchan_normalizeWeights_get", _wrap_BinSynchan_normalizeWeights_get, METH_VARARGS, (char *)"BinSynchan_normalizeWeights_get(BinSynchan self) -> bool"},
+	 { (char *)"BinSynchan_Gk_set", _wrap_BinSynchan_Gk_set, METH_VARARGS, (char *)"BinSynchan_Gk_set(BinSynchan self, double Gk)"},
+	 { (char *)"BinSynchan_Gk_get", _wrap_BinSynchan_Gk_get, METH_VARARGS, (char *)"BinSynchan_Gk_get(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan_Ik_set", _wrap_BinSynchan_Ik_set, METH_VARARGS, (char *)"BinSynchan_Ik_set(BinSynchan self, double Ik)"},
+	 { (char *)"BinSynchan_Ik_get", _wrap_BinSynchan_Ik_get, METH_VARARGS, (char *)"BinSynchan_Ik_get(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan_numSynapses_get", _wrap_BinSynchan_numSynapses_get, METH_VARARGS, (char *)"BinSynchan_numSynapses_get(BinSynchan self) -> unsigned int"},
+	 { (char *)"BinSynchan_activation_set", _wrap_BinSynchan_activation_set, METH_VARARGS, (char *)"BinSynchan_activation_set(BinSynchan self, double activation)"},
+	 { (char *)"BinSynchan_activation_get", _wrap_BinSynchan_activation_get, METH_VARARGS, (char *)"BinSynchan_activation_get(BinSynchan self) -> double"},
+	 { (char *)"BinSynchan_modulator_set", _wrap_BinSynchan_modulator_set, METH_VARARGS, (char *)"BinSynchan_modulator_set(BinSynchan self, double modulator)"},
+	 { (char *)"BinSynchan_modulator_get", _wrap_BinSynchan_modulator_get, METH_VARARGS, (char *)"BinSynchan_modulator_get(BinSynchan self) -> double"},
 	 { (char *)"BinSynchan_swigregister", BinSynchan_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_StochSynchan", _wrap_new_StochSynchan, METH_VARARGS, NULL},
-	 { (char *)"delete_StochSynchan", _wrap_delete_StochSynchan, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_getType", _wrap_StochSynchan_getType, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_Gbar", _wrap_StochSynchan___get_Gbar, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_Gbar", _wrap_StochSynchan___set_Gbar, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_Ek", _wrap_StochSynchan___get_Ek, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_Ek", _wrap_StochSynchan___set_Ek, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_tau1", _wrap_StochSynchan___get_tau1, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_tau1", _wrap_StochSynchan___set_tau1, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_tau2", _wrap_StochSynchan___get_tau2, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_tau2", _wrap_StochSynchan___set_tau2, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_normalizeWeights", _wrap_StochSynchan___get_normalizeWeights, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_normalizeWeights", _wrap_StochSynchan___set_normalizeWeights, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_Gk", _wrap_StochSynchan___get_Gk, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_Gk", _wrap_StochSynchan___set_Gk, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_Ik", _wrap_StochSynchan___get_Ik, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_Ik", _wrap_StochSynchan___set_Ik, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_numSynapses", _wrap_StochSynchan___get_numSynapses, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_numSynapses", _wrap_StochSynchan___set_numSynapses, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_weight", _wrap_StochSynchan___get_weight, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_weight", _wrap_StochSynchan___set_weight, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_delay", _wrap_StochSynchan___get_delay, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_delay", _wrap_StochSynchan___set_delay, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_releaseP", _wrap_StochSynchan___get_releaseP, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_releaseP", _wrap_StochSynchan___set_releaseP, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_releaseCount", _wrap_StochSynchan___get_releaseCount, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_releaseCount", _wrap_StochSynchan___set_releaseCount, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_synapse", _wrap_StochSynchan___get_synapse, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_synapse", _wrap_StochSynchan___set_synapse, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_activation", _wrap_StochSynchan___get_activation, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_activation", _wrap_StochSynchan___set_activation, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___get_modulator", _wrap_StochSynchan___get_modulator, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan___set_modulator", _wrap_StochSynchan___set_modulator, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_weight_set", _wrap_StochSynchan_weight_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_weight_get", _wrap_StochSynchan_weight_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_delay_set", _wrap_StochSynchan_delay_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_delay_get", _wrap_StochSynchan_delay_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_releaseP_set", _wrap_StochSynchan_releaseP_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_releaseP_get", _wrap_StochSynchan_releaseP_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_releaseCount_set", _wrap_StochSynchan_releaseCount_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_releaseCount_get", _wrap_StochSynchan_releaseCount_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_Gbar_set", _wrap_StochSynchan_Gbar_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_Gbar_get", _wrap_StochSynchan_Gbar_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_Ek_set", _wrap_StochSynchan_Ek_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_Ek_get", _wrap_StochSynchan_Ek_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_tau1_set", _wrap_StochSynchan_tau1_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_tau1_get", _wrap_StochSynchan_tau1_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_tau2_set", _wrap_StochSynchan_tau2_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_tau2_get", _wrap_StochSynchan_tau2_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_normalizeWeights_set", _wrap_StochSynchan_normalizeWeights_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_normalizeWeights_get", _wrap_StochSynchan_normalizeWeights_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_Gk_set", _wrap_StochSynchan_Gk_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_Gk_get", _wrap_StochSynchan_Gk_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_Ik_set", _wrap_StochSynchan_Ik_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_Ik_get", _wrap_StochSynchan_Ik_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_numSynapses_get", _wrap_StochSynchan_numSynapses_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_activation_set", _wrap_StochSynchan_activation_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_activation_get", _wrap_StochSynchan_activation_get, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_modulator_set", _wrap_StochSynchan_modulator_set, METH_VARARGS, NULL},
-	 { (char *)"StochSynchan_modulator_get", _wrap_StochSynchan_modulator_get, METH_VARARGS, NULL},
+	 { (char *)"new_StochSynchan", _wrap_new_StochSynchan, METH_VARARGS, (char *)"\n"
+		"StochSynchan(Id id)\n"
+		"StochSynchan(string path)\n"
+		"StochSynchan(string name, Id parentId)\n"
+		"StochSynchan(string name, PyMooseBase parent)\n"
+		"StochSynchan(StochSynchan src, string name, PyMooseBase parent)\n"
+		"StochSynchan(StochSynchan src, string name, Id parent)\n"
+		"StochSynchan(Id src, string name, Id parent)\n"
+		"new_StochSynchan(StochSynchan src, string path) -> StochSynchan\n"
+		""},
+	 { (char *)"delete_StochSynchan", _wrap_delete_StochSynchan, METH_VARARGS, (char *)"delete_StochSynchan(StochSynchan self)"},
+	 { (char *)"StochSynchan_getType", _wrap_StochSynchan_getType, METH_VARARGS, (char *)"StochSynchan_getType(StochSynchan self) -> string"},
+	 { (char *)"StochSynchan___get_Gbar", _wrap_StochSynchan___get_Gbar, METH_VARARGS, (char *)"StochSynchan___get_Gbar(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan___set_Gbar", _wrap_StochSynchan___set_Gbar, METH_VARARGS, (char *)"StochSynchan___set_Gbar(StochSynchan self, double Gbar)"},
+	 { (char *)"StochSynchan___get_Ek", _wrap_StochSynchan___get_Ek, METH_VARARGS, (char *)"StochSynchan___get_Ek(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan___set_Ek", _wrap_StochSynchan___set_Ek, METH_VARARGS, (char *)"StochSynchan___set_Ek(StochSynchan self, double Ek)"},
+	 { (char *)"StochSynchan___get_tau1", _wrap_StochSynchan___get_tau1, METH_VARARGS, (char *)"StochSynchan___get_tau1(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan___set_tau1", _wrap_StochSynchan___set_tau1, METH_VARARGS, (char *)"StochSynchan___set_tau1(StochSynchan self, double tau1)"},
+	 { (char *)"StochSynchan___get_tau2", _wrap_StochSynchan___get_tau2, METH_VARARGS, (char *)"StochSynchan___get_tau2(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan___set_tau2", _wrap_StochSynchan___set_tau2, METH_VARARGS, (char *)"StochSynchan___set_tau2(StochSynchan self, double tau2)"},
+	 { (char *)"StochSynchan___get_normalizeWeights", _wrap_StochSynchan___get_normalizeWeights, METH_VARARGS, (char *)"StochSynchan___get_normalizeWeights(StochSynchan self) -> bool"},
+	 { (char *)"StochSynchan___set_normalizeWeights", _wrap_StochSynchan___set_normalizeWeights, METH_VARARGS, (char *)"StochSynchan___set_normalizeWeights(StochSynchan self, bool normalizeWeights)"},
+	 { (char *)"StochSynchan___get_Gk", _wrap_StochSynchan___get_Gk, METH_VARARGS, (char *)"StochSynchan___get_Gk(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan___set_Gk", _wrap_StochSynchan___set_Gk, METH_VARARGS, (char *)"StochSynchan___set_Gk(StochSynchan self, double Gk)"},
+	 { (char *)"StochSynchan___get_Ik", _wrap_StochSynchan___get_Ik, METH_VARARGS, (char *)"StochSynchan___get_Ik(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan___set_Ik", _wrap_StochSynchan___set_Ik, METH_VARARGS, (char *)"StochSynchan___set_Ik(StochSynchan self, double Ik)"},
+	 { (char *)"StochSynchan___get_numSynapses", _wrap_StochSynchan___get_numSynapses, METH_VARARGS, (char *)"StochSynchan___get_numSynapses(StochSynchan self) -> unsigned int"},
+	 { (char *)"StochSynchan___set_numSynapses", _wrap_StochSynchan___set_numSynapses, METH_VARARGS, (char *)"StochSynchan___set_numSynapses(StochSynchan self, unsigned int index, unsigned int num)"},
+	 { (char *)"StochSynchan___get_weight", _wrap_StochSynchan___get_weight, METH_VARARGS, (char *)"StochSynchan___get_weight(StochSynchan self, unsigned int index) -> double"},
+	 { (char *)"StochSynchan___set_weight", _wrap_StochSynchan___set_weight, METH_VARARGS, (char *)"StochSynchan___set_weight(StochSynchan self, unsigned int index, double weight)"},
+	 { (char *)"StochSynchan___get_delay", _wrap_StochSynchan___get_delay, METH_VARARGS, (char *)"StochSynchan___get_delay(StochSynchan self, unsigned int index) -> double"},
+	 { (char *)"StochSynchan___set_delay", _wrap_StochSynchan___set_delay, METH_VARARGS, (char *)"StochSynchan___set_delay(StochSynchan self, unsigned int index, double delay)"},
+	 { (char *)"StochSynchan___get_releaseP", _wrap_StochSynchan___get_releaseP, METH_VARARGS, (char *)"StochSynchan___get_releaseP(StochSynchan self, unsigned int index) -> double"},
+	 { (char *)"StochSynchan___set_releaseP", _wrap_StochSynchan___set_releaseP, METH_VARARGS, (char *)"StochSynchan___set_releaseP(StochSynchan self, unsigned int index, double releaseP)"},
+	 { (char *)"StochSynchan___get_releaseCount", _wrap_StochSynchan___get_releaseCount, METH_VARARGS, (char *)"StochSynchan___get_releaseCount(StochSynchan self, unsigned int index) -> double"},
+	 { (char *)"StochSynchan___set_releaseCount", _wrap_StochSynchan___set_releaseCount, METH_VARARGS, (char *)"StochSynchan___set_releaseCount(StochSynchan self, unsigned int index, double releaseCount)"},
+	 { (char *)"StochSynchan___get_synapse", _wrap_StochSynchan___get_synapse, METH_VARARGS, (char *)"StochSynchan___get_synapse(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan___set_synapse", _wrap_StochSynchan___set_synapse, METH_VARARGS, (char *)"StochSynchan___set_synapse(StochSynchan self, double synapse)"},
+	 { (char *)"StochSynchan___get_activation", _wrap_StochSynchan___get_activation, METH_VARARGS, (char *)"StochSynchan___get_activation(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan___set_activation", _wrap_StochSynchan___set_activation, METH_VARARGS, (char *)"StochSynchan___set_activation(StochSynchan self, double activation)"},
+	 { (char *)"StochSynchan___get_modulator", _wrap_StochSynchan___get_modulator, METH_VARARGS, (char *)"StochSynchan___get_modulator(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan___set_modulator", _wrap_StochSynchan___set_modulator, METH_VARARGS, (char *)"StochSynchan___set_modulator(StochSynchan self, double modulator)"},
+	 { (char *)"StochSynchan_weight_set", _wrap_StochSynchan_weight_set, METH_VARARGS, (char *)"StochSynchan_weight_set(StochSynchan self, StochSynchanDoubleArray weight)"},
+	 { (char *)"StochSynchan_weight_get", _wrap_StochSynchan_weight_get, METH_VARARGS, (char *)"StochSynchan_weight_get(StochSynchan self) -> StochSynchanDoubleArray"},
+	 { (char *)"StochSynchan_delay_set", _wrap_StochSynchan_delay_set, METH_VARARGS, (char *)"StochSynchan_delay_set(StochSynchan self, StochSynchanDoubleArray delay)"},
+	 { (char *)"StochSynchan_delay_get", _wrap_StochSynchan_delay_get, METH_VARARGS, (char *)"StochSynchan_delay_get(StochSynchan self) -> StochSynchanDoubleArray"},
+	 { (char *)"StochSynchan_releaseP_set", _wrap_StochSynchan_releaseP_set, METH_VARARGS, (char *)"StochSynchan_releaseP_set(StochSynchan self, StochSynchanDoubleArray releaseP)"},
+	 { (char *)"StochSynchan_releaseP_get", _wrap_StochSynchan_releaseP_get, METH_VARARGS, (char *)"StochSynchan_releaseP_get(StochSynchan self) -> StochSynchanDoubleArray"},
+	 { (char *)"StochSynchan_releaseCount_set", _wrap_StochSynchan_releaseCount_set, METH_VARARGS, (char *)"StochSynchan_releaseCount_set(StochSynchan self, StochSynchanDoubleArray releaseCount)"},
+	 { (char *)"StochSynchan_releaseCount_get", _wrap_StochSynchan_releaseCount_get, METH_VARARGS, (char *)"StochSynchan_releaseCount_get(StochSynchan self) -> StochSynchanDoubleArray"},
+	 { (char *)"StochSynchan_Gbar_set", _wrap_StochSynchan_Gbar_set, METH_VARARGS, (char *)"StochSynchan_Gbar_set(StochSynchan self, double Gbar)"},
+	 { (char *)"StochSynchan_Gbar_get", _wrap_StochSynchan_Gbar_get, METH_VARARGS, (char *)"StochSynchan_Gbar_get(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan_Ek_set", _wrap_StochSynchan_Ek_set, METH_VARARGS, (char *)"StochSynchan_Ek_set(StochSynchan self, double Ek)"},
+	 { (char *)"StochSynchan_Ek_get", _wrap_StochSynchan_Ek_get, METH_VARARGS, (char *)"StochSynchan_Ek_get(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan_tau1_set", _wrap_StochSynchan_tau1_set, METH_VARARGS, (char *)"StochSynchan_tau1_set(StochSynchan self, double tau1)"},
+	 { (char *)"StochSynchan_tau1_get", _wrap_StochSynchan_tau1_get, METH_VARARGS, (char *)"StochSynchan_tau1_get(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan_tau2_set", _wrap_StochSynchan_tau2_set, METH_VARARGS, (char *)"StochSynchan_tau2_set(StochSynchan self, double tau2)"},
+	 { (char *)"StochSynchan_tau2_get", _wrap_StochSynchan_tau2_get, METH_VARARGS, (char *)"StochSynchan_tau2_get(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan_normalizeWeights_set", _wrap_StochSynchan_normalizeWeights_set, METH_VARARGS, (char *)"StochSynchan_normalizeWeights_set(StochSynchan self, bool normalizeWeights)"},
+	 { (char *)"StochSynchan_normalizeWeights_get", _wrap_StochSynchan_normalizeWeights_get, METH_VARARGS, (char *)"StochSynchan_normalizeWeights_get(StochSynchan self) -> bool"},
+	 { (char *)"StochSynchan_Gk_set", _wrap_StochSynchan_Gk_set, METH_VARARGS, (char *)"StochSynchan_Gk_set(StochSynchan self, double Gk)"},
+	 { (char *)"StochSynchan_Gk_get", _wrap_StochSynchan_Gk_get, METH_VARARGS, (char *)"StochSynchan_Gk_get(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan_Ik_set", _wrap_StochSynchan_Ik_set, METH_VARARGS, (char *)"StochSynchan_Ik_set(StochSynchan self, double Ik)"},
+	 { (char *)"StochSynchan_Ik_get", _wrap_StochSynchan_Ik_get, METH_VARARGS, (char *)"StochSynchan_Ik_get(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan_numSynapses_get", _wrap_StochSynchan_numSynapses_get, METH_VARARGS, (char *)"StochSynchan_numSynapses_get(StochSynchan self) -> unsigned int"},
+	 { (char *)"StochSynchan_activation_set", _wrap_StochSynchan_activation_set, METH_VARARGS, (char *)"StochSynchan_activation_set(StochSynchan self, double activation)"},
+	 { (char *)"StochSynchan_activation_get", _wrap_StochSynchan_activation_get, METH_VARARGS, (char *)"StochSynchan_activation_get(StochSynchan self) -> double"},
+	 { (char *)"StochSynchan_modulator_set", _wrap_StochSynchan_modulator_set, METH_VARARGS, (char *)"StochSynchan_modulator_set(StochSynchan self, double modulator)"},
+	 { (char *)"StochSynchan_modulator_get", _wrap_StochSynchan_modulator_get, METH_VARARGS, (char *)"StochSynchan_modulator_get(StochSynchan self) -> double"},
 	 { (char *)"StochSynchan_swigregister", StochSynchan_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_SpikeGen", _wrap_new_SpikeGen, METH_VARARGS, NULL},
-	 { (char *)"delete_SpikeGen", _wrap_delete_SpikeGen, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_getType", _wrap_SpikeGen_getType, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___get_threshold", _wrap_SpikeGen___get_threshold, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___set_threshold", _wrap_SpikeGen___set_threshold, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___get_refractT", _wrap_SpikeGen___get_refractT, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___set_refractT", _wrap_SpikeGen___set_refractT, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___get_absRefractT", _wrap_SpikeGen___get_absRefractT, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___set_absRefractT", _wrap_SpikeGen___set_absRefractT, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___get_amplitude", _wrap_SpikeGen___get_amplitude, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___set_amplitude", _wrap_SpikeGen___set_amplitude, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___get_state", _wrap_SpikeGen___get_state, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___set_state", _wrap_SpikeGen___set_state, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___get_event", _wrap_SpikeGen___get_event, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___set_event", _wrap_SpikeGen___set_event, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___get_Vm", _wrap_SpikeGen___get_Vm, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen___set_Vm", _wrap_SpikeGen___set_Vm, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_threshold_set", _wrap_SpikeGen_threshold_set, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_threshold_get", _wrap_SpikeGen_threshold_get, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_refractT_set", _wrap_SpikeGen_refractT_set, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_refractT_get", _wrap_SpikeGen_refractT_get, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_absRefractT_set", _wrap_SpikeGen_absRefractT_set, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_absRefractT_get", _wrap_SpikeGen_absRefractT_get, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_amplitude_set", _wrap_SpikeGen_amplitude_set, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_amplitude_get", _wrap_SpikeGen_amplitude_get, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_state_set", _wrap_SpikeGen_state_set, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_state_get", _wrap_SpikeGen_state_get, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_event_set", _wrap_SpikeGen_event_set, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_event_get", _wrap_SpikeGen_event_get, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_Vm_set", _wrap_SpikeGen_Vm_set, METH_VARARGS, NULL},
-	 { (char *)"SpikeGen_Vm_get", _wrap_SpikeGen_Vm_get, METH_VARARGS, NULL},
+	 { (char *)"new_SpikeGen", _wrap_new_SpikeGen, METH_VARARGS, (char *)"\n"
+		"SpikeGen(Id id)\n"
+		"SpikeGen(string path)\n"
+		"SpikeGen(string name, Id parentId)\n"
+		"SpikeGen(string name, PyMooseBase parent)\n"
+		"SpikeGen(SpikeGen src, string name, PyMooseBase parent)\n"
+		"SpikeGen(SpikeGen src, string name, Id parent)\n"
+		"SpikeGen(Id src, string name, Id parent)\n"
+		"new_SpikeGen(SpikeGen src, string path) -> SpikeGen\n"
+		""},
+	 { (char *)"delete_SpikeGen", _wrap_delete_SpikeGen, METH_VARARGS, (char *)"delete_SpikeGen(SpikeGen self)"},
+	 { (char *)"SpikeGen_getType", _wrap_SpikeGen_getType, METH_VARARGS, (char *)"SpikeGen_getType(SpikeGen self) -> string"},
+	 { (char *)"SpikeGen___get_threshold", _wrap_SpikeGen___get_threshold, METH_VARARGS, (char *)"SpikeGen___get_threshold(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen___set_threshold", _wrap_SpikeGen___set_threshold, METH_VARARGS, (char *)"SpikeGen___set_threshold(SpikeGen self, double threshold)"},
+	 { (char *)"SpikeGen___get_refractT", _wrap_SpikeGen___get_refractT, METH_VARARGS, (char *)"SpikeGen___get_refractT(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen___set_refractT", _wrap_SpikeGen___set_refractT, METH_VARARGS, (char *)"SpikeGen___set_refractT(SpikeGen self, double refractT)"},
+	 { (char *)"SpikeGen___get_absRefractT", _wrap_SpikeGen___get_absRefractT, METH_VARARGS, (char *)"SpikeGen___get_absRefractT(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen___set_absRefractT", _wrap_SpikeGen___set_absRefractT, METH_VARARGS, (char *)"SpikeGen___set_absRefractT(SpikeGen self, double abs_refract)"},
+	 { (char *)"SpikeGen___get_amplitude", _wrap_SpikeGen___get_amplitude, METH_VARARGS, (char *)"SpikeGen___get_amplitude(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen___set_amplitude", _wrap_SpikeGen___set_amplitude, METH_VARARGS, (char *)"SpikeGen___set_amplitude(SpikeGen self, double amplitude)"},
+	 { (char *)"SpikeGen___get_state", _wrap_SpikeGen___get_state, METH_VARARGS, (char *)"SpikeGen___get_state(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen___set_state", _wrap_SpikeGen___set_state, METH_VARARGS, (char *)"SpikeGen___set_state(SpikeGen self, double state)"},
+	 { (char *)"SpikeGen___get_event", _wrap_SpikeGen___get_event, METH_VARARGS, (char *)"SpikeGen___get_event(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen___set_event", _wrap_SpikeGen___set_event, METH_VARARGS, (char *)"SpikeGen___set_event(SpikeGen self, double event)"},
+	 { (char *)"SpikeGen___get_Vm", _wrap_SpikeGen___get_Vm, METH_VARARGS, (char *)"SpikeGen___get_Vm(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen___set_Vm", _wrap_SpikeGen___set_Vm, METH_VARARGS, (char *)"SpikeGen___set_Vm(SpikeGen self, double Vm)"},
+	 { (char *)"SpikeGen_threshold_set", _wrap_SpikeGen_threshold_set, METH_VARARGS, (char *)"SpikeGen_threshold_set(SpikeGen self, double threshold)"},
+	 { (char *)"SpikeGen_threshold_get", _wrap_SpikeGen_threshold_get, METH_VARARGS, (char *)"SpikeGen_threshold_get(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen_refractT_set", _wrap_SpikeGen_refractT_set, METH_VARARGS, (char *)"SpikeGen_refractT_set(SpikeGen self, double refractT)"},
+	 { (char *)"SpikeGen_refractT_get", _wrap_SpikeGen_refractT_get, METH_VARARGS, (char *)"SpikeGen_refractT_get(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen_absRefractT_set", _wrap_SpikeGen_absRefractT_set, METH_VARARGS, (char *)"SpikeGen_absRefractT_set(SpikeGen self, double absRefractT)"},
+	 { (char *)"SpikeGen_absRefractT_get", _wrap_SpikeGen_absRefractT_get, METH_VARARGS, (char *)"SpikeGen_absRefractT_get(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen_amplitude_set", _wrap_SpikeGen_amplitude_set, METH_VARARGS, (char *)"SpikeGen_amplitude_set(SpikeGen self, double amplitude)"},
+	 { (char *)"SpikeGen_amplitude_get", _wrap_SpikeGen_amplitude_get, METH_VARARGS, (char *)"SpikeGen_amplitude_get(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen_state_set", _wrap_SpikeGen_state_set, METH_VARARGS, (char *)"SpikeGen_state_set(SpikeGen self, double state)"},
+	 { (char *)"SpikeGen_state_get", _wrap_SpikeGen_state_get, METH_VARARGS, (char *)"SpikeGen_state_get(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen_event_set", _wrap_SpikeGen_event_set, METH_VARARGS, (char *)"SpikeGen_event_set(SpikeGen self, double event)"},
+	 { (char *)"SpikeGen_event_get", _wrap_SpikeGen_event_get, METH_VARARGS, (char *)"SpikeGen_event_get(SpikeGen self) -> double"},
+	 { (char *)"SpikeGen_Vm_set", _wrap_SpikeGen_Vm_set, METH_VARARGS, (char *)"SpikeGen_Vm_set(SpikeGen self, double Vm)"},
+	 { (char *)"SpikeGen_Vm_get", _wrap_SpikeGen_Vm_get, METH_VARARGS, (char *)"SpikeGen_Vm_get(SpikeGen self) -> double"},
 	 { (char *)"SpikeGen_swigregister", SpikeGen_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_RandomSpike", _wrap_new_RandomSpike, METH_VARARGS, NULL},
-	 { (char *)"delete_RandomSpike", _wrap_delete_RandomSpike, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_getType", _wrap_RandomSpike_getType, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___get_minAmp", _wrap_RandomSpike___get_minAmp, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___set_minAmp", _wrap_RandomSpike___set_minAmp, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___get_maxAmp", _wrap_RandomSpike___get_maxAmp, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___set_maxAmp", _wrap_RandomSpike___set_maxAmp, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___get_rate", _wrap_RandomSpike___get_rate, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___set_rate", _wrap_RandomSpike___set_rate, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___get_resetValue", _wrap_RandomSpike___get_resetValue, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___set_resetValue", _wrap_RandomSpike___set_resetValue, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___get_state", _wrap_RandomSpike___get_state, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___set_state", _wrap_RandomSpike___set_state, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___get_absRefract", _wrap_RandomSpike___get_absRefract, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___set_absRefract", _wrap_RandomSpike___set_absRefract, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___get_lastEvent", _wrap_RandomSpike___get_lastEvent, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___get_reset", _wrap_RandomSpike___get_reset, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike___set_reset", _wrap_RandomSpike___set_reset, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_minAmp_set", _wrap_RandomSpike_minAmp_set, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_minAmp_get", _wrap_RandomSpike_minAmp_get, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_maxAmp_set", _wrap_RandomSpike_maxAmp_set, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_maxAmp_get", _wrap_RandomSpike_maxAmp_get, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_rate_set", _wrap_RandomSpike_rate_set, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_rate_get", _wrap_RandomSpike_rate_get, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_resetValue_set", _wrap_RandomSpike_resetValue_set, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_resetValue_get", _wrap_RandomSpike_resetValue_get, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_state_set", _wrap_RandomSpike_state_set, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_state_get", _wrap_RandomSpike_state_get, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_absRefract_set", _wrap_RandomSpike_absRefract_set, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_absRefract_get", _wrap_RandomSpike_absRefract_get, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_lastEvent_get", _wrap_RandomSpike_lastEvent_get, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_reset_set", _wrap_RandomSpike_reset_set, METH_VARARGS, NULL},
-	 { (char *)"RandomSpike_reset_get", _wrap_RandomSpike_reset_get, METH_VARARGS, NULL},
+	 { (char *)"new_RandomSpike", _wrap_new_RandomSpike, METH_VARARGS, (char *)"\n"
+		"RandomSpike(Id id)\n"
+		"RandomSpike(string path)\n"
+		"RandomSpike(string name, Id parentId)\n"
+		"RandomSpike(string name, PyMooseBase parent)\n"
+		"RandomSpike(RandomSpike src, string name, PyMooseBase parent)\n"
+		"RandomSpike(RandomSpike src, string name, Id parent)\n"
+		"RandomSpike(Id src, string name, Id parent)\n"
+		"new_RandomSpike(RandomSpike src, string path) -> RandomSpike\n"
+		""},
+	 { (char *)"delete_RandomSpike", _wrap_delete_RandomSpike, METH_VARARGS, (char *)"delete_RandomSpike(RandomSpike self)"},
+	 { (char *)"RandomSpike_getType", _wrap_RandomSpike_getType, METH_VARARGS, (char *)"RandomSpike_getType(RandomSpike self) -> string"},
+	 { (char *)"RandomSpike___get_minAmp", _wrap_RandomSpike___get_minAmp, METH_VARARGS, (char *)"RandomSpike___get_minAmp(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike___set_minAmp", _wrap_RandomSpike___set_minAmp, METH_VARARGS, (char *)"RandomSpike___set_minAmp(RandomSpike self, double minAmp)"},
+	 { (char *)"RandomSpike___get_maxAmp", _wrap_RandomSpike___get_maxAmp, METH_VARARGS, (char *)"RandomSpike___get_maxAmp(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike___set_maxAmp", _wrap_RandomSpike___set_maxAmp, METH_VARARGS, (char *)"RandomSpike___set_maxAmp(RandomSpike self, double maxAmp)"},
+	 { (char *)"RandomSpike___get_rate", _wrap_RandomSpike___get_rate, METH_VARARGS, (char *)"RandomSpike___get_rate(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike___set_rate", _wrap_RandomSpike___set_rate, METH_VARARGS, (char *)"RandomSpike___set_rate(RandomSpike self, double rate)"},
+	 { (char *)"RandomSpike___get_resetValue", _wrap_RandomSpike___get_resetValue, METH_VARARGS, (char *)"RandomSpike___get_resetValue(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike___set_resetValue", _wrap_RandomSpike___set_resetValue, METH_VARARGS, (char *)"RandomSpike___set_resetValue(RandomSpike self, double resetValue)"},
+	 { (char *)"RandomSpike___get_state", _wrap_RandomSpike___get_state, METH_VARARGS, (char *)"RandomSpike___get_state(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike___set_state", _wrap_RandomSpike___set_state, METH_VARARGS, (char *)"RandomSpike___set_state(RandomSpike self, double state)"},
+	 { (char *)"RandomSpike___get_absRefract", _wrap_RandomSpike___get_absRefract, METH_VARARGS, (char *)"RandomSpike___get_absRefract(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike___set_absRefract", _wrap_RandomSpike___set_absRefract, METH_VARARGS, (char *)"RandomSpike___set_absRefract(RandomSpike self, double absRefract)"},
+	 { (char *)"RandomSpike___get_lastEvent", _wrap_RandomSpike___get_lastEvent, METH_VARARGS, (char *)"RandomSpike___get_lastEvent(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike___get_reset", _wrap_RandomSpike___get_reset, METH_VARARGS, (char *)"RandomSpike___get_reset(RandomSpike self) -> int"},
+	 { (char *)"RandomSpike___set_reset", _wrap_RandomSpike___set_reset, METH_VARARGS, (char *)"RandomSpike___set_reset(RandomSpike self, int reset)"},
+	 { (char *)"RandomSpike_minAmp_set", _wrap_RandomSpike_minAmp_set, METH_VARARGS, (char *)"RandomSpike_minAmp_set(RandomSpike self, double minAmp)"},
+	 { (char *)"RandomSpike_minAmp_get", _wrap_RandomSpike_minAmp_get, METH_VARARGS, (char *)"RandomSpike_minAmp_get(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike_maxAmp_set", _wrap_RandomSpike_maxAmp_set, METH_VARARGS, (char *)"RandomSpike_maxAmp_set(RandomSpike self, double maxAmp)"},
+	 { (char *)"RandomSpike_maxAmp_get", _wrap_RandomSpike_maxAmp_get, METH_VARARGS, (char *)"RandomSpike_maxAmp_get(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike_rate_set", _wrap_RandomSpike_rate_set, METH_VARARGS, (char *)"RandomSpike_rate_set(RandomSpike self, double rate)"},
+	 { (char *)"RandomSpike_rate_get", _wrap_RandomSpike_rate_get, METH_VARARGS, (char *)"RandomSpike_rate_get(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike_resetValue_set", _wrap_RandomSpike_resetValue_set, METH_VARARGS, (char *)"RandomSpike_resetValue_set(RandomSpike self, double resetValue)"},
+	 { (char *)"RandomSpike_resetValue_get", _wrap_RandomSpike_resetValue_get, METH_VARARGS, (char *)"RandomSpike_resetValue_get(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike_state_set", _wrap_RandomSpike_state_set, METH_VARARGS, (char *)"RandomSpike_state_set(RandomSpike self, double state)"},
+	 { (char *)"RandomSpike_state_get", _wrap_RandomSpike_state_get, METH_VARARGS, (char *)"RandomSpike_state_get(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike_absRefract_set", _wrap_RandomSpike_absRefract_set, METH_VARARGS, (char *)"RandomSpike_absRefract_set(RandomSpike self, double absRefract)"},
+	 { (char *)"RandomSpike_absRefract_get", _wrap_RandomSpike_absRefract_get, METH_VARARGS, (char *)"RandomSpike_absRefract_get(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike_lastEvent_get", _wrap_RandomSpike_lastEvent_get, METH_VARARGS, (char *)"RandomSpike_lastEvent_get(RandomSpike self) -> double"},
+	 { (char *)"RandomSpike_reset_set", _wrap_RandomSpike_reset_set, METH_VARARGS, (char *)"RandomSpike_reset_set(RandomSpike self, int reset)"},
+	 { (char *)"RandomSpike_reset_get", _wrap_RandomSpike_reset_get, METH_VARARGS, (char *)"RandomSpike_reset_get(RandomSpike self) -> int"},
 	 { (char *)"RandomSpike_swigregister", RandomSpike_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_PulseGen", _wrap_new_PulseGen, METH_VARARGS, NULL},
-	 { (char *)"delete_PulseGen", _wrap_delete_PulseGen, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_getType", _wrap_PulseGen_getType, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___get_firstLevel", _wrap_PulseGen___get_firstLevel, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___set_firstLevel", _wrap_PulseGen___set_firstLevel, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___get_firstWidth", _wrap_PulseGen___get_firstWidth, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___set_firstWidth", _wrap_PulseGen___set_firstWidth, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___get_firstDelay", _wrap_PulseGen___get_firstDelay, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___set_firstDelay", _wrap_PulseGen___set_firstDelay, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___get_secondLevel", _wrap_PulseGen___get_secondLevel, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___set_secondLevel", _wrap_PulseGen___set_secondLevel, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___get_secondWidth", _wrap_PulseGen___get_secondWidth, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___set_secondWidth", _wrap_PulseGen___set_secondWidth, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___get_secondDelay", _wrap_PulseGen___get_secondDelay, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___set_secondDelay", _wrap_PulseGen___set_secondDelay, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___get_baseLevel", _wrap_PulseGen___get_baseLevel, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___set_baseLevel", _wrap_PulseGen___set_baseLevel, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___get_output", _wrap_PulseGen___get_output, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___get_trigTime", _wrap_PulseGen___get_trigTime, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___set_trigTime", _wrap_PulseGen___set_trigTime, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___get_trigMode", _wrap_PulseGen___get_trigMode, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___set_trigMode", _wrap_PulseGen___set_trigMode, METH_VARARGS, NULL},
-	 { (char *)"PulseGen___get_prevInput", _wrap_PulseGen___get_prevInput, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_firstLevel_set", _wrap_PulseGen_firstLevel_set, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_firstLevel_get", _wrap_PulseGen_firstLevel_get, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_firstWidth_set", _wrap_PulseGen_firstWidth_set, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_firstWidth_get", _wrap_PulseGen_firstWidth_get, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_firstDelay_set", _wrap_PulseGen_firstDelay_set, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_firstDelay_get", _wrap_PulseGen_firstDelay_get, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_secondLevel_set", _wrap_PulseGen_secondLevel_set, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_secondLevel_get", _wrap_PulseGen_secondLevel_get, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_secondWidth_set", _wrap_PulseGen_secondWidth_set, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_secondWidth_get", _wrap_PulseGen_secondWidth_get, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_secondDelay_set", _wrap_PulseGen_secondDelay_set, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_secondDelay_get", _wrap_PulseGen_secondDelay_get, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_baseLevel_set", _wrap_PulseGen_baseLevel_set, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_baseLevel_get", _wrap_PulseGen_baseLevel_get, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_output_get", _wrap_PulseGen_output_get, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_trigTime_set", _wrap_PulseGen_trigTime_set, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_trigTime_get", _wrap_PulseGen_trigTime_get, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_trigMode_set", _wrap_PulseGen_trigMode_set, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_trigMode_get", _wrap_PulseGen_trigMode_get, METH_VARARGS, NULL},
-	 { (char *)"PulseGen_prevInput_get", _wrap_PulseGen_prevInput_get, METH_VARARGS, NULL},
+	 { (char *)"new_PulseGen", _wrap_new_PulseGen, METH_VARARGS, (char *)"\n"
+		"PulseGen(Id id)\n"
+		"PulseGen(string path)\n"
+		"PulseGen(string name, Id parentId)\n"
+		"PulseGen(string name, PyMooseBase parent)\n"
+		"PulseGen(PulseGen src, string name, PyMooseBase parent)\n"
+		"PulseGen(PulseGen src, string name, Id parent)\n"
+		"PulseGen(Id src, string name, Id parent)\n"
+		"new_PulseGen(PulseGen src, string path) -> PulseGen\n"
+		""},
+	 { (char *)"delete_PulseGen", _wrap_delete_PulseGen, METH_VARARGS, (char *)"delete_PulseGen(PulseGen self)"},
+	 { (char *)"PulseGen_getType", _wrap_PulseGen_getType, METH_VARARGS, (char *)"PulseGen_getType(PulseGen self) -> string"},
+	 { (char *)"PulseGen___get_firstLevel", _wrap_PulseGen___get_firstLevel, METH_VARARGS, (char *)"PulseGen___get_firstLevel(PulseGen self) -> double"},
+	 { (char *)"PulseGen___set_firstLevel", _wrap_PulseGen___set_firstLevel, METH_VARARGS, (char *)"PulseGen___set_firstLevel(PulseGen self, double firstLevel)"},
+	 { (char *)"PulseGen___get_firstWidth", _wrap_PulseGen___get_firstWidth, METH_VARARGS, (char *)"PulseGen___get_firstWidth(PulseGen self) -> double"},
+	 { (char *)"PulseGen___set_firstWidth", _wrap_PulseGen___set_firstWidth, METH_VARARGS, (char *)"PulseGen___set_firstWidth(PulseGen self, double firstWidth)"},
+	 { (char *)"PulseGen___get_firstDelay", _wrap_PulseGen___get_firstDelay, METH_VARARGS, (char *)"PulseGen___get_firstDelay(PulseGen self) -> double"},
+	 { (char *)"PulseGen___set_firstDelay", _wrap_PulseGen___set_firstDelay, METH_VARARGS, (char *)"PulseGen___set_firstDelay(PulseGen self, double firstDelay)"},
+	 { (char *)"PulseGen___get_secondLevel", _wrap_PulseGen___get_secondLevel, METH_VARARGS, (char *)"PulseGen___get_secondLevel(PulseGen self) -> double"},
+	 { (char *)"PulseGen___set_secondLevel", _wrap_PulseGen___set_secondLevel, METH_VARARGS, (char *)"PulseGen___set_secondLevel(PulseGen self, double secondLevel)"},
+	 { (char *)"PulseGen___get_secondWidth", _wrap_PulseGen___get_secondWidth, METH_VARARGS, (char *)"PulseGen___get_secondWidth(PulseGen self) -> double"},
+	 { (char *)"PulseGen___set_secondWidth", _wrap_PulseGen___set_secondWidth, METH_VARARGS, (char *)"PulseGen___set_secondWidth(PulseGen self, double secondWidth)"},
+	 { (char *)"PulseGen___get_secondDelay", _wrap_PulseGen___get_secondDelay, METH_VARARGS, (char *)"PulseGen___get_secondDelay(PulseGen self) -> double"},
+	 { (char *)"PulseGen___set_secondDelay", _wrap_PulseGen___set_secondDelay, METH_VARARGS, (char *)"PulseGen___set_secondDelay(PulseGen self, double secondDelay)"},
+	 { (char *)"PulseGen___get_baseLevel", _wrap_PulseGen___get_baseLevel, METH_VARARGS, (char *)"PulseGen___get_baseLevel(PulseGen self) -> double"},
+	 { (char *)"PulseGen___set_baseLevel", _wrap_PulseGen___set_baseLevel, METH_VARARGS, (char *)"PulseGen___set_baseLevel(PulseGen self, double baseLevel)"},
+	 { (char *)"PulseGen___get_output", _wrap_PulseGen___get_output, METH_VARARGS, (char *)"PulseGen___get_output(PulseGen self) -> double"},
+	 { (char *)"PulseGen___get_trigTime", _wrap_PulseGen___get_trigTime, METH_VARARGS, (char *)"PulseGen___get_trigTime(PulseGen self) -> double"},
+	 { (char *)"PulseGen___set_trigTime", _wrap_PulseGen___set_trigTime, METH_VARARGS, (char *)"PulseGen___set_trigTime(PulseGen self, double trigTime)"},
+	 { (char *)"PulseGen___get_trigMode", _wrap_PulseGen___get_trigMode, METH_VARARGS, (char *)"PulseGen___get_trigMode(PulseGen self) -> int"},
+	 { (char *)"PulseGen___set_trigMode", _wrap_PulseGen___set_trigMode, METH_VARARGS, (char *)"PulseGen___set_trigMode(PulseGen self, int trigMode)"},
+	 { (char *)"PulseGen___get_prevInput", _wrap_PulseGen___get_prevInput, METH_VARARGS, (char *)"PulseGen___get_prevInput(PulseGen self) -> int"},
+	 { (char *)"PulseGen_firstLevel_set", _wrap_PulseGen_firstLevel_set, METH_VARARGS, (char *)"PulseGen_firstLevel_set(PulseGen self, double firstLevel)"},
+	 { (char *)"PulseGen_firstLevel_get", _wrap_PulseGen_firstLevel_get, METH_VARARGS, (char *)"PulseGen_firstLevel_get(PulseGen self) -> double"},
+	 { (char *)"PulseGen_firstWidth_set", _wrap_PulseGen_firstWidth_set, METH_VARARGS, (char *)"PulseGen_firstWidth_set(PulseGen self, double firstWidth)"},
+	 { (char *)"PulseGen_firstWidth_get", _wrap_PulseGen_firstWidth_get, METH_VARARGS, (char *)"PulseGen_firstWidth_get(PulseGen self) -> double"},
+	 { (char *)"PulseGen_firstDelay_set", _wrap_PulseGen_firstDelay_set, METH_VARARGS, (char *)"PulseGen_firstDelay_set(PulseGen self, double firstDelay)"},
+	 { (char *)"PulseGen_firstDelay_get", _wrap_PulseGen_firstDelay_get, METH_VARARGS, (char *)"PulseGen_firstDelay_get(PulseGen self) -> double"},
+	 { (char *)"PulseGen_secondLevel_set", _wrap_PulseGen_secondLevel_set, METH_VARARGS, (char *)"PulseGen_secondLevel_set(PulseGen self, double secondLevel)"},
+	 { (char *)"PulseGen_secondLevel_get", _wrap_PulseGen_secondLevel_get, METH_VARARGS, (char *)"PulseGen_secondLevel_get(PulseGen self) -> double"},
+	 { (char *)"PulseGen_secondWidth_set", _wrap_PulseGen_secondWidth_set, METH_VARARGS, (char *)"PulseGen_secondWidth_set(PulseGen self, double secondWidth)"},
+	 { (char *)"PulseGen_secondWidth_get", _wrap_PulseGen_secondWidth_get, METH_VARARGS, (char *)"PulseGen_secondWidth_get(PulseGen self) -> double"},
+	 { (char *)"PulseGen_secondDelay_set", _wrap_PulseGen_secondDelay_set, METH_VARARGS, (char *)"PulseGen_secondDelay_set(PulseGen self, double secondDelay)"},
+	 { (char *)"PulseGen_secondDelay_get", _wrap_PulseGen_secondDelay_get, METH_VARARGS, (char *)"PulseGen_secondDelay_get(PulseGen self) -> double"},
+	 { (char *)"PulseGen_baseLevel_set", _wrap_PulseGen_baseLevel_set, METH_VARARGS, (char *)"PulseGen_baseLevel_set(PulseGen self, double baseLevel)"},
+	 { (char *)"PulseGen_baseLevel_get", _wrap_PulseGen_baseLevel_get, METH_VARARGS, (char *)"PulseGen_baseLevel_get(PulseGen self) -> double"},
+	 { (char *)"PulseGen_output_get", _wrap_PulseGen_output_get, METH_VARARGS, (char *)"PulseGen_output_get(PulseGen self) -> double"},
+	 { (char *)"PulseGen_trigTime_set", _wrap_PulseGen_trigTime_set, METH_VARARGS, (char *)"PulseGen_trigTime_set(PulseGen self, double trigTime)"},
+	 { (char *)"PulseGen_trigTime_get", _wrap_PulseGen_trigTime_get, METH_VARARGS, (char *)"PulseGen_trigTime_get(PulseGen self) -> double"},
+	 { (char *)"PulseGen_trigMode_set", _wrap_PulseGen_trigMode_set, METH_VARARGS, (char *)"PulseGen_trigMode_set(PulseGen self, int trigMode)"},
+	 { (char *)"PulseGen_trigMode_get", _wrap_PulseGen_trigMode_get, METH_VARARGS, (char *)"PulseGen_trigMode_get(PulseGen self) -> int"},
+	 { (char *)"PulseGen_prevInput_get", _wrap_PulseGen_prevInput_get, METH_VARARGS, (char *)"PulseGen_prevInput_get(PulseGen self) -> int"},
 	 { (char *)"PulseGen_swigregister", PulseGen_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Nernst", _wrap_new_Nernst, METH_VARARGS, NULL},
-	 { (char *)"delete_Nernst", _wrap_delete_Nernst, METH_VARARGS, NULL},
-	 { (char *)"Nernst_getType", _wrap_Nernst_getType, METH_VARARGS, NULL},
-	 { (char *)"Nernst___get_E", _wrap_Nernst___get_E, METH_VARARGS, NULL},
-	 { (char *)"Nernst___set_E", _wrap_Nernst___set_E, METH_VARARGS, NULL},
-	 { (char *)"Nernst___get_Temperature", _wrap_Nernst___get_Temperature, METH_VARARGS, NULL},
-	 { (char *)"Nernst___set_Temperature", _wrap_Nernst___set_Temperature, METH_VARARGS, NULL},
-	 { (char *)"Nernst___get_valence", _wrap_Nernst___get_valence, METH_VARARGS, NULL},
-	 { (char *)"Nernst___set_valence", _wrap_Nernst___set_valence, METH_VARARGS, NULL},
-	 { (char *)"Nernst___get_Cin", _wrap_Nernst___get_Cin, METH_VARARGS, NULL},
-	 { (char *)"Nernst___set_Cin", _wrap_Nernst___set_Cin, METH_VARARGS, NULL},
-	 { (char *)"Nernst___get_Cout", _wrap_Nernst___get_Cout, METH_VARARGS, NULL},
-	 { (char *)"Nernst___set_Cout", _wrap_Nernst___set_Cout, METH_VARARGS, NULL},
-	 { (char *)"Nernst___get_scale", _wrap_Nernst___get_scale, METH_VARARGS, NULL},
-	 { (char *)"Nernst___set_scale", _wrap_Nernst___set_scale, METH_VARARGS, NULL},
-	 { (char *)"Nernst___get_ESrc", _wrap_Nernst___get_ESrc, METH_VARARGS, NULL},
-	 { (char *)"Nernst___set_ESrc", _wrap_Nernst___set_ESrc, METH_VARARGS, NULL},
-	 { (char *)"Nernst___get_CinMsg", _wrap_Nernst___get_CinMsg, METH_VARARGS, NULL},
-	 { (char *)"Nernst___set_CinMsg", _wrap_Nernst___set_CinMsg, METH_VARARGS, NULL},
-	 { (char *)"Nernst___get_CoutMsg", _wrap_Nernst___get_CoutMsg, METH_VARARGS, NULL},
-	 { (char *)"Nernst___set_CoutMsg", _wrap_Nernst___set_CoutMsg, METH_VARARGS, NULL},
-	 { (char *)"Nernst_E_get", _wrap_Nernst_E_get, METH_VARARGS, NULL},
-	 { (char *)"Nernst_Temperature_set", _wrap_Nernst_Temperature_set, METH_VARARGS, NULL},
-	 { (char *)"Nernst_Temperature_get", _wrap_Nernst_Temperature_get, METH_VARARGS, NULL},
-	 { (char *)"Nernst_valence_set", _wrap_Nernst_valence_set, METH_VARARGS, NULL},
-	 { (char *)"Nernst_valence_get", _wrap_Nernst_valence_get, METH_VARARGS, NULL},
-	 { (char *)"Nernst_Cin_set", _wrap_Nernst_Cin_set, METH_VARARGS, NULL},
-	 { (char *)"Nernst_Cin_get", _wrap_Nernst_Cin_get, METH_VARARGS, NULL},
-	 { (char *)"Nernst_Cout_set", _wrap_Nernst_Cout_set, METH_VARARGS, NULL},
-	 { (char *)"Nernst_Cout_get", _wrap_Nernst_Cout_get, METH_VARARGS, NULL},
-	 { (char *)"Nernst_scale_set", _wrap_Nernst_scale_set, METH_VARARGS, NULL},
-	 { (char *)"Nernst_scale_get", _wrap_Nernst_scale_get, METH_VARARGS, NULL},
+	 { (char *)"new_Nernst", _wrap_new_Nernst, METH_VARARGS, (char *)"\n"
+		"Nernst(Id id)\n"
+		"Nernst(string path)\n"
+		"Nernst(string name, Id parentId)\n"
+		"Nernst(string name, PyMooseBase parent)\n"
+		"Nernst(Nernst src, string name, PyMooseBase parent)\n"
+		"Nernst(Nernst src, string name, Id parent)\n"
+		"Nernst(Id src, string name, Id parent)\n"
+		"new_Nernst(Nernst src, string path) -> Nernst\n"
+		""},
+	 { (char *)"delete_Nernst", _wrap_delete_Nernst, METH_VARARGS, (char *)"delete_Nernst(Nernst self)"},
+	 { (char *)"Nernst_getType", _wrap_Nernst_getType, METH_VARARGS, (char *)"Nernst_getType(Nernst self) -> string"},
+	 { (char *)"Nernst___get_E", _wrap_Nernst___get_E, METH_VARARGS, (char *)"Nernst___get_E(Nernst self) -> double"},
+	 { (char *)"Nernst___set_E", _wrap_Nernst___set_E, METH_VARARGS, (char *)"Nernst___set_E(Nernst self, double E)"},
+	 { (char *)"Nernst___get_Temperature", _wrap_Nernst___get_Temperature, METH_VARARGS, (char *)"Nernst___get_Temperature(Nernst self) -> double"},
+	 { (char *)"Nernst___set_Temperature", _wrap_Nernst___set_Temperature, METH_VARARGS, (char *)"Nernst___set_Temperature(Nernst self, double Temperature)"},
+	 { (char *)"Nernst___get_valence", _wrap_Nernst___get_valence, METH_VARARGS, (char *)"Nernst___get_valence(Nernst self) -> int"},
+	 { (char *)"Nernst___set_valence", _wrap_Nernst___set_valence, METH_VARARGS, (char *)"Nernst___set_valence(Nernst self, int valence)"},
+	 { (char *)"Nernst___get_Cin", _wrap_Nernst___get_Cin, METH_VARARGS, (char *)"Nernst___get_Cin(Nernst self) -> double"},
+	 { (char *)"Nernst___set_Cin", _wrap_Nernst___set_Cin, METH_VARARGS, (char *)"Nernst___set_Cin(Nernst self, double Cin)"},
+	 { (char *)"Nernst___get_Cout", _wrap_Nernst___get_Cout, METH_VARARGS, (char *)"Nernst___get_Cout(Nernst self) -> double"},
+	 { (char *)"Nernst___set_Cout", _wrap_Nernst___set_Cout, METH_VARARGS, (char *)"Nernst___set_Cout(Nernst self, double Cout)"},
+	 { (char *)"Nernst___get_scale", _wrap_Nernst___get_scale, METH_VARARGS, (char *)"Nernst___get_scale(Nernst self) -> double"},
+	 { (char *)"Nernst___set_scale", _wrap_Nernst___set_scale, METH_VARARGS, (char *)"Nernst___set_scale(Nernst self, double scale)"},
+	 { (char *)"Nernst___get_ESrc", _wrap_Nernst___get_ESrc, METH_VARARGS, (char *)"Nernst___get_ESrc(Nernst self) -> double"},
+	 { (char *)"Nernst___set_ESrc", _wrap_Nernst___set_ESrc, METH_VARARGS, (char *)"Nernst___set_ESrc(Nernst self, double ESrc)"},
+	 { (char *)"Nernst___get_CinMsg", _wrap_Nernst___get_CinMsg, METH_VARARGS, (char *)"Nernst___get_CinMsg(Nernst self) -> double"},
+	 { (char *)"Nernst___set_CinMsg", _wrap_Nernst___set_CinMsg, METH_VARARGS, (char *)"Nernst___set_CinMsg(Nernst self, double CinMsg)"},
+	 { (char *)"Nernst___get_CoutMsg", _wrap_Nernst___get_CoutMsg, METH_VARARGS, (char *)"Nernst___get_CoutMsg(Nernst self) -> double"},
+	 { (char *)"Nernst___set_CoutMsg", _wrap_Nernst___set_CoutMsg, METH_VARARGS, (char *)"Nernst___set_CoutMsg(Nernst self, double CoutMsg)"},
+	 { (char *)"Nernst_E_get", _wrap_Nernst_E_get, METH_VARARGS, (char *)"Nernst_E_get(Nernst self) -> double"},
+	 { (char *)"Nernst_Temperature_set", _wrap_Nernst_Temperature_set, METH_VARARGS, (char *)"Nernst_Temperature_set(Nernst self, double Temperature)"},
+	 { (char *)"Nernst_Temperature_get", _wrap_Nernst_Temperature_get, METH_VARARGS, (char *)"Nernst_Temperature_get(Nernst self) -> double"},
+	 { (char *)"Nernst_valence_set", _wrap_Nernst_valence_set, METH_VARARGS, (char *)"Nernst_valence_set(Nernst self, int valence)"},
+	 { (char *)"Nernst_valence_get", _wrap_Nernst_valence_get, METH_VARARGS, (char *)"Nernst_valence_get(Nernst self) -> int"},
+	 { (char *)"Nernst_Cin_set", _wrap_Nernst_Cin_set, METH_VARARGS, (char *)"Nernst_Cin_set(Nernst self, double Cin)"},
+	 { (char *)"Nernst_Cin_get", _wrap_Nernst_Cin_get, METH_VARARGS, (char *)"Nernst_Cin_get(Nernst self) -> double"},
+	 { (char *)"Nernst_Cout_set", _wrap_Nernst_Cout_set, METH_VARARGS, (char *)"Nernst_Cout_set(Nernst self, double Cout)"},
+	 { (char *)"Nernst_Cout_get", _wrap_Nernst_Cout_get, METH_VARARGS, (char *)"Nernst_Cout_get(Nernst self) -> double"},
+	 { (char *)"Nernst_scale_set", _wrap_Nernst_scale_set, METH_VARARGS, (char *)"Nernst_scale_set(Nernst self, double scale)"},
+	 { (char *)"Nernst_scale_get", _wrap_Nernst_scale_get, METH_VARARGS, (char *)"Nernst_scale_get(Nernst self) -> double"},
 	 { (char *)"Nernst_swigregister", Nernst_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_CaConc", _wrap_new_CaConc, METH_VARARGS, NULL},
-	 { (char *)"delete_CaConc", _wrap_delete_CaConc, METH_VARARGS, NULL},
-	 { (char *)"CaConc_getType", _wrap_CaConc_getType, METH_VARARGS, NULL},
-	 { (char *)"CaConc___get_Ca", _wrap_CaConc___get_Ca, METH_VARARGS, NULL},
-	 { (char *)"CaConc___set_Ca", _wrap_CaConc___set_Ca, METH_VARARGS, NULL},
-	 { (char *)"CaConc___get_CaBasal", _wrap_CaConc___get_CaBasal, METH_VARARGS, NULL},
-	 { (char *)"CaConc___set_CaBasal", _wrap_CaConc___set_CaBasal, METH_VARARGS, NULL},
-	 { (char *)"CaConc___get_Ca_base", _wrap_CaConc___get_Ca_base, METH_VARARGS, NULL},
-	 { (char *)"CaConc___set_Ca_base", _wrap_CaConc___set_Ca_base, METH_VARARGS, NULL},
-	 { (char *)"CaConc___get_tau", _wrap_CaConc___get_tau, METH_VARARGS, NULL},
-	 { (char *)"CaConc___set_tau", _wrap_CaConc___set_tau, METH_VARARGS, NULL},
-	 { (char *)"CaConc___get_B", _wrap_CaConc___get_B, METH_VARARGS, NULL},
-	 { (char *)"CaConc___set_B", _wrap_CaConc___set_B, METH_VARARGS, NULL},
-	 { (char *)"CaConc_Ca_set", _wrap_CaConc_Ca_set, METH_VARARGS, NULL},
-	 { (char *)"CaConc_Ca_get", _wrap_CaConc_Ca_get, METH_VARARGS, NULL},
-	 { (char *)"CaConc_CaBasal_set", _wrap_CaConc_CaBasal_set, METH_VARARGS, NULL},
-	 { (char *)"CaConc_CaBasal_get", _wrap_CaConc_CaBasal_get, METH_VARARGS, NULL},
-	 { (char *)"CaConc_Ca_base_set", _wrap_CaConc_Ca_base_set, METH_VARARGS, NULL},
-	 { (char *)"CaConc_Ca_base_get", _wrap_CaConc_Ca_base_get, METH_VARARGS, NULL},
-	 { (char *)"CaConc_tau_set", _wrap_CaConc_tau_set, METH_VARARGS, NULL},
-	 { (char *)"CaConc_tau_get", _wrap_CaConc_tau_get, METH_VARARGS, NULL},
-	 { (char *)"CaConc_B_set", _wrap_CaConc_B_set, METH_VARARGS, NULL},
-	 { (char *)"CaConc_B_get", _wrap_CaConc_B_get, METH_VARARGS, NULL},
+	 { (char *)"new_CaConc", _wrap_new_CaConc, METH_VARARGS, (char *)"\n"
+		"CaConc(::Id id)\n"
+		"CaConc(string path)\n"
+		"CaConc(string name, ::Id parentId)\n"
+		"CaConc(string name, PyMooseBase parent)\n"
+		"CaConc(CaConc src, string name, PyMooseBase parent)\n"
+		"CaConc(CaConc src, string name, Id parent)\n"
+		"CaConc(Id src, string name, Id parent)\n"
+		"new_CaConc(CaConc src, string path) -> CaConc\n"
+		""},
+	 { (char *)"delete_CaConc", _wrap_delete_CaConc, METH_VARARGS, (char *)"delete_CaConc(CaConc self)"},
+	 { (char *)"CaConc_getType", _wrap_CaConc_getType, METH_VARARGS, (char *)"CaConc_getType(CaConc self) -> string"},
+	 { (char *)"CaConc___get_Ca", _wrap_CaConc___get_Ca, METH_VARARGS, (char *)"CaConc___get_Ca(CaConc self) -> double"},
+	 { (char *)"CaConc___set_Ca", _wrap_CaConc___set_Ca, METH_VARARGS, (char *)"CaConc___set_Ca(CaConc self, double Ca)"},
+	 { (char *)"CaConc___get_CaBasal", _wrap_CaConc___get_CaBasal, METH_VARARGS, (char *)"CaConc___get_CaBasal(CaConc self) -> double"},
+	 { (char *)"CaConc___set_CaBasal", _wrap_CaConc___set_CaBasal, METH_VARARGS, (char *)"CaConc___set_CaBasal(CaConc self, double CaBasal)"},
+	 { (char *)"CaConc___get_Ca_base", _wrap_CaConc___get_Ca_base, METH_VARARGS, (char *)"CaConc___get_Ca_base(CaConc self) -> double"},
+	 { (char *)"CaConc___set_Ca_base", _wrap_CaConc___set_Ca_base, METH_VARARGS, (char *)"CaConc___set_Ca_base(CaConc self, double Ca_base)"},
+	 { (char *)"CaConc___get_tau", _wrap_CaConc___get_tau, METH_VARARGS, (char *)"CaConc___get_tau(CaConc self) -> double"},
+	 { (char *)"CaConc___set_tau", _wrap_CaConc___set_tau, METH_VARARGS, (char *)"CaConc___set_tau(CaConc self, double tau)"},
+	 { (char *)"CaConc___get_B", _wrap_CaConc___get_B, METH_VARARGS, (char *)"CaConc___get_B(CaConc self) -> double"},
+	 { (char *)"CaConc___set_B", _wrap_CaConc___set_B, METH_VARARGS, (char *)"CaConc___set_B(CaConc self, double B)"},
+	 { (char *)"CaConc_Ca_set", _wrap_CaConc_Ca_set, METH_VARARGS, (char *)"CaConc_Ca_set(CaConc self, double Ca)"},
+	 { (char *)"CaConc_Ca_get", _wrap_CaConc_Ca_get, METH_VARARGS, (char *)"CaConc_Ca_get(CaConc self) -> double"},
+	 { (char *)"CaConc_CaBasal_set", _wrap_CaConc_CaBasal_set, METH_VARARGS, (char *)"CaConc_CaBasal_set(CaConc self, double CaBasal)"},
+	 { (char *)"CaConc_CaBasal_get", _wrap_CaConc_CaBasal_get, METH_VARARGS, (char *)"CaConc_CaBasal_get(CaConc self) -> double"},
+	 { (char *)"CaConc_Ca_base_set", _wrap_CaConc_Ca_base_set, METH_VARARGS, (char *)"CaConc_Ca_base_set(CaConc self, double Ca_base)"},
+	 { (char *)"CaConc_Ca_base_get", _wrap_CaConc_Ca_base_get, METH_VARARGS, (char *)"CaConc_Ca_base_get(CaConc self) -> double"},
+	 { (char *)"CaConc_tau_set", _wrap_CaConc_tau_set, METH_VARARGS, (char *)"CaConc_tau_set(CaConc self, double tau)"},
+	 { (char *)"CaConc_tau_get", _wrap_CaConc_tau_get, METH_VARARGS, (char *)"CaConc_tau_get(CaConc self) -> double"},
+	 { (char *)"CaConc_B_set", _wrap_CaConc_B_set, METH_VARARGS, (char *)"CaConc_B_set(CaConc self, double B)"},
+	 { (char *)"CaConc_B_get", _wrap_CaConc_B_get, METH_VARARGS, (char *)"CaConc_B_get(CaConc self) -> double"},
 	 { (char *)"CaConc_swigregister", CaConc_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_HHGate", _wrap_new_HHGate, METH_VARARGS, NULL},
-	 { (char *)"delete_HHGate", _wrap_delete_HHGate, METH_VARARGS, NULL},
-	 { (char *)"HHGate_getType", _wrap_HHGate_getType, METH_VARARGS, NULL},
-	 { (char *)"HHGate___get_A", _wrap_HHGate___get_A, METH_VARARGS, NULL},
-	 { (char *)"HHGate___get_B", _wrap_HHGate___get_B, METH_VARARGS, NULL},
-	 { (char *)"HHGate_tabFill", _wrap_HHGate_tabFill, METH_VARARGS, NULL},
-	 { (char *)"HHGate_setupAlpha", _wrap_HHGate_setupAlpha, METH_VARARGS, NULL},
-	 { (char *)"HHGate_setupTau", _wrap_HHGate_setupTau, METH_VARARGS, NULL},
-	 { (char *)"HHGate_tweakAlpha", _wrap_HHGate_tweakAlpha, METH_VARARGS, NULL},
-	 { (char *)"HHGate_tweakTau", _wrap_HHGate_tweakTau, METH_VARARGS, NULL},
-	 { (char *)"HHGate_A_get", _wrap_HHGate_A_get, METH_VARARGS, NULL},
-	 { (char *)"HHGate_B_get", _wrap_HHGate_B_get, METH_VARARGS, NULL},
+	 { (char *)"new_HHGate", _wrap_new_HHGate, METH_VARARGS, (char *)"\n"
+		"HHGate(Id id)\n"
+		"HHGate(string path)\n"
+		"HHGate(string name, Id parentId)\n"
+		"HHGate(string name, PyMooseBase parent)\n"
+		"HHGate(HHGate src, string name, PyMooseBase parent)\n"
+		"HHGate(HHGate src, string name, Id parent)\n"
+		"HHGate(Id src, string name, Id parent)\n"
+		"new_HHGate(HHGate src, string path) -> HHGate\n"
+		""},
+	 { (char *)"delete_HHGate", _wrap_delete_HHGate, METH_VARARGS, (char *)"delete_HHGate(HHGate self)"},
+	 { (char *)"HHGate_getType", _wrap_HHGate_getType, METH_VARARGS, (char *)"HHGate_getType(HHGate self) -> string"},
+	 { (char *)"HHGate___get_A", _wrap_HHGate___get_A, METH_VARARGS, (char *)"HHGate___get_A(HHGate self) -> InterpolationTable"},
+	 { (char *)"HHGate___get_B", _wrap_HHGate___get_B, METH_VARARGS, (char *)"HHGate___get_B(HHGate self) -> InterpolationTable"},
+	 { (char *)"HHGate_tabFill", _wrap_HHGate_tabFill, METH_VARARGS, (char *)"HHGate_tabFill(HHGate self, int xdivs, int mode)"},
+	 { (char *)"HHGate_setupAlpha", _wrap_HHGate_setupAlpha, METH_VARARGS, (char *)"\n"
+		"setupAlpha(double AA, double AB, double AC, double AD, double AF, \n"
+		"    double BA, double BB, double BC, double BD, \n"
+		"    double BF, double size=3000, double min=-0.1, \n"
+		"    double max=0.05)\n"
+		"setupAlpha(double AA, double AB, double AC, double AD, double AF, \n"
+		"    double BA, double BB, double BC, double BD, \n"
+		"    double BF, double size=3000, double min=-0.1)\n"
+		"setupAlpha(double AA, double AB, double AC, double AD, double AF, \n"
+		"    double BA, double BB, double BC, double BD, \n"
+		"    double BF, double size=3000)\n"
+		"HHGate_setupAlpha(HHGate self, double AA, double AB, double AC, double AD, \n"
+		"    double AF, double BA, double BB, double BC, \n"
+		"    double BD, double BF)\n"
+		""},
+	 { (char *)"HHGate_setupTau", _wrap_HHGate_setupTau, METH_VARARGS, (char *)"\n"
+		"setupTau(double AA, double AB, double AC, double AD, double AF, \n"
+		"    double BA, double BB, double BC, double BD, \n"
+		"    double BF, double size=3000, double min=-0.1, \n"
+		"    double max=0.05)\n"
+		"setupTau(double AA, double AB, double AC, double AD, double AF, \n"
+		"    double BA, double BB, double BC, double BD, \n"
+		"    double BF, double size=3000, double min=-0.1)\n"
+		"setupTau(double AA, double AB, double AC, double AD, double AF, \n"
+		"    double BA, double BB, double BC, double BD, \n"
+		"    double BF, double size=3000)\n"
+		"HHGate_setupTau(HHGate self, double AA, double AB, double AC, double AD, \n"
+		"    double AF, double BA, double BB, double BC, \n"
+		"    double BD, double BF)\n"
+		""},
+	 { (char *)"HHGate_tweakAlpha", _wrap_HHGate_tweakAlpha, METH_VARARGS, (char *)"HHGate_tweakAlpha(HHGate self)"},
+	 { (char *)"HHGate_tweakTau", _wrap_HHGate_tweakTau, METH_VARARGS, (char *)"HHGate_tweakTau(HHGate self)"},
+	 { (char *)"HHGate_A_get", _wrap_HHGate_A_get, METH_VARARGS, (char *)"HHGate_A_get(HHGate self) -> InterpolationTable"},
+	 { (char *)"HHGate_B_get", _wrap_HHGate_B_get, METH_VARARGS, (char *)"HHGate_B_get(HHGate self) -> InterpolationTable"},
 	 { (char *)"HHGate_swigregister", HHGate_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_HHChannel", _wrap_new_HHChannel, METH_VARARGS, NULL},
-	 { (char *)"delete_HHChannel", _wrap_delete_HHChannel, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_getType", _wrap_HHChannel_getType, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_Gbar", _wrap_HHChannel___get_Gbar, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_Gbar", _wrap_HHChannel___set_Gbar, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_Ek", _wrap_HHChannel___get_Ek, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_Ek", _wrap_HHChannel___set_Ek, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_Xpower", _wrap_HHChannel___get_Xpower, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_Xpower", _wrap_HHChannel___set_Xpower, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_Ypower", _wrap_HHChannel___get_Ypower, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_Ypower", _wrap_HHChannel___set_Ypower, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_Zpower", _wrap_HHChannel___get_Zpower, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_Zpower", _wrap_HHChannel___set_Zpower, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_instant", _wrap_HHChannel___get_instant, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_instant", _wrap_HHChannel___set_instant, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_Gk", _wrap_HHChannel___get_Gk, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_Gk", _wrap_HHChannel___set_Gk, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_Ik", _wrap_HHChannel___get_Ik, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_Ik", _wrap_HHChannel___set_Ik, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_X", _wrap_HHChannel___get_X, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_X", _wrap_HHChannel___set_X, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_Y", _wrap_HHChannel___get_Y, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_Y", _wrap_HHChannel___set_Y, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_Z", _wrap_HHChannel___get_Z, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_Z", _wrap_HHChannel___set_Z, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_useConcentration", _wrap_HHChannel___get_useConcentration, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_useConcentration", _wrap_HHChannel___set_useConcentration, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_IkSrc", _wrap_HHChannel___get_IkSrc, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_IkSrc", _wrap_HHChannel___set_IkSrc, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___get_concen", _wrap_HHChannel___get_concen, METH_VARARGS, NULL},
-	 { (char *)"HHChannel___set_concen", _wrap_HHChannel___set_concen, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_createTable", _wrap_HHChannel_createTable, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_tweakAlpha", _wrap_HHChannel_tweakAlpha, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_tweakTau", _wrap_HHChannel_tweakTau, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_setupAlpha", _wrap_HHChannel_setupAlpha, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_setupTau", _wrap_HHChannel_setupTau, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Gbar_set", _wrap_HHChannel_Gbar_set, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Gbar_get", _wrap_HHChannel_Gbar_get, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Ek_set", _wrap_HHChannel_Ek_set, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Ek_get", _wrap_HHChannel_Ek_get, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Xpower_set", _wrap_HHChannel_Xpower_set, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Xpower_get", _wrap_HHChannel_Xpower_get, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Ypower_set", _wrap_HHChannel_Ypower_set, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Ypower_get", _wrap_HHChannel_Ypower_get, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Zpower_set", _wrap_HHChannel_Zpower_set, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Zpower_get", _wrap_HHChannel_Zpower_get, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_X_set", _wrap_HHChannel_X_set, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_X_get", _wrap_HHChannel_X_get, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Y_set", _wrap_HHChannel_Y_set, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Y_get", _wrap_HHChannel_Y_get, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Z_set", _wrap_HHChannel_Z_set, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Z_get", _wrap_HHChannel_Z_get, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_instant_set", _wrap_HHChannel_instant_set, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_instant_get", _wrap_HHChannel_instant_get, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Gk_set", _wrap_HHChannel_Gk_set, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Gk_get", _wrap_HHChannel_Gk_get, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_Ik_get", _wrap_HHChannel_Ik_get, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_useConcentration_set", _wrap_HHChannel_useConcentration_set, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_useConcentration_get", _wrap_HHChannel_useConcentration_get, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_concen_set", _wrap_HHChannel_concen_set, METH_VARARGS, NULL},
-	 { (char *)"HHChannel_concen_get", _wrap_HHChannel_concen_get, METH_VARARGS, NULL},
+	 { (char *)"new_HHChannel", _wrap_new_HHChannel, METH_VARARGS, (char *)"\n"
+		"HHChannel(Id id)\n"
+		"HHChannel(string path)\n"
+		"HHChannel(string name, Id parentId)\n"
+		"HHChannel(string name, PyMooseBase parent)\n"
+		"HHChannel(HHChannel src, string name, PyMooseBase parent)\n"
+		"HHChannel(HHChannel src, string name, Id parent)\n"
+		"HHChannel(Id src, string name, Id parent)\n"
+		"new_HHChannel(HHChannel src, string path) -> HHChannel\n"
+		""},
+	 { (char *)"delete_HHChannel", _wrap_delete_HHChannel, METH_VARARGS, (char *)"delete_HHChannel(HHChannel self)"},
+	 { (char *)"HHChannel_getType", _wrap_HHChannel_getType, METH_VARARGS, (char *)"HHChannel_getType(HHChannel self) -> string"},
+	 { (char *)"HHChannel___get_Gbar", _wrap_HHChannel___get_Gbar, METH_VARARGS, (char *)"HHChannel___get_Gbar(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_Gbar", _wrap_HHChannel___set_Gbar, METH_VARARGS, (char *)"HHChannel___set_Gbar(HHChannel self, double Gbar)"},
+	 { (char *)"HHChannel___get_Ek", _wrap_HHChannel___get_Ek, METH_VARARGS, (char *)"HHChannel___get_Ek(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_Ek", _wrap_HHChannel___set_Ek, METH_VARARGS, (char *)"HHChannel___set_Ek(HHChannel self, double Ek)"},
+	 { (char *)"HHChannel___get_Xpower", _wrap_HHChannel___get_Xpower, METH_VARARGS, (char *)"HHChannel___get_Xpower(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_Xpower", _wrap_HHChannel___set_Xpower, METH_VARARGS, (char *)"HHChannel___set_Xpower(HHChannel self, double Xpower)"},
+	 { (char *)"HHChannel___get_Ypower", _wrap_HHChannel___get_Ypower, METH_VARARGS, (char *)"HHChannel___get_Ypower(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_Ypower", _wrap_HHChannel___set_Ypower, METH_VARARGS, (char *)"HHChannel___set_Ypower(HHChannel self, double Ypower)"},
+	 { (char *)"HHChannel___get_Zpower", _wrap_HHChannel___get_Zpower, METH_VARARGS, (char *)"HHChannel___get_Zpower(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_Zpower", _wrap_HHChannel___set_Zpower, METH_VARARGS, (char *)"HHChannel___set_Zpower(HHChannel self, double Zpower)"},
+	 { (char *)"HHChannel___get_instant", _wrap_HHChannel___get_instant, METH_VARARGS, (char *)"HHChannel___get_instant(HHChannel self) -> int"},
+	 { (char *)"HHChannel___set_instant", _wrap_HHChannel___set_instant, METH_VARARGS, (char *)"HHChannel___set_instant(HHChannel self, int instant)"},
+	 { (char *)"HHChannel___get_Gk", _wrap_HHChannel___get_Gk, METH_VARARGS, (char *)"HHChannel___get_Gk(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_Gk", _wrap_HHChannel___set_Gk, METH_VARARGS, (char *)"HHChannel___set_Gk(HHChannel self, double Gk)"},
+	 { (char *)"HHChannel___get_Ik", _wrap_HHChannel___get_Ik, METH_VARARGS, (char *)"HHChannel___get_Ik(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_Ik", _wrap_HHChannel___set_Ik, METH_VARARGS, (char *)"HHChannel___set_Ik(HHChannel self, double Ik)"},
+	 { (char *)"HHChannel___get_X", _wrap_HHChannel___get_X, METH_VARARGS, (char *)"HHChannel___get_X(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_X", _wrap_HHChannel___set_X, METH_VARARGS, (char *)"HHChannel___set_X(HHChannel self, double X)"},
+	 { (char *)"HHChannel___get_Y", _wrap_HHChannel___get_Y, METH_VARARGS, (char *)"HHChannel___get_Y(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_Y", _wrap_HHChannel___set_Y, METH_VARARGS, (char *)"HHChannel___set_Y(HHChannel self, double Y)"},
+	 { (char *)"HHChannel___get_Z", _wrap_HHChannel___get_Z, METH_VARARGS, (char *)"HHChannel___get_Z(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_Z", _wrap_HHChannel___set_Z, METH_VARARGS, (char *)"HHChannel___set_Z(HHChannel self, double Z)"},
+	 { (char *)"HHChannel___get_useConcentration", _wrap_HHChannel___get_useConcentration, METH_VARARGS, (char *)"HHChannel___get_useConcentration(HHChannel self) -> int"},
+	 { (char *)"HHChannel___set_useConcentration", _wrap_HHChannel___set_useConcentration, METH_VARARGS, (char *)"HHChannel___set_useConcentration(HHChannel self, int useConcentration)"},
+	 { (char *)"HHChannel___get_IkSrc", _wrap_HHChannel___get_IkSrc, METH_VARARGS, (char *)"HHChannel___get_IkSrc(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_IkSrc", _wrap_HHChannel___set_IkSrc, METH_VARARGS, (char *)"HHChannel___set_IkSrc(HHChannel self, double IkSrc)"},
+	 { (char *)"HHChannel___get_concen", _wrap_HHChannel___get_concen, METH_VARARGS, (char *)"HHChannel___get_concen(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_concen", _wrap_HHChannel___set_concen, METH_VARARGS, (char *)"HHChannel___set_concen(HHChannel self, double concen)"},
+	 { (char *)"HHChannel_createTable", _wrap_HHChannel_createTable, METH_VARARGS, (char *)"\n"
+		"HHChannel_createTable(HHChannel self, string gate, unsigned int divs, double min, \n"
+		"    double max)\n"
+		""},
+	 { (char *)"HHChannel_tweakAlpha", _wrap_HHChannel_tweakAlpha, METH_VARARGS, (char *)"HHChannel_tweakAlpha(HHChannel self, string gate)"},
+	 { (char *)"HHChannel_tweakTau", _wrap_HHChannel_tweakTau, METH_VARARGS, (char *)"HHChannel_tweakTau(HHChannel self, string gate)"},
+	 { (char *)"HHChannel_setupAlpha", _wrap_HHChannel_setupAlpha, METH_VARARGS, (char *)"\n"
+		"setupAlpha(string gate, double_vector params)\n"
+		"setupAlpha(string gate, double AA, double AB, double AC, double AD, \n"
+		"    double AF, double BA, double BB, double BC, \n"
+		"    double BD, double BF, double size=3000, \n"
+		"    double min=-0.1, double max=0.05)\n"
+		"setupAlpha(string gate, double AA, double AB, double AC, double AD, \n"
+		"    double AF, double BA, double BB, double BC, \n"
+		"    double BD, double BF, double size=3000, \n"
+		"    double min=-0.1)\n"
+		"setupAlpha(string gate, double AA, double AB, double AC, double AD, \n"
+		"    double AF, double BA, double BB, double BC, \n"
+		"    double BD, double BF, double size=3000)\n"
+		"HHChannel_setupAlpha(HHChannel self, string gate, double AA, double AB, \n"
+		"    double AC, double AD, double AF, double BA, double BB, \n"
+		"    double BC, double BD, double BF)\n"
+		""},
+	 { (char *)"HHChannel_setupTau", _wrap_HHChannel_setupTau, METH_VARARGS, (char *)"\n"
+		"setupTau(string gate, double_vector params)\n"
+		"setupTau(string gate, double AA, double AB, double AC, double AD, \n"
+		"    double AF, double BA, double BB, double BC, \n"
+		"    double BD, double BF, double size=3000, \n"
+		"    double min=-0.1, double max=0.05)\n"
+		"setupTau(string gate, double AA, double AB, double AC, double AD, \n"
+		"    double AF, double BA, double BB, double BC, \n"
+		"    double BD, double BF, double size=3000, \n"
+		"    double min=-0.1)\n"
+		"setupTau(string gate, double AA, double AB, double AC, double AD, \n"
+		"    double AF, double BA, double BB, double BC, \n"
+		"    double BD, double BF, double size=3000)\n"
+		"HHChannel_setupTau(HHChannel self, string gate, double AA, double AB, \n"
+		"    double AC, double AD, double AF, double BA, double BB, \n"
+		"    double BC, double BD, double BF)\n"
+		""},
+	 { (char *)"HHChannel_Gbar_set", _wrap_HHChannel_Gbar_set, METH_VARARGS, (char *)"HHChannel_Gbar_set(HHChannel self, double Gbar)"},
+	 { (char *)"HHChannel_Gbar_get", _wrap_HHChannel_Gbar_get, METH_VARARGS, (char *)"HHChannel_Gbar_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_Ek_set", _wrap_HHChannel_Ek_set, METH_VARARGS, (char *)"HHChannel_Ek_set(HHChannel self, double Ek)"},
+	 { (char *)"HHChannel_Ek_get", _wrap_HHChannel_Ek_get, METH_VARARGS, (char *)"HHChannel_Ek_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_Xpower_set", _wrap_HHChannel_Xpower_set, METH_VARARGS, (char *)"HHChannel_Xpower_set(HHChannel self, double Xpower)"},
+	 { (char *)"HHChannel_Xpower_get", _wrap_HHChannel_Xpower_get, METH_VARARGS, (char *)"HHChannel_Xpower_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_Ypower_set", _wrap_HHChannel_Ypower_set, METH_VARARGS, (char *)"HHChannel_Ypower_set(HHChannel self, double Ypower)"},
+	 { (char *)"HHChannel_Ypower_get", _wrap_HHChannel_Ypower_get, METH_VARARGS, (char *)"HHChannel_Ypower_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_Zpower_set", _wrap_HHChannel_Zpower_set, METH_VARARGS, (char *)"HHChannel_Zpower_set(HHChannel self, double Zpower)"},
+	 { (char *)"HHChannel_Zpower_get", _wrap_HHChannel_Zpower_get, METH_VARARGS, (char *)"HHChannel_Zpower_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_X_set", _wrap_HHChannel_X_set, METH_VARARGS, (char *)"HHChannel_X_set(HHChannel self, double X)"},
+	 { (char *)"HHChannel_X_get", _wrap_HHChannel_X_get, METH_VARARGS, (char *)"HHChannel_X_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_Y_set", _wrap_HHChannel_Y_set, METH_VARARGS, (char *)"HHChannel_Y_set(HHChannel self, double Y)"},
+	 { (char *)"HHChannel_Y_get", _wrap_HHChannel_Y_get, METH_VARARGS, (char *)"HHChannel_Y_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_Z_set", _wrap_HHChannel_Z_set, METH_VARARGS, (char *)"HHChannel_Z_set(HHChannel self, double Z)"},
+	 { (char *)"HHChannel_Z_get", _wrap_HHChannel_Z_get, METH_VARARGS, (char *)"HHChannel_Z_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_instant_set", _wrap_HHChannel_instant_set, METH_VARARGS, (char *)"HHChannel_instant_set(HHChannel self, int instant)"},
+	 { (char *)"HHChannel_instant_get", _wrap_HHChannel_instant_get, METH_VARARGS, (char *)"HHChannel_instant_get(HHChannel self) -> int"},
+	 { (char *)"HHChannel_Gk_set", _wrap_HHChannel_Gk_set, METH_VARARGS, (char *)"HHChannel_Gk_set(HHChannel self, double Gk)"},
+	 { (char *)"HHChannel_Gk_get", _wrap_HHChannel_Gk_get, METH_VARARGS, (char *)"HHChannel_Gk_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_Ik_get", _wrap_HHChannel_Ik_get, METH_VARARGS, (char *)"HHChannel_Ik_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_useConcentration_set", _wrap_HHChannel_useConcentration_set, METH_VARARGS, (char *)"HHChannel_useConcentration_set(HHChannel self, int useConcentration)"},
+	 { (char *)"HHChannel_useConcentration_get", _wrap_HHChannel_useConcentration_get, METH_VARARGS, (char *)"HHChannel_useConcentration_get(HHChannel self) -> int"},
+	 { (char *)"HHChannel_concen_set", _wrap_HHChannel_concen_set, METH_VARARGS, (char *)"HHChannel_concen_set(HHChannel self, double concen)"},
+	 { (char *)"HHChannel_concen_get", _wrap_HHChannel_concen_get, METH_VARARGS, (char *)"HHChannel_concen_get(HHChannel self) -> double"},
 	 { (char *)"HHChannel_swigregister", HHChannel_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Mg_block", _wrap_new_Mg_block, METH_VARARGS, NULL},
-	 { (char *)"delete_Mg_block", _wrap_delete_Mg_block, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_getType", _wrap_Mg_block_getType, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___get_KMg_A", _wrap_Mg_block___get_KMg_A, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___set_KMg_A", _wrap_Mg_block___set_KMg_A, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___get_KMg_B", _wrap_Mg_block___get_KMg_B, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___set_KMg_B", _wrap_Mg_block___set_KMg_B, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___get_CMg", _wrap_Mg_block___get_CMg, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___set_CMg", _wrap_Mg_block___set_CMg, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___get_Ik", _wrap_Mg_block___get_Ik, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___set_Ik", _wrap_Mg_block___set_Ik, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___get_Gk", _wrap_Mg_block___get_Gk, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___set_Gk", _wrap_Mg_block___set_Gk, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___get_Ek", _wrap_Mg_block___get_Ek, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___set_Ek", _wrap_Mg_block___set_Ek, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___get_Zk", _wrap_Mg_block___get_Zk, METH_VARARGS, NULL},
-	 { (char *)"Mg_block___set_Zk", _wrap_Mg_block___set_Zk, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_KMg_A_set", _wrap_Mg_block_KMg_A_set, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_KMg_A_get", _wrap_Mg_block_KMg_A_get, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_K_MgB_set", _wrap_Mg_block_K_MgB_set, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_K_MgB_get", _wrap_Mg_block_K_MgB_get, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_CMg_set", _wrap_Mg_block_CMg_set, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_CMg_get", _wrap_Mg_block_CMg_get, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_Ik_set", _wrap_Mg_block_Ik_set, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_Ik_get", _wrap_Mg_block_Ik_get, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_Gk_set", _wrap_Mg_block_Gk_set, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_Gk_get", _wrap_Mg_block_Gk_get, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_Ek_set", _wrap_Mg_block_Ek_set, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_Ek_get", _wrap_Mg_block_Ek_get, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_Zk_set", _wrap_Mg_block_Zk_set, METH_VARARGS, NULL},
-	 { (char *)"Mg_block_Zk_get", _wrap_Mg_block_Zk_get, METH_VARARGS, NULL},
+	 { (char *)"new_Mg_block", _wrap_new_Mg_block, METH_VARARGS, (char *)"\n"
+		"Mg_block(Id id)\n"
+		"Mg_block(string path)\n"
+		"Mg_block(string name, Id parentId)\n"
+		"Mg_block(string name, PyMooseBase parent)\n"
+		"Mg_block(Mg_block src, string name, PyMooseBase parent)\n"
+		"Mg_block(Mg_block src, string name, Id parent)\n"
+		"Mg_block(Id src, string name, Id parent)\n"
+		"new_Mg_block(Mg_block src, string path) -> Mg_block\n"
+		""},
+	 { (char *)"delete_Mg_block", _wrap_delete_Mg_block, METH_VARARGS, (char *)"delete_Mg_block(Mg_block self)"},
+	 { (char *)"Mg_block_getType", _wrap_Mg_block_getType, METH_VARARGS, (char *)"Mg_block_getType(Mg_block self) -> string"},
+	 { (char *)"Mg_block___get_KMg_A", _wrap_Mg_block___get_KMg_A, METH_VARARGS, (char *)"Mg_block___get_KMg_A(Mg_block self) -> double"},
+	 { (char *)"Mg_block___set_KMg_A", _wrap_Mg_block___set_KMg_A, METH_VARARGS, (char *)"Mg_block___set_KMg_A(Mg_block self, double KMg_A)"},
+	 { (char *)"Mg_block___get_KMg_B", _wrap_Mg_block___get_KMg_B, METH_VARARGS, (char *)"Mg_block___get_KMg_B(Mg_block self) -> double"},
+	 { (char *)"Mg_block___set_KMg_B", _wrap_Mg_block___set_KMg_B, METH_VARARGS, (char *)"Mg_block___set_KMg_B(Mg_block self, double KMg_B)"},
+	 { (char *)"Mg_block___get_CMg", _wrap_Mg_block___get_CMg, METH_VARARGS, (char *)"Mg_block___get_CMg(Mg_block self) -> double"},
+	 { (char *)"Mg_block___set_CMg", _wrap_Mg_block___set_CMg, METH_VARARGS, (char *)"Mg_block___set_CMg(Mg_block self, double CMg)"},
+	 { (char *)"Mg_block___get_Ik", _wrap_Mg_block___get_Ik, METH_VARARGS, (char *)"Mg_block___get_Ik(Mg_block self) -> double"},
+	 { (char *)"Mg_block___set_Ik", _wrap_Mg_block___set_Ik, METH_VARARGS, (char *)"Mg_block___set_Ik(Mg_block self, double Ik)"},
+	 { (char *)"Mg_block___get_Gk", _wrap_Mg_block___get_Gk, METH_VARARGS, (char *)"Mg_block___get_Gk(Mg_block self) -> double"},
+	 { (char *)"Mg_block___set_Gk", _wrap_Mg_block___set_Gk, METH_VARARGS, (char *)"Mg_block___set_Gk(Mg_block self, double Gk)"},
+	 { (char *)"Mg_block___get_Ek", _wrap_Mg_block___get_Ek, METH_VARARGS, (char *)"Mg_block___get_Ek(Mg_block self) -> double"},
+	 { (char *)"Mg_block___set_Ek", _wrap_Mg_block___set_Ek, METH_VARARGS, (char *)"Mg_block___set_Ek(Mg_block self, double Ek)"},
+	 { (char *)"Mg_block___get_Zk", _wrap_Mg_block___get_Zk, METH_VARARGS, (char *)"Mg_block___get_Zk(Mg_block self) -> double"},
+	 { (char *)"Mg_block___set_Zk", _wrap_Mg_block___set_Zk, METH_VARARGS, (char *)"Mg_block___set_Zk(Mg_block self, double Zk)"},
+	 { (char *)"Mg_block_KMg_A_set", _wrap_Mg_block_KMg_A_set, METH_VARARGS, (char *)"Mg_block_KMg_A_set(Mg_block self, double KMg_A)"},
+	 { (char *)"Mg_block_KMg_A_get", _wrap_Mg_block_KMg_A_get, METH_VARARGS, (char *)"Mg_block_KMg_A_get(Mg_block self) -> double"},
+	 { (char *)"Mg_block_K_MgB_set", _wrap_Mg_block_K_MgB_set, METH_VARARGS, (char *)"Mg_block_K_MgB_set(Mg_block self, double K_MgB)"},
+	 { (char *)"Mg_block_K_MgB_get", _wrap_Mg_block_K_MgB_get, METH_VARARGS, (char *)"Mg_block_K_MgB_get(Mg_block self) -> double"},
+	 { (char *)"Mg_block_CMg_set", _wrap_Mg_block_CMg_set, METH_VARARGS, (char *)"Mg_block_CMg_set(Mg_block self, double CMg)"},
+	 { (char *)"Mg_block_CMg_get", _wrap_Mg_block_CMg_get, METH_VARARGS, (char *)"Mg_block_CMg_get(Mg_block self) -> double"},
+	 { (char *)"Mg_block_Ik_set", _wrap_Mg_block_Ik_set, METH_VARARGS, (char *)"Mg_block_Ik_set(Mg_block self, double Ik)"},
+	 { (char *)"Mg_block_Ik_get", _wrap_Mg_block_Ik_get, METH_VARARGS, (char *)"Mg_block_Ik_get(Mg_block self) -> double"},
+	 { (char *)"Mg_block_Gk_set", _wrap_Mg_block_Gk_set, METH_VARARGS, (char *)"Mg_block_Gk_set(Mg_block self, double Gk)"},
+	 { (char *)"Mg_block_Gk_get", _wrap_Mg_block_Gk_get, METH_VARARGS, (char *)"Mg_block_Gk_get(Mg_block self) -> double"},
+	 { (char *)"Mg_block_Ek_set", _wrap_Mg_block_Ek_set, METH_VARARGS, (char *)"Mg_block_Ek_set(Mg_block self, double Ek)"},
+	 { (char *)"Mg_block_Ek_get", _wrap_Mg_block_Ek_get, METH_VARARGS, (char *)"Mg_block_Ek_get(Mg_block self) -> double"},
+	 { (char *)"Mg_block_Zk_set", _wrap_Mg_block_Zk_set, METH_VARARGS, (char *)"Mg_block_Zk_set(Mg_block self, double Zk)"},
+	 { (char *)"Mg_block_Zk_get", _wrap_Mg_block_Zk_get, METH_VARARGS, (char *)"Mg_block_Zk_get(Mg_block self) -> double"},
 	 { (char *)"Mg_block_swigregister", Mg_block_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Compartment", _wrap_new_Compartment, METH_VARARGS, NULL},
-	 { (char *)"delete_Compartment", _wrap_delete_Compartment, METH_VARARGS, NULL},
-	 { (char *)"Compartment_getType", _wrap_Compartment_getType, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_Vm", _wrap_Compartment___get_Vm, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_Vm", _wrap_Compartment___set_Vm, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_Cm", _wrap_Compartment___get_Cm, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_Cm", _wrap_Compartment___set_Cm, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_Em", _wrap_Compartment___get_Em, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_Em", _wrap_Compartment___set_Em, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_Im", _wrap_Compartment___get_Im, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_Im", _wrap_Compartment___set_Im, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_inject", _wrap_Compartment___get_inject, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_inject", _wrap_Compartment___set_inject, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_initVm", _wrap_Compartment___get_initVm, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_initVm", _wrap_Compartment___set_initVm, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_Rm", _wrap_Compartment___get_Rm, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_Rm", _wrap_Compartment___set_Rm, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_Ra", _wrap_Compartment___get_Ra, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_Ra", _wrap_Compartment___set_Ra, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_diameter", _wrap_Compartment___get_diameter, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_diameter", _wrap_Compartment___set_diameter, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_length", _wrap_Compartment___get_length, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_length", _wrap_Compartment___set_length, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_x", _wrap_Compartment___get_x, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_x", _wrap_Compartment___set_x, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_y", _wrap_Compartment___get_y, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_y", _wrap_Compartment___set_y, METH_VARARGS, NULL},
-	 { (char *)"Compartment___get_z", _wrap_Compartment___get_z, METH_VARARGS, NULL},
-	 { (char *)"Compartment___set_z", _wrap_Compartment___set_z, METH_VARARGS, NULL},
-	 { (char *)"Compartment_Vm_set", _wrap_Compartment_Vm_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_Vm_get", _wrap_Compartment_Vm_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_Cm_set", _wrap_Compartment_Cm_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_Cm_get", _wrap_Compartment_Cm_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_Em_set", _wrap_Compartment_Em_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_Em_get", _wrap_Compartment_Em_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_Im_set", _wrap_Compartment_Im_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_Im_get", _wrap_Compartment_Im_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_inject_set", _wrap_Compartment_inject_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_inject_get", _wrap_Compartment_inject_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_initVm_set", _wrap_Compartment_initVm_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_initVm_get", _wrap_Compartment_initVm_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_Rm_set", _wrap_Compartment_Rm_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_Rm_get", _wrap_Compartment_Rm_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_Ra_set", _wrap_Compartment_Ra_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_Ra_get", _wrap_Compartment_Ra_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_diameter_set", _wrap_Compartment_diameter_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_diameter_get", _wrap_Compartment_diameter_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_length_set", _wrap_Compartment_length_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_length_get", _wrap_Compartment_length_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_x_set", _wrap_Compartment_x_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_x_get", _wrap_Compartment_x_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_y_set", _wrap_Compartment_y_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_y_get", _wrap_Compartment_y_get, METH_VARARGS, NULL},
-	 { (char *)"Compartment_z_set", _wrap_Compartment_z_set, METH_VARARGS, NULL},
-	 { (char *)"Compartment_z_get", _wrap_Compartment_z_get, METH_VARARGS, NULL},
+	 { (char *)"new_Compartment", _wrap_new_Compartment, METH_VARARGS, (char *)"\n"
+		"Compartment(::Id id)\n"
+		"Compartment(string path)\n"
+		"Compartment(string name, ::Id parentId)\n"
+		"Compartment(string name, PyMooseBase parent)\n"
+		"Compartment(Compartment src, string name, PyMooseBase parent)\n"
+		"Compartment(Compartment src, string name, Id parent)\n"
+		"Compartment(Id src, string name, Id parent)\n"
+		"new_Compartment(Compartment src, string path) -> Compartment\n"
+		""},
+	 { (char *)"delete_Compartment", _wrap_delete_Compartment, METH_VARARGS, (char *)"delete_Compartment(Compartment self)"},
+	 { (char *)"Compartment_getType", _wrap_Compartment_getType, METH_VARARGS, (char *)"Compartment_getType(Compartment self) -> string"},
+	 { (char *)"Compartment___get_Vm", _wrap_Compartment___get_Vm, METH_VARARGS, (char *)"Compartment___get_Vm(Compartment self) -> double"},
+	 { (char *)"Compartment___set_Vm", _wrap_Compartment___set_Vm, METH_VARARGS, (char *)"Compartment___set_Vm(Compartment self, double Vm)"},
+	 { (char *)"Compartment___get_Cm", _wrap_Compartment___get_Cm, METH_VARARGS, (char *)"Compartment___get_Cm(Compartment self) -> double"},
+	 { (char *)"Compartment___set_Cm", _wrap_Compartment___set_Cm, METH_VARARGS, (char *)"Compartment___set_Cm(Compartment self, double Cm)"},
+	 { (char *)"Compartment___get_Em", _wrap_Compartment___get_Em, METH_VARARGS, (char *)"Compartment___get_Em(Compartment self) -> double"},
+	 { (char *)"Compartment___set_Em", _wrap_Compartment___set_Em, METH_VARARGS, (char *)"Compartment___set_Em(Compartment self, double Em)"},
+	 { (char *)"Compartment___get_Im", _wrap_Compartment___get_Im, METH_VARARGS, (char *)"Compartment___get_Im(Compartment self) -> double"},
+	 { (char *)"Compartment___set_Im", _wrap_Compartment___set_Im, METH_VARARGS, (char *)"Compartment___set_Im(Compartment self, double Im)"},
+	 { (char *)"Compartment___get_inject", _wrap_Compartment___get_inject, METH_VARARGS, (char *)"Compartment___get_inject(Compartment self) -> double"},
+	 { (char *)"Compartment___set_inject", _wrap_Compartment___set_inject, METH_VARARGS, (char *)"Compartment___set_inject(Compartment self, double inject)"},
+	 { (char *)"Compartment___get_initVm", _wrap_Compartment___get_initVm, METH_VARARGS, (char *)"Compartment___get_initVm(Compartment self) -> double"},
+	 { (char *)"Compartment___set_initVm", _wrap_Compartment___set_initVm, METH_VARARGS, (char *)"Compartment___set_initVm(Compartment self, double initVm)"},
+	 { (char *)"Compartment___get_Rm", _wrap_Compartment___get_Rm, METH_VARARGS, (char *)"Compartment___get_Rm(Compartment self) -> double"},
+	 { (char *)"Compartment___set_Rm", _wrap_Compartment___set_Rm, METH_VARARGS, (char *)"Compartment___set_Rm(Compartment self, double Rm)"},
+	 { (char *)"Compartment___get_Ra", _wrap_Compartment___get_Ra, METH_VARARGS, (char *)"Compartment___get_Ra(Compartment self) -> double"},
+	 { (char *)"Compartment___set_Ra", _wrap_Compartment___set_Ra, METH_VARARGS, (char *)"Compartment___set_Ra(Compartment self, double Ra)"},
+	 { (char *)"Compartment___get_diameter", _wrap_Compartment___get_diameter, METH_VARARGS, (char *)"Compartment___get_diameter(Compartment self) -> double"},
+	 { (char *)"Compartment___set_diameter", _wrap_Compartment___set_diameter, METH_VARARGS, (char *)"Compartment___set_diameter(Compartment self, double diameter)"},
+	 { (char *)"Compartment___get_length", _wrap_Compartment___get_length, METH_VARARGS, (char *)"Compartment___get_length(Compartment self) -> double"},
+	 { (char *)"Compartment___set_length", _wrap_Compartment___set_length, METH_VARARGS, (char *)"Compartment___set_length(Compartment self, double length)"},
+	 { (char *)"Compartment___get_x", _wrap_Compartment___get_x, METH_VARARGS, (char *)"Compartment___get_x(Compartment self) -> double"},
+	 { (char *)"Compartment___set_x", _wrap_Compartment___set_x, METH_VARARGS, (char *)"Compartment___set_x(Compartment self, double x)"},
+	 { (char *)"Compartment___get_y", _wrap_Compartment___get_y, METH_VARARGS, (char *)"Compartment___get_y(Compartment self) -> double"},
+	 { (char *)"Compartment___set_y", _wrap_Compartment___set_y, METH_VARARGS, (char *)"Compartment___set_y(Compartment self, double y)"},
+	 { (char *)"Compartment___get_z", _wrap_Compartment___get_z, METH_VARARGS, (char *)"Compartment___get_z(Compartment self) -> double"},
+	 { (char *)"Compartment___set_z", _wrap_Compartment___set_z, METH_VARARGS, (char *)"Compartment___set_z(Compartment self, double z)"},
+	 { (char *)"Compartment_Vm_set", _wrap_Compartment_Vm_set, METH_VARARGS, (char *)"Compartment_Vm_set(Compartment self, double Vm)"},
+	 { (char *)"Compartment_Vm_get", _wrap_Compartment_Vm_get, METH_VARARGS, (char *)"Compartment_Vm_get(Compartment self) -> double"},
+	 { (char *)"Compartment_Cm_set", _wrap_Compartment_Cm_set, METH_VARARGS, (char *)"Compartment_Cm_set(Compartment self, double Cm)"},
+	 { (char *)"Compartment_Cm_get", _wrap_Compartment_Cm_get, METH_VARARGS, (char *)"Compartment_Cm_get(Compartment self) -> double"},
+	 { (char *)"Compartment_Em_set", _wrap_Compartment_Em_set, METH_VARARGS, (char *)"Compartment_Em_set(Compartment self, double Em)"},
+	 { (char *)"Compartment_Em_get", _wrap_Compartment_Em_get, METH_VARARGS, (char *)"Compartment_Em_get(Compartment self) -> double"},
+	 { (char *)"Compartment_Im_set", _wrap_Compartment_Im_set, METH_VARARGS, (char *)"Compartment_Im_set(Compartment self, double Im)"},
+	 { (char *)"Compartment_Im_get", _wrap_Compartment_Im_get, METH_VARARGS, (char *)"Compartment_Im_get(Compartment self) -> double"},
+	 { (char *)"Compartment_inject_set", _wrap_Compartment_inject_set, METH_VARARGS, (char *)"Compartment_inject_set(Compartment self, double inject)"},
+	 { (char *)"Compartment_inject_get", _wrap_Compartment_inject_get, METH_VARARGS, (char *)"Compartment_inject_get(Compartment self) -> double"},
+	 { (char *)"Compartment_initVm_set", _wrap_Compartment_initVm_set, METH_VARARGS, (char *)"Compartment_initVm_set(Compartment self, double initVm)"},
+	 { (char *)"Compartment_initVm_get", _wrap_Compartment_initVm_get, METH_VARARGS, (char *)"Compartment_initVm_get(Compartment self) -> double"},
+	 { (char *)"Compartment_Rm_set", _wrap_Compartment_Rm_set, METH_VARARGS, (char *)"Compartment_Rm_set(Compartment self, double Rm)"},
+	 { (char *)"Compartment_Rm_get", _wrap_Compartment_Rm_get, METH_VARARGS, (char *)"Compartment_Rm_get(Compartment self) -> double"},
+	 { (char *)"Compartment_Ra_set", _wrap_Compartment_Ra_set, METH_VARARGS, (char *)"Compartment_Ra_set(Compartment self, double Ra)"},
+	 { (char *)"Compartment_Ra_get", _wrap_Compartment_Ra_get, METH_VARARGS, (char *)"Compartment_Ra_get(Compartment self) -> double"},
+	 { (char *)"Compartment_diameter_set", _wrap_Compartment_diameter_set, METH_VARARGS, (char *)"Compartment_diameter_set(Compartment self, double diameter)"},
+	 { (char *)"Compartment_diameter_get", _wrap_Compartment_diameter_get, METH_VARARGS, (char *)"Compartment_diameter_get(Compartment self) -> double"},
+	 { (char *)"Compartment_length_set", _wrap_Compartment_length_set, METH_VARARGS, (char *)"Compartment_length_set(Compartment self, double length)"},
+	 { (char *)"Compartment_length_get", _wrap_Compartment_length_get, METH_VARARGS, (char *)"Compartment_length_get(Compartment self) -> double"},
+	 { (char *)"Compartment_x_set", _wrap_Compartment_x_set, METH_VARARGS, (char *)"Compartment_x_set(Compartment self, double x)"},
+	 { (char *)"Compartment_x_get", _wrap_Compartment_x_get, METH_VARARGS, (char *)"Compartment_x_get(Compartment self) -> double"},
+	 { (char *)"Compartment_y_set", _wrap_Compartment_y_set, METH_VARARGS, (char *)"Compartment_y_set(Compartment self, double y)"},
+	 { (char *)"Compartment_y_get", _wrap_Compartment_y_get, METH_VARARGS, (char *)"Compartment_y_get(Compartment self) -> double"},
+	 { (char *)"Compartment_z_set", _wrap_Compartment_z_set, METH_VARARGS, (char *)"Compartment_z_set(Compartment self, double z)"},
+	 { (char *)"Compartment_z_get", _wrap_Compartment_z_get, METH_VARARGS, (char *)"Compartment_z_get(Compartment self) -> double"},
 	 { (char *)"Compartment_swigregister", Compartment_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_NeuroScan", _wrap_new_NeuroScan, METH_VARARGS, NULL},
-	 { (char *)"delete_NeuroScan", _wrap_delete_NeuroScan, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_getType", _wrap_NeuroScan_getType, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan___get_VDiv", _wrap_NeuroScan___get_VDiv, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan___set_VDiv", _wrap_NeuroScan___set_VDiv, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan___get_VMin", _wrap_NeuroScan___get_VMin, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan___set_VMin", _wrap_NeuroScan___set_VMin, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan___get_VMax", _wrap_NeuroScan___get_VMax, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan___set_VMax", _wrap_NeuroScan___set_VMax, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan___get_CaDiv", _wrap_NeuroScan___get_CaDiv, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan___set_CaDiv", _wrap_NeuroScan___set_CaDiv, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan___get_CaMin", _wrap_NeuroScan___get_CaMin, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan___set_CaMin", _wrap_NeuroScan___set_CaMin, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan___get_CaMax", _wrap_NeuroScan___get_CaMax, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan___set_CaMax", _wrap_NeuroScan___set_CaMax, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_VDiv_set", _wrap_NeuroScan_VDiv_set, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_VDiv_get", _wrap_NeuroScan_VDiv_get, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_VMin_set", _wrap_NeuroScan_VMin_set, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_VMin_get", _wrap_NeuroScan_VMin_get, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_VMax_set", _wrap_NeuroScan_VMax_set, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_VMax_get", _wrap_NeuroScan_VMax_get, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_CaDiv_set", _wrap_NeuroScan_CaDiv_set, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_CaDiv_get", _wrap_NeuroScan_CaDiv_get, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_CaMin_set", _wrap_NeuroScan_CaMin_set, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_CaMin_get", _wrap_NeuroScan_CaMin_get, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_CaMax_set", _wrap_NeuroScan_CaMax_set, METH_VARARGS, NULL},
-	 { (char *)"NeuroScan_CaMax_get", _wrap_NeuroScan_CaMax_get, METH_VARARGS, NULL},
+	 { (char *)"new_NeuroScan", _wrap_new_NeuroScan, METH_VARARGS, (char *)"\n"
+		"NeuroScan(Id id)\n"
+		"NeuroScan(string path)\n"
+		"NeuroScan(string name, Id parentId)\n"
+		"NeuroScan(string name, PyMooseBase parent)\n"
+		"NeuroScan(NeuroScan src, string name, PyMooseBase parent)\n"
+		"NeuroScan(NeuroScan src, string name, Id parent)\n"
+		"NeuroScan(NeuroScan src, string path)\n"
+		"new_NeuroScan(Id src, string name, Id parent) -> NeuroScan\n"
+		""},
+	 { (char *)"delete_NeuroScan", _wrap_delete_NeuroScan, METH_VARARGS, (char *)"delete_NeuroScan(NeuroScan self)"},
+	 { (char *)"NeuroScan_getType", _wrap_NeuroScan_getType, METH_VARARGS, (char *)"NeuroScan_getType(NeuroScan self) -> string"},
+	 { (char *)"NeuroScan___get_VDiv", _wrap_NeuroScan___get_VDiv, METH_VARARGS, (char *)"NeuroScan___get_VDiv(NeuroScan self) -> int"},
+	 { (char *)"NeuroScan___set_VDiv", _wrap_NeuroScan___set_VDiv, METH_VARARGS, (char *)"NeuroScan___set_VDiv(NeuroScan self, int VDiv)"},
+	 { (char *)"NeuroScan___get_VMin", _wrap_NeuroScan___get_VMin, METH_VARARGS, (char *)"NeuroScan___get_VMin(NeuroScan self) -> double"},
+	 { (char *)"NeuroScan___set_VMin", _wrap_NeuroScan___set_VMin, METH_VARARGS, (char *)"NeuroScan___set_VMin(NeuroScan self, double VMin)"},
+	 { (char *)"NeuroScan___get_VMax", _wrap_NeuroScan___get_VMax, METH_VARARGS, (char *)"NeuroScan___get_VMax(NeuroScan self) -> double"},
+	 { (char *)"NeuroScan___set_VMax", _wrap_NeuroScan___set_VMax, METH_VARARGS, (char *)"NeuroScan___set_VMax(NeuroScan self, double VMax)"},
+	 { (char *)"NeuroScan___get_CaDiv", _wrap_NeuroScan___get_CaDiv, METH_VARARGS, (char *)"NeuroScan___get_CaDiv(NeuroScan self) -> int"},
+	 { (char *)"NeuroScan___set_CaDiv", _wrap_NeuroScan___set_CaDiv, METH_VARARGS, (char *)"NeuroScan___set_CaDiv(NeuroScan self, int CaDiv)"},
+	 { (char *)"NeuroScan___get_CaMin", _wrap_NeuroScan___get_CaMin, METH_VARARGS, (char *)"NeuroScan___get_CaMin(NeuroScan self) -> double"},
+	 { (char *)"NeuroScan___set_CaMin", _wrap_NeuroScan___set_CaMin, METH_VARARGS, (char *)"NeuroScan___set_CaMin(NeuroScan self, double CaMin)"},
+	 { (char *)"NeuroScan___get_CaMax", _wrap_NeuroScan___get_CaMax, METH_VARARGS, (char *)"NeuroScan___get_CaMax(NeuroScan self) -> double"},
+	 { (char *)"NeuroScan___set_CaMax", _wrap_NeuroScan___set_CaMax, METH_VARARGS, (char *)"NeuroScan___set_CaMax(NeuroScan self, double CaMax)"},
+	 { (char *)"NeuroScan_VDiv_set", _wrap_NeuroScan_VDiv_set, METH_VARARGS, (char *)"NeuroScan_VDiv_set(NeuroScan self, int VDiv)"},
+	 { (char *)"NeuroScan_VDiv_get", _wrap_NeuroScan_VDiv_get, METH_VARARGS, (char *)"NeuroScan_VDiv_get(NeuroScan self) -> int"},
+	 { (char *)"NeuroScan_VMin_set", _wrap_NeuroScan_VMin_set, METH_VARARGS, (char *)"NeuroScan_VMin_set(NeuroScan self, double VMin)"},
+	 { (char *)"NeuroScan_VMin_get", _wrap_NeuroScan_VMin_get, METH_VARARGS, (char *)"NeuroScan_VMin_get(NeuroScan self) -> double"},
+	 { (char *)"NeuroScan_VMax_set", _wrap_NeuroScan_VMax_set, METH_VARARGS, (char *)"NeuroScan_VMax_set(NeuroScan self, double VMax)"},
+	 { (char *)"NeuroScan_VMax_get", _wrap_NeuroScan_VMax_get, METH_VARARGS, (char *)"NeuroScan_VMax_get(NeuroScan self) -> double"},
+	 { (char *)"NeuroScan_CaDiv_set", _wrap_NeuroScan_CaDiv_set, METH_VARARGS, (char *)"NeuroScan_CaDiv_set(NeuroScan self, int CaDiv)"},
+	 { (char *)"NeuroScan_CaDiv_get", _wrap_NeuroScan_CaDiv_get, METH_VARARGS, (char *)"NeuroScan_CaDiv_get(NeuroScan self) -> int"},
+	 { (char *)"NeuroScan_CaMin_set", _wrap_NeuroScan_CaMin_set, METH_VARARGS, (char *)"NeuroScan_CaMin_set(NeuroScan self, double CaMin)"},
+	 { (char *)"NeuroScan_CaMin_get", _wrap_NeuroScan_CaMin_get, METH_VARARGS, (char *)"NeuroScan_CaMin_get(NeuroScan self) -> double"},
+	 { (char *)"NeuroScan_CaMax_set", _wrap_NeuroScan_CaMax_set, METH_VARARGS, (char *)"NeuroScan_CaMax_set(NeuroScan self, double CaMax)"},
+	 { (char *)"NeuroScan_CaMax_get", _wrap_NeuroScan_CaMax_get, METH_VARARGS, (char *)"NeuroScan_CaMax_get(NeuroScan self) -> double"},
 	 { (char *)"NeuroScan_swigregister", NeuroScan_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_HSolve", _wrap_new_HSolve, METH_VARARGS, NULL},
-	 { (char *)"delete_HSolve", _wrap_delete_HSolve, METH_VARARGS, NULL},
-	 { (char *)"HSolve_getType", _wrap_HSolve_getType, METH_VARARGS, NULL},
-	 { (char *)"HSolve___get_seed_path", _wrap_HSolve___get_seed_path, METH_VARARGS, NULL},
-	 { (char *)"HSolve___set_seed_path", _wrap_HSolve___set_seed_path, METH_VARARGS, NULL},
-	 { (char *)"HSolve___get_NDiv", _wrap_HSolve___get_NDiv, METH_VARARGS, NULL},
-	 { (char *)"HSolve___set_NDiv", _wrap_HSolve___set_NDiv, METH_VARARGS, NULL},
-	 { (char *)"HSolve___get_VLo", _wrap_HSolve___get_VLo, METH_VARARGS, NULL},
-	 { (char *)"HSolve___set_VLo", _wrap_HSolve___set_VLo, METH_VARARGS, NULL},
-	 { (char *)"HSolve___get_VHi", _wrap_HSolve___get_VHi, METH_VARARGS, NULL},
-	 { (char *)"HSolve___set_VHi", _wrap_HSolve___set_VHi, METH_VARARGS, NULL},
-	 { (char *)"HSolve_seedPath_set", _wrap_HSolve_seedPath_set, METH_VARARGS, NULL},
-	 { (char *)"HSolve_seedPath_get", _wrap_HSolve_seedPath_get, METH_VARARGS, NULL},
-	 { (char *)"HSolve_NDiv_set", _wrap_HSolve_NDiv_set, METH_VARARGS, NULL},
-	 { (char *)"HSolve_NDiv_get", _wrap_HSolve_NDiv_get, METH_VARARGS, NULL},
-	 { (char *)"HSolve_VLo_set", _wrap_HSolve_VLo_set, METH_VARARGS, NULL},
-	 { (char *)"HSolve_VLo_get", _wrap_HSolve_VLo_get, METH_VARARGS, NULL},
-	 { (char *)"HSolve_VHi_set", _wrap_HSolve_VHi_set, METH_VARARGS, NULL},
-	 { (char *)"HSolve_VHi_get", _wrap_HSolve_VHi_get, METH_VARARGS, NULL},
+	 { (char *)"new_HSolve", _wrap_new_HSolve, METH_VARARGS, (char *)"\n"
+		"HSolve(Id id)\n"
+		"HSolve(string path)\n"
+		"HSolve(string name, Id parentId)\n"
+		"HSolve(string name, PyMooseBase parent)\n"
+		"HSolve(HSolve src, string name, PyMooseBase parent)\n"
+		"HSolve(HSolve src, string name, Id parent)\n"
+		"HSolve(Id src, string name, Id parent)\n"
+		"new_HSolve(HSolve src, string path) -> HSolve\n"
+		""},
+	 { (char *)"delete_HSolve", _wrap_delete_HSolve, METH_VARARGS, (char *)"delete_HSolve(HSolve self)"},
+	 { (char *)"HSolve_getType", _wrap_HSolve_getType, METH_VARARGS, (char *)"HSolve_getType(HSolve self) -> string"},
+	 { (char *)"HSolve___get_seed_path", _wrap_HSolve___get_seed_path, METH_VARARGS, (char *)"HSolve___get_seed_path(HSolve self) -> string"},
+	 { (char *)"HSolve___set_seed_path", _wrap_HSolve___set_seed_path, METH_VARARGS, (char *)"HSolve___set_seed_path(HSolve self, string path)"},
+	 { (char *)"HSolve___get_NDiv", _wrap_HSolve___get_NDiv, METH_VARARGS, (char *)"HSolve___get_NDiv(HSolve self) -> int"},
+	 { (char *)"HSolve___set_NDiv", _wrap_HSolve___set_NDiv, METH_VARARGS, (char *)"HSolve___set_NDiv(HSolve self, int NDiv)"},
+	 { (char *)"HSolve___get_VLo", _wrap_HSolve___get_VLo, METH_VARARGS, (char *)"HSolve___get_VLo(HSolve self) -> double"},
+	 { (char *)"HSolve___set_VLo", _wrap_HSolve___set_VLo, METH_VARARGS, (char *)"HSolve___set_VLo(HSolve self, double VLo)"},
+	 { (char *)"HSolve___get_VHi", _wrap_HSolve___get_VHi, METH_VARARGS, (char *)"HSolve___get_VHi(HSolve self) -> double"},
+	 { (char *)"HSolve___set_VHi", _wrap_HSolve___set_VHi, METH_VARARGS, (char *)"HSolve___set_VHi(HSolve self, double VHi)"},
+	 { (char *)"HSolve_seedPath_set", _wrap_HSolve_seedPath_set, METH_VARARGS, (char *)"HSolve_seedPath_set(HSolve self, string seedPath)"},
+	 { (char *)"HSolve_seedPath_get", _wrap_HSolve_seedPath_get, METH_VARARGS, (char *)"HSolve_seedPath_get(HSolve self) -> string"},
+	 { (char *)"HSolve_NDiv_set", _wrap_HSolve_NDiv_set, METH_VARARGS, (char *)"HSolve_NDiv_set(HSolve self, int NDiv)"},
+	 { (char *)"HSolve_NDiv_get", _wrap_HSolve_NDiv_get, METH_VARARGS, (char *)"HSolve_NDiv_get(HSolve self) -> int"},
+	 { (char *)"HSolve_VLo_set", _wrap_HSolve_VLo_set, METH_VARARGS, (char *)"HSolve_VLo_set(HSolve self, double VLo)"},
+	 { (char *)"HSolve_VLo_get", _wrap_HSolve_VLo_get, METH_VARARGS, (char *)"HSolve_VLo_get(HSolve self) -> double"},
+	 { (char *)"HSolve_VHi_set", _wrap_HSolve_VHi_set, METH_VARARGS, (char *)"HSolve_VHi_set(HSolve self, double VHi)"},
+	 { (char *)"HSolve_VHi_get", _wrap_HSolve_VHi_get, METH_VARARGS, (char *)"HSolve_VHi_get(HSolve self) -> double"},
 	 { (char *)"HSolve_swigregister", HSolve_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Kintegrator", _wrap_new_Kintegrator, METH_VARARGS, NULL},
-	 { (char *)"delete_Kintegrator", _wrap_delete_Kintegrator, METH_VARARGS, NULL},
-	 { (char *)"Kintegrator_getType", _wrap_Kintegrator_getType, METH_VARARGS, NULL},
-	 { (char *)"Kintegrator___get_isInitiatilized", _wrap_Kintegrator___get_isInitiatilized, METH_VARARGS, NULL},
-	 { (char *)"Kintegrator___set_isInitiatilized", _wrap_Kintegrator___set_isInitiatilized, METH_VARARGS, NULL},
-	 { (char *)"Kintegrator_imethod", _wrap_Kintegrator_imethod, METH_VARARGS, NULL},
-	 { (char *)"Kintegrator_isInitiatilized_set", _wrap_Kintegrator_isInitiatilized_set, METH_VARARGS, NULL},
-	 { (char *)"Kintegrator_isInitiatilized_get", _wrap_Kintegrator_isInitiatilized_get, METH_VARARGS, NULL},
+	 { (char *)"new_Kintegrator", _wrap_new_Kintegrator, METH_VARARGS, (char *)"\n"
+		"Kintegrator(Id id)\n"
+		"Kintegrator(string path)\n"
+		"Kintegrator(string name, Id parentId)\n"
+		"Kintegrator(string name, PyMooseBase parent)\n"
+		"Kintegrator(Kintegrator src, string name, PyMooseBase parent)\n"
+		"Kintegrator(Kintegrator src, string name, Id parent)\n"
+		"Kintegrator(Id src, string name, Id parent)\n"
+		"new_Kintegrator(Kintegrator src, string path) -> Kintegrator\n"
+		""},
+	 { (char *)"delete_Kintegrator", _wrap_delete_Kintegrator, METH_VARARGS, (char *)"delete_Kintegrator(Kintegrator self)"},
+	 { (char *)"Kintegrator_getType", _wrap_Kintegrator_getType, METH_VARARGS, (char *)"Kintegrator_getType(Kintegrator self) -> string"},
+	 { (char *)"Kintegrator___get_isInitiatilized", _wrap_Kintegrator___get_isInitiatilized, METH_VARARGS, (char *)"Kintegrator___get_isInitiatilized(Kintegrator self) -> bool"},
+	 { (char *)"Kintegrator___set_isInitiatilized", _wrap_Kintegrator___set_isInitiatilized, METH_VARARGS, (char *)"Kintegrator___set_isInitiatilized(Kintegrator self, bool isInitiatilized)"},
+	 { (char *)"Kintegrator_imethod", _wrap_Kintegrator_imethod, METH_VARARGS, (char *)"\n"
+		"imethod() -> string\n"
+		"Kintegrator_imethod(Kintegrator self, string ?) -> string\n"
+		""},
+	 { (char *)"Kintegrator_isInitiatilized_set", _wrap_Kintegrator_isInitiatilized_set, METH_VARARGS, (char *)"Kintegrator_isInitiatilized_set(Kintegrator self, bool isInitiatilized)"},
+	 { (char *)"Kintegrator_isInitiatilized_get", _wrap_Kintegrator_isInitiatilized_get, METH_VARARGS, (char *)"Kintegrator_isInitiatilized_get(Kintegrator self) -> bool"},
 	 { (char *)"Kintegrator_swigregister", Kintegrator_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_MathFunc", _wrap_new_MathFunc, METH_VARARGS, NULL},
-	 { (char *)"delete_MathFunc", _wrap_delete_MathFunc, METH_VARARGS, NULL},
-	 { (char *)"MathFunc_getType", _wrap_MathFunc_getType, METH_VARARGS, NULL},
-	 { (char *)"MathFunc___get_mathML", _wrap_MathFunc___get_mathML, METH_VARARGS, NULL},
-	 { (char *)"MathFunc___set_mathML", _wrap_MathFunc___set_mathML, METH_VARARGS, NULL},
-	 { (char *)"MathFunc___get_function", _wrap_MathFunc___get_function, METH_VARARGS, NULL},
-	 { (char *)"MathFunc___set_function", _wrap_MathFunc___set_function, METH_VARARGS, NULL},
-	 { (char *)"MathFunc___get_result", _wrap_MathFunc___get_result, METH_VARARGS, NULL},
-	 { (char *)"MathFunc___set_result", _wrap_MathFunc___set_result, METH_VARARGS, NULL},
-	 { (char *)"MathFunc_mathML_set", _wrap_MathFunc_mathML_set, METH_VARARGS, NULL},
-	 { (char *)"MathFunc_mathML_get", _wrap_MathFunc_mathML_get, METH_VARARGS, NULL},
-	 { (char *)"MathFunc_function_set", _wrap_MathFunc_function_set, METH_VARARGS, NULL},
-	 { (char *)"MathFunc_function_get", _wrap_MathFunc_function_get, METH_VARARGS, NULL},
-	 { (char *)"MathFunc_result_set", _wrap_MathFunc_result_set, METH_VARARGS, NULL},
-	 { (char *)"MathFunc_result_get", _wrap_MathFunc_result_get, METH_VARARGS, NULL},
+	 { (char *)"new_MathFunc", _wrap_new_MathFunc, METH_VARARGS, (char *)"\n"
+		"MathFunc(Id id)\n"
+		"MathFunc(string path)\n"
+		"MathFunc(string name, Id parentId)\n"
+		"MathFunc(string name, PyMooseBase parent)\n"
+		"MathFunc(MathFunc src, string name, PyMooseBase parent)\n"
+		"MathFunc(MathFunc src, string name, Id parent)\n"
+		"MathFunc(MathFunc src, string path)\n"
+		"new_MathFunc(Id src, string name, Id parent) -> MathFunc\n"
+		""},
+	 { (char *)"delete_MathFunc", _wrap_delete_MathFunc, METH_VARARGS, (char *)"delete_MathFunc(MathFunc self)"},
+	 { (char *)"MathFunc_getType", _wrap_MathFunc_getType, METH_VARARGS, (char *)"MathFunc_getType(MathFunc self) -> string"},
+	 { (char *)"MathFunc___get_mathML", _wrap_MathFunc___get_mathML, METH_VARARGS, (char *)"MathFunc___get_mathML(MathFunc self) -> string"},
+	 { (char *)"MathFunc___set_mathML", _wrap_MathFunc___set_mathML, METH_VARARGS, (char *)"MathFunc___set_mathML(MathFunc self, string mathML)"},
+	 { (char *)"MathFunc___get_function", _wrap_MathFunc___get_function, METH_VARARGS, (char *)"MathFunc___get_function(MathFunc self) -> string"},
+	 { (char *)"MathFunc___set_function", _wrap_MathFunc___set_function, METH_VARARGS, (char *)"MathFunc___set_function(MathFunc self, string function)"},
+	 { (char *)"MathFunc___get_result", _wrap_MathFunc___get_result, METH_VARARGS, (char *)"MathFunc___get_result(MathFunc self) -> double"},
+	 { (char *)"MathFunc___set_result", _wrap_MathFunc___set_result, METH_VARARGS, (char *)"MathFunc___set_result(MathFunc self, double result)"},
+	 { (char *)"MathFunc_mathML_set", _wrap_MathFunc_mathML_set, METH_VARARGS, (char *)"MathFunc_mathML_set(MathFunc self, string mathML)"},
+	 { (char *)"MathFunc_mathML_get", _wrap_MathFunc_mathML_get, METH_VARARGS, (char *)"MathFunc_mathML_get(MathFunc self) -> string"},
+	 { (char *)"MathFunc_function_set", _wrap_MathFunc_function_set, METH_VARARGS, (char *)"MathFunc_function_set(MathFunc self, string function)"},
+	 { (char *)"MathFunc_function_get", _wrap_MathFunc_function_get, METH_VARARGS, (char *)"MathFunc_function_get(MathFunc self) -> string"},
+	 { (char *)"MathFunc_result_set", _wrap_MathFunc_result_set, METH_VARARGS, (char *)"MathFunc_result_set(MathFunc self, double result)"},
+	 { (char *)"MathFunc_result_get", _wrap_MathFunc_result_get, METH_VARARGS, (char *)"MathFunc_result_get(MathFunc self) -> double"},
 	 { (char *)"MathFunc_swigregister", MathFunc_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Stoich", _wrap_new_Stoich, METH_VARARGS, NULL},
-	 { (char *)"delete_Stoich", _wrap_delete_Stoich, METH_VARARGS, NULL},
-	 { (char *)"Stoich_getType", _wrap_Stoich_getType, METH_VARARGS, NULL},
-	 { (char *)"Stoich___get_nMols", _wrap_Stoich___get_nMols, METH_VARARGS, NULL},
-	 { (char *)"Stoich___set_nMols", _wrap_Stoich___set_nMols, METH_VARARGS, NULL},
-	 { (char *)"Stoich___get_nVarMols", _wrap_Stoich___get_nVarMols, METH_VARARGS, NULL},
-	 { (char *)"Stoich___set_nVarMols", _wrap_Stoich___set_nVarMols, METH_VARARGS, NULL},
-	 { (char *)"Stoich___get_nSumTot", _wrap_Stoich___get_nSumTot, METH_VARARGS, NULL},
-	 { (char *)"Stoich___set_nSumTot", _wrap_Stoich___set_nSumTot, METH_VARARGS, NULL},
-	 { (char *)"Stoich___get_nBuffered", _wrap_Stoich___get_nBuffered, METH_VARARGS, NULL},
-	 { (char *)"Stoich___set_nBuffered", _wrap_Stoich___set_nBuffered, METH_VARARGS, NULL},
-	 { (char *)"Stoich___get_nReacs", _wrap_Stoich___get_nReacs, METH_VARARGS, NULL},
-	 { (char *)"Stoich___set_nReacs", _wrap_Stoich___set_nReacs, METH_VARARGS, NULL},
-	 { (char *)"Stoich___get_nEnz", _wrap_Stoich___get_nEnz, METH_VARARGS, NULL},
-	 { (char *)"Stoich___set_nEnz", _wrap_Stoich___set_nEnz, METH_VARARGS, NULL},
-	 { (char *)"Stoich___get_nMMenz", _wrap_Stoich___get_nMMenz, METH_VARARGS, NULL},
-	 { (char *)"Stoich___set_nMMenz", _wrap_Stoich___set_nMMenz, METH_VARARGS, NULL},
-	 { (char *)"Stoich___get_nExternalRates", _wrap_Stoich___get_nExternalRates, METH_VARARGS, NULL},
-	 { (char *)"Stoich___set_nExternalRates", _wrap_Stoich___set_nExternalRates, METH_VARARGS, NULL},
-	 { (char *)"Stoich___get_useOneWayReacs", _wrap_Stoich___get_useOneWayReacs, METH_VARARGS, NULL},
-	 { (char *)"Stoich___set_useOneWayReacs", _wrap_Stoich___set_useOneWayReacs, METH_VARARGS, NULL},
-	 { (char *)"Stoich_path", _wrap_Stoich_path, METH_VARARGS, NULL},
-	 { (char *)"Stoich___get_rateVectorSize", _wrap_Stoich___get_rateVectorSize, METH_VARARGS, NULL},
-	 { (char *)"Stoich___set_rateVectorSize", _wrap_Stoich___set_rateVectorSize, METH_VARARGS, NULL},
-	 { (char *)"Stoich_nMols_get", _wrap_Stoich_nMols_get, METH_VARARGS, NULL},
-	 { (char *)"Stoich_nVarMols_get", _wrap_Stoich_nVarMols_get, METH_VARARGS, NULL},
-	 { (char *)"Stoich_nSumTot_get", _wrap_Stoich_nSumTot_get, METH_VARARGS, NULL},
-	 { (char *)"Stoich_nBuffered_get", _wrap_Stoich_nBuffered_get, METH_VARARGS, NULL},
-	 { (char *)"Stoich_nReacs_get", _wrap_Stoich_nReacs_get, METH_VARARGS, NULL},
-	 { (char *)"Stoich_nEnz_get", _wrap_Stoich_nEnz_get, METH_VARARGS, NULL},
-	 { (char *)"Stoich_nMMenz_get", _wrap_Stoich_nMMenz_get, METH_VARARGS, NULL},
-	 { (char *)"Stoich_nExternalRates_get", _wrap_Stoich_nExternalRates_get, METH_VARARGS, NULL},
-	 { (char *)"Stoich_useOneWayReacs_set", _wrap_Stoich_useOneWayReacs_set, METH_VARARGS, NULL},
-	 { (char *)"Stoich_useOneWayReacs_get", _wrap_Stoich_useOneWayReacs_get, METH_VARARGS, NULL},
-	 { (char *)"Stoich_rateVectorSize_get", _wrap_Stoich_rateVectorSize_get, METH_VARARGS, NULL},
+	 { (char *)"new_Stoich", _wrap_new_Stoich, METH_VARARGS, (char *)"\n"
+		"Stoich(Id id)\n"
+		"Stoich(string path)\n"
+		"Stoich(string name, Id parentId)\n"
+		"Stoich(string name, PyMooseBase parent)\n"
+		"Stoich(Stoich src, string name, PyMooseBase parent)\n"
+		"Stoich(Stoich src, string name, Id parent)\n"
+		"Stoich(Id src, string name, Id parent)\n"
+		"new_Stoich(Stoich src, string path) -> Stoich\n"
+		""},
+	 { (char *)"delete_Stoich", _wrap_delete_Stoich, METH_VARARGS, (char *)"delete_Stoich(Stoich self)"},
+	 { (char *)"Stoich_getType", _wrap_Stoich_getType, METH_VARARGS, (char *)"Stoich_getType(Stoich self) -> string"},
+	 { (char *)"Stoich___get_nMols", _wrap_Stoich___get_nMols, METH_VARARGS, (char *)"Stoich___get_nMols(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich___set_nMols", _wrap_Stoich___set_nMols, METH_VARARGS, (char *)"Stoich___set_nMols(Stoich self, unsigned int nMols)"},
+	 { (char *)"Stoich___get_nVarMols", _wrap_Stoich___get_nVarMols, METH_VARARGS, (char *)"Stoich___get_nVarMols(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich___set_nVarMols", _wrap_Stoich___set_nVarMols, METH_VARARGS, (char *)"Stoich___set_nVarMols(Stoich self, unsigned int nVarMols)"},
+	 { (char *)"Stoich___get_nSumTot", _wrap_Stoich___get_nSumTot, METH_VARARGS, (char *)"Stoich___get_nSumTot(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich___set_nSumTot", _wrap_Stoich___set_nSumTot, METH_VARARGS, (char *)"Stoich___set_nSumTot(Stoich self, unsigned int nSumTot)"},
+	 { (char *)"Stoich___get_nBuffered", _wrap_Stoich___get_nBuffered, METH_VARARGS, (char *)"Stoich___get_nBuffered(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich___set_nBuffered", _wrap_Stoich___set_nBuffered, METH_VARARGS, (char *)"Stoich___set_nBuffered(Stoich self, unsigned int nBuffered)"},
+	 { (char *)"Stoich___get_nReacs", _wrap_Stoich___get_nReacs, METH_VARARGS, (char *)"Stoich___get_nReacs(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich___set_nReacs", _wrap_Stoich___set_nReacs, METH_VARARGS, (char *)"Stoich___set_nReacs(Stoich self, unsigned int nReacs)"},
+	 { (char *)"Stoich___get_nEnz", _wrap_Stoich___get_nEnz, METH_VARARGS, (char *)"Stoich___get_nEnz(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich___set_nEnz", _wrap_Stoich___set_nEnz, METH_VARARGS, (char *)"Stoich___set_nEnz(Stoich self, unsigned int nEnz)"},
+	 { (char *)"Stoich___get_nMMenz", _wrap_Stoich___get_nMMenz, METH_VARARGS, (char *)"Stoich___get_nMMenz(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich___set_nMMenz", _wrap_Stoich___set_nMMenz, METH_VARARGS, (char *)"Stoich___set_nMMenz(Stoich self, unsigned int nMMenz)"},
+	 { (char *)"Stoich___get_nExternalRates", _wrap_Stoich___get_nExternalRates, METH_VARARGS, (char *)"Stoich___get_nExternalRates(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich___set_nExternalRates", _wrap_Stoich___set_nExternalRates, METH_VARARGS, (char *)"Stoich___set_nExternalRates(Stoich self, unsigned int nExternalRates)"},
+	 { (char *)"Stoich___get_useOneWayReacs", _wrap_Stoich___get_useOneWayReacs, METH_VARARGS, (char *)"Stoich___get_useOneWayReacs(Stoich self) -> bool"},
+	 { (char *)"Stoich___set_useOneWayReacs", _wrap_Stoich___set_useOneWayReacs, METH_VARARGS, (char *)"Stoich___set_useOneWayReacs(Stoich self, bool useOneWayReacs)"},
+	 { (char *)"Stoich_path", _wrap_Stoich_path, METH_VARARGS, (char *)"\n"
+		"path() -> string\n"
+		"Stoich_path(Stoich self, string path) -> string\n"
+		""},
+	 { (char *)"Stoich___get_rateVectorSize", _wrap_Stoich___get_rateVectorSize, METH_VARARGS, (char *)"Stoich___get_rateVectorSize(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich___set_rateVectorSize", _wrap_Stoich___set_rateVectorSize, METH_VARARGS, (char *)"Stoich___set_rateVectorSize(Stoich self, unsigned int rateVectorSize)"},
+	 { (char *)"Stoich_nMols_get", _wrap_Stoich_nMols_get, METH_VARARGS, (char *)"Stoich_nMols_get(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich_nVarMols_get", _wrap_Stoich_nVarMols_get, METH_VARARGS, (char *)"Stoich_nVarMols_get(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich_nSumTot_get", _wrap_Stoich_nSumTot_get, METH_VARARGS, (char *)"Stoich_nSumTot_get(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich_nBuffered_get", _wrap_Stoich_nBuffered_get, METH_VARARGS, (char *)"Stoich_nBuffered_get(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich_nReacs_get", _wrap_Stoich_nReacs_get, METH_VARARGS, (char *)"Stoich_nReacs_get(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich_nEnz_get", _wrap_Stoich_nEnz_get, METH_VARARGS, (char *)"Stoich_nEnz_get(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich_nMMenz_get", _wrap_Stoich_nMMenz_get, METH_VARARGS, (char *)"Stoich_nMMenz_get(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich_nExternalRates_get", _wrap_Stoich_nExternalRates_get, METH_VARARGS, (char *)"Stoich_nExternalRates_get(Stoich self) -> unsigned int"},
+	 { (char *)"Stoich_useOneWayReacs_set", _wrap_Stoich_useOneWayReacs_set, METH_VARARGS, (char *)"Stoich_useOneWayReacs_set(Stoich self, bool useOneWayReacs)"},
+	 { (char *)"Stoich_useOneWayReacs_get", _wrap_Stoich_useOneWayReacs_get, METH_VARARGS, (char *)"Stoich_useOneWayReacs_get(Stoich self) -> bool"},
+	 { (char *)"Stoich_rateVectorSize_get", _wrap_Stoich_rateVectorSize_get, METH_VARARGS, (char *)"Stoich_rateVectorSize_get(Stoich self) -> unsigned int"},
 	 { (char *)"Stoich_swigregister", Stoich_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_KineticHub", _wrap_new_KineticHub, METH_VARARGS, NULL},
-	 { (char *)"delete_KineticHub", _wrap_delete_KineticHub, METH_VARARGS, NULL},
-	 { (char *)"KineticHub_getType", _wrap_KineticHub_getType, METH_VARARGS, NULL},
-	 { (char *)"KineticHub___get_nMol", _wrap_KineticHub___get_nMol, METH_VARARGS, NULL},
-	 { (char *)"KineticHub___set_nMol", _wrap_KineticHub___set_nMol, METH_VARARGS, NULL},
-	 { (char *)"KineticHub___get_nReac", _wrap_KineticHub___get_nReac, METH_VARARGS, NULL},
-	 { (char *)"KineticHub___set_nReac", _wrap_KineticHub___set_nReac, METH_VARARGS, NULL},
-	 { (char *)"KineticHub___get_nEnz", _wrap_KineticHub___get_nEnz, METH_VARARGS, NULL},
-	 { (char *)"KineticHub___set_nEnz", _wrap_KineticHub___set_nEnz, METH_VARARGS, NULL},
-	 { (char *)"KineticHub_destroy", _wrap_KineticHub_destroy, METH_VARARGS, NULL},
-	 { (char *)"KineticHub___get_molSum", _wrap_KineticHub___get_molSum, METH_VARARGS, NULL},
-	 { (char *)"KineticHub___set_molSum", _wrap_KineticHub___set_molSum, METH_VARARGS, NULL},
-	 { (char *)"KineticHub_nMol_set", _wrap_KineticHub_nMol_set, METH_VARARGS, NULL},
-	 { (char *)"KineticHub_nMol_get", _wrap_KineticHub_nMol_get, METH_VARARGS, NULL},
-	 { (char *)"KineticHub_nReac_set", _wrap_KineticHub_nReac_set, METH_VARARGS, NULL},
-	 { (char *)"KineticHub_nReac_get", _wrap_KineticHub_nReac_get, METH_VARARGS, NULL},
-	 { (char *)"KineticHub_nEnz_set", _wrap_KineticHub_nEnz_set, METH_VARARGS, NULL},
-	 { (char *)"KineticHub_nEnz_get", _wrap_KineticHub_nEnz_get, METH_VARARGS, NULL},
-	 { (char *)"KineticHub_molSum_set", _wrap_KineticHub_molSum_set, METH_VARARGS, NULL},
-	 { (char *)"KineticHub_molSum_get", _wrap_KineticHub_molSum_get, METH_VARARGS, NULL},
+	 { (char *)"new_KineticHub", _wrap_new_KineticHub, METH_VARARGS, (char *)"\n"
+		"KineticHub(Id id)\n"
+		"KineticHub(string path)\n"
+		"KineticHub(string name, Id parentId)\n"
+		"KineticHub(string name, PyMooseBase parent)\n"
+		"KineticHub(KineticHub src, string name, PyMooseBase parent)\n"
+		"KineticHub(KineticHub src, string name, Id parent)\n"
+		"KineticHub(Id src, string name, Id parent)\n"
+		"new_KineticHub(KineticHub src, string path) -> KineticHub\n"
+		""},
+	 { (char *)"delete_KineticHub", _wrap_delete_KineticHub, METH_VARARGS, (char *)"delete_KineticHub(KineticHub self)"},
+	 { (char *)"KineticHub_getType", _wrap_KineticHub_getType, METH_VARARGS, (char *)"KineticHub_getType(KineticHub self) -> string"},
+	 { (char *)"KineticHub___get_nMol", _wrap_KineticHub___get_nMol, METH_VARARGS, (char *)"KineticHub___get_nMol(KineticHub self) -> unsigned int"},
+	 { (char *)"KineticHub___set_nMol", _wrap_KineticHub___set_nMol, METH_VARARGS, (char *)"KineticHub___set_nMol(KineticHub self, unsigned int nMol)"},
+	 { (char *)"KineticHub___get_nReac", _wrap_KineticHub___get_nReac, METH_VARARGS, (char *)"KineticHub___get_nReac(KineticHub self) -> unsigned int"},
+	 { (char *)"KineticHub___set_nReac", _wrap_KineticHub___set_nReac, METH_VARARGS, (char *)"KineticHub___set_nReac(KineticHub self, unsigned int nReac)"},
+	 { (char *)"KineticHub___get_nEnz", _wrap_KineticHub___get_nEnz, METH_VARARGS, (char *)"KineticHub___get_nEnz(KineticHub self) -> unsigned int"},
+	 { (char *)"KineticHub___set_nEnz", _wrap_KineticHub___set_nEnz, METH_VARARGS, (char *)"KineticHub___set_nEnz(KineticHub self, unsigned int nEnz)"},
+	 { (char *)"KineticHub_destroy", _wrap_KineticHub_destroy, METH_VARARGS, (char *)"KineticHub_destroy(KineticHub self)"},
+	 { (char *)"KineticHub___get_molSum", _wrap_KineticHub___get_molSum, METH_VARARGS, (char *)"KineticHub___get_molSum(KineticHub self) -> double"},
+	 { (char *)"KineticHub___set_molSum", _wrap_KineticHub___set_molSum, METH_VARARGS, (char *)"KineticHub___set_molSum(KineticHub self, double molSum)"},
+	 { (char *)"KineticHub_nMol_set", _wrap_KineticHub_nMol_set, METH_VARARGS, (char *)"KineticHub_nMol_set(KineticHub self, unsigned int nMol)"},
+	 { (char *)"KineticHub_nMol_get", _wrap_KineticHub_nMol_get, METH_VARARGS, (char *)"KineticHub_nMol_get(KineticHub self) -> unsigned int"},
+	 { (char *)"KineticHub_nReac_set", _wrap_KineticHub_nReac_set, METH_VARARGS, (char *)"KineticHub_nReac_set(KineticHub self, unsigned int nReac)"},
+	 { (char *)"KineticHub_nReac_get", _wrap_KineticHub_nReac_get, METH_VARARGS, (char *)"KineticHub_nReac_get(KineticHub self) -> unsigned int"},
+	 { (char *)"KineticHub_nEnz_set", _wrap_KineticHub_nEnz_set, METH_VARARGS, (char *)"KineticHub_nEnz_set(KineticHub self, unsigned int nEnz)"},
+	 { (char *)"KineticHub_nEnz_get", _wrap_KineticHub_nEnz_get, METH_VARARGS, (char *)"KineticHub_nEnz_get(KineticHub self) -> unsigned int"},
+	 { (char *)"KineticHub_molSum_set", _wrap_KineticHub_molSum_set, METH_VARARGS, (char *)"KineticHub_molSum_set(KineticHub self, double molSum)"},
+	 { (char *)"KineticHub_molSum_get", _wrap_KineticHub_molSum_get, METH_VARARGS, (char *)"KineticHub_molSum_get(KineticHub self) -> double"},
 	 { (char *)"KineticHub_swigregister", KineticHub_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Enzyme", _wrap_new_Enzyme, METH_VARARGS, NULL},
-	 { (char *)"delete_Enzyme", _wrap_delete_Enzyme, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_getType", _wrap_Enzyme_getType, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___get_k1", _wrap_Enzyme___get_k1, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___set_k1", _wrap_Enzyme___set_k1, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___get_k2", _wrap_Enzyme___get_k2, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___set_k2", _wrap_Enzyme___set_k2, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___get_k3", _wrap_Enzyme___get_k3, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___set_k3", _wrap_Enzyme___set_k3, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___get_Km", _wrap_Enzyme___get_Km, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___set_Km", _wrap_Enzyme___set_Km, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___get_kcat", _wrap_Enzyme___get_kcat, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___set_kcat", _wrap_Enzyme___set_kcat, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___get_mode", _wrap_Enzyme___get_mode, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___set_mode", _wrap_Enzyme___set_mode, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___get_scaleKm", _wrap_Enzyme___get_scaleKm, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___set_scaleKm", _wrap_Enzyme___set_scaleKm, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___get_scaleKcat", _wrap_Enzyme___get_scaleKcat, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___set_scaleKcat", _wrap_Enzyme___set_scaleKcat, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___get_intramol", _wrap_Enzyme___get_intramol, METH_VARARGS, NULL},
-	 { (char *)"Enzyme___set_intramol", _wrap_Enzyme___set_intramol, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_k1_set", _wrap_Enzyme_k1_set, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_k1_get", _wrap_Enzyme_k1_get, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_k2_set", _wrap_Enzyme_k2_set, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_k2_get", _wrap_Enzyme_k2_get, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_k3_set", _wrap_Enzyme_k3_set, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_k3_get", _wrap_Enzyme_k3_get, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_Km_set", _wrap_Enzyme_Km_set, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_Km_get", _wrap_Enzyme_Km_get, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_kcat_set", _wrap_Enzyme_kcat_set, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_kcat_get", _wrap_Enzyme_kcat_get, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_mode_set", _wrap_Enzyme_mode_set, METH_VARARGS, NULL},
-	 { (char *)"Enzyme_mode_get", _wrap_Enzyme_mode_get, METH_VARARGS, NULL},
+	 { (char *)"new_Enzyme", _wrap_new_Enzyme, METH_VARARGS, (char *)"\n"
+		"Enzyme(Id id)\n"
+		"Enzyme(string path)\n"
+		"Enzyme(string name, Id parentId)\n"
+		"Enzyme(string name, PyMooseBase parent)\n"
+		"Enzyme(Enzyme src, string name, PyMooseBase parent)\n"
+		"Enzyme(Enzyme src, string name, Id parent)\n"
+		"Enzyme(Id src, string name, Id parent)\n"
+		"new_Enzyme(Enzyme src, string path) -> Enzyme\n"
+		""},
+	 { (char *)"delete_Enzyme", _wrap_delete_Enzyme, METH_VARARGS, (char *)"delete_Enzyme(Enzyme self)"},
+	 { (char *)"Enzyme_getType", _wrap_Enzyme_getType, METH_VARARGS, (char *)"Enzyme_getType(Enzyme self) -> string"},
+	 { (char *)"Enzyme___get_k1", _wrap_Enzyme___get_k1, METH_VARARGS, (char *)"Enzyme___get_k1(Enzyme self) -> double"},
+	 { (char *)"Enzyme___set_k1", _wrap_Enzyme___set_k1, METH_VARARGS, (char *)"Enzyme___set_k1(Enzyme self, double k1)"},
+	 { (char *)"Enzyme___get_k2", _wrap_Enzyme___get_k2, METH_VARARGS, (char *)"Enzyme___get_k2(Enzyme self) -> double"},
+	 { (char *)"Enzyme___set_k2", _wrap_Enzyme___set_k2, METH_VARARGS, (char *)"Enzyme___set_k2(Enzyme self, double k2)"},
+	 { (char *)"Enzyme___get_k3", _wrap_Enzyme___get_k3, METH_VARARGS, (char *)"Enzyme___get_k3(Enzyme self) -> double"},
+	 { (char *)"Enzyme___set_k3", _wrap_Enzyme___set_k3, METH_VARARGS, (char *)"Enzyme___set_k3(Enzyme self, double k3)"},
+	 { (char *)"Enzyme___get_Km", _wrap_Enzyme___get_Km, METH_VARARGS, (char *)"Enzyme___get_Km(Enzyme self) -> double"},
+	 { (char *)"Enzyme___set_Km", _wrap_Enzyme___set_Km, METH_VARARGS, (char *)"Enzyme___set_Km(Enzyme self, double Km)"},
+	 { (char *)"Enzyme___get_kcat", _wrap_Enzyme___get_kcat, METH_VARARGS, (char *)"Enzyme___get_kcat(Enzyme self) -> double"},
+	 { (char *)"Enzyme___set_kcat", _wrap_Enzyme___set_kcat, METH_VARARGS, (char *)"Enzyme___set_kcat(Enzyme self, double kcat)"},
+	 { (char *)"Enzyme___get_mode", _wrap_Enzyme___get_mode, METH_VARARGS, (char *)"Enzyme___get_mode(Enzyme self) -> bool"},
+	 { (char *)"Enzyme___set_mode", _wrap_Enzyme___set_mode, METH_VARARGS, (char *)"Enzyme___set_mode(Enzyme self, bool mode)"},
+	 { (char *)"Enzyme___get_scaleKm", _wrap_Enzyme___get_scaleKm, METH_VARARGS, (char *)"Enzyme___get_scaleKm(Enzyme self) -> double"},
+	 { (char *)"Enzyme___set_scaleKm", _wrap_Enzyme___set_scaleKm, METH_VARARGS, (char *)"Enzyme___set_scaleKm(Enzyme self, double scaleKm)"},
+	 { (char *)"Enzyme___get_scaleKcat", _wrap_Enzyme___get_scaleKcat, METH_VARARGS, (char *)"Enzyme___get_scaleKcat(Enzyme self) -> double"},
+	 { (char *)"Enzyme___set_scaleKcat", _wrap_Enzyme___set_scaleKcat, METH_VARARGS, (char *)"Enzyme___set_scaleKcat(Enzyme self, double scaleKcat)"},
+	 { (char *)"Enzyme___get_intramol", _wrap_Enzyme___get_intramol, METH_VARARGS, (char *)"Enzyme___get_intramol(Enzyme self) -> double"},
+	 { (char *)"Enzyme___set_intramol", _wrap_Enzyme___set_intramol, METH_VARARGS, (char *)"Enzyme___set_intramol(Enzyme self, double intramol)"},
+	 { (char *)"Enzyme_k1_set", _wrap_Enzyme_k1_set, METH_VARARGS, (char *)"Enzyme_k1_set(Enzyme self, double k1)"},
+	 { (char *)"Enzyme_k1_get", _wrap_Enzyme_k1_get, METH_VARARGS, (char *)"Enzyme_k1_get(Enzyme self) -> double"},
+	 { (char *)"Enzyme_k2_set", _wrap_Enzyme_k2_set, METH_VARARGS, (char *)"Enzyme_k2_set(Enzyme self, double k2)"},
+	 { (char *)"Enzyme_k2_get", _wrap_Enzyme_k2_get, METH_VARARGS, (char *)"Enzyme_k2_get(Enzyme self) -> double"},
+	 { (char *)"Enzyme_k3_set", _wrap_Enzyme_k3_set, METH_VARARGS, (char *)"Enzyme_k3_set(Enzyme self, double k3)"},
+	 { (char *)"Enzyme_k3_get", _wrap_Enzyme_k3_get, METH_VARARGS, (char *)"Enzyme_k3_get(Enzyme self) -> double"},
+	 { (char *)"Enzyme_Km_set", _wrap_Enzyme_Km_set, METH_VARARGS, (char *)"Enzyme_Km_set(Enzyme self, double Km)"},
+	 { (char *)"Enzyme_Km_get", _wrap_Enzyme_Km_get, METH_VARARGS, (char *)"Enzyme_Km_get(Enzyme self) -> double"},
+	 { (char *)"Enzyme_kcat_set", _wrap_Enzyme_kcat_set, METH_VARARGS, (char *)"Enzyme_kcat_set(Enzyme self, double kcat)"},
+	 { (char *)"Enzyme_kcat_get", _wrap_Enzyme_kcat_get, METH_VARARGS, (char *)"Enzyme_kcat_get(Enzyme self) -> double"},
+	 { (char *)"Enzyme_mode_set", _wrap_Enzyme_mode_set, METH_VARARGS, (char *)"Enzyme_mode_set(Enzyme self, bool mode)"},
+	 { (char *)"Enzyme_mode_get", _wrap_Enzyme_mode_get, METH_VARARGS, (char *)"Enzyme_mode_get(Enzyme self) -> bool"},
 	 { (char *)"Enzyme_swigregister", Enzyme_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Reaction", _wrap_new_Reaction, METH_VARARGS, NULL},
-	 { (char *)"delete_Reaction", _wrap_delete_Reaction, METH_VARARGS, NULL},
-	 { (char *)"Reaction_getType", _wrap_Reaction_getType, METH_VARARGS, NULL},
-	 { (char *)"Reaction___get_kf", _wrap_Reaction___get_kf, METH_VARARGS, NULL},
-	 { (char *)"Reaction___set_kf", _wrap_Reaction___set_kf, METH_VARARGS, NULL},
-	 { (char *)"Reaction___get_kb", _wrap_Reaction___get_kb, METH_VARARGS, NULL},
-	 { (char *)"Reaction___set_kb", _wrap_Reaction___set_kb, METH_VARARGS, NULL},
-	 { (char *)"Reaction___get_scaleKf", _wrap_Reaction___get_scaleKf, METH_VARARGS, NULL},
-	 { (char *)"Reaction___set_scaleKf", _wrap_Reaction___set_scaleKf, METH_VARARGS, NULL},
-	 { (char *)"Reaction___get_scaleKb", _wrap_Reaction___get_scaleKb, METH_VARARGS, NULL},
-	 { (char *)"Reaction___set_scaleKb", _wrap_Reaction___set_scaleKb, METH_VARARGS, NULL},
-	 { (char *)"Reaction_kf_set", _wrap_Reaction_kf_set, METH_VARARGS, NULL},
-	 { (char *)"Reaction_kf_get", _wrap_Reaction_kf_get, METH_VARARGS, NULL},
-	 { (char *)"Reaction_kb_set", _wrap_Reaction_kb_set, METH_VARARGS, NULL},
-	 { (char *)"Reaction_kb_get", _wrap_Reaction_kb_get, METH_VARARGS, NULL},
-	 { (char *)"Reaction_scaleKf_set", _wrap_Reaction_scaleKf_set, METH_VARARGS, NULL},
-	 { (char *)"Reaction_scaleKf_get", _wrap_Reaction_scaleKf_get, METH_VARARGS, NULL},
-	 { (char *)"Reaction_scaleKb_set", _wrap_Reaction_scaleKb_set, METH_VARARGS, NULL},
-	 { (char *)"Reaction_scaleKb_get", _wrap_Reaction_scaleKb_get, METH_VARARGS, NULL},
+	 { (char *)"new_Reaction", _wrap_new_Reaction, METH_VARARGS, (char *)"\n"
+		"Reaction(Id id)\n"
+		"Reaction(string path)\n"
+		"Reaction(string name, Id parentId)\n"
+		"Reaction(string name, PyMooseBase parent)\n"
+		"Reaction(Reaction src, string name, PyMooseBase parent)\n"
+		"Reaction(Reaction src, string name, Id parent)\n"
+		"Reaction(Id src, string name, Id parent)\n"
+		"new_Reaction(Reaction src, string path) -> Reaction\n"
+		""},
+	 { (char *)"delete_Reaction", _wrap_delete_Reaction, METH_VARARGS, (char *)"delete_Reaction(Reaction self)"},
+	 { (char *)"Reaction_getType", _wrap_Reaction_getType, METH_VARARGS, (char *)"Reaction_getType(Reaction self) -> string"},
+	 { (char *)"Reaction___get_kf", _wrap_Reaction___get_kf, METH_VARARGS, (char *)"Reaction___get_kf(Reaction self) -> double"},
+	 { (char *)"Reaction___set_kf", _wrap_Reaction___set_kf, METH_VARARGS, (char *)"Reaction___set_kf(Reaction self, double kf)"},
+	 { (char *)"Reaction___get_kb", _wrap_Reaction___get_kb, METH_VARARGS, (char *)"Reaction___get_kb(Reaction self) -> double"},
+	 { (char *)"Reaction___set_kb", _wrap_Reaction___set_kb, METH_VARARGS, (char *)"Reaction___set_kb(Reaction self, double kb)"},
+	 { (char *)"Reaction___get_scaleKf", _wrap_Reaction___get_scaleKf, METH_VARARGS, (char *)"Reaction___get_scaleKf(Reaction self) -> double"},
+	 { (char *)"Reaction___set_scaleKf", _wrap_Reaction___set_scaleKf, METH_VARARGS, (char *)"Reaction___set_scaleKf(Reaction self, double scaleKf)"},
+	 { (char *)"Reaction___get_scaleKb", _wrap_Reaction___get_scaleKb, METH_VARARGS, (char *)"Reaction___get_scaleKb(Reaction self) -> double"},
+	 { (char *)"Reaction___set_scaleKb", _wrap_Reaction___set_scaleKb, METH_VARARGS, (char *)"Reaction___set_scaleKb(Reaction self, double scaleKb)"},
+	 { (char *)"Reaction_kf_set", _wrap_Reaction_kf_set, METH_VARARGS, (char *)"Reaction_kf_set(Reaction self, double kf)"},
+	 { (char *)"Reaction_kf_get", _wrap_Reaction_kf_get, METH_VARARGS, (char *)"Reaction_kf_get(Reaction self) -> double"},
+	 { (char *)"Reaction_kb_set", _wrap_Reaction_kb_set, METH_VARARGS, (char *)"Reaction_kb_set(Reaction self, double kb)"},
+	 { (char *)"Reaction_kb_get", _wrap_Reaction_kb_get, METH_VARARGS, (char *)"Reaction_kb_get(Reaction self) -> double"},
+	 { (char *)"Reaction_scaleKf_set", _wrap_Reaction_scaleKf_set, METH_VARARGS, (char *)"Reaction_scaleKf_set(Reaction self, double scaleKf)"},
+	 { (char *)"Reaction_scaleKf_get", _wrap_Reaction_scaleKf_get, METH_VARARGS, (char *)"Reaction_scaleKf_get(Reaction self) -> double"},
+	 { (char *)"Reaction_scaleKb_set", _wrap_Reaction_scaleKb_set, METH_VARARGS, (char *)"Reaction_scaleKb_set(Reaction self, double scaleKb)"},
+	 { (char *)"Reaction_scaleKb_get", _wrap_Reaction_scaleKb_get, METH_VARARGS, (char *)"Reaction_scaleKb_get(Reaction self) -> double"},
 	 { (char *)"Reaction_swigregister", Reaction_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Molecule", _wrap_new_Molecule, METH_VARARGS, NULL},
-	 { (char *)"delete_Molecule", _wrap_delete_Molecule, METH_VARARGS, NULL},
-	 { (char *)"Molecule_getType", _wrap_Molecule_getType, METH_VARARGS, NULL},
-	 { (char *)"Molecule___get_nInit", _wrap_Molecule___get_nInit, METH_VARARGS, NULL},
-	 { (char *)"Molecule___set_nInit", _wrap_Molecule___set_nInit, METH_VARARGS, NULL},
-	 { (char *)"Molecule___get_volumeScale", _wrap_Molecule___get_volumeScale, METH_VARARGS, NULL},
-	 { (char *)"Molecule___set_volumeScale", _wrap_Molecule___set_volumeScale, METH_VARARGS, NULL},
-	 { (char *)"Molecule___get_n", _wrap_Molecule___get_n, METH_VARARGS, NULL},
-	 { (char *)"Molecule___set_n", _wrap_Molecule___set_n, METH_VARARGS, NULL},
-	 { (char *)"Molecule___get_mode", _wrap_Molecule___get_mode, METH_VARARGS, NULL},
-	 { (char *)"Molecule___set_mode", _wrap_Molecule___set_mode, METH_VARARGS, NULL},
-	 { (char *)"Molecule___get_slave_enable", _wrap_Molecule___get_slave_enable, METH_VARARGS, NULL},
-	 { (char *)"Molecule___set_slave_enable", _wrap_Molecule___set_slave_enable, METH_VARARGS, NULL},
-	 { (char *)"Molecule___get_conc", _wrap_Molecule___get_conc, METH_VARARGS, NULL},
-	 { (char *)"Molecule___set_conc", _wrap_Molecule___set_conc, METH_VARARGS, NULL},
-	 { (char *)"Molecule___get_concInit", _wrap_Molecule___get_concInit, METH_VARARGS, NULL},
-	 { (char *)"Molecule___set_concInit", _wrap_Molecule___set_concInit, METH_VARARGS, NULL},
-	 { (char *)"Molecule___get_nSrc", _wrap_Molecule___get_nSrc, METH_VARARGS, NULL},
-	 { (char *)"Molecule___set_nSrc", _wrap_Molecule___set_nSrc, METH_VARARGS, NULL},
-	 { (char *)"Molecule___get_sumTotal", _wrap_Molecule___get_sumTotal, METH_VARARGS, NULL},
-	 { (char *)"Molecule___set_sumTotal", _wrap_Molecule___set_sumTotal, METH_VARARGS, NULL},
-	 { (char *)"Molecule_nInit_set", _wrap_Molecule_nInit_set, METH_VARARGS, NULL},
-	 { (char *)"Molecule_nInit_get", _wrap_Molecule_nInit_get, METH_VARARGS, NULL},
-	 { (char *)"Molecule_volumeScale_set", _wrap_Molecule_volumeScale_set, METH_VARARGS, NULL},
-	 { (char *)"Molecule_volumeScale_get", _wrap_Molecule_volumeScale_get, METH_VARARGS, NULL},
-	 { (char *)"Molecule_n_set", _wrap_Molecule_n_set, METH_VARARGS, NULL},
-	 { (char *)"Molecule_n_get", _wrap_Molecule_n_get, METH_VARARGS, NULL},
-	 { (char *)"Molecule_mode_set", _wrap_Molecule_mode_set, METH_VARARGS, NULL},
-	 { (char *)"Molecule_mode_get", _wrap_Molecule_mode_get, METH_VARARGS, NULL},
-	 { (char *)"Molecule_slave_enable_set", _wrap_Molecule_slave_enable_set, METH_VARARGS, NULL},
-	 { (char *)"Molecule_slave_enable_get", _wrap_Molecule_slave_enable_get, METH_VARARGS, NULL},
-	 { (char *)"Molecule_conc_set", _wrap_Molecule_conc_set, METH_VARARGS, NULL},
-	 { (char *)"Molecule_conc_get", _wrap_Molecule_conc_get, METH_VARARGS, NULL},
-	 { (char *)"Molecule_concInit_set", _wrap_Molecule_concInit_set, METH_VARARGS, NULL},
-	 { (char *)"Molecule_concInit_get", _wrap_Molecule_concInit_get, METH_VARARGS, NULL},
-	 { (char *)"Molecule_nSrc_set", _wrap_Molecule_nSrc_set, METH_VARARGS, NULL},
-	 { (char *)"Molecule_nSrc_get", _wrap_Molecule_nSrc_get, METH_VARARGS, NULL},
-	 { (char *)"Molecule_sumTotal_set", _wrap_Molecule_sumTotal_set, METH_VARARGS, NULL},
-	 { (char *)"Molecule_sumTotal_get", _wrap_Molecule_sumTotal_get, METH_VARARGS, NULL},
+	 { (char *)"new_Molecule", _wrap_new_Molecule, METH_VARARGS, (char *)"\n"
+		"Molecule(Id id)\n"
+		"Molecule(string path)\n"
+		"Molecule(string name, Id parentId)\n"
+		"Molecule(string name, PyMooseBase parent)\n"
+		"Molecule(Molecule src, string name, PyMooseBase parent)\n"
+		"Molecule(Molecule src, string name, Id parent)\n"
+		"Molecule(Id src, string name, Id parent)\n"
+		"new_Molecule(Molecule src, string path) -> Molecule\n"
+		""},
+	 { (char *)"delete_Molecule", _wrap_delete_Molecule, METH_VARARGS, (char *)"delete_Molecule(Molecule self)"},
+	 { (char *)"Molecule_getType", _wrap_Molecule_getType, METH_VARARGS, (char *)"Molecule_getType(Molecule self) -> string"},
+	 { (char *)"Molecule___get_nInit", _wrap_Molecule___get_nInit, METH_VARARGS, (char *)"Molecule___get_nInit(Molecule self) -> double"},
+	 { (char *)"Molecule___set_nInit", _wrap_Molecule___set_nInit, METH_VARARGS, (char *)"Molecule___set_nInit(Molecule self, double nInit)"},
+	 { (char *)"Molecule___get_volumeScale", _wrap_Molecule___get_volumeScale, METH_VARARGS, (char *)"Molecule___get_volumeScale(Molecule self) -> double"},
+	 { (char *)"Molecule___set_volumeScale", _wrap_Molecule___set_volumeScale, METH_VARARGS, (char *)"Molecule___set_volumeScale(Molecule self, double volumeScale)"},
+	 { (char *)"Molecule___get_n", _wrap_Molecule___get_n, METH_VARARGS, (char *)"Molecule___get_n(Molecule self) -> double"},
+	 { (char *)"Molecule___set_n", _wrap_Molecule___set_n, METH_VARARGS, (char *)"Molecule___set_n(Molecule self, double n)"},
+	 { (char *)"Molecule___get_mode", _wrap_Molecule___get_mode, METH_VARARGS, (char *)"Molecule___get_mode(Molecule self) -> int"},
+	 { (char *)"Molecule___set_mode", _wrap_Molecule___set_mode, METH_VARARGS, (char *)"Molecule___set_mode(Molecule self, int mode)"},
+	 { (char *)"Molecule___get_slave_enable", _wrap_Molecule___get_slave_enable, METH_VARARGS, (char *)"Molecule___get_slave_enable(Molecule self) -> int"},
+	 { (char *)"Molecule___set_slave_enable", _wrap_Molecule___set_slave_enable, METH_VARARGS, (char *)"Molecule___set_slave_enable(Molecule self, int slave_enable)"},
+	 { (char *)"Molecule___get_conc", _wrap_Molecule___get_conc, METH_VARARGS, (char *)"Molecule___get_conc(Molecule self) -> double"},
+	 { (char *)"Molecule___set_conc", _wrap_Molecule___set_conc, METH_VARARGS, (char *)"Molecule___set_conc(Molecule self, double conc)"},
+	 { (char *)"Molecule___get_concInit", _wrap_Molecule___get_concInit, METH_VARARGS, (char *)"Molecule___get_concInit(Molecule self) -> double"},
+	 { (char *)"Molecule___set_concInit", _wrap_Molecule___set_concInit, METH_VARARGS, (char *)"Molecule___set_concInit(Molecule self, double concInit)"},
+	 { (char *)"Molecule___get_nSrc", _wrap_Molecule___get_nSrc, METH_VARARGS, (char *)"Molecule___get_nSrc(Molecule self) -> double"},
+	 { (char *)"Molecule___set_nSrc", _wrap_Molecule___set_nSrc, METH_VARARGS, (char *)"Molecule___set_nSrc(Molecule self, double nSrc)"},
+	 { (char *)"Molecule___get_sumTotal", _wrap_Molecule___get_sumTotal, METH_VARARGS, (char *)"Molecule___get_sumTotal(Molecule self) -> double"},
+	 { (char *)"Molecule___set_sumTotal", _wrap_Molecule___set_sumTotal, METH_VARARGS, (char *)"Molecule___set_sumTotal(Molecule self, double sumTotal)"},
+	 { (char *)"Molecule_nInit_set", _wrap_Molecule_nInit_set, METH_VARARGS, (char *)"Molecule_nInit_set(Molecule self, double nInit)"},
+	 { (char *)"Molecule_nInit_get", _wrap_Molecule_nInit_get, METH_VARARGS, (char *)"Molecule_nInit_get(Molecule self) -> double"},
+	 { (char *)"Molecule_volumeScale_set", _wrap_Molecule_volumeScale_set, METH_VARARGS, (char *)"Molecule_volumeScale_set(Molecule self, double volumeScale)"},
+	 { (char *)"Molecule_volumeScale_get", _wrap_Molecule_volumeScale_get, METH_VARARGS, (char *)"Molecule_volumeScale_get(Molecule self) -> double"},
+	 { (char *)"Molecule_n_set", _wrap_Molecule_n_set, METH_VARARGS, (char *)"Molecule_n_set(Molecule self, double n)"},
+	 { (char *)"Molecule_n_get", _wrap_Molecule_n_get, METH_VARARGS, (char *)"Molecule_n_get(Molecule self) -> double"},
+	 { (char *)"Molecule_mode_set", _wrap_Molecule_mode_set, METH_VARARGS, (char *)"Molecule_mode_set(Molecule self, int mode)"},
+	 { (char *)"Molecule_mode_get", _wrap_Molecule_mode_get, METH_VARARGS, (char *)"Molecule_mode_get(Molecule self) -> int"},
+	 { (char *)"Molecule_slave_enable_set", _wrap_Molecule_slave_enable_set, METH_VARARGS, (char *)"Molecule_slave_enable_set(Molecule self, int slave_enable)"},
+	 { (char *)"Molecule_slave_enable_get", _wrap_Molecule_slave_enable_get, METH_VARARGS, (char *)"Molecule_slave_enable_get(Molecule self) -> int"},
+	 { (char *)"Molecule_conc_set", _wrap_Molecule_conc_set, METH_VARARGS, (char *)"Molecule_conc_set(Molecule self, double conc)"},
+	 { (char *)"Molecule_conc_get", _wrap_Molecule_conc_get, METH_VARARGS, (char *)"Molecule_conc_get(Molecule self) -> double"},
+	 { (char *)"Molecule_concInit_set", _wrap_Molecule_concInit_set, METH_VARARGS, (char *)"Molecule_concInit_set(Molecule self, double concInit)"},
+	 { (char *)"Molecule_concInit_get", _wrap_Molecule_concInit_get, METH_VARARGS, (char *)"Molecule_concInit_get(Molecule self) -> double"},
+	 { (char *)"Molecule_nSrc_set", _wrap_Molecule_nSrc_set, METH_VARARGS, (char *)"Molecule_nSrc_set(Molecule self, double nSrc)"},
+	 { (char *)"Molecule_nSrc_get", _wrap_Molecule_nSrc_get, METH_VARARGS, (char *)"Molecule_nSrc_get(Molecule self) -> double"},
+	 { (char *)"Molecule_sumTotal_set", _wrap_Molecule_sumTotal_set, METH_VARARGS, (char *)"Molecule_sumTotal_set(Molecule self, double sumTotal)"},
+	 { (char *)"Molecule_sumTotal_get", _wrap_Molecule_sumTotal_get, METH_VARARGS, (char *)"Molecule_sumTotal_get(Molecule self) -> double"},
 	 { (char *)"Molecule_swigregister", Molecule_swigregister, METH_VARARGS, NULL},
-	 { (char *)"mtrand", _wrap_mtrand, METH_VARARGS, NULL},
-	 { (char *)"mtseed", _wrap_mtseed, METH_VARARGS, NULL},
-	 { (char *)"delete_Probability", _wrap_delete_Probability, METH_VARARGS, NULL},
-	 { (char *)"Probability_getMean", _wrap_Probability_getMean, METH_VARARGS, NULL},
-	 { (char *)"Probability_getVariance", _wrap_Probability_getVariance, METH_VARARGS, NULL},
-	 { (char *)"Probability_getNextSample", _wrap_Probability_getNextSample, METH_VARARGS, NULL},
+	 { (char *)"mtrand", _wrap_mtrand, METH_VARARGS, (char *)"mtrand() -> double"},
+	 { (char *)"mtseed", _wrap_mtseed, METH_VARARGS, (char *)"mtseed(long seed)"},
+	 { (char *)"delete_Probability", _wrap_delete_Probability, METH_VARARGS, (char *)"delete_Probability(Probability self)"},
+	 { (char *)"Probability_getMean", _wrap_Probability_getMean, METH_VARARGS, (char *)"Probability_getMean(Probability self) -> double"},
+	 { (char *)"Probability_getVariance", _wrap_Probability_getVariance, METH_VARARGS, (char *)"Probability_getVariance(Probability self) -> double"},
+	 { (char *)"Probability_getNextSample", _wrap_Probability_getNextSample, METH_VARARGS, (char *)"Probability_getNextSample(Probability self) -> double"},
 	 { (char *)"Probability_swigregister", Probability_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Binomial", _wrap_new_Binomial, METH_VARARGS, NULL},
-	 { (char *)"Binomial_getN", _wrap_Binomial_getN, METH_VARARGS, NULL},
-	 { (char *)"Binomial_getP", _wrap_Binomial_getP, METH_VARARGS, NULL},
-	 { (char *)"Binomial_getMean", _wrap_Binomial_getMean, METH_VARARGS, NULL},
-	 { (char *)"Binomial_getVariance", _wrap_Binomial_getVariance, METH_VARARGS, NULL},
-	 { (char *)"Binomial_getNextSample", _wrap_Binomial_getNextSample, METH_VARARGS, NULL},
-	 { (char *)"delete_Binomial", _wrap_delete_Binomial, METH_VARARGS, NULL},
+	 { (char *)"new_Binomial", _wrap_new_Binomial, METH_VARARGS, (char *)"\n"
+		"Binomial()\n"
+		"new_Binomial(long n, double p) -> Binomial\n"
+		""},
+	 { (char *)"Binomial_getN", _wrap_Binomial_getN, METH_VARARGS, (char *)"Binomial_getN(Binomial self) -> long"},
+	 { (char *)"Binomial_getP", _wrap_Binomial_getP, METH_VARARGS, (char *)"Binomial_getP(Binomial self) -> double"},
+	 { (char *)"Binomial_getMean", _wrap_Binomial_getMean, METH_VARARGS, (char *)"Binomial_getMean(Binomial self) -> double"},
+	 { (char *)"Binomial_getVariance", _wrap_Binomial_getVariance, METH_VARARGS, (char *)"Binomial_getVariance(Binomial self) -> double"},
+	 { (char *)"Binomial_getNextSample", _wrap_Binomial_getNextSample, METH_VARARGS, (char *)"Binomial_getNextSample(Binomial self) -> double"},
+	 { (char *)"delete_Binomial", _wrap_delete_Binomial, METH_VARARGS, (char *)"delete_Binomial(Binomial self)"},
 	 { (char *)"Binomial_swigregister", Binomial_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Gamma", _wrap_new_Gamma, METH_VARARGS, NULL},
-	 { (char *)"Gamma_getAlpha", _wrap_Gamma_getAlpha, METH_VARARGS, NULL},
-	 { (char *)"Gamma_getTheta", _wrap_Gamma_getTheta, METH_VARARGS, NULL},
-	 { (char *)"Gamma_getMean", _wrap_Gamma_getMean, METH_VARARGS, NULL},
-	 { (char *)"Gamma_getVariance", _wrap_Gamma_getVariance, METH_VARARGS, NULL},
-	 { (char *)"Gamma_getNextSample", _wrap_Gamma_getNextSample, METH_VARARGS, NULL},
-	 { (char *)"delete_Gamma", _wrap_delete_Gamma, METH_VARARGS, NULL},
+	 { (char *)"new_Gamma", _wrap_new_Gamma, METH_VARARGS, (char *)"new_Gamma(double alpha, double theta) -> Gamma"},
+	 { (char *)"Gamma_getAlpha", _wrap_Gamma_getAlpha, METH_VARARGS, (char *)"Gamma_getAlpha(Gamma self) -> double"},
+	 { (char *)"Gamma_getTheta", _wrap_Gamma_getTheta, METH_VARARGS, (char *)"Gamma_getTheta(Gamma self) -> double"},
+	 { (char *)"Gamma_getMean", _wrap_Gamma_getMean, METH_VARARGS, (char *)"Gamma_getMean(Gamma self) -> double"},
+	 { (char *)"Gamma_getVariance", _wrap_Gamma_getVariance, METH_VARARGS, (char *)"Gamma_getVariance(Gamma self) -> double"},
+	 { (char *)"Gamma_getNextSample", _wrap_Gamma_getNextSample, METH_VARARGS, (char *)"Gamma_getNextSample(Gamma self) -> double"},
+	 { (char *)"delete_Gamma", _wrap_delete_Gamma, METH_VARARGS, (char *)"delete_Gamma(Gamma self)"},
 	 { (char *)"Gamma_swigregister", Gamma_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Normal", _wrap_new_Normal, METH_VARARGS, NULL},
-	 { (char *)"Normal_getMean", _wrap_Normal_getMean, METH_VARARGS, NULL},
-	 { (char *)"Normal_setMean", _wrap_Normal_setMean, METH_VARARGS, NULL},
-	 { (char *)"Normal_getVariance", _wrap_Normal_getVariance, METH_VARARGS, NULL},
-	 { (char *)"Normal_setVariance", _wrap_Normal_setVariance, METH_VARARGS, NULL},
-	 { (char *)"Normal_getMethod", _wrap_Normal_getMethod, METH_VARARGS, NULL},
-	 { (char *)"Normal_setMethod", _wrap_Normal_setMethod, METH_VARARGS, NULL},
-	 { (char *)"Normal_getNextSample", _wrap_Normal_getNextSample, METH_VARARGS, NULL},
-	 { (char *)"delete_Normal", _wrap_delete_Normal, METH_VARARGS, NULL},
+	 { (char *)"new_Normal", _wrap_new_Normal, METH_VARARGS, (char *)"\n"
+		"Normal(double mean=0.0, double variance=1.0, NormalGenerator algorithm=ALIAS)\n"
+		"Normal(double mean=0.0, double variance=1.0)\n"
+		"Normal(double mean=0.0)\n"
+		"new_Normal() -> Normal\n"
+		""},
+	 { (char *)"Normal_getMean", _wrap_Normal_getMean, METH_VARARGS, (char *)"Normal_getMean(Normal self) -> double"},
+	 { (char *)"Normal_setMean", _wrap_Normal_setMean, METH_VARARGS, (char *)"Normal_setMean(Normal self, double value)"},
+	 { (char *)"Normal_getVariance", _wrap_Normal_getVariance, METH_VARARGS, (char *)"Normal_getVariance(Normal self) -> double"},
+	 { (char *)"Normal_setVariance", _wrap_Normal_setVariance, METH_VARARGS, (char *)"Normal_setVariance(Normal self, double value)"},
+	 { (char *)"Normal_getMethod", _wrap_Normal_getMethod, METH_VARARGS, (char *)"Normal_getMethod(Normal self) -> NormalGenerator"},
+	 { (char *)"Normal_setMethod", _wrap_Normal_setMethod, METH_VARARGS, (char *)"Normal_setMethod(Normal self, NormalGenerator method)"},
+	 { (char *)"Normal_getNextSample", _wrap_Normal_getNextSample, METH_VARARGS, (char *)"Normal_getNextSample(Normal self) -> double"},
+	 { (char *)"delete_Normal", _wrap_delete_Normal, METH_VARARGS, (char *)"delete_Normal(Normal self)"},
 	 { (char *)"Normal_swigregister", Normal_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Poisson", _wrap_new_Poisson, METH_VARARGS, NULL},
-	 { (char *)"delete_Poisson", _wrap_delete_Poisson, METH_VARARGS, NULL},
-	 { (char *)"Poisson_setMean", _wrap_Poisson_setMean, METH_VARARGS, NULL},
-	 { (char *)"Poisson_getMean", _wrap_Poisson_getMean, METH_VARARGS, NULL},
-	 { (char *)"Poisson_getVariance", _wrap_Poisson_getVariance, METH_VARARGS, NULL},
-	 { (char *)"Poisson_getNextSample", _wrap_Poisson_getNextSample, METH_VARARGS, NULL},
+	 { (char *)"new_Poisson", _wrap_new_Poisson, METH_VARARGS, (char *)"\n"
+		"Poisson(double mean=1.0)\n"
+		"new_Poisson() -> Poisson\n"
+		""},
+	 { (char *)"delete_Poisson", _wrap_delete_Poisson, METH_VARARGS, (char *)"delete_Poisson(Poisson self)"},
+	 { (char *)"Poisson_setMean", _wrap_Poisson_setMean, METH_VARARGS, (char *)"Poisson_setMean(Poisson self, double mean)"},
+	 { (char *)"Poisson_getMean", _wrap_Poisson_getMean, METH_VARARGS, (char *)"Poisson_getMean(Poisson self) -> double"},
+	 { (char *)"Poisson_getVariance", _wrap_Poisson_getVariance, METH_VARARGS, (char *)"Poisson_getVariance(Poisson self) -> double"},
+	 { (char *)"Poisson_getNextSample", _wrap_Poisson_getNextSample, METH_VARARGS, (char *)"Poisson_getNextSample(Poisson self) -> double"},
 	 { (char *)"Poisson_swigregister", Poisson_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Exponential", _wrap_new_Exponential, METH_VARARGS, NULL},
-	 { (char *)"Exponential_getMean", _wrap_Exponential_getMean, METH_VARARGS, NULL},
-	 { (char *)"Exponential_getVariance", _wrap_Exponential_getVariance, METH_VARARGS, NULL},
-	 { (char *)"Exponential_getNextSample", _wrap_Exponential_getNextSample, METH_VARARGS, NULL},
-	 { (char *)"delete_Exponential", _wrap_delete_Exponential, METH_VARARGS, NULL},
+	 { (char *)"new_Exponential", _wrap_new_Exponential, METH_VARARGS, (char *)"\n"
+		"Exponential(double mean)\n"
+		"new_Exponential(ExponentialGenerator generator, double mean) -> Exponential\n"
+		""},
+	 { (char *)"Exponential_getMean", _wrap_Exponential_getMean, METH_VARARGS, (char *)"Exponential_getMean(Exponential self) -> double"},
+	 { (char *)"Exponential_getVariance", _wrap_Exponential_getVariance, METH_VARARGS, (char *)"Exponential_getVariance(Exponential self) -> double"},
+	 { (char *)"Exponential_getNextSample", _wrap_Exponential_getNextSample, METH_VARARGS, (char *)"Exponential_getNextSample(Exponential self) -> double"},
+	 { (char *)"delete_Exponential", _wrap_delete_Exponential, METH_VARARGS, (char *)"delete_Exponential(Exponential self)"},
 	 { (char *)"Exponential_swigregister", Exponential_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_RandGenerator", _wrap_new_RandGenerator, METH_VARARGS, NULL},
-	 { (char *)"RandGenerator_getType", _wrap_RandGenerator_getType, METH_VARARGS, NULL},
-	 { (char *)"RandGenerator___get_sample", _wrap_RandGenerator___get_sample, METH_VARARGS, NULL},
-	 { (char *)"RandGenerator___set_sample", _wrap_RandGenerator___set_sample, METH_VARARGS, NULL},
-	 { (char *)"RandGenerator___get_mean", _wrap_RandGenerator___get_mean, METH_VARARGS, NULL},
-	 { (char *)"RandGenerator___set_mean", _wrap_RandGenerator___set_mean, METH_VARARGS, NULL},
-	 { (char *)"RandGenerator___get_variance", _wrap_RandGenerator___get_variance, METH_VARARGS, NULL},
-	 { (char *)"RandGenerator___set_variance", _wrap_RandGenerator___set_variance, METH_VARARGS, NULL},
-	 { (char *)"RandGenerator___get_output", _wrap_RandGenerator___get_output, METH_VARARGS, NULL},
-	 { (char *)"RandGenerator___set_output", _wrap_RandGenerator___set_output, METH_VARARGS, NULL},
-	 { (char *)"RandGenerator_sample_get", _wrap_RandGenerator_sample_get, METH_VARARGS, NULL},
-	 { (char *)"RandGenerator_mean_get", _wrap_RandGenerator_mean_get, METH_VARARGS, NULL},
-	 { (char *)"RandGenerator_variance_get", _wrap_RandGenerator_variance_get, METH_VARARGS, NULL},
-	 { (char *)"delete_RandGenerator", _wrap_delete_RandGenerator, METH_VARARGS, NULL},
+	 { (char *)"new_RandGenerator", _wrap_new_RandGenerator, METH_VARARGS, (char *)"\n"
+		"RandGenerator(Id id)\n"
+		"RandGenerator(string className, string path)\n"
+		"RandGenerator(string className, string name, Id parentId)\n"
+		"RandGenerator(RandGenerator src, string name, PyMooseBase parent)\n"
+		"RandGenerator(RandGenerator src, string name, Id parent)\n"
+		"RandGenerator(Id src, string name, Id parent)\n"
+		"RandGenerator(RandGenerator src, string path)\n"
+		"new_RandGenerator(string className, string name, PyMooseBase parent) -> RandGenerator\n"
+		""},
+	 { (char *)"RandGenerator_getType", _wrap_RandGenerator_getType, METH_VARARGS, (char *)"RandGenerator_getType(RandGenerator self) -> string"},
+	 { (char *)"RandGenerator___get_sample", _wrap_RandGenerator___get_sample, METH_VARARGS, (char *)"RandGenerator___get_sample(RandGenerator self) -> double"},
+	 { (char *)"RandGenerator___set_sample", _wrap_RandGenerator___set_sample, METH_VARARGS, (char *)"RandGenerator___set_sample(RandGenerator self, double sample)"},
+	 { (char *)"RandGenerator___get_mean", _wrap_RandGenerator___get_mean, METH_VARARGS, (char *)"RandGenerator___get_mean(RandGenerator self) -> double"},
+	 { (char *)"RandGenerator___set_mean", _wrap_RandGenerator___set_mean, METH_VARARGS, (char *)"RandGenerator___set_mean(RandGenerator self, double mean)"},
+	 { (char *)"RandGenerator___get_variance", _wrap_RandGenerator___get_variance, METH_VARARGS, (char *)"RandGenerator___get_variance(RandGenerator self) -> double"},
+	 { (char *)"RandGenerator___set_variance", _wrap_RandGenerator___set_variance, METH_VARARGS, (char *)"RandGenerator___set_variance(RandGenerator self, double variance)"},
+	 { (char *)"RandGenerator___get_output", _wrap_RandGenerator___get_output, METH_VARARGS, (char *)"RandGenerator___get_output(RandGenerator self) -> double"},
+	 { (char *)"RandGenerator___set_output", _wrap_RandGenerator___set_output, METH_VARARGS, (char *)"RandGenerator___set_output(RandGenerator self, double output)"},
+	 { (char *)"RandGenerator_sample_get", _wrap_RandGenerator_sample_get, METH_VARARGS, (char *)"RandGenerator_sample_get(RandGenerator self) -> double"},
+	 { (char *)"RandGenerator_mean_get", _wrap_RandGenerator_mean_get, METH_VARARGS, (char *)"RandGenerator_mean_get(RandGenerator self) -> double"},
+	 { (char *)"RandGenerator_variance_get", _wrap_RandGenerator_variance_get, METH_VARARGS, (char *)"RandGenerator_variance_get(RandGenerator self) -> double"},
+	 { (char *)"delete_RandGenerator", _wrap_delete_RandGenerator, METH_VARARGS, (char *)"delete_RandGenerator(RandGenerator self)"},
 	 { (char *)"RandGenerator_swigregister", RandGenerator_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_UniformRng", _wrap_new_UniformRng, METH_VARARGS, NULL},
-	 { (char *)"delete_UniformRng", _wrap_delete_UniformRng, METH_VARARGS, NULL},
-	 { (char *)"UniformRng_getType", _wrap_UniformRng_getType, METH_VARARGS, NULL},
-	 { (char *)"UniformRng___get_min", _wrap_UniformRng___get_min, METH_VARARGS, NULL},
-	 { (char *)"UniformRng___set_min", _wrap_UniformRng___set_min, METH_VARARGS, NULL},
-	 { (char *)"UniformRng___get_max", _wrap_UniformRng___get_max, METH_VARARGS, NULL},
-	 { (char *)"UniformRng___set_max", _wrap_UniformRng___set_max, METH_VARARGS, NULL},
-	 { (char *)"UniformRng_mean_get", _wrap_UniformRng_mean_get, METH_VARARGS, NULL},
-	 { (char *)"UniformRng_variance_get", _wrap_UniformRng_variance_get, METH_VARARGS, NULL},
-	 { (char *)"UniformRng_min_set", _wrap_UniformRng_min_set, METH_VARARGS, NULL},
-	 { (char *)"UniformRng_min_get", _wrap_UniformRng_min_get, METH_VARARGS, NULL},
-	 { (char *)"UniformRng_max_set", _wrap_UniformRng_max_set, METH_VARARGS, NULL},
-	 { (char *)"UniformRng_max_get", _wrap_UniformRng_max_get, METH_VARARGS, NULL},
+	 { (char *)"new_UniformRng", _wrap_new_UniformRng, METH_VARARGS, (char *)"\n"
+		"UniformRng(Id id)\n"
+		"UniformRng(string path)\n"
+		"UniformRng(string name, Id parentId)\n"
+		"UniformRng(string name, PyMooseBase parent)\n"
+		"UniformRng(UniformRng src, string name, PyMooseBase parent)\n"
+		"UniformRng(UniformRng src, string name, Id parent)\n"
+		"UniformRng(Id src, string name, Id parent)\n"
+		"new_UniformRng(UniformRng src, string path) -> UniformRng\n"
+		""},
+	 { (char *)"delete_UniformRng", _wrap_delete_UniformRng, METH_VARARGS, (char *)"delete_UniformRng(UniformRng self)"},
+	 { (char *)"UniformRng_getType", _wrap_UniformRng_getType, METH_VARARGS, (char *)"UniformRng_getType(UniformRng self) -> string"},
+	 { (char *)"UniformRng___get_min", _wrap_UniformRng___get_min, METH_VARARGS, (char *)"UniformRng___get_min(UniformRng self) -> double"},
+	 { (char *)"UniformRng___set_min", _wrap_UniformRng___set_min, METH_VARARGS, (char *)"UniformRng___set_min(UniformRng self, double min)"},
+	 { (char *)"UniformRng___get_max", _wrap_UniformRng___get_max, METH_VARARGS, (char *)"UniformRng___get_max(UniformRng self) -> double"},
+	 { (char *)"UniformRng___set_max", _wrap_UniformRng___set_max, METH_VARARGS, (char *)"UniformRng___set_max(UniformRng self, double max)"},
+	 { (char *)"UniformRng_mean_get", _wrap_UniformRng_mean_get, METH_VARARGS, (char *)"UniformRng_mean_get(UniformRng self) -> double"},
+	 { (char *)"UniformRng_variance_get", _wrap_UniformRng_variance_get, METH_VARARGS, (char *)"UniformRng_variance_get(UniformRng self) -> double"},
+	 { (char *)"UniformRng_min_set", _wrap_UniformRng_min_set, METH_VARARGS, (char *)"UniformRng_min_set(UniformRng self, double min)"},
+	 { (char *)"UniformRng_min_get", _wrap_UniformRng_min_get, METH_VARARGS, (char *)"UniformRng_min_get(UniformRng self) -> double"},
+	 { (char *)"UniformRng_max_set", _wrap_UniformRng_max_set, METH_VARARGS, (char *)"UniformRng_max_set(UniformRng self, double max)"},
+	 { (char *)"UniformRng_max_get", _wrap_UniformRng_max_get, METH_VARARGS, (char *)"UniformRng_max_get(UniformRng self) -> double"},
 	 { (char *)"UniformRng_swigregister", UniformRng_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_GammaRng", _wrap_new_GammaRng, METH_VARARGS, NULL},
-	 { (char *)"delete_GammaRng", _wrap_delete_GammaRng, METH_VARARGS, NULL},
-	 { (char *)"GammaRng_getType", _wrap_GammaRng_getType, METH_VARARGS, NULL},
-	 { (char *)"GammaRng___get_alpha", _wrap_GammaRng___get_alpha, METH_VARARGS, NULL},
-	 { (char *)"GammaRng___set_alpha", _wrap_GammaRng___set_alpha, METH_VARARGS, NULL},
-	 { (char *)"GammaRng___get_theta", _wrap_GammaRng___get_theta, METH_VARARGS, NULL},
-	 { (char *)"GammaRng___set_theta", _wrap_GammaRng___set_theta, METH_VARARGS, NULL},
-	 { (char *)"GammaRng_alpha_set", _wrap_GammaRng_alpha_set, METH_VARARGS, NULL},
-	 { (char *)"GammaRng_alpha_get", _wrap_GammaRng_alpha_get, METH_VARARGS, NULL},
-	 { (char *)"GammaRng_theta_set", _wrap_GammaRng_theta_set, METH_VARARGS, NULL},
-	 { (char *)"GammaRng_theta_get", _wrap_GammaRng_theta_get, METH_VARARGS, NULL},
+	 { (char *)"new_GammaRng", _wrap_new_GammaRng, METH_VARARGS, (char *)"\n"
+		"GammaRng(Id id)\n"
+		"GammaRng(string path)\n"
+		"GammaRng(string name, Id parentId)\n"
+		"GammaRng(string name, PyMooseBase parent)\n"
+		"GammaRng(GammaRng src, string name, PyMooseBase parent)\n"
+		"GammaRng(GammaRng src, string name, Id parent)\n"
+		"GammaRng(Id src, string name, Id parent)\n"
+		"new_GammaRng(GammaRng src, string path) -> GammaRng\n"
+		""},
+	 { (char *)"delete_GammaRng", _wrap_delete_GammaRng, METH_VARARGS, (char *)"delete_GammaRng(GammaRng self)"},
+	 { (char *)"GammaRng_getType", _wrap_GammaRng_getType, METH_VARARGS, (char *)"GammaRng_getType(GammaRng self) -> string"},
+	 { (char *)"GammaRng___get_alpha", _wrap_GammaRng___get_alpha, METH_VARARGS, (char *)"GammaRng___get_alpha(GammaRng self) -> double"},
+	 { (char *)"GammaRng___set_alpha", _wrap_GammaRng___set_alpha, METH_VARARGS, (char *)"GammaRng___set_alpha(GammaRng self, double alpha)"},
+	 { (char *)"GammaRng___get_theta", _wrap_GammaRng___get_theta, METH_VARARGS, (char *)"GammaRng___get_theta(GammaRng self) -> double"},
+	 { (char *)"GammaRng___set_theta", _wrap_GammaRng___set_theta, METH_VARARGS, (char *)"GammaRng___set_theta(GammaRng self, double theta)"},
+	 { (char *)"GammaRng_alpha_set", _wrap_GammaRng_alpha_set, METH_VARARGS, (char *)"GammaRng_alpha_set(GammaRng self, double alpha)"},
+	 { (char *)"GammaRng_alpha_get", _wrap_GammaRng_alpha_get, METH_VARARGS, (char *)"GammaRng_alpha_get(GammaRng self) -> double"},
+	 { (char *)"GammaRng_theta_set", _wrap_GammaRng_theta_set, METH_VARARGS, (char *)"GammaRng_theta_set(GammaRng self, double theta)"},
+	 { (char *)"GammaRng_theta_get", _wrap_GammaRng_theta_get, METH_VARARGS, (char *)"GammaRng_theta_get(GammaRng self) -> double"},
 	 { (char *)"GammaRng_swigregister", GammaRng_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_ExponentialRng", _wrap_new_ExponentialRng, METH_VARARGS, NULL},
-	 { (char *)"delete_ExponentialRng", _wrap_delete_ExponentialRng, METH_VARARGS, NULL},
-	 { (char *)"ExponentialRng_getType", _wrap_ExponentialRng_getType, METH_VARARGS, NULL},
-	 { (char *)"ExponentialRng___set_mean", _wrap_ExponentialRng___set_mean, METH_VARARGS, NULL},
-	 { (char *)"ExponentialRng___get_method", _wrap_ExponentialRng___get_method, METH_VARARGS, NULL},
-	 { (char *)"ExponentialRng___set_method", _wrap_ExponentialRng___set_method, METH_VARARGS, NULL},
-	 { (char *)"ExponentialRng_mean_get", _wrap_ExponentialRng_mean_get, METH_VARARGS, NULL},
-	 { (char *)"ExponentialRng_method_set", _wrap_ExponentialRng_method_set, METH_VARARGS, NULL},
-	 { (char *)"ExponentialRng_method_get", _wrap_ExponentialRng_method_get, METH_VARARGS, NULL},
+	 { (char *)"new_ExponentialRng", _wrap_new_ExponentialRng, METH_VARARGS, (char *)"\n"
+		"ExponentialRng(Id id)\n"
+		"ExponentialRng(string path)\n"
+		"ExponentialRng(string name, Id parentId)\n"
+		"ExponentialRng(string name, PyMooseBase parent)\n"
+		"ExponentialRng(ExponentialRng src, string name, PyMooseBase parent)\n"
+		"ExponentialRng(ExponentialRng src, string name, Id parent)\n"
+		"ExponentialRng(Id src, string name, Id parent)\n"
+		"new_ExponentialRng(ExponentialRng src, string path) -> ExponentialRng\n"
+		""},
+	 { (char *)"delete_ExponentialRng", _wrap_delete_ExponentialRng, METH_VARARGS, (char *)"delete_ExponentialRng(ExponentialRng self)"},
+	 { (char *)"ExponentialRng_getType", _wrap_ExponentialRng_getType, METH_VARARGS, (char *)"ExponentialRng_getType(ExponentialRng self) -> string"},
+	 { (char *)"ExponentialRng___set_mean", _wrap_ExponentialRng___set_mean, METH_VARARGS, (char *)"ExponentialRng___set_mean(ExponentialRng self, double mean)"},
+	 { (char *)"ExponentialRng___get_method", _wrap_ExponentialRng___get_method, METH_VARARGS, (char *)"ExponentialRng___get_method(ExponentialRng self) -> int"},
+	 { (char *)"ExponentialRng___set_method", _wrap_ExponentialRng___set_method, METH_VARARGS, (char *)"ExponentialRng___set_method(ExponentialRng self, int method)"},
+	 { (char *)"ExponentialRng_mean_get", _wrap_ExponentialRng_mean_get, METH_VARARGS, (char *)"ExponentialRng_mean_get(ExponentialRng self) -> double"},
+	 { (char *)"ExponentialRng_method_set", _wrap_ExponentialRng_method_set, METH_VARARGS, (char *)"ExponentialRng_method_set(ExponentialRng self, int method)"},
+	 { (char *)"ExponentialRng_method_get", _wrap_ExponentialRng_method_get, METH_VARARGS, (char *)"ExponentialRng_method_get(ExponentialRng self) -> int"},
 	 { (char *)"ExponentialRng_swigregister", ExponentialRng_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_BinomialRng", _wrap_new_BinomialRng, METH_VARARGS, NULL},
-	 { (char *)"delete_BinomialRng", _wrap_delete_BinomialRng, METH_VARARGS, NULL},
-	 { (char *)"BinomialRng_getType", _wrap_BinomialRng_getType, METH_VARARGS, NULL},
-	 { (char *)"BinomialRng___get_n", _wrap_BinomialRng___get_n, METH_VARARGS, NULL},
-	 { (char *)"BinomialRng___set_n", _wrap_BinomialRng___set_n, METH_VARARGS, NULL},
-	 { (char *)"BinomialRng___get_p", _wrap_BinomialRng___get_p, METH_VARARGS, NULL},
-	 { (char *)"BinomialRng___set_p", _wrap_BinomialRng___set_p, METH_VARARGS, NULL},
-	 { (char *)"BinomialRng_n_set", _wrap_BinomialRng_n_set, METH_VARARGS, NULL},
-	 { (char *)"BinomialRng_n_get", _wrap_BinomialRng_n_get, METH_VARARGS, NULL},
-	 { (char *)"BinomialRng_p_set", _wrap_BinomialRng_p_set, METH_VARARGS, NULL},
-	 { (char *)"BinomialRng_p_get", _wrap_BinomialRng_p_get, METH_VARARGS, NULL},
+	 { (char *)"new_BinomialRng", _wrap_new_BinomialRng, METH_VARARGS, (char *)"\n"
+		"BinomialRng(Id id)\n"
+		"BinomialRng(string path)\n"
+		"BinomialRng(string name, Id parentId)\n"
+		"BinomialRng(string name, PyMooseBase parent)\n"
+		"BinomialRng(BinomialRng src, string name, PyMooseBase parent)\n"
+		"BinomialRng(BinomialRng src, string name, Id parent)\n"
+		"BinomialRng(Id src, string name, Id parent)\n"
+		"new_BinomialRng(BinomialRng src, string path) -> BinomialRng\n"
+		""},
+	 { (char *)"delete_BinomialRng", _wrap_delete_BinomialRng, METH_VARARGS, (char *)"delete_BinomialRng(BinomialRng self)"},
+	 { (char *)"BinomialRng_getType", _wrap_BinomialRng_getType, METH_VARARGS, (char *)"BinomialRng_getType(BinomialRng self) -> string"},
+	 { (char *)"BinomialRng___get_n", _wrap_BinomialRng___get_n, METH_VARARGS, (char *)"BinomialRng___get_n(BinomialRng self) -> int"},
+	 { (char *)"BinomialRng___set_n", _wrap_BinomialRng___set_n, METH_VARARGS, (char *)"BinomialRng___set_n(BinomialRng self, int n)"},
+	 { (char *)"BinomialRng___get_p", _wrap_BinomialRng___get_p, METH_VARARGS, (char *)"BinomialRng___get_p(BinomialRng self) -> double"},
+	 { (char *)"BinomialRng___set_p", _wrap_BinomialRng___set_p, METH_VARARGS, (char *)"BinomialRng___set_p(BinomialRng self, double p)"},
+	 { (char *)"BinomialRng_n_set", _wrap_BinomialRng_n_set, METH_VARARGS, (char *)"BinomialRng_n_set(BinomialRng self, int n)"},
+	 { (char *)"BinomialRng_n_get", _wrap_BinomialRng_n_get, METH_VARARGS, (char *)"BinomialRng_n_get(BinomialRng self) -> int"},
+	 { (char *)"BinomialRng_p_set", _wrap_BinomialRng_p_set, METH_VARARGS, (char *)"BinomialRng_p_set(BinomialRng self, double p)"},
+	 { (char *)"BinomialRng_p_get", _wrap_BinomialRng_p_get, METH_VARARGS, (char *)"BinomialRng_p_get(BinomialRng self) -> double"},
 	 { (char *)"BinomialRng_swigregister", BinomialRng_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_PoissonRng", _wrap_new_PoissonRng, METH_VARARGS, NULL},
-	 { (char *)"delete_PoissonRng", _wrap_delete_PoissonRng, METH_VARARGS, NULL},
-	 { (char *)"PoissonRng_getType", _wrap_PoissonRng_getType, METH_VARARGS, NULL},
-	 { (char *)"PoissonRng___set_mean", _wrap_PoissonRng___set_mean, METH_VARARGS, NULL},
-	 { (char *)"PoissonRng_mean_get", _wrap_PoissonRng_mean_get, METH_VARARGS, NULL},
+	 { (char *)"new_PoissonRng", _wrap_new_PoissonRng, METH_VARARGS, (char *)"\n"
+		"PoissonRng(Id id)\n"
+		"PoissonRng(string path)\n"
+		"PoissonRng(string name, Id parentId)\n"
+		"PoissonRng(string name, PyMooseBase parent)\n"
+		"PoissonRng(PoissonRng src, string name, PyMooseBase parent)\n"
+		"PoissonRng(PoissonRng src, string name, Id parent)\n"
+		"PoissonRng(Id src, string name, Id parent)\n"
+		"new_PoissonRng(PoissonRng src, string path) -> PoissonRng\n"
+		""},
+	 { (char *)"delete_PoissonRng", _wrap_delete_PoissonRng, METH_VARARGS, (char *)"delete_PoissonRng(PoissonRng self)"},
+	 { (char *)"PoissonRng_getType", _wrap_PoissonRng_getType, METH_VARARGS, (char *)"PoissonRng_getType(PoissonRng self) -> string"},
+	 { (char *)"PoissonRng___set_mean", _wrap_PoissonRng___set_mean, METH_VARARGS, (char *)"PoissonRng___set_mean(PoissonRng self, double mean)"},
+	 { (char *)"PoissonRng_mean_get", _wrap_PoissonRng_mean_get, METH_VARARGS, (char *)"PoissonRng_mean_get(PoissonRng self) -> double"},
 	 { (char *)"PoissonRng_swigregister", PoissonRng_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_NormalRng", _wrap_new_NormalRng, METH_VARARGS, NULL},
-	 { (char *)"delete_NormalRng", _wrap_delete_NormalRng, METH_VARARGS, NULL},
-	 { (char *)"NormalRng_getType", _wrap_NormalRng_getType, METH_VARARGS, NULL},
-	 { (char *)"NormalRng___set_mean", _wrap_NormalRng___set_mean, METH_VARARGS, NULL},
-	 { (char *)"NormalRng___set_variance", _wrap_NormalRng___set_variance, METH_VARARGS, NULL},
-	 { (char *)"NormalRng___get_method", _wrap_NormalRng___get_method, METH_VARARGS, NULL},
-	 { (char *)"NormalRng___set_method", _wrap_NormalRng___set_method, METH_VARARGS, NULL},
-	 { (char *)"NormalRng_mean_get", _wrap_NormalRng_mean_get, METH_VARARGS, NULL},
-	 { (char *)"NormalRng_variance_get", _wrap_NormalRng_variance_get, METH_VARARGS, NULL},
-	 { (char *)"NormalRng_method_set", _wrap_NormalRng_method_set, METH_VARARGS, NULL},
-	 { (char *)"NormalRng_method_get", _wrap_NormalRng_method_get, METH_VARARGS, NULL},
+	 { (char *)"new_NormalRng", _wrap_new_NormalRng, METH_VARARGS, (char *)"\n"
+		"NormalRng(Id id)\n"
+		"NormalRng(string path)\n"
+		"NormalRng(string name, Id parentId)\n"
+		"NormalRng(string name, PyMooseBase parent)\n"
+		"NormalRng(NormalRng src, string name, PyMooseBase parent)\n"
+		"NormalRng(NormalRng src, string name, Id parent)\n"
+		"NormalRng(Id src, string name, Id parent)\n"
+		"new_NormalRng(NormalRng src, string path) -> NormalRng\n"
+		""},
+	 { (char *)"delete_NormalRng", _wrap_delete_NormalRng, METH_VARARGS, (char *)"delete_NormalRng(NormalRng self)"},
+	 { (char *)"NormalRng_getType", _wrap_NormalRng_getType, METH_VARARGS, (char *)"NormalRng_getType(NormalRng self) -> string"},
+	 { (char *)"NormalRng___set_mean", _wrap_NormalRng___set_mean, METH_VARARGS, (char *)"NormalRng___set_mean(NormalRng self, double mean)"},
+	 { (char *)"NormalRng___set_variance", _wrap_NormalRng___set_variance, METH_VARARGS, (char *)"NormalRng___set_variance(NormalRng self, double variance)"},
+	 { (char *)"NormalRng___get_method", _wrap_NormalRng___get_method, METH_VARARGS, (char *)"NormalRng___get_method(NormalRng self) -> int"},
+	 { (char *)"NormalRng___set_method", _wrap_NormalRng___set_method, METH_VARARGS, (char *)"NormalRng___set_method(NormalRng self, int method)"},
+	 { (char *)"NormalRng_mean_get", _wrap_NormalRng_mean_get, METH_VARARGS, (char *)"NormalRng_mean_get(NormalRng self) -> double"},
+	 { (char *)"NormalRng_variance_get", _wrap_NormalRng_variance_get, METH_VARARGS, (char *)"NormalRng_variance_get(NormalRng self) -> double"},
+	 { (char *)"NormalRng_method_set", _wrap_NormalRng_method_set, METH_VARARGS, (char *)"NormalRng_method_set(NormalRng self, int method)"},
+	 { (char *)"NormalRng_method_get", _wrap_NormalRng_method_get, METH_VARARGS, (char *)"NormalRng_method_get(NormalRng self) -> int"},
 	 { (char *)"NormalRng_swigregister", NormalRng_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_KineticManager", _wrap_new_KineticManager, METH_VARARGS, NULL},
-	 { (char *)"delete_KineticManager", _wrap_delete_KineticManager, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_getType", _wrap_KineticManager_getType, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___get_autoMode", _wrap_KineticManager___get_autoMode, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___set_autoMode", _wrap_KineticManager___set_autoMode, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___get_stochastic", _wrap_KineticManager___get_stochastic, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___set_stochastic", _wrap_KineticManager___set_stochastic, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___get_spatial", _wrap_KineticManager___get_spatial, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___set_spatial", _wrap_KineticManager___set_spatial, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___get_method", _wrap_KineticManager___get_method, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___set_method", _wrap_KineticManager___set_method, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___get_variableDt", _wrap_KineticManager___get_variableDt, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___get_singleParticle", _wrap_KineticManager___get_singleParticle, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___get_multiscale", _wrap_KineticManager___get_multiscale, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___get_implicit", _wrap_KineticManager___get_implicit, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___get_description", _wrap_KineticManager___get_description, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___get_recommendedDt", _wrap_KineticManager___get_recommendedDt, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___get_eulerError", _wrap_KineticManager___get_eulerError, METH_VARARGS, NULL},
-	 { (char *)"KineticManager___set_eulerError", _wrap_KineticManager___set_eulerError, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_autoMode_set", _wrap_KineticManager_autoMode_set, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_autoMode_get", _wrap_KineticManager_autoMode_get, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_stochastic_set", _wrap_KineticManager_stochastic_set, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_stochastic_get", _wrap_KineticManager_stochastic_get, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_spatial_set", _wrap_KineticManager_spatial_set, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_spatial_get", _wrap_KineticManager_spatial_get, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_method_set", _wrap_KineticManager_method_set, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_method_get", _wrap_KineticManager_method_get, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_variableDt_get", _wrap_KineticManager_variableDt_get, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_singleParticle_get", _wrap_KineticManager_singleParticle_get, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_multiscale_get", _wrap_KineticManager_multiscale_get, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_implicit_get", _wrap_KineticManager_implicit_get, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_description_get", _wrap_KineticManager_description_get, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_recommendedDt_get", _wrap_KineticManager_recommendedDt_get, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_eulerError_set", _wrap_KineticManager_eulerError_set, METH_VARARGS, NULL},
-	 { (char *)"KineticManager_eulerError_get", _wrap_KineticManager_eulerError_get, METH_VARARGS, NULL},
+	 { (char *)"new_KineticManager", _wrap_new_KineticManager, METH_VARARGS, (char *)"\n"
+		"KineticManager(Id id)\n"
+		"KineticManager(string path)\n"
+		"KineticManager(string name, Id parentId)\n"
+		"KineticManager(string name, PyMooseBase parent)\n"
+		"KineticManager(KineticManager src, string name, PyMooseBase parent)\n"
+		"KineticManager(KineticManager src, string name, Id parent)\n"
+		"KineticManager(KineticManager src, string path)\n"
+		"new_KineticManager(Id src, string name, Id parent) -> KineticManager\n"
+		""},
+	 { (char *)"delete_KineticManager", _wrap_delete_KineticManager, METH_VARARGS, (char *)"delete_KineticManager(KineticManager self)"},
+	 { (char *)"KineticManager_getType", _wrap_KineticManager_getType, METH_VARARGS, (char *)"KineticManager_getType(KineticManager self) -> string"},
+	 { (char *)"KineticManager___get_autoMode", _wrap_KineticManager___get_autoMode, METH_VARARGS, (char *)"KineticManager___get_autoMode(KineticManager self) -> bool"},
+	 { (char *)"KineticManager___set_autoMode", _wrap_KineticManager___set_autoMode, METH_VARARGS, (char *)"KineticManager___set_autoMode(KineticManager self, bool autoMode)"},
+	 { (char *)"KineticManager___get_stochastic", _wrap_KineticManager___get_stochastic, METH_VARARGS, (char *)"KineticManager___get_stochastic(KineticManager self) -> bool"},
+	 { (char *)"KineticManager___set_stochastic", _wrap_KineticManager___set_stochastic, METH_VARARGS, (char *)"KineticManager___set_stochastic(KineticManager self, bool stochastic)"},
+	 { (char *)"KineticManager___get_spatial", _wrap_KineticManager___get_spatial, METH_VARARGS, (char *)"KineticManager___get_spatial(KineticManager self) -> bool"},
+	 { (char *)"KineticManager___set_spatial", _wrap_KineticManager___set_spatial, METH_VARARGS, (char *)"KineticManager___set_spatial(KineticManager self, bool spatial)"},
+	 { (char *)"KineticManager___get_method", _wrap_KineticManager___get_method, METH_VARARGS, (char *)"KineticManager___get_method(KineticManager self) -> string"},
+	 { (char *)"KineticManager___set_method", _wrap_KineticManager___set_method, METH_VARARGS, (char *)"KineticManager___set_method(KineticManager self, string method)"},
+	 { (char *)"KineticManager___get_variableDt", _wrap_KineticManager___get_variableDt, METH_VARARGS, (char *)"KineticManager___get_variableDt(KineticManager self) -> bool"},
+	 { (char *)"KineticManager___get_singleParticle", _wrap_KineticManager___get_singleParticle, METH_VARARGS, (char *)"KineticManager___get_singleParticle(KineticManager self) -> bool"},
+	 { (char *)"KineticManager___get_multiscale", _wrap_KineticManager___get_multiscale, METH_VARARGS, (char *)"KineticManager___get_multiscale(KineticManager self) -> bool"},
+	 { (char *)"KineticManager___get_implicit", _wrap_KineticManager___get_implicit, METH_VARARGS, (char *)"KineticManager___get_implicit(KineticManager self) -> bool"},
+	 { (char *)"KineticManager___get_description", _wrap_KineticManager___get_description, METH_VARARGS, (char *)"KineticManager___get_description(KineticManager self) -> string"},
+	 { (char *)"KineticManager___get_recommendedDt", _wrap_KineticManager___get_recommendedDt, METH_VARARGS, (char *)"KineticManager___get_recommendedDt(KineticManager self) -> double"},
+	 { (char *)"KineticManager___get_eulerError", _wrap_KineticManager___get_eulerError, METH_VARARGS, (char *)"KineticManager___get_eulerError(KineticManager self) -> double"},
+	 { (char *)"KineticManager___set_eulerError", _wrap_KineticManager___set_eulerError, METH_VARARGS, (char *)"KineticManager___set_eulerError(KineticManager self, double eulerError)"},
+	 { (char *)"KineticManager_autoMode_set", _wrap_KineticManager_autoMode_set, METH_VARARGS, (char *)"KineticManager_autoMode_set(KineticManager self, bool autoMode)"},
+	 { (char *)"KineticManager_autoMode_get", _wrap_KineticManager_autoMode_get, METH_VARARGS, (char *)"KineticManager_autoMode_get(KineticManager self) -> bool"},
+	 { (char *)"KineticManager_stochastic_set", _wrap_KineticManager_stochastic_set, METH_VARARGS, (char *)"KineticManager_stochastic_set(KineticManager self, bool stochastic)"},
+	 { (char *)"KineticManager_stochastic_get", _wrap_KineticManager_stochastic_get, METH_VARARGS, (char *)"KineticManager_stochastic_get(KineticManager self) -> bool"},
+	 { (char *)"KineticManager_spatial_set", _wrap_KineticManager_spatial_set, METH_VARARGS, (char *)"KineticManager_spatial_set(KineticManager self, bool spatial)"},
+	 { (char *)"KineticManager_spatial_get", _wrap_KineticManager_spatial_get, METH_VARARGS, (char *)"KineticManager_spatial_get(KineticManager self) -> bool"},
+	 { (char *)"KineticManager_method_set", _wrap_KineticManager_method_set, METH_VARARGS, (char *)"KineticManager_method_set(KineticManager self, string method)"},
+	 { (char *)"KineticManager_method_get", _wrap_KineticManager_method_get, METH_VARARGS, (char *)"KineticManager_method_get(KineticManager self) -> string"},
+	 { (char *)"KineticManager_variableDt_get", _wrap_KineticManager_variableDt_get, METH_VARARGS, (char *)"KineticManager_variableDt_get(KineticManager self) -> bool"},
+	 { (char *)"KineticManager_singleParticle_get", _wrap_KineticManager_singleParticle_get, METH_VARARGS, (char *)"KineticManager_singleParticle_get(KineticManager self) -> bool"},
+	 { (char *)"KineticManager_multiscale_get", _wrap_KineticManager_multiscale_get, METH_VARARGS, (char *)"KineticManager_multiscale_get(KineticManager self) -> bool"},
+	 { (char *)"KineticManager_implicit_get", _wrap_KineticManager_implicit_get, METH_VARARGS, (char *)"KineticManager_implicit_get(KineticManager self) -> bool"},
+	 { (char *)"KineticManager_description_get", _wrap_KineticManager_description_get, METH_VARARGS, (char *)"KineticManager_description_get(KineticManager self) -> string"},
+	 { (char *)"KineticManager_recommendedDt_get", _wrap_KineticManager_recommendedDt_get, METH_VARARGS, (char *)"KineticManager_recommendedDt_get(KineticManager self) -> double"},
+	 { (char *)"KineticManager_eulerError_set", _wrap_KineticManager_eulerError_set, METH_VARARGS, (char *)"KineticManager_eulerError_set(KineticManager self, double eulerError)"},
+	 { (char *)"KineticManager_eulerError_get", _wrap_KineticManager_eulerError_get, METH_VARARGS, (char *)"KineticManager_eulerError_get(KineticManager self) -> double"},
 	 { (char *)"KineticManager_swigregister", KineticManager_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_KinCompt", _wrap_new_KinCompt, METH_VARARGS, NULL},
-	 { (char *)"delete_KinCompt", _wrap_delete_KinCompt, METH_VARARGS, NULL},
-	 { (char *)"KinCompt_getType", _wrap_KinCompt_getType, METH_VARARGS, NULL},
-	 { (char *)"KinCompt___get_volume", _wrap_KinCompt___get_volume, METH_VARARGS, NULL},
-	 { (char *)"KinCompt___set_volume", _wrap_KinCompt___set_volume, METH_VARARGS, NULL},
-	 { (char *)"KinCompt___get_area", _wrap_KinCompt___get_area, METH_VARARGS, NULL},
-	 { (char *)"KinCompt___set_area", _wrap_KinCompt___set_area, METH_VARARGS, NULL},
-	 { (char *)"KinCompt___get_perimeter", _wrap_KinCompt___get_perimeter, METH_VARARGS, NULL},
-	 { (char *)"KinCompt___set_perimeter", _wrap_KinCompt___set_perimeter, METH_VARARGS, NULL},
-	 { (char *)"KinCompt___get_size", _wrap_KinCompt___get_size, METH_VARARGS, NULL},
-	 { (char *)"KinCompt___set_size", _wrap_KinCompt___set_size, METH_VARARGS, NULL},
-	 { (char *)"KinCompt___get_numDimensions", _wrap_KinCompt___get_numDimensions, METH_VARARGS, NULL},
-	 { (char *)"KinCompt___set_numDimensions", _wrap_KinCompt___set_numDimensions, METH_VARARGS, NULL},
-	 { (char *)"KinCompt_volume_set", _wrap_KinCompt_volume_set, METH_VARARGS, NULL},
-	 { (char *)"KinCompt_volume_get", _wrap_KinCompt_volume_get, METH_VARARGS, NULL},
-	 { (char *)"KinCompt_area_set", _wrap_KinCompt_area_set, METH_VARARGS, NULL},
-	 { (char *)"KinCompt_area_get", _wrap_KinCompt_area_get, METH_VARARGS, NULL},
-	 { (char *)"KinCompt_perimeter_set", _wrap_KinCompt_perimeter_set, METH_VARARGS, NULL},
-	 { (char *)"KinCompt_perimeter_get", _wrap_KinCompt_perimeter_get, METH_VARARGS, NULL},
-	 { (char *)"KinCompt_size_set", _wrap_KinCompt_size_set, METH_VARARGS, NULL},
-	 { (char *)"KinCompt_size_get", _wrap_KinCompt_size_get, METH_VARARGS, NULL},
-	 { (char *)"KinCompt_numDimensions_set", _wrap_KinCompt_numDimensions_set, METH_VARARGS, NULL},
-	 { (char *)"KinCompt_numDimensions_get", _wrap_KinCompt_numDimensions_get, METH_VARARGS, NULL},
+	 { (char *)"new_KinCompt", _wrap_new_KinCompt, METH_VARARGS, (char *)"\n"
+		"KinCompt(Id id)\n"
+		"KinCompt(string path)\n"
+		"KinCompt(string name, Id parentId)\n"
+		"KinCompt(string name, PyMooseBase parent)\n"
+		"KinCompt(KinCompt src, string name, PyMooseBase parent)\n"
+		"KinCompt(KinCompt src, string name, Id parent)\n"
+		"KinCompt(KinCompt src, string path)\n"
+		"new_KinCompt(Id src, string name, Id parent) -> KinCompt\n"
+		""},
+	 { (char *)"delete_KinCompt", _wrap_delete_KinCompt, METH_VARARGS, (char *)"delete_KinCompt(KinCompt self)"},
+	 { (char *)"KinCompt_getType", _wrap_KinCompt_getType, METH_VARARGS, (char *)"KinCompt_getType(KinCompt self) -> string"},
+	 { (char *)"KinCompt___get_volume", _wrap_KinCompt___get_volume, METH_VARARGS, (char *)"KinCompt___get_volume(KinCompt self) -> double"},
+	 { (char *)"KinCompt___set_volume", _wrap_KinCompt___set_volume, METH_VARARGS, (char *)"KinCompt___set_volume(KinCompt self, double volume)"},
+	 { (char *)"KinCompt___get_area", _wrap_KinCompt___get_area, METH_VARARGS, (char *)"KinCompt___get_area(KinCompt self) -> double"},
+	 { (char *)"KinCompt___set_area", _wrap_KinCompt___set_area, METH_VARARGS, (char *)"KinCompt___set_area(KinCompt self, double area)"},
+	 { (char *)"KinCompt___get_perimeter", _wrap_KinCompt___get_perimeter, METH_VARARGS, (char *)"KinCompt___get_perimeter(KinCompt self) -> double"},
+	 { (char *)"KinCompt___set_perimeter", _wrap_KinCompt___set_perimeter, METH_VARARGS, (char *)"KinCompt___set_perimeter(KinCompt self, double perimeter)"},
+	 { (char *)"KinCompt___get_size", _wrap_KinCompt___get_size, METH_VARARGS, (char *)"KinCompt___get_size(KinCompt self) -> double"},
+	 { (char *)"KinCompt___set_size", _wrap_KinCompt___set_size, METH_VARARGS, (char *)"KinCompt___set_size(KinCompt self, double size)"},
+	 { (char *)"KinCompt___get_numDimensions", _wrap_KinCompt___get_numDimensions, METH_VARARGS, (char *)"KinCompt___get_numDimensions(KinCompt self) -> unsigned int"},
+	 { (char *)"KinCompt___set_numDimensions", _wrap_KinCompt___set_numDimensions, METH_VARARGS, (char *)"KinCompt___set_numDimensions(KinCompt self, unsigned int numDimensions)"},
+	 { (char *)"KinCompt_volume_set", _wrap_KinCompt_volume_set, METH_VARARGS, (char *)"KinCompt_volume_set(KinCompt self, double volume)"},
+	 { (char *)"KinCompt_volume_get", _wrap_KinCompt_volume_get, METH_VARARGS, (char *)"KinCompt_volume_get(KinCompt self) -> double"},
+	 { (char *)"KinCompt_area_set", _wrap_KinCompt_area_set, METH_VARARGS, (char *)"KinCompt_area_set(KinCompt self, double area)"},
+	 { (char *)"KinCompt_area_get", _wrap_KinCompt_area_get, METH_VARARGS, (char *)"KinCompt_area_get(KinCompt self) -> double"},
+	 { (char *)"KinCompt_perimeter_set", _wrap_KinCompt_perimeter_set, METH_VARARGS, (char *)"KinCompt_perimeter_set(KinCompt self, double perimeter)"},
+	 { (char *)"KinCompt_perimeter_get", _wrap_KinCompt_perimeter_get, METH_VARARGS, (char *)"KinCompt_perimeter_get(KinCompt self) -> double"},
+	 { (char *)"KinCompt_size_set", _wrap_KinCompt_size_set, METH_VARARGS, (char *)"KinCompt_size_set(KinCompt self, double size)"},
+	 { (char *)"KinCompt_size_get", _wrap_KinCompt_size_get, METH_VARARGS, (char *)"KinCompt_size_get(KinCompt self) -> double"},
+	 { (char *)"KinCompt_numDimensions_set", _wrap_KinCompt_numDimensions_set, METH_VARARGS, (char *)"KinCompt_numDimensions_set(KinCompt self, unsigned int numDimensions)"},
+	 { (char *)"KinCompt_numDimensions_get", _wrap_KinCompt_numDimensions_get, METH_VARARGS, (char *)"KinCompt_numDimensions_get(KinCompt self) -> unsigned int"},
 	 { (char *)"KinCompt_swigregister", KinCompt_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Panel", _wrap_new_Panel, METH_VARARGS, NULL},
-	 { (char *)"delete_Panel", _wrap_delete_Panel, METH_VARARGS, NULL},
-	 { (char *)"Panel_getType", _wrap_Panel_getType, METH_VARARGS, NULL},
-	 { (char *)"Panel___get_nPts", _wrap_Panel___get_nPts, METH_VARARGS, NULL},
-	 { (char *)"Panel___get_nDims", _wrap_Panel___get_nDims, METH_VARARGS, NULL},
-	 { (char *)"Panel___get_nNeighbors", _wrap_Panel___get_nNeighbors, METH_VARARGS, NULL},
-	 { (char *)"Panel___get_shapeId", _wrap_Panel___get_shapeId, METH_VARARGS, NULL},
-	 { (char *)"Panel___get_coords", _wrap_Panel___get_coords, METH_VARARGS, NULL},
-	 { (char *)"Panel_nPts_get", _wrap_Panel_nPts_get, METH_VARARGS, NULL},
-	 { (char *)"Panel_nDims_get", _wrap_Panel_nDims_get, METH_VARARGS, NULL},
-	 { (char *)"Panel_nNeighbors_get", _wrap_Panel_nNeighbors_get, METH_VARARGS, NULL},
-	 { (char *)"Panel_shapeId_get", _wrap_Panel_shapeId_get, METH_VARARGS, NULL},
-	 { (char *)"Panel_coords_get", _wrap_Panel_coords_get, METH_VARARGS, NULL},
+	 { (char *)"new_Panel", _wrap_new_Panel, METH_VARARGS, (char *)"\n"
+		"Panel(Id id)\n"
+		"Panel(string path)\n"
+		"Panel(string name, Id parentId)\n"
+		"Panel(string name, PyMooseBase parent)\n"
+		"Panel(Panel src, string name, PyMooseBase parent)\n"
+		"Panel(Panel src, string name, Id parent)\n"
+		"Panel(Panel src, string path)\n"
+		"Panel(Id src, string name, Id parent)\n"
+		"Panel(string typeName, string objectName, Id parentId)\n"
+		"Panel(string typeName, string path)\n"
+		"new_Panel(string typeName, string objectName, PyMooseBase parent) -> Panel\n"
+		""},
+	 { (char *)"delete_Panel", _wrap_delete_Panel, METH_VARARGS, (char *)"delete_Panel(Panel self)"},
+	 { (char *)"Panel_getType", _wrap_Panel_getType, METH_VARARGS, (char *)"Panel_getType(Panel self) -> string"},
+	 { (char *)"Panel___get_nPts", _wrap_Panel___get_nPts, METH_VARARGS, (char *)"Panel___get_nPts(Panel self) -> unsigned int"},
+	 { (char *)"Panel___get_nDims", _wrap_Panel___get_nDims, METH_VARARGS, (char *)"Panel___get_nDims(Panel self) -> unsigned int"},
+	 { (char *)"Panel___get_nNeighbors", _wrap_Panel___get_nNeighbors, METH_VARARGS, (char *)"Panel___get_nNeighbors(Panel self) -> unsigned int"},
+	 { (char *)"Panel___get_shapeId", _wrap_Panel___get_shapeId, METH_VARARGS, (char *)"Panel___get_shapeId(Panel self) -> unsigned int"},
+	 { (char *)"Panel___get_coords", _wrap_Panel___get_coords, METH_VARARGS, (char *)"Panel___get_coords(Panel self) -> double_vector"},
+	 { (char *)"Panel_nPts_get", _wrap_Panel_nPts_get, METH_VARARGS, (char *)"Panel_nPts_get(Panel self) -> unsigned int"},
+	 { (char *)"Panel_nDims_get", _wrap_Panel_nDims_get, METH_VARARGS, (char *)"Panel_nDims_get(Panel self) -> unsigned int"},
+	 { (char *)"Panel_nNeighbors_get", _wrap_Panel_nNeighbors_get, METH_VARARGS, (char *)"Panel_nNeighbors_get(Panel self) -> unsigned int"},
+	 { (char *)"Panel_shapeId_get", _wrap_Panel_shapeId_get, METH_VARARGS, (char *)"Panel_shapeId_get(Panel self) -> unsigned int"},
+	 { (char *)"Panel_coords_get", _wrap_Panel_coords_get, METH_VARARGS, (char *)"Panel_coords_get(Panel self) -> double_vector"},
 	 { (char *)"Panel_swigregister", Panel_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_DiskPanel", _wrap_new_DiskPanel, METH_VARARGS, NULL},
-	 { (char *)"delete_DiskPanel", _wrap_delete_DiskPanel, METH_VARARGS, NULL},
-	 { (char *)"DiskPanel_getType", _wrap_DiskPanel_getType, METH_VARARGS, NULL},
+	 { (char *)"new_DiskPanel", _wrap_new_DiskPanel, METH_VARARGS, (char *)"\n"
+		"DiskPanel(Id id)\n"
+		"DiskPanel(string path)\n"
+		"DiskPanel(string name, Id parentId)\n"
+		"DiskPanel(string name, PyMooseBase parent)\n"
+		"DiskPanel(DiskPanel src, string name, PyMooseBase parent)\n"
+		"DiskPanel(DiskPanel src, string name, Id parent)\n"
+		"DiskPanel(DiskPanel src, string path)\n"
+		"new_DiskPanel(Id src, string name, Id parent) -> DiskPanel\n"
+		""},
+	 { (char *)"delete_DiskPanel", _wrap_delete_DiskPanel, METH_VARARGS, (char *)"delete_DiskPanel(DiskPanel self)"},
+	 { (char *)"DiskPanel_getType", _wrap_DiskPanel_getType, METH_VARARGS, (char *)"DiskPanel_getType(DiskPanel self) -> string"},
 	 { (char *)"DiskPanel_swigregister", DiskPanel_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_CylPanel", _wrap_new_CylPanel, METH_VARARGS, NULL},
-	 { (char *)"delete_CylPanel", _wrap_delete_CylPanel, METH_VARARGS, NULL},
-	 { (char *)"CylPanel_getType", _wrap_CylPanel_getType, METH_VARARGS, NULL},
+	 { (char *)"new_CylPanel", _wrap_new_CylPanel, METH_VARARGS, (char *)"\n"
+		"CylPanel(Id id)\n"
+		"CylPanel(string path)\n"
+		"CylPanel(string name, Id parentId)\n"
+		"CylPanel(string name, PyMooseBase parent)\n"
+		"CylPanel(CylPanel src, string name, PyMooseBase parent)\n"
+		"CylPanel(CylPanel src, string name, Id parent)\n"
+		"CylPanel(CylPanel src, string path)\n"
+		"new_CylPanel(Id src, string name, Id parent) -> CylPanel\n"
+		""},
+	 { (char *)"delete_CylPanel", _wrap_delete_CylPanel, METH_VARARGS, (char *)"delete_CylPanel(CylPanel self)"},
+	 { (char *)"CylPanel_getType", _wrap_CylPanel_getType, METH_VARARGS, (char *)"CylPanel_getType(CylPanel self) -> string"},
 	 { (char *)"CylPanel_swigregister", CylPanel_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_HemispherePanel", _wrap_new_HemispherePanel, METH_VARARGS, NULL},
-	 { (char *)"delete_HemispherePanel", _wrap_delete_HemispherePanel, METH_VARARGS, NULL},
-	 { (char *)"HemispherePanel_getType", _wrap_HemispherePanel_getType, METH_VARARGS, NULL},
+	 { (char *)"new_HemispherePanel", _wrap_new_HemispherePanel, METH_VARARGS, (char *)"\n"
+		"HemispherePanel(Id id)\n"
+		"HemispherePanel(string path)\n"
+		"HemispherePanel(string name, Id parentId)\n"
+		"HemispherePanel(string name, PyMooseBase parent)\n"
+		"HemispherePanel(HemispherePanel src, string name, PyMooseBase parent)\n"
+		"HemispherePanel(HemispherePanel src, string name, Id parent)\n"
+		"HemispherePanel(HemispherePanel src, string path)\n"
+		"new_HemispherePanel(Id src, string name, Id parent) -> HemispherePanel\n"
+		""},
+	 { (char *)"delete_HemispherePanel", _wrap_delete_HemispherePanel, METH_VARARGS, (char *)"delete_HemispherePanel(HemispherePanel self)"},
+	 { (char *)"HemispherePanel_getType", _wrap_HemispherePanel_getType, METH_VARARGS, (char *)"HemispherePanel_getType(HemispherePanel self) -> string"},
 	 { (char *)"HemispherePanel_swigregister", HemispherePanel_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_SpherePanel", _wrap_new_SpherePanel, METH_VARARGS, NULL},
-	 { (char *)"delete_SpherePanel", _wrap_delete_SpherePanel, METH_VARARGS, NULL},
-	 { (char *)"SpherePanel_getType", _wrap_SpherePanel_getType, METH_VARARGS, NULL},
+	 { (char *)"new_SpherePanel", _wrap_new_SpherePanel, METH_VARARGS, (char *)"\n"
+		"SpherePanel(Id id)\n"
+		"SpherePanel(string path)\n"
+		"SpherePanel(string name, Id parentId)\n"
+		"SpherePanel(string name, PyMooseBase parent)\n"
+		"SpherePanel(SpherePanel src, string name, PyMooseBase parent)\n"
+		"SpherePanel(SpherePanel src, string name, Id parent)\n"
+		"SpherePanel(SpherePanel src, string path)\n"
+		"new_SpherePanel(Id src, string name, Id parent) -> SpherePanel\n"
+		""},
+	 { (char *)"delete_SpherePanel", _wrap_delete_SpherePanel, METH_VARARGS, (char *)"delete_SpherePanel(SpherePanel self)"},
+	 { (char *)"SpherePanel_getType", _wrap_SpherePanel_getType, METH_VARARGS, (char *)"SpherePanel_getType(SpherePanel self) -> string"},
 	 { (char *)"SpherePanel_swigregister", SpherePanel_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_TriPanel", _wrap_new_TriPanel, METH_VARARGS, NULL},
-	 { (char *)"delete_TriPanel", _wrap_delete_TriPanel, METH_VARARGS, NULL},
-	 { (char *)"TriPanel_getType", _wrap_TriPanel_getType, METH_VARARGS, NULL},
+	 { (char *)"new_TriPanel", _wrap_new_TriPanel, METH_VARARGS, (char *)"\n"
+		"TriPanel(Id id)\n"
+		"TriPanel(string path)\n"
+		"TriPanel(string name, Id parentId)\n"
+		"TriPanel(string name, PyMooseBase parent)\n"
+		"TriPanel(TriPanel src, string name, PyMooseBase parent)\n"
+		"TriPanel(TriPanel src, string name, Id parent)\n"
+		"TriPanel(TriPanel src, string path)\n"
+		"new_TriPanel(Id src, string name, Id parent) -> TriPanel\n"
+		""},
+	 { (char *)"delete_TriPanel", _wrap_delete_TriPanel, METH_VARARGS, (char *)"delete_TriPanel(TriPanel self)"},
+	 { (char *)"TriPanel_getType", _wrap_TriPanel_getType, METH_VARARGS, (char *)"TriPanel_getType(TriPanel self) -> string"},
 	 { (char *)"TriPanel_swigregister", TriPanel_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_RectPanel", _wrap_new_RectPanel, METH_VARARGS, NULL},
-	 { (char *)"delete_RectPanel", _wrap_delete_RectPanel, METH_VARARGS, NULL},
-	 { (char *)"RectPanel_getType", _wrap_RectPanel_getType, METH_VARARGS, NULL},
+	 { (char *)"new_RectPanel", _wrap_new_RectPanel, METH_VARARGS, (char *)"\n"
+		"RectPanel(Id id)\n"
+		"RectPanel(string path)\n"
+		"RectPanel(string name, Id parentId)\n"
+		"RectPanel(string name, PyMooseBase parent)\n"
+		"RectPanel(RectPanel src, string name, PyMooseBase parent)\n"
+		"RectPanel(RectPanel src, string name, Id parent)\n"
+		"RectPanel(RectPanel src, string path)\n"
+		"new_RectPanel(Id src, string name, Id parent) -> RectPanel\n"
+		""},
+	 { (char *)"delete_RectPanel", _wrap_delete_RectPanel, METH_VARARGS, (char *)"delete_RectPanel(RectPanel self)"},
+	 { (char *)"RectPanel_getType", _wrap_RectPanel_getType, METH_VARARGS, (char *)"RectPanel_getType(RectPanel self) -> string"},
 	 { (char *)"RectPanel_swigregister", RectPanel_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Surface", _wrap_new_Surface, METH_VARARGS, NULL},
-	 { (char *)"delete_Surface", _wrap_delete_Surface, METH_VARARGS, NULL},
-	 { (char *)"Surface_getType", _wrap_Surface_getType, METH_VARARGS, NULL},
-	 { (char *)"Surface___get_volume", _wrap_Surface___get_volume, METH_VARARGS, NULL},
-	 { (char *)"Surface_volume_get", _wrap_Surface_volume_get, METH_VARARGS, NULL},
+	 { (char *)"new_Surface", _wrap_new_Surface, METH_VARARGS, (char *)"\n"
+		"Surface(Id id)\n"
+		"Surface(string path)\n"
+		"Surface(string name, Id parentId)\n"
+		"Surface(string name, PyMooseBase parent)\n"
+		"Surface(Surface src, string name, PyMooseBase parent)\n"
+		"Surface(Surface src, string name, Id parent)\n"
+		"Surface(Surface src, string path)\n"
+		"new_Surface(Id src, string name, Id parent) -> Surface\n"
+		""},
+	 { (char *)"delete_Surface", _wrap_delete_Surface, METH_VARARGS, (char *)"delete_Surface(Surface self)"},
+	 { (char *)"Surface_getType", _wrap_Surface_getType, METH_VARARGS, (char *)"Surface_getType(Surface self) -> string"},
+	 { (char *)"Surface___get_volume", _wrap_Surface___get_volume, METH_VARARGS, (char *)"Surface___get_volume(Surface self) -> double"},
+	 { (char *)"Surface_volume_get", _wrap_Surface_volume_get, METH_VARARGS, (char *)"Surface_volume_get(Surface self) -> double"},
 	 { (char *)"Surface_swigregister", Surface_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Geometry", _wrap_new_Geometry, METH_VARARGS, NULL},
-	 { (char *)"delete_Geometry", _wrap_delete_Geometry, METH_VARARGS, NULL},
-	 { (char *)"Geometry_getType", _wrap_Geometry_getType, METH_VARARGS, NULL},
-	 { (char *)"Geometry___get_epsilon", _wrap_Geometry___get_epsilon, METH_VARARGS, NULL},
-	 { (char *)"Geometry___set_epsilon", _wrap_Geometry___set_epsilon, METH_VARARGS, NULL},
-	 { (char *)"Geometry___get_neighdist", _wrap_Geometry___get_neighdist, METH_VARARGS, NULL},
-	 { (char *)"Geometry___set_neighdist", _wrap_Geometry___set_neighdist, METH_VARARGS, NULL},
-	 { (char *)"Geometry_epsilon_set", _wrap_Geometry_epsilon_set, METH_VARARGS, NULL},
-	 { (char *)"Geometry_epsilon_get", _wrap_Geometry_epsilon_get, METH_VARARGS, NULL},
-	 { (char *)"Geometry_neighdist_set", _wrap_Geometry_neighdist_set, METH_VARARGS, NULL},
-	 { (char *)"Geometry_neighdist_get", _wrap_Geometry_neighdist_get, METH_VARARGS, NULL},
+	 { (char *)"new_Geometry", _wrap_new_Geometry, METH_VARARGS, (char *)"\n"
+		"Geometry(Id id)\n"
+		"Geometry(string path)\n"
+		"Geometry(string name, Id parentId)\n"
+		"Geometry(string name, PyMooseBase parent)\n"
+		"Geometry(Geometry src, string name, PyMooseBase parent)\n"
+		"Geometry(Geometry src, string name, Id parent)\n"
+		"Geometry(Geometry src, string path)\n"
+		"new_Geometry(Id src, string name, Id parent) -> Geometry\n"
+		""},
+	 { (char *)"delete_Geometry", _wrap_delete_Geometry, METH_VARARGS, (char *)"delete_Geometry(Geometry self)"},
+	 { (char *)"Geometry_getType", _wrap_Geometry_getType, METH_VARARGS, (char *)"Geometry_getType(Geometry self) -> string"},
+	 { (char *)"Geometry___get_epsilon", _wrap_Geometry___get_epsilon, METH_VARARGS, (char *)"Geometry___get_epsilon(Geometry self) -> double"},
+	 { (char *)"Geometry___set_epsilon", _wrap_Geometry___set_epsilon, METH_VARARGS, (char *)"Geometry___set_epsilon(Geometry self, double epsilon)"},
+	 { (char *)"Geometry___get_neighdist", _wrap_Geometry___get_neighdist, METH_VARARGS, (char *)"Geometry___get_neighdist(Geometry self) -> double"},
+	 { (char *)"Geometry___set_neighdist", _wrap_Geometry___set_neighdist, METH_VARARGS, (char *)"Geometry___set_neighdist(Geometry self, double neighdist)"},
+	 { (char *)"Geometry_epsilon_set", _wrap_Geometry_epsilon_set, METH_VARARGS, (char *)"Geometry_epsilon_set(Geometry self, double epsilon)"},
+	 { (char *)"Geometry_epsilon_get", _wrap_Geometry_epsilon_get, METH_VARARGS, (char *)"Geometry_epsilon_get(Geometry self) -> double"},
+	 { (char *)"Geometry_neighdist_set", _wrap_Geometry_neighdist_set, METH_VARARGS, (char *)"Geometry_neighdist_set(Geometry self, double neighdist)"},
+	 { (char *)"Geometry_neighdist_get", _wrap_Geometry_neighdist_get, METH_VARARGS, (char *)"Geometry_neighdist_get(Geometry self) -> double"},
 	 { (char *)"Geometry_swigregister", Geometry_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Adaptor", _wrap_new_Adaptor, METH_VARARGS, NULL},
-	 { (char *)"delete_Adaptor", _wrap_delete_Adaptor, METH_VARARGS, NULL},
-	 { (char *)"Adaptor_getType", _wrap_Adaptor_getType, METH_VARARGS, NULL},
-	 { (char *)"Adaptor___get_inputOffset", _wrap_Adaptor___get_inputOffset, METH_VARARGS, NULL},
-	 { (char *)"Adaptor___set_inputOffset", _wrap_Adaptor___set_inputOffset, METH_VARARGS, NULL},
-	 { (char *)"Adaptor___get_outputOffset", _wrap_Adaptor___get_outputOffset, METH_VARARGS, NULL},
-	 { (char *)"Adaptor___set_outputOffset", _wrap_Adaptor___set_outputOffset, METH_VARARGS, NULL},
-	 { (char *)"Adaptor___get_scale", _wrap_Adaptor___get_scale, METH_VARARGS, NULL},
-	 { (char *)"Adaptor___set_scale", _wrap_Adaptor___set_scale, METH_VARARGS, NULL},
-	 { (char *)"Adaptor___get_output", _wrap_Adaptor___get_output, METH_VARARGS, NULL},
-	 { (char *)"Adaptor_inputOffset_set", _wrap_Adaptor_inputOffset_set, METH_VARARGS, NULL},
-	 { (char *)"Adaptor_inputOffset_get", _wrap_Adaptor_inputOffset_get, METH_VARARGS, NULL},
-	 { (char *)"Adaptor_outputOffset_set", _wrap_Adaptor_outputOffset_set, METH_VARARGS, NULL},
-	 { (char *)"Adaptor_outputOffset_get", _wrap_Adaptor_outputOffset_get, METH_VARARGS, NULL},
-	 { (char *)"Adaptor_scale_set", _wrap_Adaptor_scale_set, METH_VARARGS, NULL},
-	 { (char *)"Adaptor_scale_get", _wrap_Adaptor_scale_get, METH_VARARGS, NULL},
-	 { (char *)"Adaptor_output_get", _wrap_Adaptor_output_get, METH_VARARGS, NULL},
+	 { (char *)"new_Adaptor", _wrap_new_Adaptor, METH_VARARGS, (char *)"\n"
+		"Adaptor(Id id)\n"
+		"Adaptor(string path)\n"
+		"Adaptor(string name, Id parentId)\n"
+		"Adaptor(string name, PyMooseBase parent)\n"
+		"Adaptor(Adaptor src, string name, PyMooseBase parent)\n"
+		"Adaptor(Adaptor src, string name, Id parent)\n"
+		"Adaptor(Adaptor src, string path)\n"
+		"new_Adaptor(Id src, string name, Id parent) -> Adaptor\n"
+		""},
+	 { (char *)"delete_Adaptor", _wrap_delete_Adaptor, METH_VARARGS, (char *)"delete_Adaptor(Adaptor self)"},
+	 { (char *)"Adaptor_getType", _wrap_Adaptor_getType, METH_VARARGS, (char *)"Adaptor_getType(Adaptor self) -> string"},
+	 { (char *)"Adaptor___get_inputOffset", _wrap_Adaptor___get_inputOffset, METH_VARARGS, (char *)"Adaptor___get_inputOffset(Adaptor self) -> double"},
+	 { (char *)"Adaptor___set_inputOffset", _wrap_Adaptor___set_inputOffset, METH_VARARGS, (char *)"Adaptor___set_inputOffset(Adaptor self, double inputOffset)"},
+	 { (char *)"Adaptor___get_outputOffset", _wrap_Adaptor___get_outputOffset, METH_VARARGS, (char *)"Adaptor___get_outputOffset(Adaptor self) -> double"},
+	 { (char *)"Adaptor___set_outputOffset", _wrap_Adaptor___set_outputOffset, METH_VARARGS, (char *)"Adaptor___set_outputOffset(Adaptor self, double outputOffset)"},
+	 { (char *)"Adaptor___get_scale", _wrap_Adaptor___get_scale, METH_VARARGS, (char *)"Adaptor___get_scale(Adaptor self) -> double"},
+	 { (char *)"Adaptor___set_scale", _wrap_Adaptor___set_scale, METH_VARARGS, (char *)"Adaptor___set_scale(Adaptor self, double scale)"},
+	 { (char *)"Adaptor___get_output", _wrap_Adaptor___get_output, METH_VARARGS, (char *)"Adaptor___get_output(Adaptor self) -> double"},
+	 { (char *)"Adaptor_inputOffset_set", _wrap_Adaptor_inputOffset_set, METH_VARARGS, (char *)"Adaptor_inputOffset_set(Adaptor self, double inputOffset)"},
+	 { (char *)"Adaptor_inputOffset_get", _wrap_Adaptor_inputOffset_get, METH_VARARGS, (char *)"Adaptor_inputOffset_get(Adaptor self) -> double"},
+	 { (char *)"Adaptor_outputOffset_set", _wrap_Adaptor_outputOffset_set, METH_VARARGS, (char *)"Adaptor_outputOffset_set(Adaptor self, double outputOffset)"},
+	 { (char *)"Adaptor_outputOffset_get", _wrap_Adaptor_outputOffset_get, METH_VARARGS, (char *)"Adaptor_outputOffset_get(Adaptor self) -> double"},
+	 { (char *)"Adaptor_scale_set", _wrap_Adaptor_scale_set, METH_VARARGS, (char *)"Adaptor_scale_set(Adaptor self, double scale)"},
+	 { (char *)"Adaptor_scale_get", _wrap_Adaptor_scale_get, METH_VARARGS, (char *)"Adaptor_scale_get(Adaptor self) -> double"},
+	 { (char *)"Adaptor_output_get", _wrap_Adaptor_output_get, METH_VARARGS, (char *)"Adaptor_output_get(Adaptor self) -> double"},
 	 { (char *)"Adaptor_swigregister", Adaptor_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_SigNeur", _wrap_new_SigNeur, METH_VARARGS, NULL},
-	 { (char *)"delete_SigNeur", _wrap_delete_SigNeur, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_getType", _wrap_SigNeur_getType, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_cellProto", _wrap_SigNeur___get_cellProto, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_cellProto", _wrap_SigNeur___set_cellProto, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_spineProto", _wrap_SigNeur___get_spineProto, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_spineProto", _wrap_SigNeur___set_spineProto, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_dendProto", _wrap_SigNeur___get_dendProto, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_dendProto", _wrap_SigNeur___set_dendProto, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_somaProto", _wrap_SigNeur___get_somaProto, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_somaProto", _wrap_SigNeur___set_somaProto, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_cell", _wrap_SigNeur___get_cell, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_spine", _wrap_SigNeur___get_spine, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_dend", _wrap_SigNeur___get_dend, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_soma", _wrap_SigNeur___get_soma, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_cellMethod", _wrap_SigNeur___get_cellMethod, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_cellMethod", _wrap_SigNeur___set_cellMethod, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_spineMethod", _wrap_SigNeur___get_spineMethod, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_spineMethod", _wrap_SigNeur___set_spineMethod, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_dendMethod", _wrap_SigNeur___get_dendMethod, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_dendMethod", _wrap_SigNeur___set_dendMethod, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_somaMethod", _wrap_SigNeur___get_somaMethod, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_somaMethod", _wrap_SigNeur___set_somaMethod, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_sigDt", _wrap_SigNeur___get_sigDt, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_sigDt", _wrap_SigNeur___set_sigDt, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_cellDt", _wrap_SigNeur___get_cellDt, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_cellDt", _wrap_SigNeur___set_cellDt, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_Dscale", _wrap_SigNeur___get_Dscale, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_Dscale", _wrap_SigNeur___set_Dscale, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_lambda", _wrap_SigNeur___get_lambda, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_lambda", _wrap_SigNeur___set_lambda, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_parallelMode", _wrap_SigNeur___get_parallelMode, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_parallelMode", _wrap_SigNeur___set_parallelMode, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_updateStep", _wrap_SigNeur___get_updateStep, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_updateStep", _wrap_SigNeur___set_updateStep, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_calciumScale", _wrap_SigNeur___get_calciumScale, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_calciumScale", _wrap_SigNeur___set_calciumScale, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_dendInclude", _wrap_SigNeur___get_dendInclude, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_dendInclude", _wrap_SigNeur___set_dendInclude, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___get_dendExclude", _wrap_SigNeur___get_dendExclude, METH_VARARGS, NULL},
-	 { (char *)"SigNeur___set_dendExclude", _wrap_SigNeur___set_dendExclude, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_cellProto_set", _wrap_SigNeur_cellProto_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_cellProto_get", _wrap_SigNeur_cellProto_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_spineProto_set", _wrap_SigNeur_spineProto_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_spineProto_get", _wrap_SigNeur_spineProto_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_dendProto_set", _wrap_SigNeur_dendProto_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_dendProto_get", _wrap_SigNeur_dendProto_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_somaProto_set", _wrap_SigNeur_somaProto_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_somaProto_get", _wrap_SigNeur_somaProto_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_cell_get", _wrap_SigNeur_cell_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_spine_get", _wrap_SigNeur_spine_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_dend_get", _wrap_SigNeur_dend_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_soma_get", _wrap_SigNeur_soma_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_cellMethod_set", _wrap_SigNeur_cellMethod_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_cellMethod_get", _wrap_SigNeur_cellMethod_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_spineMethod_set", _wrap_SigNeur_spineMethod_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_spineMethod_get", _wrap_SigNeur_spineMethod_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_dendMethod_set", _wrap_SigNeur_dendMethod_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_dendMethod_get", _wrap_SigNeur_dendMethod_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_somaMethod_set", _wrap_SigNeur_somaMethod_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_somaMethod_get", _wrap_SigNeur_somaMethod_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_sigDt_set", _wrap_SigNeur_sigDt_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_sigDt_get", _wrap_SigNeur_sigDt_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_cellDt_set", _wrap_SigNeur_cellDt_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_cellDt_get", _wrap_SigNeur_cellDt_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_Dscale_set", _wrap_SigNeur_Dscale_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_Dscale_get", _wrap_SigNeur_Dscale_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_lambda__set", _wrap_SigNeur_lambda__set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_lambda__get", _wrap_SigNeur_lambda__get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_parallelMode_set", _wrap_SigNeur_parallelMode_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_parallelMode_get", _wrap_SigNeur_parallelMode_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_updateStep_set", _wrap_SigNeur_updateStep_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_updateStep_get", _wrap_SigNeur_updateStep_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_calciumScale_set", _wrap_SigNeur_calciumScale_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_calciumScale_get", _wrap_SigNeur_calciumScale_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_dendInclude_set", _wrap_SigNeur_dendInclude_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_dendInclude_get", _wrap_SigNeur_dendInclude_get, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_dendExclude_set", _wrap_SigNeur_dendExclude_set, METH_VARARGS, NULL},
-	 { (char *)"SigNeur_dendExclude_get", _wrap_SigNeur_dendExclude_get, METH_VARARGS, NULL},
+	 { (char *)"new_SigNeur", _wrap_new_SigNeur, METH_VARARGS, (char *)"\n"
+		"SigNeur(Id id)\n"
+		"SigNeur(string path)\n"
+		"SigNeur(string name, Id parentId)\n"
+		"SigNeur(string name, PyMooseBase parent)\n"
+		"SigNeur(SigNeur src, string name, PyMooseBase parent)\n"
+		"SigNeur(SigNeur src, string name, Id parent)\n"
+		"SigNeur(SigNeur src, string path)\n"
+		"new_SigNeur(Id src, string name, Id parent) -> SigNeur\n"
+		""},
+	 { (char *)"delete_SigNeur", _wrap_delete_SigNeur, METH_VARARGS, (char *)"delete_SigNeur(SigNeur self)"},
+	 { (char *)"SigNeur_getType", _wrap_SigNeur_getType, METH_VARARGS, (char *)"SigNeur_getType(SigNeur self) -> string"},
+	 { (char *)"SigNeur___get_cellProto", _wrap_SigNeur___get_cellProto, METH_VARARGS, (char *)"SigNeur___get_cellProto(SigNeur self) -> Id"},
+	 { (char *)"SigNeur___set_cellProto", _wrap_SigNeur___set_cellProto, METH_VARARGS, (char *)"SigNeur___set_cellProto(SigNeur self, Id cellProto)"},
+	 { (char *)"SigNeur___get_spineProto", _wrap_SigNeur___get_spineProto, METH_VARARGS, (char *)"SigNeur___get_spineProto(SigNeur self) -> Id"},
+	 { (char *)"SigNeur___set_spineProto", _wrap_SigNeur___set_spineProto, METH_VARARGS, (char *)"SigNeur___set_spineProto(SigNeur self, Id spineProto)"},
+	 { (char *)"SigNeur___get_dendProto", _wrap_SigNeur___get_dendProto, METH_VARARGS, (char *)"SigNeur___get_dendProto(SigNeur self) -> Id"},
+	 { (char *)"SigNeur___set_dendProto", _wrap_SigNeur___set_dendProto, METH_VARARGS, (char *)"SigNeur___set_dendProto(SigNeur self, Id dendProto)"},
+	 { (char *)"SigNeur___get_somaProto", _wrap_SigNeur___get_somaProto, METH_VARARGS, (char *)"SigNeur___get_somaProto(SigNeur self) -> Id"},
+	 { (char *)"SigNeur___set_somaProto", _wrap_SigNeur___set_somaProto, METH_VARARGS, (char *)"SigNeur___set_somaProto(SigNeur self, Id somaProto)"},
+	 { (char *)"SigNeur___get_cell", _wrap_SigNeur___get_cell, METH_VARARGS, (char *)"SigNeur___get_cell(SigNeur self) -> Id"},
+	 { (char *)"SigNeur___get_spine", _wrap_SigNeur___get_spine, METH_VARARGS, (char *)"SigNeur___get_spine(SigNeur self) -> Id"},
+	 { (char *)"SigNeur___get_dend", _wrap_SigNeur___get_dend, METH_VARARGS, (char *)"SigNeur___get_dend(SigNeur self) -> Id"},
+	 { (char *)"SigNeur___get_soma", _wrap_SigNeur___get_soma, METH_VARARGS, (char *)"SigNeur___get_soma(SigNeur self) -> Id"},
+	 { (char *)"SigNeur___get_cellMethod", _wrap_SigNeur___get_cellMethod, METH_VARARGS, (char *)"SigNeur___get_cellMethod(SigNeur self) -> string"},
+	 { (char *)"SigNeur___set_cellMethod", _wrap_SigNeur___set_cellMethod, METH_VARARGS, (char *)"SigNeur___set_cellMethod(SigNeur self, string cellMethod)"},
+	 { (char *)"SigNeur___get_spineMethod", _wrap_SigNeur___get_spineMethod, METH_VARARGS, (char *)"SigNeur___get_spineMethod(SigNeur self) -> string"},
+	 { (char *)"SigNeur___set_spineMethod", _wrap_SigNeur___set_spineMethod, METH_VARARGS, (char *)"SigNeur___set_spineMethod(SigNeur self, string spineMethod)"},
+	 { (char *)"SigNeur___get_dendMethod", _wrap_SigNeur___get_dendMethod, METH_VARARGS, (char *)"SigNeur___get_dendMethod(SigNeur self) -> string"},
+	 { (char *)"SigNeur___set_dendMethod", _wrap_SigNeur___set_dendMethod, METH_VARARGS, (char *)"SigNeur___set_dendMethod(SigNeur self, string dendMethod)"},
+	 { (char *)"SigNeur___get_somaMethod", _wrap_SigNeur___get_somaMethod, METH_VARARGS, (char *)"SigNeur___get_somaMethod(SigNeur self) -> string"},
+	 { (char *)"SigNeur___set_somaMethod", _wrap_SigNeur___set_somaMethod, METH_VARARGS, (char *)"SigNeur___set_somaMethod(SigNeur self, string somaMethod)"},
+	 { (char *)"SigNeur___get_sigDt", _wrap_SigNeur___get_sigDt, METH_VARARGS, (char *)"SigNeur___get_sigDt(SigNeur self) -> double"},
+	 { (char *)"SigNeur___set_sigDt", _wrap_SigNeur___set_sigDt, METH_VARARGS, (char *)"SigNeur___set_sigDt(SigNeur self, double sigDt)"},
+	 { (char *)"SigNeur___get_cellDt", _wrap_SigNeur___get_cellDt, METH_VARARGS, (char *)"SigNeur___get_cellDt(SigNeur self) -> double"},
+	 { (char *)"SigNeur___set_cellDt", _wrap_SigNeur___set_cellDt, METH_VARARGS, (char *)"SigNeur___set_cellDt(SigNeur self, double cellDt)"},
+	 { (char *)"SigNeur___get_Dscale", _wrap_SigNeur___get_Dscale, METH_VARARGS, (char *)"SigNeur___get_Dscale(SigNeur self) -> double"},
+	 { (char *)"SigNeur___set_Dscale", _wrap_SigNeur___set_Dscale, METH_VARARGS, (char *)"SigNeur___set_Dscale(SigNeur self, double Dscale)"},
+	 { (char *)"SigNeur___get_lambda", _wrap_SigNeur___get_lambda, METH_VARARGS, (char *)"SigNeur___get_lambda(SigNeur self) -> double"},
+	 { (char *)"SigNeur___set_lambda", _wrap_SigNeur___set_lambda, METH_VARARGS, (char *)"SigNeur___set_lambda(SigNeur self, double lambda)"},
+	 { (char *)"SigNeur___get_parallelMode", _wrap_SigNeur___get_parallelMode, METH_VARARGS, (char *)"SigNeur___get_parallelMode(SigNeur self) -> int"},
+	 { (char *)"SigNeur___set_parallelMode", _wrap_SigNeur___set_parallelMode, METH_VARARGS, (char *)"SigNeur___set_parallelMode(SigNeur self, int parallelMode)"},
+	 { (char *)"SigNeur___get_updateStep", _wrap_SigNeur___get_updateStep, METH_VARARGS, (char *)"SigNeur___get_updateStep(SigNeur self) -> double"},
+	 { (char *)"SigNeur___set_updateStep", _wrap_SigNeur___set_updateStep, METH_VARARGS, (char *)"SigNeur___set_updateStep(SigNeur self, double updateStep)"},
+	 { (char *)"SigNeur___get_calciumScale", _wrap_SigNeur___get_calciumScale, METH_VARARGS, (char *)"SigNeur___get_calciumScale(SigNeur self) -> double"},
+	 { (char *)"SigNeur___set_calciumScale", _wrap_SigNeur___set_calciumScale, METH_VARARGS, (char *)"SigNeur___set_calciumScale(SigNeur self, double calciumScale)"},
+	 { (char *)"SigNeur___get_dendInclude", _wrap_SigNeur___get_dendInclude, METH_VARARGS, (char *)"SigNeur___get_dendInclude(SigNeur self) -> string"},
+	 { (char *)"SigNeur___set_dendInclude", _wrap_SigNeur___set_dendInclude, METH_VARARGS, (char *)"SigNeur___set_dendInclude(SigNeur self, string dendInclude)"},
+	 { (char *)"SigNeur___get_dendExclude", _wrap_SigNeur___get_dendExclude, METH_VARARGS, (char *)"SigNeur___get_dendExclude(SigNeur self) -> string"},
+	 { (char *)"SigNeur___set_dendExclude", _wrap_SigNeur___set_dendExclude, METH_VARARGS, (char *)"SigNeur___set_dendExclude(SigNeur self, string dendExclude)"},
+	 { (char *)"SigNeur_cellProto_set", _wrap_SigNeur_cellProto_set, METH_VARARGS, (char *)"SigNeur_cellProto_set(SigNeur self, Id cellProto)"},
+	 { (char *)"SigNeur_cellProto_get", _wrap_SigNeur_cellProto_get, METH_VARARGS, (char *)"SigNeur_cellProto_get(SigNeur self) -> Id"},
+	 { (char *)"SigNeur_spineProto_set", _wrap_SigNeur_spineProto_set, METH_VARARGS, (char *)"SigNeur_spineProto_set(SigNeur self, Id spineProto)"},
+	 { (char *)"SigNeur_spineProto_get", _wrap_SigNeur_spineProto_get, METH_VARARGS, (char *)"SigNeur_spineProto_get(SigNeur self) -> Id"},
+	 { (char *)"SigNeur_dendProto_set", _wrap_SigNeur_dendProto_set, METH_VARARGS, (char *)"SigNeur_dendProto_set(SigNeur self, Id dendProto)"},
+	 { (char *)"SigNeur_dendProto_get", _wrap_SigNeur_dendProto_get, METH_VARARGS, (char *)"SigNeur_dendProto_get(SigNeur self) -> Id"},
+	 { (char *)"SigNeur_somaProto_set", _wrap_SigNeur_somaProto_set, METH_VARARGS, (char *)"SigNeur_somaProto_set(SigNeur self, Id somaProto)"},
+	 { (char *)"SigNeur_somaProto_get", _wrap_SigNeur_somaProto_get, METH_VARARGS, (char *)"SigNeur_somaProto_get(SigNeur self) -> Id"},
+	 { (char *)"SigNeur_cell_get", _wrap_SigNeur_cell_get, METH_VARARGS, (char *)"SigNeur_cell_get(SigNeur self) -> Id"},
+	 { (char *)"SigNeur_spine_get", _wrap_SigNeur_spine_get, METH_VARARGS, (char *)"SigNeur_spine_get(SigNeur self) -> Id"},
+	 { (char *)"SigNeur_dend_get", _wrap_SigNeur_dend_get, METH_VARARGS, (char *)"SigNeur_dend_get(SigNeur self) -> Id"},
+	 { (char *)"SigNeur_soma_get", _wrap_SigNeur_soma_get, METH_VARARGS, (char *)"SigNeur_soma_get(SigNeur self) -> Id"},
+	 { (char *)"SigNeur_cellMethod_set", _wrap_SigNeur_cellMethod_set, METH_VARARGS, (char *)"SigNeur_cellMethod_set(SigNeur self, string cellMethod)"},
+	 { (char *)"SigNeur_cellMethod_get", _wrap_SigNeur_cellMethod_get, METH_VARARGS, (char *)"SigNeur_cellMethod_get(SigNeur self) -> string"},
+	 { (char *)"SigNeur_spineMethod_set", _wrap_SigNeur_spineMethod_set, METH_VARARGS, (char *)"SigNeur_spineMethod_set(SigNeur self, string spineMethod)"},
+	 { (char *)"SigNeur_spineMethod_get", _wrap_SigNeur_spineMethod_get, METH_VARARGS, (char *)"SigNeur_spineMethod_get(SigNeur self) -> string"},
+	 { (char *)"SigNeur_dendMethod_set", _wrap_SigNeur_dendMethod_set, METH_VARARGS, (char *)"SigNeur_dendMethod_set(SigNeur self, string dendMethod)"},
+	 { (char *)"SigNeur_dendMethod_get", _wrap_SigNeur_dendMethod_get, METH_VARARGS, (char *)"SigNeur_dendMethod_get(SigNeur self) -> string"},
+	 { (char *)"SigNeur_somaMethod_set", _wrap_SigNeur_somaMethod_set, METH_VARARGS, (char *)"SigNeur_somaMethod_set(SigNeur self, string somaMethod)"},
+	 { (char *)"SigNeur_somaMethod_get", _wrap_SigNeur_somaMethod_get, METH_VARARGS, (char *)"SigNeur_somaMethod_get(SigNeur self) -> string"},
+	 { (char *)"SigNeur_sigDt_set", _wrap_SigNeur_sigDt_set, METH_VARARGS, (char *)"SigNeur_sigDt_set(SigNeur self, double sigDt)"},
+	 { (char *)"SigNeur_sigDt_get", _wrap_SigNeur_sigDt_get, METH_VARARGS, (char *)"SigNeur_sigDt_get(SigNeur self) -> double"},
+	 { (char *)"SigNeur_cellDt_set", _wrap_SigNeur_cellDt_set, METH_VARARGS, (char *)"SigNeur_cellDt_set(SigNeur self, double cellDt)"},
+	 { (char *)"SigNeur_cellDt_get", _wrap_SigNeur_cellDt_get, METH_VARARGS, (char *)"SigNeur_cellDt_get(SigNeur self) -> double"},
+	 { (char *)"SigNeur_Dscale_set", _wrap_SigNeur_Dscale_set, METH_VARARGS, (char *)"SigNeur_Dscale_set(SigNeur self, double Dscale)"},
+	 { (char *)"SigNeur_Dscale_get", _wrap_SigNeur_Dscale_get, METH_VARARGS, (char *)"SigNeur_Dscale_get(SigNeur self) -> double"},
+	 { (char *)"SigNeur_lambda__set", _wrap_SigNeur_lambda__set, METH_VARARGS, (char *)"SigNeur_lambda__set(SigNeur self, double lambda_)"},
+	 { (char *)"SigNeur_lambda__get", _wrap_SigNeur_lambda__get, METH_VARARGS, (char *)"SigNeur_lambda__get(SigNeur self) -> double"},
+	 { (char *)"SigNeur_parallelMode_set", _wrap_SigNeur_parallelMode_set, METH_VARARGS, (char *)"SigNeur_parallelMode_set(SigNeur self, int parallelMode)"},
+	 { (char *)"SigNeur_parallelMode_get", _wrap_SigNeur_parallelMode_get, METH_VARARGS, (char *)"SigNeur_parallelMode_get(SigNeur self) -> int"},
+	 { (char *)"SigNeur_updateStep_set", _wrap_SigNeur_updateStep_set, METH_VARARGS, (char *)"SigNeur_updateStep_set(SigNeur self, double updateStep)"},
+	 { (char *)"SigNeur_updateStep_get", _wrap_SigNeur_updateStep_get, METH_VARARGS, (char *)"SigNeur_updateStep_get(SigNeur self) -> double"},
+	 { (char *)"SigNeur_calciumScale_set", _wrap_SigNeur_calciumScale_set, METH_VARARGS, (char *)"SigNeur_calciumScale_set(SigNeur self, double calciumScale)"},
+	 { (char *)"SigNeur_calciumScale_get", _wrap_SigNeur_calciumScale_get, METH_VARARGS, (char *)"SigNeur_calciumScale_get(SigNeur self) -> double"},
+	 { (char *)"SigNeur_dendInclude_set", _wrap_SigNeur_dendInclude_set, METH_VARARGS, (char *)"SigNeur_dendInclude_set(SigNeur self, string dendInclude)"},
+	 { (char *)"SigNeur_dendInclude_get", _wrap_SigNeur_dendInclude_get, METH_VARARGS, (char *)"SigNeur_dendInclude_get(SigNeur self) -> string"},
+	 { (char *)"SigNeur_dendExclude_set", _wrap_SigNeur_dendExclude_set, METH_VARARGS, (char *)"SigNeur_dendExclude_set(SigNeur self, string dendExclude)"},
+	 { (char *)"SigNeur_dendExclude_get", _wrap_SigNeur_dendExclude_get, METH_VARARGS, (char *)"SigNeur_dendExclude_get(SigNeur self) -> string"},
 	 { (char *)"SigNeur_swigregister", SigNeur_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_AscFile", _wrap_new_AscFile, METH_VARARGS, NULL},
-	 { (char *)"delete_AscFile", _wrap_delete_AscFile, METH_VARARGS, NULL},
-	 { (char *)"AscFile_getType", _wrap_AscFile_getType, METH_VARARGS, NULL},
-	 { (char *)"AscFile___get_fileName", _wrap_AscFile___get_fileName, METH_VARARGS, NULL},
-	 { (char *)"AscFile___set_fileName", _wrap_AscFile___set_fileName, METH_VARARGS, NULL},
-	 { (char *)"AscFile___get_appendFlag", _wrap_AscFile___get_appendFlag, METH_VARARGS, NULL},
-	 { (char *)"AscFile___set_appendFlag", _wrap_AscFile___set_appendFlag, METH_VARARGS, NULL},
-	 { (char *)"AscFile_fileName_set", _wrap_AscFile_fileName_set, METH_VARARGS, NULL},
-	 { (char *)"AscFile_fileName_get", _wrap_AscFile_fileName_get, METH_VARARGS, NULL},
-	 { (char *)"AscFile_appendFlag_set", _wrap_AscFile_appendFlag_set, METH_VARARGS, NULL},
-	 { (char *)"AscFile_appendFlag_get", _wrap_AscFile_appendFlag_get, METH_VARARGS, NULL},
+	 { (char *)"new_AscFile", _wrap_new_AscFile, METH_VARARGS, (char *)"\n"
+		"AscFile(Id id)\n"
+		"AscFile(string path)\n"
+		"AscFile(string name, Id parentId)\n"
+		"AscFile(string name, PyMooseBase parent)\n"
+		"AscFile(AscFile src, string name, PyMooseBase parent)\n"
+		"AscFile(AscFile src, string name, Id parent)\n"
+		"AscFile(AscFile src, string path)\n"
+		"new_AscFile(Id src, string name, Id parent) -> AscFile\n"
+		""},
+	 { (char *)"delete_AscFile", _wrap_delete_AscFile, METH_VARARGS, (char *)"delete_AscFile(AscFile self)"},
+	 { (char *)"AscFile_getType", _wrap_AscFile_getType, METH_VARARGS, (char *)"AscFile_getType(AscFile self) -> string"},
+	 { (char *)"AscFile___get_fileName", _wrap_AscFile___get_fileName, METH_VARARGS, (char *)"AscFile___get_fileName(AscFile self) -> string"},
+	 { (char *)"AscFile___set_fileName", _wrap_AscFile___set_fileName, METH_VARARGS, (char *)"AscFile___set_fileName(AscFile self, string fileName)"},
+	 { (char *)"AscFile___get_appendFlag", _wrap_AscFile___get_appendFlag, METH_VARARGS, (char *)"AscFile___get_appendFlag(AscFile self) -> int"},
+	 { (char *)"AscFile___set_appendFlag", _wrap_AscFile___set_appendFlag, METH_VARARGS, (char *)"AscFile___set_appendFlag(AscFile self, int appendFlag)"},
+	 { (char *)"AscFile_fileName_set", _wrap_AscFile_fileName_set, METH_VARARGS, (char *)"AscFile_fileName_set(AscFile self, string fileName)"},
+	 { (char *)"AscFile_fileName_get", _wrap_AscFile_fileName_get, METH_VARARGS, (char *)"AscFile_fileName_get(AscFile self) -> string"},
+	 { (char *)"AscFile_appendFlag_set", _wrap_AscFile_appendFlag_set, METH_VARARGS, (char *)"AscFile_appendFlag_set(AscFile self, int appendFlag)"},
+	 { (char *)"AscFile_appendFlag_get", _wrap_AscFile_appendFlag_get, METH_VARARGS, (char *)"AscFile_appendFlag_get(AscFile self) -> int"},
 	 { (char *)"AscFile_swigregister", AscFile_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_DifShell", _wrap_new_DifShell, METH_VARARGS, NULL},
-	 { (char *)"delete_DifShell", _wrap_delete_DifShell, METH_VARARGS, NULL},
-	 { (char *)"DifShell_getType", _wrap_DifShell_getType, METH_VARARGS, NULL},
-	 { (char *)"DifShell___get_C", _wrap_DifShell___get_C, METH_VARARGS, NULL},
-	 { (char *)"DifShell___get_Ceq", _wrap_DifShell___get_Ceq, METH_VARARGS, NULL},
-	 { (char *)"DifShell___set_Ceq", _wrap_DifShell___set_Ceq, METH_VARARGS, NULL},
-	 { (char *)"DifShell___get_D", _wrap_DifShell___get_D, METH_VARARGS, NULL},
-	 { (char *)"DifShell___set_D", _wrap_DifShell___set_D, METH_VARARGS, NULL},
-	 { (char *)"DifShell___get_valence", _wrap_DifShell___get_valence, METH_VARARGS, NULL},
-	 { (char *)"DifShell___set_valence", _wrap_DifShell___set_valence, METH_VARARGS, NULL},
-	 { (char *)"DifShell___get_leak", _wrap_DifShell___get_leak, METH_VARARGS, NULL},
-	 { (char *)"DifShell___set_leak", _wrap_DifShell___set_leak, METH_VARARGS, NULL},
-	 { (char *)"DifShell___get_shapeMode", _wrap_DifShell___get_shapeMode, METH_VARARGS, NULL},
-	 { (char *)"DifShell___set_shapeMode", _wrap_DifShell___set_shapeMode, METH_VARARGS, NULL},
-	 { (char *)"DifShell___get_length", _wrap_DifShell___get_length, METH_VARARGS, NULL},
-	 { (char *)"DifShell___set_length", _wrap_DifShell___set_length, METH_VARARGS, NULL},
-	 { (char *)"DifShell___get_diameter", _wrap_DifShell___get_diameter, METH_VARARGS, NULL},
-	 { (char *)"DifShell___set_diameter", _wrap_DifShell___set_diameter, METH_VARARGS, NULL},
-	 { (char *)"DifShell___get_thickness", _wrap_DifShell___get_thickness, METH_VARARGS, NULL},
-	 { (char *)"DifShell___set_thickness", _wrap_DifShell___set_thickness, METH_VARARGS, NULL},
-	 { (char *)"DifShell___get_volume", _wrap_DifShell___get_volume, METH_VARARGS, NULL},
-	 { (char *)"DifShell___set_volume", _wrap_DifShell___set_volume, METH_VARARGS, NULL},
-	 { (char *)"DifShell___get_outerArea", _wrap_DifShell___get_outerArea, METH_VARARGS, NULL},
-	 { (char *)"DifShell___set_outerArea", _wrap_DifShell___set_outerArea, METH_VARARGS, NULL},
-	 { (char *)"DifShell___get_innerArea", _wrap_DifShell___get_innerArea, METH_VARARGS, NULL},
-	 { (char *)"DifShell___set_innerArea", _wrap_DifShell___set_innerArea, METH_VARARGS, NULL},
-	 { (char *)"DifShell_C_get", _wrap_DifShell_C_get, METH_VARARGS, NULL},
-	 { (char *)"DifShell_Ceq_set", _wrap_DifShell_Ceq_set, METH_VARARGS, NULL},
-	 { (char *)"DifShell_Ceq_get", _wrap_DifShell_Ceq_get, METH_VARARGS, NULL},
-	 { (char *)"DifShell_D_set", _wrap_DifShell_D_set, METH_VARARGS, NULL},
-	 { (char *)"DifShell_D_get", _wrap_DifShell_D_get, METH_VARARGS, NULL},
-	 { (char *)"DifShell_valence_set", _wrap_DifShell_valence_set, METH_VARARGS, NULL},
-	 { (char *)"DifShell_valence_get", _wrap_DifShell_valence_get, METH_VARARGS, NULL},
-	 { (char *)"DifShell_leak_set", _wrap_DifShell_leak_set, METH_VARARGS, NULL},
-	 { (char *)"DifShell_leak_get", _wrap_DifShell_leak_get, METH_VARARGS, NULL},
-	 { (char *)"DifShell_shapeMode_set", _wrap_DifShell_shapeMode_set, METH_VARARGS, NULL},
-	 { (char *)"DifShell_shapeMode_get", _wrap_DifShell_shapeMode_get, METH_VARARGS, NULL},
-	 { (char *)"DifShell_length_set", _wrap_DifShell_length_set, METH_VARARGS, NULL},
-	 { (char *)"DifShell_length_get", _wrap_DifShell_length_get, METH_VARARGS, NULL},
-	 { (char *)"DifShell_diameter_set", _wrap_DifShell_diameter_set, METH_VARARGS, NULL},
-	 { (char *)"DifShell_diameter_get", _wrap_DifShell_diameter_get, METH_VARARGS, NULL},
-	 { (char *)"DifShell_thickness_set", _wrap_DifShell_thickness_set, METH_VARARGS, NULL},
-	 { (char *)"DifShell_thickness_get", _wrap_DifShell_thickness_get, METH_VARARGS, NULL},
-	 { (char *)"DifShell_volume_set", _wrap_DifShell_volume_set, METH_VARARGS, NULL},
-	 { (char *)"DifShell_volume_get", _wrap_DifShell_volume_get, METH_VARARGS, NULL},
-	 { (char *)"DifShell_outerArea_set", _wrap_DifShell_outerArea_set, METH_VARARGS, NULL},
-	 { (char *)"DifShell_outerArea_get", _wrap_DifShell_outerArea_get, METH_VARARGS, NULL},
-	 { (char *)"DifShell_innerArea_set", _wrap_DifShell_innerArea_set, METH_VARARGS, NULL},
-	 { (char *)"DifShell_innerArea_get", _wrap_DifShell_innerArea_get, METH_VARARGS, NULL},
+	 { (char *)"new_DifShell", _wrap_new_DifShell, METH_VARARGS, (char *)"\n"
+		"DifShell(Id id)\n"
+		"DifShell(string path)\n"
+		"DifShell(string name, Id parentId)\n"
+		"DifShell(string name, PyMooseBase parent)\n"
+		"DifShell(DifShell src, string name, PyMooseBase parent)\n"
+		"DifShell(DifShell src, string name, Id parent)\n"
+		"DifShell(DifShell src, string path)\n"
+		"new_DifShell(Id src, string name, Id parent) -> DifShell\n"
+		""},
+	 { (char *)"delete_DifShell", _wrap_delete_DifShell, METH_VARARGS, (char *)"delete_DifShell(DifShell self)"},
+	 { (char *)"DifShell_getType", _wrap_DifShell_getType, METH_VARARGS, (char *)"DifShell_getType(DifShell self) -> string"},
+	 { (char *)"DifShell___get_C", _wrap_DifShell___get_C, METH_VARARGS, (char *)"DifShell___get_C(DifShell self) -> double"},
+	 { (char *)"DifShell___get_Ceq", _wrap_DifShell___get_Ceq, METH_VARARGS, (char *)"DifShell___get_Ceq(DifShell self) -> double"},
+	 { (char *)"DifShell___set_Ceq", _wrap_DifShell___set_Ceq, METH_VARARGS, (char *)"DifShell___set_Ceq(DifShell self, double Ceq)"},
+	 { (char *)"DifShell___get_D", _wrap_DifShell___get_D, METH_VARARGS, (char *)"DifShell___get_D(DifShell self) -> double"},
+	 { (char *)"DifShell___set_D", _wrap_DifShell___set_D, METH_VARARGS, (char *)"DifShell___set_D(DifShell self, double D)"},
+	 { (char *)"DifShell___get_valence", _wrap_DifShell___get_valence, METH_VARARGS, (char *)"DifShell___get_valence(DifShell self) -> double"},
+	 { (char *)"DifShell___set_valence", _wrap_DifShell___set_valence, METH_VARARGS, (char *)"DifShell___set_valence(DifShell self, double valence)"},
+	 { (char *)"DifShell___get_leak", _wrap_DifShell___get_leak, METH_VARARGS, (char *)"DifShell___get_leak(DifShell self) -> double"},
+	 { (char *)"DifShell___set_leak", _wrap_DifShell___set_leak, METH_VARARGS, (char *)"DifShell___set_leak(DifShell self, double leak)"},
+	 { (char *)"DifShell___get_shapeMode", _wrap_DifShell___get_shapeMode, METH_VARARGS, (char *)"DifShell___get_shapeMode(DifShell self) -> unsigned int"},
+	 { (char *)"DifShell___set_shapeMode", _wrap_DifShell___set_shapeMode, METH_VARARGS, (char *)"DifShell___set_shapeMode(DifShell self, unsigned int shapeMode)"},
+	 { (char *)"DifShell___get_length", _wrap_DifShell___get_length, METH_VARARGS, (char *)"DifShell___get_length(DifShell self) -> double"},
+	 { (char *)"DifShell___set_length", _wrap_DifShell___set_length, METH_VARARGS, (char *)"DifShell___set_length(DifShell self, double length)"},
+	 { (char *)"DifShell___get_diameter", _wrap_DifShell___get_diameter, METH_VARARGS, (char *)"DifShell___get_diameter(DifShell self) -> double"},
+	 { (char *)"DifShell___set_diameter", _wrap_DifShell___set_diameter, METH_VARARGS, (char *)"DifShell___set_diameter(DifShell self, double diameter)"},
+	 { (char *)"DifShell___get_thickness", _wrap_DifShell___get_thickness, METH_VARARGS, (char *)"DifShell___get_thickness(DifShell self) -> double"},
+	 { (char *)"DifShell___set_thickness", _wrap_DifShell___set_thickness, METH_VARARGS, (char *)"DifShell___set_thickness(DifShell self, double thickness)"},
+	 { (char *)"DifShell___get_volume", _wrap_DifShell___get_volume, METH_VARARGS, (char *)"DifShell___get_volume(DifShell self) -> double"},
+	 { (char *)"DifShell___set_volume", _wrap_DifShell___set_volume, METH_VARARGS, (char *)"DifShell___set_volume(DifShell self, double volume)"},
+	 { (char *)"DifShell___get_outerArea", _wrap_DifShell___get_outerArea, METH_VARARGS, (char *)"DifShell___get_outerArea(DifShell self) -> double"},
+	 { (char *)"DifShell___set_outerArea", _wrap_DifShell___set_outerArea, METH_VARARGS, (char *)"DifShell___set_outerArea(DifShell self, double outerArea)"},
+	 { (char *)"DifShell___get_innerArea", _wrap_DifShell___get_innerArea, METH_VARARGS, (char *)"DifShell___get_innerArea(DifShell self) -> double"},
+	 { (char *)"DifShell___set_innerArea", _wrap_DifShell___set_innerArea, METH_VARARGS, (char *)"DifShell___set_innerArea(DifShell self, double innerArea)"},
+	 { (char *)"DifShell_C_get", _wrap_DifShell_C_get, METH_VARARGS, (char *)"DifShell_C_get(DifShell self) -> double"},
+	 { (char *)"DifShell_Ceq_set", _wrap_DifShell_Ceq_set, METH_VARARGS, (char *)"DifShell_Ceq_set(DifShell self, double Ceq)"},
+	 { (char *)"DifShell_Ceq_get", _wrap_DifShell_Ceq_get, METH_VARARGS, (char *)"DifShell_Ceq_get(DifShell self) -> double"},
+	 { (char *)"DifShell_D_set", _wrap_DifShell_D_set, METH_VARARGS, (char *)"DifShell_D_set(DifShell self, double D)"},
+	 { (char *)"DifShell_D_get", _wrap_DifShell_D_get, METH_VARARGS, (char *)"DifShell_D_get(DifShell self) -> double"},
+	 { (char *)"DifShell_valence_set", _wrap_DifShell_valence_set, METH_VARARGS, (char *)"DifShell_valence_set(DifShell self, double valence)"},
+	 { (char *)"DifShell_valence_get", _wrap_DifShell_valence_get, METH_VARARGS, (char *)"DifShell_valence_get(DifShell self) -> double"},
+	 { (char *)"DifShell_leak_set", _wrap_DifShell_leak_set, METH_VARARGS, (char *)"DifShell_leak_set(DifShell self, double leak)"},
+	 { (char *)"DifShell_leak_get", _wrap_DifShell_leak_get, METH_VARARGS, (char *)"DifShell_leak_get(DifShell self) -> double"},
+	 { (char *)"DifShell_shapeMode_set", _wrap_DifShell_shapeMode_set, METH_VARARGS, (char *)"DifShell_shapeMode_set(DifShell self, unsigned int shapeMode)"},
+	 { (char *)"DifShell_shapeMode_get", _wrap_DifShell_shapeMode_get, METH_VARARGS, (char *)"DifShell_shapeMode_get(DifShell self) -> unsigned int"},
+	 { (char *)"DifShell_length_set", _wrap_DifShell_length_set, METH_VARARGS, (char *)"DifShell_length_set(DifShell self, double length)"},
+	 { (char *)"DifShell_length_get", _wrap_DifShell_length_get, METH_VARARGS, (char *)"DifShell_length_get(DifShell self) -> double"},
+	 { (char *)"DifShell_diameter_set", _wrap_DifShell_diameter_set, METH_VARARGS, (char *)"DifShell_diameter_set(DifShell self, double diameter)"},
+	 { (char *)"DifShell_diameter_get", _wrap_DifShell_diameter_get, METH_VARARGS, (char *)"DifShell_diameter_get(DifShell self) -> double"},
+	 { (char *)"DifShell_thickness_set", _wrap_DifShell_thickness_set, METH_VARARGS, (char *)"DifShell_thickness_set(DifShell self, double thickness)"},
+	 { (char *)"DifShell_thickness_get", _wrap_DifShell_thickness_get, METH_VARARGS, (char *)"DifShell_thickness_get(DifShell self) -> double"},
+	 { (char *)"DifShell_volume_set", _wrap_DifShell_volume_set, METH_VARARGS, (char *)"DifShell_volume_set(DifShell self, double volume)"},
+	 { (char *)"DifShell_volume_get", _wrap_DifShell_volume_get, METH_VARARGS, (char *)"DifShell_volume_get(DifShell self) -> double"},
+	 { (char *)"DifShell_outerArea_set", _wrap_DifShell_outerArea_set, METH_VARARGS, (char *)"DifShell_outerArea_set(DifShell self, double outerArea)"},
+	 { (char *)"DifShell_outerArea_get", _wrap_DifShell_outerArea_get, METH_VARARGS, (char *)"DifShell_outerArea_get(DifShell self) -> double"},
+	 { (char *)"DifShell_innerArea_set", _wrap_DifShell_innerArea_set, METH_VARARGS, (char *)"DifShell_innerArea_set(DifShell self, double innerArea)"},
+	 { (char *)"DifShell_innerArea_get", _wrap_DifShell_innerArea_get, METH_VARARGS, (char *)"DifShell_innerArea_get(DifShell self) -> double"},
 	 { (char *)"DifShell_swigregister", DifShell_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_GssaStoich", _wrap_new_GssaStoich, METH_VARARGS, NULL},
-	 { (char *)"delete_GssaStoich", _wrap_delete_GssaStoich, METH_VARARGS, NULL},
-	 { (char *)"GssaStoich_getType", _wrap_GssaStoich_getType, METH_VARARGS, NULL},
-	 { (char *)"GssaStoich___get_method", _wrap_GssaStoich___get_method, METH_VARARGS, NULL},
-	 { (char *)"GssaStoich___set_method", _wrap_GssaStoich___set_method, METH_VARARGS, NULL},
-	 { (char *)"GssaStoich___set_path", _wrap_GssaStoich___set_path, METH_VARARGS, NULL},
-	 { (char *)"GssaStoich_method_set", _wrap_GssaStoich_method_set, METH_VARARGS, NULL},
-	 { (char *)"GssaStoich_method_get", _wrap_GssaStoich_method_get, METH_VARARGS, NULL},
-	 { (char *)"GssaStoich_path_get", _wrap_GssaStoich_path_get, METH_VARARGS, NULL},
+	 { (char *)"new_GssaStoich", _wrap_new_GssaStoich, METH_VARARGS, (char *)"\n"
+		"GssaStoich(Id id)\n"
+		"GssaStoich(string path)\n"
+		"GssaStoich(string name, Id parentId)\n"
+		"GssaStoich(string name, PyMooseBase parent)\n"
+		"GssaStoich(GssaStoich src, string name, PyMooseBase parent)\n"
+		"GssaStoich(GssaStoich src, string name, Id parent)\n"
+		"GssaStoich(GssaStoich src, string path)\n"
+		"new_GssaStoich(Id src, string name, Id parent) -> GssaStoich\n"
+		""},
+	 { (char *)"delete_GssaStoich", _wrap_delete_GssaStoich, METH_VARARGS, (char *)"delete_GssaStoich(GssaStoich self)"},
+	 { (char *)"GssaStoich_getType", _wrap_GssaStoich_getType, METH_VARARGS, (char *)"GssaStoich_getType(GssaStoich self) -> string"},
+	 { (char *)"GssaStoich___get_method", _wrap_GssaStoich___get_method, METH_VARARGS, (char *)"GssaStoich___get_method(GssaStoich self) -> string"},
+	 { (char *)"GssaStoich___set_method", _wrap_GssaStoich___set_method, METH_VARARGS, (char *)"GssaStoich___set_method(GssaStoich self, string method)"},
+	 { (char *)"GssaStoich___set_path", _wrap_GssaStoich___set_path, METH_VARARGS, (char *)"GssaStoich___set_path(GssaStoich self, string path)"},
+	 { (char *)"GssaStoich_method_set", _wrap_GssaStoich_method_set, METH_VARARGS, (char *)"GssaStoich_method_set(GssaStoich self, string method)"},
+	 { (char *)"GssaStoich_method_get", _wrap_GssaStoich_method_get, METH_VARARGS, (char *)"GssaStoich_method_get(GssaStoich self) -> string"},
+	 { (char *)"GssaStoich_path_get", _wrap_GssaStoich_path_get, METH_VARARGS, (char *)"GssaStoich_path_get(GssaStoich self) -> string"},
 	 { (char *)"GssaStoich_swigregister", GssaStoich_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_TauPump", _wrap_new_TauPump, METH_VARARGS, NULL},
-	 { (char *)"delete_TauPump", _wrap_delete_TauPump, METH_VARARGS, NULL},
-	 { (char *)"TauPump_getType", _wrap_TauPump_getType, METH_VARARGS, NULL},
-	 { (char *)"TauPump___get_pumpRate", _wrap_TauPump___get_pumpRate, METH_VARARGS, NULL},
-	 { (char *)"TauPump___set_pumpRate", _wrap_TauPump___set_pumpRate, METH_VARARGS, NULL},
-	 { (char *)"TauPump___get_eqConc", _wrap_TauPump___get_eqConc, METH_VARARGS, NULL},
-	 { (char *)"TauPump___set_eqConc", _wrap_TauPump___set_eqConc, METH_VARARGS, NULL},
-	 { (char *)"TauPump___get_TA", _wrap_TauPump___get_TA, METH_VARARGS, NULL},
-	 { (char *)"TauPump___set_TA", _wrap_TauPump___set_TA, METH_VARARGS, NULL},
-	 { (char *)"TauPump___get_TB", _wrap_TauPump___get_TB, METH_VARARGS, NULL},
-	 { (char *)"TauPump___set_TB", _wrap_TauPump___set_TB, METH_VARARGS, NULL},
-	 { (char *)"TauPump___get_TC", _wrap_TauPump___get_TC, METH_VARARGS, NULL},
-	 { (char *)"TauPump___set_TC", _wrap_TauPump___set_TC, METH_VARARGS, NULL},
-	 { (char *)"TauPump___get_TV", _wrap_TauPump___get_TV, METH_VARARGS, NULL},
-	 { (char *)"TauPump___set_TV", _wrap_TauPump___set_TV, METH_VARARGS, NULL},
-	 { (char *)"TauPump_pumpRate_set", _wrap_TauPump_pumpRate_set, METH_VARARGS, NULL},
-	 { (char *)"TauPump_pumpRate_get", _wrap_TauPump_pumpRate_get, METH_VARARGS, NULL},
-	 { (char *)"TauPump_eqConc_set", _wrap_TauPump_eqConc_set, METH_VARARGS, NULL},
-	 { (char *)"TauPump_eqConc_get", _wrap_TauPump_eqConc_get, METH_VARARGS, NULL},
-	 { (char *)"TauPump_TA_set", _wrap_TauPump_TA_set, METH_VARARGS, NULL},
-	 { (char *)"TauPump_TA_get", _wrap_TauPump_TA_get, METH_VARARGS, NULL},
-	 { (char *)"TauPump_TB_set", _wrap_TauPump_TB_set, METH_VARARGS, NULL},
-	 { (char *)"TauPump_TB_get", _wrap_TauPump_TB_get, METH_VARARGS, NULL},
-	 { (char *)"TauPump_TC_set", _wrap_TauPump_TC_set, METH_VARARGS, NULL},
-	 { (char *)"TauPump_TC_get", _wrap_TauPump_TC_get, METH_VARARGS, NULL},
-	 { (char *)"TauPump_TV_set", _wrap_TauPump_TV_set, METH_VARARGS, NULL},
-	 { (char *)"TauPump_TV_get", _wrap_TauPump_TV_get, METH_VARARGS, NULL},
+	 { (char *)"new_TauPump", _wrap_new_TauPump, METH_VARARGS, (char *)"\n"
+		"TauPump(Id id)\n"
+		"TauPump(string path)\n"
+		"TauPump(string name, Id parentId)\n"
+		"TauPump(string name, PyMooseBase parent)\n"
+		"TauPump(TauPump src, string name, PyMooseBase parent)\n"
+		"TauPump(TauPump src, string name, Id parent)\n"
+		"TauPump(TauPump src, string path)\n"
+		"new_TauPump(Id src, string name, Id parent) -> TauPump\n"
+		""},
+	 { (char *)"delete_TauPump", _wrap_delete_TauPump, METH_VARARGS, (char *)"delete_TauPump(TauPump self)"},
+	 { (char *)"TauPump_getType", _wrap_TauPump_getType, METH_VARARGS, (char *)"TauPump_getType(TauPump self) -> string"},
+	 { (char *)"TauPump___get_pumpRate", _wrap_TauPump___get_pumpRate, METH_VARARGS, (char *)"TauPump___get_pumpRate(TauPump self) -> double"},
+	 { (char *)"TauPump___set_pumpRate", _wrap_TauPump___set_pumpRate, METH_VARARGS, (char *)"TauPump___set_pumpRate(TauPump self, double pumpRate)"},
+	 { (char *)"TauPump___get_eqConc", _wrap_TauPump___get_eqConc, METH_VARARGS, (char *)"TauPump___get_eqConc(TauPump self) -> double"},
+	 { (char *)"TauPump___set_eqConc", _wrap_TauPump___set_eqConc, METH_VARARGS, (char *)"TauPump___set_eqConc(TauPump self, double eqConc)"},
+	 { (char *)"TauPump___get_TA", _wrap_TauPump___get_TA, METH_VARARGS, (char *)"TauPump___get_TA(TauPump self) -> double"},
+	 { (char *)"TauPump___set_TA", _wrap_TauPump___set_TA, METH_VARARGS, (char *)"TauPump___set_TA(TauPump self, double TA)"},
+	 { (char *)"TauPump___get_TB", _wrap_TauPump___get_TB, METH_VARARGS, (char *)"TauPump___get_TB(TauPump self) -> double"},
+	 { (char *)"TauPump___set_TB", _wrap_TauPump___set_TB, METH_VARARGS, (char *)"TauPump___set_TB(TauPump self, double TB)"},
+	 { (char *)"TauPump___get_TC", _wrap_TauPump___get_TC, METH_VARARGS, (char *)"TauPump___get_TC(TauPump self) -> double"},
+	 { (char *)"TauPump___set_TC", _wrap_TauPump___set_TC, METH_VARARGS, (char *)"TauPump___set_TC(TauPump self, double TC)"},
+	 { (char *)"TauPump___get_TV", _wrap_TauPump___get_TV, METH_VARARGS, (char *)"TauPump___get_TV(TauPump self) -> double"},
+	 { (char *)"TauPump___set_TV", _wrap_TauPump___set_TV, METH_VARARGS, (char *)"TauPump___set_TV(TauPump self, double TV)"},
+	 { (char *)"TauPump_pumpRate_set", _wrap_TauPump_pumpRate_set, METH_VARARGS, (char *)"TauPump_pumpRate_set(TauPump self, double pumpRate)"},
+	 { (char *)"TauPump_pumpRate_get", _wrap_TauPump_pumpRate_get, METH_VARARGS, (char *)"TauPump_pumpRate_get(TauPump self) -> double"},
+	 { (char *)"TauPump_eqConc_set", _wrap_TauPump_eqConc_set, METH_VARARGS, (char *)"TauPump_eqConc_set(TauPump self, double eqConc)"},
+	 { (char *)"TauPump_eqConc_get", _wrap_TauPump_eqConc_get, METH_VARARGS, (char *)"TauPump_eqConc_get(TauPump self) -> double"},
+	 { (char *)"TauPump_TA_set", _wrap_TauPump_TA_set, METH_VARARGS, (char *)"TauPump_TA_set(TauPump self, double TA)"},
+	 { (char *)"TauPump_TA_get", _wrap_TauPump_TA_get, METH_VARARGS, (char *)"TauPump_TA_get(TauPump self) -> double"},
+	 { (char *)"TauPump_TB_set", _wrap_TauPump_TB_set, METH_VARARGS, (char *)"TauPump_TB_set(TauPump self, double TB)"},
+	 { (char *)"TauPump_TB_get", _wrap_TauPump_TB_get, METH_VARARGS, (char *)"TauPump_TB_get(TauPump self) -> double"},
+	 { (char *)"TauPump_TC_set", _wrap_TauPump_TC_set, METH_VARARGS, (char *)"TauPump_TC_set(TauPump self, double TC)"},
+	 { (char *)"TauPump_TC_get", _wrap_TauPump_TC_get, METH_VARARGS, (char *)"TauPump_TC_get(TauPump self) -> double"},
+	 { (char *)"TauPump_TV_set", _wrap_TauPump_TV_set, METH_VARARGS, (char *)"TauPump_TV_set(TauPump self, double TV)"},
+	 { (char *)"TauPump_TV_get", _wrap_TauPump_TV_get, METH_VARARGS, (char *)"TauPump_TV_get(TauPump self) -> double"},
 	 { (char *)"TauPump_swigregister", TauPump_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_TimeTable", _wrap_new_TimeTable, METH_VARARGS, NULL},
-	 { (char *)"delete_TimeTable", _wrap_delete_TimeTable, METH_VARARGS, NULL},
-	 { (char *)"TimeTable_getType", _wrap_TimeTable_getType, METH_VARARGS, NULL},
-	 { (char *)"TimeTable___get_maxTime", _wrap_TimeTable___get_maxTime, METH_VARARGS, NULL},
-	 { (char *)"TimeTable___set_maxTime", _wrap_TimeTable___set_maxTime, METH_VARARGS, NULL},
-	 { (char *)"TimeTable___get_tableVector", _wrap_TimeTable___get_tableVector, METH_VARARGS, NULL},
-	 { (char *)"TimeTable___set_tableVector", _wrap_TimeTable___set_tableVector, METH_VARARGS, NULL},
-	 { (char *)"TimeTable___get_tableSize", _wrap_TimeTable___get_tableSize, METH_VARARGS, NULL},
-	 { (char *)"TimeTable_maxTime_set", _wrap_TimeTable_maxTime_set, METH_VARARGS, NULL},
-	 { (char *)"TimeTable_maxTime_get", _wrap_TimeTable_maxTime_get, METH_VARARGS, NULL},
-	 { (char *)"TimeTable_tableVector_get", _wrap_TimeTable_tableVector_get, METH_VARARGS, NULL},
-	 { (char *)"TimeTable_tableSize_get", _wrap_TimeTable_tableSize_get, METH_VARARGS, NULL},
+	 { (char *)"new_TimeTable", _wrap_new_TimeTable, METH_VARARGS, (char *)"\n"
+		"TimeTable(Id id)\n"
+		"TimeTable(string path)\n"
+		"TimeTable(string name, Id parentId)\n"
+		"TimeTable(string name, PyMooseBase parent)\n"
+		"TimeTable(TimeTable src, string name, PyMooseBase parent)\n"
+		"TimeTable(TimeTable src, string name, Id parent)\n"
+		"TimeTable(TimeTable src, string path)\n"
+		"new_TimeTable(Id src, string name, Id parent) -> TimeTable\n"
+		""},
+	 { (char *)"delete_TimeTable", _wrap_delete_TimeTable, METH_VARARGS, (char *)"delete_TimeTable(TimeTable self)"},
+	 { (char *)"TimeTable_getType", _wrap_TimeTable_getType, METH_VARARGS, (char *)"TimeTable_getType(TimeTable self) -> string"},
+	 { (char *)"TimeTable___get_maxTime", _wrap_TimeTable___get_maxTime, METH_VARARGS, (char *)"TimeTable___get_maxTime(TimeTable self) -> double"},
+	 { (char *)"TimeTable___set_maxTime", _wrap_TimeTable___set_maxTime, METH_VARARGS, (char *)"TimeTable___set_maxTime(TimeTable self, double maxTime)"},
+	 { (char *)"TimeTable___get_tableVector", _wrap_TimeTable___get_tableVector, METH_VARARGS, (char *)"TimeTable___get_tableVector(TimeTable self) -> double_vector"},
+	 { (char *)"TimeTable___set_tableVector", _wrap_TimeTable___set_tableVector, METH_VARARGS, (char *)"TimeTable___set_tableVector(TimeTable self, double_vector tableVector)"},
+	 { (char *)"TimeTable___get_tableSize", _wrap_TimeTable___get_tableSize, METH_VARARGS, (char *)"TimeTable___get_tableSize(TimeTable self) -> unsigned int"},
+	 { (char *)"TimeTable_maxTime_set", _wrap_TimeTable_maxTime_set, METH_VARARGS, (char *)"TimeTable_maxTime_set(TimeTable self, double maxTime)"},
+	 { (char *)"TimeTable_maxTime_get", _wrap_TimeTable_maxTime_get, METH_VARARGS, (char *)"TimeTable_maxTime_get(TimeTable self) -> double"},
+	 { (char *)"TimeTable_tableVector_get", _wrap_TimeTable_tableVector_get, METH_VARARGS, (char *)"TimeTable_tableVector_get(TimeTable self) -> double_vector"},
+	 { (char *)"TimeTable_tableSize_get", _wrap_TimeTable_tableSize_get, METH_VARARGS, (char *)"TimeTable_tableSize_get(TimeTable self) -> unsigned int"},
 	 { (char *)"TimeTable_swigregister", TimeTable_swigregister, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
