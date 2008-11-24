@@ -1717,12 +1717,15 @@ def PyMooseBase_getChildren(*args):
 def PyMooseBase_initSimulation(*args):
   """PyMooseBase_initSimulation()"""
   return _moose.PyMooseBase_initSimulation(*args)
-
+# This function was inserted manually. Somehow SWIG deletes the first few characters in the function definition in moose.i
 def doc(cls):
+    """Return the builtin MOOSE documentation."""
 	if type(cls).__name__ == "classobj":
 		return _moose.PyMooseBase_getContext().doc(cls.__name__)
 	if type(cls) == type(PyMooseBase):
 		return _moose.PyMooseBase_getContext().doc(cls.className)
+        if type(cls).__name__ == "str":
+                return _moose.PyMooseBase_getContext().doc(cls)
 
 
 class Neutral(PyMooseBase):
