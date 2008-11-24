@@ -30,8 +30,8 @@ const Cinfo* initHHChannelCinfo()
 	};
 	static Finfo* process =	new SharedFinfo( "process", processShared, 
 			sizeof( processShared ) / sizeof( Finfo* ),
-			"This is a shared message to receive Process message from the scheduler. \n"
-			"The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which \n"
+			"This is a shared message to receive Process message from the scheduler. "
+			"The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which "
 			"holds lots of information about current time, thread, dt and so on.\n"
 			"The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo." );
 
@@ -128,16 +128,16 @@ const Cinfo* initHHChannelCinfo()
 		*/
 		new SharedFinfo( "channel", channelShared,
 			sizeof( channelShared ) / sizeof( Finfo* ),
-			"This is a shared message to couple channel to compartment.\n"
-			"The first entry is a MsgSrc to send Gk and Ek to the compartment \n"
+			"This is a shared message to couple channel to compartment. "
+			"The first entry is a MsgSrc to send Gk and Ek to the compartment "
 			"The second entry is a MsgDest for Vm from the compartment." ),
 		new SharedFinfo( "xGate", xGateShared,
 			sizeof( xGateShared ) / sizeof( Finfo* ),
-			"This is a shared message to communicate with the X gate. \n"
-			"Sends out Vm.\n"
-			"Receives lookedup up values A and B for the Vm. \n"
-			"The A term is the alpha term from HH equations. \n"
-			"The B term is actually alpha + beta, precalculated." ),
+			"This is a shared message to communicate with the X gate. "
+			"Sends out Vm. "
+			"Receives lookedup up values A and B for the Vm. "
+			"The A term is the alpha term from HH equations. "
+			"The B term is actually alpha + beta, precalculated. " ),
 		new SharedFinfo( "yGate", yGateShared,
 			sizeof( yGateShared ) / sizeof( Finfo* ),
 			"Shared message for Y gate. Fields as in X gate."),
@@ -164,8 +164,8 @@ const Cinfo* initHHChannelCinfo()
 	{
 		"Name", "HHChannel",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "HHChannel: Hodgkin-Huxley type voltage-gated Ion channel. Something\n"
-				"like the old tabchannel from GENESIS, but also presents\n"
+		"Description", "HHChannel: Hodgkin-Huxley type voltage-gated Ion channel. Something "
+				"like the old tabchannel from GENESIS, but also presents "
 				"a similar interface as hhchan from GENESIS. ",
 	};
 

@@ -70,11 +70,11 @@ const Cinfo* initHHGateCinfo()
 	{
 		"Name", "HHGate",
 		"Author", "Upinder S. Bhalla, 2005, NCBS",
-		"Description", "HHGate: Gate for Hodkgin-Huxley type channels, equivalent to the\n"
-				"m and h terms on the Na squid channel and the n term on K.\n"
-				"This takes the voltage and state variable from the channel,\n"
-				"computes the new value of the state variable and a scaling,\n"
-				"depending on gate power, for the conductance. These two\n"
+		"Description", "HHGate: Gate for Hodkgin-Huxley type channels, equivalent to the "
+				"m and h terms on the Na squid channel and the n term on K. "
+				"This takes the voltage and state variable from the channel, "
+				"computes the new value of the state variable and a scaling, "
+				"depending on gate power, for the conductance. These two "
 				"terms are sent right back in a message to the channel.",
 	};	
 	static Cinfo HHGateCinfo(

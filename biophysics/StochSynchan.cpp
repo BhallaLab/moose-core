@@ -117,8 +117,8 @@ const Cinfo* initStochSynchanCinfo()
 			sizeof( processShared ) / sizeof( Finfo* ) ), 
 		new SharedFinfo( "channel", channelShared,
 			sizeof( channelShared ) / sizeof( Finfo* ),
-			"This is a shared message to couple channel to compartment.\n"
-			"The first entry is a MsgSrc to send Gk and Ek to the compartment \n"
+			"This is a shared message to couple channel to compartment. "
+			"The first entry is a MsgSrc to send Gk and Ek to the compartment "
 			"The second entry is a MsgDest for Vm from the compartment." ),
 
 ///////////////////////////////////////////////////////
@@ -151,8 +151,8 @@ const Cinfo* initStochSynchanCinfo()
 	{
 		"Name", "StochSynchan",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "StochSynchan: Synaptic channel incorporating weight and delay. Does not\n"
-				"handle activity-dependent modification, see HebbStochSynchan for that.\n"
+		"Description", "StochSynchan: Synaptic channel incorporating weight and delay. Does not "
+				"handle activity-dependent modification, see HebbStochSynchan for that. "
 				"Very similiar to the old synchan from GENESIS.", 
 	};
 	static Cinfo stochSynchanCinfo(
