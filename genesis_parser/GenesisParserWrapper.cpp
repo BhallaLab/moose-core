@@ -3866,9 +3866,8 @@ void do_showstat(int argc, const char** const argv, Id s )
 	cout << "current simulation time = " << time << endl;
 }
 /**
-   Print class documentation.
-   TODO: don't know how the field level docstring will be available.
-   May need to create an access function to the doc_ map in Cinfo.
+   Print class documentation. It may be better to provide a member
+   function returning the docstring in Cinfo.
 */
 void printCinfoDoc(const Cinfo* classInfo, string field)
 {
@@ -3889,7 +3888,7 @@ void printCinfoDoc(const Cinfo* classInfo, string field)
         // are sued in pymoose code generator. But my experience
         // is that C++ RTTI is unreliable - in particular GCC produces
         // human-unreadable typename
-        cout << "\n\t" << (*iter)->name() << ": " << (*iter)->doc() << "\n";
+        cout << "\n" << (*iter)->name() << ": \n" << (*iter)->doc() << "\n";
     }
     cout << endl;    
 }
