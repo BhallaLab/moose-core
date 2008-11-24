@@ -60,8 +60,8 @@ const Cinfo* initTauPumpCinfo()
 	{
 		"Name", "TauPump",
 		"Author", "Johannes Hjorth, 2008, Stockholm Brain Institute, KTH",
-		"Description", "TauPump:: Implementation of a simple pump with a variable time\n"
-				"constant of removal. Should be coupled to a difshell, where \n"
+		"Description", "TauPump:: Implementation of a simple pump with a variable time "
+				"constant of removal. Should be coupled to a difshell, where "
 				"the change in concentration is computed.",
 	};
 

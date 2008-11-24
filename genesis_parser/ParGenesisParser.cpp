@@ -42,7 +42,7 @@ const Cinfo* initParGenesisParserCinfo()
 		new DestFinfo( "recvElist", 
 					Ftype1< vector< Id > >::global(), 
 					RFCAST( &GenesisParserWrapper::recvElist ),
-					"Then recv the vector of child ids. This function is shared by several other messages as all \n"
+					"Then recv the vector of child ids. This function is shared by several other messages as all "
 					"it does is dump the elist into a temporary local buffer." ),
 
 		///////////////////////////////////////////////////////////////

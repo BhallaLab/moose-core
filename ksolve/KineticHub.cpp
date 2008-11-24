@@ -151,32 +151,33 @@ const Cinfo* initKineticHubCinfo()
 					"This is the destination of the several messages from the Stoich object." ),
 		new SharedFinfo( "molSolve", zombieShared, 
 			      sizeof( zombieShared ) / sizeof( Finfo* ),
-					"This is identical to the message sent from clock Ticks to objects. Here it is used to take \n"
-					"over the Process message,usually only as a handle from the solver to the object.\n"
-					"Here we are using the non-deprecated form." ),
+					"This is identical to the message sent from clock Ticks to objects. Here it "
+					"is used to take over the Process message,usually only as a handle from the "
+					"solver to the object.Here we are using the non-deprecated form." ),
 		new SharedFinfo( "reacSolve", zombieShared, 
 			      sizeof( zombieShared ) / sizeof( Finfo* ),
-					"This is identical to the message sent from clock Ticks to objects. Here it is used to take \n"
-					"over the Process message,usually only as a handle from the solver to the object.\n"
-					"Here we are using the non-deprecated form." ),
+					"This is identical to the message sent from clock Ticks to objects. Here it "
+					"is used to take over the Process message,usually only as a handle from the "
+					"solver to the object.Here we are using the non-deprecated form." ),
 		new SharedFinfo( "enzSolve", zombieShared, 
 			      sizeof( zombieShared ) / sizeof( Finfo* ),
-					"This is identical to the message sent from clock Ticks to objects. Here it is used to take \n"
-					"over the Process message,usually only as a handle from the solver to the object.\n"
-					"Here we are using the non-deprecated form." ),
+					"This is identical to the message sent from clock Ticks to objects. Here it "
+					"is used to take over the Process message,usually only as a handle from the "
+					"solver to the object.Here we are using the non-deprecated form." ),
 		new SharedFinfo( "mmEnzSolve", zombieShared, 
 			      sizeof( zombieShared ) / sizeof( Finfo* ),
-					"This is identical to the message sent from clock Ticks to objects. Here it is used to take \n"
-					"over the Process message,usually only as a handle from the solver to the object.\n"
-					"Here we are using the non-deprecated form." ),
+					"This is identical to the message sent from clock Ticks to objects. Here it "
+					"is used to take over the Process message,usually only as a handle from the "
+					"solver to the object.Here we are using the non-deprecated form." ),
 		new SharedFinfo( "flux", fluxShared, 
 			      sizeof( fluxShared ) / sizeof( Finfo* ),
-					"This is used to handle fluxes between sets of molecules solved in this KineticHub and solved \n"
-					"by other Hubs. It is implemented as a reciprocal vector of influx and efflux.\n"
-					"The influx during each timestep is added directly to the molecule number in S_. The efflux is\n"
-					"computed by the Hub, and subtracted from S_, and sent on to the target Hub.\n"
-					"Its main purpose, as the name implies, is for diffusive flux across an interface. \n"
-					"Typically used for mixed simulations where the molecules in different spatial domains are\n"
+					"This is used to handle fluxes between sets of molecules solved in this "
+					"KineticHub and solved by other Hubs. It is implemented as a reciprocal "
+					"vector of influx and efflux.The influx during each timestep is added "
+					"directly to the molecule number in S_. The efflux is computed by the Hub, "
+					"and subtracted from S_, and sent on to the target Hub.Its main purpose, as "
+					"the name implies, is for diffusive flux across an interface.Typically used "
+					"for mixed simulations where the molecules in different spatial domains are "
 					"solved differently." ),
 		/*
 		new SolveFinfo( "molSolve", molFields, 
@@ -188,9 +189,9 @@ const Cinfo* initKineticHubCinfo()
 	{
 		"Name", "KineticHub",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "KineticHub: Object for controlling reaction systems on behalf of the Stoich object.\n"
-				"Interfaces both with the reaction system (molecules, reactions, enzymes and user \n"
-				"defined rate terms) and also with the Stoich class which generates the stoichiometry \n"
+		"Description", "KineticHub: Object for controlling reaction systems on behalf of the Stoich object. "
+				"Interfaces both with the reaction system (molecules, reactions, enzymes and user  "
+				"defined rate terms) and also with the Stoich class which generates the stoichiometry "
 				"matrix and handles the derivative calculations.",
 	};
 	
@@ -277,8 +278,8 @@ Finfo* initMolZombieFinfo()
 		molFields, 
 		sizeof( molFields ) / sizeof( Finfo* ),
 		tf,
-		"These fields will replace the original molecule fields so that the lookups refer to the solver rather \n"
-		"than the molecule."
+		"These fields will replace the original molecule fields so that the lookups refer to the solver "
+		"rather than the molecule."
 	);
 
 	/*

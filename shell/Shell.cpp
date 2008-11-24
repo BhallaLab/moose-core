@@ -52,11 +52,11 @@ const Cinfo* initShellCinfo()
 
 		new DestFinfo( "pushe", Ftype1< Id >::global(),
 						RFCAST( &Shell::pushe ),
-						"doing pushe: pushing current element onto stack and using argument for new cwe. \n"
-						"It sends back the cweSrc." ),
+						"doing pushe: pushing current element onto stack and using argument "
+						"for new cwe.It sends back the cweSrc." ),
 		new DestFinfo( "pope", Ftype0::global(), 
 						RFCAST( &Shell::pope ),
-						" Doing pope: popping element off stack onto cwe. It sends back the cweSrc." ),
+						"Doing pope: popping element off stack onto cwe. It sends back the cweSrc." ),
 
 		new DestFinfo( "trigLe", Ftype1< Id >::global(), 
 						RFCAST( &Shell::trigLe ),
@@ -112,7 +112,7 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "setClock",
 				Ftype3< int, double, int >::global(),
 				RFCAST( &Shell::setClock ),
-				" Handle requests for setting values for a clock tick.args are clockNo, dt, stage" ),
+				"Handle requests for setting values for a clock tick.args are clockNo, dt, stage" ),
 
 		new DestFinfo( "useClock",
 				Ftype3< string, string, string >::global(),
@@ -536,24 +536,22 @@ const Cinfo* initShellCinfo()
 		///////////////////////////////////////////////////////////////
 		new SrcFinfo( "requestMainIdSrc",
 			Ftype3< unsigned int, unsigned int, unsigned int >::global(),
-			"Here a slave node requests the master node for a block of main"
-			"Ids that it can use locally.\n"
+			"Here a slave node requests the master node for a block of main Ids that it can use locally."
 			"Args: size of block, slave node, request Id" ),
 		new DestFinfo( "requestMainId",
 			Ftype3< unsigned int, unsigned int, unsigned int >::global(),
 			RFCAST( &Shell::handleRequestMainId ),
-			"Here the master node interceptes requests from slave nodes for"
-			"regular Ids\n"
-			"Args: size of block, slave node, request Id" ),
+			"Here the master node interceptes requests from slave nodes for regular Ids "
+			"Args: size of block, slave node, request Id " ),
 		new SrcFinfo( "returnMainIdSrc",
 			Ftype2< unsigned int, unsigned int >::global(),
-			"Respond to requests from slave nodes for regular ids.\n"
+			"Respond to requests from slave nodes for regular ids. "
 			"Args: Base id in alloted block, request Id" ),
 		new DestFinfo( "returnMainId",
 			Ftype2< unsigned int, unsigned int >::global(),
 			RFCAST( &Shell::handleReturnMainId ),
-			"Receive vector of main Ids from master node\n"
-			"Args: Base id in alloted block, request Id" ),
+			"Receive vector of main Ids from master node "
+			"Args: Base id in alloted block, request Id " ),
 	};
 #endif // USE_MPI
 
@@ -608,17 +606,18 @@ const Cinfo* initShellCinfo()
 
 		new SharedFinfo( "parser", parserShared, 
 				sizeof( parserShared ) / sizeof( Finfo* ),
-				" This is a shared message to talk to the GenesisParser and perhaps to other parsers like \n"
-				"the one for SWIG and Python" ), 
+				"This is a shared message to talk to the GenesisParser and perhaps to other parsers "
+				"like the one for SWIG and Python" ), 
 		new SharedFinfo( "serial", serialShared,
 				sizeof( serialShared ) / sizeof( Finfo* ),
-				"This handles serialized data, typically between nodes. The arguments are a single long string.\n"
-				"Takes care of low-level operations such as message set up or the gory details of copies across nodes." ), 
+				"This handles serialized data, typically between nodes. The arguments are a single "
+				"long string.Takes care of low-level operations such as message set up or the gory "
+				"details of copies across nodes." ), 
 #ifdef USE_MPI
 		new SharedFinfo( "parallel", parallelShared,
 				sizeof( parallelShared ) / sizeof( Finfo* ),
-				"This handles parallelization: communication between shells on different nodes, which is the major\n"
-				"mechanism for setting up multinode simulations" ),  
+				"This handles parallelization: communication between shells on different nodes, "
+				"which is the major mechanism for setting up multinode simulations " ),  
 #endif // USE_MPI
 		/*
 		new SharedFinfo( "slave", slaveShared,

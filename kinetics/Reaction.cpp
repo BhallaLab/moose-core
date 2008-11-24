@@ -94,10 +94,9 @@ const Cinfo* initReactionCinfo()
 	{
 		"Name", "Reaction",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "Reaction: Reaction class, handles binding and conversion reactions\n"
-				"not involving enzymatic steps. Computes reversible reactions\n"
-				"but the rates can be set to zero to give irreversibility.\n"
-				"Order of substrates and products set by the number of messages between them.",
+		"Description", "Reaction: Reaction class, handles binding and conversion reactions not involving " 
+		"enzymatic steps. Computes reversible reactions but the rates can be set to zero to give "
+		"irreversibility.Order of substrates and products set by the number of messages between them.",
 	};
 
 	static  Cinfo reactionCinfo(

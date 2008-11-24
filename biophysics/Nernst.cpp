@@ -69,8 +69,8 @@ const Cinfo* initNernstCinfo()
 	{
 		"Name", "Nernst",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "Nernst: Calculates Nernst potential for a given ion based on \n"
-				"Cin and Cout, the inside and outside concentrations.\n"
+		"Description", "Nernst: Calculates Nernst potential for a given ion based on "
+				"Cin and Cout, the inside and outside concentrations. "
 				"Immediately sends out the potential to all targets.",
 	};
 	

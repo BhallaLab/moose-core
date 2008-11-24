@@ -61,9 +61,9 @@ const Cinfo* initKintegratorCinfo()
 	{
 		"Name", "Kintegrator",
 		"Author", "Upinder S. Bhalla, June 2006, NCBS",
-		"Description","Kintegrator: Kinetic Integrator base class for setting up numerical solvers.\n"
-			       "This is currently set up to work only with the Stoich class, which represents \n"
-			       "biochemical networks.The goal is to have a standard interface so different\n"
+		"Description","Kintegrator: Kinetic Integrator base class for setting up numerical solvers. "
+			       "This is currently set up to work only with the Stoich class, which represents "
+			       "biochemical networks.The goal is to have a standard interface so different "
 			       "solvers can work with different kinds of calculation.",
 	};	
 	static  Cinfo kintegratorCinfo(

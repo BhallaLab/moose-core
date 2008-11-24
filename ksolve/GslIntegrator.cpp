@@ -96,9 +96,9 @@ const Cinfo* initGslIntegratorCinfo()
 	{
 		"Name", "GslIntegrator",
 		"Author", "Upinder S. Bhalla, June 2006, NCBS",
-		"Description", "GslIntegrator: Integrator class for using the GSL ODE functions to do numerical\n"
-				"integration in the Kinetic Solver set.This is currently set up to work only with\n"
-				"the Stoich class,\nwhich represents biochemical networks.The goal is to have a \n"
+		"Description", "GslIntegrator: Integrator class for using the GSL ODE functions to do numerical "
+				"integration in the Kinetic Solver set.This is currently set up to work only with "
+				"the Stoich class, which represents biochemical networks.The goal is to have a "
 				"standard interface so different solvers can work with different kinds of calculation.",
 	};	
 	
