@@ -85,8 +85,8 @@ const Cinfo* initEnzymeCinfo()
 			ValueFtype1< double >::global(),
 			GFCAST( &Enzyme::getNinitComplex ), 
 			RFCAST( &Enzyme::setNinitComplex ),
-			"This actually looks up the child molecule for the enz-substrate complex, if it exists.\n"
-		    "Only expected to be used for initial conditions in a model."
+			"This actually looks up the child molecule for the enz-substrate complex, if it exists. "
+		        "Only expected to be used for initial conditions in a model."
 		),
 		new ValueFinfo( "concInitComplex", 
 			ValueFtype1< double >::global(),
@@ -131,33 +131,33 @@ const Cinfo* initEnzymeCinfo()
 	{
 		"Name", "Enzyme",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "Enzyme: Irreversible enzymatic reaction that supports two forms of the \n"
-				"Michaelis-Menten formulation for enzyme catalysis:\n"
+		"Description", "Enzyme: Irreversible enzymatic reaction that supports two forms of the "
+				"Michaelis-Menten formulation for enzyme catalysis: "
 				"E + S <======> E.S ------> E + P\n"
-				"In this enzyme, the forward rate for the complex formation is\n"
-				"k1, the backward rate is k2, and the final rate for product\n"
-				"formation is k3. In terms of Michaelis-Menten parameters,\n"
-				"k3 = kcat, and\n(k3 + k2)/k1 = Km.\n"
-				"In all forms, the enzyme object should be considered as an\n"
-				"enzymatic activity. It must be created in association with\n"
-				"an enzyme molecule. The same enzyme molecule may have multiple\n"
-				"activities, for example, on a range of substrates.\n"
-				"In the explicit form (default) the enzyme substrate complex E.S\n"
-				"is explictly created as a distinct molecular pool. This is\n"
-				"perhaps more realistic in complex models where there are likely\n"
-				"to be other substrates for this enzyme, and so enzyme \n"
-				"saturation effects must be accounted for. However the complex\n"
-				"molecule does not participate in any other reactions, which\n"
-				"may itself be a poor assumption. If this is a serious concern \n"
-				"then it is best to do the entire enzymatic process using elementary \n"
-				"reactions.\nIn the implicit form there is no actual enzyme-complex molecule.\n"
-				"In this form the rate term is\ncomputed using the Michaelis-Menten form\n"
+				"In this enzyme, the forward rate for the complex formation is "
+				"k1, the backward rate is k2, and the final rate for product "
+				"formation is k3. In terms of Michaelis-Menten parameters, "
+				"k3 = kcat, and (k3 + k2)/k1 = Km. \n"
+				"In all forms, the enzyme object should be considered as an "
+				"enzymatic activity. It must be created in association with "
+				"an enzyme molecule. The same enzyme molecule may have multiple "
+				"activities, for example, on a range of substrates. "
+				"In the explicit form (default) the enzyme substrate complex E.S "
+				"is explictly created as a distinct molecular pool. This is "
+				"perhaps more realistic in complex models where there are likely "
+				"to be other substrates for this enzyme, and so enzyme "
+				"saturation effects must be accounted for. However the complex "
+				"molecule does not participate in any other reactions, which "
+				"may itself be a poor assumption. If this is a serious concern "
+				"then it is best to do the entire enzymatic process using elementary "
+				"reactions. In the implicit form there is no actual enzyme-complex molecule. "
+				"In this form the rate term is computed using the Michaelis-Menten form "
 				"rate = kcat * [E] * [S] / ( Km + [S] )\n"
-				"Here the opposite problem from above applies: There is no\n"
-				"explicit complex, which means that the level of the free enzyme\n"
-				"molecule is unaffected even near saturation. However, other\n"
-				"reactions involving the enzyme do see the entire enzyme concentration. \n"
-				"For the record, I regard the explicit formulation as more\naccurate for complex simulations.",
+				"Here the opposite problem from above applies: There is no "
+				"explicit complex, which means that the level of the free enzyme "
+				"molecule is unaffected even near saturation. However, other "
+				"reactions involving the enzyme do see the entire enzyme concentration. "
+				"For the record, I regard the explicit formulation as more accurate for complex simulations.",
 	};
 	static  Cinfo enzymeCinfo(
 		doc,

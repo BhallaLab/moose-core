@@ -37,16 +37,16 @@ const Cinfo* initPostMasterCinfo()
 			"The second entry is to tell the PostMaster to post 'send'" ),
 		new DestFinfo( "poll", Ftype1< bool >::global(), 
 			RFCAST( &PostMaster::poll ),
-			"The third entry is for polling the receipt of incoming data.Each PostMaster does an MPI_Test on the \n"
-			"earlier posted iRecv." ),
+			"The third entry is for polling the receipt of incoming data.Each PostMaster does an "
+			"MPI_Test on the earlier posted iRecv." ),
 		new SrcFinfo( "harvestPoll", Ftype1< unsigned int >::global(),
-			"The fourth entry is for harvesting the poll request.The argument is the node number handled by \n"
-			"the postmaster.It comes back when the polling on that postmaster is done." ),
+			"The fourth entry is for harvesting the poll request.The argument is the node number "
+			"handled by the postmaster.It comes back when the polling on that postmaster is done." ),
 		new DestFinfo( "clearSetupStack", Ftype0::global(), 
 			RFCAST( &PostMaster::clearSetupStack ) ),
 		new DestFinfo( "barrier", Ftype0::global(), RFCAST( &PostMaster::barrier ),
-			"Removed. We want barrier-free synchronization where needed.\n"
-			"The last entry tells targets to execute a Barrier command,in order to synchronize all nodes." ),
+			"Removed. We want barrier-free synchronization where needed.The last entry tells targets "
+			"to execute a Barrier command,in order to synchronize all nodes." ),
 	};
 
 	static Finfo* serialShared[] =

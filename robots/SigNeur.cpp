@@ -168,12 +168,11 @@ const Cinfo* initSigNeurCinfo()
 	{
 		"Name", "SigNeur",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "SigNeur: Multiscale simulation setup object for doing combined \n"
-				"electrophysiological and signaling models of neurons. Takes the\n"
-				"geometry from the neuronal model and sets up diffusion between \n"
-				"signaling models to fit in this geometry. Arranges interfaces between\n"
-				"channel conductances and molecular species representing channels.\n"
-				"Also interfaces calcium conc in the two kinds of model.",
+		"Description", "SigNeur: Multiscale simulation setup object for doing combined electrophysiological "
+				"and signaling models of neurons. Takes the geometry from the neuronal model and "
+				"sets up diffusion between signaling models to fit in this geometry. Arranges "
+				"interfaces between channel conductances and molecular species representing "
+				"channels.Also interfaces calcium conc in the two kinds of model.",
 	};
 
 	static Cinfo sigNeurCinfo(

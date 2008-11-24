@@ -54,14 +54,14 @@ const Cinfo* initGenesisParserCinfo()
 		new DestFinfo( "recvElist", 
 					Ftype1< vector< Id > >::global(), 
 					RFCAST( &GenesisParserWrapper::recvElist ),
-					"Then recv the vector of child ids. This function is shared by several other messages as all \n"
+					"Then recv the vector of child ids. This function is shared by several other messages as all "
 					"it does is dump the elist into a temporary local buffer." ),
 		///////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions.
 		///////////////////////////////////////////////////////////////
 		new SrcFinfo( "create",
 				Ftype4< string, string, int, Id >::global(),
-				"Creating an object: Send out the request.\n"
+				"Creating an object: Send out the request. "
 				"args: type, name, node, parent" ),
 		new SrcFinfo( "createArray",
 				Ftype4< string, string, Id, vector <double> >::global(),
@@ -103,7 +103,7 @@ const Cinfo* initGenesisParserCinfo()
 				Ftype3< string, string, string >::global(),
 				"Assigning path and function to a clock tick: useClock" ),
 		new SrcFinfo( "el", Ftype2< string, bool >::global(),
-				"Getting a wildcard path of elements: send out request args are path, flag true for \n"
+				"Getting a wildcard path of elements: send out request args are path, flag true for "
 				"breadth-first list." ),
 		new SrcFinfo( "resched", Ftype0::global(),
 				"The return function for the wildcard past is the shared function recvElist"), // resched
@@ -130,7 +130,7 @@ const Cinfo* initGenesisParserCinfo()
 					"Delete a message based on number " ),
 		new SrcFinfo( "deleteEdge", 
 					Ftype4< Id, string, Id, string >::global(),
-					"Delete a message based on src id.field and dest id.field \n"
+					"Delete a message based on src id.field and dest id.field "
 					"This is how to specify an edge, so call it deleteEdge" ),
 		new SrcFinfo( "listMessages", 
 					Ftype3< Id, string, bool >::global(),

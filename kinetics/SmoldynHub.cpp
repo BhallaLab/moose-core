@@ -146,7 +146,8 @@ const Cinfo* initSmoldynHubCinfo()
 			RFCAST( &SmoldynHub::molSum ) ),
 		new DestFinfo( "child", Ftype1< int >::global(),
 			RFCAST( &SmoldynHub::childFunc ),
-			"override the Neutral::childFunc here, so that when this is deleted all the zombies are reanimated." ),
+			"override the Neutral::childFunc here, so that when this is deleted all the zombies are "
+			"reanimated." ),
 	///////////////////////////////////////////////////////
 	// Synapse definitions
 	///////////////////////////////////////////////////////
@@ -159,28 +160,29 @@ const Cinfo* initSmoldynHubCinfo()
 					"Handles reaction structure info from the Stoich object" ),
 		new SharedFinfo( "molSolve", zombieShared, 
 			      sizeof( zombieShared ) / sizeof( Finfo* ),
-					"Takes over the process message to each of the kinetic objects.Replaces the original message \n"
-					"usually sent by the clock Ticks." ),
+					"Takes over the process message to each of the kinetic objects.Replaces the "
+					"original message usually sent by the clock Ticks." ),
 		new SharedFinfo( "reacSolve", zombieShared, 
 			      sizeof( zombieShared ) / sizeof( Finfo* ),
-					"Takes over the process message to each of the kinetic objects.Replaces the original message \n"
-					"usually sent by the clock Ticks." ),
+					"Takes over the process message to each of the kinetic objects.Replaces the "
+					"original message usually sent by the clock Ticks." ),
 		new SharedFinfo( "enzSolve", zombieShared, 
 			      sizeof( zombieShared ) / sizeof( Finfo* ),
-					"Takes over the process message to each of the kinetic objects.Replaces the original message \n"
-					"usually sent by the clock Ticks." ),
+					"Takes over the process message to each of the kinetic objects.Replaces the "
+					"original message usually sent by the clock Ticks." ),
 		new SharedFinfo( "mmEnzSolve", zombieShared, 
 			      sizeof( zombieShared ) / sizeof( Finfo* ),
-					"Takes over the process message to each of the kinetic objects.Replaces the original message \n"
-					"usually sent by the clock Ticks." ),
+					"Takes over the process message to each of the kinetic objects.Replaces the "
+					"original message usually sent by the clock Ticks." ),
 		new SharedFinfo( "flux", fluxShared, 
 			      sizeof( fluxShared ) / sizeof( Finfo* ),
-					"This is used to handle fluxes between sets of molecules solved in this SmoldynHub and solved \n"
-					"by other Hubs. It is implemented as a reciprocal vector of influx and efflux.\n"
-					"The influx during each timestep is added directly to the molecule number in S_. The efflux is\n"
-					"computed by the Hub, and subtracted from S_, and sent on to the target Hub.\n"
-					"Its main purpose, as the name implies, is for diffusive flux across an interface. \n"
-					"Typically used for mixed simulations where the molecules in different spatial domains are \n"
+					"This is used to handle fluxes between sets of molecules solved in this "
+					"SmoldynHub and solved by other Hubs. It is implemented as a reciprocal "
+					"vector of influx and efflux.The influx during each timestep is added "
+					"directly to the molecule number in S_. The efflux is computed by the Hub, "
+					"and subtracted from S_, and sent on to the target Hub.Its main purpose, as "
+					"the name implies, is for diffusive flux across an interface.Typically used "
+					"for mixed simulations where the molecules in different spatial domains are "
 					"solved differently." ),
 	};
 
