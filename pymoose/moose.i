@@ -127,12 +127,14 @@
 // 		    %}
 // };// end of extend
 %pythoncode %{
-    def doc(cls):
-    	if type(cls).__name__ == "classobj":
-		return PyMooseBase.getContext().doc(cls.__name__)
-	elif type(cls) == type(PyMooseBase):
-	     return PyMooseBase.getContext().doc(cls.__get_className())
-		
+def doc(cls):
+    """Return documentation string from MOOSE"""
+    if type(cls).__name__ == "classobj":
+        return PyMooseBase.getContext().doc(cls.__name__)
+    elif type(cls) == type(PyMooseBase):
+        return PyMooseBase.getContext().doc(cls.className)
+    elif type(cls).__name__ == "str":
+        return PyMooseBase.getContext().doc(cls)		
 %} // !pythoncode
 	    
 // %attribute(pymoose::PyMooseBase, const std::string, __doc__, __get_docString)
