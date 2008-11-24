@@ -93,7 +93,7 @@
 #endif
 %}
 
-//%feature("autodoc", "1");
+%feature("autodoc", "1");
 %template(uint_vector) std::vector<unsigned int>;
 %template(int_vector) std::vector<int>;
 %template(double_vector) std::vector<double>;
@@ -119,6 +119,23 @@
 %attribute(pymoose::PyMooseBase, Id*, parent, __get_parent)
 %attribute(pymoose::PyMooseBase, const std::string, className, __get_className)
 
+// %extend pymoose::PyMooseBase {
+// 	%pythoncode %{
+// 		    def doc(self):
+// 		    	"""Return builtin MOOSE documentation string"""
+// 			return self.getContext().doc(self.__class__.__name__)
+// 		    %}
+// };// end of extend
+%pythoncode %{
+    def doc(cls):
+    	if type(cls).__name__ == "classobj":
+		return PyMooseBase.getContext().doc(cls.__name__)
+	elif type(cls) == type(PyMooseBase):
+	     return PyMooseBase.getContext().doc(cls.__get_className())
+		
+%} // !pythoncode
+	    
+// %attribute(pymoose::PyMooseBase, const std::string, __doc__, __get_docString)
 // The following attributes, when traversed without assigning to a
 // variable, give segmentation fault. May be some problem with the
 // swig interface to vectors. But sticking to function form helps.
