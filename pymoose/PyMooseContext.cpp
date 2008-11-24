@@ -1473,6 +1473,26 @@ const std::string PyMooseContext::getName(const Id objId) const
     return fieldValue_;
 }
 
+const std::string PyMooseContext::doc(const std::string& className) const
+{
+    const Cinfo* classInfo = Cinfo::find(className);
+    if (!classInfo)
+        return "No such MOOSE class";
+    fieldValue_ = "";
+    fieldValue_.append("Name:        ").append(classInfo->name()).append("\n");
+    fieldValue_.append("Author:      ").append(classInfo->author()).append("\n");
+    fieldValue_.append("Description: ").append(classInfo->description()).append("\n\n");
+    vector <const Finfo*> fieldList;
+    classInfo->listFinfos(fieldList);
+    for (vector <const Finfo*>::iterator iter = fieldList.begin();
+         iter != fieldList.end();
+         ++iter)
+    {
+        fieldValue_.append("\n\t").append((*iter)->name()).append(": ").append((*iter)->doc()).append("\n");
+    }
+    return fieldValue_;
+}
+
 #ifdef DO_UNIT_TESTS
 /**
    These are the unit tests
