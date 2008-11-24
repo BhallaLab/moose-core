@@ -4119,7 +4119,6 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "getarg", reinterpret_cast< slifunc >( do_getarg ), "char*" );
 	AddFunc( "randseed", reinterpret_cast< slifunc >( do_randseed ), "int" );
 	AddFunc( "rand", reinterpret_cast< slifunc >( do_rand ), "float" );
-        AddFunc( "randint", reinterpret_cast< slifunc >( do_randint ), "int" );
 	AddFunc( "xps", do_xps, "void" );
 	AddFunc( "disable", do_disable, "void" );
 	AddFunc( "setup_table2", do_setup_table2, "void" );
