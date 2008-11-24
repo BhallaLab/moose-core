@@ -33,9 +33,9 @@ const Cinfo* initscript_outCinfo()
 	};
 	static Finfo* process =	new SharedFinfo( "process", processShared, 
 			sizeof( processShared ) / sizeof( Finfo* ),
-			"This is a shared message to receive Process messages from the scheduler objects.\n"
-			"The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, \n"
-			"which holds lots of information about current time, thread, dt and so on.\n"
+			"This is a shared message to receive Process messages from the scheduler objects. "
+			"The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, "
+			"which holds lots of information about current time, thread, dt and so on. "
 			"The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo." );
 			
 	static Finfo* parserShared[] = {

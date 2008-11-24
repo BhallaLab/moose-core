@@ -98,8 +98,8 @@ const Cinfo* initSynChanCinfo()
 			"This is a shared message to receive Process message from the scheduler." ), 
 		new SharedFinfo( "channel", channelShared,
 			sizeof( channelShared ) / sizeof( Finfo* ),
-			"This is a shared message to couple channel to compartment.\n"
-			"The first entry is a MsgSrc to send Gk and Ek to the compartment \n"
+			"This is a shared message to couple channel to compartment. "
+			"The first entry is a MsgSrc to send Gk and Ek to the compartment "
 			"The second entry is a MsgDest for Vm from the compartment." ),
 
 ///////////////////////////////////////////////////////
@@ -130,8 +130,8 @@ const Cinfo* initSynChanCinfo()
 	{
 		"Name", "SynChan",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "SynChan: Synaptic channel incorporating weight and delay. Does not\n"
-				"handle activity-dependent modification, see HebbSynChan for that.\n"
+		"Description", "SynChan: Synaptic channel incorporating weight and delay. Does not "
+				"handle activity-dependent modification, see HebbSynChan for that. "
 				"Very similiar to the old synchan from GENESIS.", 
 	};
 

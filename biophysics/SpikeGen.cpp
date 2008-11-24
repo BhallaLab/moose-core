@@ -40,11 +40,13 @@ const Cinfo* initSpikeGenCinfo()
 			RFCAST( &SpikeGen::setRefractT )
 		),
 
+		/**	"The amplitude field of the spikeGen is never used. "
+		 	\todo: perhaps should deprecate this."	*/
+
 		new ValueFinfo( "amplitude", ValueFtype1< double >::global(),
 			GFCAST( &SpikeGen::getAmplitude ),
 			RFCAST( &SpikeGen::setAmplitude ),
-			"The amplitude field of the spikeGen is never used.\n"
-			" \todo: perhaps should deprecate this."
+			"The amplitude field of the spikeGen is never used. "
 		),
 		new ValueFinfo( "state", ValueFtype1< double >::global(),
 			GFCAST( &SpikeGen::getState ),

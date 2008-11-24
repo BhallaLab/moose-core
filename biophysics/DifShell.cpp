@@ -24,11 +24,11 @@ const Cinfo* initDifShellCinfo()
 	};
 	static Finfo* process_0 = new SharedFinfo( "process_0", processShared_0,
 		sizeof( processShared_0 ) / sizeof( Finfo* ),
-		"Here we create 2 shared finfos to attach with the Ticks. This is because we want to perform DifShell \n"
-		"computations in 2 stages, much as in the Compartment object.\n"
-		"In the first stage we send out the concentration value to other DifShells and Buffer elements. We also \n"
-		"receive fluxes and currents and sum them up to compute ( dC / dt ).\n"
-		"In the second stage we find the new C value using an explicit integration method.\n"
+		"Here we create 2 shared finfos to attach with the Ticks. This is because we want to perform DifShell "
+		"computations in 2 stages, much as in the Compartment object. "
+		"In the first stage we send out the concentration value to other DifShells and Buffer elements. We also "
+		"receive fluxes and currents and sum them up to compute ( dC / dt ). "
+		"In the second stage we find the new C value using an explicit integration method. "
 		"This 2-stage procedure eliminates the need to store and send prev_C values, as was common in GENESIS."	);
 	
 	static Finfo* processShared_1[] =
@@ -48,7 +48,7 @@ const Cinfo* initDifShellCinfo()
 		new DestFinfo( "reaction",
 			Ftype4< double, double, double, double >::global(),
 			RFCAST( &DifShell::buffer ),
-			"Here the DifShell receives reaction rates (forward and backward), and concentrations for the \n"
+			"Here the DifShell receives reaction rates (forward and backward), and concentrations for the "
 			"free-buffer and bound-buffer molecules."	),
 	};
 
@@ -131,20 +131,20 @@ const Cinfo* initDifShellCinfo()
 		process_1,
 		new SharedFinfo( "buffer", bufferShared,
 			sizeof( bufferShared ) / sizeof( Finfo* ),
-			"This is a shared message from a DifShell to a Buffer (FixBuffer or DifBuffer).\n"
-			"During stage 0:\n"
+			"This is a shared message from a DifShell to a Buffer (FixBuffer or DifBuffer). "
+			"During stage 0:\n "
 			"- DifShell sends ion concentration \n"
 			"- Buffer updates buffer concentration and sends it back immediately using a call-back.\n"
 			"- DifShell updates the time-derivative ( dC / dt ) \n"
 	 		"During stage 1: \n"
 			"- DifShell advances concentration C \n"
-			"This scheme means that the Buffer does not need to be scheduled, and it does its computations when \n"
-			"it receives a cue from the DifShell. May not be the best idea, but it saves us from doing the above \n"
+			"This scheme means that the Buffer does not need to be scheduled, and it does its computations when "
+			"it receives a cue from the DifShell. May not be the best idea, but it saves us from doing the above "
 			"computations in 3 stages instead of 2." ),
 		new SharedFinfo( "innerDif", innerDifShared,
 			sizeof( innerDifShared ) / sizeof( Finfo* ),
-			"This shared message (and the next) is between DifShells: adjoining shells exchange information to \n"
-			"find out the flux between them. \n"
+			"This shared message (and the next) is between DifShells: adjoining shells exchange information to "
+			"find out the flux between them. "
 			"Using this message, an inner shell sends to, and receives from its outer shell." ),
 		new SharedFinfo( "outerDif", outerDifShared,
 			sizeof( outerDifShared ) / sizeof( Finfo* ),
@@ -191,10 +191,10 @@ const Cinfo* initDifShellCinfo()
 	{
 		"Name", "DifShell",
 		"Author", "Niraj Dudani",
-		"Description", "DifShell object: Models diffusion of an ion (typically calcium) within an\n"
-				"electric compartment. A DifShell is an iso-concentration region with respect to\n"
-				"the ion. Adjoining DifShells exchange flux of this ion, and also keep track of\n"
-				"changes in concentration due to pumping, buffering and channel currents, by\n"
+		"Description", "DifShell object: Models diffusion of an ion (typically calcium) within an "
+				"electric compartment. A DifShell is an iso-concentration region with respect to "
+				"the ion. Adjoining DifShells exchange flux of this ion, and also keep track of "
+				"changes in concentration due to pumping, buffering and channel currents, by "
 				"talking to the appropriate objects.",
 	};	
 	static Cinfo difShellCinfo(
