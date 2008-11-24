@@ -10,6 +10,8 @@ OBJ = \
 	StringUtil.o	\
 	Property.o	\
 	SparseMatrix.o	\
+	Helpless.o	\
+
 
 HEADERS = \
 	ArgParser.h	\
