@@ -15,19 +15,20 @@
 #include <FlexLexer.h>
 #include "script.h"
 
-#include "../shell/Shell.h"
+#include "shell/Shell.h"
 #include "GenesisParser.h"
 #include "GenesisParserWrapper.h"
-#include "../element/Neutral.h"
+#include "element/Neutral.h"
 #include "func_externs.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
 #include <climits>
 
-	using namespace std;
+using namespace std;
 
 extern string trim(const string&);
+extern const string& helpless();
 
 /*
 static const char nullChar( '\0' );
@@ -3871,26 +3872,48 @@ void do_showstat(int argc, const char** const argv, Id s )
 */
 void printCinfoDoc(const Cinfo* classInfo, string field)
 {
-    cout << "\nName  :      " << classInfo->name() << "\n"
-         << "\nAuthor:      " << classInfo->author() << "\n"
-         << "\nDescription: " << classInfo->description() << "\n"
-         << "\nFields:      \n" 
-         << endl;
-    // go through the finfos and print their names and documentation strings.
-    vector <const Finfo* > finfoList;
-    classInfo->listFinfos(finfoList);
-    for ( vector <const Finfo* >::iterator iter = finfoList.begin();
-          iter != finfoList.end();
-          ++iter)
+    if (trim(field).empty())
     {
-        // TODO: it would have been nicer if we could print the data
-        // type also - Ftype::fulle_type, Ftype::getTemplateParameters
-        // are sued in pymoose code generator. But my experience
-        // is that C++ RTTI is unreliable - in particular GCC produces
-        // human-unreadable typename
-        cout << "\n" << (*iter)->name() << ": \n" << (*iter)->doc() << "\n";
+
+        cout << "\nName  :      " << classInfo->name() << "\n"
+             << "\nAuthor:      " << classInfo->author() << "\n"
+             << "\nDescription: " << classInfo->description() << "\n"
+             << "\nFields:      \n"
+             << endl;
+        // go through the finfos and print their names and documentation strings.
+        vector <const Finfo* > finfoList;
+        classInfo->listFinfos(finfoList);
+        for ( vector <const Finfo* >::iterator iter = finfoList.begin();
+              iter != finfoList.end();
+              ++iter)
+        {
+            // TODO: it would have been nicer if we could print the data
+            // type also - Ftype::fulle_type, Ftype::getTemplateParameters
+            // are sued in pymoose code generator. But my experience
+            // is that C++ RTTI is unreliable - in particular GCC produces
+            // human-unreadable typename
+            std::string doc = (*iter)->doc();
+            if (trim(doc).empty())
+            {
+                doc = helpless();
+            }
+
+            cout << "\n" << (*iter)->name() << ": \n" << doc << "\n";
+        }
     }
-    cout << endl;    
+
+    else
+    {
+        const Finfo* finfo = classInfo->findFinfo(field);
+        std::string doc = finfo->doc();
+        if (trim(doc).empty())
+        {
+            doc = helpless();
+        }
+        cout << "\n" << field << ": \n" << doc << "\n";
+    }
+
+    cout << endl;
 }
 
 /**
@@ -3934,7 +3957,7 @@ void do_help(int argc, const char** const argv, Id s ){
         // Assume for the time being that only one level of field
         // documentation is displayed. No help for channel.xGate.A
         // kind of stuff.
-        field = target.substr(field_start); 
+        field = target.substr(field_start+1); 
         target = target.substr(0, field_start);
     }
     // Don't know what to do about the field documentation - need some sample
@@ -4096,6 +4119,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "getarg", reinterpret_cast< slifunc >( do_getarg ), "char*" );
 	AddFunc( "randseed", reinterpret_cast< slifunc >( do_randseed ), "int" );
 	AddFunc( "rand", reinterpret_cast< slifunc >( do_rand ), "float" );
+        AddFunc( "randint", reinterpret_cast< slifunc >( do_randint ), "int" );
 	AddFunc( "xps", do_xps, "void" );
 	AddFunc( "disable", do_disable, "void" );
 	AddFunc( "setup_table2", do_setup_table2, "void" );
