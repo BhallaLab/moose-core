@@ -1717,16 +1717,15 @@ def PyMooseBase_getChildren(*args):
 def PyMooseBase_initSimulation(*args):
   """PyMooseBase_initSimulation()"""
   return _moose.PyMooseBase_initSimulation(*args)
-# This function was inserted manually. Somehow SWIG deletes the first few characters in the function definition in moose.i
-def doc(cls):
-    """Return the builtin MOOSE documentation."""
-	if type(cls).__name__ == "classobj":
-		return _moose.PyMooseBase_getContext().doc(cls.__name__)
-	if type(cls) == type(PyMooseBase):
-		return _moose.PyMooseBase_getContext().doc(cls.className)
-        if type(cls).__name__ == "str":
-                return _moose.PyMooseBase_getContext().doc(cls)
 
+def doc(cls):
+    """Return documentation string from MOOSE"""
+    if type(cls).__name__ == "classobj":
+        return _moose.PyMooseBase_getContext().doc(cls.__name__)
+    elif type(cls) == type(PyMooseBase):
+        return _moose.PyMooseBase_getContext().doc(cls.className)
+    elif type(cls).__name__ == "str":
+        return _moose.PyMooseBase_getContext().doc(cls)		
 
 class Neutral(PyMooseBase):
     """Proxy of C++ Neutral class"""
@@ -4525,6 +4524,10 @@ def mtrand(*args):
 def mtseed(*args):
   """mtseed(long seed)"""
   return _moose.mtseed(*args)
+
+def genrand_int32(*args):
+  """genrand_int32() -> unsigned long"""
+  return _moose.genrand_int32(*args)
 class Probability(object):
     """Proxy of C++ Probability class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
