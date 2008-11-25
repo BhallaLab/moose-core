@@ -1721,11 +1721,11 @@ def PyMooseBase_initSimulation(*args):
 def doc(cls):
     """Return documentation string from MOOSE"""
     if type(cls).__name__ == "classobj":
-        return _moose.PyMooseBase_getContext().doc(cls.__name__)
+        return PyMooseBase.getContext().doc(cls.__name__)
     elif type(cls) == type(PyMooseBase):
-        return _moose.PyMooseBase_getContext().doc(cls.className)
+        return PyMooseBase.getContext().doc(cls.className)
     elif type(cls).__name__ == "str":
-        return _moose.PyMooseBase_getContext().doc(cls)		
+        return PyMooseBase.getContext().doc(cls)		
 
 class Neutral(PyMooseBase):
     """Proxy of C++ Neutral class"""
