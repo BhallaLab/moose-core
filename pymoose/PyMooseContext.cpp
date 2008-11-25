@@ -27,6 +27,9 @@ using namespace pymoose;
 extern void initMoose();
 extern void initSched();
 extern const std::string& helpless();
+extern const std::string& getClassDoc(const std::string&);
+extern const std::string& getCommandDoc(const std::string&);
+
 
 extern void setupDefaultSchedule(Element*, Element*, Element*);
 extern Element* makeGenesisParser();
@@ -1462,7 +1465,7 @@ void PyMooseContext::readCell(string filename, string cellpath, double cm, doubl
                              readCellSlot, filename, cellpath , params);
 }
 
-const std::string PyMooseContext::className(const Id& objId) const
+const std::string& PyMooseContext::className(const Id& objId) const
 {
     fieldValue_ =  objId()->className();
     return fieldValue_;
@@ -1474,57 +1477,19 @@ const std::string PyMooseContext::getName(const Id objId) const
     return fieldValue_;
 }
 
-const std::string PyMooseContext::doc(const std::string& target) const
+/**
+   returns help on a specied class or a specific field of a class.
+*/
+const std::string& PyMooseContext::doc(const std::string& target) const
 {
-  std::string field = "";
-  std::string className = "";
-  string::size_type field_start = target.find_first_of(".");
-  if ( field_start != string::npos)
+    fieldValue_ = getClassDoc(target);
+    if (!fieldValue_.empty())
     {
-        // May we need to go recursively?
-        // Assume for the time being that only one level of field
-        // documentation is displayed. No help for channel.xGate.A
-        // kind of stuff.
-      field = trim(target.substr(field_start+1)); 
+        return fieldValue_;
     }
-  className = trim(target.substr(0, field_start));
-
-    const Cinfo* classInfo = Cinfo::find(className);
-    if (!classInfo)
-        return "No such MOOSE class";
-    if (field.empty())
-    {
-
-    fieldValue_ = "";
-    fieldValue_.append("\nName:        ").append(classInfo->name()).append("\n");
-    fieldValue_.append("\nAuthor:      ").append(classInfo->author()).append("\n");
-    fieldValue_.append("\nDescription: ").append(classInfo->description()).append("\n");
-    fieldValue_.append("\nFields:\n");
-    vector <const Finfo*> fieldList;
-    classInfo->listFinfos(fieldList);
-    for (vector <const Finfo*>::iterator iter = fieldList.begin();
-         iter != fieldList.end();
-         ++iter)
-      {
-	fieldValue_.append("\n").append((*iter)->name()).append(":\n");
-	std::string doc = (*iter)->doc();
-	if (trim(doc).empty()){
-	  doc = helpless();
-	}
-	fieldValue_.append(doc).append("\n");
-      }
-    }
-    else
-    {
-      const Finfo* finfo = classInfo->findFinfo(field);
-      std::string doc = finfo->doc();
-      if (trim(doc).empty())
-        {
-            doc = helpless();
-        }
-      fieldValue_.append("\n").append(field).append(": \n").append(doc).append("\n");
-    }
-
+    // check if it is old-style class name
+    // fallback to looking for a file with same name in documentation directory
+    fieldValue_ = getCommandDoc(target);
     return fieldValue_;
 }
 

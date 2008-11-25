@@ -30,7 +30,7 @@
 using namespace std;
 
 extern string trim(const string&);
-extern const string& getCinfoDoc(const Cinfo* cinfo, const string& fieldName);
+extern const string& getClassDoc(const string& command);
 extern const string& getCommandDoc(const string& command);
 
 /*
@@ -3891,40 +3891,29 @@ void do_help(int argc, const char** const argv, Id s ){
         
         return;
     }
-    string target = string(argv[1]);
-    string field = "";
-    string::size_type field_start = target.find_first_of(".");
-    if ( field_start != string::npos)
-    {
-        // May we need to go recursively?
-        // Assume for the time being that only one level of field
-        // documentation is displayed. No help for channel.xGate.A
-        // kind of stuff.
-        field = target.substr(field_start+1); 
-        target = target.substr(0, field_start);
-    }
 
-    const Cinfo * classInfo = Cinfo::find(target);
-    if (classInfo)
+    string doc = getClassDoc(string(argv[1]));
+    if (!doc.empty())
     {
-        cout << getCinfoDoc(classInfo, field);
+        cout << doc << endl;
         return;
     }
-        
-    // see if the target is old-style classname
-    map <string, string>::iterator sli_iter = sliClassNameConvert().find(target);
+
+    // check if it is old-style class name
+    map <string, string>::iterator sli_iter = sliClassNameConvert().find(string(argv[1]));
         
     if (sli_iter != sliClassNameConvert().end())
     {
-        classInfo = Cinfo::find(sli_iter->second);
-        if(classInfo)
+        doc = getClassDoc(sli_iter->second);
+        
+        if(!doc.empty())
         {
-            cout << getCinfoDoc(classInfo, field);
+            cout << doc << endl;
             return;
         }            
     }
     // fallback to looking for a file with same name in documentation directory
-    cout << getCommandDoc(target);
+    cout << getCommandDoc(string(argv[1]));
 }
 
 char** do_arglist(int argc, const char** const argv, Id s)
