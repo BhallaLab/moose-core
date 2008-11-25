@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Nov 25 11:03:34 2008 (+0530)
 // Version: 
-// Last-Updated: Tue Nov 25 15:01:07 2008 (+0530)
+// Last-Updated: Tue Nov 25 16:54:42 2008 (+0530)
 //           By: Subhasis Ray
-//     Update #: 75
+//     Update #: 81
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -80,6 +80,7 @@ const std::string& getCinfoDoc(const Cinfo* cinfo, const std::string& fieldName)
         doc.append("\n").append(START_BOLD).append("Name        :  ").append(END_BOLD).append(cinfo->name()).append("\n");
         doc.append("\n").append(START_BOLD).append("Author      :  ").append(END_BOLD).append(cinfo->author()).append("\n");
         doc.append("\n").append(START_BOLD).append("Description :  ").append(END_BOLD).append(cinfo->description()).append("\n");
+        doc.append("\n").append(START_BOLD).append("Fields      :  ").append(END_BOLD).append(cinfo->description()).append("\n");
         vector <const Finfo* > finfoList;
         cinfo->listFinfos(finfoList);
         for ( vector <const Finfo* >::iterator iter = finfoList.begin();
@@ -143,6 +144,30 @@ const std::string& getCommandDoc(const std::string& command)
     }
 
     return doc;
+}
+
+const std::string& getClassDoc(const std::string& args)
+{
+    string target = args;
+    string field = "";
+    string::size_type field_start = target.find_first_of(".");
+    if ( field_start != string::npos)
+    {
+        // May we need to go recursively?
+        // Assume for the time being that only one level of field
+        // documentation is displayed. No help for channel.xGate.A
+        // kind of stuff.
+        field = target.substr(field_start+1); 
+        target = target.substr(0, field_start);
+    }
+
+    const Cinfo * classInfo = Cinfo::find(target);
+    if (classInfo)
+    {
+        return getCinfoDoc(classInfo, field);
+    }
+    
+    return "";    
 }
 
 
