@@ -8,27 +8,30 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "moose.h"
+
 #include <math.h>
-
-#include <setjmp.h>
-#include <FlexLexer.h>
-#include "script.h"
-
-#include "shell/Shell.h"
-#include "GenesisParser.h"
-#include "GenesisParserWrapper.h"
-#include "element/Neutral.h"
-#include "func_externs.h"
 #include <iostream>
 #include <fstream>
 #include <cstring>
 #include <climits>
 
+#include <setjmp.h>
+#include <FlexLexer.h>
+
+#include "basecode/moose.h"
+#include "element/Neutral.h"
+#include "shell/Shell.h"
+
+#include "script.h"
+#include "GenesisParser.h"
+#include "func_externs.h"
+#include "GenesisParserWrapper.h"
+
 using namespace std;
 
 extern string trim(const string&);
-extern const string& helpless();
+extern const string& getCinfoDoc(const Cinfo* cinfo, const string& fieldName);
+extern const string& getCommandDoc(const string& command);
 
 /*
 static const char nullChar( '\0' );
@@ -3874,86 +3877,18 @@ void do_showstat(int argc, const char** const argv, Id s )
 	float time = do_getstat( argc, argv, s );
 	cout << "current simulation time = " << time << endl;
 }
-/**
-   Print class documentation. It may be better to provide a member
-   function returning the docstring in Cinfo.
-*/
-void printCinfoDoc(const Cinfo* classInfo, string field)
-{
-    if (trim(field).empty())
-    {
 
-        cout << "\nName  :      " << classInfo->name() << "\n"
-             << "\nAuthor:      " << classInfo->author() << "\n"
-             << "\nDescription: " << classInfo->description() << "\n"
-             << "\nFields:      \n"
-             << endl;
-        // go through the finfos and print their names and documentation strings.
-        vector <const Finfo* > finfoList;
-        classInfo->listFinfos(finfoList);
-        for ( vector <const Finfo* >::iterator iter = finfoList.begin();
-              iter != finfoList.end();
-              ++iter)
-        {
-            // TODO: it would have been nicer if we could print the data
-            // type also - Ftype::fulle_type, Ftype::getTemplateParameters
-            // are sued in pymoose code generator. But my experience
-            // is that C++ RTTI is unreliable - in particular GCC produces
-            // human-unreadable typename
-            std::string doc = (*iter)->doc();
-            if (trim(doc).empty())
-            {
-                doc = helpless();
-            }
-
-            cout << "\n" << (*iter)->name() << ": \n" << doc << "\n";
-        }
-    }
-
-    else
-    {
-        const Finfo* finfo = classInfo->findFinfo(field);
-        std::string doc = finfo->doc();
-        if (trim(doc).empty())
-        {
-            doc = helpless();
-        }
-        cout << "\n" << field << ": \n" << doc << "\n";
-    }
-
-    cout << endl;
-}
 
 /**
-   Print documentation for builtin commands.
-   Currently does not do much.
+   prints help on a specied class or a specific field of a class.
 */
-void printCommandDoc(string command)
-{
-    string filename = "../DOCS/documentation/";
-    filename.append(command);
-    cout << filename << endl;
-    string line;
-    ifstream docfile(filename.c_str());
-    if (docfile.is_open()){
-        while (! docfile.eof() ){
-            getline (docfile,line);
-            cout << line << endl;
-        }
-        docfile.close();
-    }
-    else {
-        cout << "Help not present for this command." << endl;
-    }
-}
-
 void do_help(int argc, const char** const argv, Id s ){
     if (argc == 1){
         cout << "For info on a particular command, type help <commandname>\n"
              << "For info on a particular class, type help <classname>\n"
              << "For info on a particular field, type help <classname>.<fieldname>"
              << endl;
-
+        
         return;
     }
     string target = string(argv[1]);
@@ -3972,7 +3907,7 @@ void do_help(int argc, const char** const argv, Id s ){
     const Cinfo * classInfo = Cinfo::find(target);
     if (classInfo)
     {
-        printCinfoDoc(classInfo, field);
+        cout << getCinfoDoc(classInfo, field);
         return;
     }
         
@@ -3984,12 +3919,12 @@ void do_help(int argc, const char** const argv, Id s ){
         classInfo = Cinfo::find(sli_iter->second);
         if(classInfo)
         {
-            printCinfoDoc(classInfo, field);
+            cout << getCinfoDoc(classInfo, field);
             return;
         }            
     }
-        
-    printCommandDoc(target);
+    // fallback to looking for a file with same name in documentation directory
+    cout << getCommandDoc(target);
 }
 
 char** do_arglist(int argc, const char** const argv, Id s)
