@@ -11,7 +11,7 @@ OBJ = \
 	Property.o	\
 	SparseMatrix.o	\
 	Helpless.o	\
-
+	help.o		\
 
 HEADERS = \
 	ArgParser.h	\

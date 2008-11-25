@@ -7,9 +7,9 @@
 // Maintainer: 
 // Created: Mon Nov 24 10:26:16 2008 (+0530)
 // Version: 
-// Last-Updated: Mon Nov 24 11:08:26 2008 (+0530)
+// Last-Updated: Tue Nov 25 15:07:58 2008 (+0530)
 //           By: Subhasis Ray
-//     Update #: 9
+//     Update #: 12
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -68,6 +68,10 @@ const std::string& helpless(void)
             "Please bug the developers to provide documentation.",
             "Please help us by submitting a bug report for lack of documentation.",
             "Developers too lazy to help with docs.",
+            "You are right, developers hate to write docs.",
+            "Don't hesitate - send a mail to the developers for documentation. It's there fault!",
+            "Lazy programmers need a nerve pinch to output some documentation",
+            "Play me online? Well you know that I'll beat you \nIf I ever meet you, I'll Control-Alt-Delete you. - Weird Al Yankovic, It's All About the Pentiums",
             "Remember, if you ever need a helping hand, you'll find one at the end of your arm. - Audrey Hepburn",
             "When you can't have what you want, it's time to start wanting what you have. -Kathleen A. Sutton",
             "When it gets dark enough you can see the stars. -Lee Salk",
