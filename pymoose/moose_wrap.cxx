@@ -25003,7 +25003,7 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_className(PyObject *SWIGUNUSEDPARM(sel
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
   Id *arg2 = 0 ;
-  std::string result;
+  std::string *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -25028,10 +25028,13 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_className(PyObject *SWIGUNUSEDPARM(sel
   arg2 = reinterpret_cast< Id * >(argp2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = ((pymoose::PyMooseContext const *)arg1)->className((Id const &)*arg2);
+    {
+      std::string const &_result_ref = ((pymoose::PyMooseContext const *)arg1)->className((Id const &)*arg2);
+      result = (std::string *) &_result_ref;
+    }
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  resultobj = SWIG_From_std_string(static_cast< std::string >(*result));
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -25044,7 +25047,7 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_doc(PyObject *SWIGUNUSEDPARM(self), Py
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
   std::string *arg2 = 0 ;
-  std::string result;
+  std::string *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int res2 = SWIG_OLDOBJ ;
@@ -25071,10 +25074,13 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_doc(PyObject *SWIGUNUSEDPARM(self), Py
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = ((pymoose::PyMooseContext const *)arg1)->doc((std::string const &)*arg2);
+    {
+      std::string const &_result_ref = ((pymoose::PyMooseContext const *)arg1)->doc((std::string const &)*arg2);
+      result = (std::string *) &_result_ref;
+    }
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  resultobj = SWIG_From_std_string(static_cast< std::string >(*result));
   if (SWIG_IsNewObj(res2)) delete arg2;
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
@@ -73251,6 +73257,26 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_genrand_int32(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  unsigned long result;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"genrand_int32",0,0)) SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (unsigned long)genrand_int32();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_unsigned_SS_long(static_cast< unsigned long >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_delete_Probability(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Probability *arg1 = (Probability *) 0 ;
@@ -101628,6 +101654,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Molecule_swigregister", Molecule_swigregister, METH_VARARGS, NULL},
 	 { (char *)"mtrand", _wrap_mtrand, METH_VARARGS, (char *)"mtrand() -> double"},
 	 { (char *)"mtseed", _wrap_mtseed, METH_VARARGS, (char *)"mtseed(long seed)"},
+	 { (char *)"genrand_int32", _wrap_genrand_int32, METH_VARARGS, (char *)"genrand_int32() -> unsigned long"},
 	 { (char *)"delete_Probability", _wrap_delete_Probability, METH_VARARGS, (char *)"delete_Probability(Probability self)"},
 	 { (char *)"Probability_getMean", _wrap_Probability_getMean, METH_VARARGS, (char *)"Probability_getMean(Probability self) -> double"},
 	 { (char *)"Probability_getVariance", _wrap_Probability_getVariance, METH_VARARGS, (char *)"Probability_getVariance(Probability self) -> double"},
