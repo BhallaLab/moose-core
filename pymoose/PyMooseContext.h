@@ -127,8 +127,8 @@ namespace pymoose
         void planarConnect(std::string src, std::string dst, double probability = 1.0);
         void plannarDelay(std::string src, double delay);
         void planarWeight(std::string src, double weight);
-        const std::string className(const Id& objId) const;
-        const std::string doc(const std::string& className) const;
+        const std::string& className(const Id& objId) const;
+        const std::string& doc(const std::string& className) const;
 
 #ifdef DO_UNIT_TESTS    
         static bool testPyMooseContext(int count, bool print);
