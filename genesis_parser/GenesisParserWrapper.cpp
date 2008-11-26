@@ -3878,21 +3878,26 @@ void do_showstat(int argc, const char** const argv, Id s )
 	cout << "current simulation time = " << time << endl;
 }
 
-
 /**
    prints help on a specied class or a specific field of a class.
 */
 void do_help(int argc, const char** const argv, Id s ){
     if (argc == 1){
         cout << "For info on a particular command, type help <commandname>\n"
-             << "For info on a particular class, type help <classname>\n"
+             << "For info on a particular class, type help <classname> [-full]\n"
              << "For info on a particular field, type help <classname>.<fieldname>"
              << endl;
         
         return;
     }
-
-    string doc = getClassDoc(string(argv[1]));
+    string topic(argv[1]);
+    
+    if (argc == 3)
+    {
+        topic.append(".").append(argv[2]);
+    }
+    
+    string doc = getClassDoc(topic);
     if (!doc.empty())
     {
         cout << doc << endl;
@@ -3904,13 +3909,18 @@ void do_help(int argc, const char** const argv, Id s ){
         
     if (sli_iter != sliClassNameConvert().end())
     {
-        doc = getClassDoc(sli_iter->second);
+        topic = string(sli_iter->second);
+        if(argc == 3){
+            topic.append(".").append(argv[2]);
+        }
+        
+        doc = getClassDoc(topic);
         
         if(!doc.empty())
         {
             cout << doc << endl;
             return;
-        }            
+        }
     }
     // fallback to looking for a file with same name in documentation directory
     cout << getCommandDoc(string(argv[1]));
