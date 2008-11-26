@@ -343,9 +343,7 @@ FILE *SearchForScript(const char* name, const char* mode)
         for( unsigned int i = 0; i < pathHandler.size(); ++i )
         {
             string path = pathHandler.makeFilePath(string(name), i);
-            char pathBuffer[300]; // this arbitrary and likely to cause problem 
-            strncpy(pathBuffer, path.c_str(), 300);
-            fp = OpenScriptFile(pathBuffer, mode);
+            fp = OpenScriptFile(path.c_str(), mode);
             if (fp != NULL )
             {
                 break;                
