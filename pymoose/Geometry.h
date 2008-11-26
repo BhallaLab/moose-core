@@ -4,7 +4,7 @@
 namespace pymoose{
     class Geometry : public PyMooseBase
     {      public:
-        static const std::string className;
+        static const std::string className_;
         Geometry(Id id);
         Geometry(std::string path);
         Geometry(std::string name, Id parentId);

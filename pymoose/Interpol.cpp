@@ -13,7 +13,7 @@
 using namespace pymoose;
 // We had to change the class name in order to avoid conflict with included moose class Interpol
 // But Interpol is the class name to be passed to base constructor
-const std::string InterpolationTable::className = "InterpolationTable";
+const std::string InterpolationTable::className_ = "InterpolationTable";
 InterpolationTable::InterpolationTable(Id id):PyMooseBase(id){}
 InterpolationTable::InterpolationTable(std::string path):PyMooseBase("Interpol", path){}
 InterpolationTable::InterpolationTable(std::string name, Id parentId):PyMooseBase("Interpol", name, parentId){}
@@ -67,7 +67,7 @@ InterpolationTable::InterpolationTable(std::string typeName, std::string objectN
 }
 
 
-const std::string& InterpolationTable::getType(){ return className; }
+const std::string& InterpolationTable::getType(){ return className_; }
 double InterpolationTable::__get_xmin() const
 {
     double xmin;

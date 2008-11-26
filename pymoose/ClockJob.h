@@ -6,7 +6,7 @@ namespace pymoose
     class ClockJob : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         ClockJob(Id id);
         ClockJob(std::string path);
         ClockJob(std::string name, Id parentId);

@@ -4,7 +4,7 @@
 namespace pymoose{
     class TauPump : public PyMooseBase
     {      public:
-        static const std::string className;
+        static const std::string className_;
         TauPump(Id id);
         TauPump(std::string path);
         TauPump(std::string name, Id parentId);

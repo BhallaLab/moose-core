@@ -5,7 +5,7 @@ namespace pymoose
 {
     class TickTest : public PyMooseBase
     {    public:
-        static const std::string className;
+        static const std::string className_;
         TickTest(Id id);
         TickTest(std::string path);
         TickTest(std::string name, Id parentId);

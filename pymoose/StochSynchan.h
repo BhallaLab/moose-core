@@ -32,7 +32,7 @@ namespace pymoose
 
     class StochSynchan : public PyMooseBase
     {    public:
-        static const std::string className;
+        static const std::string className_;
         StochSynchan(Id id);
         StochSynchan(std::string path);
         StochSynchan(std::string name, Id parentId);

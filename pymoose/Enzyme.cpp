@@ -2,11 +2,11 @@
 #define _pymoose_Enzyme_cpp
 #include "Enzyme.h"
 using namespace pymoose;
-const std::string Enzyme::className = "Enzyme";
+const std::string Enzyme::className_ = "Enzyme";
 Enzyme::Enzyme(Id id):PyMooseBase(id){}
-Enzyme::Enzyme(std::string path):PyMooseBase(className, path){}
-Enzyme::Enzyme(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Enzyme::Enzyme(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Enzyme::Enzyme(std::string path):PyMooseBase(className_, path){}
+Enzyme::Enzyme(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+Enzyme::Enzyme(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 Enzyme::Enzyme(const Enzyme& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 Enzyme::Enzyme(const Enzyme& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -18,7 +18,7 @@ Enzyme::Enzyme(const Id& src, string name, Id& parent):PyMooseBase(src, name, pa
 {
 }
 Enzyme::~Enzyme(){}
-const std::string& Enzyme::getType(){ return className; }
+const std::string& Enzyme::getType(){ return className_; }
 double Enzyme::__get_k1() const
 {
     double k1;

@@ -4,7 +4,7 @@
 namespace pymoose{
     class KineticManager : public PyMooseBase
     {      public:
-        static const std::string className;
+        static const std::string className_;
         KineticManager(Id id);
         KineticManager(std::string path);
         KineticManager(std::string name, Id parentId);

@@ -6,7 +6,7 @@ namespace pymoose
     class GammaRng : public RandGenerator
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         GammaRng(Id id);
         GammaRng(std::string path);
         GammaRng(std::string name, Id parentId);

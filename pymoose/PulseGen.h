@@ -4,7 +4,7 @@
 namespace pymoose{
     class PulseGen : public PyMooseBase
     {      public:
-        static const std::string className;
+        static const std::string className_;
         PulseGen(Id id);
         PulseGen(std::string path);
         PulseGen(std::string name, Id parentId);

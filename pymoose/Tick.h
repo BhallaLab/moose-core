@@ -5,7 +5,7 @@ namespace pymoose
 {
     class ClockTick : public PyMooseBase
     {    public:
-        static const std::string className;
+        static const std::string className_;
         ClockTick(Id id);
         ClockTick(std::string path);
         ClockTick(std::string name, Id parentId);

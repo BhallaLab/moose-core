@@ -5,7 +5,7 @@ namespace pymoose
 {
     class Nernst : public PyMooseBase
     {    public:
-        static const std::string className;
+        static const std::string className_;
         Nernst(Id id);
         Nernst(std::string path);
         Nernst(std::string name, Id parentId);

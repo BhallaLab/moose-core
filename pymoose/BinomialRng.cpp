@@ -21,11 +21,11 @@
 #define _pymoose_BinomialRng_cpp
 #include "BinomialRng.h"
 using namespace pymoose;
-const std::string BinomialRng::className = "BinomialRng";
+const std::string BinomialRng::className_ = "BinomialRng";
 BinomialRng::BinomialRng(Id id):RandGenerator(id){}
-BinomialRng::BinomialRng(std::string path):RandGenerator(className, path){}
-BinomialRng::BinomialRng(std::string name, Id parentId):RandGenerator(className, name, parentId){}
-BinomialRng::BinomialRng(std::string name, PyMooseBase& parent):RandGenerator(className, name, parent){}
+BinomialRng::BinomialRng(std::string path):RandGenerator(className_, path){}
+BinomialRng::BinomialRng(std::string name, Id parentId):RandGenerator(className_, name, parentId){}
+BinomialRng::BinomialRng(std::string name, PyMooseBase& parent):RandGenerator(className_, name, parent){}
 BinomialRng::BinomialRng(const BinomialRng& src, std::string objectName,  PyMooseBase& parent):RandGenerator(src, objectName, parent){}
 
 BinomialRng::BinomialRng(const BinomialRng& src, std::string objectName, Id& parent):RandGenerator(src, objectName, parent){}
@@ -37,7 +37,7 @@ BinomialRng::BinomialRng(const Id& src, string name, Id& parent):RandGenerator(s
 {
 }
 BinomialRng::~BinomialRng(){}
-const std::string& BinomialRng::getType(){ return className; }
+const std::string& BinomialRng::getType(){ return className_; }
 int BinomialRng::__get_n() const
 {
     int n;

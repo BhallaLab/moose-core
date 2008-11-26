@@ -2,11 +2,11 @@
 #define _pymoose_CaConc_cpp
 #include "CaConc.h"
 using namespace pymoose;
-const std::string CaConc::className = "CaConc";
+const std::string CaConc::className_ = "CaConc";
 CaConc::CaConc(Id id):PyMooseBase(id){}
-CaConc::CaConc(std::string path):PyMooseBase(className, path){}
-CaConc::CaConc(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-CaConc::CaConc(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+CaConc::CaConc(std::string path):PyMooseBase(className_, path){}
+CaConc::CaConc(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+CaConc::CaConc(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 CaConc::CaConc(const CaConc& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 CaConc::CaConc(const CaConc& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -18,7 +18,7 @@ CaConc::CaConc(const Id& src, string name, Id& parent):PyMooseBase(src, name, pa
 {
 }
 CaConc::~CaConc(){}
-const std::string& CaConc::getType(){ return className; }
+const std::string& CaConc::getType(){ return className_; }
 double CaConc::__get_Ca() const
 {
     double Ca;

@@ -2,11 +2,11 @@
 #define _pymoose_PoissonRng_cpp
 #include "PoissonRng.h"
 using namespace pymoose;
-const std::string PoissonRng::className = "PoissonRng";
+const std::string PoissonRng::className_ = "PoissonRng";
 PoissonRng::PoissonRng(Id id):RandGenerator(id){}
-PoissonRng::PoissonRng(std::string path):RandGenerator(className, path){}
-PoissonRng::PoissonRng(std::string name, Id parentId):RandGenerator(className, name, parentId){}
-PoissonRng::PoissonRng(std::string name, PyMooseBase& parent):RandGenerator(className, name, parent){}
+PoissonRng::PoissonRng(std::string path):RandGenerator(className_, path){}
+PoissonRng::PoissonRng(std::string name, Id parentId):RandGenerator(className_, name, parentId){}
+PoissonRng::PoissonRng(std::string name, PyMooseBase& parent):RandGenerator(className_, name, parent){}
 PoissonRng::PoissonRng(const PoissonRng& src, std::string objectName,  PyMooseBase& parent):RandGenerator(src, objectName, parent){}
 
 PoissonRng::PoissonRng(const PoissonRng& src, std::string objectName, Id& parent):RandGenerator(src, objectName, parent){}
@@ -18,7 +18,7 @@ PoissonRng::PoissonRng(const Id& src, string name, Id& parent):RandGenerator(src
 {
 }
 PoissonRng::~PoissonRng(){}
-const std::string& PoissonRng::getType(){ return className; }
+const std::string& PoissonRng::getType(){ return className_; }
 double PoissonRng::__get_mean() const
 {
     double mean;

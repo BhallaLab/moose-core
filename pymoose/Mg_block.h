@@ -7,7 +7,7 @@ namespace pymoose
     class Mg_block : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         Mg_block(Id id);
         Mg_block(std::string path);
         Mg_block(std::string name, Id parentId);
