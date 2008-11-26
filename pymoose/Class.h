@@ -23,7 +23,7 @@ namespace pymoose
     class Class : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         Class(Id id);
         Class(std::string path, std::string name);
         Class(std::string name, Id parentId);

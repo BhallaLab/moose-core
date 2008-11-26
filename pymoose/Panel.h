@@ -4,7 +4,7 @@
 namespace pymoose{
     class Panel : public PyMooseBase
     {      public:
-        static const std::string className;
+        static const std::string className_;
         Panel(Id id);
         Panel(std::string path);
         Panel(std::string name, Id parentId);

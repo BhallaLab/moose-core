@@ -6,7 +6,7 @@ namespace pymoose
     class ExponentialRng : public RandGenerator
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         ExponentialRng(Id id);
         ExponentialRng(std::string path);
         ExponentialRng(std::string name, Id parentId);

@@ -6,7 +6,7 @@ namespace pymoose
     
     class UniformRng : public RandGenerator
     {    public:
-        static const std::string className;
+        static const std::string className_;
         UniformRng(Id id);
         UniformRng(std::string path);
         UniformRng(std::string name, Id parentId);

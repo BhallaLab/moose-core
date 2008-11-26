@@ -2,11 +2,11 @@
 #define _pymoose_GammaRng_cpp
 #include "GammaRng.h"
 using namespace pymoose;
-const std::string GammaRng::className = "GammaRng";
+const std::string GammaRng::className_ = "GammaRng";
 GammaRng::GammaRng(Id id):RandGenerator(id){}
-GammaRng::GammaRng(std::string path):RandGenerator(className, path){}
-GammaRng::GammaRng(std::string name, Id parentId):RandGenerator(className, name, parentId){}
-GammaRng::GammaRng(std::string name, PyMooseBase& parent):RandGenerator(className, name, parent){}
+GammaRng::GammaRng(std::string path):RandGenerator(className_, path){}
+GammaRng::GammaRng(std::string name, Id parentId):RandGenerator(className_, name, parentId){}
+GammaRng::GammaRng(std::string name, PyMooseBase& parent):RandGenerator(className_, name, parent){}
 GammaRng::GammaRng(const GammaRng& src, std::string objectName,  PyMooseBase& parent):RandGenerator(src, objectName, parent){}
 
 GammaRng::GammaRng(const GammaRng& src, std::string objectName, Id& parent):RandGenerator(src, objectName, parent){}
@@ -18,7 +18,7 @@ GammaRng::GammaRng(const Id& src, string name, Id& parent):RandGenerator(src, na
 {
 }
 GammaRng::~GammaRng(){}
-const std::string& GammaRng::getType(){ return className; }
+const std::string& GammaRng::getType(){ return className_; }
 double GammaRng::__get_alpha() const
 {
     double alpha;

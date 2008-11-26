@@ -4,7 +4,7 @@
 namespace pymoose{
     class Adaptor : public PyMooseBase
     {      public:
-        static const std::string className;
+        static const std::string className_;
         Adaptor(Id id);
         Adaptor(std::string path);
         Adaptor(std::string name, Id parentId);

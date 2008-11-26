@@ -5,7 +5,7 @@
 namespace pymoose{
     class HemispherePanel : public Panel
     {      public:
-        static const std::string className;
+        static const std::string className_;
         HemispherePanel(Id id);
         HemispherePanel(std::string path);
         HemispherePanel(std::string name, Id parentId);

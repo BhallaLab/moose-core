@@ -2,11 +2,11 @@
 #define _pymoose_MathFunc_cpp
 #include "MathFunc.h"
 using namespace pymoose;
-const std::string MathFunc::className = "MathFunc";
+const std::string MathFunc::className_ = "MathFunc";
 MathFunc::MathFunc(Id id):PyMooseBase(id){}
-MathFunc::MathFunc(std::string path):PyMooseBase(className, path){}
-MathFunc::MathFunc(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-MathFunc::MathFunc(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+MathFunc::MathFunc(std::string path):PyMooseBase(className_, path){}
+MathFunc::MathFunc(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+MathFunc::MathFunc(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 MathFunc::MathFunc(const MathFunc& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 MathFunc::MathFunc(const MathFunc& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -18,7 +18,7 @@ MathFunc::MathFunc(const Id& src, string name, Id& parent):PyMooseBase(src, name
 {
 }
 MathFunc::~MathFunc(){}
-const std::string& MathFunc::getType(){ return className; }
+const std::string& MathFunc::getType(){ return className_; }
 string MathFunc::__get_mathML() const
 {
     string mathML;

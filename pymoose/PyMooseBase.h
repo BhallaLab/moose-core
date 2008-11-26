@@ -65,6 +65,7 @@ namespace pymoose
 //    static PyMooseBase* getObjectById(Id id);
     
       protected:
+        static const std::string className_;
         Id id_;
         PyMooseBase(Id id);    /// This is for wrapping an existing ID inside an object
         PyMooseBase(std::string className, std::string path, std::string fileName); /// this will use readcell - since we do not know how exactly all future classes will be loaded from file, we make it protected and those classes should provide the actual implementation

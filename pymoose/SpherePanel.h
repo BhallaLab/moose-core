@@ -6,7 +6,7 @@
 namespace pymoose{
     class SpherePanel : public Panel
     {      public:
-        static const std::string className;
+        static const std::string className_;
         SpherePanel(Id id);
         SpherePanel(std::string path);
         SpherePanel(std::string name, Id parentId);

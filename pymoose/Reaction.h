@@ -5,7 +5,7 @@ namespace pymoose
 {
     class Reaction : public PyMooseBase
     {    public:
-        static const std::string className;
+        static const std::string className_;
         Reaction(Id id);
         Reaction(std::string path);
         Reaction(std::string name, Id parentId);

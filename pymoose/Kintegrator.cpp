@@ -2,11 +2,11 @@
 #define _pymoose_Kintegrator_cpp
 #include "Kintegrator.h"
 using namespace pymoose;
-const std::string Kintegrator::className = "Kintegrator";
+const std::string Kintegrator::className_ = "Kintegrator";
 Kintegrator::Kintegrator(Id id):PyMooseBase(id){}
-Kintegrator::Kintegrator(std::string path):PyMooseBase(className, path){}
-Kintegrator::Kintegrator(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Kintegrator::Kintegrator(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Kintegrator::Kintegrator(std::string path):PyMooseBase(className_, path){}
+Kintegrator::Kintegrator(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+Kintegrator::Kintegrator(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 Kintegrator::Kintegrator(const Kintegrator& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 Kintegrator::Kintegrator(const Kintegrator& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -18,7 +18,7 @@ Kintegrator::Kintegrator(const Id& src, string name, Id& parent):PyMooseBase(src
 {
 }
 Kintegrator::~Kintegrator(){}
-const std::string& Kintegrator::getType(){ return className; }
+const std::string& Kintegrator::getType(){ return className_; }
 bool Kintegrator::__get_isInitiatilized() const
 {
     bool isInitiatilized;

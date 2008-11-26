@@ -2,11 +2,11 @@
 #define _pymoose_Table_cpp
 #include "Table.h"
 using namespace pymoose;
-const std::string Table::className = "Table";
+const std::string Table::className_ = "Table";
 Table::Table(Id id):InterpolationTable(id){}
-Table::Table(std::string path):InterpolationTable(className, path){}
-Table::Table(std::string name, Id parentId):InterpolationTable(className, name, parentId){}
-Table::Table(std::string name, PyMooseBase& parent):InterpolationTable(className, name, parent){}
+Table::Table(std::string path):InterpolationTable(className_, path){}
+Table::Table(std::string name, Id parentId):InterpolationTable(className_, name, parentId){}
+Table::Table(std::string name, PyMooseBase& parent):InterpolationTable(className_, name, parent){}
 Table::Table(const Table& src, std::string objectName,  PyMooseBase& parent):InterpolationTable(src, objectName, parent){}
 
 Table::Table(const Table& src, std::string objectName, Id& parent):InterpolationTable(src, objectName, parent){}
@@ -18,7 +18,7 @@ Table::Table(const Id& src, string name, Id& parent):InterpolationTable(src, nam
 {
 }
 Table::~Table(){}
-const std::string& Table::getType(){ return className; }
+const std::string& Table::getType(){ return className_; }
 double Table::__get_input() const
 {
     double input;

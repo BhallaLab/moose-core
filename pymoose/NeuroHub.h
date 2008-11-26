@@ -4,7 +4,7 @@
 namespace pymoose{
     class NeuroHub : public PyMooseBase
     {      public:
-        static const std::string className;
+        static const std::string className_;
         NeuroHub(Id id);
         NeuroHub(std::string path);
         NeuroHub(std::string name, Id parentId);

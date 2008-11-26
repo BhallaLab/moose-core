@@ -6,7 +6,7 @@
 namespace pymoose{
     class DiskPanel : public Panel
     {      public:
-        static const std::string className;
+        static const std::string className_;
         DiskPanel(Id id);
         DiskPanel(std::string path);
         DiskPanel(std::string name, Id parentId);
