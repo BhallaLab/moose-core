@@ -215,6 +215,14 @@ class Stoich
 		unsigned int nVarMolsBytes_;
 		unsigned int nCopy_;
 		unsigned int nCall_;
+
+		///////////////////////////////////////////////////
+		// Fields used for coupling between solvers.
+		///////////////////////////////////////////////////
+		vector< double* > fluxMol_;	// Pointers to diffusing S_ entries 
+		vector< double > rates;		// Flux scale factors
+		vector< double > prevFluxMol_; // Used for trapezoidal integ.
+		// vector< unsigned int > fluxMap_; // Redundant 
 };
 
 extern const Cinfo* initStoichCinfo();

@@ -8221,5 +8221,64 @@ Fixed missing capability in GssaStoich: It was unable to handle dynamic
 buffering, that is molecules that start out unbuffered but then get switched
 to buffered and assigned to assorted new values. Test is in 
 TESTS/GSSA/testDynamicBuffering.g
+Checked in as revision 961: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Fixed missing capability in GssaStoich: It was unable to handle dynamic
+buffering, that is molecules that start out unbuffered but then get switched
+to buffered and assigned to assorted new values. Test is in 
+TESTS/GSSA/testDynamicBuffering.g
+
+=============================================================================
+25 Nov 2008.
+Designing flux for volume transfer between different solvers.
+- Alternate 0: have halfreacs with appropriate flux rates, pipe the
+	molecules into the flux vector which can be a contiguous set of
+	entries in S_.
+	- Known drawback: Guaranteed to always lower the conc of molecules
+	below correct value. This fraction will be reduced for smaller dt.
+- Alternate 1: Assume that the flux terms are a small fraction of total #.
+	Then one can accumulate flux terms throughout the run without actually
+	effecting any change in mol #. At the time of exchange of flux data,
+	the mol#s are updated. This needs a variant on the FirstOrder RateTerm.
+- Alternate 2: Same assumption, don't do anything until update time. Then
+	do an estimate of # of molecules transferred for the whole period,
+	in either direction. Amounts to a simple Euler timestep. Could also
+	do as Exp Euler. This is a slightly coarser approximation than alt1,
+	assumes that average conc == latest conc. Could do a trapezoidal too.
+
+A look at NumWreck indicates all sorts of pitfalls. Key thing seems to be
+to have access to concs at either end of the dendrite: a little more 
+sophistication in the messaging. Ideally want an implicit solution, but
+here we definitely have to keep it multi-node.
+For starters, let's try their FTCS scheme, which is 2nd order in space:
+u is conc, j is the spatial index, n is the time step.
+
+(u_j_n+1 - u_j_n) / dt = D[ (u_j+1_n - 2 u_j_n + u_j-1_n)/(dx^2) ]
+
+Actually this is identical to what we would get with the simple one-sided
+explicit Euler flux calculation.
+
+- Alternate 3: Dummy neighbour compartments with the latest conc in each,
+	bidirectional reacs, updating the conc in the dummy compts each dt.
+
+Perhaps do a small standalone calculation.
+
+Alternate 0 and 3 use the intrinsic solver mechanisms. 
+Alternate 1  needs a different kind of calculation, a flux term that doesn't
+	remove any molecules.
+Alternate 2 needs a completely separate calculation.
+
+Consider using Smoldyn: Alternates 1 and 2 won't work with it.
+Alternate 0 is ugly and needs something clever still to bring in molecules
+in Smoldyn-like cases.
+Alternate 3 is clean with all molecules including Smoldyn, but may 
+entail computational cost.
+
+=============================================================================
+26 Nov 2008
+A more immediate local problem: Volume scaling still causing problems.
+Turned out to be an issue with the local kkit.g file, which was explicitly
+assigning volumes. Must weed this out. Also cleaned up the KinCompt code
+and field documentation.
 
 =============================================================================

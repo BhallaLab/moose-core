@@ -48,37 +48,44 @@ const Cinfo* initKinComptCinfo()
 			ValueFtype1< double >::global(),
 			GFCAST( &KinCompt::getVolume ), 
 			RFCAST( &KinCompt::setVolume ),
-			"Volume is the compartment volume. If there are no messages to surfaces this returns the local value. "
-			"The setVolume only works if there are no surfaces anywhere.Otherwise the surfaces override it. "
+			"Volume is the compartment volume. If there are no messages to surfaces this returns the local value.\n"
+			"The setVolume only works if there are no surfaces anywhere.Otherwise the surfaces override it \n"
 			"Assigning any of the following four parameters causes automatic rescaling of rates throughout the model."
 		),
 		new ValueFinfo( "area", 
 			ValueFtype1< double >::global(),
 			GFCAST( &KinCompt::getArea ), 
-			RFCAST( &KinCompt::setArea )
+			RFCAST( &KinCompt::setArea ),
+			"Area of compartment"
 		),
 		new ValueFinfo( "perimeter", 
 			ValueFtype1< double >::global(),
 			GFCAST( &KinCompt::getPerimeter ), 
-			RFCAST( &KinCompt::setPerimeter )
+			RFCAST( &KinCompt::setPerimeter ),
+			"Perimeter of compartment"
 		),
 		new ValueFinfo( "size", 
 			ValueFtype1< double >::global(),
 			GFCAST( &KinCompt::getSize ), 
 			RFCAST( &KinCompt::setSize ),
-			"This takes whichever of the above is appropriate for the # of dimensions. Means the same thing as the "
+			"This is equal to whichever of volume, area, or perimeter "
+			"is appropriate for the "
+			"# of dimensions. Means the same thing as the "
 			"SBML size."
 		),
 		new ValueFinfo( "numDimensions", 
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &KinCompt::getNumDimensions ), 
-			RFCAST( &KinCompt::setNumDimensions )
+			RFCAST( &KinCompt::setNumDimensions ),
+			"Number of dimensions of this compartment. Typically 3, "
+			"but for a membrane compartment we might have 2."
 		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
 		new SrcFinfo( "outside", Ftype0::global(),
-			"This goes to the compartment that encloses the current one.Appropriate even for 2d enclosed by 3d and so on." ),
+			"This goes to the compartment that encloses the current "
+			"one.Appropriate even for 2d enclosed by 3d and so on." ),
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
@@ -104,11 +111,14 @@ const Cinfo* initKinComptCinfo()
 		new DestFinfo( "volumeFromChild", 
 			Ftype2< string, double >::global(),
 			RFCAST( &KinCompt::setVolumeFromChild ),
-			"Assigns volume based on request from child Molecule. Applies the following logic:\n"
-			"- If first assignment: Assign without rescaling\n"
-			"- If later assignment, same vol: Keep tally, silently\n"
-			"- If laster assignment, new vol: Complain, tally\n"
-			"- If later new vols outnumber original vol: Complain louder." ),
+			"Assigns volume based on request from child Molecule."
+			"Applies the following logic:\n"
+			"	- If first assignment: Assign without rescaling"
+			"	- If later assignment, same vol: Keep tally, silently"
+			"	- If laster assignment, new vol: Complain, tally"
+			"	- If later new vols outnumber original vol:"
+			"Complain louder."
+			),
 	///////////////////////////////////////////////////////
 	// Synapse definitions
 	///////////////////////////////////////////////////////
@@ -124,7 +134,16 @@ const Cinfo* initKinComptCinfo()
 	{
 		"Name", "KinCompt",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "KinCompt: Kinetic compartment. Has its on volume, or gets +ve or negative contributions from varous surface objects",
+		"Description",
+ 		"The KinCompt is a compartment for kinetic calculations. "
+		"It doesn't really correspond to a single Smoldyn concept, "
+		"but it encapsulates many of them into the traditional "
+		"compartmental view. It connects up with one or more "
+		"surfaces which collectively define its volume and "
+		"area.\n "
+ 		"It also maps onto the SBML concept for compartments. "
+		"It permits the formation of compartments without surfaces "
+		"but this is discouraged."
 	};
 
 	static Cinfo kinComptCinfo(
@@ -172,7 +191,10 @@ void KinCompt::setVolume( const Conn* c, double value )
 
 double KinCompt::getVolume( Eref e )
 {
-	return static_cast< KinCompt* >( e.data() )->volume_;
+	KinCompt* kc = static_cast< KinCompt* >( e.data() );
+	if ( kc->numDimensions_  == 3 )
+		return kc->size_;
+	return kc->volume_;
 }
 
 void KinCompt::setArea( const Conn* c, double value )
@@ -183,7 +205,10 @@ void KinCompt::setArea( const Conn* c, double value )
 
 double KinCompt::getArea( Eref e )
 {
-	return static_cast< KinCompt* >( e.data() )->area_;
+	KinCompt* kc = static_cast< KinCompt* >( e.data() );
+	if ( kc->numDimensions_  == 2 )
+		return kc->size_;
+	return kc->area_;
 }
 
 void KinCompt::setPerimeter( const Conn* c, double value )
@@ -194,7 +219,10 @@ void KinCompt::setPerimeter( const Conn* c, double value )
 
 double KinCompt::getPerimeter( Eref e )
 {
-	return static_cast< KinCompt* >( e.data() )->perimeter_;
+	KinCompt* kc = static_cast< KinCompt* >( e.data() );
+	if ( kc->numDimensions_  == 1 )
+		return kc->size_;
+	return kc->perimeter_;
 }
 
 void KinCompt::setSize( const Conn* c, double value )
@@ -320,6 +348,7 @@ void KinCompt::setVolumeFromChild( const Conn* c, string ch, double v )
 
 void KinCompt::innerSetVolumeFromChild( Eref pa, string ch, double v )
 {
+	// cout << "setting vol of " << pa.id().path() << " to " << v << " from child " << ch << ", ass:mat = " << numAssigned_ << ":" << numMatching_ << endl;
 	if ( numAssigned_ == 0 ) {
 		size_ = v;
 		++numMatching_;
