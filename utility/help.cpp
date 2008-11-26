@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Nov 25 11:03:34 2008 (+0530)
 // Version: 
-// Last-Updated: Tue Nov 25 16:54:42 2008 (+0530)
+// Last-Updated: Wed Nov 26 21:08:39 2008 (+0530)
 //           By: Subhasis Ray
-//     Update #: 81
+//     Update #: 167
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -56,64 +56,124 @@ const char END_BOLD[] = {'\0'};
 
 /**
    cinfo - pointer to the Cinfo instance for the class whose
-   documentation is to be retrieved.
+   documentation is to be retrieved. If NULL, empty string is returned.
 
-   fieldName - if empty, the full class documentation ( Name, Author,
-   Description and documentation for each field) is
-   returned. Otherwise, only the documentation string for the
-   specified field is returned.
+   fieldName 
+   - if empty, the class documentation ( Name, Author,
+   Description) and a list of field names with data type is
+   returned. 
+   - if "-full", the class documentation and a list of field names
+   with data type and available documentation is returned.
+   - otherwise, the field name, data type and documentation string for
+   the specified field is returned.
 
-   Also, for UNIX systems, we add ANSII escape sequences to print the
+   NOTE: for UNIX systems, we add ANSII escape sequences to print the
    field titles in bold. But this assumes the terminal to be VT100
    compatible and is not portable.
  */
 const std::string& getCinfoDoc(const Cinfo* cinfo, const std::string& fieldName)
 {
+    static const Cinfo* previousCinfo = 0; 
     static std::string doc = "";
- 
+    static std::string previousFieldName = "-";// initialize to impossible field
+    
+    static std::vector <const Finfo*> finfoList;
+
     std::string docstr = "";
     
-    doc = ""; // clear the doc string
+    // check if arguments are identical to previous call
+    if (previousCinfo == cinfo && fieldName == previousFieldName)
+    {
+        return doc; // return buffered documentation string
+    }
     
-    if (trim(fieldName).empty()) // no field name - get full class documentation
+    doc = ""; // clear the doc string
+    if (!cinfo)
+    {
+        return doc;
+    }
+    
+    previousFieldName = fieldName;
+    
+    if (previousCinfo != cinfo) // it is a new cinfo, not buffered
+    {
+        cinfo->listFinfos(finfoList);
+        previousCinfo = cinfo;
+    }
+
+    if (fieldName.empty() || fieldName == "-full") // get class documentation
     {
         doc.append("\n").append(START_BOLD).append("Name        :  ").append(END_BOLD).append(cinfo->name()).append("\n");
         doc.append("\n").append(START_BOLD).append("Author      :  ").append(END_BOLD).append(cinfo->author()).append("\n");
         doc.append("\n").append(START_BOLD).append("Description :  ").append(END_BOLD).append(cinfo->description()).append("\n");
         doc.append("\n").append(START_BOLD).append("Fields      :  ").append(END_BOLD).append(cinfo->description()).append("\n");
-        vector <const Finfo* > finfoList;
-        cinfo->listFinfos(finfoList);
-        for ( vector <const Finfo* >::iterator iter = finfoList.begin();
-              iter != finfoList.end();
-              ++iter)
+        if (fieldName == "-full")
         {
-            // TODO: it would have been nicer if we could print the data
-            // type also - Ftype::fulle_type, Ftype::getTemplateParameters
-            // are sued in pymoose code generator. But my experience
-            // is that C++ RTTI is unreliable - in particular GCC produces
-            // human-unreadable typename
-            docstr = (*iter)->doc();
-            if (trim(docstr).empty())
+            for ( vector <const Finfo* >::iterator iter = finfoList.begin();
+                  iter != finfoList.end();
+                  ++iter)
             {
-                docstr = helpless();
+                docstr = (*iter)->doc();
+                if (trim(docstr).empty())
+                {
+                    docstr = helpless();
+                }
+                doc.append("\n").
+                    append(START_BOLD).
+                    append((*iter)->name()).
+                    append(END_BOLD).
+                    append(": ").
+                    append((*iter)->ftype()->getTemplateParameters()).
+                    append("\n").
+                    append(docstr).
+                    append("\n");
             }
-
-            doc.append("\n").append(START_BOLD).append((*iter)->name()).append(END_BOLD).append(": \n").append(docstr).append("\n");
-        }
-    }
-
+        } //! if (fieldName == "-full")
+        else 
+        {
+            for ( vector <const Finfo* >::iterator iter = finfoList.begin();
+                  iter != finfoList.end();
+                  ++iter)
+            {
+                doc.append("\n").
+                    append(START_BOLD).
+                    append((*iter)->name()).
+                    append(END_BOLD).
+                    append(": ").
+                    append((*iter)->ftype()->getTemplateParameters()).
+                    append("\n");
+            }
+        } //! if (fieldName == "-full")
+    } //!if (fieldName.empty() || fieldName == "-full")
     else
     {
         const Finfo* finfo = cinfo->findFinfo(fieldName);
+        if (!finfo)
+        {
+            doc.append("\n").
+                append(START_BOLD).
+                append(cinfo->name()).
+                append(".").
+                append(fieldName).
+                append(END_BOLD).
+                append(": No such field\n");
+            return doc;
+        }
+        
         docstr = finfo->doc();
         if (trim(docstr).empty())
         {
             docstr = helpless();
         }
-        doc.append("\n").append(START_BOLD).append(fieldName).append(END_BOLD).append(": \n").append(docstr).append("\n");
-    }
-
-    doc.append("\r");
+        doc.append("\n").
+            append(START_BOLD).
+            append(fieldName).
+            append(END_BOLD).
+            append(": \n").
+            append(docstr).
+            append("\n");
+    } //!if (fieldName.empty() || fieldName == "-full")
+    doc.append("\n");
     return doc;
 }
 
@@ -162,12 +222,7 @@ const std::string& getClassDoc(const std::string& args)
     }
 
     const Cinfo * classInfo = Cinfo::find(target);
-    if (classInfo)
-    {
-        return getCinfoDoc(classInfo, field);
-    }
-    
-    return "";    
+    return getCinfoDoc(classInfo, field);
 }
 
 
