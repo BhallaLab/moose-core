@@ -5,7 +5,7 @@ namespace pymoose
 {
     class NormalRng : public RandGenerator
     {    public:
-        static const std::string className;
+        static const std::string className_;
         NormalRng(Id id);
         NormalRng(std::string path);
         NormalRng(std::string name, Id parentId);

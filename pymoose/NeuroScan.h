@@ -4,7 +4,7 @@
 namespace pymoose{
     class NeuroScan : public PyMooseBase
     {      public:
-        static const std::string className;
+        static const std::string className_;
         NeuroScan(Id id);
         NeuroScan(std::string path);
         NeuroScan(std::string name, Id parentId);

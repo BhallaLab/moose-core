@@ -4,7 +4,7 @@
 namespace pymoose{
     class AscFile : public PyMooseBase
     {      public:
-        static const std::string className;
+        static const std::string className_;
         AscFile(Id id);
         AscFile(std::string path);
         AscFile(std::string name, Id parentId);

@@ -2,11 +2,11 @@
 #define _pymoose_HHGate_cpp
 #include "HHGate.h"
 using namespace pymoose;
-const std::string HHGate::className = "HHGate";
+const std::string HHGate::className_ = "HHGate";
 HHGate::HHGate(Id id):PyMooseBase(id){}
-HHGate::HHGate(std::string path):PyMooseBase(className, path){}
-HHGate::HHGate(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-HHGate::HHGate(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+HHGate::HHGate(std::string path):PyMooseBase(className_, path){}
+HHGate::HHGate(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+HHGate::HHGate(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 HHGate::HHGate(const HHGate& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 HHGate::HHGate(const HHGate& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -18,7 +18,7 @@ HHGate::HHGate(const Id& src, string name, Id& parent):PyMooseBase(src, name, pa
 {
 }
 HHGate::~HHGate(){}
-const std::string& HHGate::getType(){ return className; }
+const std::string& HHGate::getType(){ return className_; }
 
 // Manually edited part
 InterpolationTable* HHGate::__get_A() const

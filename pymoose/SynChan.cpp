@@ -2,11 +2,11 @@
 #define _pymoose_SynChan_cpp
 #include "SynChan.h"
 using namespace pymoose;
-const std::string SynChan::className = "SynChan";
+const std::string SynChan::className_ = "SynChan";
 SynChan::SynChan(Id id):PyMooseBase(id){}
-SynChan::SynChan(std::string path):PyMooseBase(className, path){}
-SynChan::SynChan(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-SynChan::SynChan(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+SynChan::SynChan(std::string path):PyMooseBase(className_, path){}
+SynChan::SynChan(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+SynChan::SynChan(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 SynChan::SynChan(const SynChan& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 SynChan::SynChan(const SynChan& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -18,7 +18,7 @@ SynChan::SynChan(const Id& src, string name, Id& parent):PyMooseBase(src, name, 
 {
 }
 SynChan::~SynChan(){}
-const std::string& SynChan::getType(){ return className; }
+const std::string& SynChan::getType(){ return className_; }
 double SynChan::__get_Gbar() const
 {
     double Gbar;

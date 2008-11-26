@@ -5,7 +5,7 @@ namespace pymoose
 {
     class Sched0 : public PyMooseBase
     {    public:
-        static const std::string className;
+        static const std::string className_;
         Sched0(Id id);
         Sched0(std::string path);
         Sched0(std::string name, Id parentId);

@@ -5,7 +5,7 @@
 namespace pymoose{
     class RectPanel : public Panel
     {      public:
-        static const std::string className;
+        static const std::string className_;
         RectPanel(Id id);
         RectPanel(std::string path);
         RectPanel(std::string name, Id parentId);

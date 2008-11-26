@@ -6,7 +6,7 @@ namespace pymoose
 {
     class Table : public InterpolationTable
     {    public:
-        static const std::string className;
+        static const std::string className_;
         Table(Id id);
         Table(std::string path);
         Table(std::string name, Id parentId);

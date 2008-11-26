@@ -2,11 +2,11 @@
 #define _pymoose_PulseGen_cpp
 #include "PulseGen.h"
 using namespace pymoose;
-const std::string PulseGen::className = "PulseGen";
+const std::string PulseGen::className_ = "PulseGen";
 PulseGen::PulseGen(Id id):PyMooseBase(id){}
-PulseGen::PulseGen(std::string path):PyMooseBase(className, path){}
-PulseGen::PulseGen(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-PulseGen::PulseGen(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+PulseGen::PulseGen(std::string path):PyMooseBase(className_, path){}
+PulseGen::PulseGen(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+PulseGen::PulseGen(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 PulseGen::PulseGen(const PulseGen& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 PulseGen::PulseGen(const PulseGen& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -18,7 +18,7 @@ PulseGen::PulseGen(const Id& src, string name, Id& parent):PyMooseBase(src, name
 {
 }
 PulseGen::~PulseGen(){}
-const std::string& PulseGen::getType(){ return className; }
+const std::string& PulseGen::getType(){ return className_; }
 double PulseGen::__get_firstLevel() const
 {
     double firstLevel;
