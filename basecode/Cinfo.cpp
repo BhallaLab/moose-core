@@ -158,7 +158,7 @@ void Cinfo::init( const string* doc,
                    << "    class " << name() << " : public PyMooseBase\n"
                    << "    {"
                    << "      public:\n"
-                   << "        static const std::string className;\n"
+                   << "        static const std::string className_;\n"
                    << "        " << name() << "(Id id);\n"
                    << "        " << name() << "(std::string path);\n"
                    << "        " << name() << "(std::string name, Id parentId);\n"
@@ -174,17 +174,17 @@ void Cinfo::init( const string* doc,
                 << "#define _pymoose_"<< name() << "_cpp\n"
                 << "#include \"" << name() << ".h\"\n"
                 << "using namespace pymoose;\n"             
-                << "const std::string "<< name() <<"::className = \"" << name() <<"\";\n"
+                << "const std::string "<< name() <<"::className_ = \"" << name() <<"\";\n"
                 << name() << "::" << name() << "(Id id):PyMooseBase(id){}\n"
-                << name() << "::" << name() <<"(std::string path):PyMooseBase(className, path){}\n"
-                << name() << "::" << name() << "(std::string name, Id parentId):PyMooseBase(classname, name, parentId){}\n"
-                << name() << "::" << name() << "(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}\n"
+                << name() << "::" << name() <<"(std::string path):PyMooseBase(className_, path){}\n"
+                << name() << "::" << name() << "(std::string name, Id parentId):PyMooseBase(classname_, name, parentId){}\n"
+                << name() << "::" << name() << "(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}\n"
                 << name() << "::" << name() << "(const " << name() << "& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}\n"
                 << name() << "::" << name() << "(const " << name() << "& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}\n"
                 << name() << "::" << name() << "(const " << name() << "& src, std::string path):PyMooseBase(src, path){}\n"
                 << name() << "::" << name() << "(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}\n"
                 << name() << "::~" << name() <<"(){}\n"
-                << "const std::string& "<< name() <<"::getType(){ return className; }\n";
+                << "const std::string& "<< name() <<"::getType(){ return className_; }\n";
             swig << "%include \"" << name() << ".h\"\n";        
         }
 #endif

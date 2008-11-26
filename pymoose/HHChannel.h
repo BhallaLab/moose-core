@@ -6,7 +6,7 @@ namespace pymoose
     class HHChannel : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         HHChannel(Id id);
         HHChannel(std::string path);
         HHChannel(std::string name, Id parentId);

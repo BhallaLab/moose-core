@@ -2,11 +2,11 @@
 #define _pymoose_Mg_block_cpp
 #include "Mg_block.h"
 using namespace pymoose;
-const std::string Mg_block::className = "Mg_block";
+const std::string Mg_block::className_ = "Mg_block";
 Mg_block::Mg_block(Id id):PyMooseBase(id){}
-Mg_block::Mg_block(std::string path):PyMooseBase(className, path){}
-Mg_block::Mg_block(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Mg_block::Mg_block(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Mg_block::Mg_block(std::string path):PyMooseBase(className_, path){}
+Mg_block::Mg_block(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+Mg_block::Mg_block(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 Mg_block::Mg_block(const Mg_block& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 Mg_block::Mg_block(const Mg_block& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -18,7 +18,7 @@ Mg_block::Mg_block(const Id& src, string name, Id& parent):PyMooseBase(src, name
 {
 }
 Mg_block::~Mg_block(){}
-const std::string& Mg_block::getType(){ return className; }
+const std::string& Mg_block::getType(){ return className_; }
 double Mg_block::__get_KMg_A() const
 {
     double KMg_A;

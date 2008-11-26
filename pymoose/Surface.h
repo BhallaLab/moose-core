@@ -4,7 +4,7 @@
 namespace pymoose{
     class Surface : public PyMooseBase
     {      public:
-        static const std::string className;
+        static const std::string className_;
         Surface(Id id);
         Surface(std::string path);
         Surface(std::string name, Id parentId);

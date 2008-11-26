@@ -5,7 +5,7 @@
 namespace pymoose{
     class TriPanel : public Panel
     {      public:
-        static const std::string className;
+        static const std::string className_;
         TriPanel(Id id);
         TriPanel(std::string path);
         TriPanel(std::string name, Id parentId);

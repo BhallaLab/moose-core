@@ -2,11 +2,11 @@
 #define _pymoose_KineticManager_cpp
 #include "KineticManager.h"
 using namespace pymoose;
-const std::string KineticManager::className = "KineticManager";
+const std::string KineticManager::className_ = "KineticManager";
 KineticManager::KineticManager(Id id):PyMooseBase(id){}
-KineticManager::KineticManager(std::string path):PyMooseBase(className, path){}
-KineticManager::KineticManager(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-KineticManager::KineticManager(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+KineticManager::KineticManager(std::string path):PyMooseBase(className_, path){}
+KineticManager::KineticManager(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+KineticManager::KineticManager(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 KineticManager::KineticManager(
     const KineticManager& src,
     std::string name,
@@ -40,7 +40,7 @@ KineticManager::KineticManager(
 
 KineticManager::~KineticManager(){}
 
-const std::string& KineticManager::getType(){ return className; }
+const std::string& KineticManager::getType(){ return className_; }
 bool KineticManager::__get_autoMode() const
 {
     bool _auto;

@@ -5,7 +5,7 @@ namespace pymoose{
     class RandomSpike : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         RandomSpike(Id id);
         RandomSpike(std::string path);
         RandomSpike(std::string name, Id parentId);

@@ -7,7 +7,7 @@ namespace pymoose
     class Compartment : public pymoose::PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         Compartment(::Id id);
         Compartment(std::string path);
         Compartment(std::string name, ::Id parentId);

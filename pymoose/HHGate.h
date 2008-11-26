@@ -8,7 +8,7 @@ namespace pymoose
     class HHGate : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         HHGate(Id id);
         HHGate(std::string path);
         HHGate(std::string name, Id parentId);

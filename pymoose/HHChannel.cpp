@@ -3,11 +3,11 @@
 #define _pymoose_HHChannel_cpp
 #include "pymoose.h"
 using namespace pymoose;
-const std::string HHChannel::className = "HHChannel";
+const std::string HHChannel::className_ = "HHChannel";
 HHChannel::HHChannel(Id id):PyMooseBase(id){}
-HHChannel::HHChannel(std::string path):PyMooseBase(className, path){}
-HHChannel::HHChannel(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-HHChannel::HHChannel(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+HHChannel::HHChannel(std::string path):PyMooseBase(className_, path){}
+HHChannel::HHChannel(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+HHChannel::HHChannel(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 HHChannel::HHChannel(const HHChannel& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 HHChannel::HHChannel(const HHChannel& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -19,7 +19,7 @@ HHChannel::HHChannel(const Id& src, string name, Id& parent):PyMooseBase(src, na
 {
 }
 HHChannel::~HHChannel(){}
-const std::string& HHChannel::getType(){ return className; }
+const std::string& HHChannel::getType(){ return className_; }
 double HHChannel::__get_Gbar() const
 {
     double Gbar;

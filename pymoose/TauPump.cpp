@@ -2,17 +2,17 @@
 #define _pymoose_TauPump_cpp
 #include "TauPump.h"
 using namespace pymoose;
-const std::string TauPump::className = "TauPump";
+const std::string TauPump::className_ = "TauPump";
 TauPump::TauPump(Id id):PyMooseBase(id){}
-TauPump::TauPump(std::string path):PyMooseBase(className, path){}
-TauPump::TauPump(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-TauPump::TauPump(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+TauPump::TauPump(std::string path):PyMooseBase(className_, path){}
+TauPump::TauPump(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+TauPump::TauPump(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 TauPump::TauPump(const TauPump& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 TauPump::TauPump(const TauPump& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 TauPump::TauPump(const TauPump& src, std::string path):PyMooseBase(src, path){}
 TauPump::TauPump(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
 TauPump::~TauPump(){}
-const std::string& TauPump::getType(){ return className; }
+const std::string& TauPump::getType(){ return className_; }
 double TauPump::__get_pumpRate() const
 {
     double pumpRate;

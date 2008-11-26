@@ -2,7 +2,7 @@
 #define _pymoose_RandGenerator_cpp
 #include "RandGenerator.h"
 using namespace pymoose;
-const std::string RandGenerator::className = "RandGenerator";
+const std::string RandGenerator::className_ = "RandGenerator";
 RandGenerator::RandGenerator(Id id):PyMooseBase(id){}
 RandGenerator::RandGenerator(string className, std::string path):PyMooseBase(className, path){}
 RandGenerator::RandGenerator(string className, std::string name, Id parentId):PyMooseBase(className, name, parentId){}
@@ -18,7 +18,7 @@ RandGenerator::RandGenerator(const Id& src, string name, Id& parent):PyMooseBase
 {
 }
 //RandGenerator::~RandGenerator(){}
-const std::string& RandGenerator::getType(){ return className; }
+const std::string& RandGenerator::getType(){ return className_; }
 double RandGenerator::__get_sample() const
 {
     double sample;

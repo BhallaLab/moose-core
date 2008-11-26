@@ -2,9 +2,9 @@
 #define _pymoose_StochSynchan_cpp
 #include "StochSynchan.h"
 using namespace pymoose;
-const std::string StochSynchan::className = "StochSynchan";
+const std::string StochSynchan::className_ = "StochSynchan";
 
-const std::string& StochSynchan::getType(){ return className; }
+const std::string& StochSynchan::getType(){ return className_; }
 double StochSynchan::__get_Gbar() const
 {
     double Gbar;
@@ -121,7 +121,7 @@ StochSynchan::StochSynchan(Id id):PyMooseBase(id)
     releaseP = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseP,  &StochSynchan::__set_releaseP);    
     releaseCount = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseCount,  &StochSynchan::__set_releaseCount);
 }
-StochSynchan::StochSynchan(std::string path):PyMooseBase(className, path)
+StochSynchan::StochSynchan(std::string path):PyMooseBase(className_, path)
 {
  
     weight = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this, &StochSynchan::__get_weight, &StochSynchan::__set_weight);
@@ -129,14 +129,14 @@ StochSynchan::StochSynchan(std::string path):PyMooseBase(className, path)
     releaseP = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseP,  &StochSynchan::__set_releaseP);   
     releaseCount = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseCount,  &StochSynchan::__set_releaseCount);
 }
-StochSynchan::StochSynchan(std::string name, Id parentId):PyMooseBase(className, name, parentId)
+StochSynchan::StochSynchan(std::string name, Id parentId):PyMooseBase(className_, name, parentId)
 {    
     weight = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this, &StochSynchan::__get_weight, &StochSynchan::__set_weight);
     delay = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,&StochSynchan::__get_delay, &StochSynchan::__set_delay);
     releaseP = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseP,  &StochSynchan::__set_releaseP);
     releaseCount = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseCount,  &StochSynchan::__set_releaseCount);
 }
-StochSynchan::StochSynchan(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent)
+StochSynchan::StochSynchan(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent)
 {    
      weight = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this, &StochSynchan::__get_weight, &StochSynchan::__set_weight);
     delay = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,&StochSynchan::__get_delay, &StochSynchan::__set_delay);

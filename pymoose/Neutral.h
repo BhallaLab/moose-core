@@ -5,7 +5,7 @@ namespace pymoose
 {
     class Neutral : public PyMooseBase
     {    public:
-        static const std::string className;
+        static const std::string className_;
         Neutral(Id id);
         Neutral(std::string path);
         Neutral(std::string name, Id parentId);

@@ -24,7 +24,7 @@ namespace pymoose
     class Cell : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         Cell(Id id);
         Cell(std::string path);
         Cell(std::string name, Id parentId);

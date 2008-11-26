@@ -2,17 +2,17 @@
 #define _pymoose_KinCompt_cpp
 #include "KinCompt.h"
 using namespace pymoose;
-const std::string KinCompt::className = "KinCompt";
+const std::string KinCompt::className_ = "KinCompt";
 KinCompt::KinCompt(Id id):PyMooseBase(id){}
-KinCompt::KinCompt(std::string path):PyMooseBase(className, path){}
-KinCompt::KinCompt(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-KinCompt::KinCompt(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+KinCompt::KinCompt(std::string path):PyMooseBase(className_, path){}
+KinCompt::KinCompt(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+KinCompt::KinCompt(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 KinCompt::KinCompt(const KinCompt& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 KinCompt::KinCompt(const KinCompt& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 KinCompt::KinCompt(const KinCompt& src, std::string path):PyMooseBase(src, path){}
 KinCompt::KinCompt(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
 KinCompt::~KinCompt(){}
-const std::string& KinCompt::getType(){ return className; }
+const std::string& KinCompt::getType(){ return className_; }
 double KinCompt::__get_volume() const
 {
     double volume;

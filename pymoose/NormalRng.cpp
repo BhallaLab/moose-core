@@ -2,11 +2,11 @@
 #define _pymoose_NormalRng_cpp
 #include "NormalRng.h"
 using namespace pymoose;
-const std::string NormalRng::className = "NormalRng";
+const std::string NormalRng::className_ = "NormalRng";
 NormalRng::NormalRng(Id id):RandGenerator(id){}
-NormalRng::NormalRng(std::string path):RandGenerator(className, path){}
-NormalRng::NormalRng(std::string name, Id parentId):RandGenerator(className, name, parentId){}
-NormalRng::NormalRng(std::string name, PyMooseBase& parent):RandGenerator(className, name, parent){}
+NormalRng::NormalRng(std::string path):RandGenerator(className_, path){}
+NormalRng::NormalRng(std::string name, Id parentId):RandGenerator(className_, name, parentId){}
+NormalRng::NormalRng(std::string name, PyMooseBase& parent):RandGenerator(className_, name, parent){}
 NormalRng::NormalRng(const NormalRng& src, std::string objectName,  PyMooseBase& parent):RandGenerator(src, objectName, parent){}
 
 NormalRng::NormalRng(const NormalRng& src, std::string objectName, Id& parent):RandGenerator(src, objectName, parent){}
@@ -18,7 +18,7 @@ NormalRng::NormalRng(const Id& src, string name, Id& parent):RandGenerator(src, 
 {
 }
 NormalRng::~NormalRng(){}
-const std::string& NormalRng::getType(){ return className; }
+const std::string& NormalRng::getType(){ return className_; }
 double NormalRng::__get_mean() const
 {
     double mean;

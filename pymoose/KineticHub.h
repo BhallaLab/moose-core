@@ -6,7 +6,7 @@ namespace pymoose
     class KineticHub : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         KineticHub(Id id);
         KineticHub(std::string path);
         KineticHub(std::string name, Id parentId);

@@ -29,7 +29,6 @@
   assigning all string values to PyMooseContext::fieldValue_ and then
   returning it. This should solve the problem. <2008-11-21 01:33:27 (+0530)>
 
-
 * DONE Improved introspection
   Now PyMOOSE objects have a member variable className which provides the
   Class Name of the underlying MOOSE element. The older function getType()
@@ -53,6 +52,11 @@
   >>> Compartment Compartment
   <2008-11-21 01:40:49 (+0530)>
 
+  There was a bug in it - every class had a static const member variable
+  className for providing the class name to the base class constructor. This
+  was shadowing the actual className of the underlying object. Converted the
+  above mentioned constant to className_.
+  <2008-11-26 Wed 23:58 (+0530)>
 
 * CODING JUSTIFICATIONS
   The principle of least surprise requires PyMOOSE to stick closely to the

@@ -2,11 +2,11 @@
 #define _pymoose_Reaction_cpp
 #include "Reaction.h"
 using namespace pymoose;
-const std::string Reaction::className = "Reaction";
+const std::string Reaction::className_ = "Reaction";
 Reaction::Reaction(Id id):PyMooseBase(id){}
-Reaction::Reaction(std::string path):PyMooseBase(className, path){}
-Reaction::Reaction(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Reaction::Reaction(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Reaction::Reaction(std::string path):PyMooseBase(className_, path){}
+Reaction::Reaction(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+Reaction::Reaction(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 Reaction::Reaction(const Reaction& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 Reaction::Reaction(const Reaction& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -18,7 +18,7 @@ Reaction::Reaction(const Id& src, string name, Id& parent):PyMooseBase(src, name
 {
 }
 Reaction::~Reaction(){}
-const std::string& Reaction::getType(){ return className; }
+const std::string& Reaction::getType(){ return className_; }
 double Reaction::__get_kf() const
 {
     double kf;

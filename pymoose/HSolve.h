@@ -6,7 +6,7 @@ namespace pymoose
     class HSolve : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         HSolve(Id id);
         HSolve(std::string path);
         HSolve(std::string name, Id parentId);
