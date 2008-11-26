@@ -6,7 +6,7 @@
 namespace pymoose{
     class SymCompartment : public Compartment
     {      public:
-        static const std::string className;
+        static const std::string className_;
         SymCompartment(Id id);
         SymCompartment(std::string path);
         SymCompartment(std::string name, Id parentId);

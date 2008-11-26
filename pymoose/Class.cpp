@@ -19,14 +19,14 @@
 
 #include "Class.h"
 using namespace pymoose;
-const std::string pymoose::Class::className = "Class";
+const std::string pymoose::Class::className_ = "Class";
 pymoose::Class::Class(Id id):PyMooseBase(id){}
-pymoose::Class::Class(std::string path, std::string name):PyMooseBase(className, path)
+pymoose::Class::Class(std::string path, std::string name):PyMooseBase(className_, path)
 {
     set <std::string> (id_(), "name", name);    
 }
-pymoose::Class::Class(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-pymoose::Class::Class(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+pymoose::Class::Class(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+pymoose::Class::Class(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 pymoose::Class::Class(const pymoose::Class& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 pymoose::Class::Class(const pymoose::Class& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -38,7 +38,7 @@ pymoose::Class::Class(const Id& src, string name, Id& parent):PyMooseBase(src, n
 {
 }
 pymoose::Class::~Class(){}
-const std::string& pymoose::Class::getType(){ return className; }
+const std::string& pymoose::Class::getType(){ return className_; }
 
 std::string pymoose::Class::__get_name()
 {

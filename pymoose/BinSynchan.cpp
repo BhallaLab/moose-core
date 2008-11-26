@@ -19,7 +19,7 @@
 #define _pymoose_BinSynchan_cpp
 #include "BinSynchan.h"
 using namespace pymoose;
-const std::string BinSynchan::className = "BinSynchan";
+const std::string BinSynchan::className_ = "BinSynchan";
 /*
   Be very afraid to touch these constructors. Make sure you
   understand what it means to use a pointer to a member function in
@@ -41,7 +41,7 @@ BinSynchan::BinSynchan(Id id):PyMooseBase(id)
     
     releaseCount = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseCount,  &BinSynchan::__set_releaseCount);
 }
-BinSynchan::BinSynchan(std::string path):PyMooseBase(className, path)
+BinSynchan::BinSynchan(std::string path):PyMooseBase(className_, path)
 {
  
     weight = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this, &BinSynchan::__get_weight, &BinSynchan::__set_weight);
@@ -50,7 +50,7 @@ BinSynchan::BinSynchan(std::string path):PyMooseBase(className, path)
     releaseP = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseP,  &BinSynchan::__set_releaseP);   
     releaseCount = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseCount,  &BinSynchan::__set_releaseCount);
 }
-BinSynchan::BinSynchan(std::string name, Id parentId):PyMooseBase(className, name, parentId)
+BinSynchan::BinSynchan(std::string name, Id parentId):PyMooseBase(className_, name, parentId)
 {    
     weight = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this, &BinSynchan::__get_weight, &BinSynchan::__set_weight);
     delay = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,&BinSynchan::__get_delay, &BinSynchan::__set_delay);
@@ -58,7 +58,7 @@ BinSynchan::BinSynchan(std::string name, Id parentId):PyMooseBase(className, nam
     releaseP = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseP,  &BinSynchan::__set_releaseP);
     releaseCount = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseCount,  &BinSynchan::__set_releaseCount);
 }
-BinSynchan::BinSynchan(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent)
+BinSynchan::BinSynchan(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent)
 {    
      weight = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this, &BinSynchan::__get_weight, &BinSynchan::__set_weight);
     delay = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,&BinSynchan::__get_delay, &BinSynchan::__set_delay);
@@ -87,7 +87,7 @@ BinSynchan::~BinSynchan()
     delete releaseP;
     delete releaseCount;    
 }
-const std::string& BinSynchan::getType(){ return className; }
+const std::string& BinSynchan::getType(){ return className_; }
 double BinSynchan::__get_Gbar() const
 {
     double Gbar;

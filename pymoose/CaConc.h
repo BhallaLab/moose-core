@@ -7,7 +7,7 @@ namespace pymoose
     class CaConc : public pymoose::PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         CaConc(::Id id);
         CaConc(std::string path);
         CaConc(std::string name, ::Id parentId);

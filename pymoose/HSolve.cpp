@@ -2,11 +2,11 @@
 #define _pymoose_HSolve_cpp
 #include "HSolve.h"
 using namespace pymoose;
-const std::string HSolve::className = "HSolve";
+const std::string HSolve::className_ = "HSolve";
 HSolve::HSolve(Id id):PyMooseBase(id){}
-HSolve::HSolve(std::string path):PyMooseBase(className, path){}
-HSolve::HSolve(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-HSolve::HSolve(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+HSolve::HSolve(std::string path):PyMooseBase(className_, path){}
+HSolve::HSolve(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+HSolve::HSolve(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 HSolve::HSolve(const HSolve& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 HSolve::HSolve(const HSolve& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -18,7 +18,7 @@ HSolve::HSolve(const Id& src, string name, Id& parent):PyMooseBase(src, name, pa
 {
 }
 HSolve::~HSolve(){}
-const std::string& HSolve::getType(){ return className; }
+const std::string& HSolve::getType(){ return className_; }
 
 const string HSolve::__get_seed_path() const
 {

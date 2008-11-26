@@ -5,7 +5,7 @@ namespace pymoose
 {
     class SpikeGen : public PyMooseBase
     {    public:
-        static const std::string className;
+        static const std::string className_;
         SpikeGen(Id id);
         SpikeGen(std::string path);
         SpikeGen(std::string name, Id parentId);

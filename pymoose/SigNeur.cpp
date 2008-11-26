@@ -2,17 +2,17 @@
 #define _pymoose_SigNeur_cpp
 #include "SigNeur.h"
 using namespace pymoose;
-const std::string SigNeur::className = "SigNeur";
+const std::string SigNeur::className_ = "SigNeur";
 SigNeur::SigNeur(Id id):PyMooseBase(id){}
-SigNeur::SigNeur(std::string path):PyMooseBase(className, path){}
-SigNeur::SigNeur(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-SigNeur::SigNeur(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+SigNeur::SigNeur(std::string path):PyMooseBase(className_, path){}
+SigNeur::SigNeur(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+SigNeur::SigNeur(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 SigNeur::SigNeur(const SigNeur& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 SigNeur::SigNeur(const SigNeur& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 SigNeur::SigNeur(const SigNeur& src, std::string path):PyMooseBase(src, path){}
 SigNeur::SigNeur(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
 SigNeur::~SigNeur(){}
-const std::string& SigNeur::getType(){ return className; }
+const std::string& SigNeur::getType(){ return className_; }
 Id& SigNeur::__get_cellProto() const
 {
     Id cellProto;

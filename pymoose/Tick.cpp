@@ -3,11 +3,11 @@
 #include "Tick.h"
 using namespace pymoose;
 
-const std::string ClockTick::className = "ClockTick";
+const std::string ClockTick::className_ = "ClockTick";
 ClockTick::ClockTick(Id id):PyMooseBase(id){}
-ClockTick::ClockTick(std::string path):PyMooseBase(className, path){}
-ClockTick::ClockTick(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-ClockTick::ClockTick(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+ClockTick::ClockTick(std::string path):PyMooseBase(className_, path){}
+ClockTick::ClockTick(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+ClockTick::ClockTick(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 ClockTick::ClockTick(const ClockTick& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 ClockTick::ClockTick(const ClockTick& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -19,7 +19,7 @@ ClockTick::ClockTick(const Id& src, string name, Id& parent):PyMooseBase(src, na
 {
 }
 ClockTick::~ClockTick(){}
-const std::string& ClockTick::getType(){ return className; }
+const std::string& ClockTick::getType(){ return className_; }
 double ClockTick::__get_dt() const
 {
     double dt;

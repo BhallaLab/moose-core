@@ -33,7 +33,7 @@ namespace pymoose
     class BinSynchan : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         BinSynchan(::Id id);
         BinSynchan(std::string path);
         BinSynchan(std::string name, ::Id parentId);

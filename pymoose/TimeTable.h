@@ -4,7 +4,7 @@
 namespace pymoose{
     class TimeTable : public PyMooseBase
     {      public:
-        static const std::string className;
+        static const std::string className_;
         TimeTable(Id id);
         TimeTable(std::string path);
         TimeTable(std::string name, Id parentId);

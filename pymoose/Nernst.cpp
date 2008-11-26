@@ -2,11 +2,11 @@
 #define _pymoose_Nernst_cpp
 #include "Nernst.h"
 using namespace pymoose;
-const std::string Nernst::className = "Nernst";
+const std::string Nernst::className_ = "Nernst";
 Nernst::Nernst(Id id):PyMooseBase(id){}
-Nernst::Nernst(std::string path):PyMooseBase(className, path){}
-Nernst::Nernst(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Nernst::Nernst(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Nernst::Nernst(std::string path):PyMooseBase(className_, path){}
+Nernst::Nernst(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+Nernst::Nernst(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 Nernst::Nernst(const Nernst& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 Nernst::Nernst(const Nernst& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -18,7 +18,7 @@ Nernst::Nernst(const Id& src, string name, Id& parent):PyMooseBase(src, name, pa
 {
 }
 Nernst::~Nernst(){}
-const std::string& Nernst::getType(){ return className; }
+const std::string& Nernst::getType(){ return className_; }
 double Nernst::__get_E() const
 {
     double E;
