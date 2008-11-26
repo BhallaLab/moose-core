@@ -5,7 +5,7 @@ namespace pymoose
 {
     class SynChan : public PyMooseBase
     {    public:
-        static const std::string className;
+        static const std::string className_;
         SynChan(Id id);
         SynChan(std::string path);
         SynChan(std::string name, Id parentId);

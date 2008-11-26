@@ -6,7 +6,7 @@ namespace pymoose
     class Kintegrator : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         Kintegrator(Id id);
         Kintegrator(std::string path);
         Kintegrator(std::string name, Id parentId);

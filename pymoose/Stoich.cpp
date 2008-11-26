@@ -3,11 +3,11 @@
 
 #include "Stoich.h"
 using namespace pymoose;
-const std::string Stoich::className = "Stoich";
+const std::string Stoich::className_ = "Stoich";
 Stoich::Stoich(Id id):PyMooseBase(id){}
-Stoich::Stoich(std::string path):PyMooseBase(className, path){}
-Stoich::Stoich(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Stoich::Stoich(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Stoich::Stoich(std::string path):PyMooseBase(className_, path){}
+Stoich::Stoich(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+Stoich::Stoich(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 Stoich::Stoich(const Stoich& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 Stoich::Stoich(const Stoich& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -19,7 +19,7 @@ Stoich::Stoich(const Id& src, string name, Id& parent):PyMooseBase(src, name, pa
 {
 }
 Stoich::~Stoich(){}
-const std::string& Stoich::getType(){ return className; }
+const std::string& Stoich::getType(){ return className_; }
 unsigned int Stoich::__get_nMols() const
 {
     unsigned int nMols;

@@ -5,7 +5,7 @@
 namespace pymoose{
     class CylPanel : public Panel
     {      public:
-        static const std::string className;
+        static const std::string className_;
         CylPanel(Id id);
         CylPanel(std::string path);
         CylPanel(std::string name, Id parentId);

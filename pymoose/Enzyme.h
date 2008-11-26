@@ -6,7 +6,7 @@ namespace pymoose
     class Enzyme : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         Enzyme(Id id);
         Enzyme(std::string path);
         Enzyme(std::string name, Id parentId);

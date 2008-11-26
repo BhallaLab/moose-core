@@ -4,7 +4,7 @@
 namespace pymoose{
     class KinCompt : public PyMooseBase
     {      public:
-        static const std::string className;
+        static const std::string className_;
         KinCompt(Id id);
         KinCompt(std::string path);
         KinCompt(std::string name, Id parentId);

@@ -5,7 +5,7 @@ namespace pymoose
 {
     class Molecule : public PyMooseBase
     {    public:
-        static const std::string className;
+        static const std::string className_;
         Molecule(Id id);
         Molecule(std::string path);
         Molecule(std::string name, Id parentId);

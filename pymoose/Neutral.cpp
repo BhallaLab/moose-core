@@ -2,12 +2,12 @@
 #define _pymoose_Neutral_cpp
 #include "Neutral.h"
 using namespace pymoose;
-const std::string Neutral::className = "Neutral";
+const std::string Neutral::className_ = "Neutral";
 Neutral::Neutral(Id id):PyMooseBase(id){}
-Neutral::Neutral(std::string path):PyMooseBase(className, path){}
-Neutral::Neutral(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Neutral::Neutral(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
-Neutral::Neutral(std::string path, std::string fileName):PyMooseBase(className, path, fileName){}
+Neutral::Neutral(std::string path):PyMooseBase(className_, path){}
+Neutral::Neutral(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+Neutral::Neutral(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
+Neutral::Neutral(std::string path, std::string fileName):PyMooseBase(className_, path, fileName){}
 Neutral::Neutral(const Neutral& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
 Neutral::Neutral(const Neutral& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
@@ -20,7 +20,7 @@ Neutral::Neutral(const Id& src, string name, Id& parent):PyMooseBase(src, name, 
 }
 
 Neutral::~Neutral(){}
-const std::string& Neutral::getType(){ return className; }
+const std::string& Neutral::getType(){ return className_; }
 int Neutral::__get_childSrc() const
 {
     int childSrc;

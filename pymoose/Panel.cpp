@@ -2,11 +2,11 @@
 #define _pymoose_Panel_cpp
 #include "Panel.h"
 using namespace pymoose;
-const std::string Panel::className = "Panel";
+const std::string Panel::className_ = "Panel";
 Panel::Panel(Id id):PyMooseBase(id){}
-Panel::Panel(std::string path):PyMooseBase(className, path){}
-Panel::Panel(std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-Panel::Panel(std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
+Panel::Panel(std::string path):PyMooseBase(className_, path){}
+Panel::Panel(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+Panel::Panel(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
 Panel::Panel(
     const Panel& src,
     std::string name,
@@ -54,7 +54,7 @@ Panel::Panel(std::string typeName, std::string objectName, PyMooseBase& parent):
 
 
 Panel::~Panel(){}
-const std::string& Panel::getType(){ return className; }
+const std::string& Panel::getType(){ return className_; }
 unsigned int Panel::__get_nPts() const
 {
     unsigned int nPts;

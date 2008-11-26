@@ -5,7 +5,7 @@ namespace pymoose
 {
     class Stoich : public PyMooseBase
     {    public:
-        static const std::string className;
+        static const std::string className_;
         Stoich(Id id);
         Stoich(std::string path);
         Stoich(std::string name, Id parentId);

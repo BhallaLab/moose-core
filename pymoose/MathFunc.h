@@ -6,7 +6,7 @@ namespace pymoose
     class MathFunc : public PyMooseBase
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         MathFunc(Id id);
         MathFunc(std::string path);
         MathFunc(std::string name, Id parentId);

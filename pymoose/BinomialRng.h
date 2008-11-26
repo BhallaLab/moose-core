@@ -26,7 +26,7 @@ namespace pymoose
     class BinomialRng : public RandGenerator
     {
       public:
-        static const std::string className;
+        static const std::string className_;
         BinomialRng(Id id);
         BinomialRng(std::string path);
         BinomialRng(std::string name, Id parentId);
