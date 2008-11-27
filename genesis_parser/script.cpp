@@ -289,9 +289,9 @@ struct stat buf;
 
 FILE *OpenScriptFile(const char* name, const char* mode)
 {
-FILE *fp;
-char extname[300];
-size_t len;
+  FILE *fp;
+  string extname(name);
+  size_t len;
 
     /*
     ** try to open the file.  Append script file extension if not present.
@@ -300,11 +300,10 @@ size_t len;
     len = strlen(name);
     if (len < 2 || name[len-1] != 'g' || name[len-2] != '.')
       {
-	sprintf(extname, "%s.g", name);
-	name = extname;
+	extname.append(".g");
       }
 
-    if((fp = fopen(name,mode)) != NULL){
+    if((fp = fopen(extname.c_str(), mode)) != NULL){
 	/*
 	** is it a real file?
 	*/
@@ -330,19 +329,20 @@ FILE *SearchForScript(const char* name, const char* mode)
     PathUtility pathHandler(Property::getProperty(Property::SIMPATH));
     
     fp = NULL;
-
-    if ( strchr(name, '/') != NULL )
+    string file_name = string(name);
+    if ( file_name[0] != '/' )
     {
         /*
 	** just look it up in current directory
 	*/
 	fp = OpenScriptFile(name, mode);
     }
-    else
+
+    if (fp == NULL)
     {
         for( unsigned int i = 0; i < pathHandler.size(); ++i )
         {
-            string path = pathHandler.makeFilePath(string(name), i);
+            string path = pathHandler.makeFilePath(file_name, i);
             fp = OpenScriptFile(path.c_str(), mode);
             if (fp != NULL )
             {
