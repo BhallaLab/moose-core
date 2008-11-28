@@ -1416,8 +1416,10 @@ void PyMooseContext::tweakTau( const Id& gateId)
 {
     tweakChanFunc( gateId, tweakTauSlot );
 }
-//========================
-// @deprecated in MOOSE - we chuck it altogether.
+
+/**
+   was marked deprecated in MOOSE, yet kept
+*/
 void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
 {
     char argstr[32];
@@ -1425,8 +1427,6 @@ void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
     
     send3< Id, string, string >( myId_(),
                                  setFieldSlot, table, "tabFill", argstr );
-
-//     cerr << "PyMooseContext::tabFill - deprecated! Use setupAlpha/Tau instead.\n";
 }
 
 
@@ -1437,32 +1437,41 @@ void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
 */
 void PyMooseContext::readCell(std::string filename, std::string cellpath)
 {
+    static const int node = 0;
     vector <double> params;
     params.push_back(0.0);
     params.push_back(0.0);
     params.push_back(0.0);
     params.push_back(0.0);
     params.push_back(0.0);
-    send3< string, string, vector < double > >( myId_(), 
-                                                readCellSlot, filename, cellpath , params);
+    send4< string, string, vector < double >, int >( 
+        myId_(), 
+        readCellSlot, filename, cellpath , params, node);
 }
 
 void PyMooseContext::readCell(string filename, string cellpath, vector <double> params)
 {
-    send3< string, string, vector < double > >( myId_(), 
-                             readCellSlot, filename, cellpath , params);
+    static const int node = 0;
+    send4< string, string, vector < double >, int >( 
+        myId_(), 
+        readCellSlot, filename, cellpath , params, node);
 }
 
 void PyMooseContext::readCell(string filename, string cellpath, double cm, double rm, double ra, double erestAct, double eleak)
 {
+    static const int node = 0; // this parameter was added in the shell
+                        // function to handle distributed network. do
+                        // not know what to do with this for PyMOOSE
+    
     vector <double> params;
     params.push_back(cm);
     params.push_back(rm);
     params.push_back(ra);
     params.push_back(erestAct);
     params.push_back(eleak);
-    send3< string, string, vector < double > >( myId_(), 
-                             readCellSlot, filename, cellpath , params);
+    send4< string, string, vector < double >, int >( 
+        myId_(), 
+        readCellSlot, filename, cellpath , params, node);
 }
 
 const std::string& PyMooseContext::className(const Id& objId) const
