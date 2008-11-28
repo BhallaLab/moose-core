@@ -50,9 +50,7 @@ void adaptCa2Sig( TreeNode& t,
 	static const Finfo* caBasalFinfo =  
 		initCaConcCinfo()->findFinfo( "CaBasal" );
 	
-	cout << "adaptCa2Sig( el=" << t.compt.path() << 
-		", Ca=" << caId.path() << ", mol=" << mol << 
-		", offset = " << offset << ", cascale=" << calciumScale << endl;
+	// cout << "adaptCa2Sig( el=" << t.compt.path() << ", Ca=" << caId.path() << ", mol=" << mol << ", offset = " << offset << ", cascale=" << calciumScale << endl;
 	if ( t.sigEnd <= t.sigStart ) // Nothing to do here, move along
 		return;
 	// Look up matching molecule
