@@ -757,8 +757,9 @@ void Stoich::addReac( Eref stoich, Eref e )
 	if ( findTargets( e, "prd", prd ) ) {
 		breac = makeHalfReaction( kb, prd );
 	}
-	if ( freac == 0 && breac == 0 ) {
-		freac = dummyReac;
+	if ( freac == 0 || breac == 0 ) {
+		breac = freac = dummyReac;
+		cout << "Stoich::addReac: dummy on " << e.id().path() << "\n";
 	// 	assert( 0 );
 	// 	return;
 	}
@@ -789,13 +790,13 @@ void Stoich::addReac( Eref stoich, Eref e )
 		}
 	} else { 
 		fillStoich( &S_[0], sub, prd, rates_.size() );
-			if ( freac && breac ) {
+			if ( freac != dummyReac ) {
 				rates_.push_back( 
 					new BidirectionalReaction( freac, breac )
 				);
 			} else {
 				rates_.push_back( dummyReac );
-				cout << "Stoich::addReac: dummy on " << e.id().path() << "\n";
+				// cout << "Stoich::addReac: dummy on " << e.id().path() << "\n";
 			}
 			/*
 			} else if ( freac )  {
