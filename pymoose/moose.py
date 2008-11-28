@@ -1720,7 +1720,7 @@ def PyMooseBase_initSimulation(*args):
 
 def doc(cls):
     """Return documentation string from MOOSE"""
-    if type(cls).__name__ == "classobj":
+    if (type(cls).__name__ == "classobj") or (type(cls).__name__ == "type"):
         return PyMooseBase.getContext().doc(cls.__name__)
     elif type(cls) == type(PyMooseBase):
         return PyMooseBase.getContext().doc(cls.className)
@@ -1771,7 +1771,7 @@ class Neutral(PyMooseBase):
     child = _swig_property(_moose.Neutral_child_get, _moose.Neutral_child_set)
 Neutral_swigregister = _moose.Neutral_swigregister
 Neutral_swigregister(Neutral)
-Neutral.className = _moose.cvar.Neutral_className
+Neutral.className_ = _moose.cvar.Neutral_className_
 
 class Class(PyMooseBase):
     """Proxy of C++ Class class"""
@@ -1840,7 +1840,7 @@ class Class(PyMooseBase):
     stage = _swig_property(_moose.Class_stage_get, _moose.Class_stage_set)
 Class_swigregister = _moose.Class_swigregister
 Class_swigregister(Class)
-Class.className = _moose.cvar.Class_className
+Class.className_ = _moose.cvar.Class_className_
 
 class Cell(PyMooseBase):
     """Proxy of C++ Cell class"""
@@ -1892,7 +1892,7 @@ class Cell(PyMooseBase):
     description = _swig_property(_moose.Cell_description_get)
 Cell_swigregister = _moose.Cell_swigregister
 Cell_swigregister(Cell)
-Cell.className = _moose.cvar.Cell_className
+Cell.className_ = _moose.cvar.Cell_className_
 
 class ClockTick(PyMooseBase):
     """Proxy of C++ ClockTick class"""
@@ -1969,7 +1969,7 @@ class ClockTick(PyMooseBase):
     updateDtSrc = _swig_property(_moose.ClockTick_updateDtSrc_get, _moose.ClockTick_updateDtSrc_set)
 ClockTick_swigregister = _moose.ClockTick_swigregister
 ClockTick_swigregister(ClockTick)
-ClockTick.className = _moose.cvar.ClockTick_className
+ClockTick.className_ = _moose.cvar.ClockTick_className_
 
 class ClockJob(PyMooseBase):
     """Proxy of C++ ClockJob class"""
@@ -2068,7 +2068,7 @@ class ClockJob(PyMooseBase):
     step = _swig_property(_moose.ClockJob_step_get, _moose.ClockJob_step_set)
 ClockJob_swigregister = _moose.ClockJob_swigregister
 ClockJob_swigregister(ClockJob)
-ClockJob.className = _moose.cvar.ClockJob_className
+ClockJob.className_ = _moose.cvar.ClockJob_className_
 
 def ClockJob_getClocks(*args):
   """ClockJob_getClocks() -> double_vector"""
@@ -2191,7 +2191,7 @@ class InterpolationTable(PyMooseBase):
     calcMode = _swig_property(_moose.InterpolationTable_calcMode_get, _moose.InterpolationTable_calcMode_set)
 InterpolationTable_swigregister = _moose.InterpolationTable_swigregister
 InterpolationTable_swigregister(InterpolationTable)
-InterpolationTable.className = _moose.cvar.InterpolationTable_className
+InterpolationTable.className_ = _moose.cvar.InterpolationTable_className_
 
 class TableIterator(object):
     """Proxy of C++ TableIterator class"""
@@ -2302,7 +2302,7 @@ class Table(InterpolationTable):
     threshold = _swig_property(_moose.Table_threshold_get, _moose.Table_threshold_set)
 Table_swigregister = _moose.Table_swigregister
 Table_swigregister(Table)
-Table.className = _moose.cvar.Table_className
+Table.className_ = _moose.cvar.Table_className_
 
 class SynChan(PyMooseBase):
     """Proxy of C++ SynChan class"""
@@ -2452,7 +2452,7 @@ class SynChan(PyMooseBase):
     modulator = _swig_property(_moose.SynChan_modulator_get, _moose.SynChan_modulator_set)
 SynChan_swigregister = _moose.SynChan_swigregister
 SynChan_swigregister(SynChan)
-SynChan.className = _moose.cvar.SynChan_className
+SynChan.className_ = _moose.cvar.SynChan_className_
 
 class BinSynchan(PyMooseBase):
     """Proxy of C++ BinSynchan class"""
@@ -2623,7 +2623,7 @@ class BinSynchan(PyMooseBase):
     modulator = _swig_property(_moose.BinSynchan_modulator_get, _moose.BinSynchan_modulator_set)
 BinSynchan_swigregister = _moose.BinSynchan_swigregister
 BinSynchan_swigregister(BinSynchan)
-BinSynchan.className = _moose.cvar.BinSynchan_className
+BinSynchan.className_ = _moose.cvar.BinSynchan_className_
 
 class StochSynchan(PyMooseBase):
     """Proxy of C++ StochSynchan class"""
@@ -2785,7 +2785,7 @@ class StochSynchan(PyMooseBase):
     modulator = _swig_property(_moose.StochSynchan_modulator_get, _moose.StochSynchan_modulator_set)
 StochSynchan_swigregister = _moose.StochSynchan_swigregister
 StochSynchan_swigregister(StochSynchan)
-StochSynchan.className = _moose.cvar.StochSynchan_className
+StochSynchan.className_ = _moose.cvar.StochSynchan_className_
 
 class SpikeGen(PyMooseBase):
     """Proxy of C++ SpikeGen class"""
@@ -2876,7 +2876,7 @@ class SpikeGen(PyMooseBase):
     Vm = _swig_property(_moose.SpikeGen_Vm_get, _moose.SpikeGen_Vm_set)
 SpikeGen_swigregister = _moose.SpikeGen_swigregister
 SpikeGen_swigregister(SpikeGen)
-SpikeGen.className = _moose.cvar.SpikeGen_className
+SpikeGen.className_ = _moose.cvar.SpikeGen_className_
 
 class RandomSpike(PyMooseBase):
     """Proxy of C++ RandomSpike class"""
@@ -2972,7 +2972,7 @@ class RandomSpike(PyMooseBase):
     reset = _swig_property(_moose.RandomSpike_reset_get, _moose.RandomSpike_reset_set)
 RandomSpike_swigregister = _moose.RandomSpike_swigregister
 RandomSpike_swigregister(RandomSpike)
-RandomSpike.className = _moose.cvar.RandomSpike_className
+RandomSpike.className_ = _moose.cvar.RandomSpike_className_
 
 class PulseGen(PyMooseBase):
     """Proxy of C++ PulseGen class"""
@@ -3091,7 +3091,7 @@ class PulseGen(PyMooseBase):
     prevInput = _swig_property(_moose.PulseGen_prevInput_get)
 PulseGen_swigregister = _moose.PulseGen_swigregister
 PulseGen_swigregister(PulseGen)
-PulseGen.className = _moose.cvar.PulseGen_className
+PulseGen.className_ = _moose.cvar.PulseGen_className_
 
 class Nernst(PyMooseBase):
     """Proxy of C++ Nernst class"""
@@ -3197,7 +3197,7 @@ class Nernst(PyMooseBase):
     scale = _swig_property(_moose.Nernst_scale_get, _moose.Nernst_scale_set)
 Nernst_swigregister = _moose.Nernst_swigregister
 Nernst_swigregister(Nernst)
-Nernst.className = _moose.cvar.Nernst_className
+Nernst.className_ = _moose.cvar.Nernst_className_
 
 class CaConc(PyMooseBase):
     """Proxy of C++ CaConc class"""
@@ -3270,7 +3270,7 @@ class CaConc(PyMooseBase):
     B = _swig_property(_moose.CaConc_B_get, _moose.CaConc_B_set)
 CaConc_swigregister = _moose.CaConc_swigregister
 CaConc_swigregister(CaConc)
-CaConc.className = _moose.cvar.CaConc_className
+CaConc.className_ = _moose.cvar.CaConc_className_
 
 class HHGate(PyMooseBase):
     """Proxy of C++ HHGate class"""
@@ -3356,7 +3356,7 @@ class HHGate(PyMooseBase):
     B = _swig_property(_moose.HHGate_B_get)
 HHGate_swigregister = _moose.HHGate_swigregister
 HHGate_swigregister(HHGate)
-HHGate.className = _moose.cvar.HHGate_className
+HHGate.className_ = _moose.cvar.HHGate_className_
 
 class HHChannel(PyMooseBase):
     """Proxy of C++ HHChannel class"""
@@ -3561,7 +3561,7 @@ class HHChannel(PyMooseBase):
     concen = _swig_property(_moose.HHChannel_concen_get, _moose.HHChannel_concen_set)
 HHChannel_swigregister = _moose.HHChannel_swigregister
 HHChannel_swigregister(HHChannel)
-HHChannel.className = _moose.cvar.HHChannel_className
+HHChannel.className_ = _moose.cvar.HHChannel_className_
 
 class Mg_block(PyMooseBase):
     """Proxy of C++ Mg_block class"""
@@ -3652,7 +3652,7 @@ class Mg_block(PyMooseBase):
     Zk = _swig_property(_moose.Mg_block_Zk_get, _moose.Mg_block_Zk_set)
 Mg_block_swigregister = _moose.Mg_block_swigregister
 Mg_block_swigregister(Mg_block)
-Mg_block.className = _moose.cvar.Mg_block_className
+Mg_block.className_ = _moose.cvar.Mg_block_className_
 
 class Compartment(PyMooseBase):
     """Proxy of C++ Compartment class"""
@@ -3797,7 +3797,7 @@ class Compartment(PyMooseBase):
     z = _swig_property(_moose.Compartment_z_get, _moose.Compartment_z_set)
 Compartment_swigregister = _moose.Compartment_swigregister
 Compartment_swigregister(Compartment)
-Compartment.className = _moose.cvar.Compartment_className
+Compartment.className_ = _moose.cvar.Compartment_className_
 
 class NeuroScan(PyMooseBase):
     """Proxy of C++ NeuroScan class"""
@@ -3879,7 +3879,7 @@ class NeuroScan(PyMooseBase):
     CaMax = _swig_property(_moose.NeuroScan_CaMax_get, _moose.NeuroScan_CaMax_set)
 NeuroScan_swigregister = _moose.NeuroScan_swigregister
 NeuroScan_swigregister(NeuroScan)
-NeuroScan.className = _moose.cvar.NeuroScan_className
+NeuroScan.className_ = _moose.cvar.NeuroScan_className_
 
 class HSolve(PyMooseBase):
     """Proxy of C++ HSolve class"""
@@ -3943,7 +3943,7 @@ class HSolve(PyMooseBase):
     VHi = _swig_property(_moose.HSolve_VHi_get, _moose.HSolve_VHi_set)
 HSolve_swigregister = _moose.HSolve_swigregister
 HSolve_swigregister(HSolve)
-HSolve.className = _moose.cvar.HSolve_className
+HSolve.className_ = _moose.cvar.HSolve_className_
 
 class Kintegrator(PyMooseBase):
     """Proxy of C++ Kintegrator class"""
@@ -3987,7 +3987,7 @@ class Kintegrator(PyMooseBase):
     isInitiatilized = _swig_property(_moose.Kintegrator_isInitiatilized_get, _moose.Kintegrator_isInitiatilized_set)
 Kintegrator_swigregister = _moose.Kintegrator_swigregister
 Kintegrator_swigregister(Kintegrator)
-Kintegrator.className = _moose.cvar.Kintegrator_className
+Kintegrator.className_ = _moose.cvar.Kintegrator_className_
 
 class MathFunc(PyMooseBase):
     """Proxy of C++ MathFunc class"""
@@ -4042,7 +4042,7 @@ class MathFunc(PyMooseBase):
     result = _swig_property(_moose.MathFunc_result_get, _moose.MathFunc_result_set)
 MathFunc_swigregister = _moose.MathFunc_swigregister
 MathFunc_swigregister(MathFunc)
-MathFunc.className = _moose.cvar.MathFunc_className
+MathFunc.className_ = _moose.cvar.MathFunc_className_
 
 class Stoich(PyMooseBase):
     """Proxy of C++ Stoich class"""
@@ -4167,7 +4167,7 @@ class Stoich(PyMooseBase):
     rateVectorSize = _swig_property(_moose.Stoich_rateVectorSize_get)
 Stoich_swigregister = _moose.Stoich_swigregister
 Stoich_swigregister(Stoich)
-Stoich.className = _moose.cvar.Stoich_className
+Stoich.className_ = _moose.cvar.Stoich_className_
 
 class KineticHub(PyMooseBase):
     """Proxy of C++ KineticHub class"""
@@ -4235,7 +4235,7 @@ class KineticHub(PyMooseBase):
     molSum = _swig_property(_moose.KineticHub_molSum_get, _moose.KineticHub_molSum_set)
 KineticHub_swigregister = _moose.KineticHub_swigregister
 KineticHub_swigregister(KineticHub)
-KineticHub.className = _moose.cvar.KineticHub_className
+KineticHub.className_ = _moose.cvar.KineticHub_className_
 
 class Enzyme(PyMooseBase):
     """Proxy of C++ Enzyme class"""
@@ -4341,7 +4341,7 @@ class Enzyme(PyMooseBase):
     mode = _swig_property(_moose.Enzyme_mode_get, _moose.Enzyme_mode_set)
 Enzyme_swigregister = _moose.Enzyme_swigregister
 Enzyme_swigregister(Enzyme)
-Enzyme.className = _moose.cvar.Enzyme_className
+Enzyme.className_ = _moose.cvar.Enzyme_className_
 
 class Reaction(PyMooseBase):
     """Proxy of C++ Reaction class"""
@@ -4405,7 +4405,7 @@ class Reaction(PyMooseBase):
     scaleKb = _swig_property(_moose.Reaction_scaleKb_get, _moose.Reaction_scaleKb_set)
 Reaction_swigregister = _moose.Reaction_swigregister
 Reaction_swigregister(Reaction)
-Reaction.className = _moose.cvar.Reaction_className
+Reaction.className_ = _moose.cvar.Reaction_className_
 
 class Molecule(PyMooseBase):
     """Proxy of C++ Molecule class"""
@@ -4514,7 +4514,7 @@ class Molecule(PyMooseBase):
     sumTotal = _swig_property(_moose.Molecule_sumTotal_get, _moose.Molecule_sumTotal_set)
 Molecule_swigregister = _moose.Molecule_swigregister
 Molecule_swigregister(Molecule)
-Molecule.className = _moose.cvar.Molecule_className
+Molecule.className_ = _moose.cvar.Molecule_className_
 
 
 def mtrand(*args):
@@ -4796,7 +4796,7 @@ class RandGenerator(PyMooseBase):
     __del__ = lambda self : None;
 RandGenerator_swigregister = _moose.RandGenerator_swigregister
 RandGenerator_swigregister(RandGenerator)
-RandGenerator.className = _moose.cvar.RandGenerator_className
+RandGenerator.className_ = _moose.cvar.RandGenerator_className_
 
 class UniformRng(RandGenerator):
     """Proxy of C++ UniformRng class"""
@@ -4844,7 +4844,7 @@ class UniformRng(RandGenerator):
     max = _swig_property(_moose.UniformRng_max_get, _moose.UniformRng_max_set)
 UniformRng_swigregister = _moose.UniformRng_swigregister
 UniformRng_swigregister(UniformRng)
-UniformRng.className = _moose.cvar.UniformRng_className
+UniformRng.className_ = _moose.cvar.UniformRng_className_
 
 class GammaRng(RandGenerator):
     """Proxy of C++ GammaRng class"""
@@ -4890,7 +4890,7 @@ class GammaRng(RandGenerator):
     theta = _swig_property(_moose.GammaRng_theta_get, _moose.GammaRng_theta_set)
 GammaRng_swigregister = _moose.GammaRng_swigregister
 GammaRng_swigregister(GammaRng)
-GammaRng.className = _moose.cvar.GammaRng_className
+GammaRng.className_ = _moose.cvar.GammaRng_className_
 
 class ExponentialRng(RandGenerator):
     """Proxy of C++ ExponentialRng class"""
@@ -4932,7 +4932,7 @@ class ExponentialRng(RandGenerator):
     method = _swig_property(_moose.ExponentialRng_method_get, _moose.ExponentialRng_method_set)
 ExponentialRng_swigregister = _moose.ExponentialRng_swigregister
 ExponentialRng_swigregister(ExponentialRng)
-ExponentialRng.className = _moose.cvar.ExponentialRng_className
+ExponentialRng.className_ = _moose.cvar.ExponentialRng_className_
 
 class BinomialRng(RandGenerator):
     """Proxy of C++ BinomialRng class"""
@@ -4978,7 +4978,7 @@ class BinomialRng(RandGenerator):
     p = _swig_property(_moose.BinomialRng_p_get, _moose.BinomialRng_p_set)
 BinomialRng_swigregister = _moose.BinomialRng_swigregister
 BinomialRng_swigregister(BinomialRng)
-BinomialRng.className = _moose.cvar.BinomialRng_className
+BinomialRng.className_ = _moose.cvar.BinomialRng_className_
 
 class PoissonRng(RandGenerator):
     """Proxy of C++ PoissonRng class"""
@@ -5011,7 +5011,7 @@ class PoissonRng(RandGenerator):
     mean = _swig_property(_moose.PoissonRng_mean_get)
 PoissonRng_swigregister = _moose.PoissonRng_swigregister
 PoissonRng_swigregister(PoissonRng)
-PoissonRng.className = _moose.cvar.PoissonRng_className
+PoissonRng.className_ = _moose.cvar.PoissonRng_className_
 
 class NormalRng(RandGenerator):
     """Proxy of C++ NormalRng class"""
@@ -5058,7 +5058,7 @@ class NormalRng(RandGenerator):
     method = _swig_property(_moose.NormalRng_method_get, _moose.NormalRng_method_set)
 NormalRng_swigregister = _moose.NormalRng_swigregister
 NormalRng_swigregister(NormalRng)
-NormalRng.className = _moose.cvar.NormalRng_className
+NormalRng.className_ = _moose.cvar.NormalRng_className_
 
 class KineticManager(PyMooseBase):
     """Proxy of C++ KineticManager class"""
@@ -5161,7 +5161,7 @@ class KineticManager(PyMooseBase):
     eulerError = _swig_property(_moose.KineticManager_eulerError_get, _moose.KineticManager_eulerError_set)
 KineticManager_swigregister = _moose.KineticManager_swigregister
 KineticManager_swigregister(KineticManager)
-KineticManager.className = _moose.cvar.KineticManager_className
+KineticManager.className_ = _moose.cvar.KineticManager_className_
 
 class KinCompt(PyMooseBase):
     """Proxy of C++ KinCompt class"""
@@ -5234,7 +5234,7 @@ class KinCompt(PyMooseBase):
     numDimensions = _swig_property(_moose.KinCompt_numDimensions_get, _moose.KinCompt_numDimensions_set)
 KinCompt_swigregister = _moose.KinCompt_swigregister
 KinCompt_swigregister(KinCompt)
-KinCompt.className = _moose.cvar.KinCompt_className
+KinCompt.className_ = _moose.cvar.KinCompt_className_
 
 class Panel(PyMooseBase):
     """Proxy of C++ Panel class"""
@@ -5290,7 +5290,7 @@ class Panel(PyMooseBase):
     coords = _swig_property(_moose.Panel_coords_get)
 Panel_swigregister = _moose.Panel_swigregister
 Panel_swigregister(Panel)
-Panel.className = _moose.cvar.Panel_className
+Panel.className_ = _moose.cvar.Panel_className_
 
 class DiskPanel(Panel):
     """Proxy of C++ DiskPanel class"""
@@ -5318,7 +5318,7 @@ class DiskPanel(Panel):
 
 DiskPanel_swigregister = _moose.DiskPanel_swigregister
 DiskPanel_swigregister(DiskPanel)
-DiskPanel.className = _moose.cvar.DiskPanel_className
+DiskPanel.className_ = _moose.cvar.DiskPanel_className_
 
 class CylPanel(Panel):
     """Proxy of C++ CylPanel class"""
@@ -5346,7 +5346,7 @@ class CylPanel(Panel):
 
 CylPanel_swigregister = _moose.CylPanel_swigregister
 CylPanel_swigregister(CylPanel)
-CylPanel.className = _moose.cvar.CylPanel_className
+CylPanel.className_ = _moose.cvar.CylPanel_className_
 
 class HemispherePanel(Panel):
     """Proxy of C++ HemispherePanel class"""
@@ -5374,7 +5374,7 @@ class HemispherePanel(Panel):
 
 HemispherePanel_swigregister = _moose.HemispherePanel_swigregister
 HemispherePanel_swigregister(HemispherePanel)
-HemispherePanel.className = _moose.cvar.HemispherePanel_className
+HemispherePanel.className_ = _moose.cvar.HemispherePanel_className_
 
 class SpherePanel(Panel):
     """Proxy of C++ SpherePanel class"""
@@ -5402,7 +5402,7 @@ class SpherePanel(Panel):
 
 SpherePanel_swigregister = _moose.SpherePanel_swigregister
 SpherePanel_swigregister(SpherePanel)
-SpherePanel.className = _moose.cvar.SpherePanel_className
+SpherePanel.className_ = _moose.cvar.SpherePanel_className_
 
 class TriPanel(Panel):
     """Proxy of C++ TriPanel class"""
@@ -5430,7 +5430,7 @@ class TriPanel(Panel):
 
 TriPanel_swigregister = _moose.TriPanel_swigregister
 TriPanel_swigregister(TriPanel)
-TriPanel.className = _moose.cvar.TriPanel_className
+TriPanel.className_ = _moose.cvar.TriPanel_className_
 
 class RectPanel(Panel):
     """Proxy of C++ RectPanel class"""
@@ -5458,7 +5458,7 @@ class RectPanel(Panel):
 
 RectPanel_swigregister = _moose.RectPanel_swigregister
 RectPanel_swigregister(RectPanel)
-RectPanel.className = _moose.cvar.RectPanel_className
+RectPanel.className_ = _moose.cvar.RectPanel_className_
 
 class Surface(PyMooseBase):
     """Proxy of C++ Surface class"""
@@ -5491,7 +5491,7 @@ class Surface(PyMooseBase):
     volume = _swig_property(_moose.Surface_volume_get)
 Surface_swigregister = _moose.Surface_swigregister
 Surface_swigregister(Surface)
-Surface.className = _moose.cvar.Surface_className
+Surface.className_ = _moose.cvar.Surface_className_
 
 class Geometry(PyMooseBase):
     """Proxy of C++ Geometry class"""
@@ -5537,7 +5537,7 @@ class Geometry(PyMooseBase):
     neighdist = _swig_property(_moose.Geometry_neighdist_get, _moose.Geometry_neighdist_set)
 Geometry_swigregister = _moose.Geometry_swigregister
 Geometry_swigregister(Geometry)
-Geometry.className = _moose.cvar.Geometry_className
+Geometry.className_ = _moose.cvar.Geometry_className_
 
 class Adaptor(PyMooseBase):
     """Proxy of C++ Adaptor class"""
@@ -5597,7 +5597,7 @@ class Adaptor(PyMooseBase):
     output = _swig_property(_moose.Adaptor_output_get)
 Adaptor_swigregister = _moose.Adaptor_swigregister
 Adaptor_swigregister(Adaptor)
-Adaptor.className = _moose.cvar.Adaptor_className
+Adaptor.className_ = _moose.cvar.Adaptor_className_
 
 class SigNeur(PyMooseBase):
     """Proxy of C++ SigNeur class"""
@@ -5798,7 +5798,7 @@ class SigNeur(PyMooseBase):
     dendExclude = _swig_property(_moose.SigNeur_dendExclude_get, _moose.SigNeur_dendExclude_set)
 SigNeur_swigregister = _moose.SigNeur_swigregister
 SigNeur_swigregister(SigNeur)
-SigNeur.className = _moose.cvar.SigNeur_className
+SigNeur.className_ = _moose.cvar.SigNeur_className_
 
 class AscFile(PyMooseBase):
     """Proxy of C++ AscFile class"""
@@ -5844,7 +5844,7 @@ class AscFile(PyMooseBase):
     appendFlag = _swig_property(_moose.AscFile_appendFlag_get, _moose.AscFile_appendFlag_set)
 AscFile_swigregister = _moose.AscFile_swigregister
 AscFile_swigregister(AscFile)
-AscFile.className = _moose.cvar.AscFile_className
+AscFile.className_ = _moose.cvar.AscFile_className_
 
 class DifShell(PyMooseBase):
     """Proxy of C++ DifShell class"""
@@ -5976,7 +5976,7 @@ class DifShell(PyMooseBase):
     innerArea = _swig_property(_moose.DifShell_innerArea_get, _moose.DifShell_innerArea_set)
 DifShell_swigregister = _moose.DifShell_swigregister
 DifShell_swigregister(DifShell)
-DifShell.className = _moose.cvar.DifShell_className
+DifShell.className_ = _moose.cvar.DifShell_className_
 
 class GssaStoich(PyMooseBase):
     """Proxy of C++ GssaStoich class"""
@@ -6018,7 +6018,7 @@ class GssaStoich(PyMooseBase):
     path = _swig_property(_moose.GssaStoich_path_get)
 GssaStoich_swigregister = _moose.GssaStoich_swigregister
 GssaStoich_swigregister(GssaStoich)
-GssaStoich.className = _moose.cvar.GssaStoich_className
+GssaStoich.className_ = _moose.cvar.GssaStoich_className_
 
 class TauPump(PyMooseBase):
     """Proxy of C++ TauPump class"""
@@ -6100,7 +6100,7 @@ class TauPump(PyMooseBase):
     TV = _swig_property(_moose.TauPump_TV_get, _moose.TauPump_TV_set)
 TauPump_swigregister = _moose.TauPump_swigregister
 TauPump_swigregister(TauPump)
-TauPump.className = _moose.cvar.TauPump_className
+TauPump.className_ = _moose.cvar.TauPump_className_
 
 class TimeTable(PyMooseBase):
     """Proxy of C++ TimeTable class"""
@@ -6151,7 +6151,7 @@ class TimeTable(PyMooseBase):
     tableSize = _swig_property(_moose.TimeTable_tableSize_get)
 TimeTable_swigregister = _moose.TimeTable_swigregister
 TimeTable_swigregister(TimeTable)
-TimeTable.className = _moose.cvar.TimeTable_className
+TimeTable.className_ = _moose.cvar.TimeTable_className_
 
 
 
