@@ -217,11 +217,14 @@ class Stoich
 		unsigned int nCall_;
 
 		///////////////////////////////////////////////////
-		// Fields used for coupling between solvers.
+		// Fields used for coupling between solvers: developmental
 		///////////////////////////////////////////////////
+		/*
+		vector< InterSolverFlux > flux_;
 		vector< double* > fluxMol_;	// Pointers to diffusing S_ entries 
-		vector< double > rates;		// Flux scale factors
+		vector< double > fluxRates_;		// Flux scale factors
 		vector< double > prevFluxMol_; // Used for trapezoidal integ.
+		*/
 		// vector< unsigned int > fluxMap_; // Redundant 
 };
 
