@@ -8281,4 +8281,56 @@ Turned out to be an issue with the local kkit.g file, which was explicitly
 assigning volumes. Must weed this out. Also cleaned up the KinCompt code
 and field documentation.
 
+Checked in as revision 970: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+Working again on inter-solver data transfer.
+- Need the following for each flux message:
+	- vector of current concentrations (pointers to S_ of diffusing mols)
+	- Leave it to the setup object to guarantee that the vectors are of
+	corresponding molecules. The only requirement here is that the # of
+	molecules matches.
+	- Setup object also sets fluxRates. These include transport as well as
+	diffusion. Cannot be negative. Can be asymmetric for active transport.
+	- Locally deal with trapezoidal calculations.
+	- Locally inject appropriate # of molecules in. The derived Stoich class
+	( GssaStoich ) may need to do some special update stuff here.
+
+- Alternatively, set up a separate object for handling inter-solver flux.
+	- Maps of mol names for L and R pools, looking up vec indices.
+	- Rates for each mol, each way (L and R).
+	- But the stoich still has to maintain a vec of transferred mols for
+		each flux channel.
+- Could set up like the HHGate, which has its own data visible as child
+	interpols.
+
+- Based on the construction of diffusion, just replace the 'Reaction' with a
+	derived class for inter-solver data transfer. This makes the setup
+	much easier. Issue is that the other end of the diff reaction is
+	currently just a message, but we'll need something more concrete for
+	the inter-solver data flow.
+	Actually, cannot do this so easily. The array is for the entire 
+	system: each of the kinetic compartments in the model. If I want
+	to subdivide into different solvers I will have to do different
+	things for regular array entries, which are all reactions.
+	Or do a different operation to set up the inter-solver flux at the 
+	point in the setup code where we complete the diffusion.
+	Note that if we set up stuff here, it has to be the solver that
+	figures out what to do with it. What we can do is to record the
+	Eref or Id of the putative target. Preferably also a solver identifier.
+
+	One horrible thing of the current design is that the sections are all
+	set up on arrays. Makes it hard to subdivide between nodes. This
+	is a pretty fundamental SigNeur issue.
+	For now: Deal with subdividing among different solvers.
+
+=============================================================================
+28 Nov 2008
+Minor cleanup to SigNeur code so it doesn't emit so many diagnostics.
+Minor further cleanup to SigNeur code so it does not set up diffusion if
+	one of the rates is zero.
+Medium cleanup to ksolve code, specially Stoich.cpp, so it handles dangling
+	reactions better. It puts in a zero-order reaction. This is good for
+	the Gillespie method as there are no dependencies... but at some point
+	I need to figure out what to do if I really want a zero order step.
+
 =============================================================================

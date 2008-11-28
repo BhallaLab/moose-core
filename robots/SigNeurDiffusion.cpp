@@ -113,23 +113,28 @@ void SigNeur::diffCalc( Eref m0, Eref m1, Eref diff )
 	v0 = volume_[ m0.i ];
 	assert( v0 > 0.0 );
 	bool ret = get< double >( m0, dFinfo, D0 );
-	assert( ret && D0 > 0.0 );
+	assert( ret );
 
 	assert( m1.i < volume_.size() );
 	v1 = volume_[ m1.i ];
 	assert( v1 > 0.0 );
 	ret = get< double >( m1, dFinfo, D1 );
-	assert( ret && D1 > 0.0 );
-
-	double D = Dscale_ * ( D0 + D1 ) / 2.0;
-	double kf = D * xByL_[ m0.i ] / v0;
-	double kb = D * xByL_[ m0.i ] / v1; 
-	// Note that we the xByL for parent sig compt, but vol for target compt.
-	ret = set< double >( diff, kfFinfo, kf );
 	assert( ret );
 
-	ret = set< double >( diff, kbFinfo, kb );
-	assert( ret );
+	// Permit diffusion only between mutually consenting pools.
+	if ( D1 > 0.0 && D0 > 0.0 ) {
+		// Ideally D0 and D1 should match. Should it complain? Hm...
+		// Also this doesn't handle asymmetric diffn, such as transport.
+		double D = Dscale_ * ( D0 + D1 ) / 2.0;
+		double kf = D * xByL_[ m0.i ] / v0;
+		double kb = D * xByL_[ m0.i ] / v1; 
+		// Note that we the xByL for parent sig compt, but vol for target compt.
+		ret = set< double >( diff, kfFinfo, kf );
+		assert( ret );
+	
+		ret = set< double >( diff, kbFinfo, kb );
+		assert( ret );
+	}
 }
 
 /**
