@@ -113,23 +113,17 @@
 %ignore Id::eref;   
 
 %include "../basecode/Id.h"
+
 %include "PyMooseContext.h"
 %include "PyMooseBase.h"
 %attribute(pymoose::PyMooseBase, Id*, id, __get_id)
 %attribute(pymoose::PyMooseBase, Id*, parent, __get_parent)
 %attribute(pymoose::PyMooseBase, const std::string, className, __get_className)
 
-// %extend pymoose::PyMooseBase {
-// 	%pythoncode %{
-// 		    def doc(self):
-// 		    	"""Return builtin MOOSE documentation string"""
-// 			return self.getContext().doc(self.__class__.__name__)
-// 		    %}
-// };// end of extend
 %pythoncode %{
 def doc(cls):
     """Return documentation string from MOOSE"""
-    if type(cls).__name__ == "classobj":
+    if (type(cls).__name__ == "classobj") or (type(cls).__name__ == "type"):
         return PyMooseBase.getContext().doc(cls.__name__)
     elif type(cls) == type(PyMooseBase):
         return PyMooseBase.getContext().doc(cls.className)
@@ -137,20 +131,7 @@ def doc(cls):
         return PyMooseBase.getContext().doc(cls)		
 %} // !pythoncode
 	    
-// %attribute(pymoose::PyMooseBase, const std::string, __doc__, __get_docString)
-// The following attributes, when traversed without assigning to a
-// variable, give segmentation fault. May be some problem with the
-// swig interface to vectors. But sticking to function form helps.
-
-//%attribute(pymoose::PyMooseBase, vector <Id>, children, __get_children)
-// %attribute(pymoose::PyMooseBase, vector <std::string>&, inMessages, __get_incoming_messages)
-// %attribute(pymoose::PyMooseBase, vector <std::string>&, outMessages, __get_outgoing_messages)
 %attribute(pymoose::PyMooseBase, const std::string, name, __get_name)
-//%attribute(pymoose::PyMooseBase, string& , path, _path)
-// The above gives segmentation fault, path is dynamically generated,
-// so when using pointers, the memory may already have been deallocated
-// better try writing to a string stream and returb stream.str()
-//%ignore PyMooseBase::getPath;
 %attribute(pymoose::PyMooseBase, const std::string, path, __get_path)
 %include "Neutral.h"
 %attribute(pymoose::Neutral, int, child, __get_child, __set_child)

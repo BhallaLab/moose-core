@@ -91,3 +91,11 @@
    other.
 
 ** SigNeur::lambda has been renamed to lambda_ as lambda is a python keyword.
+   
+** Id::path is a function returning a string while for all PyMOOSE classes, path is a string variable.
+   Tried to make Id::path appear to be a member variable, but could not find a
+   way around of the name collission.
+
+** readcell 
+   MOOSE does not use the last object when parent is specified as '.' in a .p
+   file.
