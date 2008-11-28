@@ -26682,16 +26682,16 @@ SWIGINTERN PyObject *PyMooseBase_swigregister(PyObject *SWIGUNUSEDPARM(self), Py
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Neutral_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Neutral_className is read-only.");
+SWIGINTERN int Swig_var_Neutral_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Neutral_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Neutral_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Neutral_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Neutral::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Neutral::className_));
   return pyobj;
 }
 
@@ -27516,16 +27516,16 @@ SWIGINTERN PyObject *Neutral_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObje
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Class_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Class_className is read-only.");
+SWIGINTERN int Swig_var_Class_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Class_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Class_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Class_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Class::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Class::className_));
   return pyobj;
 }
 
@@ -28649,16 +28649,16 @@ SWIGINTERN PyObject *Class_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Cell_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Cell_className is read-only.");
+SWIGINTERN int Swig_var_Cell_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Cell_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Cell_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Cell_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Cell::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Cell::className_));
   return pyobj;
 }
 
@@ -29551,16 +29551,16 @@ SWIGINTERN PyObject *Cell_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject 
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_ClockTick_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable ClockTick_className is read-only.");
+SWIGINTERN int Swig_var_ClockTick_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable ClockTick_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_ClockTick_className_get(void) {
+SWIGINTERN PyObject *Swig_var_ClockTick_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::ClockTick::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::ClockTick::className_));
   return pyobj;
 }
 
@@ -30835,16 +30835,16 @@ SWIGINTERN PyObject *ClockTick_swigregister(PyObject *SWIGUNUSEDPARM(self), PyOb
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_ClockJob_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable ClockJob_className is read-only.");
+SWIGINTERN int Swig_var_ClockJob_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable ClockJob_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_ClockJob_className_get(void) {
+SWIGINTERN PyObject *Swig_var_ClockJob_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::ClockJob::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::ClockJob::className_));
   return pyobj;
 }
 
@@ -32320,16 +32320,16 @@ SWIGINTERN PyObject *ClockJob_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_InterpolationTable_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable InterpolationTable_className is read-only.");
+SWIGINTERN int Swig_var_InterpolationTable_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable InterpolationTable_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_InterpolationTable_className_get(void) {
+SWIGINTERN PyObject *Swig_var_InterpolationTable_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::InterpolationTable::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::InterpolationTable::className_));
   return pyobj;
 }
 
@@ -34350,16 +34350,16 @@ SWIGINTERN PyObject *TableIterator_swigregister(PyObject *SWIGUNUSEDPARM(self), 
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Table_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Table_className is read-only.");
+SWIGINTERN int Swig_var_Table_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Table_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Table_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Table_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Table::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Table::className_));
   return pyobj;
 }
 
@@ -35650,16 +35650,16 @@ SWIGINTERN PyObject *Table_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_SynChan_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable SynChan_className is read-only.");
+SWIGINTERN int Swig_var_SynChan_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable SynChan_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_SynChan_className_get(void) {
+SWIGINTERN PyObject *Swig_var_SynChan_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::SynChan::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::SynChan::className_));
   return pyobj;
 }
 
@@ -37786,16 +37786,16 @@ SWIGINTERN PyObject *SynChan_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObje
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_BinSynchan_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable BinSynchan_className is read-only.");
+SWIGINTERN int Swig_var_BinSynchan_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable BinSynchan_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_BinSynchan_className_get(void) {
+SWIGINTERN PyObject *Swig_var_BinSynchan_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::BinSynchan::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::BinSynchan::className_));
   return pyobj;
 }
 
@@ -40488,16 +40488,16 @@ SWIGINTERN PyObject *BinSynchan_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_StochSynchan_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable StochSynchan_className is read-only.");
+SWIGINTERN int Swig_var_StochSynchan_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable StochSynchan_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_StochSynchan_className_get(void) {
+SWIGINTERN PyObject *Swig_var_StochSynchan_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::StochSynchan::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::StochSynchan::className_));
   return pyobj;
 }
 
@@ -43039,16 +43039,16 @@ SWIGINTERN PyObject *StochSynchan_swigregister(PyObject *SWIGUNUSEDPARM(self), P
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_SpikeGen_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable SpikeGen_className is read-only.");
+SWIGINTERN int Swig_var_SpikeGen_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable SpikeGen_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_SpikeGen_className_get(void) {
+SWIGINTERN PyObject *Swig_var_SpikeGen_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::SpikeGen::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::SpikeGen::className_));
   return pyobj;
 }
 
@@ -44550,16 +44550,16 @@ SWIGINTERN PyObject *SpikeGen_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_RandomSpike_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable RandomSpike_className is read-only.");
+SWIGINTERN int Swig_var_RandomSpike_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable RandomSpike_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_RandomSpike_className_get(void) {
+SWIGINTERN PyObject *Swig_var_RandomSpike_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::RandomSpike::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::RandomSpike::className_));
   return pyobj;
 }
 
@@ -46119,16 +46119,16 @@ SWIGINTERN PyObject *RandomSpike_swigregister(PyObject *SWIGUNUSEDPARM(self), Py
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_PulseGen_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable PulseGen_className is read-only.");
+SWIGINTERN int Swig_var_PulseGen_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable PulseGen_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_PulseGen_className_get(void) {
+SWIGINTERN PyObject *Swig_var_PulseGen_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::PulseGen::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::PulseGen::className_));
   return pyobj;
 }
 
@@ -48012,16 +48012,16 @@ SWIGINTERN PyObject *PulseGen_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Nernst_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Nernst_className is read-only.");
+SWIGINTERN int Swig_var_Nernst_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Nernst_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Nernst_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Nernst_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Nernst::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Nernst::className_));
   return pyobj;
 }
 
@@ -49550,16 +49550,16 @@ SWIGINTERN PyObject *Nernst_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObjec
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_CaConc_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable CaConc_className is read-only.");
+SWIGINTERN int Swig_var_CaConc_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable CaConc_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_CaConc_className_get(void) {
+SWIGINTERN PyObject *Swig_var_CaConc_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::CaConc::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::CaConc::className_));
   return pyobj;
 }
 
@@ -50795,16 +50795,16 @@ SWIGINTERN PyObject *CaConc_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObjec
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_HHGate_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable HHGate_className is read-only.");
+SWIGINTERN int Swig_var_HHGate_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable HHGate_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_HHGate_className_get(void) {
+SWIGINTERN PyObject *Swig_var_HHGate_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::HHGate::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::HHGate::className_));
   return pyobj;
 }
 
@@ -53315,16 +53315,16 @@ SWIGINTERN PyObject *HHGate_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObjec
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_HHChannel_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable HHChannel_className is read-only.");
+SWIGINTERN int Swig_var_HHChannel_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable HHChannel_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_HHChannel_className_get(void) {
+SWIGINTERN PyObject *Swig_var_HHChannel_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::HHChannel::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::HHChannel::className_));
   return pyobj;
 }
 
@@ -57774,16 +57774,16 @@ SWIGINTERN PyObject *HHChannel_swigregister(PyObject *SWIGUNUSEDPARM(self), PyOb
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Mg_block_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Mg_block_className is read-only.");
+SWIGINTERN int Swig_var_Mg_block_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Mg_block_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Mg_block_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Mg_block_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Mg_block::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Mg_block::className_));
   return pyobj;
 }
 
@@ -59285,16 +59285,16 @@ SWIGINTERN PyObject *Mg_block_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Compartment_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Compartment_className is read-only.");
+SWIGINTERN int Swig_var_Compartment_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Compartment_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Compartment_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Compartment_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Compartment::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Compartment::className_));
   return pyobj;
 }
 
@@ -61594,16 +61594,16 @@ SWIGINTERN PyObject *Compartment_swigregister(PyObject *SWIGUNUSEDPARM(self), Py
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_NeuroScan_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable NeuroScan_className is read-only.");
+SWIGINTERN int Swig_var_NeuroScan_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable NeuroScan_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_NeuroScan_className_get(void) {
+SWIGINTERN PyObject *Swig_var_NeuroScan_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::NeuroScan::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::NeuroScan::className_));
   return pyobj;
 }
 
@@ -62972,16 +62972,16 @@ SWIGINTERN PyObject *NeuroScan_swigregister(PyObject *SWIGUNUSEDPARM(self), PyOb
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_HSolve_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable HSolve_className is read-only.");
+SWIGINTERN int Swig_var_HSolve_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable HSolve_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_HSolve_className_get(void) {
+SWIGINTERN PyObject *Swig_var_HSolve_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::HSolve::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::HSolve::className_));
   return pyobj;
 }
 
@@ -64096,16 +64096,16 @@ SWIGINTERN PyObject *HSolve_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObjec
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Kintegrator_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Kintegrator_className is read-only.");
+SWIGINTERN int Swig_var_Kintegrator_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Kintegrator_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Kintegrator_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Kintegrator_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Kintegrator::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Kintegrator::className_));
   return pyobj;
 }
 
@@ -64921,16 +64921,16 @@ SWIGINTERN PyObject *Kintegrator_swigregister(PyObject *SWIGUNUSEDPARM(self), Py
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_MathFunc_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable MathFunc_className is read-only.");
+SWIGINTERN int Swig_var_MathFunc_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable MathFunc_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_MathFunc_className_get(void) {
+SWIGINTERN PyObject *Swig_var_MathFunc_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::MathFunc::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::MathFunc::className_));
   return pyobj;
 }
 
@@ -65924,16 +65924,16 @@ SWIGINTERN PyObject *MathFunc_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Stoich_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Stoich_className is read-only.");
+SWIGINTERN int Swig_var_Stoich_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Stoich_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Stoich_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Stoich_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Stoich::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Stoich::className_));
   return pyobj;
 }
 
@@ -67604,16 +67604,16 @@ SWIGINTERN PyObject *Stoich_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObjec
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_KineticHub_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable KineticHub_className is read-only.");
+SWIGINTERN int Swig_var_KineticHub_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable KineticHub_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_KineticHub_className_get(void) {
+SWIGINTERN PyObject *Swig_var_KineticHub_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::KineticHub::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::KineticHub::className_));
   return pyobj;
 }
 
@@ -68744,16 +68744,16 @@ SWIGINTERN PyObject *KineticHub_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Enzyme_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Enzyme_className is read-only.");
+SWIGINTERN int Swig_var_Enzyme_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Enzyme_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Enzyme_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Enzyme_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Enzyme::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Enzyme::className_));
   return pyobj;
 }
 
@@ -70320,16 +70320,16 @@ SWIGINTERN PyObject *Enzyme_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObjec
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Reaction_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Reaction_className is read-only.");
+SWIGINTERN int Swig_var_Reaction_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Reaction_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Reaction_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Reaction_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Reaction::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Reaction::className_));
   return pyobj;
 }
 
@@ -71432,16 +71432,16 @@ SWIGINTERN PyObject *Reaction_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Molecule_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Molecule_className is read-only.");
+SWIGINTERN int Swig_var_Molecule_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Molecule_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Molecule_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Molecule_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Molecule::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Molecule::className_));
   return pyobj;
 }
 
@@ -74849,16 +74849,16 @@ SWIGINTERN PyObject *Exponential_swigregister(PyObject *SWIGUNUSEDPARM(self), Py
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_RandGenerator_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable RandGenerator_className is read-only.");
+SWIGINTERN int Swig_var_RandGenerator_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable RandGenerator_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_RandGenerator_className_get(void) {
+SWIGINTERN PyObject *Swig_var_RandGenerator_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::RandGenerator::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::RandGenerator::className_));
   return pyobj;
 }
 
@@ -75825,16 +75825,16 @@ SWIGINTERN PyObject *RandGenerator_swigregister(PyObject *SWIGUNUSEDPARM(self), 
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_UniformRng_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable UniformRng_className is read-only.");
+SWIGINTERN int Swig_var_UniformRng_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable UniformRng_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_UniformRng_className_get(void) {
+SWIGINTERN PyObject *Swig_var_UniformRng_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::UniformRng::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::UniformRng::className_));
   return pyobj;
 }
 
@@ -76729,16 +76729,16 @@ SWIGINTERN PyObject *UniformRng_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_GammaRng_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable GammaRng_className is read-only.");
+SWIGINTERN int Swig_var_GammaRng_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable GammaRng_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_GammaRng_className_get(void) {
+SWIGINTERN PyObject *Swig_var_GammaRng_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::GammaRng::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::GammaRng::className_));
   return pyobj;
 }
 
@@ -77575,16 +77575,16 @@ SWIGINTERN PyObject *GammaRng_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_ExponentialRng_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable ExponentialRng_className is read-only.");
+SWIGINTERN int Swig_var_ExponentialRng_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable ExponentialRng_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_ExponentialRng_className_get(void) {
+SWIGINTERN PyObject *Swig_var_ExponentialRng_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::ExponentialRng::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::ExponentialRng::className_));
   return pyobj;
 }
 
@@ -78354,16 +78354,16 @@ SWIGINTERN PyObject *ExponentialRng_swigregister(PyObject *SWIGUNUSEDPARM(self),
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_BinomialRng_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable BinomialRng_className is read-only.");
+SWIGINTERN int Swig_var_BinomialRng_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable BinomialRng_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_BinomialRng_className_get(void) {
+SWIGINTERN PyObject *Swig_var_BinomialRng_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::BinomialRng::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::BinomialRng::className_));
   return pyobj;
 }
 
@@ -79200,16 +79200,16 @@ SWIGINTERN PyObject *BinomialRng_swigregister(PyObject *SWIGUNUSEDPARM(self), Py
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_PoissonRng_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable PoissonRng_className is read-only.");
+SWIGINTERN int Swig_var_PoissonRng_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable PoissonRng_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_PoissonRng_className_get(void) {
+SWIGINTERN PyObject *Swig_var_PoissonRng_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::PoissonRng::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::PoissonRng::className_));
   return pyobj;
 }
 
@@ -79846,16 +79846,16 @@ SWIGINTERN PyObject *PoissonRng_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_NormalRng_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable NormalRng_className is read-only.");
+SWIGINTERN int Swig_var_NormalRng_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable NormalRng_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_NormalRng_className_get(void) {
+SWIGINTERN PyObject *Swig_var_NormalRng_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::NormalRng::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::NormalRng::className_));
   return pyobj;
 }
 
@@ -80691,16 +80691,16 @@ SWIGINTERN PyObject *NormalRng_swigregister(PyObject *SWIGUNUSEDPARM(self), PyOb
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_KineticManager_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable KineticManager_className is read-only.");
+SWIGINTERN int Swig_var_KineticManager_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable KineticManager_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_KineticManager_className_get(void) {
+SWIGINTERN PyObject *Swig_var_KineticManager_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::KineticManager::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::KineticManager::className_));
   return pyobj;
 }
 
@@ -82299,16 +82299,16 @@ SWIGINTERN PyObject *KineticManager_swigregister(PyObject *SWIGUNUSEDPARM(self),
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_KinCompt_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable KinCompt_className is read-only.");
+SWIGINTERN int Swig_var_KinCompt_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable KinCompt_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_KinCompt_className_get(void) {
+SWIGINTERN PyObject *Swig_var_KinCompt_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::KinCompt::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::KinCompt::className_));
   return pyobj;
 }
 
@@ -83544,16 +83544,16 @@ SWIGINTERN PyObject *KinCompt_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Panel_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Panel_className is read-only.");
+SWIGINTERN int Swig_var_Panel_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Panel_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Panel_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Panel_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Panel::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Panel::className_));
   return pyobj;
 }
 
@@ -84623,16 +84623,16 @@ SWIGINTERN PyObject *Panel_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_DiskPanel_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable DiskPanel_className is read-only.");
+SWIGINTERN int Swig_var_DiskPanel_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable DiskPanel_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_DiskPanel_className_get(void) {
+SWIGINTERN PyObject *Swig_var_DiskPanel_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::DiskPanel::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::DiskPanel::className_));
   return pyobj;
 }
 
@@ -85203,16 +85203,16 @@ SWIGINTERN PyObject *DiskPanel_swigregister(PyObject *SWIGUNUSEDPARM(self), PyOb
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_CylPanel_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable CylPanel_className is read-only.");
+SWIGINTERN int Swig_var_CylPanel_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable CylPanel_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_CylPanel_className_get(void) {
+SWIGINTERN PyObject *Swig_var_CylPanel_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::CylPanel::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::CylPanel::className_));
   return pyobj;
 }
 
@@ -85783,16 +85783,16 @@ SWIGINTERN PyObject *CylPanel_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_HemispherePanel_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable HemispherePanel_className is read-only.");
+SWIGINTERN int Swig_var_HemispherePanel_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable HemispherePanel_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_HemispherePanel_className_get(void) {
+SWIGINTERN PyObject *Swig_var_HemispherePanel_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::HemispherePanel::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::HemispherePanel::className_));
   return pyobj;
 }
 
@@ -86363,16 +86363,16 @@ SWIGINTERN PyObject *HemispherePanel_swigregister(PyObject *SWIGUNUSEDPARM(self)
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_SpherePanel_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable SpherePanel_className is read-only.");
+SWIGINTERN int Swig_var_SpherePanel_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable SpherePanel_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_SpherePanel_className_get(void) {
+SWIGINTERN PyObject *Swig_var_SpherePanel_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::SpherePanel::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::SpherePanel::className_));
   return pyobj;
 }
 
@@ -86943,16 +86943,16 @@ SWIGINTERN PyObject *SpherePanel_swigregister(PyObject *SWIGUNUSEDPARM(self), Py
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_TriPanel_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable TriPanel_className is read-only.");
+SWIGINTERN int Swig_var_TriPanel_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable TriPanel_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_TriPanel_className_get(void) {
+SWIGINTERN PyObject *Swig_var_TriPanel_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::TriPanel::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::TriPanel::className_));
   return pyobj;
 }
 
@@ -87523,16 +87523,16 @@ SWIGINTERN PyObject *TriPanel_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_RectPanel_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable RectPanel_className is read-only.");
+SWIGINTERN int Swig_var_RectPanel_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable RectPanel_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_RectPanel_className_get(void) {
+SWIGINTERN PyObject *Swig_var_RectPanel_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::RectPanel::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::RectPanel::className_));
   return pyobj;
 }
 
@@ -88103,16 +88103,16 @@ SWIGINTERN PyObject *RectPanel_swigregister(PyObject *SWIGUNUSEDPARM(self), PyOb
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Surface_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Surface_className is read-only.");
+SWIGINTERN int Swig_var_Surface_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Surface_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Surface_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Surface_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Surface::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Surface::className_));
   return pyobj;
 }
 
@@ -88741,16 +88741,16 @@ SWIGINTERN PyObject *Surface_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObje
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Geometry_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Geometry_className is read-only.");
+SWIGINTERN int Swig_var_Geometry_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Geometry_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Geometry_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Geometry_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Geometry::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Geometry::className_));
   return pyobj;
 }
 
@@ -89587,16 +89587,16 @@ SWIGINTERN PyObject *Geometry_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_Adaptor_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable Adaptor_className is read-only.");
+SWIGINTERN int Swig_var_Adaptor_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Adaptor_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_Adaptor_className_get(void) {
+SWIGINTERN PyObject *Swig_var_Adaptor_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Adaptor::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Adaptor::className_));
   return pyobj;
 }
 
@@ -90624,16 +90624,16 @@ SWIGINTERN PyObject *Adaptor_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObje
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_SigNeur_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable SigNeur_className is read-only.");
+SWIGINTERN int Swig_var_SigNeur_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable SigNeur_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_SigNeur_className_get(void) {
+SWIGINTERN PyObject *Swig_var_SigNeur_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::SigNeur::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::SigNeur::className_));
   return pyobj;
 }
 
@@ -93841,16 +93841,16 @@ SWIGINTERN PyObject *SigNeur_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObje
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_AscFile_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable AscFile_className is read-only.");
+SWIGINTERN int Swig_var_AscFile_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable AscFile_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_AscFile_className_get(void) {
+SWIGINTERN PyObject *Swig_var_AscFile_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::AscFile::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::AscFile::className_));
   return pyobj;
 }
 
@@ -94699,16 +94699,16 @@ SWIGINTERN PyObject *AscFile_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObje
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_DifShell_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable DifShell_className is read-only.");
+SWIGINTERN int Swig_var_DifShell_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable DifShell_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_DifShell_className_get(void) {
+SWIGINTERN PyObject *Swig_var_DifShell_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::DifShell::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::DifShell::className_));
   return pyobj;
 }
 
@@ -96800,16 +96800,16 @@ SWIGINTERN PyObject *DifShell_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_GssaStoich_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable GssaStoich_className is read-only.");
+SWIGINTERN int Swig_var_GssaStoich_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable GssaStoich_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_GssaStoich_className_get(void) {
+SWIGINTERN PyObject *Swig_var_GssaStoich_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::GssaStoich::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::GssaStoich::className_));
   return pyobj;
 }
 
@@ -97596,16 +97596,16 @@ SWIGINTERN PyObject *GssaStoich_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_TauPump_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable TauPump_className is read-only.");
+SWIGINTERN int Swig_var_TauPump_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable TauPump_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_TauPump_className_get(void) {
+SWIGINTERN PyObject *Swig_var_TauPump_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::TauPump::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::TauPump::className_));
   return pyobj;
 }
 
@@ -98974,16 +98974,16 @@ SWIGINTERN PyObject *TauPump_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObje
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_TimeTable_className_set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable TimeTable_className is read-only.");
+SWIGINTERN int Swig_var_TimeTable_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable TimeTable_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_TimeTable_className_get(void) {
+SWIGINTERN PyObject *Swig_var_TimeTable_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::TimeTable::className));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::TimeTable::className_));
   return pyobj;
 }
 
@@ -103471,64 +103471,64 @@ SWIGEXPORT void SWIG_init(void) {
   SWIG_addvarlink(SWIG_globals(),(char*)"Id_BadIndex",Swig_var_Id_BadIndex_get, Swig_var_Id_BadIndex_set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Id_GlobalNode",Swig_var_Id_GlobalNode_get, Swig_var_Id_GlobalNode_set);
   SWIG_addvarlink(SWIG_globals(),(char*)"PyMooseContext_separator",Swig_var_PyMooseContext_separator_get, Swig_var_PyMooseContext_separator_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Neutral_className",Swig_var_Neutral_className_get, Swig_var_Neutral_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Class_className",Swig_var_Class_className_get, Swig_var_Class_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Cell_className",Swig_var_Cell_className_get, Swig_var_Cell_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"ClockTick_className",Swig_var_ClockTick_className_get, Swig_var_ClockTick_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"ClockJob_className",Swig_var_ClockJob_className_get, Swig_var_ClockJob_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"InterpolationTable_className",Swig_var_InterpolationTable_className_get, Swig_var_InterpolationTable_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Table_className",Swig_var_Table_className_get, Swig_var_Table_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"SynChan_className",Swig_var_SynChan_className_get, Swig_var_SynChan_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"BinSynchan_className",Swig_var_BinSynchan_className_get, Swig_var_BinSynchan_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"StochSynchan_className",Swig_var_StochSynchan_className_get, Swig_var_StochSynchan_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"SpikeGen_className",Swig_var_SpikeGen_className_get, Swig_var_SpikeGen_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"RandomSpike_className",Swig_var_RandomSpike_className_get, Swig_var_RandomSpike_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"PulseGen_className",Swig_var_PulseGen_className_get, Swig_var_PulseGen_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Nernst_className",Swig_var_Nernst_className_get, Swig_var_Nernst_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"CaConc_className",Swig_var_CaConc_className_get, Swig_var_CaConc_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"HHGate_className",Swig_var_HHGate_className_get, Swig_var_HHGate_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"HHChannel_className",Swig_var_HHChannel_className_get, Swig_var_HHChannel_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Mg_block_className",Swig_var_Mg_block_className_get, Swig_var_Mg_block_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Compartment_className",Swig_var_Compartment_className_get, Swig_var_Compartment_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"NeuroScan_className",Swig_var_NeuroScan_className_get, Swig_var_NeuroScan_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"HSolve_className",Swig_var_HSolve_className_get, Swig_var_HSolve_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Kintegrator_className",Swig_var_Kintegrator_className_get, Swig_var_Kintegrator_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"MathFunc_className",Swig_var_MathFunc_className_get, Swig_var_MathFunc_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Stoich_className",Swig_var_Stoich_className_get, Swig_var_Stoich_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"KineticHub_className",Swig_var_KineticHub_className_get, Swig_var_KineticHub_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Enzyme_className",Swig_var_Enzyme_className_get, Swig_var_Enzyme_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Reaction_className",Swig_var_Reaction_className_get, Swig_var_Reaction_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Molecule_className",Swig_var_Molecule_className_get, Swig_var_Molecule_className_set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Neutral_className_",Swig_var_Neutral_className__get, Swig_var_Neutral_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Class_className_",Swig_var_Class_className__get, Swig_var_Class_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Cell_className_",Swig_var_Cell_className__get, Swig_var_Cell_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"ClockTick_className_",Swig_var_ClockTick_className__get, Swig_var_ClockTick_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"ClockJob_className_",Swig_var_ClockJob_className__get, Swig_var_ClockJob_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"InterpolationTable_className_",Swig_var_InterpolationTable_className__get, Swig_var_InterpolationTable_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Table_className_",Swig_var_Table_className__get, Swig_var_Table_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"SynChan_className_",Swig_var_SynChan_className__get, Swig_var_SynChan_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"BinSynchan_className_",Swig_var_BinSynchan_className__get, Swig_var_BinSynchan_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"StochSynchan_className_",Swig_var_StochSynchan_className__get, Swig_var_StochSynchan_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"SpikeGen_className_",Swig_var_SpikeGen_className__get, Swig_var_SpikeGen_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"RandomSpike_className_",Swig_var_RandomSpike_className__get, Swig_var_RandomSpike_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"PulseGen_className_",Swig_var_PulseGen_className__get, Swig_var_PulseGen_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Nernst_className_",Swig_var_Nernst_className__get, Swig_var_Nernst_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"CaConc_className_",Swig_var_CaConc_className__get, Swig_var_CaConc_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"HHGate_className_",Swig_var_HHGate_className__get, Swig_var_HHGate_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"HHChannel_className_",Swig_var_HHChannel_className__get, Swig_var_HHChannel_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Mg_block_className_",Swig_var_Mg_block_className__get, Swig_var_Mg_block_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Compartment_className_",Swig_var_Compartment_className__get, Swig_var_Compartment_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"NeuroScan_className_",Swig_var_NeuroScan_className__get, Swig_var_NeuroScan_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"HSolve_className_",Swig_var_HSolve_className__get, Swig_var_HSolve_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Kintegrator_className_",Swig_var_Kintegrator_className__get, Swig_var_Kintegrator_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"MathFunc_className_",Swig_var_MathFunc_className__get, Swig_var_MathFunc_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Stoich_className_",Swig_var_Stoich_className__get, Swig_var_Stoich_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"KineticHub_className_",Swig_var_KineticHub_className__get, Swig_var_KineticHub_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Enzyme_className_",Swig_var_Enzyme_className__get, Swig_var_Enzyme_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Reaction_className_",Swig_var_Reaction_className__get, Swig_var_Reaction_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Molecule_className_",Swig_var_Molecule_className__get, Swig_var_Molecule_className__set);
   SWIG_Python_SetConstant(d, "ALIAS",SWIG_From_int(static_cast< int >(ALIAS)));
   SWIG_Python_SetConstant(d, "BOX_MUELLER",SWIG_From_int(static_cast< int >(BOX_MUELLER)));
   SWIG_Python_SetConstant(d, "ZIGGURAT",SWIG_From_int(static_cast< int >(ZIGGURAT)));
   SWIG_Python_SetConstant(d, "LOGARITHMIC",SWIG_From_int(static_cast< int >(LOGARITHMIC)));
   SWIG_Python_SetConstant(d, "RANDOM_MINIMIZATION",SWIG_From_int(static_cast< int >(RANDOM_MINIMIZATION)));
-  SWIG_addvarlink(SWIG_globals(),(char*)"RandGenerator_className",Swig_var_RandGenerator_className_get, Swig_var_RandGenerator_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"UniformRng_className",Swig_var_UniformRng_className_get, Swig_var_UniformRng_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"GammaRng_className",Swig_var_GammaRng_className_get, Swig_var_GammaRng_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"ExponentialRng_className",Swig_var_ExponentialRng_className_get, Swig_var_ExponentialRng_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"BinomialRng_className",Swig_var_BinomialRng_className_get, Swig_var_BinomialRng_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"PoissonRng_className",Swig_var_PoissonRng_className_get, Swig_var_PoissonRng_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"NormalRng_className",Swig_var_NormalRng_className_get, Swig_var_NormalRng_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"KineticManager_className",Swig_var_KineticManager_className_get, Swig_var_KineticManager_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"KinCompt_className",Swig_var_KinCompt_className_get, Swig_var_KinCompt_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Panel_className",Swig_var_Panel_className_get, Swig_var_Panel_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"DiskPanel_className",Swig_var_DiskPanel_className_get, Swig_var_DiskPanel_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"CylPanel_className",Swig_var_CylPanel_className_get, Swig_var_CylPanel_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"HemispherePanel_className",Swig_var_HemispherePanel_className_get, Swig_var_HemispherePanel_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"SpherePanel_className",Swig_var_SpherePanel_className_get, Swig_var_SpherePanel_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"TriPanel_className",Swig_var_TriPanel_className_get, Swig_var_TriPanel_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"RectPanel_className",Swig_var_RectPanel_className_get, Swig_var_RectPanel_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Surface_className",Swig_var_Surface_className_get, Swig_var_Surface_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Geometry_className",Swig_var_Geometry_className_get, Swig_var_Geometry_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"Adaptor_className",Swig_var_Adaptor_className_get, Swig_var_Adaptor_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"SigNeur_className",Swig_var_SigNeur_className_get, Swig_var_SigNeur_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"AscFile_className",Swig_var_AscFile_className_get, Swig_var_AscFile_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"DifShell_className",Swig_var_DifShell_className_get, Swig_var_DifShell_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"GssaStoich_className",Swig_var_GssaStoich_className_get, Swig_var_GssaStoich_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"TauPump_className",Swig_var_TauPump_className_get, Swig_var_TauPump_className_set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"TimeTable_className",Swig_var_TimeTable_className_get, Swig_var_TimeTable_className_set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"RandGenerator_className_",Swig_var_RandGenerator_className__get, Swig_var_RandGenerator_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"UniformRng_className_",Swig_var_UniformRng_className__get, Swig_var_UniformRng_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"GammaRng_className_",Swig_var_GammaRng_className__get, Swig_var_GammaRng_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"ExponentialRng_className_",Swig_var_ExponentialRng_className__get, Swig_var_ExponentialRng_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"BinomialRng_className_",Swig_var_BinomialRng_className__get, Swig_var_BinomialRng_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"PoissonRng_className_",Swig_var_PoissonRng_className__get, Swig_var_PoissonRng_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"NormalRng_className_",Swig_var_NormalRng_className__get, Swig_var_NormalRng_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"KineticManager_className_",Swig_var_KineticManager_className__get, Swig_var_KineticManager_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"KinCompt_className_",Swig_var_KinCompt_className__get, Swig_var_KinCompt_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Panel_className_",Swig_var_Panel_className__get, Swig_var_Panel_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"DiskPanel_className_",Swig_var_DiskPanel_className__get, Swig_var_DiskPanel_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"CylPanel_className_",Swig_var_CylPanel_className__get, Swig_var_CylPanel_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"HemispherePanel_className_",Swig_var_HemispherePanel_className__get, Swig_var_HemispherePanel_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"SpherePanel_className_",Swig_var_SpherePanel_className__get, Swig_var_SpherePanel_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"TriPanel_className_",Swig_var_TriPanel_className__get, Swig_var_TriPanel_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"RectPanel_className_",Swig_var_RectPanel_className__get, Swig_var_RectPanel_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Surface_className_",Swig_var_Surface_className__get, Swig_var_Surface_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Geometry_className_",Swig_var_Geometry_className__get, Swig_var_Geometry_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Adaptor_className_",Swig_var_Adaptor_className__get, Swig_var_Adaptor_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"SigNeur_className_",Swig_var_SigNeur_className__get, Swig_var_SigNeur_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"AscFile_className_",Swig_var_AscFile_className__get, Swig_var_AscFile_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"DifShell_className_",Swig_var_DifShell_className__get, Swig_var_DifShell_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"GssaStoich_className_",Swig_var_GssaStoich_className__get, Swig_var_GssaStoich_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"TauPump_className_",Swig_var_TauPump_className__get, Swig_var_TauPump_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"TimeTable_className_",Swig_var_TimeTable_className__get, Swig_var_TimeTable_className__set);
   
   /* Initialize threading */
   SWIG_PYTHON_INITIALIZE_THREADS;
