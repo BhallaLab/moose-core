@@ -502,7 +502,7 @@ bool SigNeur::traverseCell( Eref me )
 	// Set up the signaling models
 	makeSignalingModel( me );
 
-	reportTree();
+	reportTree( volume_, xByL_ );
 
 	makeCell2SigAdaptors( );
 
