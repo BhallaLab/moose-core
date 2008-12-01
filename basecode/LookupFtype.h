@@ -122,8 +122,6 @@ template < class T1, class T2 > class LookupFtype: public Ftype1< T1 >
     virtual std::string getTemplateParameters() const
     {
         static std::string s = Ftype::full_type(typeid(T1))+","+Ftype::full_type(typeid(T2));
-        cout << "In LookupFtype::getTemplateParameters - " << s << endl;
-        
         return s;
     }
 			/**
