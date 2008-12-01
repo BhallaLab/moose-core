@@ -7,9 +7,9 @@
 // Maintainer: 
 // Created: Mon Nov 24 10:26:16 2008 (+0530)
 // Version: 
-// Last-Updated: Tue Nov 25 15:07:58 2008 (+0530)
+// Last-Updated: Tue Dec  2 03:43:57 2008 (+0530)
 //           By: Subhasis Ray
-//     Update #: 12
+//     Update #: 16
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -64,6 +64,7 @@ const std::string& helpless(void)
 {
     static const std::string helpless_[] = 
         {
+            "Not documented.",
             "The documentation for this is yet to be written.",
             "Please bug the developers to provide documentation.",
             "Please help us by submitting a bug report for lack of documentation.",
@@ -77,9 +78,12 @@ const std::string& helpless(void)
             "When it gets dark enough you can see the stars. -Lee Salk",
             "You may not realize it when it happens, but a kick in the teeth may be the best thing in the world for you. - Walt Disney",
         };
-
+    // Avoid the teasers - they are irritating and clutter the screen.
+    return helpless_[0];
+#if 0    
     unsigned long item = genrand_int32()%(sizeof(helpless_)/sizeof(std::string));
     return helpless_[item];    
+#endif
 }
 
 

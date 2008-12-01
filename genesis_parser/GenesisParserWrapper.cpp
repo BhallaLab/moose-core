@@ -32,6 +32,7 @@ using namespace std;
 extern string trim(const string&);
 extern const string& getClassDoc(const string& command);
 extern const string& getCommandDoc(const string& command);
+extern void print_help(const string&);
 
 /*
 static const char nullChar( '\0' );
@@ -3900,7 +3901,7 @@ void do_help(int argc, const char** const argv, Id s ){
     string doc = getClassDoc(topic);
     if (!doc.empty())
     {
-        cout << doc << endl;
+        print_help(doc);
         return;
     }
 
@@ -3918,12 +3919,12 @@ void do_help(int argc, const char** const argv, Id s ){
         
         if(!doc.empty())
         {
-            cout << doc << endl;
+            print_help(doc);
             return;
         }
     }
     // fallback to looking for a file with same name in documentation directory
-    cout << getCommandDoc(string(argv[1]));
+    print_help(getCommandDoc(string(argv[1])));
 }
 
 char** do_arglist(int argc, const char** const argv, Id s)
