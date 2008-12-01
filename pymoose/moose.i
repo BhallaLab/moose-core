@@ -123,11 +123,11 @@
 %pythoncode %{
 def doc(cls):
     """Return documentation string from MOOSE"""
-    if (type(cls).__name__ == "classobj") or (type(cls).__name__ == "type"):
+    if isinstance(cls, type)
         return PyMooseBase.getContext().doc(cls.__name__)
-    elif type(cls) == type(PyMooseBase):
+    elif isinstance(cls, PyMooseBase):
         return PyMooseBase.getContext().doc(cls.className)
-    elif type(cls).__name__ == "str":
+    elif isinstance(cls, str):
         return PyMooseBase.getContext().doc(cls)		
 %} // !pythoncode
 	    
