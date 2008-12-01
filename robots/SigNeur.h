@@ -230,9 +230,15 @@ class SigNeur
 
 		/**
 		 * Sets up rates for diffusion between m0 and m1 via diff.
-		 * diff is a child of m0.
+		 * diff is a child of m0. 
+		 * m0 is substrate and m1 product of diff.
+		 * The baseIndices are used because the volume_ and xByL
+		 * vectors have first soma, then dend, then spine compts,
+		 * in sequential order. The indices for the Erefs though are
+		 * within the local arrays.
 		 */
-		void diffCalc( Eref m0, Eref m1, Eref diff );
+		void diffCalc( Eref m0, Eref m1, Eref diff, 
+			unsigned int m0BaseIndex, unsigned int m1BaseIndex );
 
 		/**
  		* This figures out dendritic segment dimensions. It assigns the 
@@ -271,7 +277,8 @@ class SigNeur
 		/**
  		* Print out some diagnostics about the tree subdivisions.
  		*/
-		void reportTree();
+		void reportTree(
+			vector< double >& volume, vector< double >& xByL );
 	private:
 		Id cellProto_; /// Prototype cell electrical model
 		Id spineProto_; /// Prototype spine signaling model
