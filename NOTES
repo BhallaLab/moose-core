@@ -8333,4 +8333,19 @@ Medium cleanup to ksolve code, specially Stoich.cpp, so it handles dangling
 	the Gillespie method as there are no dependencies... but at some point
 	I need to figure out what to do if I really want a zero order step.
 
+Checked in as revision 975: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+=============================================================================
+30 Nov 2008
+Working on InterSolveFlux
+=============================================================================
+1 Dec 2008
+After some strange results for the spine PKC buildup, had a look at volumes.
+These were completely off. Need to print out as they are assigned.
+OK, turned out that the issue was that the volume and xByL vectors have the
+soma, then dend, then spine compts in order. The volumes etc are actually
+OK. The problem was that I was indexing these two vectors by the Eref indices
+for src and dest molecules, which are not continuous but local to the
+arrays for soma, dend and spine respectively. Fixed. Looks OK now.
+
 =============================================================================
