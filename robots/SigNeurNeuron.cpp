@@ -85,7 +85,8 @@ void SigNeur::assignSignalingCompts()
 /**
  * Print out some diagnostics about the tree subdivisions.
  */
-void SigNeur::reportTree()
+void SigNeur::reportTree( 
+	vector< double >& volume, vector< double >& xByL )
 {
 	cout << "SigNeur: Tree size = " << tree_.size() << 
 		", s=" << numSoma_ << 
@@ -93,11 +94,16 @@ void SigNeur::reportTree()
 		", sp=" << numSpine_ <<
 		", neck=" << numNeck_ << endl;
 
+	/*
 	for ( vector< TreeNode >::iterator i = tree_.begin(); 
 		i != tree_.end(); ++i ) {
 		assert( i->parent < tree_.size() );
-		// cout << "pa: " << tree_[ i->parent ].compt.path() << ", el: " << i->compt.path() << ", sig: " << i->sigModel.path() << "[" << i->sigStart << ".." << i->sigEnd << "]\n";
+		cout << "pa: " << tree_[ i->parent ].compt.path() << ", el: " << i->compt.path() << ", sig: " << i->sigModel.path() << "[" << i->sigStart << ".." << i->sigEnd << "]\n";
+		for ( unsigned int j = i->sigStart; j < i ->sigEnd; ++j )
+			cout << "	sig[" << j << "]: vol=" << volume[j] << 
+				", xByL=" << xByL[j] << endl;
 	}
+	*/
 }
 
 Id SigNeur::findSoma( const vector< Id >& compts )
