@@ -177,7 +177,6 @@ std::string Ftype::full_type(const type_info& paramType)
     }    
     else
     {
-        cout << "Type not in list: " << paramType.name() << endl;
         return "none";
     }
 }

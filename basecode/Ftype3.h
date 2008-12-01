@@ -124,7 +124,6 @@ template < class T1, class T2, class T3 > class Ftype3: public Ftype
 			std::string getTemplateParameters() const
 			{
 				static std::string s = Ftype::full_type(typeid(T1)) +","+Ftype::full_type(typeid(T2))+","+Ftype::full_type(typeid(T3));
-				cout << "Ftype3::getTemplateParameters() - " << s << endl;
 				return s;
 			}
 			///////////////////////////////////////////////////////
