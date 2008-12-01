@@ -152,7 +152,11 @@ LIBS+= -lreadline
 CXXFLAGS+= -DUSE_READLINE
 endif
 
-
+# To compile with curses support (terminal aware printing) pass USE_CURSES=true in make command line
+ifdef USE_CURSES
+LIBS += -lcurses
+CXXFLAGS+= -DUSE_CURSES
+endif
 # For 64 bit Linux systems add paths to 64 bit libraries 
 ifeq ($(OSTYPE),Linux)
 ifeq ($(MACHINE),x86_64)
