@@ -94,9 +94,12 @@ Element* findDiff( Element* pa )
 /**
  * Utility function to do the diffusion calculations for the 
  * diffusing molecules m0 and m1, and the reaction diff.
- * Should be called at the point where the diffusion messages are set up.
+ * Should be called at the point where the diffusion messages are set up
+ * Diff is a child of m0. m0 is a substrate of diff, and m1 is the
+ * product. So kf means diffusion from m0 to m1, and vice versa.
  */
-void SigNeur::diffCalc( Eref m0, Eref m1, Eref diff )
+void SigNeur::diffCalc( Eref m0, Eref m1, Eref diff, 
+	unsigned int m0BaseIndex, unsigned int m1BaseIndex )
 {
 	static const Finfo* kfFinfo = 
 		initReactionCinfo()->findFinfo( "kf" );
@@ -109,14 +112,14 @@ void SigNeur::diffCalc( Eref m0, Eref m1, Eref diff )
 	double v1;
 	double D0;
 	double D1;
-	assert( m0.i < volume_.size() );
-	v0 = volume_[ m0.i ];
+	assert( m0.i + m0BaseIndex < volume_.size() );
+	v0 = volume_[ m0.i + m0BaseIndex ];
 	assert( v0 > 0.0 );
 	bool ret = get< double >( m0, dFinfo, D0 );
 	assert( ret );
 
-	assert( m1.i < volume_.size() );
-	v1 = volume_[ m1.i ];
+	assert( m1.i + m1BaseIndex < volume_.size() );
+	v1 = volume_[ m1.i + m1BaseIndex ];
 	assert( v1 > 0.0 );
 	ret = get< double >( m1, dFinfo, D1 );
 	assert( ret );
@@ -126,9 +129,11 @@ void SigNeur::diffCalc( Eref m0, Eref m1, Eref diff )
 		// Ideally D0 and D1 should match. Should it complain? Hm...
 		// Also this doesn't handle asymmetric diffn, such as transport.
 		double D = Dscale_ * ( D0 + D1 ) / 2.0;
-		double kf = D * xByL_[ m0.i ] / v0;
-		double kb = D * xByL_[ m0.i ] / v1; 
-		// Note that we the xByL for parent sig compt, but vol for target compt.
+		double kf = D * xByL_[ m0.i + m0BaseIndex ] / v0;
+		double kb = D * xByL_[ m0.i + m0BaseIndex ] / v1; 
+		// Note that we use the xByL for parent sig compt, 
+		// 1/vol term is with originating compt so as to get a 
+		// concentration scaling term into the rates.
 		ret = set< double >( diff, kfFinfo, kf );
 		assert( ret );
 	
@@ -153,6 +158,8 @@ void SigNeur::diffCalc( Eref m0, Eref m1, Eref diff )
  * For soma, ignore the soma dimensions except within it?
  *
  * It would be cleaner to take the el dia as the middle dia.
+ * 
+ * The soma diffusion is only used from one soma compt to another.
  *
  */
 
@@ -178,14 +185,16 @@ void SigNeur::completeSomaDiffusion(
 						ConnTainer::Simple );
 					assert( ret );
 					Eref e0( i->second, j );
-					diffCalc( e0, e1, e2 );
+					// Base index is zero as diffn is between soma only.
+					diffCalc( e0, e1, e2, 0, 0 );
 				}
 			}
 		}
 	}
 }
 
-// void diffCalc( Eref m0, Eref m1, Eref diff )
+// void diffCalc( Eref m0, Eref m1, Eref diff, 
+// unsigned int m0BaseIndex, unsigned int m1BaseIndex )
 
 void SigNeur::completeDendDiffusion( 
 	vector< unsigned int >& junctions )
@@ -213,7 +222,9 @@ void SigNeur::completeDendDiffusion(
 							ConnTainer::Simple );
 						assert( ret );
 						Eref e0( i->second, j );
-						diffCalc( e0, e1, e2 );
+						// src is dend, so numSoma offset. 
+						// Tgt is soma, so no offset.
+						diffCalc( e0, e1, e2, numSoma_, 0 );
 					}
 				} else if 
 					( tgt >= numSoma_ && tgt < numDend_ + numSoma_ ) {
@@ -228,7 +239,8 @@ void SigNeur::completeDendDiffusion(
 						ConnTainer::Simple );
 					assert( ret );
 					Eref e0( i->second, j );
-					diffCalc( e0, e1, e2 );
+					// src and tgt are dend, so numSoma offset. 
+					diffCalc( e0, e1, e2, numSoma_, numSoma_ );
 				} else { // Should not connect into spine.
 					cout << "Check: completeDendDiffusion: Is it endcompt? " << Eref( i->second, j).name() << endl;
 					// assert( 0 );
@@ -266,7 +278,10 @@ void SigNeur::completeSpineDiffusion(
 							e2, prdFinfo->msg(), 
 							ConnTainer::Simple );
 						assert( ret );
-						diffCalc( e0, e1, e2 );
+						// src is spine, so numSoma+numDend offset.
+						// tgt is dend, so numSoma offset. 
+						diffCalc( e0, e1, e2, 
+							numSoma_ + numDend_, numSoma_ );
 					}
 				}
 			}
