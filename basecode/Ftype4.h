@@ -132,8 +132,7 @@ virtual std::string getTemplateParameters() const
 			Ftype::full_type(typeid(T2))+"," +
 			Ftype::full_type(typeid(T3)) + "," +
 			Ftype::full_type(typeid( T4 )) ;
-        cout << "Ftype4::getTemplateParameters() - " << s << endl;        
-        return s;
+                        return s;
     }
 			///////////////////////////////////////////////////////
 			// Here we define the functions for handling 
