@@ -250,41 +250,47 @@ void SigNeur::completeDendDiffusion(
 	}
 }
 
-void SigNeur::completeSpineDiffusion( 
-	vector< unsigned int >& junctions )
+void SigNeur::connectSpineToDend( 
+	vector< unsigned int >& junctions,
+	map< string, Element* >::iterator i, Element* diff )
 {
 	static const Finfo* reacFinfo = 
 		initMoleculeCinfo()->findFinfo( "reac" );
 	static const Finfo* prdFinfo = 
 		initReactionCinfo()->findFinfo( "prd" );
-	
+	for ( unsigned int j = 0; j < numSpine_; ++j ) {
+		unsigned int tgt = junctions[ j + numSoma_ + numDend_ ];
+		if ( tgt >= numSoma_ && tgt < numSoma_ + numDend_ ) {
+			tgt -= numSoma_; // Fix up offset into dend array.
+			// connect to dend, if mol present
+			map< string, Element* >::iterator mol = 
+				dendMap_.find( i->first );
+			if ( mol != dendMap_.end() ) {
+				assert( tgt < mol->second->numEntries() );
+				Eref e0( i->second, j ); // Parent spine molecule
+				Eref e2( diff, j ); // Diffusion object
+				Eref e1( mol->second, tgt ); //Target dend molecule
+				bool ret = e1.add( reacFinfo->msg(), 
+					e2, prdFinfo->msg(), 
+					ConnTainer::Simple );
+				assert( ret );
+				// src is spine, so numSoma+numDend offset.
+				// tgt is dend, so numSoma offset. 
+				diffCalc( e0, e1, e2, 
+					numSoma_ + numDend_, numSoma_ );
+			}
+		}
+	}
+}
+
+void SigNeur::completeSpineDiffusion( 
+	vector< unsigned int >& junctions )
+{
 	for ( map< string, Element* >::iterator i = spineMap_.begin(); 
 		i != spineMap_.end(); ++i ) {
 		Element* diff = findDiff( i->second );
 		if ( diff ) { // Connect up all diffn compts.
-			for ( unsigned int j = 0; j < numSpine_; ++j ) {
-				unsigned int tgt = junctions[ j + numSoma_ + numDend_ ];
-				if ( tgt >= numSoma_ && tgt < numSoma_ + numDend_ ) {
-					tgt -= numSoma_; // Fix up offset into dend array.
-					// connect to dend, if mol present
-					map< string, Element* >::iterator mol = 
-						dendMap_.find( i->first );
-					if ( mol != dendMap_.end() ) {
-						assert( tgt < mol->second->numEntries() );
-						Eref e0( i->second, j ); // Parent spine molecule
-						Eref e2( diff, j ); // Diffusion object
-						Eref e1( mol->second, tgt ); //Target dend molecule
-						bool ret = e1.add( reacFinfo->msg(), 
-							e2, prdFinfo->msg(), 
-							ConnTainer::Simple );
-						assert( ret );
-						// src is spine, so numSoma+numDend offset.
-						// tgt is dend, so numSoma offset. 
-						diffCalc( e0, e1, e2, 
-							numSoma_ + numDend_, numSoma_ );
-					}
-				}
-			}
+			connectSpineToDend( junctions, i, diff );
 		}
 	}
 }
