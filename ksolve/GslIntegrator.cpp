@@ -13,6 +13,7 @@
 #include <gsl/gsl_odeiv.h>
 #include "RateTerm.h"
 #include "KinSparseMatrix.h"
+#include "InterSolverFlux.h"
 #include "Stoich.h"
 #include "GslIntegrator.h"
 

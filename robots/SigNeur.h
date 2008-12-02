@@ -218,6 +218,12 @@ class SigNeur
 		 * to dend compartments.
 		 */
 		void completeSpineDiffusion( vector< unsigned int >& junctions );
+		/**
+		 * Helper function for connecting up spine compartments
+		 */
+		void connectSpineToDend( 
+			vector< unsigned int >& junctions,
+			map< string, Element* >::iterator i, Element* diff );
 
 		/**
 		 * Traverses the cell tree to work out where the diffusion reactions
