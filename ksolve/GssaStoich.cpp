@@ -13,6 +13,7 @@
 #include "../element/Wildcard.h"
 #include "RateTerm.h"
 #include "KinSparseMatrix.h"
+#include "InterSolverFlux.h"
 #include "Stoich.h"
 #include "GssaStoich.h"
 #include "randnum.h"

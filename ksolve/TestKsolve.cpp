@@ -17,6 +17,7 @@
 #include "../builtins/Table.h"
 #include "RateTerm.h"
 #include "KinSparseMatrix.h"
+#include "InterSolverFlux.h"
 #include "Stoich.h"
 #include "GssaStoich.h"
 

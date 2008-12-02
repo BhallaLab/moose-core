@@ -14,6 +14,7 @@ OBJ = \
 	KineticHub.o	\
 	Stoich.o	\
 	GssaStoich.o	\
+	InterSolverFlux.o	\
 	Kintegrator.o	\
 	KineticManager.o	\
 	TestKsolve.o	\
@@ -45,8 +46,9 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 KinSparseMatrix.o:	KinSparseMatrix.h
 KineticHub.o:	RateTerm.h KineticHub.h
-Stoich.o:	RateTerm.h Stoich.h KinSparseMatrix.h Makefile
-GssaStoich.o:	RateTerm.h Stoich.h KinSparseMatrix.h GssaStoich.h Makefile
+Stoich.o:	RateTerm.h Stoich.h KinSparseMatrix.h InterSolverFlux.h Makefile 
+GssaStoich.o:	RateTerm.h Stoich.h KinSparseMatrix.h GssaStoich.h InterSolverFlux.h Makefile
+InterSolverFlux.o:	InterSolverFlux.h
 Kintegrator.o:	Kintegrator.h
 KineticManager.o:	KineticManager.h ../kinetics/KinCompt.h
 TestKsolve.o:	KineticManager.h RateTerm.h Stoich.h KinSparseMatrix.h KineticHub.h Makefile
