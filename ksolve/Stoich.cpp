@@ -14,6 +14,7 @@
 #include "../element/Wildcard.h"
 #include "RateTerm.h"
 #include "KinSparseMatrix.h"
+#include "InterSolverFlux.h"
 #include "Stoich.h"
 #include "kinetics/Reaction.h"
 #include "kinetics/Enzyme.h"
@@ -177,6 +178,16 @@ const Cinfo* initStoichCinfo()
 			RFCAST( &Stoich::rescaleVolume ),
 			"Scales the volume of the model by the specified ratio."
 		),
+
+		new DestFinfo( "makeFlux", 
+			Ftype3< string, 
+				vector< unsigned int >, vector< double > >::global(),
+			RFCAST( &Stoich::makeFlux ),
+			"Sets up an InterSolverFlux stub."
+			"makeFlux( stubName, molIndices, fluxRates )"
+			"The Stoich adds another entry to its flux_ vector, and"
+			"this becomes a new child object that acts as the stub."
+		),
 		
 		///////////////////////////////////////////////////////
 		// Shared definitions
@@ -201,7 +212,9 @@ const Cinfo* initStoichCinfo()
 				"the reaction system. Knows how to compute derivatives for most common things, also "
 				"knows how to handle special cases where the object will have to do its own "
 				"computation. Generates a stoichiometry matrix,which is useful for lots of other "
-				"operations as well.",
+				"operations as well."
+				"Also provides child stub objects to act as a hook"
+				"for inter-solver flow of molecules"
 	};
 	
 	static Cinfo stoichCinfo(
@@ -398,6 +411,37 @@ void Stoich::innerSetBuffer( int mode, unsigned int mol )
 	}
 }
 
+void Stoich::makeFlux( const Conn* c, 
+	string stubName, vector< unsigned int >molIndices, 
+	vector< double > fluxRates )
+{
+	static_cast< Stoich* >( c->data() )->innerMakeFlux(
+		c->target(), stubName, molIndices, fluxRates );
+}
+
+/**
+ * Puts the data into a new entry in the flux vector, and creates
+ * a stub child for handling the messages to and from the entry.
+ */
+void Stoich::innerMakeFlux( Eref e,
+	string stubName, vector< unsigned int >molIndices, 
+	vector< double > fluxRates )
+{
+	assert( molIndices.size() == fluxRates.size() );
+	vector< double* > fluxMolPtrs;
+	for ( vector< unsigned int >::iterator i = molIndices.begin();
+		i != molIndices.end(); ++i ) {
+		assert( *i < S_.size() );
+		fluxMolPtrs.push_back( &S_[ *i ] );
+	}
+	InterSolverFlux* data = 
+		new InterSolverFlux( fluxMolPtrs, fluxRates ); 
+	flux_.push_back( data );
+	const Cinfo * ic = initInterSolverFluxCinfo();
+	Element* f = ic->create( Id::scratchId(), stubName,
+		static_cast< void* >( data ), 1 );
+	e.add( "childSrc", f, "child" );
+}
 ///////////////////////////////////////////////////
 // Other function definitions
 ///////////////////////////////////////////////////

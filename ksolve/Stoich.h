@@ -65,6 +65,18 @@ class Stoich
 			int mode, unsigned int mol );
 		void innerSetBuffer( int mode, unsigned int mol );
 
+
+		/**
+ 		* Puts the data into a new entry in the flux vector, and creates
+ 		* a stub child for handling the messages to and from the entry.
+ 		*/
+		static void makeFlux( const Conn* c, 
+			string stubName, vector< unsigned int >molIndices, 
+			vector< double > fluxRates );
+		void innerMakeFlux( Eref e,
+			string stubName, vector< unsigned int >molIndices, 
+			vector< double > fluxRates );
+
 		///////////////////////////////////////////////////
 		// Functions used by the GslIntegrator
 		///////////////////////////////////////////////////
@@ -219,8 +231,8 @@ class Stoich
 		///////////////////////////////////////////////////
 		// Fields used for coupling between solvers: developmental
 		///////////////////////////////////////////////////
+		vector< InterSolverFlux* > flux_;
 		/*
-		vector< InterSolverFlux > flux_;
 		vector< double* > fluxMol_;	// Pointers to diffusing S_ entries 
 		vector< double > fluxRates_;		// Flux scale factors
 		vector< double > prevFluxMol_; // Used for trapezoidal integ.
