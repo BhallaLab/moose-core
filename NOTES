@@ -8347,5 +8347,17 @@ soma, then dend, then spine compts in order. The volumes etc are actually
 OK. The problem was that I was indexing these two vectors by the Eref indices
 for src and dest molecules, which are not continuous but local to the
 arrays for soma, dend and spine respectively. Fixed. Looks OK now.
+Checked in as revision 977: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+
+=============================================================================
+2 Dec
+Working on the InterSolverFlux stuff. Remaining:
+- Need to schedule the flux updates. Has to be set up by SigNeur, because of
+	the complex staging involved.
+- SigNeur needs to call the setup function for making the flux terms on 
+	Stoich, and then set up the messages on the flux stubs.
+
+Simplest approach for now is to keep the diff reacs on the spines,
+and use them as handles to set up the flux info.
 
 =============================================================================
