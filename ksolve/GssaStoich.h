@@ -37,9 +37,9 @@ class GssaStoich: public Stoich
 		static string getMethod( Eref e );
 		static void setMethod( const Conn* c, string method );
 		void innerSetMethod( const string& method );
-		static string getPath( Eref e );
-		static void setPath( const Conn* c, string value );
-		void localSetPath( Eref stoich, const string& value );
+		//static string getPath( Eref e );
+		//static void setPath( const Conn* c, string value );
+		//void localSetPath( Eref stoich, const string& value );
 		///////////////////////////////////////////////////
 		// Functions used by the GillespieIntegrator
 		///////////////////////////////////////////////////
