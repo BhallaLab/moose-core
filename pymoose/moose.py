@@ -1718,13 +1718,15 @@ def PyMooseBase_initSimulation(*args):
   """PyMooseBase_initSimulation()"""
   return _moose.PyMooseBase_initSimulation(*args)
 
+from inspect import isclass
+
 def doc(cls):
     """Return documentation string from MOOSE"""
-    if (type(cls).__name__ == "classobj") or (type(cls).__name__ == "type"):
+    if isclass(cls):
         return PyMooseBase.getContext().doc(cls.__name__)
-    elif type(cls) == type(PyMooseBase):
+    elif isinstance(cls, PyMooseBase):
         return PyMooseBase.getContext().doc(cls.className)
-    elif type(cls).__name__ == "str":
+    elif isinstance(cls, str):
         return PyMooseBase.getContext().doc(cls)		
 
 class Neutral(PyMooseBase):
