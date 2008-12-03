@@ -121,9 +121,11 @@
 %attribute(pymoose::PyMooseBase, const std::string, className, __get_className)
 
 %pythoncode %{
+from inspect import isclass
+
 def doc(cls):
     """Return documentation string from MOOSE"""
-    if isinstance(cls, type)
+    if isclass(cls):
         return PyMooseBase.getContext().doc(cls.__name__)
     elif isinstance(cls, PyMooseBase):
         return PyMooseBase.getContext().doc(cls.className)
