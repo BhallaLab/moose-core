@@ -36,6 +36,8 @@ class Stoich
 		static bool getUseOneWayReacs( Eref e );
 		static string getPath( Eref e );
 		static void setPath( const Conn* c, string value );
+		static vector< Id > getPathVec( Eref e );
+		static void setPathVec( const Conn* c, vector< Id > value );
 		static unsigned int getRateVectorSize( Eref e );
 
 		///////////////////////////////////////////////////
@@ -97,7 +99,12 @@ class Stoich
 		}
 		void runStats();
 #endif // USE_GSL
-		void rebuildMatrix( Eref stoich, vector< Id >& ret );
+		/**
+ 		 * Virtual function to make the data structures from the 
+ 		 * object oriented specification of the signaling network.
+ 		 */
+		virtual void rebuildMatrix( Eref stoich, vector< Id >& ret );
+
 		void localScanTicks( Eref stoich );
 
 		/**
@@ -112,7 +119,8 @@ class Stoich
 		///////////////////////////////////////////////////
 		// Setup function definitions
 		///////////////////////////////////////////////////
-		void localSetPath( Eref e, const string& value );
+		virtual void localSetPath( Eref e, const string& value );
+		void localSetPathVec( Eref e, vector< Id >& value );
 
 		void setupMols(
 			Eref e,
@@ -179,6 +187,7 @@ class Stoich
 		unsigned int nExternalRates_;
 		bool useOneWayReacs_;
 		string path_;
+		vector< Id > pathVec_;
 
 		/**
 		 * S_ holds the state variables: n for all the molecules. This

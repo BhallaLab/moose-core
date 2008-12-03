@@ -387,6 +387,39 @@ void KineticManager::innerSetMethod( Eref e, string value )
 	}
 }
 
+/**
+ * Finds descendants of this KineticManager and puts into the
+ * ret vector. Returns the # of descendants found. 
+ * If it encounters another KineticManager among descendants, it
+ * bypasses it and its children, unless the child KineticManager has 
+ * the 'neutral' or 'ee' method.
+ * Goal is to build the path of solved elements, but allow subsidiary
+ * KineticManagers to do their own thing.
+ */
+unsigned int findDescendants( Eref e, vector< Id >& ret)
+{
+	static const Finfo* childListFinfo =
+		initNeutralCinfo()->findFinfo( "childList" );
+	static const Finfo* methodFinfo =
+		initKineticManagerCinfo()->findFinfo( "method" );
+	
+	vector< Id > kids;
+	get< vector< Id > >( e, childListFinfo, kids );
+
+	for( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
+	{
+		string method;
+		if ( i->eref().e->cinfo()->isA( initKineticManagerCinfo() ) ) {
+			get< string >( i->eref(), methodFinfo, method );
+			if ( !( method == "ee" || method == "neutral" ) )
+				continue;
+		}
+		ret.push_back( *i );
+		findDescendants( i->eref(), ret );
+	}
+	return ret.size();
+}
+
 // Returns the solver set up for GSL integration, on the element e
 Id gslSetup( Eref e, const string& method )
 {
@@ -428,9 +461,12 @@ Id gslSetup( Eref e, const string& method )
 	Eref( ks ).add( "hub", kh, "hub" );
 	Eref( ks ).add( "gsl", ki, "gsl" );
 
+	vector< Id > descendants;
+	findDescendants( e, descendants );
 	set< string >( ki, "method", method );
-	string simpath = e.id().path() + "/##[]";
-	set< string >( ks, "path", simpath );
+	set< vector< Id > >( ks, "pathVec", descendants );
+	// string simpath = e.id().path() + "/##[]";
+	// set< string >( ks, "path", simpath );
 	set< double >( ki, "relativeAccuracy", 1.0e-5 );
 	set< double >( ki, "absoluteAccuracy", 1.0e-5 );
 	return solveId;
@@ -475,8 +511,11 @@ Id gillespieSetup( Eref e, const string& method )
 	Eref( ks ).add( "hub", kh, "hub" );
 
 	set< string >( ks, "method", method );
-	string simpath = e.id().path() + "/##[]";
-	set< string >( ks, "path", simpath );
+	vector< Id > descendants;
+	findDescendants( e, descendants );
+	set< vector< Id > >( ks, "pathVec", descendants );
+	// string simpath = e.id().path() + "/##[]";
+	// set< string >( ks, "path", simpath );
 	return solveId;
 }
 
@@ -515,11 +554,15 @@ Id smoldynSetup( Eref e, const string& method, double recommendedDt )
 	set< bool >( ks, "useOneWayReacs", 1 );
 	Eref( ks ).add( "hub", sh, "hub" );
 	// ks->findFinfo( "hub" )->add( ks, sh, sh->findFinfo( "hub" ) );
-	string simpath = e.id().path() + "/##[]";
-	set< string >( ks, "path", simpath );
+	vector< Id > descendants;
+	findDescendants( e, descendants );
+	set< vector< Id > >( ks, "pathVec", descendants );
+	// string simpath = e.id().path() + "/##[]";
+	// set< string >( ks, "path", simpath );
 
 	// This sets up additional things like the geometry information.
-	set< string >( sh, "path", simpath );
+	// Dec2008: Need to revise.
+	// set< string >( sh, "path", simpath );
 	return solveId;
 }
 
