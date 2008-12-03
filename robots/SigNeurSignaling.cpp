@@ -231,7 +231,7 @@ void SigNeur::makeSignalingModel( Eref me )
 	Element* kin = Neutral::create( "KineticManager", "kinetics", 
 		me.id(), Id::childId( me.id() ) );
  	Id kinId = kin->id();
-	// Each of these protos should be a simple Element neutral.
+	// Each of these protos should be a KinCompt or derived class.
 	Element* soma = copySig( kinId, somaProto_, "soma", numSoma_ );
 	Element* dend = copySig( kinId, dendProto_, "dend", numDend_ );
 	Element* spine = copySig( kinId, spineProto_, "spine", numSpine_ );

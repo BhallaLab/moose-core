@@ -155,6 +155,11 @@ const Cinfo* initStoichCinfo()
 			GFCAST( &Stoich::getPath ), 
 			RFCAST( &Stoich::setPath )
 		),
+		new ValueFinfo( "pathVec", 
+			ValueFtype1< vector< Id > >::global(),
+			GFCAST( &Stoich::getPathVec ), 
+			RFCAST( &Stoich::setPathVec )
+		),
 		new ValueFinfo( "rateVectorSize", 
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &Stoich::getRateVectorSize ), 
@@ -318,12 +323,20 @@ bool Stoich::getUseOneWayReacs( Eref e ) {
 	return static_cast< const Stoich* >( e.data() )->
 		useOneWayReacs_;
 }
+
 string Stoich::getPath( Eref e ) {
 	return static_cast< const Stoich* >( e.data() )->path_;
 }
-
 void Stoich::setPath( const Conn* c, string value ) {
 	static_cast< Stoich* >( c->data() )->localSetPath( c->target(), value);
+}
+
+vector< Id > Stoich::getPathVec( Eref e ) {
+	return static_cast< const Stoich* >( e.data() )->pathVec_;
+}
+void Stoich::setPathVec( const Conn* c, vector< Id > value ) {
+	static_cast< Stoich* >( c->data() )->localSetPathVec( 
+		c->target(), value);
 }
 
 unsigned int Stoich::getRateVectorSize( Eref e ) {
@@ -490,6 +503,7 @@ void Stoich::clear( Eref stoich )
 	v_.resize( 0 );
 	rates_.resize( 0, 0 );
 	sumTotals_.resize( 0 );
+	pathVec_.resize( 0 );
 	path2mol_.resize( 0 );
 	mol2path_.resize( 0 );
 	molMap_.clear( );
@@ -503,13 +517,20 @@ void Stoich::clear( Eref stoich )
 
 void Stoich::localSetPath( Eref stoich, const string& value )
 {
-	path_ = value;
 	vector< Id > ret;
-	wildcardFind( path_, ret );
-	clear( stoich );
-	if ( ret.size() > 0 ) {
+	wildcardFind( value, ret );
+	this->localSetPathVec( stoich, ret ); //Pass down to derived classes
+	path_ = value;
+}
 
-		rebuildMatrix( stoich, ret );
+void Stoich::localSetPathVec( Eref stoich, vector< Id >& value)
+{
+	path_ = "assigned from pathVec";
+	clear( stoich );
+	pathVec_ = value;
+	if ( pathVec_.size() > 0 ) {
+		// Pass to derived classes
+		this->rebuildMatrix( stoich, pathVec_ );
 
 		// This first target is for any Kintegrator objects
 		send1< vector< double >* >( stoich, allocateSlot, &S_ );
@@ -517,11 +538,15 @@ void Stoich::localSetPath( Eref stoich, const string& value )
 		// The second target is for GSL integrator types.
 		send1< void* >( stoich, assignStoichSlot, stoich.data() );
 	} else {
-		cout << "No objects to simulate in path '" << value << "'\n";
+		cout << "No objects to simulate in pathVec sized " << 
+			pathVec_.size() << "\n";
 	}
 }
 
-// Need to clean out existing stuff first.
+/**
+ * Virtual function to make the data structures from the 
+ * object oriented specification of the signaling network.
+ */
 void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 {
 	static const Cinfo* molCinfo = Cinfo::find( "Molecule" );
