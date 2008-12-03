@@ -8359,5 +8359,42 @@ Working on the InterSolverFlux stuff. Remaining:
 
 Simplest approach for now is to keep the diff reacs on the spines,
 and use them as handles to set up the flux info.
+Checked in as revision 980: unit test flags on, Smoldyn off, GSL on, -g, MPI off
 
 =============================================================================
+3 Dec 2008
+Working on SigNeur setup to begin InterSolver work.
+Desirable setup is to have a separate KineticManager for each compartment that
+	is to be solved independently.
+
+Analyzing setup procedures for SigNeur. It comes close to the above:
+	- Sets up a KinCompt for each compartment. Could easily be a 
+		KineticManager
+	- Issue is that parent KineticManager wants to take over the whole lot
+		during its path assignment.
+	- Futher issue: If we want to lump multiple dend compartments together
+		for calculations, we will need another layer of managers for
+		this new division of compartments.
+		- For now, OK to do fine subdivision.
+	- Continuing issue: The underlying dend and spine models are arrays.
+		OK for separate solvers, but messy between nodes.
+
+Options:
+	1 KineticManager path assignment has to be smarter and not attempt to
+	take over the turf of child KineticManagers.
+	2 KineticManager path defaults to its descendants, with above proviso.
+		- KineticManager has 'neutral' option that tells parent to 
+		treat it like a KinCompt and take over its kids.
+	3 KineticManager is really smart and figures out inter-solver data
+	transfer itself.
+		- This will need handling of multiple reaction types, using the 
+		internal methods of the junction reactions.
+		- Numerical issues begin to get nasty.
+		- What to do if enzyme, substrate, and product are on 
+		different compts?
+		- Should we only permit diffusive exchange between compartments?
+			- What if we really do want a huge model to be 
+			subdivided?  
+
+
+Going for now with option 2.

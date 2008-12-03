@@ -103,6 +103,19 @@ class KineticManager: public KinCompt
 			bool isStochastic, bool isSpatial, 
 			bool isVariableDt, bool isImplicit,
 			bool isSingleParticle, bool isMultiscale );
+		///////////////////////////////////////////////////
+		// Utility functions.
+		///////////////////////////////////////////////////
+		/**
+ 		* Finds descendants of this KineticManager and puts into the
+ 		* ret vector. Returns the # of descendants found. 
+ 		* If it encounters another KineticManager among descendants, it
+ 		* bypasses it and its children, unless the child KineticManager
+ 		* has the 'neutral' or 'ee' method.
+ 		* Goal is to build the path of solved elements, but allow
+		* subsidiary KineticManagers to do their own thing.
+ 		*/
+		//unsigned int findDescendants( Eref e, vector< Id >& ret );
 
 	private:
 		bool auto_;	// Default true. Pick method automatically

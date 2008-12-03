@@ -58,11 +58,14 @@ const Cinfo* initGssaStoichCinfo()
 			GFCAST( &GssaStoich::getMethod ), 
 			RFCAST( &GssaStoich::setMethod )
 		),
+		/*
+		* Inherited. Get rid of after testing.
 		new ValueFinfo( "path", 
 			ValueFtype1< string >::global(),
 			GFCAST( &GssaStoich::getPath ), 
 			RFCAST( &GssaStoich::setPath )
 		),
+		*/
 		///////////////////////////////////////////////////////
 		// MsgSrc definitions
 		///////////////////////////////////////////////////////
@@ -134,7 +137,7 @@ void GssaStoich::setMethod( const Conn* c, string method )
 void GssaStoich::innerSetMethod( const string& method )
 {
 	method_ = method;
-	cout << "in void GssaStoich::innerSetMethod( " << method << ") \n";
+	//cout << "in void GssaStoich::innerSetMethod( " << method << ") \n";
 /*
 	gssaMethod = G1;
 	if ( method == "tauLeap" ) {
@@ -143,6 +146,7 @@ void GssaStoich::innerSetMethod( const string& method )
 */
 }
 
+/*
 string GssaStoich::getPath( Eref e ) {
 	return static_cast< const GssaStoich* >( e.data() )->path_;
 }
@@ -164,6 +168,7 @@ void GssaStoich::localSetPath( Eref stoich, const string& value )
 		cout << "No objects to simulate in path '" << value << "'\n";
 	}
 }
+*/
 
 ///////////////////////////////////////////////////
 // Dest function definitions
@@ -202,6 +207,10 @@ void GssaStoich::innerSetMolN( const Conn* c, double y, unsigned int i )
 	s->updateAllRates();
 }
 
+/**
+ * Virtual function to make the data structures from the 
+ * object oriented specification of the signaling network.
+ */
 void GssaStoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 {
 	Stoich::rebuildMatrix( stoich, ret );
