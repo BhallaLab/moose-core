@@ -20,8 +20,8 @@ namespace pymoose
         ~HHGate();
         const std::string& getType();
         // These are manually inserted
-        InterpolationTable* __get_A() const;
-        InterpolationTable* __get_B() const;
+        Interpol* __get_A() const;
+        Interpol* __get_B() const;
         void tabFill(int xdivs, int mode);
         void setupAlpha(double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size=3000, double min=-0.1, double max=0.05);
         void setupTau(double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size=3000, double min=-0.1, double max=0.05);

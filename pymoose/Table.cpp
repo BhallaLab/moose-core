@@ -3,18 +3,18 @@
 #include "Table.h"
 using namespace pymoose;
 const std::string Table::className_ = "Table";
-Table::Table(Id id):InterpolationTable(id){}
-Table::Table(std::string path):InterpolationTable(className_, path){}
-Table::Table(std::string name, Id parentId):InterpolationTable(className_, name, parentId){}
-Table::Table(std::string name, PyMooseBase& parent):InterpolationTable(className_, name, parent){}
-Table::Table(const Table& src, std::string objectName,  PyMooseBase& parent):InterpolationTable(src, objectName, parent){}
+Table::Table(Id id):Interpol(id){}
+Table::Table(std::string path):Interpol(className_, path){}
+Table::Table(std::string name, Id parentId):Interpol(className_, name, parentId){}
+Table::Table(std::string name, PyMooseBase& parent):Interpol(className_, name, parent){}
+Table::Table(const Table& src, std::string objectName,  PyMooseBase& parent):Interpol(src, objectName, parent){}
 
-Table::Table(const Table& src, std::string objectName, Id& parent):InterpolationTable(src, objectName, parent){}
-Table::Table(const Table& src, std::string path):InterpolationTable(src, path)
+Table::Table(const Table& src, std::string objectName, Id& parent):Interpol(src, objectName, parent){}
+Table::Table(const Table& src, std::string path):Interpol(src, path)
 {
 }
 
-Table::Table(const Id& src, string name, Id& parent):InterpolationTable(src, name, parent)
+Table::Table(const Id& src, string name, Id& parent):Interpol(src, name, parent)
 {
 }
 Table::~Table(){}

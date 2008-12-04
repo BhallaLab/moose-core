@@ -58,6 +58,19 @@
   above mentioned constant to className_.
   <2008-11-26 Wed 23:58 (+0530)>
 
+* DONE Changed classname InterpolationTable to Interpol
+  Earlier I had been using the functions of builtins/Interpol.h directly in
+  pymoose/Interpol.cpp and for this I was forced to rename the class
+  InterpolationTable instead of the moose class name Interpol to avoid
+  conflicts.
+  This caused inconsistency in terms of checking the class name ( className
+  field in pymoose objects ) which always returns the moose class name. I
+  renamed pymoose::InterpolationTable to pymoose::Interpol. This class does
+  not use the methods of builtins/Interpol anymore, instead uses lookupSet and
+  lookupGet for settig and getting table entries. 
+  
+  <2008-12-05 Fri>
+
 * CODING JUSTIFICATIONS
   The principle of least surprise requires PyMOOSE to stick closely to the
   GENESIS commands. But we also want PyMOOSE to be more intuitive to the
