@@ -7,19 +7,19 @@ namespace pymoose
 
     class TableIterator;
 
-    class InterpolationTable : public PyMooseBase
+    class Interpol : public PyMooseBase
     {
       public:    
         static const std::string className_;
-        InterpolationTable(Id id);
-        InterpolationTable(std::string path);
-        InterpolationTable(std::string name, Id parentId);
-        InterpolationTable(std::string name, PyMooseBase& parent);
-        InterpolationTable(const InterpolationTable& src,std::string name, PyMooseBase& parent);
-        InterpolationTable(const InterpolationTable& src,std::string name, Id& parent);
-        InterpolationTable(const Id& src,std::string name, Id& parent);
-        InterpolationTable(const InterpolationTable& src,std::string path);
-        ~InterpolationTable();
+        Interpol(Id id);
+        Interpol(std::string path);
+        Interpol(std::string name, Id parentId);
+        Interpol(std::string name, PyMooseBase& parent);
+        Interpol(const Interpol& src,std::string name, PyMooseBase& parent);
+        Interpol(const Interpol& src,std::string name, Id& parent);
+        Interpol(const Id& src,std::string name, Id& parent);
+        Interpol(const Interpol& src,std::string path);
+        ~Interpol();
         const std::string& getType();
         double __get_xmin() const;
         void __set_xmin(double xmin);
@@ -49,9 +49,9 @@ namespace pymoose
         // This constructor is for allowing derived type (Table) to
         // have constructors exactly as if it was directly derived from PyMooseBase.
     
-        InterpolationTable(std::string className, std::string objectName, Id parentId);
-        InterpolationTable(std::string className, std::string path);    
-        InterpolationTable(std::string className, std::string objectName, PyMooseBase& parent);
+        Interpol(std::string className, std::string objectName, Id parentId);
+        Interpol(std::string className, std::string path);    
+        Interpol(std::string className, std::string objectName, PyMooseBase& parent);
     };
 }
 

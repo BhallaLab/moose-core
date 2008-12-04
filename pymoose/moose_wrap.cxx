@@ -2522,7 +2522,7 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int argnum, int flags)
 #define SWIGTYPE_p_pymoose__HHGate swig_types[38]
 #define SWIGTYPE_p_pymoose__HSolve swig_types[39]
 #define SWIGTYPE_p_pymoose__HemispherePanel swig_types[40]
-#define SWIGTYPE_p_pymoose__InterpolationTable swig_types[41]
+#define SWIGTYPE_p_pymoose__Interpol swig_types[41]
 #define SWIGTYPE_p_pymoose__KinCompt swig_types[42]
 #define SWIGTYPE_p_pymoose__KineticHub swig_types[43]
 #define SWIGTYPE_p_pymoose__KineticManager swig_types[44]
@@ -4723,32 +4723,32 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
 #define pymoose_ClockJob_step_set(self_, val_) self_->__set_step(val_)
   
 
-#define pymoose_InterpolationTable_xmin_get(self_) self_->__get_xmin()
-#define pymoose_InterpolationTable_xmin_set(self_, val_) self_->__set_xmin(val_)
+#define pymoose_Interpol_xmin_get(self_) self_->__get_xmin()
+#define pymoose_Interpol_xmin_set(self_, val_) self_->__set_xmin(val_)
   
 
-#define pymoose_InterpolationTable_xmax_get(self_) self_->__get_xmax()
-#define pymoose_InterpolationTable_xmax_set(self_, val_) self_->__set_xmax(val_)
+#define pymoose_Interpol_xmax_get(self_) self_->__get_xmax()
+#define pymoose_Interpol_xmax_set(self_, val_) self_->__set_xmax(val_)
   
 
-#define pymoose_InterpolationTable_xdivs_get(self_) self_->__get_xdivs()
-#define pymoose_InterpolationTable_xdivs_set(self_, val_) self_->__set_xdivs(val_)
+#define pymoose_Interpol_xdivs_get(self_) self_->__get_xdivs()
+#define pymoose_Interpol_xdivs_set(self_, val_) self_->__set_xdivs(val_)
   
 
-#define pymoose_InterpolationTable_mode_get(self_) self_->__get_mode()
-#define pymoose_InterpolationTable_mode_set(self_, val_) self_->__set_mode(val_)
+#define pymoose_Interpol_mode_get(self_) self_->__get_mode()
+#define pymoose_Interpol_mode_set(self_, val_) self_->__set_mode(val_)
   
 
-#define pymoose_InterpolationTable_dx_get(self_) self_->__get_dx()
-#define pymoose_InterpolationTable_dx_set(self_, val_) self_->__set_dx(val_)
+#define pymoose_Interpol_dx_get(self_) self_->__get_dx()
+#define pymoose_Interpol_dx_set(self_, val_) self_->__set_dx(val_)
   
 
-#define pymoose_InterpolationTable_sy_get(self_) self_->__get_sy()
-#define pymoose_InterpolationTable_sy_set(self_, val_) self_->__set_sy(val_)
+#define pymoose_Interpol_sy_get(self_) self_->__get_sy()
+#define pymoose_Interpol_sy_set(self_, val_) self_->__set_sy(val_)
   
 
-#define pymoose_InterpolationTable_calcMode_get(self_) self_->__get_calcMode()
-#define pymoose_InterpolationTable_calcMode_set(self_, val_) self_->__set_calcMode(val_)
+#define pymoose_Interpol_calcMode_get(self_) self_->__get_calcMode()
+#define pymoose_Interpol_calcMode_set(self_, val_) self_->__set_calcMode(val_)
   
 
 #define pymoose_Table_input_get(self_) self_->__get_input()
@@ -32320,37 +32320,37 @@ SWIGINTERN PyObject *ClockJob_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_InterpolationTable_className__set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable InterpolationTable_className_ is read-only.");
+SWIGINTERN int Swig_var_Interpol_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Interpol_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_InterpolationTable_className__get(void) {
+SWIGINTERN PyObject *Swig_var_Interpol_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::InterpolationTable::className_));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Interpol::className_));
   return pyobj;
 }
 
 
-SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Interpol__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Id arg1 ;
-  pymoose::InterpolationTable *result = 0 ;
+  pymoose::Interpol *result = 0 ;
   void *argp1 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_InterpolationTable",1,1,&obj0)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Interpol",1,1,&obj0)) SWIG_fail;
   {
     res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Id,  0  | 0);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "Id""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Interpol" "', argument " "1"" of type '" "Id""'"); 
     }  
     if (!argp1) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "Id""'");
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Interpol" "', argument " "1"" of type '" "Id""'");
     } else {
       Id * temp = reinterpret_cast< Id * >(argp1);
       arg1 = *temp;
@@ -32359,10 +32359,10 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_0(PyObject *SWIGUNUSEDPA
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::InterpolationTable *)new pymoose::InterpolationTable(arg1);
+    result = (pymoose::Interpol *)new pymoose::Interpol(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__InterpolationTable, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Interpol, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -32371,29 +32371,29 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Interpol__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::string arg1 ;
-  pymoose::InterpolationTable *result = 0 ;
+  pymoose::Interpol *result = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_InterpolationTable",1,1,&obj0)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Interpol",1,1,&obj0)) SWIG_fail;
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj0, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Interpol" "', argument " "1"" of type '" "std::string""'"); 
     }
     arg1 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::InterpolationTable *)new pymoose::InterpolationTable(arg1);
+    result = (pymoose::Interpol *)new pymoose::Interpol(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__InterpolationTable, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Interpol, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -32402,23 +32402,23 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Interpol__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::string arg1 ;
   Id arg2 ;
-  pymoose::InterpolationTable *result = 0 ;
+  pymoose::Interpol *result = 0 ;
   void *argp2 ;
   int res2 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_InterpolationTable",2,2,&obj0,&obj1)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Interpol",2,2,&obj0,&obj1)) SWIG_fail;
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj0, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Interpol" "', argument " "1"" of type '" "std::string""'"); 
     }
     arg1 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -32426,10 +32426,10 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_2(PyObject *SWIGUNUSEDPA
   {
     res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Id,  0  | 0);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_InterpolationTable" "', argument " "2"" of type '" "Id""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_Interpol" "', argument " "2"" of type '" "Id""'"); 
     }  
     if (!argp2) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_InterpolationTable" "', argument " "2"" of type '" "Id""'");
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Interpol" "', argument " "2"" of type '" "Id""'");
     } else {
       Id * temp = reinterpret_cast< Id * >(argp2);
       arg2 = *temp;
@@ -32438,10 +32438,10 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_2(PyObject *SWIGUNUSEDPA
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::InterpolationTable *)new pymoose::InterpolationTable(arg1,arg2);
+    result = (pymoose::Interpol *)new pymoose::Interpol(arg1,arg2);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__InterpolationTable, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Interpol, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -32450,41 +32450,41 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Interpol__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::string arg1 ;
   pymoose::PyMooseBase *arg2 = 0 ;
-  pymoose::InterpolationTable *result = 0 ;
+  pymoose::Interpol *result = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_InterpolationTable",2,2,&obj0,&obj1)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Interpol",2,2,&obj0,&obj1)) SWIG_fail;
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj0, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Interpol" "', argument " "1"" of type '" "std::string""'"); 
     }
     arg1 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_pymoose__PyMooseBase,  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_InterpolationTable" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_Interpol" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_InterpolationTable" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Interpol" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
   }
   arg2 = reinterpret_cast< pymoose::PyMooseBase * >(argp2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::InterpolationTable *)new pymoose::InterpolationTable(arg1,*arg2);
+    result = (pymoose::Interpol *)new pymoose::Interpol(arg1,*arg2);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__InterpolationTable, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Interpol, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -32493,12 +32493,12 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_4(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Interpol__SWIG_4(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = 0 ;
+  pymoose::Interpol *arg1 = 0 ;
   std::string arg2 ;
   pymoose::PyMooseBase *arg3 = 0 ;
-  pymoose::InterpolationTable *result = 0 ;
+  pymoose::Interpol *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp3 = 0 ;
@@ -32508,38 +32508,38 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_4(PyObject *SWIGUNUSEDPA
   PyObject * obj2 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_InterpolationTable",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__InterpolationTable,  0  | 0);
+  if(!PyArg_UnpackTuple(args,(char *)"new_Interpol",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__Interpol,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "pymoose::InterpolationTable const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Interpol" "', argument " "1"" of type '" "pymoose::Interpol const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "pymoose::InterpolationTable const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Interpol" "', argument " "1"" of type '" "pymoose::Interpol const &""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_InterpolationTable" "', argument " "2"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Interpol" "', argument " "2"" of type '" "std::string""'"); 
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_pymoose__PyMooseBase,  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_InterpolationTable" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_Interpol" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_InterpolationTable" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Interpol" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
   }
   arg3 = reinterpret_cast< pymoose::PyMooseBase * >(argp3);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::InterpolationTable *)new pymoose::InterpolationTable((pymoose::InterpolationTable const &)*arg1,arg2,*arg3);
+    result = (pymoose::Interpol *)new pymoose::Interpol((pymoose::Interpol const &)*arg1,arg2,*arg3);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__InterpolationTable, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Interpol, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -32548,12 +32548,12 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_5(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Interpol__SWIG_5(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = 0 ;
+  pymoose::Interpol *arg1 = 0 ;
   std::string arg2 ;
   Id *arg3 = 0 ;
-  pymoose::InterpolationTable *result = 0 ;
+  pymoose::Interpol *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp3 = 0 ;
@@ -32563,38 +32563,38 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_5(PyObject *SWIGUNUSEDPA
   PyObject * obj2 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_InterpolationTable",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__InterpolationTable,  0  | 0);
+  if(!PyArg_UnpackTuple(args,(char *)"new_Interpol",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__Interpol,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "pymoose::InterpolationTable const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Interpol" "', argument " "1"" of type '" "pymoose::Interpol const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "pymoose::InterpolationTable const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Interpol" "', argument " "1"" of type '" "pymoose::Interpol const &""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_InterpolationTable" "', argument " "2"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Interpol" "', argument " "2"" of type '" "std::string""'"); 
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_InterpolationTable" "', argument " "3"" of type '" "Id &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_Interpol" "', argument " "3"" of type '" "Id &""'"); 
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_InterpolationTable" "', argument " "3"" of type '" "Id &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Interpol" "', argument " "3"" of type '" "Id &""'"); 
   }
   arg3 = reinterpret_cast< Id * >(argp3);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::InterpolationTable *)new pymoose::InterpolationTable((pymoose::InterpolationTable const &)*arg1,arg2,*arg3);
+    result = (pymoose::Interpol *)new pymoose::Interpol((pymoose::Interpol const &)*arg1,arg2,*arg3);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__InterpolationTable, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Interpol, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -32603,12 +32603,12 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_6(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Interpol__SWIG_6(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Id *arg1 = 0 ;
   std::string arg2 ;
   Id *arg3 = 0 ;
-  pymoose::InterpolationTable *result = 0 ;
+  pymoose::Interpol *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp3 = 0 ;
@@ -32618,38 +32618,38 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_6(PyObject *SWIGUNUSEDPA
   PyObject * obj2 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_InterpolationTable",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Interpol",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Id,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "Id const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Interpol" "', argument " "1"" of type '" "Id const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "Id const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Interpol" "', argument " "1"" of type '" "Id const &""'"); 
   }
   arg1 = reinterpret_cast< Id * >(argp1);
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_InterpolationTable" "', argument " "2"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Interpol" "', argument " "2"" of type '" "std::string""'"); 
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_InterpolationTable" "', argument " "3"" of type '" "Id &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_Interpol" "', argument " "3"" of type '" "Id &""'"); 
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_InterpolationTable" "', argument " "3"" of type '" "Id &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Interpol" "', argument " "3"" of type '" "Id &""'"); 
   }
   arg3 = reinterpret_cast< Id * >(argp3);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::InterpolationTable *)new pymoose::InterpolationTable((Id const &)*arg1,arg2,*arg3);
+    result = (pymoose::Interpol *)new pymoose::Interpol((Id const &)*arg1,arg2,*arg3);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__InterpolationTable, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Interpol, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -32658,41 +32658,41 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_InterpolationTable__SWIG_7(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Interpol__SWIG_7(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = 0 ;
+  pymoose::Interpol *arg1 = 0 ;
   std::string arg2 ;
-  pymoose::InterpolationTable *result = 0 ;
+  pymoose::Interpol *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_InterpolationTable",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__InterpolationTable,  0  | 0);
+  if(!PyArg_UnpackTuple(args,(char *)"new_Interpol",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__Interpol,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "pymoose::InterpolationTable const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Interpol" "', argument " "1"" of type '" "pymoose::Interpol const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_InterpolationTable" "', argument " "1"" of type '" "pymoose::InterpolationTable const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Interpol" "', argument " "1"" of type '" "pymoose::Interpol const &""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_InterpolationTable" "', argument " "2"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Interpol" "', argument " "2"" of type '" "std::string""'"); 
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::InterpolationTable *)new pymoose::InterpolationTable((pymoose::InterpolationTable const &)*arg1,arg2);
+    result = (pymoose::Interpol *)new pymoose::Interpol((pymoose::Interpol const &)*arg1,arg2);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__InterpolationTable, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Interpol, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -32701,7 +32701,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_InterpolationTable(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Interpol(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[4];
   int ii;
@@ -32718,7 +32718,7 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable(PyObject *self, PyObject *args
     _v = SWIG_CheckState(res);
     if (_v) {
       SWIG_PYTHON_THREAD_END_BLOCK;
-      return _wrap_new_InterpolationTable__SWIG_0(self, args);
+      return _wrap_new_Interpol__SWIG_0(self, args);
     }
   }
   if (argc == 1) {
@@ -32727,19 +32727,19 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable(PyObject *self, PyObject *args
     _v = SWIG_CheckState(res);
     if (_v) {
       SWIG_PYTHON_THREAD_END_BLOCK;
-      return _wrap_new_InterpolationTable__SWIG_1(self, args);
+      return _wrap_new_Interpol__SWIG_1(self, args);
     }
   }
   if (argc == 2) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__InterpolationTable, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__Interpol, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
         SWIG_PYTHON_THREAD_END_BLOCK;
-        return _wrap_new_InterpolationTable__SWIG_7(self, args);
+        return _wrap_new_Interpol__SWIG_7(self, args);
       }
     }
   }
@@ -32753,7 +32753,7 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable(PyObject *self, PyObject *args
       _v = SWIG_CheckState(res);
       if (_v) {
         SWIG_PYTHON_THREAD_END_BLOCK;
-        return _wrap_new_InterpolationTable__SWIG_3(self, args);
+        return _wrap_new_Interpol__SWIG_3(self, args);
       }
     }
   }
@@ -32766,13 +32766,13 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable(PyObject *self, PyObject *args
       _v = SWIG_CheckState(res);
       if (_v) {
         SWIG_PYTHON_THREAD_END_BLOCK;
-        return _wrap_new_InterpolationTable__SWIG_2(self, args);
+        return _wrap_new_Interpol__SWIG_2(self, args);
       }
     }
   }
   if (argc == 3) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__InterpolationTable, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__Interpol, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
@@ -32783,7 +32783,7 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable(PyObject *self, PyObject *args
         _v = SWIG_CheckState(res);
         if (_v) {
           SWIG_PYTHON_THREAD_END_BLOCK;
-          return _wrap_new_InterpolationTable__SWIG_5(self, args);
+          return _wrap_new_Interpol__SWIG_5(self, args);
         }
       }
     }
@@ -32801,14 +32801,14 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable(PyObject *self, PyObject *args
         _v = SWIG_CheckState(res);
         if (_v) {
           SWIG_PYTHON_THREAD_END_BLOCK;
-          return _wrap_new_InterpolationTable__SWIG_6(self, args);
+          return _wrap_new_Interpol__SWIG_6(self, args);
         }
       }
     }
   }
   if (argc == 3) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__InterpolationTable, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__Interpol, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
@@ -32819,7 +32819,7 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable(PyObject *self, PyObject *args
         _v = SWIG_CheckState(res);
         if (_v) {
           SWIG_PYTHON_THREAD_END_BLOCK;
-          return _wrap_new_InterpolationTable__SWIG_4(self, args);
+          return _wrap_new_Interpol__SWIG_4(self, args);
         }
       }
     }
@@ -32827,25 +32827,25 @@ SWIGINTERN PyObject *_wrap_new_InterpolationTable(PyObject *self, PyObject *args
   
   SWIG_PYTHON_THREAD_END_BLOCK;
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_InterpolationTable'.\n  Possible C/C++ prototypes are:\n""    pymoose::InterpolationTable(Id)\n""    pymoose::InterpolationTable(std::string)\n""    pymoose::InterpolationTable(std::string,Id)\n""    pymoose::InterpolationTable(std::string,pymoose::PyMooseBase &)\n""    pymoose::InterpolationTable(pymoose::InterpolationTable const &,std::string,pymoose::PyMooseBase &)\n""    pymoose::InterpolationTable(pymoose::InterpolationTable const &,std::string,Id &)\n""    pymoose::InterpolationTable(Id const &,std::string,Id &)\n""    pymoose::InterpolationTable(pymoose::InterpolationTable const &,std::string)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_Interpol'.\n  Possible C/C++ prototypes are:\n""    pymoose::Interpol(Id)\n""    pymoose::Interpol(std::string)\n""    pymoose::Interpol(std::string,Id)\n""    pymoose::Interpol(std::string,pymoose::PyMooseBase &)\n""    pymoose::Interpol(pymoose::Interpol const &,std::string,pymoose::PyMooseBase &)\n""    pymoose::Interpol(pymoose::Interpol const &,std::string,Id &)\n""    pymoose::Interpol(Id const &,std::string,Id &)\n""    pymoose::Interpol(pymoose::Interpol const &,std::string)\n");
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_InterpolationTable(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_Interpol(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"delete_InterpolationTable",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, SWIG_POINTER_DISOWN |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"delete_Interpol",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_InterpolationTable" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Interpol" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     delete arg1;
@@ -32861,21 +32861,21 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_getType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_getType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   std::string *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_getType",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_getType",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_getType" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_getType" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     {
@@ -32893,24 +32893,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___get_xmin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___get_xmin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___get_xmin",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___get_xmin",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___get_xmin" "', argument " "1"" of type '" "pymoose::InterpolationTable const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___get_xmin" "', argument " "1"" of type '" "pymoose::Interpol const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)((pymoose::InterpolationTable const *)arg1)->__get_xmin();
+    result = (double)((pymoose::Interpol const *)arg1)->__get_xmin();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -32922,9 +32922,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___set_xmin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___set_xmin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -32934,15 +32934,15 @@ SWIGINTERN PyObject *_wrap_InterpolationTable___set_xmin(PyObject *SWIGUNUSEDPAR
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___set_xmin",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___set_xmin",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___set_xmin" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___set_xmin" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable___set_xmin" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol___set_xmin" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
@@ -32959,24 +32959,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___get_xmax(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___get_xmax(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___get_xmax",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___get_xmax",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___get_xmax" "', argument " "1"" of type '" "pymoose::InterpolationTable const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___get_xmax" "', argument " "1"" of type '" "pymoose::Interpol const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)((pymoose::InterpolationTable const *)arg1)->__get_xmax();
+    result = (double)((pymoose::Interpol const *)arg1)->__get_xmax();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -32988,9 +32988,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___set_xmax(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___set_xmax(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -33000,15 +33000,15 @@ SWIGINTERN PyObject *_wrap_InterpolationTable___set_xmax(PyObject *SWIGUNUSEDPAR
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___set_xmax",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___set_xmax",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___set_xmax" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___set_xmax" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable___set_xmax" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol___set_xmax" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
@@ -33025,24 +33025,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___get_xdivs(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___get_xdivs(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___get_xdivs",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___get_xdivs",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___get_xdivs" "', argument " "1"" of type '" "pymoose::InterpolationTable const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___get_xdivs" "', argument " "1"" of type '" "pymoose::Interpol const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (int)((pymoose::InterpolationTable const *)arg1)->__get_xdivs();
+    result = (int)((pymoose::Interpol const *)arg1)->__get_xdivs();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_int(static_cast< int >(result));
@@ -33054,9 +33054,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___set_xdivs(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___set_xdivs(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -33066,15 +33066,15 @@ SWIGINTERN PyObject *_wrap_InterpolationTable___set_xdivs(PyObject *SWIGUNUSEDPA
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___set_xdivs",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___set_xdivs",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___set_xdivs" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___set_xdivs" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable___set_xdivs" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol___set_xdivs" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   {
@@ -33091,24 +33091,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___get_mode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___get_mode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___get_mode",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___get_mode",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___get_mode" "', argument " "1"" of type '" "pymoose::InterpolationTable const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___get_mode" "', argument " "1"" of type '" "pymoose::Interpol const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (int)((pymoose::InterpolationTable const *)arg1)->__get_mode();
+    result = (int)((pymoose::Interpol const *)arg1)->__get_mode();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_int(static_cast< int >(result));
@@ -33120,9 +33120,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___set_mode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___set_mode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -33132,15 +33132,15 @@ SWIGINTERN PyObject *_wrap_InterpolationTable___set_mode(PyObject *SWIGUNUSEDPAR
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___set_mode",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___set_mode",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___set_mode" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___set_mode" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable___set_mode" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol___set_mode" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   {
@@ -33157,24 +33157,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___get_dx(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___get_dx(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___get_dx",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___get_dx",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___get_dx" "', argument " "1"" of type '" "pymoose::InterpolationTable const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___get_dx" "', argument " "1"" of type '" "pymoose::Interpol const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)((pymoose::InterpolationTable const *)arg1)->__get_dx();
+    result = (double)((pymoose::Interpol const *)arg1)->__get_dx();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -33186,9 +33186,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___set_dx(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___set_dx(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -33198,15 +33198,15 @@ SWIGINTERN PyObject *_wrap_InterpolationTable___set_dx(PyObject *SWIGUNUSEDPARM(
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___set_dx",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___set_dx",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___set_dx" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___set_dx" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable___set_dx" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol___set_dx" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
@@ -33223,24 +33223,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___get_sy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___get_sy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___get_sy",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___get_sy",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___get_sy" "', argument " "1"" of type '" "pymoose::InterpolationTable const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___get_sy" "', argument " "1"" of type '" "pymoose::Interpol const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)((pymoose::InterpolationTable const *)arg1)->__get_sy();
+    result = (double)((pymoose::Interpol const *)arg1)->__get_sy();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -33252,9 +33252,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___set_sy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___set_sy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -33264,15 +33264,15 @@ SWIGINTERN PyObject *_wrap_InterpolationTable___set_sy(PyObject *SWIGUNUSEDPARM(
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___set_sy",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___set_sy",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___set_sy" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___set_sy" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable___set_sy" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol___set_sy" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
@@ -33289,9 +33289,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___getitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___getitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   unsigned int arg2 ;
   double result;
   void *argp1 = 0 ;
@@ -33302,20 +33302,20 @@ SWIGINTERN PyObject *_wrap_InterpolationTable___getitem__(PyObject *SWIGUNUSEDPA
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___getitem__",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___getitem__",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___getitem__" "', argument " "1"" of type '" "pymoose::InterpolationTable const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___getitem__" "', argument " "1"" of type '" "pymoose::Interpol const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_unsigned_SS_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable___getitem__" "', argument " "2"" of type '" "unsigned int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol___getitem__" "', argument " "2"" of type '" "unsigned int""'");
   } 
   arg2 = static_cast< unsigned int >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)((pymoose::InterpolationTable const *)arg1)->__getitem__(arg2);
+    result = (double)((pymoose::Interpol const *)arg1)->__getitem__(arg2);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -33327,9 +33327,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___setitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___setitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   unsigned int arg2 ;
   double arg3 ;
   void *argp1 = 0 ;
@@ -33343,20 +33343,20 @@ SWIGINTERN PyObject *_wrap_InterpolationTable___setitem__(PyObject *SWIGUNUSEDPA
   PyObject * obj2 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___setitem__",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___setitem__",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___setitem__" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___setitem__" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_unsigned_SS_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable___setitem__" "', argument " "2"" of type '" "unsigned int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol___setitem__" "', argument " "2"" of type '" "unsigned int""'");
   } 
   arg2 = static_cast< unsigned int >(val2);
   ecode3 = SWIG_AsVal_double(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "InterpolationTable___setitem__" "', argument " "3"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Interpol___setitem__" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = static_cast< double >(val3);
   {
@@ -33373,21 +33373,21 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___iter__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___iter__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   pymoose::TableIterator *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___iter__",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___iter__",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___iter__" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___iter__" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     result = (pymoose::TableIterator *)(arg1)->__iter__();
@@ -33402,21 +33402,21 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___len__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___len__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___len__",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___len__",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___len__" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___len__" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     result = (int)(arg1)->__len__();
@@ -33431,24 +33431,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___get_calcMode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___get_calcMode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___get_calcMode",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___get_calcMode",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___get_calcMode" "', argument " "1"" of type '" "pymoose::InterpolationTable const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___get_calcMode" "', argument " "1"" of type '" "pymoose::Interpol const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (int)((pymoose::InterpolationTable const *)arg1)->__get_calcMode();
+    result = (int)((pymoose::Interpol const *)arg1)->__get_calcMode();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_int(static_cast< int >(result));
@@ -33460,9 +33460,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable___set_calcMode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol___set_calcMode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -33472,15 +33472,15 @@ SWIGINTERN PyObject *_wrap_InterpolationTable___set_calcMode(PyObject *SWIGUNUSE
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable___set_calcMode",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol___set_calcMode",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable___set_calcMode" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol___set_calcMode" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable___set_calcMode" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol___set_calcMode" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   {
@@ -33497,24 +33497,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_dumpFile__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_dumpFile__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   std::string result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_dumpFile",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_dumpFile",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_dumpFile" "', argument " "1"" of type '" "pymoose::InterpolationTable const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_dumpFile" "', argument " "1"" of type '" "pymoose::Interpol const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = ((pymoose::InterpolationTable const *)arg1)->dumpFile();
+    result = ((pymoose::Interpol const *)arg1)->dumpFile();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_std_string(static_cast< std::string >(result));
@@ -33526,9 +33526,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_dumpFile__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_dumpFile__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   std::string arg2 ;
   bool arg3 ;
   void *argp1 = 0 ;
@@ -33540,24 +33540,24 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_dumpFile__SWIG_1(PyObject *SWIGUNU
   PyObject * obj2 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_dumpFile",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_dumpFile",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_dumpFile" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_dumpFile" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "InterpolationTable_dumpFile" "', argument " "2"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "Interpol_dumpFile" "', argument " "2"" of type '" "std::string""'"); 
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   ecode3 = SWIG_AsVal_bool(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "InterpolationTable_dumpFile" "', argument " "3"" of type '" "bool""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Interpol_dumpFile" "', argument " "3"" of type '" "bool""'");
   } 
   arg3 = static_cast< bool >(val3);
   {
@@ -33574,9 +33574,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_dumpFile__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_dumpFile__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   std::string arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -33584,17 +33584,17 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_dumpFile__SWIG_2(PyObject *SWIGUNU
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_dumpFile",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_dumpFile",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_dumpFile" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_dumpFile" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "InterpolationTable_dumpFile" "', argument " "2"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "Interpol_dumpFile" "', argument " "2"" of type '" "std::string""'"); 
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -33613,7 +33613,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_dumpFile(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_dumpFile(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[4];
   int ii;
@@ -33627,31 +33627,31 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_dumpFile(PyObject *self, PyObject 
   if (argc == 1) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_pymoose__InterpolationTable, 0);
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_pymoose__Interpol, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       SWIG_PYTHON_THREAD_END_BLOCK;
-      return _wrap_InterpolationTable_dumpFile__SWIG_0(self, args);
+      return _wrap_Interpol_dumpFile__SWIG_0(self, args);
     }
   }
   if (argc == 2) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_pymoose__InterpolationTable, 0);
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_pymoose__Interpol, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
         SWIG_PYTHON_THREAD_END_BLOCK;
-        return _wrap_InterpolationTable_dumpFile__SWIG_2(self, args);
+        return _wrap_Interpol_dumpFile__SWIG_2(self, args);
       }
     }
   }
   if (argc == 3) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_pymoose__InterpolationTable, 0);
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_pymoose__Interpol, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
@@ -33663,7 +33663,7 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_dumpFile(PyObject *self, PyObject 
         }
         if (_v) {
           SWIG_PYTHON_THREAD_END_BLOCK;
-          return _wrap_InterpolationTable_dumpFile__SWIG_1(self, args);
+          return _wrap_Interpol_dumpFile__SWIG_1(self, args);
         }
       }
     }
@@ -33671,14 +33671,14 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_dumpFile(PyObject *self, PyObject 
   
   SWIG_PYTHON_THREAD_END_BLOCK;
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'InterpolationTable_dumpFile'.\n  Possible C/C++ prototypes are:\n""    dumpFile(pymoose::InterpolationTable const *)\n""    dumpFile(pymoose::InterpolationTable *,std::string,bool)\n""    dumpFile(pymoose::InterpolationTable *,std::string)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'Interpol_dumpFile'.\n  Possible C/C++ prototypes are:\n""    dumpFile(pymoose::Interpol const *)\n""    dumpFile(pymoose::Interpol *,std::string,bool)\n""    dumpFile(pymoose::Interpol *,std::string)\n");
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_tabFill(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_tabFill(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int arg2 ;
   int arg3 ;
   void *argp1 = 0 ;
@@ -33692,20 +33692,20 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_tabFill(PyObject *SWIGUNUSEDPARM(s
   PyObject * obj2 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_tabFill",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_tabFill",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_tabFill" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_tabFill" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable_tabFill" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol_tabFill" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "InterpolationTable_tabFill" "', argument " "3"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Interpol_tabFill" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
   {
@@ -33722,9 +33722,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_xmin_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_xmin_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -33734,20 +33734,20 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_xmin_set(PyObject *SWIGUNUSEDPARM(
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_xmin_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_xmin_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_xmin_set" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_xmin_set" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable_xmin_set" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol_xmin_set" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_InterpolationTable_xmin_set(arg1,arg2);
+    pymoose_Interpol_xmin_set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -33760,24 +33760,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_xmin_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_xmin_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_xmin_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_xmin_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_xmin_get" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_xmin_get" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)pymoose_InterpolationTable_xmin_get(arg1);
+    result = (double)pymoose_Interpol_xmin_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -33789,9 +33789,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_xmax_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_xmax_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -33801,20 +33801,20 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_xmax_set(PyObject *SWIGUNUSEDPARM(
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_xmax_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_xmax_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_xmax_set" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_xmax_set" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable_xmax_set" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol_xmax_set" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_InterpolationTable_xmax_set(arg1,arg2);
+    pymoose_Interpol_xmax_set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -33827,24 +33827,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_xmax_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_xmax_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_xmax_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_xmax_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_xmax_get" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_xmax_get" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)pymoose_InterpolationTable_xmax_get(arg1);
+    result = (double)pymoose_Interpol_xmax_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -33856,9 +33856,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_xdivs_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_xdivs_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -33868,20 +33868,20 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_xdivs_set(PyObject *SWIGUNUSEDPARM
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_xdivs_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_xdivs_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_xdivs_set" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_xdivs_set" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable_xdivs_set" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol_xdivs_set" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_InterpolationTable_xdivs_set(arg1,arg2);
+    pymoose_Interpol_xdivs_set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -33894,24 +33894,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_xdivs_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_xdivs_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_xdivs_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_xdivs_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_xdivs_get" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_xdivs_get" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (int)pymoose_InterpolationTable_xdivs_get(arg1);
+    result = (int)pymoose_Interpol_xdivs_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_int(static_cast< int >(result));
@@ -33923,9 +33923,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_mode_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_mode_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -33935,20 +33935,20 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_mode_set(PyObject *SWIGUNUSEDPARM(
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_mode_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_mode_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_mode_set" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_mode_set" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable_mode_set" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol_mode_set" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_InterpolationTable_mode_set(arg1,arg2);
+    pymoose_Interpol_mode_set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -33961,24 +33961,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_mode_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_mode_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_mode_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_mode_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_mode_get" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_mode_get" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (int)pymoose_InterpolationTable_mode_get(arg1);
+    result = (int)pymoose_Interpol_mode_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_int(static_cast< int >(result));
@@ -33990,9 +33990,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_dx_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_dx_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -34002,20 +34002,20 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_dx_set(PyObject *SWIGUNUSEDPARM(se
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_dx_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_dx_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_dx_set" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_dx_set" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable_dx_set" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol_dx_set" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_InterpolationTable_dx_set(arg1,arg2);
+    pymoose_Interpol_dx_set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -34028,24 +34028,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_dx_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_dx_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_dx_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_dx_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_dx_get" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_dx_get" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)pymoose_InterpolationTable_dx_get(arg1);
+    result = (double)pymoose_Interpol_dx_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -34057,9 +34057,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_sy_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_sy_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -34069,20 +34069,20 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_sy_set(PyObject *SWIGUNUSEDPARM(se
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_sy_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_sy_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_sy_set" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_sy_set" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable_sy_set" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol_sy_set" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_InterpolationTable_sy_set(arg1,arg2);
+    pymoose_Interpol_sy_set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -34095,24 +34095,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_sy_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_sy_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_sy_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_sy_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_sy_get" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_sy_get" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)pymoose_InterpolationTable_sy_get(arg1);
+    result = (double)pymoose_Interpol_sy_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -34124,9 +34124,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_calcMode_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_calcMode_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -34136,20 +34136,20 @@ SWIGINTERN PyObject *_wrap_InterpolationTable_calcMode_set(PyObject *SWIGUNUSEDP
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_calcMode_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_calcMode_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_calcMode_set" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_calcMode_set" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "InterpolationTable_calcMode_set" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Interpol_calcMode_set" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_InterpolationTable_calcMode_set(arg1,arg2);
+    pymoose_Interpol_calcMode_set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -34162,24 +34162,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_InterpolationTable_calcMode_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Interpol_calcMode_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"InterpolationTable_calcMode_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Interpol_calcMode_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InterpolationTable_calcMode_get" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Interpol_calcMode_get" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (int)pymoose_InterpolationTable_calcMode_get(arg1);
+    result = (int)pymoose_Interpol_calcMode_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_int(static_cast< int >(result));
@@ -34191,16 +34191,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *InterpolationTable_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *Interpol_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *obj;
   if (!PyArg_UnpackTuple(args,(char*)"swigregister", 1, 1,&obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_pymoose__InterpolationTable, SWIG_NewClientData(obj));
+  SWIG_TypeNewClientData(SWIGTYPE_p_pymoose__Interpol, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
 SWIGINTERN PyObject *_wrap_new_TableIterator(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::InterpolationTable *arg1 = (pymoose::InterpolationTable *) 0 ;
+  pymoose::Interpol *arg1 = (pymoose::Interpol *) 0 ;
   pymoose::TableIterator *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -34208,11 +34208,11 @@ SWIGINTERN PyObject *_wrap_new_TableIterator(PyObject *SWIGUNUSEDPARM(self), PyO
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
   if(!PyArg_UnpackTuple(args,(char *)"new_TableIterator",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_TableIterator" "', argument " "1"" of type '" "pymoose::InterpolationTable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_TableIterator" "', argument " "1"" of type '" "pymoose::Interpol *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::InterpolationTable * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Interpol * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     result = (pymoose::TableIterator *)new pymoose::TableIterator(arg1);
@@ -51371,7 +51371,7 @@ fail:
 SWIGINTERN PyObject *_wrap_HHGate___get_A(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::HHGate *arg1 = (pymoose::HHGate *) 0 ;
-  pymoose::InterpolationTable *result = 0 ;
+  pymoose::Interpol *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
@@ -51385,10 +51385,10 @@ SWIGINTERN PyObject *_wrap_HHGate___get_A(PyObject *SWIGUNUSEDPARM(self), PyObje
   arg1 = reinterpret_cast< pymoose::HHGate * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::InterpolationTable *)((pymoose::HHGate const *)arg1)->__get_A();
+    result = (pymoose::Interpol *)((pymoose::HHGate const *)arg1)->__get_A();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -51400,7 +51400,7 @@ fail:
 SWIGINTERN PyObject *_wrap_HHGate___get_B(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::HHGate *arg1 = (pymoose::HHGate *) 0 ;
-  pymoose::InterpolationTable *result = 0 ;
+  pymoose::Interpol *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
@@ -51414,10 +51414,10 @@ SWIGINTERN PyObject *_wrap_HHGate___get_B(PyObject *SWIGUNUSEDPARM(self), PyObje
   arg1 = reinterpret_cast< pymoose::HHGate * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::InterpolationTable *)((pymoose::HHGate const *)arg1)->__get_B();
+    result = (pymoose::Interpol *)((pymoose::HHGate const *)arg1)->__get_B();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -53253,7 +53253,7 @@ fail:
 SWIGINTERN PyObject *_wrap_HHGate_A_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::HHGate *arg1 = (pymoose::HHGate *) 0 ;
-  pymoose::InterpolationTable *result = 0 ;
+  pymoose::Interpol *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
@@ -53267,10 +53267,10 @@ SWIGINTERN PyObject *_wrap_HHGate_A_get(PyObject *SWIGUNUSEDPARM(self), PyObject
   arg1 = reinterpret_cast< pymoose::HHGate * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::InterpolationTable *)pymoose_HHGate_A_get(arg1);
+    result = (pymoose::Interpol *)pymoose_HHGate_A_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -53282,7 +53282,7 @@ fail:
 SWIGINTERN PyObject *_wrap_HHGate_B_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::HHGate *arg1 = (pymoose::HHGate *) 0 ;
-  pymoose::InterpolationTable *result = 0 ;
+  pymoose::Interpol *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
@@ -53296,10 +53296,10 @@ SWIGINTERN PyObject *_wrap_HHGate_B_get(PyObject *SWIGUNUSEDPARM(self), PyObject
   arg1 = reinterpret_cast< pymoose::HHGate * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::InterpolationTable *)pymoose_HHGate_B_get(arg1);
+    result = (pymoose::Interpol *)pymoose_HHGate_B_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__InterpolationTable, 0 |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Interpol, 0 |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -100572,58 +100572,58 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"ClockJob_step_set", _wrap_ClockJob_step_set, METH_VARARGS, (char *)"ClockJob_step_set(ClockJob self, int step)"},
 	 { (char *)"ClockJob_step_get", _wrap_ClockJob_step_get, METH_VARARGS, (char *)"ClockJob_step_get(ClockJob self) -> int"},
 	 { (char *)"ClockJob_swigregister", ClockJob_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_InterpolationTable", _wrap_new_InterpolationTable, METH_VARARGS, (char *)"\n"
-		"InterpolationTable(Id id)\n"
-		"InterpolationTable(string path)\n"
-		"InterpolationTable(string name, Id parentId)\n"
-		"InterpolationTable(string name, PyMooseBase parent)\n"
-		"InterpolationTable(InterpolationTable src, string name, PyMooseBase parent)\n"
-		"InterpolationTable(InterpolationTable src, string name, Id parent)\n"
-		"InterpolationTable(Id src, string name, Id parent)\n"
-		"new_InterpolationTable(InterpolationTable src, string path) -> InterpolationTable\n"
+	 { (char *)"new_Interpol", _wrap_new_Interpol, METH_VARARGS, (char *)"\n"
+		"Interpol(Id id)\n"
+		"Interpol(string path)\n"
+		"Interpol(string name, Id parentId)\n"
+		"Interpol(string name, PyMooseBase parent)\n"
+		"Interpol(Interpol src, string name, PyMooseBase parent)\n"
+		"Interpol(Interpol src, string name, Id parent)\n"
+		"Interpol(Id src, string name, Id parent)\n"
+		"new_Interpol(Interpol src, string path) -> Interpol\n"
 		""},
-	 { (char *)"delete_InterpolationTable", _wrap_delete_InterpolationTable, METH_VARARGS, (char *)"delete_InterpolationTable(InterpolationTable self)"},
-	 { (char *)"InterpolationTable_getType", _wrap_InterpolationTable_getType, METH_VARARGS, (char *)"InterpolationTable_getType(InterpolationTable self) -> string"},
-	 { (char *)"InterpolationTable___get_xmin", _wrap_InterpolationTable___get_xmin, METH_VARARGS, (char *)"InterpolationTable___get_xmin(InterpolationTable self) -> double"},
-	 { (char *)"InterpolationTable___set_xmin", _wrap_InterpolationTable___set_xmin, METH_VARARGS, (char *)"InterpolationTable___set_xmin(InterpolationTable self, double xmin)"},
-	 { (char *)"InterpolationTable___get_xmax", _wrap_InterpolationTable___get_xmax, METH_VARARGS, (char *)"InterpolationTable___get_xmax(InterpolationTable self) -> double"},
-	 { (char *)"InterpolationTable___set_xmax", _wrap_InterpolationTable___set_xmax, METH_VARARGS, (char *)"InterpolationTable___set_xmax(InterpolationTable self, double xmax)"},
-	 { (char *)"InterpolationTable___get_xdivs", _wrap_InterpolationTable___get_xdivs, METH_VARARGS, (char *)"InterpolationTable___get_xdivs(InterpolationTable self) -> int"},
-	 { (char *)"InterpolationTable___set_xdivs", _wrap_InterpolationTable___set_xdivs, METH_VARARGS, (char *)"InterpolationTable___set_xdivs(InterpolationTable self, int xdivs)"},
-	 { (char *)"InterpolationTable___get_mode", _wrap_InterpolationTable___get_mode, METH_VARARGS, (char *)"InterpolationTable___get_mode(InterpolationTable self) -> int"},
-	 { (char *)"InterpolationTable___set_mode", _wrap_InterpolationTable___set_mode, METH_VARARGS, (char *)"InterpolationTable___set_mode(InterpolationTable self, int mode)"},
-	 { (char *)"InterpolationTable___get_dx", _wrap_InterpolationTable___get_dx, METH_VARARGS, (char *)"InterpolationTable___get_dx(InterpolationTable self) -> double"},
-	 { (char *)"InterpolationTable___set_dx", _wrap_InterpolationTable___set_dx, METH_VARARGS, (char *)"InterpolationTable___set_dx(InterpolationTable self, double dx)"},
-	 { (char *)"InterpolationTable___get_sy", _wrap_InterpolationTable___get_sy, METH_VARARGS, (char *)"InterpolationTable___get_sy(InterpolationTable self) -> double"},
-	 { (char *)"InterpolationTable___set_sy", _wrap_InterpolationTable___set_sy, METH_VARARGS, (char *)"InterpolationTable___set_sy(InterpolationTable self, double sy)"},
-	 { (char *)"InterpolationTable___getitem__", _wrap_InterpolationTable___getitem__, METH_VARARGS, (char *)"InterpolationTable___getitem__(InterpolationTable self, unsigned int index) -> double"},
-	 { (char *)"InterpolationTable___setitem__", _wrap_InterpolationTable___setitem__, METH_VARARGS, (char *)"InterpolationTable___setitem__(InterpolationTable self, unsigned int index, double value)"},
-	 { (char *)"InterpolationTable___iter__", _wrap_InterpolationTable___iter__, METH_VARARGS, (char *)"InterpolationTable___iter__(InterpolationTable self) -> TableIterator"},
-	 { (char *)"InterpolationTable___len__", _wrap_InterpolationTable___len__, METH_VARARGS, (char *)"InterpolationTable___len__(InterpolationTable self) -> int"},
-	 { (char *)"InterpolationTable___get_calcMode", _wrap_InterpolationTable___get_calcMode, METH_VARARGS, (char *)"InterpolationTable___get_calcMode(InterpolationTable self) -> int"},
-	 { (char *)"InterpolationTable___set_calcMode", _wrap_InterpolationTable___set_calcMode, METH_VARARGS, (char *)"InterpolationTable___set_calcMode(InterpolationTable self, int calc_mode)"},
-	 { (char *)"InterpolationTable_dumpFile", _wrap_InterpolationTable_dumpFile, METH_VARARGS, (char *)"\n"
+	 { (char *)"delete_Interpol", _wrap_delete_Interpol, METH_VARARGS, (char *)"delete_Interpol(Interpol self)"},
+	 { (char *)"Interpol_getType", _wrap_Interpol_getType, METH_VARARGS, (char *)"Interpol_getType(Interpol self) -> string"},
+	 { (char *)"Interpol___get_xmin", _wrap_Interpol___get_xmin, METH_VARARGS, (char *)"Interpol___get_xmin(Interpol self) -> double"},
+	 { (char *)"Interpol___set_xmin", _wrap_Interpol___set_xmin, METH_VARARGS, (char *)"Interpol___set_xmin(Interpol self, double xmin)"},
+	 { (char *)"Interpol___get_xmax", _wrap_Interpol___get_xmax, METH_VARARGS, (char *)"Interpol___get_xmax(Interpol self) -> double"},
+	 { (char *)"Interpol___set_xmax", _wrap_Interpol___set_xmax, METH_VARARGS, (char *)"Interpol___set_xmax(Interpol self, double xmax)"},
+	 { (char *)"Interpol___get_xdivs", _wrap_Interpol___get_xdivs, METH_VARARGS, (char *)"Interpol___get_xdivs(Interpol self) -> int"},
+	 { (char *)"Interpol___set_xdivs", _wrap_Interpol___set_xdivs, METH_VARARGS, (char *)"Interpol___set_xdivs(Interpol self, int xdivs)"},
+	 { (char *)"Interpol___get_mode", _wrap_Interpol___get_mode, METH_VARARGS, (char *)"Interpol___get_mode(Interpol self) -> int"},
+	 { (char *)"Interpol___set_mode", _wrap_Interpol___set_mode, METH_VARARGS, (char *)"Interpol___set_mode(Interpol self, int mode)"},
+	 { (char *)"Interpol___get_dx", _wrap_Interpol___get_dx, METH_VARARGS, (char *)"Interpol___get_dx(Interpol self) -> double"},
+	 { (char *)"Interpol___set_dx", _wrap_Interpol___set_dx, METH_VARARGS, (char *)"Interpol___set_dx(Interpol self, double dx)"},
+	 { (char *)"Interpol___get_sy", _wrap_Interpol___get_sy, METH_VARARGS, (char *)"Interpol___get_sy(Interpol self) -> double"},
+	 { (char *)"Interpol___set_sy", _wrap_Interpol___set_sy, METH_VARARGS, (char *)"Interpol___set_sy(Interpol self, double sy)"},
+	 { (char *)"Interpol___getitem__", _wrap_Interpol___getitem__, METH_VARARGS, (char *)"Interpol___getitem__(Interpol self, unsigned int index) -> double"},
+	 { (char *)"Interpol___setitem__", _wrap_Interpol___setitem__, METH_VARARGS, (char *)"Interpol___setitem__(Interpol self, unsigned int index, double value)"},
+	 { (char *)"Interpol___iter__", _wrap_Interpol___iter__, METH_VARARGS, (char *)"Interpol___iter__(Interpol self) -> TableIterator"},
+	 { (char *)"Interpol___len__", _wrap_Interpol___len__, METH_VARARGS, (char *)"Interpol___len__(Interpol self) -> int"},
+	 { (char *)"Interpol___get_calcMode", _wrap_Interpol___get_calcMode, METH_VARARGS, (char *)"Interpol___get_calcMode(Interpol self) -> int"},
+	 { (char *)"Interpol___set_calcMode", _wrap_Interpol___set_calcMode, METH_VARARGS, (char *)"Interpol___set_calcMode(Interpol self, int calc_mode)"},
+	 { (char *)"Interpol_dumpFile", _wrap_Interpol_dumpFile, METH_VARARGS, (char *)"\n"
 		"dumpFile() -> string\n"
 		"dumpFile(string fileName, bool append=False)\n"
-		"InterpolationTable_dumpFile(InterpolationTable self, string fileName)\n"
+		"Interpol_dumpFile(Interpol self, string fileName)\n"
 		""},
-	 { (char *)"InterpolationTable_tabFill", _wrap_InterpolationTable_tabFill, METH_VARARGS, (char *)"InterpolationTable_tabFill(InterpolationTable self, int xdivs, int mode)"},
-	 { (char *)"InterpolationTable_xmin_set", _wrap_InterpolationTable_xmin_set, METH_VARARGS, (char *)"InterpolationTable_xmin_set(InterpolationTable self, double xmin)"},
-	 { (char *)"InterpolationTable_xmin_get", _wrap_InterpolationTable_xmin_get, METH_VARARGS, (char *)"InterpolationTable_xmin_get(InterpolationTable self) -> double"},
-	 { (char *)"InterpolationTable_xmax_set", _wrap_InterpolationTable_xmax_set, METH_VARARGS, (char *)"InterpolationTable_xmax_set(InterpolationTable self, double xmax)"},
-	 { (char *)"InterpolationTable_xmax_get", _wrap_InterpolationTable_xmax_get, METH_VARARGS, (char *)"InterpolationTable_xmax_get(InterpolationTable self) -> double"},
-	 { (char *)"InterpolationTable_xdivs_set", _wrap_InterpolationTable_xdivs_set, METH_VARARGS, (char *)"InterpolationTable_xdivs_set(InterpolationTable self, int xdivs)"},
-	 { (char *)"InterpolationTable_xdivs_get", _wrap_InterpolationTable_xdivs_get, METH_VARARGS, (char *)"InterpolationTable_xdivs_get(InterpolationTable self) -> int"},
-	 { (char *)"InterpolationTable_mode_set", _wrap_InterpolationTable_mode_set, METH_VARARGS, (char *)"InterpolationTable_mode_set(InterpolationTable self, int mode)"},
-	 { (char *)"InterpolationTable_mode_get", _wrap_InterpolationTable_mode_get, METH_VARARGS, (char *)"InterpolationTable_mode_get(InterpolationTable self) -> int"},
-	 { (char *)"InterpolationTable_dx_set", _wrap_InterpolationTable_dx_set, METH_VARARGS, (char *)"InterpolationTable_dx_set(InterpolationTable self, double dx)"},
-	 { (char *)"InterpolationTable_dx_get", _wrap_InterpolationTable_dx_get, METH_VARARGS, (char *)"InterpolationTable_dx_get(InterpolationTable self) -> double"},
-	 { (char *)"InterpolationTable_sy_set", _wrap_InterpolationTable_sy_set, METH_VARARGS, (char *)"InterpolationTable_sy_set(InterpolationTable self, double sy)"},
-	 { (char *)"InterpolationTable_sy_get", _wrap_InterpolationTable_sy_get, METH_VARARGS, (char *)"InterpolationTable_sy_get(InterpolationTable self) -> double"},
-	 { (char *)"InterpolationTable_calcMode_set", _wrap_InterpolationTable_calcMode_set, METH_VARARGS, (char *)"InterpolationTable_calcMode_set(InterpolationTable self, int calcMode)"},
-	 { (char *)"InterpolationTable_calcMode_get", _wrap_InterpolationTable_calcMode_get, METH_VARARGS, (char *)"InterpolationTable_calcMode_get(InterpolationTable self) -> int"},
-	 { (char *)"InterpolationTable_swigregister", InterpolationTable_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_TableIterator", _wrap_new_TableIterator, METH_VARARGS, (char *)"new_TableIterator(InterpolationTable table) -> TableIterator"},
+	 { (char *)"Interpol_tabFill", _wrap_Interpol_tabFill, METH_VARARGS, (char *)"Interpol_tabFill(Interpol self, int xdivs, int mode)"},
+	 { (char *)"Interpol_xmin_set", _wrap_Interpol_xmin_set, METH_VARARGS, (char *)"Interpol_xmin_set(Interpol self, double xmin)"},
+	 { (char *)"Interpol_xmin_get", _wrap_Interpol_xmin_get, METH_VARARGS, (char *)"Interpol_xmin_get(Interpol self) -> double"},
+	 { (char *)"Interpol_xmax_set", _wrap_Interpol_xmax_set, METH_VARARGS, (char *)"Interpol_xmax_set(Interpol self, double xmax)"},
+	 { (char *)"Interpol_xmax_get", _wrap_Interpol_xmax_get, METH_VARARGS, (char *)"Interpol_xmax_get(Interpol self) -> double"},
+	 { (char *)"Interpol_xdivs_set", _wrap_Interpol_xdivs_set, METH_VARARGS, (char *)"Interpol_xdivs_set(Interpol self, int xdivs)"},
+	 { (char *)"Interpol_xdivs_get", _wrap_Interpol_xdivs_get, METH_VARARGS, (char *)"Interpol_xdivs_get(Interpol self) -> int"},
+	 { (char *)"Interpol_mode_set", _wrap_Interpol_mode_set, METH_VARARGS, (char *)"Interpol_mode_set(Interpol self, int mode)"},
+	 { (char *)"Interpol_mode_get", _wrap_Interpol_mode_get, METH_VARARGS, (char *)"Interpol_mode_get(Interpol self) -> int"},
+	 { (char *)"Interpol_dx_set", _wrap_Interpol_dx_set, METH_VARARGS, (char *)"Interpol_dx_set(Interpol self, double dx)"},
+	 { (char *)"Interpol_dx_get", _wrap_Interpol_dx_get, METH_VARARGS, (char *)"Interpol_dx_get(Interpol self) -> double"},
+	 { (char *)"Interpol_sy_set", _wrap_Interpol_sy_set, METH_VARARGS, (char *)"Interpol_sy_set(Interpol self, double sy)"},
+	 { (char *)"Interpol_sy_get", _wrap_Interpol_sy_get, METH_VARARGS, (char *)"Interpol_sy_get(Interpol self) -> double"},
+	 { (char *)"Interpol_calcMode_set", _wrap_Interpol_calcMode_set, METH_VARARGS, (char *)"Interpol_calcMode_set(Interpol self, int calcMode)"},
+	 { (char *)"Interpol_calcMode_get", _wrap_Interpol_calcMode_get, METH_VARARGS, (char *)"Interpol_calcMode_get(Interpol self) -> int"},
+	 { (char *)"Interpol_swigregister", Interpol_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_TableIterator", _wrap_new_TableIterator, METH_VARARGS, (char *)"new_TableIterator(Interpol table) -> TableIterator"},
 	 { (char *)"TableIterator___iter__", _wrap_TableIterator___iter__, METH_VARARGS, (char *)"TableIterator___iter__(TableIterator self) -> TableIterator"},
 	 { (char *)"TableIterator___hasNext__", _wrap_TableIterator___hasNext__, METH_VARARGS, (char *)"TableIterator___hasNext__(TableIterator self) -> bool"},
 	 { (char *)"TableIterator___next__", _wrap_TableIterator___next__, METH_VARARGS, (char *)"TableIterator___next__(TableIterator self) -> double"},
@@ -101091,8 +101091,8 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"delete_HHGate", _wrap_delete_HHGate, METH_VARARGS, (char *)"delete_HHGate(HHGate self)"},
 	 { (char *)"HHGate_getType", _wrap_HHGate_getType, METH_VARARGS, (char *)"HHGate_getType(HHGate self) -> string"},
-	 { (char *)"HHGate___get_A", _wrap_HHGate___get_A, METH_VARARGS, (char *)"HHGate___get_A(HHGate self) -> InterpolationTable"},
-	 { (char *)"HHGate___get_B", _wrap_HHGate___get_B, METH_VARARGS, (char *)"HHGate___get_B(HHGate self) -> InterpolationTable"},
+	 { (char *)"HHGate___get_A", _wrap_HHGate___get_A, METH_VARARGS, (char *)"HHGate___get_A(HHGate self) -> Interpol"},
+	 { (char *)"HHGate___get_B", _wrap_HHGate___get_B, METH_VARARGS, (char *)"HHGate___get_B(HHGate self) -> Interpol"},
 	 { (char *)"HHGate_tabFill", _wrap_HHGate_tabFill, METH_VARARGS, (char *)"HHGate_tabFill(HHGate self, int xdivs, int mode)"},
 	 { (char *)"HHGate_setupAlpha", _wrap_HHGate_setupAlpha, METH_VARARGS, (char *)"\n"
 		"setupAlpha(double AA, double AB, double AC, double AD, double AF, \n"
@@ -101126,8 +101126,8 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"HHGate_tweakAlpha", _wrap_HHGate_tweakAlpha, METH_VARARGS, (char *)"HHGate_tweakAlpha(HHGate self)"},
 	 { (char *)"HHGate_tweakTau", _wrap_HHGate_tweakTau, METH_VARARGS, (char *)"HHGate_tweakTau(HHGate self)"},
-	 { (char *)"HHGate_A_get", _wrap_HHGate_A_get, METH_VARARGS, (char *)"HHGate_A_get(HHGate self) -> InterpolationTable"},
-	 { (char *)"HHGate_B_get", _wrap_HHGate_B_get, METH_VARARGS, (char *)"HHGate_B_get(HHGate self) -> InterpolationTable"},
+	 { (char *)"HHGate_A_get", _wrap_HHGate_A_get, METH_VARARGS, (char *)"HHGate_A_get(HHGate self) -> Interpol"},
+	 { (char *)"HHGate_B_get", _wrap_HHGate_B_get, METH_VARARGS, (char *)"HHGate_B_get(HHGate self) -> Interpol"},
 	 { (char *)"HHGate_swigregister", HHGate_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_HHChannel", _wrap_new_HHChannel, METH_VARARGS, (char *)"\n"
 		"HHChannel(Id id)\n"
@@ -102373,9 +102373,6 @@ static void *_p_pymoose__NormalRngTo_p_pymoose__RandGenerator(void *x) {
 static void *_p_pymoose__GammaRngTo_p_pymoose__RandGenerator(void *x) {
     return (void *)((pymoose::RandGenerator *)  ((pymoose::GammaRng *) x));
 }
-static void *_p_pymoose__TableTo_p_pymoose__InterpolationTable(void *x) {
-    return (void *)((pymoose::InterpolationTable *)  ((pymoose::Table *) x));
-}
 static void *_p_GammaTo_p_Probability(void *x) {
     return (void *)((Probability *)  ((Gamma *) x));
 }
@@ -102393,6 +102390,9 @@ static void *_p_ExponentialTo_p_Probability(void *x) {
 }
 static void *_p_NidTo_p_Id(void *x) {
     return (void *)((Id *)  ((Nid *) x));
+}
+static void *_p_pymoose__TableTo_p_pymoose__Interpol(void *x) {
+    return (void *)((pymoose::Interpol *)  ((pymoose::Table *) x));
 }
 static void *_p_pymoose__CellTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::Cell *) x));
@@ -102414,9 +102414,6 @@ static void *_p_pymoose__ExponentialRngTo_p_pymoose__PyMooseBase(void *x) {
 }
 static void *_p_pymoose__PulseGenTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::PulseGen *) x));
-}
-static void *_p_pymoose__InterpolationTableTo_p_pymoose__PyMooseBase(void *x) {
-    return (void *)((pymoose::PyMooseBase *)  ((pymoose::InterpolationTable *) x));
 }
 static void *_p_pymoose__UniformRngTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *) (pymoose::RandGenerator *) ((pymoose::UniformRng *) x));
@@ -102505,6 +102502,9 @@ static void *_p_pymoose__CaConcTo_p_pymoose__PyMooseBase(void *x) {
 static void *_p_pymoose__PanelTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::Panel *) x));
 }
+static void *_p_pymoose__InterpolTo_p_pymoose__PyMooseBase(void *x) {
+    return (void *)((pymoose::PyMooseBase *)  ((pymoose::Interpol *) x));
+}
 static void *_p_pymoose__SpikeGenTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::SpikeGen *) x));
 }
@@ -102539,7 +102539,7 @@ static void *_p_pymoose__RandomSpikeTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::RandomSpike *) x));
 }
 static void *_p_pymoose__TableTo_p_pymoose__PyMooseBase(void *x) {
-    return (void *)((pymoose::PyMooseBase *) (pymoose::InterpolationTable *) ((pymoose::Table *) x));
+    return (void *)((pymoose::PyMooseBase *) (pymoose::Interpol *) ((pymoose::Table *) x));
 }
 static void *_p_pymoose__MathFuncTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::MathFunc *) x));
@@ -102612,7 +102612,7 @@ static swig_type_info _swigt__p_pymoose__HHChannel = {"_p_pymoose__HHChannel", "
 static swig_type_info _swigt__p_pymoose__HHGate = {"_p_pymoose__HHGate", "pymoose::HHGate *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__HSolve = {"_p_pymoose__HSolve", "pymoose::HSolve *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__HemispherePanel = {"_p_pymoose__HemispherePanel", "pymoose::HemispherePanel *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_pymoose__InterpolationTable = {"_p_pymoose__InterpolationTable", "pymoose::InterpolationTable *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_pymoose__Interpol = {"_p_pymoose__Interpol", "pymoose::Interpol *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__KinCompt = {"_p_pymoose__KinCompt", "pymoose::KinCompt *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__KineticHub = {"_p_pymoose__KineticHub", "pymoose::KineticHub *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__KineticManager = {"_p_pymoose__KineticManager", "pymoose::KineticManager *", 0, 0, (void*)0, 0};
@@ -102705,7 +102705,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_pymoose__HHGate,
   &_swigt__p_pymoose__HSolve,
   &_swigt__p_pymoose__HemispherePanel,
-  &_swigt__p_pymoose__InterpolationTable,
+  &_swigt__p_pymoose__Interpol,
   &_swigt__p_pymoose__KinCompt,
   &_swigt__p_pymoose__KineticHub,
   &_swigt__p_pymoose__KineticManager,
@@ -102798,7 +102798,7 @@ static swig_cast_info _swigc__p_pymoose__HHChannel[] = {  {&_swigt__p_pymoose__H
 static swig_cast_info _swigc__p_pymoose__HHGate[] = {  {&_swigt__p_pymoose__HHGate, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__HSolve[] = {  {&_swigt__p_pymoose__HSolve, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__HemispherePanel[] = {  {&_swigt__p_pymoose__HemispherePanel, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_pymoose__InterpolationTable[] = {  {&_swigt__p_pymoose__InterpolationTable, 0, 0, 0},  {&_swigt__p_pymoose__Table, _p_pymoose__TableTo_p_pymoose__InterpolationTable, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_pymoose__Interpol[] = {  {&_swigt__p_pymoose__Interpol, 0, 0, 0},  {&_swigt__p_pymoose__Table, _p_pymoose__TableTo_p_pymoose__Interpol, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__KinCompt[] = {  {&_swigt__p_pymoose__KinCompt, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__KineticHub[] = {  {&_swigt__p_pymoose__KineticHub, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__KineticManager[] = {  {&_swigt__p_pymoose__KineticManager, 0, 0, 0},{0, 0, 0, 0}};
@@ -102813,7 +102813,7 @@ static swig_cast_info _swigc__p_pymoose__NormalRng[] = {  {&_swigt__p_pymoose__N
 static swig_cast_info _swigc__p_pymoose__Panel[] = {  {&_swigt__p_pymoose__DiskPanel, _p_pymoose__DiskPanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__CylPanel, _p_pymoose__CylPanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__HemispherePanel, _p_pymoose__HemispherePanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__SpherePanel, _p_pymoose__SpherePanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__Panel, 0, 0, 0},  {&_swigt__p_pymoose__TriPanel, _p_pymoose__TriPanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__RectPanel, _p_pymoose__RectPanelTo_p_pymoose__Panel, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__PoissonRng[] = {  {&_swigt__p_pymoose__PoissonRng, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__PulseGen[] = {  {&_swigt__p_pymoose__PulseGen, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_pymoose__PyMooseBase[] = {  {&_swigt__p_pymoose__Table, _p_pymoose__TableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RectPanel, _p_pymoose__RectPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__NeuroScan, _p_pymoose__NeuroScanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PyMooseBase, 0, 0, 0},  {&_swigt__p_pymoose__ExponentialRng, _p_pymoose__ExponentialRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PulseGen, _p_pymoose__PulseGenTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__InterpolationTable, _p_pymoose__InterpolationTableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__UniformRng, _p_pymoose__UniformRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__AscFile, _p_pymoose__AscFileTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DiskPanel, _p_pymoose__DiskPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Kintegrator, _p_pymoose__KintegratorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SpherePanel, _p_pymoose__SpherePanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HemispherePanel, _p_pymoose__HemispherePanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TauPump, _p_pymoose__TauPumpTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TimeTable, _p_pymoose__TimeTableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Molecule, _p_pymoose__MoleculeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Neutral, _p_pymoose__NeutralTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__BinSynchan, _p_pymoose__BinSynchanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__StochSynchan, _p_pymoose__StochSynchanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__NormalRng, _p_pymoose__NormalRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Surface, _p_pymoose__SurfaceTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Geometry, _p_pymoose__GeometryTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TriPanel, _p_pymoose__TriPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SynChan, _p_pymoose__SynChanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Cell, _p_pymoose__CellTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Stoich, _p_pymoose__StoichTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GssaStoich, _p_pymoose__GssaStoichTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HSolve, _p_pymoose__HSolveTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RandGenerator, _p_pymoose__RandGeneratorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Compartment, _p_pymoose__CompartmentTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Class, _p_pymoose__ClassTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KineticHub, _p_pymoose__KineticHubTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DifShell, _p_pymoose__DifShellTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Mg_block, _p_pymoose__Mg_blockTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HHGate, _p_pymoose__HHGateTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SpikeGen, _p_pymoose__SpikeGenTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Enzyme, _p_pymoose__EnzymeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Panel, _p_pymoose__PanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__CylPanel, _p_pymoose__CylPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Nernst, _p_pymoose__NernstTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__ClockTick, _p_pymoose__ClockTickTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SigNeur, _p_pymoose__SigNeurTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Adaptor, _p_pymoose__AdaptorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HHChannel, _p_pymoose__HHChannelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__BinomialRng, _p_pymoose__BinomialRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GammaRng, _p_pymoose__GammaRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Reaction, _p_pymoose__ReactionTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__ClockJob, _p_pymoose__ClockJobTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__CaConc, _p_pymoose__CaConcTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RandomSpike, _p_pymoose__RandomSpikeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__MathFunc, _p_pymoose__MathFuncTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PoissonRng, _p_pymoose__PoissonRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KineticManager, _p_pymoose__KineticManagerTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KinCompt, _p_pymoose__KinComptTo_p_pymoose__PyMooseBase, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_pymoose__PyMooseBase[] = {  {&_swigt__p_pymoose__Table, _p_pymoose__TableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RectPanel, _p_pymoose__RectPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__NeuroScan, _p_pymoose__NeuroScanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PyMooseBase, 0, 0, 0},  {&_swigt__p_pymoose__ExponentialRng, _p_pymoose__ExponentialRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PulseGen, _p_pymoose__PulseGenTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__UniformRng, _p_pymoose__UniformRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__AscFile, _p_pymoose__AscFileTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DiskPanel, _p_pymoose__DiskPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Kintegrator, _p_pymoose__KintegratorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HemispherePanel, _p_pymoose__HemispherePanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SpherePanel, _p_pymoose__SpherePanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TauPump, _p_pymoose__TauPumpTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TimeTable, _p_pymoose__TimeTableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Molecule, _p_pymoose__MoleculeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Neutral, _p_pymoose__NeutralTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__BinSynchan, _p_pymoose__BinSynchanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__StochSynchan, _p_pymoose__StochSynchanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__NormalRng, _p_pymoose__NormalRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Surface, _p_pymoose__SurfaceTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Geometry, _p_pymoose__GeometryTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TriPanel, _p_pymoose__TriPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SynChan, _p_pymoose__SynChanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Cell, _p_pymoose__CellTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Stoich, _p_pymoose__StoichTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GssaStoich, _p_pymoose__GssaStoichTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HSolve, _p_pymoose__HSolveTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RandGenerator, _p_pymoose__RandGeneratorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Compartment, _p_pymoose__CompartmentTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Class, _p_pymoose__ClassTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KineticHub, _p_pymoose__KineticHubTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DifShell, _p_pymoose__DifShellTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Mg_block, _p_pymoose__Mg_blockTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HHGate, _p_pymoose__HHGateTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Interpol, _p_pymoose__InterpolTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SpikeGen, _p_pymoose__SpikeGenTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Enzyme, _p_pymoose__EnzymeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Panel, _p_pymoose__PanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__CylPanel, _p_pymoose__CylPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Nernst, _p_pymoose__NernstTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__ClockTick, _p_pymoose__ClockTickTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SigNeur, _p_pymoose__SigNeurTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Adaptor, _p_pymoose__AdaptorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HHChannel, _p_pymoose__HHChannelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__BinomialRng, _p_pymoose__BinomialRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GammaRng, _p_pymoose__GammaRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Reaction, _p_pymoose__ReactionTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__ClockJob, _p_pymoose__ClockJobTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__CaConc, _p_pymoose__CaConcTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RandomSpike, _p_pymoose__RandomSpikeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__MathFunc, _p_pymoose__MathFuncTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PoissonRng, _p_pymoose__PoissonRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KineticManager, _p_pymoose__KineticManagerTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KinCompt, _p_pymoose__KinComptTo_p_pymoose__PyMooseBase, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__PyMooseContext[] = {  {&_swigt__p_pymoose__PyMooseContext, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__RandGenerator[] = {  {&_swigt__p_pymoose__UniformRng, _p_pymoose__UniformRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__RandGenerator, 0, 0, 0},  {&_swigt__p_pymoose__BinomialRng, _p_pymoose__BinomialRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__ExponentialRng, _p_pymoose__ExponentialRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__PoissonRng, _p_pymoose__PoissonRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__NormalRng, _p_pymoose__NormalRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__GammaRng, _p_pymoose__GammaRngTo_p_pymoose__RandGenerator, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__RandomSpike[] = {  {&_swigt__p_pymoose__RandomSpike, 0, 0, 0},{0, 0, 0, 0}};
@@ -102891,7 +102891,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_pymoose__HHGate,
   _swigc__p_pymoose__HSolve,
   _swigc__p_pymoose__HemispherePanel,
-  _swigc__p_pymoose__InterpolationTable,
+  _swigc__p_pymoose__Interpol,
   _swigc__p_pymoose__KinCompt,
   _swigc__p_pymoose__KineticHub,
   _swigc__p_pymoose__KineticManager,
@@ -103476,7 +103476,7 @@ SWIGEXPORT void SWIG_init(void) {
   SWIG_addvarlink(SWIG_globals(),(char*)"Cell_className_",Swig_var_Cell_className__get, Swig_var_Cell_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"ClockTick_className_",Swig_var_ClockTick_className__get, Swig_var_ClockTick_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"ClockJob_className_",Swig_var_ClockJob_className__get, Swig_var_ClockJob_className__set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"InterpolationTable_className_",Swig_var_InterpolationTable_className__get, Swig_var_InterpolationTable_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Interpol_className_",Swig_var_Interpol_className__get, Swig_var_Interpol_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Table_className_",Swig_var_Table_className__get, Swig_var_Table_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"SynChan_className_",Swig_var_SynChan_className__get, Swig_var_SynChan_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"BinSynchan_className_",Swig_var_BinSynchan_className__get, Swig_var_BinSynchan_className__set);

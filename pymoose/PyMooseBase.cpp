@@ -113,7 +113,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
     assert(path.length() > 0);
     // Consider the pros and cons - do we want to check pre existence for each new create call?
     // But I personally tend to make the mistake of trying to wrap an existing path inside a new python object
-    // table_A = moose.InterpolationTable(channel.getPath+'/xGate/A') - which fails otherwise
+    // table_A = moose.Interpol(channel.getPath+'/xGate/A') - which fails otherwise
     
     // 2007-07-30: returning pre-existing objects with an info message seems to be the best thing
     // Try to wrap preexisting object

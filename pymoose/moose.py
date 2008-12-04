@@ -2076,101 +2076,101 @@ def ClockJob_getClocks(*args):
   """ClockJob_getClocks() -> double_vector"""
   return _moose.ClockJob_getClocks(*args)
 
-class InterpolationTable(PyMooseBase):
-    """Proxy of C++ InterpolationTable class"""
+class Interpol(PyMooseBase):
+    """Proxy of C++ Interpol class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
     def __init__(self, *args): 
         """
-        __init__(self, Id id) -> InterpolationTable
-        __init__(self, string path) -> InterpolationTable
-        __init__(self, string name, Id parentId) -> InterpolationTable
-        __init__(self, string name, PyMooseBase parent) -> InterpolationTable
-        __init__(self, InterpolationTable src, string name, PyMooseBase parent) -> InterpolationTable
-        __init__(self, InterpolationTable src, string name, Id parent) -> InterpolationTable
-        __init__(self, Id src, string name, Id parent) -> InterpolationTable
-        __init__(self, InterpolationTable src, string path) -> InterpolationTable
+        __init__(self, Id id) -> Interpol
+        __init__(self, string path) -> Interpol
+        __init__(self, string name, Id parentId) -> Interpol
+        __init__(self, string name, PyMooseBase parent) -> Interpol
+        __init__(self, Interpol src, string name, PyMooseBase parent) -> Interpol
+        __init__(self, Interpol src, string name, Id parent) -> Interpol
+        __init__(self, Id src, string name, Id parent) -> Interpol
+        __init__(self, Interpol src, string path) -> Interpol
         """
-        this = _moose.new_InterpolationTable(*args)
+        this = _moose.new_Interpol(*args)
         try: self.this.append(this)
         except: self.this = this
-    __swig_destroy__ = _moose.delete_InterpolationTable
+    __swig_destroy__ = _moose.delete_Interpol
     __del__ = lambda self : None;
     def getType(*args):
         """getType(self) -> string"""
-        return _moose.InterpolationTable_getType(*args)
+        return _moose.Interpol_getType(*args)
 
     def __get_xmin(*args):
         """__get_xmin(self) -> double"""
-        return _moose.InterpolationTable___get_xmin(*args)
+        return _moose.Interpol___get_xmin(*args)
 
     def __set_xmin(*args):
         """__set_xmin(self, double xmin)"""
-        return _moose.InterpolationTable___set_xmin(*args)
+        return _moose.Interpol___set_xmin(*args)
 
     def __get_xmax(*args):
         """__get_xmax(self) -> double"""
-        return _moose.InterpolationTable___get_xmax(*args)
+        return _moose.Interpol___get_xmax(*args)
 
     def __set_xmax(*args):
         """__set_xmax(self, double xmax)"""
-        return _moose.InterpolationTable___set_xmax(*args)
+        return _moose.Interpol___set_xmax(*args)
 
     def __get_xdivs(*args):
         """__get_xdivs(self) -> int"""
-        return _moose.InterpolationTable___get_xdivs(*args)
+        return _moose.Interpol___get_xdivs(*args)
 
     def __set_xdivs(*args):
         """__set_xdivs(self, int xdivs)"""
-        return _moose.InterpolationTable___set_xdivs(*args)
+        return _moose.Interpol___set_xdivs(*args)
 
     def __get_mode(*args):
         """__get_mode(self) -> int"""
-        return _moose.InterpolationTable___get_mode(*args)
+        return _moose.Interpol___get_mode(*args)
 
     def __set_mode(*args):
         """__set_mode(self, int mode)"""
-        return _moose.InterpolationTable___set_mode(*args)
+        return _moose.Interpol___set_mode(*args)
 
     def __get_dx(*args):
         """__get_dx(self) -> double"""
-        return _moose.InterpolationTable___get_dx(*args)
+        return _moose.Interpol___get_dx(*args)
 
     def __set_dx(*args):
         """__set_dx(self, double dx)"""
-        return _moose.InterpolationTable___set_dx(*args)
+        return _moose.Interpol___set_dx(*args)
 
     def __get_sy(*args):
         """__get_sy(self) -> double"""
-        return _moose.InterpolationTable___get_sy(*args)
+        return _moose.Interpol___get_sy(*args)
 
     def __set_sy(*args):
         """__set_sy(self, double sy)"""
-        return _moose.InterpolationTable___set_sy(*args)
+        return _moose.Interpol___set_sy(*args)
 
     def __getitem__(*args):
         """__getitem__(self, unsigned int index) -> double"""
-        return _moose.InterpolationTable___getitem__(*args)
+        return _moose.Interpol___getitem__(*args)
 
     def __setitem__(*args):
         """__setitem__(self, unsigned int index, double value)"""
-        return _moose.InterpolationTable___setitem__(*args)
+        return _moose.Interpol___setitem__(*args)
 
     def __iter__(*args):
         """__iter__(self) -> TableIterator"""
-        return _moose.InterpolationTable___iter__(*args)
+        return _moose.Interpol___iter__(*args)
 
     def __len__(*args):
         """__len__(self) -> int"""
-        return _moose.InterpolationTable___len__(*args)
+        return _moose.Interpol___len__(*args)
 
     def __get_calcMode(*args):
         """__get_calcMode(self) -> int"""
-        return _moose.InterpolationTable___get_calcMode(*args)
+        return _moose.Interpol___get_calcMode(*args)
 
     def __set_calcMode(*args):
         """__set_calcMode(self, int calc_mode)"""
-        return _moose.InterpolationTable___set_calcMode(*args)
+        return _moose.Interpol___set_calcMode(*args)
 
     def dumpFile(*args):
         """
@@ -2178,29 +2178,29 @@ class InterpolationTable(PyMooseBase):
         dumpFile(self, string fileName, bool append=False)
         dumpFile(self, string fileName)
         """
-        return _moose.InterpolationTable_dumpFile(*args)
+        return _moose.Interpol_dumpFile(*args)
 
     def tabFill(*args):
         """tabFill(self, int xdivs, int mode)"""
-        return _moose.InterpolationTable_tabFill(*args)
+        return _moose.Interpol_tabFill(*args)
 
-    xmin = _swig_property(_moose.InterpolationTable_xmin_get, _moose.InterpolationTable_xmin_set)
-    xmax = _swig_property(_moose.InterpolationTable_xmax_get, _moose.InterpolationTable_xmax_set)
-    xdivs = _swig_property(_moose.InterpolationTable_xdivs_get, _moose.InterpolationTable_xdivs_set)
-    mode = _swig_property(_moose.InterpolationTable_mode_get, _moose.InterpolationTable_mode_set)
-    dx = _swig_property(_moose.InterpolationTable_dx_get, _moose.InterpolationTable_dx_set)
-    sy = _swig_property(_moose.InterpolationTable_sy_get, _moose.InterpolationTable_sy_set)
-    calcMode = _swig_property(_moose.InterpolationTable_calcMode_get, _moose.InterpolationTable_calcMode_set)
-InterpolationTable_swigregister = _moose.InterpolationTable_swigregister
-InterpolationTable_swigregister(InterpolationTable)
-InterpolationTable.className_ = _moose.cvar.InterpolationTable_className_
+    xmin = _swig_property(_moose.Interpol_xmin_get, _moose.Interpol_xmin_set)
+    xmax = _swig_property(_moose.Interpol_xmax_get, _moose.Interpol_xmax_set)
+    xdivs = _swig_property(_moose.Interpol_xdivs_get, _moose.Interpol_xdivs_set)
+    mode = _swig_property(_moose.Interpol_mode_get, _moose.Interpol_mode_set)
+    dx = _swig_property(_moose.Interpol_dx_get, _moose.Interpol_dx_set)
+    sy = _swig_property(_moose.Interpol_sy_get, _moose.Interpol_sy_set)
+    calcMode = _swig_property(_moose.Interpol_calcMode_get, _moose.Interpol_calcMode_set)
+Interpol_swigregister = _moose.Interpol_swigregister
+Interpol_swigregister(Interpol)
+Interpol.className_ = _moose.cvar.Interpol_className_
 
 class TableIterator(object):
     """Proxy of C++ TableIterator class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
     def __init__(self, *args): 
-        """__init__(self, InterpolationTable table) -> TableIterator"""
+        """__init__(self, Interpol table) -> TableIterator"""
         this = _moose.new_TableIterator(*args)
         try: self.this.append(this)
         except: self.this = this
@@ -2229,7 +2229,7 @@ class TableIterator(object):
 TableIterator_swigregister = _moose.TableIterator_swigregister
 TableIterator_swigregister(TableIterator)
 
-class Table(InterpolationTable):
+class Table(Interpol):
     """Proxy of C++ Table class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -3299,11 +3299,11 @@ class HHGate(PyMooseBase):
         return _moose.HHGate_getType(*args)
 
     def __get_A(*args):
-        """__get_A(self) -> InterpolationTable"""
+        """__get_A(self) -> Interpol"""
         return _moose.HHGate___get_A(*args)
 
     def __get_B(*args):
-        """__get_B(self) -> InterpolationTable"""
+        """__get_B(self) -> Interpol"""
         return _moose.HHGate___get_B(*args)
 
     def tabFill(*args):
