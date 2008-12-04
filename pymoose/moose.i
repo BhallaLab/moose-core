@@ -168,8 +168,8 @@ def doc(cls):
 %attribute(pymoose::ClockJob, int, step, __get_step, __set_step)
 
 %include "Interpol.h"
-/* Numpy interface for InterpolationTable */
-%extend pymoose::InterpolationTable{
+/* Numpy interface for Interpol */
+%extend pymoose::Interpol{
 #ifdef USE_NUMPY
 PyObject* get__array_struct__()
 {
@@ -218,13 +218,13 @@ void fillData(PyObject* args)
 #endif // !USE_NUMPY	     
 }; // end of extend
 
-%attribute(pymoose::InterpolationTable, double, xmin, __get_xmin, __set_xmin)
-%attribute(pymoose::InterpolationTable, double, xmax, __get_xmax, __set_xmax)
-%attribute(pymoose::InterpolationTable, int, xdivs, __get_xdivs, __set_xdivs)
-%attribute(pymoose::InterpolationTable, int, mode, __get_mode, __set_mode)
-%attribute(pymoose::InterpolationTable, double, dx, __get_dx, __set_dx)
-%attribute(pymoose::InterpolationTable, double, sy, __get_sy, __set_sy)
-%attribute(pymoose::InterpolationTable, int, calcMode, __get_calcMode, __set_calcMode)
+%attribute(pymoose::Interpol, double, xmin, __get_xmin, __set_xmin)
+%attribute(pymoose::Interpol, double, xmax, __get_xmax, __set_xmax)
+%attribute(pymoose::Interpol, int, xdivs, __get_xdivs, __set_xdivs)
+%attribute(pymoose::Interpol, int, mode, __get_mode, __set_mode)
+%attribute(pymoose::Interpol, double, dx, __get_dx, __set_dx)
+%attribute(pymoose::Interpol, double, sy, __get_sy, __set_sy)
+%attribute(pymoose::Interpol, int, calcMode, __get_calcMode, __set_calcMode)
 
 %include "TableIterator.h"
 %extend pymoose::TableIterator
@@ -240,11 +240,11 @@ void fillData(PyObject* args)
 }
 /* The following does not work
 %pythoncode %{
-	pymoose::InterpolationTable.__setitem__ = InterpolationTable.__set_table
-	pymoose::InterpolationTable.__getitem__ = InterpolationTable.__get_table
+	pymoose::Interpol.__setitem__ = Interpol.__set_table
+	pymoose::Interpol.__getitem__ = Interpol.__get_table
 %}
 */
-//%attribute(pymoose::InterpolationTable, string&, dumpFile, __get_print, __set_print) 
+//%attribute(pymoose::Interpol, string&, dumpFile, __get_print, __set_print) 
 %include "Table.h"
 %attribute(pymoose::Table, double, input, __get_input, __set_input)
 %attribute(pymoose::Table, double, output, __get_output, __set_output)
@@ -342,8 +342,8 @@ void fillData(PyObject* args)
 %attribute(pymoose::CaConc, double, B, __get_B, __set_B)
 
 %include "HHGate.h"
-%attribute(pymoose::HHGate, InterpolationTable*, A, __get_A)
-%attribute(pymoose::HHGate, InterpolationTable*, B, __get_B)
+%attribute(pymoose::HHGate, Interpol*, A, __get_A)
+%attribute(pymoose::HHGate, Interpol*, B, __get_B)
 
 %include "HHChannel.h"
 %attribute(pymoose::HHChannel, double, Gbar, __get_Gbar, __set_Gbar)

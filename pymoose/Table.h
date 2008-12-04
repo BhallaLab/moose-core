@@ -4,7 +4,7 @@
 #include "Interpol.h"
 namespace pymoose
 {
-    class Table : public InterpolationTable
+    class Table : public Interpol
     {    public:
         static const std::string className_;
         Table(Id id);

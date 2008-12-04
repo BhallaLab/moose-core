@@ -18,7 +18,7 @@ namespace pymoose
     class TableIterator
     {
       public:
-        TableIterator(InterpolationTable* table):table_(table)
+        TableIterator(Interpol* table):table_(table)
         {
             next_ = 0;            
         }
@@ -41,7 +41,7 @@ namespace pymoose
         
         // the next() method is to be implemented 
       private:
-        InterpolationTable *table_;
+        Interpol *table_;
         int next_;        
     };
 }
