@@ -238,7 +238,7 @@ void HHChannel::createTable(std::string gate, unsigned int divs, double min, dou
         cerr << "Error: " << " HHChannel::createTable(...) - Object does not exist: " << path << endl;
         return;        
     }
-    InterpolationTable tableA(id);
+    Interpol tableA(id);
     tableA.__set_xmin(min);
     tableA.__set_xmax(max);
     tableA.__set_xdivs(divs);
@@ -249,7 +249,7 @@ void HHChannel::createTable(std::string gate, unsigned int divs, double min, dou
         cerr << "Error: " << " HHChannel::createTable(...) - Object does not exist: " << path << endl;
         return;
     }    
-    InterpolationTable tableB(id);    
+    Interpol tableB(id);    
     tableB.__set_xmin(min);
     tableB.__set_xmax(max);
     tableB.__set_xdivs(divs);

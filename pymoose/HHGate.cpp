@@ -21,13 +21,13 @@ HHGate::~HHGate(){}
 const std::string& HHGate::getType(){ return className_; }
 
 // Manually edited part
-InterpolationTable* HHGate::__get_A() const
+Interpol* HHGate::__get_A() const
 {
-    return new InterpolationTable(PyMooseBase::pathToId(this->__get_path()+"/A"));    
+    return new Interpol(PyMooseBase::pathToId(this->__get_path()+"/A"));    
 }
-InterpolationTable* HHGate::__get_B() const
+Interpol* HHGate::__get_B() const
 {
-    return new InterpolationTable(PyMooseBase::pathToId(this->__get_path()+"/B"));
+    return new Interpol(PyMooseBase::pathToId(this->__get_path()+"/B"));
 }
 
 void HHGate::tabFill(int xdivs, int mode)
