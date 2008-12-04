@@ -127,14 +127,14 @@ int main(int argc, char **argv)
     Vm.__set_step_mode(3);
     Vm.connect("inputRequest",&squid,"Vm");
     HHGate Na_xGate(Id(Na.path()+"/xGate"));
-    InterpolationTable Na_xGate_A(PyMooseBase::pathToId(Na_xGate.path()+"/A"));
-    InterpolationTable Na_xGate_B(PyMooseBase::pathToId(Na_xGate.path()+"/B"));
+    Interpol Na_xGate_A(PyMooseBase::pathToId(Na_xGate.path()+"/A"));
+    Interpol Na_xGate_B(PyMooseBase::pathToId(Na_xGate.path()+"/B"));
     HHGate Na_yGate(PyMooseBase::pathToId(Na.path()+"/yGate"));
-    InterpolationTable Na_yGate_A (PyMooseBase::pathToId(Na_yGate.path()+"/A"));
-    InterpolationTable Na_yGate_B (PyMooseBase::pathToId(Na_yGate.path()+"/B"));
+    Interpol Na_yGate_A (PyMooseBase::pathToId(Na_yGate.path()+"/A"));
+    Interpol Na_yGate_B (PyMooseBase::pathToId(Na_yGate.path()+"/B"));
     HHGate K_xGate(Id(K.path()+"/xGate"));
-    InterpolationTable K_xGate_A(PyMooseBase::pathToId(K_xGate.path()+"/A"));
-    InterpolationTable K_xGate_B(PyMooseBase::pathToId(K_xGate.path()+"/B"));
+    Interpol K_xGate_A(PyMooseBase::pathToId(K_xGate.path()+"/A"));
+    Interpol K_xGate_B(PyMooseBase::pathToId(K_xGate.path()+"/B"));
 
     Na_xGate_A.__set_xmin(VMIN);
     Na_xGate_B.__set_xmin(VMIN);
