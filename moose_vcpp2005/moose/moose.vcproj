@@ -684,6 +684,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\utility\help.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\utility\Helpless.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\utility\PathUtility.cpp"
 					>
 				</File>
@@ -1209,6 +1217,10 @@
 				</File>
 				<File
 					RelativePath="..\..\ksolve\GssaStoich.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\InterSolverFlux.cpp"
 					>
 				</File>
 				<File
@@ -2025,6 +2037,10 @@
 				</File>
 				<File
 					RelativePath="..\..\ksolve\GssaStoich.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\InterSolverFlux.h"
 					>
 				</File>
 				<File
