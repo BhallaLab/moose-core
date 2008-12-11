@@ -8398,3 +8398,62 @@ Options:
 
 
 Going for now with option 2.
+Checked in as revision 982: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+Let's see now if we do get an array of KineticManagers each doing its
+own thing... Sets up OK then dies.
+
+=============================================================================
+5 Dec 2008.
+Checking multiple solver setup for spines. Croaks both for Gillespie and rk5
+methods with an assertion failure in KineticHub.cpp:742.
+
+Looks like the hub erefs are simple elements. odd.
+=============================================================================
+6 Dec 2008.
+I think I can see it now. The hubs are created individually on the duplicated
+KineticManagers. So the kms are arrayed, but hubs are simple. What a mess.
+But then the solver set up should be straightforward.
+I think I see a problem now in zombify. The system currently just returns
+if the object is already zombified. As it should if there is a single master
+solver, otherwise we will zombify array elements multiple times. Here however
+we have multiple little solvers, and need to zombify each index individually.
+Ugh. As a short-term hack, set up each spine as an individual copy, rather
+than an array copy.
+Clearly we need to move on a systematic array element management system.
+
+First pass at setting up spines as individual copies. 
+
+This happens, but the buildMoleculeNameMap is unhappy because we now have
+a tree with lots of duplicate names. Need a variant that does array indexing.
+
+Looking through existing code.
+=============================================================================
+9 Dec 2008
+
+A general solution is needed to deal with distinct solvers,
+distinct models in dendrites and spines, and distinct diffusing molecules.
+
+Currently we optimize a lot on space by using arrays for each model. 
+- Problems with handling these using distinct solvers. The current
+	eref message deletion calls don't play well with individual indices
+	in an array. Even if they did, this would be a real mess of 
+	asymmetric messaging in a context designed for symmetry. Slower updates.
+	Deeper problem: How to delete a single message at a time from an array
+	message, which is what got set up.
+- Problems with separating into individual models. Now we need to build the
+	molEref-name map for each model. Element overheads. It would be nice
+	to have completely virtual objects/Elements here. Paths change.
+- In the longer term, every Element will have array capabilities including
+	partial arrays across nodes. So would like to sort out messaging
+	issues anyway.
+	
+
+Working on zombifySeparate. This still doesn't quite do what I need, which is
+to identify when it is handling a separate hub for each index, so that it
+can either do the one-time-only zombie operations, or do the one-per-index.
+
+=============================================================================
+10 Dec
+Implemented a preliminary fix, compiles, but need to initialize the 
+separateZombie_ flag. Testing too remains.
+=============================================================================

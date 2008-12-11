@@ -110,7 +110,7 @@ class ArrayElement: public Element
 		/**
 		  * Returns the element is of type Array
 		  */
-		virtual string elementType() const
+		string elementType() const
 		{
 			return "Array";
 		}
