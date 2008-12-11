@@ -467,6 +467,10 @@ void SigNeur::innerBuild( const Conn* c )
 			" : Warning: Unable to find any signaling models to use\n";
 		return;
 	}
+
+	separateSpineSolvers_ = spineProto_.good() && dendProto_.good() && 
+		spineMethod_ != dendMethod_;
+
 	if ( !traverseCell( c->target() ) ) {
 		cout << "SigNeur::build: " << c->target().name() << 
 		cout << " : Warning: Unable to traverse cell\n";
@@ -531,6 +535,15 @@ void SigNeur::schedule( Eref me )
 
 	set< string >( cellId.eref(), "method", cellMethod_ );
 	set< string >( kinId.eref(), "method", dendMethod_ );
+	if ( separateSpineSolvers_ ) {
+		vector< Id > kids;
+		get< vector< Id > >( spine_.eref(), "childList", kids );
+		cout << "Setting separate spine method " << spineMethod_ <<
+			" to " << kids.size() << " spines\n";
+		for ( vector< Id >::iterator i = kids.begin(); 
+			i != kids.end(); ++i )
+			set< string >( i->eref(), "method", spineMethod_ );
+	}
 
 	Shell::useClock( &c, "t2", "/sig/kinetics", "process" );
 	Shell::useClock( &c, "t2", "/sig/kinetics/solve/hub", "process" );

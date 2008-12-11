@@ -189,8 +189,37 @@ class SigNeur
  		 */
 		CompartmentCategory guessCompartmentCategory( Eref e );
 
+		/**
+ 		 * This function copies a signaling model. It first traverses
+		 * the model and inserts any required diffusion reactions into
+		 * the model. These are created as children of the molecule
+		 * that diffuses, and are connected up locally for one-half of
+		 * the diffusion process. Subsequently the system needs to 
+		 * connect up to the next compartment, to set up the 
+ 		 * other half of the diffusion. Also the last diffusion reaction
+ 		 * needs to have its rates nulled out.
+ 		 *
+ 		 * Returns the root element of the copy.
+ 		 * Kinid is destination of copy
+ 		 * proto is prototype
+ 		 * Name is the name to assign to the copy.
+ 		 * num is the number of duplicates needed.
+ 		 */
 		Element* copySig( Id kinId, Id proto, 
 			const string& name, unsigned int num );
+		/**
+ 		 * This variant of copySig makes multiple copies of a signaling
+		 * model, but does NOT place them into an array. This is a 
+		 * temporary * work-around necessitated because solvers don't 
+		 * know how to deal with parts of arrays. The base element of
+		 * the whole mess is a neutral so that there is a single 
+		 * handle for the next stage of operations.
+ 		 * I would have preferred an array KineticManager, but that 
+		 * gets messy.
+ 		 */ 
+		Element* separateCopySig( Id kinId, Id proto, 
+			const string& name, unsigned int num );
+
 		/**
  		 * Traverses the signaling tree to build a map of molecule Elements 
  		 * looked up by name.
@@ -358,10 +387,13 @@ class SigNeur
 		/// Name to Molecule map for spine compartment signaling models.
 		map< string, Element* > spineMap_;
 
-		// Vector of volumes of all segments
+		/// Vector of volumes of all segments
 		vector< double > volume_;
-		// vector of cross section area divided by length of segment.
+		/// vector of cross section area divided by length of segment.
 		vector< double > xByL_;
+
+		/// True if spine compts should be solved by independent solvers
+		bool separateSpineSolvers_;
 };
 
 #endif // _KINETIC_MANAGER_H
