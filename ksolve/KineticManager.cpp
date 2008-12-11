@@ -35,6 +35,12 @@ static map< string, KMethodInfo >& fillMethodMap()
 	KineticManager::addMethod( "ee", 
 		"GENESIS Exponential Euler method.",
 		0, 0, 0, 0, 0, 0 );
+	// The difference between ee and neutral is in what they do in the
+	// findDescendants call. ee retains control over its own 
+	// elements. Neutral cedes control to the parent KineticManager.
+	KineticManager::addMethod( "neutral", 
+		"GENESIS Exponential Euler method.",
+		0, 0, 0, 0, 0, 0 );
 	KineticManager::addMethod( "rk2", 
 		"Runge Kutta 2, 3 from GSL",
 		0, 0, 0, 0, 0, 0 );
@@ -411,7 +417,7 @@ unsigned int findDescendants( Eref e, vector< Id >& ret)
 		string method;
 		if ( i->eref().e->cinfo()->isA( initKineticManagerCinfo() ) ) {
 			get< string >( i->eref(), methodFinfo, method );
-			if ( !( method == "ee" || method == "neutral" ) )
+			if ( !( method == "neutral" ) )
 				continue;
 		}
 		ret.push_back( *i );
@@ -570,7 +576,8 @@ void KineticManager::setupSolver( Eref e )
 {
 
 	Id solveId;
-	if ( method_ == "ee" ) { // Handle default and fallback case.
+	if ( method_ == "ee" | method_ == "neutral" ) 
+	{ // Handle default and fallback case.
 		if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" )){
 			if ( solveId.good() ) {
 				set( solveId(), "destroy" );
@@ -608,6 +615,7 @@ void KineticManager::setupDt( Eref e, double dt )
 {
 	static const char* fixedDtMethods[] = {
 		"ee", 
+		"neutral", 
 		"Smoldyn", 
 	};
 	static unsigned int numFixedDtMethods = 
