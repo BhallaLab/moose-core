@@ -8,6 +8,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <sstream>
 #include "moose.h"
 #include "../element/Neutral.h"
 #include "../biophysics/Compartment.h"
@@ -219,6 +220,43 @@ Element* SigNeur::copySig( Id kinId, Id proto,
 	return ret;
 }
 
+/**
+ * This variant of copySig makes multiple copies of a signaling model,
+ * but does NOT place them into an array. This is a temporary 
+ * work-around necessitated because solvers don't know how to deal with
+ * parts of arrays. The base element of the whole mess is a neutral
+ * so that there is a single handle for the next stage of operations.
+ * I would have preferred an array KineticManager, but that gets messy.
+ */ 
+Element* SigNeur::separateCopySig( Id kinId, Id proto, 
+	const string& name, unsigned int num )
+{
+	Element* ret = 0;
+	if ( proto.good() ) {
+		Id lib( "/library" );
+		/*
+		Element* temp = Neutral::create( "Neutral", "temp", libId, 
+			Id::childId( libId ) );
+		*/
+		Element* diffproto = proto()->copy( lib(), name + ".msgs" );
+		assert( diffproto );
+		insertDiffusion( diffproto ); // Insert reactions for diffusion
+
+		if ( num == 1 ) {
+			ret = diffproto->copy( kinId(), name );
+		} else if ( num > 1 ) {
+			ret = Neutral::create( "Neutral", "spines", 
+				kinId, Id::childId( kinId ) );
+			for ( unsigned int i = 0; i < num; ++i ) {
+				ostringstream s;
+				s << name << "[" << i << "]";
+				diffproto->copy( ret, s.str() );
+			}
+		}
+	}
+	return ret;
+}
+
 void SigNeur::makeSignalingModel( Eref me )
 {
 	// Make kinetic manager on sigNeur
@@ -234,7 +272,11 @@ void SigNeur::makeSignalingModel( Eref me )
 	// Each of these protos should be a KinCompt or derived class.
 	Element* soma = copySig( kinId, somaProto_, "soma", numSoma_ );
 	Element* dend = copySig( kinId, dendProto_, "dend", numDend_ );
-	Element* spine = copySig( kinId, spineProto_, "spine", numSpine_ );
+	Element* spine = 0;
+	if ( separateSpineSolvers_ ) 
+		spine = separateCopySig( kinId, spineProto_, "spine", numSpine_ );
+	else
+		spine = copySig( kinId, spineProto_, "spine", numSpine_ );
 
 	if ( soma )
 		soma_ = soma->id();
