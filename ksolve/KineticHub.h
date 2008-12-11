@@ -136,15 +136,45 @@ class KineticHub
 		static void setMmEnzKcat( const Conn* c, double value );
 		static double getMmEnzKcat( Eref e );
 
+		/**
+ 		 * This operation turns the target element e into a zombie
+		 * controlled by the hub/solver. It gets rid of any process
+		 * message coming into the zombie and replaces it with one
+		 * from the solver.
+ 		 */
+		void zombify( 
+			Eref hub, Eref e, const Finfo* hubFinfo, Finfo* solveFinfo);
 
-		static void zombify( 
-			Eref hub, Eref e, const Finfo* hubFinfo, Finfo* solveFinfo );
+		/**
+		 * This variant operates from a single hub onto an array of 
+		 * solved elements. Operates only on the first call, at which
+		 * point it does the solveFinfo replacement and sets up the
+		 * array messages from process to all the zombies. Later
+		 * calls test for the solveFinfo and return.
+		 */
+		void zombifyTogether( 
+			Eref hub, Eref e, const Finfo* hubFinfo, Finfo* solveFinfo);
+
+		/**
+		 * This variant does the cleanup on the first pass, but keeps 
+		 * going for subsequent calls. On each of these calls it
+		 * assigns the process call to specific object looked up by
+		 * the index in the Eref e.
+		 */
+		void zombifySeparate( 
+			Eref hub, Eref e, const Finfo* hubFinfo, Finfo* solveFinfo);
 	private:
 		vector< double >* S_;
 		vector< double >* Sinit_;
 		vector< RateTerm* >* rates_;
 		bool useHalfReacs_;
 		bool rebuildFlag_;
+		/**
+		 * Flag: zombifies each individual index of entities separately
+		 * if true, otherwise does a single OneToMany message to
+		 * zombify the whole lot.
+		 */
+		bool zombifySeparate_;
 		unsigned long nVarMol_;
 		unsigned long nBuf_;
 		unsigned long nSumTot_;
