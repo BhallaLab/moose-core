@@ -320,9 +320,16 @@ void redirectDynamicMessages( Eref e );
 ///////////////////////////////////////////////////
 
 KineticHub::KineticHub()
-	: S_( 0 ), Sinit_( 0 ), rates_( 0 ), 
-	useHalfReacs_( 0 ), rebuildFlag_( 0 ),
-	nVarMol_( 0 ), nBuf_( 0 ), nSumTot_( 0 )
+	: 	
+		S_( 0 ), 
+		Sinit_( 0 ), 
+		rates_( 0 ), 
+		useHalfReacs_( 0 ), 
+		rebuildFlag_( 0 ),
+		zombifySeparate_( 0 ), 
+		nVarMol_( 0 ), 
+		nBuf_( 0 ), 
+		nSumTot_( 0 )
 {
 	;
 }
@@ -664,7 +671,8 @@ void KineticHub::reacConnectionFuncLocal(
 	);
 
 	zombify( hub, reac, reacSolveFinfo, &reacZombieFinfo );
-	unsigned int connIndex = hub.e->numTargets( reacSolveFinfo->msg() );
+	unsigned int connIndex = hub.e->numTargets( 
+		reacSolveFinfo->msg(), hub.i );
 	// unsigned int connIndex = reacSolveFinfo->numOutgoing( hub );
 	assert( connIndex > 0 ); // Should have just created a message on it
 	assert( reacMap_.size() >= connIndex );
@@ -734,7 +742,8 @@ void KineticHub::enzConnectionFuncLocal(
 	);
 
 	zombify( hub, enz, enzSolveFinfo, &enzZombieFinfo );
-	unsigned int connIndex = hub.e->numTargets( enzSolveFinfo->msg() );
+	unsigned int connIndex = hub.e->numTargets( 
+		enzSolveFinfo->msg(), hub.i );
 	// unsigned int connIndex = enzSolveFinfo->numOutgoing( hub );
 	assert( connIndex > 0 ); // Should have just created a message on it
 	assert( enzMap_.size() >= connIndex );
@@ -791,7 +800,8 @@ void KineticHub::mmEnzConnectionFuncLocal(
 	);
 
 	zombify( hub, mmEnz, mmEnzSolveFinfo, &enzZombieFinfo );
-	unsigned int connIndex = hub.e->numTargets( mmEnzSolveFinfo->msg() );
+	unsigned int connIndex = hub.e->numTargets( 
+		mmEnzSolveFinfo->msg(), hub.i );
 	assert( connIndex > 0 ); // Should have just created a message on it
 	assert( mmEnzMap_.size() >= connIndex );
 
@@ -895,7 +905,7 @@ void KineticHub::setMolN( const Conn* c, double value )
 		assert ( molIndex < kh->S_->size() );
 		( *kh->S_ )[molIndex] = value;
 		// cout << "in KineticHub::setMolN with " << value << ", " << molIndex << endl;
-		assert( hubE.e->numTargets( setMolNslot.msg() ) == 1 );
+		assert( hubE.e->numTargets( setMolNslot.msg(), hubE.i ) == 1 );
 
 		// Send out for further updates in the solver system
 		send2< double, unsigned int >( hubE, setMolNslot, 
@@ -1503,8 +1513,16 @@ void KineticHubWrapper::mmEnzFuncLocal( double k1, double k2, double k3, long in
  * the zombie and replaces it with one from the solver.
  */
 void KineticHub::zombify( 
-		 Eref hub, Eref e, const Finfo* hubFinfo,
-	       	Finfo* solveFinfo )
+		 Eref hub, Eref e, const Finfo* hubFinfo, Finfo* solveFinfo )
+{
+	if ( zombifySeparate_ )
+		zombifySeparate( hub, e, hubFinfo, solveFinfo );
+	else
+		zombifyTogether( hub, e, hubFinfo, solveFinfo );
+}
+
+void KineticHub::zombifyTogether( 
+		 Eref hub, Eref e, const Finfo* hubFinfo, Finfo* solveFinfo )
 {
 	// Assume all solve stuff is done if the solveFinfo is assigned.
 	if ( e.e->getThisFinfo() == solveFinfo ) 
@@ -1530,6 +1548,66 @@ void KineticHub::zombify(
 	// Replace the 'ThisFinfo' on the solved element
 	e->setThisFinfo( solveFinfo );
 }
+
+// This variant does the cleanup on the first pass, but keeps going for
+// subsequent calls to build up the new procFinfo to the zombie,
+// typically from a unique hub.
+void KineticHub::zombifySeparate( 
+		 Eref hub, Eref e, const Finfo* hubFinfo, Finfo* solveFinfo )
+{
+	const Finfo* procFinfo = e->findFinfo( "process" );
+
+	// This is the first pass on this Eref.
+	if ( e.e->getThisFinfo() != solveFinfo ) {
+		e.dropAll( procFinfo->msg() );
+	}
+
+	if ( e.e->numTargets( procFinfo->msg(), e.i ) == 0 ) {
+		bool ret = hub.add( hubFinfo->msg(), e, 
+			procFinfo->msg(), ConnTainer::Default );
+		assert( ret );
+	}
+	
+		// Replace the 'ThisFinfo' on the solved element
+	if ( e.e->getThisFinfo() != solveFinfo ) {
+		e->setThisFinfo( solveFinfo );
+	}
+}
+/*
+// This variant does the cleanup on the first pass, but keeps going for
+// subsequent calls to build up the new procFinfo to the zombie,
+// typically from a unique hub.
+void KineticHub::zombifySeparate( 
+		 Eref hub, Eref e, const Finfo* hubFinfo, Finfo* solveFinfo )
+{
+	if ( !zombifySeparate_ && e.e->getThisFinfo() == solveFinfo )
+		return;
+	const Finfo* procFinfo = e->findFinfo( "process" );
+
+	// This is the first pass on this Eref.
+	if ( e.e->getThisFinfo() != solveFinfo ) {
+		// Replace the original procFinfo with one from the hub.
+		// Note that this clears up everything including proc messages
+		// onto other indices than zero.
+		e.dropAll( procFinfo->msg() );
+		// procFinfo->dropAll( e );
+		if ( !zombifySeparate_ && e.e->numEntries() > 1 )
+			e.i = Id::AnyIndex;
+	}
+
+	if ( e.e->numTargets( procFinfo->msg(), e.i ) == 0 ) {
+		bool ret = hub.add( hubFinfo->msg(), e, 
+			procFinfo->msg(), ConnTainer::Default );
+		// ret = hubFinfo->add( hub.e, e, procFinfo );
+		assert( ret );
+	}
+	
+		// Replace the 'ThisFinfo' on the solved element
+	if ( e.e->getThisFinfo() != solveFinfo ) {
+		e->setThisFinfo( solveFinfo );
+	}
+}
+*/
 
 /**
  * This function redirects messages originating from zombie elements,
