@@ -8456,4 +8456,99 @@ can either do the one-time-only zombie operations, or do the one-per-index.
 10 Dec
 Implemented a preliminary fix, compiles, but need to initialize the 
 separateZombie_ flag. Testing too remains.
+
 =============================================================================
+11 Dec
+Fixed up initialization, did backward compat tests with the Kholodenko model.
+Checked in as revision 985: unit test flags on, Smoldyn off, GSL on, -g, MPI off
+Next:
+	* Make zombifySeparate_ flag a field
+	- Have SigNeur use it
+	- Back off the earlier changes for separating spines out of arrays
+	- Test mess with uniform rk5 setup
+	- Make test model with a series of spines at different vols, test
+		if they are dealt with correctly by SigNeur
+	- Fix molecule name lookup stuff to be more general.
+
+
+The implementation is too snarled up at this point. I will need to rebuild
+from scratch in view of what this implementation has taught, and avoid the
+current issues which are particularly severe with the arrays and various
+hacks that have gone with them.
+
+- Compartmentalization using the cell model compartments.
+- Build an initial load map based on model size and estimated dt. 
+	Separately estimate electrical model load.
+- Split up stoch compartments wherever possible into separate solvers. 
+	Even if not parallel, these will be faster than a big solver.
+- Provide defaults for splitting up or lumping models when doing ODE solutions.
+- Arrays should only be used when they will be within a given solver.
+- Provide asymmetric flux capabilities:
+	- Transport
+	- CoInit gradients
+- Eliminate TreeNode stuff. Just build sig models on top of elec compts,
+	similar to channels. Each sig model is rooted on a KineticManager.
+	KineticManager has a child that does name[index] to Eref mapping.
+- SigNeur should have a map of compartments to load vector(s), and use it to 
+	set up the load balancing. Estimates for G1 are tricky... Should be
+	the job of the KineticManager. I think an estimate of total propensity
+
+- Are we separating this into a a super readcell and a super solver setup?
+=============================================================================
+12 Dec 2008
+
+Super readcell:
+- Read in sig prototypes. Simple, add a new 'chan' type in ReadCell::addChannel.
+	- This needs to bypass the initial copy, and instead install a
+	placeholder SigNeurKineticManager object to subsequently configure the
+	signaling model in the compartment.
+	- During its construction the SigNeurKineticManager figures out 
+	dimensions, subdivisions, load etc. Don't execute yet.
+	- What to use for the arg of the SNKM? 
+		- Not scaling of CoInit, that should be done in the sig models
+			at the level of individual molecules
+		- Possibly the recommended integ method. A bit silly.
+		- Possibly lambda for compt subdivisions. A bit crude.
+	- In addition to SNKM, could add a series of adaptors. This keeps
+		the adaptor definitions in a declarative place rather than
+		in the script that sets up the model.
+		- In theory these could also be set up in the sig model
+			definition, but if that is SBML it gets messy.
+		- Need to have multiple args here, will need work on ReadCell.
+			- Scale factor, 2 offsets
+			- mol
+			- chan.
+			- Last 2 could also be inferred from name format. Hack.
+- Work out orientation of compartments wrt soma. At this stage the SNKMs 
+	have their neighbours assigned. Sig stuff not yet instantiated.
+
+Super solver, AKA what remains of SigNeur
+	- Parse model tree, build load map.
+	- Assign nodes, if needed. Also possible multithread options later.
+	- The SigNeurKineticManager will be
+	parent to off-node models, each on a KinCompt, and the associated
+	solve neutral that holds the solver stuff.
+	- Instantiate the models. May be arrayed. May be off-node. Would be 
+		easier if we could move/copy the SNKM off-node.
+	- Set up the Adapter messages between SNKM models and 
+		parent compts and chans. Adaptors already made, see readcell.
+		May be internode.
+	- Set up the solvers. A local op for each SNKM, on whichever node it is
+	- Set up the diffusion/flux between models. May be internode.
+	- Set up scheduling.
+
+
+=============================================================================
+16 Dec 2008
+Set up skeleton for ReadCell modifications. These should be fairly easy
+to fill in. Should make sure that we can prototype the compartment with the
+SNKM and adaptors.
+Real work is to come yet, with the SNKM implementation.
+
+=============================================================================
+18 Dec 2008.
+Trying to recompile. Some of the earlier hacks get in the way.
+Reverted them. 
+Checked that the whole thing is able to handle a current SigNeur model. OK. 
+Checked that cell reader still wors. Runs moose_readcell.g: OK
+
