@@ -23,7 +23,8 @@ class KineticHub
 		static unsigned int getNmol( Eref e );
 		static unsigned int getNreac( Eref e );
 		static unsigned int getNenz( Eref e );
-
+		static bool getZombifySeparate( Eref e );
+		static void setZombifySeparate( const Conn* c, bool value );
 
 		///////////////////////////////////////////////////
 		// Dest function definitions
