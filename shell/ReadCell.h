@@ -55,6 +55,13 @@ class ReadCell
 		bool addNernst( Element* compt, Element* chan, double value );
 		void addChannelMessage( Element* chan );
 
+		void addKinModel( Element* compt, double value, 
+			string name, string method );
+		void addM2C( Element* compt, double value, 
+			vector< string >::iterator args );
+		void addC2M( Element* compt, double value, 
+			vector< string >::iterator args );
+
 	private:
 		void countProtos( );
 		
