@@ -113,17 +113,28 @@ const Cinfo* initKineticHubCinfo()
 		new ValueFinfo( "nVarMol", 
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &KineticHub::getNmol ), 
-			&dummyFunc
+			&dummyFunc,
+			"Number of molecular species in model handled by KineticHub"
 		),
 		new ValueFinfo( "nReac", 
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &KineticHub::getNreac ), 
-			&dummyFunc
+			&dummyFunc,
+			"Number of reactions in model handled by KineticHub"
 		),
 		new ValueFinfo( "nEnz", 
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &KineticHub::getNenz ), 
-			&dummyFunc
+			&dummyFunc,
+			"Number of enzymes in model handled by KineticHub"
+		),
+		new ValueFinfo( "zombifySeparate", 
+			ValueFtype1< bool >::global(),
+			GFCAST( &KineticHub::getZombifySeparate ), 
+			RFCAST( &KineticHub::setZombifySeparate ), 
+			"Temporary flag used to decide if elements in arrays should"
+			"be zombified separately, one per index, or if all the"
+			"zombies are going to be solved using the same solver."
 		),
 
 	///////////////////////////////////////////////////////
@@ -520,6 +531,16 @@ unsigned int KineticHub::getNreac( Eref e )
 unsigned int KineticHub::getNenz( Eref e )
 {
 	return static_cast< KineticHub* >( e.data() )->enzMap_.size();
+}
+
+bool KineticHub::getZombifySeparate( Eref e )
+{
+	return static_cast< KineticHub* >( e.data() )->zombifySeparate_;
+}
+
+void KineticHub::setZombifySeparate( const Conn* c, bool value )
+{
+	static_cast< KineticHub* >( c->data() )->zombifySeparate_ = value;
 }
 
 ///////////////////////////////////////////////////
