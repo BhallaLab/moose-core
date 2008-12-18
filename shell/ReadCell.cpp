@@ -563,6 +563,40 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 			set< double >( compt, "Ra", value );
 		} else if ( chan == "Cm" ) {
 			set< double >( compt, "Cm", value );
+		} else if ( chan == "kinModel" ) {
+			// Need 3 args here: 
+			// lambda, name of proto, method
+			// We already have lambda from value.
+			if ( j + 2 < argv.size() ) {
+				string protoName = argv[ ++j ];
+				string method = argv[ ++j ];
+				addKinModel( compt, value, protoName, method );
+				j += 2;
+			} else {
+				cerr << "Error: readCell: kinModel needs 3 args\n";
+				break;
+			}
+		} else if ( chan == "m2c" ) {
+			// Need 5 args here: 
+			// scale factor, mol, moloffset, chan, chanoffset
+			// We already have scale factor from value.
+			if ( j + 4 < argv.size() ) {
+				addM2C( compt, value, argv.begin() + j ); 
+				j += 4;
+			} else {
+				cerr << "Error: readCell: m2c adaptor needs 5 args\n";
+				break;
+			}
+		} else if ( chan == "c2m" ) {
+			// Need another 5 args here: 
+			// scale factor, chan, chanoffset, mol, moloffset
+			if ( j + 4 < argv.size() ) {
+				addC2M( compt, value, argv.begin() + j ); 
+				j += 4;
+			} else {
+				cerr << "Error: readCell: c2m adaptor needs 5 args\n";
+				break;
+			}
 		} else {
 			Element* chanElm = findChannel( chan );
 			if ( chanElm == 0 ) {
@@ -587,6 +621,21 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 		addChannelMessage( goodChannels[ i ] );
 	
 	return 1;
+}
+
+void ReadCell::addKinModel( Element* compt, double value, 
+	string name, string method )
+{
+}
+
+void ReadCell::addM2C( Element* compt, double value, 
+	vector< string >::iterator args )
+{
+}
+
+void ReadCell::addC2M( Element* compt, double value, 
+	vector< string >::iterator args )
+{
 }
 
 Element* ReadCell::addChannel( 
