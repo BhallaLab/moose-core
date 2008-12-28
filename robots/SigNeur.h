@@ -173,6 +173,14 @@ class SigNeur
 			int msg1, int msg2 );
 		void assignSignalingCompts();
 		void makeSignalingModel( Eref e );
+
+		/**
+ 		 * Traverse all zero index children, find ones that have D > 0
+ 		 * Create an array of diffs on these children
+ 		 * Connect up to parent using One2OneMap
+ 		 * Connect up to next index parent using SimpleConn for now
+ 		 * Assign rates.
+ 		 */
 		void insertDiffusion( Element* base );
 
 		/** 

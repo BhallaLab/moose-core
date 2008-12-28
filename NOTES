@@ -8499,17 +8499,17 @@ hacks that have gone with them.
 
 Super readcell:
 - Read in sig prototypes. Simple, add a new 'chan' type in ReadCell::addChannel.
-	- This needs to bypass the initial copy, and instead install a
+	* This needs to bypass the initial copy, and instead install a
 	placeholder SigNeurKineticManager object to subsequently configure the
 	signaling model in the compartment.
-	- During its construction the SigNeurKineticManager figures out 
+	* During its construction the SigNeurKineticManager figures out 
 	dimensions, subdivisions, load etc. Don't execute yet.
-	- What to use for the arg of the SNKM? 
+	* What to use for the arg of the SNKM? 
 		- Not scaling of CoInit, that should be done in the sig models
 			at the level of individual molecules
 		- Possibly the recommended integ method. A bit silly.
 		- Possibly lambda for compt subdivisions. A bit crude.
-	- In addition to SNKM, could add a series of adaptors. This keeps
+	* In addition to SNKM, could add a series of adaptors. This keeps
 		the adaptor definitions in a declarative place rather than
 		in the script that sets up the model.
 		- In theory these could also be set up in the sig model
@@ -8550,5 +8550,56 @@ Real work is to come yet, with the SNKM implementation.
 Trying to recompile. Some of the earlier hacks get in the way.
 Reverted them. 
 Checked that the whole thing is able to handle a current SigNeur model. OK. 
-Checked that cell reader still wors. Runs moose_readcell.g: OK
+Checked that cell reader still works. Runs moose_readcell.g: OK
 
+Checked in as revision 986: GSL on, -g, MPI off
+=============================================================================
+19 Dec 2008
+Setting up tests for the enhanced cell reader.
+* Get the simple single-line read to pass in args properly.
+- Check that cell protos work: Nope, need to implement, or decide to bypass.
++ Build kin model
+	Need to build only KinMgr to encapsulate load info.
++ Build adaptors
+- Post-build diffusion
+
+=============================================================================
+20 Dec 2008
+Working on setup of KinPlaceHolder within the cell reader.
+Compiles, doesn't run.
+Fixed.
+Also set up adaptors.
+Now all placeholders are set up from the cell reader, but the real work of
+building the model is yet to come.
+=============================================================================
+21 Dec 2008.
+Working on load estimations. Reasonable framework now in place, will need to
+calibrate on actual models. One issue is that load changes during run.
+
+Since we now use the cell reader to build the cell, we either have to adapt
+it to generate the SigNeur, or make a derived class of the Cell object that
+has the remaining SigNeur operations.
+To back up: Do we want to put the entire spec of SigNeur within the cell 
+	reader? Main remaining specifications are load balancing preferences,
+	which also may apply to regular HH models. Also may want a global
+	manager. Lots of setup work remaining though.
+- Separate SigNeur: Keep it simple for now. Cell can just be loaded onto
+	a SigNeur.
+- Derived from Cell: Makes a messy overloaded object.
+
+Do we keep the kinetics stuff now within the cell? Looks like it, since the
+	structure is designed for node decomposition.
+
+Stages:
++ Get rid of old SigNeur stuff.
++ Implement a skeleton replacement SigNeur that does the calls to the 
+	placeholders to build things up.
+- Start to fill out model building
+- Set up inter-solver flux
+- Set up parallel sims.
+=============================================================================
+
+25 Dec 2008
+Working on KinPlaceHolder.cpp to assignDiffusion.
+
+=============================================================================
