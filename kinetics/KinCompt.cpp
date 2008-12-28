@@ -115,7 +115,7 @@ const Cinfo* initKinComptCinfo()
 			"Applies the following logic:\n"
 			"	- If first assignment: Assign without rescaling"
 			"	- If later assignment, same vol: Keep tally, silently"
-			"	- If laster assignment, new vol: Complain, tally"
+			"	- If later assignment, new vol: Complain, tally"
 			"	- If later new vols outnumber original vol:"
 			"Complain louder."
 			),
