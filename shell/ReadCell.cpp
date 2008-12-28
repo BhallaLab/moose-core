@@ -566,12 +566,11 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 		} else if ( chan == "kinModel" ) {
 			// Need 3 args here: 
 			// lambda, name of proto, method
-			// We already have lambda from value.
+			// We already have lambda from value. Note it is in microns
 			if ( j + 2 < argv.size() ) {
 				string protoName = argv[ ++j ];
 				string method = argv[ ++j ];
-				addKinModel( compt, value, protoName, method );
-				j += 2;
+				addKinModel( compt, value * 1.0e-6, protoName, method );
 			} else {
 				cerr << "Error: readCell: kinModel needs 3 args\n";
 				break;
@@ -581,7 +580,7 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 			// scale factor, mol, moloffset, chan, chanoffset
 			// We already have scale factor from value.
 			if ( j + 4 < argv.size() ) {
-				addM2C( compt, value, argv.begin() + j ); 
+				addM2C( compt, value, argv.begin() + j + 1 ); 
 				j += 4;
 			} else {
 				cerr << "Error: readCell: m2c adaptor needs 5 args\n";
@@ -591,7 +590,7 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 			// Need another 5 args here: 
 			// scale factor, chan, chanoffset, mol, moloffset
 			if ( j + 4 < argv.size() ) {
-				addC2M( compt, value, argv.begin() + j ); 
+				addC2M( compt, value, argv.begin() + j + 1 ); 
 				j += 4;
 			} else {
 				cerr << "Error: readCell: c2m adaptor needs 5 args\n";
@@ -623,19 +622,90 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 	return 1;
 }
 
-void ReadCell::addKinModel( Element* compt, double value, 
+void ReadCell::addKinModel( Element* compt, double lambda, 
 	string name, string method )
 {
+	/*
+	cout << "addKinModel on " << compt->name() <<
+		" name= " << name << ", lambda = " << lambda <<
+		", using " << method << endl;
+		*/
+
+	Element* kinElm = findChannel( name );
+	if ( kinElm == 0 ) {
+		cerr << "Error:readCell: KinProto '" << name << "' not found\n";
+		cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
+		return;
+	}
+	
+	Element* kph = Neutral::create( "KinPlaceHolder", "kinModel", 
+		compt->id(), Id::childId( compt->id() ) );
+	set< Id, double, string >( kph, "setup", 
+		kinElm->id(), lambda, method );
 }
 
-void ReadCell::addM2C( Element* compt, double value, 
+void ReadCell::addM2C( Element* compt, double scale, 
 	vector< string >::iterator args )
 {
+	/*
+	cout << "addM2C on " << compt->name() << 
+		" scale= " << scale << 
+		" mol= " << *args << ", moloff= " << *(args+1) << 
+		" chan= " << *(args + 2) << ", chanoff= " << *(args+3) << endl;
+		*/
+
+	string molName = *args++;
+	double molOffset = atof( ( *args++ ).c_str() );
+	string chanName = *args++;
+	double chanOffset = atof( ( *args ).c_str() );
+	string adaptorName = molName + "_2_" + chanName;
+
+	Element* chan = findChannel( chanName );
+	if ( chan == 0 ) {
+		cerr << "Error:readCell: addM2C ': channel" << chanName << 
+			"' not found\n";
+		cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
+		return;
+	}
+
+	Element* adaptor = Neutral::create( "Adaptor", adaptorName,
+		compt->id(), Id::childId( compt->id() ) );
+	
+	Eref( adaptor ).add( "outputSrc", Eref( chan ), "Gbar" );
+	set< string, double, double, double >( adaptor, "setup",
+		molName, scale, molOffset, chanOffset );
 }
 
-void ReadCell::addC2M( Element* compt, double value, 
+void ReadCell::addC2M( Element* compt, double scale, 
 	vector< string >::iterator args )
 {
+	/*
+	cout << "addC2M on " << compt->name() << 
+		" scale= " << scale << 
+		" chan= " << *args << ", chanoff= " << *(args+1) << 
+		" mol= " << *(args + 2) << ", moloff= " << *(args+3) <<  endl;
+		*/
+
+	string chanName = *args++;
+	double chanOffset = atof( ( *args++ ).c_str() );
+	string molName = *args++;
+	double molOffset = atof( ( *args++ ).c_str() );
+	string adaptorName = "Ca_2_" + molName;
+
+	Element* chan = findChannel( chanName );
+	if ( chan == 0 ) {
+		cerr << "Error:readCell: addC2M ': channel" << chanName << 
+			"' not found\n";
+		cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
+		return;
+	}
+
+	Element* adaptor = Neutral::create( "Adaptor", adaptorName,
+		compt->id(), Id::childId( compt->id() ) );
+	
+	Eref( adaptor ).add( "inputRequest", Eref( chan ), "Ca" );
+	set< string, double, double, double >( adaptor, "setup",
+		molName, scale, chanOffset, molOffset );
 }
 
 Element* ReadCell::addChannel( 
