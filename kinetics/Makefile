@@ -24,6 +24,7 @@ OBJ = \
 	CylPanel.o	\
 	DiskPanel.o	\
 	KinCompt.o	\
+	KinPlaceHolder.o	\
 	TestKinetics.o	\
 
 HEADERS = \
@@ -65,6 +66,7 @@ HemispherePanel.o:	Panel.h HemispherePanel.h
 CylPanel.o:	Panel.h CylPanel.h
 DiskPanel.o:	Panel.h DiskPanel.h
 KinCompt.o:	KinCompt.h
+KinPlaceHolder.o:	KinPlaceHolder.h
 TestKinetics.o:	Molecule.h Reaction.h Enzyme.h Makefile
 
 ifdef ($(USE_SMOLDYN)
@@ -73,7 +75,7 @@ Particle.o:		SmoldynHub.h Particle.h Molecule.h
 SmoldynHub.o:	KinSparseMatrix.h SmoldynHub.h Smoldyn/source/smolrun.h
 endif # !USE_SMOLDYN
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c
+	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode -I../element $< -c
 
 $(TARGET):		$(OBJ) $(SMOLDYN_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(SMOLDYN_OBJ) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 

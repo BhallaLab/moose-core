@@ -67,12 +67,25 @@ class KineticManager: public KinCompt
 		static void setEulerError( const Conn* c, double value );
 		static double getEulerError( Eref e );
 
+		static double getLoadEstimate( Eref e );
+		static unsigned int getMemEstimate( Eref e );
+
 		// static string getMethodList( Eref e );
 		//
 		void innerSetMethod( Eref e, string value );
 		void setupSolver( Eref e );
 		void setupDt( Eref e, double dt );
-		double estimateDt( Id mgr, Id& elm, string& field, double error ) ;
+
+		/**
+		 * Estimates timestep and other aspects of computational load.
+		 * Uses an Euler error calculation to assign a recommended
+		 * Dt for a given error value. Different numerical methods will
+		 * typically be a certain factor better than this.
+		 * In addition, uses rules of thumb to estimate load for other 
+		 * numerical methods.
+		 */
+		double estimateDt( Id mgr, Id& elm, string& field, 
+			double error, string method ) ;
 		double findEnzSubPropensity( Eref e ) const;
 		double findEnzPrdPropensity( Eref e ) const;
 		double findReacPropensity( Eref e, bool isPrd ) const;
@@ -86,6 +99,7 @@ class KineticManager: public KinCompt
 		static void processFunc( const Conn* c, ProcInfo info );
 		static void reschedFunc( const Conn* c );
 		void reschedFuncLocal( Eref e );
+		static void estimateDtFunc( const Conn* c, string method );
 
 		/**
  		* innerSetSize is specialized from KinCompt because when 
@@ -132,7 +146,20 @@ class KineticManager: public KinCompt
 		bool singleParticle_; // Default False
 		string description_;
 		double recommendedDt_;
+
+		/**
+		 * Estimate of computational load of model
+		 * Expressed roughly as # of flops per second sim time
+		 */
+		double loadEstimate_;
+		unsigned int memEstimate_; // Est # of bytes for building model
 		double eulerError_;
+		string lastMethodForEstimateDt_;
+		static const double RKload;
+		static const double GillespieLoad;
+		static const unsigned int RKmemLoad;
+		static const unsigned int GillespieMemLoad;
+		static const unsigned int elementMemLoad;
 };
 
 const Cinfo* initKineticManagerCinfo();

@@ -16,6 +16,14 @@
 
 static const double PI = 3.1415926535;
 
+/**
+ * Steps in functioning.
+ * Traverse all zero index children, find ones that have D > 0
+ * Create an array of diffs on these children
+ * Connect up to parent using One2OneMap
+ * Connect up to next index parent using SimpleConn for now
+ * Assign rates.
+ */
 void SigNeur::insertDiffusion( Element* base )
 {
 	static const double EPSILON = 1.0e-20;
@@ -30,11 +38,6 @@ void SigNeur::insertDiffusion( Element* base )
 	static const Finfo* subFinfo = 
 		initReactionCinfo()->findFinfo( "sub" );
 
-	// Traverse all zero index children, find ones that have D > 0
-	// Create an array of diffs on these children
-	// Connect up to parent using One2OneMap
-	// Connect up to next index parent using SimpleConn for now
-	// Assign rates.
 	if ( base == 0 )
 		return;
 	
