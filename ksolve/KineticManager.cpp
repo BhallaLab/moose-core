@@ -18,6 +18,13 @@
 #include "kinetics/Molecule.h"
 #include "../utility/utility.h"
 
+// As a first pass, the loads are all just 1. Later fine-tune.
+const double KineticManager::RKload = 1.0;
+const double KineticManager::GillespieLoad = 1.0;
+const unsigned int KineticManager::RKmemLoad = 1;
+const unsigned int KineticManager::GillespieMemLoad = 1;
+const unsigned int KineticManager::elementMemLoad = 1;
+
 static map< string, KMethodInfo >& methodMap()
 {
 	static map< string, KMethodInfo > methodMap_;
@@ -137,17 +144,22 @@ const Cinfo* initKineticManagerCinfo()
 		new ValueFinfo( "method", 
 			ValueFtype1< string >::global(),
 			GFCAST( &KineticManager::getMethod ), 
-			RFCAST( &KineticManager::setMethod )
+			RFCAST( &KineticManager::setMethod ),
+			"Assigns method and if necessary sets up solver."
 		),
 		new ValueFinfo( "variableDt", 
 			ValueFtype1< bool >::global(),
 			GFCAST( &KineticManager::getVariableDt ), 
-			&dummyFunc
+			&dummyFunc,
+			"Flag. True if the selected numerical method employs a "
+			"variable dt internally."
 		),
 		new ValueFinfo( "singleParticle", 
 			ValueFtype1< bool >::global(),
 			GFCAST( &KineticManager::getSingleParticle ), 
-			&dummyFunc
+			&dummyFunc,
+			"Flag. True if the selected numerical method is a "
+			"single particle method such as Smoldyn."
 		),
 		new ValueFinfo( "multiscale", 
 			ValueFtype1< bool >::global(),
@@ -157,17 +169,38 @@ const Cinfo* initKineticManagerCinfo()
 		new ValueFinfo( "implicit", 
 			ValueFtype1< bool >::global(),
 			GFCAST( &KineticManager::getImplicit ), 
-			&dummyFunc
+			&dummyFunc,
+			"Flag. True if selected numerical method is implicit. "
+			"Applicable only for ODE methods."
 		),
 		new ValueFinfo( "description", 
 			ValueFtype1< string >::global(),
 			GFCAST( &KineticManager::getDescription ), 
-			&dummyFunc
+			&dummyFunc,
+			"Description of selected numerical method."
 		),
 		new ValueFinfo( "recommendedDt", 
 			ValueFtype1< double >::global(),
 			GFCAST( &KineticManager::getRecommendedDt ), 
-			&dummyFunc
+			&dummyFunc,
+			"Timestep recommended for calculations assuming "
+			"forward Euler integration, which is of course not the "
+			"case. However, this is a good way to get a glimpse of "
+			"the stiffness of the system of equations."
+		),
+		new ValueFinfo( "loadEstimate", 
+			ValueFtype1< double >::global(),
+			GFCAST( &KineticManager::getLoadEstimate ), 
+			&dummyFunc,
+			"Estimates # of flops to do calculations for 1 sec "
+			"simulated time. Computed by estimateDt."
+		),
+		new ValueFinfo( "memEstimate", 
+			ValueFtype1< unsigned int >::global(),
+			GFCAST( &KineticManager::getMemEstimate ), 
+			&dummyFunc,
+			"Estimates # of bytes used by entire model. "
+			"Computed by estimateDt."
 		),
 		new ValueFinfo( "eulerError", 
 			ValueFtype1< double >::global(),
@@ -190,7 +223,16 @@ const Cinfo* initKineticManagerCinfo()
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
 		new DestFinfo( "resched", Ftype0::global(),
-			RFCAST( &KineticManager::reschedFunc )
+			RFCAST( &KineticManager::reschedFunc ),
+			"Sets up solver"
+		),
+
+		new DestFinfo( "estimateDt", Ftype1< string >::global(),
+			RFCAST( &KineticManager::estimateDtFunc ),
+			"Estimates required timestep and other load parameters "
+			"for model, given specified method. Does NOT require "
+			"the system to set up the solver, just uses the "
+			"method temporarily to estimate load."
 		),
 	///////////////////////////////////////////////////////
 	// Synapse definitions
@@ -208,10 +250,12 @@ const Cinfo* initKineticManagerCinfo()
 	{
 		"Name", "KineticManager",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "Kinetic Manager: Handles integration methods for kinetic simulations. If in 'auto' "
-				"mode then it picks a method depending on the stochastic and spatial flags. If you "
-				"set a method,then the 'auto' flag goes off and all the other options are set "
-				"directly by your choice.",
+		"Description", 
+		"Kinetic Manager: Handles integration methods for kinetic "
+		"simulations. If in 'auto' mode then it picks a method "
+		"depending on the stochastic and spatial flags. If you "
+		"set a method,then the 'auto' flag goes off and all the "
+		"other options are set directly by your choice.",
 	};
 	
 	static Cinfo kineticManagerCinfo(
@@ -251,7 +295,8 @@ KineticManager::KineticManager()
 	multiscale_( 0 ),
 	singleParticle_( 0 ),
 	recommendedDt_( 0.001 ),
-	eulerError_( 0.01 )
+	eulerError_( 0.01 ),
+	lastMethodForEstimateDt_( "" )
 {
 		;
 }
@@ -363,6 +408,15 @@ double KineticManager::getEulerError( Eref e )
 	return static_cast< KineticManager* >( e.data() )->eulerError_;
 }
 
+double KineticManager::getLoadEstimate( Eref e )
+{
+	return static_cast< KineticManager* >( e.data() )->loadEstimate_;
+}
+
+unsigned int KineticManager::getMemEstimate( Eref e )
+{
+	return static_cast< KineticManager* >( e.data() )->memEstimate_;
+}
 //////////////////////////////////////////////////////////////////
 // Here we set up some of the messier inner functions.
 //////////////////////////////////////////////////////////////////
@@ -687,7 +741,8 @@ void KineticManager::reschedFuncLocal( Eref e )
 {
 	Id offendingElm;
 	string field;
-	double dt = estimateDt( e.id(), offendingElm, field, eulerError_ );
+	double dt = estimateDt( e.id(), offendingElm, field, 
+		eulerError_, method_ );
 	setupSolver( e );
 	setupDt( e, dt );
 }
@@ -701,6 +756,24 @@ void KineticManager::processFunc( const Conn* c, ProcInfo info )
 //	Element* e = c.targetElement();
 //static_cast< KineticManager* >( e.data() )->processFuncLocal( e, info );
 
+}
+
+/**
+ * Calls EstimateDt to figure out timestep and other loading parameters
+ * for specified model, assuming proposed method is applicable.
+ * Does NOT change method.
+ */
+void KineticManager::estimateDtFunc( const Conn* c, string method )
+{
+	Id elm; // Element with finest dt
+	string field; // field of element with finest dt
+	double error = 0.01; // Error requirement
+	KineticManager* km = static_cast< KineticManager* >( c->data() );
+
+	if ( km->lastMethodForEstimateDt_ == method )
+		return; // Use previous values
+
+	km->estimateDt( c->target().id(), elm, field, error, method );
 }
 
 /**
@@ -901,8 +974,10 @@ double KineticManager::findEnzPrdPropensity( Eref e ) const
 #include <limits>
 #endif
 
+
+
 double KineticManager::estimateDt( Id mgr, 
-	Id& elm, string& field, double error ) 
+	Id& elm, string& field, double error, string method ) 
 {
 	static const Cinfo* eCinfo = Cinfo::find( "Enzyme" );
 	static const Cinfo* rCinfo = Cinfo::find( "Reaction" );
@@ -920,17 +995,31 @@ double KineticManager::estimateDt( Id mgr,
 
 	double prop = 0.0;
 	double maxProp = 0.0;
+	double sumProp = 0.0;
+	unsigned int numProp = 0;
+	loadEstimate_ = 0.0;
+	memEstimate_ = 0.0;
 
 	for ( i = elist.begin(); i != elist.end(); i++ )
 	{
-		if ( ( *i )()->cinfo()->isA( rCinfo ) ) {
+		const Cinfo* ci = (*i)()->cinfo();
+		memEstimate_ += ci->size();
+		if ( ci->isA( rCinfo ) ) {
 			prop = findReacPropensity( ( *i )(), 0 );
+			if ( prop > 0 ) {
+				sumProp += prop;
+				++numProp;
+			}
 			if ( maxProp < prop ) {
 				maxProp = prop;
 				elm = *i;
 				field = "kf";
 			}
 			prop = findReacPropensity( ( *i )(), 1 );
+			if ( prop > 0 ) {
+				sumProp += prop;
+				++numProp;
+			}
 			if ( maxProp < prop ) {
 				maxProp = prop;
 				elm = *i;
@@ -938,12 +1027,20 @@ double KineticManager::estimateDt( Id mgr,
 			}
 		} else if ( ( *i )()->cinfo()->isA( eCinfo ) ) {
 			prop = findEnzSubPropensity( ( *i )() );
+			if ( prop > 0 ) {
+				sumProp += prop;
+				++numProp;
+			}
 			if ( maxProp < prop ) {
 				maxProp = prop;
 				elm = *i;
 				field = "k1";
 			}
 			prop = findEnzPrdPropensity( ( *i )() );
+			if ( prop > 0 ) {
+				sumProp += prop;
+				++numProp;
+			}
 			if ( maxProp < prop ) {
 				maxProp = prop;
 				elm = *i;
@@ -958,6 +1055,20 @@ double KineticManager::estimateDt( Id mgr,
 	recommendedDt_ = sqrt( error ) / maxProp;
 	// isinf is in 'utility.h'
 	assert ( !isInfinity< double >( recommendedDt_ ) );
+
+	if ( method == "Gillespie1" ) {
+		// Current algorithm goes as N^2. GB goes as NlogN, and
+		// another one goes as N. Here sumProp has one of the N factors.
+		loadEstimate_ = GillespieLoad * numProp * sumProp;
+		memEstimate_ += GillespieMemLoad * numProp;
+	} else if ( method == "rk5" ) {
+		// RK method is limited if any one reaction is stiff. The whole
+		// system has to go at the rate of the stiff reaction. Otherwise
+		// the calculations are linear in N.
+		loadEstimate_ = RKload * numProp / recommendedDt_;
+		memEstimate_ += RKmemLoad * numProp;
+	}
+	memEstimate_ += elist.size() * elementMemLoad;
 
 	return recommendedDt_;
 }
