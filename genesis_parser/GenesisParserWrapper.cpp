@@ -563,6 +563,11 @@ map< string, string >& sliSrcLookup()
 
         // Messages for PulseGen
         src[ "PulseGen.INPUT output" ] = "outputSrc";
+
+        // Messages for DiffAmp
+        src[ "INPUT output" ] = "output";
+        src[ "PLUS output" ] = "outputSrc";
+        src[ "MINUS output" ] = "outputSrc";
         
 	// Some messages for tables, specially used for I/O
 	src[ "SpikeGen.INPUT Vm" ] = "VmSrc";
@@ -673,6 +678,12 @@ map< string, string >& sliDestLookup()
         
         // Messages for PulseGen
         dest[ "PulseGen.INPUT output" ] = "input";
+
+        // Messages for DiffAmp
+        dest[ "PLUS output" ] = "plusDest";
+        dest[ "MINUS output" ] = "minusDest";
+        dest[ "GAIN output" ] = "gainDest";
+        
         
 	// Some messages for tables
 	dest[ "INPUT Vm" ] = "inputRequest";
@@ -732,7 +743,8 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "tabgate" ] = "HHGate";
 	classnames[ "randomspike" ] = "RandomSpike";
         classnames[ "spikegen" ] = "SpikeGen";
-        classnames[ "pulsegen" ] = "PulseGen";        
+        classnames[ "pulsegen" ] = "PulseGen";
+        classnames[ "diffamp" ] = "DiffAmp";
 	classnames[ "synchan" ] = "SynChan";
 	classnames[ "table" ] = "Table";
 	classnames[ "xbutton" ] = "Sli";
@@ -746,7 +758,7 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "x1button" ] = "Sli";
 	classnames[ "x1shape" ] = "Sli";
 	classnames[ "xtext" ] = "Sli";
-
+        
 	return classnames;
 }
 
@@ -989,14 +1001,13 @@ void GenesisParserWrapper::doAdd(
 			msgType = destClassName + "." + msgType;
                 if ( msgType == "SPIKE" && srcClassName == "RandomSpike" )
                          msgType = srcClassName + "." + msgType;
-                if (msgType == "INPUT Vm" && destClassName == "RandomSpike")
+                if ( msgType == "INPUT Vm" && destClassName == "RandomSpike")
                          msgType = destClassName + "." + msgType;                
-                if( msgType == "INPUT output" && srcClassName == "PulseGen" )
+                if ( msgType == "INPUT output" && srcClassName == "PulseGen" )
                          msgType = srcClassName + "." + msgType;
-                if( msgType == "INPUT output" && destClassName == "PulseGen" )
+                if ( msgType == "INPUT output" && destClassName == "PulseGen" )
                          msgType = destClassName + "." + msgType;
                 
-
 		bool usingMULTGATE = 0;
 		string gate = "";
 		double power = 0;
