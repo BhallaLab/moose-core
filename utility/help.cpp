@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Nov 25 11:03:34 2008 (+0530)
 // Version: 
-// Last-Updated: Tue Dec  2 04:11:53 2008 (+0530)
-//           By: Subhasis Ray
-//     Update #: 557
+// Last-Updated: Wed Dec 31 14:27:51 2008 (+0530)
+//           By: subhasis ray
+//     Update #: 566
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -24,7 +24,11 @@
 // Change log:
 // 
 // 2008-12-01: added terminal support
-// 
+//
+// 2008-12-31 14:20:04 (+0530): Modified getClassDoc to take classname
+// and field name. Now the class name and field name are separated in
+// the GenesisParserWrapper.
+//
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
@@ -256,7 +260,7 @@ const std::string& getCinfoDoc(const Cinfo* cinfo, const std::string& fieldName)
             }
         } //! if (fieldName == "-full")
     } //!if (fieldName.empty() || fieldName == "-full")
-    else
+    else // A specific field documentation has been requested
     {
         const Finfo* finfo = cinfo->findFinfo(fieldName);
         if (!finfo)
@@ -319,26 +323,12 @@ const std::string& getCommandDoc(const std::string& command)
 }
 
 /**
-   parses the help arguments and calls the getCinfoDoc to retrieve
-   documentation.
+   Calls getCinfoDoc to retrieve documentation.
 */
-const std::string& getClassDoc(const std::string& args)
+const std::string& getClassDoc(const std::string& className, const std::string& fieldName)
 {
-    string target = args;
-    string field = "";
-    string::size_type field_start = target.find_first_of(".");
-    if ( field_start != string::npos)
-    {
-        // May we need to go recursively?
-        // Assume for the time being that only one level of field
-        // documentation is displayed. No help for channel.xGate.A
-        // kind of stuff.
-        field = target.substr(field_start+1); 
-        target = target.substr(0, field_start);
-    }
-
-    const Cinfo * classInfo = Cinfo::find(target);
-    return getCinfoDoc(classInfo, field);
+    const Cinfo * classInfo = Cinfo::find(className);
+    return getCinfoDoc(classInfo, fieldName);
 }
 
 /**

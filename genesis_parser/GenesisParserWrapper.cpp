@@ -30,7 +30,7 @@
 using namespace std;
 
 extern string trim(const string&);
-extern const string& getClassDoc(const string& command);
+extern const string& getClassDoc(const string& className, const string& fieldName);
 extern const string& getCommandDoc(const string& command);
 extern void print_help(const string&);
 
@@ -568,6 +568,15 @@ map< string, string >& sliSrcLookup()
         src[ "INPUT output" ] = "output";
         src[ "PLUS output" ] = "outputSrc";
         src[ "MINUS output" ] = "outputSrc";
+
+        // Messages for PID
+        src[ "CMD output" ] = "outputSrc";
+        src[ "SNS output" ] = "outputSrc";
+        src[ "GAIN output" ] = "outputSrc";
+        src[ "CMD Vm" ] = "VmSrc";
+        src[ "SNS Vm" ] = "VmSrc";
+        src[ "GAIN Vm" ] = "VmSrc";
+        
         
 	// Some messages for tables, specially used for I/O
 	src[ "SpikeGen.INPUT Vm" ] = "VmSrc";
@@ -684,6 +693,13 @@ map< string, string >& sliDestLookup()
         dest[ "MINUS output" ] = "minusDest";
         dest[ "GAIN output" ] = "gainDest";
         
+        // Messages for PIDController
+        dest[ "CMD output" ] = "commandDest";
+        dest[ "SNS output" ] = "sensedDest";
+        dest[ "GAIN output" ] = "gainDest";
+        dest[ "SNS Vm" ] = "sensedDest";
+        dest[ "CMD Vm" ] = "commandDest";
+        dest[ "GAIN Vm" ] = "gainDest";
         
 	// Some messages for tables
 	dest[ "INPUT Vm" ] = "inputRequest";
@@ -745,6 +761,7 @@ map< string, string >& sliClassNameConvert()
         classnames[ "spikegen" ] = "SpikeGen";
         classnames[ "pulsegen" ] = "PulseGen";
         classnames[ "diffamp" ] = "DiffAmp";
+        classnames[ "PID" ] = "PIDController";
 	classnames[ "synchan" ] = "SynChan";
 	classnames[ "table" ] = "Table";
 	classnames[ "xbutton" ] = "Sli";
@@ -801,7 +818,11 @@ map< string, string >& sliFieldNameConvert()
         fieldnames["RandomSpike.min_amp"] = "minAmp";
         fieldnames["RandomSpike.max_amp"] = "maxAmp";
         fieldnames["RandomSpike.reset_value"] = "resetValue";
-        fieldnames["RandomSpike.abs_refract"] = "absRefract";        
+        fieldnames["RandomSpike.abs_refract"] = "absRefract";
+        fieldnames["PIDController.cmd"] = "command";
+        fieldnames["PIDController.sns"] = "sensed";
+        fieldnames["PIDController.tau_i"] = "tauI";
+        fieldnames["PIDController.tau_d"] = "tauD";
 	return fieldnames;
 }
 
@@ -1126,7 +1147,7 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 		if ( iter != sliFieldNameConvert().end() ) 
 			field = iter->second;
 		//hack for synapse[i].weight type of fields
-		if (field.substr(0, 8) == "synapse["){
+		if (field.substr(0, 8) == "synapse[") {
 			size_t pos = field.find(']');
 			if (pos != string::npos)
 				field = field.substr(pos+2) + '[' + field.substr(8, pos - 8) + ']';
@@ -1251,7 +1272,7 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s)
 				setFieldSlot, id, "xmax", argv[6] );
 			// id = path2eid( tempB, s );
 			id = Id( tempB );
-			if ( id.zero() || id.bad() ){ 
+			if ( id.zero() || id.bad() ) { 
 				cout << "tabCreate::Error" << endl;
 				return 0; //Error msg here
 			}
@@ -1678,7 +1699,7 @@ void do_create( int argc, const char** const argv, Id s )
 
 	assert( strlen( argv[2] ) > 0 );
 	string className = argv[1];
-	if ( !Cinfo::find( className ) )  {
+	if ( !Cinfo::find( className ) ) {
 		// Possibly it is aliased for backward compatibility.
 		map< string, string >::iterator i = 
 			sliClassNameConvert().find( argv[1] );
@@ -3025,11 +3046,11 @@ void do_xsendevent ( int argc, const char** const argv, Id s )
 	//s->error( "not implemented yet." );
 }
 
-void do_xps ( int argc, const char** const argv, Id s ){
+void do_xps ( int argc, const char** const argv, Id s ) {
 	cout << "Not yet implemented!!" << endl;
 }
 
-void do_createmap(int argc, const char** const argv, Id s){
+void do_createmap(int argc, const char** const argv, Id s) {
 	
 	const char* source, *dest;
 	int Nx, Ny;
@@ -3048,8 +3069,8 @@ void do_createmap(int argc, const char** const argv, Id s){
 	Nx = atoi(argv[3]);
 	Ny = atoi(argv[4]);
 	
-	for(int i = 0; i < argc; i++){
-		if (strcmp(argv[i], "-delta") == 0){
+	for(int i = 0; i < argc; i++) {
+		if (strcmp(argv[i], "-delta") == 0) {
                     if (i+2 >= argc) {
 			cout << "Parser:: -delta option requires two arguments..Ignoring it" << endl;
                     }
@@ -3060,7 +3081,7 @@ void do_createmap(int argc, const char** const argv, Id s){
                     }
                     
 		}	
-		else if (strcmp(argv[i], "-origin") == 0){
+		else if (strcmp(argv[i], "-origin") == 0) {
 			if (i+2 >= argc) {
 				cout << "Parser:: -origin option requires two arguments...Ignoring it." << endl;
 			}
@@ -3071,7 +3092,7 @@ void do_createmap(int argc, const char** const argv, Id s){
                         }
                         
 		}
-		else if (strcmp(argv[i], "-object") == 0){
+		else if (strcmp(argv[i], "-object") == 0) {
 			object = true;
 		}
 	}
@@ -3085,19 +3106,19 @@ void do_createmap(int argc, const char** const argv, Id s){
 	
 	string parent = dest;	
 	Id pa(parent);
-	if ( pa.bad()){
+	if ( pa.bad()) {
 		string headpath = Shell::head( dest, "/" );
 		Id head(headpath);
-		if (head.bad()){
+		if (head.bad()) {
 			cout << "'" << headpath  << "'" << " is not defined."  << dest << "." << endl;
 			return;
 		}
 		send4< string, string, int, Id >( s(),
 			createSlot, "Neutral", Shell::tail(dest, "/"), head.node(), head );
 	}
-	if (object){
+	if (object) {
 		string className = source;
-		if ( !Cinfo::find( className ) )  {
+		if ( !Cinfo::find( className ) ) {
 			/*WORK*/
 			map< string, string >::iterator i = 
 				sliClassNameConvert().find( argv[1] );
@@ -3155,7 +3176,7 @@ planarconnect / dest-path -relative -sourcemask box -1 -1 1 1 -destmask box 1 1 
 	source = argv[1];
 	dest = argv[2];
 	double probability = 1;
-	for (int i = 3; i < argc; i++ ){
+	for (int i = 3; i < argc; i++ ) {
 		if (strcmp(argv[i], "-probability") == 0 && (argc != i+1))
 			probability = atof(argv[i+1]);
 	}
@@ -3169,7 +3190,7 @@ planarconnect / dest-path -relative -sourcemask box -1 -1 1 1 -destmask box 1 1 
 
 void do_planardelay( int argc, const char** const argv, Id s )
 {
-	if (argc < 3){
+	if (argc < 3) {
 		cout << "usage:: " << endl;
 		cout << "planarweight sourcepath [destination_path]\t\\ " << endl;
 		cout << "\t-fixed delay\t\t\t\t\\ " << endl;
@@ -3188,7 +3209,7 @@ void do_planardelay( int argc, const char** const argv, Id s )
 	    destination == "-uniform"     || destination == "-gaussian" || 
 	    destination == "-exponential" || destination == "-absoluterandom" ||
 	    destination == "-add"
-	   ){
+	   ) {
 		start = 2;
 		destination = "";
 	}
@@ -3206,9 +3227,9 @@ void do_planardelay( int argc, const char** const argv, Id s )
 	
 	int delayoptions = 0;
 	int randoptions = 0;
-	for (int i = start; i < argc; i++){
-		if (strcmp(argv[i], "-fixed") == 0){
-			if (argc - i <= 1){
+	for (int i = start; i < argc; i++) {
+		if (strcmp(argv[i], "-fixed") == 0) {
+			if (argc - i <= 1) {
 				cout << "Error: Delay missing" << endl;
 				continue;
 			}
@@ -3218,8 +3239,8 @@ void do_planardelay( int argc, const char** const argv, Id s )
 			delaychoice = 0;
 			continue;
 		}
-		if (strcmp(argv[i], "-radial") == 0){
-			if (argc - i <= 1){
+		if (strcmp(argv[i], "-radial") == 0) {
+			if (argc - i <= 1) {
 				cout << "Error: Conduction velocity not given" << endl;
 				continue;
 			}
@@ -3229,8 +3250,8 @@ void do_planardelay( int argc, const char** const argv, Id s )
 			delaychoice = 1;
 			continue;
 		}
-		if (strcmp(argv[i], "-uniform") == 0){
-			if (argc - i <= 1){
+		if (strcmp(argv[i], "-uniform") == 0) {
+			if (argc - i <= 1) {
 				cout << "Error: Scale missing" << endl;
 				continue;
 			}
@@ -3240,8 +3261,8 @@ void do_planardelay( int argc, const char** const argv, Id s )
 			randchoice = 1;
 			continue;
 		}
-		if (strcmp(argv[i], "-gaussian") == 0){
-			if (argc - i <= 2){
+		if (strcmp(argv[i], "-gaussian") == 0) {
+			if (argc - i <= 2) {
 				cout << "Error: All the parameters for gaussian not given" << endl;
 				continue;
 			}
@@ -3252,8 +3273,8 @@ void do_planardelay( int argc, const char** const argv, Id s )
 			randchoice = 2;
 			continue;
 		}
-		if (strcmp(argv[i], "-exponential") == 0){
-			if (argc - i <= 2){
+		if (strcmp(argv[i], "-exponential") == 0) {
+			if (argc - i <= 2) {
 				cout << "Error: All the parameters for exponential not given" << endl;
 				continue;
 			}
@@ -3264,20 +3285,20 @@ void do_planardelay( int argc, const char** const argv, Id s )
 			randchoice = 3;
 			continue;
 		}
-		if (strcmp(argv[i], "-absoluterandom") == 0){
+		if (strcmp(argv[i], "-absoluterandom") == 0) {
 			absoluterandom = true;
 			continue;
 		}
-		if (strcmp(argv[i], "-add") == 0){
+		if (strcmp(argv[i], "-add") == 0) {
 			add = true;
 			continue;
 		}
 	}
-	if (delayoptions > 1){
+	if (delayoptions > 1) {
 		cout << "planardelay::Must have exactly one of -fixed, -radial options." << endl;
 		return;
 	}
-	if (randoptions > 1){
+	if (randoptions > 1) {
 		cout << "planardelay::Must have at most one of -uniform, -gaussian, -exponential options." << endl;
 		return;
 	}
@@ -3298,7 +3319,7 @@ void do_planardelay( int argc, const char** const argv, Id s )
 
 void do_planarweight( int argc, const char** const argv, Id s )
 {
-	if (argc < 3){
+	if (argc < 3) {
 		cout << "usage:: " << endl;
 		cout << "planarweight sourcepath [destination_path]\t\\ " << endl;
 		cout << "\t-fixed weight\t\t\t\t\\ " << endl;
@@ -3314,7 +3335,7 @@ void do_planarweight( int argc, const char** const argv, Id s )
 	int start = 3;
 	if (destination == "-fixed"       || destination == "-decay"    || 
 	    destination == "-uniform"     || destination == "-gaussian" || 
-	    destination == "-exponential" || destination == "-absoluterandom"){
+	    destination == "-exponential" || destination == "-absoluterandom") {
 		start = 2;
 		destination = "";
 	}
@@ -3335,9 +3356,9 @@ void do_planarweight( int argc, const char** const argv, Id s )
 	double max = 0;
 	bool absoluterandom = false;
 	
-	for (int i = start; i < argc; i++){
-		if (strcmp(argv[i], "-fixed") == 0){
-			if (argc - i <= 1){
+	for (int i = start; i < argc; i++) {
+		if (strcmp(argv[i], "-fixed") == 0) {
+			if (argc - i <= 1) {
 				cout << "Error: Weight missing" << endl;
 				continue;
 			}
@@ -3347,8 +3368,8 @@ void do_planarweight( int argc, const char** const argv, Id s )
 			weightchoice = 0;
 			continue;
 		}
-		if (strcmp(argv[i], "-decay") == 0){
-			if (argc - i <= 3){
+		if (strcmp(argv[i], "-decay") == 0) {
+			if (argc - i <= 3) {
 				cout << "Error: All the parameters for decay not given" << endl;
 				continue;
 			}
@@ -3360,8 +3381,8 @@ void do_planarweight( int argc, const char** const argv, Id s )
 			weightchoice = 1;
 			continue;
 		}
-		if (strcmp(argv[i], "-uniform") == 0){
-			if (argc - i <= 1){
+		if (strcmp(argv[i], "-uniform") == 0) {
+			if (argc - i <= 1) {
 				cout << "Error: Scale missing" << endl;
 				continue;
 			}
@@ -3371,8 +3392,8 @@ void do_planarweight( int argc, const char** const argv, Id s )
 			randchoice = 1;
 			continue;
 		}
-		if (strcmp(argv[i], "-gaussian") == 0){
-			if (argc - i <= 2){
+		if (strcmp(argv[i], "-gaussian") == 0) {
+			if (argc - i <= 2) {
 				cout << "Error: All the parameters for gaussian not given" << endl;
 				continue;
 			}
@@ -3383,8 +3404,8 @@ void do_planarweight( int argc, const char** const argv, Id s )
 			randchoice = 2;
 			continue;
 		}
-		if (strcmp(argv[i], "-exponential") == 0){
-			if (argc - i <= 2){
+		if (strcmp(argv[i], "-exponential") == 0) {
+			if (argc - i <= 2) {
 				cout << "Error: All the parameters for exponential not given" << endl;
 				continue;
 			}
@@ -3395,16 +3416,16 @@ void do_planarweight( int argc, const char** const argv, Id s )
 			randchoice = 3;
 			continue;
 		}
-		if (strcmp(argv[i], "-absoluterandom") == 0){
+		if (strcmp(argv[i], "-absoluterandom") == 0) {
 			absoluterandom = true;
 			continue;
 		}
 	}
-	if (weightoptions > 1){
+	if (weightoptions > 1) {
 		cout << "Must have exactly one of -fixed, -decay options." << endl;
 		return;
 	}
-	if (randoptions > 1){
+	if (randoptions > 1) {
 		cout << "Must have at most one of -uniform, -gaussian, -exponential options." << endl;
 		return;
 	}
@@ -3431,24 +3452,24 @@ int do_getsyncount( int argc, const char** const argv, Id s )
 	cout << "getsyncount:: under repair\n";
 	/*
 	vector <Conn> conn;
-	if (argc == 3){
+	if (argc == 3) {
 		Element* src = Id(argv[1])();
 		Element* dst = Id(argv[2])();
-		if (!(src->className () == "SpikeGen" && dst->className() == "SynChan")){
+		if (!(src->className () == "SpikeGen" && dst->className() == "SynChan")) {
 			cout << "getsyncount:: The elements' class types are not matching" << endl;
 			return 0;
 		}
 		src->findFinfo("event")->outgoingConns(src, conn);
 		unsigned int count = 0;
-		for(size_t i = 0; i < conn.size(); i++){
+		for(size_t i = 0; i < conn.size(); i++) {
 			if(conn[i].targetElement() == dst)
 				count++;
 		}
 		return count;
 	}
-	else if (argc == 2){
+	else if (argc == 2) {
 		Element* dest = Id(argv[1])();
-		if (dest->className() != "SynChan"){
+		if (dest->className() != "SynChan") {
 			cout << "getsyncount:: The src element is not of type SynChan." << endl;
 			return 0;
 		}
@@ -3464,7 +3485,7 @@ int do_getsyncount( int argc, const char** const argv, Id s )
 	//send2<string, string>(s(), 0, planarweightSlot, source, dest);
 }
 
-char* do_getsynsrc( int argc, const char** const argv, Id s ){
+char* do_getsynsrc( int argc, const char** const argv, Id s ) {
 //getsynsrc <postsynaptic-element> <index>
 	cout << "getsynsrc : under repair\n";
 	return copyString( "foo" );
@@ -3477,14 +3498,14 @@ char* do_getsynsrc( int argc, const char** const argv, Id s ){
 	vector <Conn> conn;
 	string ret = "";
 	Element *dst = Id(argv[1])();
-	if (dst->className() != "SynChan"){
+	if (dst->className() != "SynChan") {
 		cout << "getsynsrc:: The element's type is not matching"<< endl;
 		string s = "";
 		return copyString(s.c_str()); 
 	}
 	dst->findFinfo("synapse")->incomingConns(dst, conn);
 	unsigned int index = atoi(argv[2]);
-	if (index >= conn.size()){
+	if (index >= conn.size()) {
 		assert( 0 )
 	}
 	Element *src = conn[index].targetElement();
@@ -3494,7 +3515,7 @@ char* do_getsynsrc( int argc, const char** const argv, Id s ){
 }
 
 
-char* do_getsyndest( int argc, const char** const argv, Id s ){
+char* do_getsyndest( int argc, const char** const argv, Id s ) {
 //getsynsrc <presynaptic-element> <index>
 	cout << "getsynsrc: under repair\n";
 	return copyString( "foo" );
@@ -3507,14 +3528,14 @@ char* do_getsyndest( int argc, const char** const argv, Id s ){
 	vector <Conn> conn;
 	string ret = "";
 	Element *src = Id(argv[1])();
-	if (src->className() != "SpikeGen"){
+	if (src->className() != "SpikeGen") {
 		cout << "getsyndest:: The element's type is not matching"<< endl;
 		string s = "";
 		return copyString(s.c_str()); 
 	}
 	src->findFinfo("event")->outgoingConns(src, conn);
 	unsigned int index = atoi(argv[2]);
-	if (index >= conn.size()){ 
+	if (index >= conn.size()) { 
 		assert( 0 ) }
 	Element *dst = conn[index].targetElement();
 	ret = dst->id().path();
@@ -3522,7 +3543,7 @@ char* do_getsyndest( int argc, const char** const argv, Id s ){
 	*/
 }
 
-int do_getsynindex( int argc, const char** const argv, Id s ){
+int do_getsynindex( int argc, const char** const argv, Id s ) {
 //getsynsrc <presynaptic-element> <postsynaptic-element> [-number n]
 	cout << "getsynsrc: under repair\n";
 	return 0;
@@ -3535,17 +3556,17 @@ int do_getsynindex( int argc, const char** const argv, Id s ){
 	vector <Conn> conn;
 	Element *src = Id(argv[1])();
 	Element *dst = Id(argv[2])();
-	if (src == 0 || dst == 0){
+	if (src == 0 || dst == 0) {
 		cout << "Wrong paths!!" << endl;
 		return -1;
 	}
-	if (!(src->className() == "SpikeGen" && dst->className() == "SynChan")){
+	if (!(src->className() == "SpikeGen" && dst->className() == "SynChan")) {
 		cout << "getsynindex:: The elements' type is not matching"<< endl;
 		return 0;
 	}
 	src->findFinfo("event")->outgoingConns(src, conn);
-	for(size_t i = 0; i < conn.size(); i++){
-		if (conn[i].targetElement() == dst){
+	for(size_t i = 0; i < conn.size(); i++) {
+		if (conn[i].targetElement() == dst) {
 			return i;
 		}
 	}
@@ -3553,24 +3574,24 @@ int do_getsynindex( int argc, const char** const argv, Id s ){
 	*/
 }
 
-int do_strcmp(int argc, const char** const argv, Id s ){
-	if (argc != 3){
+int do_strcmp(int argc, const char** const argv, Id s ) {
+	if (argc != 3) {
 		cout << "usage:: strcmp <str1> <str2>" << endl;
 		return 0;
 	}
 	return strcmp(argv[1], argv[2]);
 }
 
-int do_strlen(int argc, const char** const argv, Id s ){
-	if (argc != 2){
+int do_strlen(int argc, const char** const argv, Id s ) {
+	if (argc != 2) {
 		cout << "usage:: strlen <str>" << endl;
 		return 0;
 	}
 	return strlen(argv[1]);
 }
 
-char* do_strcat(int argc, const char** const argv, Id s ){
-	if (argc != 3){
+char* do_strcat(int argc, const char** const argv, Id s ) {
+	if (argc != 3) {
 		cout << "usage:: strcat <str1> <str2>" << endl;
 		return 0;
 	}
@@ -3580,8 +3601,8 @@ char* do_strcat(int argc, const char** const argv, Id s ){
 	return copyString(concat.c_str());
 }
 
-char* do_substring(int argc, const char** const argv, Id s ){
-	if (argc < 3 || argc > 4){
+char* do_substring(int argc, const char** const argv, Id s ) {
+	if (argc < 3 || argc > 4) {
 		cout << "usage:: substring <str1> <start> <end>" << endl;
 		return 0;
 	}
@@ -3591,18 +3612,18 @@ char* do_substring(int argc, const char** const argv, Id s ){
 	size_t end = str.size();
 	if (argc == 4) 
 		end = atoi(argv[3]);
-	if (start > end){
+	if (start > end) {
 		cout << "You cannot start after end" << endl;
 		return 0;
 	}
-	if (start > str.size() || end > str.size()){
+	if (start > str.size() || end > str.size()) {
 		cout << "You string has only " << str.size() << " chars"  << endl;
 	}
 	string substr = str.substr(start, end);	
 	return copyString(substr.c_str());
 }
 
-char* do_getpath(int argc, const char** const argv, Id s ){
+char* do_getpath(int argc, const char** const argv, Id s ) {
 	if ( argc != 3 ) {
 		cout << "usage:: " << argv[0] << " path -tail -head" << endl;
 		return 0;
@@ -3645,8 +3666,8 @@ char* do_getpath(int argc, const char** const argv, Id s ){
 }
 
  
-int do_findchar(int argc, const char** const argv, Id s ){
-	if (argc != 3){
+int do_findchar(int argc, const char** const argv, Id s ) {
+	if (argc != 3) {
 		cout << "usage:: strcmp <str> <char>" << endl;
 		return 0;
 	}
@@ -3662,8 +3683,8 @@ Function: opens file
 Question: Where will the file handle go?
 */
 
-void do_openfile(int argc, const char** const argv, Id s){
-	if ( argc != 3 ){
+void do_openfile(int argc, const char** const argv, Id s) {
+	if ( argc != 3 ) {
 		cout << "usage:: openfile <filename> <mode>" << endl;
 		return;
 	}
@@ -3672,7 +3693,7 @@ void do_openfile(int argc, const char** const argv, Id s){
 	send2<string, string>(s(), openFileSlot, filename, mode);
 }
 
-void do_writefile(int argc, const char** const argv, Id s){
+void do_writefile(int argc, const char** const argv, Id s) {
 	//writefile <filename> text
 	if ( argc < 2 ) {
 		cout << "Too less arguments" << endl;
@@ -3682,14 +3703,14 @@ void do_writefile(int argc, const char** const argv, Id s){
 	bool userformat = false;
 	string format = "%s";
 	int max = argc;
-	for (int i = 2; i < argc; i++){
-		if (strcmp(argv[i], "-nonewline") == 0){
+	for (int i = 2; i < argc; i++) {
+		if (strcmp(argv[i], "-nonewline") == 0) {
 			newline = false;
 			if (max > i) 
 				max = i;
 		}
-		if (strcmp(argv[i], "-format") == 0){
-			if (i+1 >= argc){
+		if (strcmp(argv[i], "-format") == 0) {
+			if (i+1 >= argc) {
 				cout << "writefile::format not mentioned." << endl;
 				continue;
 			}
@@ -3704,7 +3725,7 @@ void do_writefile(int argc, const char** const argv, Id s){
 	
 	string filename = argv[1];
 	string text = "";
-	for ( int i = 2; i < max; i++ ){ 
+	for ( int i = 2; i < max; i++ ) { 
 		char e[100];
 		sprintf(e, format.c_str(), argv[i]);
 		text = text + e;
@@ -3717,24 +3738,24 @@ void do_writefile(int argc, const char** const argv, Id s){
 }
 
 
-void do_flushfile(int argc, const char** const argv, Id s){
-	if ( argc != 2 ){
+void do_flushfile(int argc, const char** const argv, Id s) {
+	if ( argc != 2 ) {
 		cout << "usage:: flushfile <filename>" << endl;
 	}
 	string filename = argv[1];
 	send1< string > ( s(), flushFileSlot, filename );
 }
 
-void do_closefile(int argc, const char** const argv, Id s){
-	if ( argc != 2 ){
+void do_closefile(int argc, const char** const argv, Id s) {
+	if ( argc != 2 ) {
 		cout << "usage:: closefile <filename>" << endl;
 	}
 	string filename = argv[1];
 	send1< string > ( s(), closeFileSlot, filename );
 }
 
-void do_listfiles(int argc, const char** const argv, Id s){
-	if ( argc != 1 ){
+void do_listfiles(int argc, const char** const argv, Id s) {
+	if ( argc != 1 ) {
 		cout << "usage:: openfile <filename> <mode>" << endl;
 	}
 	send0( s(), listFilesSlot );
@@ -3743,12 +3764,12 @@ void do_listfiles(int argc, const char** const argv, Id s){
 	cout << gpw->getFieldValue();	
 }
 
-string GenesisParserWrapper::getFieldValue(){
+string GenesisParserWrapper::getFieldValue() {
 	return fieldValue_;
 }
 
-char* do_readfile(int argc, const char** const argv, Id s){
-	if ( argc < 2 ){
+char* do_readfile(int argc, const char** const argv, Id s) {
+	if ( argc < 2 ) {
 		cout << "usage:: readfile <filename> -linemode" << endl;
 		return 0;
 	}
@@ -3764,21 +3785,21 @@ char* do_readfile(int argc, const char** const argv, Id s){
 	return copyString(text.c_str());
 }
 
-char* do_getarg( int argc, const char** const argv, Id s ){
+char* do_getarg( int argc, const char** const argv, Id s ) {
 	if ( !( argc >= 2  && strcmp(argv[argc-1], "-count") == 0) &&
-		!( argc >= 3  && strcmp(argv[argc-2], "-arg") == 0 ) ){
+		!( argc >= 3  && strcmp(argv[argc-2], "-arg") == 0 ) ) {
 		cout << "usage:: getarg <list of argument> <-count OR -arg #>" << endl;
 		return 0;
 	}
-	if ( strcmp(argv[argc-1], "-count") == 0 ){
+	if ( strcmp(argv[argc-1], "-count") == 0 ) {
 		char e[5];
 		sprintf(e, "%d", argc-2);
 		return strdup(e);
 	}
-	if ( strcmp(argv[argc-2], "-arg") == 0 ){
+	if ( strcmp(argv[argc-2], "-arg") == 0 ) {
 		// check whether argv[argc -1] is a number
 		int index = atoi(argv[argc-1]);
-		if (index > argc-2){
+		if (index > argc-2) {
 			cout << "getarg:: Improper index" << endl;
 			return 0;
 		}
@@ -3787,11 +3808,11 @@ char* do_getarg( int argc, const char** const argv, Id s ){
 	return 0;
 }
 
-int do_randseed( int argc, const char** const argv, Id s ){
-	if (argc == 1){
+int do_randseed( int argc, const char** const argv, Id s ) {
+	if (argc == 1) {
 		return static_cast <int> (mtrand()*294967296);
 	}
-	if (argc == 2){
+	if (argc == 2) {
 		//check whether argv[1] is an int in string!!
 		int seed = atoi(argv[1]);
 		//copied the error message from genesis
@@ -3803,8 +3824,8 @@ int do_randseed( int argc, const char** const argv, Id s ){
 	return 0;
 }
 
-float do_rand( int argc, const char** const argv, Id s ){
-	if (argc != 3){
+float do_rand( int argc, const char** const argv, Id s ) {
+	if (argc != 3) {
 		cout << "usage:: rand <lo> <hi>" << endl;
 		return 0;
 	}
@@ -3815,49 +3836,49 @@ float do_rand( int argc, const char** const argv, Id s ){
 	return lo + mtrand()*(hi - lo);
 }
 
-int do_random(int argc, const char** const argv, Id s){
-	if (argc != 1){
+int do_random(int argc, const char** const argv, Id s) {
+	if (argc != 1) {
 		cout << "usage:: random\n\treturns a random integer uniformly distributed in the range 0, 0x7fffffff." << endl;
 		return 0;
 	}
 	return (long)(genrand_int32()>>1);
 } 
 
-void do_disable( int argc, const char** const argv, Id s ){
+void do_disable( int argc, const char** const argv, Id s ) {
 	cout << "disable not yet implemented!!" << endl;
 }
 
-void do_setup_table2( int argc, const char** const argv, Id s ){
+void do_setup_table2( int argc, const char** const argv, Id s ) {
 	cout << "setup_table2 not yet implemented!!" << endl;
 }
 
-int do_INSTANTX(int argc, const char** const argv, Id s ){
-	if (argc != 1){
+int do_INSTANTX(int argc, const char** const argv, Id s ) {
+	if (argc != 1) {
 		cout << "Error:: INSTANTX is a constant" << endl;
 	}
 	return 1;
 }
 
-int do_INSTANTY(int argc, const char** const argv, Id s ){
-	if (argc != 1){
+int do_INSTANTY(int argc, const char** const argv, Id s ) {
+	if (argc != 1) {
 		cout << "Error:: INSTANTY is a constant" << endl;
 	}
 	return 2;
 }
 
 
-int do_INSTANTZ(int argc, const char** const argv, Id s ){
-	if (argc != 1){
+int do_INSTANTZ(int argc, const char** const argv, Id s ) {
+	if (argc != 1) {
 		cout << "Error:: INSTANTZ is a constant" << endl;
 	}
 	return 4;
 }
 
-void do_floatformat(int argc, const char** const argv, Id s ){
+void do_floatformat(int argc, const char** const argv, Id s ) {
 	char *format;
 	char formtype;
 	
-	if (argc != 2){
+	if (argc != 2) {
 		cout << "usage::floatformat format-string"<< endl;
 		return;
 	}
@@ -3893,8 +3914,9 @@ void do_showstat(int argc, const char** const argv, Id s )
 /**
    prints help on a specied class or a specific field of a class.
 */
-void do_help(int argc, const char** const argv, Id s ){
-    if (argc == 1){
+void do_help(int argc, const char** const argv, Id s )
+{
+    if (argc == 1 || argc > 3) {
         cout << "For info on a particular command, type help <commandname>\n"
              << "For info on a particular class, type help <classname> [-full]\n"
              << "For info on a particular field, type help <classname>.<fieldname>"
@@ -3903,36 +3925,33 @@ void do_help(int argc, const char** const argv, Id s ){
         return;
     }
     string topic(argv[1]);
-    
-    if (argc == 3)
-    {
-        topic.append(".").append(argv[2]);
+    string field = "";
+    string::size_type field_start = topic.find_first_of(".");
+    if ( field_start != string::npos) {
+        // May we need to go recursively?
+        // Assume for the time being that only one level of field
+        // documentation is displayed. No help for channel.xGate.A
+        // kind of stuff.
+        field = topic.substr(field_start+1); 
+        topic = topic.substr(0, field_start);
     }
-    
-    string doc = getClassDoc(topic);
-    if (!doc.empty())
+    else if (argc == 3)
     {
+        field = string(argv[2]);
+    }
+    // check if it is old-style class name
+    map< string, string >::iterator sli_iter = sliClassNameConvert().find( topic );
+    if ( sli_iter != sliClassNameConvert().end() ) {
+        topic = string(sli_iter->second);
+    }
+    sli_iter = sliFieldNameConvert().find(topic + "." + field);
+    if ( sli_iter != sliFieldNameConvert().end() ) {
+        field = string(sli_iter->second);
+    }
+    const string doc = getClassDoc(topic, field);
+    if(!doc.empty()) {
         print_help(doc);
         return;
-    }
-
-    // check if it is old-style class name
-    map <string, string>::iterator sli_iter = sliClassNameConvert().find(string(argv[1]));
-        
-    if (sli_iter != sliClassNameConvert().end())
-    {
-        topic = string(sli_iter->second);
-        if(argc == 3){
-            topic.append(".").append(argv[2]);
-        }
-        
-        doc = getClassDoc(topic);
-        
-        if(!doc.empty())
-        {
-            print_help(doc);
-            return;
-        }
     }
     // fallback to looking for a file with same name in documentation directory
     print_help(getCommandDoc(string(argv[1])));
@@ -3940,8 +3959,7 @@ void do_help(int argc, const char** const argv, Id s ){
 
 char** do_arglist(int argc, const char** const argv, Id s)
 {
-    if (argc == 1)
-    {
+    if (argc == 1) {
         cout << "usage:: arglist <string>" << endl;
         return NULL;
     }
@@ -3950,10 +3968,8 @@ char** do_arglist(int argc, const char** const argv, Id s)
     separateString(args, argList, " ");
     char **output = (char**)calloc(argList.size() + 1, sizeof(char*));
     char **ptr = output;
-    for (vector <string>::iterator ii = argList.begin(); ii != argList.end(); ++ii)
-    {
-        if (trim(*ii).length() > 0)
-        {
+    for (vector <string>::iterator ii = argList.begin(); ii != argList.end(); ++ii) {
+        if (trim(*ii).length() > 0) {
             *ptr = copyString(ii->c_str());
             ++ptr;
         }        
