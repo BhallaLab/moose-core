@@ -14,11 +14,13 @@ TARGET=device.o
 OBJ= \
 	DiffAmp.o \
 	PIDController.o \
+	RC.o	\
 
 
 HEADERS= \
 	DiffAmp.h \
 	PIDController.h \
+	RC.h	\
 
 
 default: $(TARGET)
