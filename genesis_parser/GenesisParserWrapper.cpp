@@ -576,7 +576,9 @@ map< string, string >& sliSrcLookup()
         src[ "CMD Vm" ] = "VmSrc";
         src[ "SNS Vm" ] = "VmSrc";
         src[ "GAIN Vm" ] = "VmSrc";
-        
+
+        // Messages for RC
+        //        src[ "INJECT output" ] - already in compartment
         
 	// Some messages for tables, specially used for I/O
 	src[ "SpikeGen.INPUT Vm" ] = "VmSrc";
@@ -593,6 +595,7 @@ map< string, string >& sliSrcLookup()
 	src[ "INPUT Z" ] = "Z";
 	src[ "INPUT n" ] = "n";
 	src[ "INPUT Co" ] = "conc";
+        src[ "INPUT state" ] = "state";
 
 	// Messages for having tables pretend to be an xplot
 	src[ "PLOT Co" ] = "conc";
@@ -715,6 +718,7 @@ map< string, string >& sliDestLookup()
 	dest[ "INPUT n" ] = "inputRequest";
 	dest[ "INPUT Co" ] = "inputRequest";
         dest[ "INPUT output" ] = "inputRequest";
+        dest[ "INPUT state" ] = "inputRequest";
         
 	// Messages for having tables pretend to be an xplot
 	dest[ "PLOT Vm" ] = "inputRequest";
