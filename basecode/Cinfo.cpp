@@ -177,7 +177,7 @@ void Cinfo::init( const string* doc,
                 << "const std::string "<< name() <<"::className_ = \"" << name() <<"\";\n"
                 << name() << "::" << name() << "(Id id):PyMooseBase(id){}\n"
                 << name() << "::" << name() <<"(std::string path):PyMooseBase(className_, path){}\n"
-                << name() << "::" << name() << "(std::string name, Id parentId):PyMooseBase(classname_, name, parentId){}\n"
+                << name() << "::" << name() << "(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}\n"
                 << name() << "::" << name() << "(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}\n"
                 << name() << "::" << name() << "(const " << name() << "& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}\n"
                 << name() << "::" << name() << "(const " << name() << "& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}\n"
