@@ -18,6 +18,7 @@ OBJ = \
 	main.o	\
 	nonblock.o \
 	init.o \
+	initCinfos.o \
 	mpiSetup.o \
 	MuMPI.o
 

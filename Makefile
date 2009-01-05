@@ -221,7 +221,7 @@ libmoose.so: libs
 	$(CXX) -G $(LIBS) -o libmoose.so
 	@echo "Created dynamic library"
 
-pymoose: CXXFLAGS += -fPIC 
+pymoose: CXXFLAGS += -DPYMOOSE -fPIC 
 pymoose: SUBDIR += pymoose
 pymoose: libs $(OBJLIBS) 
 	$(MAKE) -C $@

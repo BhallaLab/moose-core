@@ -24,7 +24,7 @@
 ############################################################################
 
 TARGET=pymoose
-CXXFLAGS+=-I..
+CXXFLAGS+=-I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../signeur -I../device
 LIBS +=-lpython2.5
 ifdef USE_NUMPY
 CXXFLAGS+=-I/usr/lib/python2.5/site-packages/numpy/core/include -DUSE_NUMPY
@@ -47,6 +47,7 @@ OBJFILES = ../basecode/basecode.o \
 	../biophysics/biophysics.o \
 	../scheduling/scheduling.o \
 	../maindir/init.o	\
+	../maindir/initCinfos.o	\
 	../connections/connections.o \
 	../utility/utility.o	\
 	../randnum/randnum.o	\
@@ -57,6 +58,7 @@ OBJFILES = ../basecode/basecode.o \
 	../hsolve/hsolve.o	\
 	../ksolve/ksolve.o	\
 	../robots/robots.o	\
+	../device/device.o \
 
 
 OBJ = PyMooseBase.o \
@@ -115,6 +117,9 @@ OBJ = PyMooseBase.o \
 	GssaStoich.o	\
 	TauPump.o	\
 	TimeTable.o	\
+	PIDController.o \
+	RC.o	\
+	DiffAmp.o	\
 
 	
 HEADERS=PyMooseUtil.h \
@@ -174,6 +179,9 @@ HEADERS=PyMooseUtil.h \
 	GssaStoich.h	\
 	TauPump.h	\
 	TimeTable.h	\
+	PIDController.h \
+	RC.h	\
+	DiffAmp.h	\
 	../randnum/randnum.h	\
 	../randnum/Probability.h	\
 	../randnum/Binomial.h	\
