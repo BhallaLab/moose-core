@@ -9,14 +9,14 @@
 #define _PYMOOSE_CONTEXT_CPP
 
 #include "PyMooseContext.h"
-#include "../basecode/Id.h"
-#include "../element/Neutral.h"
-#include "../scheduling/Tick.h"
-#include "../scheduling/ClockJob.h"
-#include "../builtins/Interpol.h"
-#include "../builtins/Table.h"
-#include "../maindir/init.h"
-#include "../connections/ConnTainer.h"
+#include "basecode/Id.h"
+#include "element/Neutral.h"
+#include "scheduling/Tick.h"
+#include "scheduling/ClockJob.h"
+#include "builtins/Interpol.h"
+#include "builtins/Table.h"
+#include "maindir/init.h"
+#include "connections/ConnTainer.h"
 
 #include <string>
 #include <cstdio>
@@ -26,9 +26,10 @@ using namespace pymoose;
 
 extern void initMoose();
 extern void initSched();
-extern const std::string& helpless();
-extern const std::string& getClassDoc(const std::string&);
-extern const std::string& getCommandDoc(const std::string&);
+extern void initCinfos();
+extern const string& helpless();
+extern const string& getClassDoc(const string&, const string&);
+extern const string& getCommandDoc(const string&);
 
 
 extern void setupDefaultSchedule(Element*, Element*, Element*);
@@ -481,7 +482,7 @@ PyMooseContext::~PyMooseContext()
    load a genesis script.
    script - filename/full path for loading the script file
 */
-void PyMooseContext::loadG(std::string script)
+void PyMooseContext::loadG(string script)
 {
     // Disconnect the PyMooseContext object temporarily and connect
     // GenesisParserWrapper to the shell
@@ -492,8 +493,8 @@ void PyMooseContext::loadG(std::string script)
     assert(ret);
         
     string stmt = "include "+script;
-    set<std::string>( this->genesisSli_, this->genesisParseFinfo_, stmt);
-    set<std::string>( this->genesisSli_, this->genesisParseFinfo_, "\n");
+    set<string>( this->genesisSli_, this->genesisParseFinfo_, stmt);
+    set<string>( this->genesisSli_, this->genesisParseFinfo_, "\n");
     ret = this->shell_.eref().dropAll("parser"); // disconnect genesis parser
     assert(ret);
     ret = this->shell_.eref().add( "parser", this->myId_(), "parser", ConnTainer::Default); // reconnect context
@@ -503,7 +504,7 @@ void PyMooseContext::loadG(std::string script)
    Run a genesis statement.
    stmt - statement to be executed.
 */
-void PyMooseContext::runG(std::string stmt)
+void PyMooseContext::runG(string stmt)
 {
     bool ret;
     ret = this->shell_.eref().dropAll("parser"); // disconnect the context from shell
@@ -513,8 +514,8 @@ void PyMooseContext::runG(std::string stmt)
     ret = this->shell_.eref().add("parser", this->genesisSli_, "parser", ConnTainer::Default); // connect genesis parser
     assert(ret);
     
-    set<std::string>( this->genesisSli_, this->genesisParseFinfo_, stmt);
-    set<std::string>( this->genesisSli_, this->genesisParseFinfo_, "\n");
+    set<string>( this->genesisSli_, this->genesisParseFinfo_, stmt);
+    set<string>( this->genesisSli_, this->genesisParseFinfo_, "\n");
     
     ret = this->shell_.eref().dropAll("parser"); // disconnect genesis parser
     assert(ret);
@@ -637,7 +638,7 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     // Call the global initialization function
     initMoose();
     initSched();
-    
+    initCinfos();
 #ifdef DO_UNIT_TESTS
 	// if ( mynode == 0 )
 	if ( 1 )
@@ -948,12 +949,12 @@ vector <double> & PyMooseContext::getClocks()
     return dbls_;        
 }
 
-void PyMooseContext::useClock(const std::string& tickName, const std::string& path, const std::string& func)
+void PyMooseContext::useClock(const string& tickName, const string& path, const string& func)
 {
     send3< string, string, string>(myId_(), useClockSlot, tickName, path, func);
 }
 
-void PyMooseContext::useClock(int tickNo, const std::string& path, const std::string& func)
+void PyMooseContext::useClock(int tickNo, const string& path, const string& func)
 {
     static const int tickNameLen = 63;
     char tickName[tickNameLen+1];
@@ -990,7 +991,7 @@ void PyMooseContext::do_deep_copy( const Id& object, string new_name, const Id& 
 */
 Id PyMooseContext::deepCopy( const Id& object, string new_name, const Id& dest)
 {
-    if ( new_name.find(PyMooseContext::separator) != std::string::npos )
+    if ( new_name.find(PyMooseContext::separator) != string::npos )
     {
         cerr << "Error: object name may not contain "<< PyMooseContext::separator << endl;
         Id id;
@@ -1435,7 +1436,7 @@ void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
    CM, RM, RA, EREST_ACT, ELEAK
 
 */
-void PyMooseContext::readCell(std::string filename, std::string cellpath)
+void PyMooseContext::readCell(string filename, string cellpath)
 {
     static const int node = 0;
     vector <double> params;
@@ -1474,13 +1475,13 @@ void PyMooseContext::readCell(string filename, string cellpath, double cm, doubl
         readCellSlot, filename, cellpath , params, node);
 }
 
-const std::string& PyMooseContext::className(const Id& objId) const
+const string& PyMooseContext::className(const Id& objId) const
 {
     fieldValue_ =  objId()->className();
     return fieldValue_;
 }
 
-const std::string PyMooseContext::getName(const Id objId) const
+const string PyMooseContext::getName(const Id objId) const
 {
     fieldValue_ = objId()->name();
     return fieldValue_;
@@ -1489,9 +1490,21 @@ const std::string PyMooseContext::getName(const Id objId) const
 /**
    returns help on a specied class or a specific field of a class.
 */
-const std::string& PyMooseContext::doc(const std::string& target) const
+const string& PyMooseContext::doc(const string& target) const
 {
-    fieldValue_ = getClassDoc(target);
+        string field = "";
+        string className(target);
+        string::size_type field_start = target.find_first_of(".");
+        if ( field_start != string::npos) {
+        // May we need to go recursively?
+        // Assume for the time being that only one level of field
+        // documentation is displayed. No help for channel.xGate.A
+        // kind of stuff.
+        field = target.substr(field_start+1); 
+        className = target.substr(0, field_start);
+    }
+
+        fieldValue_ = getClassDoc(className, field);
     if (!fieldValue_.empty())
     {
         return fieldValue_;
