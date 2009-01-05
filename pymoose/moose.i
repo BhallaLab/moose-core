@@ -56,6 +56,9 @@
 	#include "GssaStoich.h"
 	#include "TauPump.h"
 	#include "TimeTable.h"
+	#include "PIDController.h"
+	#include "DiffAmp.h"
+	#include "RC.h"
 //	#include "../kinetics/SparseMatrix.h"
 	#include "../utility/utility.h"
 	/* Random number related utilities */
@@ -135,6 +138,7 @@ def doc(cls):
 	    
 %attribute(pymoose::PyMooseBase, const std::string, name, __get_name)
 %attribute(pymoose::PyMooseBase, const std::string, path, __get_path)
+
 %include "Neutral.h"
 %attribute(pymoose::Neutral, int, child, __get_child, __set_child)
 
@@ -245,6 +249,7 @@ void fillData(PyObject* args)
 %}
 */
 //%attribute(pymoose::Interpol, string&, dumpFile, __get_print, __set_print) 
+
 %include "Table.h"
 %attribute(pymoose::Table, double, input, __get_input, __set_input)
 %attribute(pymoose::Table, double, output, __get_output, __set_output)
@@ -256,6 +261,7 @@ void fillData(PyObject* args)
 //%attribute(pymoose::Table, double, msgInput, __get_msgInput, __set_msgInput)
 // %attribute(pymoose::Table, double, sum, __get_sum, __set_sum)
 // %attribute(pymoose::Table, double, prd, __get_prd, __set_prd)
+
 %include "SynChan.h"
 %attribute(pymoose::SynChan, double, Gbar, __get_Gbar, __set_Gbar)
 %attribute(pymoose::SynChan, double, Ek, __get_Ek, __set_Ek)
@@ -304,6 +310,7 @@ void fillData(PyObject* args)
 %attribute(pymoose::SpikeGen, double, state, __get_state, __set_state)
 %attribute(pymoose::SpikeGen, double, event, __get_event, __set_event)
 %attribute(pymoose::SpikeGen, double, Vm, __get_Vm, __set_Vm)
+
 %include "RandomSpike.h"
 %attribute(pymoose::RandomSpike, double, minAmp, __get_minAmp, __set_minAmp)
 %attribute(pymoose::RandomSpike, double, maxAmp, __get_maxAmp, __set_maxAmp)
@@ -313,6 +320,7 @@ void fillData(PyObject* args)
 %attribute(pymoose::RandomSpike, double, absRefract, __get_absRefract, __set_absRefract)
 %attribute(pymoose::RandomSpike, double, lastEvent, __get_lastEvent)
 %attribute(pymoose::RandomSpike, int, reset, __get_reset, __set_reset)
+
 %include "PulseGen.h"
 %attribute(pymoose::PulseGen, double, firstLevel, __get_firstLevel, __set_firstLevel)
 %attribute(pymoose::PulseGen, double, firstWidth, __get_firstWidth, __set_firstWidth)
@@ -420,11 +428,13 @@ void fillData(PyObject* args)
 %attribute(pymoose::Stoich, bool, useOneWayReacs, __get_useOneWayReacs, __set_useOneWayReacs)
 //%attribute(pymoose::Stoich, string, path, __get_path, __set_path) -- path here is something different from element path
 %attribute(pymoose::Stoich, unsigned int, rateVectorSize, __get_rateVectorSize)
+
 %include "KineticHub.h"
 %attribute(pymoose::KineticHub, unsigned int, nMol, __get_nMol, __set_nMol)
 %attribute(pymoose::KineticHub, unsigned int, nReac, __get_nReac, __set_nReac)
 %attribute(pymoose::KineticHub, unsigned int, nEnz, __get_nEnz, __set_nEnz)
 %attribute(pymoose::KineticHub, double, molSum, __get_molSum, __set_molSum)
+
 %include "Enzyme.h"
 %attribute(pymoose::Enzyme, double, k1, __get_k1, __set_k1)
 %attribute(pymoose::Enzyme, double, k2, __get_k2, __set_k2)
@@ -439,6 +449,7 @@ void fillData(PyObject* args)
 %attribute(pymoose::Reaction, double, kb, __get_kb, __set_kb)
 %attribute(pymoose::Reaction, double, scaleKf, __get_scaleKf, __set_scaleKf)
 %attribute(pymoose::Reaction, double, scaleKb, __get_scaleKb, __set_scaleKb)
+
 %include "Molecule.h"
 %attribute(pymoose::Molecule, double, nInit, __get_nInit, __set_nInit)
 %attribute(pymoose::Molecule, double, volumeScale, __get_volumeScale, __set_volumeScale)
@@ -489,21 +500,27 @@ void fillData(PyObject* args)
 %attribute(pymoose::UniformRng, double, variance, __get_variance)
 %attribute(pymoose::UniformRng, double, min, __get_min, __set_min)
 %attribute(pymoose::UniformRng, double, max, __get_max, __set_max)
+
 %include "GammaRng.h"
 %attribute(pymoose::GammaRng, double, alpha, __get_alpha, __set_alpha)
 %attribute(pymoose::GammaRng, double, theta, __get_theta, __set_theta)
+
 %include "ExponentialRng.h"
 %attribute(pymoose::ExponentialRng, double, mean, __get_mean, __set_mean)
 %attribute(pymoose::ExponentialRng, int, method, __get_method, __set_method)
+
 %include "BinomialRng.h"
 %attribute(pymoose::BinomialRng, int, n, __get_n, __set_n)
 %attribute(pymoose::BinomialRng, double, p, __get_p, __set_p)
+
 %include "PoissonRng.h"
 %attribute(pymoose::PoissonRng, double, mean, __get_mean, __set_mean)
+
 %include "NormalRng.h"
 %attribute(pymoose::NormalRng, double, mean, __get_mean, __set_mean)
 %attribute(pymoose::NormalRng, double, variance, __get_variance, __set_variance)
 %attribute(pymoose::NormalRng, int, method, __get_method, __set_method)
+
 %include "KineticManager.h"
 %attribute(pymoose::KineticManager, bool, autoMode, __get_autoMode, __set_autoMode)
 %attribute(pymoose::KineticManager, bool, stochastic, __get_stochastic, __set_stochastic)
@@ -516,18 +533,21 @@ void fillData(PyObject* args)
 %attribute(pymoose::KineticManager, string, description, __get_description)
 %attribute(pymoose::KineticManager, double, recommendedDt, __get_recommendedDt)
 %attribute(pymoose::KineticManager, double, eulerError, __get_eulerError, __set_eulerError)
+
 %include "KinCompt.h"
 %attribute(pymoose::KinCompt, double, volume, __get_volume, __set_volume)
 %attribute(pymoose::KinCompt, double, area, __get_area, __set_area)
 %attribute(pymoose::KinCompt, double, perimeter, __get_perimeter, __set_perimeter)
 %attribute(pymoose::KinCompt, double, size, __get_size, __set_size)
 %attribute(pymoose::KinCompt, unsigned int, numDimensions, __get_numDimensions, __set_numDimensions)
+
 %include "Panel.h"
 %attribute(pymoose::Panel, unsigned int, nPts, __get_nPts)
 %attribute(pymoose::Panel, unsigned int, nDims, __get_nDims)
 %attribute(pymoose::Panel, unsigned int, nNeighbors, __get_nNeighbors)
 %attribute(pymoose::Panel, unsigned int, shapeId, __get_shapeId)
 %attribute(pymoose::Panel, const vector<double>&, coords, __get_coords)
+
 %include "DiskPanel.h"
 %include "CylPanel.h"
 %include "HemispherePanel.h"
@@ -539,11 +559,13 @@ void fillData(PyObject* args)
 %include "Geometry.h"
 %attribute(pymoose::Geometry, double, epsilon, __get_epsilon, __set_epsilon)
 %attribute(pymoose::Geometry, double, neighdist, __get_neighdist, __set_neighdist)
+
 %include "Adaptor.h"
 %attribute(pymoose::Adaptor, double, inputOffset, __get_inputOffset, __set_inputOffset)
 %attribute(pymoose::Adaptor, double, outputOffset, __get_outputOffset, __set_outputOffset)
 %attribute(pymoose::Adaptor, double, scale, __get_scale, __set_scale)
 %attribute(pymoose::Adaptor, double, output, __get_output)
+
 %include "SigNeur.h"
 %attribute(pymoose::SigNeur, Id&, cellProto, __get_cellProto, __set_cellProto)
 %attribute(pymoose::SigNeur, Id&, spineProto, __get_spineProto, __set_spineProto)
@@ -566,9 +588,11 @@ void fillData(PyObject* args)
 %attribute(pymoose::SigNeur, double, calciumScale, __get_calciumScale, __set_calciumScale)
 %attribute(pymoose::SigNeur, string, dendInclude, __get_dendInclude, __set_dendInclude)
 %attribute(pymoose::SigNeur, string, dendExclude, __get_dendExclude, __set_dendExclude)
+
 %include "AscFile.h"
 %attribute(pymoose::AscFile, string, fileName, __get_fileName, __set_fileName)
 %attribute(pymoose::AscFile, int, appendFlag, __get_appendFlag, __set_appendFlag)
+
 %include "DifShell.h"
 %attribute(pymoose::DifShell, double, C, __get_C)
 %attribute(pymoose::DifShell, double, Ceq, __get_Ceq, __set_Ceq)
@@ -582,9 +606,11 @@ void fillData(PyObject* args)
 %attribute(pymoose::DifShell, double, volume, __get_volume, __set_volume)
 %attribute(pymoose::DifShell, double, outerArea, __get_outerArea, __set_outerArea)
 %attribute(pymoose::DifShell, double, innerArea, __get_innerArea, __set_innerArea)
+
 %include "GssaStoich.h"
 %attribute(pymoose::GssaStoich, string, method, __get_method, __set_method)
 %attribute(pymoose::GssaStoich, string, path, __get_path, __set_path)
+
 %include "TauPump.h"
 %attribute(pymoose::TauPump, double, pumpRate, __get_pumpRate, __set_pumpRate)
 %attribute(pymoose::TauPump, double, eqConc, __get_eqConc, __set_eqConc)
@@ -592,7 +618,31 @@ void fillData(PyObject* args)
 %attribute(pymoose::TauPump, double, TB, __get_TB, __set_TB)
 %attribute(pymoose::TauPump, double, TC, __get_TC, __set_TC)
 %attribute(pymoose::TauPump, double, TV, __get_TV, __set_TV)
+
 %include "TimeTable.h"
 %attribute(pymoose::TimeTable, double, maxTime, __get_maxTime, __set_maxTime)
 %attribute(pymoose::TimeTable, const vector < double >&, tableVector, __get_tableVector, __set_tableVector)
 %attribute(pymoose::TimeTable, unsigned int, tableSize, __get_tableSize)
+
+%include "RC.h"
+%attribute(pymoose::RC, double, V0, __get_V0, __set_V0)
+%attribute(pymoose::RC, double, R, __get_R, __set_R)
+%attribute(pymoose::RC, double, C, __get_C, __set_C)
+%attribute(pymoose::RC, double, state, __get_state)
+%attribute(pymoose::RC, double, inject, __get_inject, __set_inject)
+
+%include "PIDController.h"
+%attribute(pymoose::PIDController, double, gain, __get_gain, __set_gain)
+%attribute(pymoose::PIDController, double, saturation, __get_saturation, __set_saturation)
+%attribute(pymoose::PIDController, double, command, __get_command)
+%attribute(pymoose::PIDController, double, sensed, __get_sensed)
+%attribute(pymoose::PIDController, double, tauI, __get_tauI)
+%attribute(pymoose::PIDController, double, tauD, __get_tauD)
+%attribute(pymoose::PIDController, double, output, __get_output)
+
+%include "DiffAmp.h"
+%attribute(pymoose::DiffAmp, double, gain, __get_gain, __set_gain)
+%attribute(pymoose::DiffAmp, double, saturation, __get_saturation, __set_saturation)
+%attribute(pymoose::DiffAmp, double, plus, __get_plus)
+%attribute(pymoose::DiffAmp, double, minus, __get_minus)
+%attribute(pymoose::DiffAmp, double, output, __get_output)
