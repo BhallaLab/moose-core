@@ -6155,5 +6155,206 @@ TimeTable_swigregister = _moose.TimeTable_swigregister
 TimeTable_swigregister(TimeTable)
 TimeTable.className_ = _moose.cvar.TimeTable_className_
 
+class RC(PyMooseBase):
+    """Proxy of C++ RC class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> RC
+        __init__(self, string path) -> RC
+        __init__(self, string name, Id parentId) -> RC
+        __init__(self, string name, PyMooseBase parent) -> RC
+        __init__(self, RC src, string name, PyMooseBase parent) -> RC
+        __init__(self, RC src, string name, Id parent) -> RC
+        __init__(self, RC src, string path) -> RC
+        __init__(self, Id src, string name, Id parent) -> RC
+        """
+        this = _moose.new_RC(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_RC
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.RC_getType(*args)
+
+    def __get_V0(*args):
+        """__get_V0(self) -> double"""
+        return _moose.RC___get_V0(*args)
+
+    def __set_V0(*args):
+        """__set_V0(self, double V0)"""
+        return _moose.RC___set_V0(*args)
+
+    def __get_R(*args):
+        """__get_R(self) -> double"""
+        return _moose.RC___get_R(*args)
+
+    def __set_R(*args):
+        """__set_R(self, double R)"""
+        return _moose.RC___set_R(*args)
+
+    def __get_C(*args):
+        """__get_C(self) -> double"""
+        return _moose.RC___get_C(*args)
+
+    def __set_C(*args):
+        """__set_C(self, double C)"""
+        return _moose.RC___set_C(*args)
+
+    def __get_state(*args):
+        """__get_state(self) -> double"""
+        return _moose.RC___get_state(*args)
+
+    def __get_inject(*args):
+        """__get_inject(self) -> double"""
+        return _moose.RC___get_inject(*args)
+
+    def __set_inject(*args):
+        """__set_inject(self, double inject)"""
+        return _moose.RC___set_inject(*args)
+
+    V0 = _swig_property(_moose.RC_V0_get, _moose.RC_V0_set)
+    R = _swig_property(_moose.RC_R_get, _moose.RC_R_set)
+    C = _swig_property(_moose.RC_C_get, _moose.RC_C_set)
+    state = _swig_property(_moose.RC_state_get)
+    inject = _swig_property(_moose.RC_inject_get, _moose.RC_inject_set)
+RC_swigregister = _moose.RC_swigregister
+RC_swigregister(RC)
+RC.className_ = _moose.cvar.RC_className_
+
+class PIDController(PyMooseBase):
+    """Proxy of C++ PIDController class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> PIDController
+        __init__(self, string path) -> PIDController
+        __init__(self, string name, Id parentId) -> PIDController
+        __init__(self, string name, PyMooseBase parent) -> PIDController
+        __init__(self, PIDController src, string name, PyMooseBase parent) -> PIDController
+        __init__(self, PIDController src, string name, Id parent) -> PIDController
+        __init__(self, PIDController src, string path) -> PIDController
+        __init__(self, Id src, string name, Id parent) -> PIDController
+        """
+        this = _moose.new_PIDController(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_PIDController
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.PIDController_getType(*args)
+
+    def __get_gain(*args):
+        """__get_gain(self) -> double"""
+        return _moose.PIDController___get_gain(*args)
+
+    def __set_gain(*args):
+        """__set_gain(self, double gain)"""
+        return _moose.PIDController___set_gain(*args)
+
+    def __get_saturation(*args):
+        """__get_saturation(self) -> double"""
+        return _moose.PIDController___get_saturation(*args)
+
+    def __set_saturation(*args):
+        """__set_saturation(self, double saturation)"""
+        return _moose.PIDController___set_saturation(*args)
+
+    def __get_command(*args):
+        """__get_command(self) -> double"""
+        return _moose.PIDController___get_command(*args)
+
+    def __get_sensed(*args):
+        """__get_sensed(self) -> double"""
+        return _moose.PIDController___get_sensed(*args)
+
+    def __get_tauI(*args):
+        """__get_tauI(self) -> double"""
+        return _moose.PIDController___get_tauI(*args)
+
+    def __get_tauD(*args):
+        """__get_tauD(self) -> double"""
+        return _moose.PIDController___get_tauD(*args)
+
+    def __get_output(*args):
+        """__get_output(self) -> double"""
+        return _moose.PIDController___get_output(*args)
+
+    gain = _swig_property(_moose.PIDController_gain_get, _moose.PIDController_gain_set)
+    saturation = _swig_property(_moose.PIDController_saturation_get, _moose.PIDController_saturation_set)
+    command = _swig_property(_moose.PIDController_command_get)
+    sensed = _swig_property(_moose.PIDController_sensed_get)
+    tauI = _swig_property(_moose.PIDController_tauI_get)
+    tauD = _swig_property(_moose.PIDController_tauD_get)
+    output = _swig_property(_moose.PIDController_output_get)
+PIDController_swigregister = _moose.PIDController_swigregister
+PIDController_swigregister(PIDController)
+PIDController.className_ = _moose.cvar.PIDController_className_
+
+class DiffAmp(PyMooseBase):
+    """Proxy of C++ DiffAmp class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> DiffAmp
+        __init__(self, string path) -> DiffAmp
+        __init__(self, string name, Id parentId) -> DiffAmp
+        __init__(self, string name, PyMooseBase parent) -> DiffAmp
+        __init__(self, DiffAmp src, string name, PyMooseBase parent) -> DiffAmp
+        __init__(self, DiffAmp src, string name, Id parent) -> DiffAmp
+        __init__(self, DiffAmp src, string path) -> DiffAmp
+        __init__(self, Id src, string name, Id parent) -> DiffAmp
+        """
+        this = _moose.new_DiffAmp(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_DiffAmp
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.DiffAmp_getType(*args)
+
+    def __get_gain(*args):
+        """__get_gain(self) -> double"""
+        return _moose.DiffAmp___get_gain(*args)
+
+    def __set_gain(*args):
+        """__set_gain(self, double gain)"""
+        return _moose.DiffAmp___set_gain(*args)
+
+    def __get_saturation(*args):
+        """__get_saturation(self) -> double"""
+        return _moose.DiffAmp___get_saturation(*args)
+
+    def __set_saturation(*args):
+        """__set_saturation(self, double saturation)"""
+        return _moose.DiffAmp___set_saturation(*args)
+
+    def __get_plus(*args):
+        """__get_plus(self) -> double"""
+        return _moose.DiffAmp___get_plus(*args)
+
+    def __get_minus(*args):
+        """__get_minus(self) -> double"""
+        return _moose.DiffAmp___get_minus(*args)
+
+    def __get_output(*args):
+        """__get_output(self) -> double"""
+        return _moose.DiffAmp___get_output(*args)
+
+    gain = _swig_property(_moose.DiffAmp_gain_get, _moose.DiffAmp_gain_set)
+    saturation = _swig_property(_moose.DiffAmp_saturation_get, _moose.DiffAmp_saturation_set)
+    plus = _swig_property(_moose.DiffAmp_plus_get)
+    minus = _swig_property(_moose.DiffAmp_minus_get)
+    output = _swig_property(_moose.DiffAmp_output_get)
+DiffAmp_swigregister = _moose.DiffAmp_swigregister
+DiffAmp_swigregister(DiffAmp)
+DiffAmp.className_ = _moose.cvar.DiffAmp_className_
+
 
 
