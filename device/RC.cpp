@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Wed Dec 31 15:47:45 2008 (+0530)
 // Version: 
-// Last-Updated: Sat Jan  3 21:44:07 2009 (+0530)
+// Last-Updated: Mon Jan  5 16:27:41 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 98
+//     Update #: 99
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -73,7 +73,7 @@ const Cinfo* initRCCinfo()
         process,
         new SrcFinfo( "outputSrc", Ftype1< double >::global(),
                       "Sends the output of the RC circuit." ),
-        new DestFinfo( "injectDest", Ftype1< double >::global(),
+        new DestFinfo( "injectMsg", Ftype1< double >::global(),
                        RFCAST( &RC::setInject ),
                        "Receives input to the RC circuit." ),
     };
