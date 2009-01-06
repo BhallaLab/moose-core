@@ -537,7 +537,7 @@ map< string, string >& sliSrcLookup()
 	src[ "RAXIAL Ra Vm" ] = "";
 	src[ "RAXIAL Ra previous_state" ] = "";
 	src[ "INJECT output" ] = "outputSrc";
-
+        
 	// Some messages for channels.
 	src[ "VOLTAGE Vm" ] = "";
 	src[ "CHANNEL Gk Ek" ] = "channel";
@@ -568,6 +568,10 @@ map< string, string >& sliSrcLookup()
         src[ "INPUT output" ] = "output";
         src[ "PLUS output" ] = "outputSrc";
         src[ "MINUS output" ] = "outputSrc";
+        // For compatibility taking output from RC
+        src[ "INPUT state" ] = "state";
+        src[ "PLUS state" ] = "outputSrc";
+        src[ "MINUS state" ] = "outputSrc";
 
         // Messages for PID
         src[ "CMD output" ] = "outputSrc";
@@ -577,8 +581,8 @@ map< string, string >& sliSrcLookup()
         src[ "SNS Vm" ] = "VmSrc";
         src[ "GAIN Vm" ] = "VmSrc";
 
-        // Messages for RC
-        //        src[ "INJECT output" ] - already in compartment
+        // Messages for RC - included in COmpartment's message
+        // src[ "RC.INJECT output" ]
         
 	// Some messages for tables, specially used for I/O
 	src[ "SpikeGen.INPUT Vm" ] = "VmSrc";
@@ -695,6 +699,10 @@ map< string, string >& sliDestLookup()
         dest[ "PLUS output" ] = "plusDest";
         dest[ "MINUS output" ] = "minusDest";
         dest[ "GAIN output" ] = "gainDest";
+        // These are to take output from RC
+        dest[ "PLUS state" ] = "plusDest";
+        dest[ "MINUS state" ] = "minusDest";
+        dest[ "GAIN state" ] = "gainDest";
         
         // Messages for PIDController
         dest[ "CMD output" ] = "commandDest";
@@ -703,6 +711,13 @@ map< string, string >& sliDestLookup()
         dest[ "SNS Vm" ] = "sensedDest";
         dest[ "CMD Vm" ] = "commandDest";
         dest[ "GAIN Vm" ] = "gainDest";
+        dest[ "CMD state" ] = "commandDest";
+        dest[ "SNS state" ] = "sensedDest";
+        //        dest[ "GAIN state" ] = "gainDest"; // already in DiffAmp
+
+        // Message for RC - already included in Compartment
+        // But the nomenclature violates the general scheme
+        // dest[ "INJECT output" ] = "injectMsg";
         
 	// Some messages for tables
 	dest[ "INPUT Vm" ] = "inputRequest";
