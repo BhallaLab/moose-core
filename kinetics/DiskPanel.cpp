@@ -33,7 +33,7 @@ const Cinfo* initDiskPanelCinfo()
 		0,
 		ValueFtype1< DiskPanel >::global()
 	);
-http://in.mc88.mail.yahoo.com/mc/showMessage?fid=Inbox&sort=date&order=down&startMid=0&.rand=1115797177&da=0&midIndex=2&mid=1_39236_ABDdVMsAAJukSSLh2gMXOxhEC%2Fk&prevMid=1_39776_ABHdVMsAAYILSSSJQQCFdE2YXtU&nextMid=1_38597_AA%2FdVMsAABflSR2KFQoJP3mORFY&m=1_40343_AA7dVMsAAP6MSSYK4gKWXwy0eMk,1_39776_ABHdVMsAAYILSSSJQQCFdE2YXtU,1_39236_ABDdVMsAAJukSSLh2gMXOxhEC%2Fk,1_38597_AA%2FdVMsAABflSR2KFQoJP3mORFY,1_38037_AA3dVMsAAB5DSRo0aAykLFEEu2Y,1_210_AArdVMsAAV%2BwSQ0mww0KLAhUAcg,1_718_ABHdVMsAAKtwSMp%2FMwoIYndPbGc,1_1351_AA3dVMsAAFapSK7qHwcvYnfwNRM,
+
 	return &diskPanelCinfo;
 }
 
