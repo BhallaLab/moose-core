@@ -19,7 +19,6 @@ extern const Cinfo* initDiskPanelCinfo();
 extern const Cinfo* initEnzymeCinfo();
 extern const Cinfo* initExponentialRngCinfo();
 extern const Cinfo* initGammaRngCinfo();
-extern const Cinfo* initGenesisParserCinfo();
 extern const Cinfo* initGeometryCinfo();
 extern const Cinfo* initGslIntegratorCinfo();
 extern const Cinfo* initGssaStoichCinfo();
@@ -29,8 +28,11 @@ extern const Cinfo* initHSolveCinfo();
 extern const Cinfo* initHSolveHubCinfo();
 extern const Cinfo* initHemispherePanelCinfo();
 #ifdef USE_MUSIC
+extern const Cinfo* initMusicCinfo();
 extern const Cinfo* initInputEventChannelCinfo();
 extern const Cinfo* initInputEventPortCinfo();
+extern const Cinfo* initOutputEventChannelCinfo();
+extern const Cinfo* initOutputEventPortCinfo();
 #endif
 extern const Cinfo* initInterSolverFluxCinfo();
 extern const Cinfo* initInterpolCinfo();
@@ -42,27 +44,24 @@ extern const Cinfo* initKintegratorCinfo();
 extern const Cinfo* initMathFuncCinfo();
 extern const Cinfo* initMg_blockCinfo();
 extern const Cinfo* initMoleculeCinfo();
-#ifdef USE_MUSIC
-extern const Cinfo* initMusicCinfo();
-#endif
 extern const Cinfo* initNernstCinfo();
 extern const Cinfo* initNeutralCinfo();
 extern const Cinfo* initNormalRngCinfo();
-#ifdef USE_MUSIC
-extern const Cinfo* initOutputEventChannelCinfo();
-extern const Cinfo* initOutputEventPortCinfo();
-#endif
 extern const Cinfo* initPIDControllerCinfo();
 extern const Cinfo* initPanelCinfo();
 #ifdef USE_MPI
-extern const Cinfo* initParGenesisParserCinfo();
+//extern const Cinfo* initParGenesisParserCinfo();
 extern const Cinfo* initParTickCinfo();
+extern const Cinfo* initPostMasterCinfo();
+#else
+extern const Cinfo* initGenesisParserCinfo();
+extern const Cinfo* initTickCinfo();
 #endif
 #ifdef USE_SMOLDYN
 extern const Cinfo* initParticleCinfo();
+extern const Cinfo* initSmoldynHubCinfo();
 #endif
 extern const Cinfo* initPoissonRngCinfo();
-extern const Cinfo* initPostMasterCinfo();
 extern const Cinfo* initPulseGenCinfo();
 #ifdef PYMOOSE
 extern const Cinfo* initPyMooseContextCinfo();
@@ -74,9 +73,6 @@ extern const Cinfo* initReactionCinfo();
 extern const Cinfo* initRectPanelCinfo();
 extern const Cinfo* initShellCinfo();
 extern const Cinfo* initSigNeurCinfo();
-#ifdef USE_SMOLDYN
-extern const Cinfo* initSmoldynHubCinfo();
-#endif
 extern const Cinfo* initSpherePanelCinfo();
 extern const Cinfo* initSpikeGenCinfo();
 extern const Cinfo* initStochSynchanCinfo();
@@ -86,7 +82,6 @@ extern const Cinfo* initSymCompartmentCinfo();
 extern const Cinfo* initSynChanCinfo();
 extern const Cinfo* initTableCinfo();
 extern const Cinfo* initTauPumpCinfo();
-extern const Cinfo* initTickCinfo();
 extern const Cinfo* initTimeTableCinfo();
 extern const Cinfo* initTriPanelCinfo();
 extern const Cinfo* initUniformRngCinfo();
@@ -111,7 +106,6 @@ void initCinfos(){
     static const Cinfo* EnzymeCinfo = initEnzymeCinfo();
     static const Cinfo* ExponentialRngCinfo = initExponentialRngCinfo();
     static const Cinfo* GammaRngCinfo = initGammaRngCinfo();
-    static const Cinfo* GenesisParserCinfo = initGenesisParserCinfo();
     static const Cinfo* GeometryCinfo = initGeometryCinfo();
 #ifdef USE_GSL
     static const Cinfo* GslIntegratorCinfo = initGslIntegratorCinfo();
@@ -125,6 +119,9 @@ void initCinfos(){
 #ifdef USE_MUSIC
     static const Cinfo* InputEventChannelCinfo = initInputEventChannelCinfo();
     static const Cinfo* InputEventPortCinfo = initInputEventPortCinfo();
+    static const Cinfo* MusicCinfo = initMusicCinfo();
+    static const Cinfo* OutputEventChannelCinfo = initOutputEventChannelCinfo();
+    static const Cinfo* OutputEventPortCinfo = initOutputEventPortCinfo();
 #endif
     static const Cinfo* InterSolverFluxCinfo = initInterSolverFluxCinfo();
     static const Cinfo* InterpolCinfo = initInterpolCinfo();
@@ -136,29 +133,24 @@ void initCinfos(){
     static const Cinfo* MathFuncCinfo = initMathFuncCinfo();
     static const Cinfo* Mg_blockCinfo = initMg_blockCinfo();
     static const Cinfo* MoleculeCinfo = initMoleculeCinfo();
-#ifdef USE_MUSIC
-    static const Cinfo* MusicCinfo = initMusicCinfo();
-#endif
     static const Cinfo* NernstCinfo = initNernstCinfo();
     static const Cinfo* NeutralCinfo = initNeutralCinfo();
     static const Cinfo* NormalRngCinfo = initNormalRngCinfo();
-#ifdef USE_MUSIC
-    static const Cinfo* OutputEventChannelCinfo = initOutputEventChannelCinfo();
-    static const Cinfo* OutputEventPortCinfo = initOutputEventPortCinfo();
-#endif
     static const Cinfo* PIDControllerCinfo = initPIDControllerCinfo();
     static const Cinfo* PanelCinfo = initPanelCinfo();
 #ifdef USE_MPI
-    static const Cinfo* ParGenesisParserCinfo = initParGenesisParserCinfo();
+//    static const Cinfo* ParGenesisParserCinfo = initParGenesisParserCinfo();
     static const Cinfo* ParTickCinfo = initParTickCinfo();
+    static const Cinfo* PostMasterCinfo = initPostMasterCinfo();
+#else
+    static const Cinfo* GenesisParserCinfo = initGenesisParserCinfo();
+    static const Cinfo* TickCinfo = initTickCinfo();
 #endif
 #ifdef USE_SMOLDYN
+    static const Cinfo* SmoldynHubCinfo = initSmoldynHubCinfo();
     static const Cinfo* ParticleCinfo = initParticleCinfo();
 #endif
     static const Cinfo* PoissonRngCinfo = initPoissonRngCinfo();
-#ifdef USE_MPI
-    static const Cinfo* PostMasterCinfo = initPostMasterCinfo();
-#endif
     static const Cinfo* PulseGenCinfo = initPulseGenCinfo();
 #ifdef PYMOOSE
     static const Cinfo* PyMooseContextCinfo = initPyMooseContextCinfo();
@@ -170,9 +162,6 @@ void initCinfos(){
     static const Cinfo* RectPanelCinfo = initRectPanelCinfo();
     static const Cinfo* ShellCinfo = initShellCinfo();
     static const Cinfo* SigNeurCinfo = initSigNeurCinfo();
-#ifdef USE_SMOLDYN
-    static const Cinfo* SmoldynHubCinfo = initSmoldynHubCinfo();
-#endif
     static const Cinfo* SpherePanelCinfo = initSpherePanelCinfo();
     static const Cinfo* SpikeGenCinfo = initSpikeGenCinfo();
     static const Cinfo* StochSynchanCinfo = initStochSynchanCinfo();
@@ -182,7 +171,6 @@ void initCinfos(){
     static const Cinfo* SynChanCinfo = initSynChanCinfo();
     static const Cinfo* TableCinfo = initTableCinfo();
     static const Cinfo* TauPumpCinfo = initTauPumpCinfo();
-    static const Cinfo* TickCinfo = initTickCinfo();
     static const Cinfo* TimeTableCinfo = initTimeTableCinfo();
     static const Cinfo* TriPanelCinfo = initTriPanelCinfo();
     static const Cinfo* UniformRngCinfo = initUniformRngCinfo();
