@@ -565,7 +565,7 @@ map< string, string >& sliSrcLookup()
         src[ "PulseGen.INPUT output" ] = "outputSrc";
 
         // Messages for DiffAmp
-        src[ "INPUT output" ] = "output";
+        src[ "DiffAmp.INPUT output" ] = "outputSrc";
         src[ "PLUS output" ] = "outputSrc";
         src[ "MINUS output" ] = "outputSrc";
         // For compatibility taking output from RC
@@ -600,6 +600,7 @@ map< string, string >& sliSrcLookup()
 	src[ "INPUT n" ] = "n";
 	src[ "INPUT Co" ] = "conc";
         src[ "INPUT state" ] = "state";
+        src[ "INPUT output" ] = "output";
 
 	// Messages for having tables pretend to be an xplot
 	src[ "PLOT Co" ] = "conc";
@@ -1042,12 +1043,17 @@ void GenesisParserWrapper::doAdd(
                 if ( msgType == "SPIKE" && srcClassName == "RandomSpike" )
                          msgType = srcClassName + "." + msgType;
                 if ( msgType == "INPUT Vm" && destClassName == "RandomSpike")
-                         msgType = destClassName + "." + msgType;                
-                if ( msgType == "INPUT output" && srcClassName == "PulseGen" )
+                         msgType = destClassName + "." + msgType;
+                // ugly hack to differentiate between INPUT output
+                // message to Table (where source is the ValueFinfo
+                // "output" and the same message to other classes,
+                // with an input message, like RC.
+                if ( msgType == "INPUT output" && srcClassName == "PulseGen" && destClassName != "Table" )                                                                                                         
                          msgType = srcClassName + "." + msgType;
                 if ( msgType == "INPUT output" && destClassName == "PulseGen" )
                          msgType = destClassName + "." + msgType;
-                
+                if ( msgType == "INPUT output" && srcClassName == "DiffAmp" && destClassName != "Table" )
+                        msgType = srcClassName + "." + msgType;
 		bool usingMULTGATE = 0;
 		string gate = "";
 		double power = 0;
