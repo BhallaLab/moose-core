@@ -39,6 +39,10 @@ double PIDController::__get_command() const
     get < double > (id_(), "command",command);
     return command;
 }
+void PIDController::__set_command( double command )
+{
+    set < double > (id_(), "command", command);
+}
 double PIDController::__get_sensed() const
 {
     double sensed;
@@ -51,11 +55,19 @@ double PIDController::__get_tauI() const
     get < double > (id_(), "tauI",tauI);
     return tauI;
 }
+void PIDController::__set_tauI( double tauI )
+{
+    set < double > (id_(), "tauI", tauI);
+}
 double PIDController::__get_tauD() const
 {
     double tauD;
     get < double > (id_(), "tauD",tauD);
     return tauD;
+}
+void PIDController::__set_tauD( double tauD )
+{
+    set < double > (id_(), "tauD", tauD);
 }
 double PIDController::__get_output() const
 {
