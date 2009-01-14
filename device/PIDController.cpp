@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Dec 30 23:36:01 2008 (+0530)
 // Version: 
-// Last-Updated: Wed Dec 31 13:59:29 2008 (+0530)
+// Last-Updated: Wed Jan 14 13:04:02 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 136
+//     Update #: 149
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -64,7 +64,7 @@ const Cinfo* initPIDControllerCinfo()
                         " value." ),
         new ValueFinfo( "command", ValueFtype1< double >::global(),
                         GFCAST( &PIDController::getCommand ),
-                        RFCAST( &dummyFunc ),
+                        RFCAST( &PIDController::setCommand  ),
                         "The command (desired) value of the sensed parameter. In control theory"
                         " this is commonly known as setpoint(SP)." ),
         new ValueFinfo( "sensed", ValueFtype1< double >::global(),
@@ -74,14 +74,14 @@ const Cinfo* initPIDControllerCinfo()
                         "(PV) in control theory."),
         new ValueFinfo( "tauI", ValueFtype1< double >::global(),
                         GFCAST( &PIDController::getTauI ),
-                        RFCAST( &dummyFunc ),
+                        RFCAST( &PIDController::setTauI ),
                         "The integration time constant, typically = dt. This is actually"
                         " proportional gain divided by integral gain (Kp/Ki)). Larger Ki"
                         " (smaller tauI) usually leads to fast elimination of steady state"
                         " errors at the cost of larger overshoot." ),
         new ValueFinfo( "tauD", ValueFtype1< double >::global(),
                          GFCAST( &PIDController::getTauD ),
-                         RFCAST( &dummyFunc ),
+                         RFCAST( &PIDController::setTauD ),
                         "The differentiation time constant, typically = dt / 4. This is"
                         " derivative gain (Kd) times proportional gain (Kp). Larger Kd (tauD)"
                         " decreases overshoot at the cost of slowing down transient response"
@@ -222,7 +222,11 @@ double PIDController::getTauD( Eref e )
 void PIDController::setSaturation( const Conn& conn, double saturation )
 {
     PIDController* instance = static_cast< PIDController* >( conn.data() );
-    instance->saturation_ = saturation;
+    if (saturation <= 0) {
+        cout << "Error: PIDController::setSaturation - saturation must be positive." << endl;
+    } else {
+        instance->saturation_ = saturation;
+    }
 }
 
 double PIDController::getSaturation( Eref e )
@@ -235,12 +239,22 @@ void PIDController::processFunc( const Conn& conn, ProcInfo proc )
 {
     PIDController* instance = static_cast< PIDController* >( conn.data() );
     instance->error_ = instance->command_ - instance->sensed_;
-    instance->e_integral_ += instance->error_ * proc->dt_;
+    instance->e_integral_ += 0.5 * (instance->error_ + instance->e_previous_) * proc->dt_;
     instance->e_derivative_ = (instance->error_ - instance->e_previous_) / proc->dt_;
-    instance->e_previous_ = instance->error_;
     instance->output_ = instance->gain_ * (instance->error_ +
                                            instance->e_integral_ / instance->tau_i_ +
                                            instance->e_derivative_ * instance->tau_d_);
+    if (instance->output_ > instance->saturation_){
+        instance->output_ = instance->saturation_;
+        instance->e_integral_ -= 0.5 * (instance->error_ + instance->e_previous_) * proc->dt_;
+    }
+    else if (instance->output_ < -instance->saturation_){
+        instance->output_ = -instance->saturation_;
+        instance->e_integral_ -= 0.5 * (instance->error_ + instance->e_previous_) * proc->dt_;
+    }
+
+    send1<double>( conn.target(), outputSlot, instance->output_);
+    instance->e_previous_ = instance->error_;
 }
 
 void PIDController::reinitFunc( const Conn& conn, ProcInfo proc )
@@ -253,7 +267,7 @@ void PIDController::reinitFunc( const Conn& conn, ProcInfo proc )
     instance->sensed_ = 0.0;
     instance->output_ = 0;
     instance->error_ = 0;
-    instance->e_previous_ = 0;
+    instance->e_previous_ = instance->error_;
     instance->e_integral_ = 0;
     instance->e_derivative_ = 0;
 }
