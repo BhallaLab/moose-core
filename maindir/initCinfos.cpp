@@ -3,7 +3,7 @@
 
 extern const Cinfo* initAdaptorCinfo();
 extern const Cinfo* initAscFileCinfo();
-extern const Cinfo* initAtestCinfo();
+//extern const Cinfo* initAtestCinfo();
 //extern const Cinfo* initAverageCinfo();
 extern const Cinfo* initBinSynchanCinfo();
 extern const Cinfo* initBinomialRngCinfo();
@@ -90,7 +90,7 @@ extern const Cinfo* initscript_outCinfo();
 void initCinfos(){
     static const Cinfo* AdaptorCinfo = initAdaptorCinfo();
     static const Cinfo* AscFileCinfo = initAscFileCinfo();
-    static const Cinfo* AtestCinfo = initAtestCinfo();
+//    static const Cinfo* AtestCinfo = initAtestCinfo();
     //    static const Cinfo* AverageCinfo = initAverageCinfo();
     static const Cinfo* BinSynchanCinfo = initBinSynchanCinfo();
     static const Cinfo* BinomialRngCinfo = initBinomialRngCinfo();
