@@ -150,5 +150,35 @@ void Compartment::__set_z( double z )
 {
     set < double > (id_(), "z", z);
 }
+double Compartment::__get_x0() const
+{
+    double x;
+    get < double > (id_(), "x0",x);
+    return x;
+}
+void Compartment::__set_x0( double x )
+{
+    set < double > (id_(), "x0", x);
+}
+double Compartment::__get_y() const
+{
+    double y;
+    get < double > (id_(), "y0",y);
+    return y;
+}
+void Compartment::__set_y0( double y )
+{
+    set < double > (id_(), "y0", y);
+}
+double Compartment::__get_z0() const
+{
+    double z;
+    get < double > (id_(), "z0",z);
+    return z;
+}
+void Compartment::__set_z0( double z )
+{
+    set < double > (id_(), "z0", z);
+}
 
 #endif

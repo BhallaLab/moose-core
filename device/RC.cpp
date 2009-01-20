@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Wed Dec 31 15:47:45 2008 (+0530)
 // Version: 
-// Last-Updated: Mon Jan  5 16:27:41 2009 (+0530)
+// Last-Updated: Tue Jan 20 12:30:02 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 99
+//     Update #: 158
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -65,17 +65,17 @@ const Cinfo* initRCCinfo()
         new ValueFinfo( "state", ValueFtype1< double >::global(),
                         GFCAST( &RC::getState ),
                         RFCAST( &dummyFunc ),
-                        "Output value of the RC circuit." ),
+                        "Output value of the RC circuit. This is the voltage across teh capacitor." ),
         new ValueFinfo( "inject", ValueFtype1< double >::global(),
                         GFCAST( &RC::getInject ),
                         RFCAST( &RC::setInject ),
-                        "Input value to the RC circuit." ),
+                        "Input value to the RC circuit.This is handled as an input current to the circuit." ),
         process,
         new SrcFinfo( "outputSrc", Ftype1< double >::global(),
                       "Sends the output of the RC circuit." ),
         new DestFinfo( "injectMsg", Ftype1< double >::global(),
-                       RFCAST( &RC::setInject ),
-                       "Receives input to the RC circuit." ),
+                       RFCAST( &RC::setInjectMsg ),
+                       "Receives input to the RC circuit. All incoming messages are summed up to give the total input current." ),
     };
     static SchedInfo  schedInfo[] = {{process, 0, 0}};
     static string doc[] = {
@@ -103,7 +103,9 @@ RC::RC():
         capacitance_(1.0),
         state_(0),
         inject_(0),
-        isteps_(1)
+        msg_inject_(0.0),
+        exp_(0.0),
+        dt_tau_(0.0)
 {
     // Do nothing
 }
@@ -162,46 +164,42 @@ double RC::getInject( Eref e )
     return instance->inject_;
 }
 
+void RC::setInjectMsg( const Conn& conn, double inject )
+{
+    RC* instance = static_cast< RC* >( conn.data() );
+    instance->msg_inject_ += inject;
+}
+
+/**
+   calculates the new voltage across the capacitor.  this is the exact
+   solution as described in Electronic Circuit and System Simulation
+   Methods by Lawrance Pillage, McGraw-Hill Professional, 1999. pp
+   87-100. Eqn: 4.7.21 */
+
 void RC::processFunc( const Conn& conn, ProcInfo proc )
 {
     RC* instance = static_cast< RC* >( conn.data() );
-    static double inject_prev = instance->inject_;
-    double dVin = (instance->inject_ - inject_prev) * instance->resistance_;
-    double Vin = instance->inject_ * instance->resistance_;
-    instance->state_ =
-            (instance->state_ -
-             Vin +
-             instance->resistance_ * instance->capacitance_ * dVin / instance->dt_) *
-            instance->exp_ +
-            ( Vin +
-              dVin +
-              instance->resistance_ * instance->capacitance_* dVin / instance->dt_ );
-            
-    //    double k1, k2, k3, k4; // Terms for 4-th order Runge-Kutta
-    // for ( int i = 0; i < instance->isteps_; ++i ){
-    //     double i_total = instance->inject_ - instance->state_ / instance->resistance_;
-    //     k1 = dt * i_total / instance->capacitance_;
-    //     k2 = dt * ( instance->state_ + k1 / 2.0 );
-    //     k3 = dt * ( instance->state_ + k2 / 2.0 );
-    //     k4 = dt * ( instance->state_ + k3 );
-    //     instance->state_ += (k1 + 2 * k2 + 2 * k3 + k4) / 6.0;
-    // }
-    inject_prev = instance->inject_;
+    static double sum_inject_prev = instance->inject_ + instance->msg_inject_;
+    double sum_inject = instance->inject_ + instance->msg_inject_;
+    double dVin = (sum_inject - sum_inject_prev) * instance->resistance_;
+    double Vin = sum_inject * instance->resistance_;
+    instance->state_ = Vin + dVin - dVin / instance->dt_tau_ +
+            (instance->state_ - Vin + dVin / instance->dt_tau_) * instance->exp_;
+    sum_inject_prev = sum_inject;
+    instance->msg_inject_ = 0.0;
 }
 
 void RC::reinitFunc( const Conn& conn, ProcInfo proc)
 {
     RC* instance = static_cast< RC* >(conn.data());
-    double tau = instance->resistance_ * instance->capacitance_;
-    if ( tau >= 20 * proc->dt_) {
-        instance->isteps_ = 1;
-    } else { // take care of dt that is large compared to tau
-        instance->isteps_ = (int)(20 * proc->dt_ / tau);
-    }
-    // not sure if reinit and procss use the same ProcInfo
-    instance->dt_ = proc->dt_ / instance->isteps_;
+    instance->dt_tau_ = proc->dt_ / (instance->resistance_ * instance->capacitance_);
     instance->state_ = instance->v0_;
-    instance->exp_ = exp(-instance->dt_ / tau);
+    if (instance->dt_tau_ > 1e-15){ 
+        instance->exp_ = exp(-instance->dt_tau_);
+    } else {// use approximation
+        instance->exp_ = 1 - instance->dt_tau_;
+    }
+    instance->msg_inject_ = 0.0;
 }
 
 
