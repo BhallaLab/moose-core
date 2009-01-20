@@ -57,8 +57,8 @@ private:
 		string type,
 		string name );
 	
-	static MUSIC::setup* setup_;
-	static MUSIC::runtime* runtime_;
+	static MUSIC::Setup* setup_;
+	static MUSIC::Runtime* runtime_;
 	
 	static double dt_;
         static double stopTime_;
