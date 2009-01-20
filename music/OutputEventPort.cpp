@@ -52,7 +52,7 @@ const Cinfo* initOutputEventPortCinfo()
                       ),
       new DestFinfo( "initialise", 
                      Ftype3< unsigned int, unsigned int,
-                             MUSIC::event_output_port* >::global(),
+                             MUSIC::EventOutputPort* >::global(),
                      RFCAST( &OutputEventPort::initialiseFunc )
                      ),
       process
@@ -102,8 +102,8 @@ void OutputEventPort::innerReinitFunc()
 {
   // Map the output from MUSIC to data channels local to this process
 //~ cerr << "Port connected? " << mPort_->is_connected() << endl;
-  MUSIC::linear_index iMap(myOffset_, myWidth_);
-  mPort_->map(&iMap, MUSIC::index::LOCAL, maxBuffered_);
+  MUSIC::LinearIndex iMap(myOffset_, myWidth_);
+  mPort_->map(&iMap, MUSIC::Index::LOCAL, maxBuffered_);
 
 }
 
@@ -112,7 +112,7 @@ void OutputEventPort::innerReinitFunc()
 void OutputEventPort::initialiseFunc( const Conn* c, 
                                       unsigned int width,
                                       unsigned int offset,
-                                      MUSIC::event_output_port* mPort)
+                                      MUSIC::EventOutputPort* mPort)
 {
   static_cast < OutputEventPort* > 
     (c->data())->innerInitialiseFunc(c->target(), width, offset, mPort);
@@ -121,7 +121,7 @@ void OutputEventPort::initialiseFunc( const Conn* c,
 void OutputEventPort::innerInitialiseFunc( Eref e, 
                                            unsigned int width, 
                                            unsigned int offset,
-                                           MUSIC::event_output_port* 
+                                           MUSIC::EventOutputPort* 
                                                  mPort) 
 {
 
@@ -140,7 +140,7 @@ void OutputEventPort::innerInitialiseFunc( Eref e,
                                           e.id(), Id::scratchId() );
       channels_.push_back(channel);
 
-      set< unsigned int, MUSIC::event_output_port* > 
+      set< unsigned int, MUSIC::EventOutputPort* > 
         (channel, "initialise", i, mPort);
     }
 
@@ -149,7 +149,7 @@ void OutputEventPort::innerInitialiseFunc( Eref e,
 unsigned int OutputEventPort::getIsConnected( Eref e ) 
 {
 	return static_cast < OutputEventPort* > (e.data())->
-		mPort_->is_connected();
+		mPort_->isConnected();
 }
 
 unsigned int OutputEventPort::getWidth( Eref e ) 

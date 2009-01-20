@@ -16,8 +16,8 @@
 #include "Music.h"
 #include "element/Neutral.h"
 
-MUSIC::setup* Music::setup_ = 0;
-MUSIC::runtime* Music::runtime_ = 0;
+MUSIC::Setup* Music::setup_ = 0;
+MUSIC::Runtime* Music::runtime_ = 0;
 //!!!
 double Music::dt_;
 double Music::stopTime_; 
@@ -137,7 +137,7 @@ void Music::innerReinitFunc( Eref e, ProcInfo p )
   if(setup_) {
     
 	dt_ = p->dt_;
-    runtime_ = new MUSIC::runtime(setup_, p->dt_ );
+    runtime_ = new MUSIC::Runtime(setup_, p->dt_ );
     setup_ = 0;
   }
 
@@ -161,7 +161,7 @@ void Music::innerReinitializeFunc( )
 
 MPI::Intracomm Music::setup( int& argc, char**& argv )
 {
-  setup_ = new MUSIC::setup( argc, argv );
+  setup_ = new MUSIC::Setup( argc, argv );
 
   // Store the MUSIC stop time
   setup_->config ("stoptime", &stopTime_);
@@ -204,7 +204,7 @@ void Music::innerAddPort (
 	port->id().setGlobal();
 
     // Publish the event input port to music
-    MUSIC::event_input_port* mPort = setup_->publish_event_input(name);
+    MUSIC::EventInputPort* mPort = setup_->publishEventInput(name);
     unsigned int width = mPort->width();
     
     unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
@@ -218,7 +218,7 @@ void Music::innerAddPort (
 
     unsigned int myOffset = myRank * avgWidth;
 
-    set< unsigned int, unsigned int, MUSIC::event_input_port* >(
+    set< unsigned int, unsigned int, MUSIC::EventInputPort* >(
 		port,"initialise", myWidth, myOffset, mPort );
     
     // Map the input from MUSIC to data channels local to this process
@@ -232,7 +232,7 @@ void Music::innerAddPort (
 	port->id().setGlobal();
 
     // Publish the event output port to music
-    MUSIC::event_output_port* mPort = setup_->publish_event_output(name);
+    MUSIC::EventOutputPort* mPort = setup_->publishEventOutput(name);
     unsigned int width = mPort->width();
     
     unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
@@ -246,7 +246,7 @@ void Music::innerAddPort (
 
     unsigned int myOffset = myRank * avgWidth;
 
-    set< unsigned int, unsigned int, MUSIC::event_output_port* >(
+    set< unsigned int, unsigned int, MUSIC::EventOutputPort* >(
     	port,"initialise", myWidth, myOffset, mPort );
     
     // Map the output from MUSIC to data channels local to this process

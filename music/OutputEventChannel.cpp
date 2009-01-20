@@ -34,7 +34,7 @@ const Cinfo* initOutputEventChannelCinfo()
 					 "potential.It is called 'synapse' because a similar field on SynChan "
 					 "objects is also called synapse." ),      
       new DestFinfo("initialise", 
-                    Ftype2< unsigned int, MUSIC::event_output_port* >::global(),
+                    Ftype2< unsigned int, MUSIC::EventOutputPort* >::global(),
                     RFCAST( &OutputEventChannel::initialise))
 
     };
@@ -68,15 +68,15 @@ void OutputEventChannel::insertEvent(const Conn* c, double time)
 
 void OutputEventChannel::innerInsertEvent(double time)
 {
-  mPort_->insert_event(time, localId_);
+  mPort_->insertEvent(time, localId_);
   //~ cerr << "event sent @ " << time << endl;
   //~ cerr << "id: " << localId_ << endl;
 }
 
 void OutputEventChannel::initialise(const Conn* c, unsigned int id, 
-                                    MUSIC::event_output_port* mPort) 
+                                    MUSIC::EventOutputPort* mPort) 
 {
   static_cast < OutputEventChannel* > (c->data())->localId_ 
-    = MUSIC::local_index(id);
+    = MUSIC::LocalIndex(id);
   static_cast < OutputEventChannel* > (c->data())->mPort_ = mPort;
 }

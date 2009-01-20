@@ -2,7 +2,7 @@
 #define _MUSIC_INPUT_EVENT_PORT_H
 
 
-class InputEventPort : public MUSIC::event_handler_local_index
+class InputEventPort : public MUSIC::EventHandlerLocalIndex
 {
 
  public:
@@ -12,7 +12,7 @@ class InputEventPort : public MUSIC::event_handler_local_index
       accLatency_ = 1e-3;
     }
 
-  void operator () ( double t, MUSIC::local_index id );
+  void operator () ( double t, MUSIC::LocalIndex id );
 
   //////////////////////////////////////////////////////////////////
   // Message dest functions.
@@ -23,7 +23,7 @@ class InputEventPort : public MUSIC::event_handler_local_index
   static void initialiseFunc( const Conn* c,
                               unsigned int width, 
                               unsigned int offset,
-                              MUSIC::event_input_port* mPort);
+                              MUSIC::EventInputPort* mPort);
 
   static unsigned int getWidth( Eref e);
   static unsigned int getIsConnected( Eref e);
@@ -37,7 +37,7 @@ class InputEventPort : public MUSIC::event_handler_local_index
 
  private:
 
-  MUSIC::event_input_port* mPort_;
+  MUSIC::EventInputPort* mPort_;
   vector < Eref > channels_;
 
   unsigned int myOffset_, myWidth_;
@@ -46,7 +46,7 @@ class InputEventPort : public MUSIC::event_handler_local_index
 
 
   void innerInitialiseFunc( Eref e, unsigned int width, unsigned int offset,
-                            MUSIC::event_input_port* mPort);
+                            MUSIC::EventInputPort* mPort);
 
   void innerReinitFunc();
 
