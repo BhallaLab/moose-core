@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Wed Dec 31 15:18:22 2008 (+0530)
 // Version: 
-// Last-Updated: Sat Jan  3 20:09:14 2009 (+0530)
+// Last-Updated: Tue Jan 20 12:27:24 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 22
+//     Update #: 29
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -57,6 +57,7 @@ class RC{
     static double getState( Eref e );
     static void setInject( const Conn& conn, double inject );
     static double getInject( Eref e );
+    static void setInjectMsg( const Conn& conn, double inject );
     static void processFunc( const Conn& conn, ProcInfo proc );
     static void reinitFunc( const Conn& conn, ProcInfo proc );
     
@@ -66,10 +67,9 @@ class RC{
     double capacitance_;
     double state_;
     double inject_;
-    double inject_prev_;
+    double msg_inject_;
     double exp_;
-    double dt_;
-    int isteps_;
+    double dt_tau_;
 };
 
 #endif
