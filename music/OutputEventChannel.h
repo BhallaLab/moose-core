@@ -5,7 +5,7 @@ class OutputEventChannel
 {
 
  public:
- OutputEventChannel() : localId_(MUSIC::local_index(0))
+ OutputEventChannel() : localId_(MUSIC::LocalIndex(0))
     {
 
     }
@@ -13,7 +13,7 @@ class OutputEventChannel
   static void insertEvent(const Conn* c, double time);
 
   static void initialise(const Conn*, unsigned int id, 
-                         MUSIC::event_output_port* mPort);
+                         MUSIC::EventOutputPort* mPort);
 
   //////////////////////////////////////////////////////////////////
   // Message dest functions.
@@ -23,8 +23,8 @@ class OutputEventChannel
 
  private:
 
-  MUSIC::local_index localId_;
-  MUSIC::event_output_port* mPort_;
+  MUSIC::LocalIndex localId_;
+  MUSIC::EventOutputPort* mPort_;
 
   void innerInsertEvent(double time);
 

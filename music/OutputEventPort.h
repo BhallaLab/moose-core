@@ -20,7 +20,7 @@ class OutputEventPort
   static void initialiseFunc( const Conn* c,
                               unsigned int width, 
                               unsigned int offset,
-                              MUSIC::event_output_port* mPort);
+                              MUSIC::EventOutputPort* mPort);
 
   static unsigned int getWidth( Eref e );
   static unsigned int getIsConnected( Eref e);
@@ -33,7 +33,7 @@ class OutputEventPort
 
  private:
 
-  MUSIC::event_output_port* mPort_;
+  MUSIC::EventOutputPort* mPort_;
 
   int maxBuffered_;
   unsigned int myOffset_, myWidth_;
@@ -45,7 +45,7 @@ class OutputEventPort
   void innerInitialiseFunc( Eref e, 
                             unsigned int width, 
                             unsigned int offset,
-                            MUSIC::event_output_port* mPort);
+                            MUSIC::EventOutputPort* mPort);
 
 };
 

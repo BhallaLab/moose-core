@@ -52,7 +52,7 @@ const Cinfo* initInputEventPortCinfo()
                       RFCAST( &InputEventPort::setMaxBuffered )
                       ),
       new DestFinfo( "initialise", 
-                     Ftype3< unsigned int, unsigned int, MUSIC::event_input_port* >::global(),
+                     Ftype3< unsigned int, unsigned int, MUSIC::EventInputPort* >::global(),
                      RFCAST( &InputEventPort::initialiseFunc )
                      ),
       //////////////////////////////////////////////////////////////////
@@ -100,13 +100,13 @@ void InputEventPort::reinitFunc( const Conn* c, ProcInfo p )
 void InputEventPort::innerReinitFunc() 
 {
   // Map the input from MUSIC to data channels local to this process
-  MUSIC::linear_index iMap(myOffset_, myWidth_);
+  MUSIC::LinearIndex iMap(myOffset_, myWidth_);
   mPort_->map(&iMap, this, accLatency_, maxBuffered_);
 
 }
 
 // Event handler
-void InputEventPort::operator () ( double t, MUSIC::local_index id ) 
+void InputEventPort::operator () ( double t, MUSIC::LocalIndex id ) 
 {
   int localId = id;
 //~ cerr << " Event received: time: " << t << " id: " << localId << endl;
@@ -117,7 +117,7 @@ void InputEventPort::operator () ( double t, MUSIC::local_index id )
 void InputEventPort::initialiseFunc( const Conn* c, 
                                      unsigned int width,
                                      unsigned int offset,
-                                     MUSIC::event_input_port* mPort)
+                                     MUSIC::EventInputPort* mPort)
 {
   static_cast < InputEventPort* > 
     (c->data())->innerInitialiseFunc(c->target(), width, offset, mPort);
@@ -126,7 +126,7 @@ void InputEventPort::initialiseFunc( const Conn* c,
 void InputEventPort::innerInitialiseFunc( Eref e, 
                                           unsigned int width, 
                                           unsigned int offset,
-                                          MUSIC::event_input_port* mPort
+                                          MUSIC::EventInputPort* mPort
 ) 
 {
   mPort_ = mPort;
@@ -149,7 +149,7 @@ void InputEventPort::innerInitialiseFunc( Eref e,
 unsigned int InputEventPort::getIsConnected( Eref e ) 
 {
 	return static_cast < InputEventPort* > (e.data())->
-		mPort_->is_connected();
+		mPort_->isConnected();
 }
 
 unsigned int InputEventPort::getWidth( Eref e ) 
