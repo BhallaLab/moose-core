@@ -580,6 +580,9 @@ map< string, string >& sliSrcLookup()
         src[ "CMD Vm" ] = "VmSrc";
         src[ "SNS Vm" ] = "VmSrc";
         src[ "GAIN Vm" ] = "VmSrc";
+        src[ "CMD state" ] = "outputSrc";
+        src[ "SNS state" ] = "outputSrc";
+        src[ "GAIN state" ] = "outputSrc";
 
         // Messages for RC - included in COmpartment's message
         // src[ "RC.INJECT output" ]
@@ -601,7 +604,12 @@ map< string, string >& sliSrcLookup()
 	src[ "INPUT Co" ] = "conc";
         src[ "INPUT state" ] = "state";
         src[ "INPUT output" ] = "output";
-
+        src[ "INPUT cmd" ] = "command";
+        src[ "INPUT sns"] = "sensed";
+        src[ "INPUT e" ] = "e";
+        src[ "INPUT e_integral" ] = "e_integral";
+        src[ "INPUT e_deriv" ] = "e_deriv";
+        src[ "INPUT e_previous" ] = "e_previous";
 	// Messages for having tables pretend to be an xplot
 	src[ "PLOT Co" ] = "conc";
 	src[ "PLOT n" ] = "n";
@@ -615,7 +623,14 @@ map< string, string >& sliSrcLookup()
 	src[ "PLOT X" ] = "X";
 	src[ "PLOT Y" ] = "Y";
 	src[ "PLOT Z" ] = "Z";
+	src[ "PLOT n" ] = "n";
+	src[ "PLOT Co" ] = "conc";
+        src[ "PLOT state" ] = "state";
         src[ "PLOT output" ] = "output";
+        src[ "PLOT e" ] = "e";
+        src[ "PLOT e_integral" ] = "e_integral";
+        src[ "PLOT e_deriv" ] = "e_deriv";
+        src[ "PLOT e_previous" ] = "e_previous";
         
 	return src;
 }
@@ -714,6 +729,9 @@ map< string, string >& sliDestLookup()
         dest[ "GAIN Vm" ] = "gainDest";
         dest[ "CMD state" ] = "commandDest";
         dest[ "SNS state" ] = "sensedDest";
+        dest[ "CMD state" ] = "commandDest";
+        dest[ "SNS state" ] = "sensedDest";
+        dest[ "GAIN state" ] = "gainDest";
         //        dest[ "GAIN state" ] = "gainDest"; // already in DiffAmp
 
         // Message for RC - already included in Compartment
@@ -735,7 +753,13 @@ map< string, string >& sliDestLookup()
 	dest[ "INPUT Co" ] = "inputRequest";
         dest[ "INPUT output" ] = "inputRequest";
         dest[ "INPUT state" ] = "inputRequest";
-        
+        dest[ "INPUT cmd" ] = "inputRequest";
+        dest[ "INPUT sns"] = "inputRequest";
+        dest[ "INPUT e" ] = "inputRequest";
+        dest[ "INPUT e_integral" ] = "inputRequest";
+        dest[ "INPUT e_deriv" ] = "inputRequest";
+        dest[ "INPUT e_previous" ] = "inputRequest";
+
 	// Messages for having tables pretend to be an xplot
 	dest[ "PLOT Vm" ] = "inputRequest";
 	dest[ "PLOT Im" ] = "inputRequest";
@@ -750,6 +774,11 @@ map< string, string >& sliDestLookup()
 	dest[ "PLOT n" ] = "inputRequest";
 	dest[ "PLOT Co" ] = "inputRequest";
         dest[ "PLOT output" ] = "inputRequest";
+        dest[ "PLOT state" ] = "inputRequest";
+        dest[ "PLOT e" ] = "inputRequest";
+        dest[ "PLOT e_integral" ] = "inputRequest";
+        dest[ "PLOT e_deriv" ] = "inputRequest";
+        dest[ "PLOT e_previous" ] = "inputRequest";
 	return dest;
 }
 
