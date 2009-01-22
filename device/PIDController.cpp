@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Dec 30 23:36:01 2008 (+0530)
 // Version: 
-// Last-Updated: Wed Jan 14 13:04:02 2009 (+0530)
+// Last-Updated: Thu Jan 22 14:24:53 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 149
+//     Update #: 174
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -94,6 +94,24 @@ const Cinfo* initPIDControllerCinfo()
                          "Where gain = proportional gain (Kp), tau_i = integral gain (Kp/Ki) and"
                          " tau_d = derivative gain (Kd/Kp). In control theory this is also known"
                          " as the manipulated variable (MV)"),
+        new ValueFinfo( "e", ValueFtype1< double >::global(),
+                        GFCAST( &PIDController::getError ),
+                        RFCAST( &dummyFunc ),
+                        "The error term, which is the difference between command and sensed"
+                        " value."),
+        new ValueFinfo( "e_integral",ValueFtype1< double >::global(),
+                        GFCAST( &PIDController::getEIntegral ),
+                        RFCAST( &dummyFunc ),
+                        "The integral term. It is calculated as INTEGRAL(e dt) ="
+                        " previous_integral + dt * (e + e_previous)/2."),
+        new ValueFinfo( "e_deriv",ValueFtype1< double >::global(),
+                        GFCAST( &PIDController::getEDerivative ),
+                        RFCAST( &dummyFunc ),
+                        "The derivative term. This is (e - e_previous)/dt."),
+        new ValueFinfo( "e_previous",ValueFtype1< double >::global(),
+                        GFCAST( &PIDController::getEPrevious ),
+                        RFCAST( &dummyFunc ),
+                        "The error term for previous step."),
         process,
         new SrcFinfo( "outputSrc", Ftype1< double >::global(),
                       "Sends the output of the PIDController. This is known as manipulated"
@@ -235,8 +253,39 @@ double PIDController::getSaturation( Eref e )
     return instance->saturation_;
 }
 
+double PIDController::getError( Eref e )
+{
+    PIDController* instance = static_cast< PIDController* >( e.e->data() );
+    return instance->error_;
+}
+
+double PIDController::getEIntegral( Eref e )
+{
+    PIDController* instance = static_cast< PIDController* >( e.e->data() );
+    return instance->e_integral_;
+}
+
+double PIDController::getEDerivative( Eref e )
+{
+    PIDController* instance = static_cast< PIDController* >( e.e->data() );
+    return instance->e_derivative_;
+}
+
+double PIDController::getEPrevious( Eref e )
+{
+    PIDController* instance = static_cast< PIDController* >( e.e->data() );
+    return instance->e_previous_;
+}
+
+// void PIDController::initFunc( const Conn& conn, ProcInfo proc)
+// {
+//     PIDController* instance = static_cast< PIDController* >( conn.data() );
+//     instance->e_previous_ = instance->error_;
+// }
+
 void PIDController::processFunc( const Conn& conn, ProcInfo proc )
 {
+    static double e_prev = 0.0;
     PIDController* instance = static_cast< PIDController* >( conn.data() );
     instance->error_ = instance->command_ - instance->sensed_;
     instance->e_integral_ += 0.5 * (instance->error_ + instance->e_previous_) * proc->dt_;
@@ -254,7 +303,8 @@ void PIDController::processFunc( const Conn& conn, ProcInfo proc )
     }
 
     send1<double>( conn.target(), outputSlot, instance->output_);
-    instance->e_previous_ = instance->error_;
+    instance->e_previous_ = e_prev;
+    e_prev = instance->error_;
 }
 
 void PIDController::reinitFunc( const Conn& conn, ProcInfo proc )
