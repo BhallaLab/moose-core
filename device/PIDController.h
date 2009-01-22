@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Dec 30 23:14:00 2008 (+0530)
 // Version: 
-// Last-Updated: Wed Dec 31 13:51:01 2008 (+0530)
+// Last-Updated: Thu Jan 22 10:54:55 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 43
+//     Update #: 44
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -59,6 +59,10 @@ class PIDController{
     static double getTauD( Eref e );
     static void setSaturation( const Conn& conn, double saturation );
     static double getSaturation( Eref e );
+    static double getError( Eref e );
+    static double getEIntegral( Eref e );
+    static double getEDerivative( Eref e );
+    static double getEPrevious( Eref e );
     static void processFunc( const Conn& conn, ProcInfo process );
     static void reinitFunc( const Conn& conn, ProcInfo process );
     
