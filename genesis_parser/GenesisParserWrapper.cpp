@@ -606,9 +606,9 @@ map< string, string >& sliSrcLookup()
         src[ "INPUT output" ] = "output";
         src[ "INPUT cmd" ] = "command";
         src[ "INPUT sns"] = "sensed";
-        src[ "INPUT e" ] = "e";
-        src[ "INPUT e_integral" ] = "e_integral";
-        src[ "INPUT e_deriv" ] = "e_deriv";
+        src[ "INPUT e" ] = "error";
+        src[ "INPUT e_integral" ] = "integral";
+        src[ "INPUT e_deriv" ] = "derivative";
         src[ "INPUT e_previous" ] = "e_previous";
 	// Messages for having tables pretend to be an xplot
 	src[ "PLOT Co" ] = "conc";
@@ -627,9 +627,9 @@ map< string, string >& sliSrcLookup()
 	src[ "PLOT Co" ] = "conc";
         src[ "PLOT state" ] = "state";
         src[ "PLOT output" ] = "output";
-        src[ "PLOT e" ] = "e";
-        src[ "PLOT e_integral" ] = "e_integral";
-        src[ "PLOT e_deriv" ] = "e_deriv";
+        src[ "PLOT e" ] = "error";
+        src[ "PLOT e_integral" ] = "integral";
+        src[ "PLOT e_deriv" ] = "deriv";
         src[ "PLOT e_previous" ] = "e_previous";
         
 	return src;
@@ -872,6 +872,9 @@ map< string, string >& sliFieldNameConvert()
         fieldnames["PIDController.sns"] = "sensed";
         fieldnames["PIDController.tau_i"] = "tauI";
         fieldnames["PIDController.tau_d"] = "tauD";
+        fieldnames["PIDController.e"] = "error";
+        fieldnames["PIDController.e_integral"] = "integral";
+        fieldnames["PIDController.e_deriv"] = "derivative";
 	return fieldnames;
 }
 
@@ -1077,10 +1080,10 @@ void GenesisParserWrapper::doAdd(
                 // message to Table (where source is the ValueFinfo
                 // "output" and the same message to other classes,
                 // with an input message, like RC.
-                if ( msgType == "INPUT output" && srcClassName == "PulseGen" && destClassName != "Table" )                                                                                                         
-                         msgType = srcClassName + "." + msgType;
+                if ( msgType == "INPUT output" && srcClassName == "PulseGen" && destClassName != "Table" )
+                        msgType = srcClassName + "." + msgType;
                 if ( msgType == "INPUT output" && destClassName == "PulseGen" )
-                         msgType = destClassName + "." + msgType;
+                        msgType = destClassName + "." + msgType;
                 if ( msgType == "INPUT output" && srcClassName == "DiffAmp" && destClassName != "Table" )
                         msgType = srcClassName + "." + msgType;
 		bool usingMULTGATE = 0;
