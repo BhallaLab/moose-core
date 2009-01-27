@@ -281,7 +281,12 @@ const DynamicFinfo* getDF( const Conn* c )
 	const Finfo* f;
 	unsigned int i = 1;
 	while ( ( f = e->localFinfo( i ) ) ) {
-		if ( f->msg() == c->targetMsg() || f->msg() == c->sourceMsg() )
+		// Not sure why the following condition was being used earlier. It was
+		// leading to incorrect callbacks from ValueFinfos.
+		// if ( f->msg() == c->targetMsg() || f->msg() == c->sourceMsg() )
+		
+		// Replaced above condition with the following one.
+		if ( f->msg() == c->targetMsg() )
 			return dynamic_cast< const DynamicFinfo* >( f );
 		i++;
 	}
