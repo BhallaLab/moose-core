@@ -1,0 +1,187 @@
+7 Jan 2009
+
+I have been playing around with a new messaging system, one that uses an
+intermediate buffer. The big advantage of this sytem is that it should
+simplify messaging in multithread and multinode systems. 
+
+Sync messages begin to look a bit like the kinetics optimizations in 
+GENESIS. 
+Differing: The msg source uses 'send' to place the data in a safe buffer.
+Similar: The msg dest scans list of ptrs to places in this buffer.
+Similar: Will need an 'ACTION'-like mechanism for calling dest funcs from
+clocks.
+Possibly this will work a bit faster than existing MOOSE messaging.
+
+Async messages are harder. Need to assemble all outgoing data on any given
+thread into an expanding buffer for that thread. Data packets include src id.
+These packets are transferred (issues here about selecting for targets).
+On target thread, src id used to look up whatever part of the ConnTainer info
+specifies the dest elements. Then the packet is delivered. Best if done through
+a scan of dests, since that retains similarity with Sync messages. 
+
+Need to introduce a mechanism for calling 'ACTIONS' directly.
+
+=============================================================================
+26 Jan 2009
+
+send -> buffer
+process -> lookup buffer
+trigger -> call func. Could restrict to fixed set, or provide a func lookup 
+	index. If fixed set could use virtual funcs.
+
+Or, eliminate trigger and provide only process, proc2, and reinit.
+	Would like to be able to call arb funcs.
+
+SendBack, SendTo become harder.
+
+
+Process op: well defined, clock ticked.
+Proc2: ditto
+Reinit: ditto.
+
+Then: generic arrival op: Scan for op request. The memory location has
+both the operation identifier and the arguments.
+
+Or: build up scan list through messages... sounds like GENESIS.
+
+Or: Alerting mechanism. 'SendTo' or 'SendBack' puts target id on queue
+
+High traffic messages are scheduled.
+	Synaptic input is scheduled even though it is sporadic. Total
+	traffic is expected to be big.
+Low traffic messages are polled by queue. When called, these are added
+	to a queue for the target object.
+Buffer info includes only data.
+	For regular input, like conc and Vm, data only is the conc/Vm.
+	For synaptic input the data includes source object info.
+	For low traffic messages the data includes complete conn info, plus args
+	For sendback messages like channelGates: It can be scheduled, so
+		the data includes return info and the op must use this to place
+		the response in the right location. Would be nice to do
+		efficiently in array form.
+	For field assignment: Regular low traffic
+	For field readout: Data includes Id for field access object.
+		This is a temporary from the command line
+		It is a regular object for plots etc.
+
+
+Design requirements:
+- Thread safe
+- Buffered data delivery for threading and for multinode operations.
+- Very fast for scheduled operations, whether threaded or not.
+- Connections remain fully traversible, 
+- Connections remain usable bidirectionally by multiple messages.
+
+Design desiderata
+- Completely deterministic for single-thread case (consider real-time ops)
+
+=============================================================================
+30 Jan 2009
+There is a problem to be sorted for any queued buffer messaging: Ensuring that
+things go into the buffer without stepping on each others' toes. For
+example, sending spikes. If we allocate a separate buffer per thread for
+each target object, things get costly and messy. But that may be better 
+than mutexes for writing into the buffer.
+
+We expect single 'synapse' objects to manage many input axons, each connecting
+with a distinct weight. Suppose 100 of these, so the convergence is up to 300.
+Assume a 16-way system, we don't want to manage 16 buffers for each synapse.
+
+Per-clock buffers: An extra step to unsort them. More info to put in to 
+identify dest.
+
+Thread-safe queue for writing: There is an extra overhead in mutex juggling
+for every 'send', though the subsequent reads can be clean as they are done
+on the object owning the queue. If we have per-object queues should be 
+manageable.
+
+=============================================================================
+31 Jan 2009
+A problem with the messaging concept: Can't put the message buf on the
+target element, because the data may go to multiple targets. Instead
+need the target element to manage ptr to the msg src(s) and read them.
+Either that, or have src element push data into multiple target bufs.
+Latter makes more sense, given that we may need to push data also into
+an MPI buffer or so.
+But by the same token data comes into the MPI Recv buffer and needs to
+be dispersed. 
+So, one way or another, the postmaster must be an active participant
+in getting data in or out of the buffer.
+
+Cost:
+Pushing data:
+Src needs addr for each buffer, N addrs.      Iterate N times.
+Each Dest needs buffer, N * datasize.         N dests each 1 lookup.
+Multhreading: No change, no need for any locks.
+MPI: Push right into MPI buffer. At remote node need to do further push.
+Sporadic Msgs: Push into queues of every target. No redundancy.
+			: Push into a single queue, later push into target?
+				No particular advantage.
+Variant on Moose 1.1 approach: Target object guarantees thread-safe
+	handling of incoming data... tricky. Need to put each incoming 
+	arg into separate location indexed by msg src itself.
+
+Pulling data:
+Src needs single buffer, no iteration. 1 addr. No iteration.
+Each dest needs addr of buffer: N* ptrsize    N dests each 1 lookup.
+Multhreading: No change, no need for any locks.
+MPI: Postmasters on src need to pull in data. At remote node usual pull.
+Sporadic msgs: Push into a single queue, managed by msg. This
+	subsequently needs to do multiple pushes anyway, unless there
+	is a very high chance that each entry will be of interest to each
+	receiving synapse.
+	: Push into multiple queues, basically into the target object.
+
+Seems like pulling data works better for scheduled messages.
+Something like pushing needed for sporadic msgs. 
+Like old GENESIS.
+
+=============================================================================
+1 Feb 2009
+Now the location of the buffers.
+sched data buffer
+- On source object:
+	+ No extra storage or management
+	. Need to redirect pointers if objects are deleted or moved
+	. Need to redirect pointers for zombies. But redirection needed anyway
+	- Mixes message transfer with object representation.
+- In a separate buffer managed by the Msg:
+	+ Management relatively straightforward, set up at msg creation time.
+	+ Deleting and moving objects managed along with messages.
+	. Zombies could do a hack and reuse the same msg space.
+	+ Separates message transfer from object representation.
+
+async data buffers
+- On dest objects:
+	+ Clean synapse management.
+	- Mixes message transfer with object representation.
+- In multiple separate buffers managed by each of the Msgs:
+	+ Again, management straightforward, set up at msg creation time.
+	+ Separates message transfer from object representation.
+	. Many-to-many msgs have a possible economy of assignment.
+
+Seems like the best bet is to have Msgs manage the buffers. The clinching point
+is that about separation of message data transfer from objects.
+
+Implemented a first pass test simulation using reacs and mols. Hard coded
+in buffer info. Works. Helps set up requirements for messaging.
+
+In this variant, the Element manages a vector< double* > that points to
+the data buffers, and this in turn is referenced by a vector< unsigned int >
+which converts the slots into the correct buffer location. The Element
+provides some helper functions for doing individual msg data (double) lookup,
+and others for taking sums and products of sequences: such ops are common.
+
+
+Next:
+	- Get svn working for this.
+	- Implement sporadic messages for field access
+	- Implement something that uses synaptic messages
+	- Implement message setup framework
+	- Scheduling
+	- Multithreading
+	- MPI
+	- Array elements and messages
+	- Benchmarking
+
+=============================================================================
