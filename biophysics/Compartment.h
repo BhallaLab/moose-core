@@ -17,6 +17,8 @@
  * also channels. This is not a particularly efficient way of doing
  * this, so we should use a solver for any substantial calculations.
  */
+namespace moose
+{
 class Compartment
 {
 	public:
@@ -137,6 +139,7 @@ class Compartment
 			double z_;
 			static const double EPSILON;
 };
+}
 
 // Used by solver, readcell, etc.
 extern const Cinfo* initCompartmentCinfo();

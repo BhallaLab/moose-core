@@ -1,6 +1,6 @@
 #!/bin/tcsh
 
-set MOOSE = ../../moose
+set MOOSE = 'mpirun ../../moose'
 
 # nearDiff is a function to see if two data files are within 
 # epsilon of each other. It assumes the files are in xplot format
