@@ -12,7 +12,7 @@
 
 #include "Compartment.h"
 
-
+using namespace moose;
 const double Compartment::EPSILON = 1.0e-15;
 
 /**
