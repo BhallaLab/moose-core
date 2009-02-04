@@ -17,7 +17,7 @@
  * also channels. This is not a particularly efficient way of doing
  * this, so we should use a solver for any substantial calculations.
  */
-class SymCompartment: public Compartment
+class SymCompartment: public moose::Compartment
 {
 	public:
 			SymCompartment();

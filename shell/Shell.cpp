@@ -22,6 +22,8 @@
 #include "../randnum/Normal.h"
 #include "math.h"
 #include "sstream"
+#include "sbml_IO/SbmlReader.h"
+#include "sbml_IO/SbmlWriter.h"
 
 extern void pollPostmaster(); // Defined in maindir/mpiSetup.cpp
 //////////////////////////////////////////////////////////////////////
@@ -252,7 +254,13 @@ const Cinfo* initShellCinfo()
 				RFCAST( &Shell::loadtab ) ),	
 		new DestFinfo( "tabop",
 				Ftype4< Id, char, double, double >::global(),
-				RFCAST( &Shell::tabop ) ),	
+				RFCAST( &Shell::tabop ) ),
+		new DestFinfo( "readsbml",
+				Ftype3< string, string, int >::global(),
+				RFCAST( &Shell::readSbml ) ),	
+		new DestFinfo( "writesbml",
+				Ftype3< string, string, int >::global(),
+				RFCAST( &Shell::writeSbml ) ),		
 	};
 	static Finfo* serialShared[] =
 	{
@@ -1965,7 +1973,49 @@ void Shell::file2tab( const Conn& c,
 				e->name() << ".load\n";
 	}
 }
+void Shell::readSbml( const Conn* c, string filename, string location, int childnode )
+{
+	SbmlReader sr;
+	
+	Id loc( location );
+	if ( loc.bad() ) {
+		string::size_type pos = location.find_last_of( "/" );
+		Id pa;
+		string name;
+		if ( pos == string::npos ) {
+			pa = getCwe( c->target() );
+			name = location;
+		} else if ( pos == 0 ) {
+			pa = Id();
+			name = location.substr( 1 );
+		} else {
+			pa = Id( location.substr( 0, pos ), "/" );
+			if ( pa.bad() ) {
+				cout << "Error: readSBML: model path '" << location << "' not found.\n";
+				return;
+			}
+			name = location.substr( pos + 1 );
+		}
+		
+		Element* locE = Neutral::create( "Neutral", name, pa, Id::scratchId() );
+		loc = locE->id();
+	}
+	
+	sr.read( filename, loc );
+}
 
+void Shell::writeSbml( const Conn* c, string filename, string location, int childnode )
+{
+	SbmlWriter sw;
+	
+	Id loc( location );
+	if ( loc.bad() ) {
+		cerr << "Error: Shell::writeSbml: Path " << location << " does not exist.\n";
+		return;
+	}
+	
+	sw.write( filename, loc );
+}
 
 // Static function
 /**

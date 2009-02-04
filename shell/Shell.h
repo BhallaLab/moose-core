@@ -521,6 +521,11 @@ class Shell
 			double max );
 		static void file2tab( const Conn& c, 
 				Id id, string filename, unsigned int skiplines );
+		//////////////////////////////////////////////////////////
+		// sbml functions
+		//////////////////////////////////////////////////////////
+		static void readSbml( const Conn* c, string filename, string modelpath, int childnode );
+		static void writeSbml( const Conn* c, string filename, string modelpath, int childnode );
 			/*
 		void add( const string& src, const string& dest );
 		void drop( const string& src, const string& dest );
