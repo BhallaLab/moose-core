@@ -19,7 +19,7 @@ void BioScan::initialize( Id object )
 	ProcInfoBase p;
 	SetConn c( object(), 0 );
 	if ( isType( object, "Compartment" ) )
-		Compartment::reinitFunc( &c, &p );
+		moose::Compartment::reinitFunc( &c, &p );
 	else if ( isType( object, "HHChannel" ) )
 		HHChannel::reinitFunc( &c, &p );
 	else if ( isType( object, "CaConc" ) )
@@ -157,7 +157,7 @@ int BioScan::targets(
 		ProcInfoBase p;
 		SetConn c( found(), 0 );
 		if ( isType( found, "Compartment" ) )
-			Compartment::reinitFunc( &c, &p );
+			moose::Compartment::reinitFunc( &c, &p );
 		else if ( isType( found, "HHChannel" ) )
 			HHChannel::reinitFunc( &c, &p );
 		else if ( isType( found, "CaConc" ) )
