@@ -105,7 +105,7 @@ endif
 # Libraries are defined below. For now we do not use threads.
 SUBLIBS = 
 #LIBS =	-lm -lpthread
-LIBS = 	-lm
+LIBS = 	-lm -lsbml -L/usr/local/lib  
 ##########################################################################
 #
 # Developer options (Don't try these unless you are writing new code!)
@@ -183,7 +183,7 @@ LD = ld
 
 SUBDIR = basecode connections maindir genesis_parser shell element scheduling \
 	biophysics hsolve kinetics ksolve builtins utility \
-	randnum signeur device $(PARALLEL_DIR) $(MUSIC_DIR) 
+	randnum signeur device sbml_IO $(PARALLEL_DIR) $(MUSIC_DIR) 
 
 # Used for 'make clean'
 CLEANSUBDIR = $(SUBDIR) parallel music pymoose
@@ -205,6 +205,7 @@ OBJLIBS =	\
 	builtins/builtins.o \
 	signeur/signeur.o \
 	device/device.o \
+	sbml_IO/sbml_IO.o \
 	$(PARALLEL_LIB) \
 	$(MUSIC_LIB)
 

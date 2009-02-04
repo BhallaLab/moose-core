@@ -195,7 +195,7 @@ void SymCompartment::innerProcessFunc( Element* e, ProcInfo p )
 
 void SymCompartment::innerReinitFunc( Eref e, ProcInfo p )
 {
-	Compartment::innerReinitFunc( e, p );
+	moose::Compartment::innerReinitFunc( e, p );
 	coeff_ = 0.0;
 	coeff2_ = 0.0;
 
@@ -283,12 +283,12 @@ void testSymCompartment()
 	ProcInfoBase p;
 	SetConn c( c0, 0 );
 	p.dt_ = 0.002;
-	Compartment::setInject( &c, 1.0 );
-	Compartment::setRm( &c, 1.0 );
-	Compartment::setRa( &c, 0.0025 );
-	Compartment::setCm( &c, 1.0 );
-	Compartment::setEm( &c, 0.0 );
-	Compartment::setVm( &c, 0.0 );
+	moose::Compartment::setInject( &c, 1.0 );
+	moose::Compartment::setRm( &c, 1.0 );
+	moose::Compartment::setRa( &c, 0.0025 );
+	moose::Compartment::setCm( &c, 1.0 );
+	moose::Compartment::setEm( &c, 0.0 );
+	moose::Compartment::setVm( &c, 0.0 );
 
 	// Get rid of all the compartments.
 	set( n, "destroy" );
