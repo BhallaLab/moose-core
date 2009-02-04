@@ -216,6 +216,10 @@ const Cinfo* initGenesisParserCinfo()
 			Ftype1< string >::global() ),
 		new SrcFinfo( "tabop", 
 			Ftype4< Id, char, double, double >::global() ),
+		new SrcFinfo( "readsbml", 
+			Ftype3< string, string, int >::global() ),
+		new SrcFinfo( "writesbml", 
+			Ftype3< string, string, int >::global() ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -364,7 +368,10 @@ static const Slot loadtabSlot =
 	initGenesisParserCinfo()->getSlot( "parser.loadtab" );
 static const Slot tabopSlot = 
 	initGenesisParserCinfo()->getSlot( "parser.tabop" );
-
+static const Slot readSbmlSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.readsbml" );
+static const Slot writeSbmlSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.writesbml" );
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -4031,9 +4038,32 @@ char** do_arglist(int argc, const char** const argv, Id s)
             ++ptr;
         }        
     }
+
     return output;
 }
+void do_readsbml( int argc, const char** const argv, Id s )
+{
+	if (argc != 3 ) {
+		cout << "usage::readSBML filename /kinetics \n";
+		return;
+	}
+	string modelpath=argv[2];
+	int childNode = parseNodeNum( modelpath );
+	string filename=argv[1];
+ 	send3< string, string, int >(s(), readSbmlSlot, filename, modelpath, childNode );
+}
 
+void do_writesbml( int argc, const char** const argv, Id s )
+{
+	if (argc != 3 ) {
+		cout << "usage::writeSBML filename /kinetics \n";
+		return;
+	}
+	string writeloc=argv[2];
+	int childNode = parseNodeNum( writeloc );
+	string filename=argv[1];
+ 	send3< string, string, int >(s(), writeSbmlSlot, filename, writeloc, childNode );
+}
 
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper load command
@@ -4158,6 +4188,8 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "showstat", do_showstat, "void" );
 	AddFunc( "help", do_help, "void" );
         AddFunc( "arglist", reinterpret_cast< slifunc > ( do_arglist ), "char**");
+	AddFunc( "readSBML", reinterpret_cast< slifunc > ( do_readsbml ), "void" );
+	AddFunc( "writeSBML", reinterpret_cast< slifunc > ( do_writesbml ), "void" );
 }
 
 //////////////////////////////////////////////////////////////////

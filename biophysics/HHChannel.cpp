@@ -880,7 +880,7 @@ void testHHChannel()
 	SetConn c2( chan, 0 );
 	SetConn c3( kchan, 0 );
 
-	Compartment::reinitFunc( &c1, &pb );
+	moose::Compartment::reinitFunc( &c1, &pb );
 	HHChannel::reinitFunc( &c2, &pb );
 	HHChannel::reinitFunc( &c3, &pb );
 
@@ -889,7 +889,7 @@ void testHHChannel()
 	for ( pb.currTime_ = 0.0; pb.currTime_ < 0.01;
 			pb.currTime_ += pb.dt_ )
 	{
-		Compartment::processFunc( &c1, &pb );
+		moose::Compartment::processFunc( &c1, &pb );
 		HHChannel::processFunc( &c2, &pb );
 		HHChannel::processFunc( &c3, &pb );
 		if ( static_cast< int >( pb.currTime_ * 1e5 ) % 10 == 0 ) {
