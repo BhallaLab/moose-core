@@ -18,6 +18,7 @@ class SbmlWriter
 		~SbmlWriter() {;}
 		void write(string filename,Id location);
 		SBMLDocument* createModel(string filename);
+		bool validateModel(SBMLDocument* sbmlDoc);
 		bool writeModel(const SBMLDocument* sbmlDoc, const string& filename);
 	private:
 		static int targets(Eref object,	const string& msg,vector< Eref >& target,const string& type = "" );
