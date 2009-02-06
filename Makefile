@@ -105,7 +105,7 @@ endif
 # Libraries are defined below. For now we do not use threads.
 SUBLIBS = 
 #LIBS =	-lm -lpthread
-LIBS = 	-lm -lsbml -L/usr/local/lib  
+LIBS = 	-lm 
 ##########################################################################
 #
 # Developer options (Don't try these unless you are writing new code!)
@@ -146,6 +146,12 @@ LIBS+= -lgsl -lgslcblas
 CXXFLAGS+= -DUSE_GSL
 endif
 
+# To use SBML ,pass USE_SBML=true in make command line
+ifdef USE_SBML
+LIBS+=-lsbml -L/usr/local/lib
+CXXFLAGS+=-DUSE_SBML  
+endif
+
 # To compile with readline support pass USE_READLINE=true in make command line
 ifdef USE_READLINE
 LIBS+= -lreadline
@@ -162,6 +168,11 @@ ifeq ($(OSTYPE),Linux)
 ifeq ($(MACHINE),x86_64)
 LIBS=-L/lib64 -L/usr/lib64 $(LIBS) 
 endif
+endif
+
+ifdef USE_SBML 
+	SBML_DIR = sbml_IO
+	SBML_LIB = sbml_IO/sbml_IO.o 
 endif
 
 ifdef USE_MUSIC
@@ -186,7 +197,7 @@ SUBDIR = basecode connections maindir genesis_parser shell element scheduling \
 	randnum signeur device sbml_IO $(PARALLEL_DIR) $(MUSIC_DIR) 
 
 # Used for 'make clean'
-CLEANSUBDIR = $(SUBDIR) parallel music pymoose
+CLEANSUBDIR = $(SUBDIR) parallel music pymoose sbml_IO
 
 OBJLIBS =	\
 	basecode/basecode.o \
@@ -205,7 +216,7 @@ OBJLIBS =	\
 	builtins/builtins.o \
 	signeur/signeur.o \
 	device/device.o \
-	sbml_IO/sbml_IO.o \
+	$(SBML_LIB) \
 	$(PARALLEL_LIB) \
 	$(MUSIC_LIB)
 
@@ -214,7 +225,7 @@ export CXXFLAGS
 export LD
 export LIBS
 
-moose: libs $(OBJLIBS) $(PARALLEL_LIB)
+moose: libs $(OBJLIBS) 
 	$(CXX) $(OBJLIBS) $(LIBS) -o moose
 	@echo "Moose compilation finished"
 
@@ -239,3 +250,4 @@ default: moose mpp
 clean:
 	@(for i in $(CLEANSUBDIR) ; do $(MAKE) -C $$i clean;  done)
 	-rm -rf moose mpp core.* DOCS/html *.so *.py *.pyc
+
