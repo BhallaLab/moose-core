@@ -194,7 +194,7 @@ LD = ld
 
 SUBDIR = basecode connections maindir genesis_parser shell element scheduling \
 	biophysics hsolve kinetics ksolve builtins utility \
-	randnum signeur device sbml_IO $(PARALLEL_DIR) $(MUSIC_DIR) 
+	randnum signeur device $(SBML_DIR) $(PARALLEL_DIR) $(MUSIC_DIR) 
 
 # Used for 'make clean'
 CLEANSUBDIR = $(SUBDIR) parallel music pymoose sbml_IO
