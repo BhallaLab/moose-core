@@ -22,8 +22,10 @@
 #include "../randnum/Normal.h"
 #include "math.h"
 #include "sstream"
+#ifdef USE_SBML
 #include "sbml_IO/SbmlReader.h"
 #include "sbml_IO/SbmlWriter.h"
+#endif
 
 extern void pollPostmaster(); // Defined in maindir/mpiSetup.cpp
 //////////////////////////////////////////////////////////////////////
@@ -1973,8 +1975,10 @@ void Shell::file2tab( const Conn& c,
 				e->name() << ".load\n";
 	}
 }
+
 void Shell::readSbml( const Conn* c, string filename, string location, int childnode )
 {
+#ifdef USE_SBML
 	SbmlReader sr;
 	
 	Id loc( location );
@@ -1991,7 +1995,7 @@ void Shell::readSbml( const Conn* c, string filename, string location, int child
 		} else {
 			pa = Id( location.substr( 0, pos ), "/" );
 			if ( pa.bad() ) {
-				cout << "Error: readSBML: model path '" << location << "' not found.\n";
+				cout << "Error: readSbml: model path '" << location << "' not found.\n";
 				return;
 			}
 			name = location.substr( pos + 1 );
@@ -2002,10 +2006,14 @@ void Shell::readSbml( const Conn* c, string filename, string location, int child
 	}
 	
 	sr.read( filename, loc );
+#else
+	cerr << "Error: readSbml: This MOOSE is not built with SBML compatibility.\n";
+#endif
 }
 
 void Shell::writeSbml( const Conn* c, string filename, string location, int childnode )
 {
+#ifdef USE_SBML 
 	SbmlWriter sw;
 	
 	Id loc( location );
@@ -2015,6 +2023,9 @@ void Shell::writeSbml( const Conn* c, string filename, string location, int chil
 	}
 	
 	sw.write( filename, loc );
+#else
+	cerr << "Error: writeSbml: This MOOSE is not built with SBML compatibility.\n";
+#endif
 }
 
 // Static function
