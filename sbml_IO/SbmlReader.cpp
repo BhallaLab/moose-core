@@ -168,8 +168,8 @@ void SbmlReader::createCompartment(Model* model,Id location)
 		if (size != 0.0){
 			
                     set< double >( comptEl_, sizeFinfo, size );
-                    double set_size;
-                    /*get <double> ( comptEl_, sizeFinfo, set_size);
+                    /*double set_size;
+                    get <double> ( comptEl_, sizeFinfo, set_size);
                     //cout << comptEl_->id().path() << "::setting size: " << size << " actually set: " <<  set_size << endl;
                     for ( map<string, Id>::iterator iter = idMap.begin(); iter != idMap.end(); ++iter )
                     {
@@ -315,7 +315,6 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 	map<string,double>pdtMap;
 	map <string, double>::iterator pdtMap_iter;
 	map<string,Eref>::iterator elemt_iter;
-	int numreact,numpdt;
 	double rctorder,pdtorder;
 	static const Cinfo* moleculeCinfo = initMoleculeCinfo();
 	static const Finfo* reacFinfo =moleculeCinfo->findFinfo( "reac" );	
@@ -333,21 +332,25 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 	{	
 		reac=model->getReaction(r); 
 		const string id=reac->getId();
+		cout<<"reaction is "<<id<<endl;
 		bool rev=reac->getReversible();
+		bool fast=reac->getFast();
+		cout<<"is fast"<<fast<<endl;  
 		const SpeciesReference* rect=reac->getReactant(0);
 		std::string sp=rect->getSpecies();
 		Id m=molMap.find(sp)->second; //gives compartment of sp
 		reaction_=Neutral::create( "Reaction",id,m,Id::scratchId() ); //create Reaction
 		
-		numreact=reac->getNumReactants();
+		//numreact=reac->getNumReactants();
 		//cout<<"num of rct :"<<numreact<<endl;
 		double rctcount=0.0;	
 		rctMap.clear();
 		double frate=1.0,brate=1.0;
 		for (int rt=0;rt<reac->getNumReactants();rt++)
-		{
+		{	
 			const SpeciesReference* rct=reac->getReactant(rt);
 			sp=rct->getSpecies();
+			cout<<"reactant is "<<sp<<endl;
 			rctMap_iter = rctMap.find(sp);			
 			if (rctMap_iter != rctMap.end()){	
 				rctcount = rctMap_iter->second;
@@ -372,14 +375,15 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 				
 			}
 		}
-		numpdt=reac->getNumProducts();
+		//numpdt=reac->getNumProducts();
 		//cout<<"no of pdt :"<<numpdt<<endl;
 		double pdtcount = 0.0;
-		pdtMap[sp]=pdtcount;
+		pdtMap.clear();
 		for (int pt=0;pt<reac->getNumProducts();pt++)
 		{
 			const SpeciesReference* pdt=reac->getProduct(pt);
 			sp=pdt->getSpecies();	
+			cout<<"product is "<<sp<<endl;
 			pdtMap_iter = pdtMap.find(sp);
 			if (pdtMap_iter != pdtMap.end()){	
 				pdtcount = pdtMap_iter->second;
@@ -405,27 +409,41 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 		}
 		//order of reactants
 		rctorder=0.0;	
+		string rsp= "",psp="";
 		for (rctMap_iter=rctMap.begin();rctMap_iter!=rctMap.end();rctMap_iter++)
 		{
 			rctorder += rctMap_iter->second;
-			sp=rctMap_iter->first;	//species of the reactant	
+			rsp=rctMap_iter->first;	//species of the reactant
+			cout<<"rsp "<<rsp<<endl;	
 		}	
 		//cout<<"rct order = "<<rctorder<<endl;
-		/*m=molMap.find(sp)->second;
-		double size;
-                get<double>(m.eref(), sizeFinfo, size); //getting compartment size
-		*/
+		Id r=molMap.find(rsp)->second;
+		cout<<"r"<< r <<endl;
+		
 		//order of products
-		pdtorder=0.0;	
+		pdtorder=0.0;
 		for (pdtMap_iter=pdtMap.begin();pdtMap_iter!=pdtMap.end();pdtMap_iter++)
 		{
-			pdtorder += pdtMap_iter->second;		
+			pdtorder += pdtMap_iter->second;
+			psp=pdtMap_iter->first;	//species of the product	
+			cout<<"psp "<<psp<<endl;	
+			
 		}
 		//cout<<"pdt order = "<<pdtorder<<endl;
-		
-		
+		Id p;
+		bool noproduct = false;
+		if (psp != ""){		
+			p=molMap.find(psp)->second;
+			cout<<"p"<< p <<endl;
+		}
+		else if (psp == "")
+			noproduct = true;
 		if (reac->isSetKineticLaw())
 		{	KineticLaw * klaw=reac->getKineticLaw();
+			string timeunit = klaw->getTimeUnits(); 
+			cout<<"timeunit "<<timeunit<<endl;
+			string subunit=klaw->getSubstanceUnits();
+			cout<<"subunit "<<subunit<<endl;
 			std::string id;
 			double value = 0.0;
 			int np = klaw->getNumParameters();
@@ -442,25 +460,6 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 					//cout<<"value of param in kl:"<<value<<endl;	
 				}
 			}
-			//const std::string subunit=klaw->getSubstanceUnits();    
-			//cout<<"sub units in klaw :"<<subunit<<endl;
-			/*UnitDefinition * ud=klaw->getDerivedUnitDefinition();
-			for (int ut=0;ut<ud->getNumUnits();ut++)
-			{
-				Unit * unit=ud->getUnit(ut);
-				double exponent=unit->getExponent();
-				cout<<"exponent  :"<<exponent<<endl;
-				double multiplier=unit->getMultiplier();
-				cout<<"multiplier :"<<multiplier<<endl;
-				int scale=unit->getScale();
-				cout<<"scale :"<<scale<<endl;
-				double ofset=unit->getOffset(); 
-				cout<<"offset :"<<ofset<<endl;
-				cout<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`"<<endl;
-				double lvalue = multiplier * pow((double)10,scale) * pow(mvalue,exponent) + ofset;
-
-		
-			}*/			
 			double kf=0.0,kb=0.0;
 			string parm;
 			if (value == 0.0){
@@ -474,25 +473,42 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 					
 				}
 			}
-			//double NA = 6.02214199e23; //Avogardo's number	
-			//if (parm == "k1" || parm == "k2"){
+			/*double NA = 6.02214199e23; //Avogardo's number	
+			if (parm == "k1" || parm == "k2"){
 				
-				//kf=NA*n*value*pow((1/6e23*n),rctorder-1);
+				kf=NA*n*value*pow((1/6e23*n),rctorder-1);
+				if (rev)				
+					kb=NA*n*value*pow((1/6e23*n),pdtorder-1);
+			}
+			else if (parm == "KT" || parm == "k3"){
+				kf=n*value;
+				if (rev)
+					kb=n*value;
+			}*/
+			if (noproduct){
+				double size;
+                		get<double>(r.eref(), sizeFinfo, size); 
+				cout<<"size "<<size<<endl;				
+				kf = size * value;
+				kb = 0;	
+				cout<<"kf = "<<kf<<"kb = "<<kb<<endl;	
+			}							
+			else if (r != p){
+				double size;
+                		get<double>(p.eref(), sizeFinfo, size); 
+				cout<<"size "<<size<<endl;				
+				kf = size * value;
+				if (rev)
+					kb = size * value;	
+				cout<<"kf = "<<kf<<"kb = "<<kb<<endl;		
+			}
+			else if ((r == p) && (noproduct == false)){ 
 				kf = frate * value;
 				if (rev)				
-					//kb=NA*n*value*pow((1/6e23*n),pdtorder-1);
 					kb = brate * value;
-							
-			//}
-			//else if (parm == "KT" || parm == "k3"){
-			//	kf=n*value;
-			//	if (rev)
-			//		kb=n*value;
-			//}
-					
-				set< double >( reaction_, kfFinfo, kf); 
-					
-				set< double >( reaction_, kbFinfo, kb); 
+			}
+			set< double >( reaction_, kfFinfo, kf); 
+			set< double >( reaction_, kbFinfo, kb); 
 		} //kinetic law		
 	}//reaction 
 }//create reaction
