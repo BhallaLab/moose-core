@@ -21,10 +21,10 @@
 void SbmlWriter::write(string filename,Id location)
 {
   	SBMLDocument* sbmlDoc = 0;
-  	//bool SBMLok = false;
-	bool SBMLok = true;
+  	bool SBMLok = false;
+	//bool SBMLok = true;
 	sbmlDoc = createModel(filename); 
-  	//SBMLok  = validateModel(sbmlDoc);
+  	SBMLok  = validateModel(sbmlDoc);
 	filename += ".xml";
     	if (SBMLok) 
 		writeModel(sbmlDoc, filename);
@@ -138,11 +138,14 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 			sp->setCompartment(parentCompt);
 			int mode;		
 			get< int >(moleEl,modeFinfo,mode);
-			if (mode==0)
+			if (mode==0){
 				sp->setConstant(false);
-			else
+				sp->setBoundaryCondition(false); 
+			}	
+			else{
 				sp->setConstant(true);
-			
+				sp->setBoundaryCondition(true); 
+			}
 			unsigned int dimension;
 		        get< unsigned int >(parent.eref(),dimensionFinfo,dimension);
 			double initamt=0.0;
@@ -375,6 +378,115 @@ int SbmlWriter::targets(Eref object,const string& msg,vector< Eref >& target,con
 bool SbmlWriter::isType( Eref object, const string& type )
 {
 	return object->cinfo()->isA( Cinfo::find( type ) );
+}
+
+bool SbmlWriter::validateModel(SBMLDocument* sbmlDoc)
+{
+	  if (!sbmlDoc)
+	  {
+	    cerr << "validateModel: given a null SBML Document" << endl;
+	    return false;
+	  }
+	 
+	  string consistencyMessages;
+	  string validationMessages;
+	  bool noProblems                     = true;
+	  unsigned int numCheckFailures       = 0;
+	  unsigned int numConsistencyErrors   = 0;
+	  unsigned int numConsistencyWarnings = 0;
+	  unsigned int numValidationErrors    = 0;
+	  unsigned int numValidationWarnings  = 0;
+
+	  // Once the whole model is done and before it gets written out, 
+	  // it's important to check that the whole model is in fact complete, consistent and valid.
+
+	  numCheckFailures = sbmlDoc->checkInternalConsistency();
+	  if ( numCheckFailures > 0 )
+	  {
+		    noProblems = false;
+		    for (unsigned int i = 0; i < numCheckFailures; i++)
+		    {
+		      const SBMLError* sbmlErr = sbmlDoc->getError(i);
+		      if ( sbmlErr->isFatal() || sbmlErr->isError() )
+		      {
+			++numConsistencyErrors;
+		      }
+		      else
+		      {
+			++numConsistencyWarnings;
+		      }      
+		    } 
+		    ostringstream oss;
+		    sbmlDoc->printErrors(oss);
+		    consistencyMessages = oss.str(); 
+	  }
+
+	  // If the internal checks fail, it makes little sense to attempt
+	  // further validation, because the model may be too compromised to
+	  // be properly interpreted.
+
+	  if (numConsistencyErrors > 0)
+	  {
+	    consistencyMessages += "Further validation aborted."; 
+	  }
+	  else
+	  {
+		    numCheckFailures = sbmlDoc->checkConsistency();
+		    if ( numCheckFailures > 0 )
+		    {
+			      noProblems = false;
+			      for (unsigned int i = 0; i < numCheckFailures; i++)
+			      {
+					const SBMLError* sbmlErr = sbmlDoc->getError(i);
+					if ( sbmlErr->isFatal() || sbmlErr->isError() )
+					{
+					  ++numValidationErrors;
+					}
+					else
+					{
+					  ++numValidationWarnings;
+					}      
+			      } 
+			      ostringstream oss;
+			      sbmlDoc->printErrors(oss);
+			      validationMessages = oss.str(); 
+		    }
+	  }
+
+	  if (noProblems)
+	    return true;
+	  else
+	  {
+		    if (numConsistencyErrors > 0)
+		    {
+		      cout << "ERROR: encountered " << numConsistencyErrors 
+			   << " consistency error" << (numConsistencyErrors == 1 ? "" : "s")
+			   << " in model '" << sbmlDoc->getModel()->getId() << "'." << endl;
+		    }
+		    if (numConsistencyWarnings > 0)
+		    {
+		      cout << "Notice: encountered " << numConsistencyWarnings
+			   << " consistency warning" << (numConsistencyWarnings == 1 ? "" : "s")
+			   << " in model '" << sbmlDoc->getModel()->getId() << "'." << endl;
+		    }
+		    cout << endl << consistencyMessages;
+
+		    if (numValidationErrors > 0)
+		    {
+		      cout << "ERROR: encountered " << numValidationErrors
+			   << " validation error" << (numValidationErrors == 1 ? "" : "s")
+			   << " in model '" << sbmlDoc->getModel()->getId() << "'." << endl;
+		    }
+		    if (numValidationWarnings > 0)
+		    {
+		      cout << "Notice: encountered " << numValidationWarnings
+			   << " validation warning" << (numValidationWarnings == 1 ? "" : "s")
+			   << " in model '" << sbmlDoc->getModel()->getId() << "'." << endl;
+		    }
+		    cout << endl << validationMessages;
+
+		    return (numConsistencyErrors == 0 && numValidationErrors == 0);
+	  }
 }
 
 
