@@ -92,7 +92,9 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 	vector< Id >::iterator itr;
 	wildcardFind("/kinetics/##[TYPE=KinCompt]", compts);
  	vector< Eref > outcompt;	
+	
 	for (itr = compts.begin(); itr != compts.end(); itr++)
+	
 	{
 		comptEl = ( *itr )();
 		::Compartment* compt = model->createCompartment();
@@ -118,6 +120,16 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 			compt->setOutside(outName);
 			
 		}
+		/*
+		vector< Eref > incompt;		
+		targets(comptEl,"inside",incompt);
+		if ( incompt.size() >= 1 ) {
+			cout<< incompt[ 0 ]().path();
+			cout<<"incompt is "<<incompName<<endl;	
+				
+			//compt->setOutside(incompName);
+			
+		}*/
 		// Create the Species objects inside the Model object. 
 		static const Cinfo* moleculeCinfo = initMoleculeCinfo();	
 		static const Finfo* nInitFinfo = moleculeCinfo->findFinfo( "nInit" );	
@@ -164,6 +176,7 @@ SBMLDocument* SbmlWriter::createModel(string filename)
   		static const Cinfo* reactionCinfo = initReactionCinfo();
  		static const Finfo* kbFinfo = reactionCinfo->findFinfo( "kb" );	
 		static const Finfo* kfFinfo = reactionCinfo->findFinfo( "kf" );	
+		static const Finfo* KfFinfo = reactionCinfo->findFinfo( "Kf" );	
 	  	Eref rectnEl;
 		vector< Id > reaction;
 		vector< Id >::iterator ritr;
@@ -184,9 +197,10 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 			reaction->setId((rectnEl)->name());
 			cout<<"reaction :"<<(rectnEl)->name()<<endl;
 			
-			double kb=0.0,kf=0.0;
+			double kb=0.0,kf=0.0,Kf=0.0;
 			get< double >( rectnEl, kbFinfo, kb); 
 			get< double >( rectnEl, kfFinfo, kf); 
+			get< double >( rectnEl, KfFinfo, Kf);
 			if (kb == 0.0)
 	 			reaction->setReversible(false);
 			else
@@ -208,7 +222,7 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 				spr->setSpecies(rctName);
 				
 			}*/
-			double frate =1.0,brate=1.0;
+			//double frate =1.0,brate=1.0;
 			for(ri=rctUniq.begin(); ri != rctUniq.end(); ri++)
 			{	
 				spr = reaction->createReactant();
@@ -219,12 +233,12 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 				rctstoch=count(rct.begin(),rct.end(),*ri);
 				spr->setStoichiometry(rctstoch);
 				//cout<<"stoichiometry :"<<rctstoch<<endl;
-				rct_order += rctstoch;
+				/*rct_order += rctstoch;
 				double initconc;
 				get < double > ((*ri),concInitFinfo,initconc);
 
 				cout<<"conc is "<<initconc<<"exponent is "<<rctstoch<<endl;
-				frate *= pow(initconc,rctstoch); 
+				frate *= pow(initconc,rctstoch); */
 				
 			}
 			//cout<<"rct_order is "<<rct_order<<endl;
@@ -254,11 +268,11 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 				pdtstoch=count(pdt.begin(),pdt.end(),*pi);
 				spr->setStoichiometry(pdtstoch);
 				//cout<<"stoichiometry :"<<pdtstoch<<endl;
-				pdt_order += pdtstoch;
+				/*pdt_order += pdtstoch;
 				double initconc;
 				get < double > ((*pi),concInitFinfo,initconc);
 				cout<<"pdt exponent is "<<pdtstoch<<endl;
-				brate *= pow(initconc,pdtstoch); 
+				brate *= pow(initconc,pdtstoch); */
 			}
 			//cout<<"pdt_order is "<<pdt_order<<endl;
 			// Create a KineticLaw object inside the Reaction object 
@@ -269,11 +283,12 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 			std::set< Eref >::iterator ri;*/
 			ostringstream rate_law;
 			if (kf != 0.0 ){
-				//double NA = 6.02214199e23; //Avogardo's number		
-				//double parmvalue = Kf*pow(6e23*size,rct_order-1)/(NA*size);
-				//double parmvalue =kf/size;
+				double NA = 6.02214199e23; //Avogardo's number		
+				double parmvalue = kf*pow(6e26*size,rct_order-1)/(NA*size);
+				double parvalue =Kf/size;
 				
-				//cout<<"value "<<parmvalue<<endl;
+				cout<<"pvalue from kf "<<parmvalue<<endl;
+				cout<<"pvalue from Kb "<<parvalue<<endl;
 				//rate_law <<comptName<<"*"<< "kf";
 				rate_law <<comptName<<"*"<< "k";
 				for(ri=rctUniq.begin(); ri != rctUniq.end(); ri++)
@@ -322,11 +337,11 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 
 			// Create local Parameter objects inside the KineticLaw object. 
 		
-			para = kl->createParameter();
-			double kval = kf/(size * frate );
-			cout<<"kval "<<kval<<endl;
-			para->setId("k");
-			para->setValue(kval);
+			//para = kl->createParameter();
+			//double kval = kf/(size * frate );
+			//cout<<"kval "<<kval<<endl;
+			//para->setId("k");
+			//para->setValue(kval);
 			//para->setUnits("litre_per_mole_per_second"); 
 			
 			
