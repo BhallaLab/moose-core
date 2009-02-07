@@ -21,6 +21,7 @@
 using namespace std;
 map<string,double>parmValueMap;
 map<string,double>::iterator pvm_iter;
+map<string,string>parmUnitMap;
 //function to get the parameter used in the kinetic law
 string SbmlReader::prn_parm(const ASTNode* p)
 {
@@ -293,7 +294,7 @@ void SbmlReader::printParameter(Model* model)
 	for (int pm=0;pm<model->getNumParameters();pm++)
 	{
 		Parameter* prm=model->getParameter(pm);
-		std::string id;
+		std::string id,unit;
 		if (prm->isSetId()){
 			id = prm->getId();
 		}
@@ -302,7 +303,10 @@ void SbmlReader::printParameter(Model* model)
 			value=prm->getValue();	
 		}
 		parmValueMap[id]=value;
-		
+		if (prm->isSetUnits()){
+			unit=prm->getUnits();			
+		}
+		parmUnitMap[id]=unit;
 	}
 }
 
@@ -335,7 +339,7 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 		cout<<"reaction is "<<id<<endl;
 		bool rev=reac->getReversible();
 		bool fast=reac->getFast();
-		cout<<"is fast"<<fast<<endl;  
+		//cout<<"is fast"<<fast<<endl;  
 		const SpeciesReference* rect=reac->getReactant(0);
 		std::string sp=rect->getSpecies();
 		Id m=molMap.find(sp)->second; //gives compartment of sp
@@ -345,12 +349,12 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 		//cout<<"num of rct :"<<numreact<<endl;
 		double rctcount=0.0;	
 		rctMap.clear();
-		double frate=1.0,brate=1.0;
+		//double frate=1.0,brate=1.0;
 		for (int rt=0;rt<reac->getNumReactants();rt++)
 		{	
 			const SpeciesReference* rct=reac->getReactant(rt);
 			sp=rct->getSpecies();
-			cout<<"reactant is "<<sp<<endl;
+			//cout<<"reactant is "<<sp<<endl;
 			rctMap_iter = rctMap.find(sp);			
 			if (rctMap_iter != rctMap.end()){	
 				rctcount = rctMap_iter->second;
@@ -360,7 +364,7 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 			}
 			rctcount += rct->getStoichiometry();
 			rctMap[sp] = rctcount;
-			m=molMap.find(sp)->second;
+			/*m=molMap.find(sp)->second;
 			double size;
                		get<double>(m.eref(), sizeFinfo, size); //getting compartment size
 			frate *= size;
@@ -368,7 +372,7 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 			double initconc;			
 			get< double >( molec, concInitFinfo, initconc);
 			//cout<<"initial con of "<<sp <<" is "<<initconc<<endl;
-			frate *= pow(initconc,rctcount);
+			frate *= pow(initconc,rctcount);*/
 			for (int i=0;(int)i<rct->getStoichiometry();i++)
 			{	
 				Eref(reaction_).add(subFinfo->msg(),elmtMap[sp],reacFinfo->msg(),ConnTainer::Default);
@@ -383,7 +387,7 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 		{
 			const SpeciesReference* pdt=reac->getProduct(pt);
 			sp=pdt->getSpecies();	
-			cout<<"product is "<<sp<<endl;
+			//cout<<"product is "<<sp<<endl;
 			pdtMap_iter = pdtMap.find(sp);
 			if (pdtMap_iter != pdtMap.end()){	
 				pdtcount = pdtMap_iter->second;
@@ -393,14 +397,14 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 			}
 			pdtcount += pdt->getStoichiometry();
 			pdtMap[sp] = pdtcount;	
-			m=molMap.find(sp)->second;
+			/*m=molMap.find(sp)->second;
 			double size;
                 	get<double>(m.eref(), sizeFinfo, size); //getting compartment size
 			brate *= size;
 			Eref molec=elmtMap[sp];	//to get the initial concentration of sp
 			double initconc;			
 			get< double >( molec, concInitFinfo, initconc);
-			brate *= pow(initconc,pdtcount);	
+			brate *= pow(initconc,pdtcount);*/	
 			for (int i=0;i<pdt->getStoichiometry();i++)
 			{	
 				Eref(reaction_).add(prdFinfo->msg(),elmtMap[sp],reacFinfo->msg(),ConnTainer::Default);
@@ -414,11 +418,11 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 		{
 			rctorder += rctMap_iter->second;
 			rsp=rctMap_iter->first;	//species of the reactant
-			cout<<"rsp "<<rsp<<endl;	
+			//cout<<"rsp "<<rsp<<endl;	
 		}	
 		//cout<<"rct order = "<<rctorder<<endl;
 		Id r=molMap.find(rsp)->second;
-		cout<<"r"<< r <<endl;
+		//cout<<"r"<< r <<endl;
 		
 		//order of products
 		pdtorder=0.0;
@@ -426,7 +430,7 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 		{
 			pdtorder += pdtMap_iter->second;
 			psp=pdtMap_iter->first;	//species of the product	
-			cout<<"psp "<<psp<<endl;	
+			//cout<<"psp "<<psp<<endl;	
 			
 		}
 		//cout<<"pdt order = "<<pdtorder<<endl;
@@ -434,18 +438,18 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 		bool noproduct = false;
 		if (psp != ""){		
 			p=molMap.find(psp)->second;
-			cout<<"p"<< p <<endl;
+			//cout<<"p"<< p <<endl;
 		}
 		else if (psp == "")
 			noproduct = true;
 		if (reac->isSetKineticLaw())
 		{	KineticLaw * klaw=reac->getKineticLaw();
 			string timeunit = klaw->getTimeUnits(); 
-			cout<<"timeunit "<<timeunit<<endl;
+			//cout<<"timeunit "<<timeunit<<endl;
 			string subunit=klaw->getSubstanceUnits();
-			cout<<"subunit "<<subunit<<endl;
-			std::string id;
-			double value = 0.0;
+			//cout<<"subunit "<<subunit<<endl;
+			std::string id,unit;
+			double value = 0.0,rvalue,pvalue;
 			int np = klaw->getNumParameters();
 			//cout<<"no of parms : "<<np<<endl;
 			for (int pi=0;pi<np;pi++)
@@ -458,6 +462,9 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 				if (p->isSetValue()){		
 					value=p->getValue();
 					//cout<<"value of param in kl:"<<value<<endl;	
+				}
+				if (p->isSetUnits()){
+					unit=p->getUnits();				
 				}
 			}
 			double kf=0.0,kb=0.0;
@@ -472,40 +479,70 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 					value = pvm_iter->second;
 					
 				}
-			}
-			/*double NA = 6.02214199e23; //Avogardo's number	
-			if (parm == "k1" || parm == "k2"){
+				unit=parmUnitMap[parm];
+				cout<<"unit is "<<unit<<endl;
 				
-				kf=NA*n*value*pow((1/6e23*n),rctorder-1);
-				if (rev)				
-					kb=NA*n*value*pow((1/6e23*n),pdtorder-1);
 			}
-			else if (parm == "KT" || parm == "k3"){
-				kf=n*value;
+			double csize;
+		        get<double>(r.eref(), sizeFinfo, csize); //getting compartment size
+			if (unit == "litre_per_mole_per_second"){
+				double NA = 6.02214199e23; //Avogardo's number	
+				rvalue=NA*value*pow((1/6e26*csize),rctorder-1);
+				pvalue=NA*value*pow((1/6e26*csize),pdtorder-1);
+			}
+			else{
+				rvalue=value;
+				pvalue=value;
+			}
+				
+			/*if (unit == "litre_per_mole_per_second"){
+				double NA = 6.02214199e23; //Avogardo's number	
+				double size;
+		        	get<double>(r.eref(), sizeFinfo, size); //getting compartment size
+				kf=size*NA*value*pow((1/6e26*size),rctorder-1);
+				
+				if (rev)				
+					kb=size*NA*value*pow((1/6e26*size),pdtorder-1);
+				else
+					kb = 0;
+				cout<<"kf = "<<kf<<"kb = "<<kb<<endl;	
+			
+			}
+			else if (unit == "per_second"){
+				double size;
+                		get<double>(r.eref(), sizeFinfo, size); 
+				//cout<<"size "<<size<<endl;				
+				kf = size * value;
 				if (rev)
-					kb=n*value;
+					kb = size * value;
+				else
+					kb = 0;	
+				cout<<"kf = "<<kf<<"kb = "<<kb<<endl;			
 			}*/
 			if (noproduct){
 				double size;
                 		get<double>(r.eref(), sizeFinfo, size); 
 				cout<<"size "<<size<<endl;				
-				kf = size * value;
+				kf = size * rvalue;
 				kb = 0;	
 				cout<<"kf = "<<kf<<"kb = "<<kb<<endl;	
 			}							
 			else if (r != p){
-				double size;
-                		get<double>(p.eref(), sizeFinfo, size); 
-				cout<<"size "<<size<<endl;				
-				kf = size * value;
-				if (rev)
-					kb = size * value;	
+				double psize,rsize;
+                		get<double>(p.eref(), sizeFinfo, psize); 
+				cout<<"psize "<<psize<<endl;				
+				kf = psize * rvalue;
+				if (rev){
+					get<double>(r.eref(), sizeFinfo, rsize); 
+					cout<<"rsize "<<rsize<<endl;		
+					kb = rsize * pvalue;
+				}	
 				cout<<"kf = "<<kf<<"kb = "<<kb<<endl;		
 			}
 			else if ((r == p) && (noproduct == false)){ 
-				kf = frate * value;
+				kf = csize * rvalue;
 				if (rev)				
-					kb = brate * value;
+					kb = csize * pvalue;
 			}
 			set< double >( reaction_, kfFinfo, kf); 
 			set< double >( reaction_, kbFinfo, kb); 
