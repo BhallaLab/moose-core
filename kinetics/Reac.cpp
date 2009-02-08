@@ -5,6 +5,31 @@ const Slot subSlot = 0;
 const Slot prdSlot = 1;
 const Slot reacSlot = 2;
 
+// meant to be templated
+static unsigned int setKf_( Eref e, const void* buf )
+{
+	static_cast< Reac* >( e.data() )->setKf( 
+		*static_cast< const double* >( buf ) );
+	 return sizeof( FuncId ) + sizeof( double );
+}
+
+static unsigned int setKb_( Eref e, const void* buf )
+{
+	static_cast< Reac* >( e.data() )->setKb( 
+		*static_cast< const double* >( buf ) );
+	 return sizeof( FuncId ) + sizeof( double );
+}
+
+Finfo** Reac::initClassInfo()
+{
+	static Finfo* reacFinfos[] = {
+		new Finfo( setKf_ ),
+		new Finfo( setKb_ ),
+	};
+
+	return reacFinfos;
+}
+
 Reac::Reac( double kf, double kb )
 	: kf_( kf ), kb_( kb )
 {
@@ -89,3 +114,13 @@ unsigned int Reac::setKf( Eref e, const char* i )
 }
 
  */
+
+void Reac::setKf( double v )
+{
+	kf_ = v;
+}
+
+void Reac::setKb( double v )
+{
+	kb_ = v;
+}

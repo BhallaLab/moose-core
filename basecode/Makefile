@@ -17,12 +17,14 @@ CXXFLAGS += -I.. -I../kinetics
 OBJ = \
 	Element.o	\
 	Eref.o	\
+	Finfo.o	\
 	main.o	\
 
 HEADERS = \
 	header.h \
 	Element.h \
 	Eref.h \
+	Finfo.h \
 
 default: $(TARGET)
 

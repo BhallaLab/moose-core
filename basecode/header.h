@@ -29,10 +29,13 @@
 using namespace std;
 
 typedef unsigned int Slot;
+typedef unsigned int FuncId;
+extern const FuncId ENDFUNC;
 
 class Element;
 class Eref;
 
+#include "Finfo.h"
 #include "ProcInfo.h"
 #include "Data.h"
 #include "Element.h"

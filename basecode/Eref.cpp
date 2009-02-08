@@ -25,3 +25,8 @@ double* Eref::getBufPtr( Slot slot )
 {
 	return e_->getBufPtr( slot, i_ );
 }
+
+Data* Eref::data()
+{
+	return e_->data( i_ );
+}

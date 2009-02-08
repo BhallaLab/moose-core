@@ -3,6 +3,20 @@
 
 const Slot vSlot = 0;
 
+Finfo** Tab::initClassInfo()
+{
+	/*
+	static Finfo* molFinfos[] = {
+		new Finfo( setN ),
+		new Finfo( setNinit ),
+	}
+
+	return molFinfos;
+	*/
+
+	return 0;
+}
+
 void Tab::process( const ProcInfo* p, Eref e )
 {
 	double v = e.oneBuf( vSlot );

@@ -3,7 +3,9 @@
 #include "Mol.h"
 #include "Tab.h"
 
-int main()
+const FuncId ENDFUNC( -1 );
+
+void testSync()
 {
 	// Make objects
 	Mol m1( 1.0 );
@@ -89,5 +91,60 @@ int main()
 	// Dump data
 	t1.print();
 
+	delete e1;
+	delete e2;
+	delete e3;
+	delete e4;
+}
+
+void testAsync( )
+{
+	/*
+	static Finfo* reacFinfos[] = {
+		new Finfo f1( setKf ),
+		new Finfo f2( setKb ),
+	};
+	*/
+
+	// Make objects
+	Reac r1( 0.2, 0.1 );
+	Element* e1 = new Element( &r1 );
+
+	vector< char > buffer( 100 );
+	char* buf = &( buffer[0] );
+	FuncId assignKf( 0 );
+	FuncId assignKb( 1 );
+
+	*static_cast< FuncId* >( static_cast< void* >( buf ) ) = assignKf;
+	buf += sizeof( FuncId );
+	*static_cast< double* >( static_cast< void* >( buf ) ) = 1234.0;
+	buf += sizeof( double );
+
+	*static_cast< FuncId* >( static_cast< void* >( buf ) ) = assignKb;
+	buf += sizeof( FuncId );
+	*static_cast< double* >( static_cast< void* >( buf ) ) = 4321.0;
+	buf += sizeof( double );
+
+	*static_cast< FuncId* >( static_cast< void* >( buf ) ) = ENDFUNC;
+	buf += sizeof( FuncId );
+
+	assert( r1.kf_ == 0.2 );
+	assert( r1.kb_ == 0.1 );
+	e1->clearQ( &( buffer[0] ) );
+	assert( r1.kf_ == 1234.0 );
+	assert( r1.kb_ == 4321.0 );
+}
+
+void testSynapse( )
+{
+}
+
+int main()
+{
+	testSync();
+	testAsync();
+	testSynapse();
+
 	return 0;
 }
+

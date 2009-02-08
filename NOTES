@@ -151,14 +151,31 @@ sched data buffer
 	. Zombies could do a hack and reuse the same msg space.
 	+ Separates message transfer from object representation.
 
-async data buffers
+async data buffers: Synaptic input.
 - On dest objects:
 	+ Clean synapse management.
 	- Mixes message transfer with object representation.
+	. Sender must scan through all dests.
+	- Extra outgoing buffers.
 - In multiple separate buffers managed by each of the Msgs:
 	+ Again, management straightforward, set up at msg creation time.
 	+ Separates message transfer from object representation.
 	. Many-to-many msgs have a possible economy of assignment.
+	- All targets must scan through all potential sources
+
+async data buffers: Sporadic input.
+- On Dest objects:
+	+ Clean data management
+	- Need to send out to all targets (But # likely small )
+	- Mixes message transfer with object representation
+- On Src objects
+	+ Single point of assignment
+	- All targets must scan through all potential sources
+	- Possible economy of assignment.
+- On buffers managed by each Msg:
+	+ Single point of assignment
+	- All targets must scan through all potential sources
+	- Possible economy of assignment.
 
 Seems like the best bet is to have Msgs manage the buffers. The clinching point
 is that about separation of message data transfer from objects.
@@ -174,7 +191,7 @@ and others for taking sums and products of sequences: such ops are common.
 
 
 Next:
-	- Get svn working for this.
+	* Get svn working for this.
 	- Implement sporadic messages for field access
 	- Implement something that uses synaptic messages
 	- Implement message setup framework
@@ -183,5 +200,24 @@ Next:
 	- MPI
 	- Array elements and messages
 	- Benchmarking
+
+=============================================================================
+2 Feb 2009
+Svn now working, the path is
+https://moose.svn.sourceforge.net/svnroot/moose/moose/branches/Msg
+
+For sporadic messages:
+- Use indexing equivalent to Finfo definitions.
+- Use a template for an adaptor function from char* args to the class-specific
+	func. The adaptor func can also do the typecasting for the class itself.
+
+Need also a queue for synaptic input. Scan on sched, but variable # of entries.
+=============================================================================
+8 Feb 2009
+For async messages, no point in defining a specific class for the 
+data packets. There will always be a FuncId but after that no telling 
+what args to take.
+
+Implemented a first simple pass at async messages for field access.
 
 =============================================================================

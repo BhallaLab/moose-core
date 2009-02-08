@@ -24,6 +24,11 @@ class Eref
 		 * Used for sends.
 		 */
 		double* getBufPtr( Slot slot );
+
+		/**
+		 * Returns data entry
+		 */
+		Data* data();
 	private:
 		Element* e_;
 		unsigned int i_;

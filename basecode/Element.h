@@ -7,11 +7,14 @@
  */
 class Element
 {
-	friend int main();
+	friend void testSync();
+	friend void testAsync();
 	public:
-		Element( Data *d )
-			: d_( d )
-			{;}
+		/**
+		 * Constructor
+		 */
+		Element( Data *d );
+
 		/**
 		 * Examine process queue, data that is expected every timestep.
 		 */
@@ -24,8 +27,14 @@ class Element
 
 		/**
 		 * Clear sporadic message queue, events that come randomly.
-		void clearQ();
 		 */
+		void clearQ( const char* buf );
+
+		/**
+		 * Utility function for calling function with specified FuncId.
+		 * May need to be optimized out.
+		 */
+		unsigned int execFunc( FuncId f, const char* buf );
 
 		/**
 		 * Return a single buffer entry specified by slot and eindex
@@ -50,6 +59,11 @@ class Element
 		 * locations available to this message slot.
 		 */
 		double* getBufPtr( Slot slot, unsigned int i );
+
+		/**
+		 * Returns the data on the specified index for the Element
+		 */
+		Data* data( unsigned int index );
 	private:
 		Data* d_;
 
@@ -70,6 +84,8 @@ class Element
 		vector< char >generalQ_; // This grows as needed.
 		vector< char >processQ_; // This is set by # of incoming proc msgs
 		*/
+
+		Finfo** finfo_;
 };
 
 /*

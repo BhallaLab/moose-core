@@ -1,5 +1,11 @@
 #include "header.h"
 
+Element::Element( Data *d )
+	: d_( d ), finfo_( d_->initClassInfo() )
+{
+	;
+}
+
 void Element::process( const ProcInfo* p )
 {
 	d_->process( p, Eref( this, 0 ) );
@@ -10,12 +16,21 @@ void Element::reinit()
 	d_->reinit( Eref( this, 0 ) );
 }
 
-/*
-void Element::clearQ()
+void Element::clearQ( const char* buf )
 {
-	;
+	FuncId f = *( static_cast < const FuncId * >( 
+		static_cast< const void* >( buf ) ) );
+	while ( f != ENDFUNC ) {
+		buf += execFunc( f, buf );
+		f = *( static_cast < const FuncId * >( 
+			static_cast< const void* >( buf ) ) );
+	}
 }
-*/
+
+unsigned int Element::execFunc( FuncId f, const char* buf )
+{
+	return finfo_[ f ]->op( Eref( this, 0 ), buf + sizeof( FuncId ) );
+}
 
 double Element::sumBuf( Slot slot, unsigned int i )
 {
@@ -60,4 +75,9 @@ double* Element::getBufPtr( Slot slot, unsigned int i )
 	unsigned int offset = slot;
 	assert( offset + 1 < procBufRange_.size() );
 	return procBuf_[ procBufRange_[ offset ] ];
+}
+
+Data* Element::data( unsigned int index )
+{
+	return d_;
 }

@@ -8,6 +8,46 @@ const Slot aSlot = 0;
 const Slot bSlot = 1;
 const Slot nSlot = 2;
 
+/*
+const Cinfo* initMolCinfo()
+{
+	static Finfo* molFinfos[] = 
+	{
+		new ValueFinfo( "n" ); 
+	};
+}
+
+template< class T, class A, ( void T::F* )( A ) > 
+	unsigned int adapt( Eref e, A arg )
+{
+	static_cast< T* >( e.data() )->F( *static_cast< A* >( arg ) );
+	return sizeof( A );
+}
+
+unsigned int qFuncDouble( Eref e, char* arg )
+{
+	static_cast< Mol* >( e.data() )->setKf( 
+		*static_cast< double* >( arg ) );
+	return sizeof( double );
+}
+
+*/
+
+Finfo** Mol::initClassInfo()
+{
+	/*
+	static Finfo* molFinfos[] = {
+		new Finfo( setN ),
+		new Finfo( setNinit ),
+	}
+
+	return molFinfos;
+	*/
+
+	return 0;
+}
+
+
 void Mol::process( const ProcInfo* p, Eref e )
 {
 /*
