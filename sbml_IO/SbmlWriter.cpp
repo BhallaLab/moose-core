@@ -62,7 +62,7 @@ SBMLDocument* SbmlWriter::createModel(string filename)
   	unit->setKind(UNIT_KIND_SECOND);
   	unit->setExponent(-1);
 
-  	// (UnitDefinition2) Create an UnitDefinition object for "litre_per_mole_per_second".  
+  	/*// (UnitDefinition2) Create an UnitDefinition object for "litre_per_mole_per_second".  
     
   	unitdef = model->createUnitDefinition();
  	unitdef->setId("litre_per_mole_per_second");
@@ -80,7 +80,7 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 
 	 unit = unitdef->createUnit();
 	 unit->setKind(UNIT_KIND_SECOND);
-	 unit->setExponent(-1);
+	 unit->setExponent(-1);*/
 
  	// Create a string for the identifier of the compartment.  
 
@@ -282,10 +282,12 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 			rctUniq.insert(rct.begin(),rct.end());
 			std::set< Eref >::iterator ri;*/
 			ostringstream rate_law;
+			double parmvalue ;
 			if (kf != 0.0 ){
 				double NA = 6.02214199e23; //Avogardo's number		
-				double parmvalue = kf*pow(6e26*size,rct_order-1)/(NA*size);
-				double parvalue =Kf/size;
+				//double parmvalue = kf*pow(6e26*size,rct_order-1)/(NA*size);
+				parmvalue = kf/size;
+				double parvalue = Kf/size;
 				
 				cout<<"pvalue from kf "<<parmvalue<<endl;
 				cout<<"pvalue from Kb "<<parvalue<<endl;
@@ -337,12 +339,12 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 
 			// Create local Parameter objects inside the KineticLaw object. 
 		
-			//para = kl->createParameter();
+			para = kl->createParameter();
 			//double kval = kf/(size * frate );
-			//cout<<"kval "<<kval<<endl;
-			//para->setId("k");
-			//para->setValue(kval);
-			//para->setUnits("litre_per_mole_per_second"); 
+			cout<<"kval "<<parmvalue<<endl;
+			para->setId("k");
+			para->setValue(parmvalue);
+			para->setUnits("per_second");
 			
 			
 		}
