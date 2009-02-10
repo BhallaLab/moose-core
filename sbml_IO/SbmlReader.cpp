@@ -54,7 +54,7 @@ string SbmlReader::prn_parm(const ASTNode* p)
     }
     return parm;
  } 
-	
+ 
 //read a model into MOOSE 
 void SbmlReader::read(string filename,Id location)
 {
@@ -85,6 +85,8 @@ void SbmlReader::read(string filename,Id location)
 }
 double SbmlReader::transformUnits(double mvalue,UnitDefinition * ud)
 {	//cout<<"num units :"<<ud->getNumUnits()<<endl;
+	double lvalue = mvalue;
+	
 	for (int ut=0;ut<ud->getNumUnits();ut++)
 	{
 		Unit * unit=ud->getUnit(ut);
@@ -95,17 +97,22 @@ double SbmlReader::transformUnits(double mvalue,UnitDefinition * ud)
 		int scale=unit->getScale();
 		//cout<<"scale :"<<scale<<endl;
 		double ofset=unit->getOffset(); 
-		double lvalue = multiplier * pow((double)10,scale) * pow(mvalue,exponent) + ofset;
+		lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + ofset;
+		//cout<<"lvalue "<<lvalue<<endl;
 		if (unit->isLitre()){
 			//cout<<"unit is litre";
 			lvalue *= pow(1e-3,exponent);
 			//cout<<"size in function is : "<<lsize<<endl;	
 		}
 		if (unit->isMole()){
-			lvalue *= pow(6e23,exponent);		
+			lvalue *= pow(6e23,exponent);	
+			//cout<<"mole"<<endl;	
 		}
-		return lvalue;
+		
+		
 	}
+	//cout<<"value before return "<<lvalue;
+	return lvalue;
 }
 // create COMPARTMENT  
 void SbmlReader::createCompartment(Model* model,Id location)
@@ -131,7 +138,6 @@ void SbmlReader::createCompartment(Model* model,Id location)
 			name = compt->getName();
 		} 
 
-		
 		std::string type;
 		if (compt->isSetCompartmentType()){
 			type =compt->getCompartmentType ();
@@ -164,22 +170,10 @@ void SbmlReader::createCompartment(Model* model,Id location)
 			static const Finfo* insideFinfo = kincomptCinfo->findFinfo( "inside" );
 			Eref(comptEl_ ).add(outsideFinfo->msg(),outcompt(),insideFinfo->msg(),ConnTainer::Default);
 		}
-		
-		
 		if (size != 0.0){
 			
                     set< double >( comptEl_, sizeFinfo, size );
-                    /*double set_size;
-                    get <double> ( comptEl_, sizeFinfo, set_size);
-                    //cout << comptEl_->id().path() << "::setting size: " << size << " actually set: " <<  set_size << endl;
-                    for ( map<string, Id>::iterator iter = idMap.begin(); iter != idMap.end(); ++iter )
-                    {
-                        Id id = iter->second;
-                        get<double>(id.eref(), sizeFinfo, set_size);
-                        //cout << id.path() << "::size = " << set_size << endl;
-
-                    }*/
-                    
+                                        
 		}
 		if (dimension != 0){
 			
@@ -272,7 +266,6 @@ void SbmlReader::createMolecule(Model* model,map<string,Id> &idMap)
 			set< int >(molecule_,modeFinfo,4); //getConstant=True indicates a buffered molecule
 		else 
 			set< int >(molecule_,modeFinfo,0);
-			
 		
 		/*std::string sptype;		
 		if (s->isSetSpeciesType())
@@ -307,6 +300,7 @@ void SbmlReader::printParameter(Model* model)
 			unit=prm->getUnits();			
 		}
 		parmUnitMap[id]=unit;
+		
 	}
 }
 
@@ -364,15 +358,6 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 			}
 			rctcount += rct->getStoichiometry();
 			rctMap[sp] = rctcount;
-			/*m=molMap.find(sp)->second;
-			double size;
-               		get<double>(m.eref(), sizeFinfo, size); //getting compartment size
-			frate *= size;
-			Eref molec=elmtMap[sp];	//to get the initial concentration of sp
-			double initconc;			
-			get< double >( molec, concInitFinfo, initconc);
-			//cout<<"initial con of "<<sp <<" is "<<initconc<<endl;
-			frate *= pow(initconc,rctcount);*/
 			for (int i=0;(int)i<rct->getStoichiometry();i++)
 			{	
 				Eref(reaction_).add(subFinfo->msg(),elmtMap[sp],reacFinfo->msg(),ConnTainer::Default);
@@ -397,14 +382,6 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 			}
 			pdtcount += pdt->getStoichiometry();
 			pdtMap[sp] = pdtcount;	
-			/*m=molMap.find(sp)->second;
-			double size;
-                	get<double>(m.eref(), sizeFinfo, size); //getting compartment size
-			brate *= size;
-			Eref molec=elmtMap[sp];	//to get the initial concentration of sp
-			double initconc;			
-			get< double >( molec, concInitFinfo, initconc);
-			brate *= pow(initconc,pdtcount);*/	
 			for (int i=0;i<pdt->getStoichiometry();i++)
 			{	
 				Eref(reaction_).add(prdFinfo->msg(),elmtMap[sp],reacFinfo->msg(),ConnTainer::Default);
@@ -450,6 +427,7 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 			//cout<<"subunit "<<subunit<<endl;
 			std::string id,unit;
 			double value = 0.0,rvalue,pvalue;
+			UnitDefinition * ud;
 			int np = klaw->getNumParameters();
 			//cout<<"no of parms : "<<np<<endl;
 			for (int pi=0;pi<np;pi++)
@@ -466,6 +444,7 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 				if (p->isSetUnits()){
 					unit=p->getUnits();				
 				}
+				ud = p->getDerivedUnitDefinition();
 			}
 			double kf=0.0,kb=0.0;
 			string parm;
@@ -479,53 +458,34 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 					value = pvm_iter->second;
 					
 				}
+				Parameter* p = model->getParameter(parm);
 				unit=parmUnitMap[parm];
-				cout<<"unit is "<<unit<<endl;
+				ud = p->getDerivedUnitDefinition();
+				//cout<<"unit is "<<unit<<endl;
 				
 			}
 			double csize;
 		        get<double>(r.eref(), sizeFinfo, csize); //getting compartment size
-			if (unit == "litre_per_mole_per_second"){
+			//cout<<"size :"<<csize<<endl;
+			double transvalue = transformUnits(1,ud);	
+			cout<<"trans value : "<<transvalue<<endl;
+			if (unit == "per_second"){
+				rvalue=transvalue*value;
+				pvalue=transvalue*value;
+			}
+			else{			
 				double NA = 6.02214199e23; //Avogardo's number	
-				rvalue=NA*value*pow((1/6e26*csize),rctorder-1);
-				pvalue=NA*value*pow((1/6e26*csize),pdtorder-1);
-			}
-			else{
-				rvalue=value;
-				pvalue=value;
-			}
+				rvalue=NA*value*pow((transvalue/csize),rctorder-1);
+				pvalue=NA*value*pow((transvalue/csize),pdtorder-1);
 				
-			/*if (unit == "litre_per_mole_per_second"){
-				double NA = 6.02214199e23; //Avogardo's number	
-				double size;
-		        	get<double>(r.eref(), sizeFinfo, size); //getting compartment size
-				kf=size*NA*value*pow((1/6e26*size),rctorder-1);
-				
-				if (rev)				
-					kb=size*NA*value*pow((1/6e26*size),pdtorder-1);
-				else
-					kb = 0;
-				cout<<"kf = "<<kf<<"kb = "<<kb<<endl;	
-			
 			}
-			else if (unit == "per_second"){
-				double size;
-                		get<double>(r.eref(), sizeFinfo, size); 
-				//cout<<"size "<<size<<endl;				
-				kf = size * value;
-				if (rev)
-					kb = size * value;
-				else
-					kb = 0;	
-				cout<<"kf = "<<kf<<"kb = "<<kb<<endl;			
-			}*/
 			if (noproduct){
 				double size;
                 		get<double>(r.eref(), sizeFinfo, size); 
 				cout<<"size "<<size<<endl;				
 				kf = size * rvalue;
 				kb = 0;	
-				cout<<"kf = "<<kf<<"kb = "<<kb<<endl;	
+				//cout<<"kf = "<<kf<<"kb = "<<kb<<endl;	
 			}							
 			else if (r != p){
 				double psize,rsize;
@@ -537,12 +497,13 @@ void SbmlReader::createReaction(Model* model,map<string,Id> &molMap,map<string,E
 					cout<<"rsize "<<rsize<<endl;		
 					kb = rsize * pvalue;
 				}	
-				cout<<"kf = "<<kf<<"kb = "<<kb<<endl;		
+				//cout<<"kf = "<<kf<<"kb = "<<kb<<endl;		
 			}
 			else if ((r == p) && (noproduct == false)){ 
 				kf = csize * rvalue;
 				if (rev)				
 					kb = csize * pvalue;
+				
 			}
 			set< double >( reaction_, kfFinfo, kf); 
 			set< double >( reaction_, kbFinfo, kb); 

@@ -22,6 +22,7 @@ class SbmlReader
 		void  printParameter(Model* model);
 		void  printUnit(Model* model);
 		void  createReaction(Model* model,map<string,Id> &,map<string,Eref> &);
+		
 				
 	private:
 		SBMLDocument* document_;
@@ -31,6 +32,7 @@ class SbmlReader
 		Element* reaction_;
 		string  prn_parm(const ASTNode* p);
 		double transformUnits(double msize,UnitDefinition * ud);
+		
 		
 };
 extern const Cinfo* initKinComptCinfo();
