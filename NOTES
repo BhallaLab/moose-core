@@ -219,5 +219,12 @@ data packets. There will always be a FuncId but after that no telling
 what args to take.
 
 Implemented a first simple pass at async messages for field access.
+Checked in as revision 1009.
+
+Trying to template it out. No luck.
+=============================================================================
+10 Feb 2009
+After some more template contortions, it works. I'm not sure if this beast
+will compile on other systems, though.
 
 =============================================================================

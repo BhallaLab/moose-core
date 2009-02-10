@@ -41,5 +41,6 @@ class Eref;
 #include "Element.h"
 #include "Eref.h"
 #include "Send.h"
+#include "Async.h"
 
 #endif // _HEADER_H

@@ -5,10 +5,23 @@ const Slot subSlot = 0;
 const Slot prdSlot = 1;
 const Slot reacSlot = 2;
 
-// meant to be templated
+// meant to be templated. But it is a spectacularly ugly template, and
+// might not work on all compilers.
+/*
+static async1< Reac, double, Reac::setKf > setKf_;
+// from Async.h:
+template< class T, class A, void ( T::*F )( A ) >
+	unsigned int async1( Eref e, const void* buf )
+{
+	(static_cast< T* >( e.data() )->*F)( 
+		*static_cast< const A* >( buf ) );
+	return sizeof( FuncId ) + sizeof ( A );
+}
+
+// This is what the template replaces:
 static unsigned int setKf_( Eref e, const void* buf )
 {
-	static_cast< Reac* >( e.data() )->setKf( 
+	static_cast< Reac* >( e.data() )->setKf(
 		*static_cast< const double* >( buf ) );
 	 return sizeof( FuncId ) + sizeof( double );
 }
@@ -19,12 +32,20 @@ static unsigned int setKb_( Eref e, const void* buf )
 		*static_cast< const double* >( buf ) );
 	 return sizeof( FuncId ) + sizeof( double );
 }
+*/
+
 
 Finfo** Reac::initClassInfo()
 {
+	/*
 	static Finfo* reacFinfos[] = {
 		new Finfo( setKf_ ),
 		new Finfo( setKb_ ),
+	};
+	*/
+	static Finfo* reacFinfos[] = {
+		new Finfo( async1< Reac, double, &Reac::setKf > ),
+		new Finfo( async1< Reac, double, &Reac::setKb > ),
 	};
 
 	return reacFinfos;
