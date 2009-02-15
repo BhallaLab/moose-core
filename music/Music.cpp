@@ -176,6 +176,11 @@ void Music::finalizeFunc( const Conn* c )
 
 void Music::innerFinalizeFunc( Eref e )
 {
+        std::cout << "Moose shutting down MUSIC communication" << std::endl;
+
+        // cerr << "Music time: " << runtime_->time() << endl;
+
+        runtime_->finalize();
 	delete runtime_;
 	runtime_ = 0;
 }
