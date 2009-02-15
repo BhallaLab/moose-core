@@ -160,8 +160,38 @@ async data buffers: Synaptic input.
 - In multiple separate buffers managed by each of the Msgs:
 	+ Again, management straightforward, set up at msg creation time.
 	+ Separates message transfer from object representation.
+	- Issue of additional data: weight, release prob, history, etc.
 	. Many-to-many msgs have a possible economy of assignment.
 	- All targets must scan through all potential sources
+- Input Q on Msg, synapse-local Q on objects
+	- Initial op: Get data from axon to Msg.
+	- Option 1: push onto Msg Q, accumulate on Msg.
+		- Thread locking needed.
+		- Msg subsequently called on tick to clean input Q.
+		- This could be a rare call if syn delay is large.
+		- Now it shuffles data into synapse-specific Q.
+			- Depending on update rate and convergence onto syn,
+				this could be a single entry Q.
+			- Multi-thread op here too, but very local.
+		- This synapse-specific Q could also be the sorted event Q
+		- Object scans base of event Q each timestep.
+		- Note that we cannot do event queueing on the incoming
+			APs, because of different delays to target.
+	- Option 2: Immediately sort onto target synapse Qs.
+		- Thread locking needed.
+		- This op has to immediately do the shuffling into 
+			synapse-specific Q, since otherwise full scan needed.
+		- This synapse-specific Q could also be the sorted event Q
+		- Object scans base of event Q each timestep.
+	- When object pops event Q, it has to locate syn wt, prob, history, etc.
+		- Option 1: Msg carries this info.
+			+ These are features of projection pattern
+			- Need to template whole Syn Msg structure
+			+ Projection could compute on fly.
+		- Option 2: Target obj carries this info
+			+ Local calculations easier. Postsyn compt history too.
+			+ No templating needed.
+			- Need index in msg for target obj to look up info.
 
 async data buffers: Sporadic input.
 - On Dest objects:
@@ -173,7 +203,6 @@ async data buffers: Sporadic input.
 	- All targets must scan through all potential sources
 	- Possible economy of assignment.
 - On buffers managed by each Msg:
-	+ Single point of assignment
 	- All targets must scan through all potential sources
 	- Possible economy of assignment.
 
@@ -192,7 +221,7 @@ and others for taking sums and products of sequences: such ops are common.
 
 Next:
 	* Get svn working for this.
-	- Implement sporadic messages for field access
+	+ Implement sporadic messages for field access
 	- Implement something that uses synaptic messages
 	- Implement message setup framework
 	- Scheduling
@@ -226,5 +255,62 @@ Trying to template it out. No luck.
 10 Feb 2009
 After some more template contortions, it works. I'm not sure if this beast
 will compile on other systems, though.
+Checked in as revision 1010.
 
+Siji tested it on Windows. Somewhat to my surprise, it works there too. Mac
+is OK too.
+
+=============================================================================
+12 Feb 2009
+
+First pass design for synaptic messaging, based on above description 
+dated Feb 1 (though it has been updated since).
+
+Upon tick at src:
+src -> Msg -> scan through list of targets -> (threadlock) target-specific Q
+Msg contains all the synaptic info, including weight, delay etc.
+Msg also manages a Q for each target synapse object.
+
+Upon tick at target synapse: Query Msg Q. Collect all data if event arrived.
+
+=============================================================================
+15 Feb 2009
+
+Question: Should the Msg be const?
+	- Gets messy with bidirectional data flow in plastic synapses.
+		If we keep Msg const, then there are separate synaptic state
+		variables needed on the target.
+		If we allow it to vary, then the target has to write to Msg.
+	- The synapse Q itself involves bidirectional data flow. Even if the
+		Msg manages the pushing internally, the object has to tell it
+		to pop. Not good.
+	- These are issues with bidirectional data flow. However, we could 
+		still have a projection as an object with explicit
+		Msg and other inputs.
+Summary: 
+	- Q cannot be on Msg.
+	- A Msg is const from viewpoint of target: Unidirectional data flow.
+	- A Msg can however be a normal variable element with a clock tick,
+		and other incoming msgs.
+
+Accessing Msg info:
+	- A Msg is an edge between individual src and dest entries in arrays.
+		Either src or dest entry can access through independent indices.
+	- A Msg is also an edge between the array containers. Likewise.
+	- A Msg may (should?) be an accessible object with fields. Name
+		could be msg field name.
+		setfield /foo/axon/projection[] delay 1e-3
+		setfield /bar/GluR/incoming[23] weight 5
+		showfield /bar/GluR/incoming[]/src
+		showfield /foo/axon/projection[][dest=/bar/#/incoming] weight
+
+
+
+Data structures for synapses:
+	Projection pattern on msg
+	This could include weights. Later we'll worr
+
+* Fix up tests so they use assertions, not printouts
+- Check in.
+- Start setting up synapses.
 =============================================================================

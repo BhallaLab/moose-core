@@ -1,9 +1,27 @@
-#include "moose.h"
-#include "Element.h"
+#include "header.h"
 #include "IntFire.h"
 
-void IntFire::Process( const ProcInfo* p, Eref e )
+
+IntFire::IntFire( double thresh, double tau )
+	: Vm_( 0.0 ), thresh_( thresh ), tau_( tau ), X_( 0.0 ), Y_( 0.0 )
 {
+	;
+}
+
+Finfo** IntFire::initClassInfo()
+{
+	static Finfo* intFireFinfos[] = {
+		new Finfo( async1< IntFire, double, &IntFire::setVm > ),
+		new Finfo( async1< IntFire, double, &IntFire::setThresh > ),
+		new Finfo( async1< IntFire, double, &IntFire::setTau > ),
+	};
+
+	return intFireFinfos;
+}
+
+void IntFire::process( const ProcInfo* p, Eref e )
+{
+/*
 	unsigned int synSize = sizeof( SynInfo );
 	for( char* i = e.processQ.begin(); i != e.processQ.end(); i += synSize )
 	{
@@ -22,13 +40,15 @@ void IntFire::Process( const ProcInfo* p, Eref e )
 		v_ = Em_;
 		sendWithId< double >( e, spikeSlot, p->t );
 	}
+*/
 }
 
 void IntFire::reinit( Eref e )
 {
-	v_ = Em_;
+	Vm_ = 0.0;
 }
 
+/*
 void IntFire::clearQ( Eref e )
 {
 	const char* i = e.generalQ.begin();
@@ -44,6 +64,7 @@ void IntFire::clearQ( Eref e )
 			// All are of the form f( Eref e, const char* i ).
 	}
 }
+*/
 
 /*
 unsigned int FuncId::doOperation( Eref e, char* i )
@@ -54,14 +75,19 @@ unsigned int FuncId::doOperation( Eref e, char* i )
 }
 */
 
-/**
- * Problem here is that it isn't really like the functions defined for
- * the existing moose. Those do a static cast for the object, which
- * is eliminated here. Instead this does a static cast for arg data.
- */
-unsigned int IntFire::setEm( Eref e, const char* i )
+
+void IntFire::setVm( double v )
 {
-	Em_ = *static_cast< double* >( i );
-	return sizeof( double );
+	Vm_ = v;
+}
+
+void IntFire::setTau( double v )
+{
+	tau_ = v;
+}
+
+void IntFire::setThresh( double v )
+{
+	thresh_ = v;
 }
 

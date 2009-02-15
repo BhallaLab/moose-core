@@ -13,7 +13,7 @@
 #
 
 TARGET = basecode.o
-CXXFLAGS += -I.. -I../kinetics
+CXXFLAGS += -I.. -I../kinetics -I../biophysics
 OBJ = \
 	Element.o	\
 	Eref.o	\

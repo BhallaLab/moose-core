@@ -1,7 +1,9 @@
 #include "header.h"
+#include <math.h>
 #include "Reac.h"
 #include "Mol.h"
 #include "Tab.h"
+#include "IntFire.h"
 
 const FuncId ENDFUNC( -1 );
 
@@ -89,12 +91,18 @@ void testSync()
 	e4->process( &p );
 
 	// Dump data
-	t1.print();
-
+	// t1.print();
+	vector< double > other;
+	for ( double x = 0.0; x < maxt; x += plotdt ) {
+		other.push_back( 0.333333 + 0.666666 * ( exp( -x / 3.333333 ) ) );
+		// cout << other.back() << endl;
+	}
+	assert( t1.equal( other, 0.001 ) );
 	delete e1;
 	delete e2;
 	delete e3;
 	delete e4;
+	cout << "sync..." << flush;
 }
 
 void testAsync( )
@@ -133,18 +141,38 @@ void testAsync( )
 	e1->clearQ( &( buffer[0] ) );
 	assert( r1.kf_ == 1234.0 );
 	assert( r1.kb_ == 4321.0 );
+
+	delete e1;
+	cout << "async..." << flush;
 }
 
 void testSynapse( )
 {
+	// Make objects. f1 and f2 connect into f3 and f4
+	IntFire f1( 0.01, 0.002 );
+	Element* e1 = new Element( &f1 );
+
+	IntFire f2( 0.01, 0.002 );
+	Element* e2 = new Element( &f2 );
+
+	IntFire f3( 0.01, 0.002 );
+	Element* e3 = new Element( &f3 );
+
+	IntFire f4( 0.01, 0.002 );
+	Element* e4 = new Element( &f4 );
+
+
+	cout << "synapse..." << flush;
 }
 
 int main()
 {
+	cout << "testing: ";
 	testSync();
 	testAsync();
 	testSynapse();
 
+	cout << endl;
 	return 0;
 }
 

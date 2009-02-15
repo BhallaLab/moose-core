@@ -85,6 +85,12 @@ class Element
 		vector< char >processQ_; // This is set by # of incoming proc msgs
 		*/
 
+		/**
+		 * This points to the Queue for incoming synaptic events,
+		 * maintained on the Msg.
+		SynQ* synQ;
+		 */
+
 		Finfo** finfo_;
 };
 
