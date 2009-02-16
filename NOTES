@@ -206,8 +206,12 @@ async data buffers: Sporadic input.
 	- All targets must scan through all potential sources
 	- Possible economy of assignment.
 
-Seems like the best bet is to have Msgs manage the buffers. The clinching point
-is that about separation of message data transfer from objects.
+Seems like the best bet is to have Msgs manage the sync buffers.
+The clinching point is that about separation of message data transfer
+from objects.
+(Added 15 Feb: Another issue overrides this, for async messages: data flow
+should be unidirectional, that is, messages cannot be changed by their targets.
+This would happen if the spikeQ was on the message rather than the target.)
 
 Implemented a first pass test simulation using reacs and mols. Hard coded
 in buffer info. Works. Helps set up requirements for messaging.
@@ -284,9 +288,12 @@ Question: Should the Msg be const?
 	- The synapse Q itself involves bidirectional data flow. Even if the
 		Msg manages the pushing internally, the object has to tell it
 		to pop. Not good.
-	- These are issues with bidirectional data flow. However, we could 
-		still have a projection as an object with explicit
-		Msg and other inputs.
+	- These are issues with bidirectional data flow. However, it does
+		not mean that Msgs have to be constant objects. For example,
+		we could still have a projection as an object with regular
+		Msg and other inputs, which could change during the
+		simulation. But it would also adhere to the rule that it
+		gets input from msgs, but does not affect the msgs.
 Summary: 
 	- Q cannot be on Msg.
 	- A Msg is const from viewpoint of target: Unidirectional data flow.
@@ -307,10 +314,35 @@ Accessing Msg info:
 
 
 Data structures for synapses:
-	Projection pattern on msg
-	This could include weights. Later we'll worr
 
 * Fix up tests so they use assertions, not printouts
-- Check in.
+* Check in. Currently at revision 1012.
 - Start setting up synapses.
+	I have a skeleton in place now, in the uncompiled files
+	Send.cpp, Msg.h. There are still-to-be-fixed changes to
+	Element.h and Data.h to let us access Data::pushQ and
+	to have indices into multiple data entries within Element.
+	The threading stuff has to be dealt with at the Element.cpp
+	level to lock out attempts to push onto the same Data.
+
+
+A preliminary design for Elements and messages:
+- All elements are array elements. 
+	- The Data* d_ becomes a vector.
+	- procBuf remains as is, but its range is looked up using
+		indexing for element index.
+- Conns are all many2many or equivalent all-to-all variants.
+	- They all connect one element (the whole array) to another.
+	- Typical sparse matrix implementation
+	- Usually traversed only for async (spike) messages, so 
+		bidrectional traversal is rare.
+	- Element manages vector of vector of Conn*. 
+		- First index for slot
+		- Second index for various other targets.
+
+=============================================================================
+16 Feb 2009
+Implemented a first pass at the framework for a lot of this stuff.
+Compiles. Not in the test. 
+
 =============================================================================

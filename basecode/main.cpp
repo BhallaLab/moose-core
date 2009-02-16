@@ -1,5 +1,6 @@
 #include "header.h"
 #include <math.h>
+#include <queue>
 #include "Reac.h"
 #include "Mol.h"
 #include "Tab.h"

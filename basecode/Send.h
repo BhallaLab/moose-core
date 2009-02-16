@@ -12,6 +12,9 @@ template < class T1, class T2 > void send2( Eref e, Slot src, T1 v1, T2 v2 )
 	*static_cast< T2* >( buf ) = v2;
 }
 
+// This is shifted over to a function of Eref
+//void sendSpike( Eref e, Slot src, double t );
+
 #if 0
 
 /**

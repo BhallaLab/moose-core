@@ -26,6 +26,12 @@ class Eref
 		double* getBufPtr( Slot slot );
 
 		/**
+		 * Sends an action potential event to all targets on specified by
+		 * slot src.
+		 */
+		void sendSpike( Slot src, double t );
+
+		/**
 		 * Returns data entry
 		 */
 		Data* data();

@@ -7,6 +7,15 @@ class Data
 		virtual void reinit( Eref e ) = 0;
 
 		/**
+		 * Handles incoming synaptic messages. Many objects don't need
+		 * it, so we don't insist.
+		 */
+		virtual void pushQ( unsigned int synId, double time )
+		{
+			;
+		}
+
+		/**
 		 * Every Data class must provide a function to initialize its
 		 * ClassInfo.
 		 */

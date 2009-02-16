@@ -1,6 +1,8 @@
+#include <queue>
 #include "header.h"
 #include "IntFire.h"
 
+const Slot spikeSlot = 0;
 
 IntFire::IntFire( double thresh, double tau )
 	: Vm_( 0.0 ), thresh_( thresh ), tau_( tau ), X_( 0.0 ), Y_( 0.0 )
@@ -21,6 +23,24 @@ Finfo** IntFire::initClassInfo()
 
 void IntFire::process( const ProcInfo* p, Eref e )
 {
+	while ( !pendingEvents_.empty() &&
+		pendingEvents_.top().delay <= p->currTime ) {
+			Vm_ += pendingEvents_.top().weight / p->dt;
+			pendingEvents_.pop();
+	}
+	if ( Vm_ > thresh_ ) {
+		e.sendSpike( spikeSlot, p->currTime );
+		Vm_ = 0;
+	} else {
+		Vm_ *= ( 1.0 - p->dt / tau_ );
+	}
+
+
+/* This is what we would do for a conductance  channel.
+	X_ = activation * xconst1_ + X_ * xconst2_;
+	Y_ = X_ * yconst1_ + Y_ * yconst2_;
+	*/
+	 
 /*
 	unsigned int synSize = sizeof( SynInfo );
 	for( char* i = e.processQ.begin(); i != e.processQ.end(); i += synSize )
@@ -43,8 +63,21 @@ void IntFire::process( const ProcInfo* p, Eref e )
 */
 }
 
+/**
+ * Inserts an event into the pendingEvents queue for spikes.
+ */
+void IntFire::addSpike( unsigned int id, double time )
+{
+	assert( id < synapses_.size() );
+	SynInfo s( synapses_[ id ], time );
+	pendingEvents_.push( s );
+}
+
 void IntFire::reinit( Eref e )
 {
+	// pendingEvents_.resize( 0 );
+	while( !pendingEvents_.empty() )
+		pendingEvents_.pop();
 	Vm_ = 0.0;
 }
 

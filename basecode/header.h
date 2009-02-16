@@ -38,6 +38,8 @@ class Eref;
 #include "Finfo.h"
 #include "ProcInfo.h"
 #include "Data.h"
+#include "SparseMatrix.h"
+#include "Msg.h"
 #include "Element.h"
 #include "Eref.h"
 #include "Send.h"

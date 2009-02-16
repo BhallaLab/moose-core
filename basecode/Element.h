@@ -64,6 +64,17 @@ class Element
 		 * Returns the data on the specified index for the Element
 		 */
 		Data* data( unsigned int index );
+
+		/** 
+		 * This function pushes a synaptic event onto a queue.
+		 * It is meant to be thread-safe: multiple threads can call it,
+		 * but only one thread is permitted to remove the queue entries.
+		 */
+		void pushQ( unsigned int elementIndex, 
+			unsigned int synId, double time );
+
+		const vector< Msg* >& msg( Slot slot ) const;
+
 	private:
 		Data* d_;
 
@@ -92,6 +103,25 @@ class Element
 		 */
 
 		Finfo** finfo_;
+
+		// srcMsg[ slot ] is the list of msgs emanating from 
+		// the specified slot. Note that each 
+		/**
+		 * These are messages emanating from this Element.
+		 * Each Msg is an array message: the specific element indices
+		 * are handled within the Msg.
+		 * Indexing:
+		 * msg_[ slot ][ msgNo ]
+		 * where slot determines message identity
+		 * and msgNo counts distinct sets of targets within a slot.
+		 */
+		vector< vector< Msg* > > msg_;
+
+		/**
+		 * Another option is a sparse matrix. Works a bit better for
+		 * very sparse connectivity.
+		 */
+
 };
 
 /*

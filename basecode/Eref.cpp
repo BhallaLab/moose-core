@@ -30,3 +30,12 @@ Data* Eref::data()
 {
 	return e_->data( i_ );
 }
+
+void Eref::sendSpike( Slot src, double t )
+{
+	// msg should do the iteration internally, passing just the
+	// double 
+	const vector< Msg* >& v = e_->msg( src );
+	for ( vector< Msg* >::const_iterator i = v.begin(); i != v.end(); ++i )
+		( *i )->pushQ( i_, t );
+}
