@@ -1,3 +1,10 @@
+/*
+ * NOT FULLY TESTED YET.
+ *
+ *
+ */
+
+
 #include <math.h>
 #include "moose.h"
 #include "GHK.h"
@@ -308,9 +315,32 @@ void GHK::innerReinitFunc( Eref e, ProcInfo info )
 }
 
 
+/*
+
+// This function should be called from TestBiophysics.cpp
+
+void testGHK()
+{
+  cout << "\nTesting GHK";
+
+  Element* n = Neutral::create( "Neutral", "n", Element::root()->id(),
+                                Id::scratchId() );
+
+  Element* g = Neutral::create( "GHK", "ghk", n->id(), Id::scratchId() );
+
+  Element* chan = Neutral::create( "HHChannel", "Na", compt->id(),
+                                   Id::scratchId() );
+
+  bool ret = Eref( compt ).add( "channel", chan, "channel" );
+
+  // How do I connect the compartment -> HH -> GHK for unit testing
+  // I do not want HH to couple back to the compartment
 
 
 
+}
+
+*/
 
 
 
