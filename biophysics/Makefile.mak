@@ -27,6 +27,7 @@ LOCAL_SRCS := \
 	StochSynchan.cpp	\
 	PulseGen.cpp		\
 	RandomSpike.cpp		\
+        GHK.cpp \
 
 $(LOCAL_DIR)$/Cell.o: $(LOCAL_DIR)$/Cell.h element$/Neutral.h
 $(LOCAL_DIR)$/BioScan.o: $(LOCAL_DIR)$/BioScan.h
@@ -36,6 +37,7 @@ $(LOCAL_DIR)$/HHChannel.o: $(LOCAL_DIR)$/HHChannel.h basecode$/Ftype2.h basecode
 $(LOCAL_DIR)$/Mg_block.o: $(LOCAL_DIR)$/Mg_block.h basecode$/Ftype2.h basecode$/Ftype3.h
 $(LOCAL_DIR)$/HHGate.o: $(LOCAL_DIR)$/HHGate.h builtins$/Interpol.h
 $(LOCAL_DIR)$/BinSynInfo.h: utility$/randnum$/BinomialRng.h
+$(LOCAL_DIR)$/GHK.o: $(LOCAL_DIR)$/GHK.h basecode$/Ftype2.h
 
 LOCAL_HEADERS := 	\
 	Cell.h	\
@@ -52,7 +54,8 @@ LOCAL_HEADERS := 	\
 	BinSynchan.h	\
 	StochSynchan.h	\
 	PulseGen.h	\
-	RandomSpike.h
+	RandomSpike.h \
+        GHK.h
 
 SOURCES += $(addprefix $(LOCAL_DIR)$/, $(LOCAL_SRCS))
 
