@@ -639,7 +639,7 @@ map< string, string >& sliSrcLookup()
         src[ "PLOT e_deriv" ] = "deriv";
         src[ "PLOT e_previous" ] = "e_previous";
         
-        src[ "PERMEABILITY Gk" ] = "Gk";
+        src[ "PERMEABILITY Gk" ] = "GkSrc";
 
 	return src;
 }
