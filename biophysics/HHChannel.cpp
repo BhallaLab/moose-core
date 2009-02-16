@@ -148,6 +148,7 @@ const Cinfo* initHHChannelCinfo()
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
+		new SrcFinfo( "GkSrc", Ftype1< double >::global() ),
 		new SrcFinfo( "IkSrc", Ftype1< double >::global() ),
 
 ///////////////////////////////////////////////////////
@@ -192,6 +193,8 @@ static const Slot yGateSlot =
 	initHHChannelCinfo()->getSlot( "yGate.Vm" );
 static const Slot zGateSlot =
 	initHHChannelCinfo()->getSlot( "zGate.Vm" );
+static const Slot gkSlot =
+	initHHChannelCinfo()->getSlot( "GkSrc" );
 static const Slot ikSlot =
 	initHHChannelCinfo()->getSlot( "IkSrc" );
 
@@ -472,7 +475,10 @@ void HHChannel::innerProcessFunc( Eref e, ProcInfo info )
 	Gk_ = g_;
 	send2< double, double >( e, channelSlot, Gk_, Ek_ );
 	Ik_ = ( Ek_ - Vm_ ) * g_;
-
+	
+	// Usually needed by GHK-type objects
+	send1< double >( e, gkSlot, Gk_ );
+	
 	// This is used if the channel connects up to a conc pool and
 	// handles influx of ions giving rise to a concentration change.
 	send1< double >( e, ikSlot, Ik_ );
