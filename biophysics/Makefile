@@ -30,6 +30,7 @@ OBJ = \
 	script_out.o \
 	DifShell.o	\
 	TauPump.o	\
+	GHK.o \
 
 
 HEADERS = \
@@ -56,6 +57,8 @@ StochSynchan.o:	StochSynchan.h StochSynInfo.h
 BinSynchan.o:	BinSynchan.h BinSynInfo.h ../randnum/BinomialRng.h
 DifShell.o: DifShell.h
 TauPump.o: TauPump.h
+GHK.o: GHK.h ../basecode/Ftype2.h
+
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I../basecode -I../randnum -I.. $< -c
 
