@@ -639,6 +639,8 @@ map< string, string >& sliSrcLookup()
         src[ "PLOT e_deriv" ] = "deriv";
         src[ "PLOT e_previous" ] = "e_previous";
         
+        src[ "PERMEABILITY Gk" ] = "Gk";
+
 	return src;
 }
 
@@ -786,6 +788,9 @@ map< string, string >& sliDestLookup()
         dest[ "PLOT e_integral" ] = "inputRequest";
         dest[ "PLOT e_deriv" ] = "inputRequest";
         dest[ "PLOT e_previous" ] = "inputRequest";
+
+        dest[ "PERMEABILITY Gk" ] = "p";
+
 	return dest;
 }
 
@@ -831,6 +836,7 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "x1button" ] = "Sli";
 	classnames[ "x1shape" ] = "Sli";
 	classnames[ "xtext" ] = "Sli";
+	classnames[ "ghk" ] = "GHK";
         
 	return classnames;
 }
