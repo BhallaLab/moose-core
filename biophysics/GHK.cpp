@@ -237,11 +237,13 @@ void GHK::innerProcessFunc( Eref e, ProcInfo info )
 {
   // Code for process adapted from original GENESIS ghk.c
 
+  Ek_ = log(Cout_/Cin_)/GHKconst_;
+
   double exponent = GHKconst_*Vm_;
   double e_to_negexp = exp(-exponent);
 
 
-  if ( abs(exponent) < .00001 ) {
+  if ( abs(exponent) < 0.00001 ) {
     /* exponent near zero, calculate current some other way */
 
     /* take Taylor expansion of V'/[exp(V') - 1], where
@@ -262,7 +264,7 @@ void GHK::innerProcessFunc( Eref e, ProcInfo info )
     /* Now calculate the chord conductance, but
      * check the denominator for a divide by zero.  */
 
-  exponent=Ek_ - Vm_;
+  exponent = Ek_ - Vm_;
     if ( abs(exponent) < 1e-12 ) {
       /* we are very close to the rest potential, so just set the
        * current and conductance to zero.  */
