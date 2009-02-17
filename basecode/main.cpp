@@ -147,27 +147,17 @@ void testAsync( )
 	cout << "async..." << flush;
 }
 
-void testSynapse( )
+void testStandaloneIntFire( )
 {
-	// Make objects. f1 and f2 connect into f3 and f4
-	// IntFire f1( thresh, tau );
-	IntFire f1( 1, 0.005 );
-	Element* e1 = new Element( &f1 );
-
-	IntFire f2( 1, 0.005 );
-	Element* e2 = new Element( &f2 );
-
+	const double EPSILON = 1e-6;
 	IntFire f3( 1, 0.005 );
 	Element* e3 = new Element( &f3 );
-
-	IntFire f4( 1, 0.005 );
-	Element* e4 = new Element( &f4 );
 
 	// SynInfo( weight, delay )
 	f3.synapses_.push_back( SynInfo( 0.5, 0.001 ) );
 	f3.synapses_.push_back( SynInfo( 2.0, 0.005 ) );
 
-	cout << "synapse..." << flush;
+	cout << "IntFire..." << flush;
 	cout << endl;
 
 	double dt = 0.001;
@@ -185,8 +175,36 @@ void testSynapse( )
 	for( double t = 0.0; t < maxt; t += dt ) {
 		p.currTime = t;
 		e3->process( &p );
-		cout << f3.Vm_ << endl;
+		if ( fabs( t - 0.006 ) < EPSILON ) // just after first input
+			assert( fabs( f3.Vm_ - 0.4 ) < EPSILON );
+		if ( fabs( t - 0.015 ) < EPSILON ) // just after second spike: fires
+			assert( fabs( f3.Vm_ ) < EPSILON );
+		if ( fabs( t - 0.021 ) < EPSILON ) // just after third input
+			assert( fabs( f3.Vm_ - 0.4 ) < EPSILON );
+		if ( fabs( t - 0.025 ) < EPSILON ) // just after last spike: fires
+			assert( fabs( f3.Vm_ ) < EPSILON );
+		// cout << f3.Vm_ << endl;
 	}
+}
+
+void testSynapse( )
+{
+	testStandaloneIntFire();
+	/*
+	// Make objects. f1 and f2 connect into f3 and f4
+	// IntFire f1( thresh, tau );
+	IntFire f1( 1, 0.005 );
+	Element* e1 = new Element( &f1 );
+
+	IntFire f2( 1, 0.005 );
+	Element* e2 = new Element( &f2 );
+
+	IntFire f3( 1, 0.005 );
+	Element* e3 = new Element( &f3 );
+
+	IntFire f4( 1, 0.005 );
+	Element* e4 = new Element( &f4 );
+	*/
 }
 
 int main()

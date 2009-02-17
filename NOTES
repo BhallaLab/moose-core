@@ -351,5 +351,8 @@ Checked in. Currently at revision 1018.
 First test for IntFire: directly insert synaptic events into its queue.
 Confirmed that it responds correctly. Generates another time-series output,
 need to set up to handle assertions.
+Checked in as revision 1019.
+
+Set up above test to use assertions rather than printout.
 
 =============================================================================

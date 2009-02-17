@@ -44,6 +44,7 @@ class SynInfo
 
 class IntFire: public Data
 {
+	friend void testStandaloneIntFire();
 	friend void testSynapse();
 	public: 
 		IntFire( double thresh, double tau );
