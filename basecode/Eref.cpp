@@ -37,5 +37,5 @@ void Eref::sendSpike( Slot src, double t )
 	// double 
 	const vector< Msg* >& v = e_->msg( src );
 	for ( vector< Msg* >::const_iterator i = v.begin(); i != v.end(); ++i )
-		( *i )->pushQ( i_, t );
+		( *i )->addSpike( i_, t );
 }

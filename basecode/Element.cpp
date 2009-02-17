@@ -39,7 +39,7 @@ unsigned int Element::execFunc( FuncId f, const char* buf )
  * the push function on the target element.
  * Should this be an Eref function with the ElementIndex internal?
  */
-void Element::pushQ( unsigned int elementIndex, 
+void Element::addSpike( unsigned int elementIndex, 
 	unsigned int synId, double time )
 {
 	//Decide if it should use the finfo
@@ -50,7 +50,7 @@ void Element::pushQ( unsigned int elementIndex,
 	// do stuff
 	// ?unflag index
 	// Carry merrily on.
-	data( elementIndex )->pushQ( synId, time );
+	data( elementIndex )->addSpike( synId, time );
 }
 
 double Element::sumBuf( Slot slot, unsigned int i )

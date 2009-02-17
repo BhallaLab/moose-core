@@ -30,7 +30,7 @@ void IntFire::process( const ProcInfo* p, Eref e )
 	}
 	if ( Vm_ > thresh_ ) {
 		e.sendSpike( spikeSlot, p->currTime );
-		Vm_ = 0;
+		Vm_ = -1.0e-7;
 	} else {
 		Vm_ *= ( 1.0 - p->dt / tau_ );
 	}

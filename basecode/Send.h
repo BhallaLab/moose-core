@@ -31,7 +31,7 @@ template < class T > void qSend1( Eref e, Slot src, T val )
 
 void synSend( Eref e, Slot syn, double time ) {
 	SynTargets *t = e.getSynMsg( syn );
-	t->pushQ( time );
+	t->addSpike( time );
 }
 
 /**
@@ -39,7 +39,7 @@ void synSend( Eref e, Slot syn, double time ) {
  * target-specific queues.
  */
 void synSend( Eref e, Slot syn, double time ) {
-	e.getSynTarget( syn, e.i )->pushQ( time ); 
+	e.getSynTarget( syn, e.i )->addSpike( time ); 
 	// Element index specifies which tgt
 }
 
@@ -51,7 +51,7 @@ void synSend( Eref e, Slot syn, double time ) {
 class SynTargets
 {
 	public:
-		virtual void pushQ( double time ) = 0;
+		virtual void addSpike( double time ) = 0;
 	private:
 };
 

@@ -19,7 +19,7 @@ class Msg
  	* Find the targets identified by the src element index and push the
 	* time onto all of them.
  	*/
-		virtual void pushQ( unsigned int srcElementIndex, double time )
+		virtual void addSpike( unsigned int srcElementIndex, double time )
 			const = 0;
 	protected:
 		Element* src_;
@@ -36,7 +36,7 @@ class SparseMsg: public Msg
 {
 	public:
 		SparseMsg( Element* src, Element* dest );
-		void pushQ( unsigned int srcElementIndex, double time ) const;
+		void addSpike( unsigned int srcElementIndex, double time ) const;
 	private:
 		// May have to be a pair of ints, to handle reverse msg indexing.
 		// But this indexing is used only to identify src........
@@ -51,7 +51,7 @@ class One2OneMsg: public Msg
 {
 	public:
 		One2OneMsg( Element* src, Element* dest );
-		void pushQ( unsigned int srcElementIndex, double time ) const;
+		void addSpike( unsigned int srcElementIndex, double time ) const;
 	private:
 		unsigned int synIndex_;
 };

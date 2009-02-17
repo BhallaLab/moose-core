@@ -190,21 +190,44 @@ void testStandaloneIntFire( )
 void testSynapse( )
 {
 	testStandaloneIntFire();
-	/*
 	// Make objects. f1 and f2 connect into f3 and f4
 	// IntFire f1( thresh, tau );
 	IntFire f1( 1, 0.005 );
 	Element* e1 = new Element( &f1 );
+	// SynInfo( weight, delay )
+	f1.synapses_.push_back( SynInfo( 2, 0.001 ) );
+	e1->msg_.resize( 2 );
+
 
 	IntFire f2( 1, 0.005 );
 	Element* e2 = new Element( &f2 );
+	f2.synapses_.push_back( SynInfo( 2, 0.003 ) );
+	e2->msg_.resize( 2 );
 
-	IntFire f3( 1, 0.005 );
-	Element* e3 = new Element( &f3 );
+	One2OneMsg m1( e1, e2 );
+	One2OneMsg m2( e2, e1 );
 
-	IntFire f4( 1, 0.005 );
-	Element* e4 = new Element( &f4 );
-	*/
+	e1->msg_[0].push_back( &m1 );
+	e1->msg_[1].push_back( &m2 );
+
+	e2->msg_[0].push_back( &m2 );
+	e2->msg_[1].push_back( &m1 );
+
+	// Here we set up a spike to get the system rolling...
+	// addSpike( id, time )
+	f1.addSpike( 0, 0.005 );
+
+	// Now off we go:
+	double dt = 0.001;
+	double maxt = 0.03;
+	ProcInfo p;
+	p.dt = dt;
+	for( double t = 0.0; t < maxt; t += dt ) {
+		p.currTime = t;
+		e1->process( &p );
+		e2->process( &p );
+		cout << t << "	" << f1.Vm_ << "	" << f2.Vm_ << endl;
+	}
 }
 
 int main()

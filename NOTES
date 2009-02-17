@@ -354,5 +354,8 @@ need to set up to handle assertions.
 Checked in as revision 1019.
 
 Set up above test to use assertions rather than printout.
+Checked in as revision 1020.
+
+Implemented a recurrent spiking loop using messaging. Seems to work fine.
 
 =============================================================================

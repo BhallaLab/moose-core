@@ -18,12 +18,16 @@ OBJ = \
 	Element.o	\
 	Eref.o	\
 	Finfo.o	\
+	Msg.o	\
+	SparseMatrix.o	\
 	main.o	\
 
 HEADERS = \
 	header.h \
 	Element.h \
 	Eref.h \
+	Msg.h \
+	SparseMatrix.h \
 	Finfo.h \
 
 default: $(TARGET)

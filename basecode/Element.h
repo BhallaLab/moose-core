@@ -72,7 +72,7 @@ class Element
 		 * It is meant to be thread-safe: multiple threads can call it,
 		 * but only one thread is permitted to remove the queue entries.
 		 */
-		void pushQ( unsigned int elementIndex, 
+		void addSpike( unsigned int elementIndex, 
 			unsigned int synId, double time );
 
 		const vector< Msg* >& msg( Slot slot ) const;

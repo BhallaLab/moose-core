@@ -29,34 +29,24 @@ SparseMsg::SparseMsg( Element* src, Element* dest )
 	;
 }
 
-void SparseMsg::pushQ( unsigned int srcElementIndex, double time ) const
+void SparseMsg::addSpike( unsigned int srcElementIndex, double time ) const
 {
-	unsigned int* synIndex;
-	unsigned int* elementIndex;
-	unsigned int n = m_.getRow( i, &synIndex, &elementIndex );
+	const unsigned int* synIndex;
+	const unsigned int* elementIndex;
+	unsigned int n = m_.getRow( srcElementIndex, &synIndex, &elementIndex );
 	for ( unsigned int i = 0; i < n; ++i )
-		dest_->pushQ( *elementIndex++, *synIndex++, time );
+		dest_->addSpike( *elementIndex++, *synIndex++, time );
 }
 
 ///////////////////////////////////////////////////////////////////////////
-class One2OneMsg: publicMsg
-{
-	public:
-		SparseMsg( Element* src, Element* dest );
-		void pushQ( unsigned int srcElementIndex, double time ) const {
-			dest->pushQ( srcElementIndex, synIndex, time );
-		}
-	private:
-		unsigned int synIndex_;
-};
 
 One2OneMsg::One2OneMsg( Element* src, Element* dest )
-	: Msg( src, dest )
+	: Msg( src, dest ), synIndex_( 0 )
 {
 	;
 }
 
-void One2OneMsg::pushQ( unsigned int srcElementIndex, double time ) const
+void One2OneMsg::addSpike( unsigned int srcElementIndex, double time ) const
 {
-	dest->pushQ( srcElementIndex, synIndex, time );
+	dest_->addSpike( srcElementIndex, synIndex_, time );
 }

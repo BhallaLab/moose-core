@@ -10,7 +10,7 @@ class Data
 		 * Handles incoming synaptic messages. Many objects don't need
 		 * it, so we don't insist.
 		 */
-		virtual void pushQ( unsigned int synId, double time )
+		virtual void addSpike( unsigned int synId, double time )
 		{
 			;
 		}
