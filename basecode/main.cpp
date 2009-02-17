@@ -150,20 +150,43 @@ void testAsync( )
 void testSynapse( )
 {
 	// Make objects. f1 and f2 connect into f3 and f4
-	IntFire f1( 0.01, 0.002 );
+	// IntFire f1( thresh, tau );
+	IntFire f1( 1, 0.005 );
 	Element* e1 = new Element( &f1 );
 
-	IntFire f2( 0.01, 0.002 );
+	IntFire f2( 1, 0.005 );
 	Element* e2 = new Element( &f2 );
 
-	IntFire f3( 0.01, 0.002 );
+	IntFire f3( 1, 0.005 );
 	Element* e3 = new Element( &f3 );
 
-	IntFire f4( 0.01, 0.002 );
+	IntFire f4( 1, 0.005 );
 	Element* e4 = new Element( &f4 );
 
+	// SynInfo( weight, delay )
+	f3.synapses_.push_back( SynInfo( 0.5, 0.001 ) );
+	f3.synapses_.push_back( SynInfo( 2.0, 0.005 ) );
 
 	cout << "synapse..." << flush;
+	cout << endl;
+
+	double dt = 0.001;
+	double maxt = 0.03;
+	ProcInfo p;
+	p.dt = dt;
+	// addSpike( id, time )
+	f3.addSpike( 0, 0.005 );
+	f3.addSpike( 1, 0.010 );
+
+	f3.addSpike( 0, 0.02 );
+	f3.addSpike( 0, 0.022 );
+	f3.addSpike( 0, 0.024 );
+	e3->msg_.resize( 2 );
+	for( double t = 0.0; t < maxt; t += dt ) {
+		p.currTime = t;
+		e3->process( &p );
+		cout << f3.Vm_ << endl;
+	}
 }
 
 int main()

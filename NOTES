@@ -344,5 +344,12 @@ A preliminary design for Elements and messages:
 16 Feb 2009
 Implemented a first pass at the framework for a lot of this stuff.
 Compiles. Not in the test. 
+Checked in. Currently at revision 1018.
+
+=============================================================================
+17 Feb 2009
+First test for IntFire: directly insert synaptic events into its queue.
+Confirmed that it responds correctly. Generates another time-series output,
+need to set up to handle assertions.
 
 =============================================================================

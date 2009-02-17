@@ -25,7 +25,7 @@ void IntFire::process( const ProcInfo* p, Eref e )
 {
 	while ( !pendingEvents_.empty() &&
 		pendingEvents_.top().delay <= p->currTime ) {
-			Vm_ += pendingEvents_.top().weight / p->dt;
+			Vm_ += pendingEvents_.top().weight;
 			pendingEvents_.pop();
 	}
 	if ( Vm_ > thresh_ ) {

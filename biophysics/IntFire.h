@@ -44,11 +44,15 @@ class SynInfo
 
 class IntFire: public Data
 {
+	friend void testSynapse();
 	public: 
 		IntFire( double thresh, double tau );
 		void process( const ProcInfo* p, Eref e );
 		void reinit( Eref e );
-		// void generalQ( Eref e );
+
+		/**
+ 		 * Inserts an event into the pendingEvents queue for spikes.
+ 		 */
 		void addSpike( unsigned int id, double time );
 		//
 		////////////////////////////////////////////////////////////////

@@ -9,6 +9,7 @@ class Element
 {
 	friend void testSync();
 	friend void testAsync();
+	friend void testSynapse();
 	public:
 		/**
 		 * Constructor
