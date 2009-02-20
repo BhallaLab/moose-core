@@ -22,6 +22,8 @@ class Interpol
 			sy_ = 1.0;
 			table_.resize( 2, 0.0 );
 		}
+		virtual ~Interpol() { ; }
+
 		Interpol( unsigned long xdivs, double xmin, double xmax );
 
 		////////////////////////////////////////////////////////////
@@ -45,7 +47,6 @@ class Interpol
 		static double getTable(
 					Eref e,const unsigned int& i );
 		static void setTableVector( const Conn* c, vector< double > value );
-
 		static vector< double > getTableVector( Eref e );
 
 		////////////////////////////////////////////////////////////
@@ -66,31 +67,32 @@ class Interpol
 		////////////////////////////////////////////////////////////
 		double interpolateWithoutCheck( double x ) const;
 		double indexWithoutCheck( double x ) const {
-			return table_[ static_cast< int >( (x - xmin_) * invDx_) ];
+			return table_[ static_cast< int >( (x - xmin_) * invDx_ ) ];
 		}
 		double innerLookup( double x ) const;
 		bool operator==( const Interpol& other ) const;
 		bool operator<( const Interpol& other ) const;
 		void localSetXmin( double value );
 		void localSetXmax( double value );
-		void localSetXdivs( int value );
-		// Later do interpolation etc to preserve contents.
+		virtual void localSetXdivs( int value );
+		virtual int localGetXdivs( ) const;
+		/// \todo Later do interpolation etc to preserve contents.
 		void localSetDx( double value );
 		double localGetDx() const;
 		double invDx() const {
 			return invDx_;
 		}
-		void localSetSy( double value );
+		virtual void localSetSy( double value );
 
 		void setTableValue( double value, unsigned int index );
-		double getTableValue( unsigned int index ) const;
+		double getTableValue( unsigned int index );
 		void localSetTableVector( const vector< double >& value );
 		void localAppendTableVector( const vector< double >& value );
-		unsigned long size( ) {
+		unsigned long size( ) const {
 			return table_.size();
 		}
-		void resize( unsigned int size ) {
-			table_.resize( size );
+		void resize( unsigned int size, double init = 0.0 ) {
+			table_.resize( size, init );
 		}
 		void push_back( double value ) {
 			table_.push_back( value );
@@ -104,6 +106,13 @@ class Interpol
 			return xmax_;
 		}
 
+		virtual int xdivs() const {
+			if ( table_.empty() )
+				return 0;
+			
+			return table_.size() - 1;
+		}
+
 		int mode() const {
 			return mode_;
 		}
@@ -113,20 +122,20 @@ class Interpol
 		 * Mode 0 : B-Splines
 		 * Mode 2 : Linear interpolation for fill 
 		 */
-		void innerTabFill( int xdivs, int mode );
-		void innerPrint( const string& fname, bool doAppend );
-		void innerLoad( const string& fname, unsigned int skiplines );
+		virtual void innerTabFill( int xdivs, int mode );
+		virtual void innerPrint( const string& fname, bool doAppend ) const;
+		virtual void innerLoad( const string& fname, unsigned int skiplines );
 
 	protected:
 		double xmin_;
 		double xmax_;
+		double invDx_;
 		int mode_;
-		static const double EPSILON;
-		static const unsigned int MAX_DIVS;
 		double sy_;
 		vector < double > table_;
-	private:
-		double invDx_;
+
+		static const double EPSILON;
+		static const unsigned int MAX_DIVS;
 };
 
 extern const Cinfo* initInterpolCinfo();
