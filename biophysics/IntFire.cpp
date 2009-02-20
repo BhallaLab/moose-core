@@ -5,7 +5,7 @@
 const Slot spikeSlot = 0;
 
 IntFire::IntFire( double thresh, double tau )
-	: Vm_( 0.0 ), thresh_( thresh ), tau_( tau ), X_( 0.0 ), Y_( 0.0 )
+	: Vm_( 0.0 ), thresh_( thresh ), tau_( tau )
 {
 	;
 }

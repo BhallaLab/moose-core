@@ -12,16 +12,20 @@ void testSync()
 {
 	// Make objects
 	Mol m1( 1.0 );
-	Element* e1 = new Element( &m1 );
+	vector< Data* > v1( 1, &m1 );
+	Element* e1 = new Element( v1 );
 
 	Mol m2( 0.0 );
-	Element* e2 = new Element( &m2 );
+	vector< Data* > v2( 1, &m2 );
+	Element* e2 = new Element( v2 );
 
 	Reac r1( 0.2, 0.1 );
-	Element* e3 = new Element( &r1 );
+	vector< Data* > v3( 1, &r1 );
+	Element* e3 = new Element( v3 );
 
 	Tab t1;
-	Element* e4 = new Element( &t1 );
+	vector< Data* > v4( 1, &t1 );
+	Element* e4 = new Element( v4 );
 
 	/////////////////////////////////////////////////////////////////////
 	// Set up messaging
@@ -117,7 +121,8 @@ void testAsync( )
 
 	// Make objects
 	Reac r1( 0.2, 0.1 );
-	Element* e1 = new Element( &r1 );
+	vector< Data* > v1( 1, &r1 );
+	Element* e1 = new Element( v1 );
 
 	vector< char > buffer( 100 );
 	char* buf = &( buffer[0] );
@@ -151,7 +156,8 @@ void testStandaloneIntFire( )
 {
 	const double EPSILON = 1e-6;
 	IntFire f3( 1, 0.005 );
-	Element* e3 = new Element( &f3 );
+	vector< Data* > v3( 1, &f3 );
+	Element* e3 = new Element( v3 );
 
 	// SynInfo( weight, delay )
 	f3.synapses_.push_back( SynInfo( 0.5, 0.001 ) );
@@ -193,14 +199,16 @@ void testSynapse( )
 	// Make objects. f1 and f2 connect into f3 and f4
 	// IntFire f1( thresh, tau );
 	IntFire f1( 1, 0.005 );
-	Element* e1 = new Element( &f1 );
+	vector< Data* > v1( 1, &f1 );
+	Element* e1 = new Element( v1 );
 	// SynInfo( weight, delay )
 	f1.synapses_.push_back( SynInfo( 2, 0.001 ) );
 	e1->msg_.resize( 2 );
 
 
 	IntFire f2( 1, 0.005 );
-	Element* e2 = new Element( &f2 );
+	vector< Data* > v2( 1, &f2 );
+	Element* e2 = new Element( v2 );
 	f2.synapses_.push_back( SynInfo( 2, 0.003 ) );
 	e2->msg_.resize( 2 );
 

@@ -1,19 +1,29 @@
 #include "header.h"
 
-Element::Element( Data *d )
-	: d_( d ), finfo_( d_->initClassInfo() )
+/*
+Element::Element( const Data *proto, unsigned int numEntries )
+	: finfo_( d_->initClassInfo() )
+{
+	d_.resize( numEntries );
+}
+*/
+
+Element::Element( vector<  Data* > d )
+	: d_( d ), finfo_( d_[0]->initClassInfo() )
 {
 	;
 }
 
 void Element::process( const ProcInfo* p )
 {
-	d_->process( p, Eref( this, 0 ) );
+	for ( unsigned int i = 0; i < d_.size(); ++i )
+		d_[i]->process( p, Eref( this, i ) );
 }
 
 void Element::reinit()
 {
-	d_->reinit( Eref( this, 0 ) );
+	for ( unsigned int i = 0; i < d_.size(); ++i )
+		d_[i]->reinit( Eref( this, i ) );
 }
 
 void Element::clearQ( const char* buf )
@@ -100,7 +110,8 @@ double* Element::getBufPtr( Slot slot, unsigned int i )
 
 Data* Element::data( unsigned int index )
 {
-	return d_;
+	assert( index < d_.size() );
+	return d_[ index ];
 }
 
 const vector< Msg* >& Element::msg( Slot slot ) const

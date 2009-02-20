@@ -70,6 +70,4 @@ class IntFire: public Data
 		double tau_; // Time course of membrane settling.
 		vector< SynInfo > synapses_;
 		priority_queue< SynInfo > pendingEvents_;
-		double X_; // state variable
-		double Y_; // state variable
 };

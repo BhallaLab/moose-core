@@ -14,11 +14,16 @@ class Element
 	public:
 		/**
 		 * Constructor
+		 * It would be nice to have shared data: e.g., thresh and tau for
+		 * IntFire. Common but not static.
+		 * Also think about parent-child hierarchy.
 		 */
-		Element( Data *d );
+		// Element( Data *prototype, unsigned int numEntries );
+		Element( vector< Data * > d );
 
 		/**
 		 * Examine process queue, data that is expected every timestep.
+		 * This function is done for all the local data entries in order.
 		 */
 		void process( const ProcInfo* p );
 
@@ -78,7 +83,24 @@ class Element
 		const vector< Msg* >& msg( Slot slot ) const;
 
 	private:
-		Data* d_;
+		/**
+		 * These are the objects managed by the Element
+		 * Option 1: Just have a big linear array of objects. 
+		 * 		Lookup using size info. Substantial savings possible.
+		 * Option 2: Allocate the objects elsewhere, just ptrs here.
+		 * 		Easy to get started with. Using this for now.
+		 */
+		vector< Data* > d_;
+
+		/**
+		 * This is the data buffer used for outgoing sync messages from
+		 * objects on this Element.
+		 * At creation time the objects know exactly how much buffer space
+		 * they need, from the Finfos.
+		 * Align as doubles because most fast data transfer is doubles.
+		 */
+		double* sendBuf_;
+		
 
 		/**
 		 * This holds the pointers to the data buffers.
@@ -118,6 +140,14 @@ class Element
 		 * and msgNo counts distinct sets of targets within a slot.
 		 */
 		vector< vector< Msg* > > msg_;
+
+		/**
+		 *
+		 * map< key, T >
+		 *
+		 * map< unsigned int slot, unsigned int msgVecIndex >
+		 */
+		 map< unsigned int, unsigned int > msgMap_;
 
 		/**
 		 * Another option is a sparse matrix. Works a bit better for

@@ -226,12 +226,14 @@ and others for taking sums and products of sequences: such ops are common.
 Next:
 	* Get svn working for this.
 	+ Implement sporadic messages for field access
-	- Implement something that uses synaptic messages
+	+ Implement something that uses synaptic messages
 	- Implement message setup framework
+	- Implement field set/get
+	- Array elements and messages
 	- Scheduling
 	- Multithreading
 	- MPI
-	- Array elements and messages
+	- Implement distribution of elements (entries) on threads and nodes.
 	- Benchmarking
 
 =============================================================================
@@ -357,5 +359,49 @@ Set up above test to use assertions rather than printout.
 Checked in as revision 1020.
 
 Implemented a recurrent spiking loop using messaging. Seems to work fine.
+Checked in as revision 1021.
+
+Next:
+Attach sync messages also to the Msg data structure. Key issue is who
+owns and manages the buffer. This has been discussed above on 1 Feb.
+- Msg: Favoured because it separates data transfer from object,
+	However it mixes data transfer with connectivity specification.
+- (originating) Element: This also separates data transfer, easier to manage.
+- Object: This has been ruled out.
+
+Managing connection info in messages:
+	- Can extract ptr info from the finfo + message, use to fill ptr bufs
+		for sync messages
+	- Message slots predefined only for small set invoked by Process or
+		initPhase. Rest go via a map to look up entry in MsgVec.
+
+Field assignment
+	- Set inserts a request into the queue.
+	- Get either needs formation of a temporary message...
+		or: Inserts a request with additional info to tell where to
+		send data back to?
+=============================================================================
+18 Feb 2009
+How do we set up the locations to use in the data buffer?
+The object knows ahead of time exactly what it has to place during
+process and other calls. This is built into the Finfo for the msg
+source. So at element creation time we can build the send buffer.
+The only time this will change is if the element is resized or deleted.
+
+=============================================================================
+19 Feb 2009
+
+Reconfigured Element to use vector of Data ptrs.
+Some patching later, it compiles and runs again.
+
+Next: Begin to set up the benchmarks for sync and async messaging.
+	Look at memory and speed scaling as we do so.
+	- run reac system with 1 to 1e8 Data entries
+		- Ordered messages
+		- Sparse matrix messages
+		- Many individual elements.
+	- run spiking system ditto.
+
+Gear up with this for testing with multi-threading.
 
 =============================================================================
