@@ -12,6 +12,7 @@ TARGET = builtins.o
 
 OBJ = \
 	Interpol.o	\
+	Interpol2D.o	\
 	Table.o	\
 	TimeTable.o \
 	AscFile.o
@@ -25,6 +26,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Interpol.o:	Interpol.h ../basecode/Ftype2.h
+Interpol2D.o:	Interpol.h Interpol2D.h ../basecode/Ftype2.h
 Table.o:	Table.h Interpol.h ../basecode/Ftype2.h ../basecode/Ftype3.h
 TimeTable.o:    TimeTable.h
 AscFile.o:      AscFile.h

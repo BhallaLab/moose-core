@@ -162,7 +162,7 @@ void Interpol::setXdivs( const Conn* c, int xdivs )
 }
 int Interpol::getXdivs( Eref e )
 {
-	return static_cast< Interpol* >( e.data() )->table_.size() - 1;
+	return static_cast< Interpol* >( e.data() )->localGetXdivs();
 }
 
 void Interpol::setDx( const Conn* c, double dx ) 
@@ -269,15 +269,13 @@ void Interpol::appendTableVector( const Conn* c, vector< double > value )
 // Here we set up private Interpol class functions.
 ////////////////////////////////////////////////////////////////////
 
-
 Interpol::Interpol( unsigned long xdivs, double xmin, double xmax )
 	: xmin_( xmin ), xmax_( xmax ), sy_( 1.0 )
 {
 	table_.resize( xdivs + 1, 0.0 );
 	mode_ = 1; // Mode 1 is linear interpolation. 0 is indexing.
 	if ( fabs( xmax_ - xmin_ ) > EPSILON )
-		invDx_ = static_cast< double >( table_.size() ) /
-			( xmax_ - xmin_);
+		invDx_ = xdivs / ( xmax_ - xmin_);
 	else 
 		invDx_ = 1.0;
 }
@@ -341,29 +339,39 @@ bool Interpol::operator<( const Interpol& other ) const
 void Interpol::localSetXmin( double value ) {
 	if ( fabs( xmax_ - value) > EPSILON ) {
 		xmin_ = value;
-		invDx_ = static_cast< double >( table_.size() - 1 ) / 
-			( xmax_ - xmin_ );
+		invDx_ = xdivs() / ( xmax_ - xmin_ );
 	} else {
 		cerr << "Warning: Interpol: Xmin ~= Xmax : Assignment failed\n";
 	}
 }
+
 void Interpol::localSetXmax( double value ) {
 	if ( fabs( value - xmin_ ) > EPSILON ) {
 		xmax_ = value;
-		invDx_ = static_cast< double >( table_.size() - 1 ) / 
-			( xmax_ - xmin_ );
+		invDx_ = xdivs() / ( xmax_ - xmin_ );
 	} else {
 		cerr << "Warning: Interpol: Xmin ~= Xmax : Assignment failed\n";
 	}
 }
+
 void Interpol::localSetXdivs( int value ) {
 	if ( value > 0 ) {
 		table_.resize( value + 1 );
-		invDx_ = static_cast< double >( value ) / ( xmax_ - xmin_ );
+		invDx_ = value / ( xmax_ - xmin_ );
+		return;
 	}
+	
+	cerr << "Error: Interpol::localSetXdivs: # of divs should be >= 1.\n";
 }
-// Later do interpolation etc to preseve contents.
-// Later also check that it is OK for xmax_ < xmin_
+
+int Interpol::localGetXdivs( ) const {
+	return xdivs();
+}
+
+/**
+ * \todo Later do interpolation etc to preserve contents.
+ * \todo Later also check that it is OK for xmax_ < xmin_
+ */
 void Interpol::localSetDx( double value ) {
 	if ( fabs( value ) - EPSILON > 0 ) {
 		unsigned int xdivs = static_cast< unsigned int >( 
@@ -373,13 +381,19 @@ void Interpol::localSetDx( double value ) {
 				xdivs << " entries in table.\n";
 				return;
 		}
-		table_.resize( xdivs + 1 );
-		invDx_ = static_cast< double >( xdivs ) / 
-			( xmax_ - xmin_ );
+		
+		localSetXdivs( xdivs );
+		invDx_ = xdivs / ( xmax_ - xmin_ );
 	}
 }
+
 double Interpol::localGetDx() const {
-	return ( xmax_ - xmin_ ) / static_cast< double >( table_.size() - 1 );
+	int xdivs = localGetXdivs();
+	
+	if ( xdivs == 0 )
+		return 0.0;
+	else
+		return ( xmax_ - xmin_ ) / xdivs;
 }
 
 void Interpol::localSetSy( double value ) {
@@ -390,7 +404,7 @@ void Interpol::localSetSy( double value ) {
 			*i *= ratio;
 		sy_ = value;
 	} else {
-		cerr << "Warning: Interpol: localSetSy: sy too small:" <<
+		cerr << "Warning: Interpol::localSetSy: sy too small:" <<
 			value << "\n";
 	}
 }
@@ -398,46 +412,59 @@ void Interpol::localSetSy( double value ) {
 void Interpol::setTableValue( double value, unsigned int index ) {
 	if ( index < table_.size() )
 		table_[ index ] = value;
+	else
+		cerr << "Error: Interpol::setTableValue: Index out of bounds!\n";
 }
 
-double Interpol::getTableValue( unsigned int index ) const {
+double Interpol::getTableValue( unsigned int index ) {
 	if ( index < table_.size() )
 		return table_[ index ];
-	return 0.0;
+	else {
+		cerr << "Error: Interpol::getTableValue: Index out of bounds!\n";
+		return 0.0;
+	}
 }
 
 // This sets the whole thing up: values, xdivs, dx and so on. Only xmin
 // and xmax are unknown to the input vector.
 void Interpol::localSetTableVector( const vector< double >& value ) 
 {
-	unsigned int xdivs = value.size();
-	if ( xdivs == 0 ) {
+	int xsize = value.size();
+	
+	if ( xsize == 1 ) {
+		cerr <<
+			"Error: Interpol::localSetTableVector: Too few entries. "
+			"Need at least 2. Not changing anything.\n";
+		return;
+	}
+	
+	if ( xsize == 0 ) {
 		table_.resize( 0 );
 		invDx_ = 1.0;
-	} else {
-		invDx_ = static_cast< double >( xdivs ) / ( xmax_ - xmin_ );
-		table_ = value;
+		return;
 	}
+	
+	invDx_ = ( xsize - 1 ) / ( xmax_ - xmin_ );
+	table_ = value;
 }
 
 // This sets the whole thing up: values, xdivs, dx and so on. Only xmin
 // and xmax are unknown to the input vector.
 void Interpol::localAppendTableVector( const vector< double >& value ) 
 {
-	unsigned int xdivs = value.size();
-	if ( xdivs == 0 ) {
+	unsigned int xsize = value.size();
+	if ( xsize == 0 )
 		return;
-	} else {
-		xdivs += table_.size();
-		invDx_ = static_cast< double >( xdivs ) / ( xmax_ - xmin_ );
-		table_.insert( table_.end(), value.begin(), value.end() );
-	}
+	
+	unsigned int xdivs = table_.size() + xsize;
+	invDx_ = xdivs / ( xmax_ - xmin_ );
+	table_.insert( table_.end(), value.begin(), value.end() );
 }
 
 void Interpol::innerTabFill( int newXDivs, int mode )
 {
 	if ( newXDivs < 3 ) {
-		cout << "Error: TabFill: # divs must be >= 3. Not filling table.\n";
+		cout << "Error: Interpol::innerTabFill: # divs must be >= 3. Not filling table.\n";
 		return;
 	}
 	
@@ -543,20 +570,21 @@ void Interpol::innerTabFill( int newXDivs, int mode )
 	invDx_ = 1.0 / dx;
 }
 
-void Interpol::innerPrint( const string& fname, bool appendFlag )
+void Interpol::innerPrint(
+	const string& fname,
+	bool appendFlag ) const
 {
-	vector< double >::iterator i;
-	if ( appendFlag ) {
-		std::ofstream fout( fname.c_str(), std::ios::app );
-		for ( i = table_.begin(); i != table_.end(); i++ )
-			fout << *i << endl;
-		fout << flush;
-	} else {
-		std::ofstream fout( fname.c_str(), std::ios::trunc );
-		for ( i = table_.begin(); i != table_.end(); i++ )
-			fout << *i << endl;
-		fout << flush;
-	}
+	std::ofstream fout;
+	if ( appendFlag )
+		fout.open( fname.c_str(), std::ios::app );
+	else
+		fout.open( fname.c_str(), std::ios::trunc );
+	
+	vector< double >::const_iterator i;
+	for ( i = table_.begin(); i != table_.end(); i++ )
+		fout << *i << "\n";
+	
+	fout << flush;
 }
 
 void Interpol::innerLoad( const string& fname, unsigned int skiplines )
@@ -579,7 +607,7 @@ void Interpol::innerLoad( const string& fname, unsigned int skiplines )
 		while ( fin >> y ) 
 			table_.push_back( y );
 	} else {
-		cout << "Error: Interpol::innerLoad: Failed to open file " << 
+		cerr << "Error: Interpol::innerLoad: Failed to open file " << 
 			fname << endl;
 	}
 }

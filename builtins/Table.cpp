@@ -169,7 +169,7 @@ const Cinfo* initTableCinfo()
 	tableFinfos,
 	sizeof( tableFinfos ) / sizeof( Finfo * ),
 	ValueFtype1< Table >::global(),
-		schedInfo, 1
+	schedInfo, 1
 	);
 
 	return &tableCinfo;
