@@ -91,6 +91,7 @@ void Cinfo::init( const string* doc,
 	for ( i = 0; i < nDoc; i += 2 )
 		doc_[ doc[ i ] ] = doc[ i + 1 ];
 	
+	map< const Finfo*, const Finfo* > baseFinfoCopy;
 	if ( baseCinfo_ ) {
 		nMsg_ = baseCinfo_->nMsg_;
 		for ( i = 0; i < baseCinfo_->finfos_.size(); i++ ) {
@@ -102,13 +103,31 @@ void Cinfo::init( const string* doc,
 				bool ret = f->inherit( baseCinfo_->finfos_[i] );
 				assert( ret );
 				finfos_.push_back( f );
-			} else
-				finfos_.push_back( baseCinfo_->finfos_[i]->copy() );
+			} else {
+				Finfo* orig = baseCinfo_->finfos_[ i ];
+				Finfo* copy = orig->copy();
+				baseFinfoCopy[ orig ] = copy;
+				
+				finfos_.push_back( copy );
+			}
 		}
 	}
 
 	// Here we set up the scheduling.
-	///\ todo: Set up inheritance for scheduling.
+	// First inherit scheduling information from base class
+	if ( baseCinfo_ ) {
+		vector< SchedInfo >::const_iterator isched;
+		for ( isched = baseCinfo_->scheduling_.begin();
+			  isched != baseCinfo_->scheduling_.end();
+			  isched++ )
+		{
+			SchedInfo schedCopy = *isched;
+			schedCopy.finfo = baseFinfoCopy[ schedCopy.finfo ];
+			scheduling_.push_back( schedCopy );
+		}
+	}
+
+	// Next store own scheduling information
 	for ( i = 0; i < nSched; i++ )
 		scheduling_.push_back( schedInfo[i] );
 
