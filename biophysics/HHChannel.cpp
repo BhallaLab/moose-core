@@ -198,6 +198,166 @@ static const Slot gkSlot =
 static const Slot ikSlot =
 	initHHChannelCinfo()->getSlot( "IkSrc" );
 
+///////////////////////////////////////////////////
+// Virtual function definitions
+///////////////////////////////////////////////////
+void HHChannel::lookupXrates( Eref e )
+{
+	send1< double >( e, xGateSlot, Vm_ );
+}
+
+void HHChannel::lookupYrates( Eref e )
+{
+	send1< double >( e, yGateSlot, Vm_ );
+}
+
+void HHChannel::lookupZrates( Eref e )
+{
+	if ( useConcentration_ )
+		send1< double >( e, zGateSlot, conc_ );
+	else
+		send1< double >( e, zGateSlot, Vm_ );
+}
+
+/**
+ * Assigns the Xpower for this gate. If the gate exists and has
+ * only this element for input, then change the gate value.
+ * If the gate exists and has multiple parents, then make a new gate.
+ * If the gate does not exist, make a new gate
+ */
+void HHChannel::innerSetXpower( Eref e, double Xpower )
+{
+	if ( Xpower == Xpower_ )
+		return;
+
+	int action = ( Xpower > 0 ) ? 1 : 0;
+	const int dimension = 1;
+
+	makeGate( e.e, e->findFinfo( "xGate" ), action, dimension );
+	Xpower_ = Xpower;
+	takeXpower_ = selectPower( Xpower );
+}
+
+void HHChannel::innerSetYpower( Eref e, double Ypower )
+{
+	if ( Ypower == Ypower_ )
+		return;
+
+	int action = ( Ypower > 0 ) ? 1 : 0;
+	const int dimension = 1;
+	
+	makeGate( e.e, e->findFinfo( "yGate" ), action, dimension );
+	Ypower_ = Ypower;
+	takeYpower_ = selectPower( Ypower );
+}
+
+void HHChannel::innerSetZpower( Eref e, double Zpower )
+{
+	if ( Zpower == Zpower_ )
+		return;
+
+	int action = ( Zpower > 0 ) ? 1 : 0;
+	const int dimension = 1;
+
+	makeGate( e.e, e->findFinfo( "zGate" ), action, dimension );
+	Zpower_ = Zpower;
+	takeZpower_ = selectPower( Zpower );
+	useConcentration_ = 1;        
+}
+
+/**
+ * Assigns the power for a specific gate, identified by the Finfo.
+ * Assumes that this is a different power from the old one.
+ * 
+ * If the gate exists and has only this element for input, then change
+ * the gate power.
+ * If the gate exists and has multiple parents, then make a new gate,
+ * 	set its power.
+ * If the gate does not exist, make a new gate, set its power.
+ *
+ * Note that if the power is zero, then the gate has to be removed.
+ *
+ * The function is designed with the idea that if copies of this
+ * channel are made, then they all point back to the original HHGate.
+ * (Unless they are cross-node copies).
+ * It is only if we subsequently alter the HHGate of this channel that
+ * we need to make our own variant of the HHGate, or disconnect from
+ * an existing one.
+ * \todo: May need to convert to handling arrays and Erefs.
+ */
+// Assuming that the elements are simple elements. Use Eref for 
+// general case
+void HHChannel::makeGate(
+	Element* e,
+	const Finfo* f,
+	int action,
+	unsigned int dim )
+{
+	assert( dim == 1 || dim == 2 );
+	dim--;
+	
+	string gateFinfo[ ] = {
+		"gate",
+		"gate2D"
+	};
+	
+	string type[ ] = {
+		"HHGate",
+		"HHGate2D"
+	};
+	
+	Element* gate = 0;	
+	Conn* gateConn = e->targets( f->msg(), 0 ); //zero index for SE
+	unsigned int numGates = e->msg( f->msg() )->numTargets( e );
+	assert( numGates <= 1 );
+	if ( action == 0 ) { // Delete
+		// If gate exists, remove it.
+		if ( numGates == 1 ) {
+			gate = gateConn->target().e;
+			unsigned int numChans =
+				gate->msg( gate->findFinfo( gateFinfo[ dim ] )->msg() )->size();
+			assert( numChans > 0 );
+			if ( numChans > 1 ) {
+				// Here we have multiple channels using this gate. So
+				// we don't mess with the original.
+				// Get rid of local connection to gate, but don't delete
+				Eref( e ).dropAll( f->msg() );
+			} else { // Delete the single gate.
+				bool ret = set( gate, "destroy" );
+				assert( ret );
+			}
+		}
+		return;
+	}
+
+	if ( numGates == 1 ) {
+		gate = gateConn->target().e;
+		unsigned int numChans =
+				gate->msg( gate->findFinfo( gateFinfo[ dim ] )->msg() )->size();
+		assert( numChans > 0 );
+		if ( numChans > 1 ) {
+			// Here we have multiple channels using this gate. So
+			// we don't mess with the original.
+			// make a new gate which we can change.
+			gate = Neutral::create( type[ dim ], "xGate", e->id(), 
+				Id::scratchId() );
+			gate->addFinfo( GlobalMarkerFinfo::global() );
+			bool ret = Eref( e ).add( f->name(), gate, gateFinfo[ dim ] );
+			// bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
+			assert( ret );
+		}
+	} else { // No gate, make a new one.
+		gate = Neutral::create( type[ dim ], f->name(), e->id(), 
+			Id::scratchId() );
+		// Make it a global so that duplicates do not happen unless
+		// the table values change.
+		gate->addFinfo( GlobalMarkerFinfo::global() );
+		bool ret = Eref( e ).add( f->name(), gate, gateFinfo[ dim ] );
+		// bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
+		assert( ret );
+	}
+	delete gateConn;
+}
 
 ///////////////////////////////////////////////////
 // Field function definitions
@@ -222,84 +382,6 @@ double HHChannel::getEk( Eref e )
 }
 
 /**
- * Assigns the power for a specific gate, identified by the Finfo.
- * Assumes that this is a different power from the old one.
- * 
- * If the gate exists and has only this element for input, then change
- * the gate power.
- * If the gate exists and has multiple parents, then make a new gate,
- * 	set its power.
- * If the gate does not exist, make a new gate, set its power.
- *
- * Note that if the power is zero, then the gate has to be removed.
- *
- * The function is designed with the idea that if copies of this
- * channel are made, then they all point back to the original HHGate.
- * (Unless they are cross-node copies).
- * It is only if we subsequently alter the HHGate of this channel that
- * we need to make our own variant of the HHGate, or disconnect from
- * an existing one.
- * \todo: May need to convert to handling arrays and Erefs.
- */
-
-// Assuming that the elements are simple elements. Use Eref for 
-// general case
-void HHChannel::makeGate( Element* e, const Finfo* f, double power )
-{
-	Element* gate = 0;	
-	Conn* gateConn = e->targets( f->msg(), 0 ); //zero index for SE
-	unsigned int numGates = e->msg( f->msg() )->numTargets( e );
-	assert( numGates <= 1 );
-	if ( power <= 0 ) {
-		// If gate exists, remove it.
-		if ( numGates == 1 ) {
-			gate = gateConn->target().e;
-			unsigned int numChans =
-				gate->msg( gate->findFinfo( "gate")->msg() )->size();
-			assert( numChans > 0 );
-			if ( numChans > 1 ) {
-				// Here we have multiple channels using this gate. So
-				// we don't mess with the original.
-				// Get rid of local connection to gate, but don't delete
-				Eref( e ).dropAll( f->msg() );
-			} else { // Delete the single gate.
-				bool ret = set( gate, "destroy" );
-				assert( ret );
-			}
-		}
-		return;
-	}
-
-	if ( numGates == 1 ) {
-		gate = gateConn->target().e;
-		unsigned int numChans =
-				gate->msg( gate->findFinfo( "gate")->msg() )->size();
-		assert( numChans > 0 );
-		if ( numChans > 1 ) {
-			// Here we have multiple channels using this gate. So
-			// we don't mess with the original.
-			// make a new gate which we can change.
-			gate = Neutral::create( "HHGate", "xGate", e->id(), 
-				Id::scratchId() );
-			gate->addFinfo( GlobalMarkerFinfo::global() );
-			bool ret = Eref( e ).add( f->name(), gate, "gate" );
-			// bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
-			assert( ret );
-		}
-	} else { // No gate, make a new one.
-		gate = Neutral::create( "HHGate", f->name(), e->id(), 
-			Id::scratchId() );
-		// Make it a global so that duplicates do not happen unless
-		// the table values change.
-		gate->addFinfo( GlobalMarkerFinfo::global() );
-		bool ret = Eref( e ).add( f->name(), gate, "gate" );
-		// bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
-		assert( ret );
-	}
-	delete gateConn;
-}
-
-/**
  * Assigns the Xpower for this gate. If the gate exists and has
  * only this element for input, then change the gate value.
  * If the gate exists and has multiple parents, then make a new gate.
@@ -307,14 +389,10 @@ void HHChannel::makeGate( Element* e, const Finfo* f, double power )
  */
 void HHChannel::setXpower( const Conn* c, double Xpower )
 {
-	Element* e = c->target().e;
-	HHChannel* chan = static_cast< HHChannel* >( c->data() );
-
-	if ( Xpower == chan->Xpower_ ) return;
-	makeGate( e, e->findFinfo( "xGate" ), Xpower );
-	chan->Xpower_ = Xpower;
-	chan->takeXpower_ = selectPower( Xpower );
+	static_cast< HHChannel* >( c->data() )->
+		innerSetXpower( c->target(), Xpower );
 }
+
 double HHChannel::getXpower( Eref e )
 {
 	return static_cast< HHChannel* >( e.data() )->Xpower_;
@@ -322,14 +400,10 @@ double HHChannel::getXpower( Eref e )
 
 void HHChannel::setYpower( const Conn* c, double Ypower )
 {
-	Element* e = c->target().e;
-	HHChannel* chan = static_cast< HHChannel* >( c->data() );
-
-	if ( Ypower == chan->Ypower_ ) return;
-	makeGate( e, e->findFinfo( "yGate" ), Ypower );
-	chan->Ypower_ = Ypower;
-	chan->takeYpower_ = selectPower( Ypower );
+	static_cast< HHChannel* >( c->data() )->
+		innerSetYpower( c->target(), Ypower );
 }
+
 double HHChannel::getYpower( Eref e )
 {
 	return static_cast< HHChannel* >( e.data() )->Ypower_;
@@ -337,20 +411,14 @@ double HHChannel::getYpower( Eref e )
 
 void HHChannel::setZpower( const Conn* c, double Zpower )
 {
-	Element* e = c->target().e;
-	HHChannel* chan = static_cast< HHChannel* >( c->data() );
-
-	if ( Zpower == chan->Zpower_ ) return;
-	makeGate( e, e->findFinfo( "zGate" ), Zpower );
-	chan->Zpower_ = Zpower;
-	chan->takeZpower_ = selectPower( Zpower );
-        chan->useConcentration_ = 1;        
+	static_cast< HHChannel* >( c->data() )->
+		innerSetZpower( c->target(), Zpower );
 }
+
 double HHChannel::getZpower( Eref e )
 {
 	return static_cast< HHChannel* >( e.data() )->Zpower_;
 }
-
 
 void HHChannel::setInstant( const Conn* c, int instant )
 {
@@ -439,8 +507,8 @@ void HHChannel::innerProcessFunc( Eref e, ProcInfo info )
 	g_ += Gbar_;
 	if ( Xpower_ > 0 ) {
 		// The looked up table values A_ and B_ come back from the gate
-		// right away after these 'send' calls.
-		send1< double >( e, xGateSlot, Vm_ );
+		// right away after 'send' calls (made from lookup#rates() functions).
+		lookupXrates( e );
 		if ( instant_ & INSTANT_X )
 			X_ = A_/B_;
 		else 
@@ -449,7 +517,7 @@ void HHChannel::innerProcessFunc( Eref e, ProcInfo info )
 	}
 
 	if ( Ypower_ > 0 ) {
-		send1< double >( e, yGateSlot, Vm_ );
+		lookupYrates( e );
 		if ( instant_ & INSTANT_Y )
 			Y_ = A_/B_;
 		else 
@@ -459,10 +527,7 @@ void HHChannel::innerProcessFunc( Eref e, ProcInfo info )
 	}
 
 	if ( Zpower_ > 0 ) {
-		if ( useConcentration_ )
-			send1< double >( e, zGateSlot, conc_ );
-		else
-			send1< double >( e, zGateSlot, Vm_ );
+		lookupZrates( e );
 
 		if ( instant_ & INSTANT_Z )
 			Z_ = A_/B_;
@@ -487,7 +552,6 @@ void HHChannel::innerProcessFunc( Eref e, ProcInfo info )
 
 void HHChannel::reinitFunc( const Conn* c, ProcInfo p )
 {
-	// cout << "HHChannel reinit: " << c->data() << " on " << c->target().name() << " from " << c->source().name() << endl << flush;
 	static_cast< HHChannel* >( c->data() )->innerReinitFunc( c->target(), p );
 }
 
@@ -502,8 +566,8 @@ void HHChannel::innerReinitFunc( Eref er, ProcInfo info )
 
 	if ( Xpower_ > 0 ) {
 		// The looked up table values A_ and B_ come back from the gate
-		// right away after these 'send' calls.
-		send1< double >( er, xGateSlot, Vm_ );
+		// right away after 'send' calls (made from lookup#rates() functions).
+		lookupXrates( er );
 		if ( B_ < EPSILON ) {
 			cout << "Warning: B_ value for " << e->name() <<
 					" is ~0. Check X table\n";
@@ -514,7 +578,7 @@ void HHChannel::innerReinitFunc( Eref er, ProcInfo info )
 	}
 
 	if ( Ypower_ > 0 ) {
-		send1< double >( er, yGateSlot, Vm_ );
+		lookupYrates( er );
 		if ( B_ < EPSILON ) {
 			cout << "Warning: B_ value for " << e->name() <<
 					" is ~0. Check Y table\n";
@@ -525,10 +589,7 @@ void HHChannel::innerReinitFunc( Eref er, ProcInfo info )
 	}
 
 	if ( Zpower_ > 0 ) {
-		if ( useConcentration_ )
-			send1< double >( er, zGateSlot, conc_ );
-		else
-			send1< double >( er, zGateSlot, Vm_ );
+		lookupZrates( er );
 		if ( B_ < EPSILON ) {
 			cout << "Warning: B_ value for " << e->name() <<
 					" is ~0. Check Z table\n";
@@ -548,7 +609,6 @@ void HHChannel::innerReinitFunc( Eref er, ProcInfo info )
 
 void HHChannel::channelFunc( const Conn* c, double Vm )
 {
-	// cout << "channelFunc for " << c->data() << " on " << c->target().name() << " from " << c->source().name() << " with Vm= " << Vm << endl;
 	static_cast< HHChannel* >( c->data() )->Vm_ = Vm;
 }
 
@@ -562,7 +622,6 @@ void HHChannel::xGateFunc( const Conn* c, double A, double B )
 	HHChannel* h = static_cast< HHChannel* >( c->data() );
 	h->A_ = A;
 	h->B_ = B;
-	
 }
 
 void HHChannel::yGateFunc( const Conn* c, double A, double B )
