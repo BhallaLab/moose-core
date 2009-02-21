@@ -230,27 +230,27 @@ double Interpol2D::interpolateWithoutCheck( double x, double y ) const
 	
 	double xv = ( x - xmin_ ) * invDx_;
 	unsigned long xInteger = static_cast< unsigned long >( xv );
-	double xFraction = x - xInteger;
+	double xFraction = xv - xInteger;
 	assert( xInteger < table_[ 0 ].size() - 1 );
 	
 	double yv = ( y - ymin_ ) * invDy_;
 	unsigned long yInteger = static_cast< unsigned long >( yv );
-	double yFraction = y - yInteger;
+	double yFraction = yv - yInteger;
 	assert( yInteger < table_.size() - 1 );
 	
 	/* The following is the same as:
 			double z00 = table_[ xInteger ][ yInteger ];
-			double z10 = table_[ xInteger ][ yInteger + 1 ];
-			double z01 = table_[ xInteger + 1 ][ yInteger ];
+			double z01 = table_[ xInteger ][ yInteger + 1 ];
+			double z10 = table_[ xInteger + 1 ][ yInteger ];
 			double z11 = table_[ xInteger + 1 ][ yInteger + 1 ];
 	*/
 	vector< vector< double > >::const_iterator iz0 = table_.begin() + xInteger;
 	vector< double >::const_iterator iz00 = iz0->begin() + yInteger;
-	vector< double >::const_iterator iz01 = ( iz0 + 1 )->begin() + yInteger;
+	vector< double >::const_iterator iz10 = ( iz0 + 1 )->begin() + yInteger;
 	double z00 = *iz00;
-	double z10 = *( iz00 + 1 );
-	double z01 = *iz01;
-	double z11 = *( iz01 + 1 );
+	double z01 = *( iz00 + 1 );
+	double z10 = *iz10;
+	double z11 = *( iz10 + 1 );
 	
 	/* The following is the same as:
 			return (
