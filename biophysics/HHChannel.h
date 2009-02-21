@@ -56,16 +56,19 @@ class HHChannel
 #endif // DO_UNIT_TESTS
 	public:
 		HHChannel()
-			: Gbar_( 0.0 ), Ek_( 0.0 ),
-			Xpower_( 0.0 ), Ypower_( 0.0 ), Zpower_( 0.0 ),
+			: Xpower_( 0.0 ), Ypower_( 0.0 ), Zpower_( 0.0 ),
+			Vm_( 0.0 ), conc_( 0.0 ),
+			Gbar_( 0.0 ), Ek_( 0.0 ),
 			instant_( 0 ),
 			Gk_( 0.0 ), Ik_( 0.0 ),
 			X_( 0.0 ), Y_( 0.0 ), Z_( 0.0 ),
-			g_( 0.0 ), conc_( 0.0 ),
+			g_( 0.0 ),
 			useConcentration_( 0 )
 		{
 			;
 		}
+		
+		virtual ~HHChannel() { ; }
 
 		/////////////////////////////////////////////////////////////
 		// Value field access function definitions
@@ -148,21 +151,45 @@ class HHChannel
 		static void xGateFunc( const Conn* c, double X, double g );
 		static void yGateFunc( const Conn* c, double Y, double g );
 		static void zGateFunc( const Conn* c, double Z, double g );
+	
+	protected:
+		virtual void lookupXrates( Eref e );
+		virtual void lookupYrates( Eref e );
+		virtual void lookupZrates( Eref e );
 
-	private:
+		virtual void innerSetXpower( Eref e, double Xpower );
+		virtual void innerSetYpower( Eref e, double Ypower );
+		virtual void innerSetZpower( Eref e, double Zpower );
+
 		// Utility function for making gates.
-		static void makeGate( Element* e, const Finfo* f, double power);
+		static void makeGate(
+			Element* e,
+			const Finfo* f,
+			int action,
+			unsigned int dimension );
 
-		/// Channel maximal conductance
-		double Gbar_;
-		/// Reversal potential of channel
-		double Ek_;
+		static PFDD selectPower( double power);
+
 		/// Exponent for X gate
 		double Xpower_;
 		/// Exponent for Y gate
 		double Ypower_;
 		/// Exponent for Z gate
 		double Zpower_;
+		/// Vm_ is input variable from compartment, used for most rates
+		double Vm_;
+		/// Conc_ is input variable for Ca-dependent channels.
+		double conc_;
+
+		double ( *takeXpower_ )( double, double );
+		double ( *takeYpower_ )( double, double );
+		double ( *takeZpower_ )( double, double );
+
+	private:
+		/// Channel maximal conductance
+		double Gbar_;
+		/// Reversal potential of channel
+		double Ek_;
 
 		/// bitmapped flag for X, Y, Z, to do equil calculation for gate
 		int instant_;
@@ -180,25 +207,14 @@ class HHChannel
 		/// Internal variable used to calculate conductance
 		double g_;	
 
-		/// Vm_ is input variable from compartment, used for most rates
-		double Vm_;
-		/// Conc_ is input variable for Ca-dependent channels.
-		double conc_;
 		/// Flag for use of conc for input to Z gate calculations.
 		bool useConcentration_;	
-
 
 		// Internal variables for return values
 		double A_;
 		double B_;
 
-		double integrate( double state, double dt );
-
-		double ( *takeXpower_ )( double, double );
-		double ( *takeYpower_ )( double, double );
-		double ( *takeZpower_ )( double, double );
-
-		static PFDD selectPower( double power);
+		virtual double integrate( double state, double dt );
 
 		static const double EPSILON;
 		static const int INSTANT_X;
