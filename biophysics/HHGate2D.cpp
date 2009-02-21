@@ -80,9 +80,9 @@ const Cinfo* initHHGate2DCinfo()
 	static Cinfo HHGate2DCinfo(
 		doc,
 		sizeof( doc ) / sizeof( string ),		
-		initNeutralCinfo(),
+		initHHGateCinfo(),
 		HHGate2DFinfos,
-		sizeof(HHGate2DFinfos)/sizeof(Finfo *),
+		sizeof( HHGate2DFinfos ) / sizeof( Finfo * ),
 		ValueFtype1< HHGate2D >::global()
 	);
 
