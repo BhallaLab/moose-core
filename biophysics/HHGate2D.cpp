@@ -91,7 +91,7 @@ const Cinfo* initHHGate2DCinfo()
 
 static const Cinfo* HHGate2DCinfo = initHHGate2DCinfo();
 
-static const Slot gateSlot = initHHGate2DCinfo()->getSlot( "gate" );
+static const Slot gateSlot = initHHGate2DCinfo()->getSlot( "gate2D" );
 
 ///////////////////////////////////////////////////
 // Field function definitions
