@@ -233,7 +233,7 @@ void HHChannel::innerSetXpower( Eref e, double Xpower )
 	int action = ( Xpower > 0 ) ? 1 : 0;
 	const int dimension = 1;
 
-	makeGate( e.e, e->findFinfo( "xGate" ), action, dimension );
+	makeGate( e.e, "xGate", e->findFinfo( "xGate" ), action, dimension );
 	Xpower_ = Xpower;
 	takeXpower_ = selectPower( Xpower );
 }
@@ -246,7 +246,7 @@ void HHChannel::innerSetYpower( Eref e, double Ypower )
 	int action = ( Ypower > 0 ) ? 1 : 0;
 	const int dimension = 1;
 	
-	makeGate( e.e, e->findFinfo( "yGate" ), action, dimension );
+	makeGate( e.e, "yGate", e->findFinfo( "yGate" ), action, dimension );
 	Ypower_ = Ypower;
 	takeYpower_ = selectPower( Ypower );
 }
@@ -259,7 +259,7 @@ void HHChannel::innerSetZpower( Eref e, double Zpower )
 	int action = ( Zpower > 0 ) ? 1 : 0;
 	const int dimension = 1;
 
-	makeGate( e.e, e->findFinfo( "zGate" ), action, dimension );
+	makeGate( e.e, "zGate", e->findFinfo( "zGate" ), action, dimension );
 	Zpower_ = Zpower;
 	takeZpower_ = selectPower( Zpower );
 	useConcentration_ = 1;        
@@ -289,6 +289,7 @@ void HHChannel::innerSetZpower( Eref e, double Zpower )
 // general case
 void HHChannel::makeGate(
 	Element* e,
+	string name,
 	const Finfo* f,
 	int action,
 	unsigned int dim )
@@ -347,7 +348,7 @@ void HHChannel::makeGate(
 			assert( ret );
 		}
 	} else { // No gate, make a new one.
-		gate = Neutral::create( type[ dim ], f->name(), e->id(), 
+		gate = Neutral::create( type[ dim ], name, e->id(), 
 			Id::scratchId() );
 		// Make it a global so that duplicates do not happen unless
 		// the table values change.
