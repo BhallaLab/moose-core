@@ -17,7 +17,7 @@ const Cinfo* initHHGate2DCinfo()
 {
 	static Finfo* gateShared[] =
 	{
-		new DestFinfo( "lookup", Ftype1< double, double >::global(),
+		new DestFinfo( "lookup", Ftype2< double, double >::global(),
 						RFCAST( &HHGate2D::gateFunc ) ),
 		new SrcFinfo( "gate", Ftype2< double, double >::global() ),
 	};

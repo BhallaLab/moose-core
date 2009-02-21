@@ -11,7 +11,6 @@
 **********************************************************************/
 class HHGate
 {
-	friend class HHGateWrapper;
 	public:
 		HHGate()
 		{ ; }
