@@ -9,7 +9,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <math.h>
 #include "moose.h"
 #include "Interpol.h"
 #include "Interpol2D.h"
