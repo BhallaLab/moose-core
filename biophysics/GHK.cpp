@@ -73,7 +73,7 @@ const Cinfo* initGHKCinfo()
                       ),
       process,
 
-      new SrcFinfo( "Ik", Ftype1< double >::global() ),
+      new SrcFinfo( "IkSrc", Ftype1< double >::global() ),
 
       new DestFinfo( "Cin", Ftype1< double >::global(),
                      RFCAST( &GHK::setCin ) ),
@@ -126,7 +126,7 @@ static const Cinfo* GHKCinfo = initGHKCinfo();
 
 
 static const Slot ikSlot =
-        initGHKCinfo()->getSlot( "Ik" );
+        initGHKCinfo()->getSlot( "IkSrc" );
 
 static const Slot channelSlot =
         initGHKCinfo()->getSlot( "channel.channel" );
