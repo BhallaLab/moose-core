@@ -1159,15 +1159,17 @@ void do_set( int argc, const char** const argv, Id s )
 void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 {
 	static map< string, string > tabmap;
-	tabmap[ "X_A" ] = "xGate/A";
-	tabmap[ "X_B" ] = "xGate/B";
-	tabmap[ "Y_A" ] = "yGate/A";
-	tabmap[ "Y_B" ] = "yGate/B";
-	tabmap[ "Z_A" ] = "zGate/A";
-	tabmap[ "Z_B" ] = "zGate/B"; 
-	tabmap[ "bet" ] = "B"; 	// Short for beta: truncated at 3 chars.
-	tabmap[ "alp" ] = "A"; 	// Short for alpha
-
+	if ( tabmap.empty() ) {
+		tabmap[ "X_A" ] = "xGate/A";
+		tabmap[ "X_B" ] = "xGate/B";
+		tabmap[ "Y_A" ] = "yGate/A";
+		tabmap[ "Y_B" ] = "yGate/B";
+		tabmap[ "Z_A" ] = "zGate/A";
+		tabmap[ "Z_B" ] = "zGate/B"; 
+		tabmap[ "bet" ] = "B"; 	// Short for beta: truncated at 3 chars.
+		tabmap[ "alp" ] = "A"; 	// Short for alpha
+	}
+	
 	Element* sh = s();
 	int start = 2;
 	if ( argc < 3 ) {

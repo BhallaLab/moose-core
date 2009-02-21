@@ -18,23 +18,23 @@ class HHGate2D: public HHGate
 		static double getAValue( Eref e, const vector< double >& v );
 		static double getBValue( Eref e, const vector< double >& v );
 		
-		static void gateFunc( const Conn* c, double v1 double v2 );
+		static void gateFunc( const Conn* c, double v1, double v2 );
 		
 		static void postCreate( const Conn* c );
 		
 		static void setupAlpha( const Conn* c, vector< double > parms )
 		{ cerr << "Error: HHGate2D: setupAlpha not implemented.\n"; }
 		
-		static void setupTau( const Conn* c, vector< double > parms );
+		static void setupTau( const Conn* c, vector< double > parms )
 		{ cerr << "Error: HHGate2D: setupTau not implemented.\n"; }
 		
-		static void tweakAlpha( const Conn* c );
+		static void tweakAlpha( const Conn* c )
 		{ cerr << "Error: HHGate2D: tweakAlpha not implemented.\n"; }
 		
-		static void tweakTau( const Conn* c );
+		static void tweakTau( const Conn* c )
 		{ cerr << "Error: HHGate2D: tweakTau not implemented.\n"; }
 		
-		static void setupGate( const Conn* c, vector< double > parms );
+		static void setupGate( const Conn* c, vector< double > parms )
 		{ cerr << "Error: HHGate2D: setupGate not implemented.\n"; }
 		
 	private:
