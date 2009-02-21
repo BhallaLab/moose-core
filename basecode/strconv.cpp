@@ -22,7 +22,10 @@ void separateString( const string& s, vector< string>& v,
 // Some template specializations to handle common conversions.
 template<> bool val2str< string >( string v, string& ret)
 {
-	ret = v;
+	if ( v.empty() )
+		ret = "<blank-string>";
+	else
+		ret = v;
 	return 1;
 }
 
