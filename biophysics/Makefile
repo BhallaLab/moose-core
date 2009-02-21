@@ -14,8 +14,10 @@ OBJ = \
 	Compartment.o	\
 	SymCompartment.o	\
 	HHChannel.o	\
+	HHChannel2D.o	\
 	Mg_block.o	\
 	HHGate.o	\
+	HHGate2D.o	\
 	CaConc.o	\
 	Nernst.o	\
 	SpikeGen.o	\
@@ -44,8 +46,10 @@ $(OBJ)	: $(HEADERS)
 Compartment.o:	Compartment.h ../basecode/Ftype2.h
 SymCompartment.o:	Compartment.h SymCompartment.h ../basecode/Ftype2.h
 HHChannel.o:	HHChannel.h ../basecode/Ftype2.h ../basecode/Ftype3.h
+HHChannel2D.o:	HHChannel.h HHChannel2D.h ../basecode/Ftype2.h ../basecode/Ftype3.h
 Mg_block.o:	Mg_block.h ../basecode/Ftype2.h ../basecode/Ftype3.h
 HHGate.o:	HHGate.h ../builtins/Interpol.h
+HHGate2D.o:	HHGate.h HHGate2D.h ../builtins/Interpol.h ../builtins/Interpol2D.h
 CaConc.o:	CaConc.h
 Nernst.o:	Nernst.h
 SpikeGen.o:	SpikeGen.h
