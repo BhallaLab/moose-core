@@ -164,6 +164,7 @@ class HHChannel
 		// Utility function for making gates.
 		static void makeGate(
 			Element* e,
+			string name,
 			const Finfo* f,
 			int action,
 			unsigned int dimension );
