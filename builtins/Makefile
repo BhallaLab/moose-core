@@ -15,7 +15,8 @@ OBJ = \
 	Interpol2D.o	\
 	Table.o	\
 	TimeTable.o \
-	AscFile.o
+	AscFile.o \
+	Calculator.o
 
 HEADERS = \
 	../basecode/header.h \
@@ -30,6 +31,7 @@ Interpol2D.o:	Interpol.h Interpol2D.h ../basecode/Ftype2.h
 Table.o:	Table.h Interpol.h ../basecode/Ftype2.h ../basecode/Ftype3.h
 TimeTable.o:    TimeTable.h
 AscFile.o:      AscFile.h
+Calculator.o:	Calculator.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I.. -I../basecode $< -c
