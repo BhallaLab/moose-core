@@ -67,6 +67,7 @@ const Cinfo* initMg_blockCinfo()
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
 		new SrcFinfo( "IkSrc", Ftype1< double >::global() ),
+		new SrcFinfo( "GkSrc", Ftype1< double >::global() ),
 
 ///////////////////////////////////////////////////////
 // Shared definitions
@@ -109,6 +110,8 @@ static const Cinfo* Mg_blockCinfo = initMg_blockCinfo();
 
 static const Slot channelSlot =
 	initMg_blockCinfo()->getSlot( "channel.channel" );
+static const Slot gkSlot =
+	initMg_blockCinfo()->getSlot( "GkSrc" );
 static const Slot ikSlot =
 	initMg_blockCinfo()->getSlot( "IkSrc" );
 
@@ -216,6 +219,8 @@ void Mg_block::innerProcessFunc( Eref e, ProcInfo info )
 	send2< double, double >( e, channelSlot, Gk_, Ek_ );
 	Ik_ = Gk_ * (Ek_ - Vm_);
 	send1< double >( e, ikSlot, Ik_ );
+	// Usually needed by GHK-type objects
+	send1< double >( e, gkSlot, Gk_ );
 }
 
 void Mg_block::reinitFunc( const Conn* c, ProcInfo p )
