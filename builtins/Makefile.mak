@@ -4,7 +4,8 @@ LOCAL_SRCS := \
 	Interpol.cpp	\
 	Table.cpp	\
         TimeTable.cpp   \
-        AscFile.cpp
+        AscFile.cpp     \
+        Calculator.cpp
 
 
 LOCAL_HEADERS := $(subst .cpp,.h,$(LOCAL_SRCS))
