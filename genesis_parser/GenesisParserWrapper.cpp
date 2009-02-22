@@ -1956,7 +1956,9 @@ void do_pushe( int argc, const char** const argv, Id s )
 				string( argv[1] ) + "'" );
 		} else {
 			send1< Id >( s(), pusheSlot, e );
-			gpw->printCwe();
+
+			// Disabling printing the CWE after pushe/pope
+			// gpw->printCwe();
 		}
 	} else {
 		cout << "usage:: " << argv[0] << " Element\n";
@@ -1970,7 +1972,9 @@ void do_pope( int argc, const char** const argv, Id s )
 		send0( s(), popeSlot );
 		GenesisParserWrapper* gpw = 
 			static_cast< GenesisParserWrapper* > ( s()->data( 0 ) );
-		gpw->printCwe();
+
+		// Disabling printing the CWE after pushe/pope
+		// gpw->printCwe();
 	} else {
 		cout << "usage:: " << argv[0] << "\n";
 	}
