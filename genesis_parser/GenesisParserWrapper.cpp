@@ -544,7 +544,7 @@ map< string, string >& sliSrcLookup()
 	src[ "RAXIAL Ra Vm" ] = "";
 	src[ "RAXIAL Ra previous_state" ] = "";
 	src[ "INJECT output" ] = "outputSrc";
-        
+	
 	// Some messages for channels.
 	src[ "VOLTAGE Vm" ] = "";
 	src[ "CHANNEL Gk Ek" ] = "channel";
@@ -558,45 +558,45 @@ map< string, string >& sliSrcLookup()
 
 	// Message for synchan
 	src[ "SpikeGen.SPIKE" ] = "event";
-        // Message for CaConcen
-        src[ "I_Ca Ik" ] = "IkSrc";
-        
-        // Messages for RandomSpike
-        src[ "RandomSpike.SPIKE"] = "eventSrc";
+	// Message for CaConcen
+	src[ "I_Ca Ik" ] = "IkSrc";
+	
+	// Messages for RandomSpike
+	src[ "RandomSpike.SPIKE"] = "eventSrc";
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
 	// done already through the existing messaging.
 	src[ "EREST Vm" ] = "";
 
-        // Messages for PulseGen
-        src[ "PulseGen.INPUT output" ] = "outputSrc";
+	// Messages for PulseGen
+	src[ "PulseGen.INPUT output" ] = "outputSrc";
 
-        // Messages for DiffAmp
-        src[ "DiffAmp.INPUT output" ] = "outputSrc";
-        src[ "PLUS output" ] = "outputSrc";
-        src[ "MINUS output" ] = "outputSrc";
-        // For compatibility taking output from RC
-        src[ "INPUT state" ] = "state";
-        src[ "PLUS state" ] = "outputSrc";
-        src[ "MINUS state" ] = "outputSrc";
+	// Messages for DiffAmp
+	src[ "DiffAmp.INPUT output" ] = "outputSrc";
+	src[ "PLUS output" ] = "outputSrc";
+	src[ "MINUS output" ] = "outputSrc";
+	// For compatibility taking output from RC
+	src[ "INPUT state" ] = "state";
+	src[ "PLUS state" ] = "outputSrc";
+	src[ "MINUS state" ] = "outputSrc";
 
-        // Messages for PID
-        src[ "CMD output" ] = "outputSrc";
-        src[ "SNS output" ] = "outputSrc";
-        src[ "GAIN output" ] = "outputSrc";
-        src[ "CMD Vm" ] = "VmSrc";
-        src[ "SNS Vm" ] = "VmSrc";
-        src[ "GAIN Vm" ] = "VmSrc";
-        src[ "CMD state" ] = "outputSrc";
-        src[ "SNS state" ] = "outputSrc";
-        src[ "GAIN state" ] = "outputSrc";
+	// Messages for PID
+	src[ "CMD output" ] = "outputSrc";
+	src[ "SNS output" ] = "outputSrc";
+	src[ "GAIN output" ] = "outputSrc";
+	src[ "CMD Vm" ] = "VmSrc";
+	src[ "SNS Vm" ] = "VmSrc";
+	src[ "GAIN Vm" ] = "VmSrc";
+	src[ "CMD state" ] = "outputSrc";
+	src[ "SNS state" ] = "outputSrc";
+	src[ "GAIN state" ] = "outputSrc";
 
-        // Messages for RC - included in COmpartment's message
-        // src[ "RC.INJECT output" ]
-        
+	// Messages for RC - included in COmpartment's message
+	// src[ "RC.INJECT output" ]
+	
 	// Some messages for tables, specially used for I/O
 	src[ "SpikeGen.INPUT Vm" ] = "VmSrc";
-        src[ "RandomSpike.INPUT Vm" ] = "eventSrc";        
+	src[ "RandomSpike.INPUT Vm" ] = "eventSrc";	
 	src[ "INPUT Vm" ] = "Vm";
 	src[ "INPUT Im" ] = "Im";
 	src[ "INPUT Ca" ] = "Ca";
@@ -609,14 +609,14 @@ map< string, string >& sliSrcLookup()
 	src[ "INPUT Z" ] = "Z";
 	src[ "INPUT n" ] = "n";
 	src[ "INPUT Co" ] = "conc";
-        src[ "INPUT state" ] = "state";
-        src[ "INPUT output" ] = "output";
-        src[ "INPUT cmd" ] = "command";
-        src[ "INPUT sns"] = "sensed";
-        src[ "INPUT e" ] = "error";
-        src[ "INPUT e_integral" ] = "integral";
-        src[ "INPUT e_deriv" ] = "derivative";
-        src[ "INPUT e_previous" ] = "e_previous";
+	src[ "INPUT state" ] = "state";
+	src[ "INPUT output" ] = "output";
+	src[ "INPUT cmd" ] = "command";
+	src[ "INPUT sns"] = "sensed";
+	src[ "INPUT e" ] = "error";
+	src[ "INPUT e_integral" ] = "integral";
+	src[ "INPUT e_deriv" ] = "derivative";
+	src[ "INPUT e_previous" ] = "e_previous";
 	// Messages for having tables pretend to be an xplot
 	src[ "PLOT Co" ] = "conc";
 	src[ "PLOT n" ] = "n";
@@ -632,17 +632,20 @@ map< string, string >& sliSrcLookup()
 	src[ "PLOT Z" ] = "Z";
 	src[ "PLOT n" ] = "n";
 	src[ "PLOT Co" ] = "conc";
-        src[ "PLOT state" ] = "state";
-        src[ "PLOT output" ] = "output";
-        src[ "PLOT e" ] = "error";
-        src[ "PLOT e_integral" ] = "integral";
-        src[ "PLOT e_deriv" ] = "deriv";
-        src[ "PLOT e_previous" ] = "e_previous";
-    
-	    
+	src[ "PLOT state" ] = "state";
+	src[ "PLOT output" ] = "output";
+	src[ "PLOT e" ] = "error";
+	src[ "PLOT e_integral" ] = "integral";
+	src[ "PLOT e_deriv" ] = "deriv";
+	src[ "PLOT e_previous" ] = "e_previous";
+	// Messages for doing table operations
+	src[ "PRD Gk" ] = "GkSrc";
+	
 	// Messages for GHK
 	src[ "PERMEABILITY Gk" ] = "GkSrc";	// From HHChannel
 	src[ "Cin Ca" ] = "concSrc"; // From CaConc
+	// Messages for GHK - to accept values from a table
+	src[ "PERMEABILITY output" ] = "outputSrc";
 	
 	return src;
 }
@@ -690,7 +693,7 @@ map< string, string >& sliDestLookup()
 	dest[ "RAXIAL Ra Vm" ] = "";
 	dest[ "RAXIAL Ra previous_state" ] = "";
 	dest[ "INJECT output" ] = "injectMsg";
-        
+	
 	// Some messages for channels.
 	dest[ "VOLTAGE Vm" ] = "";
 	dest[ "CHANNEL Gk Ek" ] = "channel";
@@ -698,9 +701,9 @@ map< string, string >& sliDestLookup()
 	// Special messages for spikegen and synapse
 	dest[ "SpikeGen.SPIKE" ] = "synapse";
 	dest[ "SpikeGen.INPUT Vm" ] = "Vm";
-        // Messages for RandomSpike
-        dest[ "RandomSpike.SPIKE" ] = "synapse";
-        
+	// Messages for RandomSpike
+	dest[ "RandomSpike.SPIKE" ] = "synapse";
+	
 	// Some of these funny comparisons are inserted when the code finds
 	// cases which need special work.
 	dest[ "SynChan.Mg_block.CHANNEL Gk Ek" ] = "origChannel";
@@ -711,45 +714,45 @@ map< string, string >& sliDestLookup()
 	dest[ "useZ.MULTGATE" ] = "zGate";
 	dest[ "MULTGATE output" ] = "zGate";	// Rare use case from table.
 	dest[ "CONCEN Ca" ] = "concen";
-        // for CaConc object
-        dest[ "I_Ca Ik" ] = "current";
-        
+	// for CaConc object
+	dest[ "I_Ca Ik" ] = "current";
+	
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
 	// done already through the existing messaging.
 	dest[ "EREST Vm" ] = "";
 
-        
-        // Messages for PulseGen
-        dest[ "PulseGen.INPUT output" ] = "input";
+	
+	// Messages for PulseGen
+	dest[ "PulseGen.INPUT output" ] = "input";
 
-        // Messages for DiffAmp
-        dest[ "PLUS output" ] = "plusDest";
-        dest[ "MINUS output" ] = "minusDest";
-        dest[ "GAIN output" ] = "gainDest";
-        // These are to take output from RC
-        dest[ "PLUS state" ] = "plusDest";
-        dest[ "MINUS state" ] = "minusDest";
-        dest[ "GAIN state" ] = "gainDest";
-        
-        // Messages for PIDController
-        dest[ "CMD output" ] = "commandDest";
-        dest[ "SNS output" ] = "sensedDest";
-        dest[ "GAIN output" ] = "gainDest";
-        dest[ "SNS Vm" ] = "sensedDest";
-        dest[ "CMD Vm" ] = "commandDest";
-        dest[ "GAIN Vm" ] = "gainDest";
-        dest[ "CMD state" ] = "commandDest";
-        dest[ "SNS state" ] = "sensedDest";
-        dest[ "CMD state" ] = "commandDest";
-        dest[ "SNS state" ] = "sensedDest";
-        dest[ "GAIN state" ] = "gainDest";
-        //        dest[ "GAIN state" ] = "gainDest"; // already in DiffAmp
+	// Messages for DiffAmp
+	dest[ "PLUS output" ] = "plusDest";
+	dest[ "MINUS output" ] = "minusDest";
+	dest[ "GAIN output" ] = "gainDest";
+	// These are to take output from RC
+	dest[ "PLUS state" ] = "plusDest";
+	dest[ "MINUS state" ] = "minusDest";
+	dest[ "GAIN state" ] = "gainDest";
+	
+	// Messages for PIDController
+	dest[ "CMD output" ] = "commandDest";
+	dest[ "SNS output" ] = "sensedDest";
+	dest[ "GAIN output" ] = "gainDest";
+	dest[ "SNS Vm" ] = "sensedDest";
+	dest[ "CMD Vm" ] = "commandDest";
+	dest[ "GAIN Vm" ] = "gainDest";
+	dest[ "CMD state" ] = "commandDest";
+	dest[ "SNS state" ] = "sensedDest";
+	dest[ "CMD state" ] = "commandDest";
+	dest[ "SNS state" ] = "sensedDest";
+	dest[ "GAIN state" ] = "gainDest";
+	//	dest[ "GAIN state" ] = "gainDest"; // already in DiffAmp
 
-        // Message for RC - already included in Compartment
-        // But the nomenclature violates the general scheme
-        // dest[ "INJECT output" ] = "injectMsg";
-        
+	// Message for RC - already included in Compartment
+	// But the nomenclature violates the general scheme
+	// dest[ "INJECT output" ] = "injectMsg";
+	
 	// Some messages for tables
 	dest[ "INPUT Vm" ] = "inputRequest";
 	dest[ "INPUT Im" ] = "inputRequest";
@@ -763,14 +766,14 @@ map< string, string >& sliDestLookup()
 	dest[ "INPUT Z" ] = "inputRequest";
 	dest[ "INPUT n" ] = "inputRequest";
 	dest[ "INPUT Co" ] = "inputRequest";
-        dest[ "INPUT output" ] = "inputRequest";
-        dest[ "INPUT state" ] = "inputRequest";
-        dest[ "INPUT cmd" ] = "inputRequest";
-        dest[ "INPUT sns"] = "inputRequest";
-        dest[ "INPUT e" ] = "inputRequest";
-        dest[ "INPUT e_integral" ] = "inputRequest";
-        dest[ "INPUT e_deriv" ] = "inputRequest";
-        dest[ "INPUT e_previous" ] = "inputRequest";
+	dest[ "INPUT output" ] = "inputRequest";
+	dest[ "INPUT state" ] = "inputRequest";
+	dest[ "INPUT cmd" ] = "inputRequest";
+	dest[ "INPUT sns"] = "inputRequest";
+	dest[ "INPUT e" ] = "inputRequest";
+	dest[ "INPUT e_integral" ] = "inputRequest";
+	dest[ "INPUT e_deriv" ] = "inputRequest";
+	dest[ "INPUT e_previous" ] = "inputRequest";
 
 	// Messages for having tables pretend to be an xplot
 	dest[ "PLOT Vm" ] = "inputRequest";
@@ -785,16 +788,20 @@ map< string, string >& sliDestLookup()
 	dest[ "PLOT Z" ] = "PLOTRequest";
 	dest[ "PLOT n" ] = "inputRequest";
 	dest[ "PLOT Co" ] = "inputRequest";
-        dest[ "PLOT output" ] = "inputRequest";
-        dest[ "PLOT state" ] = "inputRequest";
-        dest[ "PLOT e" ] = "inputRequest";
-        dest[ "PLOT e_integral" ] = "inputRequest";
-        dest[ "PLOT e_deriv" ] = "inputRequest";
-        dest[ "PLOT e_previous" ] = "inputRequest";
+	dest[ "PLOT output" ] = "inputRequest";
+	dest[ "PLOT state" ] = "inputRequest";
+	dest[ "PLOT e" ] = "inputRequest";
+	dest[ "PLOT e_integral" ] = "inputRequest";
+	dest[ "PLOT e_deriv" ] = "inputRequest";
+	dest[ "PLOT e_previous" ] = "inputRequest";
+	// Messages for doing table operations
+	dest[ "PRD Gk" ] = "prd";
 
 	// Messages for GHK
 	dest[ "PERMEABILITY Gk" ] = "p"; // From HHChannel
 	dest[ "Cin Ca" ] = "CinDest"; // From CaConc
+	// Messages for GHK - to accept values from a table
+	dest[ "PERMEABILITY output" ] = "p";
 
 	return dest;
 }
