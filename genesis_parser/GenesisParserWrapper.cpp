@@ -1970,10 +1970,9 @@ void do_pope( int argc, const char** const argv, Id s )
 	if ( argc == 1 ) {
 		// s->popeFuncLocal( );
 		send0( s(), popeSlot );
-		GenesisParserWrapper* gpw = 
-			static_cast< GenesisParserWrapper* > ( s()->data( 0 ) );
-
 		// Disabling printing the CWE after pushe/pope
+		// GenesisParserWrapper* gpw = 
+		//	static_cast< GenesisParserWrapper* > ( s()->data( 0 ) );
 		// gpw->printCwe();
 	} else {
 		cout << "usage:: " << argv[0] << "\n";
@@ -4485,9 +4484,11 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "echo {getpath /foo/ -head}", "/foo/ " );
 
 	// Checking pushe/pope
-	gpAssert( "pushe /proto", "/proto " );
+//	gpAssert( "pushe /proto", "/proto " );
+	gpAssert( "pushe /proto", "" );
 	gpAssert( "pwe", "/proto " );
-	gpAssert( "pope", "/ " );
+//	gpAssert( "pope", "/ " );
+	gpAssert( "pope", "" );
 	gpAssert( "pwe", "/ " );
 //	gpAssert( "pushe /foobarzod", "Error - cannot change to '/foobarzod' " );
 	gpAssert( "pwe", "/ " );
