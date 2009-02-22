@@ -106,6 +106,7 @@ const Cinfo* initSynChanCinfo()
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
 		new SrcFinfo( "IkSrc", Ftype1< double >::global() ),
+		new SrcFinfo( "GkSrc", Ftype1< double >::global() ),
 		new SrcFinfo( "origChannel", Ftype2< double, double >::
 			global() ),
 
@@ -154,6 +155,8 @@ static const Slot channelSlot =
 	initSynChanCinfo()->getSlot( "channel.channel" );
 static const Slot origChannelSlot =
 	initSynChanCinfo()->getSlot( "origChannel" );
+static const Slot gkSlot =
+	initSynChanCinfo()->getSlot( "GkSrc" );
 static const Slot ikSlot =
 	initSynChanCinfo()->getSlot( "IkSrc" );
 static const Slot synapseSlot =
@@ -327,6 +330,8 @@ void SynChan::innerProcessFunc( Eref e, ProcInfo info )
 	send2< double, double >( e, channelSlot, Gk_, Ek_ );
 	send2< double, double >( e, origChannelSlot, Gk_, Ek_ );
 	send1< double >( e, ikSlot, Ik_ );
+	// Usually needed by GHK-type objects
+	send1< double >( e, gkSlot, Gk_ );
 }
 
 void SynChan::processFunc( const Conn* c, ProcInfo p )
