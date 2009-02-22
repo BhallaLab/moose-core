@@ -59,18 +59,18 @@ class Element
 		/**
 		 * Return a single buffer entry specified by slot and eindex
 		 */
-		double oneBuf( Slot slot, unsigned int i );
+		double oneBuf( Slot slot, unsigned int i ) const;
 
 		/**
 		 * Sum buffer entries in range specified by slot and eindex
 		 */
-		double sumBuf( Slot slot, unsigned int i );
+		double sumBuf( Slot slot, unsigned int i ) const;
 
 		/**
 		 * return product of v with all buffer entries in range specified 
 		 * by slot and eindex. If none, return v.
 		 */
-		double prdBuf( Slot slot, unsigned int i, double v );
+		double prdBuf( Slot slot, unsigned int i, double v ) const;
 
 		/**
 		 * Get the buffer pointer specified by slot and eindex.

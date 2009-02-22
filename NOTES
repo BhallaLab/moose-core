@@ -441,5 +441,10 @@ completed 1000001 steps in 39.670479 cpu seconds
 This is about 2e8 ops, so genesis is almost 2x faster. Amazing. This new 
 messaging was supposed to go much faster.
 
+Checked in as revision 1033.
+Decide whether further optimization comes first, or the threading.
+
+Did some minor tweaking to use const iterators. This gives about 
+3% improvement, useful, but not too exciting.
 
 =============================================================================

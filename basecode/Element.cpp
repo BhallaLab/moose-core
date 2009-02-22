@@ -72,6 +72,7 @@ void Element::addSpike( unsigned int elementIndex,
 	data( elementIndex )->addSpike( synId, time );
 }
 
+/*
 double Element::sumBuf( Slot slot, unsigned int i )
 {
 	unsigned int offset = slot + i * numRecvSlots_;
@@ -85,22 +86,57 @@ double Element::sumBuf( Slot slot, unsigned int i )
 		ret += **i;
 	return ret;
 }
+*/
 
+double Element::sumBuf( Slot slot, unsigned int i ) const
+{
+	vector< unsigned int >::const_iterator offset = 
+		procBufRange_.begin() + slot + i * numRecvSlots_;
+	vector< double* >::const_iterator begin = 
+		procBuf_.begin() + *offset++;
+	vector< double* >::const_iterator end = 
+		procBuf_.begin() + *offset;
+	double ret = 0.0;
+	for ( vector< double* >::const_iterator i = begin; 
+		i != end; ++i )
+		ret += **i;
+	return ret;
+}
+
+/*
 double Element::prdBuf( Slot slot, unsigned int i, double v )
+	const
 {
 	// unsigned int offset = i * numData_ + slot;
 	unsigned int offset = slot + i * numRecvSlots_;
 	assert( offset + 1 < procBufRange_.size() );
-	vector< double* >::iterator begin = procBuf_.begin() + 
+	vector< double* >::const_iterator begin = procBuf_.begin() + 
 		procBufRange_[offset];
-	vector< double* >::iterator end = procBuf_.begin() + 
+	vector< double* >::const_iterator end = procBuf_.begin() + 
 		procBufRange_[offset + 1];
-	for ( vector< double* >::iterator i = begin; i != end; ++i )
+	for ( vector< double* >::const_iterator i = begin;
+		i != end; ++i )
+		v *= **i;
+	return v;
+}
+*/
+
+double Element::prdBuf( Slot slot, unsigned int i, double v )
+	const
+{
+	vector< unsigned int >::const_iterator offset = 
+		procBufRange_.begin() + slot + i * numRecvSlots_;
+	vector< double* >::const_iterator begin = 
+		procBuf_.begin() + *offset++;
+	vector< double* >::const_iterator end = 
+		procBuf_.begin() + *offset;
+	for ( vector< double* >::const_iterator i = begin;
+		i != end; ++i )
 		v *= **i;
 	return v;
 }
 
-double Element::oneBuf( Slot slot, unsigned int i )
+double Element::oneBuf( Slot slot, unsigned int i ) const
 {
 	// unsigned int offset = i * numData_ + slot;
 	unsigned int offset = slot + i * numRecvSlots_;
