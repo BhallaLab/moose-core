@@ -34,13 +34,13 @@ const Cinfo* initCalculatorCinfo()
       new SrcFinfo( "valueSrc", Ftype1< double >::global() ),
 
       new DestFinfo( "mul", Ftype1< double >::global(),
-                     RFCAST( &Calculator::mulValue() ) ),
+                     RFCAST( &Calculator::mulValue ) ),
       new DestFinfo( "div", Ftype1< double >::global(),
-                     RFCAST( &Calculator::divValue() ) ),
+                     RFCAST( &Calculator::divValue ) ),
       new DestFinfo( "add", Ftype1< double >::global(),
-                     RFCAST( &Calculator::addValue() ) ),
+                     RFCAST( &Calculator::addValue ) ),
       new DestFinfo( "sub", Ftype1< double >::global(),
-                     RFCAST( &Calculator::subValue() ) ),
+                     RFCAST( &Calculator::subValue ) ),
 
 
     };
