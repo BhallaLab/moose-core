@@ -20,6 +20,7 @@ OBJ = \
 	Finfo.o	\
 	Msg.o	\
 	SparseMatrix.o	\
+	testSync.o	\
 	main.o	\
 
 HEADERS = \

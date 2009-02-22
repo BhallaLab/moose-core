@@ -29,6 +29,14 @@ void Element::process( const ProcInfo* p )
 		d_[i]->process( p, Eref( this, i ) );
 }
 
+void Element::process( const ProcInfo* p, unsigned int threadNum )
+{
+	unsigned int begin = ( threadNum * d_.size() ) / p->numThreads;
+	unsigned int end = ( (threadNum + 1 ) * d_.size() ) / p->numThreads;
+	for ( unsigned int i = begin; i != end; ++i )
+		d_[i]->process( p, Eref( this, i ) );
+}
+
 void Element::reinit()
 {
 	for ( unsigned int i = 0; i < d_.size(); ++i )

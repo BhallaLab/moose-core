@@ -88,6 +88,10 @@ endif
 ifeq ($(BUILD),profile)
 CXXFLAGS  = -O3 -pg -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
 endif
+# Threading mode:
+ifeq ($(BUILD),thread)
+CXXFLAGS  = -O3 -pthread -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+endif
 ##########################################################################
 #
 # MAC OS X compilation, Debug mode:
@@ -110,6 +114,9 @@ endif
 SUBLIBS = 
 #LIBS =	-lm -lpthread
 LIBS = 	-lm
+ifeq ($(BUILD),thread)
+LIBS += -lpthread
+endif
 ##########################################################################
 #
 # Developer options (Don't try these unless you are writing new code!)

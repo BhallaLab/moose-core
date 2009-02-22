@@ -11,7 +11,7 @@ class Element
 	friend void testAsync();
 	friend void testStandaloneIntFire();
 	friend void testSynapse();
-	friend void testSyncArray( unsigned int );
+	friend void testSyncArray( unsigned int, unsigned int );
 	public:
 		/**
 		 * Constructor
@@ -39,6 +39,13 @@ class Element
 		 * This function is done for all the local data entries in order.
 		 */
 		void process( const ProcInfo* p );
+
+		/**
+		 * This variant executes a contiguous subset of the Element's
+		 * entries, specified by threadNum. ProcInfo p must carry the
+		 * total number of threads.
+		 */
+		void process( const ProcInfo* p, unsigned int threadNum );
 
 		/**
 		 * Reinitialize things.

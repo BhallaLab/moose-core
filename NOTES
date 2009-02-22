@@ -446,5 +446,9 @@ Decide whether further optimization comes first, or the threading.
 
 Did some minor tweaking to use const iterators. This gives about 
 3% improvement, useful, but not too exciting.
+Checked in as revision 1034.
+
+Implemented skeleton code for threads: creates and joins threads only.
+Compiles, runs.
 
 =============================================================================
