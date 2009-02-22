@@ -75,9 +75,9 @@ const Cinfo* initGHKCinfo()
 
       new SrcFinfo( "IkSrc", Ftype1< double >::global() ),
 
-      new DestFinfo( "Cin", Ftype1< double >::global(),
+      new DestFinfo( "CinDest", Ftype1< double >::global(),
                      RFCAST( &GHK::setCin ) ),
-      new DestFinfo( "Cout", Ftype1< double >::global(),
+      new DestFinfo( "CoutDest", Ftype1< double >::global(),
                      RFCAST( &GHK::setCout ) ),
       // new DestFinfo( "Vm", Ftype1< double >::global(),
       //                RFCAST( &GHK::setVm ) ),

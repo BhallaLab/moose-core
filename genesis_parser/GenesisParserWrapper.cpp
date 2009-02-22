@@ -638,9 +638,12 @@ map< string, string >& sliSrcLookup()
         src[ "PLOT e_integral" ] = "integral";
         src[ "PLOT e_deriv" ] = "deriv";
         src[ "PLOT e_previous" ] = "e_previous";
-        
-        src[ "PERMEABILITY Gk" ] = "GkSrc";
-
+    
+	    
+	// Messages for GHK
+	src[ "PERMEABILITY Gk" ] = "GkSrc";	// From HHChannel
+	src[ "Cin Ca" ] = "concSrc"; // From CaConc
+	
 	return src;
 }
 
@@ -789,7 +792,9 @@ map< string, string >& sliDestLookup()
         dest[ "PLOT e_deriv" ] = "inputRequest";
         dest[ "PLOT e_previous" ] = "inputRequest";
 
-        dest[ "PERMEABILITY Gk" ] = "p";
+	// Messages for GHK
+	dest[ "PERMEABILITY Gk" ] = "p"; // From HHChannel
+	dest[ "Cin Ca" ] = "CinDest"; // From CaConc
 
 	return dest;
 }
