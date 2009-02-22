@@ -167,8 +167,18 @@ double GHK::getTemperature( Eref e )
 
 void GHK::setPermeability( const Conn* c, double p )
 {
-        static_cast< GHK* >( c->data() )->p_ = p;
+  Eref e = c->target();
+  unsigned int nMsgs = e->msg( e->findFinfo( "p" )->msg() )->size();
+
+  // If 0 or 1 perm message, then just set value, otherwise add
+  if(nMsg <= 1) {
+    static_cast< GHK* >( c->data() )->p_ = p;
+  }
+  else {
+    static_cast< GHK* >( c->data() )->p_ += p;
+  }
 }
+
 double GHK::getPermeability( Eref e )
 {
         return static_cast< GHK* >( e.data() )->p_;
@@ -277,6 +287,14 @@ void GHK::innerProcessFunc( Eref e, ProcInfo info )
     send2< double, double >( e, channelSlot, Gk_, Ek_ );
     send1< double >( e, ikSlot, Ik_ );
 
+
+    unsigned int nMsgs = e->msg( e->findFinfo( "p" )->msg() )->size();
+
+    // If more than 1 message, then we are using addition rather than setting
+    // the value for the p_, so need to reset it each timestep.
+    if(nMsg > 1) {
+      p_ = 0;
+    }
 
 
 }
