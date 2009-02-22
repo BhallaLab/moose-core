@@ -171,7 +171,7 @@ void GHK::setPermeability( const Conn* c, double p )
   unsigned int nMsgs = e->msg( e->findFinfo( "p" )->msg() )->size();
 
   // If 0 or 1 perm message, then just set value, otherwise add
-  if(nMsg <= 1) {
+  if(nMsgs <= 1) {
     static_cast< GHK* >( c->data() )->p_ = p;
   }
   else {
@@ -292,7 +292,7 @@ void GHK::innerProcessFunc( Eref e, ProcInfo info )
 
     // If more than 1 message, then we are using addition rather than setting
     // the value for the p_, so need to reset it each timestep.
-    if(nMsg > 1) {
+    if(nMsgs > 1) {
       p_ = 0;
     }
 
