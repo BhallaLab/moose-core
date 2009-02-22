@@ -6,7 +6,8 @@ class Calculator {
  public:
   Calculator()
     {
-      ;
+     initVal_ = 0;
+     val_ = 0;
     }
 
   static void setInitValue( const Conn* c, double v );
