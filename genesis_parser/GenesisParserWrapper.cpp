@@ -647,6 +647,9 @@ map< string, string >& sliSrcLookup()
 	// Messages for GHK - to accept values from a table
 	src[ "PERMEABILITY output" ] = "outputSrc";
 	
+        src[ "SAVE Ik" ] = "Ik"; // Use with AscFile
+        src[ "SAVE C" ] = "Ca";
+
 	return src;
 }
 
@@ -802,6 +805,9 @@ map< string, string >& sliDestLookup()
 	dest[ "Cin Ca" ] = "CinDest"; // From CaConc
 	// Messages for GHK - to accept values from a table
 	dest[ "PERMEABILITY output" ] = "p";
+
+        dest[ "SAVE Ik" ] = "save"; // AscFile
+        dest[ "SAVE C" ] = "save";
 
 	return dest;
 }
