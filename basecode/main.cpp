@@ -1,4 +1,5 @@
 #include "header.h"
+#include <sys/time.h>
 #include <math.h>
 #include <queue>
 #include "Reac.h"
@@ -13,19 +14,19 @@ void testSync()
 	// Make objects
 	Mol m1( 1.0 );
 	vector< Data* > v1( 1, &m1 );
-	Element* e1 = new Element( v1 );
+	Element* e1 = new Element( v1, 1, 1 );
 
 	Mol m2( 0.0 );
 	vector< Data* > v2( 1, &m2 );
-	Element* e2 = new Element( v2 );
+	Element* e2 = new Element( v2, 1, 1 );
 
 	Reac r1( 0.2, 0.1 );
 	vector< Data* > v3( 1, &r1 );
-	Element* e3 = new Element( v3 );
+	Element* e3 = new Element( v3, 1, 1 );
 
 	Tab t1;
 	vector< Data* > v4( 1, &t1 );
-	Element* e4 = new Element( v4 );
+	Element* e4 = new Element( v4, 1, 1 );
 
 	/////////////////////////////////////////////////////////////////////
 	// Set up messaging
@@ -112,9 +113,15 @@ void testSync()
 
 void checkVal( double time, const Mol* m, unsigned int size )
 {
+	static const double EPS = 1.0e-4;
+	static const double THRESH = 1.0e-3;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double y = 0.333333 * ( i + i + i * exp ( -time / 3.333333 ) );
-		assert( fabs( m->n_ - y ) < 1e-5 );
+		if ( y > THRESH )
+			assert( fabs( 1.0 - m[i].n_ / y ) < EPS );
+		else
+			assert( fabs( m[i].n_ - y ) < EPS );
+		// cout << time << "	" << y << "	" << m[i].n_ << endl;
 	}
 }
 
@@ -127,21 +134,21 @@ void testSyncArray( unsigned int size )
 		m1[i].nInit_ = i; // This means that each calculation is unique.
 		v1[i] = &( m1[ i ] );
 	}
-	Element* e1 = new Element( v1 );
+	Element* e1 = new Element( v1, 1, 2 );
 	e1->sendBuf_ = new double[ size ]; // One double goes out for each molecule
 
 	Mol* m2 = new Mol[ size ]; // Default initializer: nInit = 0.0
 	vector< Data* > v2( size );
 	for ( unsigned int i = 0; i != size; ++i )
 		v2[i] = &( m2[ i ] );
-	Element* e2 = new Element( v2 );
+	Element* e2 = new Element( v2, 1, 2 );
 	e2->sendBuf_ = new double[ size ]; // One double goes out for each molecule
 
 	Reac* r1 = new Reac[ size ]; // Default constructor: kf = 0.1, kb = 0.2
 	vector< Data* > v3( size );
 	for ( unsigned int i = 0; i != size; ++i )
 		v3[i] = &( r1[ i ] );
-	Element* e3 = new Element( v3 );
+	Element* e3 = new Element( v3, 2, 2 ); // Uses 2 outgoing msg slots
 	e3->sendBuf_ = new double[ size * 2 ]; // One double each for A and B.
 
 	// Unlike the previous test, here we will need to check the results
@@ -180,8 +187,8 @@ void testSyncArray( unsigned int size )
 		e2->procBufRange_[p + 1] = k + 1; // start index procBuf subtract
 		e2->procBufRange_[p + 2] = k + 2; // End index procBuf subtract
 
-		e3->procBuf_[k] = &e1->sendBuf_[ j ]; // substrate input.
-		e3->procBuf_[k + 1] =  &e2->sendBuf_[ j ]; // product input
+		e3->procBuf_[k] = &e1->sendBuf_[ i ]; // substrate input.
+		e3->procBuf_[k + 1] =  &e2->sendBuf_[ i ]; // product input
 
 		e3->procBufRange_[p] = k; // start index for procBuf sum input
 		e3->procBufRange_[p + 1] = k + 1; // start index procBuf subtract
@@ -196,11 +203,15 @@ void testSyncArray( unsigned int size )
 	e2->reinit();
 	e3->reinit();
 
-	double dt = 0.01;
+	double dt = 0.001;
 	double plotdt = 1.0;
-	double maxt = 100.0;
+	double maxt = 10.0;
 	ProcInfo p;
 	p.dt = dt;
+
+	struct timeval tv_start;
+	struct timeval tv_end;
+	gettimeofday( &tv_start, 0 );
 	for ( double pt = 0.0; pt < maxt; pt += plotdt ) {
 		checkVal( pt, m1, size );
 		for( double t = 0.0; t < plotdt; t += dt ) {
@@ -210,6 +221,7 @@ void testSyncArray( unsigned int size )
 			e2->process( &p );
 		}
 	}
+	gettimeofday( &tv_end, 0 );
 
 	delete e1;
 	delete e2;
@@ -217,7 +229,12 @@ void testSyncArray( unsigned int size )
 	delete[] m1;
 	delete[] m2;
 	delete[] r1;
-	cout << "syncArray" << size << " " << flush;
+	cout << "syncArray" << size << "	ops=" << size * maxt / dt <<
+		"	time=" <<
+		( tv_end.tv_sec - tv_start.tv_sec ) +
+		1.0e-6 * ( tv_end.tv_usec - tv_start.tv_usec ) <<
+		"	" <<
+		endl;
 }
 
 void testAsync( )
@@ -232,7 +249,7 @@ void testAsync( )
 	// Make objects
 	Reac r1( 0.2, 0.1 );
 	vector< Data* > v1( 1, &r1 );
-	Element* e1 = new Element( v1 );
+	Element* e1 = new Element( v1, 1, 1 );
 
 	vector< char > buffer( 100 );
 	char* buf = &( buffer[0] );
@@ -267,7 +284,7 @@ void testStandaloneIntFire( )
 	const double EPSILON = 1e-6;
 	IntFire f3( 1, 0.005 );
 	vector< Data* > v3( 1, &f3 );
-	Element* e3 = new Element( v3 );
+	Element* e3 = new Element( v3, 1, 1 );
 
 	// SynInfo( weight, delay )
 	f3.synapses_.push_back( SynInfo( 0.5, 0.001 ) );
@@ -310,7 +327,7 @@ void testSynapse( )
 	// IntFire f1( thresh, tau );
 	IntFire f1( 1, 0.005 );
 	vector< Data* > v1( 1, &f1 );
-	Element* e1 = new Element( v1 );
+	Element* e1 = new Element( v1, 1, 1 );
 	// SynInfo( weight, delay )
 	f1.synapses_.push_back( SynInfo( 2, 0.001 ) );
 	e1->msg_.resize( 2 );
@@ -318,7 +335,7 @@ void testSynapse( )
 
 	IntFire f2( 1, 0.005 );
 	vector< Data* > v2( 1, &f2 );
-	Element* e2 = new Element( v2 );
+	Element* e2 = new Element( v2, 1, 1 );
 	f2.synapses_.push_back( SynInfo( 2, 0.003 ) );
 	e2->msg_.resize( 2 );
 
@@ -355,7 +372,7 @@ int main()
 	testAsync();
 	testSynapse();
 
-	for ( unsigned int size = 10; size < 1000001; size *= 10 )
+	for ( unsigned int size = 10; size < 10001; size *= 10 )
 	// Put timing stuff here.
 		testSyncArray( size );
 

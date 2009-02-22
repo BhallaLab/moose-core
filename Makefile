@@ -84,6 +84,10 @@ endif
 ifeq ($(BUILD),release)
 CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
 endif
+# Profiling mode:
+ifeq ($(BUILD),profile)
+CXXFLAGS  = -O3 -pg -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+endif
 ##########################################################################
 #
 # MAC OS X compilation, Debug mode:

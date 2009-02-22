@@ -8,8 +8,12 @@ Element::Element( const Data *proto, unsigned int numEntries )
 }
 */
 
-Element::Element( vector< Data* >& d )
-	: d_( d ), finfo_( d_[0]->initClassInfo() ), numEntries_( d.size() )
+Element::Element( vector< Data* >& d, 
+	unsigned int numSendSlots, unsigned int numRecvSlots )
+	: d_( d ), 
+	finfo_( d_[0]->initClassInfo() ), 
+	numSendSlots_( numSendSlots ),
+	numRecvSlots_( numRecvSlots )
 {
 	;
 }
@@ -70,8 +74,7 @@ void Element::addSpike( unsigned int elementIndex,
 
 double Element::sumBuf( Slot slot, unsigned int i )
 {
-	// unsigned int offset = i * numData_ + slot;
-	unsigned int offset = slot;
+	unsigned int offset = slot + i * numRecvSlots_;
 	assert( offset + 1 < procBufRange_.size() );
 	vector< double* >::iterator begin = procBuf_.begin() + 
 		procBufRange_[offset];
@@ -86,7 +89,7 @@ double Element::sumBuf( Slot slot, unsigned int i )
 double Element::prdBuf( Slot slot, unsigned int i, double v )
 {
 	// unsigned int offset = i * numData_ + slot;
-	unsigned int offset = slot;
+	unsigned int offset = slot + i * numRecvSlots_;
 	assert( offset + 1 < procBufRange_.size() );
 	vector< double* >::iterator begin = procBuf_.begin() + 
 		procBufRange_[offset];
@@ -100,7 +103,7 @@ double Element::prdBuf( Slot slot, unsigned int i, double v )
 double Element::oneBuf( Slot slot, unsigned int i )
 {
 	// unsigned int offset = i * numData_ + slot;
-	unsigned int offset = slot;
+	unsigned int offset = slot + i * numRecvSlots_;
 	assert( offset + 1 < procBufRange_.size() );
 	return *procBuf_[ procBufRange_[ offset ] ];
 }
@@ -108,21 +111,19 @@ double Element::oneBuf( Slot slot, unsigned int i )
 double* Element::getBufPtr( Slot slot, unsigned int i )
 {
 	// unsigned int offset = i * numData_ + slot;
-	unsigned int offset = slot;
+	unsigned int offset = slot + i * numRecvSlots_;
 	assert( offset + 1 < procBufRange_.size() );
 	return procBuf_[ procBufRange_[ offset ] ];
 }
 
 void Element::send1( Slot slot, unsigned int i, double v )
 {
-	sendBuf_[ slot + i * numEntries_ ] = v;
+	sendBuf_[ slot + i * numSendSlots_ ] = v;
 }
 
 void Element::send2( Slot slot, unsigned int i, double v1, double v2 )
 {
-	// Actually we shouldn't use numEntries here, but some value
-	// calculated based on the total size of all args that use the send buf
-	double* sb = sendBuf_ + slot + i * numEntries_ * 2;
+	double* sb = sendBuf_ + slot + i * numSendSlots_;
 	*sb++ = v1;
 	*sb = v2;
 }

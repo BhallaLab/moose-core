@@ -19,7 +19,10 @@ class Element
 		 * IntFire. Common but not static.
 		 * Also think about parent-child hierarchy.
 		 */
-		Element( vector< Data * >& d );
+		Element( vector< Data * >& d, 
+			unsigned int numSendSlots_,
+			unsigned int numRecvSlots_
+		);
 
 		/**
 		 * Destructor
@@ -171,7 +174,17 @@ class Element
 		 * very sparse connectivity.
 		 */
 
-		unsigned int numEntries_;
+		/**
+		 * Number of outgoing msg slots. Used to work out indexing into
+		 * send buffer.
+		 */
+		unsigned int numSendSlots_;
+
+		/**
+		 * Number of incoming msg slots. Used to work out indexing into
+		 * ProcBufRange.
+		 */
+		unsigned int numRecvSlots_;
 
 };
 

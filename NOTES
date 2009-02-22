@@ -417,3 +417,29 @@ build a reaction model with a big test array for a reaction scheme
 Compiled testSyncArray: OK. Ran it: Failed.
 
 =============================================================================
+22 Feb 2009.
+Checked in as revision 1032.
+
+Got the testSyncArray stuff to work. Did a little profiling. Spends
+about 25% of its time in Element::sumBuf. 
+Here are the timings of a single A <===> B reaction on this 1.4Ghz machine
+(Lenovo X301), using O3:
+syncArray10     ops=100000      time=0.057695
+syncArray100    ops=1e+06       time=0.313191
+syncArray1000   ops=1e+07       time=3.13012
+syncArray10000  ops=1e+08       time=31.7042
+
+Takes about 4 times longer with debugging and no optimization:
+syncArray10     ops=100000      time=0.170935
+syncArray100    ops=1e+06       time=1.18491
+syncArray1000   ops=1e+07       time=11.4804
+syncArray10000  ops=1e+08       time=115.368
+
+For reference, genesis does:
+completed 1000001 steps in 39.670479 cpu seconds 
+(for spine_v59.g, which is a model with 104 mols, 55 reacs and 76 enz).
+This is about 2e8 ops, so genesis is almost 2x faster. Amazing. This new 
+messaging was supposed to go much faster.
+
+
+=============================================================================
