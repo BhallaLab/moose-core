@@ -405,3 +405,15 @@ Next: Begin to set up the benchmarks for sync and async messaging.
 Gear up with this for testing with multi-threading.
 
 =============================================================================
+20 Feb 2009
+
+Checked in as revision 1023
+
+Setting up a main.cpp::testSyncArray( unsigned int size ) function to
+build a reaction model with a big test array for a reaction scheme
+
+=============================================================================
+21 Feb 2009
+Compiled testSyncArray: OK. Ran it: Failed.
+
+=============================================================================

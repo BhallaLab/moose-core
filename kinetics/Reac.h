@@ -3,6 +3,7 @@ class Reac: public Data
 	friend void testAsync();
 		
 	public: 
+		Reac();
 		Reac( double kf, double kb );
 		void process( const ProcInfo* p, Eref e );
 		void reinit( Eref e );

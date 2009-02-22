@@ -1,6 +1,13 @@
 class Mol: public Data
 {
+	friend void testSyncArray( unsigned int );
+	friend void checkVal( double time, const Mol* m, unsigned int size );
+
 	public: 
+		Mol()
+			: nInit_( 0.0 ), A_( 0.0 ), B_( 0.0 )
+			{;}
+
 		Mol( double nInit )
 			: nInit_( nInit ), A_( 0.0 ), B_( 0.0 )
 			{;}

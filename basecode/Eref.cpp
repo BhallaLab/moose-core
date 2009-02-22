@@ -39,3 +39,13 @@ void Eref::sendSpike( Slot src, double t )
 	for ( vector< Msg* >::const_iterator i = v.begin(); i != v.end(); ++i )
 		( *i )->addSpike( i_, t );
 }
+
+void Eref::send1( Slot src, double v )
+{
+	e_->send1( src, i_, v );
+}
+
+void Eref::send2( Slot src, double v1, double v2 )
+{
+	e_->send2( src, i_, v1, v2 );
+}

@@ -4,9 +4,9 @@
 
 #define EPSILON 1e-15
 
+const Slot nSlot = 0;
 const Slot aSlot = 0;
 const Slot bSlot = 1;
-const Slot nSlot = 2;
 
 /*
 const Cinfo* initMolCinfo()
@@ -79,13 +79,15 @@ void Mol::process( const ProcInfo* p, Eref e )
 		n_ += ( A - B ) * p->dt;
 	}
 	// send n out
-	send1< double >( e, nSlot, n_ );
+	e.send1( nSlot, n_ );
+	// send1< double >( e, nSlot, n_ );
 }
 
 void Mol::reinit( Eref e )
 {
 	n_ = nInit_;
-	send1< double >( e, nSlot, n_ );
+	e.send1( nSlot, n_ );
+	// send1< double >( e, nSlot, n_ );
 }
 
 /*

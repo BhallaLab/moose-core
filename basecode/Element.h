@@ -11,6 +11,7 @@ class Element
 	friend void testAsync();
 	friend void testStandaloneIntFire();
 	friend void testSynapse();
+	friend void testSyncArray( unsigned int );
 	public:
 		/**
 		 * Constructor
@@ -18,8 +19,17 @@ class Element
 		 * IntFire. Common but not static.
 		 * Also think about parent-child hierarchy.
 		 */
-		// Element( Data *prototype, unsigned int numEntries );
-		Element( vector< Data * > d );
+		Element( vector< Data * >& d );
+
+		/**
+		 * Destructor
+		 */
+		~Element();
+
+		/**
+		 * Here we build the array on the fly.
+		Element( const Data *prototype, unsigned int numEntries );
+		 */
 
 		/**
 		 * Examine process queue, data that is expected every timestep.
@@ -81,6 +91,13 @@ class Element
 			unsigned int synId, double time );
 
 		const vector< Msg* >& msg( Slot slot ) const;
+
+		/**
+		 * We'll try these out as alternate Send functions, given that
+		 * the buffer is local.
+		 */
+		void send1( Slot slot, unsigned int i, double v );
+		void send2( Slot slot, unsigned int i, double v1, double v2 );
 
 	private:
 		/**
@@ -147,12 +164,14 @@ class Element
 		 *
 		 * map< unsigned int slot, unsigned int msgVecIndex >
 		 */
-		 map< unsigned int, unsigned int > msgMap_;
+//		 map< unsigned int, unsigned int > msgMap_;
 
 		/**
 		 * Another option is a sparse matrix. Works a bit better for
 		 * very sparse connectivity.
 		 */
+
+		unsigned int numEntries_;
 
 };
 

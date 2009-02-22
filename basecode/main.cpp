@@ -110,6 +110,116 @@ void testSync()
 	cout << "sync..." << flush;
 }
 
+void checkVal( double time, const Mol* m, unsigned int size )
+{
+	for ( unsigned int i = 0; i < size; ++i ) {
+		double y = 0.333333 * ( i + i + i * exp ( -time / 3.333333 ) );
+		assert( fabs( m->n_ - y ) < 1e-5 );
+	}
+}
+
+void testSyncArray( unsigned int size )
+{
+	// Make objects
+	Mol* m1 = new Mol[ size ];
+	vector< Data* > v1( size );
+	for ( unsigned int i = 0; i != size; ++i ) {
+		m1[i].nInit_ = i; // This means that each calculation is unique.
+		v1[i] = &( m1[ i ] );
+	}
+	Element* e1 = new Element( v1 );
+	e1->sendBuf_ = new double[ size ]; // One double goes out for each molecule
+
+	Mol* m2 = new Mol[ size ]; // Default initializer: nInit = 0.0
+	vector< Data* > v2( size );
+	for ( unsigned int i = 0; i != size; ++i )
+		v2[i] = &( m2[ i ] );
+	Element* e2 = new Element( v2 );
+	e2->sendBuf_ = new double[ size ]; // One double goes out for each molecule
+
+	Reac* r1 = new Reac[ size ]; // Default constructor: kf = 0.1, kb = 0.2
+	vector< Data* > v3( size );
+	for ( unsigned int i = 0; i != size; ++i )
+		v3[i] = &( r1[ i ] );
+	Element* e3 = new Element( v3 );
+	e3->sendBuf_ = new double[ size * 2 ]; // One double each for A and B.
+
+	// Unlike the previous test, here we will need to check the results
+	// of the calculations on the
+	// fly because we don't want to limit ourselves with space for
+	// storing all the output.
+
+	/////////////////////////////////////////////////////////////////////
+	// Set up messaging
+	/////////////////////////////////////////////////////////////////////
+	
+	e1->procBuf_.resize( size * 2 ); // Has A & B inputs for each mol.
+	e1->procBufRange_.resize( size * 2 + 1, 0 ); // Only 2 msg types
+	e2->procBuf_.resize( size * 2 ); // Has A & B inputs for each mol.
+	e2->procBufRange_.resize( size * 2 + 1, 0 ); // Only 2 msg types
+	e3->procBuf_.resize( size * 2 ); // Has sub and prd inputs for each reac
+	e3->procBufRange_.resize( size * 2 + 1, 0 ); // Only 2 msg types
+	for ( unsigned int i = 0; i != size; ++i ) {
+		unsigned int j = i * 2; // index of B in send buf in reac.
+		unsigned int k = i * 2; // Index of procBuf.
+		unsigned int p = i * 2; // counter for procBufRange index.
+		// By a coincidence all three indices match. Since this
+		// is a test run, I retain all for clarity.
+
+		e1->procBuf_[k] = &e3->sendBuf_[ j + 1 ]; // B: sum input
+		e1->procBuf_[k + 1] =  &e3->sendBuf_[ j ]; // A: subtract input
+
+		e1->procBufRange_[p] = k; // start index for procBuf sum input
+		e1->procBufRange_[p + 1] = k + 1; // start index procBuf subtract
+		e1->procBufRange_[p + 2] = k + 2; // End index procBuf subtract
+
+		e2->procBuf_[k] = &e3->sendBuf_[ j ]; // A: sum input
+		e2->procBuf_[k + 1] =  &e3->sendBuf_[ j + 1 ]; // B: subtract input
+
+		e2->procBufRange_[p] = k; // start index for procBuf sum input
+		e2->procBufRange_[p + 1] = k + 1; // start index procBuf subtract
+		e2->procBufRange_[p + 2] = k + 2; // End index procBuf subtract
+
+		e3->procBuf_[k] = &e1->sendBuf_[ j ]; // substrate input.
+		e3->procBuf_[k + 1] =  &e2->sendBuf_[ j ]; // product input
+
+		e3->procBufRange_[p] = k; // start index for procBuf sum input
+		e3->procBufRange_[p + 1] = k + 1; // start index procBuf subtract
+		e3->procBufRange_[p + 2] = k + 2; // End index procBuf subtract
+	}
+	
+	/////////////////////////////////////////////////////////////////////
+	// Process
+	/////////////////////////////////////////////////////////////////////
+	
+	e1->reinit();
+	e2->reinit();
+	e3->reinit();
+
+	double dt = 0.01;
+	double plotdt = 1.0;
+	double maxt = 100.0;
+	ProcInfo p;
+	p.dt = dt;
+	for ( double pt = 0.0; pt < maxt; pt += plotdt ) {
+		checkVal( pt, m1, size );
+		for( double t = 0.0; t < plotdt; t += dt ) {
+			p.currTime = t + pt;
+			e3->process( &p );
+			e1->process( &p );
+			e2->process( &p );
+		}
+	}
+
+	delete e1;
+	delete e2;
+	delete e3;
+	delete[] m1;
+	delete[] m2;
+	delete[] r1;
+	cout << "syncArray" << size << " " << flush;
+}
+
 void testAsync( )
 {
 	/*
@@ -241,9 +351,13 @@ void testSynapse( )
 int main()
 {
 	cout << "testing: ";
-	testSync();
+//	testSync();
 	testAsync();
 	testSynapse();
+
+	for ( unsigned int size = 10; size < 1000001; size *= 10 )
+	// Put timing stuff here.
+		testSyncArray( size );
 
 	cout << endl;
 	return 0;

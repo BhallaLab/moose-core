@@ -8,10 +8,15 @@ Element::Element( const Data *proto, unsigned int numEntries )
 }
 */
 
-Element::Element( vector<  Data* > d )
-	: d_( d ), finfo_( d_[0]->initClassInfo() )
+Element::Element( vector< Data* >& d )
+	: d_( d ), finfo_( d_[0]->initClassInfo() ), numEntries_( d.size() )
 {
 	;
+}
+
+Element::~Element()
+{
+	delete[] sendBuf_;
 }
 
 void Element::process( const ProcInfo* p )
@@ -106,6 +111,20 @@ double* Element::getBufPtr( Slot slot, unsigned int i )
 	unsigned int offset = slot;
 	assert( offset + 1 < procBufRange_.size() );
 	return procBuf_[ procBufRange_[ offset ] ];
+}
+
+void Element::send1( Slot slot, unsigned int i, double v )
+{
+	sendBuf_[ slot + i * numEntries_ ] = v;
+}
+
+void Element::send2( Slot slot, unsigned int i, double v1, double v2 )
+{
+	// Actually we shouldn't use numEntries here, but some value
+	// calculated based on the total size of all args that use the send buf
+	double* sb = sendBuf_ + slot + i * numEntries_ * 2;
+	*sb++ = v1;
+	*sb = v2;
 }
 
 Data* Element::data( unsigned int index )

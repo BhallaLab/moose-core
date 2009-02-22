@@ -3,7 +3,7 @@
 
 const Slot subSlot = 0;
 const Slot prdSlot = 1;
-const Slot reacSlot = 2;
+const Slot reacSlot = 0;
 
 // meant to be templated. But it is a spectacularly ugly template, and
 // might not work on all compilers.
@@ -51,6 +51,12 @@ Finfo** Reac::initClassInfo()
 	return reacFinfos;
 }
 
+Reac::Reac( )
+	: kf_( 0.1 ), kb_( 0.2 )
+{
+	;
+}
+
 Reac::Reac( double kf, double kb )
 	: kf_( kf ), kb_( kb )
 {
@@ -61,7 +67,8 @@ void Reac::process( const ProcInfo* p, Eref e )
 {
 	double frate = e.prdBuf( subSlot, kf_ );
 	double brate = e.prdBuf( prdSlot, kb_ );
-	send2< double, double >( e, reacSlot, frate, brate );
+//	send2< double, double >( e, reacSlot, frate, brate );
+	e.send2( reacSlot, frate, brate );
 /*
 	unsigned int synSize = sizeof( SynInfo );
 	BufferInfo subInfo = e.processBuffer( substrateSlot );

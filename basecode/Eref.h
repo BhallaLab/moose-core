@@ -26,6 +26,16 @@ class Eref
 		double* getBufPtr( Slot slot );
 
 		/**
+		 * Sends a double argument
+		 */
+		void send1( Slot src, double v );
+
+		/**
+		 * Sends two double arguments
+		 */
+		void send2( Slot src, double v1, double v2 );
+
+		/**
 		 * Sends an action potential event to all targets on specified by
 		 * slot src.
 		 */
