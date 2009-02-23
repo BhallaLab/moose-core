@@ -330,7 +330,8 @@ void GHK::innerReinitFunc( Eref e, ProcInfo info )
     std::cerr << "GHK error, invalid permeability" << std::endl;
   }
 
-
+    send2< double, double >( e, channelSlot, Gk_, Ek_ );
+    send1< double >( e, ikSlot, Ik_ );
 
 }
 
