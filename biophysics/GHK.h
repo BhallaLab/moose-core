@@ -12,7 +12,8 @@ class GHK {
 
  public:
 
-  GHK()
+  GHK() :
+    p_( 0.0 )
     {
       ;
     }

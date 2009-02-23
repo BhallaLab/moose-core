@@ -213,10 +213,10 @@ double Interpol2D::indexWithoutCheck( double x, double y ) const
 	assert( table_.size() > 1 );
 	
 	unsigned long xInteger = static_cast< unsigned long >( ( x - xmin_ ) * invDx_ );
-	assert( xInteger < table_.size() - 1 );
+	assert( xInteger < table_.size() );
 	
 	unsigned long yInteger = static_cast< unsigned long >( ( y - ymin_ ) * invDy_ );
-	assert( yInteger < table_[ 0 ].size() - 1 );
+	assert( yInteger < table_[ 0 ].size() );
 	
 	return table_[ xInteger ][ yInteger ];
 }
