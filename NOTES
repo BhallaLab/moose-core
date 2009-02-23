@@ -505,5 +505,8 @@ However, I need to do a lot more testing, including confirming that it
 gives the right answers. Do the current calculations go across threads?
 
 Also I need to check if the 4-core opteron nodes do better.
+Checked in as revision 1048.
+
+Did check that calculations give the right answers.
 
 =============================================================================

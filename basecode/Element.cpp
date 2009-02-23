@@ -183,3 +183,8 @@ const vector< Msg* >& Element::msg( Slot slot ) const
 	assert( msg_.size() > slot );
 	return msg_[ slot ];
 }
+
+unsigned int Element::numEntries() const
+{
+	return d_.size();
+}

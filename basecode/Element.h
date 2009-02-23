@@ -109,6 +109,11 @@ class Element
 		void send1( Slot slot, unsigned int i, double v );
 		void send2( Slot slot, unsigned int i, double v1, double v2 );
 
+		/**
+		 * Number of data entries in Element
+		 */
+		unsigned int numEntries() const;
+
 	private:
 		/**
 		 * These are the objects managed by the Element

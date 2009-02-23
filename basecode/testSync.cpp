@@ -121,6 +121,32 @@ void checkVal( double time, const Mol* m, unsigned int size )
 	}
 }
 
+void forceCheckVal( double time, Element* e, unsigned int size )
+{
+	static const double EPS = 1.0e-4;
+	static const double THRESH = 1.0e-3;
+	for ( unsigned int i = 0; i < size; ++i ) {
+		const Mol* m = static_cast< const Mol* >( e->data( i ) );
+		double y = 0.333333 * ( i + i + i * exp ( -time / 3.333333 ) );
+		if ( y > THRESH ) {
+			if ( fabs( 1.0 - m->n_ / y ) > EPS ) {
+				cout << "forceCheckVal error: i = " << i << 
+					", time = " << time << 
+					" Terminating\n";
+				exit( 1 );
+			}
+		} else {
+			if ( fabs( m->n_ - y ) > EPS ) {
+				cout << "forceCheckVal error: i = " << i << 
+					", time = " << time << 
+					" Terminating\n";
+				exit( 1 );
+			}
+		}
+		// cout << time << "	" << y << "	" << m[i].n_ << endl;
+	}
+}
+
 double process( Element* e1, Element* e2, Element* e3, 
 	const Mol* m1, unsigned int size, unsigned int numThreads );
 
@@ -267,6 +293,7 @@ void* processThread( void* t )
 	p.numThreads = ti->numThreads;
 
 	for ( double pt = 0.0; pt < ti->maxt; pt += ti->plotdt ) {
+		forceCheckVal( pt, e1, e1->numEntries() );
 		for( double t = 0.0; t < ti->plotdt; t += ti->dt ) {
 			p.currTime = t + pt;
 			e3->process( &p, threadNum );
