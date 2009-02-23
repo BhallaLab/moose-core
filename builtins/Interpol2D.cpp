@@ -231,12 +231,12 @@ double Interpol2D::interpolateWithoutCheck( double x, double y ) const
 	double xv = ( x - xmin_ ) * invDx_;
 	unsigned long xInteger = static_cast< unsigned long >( xv );
 	double xFraction = xv - xInteger;
-	assert( xInteger < table_[ 0 ].size() - 1 );
+	assert( xInteger < table_.size() - 1 );
 	
 	double yv = ( y - ymin_ ) * invDy_;
 	unsigned long yInteger = static_cast< unsigned long >( yv );
 	double yFraction = yv - yInteger;
-	assert( yInteger < table_.size() - 1 );
+	assert( yInteger < table_[ 0 ].size() - 1 );
 	
 	/* The following is the same as:
 			double z00 = table_[ xInteger ][ yInteger ];
@@ -530,7 +530,7 @@ void Interpol2D::localAppendTableVector(
 	}
 	
 	table_.insert( table_.end(), value.begin(), value.end() );
-	invDy_ = ydivs() / ( ymax_ - ymin_ );
+	invDx_ = xdivs() / ( xmax_ - xmin_ );
 }
 
 void Interpol2D::resize( unsigned int xsize, unsigned int ysize, double init ) {
@@ -538,6 +538,9 @@ void Interpol2D::resize( unsigned int xsize, unsigned int ysize, double init ) {
 	table_.resize( xsize );
 	for ( i = table_.begin(); i != table_.end(); i++ )
 		i->resize( ysize, init );
+	
+	invDx_ = xdivs() / ( xmax_ - xmin_ );
+	invDy_ = ydivs() / ( ymax_ - ymin_ );
 }
 
 void Interpol2D::innerPrint(
@@ -609,6 +612,9 @@ void Interpol2D::innerLoad( const string& fname, unsigned int skiplines )
 			
 			lastWidth = table_.back().size();
 		}
+		
+		invDx_ = xdivs() / ( xmax_ - xmin_ );
+		invDy_ = ydivs() / ( ymax_ - ymin_ );
 	} else {
 		cerr << "Error: Interpol2D::innerLoad: Failed to open file " << 
 			fname << endl;
