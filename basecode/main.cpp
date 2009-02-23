@@ -147,12 +147,12 @@ int main()
 	testAsync();
 	testSynapse();
 
-	for ( unsigned int size = 10; size < 1001; size *= 10 )
+	for ( unsigned int size = 10; size < 10001; size *= 10 )
 		testSyncArray( size, 1 );
 
-	for ( unsigned int size = 10; size < 101; size *= 10 )
+	for ( unsigned int size = 10; size < 10001; size *= 10 )
 		testSyncArray( size, 2 );
-	for ( unsigned int size = 10; size < 101; size *= 10 )
+	for ( unsigned int size = 10; size < 10001; size *= 10 )
 		testSyncArray( size, 4 );
 
 	cout << endl;

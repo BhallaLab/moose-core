@@ -450,5 +450,60 @@ Checked in as revision 1034.
 
 Implemented skeleton code for threads: creates and joins threads only.
 Compiles, runs.
+Checked in as revision 1040.
+
+For threading:
+- simplest approach, probably not practical:
+	Launch a thread for each processor on each clock tick.
+	Thread computes process for subset of entries.
+	Join threads after clock tick.
+	Problem is that thread launches and joins are not cheap.
+- Condition approach, trickier but maybe faster:
+	Launch threads for each processor when calculations starts.
+	Thread runs independent scheduling.
+	At end of each tick:
+	mutex to increment count # of threads completed.
+		If all threads done
+			signals to master thread/all other threads
+		else
+			cond_wait for count
+	close mutex
+	go on to next tick.
+- pthread_barriers
+	This is probably the cleanest. 
+	Launch threads for each processor when calculations starts.
+	Thread runs independent scheduling.
+	At end of each tick, put a barrier.
+	Problem is that pthread barriers are reported to be very slow.
+	Let's see.
+- busy-loop barriers
+	Same as above, only don't use pthreads barriers. Instead do a
+	mutex-protected increment of # of threads completed,
+	close mutex
+	and do a busy-loop barrier on the # of threads completed.
+	
+Working on pthread_barrier based implementation.
+
+Well, it looks like it works. The thread advantage isn't huge on my
+2-core laptop:
+syncArray10     ops=100000      time=0.056823
+syncArray100    ops=1000000     time=0.311645
+syncArray1000   ops=10000000    time=3.16343
+syncArray10000  ops=100000000   time=31.2464
+Main: creating 2 threads
+syncArray10     ops=100000      time=0.25066
+syncArray100    ops=1000000     time=0.524708
+syncArray1000   ops=10000000    time=2.19136
+syncArray10000  ops=100000000   time=19.7902
+Main: creating 4 threads
+syncArray10     ops=100000      time=0.755361
+syncArray100    ops=1000000     time=0.970983
+syncArray1000   ops=10000000    time=2.61468
+syncArray10000  ops=100000000   time=22.7247
+
+However, I need to do a lot more testing, including confirming that it
+gives the right answers. Do the current calculations go across threads?
+
+Also I need to check if the 4-core opteron nodes do better.
 
 =============================================================================
