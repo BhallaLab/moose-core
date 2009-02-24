@@ -22,8 +22,10 @@ class SbmlWriter
 		bool writeModel(const SBMLDocument* sbmlDoc, const string& filename);
 	private:
 		static int targets(Eref object,	const string& msg,vector< Eref >& target,const string& type = "" );
-
 		static bool isType( Eref object, const string& type );
+		string parmUnit(double rct_order);
+		double transformUnits(double mvalue,UnitDefinition * ud);
+		string nameString(string str);
 };
 extern const Cinfo* initKinComptCinfo();
 extern const Cinfo* initMoleculeCinfo();
