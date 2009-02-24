@@ -81,7 +81,7 @@ const Cinfo* initGHKCinfo()
                      RFCAST( &GHK::setCout ) ),
       // new DestFinfo( "Vm", Ftype1< double >::global(),
       //                RFCAST( &GHK::setVm ) ),
-      new DestFinfo( "p", Ftype1< double >::global(),
+      new DestFinfo( "pDest", Ftype1< double >::global(),
                      RFCAST( &GHK::setPermeability ) ),
 
 
@@ -168,7 +168,7 @@ double GHK::getTemperature( Eref e )
 void GHK::setPermeability( const Conn* c, double p )
 {
   Eref e = c->target();
-  unsigned int nMsgs = e->msg( e->findFinfo( "p" )->msg() )->size();
+  unsigned int nMsgs = e->msg( e->findFinfo( "pDest" )->msg() )->size();
 
   // If 0 or 1 perm message, then just set value, otherwise add
   if(nMsgs <= 1) {
@@ -288,7 +288,7 @@ void GHK::innerProcessFunc( Eref e, ProcInfo info )
     send1< double >( e, ikSlot, Ik_ );
 
 
-    unsigned int nMsgs = e->msg( e->findFinfo( "p" )->msg() )->size();
+    unsigned int nMsgs = e->msg( e->findFinfo( "pDest" )->msg() )->size();
 
     // If more than 1 message, then we are using addition rather than setting
     // the value for the p_, so need to reset it each timestep.
