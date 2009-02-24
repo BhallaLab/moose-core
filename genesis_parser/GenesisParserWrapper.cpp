@@ -801,10 +801,10 @@ map< string, string >& sliDestLookup()
 	dest[ "PRD Gk" ] = "prd";
 
 	// Messages for GHK
-	dest[ "PERMEABILITY Gk" ] = "p"; // From HHChannel
+	dest[ "PERMEABILITY Gk" ] = "pDest"; // From HHChannel
 	dest[ "Cin Ca" ] = "CinDest"; // From CaConc
 	// Messages for GHK - to accept values from a table
-	dest[ "PERMEABILITY output" ] = "p";
+	dest[ "PERMEABILITY output" ] = "pDest";
 
         dest[ "SAVE Ik" ] = "save"; // AscFile
         dest[ "SAVE C" ] = "save";
