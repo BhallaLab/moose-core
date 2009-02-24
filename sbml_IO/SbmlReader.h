@@ -30,7 +30,7 @@ class SbmlReader
 		Element* comptEl_;
 		Element* molecule_;
 		Element* reaction_;
-		string  prn_parm(const ASTNode* p);
+		void prn_parm(const ASTNode* p,vector <string> & parameters);
 		double transformUnits(double msize,UnitDefinition * ud);
 		
 		
