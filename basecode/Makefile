@@ -29,6 +29,7 @@ HEADERS = \
 	Eref.h \
 	Msg.h \
 	SparseMatrix.h \
+	MyBarrier.h \
 	Finfo.h \
 
 default: $(TARGET)

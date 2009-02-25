@@ -1,6 +1,7 @@
 class Mol: public Data
 {
-	friend void testSyncArray( unsigned int size, unsigned int numThreads );
+	friend void testSyncArray( unsigned int size, unsigned int numThreads,
+		unsigned int method );
 	friend void checkVal( double time, const Mol* m, unsigned int size );
 	friend void forceCheckVal( double time, Element* e, unsigned int size );
 

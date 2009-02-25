@@ -4,6 +4,7 @@
 #include "Reac.h"
 #include "Mol.h"
 #include "Tab.h"
+#include "MyBarrier.h"
 
 void testSync()
 {
@@ -148,9 +149,11 @@ void forceCheckVal( double time, Element* e, unsigned int size )
 }
 
 double process( Element* e1, Element* e2, Element* e3, 
-	const Mol* m1, unsigned int size, unsigned int numThreads );
+	const Mol* m1, unsigned int size, unsigned int numThreads,
+	unsigned int method );
 
-void testSyncArray( unsigned int size, unsigned int numThreads )
+void testSyncArray( unsigned int size, unsigned int numThreads,
+	unsigned int method )
 {
 	/////////////////////////////////////////////////////////////////////
 	// Make objects
@@ -225,7 +228,7 @@ void testSyncArray( unsigned int size, unsigned int numThreads )
 	/////////////////////////////////////////////////////////////////////
 	// Do the calculations.
 	/////////////////////////////////////////////////////////////////////
-	double elapsedTime = process( e1, e2, e3, m1, size, numThreads );
+	double elapsedTime = process( e1, e2, e3, m1, size, numThreads, method);
 
 	/////////////////////////////////////////////////////////////////////
 	// Clean up and report.
@@ -257,17 +260,20 @@ class ThreadInfo
 			: e1( 0 ), e2( 0 ), e3( 0 ), 
 			dt( 0.001 ), plotdt( 1 ), maxt( 0.0 ),
 			threadNum( 0 ), numThreads( 1 ),
-			barrier( 0 )
+			barrier( 0 ),
+			myBarrier( 0 )
 		{;}
 
 		ThreadInfo( Element* a1, Element* a2, Element* a3, 
 		double adt, double pdt, double maxtime,
 		unsigned int tn, unsigned int nt,
-		pthread_barrier_t* barr )
+		pthread_barrier_t* barr,
+		MyBarrier* mb )
 			: e1( a1 ), e2( a2 ), e3( a3 ), 
 			dt( adt ), plotdt( pdt ), maxt( maxtime ),
 			threadNum( tn ), numThreads( nt ),
-			barrier( barr )
+			barrier( barr ),
+			myBarrier( mb )
 		{;}
 		
 		Element* e1;
@@ -279,8 +285,42 @@ class ThreadInfo
 		unsigned int threadNum;
 		unsigned int numThreads;
 		pthread_barrier_t* barrier;
+		MyBarrier* myBarrier;
 };
 
+/**
+ * This variant does a busy loop to check that all nodes have finished
+ * their work. It uses the MyBarrier class.
+ */
+void* processThreadBusy( void* t )
+{
+	ThreadInfo* ti = static_cast< ThreadInfo* >( t );
+	Element* e1 = ti->e1;
+	Element* e2 = ti->e2;
+	Element* e3 = ti->e3;
+	unsigned int threadNum = ti->threadNum;
+	ProcInfo p;
+	p.dt = ti->dt;
+	p.numThreads = ti->numThreads;
+
+	for ( double pt = 0.0; pt < ti->maxt; pt += ti->plotdt ) {
+		forceCheckVal( pt, e1, e1->numEntries() );
+		for( double t = 0.0; t < ti->plotdt; t += ti->dt ) {
+			p.currTime = t + pt;
+			e3->process( &p, threadNum );
+			ti->myBarrier->wait( threadNum );
+			e1->process( &p, threadNum );
+			e2->process( &p, threadNum );
+			ti->myBarrier->wait( threadNum );
+		}
+	//	cout << "on thread " << threadNum << " time = " << pt << endl;
+	}
+	return 0;
+}
+
+/**
+ * This variant uses the pthreads barrier function.
+ */
 void* processThread( void* t )
 {
 	ThreadInfo* ti = static_cast< ThreadInfo* >( t );
@@ -308,7 +348,8 @@ void* processThread( void* t )
 }
 
 double process( Element* e1, Element* e2, Element* e3, 
-	const Mol* m1, unsigned int size, unsigned int numThreads )
+	const Mol* m1, unsigned int size, unsigned int numThreads,
+	unsigned int method )
 {	
 	e1->reinit();
 	e2->reinit();
@@ -342,6 +383,7 @@ double process( Element* e1, Element* e2, Element* e3,
 			cout << "Could not create barrier\n";
 			return 0.0;
 		}
+		MyBarrier mb( numThreads );
 		int rc;
 		long t;
 		void *status;
@@ -358,16 +400,20 @@ double process( Element* e1, Element* e2, Element* e3,
 			threadInfoVec[ t ] = 
 				ThreadInfo( e1, e2, e3, dt, plotdt, maxt,
 				t, numThreads,
-				&barrier );
-			rc = pthread_create(&thread[t], &attr, &processThread,
-				static_cast< void* >( &( threadInfoVec[ t ] ) ) );
+				&barrier, &mb );
+			if ( method == 0 ) // pthreads barrier
+				rc = pthread_create(&thread[t], &attr, &processThread,
+					static_cast< void* >( &( threadInfoVec[ t ] ) ) );
+			else if ( method == 1 ) // My barrier
+				rc = pthread_create(&thread[t], &attr, &processThreadBusy,
+					static_cast< void* >( &( threadInfoVec[ t ] ) ) );
 			if (rc) {
 				cout << "ERROR; return code from pthread_create() is " <<
 					rc << endl;
 				exit(-1);
 			}
 		}
-		cout << "Main: waiting for threads\n";
+//		cout << "Main: waiting for threads\n";
 		pthread_attr_destroy(&attr);
 
 		/* Wait on the other threads */
@@ -380,7 +426,7 @@ double process( Element* e1, Element* e2, Element* e3,
 			}
 			cout << "j" << t << " " << flush;
 		}
-		cout << "Main: joined threads\n";
+//		cout << "Main: joined threads\n";
 	}
 	gettimeofday( &tv_end, 0 );
 	return ( tv_end.tv_sec - tv_start.tv_sec ) +

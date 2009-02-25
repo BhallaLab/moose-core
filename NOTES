@@ -508,5 +508,134 @@ Also I need to check if the 4-core opteron nodes do better.
 Checked in as revision 1048.
 
 Did check that calculations give the right answers.
+Checked in as revision 1049.
+
+=============================================================================
+24 Feb 2009
+Ran on 4-CPU opteron (2 chips x 2 cores each). 
+Original( 1 thread ):
+syncArray10     ops=100000      time=0.02312
+syncArray100    ops=1000000     time=0.308771
+syncArray1000   ops=10000000    time=3.13899
+syncArray10000  ops=100000000   time=32.1735
+
+Main: creating 2 threads
+syncArray10     ops=100000      time=0.111654
+syncArray100    ops=1000000     time=0.26688
+syncArray1000   ops=10000000    time=1.77432
+syncArray10000  ops=100000000   time=17.8221
+
+Main: creating 4 threads
+syncArray10     ops=100000      time=0.363325
+syncArray100    ops=1000000     time=0.522495
+syncArray1000   ops=10000000    time=2.02002
+syncArray10000  ops=100000000   time=9.49299
+
+Well, that is interesting. it goes 1.8x faster on 2 cores, and 3.4x faster on 
+4 cores. Not linear scaling, but not bad either. But this is only effective
+for large arrays. The barrier overhead looks pretty bad.
+Successive runs on the same node cause marked improvements in single-node
+performance, but not as steep for threading. For example, three runs later
+we have:
+
+1 thread:
+syncArray10     ops=100000      time=0.023302
+syncArray100    ops=1000000     time=0.274423
+syncArray1000   ops=10000000    time=2.51467
+syncArray10000  ops=100000000   time=27.6373
+
+Main: creating 2 threads
+syncArray10     ops=100000      time=0.141666
+syncArray100    ops=1000000     time=0.263635
+syncArray1000   ops=10000000    time=1.71346
+syncArray10000  ops=100000000   time=17.0478
+
+Main: creating 4 threads
+syncArray10     ops=100000      time=0.315527
+syncArray100    ops=1000000     time=0.420413
+syncArray1000   ops=10000000    time=1.25926
+syncArray10000  ops=100000000   time=9.42896
+
+
+Trying now my own implementation of barriers. I would have liked to try it
+on gj, but time to go and still debugging. 
+Here is the status:
+c0 thread=0, cycle = 0counter = 1
+c1 Main: waiting for threads
+thread=1, cycle = 1counter = 0
+thread=1, cycle = 1counter = 1
+
+Implies that we've gone through the barrier withough letting thread 0 do so.
+
+Here is more info:
+c0 thread=0, cycle = 0, counter = 1, tc[0] = 0, tc[1] = 0
+c1 thread=1, cycle = 1, counter = 0, tc[0] = 0, tc[1] = 0
+thread=1, cycle = 1, counter = 1, tc[0] = 0, tc[1] = 1
+
+I fixed this by making the 'cycle' variable a volatile. But, at least on my
+laptop, there is not much improvement:
+
+1 thread:
+syncArray10     ops=100000     		time=0.055594	0.0575	0.056	0.057
+syncArray100    ops=1000000    		time=0.311743	0.3118	0.303	0.322
+syncArray1000   ops=10000000   		time=3.07243	3.147	3.09	3.11
+syncArray10000  ops=100000000  		time=31.0668	31.4	30.8	30.9
+Main: creating 2 threads, pthreads barrier
+syncArray10 	ops=100000      	time=0.241881	0.8	0.82	0.505
+syncArray100        ops=1000000     	time=0.606399	0.57	0.78	0.66
+syncArray1000       ops=10000000    	time=2.12019	2.03	2.51	2.06
+syncArray10000      ops=100000000   	time=18.5136	18.2	19.5	18.1
+
+Main: creating 2 threads, my barrier:
+syncArray10 	ops=100000     		time=0.053082	0.032	0.07	0.08
+syncArray100        ops=1000000     	time=0.294042	0.18	0.21	0.23
+syncArray1000       ops=10000000    	time=1.85085	1.77	2.0	1.76
+syncArray10000      ops=100000000   	time=18.137	17.6	19.5	17.5
+
+more seriously, it fails if # threads > # processors. Why?
+Tried making counter also volatile. Doesn't help.
+
+One good thing is that MyBarrier seems to have much less overhead: its
+speedup is respectable and consistent even for 100 entries in the array.
+Based on the single-thread timings for 10 entries, I estimate it costs
+around 0.05 sec / 10K ~ 5 usec per invocation on my laptop. The 
+pthreads barrier is around 0.8 sec / 10K = 80 usec.
+
+Let's see how it scales on the cluster nodes.
+
+Well, that was entertaining. Two things to try:
+- multithreading on the main MOOSE kinetic solver
+	Looked at it. Should work reasonably well for bigger models with
+	>100 molecules. But I'll have to write my own RK5 solver for multi
+	threading because the GSL one has a monolithic driver for the 
+	calculations that could be split between threads.
+- contine with implementation for the synaptic input queue code.
+	Looked at it. A major issue turned up: the 'process' call
+	manipulates both target and source spike queues. The 'sendSpike'
+	function after much indirection pushes the spike info onto all 
+	target queues. The 'process' function examines and pops the local
+	queue. I need to modify this so that the push and test/pop are on
+	different clock ticks. This may well happen in more realistic
+	neuron models. Here I can separate the harvesting of the spikes
+	onto a different tick than the testing and sending spike msgs.
+	With this fixed, I need to protect the spike msg handling.
+	Mutexes are a blunt instrument here, because they protect code
+	rather than individual data structures. Ideally I want only to
+	protect the buffer(s) I am working on.
+	I've suggested an approach to this in the Element::addSpike 
+	function:
+		// mutex lock
+		// Check if index is busy: bool vector
+		// Flag index as busy
+		// release mutex
+		// do stuff
+		// ?unflag index
+		// Carry merrily on.
+	but this has many loose ends.
+
+
+=============================================================================
+25 Feb 2009
+Checking it in so that I can run the tests on gj.
 
 =============================================================================

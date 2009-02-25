@@ -11,7 +11,7 @@ class Element
 	friend void testAsync();
 	friend void testStandaloneIntFire();
 	friend void testSynapse();
-	friend void testSyncArray( unsigned int, unsigned int );
+	friend void testSyncArray( unsigned int, unsigned int, unsigned int );
 	public:
 		/**
 		 * Constructor
