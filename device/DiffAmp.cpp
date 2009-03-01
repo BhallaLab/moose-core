@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Dec 29 16:01:22 2008 (+0530)
 // Version: 
-// Last-Updated: Wed Dec 31 13:46:31 2008 (+0530)
+// Last-Updated: Sun Mar  1 18:24:29 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 147
+//     Update #: 152
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -178,9 +178,9 @@ double DiffAmp::getOutput(Eref e)
     return instance->output_;
 }
 
-void DiffAmp::processFunc(const Conn* conn, ProcInfo p)
+void DiffAmp::processFunc(const Conn& conn, ProcInfo p)
 {
-    DiffAmp* instance = static_cast< DiffAmp* >(conn->data());
+    DiffAmp* instance = static_cast< DiffAmp* >(conn.data());
     double output = instance->gain_ * (instance->plus_ - instance->minus_);
     instance->plus_ = 0.0;
     instance->minus_ = 0.0;
@@ -191,11 +191,12 @@ void DiffAmp::processFunc(const Conn* conn, ProcInfo p)
 	output = -instance->saturation_;
     }    
     instance->output_ = output;
+    send1<double>(conn.target(), outputSlot, output);
 }
 
-void DiffAmp::reinitFunc(const Conn* conn, ProcInfo p)
+void DiffAmp::reinitFunc(const Conn& conn, ProcInfo p)
 {
-    DiffAmp* instance = static_cast< DiffAmp* >(conn->data());
+    DiffAmp* instance = static_cast< DiffAmp* >(conn.data());
     instance->output_ = 0;
     instance->plus_ = 0;
     instance->minus_ = 0;
