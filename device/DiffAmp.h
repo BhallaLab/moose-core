@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Dec 29 15:55:25 2008 (+0530)
 // Version: 
-// Last-Updated: Tue Dec 30 15:38:32 2008 (+0530)
+// Last-Updated: Sun Mar  1 18:26:00 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 23
+//     Update #: 24
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -60,8 +60,8 @@ class DiffAmp
     static double getMinus(Eref e);
     static void plusFunc(const Conn* c, double input);
     static void minusFunc(const Conn* c, double input);
-    static void processFunc(const Conn* c, ProcInfo p);
-    static void reinitFunc(const Conn* c, ProcInfo p);
+    static void processFunc(const Conn& c, ProcInfo p);
+    static void reinitFunc(const Conn& c, ProcInfo p);
     
   private:
     double gain_;
