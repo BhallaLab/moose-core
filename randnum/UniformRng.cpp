@@ -59,19 +59,19 @@ const Cinfo* initUniformRngCinfo()
 
 static const Cinfo* uniformRngCinfo = initUniformRngCinfo();
 
-double UniformRng::getMin(const Element * e)
+double UniformRng::getMin(const Eref e)
 {
-    return static_cast <Uniform *> (static_cast<UniformRng*> (e->data())->rng_)->getMin();
+    return static_cast <Uniform *> (static_cast<UniformRng*> (e.data())->rng_)->getMin();
 }
 
-double UniformRng::getMax(const Element * e)
+double UniformRng::getMax(const Eref e)
 {
-    return static_cast <Uniform *> (static_cast<UniformRng*> (e->data())->rng_)->getMax();
+    return static_cast <Uniform *> (static_cast<UniformRng*> (e.data())->rng_)->getMax();
 }
 
-void UniformRng::setMin(const Conn& c, double min)
+void UniformRng::setMin(const Conn* c, double min)
 {
-    UniformRng* obj = static_cast <UniformRng*> (c.data());
+    UniformRng* obj = static_cast <UniformRng*> (c->data());
     if (obj)
     {
         if (obj->rng_)
@@ -88,9 +88,9 @@ void UniformRng::setMin(const Conn& c, double min)
         cerr << "UniformRng::setMin() - connection target is NULL." << endl;
     }
 }
-void UniformRng::setMax(const Conn& c, double max)
+void UniformRng::setMax(const Conn* c, double max)
 {
-    UniformRng* obj = static_cast <UniformRng*> (c.data());
+    UniformRng* obj = static_cast <UniformRng*> (c->data());
     if (obj)
     {
         if (obj->rng_)
@@ -114,7 +114,7 @@ UniformRng::UniformRng():RandGenerator()
     rng_ = new Uniform();
 }
 
-void UniformRng::innerReinitFunc(const Conn& conn, ProcInfo info)
+void UniformRng::innerReinitFunc(const Conn* conn, ProcInfo info)
 {
     ;    /* no use */
 }

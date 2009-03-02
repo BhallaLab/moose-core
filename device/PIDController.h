@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Dec 30 23:14:00 2008 (+0530)
 // Version: 
-// Last-Updated: Thu Jan 22 10:54:55 2009 (+0530)
+// Last-Updated: Mon Mar  2 01:27:53 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 44
+//     Update #: 45
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -46,25 +46,25 @@ class PIDController{
   public:
     PIDController();
     
-    static void setCommand( const Conn& conn, double command );
+    static void setCommand( const Conn* conn, double command );
     static double getCommand( Eref e );
-    static void setSensed( const Conn& conn, double sensed );
+    static void setSensed( const Conn* conn, double sensed );
     static double getSensed( Eref e );
     static double getOutput( Eref e );
-    static void setGain( const Conn& conn, double gain );
+    static void setGain( const Conn* conn, double gain );
     static double getGain( Eref e );
-    static void setTauI( const Conn& conn, double tau_i );
+    static void setTauI( const Conn* conn, double tau_i );
     static double getTauI( Eref e );
-    static void setTauD( const Conn& conn, double tau_d );
+    static void setTauD( const Conn* conn, double tau_d );
     static double getTauD( Eref e );
-    static void setSaturation( const Conn& conn, double saturation );
+    static void setSaturation( const Conn* conn, double saturation );
     static double getSaturation( Eref e );
     static double getError( Eref e );
     static double getEIntegral( Eref e );
     static double getEDerivative( Eref e );
     static double getEPrevious( Eref e );
-    static void processFunc( const Conn& conn, ProcInfo process );
-    static void reinitFunc( const Conn& conn, ProcInfo process );
+    static void processFunc( const Conn* conn, ProcInfo process );
+    static void reinitFunc( const Conn* conn, ProcInfo process );
     
   private:
     double command_;

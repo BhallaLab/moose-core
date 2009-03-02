@@ -118,7 +118,7 @@ RandomSpike::RandomSpike()
 void RandomSpike::setMinAmp(const Conn* c, double value)
 {
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
-    ASSERT(obj != NULL, "RandomSpike::setMinAmp(const Conn&, double) - target data pointer is NULL.");
+    ASSERT(obj != NULL, "RandomSpike::setMinAmp(const Conn*, double) - target data pointer is NULL.");
     obj->minAmp_ = value;    
 }
 
@@ -131,7 +131,7 @@ double RandomSpike::getMinAmp(Eref e)
 void RandomSpike::setMaxAmp(const Conn* c, double value)
 {
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
-    ASSERT(obj != NULL, "RandomSpike::setMaxAmp(const Conn&, double) - target data pointer is NULL.");
+    ASSERT(obj != NULL, "RandomSpike::setMaxAmp(const Conn*, double) - target data pointer is NULL.");
     obj->maxAmp_ = value;    
 }
 double RandomSpike::getMaxAmp(Eref e)
@@ -143,7 +143,7 @@ double RandomSpike::getMaxAmp(Eref e)
 void RandomSpike::setRate(const Conn* c, double value)
 {
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
-    ASSERT(obj != NULL, "RandomSpike::setRate(const Conn&, double) - target data pointer is NULL.");
+    ASSERT(obj != NULL, "RandomSpike::setRate(const Conn*, double) - target data pointer is NULL.");
     obj->rate_ = value;    
 }
 double RandomSpike::getRate(Eref e)
@@ -155,7 +155,7 @@ double RandomSpike::getRate(Eref e)
 void RandomSpike::setResetValue(const Conn* c, double value)
 {
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
-    ASSERT(obj != NULL, "RandomSpike::setResetValue(const Conn&, double) - target data pointer is NULL.");
+    ASSERT(obj != NULL, "RandomSpike::setResetValue(const Conn*, double) - target data pointer is NULL.");
     obj->resetValue_ = value;    
 }
 double RandomSpike::getResetValue(Eref e)
@@ -167,7 +167,7 @@ double RandomSpike::getResetValue(Eref e)
 void RandomSpike::setState(const Conn* c, double value)
 {
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
-    ASSERT(obj != NULL, "RandomSpike::setState(const Conn&, double) - target data pointer is NULL.");
+    ASSERT(obj != NULL, "RandomSpike::setState(const Conn*, double) - target data pointer is NULL.");
     obj->state_ = value;    
 }
 double RandomSpike::getState(Eref e)
@@ -179,7 +179,7 @@ double RandomSpike::getState(Eref e)
 void RandomSpike::setAbsRefract(const Conn* c, double value)
 {
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
-    ASSERT(obj != NULL, "RandomSpike::setAbsRefract(const Conn&, double) - target data pointer is NULL.");
+    ASSERT(obj != NULL, "RandomSpike::setAbsRefract(const Conn*, double) - target data pointer is NULL.");
     obj->absRefract_ = value;    
 }
 double RandomSpike::getAbsRefract(Eref e)
@@ -191,7 +191,7 @@ double RandomSpike::getAbsRefract(Eref e)
 void RandomSpike::setLastEvent(const Conn* c, double value)
 {
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
-    ASSERT(obj != NULL, "RandomSpike::setLastEvent(const Conn&, double) - target data pointer is NULL.");
+    ASSERT(obj != NULL, "RandomSpike::setLastEvent(const Conn*, double) - target data pointer is NULL.");
     obj->lastEvent_ = value;    
 }
 double RandomSpike::getLastEvent(Eref e)
@@ -203,7 +203,7 @@ double RandomSpike::getLastEvent(Eref e)
 void RandomSpike::setReset(const Conn* c, int value)
 {
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
-    ASSERT(obj != NULL, "RandomSpike::setReset(const Conn&, double) - target data pointer is NULL.");
+    ASSERT(obj != NULL, "RandomSpike::setReset(const Conn*, double) - target data pointer is NULL.");
     obj->reset_ = value;    
 }
 int RandomSpike::getReset(Eref e)
@@ -216,7 +216,7 @@ int RandomSpike::getReset(Eref e)
 void RandomSpike::setMinMaxAmp(const Conn* c, double min, double max)
 {
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
-    ASSERT(obj != NULL, "RandomSpike::setMinMaxAmp(const Conn&, double, double) - target data pointer is NULL.");
+    ASSERT(obj != NULL, "RandomSpike::setMinMaxAmp(const Conn*, double, double) - target data pointer is NULL.");
     obj->minAmp_ = min;
     obj->maxAmp_ = max;    
 }
@@ -224,7 +224,7 @@ void RandomSpike::setMinMaxAmp(const Conn* c, double min, double max)
 void RandomSpike::processFunc( const Conn* c, ProcInfo p )
 {
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
-    ASSERT( obj != NULL, "RandomSpikeprocessFunc(const Conn&, ProcInfo) - target data pointer is NULL.");
+    ASSERT( obj != NULL, "RandomSpikeprocessFunc(const Conn*, ProcInfo) - target data pointer is NULL.");
     obj->innerProcessFunc(c, p);
 }
 
@@ -232,7 +232,7 @@ void RandomSpike::processFunc( const Conn* c, ProcInfo p )
 void RandomSpike::reinitFunc( const Conn* c, ProcInfo p )
 {
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
-    ASSERT( obj != NULL, "RandomSpike::reinitFunc(const Conn&, ProcInfo) - target data pointer is NULL.");
+    ASSERT( obj != NULL, "RandomSpike::reinitFunc(const Conn*, ProcInfo) - target data pointer is NULL.");
     obj->state_ = obj->resetValue_;
     obj->lastEvent_ = - ( obj->absRefract_);    
 }

@@ -60,9 +60,9 @@ PoissonRng::PoissonRng()
    the rate parameter or the mean, it is mandatory to set this before
    using the generator.
 */
-void PoissonRng::setMean(const Conn& c, double mean)
+void PoissonRng::setMean(const Conn* c, double mean)
 {
-    PoissonRng* generator = static_cast<PoissonRng*>(c.data());
+    PoissonRng* generator = static_cast<PoissonRng*>(c->data());
     if ( !generator->rng_ )
     {
         generator->rng_ = new Poisson(mean);
@@ -75,9 +75,9 @@ void PoissonRng::setMean(const Conn& c, double mean)
 /**
    reports error in case the parameter mean has not been set.
 */
-void PoissonRng::innerReinitFunc(const Conn& c, ProcInfo info)
+void PoissonRng::innerReinitFunc(const Conn* c, ProcInfo info)
 {
-    PoissonRng* generator = static_cast < PoissonRng* >(c.data());
+    PoissonRng* generator = static_cast < PoissonRng* >(c->data());
     if (! generator->rng_ )
     {
         cerr << "ERROR: PoissonRng::innerReinitFunc - mean must be set before using the Poisson distribution generator." << endl;                

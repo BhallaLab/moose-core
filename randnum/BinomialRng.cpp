@@ -73,10 +73,10 @@ BinomialRng::BinomialRng()
    Set parameter n ( number of trials for a two-outcome experiment).
    This must be set before the actual generator is instantiated.
  */
-void BinomialRng::setN(const Conn& c, double n)
+void BinomialRng::setN(const Conn* c, double n)
 {  
-    BinomialRng* gen = static_cast<BinomialRng*>(c.data());
-    ASSERT( n > 0 , "BinomialRng::setN(const Conn& c, double n) - n must be positive");    
+    BinomialRng* gen = static_cast<BinomialRng*>(c->data());
+    ASSERT( n > 0 , "BinomialRng::setN(const Conn* c, double n) - n must be positive");    
     if ( gen )
     {
         gen->innerSetN(static_cast< unsigned long>( n ) );        
@@ -124,9 +124,9 @@ void BinomialRng::innerSetN(unsigned long n)
 /**
    Returns parameter n.
  */
-double BinomialRng::getN(const Element* e)
+double BinomialRng::getN(const Eref e)
 {
-    return (int)(static_cast <BinomialRng*>(e->data( 0 ))->n_);
+    return (int)(static_cast <BinomialRng*>(e.data( 0 ))->n_);
 }
 
 int BinomialRng::innerGetN()
@@ -138,11 +138,11 @@ int BinomialRng::innerGetN()
    Set parameter p ( the probability of the outcome of interest ).
    This must be set before the actual generator is instantiated.
  */
-void BinomialRng::setP(const Conn& c, double p)
+void BinomialRng::setP(const Conn* c, double p)
 {
  
     
-    BinomialRng* gen = static_cast<BinomialRng*>(c.data());
+    BinomialRng* gen = static_cast<BinomialRng*>(c->data());
     if ( gen )
     {
         gen->innerSetP(p);        
@@ -189,9 +189,9 @@ void BinomialRng::innerSetP(double p)
 /**
    returns parameter p.
 */
-double BinomialRng::getP(const Element* e)
+double BinomialRng::getP(const Eref e)
 {
-    return static_cast <BinomialRng*>(e->data( 0 ))->p_;
+    return static_cast <BinomialRng*>(e.data( 0 ))->p_;
 }
 
 
@@ -203,9 +203,9 @@ double BinomialRng::innerGetP()
 /**
    reports error if one or more of the parameters are not set.
 */
-void BinomialRng::innerReinitFunc( const Conn& c, ProcInfo info)
+void BinomialRng::innerReinitFunc( const Conn* c, ProcInfo info)
 {
-    BinomialRng* gen = static_cast<BinomialRng*>(c.data());
+    BinomialRng* gen = static_cast<BinomialRng*>(c->data());
 
     if ( gen->isNSet_ )
     {
