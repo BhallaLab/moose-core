@@ -27,11 +27,11 @@ class UniformRng: public RandGenerator
 {
   public:
     UniformRng();
-    static double getMin(const Element* e);
-    static double getMax(const Element* e);
-    static void setMin(const Conn& c, double min);
-    static void setMax(const Conn& c, double max);
-    virtual void innerReinitFunc(const Conn& c, ProcInfo info);
+    static double getMin(const Eref e);
+    static double getMax(const Eref e);
+    static void setMin(const Conn* c, double min);
+    static void setMax(const Conn* c, double max);
+    virtual void innerReinitFunc(const Conn* c, ProcInfo info);
   private:
     double min_;
     double max_;    
