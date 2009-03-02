@@ -130,20 +130,20 @@ double RandGenerator::getSample(Eref e)
     }    
 }
 
-void RandGenerator::processFunc( const Conn& c, ProcInfo info )
+void RandGenerator::processFunc( const Conn* c, ProcInfo info )
 {
-    send1<double>(c.target(), outputSlot, getSample(c.target()));    
+    send1<double>(c->target(), outputSlot, getSample(c->target()));    
 }
 
-void RandGenerator::reinitFunc(const Conn& c, ProcInfo info)
+void RandGenerator::reinitFunc(const Conn* c, ProcInfo info)
 {
-    RandGenerator* generator = static_cast < RandGenerator* >(c.data());
+    RandGenerator* generator = static_cast < RandGenerator* >(c->data());
     generator->innerReinitFunc(c, info);    
 }
 
-void RandGenerator::innerReinitFunc(const Conn& c, ProcInfo info)
+void RandGenerator::innerReinitFunc(const Conn* c, ProcInfo info)
 {
-    cerr << "RandGenerator::innerReinitFunc() - this function should never be reached. Guilty party: " << c.target().e->name() << endl;
+    cerr << "RandGenerator::innerReinitFunc() - this function should never be reached. Guilty party: " << c->target().e->name() << endl;
 }
 
 #endif

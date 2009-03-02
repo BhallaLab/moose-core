@@ -64,14 +64,14 @@ GammaRng::GammaRng()
 /**
    returns the shape parameter.
 */
-double GammaRng::getAlpha(const Element* e)
+double GammaRng::getAlpha(const Eref e)
 {
-    return static_cast<GammaRng*> (e->data( 0 ))->alpha_;    
+    return static_cast<GammaRng*> (e.data( 0 ))->alpha_;    
 }
 /**
    Sets parameter alpha. Also known as the shape parameter.
 */
-void GammaRng::setAlpha(const Conn& c, double alpha)
+void GammaRng::setAlpha(const Conn* c, double alpha)
 {
     
     if (fabs(alpha) < DBL_MIN)
@@ -79,7 +79,7 @@ void GammaRng::setAlpha(const Conn& c, double alpha)
         cerr << "ERROR: Shape parameter alpha must be non-zero." << endl;
         return;
     }
-    GammaRng* generator = static_cast<GammaRng*>(c.data());
+    GammaRng* generator = static_cast<GammaRng*>(c->data());
     if ( generator->rng_ )
     {
         generator->alpha_ = static_cast<Gamma*>(generator->rng_)->getAlpha();
@@ -95,15 +95,15 @@ void GammaRng::setAlpha(const Conn& c, double alpha)
 /**
    returns the scale parameter.
 */
-double GammaRng::getTheta(const Element* e)
+double GammaRng::getTheta(const Eref e)
 {
-    return static_cast<GammaRng*> (e->data( 0 ))->theta_;    
+    return static_cast<GammaRng*> (e.data( 0 ))->theta_;    
 }
 
 /**
    Sets parameter theta. Also known as the scale parameter.
 */
-void GammaRng::setTheta(const Conn& c, double theta)
+void GammaRng::setTheta(const Conn* c, double theta)
 {
     
     if (fabs(theta) < DBL_MIN)
@@ -111,7 +111,7 @@ void GammaRng::setTheta(const Conn& c, double theta)
         cerr << "ERROR: Scale parameter theta must be non-zero." << endl;
         return;
     }
-    GammaRng* generator = static_cast<GammaRng*>(c.data());
+    GammaRng* generator = static_cast<GammaRng*>(c->data());
     if ( generator->rng_ )
     {
         generator->theta_ = static_cast<Gamma*>(generator->rng_)->getTheta();
@@ -127,9 +127,9 @@ void GammaRng::setTheta(const Conn& c, double theta)
 /**
    reports error if parameters have not been set properly.
 */
-void GammaRng::innerReinitFunc(const Conn& c, ProcInfo info)
+void GammaRng::innerReinitFunc(const Conn* c, ProcInfo info)
 {
-    GammaRng* generator = static_cast < GammaRng* >(c.data());
+    GammaRng* generator = static_cast < GammaRng* >(c->data());
     if (! generator->rng_ )
     {
         cerr << "ERROR: GammaRng::innerReinitFunc - parameters alpha and theta must be set before using the Gamma distribution generator." << endl;                
