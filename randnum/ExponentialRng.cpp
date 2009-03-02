@@ -63,18 +63,18 @@ ExponentialRng::ExponentialRng()
    Replaces the same method in base class.  Returns the mean as
    stored in this object independent of the actual generator object.
  */
-double ExponentialRng::getMean(const Element* e)
+double ExponentialRng::getMean(const Eref e)
 {
-    return static_cast<ExponentialRng*> (e->data( 0 ))->mean_;    
+    return static_cast<ExponentialRng*> (e.data( 0 ))->mean_;    
 }
 /**
    Sets the mean. Since exponential distribution is defined in terms
    of this parameter, it is stored locally independent of the
    instantiation of the internal generator object.
 */
-void ExponentialRng::setMean(const Conn& c, double mean)
+void ExponentialRng::setMean(const Conn* c, double mean)
 {
-    ExponentialRng* generator = static_cast<ExponentialRng*>(c.data());
+    ExponentialRng* generator = static_cast<ExponentialRng*>(c->data());
     if ( !generator->rng_ )
     {
         generator->rng_ = new Exponential(mean);
@@ -84,9 +84,9 @@ void ExponentialRng::setMean(const Conn& c, double mean)
 /**
    Reports error in case the parameter mean has not been set.
  */
-void ExponentialRng::innerReinitFunc(const Conn& c, ProcInfo info)
+void ExponentialRng::innerReinitFunc(const Conn* c, ProcInfo info)
 {
-    ExponentialRng* generator = static_cast < ExponentialRng* >(c.data());
+    ExponentialRng* generator = static_cast < ExponentialRng* >(c->data());
     if (! generator->rng_ )
     {
         cerr << "ERROR: ExponentialRng::innerReinitFunc - mean must be set before using the Exponential distribution generator." << endl;                
@@ -98,9 +98,9 @@ void ExponentialRng::innerReinitFunc(const Conn& c, ProcInfo info)
    0 for logarithmic method.
    1 for random minimization method.
  */
-int ExponentialRng::getMethod(const Element* e)
+int ExponentialRng::getMethod(const Eref e e)
 {
-   return static_cast<ExponentialRng*>(e->data( 0 ))->method_;    
+   return static_cast<ExponentialRng*>(e.data( 0 ))->method_;    
 }
 
 /**
@@ -109,9 +109,9 @@ int ExponentialRng::getMethod(const Element* e)
    1 for random minimization method.
    Default is random minimization.
  */
-void ExponentialRng::setMethod(const Conn& c, int method)
+void ExponentialRng::setMethod(const Conn* c, int method)
 {
-    ExponentialRng* generator = static_cast <ExponentialRng*> ( c.data());
+    ExponentialRng* generator = static_cast <ExponentialRng*> ( c->data());
     
     if (! generator->rng_)
     {
@@ -127,7 +127,7 @@ void ExponentialRng::setMethod(const Conn& c, int method)
     }
     else 
     {
-        cerr << "Warning: cannot change method after generator object has been created. Method in use: " << static_cast <ExponentialRng*> ( c.data())->method_ << endl;
+        cerr << "Warning: cannot change method after generator object has been created. Method in use: " << static_cast <ExponentialRng*> ( c->data())->method_ << endl;
     }
 }
 

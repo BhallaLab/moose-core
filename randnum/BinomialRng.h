@@ -34,11 +34,11 @@ class BinomialRng: public RandGenerator
     double innerGetP();
     double innerGetNextSample();
     
-    static void setN(const Conn& c, double n);    
-    static double getN(const Element* e);    
-    static void setP(const Conn& c, double p);
-    static double getP(const Element* e);    
-    virtual void innerReinitFunc( const Conn& c, ProcInfo info);
+    static void setN(const Conn* c, double n);    
+    static double getN(const Eref e);    
+    static void setP(const Conn* c, double p);
+    static double getP(const Eref e);    
+    virtual void innerReinitFunc( const Conn* c, ProcInfo info);
 
   private:
     bool isNSet_;

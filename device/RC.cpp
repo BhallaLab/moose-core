@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Wed Dec 31 15:47:45 2008 (+0530)
 // Version: 
-// Last-Updated: Tue Jan 20 12:30:02 2009 (+0530)
+// Last-Updated: Mon Mar  2 01:30:30 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 158
+//     Update #: 165
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -110,39 +110,39 @@ RC::RC():
     // Do nothing
 }
             
-void RC::setV0( const Conn& conn, double v0 )
+void RC::setV0( const Conn* conn, double v0 )
 {
-    RC* instance = static_cast< RC* >( conn.data() );
+    RC* instance = static_cast< RC* >( conn->data() );
     instance->v0_ = v0;
 }
 
 double RC::getV0( Eref e )
 {
-    RC* instance = static_cast< RC* >( e.e->data() );
+    RC* instance = static_cast< RC* >( e.data() );
     return instance->v0_;
 }
 
-void RC::setResistance( const Conn& conn, double resistance )
+void RC::setResistance( const Conn* conn, double resistance )
 {
-    RC* instance = static_cast< RC* >( conn.data() );
+    RC* instance = static_cast< RC* >( conn->data() );
     instance->resistance_ = resistance;
 }
 
 double RC::getResistance( Eref e )
 {
-    RC* instance = static_cast< RC* >( e.e->data() );
+    RC* instance = static_cast< RC* >( e.data() );
     return instance->resistance_;
 }
 
-void RC::setCapacitance( const Conn& conn, double capacitance )
+void RC::setCapacitance( const Conn* conn, double capacitance )
 {
-    RC* instance = static_cast< RC* >( conn.data());
+    RC* instance = static_cast< RC* >( conn->data());
     instance->capacitance_ = capacitance;
 }
 
 double RC::getCapacitance( Eref e )
 {
-    RC* instance = static_cast< RC* >( e.e->data() );
+    RC* instance = static_cast< RC* >( e.data() );
     return instance->capacitance_;
 }
 
@@ -152,9 +152,9 @@ double RC::getState( Eref e )
     return instance->state_;
 }
 
-void RC::setInject( const Conn& conn, double inject )
+void RC::setInject( const Conn* conn, double inject )
 {
-    RC* instance = static_cast< RC* >( conn.data() );
+    RC* instance = static_cast< RC* >( conn->data() );
     instance->inject_ = inject;
 }
 
@@ -164,9 +164,9 @@ double RC::getInject( Eref e )
     return instance->inject_;
 }
 
-void RC::setInjectMsg( const Conn& conn, double inject )
+void RC::setInjectMsg( const Conn* conn, double inject )
 {
-    RC* instance = static_cast< RC* >( conn.data() );
+    RC* instance = static_cast< RC* >( conn->data() );
     instance->msg_inject_ += inject;
 }
 
@@ -176,9 +176,9 @@ void RC::setInjectMsg( const Conn& conn, double inject )
    Methods by Lawrance Pillage, McGraw-Hill Professional, 1999. pp
    87-100. Eqn: 4.7.21 */
 
-void RC::processFunc( const Conn& conn, ProcInfo proc )
+void RC::processFunc( const Conn* conn, ProcInfo proc )
 {
-    RC* instance = static_cast< RC* >( conn.data() );
+    RC* instance = static_cast< RC* >( conn->data() );
     static double sum_inject_prev = instance->inject_ + instance->msg_inject_;
     double sum_inject = instance->inject_ + instance->msg_inject_;
     double dVin = (sum_inject - sum_inject_prev) * instance->resistance_;
@@ -187,11 +187,12 @@ void RC::processFunc( const Conn& conn, ProcInfo proc )
             (instance->state_ - Vin + dVin / instance->dt_tau_) * instance->exp_;
     sum_inject_prev = sum_inject;
     instance->msg_inject_ = 0.0;
+    send1<double>(conn->target(), outputSlot, instance->state_);
 }
 
-void RC::reinitFunc( const Conn& conn, ProcInfo proc)
+void RC::reinitFunc( const Conn* conn, ProcInfo proc)
 {
-    RC* instance = static_cast< RC* >(conn.data());
+    RC* instance = static_cast< RC* >(conn->data());
     instance->dt_tau_ = proc->dt_ / (instance->resistance_ * instance->capacitance_);
     instance->state_ = instance->v0_;
     if (instance->dt_tau_ > 1e-15){ 

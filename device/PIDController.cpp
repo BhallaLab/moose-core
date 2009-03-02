@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Dec 30 23:36:01 2008 (+0530)
 // Version: 
-// Last-Updated: Fri Jan 23 16:27:04 2009 (+0530)
+// Last-Updated: Mon Mar  2 01:29:51 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 198
+//     Update #: 201
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -171,9 +171,9 @@ PIDController::PIDController():
     // do nothing else
 }
 
-void PIDController::setCommand( const Conn& conn, double command)
+void PIDController::setCommand( const Conn* conn, double command)
 {
-    PIDController* instance = static_cast< PIDController* >( conn.data() );
+    PIDController* instance = static_cast< PIDController* >( conn->data() );
     instance->command_ = command;
 }
 
@@ -183,9 +183,9 @@ double PIDController::getCommand( Eref e )
     return instance->command_;
 }
 
-void PIDController::setSensed( const Conn& conn, double sensed )
+void PIDController::setSensed( const Conn* conn, double sensed )
 {
-    PIDController* instance = static_cast< PIDController* >( conn.data() );
+    PIDController* instance = static_cast< PIDController* >( conn->data() );
     instance->sensed_ = sensed;
 }
 
@@ -201,9 +201,9 @@ double PIDController::getOutput( Eref e )
     return instance->output_;
 }
 
-void PIDController::setGain( const Conn& conn, double gain )
+void PIDController::setGain( const Conn* conn, double gain )
 {
-    PIDController* instance = static_cast< PIDController* >( conn.data() );
+    PIDController* instance = static_cast< PIDController* >( conn->data() );
     instance->gain_ = gain;
 }
 
@@ -213,9 +213,9 @@ double PIDController::getGain( Eref e )
     return instance->gain_;
 }
 
-void PIDController::setTauI( const Conn& conn, double tau_i )
+void PIDController::setTauI( const Conn* conn, double tau_i )
 {
-    PIDController* instance = static_cast< PIDController* >( conn.data());
+    PIDController* instance = static_cast< PIDController* >( conn->data());
     instance->tau_i_ = tau_i;
 }
 
@@ -225,9 +225,9 @@ double PIDController::getTauI( Eref e )
     return instance->tau_i_;
 }
 
-void PIDController::setTauD( const Conn& conn, double tau_d )
+void PIDController::setTauD( const Conn* conn, double tau_d )
 {
-    PIDController* instance = static_cast< PIDController* >( conn.data() );
+    PIDController* instance = static_cast< PIDController* >( conn->data() );
     instance->tau_d_ = tau_d;
 }
 
@@ -237,9 +237,9 @@ double PIDController::getTauD( Eref e )
     return instance->tau_d_;
 }
 
-void PIDController::setSaturation( const Conn& conn, double saturation )
+void PIDController::setSaturation( const Conn* conn, double saturation )
 {
-    PIDController* instance = static_cast< PIDController* >( conn.data() );
+    PIDController* instance = static_cast< PIDController* >( conn->data() );
     if (saturation <= 0) {
         cout << "Error: PIDController::setSaturation - saturation must be positive." << endl;
     } else {
@@ -277,10 +277,10 @@ double PIDController::getEPrevious( Eref e )
     return instance->e_previous_;
 }
 
-void PIDController::processFunc( const Conn& conn, ProcInfo proc )
+void PIDController::processFunc( const Conn* conn, ProcInfo proc )
 {
     static double e_prev = 0.0;
-    PIDController* instance = static_cast< PIDController* >( conn.data() );
+    PIDController* instance = static_cast< PIDController* >( conn->data() );
     instance->error_ = instance->command_ - instance->sensed_;
     instance->e_integral_ += 0.5 * (instance->error_ + e_prev) * proc->dt_;
     instance->e_derivative_ = (instance->error_ - e_prev) / proc->dt_;
@@ -296,14 +296,14 @@ void PIDController::processFunc( const Conn& conn, ProcInfo proc )
         instance->e_integral_ -= 0.5 * (instance->error_ + e_prev) * proc->dt_;
     }
 
-    send1<double>( conn.target(), outputSlot, instance->output_);
+    send1<double>( conn->target(), outputSlot, instance->output_);
     instance->e_previous_ = e_prev; 
     e_prev = instance->error_;
 }
 
-void PIDController::reinitFunc( const Conn& conn, ProcInfo proc )
+void PIDController::reinitFunc( const Conn* conn, ProcInfo proc )
 {
-    PIDController* instance = static_cast< PIDController* >( conn.data());
+    PIDController* instance = static_cast< PIDController* >( conn->data());
     if ( instance->tau_i_ <= 0.0 )
         instance->tau_i_ = proc->dt_;
     if ( instance->tau_d_ <= 0.0 )
