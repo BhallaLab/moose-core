@@ -31,12 +31,12 @@ class GammaRng: public RandGenerator
 {
   public:
     GammaRng();
-    static double getAlpha(const Element* e);
-    static double getTheta(const Element* e);
-    static void setAlpha(const Conn & c, double alpha);
-    static void setTheta(const Conn & c, double theta);
+    static double getAlpha(const Eref e);
+    static double getTheta(const Eref e);
+    static void setAlpha(const Conn* c, double alpha);
+    static void setTheta(const Conn* c, double theta);
     
-    virtual void innerReinitFunc( const Conn& c, ProcInfo info);
+    virtual void innerReinitFunc( const Conn* c, ProcInfo info);
 
   private:
     double alpha_;

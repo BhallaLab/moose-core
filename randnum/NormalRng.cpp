@@ -63,9 +63,9 @@ static const Cinfo* normalRngCinfo = initNormalRngCinfo();
 /**
    Set the mean of the internal generator object.   
  */
-void NormalRng::setMean(const Conn& c, double mean)
+void NormalRng::setMean(const Conn* c, double mean)
 {
-    NormalRng* generator = static_cast < NormalRng* >(c.data());
+    NormalRng* generator = static_cast < NormalRng* >(c->data());
     static_cast < Normal* > (generator->rng_)->setMean(mean);          
 }
 
@@ -73,7 +73,7 @@ void NormalRng::setMean(const Conn& c, double mean)
    Since normal distribution is defined in terms of mean and variance, we
    want to store them in order to create the internal generator object.   
  */
-void NormalRng::setVariance(const Conn& c, double variance)
+void NormalRng::setVariance(const Conn* c, double variance)
 {
     if ( variance < 0 )
     {
@@ -81,7 +81,7 @@ void NormalRng::setVariance(const Conn& c, double variance)
             return;
     }
         
-    NormalRng* generator = static_cast < NormalRng* >(c.data());
+    NormalRng* generator = static_cast < NormalRng* >(c->data());
     static_cast < Normal* > (generator->rng_)->setVariance(variance);
 }
 /**
@@ -89,9 +89,9 @@ void NormalRng::setVariance(const Conn& c, double variance)
    0 for alias method.
    1 for BoxMueller method.
  */
-NormalGenerator NormalRng::getMethod(const Element* e)
+NormalGenerator NormalRng::getMethod(const Eref e)
 {
-    NormalRng* generator = static_cast <NormalRng*> (e->data( 0 ));
+    NormalRng* generator = static_cast <NormalRng*> (e.data());
     return static_cast<Normal*> (generator->rng_)->getMethod();
 }
 /**
@@ -99,9 +99,9 @@ NormalGenerator NormalRng::getMethod(const Element* e)
    1 for BoxMueller method.
    Anything else for alias method.
  */
-void NormalRng::setMethod(const Conn& c, NormalGenerator method)
+void NormalRng::setMethod(const Conn* c, NormalGenerator method)
 {
-    NormalRng* generator = static_cast <NormalRng*> ( c.data());
+    NormalRng* generator = static_cast <NormalRng*> ( c->data());
     
     if ( generator->rng_)
     {
@@ -110,7 +110,7 @@ void NormalRng::setMethod(const Conn& c, NormalGenerator method)
     static_cast <Normal*> (generator->rng_)->setMethod(method);
 }
 
-void NormalRng::innerReinitFunc(const Conn& c, ProcInfo info)
+void NormalRng::innerReinitFunc(const Conn* c, ProcInfo info)
 {
     // do nothing
 }
