@@ -31,9 +31,9 @@ class ExponentialRng: public RandGenerator
 {
   public:
     ExponentialRng();
-    static double getMean(const Eref e);    
+    static double getMean(Eref e);    
     static void setMean(const Conn* c, double mean);
-    static int getMethod(const Eref e);    
+    static int getMethod(Eref e);    
     static void setMethod(const Conn* c, int method);    
     virtual void innerReinitFunc( const Conn* c, ProcInfo info);
 

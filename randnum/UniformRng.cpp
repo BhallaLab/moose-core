@@ -59,12 +59,12 @@ const Cinfo* initUniformRngCinfo()
 
 static const Cinfo* uniformRngCinfo = initUniformRngCinfo();
 
-double UniformRng::getMin(const Eref e)
+double UniformRng::getMin(Eref e)
 {
     return static_cast <Uniform *> (static_cast<UniformRng*> (e.data())->rng_)->getMin();
 }
 
-double UniformRng::getMax(const Eref e)
+double UniformRng::getMax(Eref e)
 {
     return static_cast <Uniform *> (static_cast<UniformRng*> (e.data())->rng_)->getMax();
 }
