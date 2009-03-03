@@ -124,9 +124,9 @@ void BinomialRng::innerSetN(unsigned long n)
 /**
    Returns parameter n.
  */
-double BinomialRng::getN(const Eref e)
+double BinomialRng::getN(Eref e)
 {
-    return (int)(static_cast <BinomialRng*>(e.data( 0 ))->n_);
+    return (int)(static_cast <BinomialRng*>(e.data())->n_);
 }
 
 int BinomialRng::innerGetN()
@@ -189,9 +189,9 @@ void BinomialRng::innerSetP(double p)
 /**
    returns parameter p.
 */
-double BinomialRng::getP(const Eref e)
+double BinomialRng::getP(Eref e)
 {
-    return static_cast <BinomialRng*>(e.data( 0 ))->p_;
+    return static_cast <BinomialRng*>(e.data())->p_;
 }
 
 
