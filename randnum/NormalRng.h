@@ -31,6 +31,7 @@ class NormalRng: public RandGenerator
 {
   public:
     NormalRng();
+    virtual ~NormalRng() { ; }
     static void setMean(const Conn* c, double mean);
     static void setVariance(const Conn* c, double variance);
     static void setMethod(const Conn* c, NormalGenerator method);

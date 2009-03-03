@@ -50,7 +50,7 @@ class GHK {
   void innerProcessFunc( Eref e, ProcInfo p );
   void innerReinitFunc( Eref e, ProcInfo p );
 
-  double Ik_, Gk_, Ek_, T_, p_, Vm_, Cin_, Cout_, valency_,GHKconst_;
+  double Ik_, p_, Gk_, Ek_, T_, Vm_, Cin_, Cout_, valency_,GHKconst_;
 
 };
 
