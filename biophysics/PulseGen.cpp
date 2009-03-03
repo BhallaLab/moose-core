@@ -264,7 +264,7 @@ double PulseGen::getOutput(Eref e)
 */
 void PulseGen::setTrigTime(const Conn* conn, double trigTime)
 {
-    PulseGen* obj = static_cast<PulseGen*> (conn.data());
+    PulseGen* obj = static_cast<PulseGen*> (conn->data());
     ASSERT( obj != NULL, "PulseGen::setTrigTime(const Conn*, double) - target data pointer is NULL.");
     obj->trigTime_ = trigTime;    
 }
@@ -404,7 +404,7 @@ void PulseGen::innerProcessFunc(const Conn* c, ProcInfo p)
         output_ = baseLevel_;
     else 
         output_ = secondLevel_;
-    send1<double>( c.target(), outputSlot, output_);    
+    send1<double>( c->target(), outputSlot, output_);    
 }
     
                      

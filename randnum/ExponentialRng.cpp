@@ -63,9 +63,9 @@ ExponentialRng::ExponentialRng()
    Replaces the same method in base class.  Returns the mean as
    stored in this object independent of the actual generator object.
  */
-double ExponentialRng::getMean(const Eref e)
+double ExponentialRng::getMean(Eref e)
 {
-    return static_cast<ExponentialRng*> (e.data( 0 ))->mean_;    
+    return static_cast<ExponentialRng*> (e.data())->mean_;    
 }
 /**
    Sets the mean. Since exponential distribution is defined in terms
@@ -98,9 +98,9 @@ void ExponentialRng::innerReinitFunc(const Conn* c, ProcInfo info)
    0 for logarithmic method.
    1 for random minimization method.
  */
-int ExponentialRng::getMethod(const Eref e e)
+int ExponentialRng::getMethod(Eref e)
 {
-   return static_cast<ExponentialRng*>(e.data( 0 ))->method_;    
+   return static_cast<ExponentialRng*>(e.data())->method_;    
 }
 
 /**
