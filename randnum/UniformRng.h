@@ -27,6 +27,7 @@ class UniformRng: public RandGenerator
 {
   public:
     UniformRng();
+    virtual ~UniformRng() { ; }
     static double getMin(Eref e);
     static double getMax(Eref e);
     static void setMin(const Conn* c, double min);
