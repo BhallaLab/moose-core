@@ -31,6 +31,7 @@ class GammaRng: public RandGenerator
 {
   public:
     GammaRng();
+    virtual ~GammaRng() { ; }
     static double getAlpha(Eref e);
     static double getTheta(Eref e);
     static void setAlpha(const Conn* c, double alpha);
