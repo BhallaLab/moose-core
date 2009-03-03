@@ -89,7 +89,7 @@ void NormalRng::setVariance(const Conn* c, double variance)
    0 for alias method.
    1 for BoxMueller method.
  */
-NormalGenerator NormalRng::getMethod(const Eref e)
+NormalGenerator NormalRng::getMethod(Eref e)
 {
     NormalRng* generator = static_cast <NormalRng*> (e.data());
     return static_cast<Normal*> (generator->rng_)->getMethod();

@@ -64,9 +64,9 @@ GammaRng::GammaRng()
 /**
    returns the shape parameter.
 */
-double GammaRng::getAlpha(const Eref e)
+double GammaRng::getAlpha(Eref e)
 {
-    return static_cast<GammaRng*> (e.data( 0 ))->alpha_;    
+    return static_cast<GammaRng*> (e.data())->alpha_;    
 }
 /**
    Sets parameter alpha. Also known as the shape parameter.
@@ -95,9 +95,9 @@ void GammaRng::setAlpha(const Conn* c, double alpha)
 /**
    returns the scale parameter.
 */
-double GammaRng::getTheta(const Eref e)
+double GammaRng::getTheta(Eref e)
 {
-    return static_cast<GammaRng*> (e.data( 0 ))->theta_;    
+    return static_cast<GammaRng*> (e.data())->theta_;    
 }
 
 /**
