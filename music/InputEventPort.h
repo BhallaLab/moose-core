@@ -12,6 +12,8 @@ class InputEventPort : public MUSIC::EventHandlerLocalIndex
       accLatency_ = 1e-3;
     }
 
+  virtual ~InputEventPort() { ; }
+
   void operator () ( double t, MUSIC::LocalIndex id );
 
   //////////////////////////////////////////////////////////////////
