@@ -1,3 +1,5 @@
+// In this script we send in pre-defined inputs to sensed and command
+// terminals of the PID.
 str simulator
 if ({version} < 3.0)
     simulator="genesis"

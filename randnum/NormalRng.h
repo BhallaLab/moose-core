@@ -34,7 +34,7 @@ class NormalRng: public RandGenerator
     static void setMean(const Conn* c, double mean);
     static void setVariance(const Conn* c, double variance);
     static void setMethod(const Conn* c, NormalGenerator method);
-    static NormalGenerator getMethod(const Eref e);
+    static NormalGenerator getMethod(Eref e);
     virtual void innerReinitFunc( const Conn* c, ProcInfo info);    
 };
 
