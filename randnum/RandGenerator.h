@@ -28,7 +28,7 @@ class RandGenerator
     
   public:
     RandGenerator();
-    ~RandGenerator();
+    virtual ~RandGenerator();
     static double getMean(Eref e);    
     static double getVariance(Eref e);
     static double getSample(Eref e);
