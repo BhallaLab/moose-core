@@ -101,8 +101,14 @@ void InputEventPort::innerReinitFunc()
 {
   // Map the input from MUSIC to data channels local to this process
   MUSIC::LinearIndex iMap(myOffset_, myWidth_);
-  mPort_->map(&iMap, this, accLatency_, maxBuffered_);
 
+
+  
+  if(!isMapped_)
+    {
+      mPort_->map(&iMap, this, accLatency_, maxBuffered_);
+      isMapped_ = 1;
+    }
 }
 
 // Event handler
