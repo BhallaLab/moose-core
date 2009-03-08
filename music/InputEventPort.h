@@ -10,6 +10,7 @@ class InputEventPort : public MUSIC::EventHandlerLocalIndex
     {
       maxBuffered_ = 100;
       accLatency_ = 1e-3;
+      isMapped_ = 0;
     }
 
   virtual ~InputEventPort() { ; }
@@ -45,7 +46,7 @@ class InputEventPort : public MUSIC::EventHandlerLocalIndex
   unsigned int myOffset_, myWidth_;
   double accLatency_;
   int maxBuffered_;
-
+  bool isMapped_;
 
   void innerInitialiseFunc( Eref e, unsigned int width, unsigned int offset,
                             MUSIC::EventInputPort* mPort);
