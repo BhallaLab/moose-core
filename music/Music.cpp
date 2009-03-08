@@ -209,6 +209,7 @@ void Music::innerAddPort (
 
     // Publish the event input port to music
     MUSIC::EventInputPort* mPort = setup_->publishEventInput(name);
+
     unsigned int width = mPort->width();
     
     unsigned int numNodes = MuMPI::INTRA_COMM().Get_size();
