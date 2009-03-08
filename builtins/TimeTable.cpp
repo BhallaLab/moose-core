@@ -193,7 +193,7 @@ void TimeTable::innerLoad( const string& fName, unsigned int skipLines )
          << fName << endl;
   }
   
-  for(unsigned int i = 0; i < skipLines & fin.good() ; i++) {
+  for(unsigned int i = 0; (i < skipLines) & fin.good() ; i++) {
     getline( fin, line );
     cout << "Skipping header line (" << i+1 << "):" << line << endl;
   }
