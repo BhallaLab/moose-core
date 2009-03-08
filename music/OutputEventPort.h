@@ -9,6 +9,7 @@ class OutputEventPort
   OutputEventPort() 
     {
       maxBuffered_ = 1;
+      isMapped_ = 0;
     }
 
   //////////////////////////////////////////////////////////////////
@@ -37,6 +38,7 @@ class OutputEventPort
 
   int maxBuffered_;
   unsigned int myOffset_, myWidth_;
+  bool isMapped_;
 
   vector < Eref > channels_;
 

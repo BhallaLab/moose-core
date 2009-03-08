@@ -138,6 +138,9 @@ void Calculator::reinitFunc( const Conn* c, ProcInfo p )
 
 void Calculator::innerReinitFunc( Eref e, ProcInfo info )
 {
-  val_ = initVal_;
+  // Setting value to 0, since the first timestep will pass this value along
+  // which causes problems if initVal_ is non-zero and the mul-message is at
+  // or close to 0.
+  val_ = 0; //initVal_;
 
 }

@@ -13,7 +13,7 @@ class GHK {
  public:
 
   GHK() :
-  p_( 0.0 ), Gk_( 0.0 ), Ek_( 0.0 )
+  Gk_( 0.0 ), Ek_( 0.0 ), p_( 0.0 )
     {
       ;
     }
@@ -27,6 +27,8 @@ class GHK {
 
   static void setPermeability( const Conn* c, double p );
   static double getPermeability( Eref );
+  static void addPermeability( const Conn* c, double p );
+
 
   static void setVm( const Conn* c, double Vm );
   static double getVm( Eref );
