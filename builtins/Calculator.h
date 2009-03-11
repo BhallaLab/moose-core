@@ -8,6 +8,7 @@ class Calculator {
     {
      initVal_ = 0;
      val_ = 0;
+     prevVal_ = 0;
     }
 
   static void setInitValue( const Conn* c, double v );
@@ -27,7 +28,7 @@ class Calculator {
   void innerProcessFunc( Eref e, ProcInfo p );
   void innerReinitFunc( Eref e, ProcInfo p );
 
-  double val_,initVal_;
+  double val_,initVal_,prevVal_;
   
 
 };

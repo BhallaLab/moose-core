@@ -13,7 +13,7 @@ class GHK {
  public:
 
   GHK() :
-  Gk_( 0.0 ), Ek_( 0.0 ), p_( 0.0 )
+  Gk_( 0.0 ), Ek_( 0.0 ), p_( 0.0 ), Cin_( 50e-6 ), Cout_( 2 )
     {
       ;
     }
