@@ -92,7 +92,10 @@ double Calculator::getInitValue( Eref e )
 
 double Calculator::getValue( Eref e )
 {
-        return static_cast< Calculator* >( e.data() )->val_;
+  // As we reset the val_ in each loop, we need to be able to show the
+  // last timesteps calculated val_, ie prevVal_
+
+  return static_cast< Calculator* >( e.data() )->prevVal_;
 }
 
 
@@ -124,8 +127,12 @@ void Calculator::processFunc( const Conn* c, ProcInfo p )
 
 void Calculator::innerProcessFunc( Eref e, ProcInfo info )
 {
+  std::cerr << "Calculator sending out : " << val_ << std::endl;
+  
   // Send the value out
   send1< double >( e, valueSlot, val_ );
+
+  prevVal_ = val_;
 
   // Reset the value 
   val_ = initVal_;
