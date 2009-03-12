@@ -30,6 +30,13 @@ const Cinfo* initGHKCinfo()
       new DestFinfo( "Vm", Ftype1< double >::global(),
                      RFCAST( &GHK::channelFunc ) ),
     };
+  
+  static Finfo* ghkShared[] =
+    {
+      new SrcFinfo( "Vm", Ftype1< double >::global() ),
+      new DestFinfo( "permeability", Ftype1< double >::global(),
+                     RFCAST( &GHK::addPermeability ) ),
+    };
 
   //!! Need to add channelFunc
 
@@ -79,24 +86,22 @@ const Cinfo* initGHKCinfo()
                      RFCAST( &GHK::setCin ) ),
       new DestFinfo( "CoutDest", Ftype1< double >::global(),
                      RFCAST( &GHK::setCout ) ),
-      // new DestFinfo( "Vm", Ftype1< double >::global(),
-      //                RFCAST( &GHK::setVm ) ),
-      new DestFinfo( "pDest", Ftype1< double >::global(),
-                     RFCAST( &GHK::addPermeability ) ),
-
-
+      
       new SharedFinfo( "channel", channelShared,
                        sizeof( channelShared ) / sizeof( Finfo* ),
                        "This is a shared message to couple channel to compartment. "
                        "The first entry is a MsgSrc to send Gk and Ek to the compartment "
                        "The second entry is a MsgDest for Vm from the compartment." ),
-
-
-
+      new SharedFinfo( "ghk", ghkShared,
+                       sizeof( ghkShared ) / sizeof( Finfo* ),
+                       "This shared message connects to an HHChannel. "
+					   "The first entry is a MsgSrc which relays the Vm received from "
+					   "a compartment. The second entry is a MsgDest which receives "
+					   "channel conductance, and interprets it as permeability." ),
     };
 
-  // We want the channel updates after the compartments are done.
-  static SchedInfo schedInfo[] = { { process, 0, 1 } };
+  // Order of updates: (t0) Compartment -> (t1) HHChannel -> (t2) GHK
+  static SchedInfo schedInfo[] = { { process, 0, 2 } };
 
   static string doc[] =
     {
@@ -130,6 +135,9 @@ static const Slot ikSlot =
 
 static const Slot channelSlot =
         initGHKCinfo()->getSlot( "channel.channel" );
+
+static const Slot vmSlot =
+        initGHKCinfo()->getSlot( "ghk.Vm" );
 
 
 ///////////////////////////////////////////////////
@@ -224,8 +232,8 @@ double GHK::getValency( Eref e )
 
 void GHK::channelFunc( const Conn* c, double Vm )
 {
-        // cout << "channelFunc for " << c->data() << " on " << c->target().name() << " from " << c->source().name() << " with Vm= " << Vm << endl;
         static_cast< GHK* >( c->data() )->Vm_ = Vm;
+		send1< double >( c->target(), vmSlot, Vm );
 }
 
 
