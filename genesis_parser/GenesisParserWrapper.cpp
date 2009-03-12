@@ -642,7 +642,7 @@ map< string, string >& sliSrcLookup()
 	src[ "PRD Gk" ] = "GkSrc";
 	
 	// Messages for GHK
-	src[ "PERMEABILITY Gk" ] = "GkSrc";	// From HHChannel
+	src[ "PERMEABILITY Gk" ] = "ghk";	// From HHChannel
 	src[ "Cin Ca" ] = "concSrc"; // From CaConc
 	// Messages for GHK - to accept values from a table
 	src[ "PERMEABILITY output" ] = "outputSrc";
@@ -801,10 +801,10 @@ map< string, string >& sliDestLookup()
 	dest[ "PRD Gk" ] = "prd";
 
 	// Messages for GHK
-	dest[ "PERMEABILITY Gk" ] = "pDest"; // From HHChannel
+	dest[ "PERMEABILITY Gk" ] = "ghk"; // From HHChannel
 	dest[ "Cin Ca" ] = "CinDest"; // From CaConc
 	// Messages for GHK - to accept values from a table
-	dest[ "PERMEABILITY output" ] = "pDest";
+	dest[ "PERMEABILITY output" ] = "ghk";
 
         dest[ "SAVE Ik" ] = "save"; // AscFile
         dest[ "SAVE C" ] = "save";
