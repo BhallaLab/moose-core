@@ -1,11 +1,11 @@
 #ifndef _GHK_H
 #define _GHK_H
 
-#define GAS_CONSTANT 8.314472
-#define FARADAY  96485.3399
-#define ZERO_CELSIUS 273.15
-#define R_OVER_F        8.617342e-5            /* volt/deg */
-#define F_OVER_R        11604.506              /* deg/volt */
+#define GAS_CONSTANT	8.314			/* (V * C)/(deg K * mol) */
+#define FARADAY		9.6487e4			/* C / mol */
+#define ZERO_CELSIUS	273.15			/* deg */
+#define R_OVER_F        8.6171458e-5		/* volt/deg */
+#define F_OVER_R        1.1605364e4		/* deg/volt */
 
 
 class GHK {
@@ -13,7 +13,7 @@ class GHK {
  public:
 
   GHK() :
-  Gk_( 0.0 ), Ek_( 0.0 ), p_( 0.0 ), Cin_( 50e-6 ), Cout_( 2 )
+  Ik_( 0.0 ), Gk_( 0.0 ), Ek_( 0.0 ), p_( 0.0 ), Cin_( 50e-6 ), Cout_( 2 )
     {
       ;
     }
@@ -52,7 +52,7 @@ class GHK {
   void innerProcessFunc( Eref e, ProcInfo p );
   void innerReinitFunc( Eref e, ProcInfo p );
 
-  double Ik_, p_, Gk_, Ek_, T_, Vm_, Cin_, Cout_, valency_,GHKconst_;
+  double Ik_, Gk_, Ek_, p_, T_, Vm_, Cin_, Cout_, valency_,GHKconst_;
 
 };
 
