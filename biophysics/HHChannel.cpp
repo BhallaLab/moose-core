@@ -63,6 +63,13 @@ const Cinfo* initHHChannelCinfo()
 			RFCAST( &HHChannel::zGateFunc ) ),
 	};
 
+	static Finfo* ghkShared[] =
+	{
+		new DestFinfo( "Vm", Ftype1< double >::global(), 
+				RFCAST( &HHChannel::channelFunc ) ),
+		new SrcFinfo( "permeability", Ftype1< double >::global() ),
+	};
+
 ///////////////////////////////////////////////////////
 // Field definitions
 ///////////////////////////////////////////////////////
@@ -144,11 +151,12 @@ const Cinfo* initHHChannelCinfo()
 		new SharedFinfo( "zGate", zGateShared,
 			sizeof( zGateShared ) / sizeof( Finfo* ),
 			"Shared message for Z gate. Fields as in X gate."),
+		new SharedFinfo( "ghk", ghkShared,
+			sizeof( ghkShared ) / sizeof( Finfo* ) ),
 
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
-		new SrcFinfo( "GkSrc", Ftype1< double >::global() ),
 		new SrcFinfo( "IkSrc", Ftype1< double >::global() ),
 
 ///////////////////////////////////////////////////////
@@ -194,7 +202,7 @@ static const Slot yGateSlot =
 static const Slot zGateSlot =
 	initHHChannelCinfo()->getSlot( "zGate.Vm" );
 static const Slot gkSlot =
-	initHHChannelCinfo()->getSlot( "GkSrc" );
+	initHHChannelCinfo()->getSlot( "ghk.permeability" );
 static const Slot ikSlot =
 	initHHChannelCinfo()->getSlot( "IkSrc" );
 
@@ -542,12 +550,13 @@ void HHChannel::innerProcessFunc( Eref e, ProcInfo info )
 	send2< double, double >( e, channelSlot, Gk_, Ek_ );
 	Ik_ = ( Ek_ - Vm_ ) * g_;
 	
-	// Usually needed by GHK-type objects
-	send1< double >( e, gkSlot, Gk_ );
-	
 	// This is used if the channel connects up to a conc pool and
 	// handles influx of ions giving rise to a concentration change.
 	send1< double >( e, ikSlot, Ik_ );
+	
+	// Needed by GHK-type objects
+	send1< double >( e, gkSlot, Gk_ );
+	
 	g_ = 0.0;
 }
 
@@ -605,6 +614,10 @@ void HHChannel::innerReinitFunc( Eref er, ProcInfo info )
 	send2< double, double >( er, channelSlot, Gk_, Ek_ );
 	// channelSrc_.send( Gk_, Ek_ );
 	Ik_ = ( Ek_ - Vm_ ) * g_;
+	
+	// Needed by GHK-type objects
+	send1< double >( e, gkSlot, Gk_ );
+	
 	g_ = 0.0;
 }
 
