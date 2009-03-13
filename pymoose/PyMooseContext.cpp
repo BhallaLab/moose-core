@@ -219,6 +219,10 @@ const Cinfo* initPyMooseContextCinfo()
 			Ftype1< string >::global() ),
 		new SrcFinfo( "tabop", 
 			Ftype4< Id, char, double, double >::global() ),
+		new SrcFinfo( "readsbml", 
+			Ftype3< string, string, int >::global() ),
+		new SrcFinfo( "writesbml", 
+			Ftype3< string, string, int >::global() ),
 	};
 	
 	static Finfo* pyMooseContextFinfos[] =
@@ -362,6 +366,10 @@ static const Slot loadtabSlot =
 	initPyMooseContextCinfo()->getSlot( "parser.loadtab" );
 static const Slot tabopSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.tabop" );
+static const Slot readSbmlSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.readsbml" );
+static const Slot writeSbmlSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.writesbml" );
 
 
 
