@@ -44,6 +44,12 @@ namespace pymoose
         void __set_y(double y);
         double __get_z() const;
         void __set_z(double z);
+        double __get_x0() const;
+        void __set_x0(double x);
+        double __get_y0() const;
+        void __set_y0(double y);
+        double __get_z0() const;
+        void __set_z0(double z);
     };
 } // namespace
 
