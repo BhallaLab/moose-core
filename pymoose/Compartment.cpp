@@ -160,7 +160,7 @@ void Compartment::__set_x0( double x )
 {
     set < double > (id_(), "x0", x);
 }
-double Compartment::__get_y() const
+double Compartment::__get_y0() const
 {
     double y;
     get < double > (id_(), "y0",y);
