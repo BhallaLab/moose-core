@@ -3712,7 +3712,7 @@ char* do_substring(int argc, const char** const argv, Id s ) {
 	if (start > str.size() || end > str.size()) {
 		cout << "You string has only " << str.size() << " chars"  << endl;
 	}
-	string substr = str.substr(start, end);	
+	string substr = str.substr(start, end-start+1);	
 	return copyString(substr.c_str());
 }
 
