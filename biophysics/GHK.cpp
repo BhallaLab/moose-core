@@ -86,7 +86,8 @@ const Cinfo* initGHKCinfo()
                      RFCAST( &GHK::setCin ) ),
       new DestFinfo( "CoutDest", Ftype1< double >::global(),
                      RFCAST( &GHK::setCout ) ),
-      
+      new DestFinfo( "pDest", Ftype1< double >::global(),      
+                     RFCAST( &GHK::addPermeability ) ),
       new SharedFinfo( "channel", channelShared,
                        sizeof( channelShared ) / sizeof( Finfo* ),
                        "This is a shared message to couple channel to compartment. "
