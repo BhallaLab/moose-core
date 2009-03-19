@@ -127,7 +127,7 @@ void Calculator::processFunc( const Conn* c, ProcInfo p )
 
 void Calculator::innerProcessFunc( Eref e, ProcInfo info )
 {
-  std::cerr << "Calculator sending out : " << val_ << std::endl;
+  //std::cerr << "Calculator sending out : " << val_ << std::endl;
   
   // Send the value out
   send1< double >( e, valueSlot, val_ );
