@@ -13,6 +13,8 @@
 #include <sbml/SBMLTypes.h>
 class SbmlReader
 {
+	struct EnzymeInfo;
+
 	public:
 		SbmlReader() {;}
 		~SbmlReader() {;}
@@ -21,7 +23,7 @@ class SbmlReader
 		void  createMolecule(Model* model,map<string,Id> &);
 		void  printParameter(Model* model);
 		void  printUnit(Model* model);
-		void  createReaction(Model* model,map<string,Id> &,map<string,Eref> &);
+		void  createReaction(Model* model,map<string,Id> &);
 		
 				
 	private:
@@ -30,13 +32,28 @@ class SbmlReader
 		Element* comptEl_;
 		Element* molecule_;
 		Element* reaction_;
+		map<string,Eref>elmtMap_;
 		void prn_parm(const ASTNode* p,vector <string> & parameters);
 		double transformUnits(double msize,UnitDefinition * ud);
+		string printAnnotation(SBase *sb,map<string,EnzymeInfo> &);
+		//string printNotes(SBase *sb);
+		void setupEnzymaticReaction(const EnzymeInfo & einfo);
+		struct EnzymeInfo
+		{
+			Id enzyme;
+			Id complex;
+			vector<Id> substrates;
+			vector<Id> products;
+			string groupName;
+			int stage;
+	
+		};
 		
 		
 };
 extern const Cinfo* initKinComptCinfo();
 extern const Cinfo* initMoleculeCinfo();
 extern const Cinfo* initReactionCinfo();
+extern const Cinfo* initEnzymeCinfo();
 #endif // _SBMLREADER_H
 
