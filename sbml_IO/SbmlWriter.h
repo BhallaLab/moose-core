@@ -26,8 +26,13 @@ class SbmlWriter
 		string parmUnit(double rct_order);
 		double transformUnits(double mvalue,UnitDefinition * ud);
 		string nameString(string str);
+		void printParameters(KineticLaw* kl,string k,double kvalue,string unit);
+		void printReactants(Reaction* reaction,vector< Eref > enz,ostringstream& rlaw);
+		void printProducts(Reaction* reaction,vector< Eref > cplx,ostringstream& rlaw);
+		void printEnzymes(vector< Id > enzms,string parentCompt,double size,Model* model);
 };
 extern const Cinfo* initKinComptCinfo();
 extern const Cinfo* initMoleculeCinfo();
 extern const Cinfo* initReactionCinfo();
+extern const Cinfo* initEnzymeCinfo();
 #endif // _SBMLWRITER_H
