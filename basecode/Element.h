@@ -315,9 +315,9 @@ class Element
 		 * including all messages. Returns the base of the copied tree.
 		 * It attaches the copied element tree to the parent.
 		 */
-		virtual Element* copy( Element* parent, const string& newName )
+		virtual Element* copy( Element* parent, const string& newName, Id id = Id() )
 				const = 0;
-				
+
 		/**
 		 * This function takes a prototype element and creates an array
 		 * of elements. Only the data part gets duplicated and Finfo and
@@ -329,8 +329,12 @@ class Element
 		   \param n number of copies
 		   \return An Element * pointing to a ArrayElement object
 		*/
-		virtual Element* copyIntoArray( Id parent, const string& newName, 
-			int n ) const = 0;
+		virtual Element* copyIntoArray(
+			Id parent,
+			const string& newName,
+			int n,
+			Id id = Id() ) const = 0;
+
 		/**
 		 * True if current element descends from the specified ancestor.
 		 */
@@ -344,11 +348,11 @@ class Element
 		 * The function does NOT fix up the messages.
 		 */
 		virtual Element* innerDeepCopy( 
-				map< const Element*, Element* >& tree )
+				map< const Element*, Element* >& tree, Id id )
 				const = 0;
 				
 		virtual Element* innerDeepCopy( 
-				map< const Element*, Element* >& tree, int n )
+				map< const Element*, Element* >& tree, int n, Id id )
 				const = 0;
 
 		/**
@@ -387,13 +391,13 @@ class Element
 		 * The returned Element is dangling in memory: No parent
 		 * or child.
 		 */
-		virtual Element* innerCopy() const = 0;
+		virtual Element* innerCopy( Id id ) const = 0;
 
 		/**
 		 * Placeholder function: Copies current element into an array
 		 * Element with n entries instead of 1.
 		 */
-		virtual Element* innerCopy(int n) const = 0;
+		virtual Element* innerCopy( int n, Id id ) const = 0;
 
 
 	private:

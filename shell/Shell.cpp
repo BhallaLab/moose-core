@@ -27,7 +27,7 @@
 #include "sbml_IO/SbmlWriter.h"
 #endif
 
-extern void pollPostmaster(); // Defined in maindir/mpiSetup.cpp
+extern void pollPostmaster(); // Defined in maindir/init.cpp
 //////////////////////////////////////////////////////////////////////
 // Shell static initializers
 //////////////////////////////////////////////////////////////////////
@@ -35,6 +35,9 @@ extern void pollPostmaster(); // Defined in maindir/mpiSetup.cpp
 unsigned int Shell::myNode_ = 0;
 unsigned int Shell::numNodes_ = 1;
 bool Shell::running_ = 1;
+unsigned int Shell::parSetupNumPending_ = 0;
+unsigned int Shell::parSetupCallingNode_ = UINT_MAX;
+vector< bool > Shell::parSetupStatus_( 0 );
 const unsigned int Shell::maxNumOffNodeRequests = 100;
 
 //////////////////////////////////////////////////////////////////////
@@ -542,24 +545,35 @@ const Cinfo* initShellCinfo()
 			RFCAST( &Shell::innerQuit ) ),
 		
 		///////////////////////////////////////////////////////////////
+		// Setup
+		///////////////////////////////////////////////////////////////
+		new SrcFinfo( "parSetupEndSrc",
+			Ftype1< unsigned int >::global(),
+			"" ),
+		new DestFinfo( "parSetupEndSrc",
+			Ftype1< unsigned int >::global(),
+			RFCAST( &Shell::handleParSetupEnd ),
+			"" ),
+		
+		///////////////////////////////////////////////////////////////
 		// Id management
 		///////////////////////////////////////////////////////////////
-		new SrcFinfo( "requestMainIdSrc",
-			Ftype3< unsigned int, unsigned int, unsigned int >::global(),
+		new SrcFinfo( "requestIdBlockSrc",
+			Ftype2< unsigned int, unsigned int >::global(),
 			"Here a slave node requests the master node for a block of main Ids that it can use locally."
-			"Args: size of block, slave node, request Id" ),
-		new DestFinfo( "requestMainId",
-			Ftype3< unsigned int, unsigned int, unsigned int >::global(),
-			RFCAST( &Shell::handleRequestMainId ),
+			"Args: size of block, request Id" ),
+		new DestFinfo( "requestIdBlock",
+			Ftype2< unsigned int, unsigned int >::global(),
+			RFCAST( &Shell::handleRequestNewIdBlock ),
 			"Here the master node interceptes requests from slave nodes for regular Ids "
-			"Args: size of block, slave node, request Id " ),
-		new SrcFinfo( "returnMainIdSrc",
+			"Args: size of block, request Id " ),
+		new SrcFinfo( "returnIdBlockSrc",
 			Ftype2< unsigned int, unsigned int >::global(),
 			"Respond to requests from slave nodes for regular ids. "
 			"Args: Base id in alloted block, request Id" ),
-		new DestFinfo( "returnMainId",
+		new DestFinfo( "returnIdBlock",
 			Ftype2< unsigned int, unsigned int >::global(),
-			RFCAST( &Shell::handleReturnMainId ),
+			RFCAST( &Shell::handleReturnNewIdBlock ),
 			"Receive vector of main Ids from master node "
 			"Args: Base id in alloted block, request Id " ),
 	};
@@ -718,6 +732,9 @@ static const Slot parSetClockSlot =
 
 static const Slot parQuitSlot =
 	initShellCinfo()->getSlot( "parallel.quitSrc" );
+
+static const Slot parSetupEndSlot =
+	initShellCinfo()->getSlot( "parallel.parSetupEndSrc" );
 
 #endif
 
@@ -1180,7 +1197,7 @@ void Shell::trigLe( const Conn* c, Id parent )
 	// 		pa.isGlobal, id.isGlobal
  */
 void Shell::staticCreate( const Conn* c, string type,
-					string name, int node, Id parent )
+					string name, unsigned int node, Id parent )
 {
 	Shell* s = static_cast< Shell* >( c->data() );
 
@@ -1188,19 +1205,17 @@ void Shell::staticCreate( const Conn* c, string type,
 	Id id;
 	Nid paNid( parent );
 
-
-	unsigned int unode = static_cast< unsigned int >( node );
-	if ( node < 0 ) { // Leave it to the system.
+	if ( node == Id::UnknownNode ) { // Leave it to the system.
 		// This is where the IdManager does clever load balancing etc
 		// to assign child node.
 		id = Id::childId( paNid );
-	} else if ( unode >= s->numNodes_ ) {
+	} else if ( node >= s->numNodes_ && ! id.isGlobal() ) {
 		cout << "Warning: Shell::staticCreate: unallocated target node " <<
-			unode << ", using node 0\n";
-		unode = 0;
+			node << ", using node 0\n";
+		node = 0;
 		id = Id::childId( paNid );
 	} else {
-		id = Id::makeIdOnNode( unode );
+		id = Id::makeIdOnNode( node );
 	}
 	if ( id.isGlobal() && !( parent == Id() || paNid.isGlobal() ) ) {
 		cout << "Error: Cannot create global object unless parent is global\n";
@@ -1211,9 +1226,14 @@ void Shell::staticCreate( const Conn* c, string type,
 		return;
 	}
 	
+	Element* ret;
 	if ( ( paNid.isGlobal() || paNid.node() == 0 || parent == Id() ) &&
 		( id.isGlobal() || id.node() == 0 ) ) { // Make it here.
-		bool ret = s->create( type, name, parent, id );
+		if ( id.isGlobal() )
+			ret = createGlobal( type, name, parent, id );
+		else
+			ret = s->create( type, name, parent, id );
+
 		if ( ret ) { // Tell the parser it was created happily.
 #ifdef DO_UNIT_TESTS
 			// Nasty issue of callback to a SetConn here.
@@ -1227,12 +1247,6 @@ void Shell::staticCreate( const Conn* c, string type,
 				name << "' on parent " << parent.path() << endl;
 		}
 #ifdef USE_MPI
-		if ( id.isGlobal() ) { // also make it on all other nodes
-			send4< string, string, Nid, Nid >( 
-				c->target(), rCreateSlot,
-				type, name, 
-				paNid, id );
-		}
 	} else { // Has to go off-node, to a single target node.
 		unsigned int targetNode = paNid.node();
 		if ( parent == Id() )
@@ -1246,6 +1260,27 @@ void Shell::staticCreate( const Conn* c, string type,
 			paNid, id );
 #endif
 	}
+}
+
+// Static function
+Element* Shell::createGlobal(
+	const string& type, const string& name, Id parent, Id id )
+{
+	assert( myNode() == 0 );
+	assert( id.isGlobal() );
+	assert( parent == Id() || parent.isGlobal() );
+	
+	Eref shellE = Id::shellId().eref();
+	Shell* sh = static_cast< Shell* >( shellE.data() );
+	Element* ret = sh->create( type, name, parent, id );
+#ifdef USE_MPI
+	if ( ret )
+		send4< string, string, Nid, Nid >( 
+			shellE, rCreateSlot,
+			type, name, parent, id );
+#endif
+	
+	return ret;
 }
 
 // Static function
@@ -1265,7 +1300,7 @@ void Shell::staticCreateArray( const Conn* c, string type,
 	// Id id = Id::scratchId();
 	if ( id.node() == 0 || id.isGlobal() ) { // local node
 		int n = (int) (parameter[0]*parameter[1]);
-		bool ret = s->createArray( type, name, parent, id, n );
+		Element* ret = s->createArray( type, name, parent, id, n );
 		assert(parameter.size() == 6);
 		Element* child = id();
 		ArrayElement* f = static_cast <ArrayElement *> (child);
@@ -1790,11 +1825,16 @@ void Shell::copyIntoArray( const Conn* c,
 #endif // ndef USE_MPI
 
 Element* Shell::localCopyIntoArray( const Conn* c, 
-				Id src, Id parent, string name, vector <double> parameter )
+				Id src, Id parent,
+				string name, vector <double> parameter,
+				Id child )
 {
+	if ( child == Id() )
+		child = Id::newId();
+
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 	int n = (int) (parameter[0]*parameter[1]);
-	Element* e = src()->copyIntoArray( parent, name, n );
+	Element* e = src()->copyIntoArray( parent, name, n, child );
 	//assign the other parameters to the arrayelement
 	assert(parameter.size() == 6);
 	ArrayElement* f = static_cast <ArrayElement *> (e);
@@ -2518,16 +2558,16 @@ void Shell::useClock( const Conn* c, string tickName, string path,
 	localUseClock( c, tickName, path, function );
 }
 
-unsigned int Shell::regularizeScratch( unsigned int size )
+unsigned int Shell::newIdBlock( unsigned int size )
 {
 	return 0;
 }
 
-void Shell::handleRequestMainId( const Conn* c,
-	unsigned int size, unsigned int node, unsigned int requestId )
+void Shell::handleRequestNewIdBlock( const Conn* c,
+	unsigned int size, unsigned int requestId )
 { ; }
 
-void Shell::handleReturnMainId( const Conn* c,
+void Shell::handleReturnNewIdBlock( const Conn* c,
 	unsigned int value, unsigned int requestId )
 { ; }
 
@@ -2953,28 +2993,26 @@ void Shell::readFile( const Conn* c, string filename, bool linemode ){
  * Creates a child element with the specified id, and schedules it.
  * Regular function.
  */
-bool Shell::create( const string& type, const string& name, 
+Element* Shell::create( const string& type, const string& name, 
 		Id parent, Id id )
 {
-	//Element* p = parent();
 	Element* child = Neutral::create( type, name, parent, id );
 	if ( child ) {
 		recentElement_ = child->id();
-		return 1;
 	}
-	return 0;
+
+	return child;
 }
 
 // Regular function
-bool Shell::createArray( const string& type, const string& name, 
+Element* Shell::createArray( const string& type, const string& name, 
 		Id parent, Id id, int n )
 {	
 	Element* child = Neutral::createArray( type, name, parent, id, n );
 	if ( child ) {
 		recentElement_ = child->id();
-		return 1;
 	}
-	return 0;
+	return child;
 	
 	/*const Cinfo* c = Cinfo::find( type );
 	Element* p = parent();
@@ -2996,7 +3034,7 @@ bool Shell::createArray( const string& type, const string& name,
 		recentElement_ = id;
 		ret = c->schedule( e );
 		assert( ret );
-		return 1;
+		return e;
 	} else  {
 		cout << "Error: Shell::create: Unable to find type " <<
 			type << endl;
@@ -3019,6 +3057,80 @@ void Shell::destroy( Id victim )
 
 	set( e, "destroy" );
 }
+
+//~ /**
+ //~ * 
+ //~ */
+//~ void Shell::parSetupBegin( unsigned int callingNode )
+//~ {
+	//~ assert( parSetupNumPending_ == 0 );
+	//~ assert( parSetupCallingNode_ == UINT_MAX );
+	//~ assert( parSetupStatus_.empty() );
+	//~ 
+	//~ parSetupCallingNode_ = callingNode;
+	//~ 
+	//~ if( callingNode == numNodes() ) {
+		//~ parSetupStatus_.resize( numNodes(), 1 );
+		//~ parSetupStatus_[ myNode() ] = 0;
+		//~ parSetupNumPending_ = numNodes() - 1;
+	//~ } else {
+		//~ parSetupNumPending_ = 1;
+	//~ }
+//~ }
+//~ 
+//~ /**
+ //~ * 
+ //~ */
+//~ void Shell::parSetupEnd( unsigned int pollingNode )
+//~ {
+	//~ Eref sh = Id::shellId().eref();
+	//~ 
+	//~ if ( pollingNode == numNodes() ) {
+		//~ send1< unsigned int >( sh, parSetupEndSlot, myNode() );
+	//~ } else {
+		//~ unsigned int target =
+			//~ pollingNode > myNode() ? pollingNode : pollingNode - 1;
+		//~ sendTo1< unsigned int >( sh, parSetupEndSlot, target, myNode() );
+	//~ }
+//~ }
+//~ 
+//~ /**
+ //~ * 
+ //~ */
+//~ void Shell::handleParSetupEnd( const Conn* c, unsigned int callingNode )
+//~ {
+	//~ assert( parSetupNumPending_ > 0 );
+	//~ parSetupNumPending_--;
+	//~ 
+	//~ if ( parSetupCallingNode_ == numNodes() ) {
+		//~ assert( callingNode < numNodes() );
+		//~ assert( parSetupStatus_.size() == numNodes() );
+		//~ assert( parSetupStatus_[ callingNode ] == 1 );
+		//~ 
+		//~ parSetupStatus_[ callingNode ] = 0;
+	//~ } else {
+		//~ assert( parSetupCallingNode_ == callingNode );
+	//~ }
+	//~ 
+	//~ if ( parSetupNumPending_ == 0 ) {
+		//~ vector< bool >::iterator i;
+		//~ for ( i = parSetupStatus_.begin(); i != parSetupStatus_.end(); i++ )
+			//~ if ( *i )
+				//~ break;
+		//~ assert( i == parSetupStatus_.end() );
+		//~ 
+		//~ parSetupCallingNode_ = UINT_MAX;
+		//~ parSetupStatus_.clear();
+	//~ }
+//~ }
+//~ 
+//~ /**
+ //~ * Flag: true till . Used in .
+ //~ */
+//~ bool Shell::isParSetupRunning()
+//~ {
+	//~ return ( parSetupNumPending_ > 0 );
+//~ }
 
 /**
  * Static function. True till simulator quits.

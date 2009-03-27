@@ -298,10 +298,10 @@ class ProxyElement: public Element
 		// Functions for the copy operation. All 5 are virtual, and 
 		// none should be coming to the Proxy.
 		///////////////////////////////////////////////////////////////
-		Element* copy( Element* parent, const string& newName ) const {
+		Element* copy( Element* parent, const string& newName, Id id = Id() ) const {
 			return 0;
 		}
-		Element* copyIntoArray( Id parent, const string& newName, int n ) const {
+		Element* copyIntoArray( Id parent, const string& newName, int n, Id id = Id() ) const {
 			return 0;
 		}
 
@@ -310,11 +310,11 @@ class ProxyElement: public Element
 		}
 
 		Element* innerDeepCopy(
-					map< const Element*, Element* >& tree ) const {
+					map< const Element*, Element* >& tree, Id id ) const {
 			return 0;
 		}
 		Element* innerDeepCopy(
-					map< const Element*, Element* >& tree, int n ) const {
+					map< const Element*, Element* >& tree, int n, Id id ) const {
 			return 0;
 		}
 		
@@ -341,10 +341,10 @@ class ProxyElement: public Element
 		}
 
 	protected:
-		Element* innerCopy() const {
+		Element* innerCopy( Id id ) const {
 			return 0;
 		}
-		Element* innerCopy(int n) const {
+		Element* innerCopy( int n, Id id ) const {
 			return 0;
 		}
 
