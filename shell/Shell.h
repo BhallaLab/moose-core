@@ -172,10 +172,10 @@ class Shell
 ////////////////////////////////////////////////////////////////////
 // Id management
 ////////////////////////////////////////////////////////////////////
-	static unsigned int regularizeScratch( unsigned int size );
-	static void handleRequestMainId( const Conn* c,
-		unsigned int size, unsigned int node, unsigned int requestId );
-	static void handleReturnMainId( const Conn* c,
+	static unsigned int newIdBlock( unsigned int size );
+	static void handleRequestNewIdBlock( const Conn* c,
+		unsigned int size, unsigned int requestId );
+	static void handleReturnNewIdBlock( const Conn* c,
 		unsigned int value, unsigned int requestId );
 
 ////////////////////////////////////////////////////////////////////
@@ -200,24 +200,28 @@ class Shell
 		static void handleReturnLe( const Conn* c,
 			vector< Nid > found, unsigned int requestId );
 
-		bool create( const string& type, const string& name,
+		Element* create( const string& type, const string& name,
 						Id parent, Id id );
-		bool createArray( const string& type, const string& name,
+		Element* createArray( const string& type, const string& name,
 						Id parent, Id id, int n );
 		void destroy( Id victim );
 
 		/**
 		 * This function creates an object, generating its
 		 * own Id. Node argument tells it which node to put it on,
-		 * but if this is -ve then the placement is left to the 
+		 * but if this is Id::UnknownNode then the placement is left to the 
 		 * system balancing algorithm.
 		 */
 		static void staticCreate( const Conn*, string type,
-						string name, int node, Id parent );
+						string name, unsigned int node, Id parent );
 
 		// static void staticCreateArray1( const Conn*, string type, string name, Id parent, vector <double> parameter );
 		static void staticCreateArray( const Conn*, string type,
 						string name, Id parent, vector <double> parameter );
+
+		static Element* createGlobal(
+						const string& type, const string& name, Id parent, Id id );
+
 		static void planarconnect( const Conn* c, string source, string dest, double probability);
 		static void planardelay(const Conn& c, string source, string destination, vector <double> parameter);
 		static void planarweight(const Conn& c, string source, string  destination, vector <double> parameter);
@@ -440,14 +444,17 @@ class Shell
 		 * This function does the actual node-local array copy.
 		 */
 		static Element* localCopyIntoArray( const Conn* c, 
-			Id src, Id parent, string name, vector <double> parameter );
+			Id src, Id parent, string name,
+			vector <double> parameter, Id child = Id() );
 
-		/**  
-		 * Handles a copy on a local node. If the Id is defined, then it 
-		 * redefines the entire list. Otherwise, it leaves things on the
-		 * scratchIds as default. At some point this needs to be upgraded
-		 * to return the created id to the master node.
-		 */  
+		/**
+		 * Handles a copy on a local node. If the Id is defined, then it assigns
+		 * the Id to the newly created copy. Otherwise an Id is generated
+		 * locally from a block of Ids allocated to this node.
+		 * 
+		 * At some point this needs to be upgraded to return the created id to
+		 * the master node.
+		 */
 		static void parCopy( const Conn* c, Nid src, Nid parent, 
 			string name, Nid kid );
 
@@ -637,6 +644,26 @@ class Shell
 		unsigned int numPendingOffNode( unsigned int rid );
 
 		/**
+		 * 
+		 */
+		static void parSetupBegin( unsigned int callingNode );
+
+		/**
+		 * 
+		 */
+		static void parSetupEnd( unsigned int pollingNode );
+
+		/**
+		 * 
+		 */
+		static void handleParSetupEnd( const Conn* c, unsigned int callingNode );
+
+		/**
+		 * Flag: true till . Used in .
+		 */
+		static bool isParSetupRunning();
+
+		/**
 		 * Flag: true till simulation quits. Used in the main loop.
 		 */
 		static bool running();
@@ -688,6 +715,15 @@ class Shell
 
 		/// Number of requests allowed for off-node data transfer.
 		static const unsigned int maxNumOffNodeRequests;
+
+		// Flag
+		static unsigned int parSetupNumPending_;
+
+		// Flag
+		static unsigned int parSetupCallingNode_;
+
+		// Flag
+		static vector< bool > parSetupStatus_;
 
 		// Flag for main loop of simulator. When it becomes false,
 		// the simulator will exit.
