@@ -34,14 +34,14 @@ class SimpleElement: public Element
 		);
 
 		/**
-		 * Copies over the name of the SimpleElement, and assigns a
-		 * scratch id.
+		 * Copies over the name of the SimpleElement, and assigns the
+		 * given id.
 		 * Does not copy the data or the Finfos.
 		 * Those are done in the 'innerCopy'
 		 * The messages are still more complicated and are done
 		 * in other stages of the Copy command.
 		 */
-		SimpleElement( const SimpleElement* orig );
+		SimpleElement( const SimpleElement* orig, Id id = Id::newId() );
 
 		/// This cleans up the data_ and finfo_ if needed.
 		~SimpleElement();
@@ -253,15 +253,17 @@ class SimpleElement: public Element
 		///////////////////////////////////////////////////////////////
 		// Functions for the copy operation. All 5 are virtual
 		///////////////////////////////////////////////////////////////
-		Element* copy( Element* parent, const string& newName ) const;
-		Element* copyIntoArray( Id parent, const string& newName, int n ) const;
+		Element* copy(
+			Element* parent, const string& newName, Id id = Id() ) const;
+		Element* copyIntoArray(
+			Id parent, const string& newName, int n, Id id = Id() ) const;
 		bool isDescendant( const Element* ancestor ) const;
 
 		Element* innerDeepCopy(
-						map< const Element*, Element* >& tree ) const;
+						map< const Element*, Element* >& tree, Id id ) const;
 		Element* innerDeepCopy(
-						map< const Element*, Element* >& tree, int n ) const;
-		
+						map< const Element*, Element* >& tree, int n, Id id ) const;
+
 		/*
 		void replaceCopyPointers(
 					map< const Element*, Element* >& tree,
@@ -290,8 +292,8 @@ class SimpleElement: public Element
 
 		// bool innerCopyMsg( const Conn* c, const Element* orig, Element* dup );
 	protected:
-		Element* innerCopy() const;
-		Element* innerCopy(int n) const;
+		Element* innerCopy( Id id ) const;
+		Element* innerCopy( int n, Id id) const;
 
 	private:
 		/**
