@@ -44,7 +44,9 @@ class ArrayElement: public Element
 		 * in other stages of the Copy command.
 		 */
 		 
-		ArrayElement( const std::string& name, 
+		ArrayElement(
+			Id id,
+			const std::string& name, 
 			const unsigned int numSrc,
 // 			const vector< Msg >& msg, 
 // 			const map< int, vector< ConnTainer* > >& dest,
@@ -54,7 +56,7 @@ class ArrayElement: public Element
 			size_t objectSize
 		);
 		
-		ArrayElement( const ArrayElement* orig );
+		ArrayElement( const ArrayElement* orig, Id id = Id() );
 
 		/// This cleans up the data_ and finfo_ if needed.
 		~ArrayElement();
@@ -259,14 +261,14 @@ class ArrayElement: public Element
 		///////////////////////////////////////////////////////////////
 		// Functions for the copy operation. All 5 are virtual
 		///////////////////////////////////////////////////////////////
-		Element* copy( Element* parent, const string& newName ) const{return 0;}
-		Element* copyIntoArray( Id parent, const string& newName, int n ) const{return 0;}
-		bool isDescendant( const Element* ancestor ) const{return 0;}
+		Element* copy( Element* parent, const string& newName, Id id = Id() ) const { return 0; }
+		Element* copyIntoArray( Id parent, const string& newName, int n, Id id = Id() ) const { return 0; }
+		bool isDescendant( const Element* ancestor ) const { return 0; }
 
 		Element* innerDeepCopy(
-						map< const Element*, Element* >& tree ) const{return 0;}
+						map< const Element*, Element* >& tree, Id id ) const { return 0; }
 		Element* innerDeepCopy(
-						map< const Element*, Element* >& tree, int n ) const{return 0;}
+						map< const Element*, Element* >& tree, int n, Id id ) const { return 0; }
 		
 		/*
 		void replaceCopyPointers(
@@ -332,8 +334,8 @@ class ArrayElement: public Element
 		}
 		
 	protected:
-		Element* innerCopy() const {return 0;}
-		Element* innerCopy(int n) const{return 0;}
+		Element* innerCopy( Id id ) const { return 0; }
+		Element* innerCopy( int n, Id id ) const { return 0; }
 
 	private:
 		/**

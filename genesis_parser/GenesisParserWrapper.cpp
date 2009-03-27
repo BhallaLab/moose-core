@@ -1764,9 +1764,9 @@ void GenesisParserWrapper::doShowMsg( int argc, const char** argv, Id s)
  * Return node.
  * Modify name to strip out node info.
  */
-int parseNodeNum( string& name )
+unsigned int parseNodeNum( string& name )
 {
-	int childNode = -1; // Tell the system to figure out child node.
+	unsigned int childNode = Id::UnknownNode; // Tell the system to figure out child node.
 	if ( name.rfind( "@" ) != string::npos ) {
 		string nodeNum = Shell::tail( name, "@" );
 		if ( nodeNum.length() > 0 ) {
@@ -1814,7 +1814,7 @@ void do_create( int argc, const char** const argv, Id s )
 		return;
 	}
 
-	int childNode = parseNodeNum( name );
+	unsigned int childNode = parseNodeNum( name );
 	/*
 	int childNode = -1; // Tell the system to figure out child node.
 	if ( name.rfind( "@" ) != string::npos ) {
@@ -4473,7 +4473,7 @@ void GenesisParserWrapper::unitTest()
 	gpAssert( "alias gf getfield", "" );
 	gpAssert( "alias", "gf\tgetfield shf\tshowfield " );
 	gpAssert( "alias gf", "getfield " );
-	gpAssert( "le /sched/cj", "t1 t0 " );
+	gpAssert( "le /sched/cj", "t0 t1 " );
 //	Autoscheduling causes solver to spawn here
 //	gpAssert( "setclock 1 0.1", "" );
 	// gpAssert( "le /sched/cj", "t0 t1 t2 t3 t4 t5 " );

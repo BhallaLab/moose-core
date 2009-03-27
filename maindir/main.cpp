@@ -31,14 +31,10 @@
 #include <readline/history.h>
 #endif //USE_READLINE
 
-extern void initMoose();
-extern void initSched();
-
-// Defined in mpiSetup.cpp
-extern unsigned int initMPI( int& argc, char**& argv );
-extern void initParSched();
+// Defined in init.cpp
+extern unsigned int init( int& argc, char**& argv );
 extern void terminateMPI( unsigned int myNode );
-extern void pollPostmaster();  // Defined in mpiSetup.cpp
+extern void pollPostmaster();
 extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 
 #ifdef DO_UNIT_TESTS
@@ -69,25 +65,10 @@ extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 
 int main(int argc, char** argv)
 {
-	unsigned int myNode = initMPI( argc, argv );
-
-	// TODO : check the repurcussions of MPI command line
-	ArgParser::parseArguments(argc, argv);
-
-	Property::initialize(ArgParser::getConfigFile(),Property::PROP_FORMAT);
-	PathUtility simpathHandler(ArgParser::getSimPath());
-	simpathHandler.addPath(Property::getProperty(Property::SIMPATH)); // merge the SIMPATH from command line and property file
-	Property::setProperty(Property::SIMPATH, simpathHandler.getAllPaths()); // put the updated path list in Property
-	cout << "SIMPATH = " << Property::getProperty(Property::SIMPATH) << endl;
-        
-	///////////////////////////////////////////////////////////////////
-	//	Initialization functions. Must be in this order.
-	///////////////////////////////////////////////////////////////////
-
-	initMoose();
-	initSched();
-	initParSched();
-        
+	init( argc, argv );
+	
+	unsigned int myNode = Shell::myNode();
+	
 #ifdef DO_UNIT_TESTS
 	if ( myNode == 0 )
 	{
@@ -146,7 +127,7 @@ int main(int argc, char** argv)
 		Id cj("/sched/cj");
 		Id t0("/sched/cj/t0");
 		Id t1("/sched/cj/t1");
-                
+		
 		// Doesn't do much. Just sets dt and stage, and cals reset.
 		if ( Shell::numNodes() == 1 )
 			setupDefaultSchedule( t0(), t1(), cj() );

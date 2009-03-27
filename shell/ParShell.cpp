@@ -65,10 +65,10 @@ static const Slot parCopyIntoArraySlot =
 static const Slot parUseClockSlot = 
 	initShellCinfo()->getSlot( "parallel.useClockSrc" );
 
-static const Slot requestMainIdSlot =
-	initShellCinfo()->getSlot( "parallel.requestMainIdSrc" );
-static const Slot returnMainIdSlot =
-	initShellCinfo()->getSlot( "parallel.returnMainIdSrc" );
+static const Slot requestIdBlockSlot =
+	initShellCinfo()->getSlot( "parallel.requestIdBlockSrc" );
+static const Slot returnIdBlockSlot =
+	initShellCinfo()->getSlot( "parallel.returnIdBlockSrc" );
 
 /**
  * Manages the setup of a message emanating from this postmaster to 
@@ -101,7 +101,7 @@ void printNodeInfo( const Conn* c )
 //////////////////////////////////////////////////////////////////////
 // Id management
 //////////////////////////////////////////////////////////////////////
-unsigned int Shell::regularizeScratch( unsigned int size )
+unsigned int Shell::newIdBlock( unsigned int size )
 {
 	assert( myNode() != 0 );
 	Eref ShellE = Id::shellId().eref();
@@ -112,25 +112,25 @@ unsigned int Shell::regularizeScratch( unsigned int size )
 	unsigned int base;
 	unsigned int requestId = 
 		openOffNodeValueRequest< unsigned int >( sh, &base, 1 );
-	sendTo3< unsigned int, unsigned int, unsigned int >(
-		ShellE, requestMainIdSlot, 0, size, myNode(), requestId
+	sendTo2< unsigned int, unsigned int >(
+		ShellE, requestIdBlockSlot, 0, size, requestId
 	);
 	unsigned int* temp = closeOffNodeValueRequest< unsigned int >( sh, requestId );
 	assert( &base == temp );
 	return base;
 }
 
-void Shell::handleRequestMainId( const Conn* c,
-	unsigned int size, unsigned int node, unsigned int requestId )
+void Shell::handleRequestNewIdBlock( const Conn* c,
+	unsigned int size, unsigned int requestId )
 {
 	assert( myNode() == 0 );
-	unsigned int base = Id::allotMainIdBlock( size, node );
+	unsigned int base = Id::newIdBlock( size );
 	sendBack2< unsigned int, unsigned int >(
-		c, returnMainIdSlot,
+		c, returnIdBlockSlot,
 		base, requestId );
 }
 
-void Shell::handleReturnMainId( const Conn* c,
+void Shell::handleReturnNewIdBlock( const Conn* c,
 	unsigned int value, unsigned int requestId )
 {
 	Shell* sh = static_cast< Shell* >( c->data() );
@@ -340,6 +340,8 @@ unsigned int Shell::getNumDestEntries( Nid dest )
 void Shell::addParallelSrc( const Conn* c,
 	Nid src, string srcField, Nid dest, string destField )
 {
+	assert( src.node() == myNode() );
+	
 	Shell* sh = static_cast< Shell* >( c->data() );
 	//unsigned int srcNode = sh->myNode_;
 	unsigned int destNode = dest.node();
@@ -526,12 +528,13 @@ void Shell::handleParTraversePathRequest( const Conn* c,
 {
 	assert( start == Id() || start == Id::shellId() );
 	Id ret = localTraversePath( start, names );
+/*
 	if( ret.isScratch() ) {
 		Element* e = ret();
 		Id::regularizeScratch();
 		ret = e->id();
 	}
-	
+*/
 	sendBack2< Nid, unsigned int >( c, returnParTraverseSlot,
 		ret, requestId );
 }
@@ -782,28 +785,27 @@ void Shell::copy( const Conn* c, Id src, Id parent, string name )
 }
 
 /**
- * Handles a copy on a local node. If the Id is defined, then it redefines
- * the entire list. Otherwise, it leaves things on the scratchIds as default
+ * Handles a copy on a local node. If the Id is defined, then it assigns the Id
+ * to the newly created copy. Otherwise an Id is generated locally from a
+ * block of Ids allocated to this node.
+ * 
  * At some point this needs to be upgraded to return the created id to
  * the master node.
  */
 void Shell::parCopy( const Conn* c, Nid src, Nid parent, 
 	string name, Nid kid )
 {
-	Id last = Id::nextScratchId();
-	Element* e = src()->copy( parent(), name );
-	assert ( e->id() == last );
-	if ( kid != Id() ) { // redefine the new scratch Ids, up to the latest.
-		Id::redefineScratchIds( last, kid );
-	}
+	if ( kid == Id() )
+		kid = Id::newId();
+	
+	src()->copy( parent(), name, kid );
 }
 
 /**
  * This function copies the prototype element in form of an array.
  * It is similar to copy() only that it creates an array of copies 
  * elements
-*/
-
+ */
 void Shell::copyIntoArray( const Conn* c, 
 				Id src, Id parent, string name, vector <double> parameter )
 {
@@ -894,20 +896,18 @@ void Shell::copyIntoArray( const Conn* c,
  * At some point this needs to be upgraded to return the created id to
  * the master node.
  * The nids vector is src, parent, child.
- * If the child nid == Id(), it tells the remote node to make the usual
- * scratchId.
+ * If the child nid == Id(), an Id is generated locally in the usual fashion.
  */
 void Shell::parCopyIntoArray( const Conn* c, vector< Nid > nids,
 	string name, vector< double > parameter )
 {
 	assert( nids.size() == 3 );
-	Id last = Id::nextScratchId();
-	Element* e = localCopyIntoArray( c, nids[0], nids[1], name, parameter );
-	// cout << "in Shell::parCopyIntoArray on node=" << myNode() << ", src=" << nids[0] << "." << nids[0].node() << ", dest = " << nids[1] << "." << nids[1].node() << ", child = " << nids[2] << "." << nids[2].node() << " name= " << name << ", last= " << last << ", e->name() = " << e->name() << ", e->id = " << e->id() << endl << flush;
-	assert ( e->id().id() == last.id() ); // Index will differ.
-	if ( nids[2] != Id() ) { // redefine the new scratch Ids, up to latest.
-		Id::redefineScratchIds( last, nids[2] );
-	}
+	
+	Id kid = nids[ 2 ];
+	if ( kid == Id() )
+		kid = Id::newId();
+	
+	localCopyIntoArray( c, nids[ 0 ], nids[ 1 ], name, parameter, kid );
 }
 
 ////////////////////////////////////////////////////////////////////
