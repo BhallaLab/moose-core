@@ -42,9 +42,9 @@ SimpleElement::SimpleElement(
 /**
  * Copies a SimpleElement. Does NOT copy data or messages.
  */
-SimpleElement::SimpleElement( const SimpleElement* orig )
-		: Element( Id::scratchId() ),
-		name_( orig->name_ ), 
+SimpleElement::SimpleElement( const SimpleElement* orig, Id id )
+		: Element( id ),
+		name_( orig->name_ ),
 		finfo_( 1 ),
 		data_( 0 ),
 		msg_( orig->cinfo()->numSrc() )

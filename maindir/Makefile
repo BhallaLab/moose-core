@@ -19,7 +19,6 @@ OBJ = \
 	nonblock.o \
 	init.o \
 	initCinfos.o \
-	mpiSetup.o \
 	MuMPI.o
 
 HEADERS = \
@@ -32,6 +31,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 MuMPI.o:	MuMPI.h
+init.o:	init.h
 
 # Now CXX value is decided in top-level Makefile
 #ifneq (,$(findstring DUSE_MPI,$(CXXFLAGS)))

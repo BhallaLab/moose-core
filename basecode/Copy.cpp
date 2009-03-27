@@ -48,10 +48,10 @@ bool SimpleElement::isDescendant( const Element* ancestor ) const
  * The returned Element is dangling in memory: No parent or child.
  */
 
-Element* SimpleElement::innerCopy() const
+Element* SimpleElement::innerCopy( Id id ) const
 {
-	SimpleElement* ret = new SimpleElement( this );
-	
+	SimpleElement* ret = new SimpleElement( this, id );
+
 	assert( finfo_.size() > 0 );
 	assert( dynamic_cast< ThisFinfo* >( finfo_[0] ) != 0 );
 
@@ -73,12 +73,12 @@ Element* SimpleElement::innerCopy() const
 	return ret;
 }
 
-Element* SimpleElement::innerCopy(int n) const
+Element* SimpleElement::innerCopy( int n, Id id ) const
 {	
 	assert( finfo_.size() > 0 );
 	assert( dynamic_cast< ThisFinfo* >( finfo_[0] ) != 0 );
 	void *data = finfo_[0]->ftype()->copyIntoArray( data_, 1, n );
-	ArrayElement* ret = new ArrayElement( name_, cinfo()->numSrc(), /*msg_, dest_,*/ finfo_, data, n, cinfo()->size());
+	ArrayElement* ret = new ArrayElement( id, name_, cinfo()->numSrc(), /*msg_, dest_,*/ finfo_, data, n, cinfo()->size());
 	for ( unsigned int i = 1; i < finfo_.size(); i++ ) {
 		Finfo* temp = finfo_[i]->copy();
 		assert( temp != 0 );
@@ -104,14 +104,14 @@ Element* SimpleElement::innerCopy(int n) const
  * but later clever things are done with the messaging.
  */
 Element* SimpleElement::innerDeepCopy(
-	map< const Element*, Element* >& tree ) const
+	map< const Element*, Element* >& tree, Id id ) const
 {
 	static unsigned int childSrcMsg = 
 		initNeutralCinfo()->getSlot( "childSrc" ).msg();
 
 	assert ( childSrcMsg == 0 );
 
-	Element* duplicate = innerCopy();
+	Element* duplicate = innerCopy( id );
 	tree[ this ] = duplicate;
 
 	const Msg* childMsg = msg( childSrcMsg );
@@ -134,20 +134,20 @@ Element* SimpleElement::innerDeepCopy(
 		if ( tree.find( tgt ) != tree.end() )
 			cout << "Warning: SimpleElement::innerDeepCopy: Loop in element tree at " << tgt->name() << endl;
 		else 
-			tgt->innerDeepCopy( tree );
+			tgt->innerDeepCopy( tree, Id::newId() );
 	}
 	return duplicate;
 }
 
 Element* SimpleElement::innerDeepCopy(
-	map< const Element*, Element* >& tree, int n ) const
+	map< const Element*, Element* >& tree, int n, Id id ) const
 {
 	static unsigned int childSrcMsg = 
 		initNeutralCinfo()->getSlot( "childSrc" ).msg();
 
 	assert ( childSrcMsg == 0 );
 
-	Element* duplicate = innerCopy(n);
+	Element* duplicate = innerCopy( n, id );
 	tree[ this ] = duplicate;
 
 	const Msg* childMsg = msg( childSrcMsg );
@@ -170,7 +170,7 @@ Element* SimpleElement::innerDeepCopy(
 		if ( tree.find( tgt ) != tree.end() )
 			cout << "Warning: SimpleElement::innerDeepCopy: Loop in element tree at " << tgt->name() << endl;
 		else 
-			tgt->innerDeepCopy( tree, n );
+			tgt->innerDeepCopy( tree, n, Id::newId() );
 	}
 	return duplicate;
 }
@@ -301,6 +301,9 @@ void SimpleElement::copyMessages( Element* dup,
  * It renames the copied tree base if the newName is not empty.
  * It first checks that the parent does not already have a child
  * of the target name.
+ * If an Id is given, it is assigned to the newly created copy.
+ * Otherwise (if the last argument is skipped), an id is generated locally from
+ * the block of Ids allocated to this node.
  * It is non-recursive but calls lots recursive functions.
  *
  * A special case happens if one of the source elements in the tree
@@ -318,9 +321,8 @@ void SimpleElement::copyMessages( Element* dup,
  * or even worse, copies of element trees that span nodes. For now
  * it is single-node stuff.
  */
-
-Element* SimpleElement::copy( Element* parent, const string& newName )
-		const
+Element* SimpleElement::copy(
+	Element* parent, const string& newName, Id id ) const
 {
 	// Phase 0: Set up and check stuff for the copy.
 	static const Element* library = Id( "/library" )();
@@ -356,7 +358,9 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 
 	// vector< pair< Element*, unsigned int > > delConns;
 
-	Element* child = innerDeepCopy( origDup );
+	if ( id == Id() )
+		id = Id::newId();
+	Element* child = innerDeepCopy( origDup, id );
 	child->setName( nm );
 
 	/*
@@ -409,8 +413,8 @@ Element* SimpleElement::copy( Element* parent, const string& newName )
 	return child;
 }
 
-Element* SimpleElement::copyIntoArray( Id parent, const string& newName, int n )
-		const
+Element* SimpleElement::copyIntoArray(
+	Id parent, const string& newName, int n, Id id ) const
 {
 	static const Element* library = Id( "/library" )();
 	static const Element* proto = Id( "/proto" )();
@@ -441,7 +445,9 @@ Element* SimpleElement::copyIntoArray( Id parent, const string& newName, int n )
 
 	// vector< pair< Element*, unsigned int > > delConns;
 
-	Element* child = innerDeepCopy( origDup, n );
+	if ( id == Id() )
+		id = Id::newId();
+	Element* child = innerDeepCopy( origDup, n, id );
 	child->setName( nm );
 	
 	

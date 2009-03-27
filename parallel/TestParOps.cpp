@@ -71,7 +71,7 @@ Id testParCreate( vector< Id >& testIds )
 		ASSERT( libid.good(), "create libkids" );
 		ASSERT( libid.isGlobal(), "create libkids" );
 		SetConn c( shellE );
-		Shell::staticCreate( &c, "Neutral", "foo", -1, libid );
+		Shell::staticCreate( &c, "Neutral", "foo", Id::UnknownNode, libid );
 	}
 	MuMPI::INTRA_COMM().Barrier();
 	pollPostmaster(); // There is a barrier in the polling operation itself
@@ -142,7 +142,7 @@ void testParCopy()
 		Id libid = Id::localId( "/library" ); // a global
 		ASSERT( libid.good(), "create libkids" );
 		ASSERT( libid.isGlobal(), "create libkids" );
-		Shell::staticCreate( &c, "Neutral", "orig", -1, libid );
+		Shell::staticCreate( &c, "Neutral", "orig", Id::UnknownNode, libid );
 		Id origId = Id::localId( "/library/orig" );
 		ASSERT( origId != Id(), "Testing copy" );
 		Shell::copy( &c, origId, libid, "dup" );
@@ -282,7 +282,7 @@ void testParSet( vector< Id >& testIds )
 		ASSERT( libid.good(), "create libkids" );
 		ASSERT( libid.isGlobal(), "create libkids" );
 		SetConn c( shellE );
-		Shell::staticCreate( &c, "Neutral", "foo", -1, libid );
+		Shell::staticCreate( &c, "Neutral", "foo", Id::UnknownNode, libid );
 	}
 	
 	MuMPI::INTRA_COMM().Barrier();

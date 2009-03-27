@@ -17,13 +17,13 @@
 
 const unsigned int Id::BadIndex = UINT_MAX;
 const unsigned int Id::AnyIndex = UINT_MAX - 1;
-const unsigned int Id::GlobalNode = UINT_MAX - 1;
 
-// using UINT_MAX-2 locally for no index in wildcard. 
-const unsigned int BAD_ID = ~0;
-const unsigned int MAX_ID = 1000000;
+const unsigned int BAD_ID = UINT_MAX;
+// const unsigned int MAX_ID = 1000000;
 
-
+const unsigned int Id::BadNode = UINT_MAX;
+const unsigned int Id::UnknownNode = UINT_MAX - 1;
+const unsigned int Id::GlobalNode = UINT_MAX - 2;
 
 //////////////////////////////////////////////////////////////
 //	Id creation
@@ -61,9 +61,15 @@ Id Id::childId( Id parent )
 }
 
 // static func
-Id Id::scratchId()
+Id Id::newId()
 {
-	return Id( manager().scratchId() );
+	return Id( manager().newId() );
+}
+
+// static func
+Id Id::initId()
+{
+	return Id( manager().initId() );
 }
 
 // static func
@@ -84,6 +90,15 @@ Id Id::postId( unsigned int node )
 	return Id( 2, node );
 }
 
+// static func
+Id Id::globalId()
+{
+	assert( Shell::myNode() == 0 );
+	Id id = newId();
+	id.setGlobal();
+	return id;
+}
+
 /**
  * Static func to extract an id from a string. We need to accept ids
  * out of the existing range, but it would be nice to have a heuristic
@@ -102,27 +117,9 @@ Id Id::assignIndex( unsigned int index ) const
 	return i;
 }
 
-// Static function
-Id Id::nextScratchId() 
+unsigned int Id::newIdBlock( unsigned int size )
 {
-	return Id( manager().scratchIndex() );
-}
-
-// static function
-bool Id::redefineScratchIds( Id last, Nid base )
-{
-	return manager().redefineScratchIds( last.id(), base.id(), 
-		base.node() );
-}
-
-void Id::regularizeScratch()
-{
-	manager().regularizeScratch();
-}
-
-unsigned int Id::allotMainIdBlock( unsigned int size, unsigned int node )
-{
-	return manager().allotMainIdBlock( size, node );
+	return manager().newIdBlock( size );
 }
 
 //////////////////////////////////////////////////////////////
@@ -234,11 +231,6 @@ bool Id::zero() const
 bool Id::outOfRange() const
 {
 	return manager().outOfRange( id_ );
-}
-
-bool Id::isScratch() const
-{
-	return manager().isScratch( id_ );
 }
 
 bool Id::isProxy() const
