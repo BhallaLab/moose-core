@@ -91,22 +91,12 @@ class IdManager
 	public:
 		IdManager();
 
-		void setNodes( unsigned int myNode, unsigned int numNodes );
-
 		//////////////////////////////////////////////////////////////////
 		// Id creation
 		//////////////////////////////////////////////////////////////////
-		/**
-		 * Allocates a new scratch id on the current node and returns it.
-		 */
-		unsigned int scratchId();
-		unsigned int myNode();
-		unsigned int numNodes();
+		unsigned int newId();
 
-		/**
-		 * Returns the upcoming scratch index. No allocation is done.
-		 */
-		unsigned int scratchIndex() const;
+		unsigned int initId();
 
 		/**
 		 * Generates an id for a child object, using parent id
@@ -131,13 +121,6 @@ class IdManager
  		*/
 		unsigned int makeIdOnNode( unsigned int childNode );
 
-		/**
-		 * Moves a set of scratchIds starting at last, to regular Ids
-		 * starting at base, on node 'node'
-		 */
-		bool redefineScratchIds( unsigned int last, 
-			unsigned int base, unsigned int node );
-		
 		//////////////////////////////////////////////////////////////////
 		// Id info
 		//////////////////////////////////////////////////////////////////
@@ -188,7 +171,7 @@ class IdManager
 		/**
 		 * Returns the most recently created id on current node
 		 */
-		unsigned int lastId();
+		unsigned int lastId() const;
 
 		/**
 		 * Tells us if specified index is out of range of the allocated
@@ -196,23 +179,7 @@ class IdManager
 		 */
 		bool outOfRange( unsigned int index ) const;
 
-		/**
-		 * True if specified index is for a scratch id
-		 */
-		bool isScratch( unsigned int index ) const;
-
-		/**
-		 * Returns local node
-		 */
-		// unsigned int myNode() const;
-
-		/**
-		 * This function moves all the scratch ids on this node onto
-		 * regular Ids, after consulting with the master node.
-		 */
-		void regularizeScratch();
-
-		unsigned int allotMainIdBlock( unsigned int size, unsigned int node );
+		unsigned int newIdBlock( unsigned int size );
 
 	private:
 		/**
@@ -243,30 +210,18 @@ class IdManager
 		 */
 		std::vector< Enode > elementList_;
 
-		//std::vector< Element* > post_;
+		unsigned int localIndex_;
+		unsigned int blockEnd_;
 
-		/**
-		 * Starting value for scratchIndex_. Values lesser than this are kept
-		 * for globals like root, shell and postmaster.
-		 */
-		unsigned int scratchBegin_;
-
-		/**
-		 * This keeps track of the # of scratch ids. Only on slave nodes.
-		 */
-		unsigned int scratchIndex_;
-
-		/**
-		 * This keeps tracks of the # of main ids. On all nodes.
-		 */
-		unsigned int mainIndex_;
+		unsigned int initIndex_;
 
 		/**
 		 * This keeps track of the last created object
 		 */
 		unsigned int lastId_;
 
-		static const unsigned int numScratch;
+		static const unsigned int initBlockEnd;
+
 		static const unsigned int blockSize;
 };
 

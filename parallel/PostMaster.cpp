@@ -404,8 +404,8 @@ void PostMaster::handleAsyncData()
 		if ( as.proxy() == Id::shellId() ) {
 			unsigned int size = sizeof( AsyncStruct ) + as.size();
 
-			vector< char > temp( data, data + size );
-			setupStack_.push_back( temp );
+			setupStack_.resize( setupStack_.size() + 1 );
+			setupStack_.back().assign( data, data + size );
 			data += size;
 		} else {
 			data += sizeof( AsyncStruct );
@@ -671,9 +671,10 @@ void* getAsyncParBuf( const Conn* c, unsigned int size )
  */
 void* PostMaster::innerGetAsyncParBuf( const Conn* c, unsigned int size )
 {
-	if ( size + sendBufPos_ > sendBuf_.size() ) {
+	unsigned int newPos = sendBufPos_ + sizeof( AsyncStruct) + size;
+	if ( newPos > sendBuf_.size() ) {
 		cout << "in getParBuf: Out of space in sendBuf_, need " <<
-			size + sendBufPos_ << " bytes\n";
+			newPos << " bytes\n";
 		// Do something clever here to send another installment
 		return 0;
 	}
@@ -689,7 +690,7 @@ void* PostMaster::innerGetAsyncParBuf( const Conn* c, unsigned int size )
 	char* sendBufPtr = &( sendBuf_[ sendBufPos_ ] );
 	*static_cast< AsyncStruct* >( static_cast< void* >( sendBufPtr ) ) = as;
 	sendBufPtr += sizeof( AsyncStruct );
-	sendBufPos_ += sizeof( AsyncStruct ) + size;
+	sendBufPos_ = newPos;
 	++numSendBufMsgs_;
 	return static_cast< void* >( sendBufPtr );
 }

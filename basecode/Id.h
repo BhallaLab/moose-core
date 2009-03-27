@@ -74,7 +74,7 @@ class Id
 		 * node for action.
 		 */
 		static Id childId( Id parent );
-		
+
 		/**
 		 * Returns a scratch id: one in the scratch range of ids,
 		 * used by local nodes if they do not expect it to be accessed
@@ -82,7 +82,11 @@ class Id
 		 * Id must never be saved or transmitted, because it may be
 		 * reassigned to the general Id range.
 		 */
-		static Id scratchId();
+		static Id scratchId() { return newId(); }
+
+		static Id newId();
+
+		static Id initId();
 
 		/**
  		* This variant of childId forces creation of object on specified 
@@ -104,6 +108,8 @@ class Id
 		 */
 		static Id postId( unsigned int node );
 
+		static Id globalId();
+
 		/**
 		 * This creates a new Id with the same element id but a new index
 		 */
@@ -115,27 +121,9 @@ class Id
 		 */
 
 		//////////////////////////////////////////////////////////////
-		//	Id management for updating values
+		//	Multi-node Id management
 		//////////////////////////////////////////////////////////////
-
-		/**
-		 * Returns the most recently created ScratchId + 1. Used as a
-		 * starting point for the redefinition of scratch Ids. Does
-		 * not allocate any new Ids.
-		 */
-		static Id nextScratchId();
-
-		/**
-		 * Shifts a block of scratchIds, from 'last' to the most recent,
-		 * to a set of regular Ids beginning at base. 
-		 * The base must be an Nid because we don't yet have its node#
-		 * recorded on this node. Node might be global.
-		 */
-		static bool redefineScratchIds( Id last, Nid base );
-
-		static void regularizeScratch();
-
-		static unsigned int allotMainIdBlock( unsigned int size, unsigned int node );
+		static unsigned int newIdBlock( unsigned int size );
 
 		//////////////////////////////////////////////////////////////
 		//	Id info
@@ -281,6 +269,9 @@ class Id
 		bool setElement( Element* e );
 		static const unsigned int AnyIndex;
 		static const unsigned int BadIndex;
+
+		static const unsigned int BadNode;
+		static const unsigned int UnknownNode;
 		static const unsigned int GlobalNode;
 
 		/**
