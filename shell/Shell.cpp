@@ -547,13 +547,13 @@ const Cinfo* initShellCinfo()
 		///////////////////////////////////////////////////////////////
 		// Setup
 		///////////////////////////////////////////////////////////////
-		new SrcFinfo( "parSetupEndSrc",
-			Ftype1< unsigned int >::global(),
-			"" ),
-		new DestFinfo( "parSetupEndSrc",
-			Ftype1< unsigned int >::global(),
-			RFCAST( &Shell::handleParSetupEnd ),
-			"" ),
+		//~ new SrcFinfo( "parSetupEndSrc",
+			//~ Ftype1< unsigned int >::global(),
+			//~ "" ),
+		//~ new DestFinfo( "parSetupEndSrc",
+			//~ Ftype1< unsigned int >::global(),
+			//~ RFCAST( &Shell::handleParSetupEnd ),
+			//~ "" ),
 		
 		///////////////////////////////////////////////////////////////
 		// Id management
