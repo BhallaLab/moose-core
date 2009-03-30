@@ -26,10 +26,16 @@ class SbmlWriter
 		string parmUnit(double rct_order);
 		double transformUnits(double mvalue,UnitDefinition * ud);
 		string nameString(string str);
+		string changeName(string parent, string child);
 		void printParameters(KineticLaw* kl,string k,double kvalue,string unit);
-		void printReactants(Reaction* reaction,vector< Eref > enz,ostringstream& rlaw);
-		void printProducts(Reaction* reaction,vector< Eref > cplx,ostringstream& rlaw);
+		void printReactants(Reaction* reaction,vector< Eref > sub,ostringstream& rlaw,string parentCompt);
+		void printProducts(Reaction* reaction,vector< Eref > cplx,ostringstream& rlaw,string parentCompt);
 		void printEnzymes(vector< Id > enzms,string parentCompt,double size,Model* model);
+		void getEnzyme(vector< Eref > enz,vector <string> &enzsName);
+		void getSubstrate(vector< Eref > sub,vector <string> &subsName);
+		void getComplex(vector< Eref > cplx,vector <string> &cpxName);
+		void getProduct(vector< Eref > prd,vector <string> &prdsName);
+		
 };
 extern const Cinfo* initKinComptCinfo();
 extern const Cinfo* initMoleculeCinfo();
