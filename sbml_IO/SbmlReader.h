@@ -19,14 +19,15 @@ class SbmlReader
 		SbmlReader() {;}
 		~SbmlReader() {;}
 		void  read(string filename,Id location);
-		void  createCompartment(Model* model,Id location);
-		void  createMolecule(Model* model,map<string,Id> &);
-		void  printParameter(Model* model);
-		void  printUnit(Model* model);
-		void  createReaction(Model* model,map<string,Id> &);
+		void  createCompartment(Id location);
+		void  createMolecule(map<string,Id> &);
+		void  printParameter();
+		//void  printUnit(Model* model);
+		void  createReaction(map<string,Id> &);
 		
 				
 	private:
+		Model* model_;		
 		SBMLDocument* document_;
 		SBMLReader reader_;
 		Element* comptEl_;
@@ -38,6 +39,7 @@ class SbmlReader
 		string printAnnotation(SBase *sb,map<string,EnzymeInfo> &);
 		//string printNotes(SBase *sb);
 		void setupEnzymaticReaction(const EnzymeInfo & einfo);
+		void setupMMEnzymeReaction(Reaction * reac);
 		struct EnzymeInfo
 		{
 			Id enzyme;
