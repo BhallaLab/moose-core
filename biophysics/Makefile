@@ -33,6 +33,7 @@ OBJ = \
 	DifShell.o	\
 	TauPump.o	\
 	GHK.o \
+	IntFire.o	\
 
 
 HEADERS = \
@@ -62,6 +63,7 @@ BinSynchan.o:	BinSynchan.h BinSynInfo.h ../randnum/BinomialRng.h
 DifShell.o: DifShell.h
 TauPump.o: TauPump.h
 GHK.o: GHK.h ../basecode/Ftype2.h
+IntFire.o: IntFire.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I../basecode -I../randnum -I.. $< -c
