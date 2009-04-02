@@ -2098,12 +2098,20 @@ void Shell::createGateMaster( const Conn* c, Id chan, string gateName )
 	Id A = Id::newId();
 	Id B = Id::newId();
 	
-	set< string >( chan(), "createGate", gateName, gate, A, B );
-	
 	if ( chan.isGlobal() ) {
+		/* 
+		 * Necessary to set the gate Id as global, before the gate is created
+		 * because the gate uses this information to decide whether it should
+		 * create its interpols.
+		 */
 		gate.setGlobal();
 		A.setGlobal();
 		B.setGlobal();
+	}
+	
+	set< string >( chan(), "createGate", gateName, gate, A, B );
+	
+	if ( chan.isGlobal() ) {
 #ifdef USE_MPI
 		send5< Id, string, Id, Id, Id >(
 			c->target(), createGateSlot,
@@ -2120,11 +2128,16 @@ void Shell::createGateWorker(
 	assert( myNode() != 0 );
 	assert( chan.good() && chan.isGlobal() );
 	
-	set< string >( chan(), "createGate", gateName, gate, A, B );
-	
+	/* 
+	 * Necessary to set the gate Id as global, before the gate is created
+	 * because the gate uses this information to decide whether it should
+	 * create its interpols.
+	 */
 	gate.setGlobal();
 	A.setGlobal();
 	B.setGlobal();
+	
+	set< string >( chan(), "createGate", gateName, gate, A, B );
 }
 
 
