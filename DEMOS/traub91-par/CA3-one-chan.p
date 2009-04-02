@@ -43,7 +43,7 @@ apical_12	apical_13		-120		0		0		5.78
 apical_11	apical_12		-120		0		0		5.78	
 apical_10	apical_11		-120		0		0		5.78	
 
-soma	apical_10				-125		0		0		8.46
+soma	apical_10				-125		0		0		8.46	 Ca_conc -7.769e12 Ca 120
 
 basal_8		soma					-110		0		0		4.84	
 basal_7		basal_8				-110		0		0		4.84	

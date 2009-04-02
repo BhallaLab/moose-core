@@ -28,24 +28,26 @@ float ECA = 0.140 + EREST_ACT // 0.080
 include traub91proto.g
 if ( 1 )
 ce /library
-	make_Na
+//	make_Na
 	make_Ca
-	make_K_DR
-	make_K_AHP
-	make_K_C
-	make_K_A
+//	make_K_DR
+//	make_K_AHP
+//	make_K_C
+//	make_K_A
 	make_Ca_conc
 ce /
 end
 //=====================================
 //  Create cells
 //=====================================
-if ( 1 )
+if ( 0 )
 	readcell CA3.p /cell0
 	readcell CA3.p /cell1@1
 else
-	readcell CA3-passive.p /cell0
-	readcell CA3-passive.p /cell1@1
+//	readcell CA3-passive.p /cell0
+//	readcell CA3-passive.p /cell1@1
+	readcell CA3-one-chan.p /cell0
+	readcell CA3-one-chan.p /cell1@1
 end
 
 ////////////////////////////////////////////////////////////////////////////////
