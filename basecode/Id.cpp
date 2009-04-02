@@ -55,6 +55,12 @@ Id Id::localId( const string& path, const string& separator )
 }
 
 // static func
+void Id::dumpState( ostream& stream )
+{
+	manager().dumpState( stream );
+}
+
+// static func
 Id Id::childId( Id parent )
 {
 	return Id( manager().childId( parent.id_ ) );
@@ -117,9 +123,9 @@ Id Id::assignIndex( unsigned int index ) const
 	return i;
 }
 
-unsigned int Id::newIdBlock( unsigned int size )
+unsigned int Id::newIdBlock( unsigned int size, unsigned int node )
 {
-	return manager().newIdBlock( size );
+	return manager().newIdBlock( size, node );
 }
 
 //////////////////////////////////////////////////////////////

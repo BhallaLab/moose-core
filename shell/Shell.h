@@ -174,7 +174,7 @@ class Shell
 ////////////////////////////////////////////////////////////////////
 	static unsigned int newIdBlock( unsigned int size );
 	static void handleRequestNewIdBlock( const Conn* c,
-		unsigned int size, unsigned int requestId );
+		unsigned int size, unsigned int node, unsigned int requestId );
 	static void handleReturnNewIdBlock( const Conn* c,
 		unsigned int value, unsigned int requestId );
 
@@ -219,7 +219,7 @@ class Shell
 		static void staticCreateArray( const Conn*, string type,
 						string name, Id parent, vector <double> parameter );
 
-		static Element* createGlobal(
+		static Element* createGlobal( Eref ShellE,
 						const string& type, const string& name, Id parent, Id id );
 
 		static void planarconnect( const Conn* c, string source, string dest, double probability);
@@ -526,14 +526,23 @@ class Shell
 		//////////////////////////////////////////////////////////
 		static void tabop( const Conn* c, Id tab, char op, double min, 
 			double max );
-		static void file2tab( const Conn& c, 
+		static void file2tab( const Conn* c, 
 				Id id, string filename, unsigned int skiplines );
 		//////////////////////////////////////////////////////////
 		// sbml functions
 		//////////////////////////////////////////////////////////
 		static void readSbml( const Conn* c, string filename, string modelpath, int childnode );
 		static void writeSbml( const Conn* c, string filename, string modelpath, int childnode );
-			/*
+
+		//////////////////////////////////////////////////////////
+		// functions to create gates on a given channel
+		//////////////////////////////////////////////////////////
+		static void createGateMaster( const Conn* c, Id chan, string gateName );
+		static void createGateWorker(
+			const Conn* c,
+			Id chan, string gateName, Id gate, Id A, Id B );
+
+		/*
 		void add( const string& src, const string& dest );
 		void drop( const string& src, const string& dest );
 		void set( const string& field, const string& value );
@@ -644,26 +653,6 @@ class Shell
 		unsigned int numPendingOffNode( unsigned int rid );
 
 		/**
-		 * 
-		 */
-		static void parSetupBegin( unsigned int callingNode );
-
-		/**
-		 * 
-		 */
-		static void parSetupEnd( unsigned int pollingNode );
-
-		/**
-		 * 
-		 */
-		static void handleParSetupEnd( const Conn* c, unsigned int callingNode );
-
-		/**
-		 * Flag: true till . Used in .
-		 */
-		static bool isParSetupRunning();
-
-		/**
 		 * Flag: true till simulation quits. Used in the main loop.
 		 */
 		static bool running();
@@ -716,15 +705,6 @@ class Shell
 		/// Number of requests allowed for off-node data transfer.
 		static const unsigned int maxNumOffNodeRequests;
 
-		// Flag
-		static unsigned int parSetupNumPending_;
-
-		// Flag
-		static unsigned int parSetupCallingNode_;
-
-		// Flag
-		static vector< bool > parSetupStatus_;
-
 		// Flag for main loop of simulator. When it becomes false,
 		// the simulator will exit.
 		static bool running_;
@@ -738,7 +718,6 @@ class Shell
 		 * it is slow, and quite likely to give rise to race conditions.
 		 */
 		map< Id, Id > parMessagePending_;
-
 		
 		/////////////////////////////////////////////////////////////
 		// This set of definitions is to manage return values from other
