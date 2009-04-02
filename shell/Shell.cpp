@@ -35,9 +35,6 @@ extern void pollPostmaster(); // Defined in maindir/init.cpp
 unsigned int Shell::myNode_ = 0;
 unsigned int Shell::numNodes_ = 1;
 bool Shell::running_ = 1;
-unsigned int Shell::parSetupNumPending_ = 0;
-unsigned int Shell::parSetupCallingNode_ = UINT_MAX;
-vector< bool > Shell::parSetupStatus_( 0 );
 const unsigned int Shell::maxNumOffNodeRequests = 100;
 
 //////////////////////////////////////////////////////////////////////
@@ -260,12 +257,23 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "tabop",
 				Ftype4< Id, char, double, double >::global(),
 				RFCAST( &Shell::tabop ) ),
+		////////////////////////////////////////////////////////////
+		// SBML
+		////////////////////////////////////////////////////////////
 		new DestFinfo( "readsbml",
 				Ftype3< string, string, int >::global(),
 				RFCAST( &Shell::readSbml ) ),	
 		new DestFinfo( "writesbml",
 				Ftype3< string, string, int >::global(),
 				RFCAST( &Shell::writeSbml ) ),		
+		////////////////////////////////////////////////////////////
+		// Misc
+		////////////////////////////////////////////////////////////
+		new DestFinfo( "createGate", 
+			Ftype2< Id, string >::global(),
+			RFCAST( &Shell::createGateMaster ),
+			"Args: Channel id, gate type (X, Y or Z) "
+			"Request an HHChannel to create a gate on it." ),
 	};
 	static Finfo* serialShared[] =
 	{
@@ -545,28 +553,17 @@ const Cinfo* initShellCinfo()
 			RFCAST( &Shell::innerQuit ) ),
 		
 		///////////////////////////////////////////////////////////////
-		// Setup
-		///////////////////////////////////////////////////////////////
-		//~ new SrcFinfo( "parSetupEndSrc",
-			//~ Ftype1< unsigned int >::global(),
-			//~ "" ),
-		//~ new DestFinfo( "parSetupEndSrc",
-			//~ Ftype1< unsigned int >::global(),
-			//~ RFCAST( &Shell::handleParSetupEnd ),
-			//~ "" ),
-		
-		///////////////////////////////////////////////////////////////
 		// Id management
 		///////////////////////////////////////////////////////////////
 		new SrcFinfo( "requestIdBlockSrc",
-			Ftype2< unsigned int, unsigned int >::global(),
+			Ftype3< unsigned int, unsigned int, unsigned int >::global(),
 			"Here a slave node requests the master node for a block of main Ids that it can use locally."
-			"Args: size of block, request Id" ),
+			"Args: size of block, requesting node, request Id" ),
 		new DestFinfo( "requestIdBlock",
-			Ftype2< unsigned int, unsigned int >::global(),
+			Ftype3< unsigned int, unsigned int, unsigned int >::global(),
 			RFCAST( &Shell::handleRequestNewIdBlock ),
 			"Here the master node interceptes requests from slave nodes for regular Ids "
-			"Args: size of block, request Id " ),
+			"Args: size of block, requesting node, request Id " ),
 		new SrcFinfo( "returnIdBlockSrc",
 			Ftype2< unsigned int, unsigned int >::global(),
 			"Respond to requests from slave nodes for regular ids. "
@@ -576,6 +573,22 @@ const Cinfo* initShellCinfo()
 			RFCAST( &Shell::handleReturnNewIdBlock ),
 			"Receive vector of main Ids from master node "
 			"Args: Base id in alloted block, request Id " ),
+		
+		///////////////////////////////////////////////////////////////
+		// Misc
+		///////////////////////////////////////////////////////////////
+		new SrcFinfo( "createGateSrc",
+			Ftype5< Id, string, Id, Id, Id >::global(),
+			"Args: Gate type (X/Y/Z), HHChannel id, HHGate id, Interpol A id, Interpol B id. "
+			"This requests a global HHGate to create Interpols, with the given "
+			"ids. This is used when the gate is a global object, and so the "
+			"interpols need to be globals too. Comes in use in TABCREATE in the "
+			"parallel context." ),
+		new DestFinfo( "createGate",
+			Ftype5< Id, string, Id, Id, Id >::global(),
+			RFCAST( &Shell::createGateWorker ),
+			"Args: Gate type (X/Y/Z), HHChannel id, HHGate id, Interpol A id, Interpol B id. "
+			"Handles request sent from the createInterpolsSrc Finfo" ),
 	};
 #endif // USE_MPI
 
@@ -686,6 +699,8 @@ static const Slot pollSlot =
 	initShellCinfo()->getSlot( "pollSrc" );
 
 #ifdef USE_MPI
+static const Slot createGateSlot =
+	initShellCinfo()->getSlot( "parallel.createGateSrc" );
 static const Slot rCreateSlot =
 	initShellCinfo()->getSlot( "parallel.createSrc" );
 static const Slot rCreateArraySlot =
@@ -720,7 +735,7 @@ static const Slot parReschedSlot =
 
 static const Slot parReinitSlot =
 	initShellCinfo()->getSlot( "parallel.reinitSrc" );
-	
+
 static const Slot parStopSlot =
 	initShellCinfo()->getSlot( "parallel.stopSrc" );
 
@@ -732,9 +747,6 @@ static const Slot parSetClockSlot =
 
 static const Slot parQuitSlot =
 	initShellCinfo()->getSlot( "parallel.quitSrc" );
-
-static const Slot parSetupEndSlot =
-	initShellCinfo()->getSlot( "parallel.parSetupEndSrc" );
 
 #endif
 
@@ -1230,7 +1242,7 @@ void Shell::staticCreate( const Conn* c, string type,
 	if ( ( paNid.isGlobal() || paNid.node() == 0 || parent == Id() ) &&
 		( id.isGlobal() || id.node() == 0 ) ) { // Make it here.
 		if ( id.isGlobal() )
-			ret = createGlobal( type, name, parent, id );
+			ret = createGlobal( c->target(), type, name, parent, id );
 		else
 			ret = s->create( type, name, parent, id );
 
@@ -1248,10 +1260,19 @@ void Shell::staticCreate( const Conn* c, string type,
 		}
 #ifdef USE_MPI
 	} else { // Has to go off-node, to a single target node.
-		unsigned int targetNode = paNid.node();
-		if ( parent == Id() )
+		unsigned int targetNode;
+		if ( parent == Id() ) {
 			targetNode = id.node();
-		assert( targetNode != 0 );
+			assert( targetNode != 0 );
+		} else {
+			targetNode = paNid.node();
+			if ( targetNode == 0 ) {
+				cerr << "Error: Shell::staticCreate: Unable to create '"
+					<< name << "' on node " << id.node()
+					<< ". Parent is on node 0.\n";
+				return;
+			}
+		}
 		assert( targetNode < numNodes() );
 
 		sendTo4< string, string, Nid, Nid >( 
@@ -1264,7 +1285,7 @@ void Shell::staticCreate( const Conn* c, string type,
 
 // Static function
 Element* Shell::createGlobal(
-	const string& type, const string& name, Id parent, Id id )
+	Eref ShellE, const string& type, const string& name, Id parent, Id id )
 {
 	assert( myNode() == 0 );
 	assert( id.isGlobal() );
@@ -1998,7 +2019,7 @@ void Shell::setVecField( const Conn* c,
 /**
  * This function handles request to load a file into an Interpol object
  */
-void Shell::file2tab( const Conn& c, 
+void Shell::file2tab( const Conn* c, 
 				Id id, string filename, unsigned int skiplines )
 {
 	assert( id.good() );
@@ -2067,6 +2088,45 @@ void Shell::writeSbml( const Conn* c, string filename, string location, int chil
 	cerr << "Error: writeSbml: This MOOSE is not built with SBML compatibility.\n";
 #endif
 }
+
+// Static function
+void Shell::createGateMaster( const Conn* c, Id chan, string gateName )
+{
+	assert( myNode() == 0 );
+	
+	Id gate = Id::newId();
+	Id A = Id::newId();
+	Id B = Id::newId();
+	
+	set< string >( chan(), "createGate", gateName, gate, A, B );
+	
+	if ( chan.isGlobal() ) {
+		gate.setGlobal();
+		A.setGlobal();
+		B.setGlobal();
+#ifdef USE_MPI
+		send5< Id, string, Id, Id, Id >(
+			c->target(), createGateSlot,
+			chan, gateName, gate, A, B );
+#endif
+	}
+}
+
+// Static function
+void Shell::createGateWorker(
+	const Conn* c,
+	Id chan, string gateName, Id gate, Id A, Id B )
+{
+	assert( myNode() != 0 );
+	assert( chan.good() && chan.isGlobal() );
+	
+	set< string >( chan(), "createGate", gateName, gate, A, B );
+	
+	gate.setGlobal();
+	A.setGlobal();
+	B.setGlobal();
+}
+
 
 // Static function
 /**
@@ -2564,7 +2624,7 @@ unsigned int Shell::newIdBlock( unsigned int size )
 }
 
 void Shell::handleRequestNewIdBlock( const Conn* c,
-	unsigned int size, unsigned int requestId )
+	unsigned int size, unsigned int node, unsigned int requestId )
 { ; }
 
 void Shell::handleReturnNewIdBlock( const Conn* c,
@@ -3057,80 +3117,6 @@ void Shell::destroy( Id victim )
 
 	set( e, "destroy" );
 }
-
-//~ /**
- //~ * 
- //~ */
-//~ void Shell::parSetupBegin( unsigned int callingNode )
-//~ {
-	//~ assert( parSetupNumPending_ == 0 );
-	//~ assert( parSetupCallingNode_ == UINT_MAX );
-	//~ assert( parSetupStatus_.empty() );
-	//~ 
-	//~ parSetupCallingNode_ = callingNode;
-	//~ 
-	//~ if( callingNode == numNodes() ) {
-		//~ parSetupStatus_.resize( numNodes(), 1 );
-		//~ parSetupStatus_[ myNode() ] = 0;
-		//~ parSetupNumPending_ = numNodes() - 1;
-	//~ } else {
-		//~ parSetupNumPending_ = 1;
-	//~ }
-//~ }
-//~ 
-//~ /**
- //~ * 
- //~ */
-//~ void Shell::parSetupEnd( unsigned int pollingNode )
-//~ {
-	//~ Eref sh = Id::shellId().eref();
-	//~ 
-	//~ if ( pollingNode == numNodes() ) {
-		//~ send1< unsigned int >( sh, parSetupEndSlot, myNode() );
-	//~ } else {
-		//~ unsigned int target =
-			//~ pollingNode > myNode() ? pollingNode : pollingNode - 1;
-		//~ sendTo1< unsigned int >( sh, parSetupEndSlot, target, myNode() );
-	//~ }
-//~ }
-//~ 
-//~ /**
- //~ * 
- //~ */
-//~ void Shell::handleParSetupEnd( const Conn* c, unsigned int callingNode )
-//~ {
-	//~ assert( parSetupNumPending_ > 0 );
-	//~ parSetupNumPending_--;
-	//~ 
-	//~ if ( parSetupCallingNode_ == numNodes() ) {
-		//~ assert( callingNode < numNodes() );
-		//~ assert( parSetupStatus_.size() == numNodes() );
-		//~ assert( parSetupStatus_[ callingNode ] == 1 );
-		//~ 
-		//~ parSetupStatus_[ callingNode ] = 0;
-	//~ } else {
-		//~ assert( parSetupCallingNode_ == callingNode );
-	//~ }
-	//~ 
-	//~ if ( parSetupNumPending_ == 0 ) {
-		//~ vector< bool >::iterator i;
-		//~ for ( i = parSetupStatus_.begin(); i != parSetupStatus_.end(); i++ )
-			//~ if ( *i )
-				//~ break;
-		//~ assert( i == parSetupStatus_.end() );
-		//~ 
-		//~ parSetupCallingNode_ = UINT_MAX;
-		//~ parSetupStatus_.clear();
-	//~ }
-//~ }
-//~ 
-//~ /**
- //~ * Flag: true till . Used in .
- //~ */
-//~ bool Shell::isParSetupRunning()
-//~ {
-	//~ return ( parSetupNumPending_ > 0 );
-//~ }
 
 /**
  * Static function. True till simulator quits.
