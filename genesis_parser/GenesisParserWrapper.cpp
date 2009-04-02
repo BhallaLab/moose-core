@@ -216,10 +216,23 @@ const Cinfo* initGenesisParserCinfo()
 			Ftype1< string >::global() ),
 		new SrcFinfo( "tabop", 
 			Ftype4< Id, char, double, double >::global() ),
+		///////////////////////////////////////////////////////////////
+		// SBML
+		///////////////////////////////////////////////////////////////
 		new SrcFinfo( "readsbml", 
 			Ftype3< string, string, int >::global() ),
 		new SrcFinfo( "writesbml", 
 			Ftype3< string, string, int >::global() ),
+		///////////////////////////////////////////////////////////////
+		// Misc
+		///////////////////////////////////////////////////////////////
+		new SrcFinfo( "createGate", 
+			Ftype2< Id, string >::global(),
+			"Args: HHGate id, Interpol A id, Interpol B id. "
+			"Request an HHGate explicitly to create Interpols, with the given "
+			"ids. This is used when the gate is a global object, and so the "
+			"interpols need to be globals too. Comes in use in TABCREATE in the "
+			"parallel context." ),
 	};
 	
 	static Finfo* genesisParserFinfos[] =
@@ -372,6 +385,8 @@ static const Slot readSbmlSlot =
 	initGenesisParserCinfo()->getSlot( "parser.readsbml" );
 static const Slot writeSbmlSlot = 
 	initGenesisParserCinfo()->getSlot( "parser.writesbml" );
+static const Slot createGateSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.createGate" );
 
 //////////////////////////////////////////////////////////////////
 // Now we have the GenesisParserWrapper functions
@@ -647,8 +662,8 @@ map< string, string >& sliSrcLookup()
 	// Messages for GHK - to accept values from a table
 	src[ "PERMEABILITY output" ] = "outputSrc";
 	
-        src[ "SAVE Ik" ] = "Ik"; // Use with AscFile
-        src[ "SAVE C" ] = "Ca";
+	src[ "SAVE Ik" ] = "Ik"; // Use with AscFile
+	src[ "SAVE C" ] = "Ca";
 
 	return src;
 }
@@ -806,8 +821,8 @@ map< string, string >& sliDestLookup()
 	// Messages for GHK - to accept values from a table
 	dest[ "PERMEABILITY output" ] = "ghk";
 
-        dest[ "SAVE Ik" ] = "save"; // AscFile
-        dest[ "SAVE C" ] = "save";
+	dest[ "SAVE Ik" ] = "save"; // AscFile
+	dest[ "SAVE C" ] = "save";
 
 	return dest;
 }
@@ -837,10 +852,10 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "vdep_gate" ] = "HHGate";
 	classnames[ "tabgate" ] = "HHGate";
 	classnames[ "randomspike" ] = "RandomSpike";
-        classnames[ "spikegen" ] = "SpikeGen";
-        classnames[ "pulsegen" ] = "PulseGen";
-        classnames[ "diffamp" ] = "DiffAmp";
-        classnames[ "PID" ] = "PIDController";
+	classnames[ "spikegen" ] = "SpikeGen";
+	classnames[ "pulsegen" ] = "PulseGen";
+	classnames[ "diffamp" ] = "DiffAmp";
+	classnames[ "PID" ] = "PIDController";
 	classnames[ "synchan" ] = "SynChan";
 	classnames[ "table" ] = "Table";
 	classnames[ "xbutton" ] = "Sli";
@@ -884,28 +899,28 @@ map< string, string >& sliFieldNameConvert()
 	fieldnames["SymCompartment.len"] = "length";
 	fieldnames["SynChan.gmax"] = "Gbar";
 	fieldnames["HHChannel.gbar"] = "Gbar";
-        fieldnames["HHChannel.Z_conc"] = "useConcentration";
-        fieldnames["PulseGen.level1"] = "firstLevel";
-        fieldnames["PulseGen.width1"] = "firstWidth";
-        fieldnames["PulseGen.delay1"] = "firstDelay";        
-        fieldnames["PulseGen.level2"] = "secondLevel";
-        fieldnames["PulseGen.width2"] = "secondWidth";
-        fieldnames["PulseGen.delay2"] = "secondDelay";
-        fieldnames["PulseGen.baselevel"] = "baseLevel";
-        fieldnames["PulseGen.trig_time"] = "trigTime";
-        fieldnames["PulseGen.trig_mode"] = "trigMode";
-        fieldnames["PulseGen.previous_input"] = "prevInput";
-        fieldnames["RandomSpike.min_amp"] = "minAmp";
-        fieldnames["RandomSpike.max_amp"] = "maxAmp";
-        fieldnames["RandomSpike.reset_value"] = "resetValue";
-        fieldnames["RandomSpike.abs_refract"] = "absRefract";
-        fieldnames["PIDController.cmd"] = "command";
-        fieldnames["PIDController.sns"] = "sensed";
-        fieldnames["PIDController.tau_i"] = "tauI";
-        fieldnames["PIDController.tau_d"] = "tauD";
-        fieldnames["PIDController.e"] = "error";
-        fieldnames["PIDController.e_integral"] = "integral";
-        fieldnames["PIDController.e_deriv"] = "derivative";
+	fieldnames["HHChannel.Z_conc"] = "useConcentration";
+	fieldnames["PulseGen.level1"] = "firstLevel";
+	fieldnames["PulseGen.width1"] = "firstWidth";
+	fieldnames["PulseGen.delay1"] = "firstDelay";	
+	fieldnames["PulseGen.level2"] = "secondLevel";
+	fieldnames["PulseGen.width2"] = "secondWidth";
+	fieldnames["PulseGen.delay2"] = "secondDelay";
+	fieldnames["PulseGen.baselevel"] = "baseLevel";
+	fieldnames["PulseGen.trig_time"] = "trigTime";
+	fieldnames["PulseGen.trig_mode"] = "trigMode";
+	fieldnames["PulseGen.previous_input"] = "prevInput";
+	fieldnames["RandomSpike.min_amp"] = "minAmp";
+	fieldnames["RandomSpike.max_amp"] = "maxAmp";
+	fieldnames["RandomSpike.reset_value"] = "resetValue";
+	fieldnames["RandomSpike.abs_refract"] = "absRefract";
+	fieldnames["PIDController.cmd"] = "command";
+	fieldnames["PIDController.sns"] = "sensed";
+	fieldnames["PIDController.tau_i"] = "tauI";
+	fieldnames["PIDController.tau_d"] = "tauD";
+	fieldnames["PIDController.e"] = "error";
+	fieldnames["PIDController.e_integral"] = "integral";
+	fieldnames["PIDController.e_deriv"] = "derivative";
 	return fieldnames;
 }
 
@@ -958,21 +973,10 @@ bool GenesisParserWrapper::innerAdd( Id s,
 {
 	vector< Id > srcList( 1, src );
 	vector< Id > destList( 1, dest );
-	// Should this be vector< Id > ?
 	if ( !src.bad() && !dest.bad() ) {
 		send4< vector< Id >, string, vector< Id >, string >( s(), addMessageSlot,
 			srcList, srcF, destList, destF );
 		return 1;
-		/*
-		Element* se = src();
-		Element* de = dest();
-		const Finfo* sf = se->findFinfo( srcF );
-		if ( !sf ) return 0;
-		const Finfo* df = de->findFinfo( destF );
-		if ( !df ) return 0;
-
-		return se->findFinfo( srcF )->add( se, de, de->findFinfo( destF )) ;
-		*/
 	}
 	return 0;
 }
@@ -1297,90 +1301,178 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
  * For tables this is 
  * call /Vm TABCREATE {NDIVS} {XMIN} {XMAX}
  */
-bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s)
+bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s )
 {
-	string path = argv[1];
-	// Id id = path2eid( path, s );
-	Id id( path );
-	if ( !id.zero() && !id.bad() ) {
-		send2< Id, string >( s(), requestFieldSlot, id, "class" );
+	string chanPath = argv[ 1 ];
+	Id chanId( chanPath );
+	if ( !chanId.zero() && !chanId.bad() ) {
+		send2< Id, string >( s(), requestFieldSlot, chanId, "class" );
 		if ( fieldValue_.length() == 0 ) // Nothing came back
 			return 0;
-		if ( fieldValue_ == "HHChannel" && argc == 7 ) {
-			// TABCREATE on HHChannel requires the assignment of
-			// something like
+		
+		if ( fieldValue_ == "Table" && argc != 6 ) {
+			cerr << "Error: GenesisParserWrapper::tabCreate: usage:"
+				<< " call element TABCREATE xdivs xmin xmax\n";
+			return 0;
+		}
+		
+		if ( fieldValue_ == "HHChannel" )
+			if ( argc != 7 || strlen( argv[ 3 ] ) != 1 )
+			{
+				cerr << "Error: GenesisParserWrapper::tabCreate: usage:"
+					<< " call element TABCREATE gate xdivs xmin xmax\n";
+				return 0;
+			}
+		
+		if ( fieldValue_ == "Table" ) {
+			send3< Id, string, string >( s(),
+				setFieldSlot, chanId, "xdivs", argv[ 3 ] );
+			send3< Id, string, string >( s(),
+				setFieldSlot, chanId, "xmin", argv[ 4 ] );
+			send3< Id, string, string >( s(),
+				setFieldSlot, chanId, "xmax", argv[ 5 ] );
+			return 1;
+		}
+		
+		if ( fieldValue_ == "HHChannel" ) {
+			// TABCREATE on HHChannel requires the assignment of something like:
+			// 
 			// setfield /squid/Na/xGate/A xmin {XMIN}
 			// setfield /squid/Na/xGate/A xmax {XMAX}
 			// setfield /squid/Na/xGate/A xdivs {XDIVS}
-			if ( strlen( argv[3] ) != 1 ) {
-				cout << "usage: call element TABCREATE gate xdivs xmin xmax\n";
-				cout << "Error: Gate should be X, Y or Z\n";
+			
+			char gate = toupper( argv[ 3 ][ 0 ] );
+			if ( gate != 'X' && gate != 'Y' && gate != 'Z' ) {
+				cerr << "Error: GenesisParserWrapper::tabCreate: usage:"
+					<< " call element TABCREATE gate xdivs xmin xmax."
+					<< " Gate should be X, Y or Z\n";
 				return 0;
 			}
-			string tempA;
-			string tempB;
-			if ( string( argv[3] ) == "X" ) {
-				tempA = path + "/xGate/A";
-				tempB = path + "/xGate/B";
-			} else if ( string( argv[3] ) == "Y" ) {
-				tempA = path + "/yGate/A";
-				tempB = path + "/yGate/B";
-			} else if ( string( argv[3] ) == "Z" ) {
-				tempA = path + "/zGate/A";
-				tempB = path + "/zGate/B";
-			}
-			// id = path2eid( tempA, s );
-			id = Id( tempA );
-			if ( id.zero() || id.bad() ) { //creating the gates'
-				string name;
-				if ( string( argv[3] ) == "X" ) {
-					name = "xGate";
-				} else if ( string( argv[3] ) == "Y" ) {
-					name = "yGate";
-				} else if ( string( argv[3] ) == "Z" ) {
-					name = "zGate";
-				}
-				vector < Id > el;
-				el.push_back(Id(path));
+			
+			/*
+			 * One way to create the gate and the interpols is to just set, lets
+			 * say, the Xpower field on the channel to some value. This will
+			 * implicitly create the corresponding (X in this case) gate and its
+			 * interpolation tables.
+			 * 
+			 * This turns out to be a problem when doing TABCREATE on a channel
+			 * that is global (for example, by being in /library). Implicit
+			 * creation means that every node will choose separate ids for the
+			 * locally generated objects.
+			 * 
+			 * To avoid this, we create the gate and its interpols explicitly below.
+			 * 
+			 * A final twist: If the channel, and hence the gate, is not a global
+			 * after all, then we leave the gate to its own devices. The gate will
+			 * detect that it is not global, and create its children Interpols
+			 * A & B implicitly. Otherwise we generate 2 global Ids, and send
+			 * them to the gates on all nodes, requesting them to create the
+			 * Interpols.
+			 */
+			
+			/*
+			 * Creating gate
+			 */
+			string gateName = string( 1, tolower( gate ) ) + "Gate";
+			string gatePath = chanPath + "/" + gateName;
+			Id gateId( gatePath );
+			if ( gateId.zero() || gateId.bad() ) {
+				/*
+				// Implicit creation of gate and interpols
+				vector< Id > el( 1, chanId );
 				send3< vector< Id >, string, string >( s(),
-						setVecFieldSlot, el, string(argv[3]) + "power", "1.0" );
-// 				set<double> (Id(path)(), "Xpower", 1.0);
-// 				send3< string, string, Id >( s(), 0,
-// 				createSlot, "HHGate", name, Id(path) );
+						setVecFieldSlot, el, string( argv[ 3 ] ) + "power", "1.0" );
+				*/
 				
-				id = Id( tempA );
+				/*
+				// Explicit creation of gate
+				// Args to shell: type, name, node, parent Id
+ 				send4< string, string, int, Id >(
+					s(), createSlot,
+					"HHGate", gateName,
+					Id::UnknownNode, chanId );
+				*/
+				
+				send2< Id, string >( s(),
+					createGateSlot, chanId, string( 1, gate ) );
+				
+				gateId = Id( gatePath );
 			}
-			if ( id.zero() || id.bad() ){ 
-				cout << "tabCreate::Error" << endl;
-				return 0; //Error msg here
+			if ( gateId.zero() || gateId.bad() ) {
+				cerr << "Error: GenesisParserWrapper::tabCreate:"
+					<< " Unable to create gate " << argv[ 3 ]
+					<< " under channel " << chanPath << ".\n";
+				return 0;
 			}
-			send3< Id, string, string >( s(),
-				setFieldSlot, id, "xdivs", argv[4] );
-			send3< Id, string, string >( s(),
-				setFieldSlot, id, "xmin", argv[5] );
-			send3< Id, string, string >( s(),
-				setFieldSlot, id, "xmax", argv[6] );
-			// id = path2eid( tempB, s );
-			id = Id( tempB );
-			if ( id.zero() || id.bad() ) { 
-				cout << "tabCreate::Error" << endl;
-				return 0; //Error msg here
+			
+			/*
+			 * Gate creation done. Creating Interpols.
+			 * 
+			 * Needed only if global.
+			 */
+			/*
+			if ( gateId.isGlobal() ) {
+				send1< Id >( s(), createGateSlot, gateId );
 			}
-			send3< Id, string, string >( s(),
-				setFieldSlot, id, "xdivs", argv[4] );
-			send3< Id, string, string >( s(),
-				setFieldSlot, id, "xmin", argv[5] );
-			send3< Id, string, string >( s(),
-				setFieldSlot, id, "xmax", argv[6] );
-			return 1;
-		}
-		if ( fieldValue_ == "Table" && argc == 6 ) {
-			send3< Id, string, string >( s(),
-				setFieldSlot, id, "xdivs", argv[3] );
-			send3< Id, string, string >( s(),
-				setFieldSlot, id, "xmin", argv[4] );
-			send3< Id, string, string >( s(),
-				setFieldSlot, id, "xmax", argv[5] );
+			*/
+			
+			/*
+			 * Interpols created. Set fields.
+			 */
+			string tables[ ] = { "A", "B" };
+			for ( unsigned int i = 0; i < 2; i++ ) {
+				string tabName = tables[ i ];
+				string tabPath = gatePath + "/" + tabName;
+				Id tabId( tabPath );
+				
+				if ( tabId.zero() || tabId.bad() ) {
+					cerr << "Error: GenesisParserWrapper::tabCreate:"
+						<< " Unable to create Interpol " << tabName
+						<< " under gate " << gatePath << ".\n";
+					return 0;
+				}
+				
+				send3< Id, string, string >( s(),
+					setFieldSlot, tabId, "xdivs", argv[ 4 ] );
+				send3< Id, string, string >( s(),
+					setFieldSlot, tabId, "xmin", argv[ 5 ] );
+				send3< Id, string, string >( s(),
+					setFieldSlot, tabId, "xmax", argv[ 6 ] );
+			}
+			
+			/*
+			string tables[ ] = { "A", "B" };
+			
+			for ( unsigned int i = 0; i < 2; i++ ) {
+				string tabName = tables[ i ];
+				string tabPath = gatePath + "/" + tabName;
+				Id tabId( tabPath );
+				
+				if ( tabId.zero() || tabId.bad() ) {
+					// Args to shell: type, name, node, parent Id
+					send4< string, string, int, Id >(
+						s(), createSlot,
+						"Interpol", tabName,
+						Id::UnknownNode, gateId );
+					
+					tabId = Id( tabPath );
+				}
+				
+				if ( tabId.zero() || tabId.bad() ) {
+					cerr << "Error: GenesisParserWrapper::tabCreate:"
+						<< " Unable to create Interpol " << tabName
+						<< " under gate " << gatePath << ".\n";
+					return 0;
+				}
+				
+				send3< Id, string, string >( s(),
+					setFieldSlot, tabId, "xdivs", argv[ 4 ] );
+				send3< Id, string, string >( s(),
+					setFieldSlot, tabId, "xmin", argv[ 5 ] );
+				send3< Id, string, string >( s(),
+					setFieldSlot, tabId, "xmax", argv[ 6 ] );
+			}
+			*/
 			return 1;
 		}
 	}
@@ -4347,37 +4439,20 @@ Element* GenesisParserWrapper::getShell( Id g )
  */
 Element* makeGenesisParser()
 {
-	// set< string, string >( Element::root(), "create", "Shell", "shell");
-	// Element* shell = Element::lastElement();
 	Id shellId = Id::shellId();
-	/*
-	lookupGet< Id, string >( Element::root(), "lookupChild",
-		shellId, "shell" );
-		*/
 	assert( !shellId.bad() );
-	//Element* shell = shellId();
-
-#ifdef CRL_MPI
-	Element* sli = Neutral::create( "ParGenesisParser", "sli", shellId, Id::scratchId() );
-#else
-	Element* sli = Neutral::create( "GenesisParser", "sli", shellId, Id::scratchId() );
-#endif
-
-	// set< string, string >( shell, "create", "GenesisParser", "sli");
-	// Element* sli = Element::lastElement();
+	Element* sli = Neutral::create( "GenesisParser", "sli", shellId, Id::initId() );
+	sli->id().setGlobal();
 	static_cast< GenesisParserWrapper* >( sli->data( 0 ) )->
 		setElement( sli->id() );
 
 	bool ret = shellId.eref().add( "parser", sli, "parser", 
 		ConnTainer::Default );
-	/*
-	unsigned int ret = shell->findFinfo( "parser" )->add( shell, sli, 
-		sli->findFinfo( "parser" ) );
-		*/
 	assert( ret );
 
 #ifdef DO_UNIT_TESTS
-	static_cast< GenesisParserWrapper* >( sli->data( 0 ) )->unitTest();
+	if ( Shell::myNode() == 0 )
+		static_cast< GenesisParserWrapper* >( sli->data( 0 ) )->unitTest();
 #endif
 
 	return sli;

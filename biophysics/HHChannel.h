@@ -151,7 +151,14 @@ class HHChannel
 		static void xGateFunc( const Conn* c, double X, double g );
 		static void yGateFunc( const Conn* c, double Y, double g );
 		static void zGateFunc( const Conn* c, double Z, double g );
-	
+
+		static void createGateFunc(
+			const Conn* c,
+			string gateType,
+			Id gate,
+			Id A,
+			Id B );
+
 	protected:
 		virtual void lookupXrates( Eref e );
 		virtual void lookupYrates( Eref e );
@@ -167,7 +174,8 @@ class HHChannel
 			string name,
 			const Finfo* f,
 			int action,
-			unsigned int dimension );
+			unsigned int dimension,
+			Id id );
 
 		static PFDD selectPower( double power);
 
