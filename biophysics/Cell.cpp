@@ -158,14 +158,10 @@ void Cell::reinitFunc( const Conn* c, ProcInfo p )
 
 void Cell::innerReinitFunc( Id cell, ProcInfo p )
 {
-#ifdef USE_MUSIC
-	return;
-#endif
-
 	double dt;
 	
 	// Delete existing solver
-	Id oldSolve( cell.path() + "/solve" );
+	Id oldSolve = Id::localId( cell.path() + "/solve" );
 	if ( oldSolve.good() )
 		set( oldSolve(), "destroy" );
 	

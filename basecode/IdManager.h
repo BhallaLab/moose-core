@@ -91,6 +91,8 @@ class IdManager
 	public:
 		IdManager();
 
+		void dumpState( ostream& stream );
+
 		//////////////////////////////////////////////////////////////////
 		// Id creation
 		//////////////////////////////////////////////////////////////////
@@ -179,16 +181,9 @@ class IdManager
 		 */
 		bool outOfRange( unsigned int index ) const;
 
-		unsigned int newIdBlock( unsigned int size );
+		unsigned int newIdBlock( unsigned int size, unsigned int node );
 
 	private:
-		/**
-		 * These keep track of size of cluster
-		 * Deprecated. Now in shell.
-		unsigned int myNode_;
-		unsigned int numNodes_;
-		 */
-
 		/**
 		 * This specifies the load at which the system looks for another
 		 * node to run on.

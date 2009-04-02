@@ -34,6 +34,40 @@ IdManager::IdManager()
 	blockEnd_ = localIndex_ + firstBlockSize;
 
 	elementList_.resize( blockEnd_ + blockSize );
+	fill(
+		elementList_.begin() + localIndex_,
+		elementList_.begin() + blockEnd_,
+		Enode( 0, Shell::myNode() )
+	);
+}
+
+void IdManager::dumpState( ostream& stream ) {
+	unsigned int i;
+	unsigned int zeroBegin;
+	bool zeroRun = false;
+
+	const unsigned int numNodes = Shell::numNodes();
+	const unsigned int myNode = Shell::myNode();
+
+	const unsigned int firstBlockSize = numNodes;
+	const unsigned int lastNode = numNodes - 1;
+	stream << initBlockEnd + firstBlockSize * ( lastNode - myNode ) << " - " << blockEnd_ - 1 << "\n";
+
+	for ( i = 0; i < blockEnd_; i++ ) {
+		Element* e = elementList_[ i ].e();
+		if ( e != 0 ) {
+			if ( zeroRun ) {
+				stream << zeroBegin << " - " << i - 1 << ": 0x0\n";
+				zeroRun = false;
+			}
+			stream << i << ": " << e->name() << "\n";
+		} else if ( ! zeroRun ) {
+			zeroRun = true;
+			zeroBegin = i;
+		}
+	}
+
+	stream << flush;
 }
 
 unsigned int IdManager::newId() {
@@ -41,7 +75,7 @@ unsigned int IdManager::newId() {
 	
 	if ( localIndex_ == blockEnd_ ) { // Local pool exhausted.
 		if ( Shell::myNode() == 0 )
-			localIndex_ = newIdBlock( blockSize );
+			localIndex_ = newIdBlock( blockSize, Shell::myNode() );
 		else
 			localIndex_ = Shell::newIdBlock( blockSize );
 		
@@ -49,6 +83,12 @@ unsigned int IdManager::newId() {
 		
 		if ( blockEnd_ >= elementList_.size() )
 			elementList_.resize( 2 * blockEnd_ );
+		
+		fill(
+			elementList_.begin() + localIndex_,
+			elementList_.begin() + blockEnd_,
+			Enode( 0, Shell::myNode() )
+		);
 	}
 	
 	lastId_ = localIndex_;
@@ -56,11 +96,27 @@ unsigned int IdManager::newId() {
 	return lastId_;
 }
 
-unsigned int IdManager::newIdBlock( unsigned int size )
+unsigned int IdManager::newIdBlock( unsigned int size, unsigned int node )
 {
 	assert( Shell::myNode() == 0 );
 	
 	unsigned int blockBegin = localIndex_;
+	unsigned int blockEnd = blockBegin + size;
+	
+	/*
+	 * Here blockBegin and blockEnd are the boundaries of the block assigned to
+	 * the requesting node. On the other hand, blockEnd_ (with the underscore)
+	 * is the end of the master node's block.
+	 */
+	
+	if ( blockEnd > elementList_.size() )
+		elementList_.resize( blockEnd );
+	fill(
+		elementList_.begin() + blockBegin,
+		elementList_.begin() + blockEnd,
+		Enode( 0, node )
+	);
+	
 	localIndex_ += size;
 	blockEnd_ += size;
 	return blockBegin;
@@ -95,11 +151,7 @@ unsigned int IdManager::childId( unsigned int parent )
 		childNode = pa.node();
 	}
 	
-	Element* e = 0;
-	//~ if ( childNode > 0 )
-		//~ e = Id::postId( 0 ).eref().e;
-	
-	elementList_[ childId ] = Enode( e, childNode );
+	elementList_[ childId ] = Enode( 0, childNode );
 	
 	return childId;
 #else
@@ -121,13 +173,9 @@ unsigned int IdManager::makeIdOnNode( unsigned int childNode )
 	unsigned int childId = newId();
 #ifdef USE_MPI
 	assert( Shell::myNode() == 0 );
-	assert( childNode < Shell::numNodes() );
+	assert( childNode == Id::GlobalNode || childNode < Shell::numNodes() );
 	
-	Element* e = 0;
-	//~ if ( childNode > 0 )
-		//~ e = Id::postId( 0 ).eref().e;
-	//~ 
-	elementList_[ childId ] = Enode( e, childNode );
+	elementList_[ childId ] = Enode( 0, childNode );
 #endif
 	return childId;
 }
