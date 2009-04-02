@@ -112,8 +112,8 @@ unsigned int Shell::newIdBlock( unsigned int size )
 	unsigned int base;
 	unsigned int requestId = 
 		openOffNodeValueRequest< unsigned int >( sh, &base, 1 );
-	sendTo2< unsigned int, unsigned int >(
-		ShellE, requestIdBlockSlot, 0, size, requestId
+	sendTo3< unsigned int, unsigned int, unsigned int >(
+		ShellE, requestIdBlockSlot, 0, size, myNode(), requestId
 	);
 	unsigned int* temp = closeOffNodeValueRequest< unsigned int >( sh, requestId );
 	assert( &base == temp );
@@ -121,10 +121,10 @@ unsigned int Shell::newIdBlock( unsigned int size )
 }
 
 void Shell::handleRequestNewIdBlock( const Conn* c,
-	unsigned int size, unsigned int requestId )
+	unsigned int size, unsigned int node, unsigned int requestId )
 {
 	assert( myNode() == 0 );
-	unsigned int base = Id::newIdBlock( size );
+	unsigned int base = Id::newIdBlock( size, node );
 	sendBack2< unsigned int, unsigned int >(
 		c, returnIdBlockSlot,
 		base, requestId );
@@ -267,7 +267,7 @@ void Shell::parCreateArrayFunc ( const Conn* c,
 bool Shell::addSingleMessage( const Conn* c, Id src, string srcField, 
 	Id dest, string destField )
 {
-	assert( myNode() == 0 );
+	//~ assert( myNode() == 0 );
 	Shell* sh = static_cast< Shell* >( c->data() );
 	unsigned int srcNode = src.node();
 	unsigned int destNode = dest.node();

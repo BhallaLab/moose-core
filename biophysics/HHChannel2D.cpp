@@ -172,7 +172,8 @@ void HHChannel2D::innerSetXindex( Eref e, string Xindex )
 	
 	int action = 1;
 	int dimension = ( Xdep1_ == -1 ) ? 1 : 2;
-	makeGate( e.e, "xGate", e->findFinfo( "xGate2D" ), action, dimension );
+	makeGate(
+		e.e, "xGate", e->findFinfo( "xGate2D" ), action, dimension, Id::newId() );
 }
 
 void HHChannel2D::innerSetYindex( Eref e, string Yindex )
@@ -188,7 +189,8 @@ void HHChannel2D::innerSetYindex( Eref e, string Yindex )
 	
 	int action = 1;
 	int dimension = ( Ydep1_ == -1 ) ? 1 : 2;
-	makeGate( e.e, "yGate", e->findFinfo( "yGate2D" ), action, dimension );
+	makeGate(
+		e.e, "yGate", e->findFinfo( "yGate2D" ), action, dimension, Id::newId() );
 }
 
 void HHChannel2D::innerSetZindex( Eref e, string Zindex )
@@ -204,7 +206,8 @@ void HHChannel2D::innerSetZindex( Eref e, string Zindex )
 	
 	int action = 1;
 	int dimension = ( Zdep1_ == -1 ) ? 1 : 2;
-	makeGate( e.e, "zGate", e->findFinfo( "zGate2D" ), action, dimension );
+	makeGate(
+		e.e, "zGate", e->findFinfo( "zGate2D" ), action, dimension, Id::newId() );
 }
 
 /**
@@ -219,7 +222,8 @@ void HHChannel2D::innerSetXpower( Eref e, double Xpower )
 	
 	int action = ( Xpower <= 0.0 ) ? 0 : 1;
 	int dimension = ( Xdep1_ == -1 ) ? 1 : 2;
-	makeGate( e.e, "xGate", e->findFinfo( "xGate2D" ), action, dimension );
+	makeGate(
+		e.e, "xGate", e->findFinfo( "xGate2D" ), action, dimension, Id::newId() );
 }
 
 void HHChannel2D::innerSetYpower( Eref e, double Ypower )
@@ -232,7 +236,8 @@ void HHChannel2D::innerSetYpower( Eref e, double Ypower )
 	
 	int action = ( Ypower <= 0.0 ) ? 0 : 1;
 	int dimension = ( Ydep1_ == -1 ) ? 1 : 2;
-	makeGate( e.e, "yGate", e->findFinfo( "yGate2D" ), action, dimension );
+	makeGate(
+		e.e, "yGate", e->findFinfo( "yGate2D" ), action, dimension, Id::newId() );
 }
 
 void HHChannel2D::innerSetZpower( Eref e, double Zpower )
@@ -245,7 +250,8 @@ void HHChannel2D::innerSetZpower( Eref e, double Zpower )
 	
 	int action = ( Zpower <= 0.0 ) ? 0 : 1;
 	int dimension = ( Zdep1_ == -1 ) ? 1 : 2;
-	makeGate( e.e, "zGate", e->findFinfo( "zGate2D" ), action, dimension );
+	makeGate(
+		e.e, "zGate", e->findFinfo( "zGate2D" ), action, dimension, Id::newId() );
 }
 
 int HHChannel2D::dependency( string index, unsigned int dim )

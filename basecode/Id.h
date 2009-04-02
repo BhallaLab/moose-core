@@ -33,6 +33,7 @@ class Id
 	friend class pymoose::PyMooseContext; ///\todo: deprecate this friend.
     
 	public:
+		static void dumpState( ostream& stream );
 
 		//////////////////////////////////////////////////////////////
 		//	Id creation
@@ -123,7 +124,7 @@ class Id
 		//////////////////////////////////////////////////////////////
 		//	Multi-node Id management
 		//////////////////////////////////////////////////////////////
-		static unsigned int newIdBlock( unsigned int size );
+		static unsigned int newIdBlock( unsigned int size, unsigned int node );
 
 		//////////////////////////////////////////////////////////////
 		//	Id info
