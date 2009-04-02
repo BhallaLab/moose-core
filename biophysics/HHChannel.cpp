@@ -163,7 +163,11 @@ const Cinfo* initHHChannelCinfo()
 // MsgDest definitions
 ///////////////////////////////////////////////////////
 		new DestFinfo( "concen", Ftype1< double >::global(),
-				RFCAST( &HHChannel::concFunc ) ),
+			RFCAST( &HHChannel::concFunc ) ),
+		new DestFinfo( "createGate",
+			Ftype4< string, Id, Id, Id >::global(),
+			RFCAST( &HHChannel::createGateFunc ),
+			"" ),
 	};
 
 	// We want the channel updates after the compartments are done.
@@ -237,40 +241,69 @@ void HHChannel::innerSetXpower( Eref e, double Xpower )
 {
 	if ( Xpower == Xpower_ )
 		return;
-
-	int action = ( Xpower > 0 ) ? 1 : 0;
-	const int dimension = 1;
-
-	makeGate( e.e, "xGate", e->findFinfo( "xGate" ), action, dimension );
+	
 	Xpower_ = Xpower;
 	takeXpower_ = selectPower( Xpower );
+	
+	string name = "xGate";
+	int action = ( Xpower > 0 ) ? 1 : 0;
+	int dimension = 1;
+	makeGate( e.e, name, e->findFinfo( name ), action, dimension, Id::newId() );
 }
 
 void HHChannel::innerSetYpower( Eref e, double Ypower )
 {
 	if ( Ypower == Ypower_ )
 		return;
-
-	int action = ( Ypower > 0 ) ? 1 : 0;
-	const int dimension = 1;
 	
-	makeGate( e.e, "yGate", e->findFinfo( "yGate" ), action, dimension );
 	Ypower_ = Ypower;
 	takeYpower_ = selectPower( Ypower );
+	
+	string name = "yGate";
+	int action = ( Ypower > 0 ) ? 1 : 0;
+	int dimension = 1;
+	makeGate( e.e, name, e->findFinfo( name ), action, dimension, Id::newId() );
 }
 
 void HHChannel::innerSetZpower( Eref e, double Zpower )
 {
 	if ( Zpower == Zpower_ )
 		return;
-
-	int action = ( Zpower > 0 ) ? 1 : 0;
-	const int dimension = 1;
-
-	makeGate( e.e, "zGate", e->findFinfo( "zGate" ), action, dimension );
+	
 	Zpower_ = Zpower;
 	takeZpower_ = selectPower( Zpower );
 	useConcentration_ = 1;        
+	
+	string name = "zGate";
+	int action = ( Zpower > 0 ) ? 1 : 0;
+	int dimension = 1;
+	makeGate( e.e, name, e->findFinfo( name ), action, dimension, Id::newId() );
+}
+
+void HHChannel::createGateFunc( const Conn* c,
+	string gateType, Id gate, Id A, Id B )
+{
+	string name;
+	if ( gateType == "X" )
+		name = "xGate";
+	else if ( gateType == "Y" )
+		name = "yGate";
+	else if ( gateType == "Z" )
+		name = "zGate";
+	else
+		assert( 0 );
+	
+	Eref e = c->target();
+	string path = e->id().path();
+	int action = 1;
+	int dimension = 1;
+	
+	makeGate( e.e, name, e->findFinfo( name ), action, dimension, gate );
+	assert( Id( path + "/" + name ).good() );
+	
+	set< Id, Id >( gate(), "createInterpols", A, B );
+	assert( Id( path + "/" + name + "/" + "A" ).good() );
+	assert( Id( path + "/" + name + "/" + "B" ).good() );
 }
 
 /**
@@ -300,7 +333,8 @@ void HHChannel::makeGate(
 	string name,
 	const Finfo* f,
 	int action,
-	unsigned int dim )
+	unsigned int dim,
+	Id id )
 {
 	assert( dim == 1 || dim == 2 );
 	dim--;
@@ -348,16 +382,14 @@ void HHChannel::makeGate(
 			// Here we have multiple channels using this gate. So
 			// we don't mess with the original.
 			// make a new gate which we can change.
-			gate = Neutral::create( type[ dim ], "xGate", e->id(), 
-				Id::scratchId() );
+			gate = Neutral::create( type[ dim ], "xGate", e->id(), id );
 			gate->addFinfo( GlobalMarkerFinfo::global() );
 			bool ret = Eref( e ).add( f->name(), gate, gateFinfo[ dim ] );
 			// bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
 			assert( ret );
 		}
 	} else { // No gate, make a new one.
-		gate = Neutral::create( type[ dim ], name, e->id(), 
-			Id::scratchId() );
+		gate = Neutral::create( type[ dim ], name, e->id(), id );
 		// Make it a global so that duplicates do not happen unless
 		// the table values change.
 		gate->addFinfo( GlobalMarkerFinfo::global() );

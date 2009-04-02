@@ -79,10 +79,16 @@ void initMPI( int& argc, char**& argv )
 	
 	if ( strncmp( argv[ argc - 1 ], "-m", 2 ) == 0 ) {
 		char hostname[ 256 ];
-		gethostname( hostname, sizeof( hostname ) );
-		cout << "Rank " << myNode << " : PID " << getpid()
-			 << " on " << hostname << " ready for attach" << endl;
-		MuMPI::INTRA_COMM().Barrier();
+		// this loop will ensure that all nodes print the following message
+		// in order of their rank
+		for ( unsigned int i = 0; i < numNodes; i++ ) {
+			if ( i == myNode ) {
+				gethostname( hostname, sizeof( hostname ) );
+				cout << "Rank " << myNode << " : PID " << getpid()
+					 << " on " << hostname << " ready for attach" << endl;
+			}
+			MuMPI::INTRA_COMM().Barrier();
+		}
 		
 		if ( myNode == 0 ) {
 			cout << "Paused, hit return to continue" << flush;
@@ -323,6 +329,14 @@ void doneInit()
 	MuMPI::INTRA_COMM().Barrier();
 	if ( Shell::myNode() == 0 )
 		cout << "\nInitialized " << Shell::numNodes() << " nodes" << endl;
+
+	for ( unsigned int i = 0; i < Shell::numNodes(); i++ ) {
+		if ( i == Shell::myNode() ) {
+			cout << "Node " << i << ":\n";
+			Id::dumpState( cout );
+		}
+		MuMPI::INTRA_COMM().Barrier();
+	}
 #endif // USE_MPI
 }
 

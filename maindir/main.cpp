@@ -62,6 +62,17 @@ extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 	extern bool nonBlockingGetLine( string& s );
 #endif
 
+/**
+ * This dummy function is called after all unit tests are done.
+ * Useful in debugging, when you don't want your breakpoint to wake up during
+ * unit tests.
+ * 
+ * Use like this:
+ * 		- Set breakpoint in this function
+ * 		- When control reaches this function, set further breakpoints of interest.
+ * 		  They will now get activated only during running of the main program.
+ */
+void breakMain() { ; }
 
 int main(int argc, char** argv)
 {
@@ -96,6 +107,10 @@ int main(int argc, char** argv)
 
 
 #ifdef USE_GENESIS_PARSER
+	Element* sli = makeGenesisParser();
+	assert( sli != 0 );
+	breakMain();
+
 	if ( myNode == 0 ) {
 		string line = "";
 		vector<string> scriptArgs = ArgParser::getScriptArgs();
@@ -119,9 +134,7 @@ int main(int argc, char** argv)
 			}
 			line.push_back('\n');
 		}
-		
-		Element* sli = makeGenesisParser();
-		assert( sli != 0 );
+
 		// Need to do this before the first script is loaded, but
 		// after the unit test for the parser.
 		Id cj("/sched/cj");

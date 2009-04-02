@@ -51,6 +51,12 @@ const Cinfo* initHHGateCinfo()
 	///////////////////////////////////////////////////////
 		new DestFinfo( "postCreate", Ftype0::global(),
 			&HHGate::postCreate ),
+		new DestFinfo( "createInterpols", Ftype2< Id, Id >::global(),
+			RFCAST( &HHGate::createInterpols ),
+			"Request the gate explicitly to create Interpols, with the given "
+			"ids. This is used when the gate is a global object, and so the "
+			"interpols need to be globals too. Comes in use in TABCREATE in the "
+			"parallel context." ),
 		new DestFinfo( "setupAlpha",
 			Ftype1< vector< double > >::global(),
 			RFCAST( &HHGate::setupAlpha ) ),
@@ -126,31 +132,39 @@ void HHGate::gateFunc( const Conn* c, double v )
 /**
  * This creates two nested child objects on the HHGate, to hold the
  * Interpols.
- * \todo: We need to figure out how to handle the deletion correctly,
- * without zapping the data fields of these child objects.
+ * 
+ * If the HHGate is global, then don't take responsibility of creating
+ * interpols. The creator of the gate should make an explicit call to
+ * "createInterpols" for this.
  */
-
 void HHGate::postCreate( const Conn* c )
 {
-	HHGate* h = static_cast< HHGate *>( c->data() );
-	Eref e = c->target();
+	if ( c->target()->id().isGlobal() )
+		return;
+	
+	createInterpols( c, Id::newId(), Id::newId() );
+}
 
-	// cout << "HHGate::postCreate called\n";
+/**
+ * Request the gate explicitly to create Interpols, with the given ids. This is
+ * used when the gate is a global object, and so the interpols need to be
+ * globals too. Comes in use in TABCREATE in the parallel context.
+ */
+void HHGate::createInterpols( const Conn* c, Id aId, Id bId )
+{
+	HHGate* h = static_cast< HHGate* >( c->data() );
+	Eref e = c->target();
+	
 	const Cinfo* ic = initInterpolCinfo();
 	// Here we must set the noDelFlag to 1 because these data
 	// parts belong to the parent HHGate structure.
 	Element* A = ic->create( 
-		Id::scratchId(), "A", static_cast< void* >( &h->A_ ), 1 );
-
+		aId, "A", static_cast< void* >( &h->A_ ), 1 );
 	e.add( "childSrc", A, "child" );
-	// e->findFinfo( "childSrc" )->add( e, A, A->findFinfo( "child" ) );
-
+	
 	Element* B = ic->create( 
-		Id::scratchId(), "B", static_cast< void* >( &h->B_), 1 );
-
+		bId, "B", static_cast< void* >( &h->B_), 1 );
 	e.add( "childSrc", B, "child" );
-
-	// e->findFinfo( "childSrc" )->add( e, B, B->findFinfo( "child" ) );
 }
 
 // static func
