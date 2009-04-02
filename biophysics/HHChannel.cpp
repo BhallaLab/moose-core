@@ -302,8 +302,8 @@ void HHChannel::createGateFunc( const Conn* c,
 	assert( Id( path + "/" + name ).good() );
 	
 	set< Id, Id >( gate(), "createInterpols", A, B );
-	assert( Id( path + "/" + name + "/" + "A" ).good() );
-	assert( Id( path + "/" + name + "/" + "B" ).good() );
+	assert( Id( path + "/" + name + "/A" ).good() );
+	assert( Id( path + "/" + name + "/B" ).good() );
 }
 
 /**
