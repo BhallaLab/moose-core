@@ -81,13 +81,21 @@ class HHChannel2D: public HHChannel
 		static void conc2Func( const Conn* c, double conc );
 
 	protected:
+		virtual string chanFinfo( string gateType ) const
+		{
+			if ( gateType == "X" ) return "xGate2D";
+			else if ( gateType == "Y" ) return "yGate2D";
+			else if ( gateType == "Z" ) return "zGate2D";
+			else assert( 0 );
+		}
+
+		virtual string gateFinfo() const { return "gate2D"; }
+
+		virtual string gateClass() const { return "HHGate2D"; }
+
 		virtual void lookupXrates( Eref e );
 		virtual void lookupYrates( Eref e );
 		virtual void lookupZrates( Eref e );
-		
-		virtual void innerSetXpower( Eref e, double Xpower );
-		virtual void innerSetYpower( Eref e, double Ypower );
-		virtual void innerSetZpower( Eref e, double Zpower );
 		
 	private:
 		void innerSetXindex( Eref e, string Xindex );

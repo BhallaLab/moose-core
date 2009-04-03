@@ -169,11 +169,6 @@ void HHChannel2D::innerSetXindex( Eref e, string Xindex )
 	Xdep1_ = dependency( Xindex, 1 );
 	
 	assert( Xdep0_ >= 0 );
-	
-	int action = 1;
-	int dimension = ( Xdep1_ == -1 ) ? 1 : 2;
-	makeGate(
-		e.e, "xGate", e->findFinfo( "xGate2D" ), action, dimension, Id::newId() );
 }
 
 void HHChannel2D::innerSetYindex( Eref e, string Yindex )
@@ -186,11 +181,6 @@ void HHChannel2D::innerSetYindex( Eref e, string Yindex )
 	Ydep1_ = dependency( Yindex, 1 );
 	
 	assert( Ydep0_ >= 0 );
-	
-	int action = 1;
-	int dimension = ( Ydep1_ == -1 ) ? 1 : 2;
-	makeGate(
-		e.e, "yGate", e->findFinfo( "yGate2D" ), action, dimension, Id::newId() );
 }
 
 void HHChannel2D::innerSetZindex( Eref e, string Zindex )
@@ -203,55 +193,6 @@ void HHChannel2D::innerSetZindex( Eref e, string Zindex )
 	Zdep1_ = dependency( Zindex, 1 );
 	
 	assert( Zdep0_ >= 0 );
-	
-	int action = 1;
-	int dimension = ( Zdep1_ == -1 ) ? 1 : 2;
-	makeGate(
-		e.e, "zGate", e->findFinfo( "zGate2D" ), action, dimension, Id::newId() );
-}
-
-/**
- */
-void HHChannel2D::innerSetXpower( Eref e, double Xpower )
-{
-	if ( Xpower == Xpower_ )
-		return;
-	
-	Xpower_ = Xpower;
-	takeXpower_ = selectPower( Xpower );
-	
-	int action = ( Xpower <= 0.0 ) ? 0 : 1;
-	int dimension = ( Xdep1_ == -1 ) ? 1 : 2;
-	makeGate(
-		e.e, "xGate", e->findFinfo( "xGate2D" ), action, dimension, Id::newId() );
-}
-
-void HHChannel2D::innerSetYpower( Eref e, double Ypower )
-{
-	if ( Ypower == Ypower_ )
-		return;
-	
-	Ypower_ = Ypower;
-	takeYpower_ = selectPower( Ypower );
-	
-	int action = ( Ypower <= 0.0 ) ? 0 : 1;
-	int dimension = ( Ydep1_ == -1 ) ? 1 : 2;
-	makeGate(
-		e.e, "yGate", e->findFinfo( "yGate2D" ), action, dimension, Id::newId() );
-}
-
-void HHChannel2D::innerSetZpower( Eref e, double Zpower )
-{
-	if ( Zpower == Zpower_ )
-		return;
-	
-	Zpower_ = Zpower;
-	takeZpower_ = selectPower( Zpower );
-	
-	int action = ( Zpower <= 0.0 ) ? 0 : 1;
-	int dimension = ( Zdep1_ == -1 ) ? 1 : 2;
-	makeGate(
-		e.e, "zGate", e->findFinfo( "zGate2D" ), action, dimension, Id::newId() );
 }
 
 int HHChannel2D::dependency( string index, unsigned int dim )
@@ -295,11 +236,30 @@ void HHChannel2D::conc2Func( const Conn* c, double conc )
 ///////////////////////////////////////////////////
 // Virtual function definitions
 ///////////////////////////////////////////////////
+//~ int HHChannel2D::dimension( string gateType )
+//~ {
+	//~ if ( gateType == "X" )
+		//~ return ( Xdep1_ == -1 ) ? 1 : 2;
+	//~ else if ( gateType == "Y" )
+		//~ return ( Ydep1_ == -1 ) ? 1 : 2;
+	//~ else if ( gateType == "Z" )
+		//~ return ( Zdep1_ == -1 ) ? 1 : 2;
+	//~ else
+		//~ assert( 0 );
+//~ }
+
+		//~ {
+			//~ if ( gateType == "X" ) return "xGate2D";
+			//~ else if ( gateType == "Y" ) return "yGate2D";
+			//~ else if ( gateType == "Z" ) return "zGate2D";
+			//~ else assert( 0 );
+		//~ }
+
 void HHChannel2D::lookupXrates( Eref e )
 {
 	double var1;
 	double var2;
-	unsigned int dim = ( Xdep1_ == -1 ) ? 1 : 2;
+	unsigned int dim = 1; // = dimension( "X" );
 	
 	switch( Xdep0_ ) {
 		case 0:		var1 = Vm_; break;
@@ -327,7 +287,7 @@ void HHChannel2D::lookupYrates( Eref e )
 {
 	double var1;
 	double var2;
-	unsigned int dim = ( Ydep1_ == -1 ) ? 1 : 2;
+	unsigned int dim = 1; // = dimension( "Y" );
 	
 	switch( Ydep0_ ) {
 		case 0:		var1 = Vm_; break;
@@ -355,7 +315,7 @@ void HHChannel2D::lookupZrates( Eref e )
 {
 	double var1;
 	double var2;
-	unsigned int dim = ( Zdep1_ == -1 ) ? 1 : 2;
+	unsigned int dim = 1; //dimension( "Z" );
 	
 	switch( Zdep0_ ) {
 		case 0:		var1 = Vm_; break;
