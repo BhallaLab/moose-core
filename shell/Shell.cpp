@@ -589,6 +589,32 @@ const Cinfo* initShellCinfo()
 			RFCAST( &Shell::createGateWorker ),
 			"Args: Gate type (X/Y/Z), HHChannel id, HHGate id, Interpol A id, Interpol B id. "
 			"Handles request sent from the createInterpolsSrc Finfo" ),
+		
+		new SrcFinfo( "setupAlphaSrc",
+			Ftype2< Id, vector< double > >::global() ),
+		new DestFinfo( "setupAlpha",
+			Ftype2< Id, vector< double > >::global(), 
+			RFCAST( &Shell::setupAlpha ) ),
+		new SrcFinfo( "setupTauSrc",
+			Ftype2< Id, vector< double > >::global() ),
+		new DestFinfo( "setupTau",
+			Ftype2< Id, vector< double > >::global(), 
+			RFCAST( &Shell::setupTau ) ),
+		new SrcFinfo( "tweakAlphaSrc",
+			Ftype1< Id >::global() ),
+		new DestFinfo( "tweakAlpha",
+			Ftype1< Id >::global(),
+			RFCAST( &Shell::tweakAlpha ) ),
+		new SrcFinfo( "tweakTauSrc",
+			Ftype1< Id >::global() ),
+		new DestFinfo( "tweakTau",
+			Ftype1< Id >::global(),
+			RFCAST( &Shell::tweakTau ) ),
+		new SrcFinfo( "setupGateSrc",
+			Ftype2< Id, vector< double > >::global() ),
+		new DestFinfo( "setupGate",
+			Ftype2< Id, vector< double > >::global(), 
+			RFCAST( &Shell::setupGate ) ),
 	};
 #endif // USE_MPI
 
@@ -635,6 +661,11 @@ const Cinfo* initShellCinfo()
 			Ftype0::global(),
 			RFCAST( &Shell::pollFunc )
 		),
+		new DestFinfo( "createGate", 
+			Ftype2< Id, string >::global(),
+			RFCAST( &Shell::createGateMaster ),
+			"Args: Channel id, gate type (X, Y or Z) "
+			"Request an HHChannel to create a gate on it." ),
 		new SrcFinfo( "pollSrc", 
 			// # of steps. 
 			// This talks to /sched/pj:step to poll the postmasters
@@ -701,6 +732,16 @@ static const Slot pollSlot =
 #ifdef USE_MPI
 static const Slot createGateSlot =
 	initShellCinfo()->getSlot( "parallel.createGateSrc" );
+static const Slot setupAlphaSlot =
+	initShellCinfo()->getSlot( "parallel.setupAlphaSrc" );
+static const Slot setupTauSlot =
+	initShellCinfo()->getSlot( "parallel.setupTauSrc" );
+static const Slot tweakAlphaSlot =
+	initShellCinfo()->getSlot( "parallel.tweakAlphaSrc" );
+static const Slot tweakTauSlot =
+	initShellCinfo()->getSlot( "parallel.tweakTauSrc" );
+static const Slot setupGateSlot =
+	initShellCinfo()->getSlot( "parallel.setupGateSrc" );
 static const Slot rCreateSlot =
 	initShellCinfo()->getSlot( "parallel.createSrc" );
 static const Slot rCreateArraySlot =
@@ -2803,6 +2844,13 @@ void Shell::setupAlpha( const Conn* c, Id gateId,
 		return;
 	}
 	set< vector< double > >( gate, setupAlphaFinfo, parms );
+	
+#ifdef USE_MPI
+	if ( gateId.isGlobal() && myNode() == 0 )
+		send2< Id, vector< double > >(
+			c->target(), setupAlphaSlot,
+			gateId, parms );
+#endif
 }
 
 void Shell::setupTau( const Conn* c, Id gateId,
@@ -2818,6 +2866,13 @@ void Shell::setupTau( const Conn* c, Id gateId,
 		return;
 	}
 	set< vector< double > >( gate, setupTauFinfo, parms );
+	
+#ifdef USE_MPI
+	if ( gateId.isGlobal() && myNode() == 0 )
+		send2< Id, vector< double > >(
+			c->target(), setupTauSlot,
+			gateId, parms );
+#endif
 }
 
 void Shell::tweakAlpha( const Conn* c, Id gateId )
@@ -2832,6 +2887,13 @@ void Shell::tweakAlpha( const Conn* c, Id gateId )
 		return;
 	}
 	set( gate, tweakAlphaFinfo );
+	
+#ifdef USE_MPI
+	if ( gateId.isGlobal() && myNode() == 0 )
+		send1< Id >(
+			c->target(), tweakAlphaSlot,
+			gateId );
+#endif
 }
 
 void Shell::tweakTau( const Conn* c, Id gateId )
@@ -2846,6 +2908,13 @@ void Shell::tweakTau( const Conn* c, Id gateId )
 		return;
 	}
 	set( gate, tweakTauFinfo );
+	
+#ifdef USE_MPI
+	if ( gateId.isGlobal() && myNode() == 0 )
+		send1< Id >(
+			c->target(), tweakTauSlot,
+			gateId );
+#endif
 }
 
 void Shell::setupGate( const Conn* c, Id gateId,
@@ -2861,6 +2930,13 @@ void Shell::setupGate( const Conn* c, Id gateId,
 		return;
 	}
 	set< vector< double > >( gate, setupGateFinfo, parms );
+	
+#ifdef USE_MPI
+	if ( gateId.isGlobal() && myNode() == 0 )
+		send2< Id, vector< double > >(
+			c->target(), setupGateSlot,
+			gateId, parms );
+#endif
 }
 
 //////////////////////////////////////////////////////////////////

@@ -1303,10 +1303,10 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
  */
 bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s )
 {
-	string chanPath = argv[ 1 ];
-	Id chanId( chanPath );
-	if ( !chanId.zero() && !chanId.bad() ) {
-		send2< Id, string >( s(), requestFieldSlot, chanId, "class" );
+	string elmPath = argv[ 1 ];
+	Id elmId( elmPath );
+	if ( !elmId.zero() && !elmId.bad() ) {
+		send2< Id, string >( s(), requestFieldSlot, elmId, "class" );
 		if ( fieldValue_.length() == 0 ) // Nothing came back
 			return 0;
 		
@@ -1326,11 +1326,11 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s )
 		
 		if ( fieldValue_ == "Table" ) {
 			send3< Id, string, string >( s(),
-				setFieldSlot, chanId, "xdivs", argv[ 3 ] );
+				setFieldSlot, elmId, "xdivs", argv[ 3 ] );
 			send3< Id, string, string >( s(),
-				setFieldSlot, chanId, "xmin", argv[ 4 ] );
+				setFieldSlot, elmId, "xmin", argv[ 4 ] );
 			send3< Id, string, string >( s(),
-				setFieldSlot, chanId, "xmax", argv[ 5 ] );
+				setFieldSlot, elmId, "xmax", argv[ 5 ] );
 			return 1;
 		}
 		
@@ -1374,12 +1374,12 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s )
 			 * Creating gate
 			 */
 			string gateName = string( 1, tolower( gate ) ) + "Gate";
-			string gatePath = chanPath + "/" + gateName;
+			string gatePath = elmPath + "/" + gateName;
 			Id gateId( gatePath );
 			if ( gateId.zero() || gateId.bad() ) {
 				/*
 				// Implicit creation of gate and interpols
-				vector< Id > el( 1, chanId );
+				vector< Id > el( 1, elmId );
 				send3< vector< Id >, string, string >( s(),
 						setVecFieldSlot, el, string( argv[ 3 ] ) + "power", "1.0" );
 				*/
@@ -1390,18 +1390,18 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s )
  				send4< string, string, int, Id >(
 					s(), createSlot,
 					"HHGate", gateName,
-					Id::UnknownNode, chanId );
+					Id::UnknownNode, elmId );
 				*/
 				
 				send2< Id, string >( s(),
-					createGateSlot, chanId, string( 1, gate ) );
+					createGateSlot, elmId, string( 1, gate ) );
 				
 				gateId = Id( gatePath );
 			}
 			if ( gateId.zero() || gateId.bad() ) {
 				cerr << "Error: GenesisParserWrapper::tabCreate:"
 					<< " Unable to create gate " << argv[ 3 ]
-					<< " under channel " << chanPath << ".\n";
+					<< " under channel " << elmPath << ".\n";
 				return 0;
 			}
 			
