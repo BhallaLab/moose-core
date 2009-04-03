@@ -101,6 +101,10 @@ class HHChannel
 		static void setUseConcentration( const Conn* c, int value );
 		static int getUseConcentration( Eref );
 
+		void innerSetXpower( Eref e, double Xpower );
+		void innerSetYpower( Eref e, double Ypower );
+		void innerSetZpower( Eref e, double Zpower );
+
 		/////////////////////////////////////////////////////////////
 		// Dest function definitions
 		/////////////////////////////////////////////////////////////
@@ -160,22 +164,24 @@ class HHChannel
 			Id B );
 
 	protected:
+		virtual string chanFinfo( string gateType ) const
+		{
+			if ( gateType == "X" ) return "xGate";
+			else if ( gateType == "Y" ) return "yGate";
+			else if ( gateType == "Z" ) return "zGate";
+			else assert( 0 );
+		}
+
+		virtual string gateFinfo() const { return "gate"; }
+
+		virtual string gateClass() const { return "HHGate"; }
+
 		virtual void lookupXrates( Eref e );
 		virtual void lookupYrates( Eref e );
 		virtual void lookupZrates( Eref e );
 
-		virtual void innerSetXpower( Eref e, double Xpower );
-		virtual void innerSetYpower( Eref e, double Ypower );
-		virtual void innerSetZpower( Eref e, double Zpower );
-
-		// Utility function for making gates.
-		static void makeGate(
-			Element* e,
-			string name,
-			const Finfo* f,
-			int action,
-			unsigned int dimension,
-			Id id );
+		// Utility function for destroying gate
+		static void destroyGate( Eref e, string name );
 
 		static PFDD selectPower( double power);
 

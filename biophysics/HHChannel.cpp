@@ -10,9 +10,10 @@
 #include <math.h>
 #include "moose.h"
 #include "HHChannel.h"
-#include "../element/Neutral.h"
+#include "element/Neutral.h"
 #include "DeletionMarkerFinfo.h"
 #include "GlobalMarkerFinfo.h"
+#include "shell/Shell.h"
 
 const double HHChannel::EPSILON = 1.0e-10;
 const int HHChannel::INSTANT_X = 1;
@@ -245,10 +246,13 @@ void HHChannel::innerSetXpower( Eref e, double Xpower )
 	Xpower_ = Xpower;
 	takeXpower_ = selectPower( Xpower );
 	
-	string name = "xGate";
-	int action = ( Xpower > 0 ) ? 1 : 0;
-	int dimension = 1;
-	makeGate( e.e, name, e->findFinfo( name ), action, dimension, Id::newId() );
+	if ( Xpower == 0.0 ) {
+		destroyGate( e, "X" );
+		return;
+	}
+	
+	if ( Shell::myNode() == 0 )
+		set< Id, string >( Id::shellId()(), "createGate", e->id(), "X" );
 }
 
 void HHChannel::innerSetYpower( Eref e, double Ypower )
@@ -259,10 +263,13 @@ void HHChannel::innerSetYpower( Eref e, double Ypower )
 	Ypower_ = Ypower;
 	takeYpower_ = selectPower( Ypower );
 	
-	string name = "yGate";
-	int action = ( Ypower > 0 ) ? 1 : 0;
-	int dimension = 1;
-	makeGate( e.e, name, e->findFinfo( name ), action, dimension, Id::newId() );
+	if ( Ypower == 0.0 ) {
+		destroyGate( e, "Y" );
+		return;
+	}
+	
+	if ( Shell::myNode() == 0 )
+		set< Id, string >( Id::shellId()(), "createGate", e->id(), "Y" );
 }
 
 void HHChannel::innerSetZpower( Eref e, double Zpower )
@@ -272,51 +279,23 @@ void HHChannel::innerSetZpower( Eref e, double Zpower )
 	
 	Zpower_ = Zpower;
 	takeZpower_ = selectPower( Zpower );
-	useConcentration_ = 1;        
+	useConcentration_ = 1;
 	
-	string name = "zGate";
-	int action = ( Zpower > 0 ) ? 1 : 0;
-	int dimension = 1;
-	makeGate( e.e, name, e->findFinfo( name ), action, dimension, Id::newId() );
-}
-
-void HHChannel::createGateFunc( const Conn* c,
-	string gateType, Id gate, Id A, Id B )
-{
-	string name;
-	if ( gateType == "X" )
-		name = "xGate";
-	else if ( gateType == "Y" )
-		name = "yGate";
-	else if ( gateType == "Z" )
-		name = "zGate";
-	else
-		assert( 0 );
+	if ( Zpower == 0.0 ) {
+		destroyGate( e, "Z" );
+		return;
+	}
 	
-	Eref e = c->target();
-	string path = e->id().path();
-	int action = 1;
-	int dimension = 1;
-	
-	makeGate( e.e, name, e->findFinfo( name ), action, dimension, gate );
-	assert( Id( path + "/" + name ).good() );
-	
-	set< Id, Id >( gate(), "createInterpols", A, B );
-	assert( Id( path + "/" + name + "/A" ).good() );
-	assert( Id( path + "/" + name + "/B" ).good() );
+	if ( Shell::myNode() == 0 )
+		set< Id, string >( Id::shellId()(), "createGate", e->id(), "Z" );
 }
 
 /**
- * Assigns the power for a specific gate, identified by the Finfo.
- * Assumes that this is a different power from the old one.
- * 
  * If the gate exists and has only this element for input, then change
  * the gate power.
  * If the gate exists and has multiple parents, then make a new gate,
  * 	set its power.
  * If the gate does not exist, make a new gate, set its power.
- *
- * Note that if the power is zero, then the gate has to be removed.
  *
  * The function is designed with the idea that if copies of this
  * channel are made, then they all point back to the original HHGate.
@@ -328,76 +307,101 @@ void HHChannel::createGateFunc( const Conn* c,
  */
 // Assuming that the elements are simple elements. Use Eref for 
 // general case
-void HHChannel::makeGate(
-	Element* e,
-	string name,
-	const Finfo* f,
-	int action,
-	unsigned int dim,
-	Id id )
+void HHChannel::createGateFunc( const Conn* c,
+	string gateType, Id gateId, Id A, Id B )
 {
-	assert( dim == 1 || dim == 2 );
-	dim--;
+	string name;
+	if ( gateType == "X" )
+		name = "xGate";
+	else if ( gateType == "Y" )
+		name = "yGate";
+	else if ( gateType == "Z" )
+		name = "zGate";
+	else
+		assert( 0 );
 	
-	string gateFinfo[ ] = {
-		"gate",
-		"gate2D"
-	};
+	HHChannel* ch = static_cast< HHChannel* >( c->data() );
+	/*
+	 * Calling a few virtual functions.
+	 * 
+	 * chanFinfo: The finfo on HHChannel that connects to a gate
+	 * gateFinfo: The finfo on HHGate that connects to a channel
+	 * gateClass: "HHGate" or "HHGate2D"
+	 */
+	string chanFinfo = ch->chanFinfo( gateType );
+	string gateFinfo = ch->gateFinfo();
+	string gateClass = ch->gateClass();
 	
-	string type[ ] = {
-		"HHGate",
-		"HHGate2D"
-	};
-	
-	Element* gate = 0;	
-	Conn* gateConn = e->targets( f->msg(), 0 ); //zero index for SE
-	unsigned int numGates = e->msg( f->msg() )->numTargets( e );
+	Element* gate = 0;
+	Eref e = c->target();
+	const Finfo* f = e->findFinfo( chanFinfo );
+	Conn* gateConn = e->targets( f->msg(), 0 ); // zero index for SE
+	unsigned int numGates = e->msg( f->msg() )->numTargets( e.e );
 	assert( numGates <= 1 );
-	if ( action == 0 ) { // Delete
-		// If gate exists, remove it.
-		if ( numGates == 1 ) {
-			gate = gateConn->target().e;
-			unsigned int numChans =
-				gate->msg( gate->findFinfo( gateFinfo[ dim ] )->msg() )->size();
-			assert( numChans > 0 );
-			if ( numChans > 1 ) {
-				// Here we have multiple channels using this gate. So
-				// we don't mess with the original.
-				// Get rid of local connection to gate, but don't delete
-				Eref( e ).dropAll( f->msg() );
-			} else { // Delete the single gate.
-				bool ret = set( gate, "destroy" );
-				assert( ret );
-			}
-		}
-		return;
-	}
-
+	
 	if ( numGates == 1 ) {
 		gate = gateConn->target().e;
 		unsigned int numChans =
-				gate->msg( gate->findFinfo( gateFinfo[ dim ] )->msg() )->size();
+			gate->msg( gate->findFinfo( gateFinfo )->msg() )->size();
 		assert( numChans > 0 );
 		if ( numChans > 1 ) {
 			// Here we have multiple channels using this gate. So
 			// we don't mess with the original.
 			// make a new gate which we can change.
-			gate = Neutral::create( type[ dim ], "xGate", e->id(), id );
+			gate = Neutral::create( gateClass, name, e->id(), gateId );
 			gate->addFinfo( GlobalMarkerFinfo::global() );
-			bool ret = Eref( e ).add( f->name(), gate, gateFinfo[ dim ] );
-			// bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
+			bool ret = Eref( e ).add( chanFinfo, gate, gateFinfo );
 			assert( ret );
 		}
 	} else { // No gate, make a new one.
-		gate = Neutral::create( type[ dim ], name, e->id(), id );
+		gate = Neutral::create( gateClass, name, e->id(), gateId );
 		// Make it a global so that duplicates do not happen unless
 		// the table values change.
 		gate->addFinfo( GlobalMarkerFinfo::global() );
-		bool ret = Eref( e ).add( f->name(), gate, gateFinfo[ dim ] );
-		// bool ret = f->add( e, gate, gate->findFinfo( "gate" ) );
+		bool ret = Eref( e ).add( chanFinfo, gate, gateFinfo );
 		assert( ret );
 	}
 	delete gateConn;
+	
+	string path = e->id().path() + "/" + name;
+	assert( Id( path ).good() );
+	
+	// If a gate was created in this function, then create interpols inside it.
+	if ( gate == gateId() ) {
+		set< Id, Id >( gate, "createInterpols", A, B );
+		assert( Id( path + "/A" ).good() );
+		assert( Id( path + "/B" ).good() );
+	}
+}
+
+void HHChannel::destroyGate( Eref e, string gateType )
+{
+	HHChannel* ch = static_cast< HHChannel* >( e.data() );
+	string chanFinfo = ch->chanFinfo( gateType );
+	string gateFinfo = ch->gateFinfo();
+	
+	Element* gate = 0;
+	const Finfo* f = e->findFinfo( chanFinfo );
+	Conn* gateConn = e->targets( f->msg(), 0 ); // zero index for SE
+	unsigned int numGates = e->msg( f->msg() )->numTargets( e.e );
+	assert( numGates <= 1 );
+	
+	// If gate exists, remove it.
+	if ( numGates == 1 ) {
+		gate = gateConn->target().e;
+		unsigned int numChans =
+			gate->msg( gate->findFinfo( gateFinfo )->msg() )->size();
+		assert( numChans > 0 );
+		if ( numChans > 1 ) {
+			// Here we have multiple channels using this gate. So
+			// we don't mess with the original.
+			// Get rid of local connection to gate, but don't delete
+			Eref( e ).dropAll( f->msg() );
+		} else { // Delete the single gate.
+			bool ret = set( gate, "destroy" );
+			assert( ret );
+		}
+	}
 }
 
 ///////////////////////////////////////////////////
