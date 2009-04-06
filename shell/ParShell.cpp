@@ -200,7 +200,7 @@ void Shell::parCreateFunc ( const Conn* c,
 	// both parent and child are here. Straightforward.
 	bool ret = 1;
 	if ( parent.node() == newobj.node() || // both local or both global
-		( parent == Id() && newobj.node() == s->myNode_ ) )
+		( parent.isGlobal() && newobj.node() == s->myNode_ ) )
 	{
 		ret = s->create( objtype, objname, parent, newobj );
 	} else {

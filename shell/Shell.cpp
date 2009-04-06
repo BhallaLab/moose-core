@@ -1280,10 +1280,10 @@ void Shell::staticCreate( const Conn* c, string type,
 		cout << "Error: Cannot create global object unless parent is global\n";
 		return;
 	}
-	if ( ( !( parent == Id() ) && paNid.isGlobal( )) && !id.isGlobal() ) {
-		cout << "Error: Cannot create local object on global parent\n";
-		return;
-	}
+	//~ if ( ( !( parent == Id() ) && paNid.isGlobal( )) && !id.isGlobal() ) {
+		//~ cout << "Error: Cannot create local object on global parent\n";
+		//~ return;
+	//~ }
 	
 	Element* ret;
 	if ( ( paNid.isGlobal() || paNid.node() == 0 || parent == Id() ) &&
@@ -1308,7 +1308,7 @@ void Shell::staticCreate( const Conn* c, string type,
 #ifdef USE_MPI
 	} else { // Has to go off-node, to a single target node.
 		unsigned int targetNode;
-		if ( parent == Id() ) {
+		if ( parent.isGlobal() ) {
 			targetNode = id.node();
 			assert( targetNode != 0 );
 		} else {
