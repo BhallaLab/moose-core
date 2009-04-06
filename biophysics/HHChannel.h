@@ -172,9 +172,9 @@ class HHChannel
 			else assert( 0 );
 		}
 
-		virtual string gateFinfo() const { return "gate"; }
+		virtual string gateFinfo( string gateType ) const { return "gate"; }
 
-		virtual string gateClass() const { return "HHGate"; }
+		virtual string gateClass( string gateType ) const { return "HHGate"; }
 
 		virtual void lookupXrates( Eref e );
 		virtual void lookupYrates( Eref e );

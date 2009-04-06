@@ -329,8 +329,8 @@ void HHChannel::createGateFunc( const Conn* c,
 	 * gateClass: "HHGate" or "HHGate2D"
 	 */
 	string chanFinfo = ch->chanFinfo( gateType );
-	string gateFinfo = ch->gateFinfo();
-	string gateClass = ch->gateClass();
+	string gateFinfo = ch->gateFinfo( gateType );
+	string gateClass = ch->gateClass( gateType );
 	
 	Element* gate = 0;
 	Eref e = c->target();
@@ -378,7 +378,7 @@ void HHChannel::destroyGate( Eref e, string gateType )
 {
 	HHChannel* ch = static_cast< HHChannel* >( e.data() );
 	string chanFinfo = ch->chanFinfo( gateType );
-	string gateFinfo = ch->gateFinfo();
+	string gateFinfo = ch->gateFinfo( gateType );
 	
 	Element* gate = 0;
 	const Finfo* f = e->findFinfo( chanFinfo );
