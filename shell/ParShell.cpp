@@ -263,6 +263,11 @@ void Shell::parCreateArrayFunc ( const Conn* c,
 /**
  * This is called on the master node. For now we can get by with the
  * implicit node info
+ * 
+ * In at least one rare case this function is also called on worker nodes:
+ * This happens when ReadCell encounters an "addmsg" field on a channel
+ * that contains an addmsg command which needs to be executed. ReadCell invokes
+ * this function for doing this.
  */
 bool Shell::addSingleMessage( const Conn* c, Id src, string srcField, 
 	Id dest, string destField )
