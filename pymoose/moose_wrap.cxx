@@ -2499,84 +2499,88 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int argnum, int flags)
 #define SWIGTYPE_p_char swig_types[15]
 #define SWIGTYPE_p_difference_type swig_types[16]
 #define SWIGTYPE_p_m_Poisson__f___double swig_types[17]
-#define SWIGTYPE_p_p_PyObject swig_types[18]
-#define SWIGTYPE_p_pymoose__Adaptor swig_types[19]
-#define SWIGTYPE_p_pymoose__AscFile swig_types[20]
-#define SWIGTYPE_p_pymoose__BinSynchan swig_types[21]
-#define SWIGTYPE_p_pymoose__BinomialRng swig_types[22]
-#define SWIGTYPE_p_pymoose__CaConc swig_types[23]
-#define SWIGTYPE_p_pymoose__Cell swig_types[24]
-#define SWIGTYPE_p_pymoose__Class swig_types[25]
-#define SWIGTYPE_p_pymoose__ClockJob swig_types[26]
-#define SWIGTYPE_p_pymoose__ClockTick swig_types[27]
-#define SWIGTYPE_p_pymoose__Compartment swig_types[28]
-#define SWIGTYPE_p_pymoose__CylPanel swig_types[29]
-#define SWIGTYPE_p_pymoose__DifShell swig_types[30]
-#define SWIGTYPE_p_pymoose__DiffAmp swig_types[31]
-#define SWIGTYPE_p_pymoose__DiskPanel swig_types[32]
-#define SWIGTYPE_p_pymoose__Enzyme swig_types[33]
-#define SWIGTYPE_p_pymoose__ExponentialRng swig_types[34]
-#define SWIGTYPE_p_pymoose__GammaRng swig_types[35]
-#define SWIGTYPE_p_pymoose__Geometry swig_types[36]
-#define SWIGTYPE_p_pymoose__GssaStoich swig_types[37]
-#define SWIGTYPE_p_pymoose__HHChannel swig_types[38]
-#define SWIGTYPE_p_pymoose__HHGate swig_types[39]
-#define SWIGTYPE_p_pymoose__HSolve swig_types[40]
-#define SWIGTYPE_p_pymoose__HemispherePanel swig_types[41]
-#define SWIGTYPE_p_pymoose__Interpol swig_types[42]
-#define SWIGTYPE_p_pymoose__KinCompt swig_types[43]
-#define SWIGTYPE_p_pymoose__KineticHub swig_types[44]
-#define SWIGTYPE_p_pymoose__KineticManager swig_types[45]
-#define SWIGTYPE_p_pymoose__Kintegrator swig_types[46]
-#define SWIGTYPE_p_pymoose__MathFunc swig_types[47]
-#define SWIGTYPE_p_pymoose__Mg_block swig_types[48]
-#define SWIGTYPE_p_pymoose__Molecule swig_types[49]
-#define SWIGTYPE_p_pymoose__Nernst swig_types[50]
-#define SWIGTYPE_p_pymoose__NeuroScan swig_types[51]
-#define SWIGTYPE_p_pymoose__Neutral swig_types[52]
-#define SWIGTYPE_p_pymoose__NormalRng swig_types[53]
-#define SWIGTYPE_p_pymoose__PIDController swig_types[54]
-#define SWIGTYPE_p_pymoose__Panel swig_types[55]
-#define SWIGTYPE_p_pymoose__PoissonRng swig_types[56]
-#define SWIGTYPE_p_pymoose__PulseGen swig_types[57]
-#define SWIGTYPE_p_pymoose__PyMooseBase swig_types[58]
-#define SWIGTYPE_p_pymoose__PyMooseContext swig_types[59]
-#define SWIGTYPE_p_pymoose__RC swig_types[60]
-#define SWIGTYPE_p_pymoose__RandGenerator swig_types[61]
-#define SWIGTYPE_p_pymoose__RandomSpike swig_types[62]
-#define SWIGTYPE_p_pymoose__Reaction swig_types[63]
-#define SWIGTYPE_p_pymoose__RectPanel swig_types[64]
-#define SWIGTYPE_p_pymoose__SigNeur swig_types[65]
-#define SWIGTYPE_p_pymoose__SpherePanel swig_types[66]
-#define SWIGTYPE_p_pymoose__SpikeGen swig_types[67]
-#define SWIGTYPE_p_pymoose__StochSynchan swig_types[68]
-#define SWIGTYPE_p_pymoose__Stoich swig_types[69]
-#define SWIGTYPE_p_pymoose__Surface swig_types[70]
-#define SWIGTYPE_p_pymoose__SynChan swig_types[71]
-#define SWIGTYPE_p_pymoose__Table swig_types[72]
-#define SWIGTYPE_p_pymoose__TableIterator swig_types[73]
-#define SWIGTYPE_p_pymoose__TauPump swig_types[74]
-#define SWIGTYPE_p_pymoose__TimeTable swig_types[75]
-#define SWIGTYPE_p_pymoose__TriPanel swig_types[76]
-#define SWIGTYPE_p_pymoose__UniformRng swig_types[77]
-#define SWIGTYPE_p_size_type swig_types[78]
-#define SWIGTYPE_p_std__invalid_argument swig_types[79]
-#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t swig_types[80]
-#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t__allocator_type swig_types[81]
-#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t__value_type swig_types[82]
-#define SWIGTYPE_p_std__vectorTdouble_std__allocatorTdouble_t_t swig_types[83]
-#define SWIGTYPE_p_std__vectorTdouble_std__allocatorTdouble_t_t__allocator_type swig_types[84]
-#define SWIGTYPE_p_std__vectorTint_std__allocatorTint_t_t swig_types[85]
-#define SWIGTYPE_p_std__vectorTint_std__allocatorTint_t_t__allocator_type swig_types[86]
-#define SWIGTYPE_p_std__vectorTstd__string_std__allocatorTstd__string_t_t swig_types[87]
-#define SWIGTYPE_p_std__vectorTstd__string_std__allocatorTstd__string_t_t__allocator_type swig_types[88]
-#define SWIGTYPE_p_std__vectorTunsigned_int_std__allocatorTunsigned_int_t_t swig_types[89]
-#define SWIGTYPE_p_std__vectorTunsigned_int_std__allocatorTunsigned_int_t_t__allocator_type swig_types[90]
-#define SWIGTYPE_p_swig__PySwigIterator swig_types[91]
-#define SWIGTYPE_p_value_type swig_types[92]
-#define SWIGTYPE_p_void swig_types[93]
-static swig_type_info *swig_types[95];
-static swig_module_info swig_module = {swig_types, 94, 0, 0, 0, 0};
+#define SWIGTYPE_p_ostream swig_types[18]
+#define SWIGTYPE_p_p_PyObject swig_types[19]
+#define SWIGTYPE_p_pymoose__Adaptor swig_types[20]
+#define SWIGTYPE_p_pymoose__AscFile swig_types[21]
+#define SWIGTYPE_p_pymoose__BinSynchan swig_types[22]
+#define SWIGTYPE_p_pymoose__BinomialRng swig_types[23]
+#define SWIGTYPE_p_pymoose__CaConc swig_types[24]
+#define SWIGTYPE_p_pymoose__Cell swig_types[25]
+#define SWIGTYPE_p_pymoose__Class swig_types[26]
+#define SWIGTYPE_p_pymoose__ClockJob swig_types[27]
+#define SWIGTYPE_p_pymoose__ClockTick swig_types[28]
+#define SWIGTYPE_p_pymoose__Compartment swig_types[29]
+#define SWIGTYPE_p_pymoose__CylPanel swig_types[30]
+#define SWIGTYPE_p_pymoose__DifShell swig_types[31]
+#define SWIGTYPE_p_pymoose__DiffAmp swig_types[32]
+#define SWIGTYPE_p_pymoose__DiskPanel swig_types[33]
+#define SWIGTYPE_p_pymoose__Enzyme swig_types[34]
+#define SWIGTYPE_p_pymoose__ExponentialRng swig_types[35]
+#define SWIGTYPE_p_pymoose__GHK swig_types[36]
+#define SWIGTYPE_p_pymoose__GammaRng swig_types[37]
+#define SWIGTYPE_p_pymoose__Geometry swig_types[38]
+#define SWIGTYPE_p_pymoose__GssaStoich swig_types[39]
+#define SWIGTYPE_p_pymoose__HHChannel swig_types[40]
+#define SWIGTYPE_p_pymoose__HHGate swig_types[41]
+#define SWIGTYPE_p_pymoose__HSolve swig_types[42]
+#define SWIGTYPE_p_pymoose__HemispherePanel swig_types[43]
+#define SWIGTYPE_p_pymoose__IntFire swig_types[44]
+#define SWIGTYPE_p_pymoose__Interpol swig_types[45]
+#define SWIGTYPE_p_pymoose__IzhikevichNrn swig_types[46]
+#define SWIGTYPE_p_pymoose__KinCompt swig_types[47]
+#define SWIGTYPE_p_pymoose__KineticHub swig_types[48]
+#define SWIGTYPE_p_pymoose__KineticManager swig_types[49]
+#define SWIGTYPE_p_pymoose__Kintegrator swig_types[50]
+#define SWIGTYPE_p_pymoose__MathFunc swig_types[51]
+#define SWIGTYPE_p_pymoose__Mg_block swig_types[52]
+#define SWIGTYPE_p_pymoose__Molecule swig_types[53]
+#define SWIGTYPE_p_pymoose__Nernst swig_types[54]
+#define SWIGTYPE_p_pymoose__NeuroScan swig_types[55]
+#define SWIGTYPE_p_pymoose__Neutral swig_types[56]
+#define SWIGTYPE_p_pymoose__NormalRng swig_types[57]
+#define SWIGTYPE_p_pymoose__PIDController swig_types[58]
+#define SWIGTYPE_p_pymoose__Panel swig_types[59]
+#define SWIGTYPE_p_pymoose__PoissonRng swig_types[60]
+#define SWIGTYPE_p_pymoose__PulseGen swig_types[61]
+#define SWIGTYPE_p_pymoose__PyMooseBase swig_types[62]
+#define SWIGTYPE_p_pymoose__PyMooseContext swig_types[63]
+#define SWIGTYPE_p_pymoose__RC swig_types[64]
+#define SWIGTYPE_p_pymoose__RandGenerator swig_types[65]
+#define SWIGTYPE_p_pymoose__RandomSpike swig_types[66]
+#define SWIGTYPE_p_pymoose__Reaction swig_types[67]
+#define SWIGTYPE_p_pymoose__RectPanel swig_types[68]
+#define SWIGTYPE_p_pymoose__SigNeur swig_types[69]
+#define SWIGTYPE_p_pymoose__SpherePanel swig_types[70]
+#define SWIGTYPE_p_pymoose__SpikeGen swig_types[71]
+#define SWIGTYPE_p_pymoose__StochSynchan swig_types[72]
+#define SWIGTYPE_p_pymoose__Stoich swig_types[73]
+#define SWIGTYPE_p_pymoose__Surface swig_types[74]
+#define SWIGTYPE_p_pymoose__SynChan swig_types[75]
+#define SWIGTYPE_p_pymoose__Table swig_types[76]
+#define SWIGTYPE_p_pymoose__TableIterator swig_types[77]
+#define SWIGTYPE_p_pymoose__TauPump swig_types[78]
+#define SWIGTYPE_p_pymoose__TimeTable swig_types[79]
+#define SWIGTYPE_p_pymoose__TriPanel swig_types[80]
+#define SWIGTYPE_p_pymoose__UniformRng swig_types[81]
+#define SWIGTYPE_p_size_type swig_types[82]
+#define SWIGTYPE_p_std__invalid_argument swig_types[83]
+#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t swig_types[84]
+#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t__allocator_type swig_types[85]
+#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t__value_type swig_types[86]
+#define SWIGTYPE_p_std__vectorTdouble_std__allocatorTdouble_t_t swig_types[87]
+#define SWIGTYPE_p_std__vectorTdouble_std__allocatorTdouble_t_t__allocator_type swig_types[88]
+#define SWIGTYPE_p_std__vectorTint_std__allocatorTint_t_t swig_types[89]
+#define SWIGTYPE_p_std__vectorTint_std__allocatorTint_t_t__allocator_type swig_types[90]
+#define SWIGTYPE_p_std__vectorTstd__string_std__allocatorTstd__string_t_t swig_types[91]
+#define SWIGTYPE_p_std__vectorTstd__string_std__allocatorTstd__string_t_t__allocator_type swig_types[92]
+#define SWIGTYPE_p_std__vectorTunsigned_int_std__allocatorTunsigned_int_t_t swig_types[93]
+#define SWIGTYPE_p_std__vectorTunsigned_int_std__allocatorTunsigned_int_t_t__allocator_type swig_types[94]
+#define SWIGTYPE_p_swig__PySwigIterator swig_types[95]
+#define SWIGTYPE_p_value_type swig_types[96]
+#define SWIGTYPE_p_void swig_types[97]
+static swig_type_info *swig_types[99];
+static swig_module_info swig_module = {swig_types, 98, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -3074,6 +3078,9 @@ SWIG_AsVal_ptrdiff_t (PyObject * obj, ptrdiff_t *val)
 	#include "PIDController.h"
 	#include "DiffAmp.h"
 	#include "RC.h"
+	#include "IntFire.h"
+	#include "IzhikevichNrn.h"
+	#include "GHK.h"
 //	#include "../kinetics/SparseMatrix.h"
 	#include "../utility/utility.h"
 	/* Random number related utilities */
@@ -5722,15 +5729,18 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
   
 
 #define pymoose_PIDController_command_get(self_) self_->__get_command()
+#define pymoose_PIDController_command_set(self_, val_) self_->__set_command(val_)
   
 
 #define pymoose_PIDController_sensed_get(self_) self_->__get_sensed()
   
 
 #define pymoose_PIDController_tauI_get(self_) self_->__get_tauI()
+#define pymoose_PIDController_tauI_set(self_, val_) self_->__set_tauI(val_)
   
 
 #define pymoose_PIDController_tauD_get(self_) self_->__get_tauD()
+#define pymoose_PIDController_tauD_set(self_, val_) self_->__set_tauD(val_)
   
 
 #define pymoose_PIDController_output_get(self_) self_->__get_output()
@@ -5751,6 +5761,128 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
   
 
 #define pymoose_DiffAmp_output_get(self_) self_->__get_output()
+  
+
+#define pymoose_IntFire_Vt_get(self_) self_->__get_Vt()
+#define pymoose_IntFire_Vt_set(self_, val_) self_->__set_Vt(val_)
+  
+
+#define pymoose_IntFire_Vr_get(self_) self_->__get_Vr()
+#define pymoose_IntFire_Vr_set(self_, val_) self_->__set_Vr(val_)
+  
+
+#define pymoose_IntFire_Rm_get(self_) self_->__get_Rm()
+#define pymoose_IntFire_Rm_set(self_, val_) self_->__set_Rm(val_)
+  
+
+#define pymoose_IntFire_Cm_get(self_) self_->__get_Cm()
+#define pymoose_IntFire_Cm_set(self_, val_) self_->__set_Cm(val_)
+  
+
+#define pymoose_IntFire_Vm_get(self_) self_->__get_Vm()
+#define pymoose_IntFire_Vm_set(self_, val_) self_->__set_Vm(val_)
+  
+
+#define pymoose_IntFire_tau_get(self_) self_->__get_tau()
+  
+
+#define pymoose_IntFire_Em_get(self_) self_->__get_Em()
+#define pymoose_IntFire_Em_set(self_, val_) self_->__set_Em(val_)
+  
+
+#define pymoose_IntFire_refractT_get(self_) self_->__get_refractT()
+#define pymoose_IntFire_refractT_set(self_, val_) self_->__set_refractT(val_)
+  
+
+#define pymoose_IntFire_initVm_get(self_) self_->__get_initVm()
+#define pymoose_IntFire_initVm_set(self_, val_) self_->__set_initVm(val_)
+  
+
+#define pymoose_IntFire_inject_get(self_) self_->__get_inject()
+#define pymoose_IntFire_inject_set(self_, val_) self_->__set_inject(val_)
+  
+
+#define pymoose_IzhikevichNrn_Vmax_get(self_) self_->__get_Vmax()
+#define pymoose_IzhikevichNrn_Vmax_set(self_, val_) self_->__set_Vmax(val_)
+  
+
+#define pymoose_IzhikevichNrn_c_get(self_) self_->__get_c()
+#define pymoose_IzhikevichNrn_c_set(self_, val_) self_->__set_c(val_)
+  
+
+#define pymoose_IzhikevichNrn_d_get(self_) self_->__get_d()
+#define pymoose_IzhikevichNrn_d_set(self_, val_) self_->__set_d(val_)
+  
+
+#define pymoose_IzhikevichNrn_a_get(self_) self_->__get_a()
+#define pymoose_IzhikevichNrn_a_set(self_, val_) self_->__set_a(val_)
+  
+
+#define pymoose_IzhikevichNrn_b_get(self_) self_->__get_b()
+#define pymoose_IzhikevichNrn_b_set(self_, val_) self_->__set_b(val_)
+  
+
+#define pymoose_IzhikevichNrn_Vm_get(self_) self_->__get_Vm()
+#define pymoose_IzhikevichNrn_Vm_set(self_, val_) self_->__set_Vm(val_)
+  
+
+#define pymoose_IzhikevichNrn_u_get(self_) self_->__get_u()
+  
+
+#define pymoose_IzhikevichNrn_Im_get(self_) self_->__get_Im()
+  
+
+#define pymoose_IzhikevichNrn_initVm_get(self_) self_->__get_initVm()
+#define pymoose_IzhikevichNrn_initVm_set(self_, val_) self_->__set_initVm(val_)
+  
+
+#define pymoose_IzhikevichNrn_initU_get(self_) self_->__get_initU()
+#define pymoose_IzhikevichNrn_initU_set(self_, val_) self_->__set_initU(val_)
+  
+
+#define pymoose_IzhikevichNrn_alpha_get(self_) self_->__get_alpha()
+#define pymoose_IzhikevichNrn_alpha_set(self_, val_) self_->__set_alpha(val_)
+  
+
+#define pymoose_IzhikevichNrn_beta_get(self_) self_->__get_beta()
+#define pymoose_IzhikevichNrn_beta_set(self_, val_) self_->__set_beta(val_)
+  
+
+#define pymoose_IzhikevichNrn_gamma_get(self_) self_->__get_gamma()
+#define pymoose_IzhikevichNrn_gamma_set(self_, val_) self_->__set_gamma(val_)
+  
+
+#define pymoose_GHK_Ik_get(self_) self_->__get_Ik()
+  
+
+#define pymoose_GHK_Gk_get(self_) self_->__get_Gk()
+  
+
+#define pymoose_GHK_Ek_get(self_) self_->__get_Ek()
+  
+
+#define pymoose_GHK_T_get(self_) self_->__get_T()
+#define pymoose_GHK_T_set(self_, val_) self_->__set_T(val_)
+  
+
+#define pymoose_GHK_p_get(self_) self_->__get_p()
+#define pymoose_GHK_p_set(self_, val_) self_->__set_p(val_)
+  
+
+#define pymoose_GHK_Vm_get(self_) self_->__get_Vm()
+#define pymoose_GHK_Vm_set(self_, val_) self_->__set_Vm(val_)
+  
+
+#define pymoose_GHK_Cin_get(self_) self_->__get_Cin()
+#define pymoose_GHK_Cin_set(self_, val_) self_->__set_Cin(val_)
+  
+
+#define pymoose_GHK_Cout_get(self_) self_->__get_Cout()
+#define pymoose_GHK_Cout_set(self_, val_) self_->__set_Cout(val_)
+  
+
+#define pymoose_GHK_valency_get(self_) self_->__get_valency()
+#define pymoose_GHK_valency_set(self_, val_) self_->__set_valency(val_)
   
 #ifdef __cplusplus
 extern "C" {
@@ -16828,6 +16960,37 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Id_dumpState(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ostream *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Id_dumpState",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_ostream,  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Id_dumpState" "', argument " "1"" of type '" "ostream &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Id_dumpState" "', argument " "1"" of type '" "ostream &""'"); 
+  }
+  arg1 = reinterpret_cast< ostream * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    Id::dumpState(*arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_new_Id__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Id *result = 0 ;
@@ -17188,6 +17351,46 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Id_newId(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Id result;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Id_newId",0,0)) SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = Id::newId();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj((new Id(static_cast< const Id& >(result))), SWIGTYPE_p_Id, SWIG_POINTER_OWN |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Id_initId(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Id result;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Id_initId",0,0)) SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = Id::initId();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj((new Id(static_cast< const Id& >(result))), SWIGTYPE_p_Id, SWIG_POINTER_OWN |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Id_makeIdOnNode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   unsigned int arg1 ;
@@ -17266,6 +17469,26 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Id_globalId(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Id result;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Id_globalId",0,0)) SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = Id::globalId();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj((new Id(static_cast< const Id& >(result))), SWIGTYPE_p_Id, SWIG_POINTER_OWN |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Id_assignIndex(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Id *arg1 = (Id *) 0 ;
@@ -17304,100 +17527,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Id_nextScratchId(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Id result;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Id_nextScratchId",0,0)) SWIG_fail;
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = Id::nextScratchId();
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_NewPointerObj((new Id(static_cast< const Id& >(result))), SWIGTYPE_p_Id, SWIG_POINTER_OWN |  0 );
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Id_redefineScratchIds(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Id arg1 ;
-  Nid arg2 ;
-  bool result;
-  void *argp1 ;
-  int res1 = 0 ;
-  void *argp2 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Id_redefineScratchIds",2,2,&obj0,&obj1)) SWIG_fail;
-  {
-    res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Id,  0  | 0);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Id_redefineScratchIds" "', argument " "1"" of type '" "Id""'"); 
-    }  
-    if (!argp1) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Id_redefineScratchIds" "', argument " "1"" of type '" "Id""'");
-    } else {
-      Id * temp = reinterpret_cast< Id * >(argp1);
-      arg1 = *temp;
-      if (SWIG_IsNewObj(res1)) delete temp;
-    }
-  }
-  {
-    res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Nid,  0  | 0);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Id_redefineScratchIds" "', argument " "2"" of type '" "Nid""'"); 
-    }  
-    if (!argp2) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Id_redefineScratchIds" "', argument " "2"" of type '" "Nid""'");
-    } else {
-      Nid * temp = reinterpret_cast< Nid * >(argp2);
-      arg2 = *temp;
-      if (SWIG_IsNewObj(res2)) delete temp;
-    }
-  }
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (bool)Id::redefineScratchIds(arg1,arg2);
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Id_regularizeScratch(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Id_regularizeScratch",0,0)) SWIG_fail;
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    Id::regularizeScratch();
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_Py_Void();
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Id_allotMainIdBlock(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Id_newIdBlock(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   unsigned int arg1 ;
   unsigned int arg2 ;
@@ -17410,20 +17540,20 @@ SWIGINTERN PyObject *_wrap_Id_allotMainIdBlock(PyObject *SWIGUNUSEDPARM(self), P
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Id_allotMainIdBlock",2,2,&obj0,&obj1)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"Id_newIdBlock",2,2,&obj0,&obj1)) SWIG_fail;
   ecode1 = SWIG_AsVal_unsigned_SS_int(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "Id_allotMainIdBlock" "', argument " "1"" of type '" "unsigned int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "Id_newIdBlock" "', argument " "1"" of type '" "unsigned int""'");
   } 
   arg1 = static_cast< unsigned int >(val1);
   ecode2 = SWIG_AsVal_unsigned_SS_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Id_allotMainIdBlock" "', argument " "2"" of type '" "unsigned int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Id_newIdBlock" "', argument " "2"" of type '" "unsigned int""'");
   } 
   arg2 = static_cast< unsigned int >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (unsigned int)Id::allotMainIdBlock(arg1,arg2);
+    result = (unsigned int)Id::newIdBlock(arg1,arg2);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
@@ -18205,6 +18335,34 @@ SWIGINTERN PyObject *Swig_var_Id_BadIndex_get(void) {
   PyObject *pyobj = 0;
   
   pyobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(Id::BadIndex));
+  return pyobj;
+}
+
+
+SWIGINTERN int Swig_var_Id_BadNode_set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Id_BadNode is read-only.");
+  return 1;
+}
+
+
+SWIGINTERN PyObject *Swig_var_Id_BadNode_get(void) {
+  PyObject *pyobj = 0;
+  
+  pyobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(Id::BadNode));
+  return pyobj;
+}
+
+
+SWIGINTERN int Swig_var_Id_UnknownNode_set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Id_UnknownNode is read-only.");
+  return 1;
+}
+
+
+SWIGINTERN PyObject *Swig_var_Id_UnknownNode_get(void) {
+  PyObject *pyobj = 0;
+  
+  pyobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(Id::UnknownNode));
   return pyobj;
 }
 
@@ -60781,6 +60939,204 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Compartment___get_x0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Compartment___get_x0",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment___get_x0" "', argument " "1"" of type '" "pymoose::Compartment const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::Compartment const *)arg1)->__get_x0();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Compartment___set_x0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Compartment___set_x0",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment___set_x0" "', argument " "1"" of type '" "pymoose::Compartment *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Compartment___set_x0" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_x0(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Compartment___get_y0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Compartment___get_y0",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment___get_y0" "', argument " "1"" of type '" "pymoose::Compartment const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::Compartment const *)arg1)->__get_y0();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Compartment___set_y0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Compartment___set_y0",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment___set_y0" "', argument " "1"" of type '" "pymoose::Compartment *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Compartment___set_y0" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_y0(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Compartment___get_z0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Compartment___get_z0",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment___get_z0" "', argument " "1"" of type '" "pymoose::Compartment const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::Compartment const *)arg1)->__get_z0();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Compartment___set_z0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Compartment___set_z0",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Compartment, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Compartment___set_z0" "', argument " "1"" of type '" "pymoose::Compartment *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::Compartment * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Compartment___set_z0" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_z0(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Compartment_Vm_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::Compartment *arg1 = (pymoose::Compartment *) 0 ;
@@ -101814,6 +102170,43 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PIDController___set_command(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PIDController *arg1 = (pymoose::PIDController *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PIDController___set_command",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PIDController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PIDController___set_command" "', argument " "1"" of type '" "pymoose::PIDController *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PIDController * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PIDController___set_command" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_command(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PIDController___get_sensed(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PIDController *arg1 = (pymoose::PIDController *) 0 ;
@@ -101872,6 +102265,43 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PIDController___set_tauI(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PIDController *arg1 = (pymoose::PIDController *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PIDController___set_tauI",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PIDController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PIDController___set_tauI" "', argument " "1"" of type '" "pymoose::PIDController *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PIDController * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PIDController___set_tauI" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_tauI(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PIDController___get_tauD(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PIDController *arg1 = (pymoose::PIDController *) 0 ;
@@ -101893,6 +102323,43 @@ SWIGINTERN PyObject *_wrap_PIDController___get_tauD(PyObject *SWIGUNUSEDPARM(sel
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PIDController___set_tauD(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PIDController *arg1 = (pymoose::PIDController *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PIDController___set_tauD",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PIDController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PIDController___set_tauD" "', argument " "1"" of type '" "pymoose::PIDController *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PIDController * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PIDController___set_tauD" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_tauD(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -102064,6 +102531,44 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PIDController_command_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PIDController *arg1 = (pymoose::PIDController *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PIDController_command_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PIDController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PIDController_command_set" "', argument " "1"" of type '" "pymoose::PIDController *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PIDController * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PIDController_command_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_PIDController_command_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PIDController_command_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PIDController *arg1 = (pymoose::PIDController *) 0 ;
@@ -102122,6 +102627,44 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PIDController_tauI_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PIDController *arg1 = (pymoose::PIDController *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PIDController_tauI_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PIDController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PIDController_tauI_set" "', argument " "1"" of type '" "pymoose::PIDController *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PIDController * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PIDController_tauI_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_PIDController_tauI_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PIDController_tauI_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PIDController *arg1 = (pymoose::PIDController *) 0 ;
@@ -102143,6 +102686,44 @@ SWIGINTERN PyObject *_wrap_PIDController_tauI_get(PyObject *SWIGUNUSEDPARM(self)
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PIDController_tauD_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PIDController *arg1 = (pymoose::PIDController *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PIDController_tauD_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PIDController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PIDController_tauD_set" "', argument " "1"" of type '" "pymoose::PIDController *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PIDController * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PIDController_tauD_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_PIDController_tauD_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -103236,6 +103817,5552 @@ SWIGINTERN PyObject *DiffAmp_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObje
   return SWIG_Py_Void();
 }
 
+SWIGINTERN int Swig_var_IntFire_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable IntFire_className_ is read-only.");
+  return 1;
+}
+
+
+SWIGINTERN PyObject *Swig_var_IntFire_className__get(void) {
+  PyObject *pyobj = 0;
+  
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::IntFire::className_));
+  return pyobj;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IntFire__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Id arg1 ;
+  pymoose::IntFire *result = 0 ;
+  void *argp1 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IntFire",1,1,&obj0)) SWIG_fail;
+  {
+    res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Id,  0  | 0);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_IntFire" "', argument " "1"" of type '" "Id""'"); 
+    }  
+    if (!argp1) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IntFire" "', argument " "1"" of type '" "Id""'");
+    } else {
+      Id * temp = reinterpret_cast< Id * >(argp1);
+      arg1 = *temp;
+      if (SWIG_IsNewObj(res1)) delete temp;
+    }
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IntFire *)new pymoose::IntFire(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IntFire, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IntFire__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::string arg1 ;
+  pymoose::IntFire *result = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IntFire",1,1,&obj0)) SWIG_fail;
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj0, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IntFire" "', argument " "1"" of type '" "std::string""'"); 
+    }
+    arg1 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IntFire *)new pymoose::IntFire(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IntFire, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IntFire__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::string arg1 ;
+  Id arg2 ;
+  pymoose::IntFire *result = 0 ;
+  void *argp2 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IntFire",2,2,&obj0,&obj1)) SWIG_fail;
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj0, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IntFire" "', argument " "1"" of type '" "std::string""'"); 
+    }
+    arg1 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Id,  0  | 0);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_IntFire" "', argument " "2"" of type '" "Id""'"); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IntFire" "', argument " "2"" of type '" "Id""'");
+    } else {
+      Id * temp = reinterpret_cast< Id * >(argp2);
+      arg2 = *temp;
+      if (SWIG_IsNewObj(res2)) delete temp;
+    }
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IntFire *)new pymoose::IntFire(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IntFire, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IntFire__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::string arg1 ;
+  pymoose::PyMooseBase *arg2 = 0 ;
+  pymoose::IntFire *result = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IntFire",2,2,&obj0,&obj1)) SWIG_fail;
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj0, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IntFire" "', argument " "1"" of type '" "std::string""'"); 
+    }
+    arg1 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_pymoose__PyMooseBase,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_IntFire" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IntFire" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
+  }
+  arg2 = reinterpret_cast< pymoose::PyMooseBase * >(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IntFire *)new pymoose::IntFire(arg1,*arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IntFire, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IntFire__SWIG_4(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = 0 ;
+  std::string arg2 ;
+  pymoose::PyMooseBase *arg3 = 0 ;
+  pymoose::IntFire *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IntFire",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__IntFire,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_IntFire" "', argument " "1"" of type '" "pymoose::IntFire const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IntFire" "', argument " "1"" of type '" "pymoose::IntFire const &""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IntFire" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_pymoose__PyMooseBase,  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_IntFire" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IntFire" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
+  }
+  arg3 = reinterpret_cast< pymoose::PyMooseBase * >(argp3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IntFire *)new pymoose::IntFire((pymoose::IntFire const &)*arg1,arg2,*arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IntFire, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IntFire__SWIG_5(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = 0 ;
+  std::string arg2 ;
+  Id *arg3 = 0 ;
+  pymoose::IntFire *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IntFire",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__IntFire,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_IntFire" "', argument " "1"" of type '" "pymoose::IntFire const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IntFire" "', argument " "1"" of type '" "pymoose::IntFire const &""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IntFire" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_IntFire" "', argument " "3"" of type '" "Id &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IntFire" "', argument " "3"" of type '" "Id &""'"); 
+  }
+  arg3 = reinterpret_cast< Id * >(argp3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IntFire *)new pymoose::IntFire((pymoose::IntFire const &)*arg1,arg2,*arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IntFire, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IntFire__SWIG_6(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = 0 ;
+  std::string arg2 ;
+  pymoose::IntFire *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IntFire",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__IntFire,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_IntFire" "', argument " "1"" of type '" "pymoose::IntFire const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IntFire" "', argument " "1"" of type '" "pymoose::IntFire const &""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IntFire" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IntFire *)new pymoose::IntFire((pymoose::IntFire const &)*arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IntFire, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IntFire__SWIG_7(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Id *arg1 = 0 ;
+  std::string arg2 ;
+  Id *arg3 = 0 ;
+  pymoose::IntFire *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IntFire",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Id,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_IntFire" "', argument " "1"" of type '" "Id const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IntFire" "', argument " "1"" of type '" "Id const &""'"); 
+  }
+  arg1 = reinterpret_cast< Id * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IntFire" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_IntFire" "', argument " "3"" of type '" "Id &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IntFire" "', argument " "3"" of type '" "Id &""'"); 
+  }
+  arg3 = reinterpret_cast< Id * >(argp3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IntFire *)new pymoose::IntFire((Id const &)*arg1,arg2,*arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IntFire, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IntFire(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[4];
+  int ii;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = (int)PyObject_Length(args);
+  for (ii = 0; (ii < argc) && (ii < 3); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Id, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      SWIG_PYTHON_THREAD_END_BLOCK;
+      return _wrap_new_IntFire__SWIG_0(self, args);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_AsPtr_std_string(argv[0], (std::string**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      SWIG_PYTHON_THREAD_END_BLOCK;
+      return _wrap_new_IntFire__SWIG_1(self, args);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__IntFire, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        SWIG_PYTHON_THREAD_END_BLOCK;
+        return _wrap_new_IntFire__SWIG_6(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = SWIG_AsPtr_std_string(argv[0], (std::string**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_pymoose__PyMooseBase, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        SWIG_PYTHON_THREAD_END_BLOCK;
+        return _wrap_new_IntFire__SWIG_3(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = SWIG_AsPtr_std_string(argv[0], (std::string**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Id, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        SWIG_PYTHON_THREAD_END_BLOCK;
+        return _wrap_new_IntFire__SWIG_2(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__IntFire, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_Id, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          SWIG_PYTHON_THREAD_END_BLOCK;
+          return _wrap_new_IntFire__SWIG_5(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__IntFire, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_pymoose__PyMooseBase, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          SWIG_PYTHON_THREAD_END_BLOCK;
+          return _wrap_new_IntFire__SWIG_4(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Id, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_Id, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          SWIG_PYTHON_THREAD_END_BLOCK;
+          return _wrap_new_IntFire__SWIG_7(self, args);
+        }
+      }
+    }
+  }
+  
+  SWIG_PYTHON_THREAD_END_BLOCK;
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_IntFire'.\n  Possible C/C++ prototypes are:\n""    pymoose::IntFire(Id)\n""    pymoose::IntFire(std::string)\n""    pymoose::IntFire(std::string,Id)\n""    pymoose::IntFire(std::string,pymoose::PyMooseBase &)\n""    pymoose::IntFire(pymoose::IntFire const &,std::string,pymoose::PyMooseBase &)\n""    pymoose::IntFire(pymoose::IntFire const &,std::string,Id &)\n""    pymoose::IntFire(pymoose::IntFire const &,std::string)\n""    pymoose::IntFire(Id const &,std::string,Id &)\n");
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_IntFire(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"delete_IntFire",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_IntFire" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_getType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  std::string *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_getType",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_getType" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    {
+      std::string const &_result_ref = (arg1)->getType();
+      result = (std::string *) &_result_ref;
+    }
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(*result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___get_Vt(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___get_Vt",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___get_Vt" "', argument " "1"" of type '" "pymoose::IntFire const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IntFire const *)arg1)->__get_Vt();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___set_Vt(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___set_Vt",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___set_Vt" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire___set_Vt" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_Vt(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___get_Vr(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___get_Vr",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___get_Vr" "', argument " "1"" of type '" "pymoose::IntFire const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IntFire const *)arg1)->__get_Vr();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___set_Vr(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___set_Vr",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___set_Vr" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire___set_Vr" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_Vr(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___get_Rm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___get_Rm",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___get_Rm" "', argument " "1"" of type '" "pymoose::IntFire const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IntFire const *)arg1)->__get_Rm();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___set_Rm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___set_Rm",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___set_Rm" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire___set_Rm" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_Rm(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___get_Cm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___get_Cm",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___get_Cm" "', argument " "1"" of type '" "pymoose::IntFire const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IntFire const *)arg1)->__get_Cm();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___set_Cm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___set_Cm",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___set_Cm" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire___set_Cm" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_Cm(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___get_Vm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___get_Vm",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___get_Vm" "', argument " "1"" of type '" "pymoose::IntFire const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IntFire const *)arg1)->__get_Vm();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___set_Vm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___set_Vm",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___set_Vm" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire___set_Vm" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_Vm(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___get_tau(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___get_tau",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___get_tau" "', argument " "1"" of type '" "pymoose::IntFire const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IntFire const *)arg1)->__get_tau();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___get_Em(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___get_Em",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___get_Em" "', argument " "1"" of type '" "pymoose::IntFire const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IntFire const *)arg1)->__get_Em();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___set_Em(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___set_Em",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___set_Em" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire___set_Em" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_Em(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___get_refractT(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___get_refractT",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___get_refractT" "', argument " "1"" of type '" "pymoose::IntFire const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IntFire const *)arg1)->__get_refractT();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___set_refractT(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___set_refractT",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___set_refractT" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire___set_refractT" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_refractT(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___get_initVm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___get_initVm",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___get_initVm" "', argument " "1"" of type '" "pymoose::IntFire const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IntFire const *)arg1)->__get_initVm();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___set_initVm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___set_initVm",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___set_initVm" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire___set_initVm" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_initVm(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___get_inject(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___get_inject",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___get_inject" "', argument " "1"" of type '" "pymoose::IntFire const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IntFire const *)arg1)->__get_inject();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire___set_inject(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire___set_inject",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire___set_inject" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire___set_inject" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_inject(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_Vt_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_Vt_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_Vt_set" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire_Vt_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IntFire_Vt_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_Vt_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_Vt_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_Vt_get" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IntFire_Vt_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_Vr_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_Vr_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_Vr_set" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire_Vr_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IntFire_Vr_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_Vr_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_Vr_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_Vr_get" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IntFire_Vr_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_Rm_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_Rm_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_Rm_set" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire_Rm_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IntFire_Rm_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_Rm_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_Rm_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_Rm_get" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IntFire_Rm_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_Cm_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_Cm_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_Cm_set" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire_Cm_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IntFire_Cm_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_Cm_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_Cm_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_Cm_get" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IntFire_Cm_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_Vm_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_Vm_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_Vm_set" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire_Vm_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IntFire_Vm_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_Vm_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_Vm_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_Vm_get" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IntFire_Vm_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_tau_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_tau_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_tau_get" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IntFire_tau_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_Em_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_Em_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_Em_set" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire_Em_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IntFire_Em_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_Em_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_Em_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_Em_get" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IntFire_Em_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_refractT_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_refractT_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_refractT_set" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire_refractT_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IntFire_refractT_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_refractT_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_refractT_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_refractT_get" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IntFire_refractT_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_initVm_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_initVm_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_initVm_set" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire_initVm_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IntFire_initVm_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_initVm_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_initVm_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_initVm_get" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IntFire_initVm_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_inject_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_inject_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_inject_set" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntFire_inject_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IntFire_inject_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IntFire_inject_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IntFire *arg1 = (pymoose::IntFire *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IntFire_inject_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IntFire, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntFire_inject_get" "', argument " "1"" of type '" "pymoose::IntFire *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IntFire * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IntFire_inject_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *IntFire_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_UnpackTuple(args,(char*)"swigregister", 1, 1,&obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_pymoose__IntFire, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN int Swig_var_IzhikevichNrn_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable IzhikevichNrn_className_ is read-only.");
+  return 1;
+}
+
+
+SWIGINTERN PyObject *Swig_var_IzhikevichNrn_className__get(void) {
+  PyObject *pyobj = 0;
+  
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::IzhikevichNrn::className_));
+  return pyobj;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IzhikevichNrn__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Id arg1 ;
+  pymoose::IzhikevichNrn *result = 0 ;
+  void *argp1 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IzhikevichNrn",1,1,&obj0)) SWIG_fail;
+  {
+    res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Id,  0  | 0);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "Id""'"); 
+    }  
+    if (!argp1) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "Id""'");
+    } else {
+      Id * temp = reinterpret_cast< Id * >(argp1);
+      arg1 = *temp;
+      if (SWIG_IsNewObj(res1)) delete temp;
+    }
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IzhikevichNrn *)new pymoose::IzhikevichNrn(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IzhikevichNrn, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IzhikevichNrn__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::string arg1 ;
+  pymoose::IzhikevichNrn *result = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IzhikevichNrn",1,1,&obj0)) SWIG_fail;
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj0, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "std::string""'"); 
+    }
+    arg1 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IzhikevichNrn *)new pymoose::IzhikevichNrn(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IzhikevichNrn, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IzhikevichNrn__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::string arg1 ;
+  Id arg2 ;
+  pymoose::IzhikevichNrn *result = 0 ;
+  void *argp2 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IzhikevichNrn",2,2,&obj0,&obj1)) SWIG_fail;
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj0, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "std::string""'"); 
+    }
+    arg1 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Id,  0  | 0);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_IzhikevichNrn" "', argument " "2"" of type '" "Id""'"); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IzhikevichNrn" "', argument " "2"" of type '" "Id""'");
+    } else {
+      Id * temp = reinterpret_cast< Id * >(argp2);
+      arg2 = *temp;
+      if (SWIG_IsNewObj(res2)) delete temp;
+    }
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IzhikevichNrn *)new pymoose::IzhikevichNrn(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IzhikevichNrn, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IzhikevichNrn__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::string arg1 ;
+  pymoose::PyMooseBase *arg2 = 0 ;
+  pymoose::IzhikevichNrn *result = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IzhikevichNrn",2,2,&obj0,&obj1)) SWIG_fail;
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj0, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "std::string""'"); 
+    }
+    arg1 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_pymoose__PyMooseBase,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_IzhikevichNrn" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IzhikevichNrn" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
+  }
+  arg2 = reinterpret_cast< pymoose::PyMooseBase * >(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IzhikevichNrn *)new pymoose::IzhikevichNrn(arg1,*arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IzhikevichNrn, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IzhikevichNrn__SWIG_4(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = 0 ;
+  std::string arg2 ;
+  pymoose::PyMooseBase *arg3 = 0 ;
+  pymoose::IzhikevichNrn *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IzhikevichNrn",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__IzhikevichNrn,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const &""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IzhikevichNrn" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_pymoose__PyMooseBase,  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_IzhikevichNrn" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IzhikevichNrn" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
+  }
+  arg3 = reinterpret_cast< pymoose::PyMooseBase * >(argp3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IzhikevichNrn *)new pymoose::IzhikevichNrn((pymoose::IzhikevichNrn const &)*arg1,arg2,*arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IzhikevichNrn, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IzhikevichNrn__SWIG_5(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = 0 ;
+  std::string arg2 ;
+  Id *arg3 = 0 ;
+  pymoose::IzhikevichNrn *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IzhikevichNrn",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__IzhikevichNrn,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const &""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IzhikevichNrn" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_IzhikevichNrn" "', argument " "3"" of type '" "Id &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IzhikevichNrn" "', argument " "3"" of type '" "Id &""'"); 
+  }
+  arg3 = reinterpret_cast< Id * >(argp3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IzhikevichNrn *)new pymoose::IzhikevichNrn((pymoose::IzhikevichNrn const &)*arg1,arg2,*arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IzhikevichNrn, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IzhikevichNrn__SWIG_6(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = 0 ;
+  std::string arg2 ;
+  pymoose::IzhikevichNrn *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IzhikevichNrn",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__IzhikevichNrn,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const &""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IzhikevichNrn" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IzhikevichNrn *)new pymoose::IzhikevichNrn((pymoose::IzhikevichNrn const &)*arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IzhikevichNrn, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IzhikevichNrn__SWIG_7(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Id *arg1 = 0 ;
+  std::string arg2 ;
+  Id *arg3 = 0 ;
+  pymoose::IzhikevichNrn *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_IzhikevichNrn",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Id,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "Id const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IzhikevichNrn" "', argument " "1"" of type '" "Id const &""'"); 
+  }
+  arg1 = reinterpret_cast< Id * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_IzhikevichNrn" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_IzhikevichNrn" "', argument " "3"" of type '" "Id &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IzhikevichNrn" "', argument " "3"" of type '" "Id &""'"); 
+  }
+  arg3 = reinterpret_cast< Id * >(argp3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::IzhikevichNrn *)new pymoose::IzhikevichNrn((Id const &)*arg1,arg2,*arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__IzhikevichNrn, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IzhikevichNrn(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[4];
+  int ii;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = (int)PyObject_Length(args);
+  for (ii = 0; (ii < argc) && (ii < 3); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Id, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      SWIG_PYTHON_THREAD_END_BLOCK;
+      return _wrap_new_IzhikevichNrn__SWIG_0(self, args);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_AsPtr_std_string(argv[0], (std::string**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      SWIG_PYTHON_THREAD_END_BLOCK;
+      return _wrap_new_IzhikevichNrn__SWIG_1(self, args);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__IzhikevichNrn, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        SWIG_PYTHON_THREAD_END_BLOCK;
+        return _wrap_new_IzhikevichNrn__SWIG_6(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = SWIG_AsPtr_std_string(argv[0], (std::string**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_pymoose__PyMooseBase, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        SWIG_PYTHON_THREAD_END_BLOCK;
+        return _wrap_new_IzhikevichNrn__SWIG_3(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = SWIG_AsPtr_std_string(argv[0], (std::string**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Id, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        SWIG_PYTHON_THREAD_END_BLOCK;
+        return _wrap_new_IzhikevichNrn__SWIG_2(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__IzhikevichNrn, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_Id, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          SWIG_PYTHON_THREAD_END_BLOCK;
+          return _wrap_new_IzhikevichNrn__SWIG_5(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__IzhikevichNrn, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_pymoose__PyMooseBase, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          SWIG_PYTHON_THREAD_END_BLOCK;
+          return _wrap_new_IzhikevichNrn__SWIG_4(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Id, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_Id, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          SWIG_PYTHON_THREAD_END_BLOCK;
+          return _wrap_new_IzhikevichNrn__SWIG_7(self, args);
+        }
+      }
+    }
+  }
+  
+  SWIG_PYTHON_THREAD_END_BLOCK;
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_IzhikevichNrn'.\n  Possible C/C++ prototypes are:\n""    pymoose::IzhikevichNrn(Id)\n""    pymoose::IzhikevichNrn(std::string)\n""    pymoose::IzhikevichNrn(std::string,Id)\n""    pymoose::IzhikevichNrn(std::string,pymoose::PyMooseBase &)\n""    pymoose::IzhikevichNrn(pymoose::IzhikevichNrn const &,std::string,pymoose::PyMooseBase &)\n""    pymoose::IzhikevichNrn(pymoose::IzhikevichNrn const &,std::string,Id &)\n""    pymoose::IzhikevichNrn(pymoose::IzhikevichNrn const &,std::string)\n""    pymoose::IzhikevichNrn(Id const &,std::string,Id &)\n");
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_IzhikevichNrn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"delete_IzhikevichNrn",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_IzhikevichNrn" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_getType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  std::string *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_getType",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_getType" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    {
+      std::string const &_result_ref = (arg1)->getType();
+      result = (std::string *) &_result_ref;
+    }
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(*result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_Vmax(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_Vmax",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_Vmax" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_Vmax();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___set_Vmax(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___set_Vmax",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___set_Vmax" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn___set_Vmax" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_Vmax(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_c(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_c",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_c" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_c();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___set_c(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___set_c",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___set_c" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn___set_c" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_c(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_d",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_d" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_d();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___set_d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___set_d",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___set_d" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn___set_d" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_d(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_a(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_a",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_a" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_a();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___set_a(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___set_a",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___set_a" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn___set_a" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_a(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_b(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_b",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_b" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_b();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___set_b(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___set_b",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___set_b" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn___set_b" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_b(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_Vm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_Vm",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_Vm" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_Vm();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___set_Vm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___set_Vm",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___set_Vm" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn___set_Vm" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_Vm(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_u(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_u",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_u" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_u();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_Im(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_Im",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_Im" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_Im();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_initVm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_initVm",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_initVm" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_initVm();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___set_initVm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___set_initVm",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___set_initVm" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn___set_initVm" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_initVm(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_initU(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_initU",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_initU" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_initU();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___set_initU(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___set_initU",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___set_initU" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn___set_initU" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_initU(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_alpha(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_alpha",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_alpha" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_alpha();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___set_alpha(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___set_alpha",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___set_alpha" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn___set_alpha" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_alpha(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_beta(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_beta",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_beta" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_beta();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___set_beta(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___set_beta",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___set_beta" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn___set_beta" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_beta(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___get_gamma(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___get_gamma",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___get_gamma" "', argument " "1"" of type '" "pymoose::IzhikevichNrn const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::IzhikevichNrn const *)arg1)->__get_gamma();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn___set_gamma(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn___set_gamma",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn___set_gamma" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn___set_gamma" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_gamma(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_Vmax_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_Vmax_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_Vmax_set" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn_Vmax_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IzhikevichNrn_Vmax_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_Vmax_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_Vmax_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_Vmax_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_Vmax_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_c_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_c_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_c_set" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn_c_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IzhikevichNrn_c_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_c_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_c_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_c_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_c_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_d_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_d_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_d_set" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn_d_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IzhikevichNrn_d_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_d_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_d_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_d_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_d_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_a_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_a_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_a_set" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn_a_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IzhikevichNrn_a_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_a_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_a_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_a_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_a_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_b_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_b_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_b_set" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn_b_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IzhikevichNrn_b_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_b_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_b_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_b_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_b_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_Vm_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_Vm_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_Vm_set" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn_Vm_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IzhikevichNrn_Vm_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_Vm_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_Vm_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_Vm_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_Vm_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_u_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_u_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_u_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_u_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_Im_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_Im_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_Im_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_Im_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_initVm_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_initVm_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_initVm_set" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn_initVm_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IzhikevichNrn_initVm_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_initVm_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_initVm_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_initVm_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_initVm_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_initU_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_initU_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_initU_set" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn_initU_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IzhikevichNrn_initU_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_initU_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_initU_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_initU_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_initU_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_alpha_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_alpha_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_alpha_set" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn_alpha_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IzhikevichNrn_alpha_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_alpha_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_alpha_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_alpha_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_alpha_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_beta_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_beta_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_beta_set" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn_beta_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IzhikevichNrn_beta_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_beta_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_beta_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_beta_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_beta_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_gamma_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_gamma_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_gamma_set" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IzhikevichNrn_gamma_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_IzhikevichNrn_gamma_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IzhikevichNrn_gamma_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::IzhikevichNrn *arg1 = (pymoose::IzhikevichNrn *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"IzhikevichNrn_gamma_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__IzhikevichNrn, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IzhikevichNrn_gamma_get" "', argument " "1"" of type '" "pymoose::IzhikevichNrn *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::IzhikevichNrn * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_IzhikevichNrn_gamma_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *IzhikevichNrn_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_UnpackTuple(args,(char*)"swigregister", 1, 1,&obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_pymoose__IzhikevichNrn, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN int Swig_var_GHK_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable GHK_className_ is read-only.");
+  return 1;
+}
+
+
+SWIGINTERN PyObject *Swig_var_GHK_className__get(void) {
+  PyObject *pyobj = 0;
+  
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::GHK::className_));
+  return pyobj;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_GHK__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Id arg1 ;
+  pymoose::GHK *result = 0 ;
+  void *argp1 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_GHK",1,1,&obj0)) SWIG_fail;
+  {
+    res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Id,  0  | 0);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_GHK" "', argument " "1"" of type '" "Id""'"); 
+    }  
+    if (!argp1) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_GHK" "', argument " "1"" of type '" "Id""'");
+    } else {
+      Id * temp = reinterpret_cast< Id * >(argp1);
+      arg1 = *temp;
+      if (SWIG_IsNewObj(res1)) delete temp;
+    }
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::GHK *)new pymoose::GHK(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__GHK, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_GHK__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::string arg1 ;
+  pymoose::GHK *result = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_GHK",1,1,&obj0)) SWIG_fail;
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj0, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_GHK" "', argument " "1"" of type '" "std::string""'"); 
+    }
+    arg1 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::GHK *)new pymoose::GHK(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__GHK, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_GHK__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::string arg1 ;
+  Id arg2 ;
+  pymoose::GHK *result = 0 ;
+  void *argp2 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_GHK",2,2,&obj0,&obj1)) SWIG_fail;
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj0, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_GHK" "', argument " "1"" of type '" "std::string""'"); 
+    }
+    arg1 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Id,  0  | 0);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_GHK" "', argument " "2"" of type '" "Id""'"); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_GHK" "', argument " "2"" of type '" "Id""'");
+    } else {
+      Id * temp = reinterpret_cast< Id * >(argp2);
+      arg2 = *temp;
+      if (SWIG_IsNewObj(res2)) delete temp;
+    }
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::GHK *)new pymoose::GHK(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__GHK, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_GHK__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::string arg1 ;
+  pymoose::PyMooseBase *arg2 = 0 ;
+  pymoose::GHK *result = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_GHK",2,2,&obj0,&obj1)) SWIG_fail;
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj0, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_GHK" "', argument " "1"" of type '" "std::string""'"); 
+    }
+    arg1 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_pymoose__PyMooseBase,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_GHK" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_GHK" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
+  }
+  arg2 = reinterpret_cast< pymoose::PyMooseBase * >(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::GHK *)new pymoose::GHK(arg1,*arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__GHK, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_GHK__SWIG_4(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = 0 ;
+  std::string arg2 ;
+  pymoose::PyMooseBase *arg3 = 0 ;
+  pymoose::GHK *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_GHK",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__GHK,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_GHK" "', argument " "1"" of type '" "pymoose::GHK const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_GHK" "', argument " "1"" of type '" "pymoose::GHK const &""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_GHK" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_pymoose__PyMooseBase,  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_GHK" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_GHK" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
+  }
+  arg3 = reinterpret_cast< pymoose::PyMooseBase * >(argp3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::GHK *)new pymoose::GHK((pymoose::GHK const &)*arg1,arg2,*arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__GHK, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_GHK__SWIG_5(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = 0 ;
+  std::string arg2 ;
+  Id *arg3 = 0 ;
+  pymoose::GHK *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_GHK",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__GHK,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_GHK" "', argument " "1"" of type '" "pymoose::GHK const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_GHK" "', argument " "1"" of type '" "pymoose::GHK const &""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_GHK" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_GHK" "', argument " "3"" of type '" "Id &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_GHK" "', argument " "3"" of type '" "Id &""'"); 
+  }
+  arg3 = reinterpret_cast< Id * >(argp3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::GHK *)new pymoose::GHK((pymoose::GHK const &)*arg1,arg2,*arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__GHK, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_GHK__SWIG_6(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = 0 ;
+  std::string arg2 ;
+  pymoose::GHK *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_GHK",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__GHK,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_GHK" "', argument " "1"" of type '" "pymoose::GHK const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_GHK" "', argument " "1"" of type '" "pymoose::GHK const &""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_GHK" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::GHK *)new pymoose::GHK((pymoose::GHK const &)*arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__GHK, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_GHK__SWIG_7(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Id *arg1 = 0 ;
+  std::string arg2 ;
+  Id *arg3 = 0 ;
+  pymoose::GHK *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"new_GHK",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Id,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_GHK" "', argument " "1"" of type '" "Id const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_GHK" "', argument " "1"" of type '" "Id const &""'"); 
+  }
+  arg1 = reinterpret_cast< Id * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_GHK" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_GHK" "', argument " "3"" of type '" "Id &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_GHK" "', argument " "3"" of type '" "Id &""'"); 
+  }
+  arg3 = reinterpret_cast< Id * >(argp3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (pymoose::GHK *)new pymoose::GHK((Id const &)*arg1,arg2,*arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__GHK, SWIG_POINTER_NEW |  0 );
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_GHK(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[4];
+  int ii;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = (int)PyObject_Length(args);
+  for (ii = 0; (ii < argc) && (ii < 3); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Id, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      SWIG_PYTHON_THREAD_END_BLOCK;
+      return _wrap_new_GHK__SWIG_0(self, args);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_AsPtr_std_string(argv[0], (std::string**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      SWIG_PYTHON_THREAD_END_BLOCK;
+      return _wrap_new_GHK__SWIG_1(self, args);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__GHK, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        SWIG_PYTHON_THREAD_END_BLOCK;
+        return _wrap_new_GHK__SWIG_6(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = SWIG_AsPtr_std_string(argv[0], (std::string**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_pymoose__PyMooseBase, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        SWIG_PYTHON_THREAD_END_BLOCK;
+        return _wrap_new_GHK__SWIG_3(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = SWIG_AsPtr_std_string(argv[0], (std::string**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Id, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        SWIG_PYTHON_THREAD_END_BLOCK;
+        return _wrap_new_GHK__SWIG_2(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__GHK, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_Id, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          SWIG_PYTHON_THREAD_END_BLOCK;
+          return _wrap_new_GHK__SWIG_5(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__GHK, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_pymoose__PyMooseBase, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          SWIG_PYTHON_THREAD_END_BLOCK;
+          return _wrap_new_GHK__SWIG_4(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Id, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_Id, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          SWIG_PYTHON_THREAD_END_BLOCK;
+          return _wrap_new_GHK__SWIG_7(self, args);
+        }
+      }
+    }
+  }
+  
+  SWIG_PYTHON_THREAD_END_BLOCK;
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_GHK'.\n  Possible C/C++ prototypes are:\n""    pymoose::GHK(Id)\n""    pymoose::GHK(std::string)\n""    pymoose::GHK(std::string,Id)\n""    pymoose::GHK(std::string,pymoose::PyMooseBase &)\n""    pymoose::GHK(pymoose::GHK const &,std::string,pymoose::PyMooseBase &)\n""    pymoose::GHK(pymoose::GHK const &,std::string,Id &)\n""    pymoose::GHK(pymoose::GHK const &,std::string)\n""    pymoose::GHK(Id const &,std::string,Id &)\n");
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_GHK(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"delete_GHK",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_GHK" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_getType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  std::string *result = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_getType",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_getType" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    {
+      std::string const &_result_ref = (arg1)->getType();
+      result = (std::string *) &_result_ref;
+    }
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(*result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___get_Ik(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___get_Ik",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___get_Ik" "', argument " "1"" of type '" "pymoose::GHK const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::GHK const *)arg1)->__get_Ik();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___get_Gk(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___get_Gk",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___get_Gk" "', argument " "1"" of type '" "pymoose::GHK const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::GHK const *)arg1)->__get_Gk();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___get_Ek(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___get_Ek",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___get_Ek" "', argument " "1"" of type '" "pymoose::GHK const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::GHK const *)arg1)->__get_Ek();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___get_T(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___get_T",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___get_T" "', argument " "1"" of type '" "pymoose::GHK const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::GHK const *)arg1)->__get_T();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___set_T(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___set_T",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___set_T" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GHK___set_T" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_T(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___get_p(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___get_p",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___get_p" "', argument " "1"" of type '" "pymoose::GHK const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::GHK const *)arg1)->__get_p();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___set_p(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___set_p",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___set_p" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GHK___set_p" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_p(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___get_Vm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___get_Vm",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___get_Vm" "', argument " "1"" of type '" "pymoose::GHK const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::GHK const *)arg1)->__get_Vm();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___set_Vm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___set_Vm",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___set_Vm" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GHK___set_Vm" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_Vm(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___get_Cin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___get_Cin",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___get_Cin" "', argument " "1"" of type '" "pymoose::GHK const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::GHK const *)arg1)->__get_Cin();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___set_Cin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___set_Cin",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___set_Cin" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GHK___set_Cin" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_Cin(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___get_Cout(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___get_Cout",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___get_Cout" "', argument " "1"" of type '" "pymoose::GHK const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::GHK const *)arg1)->__get_Cout();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___set_Cout(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___set_Cout",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___set_Cout" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GHK___set_Cout" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_Cout(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___get_valency(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___get_valency",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___get_valency" "', argument " "1"" of type '" "pymoose::GHK const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::GHK const *)arg1)->__get_valency();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK___set_valency(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK___set_valency",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK___set_valency" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GHK___set_valency" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_valency(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_Ik_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_Ik_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_Ik_get" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_GHK_Ik_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_Gk_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_Gk_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_Gk_get" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_GHK_Gk_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_Ek_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_Ek_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_Ek_get" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_GHK_Ek_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_T_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_T_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_T_set" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GHK_T_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_GHK_T_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_T_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_T_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_T_get" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_GHK_T_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_p_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_p_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_p_set" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GHK_p_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_GHK_p_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_p_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_p_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_p_get" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_GHK_p_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_Vm_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_Vm_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_Vm_set" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GHK_Vm_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_GHK_Vm_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_Vm_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_Vm_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_Vm_get" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_GHK_Vm_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_Cin_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_Cin_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_Cin_set" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GHK_Cin_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_GHK_Cin_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_Cin_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_Cin_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_Cin_get" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_GHK_Cin_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_Cout_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_Cout_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_Cout_set" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GHK_Cout_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_GHK_Cout_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_Cout_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_Cout_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_Cout_get" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_GHK_Cout_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_valency_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_valency_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_valency_set" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GHK_valency_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_GHK_valency_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GHK_valency_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::GHK *arg1 = (pymoose::GHK *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"GHK_valency_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__GHK, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GHK_valency_get" "', argument " "1"" of type '" "pymoose::GHK *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::GHK * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_GHK_valency_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *GHK_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_UnpackTuple(args,(char*)"swigregister", 1, 1,&obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_pymoose__GHK, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"delete_PySwigIterator", _wrap_delete_PySwigIterator, METH_VARARGS, NULL},
 	 { (char *)"PySwigIterator_value", _wrap_PySwigIterator_value, METH_VARARGS, NULL},
@@ -103569,6 +109696,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"initNeutralCinfo", _wrap_initNeutralCinfo, METH_VARARGS, (char *)"initNeutralCinfo() -> Cinfo"},
 	 { (char *)"separateString", _wrap_separateString, METH_VARARGS, (char *)"separateString(string s, string_vector v, string separator)"},
 	 { (char *)"parseString", _wrap_parseString, METH_VARARGS, (char *)"parseString(string s, string_vector v, char separators)"},
+	 { (char *)"Id_dumpState", _wrap_Id_dumpState, METH_VARARGS, (char *)"Id_dumpState(ostream stream)"},
 	 { (char *)"delete_Id", _wrap_delete_Id, METH_VARARGS, (char *)"delete_Id(Id self)"},
 	 { (char *)"Id_localId", _wrap_Id_localId, METH_VARARGS, (char *)"\n"
 		"localId(string path, string separator=\"/\") -> Id\n"
@@ -103576,14 +109704,14 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"Id_childId", _wrap_Id_childId, METH_VARARGS, (char *)"Id_childId(Id parent) -> Id"},
 	 { (char *)"Id_scratchId", _wrap_Id_scratchId, METH_VARARGS, (char *)"Id_scratchId() -> Id"},
+	 { (char *)"Id_newId", _wrap_Id_newId, METH_VARARGS, (char *)"Id_newId() -> Id"},
+	 { (char *)"Id_initId", _wrap_Id_initId, METH_VARARGS, (char *)"Id_initId() -> Id"},
 	 { (char *)"Id_makeIdOnNode", _wrap_Id_makeIdOnNode, METH_VARARGS, (char *)"Id_makeIdOnNode(unsigned int childNode) -> Id"},
 	 { (char *)"Id_shellId", _wrap_Id_shellId, METH_VARARGS, (char *)"Id_shellId() -> Id"},
 	 { (char *)"Id_postId", _wrap_Id_postId, METH_VARARGS, (char *)"Id_postId(unsigned int node) -> Id"},
+	 { (char *)"Id_globalId", _wrap_Id_globalId, METH_VARARGS, (char *)"Id_globalId() -> Id"},
 	 { (char *)"Id_assignIndex", _wrap_Id_assignIndex, METH_VARARGS, (char *)"Id_assignIndex(Id self, unsigned int index) -> Id"},
-	 { (char *)"Id_nextScratchId", _wrap_Id_nextScratchId, METH_VARARGS, (char *)"Id_nextScratchId() -> Id"},
-	 { (char *)"Id_redefineScratchIds", _wrap_Id_redefineScratchIds, METH_VARARGS, (char *)"Id_redefineScratchIds(Id last, Nid base) -> bool"},
-	 { (char *)"Id_regularizeScratch", _wrap_Id_regularizeScratch, METH_VARARGS, (char *)"Id_regularizeScratch()"},
-	 { (char *)"Id_allotMainIdBlock", _wrap_Id_allotMainIdBlock, METH_VARARGS, (char *)"Id_allotMainIdBlock(unsigned int size, unsigned int node) -> unsigned int"},
+	 { (char *)"Id_newIdBlock", _wrap_Id_newIdBlock, METH_VARARGS, (char *)"Id_newIdBlock(unsigned int size, unsigned int node) -> unsigned int"},
 	 { (char *)"Id_path", _wrap_Id_path, METH_VARARGS, (char *)"\n"
 		"path(string separator=\"/\") -> string\n"
 		"Id_path(Id self) -> string\n"
@@ -104705,6 +110833,12 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Compartment___set_y", _wrap_Compartment___set_y, METH_VARARGS, (char *)"Compartment___set_y(Compartment self, double y)"},
 	 { (char *)"Compartment___get_z", _wrap_Compartment___get_z, METH_VARARGS, (char *)"Compartment___get_z(Compartment self) -> double"},
 	 { (char *)"Compartment___set_z", _wrap_Compartment___set_z, METH_VARARGS, (char *)"Compartment___set_z(Compartment self, double z)"},
+	 { (char *)"Compartment___get_x0", _wrap_Compartment___get_x0, METH_VARARGS, (char *)"Compartment___get_x0(Compartment self) -> double"},
+	 { (char *)"Compartment___set_x0", _wrap_Compartment___set_x0, METH_VARARGS, (char *)"Compartment___set_x0(Compartment self, double x)"},
+	 { (char *)"Compartment___get_y0", _wrap_Compartment___get_y0, METH_VARARGS, (char *)"Compartment___get_y0(Compartment self) -> double"},
+	 { (char *)"Compartment___set_y0", _wrap_Compartment___set_y0, METH_VARARGS, (char *)"Compartment___set_y0(Compartment self, double y)"},
+	 { (char *)"Compartment___get_z0", _wrap_Compartment___get_z0, METH_VARARGS, (char *)"Compartment___get_z0(Compartment self) -> double"},
+	 { (char *)"Compartment___set_z0", _wrap_Compartment___set_z0, METH_VARARGS, (char *)"Compartment___set_z0(Compartment self, double z)"},
 	 { (char *)"Compartment_Vm_set", _wrap_Compartment_Vm_set, METH_VARARGS, (char *)"Compartment_Vm_set(Compartment self, double Vm)"},
 	 { (char *)"Compartment_Vm_get", _wrap_Compartment_Vm_get, METH_VARARGS, (char *)"Compartment_Vm_get(Compartment self) -> double"},
 	 { (char *)"Compartment_Cm_set", _wrap_Compartment_Cm_set, METH_VARARGS, (char *)"Compartment_Cm_set(Compartment self, double Cm)"},
@@ -105788,17 +111922,23 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"PIDController___get_saturation", _wrap_PIDController___get_saturation, METH_VARARGS, (char *)"PIDController___get_saturation(PIDController self) -> double"},
 	 { (char *)"PIDController___set_saturation", _wrap_PIDController___set_saturation, METH_VARARGS, (char *)"PIDController___set_saturation(PIDController self, double saturation)"},
 	 { (char *)"PIDController___get_command", _wrap_PIDController___get_command, METH_VARARGS, (char *)"PIDController___get_command(PIDController self) -> double"},
+	 { (char *)"PIDController___set_command", _wrap_PIDController___set_command, METH_VARARGS, (char *)"PIDController___set_command(PIDController self, double command)"},
 	 { (char *)"PIDController___get_sensed", _wrap_PIDController___get_sensed, METH_VARARGS, (char *)"PIDController___get_sensed(PIDController self) -> double"},
 	 { (char *)"PIDController___get_tauI", _wrap_PIDController___get_tauI, METH_VARARGS, (char *)"PIDController___get_tauI(PIDController self) -> double"},
+	 { (char *)"PIDController___set_tauI", _wrap_PIDController___set_tauI, METH_VARARGS, (char *)"PIDController___set_tauI(PIDController self, double tauI)"},
 	 { (char *)"PIDController___get_tauD", _wrap_PIDController___get_tauD, METH_VARARGS, (char *)"PIDController___get_tauD(PIDController self) -> double"},
+	 { (char *)"PIDController___set_tauD", _wrap_PIDController___set_tauD, METH_VARARGS, (char *)"PIDController___set_tauD(PIDController self, double tauD)"},
 	 { (char *)"PIDController___get_output", _wrap_PIDController___get_output, METH_VARARGS, (char *)"PIDController___get_output(PIDController self) -> double"},
 	 { (char *)"PIDController_gain_set", _wrap_PIDController_gain_set, METH_VARARGS, (char *)"PIDController_gain_set(PIDController self, double gain)"},
 	 { (char *)"PIDController_gain_get", _wrap_PIDController_gain_get, METH_VARARGS, (char *)"PIDController_gain_get(PIDController self) -> double"},
 	 { (char *)"PIDController_saturation_set", _wrap_PIDController_saturation_set, METH_VARARGS, (char *)"PIDController_saturation_set(PIDController self, double saturation)"},
 	 { (char *)"PIDController_saturation_get", _wrap_PIDController_saturation_get, METH_VARARGS, (char *)"PIDController_saturation_get(PIDController self) -> double"},
+	 { (char *)"PIDController_command_set", _wrap_PIDController_command_set, METH_VARARGS, (char *)"PIDController_command_set(PIDController self, double command)"},
 	 { (char *)"PIDController_command_get", _wrap_PIDController_command_get, METH_VARARGS, (char *)"PIDController_command_get(PIDController self) -> double"},
 	 { (char *)"PIDController_sensed_get", _wrap_PIDController_sensed_get, METH_VARARGS, (char *)"PIDController_sensed_get(PIDController self) -> double"},
+	 { (char *)"PIDController_tauI_set", _wrap_PIDController_tauI_set, METH_VARARGS, (char *)"PIDController_tauI_set(PIDController self, double tauI)"},
 	 { (char *)"PIDController_tauI_get", _wrap_PIDController_tauI_get, METH_VARARGS, (char *)"PIDController_tauI_get(PIDController self) -> double"},
+	 { (char *)"PIDController_tauD_set", _wrap_PIDController_tauD_set, METH_VARARGS, (char *)"PIDController_tauD_set(PIDController self, double tauD)"},
 	 { (char *)"PIDController_tauD_get", _wrap_PIDController_tauD_get, METH_VARARGS, (char *)"PIDController_tauD_get(PIDController self) -> double"},
 	 { (char *)"PIDController_output_get", _wrap_PIDController_output_get, METH_VARARGS, (char *)"PIDController_output_get(PIDController self) -> double"},
 	 { (char *)"PIDController_swigregister", PIDController_swigregister, METH_VARARGS, NULL},
@@ -105829,12 +111969,170 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"DiffAmp_minus_get", _wrap_DiffAmp_minus_get, METH_VARARGS, (char *)"DiffAmp_minus_get(DiffAmp self) -> double"},
 	 { (char *)"DiffAmp_output_get", _wrap_DiffAmp_output_get, METH_VARARGS, (char *)"DiffAmp_output_get(DiffAmp self) -> double"},
 	 { (char *)"DiffAmp_swigregister", DiffAmp_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_IntFire", _wrap_new_IntFire, METH_VARARGS, (char *)"\n"
+		"IntFire(Id id)\n"
+		"IntFire(string path)\n"
+		"IntFire(string name, Id parentId)\n"
+		"IntFire(string name, PyMooseBase parent)\n"
+		"IntFire(IntFire src, string name, PyMooseBase parent)\n"
+		"IntFire(IntFire src, string name, Id parent)\n"
+		"IntFire(IntFire src, string path)\n"
+		"new_IntFire(Id src, string name, Id parent) -> IntFire\n"
+		""},
+	 { (char *)"delete_IntFire", _wrap_delete_IntFire, METH_VARARGS, (char *)"delete_IntFire(IntFire self)"},
+	 { (char *)"IntFire_getType", _wrap_IntFire_getType, METH_VARARGS, (char *)"IntFire_getType(IntFire self) -> string"},
+	 { (char *)"IntFire___get_Vt", _wrap_IntFire___get_Vt, METH_VARARGS, (char *)"IntFire___get_Vt(IntFire self) -> double"},
+	 { (char *)"IntFire___set_Vt", _wrap_IntFire___set_Vt, METH_VARARGS, (char *)"IntFire___set_Vt(IntFire self, double Vt)"},
+	 { (char *)"IntFire___get_Vr", _wrap_IntFire___get_Vr, METH_VARARGS, (char *)"IntFire___get_Vr(IntFire self) -> double"},
+	 { (char *)"IntFire___set_Vr", _wrap_IntFire___set_Vr, METH_VARARGS, (char *)"IntFire___set_Vr(IntFire self, double Vr)"},
+	 { (char *)"IntFire___get_Rm", _wrap_IntFire___get_Rm, METH_VARARGS, (char *)"IntFire___get_Rm(IntFire self) -> double"},
+	 { (char *)"IntFire___set_Rm", _wrap_IntFire___set_Rm, METH_VARARGS, (char *)"IntFire___set_Rm(IntFire self, double Rm)"},
+	 { (char *)"IntFire___get_Cm", _wrap_IntFire___get_Cm, METH_VARARGS, (char *)"IntFire___get_Cm(IntFire self) -> double"},
+	 { (char *)"IntFire___set_Cm", _wrap_IntFire___set_Cm, METH_VARARGS, (char *)"IntFire___set_Cm(IntFire self, double Cm)"},
+	 { (char *)"IntFire___get_Vm", _wrap_IntFire___get_Vm, METH_VARARGS, (char *)"IntFire___get_Vm(IntFire self) -> double"},
+	 { (char *)"IntFire___set_Vm", _wrap_IntFire___set_Vm, METH_VARARGS, (char *)"IntFire___set_Vm(IntFire self, double Vm)"},
+	 { (char *)"IntFire___get_tau", _wrap_IntFire___get_tau, METH_VARARGS, (char *)"IntFire___get_tau(IntFire self) -> double"},
+	 { (char *)"IntFire___get_Em", _wrap_IntFire___get_Em, METH_VARARGS, (char *)"IntFire___get_Em(IntFire self) -> double"},
+	 { (char *)"IntFire___set_Em", _wrap_IntFire___set_Em, METH_VARARGS, (char *)"IntFire___set_Em(IntFire self, double Em)"},
+	 { (char *)"IntFire___get_refractT", _wrap_IntFire___get_refractT, METH_VARARGS, (char *)"IntFire___get_refractT(IntFire self) -> double"},
+	 { (char *)"IntFire___set_refractT", _wrap_IntFire___set_refractT, METH_VARARGS, (char *)"IntFire___set_refractT(IntFire self, double refractT)"},
+	 { (char *)"IntFire___get_initVm", _wrap_IntFire___get_initVm, METH_VARARGS, (char *)"IntFire___get_initVm(IntFire self) -> double"},
+	 { (char *)"IntFire___set_initVm", _wrap_IntFire___set_initVm, METH_VARARGS, (char *)"IntFire___set_initVm(IntFire self, double initVm)"},
+	 { (char *)"IntFire___get_inject", _wrap_IntFire___get_inject, METH_VARARGS, (char *)"IntFire___get_inject(IntFire self) -> double"},
+	 { (char *)"IntFire___set_inject", _wrap_IntFire___set_inject, METH_VARARGS, (char *)"IntFire___set_inject(IntFire self, double inject)"},
+	 { (char *)"IntFire_Vt_set", _wrap_IntFire_Vt_set, METH_VARARGS, (char *)"IntFire_Vt_set(IntFire self, double Vt)"},
+	 { (char *)"IntFire_Vt_get", _wrap_IntFire_Vt_get, METH_VARARGS, (char *)"IntFire_Vt_get(IntFire self) -> double"},
+	 { (char *)"IntFire_Vr_set", _wrap_IntFire_Vr_set, METH_VARARGS, (char *)"IntFire_Vr_set(IntFire self, double Vr)"},
+	 { (char *)"IntFire_Vr_get", _wrap_IntFire_Vr_get, METH_VARARGS, (char *)"IntFire_Vr_get(IntFire self) -> double"},
+	 { (char *)"IntFire_Rm_set", _wrap_IntFire_Rm_set, METH_VARARGS, (char *)"IntFire_Rm_set(IntFire self, double Rm)"},
+	 { (char *)"IntFire_Rm_get", _wrap_IntFire_Rm_get, METH_VARARGS, (char *)"IntFire_Rm_get(IntFire self) -> double"},
+	 { (char *)"IntFire_Cm_set", _wrap_IntFire_Cm_set, METH_VARARGS, (char *)"IntFire_Cm_set(IntFire self, double Cm)"},
+	 { (char *)"IntFire_Cm_get", _wrap_IntFire_Cm_get, METH_VARARGS, (char *)"IntFire_Cm_get(IntFire self) -> double"},
+	 { (char *)"IntFire_Vm_set", _wrap_IntFire_Vm_set, METH_VARARGS, (char *)"IntFire_Vm_set(IntFire self, double Vm)"},
+	 { (char *)"IntFire_Vm_get", _wrap_IntFire_Vm_get, METH_VARARGS, (char *)"IntFire_Vm_get(IntFire self) -> double"},
+	 { (char *)"IntFire_tau_get", _wrap_IntFire_tau_get, METH_VARARGS, (char *)"IntFire_tau_get(IntFire self) -> double"},
+	 { (char *)"IntFire_Em_set", _wrap_IntFire_Em_set, METH_VARARGS, (char *)"IntFire_Em_set(IntFire self, double Em)"},
+	 { (char *)"IntFire_Em_get", _wrap_IntFire_Em_get, METH_VARARGS, (char *)"IntFire_Em_get(IntFire self) -> double"},
+	 { (char *)"IntFire_refractT_set", _wrap_IntFire_refractT_set, METH_VARARGS, (char *)"IntFire_refractT_set(IntFire self, double refractT)"},
+	 { (char *)"IntFire_refractT_get", _wrap_IntFire_refractT_get, METH_VARARGS, (char *)"IntFire_refractT_get(IntFire self) -> double"},
+	 { (char *)"IntFire_initVm_set", _wrap_IntFire_initVm_set, METH_VARARGS, (char *)"IntFire_initVm_set(IntFire self, double initVm)"},
+	 { (char *)"IntFire_initVm_get", _wrap_IntFire_initVm_get, METH_VARARGS, (char *)"IntFire_initVm_get(IntFire self) -> double"},
+	 { (char *)"IntFire_inject_set", _wrap_IntFire_inject_set, METH_VARARGS, (char *)"IntFire_inject_set(IntFire self, double inject)"},
+	 { (char *)"IntFire_inject_get", _wrap_IntFire_inject_get, METH_VARARGS, (char *)"IntFire_inject_get(IntFire self) -> double"},
+	 { (char *)"IntFire_swigregister", IntFire_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_IzhikevichNrn", _wrap_new_IzhikevichNrn, METH_VARARGS, (char *)"\n"
+		"IzhikevichNrn(Id id)\n"
+		"IzhikevichNrn(string path)\n"
+		"IzhikevichNrn(string name, Id parentId)\n"
+		"IzhikevichNrn(string name, PyMooseBase parent)\n"
+		"IzhikevichNrn(IzhikevichNrn src, string name, PyMooseBase parent)\n"
+		"IzhikevichNrn(IzhikevichNrn src, string name, Id parent)\n"
+		"IzhikevichNrn(IzhikevichNrn src, string path)\n"
+		"new_IzhikevichNrn(Id src, string name, Id parent) -> IzhikevichNrn\n"
+		""},
+	 { (char *)"delete_IzhikevichNrn", _wrap_delete_IzhikevichNrn, METH_VARARGS, (char *)"delete_IzhikevichNrn(IzhikevichNrn self)"},
+	 { (char *)"IzhikevichNrn_getType", _wrap_IzhikevichNrn_getType, METH_VARARGS, (char *)"IzhikevichNrn_getType(IzhikevichNrn self) -> string"},
+	 { (char *)"IzhikevichNrn___get_Vmax", _wrap_IzhikevichNrn___get_Vmax, METH_VARARGS, (char *)"IzhikevichNrn___get_Vmax(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___set_Vmax", _wrap_IzhikevichNrn___set_Vmax, METH_VARARGS, (char *)"IzhikevichNrn___set_Vmax(IzhikevichNrn self, double Vmax)"},
+	 { (char *)"IzhikevichNrn___get_c", _wrap_IzhikevichNrn___get_c, METH_VARARGS, (char *)"IzhikevichNrn___get_c(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___set_c", _wrap_IzhikevichNrn___set_c, METH_VARARGS, (char *)"IzhikevichNrn___set_c(IzhikevichNrn self, double c)"},
+	 { (char *)"IzhikevichNrn___get_d", _wrap_IzhikevichNrn___get_d, METH_VARARGS, (char *)"IzhikevichNrn___get_d(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___set_d", _wrap_IzhikevichNrn___set_d, METH_VARARGS, (char *)"IzhikevichNrn___set_d(IzhikevichNrn self, double d)"},
+	 { (char *)"IzhikevichNrn___get_a", _wrap_IzhikevichNrn___get_a, METH_VARARGS, (char *)"IzhikevichNrn___get_a(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___set_a", _wrap_IzhikevichNrn___set_a, METH_VARARGS, (char *)"IzhikevichNrn___set_a(IzhikevichNrn self, double a)"},
+	 { (char *)"IzhikevichNrn___get_b", _wrap_IzhikevichNrn___get_b, METH_VARARGS, (char *)"IzhikevichNrn___get_b(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___set_b", _wrap_IzhikevichNrn___set_b, METH_VARARGS, (char *)"IzhikevichNrn___set_b(IzhikevichNrn self, double b)"},
+	 { (char *)"IzhikevichNrn___get_Vm", _wrap_IzhikevichNrn___get_Vm, METH_VARARGS, (char *)"IzhikevichNrn___get_Vm(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___set_Vm", _wrap_IzhikevichNrn___set_Vm, METH_VARARGS, (char *)"IzhikevichNrn___set_Vm(IzhikevichNrn self, double Vm)"},
+	 { (char *)"IzhikevichNrn___get_u", _wrap_IzhikevichNrn___get_u, METH_VARARGS, (char *)"IzhikevichNrn___get_u(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___get_Im", _wrap_IzhikevichNrn___get_Im, METH_VARARGS, (char *)"IzhikevichNrn___get_Im(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___get_initVm", _wrap_IzhikevichNrn___get_initVm, METH_VARARGS, (char *)"IzhikevichNrn___get_initVm(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___set_initVm", _wrap_IzhikevichNrn___set_initVm, METH_VARARGS, (char *)"IzhikevichNrn___set_initVm(IzhikevichNrn self, double initVm)"},
+	 { (char *)"IzhikevichNrn___get_initU", _wrap_IzhikevichNrn___get_initU, METH_VARARGS, (char *)"IzhikevichNrn___get_initU(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___set_initU", _wrap_IzhikevichNrn___set_initU, METH_VARARGS, (char *)"IzhikevichNrn___set_initU(IzhikevichNrn self, double initU)"},
+	 { (char *)"IzhikevichNrn___get_alpha", _wrap_IzhikevichNrn___get_alpha, METH_VARARGS, (char *)"IzhikevichNrn___get_alpha(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___set_alpha", _wrap_IzhikevichNrn___set_alpha, METH_VARARGS, (char *)"IzhikevichNrn___set_alpha(IzhikevichNrn self, double alpha)"},
+	 { (char *)"IzhikevichNrn___get_beta", _wrap_IzhikevichNrn___get_beta, METH_VARARGS, (char *)"IzhikevichNrn___get_beta(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___set_beta", _wrap_IzhikevichNrn___set_beta, METH_VARARGS, (char *)"IzhikevichNrn___set_beta(IzhikevichNrn self, double beta)"},
+	 { (char *)"IzhikevichNrn___get_gamma", _wrap_IzhikevichNrn___get_gamma, METH_VARARGS, (char *)"IzhikevichNrn___get_gamma(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn___set_gamma", _wrap_IzhikevichNrn___set_gamma, METH_VARARGS, (char *)"IzhikevichNrn___set_gamma(IzhikevichNrn self, double gamma)"},
+	 { (char *)"IzhikevichNrn_Vmax_set", _wrap_IzhikevichNrn_Vmax_set, METH_VARARGS, (char *)"IzhikevichNrn_Vmax_set(IzhikevichNrn self, double Vmax)"},
+	 { (char *)"IzhikevichNrn_Vmax_get", _wrap_IzhikevichNrn_Vmax_get, METH_VARARGS, (char *)"IzhikevichNrn_Vmax_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_c_set", _wrap_IzhikevichNrn_c_set, METH_VARARGS, (char *)"IzhikevichNrn_c_set(IzhikevichNrn self, double c)"},
+	 { (char *)"IzhikevichNrn_c_get", _wrap_IzhikevichNrn_c_get, METH_VARARGS, (char *)"IzhikevichNrn_c_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_d_set", _wrap_IzhikevichNrn_d_set, METH_VARARGS, (char *)"IzhikevichNrn_d_set(IzhikevichNrn self, double d)"},
+	 { (char *)"IzhikevichNrn_d_get", _wrap_IzhikevichNrn_d_get, METH_VARARGS, (char *)"IzhikevichNrn_d_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_a_set", _wrap_IzhikevichNrn_a_set, METH_VARARGS, (char *)"IzhikevichNrn_a_set(IzhikevichNrn self, double a)"},
+	 { (char *)"IzhikevichNrn_a_get", _wrap_IzhikevichNrn_a_get, METH_VARARGS, (char *)"IzhikevichNrn_a_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_b_set", _wrap_IzhikevichNrn_b_set, METH_VARARGS, (char *)"IzhikevichNrn_b_set(IzhikevichNrn self, double b)"},
+	 { (char *)"IzhikevichNrn_b_get", _wrap_IzhikevichNrn_b_get, METH_VARARGS, (char *)"IzhikevichNrn_b_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_Vm_set", _wrap_IzhikevichNrn_Vm_set, METH_VARARGS, (char *)"IzhikevichNrn_Vm_set(IzhikevichNrn self, double Vm)"},
+	 { (char *)"IzhikevichNrn_Vm_get", _wrap_IzhikevichNrn_Vm_get, METH_VARARGS, (char *)"IzhikevichNrn_Vm_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_u_get", _wrap_IzhikevichNrn_u_get, METH_VARARGS, (char *)"IzhikevichNrn_u_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_Im_get", _wrap_IzhikevichNrn_Im_get, METH_VARARGS, (char *)"IzhikevichNrn_Im_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_initVm_set", _wrap_IzhikevichNrn_initVm_set, METH_VARARGS, (char *)"IzhikevichNrn_initVm_set(IzhikevichNrn self, double initVm)"},
+	 { (char *)"IzhikevichNrn_initVm_get", _wrap_IzhikevichNrn_initVm_get, METH_VARARGS, (char *)"IzhikevichNrn_initVm_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_initU_set", _wrap_IzhikevichNrn_initU_set, METH_VARARGS, (char *)"IzhikevichNrn_initU_set(IzhikevichNrn self, double initU)"},
+	 { (char *)"IzhikevichNrn_initU_get", _wrap_IzhikevichNrn_initU_get, METH_VARARGS, (char *)"IzhikevichNrn_initU_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_alpha_set", _wrap_IzhikevichNrn_alpha_set, METH_VARARGS, (char *)"IzhikevichNrn_alpha_set(IzhikevichNrn self, double alpha)"},
+	 { (char *)"IzhikevichNrn_alpha_get", _wrap_IzhikevichNrn_alpha_get, METH_VARARGS, (char *)"IzhikevichNrn_alpha_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_beta_set", _wrap_IzhikevichNrn_beta_set, METH_VARARGS, (char *)"IzhikevichNrn_beta_set(IzhikevichNrn self, double beta)"},
+	 { (char *)"IzhikevichNrn_beta_get", _wrap_IzhikevichNrn_beta_get, METH_VARARGS, (char *)"IzhikevichNrn_beta_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_gamma_set", _wrap_IzhikevichNrn_gamma_set, METH_VARARGS, (char *)"IzhikevichNrn_gamma_set(IzhikevichNrn self, double gamma)"},
+	 { (char *)"IzhikevichNrn_gamma_get", _wrap_IzhikevichNrn_gamma_get, METH_VARARGS, (char *)"IzhikevichNrn_gamma_get(IzhikevichNrn self) -> double"},
+	 { (char *)"IzhikevichNrn_swigregister", IzhikevichNrn_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_GHK", _wrap_new_GHK, METH_VARARGS, (char *)"\n"
+		"GHK(Id id)\n"
+		"GHK(string path)\n"
+		"GHK(string name, Id parentId)\n"
+		"GHK(string name, PyMooseBase parent)\n"
+		"GHK(GHK src, string name, PyMooseBase parent)\n"
+		"GHK(GHK src, string name, Id parent)\n"
+		"GHK(GHK src, string path)\n"
+		"new_GHK(Id src, string name, Id parent) -> GHK\n"
+		""},
+	 { (char *)"delete_GHK", _wrap_delete_GHK, METH_VARARGS, (char *)"delete_GHK(GHK self)"},
+	 { (char *)"GHK_getType", _wrap_GHK_getType, METH_VARARGS, (char *)"GHK_getType(GHK self) -> string"},
+	 { (char *)"GHK___get_Ik", _wrap_GHK___get_Ik, METH_VARARGS, (char *)"GHK___get_Ik(GHK self) -> double"},
+	 { (char *)"GHK___get_Gk", _wrap_GHK___get_Gk, METH_VARARGS, (char *)"GHK___get_Gk(GHK self) -> double"},
+	 { (char *)"GHK___get_Ek", _wrap_GHK___get_Ek, METH_VARARGS, (char *)"GHK___get_Ek(GHK self) -> double"},
+	 { (char *)"GHK___get_T", _wrap_GHK___get_T, METH_VARARGS, (char *)"GHK___get_T(GHK self) -> double"},
+	 { (char *)"GHK___set_T", _wrap_GHK___set_T, METH_VARARGS, (char *)"GHK___set_T(GHK self, double T)"},
+	 { (char *)"GHK___get_p", _wrap_GHK___get_p, METH_VARARGS, (char *)"GHK___get_p(GHK self) -> double"},
+	 { (char *)"GHK___set_p", _wrap_GHK___set_p, METH_VARARGS, (char *)"GHK___set_p(GHK self, double p)"},
+	 { (char *)"GHK___get_Vm", _wrap_GHK___get_Vm, METH_VARARGS, (char *)"GHK___get_Vm(GHK self) -> double"},
+	 { (char *)"GHK___set_Vm", _wrap_GHK___set_Vm, METH_VARARGS, (char *)"GHK___set_Vm(GHK self, double Vm)"},
+	 { (char *)"GHK___get_Cin", _wrap_GHK___get_Cin, METH_VARARGS, (char *)"GHK___get_Cin(GHK self) -> double"},
+	 { (char *)"GHK___set_Cin", _wrap_GHK___set_Cin, METH_VARARGS, (char *)"GHK___set_Cin(GHK self, double Cin)"},
+	 { (char *)"GHK___get_Cout", _wrap_GHK___get_Cout, METH_VARARGS, (char *)"GHK___get_Cout(GHK self) -> double"},
+	 { (char *)"GHK___set_Cout", _wrap_GHK___set_Cout, METH_VARARGS, (char *)"GHK___set_Cout(GHK self, double Cout)"},
+	 { (char *)"GHK___get_valency", _wrap_GHK___get_valency, METH_VARARGS, (char *)"GHK___get_valency(GHK self) -> double"},
+	 { (char *)"GHK___set_valency", _wrap_GHK___set_valency, METH_VARARGS, (char *)"GHK___set_valency(GHK self, double valency)"},
+	 { (char *)"GHK_Ik_get", _wrap_GHK_Ik_get, METH_VARARGS, (char *)"GHK_Ik_get(GHK self) -> double"},
+	 { (char *)"GHK_Gk_get", _wrap_GHK_Gk_get, METH_VARARGS, (char *)"GHK_Gk_get(GHK self) -> double"},
+	 { (char *)"GHK_Ek_get", _wrap_GHK_Ek_get, METH_VARARGS, (char *)"GHK_Ek_get(GHK self) -> double"},
+	 { (char *)"GHK_T_set", _wrap_GHK_T_set, METH_VARARGS, (char *)"GHK_T_set(GHK self, double T)"},
+	 { (char *)"GHK_T_get", _wrap_GHK_T_get, METH_VARARGS, (char *)"GHK_T_get(GHK self) -> double"},
+	 { (char *)"GHK_p_set", _wrap_GHK_p_set, METH_VARARGS, (char *)"GHK_p_set(GHK self, double p)"},
+	 { (char *)"GHK_p_get", _wrap_GHK_p_get, METH_VARARGS, (char *)"GHK_p_get(GHK self) -> double"},
+	 { (char *)"GHK_Vm_set", _wrap_GHK_Vm_set, METH_VARARGS, (char *)"GHK_Vm_set(GHK self, double Vm)"},
+	 { (char *)"GHK_Vm_get", _wrap_GHK_Vm_get, METH_VARARGS, (char *)"GHK_Vm_get(GHK self) -> double"},
+	 { (char *)"GHK_Cin_set", _wrap_GHK_Cin_set, METH_VARARGS, (char *)"GHK_Cin_set(GHK self, double Cin)"},
+	 { (char *)"GHK_Cin_get", _wrap_GHK_Cin_get, METH_VARARGS, (char *)"GHK_Cin_get(GHK self) -> double"},
+	 { (char *)"GHK_Cout_set", _wrap_GHK_Cout_set, METH_VARARGS, (char *)"GHK_Cout_set(GHK self, double Cout)"},
+	 { (char *)"GHK_Cout_get", _wrap_GHK_Cout_get, METH_VARARGS, (char *)"GHK_Cout_get(GHK self) -> double"},
+	 { (char *)"GHK_valency_set", _wrap_GHK_valency_set, METH_VARARGS, (char *)"GHK_valency_set(GHK self, double valency)"},
+	 { (char *)"GHK_valency_get", _wrap_GHK_valency_get, METH_VARARGS, (char *)"GHK_valency_get(GHK self) -> double"},
+	 { (char *)"GHK_swigregister", GHK_swigregister, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
 
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
+static void *_p_pymoose__TableTo_p_pymoose__Interpol(void *x) {
+    return (void *)((pymoose::Interpol *)  ((pymoose::Table *) x));
+}
 static void *_p_pymoose__UniformRngTo_p_pymoose__RandGenerator(void *x) {
     return (void *)((pymoose::RandGenerator *)  ((pymoose::UniformRng *) x));
 }
@@ -105870,9 +112168,6 @@ static void *_p_ExponentialTo_p_Probability(void *x) {
 }
 static void *_p_NidTo_p_Id(void *x) {
     return (void *)((Id *)  ((Nid *) x));
-}
-static void *_p_pymoose__TableTo_p_pymoose__Interpol(void *x) {
-    return (void *)((pymoose::Interpol *)  ((pymoose::Table *) x));
 }
 static void *_p_pymoose__CellTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::Cell *) x));
@@ -105949,6 +112244,9 @@ static void *_p_pymoose__ClassTo_p_pymoose__PyMooseBase(void *x) {
 static void *_p_pymoose__GeometryTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::Geometry *) x));
 }
+static void *_p_pymoose__IzhikevichNrnTo_p_pymoose__PyMooseBase(void *x) {
+    return (void *)((pymoose::PyMooseBase *)  ((pymoose::IzhikevichNrn *) x));
+}
 static void *_p_pymoose__SynChanTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::SynChan *) x));
 }
@@ -106009,8 +112307,14 @@ static void *_p_pymoose__AdaptorTo_p_pymoose__PyMooseBase(void *x) {
 static void *_p_pymoose__DiffAmpTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::DiffAmp *) x));
 }
+static void *_p_pymoose__GHKTo_p_pymoose__PyMooseBase(void *x) {
+    return (void *)((pymoose::PyMooseBase *)  ((pymoose::GHK *) x));
+}
 static void *_p_pymoose__HHChannelTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::HHChannel *) x));
+}
+static void *_p_pymoose__IntFireTo_p_pymoose__PyMooseBase(void *x) {
+    return (void *)((pymoose::PyMooseBase *)  ((pymoose::IntFire *) x));
 }
 static void *_p_pymoose__BinomialRngTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *) (pymoose::RandGenerator *) ((pymoose::BinomialRng *) x));
@@ -106078,6 +112382,7 @@ static swig_type_info _swigt__p_allocator_type = {"_p_allocator_type", "allocato
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_difference_type = {"_p_difference_type", "difference_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_m_Poisson__f___double = {"_p_m_Poisson__f___double", "double (Poisson::**)()|PoissonGenerator *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_ostream = {"_p_ostream", "ostream *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_PyObject = {"_p_p_PyObject", "PyObject **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__Adaptor = {"_p_pymoose__Adaptor", "pymoose::Adaptor *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__AscFile = {"_p_pymoose__AscFile", "pymoose::AscFile *", 0, 0, (void*)0, 0};
@@ -106095,6 +112400,7 @@ static swig_type_info _swigt__p_pymoose__DiffAmp = {"_p_pymoose__DiffAmp", "pymo
 static swig_type_info _swigt__p_pymoose__DiskPanel = {"_p_pymoose__DiskPanel", "pymoose::DiskPanel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__Enzyme = {"_p_pymoose__Enzyme", "pymoose::Enzyme *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__ExponentialRng = {"_p_pymoose__ExponentialRng", "pymoose::ExponentialRng *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_pymoose__GHK = {"_p_pymoose__GHK", "pymoose::GHK *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__GammaRng = {"_p_pymoose__GammaRng", "pymoose::GammaRng *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__Geometry = {"_p_pymoose__Geometry", "pymoose::Geometry *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__GssaStoich = {"_p_pymoose__GssaStoich", "pymoose::GssaStoich *", 0, 0, (void*)0, 0};
@@ -106102,7 +112408,9 @@ static swig_type_info _swigt__p_pymoose__HHChannel = {"_p_pymoose__HHChannel", "
 static swig_type_info _swigt__p_pymoose__HHGate = {"_p_pymoose__HHGate", "pymoose::HHGate *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__HSolve = {"_p_pymoose__HSolve", "pymoose::HSolve *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__HemispherePanel = {"_p_pymoose__HemispherePanel", "pymoose::HemispherePanel *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_pymoose__IntFire = {"_p_pymoose__IntFire", "pymoose::IntFire *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__Interpol = {"_p_pymoose__Interpol", "pymoose::Interpol *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_pymoose__IzhikevichNrn = {"_p_pymoose__IzhikevichNrn", "pymoose::IzhikevichNrn *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__KinCompt = {"_p_pymoose__KinCompt", "pymoose::KinCompt *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__KineticHub = {"_p_pymoose__KineticHub", "pymoose::KineticHub *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__KineticManager = {"_p_pymoose__KineticManager", "pymoose::KineticManager *", 0, 0, (void*)0, 0};
@@ -106174,6 +112482,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_char,
   &_swigt__p_difference_type,
   &_swigt__p_m_Poisson__f___double,
+  &_swigt__p_ostream,
   &_swigt__p_p_PyObject,
   &_swigt__p_pymoose__Adaptor,
   &_swigt__p_pymoose__AscFile,
@@ -106191,6 +112500,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_pymoose__DiskPanel,
   &_swigt__p_pymoose__Enzyme,
   &_swigt__p_pymoose__ExponentialRng,
+  &_swigt__p_pymoose__GHK,
   &_swigt__p_pymoose__GammaRng,
   &_swigt__p_pymoose__Geometry,
   &_swigt__p_pymoose__GssaStoich,
@@ -106198,7 +112508,9 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_pymoose__HHGate,
   &_swigt__p_pymoose__HSolve,
   &_swigt__p_pymoose__HemispherePanel,
+  &_swigt__p_pymoose__IntFire,
   &_swigt__p_pymoose__Interpol,
+  &_swigt__p_pymoose__IzhikevichNrn,
   &_swigt__p_pymoose__KinCompt,
   &_swigt__p_pymoose__KineticHub,
   &_swigt__p_pymoose__KineticManager,
@@ -106270,6 +112582,7 @@ static swig_cast_info _swigc__p_allocator_type[] = {  {&_swigt__p_allocator_type
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_difference_type[] = {  {&_swigt__p_difference_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_m_Poisson__f___double[] = {  {&_swigt__p_m_Poisson__f___double, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_ostream[] = {  {&_swigt__p_ostream, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_PyObject[] = {  {&_swigt__p_p_PyObject, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__Adaptor[] = {  {&_swigt__p_pymoose__Adaptor, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__AscFile[] = {  {&_swigt__p_pymoose__AscFile, 0, 0, 0},{0, 0, 0, 0}};
@@ -106287,6 +112600,7 @@ static swig_cast_info _swigc__p_pymoose__DiffAmp[] = {  {&_swigt__p_pymoose__Dif
 static swig_cast_info _swigc__p_pymoose__DiskPanel[] = {  {&_swigt__p_pymoose__DiskPanel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__Enzyme[] = {  {&_swigt__p_pymoose__Enzyme, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__ExponentialRng[] = {  {&_swigt__p_pymoose__ExponentialRng, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_pymoose__GHK[] = {  {&_swigt__p_pymoose__GHK, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__GammaRng[] = {  {&_swigt__p_pymoose__GammaRng, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__Geometry[] = {  {&_swigt__p_pymoose__Geometry, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__GssaStoich[] = {  {&_swigt__p_pymoose__GssaStoich, 0, 0, 0},{0, 0, 0, 0}};
@@ -106294,7 +112608,9 @@ static swig_cast_info _swigc__p_pymoose__HHChannel[] = {  {&_swigt__p_pymoose__H
 static swig_cast_info _swigc__p_pymoose__HHGate[] = {  {&_swigt__p_pymoose__HHGate, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__HSolve[] = {  {&_swigt__p_pymoose__HSolve, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__HemispherePanel[] = {  {&_swigt__p_pymoose__HemispherePanel, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_pymoose__IntFire[] = {  {&_swigt__p_pymoose__IntFire, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__Interpol[] = {  {&_swigt__p_pymoose__Interpol, 0, 0, 0},  {&_swigt__p_pymoose__Table, _p_pymoose__TableTo_p_pymoose__Interpol, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_pymoose__IzhikevichNrn[] = {  {&_swigt__p_pymoose__IzhikevichNrn, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__KinCompt[] = {  {&_swigt__p_pymoose__KinCompt, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__KineticHub[] = {  {&_swigt__p_pymoose__KineticHub, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__KineticManager[] = {  {&_swigt__p_pymoose__KineticManager, 0, 0, 0},{0, 0, 0, 0}};
@@ -106310,7 +112626,7 @@ static swig_cast_info _swigc__p_pymoose__PIDController[] = {  {&_swigt__p_pymoos
 static swig_cast_info _swigc__p_pymoose__Panel[] = {  {&_swigt__p_pymoose__DiskPanel, _p_pymoose__DiskPanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__CylPanel, _p_pymoose__CylPanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__HemispherePanel, _p_pymoose__HemispherePanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__SpherePanel, _p_pymoose__SpherePanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__Panel, 0, 0, 0},  {&_swigt__p_pymoose__TriPanel, _p_pymoose__TriPanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__RectPanel, _p_pymoose__RectPanelTo_p_pymoose__Panel, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__PoissonRng[] = {  {&_swigt__p_pymoose__PoissonRng, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__PulseGen[] = {  {&_swigt__p_pymoose__PulseGen, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_pymoose__PyMooseBase[] = {  {&_swigt__p_pymoose__Table, _p_pymoose__TableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RectPanel, _p_pymoose__RectPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__NeuroScan, _p_pymoose__NeuroScanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PyMooseBase, 0, 0, 0},  {&_swigt__p_pymoose__ExponentialRng, _p_pymoose__ExponentialRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PulseGen, _p_pymoose__PulseGenTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__UniformRng, _p_pymoose__UniformRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__AscFile, _p_pymoose__AscFileTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DiskPanel, _p_pymoose__DiskPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Kintegrator, _p_pymoose__KintegratorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HemispherePanel, _p_pymoose__HemispherePanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SpherePanel, _p_pymoose__SpherePanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TauPump, _p_pymoose__TauPumpTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TimeTable, _p_pymoose__TimeTableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Molecule, _p_pymoose__MoleculeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Neutral, _p_pymoose__NeutralTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__BinSynchan, _p_pymoose__BinSynchanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__StochSynchan, _p_pymoose__StochSynchanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__NormalRng, _p_pymoose__NormalRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Surface, _p_pymoose__SurfaceTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RC, _p_pymoose__RCTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Geometry, _p_pymoose__GeometryTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TriPanel, _p_pymoose__TriPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SynChan, _p_pymoose__SynChanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Cell, _p_pymoose__CellTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Stoich, _p_pymoose__StoichTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GssaStoich, _p_pymoose__GssaStoichTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HSolve, _p_pymoose__HSolveTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RandGenerator, _p_pymoose__RandGeneratorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Compartment, _p_pymoose__CompartmentTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Class, _p_pymoose__ClassTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KineticHub, _p_pymoose__KineticHubTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DifShell, _p_pymoose__DifShellTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Mg_block, _p_pymoose__Mg_blockTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HHGate, _p_pymoose__HHGateTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PIDController, _p_pymoose__PIDControllerTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Interpol, _p_pymoose__InterpolTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SpikeGen, _p_pymoose__SpikeGenTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Enzyme, _p_pymoose__EnzymeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Panel, _p_pymoose__PanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__CylPanel, _p_pymoose__CylPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Nernst, _p_pymoose__NernstTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__ClockTick, _p_pymoose__ClockTickTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SigNeur, _p_pymoose__SigNeurTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Adaptor, _p_pymoose__AdaptorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DiffAmp, _p_pymoose__DiffAmpTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HHChannel, _p_pymoose__HHChannelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__BinomialRng, _p_pymoose__BinomialRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GammaRng, _p_pymoose__GammaRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Reaction, _p_pymoose__ReactionTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__ClockJob, _p_pymoose__ClockJobTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__CaConc, _p_pymoose__CaConcTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RandomSpike, _p_pymoose__RandomSpikeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__MathFunc, _p_pymoose__MathFuncTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PoissonRng, _p_pymoose__PoissonRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KineticManager, _p_pymoose__KineticManagerTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KinCompt, _p_pymoose__KinComptTo_p_pymoose__PyMooseBase, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_pymoose__PyMooseBase[] = {  {&_swigt__p_pymoose__Table, _p_pymoose__TableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RectPanel, _p_pymoose__RectPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__NeuroScan, _p_pymoose__NeuroScanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PyMooseBase, 0, 0, 0},  {&_swigt__p_pymoose__ExponentialRng, _p_pymoose__ExponentialRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PulseGen, _p_pymoose__PulseGenTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__UniformRng, _p_pymoose__UniformRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__AscFile, _p_pymoose__AscFileTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DiskPanel, _p_pymoose__DiskPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Kintegrator, _p_pymoose__KintegratorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HemispherePanel, _p_pymoose__HemispherePanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SpherePanel, _p_pymoose__SpherePanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TauPump, _p_pymoose__TauPumpTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TimeTable, _p_pymoose__TimeTableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Molecule, _p_pymoose__MoleculeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Neutral, _p_pymoose__NeutralTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__BinSynchan, _p_pymoose__BinSynchanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__StochSynchan, _p_pymoose__StochSynchanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__NormalRng, _p_pymoose__NormalRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Surface, _p_pymoose__SurfaceTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RC, _p_pymoose__RCTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Geometry, _p_pymoose__GeometryTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__IzhikevichNrn, _p_pymoose__IzhikevichNrnTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TriPanel, _p_pymoose__TriPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SynChan, _p_pymoose__SynChanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Cell, _p_pymoose__CellTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Stoich, _p_pymoose__StoichTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GssaStoich, _p_pymoose__GssaStoichTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HSolve, _p_pymoose__HSolveTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RandGenerator, _p_pymoose__RandGeneratorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Compartment, _p_pymoose__CompartmentTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Class, _p_pymoose__ClassTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KineticHub, _p_pymoose__KineticHubTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DifShell, _p_pymoose__DifShellTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Mg_block, _p_pymoose__Mg_blockTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HHGate, _p_pymoose__HHGateTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PIDController, _p_pymoose__PIDControllerTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Interpol, _p_pymoose__InterpolTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SpikeGen, _p_pymoose__SpikeGenTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Enzyme, _p_pymoose__EnzymeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Panel, _p_pymoose__PanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__CylPanel, _p_pymoose__CylPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Nernst, _p_pymoose__NernstTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__ClockTick, _p_pymoose__ClockTickTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SigNeur, _p_pymoose__SigNeurTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Adaptor, _p_pymoose__AdaptorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DiffAmp, _p_pymoose__DiffAmpTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GHK, _p_pymoose__GHKTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HHChannel, _p_pymoose__HHChannelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__IntFire, _p_pymoose__IntFireTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__BinomialRng, _p_pymoose__BinomialRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GammaRng, _p_pymoose__GammaRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Reaction, _p_pymoose__ReactionTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__ClockJob, _p_pymoose__ClockJobTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__CaConc, _p_pymoose__CaConcTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RandomSpike, _p_pymoose__RandomSpikeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__MathFunc, _p_pymoose__MathFuncTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PoissonRng, _p_pymoose__PoissonRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KineticManager, _p_pymoose__KineticManagerTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KinCompt, _p_pymoose__KinComptTo_p_pymoose__PyMooseBase, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__PyMooseContext[] = {  {&_swigt__p_pymoose__PyMooseContext, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__RC[] = {  {&_swigt__p_pymoose__RC, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__RandGenerator[] = {  {&_swigt__p_pymoose__UniformRng, _p_pymoose__UniformRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__RandGenerator, 0, 0, 0},  {&_swigt__p_pymoose__BinomialRng, _p_pymoose__BinomialRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__ExponentialRng, _p_pymoose__ExponentialRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__PoissonRng, _p_pymoose__PoissonRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__NormalRng, _p_pymoose__NormalRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__GammaRng, _p_pymoose__GammaRngTo_p_pymoose__RandGenerator, 0, 0},{0, 0, 0, 0}};
@@ -106334,7 +112650,7 @@ static swig_cast_info _swigc__p_size_type[] = {  {&_swigt__p_size_type, 0, 0, 0}
 static swig_cast_info _swigc__p_std__invalid_argument[] = {  {&_swigt__p_std__invalid_argument, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorTId_std__allocatorTId_t_t[] = {  {&_swigt__p_std__vectorTId_std__allocatorTId_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorTId_std__allocatorTId_t_t__allocator_type[] = {  {&_swigt__p_std__vectorTId_std__allocatorTId_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__vectorTId_std__allocatorTId_t_t__value_type[] = {  {&_swigt__p_Nid, 0, 0, 0},  {&_swigt__p_Id, 0, 0, 0},  {&_swigt__p_std__vectorTId_std__allocatorTId_t_t__value_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorTId_std__allocatorTId_t_t__value_type[] = {  {&_swigt__p_Nid, _p_NidTo_p_Id, 0, 0},  {&_swigt__p_Id, 0, 0, 0},  {&_swigt__p_std__vectorTId_std__allocatorTId_t_t__value_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorTdouble_std__allocatorTdouble_t_t[] = {  {&_swigt__p_std__vectorTdouble_std__allocatorTdouble_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorTdouble_std__allocatorTdouble_t_t__allocator_type[] = {  {&_swigt__p_std__vectorTdouble_std__allocatorTdouble_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorTint_std__allocatorTint_t_t[] = {  {&_swigt__p_std__vectorTint_std__allocatorTint_t_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -106366,6 +112682,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_char,
   _swigc__p_difference_type,
   _swigc__p_m_Poisson__f___double,
+  _swigc__p_ostream,
   _swigc__p_p_PyObject,
   _swigc__p_pymoose__Adaptor,
   _swigc__p_pymoose__AscFile,
@@ -106383,6 +112700,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_pymoose__DiskPanel,
   _swigc__p_pymoose__Enzyme,
   _swigc__p_pymoose__ExponentialRng,
+  _swigc__p_pymoose__GHK,
   _swigc__p_pymoose__GammaRng,
   _swigc__p_pymoose__Geometry,
   _swigc__p_pymoose__GssaStoich,
@@ -106390,7 +112708,9 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_pymoose__HHGate,
   _swigc__p_pymoose__HSolve,
   _swigc__p_pymoose__HemispherePanel,
+  _swigc__p_pymoose__IntFire,
   _swigc__p_pymoose__Interpol,
+  _swigc__p_pymoose__IzhikevichNrn,
   _swigc__p_pymoose__KinCompt,
   _swigc__p_pymoose__KineticHub,
   _swigc__p_pymoose__KineticManager,
@@ -106970,6 +113290,8 @@ SWIGEXPORT void SWIG_init(void) {
   PyDict_SetItemString(d,(char*)"cvar", SWIG_globals());
   SWIG_addvarlink(SWIG_globals(),(char*)"Id_AnyIndex",Swig_var_Id_AnyIndex_get, Swig_var_Id_AnyIndex_set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Id_BadIndex",Swig_var_Id_BadIndex_get, Swig_var_Id_BadIndex_set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Id_BadNode",Swig_var_Id_BadNode_get, Swig_var_Id_BadNode_set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Id_UnknownNode",Swig_var_Id_UnknownNode_get, Swig_var_Id_UnknownNode_set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Id_GlobalNode",Swig_var_Id_GlobalNode_get, Swig_var_Id_GlobalNode_set);
   SWIG_addvarlink(SWIG_globals(),(char*)"PyMooseContext_separator",Swig_var_PyMooseContext_separator_get, Swig_var_PyMooseContext_separator_set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Neutral_className_",Swig_var_Neutral_className__get, Swig_var_Neutral_className__set);
@@ -107033,6 +113355,9 @@ SWIGEXPORT void SWIG_init(void) {
   SWIG_addvarlink(SWIG_globals(),(char*)"RC_className_",Swig_var_RC_className__get, Swig_var_RC_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"PIDController_className_",Swig_var_PIDController_className__get, Swig_var_PIDController_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"DiffAmp_className_",Swig_var_DiffAmp_className__get, Swig_var_DiffAmp_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"IntFire_className_",Swig_var_IntFire_className__get, Swig_var_IntFire_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"IzhikevichNrn_className_",Swig_var_IzhikevichNrn_className__get, Swig_var_IzhikevichNrn_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"GHK_className_",Swig_var_GHK_className__get, Swig_var_GHK_className__set);
   
   /* Initialize threading */
   SWIG_PYTHON_INITIALIZE_THREADS;

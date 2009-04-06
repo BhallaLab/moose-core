@@ -24,7 +24,7 @@
 using namespace std;
 using namespace pymoose;
 
-extern void initMoose();
+extern void initMoose(int argc, char **argv);
 extern void initSched();
 extern void initCinfos();
 extern const string& helpless();
@@ -644,7 +644,7 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     Element* shell;
     bool ret;
     // Call the global initialization function
-    initMoose();
+    initMoose(0, 0);
     initSched();
     initCinfos();
 #ifdef DO_UNIT_TESTS
