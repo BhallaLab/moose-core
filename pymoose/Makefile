@@ -24,8 +24,8 @@
 ############################################################################
 
 TARGET=pymoose
-CXXFLAGS+=-I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../signeur -I../device
-LIBS +=-lpython2.5
+CXXFLAGS+=-I/usr/local/include -I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../signeur -I../device
+LIBS += -L/usr/local/lib -lpython2.5
 ifdef USE_NUMPY
 CXXFLAGS+=-I/usr/lib/python2.5/site-packages/numpy/core/include -DUSE_NUMPY
 SWIGOPTS=-DUSE_NUMPY
@@ -120,6 +120,10 @@ OBJ = PyMooseBase.o \
 	PIDController.o \
 	RC.o	\
 	DiffAmp.o	\
+	GHK.o	\
+	IntFire.o	\
+	IzhikevichNrn.o	\
+
 
 	
 HEADERS=PyMooseUtil.h \
@@ -182,6 +186,9 @@ HEADERS=PyMooseUtil.h \
 	PIDController.h \
 	RC.h	\
 	DiffAmp.h	\
+	GHK.h	\
+	IntFire.h	\
+	IzhikevichNrn.h	\
 	../randnum/randnum.h	\
 	../randnum/Probability.h	\
 	../randnum/Binomial.h	\

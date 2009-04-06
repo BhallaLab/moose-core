@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Thu Mar 19 22:57:33 2009 (+0530)
 // Version: 
-// Last-Updated: Tue Mar 31 17:53:30 2009 (+0530)
+// Last-Updated: Tue Apr  7 04:06:25 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 203
+//     Update #: 206
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -176,16 +176,20 @@ static const Slot VmSlot = initIntFireCinfo()->getSlot("VmSrc");
 static const Slot eventSlot = initIntFireCinfo()->getSlot("eventSrc");
 
 IntFire::IntFire():
+        initVm_(0.0),
         Vt_(1.0),
         Vr_(0.0),
         Vm_(0.0),
-        Cm_(1.0),
         Rm_(1.0),
-        initVm_(0.0),
+        Cm_(1.0),
         refractT_(0.0),
-        lastEvent_(-DBL_MAX),
+        Em_(0.0),
         A_(0.0),
-        B_(0.0)
+        B_(0.0),
+        lastEvent_(-DBL_MAX),
+        inject_(0.0),
+        sumInject_(0.0),
+        Im_(0.0)
         {
             //do nothing
         }
