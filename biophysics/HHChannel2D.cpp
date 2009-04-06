@@ -236,30 +236,63 @@ void HHChannel2D::conc2Func( const Conn* c, double conc )
 ///////////////////////////////////////////////////
 // Virtual function definitions
 ///////////////////////////////////////////////////
-//~ int HHChannel2D::dimension( string gateType )
-//~ {
-	//~ if ( gateType == "X" )
-		//~ return ( Xdep1_ == -1 ) ? 1 : 2;
-	//~ else if ( gateType == "Y" )
-		//~ return ( Ydep1_ == -1 ) ? 1 : 2;
-	//~ else if ( gateType == "Z" )
-		//~ return ( Zdep1_ == -1 ) ? 1 : 2;
-	//~ else
-		//~ assert( 0 );
-//~ }
+unsigned int HHChannel2D::dimension( string gateType ) const
+{
+	if ( gateType == "X" )
+		return ( Xdep1_ == -1 ) ? 1 : 2;
+	else if ( gateType == "Y" )
+		return ( Ydep1_ == -1 ) ? 1 : 2;
+	else if ( gateType == "Z" )
+		return ( Zdep1_ == -1 ) ? 1 : 2;
+	else
+		assert( 0 );
+}
 
-		//~ {
-			//~ if ( gateType == "X" ) return "xGate2D";
-			//~ else if ( gateType == "Y" ) return "yGate2D";
-			//~ else if ( gateType == "Z" ) return "zGate2D";
-			//~ else assert( 0 );
-		//~ }
+string HHChannel2D::chanFinfo( string gateType ) const
+{
+	unsigned int dim = dimension( gateType );
+	assert( dim == 1 || dim == 2 );
+	
+	if ( dim == 1 )
+		return HHChannel::chanFinfo( gateType );
+	
+	if ( gateType == "X" )
+		return "xGate2D";
+	else if ( gateType == "Y" )
+		return "yGate2D";
+	else if ( gateType == "Z" )
+		return "zGate2D";
+	else
+		assert( 0 );
+}
+
+string HHChannel2D::gateFinfo( string gateType ) const
+{
+	unsigned int dim = dimension( gateType );
+	assert( dim == 1 || dim == 2 );
+	
+	if ( dim == 1 )
+		return HHChannel::gateFinfo( gateType );
+	else
+		return "gate2D";
+}
+
+string HHChannel2D::gateClass( string gateType ) const
+{
+	unsigned int dim = dimension( gateType );
+	assert( dim == 1 || dim == 2 );
+	
+	if ( dim == 1 )
+		return HHChannel::gateClass( gateType );
+	else
+		return "HHGate2D";
+}
 
 void HHChannel2D::lookupXrates( Eref e )
 {
 	double var1;
 	double var2;
-	unsigned int dim = 1; // = dimension( "X" );
+	unsigned int dim = ( Xdep1_ == -1 ) ? 1 : 2;
 	
 	switch( Xdep0_ ) {
 		case 0:		var1 = Vm_; break;
@@ -287,7 +320,7 @@ void HHChannel2D::lookupYrates( Eref e )
 {
 	double var1;
 	double var2;
-	unsigned int dim = 1; // = dimension( "Y" );
+	unsigned int dim = ( Ydep1_ == -1 ) ? 1 : 2;
 	
 	switch( Ydep0_ ) {
 		case 0:		var1 = Vm_; break;
@@ -315,7 +348,7 @@ void HHChannel2D::lookupZrates( Eref e )
 {
 	double var1;
 	double var2;
-	unsigned int dim = 1; //dimension( "Z" );
+	unsigned int dim = ( Zdep1_ == -1 ) ? 1 : 2;
 	
 	switch( Zdep0_ ) {
 		case 0:		var1 = Vm_; break;
