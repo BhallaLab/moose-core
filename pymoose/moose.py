@@ -911,6 +911,11 @@ class Id(object):
     """Proxy of C++ Id class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
+    def dumpState(*args):
+        """dumpState(ostream stream)"""
+        return _moose.Id_dumpState(*args)
+
+    dumpState = staticmethod(dumpState)
     __swig_destroy__ = _moose.delete_Id
     __del__ = lambda self : None;
     def localId(*args):
@@ -931,6 +936,16 @@ class Id(object):
         return _moose.Id_scratchId(*args)
 
     scratchId = staticmethod(scratchId)
+    def newId(*args):
+        """newId() -> Id"""
+        return _moose.Id_newId(*args)
+
+    newId = staticmethod(newId)
+    def initId(*args):
+        """initId() -> Id"""
+        return _moose.Id_initId(*args)
+
+    initId = staticmethod(initId)
     def makeIdOnNode(*args):
         """makeIdOnNode(unsigned int childNode) -> Id"""
         return _moose.Id_makeIdOnNode(*args)
@@ -946,30 +961,20 @@ class Id(object):
         return _moose.Id_postId(*args)
 
     postId = staticmethod(postId)
+    def globalId(*args):
+        """globalId() -> Id"""
+        return _moose.Id_globalId(*args)
+
+    globalId = staticmethod(globalId)
     def assignIndex(*args):
         """assignIndex(self, unsigned int index) -> Id"""
         return _moose.Id_assignIndex(*args)
 
-    def nextScratchId(*args):
-        """nextScratchId() -> Id"""
-        return _moose.Id_nextScratchId(*args)
+    def newIdBlock(*args):
+        """newIdBlock(unsigned int size, unsigned int node) -> unsigned int"""
+        return _moose.Id_newIdBlock(*args)
 
-    nextScratchId = staticmethod(nextScratchId)
-    def redefineScratchIds(*args):
-        """redefineScratchIds(Id last, Nid base) -> bool"""
-        return _moose.Id_redefineScratchIds(*args)
-
-    redefineScratchIds = staticmethod(redefineScratchIds)
-    def regularizeScratch(*args):
-        """regularizeScratch()"""
-        return _moose.Id_regularizeScratch(*args)
-
-    regularizeScratch = staticmethod(regularizeScratch)
-    def allotMainIdBlock(*args):
-        """allotMainIdBlock(unsigned int size, unsigned int node) -> unsigned int"""
-        return _moose.Id_allotMainIdBlock(*args)
-
-    allotMainIdBlock = staticmethod(allotMainIdBlock)
+    newIdBlock = staticmethod(newIdBlock)
     def path(*args):
         """
         path(self, string separator="/") -> string
@@ -1076,6 +1081,10 @@ class Id(object):
 Id_swigregister = _moose.Id_swigregister
 Id_swigregister(Id)
 
+def Id_dumpState(*args):
+  """Id_dumpState(ostream stream)"""
+  return _moose.Id_dumpState(*args)
+
 def Id_localId(*args):
   """
     localId(string path, string separator="/") -> Id
@@ -1091,6 +1100,14 @@ def Id_scratchId(*args):
   """Id_scratchId() -> Id"""
   return _moose.Id_scratchId(*args)
 
+def Id_newId(*args):
+  """Id_newId() -> Id"""
+  return _moose.Id_newId(*args)
+
+def Id_initId(*args):
+  """Id_initId() -> Id"""
+  return _moose.Id_initId(*args)
+
 def Id_makeIdOnNode(*args):
   """Id_makeIdOnNode(unsigned int childNode) -> Id"""
   return _moose.Id_makeIdOnNode(*args)
@@ -1103,21 +1120,13 @@ def Id_postId(*args):
   """Id_postId(unsigned int node) -> Id"""
   return _moose.Id_postId(*args)
 
-def Id_nextScratchId(*args):
-  """Id_nextScratchId() -> Id"""
-  return _moose.Id_nextScratchId(*args)
+def Id_globalId(*args):
+  """Id_globalId() -> Id"""
+  return _moose.Id_globalId(*args)
 
-def Id_redefineScratchIds(*args):
-  """Id_redefineScratchIds(Id last, Nid base) -> bool"""
-  return _moose.Id_redefineScratchIds(*args)
-
-def Id_regularizeScratch(*args):
-  """Id_regularizeScratch()"""
-  return _moose.Id_regularizeScratch(*args)
-
-def Id_allotMainIdBlock(*args):
-  """Id_allotMainIdBlock(unsigned int size, unsigned int node) -> unsigned int"""
-  return _moose.Id_allotMainIdBlock(*args)
+def Id_newIdBlock(*args):
+  """Id_newIdBlock(unsigned int size, unsigned int node) -> unsigned int"""
+  return _moose.Id_newIdBlock(*args)
 
 def Id_lastId(*args):
   """Id_lastId() -> Id"""
@@ -1137,6 +1146,8 @@ def Id_id2str(*args):
 cvar = _moose.cvar
 Id.AnyIndex = _moose.cvar.Id_AnyIndex
 Id.BadIndex = _moose.cvar.Id_BadIndex
+Id.BadNode = _moose.cvar.Id_BadNode
+Id.UnknownNode = _moose.cvar.Id_UnknownNode
 Id.GlobalNode = _moose.cvar.Id_GlobalNode
 
 class Nid(Id):
@@ -3784,6 +3795,30 @@ class Compartment(PyMooseBase):
         """__set_z(self, double z)"""
         return _moose.Compartment___set_z(*args)
 
+    def __get_x0(*args):
+        """__get_x0(self) -> double"""
+        return _moose.Compartment___get_x0(*args)
+
+    def __set_x0(*args):
+        """__set_x0(self, double x)"""
+        return _moose.Compartment___set_x0(*args)
+
+    def __get_y0(*args):
+        """__get_y0(self) -> double"""
+        return _moose.Compartment___get_y0(*args)
+
+    def __set_y0(*args):
+        """__set_y0(self, double y)"""
+        return _moose.Compartment___set_y0(*args)
+
+    def __get_z0(*args):
+        """__get_z0(self) -> double"""
+        return _moose.Compartment___get_z0(*args)
+
+    def __set_z0(*args):
+        """__set_z0(self, double z)"""
+        return _moose.Compartment___set_z0(*args)
+
     Vm = _swig_property(_moose.Compartment_Vm_get, _moose.Compartment_Vm_set)
     Cm = _swig_property(_moose.Compartment_Cm_get, _moose.Compartment_Cm_set)
     Em = _swig_property(_moose.Compartment_Em_get, _moose.Compartment_Em_set)
@@ -6268,6 +6303,10 @@ class PIDController(PyMooseBase):
         """__get_command(self) -> double"""
         return _moose.PIDController___get_command(*args)
 
+    def __set_command(*args):
+        """__set_command(self, double command)"""
+        return _moose.PIDController___set_command(*args)
+
     def __get_sensed(*args):
         """__get_sensed(self) -> double"""
         return _moose.PIDController___get_sensed(*args)
@@ -6276,9 +6315,17 @@ class PIDController(PyMooseBase):
         """__get_tauI(self) -> double"""
         return _moose.PIDController___get_tauI(*args)
 
+    def __set_tauI(*args):
+        """__set_tauI(self, double tauI)"""
+        return _moose.PIDController___set_tauI(*args)
+
     def __get_tauD(*args):
         """__get_tauD(self) -> double"""
         return _moose.PIDController___get_tauD(*args)
+
+    def __set_tauD(*args):
+        """__set_tauD(self, double tauD)"""
+        return _moose.PIDController___set_tauD(*args)
 
     def __get_output(*args):
         """__get_output(self) -> double"""
@@ -6286,10 +6333,10 @@ class PIDController(PyMooseBase):
 
     gain = _swig_property(_moose.PIDController_gain_get, _moose.PIDController_gain_set)
     saturation = _swig_property(_moose.PIDController_saturation_get, _moose.PIDController_saturation_set)
-    command = _swig_property(_moose.PIDController_command_get)
+    command = _swig_property(_moose.PIDController_command_get, _moose.PIDController_command_set)
     sensed = _swig_property(_moose.PIDController_sensed_get)
-    tauI = _swig_property(_moose.PIDController_tauI_get)
-    tauD = _swig_property(_moose.PIDController_tauD_get)
+    tauI = _swig_property(_moose.PIDController_tauI_get, _moose.PIDController_tauI_set)
+    tauD = _swig_property(_moose.PIDController_tauD_get, _moose.PIDController_tauD_set)
     output = _swig_property(_moose.PIDController_output_get)
 PIDController_swigregister = _moose.PIDController_swigregister
 PIDController_swigregister(PIDController)
@@ -6355,6 +6402,354 @@ class DiffAmp(PyMooseBase):
 DiffAmp_swigregister = _moose.DiffAmp_swigregister
 DiffAmp_swigregister(DiffAmp)
 DiffAmp.className_ = _moose.cvar.DiffAmp_className_
+
+class IntFire(PyMooseBase):
+    """Proxy of C++ IntFire class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> IntFire
+        __init__(self, string path) -> IntFire
+        __init__(self, string name, Id parentId) -> IntFire
+        __init__(self, string name, PyMooseBase parent) -> IntFire
+        __init__(self, IntFire src, string name, PyMooseBase parent) -> IntFire
+        __init__(self, IntFire src, string name, Id parent) -> IntFire
+        __init__(self, IntFire src, string path) -> IntFire
+        __init__(self, Id src, string name, Id parent) -> IntFire
+        """
+        this = _moose.new_IntFire(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_IntFire
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.IntFire_getType(*args)
+
+    def __get_Vt(*args):
+        """__get_Vt(self) -> double"""
+        return _moose.IntFire___get_Vt(*args)
+
+    def __set_Vt(*args):
+        """__set_Vt(self, double Vt)"""
+        return _moose.IntFire___set_Vt(*args)
+
+    def __get_Vr(*args):
+        """__get_Vr(self) -> double"""
+        return _moose.IntFire___get_Vr(*args)
+
+    def __set_Vr(*args):
+        """__set_Vr(self, double Vr)"""
+        return _moose.IntFire___set_Vr(*args)
+
+    def __get_Rm(*args):
+        """__get_Rm(self) -> double"""
+        return _moose.IntFire___get_Rm(*args)
+
+    def __set_Rm(*args):
+        """__set_Rm(self, double Rm)"""
+        return _moose.IntFire___set_Rm(*args)
+
+    def __get_Cm(*args):
+        """__get_Cm(self) -> double"""
+        return _moose.IntFire___get_Cm(*args)
+
+    def __set_Cm(*args):
+        """__set_Cm(self, double Cm)"""
+        return _moose.IntFire___set_Cm(*args)
+
+    def __get_Vm(*args):
+        """__get_Vm(self) -> double"""
+        return _moose.IntFire___get_Vm(*args)
+
+    def __set_Vm(*args):
+        """__set_Vm(self, double Vm)"""
+        return _moose.IntFire___set_Vm(*args)
+
+    def __get_tau(*args):
+        """__get_tau(self) -> double"""
+        return _moose.IntFire___get_tau(*args)
+
+    def __get_Em(*args):
+        """__get_Em(self) -> double"""
+        return _moose.IntFire___get_Em(*args)
+
+    def __set_Em(*args):
+        """__set_Em(self, double Em)"""
+        return _moose.IntFire___set_Em(*args)
+
+    def __get_refractT(*args):
+        """__get_refractT(self) -> double"""
+        return _moose.IntFire___get_refractT(*args)
+
+    def __set_refractT(*args):
+        """__set_refractT(self, double refractT)"""
+        return _moose.IntFire___set_refractT(*args)
+
+    def __get_initVm(*args):
+        """__get_initVm(self) -> double"""
+        return _moose.IntFire___get_initVm(*args)
+
+    def __set_initVm(*args):
+        """__set_initVm(self, double initVm)"""
+        return _moose.IntFire___set_initVm(*args)
+
+    def __get_inject(*args):
+        """__get_inject(self) -> double"""
+        return _moose.IntFire___get_inject(*args)
+
+    def __set_inject(*args):
+        """__set_inject(self, double inject)"""
+        return _moose.IntFire___set_inject(*args)
+
+    Vt = _swig_property(_moose.IntFire_Vt_get, _moose.IntFire_Vt_set)
+    Vr = _swig_property(_moose.IntFire_Vr_get, _moose.IntFire_Vr_set)
+    Rm = _swig_property(_moose.IntFire_Rm_get, _moose.IntFire_Rm_set)
+    Cm = _swig_property(_moose.IntFire_Cm_get, _moose.IntFire_Cm_set)
+    Vm = _swig_property(_moose.IntFire_Vm_get, _moose.IntFire_Vm_set)
+    tau = _swig_property(_moose.IntFire_tau_get)
+    Em = _swig_property(_moose.IntFire_Em_get, _moose.IntFire_Em_set)
+    refractT = _swig_property(_moose.IntFire_refractT_get, _moose.IntFire_refractT_set)
+    initVm = _swig_property(_moose.IntFire_initVm_get, _moose.IntFire_initVm_set)
+    inject = _swig_property(_moose.IntFire_inject_get, _moose.IntFire_inject_set)
+IntFire_swigregister = _moose.IntFire_swigregister
+IntFire_swigregister(IntFire)
+IntFire.className_ = _moose.cvar.IntFire_className_
+
+class IzhikevichNrn(PyMooseBase):
+    """Proxy of C++ IzhikevichNrn class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> IzhikevichNrn
+        __init__(self, string path) -> IzhikevichNrn
+        __init__(self, string name, Id parentId) -> IzhikevichNrn
+        __init__(self, string name, PyMooseBase parent) -> IzhikevichNrn
+        __init__(self, IzhikevichNrn src, string name, PyMooseBase parent) -> IzhikevichNrn
+        __init__(self, IzhikevichNrn src, string name, Id parent) -> IzhikevichNrn
+        __init__(self, IzhikevichNrn src, string path) -> IzhikevichNrn
+        __init__(self, Id src, string name, Id parent) -> IzhikevichNrn
+        """
+        this = _moose.new_IzhikevichNrn(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_IzhikevichNrn
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.IzhikevichNrn_getType(*args)
+
+    def __get_Vmax(*args):
+        """__get_Vmax(self) -> double"""
+        return _moose.IzhikevichNrn___get_Vmax(*args)
+
+    def __set_Vmax(*args):
+        """__set_Vmax(self, double Vmax)"""
+        return _moose.IzhikevichNrn___set_Vmax(*args)
+
+    def __get_c(*args):
+        """__get_c(self) -> double"""
+        return _moose.IzhikevichNrn___get_c(*args)
+
+    def __set_c(*args):
+        """__set_c(self, double c)"""
+        return _moose.IzhikevichNrn___set_c(*args)
+
+    def __get_d(*args):
+        """__get_d(self) -> double"""
+        return _moose.IzhikevichNrn___get_d(*args)
+
+    def __set_d(*args):
+        """__set_d(self, double d)"""
+        return _moose.IzhikevichNrn___set_d(*args)
+
+    def __get_a(*args):
+        """__get_a(self) -> double"""
+        return _moose.IzhikevichNrn___get_a(*args)
+
+    def __set_a(*args):
+        """__set_a(self, double a)"""
+        return _moose.IzhikevichNrn___set_a(*args)
+
+    def __get_b(*args):
+        """__get_b(self) -> double"""
+        return _moose.IzhikevichNrn___get_b(*args)
+
+    def __set_b(*args):
+        """__set_b(self, double b)"""
+        return _moose.IzhikevichNrn___set_b(*args)
+
+    def __get_Vm(*args):
+        """__get_Vm(self) -> double"""
+        return _moose.IzhikevichNrn___get_Vm(*args)
+
+    def __set_Vm(*args):
+        """__set_Vm(self, double Vm)"""
+        return _moose.IzhikevichNrn___set_Vm(*args)
+
+    def __get_u(*args):
+        """__get_u(self) -> double"""
+        return _moose.IzhikevichNrn___get_u(*args)
+
+    def __get_Im(*args):
+        """__get_Im(self) -> double"""
+        return _moose.IzhikevichNrn___get_Im(*args)
+
+    def __get_initVm(*args):
+        """__get_initVm(self) -> double"""
+        return _moose.IzhikevichNrn___get_initVm(*args)
+
+    def __set_initVm(*args):
+        """__set_initVm(self, double initVm)"""
+        return _moose.IzhikevichNrn___set_initVm(*args)
+
+    def __get_initU(*args):
+        """__get_initU(self) -> double"""
+        return _moose.IzhikevichNrn___get_initU(*args)
+
+    def __set_initU(*args):
+        """__set_initU(self, double initU)"""
+        return _moose.IzhikevichNrn___set_initU(*args)
+
+    def __get_alpha(*args):
+        """__get_alpha(self) -> double"""
+        return _moose.IzhikevichNrn___get_alpha(*args)
+
+    def __set_alpha(*args):
+        """__set_alpha(self, double alpha)"""
+        return _moose.IzhikevichNrn___set_alpha(*args)
+
+    def __get_beta(*args):
+        """__get_beta(self) -> double"""
+        return _moose.IzhikevichNrn___get_beta(*args)
+
+    def __set_beta(*args):
+        """__set_beta(self, double beta)"""
+        return _moose.IzhikevichNrn___set_beta(*args)
+
+    def __get_gamma(*args):
+        """__get_gamma(self) -> double"""
+        return _moose.IzhikevichNrn___get_gamma(*args)
+
+    def __set_gamma(*args):
+        """__set_gamma(self, double gamma)"""
+        return _moose.IzhikevichNrn___set_gamma(*args)
+
+    Vmax = _swig_property(_moose.IzhikevichNrn_Vmax_get, _moose.IzhikevichNrn_Vmax_set)
+    c = _swig_property(_moose.IzhikevichNrn_c_get, _moose.IzhikevichNrn_c_set)
+    d = _swig_property(_moose.IzhikevichNrn_d_get, _moose.IzhikevichNrn_d_set)
+    a = _swig_property(_moose.IzhikevichNrn_a_get, _moose.IzhikevichNrn_a_set)
+    b = _swig_property(_moose.IzhikevichNrn_b_get, _moose.IzhikevichNrn_b_set)
+    Vm = _swig_property(_moose.IzhikevichNrn_Vm_get, _moose.IzhikevichNrn_Vm_set)
+    u = _swig_property(_moose.IzhikevichNrn_u_get)
+    Im = _swig_property(_moose.IzhikevichNrn_Im_get)
+    initVm = _swig_property(_moose.IzhikevichNrn_initVm_get, _moose.IzhikevichNrn_initVm_set)
+    initU = _swig_property(_moose.IzhikevichNrn_initU_get, _moose.IzhikevichNrn_initU_set)
+    alpha = _swig_property(_moose.IzhikevichNrn_alpha_get, _moose.IzhikevichNrn_alpha_set)
+    beta = _swig_property(_moose.IzhikevichNrn_beta_get, _moose.IzhikevichNrn_beta_set)
+    gamma = _swig_property(_moose.IzhikevichNrn_gamma_get, _moose.IzhikevichNrn_gamma_set)
+IzhikevichNrn_swigregister = _moose.IzhikevichNrn_swigregister
+IzhikevichNrn_swigregister(IzhikevichNrn)
+IzhikevichNrn.className_ = _moose.cvar.IzhikevichNrn_className_
+
+class GHK(PyMooseBase):
+    """Proxy of C++ GHK class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> GHK
+        __init__(self, string path) -> GHK
+        __init__(self, string name, Id parentId) -> GHK
+        __init__(self, string name, PyMooseBase parent) -> GHK
+        __init__(self, GHK src, string name, PyMooseBase parent) -> GHK
+        __init__(self, GHK src, string name, Id parent) -> GHK
+        __init__(self, GHK src, string path) -> GHK
+        __init__(self, Id src, string name, Id parent) -> GHK
+        """
+        this = _moose.new_GHK(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_GHK
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.GHK_getType(*args)
+
+    def __get_Ik(*args):
+        """__get_Ik(self) -> double"""
+        return _moose.GHK___get_Ik(*args)
+
+    def __get_Gk(*args):
+        """__get_Gk(self) -> double"""
+        return _moose.GHK___get_Gk(*args)
+
+    def __get_Ek(*args):
+        """__get_Ek(self) -> double"""
+        return _moose.GHK___get_Ek(*args)
+
+    def __get_T(*args):
+        """__get_T(self) -> double"""
+        return _moose.GHK___get_T(*args)
+
+    def __set_T(*args):
+        """__set_T(self, double T)"""
+        return _moose.GHK___set_T(*args)
+
+    def __get_p(*args):
+        """__get_p(self) -> double"""
+        return _moose.GHK___get_p(*args)
+
+    def __set_p(*args):
+        """__set_p(self, double p)"""
+        return _moose.GHK___set_p(*args)
+
+    def __get_Vm(*args):
+        """__get_Vm(self) -> double"""
+        return _moose.GHK___get_Vm(*args)
+
+    def __set_Vm(*args):
+        """__set_Vm(self, double Vm)"""
+        return _moose.GHK___set_Vm(*args)
+
+    def __get_Cin(*args):
+        """__get_Cin(self) -> double"""
+        return _moose.GHK___get_Cin(*args)
+
+    def __set_Cin(*args):
+        """__set_Cin(self, double Cin)"""
+        return _moose.GHK___set_Cin(*args)
+
+    def __get_Cout(*args):
+        """__get_Cout(self) -> double"""
+        return _moose.GHK___get_Cout(*args)
+
+    def __set_Cout(*args):
+        """__set_Cout(self, double Cout)"""
+        return _moose.GHK___set_Cout(*args)
+
+    def __get_valency(*args):
+        """__get_valency(self) -> double"""
+        return _moose.GHK___get_valency(*args)
+
+    def __set_valency(*args):
+        """__set_valency(self, double valency)"""
+        return _moose.GHK___set_valency(*args)
+
+    Ik = _swig_property(_moose.GHK_Ik_get)
+    Gk = _swig_property(_moose.GHK_Gk_get)
+    Ek = _swig_property(_moose.GHK_Ek_get)
+    T = _swig_property(_moose.GHK_T_get, _moose.GHK_T_set)
+    p = _swig_property(_moose.GHK_p_get, _moose.GHK_p_set)
+    Vm = _swig_property(_moose.GHK_Vm_get, _moose.GHK_Vm_set)
+    Cin = _swig_property(_moose.GHK_Cin_get, _moose.GHK_Cin_set)
+    Cout = _swig_property(_moose.GHK_Cout_get, _moose.GHK_Cout_set)
+    valency = _swig_property(_moose.GHK_valency_get, _moose.GHK_valency_set)
+GHK_swigregister = _moose.GHK_swigregister
+GHK_swigregister(GHK)
+GHK.className_ = _moose.cvar.GHK_className_
 
 
 
