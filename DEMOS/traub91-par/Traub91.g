@@ -40,7 +40,7 @@ end
 //=====================================
 //  Create cells
 //=====================================
-if ( 1 )
+if ( 0 )
 	readcell CA3.p /cell0
 	readcell CA3.p /cell1@1
 else
@@ -94,7 +94,7 @@ setfield /p1/Ca1 stepmode 3
 addmsg /cell0/soma /p0/Vm0 INPUT Vm
 // addmsg /cell0/soma/Ca_conc /p0/Ca0 INPUT Ca
 
-// addmsg /cell0/soma /p1/Vm0 INPUT Vm
+addmsg /cell0/soma /p1/Vm0 INPUT Vm
 // addmsg /cell0/soma/Ca_conc /p1/Ca0 INPUT Ca
 
 // addmsg /cell1/soma /p0/Vm1 INPUT Vm
@@ -170,7 +170,7 @@ if ( MOOSE && USE_SOLVER )
 	setfield /cell0/solve/integ CaAdvance 0
 	setfield /cell1/solve/integ CaAdvance 0
 end
-step {SIMLENGTH} -time
+//step {SIMLENGTH} -time
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -221,5 +221,5 @@ Plots written to *.plot. Reference curves from GENESIS are in files named
 If you have gnuplot, run 'gnuplot plot.gnuplot' to view the graphs.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
-quit
+//quit
 end

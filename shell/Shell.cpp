@@ -865,6 +865,9 @@ Id Shell::traversePath( Id start, vector< string >& names )
 Id Shell::localTraversePath( Id start, vector< string >& names )
 {
 	assert( !start.bad() );
+	if ( !start.isGlobal() && start.node() != Shell::myNode() )
+		return Id::badId();
+
 	vector< string >::iterator i;
 	for ( i = names.begin(); i != names.end(); i++ ) {
 		if ( *i == "." || *i == "/" ) {
@@ -1262,7 +1265,10 @@ void Shell::staticCreate( const Conn* c, string type,
 		// This is where the IdManager does clever load balancing etc
 		// to assign child node.
 		id = Id::childId( paNid );
-	} else if ( node >= s->numNodes_ && ! id.isGlobal() ) {
+	} else if ( node == Id::GlobalNode ) {
+		id = Id::newId();
+		id.setGlobal();
+	} else if ( node >= s->numNodes_ ) {
 		cout << "Warning: Shell::staticCreate: unallocated target node " <<
 			node << ", using node 0\n";
 		node = 0;
