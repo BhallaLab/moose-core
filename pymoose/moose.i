@@ -59,6 +59,9 @@
 	#include "PIDController.h"
 	#include "DiffAmp.h"
 	#include "RC.h"
+	#include "IntFire.h"
+	#include "IzhikevichNrn.h"
+	#include "GHK.h"
 //	#include "../kinetics/SparseMatrix.h"
 	#include "../utility/utility.h"
 	/* Random number related utilities */
@@ -634,10 +637,10 @@ void fillData(PyObject* args)
 %include "PIDController.h"
 %attribute(pymoose::PIDController, double, gain, __get_gain, __set_gain)
 %attribute(pymoose::PIDController, double, saturation, __get_saturation, __set_saturation)
-%attribute(pymoose::PIDController, double, command, __get_command)
+%attribute(pymoose::PIDController, double, command, __get_command, __set_command)
 %attribute(pymoose::PIDController, double, sensed, __get_sensed)
-%attribute(pymoose::PIDController, double, tauI, __get_tauI)
-%attribute(pymoose::PIDController, double, tauD, __get_tauD)
+%attribute(pymoose::PIDController, double, tauI, __get_tauI, __set_tauI)
+%attribute(pymoose::PIDController, double, tauD, __get_tauD, __set_tauD)
 %attribute(pymoose::PIDController, double, output, __get_output)
 
 %include "DiffAmp.h"
@@ -646,3 +649,42 @@ void fillData(PyObject* args)
 %attribute(pymoose::DiffAmp, double, plus, __get_plus)
 %attribute(pymoose::DiffAmp, double, minus, __get_minus)
 %attribute(pymoose::DiffAmp, double, output, __get_output)
+
+%include "IntFire.h"
+%attribute(pymoose::IntFire, double, Vt, __get_Vt, __set_Vt)
+%attribute(pymoose::IntFire, double, Vr, __get_Vr, __set_Vr)
+%attribute(pymoose::IntFire, double, Rm, __get_Rm, __set_Rm)
+%attribute(pymoose::IntFire, double, Cm, __get_Cm, __set_Cm)
+%attribute(pymoose::IntFire, double, Vm, __get_Vm, __set_Vm)
+%attribute(pymoose::IntFire, double, tau, __get_tau)
+%attribute(pymoose::IntFire, double, Em, __get_Em, __set_Em)
+%attribute(pymoose::IntFire, double, refractT, __get_refractT, __set_refractT)
+%attribute(pymoose::IntFire, double, initVm, __get_initVm, __set_initVm)
+%attribute(pymoose::IntFire, double, inject, __get_inject, __set_inject)
+
+%include "IzhikevichNrn.h"
+%attribute(pymoose::IzhikevichNrn, double, Vmax, __get_Vmax, __set_Vmax)
+%attribute(pymoose::IzhikevichNrn, double, c, __get_c, __set_c)
+%attribute(pymoose::IzhikevichNrn, double, d, __get_d, __set_d)
+%attribute(pymoose::IzhikevichNrn, double, a, __get_a, __set_a)
+%attribute(pymoose::IzhikevichNrn, double, b, __get_b, __set_b)
+%attribute(pymoose::IzhikevichNrn, double, Vm, __get_Vm, __set_Vm)
+%attribute(pymoose::IzhikevichNrn, double, u, __get_u)
+%attribute(pymoose::IzhikevichNrn, double, Im, __get_Im)
+%attribute(pymoose::IzhikevichNrn, double, initVm, __get_initVm, __set_initVm)
+%attribute(pymoose::IzhikevichNrn, double, initU, __get_initU, __set_initU)
+%attribute(pymoose::IzhikevichNrn, double, alpha, __get_alpha, __set_alpha)
+%attribute(pymoose::IzhikevichNrn, double, beta, __get_beta, __set_beta)
+%attribute(pymoose::IzhikevichNrn, double, gamma, __get_gamma, __set_gamma)
+
+%include "GHK.h"
+%attribute(pymoose::GHK, double, Ik, __get_Ik)
+%attribute(pymoose::GHK, double, Gk, __get_Gk)
+%attribute(pymoose::GHK, double, Ek, __get_Ek)
+%attribute(pymoose::GHK, double, T, __get_T, __set_T)
+%attribute(pymoose::GHK, double, p, __get_p, __set_p)
+%attribute(pymoose::GHK, double, Vm, __get_Vm, __set_Vm)
+%attribute(pymoose::GHK, double, Cin, __get_Cin, __set_Cin)
+%attribute(pymoose::GHK, double, Cout, __get_Cout, __set_Cout)
+%attribute(pymoose::GHK, double, valency, __get_valency, __set_valency)
+
