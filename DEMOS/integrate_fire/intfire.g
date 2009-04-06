@@ -5,6 +5,7 @@
  *  f = 1 / (refractT + tau * ln((Rm * inject + Em - Vr) / (Rm * inject + Em - Vt)))
  *************************************************************************/
 
+
 create neutral testIF
 pushe testIF
 create IntFire if1
