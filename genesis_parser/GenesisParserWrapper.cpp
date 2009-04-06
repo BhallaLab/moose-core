@@ -1384,15 +1384,6 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s )
 						setVecFieldSlot, el, string( argv[ 3 ] ) + "power", "1.0" );
 				*/
 				
-				/*
-				// Explicit creation of gate
-				// Args to shell: type, name, node, parent Id
- 				send4< string, string, int, Id >(
-					s(), createSlot,
-					"HHGate", gateName,
-					Id::UnknownNode, elmId );
-				*/
-				
 				send2< Id, string >( s(),
 					createGateSlot, elmId, string( 1, gate ) );
 				
@@ -1404,17 +1395,6 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s )
 					<< " under channel " << elmPath << ".\n";
 				return 0;
 			}
-			
-			/*
-			 * Gate creation done. Creating Interpols.
-			 * 
-			 * Needed only if global.
-			 */
-			/*
-			if ( gateId.isGlobal() ) {
-				send1< Id >( s(), createGateSlot, gateId );
-			}
-			*/
 			
 			/*
 			 * Interpols created. Set fields.
@@ -1439,40 +1419,6 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s )
 				send3< Id, string, string >( s(),
 					setFieldSlot, tabId, "xmax", argv[ 6 ] );
 			}
-			
-			/*
-			string tables[ ] = { "A", "B" };
-			
-			for ( unsigned int i = 0; i < 2; i++ ) {
-				string tabName = tables[ i ];
-				string tabPath = gatePath + "/" + tabName;
-				Id tabId( tabPath );
-				
-				if ( tabId.zero() || tabId.bad() ) {
-					// Args to shell: type, name, node, parent Id
-					send4< string, string, int, Id >(
-						s(), createSlot,
-						"Interpol", tabName,
-						Id::UnknownNode, gateId );
-					
-					tabId = Id( tabPath );
-				}
-				
-				if ( tabId.zero() || tabId.bad() ) {
-					cerr << "Error: GenesisParserWrapper::tabCreate:"
-						<< " Unable to create Interpol " << tabName
-						<< " under gate " << gatePath << ".\n";
-					return 0;
-				}
-				
-				send3< Id, string, string >( s(),
-					setFieldSlot, tabId, "xdivs", argv[ 4 ] );
-				send3< Id, string, string >( s(),
-					setFieldSlot, tabId, "xmin", argv[ 5 ] );
-				send3< Id, string, string >( s(),
-					setFieldSlot, tabId, "xmax", argv[ 6 ] );
-			}
-			*/
 			return 1;
 		}
 	}
@@ -1855,15 +1801,22 @@ void GenesisParserWrapper::doShowMsg( int argc, const char** argv, Id s)
  * Identify child node specification in the name@nodeNum format.
  * Return node.
  * Modify name to strip out node info.
+ * 
+ * If nodeNum < 0, it signifies all nodes (i.e., global)
  */
 unsigned int parseNodeNum( string& name )
 {
 	unsigned int childNode = Id::UnknownNode; // Tell the system to figure out child node.
+	int givenNode;
 	if ( name.rfind( "@" ) != string::npos ) {
 		string nodeNum = Shell::tail( name, "@" );
 		if ( nodeNum.length() > 0 ) {
 			name = Shell::head( name, "@" );
-			childNode = atoi( nodeNum.c_str() );
+			givenNode = atoi( nodeNum.c_str() );
+			if ( givenNode < 0 )
+				childNode = Id::GlobalNode;
+			else
+				childNode = static_cast< unsigned int >( givenNode );
 		}
 		else
 			childNode = 0;
@@ -2746,15 +2699,15 @@ Id findChanGateId( int argc, const char** const argv, Id s )
 	// good old tabgates and vdep_channels. Functionally equivalent,
 	// and here we merge the two cases.
 	
+	char gateChar = argv[2][0];
 	string gate = argv[1];
 	string type = "";
-	if ( argv[2][0] == 'X' )
+	if ( gateChar == 'X' )
 			type =  "xGate";
-	else if ( argv[2][0] == 'Y' )
+	else if ( gateChar == 'Y' )
 			type = "yGate";
-	else if ( argv[2][0] == 'Z' )
+	else if ( gateChar == 'Z' )
 			type = "zGate";
-	// Id gateId = GenesisParserWrapper::path2eid( gate, s );
 	
 	gate = gate + "/" + type;
 	Id gateId( gate );
@@ -2769,8 +2722,8 @@ Id findChanGateId( int argc, const char** const argv, Id s )
 			gateId = id;
 		else if ( className == "HHChannel" ) {
 			if (type != "") {
-				send4< string, string, int, Id >( s(), 
-					createSlot, "HHGate", type, id.node(), id );
+				send2< Id, string >( s(),
+					createGateSlot, id, string( 1, gateChar ) );
 				gateId = Id(gate);
 			}
 			else
