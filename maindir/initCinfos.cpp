@@ -1,7 +1,7 @@
 #include "header.h"
 #include "moose.h"
 
-extern const Cinfo* initAdaptorCinfo();
+// extern const Cinfo* initAdaptorCinfo();
 extern const Cinfo* initAscFileCinfo();
 //extern const Cinfo* initAtestCinfo();
 //extern const Cinfo* initAverageCinfo();
@@ -72,7 +72,7 @@ extern const Cinfo* initRandomSpikeCinfo();
 extern const Cinfo* initReactionCinfo();
 extern const Cinfo* initRectPanelCinfo();
 extern const Cinfo* initShellCinfo();
-extern const Cinfo* initSigNeurCinfo();
+//extern const Cinfo* initSigNeurCinfo();
 extern const Cinfo* initSpherePanelCinfo();
 extern const Cinfo* initSpikeGenCinfo();
 extern const Cinfo* initStochSynchanCinfo();
@@ -88,7 +88,7 @@ extern const Cinfo* initUniformRngCinfo();
 extern const Cinfo* initscript_outCinfo();
 
 void initCinfos(){
-    static const Cinfo* AdaptorCinfo = initAdaptorCinfo();
+    //    static const Cinfo* AdaptorCinfo = initAdaptorCinfo();
     static const Cinfo* AscFileCinfo = initAscFileCinfo();
 //    static const Cinfo* AtestCinfo = initAtestCinfo();
     //    static const Cinfo* AverageCinfo = initAverageCinfo();
@@ -161,7 +161,7 @@ void initCinfos(){
     static const Cinfo* ReactionCinfo = initReactionCinfo();
     static const Cinfo* RectPanelCinfo = initRectPanelCinfo();
     static const Cinfo* ShellCinfo = initShellCinfo();
-    static const Cinfo* SigNeurCinfo = initSigNeurCinfo();
+    //    static const Cinfo* SigNeurCinfo = initSigNeurCinfo();
     static const Cinfo* SpherePanelCinfo = initSpherePanelCinfo();
     static const Cinfo* SpikeGenCinfo = initSpikeGenCinfo();
     static const Cinfo* StochSynchanCinfo = initStochSynchanCinfo();

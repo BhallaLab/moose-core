@@ -51,7 +51,7 @@ int ArgParser::parseArguments(int argc, char **argv)
         option_['h'] =
             "This is MOOSE : the Messaging Object Oriented Simulation Environment,\n"
             + string("You can run it as \n\t")
-            + string(argv[0])
+                + string("moose")
             + string(" [OPTION1 OPTION2 ... ] [SCRIPT_FILE]\n where OPTION_S can be any of the following -\n")
             + string("\t-c, --config-file <config_file>  Read configuration from config_file\n")
             + string("\t-d, --docpath <doc_dir>          Search doc_dir for documentation\n")
