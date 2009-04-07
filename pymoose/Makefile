@@ -57,8 +57,8 @@ OBJFILES = ../basecode/basecode.o \
 	../kinetics/kinetics.o	\
 	../hsolve/hsolve.o	\
 	../ksolve/ksolve.o	\
-	../robots/robots.o	\
 	../device/device.o \
+#	../robots/robots.o	\
 
 
 OBJ = PyMooseBase.o \
@@ -110,8 +110,6 @@ OBJ = PyMooseBase.o \
 	Surface.o \
 	Geometry.o	\
 	MathFunc.o	\
-	Adaptor.o	\
-	SigNeur.o	\
 	AscFile.o	\
 	DifShell.o	\
 	GssaStoich.o	\
@@ -123,6 +121,8 @@ OBJ = PyMooseBase.o \
 	GHK.o	\
 	IntFire.o	\
 	IzhikevichNrn.o	\
+# 	Adaptor.o	\
+# 	SigNeur.o	\
 
 
 	
@@ -176,8 +176,6 @@ HEADERS=PyMooseUtil.h \
 	Surface.h	\
 	Geometry.h	\
 	MathFunc.h	\
- 	Adaptor.h	\
- 	SigNeur.h	\
 	AscFile.h	\
 	DifShell.h	\
 	GssaStoich.h	\
@@ -197,6 +195,8 @@ HEADERS=PyMooseUtil.h \
 	../randnum/Normal.h	\
 	../randnum/Poisson.h	\
 	../maindir/init.h		\
+#  	Adaptor.h	\
+#  	SigNeur.h	\
 
 
 #TEST_MAIN = TestPyMoose.o

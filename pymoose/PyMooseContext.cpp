@@ -223,6 +223,17 @@ const Cinfo* initPyMooseContextCinfo()
 			Ftype3< string, string, int >::global() ),
 		new SrcFinfo( "writesbml", 
 			Ftype3< string, string, int >::global() ),
+                ///////////////////////////////////////////////////////////////
+		// Misc
+		///////////////////////////////////////////////////////////////
+		new SrcFinfo( "createGate", 
+			Ftype2< Id, string >::global(),
+			"Args: HHGate id, Interpol A id, Interpol B id. "
+			"Request an HHGate explicitly to create Interpols, with the given "
+			"ids. This is used when the gate is a global object, and so the "
+			"interpols need to be globals too. Comes in use in TABCREATE in the "
+			"parallel context." ),
+
 	};
 	
 	static Finfo* pyMooseContextFinfos[] =
@@ -370,7 +381,8 @@ static const Slot readSbmlSlot =
 	initPyMooseContextCinfo()->getSlot( "parser.readsbml" );
 static const Slot writeSbmlSlot = 
 	initPyMooseContextCinfo()->getSlot( "parser.writesbml" );
-
+static const Slot createGateSlot = 
+	initPyMooseContextCinfo()->getSlot( "parser.createGate" );
 
 
 
