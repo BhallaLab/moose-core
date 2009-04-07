@@ -10,9 +10,9 @@
 // Maintainer: 
 // Created: Fri Apr  3 18:00:50 2009 (+0530)
 // Version: 
-// Last-Updated: Tue Apr  7 04:01:31 2009 (+0530)
+// Last-Updated: Tue Apr  7 16:27:57 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 183
+//     Update #: 187
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -327,6 +327,7 @@ double IzhikevichNrn::getInitU(Eref e)
 
 void IzhikevichNrn::processFunc(const Conn* conn, ProcInfo proc)
 {
+    double dt = proc->dt_;
     IzhikevichNrn* instance = static_cast<IzhikevichNrn*>(conn->data());
     if (instance->Vm_ >= instance->Vmax_){
         instance->Vm_ = instance->c_;
@@ -334,10 +335,10 @@ void IzhikevichNrn::processFunc(const Conn* conn, ProcInfo proc)
         send1<double>(conn->target(), eventSrcSlot, proc->currTime_);
     } else {
         instance->Vm_ = instance->Vm_ *
-                ( 1.0 + instance->alpha_ * instance->Vm_ + instance->beta_ ) +
-                instance->gamma_ - instance->u_ + instance->sum_inject_;
+                ( 1.0 + dt * (instance->alpha_ * instance->Vm_ + instance->beta_ )) +
+                dt * (instance->gamma_ - instance->u_ + instance->sum_inject_);
         instance->u_ = instance->u_ +
-                instance->a_ * (instance->b_ * instance->Vm_ - instance->u_);
+                dt * (instance->a_ * (instance->b_ * instance->Vm_ - instance->u_));
     }
     instance->sum_inject_ = 0.0;
     send1<double>(conn->target(), VmSrcSlot, instance->Vm_);
