@@ -235,7 +235,7 @@ class Id
 		/**
 		 * True if it is a scratch id.
 		 */
-		bool isScratch() const;
+    //		bool isScratch() const;
 
 		/**
 		 * True if it is a proxy element. This is a minimal holder
