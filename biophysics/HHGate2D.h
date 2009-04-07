@@ -22,6 +22,8 @@ class HHGate2D: public HHGate
 		
 		static void postCreate( const Conn* c );
 		
+		static void createInterpols( const Conn* c, Id aId, Id bId );
+		
 		static void setupAlpha( const Conn* c, vector< double > parms )
 		{ cerr << "Error: HHGate2D: setupAlpha not implemented.\n"; }
 		
