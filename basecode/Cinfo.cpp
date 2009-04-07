@@ -136,8 +136,8 @@ void Cinfo::init( const string* doc,
         std::string swig_name = out_dir_name+"pymoose.i";    
         std::string header_name = out_dir_name+name()+".h";
         std::string cpp_name = out_dir_name+name()+".cpp";
-                    
-        ofstream header, cpp, swig;
+        std::string initf_name = out_dir_name + "initCinfos.cpp";
+        ofstream header, cpp, swig, init_cinfo;
         bool created = false;
         
         created = open_outfile(header_name, header);
@@ -564,12 +564,24 @@ bool Cinfo::schedule( Element* e, unsigned int connTainerOption ) const
 	assert( tickCinfo != 0 ); // Not sure about execution order here.
 	assert( procFinfo != 0 );
 
-	const Element* library = Id::localId( "/library" )();
-	const Element* proto = Id::localId( "/proto" )();
-
 	// Don't bother to schedule objects sitting on /library or /proto
-	if ( e->isDescendant( library ) || e->isDescendant( proto ) )
+        const Id& libId = Id::localId( "/library" );
+        if (!libId.bad()){
+            const Element* library = libId();
+            if ( e->isDescendant( library )){
+                return 1;
+            }
+        }
+        const Id& protoId = Id::localId( "/proto" );
+	if (!protoId.bad())
+        {
+            const Element* proto = protoId();
+            if( e->isDescendant( proto ) ){
 		return 1;
+            }
+        }
+
+        
 
 	vector< SchedInfo >::const_iterator i;
 	for ( i = scheduling_.begin(); i != scheduling_.end(); i++ ) {

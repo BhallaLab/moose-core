@@ -66,7 +66,8 @@ const Cinfo * initRandGeneratorCinfo()
                                     initNeutralCinfo(),
                                     randGeneratorFinfos,
                                     sizeof(randGeneratorFinfos)/sizeof(Finfo*),
-                                    ValueFtype1<RandGenerator>::global());
+                                    ValueFtype1<RandGenerator>::global(),
+                                    schedInfo, 1);
     return &randGeneratorCinfo;
 }
 
