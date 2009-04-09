@@ -421,6 +421,7 @@ void ReadCell::readScript( const string& line )
 		} else if ( argv.size() == 2 ) {
 			graftFlag_ = 1;
 			currCell_ = startGraftCell( argv[1] );
+			assert( currCell_ != 0 );
 		} else {
 			cerr << "Error: readCell: Bad line: " << lineNum_ <<
 					": " << line << endl;
@@ -466,25 +467,29 @@ Element* ReadCell::startGraftCell( const string& cellpath )
 	// Warning: here is a parser dependence in the separator.
 	Id cellId( cellpath, "/" );
 	
-	if ( !cellId.bad() ) {
-		cerr << "Warning: ReadCell: cell '" << cellpath << "' already exists.\n";
-		cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
-		return 0;
+	if ( ! cellId.bad() ) {
+		if ( ! cellId.isGlobal() ) {
+			cerr << "Warning: ReadCell: cell '" << cellpath << "' already exists.\n";
+			cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
+			return 0;
+		}
+		
+		return cellId();
 	}
 	
 	string cellname;
 	
 	string::size_type pos = cellpath.find_last_of( "/" );
-	Element* cellparent;
+	Id parentId;
 	if ( pos == string::npos ) {
 		cerr << "Error: ReadCell: *start_cell should be given absolute path.\n";
 		cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
 		return 0;
 	} else if ( pos == 0 ) {
-		cellparent = Element::root();
+		parentId = Element::root()->id();
 		cellname = cellpath.substr( 1 );
 	} else {
-		Id parentId = Id( cellpath.substr( 0, pos  ), "/" );
+		parentId = Id( cellpath.substr( 0, pos  ), "/" );
 		if ( parentId.bad() ) {
 			cerr << "Error: ReadCell: cell path '" << cellpath
 				<< "' not found.\n";
@@ -492,12 +497,16 @@ Element* ReadCell::startGraftCell( const string& cellpath )
 			return 0;
 		}
 		
-		cellparent = parentId();
 		cellname = cellpath.substr( pos + 1 );
 	}
 	
-	return Neutral::create(
-		"Compartment", cellname, cellparent->id(), Id::scratchId() );
+	if ( parentId.isGlobal() && Shell::myNode() == 0 ) {
+		return Shell::createGlobal( 
+			"Compartment", cellname, parentId, Id::newId() );
+	} else {
+		return Neutral::create(
+			"Compartment", cellname, parentId, Id::newId() );
+	}
 }
 
 Element* ReadCell::findChannel( const string& name )

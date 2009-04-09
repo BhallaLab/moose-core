@@ -1289,7 +1289,7 @@ void Shell::staticCreate( const Conn* c, string type,
 	if ( ( paNid.isGlobal() || paNid.node() == 0 || parent == Id() ) &&
 		( id.isGlobal() || id.node() == 0 ) ) { // Make it here.
 		if ( id.isGlobal() )
-			ret = createGlobal( c->target(), type, name, parent, id );
+			ret = createGlobal( type, name, parent, id );
 		else
 			ret = s->create( type, name, parent, id );
 
@@ -1330,14 +1330,19 @@ void Shell::staticCreate( const Conn* c, string type,
 	}
 }
 
-// Static function
+/**
+ * Like Neutral::create, except for creating globals.
+ * Should be called on master node. Requests worker nodes to create the object.
+ * Not necessary for the caller to call id.setGlobal(), since this function
+ * does that.
+ */
 Element* Shell::createGlobal(
-	Eref ShellE, const string& type, const string& name, Id parent, Id id )
+	const string& type, const string& name, Id parent, Id id )
 {
 	assert( myNode() == 0 );
-	assert( id.isGlobal() );
 	assert( parent == Id() || parent.isGlobal() );
 	
+	id.setGlobal();
 	Eref shellE = Id::shellId().eref();
 	Shell* sh = static_cast< Shell* >( shellE.data() );
 	Element* ret = sh->create( type, name, parent, id );
