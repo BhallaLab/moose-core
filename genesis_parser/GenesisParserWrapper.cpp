@@ -2517,6 +2517,18 @@ void do_tab2file( int argc, const char** const argv, Id s )
  */
 void do_file2tab( int argc, const char** const argv, Id s )
 {
+	static map< string, string > tabmap;
+	if ( tabmap.empty() ) {
+		tabmap[ "X_A" ] = "xGate/A";
+		tabmap[ "X_B" ] = "xGate/B";
+		tabmap[ "Y_A" ] = "yGate/A";
+		tabmap[ "Y_B" ] = "yGate/B";
+		tabmap[ "Z_A" ] = "zGate/A";
+		tabmap[ "Z_B" ] = "zGate/B"; 
+		tabmap[ "bet" ] = "B"; 	// Short for beta: truncated at 3 chars.
+		tabmap[ "alp" ] = "A"; 	// Short for alpha
+	}
+
 	if ( argc < 4 ) {
 		cout << argv[0] << ": Too few command arguments\n";
 		cout << "usage: " << argv[0] << " file-name element table -table2 table -table3 table -skiplines number\n\n";
@@ -2530,13 +2542,23 @@ void do_file2tab( int argc, const char** const argv, Id s )
 		skiplines = atoi( argv[5] );
 	
 
-	// Id e = GenesisParserWrapper::path2eid( elmname, s );
 	Id e( elmname );
+	
+	// Hack here to deal with the special case of filling tables
+	// in tabchannels. Example command looks like:
+	//		file2tab {filename} Ca Y_A
+	// so here we need to do
+	//		file2tab {filename} Ca/yGate/A table
+	if ( e()->className() == "HHChannel" && tabmap.find( tabname ) != tabmap.end() ) {
+		elmname = elmname + "/" + tabmap[ tabname ];
+		e = Id( elmname );
+	}
+	
 	if ( !e.zero() && !e.bad() )
 		send3< Id, string, unsigned int >( s(),
 			file2tabSlot, e, fname, skiplines );
 	else
-		cout << "Error: " << argv[0] << ": element not found: " <<
+		cerr << "Error: " << argv[0] << ": element not found: " <<
 				elmname << endl;
 }
 
