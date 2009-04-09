@@ -53,6 +53,11 @@ const Cinfo* initInterpolCinfo()
 			GFCAST( &Interpol::getDx ),
 			RFCAST( &Interpol::setDx )
 		),
+		new ValueFinfo( "invdx", ValueFtype1< double >::global(),
+			GFCAST( &Interpol::getInvDx ),
+			RFCAST( &Interpol::setInvDx ),
+			"Only for back-compatibility with GENESIS."
+		),
 		new ValueFinfo( "sy", ValueFtype1< double >::global(),
 			GFCAST( &Interpol::getSy ),
 			RFCAST( &Interpol::setSy )
@@ -172,6 +177,15 @@ void Interpol::setDx( const Conn* c, double dx )
 double Interpol::getDx( Eref e )
 {
 	return static_cast< Interpol* >( e.data() )->localGetDx();
+}
+
+void Interpol::setInvDx( const Conn* c, double invdx ) 
+{
+	static_cast< Interpol* >( c->data() )->localSetDx( 1.0 / invdx );
+}
+double Interpol::getInvDx( Eref e )
+{
+	return 1.0 / ( static_cast< Interpol* >( e.data() )->localGetDx() );
 }
 
 void Interpol::setSy( const Conn* c, double value ) 

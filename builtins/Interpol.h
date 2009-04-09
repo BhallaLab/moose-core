@@ -37,6 +37,8 @@ class Interpol
 		static int getXdivs( Eref e );
 		static void setDx( const Conn* c, double value );
 		static double getDx( Eref e );
+		static void setInvDx( const Conn* c, double value );
+		static double getInvDx( Eref e );
 		static void setSy( const Conn* c, double value );
 		static double getSy( Eref e );
 		static void setMode( const Conn* c, int value );
