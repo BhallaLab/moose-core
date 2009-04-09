@@ -172,11 +172,11 @@ class Shell
 ////////////////////////////////////////////////////////////////////
 // Id management
 ////////////////////////////////////////////////////////////////////
-	static unsigned int newIdBlock( unsigned int size );
-	static void handleRequestNewIdBlock( const Conn* c,
-		unsigned int size, unsigned int node, unsigned int requestId );
-	static void handleReturnNewIdBlock( const Conn* c,
-		unsigned int value, unsigned int requestId );
+		static unsigned int newIdBlock( unsigned int size );
+		static void handleRequestNewIdBlock( const Conn* c,
+			unsigned int size, unsigned int node, unsigned int requestId );
+		static void handleReturnNewIdBlock( const Conn* c,
+			unsigned int value, unsigned int requestId );
 
 ////////////////////////////////////////////////////////////////////
 // Local functions for implementing basic GENESIS/MOOSE command set.
@@ -219,7 +219,7 @@ class Shell
 		static void staticCreateArray( const Conn*, string type,
 						string name, Id parent, vector <double> parameter );
 
-		static Element* createGlobal( Eref ShellE,
+		static Element* createGlobal(
 						const string& type, const string& name, Id parent, Id id );
 
 		static void planarconnect( const Conn* c, string source, string dest, double probability);
