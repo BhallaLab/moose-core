@@ -65,6 +65,11 @@ void init( int& argc, char**& argv )
  * If the last argument to moose is "-m" then each process will print its
  * process id and process 0 will wait for keyboard input. Useful for attaching a
  * debugger to the processes when running in parallel.
+ * 
+ * If the last argument is "-mi" then an infinite loop is used to pause, instead
+ * of waiting for keyboard input. Sometimes the program refuses to wait for
+ * keyboard input (happens when running moose using MUSIC--not sure why). The
+ * infinite loop comes handy then.
  */
 void initMPI( int& argc, char**& argv )
 {
@@ -77,7 +82,10 @@ void initMPI( int& argc, char**& argv )
 	// If not done here, the Shell uses defaults suitable for one node.
 	Shell::setNodes( myNode, numNodes );
 	
-	if ( strncmp( argv[ argc - 1 ], "-m", 2 ) == 0 ) {
+	bool pause = strncmp( argv[ argc - 1 ], "-m", 2 ) == 0;
+	bool infinite = strncmp( argv[ argc - 1 ], "-mi", 3 ) == 0;
+	
+	if ( pause ) {
 		char hostname[ 256 ];
 		// this loop will ensure that all nodes print the following message
 		// in order of their rank
@@ -91,8 +99,13 @@ void initMPI( int& argc, char**& argv )
 		}
 		
 		if ( myNode == 0 ) {
-			cout << "Paused, hit return to continue" << flush;
-			getchar();
+			if ( ! infinite ) {
+				cout << "Paused, hit return to continue" << flush;
+				getchar();
+			} else {
+				cout << "Paused, hit return to continue" << flush;
+				while( 1 );
+			}
 		}
 		MuMPI::INTRA_COMM().Barrier();
 	}
