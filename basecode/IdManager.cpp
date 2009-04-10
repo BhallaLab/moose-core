@@ -91,6 +91,9 @@ unsigned int IdManager::newId() {
 		);
 	}
 	
+	if ( blockEnd_ >= elementList_.size() )
+		elementList_.resize( 2 * blockEnd_ );
+	
 	lastId_ = localIndex_;
 	localIndex_++;
 	return lastId_;
