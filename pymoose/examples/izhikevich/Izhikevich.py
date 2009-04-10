@@ -11,9 +11,9 @@
 # Maintainer: 
 # Created: Mon Apr  6 15:43:16 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Apr  9 18:33:24 2009 (+0530)
+# Last-Updated: Fri Apr 10 14:51:26 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 566
+#     Update #: 652
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -57,8 +57,6 @@ import sys
 sys.path.append('/usr/lib/python2.5/site-packages')
 sys.path.append('/home/subha/src/moose/pymoose')
 
-import pylab
-
 import moose
 
 class SimEnv:
@@ -67,28 +65,53 @@ class SimEnv:
     dt = 1.0 # integration time step
     duration = 200.0 # duration of simulation
 
+def set_dt(dt):
+    SimEnv.dt = dt
 
+def set_dur(dur):
+    SimEnv.duration = dur
 
-pars={"tonic_spiking":    [0.02  ,    0.2  ,   -65,     6  ,      14 ],
-      "phasic_spiking":   [0.02  ,    0.25 ,   -65,     6  ,      0.5],
-      "tonic_bursting":   [0.02  ,    0.2  ,   -50,     2  ,      15 ],
-      "phasic_bursting":  [0.02  ,    0.25 ,   -55,     0.05,     0.6],
-      "mixed_mode":       [0.02  ,    0.2  ,   -55,     4   ,     10 ],
-      "spike_freq_adapt": [0.01  ,    0.2  ,   -65,     8   ,     30 ],# spike frequency adaptation
-      "Class_1":          [0.02  ,    -0.1 ,   -55,     6   ,     0  ],
-      "Class_2":          [0.2   ,    0.26 ,   -65,     0   ,     0  ],
-      "spike_latency":    [0.02  ,    0.2  ,   -65,     6   ,     7  ],
-      "subthresh_osc":    [0.05  ,    0.26 ,   -60,     0   ,     0  ],	# subthreshold oscillations
-      "resonator":        [0.1   ,    0.26 ,   -60,     -1  ,     0  ],
-      "integrator":       [0.02  ,    -0.1 ,   -55,     6   ,     0  ],
-      "rebound_spike":    [0.03  ,    0.25 ,   -60,     4   ,     0  ],
-      "rebound_burst":    [0.03  ,    0.25 ,   -52,     0   ,     0  ],
-      "thresh_var":       [0.03  ,    0.25 ,   -60,     4   ,     0  ],	# threshold variability
-      "bistable":         [1     ,    1.5  ,   -60,     0   ,     -65],	# bistability
-      "DAP":              [  1   ,    0.2  ,   -60,     -21 ,     0  ],
-      "accomodation":     [0.02  ,    1    ,   -55,     4   ,     0  ],
-      "iispike":          [-0.02  ,   -1   ,   -60,     8   ,     80 ],	# inhibition-induced spiking
-      "iiburst":          [-0.026 ,   -1   ,   -45,     0   ,     80 ]}       # inhibition-induced bursting
+types = ["tonic_spiking",   
+         "phasic_spiking",  
+         "tonic_bursting",  
+         "phasic_bursting", 
+         "mixed_mode",      
+         "spike_freq_adapt",
+         "Class_1",         
+         "Class_2",         
+         "spike_latency",   
+         "subthresh_osc",   
+         "resonator",       
+         "integrator",      
+         "rebound_spike",   
+         "rebound_burst",   
+         "thresh_var",      
+         "bistable",        
+         "DAP",             
+         "accommodation",   
+         "iispike",         
+         "iiburst"]         
+# The parameters are: a, b, c, d followed by injection current I and duration of simulation
+pars={"tonic_spiking":    [0.02  ,    0.2  ,   -65.0,     6.0  ,      14.0,  100.0],
+      "phasic_spiking":   [0.02  ,    0.25 ,   -65.0,     6.0  ,      0.5,   200.0],
+      "tonic_bursting":   [0.02  ,    0.2  ,   -50.0,     2.0  ,      15.0,  200.0],
+      "phasic_bursting":  [0.02  ,    0.25 ,   -55.0,     0.05 ,      0.6,   200.0],
+      "mixed_mode":       [0.02  ,    0.2  ,   -55.0,     4.0   ,     10.0,  200.0],
+      "spike_freq_adapt": [0.01  ,    0.2  ,   -65.0,     8.0   ,     30.0,  100.0],# spike frequency adaptation
+      "Class_1":          [0.02  ,    -0.1 ,   -55.0,     6.0   ,     0,     500.0],
+      "Class_2":          [0.2   ,    0.26 ,   -65.0,     0.0   ,     0,     500.0],
+      "spike_latency":    [0.02  ,    0.2  ,   -65.0,     6.0   ,     7.0,   100.0],
+      "subthresh_osc":    [0.05  ,    0.26 ,   -60.0,     0.0   ,     0,     200.0],	# subthreshold oscillations
+      "resonator":        [0.1   ,    0.26 ,   -60.0,     -1.0  ,     0,     500.0],
+      "integrator":       [0.02  ,    -0.1 ,   -55.0,     6.0   ,     0,     100.0],
+      "rebound_spike":    [0.03  ,    0.25 ,   -60.0,     4.0   ,     0,     200.0],
+      "rebound_burst":    [0.03  ,    0.25 ,   -52.0,     0.0   ,     0,     200.0],
+      "thresh_var":       [0.03  ,    0.25 ,   -60.0,     4.0   ,     0,     100.0],	# threshold variability
+      "bistable":         [1.0   ,    1.5  ,   -60.0,     0.0   ,     -65.0, 500.0],	# bistability
+      "DAP":              [1.0   ,    0.2  ,   -60.0,     -21.0 ,     0,     50.0 ],
+      "accommodation":    [0.02  ,    1.0  ,   -55.0,     4.0   ,     0,     500.0],
+      "iispike":          [-0.02 ,    -1.0 ,   -60.0,     8.0   ,     80.0,  500.0],	# inhibition-induced spiking
+      "iiburst":          [-0.026,    -1.0 ,   -45.0,     0.0   ,     80.0,  500.0]}       # inhibition-induced bursting
 
 
 class IzhikevichTest(moose.IzhikevichNrn):
@@ -141,10 +164,10 @@ class IzhikevichTest(moose.IzhikevichNrn):
     def set_input(self, array):
         """Populate the input table from an array (numpy possibly)"""
         self.input.xmin = 0.0
-        self.input.xmax = SimEnv.duration
+        self.input.xmax = SimEnv.dt * len(array)
         self.input.stepSize = SimEnv.dt
-        self.input.xdivs = int(SimEnv.duration / SimEnv.dt)
-        print len(self.input)
+        SimEnv.duration = SimEnv.dt * len(array)
+        self.input.xdivs = int(len(array))
         for i in range(len(array)):
             self.input[i] = array[i]
             
@@ -166,8 +189,8 @@ class IzhikevichTest(moose.IzhikevichNrn):
         return self.dump_data()
 
 def create_input(nrn_type, input_len):
-    if input_len < 200:
-        print("Simulate at least for 200 ms.")
+    if input_len < 50:
+        print("Simulate at least for 50 ms.")
         return numpy.zeros(input_len)
 
     input_array = numpy.zeros(int(input_len))
@@ -181,7 +204,7 @@ def create_input(nrn_type, input_len):
             input_array[20:] = pars[nrn_type][4]
     
     elif nrn_type =="Class_1" or nrn_type =="Class_2":        
-        input_array = numpy.linspace(0, 20.0, input_len)
+        input_array = numpy.linspace(0, 2.0, input_len)
     elif nrn_type =="spike_latency" or nrn_type =="subthresh_osc" or nrn_type =="DAP":
         input_array[20:21] = 20.0
     elif nrn_type =="resonator": 
@@ -198,22 +221,23 @@ def create_input(nrn_type, input_len):
                 input_array[index] = 20.0
             i = i + width
     elif nrn_type =="integrator":     
-        input_array[20] = 20.0
-        input_array[22] = 20.0
-        input_array[100] = 20.0
-        input_array[105:110] = 20.0        
+        input_array[5] = 10.0
+        input_array[10] = 10.0
+        input_array[50] = 10.0
+        input_array[65] = 10.0        
     elif nrn_type =="rebound_spike" or  nrn_type =="rebound_burst":
         input_array[20] = -20.0
     elif nrn_type =="thresh_var":     
-        input_array[20] = 20.0
-        input_array[100] = -20.0
-        input_array[102] = 20.0        
+        input_array[5] = 20.0
+        input_array[80:85] = -20.0
+        input_array[90:95] = 20.0        
     elif nrn_type =="bistable":
         input_array[20] = 20.0
         input_array[100] = 20.0        
-    elif nrn_type =="accomodation":   
-        input_array[:100] = numpy.linspace(0, 20.0, 100)
-        input_array[105] = 5.0
+    elif nrn_type =="accommodation":
+        increasing = 200
+        input_array[:increasing] = numpy.linspace(-5.0, 1.0, increasing)
+        input_array[300] = 1.0
     elif nrn_type =="iispike" or nrn_type =="iiburst":        
         input_array[20:120] = -20.0
     
@@ -231,35 +255,9 @@ def run():
     moose.PyMooseBase.getContext().reset()
     moose.PyMooseBase.getContext().step(SimEnv.duration)
 
-def run_all():
-    """Run all the models and show the plots.This is for
-    matplotlib-only system. No dependency on Qt"""
-    global pars
-    neurons = []
-    data = {}
-    nrn = IzhikevichTest("Izhikevich")
-
-    for nrn_type in pars.keys():
-        nrn.set_type(nrn_type)
-        nrn.schedule(SimEnv.dt)
-        neurons.append(nrn)
-    run(SimEnv.duration)
-    row_count = ceil(sqrt(len(neurons)))
-    col_count = ceil(len(neurons) / row_count)
-    plot_num = 1
-    for nrn in neurons:
-        print nrn.path
-        data = pylab.array(nrn.dump_data())
-        data[pylab.isnan(data)] = 0.0
-        data[pylab.isinf(data)] = 1e3
-        inject = pylab.array(nrn.inject_table)
-        pylab.subplot(row_count, col_count, plot_num)
-        pylab.plot(data)
-        pylab.plot(inject - 120.0)
-        pylab.title(nrn.name)
-        plot_num = plot_num + 1
-#    pylab.legend()
-
+def numpy_sim(nrn_type, input_array):
+    """Do the same simulation using direct array operations."""
+    
 
 
 ####################################################
@@ -284,7 +282,7 @@ class IzhikevichGui(QtGui.QMainWindow):
         layout = QtGui.QGridLayout(self.ctrl_frame)
         row = 0
         col = 0
-        for key in pars.keys():
+        for key in types:
             button = QtGui.QPushButton(key, self.ctrl_frame)
             self.connect(button, QtCore.SIGNAL('clicked()'), self.run_slot)
             print row, col
@@ -296,6 +294,15 @@ class IzhikevichGui(QtGui.QMainWindow):
                 col = 0
                 row = row + 1
             self.buttons.append(button)
+        dur_label = QtGui.QLabel("duration", self.ctrl_frame)
+        layout.addWidget(dur_label, row, 0)
+        dt_label = QtGui.QLabel("dt", self.ctrl_frame)
+        layout.addWidget(dt_label, row, 1)
+        row = row + 1
+        self.dur_input = QtGui.QLineEdit(self.ctrl_frame)
+        layout.addWidget(self.dur_input, row, 0)
+        self.dt_input = QtGui.QLineEdit(self.ctrl_frame)
+        layout.addWidget(self.dt_input, row, 1)
         self.ctrl_frame.setLayout(layout)
         self.setCentralWidget(self.ctrl_frame)
 
@@ -304,6 +311,13 @@ class IzhikevichGui(QtGui.QMainWindow):
         source = self.sender()
         nrn_type = str(source.text())
         self.nrn.set_type(nrn_type)
+        try:
+            dur = float(str(self.dur_input.text()))
+            dt = float(str(self.dt_input.text()))
+            set_dur(dur)
+            set_dt(dt)
+        except ValueError:
+            set_dur(pars[nrn_type][5])
         vm_array = numpy.array(self.nrn.fullrun())
         inj_array = numpy.array(self.nrn.inject_table)
         plot = Qwt.QwtPlot()
@@ -320,6 +334,17 @@ class IzhikevichGui(QtGui.QMainWindow):
         plot.replot()
         plot.show()
         self.plots.append(plot)
+
+    def closeEvent(self, event):
+        """Overriding QWidget.closeEvent() in order to close all other
+        windows
+        """
+        windowList = QtGui.qApp.topLevelWidgets()
+        for window in windowList:
+            if window != self:
+                window.close()
+        QtGui.qApp.quit()
+
     
 if __name__ == "__main__":
     qApp = QtGui.QApplication(sys.argv)
