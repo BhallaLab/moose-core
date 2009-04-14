@@ -31,6 +31,9 @@ namespace pymoose
         virtual const std::string& getType() = 0;
         const std::string& getSeparator() const;
         static pymoose::PyMooseContext* getContext();
+        const std::vector<std::string> getFieldList() const;
+        const std::string getField(std::string name) const;
+        void setField(std::string name, std::string value);
         const std::string __get_className() const;
         const vector< Id > children() const;
         const Id* __get_parent() const;
