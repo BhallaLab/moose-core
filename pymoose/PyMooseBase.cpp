@@ -305,6 +305,24 @@ PyMooseBase::~PyMooseBase()
     id_ = Id();    
 }
 
+const std::vector<std::string> PyMooseBase::getFieldList() const
+{
+    std::string fields = PyMooseBase::getContext()->getField(this->id_, "fieldList");
+    std::vector<std::string> fieldList;
+    separateString( fields, fieldList,  ", ");
+    return fieldList;
+}
+
+const std::string PyMooseBase::getField(std::string name) const
+{
+    return PyMooseBase::getContext()->getField(this->id_, name);
+}
+
+void PyMooseBase::setField(std::string name, std::string value)
+{
+    PyMooseBase::getContext()->setField(this->id_, name, value);
+}
+
 const std::string& PyMooseBase::getSeparator() const
 {
     return context_->separator;    
