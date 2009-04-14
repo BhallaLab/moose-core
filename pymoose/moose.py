@@ -1554,6 +1554,18 @@ class PyMooseBase(object):
         return _moose.PyMooseBase_getContext(*args)
 
     getContext = staticmethod(getContext)
+    def getFieldList(*args):
+        """getFieldList(self) -> string_vector"""
+        return _moose.PyMooseBase_getFieldList(*args)
+
+    def getField(*args):
+        """getField(self, string name) -> string"""
+        return _moose.PyMooseBase_getField(*args)
+
+    def setField(*args):
+        """setField(self, string name, string value)"""
+        return _moose.PyMooseBase_setField(*args)
+
     def __get_className(*args):
         """__get_className(self) -> string"""
         return _moose.PyMooseBase___get_className(*args)

@@ -25378,6 +25378,125 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PyMooseBase_getFieldList(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseBase *arg1 = (pymoose::PyMooseBase *) 0 ;
+  std::vector<std::string,std::allocator<std::string > > result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseBase_getFieldList",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseBase_getFieldList" "', argument " "1"" of type '" "pymoose::PyMooseBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseBase * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = ((pymoose::PyMooseBase const *)arg1)->getFieldList();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = swig::from(static_cast< std::vector<std::string,std::allocator<std::string > > >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PyMooseBase_getField(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseBase *arg1 = (pymoose::PyMooseBase *) 0 ;
+  std::string arg2 ;
+  std::string result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseBase_getField",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseBase_getField" "', argument " "1"" of type '" "pymoose::PyMooseBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseBase * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseBase_getField" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = ((pymoose::PyMooseBase const *)arg1)->getField(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PyMooseBase_setField(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseBase *arg1 = (pymoose::PyMooseBase *) 0 ;
+  std::string arg2 ;
+  std::string arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseBase_setField",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseBase_setField" "', argument " "1"" of type '" "pymoose::PyMooseBase *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseBase * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseBase_setField" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj2, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseBase_setField" "', argument " "3"" of type '" "std::string""'"); 
+    }
+    arg3 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->setField(arg2,arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PyMooseBase___get_className(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PyMooseBase *arg1 = (pymoose::PyMooseBase *) 0 ;
@@ -105520,6 +105639,9 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"PyMooseBase_getType", _wrap_PyMooseBase_getType, METH_VARARGS, (char *)"PyMooseBase_getType(PyMooseBase self) -> string"},
 	 { (char *)"PyMooseBase_getSeparator", _wrap_PyMooseBase_getSeparator, METH_VARARGS, (char *)"PyMooseBase_getSeparator(PyMooseBase self) -> string"},
 	 { (char *)"PyMooseBase_getContext", _wrap_PyMooseBase_getContext, METH_VARARGS, (char *)"PyMooseBase_getContext() -> PyMooseContext"},
+	 { (char *)"PyMooseBase_getFieldList", _wrap_PyMooseBase_getFieldList, METH_VARARGS, (char *)"PyMooseBase_getFieldList(PyMooseBase self) -> string_vector"},
+	 { (char *)"PyMooseBase_getField", _wrap_PyMooseBase_getField, METH_VARARGS, (char *)"PyMooseBase_getField(PyMooseBase self, string name) -> string"},
+	 { (char *)"PyMooseBase_setField", _wrap_PyMooseBase_setField, METH_VARARGS, (char *)"PyMooseBase_setField(PyMooseBase self, string name, string value)"},
 	 { (char *)"PyMooseBase___get_className", _wrap_PyMooseBase___get_className, METH_VARARGS, (char *)"PyMooseBase___get_className(PyMooseBase self) -> string"},
 	 { (char *)"PyMooseBase_children", _wrap_PyMooseBase_children, METH_VARARGS, (char *)"PyMooseBase_children(PyMooseBase self) -> Id_vector"},
 	 { (char *)"PyMooseBase___get_parent", _wrap_PyMooseBase___get_parent, METH_VARARGS, (char *)"PyMooseBase___get_parent(PyMooseBase self) -> Id"},
