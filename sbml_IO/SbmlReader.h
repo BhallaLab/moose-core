@@ -34,6 +34,8 @@ class SbmlReader
 		Element* molecule_;
 		Element* reaction_;
 		map<string,Eref>elmtMap_;
+		void getRules();
+		void printMembers(const ASTNode* p,vector <string> & ruleMembers);
 		void prn_parm(const ASTNode* p,vector <string> & parameters);
 		double transformUnits(double msize,UnitDefinition * ud);
 		string printAnnotation(SBase *sb,map<string,EnzymeInfo> &);
