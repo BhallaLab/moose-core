@@ -27,10 +27,13 @@ class SbmlWriter
 		double transformUnits(double mvalue,UnitDefinition * ud);
 		string nameString(string str);
 		string changeName(string parent, string child);
+		string getParentFunc(Eref p);
 		void printParameters(KineticLaw* kl,string k,double kvalue,string unit);
-		void printReactants(Reaction* reaction,vector< Eref > sub,ostringstream& rlaw,string parentCompt);
-		void printProducts(Reaction* reaction,vector< Eref > cplx,ostringstream& rlaw,string parentCompt);
-		void printEnzymes(vector< Id > enzms,string parentCompt,double size,Model* model);
+		void printReactants(Reaction* reaction,vector< Eref > sub,ostringstream& rlaw);
+		void printProducts(Reaction* reaction,vector< Eref > cplx,ostringstream& rlaw);
+		void printenzReactants(Reaction* reaction,vector< Eref > sub,ostringstream& rlaw,string parentCompt);
+		void printenzProducts(Reaction* reaction,vector< Eref > cplx,ostringstream& rlaw,string parentCompt);
+		void printEnzymes(vector< Id > enzms,Model* model);
 		void getEnzyme(vector< Eref > enz,vector <string> &enzsName);
 		void getSubstrate(vector< Eref > sub,vector <string> &subsName);
 		void getComplex(vector< Eref > cplx,vector <string> &cpxName);

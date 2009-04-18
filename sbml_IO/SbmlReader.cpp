@@ -28,36 +28,41 @@ map<string,string>parmUnitMap;
 void SbmlReader::prn_parm(const ASTNode* p,vector <string> & parameters)
 {
 	string parm = "";	
-	//bool flag=0;  
-	switch ( p->getType() ){
-        	case (AST_NAME):
-	   		cout << "_NAME" << " = " << p->getName() << endl;
-	   		pvm_iter = parmValueMap.find(std::string(p->getName()));			
-	    		if (pvm_iter != parmValueMap.end()){
+	if ( p->getType() == AST_NAME){
+        	cout << "_NAME" << " = " << p->getName() << endl;
+	   	pvm_iter = parmValueMap.find(std::string(p->getName()));			
+	    	if (pvm_iter != parmValueMap.end()){
 			parm = pvm_iter->first;
 			parameters.push_back(parm);
-			//flag = 1;
-			}
-	   		// else flag = 0;
-	   	 	break;				
-    	}
-    /*if (flag){ 
-	return parm;
-    }*/
-    	int num = p->getNumChildren();
+		}
+	}
+       	int num = p->getNumChildren();
     	for( int i = 0; i < num; ++i )
     	{  
         	const ASTNode* child = p->getChild(i);
        	 	prn_parm(child,parameters);
-        	/*if (!tmp.empty())
-        	{
-           	 parm = tmp;
-          	  break;
-        	}*/
+        	
     	}
-    	//return parm;
+    	
  } 
- 
+/* function to get members in the mathml of  rule */ 
+void SbmlReader::printMembers(const ASTNode* p,vector <string> & ruleMembers)
+{
+	if ( p->getType() == AST_NAME ){
+	   	cout << "_NAME" << " = " << p->getName() << endl;
+	   	ruleMembers.push_back(p->getName());
+	}
+	
+       	int num = p->getNumChildren();
+    	for( int i = 0; i < num; ++i )
+    	{  
+        	const ASTNode* child = p->getChild(i);
+       	 	printMembers(child,ruleMembers);
+        	
+    	}
+    	
+ } 
+
 /* function to read a model into MOOSE  */
 void SbmlReader::read(string filename,Id location)
 {
@@ -220,8 +225,6 @@ void SbmlReader::createMolecule(map<string,Id> &idMap)
 		molMap[id] = comptEl; 
 		//cout << "elmtMap_.size(): " << elmtMap_.size() << endl;
 		elmtMap_[id] = Eref(molecule_);
-
-		//printAnnotation(s); //invoke function print annotation
 		//printNotes(s);
 		UnitDefinition * ud = s->getDerivedUnitDefinition();
 		cout<<"species unit :"<<UnitDefinition::printUnits(s->getDerivedUnitDefinition())<<endl;
@@ -244,7 +247,6 @@ void SbmlReader::createMolecule(map<string,Id> &idMap)
 		cout<<"initvalue is :"<<initvalue<<endl;
 		double transvalue = transformUnits(1,ud);
 		transvalue *= initvalue;
-		//bool bcondition = s->getBoundaryCondition();
 		bool has_subunits = s->getHasOnlySubstanceUnits();
 		cout<<"has_sub "<<has_subunits<<endl;
 		unsigned int dimension;
@@ -270,7 +272,11 @@ void SbmlReader::createMolecule(map<string,Id> &idMap)
 			set< int >(molecule_,modeFinfo,4); //getConstant=True indicates a buffered molecule
 		else 
 			set< int >(molecule_,modeFinfo,0);
-		
+		bool bcondition = s->getBoundaryCondition();
+		if (bcondition)
+		{
+			set< int >(molecule_,modeFinfo,1); //indicates the species has assignment rule			
+		}
 		/*std::string sptype;		
 		if (s->isSetSpeciesType())
 			sptype=s->getSpeciesType();
@@ -279,8 +285,38 @@ void SbmlReader::createMolecule(map<string,Id> &idMap)
 			cout<<"substance units :"<<s->getSubstanceUnits()<<endl;*/
 					
 	}
-	createReaction(molMap);
+	getRules();
+	//createReaction(molMap);
 }
+
+void SbmlReader::getRules()
+{
+	unsigned int nr = model_->getNumRules();
+	cout<<"no of rules:"<<nr<<endl;
+	for (int r=0;r<nr;r++)
+	{
+		Rule * rule =model_->getRule(r);
+		cout<<"rule :"<<rule->getFormula()<<endl;
+		bool assignRule = rule->isAssignment();
+		cout<<"is assignment :"<<assignRule<<endl;
+		if (assignRule){
+			string rule_variable = rule->getVariable();
+			cout<<"variable :"<<rule_variable<<endl;
+			Eref rVariable = elmtMap_.find(rule_variable)->second;
+			const ASTNode * ast=rule->getMath();
+			vector< string > ruleMembers;
+			printMembers(ast,ruleMembers);
+			for (int rm=0;rm<ruleMembers.size();rm++)
+			{
+				Eref rMember = elmtMap_.find(ruleMembers[rm])->second;				
+				rMember.add("nSrc",rVariable,"sumTotal",ConnTainer::Default); 	
+						
+			}
+			
+		}
+	}
+}
+
 /* print annotation */
 string SbmlReader::printAnnotation(SBase *sb,map<string,EnzymeInfo> &enzInfoMap)
 {
