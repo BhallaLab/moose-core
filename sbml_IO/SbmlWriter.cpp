@@ -72,11 +72,11 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 
   	// (UnitDefinition1) Create an UnitDefinition object for "per_second".
   	unitdef = model->createUnitDefinition();
-  	unitdef->setId("litre_per_second");
+  	unitdef->setId("per_second");
   	// Create an Unit inside the UnitDefinition object above:
-  	unit = unitdef->createUnit();
+  	/*unit = unitdef->createUnit();
 	unit->setKind(UNIT_KIND_LITRE);
-	unit->setExponent(1);
+	unit->setExponent(1);*/
 
   	unit = unitdef->createUnit();
   	unit->setKind(UNIT_KIND_SECOND);
@@ -84,12 +84,12 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 
   	// Create an UnitDefinition object for "litre_per_mole_per_second".  
       	unitdef = model->createUnitDefinition();
- 	unitdef->setId("litre_per_mole_per_second");
+ 	unitdef->setId("per_umole_per_second");
     	// Create individual unit objects that will be put inside
   	// the UnitDefinition to compose "litre_per_mole_per_second".
-	unit = unitdef->createUnit();
+	/*unit = unitdef->createUnit();
 	unit->setKind(UNIT_KIND_LITRE);
-	unit->setExponent(1);
+	unit->setExponent(1);*/
 
 	unit = unitdef->createUnit();
 	unit->setKind(UNIT_KIND_MOLE);
@@ -112,22 +112,22 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 	 
 	// Create an UnitDefinition object for "litre_sq_per_mole_sq_per_second".
 	
-	unitdef = model->createUnitDefinition();
- 	unitdef->setId("litre_sq_per_mole_per_second");
+	/*unitdef = model->createUnitDefinition();
+ 	unitdef->setId("litre_per_umole_sq_per_second");
     	// Create individual unit objects that will be put inside
   	// the UnitDefinition to compose "litre_sq_per_mole_sq_per_second".
 	 unit = unitdef->createUnit();
 	 unit->setKind(UNIT_KIND_MOLE);
-	 unit->setExponent(-1);
+	 unit->setExponent(-2);
 	 unit->setScale(-6);
 
 	 unit = unitdef->createUnit();
 	 unit->setKind(UNIT_KIND_LITRE);
-	 unit->setExponent(2);
+	 unit->setExponent(1);
 
 	 unit = unitdef->createUnit();
 	 unit->setKind(UNIT_KIND_SECOND);
-	 unit->setExponent(-1);	
+	 unit->setExponent(-1);	*/
 	 
  	// Create a string for the identifier of the compartment.  
 
@@ -136,16 +136,23 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 	static const Finfo* dimensionFinfo = kincomptCinfo->findFinfo( "numDimensions" );
 	Eref comptEl;
 	vector< Id > compts;
+	vector< Id > kinSpecies;
 	vector< Id >::iterator itr;
 	wildcardFind("/kinetics/##[TYPE=KinCompt]", compts);
+	wildcardFind("/kinetics/##[TYPE=Molecule]", kinSpecies);
  	vector< Eref > outcompt;	
 	bool flag = true;
+	if ((compts.size() > 0) && (kinSpecies.size() > 0))
+	{
+		Id kinetics( "/kinetics" );//here kinetics is added with other compartments in the model.
+		compts.push_back(kinetics); 
+	}
 	if (compts.empty())     
 	{
 		Id kinetics( "/kinetics" );//here kinetics is considered as the default compartment as no compartment is specified in the model.
 		compts.push_back(kinetics); 
 		flag = false;
-	}
+	}	
 	for (itr = compts.begin(); itr != compts.end(); itr++)
 	{
 		string parentCompt;		
@@ -178,7 +185,7 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 		}
 		// Create the Species objects inside the Model object. 
 		static const Cinfo* moleculeCinfo = initMoleculeCinfo();	
-		//static const Finfo* nInitFinfo = moleculeCinfo->findFinfo( "nInit" );	
+		static const Finfo* nInitFinfo = moleculeCinfo->findFinfo( "nInit" );	
 		static const Finfo* concInitFinfo = moleculeCinfo->findFinfo( "concInit" );
 		static const Finfo* modeFinfo = moleculeCinfo->findFinfo( "mode" );
 		
@@ -189,48 +196,82 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 		wildcardFind(comptPath + "/#[TYPE=Molecule]", molecs);
 		for (mitr = molecs.begin(); mitr != molecs.end(); mitr++)
 		{		
-			moleEl = ( *mitr )();		
-			Id parent=Neutral::getParent(moleEl);
-			parentCompt=parent()->name();
-			parentCompt = nameString(parentCompt); //removes special characters from name
+			moleEl = ( *mitr )();	
+			Id parent = Neutral::getParent(moleEl);
+			parentCompt = getParentFunc(moleEl);	
 			Species *sp = model->createSpecies();
 			string molName = (moleEl)->name();
 			molName = nameString(molName); //removes special characters from name
-			string newName = changeName(parentCompt,molName); // change species name preceeded with compartment name
-			sp->setId(newName);
+			string newSpName = changeName(parentCompt,molName); // change species name preceeded with compartment name
+			sp->setId(newSpName);
 			sp->setCompartment(parentCompt);
+			sp->setHasOnlySubstanceUnits(true);
 			int mode;		
 			get< int >(moleEl,modeFinfo,mode);
-			if (mode==0){
+			if (mode == 0){
 				sp->setConstant(false);
 				sp->setBoundaryCondition(false); 
 			}	
-			else{
+			else if ((mode == 4) || (mode == 5) || (mode == 6))
+			{
 				sp->setConstant(true);
 				sp->setBoundaryCondition(true); 
 			}
-			unsigned int dimension;
-		        get< unsigned int >(parent.eref(),dimensionFinfo,dimension);
-			/*double initamt = 0.0;
+			else if ((mode == 1) ||(mode == 2))
+			{
+				sp->setConstant(false);
+				sp->setBoundaryCondition(true); 
+			}
+						
+			/* unsigned int dimension;
+		        get< unsigned int >(parent.eref(),dimensionFinfo,dimension);*/
+			double initamt = 0.0;
 			get< double >(moleEl,nInitFinfo,initamt); 
-			initamt /= 6e26 ; //b'coz given unit of initamt is mol/litre and hence the conversion factor is 6e26
-			//sp->setInitialAmount(initamt);*/			
-			double initconc = 0.0;
+			initamt /= 6.02214199e17 ; 
+			sp->setInitialAmount(initamt);			
+			/*double initconc = 0.0;
 			get< double >(moleEl,concInitFinfo,initconc); 
-			sp->setInitialConcentration(initconc);
-			
+			sp->setInitialConcentration(initconc);*/
+			vector< Eref > sumtotal;
+			targets(moleEl,"sumTotal",sumtotal);
+			cout<<" sumtotal size :"<<sumtotal.size()<<endl;
+			int sumtot_count = sumtotal.size();
+			if (sumtot_count > 0)
+			{
+				ostringstream sumtotal_formula;				
+				for (int i=0; i<sumtotal.size();i++) 
+				{	
+					sumtot_count -= 1;				
+					string spName = sumtotal[ i ].name();	
+					spName = nameString(spName);	//removes special characters from name
+					string spParent = getParentFunc(sumtotal[ i ]);
+					string newName = changeName(spParent,spName); // change species name preceeded with compartment name
+					if (sumtot_count == 0)
+						sumtotal_formula << newName;
+					else
+						sumtotal_formula << newName << "+";
+				}
+				cout<<"sumtotal formula is :"<<	sumtotal_formula.str()<<endl;
+				Rule * rule = model->createAssignmentRule();
+				rule->setVariable(newSpName);
+				rule->setFormula(sumtotal_formula.str());
+				
+			}
+
 			/* Enzyme */
 			vector< Id > enzms;
 			string molecPath = moleEl.id().path();
 			cout<<"molecpath:"<<molecPath<<endl;	
 			wildcardFind(molecPath + "/#[TYPE=Enzyme]", enzms);
-			printEnzymes(enzms,parentCompt,size,model);
+			printEnzymes(enzms,model);
 			
 		
 		} //molecule
 		static const Cinfo* reactionCinfo = initReactionCinfo();
 		static const Finfo* kbFinfo = reactionCinfo->findFinfo( "kb" );	
 		static const Finfo* kfFinfo = reactionCinfo->findFinfo( "kf" );	
+		//static const Finfo* KbFinfo = reactionCinfo->findFinfo( "Kb" );	
+		//static const Finfo* KfFinfo = reactionCinfo->findFinfo( "Kf" );	
 		Eref rectnEl;
 		vector< Id > reaction;
 		vector< Id >::iterator ritr;
@@ -254,9 +295,11 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 			reaction->setId(newName);
 			//cout<<"reaction :"<<(rectnEl)->name()<<endl;
 			cout<<"reaction :"<<rtnName<<endl;
-			double kb=0.0,kf=0.0;
+			double kb=0.0,kf=0.0,Kf=0.0,Kb=0.0;
 			get< double >( rectnEl, kbFinfo, kb); 
 			get< double >( rectnEl, kfFinfo, kf); 
+			//get< double >( rectnEl, KbFinfo, Kb); 
+			//get< double >( rectnEl, KfFinfo, Kf); 
 			if (kb == 0.0)
 				reaction->setReversible(false);
 			else
@@ -275,13 +318,15 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 				spr = reaction->createReactant();
 				string rctName = (*ri).name();	
 				rctName = nameString(rctName); //removes special characters from name
+				string subParent = getParentFunc(*ri);
 				//cout<<"rct name :"<<rctName<<endl;	
-				string newrctName = changeName(parentCompt,rctName); // change species name preceeded with compartment name
+				string newrctName = changeName(subParent,rctName); // change species name preceeded with compartment name
 				spr->setSpecies(newrctName);				
-				rctstoch=count(rct.begin(),rct.end(),*ri);
+				rctstoch = count(rct.begin(),rct.end(),*ri);
 				spr->setStoichiometry(rctstoch);
 				//cout<<"stoichiometry :"<<rctstoch<<endl;
 				rct_order += rctstoch;
+				
 				
 			}
 			cout<<"rct_order is "<<rct_order<<endl;
@@ -299,7 +344,8 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 				string pdtName = (*pi).name();	
 				pdtName = nameString(pdtName); //removes special characters from name
 				//cout<<"pdt name :"<<pdtName<<endl;
-				string newpdtName = changeName(parentCompt,pdtName); // change species name preceeded with compartment name	
+				string prdParent = getParentFunc(*pi);
+				string newpdtName = changeName(prdParent,pdtName); // change species name preceeded with compartment name	
 				spr->setSpecies(newpdtName);				
 				pdtstoch=count(pdt.begin(),pdt.end(),*pi);
 				spr->setStoichiometry(pdtstoch);
@@ -310,7 +356,6 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 			cout<<"pdt_order is "<<pdt_order<<endl;
 			// Create a KineticLaw object inside the Reaction object 
 			ostringstream rate_law,kfparm,kbparm;
-			
 			if (kf != 0.0 ){
 				kfparm<<rtnName<<"_"<<"kf";
 				kbparm<<rtnName<<"_"<<"kb";
@@ -325,12 +370,13 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 					rstoch = count(rct.begin(),rct.end(),*ri);
 					r_order += rstoch;
 					string riName = nameString((*ri).name()); //removes special characters from name
-					string newriName = changeName(parentCompt,riName); // change name preceeded with compartment name	
+					string subParent = getParentFunc(*ri);
+					string newriName = changeName(subParent,riName); // change name preceeded with compartment name	
 					if (rstoch == 1)
-						rate_law <<"*"<<newriName;
+						rate_law<<"*"<<newriName;
 					else
 						rate_law <<"*"<<newriName<<"^"<<rstoch;
-				} 
+   				} 
 				
 			}
 			if (kb != 0.0){
@@ -341,20 +387,17 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 				for(pi = pdtUniq.begin(); pi != pdtUniq.end(); pi++)
 				{	
 					pdtcount -= 1 ;
-					//cout<<"pdt size"<<pdtUniq.size()<<endl;
 					pdtstoch=count(pdt.begin(),pdt.end(),*pi);
 					string piName = nameString((*pi).name()); //removes special characters from name
-					string newpiName = changeName(parentCompt,piName); // change name preceeded with compartment name	
+					string prdParent = getParentFunc(*pi);
+					string newpiName = changeName(prdParent,piName); // change name preceeded with compartment name	
 					if (pdtstoch == 1)
-						rate_law <<"*"<<newpiName;
+						rate_law<<"*"<<newpiName;
 					else
 						rate_law <<"*"<<newpiName<<"^"<<pdtstoch;
-					/*if (pdtcount == 0)
-						rate_law <<")";*/
+   										
 				} 
 			}
-			cout<<"rate_law "<<rate_law.str()<<endl; 
-			
 			kl  = reaction->createKineticLaw();
 			kl->setFormula(rate_law.str());
 
@@ -364,49 +407,33 @@ SBMLDocument* SbmlWriter::createModel(string filename)
 			string unit=parmUnit(rct_order-1);
 			para->setUnits(unit);
 			double rvalue,pvalue;
-			
-			if (rct_order == 1)
-				//rvalue = kf/size;
-				rvalue = kf * size; 
-			else{ 
-				//double m = pow(6e26,rct_order-1);
-				double m = 1.66053873e-21;
-				//double NA = 6.02214199e23; //Avogardo's number	
-				//rvalue = kf * pow((m * size),rct_order-1)/(NA * size);
-				// recent : rvalue = kf * pow((m * size),rct_order-1) * size;
-				rvalue = (kf * size)/(pow((m / size),rct_order-1));
-					
-			}
-			para->setValue(rvalue*1e3); //to convert m^3 to litre
-
+			const double m = 6.02214199e17; // 1uMole=6.023e17
+			rvalue = kf *(pow(m,rct_order-1));
+			para->setValue(rvalue);
 			if (kb != 0.0){
-				if (pdt_order == 1)
-					//pvalue = kb/size;
-					pvalue = kb * size;
-								
-				else{
-					//double m = pow(6e26,pdt_order-1);
-					double m = 1.66053873e-21; // 1uM=6.023e17/1e-3 m^3==>6.023e20 .so M is 1/6.023e20
-					//double NA = 6.02214199e23; //Avogardo's number	
-					//pvalue = kb * pow((m * size),pdt_order-1)/(NA * size);
-					// recent :pvalue = kb * pow((m * size),pdt_order-1)* size;
-					pvalue = (kb * size)/(pow((m / size),pdt_order-1));
-						
-				     }
+				
+				pvalue = kb * (pow(m,pdt_order-1));
 				para = kl->createParameter();
 				para->setId(kbparm.str());
 				string unit=parmUnit(pdt_order-1);
 				para->setUnits(unit);
-				para->setValue(pvalue*1e3); //to convert m^3 to litre	
+				para->setValue(pvalue);
 			}
 		} //reaction
-		
-		
- 	} //compartment
+	} //compartment
  	
 	return sbmlDoc;
 
 }
+string SbmlWriter::getParentFunc(Eref p)
+{	
+	string parentName;	
+	Id parent = Neutral::getParent(p);
+	parentName = parent()->name();
+	parentName = nameString(parentName);
+	return parentName;
+}
+				
 void SbmlWriter::printParameters(KineticLaw* kl,string k,double kvalue,string unit)
 {
 	Parameter* para = kl->createParameter();
@@ -416,51 +443,74 @@ void SbmlWriter::printParameters(KineticLaw* kl,string k,double kvalue,string un
 }
 void SbmlWriter::getEnzyme(vector< Eref > enz,vector <string> &enzsName)
 {
-	
+	string parentName;
 	for (int i=0; i<enz.size();i++)
 	{	
 		string enzName = enz[ i ].name();	
-		enzName = nameString(enzName);	//removes special characters from name	
-		//string newenzName = changeName(parentCompt,rtnName); // change species name preceeded with compartment name
-		//enzsName.push_back(enzName);	
-		enzsName.push_back("<moose:enzyme>"+enzName +"</moose:enzyme> \n");
+		enzName = nameString(enzName);	//removes special characters from name
+		Id enzParent=Neutral::getParent(enz[i]);
+		string parentCompt = getParentFunc(enzParent()); 
+		if (parentCompt == "root")
+			parentName = nameString("kinetics");
+		else
+			parentName = nameString(parentCompt);
+		string newenzName = changeName(parentName,enzName); // change species name preceeded with compartment name
+		enzsName.push_back("<moose:enzyme>"+newenzName +"</moose:enzyme> \n");
 
 	}
 }
 void SbmlWriter::getSubstrate(vector< Eref > sub,vector <string> &subsName)
 {
-	
+	string parentName;
 	for (int i=0; i<sub.size();i++)
 	{	
 		string subName = sub[ i ].name();
 		subName = nameString(subName);	//removes special characters from name		
-		//subsName.push_back(subName);	
-		subsName.push_back("<moose:substrates>"+subName +"</moose:substrates> \n");
+		Id subParent=Neutral::getParent(sub[i]);
+		string parentCompt = getParentFunc(subParent()); 
+		if (parentCompt == "root")
+			parentName = nameString("kinetics");
+		else
+			parentName = nameString(parentCompt);
+		string newsubName = changeName(parentName,subName); // change species name preceeded with compartment name
+		subsName.push_back("<moose:substrates>"+newsubName +"</moose:substrates> \n");
 	}
 }
 void SbmlWriter::getComplex(vector< Eref > cplx,vector <string> &cpxName)
 {
-	
+	string parentName;
 	for (int i=0; i<cplx.size();i++)
 	{	
 		string complex = cplx[ i ].name();	
 		complex = nameString(complex);	//removes special characters from name	
-		//cpxName.push_back(complex);
-		cpxName.push_back("<moose:complex>"+complex+"</moose:complex> \n");	
+		Id cplxParent=Neutral::getParent(cplx[i]);
+		string parentCompt = getParentFunc(cplxParent()); 
+		if (parentCompt == "root")
+			parentName = nameString("kinetics");
+		else
+			parentName = nameString(parentCompt);
+		string newcomplex = changeName(parentName,complex); // change species name preceeded with compartment name
+		cpxName.push_back("<moose:complex>"+newcomplex+"</moose:complex> \n");	
 	}
 }
 void SbmlWriter::getProduct(vector< Eref > prd,vector <string> &prdsName)
 {
-	
+	string parentName;
 	for (int i=0; i<prd.size();i++)
 	{	
 		string prdName = prd[ i ].name();	
 		prdName = nameString(prdName);	//removes special characters from name	
-		//prdsName.push_back(prdName);
-		prdsName.push_back("<moose:products>"+prdName+"</moose:products> \n");	
+		Id prdParent=Neutral::getParent(prd[i]);
+		string parentCompt = getParentFunc(prdParent()); 
+		if (parentCompt == "root")
+			parentName = nameString("kinetics");
+		else
+			parentName = nameString(parentCompt);
+		string newprdName = changeName(parentName,prdName); // change species name preceeded with compartment name
+		prdsName.push_back("<moose:products>"+newprdName+"</moose:products> \n");	
 	}
 }
-void SbmlWriter::printReactants(Reaction* reaction,vector< Eref > sub,ostringstream& rlaw,string parentCompt)
+void SbmlWriter::printenzReactants(Reaction* reaction,vector< Eref > sub,ostringstream& rlaw,string parentCompt)
 {
 	for (int i=0; i<sub.size();i++)
 	{	
@@ -474,7 +524,7 @@ void SbmlWriter::printReactants(Reaction* reaction,vector< Eref > sub,ostringstr
 				
 	}
 }
-void SbmlWriter::printProducts(Reaction* reaction,vector< Eref > prd,ostringstream& rlaw,string parentCompt)
+void SbmlWriter::printenzProducts(Reaction* reaction,vector< Eref > prd,ostringstream& rlaw,string parentCompt)
 {
 	for (int i=0; i<prd.size();i++)
 	{	
@@ -489,9 +539,38 @@ void SbmlWriter::printProducts(Reaction* reaction,vector< Eref > prd,ostringstre
 			rlaw<<"*"<<newprdName;
 	}
 }
+void SbmlWriter::printReactants(Reaction* reaction,vector< Eref > sub,ostringstream& rlaw)
+{	
+	for (int i=0; i<sub.size();i++)
+	{	
+		string subName = sub[ i ].name();
+		subName = nameString(subName);	//removes special characters from name	
+		string parentName = getParentFunc(sub[i]);
+		string newsubName = changeName(parentName,subName); // change species name preceeded with compartment name
+		SpeciesReference* spr = reaction->createReactant();
+		spr->setSpecies(newsubName);
+		rlaw<<"*"<<newsubName;
+				
+	}
+}
+void SbmlWriter::printProducts(Reaction* reaction,vector< Eref > prd,ostringstream& rlaw)
+{
+	for (int i=0; i<prd.size();i++)
+	{	
+		string prdName = prd[ i ].name();
+		prdName = nameString(prdName);	//removes special characters from name		
+		string parentName = getParentFunc(prd[i]);
+		string newprdName = changeName(parentName,prdName); // change species name preceeded with compartment name
+		SpeciesReference* spr = reaction->createProduct();
+		spr->setSpecies(newprdName);
+		bool rev=reaction->getReversible();
+		if (rev)
+			rlaw<<"*"<<newprdName;
+	}
+}
 
 /* Enzyme */
-void SbmlWriter::printEnzymes(vector< Id > enzms,string parentCompt,double size,Model* model)
+void SbmlWriter::printEnzymes(vector< Id > enzms,Model* model)
 {	
 	Eref enzEl;	
 	vector< Id >::iterator ezitr;
@@ -503,16 +582,18 @@ void SbmlWriter::printEnzymes(vector< Id > enzms,string parentCompt,double size,
 	vector <string> subsName;
 	vector <string> prdsName;
 	vector <string> cpxName;
-	//vector <string>::iterator itr;
-	//ostringstream rlaw;
-	//string molecPath = moleEl.id().path();
-	//cout<<"molecpath:"<<molecPath<<endl;	
 	for (ezitr = enzms.begin(); ezitr != enzms.end(); ezitr++)
 	{		
 		enzEl = ( *ezitr )();
+		
 		Id enzParent=Neutral::getParent(enzEl);
 		string parentMole=enzParent()->name();
 		parentMole = nameString(parentMole); //removes special characters from name
+		string parentCompt = getParentFunc(enzParent()); //grand Parent
+		Id parent = Neutral::getParent(enzParent());
+		double size;
+              	get<double>(parent(), "size", size);
+		cout<<"parentcompt from enzyme: "<<parentCompt<<endl;
 		cout<<"parent mole :"<<parentMole<<endl; 
 		string newparentMole = changeName(parentCompt,parentMole);
 		string enzName = (enzEl)->name();
@@ -541,62 +622,67 @@ void SbmlWriter::printEnzymes(vector< Id > enzms,string parentCompt,double size,
 		cout<<"mode = "<<emode<<endl;
 		if (emode ==  0){
 			Reaction* react;
-			//SpeciesReference* spr;
 			KineticLaw* kl;
 			ostringstream rlaw;
-			//rlaw<<parentCompt<<"*"<<"("<<"k1";
 			rlaw<<"k1";
 			react = model->createReaction();
-			string newrctnName = changeName(parentMole,"Complex_formation");
+			string newmolName = changeName(parentCompt,parentMole);
+			string newenzName = changeName(newmolName,enzName);
+			string newrctnName = changeName(newenzName,"Complex_formation");
 			react->setId(newrctnName);
 			//react->setMetaId("reaccomplex");
 			react->setReversible(true);
-			
 			enz.clear();
 			targets(enzEl,"enz",enz);
-			printReactants(react,enz,rlaw,parentCompt); //invoke function createReactants
-			//cout<<"no of enzyme :"<<enz.size()<<endl;
+			printReactants(react,enz,rlaw);
 			sub.clear();
 			targets(enzEl,"sub",sub);
-			printReactants(react,sub,rlaw,parentCompt); //invoke function createReactants
-			//cout<<"no of substrates :"<<sub.size()<<endl;
+			printReactants(react,sub,rlaw);
 			rlaw<<"-"<<"k2";			
 			cplx.clear();
 			targets(enzEl,"cplx",cplx);
 			string cplxName = cplx[ 0 ].name();	
 			cplxName = nameString(cplxName); //removes special characters from name	
-			string newcplxName = changeName(parentCompt,cplxName);				
-			Species *sp = model->createSpecies();
+			newmolName = changeName(parentCompt,parentMole);
+			cout<<"new molName :"<<newmolName<<endl;
+			string newcplxName = changeName(newmolName,cplxName);	
+			cout<<"new complex Name:"<<newcplxName<<endl;
+			Species *sp = model->createSpecies(); // create the complex species 
 			sp->setId(newcplxName);
 			sp->setCompartment(parentCompt);
-			sp->setInitialConcentration(0.0);
+			sp->setInitialAmount(0.0);	
+			sp->setHasOnlySubstanceUnits(true);
+			SpeciesReference* spr = react->createProduct();
+			spr->setSpecies(newcplxName);
+			bool rev=react->getReversible();
+			if (rev)
+				rlaw<<"*"<<newcplxName;
 			//sp->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t this is a complex species \n\t    </body>");
-			printProducts(react,cplx,rlaw,parentCompt); //invoke function createProducts
+			//printProducts(react,cplx,rlaw); //invoke function createProducts
 			//cout<<"no of complex :"<<cplx.size()<<endl;
-			//rlaw<<")";
 			cout<<"rate law of complex formation :"<<rlaw.str()<<endl; 
 			kl  = react->createKineticLaw();
 			kl->setFormula(rlaw.str());
 			//kl->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + rlaw.str() + "\n\t    </body>");
-			double f = 1.66053873e-21;
-			k1 = (k1 * size)/(pow((f / size),0));
-			k1 = k1 * 1e3;
-			k2 *= size;
-			k2 = k2 * 1e3; //to convert m^3 to litre
-			printParameters(kl,"k1",k1,"litre_sq_per_mole_per_second"); //set the parameters
-			printParameters(kl,"k2",k2,"litre_per_second"); 
+			double f = 6.02214199e17;
+			k1 = k1 * (pow(f,1));
+			printParameters(kl,"k1",k1,"per_umole_per_second"); //set the parameters
+			printParameters(kl,"k2",k2,"per_second"); 
 			string reaction_notes = "<body xmlns:moose=\"http://www.moose.ncbs.res.in\">\n\t\t";
 			reaction_notes += "<moose:EnzymaticReaction> \n";
+			enzsName.clear();
 			getEnzyme(enz,enzsName);
 			for(int i =0; i< enzsName.size(); i++)
 			{
 				reaction_notes += enzsName[i] ;			
 			}
+			subsName.clear();			
 			getSubstrate(sub,subsName);
 			for(int i =0; i< subsName.size(); i++)
 			{
 				reaction_notes += subsName[i] ;			
 			}
+			cpxName.clear();
 			getComplex(cplx,cpxName);
 			for(int i =0; i< cpxName.size(); i++)
 			{
@@ -618,8 +704,10 @@ void SbmlWriter::printEnzymes(vector< Id > enzms,string parentCompt,double size,
 			vector< Id > ezmole;
 			ostringstream law;
 			react = model->createReaction();
-			string newrctnName1 = changeName(parentMole,"Product_formation");
-			react->setId(newrctnName1);
+			newmolName = changeName(parentCompt,parentMole);
+			newenzName = changeName(newmolName,enzName);
+			newrctnName = changeName(newenzName,"Product_formation");
+			react->setId(newrctnName);
 			react->setReversible(false);
 			wildcardFind(enzPath + "/#[TYPE=Molecule]", ezmole);
 			for (emitr = ezmole.begin(); emitr != ezmole.end(); emitr++)
@@ -627,43 +715,38 @@ void SbmlWriter::printEnzymes(vector< Id > enzms,string parentCompt,double size,
 				ezmoleEl = ( *emitr )();
 				string ezMole = (ezmoleEl)->name();
 				ezMole = nameString(ezMole); //removes special characters from name
-				//law<<parentCompt<<"*"<<"k3";
 				law<<"k3";
 				cplx.clear();
-				targets(enzEl,"cplx",cplx);
-				printReactants(react,cplx,law,parentCompt); //invoke function createReactants
-				//cout<<"no of complex :"<<cplx.size()<<endl;
-				//cout<<"molecule name :"<<ezMole<<endl;
+				SpeciesReference* spr = react->createReactant();
+				spr->setSpecies(newcplxName);
+				law<<"*"<<newcplxName;
 				Id ezMParent=Neutral::getParent(ezmoleEl);
 				string parentEMole=ezMParent()->name();
 				parentEMole = nameString(parentEMole); //removes special characters from name
 				ezm.clear();
 				targets(ezMParent(),"enz",ezm);
-				printProducts(react,ezm,law,parentCompt); //invoke function createProducts
+				printProducts(react,ezm,law); //invoke function createProducts
 				//cout<<"no of enz :"<<ezm.size()<<endl;
 				ezprd.clear();
 				targets(ezMParent(),"prd",ezprd);
-				printProducts(react,ezprd,law,parentCompt); //invoke function createProducts
+				printProducts(react,ezprd,law); //invoke function createProducts
 				//cout<<"no of prds :"<<ezprd.size()<<endl;
 				cout<<"rate law of product formation :"<<law.str()<<endl; 
 				kl  = react->createKineticLaw();
 				kl->setFormula(law.str());
 				//kl->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + law.str() + "\n\t    </body>");
-				k3 *= size;
-				k3 = k3 * 1e3;
-				printParameters(kl,"k3",k3,"litre_per_second"); //set the parameters
+				printParameters(kl,"k3",k3,"per_second"); //set the parameters
 				string reaction1_notes = "<body xmlns:moose=\"http://www.moose.ncbs.res.in\">\n\t\t";
 				reaction1_notes += "<moose:EnzymaticReaction> \n";
-				//getEnzyme(enz,enzsName);
 				for(int i =0; i< enzsName.size(); i++)
 				{
 					reaction1_notes += enzsName[i] ;			
 				}
-				//getComplex(cplx,cpxName);
 				for(int i =0; i< cpxName.size(); i++)
 				{
 					reaction1_notes += cpxName[i] ;			
 				}
+				prdsName.clear();
 				getProduct(ezprd,prdsName);
 				for(int i =0; i< prdsName.size(); i++)
 				{
@@ -689,9 +772,8 @@ void SbmlWriter::printEnzymes(vector< Id > enzms,string parentCompt,double size,
 			react->setReversible(false);
 			sub.clear();
 			targets(enzEl,"sub",sub);
-			printReactants(react,sub,rlaw,parentCompt); //invoke function createReactants
+			printReactants(react,sub,rlaw); //invoke function createReactants
 			cout<<"no of substrates :"<<sub.size()<<endl;	
-
 			enz.clear();
 			targets(enzEl,"enz",enz);
 			cout<<"no of enzyme :"<<enz.size()<<endl;
@@ -701,6 +783,7 @@ void SbmlWriter::printEnzymes(vector< Id > enzms,string parentCompt,double size,
 				enzName = nameString(enzName);	//removes special characters from name		
 				cout<<"name :"<<enzName<<endl;
 				string newenzName = changeName(parentCompt,enzName);	
+				//rlaw<<"*"<<parentCompt<<"*"<<newenzName;
 				rlaw<<"*"<<newenzName;
 				ModifierSpeciesReference * mspr = model->createModifier();
 				mspr->setSpecies(newenzName);
@@ -709,7 +792,7 @@ void SbmlWriter::printEnzymes(vector< Id > enzms,string parentCompt,double size,
 
 			prd.clear();
 			targets(enzEl,"prd",prd);
-			printProducts(react,prd,rlaw,parentCompt);
+			printProducts(react,prd,rlaw);
 			cout<<"no of prds :"<<prd.size()<<endl;
 			rlaw<<"/"<<"("<<"Km"<<" +";
 			int subcount=sub.size();
@@ -720,9 +803,9 @@ void SbmlWriter::printEnzymes(vector< Id > enzms,string parentCompt,double size,
 				subName = nameString(subName);	//removes special characters from  name
 				string newsubName = changeName(parentCompt,subName);	
 				if (subcount == 0)		
-					rlaw<<newsubName;
+					rlaw<<"*"<<newsubName;
 				else
-					rlaw<<newsubName<<"*";
+					rlaw<<"*"<<newsubName<<"*";
 				
 			}
 			rlaw<<")";
@@ -730,9 +813,7 @@ void SbmlWriter::printEnzymes(vector< Id > enzms,string parentCompt,double size,
 			kl  = react->createKineticLaw();
 			kl->setFormula(rlaw.str());
 			kl->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + rlaw.str() + "\n\t    </body>");
-			kcat *= size;		
-			kcat = kcat * 1e3; // convert m^3 to litre
-			printParameters(kl,"kcat",kcat,"litre_per_second"); //set the parameters
+			printParameters(kl,"kcat",kcat,"per_second"); //set the parameters
 			printParameters(kl,"Km",Km,"substance"); 
 						
 		}
@@ -747,17 +828,17 @@ string SbmlWriter::parmUnit(double rct_order)
 	switch(order)
 	{
 		case 0:
-			unit<<"litre_per_second";
+			unit<<"per_second";
 			break;		
 		case 1:
-			unit<<"litre_sq_per_mole_per_second";
+			unit<<"per_umole_per_second";
 			break;
 		case 2:
-			unit<<"litre_cube_per_mole_per_second";
+			unit<<"per_umole_sq_per_second";
 			break;
 		
 		default:
-			unit<<"litre_"<<rct_order+1<<"_per_mole_per_second";
+			unit<<"per_umole_"<<rct_order<<"_per_second";
 			break;
 		
 	}
@@ -775,7 +856,6 @@ string SbmlWriter::nameString(string str)
 	string str1;
 	int len = str.length();
 	int i= 0;
-	//cout<<"string is : "<<str<<" and str length is : "<<len<<endl;
 	do
 	{	
 		
@@ -820,6 +900,11 @@ string SbmlWriter::nameString(string str)
 				str1 = "_sbc_";				
 				str.replace(i,1,str1);
 				len += str1.length()-1;
+				break;
+			case '.':
+				str1 = "_dot_";	
+				str.replace(i,1,str1);
+				len += str1.length()-1;	
 				break;
 		}//switch 
 	i++;
