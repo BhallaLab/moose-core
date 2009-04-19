@@ -179,19 +179,22 @@ const Cinfo* initShellCinfo()
 		// Object heirarchy manipulation functions
 		////////////////////////////////////////////////////////////
 		new DestFinfo( "copy",
-			Ftype3< Id, Id, string >::global(), RFCAST( &Shell::copy ) ),
+			Ftype3< Id, Id, string >::global(),
+			RFCAST( &Shell::copy ) ),
 		new DestFinfo( "copyIntoArray",
-			Ftype4< Id, Id, string, vector <double> >::global(), RFCAST( &Shell::copyIntoArray ) ),
+			Ftype4< Id, Id, string, vector <double> >::global(),
+			RFCAST( &Shell::copyIntoArray ) ),
 		new DestFinfo( "move",
-			Ftype3< Id, Id, string >::global(), RFCAST( &Shell::move ) ),
+			Ftype3< Id, Id, string >::global(),
+			RFCAST( &Shell::move ) ),
 		////////////////////////////////////////////////////////////
 		// Cell reader
 		////////////////////////////////////////////////////////////
 		
 		new DestFinfo( "readcell",
 			Ftype4< string, string, vector< double >, int >::global(),
-					RFCAST( &Shell::readCell ),
-					"Args are: file cellpath globalParms" ),
+			RFCAST( &Shell::readCell ),
+			"Args are: file cellpath globalParms node" ),
 		////////////////////////////////////////////////////////////
 		// Channel setup functions
 		////////////////////////////////////////////////////////////
@@ -371,81 +374,105 @@ const Cinfo* initShellCinfo()
 				" Creating an object" ),
 
 		new SrcFinfo( "copySrc", 
-			// srcId, parentId, name, Id to give kid.
-			Ftype4< Nid, Nid, string, Nid >::global(),
-			"Send copy request to remote (src) node" 
-		),
+			Ftype4<
+				Nid,
+				Nid,
+				string,
+				IdGenerator
+			>::global(),
+			"Send copy request to remote (src) node. " 
+			"Args: srcId, parentId, name, IdGenerator for children." ),
+		
 		new DestFinfo( "copy",
-				Ftype4< Nid, Nid, string, Nid >::global(),
-				RFCAST( &Shell::parCopy ),
-				"Copying an object" ),
-
+			Ftype4<
+				Nid,
+				Nid,
+				string,
+				IdGenerator
+			>::global(),
+			RFCAST( &Shell::parCopy ),
+			"Copying an object. "
+			"Args: srcId, parentId, name, IdGenerator for children." ),
+		
 		new SrcFinfo( "copyIntoArraySrc", 
-			// srcId, parentId, name, Id to give kid.
-			Ftype3< vector< Nid >, string, vector< double > >::global(),
-			"Send array copy request to remote (src) node"
-		),
+			Ftype5<
+				Nid,
+				Nid,
+				string,
+				vector< double >,
+				IdGenerator
+			>::global(),
+			"Send array copy request to remote (src) node. "
+			"Args: srcId, parentId, name, array parameters, IdGenerator for children." ),
+		
 		new DestFinfo( "copyIntoArray",
-				Ftype3< vector< Nid >, string, vector< double > >::global(),
-				RFCAST( &Shell::parCopyIntoArray ),
-				"Copying into an array" ),
-
+			Ftype5<
+				Nid,
+				Nid,
+				string,
+				vector< double >,
+				IdGenerator
+			>::global(),
+			RFCAST( &Shell::parCopyIntoArray ),
+			"Copying into an array. "
+			"Args: srcId, parentId, name, array parameters, IdGenerator for children." ),
+		
 		new SrcFinfo( "readcellSrc",
-			Ftype5< string, string, Nid, Nid, vector< double > >::global(),
-			" Args are: file cellpath parentId, childId, globalParms" 
-		),
+			Ftype5<
+				string,
+				string,
+				vector< double >,
+				Nid,
+				IdGenerator
+			>::global(),
+			"Args are: file, cellpath, globalParms, parentId, IdGenerator for children." ),
+		
 		new DestFinfo( "readcell",
-			Ftype5< string, string, Nid, Nid, vector< double > >::global(),
-					RFCAST( &Shell::localReadCell )
-		),
-
+			Ftype5<
+				string,
+				string,
+				vector< double >,
+				Nid,
+				IdGenerator
+			>::global(),
+			RFCAST( &Shell::localReadCell ),
+			"Args are: file, cellpath, globalParms, parentId, IdGenerator for children." ),
+		
 		/////////////////////////////////////////////////////
 		// Msg stuff
 		/////////////////////////////////////////////////////
 		new SrcFinfo( "addLocalSrc",
-				// srcObjId, srcField, destObjId, destField
-			Ftype4< Id, string, Id, string >::global()
-		),
+			Ftype4< Id, string, Id, string >::global(),
+			"Args: srcObjId, srcField, destObjId, destField" ),
 		new SrcFinfo( "addParallelSrcSrc",
-				// srcObjId, srcField, destObjId, destField
-			Ftype4< Nid, string, Nid, string >::global()
-		),
+			Ftype4< Nid, string, Nid, string >::global(),
+			"Args: srcObjId, srcField, destObjId, destField" ),
 		new SrcFinfo( "addParallelDestSrc",
-				// srcObjId, srcSize, srcField, destObjId, destField
-			Ftype5< Nid, unsigned int, string, Nid, string >::global()
-		),
-
+			Ftype5< Nid, unsigned int, string, Nid, string >::global(),
+			"Args: srcObjId, srcSize, srcField, destObjId, destField" ),
 		new DestFinfo( "addLocal",
 			Ftype4< Id, string, Id, string >::global(),
-			RFCAST( &Shell::addLocal )
-		),
+			RFCAST( &Shell::addLocal ) ),
 		new DestFinfo( "addParallelSrc",
 			Ftype4< Nid, string, Nid, string >::global(),
-			RFCAST( &Shell::addParallelSrc )
-		),
+			RFCAST( &Shell::addParallelSrc ) ),
 		new DestFinfo( "addParallelDest",
 			Ftype5< Nid, unsigned int, string, Nid, string >::global(),
-			RFCAST( &Shell::addParallelDest )
-		),
+			RFCAST( &Shell::addParallelDest ) ),
 
 		/////////////////////////////////////////////////////
 		// Msg completion reporting stuff
 		/////////////////////////////////////////////////////
 		new SrcFinfo( "parMsgErrorSrc",
-			Ftype3< string, Id, Id >::global()
-		),
+			Ftype3< string, Id, Id >::global() ),
 		new SrcFinfo( "parMsgOkSrc",
-			Ftype2< Id, Id >::global()
-		),
-
+			Ftype2< Id, Id >::global() ),
 		new DestFinfo( "parMsgError",
 			Ftype3< string, Id, Id >::global(),
-			RFCAST( &Shell::parMsgErrorFunc )
-		),
+			RFCAST( &Shell::parMsgErrorFunc ) ),
 		new DestFinfo( "parMsgOk",
 			Ftype2< Id, Id >::global(),
-			RFCAST( &Shell::parMsgOkFunc )
-		),
+			RFCAST( &Shell::parMsgOkFunc ) ),
 
 		///////////////////////////////////////////////////////////
 		// This little section deals with requests to traverse the
@@ -453,70 +480,54 @@ const Cinfo* initShellCinfo()
 		///////////////////////////////////////////////////////////
 		new SrcFinfo( "parTraversePathSrc",
 			Ftype3< Id, vector< string >, unsigned int >::global(),
-			"Args are: Start, names, requestId"
-		),
+			"Args are: Start, names, requestId" ),
 		new SrcFinfo( "parTraversePathReturnSrc",
 			Ftype2< Nid, unsigned int >::global(),
-			"args are: foundId, requestId"
-		),
+			"args are: foundId, requestId" ),
 		new DestFinfo( "parTraversePath",
 			Ftype3< Id, vector< string >, unsigned int >::global(),
-			RFCAST( &Shell::handleParTraversePathRequest )
-		),
+			RFCAST( &Shell::handleParTraversePathRequest ) ),
 		new DestFinfo( "parTraversePathReturn",
 			Ftype2< Nid, unsigned int >::global(),
-			RFCAST( &Shell::handleParTraversePathReturn )
-		),
+			RFCAST( &Shell::handleParTraversePathReturn ) ),
 
 		///////////////////////////////////////////////////////////
 		// This section is the converse: Look for the path of an
 		// eid on a remote node.
 		///////////////////////////////////////////////////////////
 		new SrcFinfo( "requestPathSrc",
-			Ftype2< Nid, unsigned int >::global()
-		),
+			Ftype2< Nid, unsigned int >::global() ),
 		new DestFinfo( "requestPath",
 			Ftype2< Nid, unsigned int >::global(),
-			RFCAST( &Shell::handlePathRequest )
-		),
+			RFCAST( &Shell::handlePathRequest ) ),
 		new SrcFinfo( "returnPathSrc",
-			Ftype2< string, unsigned int >::global()
-		),
+			Ftype2< string, unsigned int >::global() ),
 		new DestFinfo( "returnPath",
 			Ftype2< string, unsigned int >::global(),
-			RFCAST( &Shell::handlePathReturn )
-		),
+			RFCAST( &Shell::handlePathReturn ) ),
 
 		///////////////////////////////////////////////////////////
 		// This section deals with requests for le and wildcards 
 		///////////////////////////////////////////////////////////
-		
 		new SrcFinfo( "requestLeSrc",
 			Ftype2< Nid, unsigned int >::global(),
-			"args are: parent, requestId"
-		),
+			"args are: parent, requestId" ),
 		new DestFinfo( "requestLe",
 			Ftype2< Nid, unsigned int >::global(),
-			RFCAST( &Shell::handleRequestLe )
-		),
-
+			RFCAST( &Shell::handleRequestLe ) ),
 		new SrcFinfo( "returnLeSrc",
 			Ftype2< vector< Nid >, unsigned int >::global(),
-			"args are: elist, requestId"
-		),
+			"args are: elist, requestId" ),
 		new DestFinfo( "returnLe",
 			Ftype2< vector< Nid >, unsigned int >::global(),
-			RFCAST( &Shell::handleReturnLe )
-		),
+			RFCAST( &Shell::handleReturnLe ) ),
 
 		new SrcFinfo( "requestParWildcardSrc",
 			Ftype3< string, bool, unsigned int >::global(),
-			" args are: path, ordered, requestId"
-		),
+			" args are: path, ordered, requestId" ),
 		new DestFinfo( "requestParWildcard",
 			Ftype3< string, bool, unsigned int >::global(),
-			RFCAST( &Shell::handleParWildcardList )
-		),
+			RFCAST( &Shell::handleParWildcardList ) ),
 
 		///////////////////////////////////////////////////////////////
 		// This section handles scheduling and execution control
@@ -1524,7 +1535,12 @@ void Shell::planarconnect( const Conn* c,
 // }
 
 
-void Shell::planardelay(const Conn& c, string source, string destination, vector <double> parameter){
+void Shell::planardelay(
+		const Conn* c,
+		string source,
+		string destination,
+		vector< double > parameter)
+{
 	assert (parameter.size() == 11);
 	double delay = parameter[0];
 // 	double conduction_velocity = parameter[1];
@@ -1631,7 +1647,12 @@ void Shell::planardelay(const Conn& c, string source, string destination, vector
 	}
 }
 
-void Shell::planarweight(const Conn& c, string source, string  destination, vector <double> parameter){
+void Shell::planarweight(
+		const Conn* c,
+		string source,
+		string destination,
+		vector< double > parameter)
+{
 	assert (parameter.size() == 12);
 	double weight = parameter[0];
 // 	double decay_rate = parameter[1];
@@ -1866,8 +1887,11 @@ void Shell::getField( const Conn* c, Id id, string field )
  * that the planned new object has a different name from any of
  * the existing children of the prospective parent.
  */
-void Shell::copy( const Conn* c, 
-				Id src, Id parent, string name )
+void Shell::copy(
+	const Conn* c, 
+	Id src,
+	Id parent,
+	string name )
 {
 	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 	Element* e = src()->copy( parent(), name );
@@ -1877,8 +1901,12 @@ void Shell::copy( const Conn* c,
 }
 
 // Static function. Dummy for the single-node version.
-void Shell::parCopy( const Conn* c, Nid src, Nid parent, 
-	string name, Nid kid )
+void Shell::parCopy(
+	const Conn* c,
+	Nid src,
+	Nid parent,
+	IdGenerator idGen,
+	string name )
 {
 	;
 }
@@ -1888,8 +1916,12 @@ void Shell::parCopy( const Conn* c, Nid src, Nid parent,
  * It is similar to copy() only that it creates an array of copied 
  * elements. Used in createmap.
 */
-void Shell::copyIntoArray( const Conn* c, 
-				Id src, Id parent, string name, vector <double> parameter )
+void Shell::copyIntoArray(
+	const Conn* c, 
+	Id src,
+	Id parent,
+	string name,
+	vector< double > parameter )
 {
 	Element* e = localCopyIntoArray( c, src, parent, name, parameter );
 	if ( e != 0 )
@@ -1897,17 +1929,16 @@ void Shell::copyIntoArray( const Conn* c,
 }
 #endif // ndef USE_MPI
 
-Element* Shell::localCopyIntoArray( const Conn* c, 
-				Id src, Id parent,
-				string name, vector <double> parameter,
-				Id child )
+Element* Shell::localCopyIntoArray(
+	const Conn* c, 
+	Id src,
+	Id parent,
+	string name,
+	vector< double > parameter,
+	IdGenerator idGen )
 {
-	if ( child == Id() )
-		child = Id::newId();
-
-	// Shell* s = static_cast< Shell* >( c.targetElement()->data() );
 	int n = (int) (parameter[0]*parameter[1]);
-	Element* e = src()->copyIntoArray( parent, name, n, child );
+	Element* e = src()->copyIntoArray( parent, name, n, idGen );
 	//assign the other parameters to the arrayelement
 	assert(parameter.size() == 6);
 	ArrayElement* f = static_cast <ArrayElement *> (e);
@@ -2772,18 +2803,24 @@ void Shell::innerListMessages( const Conn* c,
 }
 
 /**
- * Node = -1 tells the system to do the default, based on the
+ * Node = Id::UnknownNode tells the system to do the default, based on the
  * node of cellpath parent.
  * So it needs to find cellpath parent and decide there. This includes
  * building on a global such as /library.
  * node = 0 .. numNodes - 1 tells the system to build on specified node.
  * This is legal only if the parent is /root
  */
-void Shell::readCell( const Conn* c, string filename, string cellpath,
-	vector< double > globalParms, int node )
+void Shell::readCell(
+	const Conn* c,
+	string filename,
+	string cellpath,
+	vector< double > globalParms,
+	unsigned int node )
 {
-	if ( node > 0 && static_cast< unsigned int >( node ) >= numNodes() ) {
-		cout << "readcell: warning: requested node " << node << " > numNodes(" << numNodes() << "), using 0\n";
+	if ( node >= numNodes() && node != Id::UnknownNode && node != Id::GlobalNode ) {
+		cerr
+			<< "readcell: warning: requested node " << node
+			<< " > numNodes(" << numNodes() << "), using 0\n";
 		node = 0;
 	}
 
@@ -2805,41 +2842,55 @@ void Shell::readCell( const Conn* c, string filename, string cellpath,
 		cellname = cellpath.substr( pos + 1 );
 	}
 	
-	Id cellId;
-	if ( node < 0 ) { // Let load-balancer decide
-		cellId = Id::childId( pa );
+	//~ Id cellId;
+	//~ if ( node == Id::UnknownNode ) { // Let load-balancer decide
+		//~ cellId = Id::childId( pa );
+	//~ } else { // Legal node # request
+		//~ if ( pa.node() == node || pa == Id() ) { // make on unode.
+			//~ cellId = Id::makeIdOnNode( unode );
+		//~ }
+	//~ }
+	
+	if ( node == Id::UnknownNode ) { // Let load-balancer decide
+		node = Id::childNode( pa );
 	} else { // Legal node # request
-		unsigned int unode = static_cast< unsigned int >( node );
-		if ( pa.node() == unode || pa == Id() ) { // make on unode.
-			cellId = Id::makeIdOnNode( unode );
+		if ( pa.node() != node && pa != Id() ) {
+			cerr <<
+				"Error: Shell::readCell: Don't know to create " << cellpath <<
+				" on " << pa.path() << ". Both must be on the same node.\n";
+			return;
 		}
 	}
 	
-	// Now we know both where to put parent and child.
-	if ( cellId.node() == 0 ) {
-		localReadCell( c, filename, cellname, pa, cellId, globalParms );
-	} else if ( cellId.isGlobal() ) {
-		localReadCell( c, filename, cellname, pa, cellId, globalParms );
+	// Now we know both where to put the child.
+	IdGenerator idGen = Id::generator( node );
+	if ( node == 0 ) {
+		localReadCell( c, filename, cellname, globalParms, pa, idGen );
+	} else if ( idGen.isGlobal() ) {
+		localReadCell( c, filename, cellname, globalParms, pa, idGen );
 #ifdef USE_MPI
-		send5< string, string, Nid, Nid, vector< double > >( 
+		send5< string, string, vector< double >, Nid, IdGenerator >( 
 			c->target(), parReadCellSlot,
-			filename, cellname, Nid( pa ), Nid( cellId ), globalParms );
+			filename, cellname, globalParms, Nid( pa ), idGen );
 	} else { // Off on some specific target node.
-		sendTo5< string, string, Nid, Nid, vector< double > >( 
-			c->target(), parReadCellSlot, cellId.node() - 1,
-			filename, cellname, Nid( pa ), Nid( cellId ), globalParms );
+		sendTo5< string, string, vector< double >, Nid, IdGenerator >( 
+			c->target(), parReadCellSlot, node - 1,
+			filename, cellname, globalParms, Nid( pa ), idGen );
 #endif
 	}
 }
 
-void Shell::localReadCell( const Conn* c, 
-	string filename, string cellname,
-	Nid pa, Nid cellId, 
-	vector< double > globalParms )
+void Shell::localReadCell(
+	const Conn* c, 
+	string filename,
+	string cellname,
+	vector< double > globalParms,
+	Nid pa,
+	IdGenerator idGen )
 {
-	ReadCell rc( globalParms );
+	ReadCell rc( globalParms, idGen );
 	
-	rc.read( filename, cellname, Id( pa ), Id( cellId ) );
+	rc.read( filename, cellname, Id( pa ) );
 }
 
 void Shell::setupAlpha( const Conn* c, Id gateId,

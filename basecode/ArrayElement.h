@@ -261,14 +261,32 @@ class ArrayElement: public Element
 		///////////////////////////////////////////////////////////////
 		// Functions for the copy operation. All 5 are virtual
 		///////////////////////////////////////////////////////////////
-		Element* copy( Element* parent, const string& newName, Id id = Id() ) const { return 0; }
-		Element* copyIntoArray( Id parent, const string& newName, int n, Id id = Id() ) const { return 0; }
-		bool isDescendant( const Element* ancestor ) const { return 0; }
+		Element* copy(
+				Element* parent,
+				const string& newName,
+				IdGenerator& idGen ) const
+		{ return 0; }
+		
+		Element* copyIntoArray(
+				Id parent,
+				const string& newName,
+				int n,
+				IdGenerator& idGen ) const
+		{ return 0; }
+		
+		bool isDescendant( const Element* ancestor ) const
+		{ return 0; }
 
 		Element* innerDeepCopy(
-						map< const Element*, Element* >& tree, Id id ) const { return 0; }
+				map< const Element*, Element* >& tree,
+				IdGenerator& idGen ) const
+		{ return 0; }
+		
 		Element* innerDeepCopy(
-						map< const Element*, Element* >& tree, int n, Id id ) const { return 0; }
+				map< const Element*, Element* >& tree,
+				int n,
+				IdGenerator& idGen ) const
+		{ return 0; }
 		
 		/*
 		void replaceCopyPointers(
@@ -282,7 +300,8 @@ class ArrayElement: public Element
  		* also on tree.
  		*/
 		void copyMessages( Element* dup, 
-			map< const Element*, Element* >& origDup, bool isArray ) const;
+				map< const Element*, Element* >& origDup,
+				bool isArray ) const;
 
 		/**
 		 * Copies messages present between current element and globals,
@@ -334,8 +353,11 @@ class ArrayElement: public Element
 		}
 		
 	protected:
-		Element* innerCopy( Id id ) const { return 0; }
-		Element* innerCopy( int n, Id id ) const { return 0; }
+		Element* innerCopy( IdGenerator& idGen ) const
+		{ return 0; }
+		
+		Element* innerCopy( int n, IdGenerator& idGen ) const
+		{ return 0; }
 
 	private:
 		/**

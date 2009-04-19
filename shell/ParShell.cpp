@@ -712,7 +712,11 @@ void Shell::handleSingleLevelWildcardReturn( const Conn* c,
  * Another current limitation is that it does not return the new object
  * Id in cases where the object creation is off-node.
  */
-void Shell::copy( const Conn* c, Id src, Id parent, string name )
+void Shell::copy(
+	const Conn* c,
+	Id src,
+	Id parent,
+	string name )
 {
 	assert( myNode() == 0 );
 	if( src == Id() ) {
@@ -728,19 +732,19 @@ void Shell::copy( const Conn* c, Id src, Id parent, string name )
 		} else if ( parent.node() == 0 ) { // Local copy
 			e = src()->copy( parent(), name );
 		} else if ( parent.isGlobal() ) { // All-node copy of globals
-			e = src()->copy( parent(), name );
-			// cout << "in Shell::copy, e->id() = " << e->id() << ", node = " << e->id().node() << endl << flush;
-			send4< Nid, Nid, string, Nid >( c->target(), parCopySlot,
-				src, parent, name, e->id() ); 
-				// Ensure all nodes use same id.
+			IdGenerator idGen = Id::generator( Id::GlobalNode );
+			send4< Nid, Nid, string, IdGenerator >(
+				c->target(), parCopySlot,
+				src, parent, name, idGen ); 
+			e = src()->copy( parent(), name, idGen );
 		} else if ( parent.node() < numNodes() ) {	// Off-node copy 
+			IdGenerator idGen;
 			unsigned int tgtNode = parent.node();
-			// Id id = Id::makeIdOnNode( tgtNode );
 			if ( tgtNode > myNode() )
 				--tgtNode;
-			sendTo4< Nid, Nid, string, Nid >( 
+			sendTo4< Nid, Nid, string, IdGenerator >( 
 				c->target(), parCopySlot, tgtNode,
-				src, parent, name, Id() ); // Tell node to use scratchIds.
+				src, parent, name, idGen );
 			// Later will need a way to get the new id back.
 		} else {
 			assert( 0 );
@@ -759,13 +763,14 @@ void Shell::copy( const Conn* c, Id src, Id parent, string name )
 		}
 	} else if ( src.node() < numNodes() ) { // off-node src.
 		if ( parent == Id() || parent.node() == src.node() ) {
+			IdGenerator idGen;
 			// local copy on target node.
 			unsigned int tgtNode = src.node();
 			if ( tgtNode > myNode() )
 				--tgtNode;
-			sendTo4< Nid, Nid, string, Nid >( 
+			sendTo4< Nid, Nid, string, IdGenerator >( 
 				c->target(), parCopySlot, tgtNode,
-				src, parent, name, Id() ); 
+				src, parent, name, idGen );
 		} else if ( parent.isGlobal() ) { // Can't handle yet.
 			cout << "Shell::copy( " << src << ", " << parent << 
 			"): Sorry, cannot yet copy object into global\n";
@@ -797,13 +802,14 @@ void Shell::copy( const Conn* c, Id src, Id parent, string name )
  * At some point this needs to be upgraded to return the created id to
  * the master node.
  */
-void Shell::parCopy( const Conn* c, Nid src, Nid parent, 
-	string name, Nid kid )
+void Shell::parCopy(
+	const Conn* c,
+	Nid src,
+	Nid parent,
+	string name,
+	IdGenerator idGen )
 {
-	if ( kid == Id() )
-		kid = Id::newId();
-	
-	src()->copy( parent(), name, kid );
+	src()->copy( parent(), name, idGen );
 }
 
 /**
@@ -811,8 +817,12 @@ void Shell::parCopy( const Conn* c, Nid src, Nid parent,
  * It is similar to copy() only that it creates an array of copies 
  * elements
  */
-void Shell::copyIntoArray( const Conn* c, 
-				Id src, Id parent, string name, vector <double> parameter )
+void Shell::copyIntoArray(
+	const Conn* c, 
+	Id src,
+	Id parent,
+	string name,
+	vector< double > parameter )
 {
 	assert( myNode() == 0 );
 	if( src == Id() ) {
@@ -820,33 +830,27 @@ void Shell::copyIntoArray( const Conn* c,
 			") Error, cannot copy the root object\n";
 		return;
 	}
-	// cout << "in Shell::copyIntoArray on node=" << myNode() << ", src=" << src << "." << src.node() << ", dest = " << parent << "." << parent.node() <<  " name= " << name << endl << flush;
 	Element* ret = 0;
-	vector< Nid > temp; // Used to pass Nid args to remote nodes.
-	temp.push_back( src );
-	temp.push_back( parent );
 	if ( src.isGlobal() ) {
 		if ( parent == Id() ) { // Do copy on node0
 			ret = localCopyIntoArray( c, src, parent, name, parameter );
 		} else if ( parent.node() == 0 ) { // Local copy
 			ret = localCopyIntoArray( c, src, parent, name, parameter );
 		} else if ( parent.isGlobal() ) { // All-node copy of globals
-			ret = localCopyIntoArray( c, src, parent, name, parameter );
-			// cout << "in Shell::copy, e->id() = " << e->id() << ", node = " << e->id().node() << endl << flush;
-			temp.push_back( ret->id() ); // Want to assign Id of new object.
-			send3< vector< Nid >, string, vector< double > >( 
+			IdGenerator idGen = Id::generator( Id::GlobalNode );
+			send5< Nid, Nid, string, vector< double >, IdGenerator >( 
 				c->target(), parCopyIntoArraySlot,
-				temp, name, parameter ); 
+				src, parent, name, parameter, idGen );
+			ret = localCopyIntoArray( c, src, parent, name, parameter, idGen );
 		} else if ( parent.node() < numNodes() ) {	// Off-node copy 
+			IdGenerator idGen;
 			unsigned int tgtNode = parent.node();
-			// Id id = Id::makeIdOnNode( tgtNode );
 			if ( tgtNode > myNode() )
 				--tgtNode;
 			// Later will need a way to get the new id back.
-			temp.push_back( Id() ); // Tell node to use scratchIds.
-			sendTo3< vector< Nid >, string, vector< double > >( 
+			sendTo5< Nid, Nid, string, vector< double >, IdGenerator >( 
 				c->target(), parCopyIntoArraySlot, tgtNode,
-				temp, name, parameter ); 
+				src, parent, name, parameter, idGen ); 
 		} else {
 			assert( 0 );
 		}
@@ -864,15 +868,15 @@ void Shell::copyIntoArray( const Conn* c,
 		}
 	} else if ( src.node() < numNodes() ) { // off-node src.
 		if ( parent == Id() || parent.node() == src.node() ) {
+			IdGenerator idGen;
 			// local copy on target node.
 			unsigned int tgtNode = src.node();
 			if ( tgtNode > myNode() )
 				--tgtNode;
 			// Later will need a way to get the new id back.
-			temp.push_back( Id() ); // Tell node to use scratchIds.
-			sendTo3< vector< Nid >, string, vector< double > >( 
+			sendTo5< Nid, Nid, string, vector< double >, IdGenerator >( 
 				c->target(), parCopyIntoArraySlot, tgtNode,
-				temp, name, parameter ); 
+				src, parent, name, parameter, idGen ); 
 		} else if ( parent.isGlobal() ) { // Can't handle yet.
 			cout << "Shell::copy( " << src << ", " << parent << 
 			"): Sorry, cannot yet copy object into global\n";
@@ -903,16 +907,15 @@ void Shell::copyIntoArray( const Conn* c,
  * The nids vector is src, parent, child.
  * If the child nid == Id(), an Id is generated locally in the usual fashion.
  */
-void Shell::parCopyIntoArray( const Conn* c, vector< Nid > nids,
-	string name, vector< double > parameter )
+void Shell::parCopyIntoArray(
+	const Conn* c,
+	Nid src,
+	Nid parent,
+	string name,
+	vector< double > parameter,
+	IdGenerator idGen )
 {
-	assert( nids.size() == 3 );
-	
-	Id kid = nids[ 2 ];
-	if ( kid == Id() )
-		kid = Id::newId();
-	
-	localCopyIntoArray( c, nids[ 0 ], nids[ 1 ], name, parameter, kid );
+	localCopyIntoArray( c, src, parent, name, parameter, idGen );
 }
 
 ////////////////////////////////////////////////////////////////////
