@@ -18,6 +18,7 @@ OBJ = \
 	Element.o	\
 	Eref.o	\
 	Id.o	\
+	IdGenerator.o	\
 	IdManager.o	\
 	Fid.o	\
 	RecvFunc.o \
@@ -67,6 +68,7 @@ HEADERS = \
 	Slot.h \
 	Finfo.h \
 	Id.h \
+	IdGenerator.h \
 	IdManager.h \
 	Msg.h \
 	Element.h \

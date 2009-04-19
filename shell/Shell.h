@@ -44,7 +44,7 @@ class Shell
 		 * where node boundaries are crossed above the root object.
 		 */
 		static string eid2path( Id eid );
-
+		
 		/**
 		 * This is the local node version of eid2path
 		 */
@@ -53,42 +53,53 @@ class Shell
 		 * For parallel operation, we need to handle requests for the path
 		 * from different nodes. 
 		 */
-		static void handlePathRequest( const Conn* c, 
-			Nid eid, unsigned int requestId );
+		static void handlePathRequest(
+				const Conn* c, 
+				Nid eid,
+				unsigned int requestId );
 		/**
 		 * For parallel operation, we need to return the path when requested
 		 */
-		static void handlePathReturn( const Conn* c, 
-			string path, unsigned int requestId );
-
-
+		static void handlePathReturn(
+				const Conn* c, 
+				string path,
+				unsigned int requestId );
+		
 		/**
 		 * Returns an Id defined by the specified path. Works in parallel,
 		 * but not for cases where node boundaries are crossed above the
 		 * root object.
 		 * If the 'isLocal' flag is set does NOT try to go off-node.
 		 */
-		static Id path2eid( const string& path, 
-			const string& separator, bool isLocal );
-
+		static Id path2eid(
+				const string& path, 
+				const string& separator,
+				bool isLocal );
+		
 		/**
 		 * Inner function for extracting Id.
 		 */
-		Id innerPath2eid( const string& path, 
-			const string& separator, bool isLocal ) const;
-
+		Id innerPath2eid(
+				const string& path, 
+				const string& separator,
+				bool isLocal ) const;
+		
 		/**
 		 * Deeper inner function: checks on local node then lauches out
 		 * on other nodes.
 		 */
-		static Id traversePath( Id start, vector< string >& );
-
+		static Id traversePath(
+				Id start,
+				vector< string >& );
+		
 		/**
 		 * Innermost function that does the actual Id extraction work,
 		 * but only on a local node.
 		 */
-		static Id localTraversePath( Id start, vector< string >& );
-
+		static Id localTraversePath(
+				Id start,
+				vector< string >& );
+		
 		/**
 		* Returns Id for off-node object specified by path.
  		* Sets off request for children on all remote nodes, starting at 
@@ -96,43 +107,54 @@ class Shell
 		* this must be thread-safe, because during the polling there
 		* may be nested calls.
  		*/
-		static Id parallelTraversePath( Id start, vector< string >& names );
-
+		static Id parallelTraversePath(
+				Id start,
+				vector< string >& names );
+		
 		/**
 		 * Handles request for path traversal on remote node.
 		 */
-		static void handleParTraversePathRequest( const Conn* c,
-			Id start, vector< string > names, unsigned int requestId );
-
+		static void handleParTraversePathRequest(
+				const Conn* c,
+				Id start,
+				vector< string > names,
+				unsigned int requestId );
+		
 		/**
 		 * Handles return value from path traversal on remote node.
 		 */
-		static void handleParTraversePathReturn( const Conn* c,
-			Nid found, unsigned int requestId );
-
+		static void handleParTraversePathReturn(
+				const Conn* c,
+				Nid found,
+				unsigned int requestId );
+		
 		/**
 		 * Returns parent Id.
 		 */
 		static Id parent( Id eid );
-
+		
 		/**
 		 * Returns string upto but not including last separator
 		 * Returns empty string if no separator.
 		 */
-		static string head( const string& path, const string& separator );
-
+		static string head(
+				const string& path,
+				const string& separator );
+		
 		/**
 		 * Returns string after last separator.
 		 * Returns original string if no separator
 		 */
-		static string tail( const string& path, const string& separator );
-
+		static string tail(
+				const string& path,
+				const string& separator );
+		
 		/**
 		 * Converts path from relative, recent or other forms to 
 		 * a canonical absolute path that the wildcards can handle
 		 */
 		void digestPath( string& path );
-
+		
 //////////////////////////////////////////////////////////////////////
 // Special low-level operations that Shell handles using raw
 // serialized strings from PostMaster.
@@ -153,7 +175,7 @@ class Shell
 // Infinite loop called on slave nodes to monitor commands from master.
 //////////////////////////////////////////////////////////////////////
 		static void pollFunc( const Conn* c );
-
+		
 //////////////////////////////////////////////////////////
 // Parallel information
 //////////////////////////////////////////////////////////
@@ -162,77 +184,133 @@ class Shell
 		
 		/// returns node # of shell.
 		static unsigned int myNode(); 
-
+		
 		/// Returns # of nodes in simulation
 		static unsigned int numNodes(); 
-
+		
 		/// Used only in setup phase. Assigns node info.
-		static void setNodes( unsigned int myNode, unsigned int numNodes );
-
+		static void setNodes(
+				unsigned int myNode,
+				unsigned int numNodes );
+		
 ////////////////////////////////////////////////////////////////////
 // Id management
 ////////////////////////////////////////////////////////////////////
 		static unsigned int newIdBlock( unsigned int size );
-		static void handleRequestNewIdBlock( const Conn* c,
-			unsigned int size, unsigned int node, unsigned int requestId );
-		static void handleReturnNewIdBlock( const Conn* c,
-			unsigned int value, unsigned int requestId );
-
+		
+		static void handleRequestNewIdBlock(
+				const Conn* c,
+				unsigned int size,
+				unsigned int node,
+				unsigned int requestId );
+		
+		static void handleReturnNewIdBlock(
+				const Conn* c,
+				unsigned int value,
+				unsigned int requestId );
+		
 ////////////////////////////////////////////////////////////////////
 // Local functions for implementing basic GENESIS/MOOSE command set.
 ////////////////////////////////////////////////////////////////////
-
 		static void setCwe( const Conn*, Id id );
 		static Id getCwe( Eref e );
 		static void trigCwe( const Conn* );
 		static void pushe( const Conn*, Id id );
 		static void pope( const Conn* );
-
+		
 		static int getMyNode( Eref e );
 		static int getNumNodes( Eref e );
-
+		
 		static void trigLe( const Conn*, Id parent );
-		static void handleRequestLe( const Conn* c, 
-			Nid parent, unsigned int requestId );
+		static void handleRequestLe(
+				const Conn* c, 
+				Nid parent,
+				unsigned int requestId );
 		/**
  		* Undefined effects if more than one node has a matching target.
  		*/
-		static void handleReturnLe( const Conn* c,
-			vector< Nid > found, unsigned int requestId );
-
-		Element* create( const string& type, const string& name,
-						Id parent, Id id );
-		Element* createArray( const string& type, const string& name,
-						Id parent, Id id, int n );
+		static void handleReturnLe(
+				const Conn* c,
+				vector< Nid > found,
+				unsigned int requestId );
+		
+		Element* create(
+				const string& type,
+				const string& name,
+				Id parent,
+				Id id );
+		
+		Element* createArray(
+				const string& type,
+				const string& name,
+				Id parent,
+				Id id,
+				int n );
+		
 		void destroy( Id victim );
-
+		
 		/**
 		 * This function creates an object, generating its
 		 * own Id. Node argument tells it which node to put it on,
 		 * but if this is Id::UnknownNode then the placement is left to the 
 		 * system balancing algorithm.
 		 */
-		static void staticCreate( const Conn*, string type,
-						string name, unsigned int node, Id parent );
-
-		// static void staticCreateArray1( const Conn*, string type, string name, Id parent, vector <double> parameter );
-		static void staticCreateArray( const Conn*, string type,
-						string name, Id parent, vector <double> parameter );
-
+		static void staticCreate(
+				const Conn*,
+				string type,
+				string name,
+				unsigned int node,
+				Id parent );
+		
+		/*
+		static void staticCreateArray1(
+				const Conn*,
+				string type,
+				string name,
+				Id parent,
+				vector <double> parameter );
+		*/
+		
+		static void staticCreateArray(
+				const Conn*,
+				string type,
+				string name,
+				Id parent,
+				vector <double> parameter );
+		
 		static Element* createGlobal(
-						const string& type, const string& name, Id parent, Id id );
-
-		static void planarconnect( const Conn* c, string source, string dest, double probability);
-		static void planardelay(const Conn& c, string source, string destination, vector <double> parameter);
-		static void planarweight(const Conn& c, string source, string  destination, vector <double> parameter);
-		static void getSynCount2(const Conn* c, Id dest);
+				const string& type,
+				const string& name,
+				Id parent,
+				Id id );
+		
+		static void planarconnect(
+				const Conn* c,
+				string source,
+				string dest,
+				double probability);
+		
+		static void planardelay(
+				const Conn* c,
+				string source,
+				string destination,
+				vector< double > parameter);
+		
+		static void planarweight(
+				const Conn* c,
+				string source,
+				string destination,
+				vector< double > parameter);
+		
+		static void getSynCount2(
+				const Conn* c,
+				Id dest);
 		
 		/**
 		 * Delete an object. Works in parallel.
 		 */
 		static void staticDestroy( const Conn*, Id victim );
-
-
+		
 		////////////////////////////////////////////////////////////////
 		// Group of functions for field access
 		////////////////////////////////////////////////////////////////
@@ -245,52 +323,85 @@ class Shell
 		 * not result in a race condition. Ideally would do this using
 		 * a separate thread.
 		 */
-		static void getField( const Conn* c, Id id, string field );
-
+		static void getField(
+				const Conn* c,
+				Id id,
+				string field );
+		
 		/**
 		 * Invoked by addField on appropriate nodes, and does the actual adding
 		 * of the ExtFieldFinfo.
 		 */
-		static void localAddField( const Conn* c, Id id, string fieldname );
-
+		static void localAddField(
+				const Conn* c,
+				Id id,
+				string fieldname );
+		
 		/**
 		 * Calls localAddField on target nodes, to add new fields on objects.
 		 */
-		static void addField( const Conn* c, Id id, string fieldname );
+		static void addField(
+				const Conn* c,
+				Id id,
+				string fieldname );
 		
 		/**
 		 * Assign a field value to the id on the local node.
 		 */
-		static void localSetField( const Conn* c, 
-						Id id, string field, string value );
+		static void localSetField(
+				const Conn* c, 
+				Id id,
+				string field,
+				string value );
+		
 		/**
 		 * Assign a field value to an id on any node, local or remote.
 		 * Does not block: just issues the request, and carries on.
 		 * The remote node executes a localSetField to handle the request.
 		 */
-		static void setField( const Conn* c, 
-						Id id, string field, string value );
+		static void setField(
+				const Conn* c, 
+				Id id,
+				string field,
+				string value );
 		/**
 		 * Assigns a field value to a vector of ids, on any node.
 		 * Does not block: just issues the request, and carries on.
 		 * Currently does this in a simple, non-optimized way by calling
 		 * setField lots of times.
 		 */
-		static void setVecField( const Conn* c, 
-				vector< Id > elist, string field, string value );
-
+		static void setVecField(
+				const Conn* c, 
+				vector< Id > elist,
+				string field,
+				string value );
+		
 		////////////////////////////////////////////////////////////////
 		// Group of functions for scheduling
 		////////////////////////////////////////////////////////////////
-		static void setClock( const Conn* c, int clockNo, double dt,
+		static void setClock(
+				const Conn* c,
+				int clockNo,
+				double dt,
 				int stage );
-		static void useClock( const Conn* c,
-			string tickName, string path, string function );
-		static void localUseClock( const Conn* c,
-			string tickName, string path, string function );
+		
+		static void useClock(
+				const Conn* c,
+				string tickName,
+				string path,
+				string function );
+		
+		static void localUseClock(
+				const Conn* c,
+				string tickName,
+				string path,
+				string function );
+		
 		static void innerUseClock( 
-			Id tickId, vector< Id >& path, string function );
-
+				Id tickId,
+				vector< Id >& path,
+				string function );
+		
 		////////////////////////////////////////////////////////////////
 		// Group of functions for wildcards. Also works in parallel
 		////////////////////////////////////////////////////////////////
@@ -298,104 +409,146 @@ class Shell
 		 * Searches all nodes for objects matching the wildcard path.
 		 * Sends back the list on the a return message.
 		 */
-		static void getWildcardList( const Conn* c,
-			string path, bool ordered );
-
+		static void getWildcardList(
+				const Conn* c,
+				string path,
+				bool ordered );
+		
 		/**
 		 * Searches a single node for objects matching the wildcard path
 		 * Handles off-node cases too.
 		 */
-		static void innerGetWildcardList( const Conn* c,
-			string path, bool ordered, vector< Id >& list
-		);
-
+		static void innerGetWildcardList(
+				const Conn* c,
+				string path,
+				bool ordered,
+				vector< Id >& list );
+		
 		/**
 		 * Does the actual work of getting the wildcard list, on the
 		 * local node only.
 		 */
-		static void localGetWildcardList( const Conn* c,
-			string path, bool ordered, vector< Id >& list
-		);
-
+		static void localGetWildcardList(
+				const Conn* c,
+				string path,
+				bool ordered,
+				vector< Id >& list );
+		
 		/**
 		 * Deals with off-node requests for a wildcard list
 		 */
-		static void handleParWildcardList( const Conn* c,
-			string path, bool ordered, unsigned int requestId );
-
+		static void handleParWildcardList(
+				const Conn* c,
+				string path,
+				bool ordered,
+				unsigned int requestId );
+		
 		////////////////////////////////////////////////////////////////
 		// Group of functions for messaging. Also works in parallel
 		////////////////////////////////////////////////////////////////
-
+		
 		/**
 		 * This is called from the same node that the src is on, to send a 
 		 * message to a dest on a remote node. 
 		 * Note that an Id does not carry node info within itself. So we
 		 * use an Nid for the dest, as we need to retain node info
 		 */
-		static void addParallelSrc( const Conn* c,
-			Nid src, string srcField, Nid dest, string destField );
-
+		static void addParallelSrc(
+				const Conn* c,
+				Nid src,
+				string srcField,
+				Nid dest,
+				string destField );
+		
 		/**
 		 * Operates on the node of the destination object to complete the
 		 * message setup across nodes. This is the counterpart of 
 		 * addParallelSrc. Creates a proxy object if needed on the target
 		 * node.
 		 */
-		static void addParallelDest( const Conn* c,
-			Nid src, unsigned int srcSize, string srcTypeStr, 
-			Nid dest, string destField );
+		static void addParallelDest(
+				const Conn* c,
+				Nid src,
+				unsigned int srcSize,
+				string srcTypeStr, 
+				Nid dest,
+				string destField );
+		
 		/**
 		 * addMessage creates a message between two Ids, which could
 		 * also represent array elements.
 		 */
-		static void addMessage( const Conn* c,
-			vector< Id >src, string srcField, vector< Id >dest, 
-			string destField );
-		static bool addSingleMessage( const Conn* c,
-			Id src, string srcField, Id dest, string destField );
+		static void addMessage(
+				const Conn* c,
+				vector< Id >src,
+				string srcField,
+				vector< Id >dest,
+				string destField );
+		
+		static bool addSingleMessage(
+				const Conn* c,
+				Id src,
+				string srcField,
+				Id dest,
+				string destField );
 		/** 
 		 * This one does the actual work for adding messages on the
 		 * local node
 		 */
 		static bool innerAddLocal(
-			Id src, string srcField,
-			Id dest, string destField );
-
+				Id src,
+				string srcField,
+				Id dest,
+				string destField );
+		
 		/**
 		 * Wrapper function for innerAddLocal so that messages can use it.
 		 */
-		static bool addLocal( const Conn* c,
-			Id src, string srcField,
-			Id dest, string destField );
-
+		static bool addLocal(
+				const Conn* c,
+				Id src, string srcField,
+				Id dest, string destField );
+		
 		/**
 		 * This is a more general form of the addMessage command,
 		 * as it lets the user specify the connection type. Currently
 		 * not available in the GENESIS parser.
 		 */
-		static void addEdge( const Conn* c,
-			Fid src, Fid dest, int connType );
-
+		static void addEdge(
+				const Conn* c,
+				Fid src,
+				Fid dest,
+				int connType );
+		
 		/**
 		 * deleteMessage gets rid of the message identified by the Fid and
 		 * the integer lookup for it. Not parallel.
 		 */
-		static void deleteMessage( const Conn* c, Fid src, int msg );
-
+		static void deleteMessage(
+				const Conn* c,
+				Fid src,
+				int msg );
+		
 		/**
 		 * deleteEdge gets rid of messages specified as edges, that is,
 		 * using the same src/field and dest/field info that was used
 		 * to create the message. Not parallel.
 		 */
-		static void deleteMessageByDest( const Conn* c,
-			Id src, string srcField, Id dest, string destField );
-
+		static void deleteMessageByDest(
+				const Conn* c,
+				Id src,
+				string srcField,
+				Id dest,
+				string destField );
+		
 		/**
 		 * Delete a message, in a more general manner. Not parallel.
 		 */
-		static void deleteEdge( const Conn* c, Fid src, Fid dest );
-
+		static void deleteEdge(
+				const Conn* c,
+				Fid src,
+				Fid dest );
+		
 		/**
  		* listMessages builds a list of messages associated with the 
  		* specified element on the named field, and sends it back to
@@ -403,16 +556,23 @@ class Shell
  		* target element from the connections, and puts this into a
  		* vector of unsigned ints.
  		*/
-		static void listMessages( const Conn* c,
-				Id id, string field, bool isIncoming );
+		static void listMessages(
+				const Conn* c,
+				Id id,
+				string field,
+				bool isIncoming );
 				
 		/**
 		 * Does the actual work to build message list, on a local node.
 		 */
-		static void innerListMessages( const Conn* c,
-				Id id, string field, bool isIncoming,
-				vector< Id >& ret, string& remoteFields );
-
+		static void innerListMessages(
+				const Conn* c,
+				Id id,
+				string field,
+				bool isIncoming,
+				vector< Id >& ret,
+				string& remoteFields );
+		
 		//////////////////////////////////////////////////////////
 		// Functions for handling moves and copies. Not yet parallelized
 		//////////////////////////////////////////////////////////
@@ -427,8 +587,12 @@ class Shell
 		 * Another current limitation is that it does not return the 
 		 * new object Id in cases where the object creation is off-node.
 		 */
-		static void copy( const Conn* c, Id src, Id parent, string name );
-
+		static void copy(
+				const Conn* c,
+				Id src,
+				Id parent,
+				string name );
+		
 		/**
 		 * This function copies the prototype element in form of an array.
 		 * It is similar to copy() only that it creates an array of copied 
@@ -438,15 +602,24 @@ class Shell
 		 * apply to the parallel version: Cannot copy across nodes, and
 		 * cannot return new object Id if the new array is off-node.
 		 */
-		static void copyIntoArray( const Conn* c, Id src, Id parent, string name, vector <double> parameter );
-
+		static void copyIntoArray(
+				const Conn* c,
+				Id src,
+				Id parent,
+				string name,
+				vector< double > parameter );
+		
 		/**
 		 * This function does the actual node-local array copy.
 		 */
-		static Element* localCopyIntoArray( const Conn* c, 
-			Id src, Id parent, string name,
-			vector <double> parameter, Id child = Id() );
-
+		static Element* localCopyIntoArray(
+				const Conn* c,
+				Id src,
+				Id parent,
+				string name,
+				vector< double > parameter,
+				IdGenerator idGen = IdGenerator() );
+		
 		/**
 		 * Handles a copy on a local node. If the Id is defined, then it assigns
 		 * the Id to the newly created copy. Otherwise an Id is generated
@@ -455,9 +628,13 @@ class Shell
 		 * At some point this needs to be upgraded to return the created id to
 		 * the master node.
 		 */
-		static void parCopy( const Conn* c, Nid src, Nid parent, 
-			string name, Nid kid );
-
+		static void parCopy(
+				const Conn* c,
+				Nid src,
+				Nid parent, 
+				string name,
+				IdGenerator idGen );
+		
 		/**
 		 * This manages remote requests for copying an array.
 		 * The same concerns with ensuring compatibility of Id remains,
@@ -466,82 +643,179 @@ class Shell
 		 * Later we may want to put in a callback so that we can return
 		 * info on success of operation.
 		 */
-		static void parCopyIntoArray( const Conn* c, 
-			vector< Nid > nids, string name, vector< double > parameter );
+		static void parCopyIntoArray(
+				const Conn* c,
+				Nid src,
+				Nid parent,
+				string name,
+				vector< double > parameter,
+				IdGenerator idGen );
 		
-		static void move( const Conn* c, Id src, Id parent, string name );
+		static void move(
+				const Conn* c,
+				Id src,
+				Id parent,
+				string name );
 		
 		//////////////////////////////////////////////////////////
 		// Some stuff for managing scheduling and simulation runs
 		//////////////////////////////////////////////////////////
 		static void resched( const Conn* c );
+		
 		static void reinit( const Conn* c );
+		
 		static void stop( const Conn* c );
+		
 		static void step( const Conn* c, double time );
+		
 		static void requestClocks( const Conn* c );
+		
 		static void requestCurrTime( const Conn* c );
-
+		
 		//////////////////////////////////////////////////////////
 		// Major input functions.
 		//////////////////////////////////////////////////////////
 		static void readCell( 
-					const Conn* c, string filename, string cellpath,
-					vector< double > globalParms, int node );
+					const Conn* c,
+					string filename,
+					string cellpath,
+					vector< double > globalParms,
+					unsigned int node );
+		
 		static void localReadCell( 
-					const Conn* c, string filename, string cellname,
-					Nid pa, Nid cellId, 
-					vector< double > globalParms );
-
+					const Conn* c,
+					string filename,
+					string cellname,
+					vector< double > globalParms,
+					Nid pa,
+					IdGenerator idGen );
+		
 		//////////////////////////////////////////////////////////
 		// Channel setup functions.
 		//////////////////////////////////////////////////////////
-		static void setupAlpha( const Conn* c, Id gate,
+		static void setupAlpha(
+				const Conn* c,
+				Id gate,
 				vector< double > parms );
-		static void setupTau( const Conn* c, Id gate,
+		
+		static void setupTau(
+				const Conn* c,
+				Id gate,
 				vector< double > parms );
-		static void tweakAlpha( const Conn* c, Id gateId );
-		static void tweakTau( const Conn* c, Id gateId );
-		static void setupGate( const Conn* c, Id gate,
+		
+		static void tweakAlpha(
+				const Conn* c,
+				Id gateId );
+		
+		static void tweakTau(
+				const Conn* c,
+				Id gateId );
+		
+		static void setupGate(
+				const Conn* c,
+				Id gate,
 				vector< double > parms );
-
+		
 		//////////////////////////////////////////////////////////
 		// SimDump functions
 		//////////////////////////////////////////////////////////
-		static void readDumpFile( const Conn* c, string filename );
-		static void writeDumpFile( const Conn* c, 
-			string filename, string path );
-		static void simObjDump( const Conn* c, string fields );
-		static void simUndump( const Conn* c, string args );
-		static void openFile( const Conn* c, string filename, string mode );
-		static void closeFile( const Conn* c, string filename );
-		static void writeFile( const Conn* c, string filename, string text );
-		static void flushFile( const Conn* c, string filename );
-		static void readFile( const Conn* c, string filename, bool linemode );
-		static void listFiles( const Conn* c );
-		static void loadtab( const Conn* c, string data );
-		void innerLoadTab( const string& data );
-
+		static void readDumpFile(
+				const Conn* c,
+				string filename );
+		
+		static void writeDumpFile(
+				const Conn* c, 
+				string filename,
+				string path );
+		
+		static void simObjDump(
+				const Conn* c,
+				string fields );
+		
+		static void simUndump(
+				const Conn* c,
+				string args );
+		
+		static void openFile(
+				const Conn* c,
+				string filename,
+				string mode );
+		
+		static void closeFile(
+				const Conn* c,
+				string filename );
+		
+		static void writeFile(
+				const Conn* c,
+				string filename,
+				string text );
+		
+		static void flushFile(
+				const Conn* c,
+				string filename );
+		
+		static void readFile(
+				const Conn* c,
+				string filename,
+				bool linemode );
+		
+		static void listFiles(
+				const Conn* c );
+		
+		static void loadtab(
+				const Conn* c,
+				string data );
+		
+		void innerLoadTab(
+				const string& data );
+		
 		//////////////////////////////////////////////////////////
 		// Table special functions
 		//////////////////////////////////////////////////////////
-		static void tabop( const Conn* c, Id tab, char op, double min, 
-			double max );
-		static void file2tab( const Conn* c, 
-				Id id, string filename, unsigned int skiplines );
+		static void tabop(
+				const Conn* c,
+				Id tab,
+				char op,
+				double min, 
+				double max );
+		
+		static void file2tab(
+				const Conn* c, 
+				Id id,
+				string filename,
+				unsigned int skiplines );
+		
 		//////////////////////////////////////////////////////////
 		// sbml functions
 		//////////////////////////////////////////////////////////
-		static void readSbml( const Conn* c, string filename, string modelpath, int childnode );
-		static void writeSbml( const Conn* c, string filename, string modelpath, int childnode );
-
+		static void readSbml(
+				const Conn* c,
+				string filename,
+				string modelpath,
+				int childnode );
+		
+		static void writeSbml(
+				const Conn* c,
+				string filename,
+				string modelpath,
+				int childnode );
+		
 		//////////////////////////////////////////////////////////
 		// functions to create gates on a given channel
 		//////////////////////////////////////////////////////////
-		static void createGateMaster( const Conn* c, Id chan, string gateName );
+		static void createGateMaster(
+				const Conn* c,
+				Id chan,
+				string gateName );
+		
 		static void createGateWorker(
-			const Conn* c,
-			Id chan, string gateName, Id gate, Id A, Id B );
-
+				const Conn* c,
+				Id chan,
+				string gateName,
+				Id gate,
+				Id A,
+				Id B );
+		
 		/*
 		void add( const string& src, const string& dest );
 		void drop( const string& src, const string& dest );
@@ -552,6 +826,7 @@ class Shell
 			const string& src, const string& dest );
 		void copyHalo( const string& src, const string& dest );
 		*/
+		
 		/*
 		void listCommands( );
 		void listClasses( );
@@ -559,34 +834,54 @@ class Shell
 		void remoteCommand( string arglist );
 		void command( int argc, const char** argv );
 		*/
-
-
+		
 		////////////////////////////////////////////////////////////////////
 		// functions for implementing inter-node field assignments.
 		////////////////////////////////////////////////////////////////////
-		static void parGetField( const Conn* c, 
-			Id id, string field, unsigned int requestId );
-		static void handleReturnGet( const Conn* c, 
-			string value, unsigned int requestId );
+		static void parGetField(
+				const Conn* c, 
+				Id id,
+				string field,
+				unsigned int requestId );
+		
+		static void handleReturnGet(
+				const Conn* c, 
+				string value,
+				unsigned int requestId );
+		
 		// setField is a regular command, no special stuff for it.
-
+		
 		/**
 		 * Create an object on a remote node
 		 */
-		static void parCreateFunc( const Conn* c,
-			string objtype, string objname, 
-			Nid parentId, Nid newObjId );
+		static void parCreateFunc(
+				const Conn* c,
+				string objtype,
+				string objname, 
+				Nid parentId,
+				Nid newObjId );
+		
 		/**
 		 * Create an array element on a remote node
 		 */
-		static void parCreateArrayFunc ( const Conn* c, 
-				string objtype, string objname, 
-				pair< Nid, Nid > nids, vector< double > parameter );
+		static void parCreateArrayFunc(
+				const Conn* c,
+				string objtype,
+				string objname,
+				pair< Nid, Nid > nids,
+				vector< double > parameter );
 		
-		static void parMsgErrorFunc( const Conn* c, 
-			string errMsg, Id src, Id dest );
-		static void parMsgOkFunc( const Conn* c, Id src, Id dest );
-
+		static void parMsgErrorFunc(
+				const Conn* c,
+				string errMsg,
+				Id src,
+				Id dest );
+		
+		static void parMsgOkFunc(
+				const Conn* c,
+				Id src,
+				Id dest );
+		
 		/**
 		 * Find how big a remote element array is. Returns 1 if it is
 		 * a simpleElement.
@@ -596,13 +891,13 @@ class Shell
 		 * Returns the Eref for the specified postmaster.
 		 */
 		// Eref getPost( unsigned int node ) const;
-
+		
 		/////////////////////////////////////////////////////////////////
 		//	Set of commands for managing off-node requests. These
 		//	act in conjunction with a couple of templated functions
 		//	defined below.
 		/////////////////////////////////////////////////////////////////
-
+		
 		/**
  		* The next two functions should always be called in pairs and should
  		* be called within the same function, so that local variables do not
@@ -624,8 +919,9 @@ class Shell
  		* memory.
  		*/
 		unsigned int openOffNodeValueRequestInner( 
-			void* init, unsigned int numPending );
-
+				void* init,
+				unsigned int numPending );
+		
 		/**
 		 * closeOffNodeValueRequest
  		 * Polls postmaster, converts and returns data stored at rid
@@ -633,7 +929,7 @@ class Shell
 		 * same name, defined below.
  		 */
 		void* closeOffNodeValueRequestInner( unsigned int rid );
-
+		
 		/**
 		 * Returns the value pointer for the specified rid.
 		 */
@@ -651,22 +947,22 @@ class Shell
  		* Returns number of pending responses to off node request.
  		*/
 		unsigned int numPendingOffNode( unsigned int rid );
-
+		
 		/**
 		 * Flag: true till simulation quits. Used in the main loop.
 		 */
 		static bool running();
-
+		
 		/**
 		 * Tells all nodes to quit, then quits.
 		 */
 		static void quit( const Conn* c );
-
+		
 		/**
 		 * Sets running flag to 0, to get the simulator to quit
 		 */
 		static void innerQuit( const Conn* c );
-
+		
 		/**
 		 * Used only in unit tests, when we spoof an off-node postmaster
 		 * using this hack.
@@ -694,21 +990,21 @@ class Shell
 		string parser_;
 		SimDump* simDump_;
 		Id lastTab_; // Used for the loadtab -continue option, which 
-			// contines loading numbers into the previously selected table.
-
+		// contines loading numbers into the previously selected table.
+		
 		/// Node on which this shell operates
 		static unsigned int myNode_;
-
+		
 		/// Number of nodes used by simulation.
 		static unsigned int numNodes_;
-
+		
 		/// Number of requests allowed for off-node data transfer.
 		static const unsigned int maxNumOffNodeRequests;
-
+		
 		// Flag for main loop of simulator. When it becomes false,
 		// the simulator will exit.
 		static bool running_;
-
+		
 		/**
 		 * This keeps track of message requests sent off-node. 
 		 * When the target node finishes its work it tells this one that
@@ -729,7 +1025,6 @@ class Shell
 		vector< offNodeData > offNodeData_;
 		/// Manages the available Rids.
 		vector< unsigned int > freeRidStack_;
-
 };
 
 extern const Cinfo* initShellCinfo();

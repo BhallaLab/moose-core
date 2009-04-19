@@ -315,8 +315,23 @@ class Element
 		 * including all messages. Returns the base of the copied tree.
 		 * It attaches the copied element tree to the parent.
 		 */
-		virtual Element* copy( Element* parent, const string& newName, Id id = Id() )
-				const = 0;
+		virtual Element* copy(
+				Element* parent,
+				const string& newName ) const
+		{
+			IdGenerator idGen;
+			return copy( parent, newName, idGen );
+		}
+		
+		virtual Element* copy(
+				Element* parent,
+				const string& newName,
+				IdGenerator& idGen ) const
+		{
+			cerr << "";
+			assert( 0 );
+			return 0;
+		}
 
 		/**
 		 * This function takes a prototype element and creates an array
@@ -330,10 +345,24 @@ class Element
 		   \return An Element * pointing to a ArrayElement object
 		*/
 		virtual Element* copyIntoArray(
-			Id parent,
-			const string& newName,
-			int n,
-			Id id = Id() ) const = 0;
+				Id parent,
+				const string& newName,
+				int n ) const
+		{
+			IdGenerator idGen;
+			return copyIntoArray( parent, newName, n, idGen );
+		}
+		
+		virtual Element* copyIntoArray(
+				Id parent,
+				const string& newName,
+				int n,
+				IdGenerator& idGen ) const
+		{
+			cerr << "";
+			assert( 0 );
+			return 0;
+		}
 
 		/**
 		 * True if current element descends from the specified ancestor.
@@ -348,26 +377,29 @@ class Element
 		 * The function does NOT fix up the messages.
 		 */
 		virtual Element* innerDeepCopy( 
-				map< const Element*, Element* >& tree, Id id )
-				const = 0;
+				map< const Element*, Element* >& tree,
+				IdGenerator& idGen ) const = 0;
 				
 		virtual Element* innerDeepCopy( 
-				map< const Element*, Element* >& tree, int n, Id id )
-				const = 0;
+				map< const Element*, Element* >& tree,
+				int n,
+				IdGenerator& idGen ) const = 0;
 
 		/**
  		* Copies messages from current element to duplicate provided dest is
  		* also on tree.
  		*/
 		virtual void copyMessages( Element* dup, 
-			map< const Element*, Element* >& origDup, bool isArray ) const = 0;
+				map< const Element*, Element* >& origDup,
+				bool isArray ) const = 0;
 		/**
 		 * Copies messages present between current element and globals,
 		 * to go between the duplicate and the same globals. Handles
 		 * src as well as dest messages.
 		 */
-		virtual void copyGlobalMessages( Element* dup, bool isArray ) 
-			const = 0;
+		virtual void copyGlobalMessages(
+				Element* dup,
+				bool isArray ) const = 0;
 		
 		/**
 		 * Returns the memory use of the Element and its messages, 
@@ -391,13 +423,13 @@ class Element
 		 * The returned Element is dangling in memory: No parent
 		 * or child.
 		 */
-		virtual Element* innerCopy( Id id ) const = 0;
+		virtual Element* innerCopy( IdGenerator& idGen ) const = 0;
 
 		/**
 		 * Placeholder function: Copies current element into an array
 		 * Element with n entries instead of 1.
 		 */
-		virtual Element* innerCopy( int n, Id id ) const = 0;
+		virtual Element* innerCopy( int n, IdGenerator& idGen ) const = 0;
 
 
 	private:

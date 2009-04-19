@@ -74,14 +74,9 @@ class IdManager;
 #include "FuncVec.h"
 #include "Slot.h"
 #include "Finfo.h"
+#include "IdGenerator.h"
 #include "Id.h"
 #include "Msg.h"
 #include "Element.h"
-
-#ifdef CRL_MPI
-	#define MAX_MPI_RECV_RECORD_SIZE 1500
-	#define VISLN_CHUNK_SIZE (MAX_MPI_RECV_RECORD_SIZE/10)
-	#define MAX_MPI_PROCESSES 1024
-#endif
 
 #endif // _HEADER_H
