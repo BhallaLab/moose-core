@@ -100,10 +100,12 @@ void initMPI( int& argc, char**& argv )
 		
 		if ( myNode == 0 ) {
 			if ( ! infinite ) {
-				cout << "Paused, hit return to continue" << flush;
+				cout << "Paused, hit return to continue.\n" << flush;
 				getchar();
 			} else {
-				cout << "Paused, hit return to continue" << flush;
+				cout <<
+					"Paused. To resume, attach to process #0, and break out of "
+					"the infinite loop. In GDB, use the command 'j +1'.\n" << flush;
 				while( 1 );
 			}
 		}

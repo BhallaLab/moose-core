@@ -40,49 +40,53 @@ static const Cinfo* spikegenCinfo = initSpikeGenCinfo();
 static const Cinfo* nernstCinfo = initNernstCinfo();
 static const Cinfo* caconcCinfo = initCaConcCinfo();
 double calcSurf(double, double);
-ReadCell::ReadCell( const vector< double >& globalParms )
-		: RM_( 10.0 ), CM_( 0.01 ), RA_( 1.0 ), EREST_ACT_( -0.065 ),
-		dendrDiam( 0.0 ), aveLength( 0.0 ),
-		spineSurf( 0.0 ), spineDens( 0.0 ),
-		spineFreq( 0.0 ), membFactor( 0.0 ),
-		numCompartments_( 0 ), numChannels_( 0 ), numOthers_( 0 ),
-		cell_( 0 ), currCell_( 0 ),
-		lastCompt_( 0 ), protoCompt_( 0 ),
-		numProtoCompts_( 0 ), numProtoChans_( 0 ),
-		numProtoOthers_( 0 ), graftFlag_( 0 ),
-		polarFlag_( 0 ), relativeCoordsFlag_( 0 ),
-		doubleEndpointFlag_( 0 )
+
+ReadCell::ReadCell(
+	const vector< double >& globalParms,
+	IdGenerator idGen )
+	:
+	idGen_( idGen ), RM_( 10.0 ), CM_( 0.01 ), RA_( 1.0 ), EREST_ACT_( -0.065 ),
+	dendrDiam( 0.0 ), aveLength( 0.0 ),
+	spineSurf( 0.0 ), spineDens( 0.0 ),
+	spineFreq( 0.0 ), membFactor( 0.0 ),
+	numCompartments_( 0 ), numChannels_( 0 ), numOthers_( 0 ),
+	cell_( 0 ), currCell_( 0 ),
+	lastCompt_( 0 ), protoCompt_( 0 ),
+	numProtoCompts_( 0 ), numProtoChans_( 0 ),
+	numProtoOthers_( 0 ), graftFlag_( 0 ),
+	polarFlag_( 0 ), relativeCoordsFlag_( 0 ),
+	doubleEndpointFlag_( 0 )
 {
-		Id libId;
-		bool ret = lookupGet< Id, string >(
-					Element::root(), "lookupChild", libId, "library" );
+	Id libId;
+	bool ret = lookupGet< Id, string >(
+				Element::root(), "lookupChild", libId, "library" );
 
-		if ( !ret || libId.bad() ) {
-			cerr << "Warning: ReadCell: No library for channels\n";
-			cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
-			return;
-		}
+	if ( !ret || libId.bad() ) {
+		cerr << "Warning: ReadCell: No library for channels\n";
+		cerr << "File: " << filename_ << " Line: " << lineNum_ << endl;
+		return;
+	}
 
-		// We aren't using index 4, which is ELEAK.
-		assert( globalParms.size() == 5 );
+	// We aren't using index 4, which is ELEAK.
+	assert( globalParms.size() == 5 );
 
-		if ( globalParms[0] != 0.0 )
-			CM_ = globalParms[0];
-		if ( globalParms[1] != 0.0 )
-			RM_ = globalParms[1];
-		if ( globalParms[2] != 0.0 )
-			RA_ = globalParms[2];
-		if ( globalParms[3] != 0.0 )
-			EREST_ACT_ = globalParms[3];
+	if ( globalParms[0] != 0.0 )
+		CM_ = globalParms[0];
+	if ( globalParms[1] != 0.0 )
+		RM_ = globalParms[1];
+	if ( globalParms[2] != 0.0 )
+		RA_ = globalParms[2];
+	if ( globalParms[3] != 0.0 )
+		EREST_ACT_ = globalParms[3];
 
-		Element* lib = libId();
+	Element* lib = libId();
 
-		vector< Id > chanIds;
-		vector< Id >::iterator i;
-		ret = get< vector< Id > >( lib, "childList", chanIds);
-		assert( ret );
-		for ( i = chanIds.begin(); i != chanIds.end(); i++ )
-			chanProtos_.push_back( ( *i )() );
+	vector< Id > chanIds;
+	vector< Id >::iterator i;
+	ret = get< vector< Id > >( lib, "childList", chanIds);
+	assert( ret );
+	for ( i = chanIds.begin(); i != chanIds.end(); i++ )
+		chanProtos_.push_back( ( *i )() );
 }
 
 /**
@@ -91,11 +95,13 @@ ReadCell::ReadCell( const vector< double >& globalParms )
  * put it here in Shell because the cell format is independent
  * of parser and is likely to remain a legacy for a while.
  */
-void ReadCell::read( const string& filename, 
-	const string& cellname, Id pa, Id cellId )
+void ReadCell::read(
+	const string& filename, 
+	const string& cellname,
+	Id pa )
 {
 	filename_ = filename;
-	
+
 	PathUtility pathUtil(Property::getProperty(Property::SIMPATH));
 
 	ifstream fin( filename.c_str() );
@@ -106,8 +112,8 @@ void ReadCell::read( const string& filename,
 		fin.open( path.c_str() );
 	}
 
-	cell_ = Neutral::create( "Cell", cellname, pa, cellId );
-	
+	cell_ = Neutral::create( "Cell", cellname, pa, idGen_.next() );
+
 	if ( !cell_ ) {
 		cerr << "Error: ReadCell::read: unable to create cell " <<
 			cellname << " on " << pa << "." << pa.node() << endl;
@@ -306,13 +312,13 @@ Element* ReadCell::buildCompartment(
 		compt = currCell_;
 	} else {
 		if ( protoCompt_ ) {
-			compt = protoCompt_->copy( currCell_, name );
+			compt = protoCompt_->copy( currCell_, name, idGen_ );
 			numCompartments_ += numProtoCompts_;
 			numChannels_ += numProtoChans_;
 			numOthers_ += numProtoOthers_;
 		} else {
 			compt = Neutral::create( "Compartment",
-				name, currCell_->id(), Id::scratchId() );
+				name, currCell_->id(), idGen_.next() );
 			if ( !graftFlag_ )
 				++numCompartments_;
 		}
@@ -465,7 +471,7 @@ void ReadCell::readScript( const string& line )
 Element* ReadCell::startGraftCell( const string& cellpath )
 {
 	// Warning: here is a parser dependence in the separator.
-	Id cellId( cellpath, "/" );
+	Id cellId = Id::localId( cellpath );
 	
 	if ( ! cellId.bad() ) {
 		if ( ! cellId.isGlobal() ) {
@@ -500,13 +506,15 @@ Element* ReadCell::startGraftCell( const string& cellpath )
 		cellname = cellpath.substr( pos + 1 );
 	}
 	
-	if ( parentId.isGlobal() && Shell::myNode() == 0 ) {
-		return Shell::createGlobal( 
-			"Compartment", cellname, parentId, Id::newId() );
-	} else {
-		return Neutral::create(
-			"Compartment", cellname, parentId, Id::newId() );
-	}
+	//~ if ( parentId.isGlobal() && Shell::myNode() == 0 ) {
+		//~ return Shell::createGlobal( 
+			//~ "Compartment", cellname, parentId, Id::newId() );
+	//~ } else {
+		//~ return Neutral::create(
+			//~ "Compartment", cellname, parentId, Id::newId() );
+	//~ }
+	
+	return Neutral::create( "Compartment", cellname, parentId, idGen_.next() );
 }
 
 Element* ReadCell::findChannel( const string& name )
@@ -721,7 +729,7 @@ Element* ReadCell::addChannel(
 			Element* compt, Element* proto, double value, 
 			double dia, double length )
 {
-	Element* copy = proto->copy( compt, "" );
+	Element* copy = proto->copy( compt, "", idGen_ );
 	assert( copy != 0 );
 	
 	if ( addHHChannel( compt, copy, value, dia, length ) ) return copy;

@@ -160,7 +160,7 @@ const Cinfo* initGenesisParserCinfo()
 		
 		new SrcFinfo( "readcell", 
 			Ftype4< string, string, vector< double >, int >::global(),
-			"parent, cell, parms, node" ),
+			"filename, cellpath, parms, node" ),
 
 		///////////////////////////////////////////////////////////////
 		// Channel setup functions
@@ -2700,7 +2700,7 @@ void do_readcell( int argc, const char** const argv, Id s )
 		return;
 	}
 	string cellpath = argv[2];
-	int childNode = parseNodeNum( cellpath );
+	unsigned int childNode = parseNodeNum( cellpath );
 
 	GenesisParserWrapper* gpw = static_cast< GenesisParserWrapper* >
 			( s()->data( 0 ) );
