@@ -91,9 +91,6 @@ unsigned int IdManager::newId() {
 		);
 	}
 	
-	if ( blockEnd_ >= elementList_.size() )
-		elementList_.resize( 2 * blockEnd_ );
-	
 	lastId_ = localIndex_;
 	localIndex_++;
 	return lastId_;
@@ -103,26 +100,35 @@ unsigned int IdManager::newIdBlock( unsigned int size, unsigned int node )
 {
 	assert( Shell::myNode() == 0 );
 	
-	unsigned int blockBegin = localIndex_;
-	unsigned int blockEnd = blockBegin + size;
-	
 	/*
 	 * Here blockBegin and blockEnd are the boundaries of the block assigned to
 	 * the requesting node. On the other hand, blockEnd_ (with the underscore)
 	 * is the end of the master node's block.
 	 */
+	unsigned int blockBegin = localIndex_;
+	unsigned int blockEnd = blockBegin + size;
 	
-	if ( blockEnd > elementList_.size() )
-		elementList_.resize( blockEnd );
+	localIndex_ += size;
+	blockEnd_ += size;
+	
+	if ( blockEnd_ >= elementList_.size() )
+		elementList_.resize( 2 * blockEnd_ );
+	
 	fill(
 		elementList_.begin() + blockBegin,
 		elementList_.begin() + blockEnd,
 		Enode( 0, node )
 	);
 	
-	localIndex_ += size;
-	blockEnd_ += size;
 	return blockBegin;
+}
+
+IdGenerator IdManager::generator( unsigned int node )
+{
+	unsigned int id = Id::badId().id();
+	if ( node == Id::GlobalNode )
+		id = localIndex_;
+	return IdGenerator( id, node );
 }
 
 unsigned int IdManager::initId() {
@@ -133,16 +139,15 @@ unsigned int IdManager::initId() {
 }
 
 // Should only be called on master node, and parent should have been checked
-unsigned int IdManager::childId( unsigned int parent )
+unsigned int IdManager::childNode( unsigned int parent )
 {
 #ifdef USE_MPI
 	assert( Shell::myNode() == 0 );
 	assert( parent < localIndex_ );
 	
-	unsigned int childId = newId();
 	unsigned int childNode;
-	
 	Enode& pa = elementList_[ parent ];
+	
 	if ( parent == 0 ) { // Do load balancing.
 		childNode =	static_cast< unsigned int >
 			( localIndex_ / loadThresh_ ) % Shell::numNodes();
@@ -154,12 +159,16 @@ unsigned int IdManager::childId( unsigned int parent )
 		childNode = pa.node();
 	}
 	
-	elementList_[ childId ] = Enode( 0, childNode );
-	
-	return childId;
+	return childNode;
 #else
-	return newId();
+	return 0;
 #endif
+}
+
+// Should only be called on master node, and parent should have been checked
+unsigned int IdManager::childId( unsigned int parent )
+{
+	return makeIdOnNode( childNode( parent ) );
 }
 
 /**
@@ -248,7 +257,9 @@ unsigned int IdManager::findNode( unsigned int index ) const
 // Do not permit op if parent is not global
 void IdManager::setGlobal( unsigned int index )
 {
-	assert( index < elementList_.size() );
+	if ( index >= elementList_.size() )
+		elementList_.resize( ( 1 + index / blockSize ) * blockSize );
+
 	Enode& e = elementList_[ index ];
 	e.setGlobal();
 }
@@ -265,7 +276,7 @@ void IdManager::setNode( unsigned int index, unsigned int node )
 	assert( node < Shell::numNodes() || node == Id::GlobalNode );
 	
 	if ( index >= elementList_.size() )
-		elementList_.resize( index * 2 );
+		elementList_.resize( ( 1 + index / blockSize ) * blockSize );
 	
 	Enode& e = elementList_[ index ];
 	e.setNode( node );

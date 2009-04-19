@@ -24,10 +24,11 @@ enum ParseStage { COMMENT, DATA, SCRIPT };
 class ReadCell
 {
 	public:
-		ReadCell( const vector< double >& globalParms );
-		// void read( const string& filename, const string& cellpath );
-		void read( const string& filename, 
-			const string& cellname, Id pa, Id cellId );
+		ReadCell( const vector< double >& globalParms, IdGenerator idGen );
+		void read(
+				const string& filename, 
+				const string& cellname,
+				Id pa );
 		void innerRead( ifstream& fin );
 		void readData( const string& line );
 		void readScript( const string& line );
@@ -68,7 +69,8 @@ class ReadCell
 		// For error messages
 		string filename_;
 		unsigned int lineNum_;
-		
+
+		IdGenerator idGen_;
 		double RM_;
 		double CM_;
 		double RA_;
