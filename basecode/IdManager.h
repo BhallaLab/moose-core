@@ -111,6 +111,7 @@ class IdManager
 		 * - New remote node object: Parent is local, but name indicates
 		 *   a new group, such as kinetics.
 		 */
+		unsigned int childNode( unsigned int parent );
 		unsigned int childId( unsigned int parent );
 
 		/**
@@ -182,6 +183,8 @@ class IdManager
 		bool outOfRange( unsigned int index ) const;
 
 		unsigned int newIdBlock( unsigned int size, unsigned int node );
+
+		IdGenerator generator( unsigned int node );
 
 	private:
 		/**

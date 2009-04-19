@@ -18,6 +18,7 @@ using namespace std;
 
 class Eref;
 class Element;
+class IdGenerator;
 class IdManager;
 class Nid;
 namespace pymoose{
@@ -74,6 +75,7 @@ class Id
 		 * slave nodes, the shell must forward the Id to the affected
 		 * node for action.
 		 */
+		static unsigned int childNode( Id parent );
 		static Id childId( Id parent );
 
 		/**
@@ -109,8 +111,6 @@ class Id
 		 */
 		static Id postId( unsigned int node );
 
-		static Id globalId();
-
 		/**
 		 * This creates a new Id with the same element id but a new index
 		 */
@@ -125,6 +125,7 @@ class Id
 		//	Multi-node Id management
 		//////////////////////////////////////////////////////////////
 		static unsigned int newIdBlock( unsigned int size, unsigned int node );
+		static IdGenerator generator( unsigned int node );
 
 		//////////////////////////////////////////////////////////////
 		//	Id info
@@ -231,11 +232,6 @@ class Id
 		 * True if id is not in allocated range.
 		 */
 		bool outOfRange() const;
-
-		/**
-		 * True if it is a scratch id.
-		 */
-    //		bool isScratch() const;
 
 		/**
 		 * True if it is a proxy element. This is a minimal holder

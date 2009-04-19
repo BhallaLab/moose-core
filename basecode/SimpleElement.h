@@ -41,7 +41,9 @@ class SimpleElement: public Element
 		 * The messages are still more complicated and are done
 		 * in other stages of the Copy command.
 		 */
-		SimpleElement( const SimpleElement* orig, Id id = Id::newId() );
+		SimpleElement(
+				const SimpleElement* orig,
+				Id id = Id::newId() );
 
 		/// This cleans up the data_ and finfo_ if needed.
 		~SimpleElement();
@@ -254,20 +256,31 @@ class SimpleElement: public Element
 		// Functions for the copy operation. All 5 are virtual
 		///////////////////////////////////////////////////////////////
 		Element* copy(
-			Element* parent, const string& newName, Id id = Id() ) const;
+				Element* parent,
+				const string& newName,
+				IdGenerator& idGen ) const;
+		
 		Element* copyIntoArray(
-			Id parent, const string& newName, int n, Id id = Id() ) const;
+				Id parent,
+				const string& newName,
+				int n,
+				IdGenerator& idGen ) const;
+		
 		bool isDescendant( const Element* ancestor ) const;
+		
+		Element* innerDeepCopy(
+				map< const Element*, Element* >& tree,
+				IdGenerator& idGen ) const;
 
 		Element* innerDeepCopy(
-						map< const Element*, Element* >& tree, Id id ) const;
-		Element* innerDeepCopy(
-						map< const Element*, Element* >& tree, int n, Id id ) const;
+				map< const Element*, Element* >& tree,
+				int n,
+				IdGenerator& idGen ) const;
 
 		/*
 		void replaceCopyPointers(
-					map< const Element*, Element* >& tree,
-					vector< pair< Element*, unsigned int > >& delConns );
+				map< const Element*, Element* >& tree,
+				vector< pair< Element*, unsigned int > >& delConns );
 		void copyMsg( map< const Element*, Element* >& tree );
 		*/
 
@@ -275,8 +288,9 @@ class SimpleElement: public Element
  		* Copies messages from current element to duplicate provided dest is
  		* also on tree.
  		*/
-		void copyMessages( Element* dup, 
-			map< const Element*, Element* >& origDup, bool isArray ) const;
+		void copyMessages( Element* dup,
+				map< const Element*, Element* >& origDup,
+				bool isArray ) const;
 
 		/**
 		 * Copies messages present between current element and globals,
@@ -292,8 +306,8 @@ class SimpleElement: public Element
 
 		// bool innerCopyMsg( const Conn* c, const Element* orig, Element* dup );
 	protected:
-		Element* innerCopy( Id id ) const;
-		Element* innerCopy( int n, Id id) const;
+		Element* innerCopy( IdGenerator& idGen ) const;
+		Element* innerCopy( int n, IdGenerator& idGen ) const;
 
 	private:
 		/**
