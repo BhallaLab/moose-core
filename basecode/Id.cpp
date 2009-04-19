@@ -61,6 +61,12 @@ void Id::dumpState( ostream& stream )
 }
 
 // static func
+unsigned int Id::childNode( Id parent )
+{
+	return manager().childNode( parent.id_ );
+}
+
+// static func
 Id Id::childId( Id parent )
 {
 	return Id( manager().childId( parent.id_ ) );
@@ -96,15 +102,6 @@ Id Id::postId( unsigned int node )
 	return Id( 2, node );
 }
 
-// static func
-Id Id::globalId()
-{
-	assert( Shell::myNode() == 0 );
-	Id id = newId();
-	id.setGlobal();
-	return id;
-}
-
 /**
  * Static func to extract an id from a string. We need to accept ids
  * out of the existing range, but it would be nice to have a heuristic
@@ -126,6 +123,11 @@ Id Id::assignIndex( unsigned int index ) const
 unsigned int Id::newIdBlock( unsigned int size, unsigned int node )
 {
 	return manager().newIdBlock( size, node );
+}
+
+IdGenerator Id::generator( unsigned int node )
+{
+	return manager().generator( node );
 }
 
 //////////////////////////////////////////////////////////////
