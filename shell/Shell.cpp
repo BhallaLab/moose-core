@@ -1905,8 +1905,8 @@ void Shell::parCopy(
 	const Conn* c,
 	Nid src,
 	Nid parent,
-	IdGenerator idGen,
-	string name )
+	string name,
+	IdGenerator idGen )
 {
 	;
 }
