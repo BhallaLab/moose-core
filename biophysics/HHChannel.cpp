@@ -539,7 +539,7 @@ double HHChannel::getInitX( Eref e )
 {
     HHChannel* instance = static_cast< HHChannel* >(e.data());
     if (instance->Xpower_ > 0){
-        if( instance->xInited_) { 
+        if( instance->xInited_) {
             return instance->initX_;
         }else {
             instance->lookupXrates(e);
