@@ -3491,6 +3491,30 @@ class HHChannel(PyMooseBase):
         """__set_Z(self, double Z)"""
         return _moose.HHChannel___set_Z(*args)
 
+    def __get_initX(*args):
+        """__get_initX(self) -> double"""
+        return _moose.HHChannel___get_initX(*args)
+
+    def __set_initX(*args):
+        """__set_initX(self, double X)"""
+        return _moose.HHChannel___set_initX(*args)
+
+    def __get_initY(*args):
+        """__get_initY(self) -> double"""
+        return _moose.HHChannel___get_initY(*args)
+
+    def __set_initY(*args):
+        """__set_initY(self, double Y)"""
+        return _moose.HHChannel___set_initY(*args)
+
+    def __get_initZ(*args):
+        """__get_initZ(self) -> double"""
+        return _moose.HHChannel___get_initZ(*args)
+
+    def __set_initZ(*args):
+        """__set_initZ(self, double Z)"""
+        return _moose.HHChannel___set_initZ(*args)
+
     def __get_useConcentration(*args):
         """__get_useConcentration(self) -> int"""
         return _moose.HHChannel___get_useConcentration(*args)
@@ -3575,6 +3599,9 @@ class HHChannel(PyMooseBase):
     X = _swig_property(_moose.HHChannel_X_get, _moose.HHChannel_X_set)
     Y = _swig_property(_moose.HHChannel_Y_get, _moose.HHChannel_Y_set)
     Z = _swig_property(_moose.HHChannel_Z_get, _moose.HHChannel_Z_set)
+    initX = _swig_property(_moose.HHChannel_initX_get, _moose.HHChannel_initX_set)
+    initY = _swig_property(_moose.HHChannel_initY_get, _moose.HHChannel_initY_set)
+    initZ = _swig_property(_moose.HHChannel_initZ_get, _moose.HHChannel_initZ_set)
     instant = _swig_property(_moose.HHChannel_instant_get, _moose.HHChannel_instant_set)
     Gk = _swig_property(_moose.HHChannel_Gk_get, _moose.HHChannel_Gk_set)
     Ik = _swig_property(_moose.HHChannel_Ik_get)
