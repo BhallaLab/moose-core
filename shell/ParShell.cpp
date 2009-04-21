@@ -727,8 +727,18 @@ void Shell::copy(
 	}
 	Element* e = 0;
 	if ( src.isGlobal() ) {
-		if ( parent == Id() ) { // Do copy on node0
-			e = src()->copy( parent(), name );
+		if ( parent == Id() ) {
+			// Ask load-balancer where to put target
+			unsigned int tgtNode = Id::childNode( parent );
+			if ( tgtNode == 0 ) {
+				e = src()->copy( parent(), name );
+			} else {
+				IdGenerator idGen;
+				--tgtNode;
+				sendTo4< Nid, Nid, string, IdGenerator >( 
+					c->target(), parCopySlot, tgtNode,
+					src, parent, name, idGen );
+			}
 		} else if ( parent.node() == 0 ) { // Local copy
 			e = src()->copy( parent(), name );
 		} else if ( parent.isGlobal() ) { // All-node copy of globals
