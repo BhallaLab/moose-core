@@ -3391,8 +3391,8 @@ class HHChannel(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> HHChannel
         __init__(self, HHChannel src, string name, PyMooseBase parent) -> HHChannel
         __init__(self, HHChannel src, string name, Id parent) -> HHChannel
-        __init__(self, Id src, string name, Id parent) -> HHChannel
         __init__(self, HHChannel src, string path) -> HHChannel
+        __init__(self, Id src, string name, Id parent) -> HHChannel
         """
         this = _moose.new_HHChannel(*args)
         try: self.this.append(this)
@@ -3463,10 +3463,6 @@ class HHChannel(PyMooseBase):
         """__get_Ik(self) -> double"""
         return _moose.HHChannel___get_Ik(*args)
 
-    def __set_Ik(*args):
-        """__set_Ik(self, double Ik)"""
-        return _moose.HHChannel___set_Ik(*args)
-
     def __get_X(*args):
         """__get_X(self) -> double"""
         return _moose.HHChannel___get_X(*args)
@@ -3496,7 +3492,7 @@ class HHChannel(PyMooseBase):
         return _moose.HHChannel___get_initX(*args)
 
     def __set_initX(*args):
-        """__set_initX(self, double X)"""
+        """__set_initX(self, double initX)"""
         return _moose.HHChannel___set_initX(*args)
 
     def __get_initY(*args):
@@ -3504,7 +3500,7 @@ class HHChannel(PyMooseBase):
         return _moose.HHChannel___get_initY(*args)
 
     def __set_initY(*args):
-        """__set_initY(self, double Y)"""
+        """__set_initY(self, double initY)"""
         return _moose.HHChannel___set_initY(*args)
 
     def __get_initZ(*args):
@@ -3512,7 +3508,7 @@ class HHChannel(PyMooseBase):
         return _moose.HHChannel___get_initZ(*args)
 
     def __set_initZ(*args):
-        """__set_initZ(self, double Z)"""
+        """__set_initZ(self, double initZ)"""
         return _moose.HHChannel___set_initZ(*args)
 
     def __get_useConcentration(*args):
@@ -3522,74 +3518,6 @@ class HHChannel(PyMooseBase):
     def __set_useConcentration(*args):
         """__set_useConcentration(self, int useConcentration)"""
         return _moose.HHChannel___set_useConcentration(*args)
-
-    def __get_IkSrc(*args):
-        """__get_IkSrc(self) -> double"""
-        return _moose.HHChannel___get_IkSrc(*args)
-
-    def __set_IkSrc(*args):
-        """__set_IkSrc(self, double IkSrc)"""
-        return _moose.HHChannel___set_IkSrc(*args)
-
-    def __get_concen(*args):
-        """__get_concen(self) -> double"""
-        return _moose.HHChannel___get_concen(*args)
-
-    def __set_concen(*args):
-        """__set_concen(self, double concen)"""
-        return _moose.HHChannel___set_concen(*args)
-
-    def createTable(*args):
-        """createTable(self, string gate, unsigned int divs, double min, double max)"""
-        return _moose.HHChannel_createTable(*args)
-
-    def tweakAlpha(*args):
-        """tweakAlpha(self, string gate)"""
-        return _moose.HHChannel_tweakAlpha(*args)
-
-    def tweakTau(*args):
-        """tweakTau(self, string gate)"""
-        return _moose.HHChannel_tweakTau(*args)
-
-    def setupAlpha(*args):
-        """
-        setupAlpha(self, string gate, double_vector params)
-        setupAlpha(self, string gate, double AA, double AB, double AC, double AD, 
-            double AF, double BA, double BB, double BC, 
-            double BD, double BF, double size=3000, 
-            double min=-0.1, double max=0.05)
-        setupAlpha(self, string gate, double AA, double AB, double AC, double AD, 
-            double AF, double BA, double BB, double BC, 
-            double BD, double BF, double size=3000, 
-            double min=-0.1)
-        setupAlpha(self, string gate, double AA, double AB, double AC, double AD, 
-            double AF, double BA, double BB, double BC, 
-            double BD, double BF, double size=3000)
-        setupAlpha(self, string gate, double AA, double AB, double AC, double AD, 
-            double AF, double BA, double BB, double BC, 
-            double BD, double BF)
-        """
-        return _moose.HHChannel_setupAlpha(*args)
-
-    def setupTau(*args):
-        """
-        setupTau(self, string gate, double_vector params)
-        setupTau(self, string gate, double AA, double AB, double AC, double AD, 
-            double AF, double BA, double BB, double BC, 
-            double BD, double BF, double size=3000, 
-            double min=-0.1, double max=0.05)
-        setupTau(self, string gate, double AA, double AB, double AC, double AD, 
-            double AF, double BA, double BB, double BC, 
-            double BD, double BF, double size=3000, 
-            double min=-0.1)
-        setupTau(self, string gate, double AA, double AB, double AC, double AD, 
-            double AF, double BA, double BB, double BC, 
-            double BD, double BF, double size=3000)
-        setupTau(self, string gate, double AA, double AB, double AC, double AD, 
-            double AF, double BA, double BB, double BC, 
-            double BD, double BF)
-        """
-        return _moose.HHChannel_setupTau(*args)
 
     Gbar = _swig_property(_moose.HHChannel_Gbar_get, _moose.HHChannel_Gbar_set)
     Ek = _swig_property(_moose.HHChannel_Ek_get, _moose.HHChannel_Ek_set)
@@ -3602,11 +3530,7 @@ class HHChannel(PyMooseBase):
     initX = _swig_property(_moose.HHChannel_initX_get, _moose.HHChannel_initX_set)
     initY = _swig_property(_moose.HHChannel_initY_get, _moose.HHChannel_initY_set)
     initZ = _swig_property(_moose.HHChannel_initZ_get, _moose.HHChannel_initZ_set)
-    instant = _swig_property(_moose.HHChannel_instant_get, _moose.HHChannel_instant_set)
-    Gk = _swig_property(_moose.HHChannel_Gk_get, _moose.HHChannel_Gk_set)
-    Ik = _swig_property(_moose.HHChannel_Ik_get)
     useConcentration = _swig_property(_moose.HHChannel_useConcentration_get, _moose.HHChannel_useConcentration_set)
-    concen = _swig_property(_moose.HHChannel_concen_get, _moose.HHChannel_concen_set)
 HHChannel_swigregister = _moose.HHChannel_swigregister
 HHChannel_swigregister(HHChannel)
 HHChannel.className_ = _moose.cvar.HHChannel_className_
