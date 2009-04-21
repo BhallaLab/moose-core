@@ -5081,6 +5081,18 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
 #define pymoose_HHChannel_Z_set(self_, val_) self_->__set_Z(val_)
   
 
+#define pymoose_HHChannel_initX_get(self_) self_->__get_initX()
+#define pymoose_HHChannel_initX_set(self_, val_) self_->__set_initX(val_)
+  
+
+#define pymoose_HHChannel_initY_get(self_) self_->__get_initY()
+#define pymoose_HHChannel_initY_set(self_, val_) self_->__set_initY(val_)
+  
+
+#define pymoose_HHChannel_initZ_get(self_) self_->__get_initZ()
+#define pymoose_HHChannel_initZ_set(self_, val_) self_->__set_initZ(val_)
+  
+
 #define pymoose_HHChannel_instant_get(self_) self_->__get_instant()
 #define pymoose_HHChannel_instant_set(self_, val_) self_->__set_instant(val_)
   
@@ -54830,6 +54842,204 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_HHChannel___get_initX(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"HHChannel___get_initX",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__HHChannel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HHChannel___get_initX" "', argument " "1"" of type '" "pymoose::HHChannel const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::HHChannel * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::HHChannel const *)arg1)->__get_initX();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_HHChannel___set_initX(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"HHChannel___set_initX",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__HHChannel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HHChannel___set_initX" "', argument " "1"" of type '" "pymoose::HHChannel *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::HHChannel * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "HHChannel___set_initX" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_initX(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_HHChannel___get_initY(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"HHChannel___get_initY",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__HHChannel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HHChannel___get_initY" "', argument " "1"" of type '" "pymoose::HHChannel const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::HHChannel * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::HHChannel const *)arg1)->__get_initY();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_HHChannel___set_initY(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"HHChannel___set_initY",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__HHChannel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HHChannel___set_initY" "', argument " "1"" of type '" "pymoose::HHChannel *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::HHChannel * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "HHChannel___set_initY" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_initY(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_HHChannel___get_initZ(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"HHChannel___get_initZ",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__HHChannel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HHChannel___get_initZ" "', argument " "1"" of type '" "pymoose::HHChannel const *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::HHChannel * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)((pymoose::HHChannel const *)arg1)->__get_initZ();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_HHChannel___set_initZ(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"HHChannel___set_initZ",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__HHChannel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HHChannel___set_initZ" "', argument " "1"" of type '" "pymoose::HHChannel *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::HHChannel * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "HHChannel___set_initZ" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->__set_initZ(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_HHChannel___get_useConcentration(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
@@ -57675,6 +57885,207 @@ SWIGINTERN PyObject *_wrap_HHChannel_Z_get(PyObject *SWIGUNUSEDPARM(self), PyObj
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     result = (double)pymoose_HHChannel_Z_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_HHChannel_initX_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"HHChannel_initX_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__HHChannel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HHChannel_initX_set" "', argument " "1"" of type '" "pymoose::HHChannel *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::HHChannel * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "HHChannel_initX_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_HHChannel_initX_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_HHChannel_initX_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"HHChannel_initX_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__HHChannel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HHChannel_initX_get" "', argument " "1"" of type '" "pymoose::HHChannel *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::HHChannel * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_HHChannel_initX_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_HHChannel_initY_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"HHChannel_initY_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__HHChannel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HHChannel_initY_set" "', argument " "1"" of type '" "pymoose::HHChannel *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::HHChannel * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "HHChannel_initY_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_HHChannel_initY_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_HHChannel_initY_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"HHChannel_initY_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__HHChannel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HHChannel_initY_get" "', argument " "1"" of type '" "pymoose::HHChannel *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::HHChannel * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_HHChannel_initY_get(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_HHChannel_initZ_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"HHChannel_initZ_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__HHChannel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HHChannel_initZ_set" "', argument " "1"" of type '" "pymoose::HHChannel *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::HHChannel * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "HHChannel_initZ_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    pymoose_HHChannel_initZ_set(arg1,arg2);
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_HHChannel_initZ_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::HHChannel *arg1 = (pymoose::HHChannel *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"HHChannel_initZ_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__HHChannel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HHChannel_initZ_get" "', argument " "1"" of type '" "pymoose::HHChannel *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::HHChannel * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)pymoose_HHChannel_initZ_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -106423,6 +106834,12 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"HHChannel___set_Y", _wrap_HHChannel___set_Y, METH_VARARGS, (char *)"HHChannel___set_Y(HHChannel self, double Y)"},
 	 { (char *)"HHChannel___get_Z", _wrap_HHChannel___get_Z, METH_VARARGS, (char *)"HHChannel___get_Z(HHChannel self) -> double"},
 	 { (char *)"HHChannel___set_Z", _wrap_HHChannel___set_Z, METH_VARARGS, (char *)"HHChannel___set_Z(HHChannel self, double Z)"},
+	 { (char *)"HHChannel___get_initX", _wrap_HHChannel___get_initX, METH_VARARGS, (char *)"HHChannel___get_initX(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_initX", _wrap_HHChannel___set_initX, METH_VARARGS, (char *)"HHChannel___set_initX(HHChannel self, double X)"},
+	 { (char *)"HHChannel___get_initY", _wrap_HHChannel___get_initY, METH_VARARGS, (char *)"HHChannel___get_initY(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_initY", _wrap_HHChannel___set_initY, METH_VARARGS, (char *)"HHChannel___set_initY(HHChannel self, double Y)"},
+	 { (char *)"HHChannel___get_initZ", _wrap_HHChannel___get_initZ, METH_VARARGS, (char *)"HHChannel___get_initZ(HHChannel self) -> double"},
+	 { (char *)"HHChannel___set_initZ", _wrap_HHChannel___set_initZ, METH_VARARGS, (char *)"HHChannel___set_initZ(HHChannel self, double Z)"},
 	 { (char *)"HHChannel___get_useConcentration", _wrap_HHChannel___get_useConcentration, METH_VARARGS, (char *)"HHChannel___get_useConcentration(HHChannel self) -> int"},
 	 { (char *)"HHChannel___set_useConcentration", _wrap_HHChannel___set_useConcentration, METH_VARARGS, (char *)"HHChannel___set_useConcentration(HHChannel self, int useConcentration)"},
 	 { (char *)"HHChannel___get_IkSrc", _wrap_HHChannel___get_IkSrc, METH_VARARGS, (char *)"HHChannel___get_IkSrc(HHChannel self) -> double"},
@@ -106485,6 +106902,12 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"HHChannel_Y_get", _wrap_HHChannel_Y_get, METH_VARARGS, (char *)"HHChannel_Y_get(HHChannel self) -> double"},
 	 { (char *)"HHChannel_Z_set", _wrap_HHChannel_Z_set, METH_VARARGS, (char *)"HHChannel_Z_set(HHChannel self, double Z)"},
 	 { (char *)"HHChannel_Z_get", _wrap_HHChannel_Z_get, METH_VARARGS, (char *)"HHChannel_Z_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_initX_set", _wrap_HHChannel_initX_set, METH_VARARGS, (char *)"HHChannel_initX_set(HHChannel self, double initX)"},
+	 { (char *)"HHChannel_initX_get", _wrap_HHChannel_initX_get, METH_VARARGS, (char *)"HHChannel_initX_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_initY_set", _wrap_HHChannel_initY_set, METH_VARARGS, (char *)"HHChannel_initY_set(HHChannel self, double initY)"},
+	 { (char *)"HHChannel_initY_get", _wrap_HHChannel_initY_get, METH_VARARGS, (char *)"HHChannel_initY_get(HHChannel self) -> double"},
+	 { (char *)"HHChannel_initZ_set", _wrap_HHChannel_initZ_set, METH_VARARGS, (char *)"HHChannel_initZ_set(HHChannel self, double initZ)"},
+	 { (char *)"HHChannel_initZ_get", _wrap_HHChannel_initZ_get, METH_VARARGS, (char *)"HHChannel_initZ_get(HHChannel self) -> double"},
 	 { (char *)"HHChannel_instant_set", _wrap_HHChannel_instant_set, METH_VARARGS, (char *)"HHChannel_instant_set(HHChannel self, int instant)"},
 	 { (char *)"HHChannel_instant_get", _wrap_HHChannel_instant_get, METH_VARARGS, (char *)"HHChannel_instant_get(HHChannel self) -> int"},
 	 { (char *)"HHChannel_Gk_set", _wrap_HHChannel_Gk_set, METH_VARARGS, (char *)"HHChannel_Gk_set(HHChannel self, double Gk)"},
