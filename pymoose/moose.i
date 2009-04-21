@@ -368,11 +368,8 @@ void fillData(PyObject* args)
 %attribute(pymoose::HHChannel, double, initX, __get_initX, __set_initX)
 %attribute(pymoose::HHChannel, double, initY, __get_initY, __set_initY)
 %attribute(pymoose::HHChannel, double, initZ, __get_initZ, __set_initZ)
-%attribute(pymoose::HHChannel, int, instant, __get_instant, __set_instant)
-%attribute(pymoose::HHChannel, double, Gk, __get_Gk, __set_Gk)
-%attribute(pymoose::HHChannel, double, Ik, __get_Ik)
 %attribute(pymoose::HHChannel, int, useConcentration, __get_useConcentration, __set_useConcentration)
-%attribute(pymoose::HHChannel, double, concen, __get_concen, __set_concen)
+
 
 %include "Mg_block.h"
 %attribute(pymoose::Mg_block, double, KMg_A, __get_KMg_A, __set_KMg_A)
