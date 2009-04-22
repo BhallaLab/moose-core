@@ -110,16 +110,11 @@ double SbmlReader::transformUnits(double mvalue,UnitDefinition * ud)
 		if (unit->isLitre()){
 			cout<<"unit is litre";
 			lvalue *= pow(1e-3,exponent);
-			//cout<<"size in function is : "<<lsize<<endl;	
 		}
 		if (unit->isMole()){
 			cout<<"unit is mole"<<endl;
-			lvalue *= pow(6e23,exponent);	
-			
-				
+			lvalue *= pow(6.02214199e23,exponent);	
 		}
-		
-		
 	}
 	cout<<"value before return "<<lvalue<<endl;
 	return lvalue;
@@ -137,28 +132,23 @@ void SbmlReader::createCompartment(Id location)
 	for (int i=0;i<model_->getNumCompartments();i++)
 	{
 		compt = model_->getCompartment(i);
-		
 		std::string id;
 		if (compt->isSetId()){
 			id = compt->getId();
 		}
-		
 		std::string name;
 		if (compt->isSetName()){
 			name = compt->getName();
 		} 
-
 		std::string type;
 		if (compt->isSetCompartmentType()){
 			type =compt->getCompartmentType ();
 		}
-		
 		std::string outside;
 		if ( compt->isSetOutside()){
 			outside =compt->getOutside ();
 			
 		}
-		
 		if (compt->isSetSize()){
 			msize =compt->getSize();
 		}
@@ -190,12 +180,8 @@ void SbmlReader::createCompartment(Id location)
 			
 			set< unsigned int >( comptEl_,dimensionFinfo,dimension );		
 		}
-				
-		
-							
 	}
 	createMolecule(idMap);
-	
 }
 
 /* create MOLECULE */
@@ -223,32 +209,19 @@ void SbmlReader::createMolecule(map<string,Id> &idMap)
 		Id comptEl=idMap[compt];
 		molecule_= Neutral::create( "Molecule",id,comptEl,Id::scratchId() );//create Molecule
 		molMap[id] = comptEl; 
-		//cout << "elmtMap_.size(): " << elmtMap_.size() << endl;
 		elmtMap_[id] = Eref(molecule_);
 		//printNotes(s);
 		UnitDefinition * ud = s->getDerivedUnitDefinition();
 		cout<<"species unit :"<<UnitDefinition::printUnits(s->getDerivedUnitDefinition())<<endl;
 		double initvalue;
-		if (s->isSetInitialConcentration()){
+		if (s->isSetInitialConcentration())
 			initvalue = s->getInitialConcentration();
-			/*cout<<"init concentration is :"<<initvalue<<endl;
-			double transvalue = transformUnits(initvalue,ud);
-			cout<<"transform conc is :"<<transvalue<<endl;
-			set< double >(molecule_, concInitFinfo, transvalue);*/
-		}
-		
-		if (s->isSetInitialAmount()){
+		if (s->isSetInitialAmount())
 			initvalue = s->getInitialAmount() ;
-			/*cout<<"init amt is :"<<initvalue<<endl;
-			double transvalue = transformUnits(initvalue,ud);
-			cout<<"transform amt is :"<<transvalue<<endl;
-			set< double >(molecule_, nInitFinfo, transvalue);*/
-		}
-		cout<<"initvalue is :"<<initvalue<<endl;
 		double transvalue = transformUnits(1,ud);
 		transvalue *= initvalue;
-		bool has_subunits = s->getHasOnlySubstanceUnits();
-		cout<<"has_sub "<<has_subunits<<endl;
+		//bool has_subunits = s->getHasOnlySubstanceUnits();
+		//cout<<"has_sub "<<has_subunits<<endl;
 		unsigned int dimension;
                 get< unsigned int >(comptEl.eref(), dimensionFinfo,dimension);
 		if (dimension > 0 && s->isSetInitialConcentration() ) { //has_subunits == false ){
@@ -259,34 +232,17 @@ void SbmlReader::createMolecule(map<string,Id> &idMap)
 		}
 		cout<<"n init is :"<<transvalue<<endl;
 		set< double >(molecule_, nInitFinfo, transvalue); //initialAmount 	
-		
-		
-		/*if (dimension > 0 || has_subunits == false)
-			set< double >(molecule_, nInitFinfo, transvalue); //initialAmount 			
-					
-				
-		else
-			set< double >( molecule_, concInitFinfo, transvalue); //initial concentration	*/
 		bool cons=s->getConstant(); 
-		if (cons)
+		bool bcondition = s->getBoundaryCondition();
+		if ((cons = true) && (bcondition = true))
 			set< int >(molecule_,modeFinfo,4); //getConstant=True indicates a buffered molecule
+		else if ((cons = false) && (bcondition = true))
+			set< int >(molecule_,modeFinfo,1); //indicates the species has assignment rule
 		else 
 			set< int >(molecule_,modeFinfo,0);
-		bool bcondition = s->getBoundaryCondition();
-		if (bcondition)
-		{
-			set< int >(molecule_,modeFinfo,1); //indicates the species has assignment rule			
-		}
-		/*std::string sptype;		
-		if (s->isSetSpeciesType())
-			sptype=s->getSpeciesType();
-		
-		if (s->isSetSubstanceUnits()) 
-			cout<<"substance units :"<<s->getSubstanceUnits()<<endl;*/
-					
 	}
 	getRules();
-	//createReaction(molMap);
+	createReaction(molMap);
 }
 
 void SbmlReader::getRules()
@@ -331,28 +287,19 @@ string SbmlReader::printAnnotation(SBase *sb,map<string,EnzymeInfo> &enzInfoMap)
 			for( int m = 0; m < childNode.getNumChildren(); m++ )
 			{
 				XMLNode &grandChildNode = childNode.getChild( l );
-				//cout<<"prefix of grandchildnode :"<<grandChildNode.getPrefix()<<endl;
-				//cout<<"name of grandchildnode :"<<grandChildNode.getName()<<endl;  
 				if (grandChildNode.getPrefix() == "moose" && grandChildNode.getName() == "EnzymaticReaction")
 				{	for( int n = 0; n < grandChildNode.getNumChildren(); n++ )
 					{
 						XMLNode &greatGrandChildNode = grandChildNode.getChild( n );
-						/*cout<<"prefix of greatgrandchildnode :"<<greatGrandChildNode.getPrefix()<<endl;
-						cout<<"name of childnode :"<<greatGrandChildNode.getName()<<endl;  
-						cout<<"to xml string GREATgrandchild:"<<greatGrandChildNode.toXMLString()<<endl;
-						
-						cout<<"str :"<<str<<endl;*/
 						Eref elem;
 						if (greatGrandChildNode.getName() == "substrates"){
 							string str = greatGrandChildNode.getChild(0).toXMLString();
-							
 							elem=elmtMap_.find(str)->second; 
 							einfo.substrates.push_back(elem.id());
 							
 						}
 						else if (greatGrandChildNode.getName() == "products"){
 							string str = greatGrandChildNode.getChild(0).toXMLString();
-							
 							elem=elmtMap_.find(str)->second; 
 							einfo.products.push_back(elem.id());
 							
@@ -399,7 +346,6 @@ string SbmlReader::printAnnotation(SBase *sb,map<string,EnzymeInfo> &enzInfoMap)
 }
 
 /* Enzymatic Reaction */
-//void SbmlReader::setupEnzymaticReaction(EnzymeInfo &einfo)
 void SbmlReader::setupEnzymaticReaction(const EnzymeInfo & einfo)
 {
 	
@@ -469,11 +415,7 @@ void SbmlReader::printParameter()
 			value=prm->getValue();	
 		}
 		parmValueMap[id]=value;
-		/*if (prm->isSetUnits()){
-			unit=prm->getUnits();			
-		}
-		parmUnitMap[id]=unit;*/
-		
+				
 	}
 	cout<<"inside model->parameter()"<<endl;
 }
@@ -494,9 +436,6 @@ void SbmlReader::createReaction(map<string,Id> &molMap)
 	static const Finfo* prdFinfo = reactionCinfo->findFinfo( "prd" );
 	static const Finfo* kfFinfo = reactionCinfo->findFinfo( "kf" );	
 	static const Finfo* kbFinfo = reactionCinfo->findFinfo( "kb" );	
-	static const Cinfo* kincomptCinfo = initKinComptCinfo();
-	static const Finfo* sizeFinfo = kincomptCinfo->findFinfo( "size" );
-	
 	Reaction* reac;	
 	for (int r=0;r<model_->getNumReactions();r++)
 	{	
@@ -518,17 +457,12 @@ void SbmlReader::createReaction(map<string,Id> &molMap)
 				std::string sp=rect->getSpecies();
 				Id m=molMap.find(sp)->second; //gives compartment of sp
 				reaction_=Neutral::create( "Reaction",id,m,Id::scratchId() ); //create Reaction
-		
-				//numreact=reac->getNumReactants();
-				//cout<<"num of rct :"<<numreact<<endl;
 				double rctcount=0.0;	
 				rctMap.clear();
-				//double frate=1.0,brate=1.0;
 				for (int rt=0;rt<reac->getNumReactants();rt++)
 				{	
 					const SpeciesReference* rct=reac->getReactant(rt);
 					sp=rct->getSpecies();
-					//cout<<"reactant is "<<sp<<endl;
 					rctMap_iter = rctMap.find(sp);			
 					if (rctMap_iter != rctMap.end()){	
 						rctcount = rctMap_iter->second;
@@ -550,7 +484,6 @@ void SbmlReader::createReaction(map<string,Id> &molMap)
 				{
 					const SpeciesReference* pdt=reac->getProduct(pt);
 					sp=pdt->getSpecies();	
-					//cout<<"product is "<<sp<<endl;
 					pdtMap_iter = pdtMap.find(sp);
 					if (pdtMap_iter != pdtMap.end()){	
 						pdtcount = pdtMap_iter->second;
@@ -576,9 +509,6 @@ void SbmlReader::createReaction(map<string,Id> &molMap)
 					//cout<<"rsp "<<rsp<<endl;	
 				}	
 				cout<<"rct order = "<<rctorder<<endl;
-				Id r=molMap.find(rsp)->second;
-				//cout<<"r"<< r <<endl;
-		
 				//order of products
 				pdtorder = 0.0;
 				for (pdtMap_iter=pdtMap.begin();pdtMap_iter!=pdtMap.end();pdtMap_iter++)
@@ -589,21 +519,12 @@ void SbmlReader::createReaction(map<string,Id> &molMap)
 			
 				}
 				cout<<"pdt order = "<<pdtorder<<endl;
-				Id p;
-				bool noproduct = false;
-				if (psp != ""){		
-					p=molMap.find(psp)->second;
-					//cout<<"p"<< p <<endl;
-				}
-				else if (psp == "")
-				noproduct = true;
 				if (reac->isSetKineticLaw())
 				{	KineticLaw * klaw=reac->getKineticLaw();
-			
 					string timeunit = klaw->getTimeUnits(); 
 					string subunit=klaw->getSubstanceUnits();
 					std::string id,unit;
-					double value = 0.0,rvalue,pvalue;
+					double value = 0.0;
 					UnitDefinition * kfud;
 					UnitDefinition * kbud;
 					const ASTNode* astnode=klaw->getMath();
@@ -658,66 +579,20 @@ void SbmlReader::createReaction(map<string,Id> &molMap)
 					}			
 					kfud = kfp->getDerivedUnitDefinition();
 					kbud = kbp->getDerivedUnitDefinition();
-					double csize;
-					get<double>(r.eref(), sizeFinfo, csize); //getting compartment size
-					cout<<"size :"<<csize<<endl;
 					double transkf = transformUnits(1,kfud);	
 					cout<<"parm kf trans value : "<<transkf<<endl;
 					cout<<"kfvalue :"<<kfvalue<<endl;
-					double transkb = transformUnits(1,kbud);	
+					kf = kfvalue * transkf;
+					double transkb = transformUnits(1,kbud);
 					cout<<"parm kb trans value : "<<transkb<<endl;
 					cout<<"kbvalue :"<<kbvalue<<endl;
-				
-					if (rctorder == 1){
-				
-						rvalue=transkf*kfvalue;
-					}
-					else{			
-						double NA = 6.02214199e23; //Avogardo's number	
-						rvalue=kfvalue*pow((transkf/csize),rctorder-1);
-						//rvalue=NA*kfvalue*pow(transkf,rctorder-1);
-				
-					}
-					if (pdtorder == 1){
-				
-						pvalue=transkb*kbvalue;
-					}
-					else{
-						double NA = 6.02214199e23; //Avogardo's number	
-						pvalue=kbvalue*pow((transkb/csize),pdtorder-1);
-						//pvalue=NA*kbvalue*pow((transkb*csize),pdtorder-1);
-					}
-					cout<<"rvalue is :"<<rvalue<<"pvalue is :"<<pvalue<<endl; 
-					if (noproduct){
-						double size;
-						get<double>(r.eref(), sizeFinfo, size); 
-						cout<<"size "<<size<<endl;				
-						kf = size * rvalue;
-						kb = 0;	
-						//cout<<"kf = "<<kf<<"kb = "<<kb<<endl;	
-					}							
-					else if (r != p){
-						double psize,rsize;
-						get<double>(p.eref(), sizeFinfo, psize); 
-						cout<<"psize "<<psize<<endl;				
-						kf = psize * rvalue;
-						if (rev){
-							get<double>(r.eref(), sizeFinfo, rsize); 
-							cout<<"rsize "<<rsize<<endl;		
-							kb = rsize * pvalue;
-						}	
-						//cout<<"kf = "<<kf<<"kb = "<<kb<<endl;		
-					}
-					else if ((r == p) && (noproduct == false)){ 
-						//kf = csize * rvalue;
-						kf =  rvalue / csize;
-						if (rev)				
-							//kb = csize * pvalue;
-							kb = pvalue / csize ;
-					
-					}
+					kb = kbvalue * transkb;
 					set< double >( reaction_, kfFinfo, kf); 
-					set< double >( reaction_, kbFinfo, kb); 
+					set< double >( reaction_, kbFinfo, kb);
+					//const double NA = 6.02214199e17;
+					//kf = kfvalue / pow(NA,rctorder-1);
+					//kb = kbvalue / pow(NA,pdtorder-1);
+					 
 				} //kinetic law	
 			}//else modifier
 		}//else 	
