@@ -62,8 +62,7 @@ class HHChannel
 			instant_( 0 ),
 			Gk_( 0.0 ), Ik_( 0.0 ),
 			X_( 0.0 ), Y_( 0.0 ), Z_( 0.0 ),
-                          xInited_( false ), yInited_( false ), zInited_( false ),
-                          initX_( 0.0 ), initY_( 0.0 ), initZ_( 0.0 ),
+                        xInited_( false ), yInited_( false ), zInited_( false ),
 			g_( 0.0 ),
 			useConcentration_( 0 )
 		{
@@ -100,12 +99,6 @@ class HHChannel
 		static double getY( Eref );
 		static void setZ( const Conn* c, double Z );
 		static double getZ( Eref );
-		static void setInitX( const Conn* c, double X );
-		static double getInitX( Eref );
-		static void setInitY( const Conn* c, double Y );
-		static double getInitY( Eref );
-		static void setInitZ( const Conn* c, double Z );
-		static double getInitZ( Eref );
 		static void setUseConcentration( const Conn* c, int value );
 		static int getUseConcentration( Eref );
 
@@ -227,13 +220,8 @@ class HHChannel
 		double Y_;
 		/// State variable for Z gate
 		double Z_;
-    bool xInited_, yInited_, zInited_;
-    /// Initial value for X_
-    double initX_;
-    /// Initial value for Y_
-    double initY_;
-    /// Initial value for Z_
-    double initZ_;
+                bool xInited_, yInited_, zInited_; // true when a state variable
+                                                       // has been initialized
 		/// Internal variable used to calculate conductance
 		double g_;	
 
