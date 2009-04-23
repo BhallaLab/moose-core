@@ -365,9 +365,6 @@ void fillData(PyObject* args)
 %attribute(pymoose::HHChannel, double, X, __get_X, __set_X)
 %attribute(pymoose::HHChannel, double, Y, __get_Y, __set_Y)
 %attribute(pymoose::HHChannel, double, Z, __get_Z, __set_Z)
-%attribute(pymoose::HHChannel, double, initX, __get_initX, __set_initX)
-%attribute(pymoose::HHChannel, double, initY, __get_initY, __set_initY)
-%attribute(pymoose::HHChannel, double, initZ, __get_initZ, __set_initZ)
 %attribute(pymoose::HHChannel, int, useConcentration, __get_useConcentration, __set_useConcentration)
 
 

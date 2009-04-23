@@ -121,19 +121,6 @@ const Cinfo* initHHChannelCinfo()
 			GFCAST( &HHChannel::getZ ), 
 			RFCAST( &HHChannel::setZ )
 		),
-		new ValueFinfo( "initX", ValueFtype1< double >::global(),
-			GFCAST( &HHChannel::getInitX ), 
-			RFCAST( &HHChannel::setInitX )
-		),
-		new ValueFinfo( "initY", ValueFtype1< double >::global(),
-			GFCAST( &HHChannel::getInitY ), 
-			RFCAST( &HHChannel::setInitY )
-		),
-		new ValueFinfo( "initZ", ValueFtype1< double >::global(),
-			GFCAST( &HHChannel::getInitZ ), 
-			RFCAST( &HHChannel::setInitZ )
-		),
-                                
 		new ValueFinfo( "useConcentration",
 			ValueFtype1< int >::global(),
 			GFCAST( &HHChannel::getUseConcentration ), 
@@ -503,7 +490,9 @@ double HHChannel::getIk( Eref e )
 
 void HHChannel::setX( const Conn* c, double X )
 {
-	static_cast< HHChannel* >( c->data() )->X_ = X;
+        HHChannel* instance = static_cast< HHChannel* >( c->data() );
+        instance->X_ = X;
+        instance->xInited_ = true;        
 }
 double HHChannel::getX( Eref e )
 {
@@ -512,7 +501,9 @@ double HHChannel::getX( Eref e )
 
 void HHChannel::setY( const Conn* c, double Y )
 {
-	static_cast< HHChannel* >( c->data() )->Y_ = Y;
+        HHChannel* instance = static_cast< HHChannel* >( c->data() );
+        instance->Y_ = Y;
+        instance->yInited_ = true;        
 }
 double HHChannel::getY( Eref e )
 {
@@ -521,73 +512,13 @@ double HHChannel::getY( Eref e )
 
 void HHChannel::setZ( const Conn* c, double Z )
 {
-	static_cast< HHChannel* >( c->data() )->Z_ = Z;
+        HHChannel* instance = static_cast< HHChannel* >( c->data() );
+        instance->Z_ = Z;
+        instance->zInited_ = true;        
 }
 double HHChannel::getZ( Eref e )
 {
 	return static_cast< HHChannel* >( e.data() )->Z_;
-}
-
-void HHChannel::setInitX( const Conn* c, double X )
-{
-    HHChannel* instance = static_cast< HHChannel* >(c->data());
-    instance->initX_ = X;
-    instance->xInited_ = true;
-}
-
-double HHChannel::getInitX( Eref e )
-{
-    HHChannel* instance = static_cast< HHChannel* >(e.data());
-    if (instance->Xpower_ > 0){
-        if( instance->xInited_) {
-            return instance->initX_;
-        }else {
-            instance->lookupXrates(e);
-            return instance->A_/instance->B_;
-        }
-    }
-    return 0;
-}
-
-void HHChannel::setInitY( const Conn* c, double Y )
-{
-    HHChannel* instance = static_cast< HHChannel* >( c->data() );
-    instance->initY_ = Y;
-    instance->yInited_ = true;
-}
-double HHChannel::getInitY( Eref e )
-{
-    HHChannel* instance = static_cast< HHChannel* >(e.data());
-    if (instance->Ypower_ > 0){
-        if( instance->yInited_) { 
-            return instance->initY_;
-        }else {
-            instance->lookupYrates(e);
-            return instance->A_/instance->B_;
-        }
-    }
-    return 0;
-
-}
-
-void HHChannel::setInitZ( const Conn* c, double Z )
-{
-        HHChannel* instance = static_cast< HHChannel* >(c->data());
-        instance->initZ_ = Z;
-        instance->zInited_ = true;
-}
-double HHChannel::getInitZ( Eref e )
-{
-    HHChannel* instance = static_cast< HHChannel* >(e.data());
-    if (instance->Zpower_ > 0){
-        if( instance->zInited_) { 
-            return instance->initZ_;
-        }else {
-            instance->lookupZrates(e);
-            return instance->A_/instance->B_;
-        }
-    }
-    return 0;
 }
 
 void HHChannel::setUseConcentration( const Conn* c, int value )
@@ -694,7 +625,8 @@ void HHChannel::innerReinitFunc( Eref er, ProcInfo info )
 					" is ~0. Check X table\n";
 			return;
 		}
-		X_ = xInited_? initX_: A_/B_;
+                if (!xInited_)
+                    X_ = A_/B_;
 		g_ *= takeXpower_( X_, Xpower_ );
 	}
 
@@ -705,7 +637,8 @@ void HHChannel::innerReinitFunc( Eref er, ProcInfo info )
 					" is ~0. Check Y table\n";
 			return;
 		}
-		Y_ = yInited_? initY_: A_/B_;
+                if (!yInited_)
+                    Y_ = A_/B_;
 		g_ *= takeYpower_( Y_, Ypower_ );
 	}
 
@@ -716,7 +649,8 @@ void HHChannel::innerReinitFunc( Eref er, ProcInfo info )
 					" is ~0. Check Z table\n";
 			return;
 		}
-		Z_ = zInited_? initZ_: A_/B_;
+                if (!zInited_)
+                    Z_ = A_/B_;
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
