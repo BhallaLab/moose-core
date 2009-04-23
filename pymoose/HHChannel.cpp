@@ -119,36 +119,6 @@ void HHChannel::__set_Z( double Z )
 {
     set < double > (id_(), "Z", Z);
 }
-double HHChannel::__get_initX() const
-{
-    double initX;
-    get < double > (id_(), "initX",initX);
-    return initX;
-}
-void HHChannel::__set_initX( double initX )
-{
-    set < double > (id_(), "initX", initX);
-}
-double HHChannel::__get_initY() const
-{
-    double initY;
-    get < double > (id_(), "initY",initY);
-    return initY;
-}
-void HHChannel::__set_initY( double initY )
-{
-    set < double > (id_(), "initY", initY);
-}
-double HHChannel::__get_initZ() const
-{
-    double initZ;
-    get < double > (id_(), "initZ",initZ);
-    return initZ;
-}
-void HHChannel::__set_initZ( double initZ )
-{
-    set < double > (id_(), "initZ", initZ);
-}
 int HHChannel::__get_useConcentration() const
 {
     int useConcentration;
