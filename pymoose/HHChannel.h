@@ -36,12 +36,6 @@ namespace pymoose{
             void __set_Y(double Y);
             double __get_Z() const;
             void __set_Z(double Z);
-            double __get_initX() const;
-            void __set_initX(double initX);
-            double __get_initY() const;
-            void __set_initY(double initY);
-            double __get_initZ() const;
-            void __set_initZ(double initZ);
             int __get_useConcentration() const;
             void __set_useConcentration(int useConcentration);
     };
