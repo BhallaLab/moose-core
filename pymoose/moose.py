@@ -926,6 +926,11 @@ class Id(object):
         return _moose.Id_localId(*args)
 
     localId = staticmethod(localId)
+    def childNode(*args):
+        """childNode(Id parent) -> unsigned int"""
+        return _moose.Id_childNode(*args)
+
+    childNode = staticmethod(childNode)
     def childId(*args):
         """childId(Id parent) -> Id"""
         return _moose.Id_childId(*args)
@@ -961,11 +966,6 @@ class Id(object):
         return _moose.Id_postId(*args)
 
     postId = staticmethod(postId)
-    def globalId(*args):
-        """globalId() -> Id"""
-        return _moose.Id_globalId(*args)
-
-    globalId = staticmethod(globalId)
     def assignIndex(*args):
         """assignIndex(self, unsigned int index) -> Id"""
         return _moose.Id_assignIndex(*args)
@@ -975,6 +975,11 @@ class Id(object):
         return _moose.Id_newIdBlock(*args)
 
     newIdBlock = staticmethod(newIdBlock)
+    def generator(*args):
+        """generator(unsigned int node) -> IdGenerator"""
+        return _moose.Id_generator(*args)
+
+    generator = staticmethod(generator)
     def path(*args):
         """
         path(self, string separator="/") -> string
@@ -1088,6 +1093,10 @@ def Id_localId(*args):
     """
   return _moose.Id_localId(*args)
 
+def Id_childNode(*args):
+  """Id_childNode(Id parent) -> unsigned int"""
+  return _moose.Id_childNode(*args)
+
 def Id_childId(*args):
   """Id_childId(Id parent) -> Id"""
   return _moose.Id_childId(*args)
@@ -1116,13 +1125,13 @@ def Id_postId(*args):
   """Id_postId(unsigned int node) -> Id"""
   return _moose.Id_postId(*args)
 
-def Id_globalId(*args):
-  """Id_globalId() -> Id"""
-  return _moose.Id_globalId(*args)
-
 def Id_newIdBlock(*args):
   """Id_newIdBlock(unsigned int size, unsigned int node) -> unsigned int"""
   return _moose.Id_newIdBlock(*args)
+
+def Id_generator(*args):
+  """Id_generator(unsigned int node) -> IdGenerator"""
+  return _moose.Id_generator(*args)
 
 def Id_lastId(*args):
   """Id_lastId() -> Id"""
