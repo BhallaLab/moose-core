@@ -2488,97 +2488,98 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int argnum, int flags)
 #define SWIGTYPE_p_Exponential swig_types[4]
 #define SWIGTYPE_p_Gamma swig_types[5]
 #define SWIGTYPE_p_Id swig_types[6]
-#define SWIGTYPE_p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_double_t swig_types[7]
-#define SWIGTYPE_p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_int_t swig_types[8]
-#define SWIGTYPE_p_InnerPyMooseIterableTpymoose__StochSynchan_unsigned_int_double_t swig_types[9]
-#define SWIGTYPE_p_Nid swig_types[10]
-#define SWIGTYPE_p_Normal swig_types[11]
-#define SWIGTYPE_p_Poisson swig_types[12]
-#define SWIGTYPE_p_Probability swig_types[13]
-#define SWIGTYPE_p_allocator_type swig_types[14]
-#define SWIGTYPE_p_char swig_types[15]
-#define SWIGTYPE_p_difference_type swig_types[16]
-#define SWIGTYPE_p_m_Poisson__f___double swig_types[17]
-#define SWIGTYPE_p_ostream swig_types[18]
-#define SWIGTYPE_p_p_PyObject swig_types[19]
-#define SWIGTYPE_p_pymoose__AscFile swig_types[20]
-#define SWIGTYPE_p_pymoose__BinSynchan swig_types[21]
-#define SWIGTYPE_p_pymoose__BinomialRng swig_types[22]
-#define SWIGTYPE_p_pymoose__CaConc swig_types[23]
-#define SWIGTYPE_p_pymoose__Cell swig_types[24]
-#define SWIGTYPE_p_pymoose__Class swig_types[25]
-#define SWIGTYPE_p_pymoose__ClockJob swig_types[26]
-#define SWIGTYPE_p_pymoose__ClockTick swig_types[27]
-#define SWIGTYPE_p_pymoose__Compartment swig_types[28]
-#define SWIGTYPE_p_pymoose__CylPanel swig_types[29]
-#define SWIGTYPE_p_pymoose__DifShell swig_types[30]
-#define SWIGTYPE_p_pymoose__DiffAmp swig_types[31]
-#define SWIGTYPE_p_pymoose__DiskPanel swig_types[32]
-#define SWIGTYPE_p_pymoose__Enzyme swig_types[33]
-#define SWIGTYPE_p_pymoose__ExponentialRng swig_types[34]
-#define SWIGTYPE_p_pymoose__GHK swig_types[35]
-#define SWIGTYPE_p_pymoose__GammaRng swig_types[36]
-#define SWIGTYPE_p_pymoose__Geometry swig_types[37]
-#define SWIGTYPE_p_pymoose__GssaStoich swig_types[38]
-#define SWIGTYPE_p_pymoose__HHChannel swig_types[39]
-#define SWIGTYPE_p_pymoose__HHGate swig_types[40]
-#define SWIGTYPE_p_pymoose__HSolve swig_types[41]
-#define SWIGTYPE_p_pymoose__HemispherePanel swig_types[42]
-#define SWIGTYPE_p_pymoose__IntFire swig_types[43]
-#define SWIGTYPE_p_pymoose__Interpol swig_types[44]
-#define SWIGTYPE_p_pymoose__IzhikevichNrn swig_types[45]
-#define SWIGTYPE_p_pymoose__KinCompt swig_types[46]
-#define SWIGTYPE_p_pymoose__KineticHub swig_types[47]
-#define SWIGTYPE_p_pymoose__KineticManager swig_types[48]
-#define SWIGTYPE_p_pymoose__Kintegrator swig_types[49]
-#define SWIGTYPE_p_pymoose__MathFunc swig_types[50]
-#define SWIGTYPE_p_pymoose__Mg_block swig_types[51]
-#define SWIGTYPE_p_pymoose__Molecule swig_types[52]
-#define SWIGTYPE_p_pymoose__Nernst swig_types[53]
-#define SWIGTYPE_p_pymoose__NeuroScan swig_types[54]
-#define SWIGTYPE_p_pymoose__Neutral swig_types[55]
-#define SWIGTYPE_p_pymoose__NormalRng swig_types[56]
-#define SWIGTYPE_p_pymoose__PIDController swig_types[57]
-#define SWIGTYPE_p_pymoose__Panel swig_types[58]
-#define SWIGTYPE_p_pymoose__PoissonRng swig_types[59]
-#define SWIGTYPE_p_pymoose__PulseGen swig_types[60]
-#define SWIGTYPE_p_pymoose__PyMooseBase swig_types[61]
-#define SWIGTYPE_p_pymoose__PyMooseContext swig_types[62]
-#define SWIGTYPE_p_pymoose__RC swig_types[63]
-#define SWIGTYPE_p_pymoose__RandGenerator swig_types[64]
-#define SWIGTYPE_p_pymoose__RandomSpike swig_types[65]
-#define SWIGTYPE_p_pymoose__Reaction swig_types[66]
-#define SWIGTYPE_p_pymoose__RectPanel swig_types[67]
-#define SWIGTYPE_p_pymoose__SpherePanel swig_types[68]
-#define SWIGTYPE_p_pymoose__SpikeGen swig_types[69]
-#define SWIGTYPE_p_pymoose__StochSynchan swig_types[70]
-#define SWIGTYPE_p_pymoose__Stoich swig_types[71]
-#define SWIGTYPE_p_pymoose__Surface swig_types[72]
-#define SWIGTYPE_p_pymoose__SynChan swig_types[73]
-#define SWIGTYPE_p_pymoose__Table swig_types[74]
-#define SWIGTYPE_p_pymoose__TableIterator swig_types[75]
-#define SWIGTYPE_p_pymoose__TauPump swig_types[76]
-#define SWIGTYPE_p_pymoose__TimeTable swig_types[77]
-#define SWIGTYPE_p_pymoose__TriPanel swig_types[78]
-#define SWIGTYPE_p_pymoose__UniformRng swig_types[79]
-#define SWIGTYPE_p_size_type swig_types[80]
-#define SWIGTYPE_p_std__invalid_argument swig_types[81]
-#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t swig_types[82]
-#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t__allocator_type swig_types[83]
-#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t__value_type swig_types[84]
-#define SWIGTYPE_p_std__vectorTdouble_std__allocatorTdouble_t_t swig_types[85]
-#define SWIGTYPE_p_std__vectorTdouble_std__allocatorTdouble_t_t__allocator_type swig_types[86]
-#define SWIGTYPE_p_std__vectorTint_std__allocatorTint_t_t swig_types[87]
-#define SWIGTYPE_p_std__vectorTint_std__allocatorTint_t_t__allocator_type swig_types[88]
-#define SWIGTYPE_p_std__vectorTstd__string_std__allocatorTstd__string_t_t swig_types[89]
-#define SWIGTYPE_p_std__vectorTstd__string_std__allocatorTstd__string_t_t__allocator_type swig_types[90]
-#define SWIGTYPE_p_std__vectorTunsigned_int_std__allocatorTunsigned_int_t_t swig_types[91]
-#define SWIGTYPE_p_std__vectorTunsigned_int_std__allocatorTunsigned_int_t_t__allocator_type swig_types[92]
-#define SWIGTYPE_p_swig__PySwigIterator swig_types[93]
-#define SWIGTYPE_p_value_type swig_types[94]
-#define SWIGTYPE_p_void swig_types[95]
-static swig_type_info *swig_types[97];
-static swig_module_info swig_module = {swig_types, 96, 0, 0, 0, 0};
+#define SWIGTYPE_p_IdGenerator swig_types[7]
+#define SWIGTYPE_p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_double_t swig_types[8]
+#define SWIGTYPE_p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_int_t swig_types[9]
+#define SWIGTYPE_p_InnerPyMooseIterableTpymoose__StochSynchan_unsigned_int_double_t swig_types[10]
+#define SWIGTYPE_p_Nid swig_types[11]
+#define SWIGTYPE_p_Normal swig_types[12]
+#define SWIGTYPE_p_Poisson swig_types[13]
+#define SWIGTYPE_p_Probability swig_types[14]
+#define SWIGTYPE_p_allocator_type swig_types[15]
+#define SWIGTYPE_p_char swig_types[16]
+#define SWIGTYPE_p_difference_type swig_types[17]
+#define SWIGTYPE_p_m_Poisson__f___double swig_types[18]
+#define SWIGTYPE_p_ostream swig_types[19]
+#define SWIGTYPE_p_p_PyObject swig_types[20]
+#define SWIGTYPE_p_pymoose__AscFile swig_types[21]
+#define SWIGTYPE_p_pymoose__BinSynchan swig_types[22]
+#define SWIGTYPE_p_pymoose__BinomialRng swig_types[23]
+#define SWIGTYPE_p_pymoose__CaConc swig_types[24]
+#define SWIGTYPE_p_pymoose__Cell swig_types[25]
+#define SWIGTYPE_p_pymoose__Class swig_types[26]
+#define SWIGTYPE_p_pymoose__ClockJob swig_types[27]
+#define SWIGTYPE_p_pymoose__ClockTick swig_types[28]
+#define SWIGTYPE_p_pymoose__Compartment swig_types[29]
+#define SWIGTYPE_p_pymoose__CylPanel swig_types[30]
+#define SWIGTYPE_p_pymoose__DifShell swig_types[31]
+#define SWIGTYPE_p_pymoose__DiffAmp swig_types[32]
+#define SWIGTYPE_p_pymoose__DiskPanel swig_types[33]
+#define SWIGTYPE_p_pymoose__Enzyme swig_types[34]
+#define SWIGTYPE_p_pymoose__ExponentialRng swig_types[35]
+#define SWIGTYPE_p_pymoose__GHK swig_types[36]
+#define SWIGTYPE_p_pymoose__GammaRng swig_types[37]
+#define SWIGTYPE_p_pymoose__Geometry swig_types[38]
+#define SWIGTYPE_p_pymoose__GssaStoich swig_types[39]
+#define SWIGTYPE_p_pymoose__HHChannel swig_types[40]
+#define SWIGTYPE_p_pymoose__HHGate swig_types[41]
+#define SWIGTYPE_p_pymoose__HSolve swig_types[42]
+#define SWIGTYPE_p_pymoose__HemispherePanel swig_types[43]
+#define SWIGTYPE_p_pymoose__IntFire swig_types[44]
+#define SWIGTYPE_p_pymoose__Interpol swig_types[45]
+#define SWIGTYPE_p_pymoose__IzhikevichNrn swig_types[46]
+#define SWIGTYPE_p_pymoose__KinCompt swig_types[47]
+#define SWIGTYPE_p_pymoose__KineticHub swig_types[48]
+#define SWIGTYPE_p_pymoose__KineticManager swig_types[49]
+#define SWIGTYPE_p_pymoose__Kintegrator swig_types[50]
+#define SWIGTYPE_p_pymoose__MathFunc swig_types[51]
+#define SWIGTYPE_p_pymoose__Mg_block swig_types[52]
+#define SWIGTYPE_p_pymoose__Molecule swig_types[53]
+#define SWIGTYPE_p_pymoose__Nernst swig_types[54]
+#define SWIGTYPE_p_pymoose__NeuroScan swig_types[55]
+#define SWIGTYPE_p_pymoose__Neutral swig_types[56]
+#define SWIGTYPE_p_pymoose__NormalRng swig_types[57]
+#define SWIGTYPE_p_pymoose__PIDController swig_types[58]
+#define SWIGTYPE_p_pymoose__Panel swig_types[59]
+#define SWIGTYPE_p_pymoose__PoissonRng swig_types[60]
+#define SWIGTYPE_p_pymoose__PulseGen swig_types[61]
+#define SWIGTYPE_p_pymoose__PyMooseBase swig_types[62]
+#define SWIGTYPE_p_pymoose__PyMooseContext swig_types[63]
+#define SWIGTYPE_p_pymoose__RC swig_types[64]
+#define SWIGTYPE_p_pymoose__RandGenerator swig_types[65]
+#define SWIGTYPE_p_pymoose__RandomSpike swig_types[66]
+#define SWIGTYPE_p_pymoose__Reaction swig_types[67]
+#define SWIGTYPE_p_pymoose__RectPanel swig_types[68]
+#define SWIGTYPE_p_pymoose__SpherePanel swig_types[69]
+#define SWIGTYPE_p_pymoose__SpikeGen swig_types[70]
+#define SWIGTYPE_p_pymoose__StochSynchan swig_types[71]
+#define SWIGTYPE_p_pymoose__Stoich swig_types[72]
+#define SWIGTYPE_p_pymoose__Surface swig_types[73]
+#define SWIGTYPE_p_pymoose__SynChan swig_types[74]
+#define SWIGTYPE_p_pymoose__Table swig_types[75]
+#define SWIGTYPE_p_pymoose__TableIterator swig_types[76]
+#define SWIGTYPE_p_pymoose__TauPump swig_types[77]
+#define SWIGTYPE_p_pymoose__TimeTable swig_types[78]
+#define SWIGTYPE_p_pymoose__TriPanel swig_types[79]
+#define SWIGTYPE_p_pymoose__UniformRng swig_types[80]
+#define SWIGTYPE_p_size_type swig_types[81]
+#define SWIGTYPE_p_std__invalid_argument swig_types[82]
+#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t swig_types[83]
+#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t__allocator_type swig_types[84]
+#define SWIGTYPE_p_std__vectorTId_std__allocatorTId_t_t__value_type swig_types[85]
+#define SWIGTYPE_p_std__vectorTdouble_std__allocatorTdouble_t_t swig_types[86]
+#define SWIGTYPE_p_std__vectorTdouble_std__allocatorTdouble_t_t__allocator_type swig_types[87]
+#define SWIGTYPE_p_std__vectorTint_std__allocatorTint_t_t swig_types[88]
+#define SWIGTYPE_p_std__vectorTint_std__allocatorTint_t_t__allocator_type swig_types[89]
+#define SWIGTYPE_p_std__vectorTstd__string_std__allocatorTstd__string_t_t swig_types[90]
+#define SWIGTYPE_p_std__vectorTstd__string_std__allocatorTstd__string_t_t__allocator_type swig_types[91]
+#define SWIGTYPE_p_std__vectorTunsigned_int_std__allocatorTunsigned_int_t_t swig_types[92]
+#define SWIGTYPE_p_std__vectorTunsigned_int_std__allocatorTunsigned_int_t_t__allocator_type swig_types[93]
+#define SWIGTYPE_p_swig__PySwigIterator swig_types[94]
+#define SWIGTYPE_p_value_type swig_types[95]
+#define SWIGTYPE_p_void swig_types[96]
+static swig_type_info *swig_types[98];
+static swig_module_info swig_module = {swig_types, 97, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -17182,6 +17183,43 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Id_childNode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Id arg1 ;
+  unsigned int result;
+  void *argp1 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Id_childNode",1,1,&obj0)) SWIG_fail;
+  {
+    res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Id,  0  | 0);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Id_childNode" "', argument " "1"" of type '" "Id""'"); 
+    }  
+    if (!argp1) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Id_childNode" "', argument " "1"" of type '" "Id""'");
+    } else {
+      Id * temp = reinterpret_cast< Id * >(argp1);
+      arg1 = *temp;
+      if (SWIG_IsNewObj(res1)) delete temp;
+    }
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (unsigned int)Id::childNode(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Id_childId(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Id arg1 ;
@@ -17357,26 +17395,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Id_globalId(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Id result;
-  
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"Id_globalId",0,0)) SWIG_fail;
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = Id::globalId();
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_NewPointerObj((new Id(static_cast< const Id& >(result))), SWIGTYPE_p_Id, SWIG_POINTER_OWN |  0 );
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return resultobj;
-fail:
-  SWIG_PYTHON_THREAD_END_BLOCK;
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_Id_assignIndex(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Id *arg1 = (Id *) 0 ;
@@ -17445,6 +17463,35 @@ SWIGINTERN PyObject *_wrap_Id_newIdBlock(PyObject *SWIGUNUSEDPARM(self), PyObjec
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Id_generator(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  unsigned int arg1 ;
+  IdGenerator result;
+  unsigned int val1 ;
+  int ecode1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"Id_generator",1,1,&obj0)) SWIG_fail;
+  ecode1 = SWIG_AsVal_unsigned_SS_int(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "Id_generator" "', argument " "1"" of type '" "unsigned int""'");
+  } 
+  arg1 = static_cast< unsigned int >(val1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = Id::generator(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj((new IdGenerator(static_cast< const IdGenerator& >(result))), SWIGTYPE_p_IdGenerator, SWIG_POINTER_OWN |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -102905,6 +102952,7 @@ static PyMethodDef SwigMethods[] = {
 		"localId(string path, string separator=\"/\") -> Id\n"
 		"Id_localId(string path) -> Id\n"
 		""},
+	 { (char *)"Id_childNode", _wrap_Id_childNode, METH_VARARGS, (char *)"Id_childNode(Id parent) -> unsigned int"},
 	 { (char *)"Id_childId", _wrap_Id_childId, METH_VARARGS, (char *)"Id_childId(Id parent) -> Id"},
 	 { (char *)"Id_scratchId", _wrap_Id_scratchId, METH_VARARGS, (char *)"Id_scratchId() -> Id"},
 	 { (char *)"Id_newId", _wrap_Id_newId, METH_VARARGS, (char *)"Id_newId() -> Id"},
@@ -102912,9 +102960,9 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Id_makeIdOnNode", _wrap_Id_makeIdOnNode, METH_VARARGS, (char *)"Id_makeIdOnNode(unsigned int childNode) -> Id"},
 	 { (char *)"Id_shellId", _wrap_Id_shellId, METH_VARARGS, (char *)"Id_shellId() -> Id"},
 	 { (char *)"Id_postId", _wrap_Id_postId, METH_VARARGS, (char *)"Id_postId(unsigned int node) -> Id"},
-	 { (char *)"Id_globalId", _wrap_Id_globalId, METH_VARARGS, (char *)"Id_globalId() -> Id"},
 	 { (char *)"Id_assignIndex", _wrap_Id_assignIndex, METH_VARARGS, (char *)"Id_assignIndex(Id self, unsigned int index) -> Id"},
 	 { (char *)"Id_newIdBlock", _wrap_Id_newIdBlock, METH_VARARGS, (char *)"Id_newIdBlock(unsigned int size, unsigned int node) -> unsigned int"},
+	 { (char *)"Id_generator", _wrap_Id_generator, METH_VARARGS, (char *)"Id_generator(unsigned int node) -> IdGenerator"},
 	 { (char *)"Id_path", _wrap_Id_path, METH_VARARGS, (char *)"\n"
 		"path(string separator=\"/\") -> string\n"
 		"Id_path(Id self) -> string\n"
@@ -105402,6 +105450,7 @@ static swig_type_info _swigt__p_Element = {"_p_Element", "Element *", 0, 0, (voi
 static swig_type_info _swigt__p_Exponential = {"_p_Exponential", "Exponential *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Gamma = {"_p_Gamma", "Gamma *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Id = {"_p_Id", "::Id *|Id *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_IdGenerator = {"_p_IdGenerator", "IdGenerator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_double_t = {"_p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_double_t", "pymoose::BinSynchanDoubleArray *|InnerPyMooseIterable<pymoose::BinSynchan,unsigned int,double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_int_t = {"_p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_int_t", "pymoose::BinSynchanIntArray *|InnerPyMooseIterable<pymoose::BinSynchan,unsigned int,int > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_InnerPyMooseIterableTpymoose__StochSynchan_unsigned_int_double_t = {"_p_InnerPyMooseIterableTpymoose__StochSynchan_unsigned_int_double_t", "pymoose::StochSynchanDoubleArray *|InnerPyMooseIterable<pymoose::StochSynchan,unsigned int,double > *", 0, 0, (void*)0, 0};
@@ -105500,6 +105549,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_Exponential,
   &_swigt__p_Gamma,
   &_swigt__p_Id,
+  &_swigt__p_IdGenerator,
   &_swigt__p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_double_t,
   &_swigt__p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_int_t,
   &_swigt__p_InnerPyMooseIterableTpymoose__StochSynchan_unsigned_int_double_t,
@@ -105598,6 +105648,7 @@ static swig_cast_info _swigc__p_Element[] = {  {&_swigt__p_Element, 0, 0, 0},{0,
 static swig_cast_info _swigc__p_Exponential[] = {  {&_swigt__p_Exponential, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Gamma[] = {  {&_swigt__p_Gamma, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Id[] = {  {&_swigt__p_Nid, _p_NidTo_p_Id, 0, 0},  {&_swigt__p_Id, 0, 0, 0},  {&_swigt__p_std__vectorTId_std__allocatorTId_t_t__value_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_IdGenerator[] = {  {&_swigt__p_IdGenerator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_double_t[] = {  {&_swigt__p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_double_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_int_t[] = {  {&_swigt__p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_int_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_InnerPyMooseIterableTpymoose__StochSynchan_unsigned_int_double_t[] = {  {&_swigt__p_InnerPyMooseIterableTpymoose__StochSynchan_unsigned_int_double_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -105696,6 +105747,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_Exponential,
   _swigc__p_Gamma,
   _swigc__p_Id,
+  _swigc__p_IdGenerator,
   _swigc__p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_double_t,
   _swigc__p_InnerPyMooseIterableTpymoose__BinSynchan_unsigned_int_int_t,
   _swigc__p_InnerPyMooseIterableTpymoose__StochSynchan_unsigned_int_double_t,
