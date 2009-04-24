@@ -1,0 +1,30 @@
+The plan for the GUI is:
+    Left dock widget contains a toolbox with all MOOSE classes - divided into categories.
+
+    Right dock widget is a property editor for the current object
+    
+    Central widget is a workspace - like that in electronics workbench
+
+    Users can select objects from toolbox and add them to workspace.
+
+    Do not create the MOOSE structure immediately - because the user
+    may want to move things around; rather start creating a NeuroML
+    document?
+
+    Create the moose model once the user hits the reset/run button
+
+
+    For each object, there should be an incoming and an outgoing node
+    point. On this node point a user can select a message and join it
+    to a complementery message.
+
+
+    Use model/view architecture - MOOSE structure nicely falls into
+    the TreeModel category. No problem with the model. 
+
+    The view is tricky - need to allow nice graphics, allow drag and
+    drop. Started with a QGroupBox but that is insufficient.
+
+    Multilevel tree veiw is perhaps not so important. Inserting a
+    PulseGen as a child of a compartment is not so intuitive. Nor is
+    it supported by the standard languages.
