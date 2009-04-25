@@ -785,6 +785,12 @@ class Shell
 				string filename,
 				unsigned int skiplines );
 		
+		static void localFile2tab(
+				const Conn* c, 
+				Nid nid,
+				string filename,
+				unsigned int skiplines );
+		
 		//////////////////////////////////////////////////////////
 		// sbml functions
 		//////////////////////////////////////////////////////////

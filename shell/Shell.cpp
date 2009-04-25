@@ -626,6 +626,14 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "setupGate",
 			Ftype2< Id, vector< double > >::global(), 
 			RFCAST( &Shell::setupGate ) ),
+		
+		new SrcFinfo( "file2tabSrc",
+			Ftype3< Nid, string, unsigned int >::global(),
+			"Args: Interpol id, filename, # of lines to skip" ),
+		new DestFinfo( "file2tab",
+			Ftype3< Nid, string, unsigned int >::global(),
+			RFCAST( &Shell::localFile2tab ),
+			"Args: Interpol id, filename, # of lines to skip" ),
 	};
 #endif // USE_MPI
 
@@ -753,6 +761,8 @@ static const Slot tweakTauSlot =
 	initShellCinfo()->getSlot( "parallel.tweakTauSrc" );
 static const Slot setupGateSlot =
 	initShellCinfo()->getSlot( "parallel.setupGateSrc" );
+static const Slot file2tabSlot =
+	initShellCinfo()->getSlot( "parallel.file2tabSrc" );
 static const Slot rCreateSlot =
 	initShellCinfo()->getSlot( "parallel.createSrc" );
 static const Slot rCreateArraySlot =
@@ -2102,21 +2112,49 @@ void Shell::setVecField( const Conn* c,
 /**
  * This function handles request to load a file into an Interpol object
  */
-void Shell::file2tab( const Conn* c, 
-				Id id, string filename, unsigned int skiplines )
+void Shell::file2tab(
+	const Conn* c, 
+	Id id,
+	string filename,
+	unsigned int skiplines )
 {
+	assert( id.good() );
+	
+	if ( id.node() == 0 ) {
+		localFile2tab( c, id, filename, skiplines );
+	} else if ( id.isGlobal() ) {
+		localFile2tab( c, id, filename, skiplines );
+#ifdef USE_MPI
+		send3< Nid, string, unsigned int >(
+			c->target(), file2tabSlot,
+			id, filename, skiplines );
+	} else {
+		unsigned int tgtNode = id.node() - 1;
+		sendTo3< Nid, string, unsigned int >(
+			c->target(), file2tabSlot, tgtNode,
+			id, filename, skiplines );
+#endif // USE_MPI
+	}
+}
+
+void Shell::localFile2tab(
+	const Conn* c, 
+	Nid nid,
+	string filename,
+	unsigned int skiplines )
+{
+	Id id( nid );
 	assert( id.good() );
 	Element* e = id();
 	if ( !e ) {
-		cout << "Shell::file2tab:Error: Element not found: " 
-			<< id << endl;
+		cerr <<
+			"Error: Shell::file2tab: Element not found: " << id << endl;
 		return;
 	}
-	// Appropriate off-node stuff here.
-
+	
 	if ( !set< string, unsigned int >( e, "load", filename, skiplines ) ) {
-			cout << "Shell::file2tab Error: cannot set field " <<
-				e->name() << ".load\n";
+		cerr <<
+			"Error: Shell::file2tab: cannot set field " << e->name() << ".load\n";
 	}
 }
 
