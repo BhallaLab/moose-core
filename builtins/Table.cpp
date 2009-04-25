@@ -402,7 +402,7 @@ unsigned long Table::expandTable( Eref e, double size )
 		table_.reserve( index * 2 );
 	}
 	if ( table_.size() <= index )
-		table_.resize( index + 1 );
+		table_.resize( index + 1, 0.0 );
 	return index;
 }
 
