@@ -3506,12 +3506,14 @@ class HHChannel(PyMooseBase):
 
     Gbar = _swig_property(_moose.HHChannel_Gbar_get, _moose.HHChannel_Gbar_set)
     Ek = _swig_property(_moose.HHChannel_Ek_get, _moose.HHChannel_Ek_set)
+    Gk = _swig_property(_moose.HHChannel_Gk_get, _moose.HHChannel_Gk_set)
     Xpower = _swig_property(_moose.HHChannel_Xpower_get, _moose.HHChannel_Xpower_set)
     Ypower = _swig_property(_moose.HHChannel_Ypower_get, _moose.HHChannel_Ypower_set)
     Zpower = _swig_property(_moose.HHChannel_Zpower_get, _moose.HHChannel_Zpower_set)
     X = _swig_property(_moose.HHChannel_X_get, _moose.HHChannel_X_set)
     Y = _swig_property(_moose.HHChannel_Y_get, _moose.HHChannel_Y_set)
     Z = _swig_property(_moose.HHChannel_Z_get, _moose.HHChannel_Z_set)
+    instant = _swig_property(_moose.HHChannel_instant_get, _moose.HHChannel_instant_set)
     useConcentration = _swig_property(_moose.HHChannel_useConcentration_get, _moose.HHChannel_useConcentration_set)
 HHChannel_swigregister = _moose.HHChannel_swigregister
 HHChannel_swigregister(HHChannel)
