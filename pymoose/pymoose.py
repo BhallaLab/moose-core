@@ -26,12 +26,24 @@ def listmsg(pymoose_object):
     if type(pymoose_object) is type(""):
         obj = Neutral(pymoose_object)
     for msg in obj.inMessages():
-        print msg
         ret.append(msg)
     for msg in obj.outMessages():
-        print msg
         ret.append(msg)
     return ret
+
+
+def showmsg(pymoose_object):
+    """Prints the incoming and outgoing messages of the given object."""
+    obj = pymoose_object
+    if type(pymoose_object) is type(""):
+        obj = Neutral(pymoose_object)
+    print 'INCOMING:'
+    for msg in obj.inMessages():
+        print msg
+    print 'OUTGOING:'
+    for msg in obj.outMessages():
+        print msg
+
 
 def readtable(table, filename, separator=None):
     """Reads the file specified by filename to fill the MOOSE table object.
