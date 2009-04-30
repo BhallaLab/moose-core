@@ -2183,7 +2183,7 @@ void Shell::readSbml( const Conn* c, string filename, string location, int child
 			name = location.substr( pos + 1 );
 		}
 		
-		Element* locE = Neutral::create( "Neutral", name, pa, Id::scratchId() );
+		Element* locE = Neutral::create( "KineticManager", name, pa, Id::scratchId() );
 		loc = locE->id();
 	}
 	
