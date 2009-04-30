@@ -21,7 +21,7 @@ class SbmlReader
 		void  read(string filename,Id location);
 		void  createCompartment(Id location);
 		void  createMolecule(map<string,Id> &);
-		void  printParameter();
+		void  getGlobalParameter();
 		//void  printUnit(Model* model);
 		void  createReaction(map<string,Id> &);
 		
@@ -36,21 +36,24 @@ class SbmlReader
 		map<string,Eref>elmtMap_;
 		void getRules();
 		void printMembers(const ASTNode* p,vector <string> & ruleMembers);
-		void prn_parm(const ASTNode* p,vector <string> & parameters);
+		void pushParmstoVector(const ASTNode* p,vector <string> & parameters);
+		void getParameters(const ASTNode* node,vector <string> & parameters);
 		double transformUnits(double msize,UnitDefinition * ud);
-		string printAnnotation(SBase *sb,map<string,EnzymeInfo> &);
+		string getAnnotation(Reaction* reaction,map<string,EnzymeInfo> &);
 		//string printNotes(SBase *sb);
-		void setupEnzymaticReaction(const EnzymeInfo & einfo);
+		void setupEnzymaticReaction(const EnzymeInfo & einfo,string name);
 		void setupMMEnzymeReaction(Reaction * reac);
+		vector<double>getKLaw( KineticLaw * klaw,bool rev );
 		struct EnzymeInfo
 		{
 			Id enzyme;
 			Id complex;
 			vector<Id> substrates;
 			vector<Id> products;
-			string groupName;
+			double k1;
+			double k2;
+			double k3;
 			int stage;
-	
 		};
 		
 		
