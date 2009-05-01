@@ -487,7 +487,7 @@ void PyMooseContext::recvMessageList(
    method - we use send method for creating objects).
 */
 
-PyMooseContext::PyMooseContext()
+PyMooseContext::PyMooseContext():parallel(false)
 {
     genesisSli_ = NULL;
     genesisParseFinfo_ = NULL;    
@@ -846,7 +846,7 @@ const string PyMooseContext::getPath(Id id) const
 
 Id PyMooseContext::pathToId(string path, bool echo)
 {
-    Id returnValue(path);
+    Id returnValue = Shell::path2eid(path, separator, parallel);
     
     if (( returnValue.bad() ) && echo)
     {
