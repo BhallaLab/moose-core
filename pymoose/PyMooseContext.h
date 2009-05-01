@@ -137,7 +137,7 @@ namespace pymoose
         bool testSetGetField(int count, bool print);
 #endif    // DO_UNIT_TESTS
         static const std::string separator;
-    
+        bool parallel;
       private:
         Id findChanGateId( std::string channel, std::string gate);
         void setupChanFunc( std::string channel, std::string gate, std::vector <double>& parms, const Slot& slot);
