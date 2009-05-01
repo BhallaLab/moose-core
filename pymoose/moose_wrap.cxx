@@ -25242,6 +25242,73 @@ SWIGINTERN PyObject *Swig_var_PyMooseContext_separator_get(void) {
 }
 
 
+SWIGINTERN PyObject *_wrap_PyMooseContext_parallel_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_parallel_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_parallel_set" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
+  ecode2 = SWIG_AsVal_bool(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PyMooseContext_parallel_set" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->parallel = arg2;
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PyMooseContext_parallel_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  bool result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_parallel_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_parallel_get" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (bool) ((arg1)->parallel);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *PyMooseContext_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *obj;
   if (!PyArg_UnpackTuple(args,(char*)"swigregister", 1, 1,&obj)) return NULL;
@@ -103286,6 +103353,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"PyMooseContext_planarWeight", _wrap_PyMooseContext_planarWeight, METH_VARARGS, (char *)"PyMooseContext_planarWeight(PyMooseContext self, string src, double weight)"},
 	 { (char *)"PyMooseContext_className", _wrap_PyMooseContext_className, METH_VARARGS, (char *)"PyMooseContext_className(PyMooseContext self, Id objId) -> string"},
 	 { (char *)"PyMooseContext_doc", _wrap_PyMooseContext_doc, METH_VARARGS, (char *)"PyMooseContext_doc(PyMooseContext self, string className) -> string"},
+	 { (char *)"PyMooseContext_parallel_set", _wrap_PyMooseContext_parallel_set, METH_VARARGS, (char *)"PyMooseContext_parallel_set(PyMooseContext self, bool parallel)"},
+	 { (char *)"PyMooseContext_parallel_get", _wrap_PyMooseContext_parallel_get, METH_VARARGS, (char *)"PyMooseContext_parallel_get(PyMooseContext self) -> bool"},
 	 { (char *)"PyMooseContext_swigregister", PyMooseContext_swigregister, METH_VARARGS, NULL},
 	 { (char *)"delete_PyMooseBase", _wrap_delete_PyMooseBase, METH_VARARGS, (char *)"delete_PyMooseBase(PyMooseBase self)"},
 	 { (char *)"PyMooseBase_destroy", _wrap_PyMooseBase_destroy, METH_VARARGS, (char *)"PyMooseBase_destroy(Id id) -> bool"},

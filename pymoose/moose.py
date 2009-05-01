@@ -1489,6 +1489,7 @@ class PyMooseContext(object):
         """doc(self, string className) -> string"""
         return _moose.PyMooseContext_doc(*args)
 
+    parallel = _swig_property(_moose.PyMooseContext_parallel_get, _moose.PyMooseContext_parallel_set)
 PyMooseContext_swigregister = _moose.PyMooseContext_swigregister
 PyMooseContext_swigregister(PyMooseContext)
 
