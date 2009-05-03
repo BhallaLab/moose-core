@@ -24,8 +24,7 @@
 using namespace std;
 using namespace pymoose;
 
-extern void initMoose(int argc, char **argv);
-extern void initSched();
+extern void init(int& argc, char **& argv);
 extern void initCinfos();
 extern const string& helpless();
 extern const string& getClassDoc(const string&, const string&);
@@ -656,8 +655,11 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     Element* shell;
     bool ret;
     // Call the global initialization function
-    initMoose(0, 0);
-    initSched();
+    int argc =0; char** argv = NULL; // these are to comply with
+                                     // signature of init - no idea
+                                     // why int& and char**& instead
+                                     // of simple int and char**
+    init(argc, argv);
     initCinfos();
 #ifdef DO_UNIT_TESTS
 	// if ( mynode == 0 )
