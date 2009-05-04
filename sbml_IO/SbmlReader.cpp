@@ -27,19 +27,26 @@ map<string,string>parmUnitMap;
 void SbmlReader::getParameters(const ASTNode* node,vector <string> & parameters)
 {
 	assert(parameters.empty());	
-	//for( int i = 0; i < t->getNumChildren(); ++i )
-	//{	
-		//const ASTNode* node = t->getChild(i);		
-		if ( node->getType() == AST_MINUS ){
-			const ASTNode* lchild = node->getLeftChild();  
-		 	pushParmstoVector(lchild,parameters);
-			if (parameters.size() == 1){
-				const ASTNode* rchild = node->getRightChild();
-				pushParmstoVector(rchild,parameters);		
-			}
+	if ( node->getType() == AST_MINUS ){
+		const ASTNode* lchild = node->getLeftChild();  
+		pushParmstoVector(lchild,parameters);
+		if (parameters.size() == 1){
+			const ASTNode* rchild = node->getRightChild();
+			pushParmstoVector(rchild,parameters);		
 		}
-		else if (node->getType() == AST_TIMES )
-			pushParmstoVector(node,parameters);
+	}
+	else if (node->getType() == AST_DIVIDE ){
+		const ASTNode* lchild = node->getLeftChild();  
+	 	pushParmstoVector(lchild,parameters);
+		if (parameters.size() == 1){
+			const ASTNode* rchild = node->getRightChild();
+			pushParmstoVector(rchild,parameters);	
+		}
+	}
+	else if (node->getType() == AST_TIMES )
+		pushParmstoVector(node,parameters);
+		
+			
 	//}
 }
 //function to get the parameter used in the kinetic law
@@ -396,8 +403,16 @@ void SbmlReader::setupEnzymaticReaction(const EnzymeInfo & einfo,string name)
 	set< bool >(enzyme_,"mode",0);
 	set(complx,"destroy");
 }
-void SbmlReader::setupMMEnzymeReaction(Reaction * reac)
+void SbmlReader::setupMMEnzymeReaction(Reaction * reac,string rid)
 {
+	string::size_type loc = rid.find( "_MM_Reaction_" );
+     	if( loc != string::npos ) 
+       		cout << "Found  at " << loc << endl;
+     	else 
+     		cout << "Didn't find " << endl;
+	int strlen = rid.length(); 
+	rid.erase(loc,strlen-loc);
+     	cout<<"rid after erase :"<<rid<<endl;
 	static const Cinfo* enzymeCinfo = initEnzymeCinfo();
 	static const Finfo* kmFinfo = enzymeCinfo->findFinfo( "Km" );
 	static const Finfo* kcatFinfo = enzymeCinfo->findFinfo( "kcat" );	
@@ -406,27 +421,33 @@ void SbmlReader::setupMMEnzymeReaction(Reaction * reac)
 		const ModifierSpeciesReference* modfr=reac->getModifier(m);
 		string sp = modfr->getSpecies();
 		Eref E = elmtMap_.find(sp)->second;
-		Element* enzyme_ = Neutral::create( "Enzyme","kenz",E.id(),Id::scratchId() );//create Enzyme
+		Element* enzyme_ = Neutral::create( "Enzyme",rid,E.id(),Id::scratchId() );//create Enzyme
 		KineticLaw * klaw=reac->getKineticLaw();
-		vector< double > rate = getKLaw(klaw,true);
-		set< double >( enzyme_, kmFinfo, rate[0] );
-		set< double >( enzyme_, kcatFinfo, rate[1] );
-		set< bool >(enzyme_,"mode",1);
-		Eref(enzyme_).add("enz",E,"reac",ConnTainer::Default); 
-		for (unsigned int rt=0;rt<reac->getNumReactants();rt++)
+		vector< double > rate = getKLaw( klaw,true );
+		
+		/*Id Parent = Neutral::getParent(E);
+		Id grandParent = Neutral::getParent(Parent());
+		double size;
+		get<double>(grandParent(), "size", size);*/
+		set< bool >( enzyme_,"mode",1 );
+		Eref(enzyme_).add( "enz",E,"reac",ConnTainer::Default ); 
+		for ( unsigned int rt=0;rt<reac->getNumReactants();rt++ )
 		{	
 			const SpeciesReference* rct=reac->getReactant(rt);
 			sp=rct->getSpecies();
 			Eref S = elmtMap_.find(sp)->second;
-			Eref(enzyme_).add("sub",S,"reac",ConnTainer::Default); 
+			Eref(enzyme_).add( "sub",S,"reac",ConnTainer::Default ); 
 		}
-		for (unsigned int pt=0;pt<reac->getNumProducts();pt++)
+		for ( unsigned int pt=0;pt<reac->getNumProducts();pt++ )
 		{
 			const SpeciesReference* pdt=reac->getProduct(pt);
 			sp=pdt->getSpecies();
 			Eref P = elmtMap_.find(sp)->second;
-			Eref(enzyme_).add("prd",P,"prd",ConnTainer::Default);
+			Eref(enzyme_).add( "prd",P,"prd",ConnTainer::Default );
 		}
+		set< double >( enzyme_, kcatFinfo, rate[0] );
+		//double Km = rate[1] / size;
+		set< double >( enzyme_, kmFinfo, rate[1] );
 
 	}	
 }
@@ -478,7 +499,7 @@ void SbmlReader::createReaction(map<string,Id> &molMap)
 		else if (grpname == "")
 		{
 			if (reac->getNumModifiers()> 0)
-				 setupMMEnzymeReaction(reac);
+				 setupMMEnzymeReaction(reac,id);
 			else{
 				bool rev=reac->getReversible();
 				//bool fast=reac->getFast();
