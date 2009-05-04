@@ -35,14 +35,14 @@ class SbmlReader
 		Element* reaction_;
 		map<string,Eref>elmtMap_;
 		void getRules();
-		void printMembers(const ASTNode* p,vector <string> & ruleMembers);
-		void pushParmstoVector(const ASTNode* p,vector <string> & parameters);
-		void getParameters(const ASTNode* node,vector <string> & parameters);
-		double transformUnits(double msize,UnitDefinition * ud);
-		string getAnnotation(Reaction* reaction,map<string,EnzymeInfo> &);
+		void printMembers( const ASTNode* p,vector <string> & ruleMembers );
+		void pushParmstoVector( const ASTNode* p,vector <string> & parameters );
+		void getParameters( const ASTNode* node,vector <string> & parameters );
+		double transformUnits( double msize,UnitDefinition * ud );
+		string getAnnotation( Reaction* reaction,map<string,EnzymeInfo> & );
 		//string printNotes(SBase *sb);
-		void setupEnzymaticReaction(const EnzymeInfo & einfo,string name);
-		void setupMMEnzymeReaction(Reaction * reac);
+		void setupEnzymaticReaction( const EnzymeInfo & einfo,string name );
+		void setupMMEnzymeReaction( Reaction * reac,string id );
 		vector<double>getKLaw( KineticLaw * klaw,bool rev );
 		struct EnzymeInfo
 		{
