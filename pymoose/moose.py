@@ -1181,6 +1181,16 @@ class Nid(Id):
 Nid_swigregister = _moose.Nid_swigregister
 Nid_swigregister(Nid)
 
+ALL = _moose.ALL
+VALUE = _moose.VALUE
+LOOKUP = _moose.LOOKUP
+SOURCE = _moose.SOURCE
+DEST = _moose.DEST
+SHARED = _moose.SHARED
+SOLVE = _moose.SOLVE
+THIS = _moose.THIS
+GLOBAL = _moose.GLOBAL
+DEL = _moose.DEL
 class PyMooseContext(object):
     """Proxy of C++ PyMooseContext class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
@@ -1366,15 +1376,19 @@ class PyMooseContext(object):
         return _moose.PyMooseContext_addTask(*args)
 
     def do_deep_copy(*args):
-        """do_deep_copy(self, Id object, string new_name, Id dest)"""
+        """do_deep_copy(self, Id object, Id dest, string new_name)"""
         return _moose.PyMooseContext_do_deep_copy(*args)
 
+    def copy(*args):
+        """copy(self, Id src, Id dest_parent, string new_name)"""
+        return _moose.PyMooseContext_copy(*args)
+
     def deepCopy(*args):
-        """deepCopy(self, Id object, string new_name, Id dest) -> Id"""
+        """deepCopy(self, Id object, Id dest, string new_name) -> Id"""
         return _moose.PyMooseContext_deepCopy(*args)
 
     def move(*args):
-        """move(self, Id object, string new_name, Id dest)"""
+        """move(self, Id object, Id dest, string new_name)"""
         return _moose.PyMooseContext_move(*args)
 
     def connect(*args):
@@ -1488,6 +1502,17 @@ class PyMooseContext(object):
     def doc(*args):
         """doc(self, string className) -> string"""
         return _moose.PyMooseContext_doc(*args)
+
+    def getNeighbours(*args):
+        """getNeighbours(self, Id object, string fieldName) -> Id_vector"""
+        return _moose.PyMooseContext_getNeighbours(*args)
+
+    def getFieldList(*args):
+        """
+        getFieldList(self, Id id, FieldType ftype=ALL) -> string_vector
+        getFieldList(self, Id id) -> string_vector
+        """
+        return _moose.PyMooseContext_getFieldList(*args)
 
     parallel = _swig_property(_moose.PyMooseContext_parallel_get, _moose.PyMooseContext_parallel_set)
 PyMooseContext_swigregister = _moose.PyMooseContext_swigregister
