@@ -25,7 +25,8 @@
 
 namespace pymoose
 {
-    
+
+enum FieldType { ALL, VALUE, LOOKUP, SOURCE, DEST, SHARED, SOLVE, THIS, GLOBAL, DEL };
     class PyMooseContext
     {
       public:
@@ -99,9 +100,10 @@ namespace pymoose
         void useClock(const std::string& tickName, const std::string& path, const std::string& func = "process");
         void useClock(int tickNo, const std::string& path, const std::string& func = "process");
         void addTask(std::string arg);
-        void do_deep_copy( const Id& object, std::string new_name, const Id& dest);
-        Id deepCopy( const Id& object, std::string new_name, const Id& dest);    
-        void move( const Id& object, std::string new_name, const Id& dest);
+        void do_deep_copy( const Id& object, const Id& dest, std::string new_name);
+        void copy(const Id& src, const Id& dest_parent, std::string new_name);
+        Id deepCopy( const Id& object, const Id& dest, std::string new_name);    
+        void move( const Id& object, const Id& dest, std::string new_name);
         bool connect(const Id& src, std::string srcField, const Id& dest, std::string destField);
         void setupAlpha( std::string channel, std::string gate, std::vector <double> parms );
         void setupAlpha(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max);
@@ -129,7 +131,8 @@ namespace pymoose
         void planarWeight(std::string src, double weight);
         const std::string& className(const Id& objId) const;
         const std::string& doc(const std::string& className) const;
-
+        vector<Id> getNeighbours(Id object, const std::string& fieldName);
+        vector<string> getFieldList(Id id, FieldType ftype=ALL);        
 #ifdef DO_UNIT_TESTS    
         static bool testPyMooseContext(int count, bool print);
         bool testCreateDestroy(std::string className, int count, bool print);

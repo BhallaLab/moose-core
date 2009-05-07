@@ -130,6 +130,17 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
         printtree(children[-1], vchar, hchar, vcount, depth + 1, prefix, True)
 
 
+def df_traverse(root, operation, *args):
+    """Traverse the tree in a depth-first manner and apply the
+    operation using *args. The first argument is the root object by
+    default.""" 
+    if hasattr(root, '_visited'):
+        return
+    operation(root, *args)
+    for child in root.children():
+        df_traverse(child, operation, *args)
+    root._visited = True
+
 
 if __name__ == "__main__": # test printtree
     s = Neutral('cell')
