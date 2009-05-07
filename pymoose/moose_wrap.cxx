@@ -21243,14 +21243,14 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_do_deep_copy(PyObject *SWIGUNUSEDPARM(
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
   Id *arg2 = 0 ;
-  std::string arg3 ;
-  Id *arg4 = 0 ;
+  Id *arg3 = 0 ;
+  std::string arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -21271,26 +21271,89 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_do_deep_copy(PyObject *SWIGUNUSEDPARM(
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_do_deep_copy" "', argument " "2"" of type '" "Id const &""'"); 
   }
   arg2 = reinterpret_cast< Id * >(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PyMooseContext_do_deep_copy" "', argument " "3"" of type '" "Id const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_do_deep_copy" "', argument " "3"" of type '" "Id const &""'"); 
+  }
+  arg3 = reinterpret_cast< Id * >(argp3);
   {
     std::string *ptr = (std::string *)0;
-    int res = SWIG_AsPtr_std_string(obj2, &ptr);
+    int res = SWIG_AsPtr_std_string(obj3, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_do_deep_copy" "', argument " "3"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_do_deep_copy" "', argument " "4"" of type '" "std::string""'"); 
     }
-    arg3 = *ptr;
+    arg4 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
-  res4 = SWIG_ConvertPtr(obj3, &argp4, SWIGTYPE_p_Id,  0  | 0);
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "PyMooseContext_do_deep_copy" "', argument " "4"" of type '" "Id const &""'"); 
-  }
-  if (!argp4) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_do_deep_copy" "', argument " "4"" of type '" "Id const &""'"); 
-  }
-  arg4 = reinterpret_cast< Id * >(argp4);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    (arg1)->do_deep_copy((Id const &)*arg2,arg3,(Id const &)*arg4);
+    (arg1)->do_deep_copy((Id const &)*arg2,(Id const &)*arg3,arg4);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PyMooseContext_copy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  Id *arg2 = 0 ;
+  Id *arg3 = 0 ;
+  std::string arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_copy",4,4,&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_copy" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Id,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PyMooseContext_copy" "', argument " "2"" of type '" "Id const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_copy" "', argument " "2"" of type '" "Id const &""'"); 
+  }
+  arg2 = reinterpret_cast< Id * >(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PyMooseContext_copy" "', argument " "3"" of type '" "Id const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_copy" "', argument " "3"" of type '" "Id const &""'"); 
+  }
+  arg3 = reinterpret_cast< Id * >(argp3);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj3, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_copy" "', argument " "4"" of type '" "std::string""'"); 
+    }
+    arg4 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->copy((Id const &)*arg2,(Id const &)*arg3,arg4);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -21306,15 +21369,15 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_deepCopy(PyObject *SWIGUNUSEDPARM(self
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
   Id *arg2 = 0 ;
-  std::string arg3 ;
-  Id *arg4 = 0 ;
+  Id *arg3 = 0 ;
+  std::string arg4 ;
   Id result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -21335,26 +21398,26 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_deepCopy(PyObject *SWIGUNUSEDPARM(self
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_deepCopy" "', argument " "2"" of type '" "Id const &""'"); 
   }
   arg2 = reinterpret_cast< Id * >(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PyMooseContext_deepCopy" "', argument " "3"" of type '" "Id const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_deepCopy" "', argument " "3"" of type '" "Id const &""'"); 
+  }
+  arg3 = reinterpret_cast< Id * >(argp3);
   {
     std::string *ptr = (std::string *)0;
-    int res = SWIG_AsPtr_std_string(obj2, &ptr);
+    int res = SWIG_AsPtr_std_string(obj3, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_deepCopy" "', argument " "3"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_deepCopy" "', argument " "4"" of type '" "std::string""'"); 
     }
-    arg3 = *ptr;
+    arg4 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
-  res4 = SWIG_ConvertPtr(obj3, &argp4, SWIGTYPE_p_Id,  0  | 0);
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "PyMooseContext_deepCopy" "', argument " "4"" of type '" "Id const &""'"); 
-  }
-  if (!argp4) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_deepCopy" "', argument " "4"" of type '" "Id const &""'"); 
-  }
-  arg4 = reinterpret_cast< Id * >(argp4);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (arg1)->deepCopy((Id const &)*arg2,arg3,(Id const &)*arg4);
+    result = (arg1)->deepCopy((Id const &)*arg2,(Id const &)*arg3,arg4);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_NewPointerObj((new Id(static_cast< const Id& >(result))), SWIGTYPE_p_Id, SWIG_POINTER_OWN |  0 );
@@ -21370,14 +21433,14 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_move(PyObject *SWIGUNUSEDPARM(self), P
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
   Id *arg2 = 0 ;
-  std::string arg3 ;
-  Id *arg4 = 0 ;
+  Id *arg3 = 0 ;
+  std::string arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -21398,26 +21461,26 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_move(PyObject *SWIGUNUSEDPARM(self), P
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_move" "', argument " "2"" of type '" "Id const &""'"); 
   }
   arg2 = reinterpret_cast< Id * >(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PyMooseContext_move" "', argument " "3"" of type '" "Id const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_move" "', argument " "3"" of type '" "Id const &""'"); 
+  }
+  arg3 = reinterpret_cast< Id * >(argp3);
   {
     std::string *ptr = (std::string *)0;
-    int res = SWIG_AsPtr_std_string(obj2, &ptr);
+    int res = SWIG_AsPtr_std_string(obj3, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_move" "', argument " "3"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_move" "', argument " "4"" of type '" "std::string""'"); 
     }
-    arg3 = *ptr;
+    arg4 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
-  res4 = SWIG_ConvertPtr(obj3, &argp4, SWIGTYPE_p_Id,  0  | 0);
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "PyMooseContext_move" "', argument " "4"" of type '" "Id const &""'"); 
-  }
-  if (!argp4) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_move" "', argument " "4"" of type '" "Id const &""'"); 
-  }
-  arg4 = reinterpret_cast< Id * >(argp4);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    (arg1)->move((Id const &)*arg2,arg3,(Id const &)*arg4);
+    (arg1)->move((Id const &)*arg2,(Id const &)*arg3,arg4);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -25224,6 +25287,222 @@ SWIGINTERN PyObject *_wrap_PyMooseContext_doc(PyObject *SWIGUNUSEDPARM(self), Py
 fail:
   if (SWIG_IsNewObj(res2)) delete arg2;
   SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PyMooseContext_getNeighbours(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  Id arg2 ;
+  std::string *arg3 = 0 ;
+  std::vector<Id > result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 ;
+  int res2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_getNeighbours",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_getNeighbours" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
+  {
+    res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Id,  0  | 0);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PyMooseContext_getNeighbours" "', argument " "2"" of type '" "Id""'"); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_getNeighbours" "', argument " "2"" of type '" "Id""'");
+    } else {
+      Id * temp = reinterpret_cast< Id * >(argp2);
+      arg2 = *temp;
+      if (SWIG_IsNewObj(res2)) delete temp;
+    }
+  }
+  {
+    std::string *ptr = (std::string *)0;
+    res3 = SWIG_AsPtr_std_string(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PyMooseContext_getNeighbours" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_getNeighbours" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (arg1)->getNeighbours(arg2,(std::string const &)*arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = swig::from(static_cast< std::vector<Id,std::allocator<Id > > >(result));
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PyMooseContext_getFieldList__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  Id arg2 ;
+  pymoose::FieldType arg3 ;
+  std::vector<std::string > result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 ;
+  int res2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_getFieldList",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_getFieldList" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
+  {
+    res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Id,  0  | 0);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PyMooseContext_getFieldList" "', argument " "2"" of type '" "Id""'"); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_getFieldList" "', argument " "2"" of type '" "Id""'");
+    } else {
+      Id * temp = reinterpret_cast< Id * >(argp2);
+      arg2 = *temp;
+      if (SWIG_IsNewObj(res2)) delete temp;
+    }
+  }
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "PyMooseContext_getFieldList" "', argument " "3"" of type '" "pymoose::FieldType""'");
+  } 
+  arg3 = static_cast< pymoose::FieldType >(val3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (arg1)->getFieldList(arg2,arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = swig::from(static_cast< std::vector<std::string,std::allocator<std::string > > >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PyMooseContext_getFieldList__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  Id arg2 ;
+  std::vector<std::string > result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_getFieldList",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_getFieldList" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
+  {
+    res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Id,  0  | 0);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PyMooseContext_getFieldList" "', argument " "2"" of type '" "Id""'"); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PyMooseContext_getFieldList" "', argument " "2"" of type '" "Id""'");
+    } else {
+      Id * temp = reinterpret_cast< Id * >(argp2);
+      arg2 = *temp;
+      if (SWIG_IsNewObj(res2)) delete temp;
+    }
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (arg1)->getFieldList(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = swig::from(static_cast< std::vector<std::string,std::allocator<std::string > > >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PyMooseContext_getFieldList(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[4];
+  int ii;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = (int)PyObject_Length(args);
+  for (ii = 0; (ii < argc) && (ii < 3); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_pymoose__PyMooseContext, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Id, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        SWIG_PYTHON_THREAD_END_BLOCK;
+        return _wrap_PyMooseContext_getFieldList__SWIG_1(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_pymoose__PyMooseContext, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Id, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          SWIG_PYTHON_THREAD_END_BLOCK;
+          return _wrap_PyMooseContext_getFieldList__SWIG_0(self, args);
+        }
+      }
+    }
+  }
+  
+  SWIG_PYTHON_THREAD_END_BLOCK;
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'PyMooseContext_getFieldList'.\n  Possible C/C++ prototypes are:\n""    getFieldList(pymoose::PyMooseContext *,Id,pymoose::FieldType)\n""    getFieldList(pymoose::PyMooseContext *,Id)\n");
   return NULL;
 }
 
@@ -103276,9 +103555,10 @@ static PyMethodDef SwigMethods[] = {
 		"PyMooseContext_useClock(PyMooseContext self, int tickNo, string path)\n"
 		""},
 	 { (char *)"PyMooseContext_addTask", _wrap_PyMooseContext_addTask, METH_VARARGS, (char *)"PyMooseContext_addTask(PyMooseContext self, string arg)"},
-	 { (char *)"PyMooseContext_do_deep_copy", _wrap_PyMooseContext_do_deep_copy, METH_VARARGS, (char *)"PyMooseContext_do_deep_copy(PyMooseContext self, Id object, string new_name, Id dest)"},
-	 { (char *)"PyMooseContext_deepCopy", _wrap_PyMooseContext_deepCopy, METH_VARARGS, (char *)"PyMooseContext_deepCopy(PyMooseContext self, Id object, string new_name, Id dest) -> Id"},
-	 { (char *)"PyMooseContext_move", _wrap_PyMooseContext_move, METH_VARARGS, (char *)"PyMooseContext_move(PyMooseContext self, Id object, string new_name, Id dest)"},
+	 { (char *)"PyMooseContext_do_deep_copy", _wrap_PyMooseContext_do_deep_copy, METH_VARARGS, (char *)"PyMooseContext_do_deep_copy(PyMooseContext self, Id object, Id dest, string new_name)"},
+	 { (char *)"PyMooseContext_copy", _wrap_PyMooseContext_copy, METH_VARARGS, (char *)"PyMooseContext_copy(PyMooseContext self, Id src, Id dest_parent, string new_name)"},
+	 { (char *)"PyMooseContext_deepCopy", _wrap_PyMooseContext_deepCopy, METH_VARARGS, (char *)"PyMooseContext_deepCopy(PyMooseContext self, Id object, Id dest, string new_name) -> Id"},
+	 { (char *)"PyMooseContext_move", _wrap_PyMooseContext_move, METH_VARARGS, (char *)"PyMooseContext_move(PyMooseContext self, Id object, Id dest, string new_name)"},
 	 { (char *)"PyMooseContext_connect", _wrap_PyMooseContext_connect, METH_VARARGS, (char *)"\n"
 		"PyMooseContext_connect(PyMooseContext self, Id src, string srcField, Id dest, \n"
 		"    string destField) -> bool\n"
@@ -103353,6 +103633,11 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"PyMooseContext_planarWeight", _wrap_PyMooseContext_planarWeight, METH_VARARGS, (char *)"PyMooseContext_planarWeight(PyMooseContext self, string src, double weight)"},
 	 { (char *)"PyMooseContext_className", _wrap_PyMooseContext_className, METH_VARARGS, (char *)"PyMooseContext_className(PyMooseContext self, Id objId) -> string"},
 	 { (char *)"PyMooseContext_doc", _wrap_PyMooseContext_doc, METH_VARARGS, (char *)"PyMooseContext_doc(PyMooseContext self, string className) -> string"},
+	 { (char *)"PyMooseContext_getNeighbours", _wrap_PyMooseContext_getNeighbours, METH_VARARGS, (char *)"PyMooseContext_getNeighbours(PyMooseContext self, Id object, string fieldName) -> Id_vector"},
+	 { (char *)"PyMooseContext_getFieldList", _wrap_PyMooseContext_getFieldList, METH_VARARGS, (char *)"\n"
+		"getFieldList(Id id, FieldType ftype=ALL) -> string_vector\n"
+		"PyMooseContext_getFieldList(PyMooseContext self, Id id) -> string_vector\n"
+		""},
 	 { (char *)"PyMooseContext_parallel_set", _wrap_PyMooseContext_parallel_set, METH_VARARGS, (char *)"PyMooseContext_parallel_set(PyMooseContext self, bool parallel)"},
 	 { (char *)"PyMooseContext_parallel_get", _wrap_PyMooseContext_parallel_get, METH_VARARGS, (char *)"PyMooseContext_parallel_get(PyMooseContext self) -> bool"},
 	 { (char *)"PyMooseContext_swigregister", PyMooseContext_swigregister, METH_VARARGS, NULL},
@@ -106583,6 +106868,16 @@ SWIGEXPORT void SWIG_init(void) {
   SWIG_addvarlink(SWIG_globals(),(char*)"Id_BadNode",Swig_var_Id_BadNode_get, Swig_var_Id_BadNode_set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Id_UnknownNode",Swig_var_Id_UnknownNode_get, Swig_var_Id_UnknownNode_set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Id_GlobalNode",Swig_var_Id_GlobalNode_get, Swig_var_Id_GlobalNode_set);
+  SWIG_Python_SetConstant(d, "ALL",SWIG_From_int(static_cast< int >(pymoose::ALL)));
+  SWIG_Python_SetConstant(d, "VALUE",SWIG_From_int(static_cast< int >(pymoose::VALUE)));
+  SWIG_Python_SetConstant(d, "LOOKUP",SWIG_From_int(static_cast< int >(pymoose::LOOKUP)));
+  SWIG_Python_SetConstant(d, "SOURCE",SWIG_From_int(static_cast< int >(pymoose::SOURCE)));
+  SWIG_Python_SetConstant(d, "DEST",SWIG_From_int(static_cast< int >(pymoose::DEST)));
+  SWIG_Python_SetConstant(d, "SHARED",SWIG_From_int(static_cast< int >(pymoose::SHARED)));
+  SWIG_Python_SetConstant(d, "SOLVE",SWIG_From_int(static_cast< int >(pymoose::SOLVE)));
+  SWIG_Python_SetConstant(d, "THIS",SWIG_From_int(static_cast< int >(pymoose::THIS)));
+  SWIG_Python_SetConstant(d, "GLOBAL",SWIG_From_int(static_cast< int >(pymoose::GLOBAL)));
+  SWIG_Python_SetConstant(d, "DEL",SWIG_From_int(static_cast< int >(pymoose::DEL)));
   SWIG_addvarlink(SWIG_globals(),(char*)"PyMooseContext_separator",Swig_var_PyMooseContext_separator_get, Swig_var_PyMooseContext_separator_set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Neutral_className_",Swig_var_Neutral_className__get, Swig_var_Neutral_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Class_className_",Swig_var_Class_className__get, Swig_var_Class_className__set);
