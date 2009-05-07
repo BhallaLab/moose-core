@@ -233,7 +233,7 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
 
 PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string objectName, PyMooseBase& parent)
 {
-    id_ = context_->deepCopy(src.id_, objectName, parent.id_);
+    id_ = context_->deepCopy(src.id_, parent.id_, objectName);
     
 }
 
@@ -255,26 +255,26 @@ PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string path)
         name_start = 0;
         myName = path;
         Id parentId = context_->getCwe();
-        id_ = context_->deepCopy(src.id_, myName, parentId);        
+        id_ = context_->deepCopy(src.id_, parentId, myName);        
     }
     else 
     {
         myName = path.substr(name_start+1);
         parentPath = path.substr(0,name_start);
         Id parentId = context_->pathToId(parentPath, false);
-        id_ = context_->deepCopy(src.id_, myName, parentId);
+        id_ = context_->deepCopy(src.id_, parentId, myName);
     }
 }
 
 PyMooseBase::PyMooseBase(const Id& src, string name, Id& parent)
 {
-    id_ = context_->deepCopy(src, name, parent);    
+    id_ = context_->deepCopy(src, parent, name);    
 }
 
 
 PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string objectName, Id& parent)
 {
-    id_ = context_->deepCopy(src.id_, objectName, parent);
+    id_ = context_->deepCopy(src.id_, parent, objectName);
 }
 
 /**

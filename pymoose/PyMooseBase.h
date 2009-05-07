@@ -19,7 +19,7 @@ namespace pymoose
         PyMooseBase(std::string className, std::string path);
         PyMooseBase(std::string className, std::string objectName, PyMooseBase& parent);
         /** This does a deep copy of the source object as a child of parent and sets the name to objectName*/
-        PyMooseBase(const PyMooseBase& src, std::string objectName,  PyMooseBase& parent);
+        PyMooseBase(const PyMooseBase& src, std::string objectName, PyMooseBase& parent);
         PyMooseBase(const PyMooseBase& src, std::string objectName, Id& parent);
         PyMooseBase(const PyMooseBase& src, std::string path);
         PyMooseBase(const Id& src, string name, Id& parent);

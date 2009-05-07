@@ -1000,18 +1000,25 @@ void PyMooseContext::addTask(string arg)
     //Do nothing - but give a message to inform that
     cerr << "void PyMooseContext::addTask(string arg) - empty function.\n";
 }
+
+void PyMooseContext::copy(const Id& src, const Id& dest_parent, std::string new_name)
+{
+    send3< Id, Id, string >( myId_(), copySlot, src, dest_parent, new_name);
+}
+
+
 /**
    This just does the copying without returning anything.
    Corresponds to the procedural technique used in Genesis shell
 */
-void PyMooseContext::do_deep_copy( const Id& object, string new_name, const Id& dest)
+void PyMooseContext::do_deep_copy( const Id& object, const Id& dest, string new_name)
 {
     send3< Id, Id, string >  ( myId_(), copySlot, object, dest, new_name);
 }
 /**
    This is the object oriented version. It returns Id of new copy.
 */
-Id PyMooseContext::deepCopy( const Id& object, string new_name, const Id& dest)
+Id PyMooseContext::deepCopy( const Id& object, const Id& dest, string new_name)
 {
     if ( new_name.find(PyMooseContext::separator) != string::npos )
     {
@@ -1020,7 +1027,7 @@ Id PyMooseContext::deepCopy( const Id& object, string new_name, const Id& dest)
         return id;    
     }
     
-    do_deep_copy( object,  new_name, dest);
+    do_deep_copy( object, dest,  new_name);
     
     string path = getPath(dest);
     size_t len = path.length();
@@ -1044,7 +1051,7 @@ Id PyMooseContext::deepCopy( const Id& object, string new_name, const Id& dest)
 /**
    move object into the element specified by dest and rename the object to new_name
 */
-void PyMooseContext::move( const Id& object, string new_name, const Id& dest)
+void PyMooseContext::move( const Id& object, const Id& dest, string new_name)
 {
     send3< Id, Id, string >(
         myId_(), moveSlot, object, dest, new_name );
@@ -1535,6 +1542,133 @@ const string& PyMooseContext::doc(const string& target) const
     // fallback to looking for a file with same name in documentation directory
     fieldValue_ = getCommandDoc(target);
     return fieldValue_;
+}
+/**
+   Returns the list of Ids of elements connected as destination of
+   message from this element.
+*/
+// think if this is sane - returning a local vector - swig somehow
+// takes care of it, but shouldn't we be passing a vector reference as
+// argument which will be filled in?
+vector<Id> PyMooseContext::getNeighbours(Id src, const string& finfoName)
+{
+    vector<Id> ret;
+    Element* element = src();
+    Conn* conn = element->targets(finfoName, src.index());
+    while (conn->good()){
+        Eref target = conn->target();
+        ret.push_back(target.id());
+        conn->increment();
+    }      
+
+    return ret;
+}
+
+vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
+{
+    vector<string> fieldList;
+    const Cinfo* cinfo = id()->cinfo();
+    vector<const Finfo*> finfoList;
+    cinfo->listFinfos(finfoList);
+    cout << "Field type:" << ftype << endl;
+    switch (ftype){
+        case VALUE:
+            for (int i = 0; i < finfoList.size(); ++i)
+            {
+                const ValueFinfo* finfo = dynamic_cast<const ValueFinfo*>(finfoList[i]);
+                if (finfo){
+                    fieldList.push_back(finfo->name());
+                }
+            }
+            break;
+        case LOOKUP:
+            for (int i = 0; i < finfoList.size(); ++i)
+            {
+                const LookupFinfo* finfo = dynamic_cast<const LookupFinfo*>(finfoList[i]);
+                if (finfo){
+                    fieldList.push_back(finfo->name());
+                }
+            }
+            break;
+        case SOURCE:
+            for (int i = 0; i < finfoList.size(); ++i)
+            {
+                const SrcFinfo* finfo = dynamic_cast<const SrcFinfo*>(finfoList[i]);
+                if (finfo){
+                    fieldList.push_back(finfo->name());
+                }
+            }
+            break;
+        case DEST:
+            for (int i = 0; i < finfoList.size(); ++i)
+            {
+                const DestFinfo* finfo = dynamic_cast<const DestFinfo*>(finfoList[i]);
+                if (finfo){
+                    fieldList.push_back(finfo->name());
+                }
+            }
+            break;
+        case SHARED:
+            for (int i = 0; i < finfoList.size(); ++i)
+            {
+                const SharedFinfo* finfo = dynamic_cast<const SharedFinfo*>(finfoList[i]);
+                if (finfo){
+                    fieldList.push_back(finfo->name());
+                }
+            }
+            break;
+            /* The following are special finfos - some with incomplete
+             information, e.g., apparently SolveFinfo does not
+             implement name().
+            */
+        // 
+        // case SOLVE:
+        //     for (int i = 0; i < finfoList.size(); ++i)
+        //     {
+        //         const SolveFinfo* finfo = dynamic_cast<const SolveFinfo*>(finfoList[i]);
+        //         if (finfo){
+        //             fieldList.push_back(finfo->name());
+        //         }
+        //     }
+        //     break;
+        // case THIS:
+        //     for (int i = 0; i < finfoList.size(); ++i)
+        //     {
+        //         const ThisFinfo* finfo = dynamic_cast<const ThisFinfo*>(finfoList[i]);
+        //         if (finfo){
+        //             fieldList.push_back(finfo->name());
+        //         }
+        //     }
+        //     break;
+        // case GLOBAL:
+        //     for (int i = 0; i < finfoList.size(); ++i)
+        //     {
+        //         const GlobalMarkerFinfo* finfo = dynamic_cast<const GlobalMarkerFinfo*>(finfoList[i]);
+        //         if (finfo){
+        //             fieldList.push_back(finfo->name());
+        //         }
+        //     }
+        //     break;
+        // case DEL:
+        //     for (int i = 0; i < finfoList.size(); ++i)
+        //     {
+        //         const DeletionFinfo* finfo = dynamic_cast<const DeletionMarkerFinfo*>(finfoList[i]);
+        //         if (finfo){
+        //             fieldList.push_back(finfo->name());
+        //         }
+        //     }
+        //     break;
+            
+        case ALL:
+            for (int i = 0; i < finfoList.size(); ++i)
+            {
+                fieldList.push_back(finfoList[i]->name());
+            }
+            break;
+        default:
+            cout << "ERROR: Unknown Finfo type." << endl;
+    }
+    return fieldList;
 }
 
 #ifdef DO_UNIT_TESTS
