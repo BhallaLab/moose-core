@@ -17,34 +17,29 @@ class SbmlWriter
 	public:
 		SbmlWriter() {;}
 		~SbmlWriter() {;}
-		void write(string filename,Id location);
-		SBMLDocument* createModel(string filename);
-		bool validateModel(SBMLDocument* sbmlDoc);
-		bool writeModel(const SBMLDocument* sbmlDoc, const string& filename);
+		void write( string filename,Id location );
+		SBMLDocument* createModel( string filename );
+		bool validateModel( SBMLDocument* sbmlDoc );
+		bool writeModel( const SBMLDocument* sbmlDoc, const string& filename );
 	private:
 		Model* model_;	
-		std::set < string > unitsUniq_;		
-		static int targets(Eref object,	const string& msg,vector< Eref >& target,const string& type = "" );
+		static int targets( Eref object,	const string& msg,vector< Eref >& target,const string& type = "" );
 		static bool isType( Eref object, const string& type );
-		string parmUnit(double rct_order);
-		double transformUnits(double mvalue,UnitDefinition * ud);
-		string nameString(string str);
-		string changeName(string parent, string child);
-		string idBeginWith(string name);
-		string getParentFunc(Eref p);
-		void printParameters(KineticLaw* kl,string k,double kvalue,string unit);
-		void printReactants(Reaction* reaction,vector< Eref > sub,ostringstream& rlaw);
-		void printProducts(Reaction* reaction,vector< Eref > cplx,ostringstream& rlaw);
-		void printenzReactants(Reaction* reaction,vector< Eref > sub,ostringstream& rlaw,string parentCompt);
-		void printenzProducts(Reaction* reaction,vector< Eref > cplx,ostringstream& rlaw,string parentCompt);
-		void printEnzymes(vector< Id > enzms);
-		void getEnzyme(vector< Eref > enz,vector <string> &enzsName);
-		void getSubstrate(vector< Eref > sub,vector <string> &subsName);
-		void getProduct(vector< Eref > prd,vector <string> &prdsName);
-		
-
-		
-		
+		string parmUnit( double rct_order );
+		double transformUnits( double mvalue,UnitDefinition * ud );
+		string nameString( string str );
+		string changeName( string parent, string child );
+		string idBeginWith( string name );
+		string getParentFunc( Eref p );
+		void printParameters( KineticLaw* kl,string k,double kvalue,string unit );
+		void printReactants( Reaction* reaction,vector< Eref > sub,ostringstream& rlaw );
+		void printProducts( Reaction* reaction,vector< Eref > cplx,ostringstream& rlaw );
+		void printenzReactants( Reaction* reaction,vector< Eref > sub,ostringstream& rlaw,string parentCompt );
+		void printenzProducts( Reaction* reaction,vector< Eref > cplx,ostringstream& rlaw,string parentCompt );
+		void printEnzymes( vector< Id > enzms );
+		void getEnzyme( vector< Eref > enz,vector <string> &enzsName );
+		void getSubstrate( vector< Eref > sub,vector <string> &subsName );
+		void getProduct( vector< Eref > prd,vector <string> &prdsName );
 };
 extern const Cinfo* initKinComptCinfo();
 extern const Cinfo* initMoleculeCinfo();

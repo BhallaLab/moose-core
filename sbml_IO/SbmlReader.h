@@ -16,11 +16,11 @@ class SbmlReader
 	struct EnzymeInfo;
 
 	public:
-		SbmlReader() {;}
+		SbmlReader() {errorFlag_ = false;}
 		~SbmlReader() {;}
 		void  read(string filename,Id location);
-		void  createCompartment(Id location);
-		void  createMolecule(map<string,Id> &);
+		map< string,Id > createCompartment(Id location);
+		map< string,Id > createMolecule(map<string,Id> &);
 		void  getGlobalParameter();
 		//void  printUnit(Model* model);
 		void  createReaction(map<string,Id> &);
@@ -34,6 +34,7 @@ class SbmlReader
 		Element* molecule_;
 		Element* reaction_;
 		map<string,Eref>elmtMap_;
+		bool errorFlag_;
 		void getRules();
 		void printMembers( const ASTNode* p,vector <string> & ruleMembers );
 		void pushParmstoVector( const ASTNode* p,vector <string> & parameters );
@@ -43,7 +44,8 @@ class SbmlReader
 		//string printNotes(SBase *sb);
 		void setupEnzymaticReaction( const EnzymeInfo & einfo,string name );
 		void setupMMEnzymeReaction( Reaction * reac,string id );
-		vector<double>getKLaw( KineticLaw * klaw,bool rev );
+		void getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate );
+		void checkErrors();
 		struct EnzymeInfo
 		{
 			Id enzyme;
