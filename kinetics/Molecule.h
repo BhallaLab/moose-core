@@ -56,6 +56,7 @@ class Molecule
 			double size, unsigned int dim );
 		void extentFuncLocal( Eref e, double size, unsigned int dim);
 		static void rescaleFunc( const Conn* c, double ratio );
+		static const double NA;	/// Avogadro's constant
 
 	private:
 		/// Initial number of molecules: t=0 boundary condition.
@@ -69,6 +70,7 @@ class Molecule
 		double B_;	/// Internal state variable
 		static const double EPSILON; /// Used for Exp Euler calculations
 		double D_;	/// Diffusion constant
+
 };
 
 // Used by the solver
