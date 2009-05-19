@@ -168,8 +168,8 @@ static const Slot extentSlot =
 ///////////////////////////////////////////////////
 
 KinCompt::KinCompt()
-	: 	size_( 1.6666666667e-21 ), 
-		volume_( 1.666666667e-21 ), 
+	: 	size_( 1.0 / ( Molecule::NA * 1e-3 ) ), 
+		volume_( 1.0 / ( Molecule::NA * 1e-3 ) ), 
 		area_( 1.0 ), 
 		perimeter_( 1.0 ), 
 		numDimensions_( 3 ),
@@ -407,7 +407,8 @@ double getVolScale( Eref e )
 		assert( ret );
 		assert( size > 0.0 );
 		// Here we need to put in units too.
-		return 6e20 * size;
+		//return 6e20 * size;
+		return ( Molecule::NA * 1e-3 ) * size;
 	}
 	cout << "KinCompt.cpp:getVolScale: Failed to find KinCompt for volume\n";
 	return 1.0;
@@ -428,7 +429,8 @@ void setParentalVolScale( Eref e, double volScale )
 				": volScale should be > 0: " << volScale << endl;
 			return;
 		}
-		double vol = volScale / 6e20;
+		//double vol = volScale / 6e20;
+		double vol = volScale / ( Molecule::NA * 1e-3 );
 		//assert( volFromChildFinfo != 0 );
 		bool ret = set< string, double >( 
 			kc, "volumeFromChild", e.id().path(), vol);
