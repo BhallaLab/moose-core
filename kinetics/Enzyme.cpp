@@ -727,7 +727,7 @@ void testEnzyme()
 	set< double >( n, "volume", 1e-15 );
 
 	double num = Enzyme::getK1( enzE ); // Should be same as k1 * 6e5.
-	ASSERT( fabs( 1.0 - num * 6.0e5 / k1 ) < 1.0e-6, "enz vol rescaling" );
+	ASSERT( fabs( 1.0 - num * Molecule::NA * 1e-18 / k1 ) < 1.0e-6, "enz vol rescaling" );
 	num = Enzyme::getK2( enzE ); // Should be same as k2
 	ASSERT( fabs( num - k2 ) < 1.0e-6, "enz vol rescaling" );
 	num = Enzyme::getK3( enzE ); // Should be same as k3
@@ -736,7 +736,7 @@ void testEnzyme()
 	ASSERT( fabs( num - Km ) < 1.0e-6, "enz vol rescaling" );
 
 	num = Molecule::getN( enzMol ); // Should be same as nenz scaled by vol.
-	ASSERT( fabs( num - nenz * 6e5 ) < 1.0e-2, "enzmol num rescaling" );
+	ASSERT( fabs( num - nenz * Molecule::NA * 1e-18 ) < 1.0e-2, "enzmol num rescaling" );
 	num = Molecule::getConc( enzMol ); // Should be same as nenz.
 	ASSERT( fabs( num - nenz ) < 1.0e-6, "enzmol conc rescaling" );
 

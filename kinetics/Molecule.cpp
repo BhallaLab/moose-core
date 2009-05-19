@@ -15,6 +15,7 @@
 #include "KinCompt.h" // for getVolScale and setParentalVolScale
 
 const double Molecule::EPSILON = 1.0e-15;
+const double Molecule::NA = 6.02214179e23; // Avogadro's constant
 
 const Cinfo* initMoleculeCinfo()
 {
@@ -455,7 +456,8 @@ void Molecule::extentFuncLocal(  Eref e, double size, unsigned int dim)
 	// Assume that the units of conc are uM.
 	if ( size > 0.0 ) {
 		if ( dim == 3 ) // Regular 3-d scaling.
-			volumeScale_ = size / 6.023e20;
+			//volumeScale_ = size / 6.023e20;
+			volumeScale_ = size / 6.02214199e20;
 		else // Here a quandary: Do we use areal density for readout?
 			volumeScale_ = 1.0;
 	} else {
@@ -551,12 +553,12 @@ void testMolecule()
 	ASSERT( fabs( num - n1 ) < 1.0e-6, "mol num rescaling" );
 	
 	num = Molecule::getN( m0 );
-	ASSERT( fabs( num - n0 * 6e5 ) < 1.0e-2, "mol num rescaling" );
+	ASSERT( fabs( num - n0 * Molecule::NA * 1e-18 ) < 1.0e-2, "mol num rescaling" );
 	num = Molecule::getN( m1 );
-	ASSERT( fabs( num - n1 * 6e5 ) < 1.0e-2, "mol num rescaling" );
+	ASSERT( fabs( num - n1 * Molecule::NA * 1e-18 ) < 1.0e-2, "mol num rescaling" );
 
 	num = Molecule::getNinit( m0 );
-	ASSERT( fabs( num - 6e5 ) < 1.0e-2, "mol num rescaling" );
+	ASSERT( fabs( num - Molecule::NA * 1e-18 ) < 1.0e-2, "mol num rescaling" );
 	num = Molecule::getConcInit( m0 );
 	ASSERT( fabs( num - 1.0 ) < 1.0e-6, "mol num rescaling" );
 
