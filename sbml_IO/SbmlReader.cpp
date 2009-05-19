@@ -17,6 +17,7 @@
 #include "element/Neutral.h"
 #include "kinetics/KinCompt.h"
 #include "kinetics/Enzyme.h"
+#include "kinetics/Molecule.h"
 #include "SbmlReader.h"
 #include <stdlib.h>
 
@@ -48,10 +49,10 @@ void SbmlReader::read( string filename,Id location )
 		cout << "No model present." << endl;
 		errorFlag_ = true;
 	}
-	if ( !model_->isSetId() ){
-		cout << "Id not set." << endl;
+	/*if ( !model_->isSetId() ){
+		cout << "Model Id not set." << endl;
 		errorFlag_ = true;
-	}
+	}*/
 	if ( !errorFlag_ )
 		getGlobalParameter(); 
 	map< string,Id > idMap;
@@ -86,12 +87,17 @@ double SbmlReader::transformUnits( double mvalue,UnitDefinition * ud )
 		lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + ofset;
 		cout<<"lvalue "<<lvalue<<endl;
 		if ( unit->isLitre() ){
-			cout<<"unit is litre";
+			cout<<"unit is litre"<<endl;
 			lvalue *= pow(1e-3,exponent);
 		}
 		if ( unit->isMole() ){
 			cout<<"unit is mole"<<endl;
-			lvalue *= pow(6.02214199e23,exponent);	
+			lvalue *= pow( Molecule::NA ,exponent);	
+			//lvalue *= pow(6e23,exponent);	
+			/*if ( scale != -6 ){
+				int s = scale -(-6);
+				lvalue *= pow(10.0,-s);		
+			}*/
 		}
 	}
 	cout<<"value before return "<<lvalue<<endl;
@@ -197,7 +203,7 @@ map< string,Id > SbmlReader::createMolecule( map< string,Id > &idMap )
 		elmtMap_[id] = Eref( molecule_ );
 		//printNotes(s);
 		UnitDefinition * ud = s->getDerivedUnitDefinition();
-		//cout<<"species unit :"<<UnitDefinition::printUnits(s->getDerivedUnitDefinition())<<endl;
+		cout<<"species unit :"<<UnitDefinition::printUnits(s->getDerivedUnitDefinition())<<endl;
 		double initvalue;
 		if ( s->isSetInitialConcentration() )
 			initvalue = s->getInitialConcentration();
@@ -205,6 +211,7 @@ map< string,Id > SbmlReader::createMolecule( map< string,Id > &idMap )
 			initvalue = s->getInitialAmount() ;
 		double transvalue = transformUnits(1,ud);
 		transvalue *= initvalue;
+		//double transvalue = transformUnits(initvalue,ud);
 		//bool has_subunits = s->getHasOnlySubstanceUnits();
 		//cout<<"has_sub "<<has_subunits<<endl;
 		unsigned int dimension;
@@ -213,7 +220,8 @@ map< string,Id > SbmlReader::createMolecule( map< string,Id > &idMap )
 					
 			double size;
 			get< double > (comptEl.eref(),sizeFinfo,size); 			
-			transvalue *= size;			
+			transvalue *= size;	
+			//transvalue /= size;					
 		}
 		//cout<<"n init is :"<<transvalue<<endl;
 		set< double >( molecule_, nInitFinfo, transvalue ); //initialAmount 	
@@ -246,9 +254,10 @@ void SbmlReader::getRules()
 		if ( assignRule ){
 			string rule_variable = rule->getVariable();
 			cout<<"variable :"<<rule_variable<<endl;
-			map< string,Eref >::iterator iter;
-			iter = elmtMap_.find( rule_variable );
-			if ( iter != elmtMap_.end() ){
+			map< string,Eref >::iterator v_iter;
+			map< string,Eref >::iterator m_iter;
+			v_iter = elmtMap_.find( rule_variable );
+			if ( v_iter != elmtMap_.end() ){
 				
 				Eref rVariable = elmtMap_.find(rule_variable)->second;
 				//assert( rVariable != 0 );
@@ -258,8 +267,15 @@ void SbmlReader::getRules()
 				printMembers( ast,ruleMembers );
 				for ( unsigned int rm=0;rm<ruleMembers.size();rm++ )
 				{
-					Eref rMember = elmtMap_.find(ruleMembers[rm])->second;				
-					rMember.add( "nSrc",rVariable,"sumTotal",ConnTainer::Default ); 	
+					m_iter = elmtMap_.find( ruleMembers[rm] );	
+					if ( m_iter != elmtMap_.end() ){				
+						Eref rMember = elmtMap_.find(ruleMembers[rm])->second;				
+						rMember.add( "nSrc",rVariable,"sumTotal",ConnTainer::Default ); 
+					}
+					else{
+						cerr <<"SbmlReader::getRules: Assignment rule member is not a species"<<endl;
+						errorFlag_ = true;
+					}	
 				}
 			}
 			else{
@@ -661,19 +677,38 @@ void SbmlReader::getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate )
 		else{
 			kfp = klaw->getParameter( kfparm );
 			kbp = klaw->getParameter( kbparm );
+		}
+		cout<<"parameter unit :"<<UnitDefinition::printUnits(kfp->getDerivedUnitDefinition())<<endl;
+		if ( kfp->isSetUnits() ){
+			kfud = kfp->getDerivedUnitDefinition();
+			cout<<"parameter unit :"<<UnitDefinition::printUnits(kfp->getDerivedUnitDefinition())<<endl;
+			double transkf = transformUnits( 1,kfud );	
+			cout<<"parm kf trans value : "<<transkf<<endl;
+			cout<<"kfvalue :"<<kfvalue<<endl;
+			kf = kfvalue * transkf;
+			kb = 0.0;
+		}
+		else if (! kfp->isSetUnits() ){
+			kf = kfvalue;
+			kb = 0.0;
+		}
+		cout<<"parameter unit :"<<UnitDefinition::printUnits(kbp->getDerivedUnitDefinition())<<endl;
+		if ( ( kbp->isSetUnits() ) && ( rev ) ){ 
+			kbud = kbp->getDerivedUnitDefinition();	
+			cout<<"parameter unit :"<<UnitDefinition::printUnits(kbp->getDerivedUnitDefinition())<<endl;
+			double transkb = transformUnits( 1,kbud );
+			cout<<"parm kb trans value : "<<transkb<<endl;
+			cout<<"kbvalue :"<<kbvalue<<endl;
+			kb = kbvalue * transkb;	
 		}			
-		kfud = kfp->getDerivedUnitDefinition();
-		kbud = kbp->getDerivedUnitDefinition();
-		double transkf = transformUnits( 1,kfud );	
-		cout<<"parm kf trans value : "<<transkf<<endl;
-		cout<<"kfvalue :"<<kfvalue<<endl;
-		kf = kfvalue * transkf;
-		kb = 0.0;
-		if ( rev ){
+		/*if ( rev ){
 			double transkb = transformUnits( 1,kbud );
 			cout<<"parm kb trans value : "<<transkb<<endl;
 			cout<<"kbvalue :"<<kbvalue<<endl;
 			kb = kbvalue * transkb;
+		}*/
+		if ( (! kbp->isSetUnits() ) && ( rev ) ){
+			kb = kbvalue;
 		}
 		rate.push_back( kf );
 		rate.push_back( kb );
@@ -689,7 +724,7 @@ void SbmlReader::getParameters( const ASTNode* node,vector <string> & parameters
 	if ( node->getType() == AST_MINUS ){
 		const ASTNode* lchild = node->getLeftChild();  
 		pushParmstoVector( lchild,parameters );
-		if ( parameters.size() == 1 ){
+		if ( parameters.size() == 1 ) {
 			const ASTNode* rchild = node->getRightChild();
 			pushParmstoVector( rchild,parameters );		
 		}
@@ -697,7 +732,7 @@ void SbmlReader::getParameters( const ASTNode* node,vector <string> & parameters
 	else if ( node->getType() == AST_DIVIDE ){
 		const ASTNode* lchild = node->getLeftChild();  
 	 	pushParmstoVector( lchild,parameters );
-		if ( parameters.size() == 1 ){
+		if (( parameters.size() == 1 ) || ( parameters.size() == 0 )) {
 			const ASTNode* rchild = node->getRightChild();
 			pushParmstoVector( rchild,parameters );	
 		}

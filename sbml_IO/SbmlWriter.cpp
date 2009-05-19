@@ -13,6 +13,7 @@
 #include "element/Neutral.h"
 #include "element/Wildcard.h"
 #include "kinetics/KinCompt.h"
+#include "kinetics/Molecule.h"
 #include <sstream>
 #include <set>
 #include <algorithm>
@@ -196,7 +197,8 @@ SBMLDocument* SbmlWriter::createModel( string filename )
 			}
 			double initamt = 0.0;
 			get< double >( moleEl,nInitFinfo,initamt ); 
-			initamt /= 6.02214199e17 ; 
+			//initamt /= 6.02214199e17 ; 
+			initamt /= Molecule::NA * 1e-6;
 			sp->setInitialAmount( initamt );			
 			vector< Eref > sumtotal;
 			targets( moleEl,"sumTotal",sumtotal );
@@ -372,7 +374,8 @@ SBMLDocument* SbmlWriter::createModel( string filename )
 			string unit=parmUnit( rct_order-1 );
 			para->setUnits( unit );
 			double rvalue,pvalue;
-			const double m = 6.02214199e17; // 1uMole=6.023e17
+			//const double m = 6.02214199e17; // 1uMole=6.023e17
+			const double m = Molecule::NA * 1e-6;
 			rvalue = kf *(pow(m,rct_order-1));
 			para->setValue( rvalue );
 			if ( kb != 0.0 ){
@@ -586,7 +589,8 @@ void SbmlWriter::printEnzymes( vector< Id > enzms )
 			kl  = react->createKineticLaw();
 			kl->setFormula( rlaw.str() );
 			//kl->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + rlaw.str() + "\n\t    </body>");
-			double NA = 6.02214199e17;
+			//double NA = 6.02214199e17;
+			double NA = Molecule::NA * 1e-6;
 			//k1 = k1 * (pow(f,1));
 			int k1order = enz.size()+sub.size();
 			k1 = k1 * (pow(NA,k1order-1));
@@ -778,7 +782,8 @@ void SbmlWriter::printEnzymes( vector< Id > enzms )
 			Km = Km / (pow(NA,subSize-1));
 			string KmUnit = parmUnit( subSize-1 );
 			printParameters(kl,"Km",Km,KmUnit);*/
-			Km /=  6.02214199e17;
+			//Km /=  6.02214199e17;
+			Km /= Molecule::NA * 1e-6;
 			printParameters( kl,"Km",Km,"substance" ); 
 
 			string kcatUnit = parmUnit( 0 );
