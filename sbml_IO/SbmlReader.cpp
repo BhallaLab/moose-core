@@ -93,11 +93,6 @@ double SbmlReader::transformUnits( double mvalue,UnitDefinition * ud )
 		if ( unit->isMole() ){
 			cout<<"unit is mole"<<endl;
 			lvalue *= pow( Molecule::NA ,exponent);	
-			//lvalue *= pow(6e23,exponent);	
-			/*if ( scale != -6 ){
-				int s = scale -(-6);
-				lvalue *= pow(10.0,-s);		
-			}*/
 		}
 	}
 	cout<<"value before return "<<lvalue<<endl;
@@ -109,8 +104,10 @@ map< string,Id > SbmlReader::createCompartment( Id location )
 	static const Cinfo* kincomptCinfo = initKinComptCinfo();
 	static const Finfo* sizeFinfo = kincomptCinfo->findFinfo( "size" );
 	static const Finfo* dimensionFinfo = kincomptCinfo->findFinfo( "numDimensions" );
-	map<string,Id> idMap;	
-	Id outcompt; //outside compartment	
+	map< string,Id > idMap;	
+	//Id outcompt; //outside compartment	
+	map< Id,string > outsideMap;
+	map< Id,string > ::iterator iter;
 	double msize = 0.0,size=0.0;	
 	::Compartment* compt;
 	for ( unsigned int i=0;i<model_->getNumCompartments();i++ )
@@ -126,22 +123,16 @@ map< string,Id > SbmlReader::createCompartment( Id location )
 		} 
 		std::string outside;
 		if ( compt->isSetOutside() ){
-			outside =compt->getOutside ();
+			outside = compt->getOutside ();
 			
 		}
 		if ( compt->isSetSize() ){
-			msize =compt->getSize();
+			msize = compt->getSize();
 		}
-		UnitDefinition * ud=compt->getDerivedUnitDefinition();
-		//cout<<"compartment unit:"<<UnitDefinition::printUnits(compt->getDerivedUnitDefinition())<<endl;
-		size=transformUnits( msize,ud );
-		unsigned int dimension=compt->getSpatialDimensions();
-		/*string cptId;
-		if ( name != "" )
-			cptId = name;
-		else
-			cptId = id;*/
-		if ( outside=="" ){	
+		UnitDefinition * ud = compt->getDerivedUnitDefinition();
+		size = transformUnits( msize,ud );
+		unsigned int dimension = compt->getSpatialDimensions();
+		/*if ( outside=="" ){	
 			comptEl_ = Neutral::create( "KinCompt",id, location, Id::scratchId() ); //create Compartment 
 			idMap[id]=comptEl_->id(); 
 		}
@@ -152,7 +143,11 @@ map< string,Id > SbmlReader::createCompartment( Id location )
 			static const Finfo* outsideFinfo = kincomptCinfo->findFinfo( "outside" );
 			static const Finfo* insideFinfo = kincomptCinfo->findFinfo( "inside" );
 			Eref( comptEl_ ).add( outsideFinfo->msg(),outcompt(),insideFinfo->msg(),ConnTainer::Default );
-		}
+		}*/
+		comptEl_ = Neutral::create( "KinCompt",id, location, Id::scratchId() ); //create Compartment 
+		idMap[id] = comptEl_->id(); 
+		if ( outside != "" )
+			outsideMap[comptEl_->id()] = outside ; 
 		if (size != 0.0){
 			
                     set< double >( comptEl_, sizeFinfo, size );
@@ -163,7 +158,19 @@ map< string,Id > SbmlReader::createCompartment( Id location )
 			set< unsigned int >( comptEl_,dimensionFinfo,dimension );		
 		}
 	}
-	//createMolecule( idMap );
+	for ( iter = outsideMap.begin();iter != outsideMap.end();iter++ )
+	{
+		Eref msid = iter->first();			
+		string outside = iter->second;	
+		Id outcompt = idMap.find( outside )->second;	
+		static const Finfo* outsideFinfo = kincomptCinfo->findFinfo( "outside" );
+		static const Finfo* insideFinfo = kincomptCinfo->findFinfo( "inside" );
+		msid.dropAll("child"); //delete the connection with old parent ie, /kinetics
+		Eref(outcompt() ).add("childSrc",msid,"child",ConnTainer::Default); //create connection with new parent ie.outside compartment
+		Eref( msid ).add( outsideFinfo->msg(),outcompt(),insideFinfo->msg(),ConnTainer::Default );
+		
+	}	
+	
 	return idMap;
 }
 
@@ -191,12 +198,6 @@ map< string,Id > SbmlReader::createMolecule( map< string,Id > &idMap )
 		if ( s->isSetName() ){
 			name = s->getName();
 		} 
-		/*string spId;
-		if ( name != "" )
-			spId = name;
-		else
-			spId = id;*/
-		//cmptMap[id] = compt;
 		Id comptEl = idMap[compt];
 		molecule_ = Neutral::create( "Molecule",id,comptEl,Id::scratchId() );//create Molecule
 		molMap[id] = comptEl; 

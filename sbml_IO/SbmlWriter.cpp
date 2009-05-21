@@ -202,7 +202,7 @@ SBMLDocument* SbmlWriter::createModel( string filename )
 			sp->setInitialAmount( initamt );			
 			vector< Eref > sumtotal;
 			targets( moleEl,"sumTotal",sumtotal );
-			//cout<<" sumtotal size :"<<sumtotal.size()<<endl;
+			cout<<" sumtotal size :"<<sumtotal.size()<<endl;
 			int sumtot_count = sumtotal.size();
 			if ( sumtot_count > 0 )
 			{
