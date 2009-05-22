@@ -24,7 +24,6 @@ OBJ = \
 	SynChan.o	\
 	BinSynchan.o	\
 	StochSynchan.o	\
-	PulseGen.o	\
 	RandomSpike.o \
 	Cell.o		\
 	BioScan.o	\
