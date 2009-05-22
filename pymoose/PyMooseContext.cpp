@@ -1552,15 +1552,29 @@ const string& PyMooseContext::doc(const string& target) const
 // argument which will be filled in?
 vector<Id> PyMooseContext::getNeighbours(Id src, const string& finfoName)
 {
+    vector<string> fieldList;
     vector<Id> ret;
     Element* element = src();
-    Conn* conn = element->targets(finfoName, src.index());
-    while (conn->good()){
-        Eref target = conn->target();
-        ret.push_back(target.id());
-        conn->increment();
-    }      
-
+    if (finfoName.length() == 0){
+        return ret;
+    } else if (finfoName.length() == 1 && finfoName[0] == '*'){
+        const Cinfo* cinfo = element->cinfo();
+        vector<const Finfo*> finfoList;
+        cinfo->listFinfos(finfoList);
+        for ( int i = 0; i < finfoList.size(); ++i ){
+            fieldList.push_back(finfoList[i]->name());
+        }
+    } else {
+        fieldList.push_back(finfoName);
+    }
+    for ( int i = 0; i < fieldList.size(); ++i){
+        Conn* conn = element->targets(fieldList[i], src.index());
+        while (conn->good()){
+            Eref target = conn->target();
+            ret.push_back(target.id());
+            conn->increment();
+        }      
+    }
     return ret;
 }
 
@@ -1570,7 +1584,7 @@ vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
     const Cinfo* cinfo = id()->cinfo();
     vector<const Finfo*> finfoList;
     cinfo->listFinfos(finfoList);
-    cout << "Field type:" << ftype << endl;
+
     switch (ftype){
         case VALUE:
             for (int i = 0; i < finfoList.size(); ++i)
