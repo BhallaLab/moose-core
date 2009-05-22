@@ -34,6 +34,8 @@ namespace pymoose
         const std::vector<std::string> getFieldList() const;
         const std::string getField(std::string name) const;
         void setField(std::string name, std::string value);
+        const std::vector<std::string> getFieldList(FieldType ftype=ALL);
+        const std::vector<Id> neighbours(const std::string& msgName="*");
         const std::string __get_className() const;
         const vector< Id > children() const;
         const Id* __get_parent() const;
@@ -58,7 +60,8 @@ namespace pymoose
         static Id pathToId(std::string path, bool echo = true);
         static const std::string idToPath(Id id);
         static Id getParent(Id id);
-        static std::vector < Id > getChildren(Id id);    
+        static std::vector < Id > getChildren(Id id);
+        
         static void initSimulation();
         
 // Think about this - are we going to allow people to access objects by their ID?
