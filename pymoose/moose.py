@@ -1504,7 +1504,10 @@ class PyMooseContext(object):
         return _moose.PyMooseContext_doc(*args)
 
     def getNeighbours(*args):
-        """getNeighbours(self, Id object, string fieldName) -> Id_vector"""
+        """
+        getNeighbours(self, Id object, string fieldName="*") -> Id_vector
+        getNeighbours(self, Id object) -> Id_vector
+        """
         return _moose.PyMooseContext_getNeighbours(*args)
 
     def getFieldList(*args):
@@ -1589,10 +1592,6 @@ class PyMooseBase(object):
         return _moose.PyMooseBase_getContext(*args)
 
     getContext = staticmethod(getContext)
-    def getFieldList(*args):
-        """getFieldList(self) -> string_vector"""
-        return _moose.PyMooseBase_getFieldList(*args)
-
     def getField(*args):
         """getField(self, string name) -> string"""
         return _moose.PyMooseBase_getField(*args)
@@ -1600,6 +1599,21 @@ class PyMooseBase(object):
     def setField(*args):
         """setField(self, string name, string value)"""
         return _moose.PyMooseBase_setField(*args)
+
+    def getFieldList(*args):
+        """
+        getFieldList(self) -> string_vector
+        getFieldList(self, FieldType ftype=ALL) -> string_vector
+        getFieldList(self) -> string_vector
+        """
+        return _moose.PyMooseBase_getFieldList(*args)
+
+    def neighbours(*args):
+        """
+        neighbours(self, string msgName="*") -> Id_vector
+        neighbours(self) -> Id_vector
+        """
+        return _moose.PyMooseBase_neighbours(*args)
 
     def __get_className(*args):
         """__get_className(self) -> string"""

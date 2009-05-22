@@ -15,12 +15,14 @@ OBJ= \
 	DiffAmp.o \
 	PIDController.o \
 	RC.o	\
+	PulseGen.o	\
 
 
 HEADERS= \
 	DiffAmp.h \
 	PIDController.h \
 	RC.h	\
+	PulseGen.h	\
 
 
 default: $(TARGET)
