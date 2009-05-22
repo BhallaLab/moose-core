@@ -131,7 +131,7 @@ enum FieldType { ALL, VALUE, LOOKUP, SOURCE, DEST, SHARED, SOLVE, THIS, GLOBAL, 
         void planarWeight(std::string src, double weight);
         const std::string& className(const Id& objId) const;
         const std::string& doc(const std::string& className) const;
-        vector<Id> getNeighbours(Id object, const std::string& fieldName);
+        vector<Id> getNeighbours(Id object, const std::string& fieldName="*");
         vector<string> getFieldList(Id id, FieldType ftype=ALL);        
 #ifdef DO_UNIT_TESTS    
         static bool testPyMooseContext(int count, bool print);
