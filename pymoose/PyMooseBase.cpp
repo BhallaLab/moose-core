@@ -352,6 +352,14 @@ const vector <Id> PyMooseBase::children() const
     return context_->getChildren(id_);
 }
 
+const vector <std::string> PyMooseBase::getFieldList(FieldType ftype)
+{
+    return context_->getFieldList(id_, ftype);
+}
+const vector <Id> PyMooseBase::neighbours(const std::string& msgName)
+{
+    return context_->getNeighbours(id_, msgName);
+}
 const std::string PyMooseBase::__get_name() const
 {
     return context_->getName(id_);
