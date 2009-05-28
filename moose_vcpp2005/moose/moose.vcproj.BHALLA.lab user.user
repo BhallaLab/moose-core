@@ -38,8 +38,8 @@
 			>
 			<DebugSettings
 				Command="$(TargetPath)"
-				WorkingDirectory=""
-				CommandArguments=""
+				WorkingDirectory="D:\moose_Beta_1.2\moose_vcpp2005\release"
+				CommandArguments="acc70.g"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"
