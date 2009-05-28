@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
+  <model metaid="acc71" id="acc71" name="acc71">
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+        <rdf:Description rdf:about="#acc71">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Bhalla</vCard:Family>
+                  <vCard:Given>Upi</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>bhalla@ncbs.res.in</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>National Centre for Biological Sciences</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2006-10-18T16:39:27Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2009-03-11T09:39:00-02:00</dcterms:W3CDTF>
+          </dcterms:modified>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+    <listOfUnitDefinitions>
+      <unitDefinition id="substance">
+        <listOfUnits>
+          <unit kind="mole" scale="-6"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_second">
+        <listOfUnits>
+          <unit kind="mole" exponent="0" scale="-6"/>
+          <unit kind="second" exponent="-1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_uMole_per_second">
+        <listOfUnits>
+          <unit kind="mole" exponent="-1" scale="-6"/>
+          <unit kind="second" exponent="-1"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="kinetics_578_0_" size="5.21674864118402e-13"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="Pi__589_0_" compartment="kinetics_578_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="RasGTP_595_0_" compartment="kinetics_578_0_" initialAmount="5.21674864118402e-13" hasOnlySubstanceUnits="true"/>
+      <species id="RasGTP_minus_NF1_596_0_" compartment="kinetics_578_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="RasGTP_minus_NF1_star__597_0_" compartment="kinetics_578_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="RasGDP_minus_NF1_Pi_598_0_" compartment="kinetics_578_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="RasGDP_NF1_599_0_" compartment="kinetics_578_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="RasGDP_600_0_" compartment="kinetics_578_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="NF1_601_0_" compartment="kinetics_578_0_" initialAmount="5.21641653342739e-12" hasOnlySubstanceUnits="true"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="GTP_hydrolysis_sbo_1_sbc__590_0_">
+        <listOfReactants>
+          <speciesReference species="RasGTP_minus_NF1_star__597_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGDP_minus_NF1_Pi_598_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> GTP_hydrolysis_sbo_1_sbc__kf </ci>
+                <ci> RasGTP_minus_NF1_star__597_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> GTP_hydrolysis_sbo_1_sbc__kb </ci>
+                <ci> RasGDP_minus_NF1_Pi_598_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="GTP_hydrolysis_sbo_1_sbc__kf" value="19.5" units="per_second"/>
+            <parameter id="GTP_hydrolysis_sbo_1_sbc__kb" value="0.22" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="GTP_hydrolysis_sbo_2_sbc__591_0_">
+        <listOfReactants>
+          <speciesReference species="RasGDP_minus_NF1_Pi_598_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pi__589_0_"/>
+          <speciesReference species="RasGDP_NF1_599_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> GTP_hydrolysis_sbo_2_sbc__kf </ci>
+                <ci> RasGDP_minus_NF1_Pi_598_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> GTP_hydrolysis_sbo_2_sbc__kb </ci>
+                <ci> Pi__589_0_ </ci>
+                <ci> RasGDP_NF1_599_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="GTP_hydrolysis_sbo_2_sbc__kf" value="40" units="per_second"/>
+            <parameter id="GTP_hydrolysis_sbo_2_sbc__kb" value="207023168.31483" units="per_uMole_per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Ras_activation_592_0_">
+        <listOfReactants>
+          <speciesReference species="RasGTP_minus_NF1_596_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGTP_minus_NF1_star__597_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> Ras_activation_kf </ci>
+                <ci> RasGTP_minus_NF1_596_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> Ras_activation_kb </ci>
+                <ci> RasGTP_minus_NF1_star__597_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="Ras_activation_kf" value="418" units="per_second"/>
+            <parameter id="Ras_activation_kb" value="5.5" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="GAP_dissociation_593_0_">
+        <listOfReactants>
+          <speciesReference species="RasGDP_NF1_599_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGDP_600_0_"/>
+          <speciesReference species="NF1_601_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> GAP_dissociation_kf </ci>
+                <ci> RasGDP_NF1_599_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> GAP_dissociation_kb </ci>
+                <ci> RasGDP_600_0_ </ci>
+                <ci> NF1_601_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="GAP_dissociation_kf" value="46.5" units="per_second"/>
+            <parameter id="GAP_dissociation_kb" value="2300277499526.3" units="per_uMole_per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="NF1_binding_594_0_">
+        <listOfReactants>
+          <speciesReference species="RasGTP_595_0_"/>
+          <speciesReference species="NF1_601_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGTP_minus_NF1_596_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> NF1_binding_kf </ci>
+                <ci> RasGTP_595_0_ </ci>
+                <ci> NF1_601_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> NF1_binding_kb </ci>
+                <ci> RasGTP_minus_NF1_596_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="NF1_binding_kf" value="2300277499526.3" units="per_uMole_per_second"/>
+            <parameter id="NF1_binding_kb" value="6.36" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

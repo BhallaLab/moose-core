@@ -123,7 +123,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\scheduling;..\..\robots;..\..\maindir;..\..\hsolve;..\..\utility;..\..\kinetics;..\..\ksolve;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..\pymoose;..\..;&quot;C:\Program Files\GnuWin32\include&quot;;C:\Python25\include"
+				AdditionalIncludeDirectories="..\..\device;..\..\scheduling;..\..\maindir;..\..\hsolve;..\..\utility;..\..\kinetics;..\..\ksolve;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..\pymoose;..\..;&quot;C:\Program Files\GnuWin32\include&quot;;C:\Python25\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;snprintf=_snprintf_s;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -232,10 +232,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\biophysics\PulseGen.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\biophysics\RandomSpike.cpp"
 					>
 				</File>
@@ -337,6 +333,10 @@
 				</File>
 				<File
 					RelativePath="..\..\basecode\Id.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\basecode\IdGenerator.cpp"
 					>
 				</File>
 				<File
@@ -560,6 +560,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\kinetics\KinPlaceHolder.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\kinetics\MathFunc.cpp"
 					>
 				</File>
@@ -604,11 +608,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\maindir\main.cpp"
+					RelativePath="..\..\maindir\initCinfos.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\maindir\mpiSetup.cpp"
+					RelativePath="..\..\maindir\main.cpp"
 					>
 				</File>
 				<File
@@ -914,6 +918,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\DiffAmp.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\DifShell.cpp"
 					>
 					<FileConfiguration
@@ -1046,6 +1054,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\GHK.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\GssaStoich.cpp"
 					>
 					<FileConfiguration
@@ -1176,6 +1188,14 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\IntFire.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\IzhikevichNrn.cpp"
+					>
 				</File>
 				<File
 					RelativePath="..\..\pymoose\KinCompt.cpp"
@@ -1446,6 +1466,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\PIDController.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\PoissonRng.cpp"
 					>
 					<FileConfiguration
@@ -1544,6 +1568,10 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\RC.cpp"
+					>
 				</File>
 				<File
 					RelativePath="..\..\pymoose\Reaction.cpp"
@@ -2295,10 +2323,10 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="robots"
+				Name="device"
 				>
 				<File
-					RelativePath="..\..\robots\Adaptor.cpp"
+					RelativePath="..\..\device\DiffAmp.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -2320,7 +2348,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\robots\SigNeur.cpp"
+					RelativePath="..\..\device\PIDController.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -2342,20 +2370,30 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\robots\SigNeurAdaptors.cpp"
+					RelativePath="..\..\device\PulseGen.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\robots\SigNeurDiffusion.cpp"
+					RelativePath="..\..\device\RC.cpp"
 					>
-				</File>
-				<File
-					RelativePath="..\..\robots\SigNeurNeuron.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\robots\SigNeurSignaling.cpp"
-					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 			</Filter>
 		</Filter>
@@ -2409,10 +2447,6 @@
 				</File>
 				<File
 					RelativePath="..\..\biophysics\Nernst.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\PulseGen.h"
 					>
 				</File>
 				<File
@@ -2553,6 +2587,10 @@
 				</File>
 				<File
 					RelativePath="..\..\basecode\Id.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\basecode\IdGenerator.h"
 					>
 				</File>
 				<File
@@ -2792,6 +2830,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\kinetics\KinPlaceHolder.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\kinetics\MathFunc.h"
 					>
 				</File>
@@ -3012,6 +3054,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\IntFire.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\IzhikevichNrn.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\KinCompt.h"
 					>
 				</File>
@@ -3060,6 +3110,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\PIDController.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\PoissonRng.h"
 					>
 				</File>
@@ -3093,6 +3147,10 @@
 				</File>
 				<File
 					RelativePath="..\..\pymoose\RandomSpike.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\RC.h"
 					>
 				</File>
 				<File
@@ -3309,14 +3367,22 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="robots"
+				Name="device"
 				>
 				<File
-					RelativePath="..\..\robots\Adaptor.h"
+					RelativePath="..\..\device\DiffAmp.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\robots\SigNeur.h"
+					RelativePath="..\..\device\PIDController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\device\PulseGen.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\device\RC.h"
 					>
 				</File>
 			</Filter>
