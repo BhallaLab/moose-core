@@ -44,6 +44,8 @@ void SbmlReader::read( string filename,Id location )
 		return;
 	}
 	model_= document_->getModel();
+	cout<<"model id :"<<model_->getId()<<endl;
+	cout<<"no. of compartments:"<<model_->getNumCompartments()<<endl;
 	if ( model_ == 0 )
 	{
 		cout << "No model present." << endl;
@@ -113,15 +115,15 @@ map< string,Id > SbmlReader::createCompartment( Id location )
 	for ( unsigned int i=0;i<model_->getNumCompartments();i++ )
 	{
 		compt = model_->getCompartment(i);
-		std::string id;
+		std::string id = "";
 		if ( compt->isSetId() ){
 			id = compt->getId();
 		}
-		std::string name;
+		std::string name = "";
 		if ( compt->isSetName() ){
 			name = compt->getName();
 		} 
-		std::string outside;
+		std::string outside = "";
 		if ( compt->isSetOutside() ){
 			outside = compt->getOutside ();
 			
@@ -212,9 +214,6 @@ map< string,Id > SbmlReader::createMolecule( map< string,Id > &idMap )
 			initvalue = s->getInitialAmount() ;
 		double transvalue = transformUnits(1,ud);
 		transvalue *= initvalue;
-		//double transvalue = transformUnits(initvalue,ud);
-		//bool has_subunits = s->getHasOnlySubstanceUnits();
-		//cout<<"has_sub "<<has_subunits<<endl;
 		unsigned int dimension;
                 get< unsigned int >( comptEl.eref(), dimensionFinfo,dimension );
 		if ( dimension > 0 && s->isSetInitialConcentration() ) { 
@@ -222,9 +221,7 @@ map< string,Id > SbmlReader::createMolecule( map< string,Id > &idMap )
 			double size;
 			get< double > (comptEl.eref(),sizeFinfo,size); 			
 			transvalue *= size;	
-			//transvalue /= size;					
 		}
-		//cout<<"n init is :"<<transvalue<<endl;
 		set< double >( molecule_, nInitFinfo, transvalue ); //initialAmount 	
 		bool cons=s->getConstant(); 
 		bool bcondition = s->getBoundaryCondition();

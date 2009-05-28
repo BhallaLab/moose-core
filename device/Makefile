@@ -8,8 +8,7 @@
 ## Last update Mon Dec 29 15:52:03 2008 subhasis ray
 ## 
 
-CXXFLAGS += -I..
-
+CXXFLAGS += -I.. -I../basecode
 TARGET=device.o
 OBJ= \
 	DiffAmp.o \

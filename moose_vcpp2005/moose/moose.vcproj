@@ -44,7 +44,11 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_MPI"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
+<<<<<<< .working
 				RuntimeLibrary="1"
+=======
+				RuntimeLibrary="3"
+>>>>>>> .merge-right.r1122
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -62,7 +66,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				UseLibraryDependencyInputs="true"
+<<<<<<< .working
 				AdditionalDependencies="libgsl.a libgslcblas.a mpi.lib Ws2_32.lib cxx.lib"
+=======
+				AdditionalDependencies="libgsl.a libgslcblas.a mpi.lib Ws2_32.lib cxx.lib bzip2.lib libsbmlD.lib libexpat.lib zlib.lib"
+>>>>>>> .merge-right.r1122
 				ShowProgress="2"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
@@ -125,8 +133,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_MPI"
+				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;C:\Program Files\SBML\libSBML-3.3.2-xerces\win32\include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_MPI;USE_SBML"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -148,15 +156,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libgsl.a libgslcblas.a mpi.lib Ws2_32.lib cxx.lib"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				ImportLibrary=""
-				TargetMachine="1"
+				UseLibraryDependencyInputs="false"
+				AdditionalDependencies="libgsl.a libgslcblas.a mpi.lib Ws2_32.lib cxx.lib bzip2.lib libsbml.lib zlib.lib zdll.lib xerces-c_2.lib"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\SBML\libSBML-3.3.2-xerces\win32\lib&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -1837,26 +1839,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="scheduling"
-				>
-				<File
-					RelativePath="..\..\scheduling\ClockJob.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\scheduling\ParTick.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\scheduling\Sched.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\scheduling\Tick.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="shell"
 				>
 				<File
@@ -2081,6 +2063,26 @@
 				</File>
 				<File
 					RelativePath="..\..\parallel\ProxyElement.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="scheduling"
+				>
+				<File
+					RelativePath="..\..\scheduling\ClockJob.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\scheduling\ParTick.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\scheduling\Sched.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\scheduling\Tick.h"
 					>
 				</File>
 			</Filter>
