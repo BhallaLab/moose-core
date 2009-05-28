@@ -51,13 +51,12 @@ void SbmlWriter::write( string filename,Id location )
 
 SBMLDocument* SbmlWriter::createModel( string filename )
 {
-	SBMLDocument* sbmlDoc = new SBMLDocument( 2, 4 );
+	SBMLDocument* sbmlDoc = new SBMLDocument();
 	model_ = sbmlDoc->createModel();
   	model_->setId( filename );
 	model_->setMetaId( filename );
 	model_->setName( filename );
-        //cout<<"trancriber :"<<GetInfoField("transcriber")<<endl;
-       	ModelHistory * h = new ModelHistory();
+        ModelHistory * h = new ModelHistory();
 	ModelCreator *c = new ModelCreator();
 	c->setFamilyName( "Bhalla" );
 	c->setGivenName( "Upi" );
@@ -202,7 +201,7 @@ SBMLDocument* SbmlWriter::createModel( string filename )
 			sp->setInitialAmount( initamt );			
 			vector< Eref > sumtotal;
 			targets( moleEl,"sumTotal",sumtotal );
-			cout<<" sumtotal size :"<<sumtotal.size()<<endl;
+			//cout<<" sumtotal size :"<<sumtotal.size()<<endl;
 			int sumtot_count = sumtotal.size();
 			if ( sumtot_count > 0 )
 			{
@@ -262,7 +261,7 @@ SBMLDocument* SbmlWriter::createModel( string filename )
 			string newName = changeName( rtnName,rtnId.str() );
 			newName = idBeginWith( newName );
 			reaction->setId( newName );
-			cout<<"reaction :"<<newName<<endl;
+			//cout<<"reaction :"<<newName<<endl;
 			double kb=0.0,kf=0.0;
 			get< double >( rectnEl, kbFinfo, kb ); 
 			get< double >( rectnEl, kfFinfo, kf ); 
@@ -295,7 +294,7 @@ SBMLDocument* SbmlWriter::createModel( string filename )
 				
 				
 			}
-			cout<<"rct_order is "<<rct_order<<endl;
+			//cout<<"rct_order is "<<rct_order<<endl;
 			// Create a Product object that references particular Species  in the model. 		
 			pdt.clear();
 			targets( rectnEl,"prd",pdt );
@@ -320,7 +319,7 @@ SBMLDocument* SbmlWriter::createModel( string filename )
 				pdt_order += pdtstoch;
 				
 			}
-			cout<<"pdt_order is "<<pdt_order<<endl;
+			//cout<<"pdt_order is "<<pdt_order<<endl;
 			// Create a KineticLaw object inside the Reaction object 
 			ostringstream rate_law,kfparm,kbparm;
 			if ( kf != 0.0 ){
@@ -367,7 +366,7 @@ SBMLDocument* SbmlWriter::createModel( string filename )
 			}
 			kl  = reaction->createKineticLaw();
 			kl->setFormula( rate_law.str() );
-			cout<<"rate law: "<<rate_law.str()<<endl; 
+			//cout<<"rate law: "<<rate_law.str()<<endl; 
 			// Create local Parameter objects inside the KineticLaw object. 
 			para = kl->createParameter();
 			para->setId(kfparm.str());
@@ -585,7 +584,7 @@ void SbmlWriter::printEnzymes( vector< Id > enzms )
 			if ( rev )
 				rlaw<<"*"<<newcplxName;
 			//sp->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t this is a complex species \n\t    </body>");
-			cout<<"rate law of complex formation :"<<rlaw.str()<<endl; 
+			//cout<<"rate law of complex formation :"<<rlaw.str()<<endl; 
 			kl  = react->createKineticLaw();
 			kl->setFormula( rlaw.str() );
 			//kl->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + rlaw.str() + "\n\t    </body>");
@@ -660,7 +659,7 @@ void SbmlWriter::printEnzymes( vector< Id > enzms )
 				ezprd.clear();
 				targets( ezMParent(),"prd",ezprd );
 				printProducts( react,ezprd,law ); //invoke function createProducts
-				cout<<"rate law of product formation :"<<law.str()<<endl; 
+				//cout<<"rate law of product formation :"<<law.str()<<endl; 
 				kl  = react->createKineticLaw();
 				kl->setFormula( law.str() );
 				//kl->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + law.str() + "\n\t    </body>");
@@ -707,7 +706,7 @@ void SbmlWriter::printEnzymes( vector< Id > enzms )
 			rctnName = idBeginWith( rctnName );
 			//cout<<"mm rctn name :" <<rctnName<<endl;
 			react->setId(rctnName);
-			cout<<"reaction : "<<rctnName<<endl;
+			//cout<<"reaction : "<<rctnName<<endl;
 			react->setReversible( false );
 			sub.clear();
 			targets( enzEl,"sub",sub );
@@ -752,7 +751,7 @@ void SbmlWriter::printEnzymes( vector< Id > enzms )
 				
 			}
 			rlaw<<")";
-			cout<<"rate law of MM Reaction :"<<rlaw.str()<<endl; 
+			//cout<<"rate law of MM Reaction :"<<rlaw.str()<<endl; 
 			kl  = react->createKineticLaw();
 			kl->setFormula( rlaw.str() );
 			kl->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + rlaw.str() + "\n\t    </body>");
