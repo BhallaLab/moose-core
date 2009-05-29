@@ -48,9 +48,7 @@ const Cinfo* initHHGate2DCinfo()
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
-		new DestFinfo( "postCreate", Ftype0::global(),
-			&HHGate2D::postCreate ),
-		new DestFinfo( "createInterpols", Ftype2< Id, Id >::global(),
+		new DestFinfo( "createInterpols", Ftype1< IdGenerator >::global(),
 			RFCAST( &HHGate2D::createInterpols ),
 			"Request the gate explicitly to create Interpols, with the given "
 			"ids. This is used when the gate is a global object, and so the "
@@ -145,27 +143,11 @@ void HHGate2D::gateFunc( const Conn* c, double v1, double v2 )
 }
 
 /**
- * This creates two nested child objects on the HHGate, to hold the
- * Interpols.
- * 
- * If the HHGate is global, then don't take responsibility of creating
- * interpols. The creator of the gate should make an explicit call to
- * "createInterpols" for this.
- */
-void HHGate2D::postCreate( const Conn* c )
-{
-	if ( c->target()->id().isGlobal() )
-		return;
-	
-	createInterpols( c, Id::newId(), Id::newId() );
-}
-
-/**
  * Request the gate explicitly to create Interpols, with the given ids. This is
  * used when the gate is a global object, and so the interpols need to be
  * globals too. Comes in use in TABCREATE in the parallel context.
  */
-void HHGate2D::createInterpols( const Conn* c, Id aId, Id bId )
+void HHGate2D::createInterpols( const Conn* c, IdGenerator idGen )
 {
 	HHGate2D* h = static_cast< HHGate2D *>( c->data() );
 	Eref e = c->target();
@@ -175,10 +157,10 @@ void HHGate2D::createInterpols( const Conn* c, Id aId, Id bId )
 	// Here we must set the noDelFlag to 1 because these data
 	// parts belong to the parent HHGate2D structure.
 	Element* A = ic->create( 
-		aId, "A", static_cast< void* >( &h->A_ ), 1 );
+		idGen.next(), "A", static_cast< void* >( &h->A_ ), 1 );
 	e.add( "childSrc", A, "child" );
 
 	Element* B = ic->create( 
-		bId, "B", static_cast< void* >( &h->B_), 1 );
+		idGen.next(), "B", static_cast< void* >( &h->B_), 1 );
 	e.add( "childSrc", B, "child" );
 }

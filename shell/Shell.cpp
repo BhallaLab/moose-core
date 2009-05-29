@@ -568,38 +568,40 @@ const Cinfo* initShellCinfo()
 		///////////////////////////////////////////////////////////////
 		new SrcFinfo( "requestIdBlockSrc",
 			Ftype3< unsigned int, unsigned int, unsigned int >::global(),
-			"Here a slave node requests the master node for a block of main Ids that it can use locally."
+			"Here a slave node requests the master node for a block of main "
+			"Ids that it can use locally. "
 			"Args: size of block, requesting node, request Id" ),
 		new DestFinfo( "requestIdBlock",
 			Ftype3< unsigned int, unsigned int, unsigned int >::global(),
 			RFCAST( &Shell::handleRequestNewIdBlock ),
-			"Here the master node interceptes requests from slave nodes for regular Ids "
-			"Args: size of block, requesting node, request Id " ),
+			"Here the master node intercepts requests from slave nodes for "
+			"a new Id block. "
+			"Args: size of block, requesting node, request Id" ),
 		new SrcFinfo( "returnIdBlockSrc",
 			Ftype2< unsigned int, unsigned int >::global(),
-			"Respond to requests from slave nodes for regular ids. "
+			"Respond to requests from slave nodes for a new Id block. "
 			"Args: Base id in alloted block, request Id" ),
 		new DestFinfo( "returnIdBlock",
 			Ftype2< unsigned int, unsigned int >::global(),
 			RFCAST( &Shell::handleReturnNewIdBlock ),
-			"Receive vector of main Ids from master node "
-			"Args: Base id in alloted block, request Id " ),
+			"Receive an Id block from master node. "
+			"Args: Base id in alloted block, request Id" ),
 		
 		///////////////////////////////////////////////////////////////
 		// Misc
 		///////////////////////////////////////////////////////////////
 		new SrcFinfo( "createGateSrc",
-			Ftype5< Id, string, Id, Id, Id >::global(),
-			"Args: Gate type (X/Y/Z), HHChannel id, HHGate id, Interpol A id, Interpol B id. "
-			"This requests a global HHGate to create Interpols, with the given "
-			"ids. This is used when the gate is a global object, and so the "
-			"interpols need to be globals too. Comes in use in TABCREATE in the "
-			"parallel context." ),
+			Ftype3< Id, string, IdGenerator >::global(),
+			"Args: HHChannel id, Gate type (X/Y/Z), IdGenerator for children. "
+			"This requests a global HHChannel to create an HHGate, and its "
+			"Interpols (i.e., rate lookup tables). The IdGenerator is used for "
+			"assigning ids to these 3 objects. This is necessary for aligning "
+			"ids of the children across nodes, since they will be globals too." ),
 		new DestFinfo( "createGate",
-			Ftype5< Id, string, Id, Id, Id >::global(),
+			Ftype3< Id, string, IdGenerator >::global(),
 			RFCAST( &Shell::createGateWorker ),
-			"Args: Gate type (X/Y/Z), HHChannel id, HHGate id, Interpol A id, Interpol B id. "
-			"Handles request sent from the createInterpolsSrc Finfo" ),
+			"Args: HHChannel id, Gate type (X/Y/Z), IdGenerator for children. "
+			"Handles request sent from the createGateSrc Finfo." ),
 		
 		new SrcFinfo( "setupAlphaSrc",
 			Ftype2< Id, vector< double > >::global() ),
@@ -683,7 +685,7 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "createGate", 
 			Ftype2< Id, string >::global(),
 			RFCAST( &Shell::createGateMaster ),
-			"Args: Channel id, gate type (X, Y or Z) "
+			"Args: Channel id, gate type (X, Y or Z). "
 			"Request an HHChannel to create a gate on it." ),
 		new SrcFinfo( "pollSrc", 
 			// # of steps. 
@@ -2215,50 +2217,27 @@ void Shell::createGateMaster( const Conn* c, Id chan, string gateName )
 {
 	assert( myNode() == 0 );
 	
-	Id gate = Id::newId();
-	Id A = Id::newId();
-	Id B = Id::newId();
+	IdGenerator idGen = Id::generator( chan.node() );
+	set< string >( chan(), "createGate", gateName, idGen );
 	
-	if ( chan.isGlobal() ) {
-		/* 
-		 * Necessary to set the gate Id as global, before the gate is created
-		 * because the gate uses this information to decide whether it should
-		 * create its interpols.
-		 */
-		gate.setGlobal();
-		A.setGlobal();
-		B.setGlobal();
-	}
-	
-	set< string >( chan(), "createGate", gateName, gate, A, B );
-	
-	if ( chan.isGlobal() ) {
 #ifdef USE_MPI
-		send5< Id, string, Id, Id, Id >(
+	if ( chan.isGlobal() ) {
+		send3< Id, string, IdGenerator >(
 			c->target(), createGateSlot,
-			chan, gateName, gate, A, B );
-#endif
+			chan, gateName, idGen );
 	}
+#endif
 }
 
 // Static function
 void Shell::createGateWorker(
 	const Conn* c,
-	Id chan, string gateName, Id gate, Id A, Id B )
+	Id chan, string gateName, IdGenerator idGen )
 {
 	assert( myNode() != 0 );
 	assert( chan.good() && chan.isGlobal() );
 	
-	/* 
-	 * Necessary to set the gate Id as global, before the gate is created
-	 * because the gate uses this information to decide whether it should
-	 * create its interpols.
-	 */
-	gate.setGlobal();
-	A.setGlobal();
-	B.setGlobal();
-	
-	set< string >( chan(), "createGate", gateName, gate, A, B );
+	set< string, IdGenerator >( chan(), "createGate", gateName, idGen );
 }
 
 
