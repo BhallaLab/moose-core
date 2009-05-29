@@ -166,7 +166,7 @@ const Cinfo* initHHChannelCinfo()
 		new DestFinfo( "concen", Ftype1< double >::global(),
 			RFCAST( &HHChannel::concFunc ) ),
 		new DestFinfo( "createGate",
-			Ftype4< string, Id, Id, Id >::global(),
+			Ftype2< string, IdGenerator >::global(),
 			RFCAST( &HHChannel::createGateFunc ),
 			"" ),
 	};
@@ -307,8 +307,10 @@ void HHChannel::innerSetZpower( Eref e, double Zpower )
  */
 // Assuming that the elements are simple elements. Use Eref for 
 // general case
-void HHChannel::createGateFunc( const Conn* c,
-	string gateType, Id gateId, Id A, Id B )
+void HHChannel::createGateFunc(
+	const Conn* c,
+	string gateType,
+	IdGenerator idGen )
 {
 	string name;
 	if ( gateType == "X" )
@@ -335,40 +337,41 @@ void HHChannel::createGateFunc( const Conn* c,
 	Element* gate = 0;
 	Eref e = c->target();
 	const Finfo* f = e->findFinfo( chanFinfo );
-	Conn* gateConn = e->targets( f->msg(), 0 ); // zero index for SE
 	unsigned int numGates = e->msg( f->msg() )->numTargets( e.e );
 	assert( numGates <= 1 );
 	
 	if ( numGates == 1 ) {
-		gate = gateConn->target().e;
+		Conn* gateConn = e->targets( f->msg(), 0 ); // zero index for SE
+		Element* existingGate = gateConn->target().e;
+		delete gateConn;
 		unsigned int numChans =
-			gate->msg( gate->findFinfo( gateFinfo )->msg() )->size();
+			existingGate->msg( gate->findFinfo( gateFinfo )->msg() )->size();
+		
 		assert( numChans > 0 );
 		if ( numChans > 1 ) {
 			// Here we have multiple channels using this gate. So
 			// we don't mess with the original.
 			// make a new gate which we can change.
-			gate = Neutral::create( gateClass, name, e->id(), gateId );
+			gate = Neutral::create( gateClass, name, e->id(), idGen.next() );
 			gate->addFinfo( GlobalMarkerFinfo::global() );
 			bool ret = Eref( e ).add( chanFinfo, gate, gateFinfo );
 			assert( ret );
 		}
 	} else { // No gate, make a new one.
-		gate = Neutral::create( gateClass, name, e->id(), gateId );
+		gate = Neutral::create( gateClass, name, e->id(), idGen.next() );
 		// Make it a global so that duplicates do not happen unless
 		// the table values change.
 		gate->addFinfo( GlobalMarkerFinfo::global() );
 		bool ret = Eref( e ).add( chanFinfo, gate, gateFinfo );
 		assert( ret );
 	}
-	delete gateConn;
 	
 	string path = e->id().path() + "/" + name;
 	assert( Id( path ).good() );
 	
 	// If a gate was created in this function, then create interpols inside it.
-	if ( gate == gateId() ) {
-		set< Id, Id >( gate, "createInterpols", A, B );
+	if ( gate != 0 ) {
+		set< IdGenerator >( gate, "createInterpols", idGen );
 		assert( Id( path + "/A" ).good() );
 		assert( Id( path + "/B" ).good() );
 	}

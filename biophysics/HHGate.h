@@ -20,8 +20,7 @@ class HHGate
 		
 		static void gateFunc(
 				const Conn* c, double v );
-		static void postCreate( const Conn* c );
-		static void createInterpols( const Conn* c, Id aId, Id bId );
+		static void createInterpols( const Conn* c, IdGenerator idGen );
 		static void setupAlpha( const Conn* c, vector< double > parms );
 		static void setupTau( const Conn* c, vector< double > parms );
 		static void tweakAlpha( const Conn* c );
