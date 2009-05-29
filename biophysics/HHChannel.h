@@ -160,9 +160,7 @@ class HHChannel
 		static void createGateFunc(
 			const Conn* c,
 			string gateType,
-			Id gate,
-			Id A,
-			Id B );
+			IdGenerator idGen );
 
 	protected:
 		virtual string chanFinfo( string gateType ) const

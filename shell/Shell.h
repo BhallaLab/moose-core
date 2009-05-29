@@ -818,9 +818,7 @@ class Shell
 				const Conn* c,
 				Id chan,
 				string gateName,
-				Id gate,
-				Id A,
-				Id B );
+				IdGenerator idGen );
 		
 		/*
 		void add( const string& src, const string& dest );
