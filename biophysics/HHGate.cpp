@@ -49,9 +49,8 @@ const Cinfo* initHHGateCinfo()
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
-		new DestFinfo( "postCreate", Ftype0::global(),
-			&HHGate::postCreate ),
-		new DestFinfo( "createInterpols", Ftype2< Id, Id >::global(),
+		new DestFinfo( "createInterpols",
+			Ftype1< IdGenerator >::global(),
 			RFCAST( &HHGate::createInterpols ),
 			"Request the gate explicitly to create Interpols, with the given "
 			"ids. This is used when the gate is a global object, and so the "
@@ -130,27 +129,11 @@ void HHGate::gateFunc( const Conn* c, double v )
 }
 
 /**
- * This creates two nested child objects on the HHGate, to hold the
- * Interpols.
- * 
- * If the HHGate is global, then don't take responsibility of creating
- * interpols. The creator of the gate should make an explicit call to
- * "createInterpols" for this.
- */
-void HHGate::postCreate( const Conn* c )
-{
-	if ( c->target()->id().isGlobal() )
-		return;
-	
-	createInterpols( c, Id::newId(), Id::newId() );
-}
-
-/**
  * Request the gate explicitly to create Interpols, with the given ids. This is
  * used when the gate is a global object, and so the interpols need to be
  * globals too. Comes in use in TABCREATE in the parallel context.
  */
-void HHGate::createInterpols( const Conn* c, Id aId, Id bId )
+void HHGate::createInterpols( const Conn* c, IdGenerator idGen )
 {
 	HHGate* h = static_cast< HHGate* >( c->data() );
 	Eref e = c->target();
@@ -159,11 +142,11 @@ void HHGate::createInterpols( const Conn* c, Id aId, Id bId )
 	// Here we must set the noDelFlag to 1 because these data
 	// parts belong to the parent HHGate structure.
 	Element* A = ic->create( 
-		aId, "A", static_cast< void* >( &h->A_ ), 1 );
+		idGen.next(), "A", static_cast< void* >( &h->A_ ), 1 );
 	e.add( "childSrc", A, "child" );
 	
 	Element* B = ic->create( 
-		bId, "B", static_cast< void* >( &h->B_), 1 );
+		idGen.next(), "B", static_cast< void* >( &h->B_), 1 );
 	e.add( "childSrc", B, "child" );
 }
 
