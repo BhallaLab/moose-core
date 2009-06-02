@@ -345,7 +345,7 @@ void HHChannel::createGateFunc(
 		Element* existingGate = gateConn->target().e;
 		delete gateConn;
 		unsigned int numChans =
-			existingGate->msg( gate->findFinfo( gateFinfo )->msg() )->size();
+			existingGate->msg( existingGate->findFinfo( gateFinfo )->msg() )->size();
 		
 		assert( numChans > 0 );
 		if ( numChans > 1 ) {
@@ -366,11 +366,11 @@ void HHChannel::createGateFunc(
 		assert( ret );
 	}
 	
-	string path = e->id().path() + "/" + name;
-	assert( Id( path ).good() );
-	
 	// If a gate was created in this function, then create interpols inside it.
 	if ( gate != 0 ) {
+		string path = e->id().path() + "/" + name;
+		assert( Id( path ).good() );
+		
 		set< IdGenerator >( gate, "createInterpols", idGen );
 		assert( Id( path + "/A" ).good() );
 		assert( Id( path + "/B" ).good() );
