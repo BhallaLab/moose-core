@@ -1273,6 +1273,13 @@ void GenesisParserWrapper::doSet( int argc, const char** argv, Id s )
 					// elist for this so as not to interfere with the 
 					// original.
 					Id e( path );
+					if ( e.bad() ) {
+						cerr <<
+							"Error: GenesisParserWrapper::doSet: Object " <<
+							path <<
+							" not found.\n";
+						continue;
+					}
 					vector< Id > el;
 					el.push_back( e );
 					field = field.substr( pos + 2 );

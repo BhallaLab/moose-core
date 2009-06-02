@@ -105,20 +105,33 @@ Plot* findPlot( vector< Plot* >& p, const string& name )
 	return 0;
 }
 
-int main(int argc, char** argv)
+int main( int argc, char** argv )
 {
 		if (argc < 4) {
 				cerr << "Usage: " << argv[0] << " file1 file2 epsilon [-fraction_of_peak]\n";
 				return 0;
 		}
-		fstream f0( argv[1] );
-		fstream f1( argv[2] );
-		double EPSILON = atof( argv[3] );
+		
+		fstream f0( argv[ 1 ] );
+		if ( ! f0.good() ) {
+			cerr << "Error: Unable to open file " << argv[ 1 ] << ".\n";
+			return 1;
+		}
+		
+		fstream f1( argv[ 2 ] );
+		if ( ! f1.good() ) {
+			cerr << "Error: Unable to open file " << argv[ 2 ] << ".\n";
+			return 1;
+		}
+		
+		double EPSILON = atof( argv[ 3 ] );
+		if ( EPSILON <= 0.0 ) {
+			cerr << "Error: epsilon must be positive.\n";
+			return 1;
+		}
+		
 		bool useFrac = 
 			(argc == 5 && argv[4][0] == '-' && argv[4][1] == 'f' );
-		assert( f0.good() );
-		assert( f1.good() );
-		assert( EPSILON > 0.0 );
 
 		vector< Plot* > p0;
 		vector< Plot* > p1;

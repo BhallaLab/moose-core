@@ -54,52 +54,98 @@ include yamadachan.g
 create neutral /library
 
 ce /library
-// bulbchan here
+//	bulbchan here
+	echo "==== Making LCa3_mit_usb"
 	make_LCa3_mit_usb
+	
+	echo "==== Making Na_rat_smsnn"
 	make_Na_rat_smsnn
+	
+	echo "==== Making KA_bsg_yka"
 	make_KA_bsg_yka
+	
+	echo "==== Making KM_bsg_yka"
 	make_KM_bsg_yka
+	
+	echo "==== Making K_mit_usb"
 	make_K_mit_usb
+	
+	echo "==== Making K2_mit_usb"
 	make_K2_mit_usb
+	
+	echo "==== Making Na_mit_usb"
 	make_Na_mit_usb
 	
-	// make_Kca_mit_usb
-	// MOOSE cannot deal with this channel, at this time.
-	// make_Ca_mit_conc
+//	echo "==== Making Kca_mit_usb"
+//	make_Kca_mit_usb
+//	MOOSE cannot deal with this channel, at this time.
+//	echo "==== Making Ca_mit_conc"
+//	make_Ca_mit_conc
 
-// Traubchan here
+//	Traubchan here
+	echo "==== Making Ca_hip_traub"
 	make_Ca_hip_traub
+	
+	echo "==== Making K_hip_traub"
 	make_K_hip_traub
+	
+	echo "==== Making Kca_hip_traub"
 	make_Kca_hip_traub
-
+	
+	echo "==== Making Ca_hip_traub91"
 	make_Ca_hip_traub91
+	
+	echo "==== Making Kahp_hip_traub91"
 	make_Kahp_hip_traub91
+	
+	echo "==== Making Kc_hip_traub91"
 	make_Kc_hip_traub91
+	
+	echo "==== Making Na_hip_traub91"
 	make_Na_hip_traub91
+	
+	echo "==== Making Kdr_hip_traub91"
 	make_Kdr_hip_traub91
+	
+	echo "==== Making Ka_hip_traub91"
 	make_Ka_hip_traub91
 
-// hh_tchan here
-	echo doing hh_tchan
+//	hh_tchan here
+	echo "==== Making Na_hh_tchan"
 	make_Na_hh_tchan
+	
+	echo "==== Making K_hh_tchan"
 	make_K_hh_tchan
 
-// FNTchan her
-	// make_NCa_drg_fnt_tab
-	// make_NCa_drg_fnt
+//	FNTchan her
+//	echo "==== Making NCa_drg_fnt_tab"
+//	make_NCa_drg_fnt_tab
+//	
+//	echo "==== Making NCa_drg_fnt"
+//	make_NCa_drg_fnt
 
-// SMSNN channels here : 
-// Stuhmer, Methfessel, Sakmann, Noda and Numa, Eur Biophys J 1987.
-	echo doing smsnn
+//	SMSNN channels here : 
+//	Stuhmer, Methfessel, Sakmann, Noda and Numa, Eur Biophys J 1987.
+	echo "==== Making Na_rat_smsnn"
 	make_Na_rat_smsnn
 	
-// yamadachan here: Yamada, Koch, and Adams
-// Methods in Neuronal Modeling, MIT press, ed Koch and Segev.
-	echo doing yka
+//	yamadachan here: Yamada, Koch, and Adams
+//	Methods in Neuronal Modeling, MIT press, ed Koch and Segev.
+	echo "==== Making Na_bsg_yka"
 	make_Na_bsg_yka
-	make_Ca_bsg_yka
+	
+//	Currently does not work. TABCREATE fails, and a field assignment subsequently
+//	leads to a crash because the A and B interpols are not present.
+//	echo "==== Making Ca_bsg_yka"
+//	make_Ca_bsg_yka
+	
+	echo "==== Making KA_bsg_yka"
 	make_KA_bsg_yka
+	
+	echo "==== Making KM_bsg_yka"
 	make_KM_bsg_yka
+	
+	echo "==== Making K_bsg_yka"
 	make_K_bsg_yka
 ce /
 
@@ -131,6 +177,7 @@ foreach chan ( { el /library/# } )
 	copy {chan} /compt
 
 	chname = { getpath {chan } -tail }
+	echo "==== Testing channel: "{ chname }
 
 	addmsg /compt /compt/{chname} VOLTAGE Vm
 	addmsg /compt/{chname} /compt CHANNEL Gk Ek
