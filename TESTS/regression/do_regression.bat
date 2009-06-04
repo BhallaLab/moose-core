@@ -1,6 +1,7 @@
 #!/bin/tcsh
 
 set MOOSE = 'mpirun ../../moose'
+#set MOOSE = '../../moose'
 
 # nearDiff is a function to see if two data files are within 
 # epsilon of each other. It assumes the files are in xplot format
@@ -13,6 +14,25 @@ set NEARDIFF = ./neardiff
 echo -n squid
 $MOOSE moose_squid.g > /dev/null
 $NEARDIFF moose_squid.plot test.plot 5.0e-6
+echo 
+
+/bin/rm -f test.plot
+echo -n sbml_Read
+$MOOSE moose_sbml_reader.g > /dev/null
+$NEARDIFF acc88_copasi.plot test.plot 3.0e-2 -f
+echo
+
+#### v20 model gives 5% error when simulating for 3000 secs and 10% for 15000 secs ####
+#/bin/rm -f test.plot
+#echo -n sbml_Read
+#$MOOSE moose_sbml_reader.g > /dev/null
+#$NEARDIFF v20_copasi.plot v20_moose.plot 5.0e-2 -f
+#echo
+
+/bin/rm -f test.plot
+echo -n sbml_Read_Write
+$MOOSE moose_sbml_read_write.g > /dev/null
+$NEARDIFF moose.plot test.plot 1.0e-16 
 echo
 
 /bin/rm -f test.plot
