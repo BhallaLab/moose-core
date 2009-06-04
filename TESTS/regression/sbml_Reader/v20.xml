@@ -1,0 +1,2053 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
+  <model metaid="v20" id="v20" name="v20">
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+        <rdf:Description rdf:about="#v20">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Bhalla</vCard:Family>
+                  <vCard:Given>Upi</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>bhalla@ncbs.res.in</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>National Centre for Biological Sciences</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2006-10-18T16:39:27Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2009-03-11T09:39:00-02:00</dcterms:W3CDTF>
+          </dcterms:modified>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+    <listOfUnitDefinitions>
+      <unitDefinition id="substance">
+        <listOfUnits>
+          <unit kind="mole" scale="-6"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_uMole_per_second">
+        <listOfUnits>
+          <unit kind="mole" exponent="-1" scale="-6"/>
+          <unit kind="second" exponent="-1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_second">
+        <listOfUnits>
+          <unit kind="mole" exponent="0" scale="-6"/>
+          <unit kind="second" exponent="-1"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="CaMKII_636_0_" size="8.96690942907872e-17"/>
+      <compartment id="PSD_663_0_" size="9.96323269897636e-18"/>
+      <compartment id="CaMKII_PSD_678_0_" size="9.96323269897636e-18"/>
+      <compartment id="kinetics_602_0_" size="8.96690942907872e-17"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="CaMKII_637_0_" compartment="CaMKII_636_0_" initialAmount="1.79338188581574e-15" hasOnlySubstanceUnits="true"/>
+      <species id="CaMKII_minus_CaM_638_0_" compartment="CaMKII_636_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaMKII_minus_thr286_star__minus_CaM_639_0_" compartment="CaMKII_636_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaMKII_star__star__star__640_0_" compartment="CaMKII_636_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaMKII_minus_thr286_643_0_" compartment="CaMKII_636_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaMK_minus_thr306_644_0_" compartment="CaMKII_636_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="tot_CaM_CaMKII_645_0_" compartment="CaMKII_636_0_" initialAmount="0" hasOnlySubstanceUnits="true" boundaryCondition="true"/>
+      <species id="CaM_act_305_cplx_647_0_" compartment="CaMKII_636_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaM_act_286_cplx_649_0_" compartment="CaMKII_636_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="tot_autonomous_CaMKII_650_0_" compartment="CaMKII_636_0_" initialAmount="1.79338188581574e-16" hasOnlySubstanceUnits="true" boundaryCondition="true"/>
+      <species id="auton_305_cplx_652_0_" compartment="CaMKII_636_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="auton_286_cplx_654_0_" compartment="CaMKII_636_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="Ca_minus_PSD_664_0_" compartment="PSD_663_0_" initialAmount="7.97058615918108e-19" hasOnlySubstanceUnits="true"/>
+      <species id="Ca_control_PSD_665_0_" compartment="PSD_663_0_" initialAmount="7.97058615918108e-19" hasOnlySubstanceUnits="true" boundaryCondition="true" constant="true"/>
+      <species id="PP1_on_CaMKII_PSD_666_0_" compartment="PSD_663_0_" initialAmount="3.98529307959054e-18" hasOnlySubstanceUnits="true"/>
+      <species id="Deph_minus_thr286_cplx_668_0_" compartment="PSD_663_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="Deph_minus_thr286b_cplx_670_0_" compartment="PSD_663_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="Deph_minus_thr286c_cplx_672_0_" compartment="PSD_663_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="Deph_minus_thr305_cplx_674_0_" compartment="PSD_663_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="Deph_minus_thr306_cplx_676_0_" compartment="PSD_663_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaM_minus_Ca4_minus_PSD_677_0_" compartment="PSD_663_0_" initialAmount="1.59411723183622e-22" hasOnlySubstanceUnits="true" boundaryCondition="true" constant="true"/>
+      <species id="_286P_minus_PSD_679_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true" boundaryCondition="true"/>
+      <species id="actCaMKII_minus_PSD_680_0_" compartment="CaMKII_PSD_678_0_" initialAmount="1.99264653979527e-18" hasOnlySubstanceUnits="true" boundaryCondition="true"/>
+      <species id="tot_CaMKII_PSD_681_0_" compartment="CaMKII_PSD_678_0_" initialAmount="1.99264653979527e-17" hasOnlySubstanceUnits="true" boundaryCondition="true"/>
+      <species id="basal_CaMKII_PSD_682_0_" compartment="CaMKII_PSD_678_0_" initialAmount="1.99264653979527e-18" hasOnlySubstanceUnits="true"/>
+      <species id="basal_CaMKII_PSD_control_684_0_" compartment="CaMKII_PSD_678_0_" initialAmount="1.99264653979527e-18" hasOnlySubstanceUnits="true" boundaryCondition="true" constant="true"/>
+      <species id="CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaMKII_minus_CaM_minus_PSD_689_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaMKII_minus_thr286_minus_PSD_690_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaMKII_minus_PSD_691_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaMKII_star__star__star__minus_PSD_692_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaMKII_minus_thr306_minus_PSD_693_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true" boundaryCondition="true"/>
+      <species id="CaM_minus_act_minus_305_minus_PSD_cplx_696_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaM_minus_act_minus_286_minus_PSD_cplx_698_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="CaM_act_autoph_cplx_700_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="tot_minus_auto_minus_PSD_701_0_" compartment="CaMKII_PSD_678_0_" initialAmount="1.99264653979527e-18" hasOnlySubstanceUnits="true" boundaryCondition="true"/>
+      <species id="auton_minus_305_minus_PSD_cplx_703_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="auton_minus_286_minus_PSD_cplx_705_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="auton_minus_autoph_cplx_707_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="NMDAR_708_0_" compartment="CaMKII_PSD_678_0_" initialAmount="1.19558792387716e-15" hasOnlySubstanceUnits="true"/>
+      <species id="CaMKII_PSD_auton_readout_709_0_" compartment="CaMKII_PSD_678_0_" initialAmount="0" hasOnlySubstanceUnits="true" boundaryCondition="true"/>
+      <species id="CaM_minus_Ca4_623_0_" compartment="kinetics_602_0_" initialAmount="1.4347055086526e-21" hasOnlySubstanceUnits="true" boundaryCondition="true" constant="true"/>
+      <species id="PP1_minus_active_624_0_" compartment="kinetics_602_0_" initialAmount="8.96690942907872e-19" hasOnlySubstanceUnits="true"/>
+      <species id="Deph_minus_thr286_cplx_626_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="Deph_minus_thr286b_cplx_628_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="Deph_minus_thr305_cplx_630_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="Deph_minus_thr306_cplx_632_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="Deph_minus_thr286c_cplx_634_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="Ca_635_0_" compartment="kinetics_602_0_" initialAmount="7.17352754326298e-18" hasOnlySubstanceUnits="true"/>
+      <species id="tot_CaMKII_cyt_659_0_" compartment="kinetics_602_0_" initialAmount="1.97272007439732e-15" hasOnlySubstanceUnits="true" boundaryCondition="true"/>
+      <species id="act_CaMKII_cyt_660_0_" compartment="kinetics_602_0_" initialAmount="1.79338188581574e-16" hasOnlySubstanceUnits="true" boundaryCondition="true"/>
+      <species id="basal_CaMKII_cyt_661_0_" compartment="kinetics_602_0_" initialAmount="4.48345471453936e-17" hasOnlySubstanceUnits="true" boundaryCondition="true" constant="true"/>
+    </listOfSpecies>
+    <listOfRules>
+      <assignmentRule variable="tot_CaM_CaMKII_645_0_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <ci> CaMKII_minus_CaM_638_0_ </ci>
+            <ci> CaMKII_minus_thr286_star__minus_CaM_639_0_ </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule variable="tot_autonomous_CaMKII_650_0_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <ci> CaMKII_minus_thr286_643_0_ </ci>
+            <ci> CaMKII_star__star__star__640_0_ </ci>
+            <ci> basal_CaMKII_cyt_661_0_ </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule variable="_286P_minus_PSD_679_0_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <ci> CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_ </ci>
+            <ci> CaMKII_minus_thr286_minus_PSD_690_0_ </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule variable="actCaMKII_minus_PSD_680_0_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <ci> CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_ </ci>
+            <ci> CaMKII_minus_CaM_minus_PSD_689_0_ </ci>
+            <ci> tot_minus_auto_minus_PSD_701_0_ </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule variable="tot_CaMKII_PSD_681_0_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <ci> actCaMKII_minus_PSD_680_0_ </ci>
+            <ci> CaMKII_minus_PSD_691_0_ </ci>
+            <ci> CaMKII_minus_thr306_minus_PSD_693_0_ </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule variable="tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <ci> CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_ </ci>
+            <ci> CaMKII_minus_CaM_minus_PSD_689_0_ </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule variable="tot_minus_auto_minus_PSD_701_0_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <ci> CaMKII_minus_thr286_minus_PSD_690_0_ </ci>
+            <ci> CaMKII_star__star__star__minus_PSD_692_0_ </ci>
+            <ci> basal_CaMKII_PSD_682_0_ </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule variable="CaMKII_PSD_auton_readout_709_0_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <ci> CaMKII_star__star__star__minus_PSD_692_0_ </ci>
+            <ci> CaMKII_minus_thr286_minus_PSD_690_0_ </ci>
+            <ci> basal_CaMKII_PSD_682_0_ </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule variable="tot_CaMKII_cyt_659_0_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <ci> CaMKII_minus_CaM_638_0_ </ci>
+            <ci> CaMKII_minus_thr286_star__minus_CaM_639_0_ </ci>
+            <ci> CaMKII_minus_thr286_643_0_ </ci>
+            <ci> CaMKII_star__star__star__640_0_ </ci>
+            <ci> CaMK_minus_thr306_644_0_ </ci>
+            <ci> CaMKII_637_0_ </ci>
+            <ci> basal_CaMKII_cyt_661_0_ </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule variable="act_CaMKII_cyt_660_0_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <ci> tot_CaM_CaMKII_645_0_ </ci>
+            <ci> tot_autonomous_CaMKII_650_0_ </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="CaM_act_305_646_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_CaM_CaMKII_645_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_thr286_643_0_</moose:substrates>
+              <moose:complex>CaM_act_305_cplx_647_0_</moose:complex>
+              <moose:groupName>CaM_act_305_646_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="tot_CaM_CaMKII_645_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_643_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaM_act_305_cplx_647_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> tot_CaM_CaMKII_645_0_ </ci>
+                <ci> CaMKII_minus_thr286_643_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> CaM_act_305_cplx_647_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="2.9450682209816e+15" units="per_uMole_per_second"/>
+            <parameter id="k2" value="24" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaM_act_305_646_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_CaM_CaMKII_645_0_</moose:enzyme>
+              <moose:complex>CaM_act_305_cplx_647_0_</moose:complex>
+              <moose:products>CaMKII_star__star__star__640_0_</moose:products>
+              <moose:groupName>CaM_act_305_646_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="CaM_act_305_cplx_647_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tot_CaM_CaMKII_645_0_"/>
+          <speciesReference species="CaMKII_star__star__star__640_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> CaM_act_305_cplx_647_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="6" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaM_act_286_648_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_CaM_CaMKII_645_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_CaM_638_0_</moose:substrates>
+              <moose:complex>CaM_act_286_cplx_649_0_</moose:complex>
+              <moose:groupName>CaM_act_286_648_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="tot_CaM_CaMKII_645_0_"/>
+          <speciesReference species="CaMKII_minus_CaM_638_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaM_act_286_cplx_649_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> tot_CaM_CaMKII_645_0_ </ci>
+                <ci> CaMKII_minus_CaM_638_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> CaM_act_286_cplx_649_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="245420344367870" units="per_uMole_per_second"/>
+            <parameter id="k2" value="2" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaM_act_286_648_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_CaM_CaMKII_645_0_</moose:enzyme>
+              <moose:complex>CaM_act_286_cplx_649_0_</moose:complex>
+              <moose:products>CaMKII_minus_thr286_star__minus_CaM_639_0_</moose:products>
+              <moose:groupName>CaM_act_286_648_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="CaM_act_286_cplx_649_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tot_CaM_CaMKII_645_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_star__minus_CaM_639_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> CaM_act_286_cplx_649_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="0.5" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="auton_305_651_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_autonomous_CaMKII_650_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_thr286_643_0_</moose:substrates>
+              <moose:complex>auton_305_cplx_652_0_</moose:complex>
+              <moose:groupName>auton_305_651_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="tot_autonomous_CaMKII_650_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_643_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="auton_305_cplx_652_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> tot_autonomous_CaMKII_650_0_ </ci>
+                <ci> CaMKII_minus_thr286_643_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> auton_305_cplx_652_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="1.9117891326534e+15" units="per_uMole_per_second"/>
+            <parameter id="k2" value="24" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="auton_305_651_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_autonomous_CaMKII_650_0_</moose:enzyme>
+              <moose:complex>auton_305_cplx_652_0_</moose:complex>
+              <moose:products>CaMKII_star__star__star__640_0_</moose:products>
+              <moose:groupName>auton_305_651_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="auton_305_cplx_652_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tot_autonomous_CaMKII_650_0_"/>
+          <speciesReference species="CaMKII_star__star__star__640_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> auton_305_cplx_652_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="6" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="auton_286_653_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_autonomous_CaMKII_650_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_CaM_638_0_</moose:substrates>
+              <moose:complex>auton_286_cplx_654_0_</moose:complex>
+              <moose:groupName>auton_286_653_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="tot_autonomous_CaMKII_650_0_"/>
+          <speciesReference species="CaMKII_minus_CaM_638_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="auton_286_cplx_654_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> tot_autonomous_CaMKII_650_0_ </ci>
+                <ci> CaMKII_minus_CaM_638_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> auton_286_cplx_654_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="159321783196240" units="per_uMole_per_second"/>
+            <parameter id="k2" value="2" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="auton_286_653_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_autonomous_CaMKII_650_0_</moose:enzyme>
+              <moose:complex>auton_286_cplx_654_0_</moose:complex>
+              <moose:products>CaMKII_minus_thr286_star__minus_CaM_639_0_</moose:products>
+              <moose:groupName>auton_286_653_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="auton_286_cplx_654_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tot_autonomous_CaMKII_650_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_star__minus_CaM_639_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> auton_286_cplx_654_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="0.5" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaMKII_minus_bind_minus_CaM_641_0_">
+        <listOfReactants>
+          <speciesReference species="CaM_minus_Ca4_623_0_"/>
+          <speciesReference species="CaMKII_637_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaMKII_minus_CaM_638_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> CaMKII_minus_bind_minus_CaM_kf </ci>
+                <ci> CaM_minus_Ca4_623_0_ </ci>
+                <ci> CaMKII_637_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> CaMKII_minus_bind_minus_CaM_kb </ci>
+                <ci> CaMKII_minus_CaM_638_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="CaMKII_minus_bind_minus_CaM_kf" value="2.2304206547623e+17" units="per_uMole_per_second"/>
+            <parameter id="CaMKII_minus_bind_minus_CaM_kb" value="2" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaMK_minus_thr286_minus_bind_minus_CaM_642_0_">
+        <listOfReactants>
+          <speciesReference species="CaM_minus_Ca4_623_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_643_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaMKII_minus_thr286_star__minus_CaM_639_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> CaMK_minus_thr286_minus_bind_minus_CaM_kf </ci>
+                <ci> CaM_minus_Ca4_623_0_ </ci>
+                <ci> CaMKII_minus_thr286_643_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> CaMK_minus_thr286_minus_bind_minus_CaM_kb </ci>
+                <ci> CaMKII_minus_thr286_star__minus_CaM_639_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="CaMK_minus_thr286_minus_bind_minus_CaM_kf" value="1.1154211023438e+19" units="per_uMole_per_second"/>
+            <parameter id="CaMK_minus_thr286_minus_bind_minus_CaM_kb" value="0.1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr286_667_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_on_CaMKII_PSD_666_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_</moose:substrates>
+              <moose:complex>Deph_minus_thr286_cplx_668_0_</moose:complex>
+              <moose:groupName>Deph_minus_thr286_667_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP1_on_CaMKII_PSD_666_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Deph_minus_thr286_cplx_668_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP1_on_CaMKII_PSD_666_0_ </ci>
+                <ci> CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> Deph_minus_thr286_cplx_668_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="5.0184314178607e+17" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr286_667_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_on_CaMKII_PSD_666_0_</moose:enzyme>
+              <moose:complex>Deph_minus_thr286_cplx_668_0_</moose:complex>
+              <moose:products>CaMKII_minus_CaM_minus_PSD_689_0_</moose:products>
+              <moose:groupName>Deph_minus_thr286_667_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="Deph_minus_thr286_cplx_668_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP1_on_CaMKII_PSD_666_0_"/>
+          <speciesReference species="CaMKII_minus_CaM_minus_PSD_689_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> Deph_minus_thr286_cplx_668_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr286b_669_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_on_CaMKII_PSD_666_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_thr286_minus_PSD_690_0_</moose:substrates>
+              <moose:complex>Deph_minus_thr286b_cplx_670_0_</moose:complex>
+              <moose:groupName>Deph_minus_thr286b_669_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP1_on_CaMKII_PSD_666_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_minus_PSD_690_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Deph_minus_thr286b_cplx_670_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP1_on_CaMKII_PSD_666_0_ </ci>
+                <ci> CaMKII_minus_thr286_minus_PSD_690_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> Deph_minus_thr286b_cplx_670_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="5.0184314178607e+17" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr286b_669_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_on_CaMKII_PSD_666_0_</moose:enzyme>
+              <moose:complex>Deph_minus_thr286b_cplx_670_0_</moose:complex>
+              <moose:products>CaMKII_minus_PSD_691_0_</moose:products>
+              <moose:groupName>Deph_minus_thr286b_669_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="Deph_minus_thr286b_cplx_670_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP1_on_CaMKII_PSD_666_0_"/>
+          <speciesReference species="CaMKII_minus_PSD_691_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> Deph_minus_thr286b_cplx_670_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr286c_671_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_on_CaMKII_PSD_666_0_</moose:enzyme>
+              <moose:substrates>CaMKII_star__star__star__minus_PSD_692_0_</moose:substrates>
+              <moose:complex>Deph_minus_thr286c_cplx_672_0_</moose:complex>
+              <moose:groupName>Deph_minus_thr286c_671_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP1_on_CaMKII_PSD_666_0_"/>
+          <speciesReference species="CaMKII_star__star__star__minus_PSD_692_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Deph_minus_thr286c_cplx_672_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP1_on_CaMKII_PSD_666_0_ </ci>
+                <ci> CaMKII_star__star__star__minus_PSD_692_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> Deph_minus_thr286c_cplx_672_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="5.0184314178607e+17" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr286c_671_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_on_CaMKII_PSD_666_0_</moose:enzyme>
+              <moose:complex>Deph_minus_thr286c_cplx_672_0_</moose:complex>
+              <moose:products>CaMKII_minus_thr306_minus_PSD_693_0_</moose:products>
+              <moose:groupName>Deph_minus_thr286c_671_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="Deph_minus_thr286c_cplx_672_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP1_on_CaMKII_PSD_666_0_"/>
+          <speciesReference species="CaMKII_minus_thr306_minus_PSD_693_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> Deph_minus_thr286c_cplx_672_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr305_673_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_on_CaMKII_PSD_666_0_</moose:enzyme>
+              <moose:substrates>CaMKII_star__star__star__minus_PSD_692_0_</moose:substrates>
+              <moose:complex>Deph_minus_thr305_cplx_674_0_</moose:complex>
+              <moose:groupName>Deph_minus_thr305_673_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP1_on_CaMKII_PSD_666_0_"/>
+          <speciesReference species="CaMKII_star__star__star__minus_PSD_692_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Deph_minus_thr305_cplx_674_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP1_on_CaMKII_PSD_666_0_ </ci>
+                <ci> CaMKII_star__star__star__minus_PSD_692_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> Deph_minus_thr305_cplx_674_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="5.0184314178607e+17" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr305_673_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_on_CaMKII_PSD_666_0_</moose:enzyme>
+              <moose:complex>Deph_minus_thr305_cplx_674_0_</moose:complex>
+              <moose:products>CaMKII_minus_thr286_minus_PSD_690_0_</moose:products>
+              <moose:groupName>Deph_minus_thr305_673_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="Deph_minus_thr305_cplx_674_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP1_on_CaMKII_PSD_666_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_minus_PSD_690_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> Deph_minus_thr305_cplx_674_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr306_675_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_on_CaMKII_PSD_666_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_thr306_minus_PSD_693_0_</moose:substrates>
+              <moose:complex>Deph_minus_thr306_cplx_676_0_</moose:complex>
+              <moose:groupName>Deph_minus_thr306_675_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP1_on_CaMKII_PSD_666_0_"/>
+          <speciesReference species="CaMKII_minus_thr306_minus_PSD_693_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Deph_minus_thr306_cplx_676_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP1_on_CaMKII_PSD_666_0_ </ci>
+                <ci> CaMKII_minus_thr306_minus_PSD_693_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> Deph_minus_thr306_cplx_676_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="5.0184314178607e+17" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr306_675_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_on_CaMKII_PSD_666_0_</moose:enzyme>
+              <moose:complex>Deph_minus_thr306_cplx_676_0_</moose:complex>
+              <moose:products>CaMKII_minus_PSD_691_0_</moose:products>
+              <moose:groupName>Deph_minus_thr306_675_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="Deph_minus_thr306_cplx_676_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP1_on_CaMKII_PSD_666_0_"/>
+          <speciesReference species="CaMKII_minus_PSD_691_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> Deph_minus_thr306_cplx_676_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaM_minus_act_minus_305_minus_PSD_695_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_thr286_minus_PSD_690_0_</moose:substrates>
+              <moose:complex>CaM_minus_act_minus_305_minus_PSD_cplx_696_0_</moose:complex>
+              <moose:groupName>CaM_minus_act_minus_305_minus_PSD_695_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_minus_PSD_690_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaM_minus_act_minus_305_minus_PSD_cplx_696_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_ </ci>
+                <ci> CaMKII_minus_thr286_minus_PSD_690_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> CaM_minus_act_minus_305_minus_PSD_cplx_696_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="3.7095791212221e+16" units="per_uMole_per_second"/>
+            <parameter id="k2" value="24" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaM_minus_act_minus_305_minus_PSD_695_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_</moose:enzyme>
+              <moose:complex>CaM_minus_act_minus_305_minus_PSD_cplx_696_0_</moose:complex>
+              <moose:products>CaMKII_star__star__star__minus_PSD_692_0_</moose:products>
+              <moose:groupName>CaM_minus_act_minus_305_minus_PSD_695_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="CaM_minus_act_minus_305_minus_PSD_cplx_696_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_"/>
+          <speciesReference species="CaMKII_star__star__star__minus_PSD_692_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> CaM_minus_act_minus_305_minus_PSD_cplx_696_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="6" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaM_minus_act_minus_286_minus_PSD_697_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_CaM_minus_PSD_689_0_</moose:substrates>
+              <moose:complex>CaM_minus_act_minus_286_minus_PSD_cplx_698_0_</moose:complex>
+              <moose:groupName>CaM_minus_act_minus_286_minus_PSD_697_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_"/>
+          <speciesReference species="CaMKII_minus_CaM_minus_PSD_689_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaM_minus_act_minus_286_minus_PSD_cplx_698_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_ </ci>
+                <ci> CaMKII_minus_CaM_minus_PSD_689_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> CaM_minus_act_minus_286_minus_PSD_cplx_698_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="3.0913460450607e+15" units="per_uMole_per_second"/>
+            <parameter id="k2" value="2" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaM_minus_act_minus_286_minus_PSD_697_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_</moose:enzyme>
+              <moose:complex>CaM_minus_act_minus_286_minus_PSD_cplx_698_0_</moose:complex>
+              <moose:products>CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_</moose:products>
+              <moose:groupName>CaM_minus_act_minus_286_minus_PSD_697_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="CaM_minus_act_minus_286_minus_PSD_cplx_698_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> CaM_minus_act_minus_286_minus_PSD_cplx_698_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="0.5" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaM_act_autoph_699_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_PSD_691_0_</moose:substrates>
+              <moose:complex>CaM_act_autoph_cplx_700_0_</moose:complex>
+              <moose:groupName>CaM_act_autoph_699_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_"/>
+          <speciesReference species="CaMKII_minus_PSD_691_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaM_act_autoph_cplx_700_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_ </ci>
+                <ci> CaMKII_minus_PSD_691_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> CaM_act_autoph_cplx_700_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="3.7095791212221e+16" units="per_uMole_per_second"/>
+            <parameter id="k2" value="24" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaM_act_autoph_699_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_</moose:enzyme>
+              <moose:complex>CaM_act_autoph_cplx_700_0_</moose:complex>
+              <moose:products>CaMKII_minus_thr286_minus_PSD_690_0_</moose:products>
+              <moose:groupName>CaM_act_autoph_699_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="CaM_act_autoph_cplx_700_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tot_minus_CaM_minus_CaMKII_minus_PSD_694_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_minus_PSD_690_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> CaM_act_autoph_cplx_700_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="6" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="auton_minus_305_minus_PSD_702_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_minus_auto_minus_PSD_701_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_thr286_minus_PSD_690_0_</moose:substrates>
+              <moose:complex>auton_minus_305_minus_PSD_cplx_703_0_</moose:complex>
+              <moose:groupName>auton_minus_305_minus_PSD_702_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="tot_minus_auto_minus_PSD_701_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_minus_PSD_690_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="auton_minus_305_minus_PSD_cplx_703_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> tot_minus_auto_minus_PSD_701_0_ </ci>
+                <ci> CaMKII_minus_thr286_minus_PSD_690_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> auton_minus_305_minus_PSD_cplx_703_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="2.408856716e+16" units="per_uMole_per_second"/>
+            <parameter id="k2" value="24" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="auton_minus_305_minus_PSD_702_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_minus_auto_minus_PSD_701_0_</moose:enzyme>
+              <moose:complex>auton_minus_305_minus_PSD_cplx_703_0_</moose:complex>
+              <moose:products>CaMKII_star__star__star__minus_PSD_692_0_</moose:products>
+              <moose:groupName>auton_minus_305_minus_PSD_702_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="auton_minus_305_minus_PSD_cplx_703_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tot_minus_auto_minus_PSD_701_0_"/>
+          <speciesReference species="CaMKII_star__star__star__minus_PSD_692_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> auton_minus_305_minus_PSD_cplx_703_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="6" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="auton_minus_286_minus_PSD_704_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_minus_auto_minus_PSD_701_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_CaM_minus_PSD_689_0_</moose:substrates>
+              <moose:complex>auton_minus_286_minus_PSD_cplx_705_0_</moose:complex>
+              <moose:groupName>auton_minus_286_minus_PSD_704_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="tot_minus_auto_minus_PSD_701_0_"/>
+          <speciesReference species="CaMKII_minus_CaM_minus_PSD_689_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="auton_minus_286_minus_PSD_cplx_705_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> tot_minus_auto_minus_PSD_701_0_ </ci>
+                <ci> CaMKII_minus_CaM_minus_PSD_689_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> auton_minus_286_minus_PSD_cplx_705_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="2.0073605228607e+15" units="per_uMole_per_second"/>
+            <parameter id="k2" value="2" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="auton_minus_286_minus_PSD_704_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_minus_auto_minus_PSD_701_0_</moose:enzyme>
+              <moose:complex>auton_minus_286_minus_PSD_cplx_705_0_</moose:complex>
+              <moose:products>CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_</moose:products>
+              <moose:groupName>auton_minus_286_minus_PSD_704_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="auton_minus_286_minus_PSD_cplx_705_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tot_minus_auto_minus_PSD_701_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> auton_minus_286_minus_PSD_cplx_705_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="0.5" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="auton_minus_autoph_706_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_minus_auto_minus_PSD_701_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_PSD_691_0_</moose:substrates>
+              <moose:complex>auton_minus_autoph_cplx_707_0_</moose:complex>
+              <moose:groupName>auton_minus_autoph_706_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="tot_minus_auto_minus_PSD_701_0_"/>
+          <speciesReference species="CaMKII_minus_PSD_691_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="auton_minus_autoph_cplx_707_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> tot_minus_auto_minus_PSD_701_0_ </ci>
+                <ci> CaMKII_minus_PSD_691_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> auton_minus_autoph_cplx_707_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="2.408856716e+16" units="per_uMole_per_second"/>
+            <parameter id="k2" value="24" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="auton_minus_autoph_706_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>tot_minus_auto_minus_PSD_701_0_</moose:enzyme>
+              <moose:complex>auton_minus_autoph_cplx_707_0_</moose:complex>
+              <moose:products>CaMKII_minus_thr286_minus_PSD_690_0_</moose:products>
+              <moose:groupName>auton_minus_autoph_706_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="auton_minus_autoph_cplx_707_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tot_minus_auto_minus_PSD_701_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_minus_PSD_690_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> auton_minus_autoph_cplx_707_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="6" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Stoch_Basal_CaMKII_PSD_683_0_">
+        <listOfReactants>
+          <speciesReference species="basal_CaMKII_PSD_control_684_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="basal_CaMKII_PSD_682_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> Stoch_Basal_CaMKII_PSD_kf </ci>
+                <ci> basal_CaMKII_PSD_control_684_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> Stoch_Basal_CaMKII_PSD_kb </ci>
+                <ci> basal_CaMKII_PSD_682_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="Stoch_Basal_CaMKII_PSD_kf" value="1" units="per_second"/>
+            <parameter id="Stoch_Basal_CaMKII_PSD_kb" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaMKII_minus_thr286_minus_bind_minus_CaM_minus_PSD_685_0_">
+        <listOfReactants>
+          <speciesReference species="CaM_minus_Ca4_minus_PSD_677_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_minus_PSD_690_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> CaMKII_minus_thr286_minus_bind_minus_CaM_minus_PSD_kf </ci>
+                <ci> CaM_minus_Ca4_minus_PSD_677_0_ </ci>
+                <ci> CaMKII_minus_thr286_minus_PSD_690_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> CaMKII_minus_thr286_minus_bind_minus_CaM_minus_PSD_kb </ci>
+                <ci> CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="CaMKII_minus_thr286_minus_bind_minus_CaM_minus_PSD_kf" value="1.0037103721393e+20" units="per_uMole_per_second"/>
+            <parameter id="CaMKII_minus_thr286_minus_bind_minus_CaM_minus_PSD_kb" value="0.1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaMKII_minus_bind_minus_CaM_minus_PSD_686_0_" reversible="false">
+        <listOfReactants>
+          <speciesReference species="CaM_minus_Ca4_minus_PSD_677_0_"/>
+          <speciesReference species="CaMKII_minus_PSD_691_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaMKII_minus_CaM_minus_PSD_689_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> CaMKII_minus_bind_minus_CaM_minus_PSD_kf </ci>
+              <ci> CaM_minus_Ca4_minus_PSD_677_0_ </ci>
+              <ci> CaMKII_minus_PSD_691_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="CaMKII_minus_bind_minus_CaM_minus_PSD_kf" value="5.0184314178607e+18" units="per_uMole_per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaMKII_minus_diss_minus_CaM_687_0_" reversible="false">
+        <listOfReactants>
+          <speciesReference species="CaMKII_minus_CaM_minus_PSD_689_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaM_minus_Ca4_minus_PSD_677_0_"/>
+          <speciesReference species="CaMKII_minus_PSD_691_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> CaMKII_minus_diss_minus_CaM_kf </ci>
+              <ci> CaMKII_minus_CaM_minus_PSD_689_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="CaMKII_minus_diss_minus_CaM_kf" value="5" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr286_625_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_minus_active_624_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_thr286_star__minus_CaM_639_0_</moose:substrates>
+              <moose:complex>Deph_minus_thr286_cplx_626_0_</moose:complex>
+              <moose:groupName>Deph_minus_thr286_625_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP1_minus_active_624_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_star__minus_CaM_639_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Deph_minus_thr286_cplx_626_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP1_minus_active_624_0_ </ci>
+                <ci> CaMKII_minus_thr286_star__minus_CaM_639_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> Deph_minus_thr286_cplx_626_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="1.0935607276461e+16" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr286_625_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_minus_active_624_0_</moose:enzyme>
+              <moose:complex>Deph_minus_thr286_cplx_626_0_</moose:complex>
+              <moose:products>CaMKII_minus_CaM_638_0_</moose:products>
+              <moose:groupName>Deph_minus_thr286_625_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="Deph_minus_thr286_cplx_626_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP1_minus_active_624_0_"/>
+          <speciesReference species="CaMKII_minus_CaM_638_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> Deph_minus_thr286_cplx_626_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr286b_627_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_minus_active_624_0_</moose:enzyme>
+              <moose:substrates>CaMKII_minus_thr286_643_0_</moose:substrates>
+              <moose:complex>Deph_minus_thr286b_cplx_628_0_</moose:complex>
+              <moose:groupName>Deph_minus_thr286b_627_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP1_minus_active_624_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_643_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Deph_minus_thr286b_cplx_628_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP1_minus_active_624_0_ </ci>
+                <ci> CaMKII_minus_thr286_643_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> Deph_minus_thr286b_cplx_628_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="1.0935607276461e+16" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr286b_627_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_minus_active_624_0_</moose:enzyme>
+              <moose:complex>Deph_minus_thr286b_cplx_628_0_</moose:complex>
+              <moose:products>CaMKII_637_0_</moose:products>
+              <moose:groupName>Deph_minus_thr286b_627_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="Deph_minus_thr286b_cplx_628_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP1_minus_active_624_0_"/>
+          <speciesReference species="CaMKII_637_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> Deph_minus_thr286b_cplx_628_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr305_629_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_minus_active_624_0_</moose:enzyme>
+              <moose:substrates>CaMKII_star__star__star__640_0_</moose:substrates>
+              <moose:complex>Deph_minus_thr305_cplx_630_0_</moose:complex>
+              <moose:groupName>Deph_minus_thr305_629_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP1_minus_active_624_0_"/>
+          <speciesReference species="CaMKII_star__star__star__640_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Deph_minus_thr305_cplx_630_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP1_minus_active_624_0_ </ci>
+                <ci> CaMKII_star__star__star__640_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> Deph_minus_thr305_cplx_630_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="1.0935607276461e+16" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr305_629_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_minus_active_624_0_</moose:enzyme>
+              <moose:complex>Deph_minus_thr305_cplx_630_0_</moose:complex>
+              <moose:products>CaMKII_minus_thr286_643_0_</moose:products>
+              <moose:groupName>Deph_minus_thr305_629_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="Deph_minus_thr305_cplx_630_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP1_minus_active_624_0_"/>
+          <speciesReference species="CaMKII_minus_thr286_643_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> Deph_minus_thr305_cplx_630_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr306_631_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_minus_active_624_0_</moose:enzyme>
+              <moose:substrates>CaMK_minus_thr306_644_0_</moose:substrates>
+              <moose:complex>Deph_minus_thr306_cplx_632_0_</moose:complex>
+              <moose:groupName>Deph_minus_thr306_631_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP1_minus_active_624_0_"/>
+          <speciesReference species="CaMK_minus_thr306_644_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Deph_minus_thr306_cplx_632_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP1_minus_active_624_0_ </ci>
+                <ci> CaMK_minus_thr306_644_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> Deph_minus_thr306_cplx_632_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="1.0935607276461e+16" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr306_631_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_minus_active_624_0_</moose:enzyme>
+              <moose:complex>Deph_minus_thr306_cplx_632_0_</moose:complex>
+              <moose:products>CaMKII_637_0_</moose:products>
+              <moose:groupName>Deph_minus_thr306_631_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="Deph_minus_thr306_cplx_632_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP1_minus_active_624_0_"/>
+          <speciesReference species="CaMKII_637_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> Deph_minus_thr306_cplx_632_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr286c_633_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_minus_active_624_0_</moose:enzyme>
+              <moose:substrates>CaMKII_star__star__star__640_0_</moose:substrates>
+              <moose:complex>Deph_minus_thr286c_cplx_634_0_</moose:complex>
+              <moose:groupName>Deph_minus_thr286c_633_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP1_minus_active_624_0_"/>
+          <speciesReference species="CaMKII_star__star__star__640_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Deph_minus_thr286c_cplx_634_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP1_minus_active_624_0_ </ci>
+                <ci> CaMKII_star__star__star__640_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> Deph_minus_thr286c_cplx_634_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="1.0935607276461e+16" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deph_minus_thr286c_633_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP1_minus_active_624_0_</moose:enzyme>
+              <moose:complex>Deph_minus_thr286c_cplx_634_0_</moose:complex>
+              <moose:products>CaMK_minus_thr306_644_0_</moose:products>
+              <moose:groupName>Deph_minus_thr286c_633_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="Deph_minus_thr286c_cplx_634_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP1_minus_active_624_0_"/>
+          <speciesReference species="CaMK_minus_thr306_644_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> Deph_minus_thr286c_cplx_634_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="transloc_1_655_0_" reversible="false">
+        <listOfReactants>
+          <speciesReference species="CaMKII_minus_CaM_638_0_"/>
+          <speciesReference species="NMDAR_708_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaMKII_minus_CaM_minus_PSD_689_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> transloc_1_kf </ci>
+              <ci> CaMKII_minus_CaM_638_0_ </ci>
+              <ci> NMDAR_708_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="transloc_1_kf" value="12044283580000" units="per_uMole_per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="transloc_2_656_0_" reversible="false">
+        <listOfReactants>
+          <speciesReference species="CaMKII_minus_thr286_star__minus_CaM_639_0_"/>
+          <speciesReference species="NMDAR_708_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaMKII_minus_thr286_minus_CaM_minus_PSD_688_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> transloc_2_kf </ci>
+              <ci> CaMKII_minus_thr286_star__minus_CaM_639_0_ </ci>
+              <ci> NMDAR_708_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="transloc_2_kf" value="12044283580000" units="per_uMole_per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="back_1_657_0_">
+        <listOfReactants>
+          <speciesReference species="CaMKII_minus_PSD_691_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaMKII_637_0_"/>
+          <speciesReference species="NMDAR_708_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> back_1_kf </ci>
+                <ci> CaMKII_minus_PSD_691_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> back_1_kb </ci>
+                <ci> CaMKII_637_0_ </ci>
+                <ci> NMDAR_708_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="back_1_kf" value="0.3" units="per_second"/>
+            <parameter id="back_1_kb" value="6022141790000" units="per_uMole_per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="back_2_658_0_">
+        <listOfReactants>
+          <speciesReference species="CaMKII_minus_thr306_minus_PSD_693_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaMK_minus_thr306_644_0_"/>
+          <speciesReference species="NMDAR_708_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> back_2_kf </ci>
+                <ci> CaMKII_minus_thr306_minus_PSD_693_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> back_2_kb </ci>
+                <ci> CaMK_minus_thr306_644_0_ </ci>
+                <ci> NMDAR_708_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="back_2_kf" value="0.6" units="per_second"/>
+            <parameter id="back_2_kb" value="6022141790000" units="per_uMole_per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Ca_stoch_PSD_662_0_">
+        <listOfReactants>
+          <speciesReference species="Ca_control_PSD_665_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Ca_minus_PSD_664_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> Ca_stoch_PSD_kf </ci>
+                <ci> Ca_control_PSD_665_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> Ca_stoch_PSD_kb </ci>
+                <ci> Ca_minus_PSD_664_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="Ca_stoch_PSD_kf" value="100" units="per_second"/>
+            <parameter id="Ca_stoch_PSD_kb" value="100" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Ca_PSD_to_spine_710_0_">
+        <listOfReactants>
+          <speciesReference species="Ca_control_PSD_665_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Ca_635_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> Ca_PSD_to_spine_kf </ci>
+                <ci> Ca_control_PSD_665_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> Ca_PSD_to_spine_kb </ci>
+                <ci> Ca_635_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="Ca_PSD_to_spine_kf" value="450" units="per_second"/>
+            <parameter id="Ca_PSD_to_spine_kb" value="50" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CaM_PSD_to_spine_711_0_">
+        <listOfReactants>
+          <speciesReference species="CaM_minus_Ca4_minus_PSD_677_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CaM_minus_Ca4_623_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> CaM_PSD_to_spine_kf </ci>
+                <ci> CaM_minus_Ca4_minus_PSD_677_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> CaM_PSD_to_spine_kb </ci>
+                <ci> CaM_minus_Ca4_623_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="CaM_PSD_to_spine_kf" value="450" units="per_second"/>
+            <parameter id="CaM_PSD_to_spine_kb" value="50" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
