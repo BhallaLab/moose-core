@@ -55,7 +55,8 @@ function save_plots
 		
 		openfile {file} a
 		writefile {file} "/newplot"
-		writefile {file} "/plotname "{name}
+//		writefile {file} "/plotname "{name} // writes full path
+		writefile {file} "/plotname "{getpath {name} -tail} //  writes only object name
 		closefile {file}
 
 		setfield /plots/p{i} append {file}
