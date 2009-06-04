@@ -1,6 +1,6 @@
 include plotUtil.g
 
-str infile = "acc71.g"
+str infile = "acc88.xml"
 str outfile = "moose.plot"
 int plot_all = 1
 str plot_some = " "   
@@ -8,17 +8,17 @@ str plot_some = " "
 str target = "/kinetics"
 
 int USE_SOLVER = 0
-float SIMLENGTH = 100
-float SIMDT = 0.01
-float IODT = 1.0
+float SIMLENGTH = 1000
+float SIMDT = 0.001
+float IODT = 10.0
 int IOCLOCK = 2
 
 setclock 0 {SIMDT}
 setclock 1 {SIMDT}
 setclock 2 {IODT}
 
-include acc71.g
-writeSBML acc71.xml { target }
+include acc88.g
+writeSBML { infile } { target }
 
 init_plots { SIMLENGTH } { IOCLOCK } { IODT }
 
@@ -40,7 +40,6 @@ if ( ! USE_SOLVER )
 end
 reset
 step {SIMLENGTH} -time
-//step 10000
 
 /* Clear the output file */
 openfile { outfile } w
