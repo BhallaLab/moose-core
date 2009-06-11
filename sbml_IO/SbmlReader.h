@@ -1,3 +1,9 @@
+/*******************************************************************
+ * File:            SbmlReader.h
+ * Description:      
+ * Author:          Siji P George
+ * E-mail:          siji.suresh@gmail.com
+ ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
