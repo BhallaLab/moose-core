@@ -61,18 +61,18 @@ function make_Ca_bsg_yka
 	x = {getfield Ca_bsg_yka/mgate alpha->xmin}
 	dx = {getfield Ca_bsg_yka/mgate alpha->dx}
 	ndivs = {getfield Ca_bsg_yka/mgate alpha->xdivs}
-	V_OFFSET = -0.065 	// Mit definitions
+	float V_OFFSET_CA = -0.065 	// Mit definitions
 
 	for (i = 0; i <= ndivs; i = i + 1)
 		if (x < -0.032)
 		    setfield Ca_bsg_yka/mgate alpha->table[{i}] 0.0
 
-		     y = ({exp {(x + 0.006 - V_OFFSET)/0.016}} + {exp {-(x + 0.006 - V_OFFSET)/0.016}})/7.8e-3
+		     y = ({exp {(x + 0.006 - V_OFFSET_CA)/0.016}} + {exp {-(x + 0.006 - V_OFFSET_CA)/0.016}})/7.8e-3
 		     setfield Ca_bsg_yka/mgate beta->table[{i}] {y}
 		else
-		     y = ({exp {(x + 0.006 - V_OFFSET)/0.016}} + {exp {-(x + 0.006 - V_OFFSET)/0.016}})/(7.8e-3*(1.0 + {exp {-(x - 0.003 - V_OFFSET)/0.008}}))
+		     y = ({exp {(x + 0.006 - V_OFFSET_CA)/0.016}} + {exp {-(x + 0.006 - V_OFFSET_CA)/0.016}})/(7.8e-3*(1.0 + {exp {-(x - 0.003 - V_OFFSET_CA)/0.008}}))
 		     setfield Ca_bsg_yka/mgate alpha->table[{i}] {y}
-		     y = ({exp {(x + 0.006 - V_OFFSET)/0.016}} + {exp {-(x + 0.006 - V_OFFSET)/0.016}})/7.8e-3*(1.0 - 1.0/(1.0 + {exp {-(x - 0.003 - V_OFFSET)/0.008}}))
+		     y = ({exp {(x + 0.006 - V_OFFSET_CA)/0.016}} + {exp {-(x + 0.006 - V_OFFSET_CA)/0.016}})/7.8e-3*(1.0 - 1.0/(1.0 + {exp {-(x - 0.003 - V_OFFSET_CA)/0.008}}))
 		     setfield Ca_bsg_yka/mgate beta->table[{i}] {y}
 		end
 		x = x + dx
