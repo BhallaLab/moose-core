@@ -40,8 +40,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+<<<<<<< .working
 				AdditionalIncludeDirectories="..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_MPI"
+=======
+				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;D:\sbml\libsbml-3.3.2\include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_MPI;USE_SBML"
+>>>>>>> .merge-right.r1135
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 <<<<<<< .working
@@ -73,7 +78,11 @@
 >>>>>>> .merge-right.r1122
 				ShowProgress="2"
 				LinkIncremental="2"
+<<<<<<< .working
 				AdditionalLibraryDirectories="&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
+=======
+				AdditionalLibraryDirectories="&quot;D:\sbml\libsbml-3.3.2\win32\bin&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
+>>>>>>> .merge-right.r1135
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -131,9 +140,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
+				Optimization="3"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;C:\Program Files\SBML\libSBML-3.3.2-xerces\win32\include&quot;"
+				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;D:\sbml\libsbml-3.3.2\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_MPI;USE_SBML"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="2"
@@ -157,8 +166,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				UseLibraryDependencyInputs="false"
-				AdditionalDependencies="libgsl.a libgslcblas.a mpi.lib Ws2_32.lib cxx.lib bzip2.lib libsbml.lib zlib.lib zdll.lib xerces-c_2.lib"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\SBML\libSBML-3.3.2-xerces\win32\lib&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
+				AdditionalDependencies="libgsl.a libgslcblas.a mpi.lib Ws2_32.lib cxx.lib zlib.lib bzip2.lib libsbml.lib libexpat.lib"
+				AdditionalLibraryDirectories="&quot;D:\sbml\libsbml-3.3.2\win32\bin&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
