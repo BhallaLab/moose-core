@@ -61,11 +61,13 @@ ce /library
 	echo "==== Making Na_rat_smsnn"
 	make_Na_rat_smsnn
 	
-	echo "==== Making KA_bsg_yka"
-	make_KA_bsg_yka
+//	This channel is created in the Yamada section below
+//	echo "==== Making KA_bsg_yka"
+//	make_KA_bsg_yka
 	
-	echo "==== Making KM_bsg_yka"
-	make_KM_bsg_yka
+//	This channel is created in the Yamada section below
+//	echo "==== Making KM_bsg_yka"
+//	make_KM_bsg_yka
 	
 	echo "==== Making K_mit_usb"
 	make_K_mit_usb
