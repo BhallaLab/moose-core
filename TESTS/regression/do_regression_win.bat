@@ -8,10 +8,22 @@ set NEARDIFF=.\neardiff
 
 IF EXIST test.plot ERASE test.plot
 
-
 %MOOSE% moose_squid.g > NUL
 %NEARDIFF% moose_squid.plot test.plot 1.0e-5
 ECHO squid
+
+IF EXIST test.plot ERASE test.plot
+
+%MOOSE% moose_sbml_reader.g > NUL
+%NEARDIFF% acc88_copasi.plot test.plot 3.0e-2 -f
+ECHO sbml_Read
+
+IF EXIST test.plot ERASE test.plot
+
+%MOOSE% moose_sbml_read_write.g > NUL
+%NEARDIFF% moose.plot test.plot 1.0e-16 
+ECHO sbml_Read_Write
+
 
 IF EXIST test.plot ERASE test.plot
 
