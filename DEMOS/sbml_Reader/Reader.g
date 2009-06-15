@@ -7,7 +7,7 @@ str plot_some = "/kinetics/mTOR_model_624_0_/TOR_minus_clx_626_0_ /kinetics/S6Ki
 
 str target = "/kinetics"
 
-int USE_SOLVER = 0
+int USE_SOLVER = 1
 float SIMLENGTH = 1000
 float SIMDT = 0.001
 float IODT = 10.0
