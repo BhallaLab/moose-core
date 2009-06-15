@@ -327,7 +327,7 @@ call /kinetics/doqcsinfo/notes LOAD \
 "S6K activation and formation of the active 40S for translation" \
 ""
 complete_loading
-writeSBML acc88.xml /kinetics
-step {MAXTIME} -t
-do_save_all_plots acc88.plot
-quit
+//writeSBML acc88.xml /kinetics
+//step {MAXTIME} -t
+//do_save_all_plots acc88.plot
+//quit

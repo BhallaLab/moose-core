@@ -1,32 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
   <model metaid="acc88" id="acc88" name="acc88">
-    <annotation>
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
-        <rdf:Description rdf:about="#acc88">
-          <dc:creator>
-            <rdf:Bag>
-              <rdf:li rdf:parseType="Resource">
-                <vCard:N rdf:parseType="Resource">
-                  <vCard:Family>Bhalla</vCard:Family>
-                  <vCard:Given>Upi</vCard:Given>
-                </vCard:N>
-                <vCard:EMAIL>bhalla@ncbs.res.in</vCard:EMAIL>
-                <vCard:ORG rdf:parseType="Resource">
-                  <vCard:Orgname>National Centre for Biological Sciences</vCard:Orgname>
-                </vCard:ORG>
-              </rdf:li>
-            </rdf:Bag>
-          </dc:creator>
-          <dcterms:created rdf:parseType="Resource">
-            <dcterms:W3CDTF>2006-10-18T16:39:27Z</dcterms:W3CDTF>
-          </dcterms:created>
-          <dcterms:modified rdf:parseType="Resource">
-            <dcterms:W3CDTF>2009-03-11T09:39:00-02:00</dcterms:W3CDTF>
-          </dcterms:modified>
-        </rdf:Description>
-      </rdf:RDF>
-    </annotation>
     <listOfUnitDefinitions>
       <unitDefinition id="substance">
         <listOfUnits>
