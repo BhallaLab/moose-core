@@ -6,6 +6,7 @@
 	#define SWIG_FILE_WITH_INIT
 	#include "../basecode/header.h"
 	#include "../basecode/moose.h"
+	#include "../utility/utility.h"
 	#include "PyMooseContext.h"
 	#include "PyMooseBase.h"
 	#include "Neutral.h"
@@ -119,6 +120,8 @@
 %ignore Id::eref;   
 
 %include "../basecode/Id.h"
+%include "../utility/Property.h"
+%include "../utility/PathUtility.h"
 
 %include "PyMooseContext.h"
 %include "PyMooseBase.h"

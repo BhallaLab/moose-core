@@ -24,32 +24,36 @@
 #include <fstream>
 #include <cstdlib>
 
-const string Property::SIMPATH = "SIMPATH";
-const string Property::SIMNOTES = "SIMNOTES";
-const string Property::DOCPATH = "DOCPATH";
-const string Property::AUTOSCHEDULE = "AUTOSCHEDULE";
-const string Property::CREATESOLVER = "CREATESOLVER";
-const string Property::HOME = "HOME";
+const char* const Property::SIMPATH = "SIMPATH";
+const char* const Property::SIMNOTES = "SIMNOTES";
+const char* const Property::DOCPATH = "DOCPATH";
+const char* const Property::AUTOSCHEDULE = "AUTOSCHEDULE";
+const char* const Property::CREATESOLVER = "CREATESOLVER";
+const char* const Property::HOME = "HOME";
 
 const int Property::XML_FORMAT = 1;
 const int Property::PROP_FORMAT = 0;
 map <string, string> Property::properties_;
+PathUtility* Property::simpathHandler_ = new PathUtility(".");
 
 bool Property::initialized_ = false;
 
 void Property::initDefaults()
 {
-    
+    if (!simpathHandler_){
+        simpathHandler_ = new PathUtility(".");
+    }
     properties_[AUTOSCHEDULE] = "true";
     properties_[CREATESOLVER] = "true";
     properties_[SIMPATH] = ".";    
     properties_[SIMNOTES] = "notes";
     properties_[DOCPATH] = "doc";
     properties_[HOME] = "~";    
-    char * home = getenv(HOME.c_str());
+    char * home = getenv(HOME);
     if (( home != NULL ) && (home[0] != '\0'))
     {
-        properties_[SIMPATH] = "." + PathUtility::PATH_SEPARATOR + string(home);
+        properties_[SIMPATH] = string(home);
+        simpathHandler_->addPath(properties_[SIMPATH]);
     }
 }
 
@@ -63,6 +67,32 @@ void Property::setProperty(string key, string value)
     properties_[key] = value;
 }
 
+void Property::addSimPath(string path)
+{
+    if (!simpathHandler_){
+        simpathHandler_ = new PathUtility(path);
+    } else {
+        simpathHandler_->addPath(path);
+    }
+    properties_[SIMPATH] = simpathHandler_->getAllPaths();
+}
+
+const string Property::getSimPath()
+{
+    return properties_[SIMPATH];
+}
+
+void Property::setSimPath(string paths)
+{
+    cout << "changing simpath:" << paths << endl;
+    if (simpathHandler_){
+        delete simpathHandler_;
+    }
+    simpathHandler_ = new PathUtility(paths);
+    properties_[SIMPATH] = simpathHandler_->getAllPaths();
+    cout << "changing simpath:" << paths << endl;
+
+}
 /**
    Reads the property values from environment.  This function should
    be called just after initDefaults if required.  The overriding
@@ -89,7 +119,7 @@ void Property::readEnvironment()
         if ( key == SIMPATH )
         {
             
-            env = getenv(SIMPATH.c_str());            
+            env = getenv(SIMPATH);            
             if (( env != NULL ) && (env[0] != '\0'))
             {
                 string path = trim(string(env));
