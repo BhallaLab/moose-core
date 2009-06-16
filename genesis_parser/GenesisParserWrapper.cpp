@@ -556,8 +556,8 @@ map< string, string >& sliSrcLookup()
 	// Some messages for compartments.
 	src[ "AXIAL Vm" ] = "axial";
 	src[ "AXIAL previous_state" ] = "axial";
-	src[ "RAXIAL Ra Vm" ] = "";
-	src[ "RAXIAL Ra previous_state" ] = "";
+	src[ "RAXIAL Ra Vm" ] = "raxial";
+	src[ "RAXIAL Ra previous_state" ] = "raxial";
 	src[ "INJECT output" ] = "outputSrc";
 	
 	// Some messages for channels.
@@ -708,8 +708,8 @@ map< string, string >& sliDestLookup()
 	// Some messages for compartments.
 	dest[ "AXIAL Vm" ] = "raxial";
 	dest[ "AXIAL previous_state" ] = "raxial";
-	dest[ "RAXIAL Ra Vm" ] = "";
-	dest[ "RAXIAL Ra previous_state" ] = "";
+	dest[ "RAXIAL Ra Vm" ] = "axial";
+	dest[ "RAXIAL Ra previous_state" ] = "axial";
 	dest[ "INJECT output" ] = "injectMsg";
 	
 	// Some messages for channels.

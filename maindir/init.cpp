@@ -125,12 +125,15 @@ void initMoose( int argc, char** argv )
 	ArgParser::parseArguments(argc, argv);
 
 	Property::initialize(ArgParser::getConfigFile(),Property::PROP_FORMAT);
-	PathUtility simpathHandler(ArgParser::getSimPath());
-	// merge the SIMPATH from command line and property file
-	simpathHandler.addPath(Property::getProperty(Property::SIMPATH));
-	// put the updated path list in Property
-	Property::setProperty(Property::SIMPATH, simpathHandler.getAllPaths());
-	cout << "SIMPATH = " << Property::getProperty(Property::SIMPATH) << endl;
+	// PathUtility simpathHandler(ArgParser::getSimPath());
+	// // merge the SIMPATH from command line and property file
+	// simpathHandler.addPath(Property::getProperty(Property::SIMPATH));
+	// // put the updated path list in Property
+	// Property::setProperty(Property::SIMPATH,
+	// simpathHandler.getAllPaths());
+        Property::addSimPath(ArgParser::getSimPath());
+
+	cout << "SIMPATH = " << Property::getProperty(string(Property::SIMPATH)) << endl;
 
 	/**
 	 * This function puts the FuncVecs in order and must be called
