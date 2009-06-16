@@ -25,8 +25,8 @@ using namespace std;
 class PathUtility
 {
   public:
-    static const string PATH_SEPARATOR;
-    static const string DIR_SEPARATOR;
+    static const char* const PATH_SEPARATOR;
+    static const char* const DIR_SEPARATOR;
     PathUtility(string paths);    
     void addPath(string paths);
     string getPath(int index);

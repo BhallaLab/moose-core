@@ -116,6 +116,11 @@ call /Vm TABCREATE {RUNTIME / PLOTDT} 0 1
 setfield /Vm step_mode 3
 addmsg /squid /Vm INPUT Vm
 
+create table /inject
+call /inject TABCREATE {RUNTIME / PLOTDT} 0 1
+setfield /inject step_mode 3
+addmsg /squid /inject INPUT Im
+
 call /squid/Na TABCREATE X {NDIVS} {VMIN} {VMAX}
 call /squid/Na TABCREATE Y {NDIVS} {VMIN} {VMAX}
 call /squid/K TABCREATE X {NDIVS} {VMIN} {VMAX}
@@ -135,7 +140,7 @@ setclock 0 {SIMDT}
 setclock 1 {PLOTDT}
 
 useclock /squid,/squid/# 0
-useclock /Vm 1
+useclock /Vm,/inject 1
 
 // Crazy hack, but the squid demo does it and we need to match.
 setfield /squid initVm {EREST}
@@ -162,4 +167,5 @@ filename = "squid" @ {extension}
 
 int nsteps = RUNTIME / PLOTDT - 1
 tab2file {filename} /Vm table -nentries {nsteps} -overwrite
+tab2file {"squid_inject" @ {extension}} /inject table -nentries {nsteps} -overwrite
 quit
