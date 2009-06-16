@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 /** List of characters considered to be whitespace */
-static const std::string DELIMITERS=" \t\r\n";
+static const char* const DELIMITERS=" \t\r\n";
 /** Splits given string into tokens */
 void tokenize(
 	const std::string& str,

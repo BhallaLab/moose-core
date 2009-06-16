@@ -20,15 +20,17 @@
 #include "PathUtility.h"
 #include "StringUtil.h"
 #include <iostream>
+#include <cstring>
+
 #if defined(unix) || defined(__unix__) || defined(__unix) || defined(__MACH__)
 
-const string PathUtility::PATH_SEPARATOR = ":";
-const string PathUtility::DIR_SEPARATOR = "/";
+const char* const PathUtility::PATH_SEPARATOR = ":";
+const char* const PathUtility::DIR_SEPARATOR = "/";
 
 #elif defined(_WIN32) //if defined WINDOWS
 
-const string PathUtility::PATH_SEPARATOR = ";";
-const string PathUtility::DIR_SEPARATOR = "\\";
+const char* const PathUtility::PATH_SEPARATOR = ";";
+const char* const PathUtility::DIR_SEPARATOR = "\\";
 #else
 #error System type is neither Unix nor Windows. Failing
 #endif // UNIX / WINDOWS
@@ -49,24 +51,26 @@ void PathUtility::addPath(string paths)
     
     string path;    
     size_t start = 0;
-    size_t pos = paths.find(PATH_SEPARATOR,start);        
+    size_t pos = paths.find(PathUtility::PATH_SEPARATOR, start);        
         
-    while ( ( pos != string::npos ) && (start < paths.length()))
+    while ( ( pos != string::npos ))
     {
         path = trim(paths.substr(start, pos-start));
         if ( path.length() > 0 )
         {
             size_t trailing_sep =  path.rfind(DIR_SEPARATOR);
             
-            if ( trailing_sep == path.length() - DIR_SEPARATOR.length() )
+            if ( trailing_sep == path.length() - strlen(DIR_SEPARATOR) )
             {
                 path = path.substr(0, trailing_sep);
             }
-            
             path_.push_back(path);            
         }
         
         start = pos+1;
+        if (start >= paths.length()){
+            break;
+        }
         pos = paths.find(PATH_SEPARATOR, start);
     }
     path = trim(paths.substr(start));
@@ -74,12 +78,12 @@ void PathUtility::addPath(string paths)
     {
          size_t trailing_sep =  path.rfind(DIR_SEPARATOR);
             
-         if ( trailing_sep == path.length() - DIR_SEPARATOR.length() )
+         if ( trailing_sep == path.length() - strlen(DIR_SEPARATOR) )
          {
              path = path.substr(0, trailing_sep);
          }
            
-        path_.push_back(path);
+         path_.push_back(path);
     }
 }
 /**
