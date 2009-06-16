@@ -25,27 +25,32 @@ using namespace std;
 
 #define BUF_SIZE 300
 
+class PathUtility;
+
 class Property
 {
   public:
     // property key constants
-    static const string SIMPATH; // key for path to be searched for script and prototypes
-    static const string SIMNOTES; // key for notes on MOOSE
-    static const string DOCPATH; // key for path to be searched for help
-    static const string AUTOSCHEDULE; // key for autoscheduling on or off
-    static const string CREATESOLVER; // key for automatic creation of solvers ( on or off )
-    static const string HOME;
+    static const char* const SIMPATH; // key for path to be searched for script and prototypes
+    static const char* const SIMNOTES; // key for notes on MOOSE
+    static const char* const DOCPATH; // key for path to be searched for help
+    static const char* const AUTOSCHEDULE; // key for autoscheduling on or off
+    static const char* const CREATESOLVER; // key for automatic creation of solvers ( on or off )
+    static const char* const HOME;
     
     static const int XML_FORMAT;
     static const int PROP_FORMAT;
 
-    static void initialize(string fileName, int format);    
+    static void initialize(string fileName, int format);
     static void initDefaults();
     static string getProperty(string key);
     static void setProperty(string key, string value);
     static int readProperties(string fileName, int format);
     static void readEnvironment();
     static vector <string> & getKeys();
+    static void addSimPath(string path);
+    static void setSimPath(string paths);
+    static const string getSimPath();
     
   private:
     Property();
@@ -53,6 +58,7 @@ class Property
     static int readXml(string fileName);
     static int readProp(string fileName);
     static bool initialized_;
+    static PathUtility* simpathHandler_;
     
 };
 
