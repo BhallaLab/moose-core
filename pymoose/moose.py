@@ -1181,6 +1181,151 @@ class Nid(Id):
 Nid_swigregister = _moose.Nid_swigregister
 Nid_swigregister(Nid)
 
+BUF_SIZE = _moose.BUF_SIZE
+class Property(object):
+    """Proxy of C++ Property class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    def __init__(self): raise AttributeError, "No constructor defined"
+    __repr__ = _swig_repr
+    def initialize(*args):
+        """initialize(string fileName, int format)"""
+        return _moose.Property_initialize(*args)
+
+    initialize = staticmethod(initialize)
+    def initDefaults(*args):
+        """initDefaults()"""
+        return _moose.Property_initDefaults(*args)
+
+    initDefaults = staticmethod(initDefaults)
+    def getProperty(*args):
+        """getProperty(string key) -> string"""
+        return _moose.Property_getProperty(*args)
+
+    getProperty = staticmethod(getProperty)
+    def setProperty(*args):
+        """setProperty(string key, string value)"""
+        return _moose.Property_setProperty(*args)
+
+    setProperty = staticmethod(setProperty)
+    def readProperties(*args):
+        """readProperties(string fileName, int format) -> int"""
+        return _moose.Property_readProperties(*args)
+
+    readProperties = staticmethod(readProperties)
+    def readEnvironment(*args):
+        """readEnvironment()"""
+        return _moose.Property_readEnvironment(*args)
+
+    readEnvironment = staticmethod(readEnvironment)
+    def getKeys(*args):
+        """getKeys() -> string_vector"""
+        return _moose.Property_getKeys(*args)
+
+    getKeys = staticmethod(getKeys)
+    def addSimPath(*args):
+        """addSimPath(string path)"""
+        return _moose.Property_addSimPath(*args)
+
+    addSimPath = staticmethod(addSimPath)
+    def setSimPath(*args):
+        """setSimPath(string paths)"""
+        return _moose.Property_setSimPath(*args)
+
+    setSimPath = staticmethod(setSimPath)
+    def getSimPath(*args):
+        """getSimPath() -> string"""
+        return _moose.Property_getSimPath(*args)
+
+    getSimPath = staticmethod(getSimPath)
+    __swig_destroy__ = _moose.delete_Property
+    __del__ = lambda self : None;
+Property_swigregister = _moose.Property_swigregister
+Property_swigregister(Property)
+Property.SIMPATH = _moose.cvar.Property_SIMPATH
+Property.SIMNOTES = _moose.cvar.Property_SIMNOTES
+Property.DOCPATH = _moose.cvar.Property_DOCPATH
+Property.AUTOSCHEDULE = _moose.cvar.Property_AUTOSCHEDULE
+Property.CREATESOLVER = _moose.cvar.Property_CREATESOLVER
+Property.HOME = _moose.cvar.Property_HOME
+Property.XML_FORMAT = _moose.cvar.Property_XML_FORMAT
+Property.PROP_FORMAT = _moose.cvar.Property_PROP_FORMAT
+
+def Property_initialize(*args):
+  """Property_initialize(string fileName, int format)"""
+  return _moose.Property_initialize(*args)
+
+def Property_initDefaults(*args):
+  """Property_initDefaults()"""
+  return _moose.Property_initDefaults(*args)
+
+def Property_getProperty(*args):
+  """Property_getProperty(string key) -> string"""
+  return _moose.Property_getProperty(*args)
+
+def Property_setProperty(*args):
+  """Property_setProperty(string key, string value)"""
+  return _moose.Property_setProperty(*args)
+
+def Property_readProperties(*args):
+  """Property_readProperties(string fileName, int format) -> int"""
+  return _moose.Property_readProperties(*args)
+
+def Property_readEnvironment(*args):
+  """Property_readEnvironment()"""
+  return _moose.Property_readEnvironment(*args)
+
+def Property_getKeys(*args):
+  """Property_getKeys() -> string_vector"""
+  return _moose.Property_getKeys(*args)
+
+def Property_addSimPath(*args):
+  """Property_addSimPath(string path)"""
+  return _moose.Property_addSimPath(*args)
+
+def Property_setSimPath(*args):
+  """Property_setSimPath(string paths)"""
+  return _moose.Property_setSimPath(*args)
+
+def Property_getSimPath(*args):
+  """Property_getSimPath() -> string"""
+  return _moose.Property_getSimPath(*args)
+
+class PathUtility(object):
+    """Proxy of C++ PathUtility class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """__init__(self, string paths) -> PathUtility"""
+        this = _moose.new_PathUtility(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def addPath(*args):
+        """addPath(self, string paths)"""
+        return _moose.PathUtility_addPath(*args)
+
+    def getPath(*args):
+        """getPath(self, int index) -> string"""
+        return _moose.PathUtility_getPath(*args)
+
+    def getAllPaths(*args):
+        """getAllPaths(self) -> string"""
+        return _moose.PathUtility_getAllPaths(*args)
+
+    def makeFilePath(*args):
+        """makeFilePath(self, string fileName, int index) -> string"""
+        return _moose.PathUtility_makeFilePath(*args)
+
+    def size(*args):
+        """size(self) -> size_t"""
+        return _moose.PathUtility_size(*args)
+
+    __swig_destroy__ = _moose.delete_PathUtility
+    __del__ = lambda self : None;
+PathUtility_swigregister = _moose.PathUtility_swigregister
+PathUtility_swigregister(PathUtility)
+PathUtility.PATH_SEPARATOR = _moose.cvar.PathUtility_PATH_SEPARATOR
+PathUtility.DIR_SEPARATOR = _moose.cvar.PathUtility_DIR_SEPARATOR
+
 ALL = _moose.ALL
 VALUE = _moose.VALUE
 LOOKUP = _moose.LOOKUP

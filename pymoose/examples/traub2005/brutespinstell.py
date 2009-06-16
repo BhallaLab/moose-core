@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  8 11:24:30 2009 (+0530)
 # Version: 
-# Last-Updated: Thu May 21 00:06:48 2009 (+0530)
+# Last-Updated: Mon Jun  1 16:35:50 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 195
+#     Update #: 196
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,7 +48,7 @@ class SpinyStellate(moose.Cell):
     ECa = 125e-3
     Em = -65e-3
     EAR = -40e-3
-    conductance ={
+    conductance = {
 	0: {
 	    'NaF2':   0.4,
 	    'KDR_FS':   0.4,
@@ -197,196 +197,7 @@ class SpinyStellate(moose.Cell):
 	self.presyn = 57
 	for ii in range(60):
 	    comp.append(MyCompartment('comp_' + str(ii), self))
-    # TODO this is full of cycles - the neuron code is just silly -
-    # they use a check for already connected parent-child relation in
-    # traubconnect function
-	comp[1].traubConnect(comp[ 54])
-# 	comp[1].traubConnect(comp[ 2]) 
-# 	comp[1].traubConnect(comp[ 15])
-# 	comp[1].traubConnect(comp[ 28])
-# 	comp[1].traubConnect(comp[ 41])
-# 	comp[2].traubConnect(comp[ 3]) 
-# 	comp[2].traubConnect(comp[ 4]) 
-# 	comp[3].traubConnect(comp[ 4]) 
-# 	comp[3].traubConnect(comp[ 5]) 
-# 	comp[3].traubConnect(comp[ 6]) 
-# 	comp[4].traubConnect(comp[ 7]) 
-# 	comp[5].traubConnect(comp[ 6]) 
-# 	comp[5].traubConnect(comp[ 8]) 
-# 	comp[6].traubConnect(comp[ 9]) 
-# 	comp[7].traubConnect(comp[ 10])
-# 	comp[8].traubConnect(comp[ 11])
-# 	comp[11].traubConnect(comp[12])
-# 	comp[12].traubConnect(comp[13])
-# 	comp[13].traubConnect(comp[14])
-# 	comp[15].traubConnect(comp[16])
-# 	comp[15].traubConnect(comp[17])
-# 	comp[16].traubConnect(comp[17])
-# 	comp[16].traubConnect(comp[18])
-# 	comp[16].traubConnect(comp[19])
-# 	comp[17].traubConnect(comp[20])
-# 	comp[18].traubConnect(comp[19])
-# 	comp[18].traubConnect(comp[21])
-# 	comp[19].traubConnect(comp[22])
-# 	comp[20].traubConnect(comp[23])
-# 	comp[21].traubConnect(comp[24])
-# 	comp[24].traubConnect(comp[25])
-# 	comp[25].traubConnect(comp[26])
-# 	comp[26].traubConnect(comp[27])
-# 	comp[28].traubConnect(comp[29])
-# 	comp[28].traubConnect(comp[30])
-# 	comp[29].traubConnect(comp[30])
-# 	comp[29].traubConnect(comp[31])
-# 	comp[29].traubConnect(comp[32])
-# 	comp[30].traubConnect(comp[33])
-# 	comp[31].traubConnect(comp[32])
-# 	comp[31].traubConnect(comp[34])
-# 	comp[32].traubConnect(comp[35])
-# 	comp[33].traubConnect(comp[36])
-# 	comp[34].traubConnect(comp[37])
-# 	comp[37].traubConnect(comp[38])
-# 	comp[38].traubConnect(comp[39])
-# 	comp[39].traubConnect(comp[40])
-# 	comp[41].traubConnect(comp[42])
-# 	comp[41].traubConnect(comp[43])
-# 	comp[42].traubConnect(comp[43])
-# 	comp[42].traubConnect(comp[44])
-# 	comp[42].traubConnect(comp[45])
-# 	comp[43].traubConnect(comp[46])
-# 	comp[44].traubConnect(comp[45])
-# 	comp[44].traubConnect(comp[47])
-# 	comp[45].traubConnect(comp[48])
-# 	comp[46].traubConnect(comp[49])
-# 	comp[47].traubConnect(comp[50])
-# 	comp[50].traubConnect(comp[51])
-# 	comp[51].traubConnect(comp[52])
-# 	comp[52].traubConnect(comp[53])
-	comp[54].traubConnect(comp[55])
-	comp[55].traubConnect(comp[56])
-	comp[55].traubConnect(comp[58])
-	comp[56].traubConnect(comp[57])
-	comp[56].traubConnect(comp[58])
-	comp[58].traubConnect(comp[59])
-
-	comp[ 1].diameter = 2 * 7.5 
-	comp[ 2].diameter = 2 * 1.06 
-	comp[ 3].diameter = 2 * 0.666666667 
-	comp[ 4].diameter = 2 * 0.666666667 
-	comp[ 5].diameter = 2 * 0.418972332 
-	comp[ 6].diameter = 2 * 0.418972332 
-	comp[ 7].diameter = 2 * 0.666666667 
-	comp[ 8].diameter = 2 * 0.418972332 
-	comp[ 9].diameter = 2 * 0.418972332 
-	comp[ 10].diameter = 2 * 0.666666667 
-	comp[ 11].diameter = 2 * 0.418972332 
-	comp[ 12].diameter = 2 * 0.418972332 
-	comp[ 13].diameter = 2 * 0.418972332 
-	comp[ 14].diameter = 2 * 0.418972332 
-	comp[ 15].diameter = 2 * 1.06 
-	comp[ 16].diameter = 2 * 0.666666667 
-	comp[ 17].diameter = 2 * 0.666666667 
-	comp[ 18].diameter = 2 * 0.418972332 
-	comp[ 19].diameter = 2 * 0.418972332 
-	comp[ 20].diameter = 2 * 0.666666667 
-	comp[ 21].diameter = 2 * 0.418972332 
-	comp[ 22].diameter = 2 * 0.418972332 
-	comp[ 23].diameter = 2 * 0.666666667 
-	comp[ 24].diameter = 2 * 0.418972332 
-	comp[ 25].diameter = 2 * 0.418972332 
-	comp[ 26].diameter = 2 * 0.418972332 
-	comp[ 27].diameter = 2 * 0.418972332 
-	comp[ 28].diameter = 2 * 1.06 
-	comp[ 29].diameter = 2 * 0.666666667 
-	comp[ 30].diameter = 2 * 0.666666667 
-	comp[ 31].diameter = 2 * 0.418972332 
-	comp[ 32].diameter = 2 * 0.418972332 
-	comp[ 33].diameter = 2 * 0.666666667 
-	comp[ 34].diameter = 2 * 0.418972332 
-	comp[ 35].diameter = 2 * 0.418972332 
-	comp[ 36].diameter = 2 * 0.666666667 
-	comp[ 37].diameter = 2 * 0.418972332 
-	comp[ 38].diameter = 2 * 0.418972332 
-	comp[ 39].diameter = 2 * 0.418972332 
-	comp[ 40].diameter = 2 * 0.418972332 
-	comp[ 41].diameter = 2 * 1.06 
-	comp[ 42].diameter = 2 * 0.666666667 
-	comp[ 43].diameter = 2 * 0.666666667 
-	comp[ 44].diameter = 2 * 0.418972332 
-	comp[ 45].diameter = 2 * 0.418972332 
-	comp[ 46].diameter = 2 * 0.666666667 
-	comp[ 47].diameter = 2 * 0.418972332 
-	comp[ 48].diameter = 2 * 0.418972332 
-	comp[ 49].diameter = 2 * 0.666666667 
-	comp[ 50].diameter = 2 * 0.418972332 
-	comp[ 51].diameter = 2 * 0.418972332 
-	comp[ 52].diameter = 2 * 0.418972332 
-	comp[ 53].diameter = 2 * 0.418972332 
-	comp[ 54].diameter = 2 * 0.7 
-	comp[ 55].diameter = 2 * 0.6 
-	comp[ 56].diameter = 2 * 0.5 
-	comp[ 57].diameter = 2 * 0.5 
-	comp[ 58].diameter = 2 * 0.5 
-	comp[ 59].diameter = 2 * 0.5 
-	comp[ 1].length = 20. 
-	comp[ 2].length = 40. 
-	comp[ 3].length = 40. 
-	comp[ 4].length = 40. 
-	comp[ 5].length = 40. 
-	comp[ 6].length = 40. 
-	comp[ 7].length = 40. 
-	comp[ 8].length = 40. 
-	comp[ 9].length = 40. 
-	comp[ 10].length = 40.
-	comp[ 11].length = 40.
-	comp[ 12].length = 40.
-	comp[ 13].length = 40.
-	comp[ 14].length = 40.
-	comp[ 15].length = 40.
-	comp[ 16].length = 40.
-	comp[ 17].length = 40.
-	comp[ 18].length = 40.
-	comp[ 19].length = 40.
-	comp[ 20].length = 40.
-	comp[ 21].length = 40.
-	comp[ 22].length = 40.
-	comp[ 23].length = 40.
-	comp[ 24].length = 40.
-	comp[ 25].length = 40.
-	comp[ 26].length = 40.
-	comp[ 27].length = 40.
-	comp[ 28].length = 40.
-	comp[ 29].length = 40.
-	comp[ 30].length = 40.
-	comp[ 31].length = 40.
-	comp[ 32].length = 40.
-	comp[ 33].length = 40.
-	comp[ 34].length = 40.
-	comp[ 35].length = 40.
-	comp[ 36].length = 40.
-	comp[ 37].length = 40.
-	comp[ 38].length = 40.
-	comp[ 39].length = 40.
-	comp[ 40].length = 40.
-	comp[ 41].length = 40.
-	comp[ 42].length = 40.
-	comp[ 43].length = 40.
-	comp[ 44].length = 40.
-	comp[ 45].length = 40.
-	comp[ 46].length = 40.
-	comp[ 47].length = 40.
-	comp[ 48].length = 40.
-	comp[ 49].length = 40.
-	comp[ 50].length = 40.
-	comp[ 51].length = 40.
-	comp[ 52].length = 40.
-	comp[ 53].length = 40.
-	comp[ 54].length = 50.
-	comp[ 55].length = 50.
-	comp[ 56].length = 50.
-	comp[ 57].length = 50.
-	comp[ 58].length = 50.
-	comp[ 59].length = 50.
-	
+        # Assign levels to the compartments
 	level[ 1].add( comp[ 1]) 
 	level[ 2].add( comp[ 2]) 
 	level[ 3].add( comp[ 3]) 
