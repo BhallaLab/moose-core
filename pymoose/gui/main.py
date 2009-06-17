@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:12:18 2009 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 17 14:43:35 2009 (+0530)
+# Last-Updated: Thu Jun 18 02:10:48 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 45
+#     Update #: 58
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -55,10 +55,17 @@ from mainwin import MainWindow
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
-    arg = None
-    if len(sys.argv) == 2:
-        arg = sys.argv[1]
-    mainwin = MainWindow(arg)
+    fileName = None
+    fileType = None
+    if len(sys.argv) == 3:
+        fileName = sys.argv[1]
+        fileType = sys.argv[2]
+    elif len(sys.argv) == 2:
+        errorDialog = QtGui.QErrorMessage()
+        errorDialog.setWindowFlags(Qt.WindowStaysOnTopHint)
+        errorDialog.showMessage('<p>If specifying a file to load, you must specify a model type as the final argument to this program</p>')
+        app.exec_()
+    mainwin = MainWindow(fileName, fileType)
     
     mainwin.show()
     app.exec_()
