@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 17 01:41:49 2009 (+0530)
+# Last-Updated: Thu Jun 18 00:10:35 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 157
+#     Update #: 311
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -44,25 +44,37 @@
 # 
 
 # Code:
-
+import math
 from PyQt4.Qt import Qt
 from PyQt4 import QtCore, QtGui
+from PyQt4 import Qwt5 as Qwt
+import PyQt4.Qwt5.qplt as qplt
+import PyQt4.Qwt5.anynumpy as numpy
+
 
 from ui_mainwindow import Ui_MainWindow
 from moosehandler import MHandler
 
 class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
     """Main Window for MOOSE GUI"""
-    def __init__(self, *args):
-	QtGui.QMainWindow.__init__(self, *args)
-	self.mooseHandler = MHandler()
-	self.currentDirectory = '.'
-	self.fileType = None
-	self.fileTypes = MHandler.file_types
-	
-	self.filter = ''
+    def __init__(self, loadFile=None, fileType=None):
+	QtGui.QMainWindow.__init__(self)
 	self.setupUi(self)
+        self.isModelLoaded = False
+	self.mooseHandler = MHandler()
+        self.runTimeLineEdit.setText(self.tr(str(self.mooseHandler.runTime)))
+	self.currentDirectory = '.'
+	self.fileType = fileType
+	self.fileTypes = MHandler.file_types
+	self.dataPlotMap = {} # Contains a map of MOOSE tables to QwtPlot objects
+	self.filter = ''
 	self.setupActions()
+        if loadFile is not None:
+            if fileType is None:
+                errorDialog = QtGui.QErrorMessage.showMessage('<p>You must specify a model type as the final argument to this program</p>')
+            else:
+                self.load(loadFile, fileType)
+
 
     def setupActions(self):
 	self.connect(self.actionQuit,
@@ -72,7 +84,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 		     
 	self.connect(self.actionLoad, 
 		     QtCore.SIGNAL('triggered()'),		   
-		     self.load)
+		     self.loadFileDialog)
 
 	self.connect(self.actionSquid_Axon,
 		     QtCore.SIGNAL('triggered()'),
@@ -88,13 +100,14 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
 	self.connect(self.actionReset,
 		     QtCore.SIGNAL('triggered()'),
-		     self.mooseHandler.reset)
+		     self.reset)
 
 	self.connect(self.actionStart,
 		     QtCore.SIGNAL('triggered()'),
 		     self.run)
 
-    def load(self):
+
+    def loadFileDialog(self):
 	fileDialog = QtGui.QFileDialog(self)
 	fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
 	ffilter = ''
@@ -107,28 +120,80 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	    fileNames = fileDialog.selectedFiles()
 	    fileFilter = fileDialog.selectedFilter()
 	    fileType = self.fileTypes[str(fileFilter)]
-	    print 'file type:', self.fileType
+	    print 'file type:', fileType
 	    directory = fileDialog.directory() # Potential bug: if user types the whole file path, does it work? - no but gives error message
 	    for fileName in fileNames: 
 		print fileName
-		self.mooseHandler.load(fileName, fileType)
+		self.load(fileName, fileType)
+
 
     def loadIzhikevich_Neurons_Tutorial(self):
 	self.mooseHandler.load('../examples/izhikevich/Izhikevich.py', 'MOOSE')
 
+
     def loadSquid_Axon_Tutorial(self):
 	self.mooseHandler.load('../examples/squid/qtSquid.py', 'MOOSE')
+
 
     def showAbout_MOOSE(self):
 	about = QtCore.QT_TR_NOOP('<p>MOOSE is the Multi-scale Object Oriented Simulation Environment.</p>'
 				  '<p>It is a general purpose simulation environment for computational neuroscience and chemical kinetics.</p>'
-				  '<p>Copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS</p>'
+				  '<p>Copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS</p>'
 				  '<p>It is made available under the terms of the GNU Lesser General Public License version 2.1. See the file COPYING.LIB for the full notice.</p>')
 	aboutDialog = QtGui.QMessageBox.information(self, self.tr('About MOOSE'), about)
 
 	
     def run(self):
-	time = 1.0 # Test code - will come from a text box
-	self.mooseHandler.run(time)
+        try:
+            time = float(str(self.runTimeLineEdit.text()))
+        except ValueError:
+            print 'Error in converting runtime to float'
+            time = 1e-2
+            self.runTimeLineEdit.setText(self.tr(time))
+
+        print 'Going to run'
+        if not self.isModelLoaded:
+            QtGui.QErrorMessage.showMessage('<p>You must load a model first.</p>')
+            return
+        self.mooseHandler.run(time)
+        for dataTable, dataPlot in self.dataPlotMap.items():
+            ydata = numpy.array(dataTable)
+            curve = Qwt.QwtPlotCurve(self.tr(dataTable.name))
+            xdata = numpy.linspace(0, time, len(dataTable))
+            curve.setData(xdata, ydata)
+            curve.setPen(QtCore.Qt.red)
+            curve.attach(dataPlot)
+            dataPlot.replot()
+
+    def reset(self):
+        if not self.isModelLoaded:
+            QtGui.QErrorMessage.showMessage('<p>You must load a model first.</p>')
+        else:
+            self.mooseHandler.reset()
+
+    def load(self, fileName, fileType):
+        if self.isModelLoaded:
+            import subprocess
+            subprocess.call(['python', 'main.py', fileName, fileType])
+        self.mooseHandler.load(fileName, fileType)
+        dataTables = self.mooseHandler.getDataObjects()
+        rows = math.ceil(math.sqrt(len(dataTables)))
+        cols = math.ceil(float(len(dataTables)) / rows)
+        row = 0
+        col = 0
+        self.plotsGridLayout = QtGui.QGridLayout(self.plotsTab)
+        self.plotsTab.setLayout(self.plotsGridLayout)
+        expansion = self.tabWidget.sizePolicy().expandingDirections()
+        for table in dataTables:
+            plot = Qwt.QwtPlot(self.plotsTab)
+            self.dataPlotMap[table] = plot
+            self.plotsGridLayout.addWidget(plot, row, col)
+            if col >= cols:
+                row += 1
+                col = 0
+            else:
+                col += 1
+        self.isModelLoaded = True
+        
 # 
 # mainwin.py ends here
