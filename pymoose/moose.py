@@ -1589,6 +1589,10 @@ class PyMooseContext(object):
         """
         return _moose.PyMooseContext_readCell(*args)
 
+    def getCurrentTime(*args):
+        """getCurrentTime(self) -> double"""
+        return _moose.PyMooseContext_getCurrentTime(*args)
+
     def exists(*args):
         """
         exists(self, Id id) -> bool

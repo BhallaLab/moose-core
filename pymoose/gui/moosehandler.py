@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 12:25:40 2009 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 17 23:57:38 2009 (+0530)
+# Last-Updated: Thu Jun 18 01:26:59 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 75
+#     Update #: 77
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -96,7 +96,8 @@ class MHandler():
     def getDataObjects(self):
         return [moose.Table(table) for table in self.data.children()]
 
-    
+    def currentTime(self):
+        return self.context.getCurrentTime()
 
 # 
 # moosehandler.py ends here

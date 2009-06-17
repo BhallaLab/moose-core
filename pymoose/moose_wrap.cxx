@@ -23817,6 +23817,35 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PyMooseContext_getCurrentTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  double result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_getCurrentTime",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_getCurrentTime" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)(arg1)->getCurrentTime();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PyMooseContext_exists__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
@@ -104679,6 +104708,7 @@ static PyMethodDef SwigMethods[] = {
 		"readCell(string filename, string cellpath, double_vector params)\n"
 		"PyMooseContext_readCell(PyMooseContext self, string fileName, string cellPath)\n"
 		""},
+	 { (char *)"PyMooseContext_getCurrentTime", _wrap_PyMooseContext_getCurrentTime, METH_VARARGS, (char *)"PyMooseContext_getCurrentTime(PyMooseContext self) -> double"},
 	 { (char *)"PyMooseContext_exists", _wrap_PyMooseContext_exists, METH_VARARGS, (char *)"\n"
 		"exists(Id id) -> bool\n"
 		"PyMooseContext_exists(PyMooseContext self, string path) -> bool\n"

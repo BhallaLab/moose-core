@@ -1577,6 +1577,26 @@ vector<Id> PyMooseContext::getNeighbours(Id src, const string& finfoName)
     }
     return ret;
 }
+/*
+
+map<Id, string> PyMooseContext::neighbourFields(Id src, const string& field)
+{
+    map<Id, string> neighbourFieldMap;
+    Element* element = src();
+    if(field.length() == 0){
+        Conn* conn = element->targets(field, src.index());
+        while (conn->good());// TODO finish later
+    }
+    
+}
+*/
+
+double PyMooseContext::getCurrentTime()
+{
+    send0( myId_(), requestCurrentTimeSlot );
+    double ret = atof(fieldValue_.c_str());	
+    return static_cast< float >( ret );    
+}
 
 vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
 {
