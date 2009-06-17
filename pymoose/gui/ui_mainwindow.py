@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'moose_gui.ui'
 #
-# Created: Wed Jun 17 23:11:13 2009
+# Created: Thu Jun 18 02:31:45 2009
 #      by: PyQt4 UI code generator 4.3.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -87,7 +87,7 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.modelTreeTab,"")
 
         self.plotsTab = QtGui.QWidget()
-        self.plotsTab.setGeometry(QtCore.QRect(0,0,1258,648))
+        self.plotsTab.setGeometry(QtCore.QRect(0,0,646,465))
         self.plotsTab.setObjectName("plotsTab")
         self.tabWidget.addTab(self.plotsTab,"")
         self.vboxlayout.addWidget(self.tabWidget)
@@ -157,6 +157,9 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
+        QtCore.QObject.connect(self.resetPushButton,QtCore.SIGNAL("clicked()"),self.actionReset.trigger)
+        QtCore.QObject.connect(self.runPushButton,QtCore.SIGNAL("clicked()"),self.actionStart.trigger)
+        QtCore.QObject.connect(self.stopPushButton,QtCore.SIGNAL("clicked()"),self.actionStop.trigger)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
