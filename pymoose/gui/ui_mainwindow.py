@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'moose_gui.ui'
 #
-# Created: Wed Jun 17 01:20:41 2009
+# Created: Wed Jun 17 23:11:13 2009
 #      by: PyQt4 UI code generator 4.3.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,33 +12,89 @@ from PyQt4 import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(QtCore.QSize(QtCore.QRect(0,0,800,600).size()).expandedTo(MainWindow.minimumSizeHint()))
+        MainWindow.resize(QtCore.QSize(QtCore.QRect(0,0,668,617).size()).expandedTo(MainWindow.minimumSizeHint()))
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,QtGui.QSizePolicy.MinimumExpanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
+        MainWindow.setSizePolicy(sizePolicy)
 
         self.centralwidget = QtGui.QWidget(MainWindow)
-        self.centralwidget.setGeometry(QtCore.QRect(0,25,800,550))
+        self.centralwidget.setGeometry(QtCore.QRect(0,25,668,567))
         self.centralwidget.setObjectName("centralwidget")
 
-        self.widget = QtGui.QWidget(self.centralwidget)
-        self.widget.setGeometry(QtCore.QRect(-1,-1,801,571))
-        self.widget.setObjectName("widget")
+        self.vboxlayout = QtGui.QVBoxLayout(self.centralwidget)
+        self.vboxlayout.setObjectName("vboxlayout")
 
-        self.tabWidget = QtGui.QTabWidget(self.widget)
-        self.tabWidget.setGeometry(QtCore.QRect(4,-1,801,551))
+        self.runControlWidget = QtGui.QWidget(self.centralwidget)
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.runControlWidget.sizePolicy().hasHeightForWidth())
+        self.runControlWidget.setSizePolicy(sizePolicy)
+        self.runControlWidget.setObjectName("runControlWidget")
+
+        self.hboxlayout = QtGui.QHBoxLayout(self.runControlWidget)
+        self.hboxlayout.setObjectName("hboxlayout")
+
+        self.resetPushButton = QtGui.QPushButton(self.runControlWidget)
+        self.resetPushButton.setObjectName("resetPushButton")
+        self.hboxlayout.addWidget(self.resetPushButton)
+
+        self.runPushButton = QtGui.QPushButton(self.runControlWidget)
+        self.runPushButton.setObjectName("runPushButton")
+        self.hboxlayout.addWidget(self.runPushButton)
+
+        self.stopPushButton = QtGui.QPushButton(self.runControlWidget)
+        self.stopPushButton.setObjectName("stopPushButton")
+        self.hboxlayout.addWidget(self.stopPushButton)
+
+        self.runTimeLabel = QtGui.QLabel(self.runControlWidget)
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.runTimeLabel.sizePolicy().hasHeightForWidth())
+        self.runTimeLabel.setSizePolicy(sizePolicy)
+        self.runTimeLabel.setObjectName("runTimeLabel")
+        self.hboxlayout.addWidget(self.runTimeLabel)
+
+        self.runTimeLineEdit = QtGui.QLineEdit(self.runControlWidget)
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.runTimeLineEdit.sizePolicy().hasHeightForWidth())
+        self.runTimeLineEdit.setSizePolicy(sizePolicy)
+        self.runTimeLineEdit.setObjectName("runTimeLineEdit")
+        self.hboxlayout.addWidget(self.runTimeLineEdit)
+        self.vboxlayout.addWidget(self.runControlWidget)
+
+        self.tabWidget = QtGui.QTabWidget(self.centralwidget)
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,QtGui.QSizePolicy.MinimumExpanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.tabWidget.sizePolicy().hasHeightForWidth())
+        self.tabWidget.setSizePolicy(sizePolicy)
         self.tabWidget.setObjectName("tabWidget")
 
-        self.tab = QtGui.QWidget()
-        self.tab.setGeometry(QtCore.QRect(0,0,797,521))
-        self.tab.setObjectName("tab")
-        self.tabWidget.addTab(self.tab,"")
+        self.modelTreeTab = QtGui.QWidget()
+        self.modelTreeTab.setGeometry(QtCore.QRect(0,0,646,465))
+        self.modelTreeTab.setObjectName("modelTreeTab")
+        self.tabWidget.addTab(self.modelTreeTab,"")
 
-        self.tab_2 = QtGui.QWidget()
-        self.tab_2.setGeometry(QtCore.QRect(0,0,797,521))
-        self.tab_2.setObjectName("tab_2")
-        self.tabWidget.addTab(self.tab_2,"")
+        self.plotsTab = QtGui.QWidget()
+        self.plotsTab.setGeometry(QtCore.QRect(0,0,1258,648))
+        self.plotsTab.setObjectName("plotsTab")
+        self.tabWidget.addTab(self.plotsTab,"")
+        self.vboxlayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0,0,800,25))
+        self.menubar.setGeometry(QtCore.QRect(0,0,668,25))
         self.menubar.setObjectName("menubar")
 
         self.menuMOOSE = QtGui.QMenu(self.menubar)
@@ -55,7 +111,7 @@ class Ui_MainWindow(object):
         MainWindow.setMenuBar(self.menubar)
 
         self.statusbar = QtGui.QStatusBar(MainWindow)
-        self.statusbar.setGeometry(QtCore.QRect(0,575,800,25))
+        self.statusbar.setGeometry(QtCore.QRect(0,592,668,25))
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
@@ -100,13 +156,19 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtGui.QApplication.translate("MainWindow", "Tab 1", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtGui.QApplication.translate("MainWindow", "Tab 2", None, QtGui.QApplication.UnicodeUTF8))
+        self.resetPushButton.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
+        self.runPushButton.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        self.stopPushButton.setText(QtGui.QApplication.translate("MainWindow", "Stop", None, QtGui.QApplication.UnicodeUTF8))
+        self.runTimeLabel.setText(QtGui.QApplication.translate("MainWindow", "Run for (seconds)", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.modelTreeTab), QtGui.QApplication.translate("MainWindow", "Model Tree", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.modelTreeTab),QtGui.QApplication.translate("MainWindow", "Visualize the model as a tree structure", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.plotsTab), QtGui.QApplication.translate("MainWindow", "Plots", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.plotsTab),QtGui.QApplication.translate("MainWindow", "Display the plots from current run", None, QtGui.QApplication.UnicodeUTF8))
         self.menuMOOSE.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuTutorials.setTitle(QtGui.QApplication.translate("MainWindow", "Tutorials", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Help", None, QtGui.QApplication.UnicodeUTF8))

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 12:25:40 2009 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 17 01:44:09 2009 (+0530)
+# Last-Updated: Wed Jun 17 23:57:38 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 61
+#     Update #: 75
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,6 +47,7 @@
 import sys
 sys.path.append('..')
 import os
+
 import moose
 
 class MHandler():
@@ -61,9 +62,11 @@ class MHandler():
 	self.lib = moose.Neutral('/library')
 	self.data = moose.Neutral('/data')
 	self.proto = moose.Neutral('/proto')
+        self.runTime = 1e-2 # default value
 
     def load(self, fileName, fileType):
         """Load a file of specified type and add the directory in search path"""
+        print 'load'
         fileName = str(fileName)
         directory = os.path.dirname(fileName)
         fileType = str(fileType)
@@ -83,10 +86,17 @@ class MHandler():
         return True
     
     def reset(self):
+        print 'reset'
         self.context.reset()
 
     def run(self, time):
+        print 'run'
         self.context.step(float(time))
+
+    def getDataObjects(self):
+        return [moose.Table(table) for table in self.data.children()]
+
+    
 
 # 
 # moosehandler.py ends here
