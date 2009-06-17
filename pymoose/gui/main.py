@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:12:18 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Jun 16 16:38:10 2009 (+0530)
+# Last-Updated: Wed Jun 17 14:43:35 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 33
+#     Update #: 45
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -55,7 +55,11 @@ from mainwin import MainWindow
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
-    mainwin = MainWindow()
+    arg = None
+    if len(sys.argv) == 2:
+        arg = sys.argv[1]
+    mainwin = MainWindow(arg)
+    
     mainwin.show()
     app.exec_()
 
