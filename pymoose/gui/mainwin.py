@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 18 00:10:35 2009 (+0530)
+# Last-Updated: Thu Jun 18 02:33:43 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 311
+#     Update #: 360
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,6 +45,7 @@
 
 # Code:
 import math
+from collections import defaultdict
 from PyQt4.Qt import Qt
 from PyQt4 import QtCore, QtGui
 from PyQt4 import Qwt5 as Qwt
@@ -61,19 +62,19 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	QtGui.QMainWindow.__init__(self)
 	self.setupUi(self)
         self.isModelLoaded = False
+        self.stopFlag = False
 	self.mooseHandler = MHandler()
         self.runTimeLineEdit.setText(self.tr(str(self.mooseHandler.runTime)))
 	self.currentDirectory = '.'
 	self.fileType = fileType
 	self.fileTypes = MHandler.file_types
 	self.dataPlotMap = {} # Contains a map of MOOSE tables to QwtPlot objects
+        self.plotCurveMap = defaultdict(list)
 	self.filter = ''
+        self.plotUpdateInterval = 1e-2
 	self.setupActions()
-        if loadFile is not None:
-            if fileType is None:
-                errorDialog = QtGui.QErrorMessage.showMessage('<p>You must specify a model type as the final argument to this program</p>')
-            else:
-                self.load(loadFile, fileType)
+        if loadFile is not None and fileType is not None:
+            self.load(loadFile, fileType)
 
 
     def setupActions(self):
@@ -105,6 +106,10 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	self.connect(self.actionStart,
 		     QtCore.SIGNAL('triggered()'),
 		     self.run)
+
+        self.connect(self.actionStop,
+                     QtCore.SIGNAL('triggered()'),
+                     self.stop)
 
 
     def loadFileDialog(self):
@@ -153,17 +158,21 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         print 'Going to run'
         if not self.isModelLoaded:
-            QtGui.QErrorMessage.showMessage('<p>You must load a model first.</p>')
+            errorDialog = QtGui.QErrorMessage(self)
+            errorDialog.setModal(True)
+            errorDialog.showMessage('<p>You must load a model first.</p>')
             return
-        self.mooseHandler.run(time)
-        for dataTable, dataPlot in self.dataPlotMap.items():
-            ydata = numpy.array(dataTable)
-            curve = Qwt.QwtPlotCurve(self.tr(dataTable.name))
-            xdata = numpy.linspace(0, time, len(dataTable))
-            curve.setData(xdata, ydata)
-            curve.setPen(QtCore.Qt.red)
-            curve.attach(dataPlot)
-            dataPlot.replot()
+        # The run for update interval and replot data until the full runtime has been executed
+        # But this too is unresponsive
+        lastTime = self.mooseHandler.currentTime()
+        while self.mooseHandler.currentTime() - lastTime < time and not self.stopFlag:
+            self.mooseHandler.run(self.plotUpdateInterval)
+            for dataTable, dataPlot in self.dataPlotMap.items():
+                ydata = numpy.array(dataTable)            
+                xdata = numpy.linspace(0, time, len(dataTable))
+                curve = self.plotCurveMap[dataTable][-1]
+                curve.setData(xdata, ydata)
+                dataPlot.replot()
 
     def reset(self):
         if not self.isModelLoaded:
@@ -173,8 +182,10 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def load(self, fileName, fileType):
         if self.isModelLoaded:
+            
             import subprocess
             subprocess.call(['python', 'main.py', fileName, fileType])
+            
         self.mooseHandler.load(fileName, fileType)
         dataTables = self.mooseHandler.getDataObjects()
         rows = math.ceil(math.sqrt(len(dataTables)))
@@ -188,12 +199,23 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             plot = Qwt.QwtPlot(self.plotsTab)
             self.dataPlotMap[table] = plot
             self.plotsGridLayout.addWidget(plot, row, col)
+            curve = Qwt.QwtPlotCurve(self.tr(table.name))
+            ydata = numpy.array(table)            
+            xdata = numpy.linspace(0, self.mooseHandler.currentTime(), len(table))
+            curve.setData(xdata, ydata)
+            curve.setPen(QtCore.Qt.red)
+            curve.attach(plot)
+            plot.replot()
+            self.plotCurveMap[table].append(curve)
             if col >= cols:
                 row += 1
                 col = 0
             else:
                 col += 1
         self.isModelLoaded = True
-        
+
+    # Until MOOSE has a way of getting stop command from outside
+    def stop(self):
+        self.stopFlag = True
 # 
 # mainwin.py ends here
