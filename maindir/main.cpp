@@ -48,7 +48,7 @@ extern void setupDefaultSchedule(Element* t0, Element* t1, Element* cj);
 	extern void testSched();
 	extern void testSchedProcess();
 	extern void testBiophysics();
-//	extern void testHSolve();
+	extern void testHSolve();
 	extern void testKinetics();
 	extern void testKsolve();
 //	extern void testAverage();
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
 		testSched();
 		testSchedProcess();
 		testBiophysics();
-//		testHSolve();
+		testHSolve();
 		testKinetics();
 		testKsolve();
 //		testAverage();
