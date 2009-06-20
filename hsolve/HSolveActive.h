@@ -21,8 +21,9 @@ public:
 	void solve( ProcInfo info );
 	
 	/**
-	 * Functions to access the solver's data. Defined in HSolveInterface.cpp
+	 * Interface functions to access the solver's data: Defined in HSolveInterface.cpp
 	 */
+	
 	/// Interface to compartments
 	const vector< Id >& getCompartments( ) const;
 	double getVm( unsigned int index ) const;
@@ -110,7 +111,9 @@ private:
 	vector< unsigned int >    chan2compt_;
 	vector< unsigned int >    chan2state_;
 
-	// Setting up of data structures
+	/**
+	 * Setting up of data structures: Defined in HSolveActiveSetup.cpp
+	 */
 	void readChannels( );
 	void readGates( );
 	void readCalcium( );
@@ -118,7 +121,9 @@ private:
 	void createLookupTables( );
 	void cleanup( );
 
-	// Integration
+	/**
+	 * Integration: Defined in HSolveActive.cpp
+	 */
 	void calculateChannelCurrents( );
 	void updateMatrix( );
 	void forwardEliminate( );
