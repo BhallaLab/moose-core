@@ -44,12 +44,15 @@ const Cinfo* initHSolveHubCinfo()
 	///////////////////////////////////////////////////////
 		new DestFinfo( "integ-hub",
 			Ftype1< HSolveActive* >::global(),
-			RFCAST( &HSolveHub::hubFunc ) ),
+			RFCAST( &HSolveHub::hubFunc ),
+			"In this message, the hub receives a handle (a pointer) to the "
+			"solver. This is used by the hub to access the fields of the solver." ),
 		new DestFinfo( "destroy", Ftype0::global(),
 			&HSolveHub::destroy ),
 		new DestFinfo( "child", Ftype1< int >::global(),
 			RFCAST( &HSolveHub::childFunc ),
-			"override the Neutral::childFunc here, so that when this is deleted all the zombies are reanimated." ),
+			"override the Neutral::childFunc here, so that when this is deleted "
+			"all the zombies are reanimated." ),
 		new DestFinfo( "injectMsg", Ftype1< double >::global(),
 			RFCAST( &HSolveHub::comptInjectMsgFunc ) ),
 	///////////////////////////////////////////////////////
@@ -57,8 +60,9 @@ const Cinfo* initHSolveHubCinfo()
 	///////////////////////////////////////////////////////
 		new SharedFinfo( "compartmentSolve", zombieShared, 
 			sizeof( zombieShared ) / sizeof( Finfo* ),
-			"This is identical to the message sent from clock Ticks to objects. Here it is used to take over "
-			"the Process message, usually only as a handle from the solver to the object." ),
+			"This is identical to the message sent from clock Ticks to objects. "
+			"Here it is used to take over the Process message, usually only as "
+			"a handle from the solver to the object." ),
 		new SharedFinfo( "hhchannelSolve", zombieShared, 
 			sizeof( zombieShared ) / sizeof( Finfo* ) ),
 		new SharedFinfo( "caconcSolve", zombieShared, 
@@ -67,10 +71,17 @@ const Cinfo* initHSolveHubCinfo()
 	
 	static string doc[] =
 	{
-		"Name", "HSolveHub",
-		"Author", "Niraj Dudani, 2007, NCBS",
-		"Description", "HSolveHub: ",
+		"Name",
+		"HSolveHub",
+		
+		"Author",
+		"Niraj Dudani, 2007, NCBS",
+		
+		"Description",
+		"HSolveHub: Ensures that field and message requests to solved objects "
+		"are cleanly redirected to their respective HSolve object.",
 	};
+	
 	static Cinfo HSolveHubCinfo(
 		doc,
 		sizeof( doc ) / sizeof( string ),

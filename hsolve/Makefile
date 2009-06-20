@@ -16,6 +16,7 @@ OBJ = \
  	HSolvePassive.o	\
 	RateLookup.o	\
  	HSolveActive.o	\
+ 	HSolveActiveSetup.o	\
 	HSolveInterface.o \
  	HSolve.o \
  	HSolveHub.o \
@@ -33,7 +34,8 @@ HSolveStruct.o:	HSolveStruct.h RateLookup.h
 HinesMatrix.o:	HinesMatrix.h TestHSolve.h ../utility/utility.h
 HSolvePassive.o:	HSolvePassive.h HinesMatrix.h HSolveStruct.h ../biophysics/BioScan.h TestHSolve.h ../utility/utility.h
 RateLookup.o:	RateLookup.h
-HSolveActive.o:	HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../biophysics/BioScan.h ../biophysics/SynChan.h ../biophysics/SynInfo.h ../biophysics/SpikeGen.h
+HSolveActive.o:	HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../biophysics/SynChan.h ../biophysics/SynInfo.h ../biophysics/SpikeGen.h
+HSolveActiveSetup.o:	HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../biophysics/BioScan.h
 HSolveInterface.o:	HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h
 HSolve.o:	HSolve.h HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../element/Neutral.h
 HSolveHub.o:	HSolveHub.h ../basecode/SolveFinfo.h ../basecode/ThisFinfo.h HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../biophysics/Compartment.h ../biophysics/HHChannel.h ../biophysics/CaConc.h ../element/Neutral.h
