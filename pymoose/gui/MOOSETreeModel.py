@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Apr 16 14:37:07 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Apr 16 21:41:16 2009 (+0530)
+# Last-Updated: Fri Jun 19 20:59:55 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 119
+#     Update #: 123
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -141,8 +141,8 @@ class MOOSETreeModel(QtCore.QAbstractItemModel):
         return self.createIndex(parentItem.row(), 0, parentItem)
 
     def rowCount(self, parent):
-        if parent.column() > 0:
-            return 0
+        #if parent.column() > 0:
+        return 0
 
         if not parent.isValid():
             parentItem = self.rootItem
@@ -187,9 +187,9 @@ if __name__ == "__main__":
     view.setModel(model)
     model.insertRows(0, 1,view.selectionModel().currentIndex())
     model.setData(model.index(0, 0, tc), d, QtCore.Qt.EditRole)
-    mainW = QtGui.QMainWIndow()
+    mainW = QtGui.QMainWindow()
     mainW.setCentralWidget(view)
-    main.show()
+    mainW.show()
     sys.exit(app.exec_())
                   
 # 
