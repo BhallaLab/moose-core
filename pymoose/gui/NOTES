@@ -28,3 +28,47 @@ The plan for the GUI is:
     Multilevel tree veiw is perhaps not so important. Inserting a
     PulseGen as a child of a compartment is not so intuitive. Nor is
     it supported by the standard languages.
+
+
+2009-06-17 02:43:37 (+0530) 
+
+The simple interface design we decided today is supposed to consist of
+multiple tabs for different files loaded. But MDI has its own problem
+and with arbitrary model definition as allowed in GENESIS scripts,
+makes this approach impossible.
+
+First: for each tab we have to know exactly what is going to be
+plotted. We decided to use one standard location for all data tables -
+the loader does not have any way of deciding which table will go to
+which data plot.
+
+For example, if I run squid.g and this puts data in /data/squidVm and
+I run Traub.g and it puts data in /data/traubVm, there is no way to
+recognize that squidVm should be plotted in squid_tab and traubVm
+should be plotted in traub_tab.
+
+Second: I can easily give the user a tree view of the whole MOOSE
+hierarchy, but again there is no way to categorize objects depending
+on which loaded model they belong to. If squid.g creates a compartment
+/squid and Traub.g creates a compartment /traub, then there is no way
+we can separate them out post loading. Actually, there may be
+conflicts if two models have objects with same path (Siji encpuntered
+this while trying to load multiple SBML files.
+
+One possible solution could be to load each model under a new Neutral
+element. But with the kind of absolute path prevalent in GENESIS
+scripts, this approach will break down.
+
+Third: This is a fundamental problem with MOOSE/GENESIS - the clocks
+are global - so all the models share same clocks. If I call reset on
+one tab, all models get reset. If I do a run, all models will go
+through their simulation steps.
+
+
+The attempt to create a separate Python process using subprocess.call
+failed. The original window gets stuck. Will try to do via a shell
+script.
+
+2009-06-22 16:01:13 (+0530)
+Added a run tab in moose ui. The ui file is moose_gui.ui. The generated python code is ui_mainwindow.py. The mainwin.py has MainWindow class extending 
+nding and specializing the Ui_MainWindow class.
