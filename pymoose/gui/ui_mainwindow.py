@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'moose_gui.ui'
 #
-# Created: Thu Jun 18 02:31:45 2009
+# Created: Mon Jun 22 15:59:04 2009
 #      by: PyQt4 UI code generator 4.3.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(QtCore.QSize(QtCore.QRect(0,0,668,617).size()).expandedTo(MainWindow.minimumSizeHint()))
+        MainWindow.resize(QtCore.QSize(QtCore.QRect(0,0,686,617).size()).expandedTo(MainWindow.minimumSizeHint()))
 
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,QtGui.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
@@ -21,7 +21,7 @@ class Ui_MainWindow(object):
         MainWindow.setSizePolicy(sizePolicy)
 
         self.centralwidget = QtGui.QWidget(MainWindow)
-        self.centralwidget.setGeometry(QtCore.QRect(0,25,668,567))
+        self.centralwidget.setGeometry(QtCore.QRect(0,25,686,567))
         self.centralwidget.setObjectName("centralwidget")
 
         self.vboxlayout = QtGui.QVBoxLayout(self.centralwidget)
@@ -82,19 +82,24 @@ class Ui_MainWindow(object):
         self.tabWidget.setObjectName("tabWidget")
 
         self.modelTreeTab = QtGui.QWidget()
-        self.modelTreeTab.setGeometry(QtCore.QRect(0,0,646,465))
+        self.modelTreeTab.setGeometry(QtCore.QRect(0,0,664,465))
         self.modelTreeTab.setObjectName("modelTreeTab")
         self.tabWidget.addTab(self.modelTreeTab,"")
 
         self.plotsTab = QtGui.QWidget()
-        self.plotsTab.setGeometry(QtCore.QRect(0,0,646,465))
+        self.plotsTab.setGeometry(QtCore.QRect(0,0,664,465))
         self.plotsTab.setObjectName("plotsTab")
         self.tabWidget.addTab(self.plotsTab,"")
+
+        self.runTab = QtGui.QWidget()
+        self.runTab.setGeometry(QtCore.QRect(0,0,664,465))
+        self.runTab.setObjectName("runTab")
+        self.tabWidget.addTab(self.runTab,"")
         self.vboxlayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0,0,668,25))
+        self.menubar.setGeometry(QtCore.QRect(0,0,686,25))
         self.menubar.setObjectName("menubar")
 
         self.menuMOOSE = QtGui.QMenu(self.menubar)
@@ -111,7 +116,7 @@ class Ui_MainWindow(object):
         MainWindow.setMenuBar(self.menubar)
 
         self.statusbar = QtGui.QStatusBar(MainWindow)
-        self.statusbar.setGeometry(QtCore.QRect(0,592,668,25))
+        self.statusbar.setGeometry(QtCore.QRect(0,592,686,25))
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
@@ -156,7 +161,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QObject.connect(self.resetPushButton,QtCore.SIGNAL("clicked()"),self.actionReset.trigger)
         QtCore.QObject.connect(self.runPushButton,QtCore.SIGNAL("clicked()"),self.actionStart.trigger)
         QtCore.QObject.connect(self.stopPushButton,QtCore.SIGNAL("clicked()"),self.actionStop.trigger)
@@ -172,6 +177,8 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.modelTreeTab),QtGui.QApplication.translate("MainWindow", "Visualize the model as a tree structure", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.plotsTab), QtGui.QApplication.translate("MainWindow", "Plots", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.plotsTab),QtGui.QApplication.translate("MainWindow", "Display the plots from current run", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.runTab), QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.runTab),QtGui.QApplication.translate("MainWindow", "Controls for running a simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.menuMOOSE.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuTutorials.setTitle(QtGui.QApplication.translate("MainWindow", "Tutorials", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Help", None, QtGui.QApplication.UnicodeUTF8))
