@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'moose_gui.ui'
 #
-# Created: Mon Jun 22 15:59:04 2009
+# Created: Tue Jun 23 14:06:16 2009
 #      by: PyQt4 UI code generator 4.3.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,40 +39,7 @@ class Ui_MainWindow(object):
         self.hboxlayout = QtGui.QHBoxLayout(self.runControlWidget)
         self.hboxlayout.setObjectName("hboxlayout")
 
-        self.resetPushButton = QtGui.QPushButton(self.runControlWidget)
-        self.resetPushButton.setObjectName("resetPushButton")
-        self.hboxlayout.addWidget(self.resetPushButton)
-
-        self.runPushButton = QtGui.QPushButton(self.runControlWidget)
-        self.runPushButton.setObjectName("runPushButton")
-        self.hboxlayout.addWidget(self.runPushButton)
-
-        self.stopPushButton = QtGui.QPushButton(self.runControlWidget)
-        self.stopPushButton.setObjectName("stopPushButton")
-        self.hboxlayout.addWidget(self.stopPushButton)
-
-        self.runTimeLabel = QtGui.QLabel(self.runControlWidget)
-
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.runTimeLabel.sizePolicy().hasHeightForWidth())
-        self.runTimeLabel.setSizePolicy(sizePolicy)
-        self.runTimeLabel.setObjectName("runTimeLabel")
-        self.hboxlayout.addWidget(self.runTimeLabel)
-
-        self.runTimeLineEdit = QtGui.QLineEdit(self.runControlWidget)
-
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.runTimeLineEdit.sizePolicy().hasHeightForWidth())
-        self.runTimeLineEdit.setSizePolicy(sizePolicy)
-        self.runTimeLineEdit.setObjectName("runTimeLineEdit")
-        self.hboxlayout.addWidget(self.runTimeLineEdit)
-        self.vboxlayout.addWidget(self.runControlWidget)
-
-        self.tabWidget = QtGui.QTabWidget(self.centralwidget)
+        self.tabWidget = QtGui.QTabWidget(self.runControlWidget)
 
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,QtGui.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
@@ -82,20 +49,60 @@ class Ui_MainWindow(object):
         self.tabWidget.setObjectName("tabWidget")
 
         self.modelTreeTab = QtGui.QWidget()
-        self.modelTreeTab.setGeometry(QtCore.QRect(0,0,664,465))
+        self.modelTreeTab.setGeometry(QtCore.QRect(0,0,646,501))
         self.modelTreeTab.setObjectName("modelTreeTab")
         self.tabWidget.addTab(self.modelTreeTab,"")
 
         self.plotsTab = QtGui.QWidget()
-        self.plotsTab.setGeometry(QtCore.QRect(0,0,664,465))
+        self.plotsTab.setGeometry(QtCore.QRect(0,0,646,501))
         self.plotsTab.setObjectName("plotsTab")
         self.tabWidget.addTab(self.plotsTab,"")
 
         self.runTab = QtGui.QWidget()
-        self.runTab.setGeometry(QtCore.QRect(0,0,664,465))
+        self.runTab.setGeometry(QtCore.QRect(0,0,646,501))
         self.runTab.setObjectName("runTab")
+
+        self.verticalLayoutWidget = QtGui.QWidget(self.runTab)
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(10,10,129,191))
+        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+
+        self.vboxlayout1 = QtGui.QVBoxLayout(self.verticalLayoutWidget)
+        self.vboxlayout1.setObjectName("vboxlayout1")
+
+        self.runPushButton = QtGui.QPushButton(self.verticalLayoutWidget)
+        self.runPushButton.setObjectName("runPushButton")
+        self.vboxlayout1.addWidget(self.runPushButton)
+
+        self.resetPushButton = QtGui.QPushButton(self.verticalLayoutWidget)
+        self.resetPushButton.setObjectName("resetPushButton")
+        self.vboxlayout1.addWidget(self.resetPushButton)
+
+        self.stopPushButton = QtGui.QPushButton(self.verticalLayoutWidget)
+        self.stopPushButton.setObjectName("stopPushButton")
+        self.vboxlayout1.addWidget(self.stopPushButton)
+
+        self.runTimeLabel = QtGui.QLabel(self.verticalLayoutWidget)
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.runTimeLabel.sizePolicy().hasHeightForWidth())
+        self.runTimeLabel.setSizePolicy(sizePolicy)
+        self.runTimeLabel.setObjectName("runTimeLabel")
+        self.vboxlayout1.addWidget(self.runTimeLabel)
+
+        self.runTimeLineEdit = QtGui.QLineEdit(self.verticalLayoutWidget)
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.runTimeLineEdit.sizePolicy().hasHeightForWidth())
+        self.runTimeLineEdit.setSizePolicy(sizePolicy)
+        self.runTimeLineEdit.setObjectName("runTimeLineEdit")
+        self.vboxlayout1.addWidget(self.runTimeLineEdit)
         self.tabWidget.addTab(self.runTab,"")
-        self.vboxlayout.addWidget(self.tabWidget)
+        self.hboxlayout.addWidget(self.tabWidget)
+        self.vboxlayout.addWidget(self.runControlWidget)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -169,14 +176,14 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
-        self.resetPushButton.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
-        self.runPushButton.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
-        self.stopPushButton.setText(QtGui.QApplication.translate("MainWindow", "Stop", None, QtGui.QApplication.UnicodeUTF8))
-        self.runTimeLabel.setText(QtGui.QApplication.translate("MainWindow", "Run for (seconds)", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.modelTreeTab), QtGui.QApplication.translate("MainWindow", "Model Tree", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.modelTreeTab),QtGui.QApplication.translate("MainWindow", "Visualize the model as a tree structure", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.plotsTab), QtGui.QApplication.translate("MainWindow", "Plots", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.plotsTab),QtGui.QApplication.translate("MainWindow", "Display the plots from current run", None, QtGui.QApplication.UnicodeUTF8))
+        self.runPushButton.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        self.resetPushButton.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
+        self.stopPushButton.setText(QtGui.QApplication.translate("MainWindow", "Stop", None, QtGui.QApplication.UnicodeUTF8))
+        self.runTimeLabel.setText(QtGui.QApplication.translate("MainWindow", "Run for (seconds)", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.runTab), QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.runTab),QtGui.QApplication.translate("MainWindow", "Controls for running a simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.menuMOOSE.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
