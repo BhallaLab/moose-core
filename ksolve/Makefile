@@ -35,7 +35,7 @@ HEADERS = \
 # under the GPL, so only GPL-compliant uses of MOOSE will be able to
 # use it. Should be fine for academic use.
 # Optional: Comment out the following three items if not using GSL
-ifdef USE_GSL
+ifeq ($(USE_GSL),1)
 GSL_OBJ = GslIntegrator.o
 GSL_LIBS = -lgsl -lgslcblas
 GSL_FLAGS = -DUSE_GSL
@@ -53,7 +53,7 @@ Kintegrator.o:	Kintegrator.h
 KineticManager.o:	KineticManager.h ../kinetics/KinCompt.h
 TestKsolve.o:	KineticManager.h RateTerm.h Stoich.h KinSparseMatrix.h KineticHub.h Makefile
 
-ifdef ($(USE_GSL))
+ifeq ($(USE_GSL),1)
 #Optional: Comment out the following two items if not using GSL.
 $(GSL_OBJ) : $(HEADERS)
 GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h KinSparseMatrix.h 
