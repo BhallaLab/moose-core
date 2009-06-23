@@ -8601,5 +8601,15 @@ Stages:
 
 25 Dec 2008
 Working on KinPlaceHolder.cpp to assignDiffusion.
+Checked in as revision 987: GSL on, -g, MPI off
+
+=============================================================================
+28 Dec 2008
+Seems to be setting up the models and diffusion.
+- Diffusion rates (kf, kb) are 2.56e12. Various scalings needed.
+- Won't let me look at all fields in cAMP. Crashes, seems whenever I ask for
+	a field that refers back to the solver. Odd. I thought solver array
+	handling issues had been sorted out, but perhaps my hack to fix things
+	for array messages fails for individual ones.
 
 =============================================================================
