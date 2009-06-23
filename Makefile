@@ -67,6 +67,14 @@ USE_MPI?=0
 USE_MUSIC?=0
 USE_CURSES?=0
 
+export BUILD
+export USE_GSL
+export USE_SBML
+export USE_READLINE
+export USE_MPI
+export USE_MUSIC
+export USE_CURSES
+
 # PLATFORM (= Linux, win32, Darwin)
 #If using mac uncomment the following lines
 # PLATFORM=mac
