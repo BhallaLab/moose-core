@@ -51,6 +51,9 @@ class Stoich
 		unsigned int nVarMols() const {
 			return nVarMols_;
 		}
+		unsigned int nReacs() const {
+			return nReacs_;
+		}
 		void clear( Eref stoich );
 
 		// funcs to handle externally imposed changes in mol N
@@ -98,7 +101,14 @@ class Stoich
 			return &Sinit_[0];
 		}
 		void runStats();
+		vector< double >& velocity() {
+			return v_;
+		}
+		int getStoichEntry( unsigned int i, unsigned int j ) {
+			return N_.get( i, j );
+		}
 #endif // USE_GSL
+		void updateV( );
 		/**
  		 * Virtual function to make the data structures from the 
  		 * object oriented specification of the signaling network.
@@ -170,7 +180,6 @@ class Stoich
 		// These functions control the updates of state
 		// variables by calling the functions in the StoichMatrix.
 		///////////////////////////////////////////////////
-		void updateV( );
 		void updateRates( vector< double>* yprime, double dt  );
 		void updateDynamicBuffers();
 		
