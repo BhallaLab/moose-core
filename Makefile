@@ -157,7 +157,7 @@ endif
 
 # To use GSL, pass USE_GSL=1 ( anything on the right will do) in make command line
 ifeq ($(USE_GSL),1)
-LIBS+= -lgsl -lgslcblas
+LIBS+= -L/usr/lib -lgsl -lgslcblas
 CXXFLAGS+= -DUSE_GSL
 endif
 
