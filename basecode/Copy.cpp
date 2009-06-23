@@ -695,8 +695,9 @@ Element* checkBasicCopy( Element* c0, Element* n, Element* outsider,
 		Eref t1 = c1family[ i ];
 		ASSERT( t0.e != t1.e, "uniqueness of Elements" );
 		ASSERT( t0.id() != t1.id(), "uniqueness of ids" );
-		if ( i > 0 )
+		if ( i > 0 ) {
 			ASSERT( t0.name() == t1.name(), "copy names" );
+		}
 		ASSERT( compareCopyValues( t0, t1 ), "copy values" );
 		ASSERT( compareCopyMsgs( t0, t1, outsider ), "copy Msgs" );
 	}
@@ -1024,8 +1025,9 @@ void copyTest()
 		Eref t1 = ccfamily[ i ];
 		ASSERT( t0.e != t1.e, "uniqueness of Elements" );
 		ASSERT( t0.id() != t1.id(), "uniqueness of ids" );
-		if ( i > 0 )
+		if ( i > 0 ) {
 			ASSERT( t0.e->name() == t1.e->name(), "copy names" );
+		}
 		ASSERT( compareCopyValues( t0, t1 ), "copy values" );
 //		ASSERT( compareCopyMsgs( t0, t1, outsider ), "copy Msgs" );
 	}
