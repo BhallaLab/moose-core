@@ -54,10 +54,18 @@
 # USE_MPI - compile with support for parallel computing through MPICH library
 #
 
+# Default values for flags. The operator ?= assigns the given value only if the
+# variable is not already defined.
+
 # BUILD (= debug, release)
-ifndef BUILD
-BUILD=debug
-endif
+BUILD?=release
+
+USE_GSL?=1
+USE_SBML?=1
+USE_READLINE?=1
+USE_MPI?=0
+USE_MUSIC?=0
+USE_CURSES?=0
 
 # PLATFORM (= Linux, win32, Darwin)
 #If using mac uncomment the following lines
@@ -67,9 +75,8 @@ endif
 # Get the processor architecture - i686 or x86_64
 # All these should be taken care of in a script, not in the 
 # Makefile. But we are
-ifndef MACHINE
-MACHINE=i686 
-endif
+MACHINE?=i686 
+
 # We are assuming all non-win32 systems to be POSIX compliant
 # and thus have the command uname for getting Unix system name
 ifneq ($(OSTYPE),win32)
@@ -82,7 +89,7 @@ CXXFLAGS = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSE
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
-CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
 endif
 ##########################################################################
 #
@@ -121,8 +128,8 @@ CXXFLAGS += -DGENERATE_WRAPPERS
 endif
 
 # For parallel (MPI) version:
-ifdef USE_MUSIC
-USE_MPI = 1		# Automatically enable MPI if USE_MUSIC is on
+ifeq ($(USE_MUSIC),1)
+USE_MPI = 1 # Automatically enable MPI if USE_MUSIC is on (doesn't seem to work though.)
 CXXFLAGS += -DUSE_MUSIC
 LIBS += -lmusic
 endif
@@ -131,7 +138,7 @@ endif
 # MPI-2 standard. Enabled by default because it use crops up
 # often enough. You won't need if if you are not using MPICH, or
 # if your version of MPICH has fixed the issue.
-ifdef USE_MPI
+ifeq ($(USE_MPI),1)
 # CXXFLAGS += -DUSE_MPI
 CXXFLAGS += -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK
 endif
@@ -140,26 +147,26 @@ endif
 #CXXFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DUSE_READLINE
 
 
-# To use GSL, pass USE_GSL=true ( anything on the right will do) in make command line
-ifdef USE_GSL
+# To use GSL, pass USE_GSL=1 ( anything on the right will do) in make command line
+ifeq ($(USE_GSL),1)
 LIBS+= -lgsl -lgslcblas
 CXXFLAGS+= -DUSE_GSL
 endif
 
 # To use SBML ,pass USE_SBML=true in make command line
-ifdef USE_SBML
+ifeq ($(USE_SBML),1)
 LIBS+=-lsbml -L/usr/local/lib
-CXXFLAGS+=-DUSE_SBML  
+CXXFLAGS+=-DUSE_SBML
 endif
 
-# To compile with readline support pass USE_READLINE=true in make command line
-ifdef USE_READLINE
+# To compile with readline support pass USE_READLINE=1 in make command line
+ifeq ($(USE_READLINE),1)
 LIBS+= -lreadline
 CXXFLAGS+= -DUSE_READLINE
 endif
 
 # To compile with curses support (terminal aware printing) pass USE_CURSES=true in make command line
-ifdef USE_CURSES
+ifeq ($(USE_CURSES),1)
 LIBS += -lcurses
 CXXFLAGS+= -DUSE_CURSES
 endif
@@ -170,18 +177,18 @@ LIBS=-L/lib64 -L/usr/lib64 $(LIBS)
 endif
 endif
 
-ifdef USE_SBML 
+ifeq ($(USE_SBML),1)
 	SBML_DIR = sbml_IO
 	SBML_LIB = sbml_IO/sbml_IO.o 
 endif
 
-ifdef USE_MUSIC
+ifeq ($(USE_MUSIC),1)
 	MUSIC_DIR = music
 	MUSIC_LIB = music/music.o
 endif
 
 # Here we automagically change compilers to deal with MPI.
-ifdef USE_MPI
+ifeq ($(USE_MPI),1)
 	CXX = mpicxx
 	PARALLEL_DIR = parallel
 	PARALLEL_LIB = parallel/parallel.o
