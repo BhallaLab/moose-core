@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 12:25:40 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 18 01:26:59 2009 (+0530)
+# Last-Updated: Thu Jun 25 02:04:51 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 77
+#     Update #: 79
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,7 +53,7 @@ import moose
 class MHandler():
     file_types = {
         'Genesis Script(*.g)':'GENESIS',
-        'SBML(*.xml,*.bz2,*.zip,*.gz)':'SBML',
+        'SBML(*.xml *.bz2 *.zip *.gz)':'SBML',
         'MOOSE(*.py)':'MOOSE'
         }
     def __init__(self, *args):
@@ -75,7 +75,7 @@ class MHandler():
             moose.Property.addSimPath(directory)
             self.context.loadG(fileName)
         elif fileType == 'SBML':
-            moose.context.runG('readSBML ' + fileName + ' /kinetics')
+            self.context.runG('readSBML ' + fileName + ' /kinetics')
         elif fileType == 'MOOSE':
             import subprocess
             subprocess.call(['python', fileName])
