@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 18 02:33:43 2009 (+0530)
+# Last-Updated: Wed Jun 24 16:16:20 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 360
+#     Update #: 403
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,6 +54,8 @@ import PyQt4.Qwt5.anynumpy as numpy
 
 
 from ui_mainwindow import Ui_MainWindow
+from moosetree import MooseTreeWidget
+
 from moosehandler import MHandler
 
 class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
@@ -61,6 +63,14 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self, loadFile=None, fileType=None):
 	QtGui.QMainWindow.__init__(self)
 	self.setupUi(self)
+#         self.modelTreeWidget.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+        self.modelTreeWidget.headerItem().setHidden(True)
+        layout = self.modelTreeTab.layout()
+        if not layout:
+            layout = QtGui.QVBoxLayout(self.modelTreeTab)
+            self.modelTreeTab.setLayout(layout)
+        layout.addWidget(self.modelTreeWidget)
+        self.modelTreeWidget.show()
         self.isModelLoaded = False
         self.stopFlag = False
 	self.mooseHandler = MHandler()
@@ -111,6 +121,15 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
                      QtCore.SIGNAL('triggered()'),
                      self.stop)
 
+        self.connect(self.runPushButton,
+                     QtCore.SIGNAL('clicked()'),
+                     self.run)
+        self.connect(self.resetPushButton,
+                     QtCore.SIGNAL('clicked()'),
+                     self.reset)
+        self.connect(self.stopPushButton,
+                     QtCore.SIGNAL('clicked()'),
+                     self.stop)
 
     def loadFileDialog(self):
 	fileDialog = QtGui.QFileDialog(self)
@@ -181,22 +200,22 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.mooseHandler.reset()
 
     def load(self, fileName, fileType):
-        if self.isModelLoaded:
-            
+        if self.isModelLoaded:            
             import subprocess
             subprocess.call(['python', 'main.py', fileName, fileType])
             
         self.mooseHandler.load(fileName, fileType)
+        self.modelTreeWidget.recreateTree()
         dataTables = self.mooseHandler.getDataObjects()
         rows = math.ceil(math.sqrt(len(dataTables)))
         cols = math.ceil(float(len(dataTables)) / rows)
         row = 0
         col = 0
-        self.plotsGridLayout = QtGui.QGridLayout(self.plotsTab)
-        self.plotsTab.setLayout(self.plotsGridLayout)
-        expansion = self.tabWidget.sizePolicy().expandingDirections()
+        self.plotsGridLayout = QtGui.QGridLayout(self.plotsGroupBox)
+        self.plotsGroupBox.setLayout(self.plotsGridLayout)
+        
         for table in dataTables:
-            plot = Qwt.QwtPlot(self.plotsTab)
+            plot = Qwt.QwtPlot(self.plotsGroupBox)
             self.dataPlotMap[table] = plot
             self.plotsGridLayout.addWidget(plot, row, col)
             curve = Qwt.QwtPlotCurve(self.tr(table.name))
@@ -213,6 +232,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             else:
                 col += 1
         self.isModelLoaded = True
+        self.update()
 
     # Until MOOSE has a way of getting stop command from outside
     def stop(self):
