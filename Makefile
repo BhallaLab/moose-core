@@ -26,32 +26,50 @@
 #     ADDITIONAL COMMANDLINE VARIABLES FOR MAKE
 #
 ######################################################################     
-# The variable BUILD determines if it should be optimized (release)
-# or a debug version (default).
 # make can be run with a command line parameter like below:
-# make clean BUILD=debug
-# make BUILD=debug
+# 		make clean
+# 		make BUILD=debug USE_SBML=0 USE_MPI=1
+# 
 # another option is to define BUILD as an environment variable:
-# export BUILD=debug
-# make clean
-# make
+# 		export BUILD=debug
+# 		export USE_SBML=0
+# 		export USE_MPI=1
+# 		make clean
+# 		make
 #
-# There are some more variables which just need to be defined for 
-# controlling the compilation and the value does not matter. These are:
+# There are a few variables whose value you can set to control compilation.
+# Choose the libraries you want by setting the USE_* flags to 0 or 1 (to exclude
+# or include the library). The variables you can set are:
+# 
+# BUILD (default value: release) - If this variable is set to 'release' (default),
+# 		moose will be compiled in optimized mode. If it is set to 'debug', then 
+# 		debug symbols will be included and compiler optimizations will not be used.
 #
-# USE_GSL - use GNU Scientific Library for integration in kinetic simulations
+# USE_GSL (default value: 1) - use GNU Scientific Library for integration in
+# 		kinetic simulations.
+#		
+# USE_SBML (default value: 1) - compile with support for the Systems Biology
+# 		Markup Language (SBML). This allows you to read and write chemical 
+# 		kinetic models in the simulator-indpendent SBML format.
 # 
-# USE_READLINE - use the readline library which provides command history and 
-# 		better command line editing capabilities
+# USE_READLINE (default value: 1) - use the readline library which provides
+# 		command history and better command line editing capabilities
+#
+# USE_MPI (default value: 0) - compile with support for parallel computing through
+# 		MPICH library
 # 
-# GENERATE_WRAPPERS - useful for python interface developers. The binary created 
-# 		with this option looks for a directory named 'generated' in the
-# 		working directory and creates a wrapper class ( one .h file 
-# 		and a .cpp file ) and partial code for the swig interface file
-# 		(pymoose.i). These files with some modification can be used for
+# USE_MUSIC (default value: 0) - compile with MUSIC support. The MUSIC library 
+# 		allows runtime exchange of information between simulators.
+#
+# USE_CURSES (default value: 0) - To compile with curses support (terminal aware
+# 		printing)
+# 
+# GENERATE_WRAPPERS (default value: 0) - useful for python interface developers.
+# 		The binary created with this option looks for a directory named
+# 		'generated' in the working directory and creates a wrapper class
+# 		(one .h file and a .cpp file ) and partial code for the swig interface
+# 		file (pymoose.i). These files with some modification can be used for
 # 		generating the python interface using swig.
-#
-# USE_MPI - compile with support for parallel computing through MPICH library
 #
 
 # Default values for flags. The operator ?= assigns the given value only if the
@@ -59,13 +77,13 @@
 
 # BUILD (= debug, release)
 BUILD?=release
-
 USE_GSL?=1
 USE_SBML?=1
 USE_READLINE?=1
 USE_MPI?=0
 USE_MUSIC?=0
 USE_CURSES?=0
+GENERATE_WRAPPERS?=0
 
 export BUILD
 export USE_GSL
@@ -74,6 +92,7 @@ export USE_READLINE
 export USE_MPI
 export USE_MUSIC
 export USE_CURSES
+export GENERATE_WRAPPERS
 
 # PLATFORM (= Linux, win32, Darwin)
 #If using mac uncomment the following lines
@@ -131,7 +150,7 @@ LIBS = 	-lm
 # to get the generated code to work. 
 # Although this binary of MOOSE is verbose in its complaints, is completely harmless 
 # except for the overhead of  checks for the existence of a few files at startup.
-ifdef GENERATE_WRAPPERS
+ifeq ($(GENERATE_WRAPPERS),1)
 CXXFLAGS += -DGENERATE_WRAPPERS
 endif
 
@@ -155,13 +174,13 @@ endif
 #CXXFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DUSE_READLINE
 
 
-# To use GSL, pass USE_GSL=1 ( anything on the right will do) in make command line
+# To use GSL, pass USE_GSL=1 in make command line
 ifeq ($(USE_GSL),1)
 LIBS+= -L/usr/lib -lgsl -lgslcblas
 CXXFLAGS+= -DUSE_GSL
 endif
 
-# To use SBML ,pass USE_SBML=true in make command line
+# To use SBML, pass USE_SBML=1 in make command line
 ifeq ($(USE_SBML),1)
 LIBS+=-lsbml -L/usr/local/lib
 CXXFLAGS+=-DUSE_SBML
@@ -173,7 +192,7 @@ LIBS+= -lreadline
 CXXFLAGS+= -DUSE_READLINE
 endif
 
-# To compile with curses support (terminal aware printing) pass USE_CURSES=true in make command line
+# To compile with curses support (terminal aware printing) pass USE_CURSES=1 in make command line
 ifeq ($(USE_CURSES),1)
 LIBS += -lcurses
 CXXFLAGS+= -DUSE_CURSES
@@ -254,6 +273,14 @@ pymoose: libs $(OBJLIBS)
 	$(MAKE) -C $@
 
 libs:
+	@echo "Compiling with flags:"
+	@echo "	BUILD:" $(BUILD)
+	@echo "	USE_GSL:" $(USE_GSL)
+	@echo "	USE_SBML:" $(USE_SBML)
+	@echo "	USE_READLINE:" $(USE_READLINE)
+	@echo "	USE_MPI:" $(USE_MPI)
+	@echo "	USE_MUSIC:" $(USE_MUSIC)
+	@echo "	USE_CURSES:" $(USE_CURSES)
 	@(for i in $(SUBDIR); do $(MAKE) -C $$i; done)
 	@echo "All Libs compiled"
 
