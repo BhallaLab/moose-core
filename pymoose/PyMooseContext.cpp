@@ -29,7 +29,7 @@ extern void initCinfos();
 extern const string& helpless();
 extern const string& getClassDoc(const string&, const string&);
 extern const string& getCommandDoc(const string&);
-
+extern unsigned int parseNodeNum( string& name );
 
 extern void setupDefaultSchedule(Element*, Element*, Element*);
 extern Element* makeGenesisParser();
@@ -1502,6 +1502,12 @@ void PyMooseContext::readCell(string filename, string cellpath, double cm, doubl
     send4< string, string, vector < double >, int >( 
         myId_(), 
         readCellSlot, filename, cellpath , params, node);
+}
+
+void PyMooseContext::readSBML(string fileName, string modelPath)
+{
+    int node = parseNodeNum(modelPath);
+    send3< string, string, int >(myId_(), readSbmlSlot, fileName, modelPath, node );
 }
 
 const string& PyMooseContext::className(const Id& objId) const
