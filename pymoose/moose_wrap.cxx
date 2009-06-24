@@ -2511,56 +2511,56 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int argnum, int flags)
 #define SWIGTYPE_p_pymoose__Cell swig_types[27]
 #define SWIGTYPE_p_pymoose__Class swig_types[28]
 #define SWIGTYPE_p_pymoose__ClockJob swig_types[29]
-#define SWIGTYPE_p_pymoose__ClockTick swig_types[30]
-#define SWIGTYPE_p_pymoose__Compartment swig_types[31]
-#define SWIGTYPE_p_pymoose__CylPanel swig_types[32]
-#define SWIGTYPE_p_pymoose__DifShell swig_types[33]
-#define SWIGTYPE_p_pymoose__DiffAmp swig_types[34]
-#define SWIGTYPE_p_pymoose__DiskPanel swig_types[35]
-#define SWIGTYPE_p_pymoose__Enzyme swig_types[36]
-#define SWIGTYPE_p_pymoose__ExponentialRng swig_types[37]
-#define SWIGTYPE_p_pymoose__GHK swig_types[38]
-#define SWIGTYPE_p_pymoose__GammaRng swig_types[39]
-#define SWIGTYPE_p_pymoose__Geometry swig_types[40]
-#define SWIGTYPE_p_pymoose__GssaStoich swig_types[41]
-#define SWIGTYPE_p_pymoose__HHChannel swig_types[42]
-#define SWIGTYPE_p_pymoose__HHGate swig_types[43]
-#define SWIGTYPE_p_pymoose__HSolve swig_types[44]
-#define SWIGTYPE_p_pymoose__HemispherePanel swig_types[45]
-#define SWIGTYPE_p_pymoose__IntFire swig_types[46]
-#define SWIGTYPE_p_pymoose__Interpol swig_types[47]
-#define SWIGTYPE_p_pymoose__IzhikevichNrn swig_types[48]
-#define SWIGTYPE_p_pymoose__KinCompt swig_types[49]
-#define SWIGTYPE_p_pymoose__KineticHub swig_types[50]
-#define SWIGTYPE_p_pymoose__KineticManager swig_types[51]
-#define SWIGTYPE_p_pymoose__Kintegrator swig_types[52]
-#define SWIGTYPE_p_pymoose__MathFunc swig_types[53]
-#define SWIGTYPE_p_pymoose__Mg_block swig_types[54]
-#define SWIGTYPE_p_pymoose__Molecule swig_types[55]
-#define SWIGTYPE_p_pymoose__Nernst swig_types[56]
-#define SWIGTYPE_p_pymoose__NeuroScan swig_types[57]
-#define SWIGTYPE_p_pymoose__Neutral swig_types[58]
-#define SWIGTYPE_p_pymoose__NormalRng swig_types[59]
-#define SWIGTYPE_p_pymoose__PIDController swig_types[60]
-#define SWIGTYPE_p_pymoose__Panel swig_types[61]
-#define SWIGTYPE_p_pymoose__PoissonRng swig_types[62]
-#define SWIGTYPE_p_pymoose__PulseGen swig_types[63]
-#define SWIGTYPE_p_pymoose__PyMooseBase swig_types[64]
-#define SWIGTYPE_p_pymoose__PyMooseContext swig_types[65]
-#define SWIGTYPE_p_pymoose__RC swig_types[66]
-#define SWIGTYPE_p_pymoose__RandGenerator swig_types[67]
-#define SWIGTYPE_p_pymoose__RandomSpike swig_types[68]
-#define SWIGTYPE_p_pymoose__Reaction swig_types[69]
-#define SWIGTYPE_p_pymoose__RectPanel swig_types[70]
-#define SWIGTYPE_p_pymoose__SpherePanel swig_types[71]
-#define SWIGTYPE_p_pymoose__SpikeGen swig_types[72]
-#define SWIGTYPE_p_pymoose__StochSynchan swig_types[73]
-#define SWIGTYPE_p_pymoose__Stoich swig_types[74]
-#define SWIGTYPE_p_pymoose__Surface swig_types[75]
-#define SWIGTYPE_p_pymoose__SynChan swig_types[76]
-#define SWIGTYPE_p_pymoose__Table swig_types[77]
-#define SWIGTYPE_p_pymoose__TableIterator swig_types[78]
-#define SWIGTYPE_p_pymoose__TauPump swig_types[79]
+#define SWIGTYPE_p_pymoose__Compartment swig_types[30]
+#define SWIGTYPE_p_pymoose__CylPanel swig_types[31]
+#define SWIGTYPE_p_pymoose__DifShell swig_types[32]
+#define SWIGTYPE_p_pymoose__DiffAmp swig_types[33]
+#define SWIGTYPE_p_pymoose__DiskPanel swig_types[34]
+#define SWIGTYPE_p_pymoose__Enzyme swig_types[35]
+#define SWIGTYPE_p_pymoose__ExponentialRng swig_types[36]
+#define SWIGTYPE_p_pymoose__GHK swig_types[37]
+#define SWIGTYPE_p_pymoose__GammaRng swig_types[38]
+#define SWIGTYPE_p_pymoose__Geometry swig_types[39]
+#define SWIGTYPE_p_pymoose__GssaStoich swig_types[40]
+#define SWIGTYPE_p_pymoose__HHChannel swig_types[41]
+#define SWIGTYPE_p_pymoose__HHGate swig_types[42]
+#define SWIGTYPE_p_pymoose__HSolve swig_types[43]
+#define SWIGTYPE_p_pymoose__HemispherePanel swig_types[44]
+#define SWIGTYPE_p_pymoose__IntFire swig_types[45]
+#define SWIGTYPE_p_pymoose__Interpol swig_types[46]
+#define SWIGTYPE_p_pymoose__IzhikevichNrn swig_types[47]
+#define SWIGTYPE_p_pymoose__KinCompt swig_types[48]
+#define SWIGTYPE_p_pymoose__KineticHub swig_types[49]
+#define SWIGTYPE_p_pymoose__KineticManager swig_types[50]
+#define SWIGTYPE_p_pymoose__Kintegrator swig_types[51]
+#define SWIGTYPE_p_pymoose__MathFunc swig_types[52]
+#define SWIGTYPE_p_pymoose__Mg_block swig_types[53]
+#define SWIGTYPE_p_pymoose__Molecule swig_types[54]
+#define SWIGTYPE_p_pymoose__Nernst swig_types[55]
+#define SWIGTYPE_p_pymoose__NeuroScan swig_types[56]
+#define SWIGTYPE_p_pymoose__Neutral swig_types[57]
+#define SWIGTYPE_p_pymoose__NormalRng swig_types[58]
+#define SWIGTYPE_p_pymoose__PIDController swig_types[59]
+#define SWIGTYPE_p_pymoose__Panel swig_types[60]
+#define SWIGTYPE_p_pymoose__PoissonRng swig_types[61]
+#define SWIGTYPE_p_pymoose__PulseGen swig_types[62]
+#define SWIGTYPE_p_pymoose__PyMooseBase swig_types[63]
+#define SWIGTYPE_p_pymoose__PyMooseContext swig_types[64]
+#define SWIGTYPE_p_pymoose__RC swig_types[65]
+#define SWIGTYPE_p_pymoose__RandGenerator swig_types[66]
+#define SWIGTYPE_p_pymoose__RandomSpike swig_types[67]
+#define SWIGTYPE_p_pymoose__Reaction swig_types[68]
+#define SWIGTYPE_p_pymoose__RectPanel swig_types[69]
+#define SWIGTYPE_p_pymoose__SpherePanel swig_types[70]
+#define SWIGTYPE_p_pymoose__SpikeGen swig_types[71]
+#define SWIGTYPE_p_pymoose__StochSynchan swig_types[72]
+#define SWIGTYPE_p_pymoose__Stoich swig_types[73]
+#define SWIGTYPE_p_pymoose__Surface swig_types[74]
+#define SWIGTYPE_p_pymoose__SynChan swig_types[75]
+#define SWIGTYPE_p_pymoose__Table swig_types[76]
+#define SWIGTYPE_p_pymoose__TableIterator swig_types[77]
+#define SWIGTYPE_p_pymoose__TauPump swig_types[78]
+#define SWIGTYPE_p_pymoose__Tick swig_types[79]
 #define SWIGTYPE_p_pymoose__TimeTable swig_types[80]
 #define SWIGTYPE_p_pymoose__TriPanel swig_types[81]
 #define SWIGTYPE_p_pymoose__UniformRng swig_types[82]
@@ -4701,24 +4701,24 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
 #define pymoose_Cell_description_get(self_) self_->__get_description()
   
 
-#define pymoose_ClockTick_dt_get(self_) self_->__get_dt()
-#define pymoose_ClockTick_dt_set(self_, val_) self_->__set_dt(val_)
+#define pymoose_Tick_dt_get(self_) self_->__get_dt()
+#define pymoose_Tick_dt_set(self_, val_) self_->__set_dt(val_)
   
 
-#define pymoose_ClockTick_stage_get(self_) self_->__get_stage()
-#define pymoose_ClockTick_stage_set(self_, val_) self_->__set_stage(val_)
+#define pymoose_Tick_stage_get(self_) self_->__get_stage()
+#define pymoose_Tick_stage_set(self_, val_) self_->__set_stage(val_)
   
 
-#define pymoose_ClockTick_ordinal_get(self_) self_->__get_ordinal()
-#define pymoose_ClockTick_ordinal_set(self_, val_) self_->__set_ordinal(val_)
+#define pymoose_Tick_ordinal_get(self_) self_->__get_ordinal()
+#define pymoose_Tick_ordinal_set(self_, val_) self_->__set_ordinal(val_)
   
 
-#define pymoose_ClockTick_nextTime_get(self_) self_->__get_nextTime()
-#define pymoose_ClockTick_nextTime_set(self_, val_) self_->__set_nextTime(val_)
+#define pymoose_Tick_nextTime_get(self_) self_->__get_nextTime()
+#define pymoose_Tick_nextTime_set(self_, val_) self_->__set_nextTime(val_)
   
 
-#define pymoose_ClockTick_updateDtSrc_get(self_) self_->__get_updateDtSrc()
-#define pymoose_ClockTick_updateDtSrc_set(self_, val_) self_->__set_updateDtSrc(val_)
+#define pymoose_Tick_updateDtSrc_get(self_) self_->__get_updateDtSrc()
+#define pymoose_Tick_updateDtSrc_set(self_, val_) self_->__set_updateDtSrc(val_)
   
 
 #define pymoose_ClockJob_runTime_get(self_) self_->__get_runTime()
@@ -23817,6 +23817,56 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PyMooseContext_readSBML(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
+  std::string arg2 ;
+  std::string arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  if(!PyArg_UnpackTuple(args,(char *)"PyMooseContext_readSBML",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__PyMooseContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PyMooseContext_readSBML" "', argument " "1"" of type '" "pymoose::PyMooseContext *""'"); 
+  }
+  arg1 = reinterpret_cast< pymoose::PyMooseContext * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_readSBML" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj2, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "PyMooseContext_readSBML" "', argument " "3"" of type '" "std::string""'"); 
+    }
+    arg3 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->readSBML(arg2,arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return resultobj;
+fail:
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PyMooseContext_getCurrentTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   pymoose::PyMooseContext *arg1 = (pymoose::PyMooseContext *) 0 ;
@@ -31247,37 +31297,37 @@ SWIGINTERN PyObject *Cell_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject 
   return SWIG_Py_Void();
 }
 
-SWIGINTERN int Swig_var_ClockTick_className__set(PyObject *) {
-  SWIG_Error(SWIG_AttributeError,"Variable ClockTick_className_ is read-only.");
+SWIGINTERN int Swig_var_Tick_className__set(PyObject *) {
+  SWIG_Error(SWIG_AttributeError,"Variable Tick_className_ is read-only.");
   return 1;
 }
 
 
-SWIGINTERN PyObject *Swig_var_ClockTick_className__get(void) {
+SWIGINTERN PyObject *Swig_var_Tick_className__get(void) {
   PyObject *pyobj = 0;
   
-  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::ClockTick::className_));
+  pyobj = SWIG_From_std_string(static_cast< std::string >(pymoose::Tick::className_));
   return pyobj;
 }
 
 
-SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Tick__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Id arg1 ;
-  pymoose::ClockTick *result = 0 ;
+  pymoose::Tick *result = 0 ;
   void *argp1 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_ClockTick",1,1,&obj0)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Tick",1,1,&obj0)) SWIG_fail;
   {
     res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Id,  0  | 0);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_ClockTick" "', argument " "1"" of type '" "Id""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Tick" "', argument " "1"" of type '" "Id""'"); 
     }  
     if (!argp1) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_ClockTick" "', argument " "1"" of type '" "Id""'");
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Tick" "', argument " "1"" of type '" "Id""'");
     } else {
       Id * temp = reinterpret_cast< Id * >(argp1);
       arg1 = *temp;
@@ -31286,10 +31336,10 @@ SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_0(PyObject *SWIGUNUSEDPARM(self),
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::ClockTick *)new pymoose::ClockTick(arg1);
+    result = (pymoose::Tick *)new pymoose::Tick(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__ClockTick, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Tick, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -31298,29 +31348,29 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Tick__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::string arg1 ;
-  pymoose::ClockTick *result = 0 ;
+  pymoose::Tick *result = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_ClockTick",1,1,&obj0)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Tick",1,1,&obj0)) SWIG_fail;
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj0, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_ClockTick" "', argument " "1"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Tick" "', argument " "1"" of type '" "std::string""'"); 
     }
     arg1 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::ClockTick *)new pymoose::ClockTick(arg1);
+    result = (pymoose::Tick *)new pymoose::Tick(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__ClockTick, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Tick, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -31329,23 +31379,23 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Tick__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::string arg1 ;
   Id arg2 ;
-  pymoose::ClockTick *result = 0 ;
+  pymoose::Tick *result = 0 ;
   void *argp2 ;
   int res2 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_ClockTick",2,2,&obj0,&obj1)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Tick",2,2,&obj0,&obj1)) SWIG_fail;
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj0, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_ClockTick" "', argument " "1"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Tick" "', argument " "1"" of type '" "std::string""'"); 
     }
     arg1 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -31353,10 +31403,10 @@ SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_2(PyObject *SWIGUNUSEDPARM(self),
   {
     res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Id,  0  | 0);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_ClockTick" "', argument " "2"" of type '" "Id""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_Tick" "', argument " "2"" of type '" "Id""'"); 
     }  
     if (!argp2) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_ClockTick" "', argument " "2"" of type '" "Id""'");
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Tick" "', argument " "2"" of type '" "Id""'");
     } else {
       Id * temp = reinterpret_cast< Id * >(argp2);
       arg2 = *temp;
@@ -31365,10 +31415,10 @@ SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_2(PyObject *SWIGUNUSEDPARM(self),
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::ClockTick *)new pymoose::ClockTick(arg1,arg2);
+    result = (pymoose::Tick *)new pymoose::Tick(arg1,arg2);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__ClockTick, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Tick, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -31377,41 +31427,41 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Tick__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::string arg1 ;
   pymoose::PyMooseBase *arg2 = 0 ;
-  pymoose::ClockTick *result = 0 ;
+  pymoose::Tick *result = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_ClockTick",2,2,&obj0,&obj1)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Tick",2,2,&obj0,&obj1)) SWIG_fail;
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj0, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_ClockTick" "', argument " "1"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Tick" "', argument " "1"" of type '" "std::string""'"); 
     }
     arg1 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_pymoose__PyMooseBase,  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_ClockTick" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_Tick" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_ClockTick" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Tick" "', argument " "2"" of type '" "pymoose::PyMooseBase &""'"); 
   }
   arg2 = reinterpret_cast< pymoose::PyMooseBase * >(argp2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::ClockTick *)new pymoose::ClockTick(arg1,*arg2);
+    result = (pymoose::Tick *)new pymoose::Tick(arg1,*arg2);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__ClockTick, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Tick, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -31420,12 +31470,12 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_4(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Tick__SWIG_4(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = 0 ;
+  pymoose::Tick *arg1 = 0 ;
   std::string arg2 ;
   pymoose::PyMooseBase *arg3 = 0 ;
-  pymoose::ClockTick *result = 0 ;
+  pymoose::Tick *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp3 = 0 ;
@@ -31435,38 +31485,38 @@ SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_4(PyObject *SWIGUNUSEDPARM(self),
   PyObject * obj2 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_ClockTick",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__ClockTick,  0  | 0);
+  if(!PyArg_UnpackTuple(args,(char *)"new_Tick",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__Tick,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_ClockTick" "', argument " "1"" of type '" "pymoose::ClockTick const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Tick" "', argument " "1"" of type '" "pymoose::Tick const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_ClockTick" "', argument " "1"" of type '" "pymoose::ClockTick const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Tick" "', argument " "1"" of type '" "pymoose::Tick const &""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_ClockTick" "', argument " "2"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Tick" "', argument " "2"" of type '" "std::string""'"); 
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_pymoose__PyMooseBase,  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_ClockTick" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_Tick" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_ClockTick" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Tick" "', argument " "3"" of type '" "pymoose::PyMooseBase &""'"); 
   }
   arg3 = reinterpret_cast< pymoose::PyMooseBase * >(argp3);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::ClockTick *)new pymoose::ClockTick((pymoose::ClockTick const &)*arg1,arg2,*arg3);
+    result = (pymoose::Tick *)new pymoose::Tick((pymoose::Tick const &)*arg1,arg2,*arg3);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__ClockTick, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Tick, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -31475,12 +31525,12 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_5(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Tick__SWIG_5(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = 0 ;
+  pymoose::Tick *arg1 = 0 ;
   std::string arg2 ;
   Id *arg3 = 0 ;
-  pymoose::ClockTick *result = 0 ;
+  pymoose::Tick *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp3 = 0 ;
@@ -31490,38 +31540,38 @@ SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_5(PyObject *SWIGUNUSEDPARM(self),
   PyObject * obj2 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_ClockTick",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__ClockTick,  0  | 0);
+  if(!PyArg_UnpackTuple(args,(char *)"new_Tick",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__Tick,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_ClockTick" "', argument " "1"" of type '" "pymoose::ClockTick const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Tick" "', argument " "1"" of type '" "pymoose::Tick const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_ClockTick" "', argument " "1"" of type '" "pymoose::ClockTick const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Tick" "', argument " "1"" of type '" "pymoose::Tick const &""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_ClockTick" "', argument " "2"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Tick" "', argument " "2"" of type '" "std::string""'"); 
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_ClockTick" "', argument " "3"" of type '" "Id &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_Tick" "', argument " "3"" of type '" "Id &""'"); 
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_ClockTick" "', argument " "3"" of type '" "Id &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Tick" "', argument " "3"" of type '" "Id &""'"); 
   }
   arg3 = reinterpret_cast< Id * >(argp3);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::ClockTick *)new pymoose::ClockTick((pymoose::ClockTick const &)*arg1,arg2,*arg3);
+    result = (pymoose::Tick *)new pymoose::Tick((pymoose::Tick const &)*arg1,arg2,*arg3);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__ClockTick, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Tick, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -31530,12 +31580,12 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_6(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Tick__SWIG_6(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Id *arg1 = 0 ;
   std::string arg2 ;
   Id *arg3 = 0 ;
-  pymoose::ClockTick *result = 0 ;
+  pymoose::Tick *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp3 = 0 ;
@@ -31545,38 +31595,38 @@ SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_6(PyObject *SWIGUNUSEDPARM(self),
   PyObject * obj2 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_ClockTick",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
+  if(!PyArg_UnpackTuple(args,(char *)"new_Tick",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Id,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_ClockTick" "', argument " "1"" of type '" "Id const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Tick" "', argument " "1"" of type '" "Id const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_ClockTick" "', argument " "1"" of type '" "Id const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Tick" "', argument " "1"" of type '" "Id const &""'"); 
   }
   arg1 = reinterpret_cast< Id * >(argp1);
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_ClockTick" "', argument " "2"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Tick" "', argument " "2"" of type '" "std::string""'"); 
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Id,  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_ClockTick" "', argument " "3"" of type '" "Id &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_Tick" "', argument " "3"" of type '" "Id &""'"); 
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_ClockTick" "', argument " "3"" of type '" "Id &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Tick" "', argument " "3"" of type '" "Id &""'"); 
   }
   arg3 = reinterpret_cast< Id * >(argp3);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::ClockTick *)new pymoose::ClockTick((Id const &)*arg1,arg2,*arg3);
+    result = (pymoose::Tick *)new pymoose::Tick((Id const &)*arg1,arg2,*arg3);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__ClockTick, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Tick, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -31585,41 +31635,41 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_ClockTick__SWIG_7(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Tick__SWIG_7(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = 0 ;
+  pymoose::Tick *arg1 = 0 ;
   std::string arg2 ;
-  pymoose::ClockTick *result = 0 ;
+  pymoose::Tick *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"new_ClockTick",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__ClockTick,  0  | 0);
+  if(!PyArg_UnpackTuple(args,(char *)"new_Tick",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_pymoose__Tick,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_ClockTick" "', argument " "1"" of type '" "pymoose::ClockTick const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Tick" "', argument " "1"" of type '" "pymoose::Tick const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_ClockTick" "', argument " "1"" of type '" "pymoose::ClockTick const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Tick" "', argument " "1"" of type '" "pymoose::Tick const &""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_ClockTick" "', argument " "2"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_Tick" "', argument " "2"" of type '" "std::string""'"); 
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (pymoose::ClockTick *)new pymoose::ClockTick((pymoose::ClockTick const &)*arg1,arg2);
+    result = (pymoose::Tick *)new pymoose::Tick((pymoose::Tick const &)*arg1,arg2);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__ClockTick, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_pymoose__Tick, SWIG_POINTER_NEW |  0 );
   SWIG_PYTHON_THREAD_END_BLOCK;
   return resultobj;
 fail:
@@ -31628,7 +31678,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_ClockTick(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Tick(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[4];
   int ii;
@@ -31645,7 +31695,7 @@ SWIGINTERN PyObject *_wrap_new_ClockTick(PyObject *self, PyObject *args) {
     _v = SWIG_CheckState(res);
     if (_v) {
       SWIG_PYTHON_THREAD_END_BLOCK;
-      return _wrap_new_ClockTick__SWIG_0(self, args);
+      return _wrap_new_Tick__SWIG_0(self, args);
     }
   }
   if (argc == 1) {
@@ -31654,19 +31704,19 @@ SWIGINTERN PyObject *_wrap_new_ClockTick(PyObject *self, PyObject *args) {
     _v = SWIG_CheckState(res);
     if (_v) {
       SWIG_PYTHON_THREAD_END_BLOCK;
-      return _wrap_new_ClockTick__SWIG_1(self, args);
+      return _wrap_new_Tick__SWIG_1(self, args);
     }
   }
   if (argc == 2) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__ClockTick, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__Tick, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
         SWIG_PYTHON_THREAD_END_BLOCK;
-        return _wrap_new_ClockTick__SWIG_7(self, args);
+        return _wrap_new_Tick__SWIG_7(self, args);
       }
     }
   }
@@ -31680,7 +31730,7 @@ SWIGINTERN PyObject *_wrap_new_ClockTick(PyObject *self, PyObject *args) {
       _v = SWIG_CheckState(res);
       if (_v) {
         SWIG_PYTHON_THREAD_END_BLOCK;
-        return _wrap_new_ClockTick__SWIG_3(self, args);
+        return _wrap_new_Tick__SWIG_3(self, args);
       }
     }
   }
@@ -31693,13 +31743,13 @@ SWIGINTERN PyObject *_wrap_new_ClockTick(PyObject *self, PyObject *args) {
       _v = SWIG_CheckState(res);
       if (_v) {
         SWIG_PYTHON_THREAD_END_BLOCK;
-        return _wrap_new_ClockTick__SWIG_2(self, args);
+        return _wrap_new_Tick__SWIG_2(self, args);
       }
     }
   }
   if (argc == 3) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__ClockTick, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__Tick, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
@@ -31710,7 +31760,7 @@ SWIGINTERN PyObject *_wrap_new_ClockTick(PyObject *self, PyObject *args) {
         _v = SWIG_CheckState(res);
         if (_v) {
           SWIG_PYTHON_THREAD_END_BLOCK;
-          return _wrap_new_ClockTick__SWIG_5(self, args);
+          return _wrap_new_Tick__SWIG_5(self, args);
         }
       }
     }
@@ -31728,14 +31778,14 @@ SWIGINTERN PyObject *_wrap_new_ClockTick(PyObject *self, PyObject *args) {
         _v = SWIG_CheckState(res);
         if (_v) {
           SWIG_PYTHON_THREAD_END_BLOCK;
-          return _wrap_new_ClockTick__SWIG_6(self, args);
+          return _wrap_new_Tick__SWIG_6(self, args);
         }
       }
     }
   }
   if (argc == 3) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__ClockTick, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_pymoose__Tick, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
@@ -31746,7 +31796,7 @@ SWIGINTERN PyObject *_wrap_new_ClockTick(PyObject *self, PyObject *args) {
         _v = SWIG_CheckState(res);
         if (_v) {
           SWIG_PYTHON_THREAD_END_BLOCK;
-          return _wrap_new_ClockTick__SWIG_4(self, args);
+          return _wrap_new_Tick__SWIG_4(self, args);
         }
       }
     }
@@ -31754,25 +31804,25 @@ SWIGINTERN PyObject *_wrap_new_ClockTick(PyObject *self, PyObject *args) {
   
   SWIG_PYTHON_THREAD_END_BLOCK;
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_ClockTick'.\n  Possible C/C++ prototypes are:\n""    pymoose::ClockTick(Id)\n""    pymoose::ClockTick(std::string)\n""    pymoose::ClockTick(std::string,Id)\n""    pymoose::ClockTick(std::string,pymoose::PyMooseBase &)\n""    pymoose::ClockTick(pymoose::ClockTick const &,std::string,pymoose::PyMooseBase &)\n""    pymoose::ClockTick(pymoose::ClockTick const &,std::string,Id &)\n""    pymoose::ClockTick(Id const &,std::string,Id &)\n""    pymoose::ClockTick(pymoose::ClockTick const &,std::string)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_Tick'.\n  Possible C/C++ prototypes are:\n""    pymoose::Tick(Id)\n""    pymoose::Tick(std::string)\n""    pymoose::Tick(std::string,Id)\n""    pymoose::Tick(std::string,pymoose::PyMooseBase &)\n""    pymoose::Tick(pymoose::Tick const &,std::string,pymoose::PyMooseBase &)\n""    pymoose::Tick(pymoose::Tick const &,std::string,Id &)\n""    pymoose::Tick(Id const &,std::string,Id &)\n""    pymoose::Tick(pymoose::Tick const &,std::string)\n");
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_ClockTick(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_Tick(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"delete_ClockTick",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, SWIG_POINTER_DISOWN |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"delete_Tick",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_ClockTick" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Tick" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     delete arg1;
@@ -31788,21 +31838,21 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick_getType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick_getType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   std::string *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick_getType",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick_getType",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick_getType" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick_getType" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     {
@@ -31820,24 +31870,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick___get_dt(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick___get_dt(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick___get_dt",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick___get_dt",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick___get_dt" "', argument " "1"" of type '" "pymoose::ClockTick const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick___get_dt" "', argument " "1"" of type '" "pymoose::Tick const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)((pymoose::ClockTick const *)arg1)->__get_dt();
+    result = (double)((pymoose::Tick const *)arg1)->__get_dt();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -31849,9 +31899,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick___set_dt(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick___set_dt(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -31861,15 +31911,15 @@ SWIGINTERN PyObject *_wrap_ClockTick___set_dt(PyObject *SWIGUNUSEDPARM(self), Py
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick___set_dt",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick___set_dt",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick___set_dt" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick___set_dt" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ClockTick___set_dt" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tick___set_dt" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
@@ -31886,24 +31936,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick___get_stage(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick___get_stage(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick___get_stage",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick___get_stage",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick___get_stage" "', argument " "1"" of type '" "pymoose::ClockTick const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick___get_stage" "', argument " "1"" of type '" "pymoose::Tick const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (int)((pymoose::ClockTick const *)arg1)->__get_stage();
+    result = (int)((pymoose::Tick const *)arg1)->__get_stage();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_int(static_cast< int >(result));
@@ -31915,9 +31965,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick___set_stage(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick___set_stage(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -31927,15 +31977,15 @@ SWIGINTERN PyObject *_wrap_ClockTick___set_stage(PyObject *SWIGUNUSEDPARM(self),
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick___set_stage",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick___set_stage",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick___set_stage" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick___set_stage" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ClockTick___set_stage" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tick___set_stage" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   {
@@ -31952,24 +32002,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick___get_ordinal(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick___get_ordinal(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick___get_ordinal",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick___get_ordinal",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick___get_ordinal" "', argument " "1"" of type '" "pymoose::ClockTick const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick___get_ordinal" "', argument " "1"" of type '" "pymoose::Tick const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (int)((pymoose::ClockTick const *)arg1)->__get_ordinal();
+    result = (int)((pymoose::Tick const *)arg1)->__get_ordinal();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_int(static_cast< int >(result));
@@ -31981,9 +32031,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick___set_ordinal(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick___set_ordinal(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -31993,15 +32043,15 @@ SWIGINTERN PyObject *_wrap_ClockTick___set_ordinal(PyObject *SWIGUNUSEDPARM(self
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick___set_ordinal",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick___set_ordinal",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick___set_ordinal" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick___set_ordinal" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ClockTick___set_ordinal" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tick___set_ordinal" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   {
@@ -32018,24 +32068,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick___get_nextTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick___get_nextTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick___get_nextTime",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick___get_nextTime",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick___get_nextTime" "', argument " "1"" of type '" "pymoose::ClockTick const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick___get_nextTime" "', argument " "1"" of type '" "pymoose::Tick const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)((pymoose::ClockTick const *)arg1)->__get_nextTime();
+    result = (double)((pymoose::Tick const *)arg1)->__get_nextTime();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -32047,9 +32097,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick___set_nextTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick___set_nextTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -32059,15 +32109,15 @@ SWIGINTERN PyObject *_wrap_ClockTick___set_nextTime(PyObject *SWIGUNUSEDPARM(sel
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick___set_nextTime",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick___set_nextTime",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick___set_nextTime" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick___set_nextTime" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ClockTick___set_nextTime" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tick___set_nextTime" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
@@ -32084,9 +32134,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick___set_path(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick___set_path(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   std::string arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -32094,17 +32144,17 @@ SWIGINTERN PyObject *_wrap_ClockTick___set_path(PyObject *SWIGUNUSEDPARM(self), 
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick___set_path",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick___set_path",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick___set_path" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick___set_path" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "ClockTick___set_path" "', argument " "2"" of type '" "std::string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "Tick___set_path" "', argument " "2"" of type '" "std::string""'"); 
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -32123,24 +32173,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick___get_updateDtSrc(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick___get_updateDtSrc(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick___get_updateDtSrc",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick___get_updateDtSrc",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick___get_updateDtSrc" "', argument " "1"" of type '" "pymoose::ClockTick const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick___get_updateDtSrc" "', argument " "1"" of type '" "pymoose::Tick const *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)((pymoose::ClockTick const *)arg1)->__get_updateDtSrc();
+    result = (double)((pymoose::Tick const *)arg1)->__get_updateDtSrc();
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -32152,9 +32202,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick___set_updateDtSrc(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick___set_updateDtSrc(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -32164,15 +32214,15 @@ SWIGINTERN PyObject *_wrap_ClockTick___set_updateDtSrc(PyObject *SWIGUNUSEDPARM(
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick___set_updateDtSrc",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick___set_updateDtSrc",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick___set_updateDtSrc" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick___set_updateDtSrc" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ClockTick___set_updateDtSrc" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tick___set_updateDtSrc" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
@@ -32189,9 +32239,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick_dt_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick_dt_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -32201,20 +32251,20 @@ SWIGINTERN PyObject *_wrap_ClockTick_dt_set(PyObject *SWIGUNUSEDPARM(self), PyOb
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick_dt_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick_dt_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick_dt_set" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick_dt_set" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ClockTick_dt_set" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tick_dt_set" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_ClockTick_dt_set(arg1,arg2);
+    pymoose_Tick_dt_set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -32227,24 +32277,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick_dt_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick_dt_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick_dt_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick_dt_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick_dt_get" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick_dt_get" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)pymoose_ClockTick_dt_get(arg1);
+    result = (double)pymoose_Tick_dt_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -32256,9 +32306,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick_stage_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick_stage_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -32268,20 +32318,20 @@ SWIGINTERN PyObject *_wrap_ClockTick_stage_set(PyObject *SWIGUNUSEDPARM(self), P
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick_stage_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick_stage_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick_stage_set" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick_stage_set" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ClockTick_stage_set" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tick_stage_set" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_ClockTick_stage_set(arg1,arg2);
+    pymoose_Tick_stage_set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -32294,24 +32344,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick_stage_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick_stage_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick_stage_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick_stage_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick_stage_get" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick_stage_get" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (int)pymoose_ClockTick_stage_get(arg1);
+    result = (int)pymoose_Tick_stage_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_int(static_cast< int >(result));
@@ -32323,9 +32373,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick_ordinal_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick_ordinal_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -32335,20 +32385,20 @@ SWIGINTERN PyObject *_wrap_ClockTick_ordinal_set(PyObject *SWIGUNUSEDPARM(self),
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick_ordinal_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick_ordinal_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick_ordinal_set" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick_ordinal_set" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ClockTick_ordinal_set" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tick_ordinal_set" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_ClockTick_ordinal_set(arg1,arg2);
+    pymoose_Tick_ordinal_set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -32361,24 +32411,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick_ordinal_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick_ordinal_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick_ordinal_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick_ordinal_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick_ordinal_get" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick_ordinal_get" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (int)pymoose_ClockTick_ordinal_get(arg1);
+    result = (int)pymoose_Tick_ordinal_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_int(static_cast< int >(result));
@@ -32390,9 +32440,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick_nextTime_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick_nextTime_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -32402,20 +32452,20 @@ SWIGINTERN PyObject *_wrap_ClockTick_nextTime_set(PyObject *SWIGUNUSEDPARM(self)
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick_nextTime_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick_nextTime_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick_nextTime_set" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick_nextTime_set" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ClockTick_nextTime_set" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tick_nextTime_set" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_ClockTick_nextTime_set(arg1,arg2);
+    pymoose_Tick_nextTime_set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -32428,24 +32478,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick_nextTime_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick_nextTime_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick_nextTime_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick_nextTime_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick_nextTime_get" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick_nextTime_get" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)pymoose_ClockTick_nextTime_get(arg1);
+    result = (double)pymoose_Tick_nextTime_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -32457,9 +32507,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick_updateDtSrc_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick_updateDtSrc_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -32469,20 +32519,20 @@ SWIGINTERN PyObject *_wrap_ClockTick_updateDtSrc_set(PyObject *SWIGUNUSEDPARM(se
   PyObject * obj1 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick_updateDtSrc_set",2,2,&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick_updateDtSrc_set",2,2,&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick_updateDtSrc_set" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick_updateDtSrc_set" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ClockTick_updateDtSrc_set" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tick_updateDtSrc_set" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    pymoose_ClockTick_updateDtSrc_set(arg1,arg2);
+    pymoose_Tick_updateDtSrc_set(arg1,arg2);
     
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
@@ -32495,24 +32545,24 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ClockTick_updateDtSrc_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tick_updateDtSrc_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  pymoose::ClockTick *arg1 = (pymoose::ClockTick *) 0 ;
+  pymoose::Tick *arg1 = (pymoose::Tick *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-  if(!PyArg_UnpackTuple(args,(char *)"ClockTick_updateDtSrc_get",1,1,&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__ClockTick, 0 |  0 );
+  if(!PyArg_UnpackTuple(args,(char *)"Tick_updateDtSrc_get",1,1,&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_pymoose__Tick, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ClockTick_updateDtSrc_get" "', argument " "1"" of type '" "pymoose::ClockTick *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tick_updateDtSrc_get" "', argument " "1"" of type '" "pymoose::Tick *""'"); 
   }
-  arg1 = reinterpret_cast< pymoose::ClockTick * >(argp1);
+  arg1 = reinterpret_cast< pymoose::Tick * >(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)pymoose_ClockTick_updateDtSrc_get(arg1);
+    result = (double)pymoose_Tick_updateDtSrc_get(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double(static_cast< double >(result));
@@ -32524,10 +32574,10 @@ fail:
 }
 
 
-SWIGINTERN PyObject *ClockTick_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *Tick_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *obj;
   if (!PyArg_UnpackTuple(args,(char*)"swigregister", 1, 1,&obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_pymoose__ClockTick, SWIG_NewClientData(obj));
+  SWIG_TypeNewClientData(SWIGTYPE_p_pymoose__Tick, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
@@ -104708,6 +104758,7 @@ static PyMethodDef SwigMethods[] = {
 		"readCell(string filename, string cellpath, double_vector params)\n"
 		"PyMooseContext_readCell(PyMooseContext self, string fileName, string cellPath)\n"
 		""},
+	 { (char *)"PyMooseContext_readSBML", _wrap_PyMooseContext_readSBML, METH_VARARGS, (char *)"PyMooseContext_readSBML(PyMooseContext self, string fileName, string modelPath)"},
 	 { (char *)"PyMooseContext_getCurrentTime", _wrap_PyMooseContext_getCurrentTime, METH_VARARGS, (char *)"PyMooseContext_getCurrentTime(PyMooseContext self) -> double"},
 	 { (char *)"PyMooseContext_exists", _wrap_PyMooseContext_exists, METH_VARARGS, (char *)"\n"
 		"exists(Id id) -> bool\n"
@@ -104891,40 +104942,40 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Cell_implicit_get", _wrap_Cell_implicit_get, METH_VARARGS, (char *)"Cell_implicit_get(Cell self) -> bool"},
 	 { (char *)"Cell_description_get", _wrap_Cell_description_get, METH_VARARGS, (char *)"Cell_description_get(Cell self) -> string"},
 	 { (char *)"Cell_swigregister", Cell_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_ClockTick", _wrap_new_ClockTick, METH_VARARGS, (char *)"\n"
-		"ClockTick(Id id)\n"
-		"ClockTick(string path)\n"
-		"ClockTick(string name, Id parentId)\n"
-		"ClockTick(string name, PyMooseBase parent)\n"
-		"ClockTick(ClockTick src, string name, PyMooseBase parent)\n"
-		"ClockTick(ClockTick src, string name, Id parent)\n"
-		"ClockTick(Id src, string name, Id parent)\n"
-		"new_ClockTick(ClockTick src, string path) -> ClockTick\n"
+	 { (char *)"new_Tick", _wrap_new_Tick, METH_VARARGS, (char *)"\n"
+		"Tick(Id id)\n"
+		"Tick(string path)\n"
+		"Tick(string name, Id parentId)\n"
+		"Tick(string name, PyMooseBase parent)\n"
+		"Tick(Tick src, string name, PyMooseBase parent)\n"
+		"Tick(Tick src, string name, Id parent)\n"
+		"Tick(Id src, string name, Id parent)\n"
+		"new_Tick(Tick src, string path) -> Tick\n"
 		""},
-	 { (char *)"delete_ClockTick", _wrap_delete_ClockTick, METH_VARARGS, (char *)"delete_ClockTick(ClockTick self)"},
-	 { (char *)"ClockTick_getType", _wrap_ClockTick_getType, METH_VARARGS, (char *)"ClockTick_getType(ClockTick self) -> string"},
-	 { (char *)"ClockTick___get_dt", _wrap_ClockTick___get_dt, METH_VARARGS, (char *)"ClockTick___get_dt(ClockTick self) -> double"},
-	 { (char *)"ClockTick___set_dt", _wrap_ClockTick___set_dt, METH_VARARGS, (char *)"ClockTick___set_dt(ClockTick self, double dt)"},
-	 { (char *)"ClockTick___get_stage", _wrap_ClockTick___get_stage, METH_VARARGS, (char *)"ClockTick___get_stage(ClockTick self) -> int"},
-	 { (char *)"ClockTick___set_stage", _wrap_ClockTick___set_stage, METH_VARARGS, (char *)"ClockTick___set_stage(ClockTick self, int stage)"},
-	 { (char *)"ClockTick___get_ordinal", _wrap_ClockTick___get_ordinal, METH_VARARGS, (char *)"ClockTick___get_ordinal(ClockTick self) -> int"},
-	 { (char *)"ClockTick___set_ordinal", _wrap_ClockTick___set_ordinal, METH_VARARGS, (char *)"ClockTick___set_ordinal(ClockTick self, int ordinal)"},
-	 { (char *)"ClockTick___get_nextTime", _wrap_ClockTick___get_nextTime, METH_VARARGS, (char *)"ClockTick___get_nextTime(ClockTick self) -> double"},
-	 { (char *)"ClockTick___set_nextTime", _wrap_ClockTick___set_nextTime, METH_VARARGS, (char *)"ClockTick___set_nextTime(ClockTick self, double nextTime)"},
-	 { (char *)"ClockTick___set_path", _wrap_ClockTick___set_path, METH_VARARGS, (char *)"ClockTick___set_path(ClockTick self, string path)"},
-	 { (char *)"ClockTick___get_updateDtSrc", _wrap_ClockTick___get_updateDtSrc, METH_VARARGS, (char *)"ClockTick___get_updateDtSrc(ClockTick self) -> double"},
-	 { (char *)"ClockTick___set_updateDtSrc", _wrap_ClockTick___set_updateDtSrc, METH_VARARGS, (char *)"ClockTick___set_updateDtSrc(ClockTick self, double updateDtSrc)"},
-	 { (char *)"ClockTick_dt_set", _wrap_ClockTick_dt_set, METH_VARARGS, (char *)"ClockTick_dt_set(ClockTick self, double dt)"},
-	 { (char *)"ClockTick_dt_get", _wrap_ClockTick_dt_get, METH_VARARGS, (char *)"ClockTick_dt_get(ClockTick self) -> double"},
-	 { (char *)"ClockTick_stage_set", _wrap_ClockTick_stage_set, METH_VARARGS, (char *)"ClockTick_stage_set(ClockTick self, int stage)"},
-	 { (char *)"ClockTick_stage_get", _wrap_ClockTick_stage_get, METH_VARARGS, (char *)"ClockTick_stage_get(ClockTick self) -> int"},
-	 { (char *)"ClockTick_ordinal_set", _wrap_ClockTick_ordinal_set, METH_VARARGS, (char *)"ClockTick_ordinal_set(ClockTick self, int ordinal)"},
-	 { (char *)"ClockTick_ordinal_get", _wrap_ClockTick_ordinal_get, METH_VARARGS, (char *)"ClockTick_ordinal_get(ClockTick self) -> int"},
-	 { (char *)"ClockTick_nextTime_set", _wrap_ClockTick_nextTime_set, METH_VARARGS, (char *)"ClockTick_nextTime_set(ClockTick self, double nextTime)"},
-	 { (char *)"ClockTick_nextTime_get", _wrap_ClockTick_nextTime_get, METH_VARARGS, (char *)"ClockTick_nextTime_get(ClockTick self) -> double"},
-	 { (char *)"ClockTick_updateDtSrc_set", _wrap_ClockTick_updateDtSrc_set, METH_VARARGS, (char *)"ClockTick_updateDtSrc_set(ClockTick self, double updateDtSrc)"},
-	 { (char *)"ClockTick_updateDtSrc_get", _wrap_ClockTick_updateDtSrc_get, METH_VARARGS, (char *)"ClockTick_updateDtSrc_get(ClockTick self) -> double"},
-	 { (char *)"ClockTick_swigregister", ClockTick_swigregister, METH_VARARGS, NULL},
+	 { (char *)"delete_Tick", _wrap_delete_Tick, METH_VARARGS, (char *)"delete_Tick(Tick self)"},
+	 { (char *)"Tick_getType", _wrap_Tick_getType, METH_VARARGS, (char *)"Tick_getType(Tick self) -> string"},
+	 { (char *)"Tick___get_dt", _wrap_Tick___get_dt, METH_VARARGS, (char *)"Tick___get_dt(Tick self) -> double"},
+	 { (char *)"Tick___set_dt", _wrap_Tick___set_dt, METH_VARARGS, (char *)"Tick___set_dt(Tick self, double dt)"},
+	 { (char *)"Tick___get_stage", _wrap_Tick___get_stage, METH_VARARGS, (char *)"Tick___get_stage(Tick self) -> int"},
+	 { (char *)"Tick___set_stage", _wrap_Tick___set_stage, METH_VARARGS, (char *)"Tick___set_stage(Tick self, int stage)"},
+	 { (char *)"Tick___get_ordinal", _wrap_Tick___get_ordinal, METH_VARARGS, (char *)"Tick___get_ordinal(Tick self) -> int"},
+	 { (char *)"Tick___set_ordinal", _wrap_Tick___set_ordinal, METH_VARARGS, (char *)"Tick___set_ordinal(Tick self, int ordinal)"},
+	 { (char *)"Tick___get_nextTime", _wrap_Tick___get_nextTime, METH_VARARGS, (char *)"Tick___get_nextTime(Tick self) -> double"},
+	 { (char *)"Tick___set_nextTime", _wrap_Tick___set_nextTime, METH_VARARGS, (char *)"Tick___set_nextTime(Tick self, double nextTime)"},
+	 { (char *)"Tick___set_path", _wrap_Tick___set_path, METH_VARARGS, (char *)"Tick___set_path(Tick self, string path)"},
+	 { (char *)"Tick___get_updateDtSrc", _wrap_Tick___get_updateDtSrc, METH_VARARGS, (char *)"Tick___get_updateDtSrc(Tick self) -> double"},
+	 { (char *)"Tick___set_updateDtSrc", _wrap_Tick___set_updateDtSrc, METH_VARARGS, (char *)"Tick___set_updateDtSrc(Tick self, double updateDtSrc)"},
+	 { (char *)"Tick_dt_set", _wrap_Tick_dt_set, METH_VARARGS, (char *)"Tick_dt_set(Tick self, double dt)"},
+	 { (char *)"Tick_dt_get", _wrap_Tick_dt_get, METH_VARARGS, (char *)"Tick_dt_get(Tick self) -> double"},
+	 { (char *)"Tick_stage_set", _wrap_Tick_stage_set, METH_VARARGS, (char *)"Tick_stage_set(Tick self, int stage)"},
+	 { (char *)"Tick_stage_get", _wrap_Tick_stage_get, METH_VARARGS, (char *)"Tick_stage_get(Tick self) -> int"},
+	 { (char *)"Tick_ordinal_set", _wrap_Tick_ordinal_set, METH_VARARGS, (char *)"Tick_ordinal_set(Tick self, int ordinal)"},
+	 { (char *)"Tick_ordinal_get", _wrap_Tick_ordinal_get, METH_VARARGS, (char *)"Tick_ordinal_get(Tick self) -> int"},
+	 { (char *)"Tick_nextTime_set", _wrap_Tick_nextTime_set, METH_VARARGS, (char *)"Tick_nextTime_set(Tick self, double nextTime)"},
+	 { (char *)"Tick_nextTime_get", _wrap_Tick_nextTime_get, METH_VARARGS, (char *)"Tick_nextTime_get(Tick self) -> double"},
+	 { (char *)"Tick_updateDtSrc_set", _wrap_Tick_updateDtSrc_set, METH_VARARGS, (char *)"Tick_updateDtSrc_set(Tick self, double updateDtSrc)"},
+	 { (char *)"Tick_updateDtSrc_get", _wrap_Tick_updateDtSrc_get, METH_VARARGS, (char *)"Tick_updateDtSrc_get(Tick self) -> double"},
+	 { (char *)"Tick_swigregister", Tick_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_ClockJob", _wrap_new_ClockJob, METH_VARARGS, (char *)"\n"
 		"ClockJob(Id id)\n"
 		"ClockJob(string path)\n"
@@ -106979,6 +107030,9 @@ static void *_p_pymoose__NernstTo_p_pymoose__PyMooseBase(void *x) {
 static void *_p_pymoose__CompartmentTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::Compartment *) x));
 }
+static void *_p_pymoose__TickTo_p_pymoose__PyMooseBase(void *x) {
+    return (void *)((pymoose::PyMooseBase *)  ((pymoose::Tick *) x));
+}
 static void *_p_pymoose__KineticHubTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::KineticHub *) x));
 }
@@ -107002,9 +107056,6 @@ static void *_p_pymoose__InterpolTo_p_pymoose__PyMooseBase(void *x) {
 }
 static void *_p_pymoose__SpikeGenTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *)  ((pymoose::SpikeGen *) x));
-}
-static void *_p_pymoose__ClockTickTo_p_pymoose__PyMooseBase(void *x) {
-    return (void *)((pymoose::PyMooseBase *)  ((pymoose::ClockTick *) x));
 }
 static void *_p_pymoose__CylPanelTo_p_pymoose__PyMooseBase(void *x) {
     return (void *)((pymoose::PyMooseBase *) (pymoose::Panel *) ((pymoose::CylPanel *) x));
@@ -107099,7 +107150,6 @@ static swig_type_info _swigt__p_pymoose__CaConc = {"_p_pymoose__CaConc", "pymoos
 static swig_type_info _swigt__p_pymoose__Cell = {"_p_pymoose__Cell", "pymoose::Cell *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__Class = {"_p_pymoose__Class", "pymoose::Class *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__ClockJob = {"_p_pymoose__ClockJob", "pymoose::ClockJob *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_pymoose__ClockTick = {"_p_pymoose__ClockTick", "pymoose::ClockTick *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__Compartment = {"_p_pymoose__Compartment", "pymoose::Compartment *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__CylPanel = {"_p_pymoose__CylPanel", "pymoose::CylPanel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__DifShell = {"_p_pymoose__DifShell", "pymoose::DifShell *", 0, 0, (void*)0, 0};
@@ -107149,6 +107199,7 @@ static swig_type_info _swigt__p_pymoose__SynChan = {"_p_pymoose__SynChan", "pymo
 static swig_type_info _swigt__p_pymoose__Table = {"_p_pymoose__Table", "pymoose::Table *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__TableIterator = {"_p_pymoose__TableIterator", "pymoose::TableIterator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__TauPump = {"_p_pymoose__TauPump", "pymoose::TauPump *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_pymoose__Tick = {"_p_pymoose__Tick", "pymoose::Tick *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__TimeTable = {"_p_pymoose__TimeTable", "pymoose::TimeTable *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__TriPanel = {"_p_pymoose__TriPanel", "pymoose::TriPanel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_pymoose__UniformRng = {"_p_pymoose__UniformRng", "pymoose::UniformRng *", 0, 0, (void*)0, 0};
@@ -107200,7 +107251,6 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_pymoose__Cell,
   &_swigt__p_pymoose__Class,
   &_swigt__p_pymoose__ClockJob,
-  &_swigt__p_pymoose__ClockTick,
   &_swigt__p_pymoose__Compartment,
   &_swigt__p_pymoose__CylPanel,
   &_swigt__p_pymoose__DifShell,
@@ -107250,6 +107300,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_pymoose__Table,
   &_swigt__p_pymoose__TableIterator,
   &_swigt__p_pymoose__TauPump,
+  &_swigt__p_pymoose__Tick,
   &_swigt__p_pymoose__TimeTable,
   &_swigt__p_pymoose__TriPanel,
   &_swigt__p_pymoose__UniformRng,
@@ -107301,7 +107352,6 @@ static swig_cast_info _swigc__p_pymoose__CaConc[] = {  {&_swigt__p_pymoose__CaCo
 static swig_cast_info _swigc__p_pymoose__Cell[] = {  {&_swigt__p_pymoose__Cell, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__Class[] = {  {&_swigt__p_pymoose__Class, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__ClockJob[] = {  {&_swigt__p_pymoose__ClockJob, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_pymoose__ClockTick[] = {  {&_swigt__p_pymoose__ClockTick, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__Compartment[] = {  {&_swigt__p_pymoose__Compartment, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__CylPanel[] = {  {&_swigt__p_pymoose__CylPanel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__DifShell[] = {  {&_swigt__p_pymoose__DifShell, 0, 0, 0},{0, 0, 0, 0}};
@@ -107335,7 +107385,7 @@ static swig_cast_info _swigc__p_pymoose__PIDController[] = {  {&_swigt__p_pymoos
 static swig_cast_info _swigc__p_pymoose__Panel[] = {  {&_swigt__p_pymoose__DiskPanel, _p_pymoose__DiskPanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__CylPanel, _p_pymoose__CylPanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__HemispherePanel, _p_pymoose__HemispherePanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__SpherePanel, _p_pymoose__SpherePanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__Panel, 0, 0, 0},  {&_swigt__p_pymoose__TriPanel, _p_pymoose__TriPanelTo_p_pymoose__Panel, 0, 0},  {&_swigt__p_pymoose__RectPanel, _p_pymoose__RectPanelTo_p_pymoose__Panel, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__PoissonRng[] = {  {&_swigt__p_pymoose__PoissonRng, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__PulseGen[] = {  {&_swigt__p_pymoose__PulseGen, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_pymoose__PyMooseBase[] = {  {&_swigt__p_pymoose__Table, _p_pymoose__TableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RectPanel, _p_pymoose__RectPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__NeuroScan, _p_pymoose__NeuroScanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PyMooseBase, 0, 0, 0},  {&_swigt__p_pymoose__ExponentialRng, _p_pymoose__ExponentialRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PulseGen, _p_pymoose__PulseGenTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__UniformRng, _p_pymoose__UniformRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__AscFile, _p_pymoose__AscFileTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DiskPanel, _p_pymoose__DiskPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Kintegrator, _p_pymoose__KintegratorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HemispherePanel, _p_pymoose__HemispherePanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SpherePanel, _p_pymoose__SpherePanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TauPump, _p_pymoose__TauPumpTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TimeTable, _p_pymoose__TimeTableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Molecule, _p_pymoose__MoleculeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Neutral, _p_pymoose__NeutralTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__BinSynchan, _p_pymoose__BinSynchanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__StochSynchan, _p_pymoose__StochSynchanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__NormalRng, _p_pymoose__NormalRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Surface, _p_pymoose__SurfaceTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RC, _p_pymoose__RCTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Geometry, _p_pymoose__GeometryTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__IzhikevichNrn, _p_pymoose__IzhikevichNrnTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TriPanel, _p_pymoose__TriPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SynChan, _p_pymoose__SynChanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Cell, _p_pymoose__CellTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Stoich, _p_pymoose__StoichTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GssaStoich, _p_pymoose__GssaStoichTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HSolve, _p_pymoose__HSolveTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RandGenerator, _p_pymoose__RandGeneratorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Compartment, _p_pymoose__CompartmentTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Class, _p_pymoose__ClassTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KineticHub, _p_pymoose__KineticHubTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DifShell, _p_pymoose__DifShellTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Mg_block, _p_pymoose__Mg_blockTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HHGate, _p_pymoose__HHGateTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PIDController, _p_pymoose__PIDControllerTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Interpol, _p_pymoose__InterpolTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SpikeGen, _p_pymoose__SpikeGenTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Enzyme, _p_pymoose__EnzymeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Panel, _p_pymoose__PanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__CylPanel, _p_pymoose__CylPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Nernst, _p_pymoose__NernstTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__ClockTick, _p_pymoose__ClockTickTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DiffAmp, _p_pymoose__DiffAmpTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GHK, _p_pymoose__GHKTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HHChannel, _p_pymoose__HHChannelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__IntFire, _p_pymoose__IntFireTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__BinomialRng, _p_pymoose__BinomialRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GammaRng, _p_pymoose__GammaRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Reaction, _p_pymoose__ReactionTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__ClockJob, _p_pymoose__ClockJobTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__CaConc, _p_pymoose__CaConcTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RandomSpike, _p_pymoose__RandomSpikeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__MathFunc, _p_pymoose__MathFuncTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PoissonRng, _p_pymoose__PoissonRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KineticManager, _p_pymoose__KineticManagerTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KinCompt, _p_pymoose__KinComptTo_p_pymoose__PyMooseBase, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_pymoose__PyMooseBase[] = {  {&_swigt__p_pymoose__Table, _p_pymoose__TableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RectPanel, _p_pymoose__RectPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__NeuroScan, _p_pymoose__NeuroScanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PyMooseBase, 0, 0, 0},  {&_swigt__p_pymoose__ExponentialRng, _p_pymoose__ExponentialRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PulseGen, _p_pymoose__PulseGenTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__UniformRng, _p_pymoose__UniformRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__AscFile, _p_pymoose__AscFileTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DiskPanel, _p_pymoose__DiskPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Kintegrator, _p_pymoose__KintegratorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HemispherePanel, _p_pymoose__HemispherePanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SpherePanel, _p_pymoose__SpherePanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TauPump, _p_pymoose__TauPumpTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TimeTable, _p_pymoose__TimeTableTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Molecule, _p_pymoose__MoleculeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Neutral, _p_pymoose__NeutralTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__BinSynchan, _p_pymoose__BinSynchanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__StochSynchan, _p_pymoose__StochSynchanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__NormalRng, _p_pymoose__NormalRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Surface, _p_pymoose__SurfaceTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RC, _p_pymoose__RCTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Geometry, _p_pymoose__GeometryTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__IzhikevichNrn, _p_pymoose__IzhikevichNrnTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__TriPanel, _p_pymoose__TriPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SynChan, _p_pymoose__SynChanTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Cell, _p_pymoose__CellTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Stoich, _p_pymoose__StoichTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GssaStoich, _p_pymoose__GssaStoichTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HSolve, _p_pymoose__HSolveTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RandGenerator, _p_pymoose__RandGeneratorTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Compartment, _p_pymoose__CompartmentTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Class, _p_pymoose__ClassTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KineticHub, _p_pymoose__KineticHubTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DifShell, _p_pymoose__DifShellTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Mg_block, _p_pymoose__Mg_blockTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HHGate, _p_pymoose__HHGateTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PIDController, _p_pymoose__PIDControllerTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Interpol, _p_pymoose__InterpolTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__SpikeGen, _p_pymoose__SpikeGenTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Enzyme, _p_pymoose__EnzymeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Panel, _p_pymoose__PanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__CylPanel, _p_pymoose__CylPanelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Nernst, _p_pymoose__NernstTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__DiffAmp, _p_pymoose__DiffAmpTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GHK, _p_pymoose__GHKTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__HHChannel, _p_pymoose__HHChannelTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__IntFire, _p_pymoose__IntFireTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__BinomialRng, _p_pymoose__BinomialRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__GammaRng, _p_pymoose__GammaRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Tick, _p_pymoose__TickTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__Reaction, _p_pymoose__ReactionTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__ClockJob, _p_pymoose__ClockJobTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__CaConc, _p_pymoose__CaConcTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__RandomSpike, _p_pymoose__RandomSpikeTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__MathFunc, _p_pymoose__MathFuncTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__PoissonRng, _p_pymoose__PoissonRngTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KineticManager, _p_pymoose__KineticManagerTo_p_pymoose__PyMooseBase, 0, 0},  {&_swigt__p_pymoose__KinCompt, _p_pymoose__KinComptTo_p_pymoose__PyMooseBase, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__PyMooseContext[] = {  {&_swigt__p_pymoose__PyMooseContext, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__RC[] = {  {&_swigt__p_pymoose__RC, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__RandGenerator[] = {  {&_swigt__p_pymoose__UniformRng, _p_pymoose__UniformRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__RandGenerator, 0, 0, 0},  {&_swigt__p_pymoose__BinomialRng, _p_pymoose__BinomialRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__ExponentialRng, _p_pymoose__ExponentialRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__PoissonRng, _p_pymoose__PoissonRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__NormalRng, _p_pymoose__NormalRngTo_p_pymoose__RandGenerator, 0, 0},  {&_swigt__p_pymoose__GammaRng, _p_pymoose__GammaRngTo_p_pymoose__RandGenerator, 0, 0},{0, 0, 0, 0}};
@@ -107351,6 +107401,7 @@ static swig_cast_info _swigc__p_pymoose__SynChan[] = {  {&_swigt__p_pymoose__Syn
 static swig_cast_info _swigc__p_pymoose__Table[] = {  {&_swigt__p_pymoose__Table, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__TableIterator[] = {  {&_swigt__p_pymoose__TableIterator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__TauPump[] = {  {&_swigt__p_pymoose__TauPump, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_pymoose__Tick[] = {  {&_swigt__p_pymoose__Tick, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__TimeTable[] = {  {&_swigt__p_pymoose__TimeTable, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__TriPanel[] = {  {&_swigt__p_pymoose__TriPanel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_pymoose__UniformRng[] = {  {&_swigt__p_pymoose__UniformRng, 0, 0, 0},{0, 0, 0, 0}};
@@ -107402,7 +107453,6 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_pymoose__Cell,
   _swigc__p_pymoose__Class,
   _swigc__p_pymoose__ClockJob,
-  _swigc__p_pymoose__ClockTick,
   _swigc__p_pymoose__Compartment,
   _swigc__p_pymoose__CylPanel,
   _swigc__p_pymoose__DifShell,
@@ -107452,6 +107502,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_pymoose__Table,
   _swigc__p_pymoose__TableIterator,
   _swigc__p_pymoose__TauPump,
+  _swigc__p_pymoose__Tick,
   _swigc__p_pymoose__TimeTable,
   _swigc__p_pymoose__TriPanel,
   _swigc__p_pymoose__UniformRng,
@@ -108027,7 +108078,7 @@ SWIGEXPORT void SWIG_init(void) {
   SWIG_addvarlink(SWIG_globals(),(char*)"Neutral_className_",Swig_var_Neutral_className__get, Swig_var_Neutral_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Class_className_",Swig_var_Class_className__get, Swig_var_Class_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Cell_className_",Swig_var_Cell_className__get, Swig_var_Cell_className__set);
-  SWIG_addvarlink(SWIG_globals(),(char*)"ClockTick_className_",Swig_var_ClockTick_className__get, Swig_var_ClockTick_className__set);
+  SWIG_addvarlink(SWIG_globals(),(char*)"Tick_className_",Swig_var_Tick_className__get, Swig_var_Tick_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"ClockJob_className_",Swig_var_ClockJob_className__get, Swig_var_ClockJob_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Interpol_className_",Swig_var_Interpol_className__get, Swig_var_Interpol_className__set);
   SWIG_addvarlink(SWIG_globals(),(char*)"Table_className_",Swig_var_Table_className__get, Swig_var_Table_className__set);
