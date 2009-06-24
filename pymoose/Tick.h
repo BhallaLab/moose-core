@@ -3,18 +3,18 @@
 #include "PyMooseBase.h"
 namespace pymoose
 {
-    class ClockTick : public PyMooseBase
+    class Tick : public PyMooseBase
     {    public:
         static const std::string className_;
-        ClockTick(Id id);
-        ClockTick(std::string path);
-        ClockTick(std::string name, Id parentId);
-        ClockTick(std::string name, PyMooseBase& parent);
-        ClockTick(const ClockTick& src,std::string name, PyMooseBase& parent);
-        ClockTick(const ClockTick& src,std::string name, Id& parent);
-        ClockTick(const Id& src,std::string name, Id& parent);
-        ClockTick(const ClockTick& src,std::string path);
-        ~ClockTick();
+        Tick(Id id);
+        Tick(std::string path);
+        Tick(std::string name, Id parentId);
+        Tick(std::string name, PyMooseBase& parent);
+        Tick(const Tick& src,std::string name, PyMooseBase& parent);
+        Tick(const Tick& src,std::string name, Id& parent);
+        Tick(const Id& src,std::string name, Id& parent);
+        Tick(const Tick& src,std::string path);
+        ~Tick();
         const std::string& getType();
         double __get_dt() const;
         void __set_dt(double dt);

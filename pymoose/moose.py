@@ -1589,6 +1589,10 @@ class PyMooseContext(object):
         """
         return _moose.PyMooseContext_readCell(*args)
 
+    def readSBML(*args):
+        """readSBML(self, string fileName, string modelPath)"""
+        return _moose.PyMooseContext_readSBML(*args)
+
     def getCurrentTime(*args):
         """getCurrentTime(self) -> double"""
         return _moose.PyMooseContext_getCurrentTime(*args)
@@ -2113,82 +2117,82 @@ Cell_swigregister = _moose.Cell_swigregister
 Cell_swigregister(Cell)
 Cell.className_ = _moose.cvar.Cell_className_
 
-class ClockTick(PyMooseBase):
-    """Proxy of C++ ClockTick class"""
+class Tick(PyMooseBase):
+    """Proxy of C++ Tick class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
     def __init__(self, *args): 
         """
-        __init__(self, Id id) -> ClockTick
-        __init__(self, string path) -> ClockTick
-        __init__(self, string name, Id parentId) -> ClockTick
-        __init__(self, string name, PyMooseBase parent) -> ClockTick
-        __init__(self, ClockTick src, string name, PyMooseBase parent) -> ClockTick
-        __init__(self, ClockTick src, string name, Id parent) -> ClockTick
-        __init__(self, Id src, string name, Id parent) -> ClockTick
-        __init__(self, ClockTick src, string path) -> ClockTick
+        __init__(self, Id id) -> Tick
+        __init__(self, string path) -> Tick
+        __init__(self, string name, Id parentId) -> Tick
+        __init__(self, string name, PyMooseBase parent) -> Tick
+        __init__(self, Tick src, string name, PyMooseBase parent) -> Tick
+        __init__(self, Tick src, string name, Id parent) -> Tick
+        __init__(self, Id src, string name, Id parent) -> Tick
+        __init__(self, Tick src, string path) -> Tick
         """
-        this = _moose.new_ClockTick(*args)
+        this = _moose.new_Tick(*args)
         try: self.this.append(this)
         except: self.this = this
-    __swig_destroy__ = _moose.delete_ClockTick
+    __swig_destroy__ = _moose.delete_Tick
     __del__ = lambda self : None;
     def getType(*args):
         """getType(self) -> string"""
-        return _moose.ClockTick_getType(*args)
+        return _moose.Tick_getType(*args)
 
     def __get_dt(*args):
         """__get_dt(self) -> double"""
-        return _moose.ClockTick___get_dt(*args)
+        return _moose.Tick___get_dt(*args)
 
     def __set_dt(*args):
         """__set_dt(self, double dt)"""
-        return _moose.ClockTick___set_dt(*args)
+        return _moose.Tick___set_dt(*args)
 
     def __get_stage(*args):
         """__get_stage(self) -> int"""
-        return _moose.ClockTick___get_stage(*args)
+        return _moose.Tick___get_stage(*args)
 
     def __set_stage(*args):
         """__set_stage(self, int stage)"""
-        return _moose.ClockTick___set_stage(*args)
+        return _moose.Tick___set_stage(*args)
 
     def __get_ordinal(*args):
         """__get_ordinal(self) -> int"""
-        return _moose.ClockTick___get_ordinal(*args)
+        return _moose.Tick___get_ordinal(*args)
 
     def __set_ordinal(*args):
         """__set_ordinal(self, int ordinal)"""
-        return _moose.ClockTick___set_ordinal(*args)
+        return _moose.Tick___set_ordinal(*args)
 
     def __get_nextTime(*args):
         """__get_nextTime(self) -> double"""
-        return _moose.ClockTick___get_nextTime(*args)
+        return _moose.Tick___get_nextTime(*args)
 
     def __set_nextTime(*args):
         """__set_nextTime(self, double nextTime)"""
-        return _moose.ClockTick___set_nextTime(*args)
+        return _moose.Tick___set_nextTime(*args)
 
     def __set_path(*args):
         """__set_path(self, string path)"""
-        return _moose.ClockTick___set_path(*args)
+        return _moose.Tick___set_path(*args)
 
     def __get_updateDtSrc(*args):
         """__get_updateDtSrc(self) -> double"""
-        return _moose.ClockTick___get_updateDtSrc(*args)
+        return _moose.Tick___get_updateDtSrc(*args)
 
     def __set_updateDtSrc(*args):
         """__set_updateDtSrc(self, double updateDtSrc)"""
-        return _moose.ClockTick___set_updateDtSrc(*args)
+        return _moose.Tick___set_updateDtSrc(*args)
 
-    dt = _swig_property(_moose.ClockTick_dt_get, _moose.ClockTick_dt_set)
-    stage = _swig_property(_moose.ClockTick_stage_get, _moose.ClockTick_stage_set)
-    ordinal = _swig_property(_moose.ClockTick_ordinal_get, _moose.ClockTick_ordinal_set)
-    nextTime = _swig_property(_moose.ClockTick_nextTime_get, _moose.ClockTick_nextTime_set)
-    updateDtSrc = _swig_property(_moose.ClockTick_updateDtSrc_get, _moose.ClockTick_updateDtSrc_set)
-ClockTick_swigregister = _moose.ClockTick_swigregister
-ClockTick_swigregister(ClockTick)
-ClockTick.className_ = _moose.cvar.ClockTick_className_
+    dt = _swig_property(_moose.Tick_dt_get, _moose.Tick_dt_set)
+    stage = _swig_property(_moose.Tick_stage_get, _moose.Tick_stage_set)
+    ordinal = _swig_property(_moose.Tick_ordinal_get, _moose.Tick_ordinal_set)
+    nextTime = _swig_property(_moose.Tick_nextTime_get, _moose.Tick_nextTime_set)
+    updateDtSrc = _swig_property(_moose.Tick_updateDtSrc_get, _moose.Tick_updateDtSrc_set)
+Tick_swigregister = _moose.Tick_swigregister
+Tick_swigregister(Tick)
+Tick.className_ = _moose.cvar.Tick_className_
 
 class ClockJob(PyMooseBase):
     """Proxy of C++ ClockJob class"""
