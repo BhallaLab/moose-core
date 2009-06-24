@@ -55,6 +55,8 @@ void SimDumpInfo::setFieldSequence( vector< string >& argv )
 bool SimDumpInfo::setFields( Element* e, vector< string >::iterator begin,
 	vector< string >::iterator end)
 {
+	if ( end == begin )
+		return 0;
 	assert( end >= begin );
 	unsigned long size = static_cast< unsigned long >( end - begin );
 	if ( size != fieldSequence_.size() ) {
@@ -119,6 +121,7 @@ SimDump::SimDump()
 	sid.push_back( new SimDumpInfo( "xcoredraw", "Neutral", "", "" ) );
 	sid.push_back( new SimDumpInfo( "xtree", "Neutral", "", "" ) );
 	sid.push_back( new SimDumpInfo( "xtext", "Neutral", "", "" ) );
+	sid.push_back( new SimDumpInfo( "text", "Neutral", "", "" ) );
 
 	sid.push_back( new SimDumpInfo( "kchan", "ConcChan",
 		"perm Vm",
