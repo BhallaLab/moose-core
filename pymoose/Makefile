@@ -58,6 +58,7 @@ OBJFILES = ../basecode/basecode.o \
 	../hsolve/hsolve.o	\
 	../ksolve/ksolve.o	\
 	../device/device.o \
+	../sbml_IO/sbml_IO.o	\
 #	../robots/robots.o	\
 
 
