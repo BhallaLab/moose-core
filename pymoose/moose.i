@@ -162,12 +162,12 @@ def doc(cls):
 %attribute(pymoose::Cell, string, description, __get_description)
 
 %include "Tick.h"
-%attribute(pymoose::ClockTick, double, dt, __get_dt, __set_dt)
-%attribute(pymoose::ClockTick, int, stage, __get_stage, __set_stage)
-%attribute(pymoose::ClockTick, int, ordinal, __get_ordinal, __set_ordinal)
-%attribute(pymoose::ClockTick, double, nextTime, __get_nextTime, __set_nextTime)
-//%attribute(pymoose::ClockTick, string&, path, __get_path, __set_path) 
-%attribute(pymoose::ClockTick, double, updateDtSrc, __get_updateDtSrc, __set_updateDtSrc)
+%attribute(pymoose::Tick, double, dt, __get_dt, __set_dt)
+%attribute(pymoose::Tick, int, stage, __get_stage, __set_stage)
+%attribute(pymoose::Tick, int, ordinal, __get_ordinal, __set_ordinal)
+%attribute(pymoose::Tick, double, nextTime, __get_nextTime, __set_nextTime)
+//%attribute(pymoose::Tick, string&, path, __get_path, __set_path) 
+%attribute(pymoose::Tick, double, updateDtSrc, __get_updateDtSrc, __set_updateDtSrc)
 
 %include "ClockJob.h"
 %attribute(pymoose::ClockJob, double, runTime, __get_runTime, __set_runTime)

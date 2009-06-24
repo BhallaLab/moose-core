@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 24 16:16:20 2009 (+0530)
+# Last-Updated: Wed Jun 24 21:37:35 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 403
+#     Update #: 435
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -55,7 +55,7 @@ import PyQt4.Qwt5.anynumpy as numpy
 
 from ui_mainwindow import Ui_MainWindow
 from moosetree import MooseTreeWidget
-
+from moosepropedit import PropertyModel
 from moosehandler import MHandler
 
 class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
@@ -130,6 +130,21 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.stopPushButton,
                      QtCore.SIGNAL('clicked()'),
                      self.stop)
+
+        self.connect(self.modelTreeWidget, 
+                     QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'),
+                     self.popupPropertyEditor)
+
+    def popupPropertyEditor(self, item, column):
+        """Pop-up a property editor to edit the Moose object in the item"""
+        obj = item.getMooseObject()
+        self.propertyModel = PropertyModel(obj)
+        self.connect(self.propertyModel, 
+                     QtCore.SIGNAL('objectNameChanged(const QString&)'),
+                     item.updateSlot)
+        self.propertyEditor = QtGui.QTableView()
+        self.propertyEditor.setModel(self.propertyModel)
+        self.propertyEditor.show()
 
     def loadFileDialog(self):
 	fileDialog = QtGui.QFileDialog(self)
