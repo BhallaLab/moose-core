@@ -72,3 +72,15 @@ script.
 2009-06-22 16:01:13 (+0530)
 Added a run tab in moose ui. The ui file is moose_gui.ui. The generated python code is ui_mainwindow.py. The mainwin.py has MainWindow class extending 
 nding and specializing the Ui_MainWindow class.
+
+
+2009-06-25 02:06:22 (+0530) 
+
+Added a very primitive utility class to check the file type
+(filetypeutil.py:FileTypeChecker). moosehandler.MHandler is yet to be
+updated to handle each type correctly. One thing is to get the correct
+number of plots. Also, SBML is still a problem - as there may be zip
+archives which this ascii based FileTypeChecker cannot
+handle. Simplest way, is still to force the user to select one of the
+file types in the combo box for load file dialog and use that
+information to handle these situations.
