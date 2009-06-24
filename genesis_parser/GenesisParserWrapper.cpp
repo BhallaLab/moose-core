@@ -546,6 +546,12 @@ map< string, string >& sliSrcLookup()
 
 	src[ "SUMTOTAL n nInit" ] = "nSrc";	// for molecules
 	src[ "SUMTOTAL output output" ] = "outputSrc";	// for tables
+
+	// This is a bit nasty, as in GENESIS the message is directly
+	// from the enzyme, but in MOOSE it is from the child enzComplex
+	// molecule. We ignore it for now as it is a corner case.
+	src[ "SUMTOTAL nComplex nComplexInit" ] = ""; // for enzymes
+
 	src[ "SLAVE output" ] = "outputSrc";	// for tables
 	src[ "SUM output" ] = "outputSrc";	// for tables
 	src[ "SLAVE n" ] = "nSrc";	// for direct connections between mols.
@@ -698,6 +704,12 @@ map< string, string >& sliDestLookup()
 
 	dest[ "SUMTOTAL n nInit" ] = "sumTotal";	// for molecules
 	dest[ "SUMTOTAL output output" ] = "sumTotal";	// for molecules
+
+	// This is a bit nasty, as in GENESIS the message is directly
+	// from the enzyme, but in MOOSE it is from the child enzComplex
+	// molecule. We ignore it for now as it is a corner case.
+	dest[ "SUMTOTAL nComplex nComplexInit" ] = "";	// for enzymes
+
 	dest[ "SLAVE output" ] = "sumTotal";	// for molecules
 	dest[ "SUM output" ] = "sum";	// for tables
 	dest[ "SLAVE n" ] = "sumTotal";	// for molecules
