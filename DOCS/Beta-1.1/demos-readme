@@ -1,0 +1,33 @@
+This directory has demo simulations for MOOSE. To run them you should
+cd into the appropriate subdirectory and type moose <scriptfile>
+as given below. Please note that you need write permissions to the
+demo directories, since all the demos generate file output. You may
+have to copy the entire DEMOS directory to your home folder for this.
+
+Directory	Command		Output file(s)		NOTES
+axon		moose Axon.g	axon*.moose.plot	Another axon model.
+channels	moose Channels.g  *.moose.plot		Tests channel properties
+kholodenko	moose Kholodenko.g test.plot		Kinetic simuation test
+							Output not compatible
+							with gnuplot.
+							Ignore warnings about 
+							simundumpfunc and setfield
+mitral-ee	moose Mitral.g	mitral.moose.plot	Large mitral cell model
+myelin		moose Myelin.g	*.moose.plot		Myelinated axon
+network-ee	moose Network.g				Models a small network
+pymoose		python squid.py				Needs moose.py
+rallpack1	moose Rallpack1.g cable-*.moose.plot	Passive cable test
+rallpack2	moose Rallpack2.g branch*.moose.plot	Branched passive cable
+rallpack3	moose Rallpack3.g axon_*.moose.plot	Hodkin-Huxley axon 
+squid-ee	moose Squid.g	squid.moose.plot	Hodkin-Huxley Squid model
+synapse		moose Synapse.g	*.moose.plot		Synaptic transmission
+traub91		moose Traub91.g	*.moose.plot		Traub CA3 cell model
+
+To run in Windows, you may have to first open a DOS shell and cd into the 
+demo subdirectory you wish to try. Then type
+..\..\..\moose <scriptfile>
+to run the demo.
+
+In most subdirectories you can then use gnuplot to look at the output using
+the command:
+gnuplot plot.gnuplot
