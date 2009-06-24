@@ -1,0 +1,215 @@
+These are the release notes for the Beta 1.1.0 release of MOOSE, the
+Multiscale Object-Oriented Simulation environment.
+
+Introduction.
+This release has three major functional changes from the previous Beta 1.0.0:
+- The development of PyMOOSE as a full-fledged user environment.
+- The implementation of a much more functional single-neuron modeling engine
+- The implementation of array objects and messages.
+
+The release also has a major overhaul to the release management, which has been
+coordinated by a new member of the MOOSE team, Ms. Siji George. The current
+release has binaries for Linux, Solaris, Mac and Windows. The Linux release
+includes a .deb package for simplifying the installation. There are several
+permutations for Python support and for 32/64 bits.
+We expect that the source compilation should also go more smoothly for those
+who wish to compile it themselves.
+
+=============================================
+Release notes for PyMOOSE (MOOSE beta 1.1) (Subhasis Ray)
+=============================================
+
+1. INTRODUCTION
+
+PyMOOSE is MOOSE for Python. It is a module that you can import in a
+Python script.  Thus use the MOOSE classes as Python classes to create
+models and run simulations.
+
+2. INSTALLATION
+
+PyMOOSE is compiled as a shared library. We have compiled it on
+various platforms and you can download one suited for you from the
+sourceforge site. But in case there is no precompiled binary suited
+for your environment, you can compile it for yourself.
+
+2.1. LINUX
+
+To compile PyMOOSE you need the Python development library
+installed. You can install it using apt ( on Debian like systems ):
+
+apt-get install python-dev
+
+Using yum ( on Fedora )
+
+yum install python-dev
+
+If you want to use GSL, then install the GSL development
+library also.
+
+apt-get install libgsl0-dev
+
+or
+
+yum install gsl-devel
+
+In the Makefiles we have used standard paths for these libraries. If
+your system has them installed somewhere else, edit the Makefile and
+do these replacements:
+
+ /usr/include/python2.5 
+
+ with 
+
+ path to your python development library's include directory ( which 
+contains the file Python.h )
+
+ -lpython2.5 
+
+ with
+
+ -lpythonX.Y where X.Y is the version of your Python installation.
+
+Now go to the moose directory and build PyMOOSE using:
+
+make pymoose BUILD=release USE_GSL=true
+
+If you want to build without GSL support:
+
+make pymoose BUILD=release
+
+For a debug build use BUILD=debug on the make command line.
+
+2.2. Mac OS X
+
+Replace
+/Library/Frameworks/Python.framework/Versions/2.5/include/python2.5 in
+the pymoose/Makefile with the path to the directory containing
+Python.h and
+/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/config/
+with the path to the directory containing libpythonX.Y.a where X.Y is
+your Python version number.
+
+Now go to the moose directory and build PyMOOSE using:
+
+make pymoose BUILD=release USE_GSL=true
+
+If you want to build without GSL support:
+
+make pymoose BUILD=release
+
+If you want a debug build, use BUILD=debug instead.
+
+2.3. MICROSOFT WINDOWS
+
+Here we recommend that you use the ready-made binaries. To use GSL you
+can install the Windows version of GSL Library
+(http://gnuwin32.sourceforge.net/packages/gsl.htm). 
+
+If you want to build PyMOOSE for yourself, you need VC++ 8 or 9 to
+compile PyMOOSE on Windows. The freely available express editions are
+just fine.  Open the pymoose_vcpp2005/moose/moose.vcproj in Visual C++
+IDE. Select the project properties and update the preprocessor
+directives (add or remove the directive USE_GSL), update C++ include
+paths and Linker inputs and library directories.
+
+2.4. SOLARIS
+
+The procedure to compile PyMOOSE on solaris is very similar to that 
+outlined for Linux. Install Python development libraries and GSL using
+your favourite package manager, or from source.
+
+It is perhaps easiest to use GNU tools to compile PyMOOSE. You will need
+to set the appropriate paths for GNU Make, g++, flex and bison with the
+following bash commands:
+	export PATH=/usr/sfw/bin:/usr/ccs/bin:/usr/local/bin:$PATH
+	alias make='/usr/sfw/bin/gmake'
+
+If you are going to use GSL, then set the linker path:
+	export LD_LIBRARY_PATH=/usr/local/lib
+
+Finally, update the Makefile for your system, and build pymoose as
+described above for Linux. 
+
+After a successful build, you can copy pymoose/_moose.so and
+pymoose/moose.py to a directory of your choice. You have to append
+this directory to your PYTHONPATH variable in order to import the
+module. Assuming you kept files in ~/moose directory, in bash shell
+you can update PYTHONPATH by executing the command
+
+export PYTHONPATH=$PYTHONPATH:~/moose
+
+If you want this to be permanent, append the same to your ~/.bashrc file.
+
+On Windows, instead of _moose.so you will have _moose.pyd. You can set
+the PYTHONPATH variable by right clicking My Computer and selecting
+Properties from the pop-up menu. Now go to Advanced tab and click
+Environment Variables. If there is no PYTHONPATH variable defined,
+create a new one. Otherwise edit the existing one and append the path
+to the directory containing _moose.pyd and moose.py.
+
+
+3. USAGE
+
+To test your PyMOOSE installation, run python and in the interpreter prompt , try
+
+import moose
+
+If it works ( no error messages ), you can now use the moose functions
+and classes in Python scriupts. There are some example scripts in
+examples directory. In particular, there is a new avatar of the
+GENESIS squid demo using PyQt. To run the GUI, you have to install
+PyQt4(http://www.riverbankcomputing.co.uk/software/pyqt/download) and
+PyQwt5(http://pyqwt.sourceforge.net/download.html). And beware that
+for PyQt to work on windows, the path to PyQt4/bin must be the first
+entry in your PYTHONPATH environment variable.
+
+You can run the squid demo without GUI as well, just cd to the
+pymoose/examples/squid and run:
+
+python squid.py
+
+That will create a bunch of .plot files containing the time series for
+various parameters.
+
+
+You can use most MOOSE classes like regular Python classes. However you have to access global functions using the special PyMooseContext object. You can retrieve it by:
+
+context = moose.PyMooseBase.getContext()
+
+And call the global MOOSE functions as methods on this object. 
+Moreover, you can run GENESIS commands from Python using 
+
+context.runG("GENESIS command string")
+
+and load whole GENESIS scripts using
+
+context.loadG("genesis script file")
+
+Take a look into the example scripts and that should get you going.
+
+=============================================
+Release notes for the single-neuron modeling engine: Hsolve (Niraj Dudani)
+=============================================
+
+- The HSolver can now handle cell models with intracellular calcium pools and
+calcium-dependent channels. It uses a simple single-exponential description for
+the calcium dynamics. Calcium diffusion, and updates to Nernst potential are not
+dealt with yet.
+
+- A major shortcoming was found in the solution for branching compartmental
+models. Due to this, the solution was incorrect for most branching cell models.
+Much of the code for passive models has been completely reworked, and tested
+extensively using low-level unit tests and full-fledged models. Only models
+with symmetric compartments are presently supported.
+
+- HSolve is not compatible with arrays of elements (created using createmap).
+
+- The entire solver has been revamped. It is now cleaner, more stable, and
+faster. Early benchmarks show its speed to be very close to that of hsolve in
+GENESIS.
+
+- Fields and messages belonging to a cell model are now completely served for
+by its solver. This management was incomplete earlier.
+
+
+
