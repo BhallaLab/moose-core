@@ -3,80 +3,80 @@
 #include "Tick.h"
 using namespace pymoose;
 
-const std::string ClockTick::className_ = "ClockTick";
-ClockTick::ClockTick(Id id):PyMooseBase(id){}
-ClockTick::ClockTick(std::string path):PyMooseBase(className_, path){}
-ClockTick::ClockTick(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-ClockTick::ClockTick(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-ClockTick::ClockTick(const ClockTick& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+const std::string Tick::className_ = "Tick";
+Tick::Tick(Id id):PyMooseBase(id){}
+Tick::Tick(std::string path):PyMooseBase(className_, path){}
+Tick::Tick(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
+Tick::Tick(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
+Tick::Tick(const Tick& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 
-ClockTick::ClockTick(const ClockTick& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-ClockTick::ClockTick(const ClockTick& src, std::string path):PyMooseBase(src, path)
+Tick::Tick(const Tick& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
+Tick::Tick(const Tick& src, std::string path):PyMooseBase(src, path)
 {
 }
 
-ClockTick::ClockTick(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+Tick::Tick(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
-ClockTick::~ClockTick(){}
-const std::string& ClockTick::getType(){ return className_; }
-double ClockTick::__get_dt() const
+Tick::~Tick(){}
+const std::string& Tick::getType(){ return className_; }
+double Tick::__get_dt() const
 {
     double dt;
     get < double > (id_(), "dt",dt);
     return dt;
 }
-void ClockTick::__set_dt( double dt )
+void Tick::__set_dt( double dt )
 {
     set < double > (id_(), "dt", dt);
 }
-int ClockTick::__get_stage() const
+int Tick::__get_stage() const
 {
     int stage;
     get < int > (id_(), "stage",stage);
     return stage;
 }
-void ClockTick::__set_stage( int stage )
+void Tick::__set_stage( int stage )
 {
     set < int > (id_(), "stage", stage);
 }
-int ClockTick::__get_ordinal() const
+int Tick::__get_ordinal() const
 {
     int ordinal;
     get < int > (id_(), "ordinal",ordinal);
     return ordinal;
 }
-void ClockTick::__set_ordinal( int ordinal )
+void Tick::__set_ordinal( int ordinal )
 {
     set < int > (id_(), "ordinal", ordinal);
 }
-double ClockTick::__get_nextTime() const
+double Tick::__get_nextTime() const
 {
     double nextTime;
     get < double > (id_(), "nextTime",nextTime);
     return nextTime;
 }
-void ClockTick::__set_nextTime( double nextTime )
+void Tick::__set_nextTime( double nextTime )
 {
     set < double > (id_(), "nextTime", nextTime);
 }
-std::string ClockTick::__get_path() const
+std::string Tick::__get_path() const
 {
     string path;
     get < string > (id_(), "path",path);
     return path;
 }
-void ClockTick::__set_path( std::string path )
+void Tick::__set_path( std::string path )
 {
     set < string > (id_(), "path", path);
 }
-double ClockTick::__get_updateDtSrc() const
+double Tick::__get_updateDtSrc() const
 {
     double updateDtSrc;
     get < double > (id_(), "updateDtSrc",updateDtSrc);
     return updateDtSrc;
 }
-void ClockTick::__set_updateDtSrc( double updateDtSrc )
+void Tick::__set_updateDtSrc( double updateDtSrc )
 {
     set < double > (id_(), "updateDtSrc", updateDtSrc);
 }
