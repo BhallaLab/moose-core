@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'moose_gui.ui'
 #
-# Created: Wed Jun 24 16:28:41 2009
+# Created: Fri Jun 26 16:01:27 2009
 #      by: PyQt4 UI code generator 4.3.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -138,6 +138,37 @@ class Ui_MainWindow(object):
         self.runTimeLineEdit.setSizePolicy(sizePolicy)
         self.runTimeLineEdit.setObjectName("runTimeLineEdit")
         self.vboxlayout1.addWidget(self.runTimeLineEdit)
+
+        self.plotUpdateIntervalLabel = QtGui.QLabel(self.runControlWidget)
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.plotUpdateIntervalLabel.sizePolicy().hasHeightForWidth())
+        self.plotUpdateIntervalLabel.setSizePolicy(sizePolicy)
+        self.plotUpdateIntervalLabel.setWordWrap(True)
+        self.plotUpdateIntervalLabel.setObjectName("plotUpdateIntervalLabel")
+        self.vboxlayout1.addWidget(self.plotUpdateIntervalLabel)
+
+        self.plotUpdateIntervalLineEdit = QtGui.QLineEdit(self.runControlWidget)
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.plotUpdateIntervalLineEdit.sizePolicy().hasHeightForWidth())
+        self.plotUpdateIntervalLineEdit.setSizePolicy(sizePolicy)
+        self.plotUpdateIntervalLineEdit.setObjectName("plotUpdateIntervalLineEdit")
+        self.vboxlayout1.addWidget(self.plotUpdateIntervalLineEdit)
+
+        self.rescalePlotsPushButton = QtGui.QPushButton(self.runControlWidget)
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.rescalePlotsPushButton.sizePolicy().hasHeightForWidth())
+        self.rescalePlotsPushButton.setSizePolicy(sizePolicy)
+        self.rescalePlotsPushButton.setObjectName("rescalePlotsPushButton")
+        self.vboxlayout1.addWidget(self.rescalePlotsPushButton)
         self.hboxlayout1.addWidget(self.runControlWidget)
 
         self.plotsGroupBox = QtGui.QGroupBox(self.simulationWidget)
@@ -218,7 +249,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -230,6 +261,8 @@ class Ui_MainWindow(object):
         self.runPushButton.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.stopPushButton.setText(QtGui.QApplication.translate("MainWindow", "Stop", None, QtGui.QApplication.UnicodeUTF8))
         self.runTimeLabel.setText(QtGui.QApplication.translate("MainWindow", "Run for (seconds)", None, QtGui.QApplication.UnicodeUTF8))
+        self.plotUpdateIntervalLabel.setText(QtGui.QApplication.translate("MainWindow", "Plot update interval (steps)", None, QtGui.QApplication.UnicodeUTF8))
+        self.rescalePlotsPushButton.setText(QtGui.QApplication.translate("MainWindow", "Rescale plots", None, QtGui.QApplication.UnicodeUTF8))
         self.plotsGroupBox.setTitle(QtGui.QApplication.translate("MainWindow", "Plots", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.runTab), QtGui.QApplication.translate("MainWindow", "Simulation Control", None, QtGui.QApplication.UnicodeUTF8))
         self.menuMOOSE.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
