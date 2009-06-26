@@ -28,6 +28,7 @@ class SteadyState
 		static unsigned int getNiter( Eref e );
 		static unsigned int getMaxIter( Eref e );
 		static void setMaxIter( const Conn* c, unsigned int value );
+		static string getStatus( Eref e );
 		static double getConvergenceCriterion( Eref e );
 		static void setConvergenceCriterion( const Conn* c, double value );
 
@@ -42,6 +43,7 @@ class SteadyState
 		static void setMolN( const Conn* c, double y, unsigned int i );
 		static void assignStoichFunc( const Conn* c, void* stoich );
 		void assignStoichFuncLocal( void* stoich );
+		static const double EPSILON;
 
 	private:
 		void setupSSmatrix();
@@ -52,6 +54,7 @@ class SteadyState
 		unsigned int nIter_;
 		unsigned int maxIter_;
 		bool badStoichiometry_;
+		string status_;
 		bool isInitialized_;
 		bool isSetup_;
 		double convergenceCriterion_;
@@ -62,7 +65,6 @@ class SteadyState
 		unsigned int nReacs_;
 		unsigned int rank_;
 		
-		static const double EPSILON;
 };
 
 extern const Cinfo* initSteadyStateCinfo();
