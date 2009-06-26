@@ -32,10 +32,14 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_multiroots.h>
+#include <gsl/gsl_sort.h>
+#include <gsl/gsl_sort_vector.h>
 
 #include "SteadyState.h"
 
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f );
+int convert_to_row_echelon( gsl_matrix* LU, gsl_permutation* P1, 
+	int num_rows, int num_columns );
 
 // Limit below which small numbers are treated as zero.
 const double SteadyState::EPSILON = 1e-9;
@@ -96,6 +100,11 @@ const Cinfo* initSteadyStateCinfo()
 		new ValueFinfo( "nIter", 
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &SteadyState::getNiter ), 
+			&dummyFunc
+		),
+		new ValueFinfo( "status", 
+			ValueFtype1< string >::global(),
+			GFCAST( &SteadyState::getStatus ), 
 			&dummyFunc
 		),
 		new ValueFinfo( "maxIter", 
@@ -162,7 +171,9 @@ const Cinfo* initSteadyStateCinfo()
 		initNeutralCinfo(),
 		steadyStateFinfos,
 		sizeof( steadyStateFinfos )/sizeof(Finfo *),
-		ValueFtype1< SteadyState >::global()
+		ValueFtype1< SteadyState >::global(),
+		0,
+		0
 	);
 
 	return &steadyStateCinfo;
@@ -170,7 +181,7 @@ const Cinfo* initSteadyStateCinfo()
 
 static const Cinfo* steadyStateCinfo = initSteadyStateCinfo();
 
-static const Slot reinitStoichSlot =
+static const Slot reinitSlot =
 	initSteadyStateCinfo()->getSlot( "gsl.reinitSrc" );
 
 ///////////////////////////////////////////////////
@@ -178,7 +189,11 @@ static const Slot reinitStoichSlot =
 ///////////////////////////////////////////////////
 
 SteadyState::SteadyState()
-	: nIter_( 0 ), maxIter_( 0 ), badStoichiometry_( 0 ),
+	:
+		nIter_( 0 ), 
+		maxIter_( 100 ), 
+		badStoichiometry_( 0 ),
+		status_( "OK" ),
 		isInitialized_( 0 ),
 		isSetup_( 0 ),
 		convergenceCriterion_( 1e-7 ),
@@ -211,6 +226,10 @@ bool SteadyState::isInitialized( Eref e ) {
 
 unsigned int SteadyState::getNiter( Eref e ) {
 	return static_cast< const SteadyState* >( e.data() )->nIter_;
+}
+
+string SteadyState::getStatus( Eref e ) {
+	return static_cast< const SteadyState* >( e.data() )->status_;
 }
 
 unsigned int SteadyState::getMaxIter( Eref e ) {
@@ -286,36 +305,53 @@ void SteadyState::assignStoichFuncLocal( void* stoich )
 	isInitialized_ = 1;
 }
 
+void print_gsl_mat( gsl_matrix* m, const char* name )
+{
+    size_t i, j;
+    printf( "%s[%ld, %ld] = \n", name, m->size1, m->size2 );
+    for (i = 0; i < m->size1; i++) {
+        for (j = 0; j < m->size2; j++) {
+            double x = gsl_matrix_get (m, i, j );
+            if ( fabs( x ) < 1e-9 ) x = 0;
+            printf( "%6g", x );
+        }
+    
+        printf( "\n");
+    }   
+}
+
 void SteadyState::setupSSmatrix()
 {
-	unsigned int nTot = nVarMols_ + nReacs_;
-	gsl_matrix* N = gsl_matrix_alloc (nVarMols_, nReacs_);
-	gsl_permutation* P = gsl_permutation_alloc( nTot );
+	int nTot = nVarMols_ + nReacs_;
+	gsl_matrix* N = gsl_matrix_calloc (nVarMols_, nReacs_);
+	gsl_permutation* P = gsl_permutation_calloc( nTot );
 	int signum = 0;
 	if ( LU_ ) { // Clear out old one.
 		gsl_matrix_free( LU_ );
 	}
-	LU_ = gsl_matrix_alloc (nTot, nTot);
-		
+	LU_ = gsl_matrix_calloc (nTot, nTot);
 
 	for ( unsigned int i = 0; i < nVarMols_; ++i ) {
+		gsl_matrix_set (LU_, i, i + nReacs_, 1 );
 		for ( unsigned int j = 0; j < nReacs_; ++j ) {
 			double x = s_->getStoichEntry(i, j);
 			gsl_matrix_set (N, i, j, x);
 			gsl_matrix_set (LU_, i, j, x );
-			gsl_matrix_set (LU_, i, i + nReacs_, 1 );
 		}
 	}
 
+	// print_gsl_mat( N, "N" );
+	// print_gsl_mat( LU_, "LU pre" );
 	gsl_linalg_LU_decomp( LU_, P, &signum );
+	// print_gsl_mat( LU_, "LU mid" );
+	/*
+	for ( int i = 0; i < nTot; ++i )
+		cout << gsl_permutation_get( P, i ) << "	";
+	cout << endl;
+	*/
 
-	// Find rank: Number of independent molecules.
-	for ( rank_ = 0; rank_ < nVarMols_; ++rank_) {
-		if ( rank_ >= nReacs_ )
-		break;
-		if ( fabs( gsl_matrix_get( LU_, rank_, rank_ ) ) < EPSILON )
-		break;
-	}
+	rank_ = convert_to_row_echelon( LU_, P, nVarMols_, nReacs_ );
+	// print_gsl_mat( LU_, "LU post" );
 
 	gsl_matrix_free( N );
 	gsl_permutation_free( P );
@@ -339,10 +375,10 @@ void SteadyState::settle( bool forceSetup )
 
 	// Setting up matrices and vectors for the calculation.
 	unsigned int nConsv = nVarMols_ - rank_;
-	gsl_matrix* Nr = gsl_matrix_alloc ( rank_, nReacs_ );
-	gsl_matrix* gamma = gsl_matrix_alloc ( nConsv, nVarMols_ );
-	gsl_vector* x = gsl_vector_alloc( nVarMols_ );
-	double * f = (double *) calloc( nVarMols_, sizeof( double ) );
+	gsl_matrix* Nr = gsl_matrix_calloc ( rank_, nReacs_ );
+	gsl_matrix* gamma = gsl_matrix_calloc ( nConsv, nVarMols_ );
+	gsl_vector* x = gsl_vector_calloc( nVarMols_ );
+	// double * f = (double *) calloc( nVarMols_, sizeof( double ) );
 	double * T = (double *) calloc( nConsv, sizeof( double ) );
 	struct reac_info ri;
 	const gsl_multiroot_fsolver_type *st;
@@ -351,14 +387,19 @@ void SteadyState::settle( bool forceSetup )
 
 	unsigned int i, j;
 
+	// Fill up Nr.
 	for ( i = 0; i < rank_; i++)
 		for (j = i; j < nReacs_; j++)
 			gsl_matrix_set (Nr, i, j, gsl_matrix_get( LU_, i, j ) );
+	
+	// Fill up gamma
 	for ( i = rank_; i < nVarMols_; ++i )
 		for ( j = 0; j < nVarMols_; ++j )
 			gsl_matrix_set( gamma, i - rank_, j, 
 				gsl_matrix_get( LU_, i, j + nReacs_ ) );
 	
+
+	// Fill up boundary condition values
 	for ( i = 0; i < nConsv; ++i )
 		for ( j = 0; j < nVarMols_; ++j )
 			T[i] += gsl_matrix_get( gamma, i, j ) * s_->S()[ j ];
@@ -386,54 +427,138 @@ void SteadyState::settle( bool forceSetup )
 	do {
 		nIter_++;
 		status = gsl_multiroot_fsolver_iterate( solver );
+		/*
 		cout << "Iterating at " << nIter_ << endl;
+		for ( i = 0; i < nVarMols_; ++i )
+			cout << gsl_vector_get( solver->x, i ) << "	";
+		cout << endl;
+
+		for ( i = 0; i < nVarMols_; ++i )
+			cout << gsl_vector_get( solver->f, i ) << "	";
+		cout << endl;
+		*/
 
 		if (status ) break;
 		status = gsl_multiroot_test_residual( 
 			solver->f, convergenceCriterion_);
 	} while (status == GSL_CONTINUE && nIter_ < maxIter_ );
+	status_ = string( gsl_strerror( status ) );
+	if ( status != GSL_SUCCESS )
+		cout << "Warning: SteadyState iteration failed, status = " <<
+			status_ << ", nIter = " << nIter_ << endl;
 
-	printf( "status = %s, iter = %d\n", gsl_strerror( status ), nIter_ );
+
+	// printf( "status = %s, iter = %d\n", gsl_strerror( status ), nIter_ );
+	/*
 	for ( i = 0; i < nVarMols_; ++i )
-		s_->S()[i] = gsl_vector_get( x, i );
+		cout << gsl_vector_get( solver->x, i ) << "	";
+	cout << endl;
+	*/
+	for ( i = 0; i < nVarMols_; ++i )
+		s_->S()[i] = gsl_vector_get( solver->x, i );
 
 	// Clean up.
 	gsl_multiroot_fsolver_free( solver );
 	gsl_matrix_free( Nr );
 	gsl_matrix_free( gamma );
 	gsl_vector_free( x );
-	free( f );
 	free( T );
 }
 
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 {
 	struct reac_info* ri = (struct reac_info *)params;
-	gsl_vector* v = gsl_vector_alloc( ri->num_reacs );
-	gsl_vector* y = gsl_vector_alloc( ri->rank );
+	// gsl_vector* v = gsl_vector_calloc( ri->num_reacs );
+	// gsl_vector* y = gsl_vector_calloc( ri->rank );
 	int num_consv = ri->num_mols - ri->rank;
-	int i, j;
 	Stoich* s = ri->s;
 
 	for ( int i = 0; i < ri->num_mols; ++i )
 		s->S()[i] = gsl_vector_get( x, i );
 	// s->updateDynamicBuffers(); // Questionable. Should be done once.
 	s->updateV();
-	for ( int i = 0; i < ri->num_mols; ++i )
-		gsl_vector_set( v, i, s->velocity()[i] );
 
 	// y = Nr . v
+	// Note that Nr is row-echelon: diagonal and above.
+	for ( int i = 0; i < ri->rank; ++i ) {
+		double temp = 0;
+		for ( int j = i; j < ri->num_reacs; ++j )
+			temp += gsl_matrix_get( ri->Nr, i, j ) * s->velocity()[j];
+		gsl_vector_set( f, i, temp );
+	}
+			
+	/*
+	for ( int i = 0; i < ri->num_reacs; ++i )
+		gsl_vector_set( v, i, s->velocity()[i] );
+
 	gsl_blas_dgemv( CblasNoTrans, 1.0, ri->Nr, v, 0.0, y );
-	for ( i = 0; i < ri->rank; ++i )
+	for ( int i = 0; i < ri->rank; ++i )
 		gsl_vector_set( f, i, gsl_vector_get( y, i ) );
+	*/
 
 	// dT = gamma.S - T
-	for ( i = 0; i < num_consv; ++i ) {
+	for ( int i = 0; i < num_consv; ++i ) {
 		double dT = - ri->T[i];
-		for ( j = 0; j < ri->num_mols; ++j )
+		for ( int j = 0; j < ri->num_mols; ++j )
 			dT += gsl_matrix_get( ri->gamma, i, j) * gsl_vector_get( x, j );
 		gsl_vector_set( f, i + ri->rank, dT );
 	}
 
 	return GSL_SUCCESS;
 }
+
+int findStart( gsl_matrix* LU, int start )
+{
+	size_t i;
+	for ( i = start; i < LU->size2; ++i )
+		if ( fabs( gsl_matrix_get( LU, start, i ) ) > SteadyState::EPSILON )
+			return i;
+	return i;
+}
+
+// Cleans up LU matrix upper right corner, the part that specifies the
+// N matrix. Converts to row echelon form, where the upper triangle are
+// stoichiometries of the independent reactions. The remainder are zeros,
+// and are dependent reactions.
+// Returns rank.
+int convert_to_row_echelon( gsl_matrix* LU, gsl_permutation* P1, 
+	int num_rows, int num_columns )
+{
+	unsigned int width = num_rows;
+	if ( num_rows > num_columns )
+		width = num_columns;
+
+	gsl_matrix* LU2 = gsl_matrix_calloc( LU->size1, LU->size2 );
+	gsl_matrix_memcpy( LU2, LU );
+	gsl_vector* startColumn = gsl_vector_calloc( P1->size );
+	gsl_permutation* P2 = gsl_permutation_calloc( P1->size );
+	gsl_permutation* P3 = gsl_permutation_calloc( P1->size );
+	// int *startColumn = (int *) calloc( width, sizeof( int ) );
+	size_t i;
+	int rank = 0;
+	for (i = 0; i < P1->size; i++) {
+		unsigned int start = findStart( LU, i );
+		gsl_vector_set( startColumn, i, start );
+		if ( start < width )
+			rank++;
+	}
+	gsl_sort_vector_index( P2, startColumn );
+
+	// Apply P2 to LU.
+	gsl_vector* temp = gsl_vector_calloc( LU->size2 );
+	for ( i = 0; i < width; ++i ) {
+		gsl_matrix_get_row (temp, LU2, i );
+		gsl_matrix_set_row( LU, gsl_permutation_get( P2, i ), temp );
+	}
+	
+	// Generate the final permutation, will need to return to apply to
+	// the molecule vector.
+	gsl_permutation_mul( P3, P2, P1 );
+
+	// Assign P3 to P1.
+	gsl_permutation_memcpy( P1, P3 );
+
+	return rank;
+}
+
+
