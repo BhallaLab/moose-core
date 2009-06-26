@@ -515,11 +515,15 @@ Id gslSetup( Eref e, const string& method )
 	Element* kh = Neutral::create( "KineticHub", "hub", solve->id(),
 		Id::scratchId() );
 	assert( kh != 0 );
+	Element* ss = Neutral::create( "SteadyState", "ss", solve->id(),
+		Id::scratchId() );
+	assert( ss != 0 );
 
 	// ks->findFinfo( "hub" )->add( ks, kh, kh->findFinfo( "hub" ) );
 	// ks->findFinfo( "gsl" )->add( ks, ki, ki->findFinfo( "gsl" ) );
 	Eref( ks ).add( "hub", kh, "hub" );
 	Eref( ks ).add( "gsl", ki, "gsl" );
+	Eref( ks ).add( "gsl", ss, "gsl" );
 
 	vector< Id > descendants;
 	findDescendants( e, descendants );
@@ -630,7 +634,7 @@ void KineticManager::setupSolver( Eref e )
 {
 
 	Id solveId;
-	if ( method_ == "ee" | method_ == "neutral" ) 
+	if ( method_ == "ee" || method_ == "neutral" ) 
 	{ // Handle default and fallback case.
 		if ( lookupGet< Id, string >( e, "lookupChild", solveId, "solve" )){
 			if ( solveId.good() ) {
