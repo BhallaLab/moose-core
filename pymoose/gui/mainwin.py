@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Fri Jun 26 11:46:14 2009 (+0530)
+# Last-Updated: Fri Jun 26 16:32:18 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 450
+#     Update #: 574
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -17,7 +17,13 @@
 
 # Commentary: 
 # 
-# 
+#  2009-06-26 13:53:14 (+0530) This is right now a single threaded
+#  app. Running the simulation in separate thread will be a lot of
+#  work: all moose objects should live in a single thread and we'll
+#  need to guard access to every moose variable from other threads
+#  using locks. That will be a lot of work. Perticularly, the
+#  updatePlots method will need to get a serialized copy of the moose
+#  tables for thread safety.
 # 
 # 
 
@@ -75,13 +81,13 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.stopFlag = False
 	self.mooseHandler = MHandler()
         self.runTimeLineEdit.setText(self.tr(str(self.mooseHandler.runTime)))
+        self.plotUpdateIntervalLineEdit.setText(self.tr(str(self.mooseHandler.updateInterval)))
 	self.currentDirectory = '.'
 	self.fileType = fileType
 	self.fileTypes = MHandler.file_types
 	self.dataPlotMap = {} # Contains a map of MOOSE tables to QwtPlot objects
-        self.plotCurveMap = defaultdict(list)
+        self.plotCurveMap = {} # One curve per table
 	self.filter = ''
-        self.plotUpdateInterval = 1e-2
 	self.setupActions()
         if loadFile is not None and fileType is not None:
             self.load(loadFile, fileType)
@@ -91,36 +97,28 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	self.connect(self.actionQuit,
 		     QtCore.SIGNAL('triggered()'), 
 		     QtGui.qApp, 
-		     QtCore.SLOT('closeAllWindows()'))
-		     
+		     QtCore.SLOT('closeAllWindows()'))		     
 	self.connect(self.actionLoad, 
 		     QtCore.SIGNAL('triggered()'),		   
 		     self.loadFileDialog)
-
 	self.connect(self.actionSquid_Axon,
 		     QtCore.SIGNAL('triggered()'),
 		     self.loadSquid_Axon_Tutorial)
-
 	self.connect(self.actionIzhikevich_Neurons,
 		     QtCore.SIGNAL('triggered()'),
 		     self.loadIzhikevich_Neurons_Tutorial)
-
 	self.connect(self.actionAbout_MOOSE,
 		     QtCore.SIGNAL('triggered()'),
 		     self.showAbout_MOOSE)
-
 	self.connect(self.actionReset,
 		     QtCore.SIGNAL('triggered()'),
 		     self.reset)
-
 	self.connect(self.actionStart,
 		     QtCore.SIGNAL('triggered()'),
 		     self.run)
-
         self.connect(self.actionStop,
                      QtCore.SIGNAL('triggered()'),
                      self.stop)
-
         self.connect(self.runPushButton,
                      QtCore.SIGNAL('clicked()'),
                      self.run)
@@ -129,11 +127,23 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
                      self.reset)
         self.connect(self.stopPushButton,
                      QtCore.SIGNAL('clicked()'),
-                     self.stop)
-
+                     self.mooseHandler.stop)
+        self.connect(self.plotUpdateIntervalLineEdit,
+                     QtCore.SIGNAL('editingFinished()'),
+                     self.plotUpdateIntervalSlot)
         self.connect(self.modelTreeWidget, 
                      QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'),
                      self.popupPropertyEditor)
+        self.connect(self.mooseHandler, 
+                     QtCore.SIGNAL('updated()'), 
+                     self.updatePlots)
+        self.connect(self.runTimeLineEdit, 
+                     QtCore.SIGNAL('editingFinished()'),
+                     self.runTimeSlot)
+
+        self.connect(self.rescalePlotsPushButton,
+                     QtCore.SIGNAL('clicked()'),
+                     self.rescalePlots)
 
     def popupPropertyEditor(self, item, column):
         """Pop-up a property editor to edit the Moose object in the item"""
@@ -181,15 +191,24 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 				  '<p>It is made available under the terms of the GNU Lesser General Public License version 2.1. See the file COPYING.LIB for the full notice.</p>')
 	aboutDialog = QtGui.QMessageBox.information(self, self.tr('About MOOSE'), about)
 
-	
-    def run(self):
+    def plotUpdateIntervalSlot(self):
         try:
-            time = float(str(self.runTimeLineEdit.text()))
+            new_interval = int(str(self.plotUpdateIntervalLineEdit.text()))
+            self.plotUpdateInterval = new_interval
+        except ValueError:
+            print 'Update steps must be whole number.'
+            self.plotUpdateIntervalLineEdit.setText(self.tr(str(self.plotUpdateInterval)))
+    
+    def runTimeSlot(self):
+        try:
+            runtime = float(str(self.runTimeLineEdit.text()))
+            self.mooseHandler.runTime = runtime
         except ValueError:
             print 'Error in converting runtime to float'
-            time = 1e-2
-            self.runTimeLineEdit.setText(self.tr(time))
-
+            self.runTimeLineEdit.setText(self.tr(str(self.mooseHandler.updateInterval)))
+        
+            
+    def run(self):
         print 'Going to run'
         if not self.isModelLoaded:
             errorDialog = QtGui.QErrorMessage(self)
@@ -198,22 +217,46 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             return
         # The run for update interval and replot data until the full runtime has been executed
         # But this too is unresponsive
-        lastTime = self.mooseHandler.currentTime()
-        while self.mooseHandler.currentTime() - lastTime < time and not self.stopFlag:
-            self.mooseHandler.run(self.plotUpdateInterval)
-            for dataTable, dataPlot in self.dataPlotMap.items():
-                ydata = numpy.array(dataTable)            
-                xdata = numpy.linspace(0, time, len(dataTable))
-                curve = self.plotCurveMap[dataTable][-1]
-                curve.setData(xdata, ydata)
-                dataPlot.replot()
+        self.mooseHandler.run()
 
+    def updatePlots(self):        
+        """Update the plots"""
+        for dataTable, dataPlot in self.dataPlotMap.items():
+            ydata = numpy.array(dataTable)                              
+            dt = self.mooseHandler.getDt(dataTable)
+            runtime = self.mooseHandler.runTime
+            xdata = None
+            if (dt > 0):
+                steps = math.ceil(runtime/dt)
+#                 print 'runtime:', runtime, 'dt:', dt, 'steps:', steps
+                xdata = numpy.linspace(0, runtime, steps)
+                dataPlot.clear()
+                dataPlot.setAxisScale(Qwt.QwtPlot.xBottom, 0, runtime, runtime / 5.0)
+                curve = Qwt.QwtPlotCurve(self.tr(dataTable.name))
+                self.plotCurveMap[dataTable]  = curve
+                curve.setData(xdata, ydata)
+                curve.setPen(QtCore.Qt.red)
+                curve.attach(dataPlot)
+                dataPlot.replot()
+        self.update()
+
+    def rescalePlots(self):
+        for dataTable, dataPlot in self.dataPlotMap.items():
+            dataPlot.setAxisAutoScale(Qwt.QwtPlot.xBottom)
+            dataPlot.replot()
+        self.update()
+        
     def reset(self):
         if not self.isModelLoaded:
             QtGui.QErrorMessage.showMessage('<p>You must load a model first.</p>')
         else:
             self.mooseHandler.reset()
-
+            for dataTable, dataPlot in self.dataPlotMap.items():
+                dataPlot.clear()
+                self.plotCurveMap[dataTable] = None
+                dataPlot.replot()
+                
+    
     def load(self, fileName, fileType):
         if self.isModelLoaded:            
             import subprocess
@@ -225,6 +268,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.modelTreeWidget.recreateTree()
         self.plotsGridLayout = QtGui.QGridLayout(self.plotsGroupBox)
         self.plotsGroupBox.setLayout(self.plotsGridLayout)
+
         dataTables = self.mooseHandler.getDataObjects()
         if len(dataTables) <= 0:
             return
@@ -237,14 +281,15 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             plot = Qwt.QwtPlot(self.plotsGroupBox)
             self.dataPlotMap[table] = plot
             self.plotsGridLayout.addWidget(plot, row, col)
-            curve = Qwt.QwtPlotCurve(self.tr(table.name))
-            ydata = numpy.array(table)            
-            xdata = numpy.linspace(0, self.mooseHandler.currentTime(), len(table))
-            curve.setData(xdata, ydata)
-            curve.setPen(QtCore.Qt.red)
-            curve.attach(plot)
-            plot.replot()
-            self.plotCurveMap[table].append(curve)
+            if len(table) > 0:
+                curve = Qwt.QwtPlotCurve(self.tr(table.name))
+                ydata = numpy.array(table)            
+                xdata = numpy.linspace(0, self.mooseHandler.currentTime(), len(table))
+                curve.setData(xdata, ydata)
+                curve.setPen(QtCore.Qt.red)
+                curve.attach(plot)
+                plot.replot()
+                self.plotCurveMap[table] = curve
             if col >= cols:
                 row += 1
                 col = 0
@@ -253,6 +298,6 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     # Until MOOSE has a way of getting stop command from outside
     def stop(self):
-        self.stopFlag = True
+        self.mooseHandler.stop()
 # 
 # mainwin.py ends here
