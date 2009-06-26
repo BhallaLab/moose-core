@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 25 01:58:21 2009 (+0530)
+# Last-Updated: Fri Jun 26 11:46:14 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 444
+#     Update #: 450
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -64,7 +64,6 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self, loadFile=None, fileType=None):
 	QtGui.QMainWindow.__init__(self)
 	self.setupUi(self)
-#         self.modelTreeWidget.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         self.modelTreeWidget.headerItem().setHidden(True)
         layout = self.modelTreeTab.layout()
         if not layout:
@@ -222,14 +221,17 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         fileType = FileTypeChecker(str(fileName)).fileType()
         print 'File is of type:', fileType
         self.mooseHandler.load(fileName, fileType)
+        self.isModelLoaded = True
         self.modelTreeWidget.recreateTree()
+        self.plotsGridLayout = QtGui.QGridLayout(self.plotsGroupBox)
+        self.plotsGroupBox.setLayout(self.plotsGridLayout)
         dataTables = self.mooseHandler.getDataObjects()
+        if len(dataTables) <= 0:
+            return
         rows = math.ceil(math.sqrt(len(dataTables)))
         cols = math.ceil(float(len(dataTables)) / rows)
         row = 0
         col = 0
-        self.plotsGridLayout = QtGui.QGridLayout(self.plotsGroupBox)
-        self.plotsGroupBox.setLayout(self.plotsGridLayout)
         
         for table in dataTables:
             plot = Qwt.QwtPlot(self.plotsGroupBox)
@@ -248,8 +250,6 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 col = 0
             else:
                 col += 1
-        self.isModelLoaded = True
-        self.update()
 
     # Until MOOSE has a way of getting stop command from outside
     def stop(self):
