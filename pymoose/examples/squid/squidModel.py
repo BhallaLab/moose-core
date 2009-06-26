@@ -110,13 +110,13 @@ class SquidModel(moose.Neutral):
             plotDt = 1e-4
         self.getContext().setClock(0, simDt, 0)
         if not hasattr(self, "_clockTick0"):
-            self._clockTick0 = moose.ClockTick("/sched/cj/t0")
+            self._clockTick0 = moose.Tick("/sched/cj/t0")
         self.getContext().setClock(1, simDt, 1)
         if not hasattr(self, "_clockTick1"):
-            self._clockTick1 = moose.ClockTick("/sched/cj/t1")
+            self._clockTick1 = moose.Tick("/sched/cj/t1")
         self.getContext().setClock(2, plotDt, 0)
         if not hasattr(self, "_clockTick2"):
-            self._clockTick2 = moose.ClockTick("/sched/cj/t2")
+            self._clockTick2 = moose.Tick("/sched/cj/t2")
 
     def vmTable(self):
         return self._vmTable
