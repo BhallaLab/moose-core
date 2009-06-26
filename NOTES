@@ -8613,3 +8613,28 @@ Seems to be setting up the models and diffusion.
 	for array messages fails for individual ones.
 
 =============================================================================
+24 June 2009
+Working on SteadyState.cpp. Stuck with a Nan in the molecule matrix S_.
+Looked at generated matrices. One issue is that the rank is wrong. It seems
+that the LU decomposition isn't doing what I thought it did, by way of
+keeping all the nonzero entries above.
+=============================================================================
+27 June 2009
+Fixed the LU decomposition stuff by adding my own code to shuffle rows.
+After some significant debugging, first pass version works. Have yet to
+test with 'serious' models.
+The SteadyState solver is built in to the kinetics framework, and is
+set up automatically when the GslSolver is built.
+TODO: Check so that it isn't called if GSL is disabled.
+To run it on a typical kkig file:
+include fb_bis.g
+
+setfield /kinetics/A/M CoInit 1.5
+reset
+showfield /kinetics/##[ISA=Molecule] n
+call /kinetics/solve/ss settle
+showfield /kinetics/solve/ss status nIter
+showfield /kinetics/##[ISA=Molecule] n
+
+
+=============================================================================
