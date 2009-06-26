@@ -6,14 +6,15 @@
 # Maintainer: 
 # Created: Tue Jun 16 12:25:40 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 25 02:04:51 2009 (+0530)
+# Last-Updated: Fri Jun 26 16:08:26 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 79
+#     Update #: 139
 # URL: 
 # Keywords: 
 # Compatibility: 
 # 
 # 
+
 
 # Commentary: 
 # 
@@ -48,21 +49,26 @@ import sys
 sys.path.append('..')
 import os
 
+from PyQt4 import QtCore
+
 import moose
 
-class MHandler():
+class MHandler(QtCore.QObject):
     file_types = {
         'Genesis Script(*.g)':'GENESIS',
         'SBML(*.xml *.bz2 *.zip *.gz)':'SBML',
         'MOOSE(*.py)':'MOOSE'
         }
     def __init__(self, *args):
+        QtCore.QObject.__init__(self, *args)
 	self.context = moose.PyMooseBase.getContext()
 	self.root = moose.Neutral('/')
 	self.lib = moose.Neutral('/library')
 	self.data = moose.Neutral('/data')
 	self.proto = moose.Neutral('/proto')
         self.runTime = 1e-2 # default value
+        self.updateInterval = 100 # stepsdefault value
+        self.stop_ = False
 
     def load(self, fileName, fileType):
         """Load a file of specified type and add the directory in search path"""
@@ -89,15 +95,32 @@ class MHandler():
         print 'reset'
         self.context.reset()
 
-    def run(self, time):
-        print 'run'
-        self.context.step(float(time))
+    
+    def run(self):
+        print self.__class__.__name__,':run'
+        lastTime = self.currentTime()
+        print 'runtime:', self.runTime, 'update steps:', self.updateInterval
+        while self.currentTime() - lastTime < self.runTime and not self.stop_:
+            self.context.step(int(self.updateInterval))
+            self.emit(QtCore.SIGNAL('updated()'))
+
+    def stop(self):
+        print 'Stopping'
+	self.stop_ = True
 
     def getDataObjects(self):
         return [moose.Table(table) for table in self.data.children()]
 
     def currentTime(self):
         return self.context.getCurrentTime()
+
+    def getDt(self, mooseObject):
+        ret = -1
+        clocks = mooseObject.neighbours('process')
+        if len(clocks) == 1:
+            clock = moose.Tick(clocks[0])
+            ret = clock.dt
+        return ret
 
 # 
 # moosehandler.py ends here
