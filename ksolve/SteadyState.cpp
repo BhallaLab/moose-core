@@ -51,6 +51,8 @@ struct reac_info
 	int rank;
 	int num_reacs;
 	int num_mols;
+	int nIter;
+	double convergenceCriterion;
 
 	double* T;
 	Stoich* s;
@@ -122,6 +124,20 @@ const Cinfo* initSteadyStateCinfo()
 			GFCAST( &SteadyState::getRank ), 
 			&dummyFunc
 		),
+		new LookupFinfo( "total",
+			LookupFtype< double, unsigned int >::global(),
+				GFCAST( &SteadyState::getTotal ),
+				RFCAST( &SteadyState::setTotal ),
+				"Totals table for conservation laws. The exact mapping of"
+				"this to various sums of molecules is given by the "
+				"conservation matrix, and is currently a bit opaque."
+				"The value of 'total' is set to initial conditions when"
+				"the 'SteadyState::settle' function is called."
+				"Assigning values to the total is a special operation:"
+				"it rescales the concentrations of all the affected"
+				"molecules so that they are at the specified total."
+				"This happens the next time 'settle' is called."
+		),
 		///////////////////////////////////////////////////////
 		// MsgSrc definitions
 		///////////////////////////////////////////////////////
@@ -129,6 +145,11 @@ const Cinfo* initSteadyStateCinfo()
 		///////////////////////////////////////////////////////
 		// MsgDest definitions
 		///////////////////////////////////////////////////////
+		new DestFinfo( "setupMatrix", 
+			Ftype0::global(),
+			RFCAST( &SteadyState::setupMatrix ),
+			"This function initializes and rebuilds the matrices used in the calculation. It is called automatically by the KineticManager. Users will not usually have to call this."
+		),
 		new DestFinfo( "settle", 
 			Ftype0::global(),
 			RFCAST( &SteadyState::settleFunc ),
@@ -198,10 +219,13 @@ SteadyState::SteadyState()
 		isSetup_( 0 ),
 		convergenceCriterion_( 1e-7 ),
 		LU_( 0 ),
+		Nr_( 0 ),
+		gamma_( 0 ),
 		s_( 0 ),
 		nVarMols_( 0 ),
 		nReacs_( 0 ),
-		rank_( 0 )
+		rank_( 0 ),
+		reassignTotal_( 0 )
 {
 	;
 }
@@ -210,6 +234,10 @@ SteadyState::~SteadyState()
 {
 	if ( LU_ != 0 )
 		gsl_matrix_free( LU_ );
+	if ( Nr_ != 0 )
+		gsl_matrix_free( Nr_ );
+	if ( gamma_ != 0 )
+		gsl_matrix_free( gamma_ );
 }
 		
 ///////////////////////////////////////////////////
@@ -260,12 +288,46 @@ double SteadyState::getConvergenceCriterion( Eref e ) {
 		convergenceCriterion_;
 }
 
+double SteadyState::getTotal( Eref e, const unsigned int& i )
+{
+	return static_cast< const SteadyState* >( e.data() )->localGetTotal(i);
+}
+
+void SteadyState::setTotal( 
+	const Conn* c, double val, const unsigned int& i )
+{
+	static_cast< SteadyState* >( c->data() )->localSetTotal(val, i);
+}
+
+double SteadyState::localGetTotal( const unsigned int& i ) const
+{
+	if ( i < total_.size() )
+		return total_[i];
+	cout << "Warning: SteadyState::localGetTotal: index " << i <<
+			" out of range " << total_.size() << endl;
+	return 0.0;
+}
+
+void SteadyState::localSetTotal( double val, const unsigned int& i )
+{
+	if ( i < total_.size() ) {
+		total_[i] = val;
+		reassignTotal_ = 1;
+		return;
+	}
+	cout << "Warning: SteadyState::localSetTotal: index " << i <<
+		" out of range " << total_.size() << endl;
+}
 
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
 
 // Static func
+void SteadyState::setupMatrix( const Conn* c )
+{
+	static_cast< SteadyState* >( c->data() )->setupSSmatrix();
+}
 void SteadyState::settleFunc( const Conn* c )
 {
 	static_cast< SteadyState* >( c->data() )->settle( 0 );
@@ -303,6 +365,8 @@ void SteadyState::assignStoichFuncLocal( void* stoich )
 	nVarMols_ = s_->nVarMols();
 	nReacs_ = s_->velocity().size();
 	isInitialized_ = 1;
+	if ( !isSetup_ )
+		setupSSmatrix();
 }
 
 void print_gsl_mat( gsl_matrix* m, const char* name )
@@ -322,6 +386,9 @@ void print_gsl_mat( gsl_matrix* m, const char* name )
 
 void SteadyState::setupSSmatrix()
 {
+	if ( nVarMols_ == 0 || nReacs_ == 0 )
+		return;
+	
 	int nTot = nVarMols_ + nReacs_;
 	gsl_matrix* N = gsl_matrix_calloc (nVarMols_, nReacs_);
 	gsl_permutation* P = gsl_permutation_calloc( nTot );
@@ -340,23 +407,102 @@ void SteadyState::setupSSmatrix()
 		}
 	}
 
-	// print_gsl_mat( N, "N" );
-	// print_gsl_mat( LU_, "LU pre" );
 	gsl_linalg_LU_decomp( LU_, P, &signum );
-	// print_gsl_mat( LU_, "LU mid" );
-	/*
-	for ( int i = 0; i < nTot; ++i )
-		cout << gsl_permutation_get( P, i ) << "	";
-	cout << endl;
-	*/
 
 	rank_ = convert_to_row_echelon( LU_, P, nVarMols_, nReacs_ );
-	// print_gsl_mat( LU_, "LU post" );
+	unsigned int nConsv = nVarMols_ - rank_;
+	
+	if ( Nr_ ) { // Clear out old one.
+		gsl_matrix_free( Nr_ );
+	}
+	Nr_ = gsl_matrix_calloc ( rank_, nReacs_ );
+	// Fill up Nr.
+	for ( unsigned int i = 0; i < rank_; i++)
+		for ( unsigned int j = i; j < nReacs_; j++)
+			gsl_matrix_set (Nr_, i, j, gsl_matrix_get( LU_, i, j ) );
+
+	if ( gamma_ ) { // Clear out old one.
+		gsl_matrix_free( gamma_ );
+	}
+	gamma_ = gsl_matrix_calloc (nConsv, nVarMols_ );
+	
+	// Fill up gamma
+	for ( unsigned int i = rank_; i < nVarMols_; ++i )
+		for ( unsigned int j = 0; j < nVarMols_; ++j )
+			gsl_matrix_set( gamma_, i - rank_, j, 
+				gsl_matrix_get( LU_, i, j + nReacs_ ) );
+
+	// Fill up boundary condition values
+	total_.resize( nConsv );
+	total_.assign( nConsv, 0.0 );
+	for ( unsigned int i = 0; i < nConsv; ++i )
+		for ( unsigned int j = 0; j < nVarMols_; ++j )
+			total_[i] += gsl_matrix_get( gamma_, i, j ) * s_->Sinit()[ j ];
 
 	gsl_matrix_free( N );
 	gsl_permutation_free( P );
 
 	isSetup_ = 1;
+}
+
+static double op( double x )
+{
+	return x * x;
+}
+
+static double invop( double x )
+{
+	if ( x > 0.0 )
+		return sqrt( x );
+	return 0.0;
+}
+
+
+/**
+ * This does the iteration, using the specified method.
+ * First try gsl_multiroot_fsolver_hybrids
+ * If that doesn't work try gsl_multiroot_fsolver_dnewton
+ * Returns the gsl status.
+struct reac_info
+{
+	int rank;
+	int num_reacs;
+	int num_mols;
+
+	double* T;
+	Stoich* s;
+
+	gsl_matrix* Nr;
+	gsl_matrix* gamma;
+};
+ */
+int iterate( const gsl_multiroot_fsolver_type* st, struct reac_info *ri,
+	int maxIter )
+{
+	gsl_vector* x = gsl_vector_calloc( ri->num_mols );
+	gsl_multiroot_fsolver *solver = 
+		gsl_multiroot_fsolver_alloc( st, ri->num_mols );
+	gsl_multiroot_function func = {&ss_func, ri->num_mols, ri};
+
+	// This gives the starting point for finding the solution
+	for ( int i = 0; i < ri->num_mols; ++i )
+		gsl_vector_set( x, i, invop( ri->s->S()[i] ) );
+
+	gsl_multiroot_fsolver_set( solver, &func, x );
+
+	ri->nIter = 0;
+	int status;
+	do {
+		ri->nIter++;
+		status = gsl_multiroot_fsolver_iterate( solver );
+		if (status ) break;
+		status = gsl_multiroot_test_residual( 
+			solver->f, ri->convergenceCriterion);
+	} while (status == GSL_CONTINUE && ri->nIter < maxIter );
+
+	gsl_multiroot_fsolver_free( solver );
+	gsl_vector_free( x );
+	return status;
 }
 
 /**
@@ -375,18 +521,13 @@ void SteadyState::settle( bool forceSetup )
 
 	// Setting up matrices and vectors for the calculation.
 	unsigned int nConsv = nVarMols_ - rank_;
-	gsl_matrix* Nr = gsl_matrix_calloc ( rank_, nReacs_ );
-	gsl_matrix* gamma = gsl_matrix_calloc ( nConsv, nVarMols_ );
-	gsl_vector* x = gsl_vector_calloc( nVarMols_ );
-	// double * f = (double *) calloc( nVarMols_, sizeof( double ) );
+//	gsl_matrix* Nr = gsl_matrix_calloc ( rank_, nReacs_ );
+//	gsl_matrix* gamma = gsl_matrix_calloc ( nConsv, nVarMols_ );
 	double * T = (double *) calloc( nConsv, sizeof( double ) );
-	struct reac_info ri;
-	const gsl_multiroot_fsolver_type *st;
-	gsl_multiroot_fsolver *solver;
-	gsl_multiroot_function func = {&ss_func, nVarMols_, &ri};
 
 	unsigned int i, j;
 
+/*
 	// Fill up Nr.
 	for ( i = 0; i < rank_; i++)
 		for (j = i; j < nReacs_; j++)
@@ -397,85 +538,60 @@ void SteadyState::settle( bool forceSetup )
 		for ( j = 0; j < nVarMols_; ++j )
 			gsl_matrix_set( gamma, i - rank_, j, 
 				gsl_matrix_get( LU_, i, j + nReacs_ ) );
-	
-
+*/
 	// Fill up boundary condition values
-	for ( i = 0; i < nConsv; ++i )
-		for ( j = 0; j < nVarMols_; ++j )
-			T[i] += gsl_matrix_get( gamma, i, j ) * s_->S()[ j ];
+	if ( reassignTotal_ ) { // The user has defined new conservation values.
+		for ( i = 0; i < nConsv; ++i )
+			T[i] = total_[i];
+		reassignTotal_ = 0;
+	} else {
+		for ( i = 0; i < nConsv; ++i )
+			for ( j = 0; j < nVarMols_; ++j )
+				T[i] += gsl_matrix_get( gamma_, i, j ) * s_->S()[ j ];
+		total_.assign( T, T + nConsv );
+	}
 
+	struct reac_info ri;
 	ri.rank = rank_;
 	ri.num_reacs = nReacs_;
 	ri.num_mols = nVarMols_;
 	ri.T = T;
-	ri.Nr = Nr;
-	ri.gamma = gamma;
+	ri.Nr = Nr_;
+	ri.gamma = gamma_;
 	ri.s = s_;
+	ri.convergenceCriterion = convergenceCriterion_;
 
-	// This gives the starting point for finding the solution
-	for ( i = 0; i < nVarMols_; ++i )
-		gsl_vector_set( x, i, s_->S()[i] );
-
-	// Initializing the GSL root finder
-	st = gsl_multiroot_fsolver_hybrids;
-	solver = gsl_multiroot_fsolver_alloc( st, nVarMols_ );
-	gsl_multiroot_fsolver_set( solver, &func, x );
-
-	// Find the root
-	nIter_ = 0;
-	int status;
-	do {
-		nIter_++;
-		status = gsl_multiroot_fsolver_iterate( solver );
-		/*
-		cout << "Iterating at " << nIter_ << endl;
-		for ( i = 0; i < nVarMols_; ++i )
-			cout << gsl_vector_get( solver->x, i ) << "	";
-		cout << endl;
-
-		for ( i = 0; i < nVarMols_; ++i )
-			cout << gsl_vector_get( solver->f, i ) << "	";
-		cout << endl;
-		*/
-
-		if (status ) break;
-		status = gsl_multiroot_test_residual( 
-			solver->f, convergenceCriterion_);
-	} while (status == GSL_CONTINUE && nIter_ < maxIter_ );
+	int status = iterate( gsl_multiroot_fsolver_hybrids, &ri, maxIter_ );
+	if ( status ) // It failed. Fall back with the Newton method
+		status = iterate( gsl_multiroot_fsolver_dnewton, &ri, maxIter_ );
 	status_ = string( gsl_strerror( status ) );
-	if ( status != GSL_SUCCESS )
+	nIter_ = ri.nIter;
+	if ( status == GSL_SUCCESS ) {
+		
+		/*
+		 * Should happen in the ss_func.
+		for ( i = 0; i < nVarMols_; ++i )
+			s_->S()[i] = gsl_vector_get( op( solver->x ), i );
+			*/
+	} else {
 		cout << "Warning: SteadyState iteration failed, status = " <<
 			status_ << ", nIter = " << nIter_ << endl;
-
-
-	// printf( "status = %s, iter = %d\n", gsl_strerror( status ), nIter_ );
-	/*
-	for ( i = 0; i < nVarMols_; ++i )
-		cout << gsl_vector_get( solver->x, i ) << "	";
-	cout << endl;
-	*/
-	for ( i = 0; i < nVarMols_; ++i )
-		s_->S()[i] = gsl_vector_get( solver->x, i );
+	}
 
 	// Clean up.
-	gsl_multiroot_fsolver_free( solver );
-	gsl_matrix_free( Nr );
-	gsl_matrix_free( gamma );
-	gsl_vector_free( x );
+	// gsl_matrix_free( Nr );
+	// gsl_matrix_free( gamma );
 	free( T );
 }
 
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 {
 	struct reac_info* ri = (struct reac_info *)params;
-	// gsl_vector* v = gsl_vector_calloc( ri->num_reacs );
-	// gsl_vector* y = gsl_vector_calloc( ri->rank );
 	int num_consv = ri->num_mols - ri->rank;
 	Stoich* s = ri->s;
 
 	for ( int i = 0; i < ri->num_mols; ++i )
-		s->S()[i] = gsl_vector_get( x, i );
-	// s->updateDynamicBuffers(); // Questionable. Should be done once.
+		s->S()[i] = op( gsl_vector_get( x, i ) );
 	s->updateV();
 
 	// y = Nr . v
@@ -486,21 +602,14 @@ int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 			temp += gsl_matrix_get( ri->Nr, i, j ) * s->velocity()[j];
 		gsl_vector_set( f, i, temp );
 	}
-			
-	/*
-	for ( int i = 0; i < ri->num_reacs; ++i )
-		gsl_vector_set( v, i, s->velocity()[i] );
-
-	gsl_blas_dgemv( CblasNoTrans, 1.0, ri->Nr, v, 0.0, y );
-	for ( int i = 0; i < ri->rank; ++i )
-		gsl_vector_set( f, i, gsl_vector_get( y, i ) );
-	*/
 
 	// dT = gamma.S - T
 	for ( int i = 0; i < num_consv; ++i ) {
 		double dT = - ri->T[i];
 		for ( int j = 0; j < ri->num_mols; ++j )
-			dT += gsl_matrix_get( ri->gamma, i, j) * gsl_vector_get( x, j );
+			dT += gsl_matrix_get( ri->gamma, i, j) * 
+				op( gsl_vector_get( x, j ) );
+
 		gsl_vector_set( f, i + ri->rank, dT );
 	}
 
