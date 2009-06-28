@@ -533,6 +533,7 @@ Id gslSetup( Eref e, const string& method )
 	// set< string >( ks, "path", simpath );
 	set< double >( ki, "relativeAccuracy", 1.0e-5 );
 	set< double >( ki, "absoluteAccuracy", 1.0e-5 );
+	// set( ss, "setupMatrix" );
 	return solveId;
 }
 
