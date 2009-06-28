@@ -31,10 +31,16 @@ class SteadyState
 		static string getStatus( Eref e );
 		static double getConvergenceCriterion( Eref e );
 		static void setConvergenceCriterion( const Conn* c, double value );
+		static double getTotal( Eref e, const unsigned int& i );
+		static void setTotal( 
+			const Conn* c, double val, const unsigned int& i );
+		double localGetTotal( const unsigned int& i ) const;
+		void localSetTotal( double val, const unsigned int& i );
 
 		///////////////////////////////////////////////////
 		// Msg Dest function definitions
 		///////////////////////////////////////////////////
+		static void setupMatrix( const Conn* c );
 		static void settleFunc( const Conn* c );
 		static void resettleFunc( const Conn* c );
 		void settle( bool forceSetup );
@@ -60,11 +66,15 @@ class SteadyState
 		double convergenceCriterion_;
 
 		gsl_matrix* LU_;
+		gsl_matrix* Nr_;
+		gsl_matrix* gamma_;
 		Stoich* s_;
 		unsigned int nVarMols_;
 		unsigned int nReacs_;
 		unsigned int rank_;
-		
+
+		vector< double > total_;
+		bool reassignTotal_;
 };
 
 extern const Cinfo* initSteadyStateCinfo();
