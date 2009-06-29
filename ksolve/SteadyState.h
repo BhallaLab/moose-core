@@ -44,6 +44,8 @@ class SteadyState
 		static void settleFunc( const Conn* c );
 		static void resettleFunc( const Conn* c );
 		void settle( bool forceSetup );
+		static void showMatricesFunc( const Conn* c );
+		void showMatrices();
 		
 		// funcs to handle externally imposed changes in mol N
 		static void setMolN( const Conn* c, double y, unsigned int i );
