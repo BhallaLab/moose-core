@@ -8772,4 +8772,23 @@ Implemented
 mishti:~/homework/TRAFFILATOR/JUN29_SS/myGaussian.c
 which does what it says. Now try to run it through MOOSE.
 
-First check in earlier debug changes in moose.
+First check in earlier debug changes in moose. This is revision 1178
+
+Then fix up the new code. This works. Tests in 
+mishti:/home/bhalla/homework/TRAFFILATOR/JUN29_SS.
+
+Then try to get it to do the planned saddle plot figure:
+mishti:/home/bhalla/homework/TRAFFILATOR/JUN29_FIG2/saddle_start.g
+Possibly because of round-off error, the system does not stay at the saddle
+point for very long. But it does work.
+Let's see if we can salvage the original idea of the figure by using a
+MOOSE operation to reassign the initial conditions.
+
+Implemented.
+
+No. It improves the time that the ODE calculation hovers around the saddle
+point, but that is still much smaller than required for the figure.
+
+Anyway, checked in to SourceForge
+
+=============================================================================

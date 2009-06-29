@@ -20,6 +20,7 @@ class Molecule
 		///////////////////////////////////////////////////
 		
 		static void setNinit( const Conn* c, double value );
+		void localSetNinit( double value );
 		static double getNinit( Eref e );
 		static void setVolumeScale( const Conn* c, double value );
 		static double getVolumeScale( Eref e );
