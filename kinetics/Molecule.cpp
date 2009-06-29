@@ -214,6 +214,12 @@ void Molecule::setNinit( const Conn* c, double value )
 		static_cast< Molecule* >( c->data() )->nInit_ = value;
 }
 
+void Molecule::localSetNinit( double value )
+{
+	if ( value >= 0.0 )
+		nInit_ = value;
+}
+
 double Molecule::getNinit( Eref e )
 {
 	return static_cast< Molecule* >( e.data() )->nInit_;
