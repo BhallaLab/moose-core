@@ -8744,4 +8744,32 @@ A composite function for generating the entire curve: upper, lower and
 saddle, is in doser_tot.g. It runs into convergence problems at the
 transition points but doesn't crash, and the curve is a very clean one.
 
+Checked in the MOOSE code as revision 1177.
 
+Now tried to run a slightly more complicated model, a diff_eq_bis case.
+This is happening, or not as the case may be, in 
+mishti:/home/bhalla/homework/TRAFFILATOR/JUN28_FIG2
+This has problems.
+Need to inspect the matrices. Implemented SteadyState::showMatrices
+function to do so.
+This reveals that we still have a problem with the row echelon calculation.
+Also, why is Nr 6x8 while gamma is 1x7?
+7 mols is OK.
+8 reacs is OK.
+Nr should really be 5x8 (5 independent mols) 
+gamma should be 2x7 (2 dept mols)
+
+Knowing rank might help. But it should be possible to derive from LU
+decomp.
+=============================================================================
+29 June 2009
+I'm beginning to think that the GSL LU is more trouble than it is worth.
+I can simply fix up my own Gaussian elimination in order to get row-echelon
+form, and since this is a nice clean stochiometry matrix with integer entries,
+the issues of stability should not come up.
+
+Implemented
+mishti:~/homework/TRAFFILATOR/JUN29_SS/myGaussian.c
+which does what it says. Now try to run it through MOOSE.
+
+First check in earlier debug changes in moose.
