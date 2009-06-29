@@ -16,6 +16,7 @@
 #include "KinSparseMatrix.h"
 #include "InterSolverFlux.h"
 #include "Stoich.h"
+#include "kinetics/Molecule.h"
 #include "kinetics/Reaction.h"
 #include "kinetics/Enzyme.h"
 
@@ -192,6 +193,12 @@ const Cinfo* initStoichCinfo()
 			"makeFlux( stubName, molIndices, fluxRates )"
 			"The Stoich adds another entry to its flux_ vector, and"
 			"this becomes a new child object that acts as the stub."
+		),
+		new DestFinfo( "startFromCurrentConcs", 
+			Ftype0::global(),
+			RFCAST( &Stoich::startFromCurrentConcs ),
+			"Copies over the current state of the kinetic system to use"
+			"for initial conditions. Sinit = S"
 		),
 		
 		///////////////////////////////////////////////////////
@@ -454,6 +461,28 @@ void Stoich::innerMakeFlux( Eref e,
 	Element* f = ic->create( Id::scratchId(), stubName,
 		static_cast< void* >( data ), 1 );
 	e.add( "childSrc", f, "child" );
+}
+
+void Stoich::startFromCurrentConcs( const Conn* c ) {
+	static_cast< Stoich* >( c->data() )->innerStartFromCurrentConcs();
+}
+
+void Stoich::innerStartFromCurrentConcs()
+{
+	assert( Sinit_.size() == S_.size() );
+	Sinit_.assign( S_.begin(), S_.end() );
+
+	for ( map< Eref, unsigned int >::iterator i = molMap_.begin();
+		i != molMap_.end(); ++i ) {
+		assert( i->second < S_.size() );
+		Eref e = i->first;
+		Molecule* m = static_cast< Molecule* >( e.data() );
+		m->localSetNinit( S_[ i->second ] );
+		/*
+		SetConn c( i->first );
+		Molecule::setConc( &c, S_[ i->second ] );
+		*/
+	}
 }
 ///////////////////////////////////////////////////
 // Other function definitions
