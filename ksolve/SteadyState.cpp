@@ -160,7 +160,11 @@ const Cinfo* initSteadyStateCinfo()
 			RFCAST( &SteadyState::resettleFunc ),
 			"Finds the nearest steady state to the current initial conditions. This function forces a rebuild of the entire calculation"
 		),
-		
+		new DestFinfo( "showMatrices", 
+			Ftype0::global(),
+			RFCAST( &SteadyState::showMatricesFunc ),
+			"Utility function to show the matrices derived for the calculations on the reaction system. Shows the Nr, gamma, and total matrices"
+		),
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
@@ -338,6 +342,11 @@ void SteadyState::resettleFunc( const Conn* c )
 	static_cast< SteadyState* >( c->data() )->settle( 1 );
 }
 
+void SteadyState::showMatricesFunc( const Conn* c )
+{
+	static_cast< SteadyState* >( c->data() )->showMatrices();
+}
+
 ///////////////////////////////////////////////////
 // Other function definitions
 ///////////////////////////////////////////////////
@@ -382,6 +391,22 @@ void print_gsl_mat( gsl_matrix* m, const char* name )
     
         printf( "\n");
     }   
+}
+
+void SteadyState::showMatrices()
+{
+	if ( !isInitialized_ ) {
+		cout << "SteadyState::showMatrices: Sorry, the system is not yet initialized.\n";
+		return;
+	}
+	int numConsv = nVarMols_ - rank_;
+	cout << "Totals:	";
+	for ( int i = 0; i < numConsv; ++i )
+		cout << total_[i] << "	";
+	cout << endl;
+	print_gsl_mat( gamma_, "gamma" );
+	print_gsl_mat( Nr_, "Nr" );
+	print_gsl_mat( LU_, "LU" );
 }
 
 void SteadyState::setupSSmatrix()
@@ -521,24 +546,10 @@ void SteadyState::settle( bool forceSetup )
 
 	// Setting up matrices and vectors for the calculation.
 	unsigned int nConsv = nVarMols_ - rank_;
-//	gsl_matrix* Nr = gsl_matrix_calloc ( rank_, nReacs_ );
-//	gsl_matrix* gamma = gsl_matrix_calloc ( nConsv, nVarMols_ );
 	double * T = (double *) calloc( nConsv, sizeof( double ) );
 
 	unsigned int i, j;
 
-/*
-	// Fill up Nr.
-	for ( i = 0; i < rank_; i++)
-		for (j = i; j < nReacs_; j++)
-			gsl_matrix_set (Nr, i, j, gsl_matrix_get( LU_, i, j ) );
-	
-	// Fill up gamma
-	for ( i = rank_; i < nVarMols_; ++i )
-		for ( j = 0; j < nVarMols_; ++j )
-			gsl_matrix_set( gamma, i - rank_, j, 
-				gsl_matrix_get( LU_, i, j + nReacs_ ) );
-*/
 	// Fill up boundary condition values
 	if ( reassignTotal_ ) { // The user has defined new conservation values.
 		for ( i = 0; i < nConsv; ++i )
@@ -579,8 +590,6 @@ void SteadyState::settle( bool forceSetup )
 	}
 
 	// Clean up.
-	// gsl_matrix_free( Nr );
-	// gsl_matrix_free( gamma );
 	free( T );
 }
 
@@ -642,9 +651,13 @@ int convert_to_row_echelon( gsl_matrix* LU, gsl_permutation* P1,
 	gsl_vector* startColumn = gsl_vector_calloc( P1->size );
 	gsl_permutation* P2 = gsl_permutation_calloc( P1->size );
 	gsl_permutation* P3 = gsl_permutation_calloc( P1->size );
-	// int *startColumn = (int *) calloc( width, sizeof( int ) );
 	size_t i;
 	int rank = 0;
+	print_gsl_mat( LU, "LU orig" );
+	for (i = 0; i < LU2->size1; i++)
+		for (size_t j = 0; j < i; j++)
+			gsl_matrix_set( LU2, i, j, 0.0 );
+
 	for (i = 0; i < P1->size; i++) {
 		unsigned int start = findStart( LU, i );
 		gsl_vector_set( startColumn, i, start );
@@ -652,13 +665,24 @@ int convert_to_row_echelon( gsl_matrix* LU, gsl_permutation* P1,
 			rank++;
 	}
 	gsl_sort_vector_index( P2, startColumn );
+	cout << "P1->size = " << P1->size << endl;
+	for ( i = 0; i < P1->size; ++i )
+		cout << gsl_vector_get( startColumn, i ) << "	" <<
+			gsl_permutation_get( P2, i ) << "	" <<
+			gsl_permutation_get( P1, i ) << "	" <<
+			endl;
 
 	// Apply P2 to LU.
 	gsl_vector* temp = gsl_vector_calloc( LU->size2 );
 	for ( i = 0; i < width; ++i ) {
-		gsl_matrix_get_row (temp, LU2, i );
-		gsl_matrix_set_row( LU, gsl_permutation_get( P2, i ), temp );
+		gsl_matrix_get_row( temp, LU2, gsl_permutation_get( P2, i ) );
+		gsl_matrix_set_row ( LU, i, temp );
+
+		// gsl_matrix_get_row (temp, LU2, i );
+		//gsl_matrix_set_row( LU, gsl_permutation_get( P2, i ), temp );
 	}
+
+	print_gsl_mat( LU, "LU sorted" );
 	
 	// Generate the final permutation, will need to return to apply to
 	// the molecule vector.
