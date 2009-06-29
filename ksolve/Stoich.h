@@ -82,6 +82,9 @@ class Stoich
 			string stubName, vector< unsigned int >molIndices, 
 			vector< double > fluxRates );
 
+		static void startFromCurrentConcs( const Conn* c ); 
+		void innerStartFromCurrentConcs();
+
 		///////////////////////////////////////////////////
 		// Functions used by the GslIntegrator
 		///////////////////////////////////////////////////

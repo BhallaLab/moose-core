@@ -38,8 +38,7 @@
 #include "SteadyState.h"
 
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f );
-int convert_to_row_echelon( gsl_matrix* LU, gsl_permutation* P1, 
-	int num_rows, int num_columns );
+int myGaussianDecomp( gsl_matrix* U );
 
 // Limit below which small numbers are treated as zero.
 const double SteadyState::EPSILON = 1e-9;
@@ -416,12 +415,10 @@ void SteadyState::setupSSmatrix()
 	
 	int nTot = nVarMols_ + nReacs_;
 	gsl_matrix* N = gsl_matrix_calloc (nVarMols_, nReacs_);
-	gsl_permutation* P = gsl_permutation_calloc( nTot );
-	int signum = 0;
 	if ( LU_ ) { // Clear out old one.
 		gsl_matrix_free( LU_ );
 	}
-	LU_ = gsl_matrix_calloc (nTot, nTot);
+	LU_ = gsl_matrix_calloc (nVarMols_, nTot);
 
 	for ( unsigned int i = 0; i < nVarMols_; ++i ) {
 		gsl_matrix_set (LU_, i, i + nReacs_, 1 );
@@ -432,9 +429,8 @@ void SteadyState::setupSSmatrix()
 		}
 	}
 
-	gsl_linalg_LU_decomp( LU_, P, &signum );
+	rank_ = myGaussianDecomp( LU_ );
 
-	rank_ = convert_to_row_echelon( LU_, P, nVarMols_, nReacs_ );
 	unsigned int nConsv = nVarMols_ - rank_;
 	
 	if ( Nr_ ) { // Clear out old one.
@@ -465,7 +461,6 @@ void SteadyState::setupSSmatrix()
 			total_[i] += gsl_matrix_get( gamma_, i, j ) * s_->Sinit()[ j ];
 
 	gsl_matrix_free( N );
-	gsl_permutation_free( P );
 
 	isSetup_ = 1;
 }
@@ -625,73 +620,87 @@ int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 	return GSL_SUCCESS;
 }
 
-int findStart( gsl_matrix* LU, int start )
+/**
+ * eliminateRowsBelow:
+ * Eliminates leftmost entry of all rows below 'start'.
+ * Returns the row index of the row which has the leftmost nonzero
+ * entry. If this sticks out beyond numReacs, then the elimination is
+ * complete, and it returns a zero to indicate this.
+ * In leftCol it returns the column # of this leftmost nonzero entry.
+ * Zeroes out anything below EPSILON.
+ */
+void eliminateRowsBelow( gsl_matrix* U, int start, int leftCol )
 {
-	size_t i;
-	for ( i = start; i < LU->size2; ++i )
-		if ( fabs( gsl_matrix_get( LU, start, i ) ) > SteadyState::EPSILON )
-			return i;
-	return i;
+	int numMols = U->size1;
+	double pivot = gsl_matrix_get( U, start, leftCol );
+	assert( fabs( pivot ) > SteadyState::EPSILON );
+	for ( int i = start + 1; i < numMols; ++i ) {
+		double factor = gsl_matrix_get( U, i, leftCol );
+		if ( fabs ( factor ) > SteadyState::EPSILON ) {
+			factor = factor / pivot;
+			for ( size_t j = leftCol + 1; j < U->size2; ++j ) {
+				double x = gsl_matrix_get( U, i, j );
+				double y = gsl_matrix_get( U, start, j );
+				x -= y * factor;
+				if ( fabs( x ) < SteadyState::EPSILON )
+					x = 0.0;
+				gsl_matrix_set( U, i, j, x  );
+			}
+		}
+		gsl_matrix_set( U, i, leftCol, 0.0 ); // Cleaning up.
+	}
 }
 
-// Cleans up LU matrix upper right corner, the part that specifies the
-// N matrix. Converts to row echelon form, where the upper triangle are
-// stoichiometries of the independent reactions. The remainder are zeros,
-// and are dependent reactions.
-// Returns rank.
-int convert_to_row_echelon( gsl_matrix* LU, gsl_permutation* P1, 
-	int num_rows, int num_columns )
+/**
+ * reorderRows:
+ * Finds the leftmost row beginning from start, ignoring everything to the
+ * left of leftCol. Puts this row at 'start', swapping with the original.
+ * Assumes that the matrix is set up as [N I]. 
+ * Returns the new value of leftCol
+ * If there are no appropriate rows, returns numReacs.
+ */
+int reorderRows( gsl_matrix* U, int start, int leftCol )
 {
-	unsigned int width = num_rows;
-	if ( num_rows > num_columns )
-		width = num_columns;
-
-	gsl_matrix* LU2 = gsl_matrix_calloc( LU->size1, LU->size2 );
-	gsl_matrix_memcpy( LU2, LU );
-	gsl_vector* startColumn = gsl_vector_calloc( P1->size );
-	gsl_permutation* P2 = gsl_permutation_calloc( P1->size );
-	gsl_permutation* P3 = gsl_permutation_calloc( P1->size );
-	size_t i;
-	int rank = 0;
-	print_gsl_mat( LU, "LU orig" );
-	for (i = 0; i < LU2->size1; i++)
-		for (size_t j = 0; j < i; j++)
-			gsl_matrix_set( LU2, i, j, 0.0 );
-
-	for (i = 0; i < P1->size; i++) {
-		unsigned int start = findStart( LU, i );
-		gsl_vector_set( startColumn, i, start );
-		if ( start < width )
-			rank++;
+	int leftMostRow = start;
+	int numReacs = U->size2 - U->size1;
+	int newLeftCol = numReacs;
+	for ( size_t i = start; i < U->size1; ++i ) {
+		for ( int j = leftCol; j < numReacs; ++j ) {
+			if ( fabs( gsl_matrix_get( U, i, j ) ) > SteadyState::EPSILON ){
+				if ( j < newLeftCol ) {
+					newLeftCol = j;
+					leftMostRow = i;
+				}
+				break;
+			}
+		}
 	}
-	gsl_sort_vector_index( P2, startColumn );
-	cout << "P1->size = " << P1->size << endl;
-	for ( i = 0; i < P1->size; ++i )
-		cout << gsl_vector_get( startColumn, i ) << "	" <<
-			gsl_permutation_get( P2, i ) << "	" <<
-			gsl_permutation_get( P1, i ) << "	" <<
-			endl;
-
-	// Apply P2 to LU.
-	gsl_vector* temp = gsl_vector_calloc( LU->size2 );
-	for ( i = 0; i < width; ++i ) {
-		gsl_matrix_get_row( temp, LU2, gsl_permutation_get( P2, i ) );
-		gsl_matrix_set_row ( LU, i, temp );
-
-		// gsl_matrix_get_row (temp, LU2, i );
-		//gsl_matrix_set_row( LU, gsl_permutation_get( P2, i ), temp );
+	if ( leftMostRow != start ) { // swap them.
+		gsl_matrix_swap_rows( U, start, leftMostRow );
 	}
-
-	print_gsl_mat( LU, "LU sorted" );
-	
-	// Generate the final permutation, will need to return to apply to
-	// the molecule vector.
-	gsl_permutation_mul( P3, P2, P1 );
-
-	// Assign P3 to P1.
-	gsl_permutation_memcpy( P1, P3 );
-
-	return rank;
+	return newLeftCol;
 }
 
+/**
+ * Does a simple gaussian decomposition. Assumes U has nice clean numbers
+ * so I can apply a generous EPSILON to zero things out.
+ * Assumes that the U matrix is the N matrix padded out by an identity 
+ * matrix on the right.
+ * Returns rank.
+ */
+int myGaussianDecomp( gsl_matrix* U )
+{
+	int numMols = U->size1;
+	int numReacs = U->size2 - numMols;
+	int i;
+	// Start out with a nonzero entry at 0,0
+	int leftCol = reorderRows( U, 0, 0 );
 
+	for ( i = 0; i < numMols - 1; ++i ) {
+		eliminateRowsBelow( U, i, leftCol );
+		leftCol = reorderRows( U, i + 1, leftCol );
+		if ( leftCol == numReacs )
+			break;
+	}
+	return i + 1;
+}
