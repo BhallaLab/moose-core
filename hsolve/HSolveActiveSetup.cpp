@@ -26,9 +26,9 @@ void HSolveActive::setup( Id seed, double dt ) {
 	readChannels( );
 	readGates( );
 	readCalcium( );
+	createLookupTables( );
 	readSynapses( );
 	
-	createLookupTables( );
 	cleanup( );
 }
 
@@ -122,53 +122,57 @@ void HSolveActive::readCalcium( ) {
 	double Ca, CaBasal, tau, B;
 	vector< Id > caConcId;
 	vector< int > caTargetIndex;
-	vector< int > caDependIndex;
 	map< Id, int > caConcIndex;
 	int nTarget, nDepend;
 	vector< Id >::iterator iconc;
 	
-	for ( unsigned int ichan = 0; ichan < channel_.size(); ++ichan ) {
-		caConcId.clear( );
+	caCount_.resize( nCompt_ );
+	unsigned int ichan = 0;
+	for ( unsigned int ic = 0; ic < nCompt_; ++ic ) {
+		unsigned int chanBoundary = ichan + channelCount_[ ic ];
+		unsigned int nCa = caConc_.size();
 		
-		nTarget = BioScan::caTarget( channelId_[ ichan ], caConcId );
-		if ( nTarget == 0 )
-			// No calcium pools fed by this channel.
-			caTargetIndex.push_back( -1 );
-		
-		nDepend = BioScan::caDepend( channelId_[ ichan ], caConcId );
-		if ( nDepend == 0 )
-			// Channel does not depend on calcium.
-			caDependIndex.push_back( -1 );
-		
-		if ( caConcId.size() == 0 )
-			continue;
-		
-		for ( iconc = caConcId.begin(); iconc != caConcId.end(); ++iconc )
-			if ( caConcIndex.find( *iconc ) == caConcIndex.end() ) {
-				Eref elm = ( *iconc )();
-				get< double >( elm, "Ca", Ca );
-				get< double >( elm, "CaBasal", CaBasal );
-				get< double >( elm, "tau", tau );
-				get< double >( elm, "B", B );
-				
-				caConc.c_ = Ca - CaBasal;
-				caConc.factor1_ = 4.0 / ( 2.0 + dt_ / tau ) - 1.0;
-				caConc.factor2_ = 2.0 * B * dt_ / ( 2.0 + dt_ / tau );
-				caConc.CaBasal_ = CaBasal;
-				
-				caConc_.push_back( caConc );
-				caConcId_.push_back( *iconc );
-				caConcIndex[ *iconc ] = caConc_.size() - 1;
-			}
-		
-		if ( nTarget != 0 )
-			caTargetIndex.push_back( caConcIndex[ caConcId.front() ] );
-		if ( nDepend != 0 )
-			caDependIndex.push_back( caConcIndex[ caConcId.back() ] );
+		for ( ; ichan < chanBoundary; ++ichan ) {
+			caConcId.clear( );
+			
+			nTarget = BioScan::caTarget( channelId_[ ichan ], caConcId );
+			if ( nTarget == 0 )
+				// No calcium pools fed by this channel.
+				caTargetIndex.push_back( -1 );
+			
+			nDepend = BioScan::caDepend( channelId_[ ichan ], caConcId );
+			if ( nDepend == 0 )
+				// Channel does not depend on calcium.
+				caDependIndex_.push_back( -1 );
+			
+			for ( iconc = caConcId.begin(); iconc != caConcId.end(); ++iconc )
+				if ( caConcIndex.find( *iconc ) == caConcIndex.end() ) {
+					caConcIndex[ *iconc ] = caCount_[ ic ];
+					++caCount_[ ic ];
+					
+					Eref elm = ( *iconc )();
+					get< double >( elm, "Ca", Ca );
+					get< double >( elm, "CaBasal", CaBasal );
+					get< double >( elm, "tau", tau );
+					get< double >( elm, "B", B );
+					
+					caConc.c_ = Ca - CaBasal;
+					caConc.factor1_ = 4.0 / ( 2.0 + dt_ / tau ) - 1.0;
+					caConc.factor2_ = 2.0 * B * dt_ / ( 2.0 + dt_ / tau );
+					caConc.CaBasal_ = CaBasal;
+					
+					caConc_.push_back( caConc );
+					caConcId_.push_back( *iconc );
+				}
+			
+			if ( nTarget != 0 )
+				caTargetIndex.push_back( caConcIndex[ caConcId.front() ] + nCa );
+			if ( nDepend != 0 )
+				caDependIndex_.push_back( caConcIndex[ caConcId.back() ] );
+		}
 	}
 	
 	caTarget_.resize( channel_.size() );
-	caDepend_.resize( channel_.size() );
 	ca_.resize( caConc_.size() );
 	caActivation_.resize( caConc_.size() );
 	
@@ -177,40 +181,6 @@ void HSolveActive::readCalcium( ) {
 			caTarget_[ ichan ] = 0;
 		else
 			caTarget_[ ichan ] = &caActivation_[ caTargetIndex[ ichan ] ];
-		
-		if ( caDependIndex[ ichan ] == -1 )
-			caDepend_[ ichan ] = 0;
-		else
-			caDepend_[ ichan ] = &ca_[ caDependIndex[ ichan ] ];
-	}
-}
-
-void HSolveActive::readSynapses( ) {
-	vector< Id > spikeId;
-	vector< Id > synId;
-	vector< Id >::iterator syn;
-	vector< Id >::iterator spike;
-	SpikeGenStruct spikegen;
-	SynChanStruct synchan;
-	
-	for ( unsigned int ic = 0; ic < nCompt_; ++ic ) {
-		synId.clear( );
-		BioScan::synchan( compartmentId_[ ic ], synId );
-		for ( syn = synId.begin(); syn != synId.end(); ++syn ) {
-			synchan.compt_ = ic;
-			synchan.elm_ = ( *syn )();
-			synchan_.push_back( synchan );
-		}
-		
-		spikeId.clear( );
-		BioScan::spikegen( compartmentId_[ ic ], spikeId );
-		// Very unlikely that there will be >1 spikegens in a compartment,
-		// but lets take care of it anyway.
-		for ( spike = spikeId.begin(); spike != spikeId.end(); ++spike ) {
-			spikegen.compt_ = ic;
-			spikegen.elm_ = ( *spike )();
-			spikegen_.push_back( spikegen );
-		}
 	}
 }
 
@@ -219,8 +189,7 @@ void HSolveActive::createLookupTables( ) {
 	std::set< Id > vSet;
 	vector< Id > caGate;
 	vector< Id > vGate;
-	map< Id, unsigned int > caType;
-	map< Id, unsigned int > vType;
+	map< Id, unsigned int > gateSpecies;
 	
 	for ( unsigned int ig = 0; ig < gateId_.size(); ++ig )
 		if ( gCaDepend_[ ig ] )
@@ -232,16 +201,12 @@ void HSolveActive::createLookupTables( ) {
 	vGate.insert( vGate.end(), vSet.begin(), vSet.end() );
 	
 	for ( unsigned int ig = 0; ig < caGate.size(); ++ig )
-		caType[ caGate[ ig ] ] = ig;
+		gateSpecies[ caGate[ ig ] ] = ig;
 	for ( unsigned int ig = 0; ig < vGate.size(); ++ig )
-		vType[ vGate[ ig ] ] = ig;
+		gateSpecies[ vGate[ ig ] ] = ig;
 	
-	lookupGroup_.push_back(
-		RateLookupGroup( caMin_, caMax_, caDiv_, caGate.size() ) );
-	lookupGroup_.push_back(
-		RateLookupGroup( vMin_, vMax_, vDiv_, vGate.size() ) );
-	RateLookupGroup& caLookupGroup = lookupGroup_[ 0 ];
-	RateLookupGroup& vLookupGroup = lookupGroup_[ 1 ];
+	caTable_ = LookupTable( caMin_, caMax_, caDiv_, caGate.size() );
+	vTable_ = LookupTable( vMin_, vMax_, vDiv_, vGate.size() );
 	
 	vector< double > grid;
 	vector< double > A, B;
@@ -276,7 +241,7 @@ void HSolveActive::createLookupTables( ) {
 			++ia, ++ib;
 		}
 		
-		caLookupGroup.addTable( ig, A, B, interpolate );
+		caTable_.addColumns( ig, A, B, interpolate );
 	}
 	
 	// Voltage-dependent lookup tables
@@ -305,17 +270,67 @@ void HSolveActive::createLookupTables( ) {
 			++ia, ++ib;
 		}
 		
-		vLookupGroup.addTable( ig, A, B, interpolate );
+		vTable_.addColumns( ig, A, B, interpolate );
 	}
 	
-	lookup_.reserve( gateId_.size() );
-	for ( unsigned int ig = 0; ig < gateId_.size(); ++ig )
+	column_.reserve( gateId_.size() );
+	for ( unsigned int ig = 0; ig < gateId_.size(); ++ig ) {
+		unsigned int species = gateSpecies[ gateId_[ ig ] ];
+		
+		LookupColumn column;
 		if ( gCaDepend_[ ig ] )
-			lookup_.push_back( caLookupGroup.slice( caType[ gateId_[ ig ] ] ) );
+			caTable_.column( species, column );
 		else
-			lookup_.push_back( vLookupGroup.slice( vType[ gateId_[ ig ] ] ) );
+			vTable_.column( species, column );
+		
+		column_.push_back( column );
+	}
+	
+	///////////////////!!!!!!!!!!
+	unsigned int maxN = *( max_element( caCount_.begin(), caCount_.end() ) );
+	caRowCompt_.resize( maxN );
+	for ( unsigned int ichan = 0; ichan < channel_.size(); ++ichan ) {
+		if ( channel_[ ichan ].Zpower_ > 0.0 ) {
+			int index = caDependIndex_[ ichan ];
+			if ( index == -1 )
+				caRow_.push_back( 0 );
+			else
+				caRow_.push_back( &caRowCompt_[ index ] );
+		}
+	}
+}
+
+void HSolveActive::readSynapses( ) {
+	vector< Id > spikeId;
+	vector< Id > synId;
+	vector< Id >::iterator syn;
+	vector< Id >::iterator spike;
+	SpikeGenStruct spikegen;
+	SynChanStruct synchan;
+	
+	for ( unsigned int ic = 0; ic < nCompt_; ++ic ) {
+		synId.clear( );
+		BioScan::synchan( compartmentId_[ ic ], synId );
+		for ( syn = synId.begin(); syn != synId.end(); ++syn ) {
+			synchan.compt_ = ic;
+			synchan.elm_ = ( *syn )();
+			synchan_.push_back( synchan );
+		}
+		
+		spikeId.clear( );
+		BioScan::spikegen( compartmentId_[ ic ], spikeId );
+		// Very unlikely that there will be >1 spikegens in a compartment,
+		// but lets take care of it anyway.
+		for ( spike = spikeId.begin(); spike != spikeId.end(); ++spike ) {
+			spikegen.compt_ = ic;
+			spikegen.elm_ = ( *spike )();
+			spikegen_.push_back( spikegen );
+		}
+	}
 }
 
 void HSolveActive::cleanup( ) {
 //	compartmentId_.clear( );
+	gCaDepend_.clear();
+	caDependIndex_.clear();
 }
