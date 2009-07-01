@@ -30,7 +30,7 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-HSolveStruct.o:	HSolveStruct.h RateLookup.h 
+HSolveStruct.o:	HSolveStruct.h
 HinesMatrix.o:	HinesMatrix.h TestHSolve.h ../utility/utility.h
 HSolvePassive.o:	HSolvePassive.h HinesMatrix.h HSolveStruct.h ../biophysics/BioScan.h TestHSolve.h ../utility/utility.h
 RateLookup.o:	RateLookup.h
