@@ -8789,6 +8789,14 @@ Implemented.
 No. It improves the time that the ODE calculation hovers around the saddle
 point, but that is still much smaller than required for the figure.
 
-Anyway, checked in to SourceForge
+Anyway, checked in to SourceForge as revision 1179.
+
+For the purposes of figures for the paper, split up the saddle_start.g
+file into two:
+saddle_start_bis.g
+saddle_start_neg.g
+
+and the output of these files is in fig2_fb_bis.plot and fig2_fb_neg.plot
+respectively.
 
 =============================================================================
