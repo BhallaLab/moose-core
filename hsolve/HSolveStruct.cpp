@@ -9,7 +9,6 @@
 
 #include <cmath>
 #include "moose.h"
-#include "RateLookup.h"
 #include "HSolveStruct.h"
 
 void ChannelStruct::setPowers(
