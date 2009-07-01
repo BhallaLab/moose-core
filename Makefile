@@ -116,7 +116,7 @@ CXXFLAGS = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSE
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
-CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
+CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER 
 endif
 ##########################################################################
 #
@@ -177,19 +177,19 @@ endif
 # To use GSL, pass USE_GSL=1 in make command line
 ifeq ($(USE_GSL),1)
 LIBS+= -L/usr/lib -lgsl -lgslcblas
-CXXFLAGS+= -DUSE_GSL
+CXXFLAGS+= -DUSE_GSL 
 endif
 
 # To use SBML, pass USE_SBML=1 in make command line
 ifeq ($(USE_SBML),1)
 LIBS+=-lsbml -L/usr/local/lib
-CXXFLAGS+=-DUSE_SBML
+CXXFLAGS+=-DUSE_SBML 
 endif
 
 # To compile with readline support pass USE_READLINE=1 in make command line
 ifeq ($(USE_READLINE),1)
 LIBS+= -lreadline
-CXXFLAGS+= -DUSE_READLINE
+CXXFLAGS+= -DUSE_READLINE 
 endif
 
 # To compile with curses support (terminal aware printing) pass USE_CURSES=1 in make command line
@@ -260,7 +260,7 @@ export LD
 export LIBS
 
 moose: libs $(OBJLIBS) 
-	$(CXX) $(OBJLIBS) $(LIBS) -o moose
+	$(CXX) $(OBJLIBS) $(LIBS) -o moose -Wl,-Bstatic  
 	@echo "Moose compilation finished"
 
 libmoose.so: libs
