@@ -12,52 +12,7 @@ using namespace std;
 
 #include "RateLookup.h"
 
-/*
- * RateLookup function definitions
- */
-
-RateLookup::RateLookup( double* base, RateLookupGroup* group, bool interpolate )
-{
-	base_ = base;
-	group_ = group;
-	interpolate_ = interpolate;
-}
-
-void RateLookup::getKey( double x, LookupKey& key )
-{
-	group_->getKey( x, key );
-}
-
-void RateLookup::rates( const LookupKey& key, double& C1, double& C2 )
-{
-	double a, b;
-	double *ap, *bp;
-	
-	ap = base_ + key.offset1;
-	
-	if ( ! interpolate_ ) {
-		C1 = *ap;
-		C2 = *( ap + 1 );
-		
-		return;
-	}
-	
-	bp = base_ + key.offset2;
-	
-	a = *ap;
-	b = *bp;
-	C1 = a + ( b - a ) * key.fraction;
-	
-	a = *( ap + 1 );
-	b = *( bp + 1 );
-	C2 = a + ( b - a ) * key.fraction;
-}
-
-/*
- * RateLookupGroup function definitions
- */
-
-RateLookupGroup::RateLookupGroup(
+LookupTable::LookupTable(
 	double min, double max, unsigned int nDivs, unsigned int nSpecies )
 {
 	min_ = min;
@@ -73,7 +28,7 @@ RateLookupGroup::RateLookupGroup(
 	table_.resize( nPts_ * nColumns_ );
 }
 
-void RateLookupGroup::addTable(
+void LookupTable::addColumns(
 	int species,
 	const vector< double >& C1,
 	const vector< double >& C2,
@@ -97,12 +52,13 @@ void RateLookupGroup::addTable(
 	interpolate_[ species ] = interpolate;
 }
 
-RateLookup RateLookupGroup::slice( unsigned int species )
+void LookupTable::column( unsigned int species, LookupColumn& column )
 {
-	return RateLookup( &table_[ 2 * species ], this, interpolate_[ species ] );
+	column.column = 2 * species;
+	column.interpolate = interpolate_[ species ];
 }
 
-void RateLookupGroup::getKey( double x, LookupKey& key )
+void LookupTable::row( double x, LookupRow& row )
 {
 	if ( x < min_ )
 		x = min_;
@@ -112,7 +68,35 @@ void RateLookupGroup::getKey( double x, LookupKey& key )
 	double div = ( x - min_ ) / dx_;
 	unsigned int integer = ( unsigned int )( div );
 	
-	key.fraction = div - integer;
-	key.offset1  = integer * nColumns_;
-	key.offset2  = key.offset1 + nColumns_;
+	row.fraction = div - integer;
+	row.row = &( table_.front() ) + integer * nColumns_;
+}
+
+void LookupTable::lookup(
+	const LookupColumn& column,
+	const LookupRow& row,
+	double& C1,
+	double& C2 )
+{
+	double a, b;
+	double *ap, *bp;
+	
+	ap = row.row + column.column;
+	
+	if ( ! column.interpolate ) {
+		C1 = *ap;
+		C2 = *( ap + 1 );
+		
+		return;
+	}
+	
+	bp = ap + nColumns_;
+	
+	a = *ap;
+	b = *bp;
+	C1 = a + ( b - a ) * row.fraction;
+	
+	a = *( ap + 1 );
+	b = *( bp + 1 );
+	C2 = a + ( b - a ) * row.fraction;
 }

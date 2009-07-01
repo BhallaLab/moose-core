@@ -185,27 +185,31 @@ void HSolveActive::advanceCalcium( ) {
 void HSolveActive::advanceChannels( double dt ) {
 	vector< double >::iterator iv;
 	vector< double >::iterator istate = state_.begin();
-	vector< double* >::iterator icadepend = caDepend_.begin();
-	vector< RateLookup >::iterator ilookup = lookup_.begin();
 	vector< int >::iterator ichannelcount = channelCount_.begin();
 	vector< ChannelStruct >::iterator ichan = channel_.begin();
 	vector< ChannelStruct >::iterator chanBoundary;
+	vector< unsigned int >::iterator icacount = caCount_.begin();
+	vector< double >::iterator ica = ca_.begin();
+	vector< double >::iterator caBoundary;
+	vector< LookupColumn >::iterator icolumn = column_.begin();
+	vector< LookupRow >::iterator icarowcompt;
+	vector< LookupRow* >::iterator icarow = caRow_.begin();
 	
-	LookupKey key;
-	LookupKey keyCa;
+	LookupRow vRow;
 	double C1, C2;
 	for ( iv = V_.begin(); iv != V_.end(); ++iv ) {
-		//~ if ( *ichannelcount == 0 ) {
-			//~ ++ichannelcount;
-			//~ continue;
-		//~ }
+		vTable_.row( *iv, vRow );
+		icarowcompt = caRowCompt_.begin();
+		caBoundary = ica + *icacount;
+		for ( ; ica < caBoundary; ++ica ) {
+			caTable_.row( *ica, *icarowcompt );
+			++icarowcompt;
+		}
 		
-		//~ ilookup->getKey( *iv, key );
 		chanBoundary = ichan + *ichannelcount;
 		for ( ; ichan < chanBoundary; ++ichan ) {
 			if ( ichan->Xpower_ > 0.0 ) {
-				ilookup->getKey( *iv, key );
-				ilookup->rates( key, C1, C2 );
+				vTable_.lookup( *icolumn, vRow, C1, C2 );
 				//~ *istate = *istate * C1 + C2;
 				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
 				if ( ichan->instant_ & INSTANT_X )
@@ -215,12 +219,11 @@ void HSolveActive::advanceChannels( double dt ) {
 					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
 				}
 				
-				++ilookup, ++istate;
+				++icolumn, ++istate;
 			}
 			
 			if ( ichan->Ypower_ > 0.0 ) {
-				ilookup->getKey( *iv, key );
-				ilookup->rates( key, C1, C2 );
+				vTable_.lookup( *icolumn, vRow, C1, C2 );
 				//~ *istate = *istate * C1 + C2;
 				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
 				if ( ichan->instant_ & INSTANT_Y )
@@ -230,16 +233,15 @@ void HSolveActive::advanceChannels( double dt ) {
 					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
 				}
 				
-				++ilookup, ++istate;
+				++icolumn, ++istate;
 			}
 			
 			if ( ichan->Zpower_ > 0.0 ) {
-				if ( *icadepend ) {
-					ilookup->getKey( **icadepend, keyCa );
-					ilookup->rates( keyCa, C1, C2 );
+				LookupRow* caRow = *icarow;
+				if ( caRow ) {
+					caTable_.lookup( *icolumn, *caRow, C1, C2 );
 				} else {
-					ilookup->getKey( *iv, key );
-					ilookup->rates( key, C1, C2 );
+					vTable_.lookup( *icolumn, vRow, C1, C2 );
 				}
 				
 				//~ *istate = *istate * C1 + C2;
@@ -251,13 +253,11 @@ void HSolveActive::advanceChannels( double dt ) {
 					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
 				}
 				
-				++ilookup, ++istate;
+				++icolumn, ++istate, ++icarow;
 			}
-			
-			++icadepend;
 		}
 		
-		++ichannelcount;
+		++ichannelcount, ++icacount;
 	}
 }
 
