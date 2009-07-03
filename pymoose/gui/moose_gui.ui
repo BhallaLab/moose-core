@@ -18,6 +18,10 @@
   <property name="windowTitle" >
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon" >
+   <iconset resource="moose.qrc" >
+    <normaloff>:/moose_thumbnail.png</normaloff>:/moose_thumbnail.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget" >
    <property name="geometry" >
     <rect>
@@ -372,6 +376,8 @@
    <header location="global" >moosetree</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="moose.qrc" />
+ </resources>
  <connections/>
 </ui>
