@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jun 25 00:35:30 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 25 01:56:48 2009 (+0530)
+# Last-Updated: Wed Jul  1 17:36:30 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 137
+#     Update #: 138
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -130,7 +130,7 @@ class FileTypeChecker:
 		break
 	return ret
 
-
+# The following is test code
 if __name__ == '__main__':
     kkit_fname = 'kkit_tmp.g'
     kkit = open(kkit_fname, 'w')
