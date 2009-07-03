@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'moose_gui.ui'
 #
-# Created: Fri Jun 26 16:01:27 2009
+# Created: Wed Jul  1 15:48:38 2009
 #      by: PyQt4 UI code generator 4.3.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,7 +19,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
-
+ 
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setGeometry(QtCore.QRect(0,25,689,561))
         self.centralwidget.setObjectName("centralwidget")

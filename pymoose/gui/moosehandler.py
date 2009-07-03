@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 12:25:40 2009 (+0530)
 # Version: 
-# Last-Updated: Fri Jun 26 16:08:26 2009 (+0530)
+# Last-Updated: Wed Jul  1 12:55:23 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 139
+#     Update #: 150
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,7 +53,7 @@ from PyQt4 import QtCore
 
 import moose
 
-class MHandler(QtCore.QObject):
+class MHandler(QtCore.QThread):
     file_types = {
         'Genesis Script(*.g)':'GENESIS',
         'SBML(*.xml *.bz2 *.zip *.gz)':'SBML',
@@ -72,7 +72,6 @@ class MHandler(QtCore.QObject):
 
     def load(self, fileName, fileType):
         """Load a file of specified type and add the directory in search path"""
-        print 'load'
         fileName = str(fileName)
         directory = os.path.dirname(fileName)
         fileType = str(fileType)
@@ -110,6 +109,18 @@ class MHandler(QtCore.QObject):
 
     def getDataObjects(self):
         return [moose.Table(table) for table in self.data.children()]
+
+    def getKKitGraphs(self):
+        conc_list = []
+        if self.context.exists('/graphs'):
+            for conc_id in moose.Neutral('/graphs').children():
+                conc = moose.Neutral(conc_id)
+                conc_list.append(conc)
+        if self.context.exists('/moregraphs'):
+            for conc_id in moose.Neutral('/moregraphs').children():
+                conc = moose.Neutral(conc_id)
+                conc_list.append(conc)
+        return conc_list
 
     def currentTime(self):
         return self.context.getCurrentTime()
