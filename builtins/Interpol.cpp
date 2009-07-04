@@ -584,7 +584,7 @@ void Interpol::innerPrint(
 	for ( i = table_.begin(); i != table_.end(); i++ )
 		fout << *i << "\n";
 	
-	fout << flush;
+	fout.close();
 }
 
 void Interpol::innerLoad( const string& fname, unsigned int skiplines )
