@@ -1,3 +1,4 @@
+
 #ifndef _pymoose_HHChannel_h
 #define _pymoose_HHChannel_h
 #include "PyMooseBase.h"
@@ -38,6 +39,14 @@ namespace pymoose{
             void __set_Z(double Z);
             int __get_useConcentration() const;
             void __set_useConcentration(int useConcentration);
+    
+        void createTable(std::string gate, unsigned int divs, double min, double max);    
+        void tweakAlpha(std::string gate);
+        void tweakTau(std::string gate);
+        void setupAlpha(std::string gate, vector <double> params);
+        void setupAlpha(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size = 3000, double min = -0.1, double max = 0.05);
+        void setupTau(std::string gate, vector <double> params);
+        void setupTau(std::string gate, double AA, double AB, double AC , double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size = 3000, double min = -0.1, double max=0.05);    
     };
 }
 #endif
