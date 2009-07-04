@@ -29,7 +29,19 @@ models and run simulations.
 PyMOOSE is compiled as a shared library. We have compiled it on
 various platforms and you can download one suited for you from the
 sourceforge site. But in case there is no precompiled binary suited
-for your environment, you can compile it for yourself.
+for your environment, you can compile it for yourself. While the basic
+moose module does not have too many dependecies, you will need several
+GUI libraries for using the graphical interface. These are: 
+
+numpy
+PyQt (which depends on Qt)
+PyQwt (which depends on Qt, numpy, sip and Qwt)
+
+PyQwt itself has a number of dependencies and you can get the correct
+version of these packages from the PyQwt download page:
+http://pyqwt.sourceforge.net/download.html
+
+Installing the python plotting module matplotlib is also encouraged.
 
 2.1. LINUX
 
@@ -163,13 +175,12 @@ for PyQt to work on windows, the path to PyQt4/bin must be the first
 entry in your PYTHONPATH environment variable.
 
 You can run the squid demo without GUI as well, just cd to the
-pymoose/examples/squid and run:
+pymoose/squid in DEMOS directory and run:
 
 python squid.py
 
 That will create a bunch of .plot files containing the time series for
 various parameters.
-
 
 You can use most MOOSE classes like regular Python classes. However you have to access global functions using the special PyMooseContext object. You can retrieve it by:
 
@@ -185,6 +196,12 @@ and load whole GENESIS scripts using
 context.loadG("genesis script file")
 
 Take a look into the example scripts and that should get you going.
+
+4. GUI
+
+If you have installed the version with Python based GUI, then you can
+run: moosegui.py to start it. This will show a window with two tabs: a 
+
 
 =============================================
 Release notes for the single-neuron modeling engine: Hsolve (Niraj Dudani)

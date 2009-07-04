@@ -23,7 +23,9 @@ extern const Cinfo* initGeometryCinfo();
 extern const Cinfo* initGslIntegratorCinfo();
 extern const Cinfo* initGssaStoichCinfo();
 extern const Cinfo* initHHChannelCinfo();
+extern const Cinfo* initHHChannel2DCinfo();
 extern const Cinfo* initHHGateCinfo();
+extern const Cinfo* initHHGate2DCinfo();
 extern const Cinfo* initHSolveCinfo();
 extern const Cinfo* initHSolveHubCinfo();
 extern const Cinfo* initHemispherePanelCinfo();
@@ -36,6 +38,7 @@ extern const Cinfo* initOutputEventPortCinfo();
 #endif
 extern const Cinfo* initInterSolverFluxCinfo();
 extern const Cinfo* initInterpolCinfo();
+extern const Cinfo* initInterpol2DCinfo();
 extern const Cinfo* initKinComptCinfo();
 extern const Cinfo* initKinPlaceHolderCinfo();
 extern const Cinfo* initKineticHubCinfo();
@@ -85,6 +88,7 @@ extern const Cinfo* initTauPumpCinfo();
 extern const Cinfo* initTimeTableCinfo();
 extern const Cinfo* initTriPanelCinfo();
 extern const Cinfo* initUniformRngCinfo();
+extern const Cinfo* initSteadyStateCinfo();
 extern const Cinfo* initscript_outCinfo();
 
 void initCinfos(){
@@ -112,7 +116,9 @@ void initCinfos(){
 #endif
     static const Cinfo* GssaStoichCinfo = initGssaStoichCinfo();
     static const Cinfo* HHChannelCinfo = initHHChannelCinfo();
+    static const Cinfo* HHChannel2DCinfo = initHHChannel2DCinfo();
     static const Cinfo* HHGateCinfo = initHHGateCinfo();
+    static const Cinfo* HHGate2DCinfo = initHHGate2DCinfo();
     static const Cinfo* HSolveCinfo = initHSolveCinfo();
     static const Cinfo* HSolveHubCinfo = initHSolveHubCinfo();
     static const Cinfo* HemispherePanelCinfo = initHemispherePanelCinfo();
@@ -124,6 +130,7 @@ void initCinfos(){
     static const Cinfo* OutputEventPortCinfo = initOutputEventPortCinfo();
 #endif
     static const Cinfo* InterSolverFluxCinfo = initInterSolverFluxCinfo();
+    static const Cinfo* Interpol2DCinfo = initInterpol2DCinfo();
     static const Cinfo* InterpolCinfo = initInterpolCinfo();
     static const Cinfo* KinComptCinfo = initKinComptCinfo();
     static const Cinfo* KinPlaceHolderCinfo = initKinPlaceHolderCinfo();
@@ -175,4 +182,7 @@ void initCinfos(){
     static const Cinfo* TriPanelCinfo = initTriPanelCinfo();
     static const Cinfo* UniformRngCinfo = initUniformRngCinfo();
     static const Cinfo* script_outCinfo = initscript_outCinfo();
+    static const Cinfo* SteadyStateCinfo = initSteadyStateCinfo();
+    
+    
 }
