@@ -49,9 +49,10 @@ context = moose.PyMooseBase.getContext()
 
 context.setCwe("/library")
 print "Making channels"
-make_Na_mit_usb()
+naChannel = NaMitralUSB('Na_mit_usb')
+
 print "Making K_mit_usb"
-make_K_mit_usb()
+kChannel = KMitralUSB('K_mit_usb')
 
 for child in moose.Neutral("/library").children():
     print "Objects in library:", child.path
