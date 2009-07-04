@@ -41,8 +41,8 @@ class Axon():
     def __init__(self, *args):
         global SIMDT, IODT, SIMLENGTH, INJECT, EREST_ACT
         moose.PyMooseBase.getContext().setCwe("/library")
-        bulbchan.make_Na_mit_usb()
-        bulbchan.make_K_mit_usb()
+        naChannel = bulbchan.NaMitralUSB('Na_mit_usb')
+        kChannel = bulbchan.KMitralUSB('K_mit_usb')
         moose.PyMooseBase.getContext().setCwe("/")
         
         moose.PyMooseBase.getContext().readCell("axon.p", "/axon")
