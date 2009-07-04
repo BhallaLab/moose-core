@@ -122,6 +122,10 @@ OBJ = PyMooseBase.o \
 	GHK.o	\
 	IntFire.o	\
 	IzhikevichNrn.o	\
+	HHChannel2D.o	\
+	HHGate2D.o	\
+	SteadyState.o	\
+	InterSolverFlux.o	\
 # 	Adaptor.o	\
 # 	SigNeur.o	\
 
@@ -188,6 +192,10 @@ HEADERS=PyMooseUtil.h \
 	GHK.h	\
 	IntFire.h	\
 	IzhikevichNrn.h	\
+	HHChannel2D.h	\
+	HHGate2D.h	\
+	SteadyState.h	\
+	InterSolverFlux.h	\
 	../randnum/randnum.h	\
 	../randnum/Probability.h	\
 	../randnum/Binomial.h	\
