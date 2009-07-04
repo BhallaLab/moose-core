@@ -200,8 +200,24 @@ Take a look into the example scripts and that should get you going.
 4. GUI
 
 If you have installed the version with Python based GUI, then you can
-run: moosegui.py to start it. This will show a window with two tabs: a 
+run: moosegui.py to start it. This will show a window with two tabs:
+one called 'Model Tree' and the other 'Run'. 
 
+In the 'Model Tree' tab one can view the hierarchy of moose objects in
+an expandable tree form. The 'Run' tab is for running a loaded
+model. Here one can choose the duration of a simulation (Run time) and
+update interval for the plots. It also has a plots panel where all the
+plots under /data (for genesis scripts) or '/graphs' and '/moregraphs'
+(for kinetikit scripts) are shown. If the script had a step command
+altready executed, then the plots will be visible right after
+loading. Otherwise, one can reset and run the simulation for desired
+time to update the plots. It should be noted that longer update
+interval may result in unresponsive gui until the simulation is over.
+
+One can load an existing model in this gui by selecting File->Load
+(Keyboard shortcut: Ctrl+L) from the menu and navigating to the
+desired file. The directory containing the selected file gets added to
+the SIMPATH, the list of directories to search for scripts.
 
 =============================================
 Release notes for the single-neuron modeling engine: Hsolve (Niraj Dudani)
