@@ -561,7 +561,7 @@ void Interpol2D::innerPrint(
 		fout << "\n";
 	}
 	
-	fout << flush;
+	fout.close();
 }
 
 void Interpol2D::innerLoad( const string& fname, unsigned int skiplines )
