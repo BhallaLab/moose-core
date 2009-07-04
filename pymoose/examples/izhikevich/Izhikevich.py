@@ -11,9 +11,9 @@
 # Maintainer: 
 # Created: Mon Apr  6 15:43:16 2009 (+0530)
 # Version: 
-# Last-Updated: Fri Apr 10 14:51:26 2009 (+0530)
+# Last-Updated: Sat Jul  4 16:20:26 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 652
+#     Update #: 653
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,10 +52,6 @@
 # Code:
 
 from math import *
-
-import sys
-sys.path.append('/usr/lib/python2.5/site-packages')
-sys.path.append('/home/subha/src/moose/pymoose')
 
 import moose
 

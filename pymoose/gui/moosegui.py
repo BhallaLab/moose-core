@@ -1,14 +1,14 @@
-# main.py --- 
+# moosegui.py --- 
 # 
-# Filename: main.py
+# Filename: moosegui.py
 # Description: 
 # Author: subhasis ray
 # Maintainer: 
 # Created: Tue Jun 16 11:12:18 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 18 02:10:48 2009 (+0530)
+# Last-Updated: Sat Jul  4 01:06:27 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 58
+#     Update #: 60
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -73,4 +73,4 @@ if __name__ == '__main__':
 
 
 # 
-# main.py ends here
+# moosegui.py ends here
