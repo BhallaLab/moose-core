@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'moose_gui.ui'
 #
-# Created: Wed Jul  1 15:48:38 2009
+# Created: Sat Jul  4 01:34:01 2009
 #      by: PyQt4 UI code generator 4.3.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,7 +19,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
- 
+
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setGeometry(QtCore.QRect(0,25,689,561))
         self.centralwidget.setObjectName("centralwidget")
@@ -264,7 +264,7 @@ class Ui_MainWindow(object):
         self.plotUpdateIntervalLabel.setText(QtGui.QApplication.translate("MainWindow", "Plot update interval (steps)", None, QtGui.QApplication.UnicodeUTF8))
         self.rescalePlotsPushButton.setText(QtGui.QApplication.translate("MainWindow", "Rescale plots", None, QtGui.QApplication.UnicodeUTF8))
         self.plotsGroupBox.setTitle(QtGui.QApplication.translate("MainWindow", "Plots", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.runTab), QtGui.QApplication.translate("MainWindow", "Simulation Control", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.runTab), QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.menuMOOSE.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuTutorials.setTitle(QtGui.QApplication.translate("MainWindow", "Tutorials", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Help", None, QtGui.QApplication.UnicodeUTF8))
@@ -287,3 +287,4 @@ class Ui_MainWindow(object):
         self.actionIzhikevich_Neurons.setText(QtGui.QApplication.translate("MainWindow", "Izhikevich Neurons", None, QtGui.QApplication.UnicodeUTF8))
 
 from moosetree import MooseTreeWidget
+import moose_rc

@@ -3,15 +3,12 @@
 # This program creates a squid axon model along with tables to pull data
 import sys
 from math import *
-
-import numpy
-
 # The PYTHONPATH should contain the location of moose.py and _moose.so
 # files.  Putting ".." with the assumption that moose.py and _moose.so
 # has been generated in ${MOOSE_SOURCE_DIRECTORY}/pymoose/ (as default
 # pymoose build does) and this file is located in
 # ${MOOSE_SOURCE_DIRECTORY}/pymoose/examples
-sys.path.append('../..')
+# sys.path.append('../..')
 try:
     import moose
 except ImportError:
@@ -21,6 +18,9 @@ except ImportError:
 
 
 from squid import *
+
+import numpy
+
 
 EPSILON = numpy.finfo(float).eps
 class SquidModel(moose.Neutral):

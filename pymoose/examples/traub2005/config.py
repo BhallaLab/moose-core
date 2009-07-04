@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 14:36:30 2009 (+0530)
 # Version: 
-# Last-Updated: Wed May  6 17:29:53 2009 (+0530)
+# Last-Updated: Sat Jul  4 16:18:34 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 12
+#     Update #: 13
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -28,8 +28,6 @@
 # 
 # Code:
 
-import sys
-sys.path.append('/home/src/sim/cortical/py')
 import moose
 context = moose.PyMooseBase.getContext()
 lib = moose.Neutral('/library')

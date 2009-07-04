@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Fri Jun 26 16:32:18 2009 (+0530)
+# Last-Updated: Sat Jul  4 01:33:17 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 574
+#     Update #: 610
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -64,6 +64,7 @@ from moosetree import MooseTreeWidget
 from moosepropedit import PropertyModel
 from moosehandler import MHandler
 from filetypeutil import FileTypeChecker
+from mooseplot import MoosePlots
 
 class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
     """Main Window for MOOSE GUI"""
@@ -76,7 +77,13 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             layout = QtGui.QVBoxLayout(self.modelTreeTab)
             self.modelTreeTab.setLayout(layout)
         layout.addWidget(self.modelTreeWidget)
+        self.setWindowIcon(QtGui.QIcon(':moose_thumbnail.png'))
         self.modelTreeWidget.show()
+        self.plots = MoosePlots(self.plotsGroupBox)
+        self.plotsLayout = QtGui.QHBoxLayout()
+        self.plotsGroupBox.setLayout(self.plotsLayout)
+        self.plotsLayout.addWidget(self.plots)
+        
         self.isModelLoaded = False
         self.stopFlag = False
 	self.mooseHandler = MHandler()
@@ -85,8 +92,6 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	self.currentDirectory = '.'
 	self.fileType = fileType
 	self.fileTypes = MHandler.file_types
-	self.dataPlotMap = {} # Contains a map of MOOSE tables to QwtPlot objects
-        self.plotCurveMap = {} # One curve per table
 	self.filter = ''
 	self.setupActions()
         if loadFile is not None and fileType is not None:
@@ -143,7 +148,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         self.connect(self.rescalePlotsPushButton,
                      QtCore.SIGNAL('clicked()'),
-                     self.rescalePlots)
+                     self.plots.rescalePlots)
 
     def popupPropertyEditor(self, item, column):
         """Pop-up a property editor to edit the Moose object in the item"""
@@ -221,40 +226,16 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def updatePlots(self):        
         """Update the plots"""
-        for dataTable, dataPlot in self.dataPlotMap.items():
-            ydata = numpy.array(dataTable)                              
-            dt = self.mooseHandler.getDt(dataTable)
-            runtime = self.mooseHandler.runTime
-            xdata = None
-            if (dt > 0):
-                steps = math.ceil(runtime/dt)
-#                 print 'runtime:', runtime, 'dt:', dt, 'steps:', steps
-                xdata = numpy.linspace(0, runtime, steps)
-                dataPlot.clear()
-                dataPlot.setAxisScale(Qwt.QwtPlot.xBottom, 0, runtime, runtime / 5.0)
-                curve = Qwt.QwtPlotCurve(self.tr(dataTable.name))
-                self.plotCurveMap[dataTable]  = curve
-                curve.setData(xdata, ydata)
-                curve.setPen(QtCore.Qt.red)
-                curve.attach(dataPlot)
-                dataPlot.replot()
-        self.update()
+        if self.plots is not None:
+            self.plots.updatePlots(self.mooseHandler)
+            self.update()
 
-    def rescalePlots(self):
-        for dataTable, dataPlot in self.dataPlotMap.items():
-            dataPlot.setAxisAutoScale(Qwt.QwtPlot.xBottom)
-            dataPlot.replot()
-        self.update()
-        
     def reset(self):
         if not self.isModelLoaded:
             QtGui.QErrorMessage.showMessage('<p>You must load a model first.</p>')
         else:
             self.mooseHandler.reset()
-            for dataTable, dataPlot in self.dataPlotMap.items():
-                dataPlot.clear()
-                self.plotCurveMap[dataTable] = None
-                dataPlot.replot()
+            self.plots.resetPlots()
                 
     
     def load(self, fileName, fileType):
@@ -266,35 +247,10 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.mooseHandler.load(fileName, fileType)
         self.isModelLoaded = True
         self.modelTreeWidget.recreateTree()
-        self.plotsGridLayout = QtGui.QGridLayout(self.plotsGroupBox)
-        self.plotsGroupBox.setLayout(self.plotsGridLayout)
-
-        dataTables = self.mooseHandler.getDataObjects()
-        if len(dataTables) <= 0:
-            return
-        rows = math.ceil(math.sqrt(len(dataTables)))
-        cols = math.ceil(float(len(dataTables)) / rows)
-        row = 0
-        col = 0
-        
-        for table in dataTables:
-            plot = Qwt.QwtPlot(self.plotsGroupBox)
-            self.dataPlotMap[table] = plot
-            self.plotsGridLayout.addWidget(plot, row, col)
-            if len(table) > 0:
-                curve = Qwt.QwtPlotCurve(self.tr(table.name))
-                ydata = numpy.array(table)            
-                xdata = numpy.linspace(0, self.mooseHandler.currentTime(), len(table))
-                curve.setData(xdata, ydata)
-                curve.setPen(QtCore.Qt.red)
-                curve.attach(plot)
-                plot.replot()
-                self.plotCurveMap[table] = curve
-            if col >= cols:
-                row += 1
-                col = 0
-            else:
-                col += 1
+        self.plots.loadPlots(self.mooseHandler, fileType)
+        for table, curve in self.plots.table_curve_map.items():
+            print table, curve
+        self.plots.show()
 
     # Until MOOSE has a way of getting stop command from outside
     def stop(self):
