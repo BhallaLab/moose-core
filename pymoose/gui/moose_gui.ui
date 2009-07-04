@@ -93,7 +93,7 @@
            </rect>
           </property>
           <attribute name="title" >
-           <string>Simulation Control</string>
+           <string>Run</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout" >
            <item row="0" column="0" >
