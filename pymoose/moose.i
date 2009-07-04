@@ -82,6 +82,10 @@
 	#include "PoissonRng.h"
 	#include "ExponentialRng.h"
 	#include "UniformRng.h"
+	#include "HHGate2D.h"
+	#include "HHChannel2D.h"
+	#include "SteadyState.h"
+	#include "InterSolverFlux.h"
 #ifdef USE_NUMPY
 #include <algorithm>
 #ifndef PY_ARRAY_UNIQUE_SYMBOL
@@ -690,3 +694,17 @@ void fillData(PyObject* args)
 %attribute(pymoose::GHK, double, Cout, __get_Cout, __set_Cout)
 %attribute(pymoose::GHK, double, valency, __get_valency, __set_valency)
 
+%include "SteadyState.h"
+%attribute(pymoose::SteadyState, bool, badStoichiometry, __get_badStoichiometry)
+%attribute(pymoose::SteadyState, bool, isInitialized, __get_isInitialized)
+%attribute(pymoose::SteadyState, unsigned int, nIter, __get_nIter)
+%attribute(pymoose::SteadyState, unsigned int, maxIter, __get_maxIter, __set_maxIter)
+%attribute(pymoose::SteadyState, double, convergenceCriterion, __get_convergenceCriterion, __set_convergenceCriterion)
+%attribute(pymoose::SteadyState, unsigned int, rank, __get_rank)
+%include "HHChannel2D.h"
+%attribute(pymoose::HHChannel2D, string, Xindex, __get_Xindex, __set_Xindex)
+%attribute(pymoose::HHChannel2D, string, Yindex, __get_Yindex, __set_Yindex)
+%attribute(pymoose::HHChannel2D, string, Zindex, __get_Zindex, __set_Zindex)
+%include "HHGate2D.h"
+%include "InterSolverFlux.h"
+%attribute(pymoose::InterSolverFlux, string, method, __get_method, __set_method)
