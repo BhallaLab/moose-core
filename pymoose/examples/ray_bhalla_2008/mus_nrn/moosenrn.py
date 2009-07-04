@@ -3,16 +3,19 @@
 # Author: Subhasis Ray
 # 2008-09-05 10:02:31 UTC
 import sys
-sys.path.append("/home/subha/lib/python2.5/site-packages")
-sys.path.append("/home/subha/lib/python2.5/site-packages/neuron")
+####################################################################
+# Set PYTHONPATH environment variable to include the neuron module.
+# Alternative is to use something like the following:
+# sys.path.append("/home/subha/lib/python2.5/site-packages")
+# sys.path.append("/home/subha/lib/python2.5/site-packages/neuron")
+# Customize the above path according to local settings.
+####################################################################
 
 import time
-
+import moose
+import neuron
 import pylab
 import numpy
-
-import neuron
-import moose
 
 #time_file = open("runtime.txt", "w")
 

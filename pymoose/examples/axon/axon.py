@@ -19,7 +19,6 @@
 #**********************************************************************/
 import sys
 sys.path.append("../channels")
-sys.path.append("../..")
 from bulbchan import *
 
 

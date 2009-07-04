@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-sys.path.append('..')
+
 try:
     import moose
 except ImportError:

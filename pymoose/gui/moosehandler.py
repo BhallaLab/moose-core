@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 12:25:40 2009 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  1 12:55:23 2009 (+0530)
+# Last-Updated: Sat Jul  4 01:48:28 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 150
+#     Update #: 151
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -75,7 +75,7 @@ class MHandler(QtCore.QThread):
         fileName = str(fileName)
         directory = os.path.dirname(fileName)
         fileType = str(fileType)
-        if fileType == 'GENESIS':
+        if fileType == 'GENESIS' or fileType == 'KKIT':
             fileName = os.path.basename(fileName)
             moose.Property.addSimPath(directory)
             self.context.loadG(fileName)
