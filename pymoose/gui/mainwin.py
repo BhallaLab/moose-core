@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Sun Jul  5 14:24:47 2009 (+0530)
+# Last-Updated: Sun Jul  5 15:12:27 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 668
+#     Update #: 692
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -60,6 +60,7 @@ import PyQt4.Qwt5.anynumpy as numpy
 
 
 from ui_mainwindow import Ui_MainWindow
+from settingsdialog import SettingsDialog
 from moosetree import MooseTreeWidget
 from moosepropedit import PropertyModel
 from moosehandler import MHandler
@@ -72,6 +73,8 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	QtGui.QMainWindow.__init__(self)
 	self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon(':moose_thumbnail.png'))
+        self.settingsDialog = SettingsDialog()
+        self.settingsDialog.hide()
         layout = QtGui.QVBoxLayout(self.modelTreeTab)
         self.modelTreeTab.setLayout(layout)
         layout.addWidget(self.modelTreeContainerWidget)
@@ -143,10 +146,13 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.runTimeLineEdit, 
                      QtCore.SIGNAL('editingFinished()'),
                      self.runTimeSlot)
-
         self.connect(self.rescalePlotsPushButton,
                      QtCore.SIGNAL('clicked()'),
                      self.plots.rescalePlots)
+
+        self.connect(self.actionSettings,
+                     QtCore.SIGNAL('triggered()'),
+                     self.popupSettings)
         for listWidget in self.mooseClassToolBox.listWidgets:
             self.connect(listWidget, 
                          QtCore.SIGNAL('itemDoubleClicked(QListWidgetItem*)'), 
@@ -265,5 +271,12 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def insertMooseObjectSlot(self, item):
         self.modelTreeWidget.insertMooseObjectSlot(item.text())
+
+    def popupSettings(self):
+        self.settingsDialog.show()
+        result = self.settingsDialog.exec_()
+        if result == self.settingsDialog.Accepted:
+            self.mooseHandler.addSimPathList(self.settingsDialog.simPathList())
+        
 # 
 # mainwin.py ends here

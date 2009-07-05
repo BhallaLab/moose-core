@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 12:25:40 2009 (+0530)
 # Version: 
-# Last-Updated: Sun Jul  5 01:28:28 2009 (+0530)
+# Last-Updated: Sun Jul  5 15:10:21 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 156
+#     Update #: 160
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -69,6 +69,10 @@ class MHandler(QtCore.QThread):
         self.runTime = 1e-2 # default value
         self.updateInterval = 100 # stepsdefault value
         self.stop_ = False
+
+    def addSimPathList(self, simpathList):
+        for simpath in simpathList:
+            moose.Property.addSimPath(str(simpath))
 
     def load(self, fileName, fileType, parent='.'):
         """Load a file of specified type and add the directory in search path"""
