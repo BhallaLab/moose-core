@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/" >
+    <file>moose_thumbnail.png</file>
+  </qresource>
+</RCC>
