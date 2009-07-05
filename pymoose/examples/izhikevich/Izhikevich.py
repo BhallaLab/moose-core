@@ -11,9 +11,9 @@
 # Maintainer: 
 # Created: Mon Apr  6 15:43:16 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Jul  4 16:20:26 2009 (+0530)
+# Last-Updated: Sun Jul  5 13:51:28 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 653
+#     Update #: 656
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,7 +52,7 @@
 # Code:
 
 from math import *
-
+import sys
 import moose
 
 class SimEnv:
@@ -281,9 +281,9 @@ class IzhikevichGui(QtGui.QMainWindow):
         for key in types:
             button = QtGui.QPushButton(key, self.ctrl_frame)
             self.connect(button, QtCore.SIGNAL('clicked()'), self.run_slot)
-            print row, col
+#             print row, col
             layout.addWidget(button, row, col)
-            print button.text(), row, col
+#             print button.text(), row, col
             if col == 0:
                 col = 1
             else:
@@ -303,7 +303,7 @@ class IzhikevichGui(QtGui.QMainWindow):
         self.setCentralWidget(self.ctrl_frame)
 
     def run_slot(self):
-        print "In run slot"
+#         print "In run slot"
         source = self.sender()
         nrn_type = str(source.text())
         self.nrn.set_type(nrn_type)

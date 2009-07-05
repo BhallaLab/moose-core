@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Sun Jul  5 01:46:59 2009 (+0530)
+# Last-Updated: Sun Jul  5 14:24:47 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 649
+#     Update #: 668
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -128,9 +128,9 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.resetPushButton,
                      QtCore.SIGNAL('clicked()'),
                      self.reset)
-        self.connect(self.stopPushButton,
-                     QtCore.SIGNAL('clicked()'),
-                     self.mooseHandler.stop)
+#         self.connect(self.stopPushButton,
+#                      QtCore.SIGNAL('clicked()'),
+#                      self.mooseHandler.stop)
         self.connect(self.plotUpdateIntervalLineEdit,
                      QtCore.SIGNAL('editingFinished()'),
                      self.plotUpdateIntervalSlot)
@@ -232,6 +232,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         if self.plots is not None:
             self.plots.updatePlots(self.mooseHandler)
             self.update()
+        self.currentTimeLabel.setText(self.tr('Current time (seconds): %g' %  self.mooseHandler.currentTime()))
 
     def reset(self):
         if not self.isModelLoaded:
@@ -239,6 +240,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         else:
             self.mooseHandler.reset()
             self.plots.resetPlots()
+        self.currentTimeLabel.setText(self.tr('Current time (seconds): %g' % self.mooseHandler.currentTime()))
                 
     
     def load(self, fileName, fileType):
@@ -255,6 +257,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         for table, curve in self.plots.table_curve_map.items():
             print table, curve
         self.plots.show()
+        self.currentTimeLabel.setText(self.tr('Current time (seonds): %g' % self.mooseHandler.currentTime()))
 
     # Until MOOSE has a way of getting stop command from outside
     def stop(self):

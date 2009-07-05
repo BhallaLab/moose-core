@@ -25,7 +25,10 @@ namespace pymoose
         PyMooseBase(const Id& src, string name, Id& parent);
         
         virtual ~PyMooseBase();
-        
+
+        const std::string __get_className() const;
+        const std::string __get_author() const;
+        const std::string __get_description() const;
         static bool destroy(Id id);    
         static void endSimulation();    
         virtual const std::string& getType() = 0;
@@ -40,7 +43,6 @@ namespace pymoose
         // a message. It will be good to have the source object Id and
         // the field name.
         //        const std::map<Id, string> neighbourFields(std::string& field);
-        const std::string __get_className() const;
         const vector< Id > children() const;
         const Id* __get_parent() const;
         const std::string __get_path() const;   

@@ -132,6 +132,8 @@ enum FieldType { ALL, VALUE, LOOKUP, SOURCE, DEST, SHARED, SOLVE, THIS, GLOBAL, 
         void plannarDelay(std::string src, double delay);
         void planarWeight(std::string src, double weight);
         const std::string& className(const Id& objId) const;
+        const std::string description(const std::string className) const;
+        const std::string author(const std::string className) const;
         const std::string& doc(const std::string& className) const;
         vector<Id> getNeighbours(Id object, const std::string& fieldName="*");
         vector<string> getFieldList(Id id, FieldType ftype=ALL);        
