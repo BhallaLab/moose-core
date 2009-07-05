@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 12:25:40 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Jul  4 01:48:28 2009 (+0530)
+# Last-Updated: Sun Jul  5 01:28:28 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 151
+#     Update #: 156
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -70,7 +70,7 @@ class MHandler(QtCore.QThread):
         self.updateInterval = 100 # stepsdefault value
         self.stop_ = False
 
-    def load(self, fileName, fileType):
+    def load(self, fileName, fileType, parent='.'):
         """Load a file of specified type and add the directory in search path"""
         fileName = str(fileName)
         directory = os.path.dirname(fileName)
@@ -80,7 +80,7 @@ class MHandler(QtCore.QThread):
             moose.Property.addSimPath(directory)
             self.context.loadG(fileName)
         elif fileType == 'SBML':
-            self.context.runG('readSBML ' + fileName + ' /kinetics')
+            self.context.runG('readSBML ' + fileName + ' ' + parent)
         elif fileType == 'MOOSE':
             import subprocess
             subprocess.call(['python', fileName])
