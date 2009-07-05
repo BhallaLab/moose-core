@@ -35,3 +35,45 @@ to run the demo.
 In most subdirectories you can then use gnuplot to look at the output using
 the command:
 gnuplot plot.gnuplot
+
+PyMoose Demos: 
+
+There are some demos written in Python in the pymoose directory. You
+should cd into the directory and enter python <scriptfile> as listed
+below. Some of them will pop-up a gui and some will just create data
+files with the extension '.plot'.
+
+Directory      Command			Output file(s)		NOTES
+channels       python test_bulbchan.py	KMitralUSB_Vm.plot  	The bulbchan.py 
+	       	      			NaMitralUSB_Vm.plot     implements K channel
+                                                       		and Na channel of 
+								mitral cells in the 
+								olfactory bulb. The 
+								two classes defined 
+								here can be used in 
+								other models.
+izhikevich     python Izhikevich.py	<neuron-name>_vm.plot   This gives a gui with
+	       	      			<neuron-name>_i.plot	buttons for different
+                                                                types of neurons and	
+								you can click any of 
+								them to see the plot
+								of membrane potential
+								of the same. Two data
+								files - one of the Vm
+								and the other of the
+								injection current 
+								applied is created for
+								each run.
+squid		python qtSquid.py				This is the PyMoose
+		       						avatar of the GENESIS
+								squid demo. This pops
+								up two windows - one 
+								for the plots and one 
+								for simulation control.
+								To run the simulation
+								first click the reset 
+								button, then the run
+								button.
+-		python pulsegen.py	pulse*.plot		This shows various 
+					gate.plot		modes of the pulse
+					trig.plot		generator in MOOSE.				
