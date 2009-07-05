@@ -50,7 +50,7 @@
           </sizepolicy>
          </property>
          <property name="currentIndex" >
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="modelTreeTab" >
           <property name="geometry" >
@@ -67,20 +67,78 @@
           <attribute name="toolTip" >
            <string>Visualize the model as a tree structure</string>
           </attribute>
-          <widget class="MooseTreeWidget" name="modelTreeWidget" >
+          <widget class="QWidget" native="1" name="modelTreeContainerWidget" >
            <property name="geometry" >
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>651</width>
+             <width>641</width>
              <height>491</height>
             </rect>
            </property>
-           <column>
-            <property name="text" >
-             <string>1</string>
-            </property>
-           </column>
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="MinimumExpanding" hsizetype="MinimumExpanding" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_3" >
+            <item>
+             <widget class="MooseTreeWidget" name="modelTreeWidget" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Expanding" hsizetype="MinimumExpanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <column>
+               <property name="text" >
+                <string>1</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <widget class="MooseClassWidget" name="mooseClassToolBox" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="MinimumExpanding" hsizetype="MinimumExpanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="currentIndex" >
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="page" >
+               <property name="geometry" >
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>308</width>
+                 <height>405</height>
+                </rect>
+               </property>
+               <attribute name="label" >
+                <string>Page 1</string>
+               </attribute>
+               <zorder>modelTreeWidget</zorder>
+              </widget>
+              <widget class="QWidget" name="page_2" >
+               <property name="geometry" >
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>312</width>
+                 <height>393</height>
+                </rect>
+               </property>
+               <attribute name="label" >
+                <string>Page 2</string>
+               </attribute>
+              </widget>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </widget>
          <widget class="QWidget" name="runTab" >
@@ -374,6 +432,12 @@
    <class>MooseTreeWidget</class>
    <extends>QTreeWidget</extends>
    <header location="global" >moosetree</header>
+  </customwidget>
+  <customwidget>
+   <class>MooseClassWidget</class>
+   <extends>QToolBox</extends>
+   <header location="global" >mooseclasses</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

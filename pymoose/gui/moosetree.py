@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 23 18:54:14 2009 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 24 21:34:52 2009 (+0530)
+# Last-Updated: Sun Jul  5 01:35:11 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 108
+#     Update #: 137
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -77,6 +77,7 @@ class MooseTreeWidget(QtGui.QTreeWidget):
 	self.rootObject = moose.Neutral('/')
 	self.itemList = []
 	self.setupTree(self.rootObject, self, self.itemList)
+        self.setCurrentItem(self.itemList[0]) # Make root the default item
 
     def setupTree(self, mooseObject, parent, itemlist):
 	item = MooseTreeItem(parent)
@@ -92,7 +93,22 @@ class MooseTreeWidget(QtGui.QTreeWidget):
         self.clear()
         self.itemList = []
         self.setupTree(moose.Neutral('/'), self, self.itemList)
-        
+
+    def insertMooseObjectSlot(self, class_name):
+        try:
+            class_name = str(class_name)
+            class_obj = eval('moose.' + class_name)
+            current = self.currentItem()
+            new_item = MooseTreeItem(current)
+            parent = current.getMooseObject()
+            print 'creating new', class_name, 'under', parent.path
+            new_obj = class_obj(class_name, parent)
+            new_item.setMooseObject(new_obj)
+            current.addChild(new_item)
+            self.itemList.append(new_item)
+        except AttributeError:
+            print class_name, ': no such class in module moose'
+
 if __name__ == '__main__':
     c = moose.Compartment("c")
     d = moose.HHChannel("chan", c)

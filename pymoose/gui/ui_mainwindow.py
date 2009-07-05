@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'moose_gui.ui'
 #
-# Created: Sat Jul  4 01:34:01 2009
+# Created: Sun Jul  5 01:45:52 2009
 #      by: PyQt4 UI code generator 4.3.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -52,9 +52,39 @@ class Ui_MainWindow(object):
         self.modelTreeTab.setGeometry(QtCore.QRect(0,0,649,495))
         self.modelTreeTab.setObjectName("modelTreeTab")
 
-        self.modelTreeWidget = MooseTreeWidget(self.modelTreeTab)
-        self.modelTreeWidget.setGeometry(QtCore.QRect(0,0,651,491))
+        self.modelTreeContainerWidget = QtGui.QWidget(self.modelTreeTab)
+        self.modelTreeContainerWidget.setGeometry(QtCore.QRect(0,0,641,491))
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,QtGui.QSizePolicy.MinimumExpanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.modelTreeContainerWidget.sizePolicy().hasHeightForWidth())
+        self.modelTreeContainerWidget.setSizePolicy(sizePolicy)
+        self.modelTreeContainerWidget.setObjectName("modelTreeContainerWidget")
+
+        self.hboxlayout1 = QtGui.QHBoxLayout(self.modelTreeContainerWidget)
+        self.hboxlayout1.setObjectName("hboxlayout1")
+
+        self.modelTreeWidget = MooseTreeWidget(self.modelTreeContainerWidget)
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.modelTreeWidget.sizePolicy().hasHeightForWidth())
+        self.modelTreeWidget.setSizePolicy(sizePolicy)
         self.modelTreeWidget.setObjectName("modelTreeWidget")
+        self.hboxlayout1.addWidget(self.modelTreeWidget)
+
+        self.mooseClassToolBox = MooseClassWidget(self.modelTreeContainerWidget)
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,QtGui.QSizePolicy.MinimumExpanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.mooseClassToolBox.sizePolicy().hasHeightForWidth())
+        self.mooseClassToolBox.setSizePolicy(sizePolicy)
+        self.mooseClassToolBox.setObjectName("mooseClassToolBox")
+
+        self.hboxlayout1.addWidget(self.mooseClassToolBox)
         self.tabWidget.addTab(self.modelTreeTab,"")
 
         self.runTab = QtGui.QWidget()
@@ -73,8 +103,8 @@ class Ui_MainWindow(object):
         self.simulationWidget.setSizePolicy(sizePolicy)
         self.simulationWidget.setObjectName("simulationWidget")
 
-        self.hboxlayout1 = QtGui.QHBoxLayout(self.simulationWidget)
-        self.hboxlayout1.setObjectName("hboxlayout1")
+        self.hboxlayout2 = QtGui.QHBoxLayout(self.simulationWidget)
+        self.hboxlayout2.setObjectName("hboxlayout2")
 
         self.runControlWidget = QtGui.QWidget(self.simulationWidget)
 
@@ -169,7 +199,7 @@ class Ui_MainWindow(object):
         self.rescalePlotsPushButton.setSizePolicy(sizePolicy)
         self.rescalePlotsPushButton.setObjectName("rescalePlotsPushButton")
         self.vboxlayout1.addWidget(self.rescalePlotsPushButton)
-        self.hboxlayout1.addWidget(self.runControlWidget)
+        self.hboxlayout2.addWidget(self.runControlWidget)
 
         self.plotsGroupBox = QtGui.QGroupBox(self.simulationWidget)
 
@@ -179,7 +209,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.plotsGroupBox.sizePolicy().hasHeightForWidth())
         self.plotsGroupBox.setSizePolicy(sizePolicy)
         self.plotsGroupBox.setObjectName("plotsGroupBox")
-        self.hboxlayout1.addWidget(self.plotsGroupBox)
+        self.hboxlayout2.addWidget(self.plotsGroupBox)
         self.gridlayout.addWidget(self.simulationWidget,0,0,1,1)
         self.tabWidget.addTab(self.runTab,"")
         self.hboxlayout.addWidget(self.tabWidget)
@@ -249,7 +279,8 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
+        self.mooseClassToolBox.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -286,5 +317,6 @@ class Ui_MainWindow(object):
         self.actionSquid_Axon.setText(QtGui.QApplication.translate("MainWindow", "Squid Axon", None, QtGui.QApplication.UnicodeUTF8))
         self.actionIzhikevich_Neurons.setText(QtGui.QApplication.translate("MainWindow", "Izhikevich Neurons", None, QtGui.QApplication.UnicodeUTF8))
 
+from mooseclasses import MooseClassWidget
 from moosetree import MooseTreeWidget
 import moose_rc
