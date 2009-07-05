@@ -37,7 +37,6 @@ class TestKMitralUSB(unittest.TestCase):
         self.sim_length = 0.05
         self.inject = 5e-10
         self.erest_act = -0.065
-
         moose.PyMooseBase.getContext().setClock(0, self.sim_dt, 0)
         moose.PyMooseBase.getContext().setClock(1, self.sim_dt, 0)
         moose.PyMooseBase.getContext().setClock(2, self.io_dt, 0)
@@ -45,7 +44,7 @@ class TestKMitralUSB(unittest.TestCase):
     def setUp(self):
         pass
 
-    def testChannelCurrent(self):
+    def testChannel(self):
         # Set up a compartment for testing
         compartment = moose.Compartment("compartment" , self.container)
         compartment.length = 28e-6
@@ -69,30 +68,14 @@ class TestKMitralUSB(unittest.TestCase):
         pulse.firstDelay = 0.01
 #        pulse.trigMode = 0
         pulse.connect("outputSrc", compartment, "injectMsg")
-
-        channel_plot = moose.Table("KMitralUSB_Ik", self.data)
-        channel_plot.connect("inputRequest", channel, "Ik")
-        channel_plot.stepMode = 3
-        channel_plot.useClock(2)
-
-        inject_plot = moose.Table("KMitralUSB_inject", self.data)
-        inject_plot.connect("inputRequest", pulse, "output")
-        inject_plot.stepMode = 3
-        inject_plot.useClock(2)
-        
         vm_plot = moose.Table("KMitralUSB_Vm", self.data)
         vm_plot.connect("inputRequest", compartment, "Vm")
         vm_plot.stepMode = 3
         vm_plot.useClock(2)
-
         moose.PyMooseBase.getContext().reset()
         moose.PyMooseBase.getContext().reset()
-
         moose.PyMooseBase.getContext().step(self.sim_length)
-        channel_plot.dumpFile(channel_plot.name + ".pymoose.plot")
-        inject_plot.dumpFile(inject_plot.name + ".pymoose.plot")
-        vm_plot.dumpFile(vm_plot.name + ".pymoose.plot")
-# ! testChannelCurrent
+        vm_plot.dumpFile(vm_plot.name + ".plot")
 # ! TestKMitralUSB
 
 class TestNaMitralUSB(unittest.TestCase):
@@ -114,7 +97,7 @@ class TestNaMitralUSB(unittest.TestCase):
     def setUp(self):
         pass
 
-    def testChannelCurrent(self):
+    def testChannel(self):
         # Set up a compartment for testing
         compartment = moose.Compartment("compartment" , self.container)
         compartment.length = 28e-6
@@ -127,26 +110,19 @@ class TestNaMitralUSB(unittest.TestCase):
         compartment.Ek = self.erest_act
         channel = bulbchan.NaMitralUSB("Na_channel", compartment)
         channel.connect("channel", compartment, "channel")
-        
         pulse = moose.PulseGen("inject", self.container)
         pulse.firstLevel = self.inject
         pulse.firstWidth = 0.01
         pulse.firstDelay = 0.01
         pulse.trigMode = 0
         pulse.connect("outputSrc", compartment, "injectMsg")
-
-        channel_plot = moose.Table("NaMitralUSB_Ik", self.data)
-        channel_plot.connect("inputRequest", channel, "Ik")
-        channel_plot.stepMode = 3
-        channel_plot.useClock(2)
-        inject_plot = moose.Table("NaMitralUSB_inject", self.data)
-        inject_plot.connect("inputRequest", pulse, "output")
-        inject_plot.stepMode = 3
-        inject_plot.useClock(2)  
+        vm_plot = moose.Table("NaMitralUSB_Vm", self.data)
+        vm_plot.connect("inputRequest", compartment, "Vm")
+        vm_plot.stepMode = 3
+        vm_plot.useClock(2)
         moose.PyMooseBase.getContext().reset()
         moose.PyMooseBase.getContext().step(self.sim_length)
-        channel_plot.dumpFile(channel_plot.name + ".pymoose.plot")
-        inject_plot.dumpFile(inject_plot.name + ".pymoose.plot")
+        vm_plot.dumpFile(vm_plot.name + ".plot")
 
 if __name__ == "__main__":
     unittest.main()

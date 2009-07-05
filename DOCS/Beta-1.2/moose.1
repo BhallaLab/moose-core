@@ -68,18 +68,14 @@ MOOSE emits various diagnostics when it croaks. Often these will help us
 debug it, if you can send them back to the MOOSE sourceforge site at
 .I http://sourceforge.net/tracker/?group_id=165660&atid=836272
 .SH EXAMPLES
-When MOOSE is run from the command line without any arguments, or its icon
-is double-clicked, it starts up a Python/Qt based GUI. It has several
-menu items:
+When moosegui.py is run from the command line without any arguments,
+or its icon is double-clicked, it starts up a Python/Qt based GUI. It
+has several menu items:
 .br
 .B File
 This is for loading and saving simulation files. At present it handles 
 GENESIS cellreader files (.p files); GENESIS/Kinetikit files, and SBML
 files.
-.P
-.B Edit
-This opens up a tab for editing the model. Most models currently have a 
-rudimentary default editor.
 .P
 .B Tutorials and Demos
 This lets you run various tutorials and demos from the GUI.
@@ -125,6 +121,8 @@ Standard locations on a Linux system are:
 .\" set tabstop to longest possible filename, plus a wee bit
 .ta \w'/usr/lib/perl/getopts.pl   'u
 \fI/usr/bin/moose\fR	MOOSE binaries
+\fI/usr/bin/moosegui.py\fR	GUI for MOOSE
+\fI/usr/lib/python{version}/site-packages\fR	the moose module for python.
 \fI/usr/share/doc/moose\fR	unformatted programmer documentation
 In addition the 
 .I moose
