@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'moose_gui.ui'
 #
-# Created: Sun Jul  5 14:16:24 2009
+# Created: Sun Jul  5 15:07:55 2009
 #      by: PyQt4 UI code generator 4.3.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,7 +19,6 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
-
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setGeometry(QtCore.QRect(0,25,689,561))
         self.centralwidget.setObjectName("centralwidget")
@@ -267,7 +266,11 @@ class Ui_MainWindow(object):
 
         self.actionIzhikevich_Neurons = QtGui.QAction(MainWindow)
         self.actionIzhikevich_Neurons.setObjectName("actionIzhikevich_Neurons")
+
+        self.actionSettings = QtGui.QAction(MainWindow)
+        self.actionSettings.setObjectName("actionSettings")
         self.menuMOOSE.addAction(self.actionLoad)
+        self.menuMOOSE.addAction(self.actionSettings)
         self.menuMOOSE.addAction(self.actionQuit)
         self.menuTutorials.addAction(self.actionSquid_Axon)
         self.menuTutorials.addAction(self.actionIzhikevich_Neurons)
@@ -319,6 +322,7 @@ class Ui_MainWindow(object):
         self.actionQuit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSquid_Axon.setText(QtGui.QApplication.translate("MainWindow", "Squid Axon", None, QtGui.QApplication.UnicodeUTF8))
         self.actionIzhikevich_Neurons.setText(QtGui.QApplication.translate("MainWindow", "Izhikevich Neurons", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSettings.setText(QtGui.QApplication.translate("MainWindow", "Settings", None, QtGui.QApplication.UnicodeUTF8))
 
 from mooseclasses import MooseClassWidget
 from moosetree import MooseTreeWidget
