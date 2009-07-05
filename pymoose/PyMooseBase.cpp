@@ -305,6 +305,18 @@ PyMooseBase::~PyMooseBase()
     id_ = Id();    
 }
 
+const std::string PyMooseBase::__get_author() const
+{
+    const Cinfo * cinfo = this->id_()->cinfo();
+    return cinfo->author();
+}
+
+const std::string PyMooseBase::__get_description() const
+{
+    const Cinfo * cinfo = this->id_()->cinfo();
+    return cinfo->description();
+}
+
 const std::vector<std::string> PyMooseBase::getFieldList() const
 {
     std::string fields = PyMooseBase::getContext()->getField(this->id_, "fieldList");
