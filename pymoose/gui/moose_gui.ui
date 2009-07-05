@@ -50,7 +50,7 @@
           </sizepolicy>
          </property>
          <property name="currentIndex" >
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="modelTreeTab" >
           <property name="geometry" >
@@ -114,22 +114,21 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>308</width>
-                 <height>405</height>
+                 <width>96</width>
+                 <height>26</height>
                 </rect>
                </property>
                <attribute name="label" >
                 <string>Page 1</string>
                </attribute>
-               <zorder>modelTreeWidget</zorder>
               </widget>
               <widget class="QWidget" name="page_2" >
                <property name="geometry" >
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>312</width>
-                 <height>393</height>
+                 <width>96</width>
+                 <height>26</height>
                 </rect>
                </property>
                <attribute name="label" >
@@ -199,25 +198,6 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="stopPushButton" >
-                   <property name="sizePolicy" >
-                    <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-                     <horstretch>1</horstretch>
-                     <verstretch>2</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize" >
-                    <size>
-                     <width>20</width>
-                     <height>10</height>
-                    </size>
-                   </property>
-                   <property name="text" >
-                    <string>Stop</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
                   <widget class="QLabel" name="runTimeLabel" >
                    <property name="sizePolicy" >
                     <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
@@ -276,6 +256,16 @@
                    </property>
                    <property name="text" >
                     <string>Rescale plots</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="currentTimeLabel" >
+                   <property name="text" >
+                    <string>Current simulation time:</string>
+                   </property>
+                   <property name="wordWrap" >
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>

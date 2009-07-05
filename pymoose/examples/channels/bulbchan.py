@@ -153,8 +153,8 @@ class KMitralUSB(moose.HHChannel):
         yGate.B[28] = 0.865  
         yGate.B[29] = 0.865 
         yGate.B[30] = 0.865
-        yGate.A.dumpFile("k_ya0.plot")
-        yGate.B.dumpFile("k_yb0.plot")
+#         yGate.A.dumpFile("k_ya0.plot")
+#         yGate.B.dumpFile("k_yb0.plot")
 
         # Setting the calc_mode to NO_INTERP for speed 
         yGate.A.calcMode = 0 
@@ -163,21 +163,21 @@ class KMitralUSB(moose.HHChannel):
         # tweaking the tables for the tabchan calculation
     #     K_mit_usb.tweakAlpha("Y")
         yGate.tweakAlpha()
-        yGate.A.dumpFile("k_ya1.pymoose.plot")
-        yGate.B.dumpFile("k_yb1.pymoose.plot")
+#         yGate.A.dumpFile("k_ya1.pymoose.plot")
+#         yGate.B.dumpFile("k_yb1.pymoose.plot")
 
         # Filling the tables using B-SPLINE interpolation
         yGate.tabFill(3000, 0)
-        yGate.B.dumpFile("k_yb2.pymoose.plot")
+#         yGate.B.dumpFile("k_yb2.pymoose.plot")
 
         xGate.A.sy = 5.0 
         xGate.B.sy = 5.0 
         yGate.A.sy = 5.0
         yGate.B.sy = 5.0 
-        xGate.A.dumpFile("k_xa.pymoose.plot")
-        xGate.B.dumpFile("k_xb.pymoose.plot")
-        yGate.A.dumpFile("k_ya.pymoose.plot")
-        yGate.B.dumpFile("k_yb.pymoose.plot")
+#         xGate.A.dumpFile("k_xa.pymoose.plot")
+#         xGate.B.dumpFile("k_xb.pymoose.plot")
+#         yGate.A.dumpFile("k_ya.pymoose.plot")
+#         yGate.B.dumpFile("k_yb.pymoose.plot")
 
 
 
@@ -225,9 +225,9 @@ class NaMitralUSB(moose.HHChannel):
                         -5.0e-3)
         
         xGate = moose.HHGate(self.path + "/xGate")
-        xGate.A.dumpFile("na_xa.pymoose.plot")
-        xGate.B.dumpFile("na_xb.pymoose.plot")
+#         xGate.A.dumpFile("na_xa.pymoose.plot")
+#         xGate.B.dumpFile("na_xb.pymoose.plot")
         yGate = moose.HHGate(self.path + "/yGate")
-        yGate.A.dumpFile("na_ya.pymoose.plot")
-        yGate.B.dumpFile("na_yb.pymoose.plot")
+#         yGate.A.dumpFile("na_ya.pymoose.plot")
+#         yGate.B.dumpFile("na_yb.pymoose.plot")
 

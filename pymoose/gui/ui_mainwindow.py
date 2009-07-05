@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'moose_gui.ui'
 #
-# Created: Sun Jul  5 01:45:52 2009
+# Created: Sun Jul  5 14:16:24 2009
 #      by: PyQt4 UI code generator 4.3.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -84,6 +84,15 @@ class Ui_MainWindow(object):
         self.mooseClassToolBox.setSizePolicy(sizePolicy)
         self.mooseClassToolBox.setObjectName("mooseClassToolBox")
 
+        self.page = QtGui.QWidget()
+        self.page.setGeometry(QtCore.QRect(0,0,96,26))
+        self.page.setObjectName("page")
+        self.mooseClassToolBox.addItem(self.page,"")
+
+        self.page_2 = QtGui.QWidget()
+        self.page_2.setGeometry(QtCore.QRect(0,0,96,26))
+        self.page_2.setObjectName("page_2")
+        self.mooseClassToolBox.addItem(self.page_2,"")
         self.hboxlayout1.addWidget(self.mooseClassToolBox)
         self.tabWidget.addTab(self.modelTreeTab,"")
 
@@ -138,17 +147,6 @@ class Ui_MainWindow(object):
         self.runPushButton.setObjectName("runPushButton")
         self.vboxlayout1.addWidget(self.runPushButton)
 
-        self.stopPushButton = QtGui.QPushButton(self.runControlWidget)
-
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(1)
-        sizePolicy.setVerticalStretch(2)
-        sizePolicy.setHeightForWidth(self.stopPushButton.sizePolicy().hasHeightForWidth())
-        self.stopPushButton.setSizePolicy(sizePolicy)
-        self.stopPushButton.setMinimumSize(QtCore.QSize(20,10))
-        self.stopPushButton.setObjectName("stopPushButton")
-        self.vboxlayout1.addWidget(self.stopPushButton)
-
         self.runTimeLabel = QtGui.QLabel(self.runControlWidget)
 
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
@@ -199,6 +197,11 @@ class Ui_MainWindow(object):
         self.rescalePlotsPushButton.setSizePolicy(sizePolicy)
         self.rescalePlotsPushButton.setObjectName("rescalePlotsPushButton")
         self.vboxlayout1.addWidget(self.rescalePlotsPushButton)
+
+        self.currentTimeLabel = QtGui.QLabel(self.runControlWidget)
+        self.currentTimeLabel.setWordWrap(True)
+        self.currentTimeLabel.setObjectName("currentTimeLabel")
+        self.vboxlayout1.addWidget(self.currentTimeLabel)
         self.hboxlayout2.addWidget(self.runControlWidget)
 
         self.plotsGroupBox = QtGui.QGroupBox(self.simulationWidget)
@@ -279,7 +282,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         self.mooseClassToolBox.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -290,10 +293,10 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.modelTreeTab),QtGui.QApplication.translate("MainWindow", "Visualize the model as a tree structure", None, QtGui.QApplication.UnicodeUTF8))
         self.resetPushButton.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
         self.runPushButton.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
-        self.stopPushButton.setText(QtGui.QApplication.translate("MainWindow", "Stop", None, QtGui.QApplication.UnicodeUTF8))
         self.runTimeLabel.setText(QtGui.QApplication.translate("MainWindow", "Run for (seconds)", None, QtGui.QApplication.UnicodeUTF8))
         self.plotUpdateIntervalLabel.setText(QtGui.QApplication.translate("MainWindow", "Plot update interval (steps)", None, QtGui.QApplication.UnicodeUTF8))
         self.rescalePlotsPushButton.setText(QtGui.QApplication.translate("MainWindow", "Rescale plots", None, QtGui.QApplication.UnicodeUTF8))
+        self.currentTimeLabel.setText(QtGui.QApplication.translate("MainWindow", "Current simulation time:", None, QtGui.QApplication.UnicodeUTF8))
         self.plotsGroupBox.setTitle(QtGui.QApplication.translate("MainWindow", "Plots", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.runTab), QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.menuMOOSE.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
