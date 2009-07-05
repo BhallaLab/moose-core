@@ -1522,7 +1522,22 @@ const string PyMooseContext::getName(const Id objId) const
     return fieldValue_;
 }
 
-/**
+const string PyMooseContext::description(const string className) const
+{
+    const Cinfo* cinfo = Cinfo::find(className);
+    if (cinfo){
+        return cinfo->description();
+    }
+    else return className + ": No such MOOSE class exists.";
+}
+const string PyMooseContext::author(const string className) const
+{
+    const Cinfo* cinfo = Cinfo::find(className);
+    if (cinfo){
+        return cinfo->author();
+    }
+    else return className + ": No such MOOSE class exists.";
+}/**
    returns help on a specied class or a specific field of a class.
 */
 const string& PyMooseContext::doc(const string& target) const
