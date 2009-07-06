@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 12:25:40 2009 (+0530)
 # Version: 
-# Last-Updated: Sun Jul  5 15:10:21 2009 (+0530)
+# Last-Updated: Mon Jul  6 10:00:07 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 160
+#     Update #: 202
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -68,6 +68,7 @@ class MHandler(QtCore.QThread):
 	self.proto = moose.Neutral('/proto')
         self.runTime = 1e-2 # default value
         self.updateInterval = 100 # stepsdefault value
+        self.moleculeList = []
         self.stop_ = False
 
     def addSimPathList(self, simpathList):
@@ -84,7 +85,17 @@ class MHandler(QtCore.QThread):
             moose.Property.addSimPath(directory)
             self.context.loadG(fileName)
         elif fileType == 'SBML':
+            parent = '/kinetics'
             self.context.runG('readSBML ' + fileName + ' ' + parent)
+            parent = moose.Neutral(parent)
+            for comp_id in parent.children():
+
+                comp = moose.Neutral(comp_id)
+                if comp.className == 'KinCompt':
+                    for mol_id in comp.children():
+                        mol = moose.Molecule(mol_id)
+                        if mol.className == 'Molecule':
+                            self.moleculeList.append(mol)
         elif fileType == 'MOOSE':
             import subprocess
             subprocess.call(['python', fileName])
@@ -136,6 +147,15 @@ class MHandler(QtCore.QThread):
             clock = moose.Tick(clocks[0])
             ret = clock.dt
         return ret
+
+    def createTableForMolecule(self, molecule_name):
+        # Assumes all molecules have unique name - which is not necessarily true
+        for molecule in self.moleculeList:
+            if molecule.name == molecule_name:
+                table = moose.Table('/data/' + molecule_name)
+                table.stepMode = 3
+                table.connect('inputRequest', molecule, 'conc')
+                return table
 
 # 
 # moosehandler.py ends here
