@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul  1 12:58:00 2009 (+0530)
 # Version: 
-# Last-Updated: Sun Jul  5 15:14:57 2009 (+0530)
+# Last-Updated: Mon Jul  6 09:54:56 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 197
+#     Update #: 227
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -90,10 +90,10 @@ class MoosePlots(QtGui.QWidget):
             if filetype == FileTypeChecker.type_kkit:
                 mooseContainers.append(moose.Neutral('/graphs'))
                 mooseContainers.append(moose.Neutral('/moregraphs'))
-            elif filetype == FileTypeChecker.type_genesis:
+            elif (filetype == FileTypeChecker.type_genesis) or (filetype == FileTypeChecker.type_sbml):
                 mooseContainers.append(moose.Neutral('/data'))
             else:
-                print "File Type:", filetype, "Don't know where to look for plot data"
+                print "File Type:", filetype, "- Don't know where to look for plot data"
                 
             
             for container in mooseContainers:
