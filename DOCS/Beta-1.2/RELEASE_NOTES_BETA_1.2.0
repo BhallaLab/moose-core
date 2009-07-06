@@ -205,6 +205,11 @@ If you have installed the version with Python based GUI, then you can
 run: moosegui.py to start it. This will show a window with two tabs:
 one called 'Model Tree' and the other 'Run'. 
 
+One can load an existing model in this gui by selecting File->Load
+(Keyboard shortcut: Ctrl+L) from the menu and navigating to the
+desired file. The directory containing the selected file gets added to
+the SIMPATH, the list of directories to search for scripts.
+
 In the 'Model Tree' tab one can view the hierarchy of moose objects in
 an expandable tree form. This tree is editable. If you select a
 particular node and then double click on a class in the toll box on
@@ -225,10 +230,9 @@ reset and run the simulation for desired time to update the plots. It
 should be noted that longer update interval may result in unresponsive
 gui until the simulation is over.
 
-One can load an existing model in this gui by selecting File->Load
-(Keyboard shortcut: Ctrl+L) from the menu and navigating to the
-desired file. The directory containing the selected file gets added to
-the SIMPATH, the list of directories to search for scripts.
+As SBML files do not contain predefined plots, there will be a list of
+available molecules in the model beside the plots. You can double
+click on a molecule name in order to get it plotted.
 
 You can set the locations to be searched for model scripts by
 selecting File->Settings from the menu and then entering the directory
