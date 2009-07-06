@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  6 09:59:39 2009 (+0530)
+# Last-Updated: Mon Jul  6 18:19:30 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 721
+#     Update #: 788
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -81,12 +81,24 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.modelTreeTab.setLayout(layout)
         layout.addWidget(self.modelTreeContainerWidget)
         self.modelTreeWidget.headerItem().setHidden(True)
-        self.modelTreeWidget.show()
-        self.mooseClassToolBox.show()
+#         self.modelTreeWidget.show()
+#         self.mooseClassToolBox.show()
+###################
+#         self.plotsLayout = QtGui.QHBoxLayout(self.plotsGroupBox)
+#         self.plotsGroupBox.setLayout(self.plotsLayout)
+#         self.plotsScrollArea = QtGui.QScrollArea(self.plotsGroupBox)
+#         self.plotsLayout.addWidget(self.plotsScrollArea)
+#         self.plots = MoosePlots(self.plotsScrollArea)
+#         self.plotsScrollArea.setWidget(self.plots)
+#         self.plots.show()
+##################
         self.plots = MoosePlots(self.plotsGroupBox)
-        self.plotsLayout = QtGui.QHBoxLayout()
+        self.plotsLayout = QtGui.QHBoxLayout(self.plotsGroupBox)
         self.plotsGroupBox.setLayout(self.plotsLayout)
         self.plotsLayout.addWidget(self.plots)
+        
+######################
+        self.plots.show()
         self.isModelLoaded = False
         self.stopFlag = False
 	self.mooseHandler = MHandler()
@@ -277,14 +289,14 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.moleculeListWidget.show()
 
         self.plots.loadPlots(self.mooseHandler, fileType)
-        for table, curve in self.plots.table_curve_map.items():
-            print table, curve
-        self.plots.show()
         self.currentTimeLabel.setText(self.tr('Current time (seonds): %g' % self.mooseHandler.currentTime()))
+#         self.update()
 
     def addMoleculeInPlot(self, item):
         self.mooseHandler.createTableForMolecule(str(item.text()))
         self.plots.loadPlots(self.mooseHandler, FileTypeChecker.type_sbml)
+        self.plots.setVisible(True)
+        self.update()
 
     # Until MOOSE has a way of getting stop command from outside
     def stop(self):
