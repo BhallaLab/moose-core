@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Sun Jul  5 15:12:27 2009 (+0530)
+# Last-Updated: Mon Jul  6 09:59:39 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 692
+#     Update #: 721
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,6 +52,13 @@
 # Code:
 import math
 from collections import defaultdict
+from moosetree import MooseTreeWidget
+from moosepropedit import PropertyModel
+from moosehandler import MHandler
+from filetypeutil import FileTypeChecker
+from mooseplots import MoosePlots
+from settingsdialog import SettingsDialog
+
 from PyQt4.Qt import Qt
 from PyQt4 import QtCore, QtGui
 from PyQt4 import Qwt5 as Qwt
@@ -60,18 +67,13 @@ import PyQt4.Qwt5.anynumpy as numpy
 
 
 from ui_mainwindow import Ui_MainWindow
-from settingsdialog import SettingsDialog
-from moosetree import MooseTreeWidget
-from moosepropedit import PropertyModel
-from moosehandler import MHandler
-from filetypeutil import FileTypeChecker
-from mooseplot import MoosePlots
 
 class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
     """Main Window for MOOSE GUI"""
     def __init__(self, loadFile=None, fileType=None):
 	QtGui.QMainWindow.__init__(self)
 	self.setupUi(self)
+        self.moleCulesWidget = None
         self.setWindowIcon(QtGui.QIcon(':moose_thumbnail.png'))
         self.settingsDialog = SettingsDialog()
         self.settingsDialog.hide()
@@ -259,11 +261,30 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.mooseHandler.load(fileName, fileType)
         self.isModelLoaded = True
         self.modelTreeWidget.recreateTree()
+        if fileType is FileTypeChecker.type_sbml:
+            self.moleculeListWidget = QtGui.QListWidget(self)
+            self.moleculeItems = []
+            for molecule in self.mooseHandler.moleculeList:
+                item = QtGui.QListWidgetItem(self.moleculeListWidget)
+                item.setText(molecule.name)
+                item.setData(QtCore.Qt.UserRole, QtCore.QVariant(self.tr(molecule.path)))
+                self.moleculeItems.append(item)
+            self.simulationWidget.layout().addWidget(self.moleculeListWidget)
+            self.connect(self.moleculeListWidget, 
+                         QtCore.SIGNAL('itemDoubleClicked(QListWidgetItem*)'),
+                         self.addMoleculeInPlot)
+            
+            self.moleculeListWidget.show()
+
         self.plots.loadPlots(self.mooseHandler, fileType)
         for table, curve in self.plots.table_curve_map.items():
             print table, curve
         self.plots.show()
         self.currentTimeLabel.setText(self.tr('Current time (seonds): %g' % self.mooseHandler.currentTime()))
+
+    def addMoleculeInPlot(self, item):
+        self.mooseHandler.createTableForMolecule(str(item.text()))
+        self.plots.loadPlots(self.mooseHandler, FileTypeChecker.type_sbml)
 
     # Until MOOSE has a way of getting stop command from outside
     def stop(self):
