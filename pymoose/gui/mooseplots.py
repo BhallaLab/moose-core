@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul  1 12:58:00 2009 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  6 09:54:56 2009 (+0530)
+# Last-Updated: Mon Jul  6 18:56:07 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 227
+#     Update #: 316
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -56,7 +56,7 @@ import numpy
 from filetypeutil import FileTypeChecker
 import moose
 
-class MoosePlots(QtGui.QWidget):
+class MoosePlots(QtGui.QTableWidget):
     colors = [ QtCore.Qt.red, 
                QtCore.Qt.blue, 
                QtCore.Qt.darkYellow, 
@@ -75,9 +75,9 @@ class MoosePlots(QtGui.QWidget):
 
     """Container for plots in MOOSE."""
     def __init__(self, *args):
-	QtGui.QWidget.__init__(self, *args)
-	layout = QtGui.QGridLayout(self)
-	self.setLayout(layout)
+	QtGui.QTableWidget.__init__(self, *args)
+        self.horizontalHeader().hide()
+        self.verticalHeader().hide()
         self.plots = []
 	self.plot_data_map = defaultdict(set)
         self.data_plot_map = {}        
@@ -85,6 +85,11 @@ class MoosePlots(QtGui.QWidget):
         self.table_curve_map = {} # This is just for holding the reference of the curve
 
     def loadPlots(self, mooseHandler, filetype, mooseContainers=None):
+        self.plots = []
+        self.plot_data_map.clear()
+        self.container_table_map.clear()
+        self.table_curve_map.clear() # is just for holding the reference of the curve
+        self.clear()
         if mooseContainers is None:
             mooseContainers = []
             if filetype == FileTypeChecker.type_kkit:
@@ -117,18 +122,24 @@ class MoosePlots(QtGui.QWidget):
                 print 'Nothing to plot'
                 return
 
-            rows = math.ceil(math.sqrt(plot_count))
-            cols = math.ceil(float(plot_count) / rows)
+            rows = int(round(math.sqrt(plot_count)))
+            if rows is 0:
+                rows = 1
+            cols = int(math.ceil(float(plot_count) / rows))
             row = 0
             col = 0
-
+            print '#########: plots:', plot_count, ' rows:', rows, ' cols:', cols
+            self.setRowCount(rows)
+            self.setColumnCount(cols)
+            plot = None
             for name, dataset in self.container_table_map.items():
                 if len(dataset) is 0:
                     self.container_table_map.pop(name)
                     continue
                 plot = Qwt.QwtPlot(self)
-                plot.insertLegend(Qwt.QwtLegend(), Qwt.QwtPlot.RightLegend)
-                self.layout().addWidget(plot, row, col)
+                sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+                plot.setSizePolicy(sizePolicy)
+                plot.insertLegend(Qwt.QwtLegend(), Qwt.QwtPlot.BottomLegend)
                 color_no = 0
                 for table in dataset:
                     if len(table) == 0:
@@ -144,12 +155,28 @@ class MoosePlots(QtGui.QWidget):
                     color_no += 1
                     curve.attach(plot)
                     plot.replot()
+                self.setCellWidget(row, col, plot)
+                col += 1
                 if col >= cols:
                     row += 1
                     col = 0
-                else:
-                    col += 1
+            if plot is not None:
+                width = plot.sizeHint().width()
+                height = plot.sizeHint().height()
+                for col in range(self.verticalHeader().count()):
+                    self.verticalHeader().resizeSection(col, width)
+                    print 'resized col:', col
+                for row in range(self.horizontalHeader().count()):
+                    self.horizontalHeader().resizeSection(row, height)
+                    print 'resized row:', row
+#                 self.verticalHeader().setDefaultSectionSize(width)
+#                 self.horizontalHeader().setDefaultSectionSize(height)
+#                 self.horizontalHeader().resizeSections()
+#                 self.verticalHeader().resizeSections()
+                print height, width
                 
+        self.update()
+
     def updatePlots(self, mooseHandler):        
         """Update the plots"""
         runtime = mooseHandler.runTime
@@ -167,6 +194,7 @@ class MoosePlots(QtGui.QWidget):
                     curve = self.table_curve_map[table.path]
                     curve.setData(xdata, ydata)
             plot.replot()
+            plot.show()
         self.update()
 
     def rescalePlots(self):
