@@ -19,6 +19,7 @@ The entire simulation is run in parallel (needs MPI and MUSIC installed), and
 each MOOSE instance can itself be running in parallel.
 
 For more information on MUSIC, visit:
+	http://software.incf.org/software/music/home
 	http://www.incf.org/programs/modeling/music-multi-simulation-coordinator
 
 ----------------------
