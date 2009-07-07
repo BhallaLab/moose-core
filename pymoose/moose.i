@@ -132,6 +132,8 @@
 %attribute(pymoose::PyMooseBase, Id*, id, __get_id)
 %attribute(pymoose::PyMooseBase, Id*, parent, __get_parent)
 %attribute(pymoose::PyMooseBase, const std::string, className, __get_className)
+%attribute(pymoose::PyMooseBase, const std::string, author, __get_author)
+%attribute(pymoose::PyMooseBase, const std::string, description, __get_description)
 
 %pythoncode %{
 from inspect import isclass
