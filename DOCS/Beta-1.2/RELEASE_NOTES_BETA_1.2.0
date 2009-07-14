@@ -238,30 +238,52 @@ You can set the locations to be searched for model scripts by
 selecting File->Settings from the menu and then entering the directory
 paths in the dialog box and clicking OK.
 
+=============================================
+Release notes for SBML compatibility (Siji George)
+=============================================
+
+MOOSE now understands SBML (Systems Biology Markup Language) and can read and
+write models in this format. The following demos demonstrate SBML capability:
+
+	- sbml_Reader
+	- sbml_Writer
+	- sbml_roundtrip
 
 =============================================
-Release notes for the single-neuron modeling engine: Hsolve (Niraj Dudani)
+Release notes for MPI-based parallel simulations (Niraj Dudani)
 =============================================
 
-- The HSolver can now handle cell models with intracellular calcium pools and
-calcium-dependent channels. It uses a simple single-exponential description for
-the calcium dynamics. Calcium diffusion, and updates to Nernst potential are not
-dealt with yet.
+MPI-based simulations are now somewhat more robust. Many of your simple serial
+simulations should run in parallel as well, since MOOSE offers automatic
+parallelization of models. Avoid scripts in the GENESIS sli language which
+contain neuronal models with calcium--since this is currently not stable.
 
-- A major shortcoming was found in the solution for branching compartmental
-models. Due to this, the solution was incorrect for most branching cell models.
-Much of the code for passive models has been completely reworked, and tested
-extensively using low-level unit tests and full-fledged models. Only models
-with symmetric compartments are presently supported.
+There are no binaries offered with MPI support. You will need to obtain the
+source code for MOOSE and compile it yourself after installing the development
+libraries for your favourite MPI implementation. Use the following command to
+compile with MPI support:
 
-- HSolve is not compatible with arrays of elements (created using createmap).
+	make moose USE_MPI=1
 
-- The entire solver has been revamped. It is now cleaner, more stable, and
-faster. Early benchmarks show its speed to be very close to that of hsolve in
-GENESIS.
+Some other dependencies (SBML, GSL, etc.) are included by default, but you can
+switch those off by using similar flags. Refer to the Makefile for further help.
 
-- Fields and messages belonging to a cell model are now completely served for
-by its solver. This management was incomplete earlier.
+=============================================
+Release notes for MUSIC compatibility (Niraj Dudani)
+=============================================
 
+The MUSIC (MUlti-SImulation Coordinator) project aims to develop a standard to
+allow multiple simulators to exchange simulation information at runtime. It
+allows exchange spike-time-like event information, which makes it well suited
+for neuronal simulators. MOOSE now has the ability to communicate with another
+MUSIC-compatible simulator via the MUSIC library. Refer to the 'music-network'
+directory (in the DEMOS directory) for demonstration. In this demo, 2 instances
+of MOOSE talk to each other via MUSIC.
 
+To try out this DEMO, you will have to install MPI and MUSIC development
+libraries. For MUSIC downloads and information, visit:
 
+	http://software.incf.org/software/music/home
+
+Finally, compile moose using the following command:
+	make moose USE_MPI=1 USE_MUSIC=1
