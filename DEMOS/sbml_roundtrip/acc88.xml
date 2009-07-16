@@ -1,0 +1,804 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
+  <model metaid="acc88" id="acc88" name="acc88">
+    <listOfUnitDefinitions>
+      <unitDefinition id="substance">
+        <listOfUnits>
+          <unit kind="mole" scale="-6"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_uMole_per_second">
+        <listOfUnits>
+          <unit kind="mole" exponent="-1" scale="-6"/>
+          <unit kind="second" exponent="-1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_second">
+        <listOfUnits>
+          <unit kind="mole" exponent="0" scale="-6"/>
+          <unit kind="second" exponent="-1"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="mTOR_model_624_0_" size="9.96323269897635e-13"/>
+      <compartment id="S6Kinase_630_0_" size="9.96290059121972e-13"/>
+      <compartment id="kinetics_602_0_" size="9.96323269897635e-13"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="TOR_minus_clx_626_0_" compartment="mTOR_model_624_0_" initialAmount="5.97793961938581e-13" hasOnlySubstanceUnits="true"/>
+      <species id="S6K_star__631_0_" compartment="S6Kinase_630_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="S6K_632_0_" compartment="S6Kinase_630_0_" initialAmount="1.24540408737204e-12" hasOnlySubstanceUnits="true"/>
+      <species id="S6K_thr_minus_412_633_0_" compartment="S6Kinase_630_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="S6_phos_cplx_635_0_" compartment="S6Kinase_630_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="_40S_inact_637_0_" compartment="S6Kinase_630_0_" initialAmount="1.99264653979527e-14" hasOnlySubstanceUnits="true" boundaryCondition="true" constant="true"/>
+      <species id="PDK1_613_0_" compartment="kinetics_602_0_" initialAmount="9.96323269897636e-13" hasOnlySubstanceUnits="true"/>
+      <species id="S6K_phospho_cplx_615_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="PP2A_616_0_" compartment="kinetics_602_0_" initialAmount="1.49448490484645e-13" hasOnlySubstanceUnits="true"/>
+      <species id="dephos_clus_S6K_cplx_618_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="dephos_S6K_cplx_620_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="dephosp_S6K_cplx_622_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="Rheb_minus_GTP_623_0_" compartment="kinetics_602_0_" initialAmount="9.96323269897636e-13" hasOnlySubstanceUnits="true"/>
+      <species id="TOR_Rheb_minus_GTP_clx_627_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="S6K_phospho_cplx_629_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="S6K_tot_638_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true" boundaryCondition="true"/>
+      <species id="_40S_639_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="S6K_thr_minus_252_640_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="S6_phospho_cplx_642_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="MAPK_star__643_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="cluster_phospho_S6K_cplx_645_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+      <species id="_40S_basal_647_0_" compartment="kinetics_602_0_" initialAmount="9.96323269897636e-17" hasOnlySubstanceUnits="true"/>
+      <species id="basal_cplx_649_0_" compartment="kinetics_602_0_" initialAmount="0" hasOnlySubstanceUnits="true"/>
+    </listOfSpecies>
+    <listOfRules>
+      <assignmentRule variable="S6K_tot_638_0_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <ci> S6K_thr_minus_412_633_0_ </ci>
+            <ci> S6K_thr_minus_252_640_0_ </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="Rheb_minus_GTP_bind_TORclx_625_0_">
+        <listOfReactants>
+          <speciesReference species="Rheb_minus_GTP_623_0_"/>
+          <speciesReference species="TOR_minus_clx_626_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TOR_Rheb_minus_GTP_clx_627_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> Rheb_minus_GTP_bind_TORclx_kf </ci>
+                <ci> Rheb_minus_GTP_623_0_ </ci>
+                <ci> TOR_minus_clx_626_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> Rheb_minus_GTP_bind_TORclx_kb </ci>
+                <ci> TOR_Rheb_minus_GTP_clx_627_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="Rheb_minus_GTP_bind_TORclx_kf" value="6022141790000" units="per_uMole_per_second"/>
+            <parameter id="Rheb_minus_GTP_bind_TORclx_kb" value="3" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="S6_phos_634_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>S6K_thr_minus_412_633_0_</moose:enzyme>
+              <moose:substrates>_40S_inact_637_0_</moose:substrates>
+              <moose:complex>S6_phos_cplx_635_0_</moose:complex>
+              <moose:groupName>S6_phos_634_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="S6K_thr_minus_412_633_0_"/>
+          <speciesReference species="_40S_inact_637_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S6_phos_cplx_635_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> S6K_thr_minus_412_633_0_ </ci>
+                <ci> _40S_inact_637_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> S6_phos_cplx_635_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="200742074427.86" units="per_uMole_per_second"/>
+            <parameter id="k2" value="0.04" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="S6_phos_634_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>S6K_thr_minus_412_633_0_</moose:enzyme>
+              <moose:complex>S6_phos_cplx_635_0_</moose:complex>
+              <moose:products>_40S_639_0_</moose:products>
+              <moose:groupName>S6_phos_634_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="S6_phos_cplx_635_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S6K_thr_minus_412_633_0_"/>
+          <speciesReference species="_40S_639_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> S6_phos_cplx_635_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="0.01" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="S6_dephosph_636_0_" reversible="false">
+        <listOfReactants>
+          <speciesReference species="_40S_639_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_40S_inact_637_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> S6_dephosph_kf </ci>
+              <ci> _40S_639_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="S6_dephosph_kf" value="0.01" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="S6K_phospho_614_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PDK1_613_0_</moose:enzyme>
+              <moose:substrates>S6K_thr_minus_412_633_0_</moose:substrates>
+              <moose:complex>S6K_phospho_cplx_615_0_</moose:complex>
+              <moose:groupName>S6K_phospho_614_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PDK1_613_0_"/>
+          <speciesReference species="S6K_thr_minus_412_633_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S6K_phospho_cplx_615_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PDK1_613_0_ </ci>
+                <ci> S6K_thr_minus_412_633_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> S6K_phospho_cplx_615_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="501843141786.07" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="S6K_phospho_614_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PDK1_613_0_</moose:enzyme>
+              <moose:complex>S6K_phospho_cplx_615_0_</moose:complex>
+              <moose:products>S6K_thr_minus_252_640_0_</moose:products>
+              <moose:groupName>S6K_phospho_614_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="S6K_phospho_cplx_615_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PDK1_613_0_"/>
+          <speciesReference species="S6K_thr_minus_252_640_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> S6K_phospho_cplx_615_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="dephos_clus_S6K_617_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP2A_616_0_</moose:enzyme>
+              <moose:substrates>S6K_star__631_0_</moose:substrates>
+              <moose:complex>dephos_clus_S6K_cplx_618_0_</moose:complex>
+              <moose:groupName>dephos_clus_S6K_617_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP2A_616_0_"/>
+          <speciesReference species="S6K_star__631_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dephos_clus_S6K_cplx_618_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP2A_616_0_ </ci>
+                <ci> S6K_star__631_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> dephos_clus_S6K_cplx_618_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="570272738945.84" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="dephos_clus_S6K_617_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP2A_616_0_</moose:enzyme>
+              <moose:complex>dephos_clus_S6K_cplx_618_0_</moose:complex>
+              <moose:products>S6K_632_0_</moose:products>
+              <moose:groupName>dephos_clus_S6K_617_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="dephos_clus_S6K_cplx_618_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP2A_616_0_"/>
+          <speciesReference species="S6K_632_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> dephos_clus_S6K_cplx_618_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="dephos_S6K_619_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP2A_616_0_</moose:enzyme>
+              <moose:substrates>S6K_thr_minus_412_633_0_</moose:substrates>
+              <moose:complex>dephos_S6K_cplx_620_0_</moose:complex>
+              <moose:groupName>dephos_S6K_619_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP2A_616_0_"/>
+          <speciesReference species="S6K_thr_minus_412_633_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dephos_S6K_cplx_620_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP2A_616_0_ </ci>
+                <ci> S6K_thr_minus_412_633_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> dephos_S6K_cplx_620_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="570272738945.84" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="dephos_S6K_619_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP2A_616_0_</moose:enzyme>
+              <moose:complex>dephos_S6K_cplx_620_0_</moose:complex>
+              <moose:products>S6K_star__631_0_</moose:products>
+              <moose:groupName>dephos_S6K_619_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="dephos_S6K_cplx_620_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP2A_616_0_"/>
+          <speciesReference species="S6K_star__631_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> dephos_S6K_cplx_620_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="dephosp_S6K_621_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP2A_616_0_</moose:enzyme>
+              <moose:substrates>S6K_thr_minus_252_640_0_</moose:substrates>
+              <moose:complex>dephosp_S6K_cplx_622_0_</moose:complex>
+              <moose:groupName>dephosp_S6K_621_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="PP2A_616_0_"/>
+          <speciesReference species="S6K_thr_minus_252_640_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dephosp_S6K_cplx_622_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> PP2A_616_0_ </ci>
+                <ci> S6K_thr_minus_252_640_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> dephosp_S6K_cplx_622_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="570272738945.84" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="dephosp_S6K_621_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>PP2A_616_0_</moose:enzyme>
+              <moose:complex>dephosp_S6K_cplx_622_0_</moose:complex>
+              <moose:products>S6K_thr_minus_412_633_0_</moose:products>
+              <moose:groupName>dephosp_S6K_621_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="dephosp_S6K_cplx_622_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP2A_616_0_"/>
+          <speciesReference species="S6K_thr_minus_412_633_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> dephosp_S6K_cplx_622_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="S6K_phospho_628_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>TOR_Rheb_minus_GTP_clx_627_0_</moose:enzyme>
+              <moose:substrates>S6K_star__631_0_</moose:substrates>
+              <moose:complex>S6K_phospho_cplx_629_0_</moose:complex>
+              <moose:groupName>S6K_phospho_628_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="TOR_Rheb_minus_GTP_clx_627_0_"/>
+          <speciesReference species="S6K_star__631_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S6K_phospho_cplx_629_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> TOR_Rheb_minus_GTP_clx_627_0_ </ci>
+                <ci> S6K_star__631_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> S6K_phospho_cplx_629_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="376395906158.58" units="per_uMole_per_second"/>
+            <parameter id="k2" value="0.24" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="S6K_phospho_628_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>TOR_Rheb_minus_GTP_clx_627_0_</moose:enzyme>
+              <moose:complex>S6K_phospho_cplx_629_0_</moose:complex>
+              <moose:products>S6K_thr_minus_412_633_0_</moose:products>
+              <moose:groupName>S6K_phospho_628_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="S6K_phospho_cplx_629_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TOR_Rheb_minus_GTP_clx_627_0_"/>
+          <speciesReference species="S6K_thr_minus_412_633_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> S6K_phospho_cplx_629_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="0.06" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="S6_phospho_641_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>S6K_thr_minus_252_640_0_</moose:enzyme>
+              <moose:substrates>_40S_inact_637_0_</moose:substrates>
+              <moose:complex>S6_phospho_cplx_642_0_</moose:complex>
+              <moose:groupName>S6_phospho_641_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="S6K_thr_minus_252_640_0_"/>
+          <speciesReference species="_40S_inact_637_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S6_phospho_cplx_642_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> S6K_thr_minus_252_640_0_ </ci>
+                <ci> _40S_inact_637_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> S6_phospho_cplx_642_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="2007360522860.7" units="per_uMole_per_second"/>
+            <parameter id="k2" value="0.4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="S6_phospho_641_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>S6K_thr_minus_252_640_0_</moose:enzyme>
+              <moose:complex>S6_phospho_cplx_642_0_</moose:complex>
+              <moose:products>_40S_639_0_</moose:products>
+              <moose:groupName>S6_phospho_641_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="S6_phospho_cplx_642_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S6K_thr_minus_252_640_0_"/>
+          <speciesReference species="_40S_639_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> S6_phospho_cplx_642_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="0.1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="cluster_phospho_S6K_644_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>MAPK_star__643_0_</moose:enzyme>
+              <moose:substrates>S6K_632_0_</moose:substrates>
+              <moose:complex>cluster_phospho_S6K_cplx_645_0_</moose:complex>
+              <moose:groupName>cluster_phospho_S6K_644_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="MAPK_star__643_0_"/>
+          <speciesReference species="S6K_632_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="cluster_phospho_S6K_cplx_645_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> MAPK_star__643_0_ </ci>
+                <ci> S6K_632_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> cluster_phospho_S6K_cplx_645_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="290086570024.3" units="per_uMole_per_second"/>
+            <parameter id="k2" value="4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="cluster_phospho_S6K_644_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>MAPK_star__643_0_</moose:enzyme>
+              <moose:complex>cluster_phospho_S6K_cplx_645_0_</moose:complex>
+              <moose:products>S6K_star__631_0_</moose:products>
+              <moose:groupName>cluster_phospho_S6K_644_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="cluster_phospho_S6K_cplx_645_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAPK_star__643_0_"/>
+          <speciesReference species="S6K_star__631_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> cluster_phospho_S6K_cplx_645_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="basal_648_0__Complex_formation_">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>_40S_basal_647_0_</moose:enzyme>
+              <moose:substrates>_40S_inact_637_0_</moose:substrates>
+              <moose:complex>basal_cplx_649_0_</moose:complex>
+              <moose:groupName>basal_648_0_</moose:groupName>
+              <moose:stage>1</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="_40S_basal_647_0_"/>
+          <speciesReference species="_40S_inact_637_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="basal_cplx_649_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> _40S_basal_647_0_ </ci>
+                <ci> _40S_inact_637_0_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> basal_cplx_649_0_ </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" value="2007360522860.7" units="per_uMole_per_second"/>
+            <parameter id="k2" value="0.4" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="basal_648_0__Product_formation_" reversible="false">
+        <annotation>
+          <body xmlns:moose="http://www.moose.ncbs.res.in">
+            <moose:EnzymaticReaction>
+              <moose:enzyme>_40S_basal_647_0_</moose:enzyme>
+              <moose:complex>basal_cplx_649_0_</moose:complex>
+              <moose:products>_40S_639_0_</moose:products>
+              <moose:groupName>basal_648_0_</moose:groupName>
+              <moose:stage>2</moose:stage>
+            </moose:EnzymaticReaction>
+          </body>
+        </annotation>
+        <listOfReactants>
+          <speciesReference species="basal_cplx_649_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_40S_basal_647_0_"/>
+          <speciesReference species="_40S_639_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> basal_cplx_649_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" value="0.1" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="basal_S6K_646_0_" reversible="false">
+        <listOfReactants>
+          <speciesReference species="S6K_632_0_"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S6K_star__631_0_"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> basal_S6K_kf </ci>
+              <ci> S6K_632_0_ </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="basal_S6K_kf" value="0.01" units="per_second"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

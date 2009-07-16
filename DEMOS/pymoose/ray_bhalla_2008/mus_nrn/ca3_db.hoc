@@ -1,0 +1,213 @@
+/******************************************************************************
+ * Derived from Hippocampal CA3 pyramidal neuron model from the paper 
+ * M. Migliore, E. Cook, D.B. Jaffe, D.A. Turner and D. Johnston, Computer
+ * simulations of morphologically reconstructed CA3 hippocampal neurons, J.
+ * Neurophysiol. 73, 1157-1168 (1995). 
+ * The original model is available in modeldb: accession no: 3263
+ * http://senselab.med.yale.edu/ModelDb/ShowModel.asp?model=3263
+ *
+ * Modified by: Subhasis Ray , 2008 / subhasis at ncbs dot res dot in
+ ******************************************************************************/
+objref cvode, vecCai, vecT, vecV, outFile, stim1, stim2, stim3, fih
+
+vecV = new Vector()
+vecCai = new Vector()
+vecT = new Vector()
+outFile = new File()
+cvode = new CVode(0)
+cvode.active(1)
+cvode.atol(1e-3)
+START = 2
+AMP = 1.0
+// ************* NEURON A **********
+
+FARADAY=96520
+PI=3.14159
+secondorder=2
+dt=0.025
+celsius=30
+flagl=0
+
+xopen("ca3a.geo")
+
+proc conductances() {
+    forall {
+        insert pas e_pas=-65 g_pas=1/60000 Ra=200
+        insert cadifus
+        insert cal  gcalbar_cal=0.0025
+        insert can  gcanbar_can=0.0025
+        insert cat  gcatbar_cat=0.00025
+        insert kahp gkahpbar_kahp=0.0004
+        insert cagk gkbar_cagk=0.00055
+    }
+    
+    soma {
+        insert nahh    gnabar_nahh=gna
+        insert borgkdr gkdrbar_borgkdr=gkdr
+        insert borgka  gkabar_borgka=gka
+        insert borgkm  gkmbar_borgkm=gkm
+    }
+    
+    for i=0,1 dend2[i] {
+        insert nahh    gnabar_nahh=gna
+        insert borgkdr gkdrbar_borgkdr=gkdr
+        insert borgka  gkabar_borgka=gka
+        insert borgkm  gkmbar_borgkm=gkm
+    }
+    
+    for i=0,2 dend3[i] {
+        insert nahh    gnabar_nahh=gna   
+        insert borgkdr gkdrbar_borgkdr=gkdr
+        insert borgka  gkabar_borgka=gka
+        insert borgkm  gkmbar_borgkm=gkm
+    }
+    
+    for i=37,38 dend3[i] {
+        insert nahh    gnabar_nahh=gna   
+        insert borgkdr gkdrbar_borgkdr=gkdr
+        insert borgka  gkabar_borgka=gka
+        insert borgkm  gkmbar_borgkm=gkm
+    }
+    
+}
+
+proc init() {
+    t=0
+    coord_cadifus()
+    forall {
+        cao=2
+        cai=50.e-6
+        ek=-91
+        v=-65
+        if (ismembrane("nahh")) {ena=50}
+    }
+    vecV.record(&soma.v(0.5))
+    vecCai.record(&soma.cai(0.5))
+    vecT.record(&t)
+    
+    finitialize(v)
+    fcurrent()
+    
+    forall {
+	if (ismembrane("nahh")) {e_pas=v+(ina+ik+ica)/g_pas} else {e_pas=v+(ik+ica)/g_pas}
+    }
+    cvode.re_init()
+}
+
+proc setup(){
+    strength = 1.0	/*namps*/
+    tstim = 50
+    tstop=192.55e3
+    gna=0.015
+    gkdr=0.03
+    gka=0.001
+    gkm=0.0001
+    conductances()
+    /* The schedule of experiment is as follows:
+                         ________________                    
+                0.50nA  |                | 
+             __         |                |                         __
+     0.15nA |  |        |                |                 0.15nA |  |
+    ________|  |________|                |________________________|  |_   
+    
+     1s      0.25s  1s          7s                180s            0.25s
+     
+     The 1800 s runs with 1 s intervals interspersed with 1 s of
+     kinetic simulation and update of gkbar for all ca dependent k
+     channels.
+     The genesis model needs over 1 uM [Ca2+] for 10 s.
+    */
+    
+    soma {
+	// first test pulse
+	stim1 = new IClamp(0.5)
+	stim1.amp = 0.15
+	stim1.del = 1.0e3
+	stim1.dur = 0.25e3
+	// tetanus pulse
+	stim2 = new IClamp(0.5)
+	stim2.amp = 1.0
+	stim2.del = 2.25e3
+	stim2.dur = 10e3
+	// final test pulse
+	stim3 = new IClamp(0.5)
+	stim3.amp = 0.15
+	stim3.del = 192.25e3
+	stim3.dur = 0.25e3
+    }
+    init()
+}
+
+proc update_gkbar(){/* multiply all Ca2+ dependent K+ conductance by $1 */
+  forall {
+       gkahpbar_kahp = gkahpbar_kahp * $1
+   }
+   
+   soma {
+       print "soma gkdrbar before:", gkdrbar_borgkdr
+       
+       gkdrbar_borgkdr = gkdrbar_borgkdr * $1
+       gkmbar_borgkm = gkmbar_borgkm * $1
+       print "soma gkdrbar after", gkdrbar_borgkdr   
+   }
+   for i=0,1 dend2[i] {
+       gkdrbar_borgkdr = gkdrbar_borgkdr * $1
+       gkmbar_borgkm = gkmbar_borgkm * $1
+   }
+   for i=0,2 dend3[i] {
+       gkdrbar_borgkdr = gkdrbar_borgkdr * $1
+       gkmbar_borgkm = gkmbar_borgkm * $1
+   }
+   
+   for i=37,38 dend3[i] {
+       gkdrbar_borgkdr = gkdrbar_borgkdr * $1
+       gkmbar_borgkm = gkmbar_borgkm * $1
+   }
+   fcurrent()
+}
+
+access soma
+distance()
+/* run for interval specified as argument# 1 */
+proc run(){ 
+    t_start = t
+    while (t < (t_start + $1)){ 
+// 	print "run() - @t=", t
+	fadvance() 
+    }
+//     print "run(): t_start =", t_start, " current time =", t, "run interval =", $1
+
+}
+
+proc do_run(){
+    setup()
+    print "setup done. running 7.25s"
+    run(12250)
+    print "t = ", t, "ms. done running. dumping data in test_neuron1.dat"
+    outFile.wopen("test_neuron1.dat")
+    for ii = 0, vecT.size() - 1 {
+	outFile.printf("%g %g %g\n", vecT.x(ii), (vecCai.x(ii) - 50e-6)*2e6, vecV.x(ii)) // the original GUI plots this function of cai instead of absolute value - unit is nM*2
+    }
+    outFile.close()
+    print "done dumping. running for 5s with 0.5nA"
+    run(5000)
+    print "t =", t, "ms. soma.Cai = ", soma.cai(0.5), ". now updating gkbar"
+    update_gkbar(10.0)
+    print "done updating. writing to file"
+    outFile.wopen("test_neuron2.dat")
+    for ii = 0, vecT.size() - 1 {
+	outFile.printf("%g %g %g\n", vecT.x(ii), (vecCai.x(ii) - 50e-6)*2e6, vecV.x(ii)) // the original GUI plots this function of cai instead of absolute value - unit is nM*2
+    }
+    outFile.close()
+    print "done dumping. now running the rest"
+    run(1800300)
+    print "t = ", t, "ms. done running. writing to file"
+    outFile.wopen("test_neuron3.dat")
+    for ii = 0, vecT.size() - 1 {
+	outFile.printf("%g %g %\n", vecT.x(ii), (vecCai.x(ii) - 50e-6)*2e6, vecV.x(ii)) // the original GUI plots this function of cai instead of absolute value - unit is nM*2
+    }
+    outFile.close()
+}
+    
+    
+
