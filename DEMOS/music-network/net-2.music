@@ -1,0 +1,9 @@
+np=2
+stoptime=0.4
+[source]
+  binary=moose
+  args=MusicNetwork src
+[dest]
+  binary=moose
+  args=MusicNetwork dest
+  source.output -> dest.input [60]
