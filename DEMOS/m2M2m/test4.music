@@ -1,0 +1,9 @@
+np=2
+stoptime=1.0
+[source]
+  binary=../../moose
+  args=testMusicSource.g
+[dest]
+  binary=../../moose
+  args=testMusicDest.g
+  source.UTDATA -> dest.INDATA
