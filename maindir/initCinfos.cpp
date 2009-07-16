@@ -1,7 +1,7 @@
 #include "header.h"
 #include "moose.h"
 
-// extern const Cinfo* initAdaptorCinfo();
+extern const Cinfo* initAdaptorCinfo();
 extern const Cinfo* initAscFileCinfo();
 //extern const Cinfo* initAtestCinfo();
 //extern const Cinfo* initAverageCinfo();
@@ -29,6 +29,9 @@ extern const Cinfo* initHHGate2DCinfo();
 extern const Cinfo* initHSolveCinfo();
 extern const Cinfo* initHSolveHubCinfo();
 extern const Cinfo* initHemispherePanelCinfo();
+extern const Cinfo* initGHKCinfo();
+extern const Cinfo* initIntFireCinfo();
+//extern const Cinfo* initCalculatorCinfo();
 #ifdef USE_MUSIC
 extern const Cinfo* initMusicCinfo();
 extern const Cinfo* initInputEventChannelCinfo();
@@ -52,6 +55,7 @@ extern const Cinfo* initNeutralCinfo();
 extern const Cinfo* initNormalRngCinfo();
 extern const Cinfo* initPIDControllerCinfo();
 extern const Cinfo* initPanelCinfo();
+extern const Cinfo* initIzhikevichNrnCinfo();
 #ifdef USE_MPI
 //extern const Cinfo* initParGenesisParserCinfo();
 extern const Cinfo* initParTickCinfo();
@@ -75,7 +79,7 @@ extern const Cinfo* initRandomSpikeCinfo();
 extern const Cinfo* initReactionCinfo();
 extern const Cinfo* initRectPanelCinfo();
 extern const Cinfo* initShellCinfo();
-//extern const Cinfo* initSigNeurCinfo();
+extern const Cinfo* initSigNeurCinfo();
 extern const Cinfo* initSpherePanelCinfo();
 extern const Cinfo* initSpikeGenCinfo();
 extern const Cinfo* initStochSynchanCinfo();
@@ -92,10 +96,10 @@ extern const Cinfo* initSteadyStateCinfo();
 extern const Cinfo* initscript_outCinfo();
 
 void initCinfos(){
-    //    static const Cinfo* AdaptorCinfo = initAdaptorCinfo();
+    static const Cinfo* AdaptorCinfo = initAdaptorCinfo();
     static const Cinfo* AscFileCinfo = initAscFileCinfo();
 //    static const Cinfo* AtestCinfo = initAtestCinfo();
-    //    static const Cinfo* AverageCinfo = initAverageCinfo();
+//    static const Cinfo* AverageCinfo = initAverageCinfo();
     static const Cinfo* BinSynchanCinfo = initBinSynchanCinfo();
     static const Cinfo* BinomialRngCinfo = initBinomialRngCinfo();
     static const Cinfo* CaConcCinfo = initCaConcCinfo();
@@ -111,6 +115,10 @@ void initCinfos(){
     static const Cinfo* ExponentialRngCinfo = initExponentialRngCinfo();
     static const Cinfo* GammaRngCinfo = initGammaRngCinfo();
     static const Cinfo* GeometryCinfo = initGeometryCinfo();
+	static const Cinfo* GHKCinfo = initGHKCinfo();
+	static const Cinfo* IntFireCinfo = initIntFireCinfo();
+// static const Cinfo* CalculatorCinfo = initCalculatorCinfo();
+
 #ifdef USE_GSL
     static const Cinfo* GslIntegratorCinfo = initGslIntegratorCinfo();
 #endif
@@ -142,9 +150,10 @@ void initCinfos(){
     static const Cinfo* MoleculeCinfo = initMoleculeCinfo();
     static const Cinfo* NernstCinfo = initNernstCinfo();
     static const Cinfo* NeutralCinfo = initNeutralCinfo();
-    static const Cinfo* NormalRngCinfo = initNormalRngCinfo();
+	static const Cinfo* NormalRngCinfo = initNormalRngCinfo();
     static const Cinfo* PIDControllerCinfo = initPIDControllerCinfo();
     static const Cinfo* PanelCinfo = initPanelCinfo();
+	static const Cinfo* IzhikevichNrn = initIzhikevichNrnCinfo();
 #ifdef USE_MPI
 //    static const Cinfo* ParGenesisParserCinfo = initParGenesisParserCinfo();
     static const Cinfo* ParTickCinfo = initParTickCinfo();
@@ -168,7 +177,7 @@ void initCinfos(){
     static const Cinfo* ReactionCinfo = initReactionCinfo();
     static const Cinfo* RectPanelCinfo = initRectPanelCinfo();
     static const Cinfo* ShellCinfo = initShellCinfo();
-    //    static const Cinfo* SigNeurCinfo = initSigNeurCinfo();
+    static const Cinfo* SigNeurCinfo = initSigNeurCinfo();
     static const Cinfo* SpherePanelCinfo = initSpherePanelCinfo();
     static const Cinfo* SpikeGenCinfo = initSpikeGenCinfo();
     static const Cinfo* StochSynchanCinfo = initStochSynchanCinfo();

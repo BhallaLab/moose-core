@@ -21,7 +21,7 @@
 #include "../shell/Shell.h"
 #include "init.h"
 
-#ifdef _MSC_VER	      // True for Visual C++ compilers
+#ifdef WIN32	      // True for Visual C++ compilers
 #include <Windows.h>  // for Win32 Sleep function
 #include <process.h>  // for getpid
 #else                 // Else assume POSIX
@@ -34,7 +34,7 @@
 #include <mpi.h>
 #include "MuMPI.h"	// Provides MUSIC-compatible MPI calls
 #endif // USE_MPI
-
+extern void initCinfos();
 extern bool setupProxyMsg(
 	unsigned int srcNode, Id proxy, unsigned int srcFuncId,
 	unsigned int proxySize,
@@ -44,7 +44,7 @@ static Element* pj = 0;
 static const Finfo* stepFinfo;
 static const Finfo* reinitClockFinfo;
 
-void init( int& argc, char**& argv )
+unsigned int init( int& argc, char**& argv )
 {
 	initMPI( argc, argv );
 	initMoose( argc, argv );
@@ -53,6 +53,7 @@ void init( int& argc, char**& argv )
 	initParSched();
 	initGlobals();
 	doneInit();
+	return 0;
 }
 
 /**
@@ -133,8 +134,8 @@ void initMoose( int argc, char** argv )
 	// simpathHandler.getAllPaths());
         Property::addSimPath(ArgParser::getSimPath());
 
-	cout << "SIMPATH = " << Property::getProperty(string(Property::SIMPATH)) << endl;
-
+	//cout << "SIMPATH = " << Property::getProperty(string(Property::SIMPATH)) << endl;
+	initCinfos();
 	/**
 	 * This function puts the FuncVecs in order and must be called
 	 * after static initialization but before any messaging
@@ -387,7 +388,7 @@ void terminateMPI( unsigned int myNode )
 /// Portable sleep: Uses nanosleep for POSIX systems, and the Win32 Sleep function for MSVC++ compilers
 void psleep( unsigned int nanoseconds )
 {
-#ifdef _MSC_VER // If this is an MS VC++ compiler..
+#ifdef WIN32 // If this is an MS VC++ compiler..
 	unsigned int milliseconds = nanoseconds / 1000000;
 	Sleep( milliseconds );
 #else           // else assume POSIX compliant..
