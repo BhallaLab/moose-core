@@ -305,13 +305,13 @@ PyMooseBase::~PyMooseBase()
     id_ = Id();    
 }
 
-const std::string PyMooseBase::__get_author() const
+const std::string& PyMooseBase::__get_author() const
 {
     const Cinfo * cinfo = this->id_()->cinfo();
     return cinfo->author();
 }
 
-const std::string PyMooseBase::__get_description() const
+const std::string& PyMooseBase::__get_description() const
 {
     const Cinfo * cinfo = this->id_()->cinfo();
     return cinfo->description();
@@ -325,7 +325,7 @@ const std::vector<std::string> PyMooseBase::getFieldList() const
     return fieldList;
 }
 
-const std::string PyMooseBase::getField(std::string name) const
+const std::string& PyMooseBase::getField(std::string name) const
 {
     return PyMooseBase::getContext()->getField(this->id_, name);
 }
@@ -339,7 +339,7 @@ const std::string& PyMooseBase::getSeparator() const
 {
     return context_->separator;    
 }
-const std::string  PyMooseBase::__get_path() const 
+const std::string&  PyMooseBase::__get_path() const 
 {
     return context_->getPath(id_);
 }
@@ -349,7 +349,7 @@ const Id* PyMooseBase::__get_id() const
     return &id_;
 }
 
-const std::string PyMooseBase::__get_className() const
+const std::string& PyMooseBase::__get_className() const
 {
     return context_->className(id_);
 }
@@ -380,7 +380,7 @@ const map<Id, std::string> PyMooseBase::neighbourFields(const string& field)
     
 }
 */
-const std::string PyMooseBase::__get_name() const
+const std::string& PyMooseBase::__get_name() const
 {
     return context_->getName(id_);
 }
@@ -518,7 +518,7 @@ Id PyMooseBase::pathToId(std::string path, bool echo)
     Id id = context_->pathToId(path, echo);
     return id;    
 }
-const std::string PyMooseBase::idToPath(Id id)
+const std::string& PyMooseBase::idToPath(Id id)
 {
     return context_->getPath(id);
 }

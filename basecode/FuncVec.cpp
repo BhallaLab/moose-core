@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include <algorithm>
+#include <fstream>
 #include "header.h"
 #include "ProcInfo.h"
 #include "SetConn.h"
@@ -207,5 +208,15 @@ void FuncVec::sortFuncVec( )
 			// cout << "FuncVec # " << i << " = " << fv[i]->name() << endl;
 		}
 	}
+	
+#ifndef NDEBUG /* If compiling in DEBUG mode. */
+	// Printing list of FuncVecs
+	string filename = "funcvec.txt";
+	ofstream fout( filename.c_str() );
+	for ( unsigned int i = 0; i < fv.size(); i++ )
+		fout << fv[ i ]->name() << "\n";
+	fout << flush;
+	cout << "Wrote list of sorted FuncVecs to " << filename << ".\n";
+#endif // NDEBUG
 }
 

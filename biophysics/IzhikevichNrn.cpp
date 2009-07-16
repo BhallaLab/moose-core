@@ -346,10 +346,13 @@ void IzhikevichNrn::processFunc(const Conn* conn, ProcInfo proc)
 
 void IzhikevichNrn::reinitFunc(const Conn* conn, ProcInfo proc)
 {
+	//cout << "IzhikevichNrn::reinitFunc - start." << endl;
     IzhikevichNrn* instance = static_cast<IzhikevichNrn*>(conn->data());
     instance->sum_inject_ = 0.0;
     instance->Vm_ = instance->initVm_;
     instance->u_ = instance->initU_;
+	//cout << "IzhikevichNrn::reinitFunc - end." << endl;
+   
 }
 
 

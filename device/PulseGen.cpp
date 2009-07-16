@@ -325,6 +325,7 @@ void PulseGen::processFunc( const Conn* c, ProcInfo p )
 
 void PulseGen::reinitFunc( const Conn* c, ProcInfo p )
 {
+  printf("Inside PulseGen::reinitFunc\n");
     PulseGen* obj = static_cast<PulseGen*> (c->data());
     ASSERT( obj != NULL, "PulseGen::reinitFunc(const Conn*, ProcInfo) - target data pointer is NULL.");
     obj->trigTime_ = -1;

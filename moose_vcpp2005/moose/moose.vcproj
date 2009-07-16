@@ -40,20 +40,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-<<<<<<< .working
-				AdditionalIncludeDirectories="..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_MPI"
-=======
 				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;D:\sbml\libsbml-3.3.2\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_MPI;USE_SBML"
->>>>>>> .merge-right.r1135
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_SBML"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-<<<<<<< .working
-				RuntimeLibrary="1"
-=======
 				RuntimeLibrary="3"
->>>>>>> .merge-right.r1122
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -71,18 +62,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				UseLibraryDependencyInputs="true"
-<<<<<<< .working
-				AdditionalDependencies="libgsl.a libgslcblas.a mpi.lib Ws2_32.lib cxx.lib"
-=======
 				AdditionalDependencies="libgsl.a libgslcblas.a mpi.lib Ws2_32.lib cxx.lib bzip2.lib libsbmlD.lib libexpat.lib zlib.lib"
->>>>>>> .merge-right.r1122
 				ShowProgress="2"
 				LinkIncremental="2"
-<<<<<<< .working
-				AdditionalLibraryDirectories="&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
-=======
 				AdditionalLibraryDirectories="&quot;D:\sbml\libsbml-3.3.2\win32\bin&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
->>>>>>> .merge-right.r1135
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -143,7 +126,7 @@
 				Optimization="3"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;D:\sbml\libsbml-3.3.2\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_MPI;USE_SBML"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;USE_GENESIS_PARSER;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_GSL;USE_SBML"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -166,7 +149,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				UseLibraryDependencyInputs="false"
-				AdditionalDependencies="libgsl.a libgslcblas.a mpi.lib Ws2_32.lib cxx.lib zlib.lib bzip2.lib libsbml.lib libexpat.lib"
+				AdditionalDependencies="libgsl.a libgslcblas.a zlib.lib bzip2.lib libsbml.lib libexpat.lib"
 				AdditionalLibraryDirectories="&quot;D:\sbml\libsbml-3.3.2\win32\bin&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
 			/>
 			<Tool
@@ -231,11 +214,31 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\biophysics\GHK.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\biophysics\HHChannel.cpp"
 					>
 				</File>
 				<File
+					RelativePath="..\..\biophysics\HHChannel2D.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\biophysics\HHGate.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\HHGate2D.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\IntFire.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\IzhikevichNrn.cpp"
 					>
 				</File>
 				<File
@@ -244,10 +247,6 @@
 				</File>
 				<File
 					RelativePath="..\..\biophysics\Nernst.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\PulseGen.cpp"
 					>
 				</File>
 				<File
@@ -355,6 +354,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\basecode\IdGenerator.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\basecode\IdManager.cpp"
 					>
 				</File>
@@ -431,7 +434,15 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\builtins\Calculator.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\builtins\Interpol.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\builtins\Interpol2D.cpp"
 					>
 				</File>
 				<File
@@ -575,6 +586,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\kinetics\KinPlaceHolder.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\kinetics\MathFunc.cpp"
 					>
 				</File>
@@ -619,11 +634,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\maindir\main.cpp"
+					RelativePath="..\..\maindir\initCinfos.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\maindir\mpiSetup.cpp"
+					RelativePath="..\..\maindir\main.cpp"
 					>
 				</File>
 				<File
@@ -1113,6 +1128,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\hsolve\HSolveActiveSetup.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\hsolve\HSolveHub.cpp"
 					>
 				</File>
@@ -1176,14 +1195,6 @@
 			<Filter
 				Name="robots"
 				>
-				<File
-					RelativePath="..\..\robots\Adaptor.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\robots\SigNeur.cpp"
-					>
-				</File>
 				<File
 					RelativePath="..\..\robots\SigNeurAdaptors.cpp"
 					>
@@ -1373,6 +1384,104 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="device"
+				>
+				<File
+					RelativePath="..\..\device\DiffAmp.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\device\PIDController.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\device\PulseGen.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\device\RC.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="sbml_IO"
+				>
+				<File
+					RelativePath="..\..\sbml_IO\SbmlReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\sbml_IO\SbmlWriter.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="signeur"
+				>
+				<File
+					RelativePath="..\..\signeur\Adaptor.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\signeur\SigNeur.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -1387,7 +1496,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\moose_vcpp__\biophysics\BinSynInfo.h"
+					RelativePath="..\..\biophysics\BinSynInfo.h"
 					>
 				</File>
 				<File
@@ -1411,11 +1520,31 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\biophysics\GHK.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\biophysics\HHChannel.h"
 					>
 				</File>
 				<File
+					RelativePath="..\..\biophysics\HHChannel2D.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\biophysics\HHGate.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\HHGate2D.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\IntFire.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\IzhikevichNrn.h"
 					>
 				</File>
 				<File
@@ -1424,10 +1553,6 @@
 				</File>
 				<File
 					RelativePath="..\..\biophysics\Nernst.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\biophysics\PulseGen.h"
 					>
 				</File>
 				<File
@@ -1472,10 +1597,6 @@
 				>
 				<File
 					RelativePath="..\..\basecode\ArrayElement.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\basecode\ArrayWrapperElement.h"
 					>
 				</File>
 				<File
@@ -1567,6 +1688,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\basecode\IdGenerator.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\basecode\IdManager.h"
 					>
 				</File>
@@ -1651,7 +1776,15 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\builtins\Calculator.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\builtins\Interpol.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\builtins\Interpol2D.h"
 					>
 				</File>
 				<File
@@ -1747,10 +1880,6 @@
 				Name="genesis_parser"
 				>
 				<File
-					RelativePath="..\..\genesis_parser\func_externs.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\genesis_parser\GenesisParser.h"
 					>
 				</File>
@@ -1800,6 +1929,10 @@
 				</File>
 				<File
 					RelativePath="..\..\kinetics\KinCompt.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\kinetics\KinPlaceHolder.h"
 					>
 				</File>
 				<File
@@ -2010,14 +2143,6 @@
 			<Filter
 				Name="robots"
 				>
-				<File
-					RelativePath="..\..\robots\Adaptor.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\robots\SigNeur.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="ksolve"
@@ -2076,6 +2201,38 @@
 				</File>
 			</Filter>
 			<Filter
+				Name="device"
+				>
+				<File
+					RelativePath="..\..\device\DiffAmp.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\device\PIDController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\device\PulseGen.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\device\RC.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="sbml_IO"
+				>
+				<File
+					RelativePath="..\..\sbml_IO\SbmlReader.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\sbml_IO\SbmlWriter.h"
+					>
+				</File>
+			</Filter>
+			<Filter
 				Name="scheduling"
 				>
 				<File
@@ -2092,6 +2249,18 @@
 				</File>
 				<File
 					RelativePath="..\..\scheduling\Tick.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="signeur"
+				>
+				<File
+					RelativePath="..\..\signeur\Adaptor.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\signeur\SigNeur.h"
 					>
 				</File>
 			</Filter>

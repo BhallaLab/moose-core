@@ -24,9 +24,11 @@ class SbmlWriter
 		SbmlWriter() {;}
 		~SbmlWriter() {;}
 		void write( string filename,Id location );
+#ifdef USE_SBML
 		SBMLDocument* createModel( string filename );
 		bool validateModel( SBMLDocument* sbmlDoc );
 		bool writeModel( const SBMLDocument* sbmlDoc, const string& filename );
+
 	private:
 		Model* model_;	
 		static int targets( Eref object,	const string& msg,vector< Eref >& target,const string& type = "" );
@@ -46,6 +48,7 @@ class SbmlWriter
 		void getEnzyme( vector< Eref > enz,vector <string> &enzsName );
 		void getSubstrate( vector< Eref > sub,vector <string> &subsName );
 		void getProduct( vector< Eref > prd,vector <string> &prdsName );
+#endif
 };
 extern const Cinfo* initKinComptCinfo();
 extern const Cinfo* initMoleculeCinfo();

@@ -1,6 +1,6 @@
 @echo off
 
-set MOOSE=..\..\moose_vcpp2005\Release\moose
+set MOOSE=moose
 
 REM nearDiff is a function to see if two data files are within epsilon of each other. It assumes the files are in xplot format.If it succeeds, it prints out a period without a newline.If it fails, it prints out the first argument and indicates where it failed.
 
