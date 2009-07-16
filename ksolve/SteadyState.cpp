@@ -594,8 +594,13 @@ int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 	int num_consv = ri->num_mols - ri->rank;
 	Stoich* s = ri->s;
 
-	for ( int i = 0; i < ri->num_mols; ++i )
-		s->S()[i] = op( gsl_vector_get( x, i ) );
+	for ( int i = 0; i < ri->num_mols; ++i ) {
+		double temp = op( gsl_vector_get( x, i ) );
+		if ( isnan( temp ) )
+			return GSL_ERANGE;
+		else
+			s->S()[i] = temp;
+	}
 	s->updateV();
 
 	// y = Nr . v
