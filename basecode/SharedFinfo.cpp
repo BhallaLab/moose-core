@@ -105,7 +105,7 @@ bool SharedFinfo::add(
 				connTainerOption );
 		} else {
 			if ( !FuncVec::getFuncVec( destFuncId )->isDest() ) {
-				cout << "Error: SharedFinfo::add: src at both ends: " <<
+				cerr << "Error: SharedFinfo::add: src at both ends: " <<
 				e.e->name() << "." << name() << " to " << 
 				destElm.e->name() << "." << destFinfo->name() << endl;
 				return 0;

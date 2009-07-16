@@ -26,16 +26,16 @@ namespace pymoose
         
         virtual ~PyMooseBase();
 
-        const std::string __get_className() const;
-        const std::string __get_author() const;
-        const std::string __get_description() const;
+        const std::string& __get_className() const;
+        const std::string& __get_author() const;
+        const std::string& __get_description() const;
         static bool destroy(Id id);    
         static void endSimulation();    
         virtual const std::string& getType() = 0;
         const std::string& getSeparator() const;
         static pymoose::PyMooseContext* getContext();
         const std::vector<std::string> getFieldList() const;
-        const std::string getField(std::string name) const;
+        const std::string& getField(std::string name) const;
         void setField(std::string name, std::string value);
         const std::vector<std::string> getFieldList(FieldType ftype=ALL);
         const std::vector<Id> neighbours(const std::string& msgName="*");
@@ -45,9 +45,9 @@ namespace pymoose
         //        const std::map<Id, string> neighbourFields(std::string& field);
         const vector< Id > children() const;
         const Id* __get_parent() const;
-        const std::string __get_path() const;   
+        const std::string& __get_path() const;   
         const Id* __get_id() const;
-        const std::string __get_name() const;
+        const std::string& __get_name() const;
 //        static const std::string __get_docString() const;
         void useClock(int clockNo, string func="process");
         void useClock(Id clock, string func="process");        
@@ -64,7 +64,7 @@ namespace pymoose
         static Id ce(Id newElement);
         static Id ce(std::string path);
         static Id pathToId(std::string path, bool echo = true);
-        static const std::string idToPath(Id id);
+        static const std::string& idToPath(Id id);
         static Id getParent(Id id);
         static std::vector < Id > getChildren(Id id);
         

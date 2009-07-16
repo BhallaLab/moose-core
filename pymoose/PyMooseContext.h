@@ -76,14 +76,14 @@ enum FieldType { ALL, VALUE, LOOKUP, SOURCE, DEST, SHARED, SOLVE, THIS, GLOBAL, 
         void loadG(std::string script); /// load a GENESIS script file
         void runG(std::string statement); /// run a GENESIS statement
         
-        std::string getField(Id, std::string);
+        std::string& getField(Id, std::string);
         void setField(Id, std::string, std::string);
         std::vector <std::string> getMessageList(Id obj, std::string field, bool incoming);
         std::vector <std::string> getMessageList(Id obj, bool incoming);
         
         const Id& getParent(Id id) const;
-        const std::string getPath(Id id) const;
-        const std::string getName(Id id) const;
+        const std::string& getPath(Id id) const;
+        const std::string& getName(Id id) const;
         std::vector <Id> getChildren(Id id);
         std::vector <Id> getChildren(std::string path);    
         Id pathToId(std::string path, bool echo = true);
@@ -132,8 +132,8 @@ enum FieldType { ALL, VALUE, LOOKUP, SOURCE, DEST, SHARED, SOLVE, THIS, GLOBAL, 
         void plannarDelay(std::string src, double delay);
         void planarWeight(std::string src, double weight);
         const std::string& className(const Id& objId) const;
-        const std::string description(const std::string className) const;
-        const std::string author(const std::string className) const;
+        const std::string& description(const std::string className) const;
+        const std::string& author(const std::string className) const;
         const std::string& doc(const std::string& className) const;
         vector<Id> getNeighbours(Id object, const std::string& fieldName="*");
         vector<string> getFieldList(Id id, FieldType ftype=ALL);        

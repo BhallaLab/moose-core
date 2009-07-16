@@ -24,7 +24,7 @@
 using namespace std;
 using namespace pymoose;
 
-extern void init(int& argc, char **& argv);
+extern unsigned int init(int& argc, char **& argv);
 extern void initCinfos();
 extern const string& helpless();
 extern const string& getClassDoc(const string&, const string&);
@@ -62,15 +62,15 @@ const Cinfo* initPyMooseContextCinfo()
 		new DestFinfo( "recvElist", 
 					Ftype1< vector< Id > >::global(), 
 					RFCAST( &PyMooseContext::recvElist ),
-					"Then recv the vector of child ids. This function is shared by several other messages as all \n"
+					"Then recv the vector of child ids. This function is shared by several other messages as all "
 					"it does is dump the elist into a temporary local buffer." ),
-
 		///////////////////////////////////////////////////////////////
 		// Object heirarchy manipulation functions.
 		///////////////////////////////////////////////////////////////
 		new SrcFinfo( "create",
 				Ftype4< string, string, int, Id >::global(),
-				"Creating an object: Send out the request. args: type, name, node, parent" ),
+				"Creating an object: Send out the request. "
+				"args: type, name, node, parent" ),
 		new SrcFinfo( "createArray",
 				Ftype4< string, string, Id, vector <double> >::global(),
 				"Creating an object: Recv the returned object id." ),
@@ -81,8 +81,8 @@ const Cinfo* initPyMooseContextCinfo()
 		new DestFinfo( "recvCreate",
 					Ftype1< Id >::global(),
 					RFCAST( &PyMooseContext::recvCreate ) ),
-		new SrcFinfo( "delete", Ftype1< Id >::global(),
-				"Deleting an object: Send out the request." ),
+		// Deleting an object: Send out the request.
+		new SrcFinfo( "delete", Ftype1< Id >::global() ),
 
 		///////////////////////////////////////////////////////////////
 		// Value assignment: set and get.
@@ -98,7 +98,6 @@ const Cinfo* initPyMooseContextCinfo()
 		new SrcFinfo( "set", // object, field, value 
 				Ftype3< Id, string, string >::global(),
 				"Setting a field value as a string: send out request:" ),
-
 		new SrcFinfo( "file2tab", // object, filename, skiplines 
 				Ftype3< Id, string, unsigned int >::global() ),
 
@@ -112,9 +111,10 @@ const Cinfo* initPyMooseContextCinfo()
 				Ftype3< string, string, string >::global(),
 				"Assigning path and function to a clock tick: useClock" ),
 		new SrcFinfo( "el", Ftype2< string, bool >::global(),
-				"Getting a wildcard path of elements: send out request args are path, flag true for breadth-first list." ),
+				"Getting a wildcard path of elements: send out request args are path, flag true for "
+				"breadth-first list." ),
 		new SrcFinfo( "resched", Ftype0::global(),
-				"The return function for the wildcard past is the shared function recvElist" ), // resched
+				"The return function for the wildcard past is the shared function recvElist"), // resched
 		new SrcFinfo( "reinit", Ftype0::global() ), // reinit
 		new SrcFinfo( "stop", Ftype0::global() ), // stop
 		new SrcFinfo( "step", Ftype1< double >::global() ),
@@ -125,21 +125,21 @@ const Cinfo* initPyMooseContextCinfo()
 					Ftype1< vector< double > >::global(), 
 					RFCAST( &PyMooseContext::recvClocks ) ),
 		new SrcFinfo( "requestCurrentTime", Ftype0::global() ),
-		new SrcFinfo( "quit", Ftype0::global(),
-				" Returns time in the default return value." ),
+		new SrcFinfo( "quit", Ftype0::global(), 
+			"Returns time in the default return value." ),
 		
 		///////////////////////////////////////////////////////////////
 		// Message functions
 		///////////////////////////////////////////////////////////////
 		new SrcFinfo( "addMsg", 
-		Ftype4< vector< Id >, string, vector< Id >, string >::global(),
-		"Create a message. srcId, srcField, destId, destField" ),
+					Ftype4< vector< Id >, string, vector< Id >, string >::global(),
+					"Create a message. srcId, srcField, destId, destField" ),
 		new SrcFinfo( "deleteMsg", Ftype2< Fid, int >::global(),
-		"Delete a message based on number " ),
+					"Delete a message based on number " ),
 		new SrcFinfo( "deleteEdge", 
 					Ftype4< Id, string, Id, string >::global(),
-					"Delete a message based on src id.field and dest id.field This is how to specify an edge,\n"
-					"so call it deleteEdge" ),
+					"Delete a message based on src id.field and dest id.field "
+					"This is how to specify an edge, so call it deleteEdge" ),
 		new SrcFinfo( "listMessages", 
 					Ftype3< Id, string, bool >::global(),
 					"Request message list: id elm, string field, bool isIncoming" ),
@@ -152,27 +152,29 @@ const Cinfo* initPyMooseContextCinfo()
 		// Object heirarchy manipulation functions.
 		///////////////////////////////////////////////////////////////
 		new SrcFinfo( "copy", Ftype3< Id, Id, string >::global(),
-		"This function is for copying an element tree, complete with messages, onto another." ),
+					"This function is for copying an element tree, complete with messages, onto another." ),
 		new SrcFinfo( "copyIntoArray", Ftype4< Id, Id, string, vector <double> >::global() ),
 		new SrcFinfo( "move", Ftype3< Id, Id, string >::global(),
-	    "This function is for moving element trees." ),
+					"This function is for moving element trees." ),
 
 		///////////////////////////////////////////////////////////////
 		// Cell reader: filename cellpath
 		///////////////////////////////////////////////////////////////
+		
 		new SrcFinfo( "readcell", 
 			Ftype4< string, string, vector< double >, int >::global(),
-			"parent, cell, parms, node" ),
+			"filename, cellpath, parms, node" ),
 
 		///////////////////////////////////////////////////////////////
 		// Channel setup functions
 		///////////////////////////////////////////////////////////////
+		
 		new SrcFinfo( "setupAlpha", 
 					Ftype2< Id, vector< double > >::global(),
 					"setupalpha" ),
 		new SrcFinfo( "setupTau", 
 					Ftype2< Id, vector< double > >::global(),
-					" setuptau" ),
+					"setuptau" ),
 		new SrcFinfo( "tweakAlpha", Ftype1< Id >::global(),
 					"tweakalpha" ),
 		new SrcFinfo( "tweakTau", Ftype1< Id >::global(),
@@ -188,13 +190,13 @@ const Cinfo* initPyMooseContextCinfo()
 					"readDumpFile" ),
 		new SrcFinfo( "writeDumpFile", 
 					Ftype2< string, string >::global(),
-					"writeDumpFile"),
+					"writeDumpFile" ),
 		new SrcFinfo( "simObjDump",
 					Ftype1< string >::global(),
 					"simObjDump" ),
 		new SrcFinfo( "simUndump",
 					Ftype1< string >::global(),
-					"simundump"),
+					"simundump" ),
 		new SrcFinfo( "openfile", 
 			Ftype2< string, string >::global() ),
 		new SrcFinfo( "writefile", 
@@ -210,7 +212,6 @@ const Cinfo* initPyMooseContextCinfo()
 		///////////////////////////////////////////////////////////////
 		// Setting field values for a vector of objects
 		///////////////////////////////////////////////////////////////
-		
 		new SrcFinfo( "setVecField", // object, field, value 
 			Ftype3< vector< Id >, string, string >::global(),
 			"Setting a vec of field values as a string: send out request:" ),
@@ -218,11 +219,14 @@ const Cinfo* initPyMooseContextCinfo()
 			Ftype1< string >::global() ),
 		new SrcFinfo( "tabop", 
 			Ftype4< Id, char, double, double >::global() ),
+		///////////////////////////////////////////////////////////////
+		// SBML
+		///////////////////////////////////////////////////////////////
 		new SrcFinfo( "readsbml", 
 			Ftype3< string, string, int >::global() ),
 		new SrcFinfo( "writesbml", 
 			Ftype3< string, string, int >::global() ),
-                ///////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////
 		// Misc
 		///////////////////////////////////////////////////////////////
 		new SrcFinfo( "createGate", 
@@ -594,13 +598,10 @@ void PyMooseContext::setCwe(string path)
    @param fieldName - name of the field to be retrieved
    @returns the string representation of the field value
 */
-string PyMooseContext::getField(Id objectId, string fieldName)
+string& PyMooseContext::getField(Id objectId, string fieldName)
 {
     send2<Id, string >(myId_(), requestFieldSlot, objectId, fieldName);
-    
-    if ( fieldValue_.length() == 0 ) // Nothing came back
-        return 0;
-    return copyString( fieldValue_.c_str() );
+    return fieldValue_;
 }
 
 /**
@@ -659,8 +660,8 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
                                      // signature of init - no idea
                                      // why int& and char**& instead
                                      // of simple int and char**
+	
     init(argc, argv);
-    initCinfos();
 #ifdef DO_UNIT_TESTS
 	// if ( mynode == 0 )
 	if ( 1 )
@@ -840,10 +841,10 @@ const Id& PyMooseContext::getParent( Id e ) const
     return ret;
 }
 
-const string PyMooseContext::getPath(Id id) const
+const string& PyMooseContext::getPath(Id id) const
 {
-    fieldValue_ = id.path().c_str();
-    return fieldValue_;
+	fieldValue_ = Shell::eid2path( id );
+	return fieldValue_;
 }
 
 Id PyMooseContext::pathToId(string path, bool echo)
@@ -1512,17 +1513,15 @@ void PyMooseContext::readSBML(string fileName, string modelPath)
 
 const string& PyMooseContext::className(const Id& objId) const
 {
-    fieldValue_ =  objId()->className();
-    return fieldValue_;
+    return  objId()->className();
 }
 
-const string PyMooseContext::getName(const Id objId) const
+const string& PyMooseContext::getName(const Id objId) const
 {
-    fieldValue_ = objId()->name();
-    return fieldValue_;
+    return objId()->name();
 }
 
-const string PyMooseContext::description(const string className) const
+const string& PyMooseContext::description(const string className) const
 {
     const Cinfo* cinfo = Cinfo::find(className);
     if (cinfo){
@@ -1530,7 +1529,7 @@ const string PyMooseContext::description(const string className) const
     }
     else return className + ": No such MOOSE class exists.";
 }
-const string PyMooseContext::author(const string className) const
+const string& PyMooseContext::author(const string className) const
 {
     const Cinfo* cinfo = Cinfo::find(className);
     if (cinfo){
