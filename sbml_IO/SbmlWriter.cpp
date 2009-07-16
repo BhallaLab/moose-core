@@ -32,11 +32,26 @@
 *  write a Model after validation
 */
 
-void SbmlWriter::write( string filename,Id location )
+void SbmlWriter::write( string filepath,Id location )
 {
+#ifdef USE_SBML
+	string::size_type loc;
+	while ( ( loc = filepath.find( "\\" ) ) != string::npos ) {
+		filepath.replace( loc, 1, "/" );
+	}
+
 	/* allows to write filename with extensions xml,zip,bz2 and gz. if no 
 	extension is given then .xml is the default one. */
-	string fName = filename;
+	string fName = filepath;
+	if ( filepath[0]== '~' ){
+		cerr << "Error : Replace ~ with absolute path " << endl;
+		return ;
+	}
+	//string::size_type tilda_pos = fName.
+	string::size_type slash_pos = fName.find_last_of("/");
+	fName.erase( 0,slash_pos + 1 );  
+	//cout<<"filename:"<<filename<<endl;
+	
 	vector< string > extensions;
 	extensions.push_back( ".xml" );
 	extensions.push_back( ".zip" );
@@ -58,20 +73,24 @@ void SbmlWriter::write( string filename,Id location )
 		}
 	}
 	if ( i == extensions.end() )
-		filename += ".xml";
+		filepath += ".xml";
 	SBMLDocument* sbmlDoc = 0;
   	bool SBMLok = false;
 	sbmlDoc = createModel( fName ); 
   	SBMLok  = validateModel( sbmlDoc );
 	if ( SBMLok ) 
-		writeModel( sbmlDoc, filename );
+		writeModel( sbmlDoc, filepath );
     	delete sbmlDoc;
 	if ( !SBMLok ) {
 		cerr << "Errors encountered " << endl;
 		return ;
 	}
+#else
+	cout << "This version does not have SBML support." << endl;
+#endif
 }
 
+#ifdef USE_SBML
 /**
  * Create an SBML model in the SBML Level 2 Version 4 Specification.
  */
@@ -1078,5 +1097,5 @@ bool SbmlWriter::validateModel( SBMLDocument* sbmlDoc )
 		    return ( numConsistencyErrors == 0 && numValidationErrors == 0 );
 	  }
 }
-
+#endif // USE_SBML
 

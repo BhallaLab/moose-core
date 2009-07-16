@@ -25,14 +25,17 @@ class SbmlReader
 		SbmlReader() {errorFlag_ = false;}
 		~SbmlReader() {;}
 		void  read(string filename,Id location);
+#ifdef USE_SBML
 		map< string,Id > createCompartment(Id location);
 		map< string,Id > createMolecule(map<string,Id> &);
 		void  getGlobalParameter();
 		//void  printUnit(Model* model);
 		void  createReaction(map<string,Id> &);
 		
-				
+#endif	// USE_SBML			
 	private:
+bool errorFlag_;
+#ifdef USE_SBML
 		Model* model_;		
 		SBMLDocument* document_;
 		SBMLReader reader_;
@@ -40,7 +43,7 @@ class SbmlReader
 		Element* molecule_;
 		Element* reaction_;
 		map<string,Eref>elmtMap_;
-		bool errorFlag_;
+		
 		void getRules();
 		void printMembers( const ASTNode* p,vector <string> & ruleMembers );
 		void pushParmstoVector( const ASTNode* p,vector <string> & parameters );
@@ -63,7 +66,7 @@ class SbmlReader
 			double k3;
 			int stage;
 		};
-		
+#endif
 		
 };
 extern const Cinfo* initKinComptCinfo();

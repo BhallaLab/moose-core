@@ -21,7 +21,30 @@
 #include "SolveFinfo.h"
 #include "HSolveHub.h"
 
+// Defined below.
+const Cinfo* initHSolveHubCinfoInner();
+Finfo* initCompartmentZombieFinfo();
+Finfo* initHHChannelZombieFinfo();
+Finfo* initCaConcZombieFinfo();
+
+/**
+ * This function is required to initialize the replacement Finfos
+ * (i.e., SolveFinfo:s standing in for ThisFinfo:s for zombified objects).
+ * We will need to ensure that this function is called explicitly during
+ * the initialization of MOOSE (currently done in maindir/initCinfos.cpp).
+ */
 const Cinfo* initHSolveHubCinfo()
+{
+	static const Cinfo* HSolveHubCinfo = initHSolveHubCinfoInner();
+	
+	static Finfo* f1 = initCompartmentZombieFinfo();
+	static Finfo* f2 = initHHChannelZombieFinfo();
+	static Finfo* f3 = initCaConcZombieFinfo();
+	
+	return HSolveHubCinfo;
+}
+
+const Cinfo* initHSolveHubCinfoInner()
 {
 	static Finfo* zombieShared[] =
 	{
