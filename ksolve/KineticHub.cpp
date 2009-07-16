@@ -24,12 +24,30 @@
 #include "DeletionMarkerFinfo.h"
 #include "../utility/utility.h"
 
+
 void dummyStringFunc( const Conn* c, string s )
 {
 	;
 }
 
+// Defined below.
+Finfo* initMolZombieFinfo();
+const Cinfo* initKineticHubCinfoInner();
+
+/**
+ * This function is required to initialize the replacement Finfos
+ * (i.e., SolveFinfo:s standing in for ThisFinfo:s for zombified objects).
+ * We will need to ensure that this function is called explicitly during
+ * the initialization of MOOSE (currently done in maindir/initCinfos.cpp).
+ */
 const Cinfo* initKineticHubCinfo()
+{
+	static const Cinfo* KineticHubCinfo = initKineticHubCinfoInner();
+	static Finfo* f1 = initMolZombieFinfo();
+	return KineticHubCinfo;
+}
+
+const Cinfo* initKineticHubCinfoInner()
 {
 	static Finfo* processShared[] =
 	{
@@ -309,7 +327,6 @@ Finfo* initMolZombieFinfo()
 	return &molZombieFinfo;
 }
 
-static Finfo* molZombieFinfo = initMolZombieFinfo();
 /////////////////////////////////////////////////////////////////////////
 // End of static initializers.
 /////////////////////////////////////////////////////////////////////////

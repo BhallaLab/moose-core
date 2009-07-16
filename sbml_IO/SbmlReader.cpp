@@ -35,6 +35,7 @@ map< string,string > parmUnitMap;
 /* read a model into MOOSE  */
 void SbmlReader::read( string filename,Id location )
 {
+#ifdef USE_SBML
 	FILE * fp = fopen( filename.c_str(), "r" );
 	if ( fp == NULL){
 		cout << filename << " : File does not exist." << endl;
@@ -69,8 +70,11 @@ void SbmlReader::read( string filename,Id location )
 		createReaction( molMap );
 	if ( errorFlag_ )
 		return;
+#else
+	cout << "This version does not have SBML support." << endl; 
+#endif
 }
-
+#ifdef USE_SBML
 /* transform units */
 double SbmlReader::transformUnits( double mvalue,UnitDefinition * ud )
 {	//cout << "num units :" << ud->getNumUnits() << endl;
@@ -796,3 +800,4 @@ void SbmlReader::printMembers( const ASTNode* p,vector <string> & ruleMembers )
        	 	printMembers( child,ruleMembers );
         }
 } 
+#endif // USE_SBML
