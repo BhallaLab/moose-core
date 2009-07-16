@@ -9,7 +9,7 @@
 **********************************************************************/
 #ifndef _DERIVED_FTYPE_H
 #define _DERIVED_FTYPE_H
-
+#include "header.h"
 class Ftype0: public Ftype
 {
 		public:

@@ -50,8 +50,8 @@
 	#include "RectPanel.h"
 	#include "Surface.h"
 	#include "Geometry.h"
-// 	#include "Adaptor.h"
-// 	#include "SigNeur.h"
+ 	#include "Adaptor.h"
+ 	#include "SigNeur.h"
 	#include "AscFile.h"
 	#include "DifShell.h"
 	#include "GssaStoich.h"
@@ -84,8 +84,6 @@
 	#include "UniformRng.h"
 	#include "HHGate2D.h"
 	#include "HHChannel2D.h"
-	#include "SteadyState.h"
-	#include "InterSolverFlux.h"
 #ifdef USE_NUMPY
 #include <algorithm>
 #ifndef PY_ARRAY_UNIQUE_SYMBOL
@@ -412,6 +410,7 @@ void fillData(PyObject* args)
 %attribute(pymoose::NeuroScan, double, CaMax, __get_CaMax, __set_CaMax)
 
 
+
 %include "HSolve.h"
 %attribute(pymoose::HSolve, string, seedPath, __get_seed_path, __set_seed_path)
 %attribute(pymoose::HSolve, int, NDiv, __get_NDiv, __set_NDiv)
@@ -571,34 +570,34 @@ void fillData(PyObject* args)
 %attribute(pymoose::Geometry, double, epsilon, __get_epsilon, __set_epsilon)
 %attribute(pymoose::Geometry, double, neighdist, __get_neighdist, __set_neighdist)
 
-// %include "Adaptor.h"
-// %attribute(pymoose::Adaptor, double, inputOffset, __get_inputOffset, __set_inputOffset)
-// %attribute(pymoose::Adaptor, double, outputOffset, __get_outputOffset, __set_outputOffset)
-// %attribute(pymoose::Adaptor, double, scale, __get_scale, __set_scale)
-// %attribute(pymoose::Adaptor, double, output, __get_output)
+ %include "Adaptor.h"
+ %attribute(pymoose::Adaptor, double, inputOffset, __get_inputOffset, __set_inputOffset)
+ %attribute(pymoose::Adaptor, double, outputOffset, __get_outputOffset, __set_outputOffset)
+ %attribute(pymoose::Adaptor, double, scale, __get_scale, __set_scale)
+ %attribute(pymoose::Adaptor, double, output, __get_output)
 
-// %include "SigNeur.h"
-// %attribute(pymoose::SigNeur, Id&, cellProto, __get_cellProto, __set_cellProto)
-// %attribute(pymoose::SigNeur, Id&, spineProto, __get_spineProto, __set_spineProto)
-// %attribute(pymoose::SigNeur, Id&, dendProto, __get_dendProto, __set_dendProto)
-// %attribute(pymoose::SigNeur, Id&, somaProto, __get_somaProto, __set_somaProto)
-// %attribute(pymoose::SigNeur, Id&, cell, __get_cell)
-// %attribute(pymoose::SigNeur, Id&, spine, __get_spine)
-// %attribute(pymoose::SigNeur, Id&, dend, __get_dend)
-// %attribute(pymoose::SigNeur, Id&, soma, __get_soma)
-// %attribute(pymoose::SigNeur, string, cellMethod, __get_cellMethod, __set_cellMethod)
-// %attribute(pymoose::SigNeur, string, spineMethod, __get_spineMethod, __set_spineMethod)
-// %attribute(pymoose::SigNeur, string, dendMethod, __get_dendMethod, __set_dendMethod)
-// %attribute(pymoose::SigNeur, string, somaMethod, __get_somaMethod, __set_somaMethod)
-// %attribute(pymoose::SigNeur, double, sigDt, __get_sigDt, __set_sigDt)
-// %attribute(pymoose::SigNeur, double, cellDt, __get_cellDt, __set_cellDt)
-// %attribute(pymoose::SigNeur, double, Dscale, __get_Dscale, __set_Dscale)
-// %attribute(pymoose::SigNeur, double, lambda_, __get_lambda, __set_lambda)
-// %attribute(pymoose::SigNeur, int, parallelMode, __get_parallelMode, __set_parallelMode)
-// %attribute(pymoose::SigNeur, double, updateStep, __get_updateStep, __set_updateStep)
-// %attribute(pymoose::SigNeur, double, calciumScale, __get_calciumScale, __set_calciumScale)
-// %attribute(pymoose::SigNeur, string, dendInclude, __get_dendInclude, __set_dendInclude)
-// %attribute(pymoose::SigNeur, string, dendExclude, __get_dendExclude, __set_dendExclude)
+ %include "SigNeur.h"
+ %attribute(pymoose::SigNeur, Id&, cellProto, __get_cellProto, __set_cellProto)
+ %attribute(pymoose::SigNeur, Id&, spineProto, __get_spineProto, __set_spineProto)
+ %attribute(pymoose::SigNeur, Id&, dendProto, __get_dendProto, __set_dendProto)
+ %attribute(pymoose::SigNeur, Id&, somaProto, __get_somaProto, __set_somaProto)
+ %attribute(pymoose::SigNeur, Id&, cell, __get_cell)
+ %attribute(pymoose::SigNeur, Id&, spine, __get_spine)
+ %attribute(pymoose::SigNeur, Id&, dend, __get_dend)
+ %attribute(pymoose::SigNeur, Id&, soma, __get_soma)
+ %attribute(pymoose::SigNeur, string, cellMethod, __get_cellMethod, __set_cellMethod)
+ %attribute(pymoose::SigNeur, string, spineMethod, __get_spineMethod, __set_spineMethod)
+ %attribute(pymoose::SigNeur, string, dendMethod, __get_dendMethod, __set_dendMethod)
+ %attribute(pymoose::SigNeur, string, somaMethod, __get_somaMethod, __set_somaMethod)
+ %attribute(pymoose::SigNeur, double, sigDt, __get_sigDt, __set_sigDt)
+ %attribute(pymoose::SigNeur, double, cellDt, __get_cellDt, __set_cellDt)
+ %attribute(pymoose::SigNeur, double, Dscale, __get_Dscale, __set_Dscale)
+ %attribute(pymoose::SigNeur, double, lambda_, __get_lambda, __set_lambda)
+ %attribute(pymoose::SigNeur, int, parallelMode, __get_parallelMode, __set_parallelMode)
+ %attribute(pymoose::SigNeur, double, updateStep, __get_updateStep, __set_updateStep)
+ %attribute(pymoose::SigNeur, double, calciumScale, __get_calciumScale, __set_calciumScale)
+ %attribute(pymoose::SigNeur, string, dendInclude, __get_dendInclude, __set_dendInclude)
+ %attribute(pymoose::SigNeur, string, dendExclude, __get_dendExclude, __set_dendExclude)
 
 %include "AscFile.h"
 %attribute(pymoose::AscFile, string, fileName, __get_fileName, __set_fileName)
@@ -696,17 +695,9 @@ void fillData(PyObject* args)
 %attribute(pymoose::GHK, double, Cout, __get_Cout, __set_Cout)
 %attribute(pymoose::GHK, double, valency, __get_valency, __set_valency)
 
-%include "SteadyState.h"
-%attribute(pymoose::SteadyState, bool, badStoichiometry, __get_badStoichiometry)
-%attribute(pymoose::SteadyState, bool, isInitialized, __get_isInitialized)
-%attribute(pymoose::SteadyState, unsigned int, nIter, __get_nIter)
-%attribute(pymoose::SteadyState, unsigned int, maxIter, __get_maxIter, __set_maxIter)
-%attribute(pymoose::SteadyState, double, convergenceCriterion, __get_convergenceCriterion, __set_convergenceCriterion)
-%attribute(pymoose::SteadyState, unsigned int, rank, __get_rank)
+
 %include "HHChannel2D.h"
 %attribute(pymoose::HHChannel2D, string, Xindex, __get_Xindex, __set_Xindex)
 %attribute(pymoose::HHChannel2D, string, Yindex, __get_Yindex, __set_Yindex)
 %attribute(pymoose::HHChannel2D, string, Zindex, __get_Zindex, __set_Zindex)
 %include "HHGate2D.h"
-%include "InterSolverFlux.h"
-%attribute(pymoose::InterSolverFlux, string, method, __get_method, __set_method)

@@ -50,8 +50,9 @@ template < class T > void send1( Eref e, Slot src, T val )
 		vector< ConnTainer* >::const_iterator i;
 		for ( i = m->begin(); i != m->end(); i++ ) {
 			Conn* j = ( *i )->conn( e, src.func() );
-			for ( ; j->good(); j->increment() )
+			for ( ; j->good(); j->increment() ){
 				rf( j, val );
+			}
 			delete j;
 		}
 	// Yes, it is an assignment, not a comparison

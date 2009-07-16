@@ -8,7 +8,7 @@
 
 #ifndef _INIT_H
 #define _INIT_H
-
+unsigned int init(int& argc, char**& argv);
 void initMPI( int& argc, char**& argv );
 void initMoose( int argc, char** argv );
 void initParCommunication();

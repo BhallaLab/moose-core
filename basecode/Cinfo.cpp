@@ -130,6 +130,16 @@ void Cinfo::init( const string* doc,
 	// Next store own scheduling information
 	for ( i = 0; i < nSched; i++ )
 		scheduling_.push_back( schedInfo[i] );
+	#ifndef NDEBUG /* If compiling in DEBUG mode. */
+	// Printing list of FuncVecs
+	string filename = "Cinfolist.txt";
+	ofstream fout( filename.c_str() );
+	for ( unsigned int i = 0; i < nSched; i++ )
+		fout << name() << "\n";
+	fout << flush;
+	cout << "Wrote list of Cinfos to " << filename << ".\n";
+	#endif // NDEBUG
+	
 
 #ifdef GENERATE_WRAPPERS        
         std::string out_dir_name ="generated/";
@@ -273,6 +283,7 @@ void Cinfo::init( const string* doc,
 	///\todo: here need to put in additional initialization stuff from base class
 	if ( name() != "" )
 		lookup()[ name() ] = this;
+	//cout << "Cinfo: " << name() << endl;
 }
 
 Cinfo::~Cinfo()
