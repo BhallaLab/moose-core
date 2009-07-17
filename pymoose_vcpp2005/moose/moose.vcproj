@@ -511,6 +511,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\builtins\Calculator.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\builtins\Interpol.cpp"
 					>
 				</File>
@@ -2449,6 +2453,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\ksolve\SteadyState.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\ksolve\Stoich.cpp"
 					>
 				</File>
@@ -2874,6 +2882,10 @@
 				>
 				<File
 					RelativePath="..\..\builtins\AscFile.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\builtins\Calculator.h"
 					>
 				</File>
 				<File
@@ -3554,6 +3566,10 @@
 				</File>
 				<File
 					RelativePath="..\..\ksolve\RateTerm.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\SteadyState.h"
 					>
 				</File>
 				<File
