@@ -184,18 +184,18 @@ class IzhikevichTest(moose.IzhikevichNrn):
         return self.vm_table
 
     def fullrun(self):
-        //print 'fullrun: start'
+        #print 'fullrun: start'
         self.init_input()
         self.schedule()
-        //print 'fullrun: before reset'
+        #print 'fullrun: before reset'
         moose.PyMooseBase.getContext().reset()
-        //print 'fullrun: after reset'
+        #print 'fullrun: after reset'
         moose.PyMooseBase.getContext().step(SimEnv.duration)
-        //print 'fullrun: done'
+        #print 'fullrun: done'
         return self.dump_data()
 
 def create_input(nrn_type, input_len):
-    //print 'create_input: start'
+    #print 'create_input: start'
     if input_len < 50:
         print("Simulate at least for 50 ms.")
         return numpy.zeros(input_len)
@@ -247,7 +247,7 @@ def create_input(nrn_type, input_len):
         input_array[300] = 1.0
     elif nrn_type =="iispike" or nrn_type =="iiburst":        
         input_array[20:120] = -20.0
-    //print 'create_input: finished'
+    #print 'create_input: finished'
     return input_array
 
 
@@ -259,11 +259,11 @@ def run_model(nrn_type):
 
 def run():
     """Runs the simulation."""
-    //print 'Going to reset'
+    #print 'Going to reset'
     moose.PyMooseBase.getContext().reset()
-    //print 'reset: done'
+    #print 'reset: done'
     moose.PyMooseBase.getContext().step(SimEnv.duration)
-    //print 'step: done'
+    #print 'step: done'
 
 def numpy_sim(nrn_type, input_array):
     """Do the same simulation using direct array operations."""
