@@ -67,6 +67,9 @@ class SquidModel(moose.Neutral):
         self._iInjectTable.connect("inputRequest", self._pulseGen, "output")
         # Assign clock ticks
         self.getContext().useClock(0, self._model.path+"/##")
+        self._squidAxon.useClock(0)
+        self._squidAxon._Na.useClock(0)
+        self._squidAxon._K.useClock(0)
         self._squidAxon.useClock(1, "init")
         self.getContext().useClock(2,self._data.path+"/#")
         self._runTime = 0.050
@@ -195,7 +198,7 @@ class SquidModel(moose.Neutral):
             self._squidAxon.setIonPotential(paramDict["temperature"], paramDict["naConc"], paramDict["kConc"])
 #             self._runTime = paramDict["runTime"]
         self.getContext().reset()
-        if paramDict["singlePulse"]: # This is an ugly hack borrowed from GENESIS squid demo
+        if (not paramDict == None) and (paramDict["singlePulse"]): # This is an ugly hack borrowed from GENESIS squid demo
             self._pulseGen.trigTime = 0.0 
         # !SquidModel.doResetForIClamp
 

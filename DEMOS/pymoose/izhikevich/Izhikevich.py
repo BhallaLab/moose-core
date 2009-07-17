@@ -121,6 +121,7 @@ class IzhikevichTest(moose.IzhikevichNrn):
         self.Vmax = 30.0
         self.initVm = -70.0
         self.initU = -20.0
+        print 'init: creating table'
         self.vm_table = moose.Table("VmTable", self)
         self.vm_table.stepMode = 3
         self.inject_table =  moose.Table("injectTable", self)
@@ -131,17 +132,22 @@ class IzhikevichTest(moose.IzhikevichNrn):
         # In particular, xmin, xmax, step_size need to be set.
         self.input = moose.Table("input", self)
         self.input.stepMode = 1 # TAB_LOOP
+        print 'init: creating connection'
         self.input.connect("outputSrc", self, "injectDest")
         self.input.connect("output", self.inject_table, "inputRequest")
+        print 'init: done'
     
     def schedule(self):
         """Assigns clocks to the model components."""
+        print 'schedule: start'
         self.getContext().setClock(0, SimEnv.dt, 0)
         self.getContext().setClock(1, SimEnv.dt, 1)
+        print 'before useclock', self.inject_table.id.path()
         self.inject_table.useClock(0)
         self.vm_table.useClock(1)
         self.inject_table.useClock(1)
         self.useClock(1)
+        print 'after useclock'
 
     def set_type(self, name):
         """Parameterizes the model according to its type"""
@@ -178,13 +184,18 @@ class IzhikevichTest(moose.IzhikevichNrn):
         return self.vm_table
 
     def fullrun(self):
+        //print 'fullrun: start'
         self.init_input()
         self.schedule()
+        //print 'fullrun: before reset'
         moose.PyMooseBase.getContext().reset()
+        //print 'fullrun: after reset'
         moose.PyMooseBase.getContext().step(SimEnv.duration)
+        //print 'fullrun: done'
         return self.dump_data()
 
 def create_input(nrn_type, input_len):
+    //print 'create_input: start'
     if input_len < 50:
         print("Simulate at least for 50 ms.")
         return numpy.zeros(input_len)
@@ -236,7 +247,7 @@ def create_input(nrn_type, input_len):
         input_array[300] = 1.0
     elif nrn_type =="iispike" or nrn_type =="iiburst":        
         input_array[20:120] = -20.0
-    
+    //print 'create_input: finished'
     return input_array
 
 
@@ -248,8 +259,11 @@ def run_model(nrn_type):
 
 def run():
     """Runs the simulation."""
+    //print 'Going to reset'
     moose.PyMooseBase.getContext().reset()
+    //print 'reset: done'
     moose.PyMooseBase.getContext().step(SimEnv.duration)
+    //print 'step: done'
 
 def numpy_sim(nrn_type, input_array):
     """Do the same simulation using direct array operations."""

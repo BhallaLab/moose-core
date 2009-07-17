@@ -82,6 +82,8 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.modelTreeTab.setLayout(layout)
         layout.addWidget(self.modelTreeContainerWidget)
         self.modelTreeWidget.headerItem().setHidden(True)
+        self.plotUpdateIntervalLabel.setText(self.tr('<br>Plot update interval (<b>steps</b>)'))
+        self.runTimeLabel.setText(self.tr('<br>Run for (<b>seconds</b>)'))
 #         self.modelTreeWidget.show()
 #         self.mooseClassToolBox.show()
 ###################
@@ -209,18 +211,21 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
 
     def loadIzhikevich_Neurons_Tutorial(self):
-	self.mooseHandler.load('../../DEMOS/pymoose/izhikevich/Izhikevich.py', 'MOOSE')
+        spath = sys.path[0] + '/../DEMOS/pymoose/izhikevich/Izhikevich.py'
+	self.mooseHandler.load(spath, 'MOOSE')
 
 
     def loadSquid_Axon_Tutorial(self):
-	self.mooseHandler.load('../../DEMOS/pymoose/squid/qtSquid.py', 'MOOSE')
+        spath = sys.path[0] + '/../DEMOS/pymoose/squid/qtSquid.py'
+	self.mooseHandler.load(spath, 'MOOSE')
 
 
     def showAbout_MOOSE(self):
 	about = QtCore.QT_TR_NOOP('<p>MOOSE is the Multi-scale Object Oriented Simulation Environment.</p>'
 				  '<p>It is a general purpose simulation environment for computational neuroscience and chemical kinetics.</p>'
 				  '<p>Copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS</p>'
-				  '<p>It is made available under the terms of the GNU Lesser General Public License version 2.1. See the file COPYING.LIB for the full notice.</p>')
+				  '<p>It is made available under the terms of the GNU Lesser General Public License version 2.1. See the file COPYING.LIB for the full notice.</p>'
+                  '<p>homepage: <a href="http://moose.ncbs.res.in">http://moose.ncbs.res.in</a></p>')
 	aboutDialog = QtGui.QMessageBox.information(self, self.tr('About MOOSE'), about)
 
     def plotUpdateIntervalSlot(self):
