@@ -126,8 +126,8 @@ OBJ = PyMooseBase.o \
 	HHGate2D.o	\
 	SteadyState.o	\
 	InterSolverFlux.o	\
-# 	Adaptor.o	\
-# 	SigNeur.o	\
+	Adaptor.o	\
+ 	SigNeur.o	\
 
 
 	
@@ -204,8 +204,8 @@ HEADERS=PyMooseUtil.h \
 	../randnum/Normal.h	\
 	../randnum/Poisson.h	\
 	../maindir/init.h		\
-#  	Adaptor.h	\
-#  	SigNeur.h	\
+  	Adaptor.h	\
+  	SigNeur.h	\
 
 
 #TEST_MAIN = TestPyMoose.o
