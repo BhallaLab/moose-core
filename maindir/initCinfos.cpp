@@ -115,8 +115,8 @@ void initCinfos(){
     static const Cinfo* ExponentialRngCinfo = initExponentialRngCinfo();
     static const Cinfo* GammaRngCinfo = initGammaRngCinfo();
     static const Cinfo* GeometryCinfo = initGeometryCinfo();
-	static const Cinfo* GHKCinfo = initGHKCinfo();
-	static const Cinfo* IntFireCinfo = initIntFireCinfo();
+    static const Cinfo* GHKCinfo = initGHKCinfo();
+    static const Cinfo* IntFireCinfo = initIntFireCinfo();
     static const Cinfo* CalculatorCinfo = initCalculatorCinfo();
 
 #ifdef USE_GSL
