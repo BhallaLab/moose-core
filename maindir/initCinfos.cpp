@@ -31,7 +31,7 @@ extern const Cinfo* initHSolveHubCinfo();
 extern const Cinfo* initHemispherePanelCinfo();
 extern const Cinfo* initGHKCinfo();
 extern const Cinfo* initIntFireCinfo();
-//extern const Cinfo* initCalculatorCinfo();
+extern const Cinfo* initCalculatorCinfo();
 #ifdef USE_MUSIC
 extern const Cinfo* initMusicCinfo();
 extern const Cinfo* initInputEventChannelCinfo();
@@ -117,7 +117,7 @@ void initCinfos(){
     static const Cinfo* GeometryCinfo = initGeometryCinfo();
 	static const Cinfo* GHKCinfo = initGHKCinfo();
 	static const Cinfo* IntFireCinfo = initIntFireCinfo();
-// static const Cinfo* CalculatorCinfo = initCalculatorCinfo();
+    static const Cinfo* CalculatorCinfo = initCalculatorCinfo();
 
 #ifdef USE_GSL
     static const Cinfo* GslIntegratorCinfo = initGslIntegratorCinfo();
