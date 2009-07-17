@@ -34,6 +34,7 @@
 #include <gsl/gsl_multiroots.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
+#include <gsl/gsl_eigen.h>
 
 #include "SteadyState.h"
 
@@ -42,6 +43,10 @@ int myGaussianDecomp( gsl_matrix* U );
 
 // Limit below which small numbers are treated as zero.
 const double SteadyState::EPSILON = 1e-9;
+
+// This fraction of molecules is used as an increment in computing the
+// Jacobian
+const double SteadyState::DELTA = 1e-6;
 /**
  * This is used by the multidimensional root finder
  */
@@ -121,6 +126,21 @@ const Cinfo* initSteadyStateCinfo()
 		new ValueFinfo( "rank", 
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &SteadyState::getRank ), 
+			&dummyFunc
+		),
+		new ValueFinfo( "stateType", 
+			ValueFtype1< unsigned int >::global(),
+			GFCAST( &SteadyState::getStateType ), 
+			&dummyFunc
+		),
+		new ValueFinfo( "nNegEigenvalues", 
+			ValueFtype1< unsigned int >::global(),
+			GFCAST( &SteadyState::getNnegEigenvalues ), 
+			&dummyFunc
+		),
+		new ValueFinfo( "nPosEigenvalues", 
+			ValueFtype1< unsigned int >::global(),
+			GFCAST( &SteadyState::getNposEigenvalues ), 
 			&dummyFunc
 		),
 		new LookupFinfo( "total",
@@ -228,7 +248,10 @@ SteadyState::SteadyState()
 		nVarMols_( 0 ),
 		nReacs_( 0 ),
 		rank_( 0 ),
-		reassignTotal_( 0 )
+		reassignTotal_( 0 ),
+		nNegEigenvalues_( 0 ),
+		nPosEigenvalues_( 0 ),
+		stateType_( 0 )
 {
 	;
 }
@@ -273,6 +296,18 @@ void SteadyState::setMaxIter( const Conn* c, unsigned int value ) {
 
 unsigned int SteadyState::getRank( Eref e ) {
 	return static_cast< const SteadyState* >( e.data() )->rank_;
+}
+
+unsigned int SteadyState::getStateType( Eref e ) {
+	return static_cast< const SteadyState* >( e.data() )->stateType_;
+}
+
+unsigned int SteadyState::getNnegEigenvalues( Eref e ) {
+	return static_cast< const SteadyState* >( e.data() )->nNegEigenvalues_;
+}
+
+unsigned int SteadyState::getNposEigenvalues( Eref e ) {
+	return static_cast< const SteadyState* >( e.data() )->nPosEigenvalues_;
 }
 
 void SteadyState::setConvergenceCriterion( const Conn* c, double value ) {
@@ -525,6 +560,71 @@ int iterate( const gsl_multiroot_fsolver_type* st, struct reac_info *ri,
 	return status;
 }
 
+void SteadyState::classifyState( const double* T )
+{
+	unsigned int nConsv = nVarMols_ - rank_;
+	gsl_matrix* J = gsl_matrix_calloc ( nVarMols_, nVarMols_ );
+	// double* yprime = new double[ nVarMols_ ];
+	// vector< double > yprime( nVarMols_, 0.0 );
+	// Generate an approximation to the Jacobean by generating small
+	// increments to each of the molecules in the steady state, one 
+	// at a time, and putting the resultant rate vector into a column
+	// of the J matrix.
+	// This needs a bit of heuristic to decide what is a 'small' increment.
+	// Use the totals for this.
+	double tot = 0.0;
+	for ( unsigned int i = 0; i < nConsv; ++i ) {
+		tot += T[i];
+	}
+	tot *= DELTA;
+	
+	// Fill up Jacobian
+	for ( unsigned int i = 0; i < nVarMols_; ++i ) {
+		double orig = s_->S()[i];
+		s_->S()[i] = orig + tot;
+		s_->updateV();
+		s_->S()[i] = orig;
+	// 	yprime.assign( nVarMols_, 0.0 )
+	// 	vector< double >::iterator y = yprime.begin();
+
+		// Compute the rates for each mol.
+		for ( unsigned int j = 0; j < nVarMols_; ++j ) {
+	//		*y++ = N_.computeRowRate( j, s_->velocity() );
+			double temp = s_->N().computeRowRate( j, s_->velocity() );
+			gsl_matrix_set( J, i, j, temp );
+		}
+	}
+
+	// Jacobian is now ready. Find eigenvalues.
+	gsl_vector_complex* vec = gsl_vector_complex_alloc( nVarMols_ );
+	gsl_eigen_nonsymm_workspace* workspace =
+		gsl_eigen_nonsymm_alloc( nVarMols_ );
+	int status = gsl_eigen_nonsymm( J, vec, workspace );
+	if ( status != GSL_SUCCESS ) {
+		cout << "Warning: failed to find eigenvalues. Status = " <<
+			status << endl;
+	} else { // Eigenvalues are ready. Classify state.
+		nNegEigenvalues_ = 0;
+		nPosEigenvalues_ = 0;
+		for ( unsigned int i = 0; i < nVarMols_; ++i ) {
+			gsl_complex z = gsl_vector_complex_get( vec, i );
+			double r = GSL_REAL( z );
+			nNegEigenvalues_ += ( r < -EPSILON );
+			nPosEigenvalues_ += ( r > EPSILON );
+		}
+		if ( nNegEigenvalues_ == rank_ ) 
+			stateType_ = 0; // Stable
+		else if ( nPosEigenvalues_ == rank_ )
+			stateType_ = 1; // Unstable
+		else 
+			stateType_ = 2; // Saddle
+	}
+
+	gsl_vector_complex_free( vec );
+	gsl_matrix_free ( J );
+	gsl_eigen_nonsymm_free( workspace );
+}
+
 /**
  * The settle function computes the steady state nearest the initial
  * conditions.
@@ -573,7 +673,7 @@ void SteadyState::settle( bool forceSetup )
 	status_ = string( gsl_strerror( status ) );
 	nIter_ = ri.nIter;
 	if ( status == GSL_SUCCESS ) {
-		
+		classifyState( T );
 		/*
 		 * Should happen in the ss_func.
 		for ( i = 0; i < nVarMols_; ++i )
