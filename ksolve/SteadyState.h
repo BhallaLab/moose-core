@@ -36,6 +36,9 @@ class SteadyState
 			const Conn* c, double val, const unsigned int& i );
 		double localGetTotal( const unsigned int& i ) const;
 		void localSetTotal( double val, const unsigned int& i );
+		static unsigned int getStateType( Eref e );
+		static unsigned int getNnegEigenvalues( Eref e );
+		static unsigned int getNposEigenvalues( Eref e );
 
 		///////////////////////////////////////////////////
 		// Msg Dest function definitions
@@ -51,7 +54,9 @@ class SteadyState
 		static void setMolN( const Conn* c, double y, unsigned int i );
 		static void assignStoichFunc( const Conn* c, void* stoich );
 		void assignStoichFuncLocal( void* stoich );
+		void classifyState( const double* T );
 		static const double EPSILON;
+		static const double DELTA;
 
 	private:
 		void setupSSmatrix();
@@ -77,6 +82,9 @@ class SteadyState
 
 		vector< double > total_;
 		bool reassignTotal_;
+		unsigned int nNegEigenvalues_;
+		unsigned int nPosEigenvalues_;
+		unsigned int stateType_;
 };
 
 extern const Cinfo* initSteadyStateCinfo();

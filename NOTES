@@ -8800,3 +8800,9 @@ and the output of these files is in fig2_fb_bis.plot and fig2_fb_neg.plot
 respectively.
 
 =============================================================================
+16 July 2009
+Implemented classifier for steady states. I generate the Jacobian
+and then use the GSL to compute eigenvalues. Tested, seems to work, but
+there are further tests to come.
+
+=============================================================================

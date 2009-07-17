@@ -110,6 +110,9 @@ class Stoich
 		int getStoichEntry( unsigned int i, unsigned int j ) {
 			return N_.get( i, j );
 		}
+		const KinSparseMatrix& N() const {
+			return N_;
+		} 
 #endif // USE_GSL
 		void updateV( );
 		/**
