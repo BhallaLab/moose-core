@@ -211,16 +211,18 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
 
     def loadIzhikevich_Neurons_Tutorial(self):
-        #spath = sys.path[0] + '../../DEMOS/pymoose/izhikevich/Izhikevich.py'
-        #self.mooseHandler.load(spath, 'MOOSE')
-        self.mooseHandler.load('../../DEMOS/pymoose/izhikevich/Izhikevich.py', 'MOOSE')
+#     self.mooseHandler.load('../../DEMOS/pymoose/izhikevich/Izhikevich.py', 'MOOSE')
+        spath = sys.path[0] + '/../../DEMOS/pymoose/izhikevich/Izhikevich.py'
+        self.mooseHandler.load(spath, 'MOOSE')
+        
 	
 
 
     def loadSquid_Axon_Tutorial(self):
-       #spath = sys.path[0] + '../../DEMOS/pymoose/squid/qtSquid.py'
-       #self.mooseHandler.load(spath, 'MOOSE')
-       self.mooseHandler.load('../../DEMOS/pymoose/squid/qtSquid.py', 'MOOSE')
+#     self.mooseHandler.load('../../DEMOS/pymoose/squid/qtSquid.py', 'MOOSE')
+       spath = sys.path[0] + '/../../DEMOS/pymoose/squid/qtSquid.py'
+       self.mooseHandler.load(spath, 'MOOSE')
+       
 	
 
 

@@ -80,7 +80,7 @@ class MHandler(QtCore.QThread):
         """Load a file of specified type and add the directory in search path"""
         fileName = str(fileName)
         
-        fileName = '"' + fileName.replace(self.tr('\\'), self.tr('/')) +'"'
+        fileName = fileName.replace(self.tr('\\'), self.tr('/'))
         directory = os.path.dirname(fileName)
         os.chdir(directory)
         #print 'directory:', directory
