@@ -185,7 +185,10 @@ def testSquid():
     iNaTable.useClock(2) 
     iKTable.useClock(2)
     nTable.useClock(2)
+    for msg in vmTable.inMessages(): print msg
+    for msg in vmTable.outMessages(): print msg
     squid.getContext().reset()
+    print 'Successfully reset.'
     squid.inject = 0.0
     squid.getContext().step(0.005)
     squid.inject = 0.1e-6
