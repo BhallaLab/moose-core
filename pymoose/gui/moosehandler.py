@@ -66,7 +66,7 @@ class MHandler(QtCore.QThread):
 	self.lib = moose.Neutral('/library')
 	self.data = moose.Neutral('/data')
 	self.proto = moose.Neutral('/proto')
-        self.runTime = 1e-2 # default value
+        self.runTime = 100.0 # default value
         self.updateInterval = 100 # stepsdefault value
         self.moleculeList = []
         self.stop_ = False
@@ -80,8 +80,9 @@ class MHandler(QtCore.QThread):
         """Load a file of specified type and add the directory in search path"""
         fileName = str(fileName)
         
-        fileName = fileName.replace(self.tr('\\'), self.tr('/'))
+        fileName = '"' + fileName.replace(self.tr('\\'), self.tr('/')) +'"'
         directory = os.path.dirname(fileName)
+        os.chdir(directory)
         #print 'directory:', directory
         fileType = str(fileType)
         if fileType == 'GENESIS' or fileType == 'KKIT':
@@ -92,8 +93,9 @@ class MHandler(QtCore.QThread):
         elif fileType == 'SBML':
             parent = '/kinetics'
             fileName.replace("\\", "/")
+#            print fileName
             command = 'readSBML ' + fileName + ' ' + parent
-#             print command
+#            print command
             self.context.runG(command)
             #print 'done loading sbml'
             parent = moose.Neutral(parent)
@@ -121,6 +123,10 @@ class MHandler(QtCore.QThread):
     
     def run(self):
 #         print self.__class__.__name__,':run'
+        if type(self.updateInterval) != int:
+            print 'Error: Please set no of steps between updates to an integer!'
+            print 'Default update interval = 100 steps'
+            self.updateInterval = 100
         lastTime = self.currentTime()
         #print 'runtime:', self.runTime, 'update steps:', self.updateInterval
         while self.currentTime() - lastTime < self.runTime and not self.stop_:
