@@ -8804,5 +8804,14 @@ respectively.
 Implemented classifier for steady states. I generate the Jacobian
 and then use the GSL to compute eigenvalues. Tested, seems to work, but
 there are further tests to come.
+checked in as revision 1282.
+
+=============================================================================
+19 July 2009
+In heavy use over the last few days, the eigenvalue state classifier seems
+OK.
+
+Did some updates to the SteadyState object to better handle error
+status and to do slightly better on state classification.
 
 =============================================================================
