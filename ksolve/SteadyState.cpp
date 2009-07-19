@@ -131,7 +131,8 @@ const Cinfo* initSteadyStateCinfo()
 		new ValueFinfo( "stateType", 
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &SteadyState::getStateType ), 
-			&dummyFunc
+			&dummyFunc,
+			"0: stable; 1: unstable; 2: saddle; 3: other"
 		),
 		new ValueFinfo( "nNegEigenvalues", 
 			ValueFtype1< unsigned int >::global(),
@@ -142,6 +143,12 @@ const Cinfo* initSteadyStateCinfo()
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &SteadyState::getNposEigenvalues ), 
 			&dummyFunc
+		),
+		new ValueFinfo( "solutionStatus", 
+			ValueFtype1< unsigned int >::global(),
+			GFCAST( &SteadyState::getSolutionStatus ), 
+			&dummyFunc,
+			"0: Good; 1: Failed to find steady states; 2: Failed to find eigenvalues"
 		),
 		new LookupFinfo( "total",
 			LookupFtype< double, unsigned int >::global(),
@@ -251,7 +258,8 @@ SteadyState::SteadyState()
 		reassignTotal_( 0 ),
 		nNegEigenvalues_( 0 ),
 		nPosEigenvalues_( 0 ),
-		stateType_( 0 )
+		stateType_( 0 ),
+		solutionStatus_( 0 )
 {
 	;
 }
@@ -308,6 +316,10 @@ unsigned int SteadyState::getNnegEigenvalues( Eref e ) {
 
 unsigned int SteadyState::getNposEigenvalues( Eref e ) {
 	return static_cast< const SteadyState* >( e.data() )->nPosEigenvalues_;
+}
+
+unsigned int SteadyState::getSolutionStatus( Eref e ) {
+	return static_cast< const SteadyState* >( e.data() )->solutionStatus_;
 }
 
 void SteadyState::setConvergenceCriterion( const Conn* c, double value ) {
@@ -603,6 +615,7 @@ void SteadyState::classifyState( const double* T )
 	if ( status != GSL_SUCCESS ) {
 		cout << "Warning: failed to find eigenvalues. Status = " <<
 			status << endl;
+		solutionStatus_ = 2; // Steady state OK, eig classification failed
 	} else { // Eigenvalues are ready. Classify state.
 		nNegEigenvalues_ = 0;
 		nPosEigenvalues_ = 0;
@@ -616,8 +629,10 @@ void SteadyState::classifyState( const double* T )
 			stateType_ = 0; // Stable
 		else if ( nPosEigenvalues_ == rank_ )
 			stateType_ = 1; // Unstable
-		else 
+		else  if (nNegEigenvalues_ == rank_ - 1)
 			stateType_ = 2; // Saddle
+		else
+			stateType_ = 3; // Other
 	}
 
 	gsl_vector_complex_free( vec );
@@ -673,6 +688,7 @@ void SteadyState::settle( bool forceSetup )
 	status_ = string( gsl_strerror( status ) );
 	nIter_ = ri.nIter;
 	if ( status == GSL_SUCCESS ) {
+		solutionStatus_ = 0; // Good solution
 		classifyState( T );
 		/*
 		 * Should happen in the ss_func.
@@ -682,6 +698,7 @@ void SteadyState::settle( bool forceSetup )
 	} else {
 		cout << "Warning: SteadyState iteration failed, status = " <<
 			status_ << ", nIter = " << nIter_ << endl;
+		solutionStatus_ = 1; // Steady state failed.
 	}
 
 	// Clean up.

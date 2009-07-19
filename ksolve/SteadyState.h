@@ -39,6 +39,7 @@ class SteadyState
 		static unsigned int getStateType( Eref e );
 		static unsigned int getNnegEigenvalues( Eref e );
 		static unsigned int getNposEigenvalues( Eref e );
+		static unsigned int getSolutionStatus( Eref e );
 
 		///////////////////////////////////////////////////
 		// Msg Dest function definitions
@@ -85,6 +86,7 @@ class SteadyState
 		unsigned int nNegEigenvalues_;
 		unsigned int nPosEigenvalues_;
 		unsigned int stateType_;
+		unsigned int solutionStatus_;
 };
 
 extern const Cinfo* initSteadyStateCinfo();
