@@ -3875,7 +3875,8 @@ void do_openfile(int argc, const char** const argv, Id s) {
 void do_writefile(int argc, const char** const argv, Id s) {
 	//writefile <filename> text
 	if ( argc < 2 ) {
-		cout << "Too less arguments" << endl;
+		cout << "usage: " << argv[0] << 
+			" filename [arg1 ...] [-n[onewline] [-f[ormat] format]\n";
 		return;
 	}
 	bool newline = true;
@@ -3883,12 +3884,12 @@ void do_writefile(int argc, const char** const argv, Id s) {
 	string format = "%s";
 	int max = argc;
 	for (int i = 2; i < argc; i++) {
-		if (strcmp(argv[i], "-nonewline") == 0) {
+		if (strncmp(argv[i], "-n", 2) == 0) {
 			newline = false;
 			if (max > i) 
 				max = i;
 		}
-		if (strcmp(argv[i], "-format") == 0) {
+		if (strncmp(argv[i], "-f", 2) == 0) {
 			if (i+1 >= argc) {
 				cout << "writefile::format not mentioned." << endl;
 				continue;
