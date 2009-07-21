@@ -8815,3 +8815,8 @@ Did some updates to the SteadyState object to better handle error
 status and to do slightly better on state classification.
 
 =============================================================================
+20 July 2009
+Minor fix to writefile command to clean up error message and options.
+checked in as version 1288
+
+=============================================================================
