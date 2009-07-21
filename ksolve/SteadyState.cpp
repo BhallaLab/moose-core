@@ -593,6 +593,16 @@ void SteadyState::classifyState( const double* T )
 	// Fill up Jacobian
 	for ( unsigned int i = 0; i < nVarMols_; ++i ) {
 		double orig = s_->S()[i];
+		if ( isnan( orig ) ) {
+			cout << "Warning: SteadyState::classifyState: orig=nan\n";
+			solutionStatus_ = 2; // Steady state OK, eig failed
+			return;
+		}
+		if ( isnan( tot ) ) {
+			cout << "Warning: SteadyState::classifyState: tot=nan\n";
+			solutionStatus_ = 2; // Steady state OK, eig failed
+			return;
+		}
 		s_->S()[i] = orig + tot;
 		s_->updateV();
 		s_->S()[i] = orig;
@@ -613,7 +623,7 @@ void SteadyState::classifyState( const double* T )
 		gsl_eigen_nonsymm_alloc( nVarMols_ );
 	int status = gsl_eigen_nonsymm( J, vec, workspace );
 	if ( status != GSL_SUCCESS ) {
-		cout << "Warning: failed to find eigenvalues. Status = " <<
+		cout << "Warning: SteadyState::classifyState failed to find eigenvalues. Status = " <<
 			status << endl;
 		solutionStatus_ = 2; // Steady state OK, eig classification failed
 	} else { // Eigenvalues are ready. Classify state.
@@ -713,7 +723,7 @@ int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 
 	for ( int i = 0; i < ri->num_mols; ++i ) {
 		double temp = op( gsl_vector_get( x, i ) );
-		if ( isnan( temp ) )
+		if ( isnan( temp ) || isinf( temp ) )
 			return GSL_ERANGE;
 		else
 			s->S()[i] = temp;
