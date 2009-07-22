@@ -18,8 +18,7 @@ class Stoich
 #endif
 	public:
 		Stoich();
-		virtual ~Stoich()
-		{;}
+		virtual ~Stoich();
 		
 		///////////////////////////////////////////////////
 		// Field function definitions
