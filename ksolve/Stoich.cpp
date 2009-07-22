@@ -286,6 +286,13 @@ Stoich::Stoich()
 	useOneWayReacs_ = 0;
 	lasty_ = 0;
 }
+
+Stoich::~Stoich()
+{
+	for ( vector< RateTerm* >::iterator i = rates_.begin(); 
+		i != rates_.end(); ++i )
+		delete (*i);
+}
 		
 ///////////////////////////////////////////////////
 // Field function definitions
