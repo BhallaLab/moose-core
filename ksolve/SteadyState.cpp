@@ -596,11 +596,13 @@ void SteadyState::classifyState( const double* T )
 		if ( isnan( orig ) ) {
 			cout << "Warning: SteadyState::classifyState: orig=nan\n";
 			solutionStatus_ = 2; // Steady state OK, eig failed
+			gsl_matrix_free ( J );
 			return;
 		}
 		if ( isnan( tot ) ) {
 			cout << "Warning: SteadyState::classifyState: tot=nan\n";
 			solutionStatus_ = 2; // Steady state OK, eig failed
+			gsl_matrix_free ( J );
 			return;
 		}
 		s_->S()[i] = orig + tot;
