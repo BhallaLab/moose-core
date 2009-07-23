@@ -132,7 +132,7 @@ const Cinfo* initSteadyStateCinfo()
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &SteadyState::getStateType ), 
 			&dummyFunc,
-			"0: stable; 1: unstable; 2: saddle; 3: osc?; 4: other"
+			"0: stable; 1: unstable; 2: saddle; 3: osc?; 4: one near-zero eigenvalue; 5: other"
 		),
 		new ValueFinfo( "nNegEigenvalues", 
 			ValueFtype1< unsigned int >::global(),
@@ -640,22 +640,18 @@ void SteadyState::classifyState( const double* T )
 			// This means we have several zero eigenvalues.
 		}
 
-		// This is a little nasty. I will assume a stable solution if
-		// there isn't a clear postive eigenvalue. All cases I've seen
-		// in this situation have been stable.
-		if ( nNegEigenvalues_ == ( rank_ - 1) && nPosEigenvalues_ == 0 ) {
-			nNegEigenvalues_ = rank_;
-		}
 		if ( nNegEigenvalues_ == rank_ ) 
 			stateType_ = 0; // Stable
 		else if ( nPosEigenvalues_ == rank_ ) // Never see it.
 			stateType_ = 1; // Unstable
-		else  if (nNegEigenvalues_ == rank_ - 1)
+		else  if (nPosEigenvalues_ == 1)
 			stateType_ = 2; // Saddle
 		else if ( nPosEigenvalues_ >= 2 )
 			stateType_ = 3; // putative oscillatory
-		else 
-			stateType_ = 4; // Other
+		else if ( nNegEigenvalues_ == ( rank_ - 1) && nPosEigenvalues_ == 0 )
+			stateType_ = 4; // one zero or unclassified eigenvalue. Messy.
+		else
+			stateType_ = 5; // Other
 	}
 
 	gsl_vector_complex_free( vec );
