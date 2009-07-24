@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul  1 12:58:00 2009 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  6 18:56:07 2009 (+0530)
+# Last-Updated: Fri Jul 24 13:37:46 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 316
+#     Update #: 317
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -101,79 +101,79 @@ class MoosePlots(QtGui.QTableWidget):
                 print "File Type:", filetype, "- Don't know where to look for plot data"
                 
             
-            for container in mooseContainers:
-                for child_id in container.children():
-                    child_obj = moose.Neutral(child_id)
-                    if child_obj.className == 'Neutral':                        
-                        for table_id in child_obj.children():
-                            table = moose.Table(table_id)
-                            if table.className != 'Table':
-                                continue
-                            else:
-                                self.container_table_map[child_obj.name].add(table)
-                    elif child_obj.className == 'Table':
-                        self.container_table_map[child_obj.name].add(moose.Table(child_id))
-                    else:
-                        print 'Could not find any table under containers'
+        for container in mooseContainers:
+            for child_id in container.children():
+                child_obj = moose.Neutral(child_id)
+                if child_obj.className == 'Neutral':                        
+                    for table_id in child_obj.children():
+                        table = moose.Table(table_id)
+                        if table.className != 'Table':
+                            continue
+                        else:
+                            self.container_table_map[child_obj.name].add(table)
+                elif child_obj.className == 'Table':
+                    self.container_table_map[child_obj.name].add(moose.Table(child_id))
+                else:
+                    print 'Could not find any table under containers'
             
-            # Now create the plots
-            plot_count = len(self.container_table_map.keys())
-            if plot_count is 0:
-                print 'Nothing to plot'
-                return
-
-            rows = int(round(math.sqrt(plot_count)))
-            if rows is 0:
-                rows = 1
-            cols = int(math.ceil(float(plot_count) / rows))
-            row = 0
-            col = 0
-            print '#########: plots:', plot_count, ' rows:', rows, ' cols:', cols
-            self.setRowCount(rows)
-            self.setColumnCount(cols)
-            plot = None
-            for name, dataset in self.container_table_map.items():
-                if len(dataset) is 0:
-                    self.container_table_map.pop(name)
+        # Now create the plots
+        plot_count = len(self.container_table_map.keys())
+        if plot_count is 0:
+            print 'Nothing to plot'
+            return
+        
+        rows = int(round(math.sqrt(plot_count)))
+        if rows is 0:
+            rows = 1
+        cols = int(math.ceil(float(plot_count) / rows))
+        row = 0
+        col = 0
+        print '#########: plots:', plot_count, ' rows:', rows, ' cols:', cols
+        self.setRowCount(rows)
+        self.setColumnCount(cols)
+        plot = None
+        for name, dataset in self.container_table_map.items():
+            if len(dataset) is 0:
+                self.container_table_map.pop(name)
+                continue
+            plot = Qwt.QwtPlot(self)
+            sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+            plot.setSizePolicy(sizePolicy)
+            plot.insertLegend(Qwt.QwtLegend(), Qwt.QwtPlot.BottomLegend)
+            color_no = 0
+            for table in dataset:
+                if len(table) == 0:
                     continue
-                plot = Qwt.QwtPlot(self)
-                sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-                plot.setSizePolicy(sizePolicy)
-                plot.insertLegend(Qwt.QwtLegend(), Qwt.QwtPlot.BottomLegend)
-                color_no = 0
-                for table in dataset:
-                    if len(table) == 0:
-                        continue
-                    self.plot_data_map[plot].add(table)
-                    curve = Qwt.QwtPlotCurve(self.tr(table.name))
-                    self.table_curve_map[table.path] = curve
+                self.plot_data_map[plot].add(table)
+                curve = Qwt.QwtPlotCurve(self.tr(table.name))
+                self.table_curve_map[table.path] = curve
 #                     print 'Created curve for:', table.path
-                    ydata = numpy.array(table)            
-                    xdata = numpy.linspace(0, mooseHandler.currentTime(), len(table))
-                    curve.setData(xdata, ydata)
-                    curve.setPen(MoosePlots.colors[color_no])
-                    color_no += 1
-                    curve.attach(plot)
-                    plot.replot()
-                self.setCellWidget(row, col, plot)
-                col += 1
-                if col >= cols:
-                    row += 1
-                    col = 0
-            if plot is not None:
-                width = plot.sizeHint().width()
-                height = plot.sizeHint().height()
-                for col in range(self.verticalHeader().count()):
-                    self.verticalHeader().resizeSection(col, width)
-                    print 'resized col:', col
-                for row in range(self.horizontalHeader().count()):
-                    self.horizontalHeader().resizeSection(row, height)
-                    print 'resized row:', row
+                ydata = numpy.array(table)            
+                xdata = numpy.linspace(0, mooseHandler.currentTime(), len(table))
+                curve.setData(xdata, ydata)
+                curve.setPen(MoosePlots.colors[color_no])
+                color_no += 1
+                curve.attach(plot)
+                plot.replot()
+            self.setCellWidget(row, col, plot)
+            col += 1
+            if col >= cols:
+                row += 1
+                col = 0
+        if plot is not None:
+            width = plot.sizeHint().width()
+            height = plot.sizeHint().height()
+            for col in range(self.verticalHeader().count()):
+                self.verticalHeader().resizeSection(col, width)
+                print 'resized col:', col
+            for row in range(self.horizontalHeader().count()):
+                self.horizontalHeader().resizeSection(row, height)
+                print 'resized row:', row
 #                 self.verticalHeader().setDefaultSectionSize(width)
 #                 self.horizontalHeader().setDefaultSectionSize(height)
 #                 self.horizontalHeader().resizeSections()
 #                 self.verticalHeader().resizeSections()
-                print height, width
+            print height, width
                 
         self.update()
 
