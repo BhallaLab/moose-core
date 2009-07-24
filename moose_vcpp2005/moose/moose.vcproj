@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;D:\sbml\libsbml-3.3.2\include&quot;"
+				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;D:\DOWNLOADS\gsl-1.11-windows-binaries\gsl\include&quot;;&quot;D:\sbml\libsbml-3.3.2\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_SBML"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,10 +62,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				UseLibraryDependencyInputs="true"
-				AdditionalDependencies="libgsl.a libgslcblas.a mpi.lib Ws2_32.lib cxx.lib bzip2.lib libsbmlD.lib libexpat.lib zlib.lib"
+				AdditionalDependencies="gsl_d.lib cblas_d.lib mpi.lib Ws2_32.lib cxx.lib bzip2.lib libsbmlD.lib libexpat.lib zlib.lib"
 				ShowProgress="2"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;D:\sbml\libsbml-3.3.2\win32\bin&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
+				AdditionalLibraryDirectories="&quot;D:\DOWNLOADS\gsl-1.11-windows-binaries\gsl\lib&quot;;&quot;D:\sbml\libsbml-3.3.2\win32\bin&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -125,7 +125,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;D:\sbml\libsbml-3.3.2\include&quot;"
+				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;D:\DOWNLOADS\gsl-1.11-windows-binaries\gsl\include&quot;;&quot;D:\sbml\libsbml-3.3.2\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;USE_GENESIS_PARSER;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_GSL;USE_SBML"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="2"
@@ -149,8 +149,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				UseLibraryDependencyInputs="false"
-				AdditionalDependencies="libgsl.a libgslcblas.a zlib.lib bzip2.lib libsbml.lib libexpat.lib"
-				AdditionalLibraryDirectories="&quot;D:\sbml\libsbml-3.3.2\win32\bin&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
+				AdditionalDependencies="cblas.lib gsl.lib zlib.lib bzip2.lib libsbml.lib libexpat.lib"
+				AdditionalLibraryDirectories="&quot;D:\sbml\libsbml-3.3.2\win32\bin&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;D:\DOWNLOADS\gsl-1.11-windows-binaries\gsl\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -1334,6 +1334,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\ksolve\SteadyState.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\ksolve\Stoich.cpp"
 					>
 					<FileConfiguration
@@ -2177,6 +2181,10 @@
 				</File>
 				<File
 					RelativePath="..\..\ksolve\RateTerm.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\SteadyState.h"
 					>
 				</File>
 				<File
