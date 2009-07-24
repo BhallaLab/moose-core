@@ -92,9 +92,9 @@ class MHandler(QtCore.QThread):
             self.context.loadG(fileName)
         elif fileType == 'SBML':
             parent = '/kinetics'
-            fileName.replace("\\", "/")
+            
 #            print fileName
-            command = 'readSBML ' + fileName + ' ' + parent
+            command = 'readSBML "' + fileName + '" ' + parent
 #            print command
             self.context.runG(command)
             #print 'done loading sbml'
