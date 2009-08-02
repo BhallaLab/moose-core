@@ -638,30 +638,13 @@ Id PyMooseContext::getShell()
 PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string shellName)
 {
     static PyMooseContext* context = 0;
-    
     if (context)
     {
         return context;
     }
     
-    Property::initialize("",0); // create default Property map
-    
-    static const Cinfo* shellCinfo = initShellCinfo();
-    static const Cinfo* tickCinfo = initTickCinfo();
-    static const Cinfo* clockJobCinfo = initClockJobCinfo();
-    static const Cinfo* tableCinfo = initTableCinfo();
-    static const Cinfo* pyMooseContextCinfo = initPyMooseContextCinfo();
-
-    
     Element* shell;
     bool ret;
-    // Call the global initialization function
-    int argc =0; char** argv = NULL; // these are to comply with
-                                     // signature of init - no idea
-                                     // why int& and char**& instead
-                                     // of simple int and char**
-	
-    init(argc, argv);
 #ifdef DO_UNIT_TESTS
 	// if ( mynode == 0 )
 	if ( 1 )
@@ -682,8 +665,9 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
 	}
 #endif
 
-
+#ifdef DEBUG
     cout << "Trying to find shell with name " << shellName << endl;
+#endif
     // From maindir/main.cpp: parser requires to be created before the clock job
     Element * genesisSli = makeGenesisParser();
 
@@ -869,6 +853,11 @@ bool PyMooseContext::exists(string path)
 {
     Id id(path);    
     return !id.bad();    
+}
+
+void PyMooseContext::addField(string classname, string fieldname)
+{
+    send2<Id, string>(myId_(), addfieldSlot, Id(classname), fieldname);
 }
 
 vector < Id > PyMooseContext::getChildren(Id id)

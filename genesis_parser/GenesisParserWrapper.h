@@ -54,6 +54,7 @@ class GenesisParserWrapper: public myFlexLexer
 		void showClocks( Element* e );
 
 		bool tabCreate( int argc, const char** argv, Id s );
+                bool channelTabCreate(Id s, Id elmId, char gate, string xdivs, string xmin, string xmax, string ydivs="", string ymin="", string ymax="");
 		char** elementList( const string& path, Id s);
 		bool fieldExists( Id eid, const string& field, Id s );
 		string getFieldValue();

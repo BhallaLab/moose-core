@@ -860,6 +860,7 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "symcompartment" ] = "SymCompartment";
 	classnames[ "hh_channel" ] = "HHChannel";
 	classnames[ "tabchannel" ] = "HHChannel";
+	classnames[ "tab2Dchannel" ] = "HHChannel2D";
 	classnames[ "vdep_channel" ] = "HHChannel";
 	classnames[ "vdep_gate" ] = "HHGate";
 	classnames[ "tabgate" ] = "HHGate";
@@ -1329,119 +1330,140 @@ bool GenesisParserWrapper::tabCreate( int argc, const char** argv, Id s )
 		if ( fieldValue_.length() == 0 ) // Nothing came back
 			return 0;
 		
-		if ( fieldValue_ == "Table" && argc != 6 ) {
+		if ( fieldValue_ == "Table" ){
+                    if ( argc != 6 ) {
 			cerr << "Error: GenesisParserWrapper::tabCreate: usage:"
 				<< " call element TABCREATE xdivs xmin xmax\n";
 			return 0;
+                    }
+                    send3< Id, string, string >( s(),
+                                                 setFieldSlot, elmId, "xdivs", argv[ 3 ] );
+                    send3< Id, string, string >( s(),
+                                                 setFieldSlot, elmId, "xmin", argv[ 4 ] );
+                    send3< Id, string, string >( s(),
+                                                 setFieldSlot, elmId, "xmax", argv[ 5 ] );
+                    return 1;
 		}
 		
-		if ( fieldValue_ == "HHChannel" )
-			if ( argc != 7 || strlen( argv[ 3 ] ) != 1 )
+		if ( fieldValue_ == "HHChannel" ){
+                    if ( argc != 7 || strlen( argv[ 3 ] ) != 1 )
+                    {
+                        cerr << "Error: GenesisParserWrapper::tabCreate: usage:"
+                             << " call element TABCREATE gate xdivs xmin xmax\n";
+				return 0;
+                    }
+                    char gate = toupper( argv[ 3 ][ 0 ] );
+                    if ( gate != 'X' && gate != 'Y' && gate != 'Z' ) {
+				cerr << "Error: GenesisParserWrapper::tabCreate: usage:"
+                                     << " call element TABCREATE gate xdivs xmin xmax."
+                                     << " Gate should be X, Y or Z\n";
+				return 0;
+                    }
+                    return channelTabCreate(s, elmId, gate, string(argv[4]), string(argv[5]), string(argv[6]));
+		}
+
+		if ( fieldValue_ == "HHChannel2D" ){
+			if ( argc != 10 || strlen( argv[ 3 ] ) != 1 )
 			{
 				cerr << "Error: GenesisParserWrapper::tabCreate: usage:"
-					<< " call element TABCREATE gate xdivs xmin xmax\n";
+					<< " call element TABCREATE gate vdivs vmin vmax concdivs concmin concmax\n";
 				return 0;
 			}
-		
-		if ( fieldValue_ == "Table" ) {
-			send3< Id, string, string >( s(),
-				setFieldSlot, elmId, "xdivs", argv[ 3 ] );
-			send3< Id, string, string >( s(),
-				setFieldSlot, elmId, "xmin", argv[ 4 ] );
-			send3< Id, string, string >( s(),
-				setFieldSlot, elmId, "xmax", argv[ 5 ] );
-			return 1;
+                    char gate = toupper( argv[ 3 ][ 0 ] );
+                    if ( gate != 'X' && gate != 'Y' && gate != 'Z' ) {
+                        cerr << "Error: GenesisParserWrapper::tabCreate: usage:"
+                             << " call element TABCREATE gate xdivs xmin xmax ydivs ymin ymax."
+                             << " Gate should be X, Y or Z\n";
+                        return 0;
+                    }
+                    return channelTabCreate(s, elmId, gate, string(argv[4]), string(argv[5]), string(argv[6]), string(argv[7]), string(argv[8]), string(argv[9]));
 		}
-		
-		if ( fieldValue_ == "HHChannel" ) {
-			// TABCREATE on HHChannel requires the assignment of something like:
-			// 
-			// setfield /squid/Na/xGate/A xmin {XMIN}
-			// setfield /squid/Na/xGate/A xmax {XMAX}
-			// setfield /squid/Na/xGate/A xdivs {XDIVS}
+        }
+        return 0;
+}
+
+bool GenesisParserWrapper::channelTabCreate(Id s, Id elmId, char gate, string xdivs, string xmin, string xmax, string ydivs, string ymin, string ymax)
+{
+    
+    /*
+     * One way to create the gate and the interpols is to just set, lets
+     * say, the Xpower field on the channel to some value. This will
+     * implicitly create the corresponding (X in this case) gate and its
+     * interpolation tables.
+     * 
+     * This turns out to be a problem when doing TABCREATE on a channel
+     * that is global (for example, by being in /library). Implicit
+     * creation means that every node will choose separate ids for the
+     * locally generated objects.
+     * 
+     * To avoid this, we create the gate and its interpols explicitly below.
+     * 
+     * A final twist: If the channel, and hence the gate, is not a global
+     * after all, then we leave the gate to its own devices. The gate will
+     * detect that it is not global, and create its children Interpols
+     * A & B implicitly. Otherwise we generate 2 global Ids, and send
+     * them to the gates on all nodes, requesting them to create the
+     * Interpols.
+     */
 			
-			char gate = toupper( argv[ 3 ][ 0 ] );
-			if ( gate != 'X' && gate != 'Y' && gate != 'Z' ) {
-				cerr << "Error: GenesisParserWrapper::tabCreate: usage:"
-					<< " call element TABCREATE gate xdivs xmin xmax."
-					<< " Gate should be X, Y or Z\n";
-				return 0;
-			}
+    /*
+     * Creating gate
+     */
+    string gateName = string( 1, tolower( gate ) ) + "Gate";
+    string gatePath = elmId.path() + "/" + gateName;
+    Id gateId( gatePath );
+    if ( gateId.zero() || gateId.bad() ) {
+        /*
+        // Implicit creation of gate and interpols
+        vector< Id > el( 1, elmId );
+        send3< vector< Id >, string, string >( s(),
+        setVecFieldSlot, el, string( argv[ 3 ] ) + "power", "1.0" );
+        */
+				
+        send2< Id, string >( s(),
+                             createGateSlot, elmId, string( 1, gate ) );
+				
+        gateId = Id( gatePath );
+    }
+    if ( gateId.zero() || gateId.bad() ) {
+        cerr << "Error: GenesisParserWrapper::tabCreate:"
+             << " Unable to create gate " << gate
+             << " under channel " << elmId.path() << ".\n";
+        return 0;
+    }
 			
-			/*
-			 * One way to create the gate and the interpols is to just set, lets
-			 * say, the Xpower field on the channel to some value. This will
-			 * implicitly create the corresponding (X in this case) gate and its
-			 * interpolation tables.
-			 * 
-			 * This turns out to be a problem when doing TABCREATE on a channel
-			 * that is global (for example, by being in /library). Implicit
-			 * creation means that every node will choose separate ids for the
-			 * locally generated objects.
-			 * 
-			 * To avoid this, we create the gate and its interpols explicitly below.
-			 * 
-			 * A final twist: If the channel, and hence the gate, is not a global
-			 * after all, then we leave the gate to its own devices. The gate will
-			 * detect that it is not global, and create its children Interpols
-			 * A & B implicitly. Otherwise we generate 2 global Ids, and send
-			 * them to the gates on all nodes, requesting them to create the
-			 * Interpols.
-			 */
-			
-			/*
-			 * Creating gate
-			 */
-			string gateName = string( 1, tolower( gate ) ) + "Gate";
-			string gatePath = elmPath + "/" + gateName;
-			Id gateId( gatePath );
-			if ( gateId.zero() || gateId.bad() ) {
-				/*
-				// Implicit creation of gate and interpols
-				vector< Id > el( 1, elmId );
-				send3< vector< Id >, string, string >( s(),
-						setVecFieldSlot, el, string( argv[ 3 ] ) + "power", "1.0" );
-				*/
+    /*
+     * Interpols created. Set fields.
+     */
+    string tables[ ] = { "A", "B" };
+    for ( unsigned int i = 0; i < 2; i++ ) {
+        string tabName = tables[ i ];
+        string tabPath = gatePath + "/" + tabName;
+        Id tabId( tabPath );
 				
-				send2< Id, string >( s(),
-					createGateSlot, elmId, string( 1, gate ) );
+        if ( tabId.zero() || tabId.bad() ) {
+            cerr << "Error: GenesisParserWrapper::tabCreate:"
+                 << " Unable to create Interpol " << tabName
+                 << " under gate " << gatePath << ".\n";
+            return 0;
+        }
 				
-				gateId = Id( gatePath );
-			}
-			if ( gateId.zero() || gateId.bad() ) {
-				cerr << "Error: GenesisParserWrapper::tabCreate:"
-					<< " Unable to create gate " << argv[ 3 ]
-					<< " under channel " << elmPath << ".\n";
-				return 0;
-			}
-			
-			/*
-			 * Interpols created. Set fields.
-			 */
-			string tables[ ] = { "A", "B" };
-			for ( unsigned int i = 0; i < 2; i++ ) {
-				string tabName = tables[ i ];
-				string tabPath = gatePath + "/" + tabName;
-				Id tabId( tabPath );
-				
-				if ( tabId.zero() || tabId.bad() ) {
-					cerr << "Error: GenesisParserWrapper::tabCreate:"
-						<< " Unable to create Interpol " << tabName
-						<< " under gate " << gatePath << ".\n";
-					return 0;
-				}
-				
-				send3< Id, string, string >( s(),
-					setFieldSlot, tabId, "xdivs", argv[ 4 ] );
-				send3< Id, string, string >( s(),
-					setFieldSlot, tabId, "xmin", argv[ 5 ] );
-				send3< Id, string, string >( s(),
-					setFieldSlot, tabId, "xmax", argv[ 6 ] );
-			}
-			return 1;
-		}
-	}
-	return 0;
+        send3< Id, string, string >( s(),
+                                     setFieldSlot, tabId, "xdivs", xdivs );
+        send3< Id, string, string >( s(),
+                                     setFieldSlot, tabId, "xmin", xmin );
+        send3< Id, string, string >( s(),
+                                     setFieldSlot, tabId, "xmax", xmax );
+        if (!ydivs.empty() && !ymin.empty() && !ymax.empty()) {
+            send3< Id, string, string >( s(),
+                                         setFieldSlot, tabId, "ydivs", ydivs );
+            send3< Id, string, string >( s(),
+                                         setFieldSlot, tabId, "ymin", ymin );
+            send3< Id, string, string >( s(),
+                                         setFieldSlot, tabId, "ymax", ymax );
+        }
+    }
+    return 1;
 }
 
 void do_call( int argc, const char** const argv, Id s )
