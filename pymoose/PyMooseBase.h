@@ -14,7 +14,7 @@ namespace pymoose
     
     class PyMooseBase
     {
-      public:  
+      public:
         PyMooseBase(std::string className, std::string objectName, Id parentId);
         PyMooseBase(std::string className, std::string path);
         PyMooseBase(std::string className, std::string objectName, PyMooseBase& parent);
@@ -84,12 +84,13 @@ namespace pymoose
     
       private:
         static PyMooseBase* root_;    
-        static std::string  separator_;
+        static const char*  separator_;
         static pymoose::PyMooseContext* context_;
         std::vector <std::string> incomingMessages_;
         std::vector <std::string> outgoingMessages_;
     };
 } // namespace pymoose
+void initPyMoose();
 
 #endif // _PYMOOSE_BASE_H
 

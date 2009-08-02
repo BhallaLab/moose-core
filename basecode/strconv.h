@@ -53,7 +53,8 @@ template<> bool str2val< vector< string > >(
 template<> bool str2val< const Ftype* >( 
 	const string& s, const Ftype* &ret );
 template<> bool str2val< ProcInfo >( const string& s, ProcInfo& ret );
-
+template<> bool str2val< vector<int> >(const string& s, vector<int> & ret);
+template<> bool str2val< vector<unsigned int> >(const string& s, vector<unsigned int> & ret);
 template< class T > bool str2val( const string& s, T& v ) {
 	cerr << "This is the default str2val.\n";
 	return 0;

@@ -43,6 +43,23 @@ const Cinfo* initInterpol2DCinfo()
 			GFCAST( &Interpol2D::getDy ),
 			RFCAST( &Interpol2D::setDy )
 		),
+                new LookupFinfo( "table",
+			LookupFtype< double, vector< unsigned int > >::global(),
+			GFCAST( &Interpol2D::getTable2D ),
+			RFCAST( &Interpol2D::setTable2D )
+		),		
+		new LookupFinfo( "table2D",
+			LookupFtype< double, vector< unsigned int > >::global(),
+			GFCAST( &Interpol2D::getTable2D ),
+			RFCAST( &Interpol2D::setTable2D )
+		),
+		
+		new LookupFinfo( "table2D",
+			LookupFtype< double, vector< unsigned int > >::global(),
+			GFCAST( &Interpol2D::getTable2D ),
+			RFCAST( &Interpol2D::setTable2D )
+		),
+		
 		new LookupFinfo( "table2D",
 			LookupFtype< double, vector< unsigned int > >::global(),
 			GFCAST( &Interpol2D::getTable2D ),
