@@ -123,10 +123,12 @@ void initCinfos(){
     static const Cinfo* GslIntegratorCinfo = initGslIntegratorCinfo();
 #endif
     static const Cinfo* GssaStoichCinfo = initGssaStoichCinfo();
-    static const Cinfo* HHChannelCinfo = initHHChannelCinfo();
-    static const Cinfo* HHChannel2DCinfo = initHHChannel2DCinfo();
+    static const Cinfo* InterpolCinfo = initInterpolCinfo();
+    static const Cinfo* Interpol2DCinfo = initInterpol2DCinfo();
     static const Cinfo* HHGateCinfo = initHHGateCinfo();
     static const Cinfo* HHGate2DCinfo = initHHGate2DCinfo();
+    static const Cinfo* HHChannelCinfo = initHHChannelCinfo();
+    static const Cinfo* HHChannel2DCinfo = initHHChannel2DCinfo();
     static const Cinfo* HSolveCinfo = initHSolveCinfo();
     static const Cinfo* HSolveHubCinfo = initHSolveHubCinfo();
     static const Cinfo* HemispherePanelCinfo = initHemispherePanelCinfo();
@@ -138,8 +140,6 @@ void initCinfos(){
     static const Cinfo* OutputEventPortCinfo = initOutputEventPortCinfo();
 #endif
     static const Cinfo* InterSolverFluxCinfo = initInterSolverFluxCinfo();
-    static const Cinfo* Interpol2DCinfo = initInterpol2DCinfo();
-    static const Cinfo* InterpolCinfo = initInterpolCinfo();
     static const Cinfo* KinComptCinfo = initKinComptCinfo();
     static const Cinfo* KinPlaceHolderCinfo = initKinPlaceHolderCinfo();
     static const Cinfo* KineticHubCinfo = initKineticHubCinfo();
