@@ -1957,6 +1957,10 @@ def PyMooseBase_initSimulation(*args):
   """PyMooseBase_initSimulation()"""
   return _moose.PyMooseBase_initSimulation(*args)
 
+
+def initPyMoose(*args):
+  """initPyMoose()"""
+  return _moose.initPyMoose(*args)
 from inspect import isclass
 
 def doc(cls):

@@ -124,7 +124,7 @@ enum FieldType { ALL, VALUE, LOOKUP, SOURCE, DEST, SHARED, SOLVE, THIS, GLOBAL, 
         double getCurrentTime();
         bool exists(const Id& id);
         bool exists(std::string path);
-
+        void addField(std::string className, std::string fieldName);
         void createMap(std::string src, std::string dest, unsigned int nx, unsigned int ny, double dx = 1.0, double dy = 1.0, double xo = 0.0, double yo = 0.0, bool isObject = true);
         void createMap( Id src,  Id dest, std::string name, unsigned int nx, unsigned int ny, double dx = 1.0, double dy = 1.0, double xo = 0.0, double yo = 0.0);
         void createMap( Id src, Id dest, std::string name, std::vector<double> param);

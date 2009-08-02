@@ -44,5 +44,33 @@
 #include "CaConc.h"
 
 #include "Tick.h"
-
+namespace pymoose{
+extern PyMooseContext* context;
+#if 0
+// A set of convenience functions 
+Id pwe(); // similar to pwd in unix
+void ce(const string& path); // similar to cd
+void ce(const Id& id); // similar to cd
+void ce(const PyMooseBase& obj); // similar to cd
+Id id(const string& path); // path2id
+void loadg(const string& filepath); // load a genesis script
+void rung(const string& statement); // run a genesis statement
+vector<Id> children(Id id); // list of children of the object with Id id
+vector<Id> children(const string& path); // list of children of the object with Id id
+const string& getfield(const string& path, const string& field); 
+const string& getfield(Id obj, const string& field);
+void setfield(const string& path, const string& field, string value);
+void setfield(const string& path, const string& field, double value);
+void setfield(const string& path, const string& field, int value);
+vector<string> messagelist(Id obj, const string& field, bool incoming);
+void srandom(long seed); // seed the random number generator
+void step(double runtime);
+void step(long steps);
+void step();
+void stop();
+void setclock(int clockNo, double dt, int stage=0);
+void useclock(int clockNo, const string path, const string func="process");
+bool exists(const string path);
+#endif
+}
 #endif
