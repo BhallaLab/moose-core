@@ -79,6 +79,34 @@ template<> bool str2val< double >( const string& s, double& ret )
 	return 1;
 }
 
+// This one was initiated for 2D lookup tables.
+// The finfo is named table[xindex][yindex] and when passed to
+// str2val, index string looks like xindex][yindex
+// so - split on the ][ - hopefully this should be able to handle
+// more than 2D indexing
+template<> bool str2val< vector<int> >( const string& s, vector<int>& ret )
+{
+    // cerr << "in str2val< vector<int> >\n";
+    vector<string> dims;
+    separateString(s, dims, "][");
+    for (vector<string>::iterator ii = dims.begin(); ii != dims.end(); ++ii){
+        int index = strtol((*ii).c_str(), NULL, 0);
+        ret.push_back(index);
+    }
+    return 1;
+}
+template<> bool str2val< vector<unsigned int> >( const string& s, vector<unsigned int>& ret )
+{
+    // cerr << "in str2val< vector<int> >\n";
+    vector<string> dims;
+    separateString(s, dims, "][");
+    for (vector<string>::iterator ii = dims.begin(); ii != dims.end(); ++ii){
+        unsigned int index = strtol((*ii).c_str(), NULL, 0);
+        ret.push_back(index);
+    }
+    return 1;
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Id conversions
 /////////////////////////////////////////////////////////////////////////

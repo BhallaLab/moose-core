@@ -14,8 +14,14 @@
 using namespace std;
 using namespace pymoose;
     
-string PyMooseBase::separator_ = "/"; /// this is default separator is the unix path separator
-
+const char* PyMooseBase::separator_ = "/"; /// this is default separator is
+                                      /// the unix path separator
+extern void init(int& argc, char** argv);
+PyMooseContext* context;
+void initPyMoose()
+{    
+    context = PyMooseBase::getContext();
+}
 pymoose::PyMooseContext* PyMooseBase::context_ = pymoose::PyMooseContext::createPyMooseContext("BaseContext", "shell");
 
 /**

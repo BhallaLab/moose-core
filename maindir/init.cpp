@@ -39,7 +39,9 @@ extern bool setupProxyMsg(
 	unsigned int srcNode, Id proxy, unsigned int srcFuncId,
 	unsigned int proxySize,
 	Id dest, int destMsg );
-
+#ifdef PYMOOSE
+extern void initPyMoose();
+#endif
 static Element* pj = 0;
 static const Finfo* stepFinfo;
 static const Finfo* reinitClockFinfo;
@@ -52,6 +54,9 @@ unsigned int init( int& argc, char**& argv )
 	initSched();
 	initParSched();
 	initGlobals();
+#ifdef PYMOOSE
+        initPyMoose();
+#endif
 	doneInit();
 	return 0;
 }
