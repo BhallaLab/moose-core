@@ -45,19 +45,26 @@ extern void initPyMoose();
 static Element* pj = 0;
 static const Finfo* stepFinfo;
 static const Finfo* reinitClockFinfo;
-
 unsigned int init( int& argc, char**& argv )
 {
+    static bool inited = false;
+    if (inited){
+#ifndef NDEBUG
+        cout << "Already initialized." << endl;
+        return 0;
+#endif
+    }
 	initMPI( argc, argv );
 	initMoose( argc, argv );
 	initParCommunication();
 	initSched();
 	initParSched();
 	initGlobals();
-#ifdef PYMOOSE
-        initPyMoose();
-#endif
+// #ifdef PYMOOSE
+//         initPyMoose();
+// #endif
 	doneInit();
+        inited = true;
 	return 0;
 }
 

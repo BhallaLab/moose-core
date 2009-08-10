@@ -22,6 +22,7 @@ extern const Cinfo* initGammaRngCinfo();
 extern const Cinfo* initGeometryCinfo();
 extern const Cinfo* initGslIntegratorCinfo();
 extern const Cinfo* initGssaStoichCinfo();
+extern const Cinfo* initLeakageCinfo();
 extern const Cinfo* initHHChannelCinfo();
 extern const Cinfo* initHHChannel2DCinfo();
 extern const Cinfo* initHHGateCinfo();
@@ -129,6 +130,7 @@ void initCinfos(){
     static const Cinfo* HHGate2DCinfo = initHHGate2DCinfo();
     static const Cinfo* HHChannelCinfo = initHHChannelCinfo();
     static const Cinfo* HHChannel2DCinfo = initHHChannel2DCinfo();
+    static const Cinfo* LeakageCinfo = initLeakageCinfo();
     static const Cinfo* HSolveCinfo = initHSolveCinfo();
     static const Cinfo* HSolveHubCinfo = initHSolveHubCinfo();
     static const Cinfo* HemispherePanelCinfo = initHemispherePanelCinfo();
