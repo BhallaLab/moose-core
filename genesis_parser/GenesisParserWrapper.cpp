@@ -858,6 +858,7 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "Ca_concen" ] = "CaConc";
 	classnames[ "compartment" ] = "Compartment";
 	classnames[ "symcompartment" ] = "SymCompartment";
+	classnames[ "leakage" ] = "Leakage";
 	classnames[ "hh_channel" ] = "HHChannel";
 	classnames[ "tabchannel" ] = "HHChannel";
 	classnames[ "tab2Dchannel" ] = "HHChannel2D";

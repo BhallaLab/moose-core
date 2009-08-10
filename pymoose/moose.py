@@ -1604,6 +1604,10 @@ class PyMooseContext(object):
         """
         return _moose.PyMooseContext_exists(*args)
 
+    def addField(*args):
+        """addField(self, string className, string fieldName)"""
+        return _moose.PyMooseContext_addField(*args)
+
     def createMap(*args):
         """
         createMap(self, string src, string dest, unsigned int nx, unsigned int ny, 
@@ -3590,6 +3594,66 @@ class HHGate(PyMooseBase):
 HHGate_swigregister = _moose.HHGate_swigregister
 HHGate_swigregister(HHGate)
 HHGate.className_ = _moose.cvar.HHGate_className_
+
+class Leakage(PyMooseBase):
+    """Proxy of C++ Leakage class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> Leakage
+        __init__(self, string path) -> Leakage
+        __init__(self, string name, Id parentId) -> Leakage
+        __init__(self, string name, PyMooseBase parent) -> Leakage
+        __init__(self, Leakage src, string name, PyMooseBase parent) -> Leakage
+        __init__(self, Leakage src, string name, Id parent) -> Leakage
+        __init__(self, Leakage src, string path) -> Leakage
+        __init__(self, Id src, string name, Id parent) -> Leakage
+        """
+        this = _moose.new_Leakage(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_Leakage
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.Leakage_getType(*args)
+
+    def __get_Ek(*args):
+        """__get_Ek(self) -> double"""
+        return _moose.Leakage___get_Ek(*args)
+
+    def __set_Ek(*args):
+        """__set_Ek(self, double Ek)"""
+        return _moose.Leakage___set_Ek(*args)
+
+    def __get_Gk(*args):
+        """__get_Gk(self) -> double"""
+        return _moose.Leakage___get_Gk(*args)
+
+    def __set_Gk(*args):
+        """__set_Gk(self, double Gk)"""
+        return _moose.Leakage___set_Gk(*args)
+
+    def __get_Ik(*args):
+        """__get_Ik(self) -> double"""
+        return _moose.Leakage___get_Ik(*args)
+
+    def __get_activation(*args):
+        """__get_activation(self) -> double"""
+        return _moose.Leakage___get_activation(*args)
+
+    def __set_activation(*args):
+        """__set_activation(self, double activation)"""
+        return _moose.Leakage___set_activation(*args)
+
+    Ek = _swig_property(_moose.Leakage_Ek_get, _moose.Leakage_Ek_set)
+    Gk = _swig_property(_moose.Leakage_Gk_get, _moose.Leakage_Gk_set)
+    Ik = _swig_property(_moose.Leakage_Ik_get)
+    activation = _swig_property(_moose.Leakage_activation_get, _moose.Leakage_activation_set)
+Leakage_swigregister = _moose.Leakage_swigregister
+Leakage_swigregister(Leakage)
+Leakage.className_ = _moose.cvar.Leakage_className_
 
 class HHChannel(PyMooseBase):
     """Proxy of C++ HHChannel class"""
