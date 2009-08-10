@@ -133,11 +133,13 @@ void Cinfo::init( const string* doc,
 	#ifndef NDEBUG /* If compiling in DEBUG mode. */
 	// Printing list of Cinfos
 	string filename = "Cinfolist.txt";
-	ofstream fout( filename.c_str() );
-	for ( unsigned int i = 0; i < nSched; i++ )
-		fout << name() << "\n";
-	fout << flush;
+	ofstream fout( filename.c_str(), ios_base::app );
+        cout << "Printing: " << name() << "with nSched =" << nSched << endl;
+	for ( unsigned int i = 0; i < nSched; i++ ){
+		fout << name() << endl;
+        }
 	cout << "Wrote list of Cinfos to " << filename << ".\n";
+        fout.close();
 	#endif // NDEBUG
 	
 
