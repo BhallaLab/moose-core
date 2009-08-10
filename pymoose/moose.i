@@ -27,6 +27,7 @@
 	#include "Nernst.h"
 	#include "CaConc.h"
 	#include "HHGate.h"
+	#include "Leakage.h"
 	#include "HHChannel.h"
 	#include "Mg_block.h"
 	#include "Compartment.h"
@@ -363,6 +364,12 @@ void fillData(PyObject* args)
 %attribute(pymoose::HHGate, Interpol*, A, __get_A)
 %attribute(pymoose::HHGate, Interpol*, B, __get_B)
 
+%include "Leakage.h"
+%attribute(pymoose::Leakage, double, Ek, __get_Ek, __set_Ek)
+%attribute(pymoose::Leakage, double, Gk, __get_Gk, __set_Gk)
+%attribute(pymoose::Leakage, double, Ik, __get_Ik)
+%attribute(pymoose::Leakage, double, activation, __get_activation, __set_activation)
+
 %include "HHChannel.h"
 %attribute(pymoose::HHChannel, double, Gbar, __get_Gbar, __set_Gbar)
 %attribute(pymoose::HHChannel, double, Ek, __get_Ek, __set_Ek)
@@ -694,6 +701,7 @@ void fillData(PyObject* args)
 %attribute(pymoose::GHK, double, Cin, __get_Cin, __set_Cin)
 %attribute(pymoose::GHK, double, Cout, __get_Cout, __set_Cout)
 %attribute(pymoose::GHK, double, valency, __get_valency, __set_valency)
+
 
 
 %include "HHChannel2D.h"
