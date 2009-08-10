@@ -645,6 +645,10 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     
     Element* shell;
     bool ret;
+    int argc = 0;
+    char** argv = NULL;
+    init(argc, argv); // No clue why this strange signature with int&
+                      // and char**&
 #ifdef DO_UNIT_TESTS
 	// if ( mynode == 0 )
 	if ( 1 )
@@ -665,9 +669,6 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
 	}
 #endif
 
-#ifdef DEBUG
-    cout << "Trying to find shell with name " << shellName << endl;
-#endif
     // From maindir/main.cpp: parser requires to be created before the clock job
     Element * genesisSli = makeGenesisParser();
 

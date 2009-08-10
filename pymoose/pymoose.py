@@ -141,6 +141,49 @@ def df_traverse(root, operation, *args):
         df_traverse(child, operation, *args)
     root._visited = True
 
+def readcell_scrambled(filename, target):
+    """A special version for handling cases where a .p file has a line
+    with specified parent yet to be defined.
+
+    It creates a temporary file with a sorted version based on
+    connectivity, so that parent is always defined before child."""
+    pfile = open(filename, "r")
+    tmpfilename = filename + ".tmp"
+    graph = defaultdict(list)
+    data = {}
+    error = None
+    root = None
+    for line in pfile:
+        tmpline = line.strip()
+        if tmpline.startswith("*") or tmpline.startswith("//"):
+            continue
+        elif tmpline.startswith("/*"):
+            error = "Handling C style comments not implemented."
+            break
+        node, parent, rest, = tmpline.split(None, 2)
+        print node, parent
+        if (parent == "none"):
+            if (root is None):
+                root = node
+            else:
+                error = "Duplicate root elements: ", root, node, "> Cannot process any further."
+                break
+        graph[parent].append(node)
+        data[node] = line
+    if error is not None:
+        print error
+        return None
+
+    tmpfile = open(tmpfilename, "w")
+    stack = [root]
+    while stack:
+        current = stack.pop()
+        children = graph[current]
+        stack.extend(children)
+        tmpfile.write(data[current])
+    tmpfile.close()
+    PyMooseBase.getContext().readCell(tmpfilename, target)
+    return Cell(target)
 
 if __name__ == "__main__": # test printtree
     s = Neutral('cell')

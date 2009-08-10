@@ -34,6 +34,7 @@ OBJ = \
 	GHK.o \
 	IntFire.o	\
 	IzhikevichNrn.o \
+	Leakage.o	\
 
 
 HEADERS = \
@@ -65,6 +66,7 @@ TauPump.o: TauPump.h
 GHK.o: GHK.h ../basecode/Ftype2.h
 IntFire.o: IntFire.h
 IzhikevichNrn.o: IzhikevichNrn.h
+Leakage.o: Leakage.h
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I../basecode -I../randnum -I.. $< -c
 

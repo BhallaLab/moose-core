@@ -59,7 +59,8 @@ OBJFILES = ../basecode/basecode.o \
 	../ksolve/ksolve.o	\
 	../device/device.o \
 	../sbml_IO/sbml_IO.o	\
-#	../robots/robots.o	\
+	../signeur/signeur.o	\
+# 	../robots/robots.o	\
 
 
 OBJ = PyMooseBase.o \
@@ -128,6 +129,7 @@ OBJ = PyMooseBase.o \
 	InterSolverFlux.o	\
 	Adaptor.o	\
  	SigNeur.o	\
+	Leakage.o	\
 
 
 	
@@ -138,6 +140,7 @@ HEADERS=PyMooseUtil.h \
 	Neutral.h \
 	Class.h	\
 	Cell.h	\
+	Leakage.h	\
 	HHChannel.h \
 	HHGate.h \
 	Mg_block.h	\
