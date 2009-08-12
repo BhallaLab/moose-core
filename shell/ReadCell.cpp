@@ -373,7 +373,11 @@ Element* ReadCell::buildCompartment(
 
 	double Rm = RM_ / calcSurf(length, d);
 	set< double >( compt, RmFinfo, Rm );
-	double Ra = RA_ * length * 4.0 / ( d * d * M_PI );
+	double Ra;
+        if (length > 0)
+            Ra = RA_ * length * 4.0 / ( d * d * M_PI );
+        else
+            Ra = RA_ * 8.0 / ( d * M_PI );
 	set< double >( compt, RaFinfo, Ra );
 	double Cm = CM_ * calcSurf(length, d);
 	set< double >( compt, CmFinfo, Cm );
