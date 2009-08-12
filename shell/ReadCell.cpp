@@ -45,7 +45,7 @@ ReadCell::ReadCell(
 	const vector< double >& globalParms,
 	IdGenerator idGen )
 	:
-	idGen_( idGen ), RM_( 10.0 ), CM_( 0.01 ), RA_( 1.0 ), EREST_ACT_( -0.065 ),
+	idGen_( idGen ), RM_( 10.0 ), CM_( 0.01 ), RA_( 1.0 ), EREST_ACT_( -0.065 ), ELEAK_( -0.065 ),
 	dendrDiam( 0.0 ), aveLength( 0.0 ),
 	spineSurf( 0.0 ), spineDens( 0.0 ),
 	spineFreq( 0.0 ), membFactor( 0.0 ),
@@ -67,18 +67,20 @@ ReadCell::ReadCell(
 		return;
 	}
 
-	// We aren't using index 4, which is ELEAK.
 	assert( globalParms.size() == 5 );
 
-	if ( globalParms[0] != 0.0 )
+	if ( !isEqual(globalParms[0], 0.0 ))
 		CM_ = globalParms[0];
-	if ( globalParms[1] != 0.0 )
+	if ( !isEqual(globalParms[1], 0.0 ))
 		RM_ = globalParms[1];
-	if ( globalParms[2] != 0.0 )
+	if ( !isEqual(globalParms[2], 0.0 ))
 		RA_ = globalParms[2];
-	if ( globalParms[3] != 0.0 )
+	if ( !isEqual(globalParms[3], 0.0 ))
 		EREST_ACT_ = globalParms[3];
-
+        if ( !isEqual(globalParms[4], 0.0 ))
+                ELEAK_ = globalParms[4];
+        else
+                ELEAK_ = EREST_ACT_;
 	Element* lib = libId();
 
 	vector< Id > chanIds;
@@ -376,7 +378,7 @@ Element* ReadCell::buildCompartment(
 	double Cm = CM_ * calcSurf(length, d);
 	set< double >( compt, CmFinfo, Cm );
 	set< double >( compt, initVmFinfo, EREST_ACT_ );
-	set< double >( compt, EmFinfo, EREST_ACT_ );
+	set< double >( compt, EmFinfo, ELEAK_ );
 	set< double >( compt, VmFinfo, EREST_ACT_ );
 
 	return compt;
@@ -418,6 +420,8 @@ void ReadCell::readScript( const string& line )
 				CM_ = atof( argv[2].c_str() );
 		if ( argv[1] == "EREST_ACT" )
 				EREST_ACT_ = atof( argv[2].c_str() );
+                if (argv[1] == "ELEAK" )
+                                ELEAK_ = atof( argv[2].c_str() );
 	}
 
 	if ( argv[0] == "*start_cell" ) {
@@ -529,7 +533,7 @@ Element* ReadCell::findChannel( const string& name )
 double calcSurf( double len, double dia )
 {
 	double area = 0.0;
-	if ( len == 0.0 ) // Spherical
+	if ( isEqual(len, 0.0) ) // Spherical
 		area = dia * dia * M_PI;
 	else
 		area = len * dia * M_PI;
