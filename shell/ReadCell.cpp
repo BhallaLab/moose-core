@@ -763,7 +763,7 @@ bool ReadCell::addHHChannel(
 		assert( ret );
 			
 		if ( value > 0 ) {
-			value *= dia * length * M_PI;
+                    value *= calcSurf(length, dia);
 		} else {
 			value = - value;
 		}
@@ -795,7 +795,7 @@ bool ReadCell::addSynChan(
 		assert( ret );
 		
 		if ( value > 0 ) {
-			value *= dia * length * M_PI;
+                    value *= calcSurf(length, dia);
 		} else {
 			value = - value;
 		}
