@@ -75,6 +75,7 @@ class ReadCell
 		double CM_;
 		double RA_;
 		double EREST_ACT_;
+                double ELEAK_;
 		double dendrDiam;
 		double aveLength;
 		double spineSurf;
