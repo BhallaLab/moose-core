@@ -4160,6 +4160,39 @@ void do_help(int argc, const char** const argv, Id s )
     print_help(getCommandDoc(string(argv[1])));
 }
 
+/**
+   Run a shell command and return the stdout.
+   Note that buffer size is 1KB and only the last 1KB of the output
+   is printed.
+*/
+char* const do_shellcmd(int argc, char** const argv, Id s)
+{
+    const int buf_size = 1024;
+    static char buffer[buf_size];
+    FILE * cmd_out = NULL;
+    if (argc < 2){
+        cout << "usage: sh <shell-command> [<command_args>]*" << endl;
+        return NULL;
+    }
+    string commandline;
+    for ( int ii = 1; ii < argc; ++ ii){
+        commandline.append(argv[ii]);
+        commandline.append(" ");
+    }
+    cmd_out = popen(commandline.c_str(), "r");
+    if (!cmd_out){
+        return NULL;
+    }    
+    while (fgets(buffer, buf_size, cmd_out)){
+        cout << buffer;
+    }
+    cout << endl;
+    pclose(cmd_out);
+    cmd_out = NULL;
+    return copyString(buffer);
+}
+    
+
 char** do_arglist(int argc, const char** const argv, Id s)
 {
     if (argc == 1) {
@@ -4329,6 +4362,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
         AddFunc( "arglist", reinterpret_cast< slifunc > ( do_arglist ), "char**");
 	AddFunc( "readSBML", reinterpret_cast< slifunc > ( do_readsbml ), "void" );
 	AddFunc( "writeSBML", reinterpret_cast< slifunc > ( do_writesbml ), "void" );
+        AddFunc( "sh", reinterpret_cast< slifunc > (do_shellcmd ), "char*" );
 }
 
 //////////////////////////////////////////////////////////////////
