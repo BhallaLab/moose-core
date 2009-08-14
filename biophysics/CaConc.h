@@ -42,6 +42,7 @@ class CaConc
 			CaBasal_ = 0.0;
 			tau_ = 1.0;
 			B_ = 1.0;
+                        thick_ = 0.0;
 		}
 
 		///////////////////////////////////////////////////////////////
@@ -69,6 +70,8 @@ class CaConc
 		static double getTau( Eref e );
 		static void setB( const Conn* c, double val );
 		static double getB( Eref e );
+                static void setThickness( const Conn* c, double val );
+                static double getThickness( Eref e);
 
 	private:
 		double Ca_;
@@ -77,6 +80,7 @@ class CaConc
 		double B_;
 		double c_;
 		double activation_;
+                double thickness_;
 };
 
 extern const Cinfo* initCaConcCinfo();
