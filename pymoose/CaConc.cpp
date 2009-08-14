@@ -69,4 +69,14 @@ void CaConc::__set_B( double B )
 {
     set < double > (id_(), "B", B);
 }
+double CaConc::__get_thick() const
+{
+    double thick;
+    get < double > (id_(), "thick",thick);
+    return thick;
+}
+void CaConc::__set_thick( double thick )
+{
+    set < double > (id_(), "thick", thick);
+}
 #endif
