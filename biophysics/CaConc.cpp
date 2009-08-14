@@ -54,6 +54,13 @@ const Cinfo* initCaConcCinfo()
 			reinterpret_cast< GetFunc >( &CaConc::getB ), 
 			RFCAST( &CaConc::setB )
 		),
+                new ValueFinfo( "thick", ValueFtype1< double >::global(),
+                                reinterpret_cast< GetFunc >( &CaConc::getThickness ), 
+                                RFCAST( &CaConc::setThickness ),
+                                "Thickness of the shell for Ca concentration model."
+		),
+                
+                
 ///////////////////////////////////////////////////////
 // Shared message definitions
 ///////////////////////////////////////////////////////
@@ -151,6 +158,14 @@ void CaConc::setB( const Conn* c, double B )
 double CaConc::getB( Eref e )
 {
 	return static_cast< CaConc* >( e.data() )->B_;
+}
+void CaConc::setThickness( const Conn * c, double thickness )
+{
+    static_cast< CaConc* >( c->data() )->thickness_ = thickness;
+}
+double CaConc::getThickness( Eref e )
+{
+	return static_cast< CaConc* >( e.data() )->thickness_;
 }
 
 
