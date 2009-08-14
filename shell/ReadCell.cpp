@@ -844,9 +844,14 @@ bool ReadCell::addCaConc(
 		// assert( vmSrcFinfo->add( compt, chan, vmDestFinfo  ) );
 
 		if ( value > 0.0 ) {
-			double vol = dia * dia * M_PI * length / 4.0;
-			if ( vol > 0.0 ) // Scale by volume.
-				value /= dia * dia * M_PI * length / 4.0;
+                    double vol;
+                    if (length > 0.0){
+			vol = dia * dia * M_PI * length / 4.0;
+                    } else { // spherical
+                        vol = M_PI * dia * dia * dia / 6.0;
+                    }
+                    if ( vol > 0.0 ) // Scale by volume.
+                        value /= vol;
 		} else {
 			value = - value;
 		}
