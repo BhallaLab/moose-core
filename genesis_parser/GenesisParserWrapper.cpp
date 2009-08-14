@@ -4265,6 +4265,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "addalias", do_alias, "void" );
 	AddFunc( "alias", do_alias, "void" );
 	AddFunc( "quit", do_quit, "void" );
+        AddFunc( "exit", do_quit, "void" );
 	AddFunc( "stop", do_stop, "void" );
 	AddFunc( "reset", do_reset, "void" );
 	AddFunc( "step", do_step, "void" );
