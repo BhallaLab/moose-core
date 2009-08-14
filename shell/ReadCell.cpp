@@ -840,15 +840,28 @@ bool ReadCell::addCaConc(
 	static const Finfo* currentFinfo = caconcCinfo->findFinfo( "current" );
 		*/
 	static const Finfo* bFinfo = caconcCinfo->findFinfo( "B" );
+        static const Finfo* thicknessFinfo = caconcCinfo->findFinfo("thick");
+        double thick;
+        get<double>(chan, thicknessFinfo, thick);
+        if (thick > dia/2.0) thick = 0.0;
 	if ( chan->className() == "CaConc" ) {
 		// assert( vmSrcFinfo->add( compt, chan, vmDestFinfo  ) );
 
 		if ( value > 0.0 ) {
                     double vol;
                     if (length > 0.0){
-			vol = dia * dia * M_PI * length / 4.0;
+                        if (thick > 0.0){
+                            vol = M_PI * length * (dia - thick) * thick;
+                        } else {
+                            vol = dia * dia * M_PI * length / 4.0;
+                        }
                     } else { // spherical
-                        vol = M_PI * dia * dia * dia / 6.0;
+                        if (thick > 0.0){
+                            double inner_dia = dia - 2 * thick;
+                            vol = M_PI * ( dia * dia * dia - inner_dia * inner_dia * inner_dia) / 6.0; 
+                        } else {
+                            vol = M_PI * dia * dia * dia / 6.0;
+                        }
                     }
                     if ( vol > 0.0 ) // Scale by volume.
                         value /= vol;
