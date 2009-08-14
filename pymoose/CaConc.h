@@ -28,6 +28,8 @@ namespace pymoose
         void __set_tau(double tau);
         double __get_B() const;
         void __set_B(double B);
+        double __get_thick() const;
+        void __set_thick(double thick);
     };
 } // namespace pymoose
 
