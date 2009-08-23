@@ -123,10 +123,17 @@ const Cinfo* initSteadyStateCinfo()
 			GFCAST( &SteadyState::getConvergenceCriterion ), 
 			RFCAST( &SteadyState::setConvergenceCriterion )
 		),
+		new ValueFinfo( "nVarMols", 
+			ValueFtype1< unsigned int >::global(),
+			GFCAST( &SteadyState::getNvarMols ), 
+			&dummyFunc,
+			"Number of variable molecules in reaction system."
+		),
 		new ValueFinfo( "rank", 
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &SteadyState::getRank ), 
-			&dummyFunc
+			&dummyFunc,
+			"Number of independent molecules in reaction system"
 		),
 		new ValueFinfo( "stateType", 
 			ValueFtype1< unsigned int >::global(),
@@ -163,6 +170,12 @@ const Cinfo* initSteadyStateCinfo()
 				"it rescales the concentrations of all the affected"
 				"molecules so that they are at the specified total."
 				"This happens the next time 'settle' is called."
+		),
+		new LookupFinfo( "eigenvalues",
+			LookupFtype< double, unsigned int >::global(),
+				GFCAST( &SteadyState::getEigenvalue ),
+				RFCAST( &SteadyState::setEigenvalue ),
+				"Eigenvalues computed for steady state"
 		),
 		///////////////////////////////////////////////////////
 		// MsgSrc definitions
@@ -306,6 +319,10 @@ unsigned int SteadyState::getRank( Eref e ) {
 	return static_cast< const SteadyState* >( e.data() )->rank_;
 }
 
+unsigned int SteadyState::getNvarMols( Eref e ) {
+	return static_cast< const SteadyState* >( e.data() )->nVarMols_;
+}
+
 unsigned int SteadyState::getStateType( Eref e ) {
 	return static_cast< const SteadyState* >( e.data() )->stateType_;
 }
@@ -367,6 +384,27 @@ void SteadyState::localSetTotal( double val, const unsigned int& i )
 	}
 	cout << "Warning: SteadyState::localSetTotal: index " << i <<
 		" out of range " << total_.size() << endl;
+}
+
+
+double SteadyState::getEigenvalue( Eref e, const unsigned int& i )
+{
+	return static_cast< const SteadyState* >( e.data() )->localGetEigenvalue(i);
+}
+
+void SteadyState::setEigenvalue( 
+	const Conn* c, double val, const unsigned int& i )
+{
+	cout << "Warning: SteadyState::localSetEigenvalue: Readonly\n";
+}
+
+double SteadyState::localGetEigenvalue( const unsigned int& i ) const
+{
+	if ( i < eigenvalues_.size() )
+		return eigenvalues_[i];
+	cout << "Warning: SteadyState::localGetEigenvalue: index " << i <<
+			" out of range " << eigenvalues_.size() << endl;
+	return 0.0;
 }
 
 ///////////////////////////////////////////////////
@@ -574,7 +612,7 @@ int iterate( const gsl_multiroot_fsolver_type* st, struct reac_info *ri,
 
 void SteadyState::classifyState( const double* T )
 {
-	unsigned int nConsv = nVarMols_ - rank_;
+	// unsigned int nConsv = nVarMols_ - rank_;
 	gsl_matrix* J = gsl_matrix_calloc ( nVarMols_, nVarMols_ );
 	// double* yprime = new double[ nVarMols_ ];
 	// vector< double > yprime( nVarMols_, 0.0 );
@@ -583,10 +621,12 @@ void SteadyState::classifyState( const double* T )
 	// at a time, and putting the resultant rate vector into a column
 	// of the J matrix.
 	// This needs a bit of heuristic to decide what is a 'small' increment.
-	// Use the totals for this.
+	// Use the CoInits for this. Stoichiometry shouldn't matter too much.
+	// I used the totals from consv rules earlier, but that can have 
+	// negative values.
 	double tot = 0.0;
-	for ( unsigned int i = 0; i < nConsv; ++i ) {
-		tot += T[i];
+	for ( unsigned int i = 0; i < nVarMols_; ++i ) {
+		tot += s_->Sinit()[i];
 	}
 	tot *= DELTA;
 	
@@ -624,6 +664,8 @@ void SteadyState::classifyState( const double* T )
 	gsl_eigen_nonsymm_workspace* workspace =
 		gsl_eigen_nonsymm_alloc( nVarMols_ );
 	int status = gsl_eigen_nonsymm( J, vec, workspace );
+	eigenvalues_.clear();
+	eigenvalues_.resize( nVarMols_, 0.0 );
 	if ( status != GSL_SUCCESS ) {
 		cout << "Warning: SteadyState::classifyState failed to find eigenvalues. Status = " <<
 			status << endl;
@@ -636,6 +678,7 @@ void SteadyState::classifyState( const double* T )
 			double r = GSL_REAL( z );
 			nNegEigenvalues_ += ( r < -EPSILON );
 			nPosEigenvalues_ += ( r > EPSILON );
+			eigenvalues_[i] = r;
 			// We have a problem here because nVarMols_ usually > rank
 			// This means we have several zero eigenvalues.
 		}
@@ -701,6 +744,10 @@ void SteadyState::settle( bool forceSetup )
 	ri.s = s_;
 	ri.convergenceCriterion = convergenceCriterion_;
 
+	vector< double > repair( nVarMols_, 0.0 );
+	for ( unsigned int j = 0; j < nVarMols_; ++j )
+		repair[j] = s_->S()[j];
+
 	int status = iterate( gsl_multiroot_fsolver_hybrids, &ri, maxIter_ );
 	if ( status ) // It failed. Fall back with the Newton method
 		status = iterate( gsl_multiroot_fsolver_dnewton, &ri, maxIter_ );
@@ -717,6 +764,9 @@ void SteadyState::settle( bool forceSetup )
 	} else {
 		cout << "Warning: SteadyState iteration failed, status = " <<
 			status_ << ", nIter = " << nIter_ << endl;
+		// Repair the mess
+		for ( unsigned int j = 0; j < nVarMols_; ++j )
+			s_->S()[j] = repair[j];
 		solutionStatus_ = 1; // Steady state failed.
 	}
 
@@ -732,10 +782,11 @@ int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 
 	for ( int i = 0; i < ri->num_mols; ++i ) {
 		double temp = op( gsl_vector_get( x, i ) );
-		if ( isnan( temp ) || isinf( temp ) )
+		if ( isnan( temp ) || isinf( temp ) ) { 
 			return GSL_ERANGE;
-		else
+		} else {
 			s->S()[i] = temp;
+		}
 	}
 	s->updateV();
 
