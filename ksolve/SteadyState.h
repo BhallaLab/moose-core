@@ -25,6 +25,7 @@ class SteadyState
 		static bool badStoichiometry( Eref e );
 		static bool isInitialized( Eref e );
 		static unsigned int getRank( Eref e );
+		static unsigned int getNvarMols( Eref e );
 		static unsigned int getNiter( Eref e );
 		static unsigned int getMaxIter( Eref e );
 		static void setMaxIter( const Conn* c, unsigned int value );
@@ -36,6 +37,10 @@ class SteadyState
 			const Conn* c, double val, const unsigned int& i );
 		double localGetTotal( const unsigned int& i ) const;
 		void localSetTotal( double val, const unsigned int& i );
+		static double getEigenvalue( Eref e, const unsigned int& i );
+		static void setEigenvalue( 
+			const Conn* c, double val, const unsigned int& i );
+		double localGetEigenvalue( const unsigned int& i ) const;
 		static unsigned int getStateType( Eref e );
 		static unsigned int getNnegEigenvalues( Eref e );
 		static unsigned int getNposEigenvalues( Eref e );
@@ -85,6 +90,7 @@ class SteadyState
 		bool reassignTotal_;
 		unsigned int nNegEigenvalues_;
 		unsigned int nPosEigenvalues_;
+		vector< double > eigenvalues_;
 		unsigned int stateType_;
 		unsigned int solutionStatus_;
 };
