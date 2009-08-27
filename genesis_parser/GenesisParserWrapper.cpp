@@ -583,7 +583,7 @@ map< string, string >& sliSrcLookup()
 	src[ "I_Ca Ik" ] = "IkSrc";
 	
 	// Messages for RandomSpike
-	src[ "RandomSpike.SPIKE"] = "eventSrc";
+	src[ "RandomSpike.SPIKE"] = "event";
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
 	// done already through the existing messaging.
