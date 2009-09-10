@@ -30,6 +30,9 @@ class StateScanner
 		unsigned int localGetStateCategory( unsigned int i) const;
 		static void setStateCategory( 
 			const Conn* c, unsigned int val, const unsigned int& i );
+		static void addTrackedMolecule( const Conn* c, Id val );
+		static void dropTrackedMolecule( const Conn* c, Id val );
+		/*
 		static unsigned int getNumTrackedMolecules( Eref e );
 		static void setNumTrackedMolecules( const Conn* c, unsigned int value );
 		void localSetNumTrackedMolecules( unsigned int value );
@@ -38,6 +41,7 @@ class StateScanner
 			const Conn* c, Id val, const unsigned int& i );
 		Id localGetTrackedMolecule( unsigned int i ) const;
 		void localSetTrackedMolecule( Id elm, unsigned int i );
+		*/
 		static unsigned int getClassification( Eref e );
 
 		///////////////////////////////////////////////////
