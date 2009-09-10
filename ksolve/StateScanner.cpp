@@ -13,20 +13,31 @@
  * - Make a dose-response curve
  * - try to find all steady states of a reaction
  * - Follow a state trajectory
+ *
+ * How to manage the various molecules etc:
+ * 	1. Create an array of tables, one for each monitored molecule. 
+ * 	Manipulate these tables using the Stack operations.
+ * 	2. The tables themselves connect to the monitored molecules with an 
+ * 	inputRequest message to keep track of values for each molecule: 
+ * 	the points on the dose-response curve, or the steady states.
+ * 	Control these through the Process message.
+ *
  */
 
 #include "moose.h"
+#include "../element/Neutral.h"
+/*
 #include "RateTerm.h"
 #include "KinSparseMatrix.h"
 #include "InterSolverFlux.h"
 #include "Stoich.h"
+*/
 #include "StateScanner.h"
 
 const Cinfo* initStateScannerCinfo()
 {
 	/**
 	 * This picks up the entire Stoich data structure
-	 */
 	static Finfo* gslShared[] =
 	{
 		new SrcFinfo( "reinitSrc", Ftype0::global() ),
@@ -38,6 +49,16 @@ const Cinfo* initStateScannerCinfo()
 			Ftype2< double, unsigned int >::global(),
 			RFCAST( &StateScanner::setMolN )
 			),
+	};
+	 */
+
+	/**
+	 * This controls the stack operations of the child Table objects
+	 */
+	static Finfo* processShared[] =
+	{
+		new SrcFinfo( "process", Ftype1< ProcInfo >::global() ),
+		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
 	};
 
 	/**
@@ -53,6 +74,14 @@ const Cinfo* initStateScannerCinfo()
 		///////////////////////////////////////////////////////
 		// Field definitions
 		///////////////////////////////////////////////////////
+		/*
+		new ValueFinfo( "useTimeSeriesToSettle", 
+			ValueFtype1< bool >::global(),
+			GFCAST( &StateScanner::getSettleTime ), 
+			RFCAST( &StateScanner::setSettleTime )
+		),
+		*/
+
 		new ValueFinfo( "settleTime", 
 			ValueFtype1< double >::global(),
 			GFCAST( &StateScanner::getSettleTime ), 
@@ -70,6 +99,7 @@ const Cinfo* initStateScannerCinfo()
 				RFCAST( &StateScanner::setStateCategory ), // dummy
 				"Look up categories obtained for each state"
 		),
+		/*
 		new ValueFinfo( "numTrackedMolecules", 
 			ValueFtype1< int >::global(),
 			GFCAST( &StateScanner::setNumTrackedMolecules ), 
@@ -82,6 +112,7 @@ const Cinfo* initStateScannerCinfo()
 				RFCAST( &StateScanner::setTrackedMolecule ), // dummy
 				"Molecules to track during dose-response or state classification"
 		),
+		*/
 		new ValueFinfo( "classification",
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &StateScanner::getClassification ), 
@@ -100,6 +131,17 @@ const Cinfo* initStateScannerCinfo()
 		///////////////////////////////////////////////////////
 		// MsgDest definitions
 		///////////////////////////////////////////////////////
+		new DestFinfo( "addTrackedMolecule", 
+			Ftype1< Id >::global(),
+			RFCAST( &StateScanner::addTrackedMolecule ),
+			"addTrackedMolecule( molId ). "
+		),
+		new DestFinfo( "dropTrackedMolecule", 
+			Ftype1< Id >::global(),
+			RFCAST( &StateScanner::addTrackedMolecule ),
+			"dropTrackedMolecule( molId ). "
+		),
+		
 		new DestFinfo( "doseResponse", 
 			Ftype4< Id, double, double, unsigned int>::global(),
 			RFCAST( &StateScanner::doseResponse ),
@@ -129,9 +171,20 @@ const Cinfo* initStateScannerCinfo()
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
+		/*
 		new SharedFinfo( "gsl", gslShared, 
 				sizeof( gslShared )/ sizeof( Finfo* ),
 					"Messages that connect to the GslIntegrator object" ),
+
+		new SharedFinfo( "stack", stackShared, 
+			sizeof( stackShared )/ sizeof( Finfo* ),
+			"Messages that connect to the Table objects, one per "
+			"molecule, that handle arrays of results for each molecule." ),
+		*/
+		new SharedFinfo( "processSrc", processShared, 
+			sizeof( processShared )/ sizeof( Finfo* ),
+			"Messages that connect to the Table objects, one per "
+			"molecule, that handle arrays of results for each molecule." ),
 	};
 	
 	static string doc[] =
@@ -168,8 +221,11 @@ const Cinfo* initStateScannerCinfo()
 
 static const Cinfo* stateScannerCinfo = initStateScannerCinfo();
 
+static const Slot procSlot =
+	initStateScannerCinfo()->getSlot( "processSrc.pushSrc" );
+
 static const Slot reinitSlot =
-	initStateScannerCinfo()->getSlot( "gsl.reinitSrc" );
+	initStateScannerCinfo()->getSlot( "processSrc.reinitSrc" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -232,70 +288,37 @@ void StateScanner::setSolutionSeparation( const Conn* c, double value ) {
 		" retained\n";
 }
 
-unsigned int StateScanner::getNumTrackedMolecules( Eref e )
-{
-	return static_cast< const StateScanner* >( e.data() )->numTrackedMolecules_;
-}
-
-void StateScanner::setNumTrackedMolecules( const Conn* c, unsigned int val )
-{
-	static_cast< StateScanner* >( c->data() )->localSetNumTrackedMolecules(val );
-}
-
-void StateScanner::localSetNumTrackedMolecules( unsigned int i )
-{
-	// Create the appropriate number of child Interpols. Delete as needed.
-	// Hook up messages so as to make it easy to fill up.
-	;
-}
-
-Id StateScanner::getTrackedMolecule( Eref e, const unsigned int& i )
-{
-	return static_cast< const StateScanner* >( e.data() )->localGetTrackedMolecule(i);
-}
-
-void StateScanner::setTrackedMolecule( 
-	const Conn* c, Id val, const unsigned int& i )
-{
-	static_cast< StateScanner* >( c->data() )->
-		localSetTrackedMolecule(val, i);
-}
-
-bool StateScanner::isMoleculeIndexGood( unsigned int i ) const
-{
-	if ( i >= trackedMolecule_.size() ) {
-		cout << "Warning: StateScanner::localStateCategory: index " << i <<
-			" out of range " << trackedMolecule_.size() << endl;
-		return 0;
-	}
-	return 1;
-}
-
-string uniqueName( Id elm )
+const string& uniqueName( Id elm )
 {
 	return elm()->name();
 }
 
-Id StateScanner::localGetTrackedMolecule( unsigned int i ) const
+/** 
+ * Creates a table and connects to it by a process message, and 
+ * connects the table itself to the tracked molecule
+ */
+void StateScanner::addTrackedMolecule( const Conn* c, Id val )
 {
-	if ( isMoleculeIndexGood( i ) )
-		return trackedMolecule_[i];
-	return 0.0;
+	Eref scanner = c->target();
+	string name = uniqueName( val );
+	bool ret;
+	Element* tab = Neutral::create( "Table", name, scanner.id(),
+		Id::scratchId() );
+	Eref( tab ).dropAll( "process" ); // Eliminate the default msg.
+	assert( tab->id().good() );
+
+	ret = Eref( tab ).add( "inputRequest", val(), "conc" );
+	assert( ret );
+	ret = scanner.add( "processSrc", tab, "process" );
+	assert( ret );
 }
 
-// Ideally should do this by tagging on messages rather than Ids.
-void StateScanner::localSetTrackedMolecule( Id elm, unsigned int i )
+/**
+ * Finds the selected table and deletes it. The messages get automagically
+ * cleared out.
+ */
+void StateScanner::dropTrackedMolecule( const Conn* c, Id val )
 {
-	static const Cinfo* molClass = Cinfo::find( "Molecule" );
-	if ( elm.good() && isMoleculeIndexGood( i ) ) {
-		if ( elm()->cinfo()->isA( molClass ) ) {
-			trackedMolecule_[i] = elm;
-			string name = uniqueName( elm );
-			// Track down the appropriate Interpol child by index.
-			// Assign its name so that users can easily find it.
-		} else 
-			cout << "Warning: StateScanner::localSetTrackedMolecule: element " << elm.path() << " is not a Molecule\n";
-	}
 }
 
 
@@ -372,6 +395,7 @@ void StateScanner::innerClassifyStates(
 // Other function definitions
 ///////////////////////////////////////////////////
 
+/*
 void StateScanner::assignStoichFunc( const Conn* c, void* s )
 {
 	static_cast< StateScanner* >( c->data() )->assignStoichFuncLocal( s );
@@ -380,6 +404,7 @@ void StateScanner::assignStoichFunc( const Conn* c, void* s )
 void StateScanner::setMolN( const Conn* c, double y, unsigned int i )
 {
 }
+*/
 
 ///////////////////////////////////////////////////
 // GSL interface stuff
@@ -388,8 +413,8 @@ void StateScanner::setMolN( const Conn* c, double y, unsigned int i )
 /**
  * This function should also set up the sizes, and it should be at 
  * allocate, not reinit time.
- */
 void StateScanner::assignStoichFuncLocal( void* stoich ) 
 {
 }
+ */
 

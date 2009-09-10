@@ -8877,3 +8877,11 @@ int classification = NUM_STABLE
         classification = 9 // Stable + osc.
     end 
 
+=============================================================================
+10 Sep 2009
+Implementing State Scanner. It needs to manage arrays of conc values for
+different molecules, for example, for the states it finds, or for the 
+dose-response curves. This necessitated some updates to the Interpol object
+to support stack operations. Checked in as version 1323.
+
+
