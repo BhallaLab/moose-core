@@ -36,7 +36,7 @@ HEADERS = \
 # use it. Should be fine for academic use.
 # Optional: Comment out the following three items if not using GSL
 ifeq ($(USE_GSL),1)
-GSL_OBJ = GslIntegrator.o SteadyState.o
+GSL_OBJ = GslIntegrator.o SteadyState.o StateScanner.o
 #GSL_LIBS = -L/usr/lib -lgsl -lgslcblas
 GSL_FLAGS = -DUSE_GSL
 endif
@@ -58,6 +58,7 @@ ifeq ($(USE_GSL),1)
 $(GSL_OBJ) : $(HEADERS)
 GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h KinSparseMatrix.h 
 SteadyState.o:	SteadyState.h RateTerm.h KinSparseMatrix.h 
+StateScanner.o:	StateScanner.h
 endif # !USE_GSL
 
 .cpp.o:
