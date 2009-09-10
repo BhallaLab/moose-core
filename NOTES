@@ -8820,3 +8820,60 @@ Minor fix to writefile command to clean up error message and options.
 checked in as version 1288
 
 =============================================================================
+23 Aug 2009
+Major fix to SteadyState object.
+Fixed difficult bug in eigenvalue classification for kinetic SteadyState
+calculations. I was using the conservation law totals to compute total
+molecular levels in order to set the increment for estimating the
+Jacobian. This was sometimes an issue because the conservation law
+calculations don't necessarily give positive values. So it was possible
+to have negative concs when trying to estimate Jacobian. Converted to using
+initial concs, seems resolved.
+Also minor utility enhancements to SteadyState object: can look up 
+eigenvalues and nVarMols.
+Checked in as revision 1314.
+
+=============================================================================
+1 Sep 2009
+Time to code in some of the script-based classification algorithms I have
+used for the TRAFFILLATOR project. The approach was to systematically scan
+different starting points for the state classification, consistent with the
+boundary conditions of total molecules. This was pretty effective at finding
+most fixed points. 
+
+Approach for finding states:
+- Scan through all pairwise combinations of molecules, log increment of 0.1
+	Initialize conc to x, 1-x, rest to zero.
+- Check mass consv OK (No negative concs)
+- Set initial concs
+- Step for 1 sec
+- call settle function.
+- Check if solutionStatus == 0
+	- Check if solution is novel. This is if RMS diff from prev solution,
+		 EPSILON > 1e-4. This should really be scale factor from total.
+		If so, add solution as set of mol concs.
+- Should also add check in case there are not enough successful solutions.
+	Classification is stronger if there are many.
+	
+Heiruistic for state classification:
+Count each of:
+NUM_SOLUTIONS
+NUM_STABLE
+NUM_SADDLE
+NUM_OSC
+NUM_OTHER
+int classification = NUM_STABLE
+    if ( NUM_SOLUTIONS == NUM_OTHER )
+        classification = 1 
+    end 
+    if ( NUM_SOLUTIONS == 1 && ( NUM_SADDLE == 1 || NUM_OSC == 1 ) ) 
+        classification = 0 
+    else
+        if ( NUM_STABLE == 0 && ( NUM_SOLUTIONS != NUM_OTHER ) && NUM_SOLUTIONS >= 1 )
+            classification = 8 // ill-defined.
+        end
+    end 
+    if ( NUM_SOLUTIONS == 3 && NUM_OSC == 1 && NUM_STABLE == 1 ) 
+        classification = 9 // Stable + osc.
+    end 
+
