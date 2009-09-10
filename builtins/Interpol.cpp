@@ -24,6 +24,26 @@ const Cinfo* initInterpolCinfo()
 						RFCAST( &Interpol::lookupReturn ) ),
 		new SrcFinfo( "trig", Ftype1< double >::global() ),
 	};
+
+	/** 
+	 * Some stack functions
+	 */
+	static Finfo* stackShared[] =
+	{
+		new DestFinfo( "push", Ftype1< double >::global(), 
+			RFCAST( &Interpol::push ),
+			"push this value onto the top of the table."
+		),
+		new DestFinfo( "clear", Ftype0::global(), 
+			RFCAST( &Interpol::clear ),
+			"Empty out table."
+		),
+		new DestFinfo( "pop", Ftype0::global(), 
+			RFCAST( &Interpol::pop ),
+			"pop off top value."
+		),
+	};
+
 	static Finfo* interpolFinfos[] =
 	{
 	///////////////////////////////////////////////////////
@@ -69,9 +89,16 @@ const Cinfo* initInterpolCinfo()
 	///////////////////////////////////////////////////////
 	// Shared message definitions
 	///////////////////////////////////////////////////////
-		new SharedFinfo( "lookupReturn", lookupReturnShared, 2,
-						"This is a shared message for doing lookups on the table. "
-						"Receives a double with the x value.  Sends back a double with the looked-up y value." ),
+		new SharedFinfo( "lookupReturn", lookupReturnShared, 
+			sizeof( lookupReturnShared ) / sizeof( Finfo* ),
+				"This is a shared message for doing lookups on the table. "
+				"Receives a double with the x value.  Sends back a double "
+				"with the looked-up y value." ),
+
+		new SharedFinfo( "stack", stackShared, 
+			sizeof( stackShared ) / sizeof( Finfo* ),
+			"This is a shared message for stack operations on the table. "
+			"Supports push, clear, and pop operations." ),
 		
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -105,6 +132,18 @@ const Cinfo* initInterpolCinfo()
 			Ftype1< vector< double > >::global(), 
 			RFCAST( &Interpol::appendTableVector ),
 			"Append to existing table. Used in loadtab -continue."
+		),
+		new DestFinfo( "push", Ftype1< double >::global(), 
+			RFCAST( &Interpol::push ),
+			"push this value onto the top of the table."
+		),
+		new DestFinfo( "clear", Ftype0::global(), 
+			RFCAST( &Interpol::clear ),
+			"Empty out table."
+		),
+		new DestFinfo( "pop", Ftype0::global(), 
+			RFCAST( &Interpol::pop ),
+			"pop off top value."
 		),
 	};
 
@@ -265,6 +304,21 @@ void Interpol::appendTableVector( const Conn* c, vector< double > value )
 	static_cast< Interpol* >( c->data() )->localAppendTableVector( value );
 }
 
+void Interpol::push( const Conn* c, double value ) 
+{
+	static_cast< Interpol* >( c->data() )->innerPush( value );
+}
+
+void Interpol::clear( const Conn* c ) 
+{
+	static_cast< Interpol* >( c->data() )->innerClear();
+}
+
+void Interpol::pop( const Conn* c ) 
+{
+	static_cast< Interpol* >( c->data() )->innerPop();
+}
+
 ////////////////////////////////////////////////////////////////////
 // Here we set up private Interpol class functions.
 ////////////////////////////////////////////////////////////////////
@@ -423,6 +477,33 @@ double Interpol::getTableValue( unsigned int index ) {
 		cerr << "Error: Interpol::getTableValue: Index out of bounds!\n";
 		return 0.0;
 	}
+}
+
+/**
+ * Here are three stack operations.
+ */
+void Interpol::innerPush( double value )
+{
+	table_.push_back( value );
+	if ( fabs( xmax_ - xmin_ ) > EPSILON )
+		invDx_ = xdivs() / ( xmax_ - xmin_ );
+	else
+		invDx_ = 1.0;
+}
+
+void Interpol::innerClear()
+{
+	table_.resize( 0 );
+	invDx_ = 1.0;
+}
+
+void Interpol::innerPop()
+{
+	table_.pop_back();
+	if ( fabs( xmax_ - xmin_ ) > EPSILON )
+		invDx_ = xdivs() / ( xmax_ - xmin_ );
+	else
+		invDx_ = 1.0;
 }
 
 // This sets the whole thing up: values, xdivs, dx and so on. Only xmin
@@ -687,6 +768,34 @@ void testInterpol()
 	set< double >( i1, "lookup", 20000.0 );
 	get< double >( i2, "xmin", ret );
 	ASSERT( ret == 900.0, "Lookup max" );
+
+	set( i1, "clear" );
+	int iret;
+	get< int >( i1, "xdivs", iret );
+	ASSERT( iret == 0, "stack operations: clear" );
+	string sret;
+	i1->findFinfo( "tableVector" )->strGet( i1, sret );
+	ASSERT( sret == "Size: 0 []", "test strGet for tableVector" );
+
+	set< double >( i1, "push", 1.0 );
+	get< int >( i1, "xdivs", iret );
+	ASSERT( iret == 0, "stack operations: push" );
+	lookupGet< double, unsigned int >( i1, "table", ret, 0 );
+	ASSERT( ret == 1.0, "stack operations: push" );
+	i1->findFinfo( "tableVector" )->strGet( i1, sret );
+	ASSERT( sret == "Size: 1 [1]", "testing strGet for tableVector" )
+
+	set< double >( i1, "push", 12.0 );
+	get< int >( i1, "xdivs", iret );
+	ASSERT( iret == 1, "stack operations: push" );
+	lookupGet< double, unsigned int >( i1, "table", ret, 1 );
+	ASSERT( ret == 12.0, "stack operations: push" );
+	i1->findFinfo( "tableVector" )->strGet( i1, sret );
+	ASSERT( sret == "Size: 2 [1, 12]", "testing strGet for tableVector" )
+
+	set( i1, "pop" );
+	get< int >( i1, "xdivs", iret );
+	ASSERT( iret == 0, "stack operations: pop" );
 }
 
 #endif // DO_UNIT_TESTS
