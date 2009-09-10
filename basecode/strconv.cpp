@@ -8,6 +8,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <sstream>
 #include "header.h"
 #include "SimpleElement.h"
 #include "Send.h"
@@ -168,6 +169,29 @@ template<> bool str2val< vector< string > >(
 	// cerr << "in str2val< double >\n";
 	
 	separateString( s, ret, "," );
+	return 1;
+}
+
+template<> bool val2str< vector< double > >(
+				vector< double > v, string& ret)
+{
+	stringstream s;
+	s << "Size: " << v.size() << " [";
+	if ( v.size() < 20 ) {
+		if ( v.size() > 0 )
+			s << v[0];
+		for ( unsigned int i = 1 ; i < v.size(); i++ )
+			s << ", " << v[i];
+	} else {
+		for ( unsigned int i = 0 ; i < 10; i++ )
+			s << v[i] << ", ";
+		s << "... ";
+		for ( unsigned int i = v.size() - 10 ; i < v.size(); i++ )
+			s << ", " << v[i];
+	}
+	s << "]";
+
+	ret = s.str();
 	return 1;
 }
 

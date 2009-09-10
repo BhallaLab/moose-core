@@ -30,6 +30,9 @@ template<> bool val2str< const Ftype* >(
 
 template<> bool val2str< ProcInfo >( ProcInfo v, string& ret);
 
+template<> bool val2str< vector< double > >(
+				vector< double > v, string& ret);
+
 template< class T >bool val2str( T v, string& s ) {
 	s = "";
 	return 0;
