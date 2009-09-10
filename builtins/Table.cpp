@@ -31,15 +31,6 @@ const Cinfo* initTableCinfo()
 		sizeof( processShared ) / sizeof( Finfo* ),
 		"This is a shared message to receive Process message from the scheduler.");
 
-	/*
-	static TypeFuncPair processTypes[] =
-	{
-		TypeFuncPair( Ftype1< ProcInfo >::global(),
-				RFCAST( &Table::process ) ),
-	    TypeFuncPair( Ftype1< ProcInfo >::global(),
-				RFCAST( &Table::reinit ) ),
-	};
-	*/
 	static Finfo* inputRequestShared[] =
 	{
 			// Sends out the request. Issued from the process call.
@@ -48,17 +39,6 @@ const Cinfo* initTableCinfo()
 	    new DestFinfo( "handleInput", Ftype1< double >::global(),
 				RFCAST( &Table::setInput ) ),
 	};
-
-	/*
-	static TypeFuncPair inputRequestTypes[] =
-	{
-			// Sends out the request. Issued from the process call.
-		TypeFuncPair( Ftype0::global(), 0 ),
-			// Handle the returned value.
-	    TypeFuncPair( Ftype1< double >::global(),
-				RFCAST( &Table::setInput ) ),
-	};
-	*/
 
 	static Finfo* tableFinfos[] =
 	{
