@@ -62,6 +62,10 @@ class Interpol
 		static void appendTableVector( const Conn* c, 
 			vector< double > value );
 
+		static void push( const Conn* c, double value );
+		static void clear( const Conn* c );
+		static void pop( const Conn* c );
+
 		////////////////////////////////////////////////////////////
 		// Here are the internal functions
 		////////////////////////////////////////////////////////////
@@ -87,6 +91,11 @@ class Interpol
 		void setTableValue( double value, unsigned int index );
 		double getTableValue( unsigned int index );
 		void localSetTableVector( const vector< double >& value );
+
+		void innerPush( double value );
+		void innerClear();
+		void innerPop();
+
 		void localAppendTableVector( const vector< double >& value );
 		unsigned long size( ) const {
 			return table_.size();
