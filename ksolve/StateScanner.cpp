@@ -25,6 +25,7 @@
  */
 
 #include "moose.h"
+#include "ProcInfo.h"
 #include "../element/Neutral.h"
 /*
 #include "RateTerm.h"
@@ -34,26 +35,23 @@
 */
 #include "StateScanner.h"
 
+const double StateScanner::EPSILON = 1e-9;
+
 const Cinfo* initStateScannerCinfo()
 {
 	/**
-	 * This picks up the entire Stoich data structure
-	static Finfo* gslShared[] =
-	{
-		new SrcFinfo( "reinitSrc", Ftype0::global() ),
-		new DestFinfo( "assignStoich",
-			Ftype1< void* >::global(),
-			RFCAST( &StateScanner::assignStoichFunc )
-			),
-		new DestFinfo( "setMolN",
-			Ftype2< double, unsigned int >::global(),
-			RFCAST( &StateScanner::setMolN )
-			),
-	};
+	 * This controls the stack operations of the x-axis child Table object
 	 */
+	static Finfo* stackShared[] =
+	{
+		new SrcFinfo( "push", Ftype1< double >::global() ),
+		new SrcFinfo( "clear", Ftype0::global() ),
+		new SrcFinfo( "pop", Ftype0::global() ),
+	};
 
 	/**
-	 * This controls the stack operations of the child Table objects
+	 * This tells the other child Table objects to get hold of the
+	 * latest mol conc from their attached molecules
 	 */
 	static Finfo* processShared[] =
 	{
@@ -99,20 +97,30 @@ const Cinfo* initStateScannerCinfo()
 				RFCAST( &StateScanner::setStateCategory ), // dummy
 				"Look up categories obtained for each state"
 		),
-		/*
-		new ValueFinfo( "numTrackedMolecules", 
-			ValueFtype1< int >::global(),
-			GFCAST( &StateScanner::setNumTrackedMolecules ), 
-			RFCAST( &StateScanner::getNumTrackedMolecules ),
-			"This is the size of the trackedMolecules array."
+		new ValueFinfo( "useLog", 
+			ValueFtype1< bool >::global(),
+			GFCAST( &StateScanner::getUseLog ), 
+			RFCAST( &StateScanner::setUseLog ),
+			"Tells the scanner to use logarithmic sampling."
 		),
-		new LookupFinfo( "trackedMolecules",
-			LookupFtype< Id, unsigned int >::global(),
-				GFCAST( &StateScanner::getTrackedMolecule ),
-				RFCAST( &StateScanner::setTrackedMolecule ), // dummy
-				"Molecules to track during dose-response or state classification"
+		new ValueFinfo( "useSS", 
+			ValueFtype1< bool >::global(),
+			GFCAST( &StateScanner::getUseSS ), 
+			RFCAST( &StateScanner::setUseSS ),
+			"Tells the scanner to use the SteadyState solver for solutions."
 		),
-		*/
+		new ValueFinfo( "useRisingDose", 
+			ValueFtype1< bool >::global(),
+			GFCAST( &StateScanner::getUseRisingDose ), 
+			RFCAST( &StateScanner::setUseRisingDose ),
+			"Tells the scanner to use rising levels of the dose (stimulus)."
+		),
+		new ValueFinfo( "useBufferDose", 
+			ValueFtype1< bool >::global(),
+			GFCAST( &StateScanner::getUseBufferDose ), 
+			RFCAST( &StateScanner::setUseBufferDose ),
+			"Tells the scanner to use buffered input (dose) concentrations."
+		),
 		new ValueFinfo( "classification",
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &StateScanner::getClassification ), 
@@ -185,6 +193,9 @@ const Cinfo* initStateScannerCinfo()
 			sizeof( processShared )/ sizeof( Finfo* ),
 			"Messages that connect to the Table objects, one per "
 			"molecule, that handle arrays of results for each molecule." ),
+		new SharedFinfo( "stackSrc", stackShared, 
+			sizeof( stackShared )/ sizeof( Finfo* ),
+			"Messages to send x values for dose-response to another table"),
 	};
 	
 	static string doc[] =
@@ -221,11 +232,18 @@ const Cinfo* initStateScannerCinfo()
 
 static const Cinfo* stateScannerCinfo = initStateScannerCinfo();
 
-static const Slot procSlot =
-	initStateScannerCinfo()->getSlot( "processSrc.pushSrc" );
+static const Slot processSlot =
+	initStateScannerCinfo()->getSlot( "processSrc.process" );
 
 static const Slot reinitSlot =
-	initStateScannerCinfo()->getSlot( "processSrc.reinitSrc" );
+	initStateScannerCinfo()->getSlot( "processSrc.reinit" );
+
+static const Slot pushSlot =
+	initStateScannerCinfo()->getSlot( "stackSrc.push" );
+static const Slot clearSlot =
+	initStateScannerCinfo()->getSlot( "stackSrc.clear" );
+static const Slot popSlot =
+	initStateScannerCinfo()->getSlot( "stackSrc.pop" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -240,7 +258,16 @@ StateScanner::StateScanner()
 		numStable_( 0 ),
 		numSaddle_( 0 ),
 		numOsc_( 0 ),
-		numOther_( 0 )
+		numOther_( 0 ),
+		classification_( 0 ),
+		useLog_( 0 ),
+		useRisingDose_( 1 ),
+		useBufferDose_( 1 ),
+		useSS_( 1 ),
+		x_( 0.0 ),
+		dx_( 0.0 ),
+		lastx_( 0.0 ),
+		end_( 0.0 )
 {
 	;
 }
@@ -288,10 +315,61 @@ void StateScanner::setSolutionSeparation( const Conn* c, double value ) {
 		" retained\n";
 }
 
+bool StateScanner::getUseLog( Eref e ) {
+	return static_cast< const StateScanner* >( e.data() )->useLog_;
+}
+
+void StateScanner::setUseLog( const Conn* c, bool value ) {
+	static_cast< StateScanner* >( c->data() )->useLog_ = value;
+}
+
+bool StateScanner::getUseSS( Eref e ) {
+	return static_cast< const StateScanner* >( e.data() )->useSS_;
+}
+
+void StateScanner::setUseSS( const Conn* c, bool value ) {
+	static_cast< StateScanner* >( c->data() )->useSS_ = value;
+}
+
+bool StateScanner::getUseRisingDose( Eref e ) {
+	return static_cast< const StateScanner* >( e.data() )->useRisingDose_;
+}
+
+void StateScanner::setUseRisingDose( const Conn* c, bool value ) {
+	static_cast< StateScanner* >( c->data() )->useRisingDose_ = value;
+}
+
+bool StateScanner::getUseBufferDose( Eref e ) {
+	return static_cast< const StateScanner* >( e.data() )->useBufferDose_;
+}
+
+void StateScanner::setUseBufferDose( const Conn* c, bool value ) {
+	static_cast< StateScanner* >( c->data() )->useBufferDose_ = value;
+}
+		
+///////////////////////////////////////////////////
+// Utility function definitions
+///////////////////////////////////////////////////
+
 const string& uniqueName( Id elm )
 {
+	// Seketon function for now.
 	return elm()->name();
 }
+
+bool isMolecule( Id elm )
+{
+	static const Cinfo* molCinfo = Cinfo::find( "Molecule" );
+	if ( elm.good() ) {
+		return ( elm()->cinfo()->isA( molCinfo ) );
+		cout << "Warning: StateScanner: Element " << elm.path() << " is not a Molecule\n";
+	}
+	return 0;
+}
+
+///////////////////////////////////////////////////
+// Dest function definitions
+///////////////////////////////////////////////////
 
 /** 
  * Creates a table and connects to it by a process message, and 
@@ -299,13 +377,16 @@ const string& uniqueName( Id elm )
  */
 void StateScanner::addTrackedMolecule( const Conn* c, Id val )
 {
+	if ( !isMolecule( val ) )
+		return;
 	Eref scanner = c->target();
 	string name = uniqueName( val );
 	bool ret;
 	Element* tab = Neutral::create( "Table", name, scanner.id(),
 		Id::scratchId() );
-	Eref( tab ).dropAll( "process" ); // Eliminate the default msg.
 	assert( tab->id().good() );
+	Eref( tab ).dropAll( "process" ); // Eliminate the default msg.
+	set< int >( Eref( tab ), "stepmode", 3 ); // TAB_BUF
 
 	ret = Eref( tab ).add( "inputRequest", val(), "conc" );
 	assert( ret );
@@ -342,6 +423,7 @@ unsigned int StateScanner::localGetStateCategory( unsigned int i ) const
 	return 0.0;
 }
 
+
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
@@ -353,7 +435,8 @@ void StateScanner::doseResponse( const Conn* c,
 	unsigned int numSteps )
 {
 	static_cast< StateScanner* >( c->data() )->innerDoseResponse(
-		variableMol, start, end, numSteps, 0 );
+		c->target(), variableMol, start, end, numSteps, 0 );
+
 }
 
 void StateScanner::logDoseResponse( const Conn* c,
@@ -362,15 +445,175 @@ void StateScanner::logDoseResponse( const Conn* c,
 	unsigned int numSteps )
 {
 	static_cast< StateScanner* >( c->data() )->innerDoseResponse(
-		variableMol, start, end, numSteps, 1 );
+		c->target(), variableMol, start, end, numSteps, 1 );
 }
 
-void StateScanner::innerDoseResponse( Id variableMol,
+bool StateScanner::initDoser( double start, double end, unsigned int numSteps, bool useLog)
+{
+	if ( numSteps < 1 ) {
+		cout << "Error: StateScanner::initDoser: numSteps < 1 \n";
+		return 0;
+	}
+	if ( useLog_ ) {
+		if ( start < EPSILON || end < EPSILON ) {
+			cout << "Error: StateScanner:: initDoser: range of dose-response must not" << " go below zero in log mode\n";
+			return 0;
+		}
+		dx_ = exp( log( end / start ) / numSteps );
+	} else {
+		dx_ = ( end - start ) / numSteps;
+	}
+	end_ = end;
+	x_ = start;
+	if ( start > end_ )
+		useRisingDose_ = ( start > end_ );
+
+	return 1;
+}
+
+bool StateScanner::advanceDoser()
+{
+	lastx_ = x_;
+	if ( useLog_ ) {
+		x_ *= dx_;
+	} else {
+		x_ += dx_;
+	}
+	if ( useRisingDose_ && x_ > end_ )
+		return 0;
+	if ( !useRisingDose_ && x_ < end_ )
+		return 0;
+
+	return 1;
+}
+
+void StateScanner::setControlParameter( Id& variableMol )
+{
+	if ( useBufferDose_ ) {
+		set< double >( variableMol(), "concInit", x_ );
+	} else {
+		double conc;
+		get< double >( variableMol(), "conc", conc );
+		set< double >( variableMol(), "conc", conc + ( x_ - lastx_ ) );
+	}
+}
+
+void StateScanner::settle( Eref me, Id& cj, Id& ss )
+{
+	static const Finfo* startFinfo = 
+			Cinfo::find( "ClockJob" )->findFinfo( "start" );
+	static const Finfo* settleFinfo = 
+			Cinfo::find( "SteadyState" )->findFinfo( "settle" );
+	static const Finfo* statusFinfo = 
+			Cinfo::find( "SteadyState" )->findFinfo( "solutionStatus" );
+
+	set< double >( cj(), startFinfo, settleTime_ );
+	if ( useSS_ ) {
+		set( ss(), settleFinfo );
+		unsigned int status;
+		get< unsigned int >( ss(), statusFinfo, status );
+		if ( status != 0 ) { // Need to decide if to do fallback.
+			// try running to steady state.
+			cout << "status = 0\n";
+		}
+	}
+
+	// Update the x axis (dose) array.
+	send1< double >( me, pushSlot, x_ );
+	// Update the molecule conc arrays.
+	ProcInfoBase p( 0, settleTime_ );
+	send1< ProcInfo >( me, processSlot, &p );
+}
+
+void StateScanner::makeDoseTable( Eref me )
+{
+	// Make the x axis table for the dose-response, if it isn't there.
+	Id tab;
+	lookupGet< Id, string >( me, "lookupChild", tab, "xAxis" );
+	if ( tab == Id::badId() ) {
+		tab = Id::scratchId();
+		Neutral::create( "Interpol", "xAxis", me.id(), tab );
+		assert( tab.good() );
+		tab.eref().dropAll( "process" ); // Eliminate the default msg.
+		bool ret = me.add( "stackSrc", tab.eref(), "stack" );
+		assert( ret );
+		if ( ret == 0 )
+			cout << "StateScanner::makeDoseTable: Failed to add stack msg\n";
+	}
+}
+
+/**
+ * Dose-responses have the following options:
+ * Linear vs. log
+ * Using SS finder vs time-course
+ * Specific buffered input molecule vs. total conc of mol
+ * Reset vs incremented from previous solution
+ * 		If continuing from previous solution: Rising vs falling
+ *
+ */
+void StateScanner::innerDoseResponse( Eref me, Id variableMol,
 	double start, double end,
 	unsigned int numSteps,
 	bool useLog)
 {
-	;
+	static const Finfo * concInitFinfo = 
+		Cinfo::find( "Molecule" )->findFinfo( "concInit" );
+	static const Finfo * modeFinfo = 
+		Cinfo::find( "Molecule" )->findFinfo( "mode" );
+	Id cj( "/sched/cj" );
+	Id km( "/kinetics" );
+
+	if ( !isMolecule( variableMol ) )
+		return;
+	makeDoseTable( me );
+	double origConcInit = 0.0;
+	int origMode = 0; // slave enable flag.
+	get< double >( variableMol.eref(), concInitFinfo, origConcInit );
+	get< int >( variableMol.eref(), modeFinfo, origMode );
+
+	int newMode = ( useBufferDose_ ) ? 4 : 0;
+
+	if ( newMode != origMode ) { // Need to rebuild the KineticManager
+		set< int >( variableMol.eref(), modeFinfo, newMode );
+		set< string >( km.eref(), "method", "ee" ); // Hack to force rebuild.
+		set< string >( km.eref(), "method", "rk5" );
+	}
+
+	// Do a reset at the 'start' value
+	set< double >( variableMol.eref(), concInitFinfo, start );
+	set( cj(), "reinit" );
+
+	// Pick up the correct entry in the 'totals' array of the SteadyState
+	Id ss( "/kinetics/solve/ss" );
+
+	if ( initDoser( start, end, numSteps, useLog ) == 0 )
+		return;
+
+	// Clear out the tables
+	send0( me, clearSlot );
+	ProcInfoBase p( 0, settleTime_ );
+	send1< ProcInfo >( me, reinitSlot, &p );
+
+	do {
+		setControlParameter( variableMol );
+		settle( me, cj, ss );
+	} while ( advanceDoser() );
+
+	// Figure out how to increment it.
+	// Do the initial settling
+	// In the loop: Assign the totals array. Do this first time too,
+	// 	to get around numerical error in settling.
+	// Go through loop, incrementing totals array and extracting state.
+	// Do fallback time-series settle operation if the direct state
+	// settling fails.
+
+	set< double >( variableMol.eref(), concInitFinfo, origConcInit );
+
+	if ( newMode != origMode ) { // Need to rebuild the KineticManager
+		set< int >( variableMol.eref(), modeFinfo, origMode );
+		set< string >( km.eref(), "method", "ee" ); // Hack to force rebuild.
+		set< string >( km.eref(), "method", "rk5" );
+	}
 }
 
 void StateScanner::classifyStates( const Conn* c,
