@@ -30,8 +30,14 @@ class StateScanner
 		unsigned int localGetStateCategory( unsigned int i) const;
 		static void setStateCategory( 
 			const Conn* c, unsigned int val, const unsigned int& i );
-		static void addTrackedMolecule( const Conn* c, Id val );
-		static void dropTrackedMolecule( const Conn* c, Id val );
+		static bool getUseLog( Eref e );
+		static void setUseLog( const Conn* c, bool value );
+		static bool getUseSS( Eref e );
+		static void setUseSS( const Conn* c, bool value );
+		static bool getUseRisingDose( Eref e );
+		static void setUseRisingDose( const Conn* c, bool value );
+		static bool getUseBufferDose( Eref e );
+		static void setUseBufferDose( const Conn* c, bool value );
 		/*
 		static unsigned int getNumTrackedMolecules( Eref e );
 		static void setNumTrackedMolecules( const Conn* c, unsigned int value );
@@ -47,6 +53,9 @@ class StateScanner
 		///////////////////////////////////////////////////
 		// Msg Dest function definitions
 		///////////////////////////////////////////////////
+		//
+		static void addTrackedMolecule( const Conn* c, Id val );
+		static void dropTrackedMolecule( const Conn* c, Id val );
 		
 		static void doseResponse( const Conn* c, 
 			Id variableMol, 
@@ -58,7 +67,7 @@ class StateScanner
 			double start, double end, 
 			unsigned int numSteps );
 
-		void innerDoseResponse( Id variableMol, 
+		void innerDoseResponse( Eref me, Id variableMol, 
 			double start, double end, 
 			unsigned int numSteps,
 			bool useLog );
@@ -76,6 +85,16 @@ class StateScanner
 		static void setMolN( const Conn* c, double y, unsigned int i );
 		static void assignStoichFunc( const Conn* c, void* stoich );
 		void assignStoichFuncLocal( void* stoich );
+
+		///////////////////////////////////////////////////
+		// Utility functions for doing doser
+		///////////////////////////////////////////////////
+		bool initDoser( 
+			double start, double end, unsigned int numSteps, bool useLog);
+		bool advanceDoser();
+		void setControlParameter( Id& variableMol );
+		void settle( Eref me, Id& cj, Id& ss );
+		void makeDoseTable( Eref me );
 
 		
 	private:
@@ -95,6 +114,15 @@ class StateScanner
 		unsigned int numOsc_;
 		unsigned int numOther_;
 		unsigned int classification_;
+		bool useLog_; // Use logarithmic increments in dose-response
+		bool useRisingDose_; // Do a rising series.
+		bool useBufferDose_; // Use buffering in dose-response.
+		bool useSS_; // Use the SteadyState solver, rather than time-series
+		double x_; // current value in dose-response
+		double dx_; // increment: summed or multiplied, in dose-response
+		double lastx_; // previous value in dose-response
+		double end_; // terminating value in dose-response
+		static const double EPSILON;
 };
 
 extern const Cinfo* initStateScannerCinfo();

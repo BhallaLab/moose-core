@@ -8884,4 +8884,13 @@ different molecules, for example, for the states it finds, or for the
 dose-response curves. This necessitated some updates to the Interpol object
 to support stack operations. Checked in as version 1323.
 
+Further implementation of StateScanner. I have implemented the management of
+conc values as Tables. Actually the stack ops were not needed, but they may
+be handy for some other cases.
+Yet to implement actual algorithms.
 
+=============================================================================
+12 Sep 2009
+Got part of the dose-response code working.
+
+=============================================================================
