@@ -81,10 +81,9 @@ class StateScanner
 			bool useMonteCarlo,
 			bool useLog );
 
-		// funcs to handle externally imposed changes in mol N
-		static void setMolN( const Conn* c, double y, unsigned int i );
-		static void assignStoichFunc( const Conn* c, void* stoich );
-		void assignStoichFuncLocal( void* stoich );
+		static void saveAsCSV( const Conn* c, string fname );
+		static void saveAsXplot( const Conn* c, string fname );
+
 
 		///////////////////////////////////////////////////
 		// Utility functions for doing doser
@@ -99,6 +98,9 @@ class StateScanner
 		
 	private:
 		bool isMoleculeIndexGood( unsigned int i ) const;
+
+		// Utility function for dumping data
+		bool buildTabList(Eref me, vector< Id >& childList, int& maxXdivs );
 		///////////////////////////////////////////////////
 		// Internal fields.
 		///////////////////////////////////////////////////
@@ -114,14 +116,15 @@ class StateScanner
 		unsigned int numOsc_;
 		unsigned int numOther_;
 		unsigned int classification_;
-		bool useLog_; // Use logarithmic increments in dose-response
-		bool useRisingDose_; // Do a rising series.
-		bool useBufferDose_; // Use buffering in dose-response.
-		bool useSS_; // Use the SteadyState solver, rather than time-series
-		double x_; // current value in dose-response
-		double dx_; // increment: summed or multiplied, in dose-response
-		double lastx_; // previous value in dose-response
-		double end_; // terminating value in dose-response
+		bool useLog_; /// Use logarithmic increments in dose-response
+		bool useRisingDose_; /// Do a rising series.
+		bool useBufferDose_; /// Use buffering in dose-response.
+		bool useReinit_; /// Reinit each cycle if in buffering mode.
+		bool useSS_; /// Use the SteadyState solver, rather than time-series
+		double x_; /// current value in dose-response
+		double dx_; /// increment: summed or multiplied, in dose-response
+		double lastx_; /// previous value in dose-response
+		double end_; /// terminating value in dose-response
 		static const double EPSILON;
 };
 
