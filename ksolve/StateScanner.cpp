@@ -24,6 +24,7 @@
  *
  */
 
+#include <fstream>
 #include "moose.h"
 #include "ProcInfo.h"
 #include "../element/Neutral.h"
@@ -176,6 +177,21 @@ const Cinfo* initStateScannerCinfo()
 			"If the useLog flag is true, it is done using logarithmic"
 			"sampling over the possible conc range."
 		),
+		new DestFinfo( "saveAsXplot", 
+			Ftype1< string >::global(),
+			RFCAST( &StateScanner::saveAsXplot ),
+			"Save as an xplot file, with successive plots separated by /newplot and /plotname <name>."
+			"This format has two columns. Left column has xAxis value, right column has data."
+			"The xAxis values are repeated for each plot."
+		),
+		new DestFinfo( "saveAsCSV", 
+			Ftype1< string >::global(),
+			RFCAST( &StateScanner::saveAsCSV ),
+			"Save as a single flat CSV (comma separated value) table, with"
+			"the left column having the xAxis values, and successive plots"
+			"following it in later columns."
+		),
+
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
@@ -262,7 +278,8 @@ StateScanner::StateScanner()
 		classification_( 0 ),
 		useLog_( 0 ),
 		useRisingDose_( 1 ),
-		useBufferDose_( 1 ),
+		useBufferDose_( 0 ),
+		useReinit_( 1 ),
 		useSS_( 1 ),
 		x_( 0.0 ),
 		dx_( 0.0 ),
@@ -346,6 +363,27 @@ bool StateScanner::getUseBufferDose( Eref e ) {
 void StateScanner::setUseBufferDose( const Conn* c, bool value ) {
 	static_cast< StateScanner* >( c->data() )->useBufferDose_ = value;
 }
+
+unsigned int StateScanner::getStateCategory( Eref e, const unsigned int& i )
+{
+	return static_cast< const StateScanner* >( e.data() )->localGetStateCategory(i);
+}
+
+void StateScanner::setStateCategory( 
+	const Conn* c, unsigned int val, const unsigned int& i )
+{
+	; // dummy function.
+}
+
+unsigned int StateScanner::localGetStateCategory( unsigned int i ) const
+{
+	if ( i < stateCategories_.size() )
+		return stateCategories_[i];
+	cout << "Warning: StateScanner::localStateCategory: index " << i <<
+			" out of range " << stateCategories_.size() << endl;
+	return 0.0;
+}
+
 		
 ///////////////////////////////////////////////////
 // Utility function definitions
@@ -368,7 +406,7 @@ bool isMolecule( Id elm )
 }
 
 ///////////////////////////////////////////////////
-// Dest function definitions
+// Simple Dest function definitions
 ///////////////////////////////////////////////////
 
 /** 
@@ -402,30 +440,101 @@ void StateScanner::dropTrackedMolecule( const Conn* c, Id val )
 {
 }
 
-
-unsigned int StateScanner::getStateCategory( Eref e, const unsigned int& i )
+/**
+ * Saves output as a CSV file. xAxis table entries are in leftmost column.
+ */
+void StateScanner::saveAsCSV( const Conn* c, string fname )
 {
-	return static_cast< const StateScanner* >( e.data() )->localGetStateCategory(i);
+	const Finfo* tabFinfo = Cinfo::find( "Interpol" )->findFinfo( "table" );
+	ofstream fout( fname.c_str(), std::ios::trunc );
+	vector< Id > childList;
+	int maxXdivs = 0;
+	double val = 0.0;
+	StateScanner* scan = static_cast< StateScanner* >( c->data() );
+	scan->buildTabList( c->target(), childList, maxXdivs );
+	unsigned int max = maxXdivs;
+	for ( unsigned int i = 0; i < max; ++i ) {
+		for ( vector< Id >::iterator j = childList.begin(); 
+			j != childList.end(); ++j )
+		{
+			lookupGet< double, unsigned int >( (*j)(), tabFinfo, val, i );
+			fout << val;
+			if ( j != childList.end() - 1 )
+				fout << ",";
+		}
+	}
 }
 
-void StateScanner::setStateCategory( 
-	const Conn* c, unsigned int val, const unsigned int& i )
+/**
+ * Saves output as an xplot file. xAxis table entries are in left column.
+ */
+void StateScanner::saveAsXplot( const Conn* c, string fname )
 {
-	; // dummy function.
+	ofstream fout( fname.c_str(), std::ios::trunc );
+	vector< Id > childList;
+	int maxXdivs = 0;
+	// Check that the xAxis table is there
+	StateScanner* scan = static_cast< StateScanner* >( c->data() );
+	if ( scan->buildTabList( c->target(), childList, maxXdivs ) ) {
+		vector< double > xAxis;
+		vector< double > y;
+		for ( vector< Id >::iterator j = childList.begin(); 
+			j != childList.end(); ++j ) {
+			if ( (*j)()->name() == "xAxis" )
+				get< vector< double > >( (*j)(), "tableVector", xAxis );
+		}
+		for ( vector< Id >::iterator j = childList.begin(); 
+			j != childList.end(); ++j ) {
+			if ( (*j)()->name() == "xAxis" )
+				continue;
+
+			get< vector< double > >( (*j)(), "tableVector", y );
+			unsigned int size = y.size();
+			assert( size == xAxis.size() );
+			fout << "/newplot\n";
+			fout << "/plotname " << (*j)()->name() << "\n";
+			for ( unsigned int i = 0; i < size; ++i )
+				fout << xAxis[i] << "	" << y[i] << endl;
+		}
+	}
 }
 
-unsigned int StateScanner::localGetStateCategory( unsigned int i ) const
+/**
+ * Utility function for extracting tables from children and making
+ * a list headed by the xaxis table. If the xAxis table is found it
+ * returns 1, otherwise 0.
+ */
+bool StateScanner::buildTabList( 
+	Eref me, vector< Id >& childList, int& maxXdivs )
 {
-	if ( i < stateCategories_.size() )
-		return stateCategories_[i];
-	cout << "Warning: StateScanner::localStateCategory: index " << i <<
-			" out of range " << stateCategories_.size() << endl;
-	return 0.0;
+	static const Cinfo* tabCinfo = Cinfo::find( "Interpol" );
+	get< vector< Id > >( me, "childList", childList );
+	vector< Id > tabList;
+	Id xAxis;
+	int xdivs = 0;
+	for ( vector< Id >::iterator i = childList.begin();
+		i != childList.end(); ++i ) {
+		Element* e = (*i)();
+		if ( e->cinfo()->isA( tabCinfo ) ) {
+			if ( e->name() == "xAxis" )
+				xAxis = *i;
+			else
+				tabList.push_back( *i );
+			get< int >( e, "xdivs", xdivs );
+			if ( maxXdivs < xdivs )
+				maxXdivs = xdivs;
+		}
+	}
+	if ( xAxis.good() ) {
+		tabList.insert( tabList.begin(), xAxis );
+		return 1;
+	}
+	return 0;
 }
 
 
 ///////////////////////////////////////////////////
-// Dest function definitions
+// Complex Dest function definitions
 ///////////////////////////////////////////////////
 
 // Static func
@@ -447,6 +556,22 @@ void StateScanner::logDoseResponse( const Conn* c,
 	static_cast< StateScanner* >( c->data() )->innerDoseResponse(
 		c->target(), variableMol, start, end, numSteps, 1 );
 }
+
+
+void StateScanner::classifyStates( const Conn* c,
+	unsigned int numStartingPoints,
+	bool useMonteCarlo,
+	bool useLog )
+{
+	static_cast< StateScanner* >( c->data() )->innerClassifyStates(
+		numStartingPoints,
+		useMonteCarlo,
+		useLog );
+}
+
+///////////////////////////////////////////////////
+// Helper function definitions for dose response
+///////////////////////////////////////////////////
 
 bool StateScanner::initDoser( double start, double end, unsigned int numSteps, bool useLog)
 {
@@ -502,11 +627,15 @@ void StateScanner::settle( Eref me, Id& cj, Id& ss )
 {
 	static const Finfo* startFinfo = 
 			Cinfo::find( "ClockJob" )->findFinfo( "start" );
+	static const Finfo* reinitFinfo = 
+			Cinfo::find( "ClockJob" )->findFinfo( "reinit" );
 	static const Finfo* settleFinfo = 
 			Cinfo::find( "SteadyState" )->findFinfo( "settle" );
 	static const Finfo* statusFinfo = 
 			Cinfo::find( "SteadyState" )->findFinfo( "solutionStatus" );
 
+	if ( useReinit_ && useBufferDose_ )
+		set( cj(), reinitFinfo );
 	set< double >( cj(), startFinfo, settleTime_ );
 	if ( useSS_ ) {
 		set( ss(), settleFinfo );
@@ -616,16 +745,9 @@ void StateScanner::innerDoseResponse( Eref me, Id variableMol,
 	}
 }
 
-void StateScanner::classifyStates( const Conn* c,
-	unsigned int numStartingPoints,
-	bool useMonteCarlo,
-	bool useLog )
-{
-	static_cast< StateScanner* >( c->data() )->innerClassifyStates(
-		numStartingPoints,
-		useMonteCarlo,
-		useLog );
-}
+///////////////////////////////////////////////////
+// Helper function definitions for dose response
+///////////////////////////////////////////////////
 
 void StateScanner::innerClassifyStates(
 		unsigned int numStartingPoints,
@@ -633,31 +755,3 @@ void StateScanner::innerClassifyStates(
 		bool useLog )
 {
 }
-
-///////////////////////////////////////////////////
-// Other function definitions
-///////////////////////////////////////////////////
-
-/*
-void StateScanner::assignStoichFunc( const Conn* c, void* s )
-{
-	static_cast< StateScanner* >( c->data() )->assignStoichFuncLocal( s );
-}
-
-void StateScanner::setMolN( const Conn* c, double y, unsigned int i )
-{
-}
-*/
-
-///////////////////////////////////////////////////
-// GSL interface stuff
-///////////////////////////////////////////////////
-
-/**
- * This function should also set up the sizes, and it should be at 
- * allocate, not reinit time.
-void StateScanner::assignStoichFuncLocal( void* stoich ) 
-{
-}
- */
-

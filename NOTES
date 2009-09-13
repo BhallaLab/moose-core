@@ -8891,6 +8891,16 @@ Yet to implement actual algorithms.
 
 =============================================================================
 12 Sep 2009
-Got part of the dose-response code working.
+Got part of the dose-response code working. Checked in as version 1326
+
+=============================================================================
+13 Sep 2009.
+Implemented a couple of helper operations in StateScanner, to dump 
+dose-response and other data as xplot files and as csv files.
+Confirmed issue with SS finder doing dose-response curves: 
+It does not like getting input as an
+increment to one of the concs. Looks like the input does alter something,
+but mass conservation is messed up. I'm not quite sure what happens here -
+perhaps it reinits all but the incremented molecule?
 
 =============================================================================
