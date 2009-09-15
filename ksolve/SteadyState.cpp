@@ -204,6 +204,15 @@ const Cinfo* initSteadyStateCinfo()
 			RFCAST( &SteadyState::showMatricesFunc ),
 			"Utility function to show the matrices derived for the calculations on the reaction system. Shows the Nr, gamma, and total matrices"
 		),
+		new DestFinfo( "randomInit", 
+			Ftype0::global(),
+			RFCAST( &SteadyState::randomInitFunc ),
+			"Generate random initial conditions consistent with the mass"
+			"conservation rules. Typically invoked by the StateScanner"
+			"object, which will then go through the process of coordinating"
+			"settle time and the SteadyState object to find"
+			"the associated steady state."
+		),
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
@@ -429,6 +438,15 @@ void SteadyState::resettleFunc( const Conn* c )
 void SteadyState::showMatricesFunc( const Conn* c )
 {
 	static_cast< SteadyState* >( c->data() )->showMatrices();
+}
+
+/**
+ * Initializes the system to a random initial condition that is
+ * consistent with the conservation laws.
+ */
+void SteadyState::randomInitFunc( const Conn* c )
+{
+	static_cast< SteadyState* >( c->data() )->randomInit();
 }
 
 ///////////////////////////////////////////////////
@@ -895,4 +913,80 @@ int myGaussianDecomp( gsl_matrix* U )
 			break;
 	}
 	return i + 1;
+}
+
+//////////////////////////////////////////////////////////////////
+// Utility functions for doing scans for steady states
+//////////////////////////////////////////////////////////////////
+
+/**
+ * Checks if this molecule is the last remaining molecule in a
+ * conservation block. If so, it has to be assigned the remaing mols
+ * returns the consv block index (j). On failure, returns -1.
+ */
+int SteadyState::isLastConsvMol( int i )
+{
+	for ( unsigned int j = 0; j < total_.size(); ++j ) {
+		// First check if the gamma entry here is nonzero.
+		if ( fabs (gsl_matrix_get( gamma_, i, j ) ) < EPSILON ) {
+			continue;
+		}
+		// Go on to check if it is the last nonzero entry.
+		bool isLast = 1;
+		for ( unsigned int k = i+1; k < nVarMols_; ++j ) {
+			if ( fabs (gsl_matrix_get( gamma_, k, j ) ) > EPSILON ) {
+				isLast = 0;
+				break;
+			}
+		}
+		if ( isLast )
+			return j;
+	}
+	return -1;
+}
+
+void SteadyState::recalcRemainingTotal( 
+	vector< double >& y, vector< double >& tot )
+{
+	for ( unsigned int j = 0; j < tot.size() ; ++j ) {
+		double temp = 0.0;
+		for ( unsigned int i = 0; i < nVarMols_; ++i ) {
+			temp += gsl_matrix_get( gamma_, j, i ) * y[i];
+		}
+		tot[j] = total_[j] - temp;
+	}
+}
+
+void SteadyState::randomInit()
+{
+	// double* y = s_->S();
+	vector< double > y( nVarMols_, 0.0 );
+	vector< double > remainingTotal( total_ );
+	double denom = 0.0;
+	
+	for ( unsigned int i = 0; i < nVarMols_; ++i ) {
+		int j = isLastConsvMol( i );
+		if ( j > 0 ) {
+			denom = gsl_matrix_get( gamma_, j, i );
+			y[i] = remainingTotal[j] / denom;
+		} else { // Put in another random number here.
+			double p = mtrand();
+			for ( unsigned int x = 0; x < total_.size(); ++x ) {
+				denom = gsl_matrix_get( gamma_, x, i );
+				if ( fabs( denom ) > EPSILON ) {
+					x = p * remainingTotal[x] / denom;
+					if ( x > EPSILON ) {
+						y[ i ] = x;
+						break;
+					}
+				}
+			}
+		}
+		recalcRemainingTotal( y, remainingTotal );
+	}
+	// Sanity check
+	recalcRemainingTotal( y, remainingTotal );
+	for ( unsigned int j = 0; j < total_.size(); ++j ) {
+		assert( fabs( remainingTotal[j] ) < EPSILON );
+	}
 }
