@@ -8902,5 +8902,182 @@ It does not like getting input as an
 increment to one of the concs. Looks like the input does alter something,
 but mass conservation is messed up. I'm not quite sure what happens here -
 perhaps it reinits all but the incremented molecule?
+Checked in as revision 1327.
+
+Move on now to finding fixed all points.
+Approach:
+	Find conserved set with largest conc.
+	Go through algorithm on 19/7/09 (page 19 and 20) for this set,
+		making sure that all molecules in set are visited.
 
 =============================================================================
+14 Sep 2009
+
+In order to control the scanning through initial conditions, we
+need to know all about the gamma (conservation) matrix and the 
+vector of totals (which is not necessarily the simple sum of mol
+concs). 
+-> Rather than do that here, we need to talk to the SteadyState
+object and ask it to do the scanning, as it knows all.
+-> Rather than ask the user to identify a reference molecule for the
+scanning, we'll ask the SteadyState to find the biggest Totals
+group and use it first, with an approximate predefined # of samples.
+As an option, we can ask SteadyState to extend the algorithm through
+all Totals groups.
+A Monte Carlo sampling approach would need to first select a molecule,
+then decide what fraction to assign to it, then if needed decide which
+next molecule to assign. Sometimes there is only one other molecule
+that could be assigned.
+
+For reference:
+
+Gamma.S = T
+For example:
+
+Gamma					S	T
+[1	1	0	0	0]	[1] = 	[3	5]
+[-1	0	1	1	2]	[2]
+					[1]
+					[1]
+					[2]
+Steps
+- Ensure that we have a correct ordering for Totals.
+- Find a way to enumerate all mol sequences for a given proportion
+  in the first.
+
+Looked at the math a bit. Although one could with some effort figure out
+which conservation set had the largest total # of molecules, it still isn't
+a good general way to establish the set that we want to play with for finding
+steady states. For example, we could have a large conc of a slow enzyme that
+does only one reaction, but the interesting states could be in the other
+molecules.
+
+So I will simply be agnostic about the order in which to scan through the
+molecules S. Totals and Gamma server only to decide how to assign the next
+molecule.
+
+Estimating # in a scan:
+1. Pick i, mol #: Start with 1.
+2. Let x_i = T_j/gamma_ji. Find a value of j for which this is nonzero
+3. For this value of j, find # of molecules (k > i) for which 
+	(x_k == T_j/gamma_jk) > 0
+Will need to take into account initial concs in order to work out which 
+combinations can work with the other rows of gamma.
+
+This is getting ugly. Could simply look at the gamma matrix and do a quick
+estimate based on how many columns are occupied in each row, eliminating 
+overlapping columns from lower rows. For the above gamma it should be 2+3.
+But in each row, the # of permutable molecules is one less, so it becomes 1 + 2.
+This fits with the rank of the system here which is 3: only 3 molecules are
+truly independent. So we need the rank of the system to estimate # of possible 
+permutations.
+
+Suppose we have 10 values per permutable molecule.
+Take molecule 1 here. Assign it.
+	Molecule 2 is fixed because of conservation laws in row 1 of gamma
+	Molecule 3 can take any of 10 values (but note consv laws may limit)
+	Molecule 4 can take any of 10 values (but note consv laws may limit)
+	Molecule 5 is now fixed due to conservations laws in row 2 of gamma
+
+This is good, but how do we find what those 10 values are?
+
+Example 1:
+Molecule 1 takes max value of 3.
+Molecule 2 becomes 0. No choice.
+Molecule 3 can now take any value between 3 and 8. Say it takes 8.
+Molecule 4 must become 0.
+Molecule 5 must become 0.
+
+So we don't really have 3 dimensions here. Only 2.
+
+Example 2:
+Molecule 1 takes min value of 0.
+Molecule 2 becomes 3. No choice.
+Molecule 3 can now take any value between 0 and 5. Say it takes 2.
+Molecule 4 can take any value between 0 and 3. Say it takes 2.
+Molecule 5 must become 1.
+
+	Looks like Molecule 3 always has access to the full range of concs,
+	though the start and end may differ.
+	Clearly Molecule 4 does not have access to the full range of concs.
+		On average, half.
+	If we had further molecules in this series, the next one will have 
+		access to 1/4 the range of concs on average.
+
+So it looks like an exponentially declining series. For n molecules in
+a conservation set, and a granularity of g samples across the range, we have
+
+#samples = g * g/2 * g/4 *...
+
+The series for fractions of 2 goes like:
+	1 * .5 * .25 * ...
+	= 2^0 * 2^-1 * 2^-2 *....
+	= 2^(0 - 1 - 2...)
+	
+	1 + 2 + 3 + 4 ... = n(n+1)/2
+	0 + 1 + 2 + 3 ... = n(n+1)/2 - n = n( (n+1)/2 - 1 ) = n( ((n+1)-2) / 2 )
+		  	  = n(n-1)/2
+	
+So
+#samples = (g^n)/( 2^(n(n-1)/2) )
+
+ln(#samples) = n*ln(g) - (n*(1-n)/2)*ln(2)
+Some numbers: Note g = #levels - 1, since zero levels are allowed.
+
+granularity g	num mol n	#samples			using combin
+10		2		10				11
+10		3		50				66
+10		4		(1000/8) = 125			286
+	(we're now unable to get round#s of samples)
+10		5		10000/64 ~ 156 			715
+
+1		2		2				2
+1		3		3				3
+1		4		4 (estimate would have been 1)	4
+1		5		5 (estimate < 1)		5
+
+2		2		3				3
+2		3		3+2+1 = 6			6
+2		4		6+3+1 = 10			10
+
+This doesn't work too well. Try again:
+m1 + m2 + m3 ... = tot
+How many ways to choose m1, m2, m3 with a given granularity g.
+If we simply say tot = g (# of levels) and use integer, it turns into simple
+combinations with repetition: how to partition g levels among m molecules.
+
+(g + m - 1)C(m - 1) = (g + m - 1)Cg
+Plug this into the table above and see how it works.
+
+Check it for 2 mols: 10 levels. # in first can be 0 to 10 inclusive, others
+are fixed from this. So it is 11 levels.
+Check it for 3 mols: 10 levels. # in first can be 0 to 10 inclusive. Sum
+of remainder is fixed from this, and it goes into 2 mols. Remainder could be 
+0: 1 way
+1: 2 ways
+2: 3 ways
+3: 4 ways
+4: 5 ways
+...
+10: 11 ways.
+so total ways is n(n+1)/2 = 66.
+Seems OK.
+Also checked for the case of granularity = 1 and 2.
+
+This is a good quick way to estimate # of samples for a given granularity,
+and work backwards iteratively to find granularity. Next step is to implement
+the scanning.
+
+1. Order gamma so first row is all positive. I think the
+	current algorithm always does this for the first row.
+2. Define granularity, send #samples info back to StateScanner
+3. Simplest approach is to build up an internal table of mol levels that
+	the iterator looks up. It is unlikely anyone will use masses of
+	memory on this. For big numbers we'll recommend Monte Carlo.
+4. Run through table.
+
+For the Monte Carlo case it is still simpler. On each sample, generate
+random #s for mol concs scaled to fit within range.
+
+After all this, I have gone ahead with an implemetantion for the Monte Carlo
+generator instead. It just generates a single Monte Carlo point.
