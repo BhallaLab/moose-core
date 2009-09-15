@@ -728,13 +728,6 @@ void StateScanner::innerDoseResponse( Eref me, Id variableMol,
 		settle( me, cj, ss );
 	} while ( advanceDoser() );
 
-	// Figure out how to increment it.
-	// Do the initial settling
-	// In the loop: Assign the totals array. Do this first time too,
-	// 	to get around numerical error in settling.
-	// Go through loop, incrementing totals array and extracting state.
-	// Do fallback time-series settle operation if the direct state
-	// settling fails.
 
 	set< double >( variableMol.eref(), concInitFinfo, origConcInit );
 
@@ -745,10 +738,30 @@ void StateScanner::innerDoseResponse( Eref me, Id variableMol,
 	}
 }
 
-///////////////////////////////////////////////////
-// Helper function definitions for dose response
-///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+// Helper function definitions for state classification
+////////////////////////////////////////////////////////////////
 
+/**
+ * In order to control the scanning through initial conditions, we
+ * need to know all about the gamma (conservation) matrix and the 
+ * vector of totals (which is not necessarily the simple sum of mol
+ * concs). Rather than do that here, we need to talk to the SteadyState
+ * object and ask it to do the scanning, as it knows all.
+ * Rather than ask the user to identify a reference molecule for the
+ * scanning, we'll ask the SteadyState to find the biggest Totals
+ * group and use it first, with an approximate predefined # of samples.
+ * As an option, we can ask SteadyState to extend the algorithm through
+ * all Totals groups.
+ * A Monte Carlo sampling approach would need to first select a molecule,
+ * then decide what fraction to assign to it, then if needed decide which
+ * next molecule to assign. Sometimes there is only one other molecule
+ * that could be assigned.
+ * Steps
+ * - Ensure that we have a correct ordering for Totals.
+ * - Find a way to enumerate all mol sequences for a given proportion
+ *   in the first.
+ */
 void StateScanner::innerClassifyStates(
 		unsigned int numStartingPoints,
 		bool useMonteCarlo,
