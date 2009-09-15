@@ -55,8 +55,18 @@ class SteadyState
 		void settle( bool forceSetup );
 		static void showMatricesFunc( const Conn* c );
 		void showMatrices();
+		static void randomInitFunc( const Conn* c );
+		void randomInit();
+		////////////////////////////////////////////////////
+		// Utility functions for randomInit
+		////////////////////////////////////////////////////
+		int isLastConsvMol( int i );
+		void recalcRemainingTotal(
+			vector< double >& y, vector< double >& tot );
 		
+		////////////////////////////////////////////////////
 		// funcs to handle externally imposed changes in mol N
+		////////////////////////////////////////////////////
 		static void setMolN( const Conn* c, double y, unsigned int i );
 		static void assignStoichFunc( const Conn* c, void* stoich );
 		void assignStoichFuncLocal( void* stoich );
