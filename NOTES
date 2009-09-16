@@ -9081,3 +9081,16 @@ random #s for mol concs scaled to fit within range.
 
 After all this, I have gone ahead with an implemetantion for the Monte Carlo
 generator instead. It just generates a single Monte Carlo point.
+Checked in (after some problems) as revision 1328. Yet to test.
+
+=============================================================================
+15 Sep 2009
+Implemented, the algorithm itself is flawed. First, it is way to complicated:
+I came up with a much simpler way to assign the mol concs.
+Second, the constraints of the consv laws don't come through cleanly in
+	either approach, and will need careful work.
+=============================================================================
+16 Sep 2009
+Implemented new algorithm for generating initial conditions using 
+Monte Carlo methods. Seems OK for a simple test case.
+
