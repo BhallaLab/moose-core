@@ -206,7 +206,7 @@ const Cinfo* initSteadyStateCinfo()
 		),
 		new DestFinfo( "randomInit", 
 			Ftype0::global(),
-			RFCAST( &SteadyState::randomInitFunc ),
+			RFCAST( &SteadyState::randomizeInitialConditionFunc ),
 			"Generate random initial conditions consistent with the mass"
 			"conservation rules. Typically invoked by the StateScanner"
 			"object, which will then go through the process of coordinating"
@@ -444,9 +444,9 @@ void SteadyState::showMatricesFunc( const Conn* c )
  * Initializes the system to a random initial condition that is
  * consistent with the conservation laws.
  */
-void SteadyState::randomInitFunc( const Conn* c )
+void SteadyState::randomizeInitialConditionFunc( const Conn* c )
 {
-	static_cast< SteadyState* >( c->data() )->randomInit();
+	static_cast< SteadyState* >( c->data() )->randomizeInitialCondition();
 }
 
 ///////////////////////////////////////////////////
@@ -919,6 +919,7 @@ int myGaussianDecomp( gsl_matrix* U )
 // Utility functions for doing scans for steady states
 //////////////////////////////////////////////////////////////////
 
+#if 0
 /**
  * Checks if this molecule is the last remaining molecule in a
  * conservation block. If so, it has to be assigned the remaing mols
@@ -928,13 +929,13 @@ int SteadyState::isLastConsvMol( int i )
 {
 	for ( unsigned int j = 0; j < total_.size(); ++j ) {
 		// First check if the gamma entry here is nonzero.
-		if ( fabs (gsl_matrix_get( gamma_, i, j ) ) < EPSILON ) {
+		if ( fabs (gsl_matrix_get( gamma_, j, i ) ) < EPSILON ) {
 			continue;
 		}
 		// Go on to check if it is the last nonzero entry.
 		bool isLast = 1;
-		for ( unsigned int k = i+1; k < nVarMols_; ++j ) {
-			if ( fabs (gsl_matrix_get( gamma_, k, j ) ) > EPSILON ) {
+		for ( unsigned int k = i+1; k < nVarMols_; ++k ) {
+			if ( fabs (gsl_matrix_get( gamma_, j, k ) ) > EPSILON ) {
 				isLast = 0;
 				break;
 			}
@@ -966,15 +967,16 @@ void SteadyState::randomInit()
 	
 	for ( unsigned int i = 0; i < nVarMols_; ++i ) {
 		int j = isLastConsvMol( i );
-		if ( j > 0 ) {
+		if ( j >= 0 ) {
 			denom = gsl_matrix_get( gamma_, j, i );
 			y[i] = remainingTotal[j] / denom;
+			assert( y[i] > 0 );
 		} else { // Put in another random number here.
 			double p = mtrand();
-			for ( unsigned int x = 0; x < total_.size(); ++x ) {
-				denom = gsl_matrix_get( gamma_, x, i );
+			for ( unsigned int k = 0; k < total_.size(); ++k ) {
+				denom = gsl_matrix_get( gamma_, k, i );
 				if ( fabs( denom ) > EPSILON ) {
-					x = p * remainingTotal[x] / denom;
+					double x = p * remainingTotal[k] / denom;
 					if ( x > EPSILON ) {
 						y[ i ] = x;
 						break;
@@ -989,4 +991,120 @@ void SteadyState::randomInit()
 	for ( unsigned int j = 0; j < total_.size(); ++j ) {
 		assert( fabs( remainingTotal[j] ) < EPSILON );
 	}
+	for ( unsigned int i = 0; i < nVarMols_; ++i )
+		s_->S()[i] = y[i];
 }
+#endif
+
+
+/**
+ * Generates a new set of values for the S vector that is a) random
+ * and b) obeys the conservation rules.
+ */
+void SteadyState::randomizeInitialCondition()
+{
+	int numConsv = total_.size();
+	// The reorderRows function likes to have an I matrix at the end of
+	// nVarMols, so we provide space for it, although only its first
+	// column is used for the total vector.
+	gsl_matrix* U = gsl_matrix_calloc ( numConsv, nVarMols_ + numConsv );
+	for ( int i = 0; i < numConsv; ++i ) {
+		for ( unsigned int j = 0; j < nVarMols_; ++j ) {
+			gsl_matrix_set( U, i, j, gsl_matrix_get( gamma_, i, j ) );
+		}
+		gsl_matrix_set( U, i, nVarMols_, total_[i] );
+	}
+	// Do the forward elimination
+	int rank = myGaussianDecomp( U );
+	assert( rank = numConsv );
+
+	vector< double > eliminatedTotal( numConsv, 0.0 );
+	for ( int i = 0; i < numConsv; ++i ) {
+		eliminatedTotal[i] = gsl_matrix_get( U, i, nVarMols_ );
+	}
+
+	// Put Find a vector Y that fits the consv rules.
+	vector< double > y( nVarMols_, 0.0 );
+	fitConservationRules( U, eliminatedTotal, y );
+
+	// Sanity check. Try the new vector with the old gamma and tots
+	for ( int i = 0; i < numConsv; ++i ) {
+		double tot = 0.0;
+		for ( unsigned int j = 0; j < nVarMols_; ++j ) {
+			tot += y[j] * gsl_matrix_get( gamma_, i, j );
+		}
+		assert( fabs( tot - total_[i] ) < EPSILON );
+	}
+
+	// Put the new values into S.
+	for ( unsigned int j = 0; j < nVarMols_; ++j ) {
+		s_->S()[j] = y[j];
+	}
+}
+
+/**
+ * This does the actual work of generating random numbers and
+ * making sure they fit.
+ */
+void SteadyState::fitConservationRules( 
+	gsl_matrix* U, const vector< double >& eliminatedTotal,
+		vector< double >&y
+	)
+{
+	int numConsv = total_.size();
+	int lastJ = nVarMols_;
+	for ( int i = numConsv - 1; i >= 0; --i ) {
+		for ( unsigned int j = 0; j < nVarMols_; ++j ) {
+			double g = gsl_matrix_get( U, i, j );
+			if ( fabs( g ) > EPSILON ) {
+				// double ytot = calcTot( g, i, j, lastJ );
+				double ytot = 0.0;
+				for ( int k = j; k < lastJ; ++k ) {
+					y[k] = mtrand();
+					ytot += y[k] * gsl_matrix_get( U, i, k );
+				}
+				assert( fabs( ytot ) > EPSILON );
+				double lastYtot = 0.0;
+				for ( unsigned int k = lastJ; k < nVarMols_; ++k ) {
+					lastYtot += y[k] * gsl_matrix_get( U, i, k );
+				}
+				double scale = ( eliminatedTotal[i] - lastYtot ) / ytot;
+				for ( int k = j; k < lastJ; ++k ) {
+					y[k] *= scale;
+				}
+				lastJ = j;
+				break;
+			}
+		}
+	}
+}
+
+/*
+int SteadyState::fitSingleConsvRule( 
+	gsl_matrix* U, const vector< double >& eliminatedTotal,
+		vector< double >&y, int ruleIndex, int lastJ)
+{
+	for ( int j = 0; j < nVarMols_; ++j ) {
+		g = gsl_matrix_get( U, ruleIndex, j );
+		if ( fabs( g ) > EPSILON ) {
+			// double ytot = calcTot( g, i, j, lastJ );
+			double ytot = 0.0;
+			for ( int k = j; k < lastJ; ++k ) {
+				y[k] = mtrand();
+				ytot += y[k] * gsl_matrix_get( U, ruleIndex, k );
+			}
+			assert( ytot > 0.0 );
+			lastYtot = 0.0;
+			for ( int k = lastJ; k < nVarMols_; ++k ) {
+				lastYtot += y[k] * gsl_matrix_get( U, ruleIndex, k );
+			}
+			double scale = ( eliminatedTotal[ruleIndex] - lastYtot )/ytot;
+			for ( int k = j; k < lastJ; ++k ) {
+				y[k] *= scale;
+			}
+			return j;
+		}
+	}
+	return 0;
+}
+*/
