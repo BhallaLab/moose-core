@@ -55,14 +55,23 @@ class SteadyState
 		void settle( bool forceSetup );
 		static void showMatricesFunc( const Conn* c );
 		void showMatrices();
-		static void randomInitFunc( const Conn* c );
-		void randomInit();
+		static void randomizeInitialConditionFunc( const Conn* c );
+		void randomizeInitialCondition();
+		// static void randomInitFunc( const Conn* c );
+		// void randomInit();
 		////////////////////////////////////////////////////
 		// Utility functions for randomInit
 		////////////////////////////////////////////////////
+		/*
 		int isLastConsvMol( int i );
 		void recalcRemainingTotal(
 			vector< double >& y, vector< double >& tot );
+		*/
+		void fitConservationRules( 
+			gsl_matrix* U, 
+			const vector< double >& eliminatedTotal,
+			vector< double >&yi
+		);
 		
 		////////////////////////////////////////////////////
 		// funcs to handle externally imposed changes in mol N
