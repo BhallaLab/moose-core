@@ -9094,3 +9094,12 @@ Second, the constraints of the consv laws don't come through cleanly in
 Implemented new algorithm for generating initial conditions using 
 Monte Carlo methods. Seems OK for a simple test case.
 
+checked in as revision 1330.
+=============================================================================
+17 Sep 2009
+Finally the general algorithm for finding all steady states seems to be
+working. Turns out that the Monte Carlo approach is surprisingly bad at
+finding some corner cases, that turn up right away with the systematic
+scan. Some minor cleanup needed, and then I have to decide if I want to
+proceed with the systematic scan algorithm too.
+=============================================================================

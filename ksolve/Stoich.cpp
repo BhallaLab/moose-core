@@ -96,6 +96,10 @@ const Cinfo* initStoichCinfo()
 			Ftype1< void* >::global() ),
 		new SrcFinfo( "setMolNsrc",
 			Ftype2< double, unsigned int >::global() ),
+		new DestFinfo( "requestY", Ftype0::global(),
+			&Stoich::requestY ),
+		new SrcFinfo( "assignYsrc",
+			Ftype1< double* >::global() ),
 	};
 
 	/**
@@ -267,6 +271,8 @@ static const Slot assignStoichSlot =
 	initStoichCinfo()->getSlot( "gsl.assignStoich" );
 static const Slot setMolNslot =
 	initStoichCinfo()->getSlot( "gsl.setMolNsrc" );
+static const Slot assignYslot =
+	initStoichCinfo()->getSlot( "gsl.assignYsrc" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -366,6 +372,17 @@ void Stoich::reinitFunc( const Conn* c )
 {
 	Stoich* s = static_cast< Stoich* >( c->data() );
 	s->S_ = s->Sinit_;
+	/*
+	cout << "Stoich::reinitFunc: Assigning S_. \nS_ = ( ";
+	for ( unsigned int i = 0; i < s->S_.size(); ++i )
+		cout << s->S_[i] << ", ";
+	cout << " ), Sinit_ = ( ";
+	for ( unsigned int i = 0; i < s->Sinit_.size(); ++i )
+		cout << s->Sinit_[i] << ", ";
+	cout << " )\n";
+	*/
+
+
 	// send1< vector< double >* >( e, allocateSlot, &s->S_ );
 	// send1< void* >( e, assignStoichSlot, e->data() );
 	s->lasty_ = 0;
@@ -490,6 +507,13 @@ void Stoich::innerStartFromCurrentConcs()
 		Molecule::setConc( &c, S_[ i->second ] );
 		*/
 	}
+}
+
+/// Send S to gsl to update.
+void Stoich::requestY( const Conn* c )
+{
+	double* s = static_cast< Stoich* >( c->data() )->S();
+	send1< double* >( c->target(), assignYslot, s );
 }
 ///////////////////////////////////////////////////
 // Other function definitions

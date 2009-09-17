@@ -41,6 +41,8 @@ class GslIntegrator
 
 		static void assignStoichFunc( const Conn* c, void* stoich );
 		void assignStoichFuncLocal( void* stoich );
+		static void assignY( const Conn* c, double* S );
+		void innerAssignY( double* S );
 
 		static void setMolN( const Conn* c, double y, unsigned int i );
 		void innerSetMolN( double y, unsigned int i ) ;

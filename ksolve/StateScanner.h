@@ -73,13 +73,7 @@ class StateScanner
 			bool useLog );
 
 		static void classifyStates( const Conn* c, 
-			unsigned int numStartingPoints,
-			bool useMonteCarlo,
-			bool useLog );
-		void innerClassifyStates(
-			unsigned int numStartingPoints,
-			bool useMonteCarlo,
-			bool useLog );
+			unsigned int numStartingPoints, bool useMonteCarlo);
 
 		static void saveAsCSV( const Conn* c, string fname );
 		static void saveAsXplot( const Conn* c, string fname );
@@ -93,14 +87,26 @@ class StateScanner
 		bool advanceDoser();
 		void setControlParameter( Id& variableMol );
 		void settle( Eref me, Id& cj, Id& ss );
-		void makeDoseTable( Eref me );
-
+		void makeChildTable( Eref me, string name );
 		
 	private:
 		bool isMoleculeIndexGood( unsigned int i ) const;
 
 		// Utility function for dumping data
 		bool buildTabList(Eref me, vector< Id >& childList, int& maxXdivs );
+
+		///////////////////////////////////////////////////
+		// Utility functions for classifying states
+		///////////////////////////////////////////////////
+		void innerClassifyStates(
+			Eref me,
+			unsigned int numStartingPoints,
+			bool useMonteCarlo
+			);
+		void stateSettle( Eref me, Id& cj, Id& ss );
+		void checkIfUniqueState( Eref me );
+		void classify();
+		
 		///////////////////////////////////////////////////
 		// Internal fields.
 		///////////////////////////////////////////////////
