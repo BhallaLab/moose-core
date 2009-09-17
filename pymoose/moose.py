@@ -3508,12 +3508,30 @@ class CaConc(PyMooseBase):
         """__set_thick(self, double thick)"""
         return _moose.CaConc___set_thick(*args)
 
+    def __get_ceiling(*args):
+        """__get_ceiling(self) -> double"""
+        return _moose.CaConc___get_ceiling(*args)
+
+    def __set_ceiling(*args):
+        """__set_ceiling(self, double ceiling)"""
+        return _moose.CaConc___set_ceiling(*args)
+
+    def __get_floor(*args):
+        """__get_floor(self) -> double"""
+        return _moose.CaConc___get_floor(*args)
+
+    def __set_floor(*args):
+        """__set_floor(self, double floor)"""
+        return _moose.CaConc___set_floor(*args)
+
     Ca = _swig_property(_moose.CaConc_Ca_get, _moose.CaConc_Ca_set)
     CaBasal = _swig_property(_moose.CaConc_CaBasal_get, _moose.CaConc_CaBasal_set)
     Ca_base = _swig_property(_moose.CaConc_Ca_base_get, _moose.CaConc_Ca_base_set)
     tau = _swig_property(_moose.CaConc_tau_get, _moose.CaConc_tau_set)
     B = _swig_property(_moose.CaConc_B_get, _moose.CaConc_B_set)
     thick = _swig_property(_moose.CaConc_thick_get, _moose.CaConc_thick_set)
+    ceiling = _swig_property(_moose.CaConc_ceiling_get, _moose.CaConc_ceiling_set)
+    floor = _swig_property(_moose.CaConc_floor_get, _moose.CaConc_floor_set)
 CaConc_swigregister = _moose.CaConc_swigregister
 CaConc_swigregister(CaConc)
 CaConc.className_ = _moose.cvar.CaConc_className_
