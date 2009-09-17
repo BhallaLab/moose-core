@@ -288,7 +288,8 @@ SteadyState::SteadyState()
 		nNegEigenvalues_( 0 ),
 		nPosEigenvalues_( 0 ),
 		stateType_( 0 ),
-		solutionStatus_( 0 )
+		solutionStatus_( 0 ),
+		numFailed_( 0 )
 {
 	;
 }

@@ -499,6 +499,8 @@ void Interpol::innerClear()
 
 void Interpol::innerPop()
 {
+	if ( table_.size() == 0 )
+		return;
 	table_.pop_back();
 	if ( fabs( xmax_ - xmin_ ) > EPSILON )
 		invDx_ = xdivs() / ( xmax_ - xmin_ );

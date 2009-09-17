@@ -103,7 +103,7 @@ class StateScanner
 			unsigned int numStartingPoints,
 			bool useMonteCarlo
 			);
-		void stateSettle( Eref me, Id& cj, Id& ss );
+		bool stateSettle( Eref me, Id& cj, Id& ss );
 		void checkIfUniqueState( Eref me );
 		void classify();
 		
