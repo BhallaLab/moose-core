@@ -113,6 +113,7 @@ class SteadyState
 		vector< double > eigenvalues_;
 		unsigned int stateType_;
 		unsigned int solutionStatus_;
+		unsigned int numFailed_;
 };
 
 extern const Cinfo* initSteadyStateCinfo();

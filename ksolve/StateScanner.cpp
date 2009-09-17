@@ -387,10 +387,12 @@ unsigned int StateScanner::localGetStateCategory( unsigned int i ) const
 // Utility function definitions
 ///////////////////////////////////////////////////
 
-const string& uniqueName( Id elm )
+const string uniqueName( Id elm )
 {
 	// Seketon function for now.
-	return elm()->name();
+	Id pa = Neutral::getParent( elm.eref() );
+	string name = pa()->name() + "_" + elm()->name();
+	return name;
 }
 
 bool isMolecule( Id elm )
@@ -782,8 +784,8 @@ void StateScanner::innerClassifyStates(
 
 	for ( unsigned int i = 0; i < numStartingPoints; ++i ) {
 		set( ss(), randomInitFinfo );
-		stateSettle( me, cj, ss );
-		checkIfUniqueState( me );
+		if ( stateSettle( me, cj, ss ) )
+			checkIfUniqueState( me );
 	}
 	classify();
 }
@@ -794,7 +796,8 @@ void StateScanner::classify()
 	// Think about them.
 }
 
-void StateScanner::stateSettle( Eref me, Id& cj, Id& ss )
+// True if it works
+bool StateScanner::stateSettle( Eref me, Id& cj, Id& ss )
 {
 	static const Finfo* startFinfo = 
 			Cinfo::find( "ClockJob" )->findFinfo( "start" );
@@ -816,8 +819,8 @@ void StateScanner::stateSettle( Eref me, Id& cj, Id& ss )
 		get< unsigned int >( ss(), statusFinfo, status );
 		if ( status != 0 ) { // Need to decide if to do fallback.
 			// try running to steady state.
-			cout << "status = 0, skipping\n";
-			return;
+			// cout << "status = 0, skipping\n";
+			return 0;
 		}
 	}
 
@@ -832,6 +835,7 @@ void StateScanner::stateSettle( Eref me, Id& cj, Id& ss )
 	// Update the molecule conc arrays.
 	ProcInfoBase p( 0, settleTime_ );
 	send1< ProcInfo >( me, processSlot, &p );
+	return 1;
 }
 
 void StateScanner::checkIfUniqueState( Eref me )
@@ -877,7 +881,10 @@ void StateScanner::checkIfUniqueState( Eref me )
 	if ( numStates <= 1 ) // first state is always unique!
 		return;
 
-	// cout << "numStates = " << numStates << "; numSolutions = " << numSolutions << endl;
+	Id stateId( "/kinetics/scan/state" );
+	int xdivs;
+	get< int >( stateId(), "xdivs", xdivs );
+	// cout << "numStates = " << numStates << "; numSolutions = " << numSolutions << ", xdivs = " << xdivs << endl;
 	for ( unsigned int i = 0; i < numStates - 1; ++i ) {
 		double sumsq = 0.0;
 		for ( unsigned int j = 0; j < numMonitored; ++j ) {
