@@ -42,6 +42,11 @@ const Cinfo* initGslIntegratorCinfo()
 			Ftype2< double, unsigned int >::global(),
 			RFCAST( &GslIntegrator::setMolN )
 			),
+		new SrcFinfo( "requestYsrc", Ftype0::global() ),
+		new DestFinfo( "assignY",
+			Ftype1< double* >::global(),
+			RFCAST( &GslIntegrator::assignY )
+			),
 	};
 
 	static Finfo* gslIntegratorFinfos[] =
@@ -124,6 +129,8 @@ static const Slot integrateSlot =
 	*/
 static const Slot reinitSlot =
 	initGslIntegratorCinfo()->getSlot( "gsl.reinitSrc" );
+static const Slot requestYslot =
+	initGslIntegratorCinfo()->getSlot( "gsl.requestYsrc" );
 
 
 ///////////////////////////////////////////////////
@@ -307,6 +314,20 @@ void GslIntegrator::assignStoichFuncLocal( void* stoich )
 	gslSys_.jacobian = 0;
 	gslSys_.dimension = nVarMols_;
 	gslSys_.params = stoich;
+}
+
+/**
+ * Copies over the values in S to the y_ vector of the GSL.
+ */
+void GslIntegrator::assignY( const Conn* c, double* S )
+{
+	static_cast< GslIntegrator* >( c->data() )->innerAssignY( S );
+}
+
+void GslIntegrator::innerAssignY( double* S ) 
+{
+	 assert( nVarMols_ > 0 );
+	 memcpy( y_, S, nVarMols_ * sizeof( double ) );
 }
 
 void GslIntegrator::processFunc( const Conn* c, ProcInfo info )
