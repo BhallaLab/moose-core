@@ -83,6 +83,7 @@ class Stoich
 
 		static void startFromCurrentConcs( const Conn* c ); 
 		void innerStartFromCurrentConcs();
+		static void requestY( const Conn* c );
 
 		///////////////////////////////////////////////////
 		// Functions used by the GslIntegrator
