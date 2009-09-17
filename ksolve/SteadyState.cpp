@@ -81,6 +81,11 @@ const Cinfo* initSteadyStateCinfo()
 			Ftype2< double, unsigned int >::global(),
 			RFCAST( &SteadyState::setMolN )
 			),
+		new SrcFinfo( "requestYsrc", Ftype0::global() ),
+		new DestFinfo( "assignY",
+			Ftype1< double* >::global(),
+			RFCAST( &SteadyState::assignY )
+			),
 	};
 
 	/**
@@ -256,6 +261,8 @@ static const Cinfo* steadyStateCinfo = initSteadyStateCinfo();
 
 static const Slot reinitSlot =
 	initSteadyStateCinfo()->getSlot( "gsl.reinitSrc" );
+static const Slot requestYslot =
+	initSteadyStateCinfo()->getSlot( "gsl.requestYsrc" );
 
 ///////////////////////////////////////////////////
 // Class function definitions
@@ -446,7 +453,13 @@ void SteadyState::showMatricesFunc( const Conn* c )
  */
 void SteadyState::randomizeInitialConditionFunc( const Conn* c )
 {
-	static_cast< SteadyState* >( c->data() )->randomizeInitialCondition();
+	static_cast< SteadyState* >( c->data() )->
+		randomizeInitialCondition( c->target() );
+}
+
+// Dummy function
+void SteadyState::assignY( const Conn* c, double* S )
+{
 }
 
 ///////////////////////////////////////////////////
@@ -476,6 +489,8 @@ void SteadyState::assignStoichFuncLocal( void* stoich )
 	nVarMols_ = s_->nVarMols();
 	nReacs_ = s_->velocity().size();
 	isInitialized_ = 1;
+	// This is a bad time to setup the SS matrix, since the
+	// totals may change later. Have to update totals when needed.
 	if ( !isSetup_ )
 		setupSSmatrix();
 }
@@ -559,9 +574,20 @@ void SteadyState::setupSSmatrix()
 	// Fill up boundary condition values
 	total_.resize( nConsv );
 	total_.assign( nConsv, 0.0 );
+
+	/*
+	cout << "S = (";
+	for ( unsigned int j = 0; j < nVarMols_; ++j )
+		cout << s_->S()[ j ] << ", ";
+	cout << "), Sinit = ( ";
+	for ( unsigned int j = 0; j < nVarMols_; ++j )
+		cout << s_->Sinit()[ j ] << ", ";
+	cout << ")\n";
+	*/
+
 	for ( unsigned int i = 0; i < nConsv; ++i )
 		for ( unsigned int j = 0; j < nVarMols_; ++j )
-			total_[i] += gsl_matrix_get( gamma_, i, j ) * s_->Sinit()[ j ];
+			total_[i] += gsl_matrix_get( gamma_, i, j ) * s_->S()[ j ];
 
 	gsl_matrix_free( N );
 
@@ -644,7 +670,7 @@ void SteadyState::classifyState( const double* T )
 	// negative values.
 	double tot = 0.0;
 	for ( unsigned int i = 0; i < nVarMols_; ++i ) {
-		tot += s_->Sinit()[i];
+		tot += s_->S()[i];
 	}
 	tot *= DELTA;
 	
@@ -996,14 +1022,25 @@ void SteadyState::randomInit()
 }
 #endif
 
+void recalcTotal( vector< double >& tot, gsl_matrix* g, const double* S )
+{
+	assert( g->size1 == tot.size() );
+	for ( unsigned int i = 0; i < g->size1; ++i ) {
+		double t = 0.0;
+		for ( unsigned int j = 0; j < g->size2; ++j )
+			t += gsl_matrix_get( g, i, j ) * S[j];
+		tot[ i ] = t;
+	}
+}
 
 /**
  * Generates a new set of values for the S vector that is a) random
  * and b) obeys the conservation rules.
  */
-void SteadyState::randomizeInitialCondition()
+void SteadyState::randomizeInitialCondition( Eref me )
 {
 	int numConsv = total_.size();
+	recalcTotal( total_, gamma_, s_->S() );
 	// The reorderRows function likes to have an I matrix at the end of
 	// nVarMols, so we provide space for it, although only its first
 	// column is used for the total vector.
@@ -1037,9 +1074,13 @@ void SteadyState::randomizeInitialCondition()
 	}
 
 	// Put the new values into S.
+	// cout << endl;
 	for ( unsigned int j = 0; j < nVarMols_; ++j ) {
 		s_->S()[j] = y[j];
+		// cout << y[j] << " ";
 	}
+	send0( me, requestYslot ); // Transmit S information to solvers.
+	// cout << endl;
 }
 
 /**

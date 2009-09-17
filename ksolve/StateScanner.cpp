@@ -165,17 +165,15 @@ const Cinfo* initStateScannerCinfo()
 			"using numSteps in a logarithmic sequence."
 		),
 		new DestFinfo( "classifyStates", 
-			Ftype3< unsigned int, bool, bool >::global(),
+			Ftype2< unsigned int, bool >::global(),
 			RFCAST( &StateScanner::classifyStates ),
-			"classifyStates( numStartingPoints, useMonteCarlo, useLog )"
+			"classifyStates( numStartingPoints, useMonteCarlo )"
 			"Try to find and classify fixed points of this system, using"
 			"settling from numStartingPoints initial states."
 			"If the useMonteCarlo flag is zero, this "
 			"is done using a systematic scan over the possible conc range."
 			"If the useMonteCarlo flag is nonzero, this "
 			"is done using MonteCarlo sampling"
-			"If the useLog flag is true, it is done using logarithmic"
-			"sampling over the possible conc range."
 		),
 		new DestFinfo( "saveAsXplot", 
 			Ftype1< string >::global(),
@@ -559,14 +557,10 @@ void StateScanner::logDoseResponse( const Conn* c,
 
 
 void StateScanner::classifyStates( const Conn* c,
-	unsigned int numStartingPoints,
-	bool useMonteCarlo,
-	bool useLog )
+	unsigned int numStartingPoints, bool useMonteCarlo )
 {
 	static_cast< StateScanner* >( c->data() )->innerClassifyStates(
-		numStartingPoints,
-		useMonteCarlo,
-		useLog );
+		c->target(), numStartingPoints, useMonteCarlo );
 }
 
 ///////////////////////////////////////////////////
@@ -654,20 +648,20 @@ void StateScanner::settle( Eref me, Id& cj, Id& ss )
 	send1< ProcInfo >( me, processSlot, &p );
 }
 
-void StateScanner::makeDoseTable( Eref me )
+void StateScanner::makeChildTable( Eref me, string name )
 {
 	// Make the x axis table for the dose-response, if it isn't there.
 	Id tab;
-	lookupGet< Id, string >( me, "lookupChild", tab, "xAxis" );
+	lookupGet< Id, string >( me, "lookupChild", tab, name );
 	if ( tab == Id::badId() ) {
 		tab = Id::scratchId();
-		Neutral::create( "Interpol", "xAxis", me.id(), tab );
+		Neutral::create( "Interpol", name, me.id(), tab );
 		assert( tab.good() );
 		tab.eref().dropAll( "process" ); // Eliminate the default msg.
 		bool ret = me.add( "stackSrc", tab.eref(), "stack" );
 		assert( ret );
 		if ( ret == 0 )
-			cout << "StateScanner::makeDoseTable: Failed to add stack msg\n";
+			cout << "StateScanner::makeChildTable: Failed to add stack msg\n";
 	}
 }
 
@@ -694,7 +688,7 @@ void StateScanner::innerDoseResponse( Eref me, Id variableMol,
 
 	if ( !isMolecule( variableMol ) )
 		return;
-	makeDoseTable( me );
+	makeChildTable( me, "xAxis" );
 	double origConcInit = 0.0;
 	int origMode = 0; // slave enable flag.
 	get< double >( variableMol.eref(), concInitFinfo, origConcInit );
@@ -761,10 +755,148 @@ void StateScanner::innerDoseResponse( Eref me, Id variableMol,
  * - Ensure that we have a correct ordering for Totals.
  * - Find a way to enumerate all mol sequences for a given proportion
  *   in the first.
+ *
+ * Should add option to pick its own molecules to monitor.
  */
 void StateScanner::innerClassifyStates(
+		Eref me,
 		unsigned int numStartingPoints,
-		bool useMonteCarlo,
-		bool useLog )
+		bool useMonteCarlo
+		)
 {
+	static const Finfo* randomInitFinfo = 
+			Cinfo::find( "SteadyState" )->findFinfo( "randomInit" );
+
+	Id cj( "/sched/cj" );
+	Id km( "/kinetics" );
+	Id ss( "/kinetics/solve/ss" );
+
+	makeChildTable( me, "state" );
+	set( cj(), "reinit" );
+	// Pick up the correct entry in the 'totals' array of the SteadyState
+
+	// Clear out the tables
+	send0( me, clearSlot );
+	ProcInfoBase p( 0, settleTime_ );
+	send1< ProcInfo >( me, reinitSlot, &p );
+
+	for ( unsigned int i = 0; i < numStartingPoints; ++i ) {
+		set( ss(), randomInitFinfo );
+		stateSettle( me, cj, ss );
+		checkIfUniqueState( me );
+	}
+	classify();
+}
+
+void StateScanner::classify() 
+{
+	// Get the values in the state vector
+	// Think about them.
+}
+
+void StateScanner::stateSettle( Eref me, Id& cj, Id& ss )
+{
+	static const Finfo* startFinfo = 
+			Cinfo::find( "ClockJob" )->findFinfo( "start" );
+	static const Finfo* reinitFinfo = 
+			Cinfo::find( "ClockJob" )->findFinfo( "reinit" );
+	static const Finfo* settleFinfo = 
+			Cinfo::find( "SteadyState" )->findFinfo( "settle" );
+	static const Finfo* stateTypeFinfo = 
+			Cinfo::find( "SteadyState" )->findFinfo( "stateType" );
+	static const Finfo* statusFinfo = 
+			Cinfo::find( "SteadyState" )->findFinfo( "solutionStatus" );
+
+	if ( useReinit_ && useBufferDose_ )
+		set( cj(), reinitFinfo );
+	set< double >( cj(), startFinfo, settleTime_ );
+	if ( useSS_ ) {
+		set( ss(), settleFinfo );
+		unsigned int status;
+		get< unsigned int >( ss(), statusFinfo, status );
+		if ( status != 0 ) { // Need to decide if to do fallback.
+			// try running to steady state.
+			cout << "status = 0, skipping\n";
+			return;
+		}
+	}
+
+	// Get the state type:
+	unsigned int stateType = 0;
+	get< unsigned int >( ss.eref(), stateTypeFinfo, stateType );
+	x_ = stateType;
+
+	// Update the state array.
+	send1< double >( me, pushSlot, x_ );
+
+	// Update the molecule conc arrays.
+	ProcInfoBase p( 0, settleTime_ );
+	send1< ProcInfo >( me, processSlot, &p );
+}
+
+void StateScanner::checkIfUniqueState( Eref me )
+{
+	static const Finfo* tabFinfo = 
+			Cinfo::find( "Interpol" )->findFinfo( "tableVector" );
+	static const Finfo* outputFinfo = 
+			Cinfo::find( "Table" )->findFinfo( "output" );
+
+	Conn* c = me->targets( "processSrc", me.i );
+	vector< vector< double > > solutions;
+	int numSolutions = 0;
+	// Get vectors for each child table
+	while ( c->good() ) {
+		vector< double > temp;
+		double output;
+		get< vector< double > >( c->target(), tabFinfo, temp );
+		get< double >( c->target(), outputFinfo, output );
+		numSolutions = output;
+		solutions.push_back( temp );
+		c->increment();
+	}
+	delete c;
+
+	// The last entry on the stack of solutions has the latest state.
+	// Need to scan through to compare it with all others. If unique,
+	// keep it, otherwise pop it by decrementing 'output' field.
+	unsigned int numMonitored = solutions.size();
+	if ( numMonitored == 0 )  {
+		cout << "Error: StateScanner::checkIfUniqueState: No molecules monitored\n";
+		return;
+	}
+
+	unsigned int numStates = solutions[0].size();
+#if 0
+	cout << "state " << numStates - 1 << "= ( " ;
+	for ( unsigned int j = 0; j < numMonitored; ++j ) {
+		cout << solutions[j][ numStates - 1] << ", ";
+	}
+	cout << " )\n";
+#endif
+
+	if ( numStates <= 1 ) // first state is always unique!
+		return;
+
+	// cout << "numStates = " << numStates << "; numSolutions = " << numSolutions << endl;
+	for ( unsigned int i = 0; i < numStates - 1; ++i ) {
+		double sumsq = 0.0;
+		for ( unsigned int j = 0; j < numMonitored; ++j ) {
+			double dx = solutions[j][i] - solutions[j][ numStates - 1];
+			sumsq += dx * dx;
+		}
+		if ( sumsq < solutionSeparation_ ) {
+			// Similar solution to an existing one. Discard.
+			Conn* c = me->targets( "processSrc", me.i );
+			vector< vector< double > > solutions;
+			// Get vectors for each child table
+			while ( c->good() ) {
+				set< double >( c->target(), outputFinfo, double(numStates - 1));
+				c->increment();
+			}
+			send0( me, popSlot );
+			delete c;
+			return;
+		}
+	}
+	// If it gets here, then the solution was novel and is retained.
 }

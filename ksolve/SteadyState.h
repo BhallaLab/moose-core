@@ -56,7 +56,8 @@ class SteadyState
 		static void showMatricesFunc( const Conn* c );
 		void showMatrices();
 		static void randomizeInitialConditionFunc( const Conn* c );
-		void randomizeInitialCondition();
+		void randomizeInitialCondition(Eref e);
+		static void assignY( const Conn* c, double* S );
 		// static void randomInitFunc( const Conn* c );
 		// void randomInit();
 		////////////////////////////////////////////////////
