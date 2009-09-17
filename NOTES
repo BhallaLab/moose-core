@@ -9102,4 +9102,20 @@ working. Turns out that the Monte Carlo approach is surprisingly bad at
 finding some corner cases, that turn up right away with the systematic
 scan. Some minor cleanup needed, and then I have to decide if I want to
 proceed with the systematic scan algorithm too.
+checked in as revision  1332
+
+Tried with slightly bigger model  SNARE_dup_bis_m2star_TRI.g
+This fails to expand, and loses track if there are some non-convergent
+solutions. See StateScanner.cpp:832 and 898
+Another symptom is that every time the Stedy state iteration fails, the
+size of the state vector is depleted by one.
+
+Let's see how it handles one of the traffillator models.
+After much messing around, it works.  Tracked down the bug with depleted 
+state vector. There is still a bug with it maintaining one
+more solution in the mol tables than it should.
+Also it contines to need huge numbers of trials: 2000 in this case, to get
+all states of a tristable. 
+Otherwise nice.
+
 =============================================================================
