@@ -79,4 +79,24 @@ void CaConc::__set_thick( double thick )
 {
     set < double > (id_(), "thick", thick);
 }
+double CaConc::__get_ceiling() const
+{
+    double ceiling;
+    get < double > (id_(), "ceiling",ceiling);
+    return ceiling;
+}
+void CaConc::__set_ceiling( double ceiling )
+{
+    set < double > (id_(), "ceiling", ceiling);
+}
+double CaConc::__get_floor() const
+{
+    double floor;
+    get < double > (id_(), "floor",floor);
+    return floor;
+}
+void CaConc::__set_floor( double floor )
+{
+    set < double > (id_(), "floor", floor);
+}
 #endif

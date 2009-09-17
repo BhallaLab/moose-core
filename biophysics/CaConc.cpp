@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include <math.h>
+#include <cfloat>
 #include "moose.h"
 #include "CaConc.h"
 #include "../element/Neutral.h"
@@ -59,7 +60,17 @@ const Cinfo* initCaConcCinfo()
                                 RFCAST( &CaConc::setThickness ),
                                 "Thickness of the shell for Ca concentration model."
 		),
-                
+                new ValueFinfo( "ceiling", ValueFtype1< double >::global(),
+                                reinterpret_cast< GetFunc >( &CaConc::getCeiling ), 
+                                RFCAST( &CaConc::setCeiling ),
+                                "Ceiling value for Ca concentration. If Ca > ceiling, Ca = ceiling. If ceiling <= 0.0, there is no upper limit on Ca concentration value."
+		),
+                new ValueFinfo( "floor", ValueFtype1< double >::global(),
+                                reinterpret_cast< GetFunc >( &CaConc::getFloor ), 
+                                RFCAST( &CaConc::setFloor ),
+                                "Floor value for Ca concentration. If Ca < floor, Ca = floor."
+		),
+
                 
 ///////////////////////////////////////////////////////
 // Shared message definitions
@@ -167,6 +178,23 @@ double CaConc::getThickness( Eref e )
 {
 	return static_cast< CaConc* >( e.data() )->thickness_;
 }
+void CaConc::setCeiling( const Conn * c, double ceiling )
+{
+    static_cast< CaConc* >( c->data() )->ceiling_ = ceiling;
+}
+double CaConc::getCeiling( Eref e )
+{
+	return static_cast< CaConc* >( e.data() )->ceiling_;
+}
+
+void CaConc::setFloor( const Conn * c, double floor )
+{
+    static_cast< CaConc* >( c->data() )->floor_ = floor;
+}
+double CaConc::getFloor( Eref e )
+{
+	return static_cast< CaConc* >( e.data() )->floor_;
+}
 
 
 ///////////////////////////////////////////////////
@@ -194,8 +222,13 @@ void CaConc::processFunc( const Conn* c, ProcInfo info )
 void CaConc::innerProcessFunc( const Conn* conn, ProcInfo info )
 {
 	double x = exp( -info->dt_ / tau_ );
-	c_ = c_ * x + ( B_ * activation_ * tau_ )  * ( 1.0 - x );
-	Ca_ = CaBasal_ + c_;
+        Ca_ = CaBasal_ + c_ * x + ( B_ * activation_ * tau_ )  * ( 1.0 - x );
+        if (Ca_ > ceiling_){
+            Ca_ = ceiling_;
+        } else if ( Ca_ < floor_ ){
+            Ca_ = floor_;
+        }
+        c_ = Ca_ - CaBasal_;
 	send1< double >( conn->target(), concSlot, Ca_ );
 	activation_ = 0;
 }

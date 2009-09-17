@@ -43,6 +43,8 @@ class CaConc
 			tau_ = 1.0;
 			B_ = 1.0;
                         thickness_ = 0.0;
+                        ceiling_ = DBL_MAX;
+                        floor_ = -DBL_MAX;
 		}
 
 		///////////////////////////////////////////////////////////////
@@ -72,7 +74,10 @@ class CaConc
 		static double getB( Eref e );
                 static void setThickness( const Conn* c, double val );
                 static double getThickness( Eref e);
-
+                static void setCeiling( const Conn* c, double val );
+                static double getCeiling( Eref e);
+                static void setFloor( const Conn* c, double val );
+                static double getFloor( Eref e);
 	private:
 		double Ca_;
 		double CaBasal_;
@@ -81,6 +86,8 @@ class CaConc
 		double c_;
 		double activation_;
                 double thickness_;
+                double ceiling_;
+                double floor_;
 };
 
 extern const Cinfo* initCaConcCinfo();
