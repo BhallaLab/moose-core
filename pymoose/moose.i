@@ -360,6 +360,8 @@ void fillData(PyObject* args)
 %attribute(pymoose::CaConc, double, tau, __get_tau, __set_tau)
 %attribute(pymoose::CaConc, double, B, __get_B, __set_B)
 %attribute(pymoose::CaConc, double, thick, __get_thick, __set_thick)
+%attribute(pymoose::CaConc, double, ceiling, __get_ceiling, __set_ceiling)
+%attribute(pymoose::CaConc, double, floor, __get_floor, __set_floor)
 
 %include "HHGate.h"
 %attribute(pymoose::HHGate, Interpol*, A, __get_A)
