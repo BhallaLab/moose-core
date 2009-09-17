@@ -30,6 +30,10 @@ namespace pymoose
         void __set_B(double B);
         double __get_thick() const;
         void __set_thick(double thick);
+        double __get_ceiling() const;
+        void __set_ceiling(double ceiling);
+        double __get_floor() const;
+        void __set_floor(double floor);
     };
 } // namespace pymoose
 
