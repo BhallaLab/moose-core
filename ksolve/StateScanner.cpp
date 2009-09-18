@@ -441,27 +441,63 @@ void StateScanner::dropTrackedMolecule( const Conn* c, Id val )
 }
 
 /**
+ * Looks up all table solutions and organizes data into a 2d array
+ * The first entry is the state or xAxis.
+ * The remaining entries are the molecule-specific tables.
+ */
+unsigned int getTables( Eref me, vector< string >& names,
+	vector< vector< double > >& solutions )
+{
+	const Finfo* tabFinfo = Cinfo::find( "Interpol" )->findFinfo( "tableVector" );
+
+	Conn* c = me->targets( "stackSrc", me.i );
+	if ( c->good() ) {
+		names.push_back( c->target()->name() );
+		vector< double > temp;
+		get< vector< double > >( c->target(), tabFinfo, temp );
+		solutions.push_back( temp );
+	}
+	delete c;
+	c = me->targets( "processSrc", me.i );
+	// Get vectors for each child table
+	while ( c->good() ) {
+		names.push_back( c->target()->name() );
+		vector< double > temp;
+		get< vector< double > >( c->target(), tabFinfo, temp );
+		solutions.push_back( temp );
+		c->increment();
+	}
+	assert( solutions.size() == names.size() );
+	delete c;
+	if ( solutions.size() == 0 )
+		cout << "Warning: StateScanner::getTables: No solutions found\n";
+	return solutions.size();
+}
+
+
+/**
  * Saves output as a CSV file. xAxis table entries are in leftmost column.
  */
-void StateScanner::saveAsCSV( const Conn* c, string fname )
+void StateScanner::saveAsCSV( const Conn* conn, string fname )
 {
-	const Finfo* tabFinfo = Cinfo::find( "Interpol" )->findFinfo( "table" );
 	ofstream fout( fname.c_str(), std::ios::trunc );
-	vector< Id > childList;
-	int maxXdivs = 0;
-	double val = 0.0;
-	StateScanner* scan = static_cast< StateScanner* >( c->data() );
-	scan->buildTabList( c->target(), childList, maxXdivs );
-	unsigned int max = maxXdivs;
-	for ( unsigned int i = 0; i < max; ++i ) {
-		for ( vector< Id >::iterator j = childList.begin(); 
-			j != childList.end(); ++j )
-		{
-			lookupGet< double, unsigned int >( (*j)(), tabFinfo, val, i );
-			fout << val;
-			if ( j != childList.end() - 1 )
-				fout << ",";
-		}
+
+	vector< string > names;
+	vector< vector< double > > solutions;
+	unsigned int n = getTables( conn->target(), names, solutions );
+	if ( n == 0 )
+		return;
+
+	fout << "Solution_number,";
+	for ( unsigned int i = 0; i < n - 1; ++i )
+		fout << names[i] << ",";
+	fout << names[ n-1 ] << endl;		
+
+	for ( unsigned int i = 0; i < solutions[0].size(); ++i ) {
+		fout << i << ",";
+		for ( unsigned int j = 0; j < n - 1; ++j )
+			fout << solutions[j][i] << ",";
+		fout << solutions[ n-1 ][i] << endl;		
 	}
 }
 
@@ -471,67 +507,21 @@ void StateScanner::saveAsCSV( const Conn* c, string fname )
 void StateScanner::saveAsXplot( const Conn* c, string fname )
 {
 	ofstream fout( fname.c_str(), std::ios::trunc );
-	vector< Id > childList;
-	int maxXdivs = 0;
-	// Check that the xAxis table is there
-	StateScanner* scan = static_cast< StateScanner* >( c->data() );
-	if ( scan->buildTabList( c->target(), childList, maxXdivs ) ) {
-		vector< double > xAxis;
-		vector< double > y;
-		for ( vector< Id >::iterator j = childList.begin(); 
-			j != childList.end(); ++j ) {
-			if ( (*j)()->name() == "xAxis" )
-				get< vector< double > >( (*j)(), "tableVector", xAxis );
-		}
-		for ( vector< Id >::iterator j = childList.begin(); 
-			j != childList.end(); ++j ) {
-			if ( (*j)()->name() == "xAxis" )
-				continue;
+	vector< string > names;
+	vector< vector< double > > solutions;
+	unsigned int n = getTables( c->target(), names, solutions );
+	if ( n == 0 )
+		return;
+	unsigned int size = solutions[0].size();
 
-			get< vector< double > >( (*j)(), "tableVector", y );
-			unsigned int size = y.size();
-			assert( size == xAxis.size() );
-			fout << "/newplot\n";
-			fout << "/plotname " << (*j)()->name() << "\n";
-			for ( unsigned int i = 0; i < size; ++i )
-				fout << xAxis[i] << "	" << y[i] << endl;
-		}
+	for ( unsigned int i = 1; i < n; ++i ) {
+		fout << "/newplot\n";
+		fout << "/plotname " << names[ i ] << "\n";
+		for ( unsigned int j = 0; j < size; ++j )
+			fout << solutions[0][j] << "	" << solutions[i][j] << endl;
+		fout << endl;
 	}
 }
-
-/**
- * Utility function for extracting tables from children and making
- * a list headed by the xaxis table. If the xAxis table is found it
- * returns 1, otherwise 0.
- */
-bool StateScanner::buildTabList( 
-	Eref me, vector< Id >& childList, int& maxXdivs )
-{
-	static const Cinfo* tabCinfo = Cinfo::find( "Interpol" );
-	get< vector< Id > >( me, "childList", childList );
-	vector< Id > tabList;
-	Id xAxis;
-	int xdivs = 0;
-	for ( vector< Id >::iterator i = childList.begin();
-		i != childList.end(); ++i ) {
-		Element* e = (*i)();
-		if ( e->cinfo()->isA( tabCinfo ) ) {
-			if ( e->name() == "xAxis" )
-				xAxis = *i;
-			else
-				tabList.push_back( *i );
-			get< int >( e, "xdivs", xdivs );
-			if ( maxXdivs < xdivs )
-				maxXdivs = xdivs;
-		}
-	}
-	if ( xAxis.good() ) {
-		tabList.insert( tabList.begin(), xAxis );
-		return 1;
-	}
-	return 0;
-}
-
 
 ///////////////////////////////////////////////////
 // Complex Dest function definitions
@@ -744,19 +734,6 @@ void StateScanner::innerDoseResponse( Eref me, Id variableMol,
  * vector of totals (which is not necessarily the simple sum of mol
  * concs). Rather than do that here, we need to talk to the SteadyState
  * object and ask it to do the scanning, as it knows all.
- * Rather than ask the user to identify a reference molecule for the
- * scanning, we'll ask the SteadyState to find the biggest Totals
- * group and use it first, with an approximate predefined # of samples.
- * As an option, we can ask SteadyState to extend the algorithm through
- * all Totals groups.
- * A Monte Carlo sampling approach would need to first select a molecule,
- * then decide what fraction to assign to it, then if needed decide which
- * next molecule to assign. Sometimes there is only one other molecule
- * that could be assigned.
- * Steps
- * - Ensure that we have a correct ordering for Totals.
- * - Find a way to enumerate all mol sequences for a given proportion
- *   in the first.
  *
  * Should add option to pick its own molecules to monitor.
  */
@@ -790,10 +767,50 @@ void StateScanner::innerClassifyStates(
 	classify();
 }
 
+
+
 void StateScanner::classify() 
 {
 	// Get the values in the state vector
 	// Think about them.
+	Id stateId( "/kinetics/scan/state" );
+
+	vector< double > state;
+	get< vector< double > >( stateId.eref(), "tableVector", state );
+	unsigned int numSolutions = state.size();
+	unsigned int numStable = 0;
+	unsigned int numUnstable = 0;
+	unsigned int numSaddle = 0;
+	unsigned int numOsc = 0;
+	unsigned int numSingleZero = 0;
+	unsigned int numOther = 0;
+	for ( unsigned int i = 0; i < numSolutions; ++i ) {
+		switch ( int( state[i] + EPSILON ) ) {
+			case 0: ++numStable;
+				break;
+			case 1: ++numUnstable;
+				break;
+			case 2: ++numSaddle;
+				break;
+			case 3: ++numOsc;
+				break;
+			case 4: ++numSingleZero;
+				break;
+			case 5: ++numOther;
+				break;
+		}
+	}
+
+	classification_ = numStable; // Assume it is a multiplicity of stables
+	if ( numSolutions == ( numOther + numSingleZero ) )
+		classification_ = 1; // Single stable
+	if ( numSolutions == 1 && ( numSaddle == 1 || numOsc == 1 ) )
+		classification_ = 0; // Oscillatory
+	else if ( numSolutions >= 1 && numStable == 0 && 
+			( numSolutions != (numSingleZero + numOther) ) )
+		classification_ = 8; // Ill defined
+	if ( numSolutions == 3 && numOsc == 1 && numStable == 1 )
+		classification_ = 9; // Osc next to a stable state.
 }
 
 // True if it works
@@ -840,43 +857,29 @@ bool StateScanner::stateSettle( Eref me, Id& cj, Id& ss )
 
 void StateScanner::checkIfUniqueState( Eref me )
 {
-	static const Finfo* tabFinfo = 
-			Cinfo::find( "Interpol" )->findFinfo( "tableVector" );
 	static const Finfo* outputFinfo = 
 			Cinfo::find( "Table" )->findFinfo( "output" );
+	static const Finfo* popFinfo = 
+			Cinfo::find( "Table" )->findFinfo( "pop" );
 
-	Conn* c = me->targets( "processSrc", me.i );
+	vector< string > names;
 	vector< vector< double > > solutions;
-	int numSolutions = 0;
-	// Get vectors for each child table
-	while ( c->good() ) {
-		vector< double > temp;
-		double output;
-		get< vector< double > >( c->target(), tabFinfo, temp );
-		get< double >( c->target(), outputFinfo, output );
-		numSolutions = output;
-		solutions.push_back( temp );
-		c->increment();
-	}
-	delete c;
+	unsigned int n = getTables( me, names, solutions );
+	// First table in this entry is that of the solution types.
+	if ( n <= 1 )
+		return;
 
 	// The last entry on the stack of solutions has the latest state.
 	// Need to scan through to compare it with all others. If unique,
 	// keep it, otherwise pop it by decrementing 'output' field.
 	unsigned int numMonitored = solutions.size();
-	if ( numMonitored == 0 )  {
+	if ( numMonitored <= 1 )  {
 		cout << "Error: StateScanner::checkIfUniqueState: No molecules monitored\n";
 		return;
 	}
+	
 
 	unsigned int numStates = solutions[0].size();
-#if 0
-	cout << "state " << numStates - 1 << "= ( " ;
-	for ( unsigned int j = 0; j < numMonitored; ++j ) {
-		cout << solutions[j][ numStates - 1] << ", ";
-	}
-	cout << " )\n";
-#endif
 
 	if ( numStates <= 1 ) // first state is always unique!
 		return;
@@ -887,7 +890,8 @@ void StateScanner::checkIfUniqueState( Eref me )
 	// cout << "numStates = " << numStates << "; numSolutions = " << numSolutions << ", xdivs = " << xdivs << endl;
 	for ( unsigned int i = 0; i < numStates - 1; ++i ) {
 		double sumsq = 0.0;
-		for ( unsigned int j = 0; j < numMonitored; ++j ) {
+		// Note first entry is states vector.
+		for ( unsigned int j = 1; j < numMonitored; ++j ) {
 			double dx = solutions[j][i] - solutions[j][ numStates - 1];
 			sumsq += dx * dx;
 		}
@@ -898,6 +902,7 @@ void StateScanner::checkIfUniqueState( Eref me )
 			// Get vectors for each child table
 			while ( c->good() ) {
 				set< double >( c->target(), outputFinfo, double(numStates - 1));
+				set( c->target(), popFinfo );
 				c->increment();
 			}
 			send0( me, popSlot );
