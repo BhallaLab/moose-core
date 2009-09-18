@@ -92,9 +92,6 @@ class StateScanner
 	private:
 		bool isMoleculeIndexGood( unsigned int i ) const;
 
-		// Utility function for dumping data
-		bool buildTabList(Eref me, vector< Id >& childList, int& maxXdivs );
-
 		///////////////////////////////////////////////////
 		// Utility functions for classifying states
 		///////////////////////////////////////////////////
