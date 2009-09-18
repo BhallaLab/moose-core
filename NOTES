@@ -9105,8 +9105,8 @@ proceed with the systematic scan algorithm too.
 checked in as revision  1332
 
 Tried with slightly bigger model  SNARE_dup_bis_m2star_TRI.g
-This fails to expand, and loses track if there are some non-convergent
-solutions. See StateScanner.cpp:832 and 898
+This fails to expand the state table, and loses track if there are 
+some non-convergent solutions. See StateScanner.cpp:832 and 898
 Another symptom is that every time the Stedy state iteration fails, the
 size of the state vector is depleted by one.
 
@@ -9117,5 +9117,11 @@ more solution in the mol tables than it should.
 Also it contines to need huge numbers of trials: 2000 in this case, to get
 all states of a tristable. 
 Otherwise nice.
+checked in as revision 1333.
+
+=============================================================================
+18 Sep 2009
+General cleanup. Problem with extra solutions fixed. 
+Csv and xplot outputs fixed.
 
 =============================================================================
