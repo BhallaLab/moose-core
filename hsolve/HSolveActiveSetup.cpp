@@ -9,6 +9,7 @@
 
 #include "moose.h"
 #include <set>
+#include <limits>	// Max and min 'double' values needed for lookup table init.
 #include "biophysics/BioScan.h"
 #include "HSolveStruct.h"
 #include "HinesMatrix.h"
@@ -207,6 +208,34 @@ void HSolveActive::createLookupTables( ) {
 		gateSpecies[ caGate[ ig ] ] = ig;
 	for ( unsigned int ig = 0; ig < vGate.size(); ++ig )
 		gateSpecies[ vGate[ ig ] ] = ig;
+	
+	/*
+	 * Finding the smallest xmin and largest xmax across all gates' lookup
+	 * tables.
+	 */
+	vMin_ = numeric_limits< double >::max();
+	vMax_ = numeric_limits< double >::min();
+	caMin_ = numeric_limits< double >::max();
+	caMax_ = numeric_limits< double >::min();
+	
+	double min;
+	double max;
+	
+	for ( unsigned int ig = 0; ig < caGate.size(); ++ig ) {
+		BioScan::domain( caGate[ ig ], min, max );
+		if ( min < caMin_ )
+			caMin_ = min;
+		if ( max > caMax_ )
+			caMax_ = max;
+	}
+	
+	for ( unsigned int ig = 0; ig < vGate.size(); ++ig ) {
+		BioScan::domain( vGate[ ig ], min, max );
+		if ( min < vMin_ )
+			vMin_ = min;
+		if ( max > vMax_ )
+			vMax_ = max;
+	}
 	
 	caTable_ = LookupTable( caMin_, caMax_, caDiv_, caGate.size() );
 	vTable_ = LookupTable( vMin_, vMax_, vDiv_, vGate.size() );

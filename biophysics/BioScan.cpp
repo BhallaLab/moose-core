@@ -89,6 +89,50 @@ int BioScan::caDepend( Id channel, vector< Id >& ret )
 	return targets( channel, "concen", ret, "CaConc" );
 }
 
+/*
+ * Functions for accessing gates' lookup tables.
+ */
+
+/**
+ * Finds the xmin and xmax for the lookup tables (A and B) belonging to a gate.
+ * 
+ * 'min' will be the smaller of the 2 mins.
+ * 'max' will be the greater of the 2 maxs.
+ */
+int BioScan::domain(
+	Id gate,
+	double& min,
+	double& max )
+{
+	Id A;
+	Id B;
+	
+	bool success;
+	success = lookupGet< Id, string >( gate(), "lookupChild", A, "A" );
+	if ( ! success ) {
+		cerr << "Error: Interpol A not found as child of " << gate()->name();
+		return 0;
+	}
+	
+	success = lookupGet< Id, string >( gate(), "lookupChild", B, "B" );
+	if ( ! success ) {
+		cerr << "Error: Interpol B not found as child of " << gate()->name();
+		return 0;
+	}
+	
+	double Amin, Amax;
+	double Bmin, Bmax;
+	get< double >( A(), "xmin", Amin );
+	get< double >( A(), "xmax", Amax );
+	get< double >( B(), "xmin", Bmin );
+	get< double >( B(), "xmax", Bmax );
+	
+	min = Amin < Bmin ? Amin : Bmin;
+	max = Amax > Bmax ? Amax : Bmax;
+	
+	return 1;
+}
+
 void BioScan::rates(
 	Id gate,
 	const vector< double >& grid,
