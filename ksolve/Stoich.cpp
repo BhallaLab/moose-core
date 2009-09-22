@@ -512,8 +512,10 @@ void Stoich::innerStartFromCurrentConcs()
 /// Send S to gsl to update.
 void Stoich::requestY( const Conn* c )
 {
+#ifdef USE_GSL
 	double* s = static_cast< Stoich* >( c->data() )->S();
 	send1< double* >( c->target(), assignYslot, s );
+#endif // USE_GSL
 }
 ///////////////////////////////////////////////////
 // Other function definitions
