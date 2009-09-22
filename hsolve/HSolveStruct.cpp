@@ -62,13 +62,6 @@ void ChannelStruct::process( double*& state, CurrentStruct& current )
 }
 
 double CaConcStruct::process( double activation ) {
-        double ca = CaBasal_ + factor1_ * c_ + factor2_ * activation;
-        if ( ca > ceiling_ ){
-                ca = ceiling_;
-        } else if ( ca < floor_ ){
-                ca = floor_;
-        }
-        c_ = ca - CaBasal_;
-                
-        return ca;
+        c_ = factor1_ * c_ + factor2_ * activation;
+        return ( CaBasal_ + c_ );
 }
