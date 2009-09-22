@@ -83,8 +83,6 @@ struct CaConcStruct
 	double CaBasal_;
 	double factor1_;
 	double factor2_;
-        double ceiling_;
-        double floor_;
 	double process( double activation );
 };
 
