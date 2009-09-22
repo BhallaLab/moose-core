@@ -23,6 +23,12 @@ public:
 	static int synchan( Id compartment, vector< Id >& ret );
 	static int caTarget( Id channel, vector< Id >& ret );
 	static int caDepend( Id channel, vector< Id >& ret );
+	
+	// Functions for accessing gates' lookup tables.
+	static int domain(
+		Id gate,
+		double& min,
+		double& max );
 	static void rates(
 		Id gate,
 		const vector< double >& grid,
