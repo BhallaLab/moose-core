@@ -34,11 +34,11 @@ HSolveActive::HSolveActive()
 	
 	// Default lookup table size and boundaries
 	vDiv_ = 3000;    // for voltage
-	vMin_ = -0.100;
-	vMax_ = 0.050;
+	//~ vMin_ = -0.100;
+	//~ vMax_ = 0.050;
 	caDiv_ = 3000;   // for calcium
-	caMin_ = 0.0;
-	caMax_ = 1000.0;
+	//~ caMin_ = 0.0;
+	//~ caMax_ = 1000.0;
 }
 
 //////////////////////////////////////////////////////////////////////
