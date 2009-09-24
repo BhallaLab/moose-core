@@ -130,17 +130,22 @@ void Cinfo::init( const string* doc,
 	// Next store own scheduling information
 	for ( i = 0; i < nSched; i++ )
 		scheduling_.push_back( schedInfo[i] );
-	#ifndef NDEBUG /* If compiling in DEBUG mode. */
-	// Printing list of Cinfos
-	string filename = "Cinfolist.txt";
-	ofstream fout( filename.c_str(), ios_base::app );
-        cout << "Printing: " << name() << "with nSched =" << nSched << endl;
-	for ( unsigned int i = 0; i < nSched; i++ ){
-		fout << name() << endl;
-        }
-	cout << "Wrote list of Cinfos to " << filename << ".\n";
-        fout.close();
-	#endif // NDEBUG
+	
+	/*
+	 * Uncomment if you want a list of Cinfo's stored in a text file. Commented
+	 * out because it keeps creating the file everywhere you run moose.
+	 */
+	//~ #ifndef NDEBUG /* If compiling in DEBUG mode. */
+	//~ // Printing list of Cinfos
+	//~ string filename = "Cinfolist.txt";
+	//~ ofstream fout( filename.c_str(), ios_base::app );
+	//~ cout << "Printing: " << name() << "with nSched =" << nSched << endl;
+	//~ for ( unsigned int i = 0; i < nSched; i++ ){
+		//~ fout << name() << endl;
+	//~ }
+	//~ cout << "Wrote list of Cinfos to " << filename << ".\n";
+	//~ fout.close();
+	//~ #endif // NDEBUG
 	
 
 #ifdef GENERATE_WRAPPERS        
