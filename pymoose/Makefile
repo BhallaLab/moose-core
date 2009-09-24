@@ -58,10 +58,12 @@ OBJFILES = ../basecode/basecode.o \
 	../hsolve/hsolve.o	\
 	../ksolve/ksolve.o	\
 	../device/device.o \
-	../sbml_IO/sbml_IO.o	\
 	../signeur/signeur.o	\
 # 	../robots/robots.o	\
 
+ifeq ($(USE_SBML),1)
+	OBJFILES = $(OBJFILES) ../sbml_IO/sbml_IO.o
+endif
 
 OBJ = PyMooseBase.o \
 	PyMooseContext.o \
