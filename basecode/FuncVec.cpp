@@ -209,14 +209,17 @@ void FuncVec::sortFuncVec( )
 		}
 	}
 	
-#ifndef NDEBUG /* If compiling in DEBUG mode. */
-	// Printing list of FuncVecs
-	string filename = "funcvec.txt";
-	ofstream fout( filename.c_str() );
-	for ( unsigned int i = 0; i < fv.size(); i++ )
-		fout << fv[ i ]->name() << "\n";
-	fout << flush;
-	cout << "Wrote list of sorted FuncVecs to " << filename << ".\n";
-#endif // NDEBUG
+	/*
+	 * Uncomment if you want a list of FuncVecs stored in a text file. Commented
+	 * out because it keeps creating the file everywhere you run moose.
+	 */
+//~ #ifndef NDEBUG /* If compiling in DEBUG mode. */
+	//~ // Printing list of FuncVecs
+	//~ string filename = "funcvec.txt";
+	//~ ofstream fout( filename.c_str() );
+	//~ for ( unsigned int i = 0; i < fv.size(); i++ )
+		//~ fout << fv[ i ]->name() << "\n";
+	//~ fout << flush;
+	//~ cout << "Wrote list of sorted FuncVecs to " << filename << ".\n";
+//~ #endif // NDEBUG
 }
-
