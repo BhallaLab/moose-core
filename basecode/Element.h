@@ -1,3 +1,11 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
 
 /**
  * Have a single Element class, that uses an IndexRange. There can
@@ -41,21 +49,9 @@ class Element
 		void process( const ProcInfo* p );
 
 		/**
-		 * This variant executes a contiguous subset of the Element's
-		 * entries, specified by threadNum. ProcInfo p must carry the
-		 * total number of threads.
-		 */
-		void process( const ProcInfo* p, unsigned int threadNum );
-
-		/**
-		 * Reinitialize things.
-		 */
-		void reinit();
-
-		/**
 		 * Clear sporadic message queue, events that come randomly.
 		 */
-		void clearQ( const char* buf );
+		void clearQ();
 
 		/**
 		 * Utility function for calling function with specified FuncId.
@@ -93,26 +89,17 @@ class Element
 		Data* data( unsigned int index );
 
 		/** 
-		 * This function pushes a synaptic event onto a queue.
-		 * It is meant to be thread-safe: multiple threads can call it,
-		 * but only one thread is permitted to remove the queue entries.
+		 * This function pushes a function request onto a queue.
+		 * In multithread mode it figures out which queue to use.
 		 */
-		void addSpike( unsigned int elementIndex, 
-			unsigned int synId, double time );
-
-		const vector< Msg* >& msg( Slot slot ) const;
+		void addToQ( FuncId f, MsgId m, const char* arg, unsigned int size );
 
 		/**
 		 * We'll try these out as alternate Send functions, given that
 		 * the buffer is local.
 		 */
-		void send1( Slot slot, unsigned int i, double v );
-		void send2( Slot slot, unsigned int i, double v1, double v2 );
-
-		/**
-		 * Number of data entries in Element
-		 */
-		unsigned int numEntries() const;
+		void ssend1( Slot slot, unsigned int i, double v );
+		void ssend2( Slot slot, unsigned int i, double v1, double v2 );
 
 	private:
 		/**
@@ -145,73 +132,38 @@ class Element
 		 * Element index.
 		 */
 		vector< unsigned int > procBufRange_; // Size of this is static.
-		/*
-		vector< MsgSrc > m_;
-		vector< MsgBuf > b_;
-		vector< char >generalQ_; // This grows as needed.
-		vector< char >processQ_; // This is set by # of incoming proc msgs
-		*/
 
 		/**
-		 * This points to the Queue for incoming synaptic events,
-		 * maintained on the Msg.
-		SynQ* synQ;
-		 */
-
-		Finfo** finfo_;
-
-		// srcMsg[ slot ] is the list of msgs emanating from 
-		// the specified slot. Note that each 
-		/**
-		 * These are messages emanating from this Element.
-		 * Each Msg is an array message: the specific element indices
-		 * are handled within the Msg.
-		 * Indexing:
-		 * msg_[ slot ][ msgNo ]
-		 * where slot determines message identity
-		 * and msgNo counts distinct sets of targets within a slot.
-		 */
-		vector< vector< Msg* > > msg_;
-
-		/**
-		 *
-		 * map< key, T >
-		 *
-		 * map< unsigned int slot, unsigned int msgVecIndex >
-		 */
-//		 map< unsigned int, unsigned int > msgMap_;
-
-		/**
-		 * Another option is a sparse matrix. Works a bit better for
-		 * very sparse connectivity.
-		 */
-
-		/**
-		 * Number of outgoing msg slots. Used to work out indexing into
+		 * Number of outgoing sync msg slots. Used to work out indexing into
 		 * send buffer.
 		 */
 		unsigned int numSendSlots_;
 
 		/**
-		 * Number of incoming msg slots. Used to work out indexing into
+		 * Number of incoming sync msg slots. Used to work out indexing into
 		 * ProcBufRange.
 		 */
 		unsigned int numRecvSlots_;
 
-};
+		/**
+		 * This is the buffer for incoming async function requests to this 
+		 * Element. Entries are organized as FuncId, MsgId, data.
+		 * The FuncId has implicit knowledge of data size.
+		 */
+		vector< char > q_; // incoming request queue.
 
-/*
-class BufferInfo
-{
-	public:
-		const char* begin;
-		const char* end;
-};
+		/**
+		 * Class information
+		 */
+		Cinfo* cinfo_;
 
-class Eref
-{
-	public:
-		BufferInfo processBuffer( Slot slot );
-		BufferInfo asyncBuffer(); // No slots, go through all pending items
+		/**
+		 * Message vector. This is the low-level messaging information.
+		 */
+		vector< Msg* > m_;
+
+		/**
+		 * Connection vector. Connections are mid-level messaging info.
+		 */
+		vector< Conn > c_;
 };
-*/

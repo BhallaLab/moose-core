@@ -12,6 +12,7 @@ class Reac: public Data
 
 		void setKf( double v );
 		void setKb( double v );
+		const double& getKf() const;
 
 		Finfo** initClassInfo();
 	private:

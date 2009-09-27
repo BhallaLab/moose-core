@@ -78,7 +78,7 @@ endif
 
 # Debug mode:
 ifeq ($(BUILD),debug)
-CXXFLAGS = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CXXFLAGS = -g -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
@@ -112,8 +112,8 @@ endif
 
 # Libraries are defined below. For now we do not use threads.
 SUBLIBS = 
-#LIBS =	-lm -lpthread
-LIBS = 	-lm
+LIBS =	-lm -lpthread
+#LIBS = 	-lm
 ifeq ($(BUILD),thread)
 LIBS += -lpthread
 endif

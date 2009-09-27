@@ -152,3 +152,15 @@ void Reac::setKb( double v )
 {
 	kb_ = v;
 }
+
+// Need to identify source element and index.
+// Imagine multiple tables looking up the same conc at different times.
+// MsgId for now is the index of the Msg in the msg vector, with additional
+// info to identify the specific src. But we don't always need it.
+// Alternatively, synthesize a return message to the specified Id. This
+// will require however, the construction of the entire return chain.
+void Reac::getKf( Eref e, MsgId m )
+{
+	e.send( m, kf_ );
+}
+

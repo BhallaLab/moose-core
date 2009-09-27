@@ -21,6 +21,26 @@ Msg::~Msg()
 	;
 }
 
+
+// The asyncQ on the target serves all indices within the Element.
+// tgtRange: type[all,single,multiple,1range,multipleranges]: 
+// 	all: All indices
+// 	single: < index >
+// 	multiple: < n, index, index, ... >,
+// 	singleRange< index, index >
+// 	multiRange< n, <index, index >, <index, index>, ...>
+// Best to have the Element evaluate it, to save space in the buffer
+// and as it is easier for the Element to decide how to iterate.
+// Or, for all cases:
+// 	<start, end>... while end < max.
+// 	or, vector of < start, end >. Ugh.
+
+// Fdata has funcId followed by data.
+Msg::asend( Fdata fData )
+{
+	dest_->addToQ( fData, Range( 0, 1 ) );
+}
+
 ///////////////////////////////////////////////////////////////////////////
 
 SparseMsg::SparseMsg( Element* src, Element* dest )
@@ -50,3 +70,6 @@ void One2OneMsg::addSpike( unsigned int srcElementIndex, double time ) const
 {
 	dest_->addSpike( srcElementIndex, synIndex_, time );
 }
+
+
+

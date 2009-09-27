@@ -1,0 +1,210 @@
+MOOSE redesign for messaging.
+Goals:
+1. Cleanup.
+2. Handle multithreading and MPI from the ground up.
+
+Why do this?
+It is a huge amount of work to refactor a large existing code base. This is
+needed here, and was in fact anticipated, for two reasons:
+- We needed the experience of building a fairly complete, functioning system
+	to know what the underlying API must do.
+- The original parallel stuff was a hack.
+
+This redesign does a lot of things differently from the earlier MOOSE messaging.
+- Introduces a buffer-based data transfer mechanism, with a fill/empty
+	cycle to replace the earlier function-call mechanism. The fill/empty
+	cycle is needed for multithreading and also works better with multinode
+	data traffic.
+- All Elements are now assumed to be array Elements, so indexing is built into
+	messaging from the ground up.
+- There is a split between synchronous messaging (exact amount of data
+	transferred on every timestep) and asynchronous messaging (variable
+	amounts of data transferred). This split is at the data transfer
+	level but the message specification should be nearly the same.
+- Field access function specification should be cleaner.
+- Separation of function specification from messaging. This means that any
+	message can be used as a communication line for any function call 
+	between two Elements. This gives an enormous simplification to message
+	design. However, it entails:
+- Runtime type-checking of message data, hopefully in a very efficient way.
+	As message setup is itself runtime, and arbitrary functions can sit
+	on the message channels, it turns out to be very hard to
+	do complete checking at compile or setup time.
+- Wildcard info merged into messages.
+- Three-tier message manipulation hierarchy, for better introspection and
+	relating to higher-level setup calls. These are
+	Msg: Lowest level, manages info between two Elements e1 and e2. 
+		Deals with the index-level connectivity for the Element arrays.
+	Conn: Mid level. Manages a set of Msgs that together make a messaging
+		unit that takes a function call/data from source to a set of
+		destination Elements and their array entries. Has introspection
+		info. Is a MOOSE field.
+	Map: High level. Manages a set of Conns that together handle a
+		conceptual group. Equivalent to an anatomical projection from
+		one set of neurons to another in the brain. Equivalent to what
+		the 'createmap' function would generate. Has introspection.
+		Is a MOOSE Element.
+
+- Field access and function calls now go through the messaging interface. Not
+	necessarily the fastest way to do it, but simplifies life in a 
+	multinode/multithreaded system, and reduces the complexity of the
+	overall interface.
+
+
+------------------------------------------------------------------------------
+Control flow.
+
+1. Scheduling.
+As before, we have a hierarchy of Sched, Clock, and Tick.
+<insert here: how these three work to coordinate operations>
+The Tick object is the one that connects to and calls operations on target
+Elements.
+
+The operations of Elements are now split into two functions: clearQ and process.
+The old reinit/reset/resched is gone, it will be a function call triggered 
+through clearQ. These two functions are hard-coded into every Element.
+
+ASYNCHRONOUS MESSAGING>
+Scheduling:
+clearQ: Manages the event queue for the async messaging. Here are the calls:
+
+Tick::clearQ(): // Calls clearQ on targets specified by Conn
+Conn::clearQ(); // Calls clearQ on all Msgs.
+Msg::clearQ(); // Calls clearQ on e1, the first Element handled by Msg.
+voidElement::clearQ(); // Goes through queues, may select by thread. Calls:
+const char* Element::execFunc( FuncId f, const char* buf ); 
+	Finds the target function and calls the Msg to iterate over all tgts.
+	Returns next buf position.
+const char* Msg::call1( OpFunc func, const char* arg ) const; 
+	Iterates over targets on e1, and executes function. Returns next
+	queue position. If target is off-node, then skip.
+
+Still to do: Sort out flow control to interface threads such as graphics
+and console. Presumably these would go through other Jobs. There is some
+trickiness in how they fill in queues for the regular objects to clear.
+
+Functioning:
+This is how asynchronous messaging works.
+slot s = Slot1< double >(Conn#, Init<TargetType>Cinfo()->funcInfo("funcName"));
+	This slot constructor does an RTTI check on the func type, and if OK,
+	loads in the funcIndex. If bad, emits warning and stores a safety
+	function.
+	Limitation: handling multiple types of targets, whose Functions are
+	not just inherited variations. e.g., conc -> plot and xview.
+	To get round it: these are simply distinct Connections.
+s->send( Eref e, double arg ); // Uses s to send the data in a typesafe way.
+	Converts the funcId and argument into a char buffer.
+void Eref::asend( Slot s, char* arg, unsigned int size); 
+	//Looks up Conn from Slot, passes it the buffer with funcId and args.
+void Conn::asend( funcIndex, char* arg, unsigned int size); 
+	// Goes through all Msgs with buffer. 
+void Element::addToQ( FuncId funcId, MsgId msgId, const char* arg, unsigned int size ); 
+	Puts MsgId, funcId and data on queue. May select Q based on thread.
+	Multi-node Element needs a table to look up for MsgId, pointing to 
+	off-node targets for that specific MsgId. At this time it also inserts 
+	data transfer requests to those targets into the postmaster buffers.
+	Looks up opFunc, which is also an opportunity to do type checking in 
+	case lookup shows a problem.
+OpFunc Element::getOpFunc( funcId ); // asks Cinfo for opFunc.
+OpFunc cinfo::getOpFunc( funcId );
+<Need to clear up arguments of functions above>
+At this point all the info is sitting in the asyncQueue of the target Element.
+Eventually the scheduling gets round to calling clearQ as discussed above.
+<Need to put in handling of synaptic input>
+
+
+SYNCHRONOUS MESSAGING
+Scheduling:
+process: Manages synchronous messaging, which is similar to the traditional
+	GENESIS messaging in that objects transfer fixed amounts of data every
+	timestep. Here are the calls:
+Tick::process(); // Calls Process on targets specified by Conn.
+Conn::process( const ProcInfo* p ); // Calls Process on all Msgs.
+Msg::process( const ProcInfo* p ); // Calls Process on e1.
+Element::process( const ProcInfo* p );// Calls Process on all Data objects.
+	Partitions among threads.
+virtual void Data::process( const ProcInfo* p, Eref e ); 
+	Asks e to look up or sum the incoming data buffers, does computation,
+	sends out other messages.  This involves dumping data directly into 
+	the target sync buffers. Note that the memory locations are fixed 
+	ahead of time and are distinct, so this can be done simultaneously 
+	from multiple threads.
+
+Functioning:
+
+Here are the calls that the Elements/Data use to send out data:
+
+<Here Slot means an index to the hard-coded location for the buffer, different
+from the new Slot class above. Will need to clear up nomenclature.>
+void ssend1< double >( Eref e, Slot s, double arg ); // Calls Eref::send.
+Eref::send1( Slot slot, double arg); // Calls Element::send
+Element::send1( Slot slot, unsigned int eIndex, double arg ); 
+	Puts data into buffer: sendBuf_[ slot + i * numSendSlots_ ] = arg;
+Note that we assume all sync data transfer is doubles. Probably a good
+assumption, may help with data alignment.
+
+Here are some of the calls that Elements use to examine the dumped data:
+double Eref::oneBuf( Slot slot ); 
+	Looks up value in sync buffer at slot:
+	return *procBuf_[ procBufRange_[ slot + eIndex * numRecvSlots_ ] ];
+double Eref::sumBuf( Slot slot ); 
+	Sums up series of values in sync buffer at slot. Uses similar operation
+	except that it iterates through the offset variable:
+		offset = procBufRange_.begin() + slot + i * numRecvSlots_;
+double Eref::prdBuf( Slot slot, double v ); 
+	multiples v into series of values in sync buffer at slot, similar
+	fast iteration through buffer using offset.
+
+< To clarify: How to set up these buffers when defining messages >
+
+
+SPORADIC FUNCTION CALLS
+Case 1: Existing message between Elements, using all targets:
+Slot* s = Slot1< double >(...)
+s->send( Eref e, [args] )
+Case 2: Message does not exist
+bool set< double >( Id tgt, FieldId f, double val );
+bool set< double >( Id tgt, const string& fieldname, double val );
+Both of these functions create a temporary object and add a temporary message.
+<More details to come>
+Case 3: Message exists, but want to send to a single target:
+s->sendTo( Eref me, Id tgt, [args] );
+
+FIELD ACCESS
+Set: Use the same set functions as above.
+bool set< double >( Id tgt, FieldId f, double val );
+bool set< double >( Id tgt, const string& fieldname, double val );
+Get:
+bool get< double >( Id tgt, FieldId f, double& val );
+bool get< double >( Id tgt, const string& fieldname, double& val );
+Again, we create a temporary object, send off the request with the originating
+temporary object as one of the args. On the remote node the request function
+calls:
+s->sendTo( Eref me, Id requester, [args] );
+and then it has to do lots of cleanup afterward.
+<Later: Look into doing an array 'set' and 'get' command.>
+------------------------------------------------------------------------------
+Setup
+FIELD DEFINITION
+Similar to earlier MOOSE, have an initClassInfo function for each class,
+that is meant to be called in order at static initialization. The ordering
+is ensured by having the static initializers call the static initializers
+of their own base classes. 
+
+With initClassInfo, set up a static array of finfos.  Entries like:
+new Finfo( async1< Reac, double, &Reac::setKf >, "Kf" )
+Function handling is cleaner in at least three ways:
+- It does not require static typecasting of functions, 
+- It does static typecasting of the char buffer within a templated function
+- It uses member functions of the Data class directly, rather than static
+	functions.
+
+<Still need to fully define how the Finfos control runtime message setup>
+
+------------------------------------------------------------------------------
+Solvers
+Original Data is replaced completely with a solved version
+The Element uses a replacement Cinfo to handle this, so that the operation:
+	OpFunc Element::getOpFunc( funcId ); // asks Cinfo for opFunc.
+is now redone. This handles all field access and async messages.
+< Need to work out what to do with sync messages >

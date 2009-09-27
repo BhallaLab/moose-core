@@ -1,12 +1,13 @@
-#include "header.h"
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
 
-/*
-Element::Element( const Data *proto, unsigned int numEntries )
-	: finfo_( d_->initClassInfo() )
-{
-	d_.resize( numEntries );
-}
-*/
+#include "header.h"
 
 Element::Element( vector< Data* >& d, 
 	unsigned int numSendSlots, unsigned int numRecvSlots )
@@ -15,32 +16,22 @@ Element::Element( vector< Data* >& d,
 	numSendSlots_( numSendSlots ),
 	numRecvSlots_( numRecvSlots )
 {
-	;
+	q_.resize( 16, 0 ); // Put in place space for at least one entry.
 }
 
 Element::~Element()
 {
 	delete[] sendBuf_;
+	for ( vector< Data* >::iterator i = d_.begin(); i != d_.end(); ++i )
+		delete *i;
+	for ( vector< Msg* >::iterator i = m_.begin(); i != m_.end(); ++i )
+		delete *i;
 }
 
 void Element::process( const ProcInfo* p )
 {
 	for ( unsigned int i = 0; i < d_.size(); ++i )
 		d_[i]->process( p, Eref( this, i ) );
-}
-
-void Element::process( const ProcInfo* p, unsigned int threadNum )
-{
-	unsigned int begin = ( threadNum * d_.size() ) / p->numThreads;
-	unsigned int end = ( (threadNum + 1 ) * d_.size() ) / p->numThreads;
-	for ( unsigned int i = begin; i != end; ++i )
-		d_[i]->process( p, Eref( this, i ) );
-}
-
-void Element::reinit()
-{
-	for ( unsigned int i = 0; i < d_.size(); ++i )
-		d_[i]->reinit( Eref( this, i ) );
 }
 
 void Element::clearQ( const char* buf )
@@ -54,47 +45,20 @@ void Element::clearQ( const char* buf )
 	}
 }
 
-unsigned int Element::execFunc( FuncId f, const char* buf )
-{
-	return finfo_[ f ]->op( Eref( this, 0 ), buf + sizeof( FuncId ) );
-}
-
 /**
- * This function pushes a synaptic event onto a queue.
- * It should be extended to provide thread safety.
- * This function is thread-safe upto the point where it calls
- * the push function on the target element.
- * Should this be an Eref function with the ElementIndex internal?
+ * This function pushes a function event onto the queue.
+ * It should be extended to provide thread safety, which can be done
+ * if each thread has its own queue.
  */
-void Element::addSpike( unsigned int elementIndex, 
-	unsigned int synId, double time )
+void Element::addToQ( FuncId funcId, MsgId msgId, const char* arg, unsigned int size )
 {
-	//Decide if it should use the finfo
-	// mutex lock
-	// Check if index is busy: bool vector
-	// Flag index as busy
-	// release mutex
-	// do stuff
-	// ?unflag index
-	// Carry merrily on.
-	data( elementIndex )->addSpike( synId, time );
+	if ( q_.size() < 8 + size )
+		q_.resize( q_.size() + 16 + size * 2 );
+	char* pos = &q_[ q_.size()  - 1 ];
+	*reinterpret_cast< FuncId* >( pos ) = funcId;
+	*reinterpret_cast< FuncId* >( pos + sizeof( FuncId) ) = msgId;
+	memcpy( pos + sizeof( FuncId ) * 2, arg, size );
 }
-
-/*
-double Element::sumBuf( Slot slot, unsigned int i )
-{
-	unsigned int offset = slot + i * numRecvSlots_;
-	assert( offset + 1 < procBufRange_.size() );
-	vector< double* >::iterator begin = procBuf_.begin() + 
-		procBufRange_[offset];
-	vector< double* >::iterator end = procBuf_.begin() + 
-		procBufRange_[offset + 1];
-	double ret = 0.0;
-	for ( vector< double* >::iterator i = begin; i != end; ++i )
-		ret += **i;
-	return ret;
-}
-*/
 
 double Element::sumBuf( Slot slot, unsigned int i ) const
 {
@@ -110,24 +74,6 @@ double Element::sumBuf( Slot slot, unsigned int i ) const
 		ret += **i;
 	return ret;
 }
-
-/*
-double Element::prdBuf( Slot slot, unsigned int i, double v )
-	const
-{
-	// unsigned int offset = i * numData_ + slot;
-	unsigned int offset = slot + i * numRecvSlots_;
-	assert( offset + 1 < procBufRange_.size() );
-	vector< double* >::const_iterator begin = procBuf_.begin() + 
-		procBufRange_[offset];
-	vector< double* >::const_iterator end = procBuf_.begin() + 
-		procBufRange_[offset + 1];
-	for ( vector< double* >::const_iterator i = begin;
-		i != end; ++i )
-		v *= **i;
-	return v;
-}
-*/
 
 double Element::prdBuf( Slot slot, unsigned int i, double v )
 	const
@@ -160,12 +106,12 @@ double* Element::getBufPtr( Slot slot, unsigned int i )
 	return procBuf_[ procBufRange_[ offset ] ];
 }
 
-void Element::send1( Slot slot, unsigned int i, double v )
+void Element::ssend1( Slot slot, unsigned int i, double v )
 {
 	sendBuf_[ slot + i * numSendSlots_ ] = v;
 }
 
-void Element::send2( Slot slot, unsigned int i, double v1, double v2 )
+void Element::ssend2( Slot slot, unsigned int i, double v1, double v2 )
 {
 	double* sb = sendBuf_ + slot + i * numSendSlots_;
 	*sb++ = v1;
@@ -184,7 +130,54 @@ const vector< Msg* >& Element::msg( Slot slot ) const
 	return msg_[ slot ];
 }
 
-unsigned int Element::numEntries() const
+void asend( Msg m, FuncId f, double val, unsigned int eIndex )
 {
-	return d_.size();
+	m.send( f, val, this, eIndex );
+}
+
+/**
+ * Node decomposition of Element: Two stage process. First, the Queue
+ * request itself must reach all target nodes. This will have to be 
+ * managed by the Connection and set up with the Element when the
+ * Connection is created. Second, the Element must provide the Msg
+ * with range info. Msg will use efficiently to choose what to call.
+ *
+ * Thread decomposition of Element:	Incoming data is subdivided into
+ * per-thread buffers. It would be nice to clearQ these per-thread too.
+ * Need some way to shift stuff around for balancing. Must ensure that
+ * only one Msg deals with any given index.
+ *
+ */
+void Element::clearQ( )
+{
+	const char* buf = &(q_[0]);
+	while ( buf ) {
+		buf = execFunc( buf );
+	}
+}
+
+/**
+ * Parses the buffer and executes the func in all specified Data
+ * objects on the Element.
+ * Returns new position on buffer.
+ * The buffer looks like this:
+ * uint FuncId, uint MsgId, Args
+ *
+ * The Msg does the iteration, and as it is a virtual base class
+ * it can do all sorts of optimizations depending on how the mapping looks.
+ *
+ */
+const char* Element::execFunc( FuncId f, const char* buf )
+{
+	assert( buf ! = 0 );
+	FuncId fid = *( reinterpret_cast < const FuncId * >( buf ) );
+	buf += sizeof( FuncId );
+	MsgId mid = *reinterpret_cast< const MsgId* >( buf );
+	buf += sizeof( MsgId );
+	OpFunc func = getOpFunc( f ); // Runtime checks for type safety
+	Msg* m = getMsg( mid ); // Runtime checks for Msg identity.
+	if ( func && m )
+		return m->iterate( this, func, buf );
+
+	return 0;
 }

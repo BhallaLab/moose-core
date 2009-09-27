@@ -638,5 +638,292 @@ Well, that was entertaining. Two things to try:
 25 Feb 2009
 Checking it in so that I can run the tests on gj.
 Checked in as revision 1055.
+Oops, forgot to add MyBarrier.h
+Checked in as revision 1056.
+Now to run on gj.
+
+One thread
+syncArray10     ops=100000      time=0.023068	0.023	0.023	0.023
+syncArray100    ops=1000000     time=0.235919	0.236	0.236	0.301
+syncArray1000   ops=10000000    time=2.75227	2.46	2.61	2.52
+syncArray10000  ops=100000000   time=32.2201	30.52	32.6	31.7
+syncArray10000  ops=1e9		  				278.7
+
+Main: creating 2 threads, pthreads barrier
+syncArray10 ops=100000      time=0.123591	0.115	0.107	0.134
+syncArray100    ops=1000000     time=0.330623	0.285	0.304	0.272
+syncArray1000   ops=10000000    time=1.55576	1.74	1.727	1.76
+syncArray10000  ops=100000000   time=15.2927	16.74	15.6	15.8
+syncArray10000  ops=1e9	 					163.4
+
+Main: creating 4 threads, pthreads barrier
+syncArray10     ops=100000      time=0.309986	0.357	0.336	0.34
+syncArray100    ops=1000000     time=0.521644	0.508	0.486	0.48
+syncArray1000   ops=10000000    time=0.985141	1.842	0.989	1.38
+syncArray10000  ops=100000000   time=8.70518	10.48	11.6	7.64
+syncArray10000  ops=1e9						117
+
+Main: creating 2 threads: MyBarrier
+syncArray10 ops=100000      time=0.040132	0.043	0.040	0.042
+syncArray100    ops=1000000     time=0.178236	0.179	0.178	0.194
+syncArray1000   ops=10000000    time=1.63492	1.611	1.623	1.68
+syncArray10000  ops=100000000   time=15.7017	16.7	16.6	16.4
+syncArray10000  ops=1e9 					179
+
+Main: creating 4 threads: MyBarrier
+syncArray10     ops=100000      time=0.089063	0.249	0.076	0.132
+syncArray100    ops=1000000     time=0.125938	0.130	0.139	0.161
+syncArray1000   ops=10000000    time=0.835574	0.86	0.848	0.900
+syncArray10000  ops=100000000   time=7.48444	8.17	8.33	8.31
+syncArray10000  ops=1e9						114
+
+Summary:
+- MyBarrier works for 4 threads works on gj.
+- The speedup is reasonable except for 10 entries in the array. 
+- We're over 3.9 fold speedup on average, with MyBarrier on 4 nodes for
+	10K entries. But for 1K entries and less the speedup is much smaller,
+	possibly here we have cache considerations. This is confirmed by the
+	last run with 100K entries. It goes very slowly here, less than 
+	3x speedup, possibly because of cache contention? Perhaps it would
+	work better to interleave the calculations of different threads,
+	rather than to do them in separate blocks.
+
+=============================================================================
+19-20 Sep 2009
+Dimensions of problem:
+	Class management
+		Initialization
+	Element management
+		Elements handle data struct management.
+		Erefs do the ops that need index info.
+		Elements in arrays: Already by default. Distribute over nodes
+			Nested arrays: multiple child elements vs. clever lookup
+		Field management: Extended fields? Child data as fields?
+	Message management
+		Definition at static init: sync for buf, async if hard-coded
+		Creation, Deletion: Op on Msg, but sync needs extra work.
+		Shared messages: Incorporated into piggybacking: below.
+		Traversal
+			Field access via messages
+			Piggybacking onto messages
+				Msg and func are just arguments to send().
+			Using messages to scan for targets
+			Open-ended messages? Floating messages: not on elms?
+			Wildcards as message lists? On floating messages?
+				+++Concept merging for connection maps.
+				Must store original wildcard path in Msg.
+			Iterating through messages and their targets
+				Piggyback with returns instead of explicit iter
+				Do we have to give return func an id? Nodes?
+	Message use
+		Process: Centrally called for computation. Also does ClearQ.
+		ClearQ: Centrally called all the time.
+		Sync: process->src->Data->buffer; process->dest->scan buffers.
+		Async: send( Msg, func, args)->buffer; ClearQ->Elm->scan buffer.
+		Do we separate spikes from other async (queued) msgs? No.
+			Currently Data manages spike Q. Element will clear in
+			Process/ClearQ.
+		Passing arrays and other masses of data: Ptrs transform to mass
+		Return messages?: Temp Msg made from Id of src.
+		Functions and their ids: Sync across nodes. Expand dynamic? Bad.
+		Would like to access Msg fields, specially dest list, like a
+			wildcard. So make msg accessible like an object?
+	Parallel stuff
+		Threads: Element or index splits? Very sim dependent.
+		MPI: Again, need sim manager to decide how to split.
+		Object Id management: Master node hands out.
+		Moving objects between nodes: Field-based expansion.
+		Splitting Elements between nodes: Field-based expansion
+	Simulation management
+		Scheduling: Msgs from ticks, Special traverse func to call Proc.
+		Solvers and objects: Take over Process. Element remaps FuncIds
+			during clearQ. Replace Data with forwarding zombie obj.
+		Solvers to each other: Messaging.
+		Relation of objects to shell: As now.
+		Relation of shell to parser: As now.
+	Project management
+		Unit tests: cxxunit or boost? Develop basecode using UTs
+		Expectations for assertions:
+		Expectations for documentation: Doxygen.
+
+.............................................................................
+
+I think I have a picture now of most of this framework. Now to design an
+implmentation and testing process. Options:
+1. Replace current Msg implementation with updated version.
+	+ Will get rapidly to test key parts
+	+ Smaller, more testable system.
+	- Hands tied on heavier testing
+2. Go into main MOOSE and begin replacement.
+	- Horrible mess. Need to replace basecode part anyway.
+	- Too tied into older forms.
+	+ Get started on production use
+3. Rebuild entire basecode with this design, plan to bolt old MOOSE computation
+	modules on top
+	+ Good idea for eventual upgrade.
+	- Too much stuff to set up before serious testing on parallel stuff
+	can begin.
+	
+Will go with option 1. the current revision is 1056.
+Stages
+	- Set up standalone Send for async.
+		- Fix up Msg data structs to include original wildcard info.
+
+=============================================================================
+
+21 Sep
+After some muddling, seems like the place to start is field access
+(set/get) using messages. For context, assume that the operation is being
+done between nodes. This forces the operation to be done in a general way.
+
+set: Doesn't care about source, so current arrangement is fine. Here all the
+	buffer needs to store is the field identity (given by funcId) and value.
+get: Needs to specify source. Rather than use Id to do so, let's identify
+	it by a message, since there may already be one used for repeat access.
+	So we pass in the request to use the message in the access itself.
+	This implies that even a transient message needs to register with the
+	target Element. Should not be too hard now that we don't require
+	argument checking. Messages will need to carry an Id identifying them
+	on the src/dest. Otherwise we would have to put the entire Message info
+	into the buffer.
+
+	get(Id)->create temp object->locate target node->create temp message
+	through to target Id->send data on temp message->target object gets
+	message-> puts data onto message->back through postmaster->to 
+	originating object->used in script->destroy temp object->destroy msg.
+
+	Almost identical for single node
+
+	This would work with little change for wildcards onto multiple nodes.
+	Alternate approach is to ask the Shells to do this locally, and then
+	transmit their data back to the originating shell.
+	If I did not have to do the messaging, this would take somewhat less
+	effort. However, if the messaging is standardized it would take less
+	coding.
+	
+Things to do to get this to work:
+Phase 1: Single node messaging
+	- Code up MsgSet
+	- Implement add and drop for msg.
+	- Implement Cinfo that knows # and role of slots : predefined Msgs.
+	- Implement scheduling and clearQ
+	- Implement Finfo stuff to handle set/get functions.
+	- Implement some set/get functions
+	- Test above, and valgrind
+	- Implement with wildcards: multiple targets.
+	- Implement for tables, with predefined Msgs.
+	- Implement delete of one of the msg ends.
+
+Phase 2: Multinode messaging
+	- Implement cross-node data transfer with hardcoded messages.
+	- Implement cross-node message setup. Add, drop, valgrind.
+	- Test single field access
+	- Test massive tangled data flow.
+	
+
+Working from the middle out. Trying to implement a set/get function using
+this supposedly clean approach. Current issue: Suppose we have a many->one
+projection, e.g., to a channel lookup table. The get function needs to go
+back to the originating object.
+=============================================================================
+22 Sep 2009
+Finally some implementation. Goal is to figure out how to specify a single
+object for a return message. Need to do the regular messaging first.
+The current idea is to have the target Element itself do the final iteration
+among target indices. This means that each buffer entry has the function,
+its arguments, and a range of indices to which these are applied.
+Efficient because the function and arguments are generated only once, saving
+both space and time. The key thing is that the range of target object indices
+is supplied for now by the Msg.
+
+As far as value return is concerned, we want to tell the system to ignore
+what the Msg says, and return the value only to the originating Element index.
+
+=============================================================================
+23 Sep 2009
+Slowly taking shape. I need to factor in the presence of proxy elements. These
+will be pretty real in the case of elements whose objects are distributed.
+They may be virtual for elements that only represent their off-node actual
+data. I don't know about even having proxy elements for ones that have neither
+data nor any messages to the local node.
+
+Looking into using streams to put values into the buffer, rather than the
+ugly typecasts currently in use. Two things to do here:
+- See how to attach streams to existing char buffers.
+- Benchmark it to see if it is as fast as custom typecasting
+
+Tried to do the stream stuff. Total pain.  Forget it for now.
+
+Looking at messages coming to MultiNodeElement and MultiThreadElement
+(the combination of the two will be worse).
+
+Unless we precalculate the remapping, things will be hideous. We need to
+work out how the range of the message splits up onto different threads or
+nodes. So we need to go through all message entries (one range) and 
+partition according to the local and remote ranges. At the message level,
+this precalculation should result in formation of distinct sets of Ranges,
+one per target node or thread.
+
+=============================================================================
+24 Sep 2009
+
+Analysis continues. Hamstrung by lack of experience with prior implementations.
+Here we have a design decision about when to expand the Range:
+- During the final iteration on the target Element. The queue just stores an
+	identifier for this message, and the index of the originating object.
+- When we put the message on the queue. This means that the queue doesn't
+	know about the message: a problem with returns. It will also put a
+	lot of stuff repeatedly on the queue.
+
+Seems clear we expand the Range only during final iteration. This means we
+need to refer to the Msg on the target element by some Id.
+
+So, another decision: Organizing Msgs. We have a 2-level organization: one is
+for individual Msgs, which are maps between entries on single Elements. The
+other is for conceptual connections, which are groups of Msgs and also store
+the original constructor/wildcard strings for higher-level analysis. Options:
+- Make a Connection class for the concepts, which manage Msgs internally.
+	- Problem with identifying Msgs in the queue. We would like to do a
+	single index lookup to find the Msg, rather than have to look up
+	connection then Msg.
+	- Problem is that the Conn index may change during setup, if there
+	ever are any message deletes.
+
+- Have a vector of Msgs, and a separate vector of Connections. Each Connection
+	points to a group of Msgs.
+	- Problem is that the Msg index may change during setup, if there
+	ever are any message deletes.
+
+After some pen/paper scribbling, it looks like I actually should set up a
+3-layer structure:
+
+Msg: Lowest, most specific. From single src Element to single dest Element,
+	manages arbitrary indices. Implement as virtual base class with many
+	subclasses for different cases of connection patterns. Stored as
+	pointers. Shared between src and dest. 
+
+Connection: Next level up. All targets from a single src Element, including
+	a vector of Msgs. Equivalently, all srcs into a single Dest.
+	Called by Send operation. Includes Func information.
+	Also used in Wildcards. Can store original
+	Wildcard info. Overlapping but not equivalent on src and dest.
+
+Map: Highest, most general. All the conceptually related interconnections
+	between groups of elements. What the GENESIS createmap command would
+	build. Stores arrays of src and dest connections. Also stores the
+	creation command and parameters in high-level form. Is itself an
+	Element, and in due course will have
+	capabilities to manipulate the Connections that are its fields.
+
+=============================================================================
+25 Sep 2009
+Worked through control flow for different aspects of messaging by writing
+function sequences. Mostly there, but need to figure out two related things:
+- How to deal with specific info lookup for synapses
+	This is simple enough. Use the target indices. Have a separate
+	target index for each synapse, so that there is only one input coming
+	into each. Local info solved.
+- How to return data to caller, i.e., SendTo a specific target.
+	The s->sendTo function does it by going straight to Element::addToQ.
 
 =============================================================================
