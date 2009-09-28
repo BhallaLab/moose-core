@@ -1,26 +1,28 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
 typedef unsigned int (*OpFunc )( Eref e, const void* buf );
 
 class Finfo
 {
 	public:
-		Finfo( OpFunc op );
-		unsigned int op( Eref e, const void* buf );
+		Finfo( OpFunc op, const string& name );
+		~Finfo() {;}
+
+		unsigned int op( Eref e, const void* buf ) const;
+
+		const string& name() const;
+
+		virtual void registerOpFuncs( 
+			map< OpFunc, FuncId >& fm, vector< OpFunc >& funcs ); 
 		
-		/*
-		{
-			static_cast< Reac* >( d )->func_( 
-				*static_cast< const double* >( buf ) );
-			return sizeof( double );
-		}
-		*/
 	private:
 		OpFunc op_;
+		string name_;
 };
-
-
-/*
-unsigned int setKf( Eref e, const char* buf ) {
-	static_cast< Reac* >( e.data() )->setKf( *static_cast< const double* >( buf ) );
-	return sizeof( double );
-}
-*/

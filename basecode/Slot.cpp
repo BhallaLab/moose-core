@@ -9,25 +9,8 @@
 
 #include "header.h"
 
-Finfo::Finfo( OpFunc op, const string& name )
-	: op_( op ), name_( name )
+Slot::Slot( ConnId conn, const Cinfo* c, const string& funcName )
+	: conn_( conn )
 {
-	;
-}
-
-unsigned int Finfo::op( Eref e, const void* buf ) const
-{
-	return op_( e, buf );
-}
-
-const string& Finfo::name( ) const
-{
-	return name_;
-}
-
-void Finfo::registerOpFuncs( 
-	map< OpFunc, FuncId >& fm, 
-	vector< OpFunc >& funcs )
-{
-	;
+	// func_ = c->findFunc( funcName );
 }

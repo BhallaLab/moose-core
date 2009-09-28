@@ -6,45 +6,59 @@ class Eref
 		/**
 		 * returns the sum of all valid incoming entries
 		 */
-		double sumBuf( Slot slot );
+		double sumBuf( SyncId slot );
 
 		/**
 		 * Returns the product of all valid incoming entries
 		 * with v. If there are no entries, returns v
 		 */
-		double prdBuf( Slot slot, double v );
+		double prdBuf( SyncId slot, double v );
 
 		/**
 		 * Returns the single specified entry
 		 */
-		double oneBuf( Slot slot );
+		double oneBuf( SyncId slot );
 
 		/**
 		 * Returns the memory location specified by slot.
 		 * Used for sends.
 		 */
-		double* getBufPtr( Slot slot );
+		double* getBufPtr( SyncId slot );
 
 		/**
 		 * Sends a double argument
 		 */
-		void send1( Slot src, double v );
+		void ssend1( SyncId src, double v );
 
 		/**
 		 * Sends two double arguments
 		 */
-		void send2( Slot src, double v1, double v2 );
+		void ssend2( SyncId src, double v1, double v2 );
 
 		/**
-		 * Sends an action potential event to all targets on specified by
-		 * slot src.
+		 * Asynchronous message send.
 		 */
-		void sendSpike( Slot src, double t );
+		void asend( ConnId conn, FuncId func, const char* arg, 
+			unsigned int size ) const;
 
 		/**
 		 * Returns data entry
 		 */
 		Data* data();
+
+		/**
+		 * Returns Element part
+		 */
+		Element* element() const {
+			return e_;
+		}
+
+		/**
+		 * Returns index part
+		 */
+		unsigned int index() const {
+			return i_;
+		}
 	private:
 		Element* e_;
 		unsigned int i_;

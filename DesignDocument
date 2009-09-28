@@ -199,7 +199,25 @@ Function handling is cleaner in at least three ways:
 - It uses member functions of the Data class directly, rather than static
 	functions.
 
+Note that a single Finfo might refer to more than one OpFunc. For example,
+a ValueFinfo will typically define a set func and a get func.
+A LookupFinfo will define a set func with index, a get func with index, a
+	get func to return size of table, and a get func to return the whole
+	table.
+
 <Still need to fully define how the Finfos control runtime message setup>
+
+------------------------------------------------------------------------------
+OpFunc lookup
+Every function used by MOOSE has a unique FuncId, consistent across nodes. 
+This is assigned at static initialization time when the Cinfo constructor
+scans the FinfoArray.
+There is a static global vector of OpFuncs in the Cinfo class that has entries
+for every function so defined. The FuncId is the index into this vector.
+Additionally, each Cinfo instance has a vector of OpFuncs applicable to itself,
+again indexed by FuncId. Invalid FuncIds for the class have a zero pointer.
+
+FuncId 0 is a dummy function.
 
 ------------------------------------------------------------------------------
 Solvers

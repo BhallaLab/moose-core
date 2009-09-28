@@ -10,8 +10,8 @@
 #include "header.h"
 
 ///////////////////////////////////////////////////////////////////////////
-Msg::Msg( Element* src, Element* dest )
-	: src_( src ), dest_( dest )
+Msg::Msg( Element* e1, Element* e2, MsgId m1, MsgId m2 )
+	: e1_( e1 ), e2_( e2 ), m1_( m1 ), m2_( m2 )
 {
 	;
 }
@@ -21,28 +21,19 @@ Msg::~Msg()
 	;
 }
 
-
-// The asyncQ on the target serves all indices within the Element.
-// tgtRange: type[all,single,multiple,1range,multipleranges]: 
-// 	all: All indices
-// 	single: < index >
-// 	multiple: < n, index, index, ... >,
-// 	singleRange< index, index >
-// 	multiRange< n, <index, index >, <index, index>, ...>
-// Best to have the Element evaluate it, to save space in the buffer
-// and as it is easier for the Element to decide how to iterate.
-// Or, for all cases:
-// 	<start, end>... while end < max.
-// 	or, vector of < start, end >. Ugh.
-
-// Fdata has funcId followed by data.
-Msg::asend( Fdata fData )
+void Msg::clearQ() const 
 {
-	dest_->addToQ( fData, Range( 0, 1 ) );
+	e1_->clearQ();
+}
+
+void Msg::process( const ProcInfo* p ) const 
+{
+	e1_->process( p );
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
+/*
 SparseMsg::SparseMsg( Element* src, Element* dest )
 	: Msg( src, dest )
 {
@@ -57,9 +48,11 @@ void SparseMsg::addSpike( unsigned int srcElementIndex, double time ) const
 	for ( unsigned int i = 0; i < n; ++i )
 		dest_->addSpike( *elementIndex++, *synIndex++, time );
 }
+*/
 
 ///////////////////////////////////////////////////////////////////////////
 
+/*
 One2OneMsg::One2OneMsg( Element* src, Element* dest )
 	: Msg( src, dest ), synIndex_( 0 )
 {
@@ -73,3 +66,36 @@ void One2OneMsg::addSpike( unsigned int srcElementIndex, double time ) const
 
 
 
+*/
+///////////////////////////////////////////////////////////////////////////
+
+SingleMsg::SingleMsg( Eref e1, Eref e2, MsgId m1, MsgId m2 )
+	: Msg( e1.element(), e2.element(), m1, m2 ), 
+	i1_( e1.index() ), 
+	i2_( e2.index() )
+{
+	;
+}
+
+void SingleMsg::addToQ( const Element* caller, FuncId f, 
+			const char* arg, unsigned int size ) const
+{
+	if ( caller == e1_ ) {
+		e2_->addToQ( f, m2_, arg, size );
+	} else {
+		assert( caller == e2_ );
+		e1_->addToQ( f, m1_, arg, size );
+	}
+}
+
+const char* SingleMsg::exec( Element* target, OpFunc f, 
+			const char* arg ) const
+{
+	if ( target == e1_ ) {
+		f( Eref( target, i1_ ), arg );
+	} else {
+		assert( target == e2_ );
+		f( Eref( target, i2_ ), arg );
+	}
+	return 0;
+}

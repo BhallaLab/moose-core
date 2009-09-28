@@ -13,14 +13,19 @@
 #
 
 TARGET = basecode.o
-CXXFLAGS += -I.. -I../kinetics -I../biophysics
+
+#  CXXFLAGS += -I.. -I../kinetics -I../biophysics
+
 OBJ = \
 	Element.o	\
 	Eref.o	\
 	Finfo.o	\
+	Cinfo.o	\
 	Msg.o	\
-	SparseMatrix.o	\
+	Conn.o \
+	Slot.o \
 	testSync.o	\
+	testAsync.o	\
 	main.o	\
 
 HEADERS = \
@@ -28,9 +33,10 @@ HEADERS = \
 	Element.h \
 	Eref.h \
 	Msg.h \
-	SparseMatrix.h \
-	MyBarrier.h \
+	Conn.h \
 	Finfo.h \
+	Cinfo.h \
+	Slot.h \
 
 default: $(TARGET)
 

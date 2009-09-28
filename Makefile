@@ -193,16 +193,22 @@ endif
 LD = ld
 
 SUBDIR = basecode \
-	kinetics \
-	biophysics 
+
+
+#	kinetics \
+#	biophysics 
 
 # Used for 'make clean'
 CLEANSUBDIR = $(SUBDIR) 
 
 OBJLIBS =	\
 	basecode/basecode.o \
-	kinetics/kinetics.o \
-	biophysics/biophysics.o
+
+#
+#	kinetics/kinetics.o \
+#	biophysics/biophysics.o
+#
+#
 
 export CXX
 export CXXFLAGS

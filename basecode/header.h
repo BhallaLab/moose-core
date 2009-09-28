@@ -28,20 +28,23 @@
 
 using namespace std;
 
-typedef unsigned int Slot;
 typedef unsigned int FuncId;
+typedef unsigned int SyncId;
 extern const FuncId ENDFUNC;
 
 class Element;
 class Eref;
 
 #include "Finfo.h"
+#include "Cinfo.h"
 #include "ProcInfo.h"
 #include "Data.h"
-#include "SparseMatrix.h"
+// #include "SparseMatrix.h"
 #include "Msg.h"
+#include "Conn.h"
 #include "Element.h"
 #include "Eref.h"
+#include "Slot.h"
 #include "Send.h"
 #include "Async.h"
 

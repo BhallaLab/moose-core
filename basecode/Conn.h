@@ -1,0 +1,43 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+typedef unsigned int ConnId;
+
+/**
+ * Mid-level message handler. Manages multiple messages, and appropriate
+ * funcs.
+ */
+class Conn
+{
+	public:
+		/**
+		 * asend goes through all child Msgs with the specified FuncId
+		 * and adds them into the Element Queue.
+		 */
+		void asend( const Element* e, FuncId f, 
+			const char* arg, unsigned int size ) const;
+
+		/**
+		 * ClearQ calls clearQ on all Msgs.
+		 */
+		void clearQ();
+
+		/**
+		 * Add a msg to the list
+		 */
+		void add( Msg* m );
+
+		/**
+		 * Drop a msg from the list
+		 */
+		void drop( Msg* m );
+	private:
+		vector< Msg* > m_;
+};
+

@@ -6,22 +6,22 @@ Eref::Eref( Element* e, unsigned int index )
 	;
 }
 
-double Eref::sumBuf( Slot slot )
+double Eref::sumBuf( SyncId slot )
 {
 	return e_->sumBuf( slot, i_ );
 }
 
-double Eref::prdBuf( Slot slot, double v )
+double Eref::prdBuf( SyncId slot, double v )
 {
 	return e_->prdBuf( slot, i_, v );
 }
 
-double Eref::oneBuf( Slot slot )
+double Eref::oneBuf( SyncId slot )
 {
 	return e_->oneBuf( slot, i_ );
 }
 
-double* Eref::getBufPtr( Slot slot )
+double* Eref::getBufPtr( SyncId slot )
 {
 	return e_->getBufPtr( slot, i_ );
 }
@@ -31,6 +31,7 @@ Data* Eref::data()
 	return e_->data( i_ );
 }
 
+/*
 void Eref::sendSpike( Slot src, double t )
 {
 	// msg should do the iteration internally, passing just the
@@ -39,13 +40,20 @@ void Eref::sendSpike( Slot src, double t )
 	for ( vector< Msg* >::const_iterator i = v.begin(); i != v.end(); ++i )
 		( *i )->addSpike( i_, t );
 }
+*/
 
-void Eref::send1( Slot src, double v )
+void Eref::ssend1( SyncId src, double v )
 {
-	e_->send1( src, i_, v );
+	e_->ssend1( src, i_, v );
 }
 
-void Eref::send2( Slot src, double v1, double v2 )
+void Eref::ssend2( SyncId src, double v1, double v2 )
 {
-	e_->send2( src, i_, v1, v2 );
+	e_->ssend2( src, i_, v1, v2 );
+}
+
+void Eref::asend( ConnId conn, FuncId func, const char* arg, 
+			unsigned int size ) const
+{
+	e_->conn( conn ).asend( e_, func, arg, size );
 }

@@ -27,10 +27,13 @@ class Element
 		 * IntFire. Common but not static.
 		 * Also think about parent-child hierarchy.
 		 */
+		/*
 		Element( vector< Data * >& d, 
 			unsigned int numSendSlots_,
 			unsigned int numRecvSlots_
 		);
+		*/
+		Element( const Cinfo* c );
 
 		/**
 		 * Destructor
@@ -54,26 +57,27 @@ class Element
 		void clearQ();
 
 		/**
-		 * Utility function for calling function with specified FuncId.
-		 * May need to be optimized out.
+		 * execFunc executes the function defined in the buffer, and
+		 * returns the next position of the buffer. Returns 0 at the
+		 * end.
 		 */
-		unsigned int execFunc( FuncId f, const char* buf );
+		const char* execFunc( const char* buf );
 
 		/**
 		 * Return a single buffer entry specified by slot and eindex
 		 */
-		double oneBuf( Slot slot, unsigned int i ) const;
+		double oneBuf( SyncId slot, unsigned int i ) const;
 
 		/**
 		 * Sum buffer entries in range specified by slot and eindex
 		 */
-		double sumBuf( Slot slot, unsigned int i ) const;
+		double sumBuf( SyncId slot, unsigned int i ) const;
 
 		/**
 		 * return product of v with all buffer entries in range specified 
 		 * by slot and eindex. If none, return v.
 		 */
-		double prdBuf( Slot slot, unsigned int i, double v ) const;
+		double prdBuf( SyncId slot, unsigned int i, double v ) const;
 
 		/**
 		 * Get the buffer pointer specified by slot and eindex.
@@ -81,7 +85,7 @@ class Element
 		 * bytes are to go, so we don't need to get the range of buffer
 		 * locations available to this message slot.
 		 */
-		double* getBufPtr( Slot slot, unsigned int i );
+		double* getBufPtr( SyncId slot, unsigned int i );
 
 		/**
 		 * Returns the data on the specified index for the Element
@@ -98,10 +102,13 @@ class Element
 		 * We'll try these out as alternate Send functions, given that
 		 * the buffer is local.
 		 */
-		void ssend1( Slot slot, unsigned int i, double v );
-		void ssend2( Slot slot, unsigned int i, double v1, double v2 );
+		void ssend1( SyncId slot, unsigned int i, double v );
+		void ssend2( SyncId slot, unsigned int i, double v1, double v2 );
+
+		const Conn& conn( ConnId c ) const;
 
 	private:
+		const Msg* getMsg( MsgId mid ) const;
 		/**
 		 * These are the objects managed by the Element
 		 * Option 1: Just have a big linear array of objects. 
@@ -155,7 +162,7 @@ class Element
 		/**
 		 * Class information
 		 */
-		Cinfo* cinfo_;
+		const Cinfo* cinfo_;
 
 		/**
 		 * Message vector. This is the low-level messaging information.

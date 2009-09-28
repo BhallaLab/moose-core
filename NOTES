@@ -927,3 +927,5 @@ function sequences. Mostly there, but need to figure out two related things:
 	The s->sendTo function does it by going straight to Element::addToQ.
 
 =============================================================================
+27 Sep 2009.
+Starting re-implementation with Element. Did svn update to revision 1345.
