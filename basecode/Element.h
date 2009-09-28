@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+class Qinfo;
 /**
  * Have a single Element class, that uses an IndexRange. There can
  * be multiple such objects representing a complete array. So the Id
@@ -96,7 +97,7 @@ class Element
 		 * This function pushes a function request onto a queue.
 		 * In multithread mode it figures out which queue to use.
 		 */
-		void addToQ( FuncId f, MsgId m, const char* arg, unsigned int size );
+		void addToQ( const Qinfo& qi, const char* arg );
 
 		/**
 		 * We'll try these out as alternate Send functions, given that

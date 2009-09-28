@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "Qinfo.h"
 
 Element::Element( const Cinfo* c )
 	: cinfo_( c )
@@ -178,12 +179,7 @@ void Element::clearQ( )
  * It should be extended to provide thread safety, which can be done
  * if each thread has its own queue.
  */
-void Element::addToQ( FuncId funcId, MsgId msgId, const char* arg, unsigned int size )
+void Element::addToQ( const Qinfo& qi, const char* arg )
 {
-	if ( q_.size() < 8 + size )
-		q_.resize( q_.size() + 16 + size * 2 );
-	char* pos = &q_[ q_.size()  - 1 ];
-	*reinterpret_cast< FuncId* >( pos ) = funcId;
-	*reinterpret_cast< FuncId* >( pos + sizeof( FuncId) ) = msgId;
-	memcpy( pos + sizeof( FuncId ) * 2, arg, size );
+	qi.addToQ( q_, arg );
 }

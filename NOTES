@@ -929,3 +929,13 @@ function sequences. Mostly there, but need to figure out two related things:
 =============================================================================
 27 Sep 2009.
 Starting re-implementation with Element. Did svn update to revision 1345.
+=============================================================================
+28 Sep 2009.
+Compiled first pass skeleton version. Many things to do:
+- Sort out FuncId stuff and how Slots are to set them up when messages are 
+	added.
+- Form of OpFunc: I think the size of args should be passed in, not worked
+	out in OpFunc. Needed, for example, for off-node stuff.
+
+- Handle creation of Elements and associated data
+- Set up unit tests.

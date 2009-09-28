@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "Qinfo.h"
 
 ///////////////////////////////////////////////////////////////////////////
 Msg::Msg( Element* e1, Element* e2, MsgId m1, MsgId m2 )
@@ -81,10 +82,10 @@ void SingleMsg::addToQ( const Element* caller, FuncId f,
 			const char* arg, unsigned int size ) const
 {
 	if ( caller == e1_ ) {
-		e2_->addToQ( f, m2_, arg, size );
+		e2_->addToQ( Qinfo( f, size, m2_ ), arg );
 	} else {
 		assert( caller == e2_ );
-		e1_->addToQ( f, m1_, arg, size );
+		e1_->addToQ( Qinfo( f, size, m1_ ), arg );
 	}
 }
 
