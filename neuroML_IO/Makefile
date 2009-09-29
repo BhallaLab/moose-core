@@ -8,12 +8,11 @@
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-TARGET = sbml_IO.o
-
+TARGET = neuroML_IO.o
 OBJ = \
-	SbmlReader.o	\
-	SbmlWriter.o	\
-	
+	NeuromlReader.o	\
+	Cable.o  	\
+	NeuromlWriter.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -23,11 +22,16 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-SbmlReader.o:	SbmlReader.h ../element/Neutral.h
-SbmlWriter.o:	SbmlWriter.h ../element/Neutral.h
+NeuromlReader.o:	NeuromlReader.h ../element/Neutral.h
+NeuromlWriter.o:	NeuromlWriter.h ../element/Neutral.h
+Cable.o:		Cable.h
+//NBase.o:		NBase.h ../element/Neutral.h
+//Segment.o:		Segment.h ../element/Neutral.h
+
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) -I../basecode -I../utility/randnum -I.. $< -c
+	$(CXX) $(CXXFLAGS) -I/home/siji -I/usr/include/libxml2 \
+       	-I../basecode -I../utility/randnum -I.. $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	

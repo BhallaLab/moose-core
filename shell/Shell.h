@@ -805,6 +805,21 @@ class Shell
 				string filename,
 				string modelpath,
 				int childnode );
+
+		//////////////////////////////////////////////////////////
+		// neuroml functions
+		//////////////////////////////////////////////////////////
+		static void readNeuroml(
+				const Conn* c,
+				string filename,
+				string modelpath,
+				int childnode );
+		
+		static void writeNeuroml(
+				const Conn* c,
+				string filename,
+				string modelpath,
+				int childnode );
 		
 		//////////////////////////////////////////////////////////
 		// functions to create gates on a given channel

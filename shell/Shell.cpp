@@ -26,7 +26,10 @@
 #include "sbml_IO/SbmlReader.h"
 #include "sbml_IO/SbmlWriter.h"
 #endif
-
+#ifdef USE_NEUROML
+#include "neuroML_IO/NeuromlReader.h"
+#include "neuroML_IO/NeuromlWriter.h"
+#endif
 extern void pollPostmaster(); // Defined in maindir/init.cpp
 //////////////////////////////////////////////////////////////////////
 // Shell static initializers
@@ -269,6 +272,15 @@ const Cinfo* initShellCinfo()
 		new DestFinfo( "writesbml",
 				Ftype3< string, string, int >::global(),
 				RFCAST( &Shell::writeSbml ) ),		
+		////////////////////////////////////////////////////////////
+		// NeuroML
+		////////////////////////////////////////////////////////////
+		new DestFinfo( "readNeuroML",
+				Ftype3< string, string, int >::global(),
+				RFCAST( &Shell::readNeuroml ) ),	
+		new DestFinfo( "writeNeuroML",
+				Ftype3< string, string, int >::global(),
+				RFCAST( &Shell::writeNeuroml ) ),		
 		////////////////////////////////////////////////////////////
 		// Misc
 		////////////////////////////////////////////////////////////
@@ -2211,7 +2223,57 @@ void Shell::writeSbml( const Conn* c, string filename, string location, int chil
 	cerr << "Error: writeSbml: This MOOSE is not built with SBML compatibility.\n";
 #endif
 }
+void Shell::readNeuroml( const Conn* c, string filename, string location, int childnode )
+{
+#ifdef USE_NEUROML
+	NeuromlReader nr;
+	
+	Id loc( location );
+	if ( loc.bad() ) {
+		string::size_type pos = location.find_last_of( "/" );
+		Id pa;
+		string name;
+		if ( pos == string::npos ) {
+			pa = getCwe( c->target() );
+			name = location;
+		} else if ( pos == 0 ) {
+			pa = Id();
+			name = location.substr( 1 );
+		} else {
+			pa = Id( location.substr( 0, pos ), "/" );
+			if ( pa.bad() ) {
+				cout << "Error: readNeuroml: model path '" << location << "' not found.\n";
+				return;
+			}
+			name = location.substr( pos + 1 );
+		}
+		
+		Element* locE = Neutral::create( "Neutral", name, pa, Id::scratchId() );
+		loc = locE->id();
+	}
+	
+	nr.readModel( filename, loc );
+#else
+	cerr << "Error: readNeuroML: This MOOSE is not built with NeuroML compatibility.\n";
+#endif
+}
 
+void Shell::writeNeuroml( const Conn* c, string filename, string location, int childnode )
+{
+#ifdef USE_NEUROML
+	NeuromlWriter nw;
+	
+	Id loc( location );
+	if ( loc.bad() ) {
+		cerr << "Error: Shell::writeNeuroml: Path " << location << " does not exist.\n";
+		return;
+	}
+	
+	nw.writeModel( filename, loc );
+#else
+	cerr << "Error: writeNeuroml: This MOOSE is not built with NeuroML compatibility.\n";
+#endif
+}
 // Static function
 void Shell::createGateMaster( const Conn* c, Id chan, string gateName )
 {
