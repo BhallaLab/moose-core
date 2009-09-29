@@ -223,6 +223,14 @@ const Cinfo* initGenesisParserCinfo()
 			Ftype3< string, string, int >::global() ),
 		new SrcFinfo( "writesbml", 
 			Ftype3< string, string, int >::global() ),
+
+		///////////////////////////////////////////////////////////////
+		// NeuroML
+		///////////////////////////////////////////////////////////////
+		new SrcFinfo( "readneuroml", 
+			Ftype3< string, string, int >::global() ),
+		new SrcFinfo( "writeneuroml", 
+			Ftype3< string, string, int >::global() ),
 		///////////////////////////////////////////////////////////////
 		// Misc
 		///////////////////////////////////////////////////////////////
@@ -385,6 +393,10 @@ static const Slot readSbmlSlot =
 	initGenesisParserCinfo()->getSlot( "parser.readsbml" );
 static const Slot writeSbmlSlot = 
 	initGenesisParserCinfo()->getSlot( "parser.writesbml" );
+static const Slot readNeuromlSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.readneuroml" );
+static const Slot writeNeuromlSlot = 
+	initGenesisParserCinfo()->getSlot( "parser.writeneuroml" );
 static const Slot createGateSlot = 
 	initGenesisParserCinfo()->getSlot( "parser.createGate" );
 
@@ -4236,7 +4248,29 @@ void do_writesbml( int argc, const char** const argv, Id s )
 	string filename=argv[1];
  	send3< string, string, int >(s(), writeSbmlSlot, filename, writeloc, childNode );
 }
+void do_readneuroml( int argc, const char** const argv, Id s )
+{
+	if (argc != 3 ) {
+		cout << "usage::readNeuroML filename /model \n";
+		return;
+	}
+	string modelpath=argv[2];
+	int childNode = parseNodeNum( modelpath );
+	string filename=argv[1];
+ 	send3< string, string, int >(s(), readNeuromlSlot, filename, modelpath, childNode );
+}
 
+void do_writeneuroml( int argc, const char** const argv, Id s )
+{
+	if (argc != 3 ) {
+		cout << "usage::writeNeuroML filename /model \n";
+		return;
+	}
+	string writeloc=argv[2];
+	int childNode = parseNodeNum( writeloc );
+	string filename=argv[1];
+ 	send3< string, string, int >(s(), writeNeuromlSlot, filename, writeloc, childNode );
+}
 //////////////////////////////////////////////////////////////////
 // GenesisParserWrapper load command
 //////////////////////////////////////////////////////////////////
@@ -4363,7 +4397,10 @@ void GenesisParserWrapper::loadBuiltinCommands()
         AddFunc( "arglist", reinterpret_cast< slifunc > ( do_arglist ), "char**");
 	AddFunc( "readSBML", reinterpret_cast< slifunc > ( do_readsbml ), "void" );
 	AddFunc( "writeSBML", reinterpret_cast< slifunc > ( do_writesbml ), "void" );
+	AddFunc( "readNeuroML", reinterpret_cast< slifunc > ( do_readneuroml ), "void" );
+	AddFunc( "writeNeuroML", reinterpret_cast< slifunc > ( do_writeneuroml ), "void" );
         AddFunc( "sh", reinterpret_cast< slifunc > (do_shellcmd ), "char*" );
+
 }
 
 //////////////////////////////////////////////////////////////////
