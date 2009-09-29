@@ -47,5 +47,6 @@ class Eref;
 #include "Slot.h"
 #include "Send.h"
 #include "Async.h"
+#include "Ftype.h"
 
 #endif // _HEADER_H

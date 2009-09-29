@@ -56,9 +56,28 @@ template< class T1, class T2 > class Slot2: public Slot
 		void send( Eref e, const T1& arg1, T2& arg2 ) {
 			char temp[ sizeof( T1 ) + sizeof( T2 ) ];
 			*reinterpret_cast< T1* >( temp ) = arg1;
-			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg1;
+			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
 			e.asend( conn_, func_, temp, sizeof( T1 ) + sizeof( T2 ) );
 		}
 };
+
+
+template< class T1, class T2, class T3 > class Slot3: public Slot
+{
+	public:
+		Slot3( ConnId conn, const Cinfo* c, const string& funcName )
+			: Slot( conn, c, funcName )
+		{ ; }
+
+		void send( Eref e, const T1& arg1, T2& arg2, T3& arg3 ) {
+			char temp[ sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) ];
+			*reinterpret_cast< T1* >( temp ) = arg1;
+			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
+			*reinterpret_cast< T3* >( temp + sizeof( T1 ) + sizeof( T2) ) =
+				arg3;
+			e.asend( conn_, func_, temp, sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) );
+		}
+};
+
 
 #endif // _SLOT_H

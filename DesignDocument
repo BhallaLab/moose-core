@@ -207,6 +207,20 @@ A LookupFinfo will define a set func with index, a get func with index, a
 
 <Still need to fully define how the Finfos control runtime message setup>
 
+ValueFinfo: Stores functions for set and get operations on a specific field.
+LookupFinfo: Stores functions for set with index, get with index, a
+	get to return size of table, and a get to return the whole table.
+DestFinfo: Stores a single function.
+SrcFinfo: Sets up a Slot. This is a kind of ugly half-baked Finfo, no func
+	involved.
+Note that the Finfos do NOT map one-to-one to the funcs.
+
+The Finfo may have multiple functions in it. Each function is defined using
+an Ftype that provides 3 functions: 
+constructor: Loads in the function of the form &Reac::setKf.
+checkSlot( const Slot* s): Does RTTI check on the slot to ensure compatibility.
+op( Eref e, const char* buf): converts the data entry and buffer and calls func.
+
 ------------------------------------------------------------------------------
 OpFunc lookup
 Every function used by MOOSE has a unique FuncId, consistent across nodes. 

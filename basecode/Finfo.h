@@ -12,17 +12,34 @@ typedef unsigned int (*OpFunc )( Eref e, const void* buf );
 class Finfo
 {
 	public:
-		Finfo( OpFunc op, const string& name );
+		Finfo( const string& name, const string& doc );
 		~Finfo() {;}
-
-		unsigned int op( Eref e, const void* buf ) const;
 
 		const string& name() const;
 
 		virtual void registerOpFuncs( 
-			map< OpFunc, FuncId >& fm, vector< OpFunc >& funcs ); 
+			map< string, FuncId >& fm, vector< OpFunc >& funcs ) = 0; 
 		
 	private:
-		OpFunc op_;
 		string name_;
+		string doc_;
 };
+
+
+class DestFinfo: public Finfo
+{
+	public:
+		DestFinfo( const string& name, OpFunc func, const string& doc );
+		void registerOpFuncs( 
+			map< string, FuncId >& fnames, vector< OpFunc >& funcs );
+
+	private:
+		OpFunc func_;
+		OpFunc get_;
+};
+
+/*
+Template < class T, class F > class ValueFinfo< T, F >: public Finfo
+{
+};
+*/

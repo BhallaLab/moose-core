@@ -23,10 +23,15 @@ Cinfo::Cinfo( const string& name,
 
 void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
 {
+	// Start out by copying base class function array.
+	funcs_ = baseCinfo_->funcs_;
+	opFuncNames_ = baseCinfo_->opFuncNames_;
+
 	for ( unsigned int i = 0; i < nFinfos; i++ ) {
 		Finfo* f = finfoArray[i];
+		
 		finfoMap_[ f->name() ] = f;
-		f->registerOpFuncs( funcMap(), funcs_ );
+		f->registerOpFuncs( opFuncNames_, funcs_ );
 	}
 }
 

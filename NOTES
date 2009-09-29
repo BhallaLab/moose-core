@@ -934,8 +934,36 @@ Starting re-implementation with Element. Did svn update to revision 1345.
 Compiled first pass skeleton version. Many things to do:
 - Sort out FuncId stuff and how Slots are to set them up when messages are 
 	added.
-- Form of OpFunc: I think the size of args should be passed in, not worked
+* Form of OpFunc: I think the size of args should be passed in, not worked
 	out in OpFunc. Needed, for example, for off-node stuff.
+	Fixed with creation of Qinfo.
 
 - Handle creation of Elements and associated data
 - Set up unit tests.
+
+=============================================================================
+29 Sep 2009.
+FuncId stuff.
+Option 1: Unique FuncId for every func. 
+	- Simple and consistent.
+Option 2: FuncId is semi-unique. Derived classes share FuncIds with their
+	parent classes, for overridden functions.
+	- We will have to maintain two sets of records: One for each unique
+		OpFunc, and another for OpFuncs grouped by class FuncIds.
+	- This helps with many inherited functions, such as reinit
+	- This helps with zombie functions, which have to transparently replace
+		the originals.
+	- Helps with Slot/Conn design, since we lessen need to do separate
+		Slots for multiple targets.
+	Further options:
+		- Use function name to determine overlap. Don't bother about
+		inheritance, but do carry out RTTI checks during setup to
+		ensure that the arguments match. Do not permit overlap without
+		this.
+			- This effectively sets up global functions.
+		- Use function name plus inheritance to determine overlap.
+		Do RTTI checks.
+			- No globals, but will need to be careful about
+			ensuring inheritance where we need it. E.g., reinit.
+
+=============================================================================

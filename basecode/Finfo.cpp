@@ -9,15 +9,10 @@
 
 #include "header.h"
 
-Finfo::Finfo( OpFunc op, const string& name )
-	: op_( op ), name_( name )
+Finfo::Finfo( const string& name, const string& doc )
+	: name_( name ), doc_( doc )
 {
 	;
-}
-
-unsigned int Finfo::op( Eref e, const void* buf ) const
-{
-	return op_( e, buf );
 }
 
 const string& Finfo::name( ) const
@@ -26,8 +21,8 @@ const string& Finfo::name( ) const
 }
 
 void Finfo::registerOpFuncs( 
-	map< OpFunc, FuncId >& fm, 
-	vector< OpFunc >& funcs )
+	map< string, FuncId >& fnames, vector< OpFunc >& funcs
+	)
 {
 	;
 }

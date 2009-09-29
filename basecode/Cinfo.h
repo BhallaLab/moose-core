@@ -69,8 +69,11 @@ class Cinfo
 			const Cinfo* baseCinfo_;
 			map< string, Finfo* > finfoMap_;
 			vector< OpFunc > funcs_;
+			map< string, FuncId > opFuncNames_;
 
 			static map< string, Cinfo* >& cinfoMap();
+
+			// Many opfuncs share same FuncId
 			static map< OpFunc, FuncId >& funcMap();
 };
 
