@@ -35,11 +35,12 @@ const Cinfo* initCompartmentCinfo()
 	};
 	static Finfo* process =	new SharedFinfo( "process", processShared, 
 			sizeof( processShared ) / sizeof( Finfo* ),
-			"This is a shared message to receive Process messages from the scheduler objects. "
-			"The first entry is a MsgDest for the Process operation. It has a single argument,ProcInfo, "
-			"which holds lots of information about current time, thread, dt and so on. "
-			"The second entry is a MsgDest for the Reinit operation. "
-			"It also uses ProcInfo. " );
+			"This is a shared message to receive Process messages "
+			"from the scheduler objects. The first entry is a MsgDest "
+			"for the Process operation. It has a single argument, "
+			"ProcInfo, which holds lots of information about current "
+			"time, thread, dt and so on. The second entry is a MsgDest "
+			"for the Reinit operation. It also uses ProcInfo. " );
 	
 	 static Finfo* initShared[] =
 	{
@@ -50,13 +51,17 @@ const Cinfo* initCompartmentCinfo()
 	};
 	static Finfo* init = new SharedFinfo( "init", initShared,
 			sizeof( initShared ) / sizeof( Finfo* ),
-			"This is a shared message to receive Init messages from the scheduler objects. "
-			"Its job is to separate the compartmental calculations from the message passing. "
-			"It doesn't really need to be shared, as it does not use the reinit part, but the scheduler objects "
-			"expect this form of message for all scheduled output. "
-			"The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds "
-			"lots of information about current time, thread, dt and so on. "
-			"The second entry is a dummy MsgDest for the Reinit operation. It also uses ProcInfo. " );
+			"This is a shared message to receive Init messages from "
+			"the scheduler objects. Its job is to separate the "
+			"compartmental calculations from the message passing. "
+			"It doesn't really need to be shared, as it does not use "
+			"the reinit part, but the scheduler objects expect this "
+			"form of message for all scheduled output. The first "
+			"entry is a MsgDest for the Process operation. It has a "
+			"single argument, ProcInfo, which holds lots of "
+			"information about current time, thread, dt and so on. "
+			"The second entry is a dummy MsgDest for the Reinit "
+			"operation. It also uses ProcInfo. " );
 
 	static Finfo* channelShared[] =
 	{
@@ -166,27 +171,32 @@ const Cinfo* initCompartmentCinfo()
 		new SharedFinfo( "axial", axialShared,
 			sizeof( axialShared ) / sizeof( Finfo* ),
 			"This is a shared message between asymmetric compartments. "
-			"axial messages (this kind) connect up to raxial messages (defined below). "
-			"The soma should use raxial messages to connect to the axial message of all the immediately adjacent "
-			"dendritic compartments.This puts the (low) somatic resistance in series with these dendrites. "
-			"Dendrites should then use raxial messages to connect on to more distal dendrites. "
-			"In other words, raxial messages should face outward from the soma. "
-			"The first entry is a MsgSrc sending Vm to the axialFunc of the target compartment. "
-			"The second entry is a MsgDest for the info coming from the other compt. "
-			"It expects Ra and Vm from the other compt as args. "
-			"Note that the message is named after the source type. " ),
+			"axial messages (this kind) connect up to raxial "
+			"messages (defined below). The soma should use raxial "
+			"messages to connect to the axial message of all the "
+			"immediately adjacent dendritic compartments.This puts "
+			"the (low) somatic resistance in series with these "
+			"dendrites. Dendrites should then use raxial messages to"
+			"connect on to more distal dendrites. In other words, "
+			"raxial messages should face outward from the soma. "
+			"The first entry is a MsgSrc sending Vm to the axialFunc"
+			"of the target compartment. The second entry is a MsgDest "
+			"for the info coming from the other compt. It expects "
+			"Ra and Vm from the other compt as args. Note that the "
+			"message is named after the source type. " ),
 		new SharedFinfo( "raxial", raxialShared,
 			sizeof( raxialShared ) / sizeof( Finfo* ),
-			"This is a raxial shared message between asymmetric compartments. "
-			"The first entry is a MsgDest for the info coming from the other compt. "
-			"It expects Vm from the other compt as an arg. "
-			"The second is a MsgSrc sending Ra and Vm to the raxialFunc of the target compartment. " ),
+			"This is a raxial shared message between asymmetric "
+			"compartments. The first entry is a MsgDest for the info "
+			"coming from the other compt. It expects Vm from the "
+			"other compt as an arg. The second is a MsgSrc sending "
+			"Ra and Vm to the raxialFunc of the target compartment. " ),
 		new SharedFinfo( "channel", channelShared,
 			sizeof( channelShared ) / sizeof( Finfo* ),
 			"This is a shared message from a compartment to channels. "
-			"The first entry is a MsgDest for the info coming from the channel. "
-			"It expects Gk and Ek from the channel as args. "
-			"The second entry is a MsgSrc sending Vm " ),
+			"The first entry is a MsgDest for the info coming from "
+			"the channel. It expects Gk and Ek from the channel "
+			"as args. The second entry is a MsgSrc sending Vm " ),
 		/*
 		new SharedFinfo( "process", processTypes, 2 ),
 		new SharedFinfo( "init", initTypes, 2 ),
@@ -200,13 +210,17 @@ const Cinfo* initCompartmentCinfo()
 	//////////////////////////////////////////////////////////////////
 		new DestFinfo( "injectMsg", Ftype1< double >::global(),
 			RFCAST( &Compartment::injectMsgFunc ), 
-			"The injectMsg corresponds to the INJECT message in the GENESIS compartment. "
-			"It does different things from the inject field, and perhaps should just be merged in. "
-			"In particular, it needs to be updated every dt to have an effect. " ),
+			"The injectMsg corresponds to the INJECT message in the "
+			"GENESIS compartment. It does different things from the "
+			"inject field, and perhaps should just be merged in. In "
+			"particular, it needs to be updated every dt to have an effect. " ),
 		
 		new DestFinfo( "randInject", Ftype2< double, double >::global(),
 			RFCAST( &Compartment::randInjectFunc ),
 			"Arguments to randInject are probability and current." ),
+		new DestFinfo( "cable", Ftype0::global(),&dummyFunc,
+			"message from compartment to its cable" ),
+			
 	};
 
 	// This sets up two clocks: first a process clock at stage 0, tick 0,

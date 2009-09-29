@@ -79,6 +79,7 @@
 BUILD?=release
 USE_GSL?=1
 USE_SBML?=1
+USE_NEUROML?=0
 USE_READLINE?=1
 USE_MPI?=0
 USE_MUSIC?=0
@@ -88,6 +89,7 @@ GENERATE_WRAPPERS?=0
 export BUILD
 export USE_GSL
 export USE_SBML
+export USE_NEUROML
 export USE_READLINE
 export USE_MPI
 export USE_MUSIC
@@ -186,6 +188,13 @@ LIBS+= -lsbml
 CXXFLAGS+=-DUSE_SBML 
 endif
 
+# To use NeuroML, pass USE_NeuroML=1 in make command line
+ifeq ($(USE_NEUROML),1)
+#LIBS+= -lxml2 -lneuroml
+LIBS+= -lneuroml -L/home/siji/neuroML
+CXXFLAGS+=-DUSE_NEUROML
+endif
+
 # To compile with readline support pass USE_READLINE=1 in make command line
 ifeq ($(USE_READLINE),1)
 LIBS+= -lreadline
@@ -209,6 +218,11 @@ ifeq ($(USE_SBML),1)
 	SBML_LIB = sbml_IO/sbml_IO.o 
 endif
 
+ifeq ($(USE_NEUROML),1)
+	NEUROML_DIR = neuroML_IO
+	NEUROML_LIB = neuroML_IO/neuroML_IO.o 
+endif
+
 ifeq ($(USE_MUSIC),1)
 	MUSIC_DIR = music
 	MUSIC_LIB = music/music.o
@@ -228,10 +242,10 @@ LD = ld
 
 SUBDIR = basecode connections maindir genesis_parser shell element scheduling \
 	biophysics hsolve kinetics ksolve builtins utility \
-	randnum signeur device $(SBML_DIR) $(PARALLEL_DIR) $(MUSIC_DIR) 
+	randnum signeur device $(SBML_DIR) $(NEUROML_DIR) $(PARALLEL_DIR) $(MUSIC_DIR) 
 
 # Used for 'make clean'
-CLEANSUBDIR = $(SUBDIR) parallel music pymoose sbml_IO
+CLEANSUBDIR = $(SUBDIR) parallel music pymoose sbml_IO neuroML_IO
 
 OBJLIBS =	\
 	basecode/basecode.o \
@@ -251,6 +265,7 @@ OBJLIBS =	\
 	signeur/signeur.o \
 	device/device.o \
 	$(SBML_LIB) \
+	$(NEUROML_LIB) \
 	$(PARALLEL_LIB) \
 	$(MUSIC_LIB)
 
@@ -277,6 +292,7 @@ libs:
 	@echo "	BUILD:" $(BUILD)
 	@echo "	USE_GSL:" $(USE_GSL)
 	@echo "	USE_SBML:" $(USE_SBML)
+	@echo "	USE_NEUROML:" $(USE_NEUROML)
 	@echo "	USE_READLINE:" $(USE_READLINE)
 	@echo "	USE_MPI:" $(USE_MPI)
 	@echo "	USE_MUSIC:" $(USE_MUSIC)
