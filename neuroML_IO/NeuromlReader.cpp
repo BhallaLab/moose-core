@@ -29,7 +29,7 @@ void NeuromlReader::readModel( string filename,Id location )
    NCell* c;
    c = nb.readNeuroML (filename);
    c->register_namespaces();
-   double x,y,z,x1,y1,z1,diam1,diam2,diameter,length,initVm,r,ca,Cm,Ra;
+   double x,y,z,x1,y1,z1,diam1,diam2,diameter,length,initVm,r,ca,Cm,Ra,sa;
    initVm = c->getInit_memb_potential();
    ca = c->getSpec_capacitance();
    r = c->getSpec_axial_resistance();
@@ -51,7 +51,7 @@ void NeuromlReader::readModel( string filename,Id location )
 	std::string cid = "", cname = "";
 	cid = cab->getId();
 	cname = cab->getName(); 
-	cout << "id " << cid << " name " << cname << endl;
+	//cout << "id " << cid << " name " << cname << endl;
 	cable_ = Neutral::create( "Cable",cid,loc,Id::scratchId() ); 
 	cabMap[cid] = cable_->id();
 	set< string >( cable_,nameFinfo,cid );
@@ -63,9 +63,6 @@ void NeuromlReader::readModel( string filename,Id location )
    }
    map< string,vector< string > > cablesegMap;
    map< string,Id > segMap;	
-   //vector<Id> segmentId;
-  // map< Id,string > parentMap;
-  // map< Id,string >::iterator iter;
    for( int i = 1; i<= num_segments; i ++ )
    {
 		
@@ -76,16 +73,12 @@ void NeuromlReader::readModel( string filename,Id location )
 	name = seg->getName();   
 	cable = seg->getCable();
 	parent = seg->getParent();
-	cout << "id " << id << " name " << name << " cable " << cable << endl; 
+	//cout << "id " << id << " name " << name << " cable " << cable << endl; 
 	compt_ = Neutral::create( "Compartment",id,location,Id::scratchId() );
 	segMap[id] = compt_->id(); 
 	if (parent != "")
 		Eref(compt_).add("raxial",segMap[parent](),"axial",ConnTainer::Default ); 
 	Eref(cabMap[cable]()).add("compartment",Eref(compt_),"cable",ConnTainer::Default ); 
-	//parentMap[compt_->id()] = parent;
-	//Eref(reaction_).add( subFinfo->msg(),elmtMap_[sp],reacFinfo->msg(),ConnTainer::Default );
-	//Eref S = elmtMap_.find(sp)->second;
-	//Eref(enzyme_).add( "sub",S,"reac",ConnTainer::Default ); 
 	cablesegMap[cable].push_back(id);
 	x = seg->proximal.getX();
 	y = seg->proximal.getY();
@@ -102,27 +95,27 @@ void NeuromlReader::readModel( string filename,Id location )
 	set< double >( compt_, yFinfo, y1 );
 	set< double >( compt_, zFinfo, z1 );
 	diameter = (diam1 + diam2 )/2;
+	diameter *= 1e-4;
 	length = sqrt(pow((x1-x),2) + pow((y1-y),2) + pow((z1-z),2));
+	length *= 1e-4;
 	set< double >( compt_, diameterFinfo, diameter );
 	set< double >( compt_, lengthFinfo, length );
-        Cm = ca * length * PI * diameter;
-        Ra = (r * length )/(PI * diameter * diameter/4);
+	if ( length == 0 ){
+		Cm = ca * PI * diameter * diameter;
+		Ra = 13.50 * r /( diameter * PI );
+		sa = 4 * PI * diameter * diameter/4;
+	}
+	else{
+        	Cm = ca * length * PI * diameter;
+        	Ra = (r * length )/(PI * diameter * diameter/4);
+		sa = (2 * PI * (diameter * diameter)/4)+(2 * PI * diameter/2 * length);
+	}
         set< double >( compt_, CmFinfo, Cm );
         set< double >( compt_, RaFinfo, Ra ); 
         set< double >( compt_, initVmFinfo, initVm );
 	set< double >( compt_, EmFinfo, initVm );
     }
     
-    // xmlDocPtr xmlDoc = c.getDocument(filename);
-  /* const Channel * chl ;
-   chl = c.getChannelML();
-   unsigned int numgates = c.getNumGates();
-   for (int i=1;i<=numgates;i++)
-   {
-
-   	c.getGate(i);
-   }*/
-   //c.getSegment("1");
     static const Cinfo* channelCinfo = initHHChannelCinfo();
     static const Finfo* gbarFinfo = channelCinfo->findFinfo( "Gbar" );
     static const Finfo* ekFinfo = channelCinfo->findFinfo( "Ek" );
@@ -139,19 +132,78 @@ void NeuromlReader::readModel( string filename,Id location )
 	string name = "", group = "";
 	double gmax,ek;
 	Id loc( "/library" );
-	group = chl->getGroup();
-	cout<< " group: " << group ;
-	vector< string > cId ;
-	vector< string > sId;
-	cmap_iter = groupcableMap.find( group );
-	if ( cmap_iter != groupcableMap.end() )
+	name = chl->getName();
+ 	 channel_ = Neutral::create( "HHChannel",name,loc,Id::scratchId() );
+	 gmax = chl->getParameterValue();
+	 double gbar = gmax * sa;
+	 set< double >( channel_, gbarFinfo, gbar );
+	 ek = chl->getDefault_erev();
+	 set< double >( channel_, ekFinfo, ek );
+	 double xmin,xmax;
+	 int xdivs;
+	 string units = "Physiological Units";
+	 if ( units == "Physiological Units" ){
+	 	xmin = -100;
+	 	xmax = 50;
+	 }
+	 else if ( units == "SI Units" ){
+	 	xmin = -0.1;
+	 	xmax = 0.05;
+	 }
+	 xdivs = 3000;
+	 string path = Eref(channel_).id().path();
+	 vector< string > gatename;
+	 gatename.push_back("/xGate");
+	 gatename.push_back("/yGate");
+	 gatename.push_back("/zGate");
+	 unsigned int  num = chl->getNumGates();
+	 for( int i=1;i<=num;i++ )
+	 {	
+		Gate* gat ;		
+		gat = chl->getGate(i);
+		string name = gat->getGateName();
+		double power = gat->getInstances();
+		if ( i == 1 )
+			set< double >( channel_, xpowerFinfo, power );
+		else if ( i == 2 )
+			set< double >( channel_, ypowerFinfo, power );
+		else if ( i == 3 )
+			set< double >( channel_, zpowerFinfo, power );
+		string gatepath = path + gatename[i-1];
+		//cout << " gate path : " << gatepath << endl;
+	 	Id gateid(gatepath);
+		vector< double > result;
+		result.clear();
+		string Aexpr_form = gat->alpha.expr_form;
+		double Arate = gat->alpha.rate;
+		double Ascale = gat->alpha.scale;
+		double Amidpoint = gat->alpha.midpoint;
+		pushtoVector(result,Aexpr_form,Arate,Ascale,Amidpoint);
+		string Bexpr_form = gat->beta.expr_form;
+		double Brate = gat->beta.rate;
+		double Bscale = gat->beta.scale;
+		double Bmidpoint = gat->beta.midpoint;
+		pushtoVector(result,Bexpr_form,Brate,Bscale,Bmidpoint);
+		result.push_back(xdivs);
+		result.push_back(xmin);
+		result.push_back(xmax);
+		//cout << "result size : "<< result.size() << endl;
+		set< vector< double > >( Eref(gateid()),"setupAlpha",result );
+	 }
+	 bool passive = chl->getPassivecond();
+	 group = chl->getGroup();
+	// cout<< " group: " << group ;
+	 vector< string > cId ;
+	 vector< string > sId;
+	 cmap_iter = groupcableMap.find( group );
+	 if ( cmap_iter != groupcableMap.end() )
 	    cId = cmap_iter->second;
-	else {
+	 else {
 	   cout << "Error: CableId is empty" << endl;
 	   return;
-	}
-	for( int i = 0; i < cId.size(); i++ )
-	{
+	 }
+	 for( int i = 0; i < cId.size(); i++ )
+	 {
 	   //cout << " cable id:  " << cId[i];
 	    smap_iter = cablesegMap.find( cId[i] );
 	    if ( smap_iter != cablesegMap.end() )
@@ -160,66 +212,53 @@ void NeuromlReader::readModel( string filename,Id location )
 		cout << "Error:SegmentId is empty" << endl;
 		return;
 	    }
-	    for( int j = 0; j < sId.size(); j++ )
-		cout << " seg Id:  " << sId[j] << endl; 
-         }
-	 name = chl->getName();
- 	 channel_ = Neutral::create( "HHChannel",name,loc,Id::scratchId() );
-	 gmax = chl->getParameterValue();
-	 set< double >( channel_, gbarFinfo, gmax );
-	 ek = chl->getDefault_erev();
-	 set< double >( channel_, ekFinfo, ek );
-	 unsigned int  num = chl->getNumGates();
-	 for( int i=1;i<=num;i++ )
-	 {	
-		Gate* gat ;		
-		gat = chl->getGate(i);
-		string gatename = gat->getGateName();
-		double power = gat->getInstances();
-		if ( i == 1 )
-			set< double >( channel_, xpowerFinfo, power );
-		else if ( i == 2 )
-			set< double >( channel_, ypowerFinfo, power );
-		else if ( i == 3 )
-			set< double >( channel_, zpowerFinfo, power );
-		string closeid = gat->getClosestateId();
-		string openid = gat->getOpenstateId();
-		string alname = gat->alpha.name;
-		string from = gat->alpha.from;
-		string to = gat->alpha.to;
-		string expr_form = gat->alpha.expr_form;
-		double rate = gat->alpha.rate;
-		double scale = gat->alpha.scale;
-		double midpoint = gat->alpha.midpoint;
-		//cout << "gatename " << gatename << "  closeid " << closeid << " openid " << openid << " alname " << alname << " from " << from << " to " << to << 
-		//" expr_form " << expr_form << " rate " << rate << " scale " << scale << " midpoint " << midpoint <<  endl;
-	 }
-	 string path = Eref(channel_).id().path();
-	 string Apath = path + "/xGate/A";
-	 string Bpath = path + "/yGate/B";
-	 cout << "Apath " << Apath << endl;
-         Id Aid(Apath);
-	 if ( Aid.good() ) 
-		cout << "A good";
-	
-	 Id Bid(Bpath);
-	 if ( Bid.good() ) 
-		cout << "B good";
-	 bool passive = chl->getPassivecond();
-	 cout << "name: "<< name << " passive " << passive<< endl;
-	 if (passive){
-	   double Rm = 1/gmax;
-	   set< double >( compt_, RmFinfo, Rm );
-	 }
+	    for( int j = 0; j < sId.size(); j++ ){
+		//cout << " seg Id:  " << sId[j] << endl; 
+		Id comptEl = segMap[sId[j]];
+		if (passive){
+			
+	   		double Rm = 1/(gmax*sa);
+	   		set< double >( comptEl(), RmFinfo, Rm );
+			set< double >( comptEl(), EmFinfo, ek );
+	 	}
+		else{
+			Element* copyEl = channel_->copy(comptEl(),channel_->name());
+			Eref(comptEl()).add("channel",copyEl,"channel",ConnTainer::Default ); 
+		}
+           }
+	 
      }
-   
+}   
 }
-double NeuromlReader::solve (string expr_form,double r,double s,double m)
+void NeuromlReader::pushtoVector(vector< double > &result,string expr_form,double r,double s,double m)
 {
-	double result ;
-	if( expr_form == "exp_linear"
-		result = (r*(v-m)/s)/(1-(1e-1*((v-m)/s))
-	return result;
+	double A,B,C,D,F;
+	if( expr_form == "exp_linear" ){
+		A = r*m/s;
+		B = -r/s;
+		C = -1;
+		D = -m;
+		F = -s;	
+	}
+	if( expr_form == "sigmoid" ){
+		A = r;
+		B = 0;
+		C = 1;
+		D = -m;
+		F = s;	
+	}
+	if( expr_form == "exponential" ){
+		A = r;
+		B = 0;
+		C = 0;
+		D = -m;
+		F = -s;
+	}
+	result.push_back(A);
+	result.push_back(B);
+	result.push_back(C);
+	result.push_back(D);
+	result.push_back(F);	
 }
 
 

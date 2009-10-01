@@ -21,7 +21,7 @@ class NeuromlReader
 		NeuromlReader() {;}
 		~NeuromlReader() {;}
 		void  readModel(std::string filename,Id location);
-		double solve (string expr_form,double r,double s,double m);
+		void pushtoVector(vector< double >&result,string expr_form,double r,double s,double m);
 		
 	private:
 		Element* compt_;
@@ -37,5 +37,6 @@ class NeuromlReader
 };
 extern const Cinfo* initCompartmentCinfo();
 extern const Cinfo* initHHChannelCinfo();
+extern const Cinfo* initInterpolCinfo();
 #endif // _NEUROMLREADER_H
 
