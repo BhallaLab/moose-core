@@ -966,4 +966,12 @@ Option 2: FuncId is semi-unique. Derived classes share FuncIds with their
 			- No globals, but will need to be careful about
 			ensuring inheritance where we need it. E.g., reinit.
 
+
+Trying to compile. Relevant file is Cinfo.h
 =============================================================================
+30 Sep 2009
+Working on Ftype2.h. Also need to fix up OpFuncs and Ftype.h
+Created a Dinfo class, to handle information and utility functions for the
+Data type.
+Struggling with Cinfo::create function. look in Neutral.h
+

@@ -89,14 +89,14 @@ void SingleMsg::addToQ( const Element* caller, FuncId f,
 	}
 }
 
-const char* SingleMsg::exec( Element* target, OpFunc f, 
+const char* SingleMsg::exec( Element* target, OpFunc* f, 
 			const char* arg ) const
 {
 	if ( target == e1_ ) {
-		f( Eref( target, i1_ ), arg );
+		f->op( Eref( target, i1_ ), arg );
 	} else {
 		assert( target == e2_ );
-		f( Eref( target, i2_ ), arg );
+		f->op( Eref( target, i2_ ), arg );
 	}
 	return 0;
 }

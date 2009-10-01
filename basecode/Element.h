@@ -34,7 +34,8 @@ class Element
 			unsigned int numRecvSlots_
 		);
 		*/
-		Element( const Cinfo* c );
+		Element( const Cinfo* c, 
+			Data* d, unsigned int numData, unsigned int dataSize );
 
 		/**
 		 * Destructor
@@ -93,6 +94,10 @@ class Element
 		 */
 		Data* data( unsigned int index );
 
+		unsigned int numData() const {
+			return numData_;
+		}
+
 		/** 
 		 * This function pushes a function request onto a queue.
 		 * In multithread mode it figures out which queue to use.
@@ -115,9 +120,12 @@ class Element
 		 * Option 1: Just have a big linear array of objects. 
 		 * 		Lookup using size info. Substantial savings possible.
 		 * Option 2: Allocate the objects elsewhere, just ptrs here.
-		 * 		Easy to get started with. Using this for now.
+		 * 		Easy to get started with.
 		 */
-		vector< Data* > d_;
+		Data* d_;
+		unsigned int numData_;
+		unsigned int dataSize_;
+		// vector< Data* > d_;
 
 		/**
 		 * This is the data buffer used for outgoing sync messages from

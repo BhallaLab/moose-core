@@ -24,8 +24,10 @@ OBJ = \
 	Msg.o	\
 	Conn.o \
 	Slot.o \
+	Id.o \
 	testSync.o	\
 	testAsync.o	\
+	Neutral.o	\
 	main.o	\
 
 HEADERS = \

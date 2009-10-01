@@ -8,29 +8,33 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "header.h"
+#include "Dinfo.h"
 
 Cinfo::Cinfo( const string& name,
 				const Cinfo* baseCinfo,
 				Finfo** finfoArray,
 				unsigned int nFinfos,
+				DinfoBase* d,
 				struct SchedInfo* schedInfo,
 				unsigned int nSched
 )
-		: name_( name ), baseCinfo_( baseCinfo )
+		: name_( name ), baseCinfo_( baseCinfo ), dinfo_( d )
 {
 	init( finfoArray, nFinfos );
 }
 
 void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
 {
-	// Start out by copying base class function array.
-	funcs_ = baseCinfo_->funcs_;
-	opFuncNames_ = baseCinfo_->opFuncNames_;
+	if ( baseCinfo_ ) {
+		// Start out by copying base class function array.
+		funcs_ = baseCinfo_->funcs_;
+		opFuncNames_ = baseCinfo_->opFuncNames_;
+	}
 
 	for ( unsigned int i = 0; i < nFinfos; i++ ) {
 		Finfo* f = finfoArray[i];
-		
 		finfoMap_[ f->name() ] = f;
+		
 		f->registerOpFuncs( opFuncNames_, funcs_ );
 	}
 }
@@ -67,12 +71,25 @@ const Finfo* Cinfo::findFinfo( const string& name ) const
 	return 0;
 }
 
-OpFunc Cinfo::getOpFunc( FuncId fid ) const {
+OpFunc* Cinfo::getOpFunc( FuncId fid ) const {
 	if ( fid < funcs_.size () )
 		return funcs_[ fid ];
 	return 0;
 }
 
+// Later: make it possible to assign specific new Id.
+Id Cinfo::create( const string& name, unsigned int numEntries )
+{
+	return Id::create( 
+		new Element( 
+			this, dinfo_->allocData( numEntries ), numEntries,
+			dinfo_->size() )
+	);
+}
+
+////////////////////////////////////////////////////////////////////////
+// Private functions.
+////////////////////////////////////////////////////////////////////////
 map<string, Cinfo*>& Cinfo::cinfoMap()
 {
 	static map<std::string, Cinfo*> lookup_;
@@ -81,10 +98,11 @@ map<string, Cinfo*>& Cinfo::cinfoMap()
 
 
 
+/*
 map< OpFunc, FuncId >& Cinfo::funcMap()
 {
 	static map< OpFunc, FuncId > lookup_;
 	return lookup_;
 }
-
+*/
 

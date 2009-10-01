@@ -14,3 +14,14 @@ Slot::Slot( ConnId conn, const Cinfo* c, const string& funcName )
 {
 	// func_ = c->findFunc( funcName );
 }
+
+Slot::Slot( ConnId conn, FuncId func )
+	: conn_( conn ), func_( func )
+{
+	// func_ = c->findFunc( funcName );
+}
+
+void Slot0::send( Eref e )
+{
+	e.asend( conn_, func_, 0, 0 );
+}

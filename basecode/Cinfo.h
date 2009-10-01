@@ -1,4 +1,3 @@
-
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
@@ -11,6 +10,7 @@
 #ifndef _CINFO_H
 #define _CINFO_H
 
+class DinfoBase;
 
 /**
  * Class to manage class information for all the other classes.
@@ -30,9 +30,10 @@ class Cinfo
 			 * semantics for this sequence in most C++ compilers.
 			 */
 			Cinfo( const std::string& name,
-					const Cinfo* baseCinfo,
-					Finfo** finfoArray,
+					const Cinfo* baseCinfo, // Base class
+					Finfo** finfoArray,	// Field information array
 					unsigned int nFinfos,
+					DinfoBase* d,	// A handle to lots of utility functions for the Data class.
 					struct SchedInfo* schedInfo = 0,
 					unsigned int nSched = 0
 			);
@@ -41,7 +42,7 @@ class Cinfo
 
 			void init( Finfo** finfoArray, unsigned int nFinfos );
 
-			OpFunc getOpFunc( FuncId fid ) const;
+			OpFunc* getOpFunc( FuncId fid ) const;
 
 			// Some dummy funcs
 			const std::string& name() const;
@@ -57,8 +58,10 @@ class Cinfo
 			 */
 			const Finfo* findFinfo( const string& name) const;
 
-			Element* create( const string& name,
-				unsigned int numEntries ) const ;
+			/**
+			 * Creates a new Element. Assigns a new Id or takes one you give
+			 */
+			Id create( const string& name, unsigned int numEntries );
 
 		private:
 			const string name_;
@@ -67,14 +70,16 @@ class Cinfo
 			// const std::string author_;
 			// const std::string description_;
 			const Cinfo* baseCinfo_;
+			const DinfoBase* dinfo_;
+
 			map< string, Finfo* > finfoMap_;
-			vector< OpFunc > funcs_;
+			vector< OpFunc* > funcs_;
 			map< string, FuncId > opFuncNames_;
 
 			static map< string, Cinfo* >& cinfoMap();
 
 			// Many opfuncs share same FuncId
-			static map< OpFunc, FuncId >& funcMap();
+			// static map< OpFunc*, FuncId >& funcMap();
 };
 
 #endif // _CINFO_H

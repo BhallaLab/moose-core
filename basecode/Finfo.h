@@ -6,8 +6,10 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#ifndef _FINFO_H
+#define _FINFO_H
 
-typedef unsigned int (*OpFunc )( Eref e, const void* buf );
+// typedef unsigned int (*OpFunc )( Eref e, const void* buf );
 
 class Finfo
 {
@@ -18,7 +20,7 @@ class Finfo
 		const string& name() const;
 
 		virtual void registerOpFuncs( 
-			map< string, FuncId >& fm, vector< OpFunc >& funcs ) = 0; 
+			map< string, FuncId >& fm, vector< OpFunc* >& funcs ) = 0; 
 		
 	private:
 		string name_;
@@ -26,20 +28,19 @@ class Finfo
 };
 
 
+/*
+ * Should set this up to take a regular func, similar to field funcs.
+ * Will need a bit of templating but will be easier for users.
 class DestFinfo: public Finfo
 {
 	public:
 		DestFinfo( const string& name, OpFunc func, const string& doc );
 		void registerOpFuncs( 
-			map< string, FuncId >& fnames, vector< OpFunc >& funcs );
+			map< string, FuncId >& fnames, vector< Ftype* >& funcs );
 
 	private:
 		OpFunc func_;
-		OpFunc get_;
-};
-
-/*
-Template < class T, class F > class ValueFinfo< T, F >: public Finfo
-{
 };
 */
+
+#endif // _FINFO_H

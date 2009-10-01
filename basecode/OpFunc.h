@@ -7,19 +7,19 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-class Ftype
+class OpFunc
 {
 	public:
-		virtual ~Ftype()
+		virtual ~OpFunc()
 		{;}
 		virtual bool checkSlot( const Slot* s) const = 0;
 		virtual void op( Eref e, const char* buf ) const = 0;
 };
 
-template< class T, class A > class Ftype1: public Ftype
+template< class T, class A > class OpFunc1: public OpFunc
 {
 	public:
-		Ftype1( void ( T::*func )( A ) )
+		OpFunc1( void ( T::*func )( const A& ) )
 			: func_( func )
 			{;}
 
@@ -34,13 +34,13 @@ template< class T, class A > class Ftype1: public Ftype
 		}
 
 	private:
-		void ( T::*func_ )( A ); 
+		void ( T::*func_ )( const A& ); 
 };
 
-template< class T, class A1, class A2 > class Ftype2: public Ftype
+template< class T, class A1, class A2 > class OpFunc2: public OpFunc
 {
 	public:
-		Ftype2( void ( T::*func )( A1, A2 ) )
+		OpFunc2( void ( T::*func )( A1, A2 ) )
 			: func_( func )
 			{;}
 
@@ -60,11 +60,11 @@ template< class T, class A1, class A2 > class Ftype2: public Ftype
 		void ( T::*func_ )( A1, A2 ); 
 };
 
-template< class T, class A1, class A2, class A3 > class Ftype3: 
-	public Ftype
+template< class T, class A1, class A2, class A3 > class OpFunc3: 
+	public OpFunc
 {
 	public:
-		Ftype3( void ( T::*func )( A1, A2, A3 ) )
+		OpFunc3( void ( T::*func )( A1, A2, A3 ) )
 			: func_( func )
 			{;}
 
@@ -88,15 +88,15 @@ template< class T, class A1, class A2, class A3 > class Ftype3:
 
 
 /**
- * This specialized Ftype is for returning a single field value
+ * This specialized OpFunc is for returning a single field value
  * It generates an opFunc that takes three arguments:
  * Id, MsgId and FuncId of the function on the object that requested the
  * value. The OpFunc then sends back a message with the info.
  */
-template< class T, class A > class GetFtype: public Ftype
+template< class T, class A > class GetOpFunc: public OpFunc
 {
 	public:
-		GetFtype( const A& ( T::*func )() const )
+		GetOpFunc( const A& ( T::*func )() const )
 			: func_( func )
 			{;}
 
@@ -105,14 +105,14 @@ template< class T, class A > class GetFtype: public Ftype
 		}
 
 		void op( Eref e, const char* buf ) const {
-			A ret = static_cast< T* >( e.data() )->func_();
-		    Id src = *reinterpret_cast< Id* >( buf );
+			A ret = (( static_cast< T* >( e.data() ) )->*func_)();
+		    Id src = *reinterpret_cast< const Id* >( buf );
 		    buf += sizeof( Id );
-		    MsgId srcMsg = *reinterpret_cast< MsgId* >( buf );
+		    MsgId srcMsg = *reinterpret_cast< const MsgId* >( buf );
 		    buf += sizeof( MsgId );
-		    FuncId srcFunc = *reinterpret_cast< FuncId* >( buf );
-		    Slot2< MsgId, A > s( MsgId, srcFunc );
-		    s.sendTo( e, Id, ret );
+		    FuncId srcFunc = *reinterpret_cast< const FuncId* >( buf );
+		    Slot1< A > s( srcMsg, srcFunc );
+		    s.sendTo( e, src, ret );
 		}
 
 	private:

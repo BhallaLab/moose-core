@@ -42,7 +42,7 @@ class Msg
 		 * Returns next buf pos.
 		 */
 		virtual const char* exec( 
-			Element* target, OpFunc func, const char* arg ) const = 0;
+			Element* target, OpFunc* func, const char* arg ) const = 0;
 
 		/*
 		/// call func( arg ) on all targets in e1. Returns next buf pos
@@ -84,7 +84,7 @@ class SingleMsg: public Msg
 		void addToQ( const Element* caller, FuncId f, 
 			const char* arg, unsigned int size ) const;
 		const char* exec( 
-			Element* target, OpFunc func, const char* arg ) const;
+			Element* target, OpFunc* func, const char* arg ) const;
 	private:
 		unsigned int i1_;
 		unsigned int i2_;

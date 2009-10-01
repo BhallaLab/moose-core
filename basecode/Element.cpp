@@ -10,9 +10,12 @@
 #include "header.h"
 #include "Qinfo.h"
 
-Element::Element( const Cinfo* c )
-	: cinfo_( c )
-{ ; }
+Element::Element( const Cinfo* c, 
+	Data* d, unsigned int numData, unsigned int dataSize )
+	: d_( d ), numData_( numData ), dataSize_( dataSize ), cinfo_( c )
+{ 
+	;
+}
 
 /*
 Element::Element( vector< Data* >& d, 
@@ -29,16 +32,27 @@ Element::Element( vector< Data* >& d,
 Element::~Element()
 {
 	delete[] sendBuf_;
+	delete[] d_;
+	/*
 	for ( vector< Data* >::iterator i = d_.begin(); i != d_.end(); ++i )
 		delete *i;
+	*/
 	for ( vector< Msg* >::iterator i = m_.begin(); i != m_.end(); ++i )
 		delete *i;
 }
 
 void Element::process( const ProcInfo* p )
 {
+	char* data = reinterpret_cast< char* >( d_ );
+	for ( unsigned int i = 0; i < numData_; ++i ) {
+		reinterpret_cast< Data* >( data )->process( p, Eref( this, i ) );
+		data += dataSize_;
+	}
+
+	/*
 	for ( unsigned int i = 0; i < d_.size(); ++i )
 		d_[i]->process( p, Eref( this, i ) );
+		*/
 }
 
 
@@ -102,8 +116,9 @@ void Element::ssend2( SyncId slot, unsigned int i, double v1, double v2 )
 
 Data* Element::data( unsigned int index )
 {
-	assert( index < d_.size() );
-	return d_[ index ];
+	assert( index < numData_ );
+	return reinterpret_cast< Data* >( 
+		reinterpret_cast< char* >( d_ ) + index * dataSize_ );
 }
 
 /*
@@ -142,7 +157,7 @@ const char* Element::execFunc( const char* buf )
 	buf += sizeof( FuncId );
 	MsgId mid = *reinterpret_cast< const MsgId* >( buf );
 	buf += sizeof( MsgId );
-	OpFunc func = cinfo_->getOpFunc( fid ); // Runtime check for type safety
+	OpFunc* func = cinfo_->getOpFunc( fid ); // checks for type safety
 	const Msg* m = getMsg( mid ); // Runtime check for Msg identity.
 	if ( func && m )
 		return m->exec( this, func, buf );

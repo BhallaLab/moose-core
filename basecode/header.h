@@ -34,19 +34,22 @@ extern const FuncId ENDFUNC;
 
 class Element;
 class Eref;
+class OpFunc;
+class Id;
 
 #include "Finfo.h"
-#include "Cinfo.h"
 #include "ProcInfo.h"
+#include "Cinfo.h"
 #include "Data.h"
-// #include "SparseMatrix.h"
 #include "Msg.h"
 #include "Conn.h"
 #include "Element.h"
 #include "Eref.h"
+#include "Id.h"
 #include "Slot.h"
 #include "Send.h"
 #include "Async.h"
-#include "Ftype.h"
+#include "OpFunc.h"
+#include "ValueFinfo.h"
 
 #endif // _HEADER_H

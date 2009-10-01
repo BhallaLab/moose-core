@@ -7,22 +7,15 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-
-Finfo::Finfo( const string& name, const string& doc )
-	: name_( name ), doc_( doc )
+class Neutral: public Data
 {
-	;
-}
+	public:
+		Neutral();
+		void process( const ProcInfo* p, Eref e );
+		void setName( const string& name );
+		const string& getName() const;
+		static const Cinfo* initCinfo();
 
-const string& Finfo::name( ) const
-{
-	return name_;
-}
-
-void Finfo::registerOpFuncs( 
-	map< string, FuncId >& fnames, vector< OpFunc* >& funcs
-	)
-{
-	;
-}
+	private:
+		string name_;
+};
