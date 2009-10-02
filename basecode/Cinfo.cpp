@@ -29,6 +29,10 @@ void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
 		// Start out by copying base class function array.
 		funcs_ = baseCinfo_->funcs_;
 		opFuncNames_ = baseCinfo_->opFuncNames_;
+	} else {
+		// Initialize zero funcId
+		funcs_.push_back( 0 );
+		opFuncNames_[ "dummy" ] = 0;
 	}
 
 	for ( unsigned int i = 0; i < nFinfos; i++ ) {
@@ -78,7 +82,7 @@ OpFunc* Cinfo::getOpFunc( FuncId fid ) const {
 }
 
 // Later: make it possible to assign specific new Id.
-Id Cinfo::create( const string& name, unsigned int numEntries )
+Id Cinfo::create( const string& name, unsigned int numEntries ) const
 {
 	return Id::create( 
 		new Element( 

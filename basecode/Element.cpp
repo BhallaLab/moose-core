@@ -153,16 +153,21 @@ const Msg* Element::getMsg( MsgId mid ) const {
 const char* Element::execFunc( const char* buf )
 {
 	assert( buf != 0 );
+
+	Qinfo q = *( reinterpret_cast < const Qinfo * >( buf ) );
+	buf += sizeof( Qinfo );
+	/*
 	FuncId fid = *( reinterpret_cast < const FuncId * >( buf ) );
 	buf += sizeof( FuncId );
 	MsgId mid = *reinterpret_cast< const MsgId* >( buf );
 	buf += sizeof( MsgId );
-	OpFunc* func = cinfo_->getOpFunc( fid ); // checks for type safety
-	const Msg* m = getMsg( mid ); // Runtime check for Msg identity.
+	*/
+	OpFunc* func = cinfo_->getOpFunc( q.fid() ); // checks for valid func
+	const Msg* m = getMsg( q.mid() ); // Runtime check for Msg identity.
 	if ( func && m )
-		return m->exec( this, func, buf );
+		m->exec( this, func, buf );
 
-	return 0;
+	return buf + q.size();;
 }
 
 /**
@@ -184,7 +189,9 @@ const char* Element::execFunc( const char* buf )
 void Element::clearQ( )
 {
 	const char* buf = &(q_[0]);
-	while ( buf && *reinterpret_cast< const FuncId* >(buf) != ENDFUNC ) {
+//	while ( buf && *reinterpret_cast< const FuncId* >(buf) != ENDFUNC )
+	while ( buf < &q_.back() )
+	{
 		buf = execFunc( buf );
 	}
 }
@@ -197,4 +204,10 @@ void Element::clearQ( )
 void Element::addToQ( const Qinfo& qi, const char* arg )
 {
 	qi.addToQ( q_, arg );
+}
+
+MsgId Element::addMsg( Msg* m )
+{
+	m_.push_back( m );
+	return m_.size() - 1;
 }

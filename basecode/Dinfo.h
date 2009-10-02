@@ -19,8 +19,11 @@ class DinfoBase
 		{;}
 		virtual Data* allocData( unsigned int numData ) const = 0;
 		virtual unsigned int size() const = 0;
-		virtual unsigned int serialize( char* buf, const Data* d ) const = 0;
-		virtual unsigned int unserialize( const char* buf, Data* d ) const = 0;
+		/*
+		static unsigned int size( const D* value ) const = 0;
+		static unsigned int serialize( char* buf, const Data* d ) const = 0;
+		static unsigned int unserialize( const char* buf, Data* d ) const = 0;
+		*/
 		virtual bool isA( const DinfoBase* other ) const = 0;
 	private:
 		const int makeCompilerHappy;
@@ -35,26 +38,28 @@ template< class D > class Dinfo: public DinfoBase
 			return new D[ numData ];
 		}
 
-		unsigned int size() const {
+		unsigned int size()  const {
 			return sizeof( D );
 		}
 
+		/*
 		// Will need to specialize for variable size and pointer-containing
 		// D.
-		unsigned int serialize( char* buf, const Data* d ) const {
+		static unsigned int serialize( char* buf, const Data* d ) {
 			*reinterpret_cast< D* >( buf ) = *static_cast< const D* >( d );
 			return sizeof( D );
 		}
 
-		unsigned int unserialize( const char* buf, Data* d ) const {
+		static unsigned int unserialize( const char* buf, Data* d ) {
 			*d = *reinterpret_cast< const D* >( buf );
 			return sizeof( D );
 		}
+		// Possible problems of dependence here.
+		// static const Cinfo* cinfo;
+		*/
 		bool isA( const DinfoBase* other ) const {
 			return dynamic_cast< const Dinfo< D >* >( other );
 		}
-		// Possible problems of dependence here.
-		// static const Cinfo* cinfo;
 
 	private:
 };

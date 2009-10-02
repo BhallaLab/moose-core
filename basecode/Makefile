@@ -28,17 +28,27 @@ OBJ = \
 	testSync.o	\
 	testAsync.o	\
 	Neutral.o	\
+	Qinfo.o \
 	main.o	\
 
 HEADERS = \
 	header.h \
+	Cinfo.h \
+	Conn.h \
+	Conv.h \
+	Data.h \
+	Dinfo.h \
 	Element.h \
 	Eref.h \
-	Msg.h \
-	Conn.h \
 	Finfo.h \
-	Cinfo.h \
+	Id.h \
+	Msg.h \
+	Neutral.h \
+	OpFunc.h \
+	ProcInfo.h \
+	Qinfo.h \
 	Slot.h \
+	ValueFinfo.h \
 
 default: $(TARGET)
 

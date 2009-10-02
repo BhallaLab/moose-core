@@ -8,10 +8,34 @@
 **********************************************************************/
 
 #include "header.h"
-#include <sys/time.h>
-#include <math.h>
-#include <queue>
+#include "Neutral.h"
+#include "Dinfo.h"
+#include "Qinfo.h"
 
 void testAsync( )
 {
+	const Cinfo* nc = Neutral::initCinfo();
+	unsigned int size = 100;
+
+	Id i1 = nc->create( "test1", size );
+	Id i2 = nc->create( "test2", size );
+
+	Eref e1 = i1.eref();
+	Eref e2 = i2.eref();
+
+	Msg* m = new SingleMsg( e1, e2 );
+	
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		char temp[10];
+		sprintf( temp, "objname_%d", i );
+		string stemp( temp );
+		char buf[200];
+
+		unsigned int size = Conv< string >::val2buf( buf, stemp );
+		Qinfo qi( 1, size, m->mid1() );
+
+		e1.element()->addToQ( qi, buf );
+	}
+	e1.element()->clearQ();
 }

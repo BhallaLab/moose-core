@@ -59,9 +59,14 @@ class Cinfo
 			const Finfo* findFinfo( const string& name) const;
 
 			/**
+			 * Finds the funcId by name. Returns 0 on failure.
+			 */
+			const FuncId findFuncId( const string& name) const;
+
+			/**
 			 * Creates a new Element. Assigns a new Id or takes one you give
 			 */
-			Id create( const string& name, unsigned int numEntries );
+			Id create( const string& name, unsigned int numEntries ) const;
 
 		private:
 			const string name_;

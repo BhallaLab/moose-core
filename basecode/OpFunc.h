@@ -16,6 +16,25 @@ class OpFunc
 		virtual void op( Eref e, const char* buf ) const = 0;
 };
 
+template< class T > class OpFunc0: public OpFunc
+{
+	public:
+		OpFunc0( void ( T::*func )( ) )
+			: func_( func )
+			{;}
+
+		bool checkSlot( const Slot* s ) const {
+			return dynamic_cast< const Slot0* >( s );
+		}
+
+		void op( Eref e, const char* buf ) const {
+			(static_cast< T* >( e.data() )->*func_)( );
+		}
+
+	private:
+		void ( T::*func_ )( ); 
+};
+
 template< class T, class A > class OpFunc1: public OpFunc
 {
 	public:
@@ -27,10 +46,12 @@ template< class T, class A > class OpFunc1: public OpFunc
 			return dynamic_cast< const Slot1< A >* >( s );
 		}
 
+		// This could do with a whole lot of optimization to avoid
+		// copying data back and forth.
 		void op( Eref e, const char* buf ) const {
-			(static_cast< T* >( e.data() )->*func_)( 
-				*reinterpret_cast< const A* >( buf )
-			);
+			A val;
+			Conv< A >::buf2val( val, buf );
+			(static_cast< T* >( e.data() )->*func_)( val ) ;
 		}
 
 	private:

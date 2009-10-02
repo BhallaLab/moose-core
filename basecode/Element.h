@@ -113,6 +113,12 @@ class Element
 
 		const Conn& conn( ConnId c ) const;
 
+		/** 
+		 * Pushes the Msg m onto the list, and returns the index to look
+		 * it up as the MsgId.
+		 */
+		MsgId addMsg( Msg* m );
+
 	private:
 		const Msg* getMsg( MsgId mid ) const;
 		/**
@@ -180,6 +186,8 @@ class Element
 
 		/**
 		 * Connection vector. Connections are mid-level messaging info.
+		 * They group together messages to be called by a given 'send'
+		 * command.
 		 */
 		vector< Conn > c_;
 };

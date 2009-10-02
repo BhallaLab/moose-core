@@ -11,10 +11,11 @@
 #include "Qinfo.h"
 
 ///////////////////////////////////////////////////////////////////////////
-Msg::Msg( Element* e1, Element* e2, MsgId m1, MsgId m2 )
-	: e1_( e1 ), e2_( e2 ), m1_( m1 ), m2_( m2 )
+Msg::Msg( Element* e1, Element* e2 )
+	: e1_( e1 ), e2_( e2 )
 {
-	;
+	m1_ = e1->addMsg( this );
+	m2_ = e2->addMsg( this );
 }
 
 Msg::~Msg()
@@ -70,8 +71,8 @@ void One2OneMsg::addSpike( unsigned int srcElementIndex, double time ) const
 */
 ///////////////////////////////////////////////////////////////////////////
 
-SingleMsg::SingleMsg( Eref e1, Eref e2, MsgId m1, MsgId m2 )
-	: Msg( e1.element(), e2.element(), m1, m2 ), 
+SingleMsg::SingleMsg( Eref e1, Eref e2 )
+	: Msg( e1.element(), e2.element() ),
 	i1_( e1.index() ), 
 	i2_( e2.index() )
 {

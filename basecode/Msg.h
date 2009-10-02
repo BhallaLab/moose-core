@@ -20,7 +20,7 @@ typedef unsigned int MsgId;
 class Msg
 {
 	public:
-		Msg( Element* e1, Element* e2, MsgId m1, MsgId m2 );
+		Msg( Element* e1, Element* e2 );
 		virtual ~Msg();
 
 		/**
@@ -68,6 +68,14 @@ class Msg
 		// Duplicate message on new Elements.
 		// virtual Msg* dup( Element* e1, Element* e2 ) const;
 
+		MsgId mid1() const {
+			return m1_;
+		}
+
+		MsgId mid2() const {
+			return m2_;
+		}
+
 	protected:
 		Element* e1_;
 		Element* e2_;
@@ -78,7 +86,7 @@ class Msg
 class SingleMsg: public Msg
 {
 	public:
-		SingleMsg( Eref e1, Eref e2, MsgId m1, MsgId m2 );
+		SingleMsg( Eref e1, Eref e2 );
 		~SingleMsg() {;}
 
 		void addToQ( const Element* caller, FuncId f, 

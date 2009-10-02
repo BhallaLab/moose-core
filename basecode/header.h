@@ -49,6 +49,7 @@ class Id;
 #include "Slot.h"
 #include "Send.h"
 #include "Async.h"
+#include "Conv.h"
 #include "OpFunc.h"
 #include "ValueFinfo.h"
 

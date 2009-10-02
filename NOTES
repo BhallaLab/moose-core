@@ -975,3 +975,49 @@ Created a Dinfo class, to handle information and utility functions for the
 Data type.
 Struggling with Cinfo::create function. look in Neutral.h
 
+Got it together, compiled.  Checked in as revision 1352
+
+Next: 
+	create a neutral *
+	do some 'send' tests.
+		Began with explict call to stuff data into buffer.
+
+=============================================================================
+2 Oct 2009
+Working on most basic tests.
+I'm now at the point where func requests have gone into the buffer, and the
+element is doing clearQ. The execFunc fails because at this point I have no
+Msgs on the Element, which is needed to farm out the function calls.
+Examining how to handle sendTo calls here. Needed for table lookup like calls.
+We need a way of specifying one target Data index in the Element.
+Options:
+	- Encode index also in Qinfo. Could make FuncId and MsgId shorts,
+	and have a full uint for Data index.
+		- Wasteful, as use of sendTo is very limited.
+			- Table lookups
+			- Solver controlling slaves.
+		- Will need special messages too, since we need to encode
+			the special request into the Qinfo.
+	- Encode it as a flag on one bit of the msgid, using the rest of the 
+		msgid as the data index. Use Msg # 0 as a
+		special one which looks up this one index for its exec call.
+		- Really ugly.
+	- Ignore for now.
+	- Encode SendBacks as an Element-level consolidation either way
+		into vectors.
+	- Encode SendBacks as individual Msgs.
+	- Define special SendBack Msgs that read extra info in args.
+	- Use sync msgs for this sort of thing.
+
+There is a good bit of cleanup needed for the buffers, both for safety
+and efficiency.
+Safety:
+	- Should do as a vector, with expansion as needed
+Efficiency:
+	- Align on ints or doubles?
+	- Use sensible sizes for fields in Qinfo.
+	- Map data directly to lookup structures like Qinfo, rather than
+		doing a copy.
+	
+
+
