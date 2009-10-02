@@ -40,7 +40,7 @@ else # this is for unix like systems - change /usr/include/Python2.5 to the dire
 	LDFLAGS+=-shared
 endif
 
-OBJFILES = ../basecode/basecode.o \
+OBJFILES := ../basecode/basecode.o \
 	../element/element.o \
 	../shell/shell.o \
 	../builtins/builtins.o \
@@ -62,7 +62,7 @@ OBJFILES = ../basecode/basecode.o \
 # 	../robots/robots.o	\
 
 ifeq ($(USE_SBML),1)
-	OBJFILES = $(OBJFILES) ../sbml_IO/sbml_IO.o
+	OBJFILES := $(OBJFILES) ../sbml_IO/sbml_IO.o
 endif
 
 OBJ = PyMooseBase.o \
