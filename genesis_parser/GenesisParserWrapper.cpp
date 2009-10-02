@@ -4089,6 +4089,22 @@ int do_INSTANTZ(int argc, const char** const argv, Id s ) {
 	return 4;
 }
 
+const char* do_VOLT_C1_INDEX(int argc, const char ** const argv, Id s){
+    static const string ret = "VOLT_C1_INDEX";
+    if (argc != 1) {
+        cout << "Error: VOLT_C1_INDEX is a constant" << endl;
+    }
+    return ret.c_str();
+}
+
+const char* do_VOLT_C2_INDEX(int argc, const char ** const argv, Id s){
+    static const string ret = "VOLT_C2_INDEX";
+    if (argc != 1) {
+        cout << "Error: VOLT_C1_INDEX is a constant" << endl;
+    }
+    return ret.c_str();
+}
+
 void do_floatformat(int argc, const char** const argv, Id s ) {
 	char *format;
 	char formtype;
@@ -4390,6 +4406,8 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "INSTANTX", reinterpret_cast< slifunc > ( do_INSTANTX ), "int" );
 	AddFunc( "INSTANTY", reinterpret_cast< slifunc > ( do_INSTANTY ), "int" );
 	AddFunc( "INSTANTZ", reinterpret_cast< slifunc > ( do_INSTANTZ ), "int" );
+        AddFunc( "VOLT_C1_INDEX",  reinterpret_cast< slifunc > ( do_VOLT_C1_INDEX ), "char*");
+        AddFunc( "VOLT_C2_INDEX",  reinterpret_cast< slifunc > ( do_VOLT_C2_INDEX ), "char*");
 	AddFunc( "floatformat", do_floatformat, "void" );
 	AddFunc( "getstat", reinterpret_cast< slifunc > ( do_getstat ), "float" );
 	AddFunc( "showstat", do_showstat, "void" );
